@@ -11716,457 +11716,457 @@ subroutine unc_read_map(filename, tim, ierr)
     call realloc(ilink_merge,  1, keepExisting=.false., fill = -999)
 
     redo_merged_same: do redo = 1, 2
-    if (jamergedmap == 1) then
-       ! If rst file is a merged-map or merged-rst file, read only a domain's own flow nodes and links.
-       if (jamergedmap_same == 1) then  ! If the partitions of the model are the same with the rst file
-          ndxi_own = 0
-          lnx_own  = 0
-          call realloc(inode_own, ndxi, keepExisting=.false.)
-          call realloc(ilink_own, lnx, keepExisting=.false.)
-          call realloc(tmpvar1, max(ndxi,lnx), keepExisting=.false.) ! Only necessary for buffered reading from merged map.
+       if (jamergedmap == 1) then
+          ! If rst file is a merged-map or merged-rst file, read only a domain's own flow nodes and links.
+          if (jamergedmap_same == 1) then  ! If the partitions of the model are the same with the rst file
+             ndxi_own = 0
+             lnx_own  = 0
+             call realloc(inode_own, ndxi, keepExisting=.false.)
+             call realloc(ilink_own, lnx, keepExisting=.false.)
+             call realloc(tmpvar1, max(ndxi,lnx), keepExisting=.false.) ! Only necessary for buffered reading from merged map.
 
-          if (nbnd_read > 0 .and. jaoldrstfile == 0 .and. jampi == 0) then
-              do kk = 1, nbnd_read
-                 ibnd_own(kk) = kk
-              enddo
-          endif
-
-          if (jafillghost == 0) then
-             do kk=1,ndxi
-                if (idomain(kk) == my_rank) then
-                   ndxi_own = ndxi_own + 1
-                   inode_own(ndxi_own) = kk
-                end if
-             end do
-
-             do LL=1,lnx
-                call link_ghostdata(my_rank,idomain(ln(1,LL)), idomain(ln(2,LL)), jaghost, idmn_ghost, &
-                                    ighostlev(ln(1,LL)), ighostlev(ln(2,LL)))
-                if ( jaghost /= 1 ) then
-                   lnx_own = lnx_own + 1
-                   ilink_own(lnx_own) = LL
-                end if
-             end do
-          else ! Using merged rst file in 3D problems need to fill in some variables on ghost cells
-             ndxi_ghost=0
-             lnx_ghost= 0
-             call realloc(inode_ghost, ndxi, keepExisting=.false.)
-             call realloc(inodeghost_merge, ndxi, keepExisting=.false.)
-             call realloc(ilink_ghost, lnx, keepExisting=.false.)
-             call realloc(ilinkghost_merge, lnx, keepExisting=.false.)
-
-             do kk=1,ndxi
-                if (idomain(kk) == my_rank) then
-                   ndxi_own = ndxi_own + 1
-                   inode_own(ndxi_own) = kk
-                else
-                   ndxi_ghost = ndxi_ghost + 1
-                   inode_ghost(ndxi_ghost) = kk
-                endif
-             enddo
-
-             do LL=1,lnx
-                call link_ghostdata(my_rank,idomain(ln(1,LL)), idomain(ln(2,LL)), jaghost, idmn_ghost, &
-                                    ighostlev(ln(1,LL)), ighostlev(ln(2,LL)))
-                if ( jaghost /= 1 ) then
-                   lnx_own = lnx_own + 1
-                   ilink_own(lnx_own) = LL
-                else
-                   lnx_ghost = lnx_ghost + 1
-                   ilink_ghost(lnx_ghost) = LL
-                end if
-             end do
-
-             ! prepare for kd-tree search
-             ! Read coordinates of flow elem circumcenters from merged map file
-             ierr = nf90_inq_dimid(imapfile, 'nFlowElem', id_flowelemdim)
-             call check_error(ierr, 'nFlowElem')
-             ierr = nf90_inquire_dimension(imapfile, id_flowelemdim, len=ndxi_merge)
-             call check_error(ierr, 'Flow Elem count')
-             ierr = nf90_inq_varid(imapfile, 'FlowElem_xzw', id_xzw)
-             call check_error(ierr, 'center of mass x-coordinate')
-             ierr = nf90_inq_varid(imapfile, 'FlowElem_yzw', id_yzw)
-             call check_error(ierr, 'center of mass y-coordinate')
-
-             allocate(xmc(ndxi_merge))
-             allocate(ymc(ndxi_merge))
-             ierr = nf90_get_var(imapfile, id_xzw, xmc)
-             ierr = nf90_get_var(imapfile, id_yzw, ymc)
-
-             Ns = 0
-             call find_flownodesorlinks_merge(ndxi_merge, xmc, ymc, ndxi, ndxi_ghost, inode_ghost, inodeghost_merge, 1, 1)
-
-            ! read coordinates of flow links center
-            ierr = nf90_inq_dimid(imapfile, 'nFlowLink', id_flowlinkdim)
-            call check_error(ierr, 'nFlowLink')
-            ierr = nf90_inquire_dimension(imapfile, id_flowlinkdim, len=lnx_merge )
-            call check_error(ierr, 'link count')
-            ierr = nf90_inq_varid(imapfile, 'FlowLink_xu', id_xu)
-            ierr = nf90_inq_varid(imapfile, 'FlowLink_yu', id_yu)
-            if (nerr_ > 0) goto 999
-
-            allocate(xuu(lnx_merge))
-            allocate(yuu(lnx_merge))
-            ierr = nf90_get_var(imapfile, id_xu, xuu)
-            ierr = nf90_get_var(imapfile, id_yu, yuu)
-
-            !call find_flownodesorlinks_merge(lnx_merge, xuu, yuu, lnx, lnx_own, ilink_own, ilink_merge, 0)
-            call find_flownodesorlinks_merge(lnx_merge, xuu, yuu, lnx, lnx_ghost, ilink_ghost, ilinkghost_merge, 0, 1)
-          endif
-       else     ! If the partitions in the model are different comparing with the rst file
-          ndxi_own = 0
-          lnx_own  = 0
-          call realloc(inode_own,   ndxi, keepExisting=.false.)
-          call realloc(inode_merge, ndxi, keepExisting=.false.)
-          call realloc(ilink_own,    lnx, keepExisting=.false.)
-          call realloc(ilink_merge,  lnx, keepExisting=.false.)
-          call realloc(inode_owninv,ndxi, keepExisting=.false., fill = -999)
-
-          if (jampi == 0) then ! Restart a sequential run with a merged rst file
-             ndxbnd_own = ndx - ndxi
-             if (ndxbnd_own>0 .and. jaoldrstfile == 0) then
-                call realloc(ibnd_own, ndxbnd_own, keepExisting=.false.)
-             endif
-          endif
-          if (ndxbnd_own > 0 .and. jaoldrstfile == 0) then
-             call realloc(ibnd_merge, ndxbnd_own, keepExisting=.false.)
-          endif
-
-          !!! Set inode_own, ilink_own, ect
-          ! when sequential run
-          if (jampi==0) then
-             ! node
-             ndxi_own = ndxi
-             ndxi_all = ndxi_own
-             do kk=1,ndxi
-                inode_own(kk) = kk
-             enddo
-             ! bnd
-             nbnd_read = ndx - ndxi    ! Sequential restart, nbnd_read is assumed to be ndx-ndxi
-             if (nbnd_read > 0 .and. jaoldrstfile == 0) then
+             if (nbnd_read > 0 .and. jaoldrstfile == 0 .and. jampi == 0) then
                 do kk = 1, nbnd_read
                    ibnd_own(kk) = kk
                 enddo
              endif
-             ! link
-             lnx_own = lnx
-             lnx_all = lnx_own
-             do LL=1,lnx
-                ilink_own(LL) = LL
-             enddo
-          else
-            ! parallel
-            if (jafillghost==0) then
-               ! only consider non-ghost flow nodes
-              do kk=1,ndxi
-                 if (idomain(kk) == my_rank) then
-                    ndxi_own = ndxi_own + 1
-                    inode_own(ndxi_own) = kk
-                    inode_owninv(kk) = ndxi_own
-                 end if
-              end do
-              ! link
-              do LL=1,lnx
-                 call link_ghostdata(my_rank,idomain(ln(1,LL)), idomain(ln(2,LL)), jaghost, idmn_ghost, &
-                                     ighostlev(ln(1,LL)), ighostlev(ln(2,LL)))
-                 if ( jaghost /= 1 ) then
-                    lnx_own = lnx_own + 1
-                    ilink_own(lnx_own) = LL
-                 end if
-              end do
-            else ! need to fill ghosts
-               ndxi_ghost=0
-               lnx_ghost= 0
-               call realloc(inode_ghost, ndxi, keepExisting=.false.)
-               call realloc(inodeghost_merge, ndxi, keepExisting=.false.)
-               call realloc(ilink_ghost, lnx, keepExisting=.false.)
-               call realloc(ilinkghost_merge, lnx, keepExisting=.false.)
 
+             if (jafillghost == 0) then
+                do kk=1,ndxi
+                   if (idomain(kk) == my_rank) then
+                      ndxi_own = ndxi_own + 1
+                      inode_own(ndxi_own) = kk
+                   end if
+                end do
+
+                do LL=1,lnx
+                   call link_ghostdata(my_rank,idomain(ln(1,LL)), idomain(ln(2,LL)), jaghost, idmn_ghost, &
+                                       ighostlev(ln(1,LL)), ighostlev(ln(2,LL)))
+                   if ( jaghost /= 1 ) then
+                      lnx_own = lnx_own + 1
+                      ilink_own(lnx_own) = LL
+                   end if
+                end do
+             else ! Using merged rst file in 3D problems need to fill in some variables on ghost cells
+                ndxi_ghost=0
+                lnx_ghost= 0
+                call realloc(inode_ghost, ndxi, keepExisting=.false.)
+                call realloc(inodeghost_merge, ndxi, keepExisting=.false.)
+                call realloc(ilink_ghost, lnx, keepExisting=.false.)
+                call realloc(ilinkghost_merge, lnx, keepExisting=.false.)
+
+                do kk=1,ndxi
+                   if (idomain(kk) == my_rank) then
+                      ndxi_own = ndxi_own + 1
+                      inode_own(ndxi_own) = kk
+                   else
+                      ndxi_ghost = ndxi_ghost + 1
+                      inode_ghost(ndxi_ghost) = kk
+                   endif
+                enddo
+
+                do LL=1,lnx
+                   call link_ghostdata(my_rank,idomain(ln(1,LL)), idomain(ln(2,LL)), jaghost, idmn_ghost, &
+                                       ighostlev(ln(1,LL)), ighostlev(ln(2,LL)))
+                   if ( jaghost /= 1 ) then
+                      lnx_own = lnx_own + 1
+                      ilink_own(lnx_own) = LL
+                   else
+                      lnx_ghost = lnx_ghost + 1
+                      ilink_ghost(lnx_ghost) = LL
+                   end if
+                end do
+
+                ! prepare for kd-tree search
+                ! Read coordinates of flow elem circumcenters from merged map file
+                ierr = nf90_inq_dimid(imapfile, 'nFlowElem', id_flowelemdim)
+                call check_error(ierr, 'nFlowElem')
+                ierr = nf90_inquire_dimension(imapfile, id_flowelemdim, len=ndxi_merge)
+                call check_error(ierr, 'Flow Elem count')
+                ierr = nf90_inq_varid(imapfile, 'FlowElem_xzw', id_xzw)
+                call check_error(ierr, 'center of mass x-coordinate')
+                ierr = nf90_inq_varid(imapfile, 'FlowElem_yzw', id_yzw)
+                call check_error(ierr, 'center of mass y-coordinate')
+
+                allocate(xmc(ndxi_merge))
+                allocate(ymc(ndxi_merge))
+                ierr = nf90_get_var(imapfile, id_xzw, xmc)
+                ierr = nf90_get_var(imapfile, id_yzw, ymc)
+
+                Ns = 0
+                call find_flownodesorlinks_merge(ndxi_merge, xmc, ymc, ndxi, ndxi_ghost, inode_ghost, inodeghost_merge, 1, 1)
+
+                ! read coordinates of flow links center
+                ierr = nf90_inq_dimid(imapfile, 'nFlowLink', id_flowlinkdim)
+                call check_error(ierr, 'nFlowLink')
+                ierr = nf90_inquire_dimension(imapfile, id_flowlinkdim, len=lnx_merge )
+                call check_error(ierr, 'link count')
+                ierr = nf90_inq_varid(imapfile, 'FlowLink_xu', id_xu)
+                ierr = nf90_inq_varid(imapfile, 'FlowLink_yu', id_yu)
+                if (nerr_ > 0) goto 999
+
+                allocate(xuu(lnx_merge))
+                allocate(yuu(lnx_merge))
+                ierr = nf90_get_var(imapfile, id_xu, xuu)
+                ierr = nf90_get_var(imapfile, id_yu, yuu)
+
+                !call find_flownodesorlinks_merge(lnx_merge, xuu, yuu, lnx, lnx_own, ilink_own, ilink_merge, 0)
+                call find_flownodesorlinks_merge(lnx_merge, xuu, yuu, lnx, lnx_ghost, ilink_ghost, ilinkghost_merge, 0, 1)
+             endif
+          else     ! If the partitions in the model are different comparing with the rst file
+             ndxi_own = 0
+             lnx_own  = 0
+             call realloc(inode_own,   ndxi, keepExisting=.false.)
+             call realloc(inode_merge, ndxi, keepExisting=.false.)
+             call realloc(ilink_own,    lnx, keepExisting=.false.)
+             call realloc(ilink_merge,  lnx, keepExisting=.false.)
+             call realloc(inode_owninv,ndxi, keepExisting=.false., fill = -999)
+
+             if (jampi == 0) then ! Restart a sequential run with a merged rst file
+                ndxbnd_own = ndx - ndxi
+                if (ndxbnd_own>0 .and. jaoldrstfile == 0) then
+                   call realloc(ibnd_own, ndxbnd_own, keepExisting=.false.)
+                endif
+             endif
+             if (ndxbnd_own > 0 .and. jaoldrstfile == 0) then
+                call realloc(ibnd_merge, ndxbnd_own, keepExisting=.false.)
+             endif
+
+            !!! Set inode_own, ilink_own, ect
+            ! when sequential run
+            if (jampi==0) then
+               ! node
+               ndxi_own = ndxi
+               ndxi_all = ndxi_own
                do kk=1,ndxi
-                  if (idomain(kk) == my_rank) then
-                     ndxi_own = ndxi_own + 1
-                     inode_own(ndxi_own) = kk
-                     inode_owninv(kk) = ndxi_own
-                  else
-                     ndxi_ghost = ndxi_ghost + 1
-                     inode_ghost(ndxi_ghost) = kk
-                  endif
+                  inode_own(kk) = kk
                enddo
-
+               ! bnd
+               nbnd_read = ndx - ndxi    ! Sequential restart, nbnd_read is assumed to be ndx-ndxi
+               if (nbnd_read > 0 .and. jaoldrstfile == 0) then
+                  do kk = 1, nbnd_read
+                     ibnd_own(kk) = kk
+                  enddo
+               endif
+               ! link
+               lnx_own = lnx
+               lnx_all = lnx_own
                do LL=1,lnx
-                  call link_ghostdata(my_rank,idomain(ln(1,LL)), idomain(ln(2,LL)), jaghost, idmn_ghost, &
-                                      ighostlev(ln(1,LL)), ighostlev(ln(2,LL)))
-                  if ( jaghost /= 1 ) then
-                     lnx_own = lnx_own + 1
-                     ilink_own(lnx_own) = LL
-                  else
-                     lnx_ghost = lnx_ghost + 1
-                     ilink_ghost(lnx_ghost) = LL
-                  end if
-               end do
-            endif
-            ! compute global number of nodes/lnx of all subdomains
-            call reduce_int_sum(ndxi_own, ndxi_all)
-            call reduce_int_sum(lnx_own,  lnx_all )
-          endif
+                  ilink_own(LL) = LL
+               enddo
+            else
+              ! parallel
+              if (jafillghost==0) then
+                 ! only consider non-ghost flow nodes
+                do kk=1,ndxi
+                   if (idomain(kk) == my_rank) then
+                      ndxi_own = ndxi_own + 1
+                      inode_own(ndxi_own) = kk
+                      inode_owninv(kk) = ndxi_own
+                   end if
+                end do
+                ! link
+                do LL=1,lnx
+                   call link_ghostdata(my_rank,idomain(ln(1,LL)), idomain(ln(2,LL)), jaghost, idmn_ghost, &
+                                       ighostlev(ln(1,LL)), ighostlev(ln(2,LL)))
+                   if ( jaghost /= 1 ) then
+                      lnx_own = lnx_own + 1
+                      ilink_own(lnx_own) = LL
+                   end if
+                end do
+              else ! need to fill ghosts
+                 ndxi_ghost=0
+                 lnx_ghost= 0
+                 call realloc(inode_ghost, ndxi, keepExisting=.false.)
+                 call realloc(inodeghost_merge, ndxi, keepExisting=.false.)
+                 call realloc(ilink_ghost, lnx, keepExisting=.false.)
+                 call realloc(ilinkghost_merge, lnx, keepExisting=.false.)
+
+                 do kk=1,ndxi
+                    if (idomain(kk) == my_rank) then
+                       ndxi_own = ndxi_own + 1
+                       inode_own(ndxi_own) = kk
+                       inode_owninv(kk) = ndxi_own
+                    else
+                       ndxi_ghost = ndxi_ghost + 1
+                       inode_ghost(ndxi_ghost) = kk
+                    endif
+                 enddo
+
+                 do LL=1,lnx
+                    call link_ghostdata(my_rank,idomain(ln(1,LL)), idomain(ln(2,LL)), jaghost, idmn_ghost, &
+                                        ighostlev(ln(1,LL)), ighostlev(ln(2,LL)))
+                    if ( jaghost /= 1 ) then
+                       lnx_own = lnx_own + 1
+                       ilink_own(lnx_own) = LL
+                    else
+                       lnx_ghost = lnx_ghost + 1
+                       ilink_ghost(lnx_ghost) = LL
+                    end if
+                 end do
+              endif
+              ! compute global number of nodes/lnx of all subdomains
+              call reduce_int_sum(ndxi_own, ndxi_all)
+              call reduce_int_sum(lnx_own,  lnx_all )
+           endif
 
 
-          !! read and prepare for inode_merge and ilink_merge,etc
-          ! Read coordinates of flow elem circumcenters from merged map file
-          ierr = nf90_inq_dimid(imapfile, 'nFlowElem', id_flowelemdim)
-          call check_error(ierr, 'nFlowElem')
-          ierr = nf90_inquire_dimension(imapfile, id_flowelemdim, len=ndxi_merge)
-          call check_error(ierr, 'Flow Elem count')
+           !! read and prepare for inode_merge and ilink_merge,etc
+           ! Read coordinates of flow elem circumcenters from merged map file
+           ierr = nf90_inq_dimid(imapfile, 'nFlowElem', id_flowelemdim)
+           call check_error(ierr, 'nFlowElem')
+           ierr = nf90_inquire_dimension(imapfile, id_flowelemdim, len=ndxi_merge)
+           call check_error(ierr, 'Flow Elem count')
 
-          ! Check if global number of nodes in the merged rst file is equal to that in the model
-          if (ndxi_all .ne. ndxi_merge) then
-             write (msgbuf, '(a,i0,a,i0,a)') 'Global number of nodes among all partitions: in the merged restart file ', ndxi_merge, ',  in model: ', ndxi_all, '.'
-             call warn_flush()
-             call qnerror('Global number of nodes read from the merged restart file unequal to global number of nodes in model,' &
-                           //' therefore some nodes may not be found',' ',' ')
+           ! Check if global number of nodes in the merged rst file is equal to that in the model
+           if (ndxi_all .ne. ndxi_merge) then
+              write (msgbuf, '(a,i0,a,i0,a)') 'Global number of nodes among all partitions: in the merged restart file ', ndxi_merge, ',  in model: ', ndxi_all, '.'
+              call warn_flush()
+              call qnerror('Global number of nodes read from the merged restart file unequal to global number of nodes in model,' &
+                            //' therefore some nodes may not be found',' ',' ')
+           end if
+
+           ierr = nf90_inq_varid(imapfile, 'FlowElem_xzw', id_xzw)
+           call check_error(ierr, 'center of mass x-coordinate')
+           ierr = nf90_inq_varid(imapfile, 'FlowElem_yzw', id_yzw)
+           call check_error(ierr, 'center of mass y-coordinate')
+           if (ndxbnd_own >0) then
+              ierr = nf90_inq_dimid(imapfile, 'nFlowElemBnd', id_bnddim)
+              if (ierr == 0) then
+                  jaoldrstfile = 0
+                  call check_error(ierr, 'nFlowElemBnd')
+                  ierr = nf90_inquire_dimension(imapfile, id_bnddim, len=ndxbnd_merge)
+                  call check_error(ierr, 'Flow Elem bnd count')
+                  ierr = nf90_inq_varid(imapfile, 'FlowElem_xbnd', id_xbnd)
+                  call check_error(ierr, 'x-coordinate of boundary points')
+                  ierr = nf90_inq_varid(imapfile, 'FlowElem_ybnd', id_ybnd)
+                  call check_error(ierr, 'y-coordinate of boundary points')
+              else
+                 jaoldrstfile = 1
+                 ierr = 0
+              endif
+           endif
+
+           if (ierr == nf90_noerr) then
+              ! centers of mass were stored in rst/map file, so directly read them
+              allocate(xmc(ndxi_merge))
+              allocate(ymc(ndxi_merge))
+              ierr = nf90_get_var(imapfile, id_xzw, xmc)
+              call check_error(ierr, 'xmc')
+              ierr = nf90_get_var(imapfile, id_yzw, ymc)
+              call check_error(ierr, 'ymc')
+              if (ndxbnd_own >0 .and. jaoldrstfile == 0) then
+                 allocate(xbnd_read(ndxbnd_merge))
+                 allocate(ybnd_read(ndxbnd_merge))
+                 ierr = nf90_get_var(imapfile, id_xbnd, xbnd_read)
+                 call check_error(ierr, 'xbnd_read')
+                 ierr = nf90_get_var(imapfile, id_ybnd, ybnd_read)
+                 call check_error(ierr, 'ybnd_read')
+              endif
+           end if
+
+           if (nerr_ > 0) goto 999
+
+           call realloc(inode_merge2own, ndxi_merge, keepExisting=.false., fill=-999)
+           call find_flownodesorlinks_merge(ndxi_merge, xmc, ymc, ndxi, ndxi_own, inode_own, inode_merge, 1, 1, inode_merge2own)
+
+           if (ndxbnd_own>0 .and. jaoldrstfile == 0) then
+              ! For parallel run, 'ibnd_own' and 'ndxbnd_own' has been determined in function 'flow_initexternalforcings'
+              call find_flownodesorlinks_merge(ndxbnd_merge, xbnd_read, ybnd_read, ndx-ndxi, ndxbnd_own, ibnd_own, ibnd_merge, 2, 1)
+           endif
+           ! read coordinates of flow links center
+           ierr = nf90_inq_dimid(imapfile, 'nFlowLink', id_flowlinkdim)
+           call check_error(ierr, 'nFlowLink')
+           ierr = nf90_inquire_dimension(imapfile, id_flowlinkdim, len=lnx_merge )
+           call check_error(ierr, 'link count')
+           ! ! Check if global number of links in the merged rst file is equal to that in the model
+           if (lnx_all .ne. lnx_merge) then
+              write (msgbuf, '(a,i0,a,i0,a)') 'Global number of links among all partitions: in the merged restart file ', lnx_merge, ',  in model: ', lnx_all, '.'
+              call warn_flush()
+              call qnerror('Global number of links read from the merged restart file unequal to global number of links in model, '&
+                            //' therefore some links may not be found',' ',' ')
+           end if
+           ierr = nf90_inq_varid(imapfile, 'FlowLink_xu', id_xu)
+           call check_error(ierr, 'FlowLink_xu')
+           ierr = nf90_inq_varid(imapfile, 'FlowLink_yu', id_yu)
+           call check_error(ierr, 'FlowLink_yu')
+
+           allocate(xuu(lnx_merge))
+           allocate(yuu(lnx_merge))
+           ierr = nf90_get_var(imapfile, id_xu, xuu)
+           call check_error(ierr, 'xuu')
+           ierr = nf90_get_var(imapfile, id_yu, yuu)
+           call check_error(ierr, 'yuu')
+
+           if (nerr_ > 0) goto 999
+
+           call find_flownodesorlinks_merge(lnx_merge, xuu, yuu, lnx, lnx_own, ilink_own, ilink_merge, 0, 1)
+
+           if (jafillghost==1) then
+              call find_flownodesorlinks_merge(ndxi_merge, xmc, ymc, ndxi, ndxi_ghost, inode_ghost, inodeghost_merge, 1, 1)
+              call find_flownodesorlinks_merge(lnx_merge, xuu, yuu, lnx, lnx_ghost, ilink_ghost, ilinkghost_merge, 0, 1)
+           endif
+
+           if ( jampi.eq.0 ) then
+              if ( NS.gt.0 ) then
+                 call newfil(MSAM, 'rst_error.xyz')
+                 call wrisam(MSAM)
+   !             delete samples
+                 NS = 0
+                 call mess(LEVEL_ERROR, 'restart error, unfound nodes/links are written to sample files rst_error.xyz')
+              end if
+           else
+              if ( NS.gt.0 ) then
+                 call newfil(MSAM, 'rst_error_'// sdmn // '.xyz')
+                 call wrisam(MSAM)
+                 call mess(LEVEL_WARN, 'restart error, unfound nodes/links are written to sample files rst_error_'// sdmn // '.xyz')
+              end if
+
+!             get maximum number of flownodes with error over all subdomains
+              call reduce_key(Ns)
+
+              if ( Ns.gt.0 ) then
+                 call mess(LEVEL_ERROR, 'restart error, please check sample files rst_error_NNNN.xyz')
+              end if
+
+   !          delete samples
+              NS = 0
+           end if
+
+           deallocate(xmc, ymc, xuu, yuu)
+           if(ndxbnd_own>0 .and. jaoldrstfile == 0)  deallocate(xbnd_read, ybnd_read)
+        endif
+     else ! If rst file is a non-merged rst file
+        ! NOTE: intentional: if jampi==1, but rst file is a normal separate rst file
+        !       *per* partition, just read all ndxi/lnx, including ghost nodes/links (as before)
+        ndxi_own = ndxi
+        lnx_own  = lnx
+
+        nerr_ = 0
+
+        ! Ask file for dimension id of nodes and edges
+        ierr = nf90_inq_dimid(imapfile, 'nFlowElem', id_flowelemdim) ! Intentional: read a map/rst is *without* boundary nodes.
+                                                                     ! (so don't read nFlowElemWithBnd)
+        call check_error(ierr, 'nFlowElem')
+        ierr = nf90_inq_dimid(imapfile, 'nFlowLink', id_flowlinkdim)
+        call check_error(ierr, 'nFlowLink')
+        if (nerr_ > 0) goto 999
+
+        ! Ask for dimensions of nodes and edges, ergo: the number of netnodes and netlinks
+        ierr = nf90_inquire_dimension(imapfile, id_flowelemdim, len=ndxi_read)
+        call check_error(ierr, 'elem count')
+        ierr = nf90_inquire_dimension(imapfile, id_flowlinkdim, len=lnx_read )
+        call check_error(ierr, 'link count')
+        if (nerr_ > 0) goto 999
+
+        ! Ask file for the dimension of its own boundary points
+        ierr = nf90_inq_dimid(imapfile, 'nFlowElemBnd', id_bnddim)
+        if (ierr == 0) then
+           ierr = nf90_inquire_dimension(imapfile, id_bnddim, len=nbnd_read)
+           call check_error(ierr, 'FlowElem_bnd count')
+           jaoldrstfile = 0
+        else
+           call mess(LEVEL_INFO, 'The restart file does not contain waterlevel info. on boundaries')
+           ierr = 0
+           nbnd_read = 0
+           jaoldrstfile = 1
+        endif
+     end if
+
+     ! check if restarting a model with Riemann boundary conditions
+     if (allocated(kbndz)) then
+        if( any(kbndz(4,:) .eq. 5) .and. jaoldrstfile == 1) then
+           call mess(LEVEL_WARN, 'When restarting a model with Riemann boundary conditions, the restart file should be '&
+                     //'a *_rst file which contains waterlevel info. on boundaries. Otherwise FM still runs but the results are '&
+                     //'not accurate.')
+        endif
+     endif
+
+     if (jamergedmap_same == 1) then
+        if (ndxi_read /= ndxi_own .or. lnx_read /= lnx_own) then
+           if (jampi > 0 .and. jamergedmap == 1) then
+              jamergedmap_same = 0
+              cycle redo_merged_same
+           end if
+           tmpstr = ''
+           if (jampi == 1) then
+              write (tmpstr, '(a,i0,a)') 'my_rank=', my_rank, ': '
+           end if
+           write (msgbuf, '(a,i0,a,i0,a)') trim(tmpstr)//'#nodes in file: ', ndxi_read, ', #nodes in model: ', ndxi_own, '.'
+           call warn_flush()
+           write (msgbuf, '(a,i0,a,i0,a)') trim(tmpstr)//'#links in file: ', lnx_read, ', #links in model: ', lnx_own, '.'
+           call warn_flush()
+           call qnerror('Error reading '''//trim(filename)//''': Number of nodes/links read unequal to nodes/links in model',' ',' ')
+           ierr = DFM_GENERICERROR
+           call readyy('Reading map data',-1d0)
+           goto 999
+        end if
+        if (nbnd_read > 0 .and. jaoldrstfile == 0) then
+           if ((jampi==0 .and. nbnd_read .ne. ndx-ndxi) .or. (jampi>0 .and. nbnd_read .ne. ndxbnd_own)) then
+              if (jampi > 0 .and. jamergedmap == 1) then
+                 jamergedmap_same = 0
+                 cycle redo_merged_same
+              end if
+              tmpstr = ''
+              write (msgbuf, '(a,i0,a,i0,a)') trim(tmpstr)//'#boundary points in file: ', nbnd_read, ', #boundary points in model: ', &
+                     ndx-ndxi, '.'
+              call warn_flush()
+              call qnerror('Number of boundary points unequal to those in model',' ',' ')
+              ierr = DFM_GENERICERROR
+              call readyy('Reading map data',-1d0)
+              goto 999
+              endif
+           endif
+
+           if (jamergedmap == 0) then
+              !! check if the flownodes/flowlinks numbering index is the same
+              ! only check when sequential restart and parallel restart with its own rst file.
+              ! TODO: check also for other restart situations
+              ! Read coordinates of flownodes
+              call realloc(xmc, ndxi_read, keepExisting=.false.)
+              call realloc(ymc, ndxi_read, keepExisting=.false.)
+              ierr = nf90_inq_varid(imapfile, 'FlowElem_xzw', id_xzw)
+              if (ierr == nf90_noerr) call check_error(ierr, 'center of mass x-coordinate')
+              if (ierr == nf90_noerr) ierr = nf90_inq_varid(imapfile, 'FlowElem_yzw', id_yzw)
+              if (ierr == nf90_noerr) call check_error(ierr, 'center of mass y-coordinate')
+
+              if (ierr == nf90_noerr) ierr = nf90_get_var(imapfile, id_xzw, xmc)
+              if (ierr == nf90_noerr) ierr = nf90_get_var(imapfile, id_yzw, ymc)
+
+              if (ierr == nf90_noerr) then
+                 ! check flownodes numbering with rst file
+                 call check_flownodesorlinks_numbering_rst(ndxi, 1, xmc, ymc, ierr)
+                 if (ierr .ne. nf90_noerr) then
+                    goto 999
+                 end if
+              else
+                 call mess(LEVEL_WARN, 'Skip checking flownodes numbering when restart, '&
+                            //'because flownodes coordinates are missing in rst file.')
+              end if
+
+              ! Read coordinates of flowlinks
+              call realloc(xuu, lnx_read, keepExisting=.false.)
+              call realloc(yuu, lnx_read, keepExisting=.false.)
+              ierr = nf90_inq_varid(imapfile, 'FlowLink_xu', id_xu)
+              call check_error(ierr, 'velocity point x-coordinate')
+              ierr = nf90_inq_varid(imapfile, 'FlowLink_yu', id_yu)
+              call check_error(ierr, 'velocity point y-coordinate')
+              ierr = nf90_get_var(imapfile, id_xu, xuu)
+              ierr = nf90_get_var(imapfile, id_yu, yuu)
+
+              if (ierr == nf90_noerr) then
+                 ! Check flowlinks numbering with rst file
+                 call check_flownodesorlinks_numbering_rst(lnx, 0, xuu, yuu, ierr)
+                 if (ierr .ne. nf90_noerr) then
+                    goto 999
+                 end if
+              else
+                 call mess(LEVEL_WARN, 'Skip checking flowlinks numbering when restart, '&
+                            //'because flowlinks coordinates are missing in rst file.')
+              end if
           end if
-
-          ierr = nf90_inq_varid(imapfile, 'FlowElem_xzw', id_xzw)
-          call check_error(ierr, 'center of mass x-coordinate')
-          ierr = nf90_inq_varid(imapfile, 'FlowElem_yzw', id_yzw)
-          call check_error(ierr, 'center of mass y-coordinate')
-          if (ndxbnd_own >0) then
-             ierr = nf90_inq_dimid(imapfile, 'nFlowElemBnd', id_bnddim)
-             if (ierr == 0) then
-                 jaoldrstfile = 0
-                 call check_error(ierr, 'nFlowElemBnd')
-                 ierr = nf90_inquire_dimension(imapfile, id_bnddim, len=ndxbnd_merge)
-                 call check_error(ierr, 'Flow Elem bnd count')
-                 ierr = nf90_inq_varid(imapfile, 'FlowElem_xbnd', id_xbnd)
-                 call check_error(ierr, 'x-coordinate of boundary points')
-                 ierr = nf90_inq_varid(imapfile, 'FlowElem_ybnd', id_ybnd)
-                 call check_error(ierr, 'y-coordinate of boundary points')
-             else
-                jaoldrstfile = 1
-                ierr = 0
-             endif
-          endif
-
-          if (ierr == nf90_noerr) then
-             ! centers of mass were stored in rst/map file, so directly read them
-             allocate(xmc(ndxi_merge))
-             allocate(ymc(ndxi_merge))
-             ierr = nf90_get_var(imapfile, id_xzw, xmc)
-             call check_error(ierr, 'xmc')
-             ierr = nf90_get_var(imapfile, id_yzw, ymc)
-             call check_error(ierr, 'ymc')
-             if (ndxbnd_own >0 .and. jaoldrstfile == 0) then
-                allocate(xbnd_read(ndxbnd_merge))
-                allocate(ybnd_read(ndxbnd_merge))
-                ierr = nf90_get_var(imapfile, id_xbnd, xbnd_read)
-                call check_error(ierr, 'xbnd_read')
-                ierr = nf90_get_var(imapfile, id_ybnd, ybnd_read)
-                call check_error(ierr, 'ybnd_read')
-             endif
-          end if
-
-          if (nerr_ > 0) goto 999
-
-          call realloc(inode_merge2own, ndxi_merge, keepExisting=.false., fill=-999)
-          call find_flownodesorlinks_merge(ndxi_merge, xmc, ymc, ndxi, ndxi_own, inode_own, inode_merge, 1, 1, inode_merge2own)
-
-          if (ndxbnd_own>0 .and. jaoldrstfile == 0) then
-             ! For parallel run, 'ibnd_own' and 'ndxbnd_own' has been determined in function 'flow_initexternalforcings'
-             call find_flownodesorlinks_merge(ndxbnd_merge, xbnd_read, ybnd_read, ndx-ndxi, ndxbnd_own, ibnd_own, ibnd_merge, 2, 1)
-          endif
-          ! read coordinates of flow links center
-          ierr = nf90_inq_dimid(imapfile, 'nFlowLink', id_flowlinkdim)
-          call check_error(ierr, 'nFlowLink')
-          ierr = nf90_inquire_dimension(imapfile, id_flowlinkdim, len=lnx_merge )
-          call check_error(ierr, 'link count')
-          ! ! Check if global number of links in the merged rst file is equal to that in the model
-          if (lnx_all .ne. lnx_merge) then
-             write (msgbuf, '(a,i0,a,i0,a)') 'Global number of links among all partitions: in the merged restart file ', lnx_merge, ',  in model: ', lnx_all, '.'
-             call warn_flush()
-             call qnerror('Global number of links read from the merged restart file unequal to global number of links in model, '&
-                           //' therefore some links may not be found',' ',' ')
-          end if
-          ierr = nf90_inq_varid(imapfile, 'FlowLink_xu', id_xu)
-          call check_error(ierr, 'FlowLink_xu')
-          ierr = nf90_inq_varid(imapfile, 'FlowLink_yu', id_yu)
-          call check_error(ierr, 'FlowLink_yu')
-
-          allocate(xuu(lnx_merge))
-          allocate(yuu(lnx_merge))
-          ierr = nf90_get_var(imapfile, id_xu, xuu)
-          call check_error(ierr, 'xuu')
-          ierr = nf90_get_var(imapfile, id_yu, yuu)
-          call check_error(ierr, 'yuu')
-
-          if (nerr_ > 0) goto 999
-
-          call find_flownodesorlinks_merge(lnx_merge, xuu, yuu, lnx, lnx_own, ilink_own, ilink_merge, 0, 1)
-
-          if (jafillghost==1) then
-             call find_flownodesorlinks_merge(ndxi_merge, xmc, ymc, ndxi, ndxi_ghost, inode_ghost, inodeghost_merge, 1, 1)
-             call find_flownodesorlinks_merge(lnx_merge, xuu, yuu, lnx, lnx_ghost, ilink_ghost, ilinkghost_merge, 0, 1)
-          endif
-
-          if ( jampi.eq.0 ) then
-             if ( NS.gt.0 ) then
-                call newfil(MSAM, 'rst_error.xyz')
-                call wrisam(MSAM)
-   !            delete samples
-                NS = 0
-                call mess(LEVEL_ERROR, 'restart error, unfound nodes/links are written to sample files rst_error.xyz')
-             end if
-          else
-             if ( NS.gt.0 ) then
-                call newfil(MSAM, 'rst_error_'// sdmn // '.xyz')
-                call wrisam(MSAM)
-                call mess(LEVEL_WARN, 'restart error, unfound nodes/links are written to sample files rst_error_'// sdmn // '.xyz')
-             end if
-
-!            get maximum number of flownodes with error over all subdomains
-             call reduce_key(Ns)
-
-             if ( Ns.gt.0 ) then
-                call mess(LEVEL_ERROR, 'restart error, please check sample files rst_error_NNNN.xyz')
-             end if
-
-   !         delete samples
-             NS = 0
-          end if
-
-          deallocate(xmc, ymc, xuu, yuu)
-          if(ndxbnd_own>0 .and. jaoldrstfile == 0)  deallocate(xbnd_read, ybnd_read)
        endif
-    else ! If rst file is a non-merged rst file
-       ! NOTE: intentional: if jampi==1, but rst file is a normal separate rst file
-       !       *per* partition, just read all ndxi/lnx, including ghost nodes/links (as before)
-       ndxi_own = ndxi
-       lnx_own  = lnx
-
-       nerr_ = 0
-
-       ! Ask file for dimension id of nodes and edges
-       ierr = nf90_inq_dimid(imapfile, 'nFlowElem', id_flowelemdim) ! Intentional: read a map/rst is *without* boundary nodes.
-                                                                    ! (so don't read nFlowElemWithBnd)
-       call check_error(ierr, 'nFlowElem')
-       ierr = nf90_inq_dimid(imapfile, 'nFlowLink', id_flowlinkdim)
-       call check_error(ierr, 'nFlowLink')
-       if (nerr_ > 0) goto 999
-
-       ! Ask for dimensions of nodes and edges, ergo: the number of netnodes and netlinks
-       ierr = nf90_inquire_dimension(imapfile, id_flowelemdim, len=ndxi_read)
-       call check_error(ierr, 'elem count')
-       ierr = nf90_inquire_dimension(imapfile, id_flowlinkdim, len=lnx_read )
-       call check_error(ierr, 'link count')
-       if (nerr_ > 0) goto 999
-
-       ! Ask file for the dimension of its own boundary points
-       ierr = nf90_inq_dimid(imapfile, 'nFlowElemBnd', id_bnddim)
-       if (ierr == 0) then
-          ierr = nf90_inquire_dimension(imapfile, id_bnddim, len=nbnd_read)
-          call check_error(ierr, 'FlowElem_bnd count')
-          jaoldrstfile = 0
-       else
-          call mess(LEVEL_INFO, 'The restart file does not contain waterlevel info. on boundaries')
-          ierr = 0
-          nbnd_read = 0
-          jaoldrstfile = 1
-       endif
-    end if
-
-   ! check if restarting a model with Riemann boundary conditions
-    if (allocated(kbndz)) then
-       if( any(kbndz(4,:) .eq. 5) .and. jaoldrstfile == 1) then
-          call mess(LEVEL_WARN, 'When restarting a model with Riemann boundary conditions, the restart file should be '&
-                    //'a *_rst file which contains waterlevel info. on boundaries. Otherwise FM still runs but the results are '&
-                    //'not accurate.')
-       endif
-    endif
-
-    if (jamergedmap_same == 1) then
-      if (ndxi_read /= ndxi_own .or. lnx_read /= lnx_own) then
-         if (jampi > 0 .and. jamergedmap == 1) then
-            jamergedmap_same = 0
-            cycle redo_merged_same
-         end if
-         tmpstr = ''
-         if (jampi == 1) then
-            write (tmpstr, '(a,i0,a)') 'my_rank=', my_rank, ': '
-         end if
-         write (msgbuf, '(a,i0,a,i0,a)') trim(tmpstr)//'#nodes in file: ', ndxi_read, ', #nodes in model: ', ndxi_own, '.'
-         call warn_flush()
-         write (msgbuf, '(a,i0,a,i0,a)') trim(tmpstr)//'#links in file: ', lnx_read, ', #links in model: ', lnx_own, '.'
-         call warn_flush()
-         call qnerror('Error reading '''//trim(filename)//''': Number of nodes/links read unequal to nodes/links in model',' ',' ')
-         ierr = DFM_GENERICERROR
-         call readyy('Reading map data',-1d0)
-         goto 999
-      end if
-      if (nbnd_read > 0 .and. jaoldrstfile == 0) then
-         if ((jampi==0 .and. nbnd_read .ne. ndx-ndxi) .or. (jampi>0 .and. nbnd_read .ne. ndxbnd_own)) then
-            if (jampi > 0 .and. jamergedmap == 1) then
-               jamergedmap_same = 0
-               cycle redo_merged_same
-            end if
-            tmpstr = ''
-            write (msgbuf, '(a,i0,a,i0,a)') trim(tmpstr)//'#boundary points in file: ', nbnd_read, ', #boundary points in model: ', &
-                   ndx-ndxi, '.'
-            call warn_flush()
-            call qnerror('Number of boundary points unequal to those in model',' ',' ')
-            ierr = DFM_GENERICERROR
-            call readyy('Reading map data',-1d0)
-            goto 999
-            endif
-      endif
-
-      if (jamergedmap == 0) then
-      !! check if the flownodes/flowlinks numbering index is the same
-      ! only check when sequential restart and parallel restart with its own rst file.
-      ! TODO: check also for other restart situations
-         ! Read coordinates of flownodes
-         call realloc(xmc, ndxi_read, keepExisting=.false.)
-         call realloc(ymc, ndxi_read, keepExisting=.false.)
-         ierr = nf90_inq_varid(imapfile, 'FlowElem_xzw', id_xzw)
-         if (ierr == nf90_noerr) call check_error(ierr, 'center of mass x-coordinate')
-         if (ierr == nf90_noerr) ierr = nf90_inq_varid(imapfile, 'FlowElem_yzw', id_yzw)
-         if (ierr == nf90_noerr) call check_error(ierr, 'center of mass y-coordinate')
-
-         if (ierr == nf90_noerr) ierr = nf90_get_var(imapfile, id_xzw, xmc)
-         if (ierr == nf90_noerr) ierr = nf90_get_var(imapfile, id_yzw, ymc)
-
-         if (ierr == nf90_noerr) then
-            ! check flownodes numbering with rst file
-            call check_flownodesorlinks_numbering_rst(ndxi, 1, xmc, ymc, ierr)
-            if (ierr .ne. nf90_noerr) then
-               goto 999
-            end if
-         else
-            call mess(LEVEL_WARN, 'Skip checking flownodes numbering when restart, '&
-                       //'because flownodes coordinates are missing in rst file.')
-         end if
-
-         ! Read coordinates of flowlinks
-         call realloc(xuu, lnx_read, keepExisting=.false.)
-         call realloc(yuu, lnx_read, keepExisting=.false.)
-         ierr = nf90_inq_varid(imapfile, 'FlowLink_xu', id_xu)
-         call check_error(ierr, 'velocity point x-coordinate')
-         ierr = nf90_inq_varid(imapfile, 'FlowLink_yu', id_yu)
-         call check_error(ierr, 'velocity point y-coordinate')
-         ierr = nf90_get_var(imapfile, id_xu, xuu)
-         ierr = nf90_get_var(imapfile, id_yu, yuu)
-
-         if (ierr == nf90_noerr) then
-            ! Check flowlinks numbering with rst file
-            call check_flownodesorlinks_numbering_rst(lnx, 0, xuu, yuu, ierr)
-            if (ierr .ne. nf90_noerr) then
-               goto 999
-            end if
-         else
-            call mess(LEVEL_WARN, 'Skip checking flowlinks numbering when restart, '&
-                       //'because flowlinks coordinates are missing in rst file.')
-         end if
-      end if
-    endif
-    exit redo_merged_same
+       exit redo_merged_same
     enddo redo_merged_same
     call readyy('Reading map data',0.05d0)
 
