@@ -1925,6 +1925,9 @@ if(q /= 0) then
 
     calcConv = 1
     call getprof_1D(L, hu(L), au(L), widu, japerim, calcConv, perim)  ! memory closeness of profiles causes this statement here instead of in setau
+
+    ! calculate VOL1_F to be used for 1d-advection
+
     if (kcs(k1) == 1) then ! TODO: consider *also* adding storage area to the 2D side k1, if kcu(L)==5, maybe not for kcu(L)==7
       hpr = s1(k1)-bob0(1,L)
       if (hpr >= 0d0) then
