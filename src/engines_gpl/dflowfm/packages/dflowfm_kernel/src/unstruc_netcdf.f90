@@ -6952,7 +6952,7 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
         ierr = nf90_put_att(imapfile, id_timestep(iid),  'units'        , 'seconds')
         ierr = nf90_put_att(imapfile, id_timestep(iid),  'standard_name', 'timestep')
 
-        if(jamaps1 > 0) then
+        if (jamaps1 > 0 .or. jaseparate_==2) then
             ! Flow data on centres: water level at latest timestep
             ierr = nf90_def_var(imapfile, 's1',  nf90_double, (/ id_flowelemdim(iid), id_timedim (iid)/) , id_s1(iid))
             ierr = nf90_put_att(imapfile, id_s1(iid),   'coordinates'  , 'FlowElem_xcc FlowElem_ycc')
@@ -7190,18 +7190,18 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
         endif   ! jaseparate =/ 2
         !
         if (kmx==0) then
-           if(jamapucvec > 0) then
+           if(jamapucvec > 0 .or. jaseparate_==2) then
                ierr = nf90_def_var(imapfile, 'ucx'   , nf90_double, (/ id_flowelemdim(iid), id_timedim (iid)/) , id_ucx(iid)  )
                ierr = nf90_def_var(imapfile, 'ucy'   , nf90_double, (/ id_flowelemdim(iid), id_timedim (iid)/) , id_ucy(iid)  )
            endif
         else
-           if (jamapucvec > 0) then
+           if (jamapucvec > 0 .or. jaseparate_==2) then
               ierr = nf90_def_var(imapfile, 'ucx'  , nf90_double, (/ id_laydim(iid), id_flowelemdim(iid), id_timedim (iid)/) , id_ucx(iid)  )
               ierr = nf90_def_var(imapfile, 'ucy'  , nf90_double, (/ id_laydim(iid), id_flowelemdim(iid), id_timedim (iid)/) , id_ucy(iid)  )
            endif
         endif
 
-        if(jamapucvec > 0) then
+        if(jamapucvec > 0 .or. jaseparate_==2) then
             ierr = nf90_put_att(imapfile, id_ucx(iid)  ,'coordinates'  , 'FlowElem_xcc FlowElem_ycc')
             if (jsferic == 0) then
                ierr = nf90_put_att(imapfile, id_ucx(iid)  ,'standard_name', 'sea_water_x_velocity')
@@ -8114,8 +8114,8 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
             call definencvar(imapfile,id_patm(iid)   ,nf90_double,idims,2, 'Patm'  , 'Atmospheric Pressure', 'N m-2', 'FlowElem_xcc FlowElem_ycc')
         endif
 
-        if ((jamapwind > 0 .or. jamapwindstress > 0) .and. jawind /= 0) then
-           if (jawindstressgiven == 0) then
+        if ((jamapwind > 0 .or. jamapwindstress > 0 .or. jaseparate_==2) .and. jawind /= 0) then
+           if (jawindstressgiven == 0 .or. jaseparate_==2) then
               ierr = nf90_def_var(imapfile, 'windx', nf90_double, (/ id_flowelemdim(iid), id_timedim (iid)/) , id_windx(iid))
               ierr = nf90_def_var(imapfile, 'windy', nf90_double, (/ id_flowelemdim(iid), id_timedim (iid)/) , id_windy(iid))
            else
@@ -8124,7 +8124,7 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
            endif
 
            ierr = nf90_put_att(imapfile, id_windx(iid),  'coordinates'  , 'FlowElem_xcc FlowElem_ycc')
-           if (jawindstressgiven == 0) then
+           if (jawindstressgiven == 0 .or. jaseparate_==2) then
               if (jsferic == 0 ) then
                  ierr = nf90_put_att(imapfile, id_windx(iid),  'standard_name', 'x_wind')
                  ierr = nf90_put_att(imapfile, id_windx(iid),  'long_name'    , 'velocity of air on flow element center, x-component')
@@ -8145,7 +8145,7 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
            endif
 
            ierr = nf90_put_att(imapfile, id_windy(iid),  'coordinates'  , 'FlowElem_xcc FlowElem_ycc')
-           if (jawindstressgiven == 0) then
+           if (jawindstressgiven == 0 .or. jaseparate_==2) then
               if (jsferic == 0 ) then
                  ierr = nf90_put_att(imapfile, id_windy(iid),  'standard_name', 'y_wind')
                  ierr = nf90_put_att(imapfile, id_windy(iid),  'long_name'    , 'velocity of air on flow element center, y-component')
@@ -8576,45 +8576,53 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
     end if
     !
     ! Water level
-    ierr = nf90_put_var(imapfile, id_s1(iid),  s1,   (/ 1, itim /), (/ ndxndxi, 1 /))
+    if (jamaps1>0 .or. jaseparate_==2) then
+       ierr = nf90_put_var(imapfile, id_s1(iid),  s1,   (/ 1, itim /), (/ ndxndxi, 1 /))
+    endif
     !
-    if ( kmx==0 ) then
-       ierr = nf90_put_var(imapfile, id_ucx  (iid), workx,  (/ 1, itim /), (/ ndxndxi, 1 /))
-       ierr = nf90_put_var(imapfile, id_ucy  (iid), worky,  (/ 1, itim /), (/ ndxndxi, 1 /))
+    if (jamapucvec>0 .or. jaseparate_==2) then
+       if ( kmx==0 ) then
+          ierr = nf90_put_var(imapfile, id_ucx  (iid), workx,  (/ 1, itim /), (/ ndxndxi, 1 /))
+          ierr = nf90_put_var(imapfile, id_ucy  (iid), worky,  (/ 1, itim /), (/ ndxndxi, 1 /))
+       endif
     endif
 
     if ( kmx>0 ) then
        call unc_append_3dflowgeom_put(imapfile, jaseparate_, itim) ! needed for 3D wave coupling on comfile: Flowelem_zw
-
-       do kk=1,ndxndxi
-          work1(:, kk) = dmiss ! For proper fill values in z-model runs.
-          call getkbotktop(kk,kb,kt)
-          call getlayerindices(kk, nlayb, nrlay)
-          do k = kb,kt
-             work1(k-kb+nlayb,kk) = workx(k)
+       if (jamapucvec>0 .or. jaseparate_==2) then
+          do kk=1,ndxndxi
+             work1(:, kk) = dmiss ! For proper fill values in z-model runs.
+             call getkbotktop(kk,kb,kt)
+             call getlayerindices(kk, nlayb, nrlay)
+             do k = kb,kt
+                work1(k-kb+nlayb,kk) = workx(k)
+             enddo
           enddo
-       enddo
-       ierr = nf90_put_var(imapfile, id_ucx(iid), work1(1:kmx,1:ndxndxi), start=(/ 1, 1, itim /), count=(/ kmx, ndxndxi, 1 /))
-
-       do kk=1,ndxndxi
-          work1(:, kk) = dmiss ! For proper fill values in z-model runs.
-          call getkbotktop(kk,kb,kt)
-          call getlayerindices(kk, nlayb, nrlay)
-          do k = kb,kt
-             work1(k-kb+nlayb,kk) = worky(k)
+          ierr = nf90_put_var(imapfile, id_ucx(iid), work1(1:kmx,1:ndxndxi), start=(/ 1, 1, itim /), count=(/ kmx, ndxndxi, 1 /))
+          
+          do kk=1,ndxndxi
+             work1(:, kk) = dmiss ! For proper fill values in z-model runs.
+             call getkbotktop(kk,kb,kt)
+             call getlayerindices(kk, nlayb, nrlay)
+             do k = kb,kt
+                work1(k-kb+nlayb,kk) = worky(k)
+             enddo
           enddo
-       enddo
-       ierr = nf90_put_var(imapfile, id_ucy(iid), work1(1:kmx,1:ndxndxi), start=(/ 1, 1, itim /), count=(/ kmx, ndxndxi, 1 /))
+          ierr = nf90_put_var(imapfile, id_ucy(iid), work1(1:kmx,1:ndxndxi), start=(/ 1, 1, itim /), count=(/ kmx, ndxndxi, 1 /))
+       endif
     endif
 
     if (jaseparate_ /= 2) then
-        ierr = nf90_put_var(imapfile, id_s0(iid),  s0,   (/ 1, itim /), (/ ndxndxi, 1 /))
-
-        ierr = nf90_put_var(imapfile, id_hs(iid),  hs,   (/ 1, itim /), (/ ndxndxi, 1 /))
-
+        if (jamaps0>0) then
+           ierr = nf90_put_var(imapfile, id_s0(iid),  s0,   (/ 1, itim /), (/ ndxndxi, 1 /))
+        endif
+        
+        if (jamaps1>0) then
+           ierr = nf90_put_var(imapfile, id_hs(iid),  hs,   (/ 1, itim /), (/ ndxndxi, 1 /))
+        endif
        ! Tau current and chezy roughness
        if (jamaptaucurrent > 0 .or. jamapchezy > 0) then
-          if (jawave<3) then       ! Else, get taus from subroutine tauwave (taus = taucur + tauwave)
+          if (jawave<3) then       ! Else, get taus from subroutine tauwave (taus = f(taucur,tauwave))
              call gettaus(1)       ! Update taus and czs
           elseif (jamapchezy > 0) then
              call gettaus(2)       ! Only update czs
@@ -8641,101 +8649,117 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
        ! Velocities
        if ( kmx>0 ) then
 !         3D
-          call reconstructucz(0)
-          !
-          do kk=1,ndxndxi
-             work1(:, kk) = dmiss ! For proper fill values in z-model runs.
-             call getkbotktop(kk,kb,kt)
-             call getlayerindices(kk, nlayb, nrlay)
-             do k = kb,kt
-                work1(k-kb+nlayb,kk) = ucz(k)
+          if (jamapucvec>0) then
+             call reconstructucz(0)
+             !
+             do kk=1,ndxndxi
+                work1(:, kk) = dmiss ! For proper fill values in z-model runs.
+                call getkbotktop(kk,kb,kt)
+                call getlayerindices(kk, nlayb, nrlay)
+                do k = kb,kt
+                   work1(k-kb+nlayb,kk) = ucz(k)
+                enddo
              enddo
-          enddo
-          ierr = nf90_put_var(imapfile, id_ucz(iid), work1(1:kmx,1:ndxndxi), start=(/ 1, 1, itim /), count=(/ kmx, ndxndxi, 1 /))
-
-          ierr = nf90_put_var(imapfile, id_ucxa(iid), ucxq(1:ndxndxi), start=(/ 1, itim /), count=(/ ndxndxi, 1 /))
-          ierr = nf90_put_var(imapfile, id_ucya(iid), ucyq(1:ndxndxi), start=(/ 1, itim /), count=(/ ndxndxi, 1 /))
-
-          do kk=1,ndxndxi
-             work0(:, kk) = dmiss ! For proper fill values in z-model runs.
-             call getkbotktop(kk,kb,kt)
-             call getlayerindices(kk, nlayb, nrlay)
-             do k = kb-1,kt
-                work0(k-kb+nlayb,kk) = ww1(k)
+             ierr = nf90_put_var(imapfile, id_ucz(iid), work1(1:kmx,1:ndxndxi), start=(/ 1, 1, itim /), count=(/ kmx, ndxndxi, 1 /))
+             
+             ierr = nf90_put_var(imapfile, id_ucxa(iid), ucxq(1:ndxndxi), start=(/ 1, itim /), count=(/ ndxndxi, 1 /))
+             ierr = nf90_put_var(imapfile, id_ucya(iid), ucyq(1:ndxndxi), start=(/ 1, itim /), count=(/ ndxndxi, 1 /))
+          endif
+          
+          if (jamapww1 > 0) then
+             do kk=1,ndxndxi
+                work0(:, kk) = dmiss ! For proper fill values in z-model runs.
+                call getkbotktop(kk,kb,kt)
+                call getlayerindices(kk, nlayb, nrlay)
+                do k = kb-1,kt
+                   work0(k-kb+nlayb,kk) = ww1(k)
+                enddo
              enddo
-          enddo
-          ierr = nf90_put_var(imapfile, id_ww1(iid), work0(0:kmx,1:ndxndxi), start=(/ 1, 1, itim /), count=(/ kmx+1, ndxndxi, 1 /))
-
-          do LL=1,lnx
-             work1(:, LL) = dmiss ! For proper fill values in z-model runs.
-             call getLbotLtopmax(LL,Lb,Ltx)
-             call getlayerindicesLmax(LL, nlaybL, nrlayLx)
-             do L = Lb,Ltx
-                 work1(L-Lb+nlaybL,LL) = u1(L)
+             ierr = nf90_put_var(imapfile, id_ww1(iid), work0(0:kmx,1:ndxndxi), start=(/ 1, 1, itim /), count=(/ kmx+1, ndxndxi, 1 /))
+          endif
+          
+          if (jamapu1>0) then 
+             do LL=1,lnx
+                work1(:, LL) = dmiss ! For proper fill values in z-model runs.
+                call getLbotLtopmax(LL,Lb,Ltx)
+                call getlayerindicesLmax(LL, nlaybL, nrlayLx)
+                do L = Lb,Ltx
+                    work1(L-Lb+nlaybL,LL) = u1(L)
+                enddo
              enddo
-          enddo
-          ierr = nf90_put_var(imapfile, id_unorm(iid), work1(1:kmx,1:lnx), start=(/ 1, 1, itim /), count=(/ kmx, lnx, 1 /))
-
-          do LL=1,lnx
-             work1(:, LL) = dmiss ! For proper fill values in z-model runs.
-             call getLbotLtopmax(LL,Lb,Ltx)
-             call getlayerindicesLmax(LL, nlaybL, nrlayLx)
-             do L = Lb,Ltx
-                 work1(L-Lb+nlaybL,LL) = u0(L)
+             ierr = nf90_put_var(imapfile, id_unorm(iid), work1(1:kmx,1:lnx), start=(/ 1, 1, itim /), count=(/ kmx, lnx, 1 /))
+          endif
+          
+          if (jamapu0>0) then
+             do LL=1,lnx
+                work1(:, LL) = dmiss ! For proper fill values in z-model runs.
+                call getLbotLtopmax(LL,Lb,Ltx)
+                call getlayerindicesLmax(LL, nlaybL, nrlayLx)
+                do L = Lb,Ltx
+                    work1(L-Lb+nlaybL,LL) = u0(L)
+                enddo
              enddo
-          enddo
-          ierr = nf90_put_var(imapfile, id_u0(iid)   , work1(1:kmx,1:lnx), start=(/ 1, 1, itim /), count=(/ kmx, lnx, 1 /))
-
-          do LL=1,lnx
-             work1(:, LL) = dmiss ! For proper fill values in z-model runs.
-             call getLbotLtopmax(LL,Lb,Ltx)
-             call getlayerindicesLmax(LL, nlaybL, nrlayLx)
-             do L = Lb,Ltx
-                 work1(L-Lb+nlaybL,LL) = q1(L)
+             ierr = nf90_put_var(imapfile, id_u0(iid)   , work1(1:kmx,1:lnx), start=(/ 1, 1, itim /), count=(/ kmx, lnx, 1 /))
+          endif
+          
+          if(jamapq1 > 0) then
+             do LL=1,lnx
+                work1(:, LL) = dmiss ! For proper fill values in z-model runs.
+                call getLbotLtopmax(LL,Lb,Ltx)
+                call getlayerindicesLmax(LL, nlaybL, nrlayLx)
+                do L = Lb,Ltx
+                    work1(L-Lb+nlaybL,LL) = q1(L)
+                enddo
              enddo
-          enddo
-          ierr = nf90_put_var(imapfile, id_q1(iid)   , work1(1:kmx,1:lnx), start=(/ 1, 1, itim /), count=(/ kmx, lnx, 1 /))
-
-          do LL=1,lnx
-             work1(:, LL) = dmiss ! For proper fill values in z-model runs.
-             call getLbotLtopmax(LL,Lb,Ltx)
-             call getlayerindicesLmax(LL, nlaybL, nrlayLx)
-             if (javiusp == 1) then       ! user specified part
-                 vicc = viusp(LL)
-             else
-                 vicc = vicouv
-             endif
-             do L = Lb,Ltx
-                 work1(L-Lb+nlaybL,LL) = viu(L) + vicc
+             ierr = nf90_put_var(imapfile, id_q1(iid)   , work1(1:kmx,1:lnx), start=(/ 1, 1, itim /), count=(/ kmx, lnx, 1 /))
+          endif
+          
+          if (jamapviu>0) then
+             do LL=1,lnx
+                work1(:, LL) = dmiss ! For proper fill values in z-model runs.
+                call getLbotLtopmax(LL,Lb,Ltx)
+                call getlayerindicesLmax(LL, nlaybL, nrlayLx)
+                if (javiusp == 1) then       ! user specified part
+                    vicc = viusp(LL)
+                else
+                    vicc = vicouv
+                endif
+                do L = Lb,Ltx
+                    work1(L-Lb+nlaybL,LL) = viu(L) + vicc
+                enddo
              enddo
-          enddo
-          ierr = nf90_put_var(imapfile, id_viu(iid)   , work1(1:kmx,1:lnx), start=(/ 1, 1, itim /), count=(/ kmx, lnx, 1 /))
-
-          do LL=1,lnx
-             work1(:, LL) = dmiss ! For proper fill values in z-model runs.
-             call getLbotLtopmax(LL,Lb,Ltx)
-             call getlayerindicesLmax(LL, nlaybL, nrlayLx)
-             if (jadiusp == 1) then
-                 dicc = diusp(LL)
-             else
-                 dicc = dicouv
-             endif
-             do L = Lb,Ltx
-                 work1(L-Lb+nlaybL,LL) = viu(L) * 0.7 + dicc
+             ierr = nf90_put_var(imapfile, id_viu(iid)   , work1(1:kmx,1:lnx), start=(/ 1, 1, itim /), count=(/ kmx, lnx, 1 /))
+          endif
+          
+          if (jamapdiu>0) then
+             do LL=1,lnx
+                work1(:, LL) = dmiss ! For proper fill values in z-model runs.
+                call getLbotLtopmax(LL,Lb,Ltx)
+                call getlayerindicesLmax(LL, nlaybL, nrlayLx)
+                if (jadiusp == 1) then
+                    dicc = diusp(LL)
+                else
+                    dicc = dicouv
+                endif
+                do L = Lb,Ltx
+                    work1(L-Lb+nlaybL,LL) = viu(L) * 0.7 + dicc
+                enddo
              enddo
-          enddo
-          ierr = nf90_put_var(imapfile, id_diu(iid)   , work1(1:kmx,1:lnx), start=(/ 1, 1, itim /), count=(/ kmx, lnx, 1 /))
-
-          do kk=1,ndxndxi
-             work1(:, kk) = dmiss ! For proper fill values in z-model runs.
-             call getkbotktop(kk,kb,kt)
-             call getlayerindices(kk, nlayb, nrlay)
-             do k = kb,kt
-                work1(k-kb+nlayb, kk) = rho(k)
+             ierr = nf90_put_var(imapfile, id_diu(iid)   , work1(1:kmx,1:lnx), start=(/ 1, 1, itim /), count=(/ kmx, lnx, 1 /))
+          endif
+          
+          if (jamaprho>0) then
+             do kk=1,ndxndxi
+                work1(:, kk) = dmiss ! For proper fill values in z-model runs.
+                call getkbotktop(kk,kb,kt)
+                call getlayerindices(kk, nlayb, nrlay)
+                do k = kb,kt
+                   work1(k-kb+nlayb, kk) = rho(k)
+                enddo
              enddo
-          enddo
-          ierr = nf90_put_var(imapfile, id_rho(iid), work1(1:kmx,1:ndxndxi), start=(/ 1, 1, itim /), count=(/ kmx, ndxndxi, 1 /))
-
+             ierr = nf90_put_var(imapfile, id_rho(iid), work1(1:kmx,1:ndxndxi), start=(/ 1, 1, itim /), count=(/ kmx, ndxndxi, 1 /))
+          endif
+          
           if (jamaptur > 0 .and. iturbulencemodel >= 3) then
              do LL=1,lnx
                 work0(:, LL) = dmiss ! For proper fill values in z-model runs.
@@ -8776,31 +8800,43 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
        endif
 
        if ( kmx == 0 ) then
-           ierr = nf90_put_var(imapfile, id_unorm(iid), u1 ,  (/ 1, itim /), (/ lnx , 1 /))
-           ierr = nf90_put_var(imapfile, id_u0   (iid), u0 ,  (/ 1, itim /), (/ lnx , 1 /))
-           ierr = nf90_put_var(imapfile, id_q1 (iid)    , q1     , (/ 1, itim /), (/ lnx    , 1 /))
-
-           do LL=1,lnx
-              work1(:,LL) = dmiss
-              if (javiusp == 1) then       ! user specified part
-                 vicc = viusp(LL)
-              else
-                 vicc = vicouv
-              endif
-              work1(1,LL) = viu(LL) + vicc
-           enddo
-           ierr = nf90_put_var(imapfile, id_viu (iid), work1(1:1,1:lnx) ,  (/ 1, itim /), (/ lnx , 1 /))
-
-           do LL=1,lnx
-              work1(:,LL) = dmiss
-              if (jadiusp == 1) then
-                 dicc = diusp(LL)
-              else
-                 dicc = dicouv
-              endif
-              work1(1,LL) = viu(LL) * 0.7 + dicc
-          enddo
-           ierr = nf90_put_var(imapfile, id_diu (iid), work1(1:1,1:lnx) ,  (/ 1, itim /), (/ lnx , 1 /))
+          if (jamapu1>0) then
+             ierr = nf90_put_var(imapfile, id_unorm(iid), u1 ,  (/ 1, itim /), (/ lnx , 1 /))
+          endif
+          
+          if (jamapu0>0) then
+             ierr = nf90_put_var(imapfile, id_u0   (iid), u0 ,  (/ 1, itim /), (/ lnx , 1 /))
+          endif
+          
+          if (jamapq1>0) then
+             ierr = nf90_put_var(imapfile, id_q1 (iid)  , q1     , (/ 1, itim /), (/ lnx    , 1 /))
+          endif
+          
+          if (jamapviu>0) then
+             do LL=1,lnx
+                work1(:,LL) = dmiss
+                if (javiusp == 1) then       ! user specified part
+                   vicc = viusp(LL)
+                else
+                   vicc = vicouv
+                endif
+                work1(1,LL) = viu(LL) + vicc
+             enddo
+             ierr = nf90_put_var(imapfile, id_viu (iid), work1(1:1,1:lnx) ,  (/ 1, itim /), (/ lnx , 1 /))
+          endif
+          
+          if (jamapdiu>0) then
+             do LL=1,lnx
+                work1(:,LL) = dmiss
+                if (jadiusp == 1) then
+                   dicc = diusp(LL)
+                else
+                   dicc = dicouv
+                endif
+                work1(1,LL) = viu(LL) * 0.7 + dicc
+             enddo
+             ierr = nf90_put_var(imapfile, id_diu (iid), work1(1:1,1:lnx) ,  (/ 1, itim /), (/ lnx , 1 /))
+           endif
        end if
 
     end if
@@ -9390,7 +9426,7 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
        end if
     endif
 
-    if (jawind > 0 .and. jamapwind > 0 .and. jawindstressgiven == 0) then
+    if (jawind > 0 .and. ((jamapwind > 0 .and. jawindstressgiven == 0) .or. (jaseparate_==2))) then
        allocate (windx(ndxndxi), windy(ndxndxi), stat=ierr)
        if (ierr /= 0) call aerr( 'windx/windy', ierr, ndxndxi)
        !windx/y is not set to 0.0 for flownodes without links
