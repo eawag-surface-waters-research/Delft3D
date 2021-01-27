@@ -19317,7 +19317,7 @@ subroutine unc_write_his(tim)            ! wrihis
     use unstruc_netcdf, only: unc_create, unc_close, unc_addcoordatts, unc_def_var_nonspatial, unc_write_flowgeom_filepointer, definencvar
     use unstruc_netcdf, only: ihisfile, mapids
     use unstruc_netcdf, only: UNC_LOC_S3D, UNC_LOC_WU, UNC_LOC_W
-    use unstruc_netcdf, only: unc_writeopts, nccrs => crs
+    use unstruc_netcdf, only: unc_writeopts, UG_WRITE_LATLON, nccrs => crs
     use unstruc_messages
     use m_sferic, only: jsferic
     use m_partitioninfo
