@@ -1565,7 +1565,7 @@ subroutine pol_to_crosssections(xpl, ypl, npl, names)
             if (i1 <= i2) then
                 ! 1: Special name for this CRS or not?
                 ic = ic + 1
-                if (ic < numnam) then
+                if (ic <= numnam) then
                     name = names(ic)
                 else
                     name = ' '
