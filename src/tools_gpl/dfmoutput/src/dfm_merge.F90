@@ -101,7 +101,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
    integer :: id_flownodedomain , id_flownodeglobnr, id_edgefaces, id_netfacenodes, id_edgenodes, id_netedgefaces, id_netfaceedges
    integer :: ierri
    integer :: maxlen, nlen, plen, mlen, ii, id, iv, it, itm, ip, ik, is, ie, nvarsel, ntsel, nvars, ndims, nvardims, vartype
-   integer :: netfacemaxnodesg, netnodemaxface=10, ndxc, lnxc, numkc, numlc,ndx_bndc
+   integer :: netfacemaxnodesg, netnodemaxface=12, ndxc, lnxc, numkc, numlc,ndx_bndc
    integer :: nfaceglob, nfaceglob0, nfacecount, ifaceglob
    integer :: nedgeglob, nedgeglob0, nedgecount, iedgeglob
    integer :: nnodeglob, nnodeglob0, nnodecount, inodeglob
