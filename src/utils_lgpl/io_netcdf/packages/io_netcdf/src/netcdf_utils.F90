@@ -37,6 +37,7 @@ private
 
 public :: ncu_format_to_cmode
 public :: ncu_inq_var_fill, ncu_copy_atts, ncu_copy_chunking_deflate
+public :: ncu_clone_vardef
 
 ! Copied from official NetCDF: typeSizes.f90
 integer, parameter ::   OneByteInt = selected_int_kind(2), &
@@ -118,6 +119,80 @@ function ncu_copy_atts( ncidin, ncidout, varidin, varidout ) result(ierr)
 
    ierr = nf90_noerr
 end function ncu_copy_atts
+
+
+!> Clones a NetCDF variable definition.
+!!
+!! The cloned variable will appear under a new name in the (output) file.
+!! No data will be copied. Optionally, different standard_name, long_name
+!! and units may directly be specified.
+function ncu_clone_vardef(ncidin, ncidout, varidin, newname, varidout, &
+                          newstdname, newlongname, newunits) result(ierr)
+   integer,                    intent(in   ) :: ncidin      !< ID of the input NetCDF file
+   integer,                    intent(in   ) :: ncidout     !< ID of the output NetCDF file (can be the same as input NetCDF file)
+   integer,                    intent(in   ) :: varidin     !< ID of the variable in the input file.
+   character(len=*),           intent(in   ) :: newname     !< Variable name for the new variable.
+   integer,                    intent(  out) :: varidout    !< ID of the variable in the output file.
+   character(len=*), optional, intent(in   ) :: newstdname  !< New standard_name for the new variable.
+   character(len=*), optional, intent(in   ) :: newlongname !< New long_name for the new variable.
+   character(len=*), optional, intent(in   ) :: newunits    !< New units for the new variable.
+
+
+   integer                        :: ierr
+   integer                        :: i
+
+   character(len=nf90_max_name)   :: attname
+   integer                        :: natts
+   integer :: ndims, xtype
+   integer, allocatable ::dimids(:)
+
+   ierr = -1
+
+   ierr = nf90_inquire_variable(ncidin, varidin, xtype = xtype, nDims=ndims, nAtts = natts)
+   if ( ierr /= nf90_noerr ) then
+      return
+   endif
+
+   ! Currently skipped properties in nf90_inquire_variable:
+   !  logical, optional, intent(out) :: contiguous
+   !  integer, optional, dimension(:), intent(out) :: chunksizes
+   !  integer, optional, intent(out) :: deflate_level
+   !  logical, optional, intent(out) :: shuffle, fletcher32
+   !  integer, optional, intent(out) :: endianness
+
+   allocate(dimids(ndims))
+   ierr = nf90_inquire_variable(ncidin, varidin, dimids=dimids)
+
+   ierr = nf90_def_var(ncidout, newname, xtype, dimids, varidout)
+
+   ! TODO: AvD: consider copying all attributes
+   !do i = 1,natts
+   !   ierr = nf90_inq_attname( ncidin, varidin, i, attname )
+   !   if ( ierr /= nf90_noerr ) then
+   !      return
+   !   endif
+   !
+   !   ierr = nf90_copy_att( ncidin, varidin, attname, ncidout, varidout )
+   !   if ( ierr /= nf90_noerr ) then
+   !      return
+   !   endif
+   !enddo
+
+   if (present(newstdname)) then
+      ierr = nf90_put_att(ncidout, varidout, 'standard_name', newstdname)
+   end if
+
+   if (present(newlongname)) then
+      ierr = nf90_put_att(ncidout, varidout, 'long_name', newlongname)
+   end if
+
+   if (present(newunits)) then
+      ierr = nf90_put_att(ncidout, varidout, 'units', newunits)
+   end if
+
+   ierr = nf90_noerr
+end function ncu_clone_vardef
+
 
 !> Compatibility function: returns the fill settings for a variable in a netCDF-3 file.
 function ncu_inq_var_fill_int4( ncid, varid, no_fill, fill_value) result(ierr)

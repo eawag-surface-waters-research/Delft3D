@@ -232,9 +232,9 @@ end function get_proj_string_from_epsg
       type(pj_object)     :: projection !< coordinate system object.
       character(len=1024) :: message !< Temporary variable for writing log messages.
 
-      call mess(LEVEL_INFO, trim(message))
       projection = pj_init_plus(trim(proj_string)//char(0))
       if (.not. pj_associated(projection)) then
+         message = 'get_projection: could not initialize projection for proj_string '''//trim(proj_string)//'''.'
          call mess(LEVEL_ERROR, trim(message))
          return
       endif
@@ -311,6 +311,51 @@ end function get_proj_string_from_epsg
 
       call pj_free(src_projection)
       call pj_free(dst_projection)
+   end subroutine
+
+   !> Transforms input arrays of projected x/y coordinates into lon/lat coordinates and directly writes them to a NetCDF dataset.
+   subroutine transform_and_put_latlon_coordinates(ncid, varid_lon, varid_lat, src_proj_string, src_x, src_y, start, count)
+      use proj
+
+      implicit none
+
+      integer,                                         intent(in) :: ncid            !< NetCDF data set id.
+      integer,                                         intent(in) :: varid_lon       !< NetCDF varid for longitude coordinates.
+      integer,                                         intent(in) :: varid_lat       !< NetCDF varid for latitude coordinates.
+      character(len=*),                                intent(in) :: src_proj_string !< proj4 string describing source coordinate system.
+      real(kind=kind(1.0d00)), dimension(:),           intent(in) :: src_x           !< x coordinates to transform in degrees/meters.
+      real(kind=kind(1.0d00)), dimension(:),           intent(in) :: src_y           !< y coordinates to transform in degrees/meters.
+      integer,                 dimension(:), optional, intent(in) :: start           !< start index array for writing the lon/lat coordinates
+      integer,                 dimension(:), optional, intent(in) :: count           !< count array for writing the lon/lat coordinates
+      
+
+      real(kind=kind(1d0)), dimension(:), allocatable :: lon, lat
+      integer :: ierr
+      integer, dimension(:), allocatable :: start_, count_
+
+      if (present(start)) then
+         allocate(start_(size(start)))
+         start_ = start
+      else
+         allocate(start_(1))
+         start_ = 1
+      end if
+      if (present(count)) then
+         allocate(count_(size(count)))
+         count_ = count
+      else
+         allocate(count_(1))
+         count_ = size(src_x)
+      end if
+
+      allocate(lon(size(src_x)))
+      allocate(lat(size(src_y)))
+
+!   if (add_latlon) then ! If x,y are not in WGS84 system, then add mandatory additional lon/lat coordinates.
+      call transform_coordinates(src_proj_string, WGS84_PROJ_STRING, src_x, src_y, lon, lat)
+      ierr = nf90_put_var(ncid, varid_lon, lon, start = start_, count = count_)
+      ierr = nf90_put_var(ncid, varid_lat, lat, start = start_, count = count_)
+!   end if
    end subroutine
 #endif
 

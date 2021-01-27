@@ -19311,10 +19311,13 @@ subroutine unc_write_his(tim)            ! wrihis
     use m_monitoring_runupgauges
     use m_missing
     use netcdf
+    use netcdf_utils
+    use coordinate_reference_system, only: transform_and_put_latlon_coordinates
     use unstruc_files, only: defaultFilename
     use unstruc_netcdf, only: unc_create, unc_close, unc_addcoordatts, unc_def_var_nonspatial, unc_write_flowgeom_filepointer, definencvar
     use unstruc_netcdf, only: ihisfile, mapids
     use unstruc_netcdf, only: UNC_LOC_S3D, UNC_LOC_WU, UNC_LOC_W
+    use unstruc_netcdf, only: unc_writeopts, nccrs => crs
     use unstruc_messages
     use m_sferic, only: jsferic
     use m_partitioninfo
@@ -19345,6 +19348,7 @@ subroutine unc_write_his(tim)            ! wrihis
     integer, save :: id_laydim , id_laydimw, &
                      id_statdim, id_mstatdim, id_strlendim, id_crsdim, id_crslendim, id_crsptsdim, id_timedim, &
                      id_statx, id_staty, id_statid, id_statname, id_time, id_timestep, &
+                     id_statlon, id_statlat, &
                      id_mstatx, id_mstaty, id_mstatname, &
                      id_crsx, id_crsy, id_crsname, &
                      id_vars, id_varucx, id_varucy, id_varucz, id_varsal, id_vartem, id_varsed, id_varrho, &
@@ -19393,6 +19397,7 @@ subroutine unc_write_his(tim)            ! wrihis
                      id_rugdim, id_rugx, id_rugy, id_rugid, id_rugname, id_varruh
     ! ids for geometry variables, only use them once at the first time of history output
     integer :: id_statgeom_node_count,        id_statgeom_node_coordx,        id_statgeom_node_coordy,    &
+                                              id_statgeom_node_lon,           id_statgeom_node_lat,       &
                id_crsgeom_node_count,         id_crsgeom_node_coordx,         id_crsgeom_node_coordy,     &
                id_weirgeom_node_count,        id_weirgeom_node_coordx,        id_weirgeom_node_coordy,    &
                id_orifgeom_node_count,        id_orifgeom_node_coordx,        id_orifgeom_node_coordy,    &
@@ -19430,6 +19435,7 @@ subroutine unc_write_his(tim)            ! wrihis
     integer                      :: strlen_netcdf  ! string length definition for (station) names on history file
     character(len=255)           :: filename
     character(len=25)            :: transpunit
+    character(len=1024)          :: statcoordstring
     integer                      :: igen, istru
     integer                      :: ndims
     character(len=255)           :: tmpstr, tmpstr2, tmpstr3, unit1, unit2, unit3
@@ -19441,6 +19447,7 @@ subroutine unc_write_his(tim)            ! wrihis
     double precision, allocatable:: toutput_cum, toutput_cur
     type(t_structure), pointer   :: pstru
     integer                      :: lsed
+    logical                      :: add_latlon
 
     if (jahiszcor > 0) then
        jawrizc = 1
@@ -19472,6 +19479,13 @@ subroutine unc_write_his(tim)            ! wrihis
         ihisfile = -1 ! -1 stands for: no file open, no obs/crs defined.
         return
     end if
+
+    ! Only add auto-tranformed lat/lon coordinates if model is Cartesian and user has requested extra latlon output.
+#ifdef HAVE_PROJ
+    add_latlon = jsferic == 0 .and. iand(unc_writeopts, UG_WRITE_LATLON) == UG_WRITE_LATLON
+#else
+    add_latlon = .false.
+#endif    
 
     if (ihisfile == 0) then
 
@@ -19520,6 +19534,16 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = nf90_put_att(ihisfile, id_statx, 'long_name', 'original x-coordinate of station (non-snapped)')
             ierr = nf90_put_att(ihisfile, id_staty, 'long_name', 'original y-coordinate of station (non-snapped)')
 
+            statcoordstring = 'station_x_coordinate station_y_coordinate station_name'
+            if (add_latlon) then
+               ierr = ncu_clone_vardef(ihisfile, ihisfile, id_statx, 'station_lon', id_statlon, &
+                             'longitude', 'original lon-coordinate of station (non-snapped)', 'degrees_east')
+               ierr = ncu_clone_vardef(ihisfile, ihisfile, id_staty, 'station_lat', id_statlat, &
+                             'latitude', 'original lat-coordinate of station (non-snapped)', 'degrees_north')
+
+               statcoordstring = trim(statcoordstring) // ' station_lon station_lat'
+            end if
+
             ierr = nf90_def_var(ihisfile, 'station_id',         nf90_char,   (/ id_strlendim, id_statdim /), id_statid)
             ierr = nf90_put_att(ihisfile, id_statid,  'long_name'    , 'observation station identifier') ! REF
 
@@ -19531,14 +19555,15 @@ subroutine unc_write_his(tim)            ! wrihis
             station_geom_container_name = 'station_geom'
             nNodeTot = numobs+nummovobs
             ierr = sgeom_def_geometry_variables(ihisfile, station_geom_container_name, 'station', 'point', nNodeTot, id_statdim, &
-               id_statgeom_node_count, id_statgeom_node_coordx, id_statgeom_node_coordy)
+               id_statgeom_node_count, id_statgeom_node_coordx, id_statgeom_node_coordy, add_latlon, id_statgeom_node_lon, id_statgeom_node_lat)
+            
 
             if ( jahiswatlev > 0 ) then
                ierr = nf90_def_var(ihisfile, 'waterlevel', nf90_double, (/ id_statdim, id_timedim /), id_vars)
                ierr = nf90_put_att(ihisfile, id_vars, 'standard_name', 'sea_surface_height') ! sorry for inland water people
                ierr = nf90_put_att(ihisfile, id_vars, 'long_name', 'water level')
                ierr = nf90_put_att(ihisfile, id_vars, 'units', 'm')
-               ierr = nf90_put_att(ihisfile, id_vars, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
+               ierr = nf90_put_att(ihisfile, id_vars, 'coordinates', statcoordstring)
                ierr = nf90_put_att(ihisfile, id_vars, 'geometry', station_geom_container_name)
                ierr = nf90_put_att(ihisfile, id_vars, '_FillValue', dmiss)
             endif
@@ -19551,7 +19576,7 @@ subroutine unc_write_his(tim)            ! wrihis
                endif
                ierr = nf90_put_att(ihisfile, id_varb, 'long_name', 'bottom level')
                ierr = nf90_put_att(ihisfile, id_varb, 'units', 'm')
-               ierr = nf90_put_att(ihisfile, id_varb, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
+               ierr = nf90_put_att(ihisfile, id_varb, 'coordinates', statcoordstring)
                ierr = nf90_put_att(ihisfile, id_varb, 'geometry', station_geom_container_name)
                ierr = nf90_put_att(ihisfile, id_varb, '_FillValue', dmiss)
             endif
@@ -19559,25 +19584,25 @@ subroutine unc_write_his(tim)            ! wrihis
             idims(1) = id_statdim
             idims(2) = id_timedim
             if (jahiswatdep > 0) then
-               call definencvar(ihisfile,id_hs, nf90_double, idims, 2, 'waterdepth'  , 'water depth', 'm', 'station_x_coordinate station_y_coordinate station_name', station_geom_container_name)
+               call definencvar(ihisfile,id_hs, nf90_double, idims, 2, 'waterdepth'  , 'water depth', 'm', statcoordstring, station_geom_container_name)
             endif
 
             if( jahisvelvec > 0 ) then
                if ( kmx.gt.0 ) then
                   ierr = nf90_def_var(ihisfile, 'x_velocity', nf90_double, (/ id_laydim, id_statdim, id_timedim /), id_varucx)
-                  ierr = nf90_put_att(ihisfile, id_varucx, 'coordinates', 'station_x_coordinate station_y_coordinate station_name zcoordinate_c')
+                  ierr = nf90_put_att(ihisfile, id_varucx, 'coordinates', trim(statcoordstring) // ' zcoordinate_c')
                   ierr = nf90_def_var(ihisfile, 'y_velocity', nf90_double, (/ id_laydim, id_statdim, id_timedim /), id_varucy)
-                  ierr = nf90_put_att(ihisfile, id_varucy, 'coordinates', 'station_x_coordinate station_y_coordinate station_name zcoordinate_c')
+                  ierr = nf90_put_att(ihisfile, id_varucy, 'coordinates', trim(statcoordstring) // ' zcoordinate_c')
                   ierr = nf90_def_var(ihisfile, 'z_velocity', nf90_double, (/ id_laydim, id_statdim, id_timedim /), id_varucz)
                   ierr = nf90_put_att(ihisfile, id_varucz, 'standard_name', 'upward_sea_water_velocity')
                   ierr = nf90_put_att(ihisfile, id_varucz, 'long_name', 'vertical/upward component of flow element center velocity vector') ! sorry for inland water people
                   ierr = nf90_put_att(ihisfile, id_varucz, 'units', 'm s-1')
-                  ierr = nf90_put_att(ihisfile, id_varucz, 'coordinates', 'station_x_coordinate station_y_coordinate station_name zcoordinate_c')
+                  ierr = nf90_put_att(ihisfile, id_varucz, 'coordinates', trim(statcoordstring) // ' zcoordinate_c')
                   ierr = nf90_put_att(ihisfile, id_varucz, 'geometry', station_geom_container_name)
                   ierr = nf90_put_att(ihisfile, id_varucz, '_FillValue', dmiss)
                   jawrizc = 1
                   ierr = nf90_def_var(ihisfile, 'depth-averaged_x_velocity', nf90_double, (/ id_statdim, id_timedim /), id_varucxq)
-                  ierr = nf90_put_att(ihisfile, id_varucxq, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
+                  ierr = nf90_put_att(ihisfile, id_varucxq, 'coordinates', statcoordstring)
                   ierr = nf90_put_att(ihisfile, id_varucxq, 'standard_name', 'sea_water_depth-averaged_x_velocity')
                   ierr = nf90_put_att(ihisfile, id_varucxq, 'long_name', 'flow element depth-averaged center velocity vector, x-component')
                   ierr = nf90_put_att(ihisfile, id_varucxq, 'units', 'm s-1')
@@ -19585,7 +19610,7 @@ subroutine unc_write_his(tim)            ! wrihis
                   ierr = nf90_put_att(ihisfile, id_varucxq, '_FillValue', dmiss)
 
                   ierr = nf90_def_var(ihisfile, 'depth-averaged_y_velocity', nf90_double, (/ id_statdim, id_timedim /), id_varucyq)
-                  ierr = nf90_put_att(ihisfile, id_varucyq, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
+                  ierr = nf90_put_att(ihisfile, id_varucyq, 'coordinates', statcoordstring)
                   ierr = nf90_put_att(ihisfile, id_varucyq, 'standard_name', 'sea_water_depth-averaged_y_velocity')
                   ierr = nf90_put_att(ihisfile, id_varucyq, 'long_name', 'flow element depth-averaged center velocity vector, y-component')
                   ierr = nf90_put_att(ihisfile, id_varucyq, 'units', 'm s-1')
@@ -19593,9 +19618,9 @@ subroutine unc_write_his(tim)            ! wrihis
                   ierr = nf90_put_att(ihisfile, id_varucyq, '_FillValue', dmiss)
                else
                   ierr = nf90_def_var(ihisfile, 'x_velocity', nf90_double, (/ id_statdim, id_timedim /), id_varucx)
-                  ierr = nf90_put_att(ihisfile, id_varucx, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
+                  ierr = nf90_put_att(ihisfile, id_varucx, 'coordinates', statcoordstring)
                   ierr = nf90_def_var(ihisfile, 'y_velocity', nf90_double, (/ id_statdim, id_timedim /), id_varucy)
-                  ierr = nf90_put_att(ihisfile, id_varucy, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
+                  ierr = nf90_put_att(ihisfile, id_varucy, 'coordinates', statcoordstring)
                end if
                ierr = nf90_put_att(ihisfile, id_varucx, 'standard_name', 'sea_water_x_velocity')
                ierr = nf90_put_att(ihisfile, id_varucx, 'long_name', 'x-component of flow element center velocity vector')
@@ -19624,25 +19649,25 @@ subroutine unc_write_his(tim)            ! wrihis
                !ierr = nf90_put_att(ihisfile, id_zws, 'positive' , 'up')
 
                if (iturbulencemodel >= 3 .and. jahistur > 0) then
-                  call definencvar(ihisfile,id_turkin,nf90_double, idims,3, 'tke'   , 'turbulent kinetic energy'   , 'm2 s-2',  'station_x_coordinate station_y_coordinate station_name zcoordinate_wu', station_geom_container_name, fillVal = dmiss)
+                  call definencvar(ihisfile,id_turkin,nf90_double, idims,3, 'tke'   , 'turbulent kinetic energy'   , 'm2 s-2',  trim(statcoordstring) // ' zcoordinate_wu', station_geom_container_name, fillVal = dmiss)
                   jawrizw = 1
                endif
                if (iturbulencemodel > 1 .and. jahistur > 0 ) then
-                  call definencvar(ihisfile,id_vicwwu,nf90_double, idims,3, 'vicww' , 'turbulent vertical eddy viscosity'    , 'm2 s-1' ,  'station_x_coordinate station_y_coordinate station_name zcoordinate_wu', station_geom_container_name, fillVal = dmiss)
+                  call definencvar(ihisfile,id_vicwwu,nf90_double, idims,3, 'vicww' , 'turbulent vertical eddy viscosity'    , 'm2 s-1' ,  trim(statcoordstring) // ' zcoordinate_wu', station_geom_container_name, fillVal = dmiss)
                   ierr = nf90_put_att(ihisfile, id_turkin, 'standard_name', 'specific_turbulent_kinetic_energy_of_sea_water')
                   jawrizw = 1
                endif
                if (iturbulencemodel == 3 .and. jahistur > 0) then
-                  call definencvar(ihisfile,id_tureps,nf90_double, idims,3, 'eps'   , 'turbulent energy dissipation', 'm2 s-3'  ,  'station_x_coordinate station_y_coordinate station_name zcoordinate_wu', station_geom_container_name, fillVal = dmiss)
+                  call definencvar(ihisfile,id_tureps,nf90_double, idims,3, 'eps'   , 'turbulent energy dissipation', 'm2 s-3'  ,  trim(statcoordstring) // ' zcoordinate_wu', station_geom_container_name, fillVal = dmiss)
                   ierr = nf90_put_att(ihisfile, id_tureps, 'standard_name', 'specific_turbulent_kinetic_energy_dissipation_in_sea_water')
                   jawrizw = 1
                else if (iturbulencemodel == 4 .and. jahistur > 0) then
-                  call definencvar(ihisfile,id_tureps,nf90_double, idims,3, 'tau'   , 'turbulent time scale', 's-1'  ,  'station_x_coordinate station_y_coordinate station_name zcoordinate_wu', station_geom_container_name, fillVal = dmiss)
+                  call definencvar(ihisfile,id_tureps,nf90_double, idims,3, 'tau'   , 'turbulent time scale', 's-1'  ,  trim(statcoordstring) // ' zcoordinate_wu', station_geom_container_name, fillVal = dmiss)
                   jawrizw = 1
                endif
 
                if (jarichardsononoutput > 0) then
-                  call definencvar(ihisfile,id_rich,nf90_double, idims,3, 'rich' , 'Richardson Nr'    , '  ' ,  'station_x_coordinate station_y_coordinate station_name zcoordinate_wu', station_geom_container_name, fillVal = dmiss)
+                  call definencvar(ihisfile,id_rich,nf90_double, idims,3, 'rich' , 'Richardson Nr'    , '  ' ,  trim(statcoordstring) // ' zcoordinate_wu', station_geom_container_name, fillVal = dmiss)
                   jawrizw = 1
                end if
 
@@ -19667,11 +19692,11 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = nf90_put_att(ihisfile, id_varucy, 'units', 'm s-1')
 
             if (kmx > 0) then
-               ierr = nf90_put_att(ihisfile, id_varucx, 'coordinates', 'station_x_coordinate station_y_coordinate station_name zcoordinate_c')
-               ierr = nf90_put_att(ihisfile, id_varucy, 'coordinates', 'station_x_coordinate station_y_coordinate station_name zcoordinate_c')
+               ierr = nf90_put_att(ihisfile, id_varucx, 'coordinates', trim(statcoordstring) // ' zcoordinate_c')
+               ierr = nf90_put_att(ihisfile, id_varucy, 'coordinates', trim(statcoordstring) // ' zcoordinate_c')
             else
-               ierr = nf90_put_att(ihisfile, id_varucx, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
-               ierr = nf90_put_att(ihisfile, id_varucy, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
+               ierr = nf90_put_att(ihisfile, id_varucx, 'coordinates', statcoordstring)
+               ierr = nf90_put_att(ihisfile, id_varucy, 'coordinates', statcoordstring)
             end if
 
             ierr = nf90_put_att(ihisfile, id_varucx, 'geometry', station_geom_container_name)
@@ -19683,11 +19708,11 @@ subroutine unc_write_his(tim)            ! wrihis
             if (jasal > 0 .and. jahissal > 0) then
                if ( kmx.gt.0 ) then
                   ierr = nf90_def_var(ihisfile, 'salinity', nf90_double, (/ id_laydim, id_statdim, id_timedim /), id_varsal)
-                  ierr = nf90_put_att(ihisfile, id_varsal, 'coordinates', 'station_x_coordinate station_y_coordinate station_name zcoordinate_c')
+                  ierr = nf90_put_att(ihisfile, id_varsal, 'coordinates', trim(statcoordstring) // ' zcoordinate_c')
                   jawrizc = 1
                else
                   ierr = nf90_def_var(ihisfile, 'salinity', nf90_double, (/ id_statdim, id_timedim /), id_varsal)
-                  ierr = nf90_put_att(ihisfile, id_varsal, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
+                  ierr = nf90_put_att(ihisfile, id_varsal, 'coordinates', statcoordstring)
                end if
                ierr = nf90_put_att(ihisfile, id_varsal, 'units', '1e-3')
                ierr = nf90_put_att(ihisfile, id_varsal, 'geometry', station_geom_container_name)
@@ -19699,7 +19724,7 @@ subroutine unc_write_his(tim)            ! wrihis
             if (jawave .eq. 4) then
 
                ierr = nf90_def_var(ihisfile, 'R',  nf90_double, ((/ id_statdim, id_timedim /)) , id_R)
-               ierr = nf90_put_att(ihisfile, id_R,   'coordinates'  , 'station_x_coordinate station_y_coordinate station_name')
+               ierr = nf90_put_att(ihisfile, id_R,   'coordinates'  , statcoordstring)
                ierr = nf90_put_att(ihisfile, id_R,   'standard_name', 'sea_surface_bulk_roller_energy')                          ! not CF
                ierr = nf90_put_att(ihisfile, id_R,   'long_name'    , 'roller energy per square meter')
                ierr = nf90_put_att(ihisfile, id_R,   'units'        , 'J m-2')
@@ -19710,7 +19735,7 @@ subroutine unc_write_his(tim)            ! wrihis
 
             if (jawave > 0 .and. jahiswav > 0) then
                ierr = nf90_def_var(ihisfile, 'hwav',  nf90_double, ((/ id_statdim, id_timedim /)) , id_WH)
-               ierr = nf90_put_att(ihisfile, id_WH,   'coordinates'  , 'station_x_coordinate station_y_coordinate station_name')
+               ierr = nf90_put_att(ihisfile, id_WH,   'coordinates'  , statcoordstring)
                ierr = nf90_put_att(ihisfile, id_WH,   'standard_name', 'sea_surface_wave_significant_wave_height')     ! Default behaviour
                ierr = nf90_put_att(ihisfile, id_WH,   'long_name'    , 'Significant wave height')
                if (jahissigwav==0) then
@@ -19722,7 +19747,7 @@ subroutine unc_write_his(tim)            ! wrihis
                ierr = nf90_put_att(ihisfile, id_WH, '_FillValue', dmiss)
 
                ierr = nf90_def_var(ihisfile, 'twav',  nf90_double, ((/ id_statdim, id_timedim /)) , id_WT)
-               ierr = nf90_put_att(ihisfile, id_WT,   'coordinates'  , 'station_x_coordinate station_y_coordinate station_name')
+               ierr = nf90_put_att(ihisfile, id_WT,   'coordinates'  , statcoordstring)
                ierr = nf90_put_att(ihisfile, id_WT,   'standard_name', 'sea_surface_wave_period')
                ierr = nf90_put_att(ihisfile, id_WT,   'long_name'    , 'Wave period')
                ierr = nf90_put_att(ihisfile, id_WT,   'units'        , 's')
@@ -19730,7 +19755,7 @@ subroutine unc_write_his(tim)            ! wrihis
                ierr = nf90_put_att(ihisfile, id_WT, '_FillValue', dmiss)
 
                ierr = nf90_def_var(ihisfile, 'phiwav',  nf90_double, ((/ id_statdim, id_timedim /)) , id_WD)
-               ierr = nf90_put_att(ihisfile, id_WD,   'coordinates'  , 'station_x_coordinate station_y_coordinate station_name')
+               ierr = nf90_put_att(ihisfile, id_WD,   'coordinates'  , statcoordstring)
                ierr = nf90_put_att(ihisfile, id_WD,   'standard_name', 'sea_surface_wave_from_direction')
                ierr = nf90_put_att(ihisfile, id_WD,   'long_name'    , 'Wave from direction')
                ierr = nf90_put_att(ihisfile, id_WD,   'units'        , 'deg from N')
@@ -19738,7 +19763,7 @@ subroutine unc_write_his(tim)            ! wrihis
                ierr = nf90_put_att(ihisfile, id_WD, '_FillValue', dmiss)
 
                ierr = nf90_def_var(ihisfile, 'rlabda',  nf90_double, ((/ id_statdim, id_timedim /)) , id_WL)
-               ierr = nf90_put_att(ihisfile, id_WL,   'coordinates'  , 'station_x_coordinate station_y_coordinate station_name')
+               ierr = nf90_put_att(ihisfile, id_WL,   'coordinates'  , statcoordstring)
                ierr = nf90_put_att(ihisfile, id_WL,   'standard_name', 'sea_surface_wave_length')
                ierr = nf90_put_att(ihisfile, id_WL,   'long_name'    , 'Wave length')
                ierr = nf90_put_att(ihisfile, id_WL,   'units'        , 'm')
@@ -19746,7 +19771,7 @@ subroutine unc_write_his(tim)            ! wrihis
                ierr = nf90_put_att(ihisfile, id_WL, '_FillValue', dmiss)
 
                ierr = nf90_def_var(ihisfile, 'uorb',  nf90_double, ((/ id_statdim, id_timedim /)) , id_WU)
-               ierr = nf90_put_att(ihisfile, id_WU,   'coordinates'  , 'station_x_coordinate station_y_coordinate station_name')
+               ierr = nf90_put_att(ihisfile, id_WU,   'coordinates'  , statcoordstring)
                ierr = nf90_put_att(ihisfile, id_WU,   'standard_name', 'sea_surface_wave_orbital_velocity')
                ierr = nf90_put_att(ihisfile, id_WU,   'long_name'    , 'Orbital velocity')
                ierr = nf90_put_att(ihisfile, id_WU,   'units'        , 'm/s')
@@ -19755,14 +19780,14 @@ subroutine unc_write_his(tim)            ! wrihis
 
                if (kmx==0) then
                    ierr = nf90_def_var(ihisfile, 'ustokes',  nf90_double, ((/ id_statdim, id_timedim /)) , id_USTX)
-                   ierr = nf90_put_att(ihisfile, id_USTX,   'coordinates'  , 'station_x_coordinate station_y_coordinate station_name')
+                   ierr = nf90_put_att(ihisfile, id_USTX,   'coordinates'  , statcoordstring)
                    ierr = nf90_def_var(ihisfile, 'vstokes',  nf90_double, ((/ id_statdim, id_timedim /)) , id_USTY)
-                   ierr = nf90_put_att(ihisfile, id_USTY,   'coordinates'  , 'station_x_coordinate station_y_coordinate station_name')
+                   ierr = nf90_put_att(ihisfile, id_USTY,   'coordinates'  , statcoordstring)
                else
                    ierr = nf90_def_var(ihisfile, 'ustokes',  nf90_double, ((/ id_laydim, id_statdim, id_timedim /)) , id_USTX)
-                   ierr = nf90_put_att(ihisfile, id_USTX,   'coordinates'  , 'station_x_coordinate station_y_coordinate station_name zcoordinate_c')
+                   ierr = nf90_put_att(ihisfile, id_USTX,   'coordinates'  , trim(statcoordstring) // ' zcoordinate_c')
                    ierr = nf90_def_var(ihisfile, 'vstokes',  nf90_double, ((/ id_laydim, id_statdim, id_timedim /)) , id_USTY)
-                   ierr = nf90_put_att(ihisfile, id_USTY,   'coordinates'  , 'station_x_coordinate station_y_coordinate station_name zcoordinate_c')
+                   ierr = nf90_put_att(ihisfile, id_USTY,   'coordinates'  , trim(statcoordstring) // ' zcoordinate_c')
                    jawrizc = 1
                endif
 
@@ -19780,7 +19805,7 @@ subroutine unc_write_his(tim)            ! wrihis
 
             if (jahistaucurrent>0) then
                ierr = nf90_def_var(ihisfile, 'taus',  nf90_double, ((/ id_statdim, id_timedim /)) , id_WTAU)
-               ierr = nf90_put_att(ihisfile, id_WTAU, 'coordinates'  , 'station_x_coordinate station_y_coordinate station_name')
+               ierr = nf90_put_att(ihisfile, id_WTAU, 'coordinates'  , statcoordstring)
                ierr = nf90_put_att(ihisfile, id_WTAU, 'standard_name', 'mean_bottom_shear_stress')
                ierr = nf90_put_att(ihisfile, id_WTAU, 'long_name'    , 'Mean bottom shear stress')
                ierr = nf90_put_att(ihisfile, id_WTAU, 'units'        , 'Pa')
@@ -19791,11 +19816,11 @@ subroutine unc_write_his(tim)            ! wrihis
             if (jatem > 0 .and. jahistem > 0) then
                if ( kmx.gt.0 ) then
                   ierr = nf90_def_var(ihisfile, 'temperature', nf90_double, (/ id_laydim, id_statdim, id_timedim /), id_vartem)
-                  ierr = nf90_put_att(ihisfile, id_vartem, 'coordinates', 'station_x_coordinate station_y_coordinate station_name zcoordinate_c')
+                  ierr = nf90_put_att(ihisfile, id_vartem, 'coordinates', trim(statcoordstring) // ' zcoordinate_c')
                   jawrizc = 1
                else
                   ierr = nf90_def_var(ihisfile, 'temperature', nf90_double, (/ id_statdim, id_timedim /), id_vartem)
-                  ierr = nf90_put_att(ihisfile, id_vartem, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
+                  ierr = nf90_put_att(ihisfile, id_vartem, 'coordinates', statcoordstring)
                end if
                ierr = nf90_put_att(ihisfile, id_vartem, 'units', 'degC')
                ierr = nf90_put_att(ihisfile, id_vartem, 'geometry', station_geom_container_name)
@@ -19805,21 +19830,21 @@ subroutine unc_write_his(tim)            ! wrihis
                if (jatem > 1 .and. jahisheatflux > 0) then ! here less verbose
                   idims(1) = id_statdim
                   idims(2) = id_timedim
-                  call definencvar(ihisfile,id_wind   ,nf90_double,idims,2, 'wind'  , 'windspeed', 'm s-1', 'station_x_coordinate station_y_coordinate station_name', station_geom_container_name)
-                  call definencvar(ihisfile,id_tair   ,nf90_double,idims,2, 'Tair'  , 'air temperature', 'degC', 'station_x_coordinate station_y_coordinate station_name', station_geom_container_name)
+                  call definencvar(ihisfile,id_wind   ,nf90_double,idims,2, 'wind'  , 'windspeed', 'm s-1', statcoordstring, station_geom_container_name)
+                  call definencvar(ihisfile,id_tair   ,nf90_double,idims,2, 'Tair'  , 'air temperature', 'degC', statcoordstring, station_geom_container_name)
                   if (jatem == 5) then
-                     call definencvar(ihisfile,id_rhum   ,nf90_double,idims,2, 'rhum'  , 'relative humidity', ' ','station_x_coordinate station_y_coordinate station_name', station_geom_container_name)
-                     call definencvar(ihisfile,id_clou   ,nf90_double,idims,2, 'clou'  , 'cloudiness', ' ', 'station_x_coordinate station_y_coordinate station_name', station_geom_container_name)
+                     call definencvar(ihisfile,id_rhum   ,nf90_double,idims,2, 'rhum'  , 'relative humidity', ' ',statcoordstring, station_geom_container_name)
+                     call definencvar(ihisfile,id_clou   ,nf90_double,idims,2, 'clou'  , 'cloudiness', ' ', statcoordstring, station_geom_container_name)
 
-                     call definencvar(ihisfile,id_qsun   ,nf90_double,idims,2, 'Qsun'  , 'solar influx', 'W m-2', 'station_x_coordinate station_y_coordinate station_name', station_geom_container_name)
-                     call definencvar(ihisfile,id_Qeva   ,nf90_double,idims,2, 'Qeva'  , 'evaporative heat flux', 'W m-2', 'station_x_coordinate station_y_coordinate station_name', station_geom_container_name)
-                     call definencvar(ihisfile,id_Qcon   ,nf90_double,idims,2, 'Qcon'  , 'sensible heat flux', 'W m-2', 'station_x_coordinate station_y_coordinate station_name', station_geom_container_name)
-                     call definencvar(ihisfile,id_Qlong  ,nf90_double,idims,2, 'Qlong' , 'long wave back radiation', 'W m-2', 'station_x_coordinate station_y_coordinate station_name', station_geom_container_name)
-                     call definencvar(ihisfile,id_Qfreva ,nf90_double,idims,2, 'Qfreva', 'free convection evaporative heat flux', 'W m-2', 'station_x_coordinate station_y_coordinate station_name', station_geom_container_name)
-                     call definencvar(ihisfile,id_Qfrcon ,nf90_double,idims,2, 'Qfrcon', 'free convection sensible heat flux', 'W m-2', 'station_x_coordinate station_y_coordinate station_name', station_geom_container_name)
+                     call definencvar(ihisfile,id_qsun   ,nf90_double,idims,2, 'Qsun'  , 'solar influx', 'W m-2', statcoordstring, station_geom_container_name)
+                     call definencvar(ihisfile,id_Qeva   ,nf90_double,idims,2, 'Qeva'  , 'evaporative heat flux', 'W m-2', statcoordstring, station_geom_container_name)
+                     call definencvar(ihisfile,id_Qcon   ,nf90_double,idims,2, 'Qcon'  , 'sensible heat flux', 'W m-2', statcoordstring, station_geom_container_name)
+                     call definencvar(ihisfile,id_Qlong  ,nf90_double,idims,2, 'Qlong' , 'long wave back radiation', 'W m-2', statcoordstring, station_geom_container_name)
+                     call definencvar(ihisfile,id_Qfreva ,nf90_double,idims,2, 'Qfreva', 'free convection evaporative heat flux', 'W m-2', statcoordstring, station_geom_container_name)
+                     call definencvar(ihisfile,id_Qfrcon ,nf90_double,idims,2, 'Qfrcon', 'free convection sensible heat flux', 'W m-2', statcoordstring, station_geom_container_name)
                   endif
                   if (jatem > 1) then
-                     call definencvar(ihisfile,id_Qtot   ,nf90_double,idims,2, 'Qtot'  , 'total heat flux', 'W m-2', 'station_x_coordinate station_y_coordinate station_name', station_geom_container_name)
+                     call definencvar(ihisfile,id_Qtot   ,nf90_double,idims,2, 'Qtot'  , 'total heat flux', 'W m-2', statcoordstring, station_geom_container_name)
                   end if
                endif
             endif
@@ -19827,11 +19852,11 @@ subroutine unc_write_his(tim)            ! wrihis
             if ((jasal > 0 .or. jatem > 0 .or. jased > 0) .and. jahisrho > 0) then
                if ( kmx.gt.0 ) then
                   ierr = nf90_def_var(ihisfile, 'density', nf90_double, (/ id_laydim, id_statdim, id_timedim /), id_varrho)
-                  ierr = nf90_put_att(ihisfile, id_varrho, 'coordinates', 'station_x_coordinate station_y_coordinate station_name zcoordinate_c')
+                  ierr = nf90_put_att(ihisfile, id_varrho, 'coordinates', trim(statcoordstring) // ' zcoordinate_c')
                   jawrizc = 1
                else
                   ierr = nf90_def_var(ihisfile, 'density', nf90_double, (/ id_statdim, id_timedim /), id_varrho)
-                  ierr = nf90_put_att(ihisfile, id_varrho, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
+                  ierr = nf90_put_att(ihisfile, id_varrho, 'coordinates', statcoordstring)
                end if
                ierr = nf90_put_att(ihisfile, id_varrho, 'units', 'kg m-3')
                ierr = nf90_put_att(ihisfile, id_varrho, 'geometry', station_geom_container_name)
@@ -19849,11 +19874,11 @@ subroutine unc_write_his(tim)            ! wrihis
 
                   if ( kmx > 0 ) then
                      ierr = nf90_def_var(ihisfile, trim(tmpstr), nf90_double, (/ id_laydim, id_statdim, id_timedim /), id_tra(i))
-                     ierr = nf90_put_att(ihisfile, id_tra(i), 'coordinates', 'station_x_coordinate station_y_coordinate station_name zcoordinate_c')
+                     ierr = nf90_put_att(ihisfile, id_tra(i), 'coordinates', trim(statcoordstring) // ' zcoordinate_c')
                      jawrizc = 1
                   else
                      ierr = nf90_def_var(ihisfile, trim(tmpstr), nf90_double, (/ id_statdim, id_timedim /), id_tra(i))
-                     ierr = nf90_put_att(ihisfile, id_tra(i), 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
+                     ierr = nf90_put_att(ihisfile, id_tra(i), 'coordinates', statcoordstring)
                   end if
                   if (const_units(j).ne.' ') then
                      tmpstr = const_units(j)
@@ -19875,7 +19900,7 @@ subroutine unc_write_his(tim)            ! wrihis
                   call replace_char(tmpstr,32,95)
 
                   ierr = nf90_def_var(ihisfile, trim(tmpstr), nf90_double, (/ id_statdim, id_timedim /), id_hwqb(i))
-                  ierr = nf90_put_att(ihisfile, id_hwqb(i), 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
+                  ierr = nf90_put_att(ihisfile, id_hwqb(i), 'coordinates', statcoordstring)
 
                   tmpstr = wqbotunits(i)
                   ierr = nf90_put_att(ihisfile, id_hwqb(i), 'units', tmpstr)
@@ -19891,7 +19916,7 @@ subroutine unc_write_his(tim)            ! wrihis
                      call replace_char(tmpstr,32,95)
 
                      ierr = nf90_def_var(ihisfile, trim(tmpstr)//'_3D', nf90_double, (/ id_laydim, id_statdim, id_timedim /), id_hwqb3d(i))
-                     ierr = nf90_put_att(ihisfile, id_hwqb3d(i), 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
+                     ierr = nf90_put_att(ihisfile, id_hwqb3d(i), 'coordinates', statcoordstring)
 
                      tmpstr = wqbotunits(i)
                      ierr = nf90_put_att(ihisfile, id_hwqb3d(i), 'units', tmpstr)
@@ -19911,10 +19936,10 @@ subroutine unc_write_his(tim)            ! wrihis
                      write (tmpstr, "('water_quality_output_',I0)") j
                      if ( kmx > 0 ) then  !        3D
                         ierr = nf90_def_var(ihisfile, trim(tmpstr), nf90_double, (/ id_laydim, id_statdim, id_timedim /), id_hwq(j))
-                        ierr = nf90_put_att(ihisfile, id_hwq(j), 'coordinates', 'station_x_coordinate station_y_coordinate station_name zcoordinate_c')
+                        ierr = nf90_put_att(ihisfile, id_hwq(j), 'coordinates', trim(statcoordstring) // ' zcoordinate_c')
                      else
                         ierr = nf90_def_var(ihisfile, trim(tmpstr), nf90_double, (/ id_statdim, id_timedim /), id_hwq(j))
-                        ierr = nf90_put_att(ihisfile, id_hwq(j), 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
+                        ierr = nf90_put_att(ihisfile, id_hwq(j), 'coordinates', statcoordstring)
                      end if
                      tmpstr = trim(outputs%names(j))//' - '//trim(outputs%descrs(j))//' in flow element'
                      call replace_multiple_spaces_by_single_spaces(tmpstr)
@@ -19933,10 +19958,10 @@ subroutine unc_write_his(tim)            ! wrihis
                      write (tmpstr, "('water_quality_stat_',I0)") j
                      if ( kmx > 0 ) then  !        3D
                         ierr = nf90_def_var(ihisfile, trim(tmpstr), nf90_double, (/ id_laydim, id_statdim, id_timedim /), id_hwq(jj))
-                        ierr = nf90_put_att(ihisfile, id_hwq(jj), 'coordinates', 'station_x_coordinate station_y_coordinate station_name zcoordinate_c')
+                        ierr = nf90_put_att(ihisfile, id_hwq(jj), 'coordinates', trim(statcoordstring) // ' zcoordinate_c')
                      else
                         ierr = nf90_def_var(ihisfile, trim(tmpstr), nf90_double, (/ id_statdim, id_timedim /), id_hwq(jj))
-                        ierr = nf90_put_att(ihisfile, id_hwq(jj), 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
+                        ierr = nf90_put_att(ihisfile, id_hwq(jj), 'coordinates', statcoordstring)
                      end if
                      tmpstr = trim(outputs%names(jj))//' - '//trim(outputs%descrs(jj))//' in flow element'
                      call replace_multiple_spaces_by_single_spaces(tmpstr)
@@ -19955,10 +19980,10 @@ subroutine unc_write_his(tim)            ! wrihis
                      write (tmpstr, "('water_quality_stat_',I0)") noout_statt + j
                      if ( kmx > 0 ) then  !        3D
                         ierr = nf90_def_var(ihisfile, trim(tmpstr), nf90_double, (/ id_laydim, id_statdim /), id_hwq(jj))
-                        ierr = nf90_put_att(ihisfile, id_hwq(jj), 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
+                        ierr = nf90_put_att(ihisfile, id_hwq(jj), 'coordinates', statcoordstring)
                      else
                         ierr = nf90_def_var(ihisfile, trim(tmpstr), nf90_double, (/ id_statdim /), id_hwq(jj))
-                        ierr = nf90_put_att(ihisfile, id_hwq(jj), 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
+                        ierr = nf90_put_att(ihisfile, id_hwq(jj), 'coordinates', statcoordstring)
                      end if
                      tmpstr = trim(outputs%names(jj))//' - '//trim(outputs%descrs(jj))//' in flow element'
                      call replace_multiple_spaces_by_single_spaces(tmpstr)
@@ -19986,7 +20011,7 @@ subroutine unc_write_his(tim)            ! wrihis
                   ierr = nf90_put_att(ihisfile, id_seddif, 'long_name', 'Sediment vertical diffusion')
                   ierr = nf90_put_att(ihisfile, id_seddif, 'units', 'm2 s-1')
                   ierr = nf90_put_att(ihisfile, id_seddif, '_FillValue', dmiss)
-                  ierr = nf90_put_att(ihisfile, id_seddif, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
+                  ierr = nf90_put_att(ihisfile, id_seddif, 'coordinates', statcoordstring)
                   ierr = nf90_put_att(ihisfile, id_seddif, 'geometry', station_geom_container_name)
                   !
                   jawrizc = 1
@@ -19998,12 +20023,12 @@ subroutine unc_write_his(tim)            ! wrihis
                !
                ierr = nf90_put_att(ihisfile, id_sf, 'long_name', 'Sediment concentration')
                ierr = nf90_put_att(ihisfile, id_sf, 'units', 'kg m-3')
-               ierr = nf90_put_att(ihisfile, id_sf, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
+               ierr = nf90_put_att(ihisfile, id_sf, 'coordinates', statcoordstring)
                ierr = nf90_put_att(ihisfile, id_sf, 'geometry', station_geom_container_name)
                !
                ierr = nf90_put_att(ihisfile, id_ws, 'long_name', 'Sediment settling velocity')
                ierr = nf90_put_att(ihisfile, id_ws, 'units', 'm s-1')
-               ierr = nf90_put_att(ihisfile, id_ws, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
+               ierr = nf90_put_att(ihisfile, id_ws, 'coordinates', statcoordstring)
                ierr = nf90_put_att(ihisfile, id_ws, 'geometry', station_geom_container_name)
                !
             endif
@@ -20025,48 +20050,48 @@ subroutine unc_write_his(tim)            ! wrihis
                   ierr = nf90_def_var(ihisfile, 'Current related bedload transport, x-component', nf90_double, (/  id_statdim, id_sedtotdim, id_timedim /), id_sbcx)
                   ierr = nf90_put_att(ihisfile, id_sbcx, 'long_name', 'Current related bedload transport, x-component')
                   ierr = nf90_put_att(ihisfile, id_sbcx, 'units', transpunit)
-                  ierr = nf90_put_att(ihisfile, id_sbcx, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
+                  ierr = nf90_put_att(ihisfile, id_sbcx, 'coordinates', statcoordstring)
                   ierr = nf90_put_att(ihisfile, id_sbcx, 'geometry', station_geom_container_name)
                   ierr = nf90_def_var(ihisfile, 'Current related bedload transport, y-component', nf90_double, (/ id_statdim, id_sedtotdim, id_timedim /), id_sbcy)
                   ierr = nf90_put_att(ihisfile, id_sbcy, 'long_name', 'Current related bedload transport, y-component')
                   ierr = nf90_put_att(ihisfile, id_sbcy, 'units', transpunit)
-                  ierr = nf90_put_att(ihisfile, id_sbcy, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
+                  ierr = nf90_put_att(ihisfile, id_sbcy, 'coordinates', statcoordstring)
                   ierr = nf90_put_att(ihisfile, id_sbcy, 'geometry', station_geom_container_name)
                endif
                if (stmpar%morpar%moroutput%sbwuv .and. jawave>0) then
                   ierr = nf90_def_var(ihisfile, 'Wave related bedload transport, x-component', nf90_double, (/ id_statdim, id_sedtotdim, id_timedim /), id_sbwx)
                   ierr = nf90_put_att(ihisfile, id_sbwx, 'long_name', 'Wave related bedload transport, x-component')
                   ierr = nf90_put_att(ihisfile, id_sbwx, 'units', transpunit)
-                  ierr = nf90_put_att(ihisfile, id_sbwx, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
+                  ierr = nf90_put_att(ihisfile, id_sbwx, 'coordinates', statcoordstring)
                   ierr = nf90_put_att(ihisfile, id_sbwx, 'geometry', station_geom_container_name)
                   ierr = nf90_def_var(ihisfile, 'Wave related bedload transport, y-component', nf90_double, (/ id_statdim, id_sedtotdim, id_timedim /), id_sbwy)
                   ierr = nf90_put_att(ihisfile, id_sbwy, 'long_name', 'Wave related bedload transport, y-component')
                   ierr = nf90_put_att(ihisfile, id_sbwy, 'units', transpunit)
-                  ierr = nf90_put_att(ihisfile, id_sbwy, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
+                  ierr = nf90_put_att(ihisfile, id_sbwy, 'coordinates', statcoordstring)
                   ierr = nf90_put_att(ihisfile, id_sbwy, 'geometry', station_geom_container_name)
                endif
                if (stmpar%morpar%moroutput%sswuv .and. jawave>0) then
                   ierr = nf90_def_var(ihisfile, 'Wave related suspended transport, x-component', nf90_double, (/ id_statdim, id_sedtotdim, id_timedim /), id_sswx)
                   ierr = nf90_put_att(ihisfile, id_sswx, 'long_name', 'Wave related suspended transport, x-component')
                   ierr = nf90_put_att(ihisfile, id_sswx, 'units', transpunit)
-                  ierr = nf90_put_att(ihisfile, id_sswx, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
+                  ierr = nf90_put_att(ihisfile, id_sswx, 'coordinates', statcoordstring)
                   ierr = nf90_put_att(ihisfile, id_sswx, 'geometry', station_geom_container_name)
                   ierr = nf90_def_var(ihisfile, 'Wave related suspended transport, y-component', nf90_double, (/ id_statdim, id_sedtotdim, id_timedim /), id_sswy)
                   ierr = nf90_put_att(ihisfile, id_sswy, 'long_name', 'Wave related suspended transport, y-component')
                   ierr = nf90_put_att(ihisfile, id_sswy, 'units', transpunit)
-                  ierr = nf90_put_att(ihisfile, id_sswy, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
+                  ierr = nf90_put_att(ihisfile, id_sswy, 'coordinates', statcoordstring)
                   ierr = nf90_put_att(ihisfile, id_sswy, 'geometry', station_geom_container_name)
                end if
                if (stmpar%morpar%moroutput%sscuv) then
                   ierr = nf90_def_var(ihisfile, 'Current related suspended transport, x-component', nf90_double, (/ id_statdim, id_sedtotdim, id_timedim /), id_sscx)
                   ierr = nf90_put_att(ihisfile, id_sscx, 'long_name', 'Current related suspended transport, x-component')
                   ierr = nf90_put_att(ihisfile, id_sscx, 'units', transpunit)
-                  ierr = nf90_put_att(ihisfile, id_sscx, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
+                  ierr = nf90_put_att(ihisfile, id_sscx, 'coordinates', statcoordstring)
                   ierr = nf90_put_att(ihisfile, id_sscx, 'geometry', station_geom_container_name)
                   ierr = nf90_def_var(ihisfile, 'Current related suspended transport, y-component', nf90_double, (/ id_statdim, id_sedtotdim, id_timedim /), id_sscy)
                   ierr = nf90_put_att(ihisfile, id_sscy, 'long_name', 'Current related suspended transport, y-component')
                   ierr = nf90_put_att(ihisfile, id_sscy, 'units', transpunit)
-                  ierr = nf90_put_att(ihisfile, id_sscy, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
+                  ierr = nf90_put_att(ihisfile, id_sscy, 'coordinates', statcoordstring)
                   ierr = nf90_put_att(ihisfile, id_sscy, 'geometry', station_geom_container_name)
                endif
                !
@@ -20076,13 +20101,13 @@ subroutine unc_write_his(tim)            ! wrihis
                   ierr = nf90_def_var(ihisfile, 'Source term suspended sediment transport', nf90_double, (/ id_statdim, id_sedsusdim, id_timedim /), id_sour)
                   ierr = nf90_put_att(ihisfile, id_sour, 'long_name', 'Source term suspended sediment transport')
                   ierr = nf90_put_att(ihisfile, id_sour, 'units', 'kg m-3 s-1')
-                  ierr = nf90_put_att(ihisfile, id_sour, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
+                  ierr = nf90_put_att(ihisfile, id_sour, 'coordinates', statcoordstring)
                   ierr = nf90_put_att(ihisfile, id_sour, 'geometry', station_geom_container_name)
 
                   ierr = nf90_def_var(ihisfile, 'Sink term suspended sediment transport', nf90_double, (/ id_statdim, id_sedsusdim, id_timedim /), id_sink)
                   ierr = nf90_put_att(ihisfile, id_sink, 'long_name', 'Sink term suspended sediment transport')
                   ierr = nf90_put_att(ihisfile, id_sink, 'units', 's-1')
-                  ierr = nf90_put_att(ihisfile, id_sink, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
+                  ierr = nf90_put_att(ihisfile, id_sink, 'coordinates', statcoordstring)
                   ierr = nf90_put_att(ihisfile, id_sink, 'geometry', station_geom_container_name)
                endif
                !
@@ -20094,14 +20119,14 @@ subroutine unc_write_his(tim)            ! wrihis
                      ierr = nf90_put_att(ihisfile, id_bodsed, 'long_name', 'Available sediment mass in the bed')
                      ierr = nf90_put_att(ihisfile, id_bodsed, 'units', 'kg m-2')
                      ierr = nf90_put_att(ihisfile, id_bodsed, '_FillValue', dmiss)
-                     ierr = nf90_put_att(ihisfile, id_bodsed, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
+                     ierr = nf90_put_att(ihisfile, id_bodsed, 'coordinates', statcoordstring)
                      ierr = nf90_put_att(ihisfile, id_bodsed, 'geometry', station_geom_container_name)
                      !
                      ierr = nf90_def_var(ihisfile, 'Sediment thickness in the bed', nf90_double, (/ id_statdim, id_timedim /), id_dpsed)
                      ierr = nf90_put_att(ihisfile, id_dpsed, 'long_name', 'Sediment thickness in the bed')
                      ierr = nf90_put_att(ihisfile, id_dpsed, 'units', 'm')
                      ierr = nf90_put_att(ihisfile, id_dpsed, '_FillValue', dmiss)
-                     ierr = nf90_put_att(ihisfile, id_dpsed, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
+                     ierr = nf90_put_att(ihisfile, id_dpsed, 'coordinates', statcoordstring)
                      ierr = nf90_put_att(ihisfile, id_dpsed, 'geometry', station_geom_container_name)
                   case (2)
                      ierr = nf90_def_dim(ihisfile, 'nBedLayers', stmpar%morlyr%settings%nlyr, id_nlyrdim)
@@ -20110,14 +20135,14 @@ subroutine unc_write_his(tim)            ! wrihis
                      ierr = nf90_put_att(ihisfile, id_msed, 'long_name', 'Available sediment mass in a layer of the bed')
                      ierr = nf90_put_att(ihisfile, id_msed, 'units', 'kg m-2')
                      ierr = nf90_put_att(ihisfile, id_msed, '_FillValue', dmiss)
-                     ierr = nf90_put_att(ihisfile, id_msed, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
+                     ierr = nf90_put_att(ihisfile, id_msed, 'coordinates', statcoordstring)
                      ierr = nf90_put_att(ihisfile, id_msed, 'geometry', station_geom_container_name)
                      !
                      ierr = nf90_def_var(ihisfile, 'Thickness of a layer of the bed', nf90_double, (/ id_nlyrdim, id_statdim, id_timedim /), id_thlyr)
                      ierr = nf90_put_att(ihisfile, id_thlyr, 'long_name', 'Thickness of a layer of the bed')
                      ierr = nf90_put_att(ihisfile, id_thlyr, 'units', 'm')
                      ierr = nf90_put_att(ihisfile, id_thlyr, '_FillValue', dmiss)
-                     ierr = nf90_put_att(ihisfile, id_thlyr, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
+                     ierr = nf90_put_att(ihisfile, id_thlyr, 'coordinates', statcoordstring)
                      ierr = nf90_put_att(ihisfile, id_thlyr, 'geometry', station_geom_container_name)
                      !
                      if (stmpar%morlyr%settings%iporosity>0) then
@@ -20125,7 +20150,7 @@ subroutine unc_write_his(tim)            ! wrihis
                         ierr = nf90_put_att(ihisfile, id_poros, 'long_name', 'Porosity of a layer of the bed')
                         ierr = nf90_put_att(ihisfile, id_poros, 'units', '-')
                         ierr = nf90_put_att(ihisfile, id_poros, '_FillValue', dmiss)
-                        ierr = nf90_put_att(ihisfile, id_poros, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
+                        ierr = nf90_put_att(ihisfile, id_poros, 'coordinates', statcoordstring)
                         ierr = nf90_put_att(ihisfile, id_poros, 'geometry', station_geom_container_name)
             endif
             !
@@ -20133,7 +20158,7 @@ subroutine unc_write_his(tim)            ! wrihis
                      ierr = nf90_put_att(ihisfile, id_lyrfrac, 'long_name', 'Volume fraction in a layer of the bed')
                      ierr = nf90_put_att(ihisfile, id_lyrfrac, 'units', 'm')
                      ierr = nf90_put_att(ihisfile, id_lyrfrac, '_FillValue', dmiss)
-                     ierr = nf90_put_att(ihisfile, id_lyrfrac, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
+                     ierr = nf90_put_att(ihisfile, id_lyrfrac, 'coordinates', statcoordstring)
                      ierr = nf90_put_att(ihisfile, id_lyrfrac, 'geometry', station_geom_container_name)
                end select
 		         !
@@ -20142,7 +20167,7 @@ subroutine unc_write_his(tim)            ! wrihis
                   ierr = nf90_put_att(ihisfile, id_frac, 'long_name', 'Availability fraction in top layer')
                   ierr = nf90_put_att(ihisfile, id_frac, 'units', '-')
                   ierr = nf90_put_att(ihisfile, id_frac, '_FillValue', dmiss)
-                  ierr = nf90_put_att(ihisfile, id_frac, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
+                  ierr = nf90_put_att(ihisfile, id_frac, 'coordinates', statcoordstring)
                   ierr = nf90_put_att(ihisfile, id_frac, 'geometry', station_geom_container_name)
                endif
                !
@@ -20151,7 +20176,7 @@ subroutine unc_write_his(tim)            ! wrihis
                   ierr = nf90_put_att(ihisfile, id_mudfrac, 'long_name', 'Mud fraction in top layer')
                   ierr = nf90_put_att(ihisfile, id_mudfrac, 'units', '-')
                   ierr = nf90_put_att(ihisfile, id_mudfrac, '_FillValue', dmiss)
-                  ierr = nf90_put_att(ihisfile, id_mudfrac, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
+                  ierr = nf90_put_att(ihisfile, id_mudfrac, 'coordinates', statcoordstring)
                   ierr = nf90_put_att(ihisfile, id_mudfrac, 'geometry', station_geom_container_name)
                endif
                !
@@ -20160,7 +20185,7 @@ subroutine unc_write_his(tim)            ! wrihis
                   ierr = nf90_put_att(ihisfile, id_sandfrac, 'long_name', 'Sand fraction in top layer')
                   ierr = nf90_put_att(ihisfile, id_sandfrac, 'units', '-')
                   ierr = nf90_put_att(ihisfile, id_sandfrac, '_FillValue', dmiss)
-                  ierr = nf90_put_att(ihisfile, id_sandfrac, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
+                  ierr = nf90_put_att(ihisfile, id_sandfrac, 'coordinates', statcoordstring)
                   ierr = nf90_put_att(ihisfile, id_sandfrac, 'geometry', station_geom_container_name)
                endif
                !
@@ -20169,7 +20194,7 @@ subroutine unc_write_his(tim)            ! wrihis
                   ierr = nf90_put_att(ihisfile, id_fixfac, 'long_name', 'Reduction factor due to limited sediment thickness')
                   ierr = nf90_put_att(ihisfile, id_fixfac, 'units', '-')
                   ierr = nf90_put_att(ihisfile, id_fixfac, '_FillValue', dmiss)
-                  ierr = nf90_put_att(ihisfile, id_fixfac, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
+                  ierr = nf90_put_att(ihisfile, id_fixfac, 'coordinates', statcoordstring)
                   ierr = nf90_put_att(ihisfile, id_fixfac, 'geometry', station_geom_container_name)
                endif
                !
@@ -20178,7 +20203,7 @@ subroutine unc_write_his(tim)            ! wrihis
                   ierr = nf90_put_att(ihisfile, id_hidexp, 'long_name', 'Hiding and exposure factor')
                   ierr = nf90_put_att(ihisfile, id_hidexp, 'units', '-')
                   ierr = nf90_put_att(ihisfile, id_hidexp, '_FillValue', dmiss)
-                  ierr = nf90_put_att(ihisfile, id_hidexp, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
+                  ierr = nf90_put_att(ihisfile, id_hidexp, 'coordinates', statcoordstring)
                   ierr = nf90_put_att(ihisfile, id_hidexp, 'geometry', station_geom_container_name)
                endif
                !
@@ -20187,7 +20212,7 @@ subroutine unc_write_his(tim)            ! wrihis
                   ierr = nf90_put_att(ihisfile, id_mfluff, 'long_name', 'Sediment mass in fluff layer')
                   ierr = nf90_put_att(ihisfile, id_mfluff, 'units', '-')
                   ierr = nf90_put_att(ihisfile, id_mfluff, '_FillValue', dmiss)
-                  ierr = nf90_put_att(ihisfile, id_mfluff, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
+                  ierr = nf90_put_att(ihisfile, id_mfluff, 'coordinates', statcoordstring)
                   ierr = nf90_put_att(ihisfile, id_mfluff, 'geometry', station_geom_container_name)
                end if
             endif
@@ -20195,11 +20220,11 @@ subroutine unc_write_his(tim)            ! wrihis
             if (jased > 0 .and. .not. stm_included .and. jahissed > 0) then
                if ( kmx.gt.0 ) then
                   ierr = nf90_def_var(ihisfile, 'sediment_concentration', nf90_double, (/ id_laydim, id_statdim, id_timedim /), id_varsed)
-                  ierr = nf90_put_att(ihisfile, id_varsed, 'coordinates', 'station_x_coordinate station_y_coordinate station_name zcoordinate_c')
+                  ierr = nf90_put_att(ihisfile, id_varsed, 'coordinates', trim(statcoordstring) // ' zcoordinate_c')
                   jawrizc = 1
                else
                   ierr = nf90_def_var(ihisfile, 'sediment_concentration', nf90_double, (/ id_statdim, id_timedim /), id_varsed)
-                  ierr = nf90_put_att(ihisfile, id_varsed, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
+                  ierr = nf90_put_att(ihisfile, id_varsed, 'coordinates', statcoordstring)
                end if
                ierr = nf90_put_att(ihisfile, id_varsed, 'units', 'kg m-3')
                ierr = nf90_put_att(ihisfile, id_varsed, 'geometry', station_geom_container_name)
@@ -20208,19 +20233,19 @@ subroutine unc_write_his(tim)            ! wrihis
             endif
 
             if (japatm > 0 .and. jahiswind > 0) then
-               call definencvar(ihisfile,id_varpatm   ,nf90_double,(/ id_statdim, id_timedim /),2, 'patm'  , 'atmospheric pressure', 'N m-2', 'station_x_coordinate station_y_coordinate station_name', station_geom_container_name)
+               call definencvar(ihisfile,id_varpatm   ,nf90_double,(/ id_statdim, id_timedim /),2, 'patm'  , 'atmospheric pressure', 'N m-2', statcoordstring, station_geom_container_name)
             endif
 
             if (jawind > 0 .and. jahiswind > 0) then
                ierr = nf90_def_var(ihisfile, 'windx', nf90_double, (/ id_statdim, id_timedim /), id_varwx)
                ierr = nf90_put_att(ihisfile, id_varwx, 'units', 'm s-1')
                ierr = nf90_put_att(ihisfile, id_varwx, '_FillValue', dmiss)
-               ierr = nf90_put_att(ihisfile, id_varwx, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
+               ierr = nf90_put_att(ihisfile, id_varwx, 'coordinates', statcoordstring)
                ierr = nf90_put_att(ihisfile, id_varwx, 'geometry', station_geom_container_name)
                ierr = nf90_def_var(ihisfile, 'windy', nf90_double, (/ id_statdim, id_timedim /), id_varwy)
                ierr = nf90_put_att(ihisfile, id_varwy, 'units', 'm s-1')
                ierr = nf90_put_att(ihisfile, id_varwy, '_FillValue', dmiss)
-               ierr = nf90_put_att(ihisfile, id_varwy, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
+               ierr = nf90_put_att(ihisfile, id_varwy, 'coordinates', statcoordstring)
                ierr = nf90_put_att(ihisfile, id_varwy, 'geometry', station_geom_container_name)
                if (jsferic == 0) then
                   ierr = nf90_put_att(ihisfile, id_varwx, 'standard_name', 'x_wind')
@@ -20237,7 +20262,7 @@ subroutine unc_write_his(tim)            ! wrihis
                ierr = nf90_def_var(ihisfile, 'rain', nf90_double, (/ id_statdim, id_timedim /), id_varrain)
                ierr = nf90_put_att(ihisfile, id_varrain, 'units', 'mm day-1')
                ierr = nf90_put_att(ihisfile, id_varrain, '_FillValue', dmiss)
-               ierr = nf90_put_att(ihisfile, id_varrain, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
+               ierr = nf90_put_att(ihisfile, id_varrain, 'coordinates', statcoordstring)
                ierr = nf90_put_att(ihisfile, id_varrain, 'standard_name', 'lwe_precipitation_rate')
                ierr = nf90_put_att(ihisfile, id_varrain, 'long_name', 'precipitation depth per time unit')
                ierr = nf90_put_att(ihisfile, id_varrain, 'geometry', station_geom_container_name)
@@ -20247,7 +20272,7 @@ subroutine unc_write_his(tim)            ! wrihis
                ierr = nf90_def_var(ihisfile, 'infiltration_cap', nf90_double, (/ id_statdim, id_timedim /), id_infiltcap)
                ierr = nf90_put_att(ihisfile, id_infiltcap, 'units', 'mm hr-1')
                ierr = nf90_put_att(ihisfile, id_infiltcap, '_FillValue', dmiss)
-               ierr = nf90_put_att(ihisfile, id_infiltcap, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
+               ierr = nf90_put_att(ihisfile, id_infiltcap, 'coordinates', statcoordstring)
                !ierr = nf90_put_att(ihisfile, id_infiltcap, 'standard_name', 'infiltration_rate)
                ierr = nf90_put_att(ihisfile, id_infiltcap, 'long_name', 'Infiltration capacity')
                ierr = nf90_put_att(ihisfile, id_infiltcap, 'geometry', station_geom_container_name)
@@ -20255,7 +20280,7 @@ subroutine unc_write_his(tim)            ! wrihis
                ierr = nf90_def_var(ihisfile, 'infiltration_actual', nf90_double, (/ id_statdim, id_timedim /), id_infiltact)
                ierr = nf90_put_att(ihisfile, id_infiltact, 'units', 'mm hr-1')
                ierr = nf90_put_att(ihisfile, id_infiltact, '_FillValue', dmiss)
-               ierr = nf90_put_att(ihisfile, id_infiltact, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
+               ierr = nf90_put_att(ihisfile, id_infiltact, 'coordinates', statcoordstring)
                ierr = nf90_put_att(ihisfile, id_infiltact, 'long_name', 'Actual infiltration rate')
                ierr = nf90_put_att(ihisfile, id_infiltact, 'geometry', station_geom_container_name)
             endif
@@ -21523,6 +21548,8 @@ subroutine unc_write_his(tim)            ! wrihis
 
             ierr = sgeom_def_geometry_variables(ihisfile, longculvert_geom_container_name, 'longculvert', 'line', nNodeTot, id_longculvertdim, &
                id_longculvertgeom_node_count, id_longculvertgeom_node_coordx, id_longculvertgeom_node_coordy)
+            ierr = ncu_clone_vardef(ihisfile, ihisfile, id_longculvertgeom_node_coordx, 'longculvert_geom_lon', id_laydim, & !id_statlon, &
+                          'longitude', 'blabla1', 'degrees_east')
 
             ierr = nf90_def_var(ihisfile, 'longculvert_discharge', nf90_double, (/ id_longculvertdim, id_timedim /), id_longculvert_dis)
             ierr = nf90_put_att(ihisfile, id_longculvert_dis, 'long_name', 'Discharge through long culvert')
@@ -21923,14 +21950,29 @@ subroutine unc_write_his(tim)            ! wrihis
           ierr = nf90_put_var(ihisfile,    id_statgeom_node_count, node_count)
           ierr = nf90_put_var(ihisfile,    id_statgeom_node_coordx,  xobs(:), start = (/ 1 /), count = (/ numobs /))
           ierr = nf90_put_var(ihisfile,    id_statgeom_node_coordy,  yobs(:), start = (/ 1 /), count = (/ numobs /))
+#ifdef HAVE_PROJ
+          if (add_latlon) then
+             call transform_and_put_latlon_coordinates(ihisfile, id_statgeom_node_lon, id_statgeom_node_lat, nccrs%proj_string, xobs, yobs)
+          end if
+#endif
        end if
 
        if ( nummovobs > 0 ) then
           ierr = nf90_put_var(ihisfile,    id_statx,  xobs(:),            start = (/ 1, it_his /), count = (/ ntot, 1 /))
           ierr = nf90_put_var(ihisfile,    id_staty,  yobs(:),            start = (/ 1, it_his /), count = (/ ntot, 1 /))
+#ifdef HAVE_PROJ
+          if (add_latlon) then
+             call transform_and_put_latlon_coordinates(ihisfile, id_statlon, id_statlat, nccrs%proj_string, xobs, yobs, start = (/ 1, it_his /), count = (/ ntot, 1 /))
+          end if
+#endif
        else
           ierr = nf90_put_var(ihisfile,    id_statx,  xobs(:),            start = (/ 1 /), count = (/ ntot /))
           ierr = nf90_put_var(ihisfile,    id_staty,  yobs(:),            start = (/ 1 /), count = (/ ntot /))
+#ifdef HAVE_PROJ
+          if (add_latlon) then
+             call transform_and_put_latlon_coordinates(ihisfile, id_statlon, id_statlat, nccrs%proj_string, xobs, yobs)
+          end if
+#endif
        endif
     endif
 
