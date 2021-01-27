@@ -425,7 +425,6 @@ src/Makefile.am -text
 src/NEWS -text
 src/README -text
 src/TODO -text
-src/addcovoptions.py -text
 src/autogen.sh -text
 src/build.cmd -text
 src/build.sh -text
@@ -452,7 +451,6 @@ src/buildvs15fm_coverage.cmd -text
 src/buildvs17.cmd -text
 src/buildvs17_test.cmd -text
 src/buildvs17fm.cmd -text
-src/catfiles.py -text
 src/clean.cmd -text
 src/clean.sh -text
 src/common.am -text
@@ -2966,8 +2964,6 @@ src/prebuild-h6_buildserver.sh -text
 src/prebuild-h6_buildserver_intel16.sh -text
 src/prepare_sln.cmd -text
 src/prepare_sln.py -text
-src/readcov.lst -text
-src/readcov.py -text
 src/scripts_lgpl/Makefile.am -text
 src/scripts_lgpl/linux/Makefile.am -text
 src/scripts_lgpl/linux/gatherlibraries.rb -text
@@ -2986,6 +2982,10 @@ src/scripts_lgpl/win64/list_all_what_strings.py -text
 src/scripts_lgpl/win64/nefis_template.sln -text
 src/scripts_lgpl/win64/oss-install_debug_x64.cmd -text
 src/scripts_lgpl/win64/oss-install_x64.cmd -text
+src/scripts_lgpl/win64/testcoverage/addcovoptions.py -text
+src/scripts_lgpl/win64/testcoverage/catfiles.py -text
+src/scripts_lgpl/win64/testcoverage/readcov.lst -text
+src/scripts_lgpl/win64/testcoverage/readcov.py -text
 src/scripts_lgpl/win64/tests_template.sln -text
 src/scripts_lgpl/win64/utils_lgpl_template.sln -text
 src/test/Makefile.am -text
