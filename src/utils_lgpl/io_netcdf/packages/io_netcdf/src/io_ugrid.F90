@@ -27,6 +27,9 @@
 
 ! $Id$
 ! $HeadURL$
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 !> I/O module for reading and writing NetCDF files with UGRID-compliant data on unstructured grids.
 !! UGRID Conventions website: https://github.com/ugrid-conventions/ugrid-conventions

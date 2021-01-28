@@ -27,6 +27,9 @@
 
 !  $Id$
 !  $HeadURL$
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 !> Module for utility types and functions for working with coordinates in different coordinate systems.
 module coordinate_reference_system
