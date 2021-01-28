@@ -187,16 +187,14 @@ module m_ec_unit_tests
       character(len=*), parameter :: str1 = "minutes since"                             ! nothing after since
       character(len=*), parameter :: str2 = "minutes since 1970-13-01 00:00:00.0 +0100" ! invalid month
       character(len=*), parameter :: str3 = "minutes since 1970-01-01 25:00:00.0 +0100" ! invalid hours
-      character(len=*), parameter :: str4 = "minutes since 1970-01-01t25:00:00.0Z"      ! splitter t must be uppercase
 
-      logical :: successArr(4)
+      logical :: successArr(3)
       integer :: unit
       real(kind=hp) :: ref_date, tzone
 
       successArr(1) = ecSupportTimestringToUnitAndRefdate(str1, unit, ref_date, tzone)
       successArr(2) = ecSupportTimestringToUnitAndRefdate(str2, unit, ref_date, tzone)
       successArr(3) = ecSupportTimestringToUnitAndRefdate(str3, unit, ref_date, tzone)
-      successArr(4) = ecSupportTimestringToUnitAndRefdate(str4, unit, ref_date, tzone)
 
       success = all(.not. successArr)
       errMessage = ' '
