@@ -265,7 +265,7 @@ end function get_proj_string_from_epsg
       dst_x = src_x
       dst_y = src_y
 
-      if (pj_is_latlong(src_projection)) then ! If source is spherical coordinate system.
+      if (pj_is_latlong(src_projection) == 1) then ! If source is spherical coordinate system.
          ! Convert degrees to radians.
          dst_x = dst_x*pj_deg_to_rad
          dst_y = dst_y*pj_deg_to_rad
@@ -282,7 +282,7 @@ end function get_proj_string_from_epsg
          return
       endif
 
-      if (pj_is_latlong(dst_projection)) then ! If destination is spherical coordinate system.
+      if (pj_is_latlong(dst_projection) == 1) then ! If destination is spherical coordinate system.
          ! Convert radians to degrees.
          dst_x = dst_x*pj_rad_to_deg
          dst_y = dst_y*pj_rad_to_deg
