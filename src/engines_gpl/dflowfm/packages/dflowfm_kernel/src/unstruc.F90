@@ -1928,31 +1928,40 @@ if(q /= 0) then
 
     ! calculate VOL1_F to be used for 1d-advection
 
-    if (kcs(k1) == 1) then ! TODO: consider *also* adding storage area to the 2D side k1, if kcu(L)==5, maybe not for kcu(L)==7
-      hpr = s1(k1)-bob0(1,L)
-      if (hpr >= 0d0) then
-         if(network%loaded) then
+    k1 = ln(1,L)
+    k2 = ln(2,L)
+    if(network%loaded) then
+       dx1 = 0.5d0*dx(L) ; dx2 = dx1
+       if (dxDoubleAt1DEndNodes) then
+          if (kcu(L) == 1) then
+             if ( nd(k1)%lnx == 1 ) then
+                dx1 = 2d0*dx1
+             endif
+             if ( nd(k2)%lnx == 1 ) then
+                dx2 = 2d0*dx2
+             endif
+          endif
+       endif
+       if (kcs(k1) == 1) then ! TODO: consider *also* adding storage area to the 2D side k1, if kcu(L)==5, maybe not for kcu(L)==7
+         hpr = s1(k1)-bob0(1,L)
+         if (hpr >= 0d0) then
             call getprof_1D(L, hpr, ar1, wid1, 1, calcConv, perim)
             vol1_f(k1) = vol1_f(k1) + dx1*ar1
-         else
-            vol1_f(k1) = vol1(k1)
          endif
       endif
-   endif
 
-   if (kcs(k2) == 1) then ! TODO: consider *also* adding storage area to the 2D side k2, if kcu(L)==5, maybe not for kcu(L)==7
-      hpr = s1(k2)-bob0(2,L)
-      if (hpr >= 0d0) then
-         ! flow volume
-         if(network%loaded) then
+      if (kcs(k2) == 1) then ! TODO: consider *also* adding storage area to the 2D side k2, if kcu(L)==5, maybe not for kcu(L)==7
+         hpr = s1(k2)-bob0(2,L)
+         if (hpr >= 0d0) then
+            ! flow volume
             call getprof_1D(L, hpr, ar2, wid2, 1, calcConv, perim)
             vol1_f(k2) = vol1_f(k2) + dx2*ar2
-         else
-            vol1_f(k2) = vol1(k2)
          endif
       endif
-   endif
-                                                          ! getprof1D sets cfu
+    else
+       vol1_f(k1) = vol1(k1)
+       vol1_f(k2) = vol1(k2)
+    endif                                                      ! getprof1D sets cfu
  endif
 
  end subroutine addlink1D
@@ -3441,6 +3450,7 @@ end subroutine sethu
  if (kmx == 0) then
 
 
+    vol1_f = 0d0
     call vol12D(1)
 
     ! set correct flow areas for dambreaks, using the actual flow width
