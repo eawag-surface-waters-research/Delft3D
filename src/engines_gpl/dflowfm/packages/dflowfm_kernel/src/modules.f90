@@ -5526,7 +5526,7 @@ module m_fm_wq_processes
 
    real(hp), allocatable, dimension(:,:)     :: amass                       !< mass array to be updated
    logical , allocatable, dimension(:)       :: wqactive                    !< indicates if processes are active based on volume ('VolumeDryThreshold') and depth ('DepthDryThreshold') criteria 
-   logical , allocatable, dimension(:)       :: wqmydomain                  !< indicates if a segment is in mydomain                                
+   logical , allocatable, dimension(:)       :: wqmydomain                  !< indicates if a segment is part of the current domain (idomain==my_rank)
    logical , allocatable, dimension(:)       :: wqdoproc                    !< indicates if processes are active based on 'ProcessesInactive' parameter
    integer , allocatable, dimension(:)       :: iknmrk                      !< segment characteristics.
                                                                             !< 1st digit from the right indicates wet/dry (1/0),
