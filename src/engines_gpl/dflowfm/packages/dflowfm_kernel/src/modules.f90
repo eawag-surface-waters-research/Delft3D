@@ -5525,12 +5525,18 @@ module m_fm_wq_processes
    integer,  allocatable, dimension(:,:)     :: iexpnt                      !< Exchange pointer
 
    real(hp), allocatable, dimension(:,:)     :: amass                       !< mass array to be updated
-   logical , allocatable, dimension(:)       :: wetdry                      !< wet/dry indicator (wet=true/dry=false)
-   logical , allocatable, dimension(:)       :: wqmydomain                  !< segment in my domain indicator
-   logical , allocatable, dimension(:)       :: doproc                      !< do processes indicator (do processes=true/no processes=false)
+   logical , allocatable, dimension(:)       :: wqactive                    !< indicates if processes are active based on volume ('VolumeDryThreshold') and depth ('DepthDryThreshold') criteria 
+   logical , allocatable, dimension(:)       :: wqmydomain                  !< indicates if a segment is in mydomain                                
+   logical , allocatable, dimension(:)       :: wqdoproc                    !< indicates if processes are active based on 'ProcessesInactive' parameter
    integer , allocatable, dimension(:)       :: iknmrk                      !< segment characteristics.
                                                                             !< 1st digit from the right indicates wet/dry (1/0),
                                                                             !< 2nd digit indicates top/middle/bottom/top&bottom in water column (1/2/3/0).
+                                                                            !< possible iknmrk values for processes
+   integer, parameter                        :: IKNMRK_INACTIVE      = 1100 !< processes are inactive
+   integer, parameter                        :: IKNMRK_ACTIVE_TOPBOT = 1101 !< processes are active, single active layer, both top and bottom of water column
+   integer, parameter                        :: IKNMRK_ACTIVE_TOP    = 1111 !< processes are active, top of water column
+   integer, parameter                        :: IKNMRK_ACTIVE_MIDDLE = 1121 !< processes are active, middle of water column
+   integer, parameter                        :: IKNMRK_ACTIVE_BOTTOM = 1131 !< processes are active, bottom of water column
 
    integer                                   :: sizepmsa                    !< size of (pms)a-array
    real(sp), allocatable, dimension(:)       :: pmsa                        !< the actual data array

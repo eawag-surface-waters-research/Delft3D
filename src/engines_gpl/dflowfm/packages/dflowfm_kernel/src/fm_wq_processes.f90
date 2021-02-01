@@ -143,8 +143,6 @@
 !        allocate vertical exchanges array
          call realloc(iexpnt, [4, noq3], keepExisting=.false., fill=0)
 
-!        allocate array that indicates active cells (segments)
-         call realloc(iknmrk, noseg, keepExisting=.false., fill=0)
 
 !        set vertical exchanges
          iex = 0
@@ -156,21 +154,6 @@
                iexpnt(2,iex) = k-1 - kbx+1
             end do
          end do
-
-!        set array that indicates active cells (segments)
-         iknmrk = 0
-         do kk=1,Ndxi
-            call getkbotktopmax(kk,kb,kt,ktmax)
-            if ( kb.eq.ktmax ) then
-               iknmrk(kb-kbx+1) = 1101
-            else
-               iknmrk(kb-kbx+1) = 1131
-               do k=kb+1,ktmax-1
-                  iknmrk(k-kbx+1) = 1121
-               end do
-               iknmrk(ktmax-kbx+1) = 1111
-            end if
-         end do
       else
          kbx = 1
          ktx = Ndxi
@@ -180,19 +163,20 @@
          noq3 = 0
          noq4 = 0
 
-!        allocate vertical exchanges array
+!        allocate vertical exchanges array (dummy)
          call realloc(iexpnt, [4, noq3], keepExisting=.false., fill=0)
-
-!        allocate array that indicates active cells (segments)
-         call realloc(iknmrk, noseg, keepExisting=.false., fill=0)
-
-!        set array that indicates active cells (segments)
-         iknmrk = 1101
       end if
 
-!    allocate array that indicates is dflowfm cells are wet or dry
-     call realloc(wetdry, ktx, keepExisting=.false., fill=.true.)
-     call realloc(doproc, ktx, keepExisting=.false., fill=.true.)
+!    allocate array that indicates if processes are active based on volume and depth criteria
+     call realloc(wqactive, ktx, keepExisting=.false., fill=.true.)
+
+!    allocate array that indicates if processes are active based on 'ProcessesInactive' parameter
+     call realloc(wqdoproc, ktx, keepExisting=.false., fill=.true.)
+
+!    allocate iknmrk array used by processes that indicates if processes are active, and position in the watercolumn, dynamically set every timestep
+     call realloc(iknmrk, noseg, keepExisting=.false., fill=0)
+
+!    allocate and fill array that can tell processes if they are in the current domain when running in parallel
      call realloc(wqmydomain, noseg, keepExisting=.false., fill=.true.)
      if(jampi.eq.1) then
         do kk=1,Ndxi
@@ -762,20 +746,19 @@
           outvar(j) = ivar
       enddo
 
-! If there is a parameter 'doprocesses', mask the area where processes are active by setting doproc to .true./.false. (default=.true.)
+! If there is a parameter 'doprocesses', mask the area where processes are active by setting wqdoproc to .true./.false. (default=.true.)
       call zoekns(cdoprocesses,nopa,paname,20,ipar)
       if (ipar>0) then
          call mess(LEVEL_WARN, 'Found parameter ''DoProcesses'', but this is not used any more.')
          call mess(LEVEL_WARN, 'Use ''ProcessesInactive'' with non-zero values to set processes to inactive instead')
       endif
 
-! If there is a parameter 'ProcessesInactive', mask the area where processes are active by setting doproc to .true./.false. (default=.true.)
+! If there is a parameter 'ProcessesInactive', mask the area where processes are active by setting wqdoproc to .true./.false. (default=.true.)
       call zoekns(cprocessesinactive,nopa,paname,20,ipar)
       if (ipar>0) then
          call mess(LEVEL_INFO, 'Found parameter ''ProcessesInactive''. Water quality processes are switched off for segments where ProcessesInactive <> 0.0')
-         ip = arrpoi(iiparm)
          do k=kbx,ktx
-            doproc(k) = painp(ipar,k)==0.0
+            wqdoproc(k) = comparereal(painp(ipar,k),0.0e0)==0
          end do
       endif
 
@@ -1258,7 +1241,7 @@
       integer          :: ipoivol, ipoiconc, ipoisal, ipoitem
       integer          :: ipoivwind, ipoiwinddir, ipoifetchl, ipoifetchd, ipoiradsurf, ipoirain, ipoivertdisper, ipoileng
       integer          :: i, ip, ifun, isfun
-      integer          :: kk, k, kb, kt, ktmax, kwaq
+      integer          :: kk, k, kb, kt, ktmax, ktwq
       integer          :: L, nw1, nw2
 
       integer          :: iknmrk_dry, iknmrk_wet
@@ -1429,11 +1412,11 @@
 
       end if
 
-!     determine dry/wet cells
+!     determine cells where processes can be active above a minimum volume and depth (the switch wqdoproc can overrule this)
       do kk=1,Ndxi
          call getkbotktopmax(kk,kb,kt,ktmax)
          do k=kb,ktmax
-            wetdry(k) = vol1(k).gt.waq_vol_dry_thr .and. (vol1(k)/ba(kk)).gt.waq_dep_dry_thr
+            wqactive(k) = vol1(k).gt.waq_vol_dry_thr .and. (vol1(k)/ba(kk)).gt.waq_dep_dry_thr
          enddo
       enddo
 
@@ -1448,7 +1431,7 @@
 
 !     fill masses (transported)
       do k=kbx,ktx
-         if (wetdry(k)) then
+         if (wqactive(k)) then
             do isys=1,nosys
                iconst = isys2const(isys)
                amass(isys,k-kbx+1) = constituents(iconst,k)*vol1(k)
@@ -1478,37 +1461,48 @@
          end if
       end if
 
-!     set dry/wet indicator
+!     set iknmrk array
       if(kmx.gt.0) then
          do kk=1,Ndxi
             call getkbotktopmax(kk,kb,kt,ktmax)
-            do k=kb,kt
-               kwaq = k-kbx+1
-
-               iknmrk_dry = int(iknmrk(kwaq)/10) * 10
-               iknmrk_wet = iknmrk_dry + 1
-
-               if (wetdry(k).and.doproc(k)) then
-                  iknmrk(kwaq) = iknmrk_wet
-               else
-                  iknmrk(kwaq) = iknmrk_dry
+            if (.not.wqdoproc(kb)) then
+               ! whole column is inactive
+               do k=kb,ktmax
+                  iknmrk(k-kbx+1) = IKNMRK_INACTIVE
+               end do
+            else
+               ktwq = 0
+               do k=ktmax,kb,-1
+                  if (wqactive(k)) then
+                     ! first active segment from the top
+                     ktwq = k
+                     exit
+                  else
+                     ! set inactive segments from the top as inactive
+                     iknmrk(k-kbx+1) = IKNMRK_INACTIVE
+                  end if
+               enddo
+               if (ktwq > 0) then
+                  if ( kb.eq.ktwq ) then
+                     ! only one active segment
+                     iknmrk(ktwq-kbx+1) = IKNMRK_ACTIVE_TOPBOT
+                  else
+                     ! ktwq is the top active segment
+                     iknmrk(ktwq-kbx+1) = IKNMRK_ACTIVE_TOP
+                     do k=kb+1,ktwq-1
+                        iknmrk(k-kbx+1) = IKNMRK_ACTIVE_MIDDLE
+                     end do
+                     iknmrk(kb-kbx+1) = IKNMRK_ACTIVE_BOTTOM
+                  end if
                end if
-            end do
-
-!           segments above kt always inactive (z-layer)
-            do k=kt+1,ktmax
-               kwaq = k-kbx+1
-
-               iknmrk_dry = int(iknmrk(kwaq)/10) * 10
-               iknmrk(kwaq) = iknmrk_dry
-            end do
+            end if
          end do
       else
          do k=1,Ndxi
-            if (wetdry(k).and.doproc(k)) then
-               iknmrk(k) = 1101
+            if (wqactive(k).and.wqdoproc(k)) then
+               iknmrk(k) = IKNMRK_ACTIVE_TOPBOT
             else
-               iknmrk(k) = 1100
+               iknmrk(k) = IKNMRK_INACTIVE
             end if
          end do
       end if
@@ -1553,7 +1547,7 @@
       do kk=1,Ndxi
          call getkbotktopmax(kk,kb,kt,ktmax)
          do k=kb,kt
-            if (wetdry(k)) then
+            if (wqactive(k)) then
                do isys=1,nosys
                   iconst = isys2const(isys)
                   constituents(iconst,k) = amass(isys,k-kbx+1) / vol1(k)
