@@ -42,7 +42,7 @@ module md5_checksum
         end subroutine md5_final
     end interface
 
-    integer, parameter :: md5length = 16 !< Required (minimal) length for the checksum string
+    integer, parameter :: md5length = 16 !< Number of bytes in MD5-hash. Required (minimal) length for the hexadecimal checksum string is 2 times this length.
 contains
 
 subroutine md5file( filename, checksum, success )
@@ -57,7 +57,7 @@ subroutine md5file( filename, checksum, success )
 !     https://openwall.info/wiki/people/solar/software/public-domain-source-code/md5
 
     character(len=*), intent(in)  :: filename        !< Name of the file to be examined
-    character(len=*), intent(out) :: checksum        !< MD5 checksum (14-bytes string)
+    character(len=*), intent(out) :: checksum        !< MD5 checksum (16-byte "string"). Raw checksum, so no hexadimal characters.
     logical, intent(out)          :: success         !< Whether the procedure succeeded or not
 
     character(len=md5length)      :: result
