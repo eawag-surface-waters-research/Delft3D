@@ -1,4 +1,4 @@
-!!  Copyright (C)  Stichting Deltares, 2012-2019.
+!!  Copyright (C)  Stichting Deltares, 2012-2021.
 !!
 !!  This program is free software: you can redistribute it and/or modify
 !!  it under the terms of the GNU General Public License version 3,
@@ -60,7 +60,7 @@ subroutine md5file( filename, checksum, success )
     character(len=*), intent(out) :: checksum        !< MD5 checksum (16-byte "string"). Raw checksum, so no hexadimal characters.
     logical, intent(out)          :: success         !< Whether the procedure succeeded or not
 
-    character(len=md5length)      :: result
+    character(len=md5length)      :: md5result
     character(len=2048)           :: chunk
     integer                       :: filesize
     integer(kind=c_long)          :: length
@@ -100,31 +100,23 @@ subroutine md5file( filename, checksum, success )
         call md5_update( chunk, length )
     enddo
 
-    call md5_final( result )
-    checksum = result
+    call md5_final( md5result )
+    checksum = md5result
 
     close(lun)
 
 end subroutine md5file
 
+!> generates a MD5 checksum for input array
 subroutine md5intarr( intarr, checksum, success )
 
+    integer,          intent(in   ) :: intarr(:)       !< integer array to be examined
+    character(len=*), intent(  out) :: checksum        !< MD5 checksum (16-bytes string)
+    logical,          intent(  out) :: success         !< Whether the procedure succeeded or not
 
-!     Deltares Software Centre
-
-!>\file
-!>    Determine the MD5 checksum for one array of integers
-!
-!     Note: the C source was retrieved from:
-!     https://openwall.info/wiki/people/solar/software/public-domain-source-code/md5
-
-    integer,          intent(in)  :: intarr(:)       !< integer array to be examined
-    character(len=*), intent(out) :: checksum        !< MD5 checksum (14-bytes string)
-    logical, intent(out)          :: success         !< Whether the procedure succeeded or not
-
-    character(len=md5length)      :: result
+    character(len=md5length)      :: md5result
     character(len=2048)           :: chunk
-    integer                       :: filesize
+    integer                       :: array_size
     integer(kind=c_long)          :: length
     integer                       :: no_chunks
     integer                       :: i, ii, j, k, m
@@ -132,15 +124,15 @@ subroutine md5intarr( intarr, checksum, success )
 
     success = .true.
 
-    filesize = size(intarr) * sizeof(i)
+    array_size = size(intarr) * sizeof(i)
 
     call md5_init
 
-    no_chunks = (filesize + len(chunk) - 1) / len(chunk)
+    no_chunks = (array_size + len(chunk) - 1) / len(chunk)
     ii = 0
     do i = 1,no_chunks
         if ( i == no_chunks ) then
-            length = mod( filesize, len(chunk) )
+            length = mod( array_size, len(chunk) )
         else
             length = len(chunk)
         endif
@@ -158,20 +150,22 @@ subroutine md5intarr( intarr, checksum, success )
         call md5_update( chunk, length )
     enddo
 
-    call md5_final( result )
-    checksum = result
+    call md5_final( md5result )
+    checksum = md5result
 
 end subroutine md5intarr
 
+!> converts a MD5 checksum as generated above into a printable hexadecimal string
+!! if string lenght(s) are too small, output string is filled with '*****'
 subroutine checksum2hex(checksum, s)
-   character(len=*), intent(in) :: checksum
-   character(len=*), intent(out) :: s
+   character(len=*), intent(in   ) :: checksum  !< MD5 checksum as binary string
+   character(len=*), intent(  out) :: s         !< MD5 hexadecimal equivalent of input checksum
 
    character(len=2) :: temp
-
-   integer :: i
+   integer          :: i
 
    if (len(checksum) >= md5length .and. len(s) >= 2*md5length) then
+      s = ' '
       do i = 1, md5length
          write(temp, '(Z2.2)') ichar(checksum(i:i))
          s(2*i-1:2*i) = temp

@@ -11151,8 +11151,6 @@ subroutine unc_read_net(filename, numk_keep, numl_keep, numk_read, numl_read, ie
     use m_missing
     use dfm_error
     use gridoperations
-    use md5_checksum
-    use unstruc_messages
 
     character(len=*), intent(in)     :: filename  !< Name of NetCDF file.
     integer,          intent(inout)  :: numk_keep !< Number of netnodes to keep in existing net.
@@ -11177,9 +11175,6 @@ subroutine unc_read_net(filename, numk_keep, numl_keep, numk_read, numl_read, ie
 
     integer :: ja, L
     double precision :: zk_fillvalue
-    character(len=14) :: checksum
-    character(len=28) :: checksum_hex
-    logical :: success
 
     call readyy('Reading net data',0d0)
 
@@ -11325,21 +11320,45 @@ subroutine unc_read_net(filename, numk_keep, numl_keep, numk_read, numl_read, ie
     ierr = unc_close(inetfile)
     call readyy('Reading net data',-1d0)
 
-    if (loglevel_StdOut <= LEVEL_DEBUG) then
-       allocate(kn1read(3*(numl_keep+numl_read)))
-       do l = 1, numl_keep+numl_read
-          kn1read(3*l-2) = KN(1,L)
-          kn1read(3*l-1) = KN(2,L)
-          kn1read(3*l  ) = KN(3,L)
-       end do
-       call md5intarr(kn1read, checksum, success)
-       call checksum2hex(checksum, checksum_hex)
-       call mess(LEVEL_DEBUG, 'MD5 checksum KN = '//  checksum_hex)
-       deallocate(kn1read)
-    end if
-
 end subroutine unc_read_net
 
+!> print MD5 checksum for net file
+!! only in case of loglevel is debug or all
+subroutine md5_net_file(numln)
+    use network_data, only : kn
+    use md5_checksum
+    use unstruc_messages
+
+    integer, intent(in) :: numln !< number of net links
+
+    integer                    :: L
+    integer                    :: ierr
+    integer, allocatable       :: kn1d(:)
+    character(len=  md5length) :: checksum
+    character(len=2*md5length) :: checksum_hex
+    logical                    :: success
+
+    if (loglevel_StdOut <= LEVEL_DEBUG .or. loglevel_file <= LEVEL_DEBUG) then
+       allocate(kn1d(3*(numln)), stat=ierr)
+       if (ierr /= 0) then
+          call mess(LEVEL_FATAL, 'memory allocation error in md5_net_file with size = ', 3*numln)
+       end if
+       do L = 1, numln
+          kn1d(3*L-2) = KN(1,L)
+          kn1d(3*L-1) = KN(2,L)
+          kn1d(3*L  ) = KN(3,L)
+       end do
+       call md5intarr(kn1d, checksum, success)
+       if (success) then
+          call checksum2hex(checksum, checksum_hex)
+          call mess(LEVEL_DEBUG, 'MD5 checksum KN = '// checksum_hex)
+       else
+          call mess(LEVEL_DEBUG, 'could not generate MD5 checksum')
+       end if
+       deallocate(kn1d)
+    end if
+
+end subroutine md5_net_file
 
 !> Reads a single array variable from a map file, and optionally,
 !! if it was a merged map file from parallel run, reshift the read

@@ -41,7 +41,7 @@ contains
 
 subroutine loadNetwork(filename, istat, jadoorladen)
     
-    use unstruc_netcdf, only : unc_read_net, unc_write_net
+    use unstruc_netcdf, only : unc_read_net, unc_write_net, md5_net_file
     use unstruc_messages
     use m_missing
     use gridoperations
@@ -86,6 +86,7 @@ subroutine loadNetwork(filename, istat, jadoorladen)
 
     ! New NetCDF net file
     call unc_read_net(filename, K0, L0, NUMKN, NUMLN, istat)
+    call md5_net_file(NUMLN)
 
     iDumk = 0
     iDuml = 0
