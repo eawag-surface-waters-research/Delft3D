@@ -81,9 +81,7 @@ module unstruc_caching
 
 
     character(len=30), parameter, private :: version_string = "D-Flow FM, cache file, 1.0"
-    character(len=16), private :: md5current
-
-
+    character(len=md5length), private :: md5current
 
 contains
 !> Sets ALL (scalar) variables in this module to their default values.
@@ -128,7 +126,7 @@ subroutine loadCachingFile( basename, netfile, usecaching )
     integer :: number, number_links, number_sections
     character(len=30) :: version_file
     character(len=20) :: key
-    character(len=16) :: md5checksum
+    character(len=md5length) :: md5checksum
     logical :: okay
     logical :: success
     character(len=256) :: filename

@@ -26,7 +26,7 @@ module md5_checksum
     use iso_c_binding
     implicit none
     private
-    public :: md5file, md5intarr, checksum2hex
+    public :: md5file, md5intarr, checksum2hex, md5length
     interface
         subroutine md5_init() bind(C, name = 'md5_init')
         end subroutine md5_init
@@ -41,6 +41,8 @@ module md5_checksum
             character(len=1), dimension(*) :: result
         end subroutine md5_final
     end interface
+
+    integer, parameter :: md5length = 16 !< Required (minimal) length for the checksum string
 contains
 
 subroutine md5file( filename, checksum, success )
@@ -58,7 +60,7 @@ subroutine md5file( filename, checksum, success )
     character(len=*), intent(out) :: checksum        !< MD5 checksum (14-bytes string)
     logical, intent(out)          :: success         !< Whether the procedure succeeded or not
 
-    character(len=16)             :: result
+    character(len=md5length)      :: result
     character(len=2048)           :: chunk
     integer                       :: filesize
     integer(kind=c_long)          :: length
@@ -120,7 +122,7 @@ subroutine md5intarr( intarr, checksum, success )
     character(len=*), intent(out) :: checksum        !< MD5 checksum (14-bytes string)
     logical, intent(out)          :: success         !< Whether the procedure succeeded or not
 
-    character(len=14)             :: result
+    character(len=md5length)      :: result
     character(len=2048)           :: chunk
     integer                       :: filesize
     integer(kind=c_long)          :: length
@@ -169,8 +171,8 @@ subroutine checksum2hex(checksum, s)
 
    integer :: i
 
-   if (len(checksum) >= 16 .and. len(s) >= 32) then
-      do i = 1, 16
+   if (len(checksum) >= md5length .and. len(s) >= 2*md5length) then
+      do i = 1, md5length
          write(temp, '(Z2.2)') ichar(checksum(i:i))
          s(2*i-1:2*i) = temp
       end do
