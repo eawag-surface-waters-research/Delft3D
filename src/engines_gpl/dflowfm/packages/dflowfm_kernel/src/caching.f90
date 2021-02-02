@@ -81,7 +81,7 @@ module unstruc_caching
 
 
     character(len=30), parameter, private :: version_string = "D-Flow FM, cache file, 1.0"
-    character(len=14), private :: md5current
+    character(len=16), private :: md5current
 
 
 
@@ -128,7 +128,7 @@ subroutine loadCachingFile( basename, netfile, usecaching )
     integer :: number, number_links, number_sections
     character(len=30) :: version_file
     character(len=20) :: key
-    character(len=14) :: md5checksum
+    character(len=16) :: md5checksum
     logical :: okay
     logical :: success
     character(len=256) :: filename
@@ -299,7 +299,7 @@ subroutine loadCachedSections( lun, linklist, ipol, sections, ierr )
 
     integer                                 :: i, np, nlink
     logical                                 :: okay
-    
+
     ! If there is nothing to be cached, do not even try to read (D3DFMIQ-2193)
     if ( size(linklist) == 0 ) then
         ierr = 0
