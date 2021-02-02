@@ -67,7 +67,6 @@ subroutine md5file( filename, checksum, success )
     integer                       :: lun
     integer                       :: ierr
 
-    external :: md5_init, md5_update, md5_final
     success = .true.
 
     open( newunit = lun, file = filename, access = 'stream', status = 'old', iostat = ierr )
