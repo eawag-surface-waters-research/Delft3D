@@ -58,7 +58,7 @@ subroutine md5file( filename, checksum, success )
     character(len=*), intent(out) :: checksum        !< MD5 checksum (14-bytes string)
     logical, intent(out)          :: success         !< Whether the procedure succeeded or not
 
-    character(len=14)             :: result
+    character(len=16)             :: result
     character(len=2048)           :: chunk
     integer                       :: filesize
     integer(kind=c_long)          :: length
@@ -164,13 +164,13 @@ end subroutine md5intarr
 subroutine checksum2hex(checksum, s)
    character(len=*), intent(in) :: checksum
    character(len=*), intent(out) :: s
-   
+
    character(len=2) :: temp
 
    integer :: i
 
-   if (len(checksum) >= 14 .and. len(s) >= 28) then
-      do i = 1, 14
+   if (len(checksum) >= 16 .and. len(s) >= 32) then
+      do i = 1, 16
          write(temp, '(Z2.2)') ichar(checksum(i:i))
          s(2*i-1:2*i) = temp
       end do
