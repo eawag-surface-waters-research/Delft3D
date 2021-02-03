@@ -2436,32 +2436,29 @@ function ug_is_network_topology(ncid, varid) result(is_mesh_topo)
    logical                     :: is_mesh_topo !< Return value
 
    integer :: cfrole, nodeidvar, edgeGeometryId, edgecoord
-   character(len=13) :: buffer
-   character(len=nf90_max_name) :: nodeidsvar
-   integer :: iworkaround1, iworkaround2
+   character(len=:), allocatable :: buffer
+   character(len=:), allocatable :: nodeidsvar
+   integer :: buffer_len
+   integer :: nodeidsvar_len
+   integer :: status
+   integer :: mesh_topo
+   integer :: edge_geom
 
    is_mesh_topo = .false.
 
-   ! NOTE: AvD: On Linux + netcdf/v4.3.2_v4.4.0_intel_14.0.3 a UGRID _net.nc file
-   ! gives an unexplained SIGSEGV in nf_attio.F90 on line 332:
-   !  cncid  = ncid
-   ! (in the second nf90_get_att call below)
-   ! TODO: check whether the latest netcdf-fortran resolves this (some var decs
-   ! have been changed there from integer(KIND=C_INT) to integer(C_INT).
-   ! For now: this workaround somehow solves it.
-
-   iworkaround1 = ncid
-   iworkaround2 = varid
-
+   status    = nf90_inquire_attribute(ncid, varid, 'cf_role', len=buffer_len)
+   allocate( character(len=buffer_len) :: buffer ) 
    buffer = ' '
-   cfrole    = nf90_get_att(ncid, varid, 'cf_role', buffer)
-   !write (*,*) 'cf_role = ', cfrole, ', buffer="', buffer, '".'
-   edgeGeometryId    = nf90_get_att(iworkaround1, iworkaround2, 'edge_geometry', nodeidsvar)
-   !write (*,*) 'edgeGeometryId = ', edgeGeometryId, ', iworkaround1 = ', iworkaround1, ', iworkaround2 = ', iworkaround2, ', buffer="', nodeidsvar, '".'
-   if (cfrole == nf90_noerr .and. edgeGeometryId == nf90_noerr ) then
+   mesh_topo = nf90_get_att(ncid, varid, 'cf_role', buffer)
+   
+   status    = nf90_inquire_attribute(ncid, varid, 'cf_role', len=nodeidsvar_len)
+   allocate( character(len=nodeidsvar_len) :: nodeidsvar ) 
+   nodeidsvar = ' '
+   edge_geom = nf90_get_att(ncid, varid, 'edge_geometry', nodeidsvar)
+
+   if (mesh_topo == nf90_noerr .and. edge_geom == nf90_noerr ) then
          is_mesh_topo = .true. !new ugrid format detected
    end if
-   !write (*,*) 'is_mesh_topo = ', is_mesh_topo
 end function ug_is_network_topology   
 
 !> Returns whether a given variable is a link topology
