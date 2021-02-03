@@ -1820,25 +1820,26 @@ if(q /= 0) then
 end subroutine checkvolnan
 
 subroutine addlink1D(L,japerim)                        ! and add area's and volumes of 1D links
-   use m_flowgeom
-   use m_flow
-   use m_missing
-   use m_flowparameters
-   use unstruc_channel_flow
-   use precision_basics
-   
-   implicit none
-   
-   integer           :: japerim, L, ja, calcConv
-   
-   integer           :: k1, k2, K, LL
-   double precision  :: ar1, wid1, cf1, ar2, wid2, cf2, dx1, dx2, widu, diam, perim
-   double precision  :: hpr
-   
-   dx1 = 0.5d0*dx(L) 
-   dx2 = dx1
-   k1 = ln(1,L)
-   k2 = ln(2,L)
+ use m_flowgeom
+ use m_flow
+ use m_missing
+ use m_flowparameters
+ use unstruc_channel_flow
+ use precision_basics
+ 
+ implicit none
+ 
+ integer           :: japerim, L, ja, calcConv
+ 
+ integer           :: k1, k2, K, LL
+ double precision  :: ar1, wid1, cf1, ar2, wid2, cf2, dx1, dx2, widu, diam, perim
+ double precision  :: hpr
+ 
+ dx1 = 0.5d0*dx(L) 
+ dx2 = dx1
+ k1 = ln(1,L)
+ k2 = ln(2,L)
+ 
  if (dxDoubleAt1DEndNodes) then
     if (kcu(L) == 1) then
        if ( nd(k1)%lnx == 1 ) then
