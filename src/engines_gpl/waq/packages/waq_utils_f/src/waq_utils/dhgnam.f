@@ -15,7 +15,7 @@
 !!  contact: delft3d.support@deltares.nl
 !!  Stichting Deltares
 !!  P.O. Box 177
-!!  2OUTPUT_UNIT00 MH Delft, The Netherlands
+!!  2600 MH Delft, The Netherlands
 !!
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All

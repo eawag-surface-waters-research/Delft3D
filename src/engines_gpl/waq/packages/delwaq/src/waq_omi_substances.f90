@@ -135,6 +135,8 @@ subroutine loadSubstancesFile( substances_file, parameters_file, success )
         call registerSubstances( success )
     endif
 
+    close( lunsub )
+    close( lunpar )
     close( lunlst )
 
 end subroutine LoadSubstancesFile
