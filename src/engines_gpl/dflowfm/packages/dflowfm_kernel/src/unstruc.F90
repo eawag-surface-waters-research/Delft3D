@@ -1816,40 +1816,43 @@ if(q /= 0) then
     if (isnan(vol1(n))) then
        write(msgbuf,*)  ' volnan ', i, n ; call msg_flush()
     endif
- enddo
- end subroutine checkvolnan
+   enddo
+end subroutine checkvolnan
 
- subroutine addlink1D(L,japerim)                        ! and add area's and volumes of 1D links
- use m_flowgeom
- use m_flow
- use m_missing
- use m_flowparameters
- use unstruc_channel_flow
-
- implicit none
-
- integer           :: japerim, L, ja, calcConv
-
- integer           :: k1, k2, K, LL
- double precision  :: ar1, wid1, cf1, ar2, wid2, cf2, dx1, dx2, widu, diam, perim
- double precision  :: hpr
+subroutine addlink1D(L,japerim)                        ! and add area's and volumes of 1D links
+   use m_flowgeom
+   use m_flow
+   use m_missing
+   use m_flowparameters
+   use unstruc_channel_flow
+   use precision_basics
+   
+   implicit none
+   
+   integer           :: japerim, L, ja, calcConv
+   
+   integer           :: k1, k2, K, LL
+   double precision  :: ar1, wid1, cf1, ar2, wid2, cf2, dx1, dx2, widu, diam, perim
+   double precision  :: hpr
+   
+   dx1 = 0.5d0*dx(L) 
+   dx2 = dx1
+   k1 = ln(1,L)
+   k2 = ln(2,L)
+ if (dxDoubleAt1DEndNodes) then
+    if (kcu(L) == 1) then
+       if ( nd(k1)%lnx == 1 ) then
+          dx1 = 2d0*dx1
+       endif
+       if ( nd(k2)%lnx == 1 ) then
+          dx2 = 2d0*dx2
+       endif
+    endif
+ endif
 
  if (japerim == 0) then
 
     calcConv = 0
-    k1  = ln(1,L) ; k2 = ln(2,L)
-
-    dx1 = 0.5d0*dx(L) ; dx2 = dx1
-    if (dxDoubleAt1DEndNodes) then
-       if (kcu(L) == 1) then
-          if ( nd(k1)%lnx == 1 ) then
-             dx1 = 2d0*dx1
-          endif
-          if ( nd(k2)%lnx == 1 ) then
-             dx2 = 2d0*dx2
-          endif
-       endif
-    endif
 
     if (kcs(k1) == 1) then ! TODO: consider *also* adding storage area to the 2D side k1, if kcu(L)==5, maybe not for kcu(L)==7
        hpr = s1(k1)-bob0(1,L)
@@ -1924,29 +1927,23 @@ if(q /= 0) then
  else if (hu(L) > 0) then
 
     calcConv = 1
+                                                     
+    ! getprof1D sets cfu    
     call getprof_1D(L, hu(L), au(L), widu, japerim, calcConv, perim)  ! memory closeness of profiles causes this statement here instead of in setau
 
     ! calculate VOL1_F to be used for 1d-advection
 
-    k1 = ln(1,L)
-    k2 = ln(2,L)
+    calcConv = 0
     if(network%loaded) then
-       dx1 = 0.5d0*dx(L) ; dx2 = dx1
-       if (dxDoubleAt1DEndNodes) then
-          if (kcu(L) == 1) then
-             if ( nd(k1)%lnx == 1 ) then
-                dx1 = 2d0*dx1
-             endif
-             if ( nd(k2)%lnx == 1 ) then
-                dx2 = 2d0*dx2
-             endif
-          endif
-       endif
        if (kcs(k1) == 1) then ! TODO: consider *also* adding storage area to the 2D side k1, if kcu(L)==5, maybe not for kcu(L)==7
          hpr = s1(k1)-bob0(1,L)
          if (hpr >= 0d0) then
-            call getprof_1D(L, hpr, ar1, wid1, 1, calcConv, perim)
-            vol1_f(k1) = vol1_f(k1) + dx1*ar1
+            if (comparereal(hu(L), hpr, eps=1d-5)== 0) then
+               vol1_f(k1) = vol1_f(k1) + dx1*au(L)
+            else
+               call getprof_1D(L, hpr, ar1, wid1, 1, calcConv, perim)
+               vol1_f(k1) = vol1_f(k1) + dx1*ar1
+            endif
          endif
       endif
 
@@ -1954,14 +1951,18 @@ if(q /= 0) then
          hpr = s1(k2)-bob0(2,L)
          if (hpr >= 0d0) then
             ! flow volume
-            call getprof_1D(L, hpr, ar2, wid2, 1, calcConv, perim)
-            vol1_f(k2) = vol1_f(k2) + dx2*ar2
+            if (comparereal(hu(L), hpr, eps=1d-5)== 0) then
+               vol1_f(k2) = vol1_f(k2) + dx2*au(L)
+            else
+               call getprof_1D(L, hpr, ar2, wid2, 1, calcConv, perim)
+               vol1_f(k2) = vol1_f(k2) + dx2*ar2
+            endif
          endif
       endif
     else
        vol1_f(k1) = vol1(k1)
        vol1_f(k2) = vol1(k2)
-    endif                                                      ! getprof1D sets cfu
+    endif 
  endif
 
  end subroutine addlink1D
@@ -4448,6 +4449,7 @@ end subroutine setdt
  use m_partitioninfo
  use m_fixedweirs
  use m_sferic
+ use CheckVersions
 
  implicit none
 
@@ -4520,6 +4522,14 @@ end subroutine setdt
  double precision,        external :: dlimiter, dslim
 
  japiaczek33 = 0
+
+ call cvdata('time', 1, time1)
+ do L = 1, lnx1d
+   k1 = ln(1,L)
+   k2 = ln(2,L)
+   call cvData('Vol1_f k1',L, vol1_f(k1))
+   call cvData('Vol1_f k2',L, vol1_f(k2))
+ enddo
 
  if (ifixedweirscheme >= 3 .and. ifixedweirscheme <= 5) then
     do L  = 1,lnxi
@@ -11024,7 +11034,7 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
  use m_fm_wq_processes, only: jawaqproc
  use m_vegetation
  use m_hydrology, only: jadhyd, init_hydrology
- use m_integralstats
+ use m_integralstats 
  use m_xbeach_data, only: instat, newstatbc, bccreated
  use m_oned_functions
  use unstruc_display, only : ntek, jaGUI
@@ -11033,6 +11043,8 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
  use m_fm_update_crosssections, only: fm_update_mor_width_area, fm_update_mor_width_mean_bedlevel
  use unstruc_netcdf_map_class
  use unstruc_caching
+ use CheckVersions
+ 
  !use m_mormerge
  !
  ! To raise floating-point invalid, divide-by-zero, and overflow exceptions:
@@ -11056,6 +11068,9 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
  !
 
  iresult = DFM_GENERICERROR
+
+ call cvSetActive(.false.)
+ call cvInitialize()
 
  call datum2(rundat2)
  L = len_trim(rundat2)
