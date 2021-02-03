@@ -83,6 +83,7 @@ for %%f in ("%D3DT%") do set ARCH=%%~nxf
 
 set delwaqexedir=%D3D_HOME%\%ARCH%\dwaq\bin
 set dflowfmexedir=%D3D_HOME%\%ARCH%\dflowfm\bin
+set proc_def_dir=%D3D_HOME%\%ARCH%\dflowfm\default
 set dimrexedir=%D3D_HOME%\%ARCH%\dimr\bin
 set esmfexedir=%D3D_HOME%\%ARCH%\esmf\bin
 set esmfbatdir=%D3D_HOME%\%ARCH%\esmf\scripts

@@ -798,6 +798,10 @@ src/engines_gpl/dimr/scripts/dimr_artifacts.py -text
 src/engines_gpl/dimr/scripts/flow2d3d/dimr_config.xml -text
 src/engines_gpl/dimr/scripts/flow2d3d/run_dimr.bat -text
 src/engines_gpl/dimr/scripts/fm/dimr_config.xml -text
+src/engines_gpl/dimr/scripts/fm/dimr_wq_with_BLOOM.xml -text
+src/engines_gpl/dimr/scripts/fm/dimr_wq_with_BLOOM_parallel.xml -text
+src/engines_gpl/dimr/scripts/fm/dimr_wq_without_BLOOM.xml -text
+src/engines_gpl/dimr/scripts/fm/dimr_wq_without_BLOOM_parallel.xml -text
 src/engines_gpl/dimr/scripts/fm/fm_parameters_for_waves.txt -text
 src/engines_gpl/dimr/scripts/fm/run_dimr.bat -text
 src/engines_gpl/dimr/scripts/generic/Makefile.am -text

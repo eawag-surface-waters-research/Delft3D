@@ -143,9 +143,12 @@ if [ ! -d $D3D_HOME ]; then
     print_usage_info
 fi
 export D3D_HOME
+PROC_DEF_DIR=$D3D_HOME/share/delft3d
+export PROC_DEF_DIR
  
 echo "    Configfile       : $configfile"
 echo "    D3D_HOME         : $D3D_HOME"
+echo "    PROC_DEF_DIR     : $PROC_DEF_DIR"
 echo "    Working directory: $workdir"
 echo "    Number of slots  : $NSLOTS"
 echo "    Docker parallel  : $dockerprl"
