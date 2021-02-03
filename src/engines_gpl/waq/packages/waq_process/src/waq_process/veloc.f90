@@ -115,7 +115,7 @@
       in11 = increm(11)
 
        FlowSeg1 = 0.
-       FlowSeg2 = 0. 
+       FlowSeg2 = 0.
 !.....Berekening gemiddelde stroomsnelheid horizontale richting
       do 100 iq = 1, noq1+noq2
 
@@ -198,11 +198,14 @@
 
             Veloc1 = pmsa(ipnt(1)) / max( pmsa(ipnt(2)), 1.0 )
             Veloc2 = pmsa(ipnt(3)) / max( pmsa(ipnt(4)), 1.0 )
-            
+
+            SWCalcVelo = pmsa( ipnt(8) )
+            icalsw = int ( SWCalcVelo + 0.5 )
+
             if (icalsw .eq. 3) then
                 FlowSeg1 = pmsa(ipnt(1))
-                FlowSeg2 = pmsa(ipnt(3))           
-            endif    
+                FlowSeg2 = pmsa(ipnt(3))
+            endif
 
 !           switch (1=Pythagoras, 2=Min, 3=Max)            (-)
 
@@ -241,7 +244,7 @@
                   FlowDir = -1.0
                case ( 3 )
                   Velocity = min(abs(Veloc1),abs(Veloc2))
-                  FlowSeg = min(abs(FlowSeg1),abs(FlowSeg2))                  
+                  FlowSeg = min(abs(FlowSeg1),abs(FlowSeg2))
                   FlowDir = -1.0
                case default
             end select
@@ -253,7 +256,7 @@
             endif
 !
             pmsa( ipnt( 12)   ) = Velocity
-             pmsa( ipnt( 13)   ) = FlowDir           
+             pmsa( ipnt( 13)   ) = FlowDir
             if (icalsw .eq. 3) then
                 pmsa( ipnt( 14)   ) = FlowSeg
             else
