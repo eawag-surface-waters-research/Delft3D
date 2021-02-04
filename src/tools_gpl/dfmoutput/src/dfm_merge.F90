@@ -66,6 +66,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
 
    integer, parameter :: int8 = 1     ! also local storage compact in 1 byte
    integer, parameter :: mapclass_time_buffer_size =   1
+   integer, parameter :: netnodemaxface = 12
 
    integer, dimension(nfiles+1) :: ncids, id_timedim, id_facedim, id_edgedim, id_laydim, id_wdim, id_nodedim, id_sedtotdim, id_sedsusdim, &
                                    id_netedgedim, id_netfacedim, id_netfacemaxnodesdim, id_time, id_timestep, id_bnddim !< dim and var ids, maintained for all input files + 1 output file.
@@ -101,7 +102,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
    integer :: id_flownodedomain , id_flownodeglobnr, id_edgefaces, id_netfacenodes, id_edgenodes, id_netedgefaces, id_netfaceedges
    integer :: ierri
    integer :: maxlen, nlen, plen, mlen, ii, id, iv, it, itm, ip, ik, is, ie, nvarsel, ntsel, nvars, ndims, nvardims, vartype
-   integer :: netfacemaxnodesg, netnodemaxface=12, ndxc, lnxc, numkc, numlc,ndx_bndc
+   integer :: netfacemaxnodesg, ndxc, lnxc, numkc, numlc,ndx_bndc
    integer :: nfaceglob, nfaceglob0, nfacecount, ifaceglob
    integer :: nedgeglob, nedgeglob0, nedgecount, iedgeglob
    integer :: nnodeglob, nnodeglob0, nnodecount, inodeglob
