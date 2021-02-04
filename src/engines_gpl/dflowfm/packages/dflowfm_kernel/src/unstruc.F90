@@ -4450,7 +4450,6 @@ end subroutine setdt
  use m_partitioninfo
  use m_fixedweirs
  use m_sferic
- use CheckVersions
 
  implicit none
 
@@ -4523,14 +4522,6 @@ end subroutine setdt
  double precision,        external :: dlimiter, dslim
 
  japiaczek33 = 0
-
- call cvdata('time', 1, time1)
- do L = 1, lnx1d
-   k1 = ln(1,L)
-   k2 = ln(2,L)
-   call cvData('Vol1_f k1',L, vol1_f(k1))
-   call cvData('Vol1_f k2',L, vol1_f(k2))
- enddo
 
  if (ifixedweirscheme >= 3 .and. ifixedweirscheme <= 5) then
     do L  = 1,lnxi
@@ -11044,7 +11035,6 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
  use m_fm_update_crosssections, only: fm_update_mor_width_area, fm_update_mor_width_mean_bedlevel
  use unstruc_netcdf_map_class
  use unstruc_caching
- use CheckVersions
  
  !use m_mormerge
  !
@@ -11069,9 +11059,6 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
  !
 
  iresult = DFM_GENERICERROR
-
- call cvSetActive(.false.)
- call cvInitialize()
 
  call datum2(rundat2)
  L = len_trim(rundat2)
