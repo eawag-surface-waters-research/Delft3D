@@ -2447,14 +2447,23 @@ function ug_is_network_topology(ncid, varid) result(is_mesh_topo)
    is_mesh_topo = .false.
 
    status    = nf90_inquire_attribute(ncid, varid, 'cf_role', len=buffer_len)
-   allocate( character(len=buffer_len) :: buffer ) 
-   buffer = ' '
-   mesh_topo = nf90_get_att(ncid, varid, 'cf_role', buffer)
+   if ( status == nf90_noerr ) then
+       allocate( character(len=buffer_len) :: buffer ) 
+       mesh_topo = nf90_get_att(ncid, varid, 'cf_role', buffer)
+   else 
+       buffer = ' ' ! Unless you do not want to check the actual contents
+       mesh_topo = status
+   endif   
    
    status    = nf90_inquire_attribute(ncid, varid, 'cf_role', len=nodeidsvar_len)
-   allocate( character(len=nodeidsvar_len) :: nodeidsvar ) 
-   nodeidsvar = ' '
-   edge_geom = nf90_get_att(ncid, varid, 'edge_geometry', nodeidsvar)
+   if ( status == nf90_noerr ) then
+       allocate( character(len=nodeidsvar_len) :: nodeidsvar ) 
+       nodeidsvar = ' '
+       edge_geom = nf90_get_att(ncid, varid, 'edge_geometry', nodeidsvar)
+   else 
+       nodeidsvar = ' ' ! Unless you do not want to check the actual contents
+       edge_geom = status
+   endif   
 
    if (mesh_topo == nf90_noerr .and. edge_geom == nf90_noerr ) then
          is_mesh_topo = .true. !new ugrid format detected
