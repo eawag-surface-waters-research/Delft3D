@@ -1,28 +1,28 @@
 !----- LGPL --------------------------------------------------------------------
-!                                                                               
-!  Copyright (C)  Stichting Deltares, 2011-2021.                                
-!                                                                               
-!  This library is free software; you can redistribute it and/or                
-!  modify it under the terms of the GNU Lesser General Public                   
-!  License as published by the Free Software Foundation version 2.1.                 
-!                                                                               
-!  This library is distributed in the hope that it will be useful,              
-!  but WITHOUT ANY WARRANTY; without even the implied warranty of               
-!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU            
-!  Lesser General Public License for more details.                              
-!                                                                               
-!  You should have received a copy of the GNU Lesser General Public             
-!  License along with this library; if not, see <http://www.gnu.org/licenses/>. 
-!                                                                               
-!  contact: delft3d.support@deltares.nl                                         
-!  Stichting Deltares                                                           
-!  P.O. Box 177                                                                 
-!  2600 MH Delft, The Netherlands                                               
-!                                                                               
-!  All indications and logos of, and references to, "Delft3D" and "Deltares"    
-!  are registered trademarks of Stichting Deltares, and remain the property of  
-!  Stichting Deltares. All rights reserved.                                     
-!                                                                               
+!
+!  Copyright (C)  Stichting Deltares, 2011-2021.
+!
+!  This library is free software; you can redistribute it and/or
+!  modify it under the terms of the GNU Lesser General Public
+!  License as published by the Free Software Foundation version 2.1.
+!
+!  This library is distributed in the hope that it will be useful,
+!  but WITHOUT ANY WARRANTY; without even the implied warranty of
+!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+!  Lesser General Public License for more details.
+!
+!  You should have received a copy of the GNU Lesser General Public
+!  License along with this library; if not, see <http://www.gnu.org/licenses/>.
+!
+!  contact: delft3d.support@deltares.nl
+!  Stichting Deltares
+!  P.O. Box 177
+!  2600 MH Delft, The Netherlands
+!
+!  All indications and logos of, and references to, "Delft3D" and "Deltares"
+!  are registered trademarks of Stichting Deltares, and remain the property of
+!  Stichting Deltares. All rights reserved.
+!
 !-------------------------------------------------------------------------------
 
 ! $Id$
@@ -68,8 +68,8 @@ type ::t_ug_meta
    character(len=ug_strLenMeta) :: modelname
 end type t_ug_meta
 
-!! Meta data for string info 
-type :: t_ug_charinfo  
+!! Meta data for string info
+type :: t_ug_charinfo
     character(len=ug_idsLen)            :: ids
     character(len=ug_idsLongNamesLen)   :: longnames
 end type t_ug_charinfo
@@ -84,7 +84,7 @@ integer, parameter :: UG_ENOTVAR               = -1015 !< Some variable was not 
 integer, parameter :: UG_VAR_TOOMANYFOUND      = -1016 !< Multiple variables were found in an inquiry whereas only one was expected or requested.
 integer, parameter :: UG_INVALID_LAYERS        = -1017
 integer, parameter :: UG_ENOTATT               = -1018 !< Some attribute was not found. Probably due to a native NF90_ENOTATT.
-integer, parameter :: UG_ENOTDIM               = -1019 !< Some dimension was not found. Probably due to a native NF90_EBADDIM      
+integer, parameter :: UG_ENOTDIM               = -1019 !< Some dimension was not found. Probably due to a native NF90_EBADDIM
 integer, parameter :: UG_INVALID_CRS           = -1030 !< Invalid/missing coordinate reference system (using default)
 integer, parameter :: UG_INVALID_NETNAME       = -1031 !< Invalid network name
 integer, parameter :: UG_NOTIMPLEMENTED        = -1099
@@ -125,7 +125,7 @@ character(len=maxMessageLen) :: ug_messagestr !< Placeholder string for storing 
 type t_face
    integer                        :: n               !< nr of nodes
    integer, allocatable           :: nod(:)          !< node nrs
-   integer, allocatable           :: lin(:)          !< link nrs, kn(1 of 2,netcell(n)%lin(1)) =  netcell(n)%nod(1)  
+   integer, allocatable           :: lin(:)          !< link nrs, kn(1 of 2,netcell(n)%lin(1)) =  netcell(n)%nod(1)
 end type t_face
 
 !mesh dimensions
@@ -135,7 +135,7 @@ enumerator mdim_node                       !< Dimension ID for nodes.
 enumerator mdim_edge                       !< Dimension ID for edges.
 enumerator mdim_face                       !< Dimension ID for faces.
 enumerator mdim_1dbranches                 !< Dimension ID for 1d network branches
-enumerator mdim_1dnodes                    !< Dimension ID for 1d network nodes 
+enumerator mdim_1dnodes                    !< Dimension ID for 1d network nodes
 enumerator mdim_1dgeopoints                !< Dimension ID for 1d network geometry points
 enumerator mdim_maxfacenodes               !< Dimension ID for max nr of nodes per face.
 enumerator mdim_two                        !< Dimension ID for two
@@ -153,7 +153,7 @@ enum, bind(C)
 enumerator::mid_start = 1
 !1d variables
 enumerator mid_1dtopo                     !< The network used by this topology
-enumerator mid_1dnodebranch               !< Variable ID for 1d branch indexes of each mesh point 
+enumerator mid_1dnodebranch               !< Variable ID for 1d branch indexes of each mesh point
 enumerator mid_1dnodeoffset               !< Coordinate variable ID for mesh point offsets on branches
 enumerator mid_1dedgebranch               !< Variable ID for 1d branch indexes of each mesh edge
 enumerator mid_1dedgeoffset               !< Coordinate variable ID for mesh edge offsets on branches
@@ -172,41 +172,41 @@ enumerator mid_node_longnames              !< Variable ID for node longnames (op
 enumerator mid_edge_longnames              !< Variable ID for edge longnames (optional, can be -1).
 enumerator mid_face_longnames              !< Variable ID for face longnames (optional, can be -1).
 !Coordinate variables
-enumerator mid_nodex                       !< Coordinate variable ID for node x-coordinate.     
-enumerator mid_nodey                       !< Coordinate variable ID for node y-coordinate.   
+enumerator mid_nodex                       !< Coordinate variable ID for node x-coordinate.
+enumerator mid_nodey                       !< Coordinate variable ID for node y-coordinate.
 enumerator mid_nodez                       !< Coordinate variable ID for node z-coordinate.
-enumerator mid_nodelon                     !< Coordinate variable ID for node longitude coordinate. 
+enumerator mid_nodelon                     !< Coordinate variable ID for node longitude coordinate.
 enumerator mid_nodelat                     !< Coordinate variable ID for node latitude coordinate.
-enumerator mid_edgex                       !< Coordinate variable ID for edge x-coordinate. 
-enumerator mid_edgey                       !< Coordinate variable ID for edge y-coordinate. 
-enumerator mid_edgexbnd                    !< Coordinate variable ID for edge boundaries' x-coordinate. 
-enumerator mid_edgeybnd                    !< Coordinate variable ID for edge boundaries' y-coordinate. 
-enumerator mid_edgelon                     !< Coordinate variable ID for edge longitude coordinate.    
-enumerator mid_edgelat                     !< Coordinate variable ID for edge latitude coordinate.    
-enumerator mid_edgelonbnd                  !< Coordinate variable ID for edge boundaries' longitude coordinate.     
+enumerator mid_edgex                       !< Coordinate variable ID for edge x-coordinate.
+enumerator mid_edgey                       !< Coordinate variable ID for edge y-coordinate.
+enumerator mid_edgexbnd                    !< Coordinate variable ID for edge boundaries' x-coordinate.
+enumerator mid_edgeybnd                    !< Coordinate variable ID for edge boundaries' y-coordinate.
+enumerator mid_edgelon                     !< Coordinate variable ID for edge longitude coordinate.
+enumerator mid_edgelat                     !< Coordinate variable ID for edge latitude coordinate.
+enumerator mid_edgelonbnd                  !< Coordinate variable ID for edge boundaries' longitude coordinate.
 enumerator mid_edgelatbnd                  !< Coordinate variable ID for edge boundaries' latitude coordinate.
-enumerator mid_facex                       !< Coordinate variable ID for face x-coordinate.    
-enumerator mid_facey                       !< Coordinate variable ID for face y-coordinate.   
-enumerator mid_facexbnd                    !< Coordinate variable ID for face boundaries' x-coordinate.    
-enumerator mid_faceybnd                    !< Coordinate variable ID for face boundaries' y-coordinate.      
-enumerator mid_facelon                     !< Coordinate variable ID for face longitude coordinate. 
-enumerator mid_facelat                     !< Coordinate variable ID for face latitude coordinate. 
-enumerator mid_facelonbnd                  !< Coordinate variable ID for face boundaries' longitude coordinate. 
+enumerator mid_facex                       !< Coordinate variable ID for face x-coordinate.
+enumerator mid_facey                       !< Coordinate variable ID for face y-coordinate.
+enumerator mid_facexbnd                    !< Coordinate variable ID for face boundaries' x-coordinate.
+enumerator mid_faceybnd                    !< Coordinate variable ID for face boundaries' y-coordinate.
+enumerator mid_facelon                     !< Coordinate variable ID for face longitude coordinate.
+enumerator mid_facelat                     !< Coordinate variable ID for face latitude coordinate.
+enumerator mid_facelonbnd                  !< Coordinate variable ID for face boundaries' longitude coordinate.
 enumerator mid_facelatbnd                  !< Coordinate variable ID for face boundaries' latitude coordinate.
 enumerator mid_layerzs                     !< Coordinate variable ID for fixed z/sigma layer center vertical coordinate (either z or sigma).
-enumerator mid_interfacezs                 !< Coordinate variable ID for fixed z/sigma layer interface vertical coordinate (either z or sigma).   
-enumerator mid_node_ids_original           !< Variable storing the original ids 
+enumerator mid_interfacezs                 !< Coordinate variable ID for fixed z/sigma layer interface vertical coordinate (either z or sigma).
+enumerator mid_node_ids_original           !< Variable storing the original ids
 enumerator mid_node_mapping_original       !< Variable storing the ids - current nodes mapping
 enumerator mid_end
 end enum
 
 !contact dimension
-enum, bind(C) 
+enum, bind(C)
 enumerator::cdim_start = 1
-enumerator cdim_ncontacts                 !< Dimension ID for contacts.    
+enumerator cdim_ncontacts                 !< Dimension ID for contacts.
 enumerator cdim_idstring                  !< Dimension ID for the string id
-enumerator cdim_longnamestring            !< Dimension ID for the string longnames 
-enumerator cdim_two                       !< Dimension ID for two 
+enumerator cdim_longnamestring            !< Dimension ID for the string longnames
+enumerator cdim_two                       !< Dimension ID for two
 enumerator cdim_end
 end enum
 
@@ -218,10 +218,10 @@ enumerator cid_contactids                 !< Variable ID for contacts ids
 enumerator cid_contactlongnames           !< Variable ID for contacts longnames
 enumerator cid_contacttype                !< Variable ID for contact types
 enumerator cid_end
-end enum   
+end enum
 
 !network dimension
-enum, bind(C) 
+enum, bind(C)
 enumerator::ntdim_start = 1
 enumerator ntdim_1dnodes                    !< Dimension ID for the number of network nodes
 enumerator ntdim_1dgeopoints                !< Dimension ID for the geometry points
@@ -235,7 +235,7 @@ end enum
 !network variables
 enum, bind(C)
 enumerator::ntid_start = 1
-enumerator ntid_1dtopo                     !< Top-level variable for 1d network topology 
+enumerator ntid_1dtopo                     !< Top-level variable for 1d network topology
 enumerator ntid_1dgeometry                 !< Variable ID for 1d geometry points
 enumerator ntid_1dbranchids                !< Variable ID for 1d branches ids
 enumerator ntid_1dbranchlongnames          !< Variable ID for 1d branches long names
@@ -251,7 +251,7 @@ enumerator ntid_1dedgenodes
 enumerator ntid_1dbranchorder              !< Coordinate variable for the branch order
 enumerator ntid_1dbranchtype              !< Coordinate variable for the branch order
 enumerator ntid_end
-end enum    
+end enum
 
 !mesh type, it will expand with the commented componentes to accomodate composite meshes
 type t_ug_mesh
@@ -280,10 +280,10 @@ type t_ug_file
    integer                          :: numcontacts
    integer                          :: numnet
    type(t_ug_mesh),allocatable      :: meshids(:)         !< The type with underlying variable IDs (one column for each mesh topology).
-   type(t_ug_network),allocatable   :: netids(:)    
+   type(t_ug_network),allocatable   :: netids(:)
    type(t_ug_contacts),allocatable  :: contactids(:)      !< The array with underlying variable IDs, one column for each link topology.
    character(len=256), allocatable  :: meshnames(:)       !< The variable names for all mesh topologies in file.
-   character(len=256), allocatable  :: networksnames(:) 
+   character(len=256), allocatable  :: networksnames(:)
    character(len=256), allocatable  :: contactsnames(:)   !< The variable names for all contacts.
 end type t_ug_file
 
@@ -327,9 +327,9 @@ function ug_strerror(ugerr) result(str)
    case (UG_ENOTVAR);               str = 'Variable not in dataset'
    case (UG_ENOTATT);               str = 'Attribute not in dataset'
    case (UG_ENOTDIM);               str = 'Dimension not in dataset'
-   case (UG_VAR_TOOMANYFOUND);      str = 'Too many matching variables found in dataset'  
-   case (UG_INVALID_LAYERS);        str = 'Invalid layer type'    
-   case (UG_INVALID_CRS);           str = 'Invalid coordinate reference system'       
+   case (UG_VAR_TOOMANYFOUND);      str = 'Too many matching variables found in dataset'
+   case (UG_INVALID_LAYERS);        str = 'Invalid layer type'
+   case (UG_INVALID_CRS);           str = 'Invalid coordinate reference system'
    case (UG_NOTIMPLEMENTED);        str = 'Functionality not available yet (not implemented)'
    case default
       str = 'Unknown error'
@@ -348,33 +348,33 @@ integer function ug_get_constant(constname, constvalue) result(ierr)
 
    select case (trim(constname))
    case('ug_strLenMeta');               constvalue = ug_strLenMeta
-   case('ug_idsLen');                   constvalue = ug_idsLen          
-   case('ug_idsLongNamesLen');          constvalue = ug_idsLongNamesLen 
-   case('UG_NOERR');                    constvalue = UG_NOERR                
-   case('UG_SOMEERR');                  constvalue = UG_SOMEERR              
-   case('UG_INVALID_MESHNAME');         constvalue = UG_INVALID_MESHNAME     
+   case('ug_idsLen');                   constvalue = ug_idsLen
+   case('ug_idsLongNamesLen');          constvalue = ug_idsLongNamesLen
+   case('UG_NOERR');                    constvalue = UG_NOERR
+   case('UG_SOMEERR');                  constvalue = UG_SOMEERR
+   case('UG_INVALID_MESHNAME');         constvalue = UG_INVALID_MESHNAME
    case('UG_INVALID_MESHDIMENSION');    constvalue = UG_INVALID_MESHDIMENSION
-   case('UG_INVALID_DATALOCATION');     constvalue = UG_INVALID_DATALOCATION 
-   case('UG_ARRAY_TOOSMALL');           constvalue = UG_ARRAY_TOOSMALL    
+   case('UG_INVALID_DATALOCATION');     constvalue = UG_INVALID_DATALOCATION
+   case('UG_ARRAY_TOOSMALL');           constvalue = UG_ARRAY_TOOSMALL
    case('UG_ENOTVAR');                  constvalue = UG_ENOTVAR
    case('UG_ENOTATT');                  constvalue = UG_ENOTATT
    case('UG_ENOTDIM');                  constvalue = UG_ENOTDIM
-   case('UG_VAR_TOOMANYFOUND');         constvalue = UG_VAR_TOOMANYFOUND  
-   case('UG_INVALID_LAYERS');           constvalue = UG_INVALID_LAYERS    
-   case('UG_INVALID_CRS');              constvalue = UG_INVALID_CRS       
-   case('UG_NOTIMPLEMENTED');           constvalue = UG_NOTIMPLEMENTED    
-   case('LAYERTYPE_OCEANSIGMA');        constvalue = LAYERTYPE_OCEANSIGMA 
-   case('LAYERTYPE_Z');                 constvalue = LAYERTYPE_Z          
+   case('UG_VAR_TOOMANYFOUND');         constvalue = UG_VAR_TOOMANYFOUND
+   case('UG_INVALID_LAYERS');           constvalue = UG_INVALID_LAYERS
+   case('UG_INVALID_CRS');              constvalue = UG_INVALID_CRS
+   case('UG_NOTIMPLEMENTED');           constvalue = UG_NOTIMPLEMENTED
+   case('LAYERTYPE_OCEANSIGMA');        constvalue = LAYERTYPE_OCEANSIGMA
+   case('LAYERTYPE_Z');                 constvalue = LAYERTYPE_Z
    case('UG_LOC_NONE');                 constvalue = UG_LOC_NONE
    case('UG_LOC_NODE');                 constvalue = UG_LOC_NODE
    case('UG_LOC_EDGE');                 constvalue = UG_LOC_EDGE
    case('UG_LOC_FACE');                 constvalue = UG_LOC_FACE
-   case('UG_LOC_VOL');                  constvalue = UG_LOC_VOL 
+   case('UG_LOC_VOL');                  constvalue = UG_LOC_VOL
    case('UG_LOC_ALL2D');                constvalue = UG_LOC_ALL2D
    case('UG_EDGETYPE_INTERNAL_CLOSED'); constvalue = UG_EDGETYPE_INTERNAL_CLOSED
-   case('UG_EDGETYPE_INTERNAL');        constvalue = UG_EDGETYPE_INTERNAL      
-   case('UG_EDGETYPE_BND');             constvalue = UG_EDGETYPE_BND           
-   case('UG_EDGETYPE_BND_CLOSED');      constvalue = UG_EDGETYPE_BND_CLOSED    
+   case('UG_EDGETYPE_INTERNAL');        constvalue = UG_EDGETYPE_INTERNAL
+   case('UG_EDGETYPE_BND');             constvalue = UG_EDGETYPE_BND
+   case('UG_EDGETYPE_BND_CLOSED');      constvalue = UG_EDGETYPE_BND_CLOSED
    case default
       ierr = UG_SOMEERR
    end select
@@ -488,7 +488,7 @@ function ug_get_var_attset(ncid, varid, attset) result(ierr)
    return ! Return with success
 
 888 continue
-    
+
 end function ug_get_var_attset
 
 
@@ -664,7 +664,7 @@ function ug_add_coordmapping(ncid, crs) result(ierr)
       varname = 'wgs84'
    else if (len_trim(crs%varname) > 0) then
       varname = crs%varname
-   else 
+   else
       ierr_missing = UG_INVALID_CRS
       varname = 'projected_coordinate_system'
    end if
@@ -679,15 +679,15 @@ function ug_add_coordmapping(ncid, crs) result(ierr)
    ierr = nf90_def_var(ncid, trim(varname), nf90_int, id_crs)
 
    !The meta info other than epsg code should be retrived from proj4 library, as done in Delta Shell
-   !otherwise we will generate inconsistent information 
-   if (crs%epsg_code == 4326 ) then 
+   !otherwise we will generate inconsistent information
+   if (crs%epsg_code == 4326 ) then
       ierr_missing = UG_INVALID_CRS
       write (epsgstring, '("EPSG:",I0)') crs%epsg_code
       ierr = nf90_put_att(ncid, id_crs, 'name',                       'WGS84'             ) ! CF
       ierr = nf90_put_att(ncid, id_crs, 'epsg',                        crs%epsg_code      ) ! CF
       ierr = nf90_put_att(ncid, id_crs, 'grid_mapping_name',          'latitude_longitude') ! CF
       ierr = nf90_put_att(ncid, id_crs, 'longitude_of_prime_meridian', 0d0                ) ! CF
-      ierr = nf90_put_att(ncid, id_crs, 'semi_major_axis',             6378137d0          ) ! CF 
+      ierr = nf90_put_att(ncid, id_crs, 'semi_major_axis',             6378137d0          ) ! CF
       ierr = nf90_put_att(ncid, id_crs, 'semi_minor_axis',             6356752.314245d0   ) ! CF
       ierr = nf90_put_att(ncid, id_crs, 'inverse_flattening',          298.257223563d0    ) ! CF
       ierr = nf90_put_att(ncid, id_crs, 'EPSG_code',                   trim(epsgstring)   ) ! ADAGUC
@@ -699,7 +699,7 @@ function ug_add_coordmapping(ncid, crs) result(ierr)
       ierr = ug_put_var_attset(ncid, id_crs, crs%attset)
    else
       ierr_missing = UG_INVALID_CRS      ! TODO: remove hardcoded defaults below. Replace by cloning the crs%attset  into this new NetCDF var.
-      write (epsgstring, '("EPSG:",I0)') crs%epsg_code      
+      write (epsgstring, '("EPSG:",I0)') crs%epsg_code
       ierr = nf90_put_att(ncid, id_crs, 'name',                        'Unknown projected' ) ! CF
       ierr = nf90_put_att(ncid, id_crs, 'epsg',                        crs%epsg_code       ) ! CF
       ierr = nf90_put_att(ncid, id_crs, 'grid_mapping_name',           'Unknown projected' ) ! CF
@@ -801,11 +801,11 @@ subroutine ug_location_to_loctype(locName, locType)
       locType = UG_LOC_VOL
    case default
       locType = UG_LOC_NONE
-   end select   
+   end select
 
 end subroutine ug_location_to_loctype
 
-!> Translates the integer location type to a topological location. 
+!> Translates the integer location type to a topological location.
 subroutine ug_loctype_to_location(locType,locName)
    character(len=*), intent(out)    :: locName !< String name of the location.
    integer,          intent(in)     :: locType !< Integer location code (one of UG_LOC_NODE, UG_LOC_EDGE, UG_LOC_FACE, UG_LOC_VOL).
@@ -821,7 +821,7 @@ subroutine ug_loctype_to_location(locType,locName)
       locName = 'volume'
    case default
       locName='not implemented'
-   end select  
+   end select
 
 end subroutine ug_loctype_to_location
 
@@ -876,7 +876,7 @@ function ug_write_meshtopology(ncid, meshids, meshName, dim, dataLocsCode, add_e
    end if
    ierr = nf90_put_att(ncid, meshids%varids(mid_meshtopo), 'node_dimension', prefix//'_nNodes')
    ierr = nf90_put_att(ncid, meshids%varids(mid_meshtopo), 'max_face_nodes_dimension', prefix//'_nMax_face_nodes') ! non ugrid standard!
-   
+
    ! 1D: required, 2D: optionally required if data there
    if (dim == 1 .or. ug_checklocation(dataLocsCode, UG_LOC_EDGE)) then
       ierr = nf90_put_att(ncid, meshids%varids(mid_meshtopo), 'edge_node_connectivity', prefix//'_edge_nodes')
@@ -1078,7 +1078,7 @@ function ug_def_var(ncid, id_var, id_dims, itype, iloctype, mesh_name, var_name,
 888 continue
 
 end function ug_def_var
-    
+
 
 !> Writes a complete mesh geometry to an open NetCDF data set.
 !! The mesh geometry is the required starting point for all variables/data defined ON that mesh.
@@ -1091,8 +1091,8 @@ function ug_write_mesh_struct(ncid, meshids, networkids, crs, meshgeom, nnodeids
    type(t_ug_meshgeom), intent(in   ) :: meshgeom !< The complete mesh geometry in a single struct.
    type(t_crs),           intent(in)  :: crs      !< Optional crs containing metadata of unsupported coordinate reference systems
    integer                            :: ierr     !< Result status (UG_NOERR==NF90_NOERR) if successful.
-   character(len=ug_idsLen), optional, allocatable           :: nnodeids(:), nbranchids(:), nodeids(:)    
-   character(len=ug_idsLongNamesLen), optional, allocatable  :: nnodelongnames(:), nbranchlongnames(:), nodelongnames(:) 
+   character(len=ug_idsLen), optional, allocatable           :: nnodeids(:), nbranchids(:), nodeids(:)
+   character(len=ug_idsLongNamesLen), optional, allocatable  :: nnodelongnames(:), nbranchlongnames(:), nodelongnames(:)
    character(len=*), optional                                :: network1dname
 
    ierr = ug_write_mesh_arrays(ncid, meshids, meshgeom%meshName, meshgeom%dim, UG_LOC_ALL2D, meshgeom%numNode, meshgeom%numEdge, meshgeom%numFace, meshgeom%maxNumFaceNodes, &
@@ -1100,11 +1100,11 @@ function ug_write_mesh_struct(ncid, meshids, networkids, crs, meshgeom, nnodeids
                                meshgeom%edgex, meshgeom%edgey, meshgeom%facex, meshgeom%facey, &
                                crs, -999, -999d0, meshgeom%start_index, meshgeom%numlayer, meshgeom%layertype, meshgeom%layer_zs, meshgeom%interface_zs, &
                                networkids, network1dname, meshgeom%nnodex, meshgeom%nnodey, nnodeids, nnodelongnames, &
-                               meshgeom%nedge_nodes(1,:), meshgeom%nedge_nodes(2,:), nbranchids, nbranchlongnames, meshgeom%nbranchlengths, meshgeom%nbranchgeometrynodes, meshgeom%nbranches, & 
+                               meshgeom%nedge_nodes(1,:), meshgeom%nedge_nodes(2,:), nbranchids, nbranchlongnames, meshgeom%nbranchlengths, meshgeom%nbranchgeometrynodes, meshgeom%nbranches, &
                                meshgeom%ngeopointx, meshgeom%ngeopointy, meshgeom%ngeometry, &
                                meshgeom%nbranchorder, &
                                nodeids, nodelongnames, meshgeom%nodebranchidx, meshgeom%nodeoffsets, meshgeom%edgebranchidx, meshgeom%edgeoffsets, zn = meshgeom%nodez)
-   
+
 end function ug_write_mesh_struct
 
 !> Writes a complete mesh geometry to an open NetCDF data set based on separate arrays with all mesh data.
@@ -1151,13 +1151,13 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
    real(kind=dp), optional, pointer, intent(in) :: layer_zs(:)     !< Vertical coordinates of the mesh layers' center (either z or sigma). Optional, only used if numLayer >= 1.
    real(kind=dp), optional, pointer, intent(in) :: interface_zs(:) !< Vertical coordinates of the mesh layers' interface (either z or sigma). Optional, only used if numLayer >= 1.
    real(kind=dp), optional, pointer, intent(in) :: zn(:)           !< z-coordinates of the mesh nodes.
-   
-   ! Optional network1d variables for 1d UGrid                            
+
+   ! Optional network1d variables for 1d UGrid
    type(t_ug_network), optional, intent(inout)               :: networkids
    double precision, optional, pointer,intent(in)            :: nnodex(:), nnodey(:), nbranchlengths(:), ngeopointx(:), ngeopointy(:)
    integer, optional, intent(in)                             :: sourceNodeId(:), targetNodeId(:), nbranchgeometrynodes(:), nbranchorder(:), nbranches, ngeometry
-   character(len=ug_idsLen), optional, allocatable           :: nnodeids(:), nbranchids(:), nodeids(:)    
-   character(len=ug_idsLongNamesLen), optional, allocatable  :: nnodelongnames(:), nbranchlongnames(:), nodelongnames(:) 
+   character(len=ug_idsLen), optional, allocatable           :: nnodeids(:), nbranchids(:), nodeids(:)
+   character(len=ug_idsLongNamesLen), optional, allocatable  :: nnodelongnames(:), nbranchlongnames(:), nodelongnames(:)
    character(len=*), optional                                :: network1dname
    ! Optional mesh1d variables for 1d UGrid
    integer, optional, pointer,intent(in)                     :: nodebranchidx(:) !< Branch indexes for each mesh1d node.
@@ -1165,9 +1165,9 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
    integer,          optional, pointer,intent(in)            :: edgebranchidx(:) !< Branch indexes for each mesh1d edge.
    double precision, optional, pointer,intent(in)            :: edgeoffsets(:)   !< Offset along branch on which each mesh1d edge lies.
    integer,                           optional, intent(in)   :: writeopts !< integer option, currently only: UG_WRITE_LATLON
-   
+
    integer                                               :: ierr !< Result status (UG_NOERR==NF90_NOERR) if successful.
-      
+
    real(kind=dp), allocatable :: edgexbnd(:,:), edgeybnd(:,:), facexbnd(:,:), faceybnd(:,:)
    real(kind=dp), allocatable :: lonn(:), latn(:) !< lon,lat-coordinates of the mesh nodes.
    real(kind=dp), allocatable :: lone(:), late(:) !< representative lon,lat-coordinates of the mesh edges.
@@ -1184,8 +1184,8 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
    integer :: offset
    logical :: is1dugridnetwork
    integer :: lengthofnetworkname
-   
-   
+
+
    offset = 0
    if (start_index.ne.-1 .and. start_index == 0) then
       offset = 1
@@ -1203,11 +1203,11 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
    add_face_edge_connectivity = associated(face_edges)
    add_face_face_connectivity = associated(face_links)
    add_layers = .false.
-   
+
    if (present(numLayer) .and. present(layerType) .and. present(layer_zs) .and. present(interface_zs)) then
       add_layers = numLayer >= 1
    end if
-   
+
 #ifdef HAVE_PROJ
       if (present(writeopts)) then
          add_latlon = crs%epsg_code /= 4326 .and. iand(writeopts, UG_WRITE_LATLON) == UG_WRITE_LATLON
@@ -1278,10 +1278,10 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
       end if
 
 
-   else 
+   else
       if ( dim == 1 ) then
         if ( present(ngeopointx).and. associated(ngeopointx)) then !1d UGRID 1.6
-            !some results might still be saved at the edges, also for 1d 
+            !some results might still be saved at the edges, also for 1d
             ierr = ug_create_1d_network(ncid, networkids, network1dname, size(nnodex), nbranches, ngeometry)
         endif
         if (numNode.gt.0) then
@@ -1290,12 +1290,12 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
         endif
       endif
    endif
-   
+
    if (ierr /= UG_NOERR) then
       goto 888
    end if
-   
-   
+
+
    if (ug_checklocation(dataLocs, UG_LOC_EDGE)) then
       ! edge x,y-coordinates.
       if (meshids%varids(mid_edgex) == -1) then
@@ -1339,7 +1339,7 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
          ierr = nf90_put_att(ncid, meshids%varids(mid_edgenodes), 'start_index',  start_index)
       endif
    end if
-   
+
    ! Faces
    if (dim == 2 .or. ug_checklocation(dataLocs, UG_LOC_FACE)) then
       ierr = nf90_def_var(ncid, prefix//'_face_nodes', nf90_int, (/ meshids%dimids(mdim_maxfacenodes), meshids%dimids(mdim_face) /) , meshids%varids(mid_facenodes))
@@ -1455,7 +1455,7 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
    ierr = nf90_enddef(ncid)
 
 ! -- end of header --
-      
+
    ! Write the actual data
    ! Nodes:
    ierr = nf90_put_var(ncid, meshids%varids(mid_nodex),    xn(1:numNode))
@@ -1478,12 +1478,12 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
    ! Edges:
    if (dim == 1 .or. ug_checklocation(dataLocs, UG_LOC_EDGE)) then
       !if is UGRID 1.0 network, we need to write the network here
-      if (is1dugridnetwork .and. present(ngeopointx) .and. associated(ngeopointx)) then   
+      if (is1dugridnetwork .and. present(ngeopointx) .and. associated(ngeopointx)) then
         ! write network
-        ierr = ug_write_1d_network_nodes(ncid, networkids, nnodex, nnodey, nnodeids, nnodelongnames)           
+        ierr = ug_write_1d_network_nodes(ncid, networkids, nnodex, nnodey, nnodeids, nnodelongnames)
         ierr = ug_put_1d_network_branches(ncid, networkids, sourceNodeId,targetNodeId, nbranchids, nbranchlengths, nbranchlongnames, nbranchgeometrynodes, nbranches, start_index)
         ierr = ug_put_1d_network_branchorder(ncid, networkids, nbranchorder)
-        ierr = ug_write_1d_network_branches_geometry(ncid, networkids, ngeopointx, ngeopointy)   
+        ierr = ug_write_1d_network_branches_geometry(ncid, networkids, ngeopointx, ngeopointy)
       endif
       ! write mesh1d
       if (lengthofnetworkname.gt.0) then
@@ -1597,7 +1597,7 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
         allocate(facexbnd(maxnv, numFace), faceybnd(maxnv, numFace))
         facexbnd = dmiss
         faceybnd = dmiss
-      
+
        do n=1,numFace
           do k=1,maxnv
                if (face_nodes(k, n) == imiss) then
@@ -1613,7 +1613,7 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
         endif
         if (meshids%varids(mid_faceybnd).ne.-1) then
            ierr = nf90_put_var(ncid, meshids%varids(mid_faceybnd), faceybnd)
-         endif  
+         endif
         deallocate(facexbnd, faceybnd)
      endif
 
@@ -1644,9 +1644,9 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
       end if
 #endif
    end if
-   
+
    if (ug_checklocation(dataLocs, UG_LOC_FACE)) then
-   
+
       if ((meshids%varids(mid_facex).ne.-1).and.(numFace.gt.0)) then
          ierr = nf90_put_var(ncid, meshids%varids(mid_facex),    xf(1:numFace))
       endif
@@ -1700,23 +1700,23 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
 
 888 continue
 
-end function ug_write_mesh_arrays                              
+end function ug_write_mesh_arrays
 
 !
 ! -- Reading-related routines ---------------------------------------------
 !
-                              
+
 !> This function just creates a new mesh with no topology information, these will be added later
 function ug_add_mesh(ncid, ug_file, meshid) result(ierr)
-   
+
    integer,         intent(in   )   :: ncid    !< ID of already opened data set.
    type(t_ug_file), intent(inout)   :: ug_file !< UGRID file struct with cached meta information.
    integer                          :: ierr,i   !< Result status (UG_NOERR if successful).
    integer,intent(inout)            :: meshid
    type(t_ug_mesh), allocatable     :: newmeshids(:)
    character(len=256), allocatable  :: newmeshnames(:)
-   integer                          :: nmesh, npresentmeshes 
-   
+   integer                          :: nmesh, npresentmeshes
+
    ! Count nr of meshes present in the file
    ierr = ug_get_mesh_count(ncid, npresentmeshes)
    if (ierr /= UG_NOERR) then
@@ -1726,19 +1726,19 @@ function ug_add_mesh(ncid, ug_file, meshid) result(ierr)
 
    nmesh = npresentmeshes + 1
    ug_file%nummesh = nmesh
-   
-   allocate(newmeshids(nmesh), stat=ierr) 
+
+   allocate(newmeshids(nmesh), stat=ierr)
    if (ierr /= 0) then
        ierr = UG_SOMEERR
       goto 999
    end if
-   
-   allocate(newmeshnames(nmesh), stat=ierr) 
+
+   allocate(newmeshnames(nmesh), stat=ierr)
    if (ierr /= 0) then
        ierr = UG_SOMEERR
       goto 999
    end if
-   
+
    if (npresentmeshes > 0) then
        do i= 1, npresentmeshes
           newmeshids(i)%dimids = ug_file%meshids(i)%dimids
@@ -1746,20 +1746,20 @@ function ug_add_mesh(ncid, ug_file, meshid) result(ierr)
           newmeshnames(i)      = ug_file%meshnames(i)
        enddo
    endif
-   
+
    ! here we pass the ownership of the allocated space from newmeshids to ug_file%meshidsvec
-   call move_alloc(newmeshids,ug_file%meshids) 
-   call move_alloc(newmeshnames,ug_file%meshnames)   
-   
+   call move_alloc(newmeshids,ug_file%meshids)
+   call move_alloc(newmeshnames,ug_file%meshnames)
+
    meshid = nmesh
-   
+
 999 continue
-    
+
 end function ug_add_mesh
 
 !> This function creates new contactsids structure
 function ug_add_mesh_contact(ncid, ug_file, contactsmesh) result(ierr)
-   
+
    integer,         intent(in   )   :: ncid    !< ID of already opened data set.
    type(t_ug_file), intent(inout)   :: ug_file !< UGRID file struct with cached meta information.
    integer                          :: ierr    !< Result status (UG_NOERR if successful).
@@ -1767,24 +1767,24 @@ function ug_add_mesh_contact(ncid, ug_file, contactsmesh) result(ierr)
    type(t_ug_contacts), allocatable :: newcontacts(:)
    character(len=256), allocatable  :: newcontactsnames(:)
    integer                          :: npresentcontactmeshes, ncontactmeshes, i
-   
+
    ! Count nr of meshes present in the file
    ierr = ug_get_contact_topo_count(ncid, npresentcontactmeshes)
    if (ierr /= UG_NOERR) then
        ierr = UG_SOMEERR
       goto 999
    end if
-   
+
    ncontactmeshes = npresentcontactmeshes + 1
    ug_file%numcontacts = ncontactmeshes
-   
-   allocate(newcontacts(ncontactmeshes), stat=ierr) 
+
+   allocate(newcontacts(ncontactmeshes), stat=ierr)
    if (ierr /= 0) then
        ierr = UG_SOMEERR
       goto 999
    end if
-   
-   allocate(newcontactsnames(ncontactmeshes), stat=ierr) 
+
+   allocate(newcontactsnames(ncontactmeshes), stat=ierr)
    if (ierr /= 0) then
        ierr = UG_SOMEERR
       goto 999
@@ -1798,25 +1798,25 @@ function ug_add_mesh_contact(ncid, ug_file, contactsmesh) result(ierr)
    endif
 
    ! here we pass the ownership of the allocated space from newcontacts to ug_file%contactids
-   call move_alloc(newcontacts,ug_file%contactids) 
-   call move_alloc(newcontactsnames,ug_file%contactsnames) 
+   call move_alloc(newcontacts,ug_file%contactids)
+   call move_alloc(newcontactsnames,ug_file%contactsnames)
    contactsmesh = ncontactmeshes
-   
+
 999 continue
-    
+
     end function ug_add_mesh_contact
 
 !> This function creates a new network information, these will be added later
 function ug_add_network(ncid, ug_file, networkid) result(ierr)
-   
+
    integer,         intent(in   )   :: ncid    !< ID of already opened data set.
    type(t_ug_file), intent(inout)   :: ug_file !< UGRID file struct with cached meta information.
    integer                          :: ierr,i   !< Result status (UG_NOERR if successful).
    integer,intent(inout)            :: networkid
    type(t_ug_network), allocatable  :: newnetids(:)
    character(len=256), allocatable  :: newnetworksnames(:)
-   integer                          :: nnet, npresentnet 
-   
+   integer                          :: nnet, npresentnet
+
    ! Count nr of meshes present in the file
    ierr = ug_get_network_count(ncid, npresentnet)
    if (ierr /= UG_NOERR) then
@@ -1826,14 +1826,14 @@ function ug_add_network(ncid, ug_file, networkid) result(ierr)
 
    nnet = npresentnet + 1
    ug_file%numnet = nnet
-   
-   allocate(newnetids(nnet), stat=ierr) 
+
+   allocate(newnetids(nnet), stat=ierr)
    if (ierr /= 0) then
        ierr = UG_SOMEERR
       goto 999
    end if
-   
-   allocate(newnetworksnames(nnet), stat=ierr) 
+
+   allocate(newnetworksnames(nnet), stat=ierr)
    if (ierr /= 0) then
        ierr = UG_SOMEERR
       goto 999
@@ -1845,34 +1845,34 @@ function ug_add_network(ncid, ug_file, networkid) result(ierr)
           newnetworksnames(i)   = ug_file%networksnames(i)
        enddo
    endif
-   
+
    ! here we pass the ownership of the allocated space from newnetids to ug_file%meshidsvec
-   call move_alloc(newnetids,ug_file%netids) 
-   call move_alloc(newnetworksnames,ug_file%networksnames) 
+   call move_alloc(newnetids,ug_file%netids)
+   call move_alloc(newnetworksnames,ug_file%networksnames)
    networkid = nnet
-   
+
 999 continue
-    
-end function ug_add_network    
-         
+
+end function ug_add_network
+
 !> Initialized all UGRID-specific meta information present in an open data set.
 function ug_init_dataset(ncid, ug_file) result(ierr)
    integer,         intent(in   ) :: ncid          !< ID of already opened data set.
    type(t_ug_file), intent(inout) :: ug_file       !< UGRID file struct with cached meta information.
    integer                        :: ierr          !< Result status (UG_NOERR if successful).
-   
+
    integer :: iv, im, nmesh, numvar, il, ncontacts,i, nnetworks, inet
    logical :: is_mesh_topo, is_link_topo, is_network_topo
-   
+
    ! Count nr of meshes present in the file
    ierr = ug_get_mesh_count(ncid, nmesh)
    if (ierr /= UG_NOERR) then
       goto 999
    end if
    ug_file%nummesh = nmesh
-   
+
    allocate(ug_file%meshnames(nmesh)) ! TODO: LC: if allocated deallocate..
-   allocate(ug_file%meshids(nmesh), stat=ierr) 
+   allocate(ug_file%meshids(nmesh), stat=ierr)
    if (ierr /= 0) then
        ierr = UG_SOMEERR
       goto 999
@@ -1884,9 +1884,9 @@ function ug_init_dataset(ncid, ug_file) result(ierr)
       goto 999
    end if
    ug_file%numnet = nnetworks
-   
+
    allocate(ug_file%networksnames(nnetworks))
-   allocate(ug_file%netids(nnetworks), stat=ierr) 
+   allocate(ug_file%netids(nnetworks), stat=ierr)
    if (ierr /= 0) then
        ierr = UG_SOMEERR
       goto 999
@@ -1905,7 +1905,7 @@ function ug_init_dataset(ncid, ug_file) result(ierr)
        ierr = UG_SOMEERR
       goto 999
    end if
-   
+
    ! Now check all variables and if they're a mesh topology, read in all details.
    ierr = nf90_inquire(ncid, nVariables = numVar)
 
@@ -1937,7 +1937,7 @@ function ug_init_dataset(ncid, ug_file) result(ierr)
          ierr = nf90_inquire_variable(ncid, iv, name = ug_file%contactsnames(il))
          ierr = ug_init_link_topology(ncid, iv, ug_file%contactids(il))
       end if
-     
+
       if (ierr /= UG_NOERR) then
          goto 999
       end if
@@ -1957,10 +1957,10 @@ function ug_init_link_topology(ncid, varid, contactids) result(ierr)
    integer,            intent(in   ) :: varid         !< NetCDF variable ID that contains the link topology information.
    type(t_ug_contacts),intent(inout) :: contactids !< vector in which all link topology dimension and variables ids will be stored.
    integer                           :: ierr          !< Result status (UG_NOERR if successful).
-   
+
    ierr = UG_NOERR
-   
-   contactids%varids(cid_contacttopo) = varid  
+
+   contactids%varids(cid_contacttopo) = varid
    ierr = att_to_dimid(ncid, varid, 'link_dimension'   , contactids%dimids(cdim_ncontacts))
    ierr = att_to_varid(ncid, varid, 'contact_id'       , contactids%varids(cid_contactids))
    if (ierr /= UG_NOERR) then
@@ -1973,11 +1973,11 @@ function ug_init_link_topology(ncid, varid, contactids) result(ierr)
       ierr = att_to_varid(ncid, varid, 'contact_long_names', contactids%varids(cid_contactlongnames))
    end if
    ierr = att_to_varid(ncid, varid, 'contact_type', contactids%varids(cid_contacttype))
-   
+
    ierr = UG_NOERR
 
    end function ug_init_link_topology
-   
+
 function ug_init_network_topology(ncid, varid, netids) result(ierr)
 
    integer,            intent(in)    :: ncid          !< ID of already opened data set.
@@ -1986,9 +1986,9 @@ function ug_init_network_topology(ncid, varid, netids) result(ierr)
    character(len=nf90_max_name)      :: varname       !< char array  to hold the network name
    integer                           :: ierr          !< Result status (UG_NOERR if successful).
    integer                           :: dimids(2)
-   
+
    ierr = UG_NOERR
-   
+
    netids%varids(ntid_1dtopo) = varid
    ierr = nf90_inquire_variable(ncid, varid, name = varname)
 
@@ -2045,10 +2045,10 @@ function ug_init_network_topology(ncid, varid, netids) result(ierr)
 
    ! get the number of geometric points for each branch
    ! try to get the node_count
-   ierr = att_to_varid(ncid, netids%varids(ntid_1dgeometry), 'node_count', netids%varids(ntid_1dgeopointsperbranch))   
+   ierr = att_to_varid(ncid, netids%varids(ntid_1dgeometry), 'node_count', netids%varids(ntid_1dgeopointsperbranch))
    if (ierr /= UG_NOERR) then
       ! for backward compatibility: part_node_count was used rather than node_count. If there get the varid of the attribute
-      ierr = att_to_varid(ncid, netids%varids(ntid_1dgeometry), 'part_node_count', netids%varids(ntid_1dgeopointsperbranch))   
+      ierr = att_to_varid(ncid, netids%varids(ntid_1dgeometry), 'part_node_count', netids%varids(ntid_1dgeopointsperbranch))
    endif
 
    !dim variables
@@ -2056,7 +2056,7 @@ function ug_init_network_topology(ncid, varid, netids) result(ierr)
    netids%dimids(ntdim_idstring) = dimids(1)
    ierr = nf90_inquire_variable( ncid, netids%varids(ntid_1dbranchlongnames),dimids = dimids)
    netids%dimids(ntdim_longnamestring) = dimids(1)
-   
+
    !read the branch order
    ierr = nf90_inquire_variable(ncid, varid, name = varname)
    ierr = nf90_inq_varid(ncid, trim(varname)//'_branch_order', netids%varids(ntid_1dbranchorder))
@@ -2064,8 +2064,8 @@ function ug_init_network_topology(ncid, varid, netids) result(ierr)
    !read the branch type
    ierr = nf90_inquire_variable(ncid, varid, name = varname)
    ierr = nf90_inq_varid(ncid, trim(varname)//'_branch_type', netids%varids(ntid_1dbranchtype))
-   
-   
+
+
    ierr = UG_NOERR
 
 end function ug_init_network_topology
@@ -2073,7 +2073,7 @@ end function ug_init_network_topology
 
 !> Reads the mesh_topology attributes from a NetCDF variable.
 function ug_init_mesh_topology(ncid, varid, meshids) result(ierr)
-   
+
    integer,         intent(in   )    :: ncid          !< ID of already opened data set.
    integer,         intent(in   )    :: varid         !< NetCDF variable ID that contains the mesh topology information.
    type(t_ug_mesh), intent(inout)    :: meshids          !< vector in which all mesh topology dimension and variables ids will be stored.
@@ -2082,14 +2082,14 @@ function ug_init_mesh_topology(ncid, varid, meshids) result(ierr)
    character(len=nf90_max_name)      :: varname
    integer                           :: id
    integer                           :: dimids(2)
-   integer                           :: isMappedMesh 
-   
+   integer                           :: isMappedMesh
+
    ierr = UG_NOERR
-   
+
    !< Top-level variable ID for mesh topology, collects all related variable names via attributes.
-   
+
    isMappedMesh = -1
-   meshids%varids(mid_meshtopo)       = varid              
+   meshids%varids(mid_meshtopo)       = varid
    !
    ! Dimensions:
    !
@@ -2100,16 +2100,16 @@ function ug_init_mesh_topology(ncid, varid, meshids) result(ierr)
    ! Dimension 2 might already be present
    ierr = nf90_inq_dimid(ncid, 'Two', meshids%dimids(mdim_two))
    ! Otherwise check another possible definitions
-   if ( ierr /= UG_NOERR) then 
+   if ( ierr /= UG_NOERR) then
       ierr = nf90_inquire_variable( ncid, varid, name = varname)
       varname = 'n'//trim(varname)//'_Two'
-      ierr = nf90_inq_dimid(ncid, trim(varname), meshids%dimids(mdim_two))   
+      ierr = nf90_inq_dimid(ncid, trim(varname), meshids%dimids(mdim_two))
    endif
-   
+
    !check here if this is a mapped mesh
    isMappedMesh = nf90_get_att(ncid, meshids%varids(mid_meshtopo), 'coordinate_space', coordspaceind)
    if (isMappedMesh == nf90_noerr) then
-      !inquire the variable with that name 
+      !inquire the variable with that name
       ierr = att_to_varid(ncid, varid, 'coordinate_space', meshids%varids(mid_1dtopo))
       !read branch id and offsets
       ierr = att_to_coordvarids(ncid, meshids%varids(mid_meshtopo), 'node_coordinates', meshids%varids(mid_1dnodebranch), meshids%varids(mid_1dnodeoffset), meshids%varids(mid_nodex), meshids%varids(mid_nodey))
@@ -2133,7 +2133,7 @@ function ug_init_mesh_topology(ncid, varid, meshids) result(ierr)
    !
    ! Topology variables
    !
-   
+
    ierr = att_to_varid(ncid, varid, 'edge_node_connectivity', meshids%varids(mid_edgenodes)) !< Variable ID for edge-to-node mapping table.
    if (ierr == nf90_noerr) then
       ! The optional edge_dimension attribute was not found, so auto-detect it from the edge_node topology.
@@ -2163,11 +2163,11 @@ function ug_init_mesh_topology(ncid, varid, meshids) result(ierr)
       end if
    end if
 
-   ierr = att_to_varid(ncid, varid, 'edge_face_connectivity', meshids%varids(mid_edgefaces)) !< Variable ID for edge-to-face mapping table (optional, can be -1).   
+   ierr = att_to_varid(ncid, varid, 'edge_face_connectivity', meshids%varids(mid_edgefaces)) !< Variable ID for edge-to-face mapping table (optional, can be -1).
    ierr = att_to_varid(ncid, varid, 'face_edge_connectivity', meshids%varids(mid_faceedges)) !< Variable ID for face-to-edge mapping table (optional, can be -1).
    ierr = att_to_varid(ncid, varid, 'face_face_connectivity', meshids%varids(mid_facelinks)) !< Variable ID for face-to-face mapping table (optional, can be -1).
-   
-   ! 
+
+   !
    ! Get the ids defined in nodes/edges/faces
    !
    ierr = att_to_varid(ncid, varid, 'node_id',     meshids%varids(mid_node_ids)) !< Variable ID for node ids
@@ -2185,8 +2185,8 @@ function ug_init_mesh_topology(ncid, varid, meshids) result(ierr)
       ! Backwards compatible read of Deltares-0.9 plural-names.
       ierr = att_to_varid(ncid, varid, 'face_ids', meshids%varids(mid_face_ids)) !< Variable ID for face ids
    end if
-   
-   ! 
+
+   !
    ! Get the longnames defined in nodes/edges/faces
    !
    ierr = att_to_varid(ncid, varid, 'node_long_name',     meshids%varids(mid_node_longnames)) !< Variable ID for node ids
@@ -2204,7 +2204,7 @@ function ug_init_mesh_topology(ncid, varid, meshids) result(ierr)
       ! Backwards compatible read of Deltares-0.9 plural-names.
       ierr = att_to_varid(ncid, varid, 'face_long_names', meshids%varids(mid_face_longnames)) !< Variable ID for face ids
    end if
-   
+
    ierr = UG_NOERR
 
 end function ug_init_mesh_topology
@@ -2230,10 +2230,10 @@ function att_to_coordvarids(ncid, varin, attname, idx, idy, idz, idw) result(ier
    if (ierr /= nf90_noerr) then
       goto 999
    end if
-   
+
    i1 = 1
-   n = len_trim(varname)   
-   
+   n = len_trim(varname)
+
    ! TODO: AvD: I'd rather use a string tokenizer here.
    ! TODO: UNST-2408, support multiple sets of coordinates.
    i2 = index(varname(i1:n), ' ')
@@ -2279,13 +2279,13 @@ function att_to_coordvarids(ncid, varin, attname, idx, idy, idz, idw) result(ier
    return
 
 999 continue
-    ! Some error  
+    ! Some error
 end function att_to_coordvarids
 
 !> Inquire for a NetCDF variable ID based on an attribute in another variable.
 !! For example: mesh2d:face_node_connectivity
 function att_to_varid(ncid, varin, attname, id) result(ierr)
-   
+
    integer         , intent(in   ) :: ncid    !< NetCDF dataset ID
    integer         , intent(in   ) :: varin   !< NetCDF variable ID from which the attribute will be gotten.
    character(len=*), intent(in   ) :: attname !< Name of attribute in varin that contains the variable name.
@@ -2293,9 +2293,9 @@ function att_to_varid(ncid, varin, attname, id) result(ierr)
    integer                         :: ierr    !< Result status. UG_NOERR if successful.
 
    character(len=nf90_max_name)  :: varname
-   
+
    ierr = UG_NOERR
-   
+
    varname = ''
    ierr = nf90_get_att(ncid, varin, attname, varname)
    if (ierr /= nf90_noerr) then
@@ -2311,7 +2311,7 @@ function att_to_varid(ncid, varin, attname, id) result(ierr)
    ! Return with success
    return
 
-999 continue 
+999 continue
    ! An error occurred, keep ierr nonzero and set undefined id.
    id = -1         ! undefined id
 end function att_to_varid
@@ -2327,9 +2327,9 @@ function att_to_dimid(ncid, varin, attname, id) result(ierr)
    integer                         :: ierr    !< Result status. UG_NOERR if successful.
 
    character(len=nf90_max_name)    :: varname
-   
+
    ierr = UG_NOERR
-   
+
    varname = ''
    ierr = nf90_get_att(ncid, varin, attname, varname)
    if (ierr /= nf90_noerr) then
@@ -2345,17 +2345,17 @@ function att_to_dimid(ncid, varin, attname, id) result(ierr)
    ! Return with success
    return
 
-999 continue 
+999 continue
    ! An error occurred, keep ierr nonzero and set undefined id.
    id = -1         ! undefined id
 
-end function att_to_dimid 
+end function att_to_dimid
 
 
 !> Gets a single dimension ID for a given variable ID.
 !! Used for example to determine node dimension id from a node coordinate variable.
 function varid_to_dimid(ncid, varin, dimid, dimidx) result(ierr)
-   
+
    integer         , intent(in   ) :: ncid   !< NetCDF dataset ID
    integer         , intent(in   ) :: varin  !< NetCDF variable ID from which the dimension ID will be gotten.
    integer         , intent(  out) :: dimid  !< NetCDF dimension ID that was found.
@@ -2366,7 +2366,7 @@ function varid_to_dimid(ncid, varin, dimid, dimidx) result(ierr)
    integer :: dimidx_, ndims
 
    ierr = UG_NOERR
-   
+
    if (present(dimidx)) then
       dimidx_ = dimidx
    else
@@ -2380,11 +2380,11 @@ function varid_to_dimid(ncid, varin, dimid, dimidx) result(ierr)
 
    dimid = dimids(dimidx_)
 
-   return 
-    
-999 continue 
+   return
+
+999 continue
     ! here we should return an error is the variable is undefined, following up actions are taken in ug_init_mesh_topology
-    dimid = -1           ! undefined id 
+    dimid = -1           ! undefined id
 end function varid_to_dimid
 
 
@@ -2394,7 +2394,7 @@ function ug_is_mesh_topology(ncid, varid) result(is_mesh_topo)
    integer,        intent(in)  :: varid        !< NetCDF variable id
    logical                     :: is_mesh_topo !< Return value
 
-   integer :: ierr, topology_dimension 
+   integer :: ierr, topology_dimension
    character(len=nf90_max_name) :: edge_geometry_buffer, cf_role_buffer
    integer :: ndum
 
@@ -2404,7 +2404,7 @@ function ug_is_mesh_topology(ncid, varid) result(is_mesh_topo)
    edge_geometry_buffer = ' '
    topology_dimension =  -1
    ierr = nf90_get_att(ncid, varid, 'cf_role', cf_role_buffer)
-   
+
    if (trim(cf_role_buffer)=='mesh_topology') then
       ! Some data producers confusingly use 'mesh_topology' for parent meshes too (instead of 'parent_mesh_topology').
       ! We want to filter those out here: if the var has an attribute :meshes (with any value), then discard.
@@ -2413,19 +2413,19 @@ function ug_is_mesh_topology(ncid, varid) result(is_mesh_topo)
          is_mesh_topo = .false.
          return
       end if
-            
+
       ierr = nf90_get_att(ncid, varid, 'topology_dimension', topology_dimension)
-      
+
       if (topology_dimension.eq.1) then !1d case
          ierr = nf90_get_att(ncid, varid, 'edge_geometry', edge_geometry_buffer)
          if (ierr.ne.nf90_noerr) then
             is_mesh_topo = .true. !true only if does not contain edge_geometry
          endif
-      else if(topology_dimension.gt.1) then 
+      else if(topology_dimension.gt.1) then
             is_mesh_topo = .true.
       endif
    endif
-      
+
 end function ug_is_mesh_topology
 
 
@@ -2448,27 +2448,26 @@ function ug_is_network_topology(ncid, varid) result(is_mesh_topo)
 
    status    = nf90_inquire_attribute(ncid, varid, 'cf_role', len=buffer_len)
    if ( status == nf90_noerr ) then
-       allocate( character(len=buffer_len) :: buffer ) 
+       allocate( character(len=buffer_len) :: buffer )
        mesh_topo = nf90_get_att(ncid, varid, 'cf_role', buffer)
-   else 
+   else
        buffer = ' ' ! Unless you do not want to check the actual contents
        mesh_topo = status
-   endif   
-   
-   status    = nf90_inquire_attribute(ncid, varid, 'cf_role', len=nodeidsvar_len)
+   endif
+
+   status    = nf90_inquire_attribute(ncid, varid, 'edge_geometry', len=nodeidsvar_len)
    if ( status == nf90_noerr ) then
-       allocate( character(len=nodeidsvar_len) :: nodeidsvar ) 
-       nodeidsvar = ' '
+       allocate( character(len=nodeidsvar_len) :: nodeidsvar )
        edge_geom = nf90_get_att(ncid, varid, 'edge_geometry', nodeidsvar)
-   else 
+   else
        nodeidsvar = ' ' ! Unless you do not want to check the actual contents
        edge_geom = status
-   endif   
+   endif
 
    if (mesh_topo == nf90_noerr .and. edge_geom == nf90_noerr ) then
          is_mesh_topo = .true. !new ugrid format detected
    end if
-end function ug_is_network_topology   
+end function ug_is_network_topology
 
 !> Returns whether a given variable is a link topology
 function ug_is_link_topology(ncid, varid) result(ug_is_link_topo)
@@ -2490,7 +2489,7 @@ end function ug_is_link_topology
 !> Gets the number of mesh topologies in an open dataset.
 !! use this to determine on how many different meshes, data is defined in the dataset.
 !!
-!! \see 
+!! \see
 function ug_get_mesh_count(ncid, numMesh) result(ierr)
    integer,        intent(in)  :: ncid     !< NetCDF dataset id
    integer,        intent(out) :: numMesh  !< Number of mesh topologies in the dataset (>= 0).
@@ -2500,7 +2499,7 @@ function ug_get_mesh_count(ncid, numMesh) result(ierr)
    logical :: is_mesh_topo
 
    ierr = nf90_inquire(ncid, nVariables = numVar)
-  
+
    numMesh = 0
    do i=1,numVar
       is_mesh_topo = ug_is_mesh_topology(ncid, i)
@@ -2537,7 +2536,7 @@ function ug_get_network_count(ncid, numNet) result(ierr)
 
 end function ug_get_network_count
 
-!> Gets the number of link topologies in an open dataset. 
+!> Gets the number of link topologies in an open dataset.
 function ug_get_contact_topo_count(ncid, ncontacts) result(ierr)
    integer,        intent(in)  :: ncid     !< NetCDF dataset id
    integer,        intent(out) :: ncontacts !< Number of links (>= 0).
@@ -2546,7 +2545,7 @@ function ug_get_contact_topo_count(ncid, ncontacts) result(ierr)
    logical                     :: is_link_topo
 
    ierr = nf90_inquire(ncid, nVariables = numVar)
-   
+
    ncontacts = 0
    do i= 1, numVar
       is_link_topo = ug_is_link_topology(ncid, i)
@@ -2554,18 +2553,18 @@ function ug_get_contact_topo_count(ncid, ncontacts) result(ierr)
          ncontacts = ncontacts + 1
       end if
    end do
-   
+
 end function ug_get_contact_topo_count
 
 !> Gets the name of the mesh topology variable in an open dataset.
 !!
-!! \see 
+!! \see
 function ug_get_mesh_name(ncid, meshids, meshname) result(ierr)
    integer,             intent(in)    :: ncid     !< NetCDF dataset id, should be already open.
    type(t_ug_mesh),  intent(in)       :: meshids  !< Set of NetCDF-ids for all mesh geometry arrays.
    character(len=*),    intent(  out) :: meshname !< The name of the mesh topology variable.
    integer                            :: ierr     !< Result status, ug_noerr if successful.
-   
+
    meshname = ''
    ierr = nf90_inquire_variable(ncid, meshids%varids(mid_meshtopo), name=meshname)
    if (ierr /= nf90_noerr) then
@@ -2577,13 +2576,13 @@ end function ug_get_mesh_name
 
 !> Gets the name of the network topology variable in an open dataset.
 !!
-!! \see 
+!! \see
 function ug_get_network_name(ncid, netids, networkname) result(ierr)
    integer,             intent(in)    :: ncid     !< NetCDF dataset id, should be already open.
    type(t_ug_network),  intent(in)    :: netids  !< Set of NetCDF-ids for all mesh geometry arrays.
    character(len=*),    intent(  out) :: networkname !< The name of the mesh topology variable.
    integer                            :: ierr     !< Result status, ug_noerr if successful.
-   
+
    networkname = ''
    ierr = nf90_inquire_variable(ncid, netids%varids(ntid_1dtopo), name=networkname)
    if (ierr /= nf90_noerr) then
@@ -2595,31 +2594,31 @@ end function ug_get_network_name
 
 !> Gets the name of the network topology variable in an open dataset.
 !!
-!! \see 
+!! \see
 function ug_get_mesh_network_name(ncid, meshids, networkname) result(ierr)
    integer,             intent(in)    :: ncid         !< NetCDF dataset id, should be already open.
    type(t_ug_mesh),     intent(in)    :: meshids      !< Set of NetCDF-ids for all mesh geometry arrays.
    character(len=*),    intent(  out) :: networkname  !< The name of the mesh topology variable.
    integer                            :: ierr         !< Result status, ug_noerr if successful.
-   
+
    ierr = UG_NOERR
    networkname = ''
    if (meshids%varids(mid_1dtopo)/= - 1) then
       ierr = nf90_inquire_variable(ncid, meshids%varids(mid_1dtopo), name=networkname)
-   
+
       if (ierr /= nf90_noerr) then
          write (ug_messagestr, '(a,i0)') 'ug_get_network_name: could not find networkname for mesh ', meshids%varids(mid_1dtopo)
          ierr = UG_INVALID_NETNAME
          Call SetMessage(Level_Fatal, ug_messagestr)
       end if
    endif
-   
+
 end function ug_get_mesh_network_name
 
 function ug_get_network_name_from_mesh1d(ncid, meshids, network1d) result(ierr)
 
    integer, intent(in)                            :: ncid
-   type(t_ug_mesh), intent(in)                    :: meshids 
+   type(t_ug_mesh), intent(in)                    :: meshids
    character(len=nf90_max_name)                   :: att
    integer                                        :: attlen, i, ierr
    character(len=*), intent(inout)                :: network1d
@@ -2627,12 +2626,12 @@ function ug_get_network_name_from_mesh1d(ncid, meshids, network1d) result(ierr)
    ierr = UG_SOMEERR
    ierr = nf90_inquire_attribute(ncid, meshids%varids(mid_meshtopo), 'coordinate_space', len = attlen)
    ierr = nf90_get_att(ncid, meshids%varids(mid_meshtopo), 'coordinate_space', att)
-   
+
    network1d =''
-   do i=1, attlen 
+   do i=1, attlen
       network1d= trim(network1d)//att(i:i)
    end do
-   
+
 end function ug_get_network_name_from_mesh1d
 
 !> Gets the size/count of items for the specified topological location.
@@ -2654,25 +2653,25 @@ function ug_inquire_dimension(ncid, meshids, idimtype, nitems) result(ierr)
    case (UG_LOC_FACE)
       idim = meshids%dimids(mdim_face)
    case (UG_DIM_MAXFACENODES)
-      idim = meshids%dimids(mdim_maxfacenodes) 
+      idim = meshids%dimids(mdim_maxfacenodes)
    case default
       ierr = UG_NOTIMPLEMENTED
       goto 999
    end select
-   
+
    if (idim > 0) then
       ierr = nf90_inquire_dimension(ncid, idim, len=nitems)
    else
       nitems = -1
       ierr = 0 !invalid location is not considered an error
    endif
-   
+
 
    ! Success
    return
 
 999 continue
-    ! Some error  
+    ! Some error
 end function ug_inquire_dimension
 
 
@@ -2690,7 +2689,7 @@ function ug_get_topology_dimension(ncid, meshids, dim) result(ierr)
    return
 
 999 continue
-    ! Some error  
+    ! Some error
 end function ug_get_topology_dimension
 
 
@@ -2698,21 +2697,21 @@ end function ug_get_topology_dimension
 !! By default only reads in the dimensions (face/edge/node counts).
 !! Optionally, also all coordinate arrays + connectivity tables can be read.
 function ug_get_meshgeom(ncid, meshgeom, start_index, meshids, netid, includeArrays, nbranchids, nbranchlongnames, nnodeids, nnodelongnames, nodeids, nodelongnames, network1dname, mesh1dname) result(ierr)
-   
+
    use m_alloc
 
    integer,             intent(in   ) :: ncid          !< ID of already opened data set.
    type(t_ug_meshgeom), intent(inout) :: meshgeom      !< Structure in which all mesh geometry will be stored.
    integer,             intent(in   ) :: start_index   !< the base index of the meshgeom arrays
- 
+
    ! Optional variables
    type(t_ug_mesh),         optional, intent(in)                           :: meshids       !< Structure with all mesh topology variable ids (should be initialized already).
    type(t_ug_network),      optional, intent(in)                           :: netid         !< (optional) The network associated with the mesh (for 1d Ugrid)
-   logical,                 optional, intent(in)                           :: includeArrays !< (optional) Whether or not to include coordinate arrays and connectivity tables. Default: .false., i.e., dimension counts only.   
+   logical,                 optional, intent(in)                           :: includeArrays !< (optional) Whether or not to include coordinate arrays and connectivity tables. Default: .false., i.e., dimension counts only.
    character(len=ug_idsLen),optional, allocatable, intent(inout)           :: nbranchids(:), nnodeids(:),  nodeids(:)
    character(len=ug_idsLongNamesLen), optional, allocatable, intent(inout) :: nbranchlongnames(:), nnodelongnames(:), nodelongnames(:)
    character(len=*), optional, intent(inout)                               :: network1dname, mesh1dname
-   
+
    !locals
    integer                                  :: ierr          !< Result status (UG_NOERR if successful).
    integer,allocatable                      :: sourcenodeid(:), targetnodeid(:)
@@ -2724,10 +2723,10 @@ function ug_get_meshgeom(ncid, meshgeom, start_index, meshids, netid, includeArr
    integer ::dimids(2)
 
    ierr = UG_NOERR
-   
+
    !re-set meshgeom
-   ierr = t_ug_meshgeom_destructor(meshgeom) 
-   
+   ierr = t_ug_meshgeom_destructor(meshgeom)
+
    !requested by the client
    meshgeom%start_index = start_index
 
@@ -2740,12 +2739,12 @@ function ug_get_meshgeom(ncid, meshgeom, start_index, meshids, netid, includeArr
 
    !read the network
    if(present(netid)) then
-      
+
       !We are in 1d ugrid, populate dimensions
       ierr = ug_get_1d_network_branches_count(ncid, netid, meshgeom%nbranches); write(*,'(a,i0)') 'ug_get_meshgeom, #1, ierr=', ierr
       ierr = ug_get_1d_network_branches_geometry_coordinate_count(ncid,netid, meshgeom%ngeometry); write(*,'(a,i0)') 'ug_get_meshgeom, #2, ierr=', ierr
       ierr = ug_get_1d_network_nodes_count(ncid, netid, meshgeom%nnodes); write(*,'(a,i0)') 'ug_get_meshgeom, #3, ierr=', ierr
-      
+
       if (includeArrays_) then
 
          call reallocP(meshgeom%nbranchorder, meshgeom%nbranches, keepExisting = .false., fill = -999)
@@ -2778,7 +2777,7 @@ function ug_get_meshgeom(ncid, meshgeom, start_index, meshids, netid, includeArr
          else
             ierr = ug_read_1d_network_nodes(ncid, netid, meshgeom%nnodex, meshgeom%nnodey); write(*,'(a,i0)') 'ug_get_meshgeom, #9, ierr=', ierr
          endif
-   
+
       endif
    endif
 
@@ -2818,7 +2817,7 @@ function ug_get_meshgeom(ncid, meshgeom, start_index, meshids, netid, includeArr
          ! read mesh edge nodes only if numedge is present
          !
          if ( meshgeom%numedge.ne.-1 ) then
-            call reallocP(meshgeom%edge_nodes, (/ 2, meshgeom%numedge /), keepExisting=.false.)            
+            call reallocP(meshgeom%edge_nodes, (/ 2, meshgeom%numedge /), keepExisting=.false.)
             ! Edge nodes
             ierr = ug_get_edge_nodes(ncid, meshids, meshgeom%edge_nodes, meshgeom%start_index); write(*,'(a,i0)') 'ug_get_meshgeom, #12, ierr=', ierr
 
@@ -2834,7 +2833,7 @@ function ug_get_meshgeom(ncid, meshgeom, start_index, meshids, netid, includeArr
                call reallocP(meshgeom%face_nodes, (/ meshgeom%maxnumfacenodes, meshgeom%numface /), keepExisting=.false.)
                call reallocP(meshgeom%facex, meshgeom%numface, keepExisting=.false.)
                call reallocP(meshgeom%facey, meshgeom%numface, keepExisting=.false.)
-            
+
                ierr = ug_get_face_coordinates(ncid, meshids, meshgeom%facex, meshgeom%facey)
                ierr = ug_get_face_nodes(ncid, meshids, meshgeom%face_nodes, startIndex = meshgeom%start_index)
             endif
@@ -2850,7 +2849,7 @@ function ug_get_meshgeom(ncid, meshgeom, start_index, meshids, netid, includeArr
             call reallocP(meshgeom%nodeoffsets, meshgeom%numnode, keepExisting = .false., fill = -999d0)
             ierr = ug_get_1d_mesh_discretisation_points(ncid, meshids, meshgeom%nodebranchidx, meshgeom%nodeoffsets, meshgeom%start_index); write(*,'(a,i0)') 'ug_get_meshgeom, #13, ierr=', ierr
             !Here i can not use gridgeom to get xy-coordinates of the mesh1d (gridgeom depends on io_netcdf)
-            
+
             call reallocP(meshgeom%edgebranchidx, meshgeom%numedge, keepExisting = .false., fill = -999)
             call reallocP(meshgeom%edgeoffsets, meshgeom%numedge, keepExisting = .false., fill = -999d0)
             ierr = ug_get_1d_mesh_edge_coordinates(ncid, meshids, meshgeom%edgebranchidx, meshgeom%edgeoffsets, meshgeom%start_index); write(*,'(a,i0)') 'ug_get_meshgeom, #14, ierr=', ierr
@@ -2867,13 +2866,13 @@ function ug_get_meshgeom(ncid, meshgeom, start_index, meshids, netid, includeArr
                ierr = nf90_get_var(ncid, meshids%varids(mid_node_longnames), nodelongnames)
             endif
          endif
-         
+
          ! TODO: AvD: introduce ug_read_mesh_arrays( .. intent out arrays ..)
       end if
    endif
 end function ug_get_meshgeom
 
-   
+
 !> Gets the x,y-coordinates for all nodes in the specified mesh.
 !! The output x,y arrays are supposed to be of exact correct length already.
 function ug_get_node_coordinates(ncid, meshids, xn, yn) result(ierr)
@@ -2883,9 +2882,9 @@ function ug_get_node_coordinates(ncid, meshids, xn, yn) result(ierr)
    integer                         :: ierr     !< Result status (UG_NOERR==NF90_NOERR if successful).
 
    ierr = nf90_get_var(ncid, meshids%varids(mid_nodex), xn)
-   if(ierr /= UG_NOERR) then 
+   if(ierr /= UG_NOERR) then
       call SetMessage(LEVEL_WARN, 'Could not read mesh node x-coordinates. Check any previous warnings.') ! low level lib may not throw fatal errors
-   end if 
+   end if
    ierr = nf90_get_var(ncid, meshids%varids(mid_nodey), yn)
    ! TODO: AvD: some more careful error handling
 
@@ -2901,9 +2900,9 @@ function ug_put_node_coordinates(ncid, meshids, xn, yn) result(ierr)
    integer                         :: ierr     !< Result status (UG_NOERR==NF90_NOERR if successful).
 
    ierr = nf90_put_var(ncid, meshids%varids(mid_nodex), xn)
-   if(ierr /= NF90_NOERR) then 
+   if(ierr /= NF90_NOERR) then
       call SetMessage(LEVEL_WARN, 'Could not put mesh node x-coordinates. Check any previous warnings.') ! low level lib may not throw fatal errors
-   end if 
+   end if
    ierr = nf90_put_var(ncid, meshids%varids(mid_nodey), yn)
    ! TODO: AvD: some more careful error handling
 
@@ -2927,10 +2926,10 @@ function ug_get_edge_faces(ncid, meshids, edge_faces, ifill, startIndex) result(
    if (present(ifill)) then
       ierr = nf90_get_att(ncid, meshids%varids(mid_edgefaces), '_FillValue', ifill)
    end if
-   
+
    if (present(startIndex)) then
       !we check for the start_index, we do not know if the variable was written as 0 based
-      ierr = nf90_get_att(ncid, meshids%varids(mid_edgefaces),'start_index', varStartIndex)  
+      ierr = nf90_get_att(ncid, meshids%varids(mid_edgefaces),'start_index', varStartIndex)
       if (ierr .eq. UG_NOERR) then
          ierr = convert_start_index(edge_faces(1,:), imiss, varStartIndex, startIndex)
          ierr = convert_start_index(edge_faces(2,:), imiss, varStartIndex, startIndex)
@@ -2955,10 +2954,10 @@ function ug_get_edge_nodes(ncid, meshids, edge_nodes, startIndex) result(ierr)
    integer                        :: varStartIndex    !< The index stored in the netCDF file
 
    ierr = nf90_get_var(ncid, meshids%varids(mid_edgenodes), edge_nodes)
-   
+
    if (present(startIndex)) then
       !we check for the start_index, we do not know if the variable was written as 0 based
-      ierr = nf90_get_att(ncid, meshids%varids(mid_edgenodes),'start_index', varStartIndex)  
+      ierr = nf90_get_att(ncid, meshids%varids(mid_edgenodes),'start_index', varStartIndex)
       if (ierr .eq. UG_NOERR) then
          ierr = convert_start_index(edge_nodes(1,:), imiss, varStartIndex, startIndex)
          ierr = convert_start_index(edge_nodes(2,:), imiss, varStartIndex, startIndex)
@@ -2967,11 +2966,11 @@ function ug_get_edge_nodes(ncid, meshids, edge_nodes, startIndex) result(ierr)
         ierr = convert_start_index(edge_nodes(2,:), imiss, 0, startIndex)
       endif
    endif
-   
+
    ! Getting fillvalue is unnecessary because each edge should have a begin- and end-point
 end function ug_get_edge_nodes
 
-   
+
 !> Gets the x,y-coordinates (representative centre) for all faces in the specified mesh.
 !! The output x,y arrays are supposed to be of exact correct length already.
 function ug_get_face_coordinates(ncid, meshids, xf, yf) result(ierr)
@@ -2981,9 +2980,9 @@ function ug_get_face_coordinates(ncid, meshids, xf, yf) result(ierr)
    integer                        :: ierr     !< Result status (UG_NOERR==NF90_NOERR if successful).
 
    ierr = nf90_get_var(ncid, meshids%varids(mid_facex), xf)
-   if(ierr /= UG_NOERR) then 
+   if(ierr /= UG_NOERR) then
       call SetMessage(LEVEL_WARN, 'Could not read mesh face x-coordinates. Check any previous warnings.') ! low level lib may not throw fatal errors
-   end if 
+   end if
    ierr = nf90_get_var(ncid, meshids%varids(mid_facey), yf)
    ! TODO: AvD: some more careful error handling
 
@@ -2999,9 +2998,9 @@ function ug_put_face_coordinates(ncid, meshids, xf, yf) result(ierr)
    integer                         :: ierr     !< Result status (UG_NOERR==NF90_NOERR if successful).
 
    ierr = nf90_put_var(ncid, meshids%varids(mid_facex), xf)
-   if(ierr /= NF90_NOERR) then 
+   if(ierr /= NF90_NOERR) then
       call SetMessage(LEVEL_WARN, 'Could not put mesh face x-coordinates. Check any previous warnings.') ! low level lib may not throw fatal errors
-   end if 
+   end if
    ierr = nf90_put_var(ncid, meshids%varids(mid_facey), yf)
    ! TODO: AvD: some more careful error handling
 
@@ -3019,15 +3018,15 @@ function ug_get_face_edges(ncid, meshids, face_edges, ifill, startIndex) result(
    integer, optional, intent(in)  :: startIndex      !< The start index the caller asks for
    integer                        :: k,varStartIndex   !< Temp variables
    integer                        :: ierr            !< Result status (UG_NOERR==NF90_NOERRif successful).
-   
+
    ierr = nf90_get_var(ncid, meshids%varids(mid_faceedges), face_edges)
    if (present(ifill)) then
       ierr = nf90_get_att(ncid, meshids%varids(mid_faceedges), '_FillValue', ifill)
    end if
-   
+
    if (present(startIndex)) then
       !we check for the start_index, we do not know if the variable was written as 0 based
-      ierr = nf90_get_att(ncid, meshids%varids(mid_faceedges),'start_index', varStartIndex)  
+      ierr = nf90_get_att(ncid, meshids%varids(mid_faceedges),'start_index', varStartIndex)
       if (ierr .eq. UG_NOERR) then
          do k = 1, size(face_edges,1)
             ierr = convert_start_index(face_edges(k,:), imiss, varStartIndex, startIndex)
@@ -3045,7 +3044,7 @@ end function ug_get_face_edges
 !> Gets the face-node connectivity table for all faces in the specified mesh.
 !! The output face_nodes array is supposed to be of exact correct size already.
 function ug_get_face_nodes(ncid, meshids, face_nodes, ifill, startIndex) result(ierr)
-   use array_module 
+   use array_module
    integer,           intent(in)  :: ncid            !< NetCDF dataset id, should be already open.
    type(t_ug_mesh),   intent(in)  :: meshids         !< Set of NetCDF-ids for all mesh geometry arrays.
    integer,           intent(out) :: face_nodes(:,:) !< Array to the face-node connectivity table.
@@ -3058,10 +3057,10 @@ function ug_get_face_nodes(ncid, meshids, face_nodes, ifill, startIndex) result(
    if (present(ifill)) then
       ierr = nf90_get_att(ncid, meshids%varids(mid_facenodes), '_FillValue', ifill)
    end if
-   
+
    if (present(startIndex)) then
       !we check for the start_index, we do not know if the variable was written as 0 based
-      ierr = nf90_get_att(ncid, meshids%varids(mid_facenodes),'start_index', varStartIndex)  
+      ierr = nf90_get_att(ncid, meshids%varids(mid_facenodes),'start_index', varStartIndex)
       if (ierr .eq. UG_NOERR) then
          do k = 1, size(face_nodes,1)
          ierr = convert_start_index(face_nodes(k,:), imiss, varStartIndex, startIndex)
@@ -3109,7 +3108,7 @@ function ug_get_var_count(ncid, meshids, iloctype, nvar) result(ierr)
          ! No UGRID :mesh attribute, ignore this var.
          cycle
       end if
-      
+
       if (.not.strcmpi(str,meshname)) then
          ! Mesh names do not match
          cycle
@@ -3174,7 +3173,7 @@ function ug_inq_varids(ncid, meshids, iloctype, varids, nvar) result(ierr)
          ! No UGRID :mesh attribute, ignore this var.
          cycle
       end if
-      
+
       if (.not.strcmpi(str,meshname)) then
          ! Mesh names do not match
          cycle
@@ -3255,7 +3254,7 @@ function ug_inq_varid(ncid, meshids, varname, varid) result(ierr)
       !
       str = meshname
    end if
-      
+
    if (.not.strcmpi(str,meshname)) then
       ! Mesh names do not match
       ug_messagestr = 'ug_inc_varid: candidate variable for name '''//trim(varname)//''' on mesh '''//trim(meshname)//''' has different :mesh attribute '''//trim(str)//'''.'
@@ -3274,7 +3273,7 @@ end function ug_inq_varid
 
 
 !> Gets the variable ID for the variable in the specified dataset on the specified mesh,
-!! that also has the specified value for its ':standard_name' attribute, and 
+!! that also has the specified value for its ':standard_name' attribute, and
 !! is defined on the specified topological mesh location (UGRID-compliant, so UG_LOC_FACE/EDGE/NODE/ALL2D)
 function ug_inq_varid_by_standard_name(ncid, meshids, iloctype, stdname, varid) result(ierr)
    use string_module
@@ -3326,7 +3325,7 @@ function ug_inq_varid_by_standard_name(ncid, meshids, iloctype, stdname, varid) 
       ierr = UG_ENOTVAR
       goto 999
    end if
-   
+
    ierr = UG_NOERR
    goto 888 ! Return with success
 
@@ -3335,7 +3334,7 @@ function ug_inq_varid_by_standard_name(ncid, meshids, iloctype, stdname, varid) 
 
 888 continue
    deallocate(varids)
-    
+
 end function ug_inq_varid_by_standard_name
 
 
@@ -3389,13 +3388,13 @@ end subroutine write_edge_type_variable
 !!
 !! NOTE: do not pass already filled mesh geometries to this function,
 !! since array pointers will become disassociated, possibly causing memory leaks.
-function ug_create_ugrid_geometry(meshgeom, crs) result(ierr)   
+function ug_create_ugrid_geometry(meshgeom, crs) result(ierr)
     type(t_ug_meshgeom), intent(out) :: meshgeom     !< The mesh geometry that is to be created and filled.
-    type(t_crs), intent(inout) :: crs     
+    type(t_crs), intent(inout) :: crs
     ! TODO why need save here?
     integer, allocatable, target, save       :: edge_nodes(:,:), edge_faces(:,:), face_nodes(:,:), face_edges(:,:), face_links(:,:) !< Output arrays.
-    
-    type (t_face), pointer        :: netcell(:) 
+
+    type (t_face), pointer        :: netcell(:)
     real(kind=dp), allocatable, target, save :: edgex(:), edgey(:) !< Output coordinate arrays.
     integer                                  :: edge, face, maxNodesPerFace, nodesPerFace, nump !< Counters.
     integer, parameter                       :: missing_value = -999
@@ -3406,10 +3405,10 @@ function ug_create_ugrid_geometry(meshgeom, crs) result(ierr)
 
     ! Create 2D mesh geometry that contains all 2D faces, edges and nodes.
     ierr = t_ug_meshgeom_destructor(meshgeom)
-    
+
     meshgeom%meshName = 'mesh2d'
     meshgeom%dim = 2
-    
+
     meshgeom%epsg = 4326
 
     crs%varname = 'wgs84'
@@ -3417,7 +3416,7 @@ function ug_create_ugrid_geometry(meshgeom, crs) result(ierr)
 
     ! Nodes.
     meshgeom%numNode = 5
-    
+
     ! Get node coordinates.
     allocate(meshgeom%nodex(5))
     meshgeom%nodex(1) = 0.
@@ -3425,22 +3424,22 @@ function ug_create_ugrid_geometry(meshgeom, crs) result(ierr)
     meshgeom%nodex(3) = 15.
     meshgeom%nodex(4) = 10.
     meshgeom%nodex(5) = 5.
-    
+
     allocate(meshgeom%nodey(5))
     meshgeom%nodey(1) = 0.
     meshgeom%nodey(2) = 0.
     meshgeom%nodey(3) = 5.
     meshgeom%nodey(4) = 10.
-    meshgeom%nodey(5) = 5.     
+    meshgeom%nodey(5) = 5.
 
     ! Edges.
     ! Use only 2D net links (= edges).
     meshgeom%numEdge = 6
 
     ! Get edge nodes connectivity, edge types and edge coordinates (ordered as follows: first flow links, then closed edges).
-    allocate(edge_nodes(2, meshgeom%numEdge)) 
+    allocate(edge_nodes(2, meshgeom%numEdge))
     edge_nodes = missing_value
-    
+
     allocate(edgex(meshgeom%numEdge))
     allocate(edgey(meshgeom%numEdge))
     edgex = dmiss
@@ -3458,9 +3457,9 @@ function ug_create_ugrid_geometry(meshgeom, crs) result(ierr)
     edge_nodes(2,5) = 3
     edge_nodes(1,6) = 3
     edge_nodes(2,6) = 2
-    
+
     meshgeom%edge_nodes => edge_nodes
-    
+
     meshgeom%edgex => edgex
     meshgeom%edgey => edgey
     ! Edge z coordinates are unknown.
@@ -3486,67 +3485,67 @@ function ug_create_ugrid_geometry(meshgeom, crs) result(ierr)
 
     ! Faces.
     ! Use only 2D internal net cells = 2D internal flow nodes (= faces).
-    nump = 2 
+    nump = 2
     meshgeom%numFace = nump
 
     ! Get face coordinates.
     allocate(meshgeom%facex(2))
     meshgeom%facex(1) = 5
     meshgeom%facex(2) = 10
-    
+
     allocate(meshgeom%facey(2))
     meshgeom%facey(1) = 2.5
     meshgeom%facey(2) = 5
-        
+
     ! Determine max nr of net nodes per 2D net cell = face.
     maxNodesPerFace = 4
     meshgeom%maxNumFaceNodes = maxNodesPerFace
-  
+
     ! Get face nodes connectivity, face edges connectivity and face-face connectivity.
     allocate(face_nodes(maxNodesPerFace, meshgeom%numFace))
     face_nodes = missing_value
-    
+
     allocate(face_edges(maxNodesPerFace, meshgeom%numFace))
     face_edges = missing_value
-    
+
     allocate(face_links(maxNodesPerFace, meshgeom%numFace))
     face_links = missing_value
-    
+
     allocate(netcell(2))
     netcell(1)%n = 3
     netcell(2)%n = 4
-    
+
     allocate(netcell(1)%nod(3))
     netcell(1)%nod(1) = 1
     netcell(1)%nod(2) = 2
     netcell(1)%nod(3) = 5
-    
+
     allocate(netcell(2)%nod(4))
     netcell(2)%nod(1) = 2
     netcell(2)%nod(2) = 3
     netcell(2)%nod(3) = 4
     netcell(2)%nod(4) = 5
-    
+
     do face = 1,nump
         nodesPerFace = netcell(face)%n
-        face_nodes(1:nodesPerFace, face) = netcell(face)%nod        
+        face_nodes(1:nodesPerFace, face) = netcell(face)%nod
     end do
-    
+
     meshgeom%face_nodes => face_nodes
     meshgeom%face_edges => face_edges
-    meshgeom%face_links => face_links    
+    meshgeom%face_links => face_links
 
 end function ug_create_ugrid_geometry
 
 subroutine ug_create_ugrid_meta(meta)
     type(t_ug_meta) :: meta  !< Meta information on file.
-        
+
     meta%institution = "Deltares"
     meta%source      = "DeltaShell"
-    meta%references  = "geen idee"    
+    meta%references  = "geen idee"
     meta%version     = "0"
     meta%modelname   = "manual"
-    
+
 end subroutine ug_create_ugrid_meta
 
 !> Writes the unstructured network and edge type to an already opened netCDF dataset.
@@ -3558,15 +3557,15 @@ function ug_write_geom_filepointer_ugrid(ncid, meshgeom, crs, meshids, networkid
     type(t_ug_network), intent(inout)   :: networkids
     integer                             :: ierr     !< Result status (UG_NOERR==NF90_NOERR if successful).
     type(t_ug_meta)                     :: meta  !< Meta information on file. ! TODO: later also input arg
-    
+
     ierr = UG_NOERR
 
     ! create default meta
     call ug_create_ugrid_meta(meta)
-    
+
     ! Add global attributes to NetCDF file.
     ierr = ug_addglobalatts(ncid, meta)
-    
+
     ! Write mesh geometry.
     ierr = ug_write_mesh_struct(ncid, meshids, networkids, crs, meshgeom)
 
@@ -3584,19 +3583,19 @@ function ug_write_geom_ugrid(filename) result(ierr)
     type(t_ug_network)  :: networkid        !< Set of NetCDF-ids for all network variables.
     type(t_crs)         :: crs              !< Set of NetCDF-ids for all mesh geometry variables.
     integer :: ncid
-    
+
     ierr = nf90_create(filename, 0, ncid)
     if (ierr /= nf90_noerr) then
         return
     end if
-    
+
     ! create mesh geometry
     ierr = ug_create_ugrid_geometry(meshgeom, crs)
 
     ierr = ug_write_geom_filepointer_ugrid(ncid, meshgeom, crs, meshids, networkid)
-         
+
     ierr = nf90_close(ncid)
-        
+
 end function ug_write_geom_ugrid
 
 
@@ -3609,7 +3608,7 @@ function ug_write_map_ugrid(filename) result(ierr)
 
     type(t_ug_meshgeom)               :: meshgeom    !< Mesh geometry to be written to the NetCDF file.
     type(t_ug_mesh)                   :: meshids     !< Set of NetCDF-ids for all mesh geometry variables.
-    type(t_ug_network)                :: networkid   !< Set of NetCDF-ids for all mesh geometry variables.   
+    type(t_ug_network)                :: networkid   !< Set of NetCDF-ids for all mesh geometry variables.
     type(t_crs)                       :: crs     !< Set of NetCDF-ids for all mesh geometry variables.
     integer                           :: id_s1, id_s2, id_u1, id_zk, id_time, itim ! example: water levels, water depth, edge speed, bed level and a timer
     integer                           :: ncid, id_timedim
@@ -3622,8 +3621,8 @@ function ug_write_map_ugrid(filename) result(ierr)
     if (ierr /= nf90_noerr) then
         return
     end if
-    
-    
+
+
     ! create mesh geometry
     ierr = ug_create_ugrid_geometry(meshgeom, crs)
 
@@ -3637,13 +3636,13 @@ function ug_write_map_ugrid(filename) result(ierr)
 
     ierr = ug_def_var(ncid, id_s1, (/ meshids%dimids(mdim_face), id_timedim /), nf90_double, UG_LOC_FACE, meshgeom%meshname, "s1", "sea_surface_level_above_geoid", "Water level on cell centres", &
                     "m", "average", '', crs, -1, -999d0)
-    
+
     ierr = ug_def_var(ncid, id_s2, (/ meshids%dimids(mdim_face), id_timedim /), nf90_double, UG_LOC_FACE, meshgeom%meshname, "s2", "sea_floor_depth_below_geoid", "Water depth on cell centres", &
                     "m", "average", '', crs, -1, -999d0)
-    
+
     ierr = ug_def_var(ncid, id_u1, (/ meshids%dimids(mdim_edge), id_timedim /), nf90_double, UG_LOC_EDGE, meshgeom%meshname, "u1", "", "Normal velocity on cell edges", &
                     "m s-1", "average", '', crs, -1, -999d0)
-    
+
     ierr = ug_def_var(ncid, id_zk, (/ meshids%dimids(mdim_node), id_timedim /), nf90_double, UG_LOC_NODE, meshgeom%meshname, "zk", "", "Bed level on cell corners", &
                     "m", "point", '', crs, -1, -999d0)
     ! NOTE: zk is rarely time-dependent, but just as an example
@@ -3657,11 +3656,11 @@ function ug_write_map_ugrid(filename) result(ierr)
     allocate(workn(meshgeom%numnode))
     workn = -7.68d0
     do itim=1,10
-       
+
         workf(:) = workf(:) + itim ! Dummy data time-dependent
         ierr = nf90_put_var(ncid, id_time, dble(itim))
 
-        ierr = nf90_put_var(ncid, id_s1, workf, count = (/ meshgeom%numface, 1 /), start = (/ 1, itim /))        
+        ierr = nf90_put_var(ncid, id_s1, workf, count = (/ meshgeom%numface, 1 /), start = (/ 1, itim /))
         ierr = nf90_put_var(ncid, id_s2, workf+5d0, count = (/ meshgeom%numface, 1 /), start = (/ 1, itim /))
 
         worke(:) = worke(:) + itim*.01d0 ! Dummy data time-dependent
@@ -3675,16 +3674,16 @@ function ug_write_map_ugrid(filename) result(ierr)
     ! ..
     deallocate(workn, worke, workf)
     ierr = nf90_close(ncid)
-        
+
 end function ug_write_map_ugrid
 
-! UGRID mesh and network1d functions 
+! UGRID mesh and network1d functions
 
 !> This function creates a 1d network accordingly to the new 1d format.
 !> This version of the interface is kept for backward compatibility.
 function ug_create_1d_network(ncid, netids, networkName, nNodes, nBranches,nGeometry) result(ierr)
 
-   integer,            intent(in   ) :: ncid 
+   integer,            intent(in   ) :: ncid
    character(len=*),   intent(in   ) :: networkName
    integer,            intent(in   ) :: nNodes
    integer,            intent(in   ) :: nBranches
@@ -3697,14 +3696,14 @@ function ug_create_1d_network(ncid, netids, networkName, nNodes, nBranches,nGeom
 
    crs%varname = 'Unknown projected'
    crs%epsg_code = 0
-   
+
    ierr = ug_create_1d_network_v1(ncid, netids, networkName, nNodes, nBranches,nGeometry,crs)
 end function ug_create_1d_network
 
-!> This function creates a 1d network accordingly to the new 1d format. 
+!> This function creates a 1d network accordingly to the new 1d format.
 function ug_create_1d_network_v1(ncid, netids, networkName, nNodes, nBranches,nGeometry,crs) result(ierr)
 
-   integer,            intent(in   ) :: ncid 
+   integer,            intent(in   ) :: ncid
    character(len=*),   intent(in   ) :: networkName
    integer,            intent(in   ) :: nNodes
    integer,            intent(in   ) :: nBranches
@@ -3712,39 +3711,39 @@ function ug_create_1d_network_v1(ncid, netids, networkName, nNodes, nBranches,nG
    type(t_ug_network), intent(inout) :: netids
    type(t_crs),        intent(in   ) :: crs           !< Coordinate reference system for the x/y-coordinates variables.
    integer                           :: ierr
-   
+
    !locals
    integer                              :: wasInDefine
    character(len=len_trim(networkName)) :: prefix
    character(len=256) :: buffer
 
    prefix=trim(networkName)
-   
+
    ierr = UG_SOMEERR
    wasInDefine = 0
-   ierr = nf90_redef(ncid) 
+   ierr = nf90_redef(ncid)
    if (ierr == nf90_eindefine) then
       wasInDefine = 1 ! Was still in define mode.
    endif
-    
+
    !Dimensions
    ierr  = nf90_def_dim(ncid, prefix//'_nEdges'         , nBranches, netids%dimids(ntdim_1dedges))
    ierr  = nf90_def_dim(ncid, prefix//'_nNodes'         , nNodes,    netids%dimids(ntdim_1dnodes))
    ierr  = nf90_def_dim(ncid, prefix//'_nGeometryNodes' , nGeometry, netids%dimids(ntdim_1dgeopoints))
-   !These dimensions might already be defined, check first if they are present 
+   !These dimensions might already be defined, check first if they are present
    ierr = nf90_inq_dimid(ncid, 'strLengthIds', netids%dimids(ntdim_idstring))
-   if ( ierr /= UG_NOERR) then 
-   ierr = nf90_def_dim(ncid, 'strLengthIds', ug_idsLen,  netids%dimids(ntdim_idstring))   
+   if ( ierr /= UG_NOERR) then
+   ierr = nf90_def_dim(ncid, 'strLengthIds', ug_idsLen,  netids%dimids(ntdim_idstring))
    endif
    ierr = nf90_inq_dimid(ncid, 'strLengthLongNames', netids%dimids(ntdim_longnamestring))
-   if ( ierr /= UG_NOERR) then 
-   ierr = nf90_def_dim(ncid, 'strLengthLongNames', ug_idsLongNamesLen,  netids%dimids(ntdim_longnamestring))   
+   if ( ierr /= UG_NOERR) then
+   ierr = nf90_def_dim(ncid, 'strLengthLongNames', ug_idsLongNamesLen,  netids%dimids(ntdim_longnamestring))
    endif
-   
+
    ! Dimension 2 might already be present
    ierr = nf90_inq_dimid(ncid, 'Two', netids%dimids(ntdim_two))
-   if ( ierr /= UG_NOERR) then 
-   ierr = nf90_def_dim(ncid, 'Two', 2, netids%dimids(ntdim_two))   
+   if ( ierr /= UG_NOERR) then
+   ierr = nf90_def_dim(ncid, 'Two', 2, netids%dimids(ntdim_two))
    endif
 
    !Variable declarations: Network1d
@@ -3761,11 +3760,11 @@ function ug_create_1d_network_v1(ncid, netids, networkName, nNodes, nBranches,nG
    ierr = nf90_put_att(ncid, netids%varids(ntid_1dtopo), 'topology_dimension', 1)
    !nodes attributes
    ierr = nf90_put_att(ncid, netids%varids(ntid_1dtopo), 'node_id', prefix//'_node_id')
-   ierr = nf90_put_att(ncid, netids%varids(ntid_1dtopo), 'node_long_name', prefix//'_node_long_name')   
+   ierr = nf90_put_att(ncid, netids%varids(ntid_1dtopo), 'node_long_name', prefix//'_node_long_name')
    !branches attrubutes
    ierr = nf90_put_att(ncid, netids%varids(ntid_1dtopo), 'branch_id', prefix//'_branch_id')
-   ierr = nf90_put_att(ncid, netids%varids(ntid_1dtopo), 'branch_long_name', prefix//'_branch_long_name')   
-   ierr = nf90_put_att(ncid, netids%varids(ntid_1dtopo), 'edge_length', prefix//'_edge_length')  
+   ierr = nf90_put_att(ncid, netids%varids(ntid_1dtopo), 'branch_long_name', prefix//'_branch_long_name')
+   ierr = nf90_put_att(ncid, netids%varids(ntid_1dtopo), 'edge_length', prefix//'_edge_length')
 
    !2. Branch: the start and the end nodes of each branch
    ierr = nf90_def_var(ncid, prefix//'_edge_nodes', nf90_int, (/ netids%dimids(ntdim_two), netids%dimids(ntdim_1dedges) /), netids%varids(ntid_1dedgenodes))
@@ -3811,13 +3810,13 @@ function ug_create_1d_network_v1(ncid, netids, networkName, nNodes, nBranches,nG
    ierr = ug_addcoordatts(ncid, netids%varids(ntid_1dgeox), netids%varids(ntid_1dgeoy), crs)
    ierr = nf90_put_att(ncid, netids%varids(ntid_1dgeox), 'long_name', 'x-coordinate of branch geometry nodes')
    ierr = nf90_put_att(ncid, netids%varids(ntid_1dgeoy), 'long_name', 'y-coordinate of branch geometry nodes')
-   
+
    !5 Branch order : might be temporary, could be defined, written and retrived using ug_def_var, ug_put_var, ug_get_var
    ierr = nf90_def_var(ncid, prefix//'_branch_order', nf90_int, (/ netids%dimids(ntdim_1dedges) /) , netids%varids(ntid_1dbranchorder))
    ierr = nf90_put_att(ncid, netids%varids(ntid_1dbranchorder), 'long_name', 'Order of branches for interpolation')
    ierr = nf90_put_att(ncid, netids%varids(ntid_1dbranchorder), 'mesh', prefix)
    ierr = nf90_put_att(ncid, netids%varids(ntid_1dbranchorder), 'location', 'edge')
-   
+
    !6 Branch type
    ierr = nf90_def_var(ncid, prefix//'_branch_type', nf90_int, (/ netids%dimids(ntdim_1dedges) /) , netids%varids(ntid_1dbranchtype))
    ierr = nf90_put_att(ncid, netids%varids(ntid_1dbranchtype), 'long_name', 'Type of branches')
@@ -3827,14 +3826,14 @@ function ug_create_1d_network_v1(ncid, netids, networkName, nNodes, nBranches,nG
    if (wasInDefine==0) then
       ierr = nf90_enddef(ncid)
    endif
-   
+
 end function ug_create_1d_network_v1
 
 !> This function is included for backward compatibility
 function ug_create_1d_mesh(ncid, networkname, meshids, meshname, nmeshpoints) result(ierr)
-   
+
    integer, intent(in)                  :: ncid, nmeshpoints
-   type(t_ug_mesh), intent(inout)       :: meshids   
+   type(t_ug_mesh), intent(inout)       :: meshids
    character(len=*),intent(in)          :: meshname, networkname
    integer                              :: ierr
 
@@ -3842,12 +3841,12 @@ function ug_create_1d_mesh(ncid, networkname, meshids, meshname, nmeshpoints) re
    ierr = ug_create_1d_mesh_v1(ncid, networkname, meshids, meshname, nmeshpoints, 0)
 end function ug_create_1d_mesh
 
-!> This function creates a 1d mesh accordingly to the new 1d format. 
+!> This function creates a 1d mesh accordingly to the new 1d format.
 function ug_create_1d_mesh_v1(ncid, networkname, meshids, meshname, nmeshpoints, writexy) result(ierr)
-   
+
    integer,          intent(in   ) :: ncid
    integer,          intent(in   ) :: nmeshpoints
-   type(t_ug_mesh),  intent(inout) :: meshids   
+   type(t_ug_mesh),  intent(inout) :: meshids
    character(len=*), intent(in   ) :: networkname
    character(len=*), intent(in   ) :: meshname
    integer,          intent(in   ) :: writexy
@@ -3858,7 +3857,7 @@ function ug_create_1d_mesh_v1(ncid, networkname, meshids, meshname, nmeshpoints,
 
    crs%varname = 'Unknown projected'
    crs%epsg_code = 0
-   
+
    ierr = -1
    ierr = ug_create_1d_mesh_v2(ncid, networkname, meshids, meshname, nmeshpoints, 0, writexy, crs)
 end function ug_create_1d_mesh_v1
@@ -3866,44 +3865,44 @@ end function ug_create_1d_mesh_v1
 !> This function creates a 1d mesh accordingly to the new 1d format.
 !> Including correct names for x and y-coordinates.
 function ug_create_1d_mesh_v2(ncid, networkname, meshids, meshname, nmeshpoints, nmeshedges, writexy, crs) result(ierr)
-   
+
    integer         , intent(in)    :: ncid
    integer         , intent(in)    :: nmeshpoints
    integer         , intent(in)    :: nmeshedges
-   type(t_ug_mesh) , intent(inout) :: meshids   
+   type(t_ug_mesh) , intent(inout) :: meshids
    character(len=*), intent(in)    :: networkname
    character(len=*), intent(in)    :: meshname
    integer         , intent(in)    :: writexy
    type(t_crs)     , intent(in)    :: crs           !< Coordinate reference system for the x/y-coordinates variables.
    integer                         :: ierr
-   
+
    !locals
    integer                              :: wasInDefine
    character(len=len_trim(meshname))    :: prefix
    character(len=nf90_max_name)         :: buffer
-      
+
    prefix=trim(meshname)
-   
+
    ierr = UG_SOMEERR
    wasInDefine = 0
-   ierr = nf90_redef(ncid) 
+   ierr = nf90_redef(ncid)
    if (ierr == nf90_eindefine) then
       wasInDefine = 1 ! Was still in define mode.
    endif
-   
+
    !define dim
-   ! This dimension might already be defined, check first if it is present 
+   ! This dimension might already be defined, check first if it is present
    ierr = nf90_inq_dimid(ncid, 'Two', meshids%dimids(mdim_two))
-   if ( ierr /= UG_NOERR) then 
-   ierr = nf90_def_dim(ncid, 'Two', 2,  meshids%dimids(mdim_two))   
+   if ( ierr /= UG_NOERR) then
+   ierr = nf90_def_dim(ncid, 'Two', 2,  meshids%dimids(mdim_two))
    endif
    ierr = nf90_inq_dimid(ncid, prefix//'_nNodes', meshids%dimids(mdim_node))
-   if ( ierr /= UG_NOERR) then 
+   if ( ierr /= UG_NOERR) then
          ierr  = nf90_def_dim(ncid, prefix//'_nNodes', nmeshpoints, meshids%dimids(mdim_node))
    endif
    if (nmeshedges > 0) then
-      ierr = nf90_inq_dimid(ncid, prefix//'_nEdges',    meshids%dimids(mdim_edge))  
-      if ( ierr /= UG_NOERR) then 
+      ierr = nf90_inq_dimid(ncid, prefix//'_nEdges',    meshids%dimids(mdim_edge))
+      if ( ierr /= UG_NOERR) then
             ierr  = nf90_def_dim(ncid, prefix//'_nEdges', nmeshedges, meshids%dimids(mdim_edge))
       endif
    end if
@@ -3941,9 +3940,9 @@ function ug_create_1d_mesh_v2(ncid, networkname, meshids, meshname, nmeshpoints,
 
    ! 2. mesh1D :assign the the offset from the starting node
    ierr = nf90_def_var(ncid, prefix//'_node_offset', nf90_double, (/ meshids%dimids(mdim_node) /) , meshids%varids(mid_1dnodeoffset))
-   ierr = nf90_put_att(ncid, meshids%varids(mid_1dnodeoffset), 'long_name', 'Offset along branch of mesh nodes')   
-   ierr = nf90_put_att(ncid, meshids%varids(mid_1dnodeoffset), 'units', 'm')   
-   
+   ierr = nf90_put_att(ncid, meshids%varids(mid_1dnodeoffset), 'long_name', 'Offset along branch of mesh nodes')
+   ierr = nf90_put_att(ncid, meshids%varids(mid_1dnodeoffset), 'units', 'm')
+
    if (writexy == 1) then
        ierr = nf90_def_var(ncid, prefix//'_node_x', nf90_double, (/ meshids%dimids(mdim_node) /), meshids%varids(mid_nodex))
        ierr = nf90_def_var(ncid, prefix//'_node_y', nf90_double, (/ meshids%dimids(mdim_node) /), meshids%varids(mid_nodey))
@@ -3951,7 +3950,7 @@ function ug_create_1d_mesh_v2(ncid, networkname, meshids, meshname, nmeshpoints,
        ierr = nf90_put_att(ncid, meshids%varids(mid_nodex), 'long_name', 'x-coordinate of mesh nodes')
        ierr = nf90_put_att(ncid, meshids%varids(mid_nodey), 'long_name', 'y-coordinate of mesh nodes')
    endif
-   
+
    !
    ! Edges
    !
@@ -3965,9 +3964,9 @@ function ug_create_1d_mesh_v2(ncid, networkname, meshids, meshname, nmeshpoints,
 
       ! 2. mesh1D :assign the the offset along the branch for each edge
       ierr = nf90_def_var(ncid, prefix//'_edge_offset', nf90_double, (/ meshids%dimids(mdim_edge) /) , meshids%varids(mid_1dedgeoffset))
-      ierr = nf90_put_att(ncid, meshids%varids(mid_1dedgeoffset), 'long_name', 'Offset along branch of mesh edges')   
-      ierr = nf90_put_att(ncid, meshids%varids(mid_1dedgeoffset), 'units', 'm')   
-   
+      ierr = nf90_put_att(ncid, meshids%varids(mid_1dedgeoffset), 'long_name', 'Offset along branch of mesh edges')
+      ierr = nf90_put_att(ncid, meshids%varids(mid_1dedgeoffset), 'units', 'm')
+
       if (writexy == 1) then
           ierr = nf90_def_var(ncid, prefix//'_edge_x', nf90_double, (/ meshids%dimids(mdim_edge) /), meshids%varids(mid_edgex))
           ierr = nf90_def_var(ncid, prefix//'_edge_y', nf90_double, (/ meshids%dimids(mdim_edge) /), meshids%varids(mid_edgey))
@@ -3995,20 +3994,20 @@ function ug_def_mesh_ids(ncid, meshids, meshname, locationType) result(ierr)
    prefix=trim(meshname)
 
    ierr = UG_SOMEERR
-   
+
    wasInDefine = 0
-   ierr = nf90_redef(ncid) 
+   ierr = nf90_redef(ncid)
    if (ierr == nf90_eindefine) then
       wasInDefine = 1 ! Was still in define mode.
-   endif  
+   endif
 
    ierr = nf90_inq_dimid(ncid, 'strLengthIds', meshids%dimids(mdim_idstring))
-   if ( ierr /= UG_NOERR) then 
-   ierr = nf90_def_dim(ncid, 'strLengthIds', ug_idsLen, meshids%dimids(mdim_idstring))   
+   if ( ierr /= UG_NOERR) then
+   ierr = nf90_def_dim(ncid, 'strLengthIds', ug_idsLen, meshids%dimids(mdim_idstring))
    endif
    ierr = nf90_inq_dimid(ncid, 'strLengthLongNames', meshids%dimids(mdim_longnamestring))
-   if ( ierr /= UG_NOERR) then 
-   ierr = nf90_def_dim(ncid, 'strLengthLongNames', ug_idsLongNamesLen, meshids%dimids(mdim_longnamestring))   
+   if ( ierr /= UG_NOERR) then
+   ierr = nf90_def_dim(ncid, 'strLengthLongNames', ug_idsLongNamesLen, meshids%dimids(mdim_longnamestring))
    endif
 
    if(locationType == UG_LOC_NODE ) then
@@ -4043,7 +4042,7 @@ function ug_def_mesh_ids(ncid, meshids, meshname, locationType) result(ierr)
    if (wasInDefine==0) then
       ierr = nf90_enddef(ncid)
    endif
- 
+
 end function ug_def_mesh_ids
 
 ! Creates a mesh_topology_contact variable for storing contacts between meshes.
@@ -4054,80 +4053,80 @@ function ug_def_mesh_contact(ncid, contactids, linkmeshname, ncontacts, meshidfr
    character(len=*), intent(in)          :: linkmeshname
    character(len=len_trim(linkmeshname)) :: prefix
    type(t_ug_contacts), intent(inout)    :: contactids
-   character(len=nf90_max_name)          :: locationType1, locationType2, mesh1, mesh2     
+   character(len=nf90_max_name)          :: locationType1, locationType2, mesh1, mesh2
    integer                               :: ierr, wasInDefine
    integer, optional                     :: start_index
 
    ierr = UG_SOMEERR
    wasInDefine = 0
-   ierr = nf90_redef(ncid) 
+   ierr = nf90_redef(ncid)
    if (ierr == nf90_eindefine) then
       wasInDefine = 1 ! Was still in define mode.
    endif
-   
-   prefix=trim(linkmeshname)   
+
+   prefix=trim(linkmeshname)
    !define dim
    ierr  = nf90_def_dim(ncid, prefix//'_nContacts'       ,ncontacts ,contactids%dimids(cdim_ncontacts))
-   !These dimensions might already be defined, check first if they are present 
+   !These dimensions might already be defined, check first if they are present
    ierr = nf90_inq_dimid(ncid, 'strLengthIds', contactids%dimids(cdim_idstring))
-   if ( ierr /= UG_NOERR) then 
-   ierr = nf90_def_dim(ncid, 'strLengthIds', ug_idsLen, contactids%dimids(cdim_idstring))   
+   if ( ierr /= UG_NOERR) then
+   ierr = nf90_def_dim(ncid, 'strLengthIds', ug_idsLen, contactids%dimids(cdim_idstring))
    endif
    ierr = nf90_inq_dimid(ncid, 'strLengthLongNames', contactids%dimids(cdim_longnamestring))
-   if ( ierr /= UG_NOERR) then 
-   ierr = nf90_def_dim(ncid, 'strLengthLongNames', ug_idsLongNamesLen, contactids%dimids(cdim_longnamestring))   
+   if ( ierr /= UG_NOERR) then
+   ierr = nf90_def_dim(ncid, 'strLengthLongNames', ug_idsLongNamesLen, contactids%dimids(cdim_longnamestring))
    endif
    ierr = nf90_inq_dimid(ncid, 'Two', contactids%dimids(cdim_two))
-   if ( ierr /= UG_NOERR) then 
-   ierr = nf90_def_dim(ncid, 'Two', 2,  contactids%dimids(cdim_two))   
+   if ( ierr /= UG_NOERR) then
+   ierr = nf90_def_dim(ncid, 'Two', 2,  contactids%dimids(cdim_two))
    endif
-   
+
    !select the location type
    call ug_loctype_to_location(locationType1Id,locationType1)
-   if(ierr /= UG_NOERR) then 
+   if(ierr /= UG_NOERR) then
        Call SetMessage(Level_Fatal, 'Could not select locationType1 for mesh contact '''//trim(linkmeshname)//'''.')
-   end if 
+   end if
    call ug_loctype_to_location(locationType2Id,locationType2)
-   if(ierr /= UG_NOERR) then 
+   if(ierr /= UG_NOERR) then
        Call SetMessage(Level_Fatal, 'Could not select locationType2 for mesh contact '''//trim(linkmeshname)//'''.')
-   end if 
-   
+   end if
+
    !get the mesh names
    ierr = ug_get_mesh_name(ncid, meshidfrom, meshname = mesh1)
    ierr = ug_get_mesh_name(ncid, meshidto, meshname = mesh2)
-   
+
    !define the variable contacts and its attributes
    ierr = nf90_def_var(ncid, prefix, nf90_int, (/ contactids%dimids(cdim_two), contactids%dimids(cdim_ncontacts) /), contactids%varids(cid_contacttopo))
    ierr = nf90_put_att(ncid, contactids%varids(cid_contacttopo), 'cf_role'              , 'mesh_topology_contact')
-   ierr = nf90_put_att(ncid, contactids%varids(cid_contacttopo), 'contact'              , trim(mesh1)//': '//trim(locationType1)//' '//trim(mesh2)//': '//trim(locationType2)) 
-   ierr = nf90_put_att(ncid, contactids%varids(cid_contacttopo), 'contact_type'         , prefix//'_contact_type') 
+   ierr = nf90_put_att(ncid, contactids%varids(cid_contacttopo), 'contact'              , trim(mesh1)//': '//trim(locationType1)//' '//trim(mesh2)//': '//trim(locationType2))
+   ierr = nf90_put_att(ncid, contactids%varids(cid_contacttopo), 'contact_type'         , prefix//'_contact_type')
    ierr = nf90_put_att(ncid, contactids%varids(cid_contacttopo), 'contact_id'           , prefix//'_contact_id')
-   ierr = nf90_put_att(ncid, contactids%varids(cid_contacttopo), 'contact_long_name'    , prefix//'_contact_long_name') 
+   ierr = nf90_put_att(ncid, contactids%varids(cid_contacttopo), 'contact_long_name'    , prefix//'_contact_long_name')
    if (present(start_index)) then
-      if (start_index.ne.0) ierr = nf90_put_att(ncid, contactids%varids(cid_contacttopo), 'start_index'  , start_index) 
+      if (start_index.ne.0) ierr = nf90_put_att(ncid, contactids%varids(cid_contacttopo), 'start_index'  , start_index)
    endif
-   
+
    !define the variable and attributes contacts id
    ierr = nf90_def_var(ncid, prefix//'_contact_id', nf90_char, (/ contactids%dimids(cdim_idstring), contactids%dimids(cdim_ncontacts) /) , contactids%varids(cid_contactids))
    ierr = nf90_put_att(ncid, contactids%varids(cid_contactids), 'long_name',' ID of mesh contacts')
-   
+
    !define the variable and attributes contact long name
    ierr = nf90_def_var(ncid, prefix//'_contact_long_name', nf90_char, (/ contactids%dimids(cdim_longnamestring), contactids%dimids(cdim_ncontacts) /) , contactids%varids(cid_contactlongnames))
    ierr = nf90_put_att(ncid, contactids%varids(cid_contactlongnames), 'long_name', 'Long name of mesh contacts')
-   
+
    !define the variable and attributes long names
    ierr = nf90_def_var(ncid, prefix//'_contact_type', nf90_int, (/ contactids%dimids(cdim_ncontacts) /) , contactids%varids(cid_contacttype))
    ierr = nf90_put_att(ncid, contactids%varids(cid_contacttype), '_FillValue',  -1)
    ierr = nf90_put_att(ncid, contactids%varids(cid_contacttype), 'valid_range',  (/ 3, 4/))
    ierr = nf90_put_att(ncid, contactids%varids(cid_contacttype), 'flag_values',  (/ 3, 4/))
    ierr = nf90_put_att(ncid, contactids%varids(cid_contacttype), 'flag_meanings', 'lateral_1d2d_link longitudinal_1d2d_link')
-   
+
    if (wasInDefine==0) then
       ierr = nf90_enddef(ncid)
    endif
-   
+
 end function ug_def_mesh_contact
-!> Writes edge nodes 
+!> Writes edge nodes
 function ug_write_mesh_1d_edge_nodes (ncid, meshids, meshName, numEdge, mesh_1d_edge_nodes, start_index) result(ierr)
    integer,          intent(in)         :: ncid                     !< NetCDF dataset id, should be already open and ready for writing.
    type(t_ug_mesh), intent(inout)       :: meshids                  !< Set of NetCDF-ids for all mesh geometry arrays.
@@ -4136,21 +4135,21 @@ function ug_write_mesh_1d_edge_nodes (ncid, meshids, meshName, numEdge, mesh_1d_
    integer,          intent(in)         :: mesh_1d_edge_nodes(:,:)  !< Edge-to-node mapping array.
    integer                              :: start_index              !< The base index of the provided arrays (0 if this function writes array from C/C++/C#, 1 for Fortran)
    integer                              :: ierr                     !< Result status (UG_NOERR==NF90_NOERR) if successful.
-      
+
    character(len=len_trim(meshName))    :: prefix
    integer :: wasInDefine
-      
+
    ierr = UG_SOMEERR
    wasInDefine = 0
 
    ierr = nf90_redef(ncid)
    if (ierr == nf90_eindefine) wasInDefine = 1 ! Was still in define mod
-   
+
    prefix=trim(meshName)
 
    ! Edges
-   ierr = nf90_inq_dimid(ncid, prefix//'_edge_nodes',    meshids%dimids(mdim_1dedgenodes))  
-   if ( ierr /= UG_NOERR) then 
+   ierr = nf90_inq_dimid(ncid, prefix//'_edge_nodes',    meshids%dimids(mdim_1dedgenodes))
+   if ( ierr /= UG_NOERR) then
         ierr = nf90_def_var(ncid, prefix//'_edge_nodes', nf90_int, (/ meshids%dimids(mdim_two), meshids%dimids(mdim_edge) /) , meshids%varids(mdim_1dedgenodes))
         ierr = nf90_put_att(ncid, meshids%varids(mdim_1dedgenodes), 'cf_role',   'edge_node_connectivity')
         ierr = nf90_put_att(ncid, meshids%varids(mdim_1dedgenodes), 'long_name',  'Start and end nodes of mesh edges')
@@ -4158,13 +4157,13 @@ function ug_write_mesh_1d_edge_nodes (ncid, meshids, meshName, numEdge, mesh_1d_
            ierr = nf90_put_att(ncid, meshids%varids(mdim_1dedgenodes), 'start_index',  start_index)
         endif
    endif
-   
+
    ierr = nf90_enddef(ncid)
 
 ! -- end of header --
-      
+
    ! Write the actual data
-   
+
    ! Edges:
   ! always write edge nodes
   if (meshids%varids(mdim_1dedgenodes).ne.-1) then
@@ -4186,7 +4185,7 @@ function ug_write_mesh_1d_edge_nodes (ncid, meshids, meshName, numEdge, mesh_1d_
 
 801 continue
 
-end function ug_write_mesh_1d_edge_nodes                              
+end function ug_write_mesh_1d_edge_nodes
 
 ! Gets the number of contacts
 function ug_get_contacts_count(ncid, contactids, ncontacts) result(ierr)
@@ -4197,47 +4196,47 @@ function ug_get_contacts_count(ncid, contactids, ncontacts) result(ierr)
    integer                           :: ierr, xtype, ndims, nAtts, dimvalue, ncontactsDim1, ncontactsDim2
    character(len=nf90_max_name)      :: name
    integer, dimension(nf90_max_dims) :: dimids
-   
+
    ierr = nf90_inquire_variable( ncid, contactids%varids(cid_contacttopo), name = name, xtype = xtype, ndims = ndims, dimids = dimids, nAtts = nAtts)
-   if(ierr /= UG_NOERR) then 
+   if(ierr /= UG_NOERR) then
        Call SetMessage(Level_Fatal, 'Could not inquire the number of contacts for mesh contact '''//trim(name)//'''.')
    endif
-   
+
    ierr = nf90_inquire_dimension(ncid, dimids(1), len=ncontactsDim1)
-   if(ierr /= UG_NOERR) then 
+   if(ierr /= UG_NOERR) then
        Call SetMessage(Level_Fatal, 'Could not read the first dimension for mesh contact '''//trim(name)//'''.')
    endif
-   
+
    ierr = nf90_inquire_dimension(ncid, dimids(2), len=ncontactsDim2)
-   if(ierr /= UG_NOERR) then 
+   if(ierr /= UG_NOERR) then
        Call SetMessage(Level_Fatal, 'Could not read the second dimension for mesh contact '''//trim(name)//'''.')
    endif
-   
+
    ! ncontacts = max(ncontactsDim1,ncontactsDim2)
    ncontacts = ncontactsDim2
-   
+
 end function ug_get_contacts_count
 
 ! Writes the mesh_topology_contact mesh.
 function ug_put_mesh_contact(ncid, contactids, mesh1indexes, mesh2indexes, contacttype, contactsids, contactslongnames, startIndex) result(ierr)
    use array_module
-   integer, intent(in)                        :: ncid 
+   integer, intent(in)                        :: ncid
    type(t_ug_contacts), intent(in)            :: contactids
-   integer, intent(in)                        :: mesh1indexes(:),mesh2indexes(:),contacttype(:) 
+   integer, intent(in)                        :: mesh1indexes(:),mesh2indexes(:),contacttype(:)
    integer, allocatable                       :: contacts(:,:)
-   character(len=*), optional,intent(in)      :: contactsids(:), contactslongnames(:) 
+   character(len=*), optional,intent(in)      :: contactsids(:), contactslongnames(:)
    integer, intent(in), optional              :: startIndex
    integer                                    :: ierr, i
-   
+
    ierr = UG_SOMEERR
    ierr = nf90_enddef(ncid) !Put the NetCDF in write mode
-   
+
    allocate(contacts(2,size(mesh1indexes)))
-   
+
    contacts(1,:) = mesh1indexes(:)
    contacts(2,:) = mesh2indexes(:)
 
-   !we have not defined the start_index, so when we put the variable it must be zero based   
+   !we have not defined the start_index, so when we put the variable it must be zero based
    if (present(startIndex) .and. startIndex.ne.-1) then
        ierr = convert_start_index(contacts(1,:), imiss, startIndex, 0)
        ierr = convert_start_index(contacts(2,:), imiss, startIndex, 0)
@@ -4245,36 +4244,36 @@ function ug_put_mesh_contact(ncid, contactids, mesh1indexes, mesh2indexes, conta
 
    ierr = nf90_put_var(ncid, contactids%varids(cid_contacttopo), contacts)
 
-   if (present(contactsids)) then 
+   if (present(contactsids)) then
       ierr = nf90_put_var(ncid, contactids%varids(cid_contactids), contactsids)
    endif
-   if (present(contactslongnames)) then 
-      ierr = nf90_put_var(ncid, contactids%varids(cid_contactlongnames), contactslongnames) 
+   if (present(contactslongnames)) then
+      ierr = nf90_put_var(ncid, contactids%varids(cid_contactlongnames), contactslongnames)
    endif
-   
-   ierr = nf90_put_var(ncid, contactids%varids(cid_contacttype), contacttype) 
+
+   ierr = nf90_put_var(ncid, contactids%varids(cid_contacttype), contacttype)
 
 end function ug_put_mesh_contact
 
 ! Gets the indexses of the contacts and the ids and the descriptions of each link
 function ug_get_mesh_contact(ncid, contactids, mesh1indexes, mesh2indexes, contactsids, contactslongnames, contacttype, startIndex) result(ierr)
    use array_module
-   integer, intent(in)               :: ncid, startIndex 
+   integer, intent(in)               :: ncid, startIndex
    type(t_ug_contacts), intent(in)   :: contactids
    integer, intent(out)              :: mesh1indexes(:),mesh2indexes(:),contacttype(:)
-   character(len=*), intent(out)     :: contactsids(:), contactslongnames(:) 
+   character(len=*), intent(out)     :: contactsids(:), contactslongnames(:)
    integer, allocatable              :: contacts(:,:)
    integer                           :: ierr, i, varStartIndex
 
    allocate(contacts(2,size(mesh1indexes)))
-   
-   ierr = nf90_get_var(ncid, contactids%varids(cid_contacttopo), contacts) 
-   ierr = nf90_get_var(ncid, contactids%varids(cid_contactids), contactsids)  
-   ierr = nf90_get_var(ncid, contactids%varids(cid_contacttype), contacttype)  
-   ierr = nf90_get_var(ncid, contactids%varids(cid_contactlongnames), contactslongnames) 
-   
+
+   ierr = nf90_get_var(ncid, contactids%varids(cid_contacttopo), contacts)
+   ierr = nf90_get_var(ncid, contactids%varids(cid_contactids), contactsids)
+   ierr = nf90_get_var(ncid, contactids%varids(cid_contacttype), contacttype)
+   ierr = nf90_get_var(ncid, contactids%varids(cid_contactlongnames), contactslongnames)
+
    !we check for the start_index, we do not know if the variable was written as 0 based
-   ierr = nf90_get_att(ncid, contactids%varids(cid_contacttopo),'start_index', varStartIndex)  
+   ierr = nf90_get_att(ncid, contactids%varids(cid_contacttopo),'start_index', varStartIndex)
    if (ierr .eq. UG_NOERR) then
         ierr = convert_start_index(contacts(1,:), imiss, varStartIndex, startIndex)
         ierr = convert_start_index(contacts(2,:), imiss, varStartIndex, startIndex)
@@ -4282,12 +4281,12 @@ function ug_get_mesh_contact(ncid, contactids, mesh1indexes, mesh2indexes, conta
         ierr = convert_start_index(contacts(1,:), imiss, 0, startIndex)
         ierr = convert_start_index(contacts(2,:), imiss, 0, startIndex)
    endif
-   
+
    do i = 1, size(mesh1indexes)
-      mesh1indexes(i) = contacts(1,i) 
-      mesh2indexes(i) = contacts(2,i) 
+      mesh1indexes(i) = contacts(1,i)
+      mesh2indexes(i) = contacts(2,i)
    end do
-   
+
 end function ug_get_mesh_contact
 
 !> This function writes the nodes of the 1d network
@@ -4298,15 +4297,15 @@ function ug_write_1d_network_nodes(ncid,netids, nodesX, nodesY, nodeids, nodelon
    double precision, intent(in)               :: nodesX(:), nodesY(:)
    character(len=*), optional,intent(in)      :: nodeids(:),nodelongnames(:)
    integer                                    :: ierr
-   
+
    ierr = UG_SOMEERR
    !Put the NetCDF in write mode
    ierr = nf90_enddef(ncid)
-      
+
    ierr = nf90_put_var(ncid, netids%varids(ntid_1dnodex), nodesX)
    ierr = nf90_put_var(ncid, netids%varids(ntid_1dnodey), nodesY)
    if (present(nodeids)) then
-   ierr = nf90_put_var(ncid, netids%varids(ntid_1dnodids), nodeids) 
+   ierr = nf90_put_var(ncid, netids%varids(ntid_1dnodids), nodeids)
    endif
    if (present(nodelongnames)) then
    ierr = nf90_put_var(ncid, netids%varids(ntid_1dnodlongnames), nodelongnames)
@@ -4322,36 +4321,36 @@ function ug_put_1d_network_branches(ncid,netids, sourceNodeId, targetNodeId, bra
    type(t_ug_network), intent(in)    :: netids !< Set of NetCDF-ids for all mesh geometry arrays
    integer,           intent(in)     ::sourceNodeId(:),targetNodeId(:)
    integer,           allocatable    ::sourcestargets(:,:)
-   double precision,  intent(in)     ::branchlengths(:) 
+   double precision,  intent(in)     ::branchlengths(:)
    character(len=*),  intent(in)     ::branchids(:),branchlongnames(:)
    integer,           intent(in)     ::nbranchgeometrynodes(:)
    integer                           ::ierr, n, k
-   
+
    ierr = UG_SOMEERR
    ierr = nf90_enddef(ncid)
-   
+
    allocate(sourcestargets(2, nBranches))
    k = 0
    do n=1,nBranches
        k = k + 1
-       sourcestargets(1, k)=sourceNodeId(n) 
+       sourcestargets(1, k)=sourceNodeId(n)
        sourcestargets(2, k)=targetNodeId(n)
    end do
-   
+
    !we have not defined the start_index, so when we put the variable it must be zero based
    if (startIndex.ne.-1) then
         ierr = convert_start_index(sourcestargets(1,:), imiss, startIndex, 0)
         ierr = convert_start_index(sourcestargets(2,:), imiss, startIndex, 0)
    endif
-   
+
    ierr = nf90_put_var(ncid, netids%varids(ntid_1dedgenodes), sourcestargets)
-   ierr = nf90_put_var(ncid, netids%varids(ntid_1dbranchids), branchids)  
-   ierr = nf90_put_var(ncid, netids%varids(ntid_1dbranchlongnames), branchlongnames) 
-   ierr = nf90_put_var(ncid, netids%varids(ntid_1dbranchlengths), branchlengths) 
-   ierr = nf90_put_var(ncid, netids%varids(ntid_1dgeopointsperbranch), nbranchgeometrynodes) 
-  
+   ierr = nf90_put_var(ncid, netids%varids(ntid_1dbranchids), branchids)
+   ierr = nf90_put_var(ncid, netids%varids(ntid_1dbranchlongnames), branchlongnames)
+   ierr = nf90_put_var(ncid, netids%varids(ntid_1dbranchlengths), branchlengths)
+   ierr = nf90_put_var(ncid, netids%varids(ntid_1dgeopointsperbranch), nbranchgeometrynodes)
+
 end function ug_put_1d_network_branches
-   
+
 !> This function writes the branch order array
    function ug_put_1d_network_branchorder(ncid, netids, branchorder) result(ierr)
 
@@ -4359,11 +4358,11 @@ end function ug_put_1d_network_branches
    type(t_ug_network), intent(in)    :: netids !< Set of NetCDF-ids for network
    integer,           intent(in)     :: branchorder(:)
    integer                           :: ierr
-   
-   ierr = nf90_put_var(ncid, netids%varids(ntid_1dbranchorder), branchorder) 
+
+   ierr = nf90_put_var(ncid, netids%varids(ntid_1dbranchorder), branchorder)
 
    end function ug_put_1d_network_branchorder
-   
+
    !> This function writes the branch order array
    function ug_put_1d_network_branchtype(ncid, netids, branchtypes) result(ierr)
 
@@ -4371,8 +4370,8 @@ end function ug_put_1d_network_branches
    type(t_ug_network), intent(in)    :: netids !< Set of NetCDF-ids for network
    integer,           intent(in)     :: branchtypes(:)
    integer                           :: ierr
-   
-   ierr = nf90_put_var(ncid, netids%varids(ntid_1dbranchtype), branchtypes) 
+
+   ierr = nf90_put_var(ncid, netids%varids(ntid_1dbranchtype), branchtypes)
 
    end function ug_put_1d_network_branchtype
 
@@ -4380,16 +4379,16 @@ end function ug_put_1d_network_branches
 function ug_write_1d_network_branches_geometry(ncid,netids, geopointsX, geopointsY)  result(ierr)
 
    integer, intent(in)               :: ncid
-   type(t_ug_network), intent(in)    :: netids 
-   double precision,  intent(in)     :: geopointsX(:), geopointsY(:) 
+   type(t_ug_network), intent(in)    :: netids
+   double precision,  intent(in)     :: geopointsX(:), geopointsY(:)
    integer                           :: ierr
-   
+
    ierr = UG_SOMEERR
    ierr = nf90_enddef(ncid)
-   
+
    ierr = nf90_put_var(ncid, netids%varids(ntid_1dgeox), geopointsX)
    ierr = nf90_put_var(ncid, netids%varids(ntid_1dgeoy), geopointsY)
-   
+
 end function ug_write_1d_network_branches_geometry
 
 
@@ -4399,13 +4398,13 @@ function ug_put_1d_mesh_discretisation_points(ncid, meshids, nodebranchidx, node
 
    integer, intent(in)                :: ncid, nodebranchidx(:), startIndex
    double precision, intent(in)       :: nodeoffset(:)
-   type(t_ug_mesh), intent(in)        :: meshids 
-   
+   type(t_ug_mesh), intent(in)        :: meshids
+
    integer,          allocatable      :: shiftednodebranchidx(:), shiftedEdgeNodes(:,:)
    integer                            :: ierr,nmeshpoints
 
    ierr = UG_SOMEERR
-   ierr = ug_put_1d_mesh_discretisation_points_v1(ncid, meshids, nodebranchidx, nodeoffset, startIndex) 
+   ierr = ug_put_1d_mesh_discretisation_points_v1(ncid, meshids, nodebranchidx, nodeoffset, startIndex)
 
 end function ug_put_1d_mesh_discretisation_points
 
@@ -4414,14 +4413,14 @@ function ug_put_1d_mesh_discretisation_points_v1(ncid, meshids, nodebranchidx, n
    use array_module
    integer, intent(in)                                  :: ncid, nodebranchidx(:), startIndex
    double precision, intent(in)                         :: nodeoffset(:)
-   type(t_ug_mesh), intent(in)                          :: meshids 
-   double precision, dimension(:), optional, intent(in) :: coordx, coordy 
+   type(t_ug_mesh), intent(in)                          :: meshids
+   double precision, dimension(:), optional, intent(in) :: coordx, coordy
    integer, allocatable                                 :: shiftednodebranchidx(:), shiftedEdgeNodes(:,:)
    integer                                              :: ierr,nmeshpoints
 
    ierr = UG_SOMEERR
    ierr = nf90_enddef(ncid)
-   
+
    ierr = nf90_inquire_dimension(ncid, meshids%dimids(mdim_node), len=nmeshpoints)
    if(ierr /= UG_NOERR) then
        Call SetMessage(Level_Fatal, 'Could not read the 1D mesh node dimension. Check any previous warnings.')
@@ -4443,7 +4442,7 @@ function ug_put_1d_mesh_discretisation_points_v1(ncid, meshids, nodebranchidx, n
 
    ierr = nf90_put_var(ncid, meshids%varids(mid_1dnodebranch), shiftednodebranchidx)
    ierr = nf90_put_var(ncid, meshids%varids(mid_1dnodeoffset), nodeoffset)
-   
+
    if( present(coordx) .and. present(coordy) ) then
       ierr = nf90_put_var(ncid, meshids%varids(mid_nodex), coordx)
       ierr = nf90_put_var(ncid, meshids%varids(mid_nodey), coordy)
@@ -4481,7 +4480,7 @@ function ug_put_1d_mesh_edges(ncid, meshids, edgebranchidx, edgeoffset, startInd
    if (ierr /= UG_NOERR) then
        Call SetMessage(Level_Fatal, 'Could not read the 1D mesh edge dimension. Check any previous warnings.')
    end if
-   
+
    !we have not defined the start_index, so when we put the variable it must be zero based
    allocate(shiftededgebranchidx(size(edgebranchidx)))
    shiftededgebranchidx = edgebranchidx
@@ -4513,44 +4512,44 @@ end function ug_put_1d_mesh_edges
 function ug_get_1d_network_nodes_count(ncid,netids, nNodes) result(ierr)
 
    integer, intent(in)               :: ncid
-   type(t_ug_network), intent(in)    :: netids 
+   type(t_ug_network), intent(in)    :: netids
    integer, intent(out)              :: nNodes
    integer                           :: ierr
-   
+
   ierr = nf90_inquire_dimension(ncid, netids%dimids(ntdim_1dnodes), len=nNodes)
-  if(ierr /= UG_NOERR) then 
+  if(ierr /= UG_NOERR) then
        Call SetMessage(Level_Fatal, 'Could not read the 1D network nodes count. Check previous warnings.')
-  end if 
-   
+  end if
+
 end function ug_get_1d_network_nodes_count
 
 !> This function gets the number of branches
 function ug_get_1d_network_branches_count(ncid,netids, nbranches) result(ierr)
 
    integer, intent(in)               :: ncid
-   type(t_ug_network), intent(in)    :: netids 
+   type(t_ug_network), intent(in)    :: netids
    integer, intent(out)              :: nbranches
    integer                           :: ierr
-   
+
   ierr = nf90_inquire_dimension(ncid, netids%dimids(ntdim_1dedges), len=nbranches)
-  if(ierr /= UG_NOERR) then 
+  if(ierr /= UG_NOERR) then
        Call SetMessage(Level_Fatal, 'Could not read the 1D network number of branches. Check any previous warnings.')
-  end if 
-   
+  end if
+
 end function ug_get_1d_network_branches_count
 
 !> This function gets the number of geometry points
 function ug_get_1d_network_branches_geometry_coordinate_count(ncid,netids, ngeometry) result(ierr)
 
    integer, intent(in)               :: ncid
-   type(t_ug_network), intent(in)    :: netids   
+   type(t_ug_network), intent(in)    :: netids
    integer, intent(out)              :: ngeometry
    integer                           :: ierr
-   
+
   ierr = nf90_inquire_dimension(ncid, netids%dimids(ntdim_1dgeopoints), len=ngeometry)
-  if(ierr /= UG_NOERR) then 
+  if(ierr /= UG_NOERR) then
        Call SetMessage(Level_Fatal, 'Could not read the 1D network number of geometry points. Check any previous warnings.')
-  end if 
+  end if
 
 end function ug_get_1d_network_branches_geometry_coordinate_count
 
@@ -4558,31 +4557,31 @@ end function ug_get_1d_network_branches_geometry_coordinate_count
 function ug_read_1d_network_nodes(ncid, netids, nodesX, nodesY, nodeids, nodelongnames) result(ierr)
 
    integer, intent(in)                      :: ncid
-   type(t_ug_network), intent(in)           :: netids 
-   double precision,intent(out)             :: nodesX(:), nodesY(:) 
+   type(t_ug_network), intent(in)           :: netids
+   double precision,intent(out)             :: nodesX(:), nodesY(:)
    character(len=*),optional,intent(out)    :: nodeids(:), nodelongnames(:)
    integer                                  :: ierr
- 
+
    ierr = nf90_get_var(ncid, netids%varids(ntid_1dnodex), nodesX)
-   if(ierr /= UG_NOERR) then 
+   if(ierr /= UG_NOERR) then
        Call SetMessage(Level_Fatal, 'Could not read 1D network node x-coordinates. Check any previous warnings.')
-   end if 
-   
+   end if
+
    ierr = nf90_get_var(ncid, netids%varids(ntid_1dnodey), nodesY)
-   if(ierr /= UG_NOERR) then 
+   if(ierr /= UG_NOERR) then
        Call SetMessage(Level_Fatal, 'Could not read 1D network node y-coordinates. Check any previous warnings.')
    end if
 
    if (present(nodeids)) then
       ierr = nf90_get_var(ncid, netids%varids(ntid_1dnodids), nodeids)
-      if(ierr /= UG_NOERR) then 
+      if(ierr /= UG_NOERR) then
          Call SetMessage(Level_Fatal, 'Could not read 1D network node ids. Check any previous warnings.')
       end if
    end if
 
    if (present(nodelongnames)) then
       ierr = nf90_get_var(ncid, netids%varids(ntid_1dnodlongnames), nodelongnames)
-      if(ierr /= UG_NOERR) then 
+      if(ierr /= UG_NOERR) then
          Call SetMessage(Level_Fatal, 'Could not read 1D network node longnames. Check any previous warnings.')
       end if
    end if
@@ -4593,8 +4592,8 @@ end function ug_read_1d_network_nodes
 function ug_get_1d_network_branches(ncid, netids, sourcenodeid, targetnodeid, branchlengths, nbranchgeometrypoints, startIndex, nbranchid, nbranchlongnames) result(ierr)
    use array_module
    integer, intent(in)                        :: ncid, startIndex
-   type(t_ug_network), intent(in)             :: netids 
-   integer,intent(out)                        :: sourcenodeid(:), targetnodeid(:),nbranchgeometrypoints(:) 
+   type(t_ug_network), intent(in)             :: netids
+   integer,intent(out)                        :: sourcenodeid(:), targetnodeid(:),nbranchgeometrypoints(:)
    real(kind=dp),intent(out)                  :: branchlengths(:)
    character(len=*),intent(out), optional     :: nbranchid(:),nbranchlongnames(:)
    integer                                    :: ierr, n, k, bid, nmeshpoints, nbranches, varStartIndex
@@ -4606,8 +4605,8 @@ function ug_get_1d_network_branches(ncid, netids, sourcenodeid, targetnodeid, br
    ierr = nf90_get_var(ncid, netids%varids(ntid_1dedgenodes), sourcestargets)
    if(ierr /= UG_NOERR) then
        Call SetMessage(Level_Fatal, 'Could not read the 1D network branches''s start and end nodes. Check any previous warnings.')
-   end if 
-   
+   end if
+
    !we check for the start_index, we do not know if the variable was written as 0 based
    ierr = nf90_get_att(ncid, netids%varids(ntid_1dedgenodes),'start_index', varStartIndex)
    if (ierr .eq. UG_NOERR) then
@@ -4617,7 +4616,7 @@ function ug_get_1d_network_branches(ncid, netids, sourcenodeid, targetnodeid, br
        ierr = convert_start_index(sourcestargets(1,:), imiss, 0, startIndex)
        ierr = convert_start_index(sourcestargets(2,:), imiss, 0, startIndex)
    endif
-   
+
    k = 0
    do n=1,nBranches
        k = k + 1
@@ -4625,31 +4624,31 @@ function ug_get_1d_network_branches(ncid, netids, sourcenodeid, targetnodeid, br
        targetNodeId(n)=sourcestargets(2,k)
    end do
 
-   
+
    ierr = nf90_get_var(ncid, netids%varids(ntid_1dbranchlengths), branchlengths)
-   if(ierr /= UG_NOERR) then 
+   if(ierr /= UG_NOERR) then
        Call SetMessage(Level_Fatal, 'Could not read the 1D network branch lengths. Check any previous warnings.')
-   end if 
-   
+   end if
+
    ierr = nf90_get_var(ncid, netids%varids(ntid_1dgeopointsperbranch), nbranchgeometrypoints)
-   if(ierr /= UG_NOERR) then 
+   if(ierr /= UG_NOERR) then
        Call SetMessage(Level_Fatal, 'Could not read the 1D network branches geometry points. Check any previous warnings.')
-   end if 
-   
+   end if
+
    if (present(nbranchid).and.present(nbranchlongnames)) then
       ierr = nf90_get_var(ncid, netids%varids(ntid_1dbranchids), nbranchid)
-      if(ierr /= UG_NOERR) then 
+      if(ierr /= UG_NOERR) then
          Call SetMessage(Level_Fatal, 'Could not read the 1D network branch ids. Check any previous warnings.')
-      end if 
-   
+      end if
+
       ierr = nf90_get_var(ncid, netids%varids(ntid_1dbranchlongnames), nbranchlongnames)
-      if(ierr /= UG_NOERR) then 
+      if(ierr /= UG_NOERR) then
          Call SetMessage(Level_Fatal, 'Could not read the 1D network branch longnames. Check any previous warnings.')
-      end if 
+      end if
    endif
-   
+
    end function ug_get_1d_network_branches
-   
+
 !> This function writes the branch order array
    function ug_get_1d_network_branchorder(ncid, netids, branchorder) result(ierr)
 
@@ -4657,45 +4656,45 @@ function ug_get_1d_network_branches(ncid, netids, sourcenodeid, targetnodeid, br
    type(t_ug_network), intent(in)    :: netids !< Set of NetCDF-ids for network
    integer,           intent( out)   :: branchorder(:)
    integer                           :: ierr
-   
-   ierr = nf90_get_var(ncid, netids%varids(ntid_1dbranchorder), branchorder) 
-   if(ierr /= UG_NOERR) then 
-       Call SetMessage(Level_Fatal, 'Could not read the 1D network branch order. Check any previous warnings.')
-   end if 
 
-   end function ug_get_1d_network_branchorder   
-   
+   ierr = nf90_get_var(ncid, netids%varids(ntid_1dbranchorder), branchorder)
+   if(ierr /= UG_NOERR) then
+       Call SetMessage(Level_Fatal, 'Could not read the 1D network branch order. Check any previous warnings.')
+   end if
+
+   end function ug_get_1d_network_branchorder
+
    function ug_get_1d_network_branchtype(ncid, netids, branchtype) result(ierr)
 
    integer, intent(in)               :: ncid
    type(t_ug_network), intent(in)    :: netids !< Set of NetCDF-ids for network
    integer,           intent( out)   :: branchtype(:)
    integer                           :: ierr
-   
-   ierr = nf90_get_var(ncid, netids%varids(ntid_1dbranchtype), branchtype) 
-   if(ierr /= UG_NOERR) then 
-       Call SetMessage(Level_Fatal, 'Could not read the 1D network branch type. Check any previous warnings.')
-   end if 
 
-   end function ug_get_1d_network_branchtype  
+   ierr = nf90_get_var(ncid, netids%varids(ntid_1dbranchtype), branchtype)
+   if(ierr /= UG_NOERR) then
+       Call SetMessage(Level_Fatal, 'Could not read the 1D network branch type. Check any previous warnings.')
+   end if
+
+   end function ug_get_1d_network_branchtype
 
 !> This function reads the coordinates of the geometry points
 function ug_read_1d_network_branches_geometry(ncid, netids, geopointsX, geopointsY) result(ierr)
 
    integer, intent(in)                      :: ncid
-   type(t_ug_network), intent(in)           :: netids 
+   type(t_ug_network), intent(in)           :: netids
    real(kind=dp), intent(out)               :: geopointsX(:), geopointsY(:)
    integer                                  :: ierr
-         
+
    ierr = nf90_get_var(ncid, netids%varids(ntid_1dgeox), geopointsX)
-   if(ierr /= UG_NOERR) then 
+   if(ierr /= UG_NOERR) then
        Call SetMessage(Level_Fatal, 'Could not read the network 1D geometry x-coordinates. Check any previous warnings.')
-   end if 
-   
+   end if
+
    ierr = nf90_get_var(ncid, netids%varids(ntid_1dgeoy), geopointsY)
-   if(ierr /= UG_NOERR) then 
+   if(ierr /= UG_NOERR) then
        Call SetMessage(Level_Fatal, 'Could not read the network 1D geometry y-coordinates. Check any previous warnings.')
-   end if 
+   end if
 
 end function ug_read_1d_network_branches_geometry
 
@@ -4703,28 +4702,28 @@ end function ug_read_1d_network_branches_geometry
 function ug_get_1d_mesh_discretisation_points_count(ncid, meshids, nmeshpoints) result(ierr)
 
    integer, intent(in)               :: ncid
-   type(t_ug_mesh), intent(in)       :: meshids 
+   type(t_ug_mesh), intent(in)       :: meshids
    integer, intent(out)              :: nmeshpoints
    integer                           :: ierr
-   
+
    ierr = nf90_inquire_dimension(ncid, meshids%dimids(mdim_node), len=nmeshpoints)
-   if(ierr /= UG_NOERR) then 
+   if(ierr /= UG_NOERR) then
        Call SetMessage(Level_Fatal, 'Could not read the number of 1D mesh nodes. Check any previous warnings.')
-   end if 
-   
+   end if
+
 end function ug_get_1d_mesh_discretisation_points_count
 
 !> This function reads the geometry information for the mesh points
 function ug_get_1d_mesh_discretisation_points(ncid, meshids, nodebranchidx, nodeoffsets, startIndex, coordx, coordy) result(ierr)
    use array_module
    integer, intent(in)                      :: ncid, startIndex
-   type(t_ug_mesh), intent(in)              :: meshids 
+   type(t_ug_mesh), intent(in)              :: meshids
    real(kind=dp),   intent(out)             :: nodeoffsets(:)
    integer,intent(out)                      :: nodebranchidx(:)
-   
-   real(kind=dp),   intent(out), optional   :: coordx(:), coordy(:) 
+
+   real(kind=dp),   intent(out), optional   :: coordx(:), coordy(:)
    integer                                  :: ierr,varStartIndex
-         
+
    ierr = nf90_get_var(ncid, meshids%varids(mid_1dnodebranch), nodebranchidx)
 
    !we check for the start_index, we do not know if the variable was written as 0 based
@@ -4734,30 +4733,30 @@ function ug_get_1d_mesh_discretisation_points(ncid, meshids, nodebranchidx, node
    else
         ierr = convert_start_index(nodebranchidx, imiss, 0, startIndex)
    endif
-   
+
    !define dim
-   if(ierr /= UG_NOERR) then 
+   if(ierr /= UG_NOERR) then
        Call SetMessage(Level_Fatal, 'Could not read the 1D mesh node branch ids. Check any previous warnings.')
-   end if 
+   end if
    ierr = nf90_get_var(ncid, meshids%varids(mid_1dnodeoffset), nodeoffsets)
-   if(ierr /= UG_NOERR) then 
+   if(ierr /= UG_NOERR) then
        Call SetMessage(Level_Fatal, 'Could not read the 1D mesh node offsets. Check any previous warnings.')
-   end if 
-   
+   end if
+
    if(present(coordx)) then
       ierr = nf90_get_var(ncid, meshids%varids(mid_nodex), coordx)
-      if(ierr /= UG_NOERR) then 
+      if(ierr /= UG_NOERR) then
          Call SetMessage(Level_Fatal, 'Could not read the 1D mesh node x-coordinates. Check any previous warnings.')
-      end if 
+      end if
    endif
-   
+
    if(present(coordy)) then
       ierr = nf90_get_var(ncid, meshids%varids(mid_nodey), coordy)
-      if(ierr /= UG_NOERR) then 
+      if(ierr /= UG_NOERR) then
          Call SetMessage(Level_Fatal, 'Could not read the 1D mesh nodes y-coordinates. Check any previous warnings.')
       end if
    endif
-    
+
 end function  ug_get_1d_mesh_discretisation_points
 
 !> This function reads the coordinate values for the mesh edges.
@@ -4793,7 +4792,7 @@ function ug_get_1d_mesh_edge_coordinates(ncid, meshids, edgebranchidx, edgeoffse
             //trim(meshname)//''' from '''//trim(varname)//'''. Check any previous warnings.')
       end if
       numerr = numerr + 1
-   end if 
+   end if
 
    !we check for the start_index, we do not know if the variable was written as 0 based
    ierr = nf90_get_att(ncid, meshids%varids(mid_1dedgebranch),'start_index', varStartIndex)
@@ -4802,9 +4801,9 @@ function ug_get_1d_mesh_edge_coordinates(ncid, meshids, edgebranchidx, edgeoffse
    else
         ierr = convert_start_index(edgebranchidx, imiss, 0, startIndex)
    endif
-   
+
    ierr = nf90_get_var(ncid, meshids%varids(mid_1dedgeoffset), edgeoffsets)
-   if (ierr /= nf90_noerr) then 
+   if (ierr /= nf90_noerr) then
       if (meshids%varids(mid_1dedgeoffset) <= 0) then
          call SetMessage(LEVEL_WARN, 'ug_get_1d_mesh_edge_coordinates: could not find the 1D mesh edge branch offsets variable for ''' &
             //trim(meshname)//'''. Is the :edge_coordinates attribute complete?')
@@ -4818,7 +4817,7 @@ function ug_get_1d_mesh_edge_coordinates(ncid, meshids, edgebranchidx, edgeoffse
 
    if (present(edgex)) then
       ierr = nf90_get_var(ncid, meshids%varids(mid_edgex), edgex)
-      if (ierr /= nf90_noerr) then 
+      if (ierr /= nf90_noerr) then
          if (meshids%varids(mid_edgex) <= 0) then
             call SetMessage(LEVEL_WARN, 'ug_get_1d_mesh_edge_coordinates: could not find the 1D mesh edge x-coordinates variable for ''' &
                //trim(meshname)//'''. Is the :edge_coordinates attribute complete?')
@@ -4828,12 +4827,12 @@ function ug_get_1d_mesh_edge_coordinates(ncid, meshids, edgebranchidx, edgeoffse
                //trim(meshname)//''' from '''//trim(varname)//'''. Check any previous warnings.')
          end if
          numerr = numerr + 1
-      end if 
+      end if
    endif
-   
+
    if (present(edgey)) then
       ierr = nf90_get_var(ncid, meshids%varids(mid_edgey), edgey)
-      if (ierr /= nf90_noerr) then 
+      if (ierr /= nf90_noerr) then
          if (meshids%varids(mid_edgey) <= 0) then
             call SetMessage(LEVEL_WARN, 'ug_get_1d_mesh_edge_coordinates: could not find the 1D mesh edge y-coordinates variable for ''' &
                //trim(meshname)//'''. Is the :edge_coordinates attribute complete?')
@@ -4865,22 +4864,22 @@ end function  ug_get_1d_mesh_edge_coordinates
 
 ! we assume  global attributes are already present in the file (it is needed to read the file back in later)
 function ug_clone_mesh_definition( ncidin, ncidout, meshidsin, meshidsout ) result(ierr)
-    
+
     integer, intent(in)                   :: ncidin, ncidout
-    type(t_ug_mesh), intent(in)           :: meshidsin  
-    type(t_ug_mesh), intent(inout)        :: meshidsout 
+    type(t_ug_mesh), intent(in)           :: meshidsin
+    type(t_ug_mesh), intent(inout)        :: meshidsout
     integer                               :: i, j, ierr, xtype, ndims, nAtts, dimvalue
     integer                               :: attval
     logical                               :: isMeshTopo
-    integer, dimension(nf90_max_var_dims) :: dimids    
+    integer, dimension(nf90_max_var_dims) :: dimids
     character(len=nf90_max_name)          :: name
     integer, dimension(nf90_max_dims)     :: dimmap, outdimids
     character(len=:),allocatable          :: invarname
     type(t_ug_meta)                       :: meta  !< Meta information on file.
-     
+
     ierr = UG_SOMEERR
     ierr = nf90_redef(ncidout) !open NetCDF in define mode
-        
+
     !copy dimensions
     do i= mdim_start + 1, mdim_end - 1
     if (meshidsin%dimids(i)/=-1) then
@@ -4889,10 +4888,10 @@ function ug_clone_mesh_definition( ncidin, ncidout, meshidsin, meshidsout ) resu
           if ( ierr /= nf90_noerr ) then
              return
           endif
-          !define variable in the new file, first check if it is already present. 
+          !define variable in the new file, first check if it is already present.
           !if is not present we will get an error, and we kniw we have to define the variable.
           ierr = nf90_inq_dimid(ncidout, name, meshidsout%dimids(i))
-          if ( ierr /= nf90_noerr) then    
+          if ( ierr /= nf90_noerr) then
           ierr = nf90_def_dim( ncidout, name, dimvalue, meshidsout%dimids(i))
           endif
           if ( ierr /= nf90_noerr ) then
@@ -4902,7 +4901,7 @@ function ug_clone_mesh_definition( ncidin, ncidout, meshidsin, meshidsout ) resu
           dimmap(meshidsin%dimids(i))=meshidsout%dimids(i);
      end if
     end do
-    
+
     !copy variables and attrubutes
     do i= mid_start + 1, mid_end - 1
        if (meshidsin%varids(i)/=-1) then
@@ -4931,7 +4930,7 @@ function ug_clone_mesh_definition( ncidin, ncidout, meshidsin, meshidsout ) resu
           end if
 
           ! if is a 1d mesh we need to refer in the coordinate_space to the varid of the network geometry
-          
+
          isMeshTopo = ug_is_mesh_topology(ncidin,  meshidsin%varids(i))
          ierr = nf90_get_att(ncidin, meshidsin%varids(mid_meshtopo),'topology_dimension', attval)
          if (ierr == nf90_noerr .and. isMeshTopo .and. attval==1) then
@@ -4954,15 +4953,15 @@ end function ug_clone_mesh_definition
 function ug_clone_mesh_data( ncidin, ncidout, meshidsin, meshidsout ) result(ierr)
 
     integer, intent(in)                   :: ncidin, ncidout
-    type(t_ug_mesh), intent(in)           :: meshidsin, meshidsout     
+    type(t_ug_mesh), intent(in)           :: meshidsin, meshidsout
     integer                               :: i, dim, ierr, xtype, ndims, nAtts, dimvalue
-    integer, dimension(nf90_max_var_dims) :: dimids, dimsizes   
+    integer, dimension(nf90_max_var_dims) :: dimids, dimsizes
     character(len=nf90_max_name)          :: name
 
     ! end definition
     ierr = UG_SOMEERR
     ierr = nf90_enddef( ncidout )
-    
+
     do i= mid_start + 1, mid_end - 1
         if (meshidsin%varids(i)/=-1) then
 
@@ -4976,7 +4975,7 @@ function ug_clone_mesh_data( ncidin, ncidout, meshidsin, meshidsout ) result(ier
             do dim = 1, ndims
                ierr = nf90_inquire_dimension(ncidin, dimids(dim), len=dimsizes(dim))
             enddo
-            
+
             !get and write the variables
             select case ( xtype )
             case( nf90_int )
@@ -5003,9 +5002,9 @@ end function ug_clone_mesh_data
 !integer copy function
 function ug_copy_int_var( ncidin, ncidout, meshidin, meshidout, ndims, dimsizes )  result(ierr)
 
-    integer, intent(in)    :: ncidin, ncidout, meshidin, meshidout, ndims, dimsizes(:)       
+    integer, intent(in)    :: ncidin, ncidout, meshidin, meshidout, ndims, dimsizes(:)
     integer                :: ierr, dim1, dim2
-    integer, allocatable   :: value(:), value2d(:,:) 
+    integer, allocatable   :: value(:), value2d(:,:)
 
     if (ndims==0) then
         !scalar
@@ -5024,14 +5023,14 @@ function ug_copy_int_var( ncidin, ncidout, meshidin, meshidout, ndims, dimsizes 
         ierr = nf90_put_var( ncidout, meshidout, value2d )
     endif
 
-end function 
+end function
 
 !real copy function
 function ug_copy_real_var( ncidin, ncidout, meshidin, meshidout, ndims, dimsizes )  result(ierr)
 
-    integer, intent(in)     :: ncidin, ncidout, meshidin, meshidout, ndims, dimsizes(:)       
+    integer, intent(in)     :: ncidin, ncidout, meshidin, meshidout, ndims, dimsizes(:)
     integer                 :: ierr, dim1, dim2
-    real, allocatable       :: value(:), value2d(:,:) 
+    real, allocatable       :: value(:), value2d(:,:)
 
     if (ndims==0) then
         !scalar
@@ -5050,14 +5049,14 @@ function ug_copy_real_var( ncidin, ncidout, meshidin, meshidout, ndims, dimsizes
         ierr = nf90_put_var( ncidout, meshidout, value2d )
     endif
 
-end function 
+end function
 
 !double copy function
 function ug_copy_double_var( ncidin, ncidout, meshidin, meshidout, ndims, dimsizes )  result(ierr)
 
-    integer, intent(in)                   :: ncidin, ncidout, meshidin, meshidout, ndims, dimsizes(:)       
+    integer, intent(in)                   :: ncidin, ncidout, meshidin, meshidout, ndims, dimsizes(:)
     integer                               :: ierr, dim1, dim2
-    real(kind=kind(1.0d0)), allocatable   :: value(:), value2d(:,:) 
+    real(kind=kind(1.0d0)), allocatable   :: value(:), value2d(:,:)
 
     if (ndims==0) then
         !scalar
@@ -5076,7 +5075,7 @@ function ug_copy_double_var( ncidin, ncidout, meshidin, meshidout, ndims, dimsiz
         ierr = nf90_put_var( ncidout, meshidout, value2d )
     endif
 
-end function 
+end function
 
 !For characters we always assume size 2
 function ug_copy_char_var( ncidin, ncidout, meshidin, meshidout, ndims, dimsizes )  result(ierr)
@@ -5087,7 +5086,7 @@ function ug_copy_char_var( ncidin, ncidout, meshidin, meshidout, ndims, dimsizes
 
     ierr = nf90_get_var( ncidin, meshidin, value2d )
     ierr = nf90_put_var( ncidout, meshidout, value2d )
-    
+
 end function
 
 !copy the variable attributes
@@ -5099,7 +5098,7 @@ function ug_copy_var_atts( ncidin, ncidout, varidin, varidout ) result(ierr)
     character(len=nf90_max_name)   :: attname
     integer                        :: natts
     integer                        :: attvalue
-    
+
     ierr = -1
     ierr = nf90_inquire_variable( ncidin, varidin, nAtts=natts )
     if ( ierr == nf90_enotvar ) then
@@ -5114,13 +5113,13 @@ function ug_copy_var_atts( ncidin, ncidout, varidin, varidout ) result(ierr)
         if ( ierr /= nf90_noerr ) then
             return
         endif
-        
+
         ierr = nf90_copy_att( ncidin, varidin, attname, ncidout, varidout )
         if ( ierr /= nf90_noerr ) then
             return
-        endif        
+        endif
     enddo
-    
+
 end function ug_copy_var_atts
 
 
@@ -5132,7 +5131,7 @@ function ug_copy_var_atts_mesh1d( ncidin, ncidout, varidin, varidout, coordvarid
     integer                        :: i
     character(len=nf90_max_name)   :: attname
     integer                        :: natts, attvalue
-    
+
     ierr = -1
     ierr = nf90_inquire_variable( ncidin, varidin, nAtts=natts )
     if ( ierr == nf90_enotvar ) then
@@ -5156,25 +5155,25 @@ function ug_copy_var_atts_mesh1d( ncidin, ncidout, varidin, varidout, coordvarid
             endif
           cycle
         endif
-        
+
         ierr = nf90_copy_att( ncidin, varidin, attname, ncidout, varidout )
         if ( ierr /= nf90_noerr ) then
             return
-        endif        
+        endif
     enddo
-    
+
    end function ug_copy_var_atts_mesh1d
 
 !
-! Get mesh ids 
+! Get mesh ids
 !
-   
+
 function ug_ionc_get_number_of_networks(ug_file, nnumNetworks) result(ierr)
 
    type(t_ug_file), intent(in)   :: ug_file      !< ID of already opened data set.
    integer, intent(inout)        :: nnumNetworks
    integer                       :: ierr
-   
+
    ierr = UG_NOERR
    nnumNetworks = 0
    if (allocated(ug_file%netids)) then
@@ -5182,7 +5181,7 @@ function ug_ionc_get_number_of_networks(ug_file, nnumNetworks) result(ierr)
          nnumNetworks = size(ug_file%netids)
       end if
    endif
-   
+
 end function ug_ionc_get_number_of_networks
 
 function ug_get_number_of_meshes(ncid, ug_file, meshType, numMeshes) result(ierr)
@@ -5191,16 +5190,16 @@ function ug_get_number_of_meshes(ncid, ug_file, meshType, numMeshes) result(ierr
    integer, intent(in)           :: ncid, meshType
    integer, intent(inout)        :: numMeshes
    integer                       :: ierr, i, attval
-   
+
    ierr = UG_NOERR
    numMeshes = 0
    if(size(ug_file%meshids)>0) then
-   
+
       !All meshes
       if (meshType==0) then
          numMeshes = size(ug_file%meshids)
-            return 
-      else  
+            return
+      else
          !Only meshType
          do i=1,size(ug_file%meshids)
             ierr = nf90_get_att(ncid, ug_file%meshids(i)%varids(mid_meshtopo),'topology_dimension', attval)
@@ -5210,7 +5209,7 @@ function ug_get_number_of_meshes(ncid, ug_file, meshType, numMeshes) result(ierr
             numMeshes = numMeshes + 1
          enddo
       endif
-   endif   
+   endif
 
 end function ug_get_number_of_meshes
 
@@ -5222,17 +5221,17 @@ function ug_get_network_ids(ug_file, networkids) result(ierr)
 
    ierr = UG_NOERR
    ierr = ug_ionc_get_number_of_networks(ug_file, nnumNetworks)
-   
+
    if (nnumNetworks /= size(networkids)) then
       ierr = -1
       return
    endif
-   
+
    do i=1, size(networkids)
       networkids(i) = i
    end do
-   
-end function ug_get_network_ids 
+
+end function ug_get_network_ids
 
 function ug_get_mesh_ids(ncid, ug_file, meshType, meshids) result(ierr)
 
@@ -5263,23 +5262,23 @@ function ug_get_mesh_ids(ncid, ug_file, meshType, meshids) result(ierr)
          endif
       enddo
    endif
-   
-end function ug_get_mesh_ids 
+
+end function ug_get_mesh_ids
 
 
 function ug_get_contact_id(ncid, ug_file, contactid)  result(ierr)
 
-   integer, intent(in)           :: ncid   
-   type(t_ug_file), intent(in)   :: ug_file      
+   integer, intent(in)           :: ncid
+   type(t_ug_file), intent(in)   :: ug_file
    integer, intent(out)          :: contactid
    integer                       :: ierr
-   
+
    ierr = 0
    contactid = -1
    if (size(ug_file%contactids) > 0) then
       contactid = 1
    endif
-   
+
 end function ug_get_contact_id
 
 
@@ -5289,81 +5288,81 @@ function ug_get_1d_network_id(ncid, ug_file, networkid) result(ierr)
    integer                       :: i, ierr, attval         !< Result status (UG_NOERR if successful).
    integer, intent(inout)        :: networkid
    character(len=13)  :: attname
-   type(t_ug_file), intent(in)   :: ug_file 
-   
+   type(t_ug_file), intent(in)   :: ug_file
+
    networkid      = -1
    do i=1,size(ug_file%netids)
-      
+
       !check if it has a geometry and its dimension is 1
       if (ug_file%netids(i)%varids(ntid_1dtopo)== -1) then
          cycle
       end if
-      
+
       ierr = nf90_get_att(ncid, ug_file%netids(i)%varids(ntid_1dtopo),'topology_dimension', attval)
       if (ierr /= UG_NOERR .or. attval /= 1 ) then
        cycle
       endif
-      
+
       networkid = i
       return
-      
+
    end do
-   
+
    ! nothing found, all fields to -1
-   ierr      = -1 
+   ierr      = -1
    networkid = -1
-   
+
 end function ug_get_1d_network_id
 
 
 function ug_get_mesh_id(ncid, ug_file, meshid, dim) result(ierr)
 
-   integer, intent(in)           :: ncid, dim        
+   integer, intent(in)           :: ncid, dim
    integer                       :: i, ierr, attval    !< Result status (UG_NOERR if successful).
    integer, intent(inout)        :: meshid
    character(len=13)             :: attname
-   type(t_ug_file), intent(in)   :: ug_file 
-   logical                       :: isMeshTopo     
-   
+   type(t_ug_file), intent(in)   :: ug_file
+   logical                       :: isMeshTopo
+
    meshid         = -1
    do i=1,size(ug_file%meshids)
-   
+
       if (ug_file%meshids(i)%varids(mid_meshtopo)== -1) then
          cycle
       end if
       isMeshTopo = ug_is_mesh_topology(ncid, ug_file%meshids(i)%varids(mid_meshtopo))
       if (.not.isMeshTopo) then
          cycle
-      endif 
+      endif
       ierr = nf90_get_att(ncid, ug_file%meshids(i)%varids(mid_meshtopo),'topology_dimension', attval)
       if ( ierr /= UG_NOERR .or. attval /= dim) then
          cycle
       end if
-      
+
       ! meshid found, return
       meshid = i
       return
-      
+
    end do
-   
+
    ! nothing found, all fields to -1
-   ierr      = -1 
+   ierr      = -1
    meshid    = -1
-   
-end function ug_get_mesh_id 
+
+end function ug_get_mesh_id
 
 function ug_count_mesh_ids_from_network_id(ncid, ug_file, netid, nmeshids) result(ierr)
 
-   integer,          intent(in)      :: ncid 
+   integer,          intent(in)      :: ncid
    integer,          intent(in)      :: netid
    integer,          intent(inout)   :: nmeshids
-   type(t_ug_file),  intent(in)      :: ug_file 
+   type(t_ug_file),  intent(in)      :: ug_file
    character(len=nf90_max_name)      :: networkname   !< the network name
    character(len=nf90_max_name)      :: networkmeshname      !< the mesh name
    integer                           :: i, ierr
-   
+
    ierr = UG_NOERR
-   !get the variable mesh id 
+   !get the variable mesh id
    networkname = ug_file%networksnames(netid);
    nmeshids = 0
    do i = 1 , size(ug_file%meshnames)
@@ -5378,16 +5377,16 @@ end function ug_count_mesh_ids_from_network_id
 
 function ug_get_mesh_ids_from_network_id(ncid, ug_file, netid, meshids) result(ierr)
 
-   integer,          intent(in)      :: ncid 
+   integer,          intent(in)      :: ncid
    integer,          intent(in)      :: netid
    integer,          intent(inout)   :: meshids(:)
-   type(t_ug_file),  intent(in)      :: ug_file 
+   type(t_ug_file),  intent(in)      :: ug_file
    character(len=nf90_max_name)      :: networkname   !< the network name
    character(len=nf90_max_name)      :: networkmeshname      !< the mesh name
    integer                           :: i, ierr
 
    ierr = UG_NOERR
-   !get the variable mesh id 
+   !get the variable mesh id
    networkname = ug_file%networksnames(netid);
    do i = 1 , size(ug_file%meshnames)
       ierr = ug_get_mesh_network_name(ncid, ug_file%meshids(i), networkmeshname)
@@ -5400,18 +5399,18 @@ end function ug_get_mesh_ids_from_network_id
 
 function ug_get_network_id_from_mesh_id(ncid, meshids, ug_file, networkid) result(ierr)
 
-   integer,          intent(in)      :: ncid 
-   type(t_ug_mesh),  intent(in)      :: meshids 
-   type(t_ug_file),  intent(in)      :: ug_file 
+   integer,          intent(in)      :: ncid
+   type(t_ug_mesh),  intent(in)      :: meshids
+   type(t_ug_file),  intent(in)      :: ug_file
    integer,          intent(inout)   :: networkid
    character(len=nf90_max_name)      :: networkname          !< the network name
    character(len=nf90_max_name)      :: networkmeshname      !< the network name associated with the mesh
    integer                           :: i, ierr
-   
+
    ierr = ug_get_mesh_network_name(ncid, meshids, networkmeshname)
    ierr = UG_NOERR
    networkid = -1
-   
+
    if(ierr == 0) then
       do i = 1 , size(ug_file%netids)
          ierr = ug_get_network_name(ncid, ug_file%netids(i), networkname)
@@ -5421,7 +5420,7 @@ function ug_get_network_id_from_mesh_id(ncid, meshids, ug_file, networkid) resul
          end if
       enddo
    endif
-   
+
 end function ug_get_network_id_from_mesh_id
 
 !> Gets the name of the contact topology variable in an open dataset.
@@ -5430,7 +5429,7 @@ function ug_get_contact_name(ncid, contactids, meshContactName) result(ierr)
    type(t_ug_contacts),  intent(in)    :: contactids      !< Set of NetCDF-ids for all contact ids.
    character(len=*),     intent(  out) :: meshContactName !< The name of the mesh topology variable.
    integer                             :: ierr            !< Result status, ug_noerr if successful.
-   
+
    meshContactName = ''
    ierr = nf90_inquire_variable(ncid, contactids%varids(cid_contacttopo), name=meshContactName)
    if (ierr /= nf90_noerr) then
