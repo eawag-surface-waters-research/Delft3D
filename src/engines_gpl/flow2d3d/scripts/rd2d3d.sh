@@ -134,7 +134,8 @@ if [[ $withrtc -ne 0 && $NSLOTS -ne 1 ]] ; then
 fi
 
 export D3D_HOME
- 
+
+
 echo "    Configfile           : $configfile"
 echo "    D3D_HOME             : $D3D_HOME"
 echo "    Working directory    : $workdir"
@@ -144,6 +145,11 @@ if [ "$wavefile" != "runwithoutwaveonlinebydefault" ]; then
 fi
 if [ $withrtc -ne 0 ] ; then
     echo "    Online with RTC      : YES"
+fi
+if [ $NNODES -ne 1 ]; then
+    # Try to module load mpi. If it doesn't work: assume mpiexec is not needed or already available somewhere in the path
+    module load mpich/3.3.2_intel18.0.3
+    echo "    `type mpiexec`"
 fi
 echo 
 
@@ -246,9 +252,9 @@ else
         echo ----------------------------------------------------------------------
 
         if [ $NNODES -ne 1 ]; then
-            echo "Starting mpd..."
-            mpd &
-            mpdboot -n $NSLOTS
+            # echo "Starting mpd; not needed on h6 (but will not harm): suppress messages"
+            mpd &>/dev/null &
+            mpdboot -n $NSLOTS &>/dev/null
         fi
 
         node_number=$NSLOTS
@@ -265,7 +271,8 @@ else
     fi
 
     if [ $NNODES -ne 1 ]; then
-        mpdallexit
+        # Not needed on h6 (but will not harm): suppress messages"
+        mpdallexit &>/dev/null
     fi
 fi
 
