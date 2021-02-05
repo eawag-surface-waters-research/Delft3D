@@ -85,6 +85,10 @@ Module netcdf_nc_data
 ! but allow users to use the default definition for compilers that support 
 ! TS29113 (like gfortran 4.8). Default will be C_INTPTR_T 
 
+#if __INTEL_COMPILER==2021
+#define HAVE_TS29113_SUPPORT 1
+#endif
+
 #ifndef HAVE_TS29113_SUPPORT
 #if (SIZEOF_PTRDIFF_T == 4)
  Integer, Parameter :: C_PTRDIFF_T = C_INT32_T
