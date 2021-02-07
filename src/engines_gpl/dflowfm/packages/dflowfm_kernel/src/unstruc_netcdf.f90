@@ -10736,7 +10736,7 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
    double precision, allocatable             :: xface(:), yface(:)
    integer, allocatable                      :: branchStartNode(:), branchEndNode(:)
    integer                                   :: nodesOnBranchVertices
-   character(len=255)                        :: tmpstring
+   character(len=nf90_max_name)              :: tmpstring
    integer :: n1, n2, ibr_n1, ibr_n2, ibr
    double precision :: off1, off2
    integer :: numerr
@@ -11161,7 +11161,7 @@ subroutine unc_read_net(filename, numk_keep, numl_keep, numk_read, numl_read, ie
 
     logical :: stringsequalinsens
 
-    character(len=32) :: coordsyscheck
+    character(len=nf90_max_name) :: coordsyscheck
     integer, dimension(:),   allocatable :: kn3read
     integer, dimension(:),   allocatable :: kn1read
     integer, dimension(:),   allocatable :: kn2read
@@ -11536,9 +11536,9 @@ subroutine unc_read_map(filename, tim, ierr)
     real(kind=hp),     intent(in)       :: tim        !< Desired time (snapshot) to be read from map file.
     integer,           intent(out)      :: ierr       !< Return status (NetCDF operations)
 
-    character(len=33)                   :: refdat_map !< Date time string read from map file.
+    character(len=nf90_max_name)        :: refdat_map !< Date time string read from map file.
     real(kind=hp)                       :: trefdat_map, trefdat_rst, trefdat_mdu
-    character(len=100)             :: convformat
+    character(len=nf90_max_name)        :: convformat
 
     real(fp), dimension(:,:,:), pointer :: msed
     real(fp), dimension(:,:),   pointer :: thlyr

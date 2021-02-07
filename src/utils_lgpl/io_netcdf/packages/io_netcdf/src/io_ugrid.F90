@@ -436,7 +436,7 @@ function ug_get_var_attset(ncid, varid, attset) result(ierr)
    integer                                      :: ierr      !< Result status (UG_NOERR==NF90_NOERR) if successful.
 
    character(len=64) :: attname
-   character(len=1024) :: tmpstr
+   character(len=nf90_max_name) :: tmpstr
    integer :: i, j, natts, atttype, attlen, nlen
 
    ierr = UG_NOERR
@@ -2475,7 +2475,7 @@ function ug_is_link_topology(ncid, varid) result(ug_is_link_topo)
    integer,        intent(in)  :: varid        !< NetCDF variable id
    logical                     :: ug_is_link_topo !< Return value
    integer                     :: cfrole
-   character(len=21)           :: buffer
+   character(len=nf90_max_name)  :: buffer
 
    ug_is_link_topo = .false.
 
@@ -3087,7 +3087,7 @@ function ug_get_var_count(ncid, meshids, iloctype, nvar) result(ierr)
    integer                            :: ierr     !< Result status, ug_noerr if successful.
 
    integer :: numVar, iv, ivarloc
-   character(len=255) :: str, meshname
+   character(len=nf90_max_name) :: str, meshname
    str = ''
    meshname = ''
    ierr = nf90_inquire_variable(ncid, meshids%varids(mid_meshtopo), name=meshname)
@@ -3150,7 +3150,7 @@ function ug_inq_varids(ncid, meshids, iloctype, varids, nvar) result(ierr)
    integer                         :: ierr      !< Result status, ug_noerr if successful.
 
    integer :: numVar, iv, ivarloc, maxvar
-   character(len=255) :: str, meshname
+   character(len=nf90_max_name) :: str, meshname
    str = ''
    meshname = ''
 
@@ -3219,7 +3219,7 @@ function ug_inq_varid(ncid, meshids, varname, varid) result(ierr)
    integer                            :: ierr     !< Result status, ug_noerr if successful.
 
    integer :: numVar, iv, ivarloc, nvar, maxvar
-   character(len=255) :: str, meshname
+   character(len=nf90_max_name) :: str, meshname
    str = ''
    meshname = ''
 
@@ -3286,7 +3286,7 @@ function ug_inq_varid_by_standard_name(ncid, meshids, iloctype, stdname, varid) 
 
    integer, allocatable :: varids(:) !< Array to store the candidate variable ids in.
    integer :: iv, nvar, maxvar
-   character(len=255) :: str
+   character(len=nf90_max_name) :: str
    integer :: nlen
    str = ''
 

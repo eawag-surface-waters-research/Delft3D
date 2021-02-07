@@ -2096,7 +2096,7 @@ module m_ec_filereader_read
          integer                                       :: ndims
          integer                                       :: ierr
          integer                                       :: Nreadrow      !< number of rows read at once
-         character(len=32)                             :: standard_name
+         character(len=nf90_max_name)                  :: standard_name
          integer, allocatable                          :: start(:), cnt(:)
 
          ierror = 1

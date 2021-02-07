@@ -1368,7 +1368,7 @@ function detect_conventions(ioncid) result(ierr)
 
    integer              :: i         !< index of convention name
    
-   character(len=MAXSTRLEN) :: convstring
+   character(len=nf90_max_name) :: convstring
 
    ierr = IONC_NOERR
 
@@ -1409,7 +1409,7 @@ function detect_coordinate_system(ioncid) result(ierr)
    integer              :: ierr      !< Result status, ionc_noerr if successful.
 
    integer            :: id_crs
-   character(len=255) :: tmpstring
+   character(len=nf90_max_name) :: tmpstring
 
    ierr = IONC_NOERR
 

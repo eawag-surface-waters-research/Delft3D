@@ -150,7 +150,7 @@ module m_ec_netcdf_timeseries
     character(len=*),              intent(in)      :: ncname
     type (tEcNetCDF),              pointer         :: ncptr
     integer, optional,             intent(out)     :: iostat
-    character(len=50)                              :: name, cf_role , positive, zunits
+    character(len=nf90_max_name)                   :: name, cf_role , positive, zunits
 
     integer    :: iDims, nDims, iVars, iTims, nVars, nTims, nGlobalAtts, unlimdimid, ierr 
     integer    :: tslen
@@ -400,7 +400,7 @@ module m_ec_netcdf_timeseries
     integer, intent(out)             :: vectormax 
     integer                          :: ierr 
     
-    character(len=10)   :: str
+    character(len=nf90_max_name)   :: str
     success = .False. 
     ierr = nf90_get_att(ncptr%ncid,q_id,'vectormax',str)
     if (ierr/=NF90_NOERR) return 
