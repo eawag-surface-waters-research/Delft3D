@@ -60,7 +60,7 @@ subroutine erosilt(thick    ,kmax      ,ws        ,lundia   , &
     integer                             , intent(in)    :: numrealpar
     integer                             , intent(in)    :: numstrpar
     integer                             , intent(in)    :: kmax
-    integer                                             :: lundia   !  Description and declaration in inout.igs
+    integer                                             :: lundia     !> handle of diagnostics file
     integer                             , intent(in)    :: npar
     integer       , dimension(numintpar), intent(inout) :: intpar
     integer(pntrsize)                   , intent(in)    :: dllhandle
@@ -92,35 +92,35 @@ subroutine erosilt(thick    ,kmax      ,ws        ,lundia   , &
 !
 ! Local variables
 !
-    integer  :: k
-    real(fp) :: betaslope
-    real(fp) :: sour
-    real(fp) :: sour_fluff
-    real(fp) :: sink
-    real(fp) :: taub
-    real(fp) :: taum
-    real(fp) :: entr
-    real(fp) :: taucrmin
-    real(fp) :: tcrdep
-    real(fp) :: tcrero
-    real(fp) :: eropar
-    real(fp) :: tcrflf
-    real(fp) :: parfl0
-    real(fp) :: parfl1
-    real(fp) :: depeff
+    real(fp) :: betaslope     !> coefficient in bed slope effect on critical shear stress for bed erosion (-)
+    real(fp) :: sour          !> entrainment flux from bed (kg/m2/s)
+    real(fp) :: sour_fluff    !> entrainment flux from fluff layer (kg/m2/s)
+    real(fp) :: sink          !> dimensionless sedimentation factor (-)
+    real(fp) :: taub          !> (wave enhanced) bed shear stress (N/m2)
+    real(fp) :: taum          !> dimensionless excess bed shear stress for erosion (-)
+    real(fp) :: entr          !> entrainment flux in case of two-layer fluid mud (kg/m2/s)
+    real(fp) :: taucrmin      !> minimim critical shear stress for erosion during bed slope effect computation (N/m2)
+    real(fp) :: tcrdep        !> critical shear stress for deposition (N/m2)
+    real(fp) :: tcrero        !> critical shear stress for erosion from the bed (N/m2)
+    real(fp) :: eropar        !> erosion rate parameter (kg/m2/s)
+    real(fp) :: tcrflf        !> critical shear stress for erosion from the fluff layer (N/m2)
+    real(fp) :: parfl0        !> zero-order erosion rate parameter for the fluff layer (m*s)
+    real(fp) :: parfl1        !> first-order erosion rate parameter for the fluff layer (m*s/kg)
+    real(fp) :: depeff        !> coefficient determining mud sedimentation (to fluff layer or bed) (-)
+    real(fp) :: powern        !> exponent in the erosion rate formulation (-)
     !
     ! Interface to dll is in High precision!
     !
-    real(hp)                    :: sink_dll
-    real(hp)                    :: sour_dll
+    real(hp)                    :: sink_dll       !> dimensionless deposition flux computed by user dll (-)
+    real(hp)                    :: sour_dll       !> entrainment flux computed by user dll (kg/m2/s)
     integer(pntrsize)           :: ierror_ptr
     integer(pntrsize), external :: perf_function_erosilt
-    character(1024)             :: errmsg
-    character(256)              :: message        ! Contains message from user dll
-    character(kind=c_char)      :: message_c(257) ! C- version of "message", including C_NULL_CHAR
+    character(1024)             :: errmsg         !> error message from this routine
+    character(256)              :: message        !> error message from user dll
+    character(kind=c_char)      :: message_c(257) !> C-version of "message", including C_NULL_CHAR
                                                   ! Calling perf_function_erosilt with "message" caused problems
                                                   ! Solved by using "message_c"
-    integer                     :: i
+    integer                     :: i              !> loop index
 !
 !! executable statements ------------------
 !
@@ -165,6 +165,7 @@ subroutine erosilt(thick    ,kmax      ,ws        ,lundia   , &
           parfl0 = par(15)
           parfl1 = par(16)
           depeff = par(17)
+          powern = par(18)
           !
           ! Default Partheniades-Krone formula
           !
@@ -180,7 +181,7 @@ subroutine erosilt(thick    ,kmax      ,ws        ,lundia   , &
           endif
           !
           taum = max(0.0_fp, taub/tcrero - 1.0_fp)
-          sour = eropar * taum
+          sour = eropar * taum**powern
           !
           ! Erosion from fluff layer
           !
