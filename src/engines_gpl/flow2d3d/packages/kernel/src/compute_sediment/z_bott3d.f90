@@ -260,6 +260,7 @@ subroutine z_bott3d(nmmax     ,kmax      ,lsed      ,lsedtot   , &
     real(fp) :: totfixfrac
     real(fp) :: trndiv
     real(fp) :: z
+    real(hp) :: dim_real
     real(fp) :: cellht
     real(fp) :: zusum
 !
@@ -333,6 +334,7 @@ subroutine z_bott3d(nmmax     ,kmax      ,lsed      ,lsedtot   , &
     bedload = .false.
     dtmor   = dt*morfac
     nm_pos  = 1
+    dim_real = real(nmmax*lsedtot,hp)
     !
     !   Calculate suspended sediment transport correction vector (for SAND)
     !   Note: uses GLM velocites, consistent with DIFU
