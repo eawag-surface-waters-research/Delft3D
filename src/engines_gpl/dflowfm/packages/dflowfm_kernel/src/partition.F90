@@ -5458,9 +5458,13 @@ end subroutine partition_make_globalnumbers
 !     set default options
       call METIS_SetDefaultOptions(opts)
 
-      if ( jacontiguous == 1 .and. method == 1) then
-         ierror = metisopts(opts, "CONTIG", 1)   ! enforce contiguous domains, observation: number of cells per domain becomes less homogeneous
-         if ( ierror /= 0 ) goto 1234
+      if ( jacontiguous == 1) then
+         if (method == 1 .or. method == 0 ) then    ! K-way (method = 1) is the default (method = 0) now
+            ierror = metisopts(opts, "CONTIG", 1)   ! enforce contiguous domains, observation: number of cells per domain becomes less homogeneous
+            if ( ierror /= 0 ) goto 1234
+         else if (method == 2) then
+            call mess(LEVEL_WARN, 'Contiguous option is not available for Recursive Bisection method (method = 2). To enforce contiguous option, use K-way partitioning (default) method (method = 0 or 1).')
+         end if
       endif
 !      i = metisopts(opts,"NCUTS",10)
       ierror = metisopts(opts, "DBGLVL", 1)     ! output
@@ -5555,9 +5559,9 @@ end subroutine partition_make_globalnumbers
       netstat = NETSTAT_CELLS_DIRTY
 
       select case (method)
-      case (1)
+      case (0,1)
          call METIS_PartGraphKway(Ne, Ncon, iadj, jadj, vwgt, vsize, adjw, Nparts, tpwgts, ubvec, opts, objval, idomain)
-      case (0,2)
+      case (2)
          call METIS_PartGraphRecursive(Ne, Ncon, iadj, jadj, vwgt, vsize, adjw, Nparts, tpwgts, ubvec, opts, objval, idomain)
       case (3)
          call METIS_PARTMESHDUAL(Ne, Nn, eptr, eind, vwgt, vsize, ncommon, Nparts, tpwgts, opts, objval, idomain, npart)
@@ -5641,12 +5645,12 @@ end subroutine partition_make_globalnumbers
          method = -1
          do while ( method.lt.0 .or. method.gt.2 )
              method = 0
-             call getint('Partition method? (0:default, 1: K-Way, 2: Recursive bisection)', method) ! default method is Recursive
+             call getint('Partition method? (0:default, 1: K-Way, 2: Recursive bisection)', method) ! default method is K-way
          enddo
          jacontiguous = -1
-         if ( method.eq.1 ) then ! K-Way enables contiguous
+         if ( method.eq.1 .or. method .eq. 0) then ! K-Way (default) method enables contiguous
              do while ( jacontiguous.ne.0 .and. jacontiguous.ne.1 )
-                jacontiguous = 0
+                jacontiguous = 1
                 call getint('Enforce contiguous domains? (0:no, 1:yes)', jacontiguous)
              enddo
          endif

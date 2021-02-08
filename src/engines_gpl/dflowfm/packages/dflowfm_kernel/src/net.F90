@@ -34539,7 +34539,7 @@ subroutine partition_from_commandline(fnam, md_Ndomains, md_jacontiguous, md_icg
    integer,            intent(in) :: md_Ndomains      !< number of subdomains, Metis (>0) or polygon (0)
    integer,            intent(in) :: md_jacontiguous  !< contiguous domains, Metis (1) or not (0)
    integer,            intent(in) :: md_icgsolver     !< intended solver
-   integer,            intent(in) :: md_pmethod       !< partition method: Recursive Bisection(=0 default), K-way (=1)
+   integer,            intent(in) :: md_pmethod       !< partition method: K-way (=1, default), Recursive Bisection(=2)
    character(len=255), intent(in) :: md_dryptsfile    !< dry points file
    character(len=255), intent(in) :: md_encfile       !< Enclosure file to clip outer parts from the grid *.pol
    integer,            intent(in) :: md_genpolygon    !< make partition file (1) or not (0)
@@ -34676,10 +34676,10 @@ function read_commandline() result(istat)
 
 !           default settings
             md_ndomains = 0
-            md_jacontiguous = 0
+            md_jacontiguous = 1        ! by default enforce contiguous
             md_icgsolver = 0
             md_genpolygon = 0          ! default: no polygon
-            md_pmethod = 0             ! partition method using Metis: (=0)Recursive Bisection, (=1)K-way
+            md_pmethod = 1             ! partition method using Metis: (=1, default)K-way, (=2)Recursive Bisection
             md_partugrid = 0           ! ugrid for partitioned netfiles is work-in-progress
 !           key-value pairs
             do ikey = 1, Nkeys
@@ -35062,7 +35062,7 @@ end if
    write (*,*) ' '
    write (*,*) '      OPTS is a colon-separated list opt1=val1:opt2=val2:...'
    write (*,*) '        ndomains  = N     Number of partitions.'
-   write (*,*) '        method    = [01]  Partition method: Recursive Bisection(0), K-Way(1).'
+   write (*,*) '        method    = [12]  Partition method: K-Way(1, default), Recursive Bisection(2).'
    write (*,*) '        genpolygon= [01]  Generate partition polygon(1), or not (0).'
    write (*,*) '        contiguous= [01]  Enforce contiguous grid cells in each domain.'
    write (*,*) '                          Only available when K-Way is enabled (method=1).'

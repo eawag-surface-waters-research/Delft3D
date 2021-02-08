@@ -218,9 +218,9 @@ implicit none
     integer            :: md_snapshot_seqnr  = 0 !< Sequence number of last snapshot file written.
 !   partitioning command line options
     integer            :: md_japartition     = 0   !< partition (1) or not (0)
-    integer            :: md_pmethod         = 0   !< partition method: Recursive bisection (0), or K-way (1)
+    integer            :: md_pmethod         = 1   !< partition method: Recursive bisection (2), or K-way (1)
     integer            :: md_ndomains        = 0   !< METIS/number of domains (>0) or use polygon (0)
-    integer            :: md_jacontiguous    = 0   !< METIS/contiguous domains (1) or not (0)
+    integer            :: md_jacontiguous    = 1   !< METIS/contiguous domains (1, default) or not (0)
     integer            :: md_icgsolver       = 0   !< intended solver
     integer            :: md_genpolygon      = 0   !< generate partition polygons and use it in parallel runs (1) or writing cell subdomain information to partitioned net files (0)
     integer            :: md_partugrid       = 0   !< partitioned netfile is ugrid or not
