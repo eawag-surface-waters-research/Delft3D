@@ -994,7 +994,13 @@ subroutine z_bott3d(nmmax     ,kmax      ,lsed      ,lsedtot   , &
                 mergebuf(i) = real(dbodsd(l, nm),hp)
              enddo
           enddo
+          ! First sent the array size
+          ! Needed since FM communicates the time step (dim_real=1)
+          ! Since here the dbodsed array is going to be communicated, dim_real=nmmax*lsedtot
+          call putarray (mergehandle,dim_real,1)
+          ! Then sent the dbodsed array
           call putarray (mergehandle,mergebuf(1:nmmax*lsedtot),nmmax*lsedtot)
+          ! Then receive the merged dbodsed array
           call getarray (mergehandle,mergebuf(1:nmmax*lsedtot),nmmax*lsedtot)
           i = 0
           do l = 1, lsedtot
@@ -1046,7 +1052,7 @@ subroutine z_bott3d(nmmax     ,kmax      ,lsed      ,lsedtot   , &
                        & nto       ,bc_mor_array , &
                        & gdp       )
        else
-          !
+    !
           ! Compute bed level changes without actually updating the bed composition
           !
           depchg = 0.0_fp
