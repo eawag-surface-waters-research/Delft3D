@@ -995,7 +995,7 @@ subroutine readMDUFile(filename, istat)
     call prop_get_integer( md_ptr, 'geometry', 'RenumberFlowNodes',  jarenumber) ! hidden option for testing renumbering
     call prop_get_logical( md_ptr, 'geometry', 'dxDoubleAt1DEndNodes', dxDoubleAt1DEndNodes)
 
-    useVolumeTables = .true.
+    useVolumeTables = .false.
     call prop_get_logical( md_ptr, 'volumeTables', 'useVolumeTables', useVolumeTables)
 ! Numerics
     call prop_get_double( md_ptr, 'numerics', 'CFLMax'          , cflmx)
