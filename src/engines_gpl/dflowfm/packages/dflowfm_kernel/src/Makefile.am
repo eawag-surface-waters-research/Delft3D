@@ -46,7 +46,6 @@ PETSOURCES=
 endif
 
 libdflowfm_la_SOURCES=\
-        volume_table.f90 \
         unstruc_version.F90 \
         unstruc_messages.f90 \
         unstruc_ini.f90 \
@@ -138,6 +137,7 @@ libdflowfm_la_SOURCES+=\
         advec.f90 \
 	m_filter.f90 \
 	filter.F90 \
+        volume_table.f90 \
         unstruc.F90
 # and the library interface
 libdflowfm_la_SOURCES+=\
