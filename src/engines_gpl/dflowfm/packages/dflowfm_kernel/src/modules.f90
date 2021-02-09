@@ -1678,7 +1678,7 @@ subroutine crspath_on_singlelink(path, linknr, xk3, yk3, xk4, yk4, xza, yza, xzb
            CALL CROSSinbox(path%XP(ip), path%YP(ip), path%XP(ip+1), path%YP(ip+1), xza, yza, xzb, yzb, jacros, SL, SM, XCR, YCR, CRP, jsferic, dmiss)
         else
            CALL CROSSinbox(path%XP(ip), path%YP(ip), path%XP(ip+1), path%YP(ip+1), xk3, yk3, xk4, yk4, jacros, SL, SM, XCR, YCR, CRP, jsferic, dmiss)
-        endif   
+        endif
         if (jacros == 1) then
             if (SM == 1d0) then
                if (crp > 0d0) then
@@ -2983,7 +2983,7 @@ subroutine default_flowparameters()
     jaSELFALcorrectWLwithIni = 0   !< correct water level with initial atmospheric pressure in SAL
 
     ! DOODSONSTART = 55.565D0 ; DOODSONSTOP = 375.575D0 ; Doodsoneps = .00D0    ! standaard TRIWAQ alle 484 cmp
-      DOODSONSTART = 55.565D0 ; DOODSONSTOP = 375.575D0 ; Doodsoneps = .00D0    ! 
+      DOODSONSTART = 55.565D0 ; DOODSONSTOP = 375.575D0 ; Doodsoneps = .00D0    !
     ! DOODSONSTART = 57.555D0 ; DOODSONSTOP = 275.555D0 ; Doodsoneps = .03D0    ! Delft3D
 
     jasecflow = 0     ! include secondary flow (0=no, 1=yes)
@@ -5527,7 +5527,7 @@ module m_fm_wq_processes
    integer,  allocatable, dimension(:,:)     :: iexpnt                      !< Exchange pointer
 
    real(hp), allocatable, dimension(:,:)     :: amass                       !< mass array to be updated
-   logical , allocatable, dimension(:)       :: wqactive                    !< indicates if processes are active based on volume ('VolumeDryThreshold') and depth ('DepthDryThreshold') criteria 
+   logical , allocatable, dimension(:)       :: wqactive                    !< indicates if processes are active based on volume ('VolumeDryThreshold') and depth ('DepthDryThreshold') criteria
    logical , allocatable, dimension(:)       :: wqmydomain                  !< indicates if a segment is part of the current domain (idomain==my_rank)
    logical , allocatable, dimension(:)       :: wqdoproc                    !< indicates if processes are active based on 'ProcessesInactive' parameter
    integer , allocatable, dimension(:)       :: iknmrk                      !< segment characteristics.
@@ -5552,7 +5552,7 @@ module m_fm_wq_processes
    integer,  allocatable, dimension(:)       :: isys2wqbot                  !< WAQ inactive system to D-FlowFM water quality bottom variable
    integer,  allocatable, dimension(:)       :: ifall2vpnw                  !< substance-with-fall-velocity to WAQ numbering in fall-velocity array
 
-   integer                                   :: numwqbots                   !< number of water quality bottom variables
+   integer                                   :: numwqbots = 0               !< number of water quality bottom variables
    character(len=NAMWAQLEN), dimension(:), allocatable :: wqbotnames        !< water quality bottom variable names
    character(len=NAMWAQLEN), dimension(:), allocatable :: wqbotunits        !< water quality bottom variable units
    integer,  allocatable, dimension(:,:)     :: id_wqb                      !< wqbot id's in map-file
@@ -6120,7 +6120,7 @@ contains
    end subroutine reset_save_ugrid_state
 
    end module m_save_ugrid_state
-   
+
    module m_subsidence
       logical                                              :: sdu_first     !< Flag indicating whether this is the first call to obtain the 'bedrock_surface_elevation'
       integer                                              :: sdu_update_s1 !< Flag indicating whether water levels at wet point should be updated (0 = no, 1 = yes)
@@ -6130,13 +6130,13 @@ contains
       double precision, dimension(:), allocatable          :: subsupl_tp    !< Previous field of 'bedrock_surface_elevation'
       double precision, dimension(:), allocatable          :: subsout       !< Output field of subsidence/uplift: latest field - initial field
       double precision, dimension(:), allocatable          :: sdu_blp       !< Previous field of bed level values at cell centres (temporary copy of bl(:))
-      
+
    contains
-   
+
       subroutine default_subsupl()
          jasubsupl     = 0
          sdu_first     = .true.
          sdu_update_s1 = 0
       end subroutine
-   
+
    end module m_subsidence
