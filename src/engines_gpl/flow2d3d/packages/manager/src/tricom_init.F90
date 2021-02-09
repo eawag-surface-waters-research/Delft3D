@@ -152,8 +152,10 @@ subroutine tricom_init(olv_handle, gdp)
     integer                             , pointer :: itdiag
     integer                             , pointer :: julday
     integer                             , pointer :: ntstep
+    real(fp)                            , pointer :: tcmp
     real(fp)                            , pointer :: tmor
     real(fp)                            , pointer :: rdc
+    integer                             , pointer :: itcmp
     integer                             , pointer :: itmor
     type (bedbndtype) , dimension(:)    , pointer :: morbnd
     logical                             , pointer :: densin
@@ -529,8 +531,10 @@ subroutine tricom_init(olv_handle, gdp)
     itdiag              => gdp%gdinttim%itdiag
     julday              => gdp%gdinttim%julday
     ntstep              => gdp%gdinttim%ntstep
+    tcmp                => gdp%gdmorpar%tcmp
     tmor                => gdp%gdmorpar%tmor
     rdc                 => gdp%gdmorpar%rdc
+    itcmp               => gdp%gdmorpar%itcmp
     itmor               => gdp%gdmorpar%itmor
     morbnd              => gdp%gdmorpar%morbnd
     densin              => gdp%gdmorpar%densin
@@ -980,14 +984,24 @@ subroutine tricom_init(olv_handle, gdp)
     ! continuing simulations
     !
     if (sedim) then
+       tdif  = tcmp + itstrt*dt
+       itcmp = nint(tdif/dt)
+       if (abs(itcmp*dt-tdif) > (0.1*dt)) then
+          error  = .true.
+          txtput = 'Bed composition updating start time'
+          call prterr(lundia, 'U044', txtput)
+       endif
+       write(txtput,'(a,i0)') 'Bed composition updating starts at (step) : ',itcmp
+       call prterr(lundia, 'G051', txtput)
+       !
        tdif  = tmor + itstrt*dt
        itmor = nint(tdif/dt)
        if (abs(itmor*dt-tdif) > (0.1*dt)) then
           error  = .true.
-          txtput = 'Morphological calculation start time'
+          txtput = 'Bed level updating start time'
           call prterr(lundia, 'U044', txtput)
        endif
-       write(txtput,'(a,i0)') 'Morphological Changes Start Time (step) : ',itmor
+       write(txtput,'(a,i0)') 'Bed level updating starts at (step) : ',itmor
        call prterr(lundia, 'G051', txtput)
     endif
     !

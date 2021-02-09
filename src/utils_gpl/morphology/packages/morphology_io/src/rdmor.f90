@@ -1438,12 +1438,6 @@ subroutine echomor(lundia    ,error     ,lsec      ,lsedtot   ,nto       , &
     else
        write (lundia, '(2a,e20.4)') txtput1, ':', morfac
     endif
-    txtput1 = 'Morphological Changes Start Time ('//trim(dtunit)//')'
-    write (lundia, '(2a,e20.4)') txtput1, ':', tmor
-    txtput1 = 'Composition Changes Start Time ('//trim(dtunit)//')'
-    write (lundia, '(2a,e20.4)') txtput1, ':', tcmp    
-    txtput1 = 'Fixed Layer Erosion Threshold'
-    write (lundia, '(2a,e20.4)') txtput1, ':', thresh
     !
     txtput1 = 'Bed level updating  '
     if (bedupd) then
@@ -1452,6 +1446,11 @@ subroutine echomor(lundia    ,error     ,lsec      ,lsedtot   ,nto       , &
        txtput2 = '            INACTIVE'
     endif
     write (lundia, '(3a)') txtput1, ':', txtput2
+    if (bedupd) then
+       txtput1 = 'Bed level updates start after ('//trim(dtunit)//')'
+       write (lundia, '(2a,e20.4)') txtput1, ':', tmor
+    endif
+    !
     txtput1 = 'Composition updating'
     if (cmpupd) then
        txtput2 = '              ACTIVE'
@@ -1459,6 +1458,13 @@ subroutine echomor(lundia    ,error     ,lsec      ,lsedtot   ,nto       , &
        txtput2 = '            INACTIVE'
     endif
     write (lundia, '(3a)') txtput1, ':', txtput2
+    if (cmpupd) then
+       txtput1 = 'Composition updates start after ('//trim(dtunit)//')'
+       write (lundia, '(2a,e20.4)') txtput1, ':', tcmp    
+    endif
+    !
+    txtput1 = 'Fixed Layer Erosion Threshold'
+    write (lundia, '(2a,e20.4)') txtput1, ':', thresh
     txtput1 = 'Entrainment/deposition flux in mass bal.'
     if (neglectentrainment) then
        txtput2 = '           NEGLECTED'

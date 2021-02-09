@@ -421,8 +421,8 @@ type morpar_type
                            !  3: Ashida & Michiue (1971), modified Egiazaroff
                            !  4: Soehngen, Kellermann, Loy (1992)
                            !  5: Wu, Wang, Jia (2000)
-    integer :: itmor       !  time step where calculation for morphological changes starts
-    integer :: itcmp       !  time step where calculation for bed composition changes starts
+    integer :: itmor       !  time step where calculation for bed level updating starts
+    integer :: itcmp       !  time step where calculation for bed composition updating starts
     integer :: iopkcw
     integer :: iopsus
     integer :: islope      !  switch for bed slope effect, according
