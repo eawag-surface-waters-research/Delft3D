@@ -53,6 +53,7 @@ module m_Storage
    public getSurface
    public printData
    public fill_hashtable
+   public getTopLevel
 
    interface printData
       module procedure printStorageSet
@@ -284,6 +285,15 @@ contains
       endif
    end function getVolumeByStorNode
 
+   double precision function getTopLevel(storage)
+      type(t_storage), intent(in)            :: storage
+      if (storage%useStreetStorage .and. (.not. storage%useTable)) then
+         getTopLevel = storage%streetArea%x(storage%streetArea%length)
+      else
+         getTopLevel = storage%storageArea%x(storage%storageArea%length)
+      endif
+   end function getTopLevel
+   
    subroutine fill_hashtable_sto(storS)
    
       type (t_storageSet), intent(inout), target   :: storS

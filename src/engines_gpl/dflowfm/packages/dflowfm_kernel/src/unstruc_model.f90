@@ -733,7 +733,7 @@ subroutine readMDUFile(filename, istat)
     use system_utils, only: split_filename
     use m_commandline_option, only: iarg_usecaching
     use m_subsidence, only: sdu_update_s1
-
+    use unstruc_channel_flow
 
     use m_sediment
     use m_waves, only: hwavuni, twavuni, phiwavuni
@@ -995,6 +995,8 @@ subroutine readMDUFile(filename, istat)
     call prop_get_integer( md_ptr, 'geometry', 'RenumberFlowNodes',  jarenumber) ! hidden option for testing renumbering
     call prop_get_logical( md_ptr, 'geometry', 'dxDoubleAt1DEndNodes', dxDoubleAt1DEndNodes)
 
+    useVolumeTables = .true.
+    call prop_get_logical( md_ptr, 'volumeTables', 'useVolumeTables', useVolumeTables)
 ! Numerics
     call prop_get_double( md_ptr, 'numerics', 'CFLMax'          , cflmx)
     call prop_get_double( md_ptr, 'numerics', 'EpsMaxlev'       , epsmaxlev)
@@ -2373,6 +2375,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     use m_structures, only: jahiscgen, jahiscdam, jahispump, jahisgate, jahisweir, jahisorif, jahisbridge, jahisculv, jahisdambreak, jahisuniweir, jahiscmpstru, jahislongculv
     use m_sobekdfm,              only : sbkdfm_umin, sbkdfm_umin_method, minimal_1d2d_embankment, sbkdfm_relax
     use m_subsidence, only: sdu_update_s1
+    use unstruc_channel_flow
 
     integer, intent(in)  :: mout  !< File pointer where to write to.
     logical, intent(in)  :: writeall !< Write all fields, including default values
@@ -2646,6 +2649,10 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
           call prop_set(prop_ptr, 'geometry', 'Keepzlayeringatbed'  , keepzlayeringatbed, '0:bedlayerthickness == zlayerthickness, 1:possibly very thin layer at bed, 2=equal thickness first two layers')
        endif
 
+    endif
+    
+    if (writeall .or. useVolumeTables) then
+       call prop_set (prop_ptr, 'volumeTables', 'useVolumeTables',  merge(1, 0, useVolumeTables), 'Use 1D volume tables (1: yes, 0: no).')
     endif
 
 ! Numerics

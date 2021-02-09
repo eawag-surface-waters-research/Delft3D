@@ -2245,8 +2245,10 @@ end module m_flowexternalforcings
 module unstruc_channel_flow
 use m_network
 implicit none
-type(t_network), target              :: network
-integer                      :: CSCalculationOption  !< calculation option for total area computation in 1d
+type(t_network), target       :: network
+integer                       :: CSCalculationOption  !< Calculation option for total area computation in 1d
+logical                       :: useVolumeTables       !< Indicates whether 1d volume tables are useds
+
 contains
 
 

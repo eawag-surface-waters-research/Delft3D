@@ -2709,12 +2709,13 @@ subroutine getseg1D(hpr,wu2,dz,ai,frcn,ifrctyp, wid,ar,conv,perim,jaconv)  ! cop
  use m_flow
  use m_missing
  use m_ship
+ use m_volume_table
 
  implicit none
 
  integer           :: japerim
 
- integer           :: L, k1, k2, K, n, kk, kb, kt, nl1 , nl2, i, nstor
+ integer           :: L, k1, k2, K, n, kk, kb, kt, nl1 , nl2, i, nstor, n1d
  double precision  :: hh, slotsav, sl1, sl2
  type(t_storage), dimension(:), pointer :: stors
 
@@ -2725,10 +2726,15 @@ subroutine getseg1D(hpr,wu2,dz,ai,frcn,ifrctyp, wid,ar,conv,perim,jaconv)  ! cop
 
  if (japerim == 1 .or. nonlin > 0) then
 
-
-
  nstor = network%stors%count
- if (japerim == 0 .and. nstor > 0) then
+ if (japerim == 0 .and. useVolumeTables) then
+    ! Compute 1d volumes, using volume tables
+    do n = ndx2d+1, ndx
+       n1d = n - ndx2d
+       vol1(n) = vol1(n) + vltb(n1d)%get_volume(s1(n))
+       a1(n)   = a1(n)   + vltb(n1d)%get_surface(s1(n))
+    enddo
+ else if (japerim == 0 .and. nstor > 0) then
     stors => network%stors%stor
     do i = 1, nstor
        k1 = stors(i)%gridPoint
@@ -2748,7 +2754,7 @@ subroutine getseg1D(hpr,wu2,dz,ai,frcn,ifrctyp, wid,ar,conv,perim,jaconv)  ! cop
        else
           call addlink1Dkcu3(L,japerim)
        endif
-    else
+    elseif (japerim == 1 .or. .not. useVolumeTables) then
        call addlink1D(L,japerim)                   ! regular 1D link and original 1D2D internal links
     endif
  enddo
@@ -2763,7 +2769,9 @@ subroutine getseg1D(hpr,wu2,dz,ai,frcn,ifrctyp, wid,ar,conv,perim,jaconv)  ! cop
  do L   = lnxi+1,lnx
     if (kcu(L) == -1) then
        if (japerim == 0 .and. nonlin1D == 0) cycle
-       call addlink1D(L,japerim)                   ! 1D boundary links
+       if (japerim == 1 .or. .not. useVolumeTables) then
+          call addlink1D(L,japerim)                   ! 1D boundary links
+       endif
     else
        if (japerim == 0 .and. nonlin2D == 0) cycle
        call addlink2D(L,japerim)                   ! 2D boundary links
@@ -15437,12 +15445,13 @@ else if (nodval == 27) then
  use geometry_module ! , only: dbdistance, normalout, half
  use m_physcoef, only: backgroundwatertemperature
  use m_alloc
- use unstruc_channel_flow, only: network
+ use unstruc_channel_flow, only: network, useVolumeTables
  use m_1d_structures, only: initialize_structures_actual_params, t_structure
  use m_oned_functions, only: updateFreeboard, set_max_volume_for_1d_nodes, updateDepthOnGround, updateVolOnGround, updateTotalInflow1d2d, updateTotalInflowLat
  use m_waves
  use m_structures
  use m_longculverts
+ use m_volume_table
 
  implicit none
 
@@ -15482,6 +15491,11 @@ else if (nodval == 27) then
 
  Lnmax = 0 ; Lnmin = 0
  ndmax = 0 ; ndmin = 0
+
+ ! Generate the volume tables for 1d nodes
+ if (useVolumeTables) then
+    call make_volume_table
+ endif
 
  call inisferic()                                    ! also set coriolis :<
  if (icorio > 0) then
