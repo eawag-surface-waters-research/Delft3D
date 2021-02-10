@@ -755,7 +755,7 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
        !
        ! nodal relations are not supported in older version sed files 
        !
-       do l = 0, lsedtot       
+       do l = 0, lsedtot
            sedpar%flnrd(l) = ' '
        enddo
        !
@@ -1168,6 +1168,10 @@ subroutine echosed(lundia    ,error     ,lsed      ,lsedtot   , &
        !
        txtput1 = 'Critical fluff layer coverage factor'
        write (lundia, '(2a,f12.6)') txtput1,':', sc_flcf
+    endif
+    if (sedpar%flnrd(0) /= ' ') then
+       txtput1 = '1D nodal relations for bed/total load'
+       write (lundia, '(3a)') txtput1, ':  ', trim(sedpar%flnrd(0))
     endif
     !
     do l = 1, lsedtot
@@ -1596,6 +1600,10 @@ subroutine echosed(lundia    ,error     ,lsed      ,lsedtot   , &
              txtput1 = '  Input for Settle function'
              write (lundia, '(3a)') txtput1, ': ', trim(dll_usrfil_settle(l))
           endif
+       endif
+       if (sedpar%flnrd(l) /= ' ') then
+          txtput1 = '  1D nodal relations for bed/total load'
+          write (lundia, '(3a)') txtput1, ':  ', trim(sedpar%flnrd(l))
        endif
     enddo
     !
