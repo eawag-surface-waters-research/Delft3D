@@ -1913,7 +1913,7 @@ function ug_init_dataset(ncid, ug_file) result(ierr)
    im = 0
    il = 0
    inet = 0
-   do varid = 0, numVar-1 ! the following routines expect a netCDF variable id which is 0-based
+   do varid = 0, numVar-1 ! loop over the netCDF variable IDs (which are 0-based)
       is_mesh_topo = ug_is_mesh_topology(ncid, varid)
       is_network_topo = ug_is_network_topology(ncid, varid)
       is_link_topo = ug_is_link_topology(ncid, varid)
@@ -2503,7 +2503,7 @@ function ug_get_mesh_count(ncid, numMesh) result(ierr)
    ierr = nf90_inquire(ncid, nVariables = numVar)
   
    numMesh = 0
-   do varid = 0, numVar-1 ! the following routines expect a netCDF variable id which is 0-based
+   do varid = 0, numVar-1 ! loop over the netCDF variable IDs (which are 0-based)
       is_mesh_topo = ug_is_mesh_topology(ncid, varid)
       if (is_mesh_topo) then
          numMesh = numMesh + 1
@@ -2530,7 +2530,7 @@ function ug_get_network_count(ncid, numNet) result(ierr)
    ierr = nf90_inquire(iworkaround1, nVariables = numVar)
 
    numNet = 0
-   do varid = 0, numVar-1 ! the following routines expect a netCDF variable id which is 0-based
+   do varid = 0, numVar-1 ! loop over the netCDF variable IDs (which are 0-based)
       is_net_topo = ug_is_network_topology(ncid, varid)
       if (is_net_topo) then
          numNet = numNet + 1
@@ -3105,7 +3105,7 @@ function ug_get_var_count(ncid, meshids, iloctype, nvar) result(ierr)
    ierr = nf90_inquire(ncid, nVariables = numVar)
 
    nvar = 0
-   do varid = 0, numVar-1 ! the following routines expect a netCDF variable id which is 0-based
+   do varid = 0, numVar-1 ! loop over the netCDF variable IDs (which are 0-based)
       ! Step 1 of 2: check mesh name
       str = ''
       ierr = nf90_get_att(ncid, varid, 'mesh', str)
@@ -3172,7 +3172,7 @@ function ug_inq_varids(ncid, meshids, iloctype, varids, nvar) result(ierr)
 
    maxvar = size(varids)
    nvar = 0
-   do varid = 0, numVar-1 ! the following routines expect a netCDF variable id which is 0-based
+   do varid = 0, numVar-1 ! loop over the netCDF variable IDs (which are 0-based)
       ! Step 1 of 2: check mesh name
       str = ''
       ierr = nf90_get_att(ncid, varid, 'mesh', str)
