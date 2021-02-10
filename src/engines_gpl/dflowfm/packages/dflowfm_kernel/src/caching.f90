@@ -442,12 +442,18 @@ subroutine storeCachingFile( basename, usecaching )
     !
     ! Store the data for the cross-sections
     !
+    if ( .not. allocated(crs) ) then
+        allocate( crs(0) )
+    endif
     write( lun ) section(key_cross_sections), size(crs)
     call storeSections( lun, crs, cache_linklist, cache_ipol )
 
     !
     ! Store the data for the long culverts
     !
+    if ( .not. allocated(longculverts) ) then
+        allocate( longculverts(0) )
+    endif
     write( lun ) section(key_long_culverts), size(longculverts)
     call storeLongCulverts( lun, longculverts )
 
