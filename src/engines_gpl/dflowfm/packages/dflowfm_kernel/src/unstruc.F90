@@ -13573,14 +13573,14 @@ subroutine writesomeinitialoutput()
  endif
  end subroutine getcz
 
-subroutine getczz0(h0, frcn, ifrctyp, cz, z0)       ! basic get z0 (m),  this routine is not safe for frcn == 0
+subroutine getczz0(h1, frcn, ifrctyp, cz, z0)       ! basic get z0 (m),  this routine is not safe for frcn == 0
  use m_physcoef, only : sag, vonkar, ee, ee9, c9of1
  implicit none
  integer          :: ifrctyp
- double precision :: h0, frcn, cz, z0, sqcf, hurou, z02  ! hydraulic radius, friction coeff, friction typ, chezy coeff
+ double precision :: h0, h1,frcn, cz, z0, sqcf, hurou, z02  ! hydraulic radius, friction coeff, friction typ, chezy coeff
  double precision :: sixth = 1d0/6d0
 
- h0    = max(h0,1d-4)
+ h0    = max(h1,1d-4)
 
  if (ifrctyp == 0) then                              ! Chezy type
      cz   = frcn
