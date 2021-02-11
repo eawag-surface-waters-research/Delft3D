@@ -153,8 +153,11 @@ echo "    Working directory: $workdir"
 echo "    Number of slots  : $NSLOTS"
 echo "    Docker parallel  : $dockerprl"
 if [ $NNODES -ne 1 ]; then
-    # Try to module load mpi. If it doesn't work: assume mpiexec is not needed or already available somewhere in the path
-    module load mpich/3.3.2_intel18.0.3
+    testmpiexec=$(type mpiexec 2>/dev/null)
+    if [[ $testmpiexec != "mpiexec is"* ]]; then
+        # Try to module load mpi.
+        module load mpich/3.3.2_intel18.0.3
+    fi
     echo "    `type mpiexec`"
 fi
 echo 

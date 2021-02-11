@@ -147,8 +147,11 @@ if [ $withrtc -ne 0 ] ; then
     echo "    Online with RTC      : YES"
 fi
 if [ $NNODES -ne 1 ]; then
-    # Try to module load mpi. If it doesn't work: assume mpiexec is not needed or already available somewhere in the path
-    module load mpich/3.3.2_intel18.0.3
+    testmpiexec=$(type mpiexec 2>/dev/null)
+    if [[ $testmpiexec != "mpiexec is"* ]]; then
+        # Try to module load mpi.
+        module load mpich/3.3.2_intel18.0.3
+    fi
     echo "    `type mpiexec`"
 fi
 echo 
@@ -167,7 +170,7 @@ sharedir=$D3D_HOME/share
 
     # Run
 export LD_LIBRARY_PATH=$libdir:$LD_LIBRARY_PATH
-export PATH=$bindir:$PATH:/usr/lib64/mpich/bin
+export PATH=$bindir:$PATH
 # export LD_PRELOAD=$libdir/libmkl_core.so
 
 # For debugging only
