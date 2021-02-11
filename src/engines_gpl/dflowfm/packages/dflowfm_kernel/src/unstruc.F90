@@ -1925,13 +1925,15 @@ subroutine addlink1D(L,japerim)                        ! and add area's and volu
 
     endif
 
- else if (hu(L) > 0) then
+ else 
 
     calcConv = 1
                                                      
     ! getprof1D sets cfu    
-    call getprof_1D(L, hu(L), au(L), widu, japerim, calcConv, perim)  ! memory closeness of profiles causes this statement here instead of in setau
-
+    if (hu(L) > 0) then
+       call getprof_1D(L, hu(L), au(L), widu, japerim, calcConv, perim)  ! memory closeness of profiles causes this statement here instead of in setau
+    endif
+    
     ! calculate VOL1_F to be used for 1d-advection
 
     calcConv = 0
@@ -1939,7 +1941,7 @@ subroutine addlink1D(L,japerim)                        ! and add area's and volu
        if (kcs(k1) == 1) then ! TODO: consider *also* adding storage area to the 2D side k1, if kcu(L)==5, maybe not for kcu(L)==7
          hpr = s1(k1)-bob0(1,L)
          if (hpr >= 0d0) then
-            if (comparereal(hu(L), hpr, eps=1d-5)== 0) then
+            if (comparereal(hu(L), hpr)== 0) then
                vol1_f(k1) = vol1_f(k1) + dx1*au(L)
             else
                call getprof_1D(L, hpr, ar1, wid1, 1, calcConv, perim)
@@ -1952,7 +1954,7 @@ subroutine addlink1D(L,japerim)                        ! and add area's and volu
          hpr = s1(k2)-bob0(2,L)
          if (hpr >= 0d0) then
             ! flow volume
-            if (comparereal(hu(L), hpr, eps=1d-5)== 0) then
+            if (comparereal(hu(L), hpr)== 0) then
                vol1_f(k2) = vol1_f(k2) + dx2*au(L)
             else
                call getprof_1D(L, hpr, ar2, wid2, 1, calcConv, perim)
@@ -3446,12 +3448,13 @@ end subroutine sethu
  use m_partitioninfo
  use m_timer
  use m_longculverts
+ use precision_basics
 
  implicit none
 
  integer                                           :: n, nq, L, k1, k2, nlowest
  integer                                           :: ierror, ng, Lnu, LL, iup, k
- double precision                                  :: at, ssav, wwav, blowest, fac, zlu, zgaten, sup, bupmin, bup, openfact, afac
+ double precision                                  :: at, ssav, wwav, blowest, fac, zlu, zgaten, sup, bupmin, bup, openfact, afac, hh
 
  double precision, parameter                       :: FAC23 = 0.6666666666667d0
 
@@ -3459,8 +3462,17 @@ end subroutine sethu
 
  if (kmx == 0) then
 
+   if (nonlin == 0) then
+      do n = ndx2d+1, ndxi
+         hh = max(0d0, s1(n)-bl(n) )
+         vol1_f(n) = ba(n)*hh
+         a1(n)   = ba(n)
+      enddo
+   else
+      vol1_f(ndx2D+1:ndxi) = 0d0
+   endif
+  
 
-    vol1_f = 0d0
     call vol12D(1)
 
     ! set correct flow areas for dambreaks, using the actual flow width
@@ -3683,6 +3695,12 @@ end subroutine sethu
            zbndu(n) = (zbndq(n)*huqbnd(n)**FAC23)/at
        enddo
     endif
+ enddo
+
+ do L = lnxi+1,Lnx
+    k1 = ln(1,L) ; k2 = ln(2,L)
+    a1  (k1) = ba(k2)                                   ! set bnd a1 to ba of inside point
+    vol1_f(k1) = vol1_f(k2)
  enddo
 
  end subroutine setau
