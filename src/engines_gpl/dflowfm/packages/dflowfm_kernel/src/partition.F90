@@ -5412,7 +5412,7 @@ end subroutine partition_make_globalnumbers
       integer,          allocatable, dimension(:)  :: iadj, jadj, adjw
       integer                                      :: LL
 
-      integer,                       external      :: metisopts
+      integer,                       external      :: metisopts, METIS_PartGraphKway, METIS_PartGraphRecursive, METIS_PARTMESHDUAL
 
       ierror = 1
 
@@ -5560,14 +5560,18 @@ end subroutine partition_make_globalnumbers
 
       select case (method)
       case (0,1)
-         call METIS_PartGraphKway(Ne, Ncon, iadj, jadj, vwgt, vsize, adjw, Nparts, tpwgts, ubvec, opts, objval, idomain)
+         ierror = METIS_PartGraphKway(Ne, Ncon, iadj, jadj, vwgt, vsize, adjw, Nparts, tpwgts, ubvec, opts, objval, idomain)
       case (2)
-         call METIS_PartGraphRecursive(Ne, Ncon, iadj, jadj, vwgt, vsize, adjw, Nparts, tpwgts, ubvec, opts, objval, idomain)
+         ierror = METIS_PartGraphRecursive(Ne, Ncon, iadj, jadj, vwgt, vsize, adjw, Nparts, tpwgts, ubvec, opts, objval, idomain)
       case (3)
-         call METIS_PARTMESHDUAL(Ne, Nn, eptr, eind, vwgt, vsize, ncommon, Nparts, tpwgts, opts, objval, idomain, npart)
+         ierror = METIS_PARTMESHDUAL(Ne, Nn, eptr, eind, vwgt, vsize, ncommon, Nparts, tpwgts, opts, objval, idomain, npart)
       case default
          call mess(LEVEL_ERROR, 'Unknown partitioning method number', method)
       end select
+
+      if (ierror < 0) then
+         call mess(LEVEL_ERROR, 'Metis returns with error code: ', ierror)
+      end if
 
 #else
       idomain = 0
@@ -5575,7 +5579,6 @@ end subroutine partition_make_globalnumbers
                     //'so the option of partitioning a mesh is not available.')
 #endif
 
-      ierror=0
  1234 continue
 
       return
