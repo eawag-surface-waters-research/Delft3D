@@ -445,6 +445,12 @@ subroutine storeCachingFile( basename, usecaching )
     if ( .not. allocated(crs) ) then
         allocate( crs(0) )
     endif
+    if ( .not. allocated(cache_linklist) ) then
+        allocate( cache_linklist(0) )
+    endif
+    if ( .not. allocated(cache_ipol) ) then
+        allocate( cache_ipol(0) )
+    endif
     write( lun ) section(key_cross_sections), size(crs)
     call storeSections( lun, crs, cache_linklist, cache_ipol )
 
