@@ -279,7 +279,6 @@ rem ====================
     call :makeDir !dest_share!
 
     call :copyFile "third_party_open\expat\x64\x64\Release\libexpat.dll"        !dest_share!
-    call :copyFile "third_party_open\intelredist\lib\x64\*.dll"                 !dest_share!
     call :copyFile "third_party_open\mpich2\x64\bin\*.exe"                      !dest_share!
     call :copyFile "third_party_open\mpich2\x64\lib\*.dll"                      !dest_share!
     call :copyFile "third_party_open\pthreads\bin\x64\*.dll"                    !dest_share!
@@ -337,39 +336,54 @@ rem ====================
     call :copyFile engines_gpl\waq\default\proc_def.def                        !dest_default!
 
     call :copyFile engines_gpl\dflowfm\scripts\team-city\run_dflowfm_processes.bat !dest_scripts!
-    call :copyFile engines_gpl\dflowfm\scripts\team-city\run_dflowfm.bat       !dest_scripts!
-    call :copyFile engines_gpl\dflowfm\scripts\team-city\run_dfmoutput.bat     !dest_scripts!
-	
+    call :copyFile engines_gpl\dflowfm\scripts\team-city\run_dflowfm.bat           !dest_scripts!
+    call :copyFile engines_gpl\dflowfm\scripts\team-city\run_dfmoutput.bat         !dest_scripts!
+
+
+
+    call :copyNetcdf                                                                        !dest_share!
+    call :copyFile "third_party_open\Tecplot\lib\x64\*.dll"                                 !dest_share!
+    call :copyFile "third_party_open\petsc\petsc-3.10.2\lib\x64\Release\*.dll"              !dest_share!
+    call :copyFile "third_party_open\GISInternals\release-1911-x64\bin\xerces-c_3_2.dll"    !dest_share!
+    call :copyFile "third_party_open\GISInternals\release-1911-x64\bin\gdal300.dll"         !dest_share!
+    call :copyFile "third_party_open\GISInternals\release-1911-x64\bin\expat.dll"           !dest_share!
+    call :copyFile "third_party_open\GISInternals\release-1911-x64\bin\libpq.dll"           !dest_share!
+    call :copyFile "third_party_open\GISInternals\release-1911-x64\bin\sqlite3.dll"         !dest_share!
+    call :copyFile "third_party_open\GISInternals\release-1911-x64\bin\libmysql.dll"        !dest_share!
+    call :copyFile "third_party_open\GISInternals\release-1911-x64\bin\spatialite.dll"      !dest_share!
+    call :copyFile "third_party_open\GISInternals\release-1911-x64\bin\proj.dll"            !dest_share!
+    call :copyFile "third_party_open\GISInternals\release-1911-x64\bin\proj_6_1.dll"        !dest_share!
+    call :copyFile "third_party_open\GISInternals\release-1911-x64\bin\openjp2.dll"         !dest_share!
+    call :copyFile "third_party_open\GISInternals\release-1911-x64\bin\geos_c.dll"          !dest_share!
+    call :copyFile "third_party_open\GISInternals\release-1911-x64\bin\libxml2.dll"         !dest_share!
+    call :copyFile "third_party_open\GISInternals\release-1911-x64\bin\iconv.dll"           !dest_share!
+    call :copyFile "third_party_open\GISInternals\release-1911-x64\bin\geos.dll"            !dest_share!
+    call :copyFile "third_party_open\GISInternals\release-1911-x64\bin\freexl.dll"          !dest_share!
+
     if !compiler_redist_dir!=="" (
         rem Compiler_dir not set
     ) else (
         rem "Compiler_dir:!compiler_redist_dir!"
         set localstring="!compiler_redist_dir!*.dll"
         rem Note the awkward usage of !-characters
-        call :copyFile !!localstring! !dest_bin!!
-        call :copyFile "third_party_open\petsc\petsc-3.10.2\lib\x64\Release\libpetsc.dll"  !dest_bin!
-        rem is needed for dimr nuget package? please check
-        call :copyFile "third_party_open\petsc\petsc-3.10.2\lib\x64\Release\libpetsc.dll"  !dest_share!
+        call :copyFile !!localstring! !dest_share!!
     )
 
     if !mkl_redist_dir!=="" (
         rem mkl_redist_dir not set
     ) else (
         set localstring="!mkl_redist_dir!mkl_core.dll"
-        call :copyFile !!localstring! !dest_bin!
+        call :copyFile !!localstring! !dest_share!
         set localstring="!mkl_redist_dir!mkl_def.dll"
-        call :copyFile !!localstring! !dest_bin!
+        call :copyFile !!localstring! !dest_share!
         set localstring="!mkl_redist_dir!mkl_core.dll"
-        call :copyFile !!localstring! !dest_bin!
+        call :copyFile !!localstring! !dest_share!
         set localstring="!mkl_redist_dir!mkl_avx.dll"
-        call :copyFile !!localstring! !dest_bin!
+        call :copyFile !!localstring! !dest_share!
         rem is needed for dimr nuget package? please check
         call :copyFile !!localstring! !dest_share!
         set localstring="!mkl_redist_dir!mkl_intel_thread.dll"
-        call :copyFile !!localstring! !dest_bin!
-        rem is needed for dimr nuget package?  please check
         call :copyFile !!localstring! !dest_share!
-        call :copyFile "third_party_open\petsc\petsc-3.10.2\lib\x64\Release\libpetsc.dll"  !dest_bin!
     )
 
 goto :endproc
@@ -400,7 +414,7 @@ rem ================
     call :copyFile engines_gpl\d_hydro\scripts\create_config_xml.tcl     !dest_menu!
 
     call :copyFile "engines_gpl\dimr\scripts\generic\win64\*.*"     !dest_scripts!
-    call :copyFolderContent "engines_gpl\dimr\schemas"     				!dest_schemas!
+    call :copyFolderContent "engines_gpl\dimr\schemas"          !dest_schemas!
 
 goto :endproc
 
