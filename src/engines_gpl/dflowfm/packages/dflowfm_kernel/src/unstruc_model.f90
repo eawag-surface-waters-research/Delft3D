@@ -1940,12 +1940,24 @@ subroutine readMDUFile(filename, istat)
        ti_mpt_rel = tstop_user
     endif
 
-    call prop_get_integer( md_ptr, 'output', 'FullGridOutput', jafullgridoutput)
+    call prop_get_integer( md_ptr, 'output', 'FullGridOutput', jafullgridoutput, success)
     if (jawave==3 .and. kmx>0) then
        jafullgridoutput=1
        call mess(LEVEL_WARN, 'D-WAVES coupling enabled and kmx>0, so layer interface coordinates are needed on com-file. FullGridOutput set to 1.')
        call warn_flush()
     endif
+    if (success) then
+       if (jafullgridoutput == 0 .and. Layertype > 1 .and. Numtopsig > 0 .and. kmx > 0) then
+          jafullgridoutput = 1
+          call mess(LEVEL_WARN, 'A combination of Z- and Sigma-layers is used. FullGridOutput is set to 1.')
+          call warn_flush()
+       endif
+    else
+       if (Layertype > 1 .and. Numtopsig > 0 .and. kmx > 0) then
+          jafullgridoutput = 1
+       endif
+    endif
+
     call prop_get_integer( md_ptr, 'output', 'EulerVelocities', jaeulervel)
     if (jawave<3 .and. jaeulervel == 1 ) then    ! also for surfbeat
        call mess(LEVEL_WARN, '''EulerVelocities'' is not compatible with the selected Wavemodelnr. ''EulerVelocities'' is set to zero.')
