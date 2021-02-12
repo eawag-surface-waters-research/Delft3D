@@ -1,30 +1,30 @@
 !----- AGPL --------------------------------------------------------------------
-!                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2021.                                
-!                                                                               
-!  This file is part of Delft3D (D-Flow Flexible Mesh component).               
-!                                                                               
-!  Delft3D is free software: you can redistribute it and/or modify              
-!  it under the terms of the GNU Affero General Public License as               
-!  published by the Free Software Foundation version 3.                         
-!                                                                               
-!  Delft3D  is distributed in the hope that it will be useful,                  
-!  but WITHOUT ANY WARRANTY; without even the implied warranty of               
-!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the                
-!  GNU Affero General Public License for more details.                          
-!                                                                               
-!  You should have received a copy of the GNU Affero General Public License     
-!  along with Delft3D.  If not, see <http://www.gnu.org/licenses/>.             
-!                                                                               
-!  contact: delft3d.support@deltares.nl                                         
-!  Stichting Deltares                                                           
-!  P.O. Box 177                                                                 
-!  2600 MH Delft, The Netherlands                                               
-!                                                                               
-!  All indications and logos of, and references to, "Delft3D",                  
-!  "D-Flow Flexible Mesh" and "Deltares" are registered trademarks of Stichting 
+!
+!  Copyright (C)  Stichting Deltares, 2017-2021.
+!
+!  This file is part of Delft3D (D-Flow Flexible Mesh component).
+!
+!  Delft3D is free software: you can redistribute it and/or modify
+!  it under the terms of the GNU Affero General Public License as
+!  published by the Free Software Foundation version 3.
+!
+!  Delft3D  is distributed in the hope that it will be useful,
+!  but WITHOUT ANY WARRANTY; without even the implied warranty of
+!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+!  GNU Affero General Public License for more details.
+!
+!  You should have received a copy of the GNU Affero General Public License
+!  along with Delft3D.  If not, see <http://www.gnu.org/licenses/>.
+!
+!  contact: delft3d.support@deltares.nl
+!  Stichting Deltares
+!  P.O. Box 177
+!  2600 MH Delft, The Netherlands
+!
+!  All indications and logos of, and references to, "Delft3D",
+!  "D-Flow Flexible Mesh" and "Deltares" are registered trademarks of Stichting
 !  Deltares, and remain the property of Stichting Deltares. All rights reserved.
-!                                                                               
+!
 !-------------------------------------------------------------------------------
 
 ! $Id$
@@ -32,7 +32,7 @@
 module unstruc_boundaries
 implicit none
 
-integer, parameter :: max_registered_item_id = 128    
+integer, parameter :: max_registered_item_id = 128
 integer            :: max_ext_bnd_items      = 64  ! Starting size, will grow dynamically when needed.
 character(len=max_registered_item_id), allocatable :: registered_items(:)
 integer            :: num_registered_items = 0
@@ -77,7 +77,7 @@ subroutine findexternalboundarypoints()             ! find external boundary poi
  integer               :: ifrac
  character(len=64)     :: varname
 
- jatimespace = 1 
+ jatimespace = 1
 
  return_time = 0
  ja_ext_force = 0
@@ -111,10 +111,10 @@ subroutine findexternalboundarypoints()             ! find external boundary poi
        call err_flush()
     endif
  endif
- 
+
 ! if (ja_ext_force == 0 .and. .not. ext_force_bnd_used) then
 !    return
-! endif 
+! endif
 
  if ( allocated (xe) ) deallocate(xe, ye, xyen)     ! centre points of all net links, also needed for opening closed boundaries
 
@@ -156,7 +156,7 @@ subroutine findexternalboundarypoints()             ! find external boundary poi
  call aerr('kce(nx), ke(nx), kez(nx), keu(nx), kes(nx), ketm(nx), kesd(nx), keuxy(nx), ket(nx), ken(nx), ke1d2d(nx), keg(nx), ked(nx), kep(nx), kedb(nx), keklep(nx), kevalv(nx), kegs(nx), kegen(nx), itpez(nx), itpenz(nx), itpeu(nx) , itpenu(nx), kew(nx), ftpet(nx)',ierr, 17*nx)
             kce = 0; ke = 0; kez = 0; keu = 0; kes = 0; ketm = 0; kesd = 0; keuxy = 0; ket = 0; ken = 0; ke1d2d = 0; keg = 0; ked = 0; kep=  0; kedb=0  ; keklep=0  ; kevalv=0  ; kegen= 0; itpez = 0; itpenz = 0; itpeu = 0 ; itpenu = 0 ; kew = 0; ftpet = 1d6
 
- if (allocated(ketr) ) deallocate(ketr)          
+ if (allocated(ketr) ) deallocate(ketr)
  allocate ( ketr(nx,1), stat = ierr )
  call aerr('ketr(nx,1)', ierr, nx)
             ketr = 0
@@ -165,31 +165,31 @@ subroutine findexternalboundarypoints()             ! find external boundary poi
  allocate ( nbndtr(1), stat = ierr )
  call aerr('nbndtr(1)', ierr, 1 )
             nbndtr = 0
-            
+
  if ( allocated(trnames) ) deallocate(trnames)
  allocate ( trnames(1), stat = ierr )
  call aerr('trnames(1)', ierr, 1 )
             trnames(1) = ''
  numtracers = 0
- 
- if (allocated(kesf) ) deallocate(kesf)          
+
+ if (allocated(kesf) ) deallocate(kesf)
  allocate ( kesf(1,nx), stat = ierr )   ! would have been nice to have stmpar%lsedsus,
  call aerr('kesf(1,nx)', ierr, nx)      ! but no can do, jammer de bammer...
  kesf = 0
-            
+
  if ( allocated(nbndsf) ) deallocate(nbndsf)
  allocate ( nbndsf(1), stat = ierr )
  call aerr('nbndsf(1)', ierr, 1 )
  nbndsf = 0
-            
+
  if ( allocated(sfnames) ) deallocate(sfnames)
  allocate ( sfnames(1), stat = ierr )
  call aerr('sfnames(1)', ierr, 1 )
  sfnames = ''
  numfracs = 0
-      
- call make_mirrorcells(Nx, xe, ye, xyen, kce, ke, ierror) 
- 
+
+ call make_mirrorcells(Nx, xe, ye, xyen, kce, ke, ierror)
+
  if ( jampi.eq.1 ) then
 ! disable mirror cells that are not mirror cells in the whole model by setting kce=0
     call partition_reduce_mirrorcells(Nx, kce, ke, ierror)
@@ -200,13 +200,13 @@ subroutine findexternalboundarypoints()             ! find external boundary poi
  nbnds = 0                                           ! startindex salinity   bnds
  nbndtm = 0                                          ! startindex temperature bnds
  nbndt = 0                                           ! startindex tangential vel. bnds
- nbnduxy = 0                                         ! startindex uxuy vel. bnds 
+ nbnduxy = 0                                         ! startindex uxuy vel. bnds
  nbndn = 0                                           ! startindex normal     vel. bnds
  nbnd1d2d = 0                                        ! startindex 1d2d bnds
  ngate = 0                                           ! startindex gate links
  ncdam = 0                                           ! startindex cdam links
  npump = 0                                           ! startindex pump links
- nbndw  = 0                                          ! startindex wave energy bnds 
+ nbndw  = 0                                          ! startindex wave energy bnds
 
  nqbnd   = 0                                         ! nr of q sections   or specified q bnd's
  nqhbnd  = 0                                         ! nr of qh boundary sections or specified qh bnd's
@@ -223,12 +223,12 @@ subroutine findexternalboundarypoints()             ! find external boundary poi
     call readlocationfilesfromboundaryblocks(trim(md_extfile_new), nx, kce, num_bc_ini_blocks, &
                                          numz, numu, nums, numtm, numsd, numt, numuxy, numn, num1d2d, numqh, numw, numtr, numsf)
  endif
- 
+
  do while (ja_ext_force .eq. 1)                      ! read *.ext file
 
     call readprovider(mext,qid,filename,filetype,method,operand,transformcoef,ja_ext_force,varname)
     call resolvePath(filename, md_extfile_dir, filename)
-    
+
     if (num_bc_ini_blocks > 0 .and. qid(len_trim(qid)-2:len_trim(qid)) == 'bnd') then
        write(msgbuf, '(a)') 'Boundaries in BOTH external forcing and bound.ext.force file is not allowed'
        call msg_flush()
@@ -241,7 +241,7 @@ subroutine findexternalboundarypoints()             ! find external boundary poi
         jatimespace = 1                              ! module is to be used
 
         call processexternalboundarypoints(qid, filename, filetype, return_time,  nx, kce, numz, numu, nums, numtm, numsd, numt, numuxy, numn, num1d2d, numqh, numw, numtr, numsf, 1d0, transformcoef)
-    
+
     endif
 
  enddo
@@ -284,7 +284,7 @@ subroutine readlocationfilesfromboundaryblocks(filename, nx, kce, num_bc_ini_blo
 
  type(tree_data), pointer     :: bnd_ptr             !< tree of extForceBnd-file's [boundary] blocks
  type(tree_data), pointer     :: node_ptr            !
- integer                      :: filetype            !< possible values POLY_TIM: use polygon file as location reference, or NODE_ID: use nodeId as a location reference 
+ integer                      :: filetype            !< possible values POLY_TIM: use polygon file as location reference, or NODE_ID: use nodeId as a location reference
  integer                      :: istat               !
  integer, parameter           :: ini_key_len   = 32  !
  integer, parameter           :: ini_value_len = 256 !
@@ -323,7 +323,7 @@ subroutine readlocationfilesfromboundaryblocks(filename, nx, kce, num_bc_ini_blo
     call err_flush()
     return
  end if
- 
+
  call split_filename(filename, basedir, fnam) ! Remember base dir of input file, to resolve all refenced files below w.r.t. that base dir.
 
  num_items_in_file = 0
@@ -348,9 +348,9 @@ subroutine readlocationfilesfromboundaryblocks(filename, nx, kce, num_bc_ini_blo
        if (.not. property_ok) then
           call qnerror( 'Expected property' , 'quantity', ' for boundary definition' )
        end if
-       
+
        group_ok = group_ok .and. property_ok
-       
+
        call prop_get_string(node_ptr, '', 'nodeId', locationfile, property_ok)
        if (property_ok)  then
           filetype = node_id
@@ -358,15 +358,15 @@ subroutine readlocationfilesfromboundaryblocks(filename, nx, kce, num_bc_ini_blo
           call prop_get_string(node_ptr, '', 'locationFile', locationfile, property_ok)
           filetype = poly_tim
        endif
-       
+
        if (property_ok)  then
           call resolvePath(locationfile, basedir, locationfile)
        else
           call qnerror( 'Expected property' , 'locationFile', ' for boundary definition' )
        end if
-       
+
        group_ok = group_ok .and. property_ok
-       
+
        call prop_get_string(node_ptr, '', 'forcingFile ', forcingfile , property_ok)
        if (property_ok)  then
           call resolvePath(forcingfile, basedir, forcingfile)
@@ -410,37 +410,37 @@ subroutine readlocationfilesfromboundaryblocks(filename, nx, kce, num_bc_ini_blo
     else
        ! warning: unknown group
     endif
-    
+
  end do
 
  call tree_destroy(bnd_ptr)
 
 end subroutine readlocationfilesfromboundaryblocks
-                                                
+
 subroutine appendrettime(qidfm, nbnd, rettime)
 
  use m_flowexternalforcings
  use m_alloc
- 
+
  implicit none
- 
+
  character(len=256), intent(in)  :: qidfm ! constituent index
  integer, intent(in)             :: nbnd    ! boundary cell index
  double precision, intent(in)    :: rettime ! return time (h)
  integer                         :: thrtlen ! temp array length
- 
- if (allocated(thrtt)) then 
+
+ if (allocated(thrtt)) then
     thrtlen = size(thrtt) + 1
  else
     thrtlen = 1
- endif 
- 
+ endif
+
  call realloc(thrtq, thrtlen, keepExisting=.true., fill='')
  thrtq(thrtlen) = qidfm
- 
+
  call realloc(thrtn, thrtlen, keepExisting=.true., fill=0)
  thrtn(thrtlen) = nbnd
- 
+
  call realloc(thrtt, thrtlen, keepExisting=.true., fill=0d0)
  thrtt(thrtlen) = rettime
 end subroutine appendrettime
@@ -468,13 +468,13 @@ subroutine processexternalboundarypoints(qid, filename, filetype, return_time, n
  use m_transport
  use m_sediment, only: stm_included, stmpar, sedtot2sedsus
  use sediment_basics_module, only: SEDTYP_NONCOHESIVE_SUSPENDED, SEDTYP_COHESIVE
- use m_meteo, qid_meteo => qid, filetype_meteo => filetype 
+ use m_meteo, qid_meteo => qid, filetype_meteo => filetype
  use m_sobekdfm
  use m_flowparameters, only: jawave
  use string_module
  use m_strucs, only: numgeneralkeywrd
  use m_missing, only: dmiss
- 
+
  implicit none
 
  character(len=256)    , intent(in)    :: qid                                 !
@@ -486,14 +486,14 @@ subroutine processexternalboundarypoints(qid, filename, filetype, return_time, n
  integer               , intent(inout) :: numz, numu, nums, numtm, numsd, &   !
                                           numt, numuxy, numn, num1d2d, numqh, numw, numtr, numsf      !
  double precision      , intent(in)    :: rrtolrel !< To enable a more strict rrtolerance value than the global rrtol. Measured w.r.t. global rrtol.
- 
+
  double precision, dimension(numgeneralkeywrd), optional, intent(in) :: tfc
  double precision, optional, intent(in) :: width1D !< Optional custom width for boundary flow link.
  double precision, optional, intent(in) :: blDepth !< Optional custom bed level depths below water level boundaries's initial value for boundary points.
- 
+
  character(len=256)                    :: qidfm                               !
  integer                               :: itpbn
- character (len=NAMTRACLEN)            :: tracnam, sfnam, qidnam 
+ character (len=NAMTRACLEN)            :: tracnam, sfnam, qidnam
  character(len=20)                     :: tracunit
  integer                               :: itrac, isf
  integer, external                     :: findname
@@ -511,14 +511,14 @@ subroutine processexternalboundarypoints(qid, filename, filetype, return_time, n
 
      if (qidfm == 'waterlevelbnd')  itpbn = 1
      if (qidfm == 'neumannbnd'   )  itpbn = 2
-     if (qidfm == 'riemannbnd'  )   then 
+     if (qidfm == 'riemannbnd'  )   then
         itpbn = 5
         if (present(tfc)) then
            ftpet(nbndz+1:nbndz+numz) = tfc(7)    ! relaxation time riemann from ext file
         end if
      end if
      if (qidfm == 'outflowbnd'   )  itpbn = 6
-     
+
      if (qidfm == 'qhbnd') then
          itpbn = 7
          nqhbnd = nqhbnd + 1
@@ -529,11 +529,11 @@ subroutine processexternalboundarypoints(qid, filename, filetype, return_time, n
          call realloc(atqh_all,nqhbnd); atqh_all(nqhbnd) = 0d0
          call realloc(atqh_sum,nqhbnd); atqh_sum(nqhbnd) = 0d0
          call realloc(qhbndz,nqhbnd)  ; qhbndz(nqhbnd)   = 0d0
-     end if    
+     end if
      itpez(nbndz+1:nbndz+numz) =  itpbn
-     
+
      call addopenbndsection(numz, kez(nbndz+1:nbndz+numz), filename, IBNDTP_ZETA)
-     
+
      ! When present, set custom geometry for open boundaries (bed level for bndz and/or width1D for 1D bndz/u).
      ! Only for z:
      if (present(blDepth)) then
@@ -548,16 +548,16 @@ subroutine processexternalboundarypoints(qid, filename, filetype, return_time, n
 
      itpenz(nbndz+1:nbndz+numz) = nopenbndsect
      nbndz = nbndz + numz
-     
+
   else if (qidfm == 'velocitybnd' .or. qidfm == 'dischargebnd' .or. qidfm == 'qhubnd'.or. &
            qidfm == 'criticaloutflowbnd' .or. qidfm == 'weiroutflowbnd' .or. qidfm == 'absgenbnd') then
      call selectelset( filename, filetype, xe, ye, xyen, kce, nx, keu(nbndu+1:nx), numu, usemask=.true., rrtolrel=rrtolrel)
      write(msgbuf,'(a,x,a,i8,a)') trim (qid), trim( filename), numu, ' nr of open bndcells' ; call msg_flush()
      nubnd = nubnd + 1
-     
-     if (qidfm == 'velocitybnd' ) then 
+
+     if (qidfm == 'velocitybnd' ) then
         itpbn = 3
-     else if (qidfm == 'dischargebnd') then      
+     else if (qidfm == 'dischargebnd') then
         itpbn = 4
         nqbnd = nqbnd + 1
         call realloc(L1qbnd,nqbnd) ; L1qbnd(nqbnd) = nbndu + 1
@@ -576,7 +576,7 @@ subroutine processexternalboundarypoints(qid, filename, filetype, return_time, n
         itpbn = 5
         !ftpet(nbndu+1:nbndu+numu) = tfc(7)   ! riemann relaxation
      else if ( qidfm == 'qhubnd') then
-        itpbn = 6 
+        itpbn = 6
      else if ( qidfm == 'criticaloutflowbnd') then
         itpbn = 8
      else if ( qidfm == 'weiroutflowbnd') then
@@ -607,7 +607,7 @@ subroutine processexternalboundarypoints(qid, filename, filetype, return_time, n
         nbnds = nbnds + nums
      end if
   ! JRE
-     
+
   else if (qidfm == 'waveenergybnd' ) then
 
      kce   = abs(kce) ! switch kce back on, but only for all net boundaries (some of which may have been set to -1 by a flow boundary)
@@ -618,7 +618,7 @@ subroutine processexternalboundarypoints(qid, filename, filetype, return_time, n
 
      call realloc(L1wbnd,nwbnd) ; L1wbnd(nwbnd) = nbndw + 1
      call realloc(L2wbnd,nwbnd) ; L2wbnd(nwbnd) = nbndw + numw
-     
+
      nbndw = nbndw + numw
      call realloc(fnamwbnd,nwbnd,fill='')
      fnamwbnd(nwbnd) = trim(filename)
@@ -641,20 +641,20 @@ subroutine processexternalboundarypoints(qid, filename, filetype, return_time, n
      if (numsd>0) then
         call appendrettime(qidfm, nbndsd + 1, return_time)
         nbndsd = nbndsd + numsd
-     end if 
-     
+     end if
+
   else if (qidfm(1:9) == 'tracerbnd' ) then
-     
+
      kce   = abs(kce) ! switch kce back on, but only for all net boundaries (some of which may have been set to -1 by a flow boundary)
      call get_tracername(qidfm, tracnam, qidnam)
      tracunit = " "
      call add_bndtracer(tracnam, tracunit, itrac, janew)
-     
+
      if ( janew.eq.1 ) then
 !       realloc ketr
         call realloc(ketr, (/ Nx, numtracers /), keepExisting=.true., fill=0 )
      end if
-     
+
      ! kce   = 1 ! switch kce back on as points to be potentially flagged
      call selectelset( filename, filetype, xe, ye, xyen, kce, nx, ketr(nbndtr(itrac)+1:,itrac), numtr, usemask=.false., rrtolrel=rrtolrel)
      write(msgbuf,'(a,x,a,i8,a)') trim(qid), trim(filename) , numtr, ' nr of tracer bndcells' ; call msg_flush()
@@ -663,26 +663,26 @@ subroutine processexternalboundarypoints(qid, filename, filetype, return_time, n
         nbndtr(itrac) = nbndtr(itrac) + numtr
         nbndtr_all = maxval(nbndtr(1:numtracers))
      end if
-     
+
   else if (qid(1:13) == 'initialtracer' ) then
      call get_tracername(qid, tracnam, qidnam)
      tracunit = " "
      call add_bndtracer(tracnam, tracunit, itrac, janew)
-     
+
      if ( janew.eq.1 ) then
 !       realloc ketr
         call realloc(ketr, (/ Nx, numtracers /), keepExisting=.true., fill=0 )
      end if
 
   else if (qidfm(1:10) == 'sedfracbnd' .and. jased > 0) then
-     
-     kce = abs(kce)   ! kce=1     
-     call get_sedfracname(qidfm, sfnam, qidnam)    
+
+     kce = abs(kce)   ! kce=1
+     call get_sedfracname(qidfm, sfnam, qidnam)
      isf = findname(numfracs, sfnames, sfnam)
 
-     if ( isf.eq.0 ) then   ! add 
-     
-        numfracs = numfracs+1    
+     if ( isf.eq.0 ) then   ! add
+
+        numfracs = numfracs+1
 !       realloc
         call realloc(kesf, (/Nx, numfracs/), keepExisting=.true., fill=0 )
         call realloc(nbndsf, numfracs, keepExisting=.true., fill=0 )
@@ -690,7 +690,7 @@ subroutine processexternalboundarypoints(qid, filename, filetype, return_time, n
 
         sfnames(numfracs) = trim(sfnam)
         isf = numfracs
-        
+
      end if
 
      call selectelset( filename, filetype, xe, ye, xyen, kce, nx, kesf(nbndsf(isf)+1:,isf), numsf, usemask=.false., rrtolrel=rrtolrel)
@@ -700,7 +700,7 @@ subroutine processexternalboundarypoints(qid, filename, filetype, return_time, n
         nbndsf(isf) = nbndsf(isf) + numsf
         nbndsf_all = maxval(nbndsf(1:numfracs))
      endif
-     
+
   else if (qidfm == 'tangentialvelocitybnd' ) then
 
      ! kce   = 1 ! switch kce back on as points to be potentially flagged
@@ -738,11 +738,11 @@ subroutine processexternalboundarypoints(qid, filename, filetype, return_time, n
   else if (qidfm == 'shiptxy' ) then
 
      nshiptxy = nshiptxy + 1
-     
+
   else if (qidfm == 'nudgetime' .or. qidfm == 'nudgerate' .or. qidfm == 'nudge_salinity_temperature' ) then
-  
+
      janudge = 1
-     
+
  endif
 
  end subroutine processexternalboundarypoints
@@ -755,9 +755,9 @@ function addtimespacerelation_boundaries(qid, filename, filetype, method, operan
    use m_flowparameters, only: jawave
    use m_flow, only: kmx
    use m_flowtimes, only: dt_nodal
-   
+
    implicit none
-   
+
    character(len=*),            intent(inout) :: qid         !< Identifier of current quantity (i.e., 'waterlevelbnd')
    character(len=*),            intent(in)    :: filename    !< Name of data file for current quantity.
    integer,                     intent(in)    :: filetype    !< File type of current quantity.
@@ -791,7 +791,7 @@ function addtimespacerelation_boundaries(qid, filename, filetype, method, operan
 
    else if (nqhbnd > 0 .and. (qid == 'qhbnd')) then
       success = ec_addtimespacerelation(qid, xbndz, ybndz, kdz, kx, filename, filetype, method, operand, xy2bndz, forcingfile=forcingfile, targetindex=targetindex)
-           
+
    else if (nbndu > 0 .and. (qid == 'dischargebnd' .or. qid == 'criticaloutflowbnd' .or. qid == 'weiroutflowbnd' .or. qid == 'absgenbnd' ) ) then
       if ( qid.eq.'absgenbnd' ) then
          jawave = 4
@@ -817,9 +817,9 @@ function addtimespacerelation_boundaries(qid, filename, filetype, method, operan
          success = ec_addtimespacerelation(qid, xbnds, ybnds, kds, kx, filename, filetype, method, operand, xy2bnds,    &
                                            z=sigmabnds, pzmin=pzmin, pzmax=pzmax, forcingfile=forcingfile, targetindex=targetindex)
       endif
-              
+
    else if (nbndTM > 0 .and. qid == 'temperaturebnd') then
-            
+
       if (kmx == 0) then ! 2D
          success = ec_addtimespacerelation(qid, xbndTM, ybndTM, kdtm, kx, filename, filetype, method, operand, xy2bndtm, forcingfile=forcingfile, targetindex=targetindex)
       else               ! 3D
@@ -827,8 +827,8 @@ function addtimespacerelation_boundaries(qid, filename, filetype, method, operan
          pzmax => zminmaxtm(nbndTM+1:2*nbndTM)
          success = ec_addtimespacerelation(qid, xbndTM, ybndTM, kdtm, kx, filename, filetype, method, operand, xy2bndtm,   &
                                            z=sigmabndtm, pzmin=pzmin, pzmax=pzmax, forcingfile=forcingfile, targetindex=targetindex)
-      endif 
-     
+      endif
+
    else if (nbndsd > 0 .and. (qid == 'sedimentbnd')) then
          pzmin => zminmaxsd(1:nbndsd)
          pzmax => zminmaxsd(nbndsd+1:2*nbndsd)
@@ -839,7 +839,7 @@ function addtimespacerelation_boundaries(qid, filename, filetype, method, operan
       ! get tracer boundary condition number
       call get_tracername(qid, tracnam, qidnam)
       itrac = findname(numtracers, trnames, tracnam)
-           
+
 ! for parallel runs, we always need to add the tracer, even if this subdomain has no tracer boundary conditions defined
 !      call add_tracer(tracnam, iconst)
 !      update: all tracers are counted first and allocated later
@@ -850,7 +850,7 @@ function addtimespacerelation_boundaries(qid, filename, filetype, method, operan
          else                  ! 3D
             pzmin => bndtr(itrac)%zminmax(1:nbndtr(itrac))
             pzmax => bndtr(itrac)%zminmax(nbndtr(itrac)+1:2*nbndtr(itrac))
-            success = ec_addtimespacerelation(qid, bndtr(itrac)%x, bndtr(itrac)%y, bndtr(itrac)%kd, kx, filename, filetype, method, operand, bndtr(itrac)%xy2,    & 
+            success = ec_addtimespacerelation(qid, bndtr(itrac)%x, bndtr(itrac)%y, bndtr(itrac)%kd, kx, filename, filetype, method, operand, bndtr(itrac)%xy2,    &
                                               z=bndtr(itrac)%sigma, forcingfile=forcingfile, pzmin=pzmin, pzmax=pzmax, targetindex=targetindex)
          end if
       else
@@ -869,7 +869,7 @@ function addtimespacerelation_boundaries(qid, filename, filetype, method, operan
             else
                pzmin => bndsf(isf)%zminmax(1:nbndsf(isf))
                pzmax => bndsf(isf)%zminmax(nbndsf(isf)+1:2*nbndsf(isf))
-               success = ec_addtimespacerelation(qid, bndsf(isf)%x, bndsf(isf)%y, bndsf(isf)%kd, kx, filename, filetype, method, operand, bndsf(isf)%xy2,    & 
+               success = ec_addtimespacerelation(qid, bndsf(isf)%x, bndsf(isf)%y, bndsf(isf)%kd, kx, filename, filetype, method, operand, bndsf(isf)%xy2,    &
                                                  z=bndsf(isf)%sigma, forcingfile=forcingfile, pzmin=pzmin, pzmax=pzmax, targetindex=targetindex)
             end if
          else
@@ -888,18 +888,18 @@ function addtimespacerelation_boundaries(qid, filename, filetype, method, operan
       kx = 2
       if (kmx == 0) then ! 2D
          success = ec_addtimespacerelation(qid, xbnduxy, ybnduxy, kduxy, kx, filename, filetype, method, operand, xy2bnduxy, forcingfile=forcingfile, targetindex=targetindex)
-      else 
+      else
          pzmin => zminmaxuxy(1:nbnduxy)
          pzmax => zminmaxuxy(nbnduxy+1:2*nbnduxy)
          success = ec_addtimespacerelation(qid, xbnduxy, ybnduxy, kduxy, kx, filename, filetype, method, operand, xy2bnduxy,   &
                                            z=sigmabnduxy, pzmin=pzmin, pzmax=pzmax, forcingfile=forcingfile)
-      endif 
+      endif
 
    else if (nbndn > 0 .and. (qid == 'normalvelocitybnd')) then
       success = ec_addtimespacerelation(qid, xbndn, ybndn, kdn, kx, filename, filetype, method, operand, xy2bndn, forcingfile=forcingfile, targetindex=targetindex)
 
    else !There is some boundary that is not detected or recognized
-!      success = .false.      
+!      success = .false.
 ! SPvdP: this is not an error, especially for parallel runs
    end if
 end function addtimespacerelation_boundaries
@@ -964,7 +964,7 @@ logical function initboundaryblocksforcings(filename)
  integer                      :: ilattype, nlat
  integer                      :: k, n, k1, nini
  integer                      :: fmmethod
- integer, dimension(1)        :: targetindex 
+ integer, dimension(1)        :: targetindex
  integer                      :: ib, ibqh, ibt
  integer                      :: maxlatsg
  integer                      :: major, minor
@@ -984,7 +984,7 @@ logical function initboundaryblocksforcings(filename)
 
  call tree_create(trim(filename), bnd_ptr)
  call prop_file('ini',trim(filename),bnd_ptr,istat)
- 
+
  ! check FileVersion
  major = 1
  minor = 0
@@ -995,7 +995,7 @@ logical function initboundaryblocksforcings(filename)
     initboundaryblocksforcings = .false.
     return
  end if
- 
+
  call init_registered_items()
 
  call split_filename(filename, basedir, fnam) ! Remember base dir of input file, to resolve all refenced files below w.r.t. that base dir.
@@ -1060,7 +1060,7 @@ logical function initboundaryblocksforcings(filename)
           fmmethod  = weightfactors
           call prop_get_string(node_ptr, '', 'locationfile', locationfile, retVal)
        endif
-       
+
        if (retVal) then
           call resolvePath(locationfile, basedir, locationfile)
        else
@@ -1079,8 +1079,8 @@ logical function initboundaryblocksforcings(filename)
           call warn_flush()
           cycle
        end if
-          
-       
+
+
        num_items_in_block = 0
        if (associated(node_ptr%child_nodes)) then
            num_items_in_block = size(node_ptr%child_nodes)
@@ -1142,15 +1142,15 @@ logical function initboundaryblocksforcings(filename)
                 endif
                 initboundaryblocksforcings = initboundaryblocksforcings .and. retVal ! Remember any previous errors.
              else if (property_name == 'returntime' .or. property_name == 'return_time') then
-                continue                   ! used elsewhere to set Thatcher-Harleman delay 
+                continue                   ! used elsewhere to set Thatcher-Harleman delay
              else if (property_name == 'openboundarytolerance') then
-                continue                   ! used in findexternalboundarypoints/readlocationfiles... to set search distance. Not relevant here. 
+                continue                   ! used in findexternalboundarypoints/readlocationfiles... to set search distance. Not relevant here.
              else if (property_name == 'nodeid') then
-                continue                   
+                continue
              else if (property_name == 'bndwidth1d') then
-                continue                   
+                continue
              else if (property_name == 'bndbldepth') then
-                continue                   
+                continue
              else
                 ! initboundaryblocksforcings remains unchanged: support ignored lines in ext file.
                 write(msgbuf, '(9a)') 'Unrecognized line in file ''', trim(filename), ''' for block [', trim(groupname), ']: ', trim(property_name), ' = ', trim(property_value), '. Ignoring this line.'
@@ -1176,7 +1176,7 @@ logical function initboundaryblocksforcings(filename)
           call warn_flush()
           cycle
        end if
- 
+
        ! locationType = optional for lateral
        ! fileVersion >= 2: locationType = 1d | 2d | all
        ! fileVersion <= 1: Type         = 1d | 2d | 1d2d
@@ -1270,7 +1270,7 @@ logical function initboundaryblocksforcings(filename)
 
        if (allocated(xcoordinates)) deallocate(xcoordinates, stat=ierr)
        if (allocated(ycoordinates)) deallocate(ycoordinates, stat=ierr)
-     
+
        ! [lateral]
        ! Flow = 1.23 | test.tim | REALTIME
        kx = 1
@@ -1293,7 +1293,7 @@ logical function initboundaryblocksforcings(filename)
           jaqin = 1
           lat_ids(numlatsg) = locid
        end if
-       
+
     case ('meteo')
 
        ! First check for required input:
@@ -1351,7 +1351,7 @@ logical function initboundaryblocksforcings(filename)
        select case (quantity)
           case ('rainfall','rainfall_rate')
              if (.not. allocated(rain) ) then
-                allocate ( rain(ndx) , stat=ierr) 
+                allocate ( rain(ndx) , stat=ierr)
                 call aerr('rain(ndx)', ierr, ndx)
                 rain = 0d0
              endif
@@ -1392,12 +1392,12 @@ logical function initboundaryblocksforcings(filename)
              case default
                 ilattype = ILATTP_ALL
              end select
-             
+
 
              call realloc(kcsini, ndx, keepExisting=.false., fill = 0)
              call prepare_lateral_mask(kcsini, ilattype)
-             !kcsini(ndx2d+1:ndxi) = 1 ! Only 1D for now 
-            
+             !kcsini(ndx2d+1:ndxi) = 1 ! Only 1D for now
+
              success = timespaceinitialfield(xz, yz, qext, ndx, forcingFile, filetype, fmmethod, oper, transformcoef, 2, kcsini) ! zie meteo module
              cycle ! This was a special case, don't continue with timespace processing below.
           case default
@@ -1433,14 +1433,14 @@ logical function initboundaryblocksforcings(filename)
                 jawind = 1
           end select
        endif
-       
+
     case default       ! Unrecognized item in a ext block
        ! initboundaryblocksforcings remains unchanged: Not an error (support commented/disabled blocks in ext file)
        write(msgbuf, '(5a)') 'Unrecognized block in file ''', trim(filename), ''': [', trim(groupname), ']. Ignoring this block.'
        call warn_flush()
     end select
  end do
- 
+
  if (allocated(itpenzr)) deallocate(itpenzr)
  if (allocated(itpenur)) deallocate(itpenur)
 
@@ -1450,21 +1450,21 @@ logical function initboundaryblocksforcings(filename)
        do k1=n1latsg(n),n2latsg(n)
           k = nnlat(k1)
           ! TODO: MPI, as in old ext handling. if (jampi == 1) then
-          if (k > 0) then 
+          if (k > 0) then
              balat(n) = balat(n) + ba(k)
-          endif   
+          endif
        end do
     end do
     if (allocated(kclat)) then
        deallocate(kclat)
     endif
  end if
- 
+
  call tree_destroy(bnd_ptr)
- if (allocated(thrtt)) then 
+ if (allocated(thrtt)) then
     call init_threttimes()
  endif
- 
+
 end function initboundaryblocksforcings
 
 
@@ -1485,8 +1485,8 @@ subroutine ini_alloc_laterals()
       call aerr('nnLat(nlatndguess)', ierr, nlatndguess)
       nnLat = 0
    endif
-   if (.not. allocated(kcLat) ) then 
-      allocate ( kcLat(ndx) , stat=ierr)                  ! only if needed  
+   if (.not. allocated(kcLat) ) then
+      allocate ( kcLat(ndx) , stat=ierr)                  ! only if needed
       call aerr('kcLat(ndx)', ierr, ndx)
    endif
 end subroutine ini_alloc_laterals
@@ -1497,10 +1497,10 @@ subroutine prepare_lateral_mask(kc, ilattype)
    use m_flowgeom
    use m_wind
    implicit none
-   
+
    integer         , intent(inout) :: kc(:) !< (ndx) The mask array that is to be filled.
    integer         , intent(in)    :: ilattype !< Type of the new lateral (one of ILATTP_1D|2D|1D2D)
-   
+
    integer                         :: L, k1, k2
 
    kc = 0
@@ -1516,13 +1516,13 @@ subroutine prepare_lateral_mask(kc, ilattype)
             if (k2 > ndx2d) then
                kc(k2) = 1
             end if
-         !endif   
-      enddo   
+         !endif
+      enddo
    case (ILATTP_2D)       ! in everything 2D
       do L = lnx1D+1,lnxi
          k1 = ln(1,L) ; kc(k1) = 1
          k2 = ln(2,L) ; kc(k2) = 1
-      enddo   
+      enddo
    case (ILATTP_ALL)      ! both to everything 2D, and 1D, except to 1D pipes
       do L = 1,lnx1D
          if (abs(prof1D(3,L)) .ne. 1 .and. prof1D(3,L) > 0 ) then ! no pipes pos or neg, others only if pos
@@ -1530,12 +1530,12 @@ subroutine prepare_lateral_mask(kc, ilattype)
             k2 = ln(2,L) ; kc(k2) = 1
          else
             continue
-         endif   
-      enddo   
+         endif
+      enddo
       do L = lnx1D+1,lnxi
          k1 = ln(1,L) ; kc(k1) = 1
          k2 = ln(2,L) ; kc(k2) = 1
-      enddo   
+      enddo
    end select
 end subroutine prepare_lateral_mask
 
@@ -1551,7 +1551,7 @@ function adduniformtimerelation_objects(qid, locationfile, objtype, objid, param
    use string_module, only: strcmpi
    use timespace_parameters, only: uniform, bcascii, spaceandtime
    use unstruc_messages
-   
+
    implicit none
 
    character(len=*), intent(in)    :: qid            !< Identifier of current quantity (i.e., 'waterlevelbnd')
@@ -1586,7 +1586,7 @@ function adduniformtimerelation_objects(qid, locationfile, objtype, objid, param
       ! Prepare time series relation, if the .pli file has an associated .tim file.
       L = index(locationfile,'.', back=.true.) - 1
       valuestring = locationfile(1:L)//'_0001.tim'
-   else 
+   else
       ! TODO: AvD: error msg?
       success = .false.
    end if
@@ -1604,39 +1604,39 @@ function adduniformtimerelation_objects(qid, locationfile, objtype, objid, param
          call dbg_flush()
       else
          if (fm_ext_force_name_to_ec_item('','','', qid,multuniptr,intptr,intptr,intptr,dbleptr,dbleptr,dbleptr,dbleptr)) then
-            success = .true.     
+            success = .true.
          else
-            success = .false.     
+            success = .false.
             write(msgbuf, '(a)') 'Unknown quantity '''//trim(qid)//'''.'
             call warn_flush()
             return
          end if
-               
+
          fnam = trim(valuestring)
          ! Time-interpolated value will be placed in target array (e.g., qplat(n)) when calling ec_gettimespacevalue.
-         if (index(trim(fnam)//'|','.tim|')>0) then 
+         if (index(trim(fnam)//'|','.tim|')>0) then
             ! uniform=single time series vectormax = 1
             success  = ec_addtimespacerelation(qid, xdum, ydum, kdum, vectormax, fnam,    &
                                                filetype    = uniform,                     &
-                                               method      = spaceandtime,                & 
+                                               method      = spaceandtime,                &
                                                operand     = 'O',                         &
-                                               tgt_data1   = targetarrayptr,              &         
+                                               tgt_data1   = targetarrayptr,              &
                                                tgt_item1   = tgtitem,                     &
                                                multuni1    = multuniptr,                  &
                                                targetIndex = targetindex)
-         elseif (index(trim(fnam)//'|','.bc|')>0) then 
+         elseif (index(trim(fnam)//'|','.bc|')>0) then
             ! uniform=single time series vectormax = 1
-             
+
             success  = ec_addtimespacerelation(qid, xdum, ydum, kdum, vectormax, objid,   &
                                                filetype    = bcascii,                     &
-                                               method      = spaceandtime,                & 
+                                               method      = spaceandtime,                &
                                                operand     = 'O',                         &
-                                               tgt_data1   = targetarrayptr,              &         
+                                               tgt_data1   = targetarrayptr,              &
                                                tgt_item1   = tgtitem,                     &
                                                multuni1    = multuniptr,                  &
                                                targetIndex = targetindex,                 &
-                                               forcingfile = fnam)                                            
-         endif 
+                                               forcingfile = fnam)
+         endif
       end if
    else
       targetarray(targetindex) = valuedble ! Constant value for always, set it now already.
@@ -1648,11 +1648,11 @@ subroutine register_quantity_pli_combination(quantity, locationfile)
    use m_alloc
    implicit none
    character(len=*), intent(in)          :: quantity
-   character(len=*), intent(in)          :: locationfile   
+   character(len=*), intent(in)          :: locationfile
    character(len=max_registered_item_id) :: item_id
 
    item_id = trim(quantity) // '-' // trim(locationfile)
-   
+
    if (num_registered_items >= max_ext_bnd_items) then
       max_ext_bnd_items = ceiling(1.2*num_registered_items)
       call realloc(registered_items, max_ext_bnd_items, keepExisting = .true., fill='')
@@ -1679,14 +1679,14 @@ function quantity_pli_combination_is_registered(quantity, locationfile) result(i
    implicit none
    logical                               :: is_registered
    character(len=*),intent(in)           :: quantity
-   character(len=*),intent(in)           :: locationfile   
+   character(len=*),intent(in)           :: locationfile
    integer                               :: i
    character(len=max_registered_item_id) :: item_id
 
    item_id = trim(quantity) // '-' // trim(locationfile)
 
    is_registered = .false.
-   
+
    do i = 1, num_registered_items
       if (item_id == registered_items(i)) then
          is_registered = .true.
@@ -1705,30 +1705,30 @@ subroutine init_threttimes()
  use m_sediment, only: stm_included
  use unstruc_messages
  use m_missing
- 
+
  implicit none
- 
+
  integer             :: thrtlen, i, j, nseg, itrac, ifrac, iconst, n, ierr
  character(len=256)  :: qidfm, tracnam, sedfracnam, qidnam
  integer, external   :: findname
- 
+
  if(jatransportmodule == 0) then
     return
  endif
- 
+
  ! deallocation of TH arrays
- if(allocated(threttim)) then 
+ if(allocated(threttim)) then
     deallocate(threttim)
  endif
- 
- if(nopenbndsect==0) then 
+
+ if(nopenbndsect==0) then
     return
  endif
- 
+
  allocate(threttim(NUMCONST,nopenbndsect), stat=ierr)
  call aerr('threttim(NUMCONST,nopenbndsect)', ierr, nopenbndsect)
  threttim = 0
- 
+
  ! assign return times using temp arrays
  thrtlen = size(thrtt)
  do i = 1, thrtlen
@@ -1794,55 +1794,55 @@ subroutine init_threttimes()
        endif
     endif
  enddo
- 
+
  if(allocated(thtbnds)) deallocate(thtbnds)
  if(allocated(thzbnds)) deallocate(thzbnds)
  if(allocated(thtbndtm)) deallocate(thtbndtm)
  if(allocated(thzbndtm)) deallocate(thzbndtm)
  if(allocated(thtbndsd)) deallocate(thtbndsd)
  if(allocated(thzbndsd)) deallocate(thzbndsd)
- 
+
  allocate(thtbnds(nbnds), thzbnds(nbnds*kmxd), thtbndtm(nbndtm), thzbndtm(nbndtm*kmxd), thtbndsd(nbndsd), thzbndsd(nbndsd*kmxd), stat=ierr)
  call aerr('thtbnds(nbnds), thzbnds(nbnds*kmxd), thtbndtm(nbndtm), thzbndtm(nbndtm*kmxd), thtbndsd(nbndsd), thzbndsd(nbndsd*kmxd)', ierr, (kmxd+1)*(nbnds+nbndtm+nbndsd))
  thzbnds = DMISS
- 
+
  do i = 1,nbnds
     thtbnds(i) = threttim(ISALT,kbnds(5,i))
  enddo
- 
+
  do i = 1,nbndtm
     thtbndtm(i) = threttim(ITEMP,kbndtm(5,i))
  enddo
- 
+
  do i = 1,nbndsd
     thtbndsd(i) = threttim(ISED1,kbndsd(5,i))
  enddo
- 
+
  if (allocated(bndtr)) then
     do itrac = 1, numtracers
        iconst = itrac2const(itrac)
 
        if(allocated(bndtr(itrac)%tht)) deallocate(bndtr(itrac)%tht)
        if(allocated(bndtr(itrac)%thz)) deallocate(bndtr(itrac)%thz)
-    
+
        n = nbndtr(itrac)
-    
+
        allocate (bndtr(itrac)%tht(n), bndtr(itrac)%thz(n*kmxd), stat=ierr)
        call aerr('bndtr(itrac)%tht(n), bndtr(itrac)%thz(n*kmxd)', ierr, n*(kmxd+1))
 
-       bndtr(itrac)%thz = dmiss 
+       bndtr(itrac)%thz = dmiss
        do i = 1,n
          bndtr(itrac)%tht(i) = threttim(iconst,bndtr(itrac)%k(5,i))
        enddo
     enddo
  endif
- 
+
  do ifrac = 1, numfracs
     if(allocated(bndsf(ifrac)%tht)) deallocate(bndsf(ifrac)%tht)
     if(allocated(bndsf(ifrac)%thz)) deallocate(bndsf(ifrac)%thz)
-    
+
     n = nbndsf(ifrac)
-    
+
     allocate(bndsf(ifrac)%tht(n), bndsf(ifrac)%thz(n*kmxd), stat=ierr)
     call aerr('bndsf(ifrac)%tht(n), bndsf(ifrac)%thz(n*kmxd)', ierr, n*(kmxd+1))
 
@@ -1857,7 +1857,7 @@ subroutine init_threttimes()
        enddo
     end if
  enddo
-       
+
 end subroutine
 
 !> helper function to check combined usage of old style and new style keywords in General Structure.
@@ -2079,7 +2079,7 @@ kcw = 1
 
 end function flow_initwaveforcings_runtime
 
- 
+
 
 !> Initializes controllers that force structures.
 !! Currently only time series files, in the future also realtime control (RTC).
@@ -2139,17 +2139,17 @@ type(t_forcing), pointer      :: pfrc
 logical                       :: successloc
 
 integer :: istrtmp
-double precision, allocatable :: hulp(:,:) ! hulp 
+double precision, allocatable :: hulp(:,:) ! hulp
 type(c_ptr) :: cptr
 
 ! dambreak
 double precision              :: x_breach, y_breach, distemp
-double precision              :: xc, yc, xn, yn   
+double precision              :: xc, yc, xn, yn
 integer                       :: nDambreakCoordinates, k3, k4, kpol, indexInStructure, indexInPliset, indexLink, ja, Lstart
 double precision              :: xla, xlb, yla, ylb, rn, rt
 integer, allocatable          :: lftopol(:)
 double precision, allocatable :: xl(:,:), yl(:,:)
-integer                       :: branchIndex   
+integer                       :: branchIndex
 integer                       :: istat
 double precision              :: chainage
 double precision, pointer :: tgtarr(:)
@@ -2250,7 +2250,7 @@ do i=1,network%sts%count
                                        branchindex = pstru%ibran, chainage = pstru%chainage, &
                                        sortLinks = 1)
    end select
-   
+
    if (numgen > 0) then
       istat =  initialize_structure_links(pstru, numgen, kegen(1:numgen), wu)
    else
@@ -2258,7 +2258,7 @@ do i=1,network%sts%count
       msgbuf = 'No intersecting flow links found for structure with id '''//trim(pstru%id)//'''.'
       call msg_flush()
    endif
-   
+
 end do
 ! UNST-3308: early counting of ndambreak was needed here, because of lftopol array, but must be redone later below as well.
 ndambreak = 0
@@ -2271,7 +2271,7 @@ endif
 ! TODO handle the forcinglist for moveable structrures
 !do i=1,network%forcingList%Count
 !   pForcing => network%forcingList%forcing(i)
-!   
+!
 !   if (strcmpi(pForcing%filename, 'realtime')) then
 !      call mess(.. info realtime)
 !      cycle
@@ -2293,7 +2293,7 @@ do i=1,nstr
    str_ptr => strs_ptr%child_nodes(i)%node_ptr
 
    success = .true.
-   
+
    if (.not. strcmpi(tree_get_name(str_ptr), 'Structure')) then
       ! Only read [Structure] blocks, skip any other (e.g., [General]).
       cycle
@@ -2353,7 +2353,7 @@ do i=1,nstr
       end if
 
    end if
-   
+
    ! TODO: remove branchIndex code for pumps below, use above loc_spec_type instead.
    !branchIndex = -1
    !call prop_get_string(str_ptr, '', 'branchid', branchid, success)
@@ -2420,7 +2420,7 @@ do i=1,nstr
       else
          call selectelset_internal_links(xz, yz, ndx, ln, lnx, kep(npump+1:numl), npum, LOCTP_POLYLINE_FILE, plifile)
       endif
-      
+
       !endif
       success = .true.
       WRITE(msgbuf,'(2a,i8,a)') trim(qid), trim(plifile) , npum, ' nr of pump links' ; call msg_flush()
@@ -2516,7 +2516,7 @@ end do
  allocate ( xdum(1), ydum(1), kdum(1) , stat=ierr)
  call aerr('xdum(1), ydum(1), kdum(1)', ierr, 3)
  xdum = 1d0 ; ydum = 1d0; kdum = 1
- 
+
  if (ncgensg > 0) then  ! All generalstructure, i.e., the weir/gate/generalstructure user input
     if (allocated   (zcgen)   ) deallocate( zcgen)
     if (allocated   (kcgen)   ) deallocate( kcgen)
@@ -2564,7 +2564,7 @@ end do
 
           call setfixedweirscheme3onlink(Lf)
           iadv(Lf)     = 22             ! iadv = general
-             
+
        enddo
 
     enddo
@@ -2580,7 +2580,7 @@ end do
     hulp(8,1:ncgensg)  = 0.0 ! levelrightZbsr=0.0
     hulp(9,1:ncgensg)  = 10  ! widthrightW2=10
     hulp(10,1:ncgensg) = 0.0 ! levelrightZb2=0.0
-    hulp(11,1:ncgensg) = 0.0d0  ! GateLowerEdgeLevel  
+    hulp(11,1:ncgensg) = 0.0d0  ! GateLowerEdgeLevel
     hulp(12,1:ncgensg) = 1d10  ! gateheightintervalcntrl=12
     hulp(13,1:ncgensg) = 1   ! pos_freegateflowcoeff=1
     hulp(14,1:ncgensg) = 1   ! pos_drowngateflowcoeff=1
@@ -2596,7 +2596,7 @@ end do
     hulp(24,1:ncgensg) = 1.  ! dynstructext=1.
     hulp(25,1:ncgensg) = 1d10! gatedoorheight
     hulp(26,1:ncgensg) = 0.  ! door_opening_width=0
-  
+
     if ( allocated(generalstruc) )   deallocate (generalstruc)
     allocate (generalstruc(ncgensg) )
 
@@ -2675,25 +2675,25 @@ end do
                fnam = trim(rec)
                call resolvePath(fnam, md_structurefile_dir, fnam)
                ! Time-interpolated value will be placed in zcgen((n-1)*3+1) when calling ec_gettimespacevalue.
-               if (index(trim(fnam)//'|','.tim|')>0) then 
+               if (index(trim(fnam)//'|','.tim|')>0) then
                   success  = ec_addtimespacerelation(qid, xdum, ydum, kdum, 1, fnam, uniform, spaceandtime, 'O', targetIndex=(n-1)*kx+1) ! Hook up 1 component at a time, even when target element set has kx=3
-               endif 
-               if (index(trim(fnam)//'|','.cmp|')>0) then 
+               endif
+               if (index(trim(fnam)//'|','.cmp|')>0) then
                   success  = ec_addtimespacerelation(qid, xdum, ydum, kdum, 1, fnam, fourier, justupdate, 'O', targetIndex=(n-1)*kx+1) ! Hook up 1 component at a time, even when target element set has kx=3
-               endif 
+               endif
             end if
          else
             zcgen((n-1)*kx+1) = tmpval ! Constant value for always, set it now already.
             hulp(6, n)        = tmpval
          end if
-         
+
          tmpval = dmiss
          call prop_get(str_ptr, '', 'CrestWidth', rec, success)
          if (success) then
              read(rec, *, iostat = ierr) tmpval
              zcgen((n-1)*kx+3) = tmpval ! Constant value for always, set it now already.
          endif
-         
+
          tmpval = dmiss
          call prop_get(str_ptr, '', 'lat_contr_coeff', tmpval)
          ! TODO: Herman/Jaco: this is not relevant anymore, using width (gate only)??
@@ -2739,12 +2739,12 @@ end do
                fnam = trim(rec)
                call resolvePath(fnam, md_structurefile_dir, fnam)
                ! Time-interpolated value will be placed in zcgen((n-1)*3+1) when calling ec_gettimespacevalue.
-               if (index(trim(fnam)//'|','.tim|')>0) then 
+               if (index(trim(fnam)//'|','.tim|')>0) then
                   success  = ec_addtimespacerelation(qid, xdum, ydum, kdum, 1, fnam, uniform, spaceandtime, 'O', targetIndex=(n-1)*kx+1) ! Hook up 1 component at a time, even when target element set has kx=3
-               endif 
-               if (index(trim(fnam)//'|','.cmp|')>0) then 
+               endif
+               if (index(trim(fnam)//'|','.cmp|')>0) then
                   success  = ec_addtimespacerelation(qid, xdum, ydum, kdum, 1, fnam, fourier, justupdate, 'O', targetIndex=(n-1)*kx+1) ! Hook up 1 component at a time, even when target element set has kx=3
-               endif 
+               endif
             end if
          else
             zcgen((n-1)*kx+1) = tmpval ! Constant value for always, set it now already.
@@ -2799,12 +2799,12 @@ end do
                fnam = trim(rec)
                call resolvePath(fnam, md_structurefile_dir, fnam)
                ! Time-interpolated value will be placed in zcgen((n-1)*3+2) when calling ec_gettimespacevalue.
-               if (index(trim(fnam)//'|','.tim|')>0) then 
+               if (index(trim(fnam)//'|','.tim|')>0) then
                    success  = ec_addtimespacerelation(qid, xdum, ydum, kdum, 1, fnam, uniform, spaceandtime, 'O', targetIndex=(n-1)*kx+2) ! Hook up 1 component at a time, even when target element set has kx=3
-               endif 
-               if (index(trim(fnam)//'|','.cmp|')>0) then 
+               endif
+               if (index(trim(fnam)//'|','.cmp|')>0) then
                    success  = ec_addtimespacerelation(qid, xdum, ydum, kdum, 1, fnam, fourier, justupdate, 'O', targetIndex=(n-1)*kx+2) ! Hook up 1 component at a time, even when target element set has kx=3
-               endif 
+               endif
             end if
          else
             zcgen((n-1)*kx+2) = tmpval ! Constant value for always, set it now already.
@@ -2835,12 +2835,12 @@ end do
                   fnam = trim(rec)
                   call resolvePath(fnam, md_structurefile_dir, fnam)
                   ! Time-interpolated value will be placed in zcgen((n-1)*3+3) when calling ec_gettimespacevalue.
-                  if (index(trim(fnam)//'|','.tim|')>0) then 
+                  if (index(trim(fnam)//'|','.tim|')>0) then
                       success  = ec_addtimespacerelation(qid, xdum, ydum, kdum, 1, fnam, uniform, spaceandtime, 'O', targetIndex=(n-1)*kx+3) ! Hook up 1 component at a time, even when target element set has kx=3
-                  endif 
-                  if (index(trim(fnam)//'|','.cmp|')>0) then 
+                  endif
+                  if (index(trim(fnam)//'|','.cmp|')>0) then
                       success  = ec_addtimespacerelation(qid, xdum, ydum, kdum, 1, fnam, fourier, justupdate, 'O', targetIndex=(n-1)*kx+3) ! Hook up 1 component at a time, even when target element set has kx=3
-                  endif 
+                  endif
                end if
             else
                zcgen((n-1)*kx+3) = tmpval ! Constant value for always, set it now already.
@@ -2920,12 +2920,12 @@ end do
                      qid = 'generalstructure'
                      fnam = trim(rec)
                      call resolvePath(fnam, md_structurefile_dir, fnam)
-                     if (index(trim(fnam)//'|','.tim|')>0) then 
+                     if (index(trim(fnam)//'|','.tim|')>0) then
                          success  = ec_addtimespacerelation(qid, xdum, ydum, kdum, 1, fnam, uniform, spaceandtime, 'O', targetIndex=(n-1)*kx+ifld) ! Hook up 1 component at a time, even when target element set has kx=3
-                     endif 
-                     if (index(trim(fnam)//'|','.cmp|')>0) then 
+                     endif
+                     if (index(trim(fnam)//'|','.cmp|')>0) then
                          success  = ec_addtimespacerelation(qid, xdum, ydum, kdum, 1, fnam, fourier, justupdate, 'O', targetIndex=(n-1)*kx+ifld) ! Hook up 1 component at a time, even when target element set has kx=3
-                     endif 
+                     endif
                   end if
                end if
             else
@@ -2935,9 +2935,9 @@ end do
          end do
 
          ! Set some zcgen values to their initial scalar values (for example, zcgen((n-1)*3+1) is quickly need for updating bobs.)
-         zcgen((n-1)*3+1) = hulp( 6, n) ! levelcenter 
+         zcgen((n-1)*3+1) = hulp( 6, n) ! levelcenter
          zcgen((n-1)*3+2) = hulp(11, n) ! gateheight  == 'gateloweredgelevel', really a level
-         zcgen((n-1)*3+3) = hulp(26, n) ! door_opening_width 
+         zcgen((n-1)*3+3) = hulp(26, n) ! door_opening_width
 
          ngenstru = ngenstru+1
          genstru2cgen(ngenstru) = n ! Mapping from 1:ngenstru to underlying generalstructure --> (1:ncgensg)
@@ -3020,14 +3020,14 @@ if (ngate > 0) then ! Old-style controllable gateloweredgelevel
             qid = 'gateloweredgelevel'
             fnam = trim(rec)
             call resolvePath(fnam, md_structurefile_dir, fnam)
-            if (index(trim(fnam)//'|','.tim|')>0) then 
+            if (index(trim(fnam)//'|','.tim|')>0) then
                ! Time-interpolated value will be placed in zgate(n) when calling ec_gettimespacevalue.
                success  = ec_addtimespacerelation(qid, xdum, ydum, kdum, kx, fnam, uniform, spaceandtime, 'O', targetIndex=n)
-            endif 
-            if (index(trim(fnam)//'|','.cmp|')>0) then 
+            endif
+            if (index(trim(fnam)//'|','.cmp|')>0) then
                ! Evaluated harmonic signals value will be placed in zgate(n) when calling ec_gettimespacevalue.
                success  = ec_addtimespacerelation(qid, xdum, ydum, kdum, kx, fnam, fourier, justupdate, 'O', targetIndex=n)
-            endif 
+            endif
          end if
       else
          zgate(n) = tmpval ! Constant value for always, set it now already.
@@ -3088,14 +3088,14 @@ if (ncdamsg > 0) then ! Old-style controllable damlevel
             qid = 'damlevel'
             fnam = trim(rec)
             call resolvePath(fnam, md_structurefile_dir, fnam)
-            if (index(trim(fnam)//'|','.tim|')>0) then 
+            if (index(trim(fnam)//'|','.tim|')>0) then
                ! Time-interpolated value will be placed in zcdam(n) when calling ec_gettimespacevalue.
                success  = ec_addtimespacerelation(qid, xdum, ydum, kdum, kx, fnam, uniform, spaceandtime, 'O', targetIndex=n)
-            endif 
-            if (index(trim(fnam)//'|','.cmp|')>0) then 
+            endif
+            if (index(trim(fnam)//'|','.cmp|')>0) then
                ! Evaluated harmonic signals value will be placed in zcdam(n) when calling ec_gettimespacevalue.
                success  = ec_addtimespacerelation(qid, xdum, ydum, kdum, kx, fnam, fourier, justupdate, 'O', targetIndex=n)
-            endif 
+            endif
          end if
       else
          zcdam(n) = tmpval ! Constant value for always, set it now already.
@@ -3142,21 +3142,21 @@ if (npump > 0) then
          kpump(3,k)    = L ! f
       enddo
    end do
-   
+
    nPumpsWithLevels = 0
-   
+
    if (allocated(pumpsWithLevels)) deallocate(pumpsWithLevels)
    allocate(pumpsWithLevels(npumpsg))
    pumpsWithLevels = -1;
-   
+
    if (allocated(waterLevelsPumpLeft)) deallocate(waterLevelsPumpLeft)
    allocate(waterLevelsPumpLeft(npumpsg))
    waterLevelsPumpLeft = 0d0;
-   
+
    if (allocated(waterLevelsPumpRight)) deallocate(waterLevelsPumpRight)
    allocate(waterLevelsPumpRight(npumpsg))
    waterLevelsPumpRight = 0d0;
-   
+
    if (allocated(pumpAveraging)) deallocate(pumpAveraging)
    allocate(pumpAveraging(2,npumpsg))
    pumpAveraging = 0d0;
@@ -3191,7 +3191,7 @@ if (npump > 0) then
             endif
          endif
       end if
-      
+
       ! mapping for qpump array
       if (success) then
          nPumpsWithLevels   = nPumpsWithLevels + 1
@@ -3219,7 +3219,7 @@ if (npump > 0) then
                call resolvePath(fnam, md_structurefile_dir, fnam)
                if (index(trim(fnam)//'|','.tim|')>0) then
                   ! Time-interpolated value will be placed in qpump(n) when calling ec_gettimespacevalue.
-                  success  = ec_addtimespacerelation(qid, xdum, ydum, kdum, kx, fnam, uniform, spaceandtime, 'O', targetIndex=n) 
+                  success  = ec_addtimespacerelation(qid, xdum, ydum, kdum, kx, fnam, uniform, spaceandtime, 'O', targetIndex=n)
                   if(.not.success) then
                      message = dumpECMessageStack(LEVEL_WARN,callback_msg)
                      call qnerror( message, ' for ',strid)
@@ -3250,94 +3250,94 @@ if (ndambreak > 0) then
    if (allocated(maximumDambreakWidths)) deallocate(maximumDambreakWidths)
    allocate(maximumDambreakWidths(ndambreak))
    maximumDambreakWidths = 0d0;
-   
+
    if (allocated(kdambreak)) deallocate(kdambreak)
-   allocate(kdambreak(3,ndambreak), stat=ierr) ! the last row stores the actual 
-   kdambreak = 0d0; 
-   
+   allocate(kdambreak(3,ndambreak), stat=ierr) ! the last row stores the actual
+   kdambreak = 0d0;
+
    if (allocated(dambreaks)) deallocate(dambreaks)
    allocate(dambreaks(ndambreaksg))
    dambreaks = 0
-   
+
    if (allocated(LStartBreach)) deallocate(LStartBreach)
    allocate(LStartBreach(ndambreaksg))
    LStartBreach     = - 1
-   
+
    if (allocated(waterLevelsDambreakDownStream)) deallocate(waterLevelsDambreakDownStream)
    allocate(waterLevelsDambreakDownStream(ndambreaksg))
    waterLevelsDambreakDownStream = 0.0d0
-   
+
    if (allocated(waterLevelsDambreakUpStream)) deallocate(waterLevelsDambreakUpStream)
    allocate(waterLevelsDambreakUpStream(ndambreaksg))
    waterLevelsDambreakUpStream   = 0.0d0
-   
+
    if (allocated(breachDepthDambreak)) deallocate(breachDepthDambreak)
    allocate(breachDepthDambreak(ndambreaksg))
    breachDepthDambreak           = 0.0d0
-   
+
    if (allocated(breachWidthDambreak)) deallocate(breachWidthDambreak)
    allocate(breachWidthDambreak(ndambreaksg))
    breachWidthDambreak           = 0.0d0
-   
+
    if (allocated(dambreak_ids)) deallocate(dambreak_ids)
    allocate(dambreak_ids(ndambreaksg))
-   
+
    if(allocated(activeDambreakLinks)) deallocate(activeDambreakLinks)
    allocate(activeDambreakLinks(ndambreak))
    activeDambreakLinks = 0
-   
+
    if(allocated(normalVelocityDambreak)) deallocate(normalVelocityDambreak)
    allocate(normalVelocityDambreak(ndambreaksg))
    normalVelocityDambreak = 0.0d0
-   
+
    if(allocated(dambreakAveraging)) deallocate(dambreakAveraging)
    allocate(dambreakAveraging(2,ndambreaksg))
    dambreakAveraging = 0.0d0
-   
+
    if(allocated(dambreakLevelsAndWidthsFromTable)) deallocate(dambreakLevelsAndWidthsFromTable)
    allocate(dambreakLevelsAndWidthsFromTable(ndambreaksg*2))
    dambreakLevelsAndWidthsFromTable = 0.0d0
-   
+
    if(allocated(breachWidthDerivativeDambreak)) deallocate(breachWidthDerivativeDambreak)
    allocate(breachWidthDerivativeDambreak(ndambreaksg))
    breachWidthDerivativeDambreak = 0.0d0
-   
+
    if(allocated(waterLevelJumpDambreak)) deallocate(waterLevelJumpDambreak)
    allocate(waterLevelJumpDambreak(ndambreaksg))
    waterLevelJumpDambreak = 0.0d0
-   
+
    if(allocated(waterLevelJumpDambreak)) deallocate(waterLevelJumpDambreak)
    allocate(waterLevelJumpDambreak(ndambreaksg))
    waterLevelJumpDambreak = 0.0d0
-   
+
    ! dambreak upstream
    if(allocated(dambreakLocationsUpstreamMapping)) deallocate(dambreakLocationsUpstreamMapping)
    allocate(dambreakLocationsUpstreamMapping(ndambreaksg))
    dambreakLocationsUpstreamMapping = 0.0d0
-   
+
    if(allocated(dambreakLocationsUpstream)) deallocate(dambreakLocationsUpstream)
    allocate(dambreakLocationsUpstream(ndambreaksg))
    dambreakLocationsUpstream = 0.0d0
-   
+
    if(allocated(dambreakAverigingUpstreamMapping)) deallocate(dambreakAverigingUpstreamMapping)
    allocate(dambreakAverigingUpstreamMapping(ndambreaksg))
    dambreakAverigingUpstreamMapping = 0.0d0
-   
+
    nDambreakLocationsUpstream = 0
    nDambreakAveragingUpstream = 0
-   
+
    ! dambreak downstream
    if(allocated(dambreakLocationsDownstreamMapping)) deallocate(dambreakLocationsDownstreamMapping)
    allocate(dambreakLocationsDownstreamMapping(ndambreaksg))
    dambreakLocationsDownstreamMapping = 0.0d0
-   
+
    if(allocated(dambreakLocationsDownstream)) deallocate(dambreakLocationsDownstream)
    allocate(dambreakLocationsDownstream(ndambreaksg))
    dambreakLocationsDownstream = 0.0d0
-   
+
    if(allocated(dambreakAverigingDownstreamMapping)) deallocate(dambreakAverigingDownstreamMapping)
    allocate(dambreakAverigingDownstreamMapping(ndambreaksg))
-   dambreakAverigingDownstreamMapping = 0.0d0  
+   dambreakAverigingDownstreamMapping = 0.0d0
 
    nDambreakLocationsDownstream = 0
    nDambreakAveragingDownstream = 0
@@ -3356,10 +3356,10 @@ if (ndambreak > 0) then
          ! kdambreak
          kdambreak(1,k)  = kb
          kdambreak(2,k)  = kbi
-         kdambreak(3,k)  = L   
+         kdambreak(3,k)  = L
       end do
    enddo
-   
+
    ! number of columns in the dambreak hights and widths tim file
    kx = 2
    do n = 1, ndambreaksg
@@ -3367,7 +3367,7 @@ if (ndambreak > 0) then
       !The index of the structure
       indexInStructure = dambridx(n)
       if (indexInStructure == -1 ) cycle
-      
+
       str_ptr => strs_ptr%child_nodes(indexInStructure)%node_ptr
 
       ! read the id first
@@ -3409,11 +3409,11 @@ if (ndambreak > 0) then
             ! Time-interpolated value will be placed in zcgen((n-1)*3+1) when calling ec_gettimespacevalue.
             qid='dambreakLevelsAndWidths'
             network%sts%struct(istrtmp)%dambreak%levelsAndWidths = trim(network%sts%struct(istrtmp)%dambreak%levelsAndWidths)
-            if (index(trim(network%sts%struct(istrtmp)%dambreak%levelsAndWidths)//'|','.tim|')>0) then   
+            if (index(trim(network%sts%struct(istrtmp)%dambreak%levelsAndWidths)//'|','.tim|')>0) then
                success  = ec_addtimespacerelation(qid, xdum, ydum, kdum, kx, network%sts%struct(istrtmp)%dambreak%levelsAndWidths , uniform, spaceandtime, 'O', targetIndex=n) ! Hook up 1 component at a time, even when target element set has kx=3
             else
                success = .false.
-            endif            
+            endif
          endif
 
          ! inquire if the water level upstream has to be taken from a location or be a result of averaging
@@ -3473,18 +3473,18 @@ if (ndambreak > 0) then
                dambreakAverigingDownstreamMapping(nDambreakAveragingDownstream) = n
             endif
          endif
-         
+
       else
          ! old dambreak format
          write(msgbuf, '(a,a,a)') 'Dambreak ''', trim(strid), ''' could not be read. Perhaps missing fields in structure file?'
          call err_flush()
          cycle
       endif
-      
+
       ! Project the start of the breach on the polyline, find xn and yn
       if(.not.allocated(dambreakPolygons(indexInPliset)%xp)) cycle
       if(.not.allocated(dambreakPolygons(indexInPliset)%yp)) cycle
-     
+
       ! Create the array with the coordinates of the flow links
       if(allocated(xl)) deallocate(xl)
       if(allocated(yl)) deallocate(yl)
@@ -3496,31 +3496,31 @@ if (ndambreak > 0) then
          indexLink = indexLink + 1
          ! compute the mid point
          Lf = iabs(kdambreak(3,k))
-         k3 = lncn(1,Lf) 
+         k3 = lncn(1,Lf)
          k4 = lncn(2,Lf)
          xl(indexLink, 1) = xk(k3)
          xl(indexLink, 2) = xk(k4)
          yl(indexLink, 1) = yk(k3)
          yl(indexLink, 2) = yk(k4)
       enddo
-   
-      ! comp_breach_point takes plain arrays to compute the breach point (also used in unstruct_bmi)      
-      call comp_breach_point(network%sts%struct(istrtmp)%dambreak%startLocationX, & 
-                             network%sts%struct(istrtmp)%dambreak%startLocationY, & 
-                             dambreakPolygons(indexInPliset)%xp, & 
-                             dambreakPolygons(indexInPliset)%yp, & 
-                             dambreakPolygons(indexInPliset)%np, & 
-                             xl, & 
-                             yl, & 
-                             Lstart, & 
-                             x_breach, & 
-                             y_breach, & 
-                             jsferic, & 
+
+      ! comp_breach_point takes plain arrays to compute the breach point (also used in unstruct_bmi)
+      call comp_breach_point(network%sts%struct(istrtmp)%dambreak%startLocationX, &
+                             network%sts%struct(istrtmp)%dambreak%startLocationY, &
+                             dambreakPolygons(indexInPliset)%xp, &
+                             dambreakPolygons(indexInPliset)%yp, &
+                             dambreakPolygons(indexInPliset)%np, &
+                             xl, &
+                             yl, &
+                             Lstart, &
+                             x_breach, &
+                             y_breach, &
+                             jsferic, &
                              jasfer3D,&
                              dmiss)
-      
-      LStartBreach(n) = L1dambreaksg(n) -  1  + Lstart 
-      
+
+      LStartBreach(n) = L1dambreaksg(n) -  1  + Lstart
+
       ! compute the normal projections of the start and endpoints of the flow links
       do k = L1dambreaksg(n), L2dambreaksg(n)
          Lf = iabs(kdambreak(3,k))
@@ -3534,7 +3534,7 @@ if (ndambreak > 0) then
             xlb = dambreakPolygons(indexInPliset)%xp(kpol + 1)
             yla = dambreakPolygons(indexInPliset)%yp(kpol)
             ylb = dambreakPolygons(indexInPliset)%yp(kpol + 1)
-            
+
             call normalout( xla, yla, xlb, ylb, xn, yn, jsferic, jasfer3D, dmiss, dxymis)
             dambreakLinksEffectiveLength(k) = dbdistance(xk(k3), yk(k3), xk(k4), yk(k4), jsferic, jasfer3D, dmiss)
             dambreakLinksEffectiveLength(k) = dambreakLinksEffectiveLength(k) * abs( xn*csu(Lf) + yn*snu(Lf) )
@@ -3543,7 +3543,7 @@ if (ndambreak > 0) then
          ! Sum the length of the intersected flow links (required to bound maximum breach width)
          maximumDambreakWidths(n) = maximumDambreakWidths(n) + dambreakLinksEffectiveLength(k)
       enddo
-      
+
       ! Now we can deallocate the polygon
       deallocate(dambreakPolygons(indexInPliset)%yp)
       deallocate(dambreakPolygons(indexInPliset)%xp)
@@ -3557,7 +3557,7 @@ endif
 
 ! Cleanup:
 888 continue
-    
+
  if (mext /= 0) then
 !    call doclose(mext) ! close ext file
 !    deallocate ( keg, ked, kep, kegs) ! TODO: AvD: cleanup now still done in initexternalforcings. Split off later, or not?
@@ -3585,13 +3585,13 @@ subroutine getStructureIndex(strtypename, strname, index, is_in_network)
    use m_hash_search, only: hashsearch
    use unstruc_channel_flow, only: network
    use m_longculverts
-   
+
    implicit none
    character(len=*), intent(in   ) :: strtypename   !< the type of the structure: 'pumps', 'weirs', 'gates', ...
    character(len=*), intent(in   ) :: strname       !< Id/name of the requested structure, e.g. 'Pump01'
    integer,          intent(  out) :: index         !< Returned index of the found structure in its controllable value arrays. -1 when not found.
    logical,          intent(  out) :: is_in_network !< Whether or not the found structure is inside the network%sts set, or in FM global structure set. No meaning when structure not found.
- 
+
    integer :: i, nstr, icgen
    integer, pointer :: cgen_mapping(:)
    index = -1
@@ -3676,24 +3676,24 @@ end subroutine getStructureIndex
 !> returns the index of a named lateral in the global array from this module
 subroutine getLateralIndex(idlat, index)
    use m_wind
-   
+
    implicit none
    character(len=*), intent(in)  :: idlat !< id of the lateral
    integer,          intent(out) :: index !< its position in the global array
    integer                       :: i
-   
+
    index = 0
-   
+
    i = -1
    do i = 1, numlatsg
       if (trim(lat_ids(i)) == trim(idlat)) then
          index = i
          exit
-      end if 
-   end do    
-      
+      end if
+   end do
+
 end subroutine getLateralIndex
- 
+
 !> Reads a key=value entry from a property block and tries to interpret the value.
 !! The (single!) property block should come from an already-parsed .ini file.
 !! The string value is always returned, if found, and an attempt is also made to
@@ -3715,7 +3715,7 @@ subroutine read_required_property(prop_ptr, key, strvalue, dblvalue, is_double, 
 
    success   = .false.
    is_double = .false.
-   
+
    call prop_get(prop_ptr, '', trim(key), strvalue, success)
    if (.not. success .or. len_trim(strvalue) == 0) then
       write(msgbuf, '(a,a,a,a,a)') 'Required field ''', trim(key), ''' missing in ', trim(typeandid), '.'
@@ -3733,7 +3733,7 @@ subroutine read_required_property(prop_ptr, key, strvalue, dblvalue, is_double, 
 888 continue
 
 end subroutine read_required_property
-   
+
 subroutine flow_init_discharge()
    use properties
    implicit none
@@ -3748,7 +3748,7 @@ subroutine flow_init_discharge()
          call prop_get(dis_ptr, '', 'polylinefile', rec)
          call prop_get(dis_ptr, '', 'type', dis_type) ! normal, momentum, walking, in-out
          !call prop_get(dis_ptr, '', 'interpolation', rec) ! linear, block
-         
+
          !if (.not. success .or. len_trim(rec) == 0) then
          !   write(msgbuf, '(a,a,a)') 'Required field ''crest_level'' missing in weir ''', trim(strid), '''.'
          !   call warn_flush()
@@ -3790,15 +3790,22 @@ subroutine add_bndtracer(tracnam, tracunit, itrac, janew)
    use unstruc_messages
 
    implicit none
-   
+
    character(len=*), intent(in)  :: tracnam
    character(len=20), intent(in) :: tracunit
    integer,          intent(out) :: itrac
    integer,          intent(out) :: janew
-   
+
    integer,          external    :: findname
    integer                       :: iwqbot
-   
+
+   if ( .not. allocated(trnames) ) then
+       allocate( trnames(0) )
+   endif
+   if ( .not. allocated(wqbotnames) ) then
+       allocate( wqbotnames(0) )
+   endif
+
    itrac = findname(numtracers, trnames, tracnam)
    iwqbot = findname(numwqbots, wqbotnames, tracnam)
 
@@ -3810,8 +3817,8 @@ subroutine add_bndtracer(tracnam, tracunit, itrac, janew)
    if ( itrac.eq.0 ) then
       janew = 1
 !     add tracer
-   
-      numtracers = numtracers+1    
+
+      numtracers = numtracers+1
 !     realloc
       call realloc(nbndtr, numtracers, keepExisting=.true., fill=0 )
       call realloc(trnames, numtracers, keepExisting=.true., fill='')
@@ -3852,29 +3859,29 @@ subroutine check_structures_and_fixed_weirs()
    use m_fixedweirs, only: nfxw, lnfxw
    use unstruc_messages
    implicit none
-   
+
    character(len=128)                 :: msg
-   
+
    integer, dimension(:), allocatable :: L2struct
    integer, dimension(:), allocatable :: L2weir
-   
+
    integer                            :: Lf, n, k
    integer                            :: nummulti
    integer                            :: numweir
-   
+
 !  allocate flowlink -> structure array
    allocate(L2struct(Lnx))
    L2struct = 0
 !  allocate flowlink -> weir array
    allocate(L2weir(Lnx))
    L2weir = 0
-   
+
 !  fill flowlink -> fixed weir array
    do n=1,nfxw
       Lf = lnfxw(n)
       L2weir(Lf) = n
    end do
-   
+
    nummulti = 0
    numweir = 0
 !  loop over structures
@@ -3883,7 +3890,7 @@ subroutine check_structures_and_fixed_weirs()
       do k = L1cgensg(n), L2cgensg(n)
 !        get flowlink
          Lf = kcgen(3,k)
-         
+
 !        check if this flowlink is free
          if ( L2struct(Lf).eq.0 ) then
 !           flowlink is free
@@ -3894,7 +3901,7 @@ subroutine check_structures_and_fixed_weirs()
             write(msg, "('Flowlink ', I0, ' found in structure ', I0, ' already claimed by structure ', I0, '.')") Lf, n, L2struct(Lf)
             call mess(LEVEL_WARN, trim(msg))
          end if
-         
+
 !        check if this flowlink is not associated with a fixed weir
          if ( L2weir(Lf).ne.0 ) then
 !           flowlink is associated with fixed weir
@@ -3904,14 +3911,14 @@ subroutine check_structures_and_fixed_weirs()
          end if
       end do
    end do
-   
+
    if ( nummulti.gt.0 ) then
       call mess(LEVEL_ERROR, 'multiple general structures defined on one or more flowlink(s), see preceding message(s).')
    end if
-   
-!  deallocate   
+
+!  deallocate
    if ( allocated(L2struct) ) deallocate(L2struct)
    if ( allocated(L2weir) )   deallocate(L2weir)
-   
+
    return
 end subroutine check_structures_and_fixed_weirs
