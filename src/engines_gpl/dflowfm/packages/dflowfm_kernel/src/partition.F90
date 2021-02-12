@@ -51,6 +51,12 @@ module m_metis
    integer, parameter :: METIS_NOPTIONS=40
    
    integer, dimension(METIS_NOPTIONS) :: opts
+
+   !> FORTRAN interface to native METIS return codes
+   integer, parameter :: METIS_OK              = 1    !< Returned normally
+   integer, parameter :: METIS_ERROR_INPUT     = -2   !< Returned due to erroneous inputs and/or options
+   integer, parameter :: METIS_ERROR_MEMORY    = -3   !< Returned due to insufficient memory
+   integer, parameter :: METIS_ERROR           = -4   !< Some other errors
 end module
 
 module m_partitioninfo
@@ -5561,6 +5567,13 @@ end subroutine partition_make_globalnumbers
       select case (method)
       case (0,1)
          ierror = METIS_PartGraphKway(Ne, Ncon, iadj, jadj, vwgt, vsize, adjw, Nparts, tpwgts, ubvec, opts, objval, idomain)
+         if (ierror /= METIS_OK) then
+            call mess(LEVEL_WARN, 'Partitioning failed for k-way method with option contiguous=1. Retrying now with contiguous=0.')
+            ierror = metisopts(opts, "CONTIG", 0) ! Fallback, allow non-contiguous domains in case of non-contiguous network.
+            if (ierror == 0) then ! Note: metisopts does not use METIS_OK status, but simply 0 instead.
+               ierror = METIS_PartGraphKway(Ne, Ncon, iadj, jadj, vwgt, vsize, adjw, Nparts, tpwgts, ubvec, opts, objval, idomain)
+            end if
+         end if
       case (2)
          ierror = METIS_PartGraphRecursive(Ne, Ncon, iadj, jadj, vwgt, vsize, adjw, Nparts, tpwgts, ubvec, opts, objval, idomain)
       case (3)
