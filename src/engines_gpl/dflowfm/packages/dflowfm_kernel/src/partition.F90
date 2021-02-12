@@ -5567,11 +5567,13 @@ end subroutine partition_make_globalnumbers
       select case (method)
       case (0,1)
          ierror = METIS_PartGraphKway(Ne, Ncon, iadj, jadj, vwgt, vsize, adjw, Nparts, tpwgts, ubvec, opts, objval, idomain)
-         if (ierror /= METIS_OK) then
+         if (ierror /= METIS_OK .and. jacontiguous == 1) then
             call mess(LEVEL_WARN, 'Partitioning failed for k-way method with option contiguous=1. Retrying now with contiguous=0.')
             ierror = metisopts(opts, "CONTIG", 0) ! Fallback, allow non-contiguous domains in case of non-contiguous network.
             if (ierror == 0) then ! Note: metisopts does not use METIS_OK status, but simply 0 instead.
                ierror = METIS_PartGraphKway(Ne, Ncon, iadj, jadj, vwgt, vsize, adjw, Nparts, tpwgts, ubvec, opts, objval, idomain)
+            else
+               call mess(LEVEL_ERROR, 'Fallback fails.')
             end if
          end if
       case (2)
@@ -5582,7 +5584,7 @@ end subroutine partition_make_globalnumbers
          call mess(LEVEL_ERROR, 'Unknown partitioning method number', method)
       end select
 
-      if (ierror < 0) then
+      if (ierror /= METIS_OK) then
          call mess(LEVEL_ERROR, 'Metis returns with error code: ', ierror)
       end if
 
