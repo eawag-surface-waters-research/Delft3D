@@ -100,6 +100,7 @@ end function dlwqnc_lowercase
 !     nf90_noerr if variable found, otherwise an error code
 !
 integer function dlwqnc_find_var_with_att( ncid, attribute, varid, expected_value )
+    use io_ugrid
 
     implicit none
 
@@ -114,8 +115,9 @@ integer function dlwqnc_find_var_with_att( ncid, attribute, varid, expected_valu
     integer                                :: xtype, length, attnum
 
     character(len=nf90_max_name)           :: varname
-    character(len=nf90_max_name)           :: att_value
+    character(len=:), allocatable          :: att_value
 
+    allocate(character(len=0) :: att_value)    
     dlwqnc_find_var_with_att = -1
     varid                    = -1
 
@@ -135,7 +137,7 @@ integer function dlwqnc_find_var_with_att( ncid, attribute, varid, expected_valu
             ierror = nf90_inquire_variable( ncid, varid, name=varname )
 
             if ( present(expected_value) ) then
-                ierror = nf90_get_att( ncid, varid, attribute, att_value )
+                ierror = ug_get_attribute( ncid, varid, attribute, att_value )
                 if ( ierror /= nf90_noerr ) then
                     cycle ! Not the right type, it appears
                 else
@@ -156,6 +158,8 @@ integer function dlwqnc_find_var_with_att( ncid, attribute, varid, expected_valu
     else
         dlwqnc_find_var_with_att = nf90_enotatt
     endif
+    deallocate(att_value)
+    
 end function dlwqnc_find_var_with_att
 
 ! dlwqnc_copy_var_atts --
@@ -505,6 +509,8 @@ end function dlwqnc_copy_dims
 !
 recursive function dlwqnc_copy_associated( ncidin, ncidout, meshidin, meshidout, attribute, &
                                                    dimsizes, use_attrib ) result(dlwqnc_result)
+    use io_ugrid
+    
     integer, intent(in)               :: ncidin, ncidout, meshidin, meshidout
     character(len=*), intent(in)      :: attribute
     integer, intent(in), dimension(:) :: dimsizes
@@ -520,7 +526,7 @@ recursive function dlwqnc_copy_associated( ncidin, ncidout, meshidin, meshidout,
     integer                               :: ndims
     integer, dimension(nf90_max_var_dims) :: dimids, newdimids
 
-    character(len=4*nf90_max_name) :: attvalue
+    character(len=:), allocatable  :: att_value
     character(len=nf90_max_name)   :: varname
     character(len=1)               :: dummy
 
@@ -528,6 +534,7 @@ recursive function dlwqnc_copy_associated( ncidin, ncidout, meshidin, meshidout,
 
     logical, save                  :: suppress_message = .false. ! Because of the recursive call
 
+    allocate(character(len=0) :: att_value)    
     dlwqnc_result = -1
 
     use_names_in_attrib = .true.
@@ -546,8 +553,7 @@ recursive function dlwqnc_copy_associated( ncidin, ncidout, meshidin, meshidout,
     endif
 
     if ( use_names_in_attrib ) then
-        attvalue = ' '
-        ierror   = nf90_get_att( ncidin, meshidin, attribute, attvalue )
+        ierror   = ug_get_attribute( ncidin, meshidin, attribute, att_value )
         if ( ierror /= nf90_noerr .and. .not. suppress_message ) then
             if (warning_message) then
                 if (dlwqnc_debug) write(*,*) 'Warning: retrieving attribute ', trim(attribute), ' failed -- ', ierror
@@ -559,11 +565,12 @@ recursive function dlwqnc_copy_associated( ncidin, ncidout, meshidin, meshidout,
             return
         endif
     else
-        attvalue = attribute
+        call realloc(att_value, len(attribute))
+        att_value = attribute
     endif
 
-    do i = 1,100
-        read( attvalue, *, iostat = ierr ) (dummy, j=1,i-1), varname
+    do i = 1,100  ! JanM: Is att_value lang genoeg
+        read( att_value, *, iostat = ierr ) (dummy, j=1,i-1), varname
 
         if ( ierr /= 0 ) then
             exit
@@ -649,7 +656,7 @@ recursive function dlwqnc_copy_associated( ncidin, ncidout, meshidin, meshidout,
             suppress_message = .false.
         endif
     enddo
-
+    deallocate(att_value)
     dlwqnc_result = nf90_noerr
 end function dlwqnc_copy_associated
 

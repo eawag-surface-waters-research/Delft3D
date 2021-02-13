@@ -2068,6 +2068,8 @@ module m_ec_filereader_read
 !     read data and store in CRS format
       subroutine read_data_sparse(filehandle, varid, n_cols, n_rows, n_layers, timesndx, relndx, ia, ja, Ndatasize, arr1d, ierror)
          use netcdf
+         use io_ugrid
+         
          implicit none
          
          integer,                        intent(in)    :: filehandle  !< filehandle
@@ -2096,10 +2098,11 @@ module m_ec_filereader_read
          integer                                       :: ndims
          integer                                       :: ierr
          integer                                       :: Nreadrow      !< number of rows read at once
-         character(len=32)                             :: standard_name
+         character(len=:), allocatable                 :: standard_name
          integer, allocatable                          :: start(:), cnt(:)
 
          ierror = 1
+         allocate(character(len=0) :: standard_name)
 
          Nreadrow = n_rows
 
@@ -2160,7 +2163,7 @@ module m_ec_filereader_read
                   ierror = nf90_get_var(fileHandle, varid, data_block, start=start, count=cnt)
 
                   if ( ierror /= 0 ) then
-                     ierr = nf90_get_att(fileHandle, varid, 'standard_name', standard_name)
+                     ierr = ug_get_attribute(fileHandle, varid, 'standard_name', standard_name)
                      if (ierr /= 0) write(standard_name,*) 'varid = ', varid
                      call setECMessage("Read error in read_data_sparse for " // trim(standard_name))
                      goto 1234
@@ -2181,6 +2184,7 @@ module m_ec_filereader_read
  1234    continue
 
 !        deallocate
+         deallocate(standard_name)
          if ( allocated(data_block) ) deallocate(data_block)
          if ( allocated(mcolmin)    ) deallocate(mcolmin)
          if ( allocated(mcolmax)    ) deallocate(mcolmax)

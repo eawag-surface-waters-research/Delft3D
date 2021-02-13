@@ -168,6 +168,8 @@ module m_ec_quantity
       use netcdf
       use string_module
       use physicalconsts, only : CtoKelvin
+      use io_ugrid 
+
          implicit none
          logical                               :: success     !< function status
          type(tEcInstance), pointer            :: instancePtr !< intent(in)
@@ -177,22 +179,20 @@ module m_ec_quantity
                                                               !< order: new = (old*scale) + offset
          character(len=:), allocatable  :: units
          integer  :: ierr
-         integer  :: attriblen
          real(hp) :: add_offset, scalefactor, fillvalue
-
+         
+         allocate(character(len=0) :: units)
+         
          success = .false.
          add_offset = 0.d0
          scalefactor = 1.d0
          fillvalue = ec_undef_hp
-         attriblen=0
-         if (nf90_inquire_attribute(ncid, varid, 'units', len=attriblen)==NF90_NOERR) then
-            if (attriblen>0) then
-               allocate(character(len=attriblen) :: units) 
-               units(1:len(units)) = ''
-               if (nf90_get_att(ncid, varid, 'units', units)==NF90_NOERR) then 
-                  call str_upper(units) ! make units attribute case-insensitive 
-                  if (.not.(ecQuantitySet(instancePtr, quantityId, units=units))) return
-               end if
+
+         if (ug_get_attribute(ncid, varid, 'units', units)==NF90_NOERR) then 
+            call str_upper(units) ! make units attribute case-insensitive 
+            if (.not.(ecQuantitySet(instancePtr, quantityId, units=units))) then
+                deallocate(units)
+                return
             end if
          end if
 
@@ -227,7 +227,8 @@ module m_ec_quantity
             end if
          end if
 
-         success = .true.
+        deallocate(units)
+        success = .true.
 
       end function ecQuantitySetUnitsFillScaleOffsetFromNcidVarid
      

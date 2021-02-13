@@ -10736,7 +10736,7 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
    double precision, allocatable             :: xface(:), yface(:)
    integer, allocatable                      :: branchStartNode(:), branchEndNode(:)
    integer                                   :: nodesOnBranchVertices
-   character(len=255)                        :: tmpstring
+   character(len=:), allocatable             :: tmpstring
    integer :: n1, n2, ibr_n1, ibr_n2, ibr
    double precision :: off1, off2
    integer :: numerr
@@ -10751,6 +10751,8 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
    networkIndex = 0
    koffset1dmesh = 0
    numerr = 0
+   
+   allocate(character(len=0) :: tmpstring)
    ierr = ionc_open(filename, NF90_NOWRITE, ioncid, iconvtype, convversion)
 
    if (ierr /= ionc_noerr .or. iconvtype /= IONC_CONV_UGRID .or. convversion < 1.0) then ! NOTE: no check on conventions version number (yet?)
@@ -10778,8 +10780,7 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
    ! UNST-2510: Based on _net.nc version either read with or without duplicatie points on connection nodes.
    nodesOnBranchVertices = 1
    ierr = ionc_get_ncid(ioncid, ncid)
-   tmpstring = ''
-   ierr = nf90_get_att(ncid, nf90_global, 'Conventions', tmpstring)
+   ierr = ug_get_attribute(ncid, nf90_global, 'Conventions', tmpstring)
    if (ierr == NF90_ENOTATT) then
       nodesOnBranchVertices = 0 ! New format.
       call mess(LEVEL_DEBUG,  'No NetCDF Conventions found. Defaulting to current format (>= "CF-1.8 UGRID-1.0 Deltares-0.10") for '''//trim(filename)//'''.')
@@ -10793,6 +10794,7 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
          call mess(LEVEL_DEBUG,  'Detected new format for 1D ("'//trim(tmpstring)//'") in '''//trim(filename)//'''.')
       end if
    end if
+   deallocate(tmpstring)
 
 
    ! Construct network with with old files (nodesOnBranchVertices). In this function 1d edge nodes (kn array) are also set
@@ -11161,7 +11163,7 @@ subroutine unc_read_net(filename, numk_keep, numl_keep, numk_read, numl_read, ie
 
     logical :: stringsequalinsens
 
-    character(len=32) :: coordsyscheck
+    character(len=:), allocatable :: coordsyscheck
     integer, dimension(:),   allocatable :: kn3read
     integer, dimension(:),   allocatable :: kn1read
     integer, dimension(:),   allocatable :: kn2read
@@ -11181,6 +11183,7 @@ subroutine unc_read_net(filename, numk_keep, numl_keep, numk_read, numl_read, ie
     call prepare_error('Could not read NetCDF file '''//trim(filename)//'''. Details follow:')
 
     nerr_ = 0
+    allocate(character(len=0) :: coordsyscheck)
 
     !
     ! Try and read as new UGRID NetCDF format
@@ -11271,8 +11274,7 @@ subroutine unc_read_net(filename, numk_keep, numl_keep, numk_read, numl_read, ie
     end if
     call readyy('Reading net data',.7d0)
 
-    coordsyscheck = ' '
-    ierr = nf90_get_att(inetfile, id_netnodex, 'standard_name', coordsyscheck)
+    ierr = ug_get_attribute(inetfile, id_netnodex, 'standard_name', coordsyscheck)
     if (stringsequalinsens(coordsyscheck, 'longitude')) then
         jsferic  = 1
     else
@@ -11282,6 +11284,7 @@ subroutine unc_read_net(filename, numk_keep, numl_keep, numk_read, numl_read, ie
     if (jsferic == 1) then
        crs%epsg_code = 4326
     end if
+    deallocate(coordsyscheck)
 
     ! An array slice cannot be passed to netcdf C-library (risk of stack overflow), so use placeholder.
     allocate(kn3read(numl_read))
@@ -11536,9 +11539,9 @@ subroutine unc_read_map(filename, tim, ierr)
     real(kind=hp),     intent(in)       :: tim        !< Desired time (snapshot) to be read from map file.
     integer,           intent(out)      :: ierr       !< Return status (NetCDF operations)
 
-    character(len=33)                   :: refdat_map !< Date time string read from map file.
+    character(len=:), allocatable       :: refdat_map !< Date time string read from map file.
     real(kind=hp)                       :: trefdat_map, trefdat_rst, trefdat_mdu
-    character(len=100)             :: convformat
+    character(len=:), allocatable       :: convformat
 
     real(fp), dimension(:,:,:), pointer :: msed
     real(fp), dimension(:,:),   pointer :: thlyr
@@ -11598,7 +11601,7 @@ subroutine unc_read_map(filename, tim, ierr)
     integer :: kloc,kk, kb, kt, LL, Lb, Lt, laydim, wdim, itmp, i, iconst, iwqbot, nm, Lf, j, k, nlayb, nrlay
     integer :: iostat
     logical :: fname_has_date, mdu_has_date
-    integer :: titleLength, strlen, nlen, istru, jaCulvDim
+    integer :: strlen, nlen, istru, jaCulvDim
     integer, allocatable :: maptimes(:)
     logical :: file_exists
     double precision, allocatable        :: max_threttim(:)
@@ -11635,6 +11638,11 @@ subroutine unc_read_map(filename, tim, ierr)
     ierr = DFM_GENERICERROR
 
     numformat = '(I2.2)'
+    call realloc(tmpvar1  , 0) 
+    call realloc(inode_own, 0)
+    call realloc(ilink_own, 0)
+    allocate(character(len=0) :: convformat)
+    allocate(character(len=0) :: refdat_map)
 
     ! Identify the type of restart file: *_rst.nc or *_map.nc
     tok1 = index( filename, '_rst.nc', .true. )
@@ -11663,8 +11671,9 @@ subroutine unc_read_map(filename, tim, ierr)
     jamergedmap_same = 1
 
     ! do not support a rst file of UGRID format
-    ierr = nf90_get_att(imapfile, nf90_global, 'Conventions', convformat)
+    ierr = ug_get_attribute(imapfile, nf90_global, 'Conventions', convformat)
     lugrid = index(convformat, 'UGRID-1')
+    deallocate(convformat)
     if (lugrid > 0) then
        call mess(LEVEL_ERROR, 'The specified restart file is of UGRID format, which is not supported.')
        call readyy('Reading map data',-1d0)
@@ -12298,12 +12307,12 @@ subroutine unc_read_map(filename, tim, ierr)
         ! Seconds since yyyy-dd-mm HH:MM:SS
         ! 123456789012345678901234567890123
         ierr = nf90_inq_varid(imapfile, 'time', id_time)
-        ierr = nf90_inquire_attribute(imapfile, id_time, "units", len = titleLength)
-        ierr = nf90_get_att(imapfile, id_time, "units", refdat_map)
+        ierr = ug_get_attribute(imapfile, id_time, "units", refdat_map)
         tmpstr = ' '
         tmpstr  = refdat_map(15:18)//refdat_map(20:21)//refdat_map(23:24)//refdat_map(26:27)//refdat_map(29:30)//refdat_map(32:33)
         call maketimeinverse(trim(tmpstr),trefdat_map,iostat)             ! result: refdatold in seconds  w.r.t. absolute t0
-
+        deallocate(refdat_map)
+        
         ! Read map times
         ierr = nf90_inq_varid(imapfile, 'time', id_time)
         ierr = nf90_get_var(imapfile, id_time, maptimes)
@@ -13556,6 +13565,7 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd)
           n1dedges = n1dedges + (lnx1db - lnxi)
       endif
 
+      call realloc(face_nodes, (/ 0, 0 /))
       !allocate mesh edges and 1d2d contacts
       call realloc(edge_nodes, (/ 2, n1dedges /), fill = -999)
       call realloc(contacts, (/ 2, n1d2dcontacts /), fill = -999)
