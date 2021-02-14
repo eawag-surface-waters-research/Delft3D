@@ -2535,17 +2535,18 @@ end function ug_get_network_count
 
 !> Gets the number of link topologies in an open dataset.
 function ug_get_contact_topo_count(ncid, ncontacts) result(ierr)
-   integer,        intent(in)  :: ncid     !< NetCDF dataset id
+   integer,        intent(in)  :: ncid      !< NetCDF dataset id
    integer,        intent(out) :: ncontacts !< Number of links (>= 0).
-   integer                     :: ierr     !< Result status (UG_NOERR==NF90_NOERR) if successful.
-   integer                     :: numVar, i
+   integer                     :: ierr      !< Result status (UG_NOERR==NF90_NOERR) if successful.
+   integer                     :: numVar    !< number of variables in the netCDF file.
+   integer                     :: varid     !< NetCDF variable ID (this is a 0-based index).
    logical                     :: is_link_topo
 
    ierr = nf90_inquire(ncid, nVariables = numVar)
 
    ncontacts = 0
-   do i= 1, numVar
-      is_link_topo = ug_is_link_topology(ncid, i)
+   do varid = 0, numVar-1 ! loop over the netCDF variable IDs (which are 0-based)
+      is_link_topo = ug_is_link_topology(ncid, varid)
       if (is_link_topo) then
          ncontacts = ncontacts + 1
       end if
