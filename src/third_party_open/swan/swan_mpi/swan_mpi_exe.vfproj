@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<VisualStudioProject ProjectCreator="Intel Fortran" Keyword="Console Application" Version="11.0" ProjectIdGuid="{BA70CD80-C7BE-4296-96EA-190F79EDBB84}">
+	<Platforms>
+		<Platform Name="Win32"/>
+		<Platform Name="x64"/></Platforms>
+	<Configurations>
+		<Configuration Name="Debug|Win32">
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" Preprocess="preprocessYes" AdditionalIncludeDirectories="..\include" PreprocessorDefinitions="SWANEXE, USE_MPI" Traceback="true" BoundsCheck="true" RuntimeLibrary="rtMultiThreadedDebugDLL"/>
+				<Tool Name="VFLinkerTool" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" IgnoreDefaultLibraryNames="libc.lib;libcmtd.lib;libcmt.lib" GenerateDebugInformation="true" SubSystem="subSystemConsole" LargeAddressAware="addrAwareLarge" AdditionalDependencies="netcdf.lib"/>
+				<Tool Name="VFResourceCompilerTool"/>
+				<Tool Name="VFMidlTool" SuppressStartupBanner="true"/>
+				<Tool Name="VFCustomBuildTool"/>
+				<Tool Name="VFPreLinkEventTool"/>
+				<Tool Name="VFPreBuildEventTool"/>
+				<Tool Name="VFPostBuildEventTool"/>
+				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
+		<Configuration Name="Release|Win32">
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" Preprocess="preprocessYes" AdditionalIncludeDirectories="..\include" PreprocessorDefinitions="SWANEXE, USE_MPI" RuntimeLibrary="rtMultiThreadedDLL"/>
+				<Tool Name="VFLinkerTool" AdditionalOptions="/LTCG" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" IgnoreDefaultLibraryNames="libc.lib;libcd.lib;libcmt.lib" SubSystem="subSystemConsole" LargeAddressAware="addrAwareLarge" AdditionalDependencies="netcdf.lib"/>
+				<Tool Name="VFResourceCompilerTool"/>
+				<Tool Name="VFMidlTool" SuppressStartupBanner="true"/>
+				<Tool Name="VFCustomBuildTool"/>
+				<Tool Name="VFPreLinkEventTool"/>
+				<Tool Name="VFPreBuildEventTool"/>
+				<Tool Name="VFPostBuildEventTool"/>
+				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
+		<Configuration Name="Debug|x64">
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" Preprocess="preprocessYes" AdditionalIncludeDirectories="..\include;..\..\mpich2\x64\include" PreprocessorDefinitions="SWANEXE, USE_MPI" Traceback="true" BoundsCheck="true" RuntimeLibrary="rtMultiThreadedDebugDLL"/>
+				<Tool Name="VFLinkerTool" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" AdditionalLibraryDirectories="..\..\netcdf\netCDF 4.6.1\lib;..\..\mpich2\x64\lib" IgnoreDefaultLibraryNames="libc.lib;libcmtd.lib;libcmt.lib" GenerateDebugInformation="true" SubSystem="subSystemConsole" LargeAddressAware="addrAwareLarge" AdditionalDependencies="netcdf.lib fmpich2.lib"/>
+				<Tool Name="VFResourceCompilerTool"/>
+				<Tool Name="VFMidlTool" SuppressStartupBanner="true" TargetEnvironment="midlTargetAMD64"/>
+				<Tool Name="VFCustomBuildTool"/>
+				<Tool Name="VFPreLinkEventTool"/>
+				<Tool Name="VFPreBuildEventTool"/>
+				<Tool Name="VFPostBuildEventTool"/>
+				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
+		<Configuration Name="Release|x64">
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" Preprocess="preprocessYes" AdditionalIncludeDirectories="..\include;..\..\mpich2\x64\include" PreprocessorDefinitions="SWANEXE, USE_MPI" RuntimeLibrary="rtMultiThreadedDLL"/>
+				<Tool Name="VFLinkerTool" AdditionalOptions="/LTCG" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" AdditionalLibraryDirectories="..\..\netcdf\netCDF 4.6.1\lib;..\..\mpich2\x64\lib" IgnoreDefaultLibraryNames="libc.lib;libcd.lib;libcmt.lib" ProgramDatabaseFile="$(TargetDir)$(TargetName)_exe.pdb" SubSystem="subSystemConsole" LargeAddressAware="addrAwareLarge" AdditionalDependencies="netcdf.lib fmpich2.lib"/>
+				<Tool Name="VFResourceCompilerTool"/>
+				<Tool Name="VFMidlTool" SuppressStartupBanner="true" TargetEnvironment="midlTargetAMD64"/>
+				<Tool Name="VFCustomBuildTool"/>
+				<Tool Name="VFPreLinkEventTool"/>
+				<Tool Name="VFPreBuildEventTool"/>
+				<Tool Name="VFPostBuildEventTool"/>
+				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration></Configurations>
+	<Files>
+		<Filter Name="Source Files" Filter="f90;for;f;fpp;ftn;def;odl;idl">
+		<File RelativePath="..\src\agioncmd.f90"/>
+		<File RelativePath="..\src\couple2adcirc.f90"/>
+		<File RelativePath="..\src\HRextensions.f90"/>
+		<File RelativePath="..\src\m_constants.f90"/>
+		<File RelativePath="..\src\m_fileio.f90"/>
+		<File RelativePath="..\src\mod_xnl4v5.f90"/>
+		<File RelativePath="..\src\nctablemd.f90"/>
+		<File RelativePath="..\src\netcdf_tools.f90"/>
+		<File RelativePath="..\src\ocpcre.for"/>
+		<File RelativePath="..\src\ocpids.F"/>
+		<File RelativePath="..\src\ocpmix.for"/>
+		<File RelativePath="..\src\SdsBabanin.f90"/>
+		<File RelativePath="..\src\serv_xnl4v5.f90"/>
+		<File RelativePath="..\src\swan2coh.f90"/>
+		<File RelativePath="..\src\SwanBndStruc.f90"/>
+		<File RelativePath="..\src\SwanBpntlist.f90"/>
+		<File RelativePath="..\src\SwanCheckGrid.f90"/>
+		<File RelativePath="..\src\swancom1.F"/>
+		<File RelativePath="..\src\swancom2.for"/>
+		<File RelativePath="..\src\swancom3.for"/>
+		<File RelativePath="..\src\swancom4.for"/>
+		<File RelativePath="..\src\swancom5.for"/>
+		<File RelativePath="..\src\SwanCompdata.f90"/>
+		<File RelativePath="..\src\SwanCompUnstruc.f90"/>
+		<File RelativePath="..\src\SwanComputeForce.f90"/>
+		<File RelativePath="..\src\SwanConvAccur.f90"/>
+		<File RelativePath="..\src\SwanConvStopc.f90"/>
+		<File RelativePath="..\src\SwanCreateEdges.f90"/>
+		<File RelativePath="..\src\SwanCrossObstacle.f90"/>
+		<File RelativePath="..\src\SwanDiffPar.f90"/>
+		<File RelativePath="..\src\SwanDispParm.f90"/>
+		<File RelativePath="..\src\SwanFindObstacles.f90"/>
+		<File RelativePath="..\src\SwanFindPoint.f90"/>
+		<File RelativePath="..\src\SwanGradDepthorK.f90"/>
+		<File RelativePath="..\src\SwanGradVel.f90"/>
+		<File RelativePath="..\src\SwanGridCell.f90"/>
+		<File RelativePath="..\src\SwanGriddata.f90"/>
+		<File RelativePath="..\src\SwanGridFace.f90"/>
+		<File RelativePath="..\src\SwanGridobjects.f90"/>
+		<File RelativePath="..\src\SwanGridTopology.f90"/>
+		<File RelativePath="..\src\SwanGridVert.f90"/>
+		<File RelativePath="..\src\SwanGSECorr.f90"/>
+		<File RelativePath="..\src\SwanInitCompGrid.f90"/>
+		<File RelativePath="..\src\SwanInterpolateAc.f90"/>
+		<File RelativePath="..\src\SwanInterpolateOutput.f90"/>
+		<File RelativePath="..\src\SwanInterpolatePoint.f90"/>
+		<File RelativePath="..\src\SwanIntgratSpc.f90"/>
+		<File RelativePath="..\src\swanmain.F"/>
+		<File RelativePath="..\src\SwanMaxOverNodes.f90"/>
+		<File RelativePath="..\src\SwanMinOverNodes.f90"/>
+		<File RelativePath="..\src\swanout1.for"/>
+		<File RelativePath="..\src\swanout2.for"/>
+		<File RelativePath="..\src\swanparll.F"/>
+		<File RelativePath="..\src\SwanPointinMesh.f90"/>
+		<File RelativePath="..\src\swanpre1.for"/>
+		<File RelativePath="..\src\swanpre2.for"/>
+		<File RelativePath="..\src\SwanPrepComp.f90"/>
+		<File RelativePath="..\src\SwanPrintGridInfo.f90"/>
+		<File RelativePath="..\src\SwanPropvelS.f90"/>
+		<File RelativePath="..\src\SwanPropvelX.f90"/>
+		<File RelativePath="..\src\SwanPunCollect.f90"/>
+		<File RelativePath="..\src\SwanReadADCGrid.f90"/>
+		<File RelativePath="..\src\SwanReadEasymeshGrid.f90"/>
+		<File RelativePath="..\src\SwanReadfort18.f90"/>
+		<File RelativePath="..\src\SwanReadGrid.f90"/>
+		<File RelativePath="..\src\SwanReadTriangleGrid.f90"/>
+		<File RelativePath="..\src\swanser.for"/>
+		<File RelativePath="..\src\SwanSpectPart.for"/>
+		<File RelativePath="..\src\SwanSumOverNodes.f90"/>
+		<File RelativePath="..\src\SwanSweepSel.f90"/>
+		<File RelativePath="..\src\SwanThreadBounds.f90"/>
+		<File RelativePath="..\src\SwanTranspAc.f90"/>
+		<File RelativePath="..\src\SwanTranspX.f90"/>
+		<File RelativePath="..\src\SwanVertlist.f90"/>
+		<File RelativePath="..\src\swmod1.for"/>
+		<File RelativePath="..\src\swmod2.F"/>
+		<File RelativePath="..\src\swn_outnc.f90"/></Filter></Files>
+	<Globals/></VisualStudioProject>

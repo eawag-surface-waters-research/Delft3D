@@ -726,6 +726,7 @@ third_party_open/polypack/Makefile
 third_party_open/polypack/src/Makefile
 third_party_open/swan/bin/linux/Makefile
 third_party_open/swan/bin/Makefile
+third_party_open/swan/src/Makefile
 third_party_open/swan/Makefile
 third_party_open/swan/scripts/Makefile
 third_party_open/triangle/Makefile
