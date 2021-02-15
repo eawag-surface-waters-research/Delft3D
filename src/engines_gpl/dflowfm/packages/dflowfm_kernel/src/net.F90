@@ -697,16 +697,12 @@
 
 
    SUBROUTINE read_restart_from_map(filename,ierr)
-   use unstruc_netcdf
-   use dfm_error
+   use unstruc_netcdf, only : unc_read_map
    implicit none
    character(len=*),  intent(in)  :: filename
    integer,           intent(out) :: ierr !< Error status (DFM_NOERR==0 is successful)
-   integer   :: k
-   integer   :: l
-   INTEGER   :: Mmap, NDXR, LNXR
 
-   call unc_read_map(filename, 0d0, ierr)
+   call unc_read_map(filename, ierr)
 
    END SUBROUTINE read_restart_from_map
 

@@ -69,7 +69,7 @@ integer            :: nopen_files_ = 0             !< Nr. of NetCDF files curren
 private :: nerr_, err_firsttime_, err_firstline_, &
            t_unc_netelem_ids, unc_def_net_elem, unc_write_net_elem, &
            unc_def_idomain, unc_def_iglobal, fill_netlink_geometry, &
-           open_files_, open_datasets_, nopen_files_
+           open_files_, open_datasets_, nopen_files_, unc_read_merged_map, t_unc_merged
 
 integer, parameter :: UNC_CONV_CFOLD = 1 !< Old CF-only conventions.
 integer, parameter :: UNC_CONV_UGRID = 2 !< New CF+UGRID conventions.
@@ -425,6 +425,15 @@ type t_unc_netelem_ids
    integer :: id_netlinkxu             !< id for netlinkxu
    integer :: id_netlinkyu             !< id for netlinkyu
 end type t_unc_netelem_ids
+
+!> type for the administration of reading a merged map/rst file
+type t_unc_merged
+   integer              :: jamergedmap, jafillghost
+   integer              :: jamergedmap_same, idmn_ghost, ndxi_own, lnx_own, nbnd_read
+   integer              :: ndxi_ghost, lnx_ghost, id_bnddim, ndxi_read, lnx_read   !< number of nodes/links that are a domain's own (if jampi==0, ndxi_own===ndxi, lnx_own===lnx)
+   integer, allocatable :: inode_own(:), ilink_own(:), inode_ghost(:), ilink_ghost(:) !< Mapping from unique flow nodes/links that are a domain's own to the actual index in 1:ndxi and 1:lnx
+   integer, allocatable :: inodeghost_merge(:), ilinkghost_merge(:), ibnd_merge(:), inode_merge(:), ilink_merge(:) !< Mapping from subdomain flow nodes/links to merged map files
+end type t_unc_merged
 
 type(t_unc_mapids) :: mapids       !< Global descriptor for the (open) map-file
 integer            :: ihisfile = 0 !< Global netcdf ID of the his-file
@@ -11529,12 +11538,12 @@ end function get_var_and_shift
 !! Processing is done elsewhere.
 !subroutine unc_read_map(filename, numk_keep, numl_keep, numk_read, numl_read, ierr)
 !TODO:JZ modify the name of this subroutine, since it also reads rst files.
-subroutine unc_read_map(filename, tim, ierr)
+subroutine unc_read_map(filename, ierr)
     use m_flow
     use m_flowtimes
     use m_transport, only: NUMCONST, ISALT, ITEMP, ISED1, ISEDN, ITRA1, ITRAN, constituents, itrac2const, const_names
     use m_fm_wq_processes
-    use m_flowexternalforcings, only: numtracers, trnames, kbndz
+    use m_flowexternalforcings, only: numtracers, trnames
     use m_sediment
     use bedcomposition_module
     use m_flowgeom
@@ -11543,45 +11552,29 @@ subroutine unc_read_map(filename, tim, ierr)
     use m_alloc
     use m_timer
     use m_turbulence
-    use m_samples
     use m_CrossSections
     use m_save_ugrid_state,   only: mesh1dname
     use unstruc_channel_flow, only: network
-    use m_oned_functions,     only: gridpoint2cross
     use m_GlobalParameters
 
     character(len=*),  intent(in)       :: filename   !< Name of NetCDF file.
-    real(kind=hp),     intent(in)       :: tim        !< Desired time (snapshot) to be read from map file.
     integer,           intent(out)      :: ierr       !< Return status (NetCDF operations)
 
     character(len=:), allocatable       :: refdat_map !< Date time string read from map file.
     real(kind=hp)                       :: trefdat_map, trefdat_rst, trefdat_mdu
     character(len=:), allocatable       :: convformat
 
+    type(t_unc_merged)                  :: um        !< struct holding all data for ugrid merged map/rst files
+
     real(fp), dimension(:,:,:), pointer :: msed
     real(fp), dimension(:,:),   pointer :: thlyr
     real(fp), dimension(:,:),   pointer :: svfrac
 
     integer :: imapfile,                        &
-               id_flowelemdim,                  &
-               id_flowlinkdim,                  &
-               id_laydim,                       &
-               id_wdim,                         &
                id_timedim,                      &
-               id_bndsaldim,                    &
-               id_bndtemdim,                    &
-               id_bndseddim,                    &
                id_bnddim,                       &
                id_time,                         &
                id_timestep,                     &
-               id_s1,                           &
-               id_s0,                           &
-               id_u1,                           &
-               id_u0,                           &
-               id_q1,                           &
-               id_ww1,                          &
-               id_sa1,                          &
-               id_tem1,                         &
                id_tsalbnd,                      &
                id_zsalbnd,                      &
                id_ttembnd,                      &
@@ -11596,66 +11589,49 @@ subroutine unc_read_map(filename, tim, ierr)
                id_thlyr,                        &
                id_lyrfrac,                      &
                id_bodsed,                       &
-               id_xzw, id_yzw, id_xu, id_yu,    &
-               id_bl, id_blbnd, id_s0bnd, id_s1bnd, id_xbnd, id_ybnd, &
-               id_unorma, id_vicwwu, id_tureps1, id_turkin1, id_qw, id_qa, id_hu, id_flowlink, &
-               id_morft, id_taus, id_czs,                       &
-               id_jmax, id_ncrs, id_flowelemcrsz, id_flowelemcrsn, &
-               id_culvertdim, id_culvert_openh
+               id_blbnd, id_s0bnd, id_s1bnd, &
+               id_morft,                         &
+               id_jmax, id_ncrs, id_flowelemcrsz, id_flowelemcrsn
 
-
-    double precision, allocatable :: xmc(:), ymc(:), xuu(:), yuu(:), xbnd_read(:), ybnd_read(:)
     integer :: id_tmp
     integer :: layerfrac
-    integer, allocatable :: id_tr1(:), id_bndtradim(:), id_ttrabnd(:), id_ztrabnd(:)
-    integer, allocatable :: id_sf1(:), id_bndsedfracdim(:), id_tsedfracbnd(:), id_zsedfracbnd(:)
+    integer, allocatable :: id_tr1(:), id_ttrabnd(:), id_ztrabnd(:)
+    integer, allocatable :: id_sf1(:), id_tsedfracbnd(:), id_zsedfracbnd(:)
     integer, allocatable :: id_rwqb(:)
 
-    integer :: it_read, nt_read, ndxi_read, lnx_read, mapref, L, tok1, tok2, tok3, nbnd_read
+    integer :: it_read, nt_read, ndxi_read, lnx_read, L, tok1, tok2, tok3
     integer :: sedtot_read, sedsus_read, nlyr_read
-    integer :: kloc,kk, kb, kt, LL, Lb, Lt, laydim, wdim, itmp, i, iconst, iwqbot, nm, Lf, j, k, nlayb, nrlay
+    integer :: kloc,kk, kb, kt, itmp, i, iconst, iwqbot, nm, Lf, j, k, nlayb, nrlay
     integer :: iostat
     logical :: fname_has_date, mdu_has_date
-    integer :: strlen, nlen, istru, jaCulvDim
     integer, allocatable :: maptimes(:)
     logical :: file_exists
     double precision, allocatable        :: max_threttim(:)
     double precision, allocatable        :: tmpvar(:,:)
     double precision, allocatable        :: tmpvar1(:)
     double precision, allocatable        :: tmpvar2(:,:,:)
-    double precision, allocatable        :: tmp_s1(:), tmp_bl(:), tmp_s0(:), tmp_sa1(:), tmp_tem1(:)
+    double precision, allocatable        :: tmp_s1(:), tmp_bl(:), tmp_s0(:)
     double precision, allocatable        :: rst_bodsed(:,:), rst_mfluff(:,:), rst_thlyr(:,:)
     double precision, allocatable        :: rst_msed(:,:,:)
     real(fp)                             :: mfracsum, poros, sedthick
     real(fp), dimension(stmpar%lsedtot)  :: mfrac
-    integer, allocatable :: inode_own(:), ilink_own(:), inode_ghost(:), ilink_ghost(:) !< Mapping from unique flow nodes/links that are a domain's own to the actual index in 1:ndxi and 1:lnx
-    integer, allocatable :: inode_merge(:), ilink_merge(:), ibnd_merge(:), inodeghost_merge(:), ilinkghost_merge(:) !< Mapping from subdomain flow nodes/links to merged map files
-    integer, allocatable :: inode_merge2own(:) !< Mapping flownodes from merged file to subdomain own index
-    integer, allocatable :: inode_owninv(:)    !< Mapping from actual node index to its own index
-    integer, allocatable :: ln_read(:,:)       !< ln array read from the merged file
-    integer, allocatable :: itmp2D(:,:)
-    integer :: ndxi_own, lnx_own, ndxi_ghost, lnx_ghost !< number of nodes/links that are a domain's own (if jampi==0, ndxi_own===ndxi, lnx_own===lnx)
-    integer :: ndxi_all, lnx_all !< total numbers of nodes/links among all partitions
-    integer :: ndxi_merge, lnx_merge, ndxbnd_merge
-    integer :: numpart, jamergedmap, jaghost, idmn_ghost, jamergedmap_same, lmerge = 0, lugrid = 0, jafillghost
+    integer :: numpart,  lmerge = 0, lugrid = 0
     integer :: kstart, lstart, kstart_bnd
-    integer :: MSAM
+    integer :: jamergedmap_same_bu
 
     character(len=8)::numformat
     character(len=2)::numtrastr, numsedfracstr
     character(len=255) :: tmpstr
 
-    type(t_CSType), pointer                       :: pCS
-    type(t_CSType), pointer, dimension(:)         :: pCSs
-    integer                                       :: n, jmax, ndx1d, nCrs, redo
+    integer                                       :: jmax, ndx1d, nCrs
     double precision, dimension(:,:), allocatable :: work1d_z, work1d_n
 
     ierr = DFM_GENERICERROR
 
     numformat = '(I2.2)'
     call realloc(tmpvar1  , 0) 
-    call realloc(inode_own, 0)
-    call realloc(ilink_own, 0)
+    call realloc(um%inode_own, 0)
+    call realloc(um%ilink_own, 0)
     allocate(character(len=0) :: convformat)
     allocate(character(len=0) :: refdat_map)
 
@@ -11682,8 +11658,8 @@ subroutine unc_read_map(filename, tim, ierr)
 
     !-- Sequential model, or parallel? If parallel: merged-map file, or separate partition-map files?
     ! First check whether the restart NetCDF file contains a fully merged model, or is just a partition.
-    jamergedmap = 0
-    jamergedmap_same = 1
+    um%jamergedmap = 0
+    um%jamergedmap_same = 1
 
     ! do not support a rst file of UGRID format
     ierr = ug_get_attribute(imapfile, nf90_global, 'Conventions', convformat)
@@ -11697,12 +11673,12 @@ subroutine unc_read_map(filename, tim, ierr)
 
     lmerge = index(filename, '_merged')
     if ( lmerge > 0) then
-       jamergedmap = 1
+       um%jamergedmap = 1
     endif
 
     if (jampi == 1) then
        ierr = nf90_get_att(imapfile, nf90_global, 'NumPartitionsInFile', numpart)
-       if (ierr .ne. nf90_noerr  .and. jamergedmap .eq. 1) then
+       if (ierr .ne. nf90_noerr  .and. um%jamergedmap .eq. 1) then
           call mess(LEVEL_ERROR, 'The merged restart file is not correct.')
           call readyy('Reading map data',-1d0)
           go to 999
@@ -11712,9 +11688,9 @@ subroutine unc_read_map(filename, tim, ierr)
              write (msgbuf, '(a,i0,a,a,a,i0,a)') 'Partitions are different in model (', numranks, ') and in restart file `', &
                     trim(filename), ''' (', numpart, ').'
              call warn_flush() ! Error handled on call site.
-             jamergedmap_same = 0
+             um%jamergedmap_same = 0
           endif
-          if (jamergedmap_same == 1) then ! If rst file is a merged file, and the partitions do not change
+          if (um%jamergedmap_same == 1) then ! If rst file is a merged file, and the partitions do not change
              nerr_ = 0
 
              ierr = nf90_inq_varid(imapfile, 'partitions_face_count', id_tmp)
@@ -11747,14 +11723,14 @@ subroutine unc_read_map(filename, tim, ierr)
 
                 ierr = nf90_inq_varid(imapfile, 'partitions_facebnd_count', id_tmp)
                 call check_error(ierr, 'getting partitions_facebnd_count')
-                ierr = nf90_get_var(imapfile, id_tmp, nbnd_read, start=(/ my_rank+1 /))
+                ierr = nf90_get_var(imapfile, id_tmp, um%nbnd_read, start=(/ my_rank+1 /))
                 call check_error(ierr, 'getting partitions_facebnd_count')
 
                 jaoldrstfile = 0
              else
                 call mess(LEVEL_INFO, 'The restart file does not contain info. on boundaries.')
                 ierr = 0
-                nbnd_read = 0
+                um%nbnd_read = 0
                 jaoldrstfile = 1
              endif
 
@@ -11776,477 +11752,33 @@ subroutine unc_read_map(filename, tim, ierr)
        lstart = 1
        kstart_bnd = 1
     end if
-    if (jampi == 0 .and. jamergedmap == 1) then
+    if (jampi == 0 .and. um%jamergedmap == 1) then
        call mess(LEVEL_INFO, 'Restart a sequential run with a merged rst file.')
-       jamergedmap_same = 0
+       um%jamergedmap_same = 0
     endif
 
-    if (jampi>0 .and. kmx>0 .and. jamergedmap==1) then
+    if (jampi>0 .and. kmx>0 .and. um%jamergedmap==1) then
        ! In the case of 3D parallel restarting with a merged rst file,
        ! some variables on ghost cells are not communicated but filled using kd-tree
-       jafillghost = 1
+       um%jafillghost = 1
     else
-       jafillghost = 0
+       um%jafillghost = 0
     endif
 
     ! allocate inode_merge and ilink_merge in all restart situations. When the partition is the same, these two arrays do not function,
     ! but they help to simplify the codes when calling "get_var_and_shift".
-    call realloc(inode_merge,  1, keepExisting=.false., fill = -999)
-    call realloc(ilink_merge,  1, keepExisting=.false., fill = -999)
+    call realloc(um%inode_merge,  1, keepExisting=.false., fill = -999)
+    call realloc(um%ilink_merge,  1, keepExisting=.false., fill = -999)
 
-    redo_merged_same: do redo = 1, 2
-       if (jamergedmap == 1) then
-          ! If rst file is a merged-map or merged-rst file, read only a domain's own flow nodes and links.
-          if (jamergedmap_same == 1) then  ! If the partitions of the model are the same with the rst file
-             ndxi_own = 0
-             lnx_own  = 0
-             call realloc(inode_own, ndxi, keepExisting=.false.)
-             call realloc(ilink_own, lnx, keepExisting=.false.)
-             call realloc(tmpvar1, max(ndxi,lnx), keepExisting=.false.) ! Only necessary for buffered reading from merged map.
+    jamergedmap_same_bu = um%jamergedmap_same
+    success = unc_read_merged_map(um, imapfile, filename, ierr)
+    if (jamergedmap_same_bu /= um%jamergedmap_same) then
+       ! number of partitions is the same, but the partition itself differs
+       success = unc_read_merged_map(um, imapfile, filename, ierr)
+    end if
+    if (.not. success) goto 999
+    if (ierr /= 0) return
 
-             if (nbnd_read > 0 .and. jaoldrstfile == 0 .and. jampi == 0) then
-                do kk = 1, nbnd_read
-                   ibnd_own(kk) = kk
-                enddo
-             endif
-
-             if (jafillghost == 0) then
-                do kk=1,ndxi
-                   if (idomain(kk) == my_rank) then
-                      ndxi_own = ndxi_own + 1
-                      inode_own(ndxi_own) = kk
-                   end if
-                end do
-
-                do LL=1,lnx
-                   call link_ghostdata(my_rank,idomain(ln(1,LL)), idomain(ln(2,LL)), jaghost, idmn_ghost, &
-                                       ighostlev(ln(1,LL)), ighostlev(ln(2,LL)))
-                   if ( jaghost /= 1 ) then
-                      lnx_own = lnx_own + 1
-                      ilink_own(lnx_own) = LL
-                   end if
-                end do
-             else ! Using merged rst file in 3D problems need to fill in some variables on ghost cells
-                ndxi_ghost=0
-                lnx_ghost= 0
-                call realloc(inode_ghost, ndxi, keepExisting=.false.)
-                call realloc(inodeghost_merge, ndxi, keepExisting=.false.)
-                call realloc(ilink_ghost, lnx, keepExisting=.false.)
-                call realloc(ilinkghost_merge, lnx, keepExisting=.false.)
-
-                do kk=1,ndxi
-                   if (idomain(kk) == my_rank) then
-                      ndxi_own = ndxi_own + 1
-                      inode_own(ndxi_own) = kk
-                   else
-                      ndxi_ghost = ndxi_ghost + 1
-                      inode_ghost(ndxi_ghost) = kk
-                   endif
-                enddo
-
-                do LL=1,lnx
-                   call link_ghostdata(my_rank,idomain(ln(1,LL)), idomain(ln(2,LL)), jaghost, idmn_ghost, &
-                                       ighostlev(ln(1,LL)), ighostlev(ln(2,LL)))
-                   if ( jaghost /= 1 ) then
-                      lnx_own = lnx_own + 1
-                      ilink_own(lnx_own) = LL
-                   else
-                      lnx_ghost = lnx_ghost + 1
-                      ilink_ghost(lnx_ghost) = LL
-                   end if
-                end do
-
-                ! prepare for kd-tree search
-                ! Read coordinates of flow elem circumcenters from merged map file
-                ierr = nf90_inq_dimid(imapfile, 'nFlowElem', id_flowelemdim)
-                call check_error(ierr, 'nFlowElem')
-                ierr = nf90_inquire_dimension(imapfile, id_flowelemdim, len=ndxi_merge)
-                call check_error(ierr, 'Flow Elem count')
-                ierr = nf90_inq_varid(imapfile, 'FlowElem_xzw', id_xzw)
-                call check_error(ierr, 'center of mass x-coordinate')
-                ierr = nf90_inq_varid(imapfile, 'FlowElem_yzw', id_yzw)
-                call check_error(ierr, 'center of mass y-coordinate')
-
-                allocate(xmc(ndxi_merge))
-                allocate(ymc(ndxi_merge))
-                ierr = nf90_get_var(imapfile, id_xzw, xmc)
-                ierr = nf90_get_var(imapfile, id_yzw, ymc)
-
-                Ns = 0
-                call find_flownodesorlinks_merge(ndxi_merge, xmc, ymc, ndxi, ndxi_ghost, inode_ghost, inodeghost_merge, 1, 1)
-
-                ! read coordinates of flow links center
-                ierr = nf90_inq_dimid(imapfile, 'nFlowLink', id_flowlinkdim)
-                call check_error(ierr, 'nFlowLink')
-                ierr = nf90_inquire_dimension(imapfile, id_flowlinkdim, len=lnx_merge )
-                call check_error(ierr, 'link count')
-                ierr = nf90_inq_varid(imapfile, 'FlowLink_xu', id_xu)
-                ierr = nf90_inq_varid(imapfile, 'FlowLink_yu', id_yu)
-                if (nerr_ > 0) goto 999
-
-                allocate(xuu(lnx_merge))
-                allocate(yuu(lnx_merge))
-                ierr = nf90_get_var(imapfile, id_xu, xuu)
-                ierr = nf90_get_var(imapfile, id_yu, yuu)
-
-                !call find_flownodesorlinks_merge(lnx_merge, xuu, yuu, lnx, lnx_own, ilink_own, ilink_merge, 0)
-                call find_flownodesorlinks_merge(lnx_merge, xuu, yuu, lnx, lnx_ghost, ilink_ghost, ilinkghost_merge, 0, 1)
-             endif
-          else     ! If the partitions in the model are different comparing with the rst file
-             ndxi_own = 0
-             lnx_own  = 0
-             call realloc(inode_own,   ndxi, keepExisting=.false.)
-             call realloc(inode_merge, ndxi, keepExisting=.false.)
-             call realloc(ilink_own,    lnx, keepExisting=.false.)
-             call realloc(ilink_merge,  lnx, keepExisting=.false.)
-             call realloc(inode_owninv,ndxi, keepExisting=.false., fill = -999)
-
-             if (jampi == 0) then ! Restart a sequential run with a merged rst file
-                ndxbnd_own = ndx - ndxi
-                if (ndxbnd_own>0 .and. jaoldrstfile == 0) then
-                   call realloc(ibnd_own, ndxbnd_own, keepExisting=.false.)
-                endif
-             endif
-             if (ndxbnd_own > 0 .and. jaoldrstfile == 0) then
-                call realloc(ibnd_merge, ndxbnd_own, keepExisting=.false.)
-             endif
-
-            !!! Set inode_own, ilink_own, ect
-            ! when sequential run
-            if (jampi==0) then
-               ! node
-               ndxi_own = ndxi
-               ndxi_all = ndxi_own
-               do kk=1,ndxi
-                  inode_own(kk) = kk
-               enddo
-               ! bnd
-               nbnd_read = ndx - ndxi    ! Sequential restart, nbnd_read is assumed to be ndx-ndxi
-               if (nbnd_read > 0 .and. jaoldrstfile == 0) then
-                  do kk = 1, nbnd_read
-                     ibnd_own(kk) = kk
-                  enddo
-               endif
-               ! link
-               lnx_own = lnx
-               lnx_all = lnx_own
-               do LL=1,lnx
-                  ilink_own(LL) = LL
-               enddo
-            else
-              ! parallel
-              if (jafillghost==0) then
-                 ! only consider non-ghost flow nodes
-                do kk=1,ndxi
-                   if (idomain(kk) == my_rank) then
-                      ndxi_own = ndxi_own + 1
-                      inode_own(ndxi_own) = kk
-                      inode_owninv(kk) = ndxi_own
-                   end if
-                end do
-                ! link
-                do LL=1,lnx
-                   call link_ghostdata(my_rank,idomain(ln(1,LL)), idomain(ln(2,LL)), jaghost, idmn_ghost, &
-                                       ighostlev(ln(1,LL)), ighostlev(ln(2,LL)))
-                   if ( jaghost /= 1 ) then
-                      lnx_own = lnx_own + 1
-                      ilink_own(lnx_own) = LL
-                   end if
-                end do
-              else ! need to fill ghosts
-                 ndxi_ghost=0
-                 lnx_ghost= 0
-                 call realloc(inode_ghost, ndxi, keepExisting=.false.)
-                 call realloc(inodeghost_merge, ndxi, keepExisting=.false.)
-                 call realloc(ilink_ghost, lnx, keepExisting=.false.)
-                 call realloc(ilinkghost_merge, lnx, keepExisting=.false.)
-
-                 do kk=1,ndxi
-                    if (idomain(kk) == my_rank) then
-                       ndxi_own = ndxi_own + 1
-                       inode_own(ndxi_own) = kk
-                       inode_owninv(kk) = ndxi_own
-                    else
-                       ndxi_ghost = ndxi_ghost + 1
-                       inode_ghost(ndxi_ghost) = kk
-                    endif
-                 enddo
-
-                 do LL=1,lnx
-                    call link_ghostdata(my_rank,idomain(ln(1,LL)), idomain(ln(2,LL)), jaghost, idmn_ghost, &
-                                        ighostlev(ln(1,LL)), ighostlev(ln(2,LL)))
-                    if ( jaghost /= 1 ) then
-                       lnx_own = lnx_own + 1
-                       ilink_own(lnx_own) = LL
-                    else
-                       lnx_ghost = lnx_ghost + 1
-                       ilink_ghost(lnx_ghost) = LL
-                    end if
-                 end do
-              endif
-              ! compute global number of nodes/lnx of all subdomains
-              call reduce_int_sum(ndxi_own, ndxi_all)
-              call reduce_int_sum(lnx_own,  lnx_all )
-           endif
-
-
-           !! read and prepare for inode_merge and ilink_merge,etc
-           ! Read coordinates of flow elem circumcenters from merged map file
-           ierr = nf90_inq_dimid(imapfile, 'nFlowElem', id_flowelemdim)
-           call check_error(ierr, 'nFlowElem')
-           ierr = nf90_inquire_dimension(imapfile, id_flowelemdim, len=ndxi_merge)
-           call check_error(ierr, 'Flow Elem count')
-
-           ! Check if global number of nodes in the merged rst file is equal to that in the model
-           if (ndxi_all .ne. ndxi_merge) then
-              write (msgbuf, '(a,i0,a,i0,a)') 'Global number of nodes among all partitions: in the merged restart file ', ndxi_merge, ',  in model: ', ndxi_all, '.'
-              call warn_flush()
-              call qnerror('Global number of nodes read from the merged restart file unequal to global number of nodes in model,' &
-                            //' therefore some nodes may not be found',' ',' ')
-           end if
-
-           ierr = nf90_inq_varid(imapfile, 'FlowElem_xzw', id_xzw)
-           call check_error(ierr, 'center of mass x-coordinate')
-           ierr = nf90_inq_varid(imapfile, 'FlowElem_yzw', id_yzw)
-           call check_error(ierr, 'center of mass y-coordinate')
-           if (ndxbnd_own >0) then
-              ierr = nf90_inq_dimid(imapfile, 'nFlowElemBnd', id_bnddim)
-              if (ierr == 0) then
-                  jaoldrstfile = 0
-                  call check_error(ierr, 'nFlowElemBnd')
-                  ierr = nf90_inquire_dimension(imapfile, id_bnddim, len=ndxbnd_merge)
-                  call check_error(ierr, 'Flow Elem bnd count')
-                  ierr = nf90_inq_varid(imapfile, 'FlowElem_xbnd', id_xbnd)
-                  call check_error(ierr, 'x-coordinate of boundary points')
-                  ierr = nf90_inq_varid(imapfile, 'FlowElem_ybnd', id_ybnd)
-                  call check_error(ierr, 'y-coordinate of boundary points')
-              else
-                 jaoldrstfile = 1
-                 ierr = 0
-              endif
-           endif
-
-           if (ierr == nf90_noerr) then
-              ! centers of mass were stored in rst/map file, so directly read them
-              allocate(xmc(ndxi_merge))
-              allocate(ymc(ndxi_merge))
-              ierr = nf90_get_var(imapfile, id_xzw, xmc)
-              call check_error(ierr, 'xmc')
-              ierr = nf90_get_var(imapfile, id_yzw, ymc)
-              call check_error(ierr, 'ymc')
-              if (ndxbnd_own >0 .and. jaoldrstfile == 0) then
-                 allocate(xbnd_read(ndxbnd_merge))
-                 allocate(ybnd_read(ndxbnd_merge))
-                 ierr = nf90_get_var(imapfile, id_xbnd, xbnd_read)
-                 call check_error(ierr, 'xbnd_read')
-                 ierr = nf90_get_var(imapfile, id_ybnd, ybnd_read)
-                 call check_error(ierr, 'ybnd_read')
-              endif
-           end if
-
-           if (nerr_ > 0) goto 999
-
-           call realloc(inode_merge2own, ndxi_merge, keepExisting=.false., fill=-999)
-           call find_flownodesorlinks_merge(ndxi_merge, xmc, ymc, ndxi, ndxi_own, inode_own, inode_merge, 1, 1, inode_merge2own)
-
-           if (ndxbnd_own>0 .and. jaoldrstfile == 0) then
-              ! For parallel run, 'ibnd_own' and 'ndxbnd_own' has been determined in function 'flow_initexternalforcings'
-              call find_flownodesorlinks_merge(ndxbnd_merge, xbnd_read, ybnd_read, ndx-ndxi, ndxbnd_own, ibnd_own, ibnd_merge, 2, 1)
-           endif
-           ! read coordinates of flow links center
-           ierr = nf90_inq_dimid(imapfile, 'nFlowLink', id_flowlinkdim)
-           call check_error(ierr, 'nFlowLink')
-           ierr = nf90_inquire_dimension(imapfile, id_flowlinkdim, len=lnx_merge )
-           call check_error(ierr, 'link count')
-           ! ! Check if global number of links in the merged rst file is equal to that in the model
-           if (lnx_all .ne. lnx_merge) then
-              write (msgbuf, '(a,i0,a,i0,a)') 'Global number of links among all partitions: in the merged restart file ', lnx_merge, ',  in model: ', lnx_all, '.'
-              call warn_flush()
-              call qnerror('Global number of links read from the merged restart file unequal to global number of links in model, '&
-                            //' therefore some links may not be found',' ',' ')
-           end if
-           ierr = nf90_inq_varid(imapfile, 'FlowLink_xu', id_xu)
-           call check_error(ierr, 'FlowLink_xu')
-           ierr = nf90_inq_varid(imapfile, 'FlowLink_yu', id_yu)
-           call check_error(ierr, 'FlowLink_yu')
-
-           allocate(xuu(lnx_merge))
-           allocate(yuu(lnx_merge))
-           ierr = nf90_get_var(imapfile, id_xu, xuu)
-           call check_error(ierr, 'xuu')
-           ierr = nf90_get_var(imapfile, id_yu, yuu)
-           call check_error(ierr, 'yuu')
-
-           if (nerr_ > 0) goto 999
-
-           call find_flownodesorlinks_merge(lnx_merge, xuu, yuu, lnx, lnx_own, ilink_own, ilink_merge, 0, 1)
-
-           if (jafillghost==1) then
-              call find_flownodesorlinks_merge(ndxi_merge, xmc, ymc, ndxi, ndxi_ghost, inode_ghost, inodeghost_merge, 1, 1)
-              call find_flownodesorlinks_merge(lnx_merge, xuu, yuu, lnx, lnx_ghost, ilink_ghost, ilinkghost_merge, 0, 1)
-           endif
-
-           if ( jampi.eq.0 ) then
-              if ( NS.gt.0 ) then
-                 call newfil(MSAM, 'rst_error.xyz')
-                 call wrisam(MSAM)
-   !             delete samples
-                 NS = 0
-                 call mess(LEVEL_ERROR, 'restart error, unfound nodes/links are written to sample files rst_error.xyz')
-              end if
-           else
-              if ( NS.gt.0 ) then
-                 call newfil(MSAM, 'rst_error_'// sdmn // '.xyz')
-                 call wrisam(MSAM)
-                 call mess(LEVEL_WARN, 'restart error, unfound nodes/links are written to sample files rst_error_'// sdmn // '.xyz')
-              end if
-
-!             get maximum number of flownodes with error over all subdomains
-              call reduce_key(Ns)
-
-              if ( Ns.gt.0 ) then
-                 call mess(LEVEL_ERROR, 'restart error, please check sample files rst_error_NNNN.xyz')
-              end if
-
-   !          delete samples
-              NS = 0
-           end if
-
-           deallocate(xmc, ymc, xuu, yuu)
-           if(ndxbnd_own>0 .and. jaoldrstfile == 0)  deallocate(xbnd_read, ybnd_read)
-        endif
-     else ! If rst file is a non-merged rst file
-        ! NOTE: intentional: if jampi==1, but rst file is a normal separate rst file
-        !       *per* partition, just read all ndxi/lnx, including ghost nodes/links (as before)
-        ndxi_own = ndxi
-        lnx_own  = lnx
-
-        nerr_ = 0
-
-        ! Ask file for dimension id of nodes and edges
-        ierr = nf90_inq_dimid(imapfile, 'nFlowElem', id_flowelemdim) ! Intentional: read a map/rst is *without* boundary nodes.
-                                                                     ! (so don't read nFlowElemWithBnd)
-        call check_error(ierr, 'nFlowElem')
-        ierr = nf90_inq_dimid(imapfile, 'nFlowLink', id_flowlinkdim)
-        call check_error(ierr, 'nFlowLink')
-        if (nerr_ > 0) goto 999
-
-        ! Ask for dimensions of nodes and edges, ergo: the number of netnodes and netlinks
-        ierr = nf90_inquire_dimension(imapfile, id_flowelemdim, len=ndxi_read)
-        call check_error(ierr, 'elem count')
-        ierr = nf90_inquire_dimension(imapfile, id_flowlinkdim, len=lnx_read )
-        call check_error(ierr, 'link count')
-        if (nerr_ > 0) goto 999
-
-        ! Ask file for the dimension of its own boundary points
-        ierr = nf90_inq_dimid(imapfile, 'nFlowElemBnd', id_bnddim)
-        if (ierr == 0) then
-           ierr = nf90_inquire_dimension(imapfile, id_bnddim, len=nbnd_read)
-           call check_error(ierr, 'FlowElem_bnd count')
-           jaoldrstfile = 0
-        else
-           call mess(LEVEL_INFO, 'The restart file does not contain waterlevel info. on boundaries')
-           ierr = 0
-           nbnd_read = 0
-           jaoldrstfile = 1
-        endif
-     end if
-
-     ! check if restarting a model with Riemann boundary conditions
-     if (allocated(kbndz)) then
-        if( any(kbndz(4,:) .eq. 5) .and. jaoldrstfile == 1) then
-           call mess(LEVEL_WARN, 'When restarting a model with Riemann boundary conditions, the restart file should be '&
-                     //'a *_rst file which contains waterlevel info. on boundaries. Otherwise FM still runs but the results are '&
-                     //'not accurate.')
-        endif
-     endif
-
-     if (jamergedmap_same == 1) then
-        if (ndxi_read /= ndxi_own .or. lnx_read /= lnx_own) then
-           if (jampi > 0 .and. jamergedmap == 1) then
-              jamergedmap_same = 0
-              cycle redo_merged_same
-           end if
-           tmpstr = ''
-           if (jampi == 1) then
-              write (tmpstr, '(a,i0,a)') 'my_rank=', my_rank, ': '
-           end if
-           write (msgbuf, '(a,i0,a,i0,a)') trim(tmpstr)//'#nodes in file: ', ndxi_read, ', #nodes in model: ', ndxi_own, '.'
-           call warn_flush()
-           write (msgbuf, '(a,i0,a,i0,a)') trim(tmpstr)//'#links in file: ', lnx_read, ', #links in model: ', lnx_own, '.'
-           call warn_flush()
-           call qnerror('Error reading '''//trim(filename)//''': Number of nodes/links read unequal to nodes/links in model',' ',' ')
-           ierr = DFM_GENERICERROR
-           call readyy('Reading map data',-1d0)
-           goto 999
-        end if
-        if (nbnd_read > 0 .and. jaoldrstfile == 0) then
-           if ((jampi==0 .and. nbnd_read .ne. ndx-ndxi) .or. (jampi>0 .and. nbnd_read .ne. ndxbnd_own)) then
-              if (jampi > 0 .and. jamergedmap == 1) then
-                 jamergedmap_same = 0
-                 cycle redo_merged_same
-              end if
-              tmpstr = ''
-              write (msgbuf, '(a,i0,a,i0,a)') trim(tmpstr)//'#boundary points in file: ', nbnd_read, ', #boundary points in model: ', &
-                     ndx-ndxi, '.'
-              call warn_flush()
-              call qnerror('Number of boundary points unequal to those in model',' ',' ')
-              ierr = DFM_GENERICERROR
-              call readyy('Reading map data',-1d0)
-              goto 999
-              endif
-           endif
-
-           if (jamergedmap == 0) then
-              !! check if the flownodes/flowlinks numbering index is the same
-              ! only check when sequential restart and parallel restart with its own rst file.
-              ! TODO: check also for other restart situations
-              ! Read coordinates of flownodes
-              call realloc(xmc, ndxi_read, keepExisting=.false.)
-              call realloc(ymc, ndxi_read, keepExisting=.false.)
-              ierr = nf90_inq_varid(imapfile, 'FlowElem_xzw', id_xzw)
-              if (ierr == nf90_noerr) call check_error(ierr, 'center of mass x-coordinate')
-              if (ierr == nf90_noerr) ierr = nf90_inq_varid(imapfile, 'FlowElem_yzw', id_yzw)
-              if (ierr == nf90_noerr) call check_error(ierr, 'center of mass y-coordinate')
-
-              if (ierr == nf90_noerr) ierr = nf90_get_var(imapfile, id_xzw, xmc)
-              if (ierr == nf90_noerr) ierr = nf90_get_var(imapfile, id_yzw, ymc)
-
-              if (ierr == nf90_noerr) then
-                 ! check flownodes numbering with rst file
-                 call check_flownodesorlinks_numbering_rst(ndxi, 1, xmc, ymc, ierr)
-                 if (ierr .ne. nf90_noerr) then
-                    goto 999
-                 end if
-              else
-                 call mess(LEVEL_WARN, 'Skip checking flownodes numbering when restart, '&
-                            //'because flownodes coordinates are missing in rst file.')
-              end if
-
-              ! Read coordinates of flowlinks
-              call realloc(xuu, lnx_read, keepExisting=.false.)
-              call realloc(yuu, lnx_read, keepExisting=.false.)
-              ierr = nf90_inq_varid(imapfile, 'FlowLink_xu', id_xu)
-              call check_error(ierr, 'velocity point x-coordinate')
-              ierr = nf90_inq_varid(imapfile, 'FlowLink_yu', id_yu)
-              call check_error(ierr, 'velocity point y-coordinate')
-              ierr = nf90_get_var(imapfile, id_xu, xuu)
-              ierr = nf90_get_var(imapfile, id_yu, yuu)
-
-              if (ierr == nf90_noerr) then
-                 ! Check flowlinks numbering with rst file
-                 call check_flownodesorlinks_numbering_rst(lnx, 0, xuu, yuu, ierr)
-                 if (ierr .ne. nf90_noerr) then
-                    goto 999
-                 end if
-              else
-                 call mess(LEVEL_WARN, 'Skip checking flowlinks numbering when restart, '&
-                            //'because flowlinks coordinates are missing in rst file.')
-              end if
-          end if
-       endif
-       exit redo_merged_same
-    enddo redo_merged_same
     call readyy('Reading map data',0.05d0)
 
     ! Choose latest timestep
@@ -12380,14 +11912,14 @@ subroutine unc_read_map(filename, tim, ierr)
 
     ! Read following variables no matter if it is the same or different partitions
     ! Read waterlevels (flow elem)
-    ierr = get_var_and_shift(imapfile, 's1', s1, tmpvar1, UNC_LOC_S, kmx, kstart, ndxi_own, it_read, jamergedmap, inode_own, &
-                             inode_merge)
+    ierr = get_var_and_shift(imapfile, 's1', s1, tmpvar1, UNC_LOC_S, kmx, kstart, um%ndxi_own, it_read, um%jamergedmap, um%inode_own, &
+                             um%inode_merge)
     call check_error(ierr, 'waterlevels')
     call readyy('Reading map data',0.30d0)
 
     ! Read waterlevels old (flow elem)
-    ierr = get_var_and_shift(imapfile, 's0', s0, tmpvar1, UNC_LOC_S, kmx, kstart, ndxi_own, it_read, jamergedmap, inode_own, &
-                             inode_merge)
+    ierr = get_var_and_shift(imapfile, 's0', s0, tmpvar1, UNC_LOC_S, kmx, kstart, um%ndxi_own, it_read, um%jamergedmap, um%inode_own, &
+                             um%inode_merge)
 
     call check_error(ierr, 'waterlevels old')
     call readyy('Reading map data',0.35d0)
@@ -12398,42 +11930,42 @@ subroutine unc_read_map(filename, tim, ierr)
     else if (jarstignorebl .eq. 1) then
        call mess(LEVEL_INFO, 'Ignoring bedlevel information on restart file')
     else if (jased > 0) then
-       ierr = get_var_and_shift(imapfile, 'FlowElem_bl', bl, tmpvar1, UNC_LOC_S, kmx, kstart, ndxi_own, 1, jamergedmap, &
-                                inode_own, inode_merge)
+       ierr = get_var_and_shift(imapfile, 'FlowElem_bl', bl, tmpvar1, UNC_LOC_S, kmx, kstart, um%ndxi_own, 1, um%jamergedmap, &
+                                um%inode_own, um%inode_merge)
        call check_error(ierr, 'FlowElem_bl')
     endif
     ! Read normal velocities (flow link)
-    ierr = get_var_and_shift(imapfile, 'unorm', u1, tmpvar1, UNC_LOC_U3D, kmx, Lstart, lnx_own, it_read, jamergedmap, &
-                             ilink_own, ilink_merge)
+    ierr = get_var_and_shift(imapfile, 'unorm', u1, tmpvar1, UNC_LOC_U3D, kmx, Lstart, um%lnx_own, it_read, um%jamergedmap, &
+                             um%ilink_own, um%ilink_merge)
     call check_error(ierr, 'normal velocities')
     call readyy('Reading map data',0.40d0)
 
     ! Read normal velocities old (flow link)
-    ierr = get_var_and_shift(imapfile, 'u0', u0, tmpvar1, UNC_LOC_U3D, kmx, Lstart, lnx_own, it_read, jamergedmap, &
-                             ilink_own, ilink_merge)
+    ierr = get_var_and_shift(imapfile, 'u0', u0, tmpvar1, UNC_LOC_U3D, kmx, Lstart, um%lnx_own, it_read, um%jamergedmap, &
+                             um%ilink_own, um%ilink_merge)
     call check_error(ierr, 'normal velocities old')
     call readyy('Reading map data',0.45d0)
 
     ! Read discharges (flow link)
-    ierr = get_var_and_shift(imapfile, 'q1', q1, tmpvar1, UNC_LOC_U3D, kmx, Lstart, lnx_own, it_read, jamergedmap, &
-                             ilink_own, ilink_merge)
+    ierr = get_var_and_shift(imapfile, 'q1', q1, tmpvar1, UNC_LOC_U3D, kmx, Lstart, um%lnx_own, it_read, um%jamergedmap, &
+                             um%ilink_own, um%ilink_merge)
     call check_error(ierr, 'discharges')
     call readyy('Reading map data',0.50d0)
 
     ! Read qa (flow link) only from rst file
     if (tok1 > 0) then
-       ierr = get_var_and_shift(imapfile, 'qa', qa, tmpvar1, UNC_LOC_U3D, kmx, Lstart, lnx_own, it_read, jamergedmap, &
-                                ilink_own, ilink_merge)
+       ierr = get_var_and_shift(imapfile, 'qa', qa, tmpvar1, UNC_LOC_U3D, kmx, Lstart, um%lnx_own, it_read, um%jamergedmap, &
+                                um%ilink_own, um%ilink_merge)
        call check_error(ierr, 'qa')
        call readyy('Reading map data',0.50d0)
     end if
 
-    if (jamergedmap_same == 1) then
+    if (um%jamergedmap_same == 1) then
        ! Read info. on waterlevel boundaries
-       if (nbnd_read > 0 .and. jaoldrstfile == 0) then
-          call realloc(tmp_s1, nbnd_read, stat=ierr, keepExisting=.false.)
-          call realloc(tmp_s0, nbnd_read, stat=ierr, keepExisting=.false.)
-          call realloc(tmp_bl, nbnd_read, stat=ierr, keepExisting=.false.)
+       if (um%nbnd_read > 0 .and. jaoldrstfile == 0) then
+          call realloc(tmp_s1, um%nbnd_read, stat=ierr, keepExisting=.false.)
+          call realloc(tmp_s0, um%nbnd_read, stat=ierr, keepExisting=.false.)
+          call realloc(tmp_bl, um%nbnd_read, stat=ierr, keepExisting=.false.)
 
           ierr = nf90_inq_varid(imapfile, 's0_bnd', id_s0bnd)
           if (ierr/=0) goto 999
@@ -12444,18 +11976,18 @@ subroutine unc_read_map(filename, tim, ierr)
              if (ierr/=0) goto 999
           endif
 
-          ierr = nf90_get_var(imapfile, id_s0bnd, tmp_s0, start=(/ kstart_bnd, it_read/), count = (/ nbnd_read, 1 /))
+          ierr = nf90_get_var(imapfile, id_s0bnd, tmp_s0, start=(/ kstart_bnd, it_read/), count = (/ um%nbnd_read, 1 /))
           call check_error(ierr, 's0_bnd')
-          ierr = nf90_get_var(imapfile, id_s1bnd, tmp_s1, start=(/ kstart_bnd, it_read/), count = (/ nbnd_read, 1 /))
+          ierr = nf90_get_var(imapfile, id_s1bnd, tmp_s1, start=(/ kstart_bnd, it_read/), count = (/ um%nbnd_read, 1 /))
           call check_error(ierr, 's1_bnd')
           if (jarstignorebl .eq. 0) then
-              ierr = nf90_get_var(imapfile, id_blbnd, tmp_bl, start=(/ kstart_bnd, it_read/), count = (/ nbnd_read, 1 /))
+              ierr = nf90_get_var(imapfile, id_blbnd, tmp_bl, start=(/ kstart_bnd, it_read/), count = (/ um%nbnd_read, 1 /))
               call check_error(ierr, 'bl_bnd')
           endif
           if (nerr_/=0) goto 999
 
           if (jampi==0) then
-             do i = 1, nbnd_read
+             do i = 1, um%nbnd_read
                 kk = ln(1, lnxi+i)
                 s0(kk) = tmp_s0(i)
                 s1(kk) = tmp_s1(i)
@@ -12464,7 +11996,7 @@ subroutine unc_read_map(filename, tim, ierr)
                 endif
              enddo
           else
-             do i = 1, nbnd_read ! u and z bnd
+             do i = 1, um%nbnd_read ! u and z bnd
                 Lf = lnxi+ibnd_own(i) ! boundary flow link
                 kk = ln(1, Lf) ! boundary flow node (the external one)
                 s0(kk) = tmp_s0(i)
@@ -12486,14 +12018,14 @@ subroutine unc_read_map(filename, tim, ierr)
              call realloc(tmp_bl, ndx-ndxi, stat=ierr, keepExisting=.false.)
           endif
           ierr = get_var_and_shift(imapfile, 's0_bnd', tmp_s0, tmpvar1, UNC_LOC_S, kmx, kstart, ndxbnd_own, it_read, &
-                                   jamergedmap, ibnd_own, ibnd_merge)
+                                   um%jamergedmap, ibnd_own, um%ibnd_merge)
           call check_error(ierr, 's0_bnd')
           ierr = get_var_and_shift(imapfile, 's1_bnd', tmp_s1, tmpvar1, UNC_LOC_S, kmx, kstart, ndxbnd_own, it_read, &
-                                   jamergedmap, ibnd_own, ibnd_merge)
+                                   um%jamergedmap, ibnd_own, um%ibnd_merge)
           call check_error(ierr, 's1_bnd')
           if (jarstignorebl .eq. 0) then
              ierr = get_var_and_shift(imapfile, 'bl_bnd', tmp_bl, tmpvar1, UNC_LOC_S, kmx, kstart, ndxbnd_own, it_read, &
-                                      jamergedmap, ibnd_own, ibnd_merge)
+                                      um%jamergedmap, ibnd_own, um%ibnd_merge)
              call check_error(ierr, 'bl_bnd')
           endif
 
@@ -12517,35 +12049,35 @@ subroutine unc_read_map(filename, tim, ierr)
 
     ! For 3D model
     if (kmx > 0) then
-       ierr =get_var_and_shift(imapfile, 'ww1', ww1, tmpvar1, UNC_LOC_W,   kmx, kstart, ndxi_own, it_read, jamergedmap, &
-                               inode_own, inode_merge)
+       ierr =get_var_and_shift(imapfile, 'ww1', ww1, tmpvar1, UNC_LOC_W,   kmx, kstart, um%ndxi_own, it_read, um%jamergedmap, &
+                               um%inode_own, um%inode_merge)
        call check_error(ierr, 'ww1')
        !! qa
        !ierr = get_var_and_shift(imapfile, 'qa', qa,  tmpvar1, UNC_LOC_U3D, kmx, Lstart, lnx_own,  it_read, jamergedmap, &
        !                         ilink_own, ilink_merge)
        !call check_error(ierr, 'qa')
        ! qw
-       ierr = get_var_and_shift(imapfile, 'qw', qw,  tmpvar1, UNC_LOC_W,   kmx, kstart, ndxi_own, it_read, jamergedmap, &
-                                inode_own, inode_merge)
+       ierr = get_var_and_shift(imapfile, 'qw', qw,  tmpvar1, UNC_LOC_W,   kmx, kstart, um%ndxi_own, it_read, um%jamergedmap, &
+                                um%inode_own, um%inode_merge)
         call check_error(ierr, 'qw')
        ! unorm_averaged
-       ierr = get_var_and_shift(imapfile, 'unorm_averaged', u1(1:lnx), tmpvar1, UNC_LOC_U, 1, Lstart, lnx_own,   it_read, &
-                                jamergedmap, ilink_own,   ilink_merge)
+       ierr = get_var_and_shift(imapfile, 'unorm_averaged', u1(1:lnx), tmpvar1, UNC_LOC_U, 1, Lstart, um%lnx_own,   it_read, &
+                                um%jamergedmap, um%ilink_own, um%ilink_merge)
        call check_error(ierr, 'unorm_averaged')
        ! sqi
-       ierr = get_var_and_shift(imapfile, 'sqi', sqi,  tmpvar1, UNC_LOC_W,   kmx, kstart, ndxi_own, it_read, jamergedmap, &
-                                inode_own, inode_merge)
+       ierr = get_var_and_shift(imapfile, 'sqi', sqi,  tmpvar1, UNC_LOC_W,   kmx, kstart, um%ndxi_own, it_read, um%jamergedmap, &
+                                um%inode_own, um%inode_merge)
        ! squ
-       ierr = get_var_and_shift(imapfile, 'squ', squ,  tmpvar1, UNC_LOC_W,   kmx, kstart, ndxi_own, it_read, jamergedmap, &
-                                inode_own, inode_merge)
+       ierr = get_var_and_shift(imapfile, 'squ', squ,  tmpvar1, UNC_LOC_W,   kmx, kstart, um%ndxi_own, it_read, um%jamergedmap, &
+                                um%inode_own, um%inode_merge)
 
        ! ghost
-       if (jafillghost==1) then
-          ierr = get_var_and_shift(imapfile, 'qw',  qw,  tmpvar1, UNC_LOC_W, kmx, kstart, ndxi_ghost, it_read, jamergedmap, &
-                                   inode_ghost, inodeghost_merge)
+       if (um%jafillghost==1) then
+          ierr = get_var_and_shift(imapfile, 'qw',  qw,  tmpvar1, UNC_LOC_W, kmx, kstart, um%ndxi_ghost, it_read, um%jamergedmap, &
+                                   um%inode_ghost, um%inodeghost_merge)
           call check_error(ierr, 'qw_ghost_cells')
-          ierr = get_var_and_shift(imapfile, 'unorm_averaged', u1(1:lnx), tmpvar1, UNC_LOC_U, 1, Lstart, lnx_ghost, it_read, &
-                                   jamergedmap, ilink_ghost, ilinkghost_merge)
+          ierr = get_var_and_shift(imapfile, 'unorm_averaged', u1(1:lnx), tmpvar1, UNC_LOC_U, 1, Lstart, um%lnx_ghost, it_read, &
+                                   um%jamergedmap, um%ilink_ghost, um%ilinkghost_merge)
           call check_error(ierr, 'unorm_averaged_ghost_cells')
        endif
        call readyy('Reading map data',0.75d0)
@@ -12553,38 +12085,38 @@ subroutine unc_read_map(filename, tim, ierr)
        ! turbulence variables
        if ( iturbulencemodel >= 3 ) then
           ! vicwwu
-          ierr = get_var_and_shift(imapfile, 'vicwwu',  vicwwu, tmpvar1, UNC_LOC_WU, kmx, Lstart, lnx_own, it_read, &
-                                   jamergedmap, ilink_own, ilink_merge)
+          ierr = get_var_and_shift(imapfile, 'vicwwu',  vicwwu, tmpvar1, UNC_LOC_WU, kmx, Lstart, um%lnx_own, it_read, &
+                                   um%jamergedmap, um%ilink_own, um%ilink_merge)
           call check_error(ierr, 'vicwwu')
           call readyy('Reading map data',0.76d0)
 
           ! tureps1
-          ierr = get_var_and_shift(imapfile, 'tureps1', tureps1, tmpvar1, UNC_LOC_WU, kmx, Lstart, lnx_own, it_read, &
-                                   jamergedmap, ilink_own, ilink_merge)
+          ierr = get_var_and_shift(imapfile, 'tureps1', tureps1, tmpvar1, UNC_LOC_WU, kmx, Lstart, um%lnx_own, it_read, &
+                                   um%jamergedmap, um%ilink_own, um%ilink_merge)
           call check_error(ierr, 'tureps1')
           call readyy('Reading map data',0.77d0)
 
           ! turkin1
-          ierr = get_var_and_shift(imapfile, 'turkin1', turkin1, tmpvar1, UNC_LOC_WU, kmx, Lstart, lnx_own, it_read, &
-                                   jamergedmap, ilink_own, ilink_merge)
+          ierr = get_var_and_shift(imapfile, 'turkin1', turkin1, tmpvar1, UNC_LOC_WU, kmx, Lstart, um%lnx_own, it_read, &
+                                   um%jamergedmap, um%ilink_own, um%ilink_merge)
           call check_error(ierr, 'turkin1')
           call readyy('Reading map data',0.78d0)
 
           ! ghost
-          if (jafillghost==1) then
-            ierr = get_var_and_shift(imapfile, 'tureps1', tureps1, tmpvar1, UNC_LOC_WU, kmx, Lstart, lnx_ghost, it_read, &
-                                     jamergedmap, ilink_ghost, ilinkghost_merge)
+          if (um%jafillghost==1) then
+            ierr = get_var_and_shift(imapfile, 'tureps1', tureps1, tmpvar1, UNC_LOC_WU, kmx, Lstart, um%lnx_ghost, it_read, &
+                                     um%jamergedmap, um%ilink_ghost, um%ilinkghost_merge)
             call check_error(ierr, 'tureps1_ghost_cells')
-            ierr = get_var_and_shift(imapfile, 'turkin1', turkin1, tmpvar1, UNC_LOC_WU, kmx, Lstart, lnx_ghost, it_read, &
-                                     jamergedmap, ilink_ghost, ilinkghost_merge)
+            ierr = get_var_and_shift(imapfile, 'turkin1', turkin1, tmpvar1, UNC_LOC_WU, kmx, Lstart, um%lnx_ghost, it_read, &
+                                     um%jamergedmap, um%ilink_ghost, um%ilinkghost_merge)
             call check_error(ierr, 'turkin1_ghost_cells')
           endif
        endif
     else
        if (tok1 > 0) then ! only read squ from *_rst.nc file
           ! squ
-          ierr = get_var_and_shift(imapfile, 'squ', squ,  tmpvar1, UNC_LOC_W,   kmx, kstart, ndxi_own, it_read, jamergedmap, &
-                                   inode_own, inode_merge)
+          ierr = get_var_and_shift(imapfile, 'squ', squ,  tmpvar1, UNC_LOC_W,   kmx, kstart, um%ndxi_own, it_read, um%jamergedmap, &
+                                   um%inode_own, um%inode_merge)
           call check_error(ierr, 'squ')
        end if
     endif
@@ -12593,16 +12125,16 @@ subroutine unc_read_map(filename, tim, ierr)
 
     ! Read the salinity (flow elem)
     if (jasal > 0) then
-        ierr = get_var_and_shift(imapfile, 'sa1', sa1, tmpvar1, UNC_LOC_S3D, kmx, kstart, ndxi_own, it_read, jamergedmap, &
-                                 inode_own, inode_merge)
+        ierr = get_var_and_shift(imapfile, 'sa1', sa1, tmpvar1, UNC_LOC_S3D, kmx, kstart, um%ndxi_own, it_read, um%jamergedmap, &
+                                 um%inode_own, um%inode_merge)
         call check_error(ierr, 'salinity')
     endif
     call readyy('Reading map data',0.90d0)
     ! Read the temperature (flow elem)
     if (jatem > 0) then
 
-        ierr = get_var_and_shift(imapfile, 'tem1', tem1, tmpvar1, UNC_LOC_S3D, kmx, kstart, ndxi_own, it_read, jamergedmap, &
-                                 inode_own, inode_merge)
+        ierr = get_var_and_shift(imapfile, 'tem1', tem1, tmpvar1, UNC_LOC_S3D, kmx, kstart, um%ndxi_own, it_read, um%jamergedmap, &
+                                 um%inode_own, um%inode_merge)
         call check_error(ierr, 'temperature')
         ! TODO: [TRUNKMERGE]: HK: fill this tem1 into constituents (because below the updateghost will not work now for tem)
     endif
@@ -12625,11 +12157,11 @@ subroutine unc_read_map(filename, tim, ierr)
           if ( ierr.eq.NF90_NOERR ) then
 !            tracer exists in restart file
              if(kmx > 0) then
-                ierr = nf90_get_var(imapfile, id_tr1(i), tmpvar(1:kmx,1:ndxi_own), start=(/ 1, kstart, it_read /), &
-                                    count=(/ kmx, ndxi_own, 1 /))
-                do kk = 1, ndxi_own
-                   if (jamergedmap == 1) then
-                      kloc = inode_own(kk)
+                ierr = nf90_get_var(imapfile, id_tr1(i), tmpvar(1:kmx,1:um%ndxi_own), start=(/ 1, kstart, it_read /), &
+                                    count=(/ kmx, um%ndxi_own, 1 /))
+                do kk = 1, um%ndxi_own
+                   if (um%jamergedmap == 1) then
+                      kloc = um%inode_own(kk)
                    else
                       kloc = kk
                    end if
@@ -12641,10 +12173,10 @@ subroutine unc_read_map(filename, tim, ierr)
                    end do
                 enddo
              else
-                ierr = nf90_get_var(imapfile, id_tr1(i), tmpvar(1,1:ndxi_own), start = (/ kstart, it_read/), count = (/ndxi,1/))
+                ierr = nf90_get_var(imapfile, id_tr1(i), tmpvar(1,1:um%ndxi_own), start = (/ kstart, it_read/), count = (/ndxi,1/))
                 do kk = 1, ndxi
-                   if (jamergedmap == 1) then
-                      kloc = inode_own(kk)
+                   if (um%jamergedmap == 1) then
+                      kloc = um%inode_own(kk)
                    else
                       kloc = kk
                    end if
@@ -12673,11 +12205,11 @@ subroutine unc_read_map(filename, tim, ierr)
              ierr = nf90_inq_varid(imapfile, trim(tmpstr)//'_3D', id_rwqb(iwqbot))
              if ( ierr.eq.NF90_NOERR ) then
 !            3D water quality bottom variable exists in restart file
-                ierr = nf90_get_var(imapfile, id_rwqb(iwqbot), tmpvar(1:kmx,1:ndxi_own), start=(/ 1, kstart, it_read /), &
-                                    count=(/ kmx, ndxi_own, 1 /))
-                do kk = 1, ndxi_own
-                   if (jamergedmap == 1) then
-                      kloc = inode_own(kk)
+                ierr = nf90_get_var(imapfile, id_rwqb(iwqbot), tmpvar(1:kmx,1:um%ndxi_own), start=(/ 1, kstart, it_read /), &
+                                    count=(/ kmx, um%ndxi_own, 1 /))
+                do kk = 1, um%ndxi_own
+                   if (um%jamergedmap == 1) then
+                      kloc = um%inode_own(kk)
                    else
                       kloc = kk
                    end if
@@ -12692,10 +12224,10 @@ subroutine unc_read_map(filename, tim, ierr)
              ierr = nf90_inq_varid(imapfile, trim(tmpstr), id_rwqb(iwqbot))
              if ( ierr.eq.NF90_NOERR ) then
    !            2D water quality bottom variable exists in restart file, put it in the bottom layer
-                ierr = nf90_get_var(imapfile, id_rwqb(iwqbot), tmpvar(1,1:ndxi_own), start = (/ kstart, it_read/), count = (/ndxi,1/))
+                ierr = nf90_get_var(imapfile, id_rwqb(iwqbot), tmpvar(1,1:um%ndxi_own), start = (/ kstart, it_read/), count = (/ndxi,1/))
                 do kk = 1, ndxi
-                   if (jamergedmap == 1) then
-                      kloc = inode_own(kk)
+                   if (um%jamergedmap == 1) then
+                      kloc = um%inode_own(kk)
                    else
                       kloc = kk
                    end if
@@ -12710,7 +12242,7 @@ subroutine unc_read_map(filename, tim, ierr)
 
     ! JRE to do
     if (jased > 0 .and. stm_included) then
-       if (jamergedmap == 1) then
+       if (um%jamergedmap == 1) then
           call mess(LEVEL_WARN, 'read_map: Morphology data not present in merged map file. Ignoring for now.')
        end if
        msed  => stmpar%morlyr%state%msed
@@ -12775,10 +12307,10 @@ subroutine unc_read_map(filename, tim, ierr)
              call replace_char(tmpstr,47,95)
              ierr = nf90_inq_varid(imapfile, trim(tmpstr), id_sf1(i))
              if (kmx > 0) then
-                ierr = nf90_get_var(imapfile, id_sf1(i), tmpvar(1:kmx,1:ndxi_own), start=(/ 1, kstart, it_read /), count=(/ kmx, ndxi_own, 1 /))
-                do kk = 1, ndxi_own
-                   if (jamergedmap == 1) then
-                      kloc = inode_own(kk)
+                ierr = nf90_get_var(imapfile, id_sf1(i), tmpvar(1:kmx,1:um%ndxi_own), start=(/ 1, kstart, it_read /), count=(/ kmx, um%ndxi_own, 1 /))
+                do kk = 1, um%ndxi_own
+                   if (um%jamergedmap == 1) then
+                      kloc = um%inode_own(kk)
                    else
                       kloc = kk
                    end if
@@ -12788,10 +12320,10 @@ subroutine unc_read_map(filename, tim, ierr)
                    sed(i,kb:kt) = tmpvar(1:kt-kb+1,kk)
                 enddo
              else
-                ierr = nf90_get_var(imapfile, id_sf1(i), tmpvar(1,1:ndxi_own), start = (/ kstart, it_read/), count = (/ndxi,1/))
+                ierr = nf90_get_var(imapfile, id_sf1(i), tmpvar(1,1:um%ndxi_own), start = (/ kstart, it_read/), count = (/ndxi,1/))
                 do kk = 1, ndxi
-                   if (jamergedmap == 1) then
-                      kloc = inode_own(kk)
+                   if (um%jamergedmap == 1) then
+                      kloc = um%inode_own(kk)
                    else
                       kloc = kk
                    end if
@@ -12805,8 +12337,8 @@ subroutine unc_read_map(filename, tim, ierr)
 
        ! morbl
        if (jarstignorebl .eq. 0) then
-           ierr = get_var_and_shift(imapfile, 'mor_bl', bl, tmpvar1, UNC_LOC_S, kmx, kstart, ndxi_own, it_read, jamergedmap, &
-                                inode_own, inode_merge)
+           ierr = get_var_and_shift(imapfile, 'mor_bl', bl, tmpvar1, UNC_LOC_S, kmx, kstart, um%ndxi_own, it_read, um%jamergedmap, &
+                                um%inode_own, um%inode_merge)
        end if
 
        ! morphological time
@@ -12821,10 +12353,10 @@ subroutine unc_read_map(filename, tim, ierr)
           allocate(tmpvar(sedsus_read, ndxi))
           allocate(rst_mfluff(stmpar%lsedsus, ndxi))
           ierr = nf90_inq_varid(imapfile, 'mfluff', id_mfluff)
-          ierr = nf90_get_var(imapfile, id_mfluff, tmpvar(1:sedsus_read, 1:ndxi_own), start = (/ 1, kstart, it_read/), count = (/sedsus_read, ndxi,1/))
+          ierr = nf90_get_var(imapfile, id_mfluff, tmpvar(1:sedsus_read, 1:um%ndxi_own), start = (/ 1, kstart, it_read/), count = (/sedsus_read, ndxi,1/))
           do kk = 1, ndxi
-             if (jamergedmap == 1) then
-                kloc = inode_own(kk)
+             if (um%jamergedmap == 1) then
+                kloc = um%inode_own(kk)
              else
                 kloc = kk
              end if
@@ -12844,10 +12376,10 @@ subroutine unc_read_map(filename, tim, ierr)
           allocate(rst_bodsed(sedtot_read, ndxi))
           do l = 1, stmpar%lsedtot
              ierr = nf90_inq_varid(imapfile, 'bodsed', id_bodsed)
-             ierr = nf90_get_var(imapfile, id_bodsed, tmpvar(1:sedtot_read, 1:ndxi_own), start = (/ 1, kstart, it_read/), count = (/sedtot_read, ndxi,1/))
+             ierr = nf90_get_var(imapfile, id_bodsed, tmpvar(1:sedtot_read, 1:um%ndxi_own), start = (/ 1, kstart, it_read/), count = (/sedtot_read, ndxi,1/))
              do kk = 1, ndxi
-                if (jamergedmap == 1) then
-                   kloc = inode_own(kk)
+                if (um%jamergedmap == 1) then
+                   kloc = um%inode_own(kk)
                 else
                    kloc = kk
                 end if
@@ -12866,12 +12398,12 @@ subroutine unc_read_map(filename, tim, ierr)
           !
           ierr = nf90_inq_varid(imapfile, 'msed', id_msed)
           do l = 1, sedtot_read
-             ierr = nf90_get_var(imapfile, id_msed, tmpvar2(l, 1:nlyr_read,1:ndxi_own), start = (/ l, 1, kstart, it_read/), count = (/1, nlyr_read, ndxi, 1/))
+             ierr = nf90_get_var(imapfile, id_msed, tmpvar2(l, 1:nlyr_read,1:um%ndxi_own), start = (/ l, 1, kstart, it_read/), count = (/1, nlyr_read, ndxi, 1/))
           end do
           !
           do kk = 1, ndxi
-             if (jamergedmap == 1) then
-                kloc = inode_own(kk)
+             if (um%jamergedmap == 1) then
+                kloc = um%inode_own(kk)
              else
                 kloc = kk
              end if
@@ -12886,11 +12418,11 @@ subroutine unc_read_map(filename, tim, ierr)
              !
              ierr = nf90_inq_varid(imapfile, 'lyrfrac', id_lyrfrac)
              do l = 1, sedtot_read
-                ierr = nf90_get_var(imapfile, id_lyrfrac, tmpvar2(l, 1:nlyr_read,1:ndxi_own), start = (/ l, 1, kstart, it_read/), count = (/1, nlyr_read, ndxi, 1/))
+                ierr = nf90_get_var(imapfile, id_lyrfrac, tmpvar2(l, 1:nlyr_read,1:um%ndxi_own), start = (/ l, 1, kstart, it_read/), count = (/1, nlyr_read, ndxi, 1/))
              end do
              do kk = 1, ndxi
-                if (jamergedmap == 1) then
-                   kloc = inode_own(kk)
+                if (um%jamergedmap == 1) then
+                   kloc = um%inode_own(kk)
                 else
                    kloc = kk
                 end if
@@ -12907,10 +12439,10 @@ subroutine unc_read_map(filename, tim, ierr)
           call realloc(rst_thlyr,(/nlyr_read, ndxi/),keepExisting = .false.)
           !
           ierr = nf90_inq_varid(imapfile, 'thlyr', id_thlyr)
-          ierr = nf90_get_var(imapfile, id_thlyr, tmpvar(1:nlyr_read,1:ndxi_own), start = (/ 1, kstart, it_read/), count = (/nlyr_read, ndxi, 1/))
+          ierr = nf90_get_var(imapfile, id_thlyr, tmpvar(1:nlyr_read,1:um%ndxi_own), start = (/ 1, kstart, it_read/), count = (/nlyr_read, ndxi, 1/))
           do kk = 1, ndxi
-             if (jamergedmap == 1) then
-                kloc = inode_own(kk)
+             if (um%jamergedmap == 1) then
+                kloc = um%inode_own(kk)
              else
                 kloc = kk
              end if
@@ -13049,7 +12581,7 @@ subroutine unc_read_map(filename, tim, ierr)
     ! Read Thatcher-Harleman boundary data
     ! TODO: AvD: UNST-994: no TH data in merged files yet. Replace the 1 indices below by a prop kstart later.
     if(allocated(threttim)) then
-       if (jamergedmap == 1) then
+       if (um%jamergedmap == 1) then
           call mess(LEVEL_WARN, 'read_map: Thatcher-Harlemann data not present in merged map file. Ignoring for now.')
        end if
       allocate(max_threttim(NUMCONST))
@@ -13135,7 +12667,7 @@ subroutine unc_read_map(filename, tim, ierr)
    !end if
 
    !-- Synchronisation to other domains, only for merged-map input
-   if (jampi == 1 .and. jamergedmap == 1) then
+   if (jampi == 1 .and. um%jamergedmap == 1) then
       !-- S/S3D --
       if ( jatimer.eq.1 ) call starttimer(IUPDSALL)
 
@@ -13219,6 +12751,486 @@ subroutine unc_read_map(filename, tim, ierr)
 
 end subroutine unc_read_map
 
+!> helper routine for unc_read_map
+function unc_read_merged_map(um, imapfile, filename, ierr) result (success)
+   use m_alloc               , only : realloc
+   use m_samples             , only : ns
+   use dfm_error             , only : DFM_GENERICERROR
+   use m_partitioninfo       , only : jampi, my_rank, idomain, ighostlev, sdmn, link_ghostdata, reduce_key, reduce_int_sum
+   use m_flowgeom            , only : ndxi, lnx, ln, ndx
+   use m_flowexternalforcings, only : ibnd_own, kbndz, ndxbnd_own, jaoldrstfile
+   character(len=*)     , intent(in   ) :: filename  !< Name of NetCDF file.
+   integer              , intent(in   ) :: imapfile
+   integer              , intent(inout) :: ierr
+   type(t_unc_merged)   , intent(inout) :: um        !< struct holding all data for ugrid merged map/rst files
+   logical                              :: success   !< function result
+
+   integer :: kk, ll
+   integer :: MSAM
+   integer :: ndxi_merge, lnx_merge, ndxbnd_merge, jaghost
+   integer :: ndxi_all, lnx_all !< total numbers of nodes/links among all partitions
+   integer :: id_xu, id_yu, id_xbnd, id_ybnd, id_xzw, id_yzw, id_flowelemdim, id_flowlinkdim
+   real(kind=hp), allocatable :: xmc(:), ymc(:), xuu(:), yuu(:), xbnd_read(:), ybnd_read(:)
+   integer, allocatable :: inode_owninv(:)    !< Mapping from actual node index to its own index
+   character(len=32)    :: tmpstr
+   integer, allocatable :: inode_merge2own(:) !< Mapping flownodes from merged file to subdomain own index
+
+   success = .false.
+
+   if (um%jamergedmap == 1) then
+      ! If rst file is a merged-map or merged-rst file, read only a domain's own flow nodes and links.
+      if (um%jamergedmap_same == 1) then  ! If the partitions of the model are the same with the rst file
+         um%ndxi_own = 0
+         um%lnx_own  = 0
+         call realloc(um%inode_own, ndxi, keepExisting=.false.)
+         call realloc(um%ilink_own, lnx, keepExisting=.false.)
+
+         if (um%nbnd_read > 0 .and. jaoldrstfile == 0 .and. jampi == 0) then
+            do kk = 1, um%nbnd_read
+               ibnd_own(kk) = kk
+            enddo
+         endif
+
+         if (um%jafillghost == 0) then
+            do kk=1,ndxi
+               if (idomain(kk) == my_rank) then
+                  um%ndxi_own = um%ndxi_own + 1
+                  um%inode_own(um%ndxi_own) = kk
+               end if
+            end do
+
+            do LL=1,lnx
+               call link_ghostdata(my_rank,idomain(ln(1,LL)), idomain(ln(2,LL)), jaghost, um%idmn_ghost, &
+                                   ighostlev(ln(1,LL)), ighostlev(ln(2,LL)))
+               if ( jaghost /= 1 ) then
+                  um%lnx_own = um%lnx_own + 1
+                  um%ilink_own(um%lnx_own) = LL
+               end if
+            end do
+         else ! Using merged rst file in 3D problems need to fill in some variables on ghost cells
+            um%ndxi_ghost=0
+            um%lnx_ghost= 0
+            call realloc(um%inode_ghost, ndxi, keepExisting=.false.)
+            call realloc(um%inodeghost_merge, ndxi, keepExisting=.false.)
+            call realloc(um%ilink_ghost, lnx, keepExisting=.false.)
+            call realloc(um%ilinkghost_merge, lnx, keepExisting=.false.)
+
+            do kk=1,ndxi
+               if (idomain(kk) == my_rank) then
+                  um%ndxi_own = um%ndxi_own + 1
+                  um%inode_own(um%ndxi_own) = kk
+               else
+                  um%ndxi_ghost = um%ndxi_ghost + 1
+                  um%inode_ghost(um%ndxi_ghost) = kk
+               endif
+            enddo
+
+            do LL=1,lnx
+               call link_ghostdata(my_rank,idomain(ln(1,LL)), idomain(ln(2,LL)), jaghost, um%idmn_ghost, &
+                                   ighostlev(ln(1,LL)), ighostlev(ln(2,LL)))
+               if ( jaghost /= 1 ) then
+                  um%lnx_own = um%lnx_own + 1
+                  um%ilink_own(um%lnx_own) = LL
+               else
+                  um%lnx_ghost = um%lnx_ghost + 1
+                  um%ilink_ghost(um%lnx_ghost) = LL
+               end if
+            end do
+
+            ! prepare for kd-tree search
+            ! Read coordinates of flow elem circumcenters from merged map file
+            ierr = nf90_inq_dimid(imapfile, 'nFlowElem', id_flowelemdim)
+            call check_error(ierr, 'nFlowElem')
+            ierr = nf90_inquire_dimension(imapfile, id_flowelemdim, len=ndxi_merge)
+            call check_error(ierr, 'Flow Elem count')
+            ierr = nf90_inq_varid(imapfile, 'FlowElem_xzw', id_xzw)
+            call check_error(ierr, 'center of mass x-coordinate')
+            ierr = nf90_inq_varid(imapfile, 'FlowElem_yzw', id_yzw)
+            call check_error(ierr, 'center of mass y-coordinate')
+
+            allocate(xmc(ndxi_merge))
+            allocate(ymc(ndxi_merge))
+            ierr = nf90_get_var(imapfile, id_xzw, xmc)
+            ierr = nf90_get_var(imapfile, id_yzw, ymc)
+
+            Ns = 0
+            call find_flownodesorlinks_merge(ndxi_merge, xmc, ymc, ndxi, um%ndxi_ghost, um%inode_ghost, um%inodeghost_merge, 1, 1)
+
+            ! read coordinates of flow links center
+            ierr = nf90_inq_dimid(imapfile, 'nFlowLink', id_flowlinkdim)
+            call check_error(ierr, 'nFlowLink')
+            ierr = nf90_inquire_dimension(imapfile, id_flowlinkdim, len=lnx_merge )
+            call check_error(ierr, 'link count')
+            ierr = nf90_inq_varid(imapfile, 'FlowLink_xu', id_xu)
+            ierr = nf90_inq_varid(imapfile, 'FlowLink_yu', id_yu)
+            if (nerr_ > 0) return
+
+            allocate(xuu(lnx_merge))
+            allocate(yuu(lnx_merge))
+            ierr = nf90_get_var(imapfile, id_xu, xuu)
+            ierr = nf90_get_var(imapfile, id_yu, yuu)
+
+            !call find_flownodesorlinks_merge(lnx_merge, xuu, yuu, lnx, lnx_own, ilink_own, ilink_merge, 0)
+            call find_flownodesorlinks_merge(lnx_merge, xuu, yuu, lnx, um%lnx_ghost, um%ilink_ghost, um%ilinkghost_merge, 0, 1)
+         endif
+      else     ! If the partitions in the model are different comparing with the rst file
+         um%ndxi_own = 0
+         um%lnx_own  = 0
+         call realloc(um%inode_own,   ndxi, keepExisting=.false.)
+         call realloc(um%inode_merge, ndxi, keepExisting=.false.)
+         call realloc(um%ilink_own,    lnx, keepExisting=.false.)
+         call realloc(um%ilink_merge,  lnx, keepExisting=.false.)
+         call realloc(inode_owninv,   ndxi, keepExisting=.false., fill = -999)
+
+         if (jampi == 0) then ! Restart a sequential run with a merged rst file
+            ndxbnd_own = ndx - ndxi
+            if (ndxbnd_own>0 .and. jaoldrstfile == 0) then
+               call realloc(ibnd_own, ndxbnd_own, keepExisting=.false.)
+            endif
+         endif
+         if (ndxbnd_own > 0 .and. jaoldrstfile == 0) then
+            call realloc(um%ibnd_merge, ndxbnd_own, keepExisting=.false.)
+         endif
+
+        !!! Set inode_own, ilink_own, ect
+        ! when sequential run
+        if (jampi==0) then
+           ! node
+           um%ndxi_own = ndxi
+           ndxi_all = um%ndxi_own
+           do kk=1,ndxi
+              um%inode_own(kk) = kk
+           enddo
+           ! bnd
+           um%nbnd_read = ndx - ndxi    ! Sequential restart, nbnd_read is assumed to be ndx-ndxi
+           if (um%nbnd_read > 0 .and. jaoldrstfile == 0) then
+              do kk = 1, um%nbnd_read
+                 ibnd_own(kk) = kk
+              enddo
+           endif
+           ! link
+           um%lnx_own = lnx
+           lnx_all = um%lnx_own
+           do LL=1,lnx
+              um%ilink_own(LL) = LL
+           enddo
+        else
+          ! parallel
+          if (um%jafillghost==0) then
+             ! only consider non-ghost flow nodes
+            do kk=1,ndxi
+               if (idomain(kk) == my_rank) then
+                  um%ndxi_own = um%ndxi_own + 1
+                  um%inode_own(um%ndxi_own) = kk
+                  inode_owninv(kk) = um%ndxi_own
+               end if
+            end do
+            ! link
+            do LL=1,lnx
+               call link_ghostdata(my_rank,idomain(ln(1,LL)), idomain(ln(2,LL)), jaghost, um%idmn_ghost, &
+                                   ighostlev(ln(1,LL)), ighostlev(ln(2,LL)))
+               if ( jaghost /= 1 ) then
+                  um%lnx_own = um%lnx_own + 1
+                  um%ilink_own(um%lnx_own) = LL
+               end if
+            end do
+          else ! need to fill ghosts
+             um%ndxi_ghost=0
+             um%lnx_ghost= 0
+             call realloc(um%inode_ghost, ndxi, keepExisting=.false.)
+             call realloc(um%inodeghost_merge, ndxi, keepExisting=.false.)
+             call realloc(um%ilink_ghost, lnx, keepExisting=.false.)
+             call realloc(um%ilinkghost_merge, lnx, keepExisting=.false.)
+
+             do kk=1,ndxi
+                if (idomain(kk) == my_rank) then
+                   um%ndxi_own = um%ndxi_own + 1
+                   um%inode_own(um%ndxi_own) = kk
+                   inode_owninv(kk) = um%ndxi_own
+                else
+                   um%ndxi_ghost = um%ndxi_ghost + 1
+                   um%inode_ghost(um%ndxi_ghost) = kk
+                endif
+             enddo
+
+             do LL=1,lnx
+                call link_ghostdata(my_rank,idomain(ln(1,LL)), idomain(ln(2,LL)), jaghost, um%idmn_ghost, &
+                                    ighostlev(ln(1,LL)), ighostlev(ln(2,LL)))
+                if ( jaghost /= 1 ) then
+                   um%lnx_own = um%lnx_own + 1
+                   um%ilink_own(um%lnx_own) = LL
+                else
+                   um%lnx_ghost = um%lnx_ghost + 1
+                   um%ilink_ghost(um%lnx_ghost) = LL
+                end if
+             end do
+          endif
+          ! compute global number of nodes/lnx of all subdomains
+          call reduce_int_sum(um%ndxi_own, ndxi_all)
+          call reduce_int_sum(um%lnx_own,  lnx_all )
+       endif
+
+
+       !! read and prepare for inode_merge and ilink_merge,etc
+       ! Read coordinates of flow elem circumcenters from merged map file
+       ierr = nf90_inq_dimid(imapfile, 'nFlowElem', id_flowelemdim)
+       call check_error(ierr, 'nFlowElem')
+       ierr = nf90_inquire_dimension(imapfile, id_flowelemdim, len=ndxi_merge)
+       call check_error(ierr, 'Flow Elem count')
+
+       ! Check if global number of nodes in the merged rst file is equal to that in the model
+       if (ndxi_all .ne. ndxi_merge) then
+          write (msgbuf, '(a,i0,a,i0,a)') 'Global number of nodes among all partitions: in the merged restart file ', ndxi_merge, ',  in model: ', ndxi_all, '.'
+          call warn_flush()
+          call qnerror('Global number of nodes read from the merged restart file unequal to global number of nodes in model,' &
+                        //' therefore some nodes may not be found',' ',' ')
+       end if
+
+       ierr = nf90_inq_varid(imapfile, 'FlowElem_xzw', id_xzw)
+       call check_error(ierr, 'center of mass x-coordinate')
+       ierr = nf90_inq_varid(imapfile, 'FlowElem_yzw', id_yzw)
+       call check_error(ierr, 'center of mass y-coordinate')
+       if (ndxbnd_own >0) then
+          ierr = nf90_inq_dimid(imapfile, 'nFlowElemBnd', um%id_bnddim)
+          if (ierr == 0) then
+              jaoldrstfile = 0
+              call check_error(ierr, 'nFlowElemBnd')
+              ierr = nf90_inquire_dimension(imapfile, um%id_bnddim, len=ndxbnd_merge)
+              call check_error(ierr, 'Flow Elem bnd count')
+              ierr = nf90_inq_varid(imapfile, 'FlowElem_xbnd', id_xbnd)
+              call check_error(ierr, 'x-coordinate of boundary points')
+              ierr = nf90_inq_varid(imapfile, 'FlowElem_ybnd', id_ybnd)
+              call check_error(ierr, 'y-coordinate of boundary points')
+          else
+             jaoldrstfile = 1
+             ierr = 0
+          endif
+       endif
+
+       if (ierr == nf90_noerr) then
+          ! centers of mass were stored in rst/map file, so directly read them
+          allocate(xmc(ndxi_merge))
+          allocate(ymc(ndxi_merge))
+          ierr = nf90_get_var(imapfile, id_xzw, xmc)
+          call check_error(ierr, 'xmc')
+          ierr = nf90_get_var(imapfile, id_yzw, ymc)
+          call check_error(ierr, 'ymc')
+          if (ndxbnd_own >0 .and. jaoldrstfile == 0) then
+             allocate(xbnd_read(ndxbnd_merge))
+             allocate(ybnd_read(ndxbnd_merge))
+             ierr = nf90_get_var(imapfile, id_xbnd, xbnd_read)
+             call check_error(ierr, 'xbnd_read')
+             ierr = nf90_get_var(imapfile, id_ybnd, ybnd_read)
+             call check_error(ierr, 'ybnd_read')
+          endif
+       end if
+
+       if (nerr_ > 0) return
+
+       call realloc(inode_merge2own, ndxi_merge, keepExisting=.false., fill=-999)
+       call find_flownodesorlinks_merge(ndxi_merge, xmc, ymc, ndxi, um%ndxi_own, um%inode_own, um%inode_merge, 1, 1, inode_merge2own)
+
+       if (ndxbnd_own>0 .and. jaoldrstfile == 0) then
+          ! For parallel run, 'ibnd_own' and 'ndxbnd_own' has been determined in function 'flow_initexternalforcings'
+          call find_flownodesorlinks_merge(ndxbnd_merge, xbnd_read, ybnd_read, ndx-ndxi, ndxbnd_own, ibnd_own, um%ibnd_merge, 2, 1)
+       endif
+       ! read coordinates of flow links center
+       ierr = nf90_inq_dimid(imapfile, 'nFlowLink', id_flowlinkdim)
+       call check_error(ierr, 'nFlowLink')
+       ierr = nf90_inquire_dimension(imapfile, id_flowlinkdim, len=lnx_merge )
+       call check_error(ierr, 'link count')
+       ! ! Check if global number of links in the merged rst file is equal to that in the model
+       if (lnx_all .ne. lnx_merge) then
+          write (msgbuf, '(a,i0,a,i0,a)') 'Global number of links among all partitions: in the merged restart file ', lnx_merge, ',  in model: ', lnx_all, '.'
+          call warn_flush()
+          call qnerror('Global number of links read from the merged restart file unequal to global number of links in model, '&
+                        //' therefore some links may not be found',' ',' ')
+       end if
+       ierr = nf90_inq_varid(imapfile, 'FlowLink_xu', id_xu)
+       call check_error(ierr, 'FlowLink_xu')
+       ierr = nf90_inq_varid(imapfile, 'FlowLink_yu', id_yu)
+       call check_error(ierr, 'FlowLink_yu')
+
+       allocate(xuu(lnx_merge))
+       allocate(yuu(lnx_merge))
+       ierr = nf90_get_var(imapfile, id_xu, xuu)
+       call check_error(ierr, 'xuu')
+       ierr = nf90_get_var(imapfile, id_yu, yuu)
+       call check_error(ierr, 'yuu')
+
+       if (nerr_ > 0) return
+
+       call find_flownodesorlinks_merge(lnx_merge, xuu, yuu, lnx, um%lnx_own, um%ilink_own, um%ilink_merge, 0, 1)
+
+       if (um%jafillghost==1) then
+          call find_flownodesorlinks_merge(ndxi_merge, xmc, ymc, ndxi, um%ndxi_ghost, um%inode_ghost, um%inodeghost_merge, 1, 1)
+          call find_flownodesorlinks_merge(lnx_merge, xuu, yuu, lnx, um%lnx_ghost, um%ilink_ghost, um%ilinkghost_merge, 0, 1)
+       endif
+
+       if ( jampi.eq.0 ) then
+          if ( NS.gt.0 ) then
+             call newfil(MSAM, 'rst_error.xyz')
+             call wrisam(MSAM)
+   !         delete samples
+             NS = 0
+             call mess(LEVEL_ERROR, 'restart error, unfound nodes/links are written to sample files rst_error.xyz')
+          end if
+       else
+          if ( NS.gt.0 ) then
+             call newfil(MSAM, 'rst_error_'// sdmn // '.xyz')
+             call wrisam(MSAM)
+             call mess(LEVEL_WARN, 'restart error, unfound nodes/links are written to sample files rst_error_'// sdmn // '.xyz')
+          end if
+
+!         get maximum number of flownodes with error over all subdomains
+          call reduce_key(Ns)
+
+          if ( Ns.gt.0 ) then
+             call mess(LEVEL_ERROR, 'restart error, please check sample files rst_error_NNNN.xyz')
+          end if
+
+   !      delete samples
+          NS = 0
+       end if
+
+       deallocate(xmc, ymc, xuu, yuu)
+       if(ndxbnd_own>0 .and. jaoldrstfile == 0)  deallocate(xbnd_read, ybnd_read)
+    endif
+ else ! If rst file is a non-merged rst file
+    ! NOTE: intentional: if jampi==1, but rst file is a normal separate rst file
+    !       *per* partition, just read all ndxi/lnx, including ghost nodes/links (as before)
+    um%ndxi_own = ndxi
+    um%lnx_own  = lnx
+
+    nerr_ = 0
+
+    ! Ask file for dimension id of nodes and edges
+    ierr = nf90_inq_dimid(imapfile, 'nFlowElem', id_flowelemdim) ! Intentional: read a map/rst is *without* boundary nodes.
+                                                                 ! (so don't read nFlowElemWithBnd)
+    call check_error(ierr, 'nFlowElem')
+    ierr = nf90_inq_dimid(imapfile, 'nFlowLink', id_flowlinkdim)
+    call check_error(ierr, 'nFlowLink')
+    if (nerr_ > 0) return
+
+    ! Ask for dimensions of nodes and edges, ergo: the number of netnodes and netlinks
+    ierr = nf90_inquire_dimension(imapfile, id_flowelemdim, len=um%ndxi_read)
+    call check_error(ierr, 'elem count')
+    ierr = nf90_inquire_dimension(imapfile, id_flowlinkdim, len=um%lnx_read )
+    call check_error(ierr, 'link count')
+    if (nerr_ > 0) return
+
+    ! Ask file for the dimension of its own boundary points
+    ierr = nf90_inq_dimid(imapfile, 'nFlowElemBnd', um%id_bnddim)
+    if (ierr == 0) then
+       ierr = nf90_inquire_dimension(imapfile, um%id_bnddim, len=um%nbnd_read)
+       call check_error(ierr, 'FlowElem_bnd count')
+       jaoldrstfile = 0
+    else
+       call mess(LEVEL_INFO, 'The restart file does not contain waterlevel info. on boundaries')
+       ierr = 0
+       um%nbnd_read = 0
+       jaoldrstfile = 1
+    endif
+ end if
+
+ ! check if restarting a model with Riemann boundary conditions
+ if (allocated(kbndz)) then
+    if( any(kbndz(4,:) .eq. 5) .and. jaoldrstfile == 1) then
+       call mess(LEVEL_WARN, 'When restarting a model with Riemann boundary conditions, the restart file should be '&
+                 //'a *_rst file which contains waterlevel info. on boundaries. Otherwise FM still runs but the results are '&
+                 //'not accurate.')
+    endif
+ endif
+
+ if (um%jamergedmap_same == 1) then
+    if (um%ndxi_read /= um%ndxi_own .or. um%lnx_read /= um%lnx_own) then
+       if (jampi > 0 .and. um%jamergedmap == 1) then
+          success = .true.
+          um%jamergedmap_same = 0
+          return
+       end if
+       tmpstr = ''
+       if (jampi == 1) then
+          write (tmpstr, '(a,i0,a)') 'my_rank=', my_rank, ': '
+       end if
+       write (msgbuf, '(a,i0,a,i0,a)') trim(tmpstr)//'#nodes in file: ', um%ndxi_read, ', #nodes in model: ', um%ndxi_own, '.'
+       call warn_flush()
+       write (msgbuf, '(a,i0,a,i0,a)') trim(tmpstr)//'#links in file: ', um%lnx_read, ', #links in model: ', um%lnx_own, '.'
+       call warn_flush()
+       call qnerror('Error reading '''//trim(filename)//''': Number of nodes/links read unequal to nodes/links in model',' ',' ')
+       ierr = DFM_GENERICERROR
+       call readyy('Reading map data',-1d0)
+       return
+    end if
+    if (um%nbnd_read > 0 .and. jaoldrstfile == 0) then
+       if ((jampi==0 .and. um%nbnd_read .ne. ndx-ndxi) .or. (jampi>0 .and. um%nbnd_read .ne. ndxbnd_own)) then
+          if (jampi > 0 .and. um%jamergedmap == 1) then
+             success = .true.
+             um%jamergedmap_same = 0
+             return
+          end if
+          tmpstr = ''
+          write (msgbuf, '(a,i0,a,i0,a)') trim(tmpstr)//'#boundary points in file: ', um%nbnd_read, ', #boundary points in model: ', &
+                 ndx-ndxi, '.'
+          call warn_flush()
+          call qnerror('Number of boundary points unequal to those in model',' ',' ')
+          ierr = DFM_GENERICERROR
+          call readyy('Reading map data',-1d0)
+          return
+          endif
+       endif
+
+       if (um%jamergedmap == 0) then
+          !! check if the flownodes/flowlinks numbering index is the same
+          ! only check when sequential restart and parallel restart with its own rst file.
+          ! TODO: check also for other restart situations
+          ! Read coordinates of flownodes
+          call realloc(xmc, um%ndxi_read, keepExisting=.false.)
+          call realloc(ymc, um%ndxi_read, keepExisting=.false.)
+          ierr = nf90_inq_varid(imapfile, 'FlowElem_xzw', id_xzw)
+          if (ierr == nf90_noerr) call check_error(ierr, 'center of mass x-coordinate')
+          if (ierr == nf90_noerr) ierr = nf90_inq_varid(imapfile, 'FlowElem_yzw', id_yzw)
+          if (ierr == nf90_noerr) call check_error(ierr, 'center of mass y-coordinate')
+
+          if (ierr == nf90_noerr) ierr = nf90_get_var(imapfile, id_xzw, xmc)
+          if (ierr == nf90_noerr) ierr = nf90_get_var(imapfile, id_yzw, ymc)
+
+          if (ierr == nf90_noerr) then
+             ! check flownodes numbering with rst file
+             call check_flownodesorlinks_numbering_rst(ndxi, 1, xmc, ymc, ierr)
+             if (ierr .ne. nf90_noerr) then
+                return
+             end if
+          else
+             call mess(LEVEL_WARN, 'Skip checking flownodes numbering when restart, '&
+                        //'because flownodes coordinates are missing in rst file.')
+          end if
+
+          ! Read coordinates of flowlinks
+          call realloc(xuu, um%lnx_read, keepExisting=.false.)
+          call realloc(yuu, um%lnx_read, keepExisting=.false.)
+          ierr = nf90_inq_varid(imapfile, 'FlowLink_xu', id_xu)
+          call check_error(ierr, 'velocity point x-coordinate')
+          ierr = nf90_inq_varid(imapfile, 'FlowLink_yu', id_yu)
+          call check_error(ierr, 'velocity point y-coordinate')
+          ierr = nf90_get_var(imapfile, id_xu, xuu)
+          ierr = nf90_get_var(imapfile, id_yu, yuu)
+
+          if (ierr == nf90_noerr) then
+             ! Check flowlinks numbering with rst file
+             call check_flownodesorlinks_numbering_rst(lnx, 0, xuu, yuu, ierr)
+             if (ierr .ne. nf90_noerr) then
+                return
+             end if
+          else
+             call mess(LEVEL_WARN, 'Skip checking flowlinks numbering when restart, '&
+                        //'because flowlinks coordinates are missing in rst file.')
+          end if
+      end if
+   endif
+
+   success = .true.
+end function unc_read_merged_map
 
 !> Writes the unstructured flow geometry to a netCDF file.
 !! If file exists, it will be overwritten.
