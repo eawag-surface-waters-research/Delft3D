@@ -327,11 +327,9 @@
 
 !      Use functions to set 2D (or 0D variables) from DFM per column
       nofun = 0
-      allocate(funame(nofun))
       call realloc(funame, nofun)
 
       nosfun = 0
-      allocate(sfunname(nofun))
       call realloc(sfunname, nofun)
 
       call dfm_waq_initexternalforcings(ierr)
