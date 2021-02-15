@@ -1825,7 +1825,6 @@ subroutine addlink1D(L,japerim)                        ! and add area's and volu
  use m_missing
  use m_flowparameters
  use unstruc_channel_flow
- use precision_basics
 
  implicit none
 
@@ -1834,12 +1833,13 @@ subroutine addlink1D(L,japerim)                        ! and add area's and volu
  integer           :: k1, k2, K, LL
  double precision  :: ar1, wid1, cf1, ar2, wid2, cf2, dx1, dx2, widu, diam, perim
  double precision  :: hpr
+ 
+ if (japerim == 0) then
 
- dx1 = 0.5d0*dx(L)
- dx2 = dx1
- k1 = ln(1,L)
- k2 = ln(2,L)
+    calcConv = 0
+    k1  = ln(1,L) ; k2 = ln(2,L)
 
+    dx1 = 0.5d0*dx(L) ; dx2 = dx1
  if (dxDoubleAt1DEndNodes) then
     if (kcu(L) == 1) then
        if ( nd(k1)%lnx == 1 ) then
@@ -1850,10 +1850,6 @@ subroutine addlink1D(L,japerim)                        ! and add area's and volu
        endif
     endif
  endif
-
- if (japerim == 0) then
-
-    calcConv = 0
 
     if (kcs(k1) == 1) then ! TODO: consider *also* adding storage area to the 2D side k1, if kcu(L)==5, maybe not for kcu(L)==7
        hpr = s1(k1)-bob0(1,L)
@@ -1866,6 +1862,13 @@ subroutine addlink1D(L,japerim)                        ! and add area's and volu
           endif
           a1(k1) =   a1(k1) + dx1*wid1
 
+          ! flow volume
+          if(network%loaded) then
+             call getprof_1D(L, hpr, ar1, wid1, 1, calcConv, perim)
+             vol1_f(k1) = vol1_f(k1) + dx1*ar1
+          else
+             vol1_f(k1) = vol1(k1)
+          endif
        endif
     endif
 
@@ -1879,6 +1882,13 @@ subroutine addlink1D(L,japerim)                        ! and add area's and volu
              call getprof_1D(L, epshu, ar2, wid2, japerim, calcConv, perim)
           endif
           a1(k2) =   a1(k2) + dx2*wid2
+          ! flow volume
+          if(network%loaded) then
+             call getprof_1D(L, hpr, ar2, wid2, 1, calcConv, perim)
+             vol1_f(k2) = vol1_f(k2) + dx2*ar2
+          else
+             vol1_f(k2) = vol1(k2)
+          endif
        endif
     endif
 
@@ -1925,47 +1935,11 @@ subroutine addlink1D(L,japerim)                        ! and add area's and volu
 
     endif
 
- else
+ else if (hu(L) > 0) then
 
     calcConv = 1
-
-    ! getprof1D sets cfu
-    if (hu(L) > 0) then
-       call getprof_1D(L, hu(L), au(L), widu, japerim, calcConv, perim)  ! memory closeness of profiles causes this statement here instead of in setau
-    endif
-
-    ! calculate VOL1_F to be used for 1d-advection
-
-    calcConv = 0
-    if(network%loaded) then
-       if (kcs(k1) == 1) then ! TODO: consider *also* adding storage area to the 2D side k1, if kcu(L)==5, maybe not for kcu(L)==7
-         hpr = s1(k1)-bob0(1,L)
-         if (hpr >= 0d0) then
-            if (comparereal(hu(L), hpr)== 0) then
-               vol1_f(k1) = vol1_f(k1) + dx1*au(L)
-            else
-               call getprof_1D(L, hpr, ar1, wid1, 1, calcConv, perim)
-               vol1_f(k1) = vol1_f(k1) + dx1*ar1
-            endif
-         endif
-      endif
-
-      if (kcs(k2) == 1) then ! TODO: consider *also* adding storage area to the 2D side k2, if kcu(L)==5, maybe not for kcu(L)==7
-         hpr = s1(k2)-bob0(2,L)
-         if (hpr >= 0d0) then
-            ! flow volume
-            if (comparereal(hu(L), hpr)== 0) then
-               vol1_f(k2) = vol1_f(k2) + dx2*au(L)
-            else
-               call getprof_1D(L, hpr, ar2, wid2, 1, calcConv, perim)
-               vol1_f(k2) = vol1_f(k2) + dx2*ar2
-            endif
-         endif
-      endif
-    else
-       vol1_f(k1) = vol1(k1)
-       vol1_f(k2) = vol1(k2)
-    endif
+    call getprof_1D(L, hu(L), au(L), widu, japerim, calcConv, perim)  ! memory closeness of profiles causes this statement here instead of in setau
+    ! getprof1D sets cfu    
  endif
 
  end subroutine addlink1D
@@ -3461,16 +3435,6 @@ end subroutine sethu
  ! call writesluices()
 
  if (kmx == 0) then
-
-   if (nonlin == 0) then
-      do n = ndx2d+1, ndxi
-         hh = max(0d0, s1(n)-bl(n) )
-         vol1_f(n) = ba(n)*hh
-         a1(n)   = ba(n)
-      enddo
-   else
-      vol1_f(ndx2D+1:ndxi) = 0d0
-   endif
 
 
     call vol12D(1)
