@@ -31,7 +31,7 @@
                                        ndspx  , dspx   , dsto   , nveln  , ivpnew , &
                                        velonw , nvelx  , velx   , vsto   , isdmp  , &
                                        defaul , prondt , prvvar , prvtyp , vararr , &
-                                       varidx , arrpoi , arrknd , arrdm1 , arrdm2 , & 
+                                       varidx , arrpoi , arrknd , arrdm1 , arrdm2 , &
                                        novar  , a      , ndmps  , pronam , prvpnt , &
                                        nodef  , surfac , flux_int)
 
@@ -85,7 +85,7 @@
       integer( 4), intent(in   ) :: noq2                        !< Number of exchanges second direction
       integer( 4), intent(in   ) :: noq3                        !< Number of exchanges vertical
       integer( 4), intent(in   ) :: noq4                        !< Number of exchanges in the bed
-      real   ( 4), intent(in   ) :: area  (*)                   !< exchange areas 
+      real   ( 4), intent(in   ) :: area  (*)                   !< exchange areas
       integer( 4), intent(in   ) :: ndspn                       !< Number of new dispersion arrays
       integer( 4), intent(in   ) :: idpnew(nosys )              !< Pointer to new disp array
       real   ( 4), intent(inout) :: dispnw(ndspn ,*)            !< New dispersion array
@@ -141,15 +141,15 @@
       real(8)                    :: vol                             ! Help variable volume
       real(8)                    :: ndt                             ! Help variable time step multiplier
       real(8)                    :: atfac                           ! Help variable
-      
+
       save    istep
       data    istep  / 0 /
 
       integer(4) ithndl /0/
       if ( timon ) call timstrt ( "wq_processes_proces", ithndl )
-      
+
       IFRACS = 1
-      
+
       IF ( nproc .eq. 0 ) goto 9999
 
 !     Count calls of this module
@@ -217,7 +217,7 @@
                      endif
                   enddo
                endif
-               
+
             endif
 
             if ( istep .eq. 1 ) then
@@ -289,7 +289,7 @@
          if ( istep .eq. 1 ) then
             deriv(:,:) = 0.0d0
             if ( ibflag .gt. 0 ) flxdmp = 0.0d0
-         else 
+         else
 
 !           Scale fluxes and update "processes" accumulation arrays
             atfac = 1.0/real(itfact,8)
@@ -335,7 +335,7 @@
                           arrdm2(*)      ,                  &
                           ipmsa (*)      , increm(*)      , &
                           iflux (*)      , promnr(*)      , &
-                          iexpnt(*)      , iknmrk(*)        
+                          iexpnt(*)      , iknmrk(*)
       real                a(*)           , flux(*)
       character*10        pronam(*)
       integer(8)   , intent(in   ) :: dll_opb     ! open proces library dll handle
@@ -344,13 +344,13 @@
 !
       integer :: ityp
       integer :: ivario
-      integer :: ivar  
-      integer :: iarr  
+      integer :: ivar
+      integer :: iarr
       integer :: iv_idx
       integer :: iarknd
       integer :: ip_arr
-      integer :: idim1 
-      integer :: idim2 
+      integer :: idim1
+      integer :: idim2
       integer :: ipflux
 
       integer(4) ithndl /0/
@@ -377,6 +377,8 @@
          elseif ( iarknd .eq. 3 ) then
             ipmsa (k+ivario-1) = ip_arr + (iv_idx-1)*idim1
             increm(k+ivario-1) = 1
+         else
+            write(*,*) 'Processes: type = ', iarknd, ivario, ' - ', pronam(iproc)
          endif
 !
       enddo
