@@ -1826,20 +1826,20 @@ subroutine addlink1D(L,japerim)                        ! and add area's and volu
  use m_flowparameters
  use unstruc_channel_flow
  use precision_basics
- 
+
  implicit none
- 
+
  integer           :: japerim, L, ja, calcConv
- 
+
  integer           :: k1, k2, K, LL
  double precision  :: ar1, wid1, cf1, ar2, wid2, cf2, dx1, dx2, widu, diam, perim
  double precision  :: hpr
- 
- dx1 = 0.5d0*dx(L) 
+
+ dx1 = 0.5d0*dx(L)
  dx2 = dx1
  k1 = ln(1,L)
  k2 = ln(2,L)
- 
+
  if (dxDoubleAt1DEndNodes) then
     if (kcu(L) == 1) then
        if ( nd(k1)%lnx == 1 ) then
@@ -1925,15 +1925,15 @@ subroutine addlink1D(L,japerim)                        ! and add area's and volu
 
     endif
 
- else 
+ else
 
     calcConv = 1
-                                                     
-    ! getprof1D sets cfu    
+
+    ! getprof1D sets cfu
     if (hu(L) > 0) then
        call getprof_1D(L, hu(L), au(L), widu, japerim, calcConv, perim)  ! memory closeness of profiles causes this statement here instead of in setau
     endif
-    
+
     ! calculate VOL1_F to be used for 1d-advection
 
     calcConv = 0
@@ -1965,7 +1965,7 @@ subroutine addlink1D(L,japerim)                        ! and add area's and volu
     else
        vol1_f(k1) = vol1(k1)
        vol1_f(k2) = vol1(k2)
-    endif 
+    endif
  endif
 
  end subroutine addlink1D
@@ -3471,7 +3471,7 @@ end subroutine sethu
    else
       vol1_f(ndx2D+1:ndxi) = 0d0
    endif
-  
+
 
     call vol12D(1)
 
@@ -11052,7 +11052,7 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
  use m_fm_wq_processes, only: jawaqproc
  use m_vegetation
  use m_hydrology, only: jadhyd, init_hydrology
- use m_integralstats 
+ use m_integralstats
  use m_xbeach_data, only: instat, newstatbc, bccreated
  use m_oned_functions
  use unstruc_display, only : ntek, jaGUI
@@ -11061,7 +11061,7 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
  use m_fm_update_crosssections, only: fm_update_mor_width_area, fm_update_mor_width_mean_bedlevel
  use unstruc_netcdf_map_class
  use unstruc_caching
- 
+
  !use m_mormerge
  !
  ! To raise floating-point invalid, divide-by-zero, and overflow exceptions:
@@ -19530,7 +19530,7 @@ subroutine unc_write_his(tim)            ! wrihis
     add_latlon = jsferic == 0 .and. iand(unc_writeopts, UG_WRITE_LATLON) == UG_WRITE_LATLON
 #else
     add_latlon = .false.
-#endif    
+#endif
 
     if (ihisfile == 0) then
 
@@ -19601,7 +19601,7 @@ subroutine unc_write_his(tim)            ! wrihis
             nNodeTot = numobs+nummovobs
             ierr = sgeom_def_geometry_variables(ihisfile, station_geom_container_name, 'station', 'point', nNodeTot, id_statdim, &
                id_statgeom_node_count, id_statgeom_node_coordx, id_statgeom_node_coordy, add_latlon, id_statgeom_node_lon, id_statgeom_node_lat)
-            
+
 
             if ( jahiswatlev > 0 ) then
                ierr = nf90_def_var(ihisfile, 'waterlevel', nf90_double, (/ id_statdim, id_timedim /), id_vars)
@@ -43822,6 +43822,19 @@ end function is_1d_boundary_candidate
 
  success = .true.    ! default if no valid providers are present in *.ext file (m_flowexternalforcings::success)
 
+ if ( .not. allocated(const_names) ) then
+    allocate( const_names(0) )
+ endif
+ if ( .not. allocated(trnames) ) then
+    allocate( trnames(0) )
+ endif
+ if ( .not. allocated(wqbotnames) ) then
+    allocate( wqbotnames(0) )
+ endif
+ if ( .not. allocated(mbaname) ) then
+    allocate( mbaname(0) )
+ endif
+
  ! (re-)initialize flags/counters related to temperature forcings
  itempforcingtyp = 0
  btempforcingtypA = .false.
@@ -45485,6 +45498,9 @@ if (mext /= 0) then
 
         else if (qid(1:15) == 'massbalancearea' .or. qid(1:18) == 'waqmassbalancearea') then
            if (ti_mba > 0) then
+               if ( .not. allocated(mbaname) ) then
+                  allocate( mbaname(0) )
+               endif
                imba = findname(nomba, mbaname, mbainputname)
 
                if ( imba.eq.0 ) then
