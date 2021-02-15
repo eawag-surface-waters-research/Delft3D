@@ -847,6 +847,22 @@
 
    success = .true.    ! default if no valid providers are present in *.ext file (m_flowexternalforcings::success)
 
+   if ( .not. allocated(paname) ) then
+       allocate( paname(0) )
+   endif
+   if ( .not. allocated(funame) ) then
+       allocate( funame(0) )
+   endif
+   if ( .not. allocated(sfunname) ) then
+       allocate( sfunname(0) )
+   endif
+   if ( .not. allocated(monname) ) then
+       allocate( monname(0) )
+   endif
+   if ( .not. allocated(mondef) ) then
+       allocate( mondef(0,0) )
+   endif
+
    call settimespacerefdat(refdat, julrefdat, Tzone, Timjan)
 
    if (mext /= 0) then
@@ -1161,6 +1177,16 @@
       integer,          external    :: findname
 
       integer                       :: itrac
+
+      if ( .not. allocated(wqbotnames) ) then
+         allocate( wqbotnames(0) )
+      endif
+      if ( .not. allocated(wqbot) ) then
+         allocate( wqbot(0,0) )
+      endif
+      if ( .not. allocated(trnames) ) then
+         allocate( trnames(0) )
+      endif
 
       iwqbot = findname(numwqbots, wqbotnames, wqbotnam)
       itrac = findname(numtracers, trnames, wqbotnam)
