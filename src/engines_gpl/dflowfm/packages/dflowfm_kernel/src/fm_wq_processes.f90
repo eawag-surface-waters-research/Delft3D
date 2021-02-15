@@ -220,6 +220,24 @@
       if ( .not. allocated(oudesc_sub) ) then
           allocate( oudesc_sub(0) )
       endif
+      if ( .not. allocated(syname_eho) ) then
+          allocate( syname_eho(0) )
+      endif
+      if ( .not. allocated(syunit_eho) ) then
+          allocate( syunit_eho(0) )
+      endif
+      if ( .not. allocated(coname_eho) ) then
+          allocate( coname_eho(0) )
+      endif
+      if ( .not. allocated(covalue_eho) ) then
+          allocate( covalue_eho(0) )
+      endif
+      if ( .not. allocated(ouname_eho) ) then
+          allocate( ouname_eho(0) )
+      endif
+      if ( .not. allocated(oudesc_eho) ) then
+          allocate( oudesc_eho(0) )
+      endif
 
       call rd_sub(Lallocated,substance_file,nosys,notot,nocons,noout_sub,syname_sub,syunit_sub,coname_sub, &
                   covalue_sub,ouname_sub,oudesc_sub,ierr_sub,cerr)
