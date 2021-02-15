@@ -11357,7 +11357,7 @@ subroutine md5_net_file(numlstart, numlcount)
     end if
 
     if (loglevel_StdOut <= LEVEL_DEBUG .or. loglevel_file <= LEVEL_DEBUG) then
-       allocate(kn1d(3*(numlcount_)), stat=ierr)
+       allocate(kn1d(3*(numlcount_+1)), stat=ierr)
        if (ierr /= 0) then
           call mess(LEVEL_FATAL, 'memory allocation error in md5_net_file with size = ', 3*numlcount_)
        end if
