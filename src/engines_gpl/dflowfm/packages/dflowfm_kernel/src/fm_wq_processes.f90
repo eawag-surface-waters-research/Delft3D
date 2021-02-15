@@ -201,6 +201,26 @@
 
       call mess(LEVEL_INFO, 'Opening substance file: ', trim(substance_file))
       Lallocated = .false.
+
+      if ( .not. allocated(syname_sub) ) then
+          allocate( syname_sub(0) )
+      endif
+      if ( .not. allocated(syunit_sub) ) then
+          allocate( syunit_sub(0) )
+      endif
+      if ( .not. allocated(coname_sub) ) then
+          allocate( coname_sub(0) )
+      endif
+      if ( .not. allocated(covalue_sub) ) then
+          allocate( covalue_sub(0) )
+      endif
+      if ( .not. allocated(ouname_sub) ) then
+          allocate( ouname_sub(0) )
+      endif
+      if ( .not. allocated(oudesc_sub) ) then
+          allocate( oudesc_sub(0) )
+      endif
+
       call rd_sub(Lallocated,substance_file,nosys,notot,nocons,noout_sub,syname_sub,syunit_sub,coname_sub, &
                   covalue_sub,ouname_sub,oudesc_sub,ierr_sub,cerr)
       if (ierr_sub.ne.0) call mess(LEVEL_ERROR, cerr)
