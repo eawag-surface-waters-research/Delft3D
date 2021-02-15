@@ -80,7 +80,7 @@
             allocate( bndtr(i)%z(0) )
          endif
          if ( .not. allocated(bndtr(i)%k) ) then
-            allocate( bndtr(i)%k(0) )
+            allocate( bndtr(i)%k(0,0) )
          endif
          if ( .not. allocated(bndtr(i)%tht) ) then
             allocate( bndtr(i)%tht(0) )
@@ -97,7 +97,7 @@
             allocate( bndsf(i)%z(0) )
          endif
          if ( .not. allocated(bndsf(i)%k) ) then
-            allocate( bndsf(i)%k(0) )
+            allocate( bndsf(i)%k(0,0) )
          endif
          if ( .not. allocated(bndsf(i)%tht) ) then
             allocate( bndsf(i)%tht(0) )
