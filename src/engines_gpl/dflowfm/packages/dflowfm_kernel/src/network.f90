@@ -86,7 +86,7 @@ subroutine loadNetwork(filename, istat, jadoorladen)
 
     ! New NetCDF net file
     call unc_read_net(filename, K0, L0, NUMKN, NUMLN, istat)
-    call md5_net_file(NUMLN)
+    call md5_net_file(L0+1, NUMLN)
 
     iDumk = 0
     iDuml = 0

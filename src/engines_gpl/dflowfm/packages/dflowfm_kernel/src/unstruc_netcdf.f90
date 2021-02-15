@@ -11325,14 +11325,15 @@ subroutine unc_read_net(filename, numk_keep, numl_keep, numk_read, numl_read, ie
 
 end subroutine unc_read_net
 
-!> print MD5 checksum for net file
-!! only in case of loglevel is debug or all
-subroutine md5_net_file(numln)
-    use network_data, only : kn
+!> print MD5 checksum for net file, based on netlinks only.
+!! Only in case of loglevel is debug or all.
+subroutine md5_net_file(numlstart, numlcount)
+    use network_data, only : kn, numl
     use md5_checksum
     use unstruc_messages
 
-    integer, intent(in) :: numln !< number of net links
+    integer, optional, intent(in   ) :: numlstart !< Start index of links to start checking. Optional, default: 1.
+    integer, optional, intent(in   ) :: numlcount !< Total count of links to check. Optional, default: numl.
 
     integer                    :: L
     integer                    :: ierr
@@ -11340,16 +11341,30 @@ subroutine md5_net_file(numln)
     character(len=  md5length) :: checksum
     character(len=2*md5length) :: checksum_hex
     logical                    :: success
+    integer                    :: numlstart_
+    integer                    :: numlcount_
+
+    if (present(numlstart)) then
+       numlstart_ = numlstart
+    else
+       numlstart_ = 1
+    end if
+
+    if (present(numlcount)) then
+       numlcount_ = numlcount
+    else
+       numlcount_ = numl
+    end if
 
     if (loglevel_StdOut <= LEVEL_DEBUG .or. loglevel_file <= LEVEL_DEBUG) then
-       allocate(kn1d(3*(numln)), stat=ierr)
+       allocate(kn1d(3*(numlcount_)), stat=ierr)
        if (ierr /= 0) then
-          call mess(LEVEL_FATAL, 'memory allocation error in md5_net_file with size = ', 3*numln)
+          call mess(LEVEL_FATAL, 'memory allocation error in md5_net_file with size = ', 3*numlcount_)
        end if
-       do L = 1, numln
-          kn1d(3*L-2) = KN(1,L)
-          kn1d(3*L-1) = KN(2,L)
-          kn1d(3*L  ) = KN(3,L)
+       do L = numlstart_, numlstart_+numlcount_
+          kn1d(3*(L-numlstart_)+1) = KN(1,L)
+          kn1d(3*(L-numlstart_)+2) = KN(2,L)
+          kn1d(3*(L-numlstart_)+3) = KN(3,L)
        end do
        call md5intarr(kn1d, checksum, success)
        if (success) then
