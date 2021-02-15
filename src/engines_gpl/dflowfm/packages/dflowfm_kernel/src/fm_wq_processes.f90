@@ -238,6 +238,27 @@
       if ( .not. allocated(oudesc_eho) ) then
           allocate( oudesc_eho(0) )
       endif
+      if ( .not. allocated(syname) ) then
+          allocate( syname(0) )
+      endif
+      if ( .not. allocated(coname) ) then
+          allocate( coname(0) )
+      endif
+      if ( .not. allocated(funame) ) then
+          allocate( funame(0) )
+      endif
+      if ( .not. allocated(paname) ) then
+          allocate( paname(0) )
+      endif
+      if ( .not. allocated(sfunname) ) then
+          allocate( sfunname(0) )
+      endif
+      if ( .not. allocated(diname) ) then
+          allocate( diname(0) )
+      endif
+      if ( .not. allocated(vename) ) then
+          allocate( vename(0) )
+      endif
 
       call rd_sub(Lallocated,substance_file,nosys,notot,nocons,noout_sub,syname_sub,syunit_sub,coname_sub, &
                   covalue_sub,ouname_sub,oudesc_sub,ierr_sub,cerr)
