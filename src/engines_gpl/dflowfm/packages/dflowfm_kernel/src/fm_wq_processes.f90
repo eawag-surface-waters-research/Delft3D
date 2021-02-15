@@ -259,6 +259,9 @@
       if ( .not. allocated(vename) ) then
           allocate( vename(0) )
       endif
+      if ( .not. allocated(flxdmp) ) then
+          allocate( flxdmp(0,0,0) )
+      endif
 
       call rd_sub(Lallocated,substance_file,nosys,notot,nocons,noout_sub,syname_sub,syunit_sub,coname_sub, &
                   covalue_sub,ouname_sub,oudesc_sub,ierr_sub,cerr)
