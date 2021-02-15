@@ -102,11 +102,12 @@ integer, parameter :: UG_LOC_VOL      = 8 !< Mesh data location: mesh volume
 integer, parameter :: UG_LOC_CONTACT  = 9 !< Mesh data location: 1d2d contacts
 integer, parameter :: UG_LOC_ALL2D = UG_LOC_NODE + UG_LOC_EDGE + UG_LOC_FACE !< All three possible 2D locations.
 
-! The following edge type codes define for each netlink (UGRID 'edge') the type (or absence) of flowlink.
-integer, parameter :: UG_EDGETYPE_INTERNAL_CLOSED = 0
-integer, parameter :: UG_EDGETYPE_INTERNAL        = 1
-integer, parameter :: UG_EDGETYPE_BND             = 2
-integer, parameter :: UG_EDGETYPE_BND_CLOSED      = 3
+!> The following edge type codes define for each netlink (UGRID 'edge') the type (or absence) of flowlink.
+!! Note: these are different from contact types (but intentionally the numbers do not overlap).
+integer, parameter :: UG_EDGETYPE_INTERNAL_CLOSED = 20 !< Edge that is closed/no flow link
+integer, parameter :: UG_EDGETYPE_INTERNAL        = 21 !< Regular edge with an open flow link
+integer, parameter :: UG_EDGETYPE_BND             = 22 !< Boundary edge with open boundary
+integer, parameter :: UG_EDGETYPE_BND_CLOSED      = 23 !< Boundary edge with closed boundary
 
 !! Dimension types (form a supplement to the preceding location types)
 integer, parameter :: UG_DIM_MAXFACENODES = 128 !< The dimension containing the max number of nodes in the face_node_connectivity table.
