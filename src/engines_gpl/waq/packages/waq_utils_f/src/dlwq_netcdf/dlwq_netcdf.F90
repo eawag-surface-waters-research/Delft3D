@@ -117,7 +117,7 @@ integer function dlwqnc_find_var_with_att( ncid, attribute, varid, expected_valu
     character(len=nf90_max_name)           :: varname
     character(len=:), allocatable          :: att_value
 
-    allocate(character(len=0) :: att_value)    
+    allocate(character(len=0) :: att_value)
     dlwqnc_find_var_with_att = -1
     varid                    = -1
 
@@ -159,7 +159,7 @@ integer function dlwqnc_find_var_with_att( ncid, attribute, varid, expected_valu
         dlwqnc_find_var_with_att = nf90_enotatt
     endif
     deallocate(att_value)
-    
+
 end function dlwqnc_find_var_with_att
 
 ! dlwqnc_copy_var_atts --
@@ -510,7 +510,7 @@ end function dlwqnc_copy_dims
 recursive function dlwqnc_copy_associated( ncidin, ncidout, meshidin, meshidout, attribute, &
                                                    dimsizes, use_attrib ) result(dlwqnc_result)
     use io_ugrid
-    
+
     integer, intent(in)               :: ncidin, ncidout, meshidin, meshidout
     character(len=*), intent(in)      :: attribute
     integer, intent(in), dimension(:) :: dimsizes
@@ -534,7 +534,7 @@ recursive function dlwqnc_copy_associated( ncidin, ncidout, meshidin, meshidout,
 
     logical, save                  :: suppress_message = .false. ! Because of the recursive call
 
-    allocate(character(len=0) :: att_value)    
+    allocate(character(len=0) :: att_value)
     dlwqnc_result = -1
 
     use_names_in_attrib = .true.
@@ -565,7 +565,6 @@ recursive function dlwqnc_copy_associated( ncidin, ncidout, meshidin, meshidout,
             return
         endif
     else
-        call realloc(att_value, len(attribute))
         att_value = attribute
     endif
 
