@@ -37,11 +37,14 @@ subroutine run_swan (casl)
 ! NONE
 !!--declarations----------------------------------------------------------------
     use swan_input
+    use wave_mpi
+    use system_utils, only: SCRIPT_EXTENSION
     !
     implicit none
 !
 ! Global variables
 !
+    integer                 :: ierr
     integer                 :: ind
     integer                 :: strlen
     integer                 :: ncasl 
@@ -72,39 +75,46 @@ subroutine run_swan (casl)
     copy = 'copy'
     call cp_file( swninp, wvsswn, copy, nuerr)
     if (nuerr > 0) then
-       write (*, '(a,i3)') '*** ERROR: While copying swan.inp to waves.swn, errorcode:', nuerr
-       call wavestop(1, '*** ERROR: While copying swan.inp to waves.swn')
+       write (*, '(3a,i3)') '*** ERROR: While copying swan.inp to ',trim(wvsswn),', errorcode:', nuerr
+       call wavestop(1, '*** ERROR: While copying swan.inp to <case>.swn')
     endif
     !
-    if (arch == 'linux') then
-       write(*,'(a)')'>>...Check file swan_sh.log'
-       write(swanCommand, '(3a)') 'swan.sh', ' ', trim(casl)
+    ! SWAN execution
+    !
+    if (swan_run%exemode == SWAN_MODE_LIB) then
        !
-       ! SWAN execution
+       ! As built-in function.
+       ! Copy input fiel to INPUT -- done by script when running executable.
+       !
+       call cp_file( swninp, 'INPUT', copy, nuerr)
+       !
+       if (numranks > 1) then
+          call wave_mpi_bcast(SWAN_GO, ierr)
+          if ( ierr /= MPI_SUCCESS ) then
+             write (*,'(a,i5)') 'MPI produces some internal error - return code is ',ierr
+             call wavestop(1, '*** ERROR: MPI produced an internal error')
+          endif
+       endif
+       call swan(engine_comm_world)
+    else
+       !
+       ! As executable
+       !
+       write(*,'(3a)')'>>...Check file swan_',SCRIPT_EXTENSION(2:),'.log'
+       write(swanCommand, '(4a)') 'swan',SCRIPT_EXTENSION, ' ', trim(casl)
        !
        ! In debug mode, util_system wants spaces at the end...
        !
        call util_system(swanCommand(1:len_trim(swanCommand)+5))
        inquire (file = 'norm_end', exist = ex)
-       if (.not. ex) then
+       if (.not. ex .and. SCRIPT_EXTENSION=='.sh') then
           write (*,'(a)') '*** WARNING: unable to run SWAN using "swan.sh". Trying with "swan.bat" ...'
           write(swanCommand,'(3a)') 'swan.bat', ' ', trim(casl)
-          !
-          ! SWAN execution
           !
           ! In debug mode, util_system wants spaces at the end...
           !
           call util_system(swanCommand(1:len_trim(swanCommand)+5))
        endif
-    else
-       write(*,'(a)')'>>...Check file swan_bat.log'
-       write(swanCommand,'(3a)') 'swan.bat', ' ', trim(casl)
-       !
-       ! SWAN execution
-       !
-       ! In debug mode, util_system wants spaces at the end...
-       !
-       call util_system(swanCommand(1:len_trim(swanCommand)+5))
     endif
     write(*,'(a)')'>>...End of SWAN run'
     !

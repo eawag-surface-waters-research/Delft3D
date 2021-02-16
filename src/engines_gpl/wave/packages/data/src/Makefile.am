@@ -32,6 +32,7 @@ libdata_la_SOURCES = \
          datetime_to_string.f90 \
          nc_check_err.f90 \
          nc_def_var.f90 \
+         wave_mpi.F90 \
          wave_data.f90 \
          rdsec.f90 \
          read_grids.f90 \

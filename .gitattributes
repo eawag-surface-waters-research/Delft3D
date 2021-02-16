@@ -2830,6 +2830,7 @@ src/engines_gpl/wave/packages/data/src/swan_flow_grid_maps.f90 -text
 src/engines_gpl/wave/packages/data/src/swan_input.f90 -text
 src/engines_gpl/wave/packages/data/src/timdat.f90 -text
 src/engines_gpl/wave/packages/data/src/wave_data.f90 -text
+src/engines_gpl/wave/packages/data/src/wave_mpi.F90 -text
 src/engines_gpl/wave/packages/data/src/wavestop.f90 -text
 src/engines_gpl/wave/packages/io/Makefile.am -text
 src/engines_gpl/wave/packages/io/io.vfproj -text
@@ -2882,16 +2883,15 @@ src/engines_gpl/wave/packages/kernel/src/map_swan_output.f90 -text
 src/engines_gpl/wave/packages/kernel/src/perpar.f90 -text
 src/engines_gpl/wave/packages/kernel/src/rm_del.f90 -text
 src/engines_gpl/wave/packages/kernel/src/run_swan.f90 -text
+src/engines_gpl/wave/packages/kernel/src/run_swan_slave.f90 -text
 src/engines_gpl/wave/packages/kernel/src/update_wavecond.f90 -text
 src/engines_gpl/wave/packages/kernel/src/wapar.f90 -text
 src/engines_gpl/wave/packages/kernel/src/wave2com.f90 -text
 src/engines_gpl/wave/packages/kernel/src/wave2flow.f90 -text
-src/engines_gpl/wave/packages/kernel/src/wave_init.f90 -text
 src/engines_gpl/wave/packages/manager/Makefile.am -text
 src/engines_gpl/wave/packages/manager/include/version_number.ini -text
 src/engines_gpl/wave/packages/manager/manager.vfproj -text
 src/engines_gpl/wave/packages/manager/src/Makefile.am -text
-src/engines_gpl/wave/packages/manager/src/checklicense.f90 -text
 src/engines_gpl/wave/packages/manager/src/resource.h -text
 src/engines_gpl/wave/packages/manager/src/swan_tot.f90 -text
 src/engines_gpl/wave/packages/manager/src/usage.f90 -text

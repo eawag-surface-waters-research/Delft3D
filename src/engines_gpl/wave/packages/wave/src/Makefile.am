@@ -29,6 +29,13 @@ AM_CPPFLAGS = \
     $(STANDARD_C_INCLUDES) \
     -I../include
 
+if USEMPI
+AM_FCFLAGS+=${MPI_CFLAGS}
+AM_FCFLAGS+=${MPI_FCFLAGS}
+# Manualy add the MPI (fortran dll)
+LIBS+=${MPILIBS}
+endif  
+
 #-------------------------------------------------------------------------------
 #Sources
 wave_SOURCES = \
@@ -54,6 +61,7 @@ $(top_builddir)/utils_lgpl/nefis/packages/nefis/src/libNefis.la \
 $(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src/libDeltaresCommon.la \
 $(top_builddir)/utils_lgpl/kdtree_wrapper/packages/kdtree_wrapper/src/libkdtreewrapper.la \
 $(top_builddir)/third_party_open/kdtree2/src-f90/libkdtree2f.la \
+$(top_builddir)/third_party_open/swan/src/libSwan.la \
 $(top_builddir)/third_party_open/triangle/libtriangle_c.la \
 $(FCLIBS) $(CCLIBS)
 

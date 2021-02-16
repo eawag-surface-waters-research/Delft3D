@@ -48,7 +48,7 @@ subroutine grids_and_gridmaps (n_swan_grids, n_flow_grids, sr, mode)
    integer                             :: n_swan_grids     ! number of SWAN grids
    integer                             :: n_flow_grids     ! number of FLOW grids
    integer                             :: mode
-   type(swan)                          :: sr
+   type(swan_type)                     :: sr
 !
 ! Local variables
 !

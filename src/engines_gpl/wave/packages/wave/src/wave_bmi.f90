@@ -288,6 +288,7 @@ subroutine get_var(c_var_name, x) bind(C, name="get_var")
   !DEC$ ATTRIBUTES DLLEXPORT :: get_var
   ! Return a pointer to the variable
   use iso_c_binding, only: c_double, c_char, c_loc
+  use wave_mpi, only: engine_comm_world
   !
   ! Global
   character(kind=c_char), intent(in) :: c_var_name(*)
@@ -305,6 +306,9 @@ subroutine get_var(c_var_name, x) bind(C, name="get_var")
   select case(var_name)
   case("mode")
      x = c_loc(wave_mode)
+     return
+  case("engine_comm_world")
+     x = c_loc(engine_comm_world)
      return
   end select
   !

@@ -1,4 +1,4 @@
-subroutine checklicense(success)
+subroutine run_swan_slave (command, retval)
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2021.                                
@@ -29,48 +29,35 @@ subroutine checklicense(success)
 !  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
+!     *** Run swan; produce output file swanout with values on     ***
+!     *** swan computational grid                                  ***
+!
+!
 !!--pseudo code and references--------------------------------------------------
 ! NONE
 !!--declarations----------------------------------------------------------------
-use message_module
-!
-implicit none
+   use wave_mpi
+   implicit none
 !
 ! Global variables
 !
-logical     , intent(out) :: success
+   integer, intent(out) :: command
+   integer, intent(out) :: retval
 !
 ! Local variables
 !
-    integer                :: n
-    character(message_len) :: txthlp       ! Help var.
-    character(80)          :: txtfil
-    character(256)         :: version_full  !  Version nr. of the module of the current package
+   integer :: ierr
 !
-!! executable statements -------------------------------------------------------
+!! executable statements -----------------------------------------------
 !
-    ! get source code location
-    !
-    call getsourcecodelocation_WAVE(version_full)
-    n = index(txthlp,'/src/utils_lgpl') ! regular checkout with src and examples level
-    if (n==0) then
-        n = index(txthlp,'/utils_lgpl') ! reduced checkout with src and examples level
-    endif
-    if (n==0) then
-        txthlp = 'unknown source code location'
-    else
-        txthlp = txthlp(16:n-1)
-    endif
-    !
-    txtfil        = '--------------------------------------------------------------------------------'
-    version_full  = ' '
-    call getfullversionstring_WAVE(version_full)
-    write (*, '(a)') txtfil
-    write (*, '(a)') '-  Delft3D'
-    write (*, '(2a)') '-  ', trim(version_full)
-    ! write (*, '(2a)')  '-  Built from : ', trim(txthlp)
-    write (*, '(a)') '-  Open source'
-    write (*, '(a)') '-'
-    write (*, '(a)') txtfil
-    success = .true.
-end subroutine checklicense
+   call wave_mpi_bcast(command, ierr)
+   if ( ierr /= MPI_SUCCESS ) then
+      write (*,'(a,i5)') 'MPI produces some internal error - return code is ',ierr
+      retval = -1
+   else
+      if (command == SWAN_GO) then
+         call swan(engine_comm_world)
+      endif
+      retval = 0
+   endif
+end subroutine run_swan_slave

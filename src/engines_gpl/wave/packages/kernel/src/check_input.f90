@@ -41,7 +41,7 @@ subroutine check_input(sr, wavedata)
 !
 ! Global variables
 !
-   type(swan)                  :: sr
+   type(swan_type)             :: sr
    type(wave_data_type)        :: wavedata
 !
 ! Local variables

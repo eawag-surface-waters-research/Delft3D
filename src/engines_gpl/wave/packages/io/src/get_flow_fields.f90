@@ -50,7 +50,7 @@ subroutine get_flow_fields (i_flow, i_swan, sif, fg, sg, f2s, wavedata, sr, flow
    type(grid_map)                   :: f2s              ! flow to swn grid mapper
    integer, dimension(:,:), pointer :: covered
    type(wave_data_type)             :: wavedata
-   type(swan)                       :: sr               ! swan input structure
+   type(swan_type)                  :: sr               ! swan input structure
 !
 ! Local variables
 !

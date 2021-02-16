@@ -25,7 +25,6 @@ FMODULES += \
 #-------------------------------------------------------------------------------
 #Sources
 libmanager_la_SOURCES = \
-         checklicense.f90 \
          swan_tot.f90 \
          usage.f90 \
          wave_main.f90 \

@@ -6,7 +6,7 @@ use swan_flow_grid_maps
 use swan_input
 implicit none
 type (output_fields) :: fof
-type (swan)          :: sr
+type (swan_type)     :: sr
 
    call hiscom(fof%hs             ,fof%dir           ,fof%period         ,fof%depth         , &
              & fof%fx             ,fof%fy            ,fof%mx             ,fof%my            , &

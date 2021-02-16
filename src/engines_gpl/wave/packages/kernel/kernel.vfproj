@@ -25,7 +25,7 @@
 				<Tool Name="VFPostBuildEventTool"/>
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
 		<Configuration Name="Debug|x64" OutputDirectory="bin\$(PlatformName)\$(ConfigurationName)" ConfigurationType="typeStaticLibrary">
-				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" AdditionalIncludeDirectories="..\data\bin\$(PlatformName)\$(ConfigurationName)" WarnInterfaces="true" ModulePath="$(OutDir)/" Traceback="true" NullPointerCheck="true" BoundsCheck="true" UninitializedVariablesCheck="true" StackFrameCheck="true" RuntimeLibrary="rtMultiThreadedDebugDLL"/>
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" AdditionalIncludeDirectories="..\data\bin\$(PlatformName)\$(ConfigurationName);..\..\..\..\third_party_open\mpich2\x64\include" WarnInterfaces="true" ModulePath="$(OutDir)/" Traceback="true" NullPointerCheck="true" BoundsCheck="true" UninitializedVariablesCheck="true" StackFrameCheck="true" RuntimeLibrary="rtMultiThreadedDebugDLL"/>
 				<Tool Name="VFLibrarianTool"/>
 				<Tool Name="VFResourceCompilerTool"/>
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true" TargetEnvironment="midlTargetAMD64"/>
@@ -35,7 +35,7 @@
 				<Tool Name="VFPostBuildEventTool"/>
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
 		<Configuration Name="Release|x64" OutputDirectory="lib/$(PlatformName)/$(ConfigurationName)" ConfigurationType="typeStaticLibrary">
-				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" AdditionalIncludeDirectories="..\data\lib\$(PlatformName)\$(ConfigurationName)" LocalVariableStorage="localStorageAutomatic" ModulePath="$(OutDir)/" RuntimeLibrary="rtMultiThreadedDLL"/>
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" AdditionalIncludeDirectories="..\data\lib\$(PlatformName)\$(ConfigurationName);..\..\..\..\third_party_open\mpich2\x64\include" LocalVariableStorage="localStorageAutomatic" ModulePath="$(OutDir)/" RuntimeLibrary="rtMultiThreadedDLL"/>
 				<Tool Name="VFLibrarianTool" AdditionalOptions="/LTCG"/>
 				<Tool Name="VFResourceCompilerTool"/>
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true" TargetEnvironment="midlTargetAMD64"/>
@@ -57,9 +57,9 @@
 		<File RelativePath=".\src\perpar.f90"/>
 		<File RelativePath=".\src\rm_del.f90"/>
 		<File RelativePath=".\src\run_swan.f90"/>
+		<File RelativePath=".\src\run_swan_slave.f90"/>
 		<File RelativePath=".\src\update_wavecond.f90"/>
 		<File RelativePath=".\src\wapar.f90"/>
 		<File RelativePath=".\src\wave2com.f90"/>
-		<File RelativePath=".\src\wave2flow.f90"/>
-		<File RelativePath=".\src\wave_init.f90"/></Filter></Files>
+		<File RelativePath=".\src\wave2flow.f90"/></Filter></Files>
 	<Globals/></VisualStudioProject>

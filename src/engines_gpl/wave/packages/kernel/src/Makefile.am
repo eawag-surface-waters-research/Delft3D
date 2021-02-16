@@ -32,11 +32,11 @@ libkernel_la_SOURCES = \
          perpar.f90 \
          rm_del.f90 \
          run_swan.f90 \
+         run_swan_slave.f90 \
          update_wavecond.f90 \
          wapar.f90 \
          wave2com.f90 \
-         wave2flow.f90 \
-         wave_init.f90
+         wave2flow.f90
 
 #-------------------------------------------------------------------------------
 #Libraries

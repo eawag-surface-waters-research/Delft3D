@@ -99,6 +99,9 @@ module swan_input
     use table_handles
     use rdsec_module
     !
+    integer, parameter :: SWAN_MODE_EXE = 0
+    integer, parameter :: SWAN_MODE_LIB = 1
+    !
     type swan_dom
        real                                    :: freqmax          ! maximum frequency
        real                                    :: freqmin          ! minimum frequency
@@ -164,7 +167,7 @@ module swan_input
        character(37) , dimension(:), pointer   :: spectrum
     end type swan_bnd
     !
-    type swan
+    type swan_type
        integer                                 :: maxbound
        integer                                 :: maxcurv
        integer                                 :: maxnest
@@ -177,6 +180,7 @@ module swan_input
        integer                                 :: diffr_smsteps
        integer                                 :: diffr_adapt_propag
        integer                                 :: error
+       integer                                 :: exemode
        integer                                 :: frictype
        integer                                 :: genmode
        integer                                 :: inrhog
@@ -341,9 +345,9 @@ module swan_input
        !
        type(swan_bnd), dimension(:), pointer    :: bnd
        type(swan_dom), dimension(:), pointer    :: dom
-    end type swan
+    end type swan_type
     !
-    type (swan),save :: swan_run
+    type (swan_type),save :: swan_run
     !
     integer, parameter :: q_bath = 1 ! used as index in array qextnd
     integer, parameter :: q_wl   = 2 ! used as index in array qextnd
@@ -356,7 +360,7 @@ contains
 subroutine alloc_swan(sr)
    implicit none
    !
-   type (swan) :: sr
+   type (swan_type) :: sr
    integer     :: i
    !
    allocate (sr%timwav  (sr%maxsteps ))
@@ -404,7 +408,7 @@ end subroutine alloc_swan
 subroutine dealloc_swan(sr)
    implicit none
    !
-   type (swan) :: sr
+   type (swan_type) :: sr
    integer     :: i
    integer     :: istat
    !
@@ -459,7 +463,7 @@ subroutine read_swan (filnam, sr, wavedata)
    implicit none
    !
    character(*)                :: filnam
-   type(swan)                  :: sr
+   type(swan_type)             :: sr
    type(wave_data_type)        :: wavedata
    !
    integer            :: indend
@@ -481,6 +485,7 @@ subroutine read_swan (filnam, sr, wavedata)
    sr%comfile       = ''
    sr%flowgridfile  = ' '
    sr%useflowdata   = .false.
+   sr%exemode       = SWAN_MODE_EXE
    sr%swmor         = .false.
    sr%swwlt         = .false.
    sr%swuvt         = .false.
@@ -580,7 +585,7 @@ subroutine scan_mdw(sr)
     !
     ! Global variables
     !
-    type(swan)                  :: sr
+    type(swan_type)             :: sr
     !
     ! Local variables
     !
@@ -1129,7 +1134,7 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
     use netcdf_utils, only: ncu_format_to_cmode
     implicit none
     !
-    type(swan)                  :: sr
+    type(swan_type)             :: sr
     type(wave_data_type)        :: wavedata
     logical                     :: keywbased
     !
@@ -1183,6 +1188,7 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
     real                        :: def_freqmax
     real                        :: tscale
     real, dimension(2)          :: xy
+    character(10)               :: exemode
     character(10)               :: versionstring
     character(37)               :: obstfil
     character(37)               :: tseriesfilename
@@ -1233,6 +1239,19 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
     call prop_get_string (mdw_ptr, 'General', 'Description3'   , sr%title3)
     call prop_get_logical(mdw_ptr, 'General', 'OnlyInputVerify', flag)
     sr%compmode = .not. flag
+    !
+    exemode = 'exe'
+    call prop_get_string (mdw_ptr, 'General', 'SwanMode'       , exemode)
+    call str_lower(exemode)
+    select case (exemode)
+    case ('exe')
+        sr%exemode = SWAN_MODE_EXE
+    case ('lib')
+        sr%exemode = SWAN_MODE_LIB
+    case default
+       write(*,*) 'SWAN_INPUT: invalid SWAN execution mode. Expected SwanMode = "exe" or "lib"'
+       goto 999
+    end select
     !
     sr%deltc            = -999.0
     sr%nonstat_interval = -999.0
@@ -2895,7 +2914,7 @@ subroutine read_swan_mdw(casl      ,wavedata  , &
     character(72)                   ,intent(out) :: title2
     character(72)                   ,intent(out) :: title3
     character(*)                    ,intent(in)  :: filnam
-    type(swan)                                   :: sr
+    type(swan_type)                              :: sr
     type(wave_data_type)                         :: wavedata
 !
 ! Local variables
@@ -3795,7 +3814,7 @@ subroutine write_swan_input (sr, itide, calccount, inest, xymiss, wavedata)
     real                              :: wvel
     real(hp)                          :: xymiss
     character(37)                     :: curlif
-    type(swan)                        :: sr
+    type(swan_type)                   :: sr
     type(wave_data_type)              :: wavedata
     !
     curlif = sr%dom(inest)%curlif(1:37)
@@ -3892,7 +3911,7 @@ subroutine write_swan_inp (wavedata, calccount, &
     character(72)                  , intent(in)  :: title1
     character(72)                  , intent(in)  :: title2
     character(72)                  , intent(in)  :: title3
-    type(swan)                                   :: sr
+    type(swan_type)                              :: sr
     type(wave_data_type)                         :: wavedata
 !
 ! Local variables
@@ -5490,7 +5509,7 @@ subroutine adjustinput(sr)
     use properties
     implicit none
     !
-    type(swan)                  :: sr
+    type(swan_type)             :: sr
     !
     character(256)              :: filnam
     character(256)              :: parname

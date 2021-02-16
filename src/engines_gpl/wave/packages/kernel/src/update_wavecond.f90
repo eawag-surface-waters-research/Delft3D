@@ -48,7 +48,7 @@ subroutine update_wavecond(sr,wavetime)
    !
    implicit none
    !
-   type(swan)              :: sr
+   type(swan_type)         :: sr
    type(wave_time_type)    :: wavetime
    !
    integer                    :: i
@@ -198,7 +198,7 @@ subroutine update_wavecond_mdw(sr,wavetime)
    !
    implicit none
    !
-   type(swan)              :: sr
+   type(swan_type)         :: sr
    type(wave_time_type)    :: wavetime
    !
    integer                    :: i
@@ -277,7 +277,7 @@ subroutine iniswn(nnest     , sr)
 !
 ! Global variables
 !
-    type(swan)                         :: sr
+    type(swan_type)                    :: sr
     integer              , intent(in)  :: nnest
 !
 ! Local variables
@@ -316,7 +316,7 @@ subroutine setswn(nnest     ,hs        ,per       ,dir       ,dd        , &
 !
 ! Global variables
 !
-    type(swan)                         :: sr
+    type(swan_type)                    :: sr
     integer              , intent(in)  :: nnest
     real                 , intent(in)  :: dd
     real                 , intent(in)  :: dir

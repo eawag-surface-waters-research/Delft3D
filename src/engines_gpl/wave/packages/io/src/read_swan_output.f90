@@ -8,7 +8,7 @@ implicit none
 !
 ! parameters
 type (output_fields)           :: sof
-type (swan)                    :: sr
+type (swan_type)               :: sr
 integer                        :: offset
 logical                        :: deletefile
 !

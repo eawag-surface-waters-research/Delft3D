@@ -613,7 +613,7 @@ subroutine init_input_fields (inpfld,sr,itide)
    implicit none
    !
    type(input_fields)      :: inpfld
-   type(swan)              :: sr
+   type(swan_type)         :: sr
    integer                 :: itide
    !
    ! locals
