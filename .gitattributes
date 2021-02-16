@@ -449,6 +449,7 @@ src/buildvs15_test.cmd -text
 src/buildvs15fm.cmd -text
 src/buildvs15fm_coverage.cmd -text
 src/buildvs17.cmd -text
+src/buildvs17_dimr.cmd -text
 src/buildvs17_test.cmd -text
 src/buildvs17fm.cmd -text
 src/clean.cmd -text
