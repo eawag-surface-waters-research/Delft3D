@@ -85,6 +85,16 @@ EXTRALIBS=\
         $(CCLIBS)
 #        $(top_builddir)/third_party_open/FLAP/src/libFLAP.la
 
+if USEFORTRANGIS
+FMODULES += \
+    -I$(top_builddir)/third_party_open/fortrangis/libfortranc \
+    -I$(top_builddir)/third_party_open/fortrangis/libfortrangis
+EXTRALIBS += \
+    $(top_builddir)/third_party_open/fortrangis/libfortranc/libfortranc.la \
+    $(top_builddir)/third_party_open/fortrangis/libfortrangis/libfortrangis.la
+endif 
+
+
 dfmoutput_LDFLAGS=-static
 
 dfmoutput_LDADD=\
