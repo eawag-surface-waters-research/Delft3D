@@ -262,6 +262,27 @@
       if ( .not. allocated(flxdmp) ) then
           allocate( flxdmp(0,0,0) )
       endif
+      if ( .not. allocated(idpnew) ) then
+          allocate( idpnew(0) )
+      endif
+      if ( .not. allocated(dispnw) ) then
+          allocate( dispnw(0,0) )
+      endif
+      if ( .not. allocated(dspx) ) then
+          allocate( dspx(0) )
+      endif
+      if ( .not. allocated(dsto) ) then
+          allocate( dsto(0) )
+      endif
+      if ( .not. allocated(velonw) ) then
+          allocate( velonw(0,0) )
+      endif
+      if ( .not. allocated(velx) ) then
+          allocate( velx(0,0) )
+      endif
+      if ( .not. allocated(vsto) ) then
+          allocate( vsto(0) )
+      endif
 
       call rd_sub(Lallocated,substance_file,nosys,notot,nocons,noout_sub,syname_sub,syunit_sub,coname_sub, &
                   covalue_sub,ouname_sub,oudesc_sub,ierr_sub,cerr)
