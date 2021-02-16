@@ -13213,8 +13213,9 @@ function unc_read_merged_map(um, imapfile, filename, ierr) result (success)
           call check_error(ierr, 'velocity point x-coordinate')
           ierr = nf90_inq_varid(imapfile, 'FlowLink_yu', id_yu)
           call check_error(ierr, 'velocity point y-coordinate')
-          ierr = nf90_get_var(imapfile, id_xu, xuu)
-          ierr = nf90_get_var(imapfile, id_yu, yuu)
+
+          if (ierr == nf90_noerr) ierr = nf90_get_var(imapfile, id_xu, xuu)
+          if (ierr == nf90_noerr) ierr = nf90_get_var(imapfile, id_yu, yuu)
 
           if (ierr == nf90_noerr) then
              ! Check flowlinks numbering with rst file
@@ -13223,6 +13224,7 @@ function unc_read_merged_map(um, imapfile, filename, ierr) result (success)
                 return
              end if
           else
+             ierr = 0 ! as it a warning
              call mess(LEVEL_WARN, 'Skip checking flowlinks numbering when restart, '&
                         //'because flowlinks coordinates are missing in rst file.')
           end if
