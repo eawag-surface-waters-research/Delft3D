@@ -398,7 +398,7 @@
 
       include "omp_lib.h"
 
-      integer(ip)         :: itime   , lunpr, lunfil
+      integer(ip)         :: itime   , lunpr, lunfil, lunini
       integer(ip)         :: nosubud , noth
       integer(ip)         :: ilp, isp, iext, nores, noras
       real(sp)            :: dtstep
@@ -612,18 +612,18 @@
       if ( idp_file .ne. ' ' ) then
          if (modtyp .ne. 6) then
             write ( lunpr, * ) ' Opening initial particles file:', idp_file(1:len_trim(idp_file))
-            call openfl ( 50, idp_file, ftype(2), 0 )
-            read ( 50 ) ilp, nopart, nosubs
+            call openfl ( lunini, idp_file, ftype(2), 0 )
+            read ( lunini ) ilp, nopart, nosubs
             do ilp = 1, nopart
-               read( 50 ) npart(ilp), mpart(ilp), kpart(ilp), xpart(ilp), ypart(ilp), zpart(ilp), wpart(1:nosubs,ilp), iptime(ilp)
+               read( lunini ) npart(ilp), mpart(ilp), kpart(ilp), xpart(ilp), ypart(ilp), zpart(ilp), wpart(1:nosubs,ilp), iptime(ilp)
             enddo
-            close ( 50 )
+            close ( lunini )
          else
             write ( lunpr, * ) ' Opening initial particles file:', idp_file(1:len_trim(idp_file))
-            call openfl ( 50, idp_file, ftype(2), 0 )
-            read ( 50 ) ilp, nopart, nosubs
+            call openfl ( lunini, idp_file, ftype(2), 0 )
+            read ( lunini ) ilp, nopart, nosubs
             do ilp = 1, nopart
-               read( 50 ) npart(ilp), mpart(ilp), kpart(ilp), xpart(ilp), ypart(ilp), zpart(ilp), wpart(1:nosubs,ilp), &
+               read( lunini ) npart(ilp), mpart(ilp), kpart(ilp), xpart(ilp), ypart(ilp), zpart(ilp), wpart(1:nosubs,ilp), &
                           spart(1:nosubs,ilp), iptime(ilp)
             enddo
             do ilp = 1, nopart
@@ -633,7 +633,7 @@
                   endif                 
                enddo
             enddo
-            close ( 50 )
+            close ( lunini )
          end if
       endif
 
