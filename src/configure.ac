@@ -158,6 +158,17 @@ AX_CHECK_COMPILE_FLAG([-r8],
         ])
 AC_SUBST(POLYPACK_FFLAGS)
 
+SWAN_FFLAGS=
+AX_CHECK_COMPILE_FLAG([-r8],
+        [
+        # Intel ifort
+        SWAN_FFLAGS=-72
+        ],[
+        # GNU gfortran
+        SWAN_FFLAGS=-ffixed-line-length-72
+        ])
+AC_SUBST(POLYPACK_FFLAGS)
+
 AC_LANG_POP
 
 # NetCDF, for fortran 90...
