@@ -1833,7 +1833,7 @@ subroutine addlink1D(L,japerim)                        ! and add area's and volu
  integer           :: k1, k2, K, LL
  double precision  :: ar1, wid1, cf1, ar2, wid2, cf2, dx1, dx2, widu, diam, perim
  double precision  :: hpr
- 
+
  if (japerim == 0) then
 
     calcConv = 0
@@ -1939,7 +1939,7 @@ subroutine addlink1D(L,japerim)                        ! and add area's and volu
 
     calcConv = 1
     call getprof_1D(L, hu(L), au(L), widu, japerim, calcConv, perim)  ! memory closeness of profiles causes this statement here instead of in setau
-    ! getprof1D sets cfu    
+    ! getprof1D sets cfu
  endif
 
  end subroutine addlink1D
@@ -44468,11 +44468,9 @@ end function is_1d_boundary_candidate
 
  call setzminmax(); call setsigmabnds() ! our side of preparation for 3D ec module
 
-! initialise mass balance areas
- if (ti_mba > 0) then
-   call realloc(mbadef, Ndkx, keepExisting=.false., fill =-999)
-   call realloc(mbadefdomain, Ndkx, keepExisting=.false., fill =-999)
- endif
+! initialise mass balance areas - always allocate these arrays
+ call realloc(mbadef, Ndkx, keepExisting=.false., fill =-999)
+ call realloc(mbadefdomain, Ndkx, keepExisting=.false., fill =-999)
 
  ! Start processing ext files, start with success.
  success = .true.
