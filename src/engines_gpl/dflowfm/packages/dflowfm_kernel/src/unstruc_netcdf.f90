@@ -12754,7 +12754,7 @@ end subroutine unc_read_map
 !> helper routine for unc_read_map
 function unc_read_merged_map(um, imapfile, filename, ierr) result (success)
    use m_alloc               , only : realloc
-   use m_samples             , only : ns
+   use m_samples             , only : Ns
    use dfm_error             , only : DFM_GENERICERROR
    use m_partitioninfo       , only : jampi, my_rank, idomain, ighostlev, sdmn, link_ghostdata, reduce_key, reduce_int_sum
    use m_flowgeom            , only : ndxi, lnx, ln, ndx
@@ -12800,7 +12800,7 @@ function unc_read_merged_map(um, imapfile, filename, ierr) result (success)
             end do
 
             do LL=1,lnx
-               call link_ghostdata(my_rank,idomain(ln(1,LL)), idomain(ln(2,LL)), jaghost, um%idmn_ghost, &
+               call link_ghostdata(my_rank, idomain(ln(1,LL)), idomain(ln(2,LL)), jaghost, um%idmn_ghost, &
                                    ighostlev(ln(1,LL)), ighostlev(ln(2,LL)))
                if ( jaghost /= 1 ) then
                   um%lnx_own = um%lnx_own + 1
@@ -12826,7 +12826,7 @@ function unc_read_merged_map(um, imapfile, filename, ierr) result (success)
             enddo
 
             do LL=1,lnx
-               call link_ghostdata(my_rank,idomain(ln(1,LL)), idomain(ln(2,LL)), jaghost, um%idmn_ghost, &
+               call link_ghostdata(my_rank, idomain(ln(1,LL)), idomain(ln(2,LL)), jaghost, um%idmn_ghost, &
                                    ighostlev(ln(1,LL)), ighostlev(ln(2,LL)))
                if ( jaghost /= 1 ) then
                   um%lnx_own = um%lnx_own + 1
@@ -12848,8 +12848,8 @@ function unc_read_merged_map(um, imapfile, filename, ierr) result (success)
             ierr = nf90_inq_varid(imapfile, 'FlowElem_yzw', id_yzw)
             call check_error(ierr, 'center of mass y-coordinate')
 
-            allocate(xmc(ndxi_merge))
-            allocate(ymc(ndxi_merge))
+            call realloc(xmc, ndxi_merge, keepExisting=.false.)
+            call realloc(ymc, ndxi_merge, keepExisting=.false.)
             ierr = nf90_get_var(imapfile, id_xzw, xmc)
             ierr = nf90_get_var(imapfile, id_yzw, ymc)
 
@@ -12865,12 +12865,11 @@ function unc_read_merged_map(um, imapfile, filename, ierr) result (success)
             ierr = nf90_inq_varid(imapfile, 'FlowLink_yu', id_yu)
             if (nerr_ > 0) return
 
-            allocate(xuu(lnx_merge))
-            allocate(yuu(lnx_merge))
+            call realloc(xuu, lnx_merge, keepExisting=.false.)
+            call realloc(yuu, lnx_merge, keepExisting=.false.)
             ierr = nf90_get_var(imapfile, id_xu, xuu)
             ierr = nf90_get_var(imapfile, id_yu, yuu)
 
-            !call find_flownodesorlinks_merge(lnx_merge, xuu, yuu, lnx, lnx_own, ilink_own, ilink_merge, 0)
             call find_flownodesorlinks_merge(lnx_merge, xuu, yuu, lnx, um%lnx_ghost, um%ilink_ghost, um%ilinkghost_merge, 0, 1)
          endif
       else     ! If the partitions in the model are different comparing with the rst file
@@ -12884,7 +12883,7 @@ function unc_read_merged_map(um, imapfile, filename, ierr) result (success)
 
          if (jampi == 0) then ! Restart a sequential run with a merged rst file
             ndxbnd_own = ndx - ndxi
-            if (ndxbnd_own>0 .and. jaoldrstfile == 0) then
+            if (ndxbnd_own > 0 .and. jaoldrstfile == 0) then
                call realloc(ibnd_own, ndxbnd_own, keepExisting=.false.)
             endif
          endif
@@ -12892,7 +12891,7 @@ function unc_read_merged_map(um, imapfile, filename, ierr) result (success)
             call realloc(um%ibnd_merge, ndxbnd_own, keepExisting=.false.)
          endif
 
-        !!! Set inode_own, ilink_own, ect
+        !!! Set inode_own, ilink_own, etc
         ! when sequential run
         if (jampi==0) then
            ! node
@@ -12927,7 +12926,7 @@ function unc_read_merged_map(um, imapfile, filename, ierr) result (success)
             end do
             ! link
             do LL=1,lnx
-               call link_ghostdata(my_rank,idomain(ln(1,LL)), idomain(ln(2,LL)), jaghost, um%idmn_ghost, &
+               call link_ghostdata(my_rank, idomain(ln(1,LL)), idomain(ln(2,LL)), jaghost, um%idmn_ghost, &
                                    ighostlev(ln(1,LL)), ighostlev(ln(2,LL)))
                if ( jaghost /= 1 ) then
                   um%lnx_own = um%lnx_own + 1
@@ -12954,7 +12953,7 @@ function unc_read_merged_map(um, imapfile, filename, ierr) result (success)
              enddo
 
              do LL=1,lnx
-                call link_ghostdata(my_rank,idomain(ln(1,LL)), idomain(ln(2,LL)), jaghost, um%idmn_ghost, &
+                call link_ghostdata(my_rank, idomain(ln(1,LL)), idomain(ln(2,LL)), jaghost, um%idmn_ghost, &
                                     ighostlev(ln(1,LL)), ighostlev(ln(2,LL)))
                 if ( jaghost /= 1 ) then
                    um%lnx_own = um%lnx_own + 1
@@ -12970,8 +12969,7 @@ function unc_read_merged_map(um, imapfile, filename, ierr) result (success)
           call reduce_int_sum(um%lnx_own,  lnx_all )
        endif
 
-
-       !! read and prepare for inode_merge and ilink_merge,etc
+       !! read and prepare for inode_merge and ilink_merge, etc
        ! Read coordinates of flow elem circumcenters from merged map file
        ierr = nf90_inq_dimid(imapfile, 'nFlowElem', id_flowelemdim)
        call check_error(ierr, 'nFlowElem')
@@ -12979,7 +12977,7 @@ function unc_read_merged_map(um, imapfile, filename, ierr) result (success)
        call check_error(ierr, 'Flow Elem count')
 
        ! Check if global number of nodes in the merged rst file is equal to that in the model
-       if (ndxi_all .ne. ndxi_merge) then
+       if (ndxi_all /= ndxi_merge) then
           write (msgbuf, '(a,i0,a,i0,a)') 'Global number of nodes among all partitions: in the merged restart file ', ndxi_merge, ',  in model: ', ndxi_all, '.'
           call warn_flush()
           call qnerror('Global number of nodes read from the merged restart file unequal to global number of nodes in model,' &
@@ -13009,15 +13007,15 @@ function unc_read_merged_map(um, imapfile, filename, ierr) result (success)
 
        if (ierr == nf90_noerr) then
           ! centers of mass were stored in rst/map file, so directly read them
-          allocate(xmc(ndxi_merge))
-          allocate(ymc(ndxi_merge))
+          call realloc(xmc, ndxi_merge, keepExisting=.false.)
+          call realloc(ymc, ndxi_merge, keepExisting=.false.)
           ierr = nf90_get_var(imapfile, id_xzw, xmc)
           call check_error(ierr, 'xmc')
           ierr = nf90_get_var(imapfile, id_yzw, ymc)
           call check_error(ierr, 'ymc')
-          if (ndxbnd_own >0 .and. jaoldrstfile == 0) then
-             allocate(xbnd_read(ndxbnd_merge))
-             allocate(ybnd_read(ndxbnd_merge))
+          if (ndxbnd_own > 0 .and. jaoldrstfile == 0) then
+             call realloc(xbnd_read, ndxbnd_merge, keepExisting=.false.)
+             call realloc(ybnd_read, ndxbnd_merge, keepExisting=.false.)
              ierr = nf90_get_var(imapfile, id_xbnd, xbnd_read)
              call check_error(ierr, 'xbnd_read')
              ierr = nf90_get_var(imapfile, id_ybnd, ybnd_read)
@@ -13040,7 +13038,7 @@ function unc_read_merged_map(um, imapfile, filename, ierr) result (success)
        ierr = nf90_inquire_dimension(imapfile, id_flowlinkdim, len=lnx_merge )
        call check_error(ierr, 'link count')
        ! ! Check if global number of links in the merged rst file is equal to that in the model
-       if (lnx_all .ne. lnx_merge) then
+       if (lnx_all /= lnx_merge) then
           write (msgbuf, '(a,i0,a,i0,a)') 'Global number of links among all partitions: in the merged restart file ', lnx_merge, ',  in model: ', lnx_all, '.'
           call warn_flush()
           call qnerror('Global number of links read from the merged restart file unequal to global number of links in model, '&
@@ -13051,8 +13049,8 @@ function unc_read_merged_map(um, imapfile, filename, ierr) result (success)
        ierr = nf90_inq_varid(imapfile, 'FlowLink_yu', id_yu)
        call check_error(ierr, 'FlowLink_yu')
 
-       allocate(xuu(lnx_merge))
-       allocate(yuu(lnx_merge))
+       call realloc(xuu, lnx_merge, keepExisting=.false.)
+       call realloc(yuu, lnx_merge, keepExisting=.false.)
        ierr = nf90_get_var(imapfile, id_xu, xuu)
        call check_error(ierr, 'xuu')
        ierr = nf90_get_var(imapfile, id_yu, yuu)
@@ -13067,16 +13065,16 @@ function unc_read_merged_map(um, imapfile, filename, ierr) result (success)
           call find_flownodesorlinks_merge(lnx_merge, xuu, yuu, lnx, um%lnx_ghost, um%ilink_ghost, um%ilinkghost_merge, 0, 1)
        endif
 
-       if ( jampi.eq.0 ) then
-          if ( NS.gt.0 ) then
+       if ( jampi == 0 ) then
+          if ( Ns > 0 ) then
              call newfil(MSAM, 'rst_error.xyz')
              call wrisam(MSAM)
    !         delete samples
-             NS = 0
+             Ns = 0
              call mess(LEVEL_ERROR, 'restart error, unfound nodes/links are written to sample files rst_error.xyz')
           end if
        else
-          if ( NS.gt.0 ) then
+          if ( Ns > 0 ) then
              call newfil(MSAM, 'rst_error_'// sdmn // '.xyz')
              call wrisam(MSAM)
              call mess(LEVEL_WARN, 'restart error, unfound nodes/links are written to sample files rst_error_'// sdmn // '.xyz')
@@ -13085,16 +13083,16 @@ function unc_read_merged_map(um, imapfile, filename, ierr) result (success)
 !         get maximum number of flownodes with error over all subdomains
           call reduce_key(Ns)
 
-          if ( Ns.gt.0 ) then
+          if ( Ns > 0 ) then
              call mess(LEVEL_ERROR, 'restart error, please check sample files rst_error_NNNN.xyz')
           end if
 
    !      delete samples
-          NS = 0
+          Ns = 0
        end if
 
        deallocate(xmc, ymc, xuu, yuu)
-       if(ndxbnd_own>0 .and. jaoldrstfile == 0)  deallocate(xbnd_read, ybnd_read)
+       if(ndxbnd_own > 0 .and. jaoldrstfile == 0)  deallocate(xbnd_read, ybnd_read)
     endif
  else ! If rst file is a non-merged rst file
     ! NOTE: intentional: if jampi==1, but rst file is a normal separate rst file
@@ -13135,7 +13133,7 @@ function unc_read_merged_map(um, imapfile, filename, ierr) result (success)
 
  ! check if restarting a model with Riemann boundary conditions
  if (allocated(kbndz)) then
-    if( any(kbndz(4,:) .eq. 5) .and. jaoldrstfile == 1) then
+    if( any(kbndz(4,:) == 5) .and. jaoldrstfile == 1) then
        call mess(LEVEL_WARN, 'When restarting a model with Riemann boundary conditions, the restart file should be '&
                  //'a *_rst file which contains waterlevel info. on boundaries. Otherwise FM still runs but the results are '&
                  //'not accurate.')
@@ -13159,23 +13157,21 @@ function unc_read_merged_map(um, imapfile, filename, ierr) result (success)
        call warn_flush()
        call qnerror('Error reading '''//trim(filename)//''': Number of nodes/links read unequal to nodes/links in model',' ',' ')
        ierr = DFM_GENERICERROR
-       call readyy('Reading map data',-1d0)
+       call readyy('Reading map data', -1d0)
        return
     end if
     if (um%nbnd_read > 0 .and. jaoldrstfile == 0) then
-       if ((jampi==0 .and. um%nbnd_read .ne. ndx-ndxi) .or. (jampi>0 .and. um%nbnd_read .ne. ndxbnd_own)) then
+       if ((jampi==0 .and. um%nbnd_read /= ndx-ndxi) .or. (jampi>0 .and. um%nbnd_read /= ndxbnd_own)) then
           if (jampi > 0 .and. um%jamergedmap == 1) then
              success = .true.
              um%jamergedmap_same = 0
              return
           end if
-          tmpstr = ''
-          write (msgbuf, '(a,i0,a,i0,a)') trim(tmpstr)//'#boundary points in file: ', um%nbnd_read, ', #boundary points in model: ', &
-                 ndx-ndxi, '.'
+          write (msgbuf, '(a,i0,a,i0,a)') '#boundary points in file: ', um%nbnd_read, ', #boundary points in model: ', ndx-ndxi, '.'
           call warn_flush()
           call qnerror('Number of boundary points unequal to those in model',' ',' ')
           ierr = DFM_GENERICERROR
-          call readyy('Reading map data',-1d0)
+          call readyy('Reading map data', -1d0)
           return
           endif
        endif
@@ -13198,7 +13194,7 @@ function unc_read_merged_map(um, imapfile, filename, ierr) result (success)
           if (ierr == nf90_noerr) then
              ! check flownodes numbering with rst file
              call check_flownodesorlinks_numbering_rst(ndxi, 1, xmc, ymc, ierr)
-             if (ierr .ne. nf90_noerr) then
+             if (ierr /= nf90_noerr) then
                 return
              end if
           else
@@ -13220,7 +13216,7 @@ function unc_read_merged_map(um, imapfile, filename, ierr) result (success)
           if (ierr == nf90_noerr) then
              ! Check flowlinks numbering with rst file
              call check_flownodesorlinks_numbering_rst(lnx, 0, xuu, yuu, ierr)
-             if (ierr .ne. nf90_noerr) then
+             if (ierr /= nf90_noerr) then
                 return
              end if
           else
