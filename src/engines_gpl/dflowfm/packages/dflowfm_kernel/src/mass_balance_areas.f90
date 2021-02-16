@@ -28,9 +28,9 @@
 
 ! $Id$
 ! $HeadURL$
-   
+
    subroutine mba_init()
-   
+
    use m_alloc
    use m_mass_balance_areas
    use m_fm_wq_processes
@@ -44,7 +44,7 @@
    use unstruc_files
 
    implicit none
-   
+
    integer :: iconst, imbs, isys, iwqbot, imba, i, j, istart, ibnd, isrc, L, LL, Lf, kk1, kk2, ba1, ba2, to, from, ierr
    logical :: writebalance
    character(len=64)  :: ident !< Identifier of the model, used as suggested basename for some files. (runid)
@@ -54,7 +54,7 @@
 
    timembastart = tstart_user ! when DFM doesn't start at t=0.0??
    timembastarttot = timembastart
-   
+
    flxdmp = 0.0
    flxdmptot = 0.0
 
@@ -72,7 +72,7 @@
       mbsname(numconst + iwqbot) = wqbotnames(iwqbot)
       imbs2sys(numconst + iwqbot) = nosys + iwqbot
    enddo
-  
+
    nombabnd = nomba + nopenbndsect
 
    call realloc(mbaarea, nomba, keepExisting=.false., fill=0d0)
@@ -80,7 +80,7 @@
    call realloc(mbavolumebegin   , nomba, keepExisting=.false., fill=0d0)
    call realloc(mbavolumebegintot, nomba, keepExisting=.false., fill=0d0)
    call realloc(mbavolumeend     , nomba, keepExisting=.false., fill=0d0)
-      
+
    call realloc(mbaflowhor, [2, nombabnd, nombabnd], keepExisting=.false., fill=0d0)
    call realloc(mbaflowhortot, [2, nombabnd, nombabnd], keepExisting=.false., fill=0d0)
    call realloc(mbaflowsorsin, [2, numsrc], keepExisting=.false., fill=0d0)
@@ -93,13 +93,17 @@
    call realloc(mbamassbegin   , [nombs, nomba], keepExisting=.false., fill=0d0)
    call realloc(mbamassbegintot, [nombs, nomba], keepExisting=.false., fill=0d0)
    call realloc(mbamassend     , [nombs, nomba], keepExisting=.false., fill=0d0)
-      
+
    call realloc(mbafluxhor, [2, numconst, nombabnd, nombabnd], keepExisting=.false., fill=0d0)
    call realloc(mbafluxhortot, [2, numconst, nombabnd, nombabnd], keepExisting=.false., fill=0d0)
    call realloc(mbafluxsorsin, [2, 2, numconst, numsrc], keepExisting=.false., fill=0d0)
    call realloc(mbafluxsorsintot, [2, 2, numconst, numsrc], keepExisting=.false., fill=0d0)
    call realloc(mbafluxheat, [2, nomba], keepExisting=.false., fill=0d0)
    call realloc(mbafluxheattot, [2, nomba], keepExisting=.false., fill=0d0)
+
+   if ( .not. allocated(srcname) ) then
+      allocate( srcname(0) )
+   endif
 
    if ( jampi.eq.1 ) then
       call realloc(mbavolumereduce  , nomba, keepExisting=.false., fill=0d0)
@@ -114,7 +118,7 @@
    end if
 
 !  Determine 2D pointers fo links (from balance area to balance area)
-   nombaln = 0 
+   nombaln = 0
    do LL=1,Lnxi
       kk1=ln(1,LL)
       kk2=ln(2,LL)
@@ -134,7 +138,7 @@
          mbalnfromto(2, nombaln) = ba2
       endif
    enddo
-      
+
    call realloc(mbabndname, nombabnd, keepExisting=.true., fill=' ')
    do imba = 1, nomba
       mbabndname(imba) = 'From/to area '//mbaname(imba)
@@ -159,7 +163,7 @@
          istart = nopenbndlin(ibnd) + 1
       enddo
    endif
-      
+
    call realloc(mbalnused, [nomba, nombabnd], keepExisting=.true., fill=0)
    do imba = 1, nombaln
       to = mbalnfromto(1, imba)
@@ -175,7 +179,7 @@
    if (jampi.eq.1) then
       call reduce_int_array_sum(nomba * nombabnd, mbalnused)
    endif
-      
+
    call realloc(mbasorsin, [2, numsrc], keepExisting=.true., fill=0)
    call realloc(mbasorsinout, [2, numsrc], keepExisting=.true., fill=0)
    do isrc = 1, numsrc
@@ -223,7 +227,7 @@
          enddo
       enddo
    endif
-   
+
    do imba = 1, nomba
       mbavolumebegintot(imba) = mbavolumebegin(imba)
    end do
@@ -237,7 +241,7 @@
 !  write mbahis to a his files (for now) and ascii bal-files
    writebalance = .true.
    if ( jampi.eq.1 ) then
-!     in MPI mode      
+!     in MPI mode
       if (my_rank.ne.0) then
 !        this is not the main node that writes the full balance over all domains, switch of writing
          writebalance = .false.
@@ -261,7 +265,7 @@
          write (lunmbacsvmb, '("datetimestart,datetimestop,Mass Balance Area,Constituent,Balance Term Type,Balance Term Name,In,Out,Nett")')
       endif
    endif
-   
+
    end subroutine mba_init
 
 !> Convert qid (from .ext file) to waq input name (split in generic qidname and specific input name).
@@ -313,7 +317,7 @@
    logical :: writebalance
 
    timembaend = time
-   
+
    call gregor(refdate_mjd + offset_reduced_jd + timembastart/86400.0, iyear, imonth, iday, ihour, imin, isec, sec)
    write(datembastart, '(i4,"-",i2.2,"-",i2.2," ",i2.2,":",i2.2,":",i2.2)') iyear, imonth, iday, ihour, imin, isec
    call gregor(refdate_mjd + offset_reduced_jd + timembaend/86400.0, iyear, imonth, iday, ihour, imin, isec, sec)
@@ -520,13 +524,13 @@
    end subroutine mba_final
 
    subroutine mba_sum(nombs, nomba, mbadef, mbavolume, mbamass)
-   
+
    use m_fm_wq_processes, only: numwqbots, wqbot
    use m_partitioninfo
    use m_flowgeom
    use m_flow
    use m_transport
-   
+
    implicit none
 
    integer          :: nombs, nomba
@@ -555,14 +559,14 @@
             mbamass(numconst+iwqbot,imba) = mbamass(numconst+iwqbot,imba) + wqbot(iwqbot,k)*ba(kk)
          end do
       end do
-   end do 
+   end do
    end subroutine mba_sum
 
    subroutine mba_sum_area(nomba, mbadef, mbaba)
-   
+
    use m_partitioninfo
    use m_flowgeom
-   
+
    implicit none
 
    integer          :: nomba
@@ -580,12 +584,12 @@
       end if
       imba = mbadef(kk)
       mbaba(imba) = mbaba(imba) + ba(kk)
-   end do 
+   end do
    end subroutine mba_sum_area
 
    subroutine comp_horflowmba()
    use m_flowgeom, only: Lnx
-   use m_flow, only: Lbot, Ltop, kmx, Lnkx, q1 
+   use m_flow, only: Lbot, Ltop, kmx, Lnkx, q1
    use m_flowtimes, only: dts
    use m_flowexternalforcings, only: numsrc, ksrc, qsrc
    use m_mass_balance_areas
@@ -600,7 +604,7 @@
 
    integer(4) ithndl /0/
    if (timon) call timstrt ( "comp_horflowmba", ithndl )
-   
+
    do i=1,nombaln
       LL = mbalnlist(i)
       Lb = Lbot(LL)
@@ -631,7 +635,7 @@
             endif
          endif
       endif
-      qsrck = qsrc(n) 
+      qsrck = qsrc(n)
       if (qsrck > 0) then
          mbaflowsorsin(2,n) = mbaflowsorsin(2,n) + qsrck*dts
       else if (qsrck < 0) then
@@ -682,16 +686,16 @@
 
    subroutine mba_write_bal_header(lunbal, numconst, const_names, iconst2sys, nosys, notot, isys2wqbot, syname_sub, nomba, mbaname, nflux, &
                                    totfluxsys, stochi, fluxname, fluxprocname, nfluxsys, ipfluxsys, fluxsys)
-   
+
    use unstruc_version_module, only: unstruc_version_full, get_unstruc_source
 
    implicit none
-   
+
    integer                     :: lunbal                    ! logical unit
 
    integer                     :: numconst                  ! Total number of constituents
    character(len=*)            :: const_names(numconst)     ! constituent names
-   
+
    integer                     :: iconst2sys(numconst)      ! WAQ substance to D-Flow FM constituents
    integer                     :: nosys                     ! Number of active systems
    integer                     :: notot                     ! Number of systems
@@ -700,14 +704,14 @@
 
    integer                     :: nomba                     ! Number of balance areas
    character(*)                :: mbaname(nomba)            ! balance names
-   
+
    integer                     :: nflux                     ! number of fluxes
    integer                     :: totfluxsys                ! total number of fluxes for all sustances
 
    real                        :: stochi(notot,nflux)
    character(10)               :: fluxname(nflux)
    character(10)               :: fluxprocname(nflux)
-      
+
    integer                     :: nfluxsys(notot)
    integer                     :: ipfluxsys(notot)
    integer                     :: fluxsys(totfluxsys)
@@ -755,7 +759,7 @@
          endif
       enddo
    endif
-   
+
    if(nosys .lt. notot) then
       write (lunbal, '(/"List of WQ bot variables/inactive WQ substances")')
       write (lunbal, '(/" FM number   WQ number  Name")')
@@ -781,11 +785,11 @@
             ifluxsys = ifluxsys + nfluxsys(isys)
          endif
       enddo
-   endif 
+   endif
 
    return
    end subroutine mba_write_bal_header
-   
+
    subroutine mba_write_bal_time_step(lunbal, timestart, timeend, datestart, dateend, numconst, notot, nombs, imbs2sys, nomba, &
                                       nombabnd, nflux, totfluxsys, mbsname, mbaname, mbabndname, mbalnused, numsrc, srcname, &
                                       mbasorsinout, mbaarea, mbavolumebegin, mbavolumeend, mbaflowhor, mbaflowsorsin, mbaflowraineva, &
@@ -794,9 +798,9 @@
                                       jambalumpmba, jambalumpbnd, jambalumpsrc, jambalumpproc)
 
    implicit none
-   
+
    integer                     :: lunbal                    ! logical unit
-   
+
    double precision            :: timestart                 ! start time of balance period (s)
    double precision            :: timeend                   ! end time of balance period (s)
    character(len=19)           :: datestart                 ! start date of balance period
@@ -813,13 +817,13 @@
    character(*)                :: mbsname(nombs)            ! mass balance names
    character(*)                :: mbaname(nomba)            ! mass balance area names
    character(*)                :: mbabndname(nombabnd)      ! mass balance area exchange names
-   
+
    integer                     :: mbalnused(nomba,nombabnd) ! number of links between mda and mbabnd that are actually active
 
    integer                     :: numsrc                    ! nr of point sources/sinks
    character(len=255)          :: srcname(numsrc)           ! sources/sinks name (numsrc)
    integer                     :: mbasorsinout(2,numsrc)    ! (reduced) mba for each side of a source sink
-   
+
    double precision            :: mbaarea(nomba)            ! surface area of mass balance area
 
    double precision            :: mbavolumebegin(nomba)     ! begin volume in mass balance area
@@ -838,11 +842,11 @@
    double precision            :: flxdmp(2,nflux, nomba)
    real                        :: stochi(notot,nflux)
    character(10)               :: fluxname(nflux)
-      
+
    integer                     :: nfluxsys(notot)
    integer                     :: ipfluxsys(notot)
    integer                     :: fluxsys(totfluxsys)
-   
+
    integer                     :: jarain                    ! use rain yes or no
    integer                     :: jaevap                    ! use evaporation yes or no
    integer                     :: jatem                     ! Temperature model (0=no, 5=heatfluxmodel)
@@ -963,11 +967,11 @@
       if (jarain > 0) then
          totals = totals + mbaflowraineva(1:2, imba)
          write (lunbal, 2001) labelraineva, mbaflowraineva(1:2, imba)
-      endif   
+      endif
       if (jaevap > 0 .and. jatem > 3) then
          totals(2) = totals(2) + mbafloweva(imba)
          write (lunbal, 2001) labeleva, 0.0d0, mbafloweva(imba)
-      endif   
+      endif
       write (lunbal, 1004)
       write (lunbal, 2003) totals
       write (lunbal, 2010) totals(2)-totals(1)
@@ -1131,13 +1135,13 @@
    write (lunbal, 1001) seconds_to_dhms(nint(timestart, long)), datestart, seconds_to_dhms(nint(timeend, long)), &
                         dateend, summbaarea
    write (lunbal, 2000) summbavolumebegin, summbavolumeend
-   write (lunbal, 1002) 
+   write (lunbal, 1002)
    if (summbaarea.gt.0.0) then
       write (lunbal, 2000) summbavolumebegin/summbaarea, summbavolumeend/summbaarea
    else
       write (lunbal, 2005)
    endif
-   write (lunbal, 1003) 
+   write (lunbal, 1003)
    if (summbavolumebegin.gt.summbavolumeend) then
       totals(1) = summbavolumebegin - summbavolumeend
    else
@@ -1193,7 +1197,7 @@
    if (jaevap > 0 .and. jatem > 3) then
       totals(2) = totals(2) + sum(mbafloweva(:))
       write (lunbal, 2001) labeleva, 0.0d0, sum(mbafloweva(:))
-   endif   
+   endif
    write (lunbal, 1004)
    write (lunbal, 2003) totals
    write (lunbal, 2010) totals(2)-totals(1)
@@ -1371,13 +1375,13 @@
    2010 format (  /'Water balance error (m3)                                                   ',ES15.6E3)
    2011 format (   'Water balance error                                                        ',F15.6,'%')
    2012 format (   'Water balance error                                                                     - %')
- 
+
    2020 format (  /'Mass balance error ',A50,'     ',ES15.6E3)
    2021 format (   'Mass balance error ',A50,'     ',F15.6,'%')
    2022 format (   'Mass balance error ',A50,'                  - %')
 
    end subroutine mba_write_bal_time_step
-   
+
    subroutine mba_write_csv_time_step(luncsvm, luncsvmb, timestart, timeend, datestart, dateend, numconst, notot, nombs, imbs2sys, nomba, &
                                       nopenbndsect,  nombabnd, nflux, totfluxsys, mbsname, mbaname, openbndname, mbalnused, numsrc, &
                                       srcname, mbasorsinout, mbaarea, mbavolumebegin, mbavolumeend, mbaflowhor, mbaflowsorsin, &
@@ -1386,10 +1390,10 @@
                                       jambalumpmba, jambalumpbnd, jambalumpsrc, jambalumpproc)
 
    implicit none
-   
+
    integer                     :: luncsvm                   ! logical unit mass
    integer                     :: luncsvmb                  ! logical unit mass balances
-   
+
    double precision            :: timestart                 ! start time of balance period (s)
    double precision            :: timeend                   ! end time of balance period (s)
    character(len=19)           :: datestart                 ! start date of balance period
@@ -1407,13 +1411,13 @@
    character(*)                :: mbsname(nombs)            ! mass balance names
    character(*)                :: mbaname(nomba)            ! mass balance area names
    character(*)                :: openbndname(nombabnd)      ! mass balance area exchange names
-   
+
    integer                     :: mbalnused(nomba,nombabnd) ! number of links between mda and mbabnd that are actually active
 
    integer                     :: numsrc                    ! nr of point sources/sinks
    character(len=255)          :: srcname(numsrc)           ! sources/sinks name (numsrc)
    integer                     :: mbasorsinout(2,numsrc)    ! (reduced) mba for each side of a source sink
-   
+
    double precision            :: mbaarea(nomba)            ! surface area of mass balance area
 
    double precision            :: mbavolumebegin(nomba)     ! begin volume in mass balance area
@@ -1432,11 +1436,11 @@
    double precision            :: flxdmp(2,nflux, nomba)
    real                        :: stochi(notot,nflux)
    character(10)               :: fluxname(nflux)
-      
+
    integer                     :: nfluxsys(notot)
    integer                     :: ipfluxsys(notot)
    integer                     :: fluxsys(totfluxsys)
-   
+
    integer                     :: jarain                    ! use rain yes or no
    integer                     :: jaevap                    ! use evaporation yes or no
    integer                     :: jatem                     ! Temperature model (0=no, 5=heatfluxmodel)
@@ -1513,7 +1517,7 @@
       if (jambalumpmba==1 .and. jalump) then
          write (luncsvmb, 3) trim(datetimmbambs), labelmba, labelall, lumptotals, lumptotals(1) - lumptotals(2)
       endif
-      
+
       ! Water - boundaries
       lumptotals = zero ; jalump = .false.
       do jmba = nomba + 1, nombabnd
@@ -1530,7 +1534,7 @@
       if (jambalumpbnd==1 .and. jalump) then
          write (luncsvmb, 3) trim(datetimmbambs), labelbnd, labelall, lumptotals, lumptotals(1) - lumptotals(2)
       endif
-      
+
       ! Water - source/sink
       lumptotals = zero ; jalump = .false.
       do isrc = 1, numsrc
@@ -1561,10 +1565,10 @@
       if (jarain > 0) then
          write (luncsvmb, 3) trim(datetimmbambs), labelext, labelraineva, mbaflowraineva(1:2, imba), &
                            mbaflowraineva(1, imba) - mbaflowraineva(2, imba)
-      endif   
+      endif
       if (jaevap > 0 .and. jatem > 3) then
          write (luncsvmb, 3) trim(datetimmbambs), labelext, labeleva, zero, mbafloweva(imba), -mbafloweva(imba)
-      endif   
+      endif
 
       ! Constituents
       do imbs = 1, nombs
@@ -1674,7 +1678,7 @@
    end do
 
    ! Output for Whole model
-   
+
    ! Water
    write (datetimmbambs, 1) datestart, dateend, labelwhole, labelwater
 
@@ -1688,7 +1692,7 @@
    else
       write (luncsvmb, 3) trim(datetimmbambs), labelstt, labelstn,  zero, volchange, -volchange
    endif
-   
+
    ! Water - boundaries
    lumptotals = zero ; jalump = .false.
    do jmba = nomba + 1, nombabnd
@@ -1732,12 +1736,12 @@
       sumwhole(1) = sum(mbaflowraineva(1, :))
       sumwhole(2) = sum(mbaflowraineva(2, :))
       write (luncsvmb, 3) trim(datetimmbambs), labelext, labelraineva, sumwhole, sumwhole(1) - sumwhole(2)
-   endif   
+   endif
    if (jaevap > 0 .and. jatem > 3) then
       sumwhole(2) = sum(mbafloweva(:))
       write (luncsvmb, 3) trim(datetimmbambs), labelext, labeleva, zero, sumwhole(2), -sumwhole(2)
-   endif   
-   
+   endif
+
    ! Constituents
    do imbs = 1, nombs
       write (datetimmbambs, 1) datestart, dateend, labelwhole, trim(mbsname(imbs))
@@ -1769,7 +1773,7 @@
          if (jambalumpbnd == 1 .and. jalump) then
             write (luncsvmb, 3) trim(datetimmbambs), labelbnd, labelall, lumptotals, lumptotals(1) - lumptotals(2)
          endif
-         
+
          ! Constituents - source/sink
          lumptotals = zero ; jalump = .false.
          do isrc = 1, numsrc
@@ -1831,7 +1835,7 @@
    end do
 
    return
-  
+
 1  format (a',',a',',a',',a',')
 2  format (a,es16.8e3,',',es16.8e3,',',es16.8e3)
 3  format (a,a',',a',',es16.8e3,',',es16.8e3,',',es16.8e3)
