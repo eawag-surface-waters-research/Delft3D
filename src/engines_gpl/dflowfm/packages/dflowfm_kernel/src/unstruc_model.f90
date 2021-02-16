@@ -218,7 +218,7 @@ implicit none
     integer            :: md_snapshot_seqnr  = 0 !< Sequence number of last snapshot file written.
 !   partitioning command line options
     integer            :: md_japartition     = 0   !< partition (1) or not (0)
-    integer            :: md_pmethod         = 1   !< partition method: Recursive bisection (2), or K-way (1)
+    integer            :: md_pmethod         = 1   !< partition method: K-way (=1, default), Recursive Bisection(=2), Mesh-dual(=3)
     integer            :: md_ndomains        = 0   !< METIS/number of domains (>0) or use polygon (0)
     integer            :: md_jacontiguous    = 1   !< METIS/contiguous domains (1, default) or not (0)
     integer            :: md_icgsolver       = 0   !< intended solver
@@ -387,7 +387,7 @@ use unstruc_channel_flow
     ! The following settings are intentionally *not* reset for each model.
     !md_snapshot_seqnr  = 0 ! not handy in practice, it destroys previous plots without warning
     !md_japartition     = 0   !< partition (1) or not (0)
-    !md_pmethod         = 0   !< partition method: Recursive bisection (0), or K-way (1)
+    !md_pmethod         = 1   !< partition method: K-way (=1, default), Recursive Bisection(=2), Mesh-dual(=3)
     !md_ndomains        = 0   !< METIS/number of domains (>0) or use polygon (0)
     !md_jacontiguous    = 0   !< METIS/contiguous domains (1) or not (0)
     !md_icgsolver       = 0   !< intended solver

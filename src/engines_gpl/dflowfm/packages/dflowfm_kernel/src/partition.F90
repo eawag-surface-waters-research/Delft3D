@@ -5393,7 +5393,7 @@ end subroutine partition_make_globalnumbers
       implicit none
 
       integer,                         intent(in) :: Nparts          !< number of partitions
-      integer,                         intent(in) :: method          !< partition method. 1: K-Way, 0,2: Recursive, 3: Mesh
+      integer,                         intent(in) :: method          !< partition method. 1: K-Way, 2: Recursive, 3: Mesh-dual
       integer,                         intent(in) :: jacontiguous    !< enforce contiguous domains (1) or not (0)
 
       integer                                     :: ierror
@@ -5469,7 +5469,7 @@ end subroutine partition_make_globalnumbers
             ierror = metisopts(opts, "CONTIG", 1)   ! enforce contiguous domains, observation: number of cells per domain becomes less homogeneous
             if ( ierror /= 0 ) goto 1234
          else if (method == 2) then
-            call mess(LEVEL_WARN, 'Contiguous option is not available for Recursive Bisection method (method = 2). To enforce contiguous option, use K-way partitioning (default) method (method = 0 or 1).')
+            call mess(LEVEL_WARN, 'Contiguous option is not available for Recursive Bisection method (method = 2). To enforce contiguous option, use K-way partitioning (default) method (method = 1).')
          end if
       endif
 !      i = metisopts(opts,"NCUTS",10)
@@ -5661,9 +5661,9 @@ end subroutine partition_make_globalnumbers
             call getint('Number of domains', Ndomains)
          end do
          method = -1
-         do while ( method.lt.0 .or. method.gt.2 )
-             method = 0
-             call getint('Partition method? (0:default, 1: K-Way, 2: Recursive bisection)', method) ! default method is K-way
+         do while ( method.lt.0 .or. method.gt.3 )
+             method = 1
+             call getint('Partition method? (1: K-Way, 2: Recursive bisection, 3: Mesh-dual)', method) ! default method is K-way
          enddo
          jacontiguous = -1
          if ( method.eq.1 .or. method .eq. 0) then ! K-Way (default) method enables contiguous
