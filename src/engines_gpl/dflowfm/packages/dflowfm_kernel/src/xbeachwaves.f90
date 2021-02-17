@@ -1232,7 +1232,7 @@ subroutine xbeach_instationary()
    phiwav = thetamean*rd2dg
    rlabda = L1
    uorb = urms_cc
-   ustokes = ust
+   ustokes = ust              ! will be overwritten for 3D in getustwav
    vstokes = vst   
 
    deallocate(hh, ddlok, wete, drr, stat = ierr)
@@ -1241,7 +1241,7 @@ subroutine xbeach_instationary()
    end subroutine xbeach_instationary
 
 
-   subroutine xbeach_wave_compute_flow_forcing()
+subroutine xbeach_wave_compute_flowforcing2D()
    use m_flowgeom
    use m_flow
    use m_xbeach_data
@@ -1251,10 +1251,14 @@ subroutine xbeach_instationary()
 
    implicit none
 
-   integer                        :: k, L, k1, k2
-   double precision               :: dumFx, dumFy, cs, sn, wul
-   doUbLE PREciSIOn               :: Sxx2, Sxy2, Syy2
-   iNtEGeR                        :: nwalls, ierror
+   integer                              :: k, n, L, k1, k2
+   double precision                     :: cs, sn, wul
+   iNtEGeR                              :: ierror
+   double precision, allocatable, save  :: dsxxdx(:),dsyydy(:),dsxydx(:),dsxydy(:)
+
+   if (.not. allocated(dsxxdx)) then
+      allocate(dsxxdx(1:ndx),dsyydy(1:ndx),dsxydx(1:ndx),dsxydy(1:ndx))
+   endif 
 
    !   Radiation stresses
    nwav = cgwav/max(cwav,1d-10)
@@ -1267,97 +1271,78 @@ subroutine xbeach_instationary()
       Syy(k) = Syy(k) + sum((sinth(:,k)**2)*rr(:,k),dim=1)*dtheta
       Sxy(k) = Sxy(k) + sum( sinth(:,k)*costh(:,k)*rr(:,k),dim=1)*dtheta
    end do
+
    !   Wave forces Fx, Fy, value on links
    Fx_cc = 0d0
    Fy_cc = 0d0
-   do L = 1, Lnx
-      k1 = ln(1,L);   k2 = ln(2,L)
-      dumFx = -(acl(L)*Sxx(k1)+(1-acl(L))*Sxx(k2))*wu(L)*csu(L) - (acl(L)*Sxy(k1)+(1-acl(L))*Sxy(k2))*wu(L)*snu(L)
-      dumFy = -(acl(L)*Sxy(k1)+(1-acl(L))*Sxy(k2))*wu(L)*csu(L) - (acl(L)*Syy(k1)+(1-acl(L))*Syy(k2))*wu(L)*snu(L)
-      Fx_cc(k1) = Fx_cc(k1) + dumFx
-      Fx_cc(k2) = Fx_cc(k2) - dumFx
-      Fy_cc(k1) = Fy_cc(k1) + dumFy
-      Fy_cc(k2) = Fy_cc(k2) - dumFy
+   dsxxdx = 0d0
+   dsyydy = 0d0
+   dsxydy = 0d0
+   dsxydx = 0d0
+   ! Jipjanneke
+   do L=1,lnx
+      k1 = ln(1,L)
+      k2 = ln(2,L)
+      dsxxdx(k1) = dsxxdx(k1) + wcx1(L)*(Sxx(k2)-Sxx(k1))*dxi(L)
+      dsxxdx(k2) = dsxxdx(k2) + wcx2(L)*(Sxx(k2)-Sxx(k1))*dxi(L)
+   
+      dsyydy(k1) = dsyydy(k1) + wcy1(L)*(Syy(k2)-Syy(k1))*dxi(L)
+      dsyydy(k2) = dsyydy(k2) + wcy2(L)*(Syy(k2)-Syy(k1))*dxi(L)
+   
+      dsxydx(k1) = dsxydx(k1) + wcx1(L)*(Sxy(k2)-Sxy(k1))*dxi(L)
+      dsxydx(k2) = dsxydx(k2) + wcx2(L)*(Sxy(k2)-Sxy(k1))*dxi(L)
+   
+      dsxydy(k1) = dsxydy(k1) + wcy1(L)*(Sxy(k2)-Sxy(k1))*dxi(L)
+      dsxydy(k2) = dsxydy(k2) + wcy2(L)*(Sxy(k2)-Sxy(k1))*dxi(L)
    enddo
-
-   do k = 1, ndx
-      Fx_cc(k) = Fx_cc(k)*bai(k)
-      Fy_cc(k) = Fy_cc(k)*bai(k)
+   
+   do k = 1,ndx
+      Fx_cc(k) = -dsxxdx(k)-dsxydy(k)
+      Fy_cc(k) = -dsxydx(k)-dsyydy(k) 
    enddo
 
    ! Open boundaries: Neumann
-   do L = 1,nbndw
-      k1 = kbndw(1,L); k2=kbndw(2,L)
+   do n = 1,nbndw                     ! not necessary, no wave bnd without open flow bnd
+      k1 = kbndw(1,n); k2=kbndw(2,n)
       Fx_cc(k1) = Fx_cc(k2)
       Fy_cc(k1) = Fy_cc(k2)
    end do
 
-   do L = 1, nbndz
-      k1 = kbndz(1,L); k2=kbndz(2,L)
+   do n = 1, nbndz
+      k1 = kbndz(1,n); k2=kbndz(2,n)
       Fx_cc(k1) = Fx_cc(k2)
       Fy_cc(k1) = Fy_cc(k2)
    end do
 
-   do L = 1, nbndu
-      k1 = kbndu(1,L); k2=kbndu(2,L)
+   do n = 1, nbndu
+      k1 = kbndu(1,n); k2=kbndu(2,n)
       Fx_cc(k1) = Fx_cc(k2)
       Fy_cc(k1) = Fy_cc(k2)
    end do
-   
-   !  closed
-   do nwalls=1,mxwalls
-      k1 = walls(1,nwalls)
-      
-      cs =  walls(8,nwalls) ! outward positive
-      sn = -walls(7,nwalls)
-      wuL = walls(9,nwalls)                                      
-      
-      Sxx2 = -Sxx(k1)
-      Sxy2 = -Sxy(k1)
-      Syy2 = -Syy(k1)
-                            
-      dumFx = -(acl(L)*Sxx(k1)+(1-acl(L))*Sxx2)*wu(L)*csu(L) - (acl(L)*Sxy(k1)+(1-acl(L))*Sxy2)*wu(L)*snu(L)
-      dumFy = -(acl(L)*Sxy(k1)+(1-acl(L))*Sxy2)*wu(L)*csu(L) - (acl(L)*Syy(k1)+(1-acl(L))*Syy2)*wu(L)*snu(L)
-      Fx_cc(k1) = Fx_cc(k1) + dumFx
-      Fy_cc(k1) = Fy_cc(k1) + dumFy
-   end do
-   
-! account for thin dams
-   do nwalls=1,nthd
-      k1 = thindam(1,nwalls)
-      k2 = k1                            ! JRE: todo, check
-      
-      cs = thindam(5,nwalls) 
-      sn = -thindam(4,nwalls)
-      wuL = thindam(6,nwalls)                                            
-      
-      Sxx2 = Sxx(k1)
-      Sxy2 = Sxy(k1)
-      Syy2 = Syy(k1)
-                            
-      dumFx = -(acl(L)*Sxx(k1)+(1-acl(L))*Sxx2)*wu(L)*csu(L) - (acl(L)*Sxy(k1)+(1-acl(L))*Sxy2)*wu(L)*snu(L)
-      dumFy = -(acl(L)*Sxy(k1)+(1-acl(L))*Sxy2)*wu(L)*csu(L) - (acl(L)*Syy(k1)+(1-acl(L))*Syy2)*wu(L)*snu(L)
-      Fx_cc(k1) = Fx_cc(k1) + dumFx
-      Fy_cc(k1) = Fy_cc(k1) + dumFy
-   end do
 
-   ! JRE DEBUG
    if (jampi.eq.1) then
       if ( jatimer.eq.1 ) call starttimer(IXBEACH)
       call update_ghosts(ITYPE_SALL, 1, ndx, Fx_cc, ierror)
       call update_ghosts(ITYPE_SALL, 1, ndx, Fy_cc, ierror)
       if ( jatimer.eq.1 ) call stoptimer(IXBEACH)
    endif
-   !\  DEBUG
-   
-                   
+
    do L = 1,Lnx
       k1 = ln(1,L); k2 = ln(2,L)
-      Fx(L) = ( acL(L)*Fx_cc(k1) + (1d0-acL(L))*Fx_cc(k2) )
-      Fy(L) = ( acL(L)*Fy_cc(k1) + (1d0-acL(L))*Fy_cc(k2) )
+      Fx(L)   = ( acL(L)*Fx_cc(k1) + (1d0-acL(L))*Fx_cc(k2) )
+      Fy(L)   = ( acL(L)*Fy_cc(k1) + (1d0-acL(L))*Fy_cc(k2) )
+      wavfu(L) =  Fx(L)*csu(L)+Fy(L)*snu(L)
+      wavfv(L) = -Fx(L)*snu(L)+Fy(L)*csu(L)
    enddo
 
-   end subroutine xbeach_wave_compute_flow_forcing
+   where (hu<=epshu)
+      Fx    = 0d0
+      Fy    = 0d0
+      wavfu = 0d0
+      wavfv = 0d0
+   endwhere
+
+   end subroutine xbeach_wave_compute_flowforcing2D
 
    subroutine xbeach_wave_maxtimestep()
    use m_flowtimes

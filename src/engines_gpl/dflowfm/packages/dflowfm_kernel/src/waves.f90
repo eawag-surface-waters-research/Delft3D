@@ -996,7 +996,7 @@
          wavfx     = ac1*sxwav(k1) + ac2*sxwav(k2)
          wavfy     = ac1*sywav(k1) + ac2*sywav(k2)
          wavfu_loc = csu(LL)*wavfx + snu(LL)*wavfy
-         wavfuL    = 4d0*sign(min(abs(wavfu_loc), fmax), wavfu_loc)/hwavL          ! hwavL/4 is integral over 0.5*hwavL waterdepth of linear decrease
+         wavfuL    = 4d0*sign(min(abs(wavfu_loc), fmax), wavfu_loc)/max(hwavL,gammax*hminlw) ! to check
          zw=0.5*(hu(Lt)-hu(Lt-1))    ! center top layer
          do L=Lt,Lb+1,-1
             if (zw<=0.5*hwavL) then

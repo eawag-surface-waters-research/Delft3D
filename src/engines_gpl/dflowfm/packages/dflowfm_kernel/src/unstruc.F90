@@ -1825,17 +1825,17 @@ subroutine addlink1D(L,japerim)                        ! and add area's and volu
  use m_missing
  use m_flowparameters
  use unstruc_channel_flow
-
+ 
  implicit none
-
+ 
  integer           :: japerim, L, ja, calcConv
-
+ 
  integer           :: k1, k2, K, LL
  double precision  :: ar1, wid1, cf1, ar2, wid2, cf2, dx1, dx2, widu, diam, perim
  double precision  :: hpr
 
  if (japerim == 0) then
-
+ 
     calcConv = 0
     k1  = ln(1,L) ; k2 = ln(2,L)
 
@@ -1868,8 +1868,8 @@ subroutine addlink1D(L,japerim)                        ! and add area's and volu
              vol1_f(k1) = vol1_f(k1) + dx1*ar1
           else
              vol1_f(k1) = vol1(k1)
-          endif
        endif
+    endif
     endif
 
     if (kcs(k2) == 1) then ! TODO: consider *also* adding storage area to the 2D side k2, if kcu(L)==5, maybe not for kcu(L)==7
@@ -1888,8 +1888,8 @@ subroutine addlink1D(L,japerim)                        ! and add area's and volu
              vol1_f(k2) = vol1_f(k2) + dx2*ar2
           else
              vol1_f(k2) = vol1(k2)
-          endif
        endif
+    endif
     endif
 
     if (nonlin >= 2) then
@@ -1940,7 +1940,7 @@ subroutine addlink1D(L,japerim)                        ! and add area's and volu
     calcConv = 1
     call getprof_1D(L, hu(L), au(L), widu, japerim, calcConv, perim)  ! memory closeness of profiles causes this statement here instead of in setau
     ! getprof1D sets cfu
- endif
+            endif
 
  end subroutine addlink1D
 
@@ -5643,7 +5643,7 @@ if (jawind > 0) then
 
 ! JRE
  if (jawave .eq. 4) then                              ! wave forcing from XBeach
-    call xbeach_wave_compute_flow_forcing()
+    call xbeach_wave_compute_flowforcing2D()
     if (lwave==1)  then
       !! !$OMP PARALLEL DO                                          &
       !! !$OMP PRIVATE(L, floc)
@@ -11016,7 +11016,7 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
  use m_fm_wq_processes, only: jawaqproc
  use m_vegetation
  use m_hydrology, only: jadhyd, init_hydrology
- use m_integralstats
+ use m_integralstats 
  use m_xbeach_data, only: instat, newstatbc, bccreated
  use m_oned_functions
  use unstruc_display, only : ntek, jaGUI
@@ -11025,7 +11025,7 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
  use m_fm_update_crosssections, only: fm_update_mor_width_area, fm_update_mor_width_mean_bedlevel
  use unstruc_netcdf_map_class
  use unstruc_caching
-
+ 
  !use m_mormerge
  !
  ! To raise floating-point invalid, divide-by-zero, and overflow exceptions:
@@ -13557,12 +13557,19 @@ subroutine writesomeinitialoutput()
 
 subroutine getczz0(h1, frcn, ifrctyp, cz, z0)       ! basic get z0 (m),  this routine is not safe for frcn == 0
  use m_physcoef, only : sag, vonkar, ee, ee9, c9of1
+ use m_flowparameters, only: epshu
  implicit none
- integer          :: ifrctyp
- double precision :: h0, h1,frcn, cz, z0, sqcf, hurou, z02  ! hydraulic radius, friction coeff, friction typ, chezy coeff
- double precision :: sixth = 1d0/6d0
+ 
+ double precision, intent(in) :: h1
+ integer, intent(in) :: ifrctyp
+ double precision, intent(in) :: frcn
+ double precision, intent(out) :: cz
+ double precision, intent(out) :: z0
+ 
+ double precision    :: h0, sqcf, hurou  ! hydraulic radius, friction coeff, friction typ, chezy coeff
+ double precision    :: sixth = 1d0/6d0
 
- h0    = max(h1,1d-4)
+ h0    = max(h1,epshu)
 
  if (ifrctyp == 0) then                              ! Chezy type
      cz   = frcn
@@ -19494,7 +19501,7 @@ subroutine unc_write_his(tim)            ! wrihis
     add_latlon = jsferic == 0 .and. iand(unc_writeopts, UG_WRITE_LATLON) == UG_WRITE_LATLON
 #else
     add_latlon = .false.
-#endif
+#endif    
 
     if (ihisfile == 0) then
 
@@ -19565,7 +19572,7 @@ subroutine unc_write_his(tim)            ! wrihis
             nNodeTot = numobs+nummovobs
             ierr = sgeom_def_geometry_variables(ihisfile, station_geom_container_name, 'station', 'point', nNodeTot, id_statdim, &
                id_statgeom_node_count, id_statgeom_node_coordx, id_statgeom_node_coordy, add_latlon, id_statgeom_node_lon, id_statgeom_node_lat)
-
+            
 
             if ( jahiswatlev > 0 ) then
                ierr = nf90_def_var(ihisfile, 'waterlevel', nf90_double, (/ id_statdim, id_timedim /), id_vars)
@@ -39795,18 +39802,15 @@ end subroutine setbobs_fixedweirs
     itpbn = kbndu(4,n)
     call getLbotLtop(LL,Lb,Lt)
 
-    ! DEBUG
-    ! Original:
+    !Original:    
     !zbndun = zbndu( (n-1)*kmxd + 1 )
     if (kbndu(4,n) .ne. 5) then
        zbndun = zbndu(n)
        zbndu0n = zbndu0(n)
-    else
+    else                    ! absgenbc
        zbndu0n = u0(LL)
        zbndun  = u1(LL)     ! set in xbeach_absgen_bc
     end if
-    !\ DEBUG
-
 
     if (alfsmo < 1d0) then
        zbndun  = alfsmo*zbndun  + (1d0-alfsmo)*zbndu0n                     ! i.c. smoothing, start from 0

@@ -628,7 +628,7 @@ subroutine fm_calksc()
     use m_sferic,               only: pi
     use m_physcoef,             only: ag, frcuni, ifrctypuni
     use m_flowtimes,            only: dts, dt_max
-    use m_flow,                 only: kmx, s1, u1, u0, hs, z0urou, ucx, ucy, frcu, ifrcutp, hu, ucx_mor, ucy_mor
+    use m_flow,                 only: kmx, s1, u1, u0, hs, z0urou, ucx, ucy, frcu, ifrcutp, hu, ucx_mor, ucy_mor, zws
     use m_flowgeom,             only: ndx, kfs, bl, ndxi, lnx, wcl, ln
     use m_flowparameters,       only: v2dwbl, jatrt, epshs, jawave
     use m_sediment
@@ -664,14 +664,15 @@ subroutine fm_calksc()
 
     real(fp), parameter                            :: rwe = 1.65
     
-    integer                                        :: nm, k, kb, kt, ierr, k1, k2, L
+    integer                                        :: nm, k, kk, kb, kt, ierr, k1, k2, L
     integer                                        :: kmaxx
     real(fp)                                       :: par1, par2, par3, par4, par5, par6
     real(fp)                                       :: relaxr, relaxmr, relaxd
+    real(fp)                                       :: maxdepfrac, zcc, zz
     real(fp)                                       :: hh, arg, uw, rr, umax, t1, uu, a11, raih, rmax, uon, uoff, uwbih, depth, umod, u2dh
     real(fp)                                       :: d50l, d90l, fch2, fcoarse, uwc, psi, rksr0, rksmr0, rksd0, cz_dum, z00
     double precision, dimension(:), allocatable    :: u1eul
-    double precision, dimension(:), allocatable    :: z0rou
+    double precision, dimension(:), allocatable    :: z0rou, deltas
 
 !
 !! executable statements -------------------------------------------------------
@@ -706,8 +707,9 @@ subroutine fm_calksc()
     if (.not. allocated(z0rou)) then
        allocate(u1eul(1:lnx), stat=ierr)
        allocate(z0rou(1:ndx), stat=ierr)
+       allocate(deltas(1:ndx), stat=ierr)
     endif
-    z0rou = 0d0; u1eul = 0d0
+    z0rou = 0d0; u1eul = 0d0; deltas = 0d0
     !
     ! Calculate Eulerian velocities at old time level
     if (jawave>0) then
@@ -755,6 +757,17 @@ subroutine fm_calksc()
        relaxmr = exp(- dt_max / max(1.0e-20_fp, par5))
        relaxd  = exp(- dt_max / max(1.0e-20_fp, par6))
        !
+       maxdepfrac = 0.05d0
+       if (v2dwbl>0 .and. jawave>0 .and. kmx>0) then
+          deltas = 0d0
+          do L=1,lnx
+             k1=ln(1,L); k2=ln(2,L)
+             deltas(k1) =  deltas(k1) + wcl(1,L)*wblt(L)
+             deltas(k2) =  deltas(k2) + wcl(2,L)*wblt(L)
+          end do
+          maxdepfrac = 0.5d0                   
+       endif   
+       !
        do k = 1, ndx
           if ((s1(k)-bl(k))>epshs) then
               depth = s1(k)-bl(k)
@@ -764,37 +777,36 @@ subroutine fm_calksc()
              call getkbotktop(k, kb, kt)
              kmaxx = kb
              !
-             if (v2dwbl>0 .and. (jawave>0) .and. kmx>1) then    ! JRE to do: 3D
+             if (v2dwbl>0 .and. (jawave>0) .and. kmx>0) then
                 !
                 ! Determine representative 2Dh velocity based on velocities in first layer above wave boundary layer 
                 ! kmaxx is the first layer with its centre above the wave boundary layer
                 !
-!                fact   = max(kfu(nm) + kfu(nmd) + kfv(nm) + kfv(ndm), 1)
-!                deltas = (deltau(nm) + deltau(nmd) + deltav(nm) + deltav(ndm)) / fact
-!                !
-!                do k = kmax, 1, -1
-!                   zcc = (1.0 + sig(k))*depth
-!                   if (zcc>deltas .or. zcc>0.5*depth) then
-!                      kmaxx = k
-!                      exit
-!                   endif
-!                enddo
-                
+                zcc = 0d0
+                !
+                do kk = kb, kt
+                   zcc  = 0.5d0*(zws(kk-1)+zws(kk))         ! cell centre position in vertical layer admin, using absolute height
+                   kmaxx=kk
+                   if (zcc>=(bl(k)+maxdepfrac*depth) .or. zcc>=(bl(k)+deltas(k))) then
+                      exit
+                   endif
+                enddo         
              endif
              !
              ! Depth-average velocity (similar as in TAUBOT)
-             ! JRE: to do, 3D, see calksc.f90
              !
              umod   = sqrt(ucx_mor(kmaxx)**2 + ucy_mor(kmaxx)**2)
              !
              if (kmx==0) then
                 u2dh = umod
-             else    ! JRE to do, 3D
-                !u2dh = (umod/depth*((depth + z0rou)*log(1.0_fp + depth/z0rou) - depth)) &
-                !     & / log(1.0_fp + (1.0_fp + sig(kmaxx))*depth/z0rou)
+             else    
+                zz   = 0.5*(zws(kmaxx)+zws(kmaxx-1))-bl(k)
+                u2dh = (umod/depth*((depth + z0rou(k))*log(1d0 + depth/z0rou(k)) - depth)) &
+                     & / log(1d0 + zz/z0rou(k))
              endif
+             !
              if (jawave>0) then
-                hh     = hwav(k) * sqrt(2.0_fp)
+                hh  = hwav(k) * sqrt(2.0_fp)
                 arg = 2.0_fp * pi * depth / max(rlabda(k),0.1)
                 if (arg > 50.0_fp) then
                    uw = 0.0_fp

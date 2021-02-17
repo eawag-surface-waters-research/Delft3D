@@ -832,7 +832,7 @@
    use m_missing
    use m_physcoef, only: frcuni, ifrctypuni
    use m_turbulence, only: vicwws, turkinepsws
-   use m_flowparameters, only: jasal, jatem, jawave, epshs, jasecflow, eps10, jasourcesink
+   use m_flowparameters, only: jasal, jatem, jawave, epshs, jasecflow, eps10, jasourcesink, v2dwbl
    use m_fm_erosed
    use m_bedform
    use m_xbeach_data
@@ -1128,21 +1128,15 @@
    ltur = 0
    if (kmx>0) then
       select case (iturbulencemodel)
-         case (0)
+         case (0,1,2)
             ltur = 0
-         case (1)
-            ltur = 0
-         case (2)
-            ltur = 0
-         case (3)
-            ltur = 2
-         case (4)
+         case (3,4)
             ltur = 2
       end select
    end if
 
    do nm = 1, ndx
-      if ((s1(nm) - bl(nm)) > sedthr) then ! *kfs(nm): always compute sed, also in ghost nodes
+      if ((s1(nm) - bl(nm)) > sedthr) then 
          kfsed(nm) = 1
       else
          kfsed(nm) = 0
@@ -1197,13 +1191,17 @@
    !endif
    !
    if (kmx > 0) then            ! 3D
-      deltas = 0d0
-      do L=1,lnx
-         k1=ln(1,L); k2=ln(2,L)
-         deltas(k1) =  deltas(k1) + wcl(1,L)*wblt(L)
-         deltas(k2) =  deltas(k2) + wcl(2,L)*wblt(L)
-      end do
-      maxdepfrac = 0.05                       !        cases where you want 2D velocity above the wbl
+      deltas = 0.05d0
+      maxdepfrac = 0.05
+      if (jawave>0 .and. v2dwbl>0) then 
+         deltas = 0d0
+         do L=1,lnx
+            k1=ln(1,L); k2=ln(2,L)
+            deltas(k1) =  deltas(k1) + wcl(1,L)*wblt(L)
+            deltas(k2) =  deltas(k2) + wcl(2,L)*wblt(L)
+         end do
+         maxdepfrac = 0.5d0                  !        cases where you want 2D velocity above the wbl, make sure 2nd criterion applies
+      endif
       zcc = 0d0
 
       do kk = 1, ndx
@@ -1211,7 +1209,7 @@
          do k = kb, kt
             zcc  = 0.5d0*(zws(k-1)+zws(k))         ! cell centre position in vertical layer admin, using absolute height
             kmxvel = k
-            if (zcc>=(bl(kk)+maxdepfrac*hs(kk)) .or. (jawave>0 .and. zcc>=(bl(kk)+deltas(kk)))) then
+            if (zcc>=(bl(kk)+maxdepfrac*hs(kk)) .or. zcc>=(bl(kk)+deltas(kk))) then
                exit
             endif
          enddo
@@ -1258,8 +1256,8 @@
    !
    dtmor = dts * morfac
    !
-   call getfixfac(stmpar%morlyr, 1        , ndx     , lsedtot, &                  ! Update underlayer bookkeeping system for erosion/sedimentation
-   & ndx          , fixfac   , ffthresh  )
+   call getfixfac(stmpar%morlyr, 1        , ndx     , lsedtot, &                    ! Update underlayer bookkeeping system for erosion/sedimentation
+                & ndx          , fixfac   , ffthresh  )
    !
    ! Set fixfac to 1.0 for tracer sediments and adjust frac
    !
@@ -1378,10 +1376,10 @@
       ! do not calculate sediment sources, sinks, and bed load
       ! transport in areas with very shallow water.
       !
-      if (hs(nm) < sedthr) cycle
+      if ((s1(nm)-bl(nm))<epshs) cycle     ! dry
       !
       call getkbotktop(nm, kb, kt)
-      if (kfsed(nm) == 0) then
+      if (kfsed(nm) == 0) then             ! shallow but not dry
          !
          ! Very shallow water:
          ! set sediment diffusion coefficient
@@ -1830,7 +1828,7 @@
                klc    = 0
                dcwwlc = 0.0_fp
                wslc   = 0.0_fp
-               do kk = kt, kb-1, -1         ! sigma convention
+               do kk = kt, kb-1, -1                ! sigma convention
                   dcwwlc(klc) = vicwws(kk)+dicoww  ! JRE to check for double counting
                   wslc(klc)   = ws(kk, l)
                   klc=klc+1
@@ -2547,6 +2545,7 @@
    timhr = time1 / 3600.0d0
    nto    = nopenbndsect
    dim_real = real(ndxi*lsedtot,hp)
+   blchg = 0d0
    !
    !   Calculate suspended sediment transport correction vector (for SAND)
    !   Note: uses GLM velocities, consistent with DIFU
@@ -2571,6 +2570,11 @@
       ! suspension transport correction vector only for 3D
       !
       if (kmx > 0) then
+         !
+         if (jampi>0) then
+            call update_ghosts(ITYPE_U, NUMCONST,lnx,fluxhortot,ierror)
+         endif   
+         !
          do l = 1, lsed
             ll = ised1-1 + l
             if (sedtyp(l) == SEDTYP_NONCOHESIVE_SUSPENDED) then
@@ -2596,7 +2600,7 @@
                   ! note correction vector only computed for velocity
                   ! points with active sediment cells on both sides
                   !
-                  if (hu(Lx) > epshu) then
+                  if (kfsed(k1)*kfsed(k2)>0) then  ! bring sedthr into account
                      cumflux = 0.0_fp
                      !
                      ! Determine reference height aks in vel. pt.
@@ -2634,9 +2638,9 @@
                      enddo
                      !
                      k = ka
-                     if (ka==0) then
+                     if (k==0) then
                         ! aksu larger than water depth, so all done
-                     elseif (ka==Lt) then
+                     elseif (k==Lt) then
                         ! aksu is located in top layer; use simple flux
                         ! approximation assuming uniform flux
                         cumflux = cumflux + fluxhortot(ll,k)*(aksu - zktop + dz)/dz
@@ -4734,9 +4738,9 @@
          !
          slp = sqrt(e_dzdn(L)*e_dzdn(L)+e_dzdt(L)*e_dzdt(L))
          if (slp>slpmax) then
-            avflux = ba(k1)*ba(k2)/(ba(k1)+ba(k2)) * (bl(k2)-bl(k1) + slpmax*e_dzdn(L)/slp*Dx(L)) * (ac1*frac(k1,lsd) + ac2*frac(k2,lsd)) / avaltime / morfac
+            avflux = ba(k1)*ba(k2)/(ba(k1)+ba(k2)) * (bl(k2)-bl(k1) + slpmax*e_dzdn(L)/slp*Dx(L)) * (ac1*frac(k1,lsd) + ac2*frac(k2,lsd)) / avaltime / max(morfac, 1d0)
 
-            maxflux= ba(k1)*ba(k2)/(ba(k1)+ba(k2)) * dzmaxdune / morfac
+            maxflux= ba(k1)*ba(k2)/(ba(k1)+ba(k2)) * dzmaxdune / max(morfac,1d0)
 
             if (abs(maxflux) < abs(avflux)) then
                if (avflux > 0 ) then
