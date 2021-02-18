@@ -3255,9 +3255,8 @@ function ug_inq_varid(ncid, meshids, varname, varid) result(ierr)
       !goto 999
       !
       ! NOTE: not all variables have a :mesh attribute anymore (e.g., <prefix>_node_id),
-      ! so don't fail on htis check here. Continue with given meshname.
+      ! so don't fail on this check here. Continue with given meshname.
       !
-      allocate(character(len=len(meshname)) :: str)
       str = meshname
    end if
 
@@ -5469,6 +5468,6 @@ function ug_get_attribute(ncid, varid, att_name, att_value) result(status)
       allocate( character(len=0) :: att_value )
    end if
 
-end function
+end function ug_get_attribute
 
 end module io_ugrid
