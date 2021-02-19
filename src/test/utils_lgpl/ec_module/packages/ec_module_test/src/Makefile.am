@@ -46,8 +46,8 @@ FINCLUDES +=
 
 FMODULES += \
     -I$(top_builddir)/utils_lgpl/ec_module/packages/ec_module/src \
-    -I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src
-#    -I$(top_builddir)/utils_lgpl/io_netcdf/packages/io_netcdf/src \
+    -I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src \
+    -I$(top_builddir)/utils_lgpl/io_netcdf/packages/io_netcdf/src
 #    -I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common_mpi/src \
 #    -I$(top_builddir)/utils_gpl/morphology/packages/morphology_data/src \
 #    -I$(top_builddir)/utils_gpl/morphology/packages/morphology_io/src \
