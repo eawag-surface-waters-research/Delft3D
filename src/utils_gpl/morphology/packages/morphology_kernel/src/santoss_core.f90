@@ -44,10 +44,10 @@ subroutine santoss_core(pl_effects, sw_effects, g, d50, d, hw, rhos, rhow, &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
-    use mathconsts, only: pi
+    use mathconsts, only: pi, eps_fp
     implicit none
 !
-! call variables
+! arguments
 !
     integer   , intent(in)  :: pl_effects
     integer   , intent(in)  :: sw_effects
@@ -113,7 +113,6 @@ subroutine santoss_core(pl_effects, sw_effects, g, d50, d, hw, rhos, rhow, &
     real(fp)                :: fsl_bagnold_c
     real(fp)                :: fsl_bagnold_t
     real(fp)                :: tmp
-    real(fp)                :: eps
     real(fp)                :: eps_corr
     real(fp)                :: worbc
     real(fp)                :: worbt
@@ -129,7 +128,6 @@ subroutine santoss_core(pl_effects, sw_effects, g, d50, d, hw, rhos, rhow, &
 !
 !! executable statements -------------------------------------------------------
 !
-    eps = 2.0_fp**(-52)
 !
 !   calculation phase-lag parameters [-]
 !
@@ -201,7 +199,7 @@ subroutine santoss_core(pl_effects, sw_effects, g, d50, d, hw, rhos, rhow, &
         oct = 0.0_fp
     else ! pc > 1.0_fp
         occ=min(pcr/pc,1.0_fp)*oc
-        if  (abs(tc) < eps) then          ! check zero value ttrough
+        if  (abs(tc) < eps_fp) then       ! check zero value ttrough
             tmp = 1.0_fp                  ! limit goes to 1. Normal calculation goes to NaN and otc becomes 0 and not otc
         else
             tmp = (pc-pcr)/pc             ! normal calculation
@@ -215,7 +213,7 @@ subroutine santoss_core(pl_effects, sw_effects, g, d50, d, hw, rhos, rhow, &
         otc=0.0_fp
     else ! pt > 1.0_fp
         ott=min(pcr/pt,1.0_fp)*ot          ! load entrained and transported during trough period
-        if (abs(tt) < eps) then            ! check zero value ttrough
+        if (abs(tt) < eps_fp) then         ! check zero value ttrough
             tmp = 1.0_fp                   ! limit goes to 1. Normal calculation goes to nan and otc becomes 0 and not ot
         else
             tmp = (pt-pcr)/pt              ! normal calculation

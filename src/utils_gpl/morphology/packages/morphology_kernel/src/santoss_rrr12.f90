@@ -43,7 +43,7 @@ subroutine santoss_rrr12(g, hs, tp, d, sk, as, phi_ab, r_ab, ur, km)
     use mathconsts, only: pi
     implicit none
 !
-! call variables
+! arguments
 !
     real(fp)  , intent(in)  :: g       ! gravity acceleration          [m/s^2]
     real(fp)  , intent(in)  :: hs      ! significant wave height       [m]

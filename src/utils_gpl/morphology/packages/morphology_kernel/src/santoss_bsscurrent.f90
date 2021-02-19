@@ -45,7 +45,7 @@ subroutine santoss_bsscurrent(i2d3d, g, d, d50, d90, delta, unet, ang, &
     use mathconsts, only: degrad
     implicit none
 !
-! call variables
+! arguments
 !
     integer                         , intent(in)    :: i2d3d
     real(fp)                        , intent(in)    :: g
@@ -67,6 +67,7 @@ subroutine santoss_bsscurrent(i2d3d, g, d, d50, d90, delta, unet, ang, &
 !
 ! local variables
 !
+    integer                 :: istat
     integer                 :: j
     real(fp)                :: mu
     real(fp)                :: p_corr
@@ -81,10 +82,11 @@ subroutine santoss_bsscurrent(i2d3d, g, d, d50, d90, delta, unet, ang, &
     real(fp)                :: fcc
     real(fp)                :: theta
     real(fp)                :: ustarc
-    real(fp), dimension(100) :: dum
+    real(fp), dimension(:), allocatable :: dum
 !
 !! executable statements -------------------------------------------------------
 !
+    allocate(dum(100), STAT = istat)
 !   initialize local variables
     mu = 6.0_fp !in combination with deltas sheetflow layer thickness in sfltd99
 
@@ -180,4 +182,5 @@ subroutine santoss_bsscurrent(i2d3d, g, d, d50, d90, delta, unet, ang, &
     sc = 0.5_fp*fc*unet_delwblt**2/(delta*g*d50)
     scx = sc * cos(ang*degrad)
     scy = sc * sin(ang*degrad)
+    deallocate(dum, STAT = istat)
 end subroutine santoss_bsscurrent

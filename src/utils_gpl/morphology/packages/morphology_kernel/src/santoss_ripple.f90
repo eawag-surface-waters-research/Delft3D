@@ -42,7 +42,7 @@ subroutine santoss_ripple(d50, uwc, uwt, delta, g, aw, rh, rl)
     use mathconsts, only: pi
     implicit none
 !
-! call variables
+! arguments
 !
     real(fp)  , intent(in)  :: d50
     real(fp)  , intent(in)  :: uwc

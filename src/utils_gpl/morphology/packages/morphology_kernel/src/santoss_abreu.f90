@@ -40,7 +40,7 @@ subroutine santoss_abreu(hrms, km, d, r_ab, phi_ab, urms, tp, nt, tw, uorb)
     use mathconsts, only:sqrt2, pi
     implicit none
 !
-! call variables
+! arguments
 !
     real(fp)                , intent(in)  :: hrms
     real(fp)                , intent(in)  :: km

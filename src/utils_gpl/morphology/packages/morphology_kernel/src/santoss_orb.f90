@@ -45,7 +45,7 @@ subroutine santoss_orb(nt, as_effects, tw, uorb, unet, ang, tp, &
     use mathconsts, only: twopi, degrad, sqrt2
     implicit none
 !
-! call variables
+! arguments
 !
     integer                 , intent(in)    :: nt            ! number of timesteps in tw and uorb
     integer                 , intent(in)    :: as_effects
@@ -86,30 +86,34 @@ subroutine santoss_orb(nt, as_effects, tw, uorb, unet, ang, tp, &
 !
 ! local variables
 !
-      integer                  :: i
-      integer                  :: i_next
-      integer                  :: i_prev
-      real(fp)                 :: deltah
-      real(fp)                 :: dt
-      real(fp), dimension(200) :: ab_ts
-      real(fp), dimension(200) :: ub_ts
-      real(fp)                 :: t_max
-      real(fp)                 :: t_min
-      real(fp)                 :: u_max
-      real(fp)                 :: u_min
-      real(fp)                 :: t_0_np
-      real(fp)                 :: t_0_pn
-      real(fp)                 :: ucyrepr              ! representative crest velocity perpendicular to wave direction (wave+current)
-      real(fp)                 :: utyrepr              ! representative trough velocity perpendicular to wave direction (wave+current)
-      real(fp)                 :: awmax
-      real(fp)                 :: awmin
-      real(fp)                 :: kbed
-      real(fp)                 :: kbed11
-      real(fp)                 :: kbed1
-      real(fp)                 :: kbed2
+      integer                             :: i
+      integer                             :: i_next
+      integer                             :: i_prev
+      integer                             :: istat
+      real(fp)                            :: deltah
+      real(fp)                            :: dt
+      real(fp), dimension(:), allocatable :: ab_ts
+      real(fp), dimension(:), allocatable :: ub_ts
+      real(fp)                            :: t_max
+      real(fp)                            :: t_min
+      real(fp)                            :: u_max
+      real(fp)                            :: u_min
+      real(fp)                            :: t_0_np
+      real(fp)                            :: t_0_pn
+      real(fp)                            :: ucyrepr  ! representative crest velocity perpendicular to wave direction (wave+current)
+      real(fp)                            :: utyrepr  ! representative trough velocity perpendicular to wave direction (wave+current)
+      real(fp)                            :: awmax
+      real(fp)                            :: awmin
+      real(fp)                            :: kbed
+      real(fp)                            :: kbed11
+      real(fp)                            :: kbed1
+      real(fp)                            :: kbed2
 !
 !! executable statements -------------------------------------------------------
 !
+    allocate(ab_ts(200), STAT = istat)
+    allocate(ub_ts(200), STAT = istat)
+
     dt = tp/nt
 
     ucx = unet*cos(ang*degrad)               ! current component parallel to wave direction (crest)
@@ -259,4 +263,7 @@ subroutine santoss_orb(nt, as_effects, tw, uorb, unet, ang, tp, &
     utxrepr = -uwtrepr + utx                 ! representative trough velocity parallel to wave direction (wave+current)
     utyrepr =  uty                           ! representative trough velocity perpendicular to wave direction (wave+current)
     utrepr  = sqrt(utxrepr**2+utyrepr**2)    ! representative trough velocity (wave+current)
+    !
+    deallocate(ab_ts, STAT = istat)
+    deallocate(ub_ts, STAT = istat)
 end subroutine santoss_orb

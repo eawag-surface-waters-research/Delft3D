@@ -42,7 +42,7 @@ subroutine santoss_sfltd99(d50, sc, st, swc, swt, udeltanet, sfltc, sfltt)
     use precision
     implicit none
 !
-! call variables
+! arguments
 !
     real(fp)  , intent(in)  :: d50
     real(fp)  , intent(in)  :: sc

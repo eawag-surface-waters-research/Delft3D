@@ -48,7 +48,7 @@ subroutine santoss_bss2(sw_effects, as_effects, g, d, rhow, rhos, delta, &
     use mathconsts, only: pi,degrad
     implicit none
 !
-! call variables
+! arguments
 !
     integer   , intent(in)    :: sw_effects
     integer   , intent(in)    :: as_effects
@@ -237,14 +237,6 @@ subroutine santoss_bss2(sw_effects, as_effects, g, d, rhow, rhos, delta, &
         swre    = tauwre / ((rhos - rhow) * g * d50)
 !
 !       (vi) crest period extension for horizontal particle displacement.
-!
-!       ! tuning factor 0.55 from measurements GWK Schretlen 2010
-!        tcu = tcu/tc*(tc + t*0.55*uw/(c*pi-0.55*2.*uw))
-!        tc  = tc + t*0.55*uw/(c*pi-0.55*2*uw)
-!        tcd = tc-tcu
-!        ttu = ttu/tt*(tt - t*0.55*uw/(c*pi+0.55*2.*uw))
-!        tt  = tt - t*0.55*uw/(c*pi+0.55*2.*uw)
-!        ttd = tt-ttu
 !
 !       (vii) bed shear stress for surface waves with/without a current
 !

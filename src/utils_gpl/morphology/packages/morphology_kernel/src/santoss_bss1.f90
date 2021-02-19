@@ -46,7 +46,7 @@ subroutine santoss_bss1(i2d3d, g, d, d50, d90, delta, aw, uw, &
     use mathconsts, only:degrad
     implicit none
 !
-! call variables
+! arguments
 !
     integer                         , intent(in)    :: i2d3d
     real(fp)                        , intent(in)    :: g
@@ -79,26 +79,28 @@ subroutine santoss_bss1(i2d3d, g, d, d50, d90, delta, aw, uw, &
 !
 ! local variables
 !
-    integer                 :: j
-    real(fp)                :: fw_wblt
-    real(fp)                :: wblt_sett
-    real(fp)                :: mu
-    real(fp)                :: ksw1
-    real(fp)                :: fw1
-    real(fp)                :: p_corr
-    real(fp)                :: ksc1
-    real(fp)                :: z0c1
-    real(fp)                :: fc1
-    real(fp)                :: theta1
-    real(fp)                :: theta2
-    real(fp), dimension(102):: dum
-    real(fp)                :: z0c
-    real(fp)                :: fcc
-    real(fp)                :: ustarc
-    real(fp)                :: nu_corr
+    integer                             :: istat
+    integer                             :: j
+    real(fp)                            :: fw_wblt
+    real(fp)                            :: wblt_sett
+    real(fp)                            :: mu
+    real(fp)                            :: ksw1
+    real(fp)                            :: fw1
+    real(fp)                            :: p_corr
+    real(fp)                            :: ksc1
+    real(fp)                            :: z0c1
+    real(fp)                            :: fc1
+    real(fp)                            :: theta1
+    real(fp)                            :: theta2
+    real(fp), dimension(:), allocatable :: dum
+    real(fp)                            :: z0c
+    real(fp)                            :: fcc
+    real(fp)                            :: ustarc
+    real(fp)                            :: nu_corr
 !
 !! executable statements -------------------------------------------------------
 !
+    allocate(dum(102), STAT = istat)
     mu = 6.0_fp !in combination with deltas sheetflow layer thickness in sfltd99
 !
 !   (iii) bed roughness (mobile or ripples) and friction coefficient for waves + current
@@ -109,27 +111,27 @@ subroutine santoss_bss1(i2d3d, g, d, d50, d90, delta, aw, uw, &
     ksw1=d50
 
 !   wave friction formula of swart (1974) [-]
-    if (ksw1/aw < 0.63) then
-        fw1=exp(5.213*(ksw1/aw)**0.194-5.977)
+    if (ksw1/aw < 0.63_fp) then
+        fw1=exp(5.213_fp*(ksw1/aw)**0.194_fp-5.977_fp)
     else
-        fw1=0.3
+        fw1=0.3_fp
     endif
 
 !   initial current roughness [m]
-    ksc1=3.*d90
-    z0c1=ksc1/30.
+    ksc1=3.0_fp*d90
+    z0c1=ksc1/30.0_fp
 
 !   current fricion factor assuming logarithmic current profile [-]
-    if (unet == 0.) then
-        fc1=0.
+    if (unet == 0.0_fp) then
+        fc1=0.0_fp
     elseif (i2d3d == 2) then ! 2d
-        fc1=2.*(0.4/(log(d/z0c1)-1.+z0c1/d))**2.
+        fc1=2.0_fp*(0.4_fp/(log(d/z0c1)-1.0_fp+z0c1/d))**2.0_fp
     else ! 3d
-        fc1=2.*(0.4/log(zref/z0c1))**2.
+        fc1=2.0_fp*(0.4_fp/log(zref/z0c1))**2.0_fp
     endif
 
 !   initial wave-averaged total bed shear stress [-] 
-    theta1=0.5*fc1*unet**2./(delta*g*d50)+0.25*fw1*uw**2./(delta*g*d50)
+    theta1=0.5_fp*fc1*unet**2.0_fp/(delta*g*d50)+0.25_fp*fw1*uw**2.0_fp/(delta*g*d50)
 
 !    - mobile bed roughness
 !    - friction coefficient for waves and for current
@@ -261,4 +263,6 @@ subroutine santoss_bss1(i2d3d, g, d, d50, d90, delta, aw, uw, &
             uc=sqrt(0.001_fp**2+(unet_delwblt*sin(ang*degrad))**2)
         endif
     endif
+    !
+    deallocate(dum, STAT = istat)
 end subroutine santoss_bss1
