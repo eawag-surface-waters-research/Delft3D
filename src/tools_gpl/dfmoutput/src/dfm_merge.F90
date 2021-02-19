@@ -2006,12 +2006,13 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
                         end do
                      end do
 
+                     nitemglob = item_counts(noutfile) ! Update nitemglob, otherwise the check on nitemglob after the outer do-loop will show unexpected error message.
                      if (var_types(iv) == nf90_double) then
-                        tmpvar1D(1:nnodeglob) = tmpvar1D_tmp(1:nnodeglob)
+                        tmpvar1D(1:nitemglob) = tmpvar1D_tmp(1:nitemglob)
                      else if (var_types(iv) == nf90_int .or. var_types(iv) == nf90_short) then
-                        itmpvar1D(1:nnodeglob) = itmpvar1D_tmp(1:nnodeglob)
+                        itmpvar1D(1:nitemglob) = itmpvar1D_tmp(1:nitemglob)
                      else if (var_types(iv) == nf90_byte) then
-                        btmpvar1D(1:nnodeglob,itm:itm) = btmpvar1D_tmp(1:nnodeglob,itm:itm)
+                        btmpvar1D(1:nitemglob,itm:itm) = btmpvar1D_tmp(1:nitemglob,itm:itm)
                      end if
                   end if
                else
