@@ -3257,6 +3257,11 @@ function ug_inq_varid(ncid, meshids, varname, varid) result(ierr)
       ! NOTE: not all variables have a :mesh attribute anymore (e.g., <prefix>_node_id),
       ! so don't fail on this check here. Continue with given meshname.
       !
+      ierr = len_trim(meshname)
+      if (len(str)>=0) then
+          deallocate(str)
+      end if
+      allocate(character(len=ierr) :: str)
       str = meshname
    end if
 
