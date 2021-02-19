@@ -1982,6 +1982,38 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
                !         end if
                !      end if
                !   end if
+               else if (topodim == 1 .and. var_loctype(iv) == UNC_LOC_CN) then
+               ! For 1D mesh, the node indices in the merged file are read directly from flowelem_globalnr into node_c2g.
+               ! So for variables that locate on nodes, we do not use the shift method, but use the global numbers in node_c2g.
+                  if (ii < nfiles) then
+                     nitemglob = sum(numk(1:ii)) ! This varialbe needs to be updated for reading variables from input map files.
+                  else if (ii == nfiles) then    ! The merged variable is formed after this variable in all input map files is read.
+                     do iii = 1, nfiles
+                        nnodecount = sum(numk(1:iii-1))
+                        do ip=1,item_counts(iii)
+                           if (item_domain(nnodecount+ip) == iii-1) then ! only for the node which belongs to the current domain
+                              inodeglob = node_c2g(nnodecount+ip)
+                              if (inodeglob > 0) then
+                                 if (var_types(iv) == nf90_double) then
+                                    tmpvar1D_tmp(inodeglob) = tmpvar1D(nnodecount+ip)
+                                 else if (var_types(iv) == nf90_int .or. var_types(iv) == nf90_short) then
+                                    itmpvar1D_tmp(inodeglob) = itmpvar1D(nnodecount+ip)
+                                 else if (var_types(iv) == nf90_byte) then
+                                    btmpvar1D_tmp(inodeglob,itm:itm) = btmpvar1D(nnodecount+ip,itm:itm)
+                                 end if
+                              end if
+                           end if
+                        end do
+                     end do
+
+                     if (var_types(iv) == nf90_double) then
+                        tmpvar1D(1:nnodeglob) = tmpvar1D_tmp(1:nnodeglob)
+                     else if (var_types(iv) == nf90_int .or. var_types(iv) == nf90_short) then
+                        itmpvar1D(1:nnodeglob) = itmpvar1D_tmp(1:nnodeglob)
+                     else if (var_types(iv) == nf90_byte) then
+                        btmpvar1D(1:nnodeglob,itm:itm) = btmpvar1D_tmp(1:nnodeglob,itm:itm)
+                     end if
+                  end if
                else
                needshift = .false. ! The get_var above started at the right place, so no shifting needed yet.
                if (var_types(iv) == nf90_double) then ! TODO: AvD: try to remove this ugly code-copy for just different types
