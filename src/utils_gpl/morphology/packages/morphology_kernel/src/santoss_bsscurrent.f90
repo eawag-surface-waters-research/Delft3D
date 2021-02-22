@@ -140,5 +140,4 @@ subroutine santoss_bsscurrent(i2d3d, g, d, d50, d90, delta, unet, ang, &
     sc = 0.5_fp*fc*unet_delwblt**2/(delta*g*d50)
     scx = sc * cos(ang*degrad)
     scy = sc * sin(ang*degrad)
-    deallocate(dum, STAT = istat)
 end subroutine santoss_bsscurrent
