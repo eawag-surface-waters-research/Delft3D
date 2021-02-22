@@ -72,94 +72,52 @@ subroutine santoss_bsscurrent(i2d3d, g, d, d50, d90, delta, unet, ang, &
     real(fp)                :: mu
     real(fp)                :: p_corr
     real(fp)                :: ksc1
-    real(fp)                :: z0c1
-    real(fp)                :: fc1
     real(fp)                :: theta1
-    real(fp)                :: theta2
     real(fp)                :: ksc
     real(fp)                :: z0c
     real(fp)                :: fc
     real(fp)                :: fcc
     real(fp)                :: theta
     real(fp)                :: ustarc
-    real(fp), dimension(:), allocatable :: dum
 !
 !! executable statements -------------------------------------------------------
 !
-    allocate(dum(100), STAT = istat)
 !   initialize local variables
     mu = 6.0_fp !in combination with deltas sheetflow layer thickness in sfltd99
 
-!
-!   current alone part i and ii
-!
-    ksc1=3.0_fp*d90
-    z0c1=ksc1/30.0_fp
-
-    ! current fricion factor assuming logarithmic current profile [-]
-    if (comparereal(unet,0.0_fp)==0) then
-        fc1=0.0_fp
-    elseif (i2d3d == 2) then ! 2d
-        fc1=2.0_fp*(0.4_fp/(log(d/z0c1)-1.0_fp+z0c1/d))**2
-    else ! 3d
-        fc1=2.0_fp*(0.4_fp/log(zref/z0c1))**2
-    endif
-
-!   initial total bed shear stress [-] - note that for current only conditions 
-!   hiding/exposure is not accounted for since no such conditions in the database. 
-!   can apply zeta factor as above or other approaches, e.g. Day, 1980
-    theta1=0.5_fp*fc1*unet**2/(delta*g*d50)
-
-!     - mobile bed roughness
-!     - friction coefficient for waves and for current
-!     - mean magnitude of bed shear stress
-
-    j=1
-    dum(j)=theta1
-
-!   additional roughness if wave averaged total Shiels >1 [m]
-    if (d50 <= 0.00015_fp) then
-        ksc=max(ksc1,d50*(mu+6.0_fp*(dum(j)-1.0_fp)))
-    elseif (d50 >= 0.00020_fp) then
-        ksc=max(ksc1,d50*(1.0_fp+6.0_fp*(dum(j)-1.0_fp)))
-    else
-        ksc=max(ksc1,d50*(mu+(d50-0.00015_fp)*(1.0_fp-mu)/ &
-                    & (0.00020_fp-0.00015_fp)+6.0_fp*(dum(j)-1.0_fp)))
-    endif
-    z0c=ksc/30.0_fp
-    if (i2d3d == 2) then ! 2d
-        fcc=2.0_fp*(0.4_fp/(log(d/z0c)-1.0_fp+z0c/d))**2
-    else ! 3d
-        fcc=2.0_fp*(0.4_fp/log(zref/z0c))**2
-    endif
-
-!   total bed shear stress [-]
-    theta2=0.5_fp*fcc*unet**2/(delta*g*d50)
-    j=j+1
-    dum(j)=theta2
-
-!   while loop to find theta with 0.001 difference and 100 iterations
+!   loop to find total Shields [-] with 0.001 difference and 100 iterations
 !   as stop criteria.
-    do while (abs(dum(j)-dum(j-1)) > 0.001_fp .and. j < 100)
-        if (d50 <= 0.00015_fp) then
-            ksc=max(ksc1,d50*(mu+6.0_fp*(dum(j)-1.0_fp)))
+    ksc1 = 3*d90
+    do j = 0, 99
+!       mobile bed roughness [m]
+        if (j==0) then
+            ksc = ksc1
+        elseif (d50 <= 0.00015_fp) then
+            ksc=max(ksc1,d50*(mu+6.0_fp*(theta1-1.0_fp)))
         elseif (d50 >= 0.00020_fp) then
-            ksc=max(ksc1,d50*(1.0_fp+6.0_fp*(dum(j)-1.0_fp)))
+            ksc=max(ksc1,d50*(1.0_fp+6.0_fp*(theta1-1.0_fp)))
         else
             ksc=max(ksc1,d50*(mu+(d50-0.00015_fp)*(1.0_fp-mu)/ &
-                        & (0.00020_fp-0.00015_fp)+6.0_fp*(dum(j)-1.0_fp)))
+                        & (0.00020_fp-0.00015_fp)+6.0_fp*(theta1-1.0_fp)))
         endif
         z0c=ksc/30.0_fp
         
-        if (i2d3d == 2) then ! 2d
-            fcc=2.0_fp*(0.4_fp/(log(d/z0c)-1.0_fp+z0c/d))**2
+!       current fricion factor assuming logarithmic current profile [-]
+        if (comparereal(unet,0.0_fp)==0) then
+            fcc = 0.0_fp
+        elseif (i2d3d == 2) then ! 2d
+            fcc = 2.0_fp*(0.4_fp/(log(d/z0c)-1.0_fp+z0c/d))**2
         else ! 3d
-            fcc=2.0_fp*(0.4_fp/log(zref/z0c))**2
+            fcc = 2.0_fp*(0.4_fp/log(zref/z0c))**2
         end if
-        j=j+1
-        dum(j)=0.5_fp*fcc*unet**2/(delta*g*d50)
+
+!       mean magnitude of bed shear stress [N/m2]
+        theta = 0.5_fp*fcc*unet**2/(delta*g*d50)
+        if (j>0) then
+            if (abs(theta - theta1) <= 0.001_fp) exit
+        endif
+        theta1 = theta
     enddo
-    theta=dum(j)  !total shields 
 
 !
 !   (ii) bed shear stress for only currents: tc, tt and x,y components stx, sty

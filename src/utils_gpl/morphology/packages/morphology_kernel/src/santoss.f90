@@ -9,7 +9,7 @@
 !! Computations of the orbital motions in the nearshore morphodynamical model
 !! using the formula of Abreu et al. (2010)
 !!
-subroutine santoss(numrealpar, realpar ,par ,dzduu ,dzdvv , i2d3d, &
+subroutine santoss(numrealpar, realpar ,par ,npar, dzduu ,dzdvv , i2d3d, &
                  & sbcu, sbcv, sbwu, sbwv, sswu, sswv , &
                  & error, message)
 !----- GPL ---------------------------------------------------------------------
@@ -49,13 +49,15 @@ subroutine santoss(numrealpar, realpar ,par ,dzduu ,dzdvv , i2d3d, &
 !
 ! arguments
 !
-    integer                         , intent(in)    :: i2d3d      !< 
-    integer                         , intent(in)    :: numrealpar !< 
+    integer                         , intent(in)    :: i2d3d      !< switch 2D/3D (2 = 2D, 3 = 3D)
+    integer                         , intent(in)    :: numrealpar !< number of parameters in realpar array
+    integer                         , intent(in)    :: npar       !< number of parameters in par array
     real(fp)                        , intent(in)    :: dzduu      !< slope in m direction [m/m]
     real(fp)                        , intent(in)    :: dzdvv      !< slope in n direction [m/m]
 !
-    real(hp), dimension(numrealpar) , intent(inout) :: realpar    !< 
-    real(fp), dimension(30)         , intent(inout) :: par        !< 
+    real(hp), dimension(numrealpar) , intent(in)    :: realpar    !< array of local conditions
+    real(fp), dimension(30)         , intent(inout) :: par        !< in: transport formula parameters
+                                                                  !! out: transport output variables
 !
     real(fp)                        , intent(out)   :: sbcu       !< bed load due to currents, m component [m3/m/s]
     real(fp)                        , intent(out)   :: sbcv       !< bed load due to currents, n component [m3/m/s]
@@ -63,8 +65,8 @@ subroutine santoss(numrealpar, realpar ,par ,dzduu ,dzdvv , i2d3d, &
     real(fp)                        , intent(out)   :: sbwv       !< bed load due to waves, n component [m3/m/s]
     real(fp)                        , intent(out)   :: sswu       !< susp load due to waves, m component [m3/m/s]
     real(fp)                        , intent(out)   :: sswv       !< susp load due to waves, n component [m3/m/s]
-    character(len=256)              , intent(out)   :: message    !< not empty: echo and stop run
-    logical                         , intent(out)   :: error      !< 
+    character(len=256)              , intent(out)   :: message    !< error message
+    logical                         , intent(out)   :: error      !< flag indicating whether an error occurred
 
 !
 ! local variables for input parameters
@@ -99,146 +101,146 @@ subroutine santoss(numrealpar, realpar ,par ,dzduu ,dzdvv , i2d3d, &
 !
 ! local variables
 !
-      integer                             :: i
+      integer                  :: i
       integer                             :: istat
-      integer                             :: j
-      integer                             :: nt
-      real(fp)                            :: ang        ! angle between net current direction and positive orbital velocity [deg]
-      real(fp)                            :: alphas
-      real(fp)                            :: alphar
-      real(fp)                            :: aw
-      real(fp)                            :: alpha
-      real(fp)                            :: ang_cur
-      real(fp)                            :: ang_ubot
-      real(fp)                            :: a1
-      real(fp)                            :: a2
-      real(fp)                            :: a3
-      real(fp)                            :: as
-      real(fp)                            :: b
-      real(fp)                            :: c1
-      real(fp)                            :: delwblt
-      real(fp)                            :: delta
-      real(fp)                            :: dzbds_c
-      real(fp)                            :: dzbds_t
-      real(fp)                            :: dstar      ! dimensionless grain-size [-]
-      real(fp)                            :: dstars     ! dimensionless grain size associated with representative grain size d50s [-]
-      real(fp)                            :: d50s       ! representative grain size [m]
-      real(fp)                            :: fc
-      real(fp)                            :: fw
-      real(fp)                            :: fcw
-      real(fp)                            :: fsl_cr_c
-      real(fp)                            :: fsl_cr_t
-      real(fp)                            :: fcwc
-      real(fp)                            :: fcwt
-      real(fp)                            :: hw         ! wave height  [m]
-      real(fp)                            :: ksw
-      real(fp)                            :: ksc
-      real(fp)                            :: k
-      real(fp)                            :: k0
-      real(fp)                            :: k1
-      real(fp)                            :: km
-      real(fp)                            :: l
-      real(fp)                            :: l0
-      real(fp)                            :: m1
-      real(fp)                            :: n1
-      real(fp)                            :: nr_timesteps
-      real(fp)                            :: ocr
-      real(fp)                            :: oc
-      real(fp)                            :: occ
-      real(fp)                            :: oct
-      real(fp)                            :: ot
-      real(fp)                            :: ott
-      real(fp)                            :: otc
-      real(fp)                            :: omega
-      real(fp)                            :: pcr       ! critical phase lag parameter [-]
-      real(fp)                            :: pc
-      real(fp)                            :: pt
-      real(fp)                            :: phi_ab
-      real(fp)                            :: phicx
-      real(fp)                            :: phitx
-      real(fp)                            :: phicy
-      real(fp)                            :: phity
-      real(fp)                            :: qsx
-      real(fp)                            :: qsy
-      real(fp)                            :: qsu
-      real(fp)                            :: qsv
-      real(fp)                            :: r
-      real(fp)                            :: rh
-      real(fp)                            :: rl
-      real(fp)                            :: r_ab
-      real(fp)                            :: sfltc
-      real(fp)                            :: sfltt
-      real(fp)                            :: sflt
-      real(fp)                            :: scr
-      real(fp)                            :: scr_c
-      real(fp)                            :: scr_t
-      real(fp)                            :: sc
-      real(fp)                            :: s1
-      real(fp)                            :: sk
-      real(fp)                            :: st
-      real(fp)                            :: swc
-      real(fp)                            :: swt
-      real(fp)                            :: scx
-      real(fp)                            :: scy
-      real(fp)                            :: stx
-      real(fp)                            :: sty
-      real(fp)                            :: sc_sflt
-      real(fp)                            :: st_sflt
-      real(fp)                            :: swt_sflt
-      real(fp)                            :: swcrepr
-      real(fp)                            :: swtrepr
-      real(fp)                            :: swc_sflt
-      real(fp)                            :: screpr
-      real(fp)                            :: strepr
-      real(fp)                            :: scxrepr
-      real(fp)                            :: scyrepr
-      real(fp)                            :: stxrepr
-      real(fp)                            :: styrepr
-      real(fp)                            :: screpr_v
-      real(fp)                            :: screpr_u
-      real(fp)                            :: strepr_v
-      real(fp)                            :: strepr_u
-      real(fp)                            :: tc
-      real(fp)                            :: tt
-      real(fp)                            :: tcu
-      real(fp)                            :: tcd
-      real(fp)                            :: ttu
-      real(fp)                            :: ttd
+      integer                  :: j
+      integer                  :: nt
+      real(fp)                 :: ang        ! angle between net current direction and positive orbital velocity [deg]
+      real(fp)                 :: alphas
+      real(fp)                 :: alphar
+      real(fp)                 :: aw
+      real(fp)                 :: alpha
+      real(fp)                 :: ang_cur
+      real(fp)                 :: ang_ubot
+      real(fp)                 :: a1
+      real(fp)                 :: a2
+      real(fp)                 :: a3
+      real(fp)                 :: as
+      real(fp)                 :: b
+      real(fp)                 :: c1
+      real(fp)                 :: delwblt
+      real(fp)                 :: delta
+      real(fp)                 :: dzbds_c
+      real(fp)                 :: dzbds_t
+      real(fp)                 :: dstar      ! dimensionless grain-size [-]
+      real(fp)                 :: dstars     ! dimensionless grain size associated with representative grain size d50s [-]
+      real(fp)                 :: d50s       ! representative grain size [m]
+      real(fp)                 :: fc
+      real(fp)                 :: fw
+      real(fp)                 :: fcw
+      real(fp)                 :: fsl_cr_c
+      real(fp)                 :: fsl_cr_t
+      real(fp)                 :: fcwc
+      real(fp)                 :: fcwt
+      real(fp)                 :: hw         ! wave height  [m]
+      real(fp)                 :: ksw
+      real(fp)                 :: ksc
+      real(fp)                 :: k
+      real(fp)                 :: k0
+      real(fp)                 :: k1
+      real(fp)                 :: km
+      real(fp)                 :: l
+      real(fp)                 :: l0
+      real(fp)                 :: m1
+      real(fp)                 :: n1
+      real(fp)                 :: nr_timesteps
+      real(fp)                 :: ocr
+      real(fp)                 :: oc
+      real(fp)                 :: occ
+      real(fp)                 :: oct
+      real(fp)                 :: ot
+      real(fp)                 :: ott
+      real(fp)                 :: otc
+      real(fp)                 :: omega
+      real(fp)                 :: pcr       ! critical phase lag parameter [-]
+      real(fp)                 :: pc
+      real(fp)                 :: pt
+      real(fp)                 :: phi_ab
+      real(fp)                 :: phicx
+      real(fp)                 :: phitx
+      real(fp)                 :: phicy
+      real(fp)                 :: phity
+      real(fp)                 :: qsx
+      real(fp)                 :: qsy
+      real(fp)                 :: qsu
+      real(fp)                 :: qsv
+      real(fp)                 :: r
+      real(fp)                 :: rh
+      real(fp)                 :: rl
+      real(fp)                 :: r_ab
+      real(fp)                 :: sfltc
+      real(fp)                 :: sfltt
+      real(fp)                 :: sflt
+      real(fp)                 :: scr
+      real(fp)                 :: scr_c
+      real(fp)                 :: scr_t
+      real(fp)                 :: sc
+      real(fp)                 :: s1
+      real(fp)                 :: sk
+      real(fp)                 :: st
+      real(fp)                 :: swc
+      real(fp)                 :: swt
+      real(fp)                 :: scx
+      real(fp)                 :: scy
+      real(fp)                 :: stx
+      real(fp)                 :: sty
+      real(fp)                 :: sc_sflt
+      real(fp)                 :: st_sflt
+      real(fp)                 :: swt_sflt
+      real(fp)                 :: swcrepr
+      real(fp)                 :: swtrepr
+      real(fp)                 :: swc_sflt
+      real(fp)                 :: screpr
+      real(fp)                 :: strepr
+      real(fp)                 :: scxrepr
+      real(fp)                 :: scyrepr
+      real(fp)                 :: stxrepr
+      real(fp)                 :: styrepr
+      real(fp)                 :: screpr_v
+      real(fp)                 :: screpr_u
+      real(fp)                 :: strepr_v
+      real(fp)                 :: strepr_u
+      real(fp)                 :: tc
+      real(fp)                 :: tt
+      real(fp)                 :: tcu
+      real(fp)                 :: tcd
+      real(fp)                 :: ttu
+      real(fp)                 :: ttd
       real(fp), dimension(:), allocatable :: tw
-      real(fp)                            :: theta
-      real(fp)                            :: unet_delwbltzero
-      real(fp)                            :: ustar
-      real(fp)                            :: unet      ! magnitude of current velocity [umod] at reference level zumod [m/s]
-      real(fp)                            :: urms      ! rootmeansquare orbital velocity [m/s]
-      real(fp)                            :: uwc
-      real(fp)                            :: uwt
-      real(fp)                            :: uw
-      real(fp)                            :: uwcrepr
-      real(fp)                            :: uwtrepr
+      real(fp)                 :: theta
+      real(fp)                 :: ustar
+      real(fp)                 :: unet      ! magnitude of current velocity [umod] at reference level zumod [m/s]
+      real(fp)                 :: urms      ! rootmeansquare orbital velocity [m/s]
+      real(fp)                 :: uwc
+      real(fp)                 :: uwt
+      real(fp)                 :: uw
+      real(fp)                 :: uwcrepr
+      real(fp)                 :: uwtrepr
       real(fp), dimension(:), allocatable :: uorb_time_serie
-      real(fp)                            :: ur
-      real(fp)                            :: ucxrepr
-      real(fp)                            :: ucyrepr
-      real(fp)                            :: ucrepr
-      real(fp)                            :: utxrepr
-      real(fp)                            :: utyrepr
-      real(fp)                            :: utrepr
-      real(fp)                            :: ucx
-      real(fp)                            :: ucy
-      real(fp)                            :: utx
-      real(fp)                            :: uty
-      real(fp)                            :: uc
-      real(fp)                            :: ut
-      real(fp)                            :: unet_delwblt
-      real(fp)                            :: uwmax
-      real(fp)                            :: uwmin
-      real(fp)                            :: wss
-      real(fp)                            :: zref           ! reference level net current velocity [m]
+      real(fp)                 :: ur
+      real(fp)                 :: ucxrepr
+      real(fp)                 :: ucyrepr
+      real(fp)                 :: ucrepr
+      real(fp)                 :: utxrepr
+      real(fp)                 :: utyrepr
+      real(fp)                 :: utrepr
+      real(fp)                 :: ucx
+      real(fp)                 :: ucy
+      real(fp)                 :: utx
+      real(fp)                 :: uty
+      real(fp)                 :: uc
+      real(fp)                 :: ut
+      real(fp)                 :: unet_delwblt
+      real(fp)                 :: uwmax
+      real(fp)                 :: uwmin
+      real(fp)                 :: wss
+      real(fp)                 :: zref           ! reference level net current velocity [m]
 !
 !! executable statements -------------------------------------------------------
 !
-    allocate(tw             (200), STAT = istat)
-    allocate(uorb_time_serie(200), STAT = istat)
+    nt = 200 ! must equal length of tw, uorb_time_serie, and ub_ts, ab_ts in santoss_orb
+    allocate(tw             (nt), STAT = istat)
+    allocate(uorb_time_serie(nt), STAT = istat)
     !
     d         = real(realpar(RP_DEPTH),fp)  ! d water depth [m]
     d50       = real(realpar(RP_D50)  ,fp)  ! sediment diameter of fraction [m]
@@ -315,7 +317,6 @@ subroutine santoss(numrealpar, realpar ,par ,dzduu ,dzdvv , i2d3d, &
             uwmax = max(uwmax,uorb_time_serie(i))
             uwmin = min(uwmin,uorb_time_serie(i))
         enddo
-        unet_delwbltzero = 0.0_fp ! dummy
 
         if (comparereal(uwmax,0.0_fp) == 0 .and. comparereal(uwmin,0.0_fp) == 0) then
             uw      =  0.0_fp
@@ -338,15 +339,13 @@ subroutine santoss(numrealpar, realpar ,par ,dzduu ,dzdvv , i2d3d, &
         else
 !
 !           calculate orbital periods and velocities
+!           for this first call set unet = 0.
 !
-            call santoss_orb(nt, as_effects, tw, uorb_time_serie, unet_delwbltzero, ang, tp, &
+            call santoss_orb(nt, as_effects, tw, uorb_time_serie, 0.0_fp, ang, tp, &
                      & rhowat, d, hw, aw, uw, uwc, uwt, uwcrepr, uwtrepr, &
                      & tc, tcu, tcd, tt, ttu, ttd, uc, ut, ucx, utx, ucy, uty, &
                      & ucxrepr, utxrepr, ucrepr, utrepr, b)
         endif
-!
-!       wave-induced current not considered as real current
-!
         delta = (rhosol-rhowat)/rhowat
 !
 !       calculate ripple height and length

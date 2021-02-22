@@ -424,7 +424,7 @@ subroutine tram2 (numrealpar,realpar   ,wave      ,i2d3d     ,npar      , &
            par(17) = rksrs
        elseif (iform == -4) then
            ! extended SANTOSS bed load
-           call santoss(numrealpar, realpar, par, dzduu, dzdvv, i2d3d, &
+           call santoss(numrealpar, realpar, par, npar, dzduu, dzdvv, i2d3d, &
                       & sbcu, sbcv, sbwu, sbwv, sswu, sswv , &
                       & error, message)
        endif

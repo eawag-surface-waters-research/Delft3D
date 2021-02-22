@@ -47,10 +47,10 @@ subroutine santoss_orb(nt, as_effects, tw, uorb, unet, ang, tp, &
 !
 ! arguments
 !
-    integer                 , intent(in)    :: nt            ! number of timesteps in tw and uorb
+    integer                 , intent(in)    :: nt            ! number of timesteps in tw and uorb; must equal 200!
     integer                 , intent(in)    :: as_effects
-    real(fp), dimension(200), intent(in)    :: tw            ! time of the uorb (200 datapoints)
-    real(fp), dimension(200), intent(in)    :: uorb          ! time serie of orbital velocity one wave cycle (200 datapoints)
+    real(fp), dimension(nt) , intent(in)    :: tw            ! time of the uorb
+    real(fp), dimension(nt) , intent(in)    :: uorb          ! time serie of orbital velocity one wave cycle
     real(fp)                , intent(in)    :: unet          ! flow velocity
     real(fp)                , intent(in)    :: ang           ! angle between waves direction and current direction
     real(fp)                , intent(in)    :: tp            ! peak wave period
@@ -111,8 +111,8 @@ subroutine santoss_orb(nt, as_effects, tw, uorb, unet, ang, tp, &
 !
 !! executable statements -------------------------------------------------------
 !
-    allocate(ab_ts(200), STAT = istat)
-    allocate(ub_ts(200), STAT = istat)
+    allocate(ab_ts(nt), STAT = istat)
+    allocate(ub_ts(nt), STAT = istat)
 
     dt = tp/nt
 
@@ -166,27 +166,6 @@ subroutine santoss_orb(nt, as_effects, tw, uorb, unet, ang, tp, &
             u_min = ub_ts(i)
          endif
     enddo
-!
-!   definition of zero-crossing (neg-pos and pos-neg)
-!
-    do i=1,nt
-        i_prev = i-1
-        if (i == 1)   i_prev = nt
-!       define zero-crossing ub_ts based on neg-pos
-        if (ub_ts(i_prev) < 0.0_fp .and. ub_ts(i) >= 0.0_fp) then
-            if (i_prev /= nt) then
-                t_0_np = tw(i)+(0.0_fp-ub_ts(i_prev))/(ub_ts(i)-ub_ts(i_prev))*(tw(i)-tw(i_prev))
-            else
-                t_0_np = tw(i)+(0.0_fp-ub_ts(i_prev))/(ub_ts(i)-ub_ts(i_prev))*(tw(i)-0.0_fp)
-            endif
-        elseif (ub_ts(i_prev) >= 0.0_fp .and. ub_ts(i) < 0.0_fp) then
-            if (i_prev /= nt) then
-                t_0_pn = tw(i)+(0.0_fp-ub_ts(i_prev))/(ub_ts(i)-ub_ts(i_prev))*(tw(i)-tw(i_prev))
-            else
-                t_0_pn = tw(i)+(0.0_fp-ub_ts(i_prev))/(ub_ts(i)-ub_ts(i_prev))*(tw(i)-0.0_fp)
-            endif
-        endif
-    enddo
 
     if (u_max > 0.0_fp .and. u_min > 0.0_fp) then
         tc = tp
@@ -217,14 +196,36 @@ subroutine santoss_orb(nt, as_effects, tw, uorb, unet, ang, tp, &
             ttd = tt-ttu
         endif
     else
+        !
+        !   definition of zero-crossing (neg-pos and pos-neg)
+        !
+        do i=1,nt
+            i_prev = i-1
+            if (i == 1)   i_prev = nt
+            ! define zero-crossing ub_ts based on neg-pos
+            if (ub_ts(i_prev) < 0.0_fp .and. ub_ts(i) >= 0.0_fp) then
+                if (i_prev /= nt) then
+                    t_0_np = tw(i)+(0.0_fp-ub_ts(i_prev))/(ub_ts(i)-ub_ts(i_prev))*(tw(i)-tw(i_prev))
+                else
+                    t_0_np = tw(i)+(0.0_fp-ub_ts(i_prev))/(ub_ts(i)-ub_ts(i_prev))*(tw(i)-0.0_fp)
+                endif
+            elseif (ub_ts(i_prev) >= 0.0_fp .and. ub_ts(i) < 0.0_fp) then
+                if (i_prev /= nt) then
+                    t_0_pn = tw(i)+(0.0_fp-ub_ts(i_prev))/(ub_ts(i)-ub_ts(i_prev))*(tw(i)-tw(i_prev))
+                else
+                    t_0_pn = tw(i)+(0.0_fp-ub_ts(i_prev))/(ub_ts(i)-ub_ts(i_prev))*(tw(i)-0.0_fp)
+                endif
+            endif
+        enddo
+
         if (t_0_pn > t_0_np) then
             tc  = t_0_pn-t_0_np
             tt  = tp-tc
-            tcu = t_max- t_0_np   !is t_max always larger than t_0_np?
+            tcu = t_max- t_0_np
         else
             tt  = t_0_np-t_0_pn
             tc  = tp-tt
-            tcu = t_max+tp-t_0_np !this works if u(o) > 0, and tmax < t_0_pn                        
+            tcu = t_max+tp-t_0_np
         endif
         if (as_effects == 0) then
             tcd = 0.5_fp*tc
@@ -233,7 +234,7 @@ subroutine santoss_orb(nt, as_effects, tw, uorb, unet, ang, tp, &
             ttu = 0.5_fp*tt
         else
             tcd = tc - tcu
-            ttu = t_min - t_0_pn !is t_min always larger than t_0_pn?
+            ttu = t_min - t_0_pn
             ttd = tt - ttu
         endif
     endif

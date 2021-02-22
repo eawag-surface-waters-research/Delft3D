@@ -49,10 +49,10 @@ subroutine santoss_abreu(hrms, km, d, r_ab, phi_ab, urms, tp, nt, tw, uorb)
     real(fp)                , intent(in)  :: phi_ab
     real(fp)                , intent(in)  :: urms
     real(fp)                , intent(in)  :: tp
+    integer                 , intent(in)  :: nt
 !
-    integer                 , intent(out) :: nt
-    real(fp), dimension(200), intent(out) :: tw
-    real(fp), dimension(200), intent(out) :: uorb
+    real(fp), dimension(nt) , intent(out) :: tw
+    real(fp), dimension(nt) , intent(out) :: uorb
 !
 ! local variables
 !
@@ -67,7 +67,6 @@ subroutine santoss_abreu(hrms, km, d, r_ab, phi_ab, urms, tp, nt, tw, uorb)
 !   input variables f and n for Abreu formula
 !
     f_ab  = sqrt(1.0_fp-r_ab**2)  ! underneath eq. (7)
-    nt    = 200
 
 !   determine orbital amplitude (linear wave theory)
     uw    = sqrt2*urms

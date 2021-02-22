@@ -128,7 +128,6 @@ subroutine santoss_core(pl_effects, sw_effects, g, d50, d, hw, rhos, rhow, &
 !
 !! executable statements -------------------------------------------------------
 !
-!
 !   calculation phase-lag parameters [-]
 !
 !   calculate maximum vertical orbital velocity for real waves (zero for other)
@@ -193,32 +192,32 @@ subroutine santoss_core(pl_effects, sw_effects, g, d50, d, hw, rhos, rhow, &
 !
 !   load components [-]
 !
-    oc = m*max((sc-scr_c),0.0_fp)**n      ! load entrained during crest period
+    oc = m*max((sc-scr_c),0.0_fp)**n            ! load entrained during crest period
     if( pc <= 1.0_fp) then
-        occ = oc                          ! load entrained and transported during crest period
+        occ = oc                                ! load entrained and transported during crest period
         oct = 0.0_fp
     else ! pc > 1.0_fp
         occ=min(pcr/pc,1.0_fp)*oc
-        if  (abs(tc) < eps_fp) then       ! check zero value ttrough
-            tmp = 1.0_fp                  ! limit goes to 1. Normal calculation goes to NaN and otc becomes 0 and not otc
+        if  (abs(tc) < eps_fp) then             ! check zero value t_crest
+            tmp = 1.0_fp                        ! limit goes to 1. Normal calculation goes to NaN and otc becomes 0 and not otc
         else
-            tmp = (pc-pcr)/pc             ! normal calculation
+            tmp = (pc-pcr)/pc                   ! normal calculation
         endif
-        oct = max(tmp,0.0_fp)*oc            ! load entrained during crest period and transported during trough period
+        oct = max(tmp,0.0_fp)*oc                ! load entrained during crest period and transported during trough period
     endif
 
-    ot = m*max((abs(st)-scr_t),0.0_fp)**n   ! load entrained during trough period
+    ot = m*max((abs(st)-scr_t),0.0_fp)**n       ! load entrained during trough period
     if( pt <= 1.0_fp) then
         ott=ot
         otc=0.0_fp
     else ! pt > 1.0_fp
-        ott=min(pcr/pt,1.0_fp)*ot          ! load entrained and transported during trough period
-        if (abs(tt) < eps_fp) then         ! check zero value ttrough
-            tmp = 1.0_fp                   ! limit goes to 1. Normal calculation goes to nan and otc becomes 0 and not ot
+        ott=min(pcr/pt,1.0_fp)*ot               ! load entrained and transported during trough period
+        if (abs(tt) < eps_fp) then              ! check zero value t_trough
+            tmp = 1.0_fp                        ! limit goes to 1. Normal calculation goes to nan and otc becomes 0 and not ot
         else
-            tmp = (pt-pcr)/pt              ! normal calculation
+            tmp = (pt-pcr)/pt                   ! normal calculation
         endif
-        otc = max(tmp,0.0_fp)*ot           ! entrained during trough period and transported during crest period
+        otc = max(tmp,0.0_fp)*ot                ! entrained during trough period and transported during crest period
     endif
 
 !
