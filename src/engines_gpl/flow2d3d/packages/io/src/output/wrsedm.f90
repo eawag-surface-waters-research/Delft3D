@@ -392,7 +392,7 @@ subroutine wrsedm(lundia    ,error     ,mmax      ,kmax      ,nmaxus    , &
        if (moroutput%hidexp) then
           call addelm(gdp, lundia, FILOUT_MAP, grpnam, 'HIDEXP', ' ', io_prec    , 3, dimids=(/iddim_n, iddim_m, iddim_lsedtot/), longname='Hiding and exposure factor', acl='z')
        endif
-       if (moroutput%sedparout) then
+       if (moroutput%sedpar) then
           do l = 1, lsedtot
              write(sednr,'(I3.3)') l
              do k = 1, noutpar(l)
@@ -1230,7 +1230,7 @@ subroutine wrsedm(lundia    ,error     ,mmax      ,kmax      ,nmaxus    , &
           if (ierror /= 0) goto 9999
        endif
        !
-       if (moroutput%sedparout) then
+       if (moroutput%sedpar) then
           allocate( rbuff2(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) )
           i = 0
           do l = 1, lsedtot

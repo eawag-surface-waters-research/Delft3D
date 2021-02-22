@@ -1183,7 +1183,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
                        & sbwv(nm,l),sswu(nm,l),sswv(nm,l),tdss      ,caks_ss3d , &
                        & aks_ss3d  ,ust2(nm)  ,tsd       ,error     )
              if (error) call d3stop(1, gdp)
-             if (gdp%gdmorpar%moroutput%sedparout) then
+             if (gdp%gdmorpar%moroutput%sedpar) then
                  do i = 1,gdp%gdtrapar%noutpar(l)
                      j = gdp%gdtrapar%ioutpar(i,l)
                      gdp%gdtrapar%outpar(j, nm) = localpar(i)
@@ -1266,7 +1266,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
                        & sbwv(nm,l),sswu(nm,l),sswv(nm,l),tdss      ,caks_ss3d , &
                        & aks_ss3d  ,ust2(nm)  ,tsd       ,error     )
              if (error) call d3stop(1, gdp)
-             if (gdp%gdmorpar%moroutput%sedparout) then
+             if (gdp%gdmorpar%moroutput%sedpar) then
                  do i = 1,gdp%gdtrapar%noutpar(l)
                      j = gdp%gdtrapar%ioutpar(i,l)
                      gdp%gdtrapar%outpar(j, nm) = localpar(i)

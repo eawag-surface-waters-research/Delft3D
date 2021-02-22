@@ -750,7 +750,8 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
        call prop_get_logical(mor_ptr, 'Output', 'SettlingVelocity'            , moroutput%ws)
        call prop_get_logical(mor_ptr, 'Output', 'RawTransportsAtZeta'         , moroutput%rawtransports)
        call prop_get_logical(mor_ptr, 'Output', 'Seddif'                      , moroutput%seddif)
-       call prop_get_logical(mor_ptr, 'Output', 'SedParOut'                   , moroutput%sedparout)
+       call prop_get_logical(mor_ptr, 'Output', 'SedParOut'                   , moroutput%sedpar) ! backward compatibility
+       call prop_get_logical(mor_ptr, 'Output', 'SedPar'                      , moroutput%sedpar)
        !
        call prop_get_logical(mor_ptr, 'Output', 'Bedslope'                    , moroutput%dzduuvv)
        call prop_get_logical(mor_ptr, 'Output', 'Taurat'                      , moroutput%taurat)
