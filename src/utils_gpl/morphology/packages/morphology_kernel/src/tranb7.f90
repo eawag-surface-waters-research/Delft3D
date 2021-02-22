@@ -39,7 +39,7 @@ subroutine tranb7(utot      ,d50       ,d90       ,h         ,npar      , &
     use precision
     implicit none
 !
-! Call variables
+! Arguments
 !
     integer                  , intent(in)    :: npar
     real(fp)                 , intent(in)    :: d50     ! grain size diameter (first specified diameter)

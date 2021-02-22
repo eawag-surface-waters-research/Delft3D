@@ -57,7 +57,7 @@ subroutine initrafrm(lundia    ,error     ,lsedtot   ,trapar    )
     !
     implicit none
     !
-! Call variables
+! Arguments
     !
     integer                   , intent(in)   :: lundia
     logical                   , intent(out)  :: error
@@ -241,7 +241,7 @@ subroutine rdtrafrm(lundia    ,error     ,filtrn    ,lsedtot   , &
     !
     implicit none
     !
-    ! Call variables
+    ! Arguments
     !
     integer                      , intent(in)   :: npardef
     integer                      , intent(in)   :: lundia
@@ -430,7 +430,7 @@ subroutine rdtrafrm0(lundia    ,error     ,iform     ,npar      ,par       , &
     !
     implicit none
 !
-! Call variables
+! Arguments
 !
     integer                       , intent(in)   :: npardef
     integer                                      :: lundia  !  Description and declaration in inout.igs
@@ -726,7 +726,7 @@ subroutine rdtraparfld(lundia    ,error     ,lsedtot   ,trapar    , &
     !
     implicit none
     !
-    ! Call variables
+    ! Arguments
     !
     integer                      , intent(in)   :: lundia
     logical                      , intent(out)  :: error
@@ -797,7 +797,7 @@ subroutine setpardeflog(ipardef   ,rpardef   ,npardef   ,iform     , &
     !
     implicit none
 !
-! Call variables
+! Arguments
 !
     integer                       , intent(in)    :: npardef
     integer, dimension(2,npardef) , intent(inout) :: ipardef
@@ -830,7 +830,7 @@ subroutine setpardefint(ipardef   ,rpardef   ,npardef   ,iform     , &
     !
     implicit none
 !
-! Call variables
+! Arguments
 !
     integer                       , intent(in)    :: npardef
     integer, dimension(2,npardef) , intent(inout) :: ipardef
@@ -862,7 +862,7 @@ subroutine setpardefreal(ipardef   ,rpardef   ,npardef   ,iform     , &
     !
     implicit none
 !
-! Call variables
+! Arguments
 !
     integer                       , intent(in)    :: npardef
     integer, dimension(2,npardef) , intent(inout) :: ipardef
@@ -898,7 +898,7 @@ subroutine getpardef(ipardef   ,rpardef   ,npardef   ,iform     ,pardef    )
     !
     implicit none
 !
-! Call variables
+! Arguments
 !
     integer                       , intent(in)    :: npardef
     integer, dimension(2,npardef) , intent(in)    :: ipardef
@@ -933,7 +933,7 @@ subroutine echotrafrm(lundia    ,trapar      ,ifrac     )
     !
     implicit none
 !
-! Call variables
+! Arguments
 !
     integer                                      :: lundia  !  Description and declaration in inout.igs
     type(trapar_type)              , intent(in)  :: trapar
@@ -987,7 +987,7 @@ subroutine traparams(iform     ,name      ,nparreq   ,nparopt   ,parkeyw   , &
     !
     implicit none
 !
-! Call variables
+! Arguments
 !
     integer                       , intent(in)  :: iform
     character(*)                  , intent(out) :: name

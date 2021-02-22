@@ -42,7 +42,7 @@ subroutine trab20(u         ,v         ,hrms      ,rlabda    ,teta      ,h      
     !
     implicit none
 !
-! Call variables
+! Arguments
 !
     logical                  , intent(in)    :: ubot_from_com
     integer                  , intent(in)    :: npar

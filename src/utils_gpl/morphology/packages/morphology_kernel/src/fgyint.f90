@@ -37,7 +37,7 @@ function fgyint(a         ,b         ,z         ,eps       ,terfgy    )
     use precision
     implicit none
 !
-! Call variables
+! Arguments
 !
     real(fp), intent(in)  :: a
     real(fp), intent(in)  :: b

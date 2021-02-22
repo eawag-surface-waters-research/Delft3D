@@ -59,7 +59,7 @@ subroutine compdiam(frac      ,seddm     ,sedd50    ,sedtyp    ,lsedtot   , &
     !
     implicit none
 !
-! Call variables
+! Arguments
 !
     integer                                             , intent(in)  :: lsedtot   ! number of sediment fractions
     integer                                             , intent(in)  :: nmmax     ! last space index to be processed

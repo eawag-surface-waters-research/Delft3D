@@ -75,7 +75,7 @@ subroutine rdstm(stm, griddim, filsed, filmor, filtrn, &
     !
     implicit none
 !
-! Call variables
+! Arguments
 !
     type(stmtype)               , intent(out) :: stm
     type(griddimtype)   , target, intent(in)  :: griddim
@@ -247,7 +247,7 @@ function clrstm(stm) result(istat)
     use m_ini_noderel
     implicit none
 !
-! Call variables
+! Arguments
 !
     type(stmtype)   , intent(inout) :: stm
     integer                         :: istat

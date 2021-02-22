@@ -41,7 +41,7 @@ subroutine factor3d2d(kmax      ,aks       ,kmaxsd    ,sig       ,thick     , &
     !
     implicit none
 !
-! Call variables
+! Arguments
 !
     integer                         , intent(in)   :: kmax     ! number of layers
     integer                         , intent(out)  :: kmaxsd   ! layer above reference height

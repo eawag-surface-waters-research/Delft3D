@@ -38,7 +38,7 @@ function shld(dstar     )
     use precision
     implicit none
 !
-! Call variables
+! Arguments
 !
     real(fp), intent(in) :: dstar ! critical dimensionless grain size parameter
     real(fp)         :: shld

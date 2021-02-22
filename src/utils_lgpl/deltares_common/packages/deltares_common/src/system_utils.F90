@@ -65,7 +65,7 @@ function cat_filename(path, file, ext) result(name)
     !
     implicit none
     !
-    ! Call variables
+    ! Arguments
     !
     character(*)          , intent(in) :: path   ! Path name
     character(*)          , intent(in) :: file   ! File name
@@ -114,7 +114,7 @@ subroutine split_filename(name, path, file, ext)
     !
     implicit none
     !
-    ! Call variables
+    ! Arguments
     !
     character(*)          , intent(in)  :: name   ! Full name of file (path,file,ext)
     character(*)          , intent(out) :: path   ! Path name
@@ -166,7 +166,7 @@ subroutine remove_path(name, file)
     !
     implicit none
     !
-    ! Call variables
+    ! Arguments
     !
     character(*)          , intent(in)  :: name   ! Full name of file (path,file,ext)
     character(*)          , intent(out) :: file   ! File name (including extension if ext is present)
@@ -201,7 +201,7 @@ function exifil(name, unit)
     !
     implicit none
     !
-    ! Call variables
+    ! Arguments
     !
     integer  , optional  :: unit   ! File unit number for 
     logical              :: exifil

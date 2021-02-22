@@ -50,7 +50,7 @@ subroutine tram2 (numrealpar,realpar   ,wave      ,i2d3d     ,npar      , &
     !
     implicit none
 !
-! Call variables
+! Arguments
 !
     logical                         , intent(in)   :: scour
     logical                         , intent(in)   :: wave

@@ -47,7 +47,7 @@ subroutine osmom(hrms      ,depth     ,tp        ,g         ,cr        , &
     integer , save :: itable
     real(fp), dimension(0:40, 0:40, 12), save :: table               ! Table containing the moments
 !
-! Call variables
+! Arguments
 !
     real(fp), intent(in) :: cr
     real(fp), intent(in) :: depth

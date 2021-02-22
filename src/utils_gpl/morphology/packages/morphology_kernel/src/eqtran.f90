@@ -61,7 +61,7 @@ subroutine eqtran(sig       ,thick     ,kmax      ,ws        ,ltur      , &
     !
     implicit none
 !
-! Call variables
+! Arguments
 !
     integer(pntrsize)                   , intent(in)    :: dllhandle
     integer                             , intent(in)    :: i2d3d

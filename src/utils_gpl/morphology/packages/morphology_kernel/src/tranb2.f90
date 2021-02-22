@@ -38,7 +38,7 @@ subroutine tranb2(utot      ,d50       ,d90       ,chezy     ,h         , &
     use precision
     implicit none
 !
-! Call variables
+! Arguments
 !
     integer                  , intent(in)    :: npar
     real(fp)                 , intent(in)    :: chezy

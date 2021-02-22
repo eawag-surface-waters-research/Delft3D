@@ -47,7 +47,7 @@ subroutine morini2waqdef(morpar, sedpar, trapar, waqmor)
     !
     implicit none
 !
-! Call variables
+! Arguments
 !
     type (morpar_type)                       , pointer     :: morpar
     type (sedpar_type)                       , pointer     :: sedpar
@@ -216,7 +216,7 @@ subroutine addpar(waqmor,newpar,rval,ival)
     use m_alloc
     implicit none
 !
-! Call variables
+! Arguments
 !
     type (waqsimtype)                          :: waqmor
     character(*)               , intent(in)    :: newpar
@@ -254,7 +254,7 @@ subroutine addfldex(waqmor,newfld,cval)
     use m_alloc
     implicit none
 !
-! Call variables
+! Arguments
 !
     type (waqsimtype)                          :: waqmor
     character(*)               , intent(in)    :: newfld
@@ -294,7 +294,7 @@ subroutine addfld(waqmor,newfld,rval)
     use m_alloc
     implicit none
 !
-! Call variables
+! Arguments
 !
     type (waqsimtype)                            :: waqmor
     character(*)                    , intent(in) :: newfld
@@ -344,7 +344,7 @@ subroutine addsubs(waqmor,newsubs,transp,subsmult)
     use m_alloc
     implicit none
 !
-! Call variables
+! Arguments
 !
     type (waqsimtype)                          :: waqmor
     character(*)               , intent(in)    :: newsubs
@@ -385,7 +385,7 @@ subroutine addprocess(waqmor,newproc)
     use m_alloc
     implicit none
 !
-! Call variables
+! Arguments
 !
     type (waqsimtype)                          :: waqmor
     character(*)               , intent(in)    :: newproc
@@ -417,7 +417,7 @@ subroutine addoutput(waqmor,newoutput)
     use m_alloc
     implicit none
 !
-! Call variables
+! Arguments
 !
     type (waqsimtype)                          :: waqmor
     character(*)               , intent(in)    :: newoutput

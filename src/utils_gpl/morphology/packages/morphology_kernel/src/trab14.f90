@@ -40,7 +40,7 @@ subroutine trab14(utot      ,d50       ,chezy     ,npar      ,par       , &
     !
     implicit none
 !
-! Call variables
+! Arguments
 !
     integer                  , intent(in)    :: npar
     real(fp)                 , intent(in)    :: chezy  ! chezy value

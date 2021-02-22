@@ -53,7 +53,7 @@ subroutine bedbc2004(tp        ,rhowat    , &
     !
     implicit none
 !
-! Call variables
+! Arguments
 !
     integer, intent(in)   :: i2d3d
     real(fp), intent(out) :: aks    !  Description and declaration in esm_alloc_real.f90

@@ -47,7 +47,7 @@ subroutine bedbc1993(tp        ,uorb      ,rhowat    ,h1        ,umod      , &
     !
     implicit none
 !
-! Call variables
+! Arguments
 !
     real(fp), intent(out) :: aks    !  Description and declaration in esm_alloc_real.f90
     real(fp), intent(out) :: awb

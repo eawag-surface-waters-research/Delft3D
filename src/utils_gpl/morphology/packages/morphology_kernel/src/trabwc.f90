@@ -41,7 +41,7 @@ subroutine trabwc(utot      ,di        ,taub      ,npar      ,par       , &
     !
     implicit none
 !
-! Call variables
+! Arguments
 !
     integer                  , intent(in)    :: npar
     real(fp)                 , intent(in)    :: chezy  ! local Chézy value [m1/2/s]

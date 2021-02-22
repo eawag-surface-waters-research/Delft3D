@@ -45,7 +45,7 @@ subroutine comphidexp(frac      ,dm        ,nmmax     ,lsedtot   , &
     real(hp), parameter :: log10_19 = 1.27875360095283_hp
     real(fp), parameter :: dmmin    = 1.0e-4_fp                                  ! minimum value of dm
 !
-! Call variables
+! Arguments
 !
     integer                                             , intent(in)  :: lsedtot
     integer                                             , intent(in)  :: nmlb

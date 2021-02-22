@@ -198,7 +198,7 @@ function poi_read(waqsim, filename) result (success)
 !!--declarations----------------------------------------------------------------
     implicit none
 !
-! Call variables
+! Arguments
 !
     type (waqsimtype)                                      :: waqsim
     character(*)                                           :: filename
@@ -236,7 +236,7 @@ function hyd_read(hyd_file, hyd) result (success)
 !!--declarations----------------------------------------------------------------
     implicit none
 !
-! Call variables
+! Arguments
 !
     type (hydtype)                                         :: hyd
     character(*)                                           :: hyd_file
@@ -477,7 +477,7 @@ subroutine token2time(token,time)
 !!--declarations----------------------------------------------------------------
     implicit none
 !
-! Call variables
+! Arguments
 !
     character(*)                                           :: token
     integer, dimension(6)                                  :: time
@@ -502,7 +502,7 @@ end subroutine token2time
 !!!--declarations----------------------------------------------------------------
 !    implicit none
 !!
-!! Call variables
+!! Arguments
 !!
 !    type (waqsimtype)                        , target      :: waqsim
 !    character(*)                                           :: procdef_file
@@ -597,7 +597,7 @@ end subroutine token2time
 !!!--declarations----------------------------------------------------------------
 !    implicit none
 !!
-!! Call variables
+!! Arguments
 !!
 !    type (waqsimtype)                        , target      :: waqsim
 !    logical                                                :: success
@@ -627,7 +627,7 @@ end subroutine token2time
 !!!--declarations----------------------------------------------------------------
 !    implicit none
 !!
-!! Call variables
+!! Arguments
 !!
 !    type (waqsimtype)                                      :: waqsim
 !    character(*)                             , intent(in)  :: quant
@@ -658,7 +658,7 @@ end subroutine token2time
 !!!--declarations----------------------------------------------------------------
 !    implicit none
 !!
-!! Call variables
+!! Arguments
 !!
 !    type (waqsimtype)                                      :: waqsim
 !    character(*)                             , intent(in)  :: quant
@@ -692,7 +692,7 @@ end subroutine token2time
 !!!--declarations----------------------------------------------------------------
 !    implicit none
 !!
-!! Call variables
+!! Arguments
 !!
 !    type (waqsimtype)                                      :: waqsim
 !    character(*)                             , intent(in)  :: quant
@@ -725,7 +725,7 @@ end subroutine token2time
 !!!--declarations----------------------------------------------------------------
 !    implicit none
 !!
-!! Call variables
+!! Arguments
 !!
 !    type (waqsimtype)                        , target      :: waqsim
 !    logical                                                :: success
@@ -752,7 +752,7 @@ subroutine waqsim_writeinp(waqsim, filename, hyd)
     use time_module, only: sec2ddhhmmss
     implicit none
 !
-! Call variables
+! Arguments
 !
     type (waqsimtype)                        , target      :: waqsim
     type (hydtype)                           , target      :: hyd
@@ -1048,7 +1048,7 @@ subroutine waqsim_allocate(waqsim)
 !!--declarations----------------------------------------------------------------
     implicit none
 !
-! Call variables
+! Arguments
 !
     type (waqsimtype)                                      :: waqsim
 !
@@ -1235,7 +1235,7 @@ subroutine computegridprop(hyd, poi, array)
 !!--declarations----------------------------------------------------------------
     implicit none
 !
-! Call variables
+! Arguments
 !
     type (hydtype)                           , intent(in)  :: hyd
     integer, dimension(:,:)                  , intent(in)  :: poi
@@ -1267,7 +1267,7 @@ subroutine gridpropcurv(hyd, poi, array)
 !!--declarations----------------------------------------------------------------
     implicit none
 !
-! Call variables
+! Arguments
 !
     type (hydtype)                           , intent(in)  :: hyd
     integer, dimension(:,:)                  , intent(in)  :: poi
@@ -1416,7 +1416,7 @@ subroutine gridproptelm(hyd, poi, array)
 !!--declarations----------------------------------------------------------------
     implicit none
 !
-! Call variables
+! Arguments
 !
     type (hydtype)                           , intent(in)  :: hyd
     integer, dimension(:,:)                  , intent(in)  :: poi

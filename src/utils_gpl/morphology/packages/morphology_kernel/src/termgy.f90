@@ -39,7 +39,7 @@ function termgy(n         ,y         ,z         )
     !
     implicit none
 !
-! Call variables
+! Arguments
 !
     integer, intent(in)   :: n
     real(hp)              :: termgy

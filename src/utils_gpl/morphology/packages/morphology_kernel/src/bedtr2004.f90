@@ -57,7 +57,7 @@ subroutine bedtr2004(u2dh      ,d50       ,d90       ,h1        ,rhosol    , &
     !
     implicit none
 !
-! Call variables
+! Arguments
 !
     integer                  , intent(in)  :: kmax     !  Description and declaration in inout.igs
     real(fp)                 , intent(in)  :: aks

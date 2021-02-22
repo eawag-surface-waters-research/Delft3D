@@ -74,7 +74,7 @@ subroutine postpr_hdt(nst, gdp)
     integer                             , pointer :: ntcur   ! Total number of timesteps on comm. file (to write to) 
     real(fp)                            , pointer :: dtsec   ! DT in seconds 
 !
-! Call variables
+! Arguments
 !
     integer                                       :: nst           ! Current time step counter 
 !

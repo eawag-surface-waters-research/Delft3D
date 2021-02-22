@@ -42,7 +42,7 @@ subroutine tranb5(u         ,v         ,d50       ,d90       ,chezy     , &
     !
     implicit none
 !
-! Call variables
+! Arguments
 !
     integer                  , intent(in)    :: npar
     real(fp)                                 :: cesus

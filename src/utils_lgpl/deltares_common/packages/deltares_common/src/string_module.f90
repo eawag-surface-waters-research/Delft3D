@@ -85,7 +85,7 @@ module string_module
       subroutine string_module_info(messages)
           use message_module
           !
-          ! Call variables
+          ! Arguments
           !
           type(message_stack), pointer :: messages
           !
@@ -112,7 +112,7 @@ module string_module
       ! ------------------------------------------------------------------------------
       subroutine str_token(string, token, quote, delims)
           !
-          ! Call variables
+          ! Arguments
           !
           character(*)          , intent(inout) :: string
           character(*)          , intent(out)   :: token
@@ -231,7 +231,7 @@ module string_module
       ! ------------------------------------------------------------------------------
       subroutine str_lower(string, lenstr)
           !
-          ! Call variables
+          ! Arguments
           !
           integer     , optional, intent(in) :: lenstr
           character(*)                       :: string
@@ -271,7 +271,7 @@ module string_module
       ! ------------------------------------------------------------------------------
       subroutine str_upper(string, lenstr)
           !
-          ! Call variables
+          ! Arguments
           !
           integer     , optional, intent(in) :: lenstr
           character(*)                       :: string
@@ -311,7 +311,7 @@ module string_module
       ! ------------------------------------------------------------------------------
       subroutine remove_all_spaces(string, lenstr)
           !
-          ! Call variables
+          ! Arguments
           !
           character(*)                       :: string
           integer     , optional, intent(out):: lenstr
@@ -356,7 +356,7 @@ module string_module
       ! ------------------------------------------------------------------------------
       subroutine replace_multiple_spaces_by_single_spaces(string)
           !
-          ! Call variables
+          ! Arguments
           !
           character(*)                       :: string
           !
@@ -412,7 +412,7 @@ module string_module
       ! ------------------------------------------------------------------------------
       subroutine remove_leading_spaces(string, lenstr)
           !
-          ! Call variables
+          ! Arguments
           !
           character(*)                       :: string
           integer     , optional, intent(out):: lenstr
@@ -469,7 +469,7 @@ module string_module
       ! ------------------------------------------------------------------------------
       function strcmpi(string1, string2, lenreq) result(retval)
           !
-          ! Call variables
+          ! Arguments
           !
           character(*)                   , intent(in) :: string1
           character(*)                   , intent(in) :: string2

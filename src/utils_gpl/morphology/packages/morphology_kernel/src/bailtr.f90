@@ -39,7 +39,7 @@ subroutine bailtr(h         ,hrms      ,tp        ,thetaw    ,w         , &
     implicit none
     !
 !
-! Call variables
+! Arguments
 !
     real(fp), intent(in)               :: dzdx
     real(fp), intent(in)               :: dzdy

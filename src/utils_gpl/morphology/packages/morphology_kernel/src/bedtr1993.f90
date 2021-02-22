@@ -53,7 +53,7 @@ subroutine bedtr1993(uuu       ,vvv       ,u2dh      ,d50       ,d90       , &
     !
     implicit none
 !
-! Call variables
+! Arguments
 !
     real(fp)    , intent(in)  :: ag
     real(fp)    , intent(in)  :: d50

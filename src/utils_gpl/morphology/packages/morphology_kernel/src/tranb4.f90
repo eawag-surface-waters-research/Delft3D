@@ -39,7 +39,7 @@ subroutine tranb4(utot      ,d         ,c         ,npar      ,par       , &
     !
     implicit none
 !
-! Call variables
+! Arguments
 !
     integer                  , intent(in)    :: npar
     real(fp)                 , intent(in)    :: c

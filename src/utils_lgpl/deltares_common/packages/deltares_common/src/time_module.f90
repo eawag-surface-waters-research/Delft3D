@@ -102,7 +102,7 @@ module time_module
       subroutine time_module_info(messages)
           use message_module
           !
-          ! Call variables
+          ! Arguments
           !
           type(message_stack), pointer :: messages
           !
@@ -123,7 +123,7 @@ module time_module
       ! ------------------------------------------------------------------------------
       function datetime2sec(datetime, refdatetime) result (sec)
           !
-          ! Call variables
+          ! Arguments
           !
           integer, dimension(6)           , intent(in)    :: datetime
           integer, dimension(6) , optional, intent(in)    :: refdatetime
@@ -167,7 +167,7 @@ module time_module
       ! ------------------------------------------------------------------------------
       function sec2ddhhmmss(sec) result (ddhhmmss)
           !
-          ! Call variables
+          ! Arguments
           !
           integer                         , intent(in)    :: sec
           integer                                         :: ddhhmmss

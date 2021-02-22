@@ -45,7 +45,7 @@ subroutine soursin_2d(umod      ,ustarc    ,h0        ,h1        , &
     !
 
 !
-! Call variables
+! Arguments
 !
     real(fp), intent(in)  :: umod
     real(fp), intent(in)  :: ustarc

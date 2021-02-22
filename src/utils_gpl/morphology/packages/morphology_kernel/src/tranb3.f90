@@ -38,7 +38,7 @@ subroutine tranb3(utot      ,d35       ,c         ,h         ,npar      , &
     use precision
     implicit none
 !
-! Call variables
+! Arguments
 !
     integer                  , intent(in)    :: npar
     real(fp)                 , intent(in)    :: c

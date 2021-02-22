@@ -47,7 +47,7 @@ subroutine calseddf2004(ustarc    ,ws        ,tp        ,hrms      ,h1        , 
     !
     implicit none
 !
-! Call variables
+! Arguments
 !
     integer                    , intent(in)  :: kmax   !  Description and declaration in esm_alloc_int.f90
     integer                    , intent(in)  :: ltur   !  Description and declaration in esm_alloc_int.f90

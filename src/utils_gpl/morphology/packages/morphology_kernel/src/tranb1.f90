@@ -38,7 +38,7 @@ subroutine tranb1(utot      ,d50       ,c         ,h         ,npar       , &
     use precision
     implicit none
 !
-! Call variables
+! Arguments
 !
     integer                  , intent(in)  :: npar    !< length of transport parameter array
     real(fp)                 , intent(in)  :: c       !< Chezy value

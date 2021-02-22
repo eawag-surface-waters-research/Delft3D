@@ -40,7 +40,7 @@ subroutine updmorfac(morpar, timhr, refjulday)
     !
     implicit none
 !
-! Call variables
+! Arguments
 !
     type(morpar_type)                    , intent(inout) :: morpar
     real(fp)                             , intent(in)    :: timhr

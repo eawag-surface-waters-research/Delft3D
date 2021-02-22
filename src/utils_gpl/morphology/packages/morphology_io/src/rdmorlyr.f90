@@ -50,7 +50,7 @@ subroutine rdmorlyr(lundia    ,error     ,filmor    , &
     !
     implicit none
 !
-! Call variables
+! Arguments
 !
     integer                                         , intent(in)  :: lsedtot  !  Description and declaration in esm_alloc_int.f90
     integer                                                       :: lundia   !  Description and declaration in inout.igs

@@ -44,7 +44,7 @@ subroutine trab12(u         ,v         ,hrms      ,h         ,tp        , &
     !
     implicit none
 !
-! Call variables
+! Arguments
 !
     logical                  , intent(in)    :: ubot_from_com
     integer                  , intent(in)    :: npar

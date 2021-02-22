@@ -54,7 +54,7 @@ logical function nan_check_1D_sp(field, fieldnam, lundia) result (retval)
 !
 !!--declarations----------------------------------------------------------------
     !
-    ! Call variables
+    ! Arguments
     !
     real(kind=4), dimension(:), intent(in) :: field
     character*(*), intent(in)              :: fieldnam
@@ -86,7 +86,7 @@ logical function nan_check_2D_sp(field, fieldnam, lundia) result (retval)
 !
 !!--declarations----------------------------------------------------------------
     !
-    ! Call variables
+    ! Arguments
     !
     real(kind=4), dimension(:,:), intent(in) :: field
     character*(*), intent(in)                :: fieldnam
@@ -120,7 +120,7 @@ logical function nan_check_3D_sp(field, fieldnam, lundia) result (retval)
 !
 !!--declarations----------------------------------------------------------------
     !
-    ! Call variables
+    ! Arguments
     !
     real(kind=4), dimension(:,:,:), intent(in) :: field
     character*(*), intent(in)                  :: fieldnam
@@ -156,7 +156,7 @@ logical function nan_check_4D_sp(field, fieldnam, lundia) result (retval)
 !
 !!--declarations----------------------------------------------------------------
     !
-    ! Call variables
+    ! Arguments
     !
     real(kind=4), dimension(:,:,:,:), intent(in) :: field
     character*(*), intent(in)                    :: fieldnam
@@ -194,7 +194,7 @@ logical function nan_check_1D_dp(field, fieldnam, lundia) result (retval)
 !
 !!--declarations----------------------------------------------------------------
     !
-    ! Call variables
+    ! Arguments
     !
     real(kind=8), dimension(:), intent(in) :: field
     character*(*), intent(in)              :: fieldnam
@@ -226,7 +226,7 @@ logical function nan_check_2D_dp(field, fieldnam, lundia) result (retval)
 !
 !!--declarations----------------------------------------------------------------
     !
-    ! Call variables
+    ! Arguments
     !
     real(kind=8), dimension(:,:), intent(in) :: field
     character*(*), intent(in)                :: fieldnam
@@ -260,7 +260,7 @@ logical function nan_check_3D_dp(field, fieldnam, lundia) result (retval)
 !
 !!--declarations----------------------------------------------------------------
     !
-    ! Call variables
+    ! Arguments
     !
     real(kind=8), dimension(:,:,:), intent(in) :: field
     character*(*), intent(in)                  :: fieldnam
@@ -296,7 +296,7 @@ logical function nan_check_4D_dp(field, fieldnam, lundia) result (retval)
 !
 !!--declarations----------------------------------------------------------------
     !
-    ! Call variables
+    ! Arguments
     !
     real(kind=8), dimension(:,:,:,:), intent(in) :: field
     character*(*), intent(in)                    :: fieldnam

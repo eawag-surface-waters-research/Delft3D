@@ -206,7 +206,7 @@ subroutine simplegrid_dimens(griddim,nmax,mmax,aggrtable)
 !!--declarations----------------------------------------------------------------
     implicit none
 !
-! Call variables
+! Arguments
 !
     type (griddimtype)        :: griddim
     integer                   :: nmax

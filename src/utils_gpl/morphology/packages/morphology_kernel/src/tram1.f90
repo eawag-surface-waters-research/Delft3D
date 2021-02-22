@@ -49,7 +49,7 @@ subroutine tram1 (numrealpar,realpar   ,wave      ,npar      ,par       , &
     !
     implicit none
 !
-! Call variables
+! Arguments
 !
     logical                         , intent(in)   :: scour
     logical                         , intent(in)   :: wave

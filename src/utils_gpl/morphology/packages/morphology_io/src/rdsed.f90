@@ -115,7 +115,7 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
     integer          , dimension(:)    , pointer :: iform
     character(256)   , dimension(:)    , pointer :: flstrn
 !
-! Call variables
+! Arguments
 !
     integer                                  , intent(in)  :: lsal    !  Description and declaration in dimens.igs
     integer                                  , intent(in)  :: lsed    !  Description and declaration in esm_alloc_int.f90
@@ -808,7 +808,7 @@ subroutine rdsed01(lsed      ,luninp    ,lundia    ,csoil     ,iopsus    , &
     !
     implicit none
 !
-! Call variables
+! Arguments
 !
     integer                        , intent(out):: iopsus
     integer                        , intent(in) :: lundia !  Description and declaration in inout.igs
@@ -922,7 +922,7 @@ subroutine opensedfil(lundia    ,error     ,filsed    ,luninp    ,version  )
     use string_module
     implicit none
 !
-! Call variables
+! Arguments
 !
     integer                                  , intent(in)  :: lundia  ! unit of diagnostic file
     integer                                  , intent(out) :: luninp  ! unit of opened .sed file
@@ -986,7 +986,7 @@ subroutine echosed(lundia    ,error     ,lsed      ,lsedtot   , &
     !
     implicit none
 !
-! Call variables
+! Arguments
 !
     integer                                  , intent(in)  :: iopsus
     integer                                  , intent(in)  :: lsed    !  Description and declaration in iidim.f90
@@ -1627,7 +1627,7 @@ subroutine count_sed(lundia    ,error     ,lsed      ,lsedtot   , &
     !
     implicit none
 !
-! Call variables
+! Arguments
 !
     integer                         , intent(out) :: lsed    ! Number of suspended sediment fractions
     integer                         , intent(out) :: lsedtot ! Total number of sediment fractions
@@ -1827,7 +1827,7 @@ subroutine count_sed01(lundia    ,error     ,lsed      ,filsed    , &
     !
     implicit none
 !
-! Call variables
+! Arguments
 !
     integer                         , intent(out) :: lsed     ! Number of suspended sediment fractions
     integer                         , intent(in)  :: lundia   ! Unit of diagnostic file

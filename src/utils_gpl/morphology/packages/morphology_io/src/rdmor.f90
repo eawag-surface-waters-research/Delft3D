@@ -145,7 +145,7 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
 !
     integer, parameter :: max_nuserfrac     = 20
 !
-! Call variables
+! Arguments
 !
     integer                        , intent(in)  :: julday
     integer                        , intent(in)  :: nmaxus
@@ -1040,7 +1040,7 @@ subroutine rdmor0(ilun      ,morfac    ,tmor      ,thresh    ,morupd    , &
     use precision
     implicit none
 !
-! Call variables
+! Arguments
 !
     integer, intent(in)  :: ilun
     logical, intent(out) :: densin !  Description and declaration in morpar.igs
@@ -1120,7 +1120,7 @@ subroutine rdmor1(ilun      ,morfac    ,tmor      ,thresh    ,morupd    , &
     use precision
     implicit none
 !
-! Call variables
+! Arguments
 !
     integer, intent(in)  :: ilun
     integer, intent(out) :: iopkcw
@@ -1297,7 +1297,7 @@ subroutine echomor(lundia    ,error     ,lsec      ,lsedtot   ,nto       , &
     type(mornumericstype)                  , pointer :: mornum
     type(bedbndtype)       , dimension(:)  , pointer :: morbnd
 !
-! Call variables
+! Arguments
 !
     integer                        , intent(in)  :: nto
     integer                                      :: lundia  !  Description and declaration in inout.igs

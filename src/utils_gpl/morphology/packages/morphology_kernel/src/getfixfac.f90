@@ -40,7 +40,7 @@ subroutine getfixfac(bedcomp   ,nmlb      ,nmub      ,nval      ,nmmax     , &
     !
     implicit none
 !
-! Call variables
+! Arguments
 !
     integer                                            , intent(in)  :: nmmax
     integer                                            , intent(in)  :: nmlb

@@ -39,7 +39,7 @@ subroutine wave(uo        ,t         ,uuvar     ,pi        ,wh        , &
     use precision
     implicit none
 !
-! Call variables
+! Arguments
 !
     real(fp), intent(in)               :: ag !  Description and declaration in esm_alloc_real.f90
     real(fp), intent(in)               :: c !  Description and declaration in esm_alloc_real.f90
