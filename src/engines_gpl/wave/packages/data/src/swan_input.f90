@@ -333,6 +333,7 @@ module swan_input
        character(256)                           :: casl
        character(256)                           :: filnam
        character(256)                           :: flowgridfile ! netcdf file containing flow grid
+       character(256)                           :: scriptname
        character(256)                           :: specfile
        character(1024)                          :: comfile
        character(15)                            :: usehottime    = '00000000.000000'       ! Time in the name of the hotfile that has to be used by SWAN
@@ -1132,6 +1133,7 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
     use time_module
     use string_module
     use netcdf_utils, only: ncu_format_to_cmode
+    use system_utils, only: SCRIPT_EXTENSION
     implicit none
     !
     type(swan_type)             :: sr
@@ -1180,6 +1182,7 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
     integer, dimension(4)       :: def_ts_tp
     integer, dimension(4)       :: def_ts_wd
     integer, dimension(4)       :: def_ts_ds
+    logical                     :: ex           !< flag indicating whether file exists
     logical                     :: flag
     logical                     :: success
     real                        :: def_startdir
@@ -1241,6 +1244,7 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
     sr%compmode = .not. flag
     !
     exemode = 'exe'
+    sr%scriptname = ' '
     call prop_get_string (mdw_ptr, 'General', 'SwanMode'       , exemode)
     call str_lower(exemode)
     select case (exemode)
@@ -1248,6 +1252,15 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
         sr%exemode = SWAN_MODE_EXE
     case ('lib')
         sr%exemode = SWAN_MODE_LIB
+        call prop_get_string (mdw_ptr, 'General', 'ScriptName' , sr%scriptname)
+        if (sr%scriptname /= ' ') then
+            sr%scriptname = trim(sr%scriptname)//SCRIPT_EXTENSION
+            inquire (file = trim(sr%scriptname), exist = ex)
+            if (.not. ex) then
+                write(*,*) 'SWAN_INPUT: specified ScriptName "',trim(sr%scriptname),'" does not exist.'
+                goto 999
+            endif
+        endif
     case default
        write(*,*) 'SWAN_INPUT: invalid SWAN execution mode. Expected SwanMode = "exe" or "lib"'
        goto 999

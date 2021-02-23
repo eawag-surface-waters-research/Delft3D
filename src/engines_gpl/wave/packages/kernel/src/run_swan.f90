@@ -58,7 +58,7 @@ subroutine run_swan (casl)
     character(8)            :: swninp
     character(256)          :: wvsswn
     character(256)          :: string
-    character(256)          :: swanCommand
+    character(1024)         :: swanCommand
 !
 !! executable statements -------------------------------------------------------
 !
@@ -84,10 +84,37 @@ subroutine run_swan (casl)
     if (swan_run%exemode == SWAN_MODE_LIB) then
        !
        ! As built-in function.
-       ! Copy input fiel to INPUT -- done by script when running executable.
        !
-       call cp_file( swninp, 'INPUT', copy, nuerr)
+       if (swan_run%scriptname /= ' ') then
+           !
+           ! The name of a preprocessing script has been specified. Call it.
+           ! The script will generate 'INPUT' based on 'swan.inp'.
+           !
+           write (*,'(2a)') 'Preprocessing SWAN input file using: ', trim(swan_run%scriptname)
+           write(swanCommand, '(3a)') trim(swan_run%scriptname), ' ', trim(casl)
+           !
+           ! In debug mode, util_system wants spaces at the end...
+           !
+           call util_system(swanCommand(1:len_trim(swanCommand)+5))
+           !
+           inquire (file = 'INPUT', exist = ex)
+           if (.not. ex) then
+              write (*,'(3a)') '*** ERROR: preprocessing script "', trim(swan_run%scriptname), '" ran without generating ''INPUT'' file'
+              call wavestop(1, '*** ERROR: preprocessing script ran without generating ''INPUT'' file')
+           endif
+       else
+           !
+           ! No preprocessing script specified.
+           ! Copy input file directly to INPUT.
+           !
+           call cp_file( swninp, 'INPUT', copy, nuerr)
+           if (nuerr > 0) then
+              write (*, '(a,i3)') '*** ERROR: While copying swan.inp to INPUT, errorcode:', nuerr
+              call wavestop(1, '*** ERROR: While copying swan.inp to INPUT')
+           endif
+       endif
        !
+       write(*,'(a)')'>>...Start SWAN run'
        if (numranks > 1) then
           call wave_mpi_bcast(SWAN_GO, ierr)
           if ( ierr /= MPI_SUCCESS ) then
@@ -101,11 +128,12 @@ subroutine run_swan (casl)
        ! As executable
        !
        write(*,'(3a)')'>>...Check file swan_',SCRIPT_EXTENSION(2:),'.log'
-       write(swanCommand, '(4a)') 'swan',SCRIPT_EXTENSION, ' ', trim(casl)
+       write(swanCommand, '(4a)') 'swan', SCRIPT_EXTENSION, ' ', trim(casl)
        !
        ! In debug mode, util_system wants spaces at the end...
        !
        call util_system(swanCommand(1:len_trim(swanCommand)+5))
+       !
        inquire (file = 'norm_end', exist = ex)
        if (.not. ex .and. SCRIPT_EXTENSION=='.sh') then
           write (*,'(a)') '*** WARNING: unable to run SWAN using "swan.sh". Trying with "swan.bat" ...'
