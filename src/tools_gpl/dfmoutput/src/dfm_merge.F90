@@ -86,6 +86,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
    integer, allocatable :: netfaceedges(:,:)  !< NetElemLinks
    integer, allocatable :: netfacenodes(:,:) !< Net cell - to - net node mapping
    integer, allocatable :: netfacenodesl(:,:) !< Net cell - to - net node mapping for local usage (per cell)
+   ! A summary of global numbering of nodes/edges/faces in map merge can be found in the description of UNST-3929.
    integer, allocatable :: face_c2g(:), node_c2g(:), netedge_c2g(:), edge_c2g(:) !< Concatenated index - to - global index mapping.
    integer, allocatable :: node_g2c(:), edge_g2c(:), face_g2c(:), netedge_g2c(:) !< Global index - to - concatenated index mapping.
    integer, allocatable :: node_faces(:,:) ! faces that surrounds the node
@@ -1985,27 +1986,24 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
                else if (topodim == 1 .and. var_loctype(iv) == UNC_LOC_CN) then
                ! For 1D mesh, the node indices in the merged file are read directly from flowelem_globalnr into node_c2g.
                ! So for variables that locate on nodes, we do not use the shift method, but use the global numbers in node_c2g.
-                  if (ii < nfiles) then
-                     nitemglob = sum(numk(1:ii)) ! This varialbe needs to be updated for reading variables from input map files.
-                  else if (ii == nfiles) then    ! The merged variable is formed after this variable in all input map files is read.
-                     do iii = 1, nfiles
-                        nnodecount = sum(numk(1:iii-1))
-                        do ip=1,item_counts(iii)
-                           if (item_domain(nnodecount+ip) == iii-1) then ! only for the node which belongs to the current domain
-                              inodeglob = node_c2g(nnodecount+ip)
-                              if (inodeglob > 0) then
-                                 if (var_types(iv) == nf90_double) then
-                                    tmpvar1D_tmp(inodeglob) = tmpvar1D(nnodecount+ip)
-                                 else if (var_types(iv) == nf90_int .or. var_types(iv) == nf90_short) then
-                                    itmpvar1D_tmp(inodeglob) = itmpvar1D(nnodecount+ip)
-                                 else if (var_types(iv) == nf90_byte) then
-                                    btmpvar1D_tmp(inodeglob,itm:itm) = btmpvar1D(nnodecount+ip,itm:itm)
-                                 end if
-                              end if
+                  nnodecount = sum(numk(1:ii-1))
+                  do ip=1,item_counts(ii)
+                     if (item_domain(nnodecount+ip) == ii-1) then ! only for the node which belongs to the current domain
+                        inodeglob = node_c2g(nnodecount+ip)
+                        if (inodeglob > 0) then
+                           if (var_types(iv) == nf90_double) then
+                              tmpvar1D_tmp(inodeglob) = tmpvar1D(nnodecount+ip)
+                           else if (var_types(iv) == nf90_int .or. var_types(iv) == nf90_short) then
+                              itmpvar1D_tmp(inodeglob) = itmpvar1D(nnodecount+ip)
+                           else if (var_types(iv) == nf90_byte) then
+                              btmpvar1D_tmp(inodeglob,itm:itm) = btmpvar1D(nnodecount+ip,itm:itm)
                            end if
-                        end do
-                     end do
+                        end if
+                     end if
+                  end do
+                  nitemglob  = nnodecount + item_counts(ii) ! This varialbe needs to be updated for reading variables from input map files.
 
+                  if (ii == nfiles) then
                      nitemglob = item_counts(noutfile) ! Update nitemglob, otherwise the check on nitemglob after the outer do-loop will show unexpected error message.
                      if (var_types(iv) == nf90_double) then
                         tmpvar1D(1:nitemglob) = tmpvar1D_tmp(1:nitemglob)
