@@ -239,13 +239,7 @@ subroutine santoss_bss2(sw_effects, as_effects, g, d, rhow, rhos, delta, &
 !
 !       (vi) crest period extension for horizontal particle displacement.
 !
-!       ! tuning factor 0.55_fp from measurements GWK Schretlen 2010
-!        tcu = tcu/tc*(tc + t*0.55_fp*uw/(c*pi-0.55_fp*2*uw))
-!        tc  = tc + t*0.55_fp*uw/(c*pi-0.55_fp*2*uw)
-!        tcd = tc-tcu
-!        ttu = ttu/tt*(tt - t*0.55_fp*uw/(c*pi+0.55_fp*2*uw))
-!        tt  = tt - t*0.55_fp*uw/(c*pi+0.55_fp*2*uw)
-!        ttd = tt-ttu
+!       removed
 !
 !       (vii) bed shear stress for surface waves with/without a current
 !
