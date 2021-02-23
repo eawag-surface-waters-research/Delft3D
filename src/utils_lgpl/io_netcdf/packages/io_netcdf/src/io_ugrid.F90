@@ -3257,12 +3257,7 @@ function ug_inq_varid(ncid, meshids, varname, varid) result(ierr)
       ! NOTE: not all variables have a :mesh attribute anymore (e.g., <prefix>_node_id),
       ! so don't fail on this check here. Continue with given meshname.
       !
-      ierr = len_trim(meshname)
-      if (len(str)>=0) then
-          deallocate(str)
-      end if
-      allocate(character(len=ierr) :: str)
-      str = meshname
+      str = trim(meshname)
    end if
 
    if (.not.strcmpi(str,meshname)) then
@@ -5454,23 +5449,31 @@ end function ug_get_contact_name
 
 !> Gets the STRING-attribute of a variable from the nc-file.
 function ug_get_attribute(ncid, varid, att_name, att_value) result(status)
-   integer,              intent(in) :: ncid         !< NetCDF dataset id, should be already open.
-   integer,              intent(in) :: varid        !< NetCDF variable id
-   character(len=*),     intent(in) :: att_name     !< The name of the attribute.
-   character(len=:), allocatable    :: att_value    !< The value of the attribute.
-   integer                          :: status       !< Result status, ug_noerr if successful.
+   integer,                       intent(in   ) :: ncid         !< NetCDF dataset id, should be already open.
+   integer,                       intent(in   ) :: varid        !< NetCDF variable id
+   character(len=*),              intent(in   ) :: att_name     !< The name of the attribute.
+   character(len=:), allocatable, intent(inout) :: att_value    !< The value of the attribute (unchanged when an error occurred).
+   integer                                      :: status       !< Result status, ug_noerr if successful.
 
-   integer                          :: att_value_len       !< Length of the attribute value on the netCDF file.
+   integer :: att_value_len       !< Length of the attribute value on the netCDF file.
+   integer :: istat
 
-   if (len(att_value) >= 0) then
-      deallocate(att_value)
-   end if 
    status    = nf90_inquire_attribute(ncid, varid, att_name, len=att_value_len)
    if ( status == nf90_noerr ) then
-       allocate( character(len=att_value_len) :: att_value )
-       status = nf90_get_att(ncid, varid, att_name, att_value)
-   else
-      allocate( character(len=0) :: att_value )
+      if (allocated(att_value)) then
+         deallocate(att_value, stat = istat)
+         if (istat /= 0) then
+            status = UG_SOMEERR
+            return
+         end if
+      end if 
+
+      allocate( character(len=att_value_len) :: att_value, stat = istat )
+      if (istat /= 0) then
+         status = UG_SOMEERR
+         return
+      end if
+      status = nf90_get_att(ncid, varid, att_name, att_value)
    end if
 
 end function ug_get_attribute
