@@ -2685,7 +2685,7 @@ subroutine getseg1D(hpr,wu2,dz,ai,frcn,ifrctyp, wid,ar,conv,perim,jaconv)  ! cop
  use m_flow
  use m_missing
  use m_ship
- use m_volume_table
+ use m_VolumeTables
 
  implicit none
 
@@ -2707,8 +2707,8 @@ subroutine getseg1D(hpr,wu2,dz,ai,frcn,ifrctyp, wid,ar,conv,perim,jaconv)  ! cop
     ! Compute 1d volumes, using volume tables
     do n = ndx2d+1, ndx
        n1d = n - ndx2d
-       vol1(n) = vol1(n) + vltb(n1d)%get_volume(s1(n))
-       a1(n)   = a1(n)   + vltb(n1d)%get_surface(s1(n))
+       vol1(n) = vol1(n) + vltb(n1d)%getVolume(s1(n))
+       a1(n)   = a1(n)   + vltb(n1d)%getSurface(s1(n))
     enddo
  else if (japerim == 0 .and. nstor > 0) then
     stors => network%stors%stor
@@ -15440,7 +15440,7 @@ else if (nodval == 27) then
  use m_waves
  use m_structures
  use m_longculverts
- use m_volume_table
+ use m_VolumeTables
 
  implicit none
 
@@ -15483,7 +15483,7 @@ else if (nodval == 27) then
 
  ! Generate the volume tables for 1d nodes
  if (useVolumeTables) then
-    call make_volume_table
+    call makeVolumeTable
  endif
 
  call inisferic()                                    ! also set coriolis :<

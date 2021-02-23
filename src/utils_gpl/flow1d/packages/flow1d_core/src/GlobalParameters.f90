@@ -68,10 +68,10 @@ module m_GlobalParameters
    integer, public :: luntrans = 0
 
    ! storage table controls
-   double precision, public      :: tb_inc = 0.1
-   double precision, public      :: tb_extra_height = 0.0
-   character(len=charln), public :: st_filename
-   logical, public               :: write_tables
+   double precision, public      :: tableIncrement = 0.1
+   double precision, public      :: tableExtraHeight = 0.0
+   character(len=charln), public :: tableOutputFile
+   logical, public               :: writeTables
 
    
    character(len=charln)            :: wlevStateFileIn

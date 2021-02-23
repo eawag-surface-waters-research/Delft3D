@@ -1,5 +1,5 @@
 !> Module for using volume tables at 1d nodes for the computation of the total volume of water in a node.
-module m_volume_table
+module m_VolumeTables
    
    use messageHandling
    use m_GlobalParameters
@@ -8,10 +8,10 @@ module m_volume_table
 
    private
    
-   public make_volume_table
+   public makeVolumeTable
    
    interface dealloc
-      module procedure dealloc_voltables
+      module procedure deallocVolTables
    end interface
    
    type, public :: t_voltable
@@ -22,22 +22,22 @@ module m_volume_table
       logical :: hasNegativeWidths                                  !< In case of a simulation with the Nested Newton solver, a distinction
                                                                     !< between a non-decreasing part of the cross section is made and a
                                                                     !< non-increasing part. In case of Nested Newton and 1 or more 
-                                                                    !< surrounding closed cross sections, vol_decreasing is allocated and
+                                                                    !< surrounding closed cross sections, volDecreasing is allocated and
                                                                     !< filled.
       logical :: hysteresis                                         !< hysteresis value for summerdike
-      double precision :: bed_level                                 !< The bed level at the location of the volume table.
-      double precision :: top_level                                 !< Highest level (w.r.t. the bed level) of the surrounding cross sections
+      double precision :: bedLevel                                 !< The bed level at the location of the volume table.
+      double precision :: topLevel                                 !< Highest level (w.r.t. the bed level) of the surrounding cross sections
       double precision, allocatable, dimension(:) :: vol            !< Volume at each level of the table.
       double precision, allocatable, dimension(:) :: sur            !< Surface area at each level of the table.
-      double precision, allocatable, dimension(:) :: vol_summerdike !< Volume table for decreasing levels
-      double precision, allocatable, dimension(:) :: sur_summerdike !< Surface area table for decreasing levels
-      double precision, allocatable, dimension(:) :: vol_decreasing !< Volume table for decreasing widths (Nested Newton)
-      double precision, allocatable, dimension(:) :: sur_decreasing !< Surface area table for decreasing widths (Nested Newton)
+      double precision, allocatable, dimension(:) :: volSummerdike !< Volume table for decreasing levels
+      double precision, allocatable, dimension(:) :: surSummerdike !< Surface area table for decreasing levels
+      double precision, allocatable, dimension(:) :: volDecreasing !< Volume table for decreasing widths (Nested Newton)
+      double precision, allocatable, dimension(:) :: surDecreasing !< Surface area table for decreasing widths (Nested Newton)
    contains 
-      procedure, pass :: alloc   => alloc_voltable                  !< Allocates the allocatable arrays in this structure
-      procedure, pass :: dealloc => dealloc_voltable                !< Deallocates the allocatable arrays in this structure
-      procedure, pass :: get_volume => get_volume_voltable          !< Returns the volume for a given water level
-      procedure, pass :: get_surface => get_surface_voltable        !< Returns the surface area for a given water level
+      procedure, pass :: alloc   => allocVoltable                  !< Allocates the allocatable arrays in this structure
+      procedure, pass :: dealloc => deallocVoltable                !< Deallocates the allocatable arrays in this structure
+      procedure, pass :: getVolume => getVolumeVoltable          !< Returns the volume for a given water level
+      procedure, pass :: getSurface => getSurfaceVoltable        !< Returns the surface area for a given water level
    end type
    
    type(t_voltable), public, allocatable, dimension(:)   :: vltb
@@ -45,52 +45,52 @@ module m_volume_table
    contains
    
    !> Allocate the volume table arrays and initialize to 0
-   subroutine alloc_voltable(this)
+   subroutine allocVoltable(this)
       class(t_voltable) :: this
       
       allocate(this%vol(this%count))
       allocate(this%sur(this%count))
       this%vol   = 0.0d0
       this%sur   = 0.0d0
-   end subroutine alloc_voltable
+   end subroutine allocVoltable
    
    !> Deallocate the volume table arrays
-   subroutine dealloc_voltable(this)
+   subroutine deallocVoltable(this)
       class(t_voltable) :: this
       
       if (allocated(this%vol))   deallocate(this%vol)
       if (allocated(this%sur))   deallocate(this%sur)
-   end subroutine dealloc_voltable
+   end subroutine deallocVoltable
 
    !> Retrieve the volume for given volume table and water level
-   double precision function get_volume_voltable(this, level)
+   double precision function getVolumeVoltable(this, level)
       class(t_voltable)             :: this
       double precision, intent(in)  :: level    !< water level
       
       integer           :: index
       double precision  :: heightIncrement
-      index = min(int( max(0d0,level-this%bed_level)/ tb_inc)+1,this%count)
+      index = min(int( max(0d0,level-this%bedLevel)/ tableIncrement)+1,this%count)
       
-      heightIncrement = ( (level-this%bed_level) - dble(index-1) * tb_inc )
+      heightIncrement = ( (level-this%bedLevel) - dble(index-1) * tableIncrement )
       
-      get_volume_voltable = this%vol(index) + this%sur(index) * heightIncrement
+      getVolumeVoltable = this%vol(index) + this%sur(index) * heightIncrement
       
-   end function get_volume_voltable
+   end function getVolumeVoltable
    
    !> Retrieve the surface area for given volume table and water level
-   double precision function get_surface_voltable(this, level)
+   double precision function getSurfaceVoltable(this, level)
       class(t_voltable)             :: this
       double precision, intent(in)  :: level    !< water level
       
       integer           :: index
-      index = min(int( max(0d0,level-this%bed_level)/ tb_inc)+1,this%count)
+      index = min(int( max(0d0,level-this%bedLevel)/ tableIncrement)+1,this%count)
       
-      get_surface_voltable = this%sur(index)
+      getSurfaceVoltable = this%sur(index)
       
-   end function get_surface_voltable
+   end function getSurfaceVoltable
    
    !> Generate the volume tables, by using GetCSParsTotal. 
-   subroutine make_volume_table()
+   subroutine makeVolumeTable()
    
       use unstruc_channel_flow
       use m_flowparameters
@@ -126,7 +126,7 @@ module m_volume_table
       allocate(vltb(ndx1d))
       do n = 1, ndx1d
          vltb(n)%count = 0
-         vltb(n)%top_level = 0d0
+         vltb(n)%topLevel = 0d0
       enddo
 
       ! determine the highest level for the storage nodes
@@ -136,13 +136,13 @@ module m_volume_table
          do i = 1, nstor
             nod = stors(i)%gridPoint
             n = nod-ndx2d
-            vltb(n)%top_level = max(vltb(n)%top_level, getTopLevel(stors(i)))
+            vltb(n)%topLevel = max(vltb(n)%topLevel, getTopLevel(stors(i)))
          enddo
       endif
       
       do n = 1, ndx1d
          nod = n+ndx2d
-         vltb(n)%bed_level = bl(nod)
+         vltb(n)%bedLevel = bl(nod)
          
          ! determine highest level (characteristic height) of all incoming and outgoing links to node nod
          do LL = 1, nd(nod)%lnx
@@ -161,17 +161,17 @@ module m_volume_table
                L = LBND1D(L)
             endif
             charheight = cross(line2cross(L,index)%c1)%charheight
-            if (charheight > vltb(n)%top_level) then
-               vltb(n)%top_level = charheight
+            if (charheight > vltb(n)%topLevel) then
+               vltb(n)%topLevel = charheight
             endif
             charheight = cross(line2cross(L,index)%c2)%charheight
-            if (charheight > vltb(n)%top_level) then
-               vltb(n)%top_level = charheight
+            if (charheight > vltb(n)%topLevel) then
+               vltb(n)%topLevel = charheight
             endif
          enddo
 
          ! Make sure the volume table consists of at least two levels
-         vltb(n)%count = max(2,int(vltb(n)%top_level / tb_inc) + 1)
+         vltb(n)%count = max(2,int(vltb(n)%topLevel / tableIncrement) + 1)
          call vltb(n)%alloc()
       enddo
 
@@ -181,7 +181,7 @@ module m_volume_table
          n = nod-ndx2d
 
          do j = 1, vltb(n)%count
-            level = bl(nod) + (j-1)*tb_inc
+            level = bl(nod) + (j-1)*tableIncrement
             vltb(n)%vol(j) = vltb(n)%vol(j) + getVolume(stors(i), level)
          enddo
          vltb(n)%sur(vltb(n)%count) = vltb(n)%sur(vltb(n)%count) + GetSurface(stors(i), level)
@@ -195,7 +195,7 @@ module m_volume_table
             
          ! compute volumes, NOTE the volume at the first level is 0 by design
          do j = 2, vltb(n)%count
-            height = (j-1)*tb_inc
+            height = (j-1)*tableIncrement
             do LL = 1, nd(nod)%lnx
                L = iabs(nd(nod)%ln(LL))
                if (nd(nod)%ln(LL) < 0) then
@@ -229,14 +229,14 @@ module m_volume_table
                endif
             enddo
             ! compute water surface area
-            vltb(n)%sur(j-1) = (vltb(n)%vol(j) - vltb(n)%vol(j-1))/tb_inc
+            vltb(n)%sur(j-1) = (vltb(n)%vol(j) - vltb(n)%vol(j-1))/tableIncrement
          enddo
       enddo
       
-   end subroutine make_volume_table
+   end subroutine makeVolumeTable
    
    !> Deallocate all volume tables.
-   subroutine dealloc_voltables()
+   subroutine deallocVolTables()
 
       integer i
       
@@ -247,7 +247,7 @@ module m_volume_table
          deallocate(vltb)
       endif
       
-   end subroutine dealloc_voltables
+   end subroutine deallocVolTables
    
 
-end module m_volume_table
+end module m_VolumeTables

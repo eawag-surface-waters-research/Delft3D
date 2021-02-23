@@ -206,17 +206,17 @@ module m_readModelParameters
       call prop_get_double(md_ptr, 'AdvancedOptions', 'Longitude', longitude, success)
       call prop_get_double(md_ptr, 'AdvancedOptions', 'timeZone', time_zone, success)
       
-      write_tables = .false.
-      call prop_get_logical(md_ptr, 'StorageTable', 'WriteStorageTables', write_tables, success)
-      if (write_tables) then
-         call prop_get_string(md_ptr, 'StorageTable', 'StorageOutputFile', st_filename, success)
+      writeTables = .false.
+      call prop_get_logical(md_ptr, 'StorageTable', 'WriteStorageTables', writeTables, success)
+      if (writeTables) then
+         call prop_get_string(md_ptr, 'StorageTable', 'StorageOutputFile', tableOutputFile, success)
          if (.not. success) then
             call setmessage(LEVEL_ERROR, 'StorageOutputFile not found in md1d file')
          endif
-         tb_inc = 0.1d0
-         call prop_get_double(md_ptr, 'StorageTable', 'StorageTableIncrement', tb_inc, success)
-         tb_extra_height = 0d0
-         call prop_get_double(md_ptr, 'StorageTable', 'ExtraHeight', tb_extra_height, success)
+         tableIncrement = 0.1d0
+         call prop_get_double(md_ptr, 'StorageTable', 'StorageTableIncrement', tableIncrement, success)
+         tableExtraHeight = 0d0
+         call prop_get_double(md_ptr, 'StorageTable', 'ExtraHeight', tableExtraHeight, success)
       endif
       
       call prop_get_integer(md_ptr, 'Morphology', 'CalculateMorphology', iValue, success)
