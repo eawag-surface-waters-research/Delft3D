@@ -67,13 +67,6 @@ module m_GlobalParameters
    !TODO temporary unit to be removed, when finished
    integer, public :: luntrans = 0
 
-   ! storage table controls
-   double precision, public      :: tableIncrement = 0.1
-   double precision, public      :: tableExtraHeight = 0.0
-   character(len=charln), public :: tableOutputFile
-   logical, public               :: writeTables
-
-   
    character(len=charln)            :: wlevStateFileIn
    character(len=charln)            :: wlevStateFileOut
    

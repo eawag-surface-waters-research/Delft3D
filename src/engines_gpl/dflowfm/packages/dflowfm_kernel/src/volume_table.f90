@@ -7,9 +7,9 @@ module m_VolumeTables
    implicit none
 
    private
-   
-   public makeVolumeTable
-   
+
+   public makeVolumeTables
+
    interface dealloc
       module procedure deallocVolTables
    end interface
@@ -25,23 +25,27 @@ module m_VolumeTables
                                                                     !< surrounding closed cross sections, volDecreasing is allocated and
                                                                     !< filled.
       logical :: hysteresis                                         !< hysteresis value for summerdike
-      double precision :: bedLevel                                 !< The bed level at the location of the volume table.
-      double precision :: topLevel                                 !< Highest level (w.r.t. the bed level) of the surrounding cross sections
+      double precision :: bedLevel                                  !< The bed level at the location of the volume table.
+      double precision :: topLevel                                  !< Highest level (w.r.t. the bed level) of the surrounding cross sections
       double precision, allocatable, dimension(:) :: vol            !< Volume at each level of the table.
       double precision, allocatable, dimension(:) :: sur            !< Surface area at each level of the table.
-      double precision, allocatable, dimension(:) :: volSummerdike !< Volume table for decreasing levels
-      double precision, allocatable, dimension(:) :: surSummerdike !< Surface area table for decreasing levels
-      double precision, allocatable, dimension(:) :: volDecreasing !< Volume table for decreasing widths (Nested Newton)
-      double precision, allocatable, dimension(:) :: surDecreasing !< Surface area table for decreasing widths (Nested Newton)
-   contains 
-      procedure, pass :: alloc   => allocVoltable                  !< Allocates the allocatable arrays in this structure
-      procedure, pass :: dealloc => deallocVoltable                !< Deallocates the allocatable arrays in this structure
-      procedure, pass :: getVolume => getVolumeVoltable          !< Returns the volume for a given water level
-      procedure, pass :: getSurface => getSurfaceVoltable        !< Returns the surface area for a given water level
+      double precision, allocatable, dimension(:) :: volSummerdike  !< Volume table for decreasing levels
+      double precision, allocatable, dimension(:) :: surSummerdike  !< Surface area table for decreasing levels
+      double precision, allocatable, dimension(:) :: volDecreasing  !< Volume table for decreasing widths (Nested Newton)
+      double precision, allocatable, dimension(:) :: surDecreasing  !< Surface area table for decreasing widths (Nested Newton)
+   contains
+      procedure, pass :: alloc   => allocVoltable                   !< Allocates the allocatable arrays in this structure
+      procedure, pass :: dealloc => deallocVoltable                 !< Deallocates the allocatable arrays in this structure
+      procedure, pass :: getVolume => getVolumeVoltable             !< Returns the volume for a given water level
+      procedure, pass :: getSurface => getSurfaceVoltable           !< Returns the surface area for a given water level
    end type
    
-   type(t_voltable), public, allocatable, dimension(:)   :: vltb
-   
+   type(t_voltable),       public, allocatable, dimension(:)   :: vltb  !< 1D Volume tables
+   logical,                public :: useVolumeTables                    !< Indicates whether 1d volume tables are useds
+   double precision,       public :: tableIncrement = 0.1               !< Increment for volume tables
+   character(len=charln),  public :: tableOutputFile                    !< Name of the table output file
+   logical,                public :: writeTables                        !< Write the volume tables to file (or not)
+
    contains
    
    !> Allocate the volume table arrays and initialize to 0
@@ -88,10 +92,10 @@ module m_VolumeTables
       getSurfaceVoltable = this%sur(index)
       
    end function getSurfaceVoltable
-   
-   !> Generate the volume tables, by using GetCSParsTotal. 
-   subroutine makeVolumeTable()
-   
+
+   !> Generate the volume tables, by using GetCSParsTotal.
+   subroutine makeVolumeTables()
+
       use unstruc_channel_flow
       use m_flowparameters
       use m_flowgeom
@@ -232,9 +236,13 @@ module m_VolumeTables
             vltb(n)%sur(j-1) = (vltb(n)%vol(j) - vltb(n)%vol(j-1))/tableIncrement
          enddo
       enddo
-      
-   end subroutine makeVolumeTable
-   
+
+      if (writeTables) then
+         call writeVolumeTables()
+      endif
+
+   end subroutine makeVolumeTables
+
    !> Deallocate all volume tables.
    subroutine deallocVolTables()
 
@@ -250,4 +258,48 @@ module m_VolumeTables
    end subroutine deallocVolTables
    
 
-end module m_VolumeTables
+   !> write the volume table to a binary file.
+   subroutine writeVolumeTables()
+
+      use m_flowgeom
+      use m_GlobalParameters
+
+      integer :: ibin
+      integer :: i, n, istat
+      integer :: ndx1d
+      integer :: count
+
+      open(newunit=ibin, file=tableOutputFile, form='unformatted', access='stream', iostat=istat)
+      if (istat/=0) then
+         call SetMessage(LEVEL_WARN, 'Something went wrong during the opening of binary volume table file: '// trim(tableOutputFile))
+         return
+      endif
+
+      ndx1d = ndx - ndx2d
+      write(ibin) ndx1d
+
+      do n = 1, ndx1d
+         count = vltb(n)%count
+         write(ibin) count
+         write(ibin) vltb(n)%hasSummerdike
+         write(ibin) vltb(n)%hasNegativeWidths
+         write(ibin) vltb(n)%hysteresis
+         write(ibin) vltb(n)%bedLevel
+         write(ibin) vltb(n)%topLevel
+         write(ibin) (vltb(n)%vol(i), i = 1, count)
+         write(ibin) (vltb(n)%sur(i), i = 1, count)
+         if (vltb(n)%hasSummerdike) then
+            write(ibin) (vltb(n)%volSummerdike(i), i = 1, count)
+            write(ibin) (vltb(n)%surSummerdike(i), i = 1, count)
+         endif
+         if (vltb(n)%hasNegativeWidths) then
+            write(ibin) (vltb(n)%volDecreasing(i), i = 1, count)
+            write(ibin) (vltb(n)%surDecreasing(i), i = 1, count)
+         endif
+      enddo
+      
+      close(ibin)
+
+   end subroutine writeVolumeTables
+
+end module m_volumeTables
