@@ -49,7 +49,7 @@
 "Extinc_VLG",A,A,A,A,
 "Extinc_UVG",A,A,A,A,
 "CalcRad   ",A,A,A,A,
-"CalcRadDay", , , , ,
+"CalcRadDay",A,A,A,A,
 "CalcRadUV ",A,A,A,A,
 "Daylength ",A,A,A,A,
 "Reflection",A,A,A,A,
