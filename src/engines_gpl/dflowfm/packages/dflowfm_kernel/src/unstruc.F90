@@ -15483,7 +15483,7 @@ else if (nodval == 27) then
 
  ! Generate the volume tables for 1d nodes
  if (useVolumeTables) then
-    call makeVolumeTable
+    call makeVolumeTables
  endif
 
  call inisferic()                                    ! also set coriolis :<
