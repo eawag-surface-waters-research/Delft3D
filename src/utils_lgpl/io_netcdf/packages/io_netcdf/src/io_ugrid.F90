@@ -457,6 +457,7 @@ function ug_get_var_attset(ncid, varid, attset) result(ierr)
 
       select case(atttype)
       case(NF90_CHAR)
+         tmpstr = ''
          ierr = ug_get_attribute(ncid, varid, attname, tmpstr)   
          
          allocate(attset(i)%strvalue(attlen))
@@ -2230,6 +2231,7 @@ function att_to_coordvarids(ncid, varid, attname, idx, idy, idz, idw) result(ier
    integer :: i1, i2, n
 
    allocate( character(len=0) :: varname )
+   varname = ''
    ierr = ug_get_attribute(ncid, varid, attname, varname)
    if (ierr /= nf90_noerr) then
       goto 999
@@ -2303,6 +2305,7 @@ function att_to_varid(ncid, varid, attname, id) result(ierr)
    ierr = UG_NOERR
    allocate( character(len=0) :: varname )
 
+   varname = ''
    ierr = ug_get_attribute(ncid, varid, attname, varname)
    if (ierr /= nf90_noerr) then
       ierr = UG_ENOTATT
@@ -2410,6 +2413,7 @@ function ug_is_mesh_topology(ncid, varid) result(is_mesh_topo)
    allocate(character(len=0) :: buffer)
 
    topology_dimension =  -1
+   buffer = ''
    ierr = ug_get_attribute(ncid, varid, 'cf_role', buffer)
 
    if (trim(buffer)=='mesh_topology') then
@@ -2424,6 +2428,7 @@ function ug_is_mesh_topology(ncid, varid) result(is_mesh_topo)
       ierr = nf90_get_att(ncid, varid, 'topology_dimension', topology_dimension)
 
       if (topology_dimension.eq.1) then !1d case
+         buffer = ''
          ierr = ug_get_attribute(ncid, varid, 'edge_geometry', buffer)
          if (ierr.ne.nf90_noerr) then
             is_mesh_topo = .true. !true only if does not contain edge_geometry
@@ -2453,8 +2458,10 @@ function ug_is_network_topology(ncid, varid) result(is_mesh_topo)
    is_mesh_topo = .false.
    allocate( character(len=0) :: buffer )
    
+   buffer = ''
    mesh_topo = ug_get_attribute(ncid, varid, 'cf_role', buffer);   
    if (mesh_topo == nf90_noerr) then
+      buffer = ''
       edge_geom = ug_get_attribute(ncid, varid, 'edge_geometry', buffer);   
       if (edge_geom == nf90_noerr) then
          is_mesh_topo = .true. ! new ugrid format detected
@@ -2475,6 +2482,7 @@ function ug_is_link_topology(ncid, varid) result(ug_is_link_topo)
    ug_is_link_topo = .false.
    allocate(character(len=0) :: buffer)
 
+   buffer = ''
    cfrole    = ug_get_attribute(ncid, varid, 'cf_role', buffer)
    if (cfrole == nf90_noerr .and. trim(buffer) == 'mesh_topology_contact') then
          ug_is_link_topo = .true. !new link topology detected
@@ -3170,6 +3178,7 @@ function ug_inq_varids(ncid, meshids, iloctype, varids, nvar) result(ierr)
    nvar = 0
    do varid = 0, numVar-1 ! loop over the netCDF variable IDs (which are 0-based)
       ! Step 1 of 2: check mesh name
+      str = ''
       ierr = ug_get_attribute(ncid, varid, 'mesh', str)
 
       if (ierr /= nf90_noerr) then
@@ -3183,6 +3192,7 @@ function ug_inq_varids(ncid, meshids, iloctype, varids, nvar) result(ierr)
       end if
 
       ! Step 2 of 2: check location name
+      str = ''
       ierr = ug_get_attribute(ncid, varid, 'location', str)
       if (ierr /= nf90_noerr) then
          ! No UGRID :location attribute, ignore this var.
@@ -3247,6 +3257,7 @@ function ug_inq_varid(ncid, meshids, varname, varid) result(ierr)
       goto 999
    end if
 
+   str = ''
    ierr = ug_get_attribute(ncid, loc_varid, 'mesh', str)
    if (ierr /= nf90_noerr) then
       ! No UGRID :mesh attribute, discard this var.
@@ -3310,6 +3321,7 @@ function ug_inq_varid_by_standard_name(ncid, meshids, iloctype, stdname, varid) 
    varid = -1 ! dummy
    do iv = 1, numVar
 
+      str = ''
       ierr = ug_get_attribute(ncid, varids(iv), 'standard_name', str)
       if (ierr /= nf90_noerr) then
          ! No CF :standard_name attribute, ignore this var.

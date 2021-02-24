@@ -188,6 +188,7 @@ module m_ec_quantity
          scalefactor = 1.d0
          fillvalue = ec_undef_hp
 
+         units = ''
          if (ug_get_attribute(ncid, varid, 'units', units)==NF90_NOERR) then 
             call str_upper(units) ! make units attribute case-insensitive 
             if (.not.(ecQuantitySet(instancePtr, quantityId, units=units))) then

@@ -553,6 +553,7 @@ recursive function dlwqnc_copy_associated( ncidin, ncidout, meshidin, meshidout,
     endif
 
     if ( use_names_in_attrib ) then
+        att_value = ''
         ierror   = ug_get_attribute( ncidin, meshidin, attribute, att_value )
         if ( ierror /= nf90_noerr .and. .not. suppress_message ) then
             if (warning_message) then

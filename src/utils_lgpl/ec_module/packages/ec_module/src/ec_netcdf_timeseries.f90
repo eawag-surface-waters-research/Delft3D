@@ -211,6 +211,7 @@ module m_ec_netcdf_timeseries
        ierr = nf90_inquire_variable(ncptr%ncid,iVars,ndims=var_ndims(iVars),dimids=var_dimids(:,iVars))
 
        ! Check for important var: was it the stations?
+       cf_role = ''
        ierr = ug_get_attribute(ncptr%ncid,iVars,'cf_role',cf_role)
        if (cf_role == 'timeseries_id') then 
              nDims = 0                
@@ -243,6 +244,8 @@ module m_ec_netcdf_timeseries
        endif 
 
        ! Check for important var: was it vertical layering?
+       positive = ''
+       zunits = ''
        ierr = ug_get_attribute(ncptr%ncid,iVars,'positive',positive)
        if (len_trim(positive) > 0) then ! Identified a layercoord variable, by its positive:up/down attribute
           ! NOTE: officially, a vertical coord var may also be identified by a unit of pressure, but we don't support that here.

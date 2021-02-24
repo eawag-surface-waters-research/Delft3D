@@ -754,6 +754,7 @@ integer                         :: ndxndxi       !< Last node to be saved. Equal
          idims(idx_layerdim) = id_tsp%meshids2d%dimids(mdim_layer)
          ierr = ug_def_var(ncid, id_var(2), idims(idx_fastdim:maxrank), itype, UG_LOC_FACE, &
                            trim(mesh2dname), var_name, standard_name, long_name, unit, cell_method_, cell_measures, crs, ifill=-999, dfill=dmiss, writeopts=unc_writeopts)
+
       end if
 
       if (jamapanc > 0 .and. jamaps1 > 0 .and. .not. strcmpi(var_name, 'waterdepth')) then
@@ -10789,6 +10790,7 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
    ! UNST-2510: Based on _net.nc version either read with or without duplicatie points on connection nodes.
    nodesOnBranchVertices = 1
    ierr = ionc_get_ncid(ioncid, ncid)
+   tmpstring = ''
    ierr = ug_get_attribute(ncid, nf90_global, 'Conventions', tmpstring)
    if (ierr == NF90_ENOTATT) then
       nodesOnBranchVertices = 0 ! New format.
@@ -11283,6 +11285,7 @@ subroutine unc_read_net(filename, numk_keep, numl_keep, numk_read, numl_read, ie
     end if
     call readyy('Reading net data',.7d0)
 
+    coordsyscheck = ''
     ierr = ug_get_attribute(inetfile, id_netnodex, 'standard_name', coordsyscheck)
     if (stringsequalinsens(coordsyscheck, 'longitude')) then
         jsferic  = 1
