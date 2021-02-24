@@ -15434,7 +15434,7 @@ else if (nodval == 27) then
  use geometry_module ! , only: dbdistance, normalout, half
  use m_physcoef, only: backgroundwatertemperature
  use m_alloc
- use unstruc_channel_flow, only: network, useVolumeTables
+ use unstruc_channel_flow, only: network
  use m_1d_structures, only: initialize_structures_actual_params, t_structure
  use m_oned_functions, only: updateFreeboard, set_max_volume_for_1d_nodes, updateDepthOnGround, updateVolOnGround, updateTotalInflow1d2d, updateTotalInflowLat
  use m_waves
