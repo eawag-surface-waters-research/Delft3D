@@ -138,7 +138,6 @@ libdflowfm_la_SOURCES+=\
         advec.f90 \
 	m_filter.f90 \
 	filter.F90 \
-        volume_table.f90 \
         unstruc.F90
 # and the library interface
 libdflowfm_la_SOURCES+=\
