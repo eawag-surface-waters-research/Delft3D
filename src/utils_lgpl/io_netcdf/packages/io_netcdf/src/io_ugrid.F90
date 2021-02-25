@@ -116,6 +116,7 @@ integer, parameter :: UG_DIM_MAXFACENODES = 128 !< The dimension containing the 
 !! Write options, intended to be specified as a single integer with a summation of the parameters below (i.e. as bit pattern)
 integer, parameter :: UG_WRITE_NOOPTS = 0 !< zero parameter for write options
 integer, parameter :: UG_WRITE_LATLON = 1 !< Automatically write also lat lon coordinates if the input is in some non-WGS84 projected system.
+integer, parameter :: UG_WRITE_LYRVAR = 2 !< Automatically write also layer coordinates as variables
 
 !! Basics
 integer, parameter :: dp=kind(1.0d00)
@@ -1181,7 +1182,8 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
    logical :: add_edge_face_connectivity !< Specifies whether edge_face_connectivity should be added.
    logical :: add_face_edge_connectivity !< Specifies whether face_edge_connectivity should be added.
    logical :: add_face_face_connectivity !< Specifies whether face_face_connectivity should be added.
-   logical :: add_layers                 !< Specifies whether layer and interface vertical dimensions should be added.
+   logical :: add_layer_dim              !< Specifies whether layer and interface vertical dimensions should be added.
+   logical :: add_layer_var              !< Specifies whether layer and interface vertical should be added as separate coordinate variables.
    logical :: add_latlon                 !< Specifies whether latlon coordinates should be added.
    integer :: offset
    logical :: is1dugridnetwork
@@ -1204,10 +1206,16 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
    add_edge_face_connectivity = associated(edge_faces)
    add_face_edge_connectivity = associated(face_edges)
    add_face_face_connectivity = associated(face_links)
-   add_layers = .false.
+   add_layer_dim = .false.
 
    if (present(numLayer) .and. present(layerType) .and. present(layer_zs) .and. present(interface_zs)) then
-      add_layers = numLayer >= 1
+      add_layer_dim = numLayer >= 1
+   end if
+
+   if (present(writeopts)) then
+      add_layer_var = add_layer_dim .and. (iand(writeopts,UG_WRITE_LYRVAR)>0)
+   else
+      add_layer_var = add_layer_dim
    end if
 
 #ifdef HAVE_PROJ
@@ -1237,7 +1245,7 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
    endif
 
    if (.not.is1dugridnetwork) then !2d/3d and 1d not UGRID 1.6
-      ierr = ug_write_meshtopology(ncid, meshids, meshName, dim, dataLocs, add_edge_face_connectivity, add_face_edge_connectivity, add_face_face_connectivity, add_layers, add_latlon)
+      ierr = ug_write_meshtopology(ncid, meshids, meshName, dim, dataLocs, add_edge_face_connectivity, add_face_edge_connectivity, add_face_face_connectivity, add_layer_dim, add_latlon)
       ! Dimensions
       ierr = nf90_def_dim(ncid, prefix//'_nEdges',           numEdge,   meshids%dimids(mdim_edge))
       ierr = nf90_def_dim(ncid, prefix//'_nNodes',           numNode,   meshids%dimids(mdim_node))
@@ -1250,7 +1258,7 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
          ierr = nf90_def_dim(ncid, prefix//'_nMax_face_nodes',  maxnv,   meshids%dimids(mdim_maxfacenodes))
       end if
 
-      if (add_layers) then
+      if (add_layer_dim) then
          if (dim >= 3) then
             ! Only 1D and 2D mesh topologies can be layered.
             ierr = UG_INVALID_LAYERS
@@ -1414,7 +1422,7 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
    end if
 
    ! Layers
-   if (add_layers) then
+   if (add_layer_var) then
       ! Write mesh layer distribution (mesh-global, not per face)
       select case(layerType)
       case (LAYERTYPE_OCEANSIGMA)
@@ -1677,7 +1685,7 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
    if (allocated(latn)) deallocate(latn)
 
    ! Layers
-   if (add_layers) then
+   if (add_layer_var) then
       ! Write mesh layer distribution (mesh-global, not per face)
       if (associated(layer_zs).and.(meshids%varids(mid_layerzs).ne.-1).and.(numLayer.gt.0)) then
          ierr = nf90_put_var(ncid, meshids%varids(mid_layerzs),     layer_zs(1:numLayer))

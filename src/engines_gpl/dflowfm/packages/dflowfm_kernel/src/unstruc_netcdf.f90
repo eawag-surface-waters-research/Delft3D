@@ -525,6 +525,7 @@ end function unc_def_var_nonspatial
 !! Space-dependent variables will be multiply defined: on mesh1d and mesh2d-based variables (unless specified otherwise via which_meshdim argument).
 function unc_def_var_map(ncid,id_tsp, id_var, itype, iloc, var_name, standard_name, long_name, unit, is_timedep, dimids, cell_method, which_meshdim, jabndnd) result(ierr)
 use m_save_ugrid_state, only: network1dname, mesh2dname, mesh1dname, contactname
+use netcdf_utils, only: ncu_append_atts
 use m_flowgeom
 use m_flowparameters, only: jamapvol1, jamapau, jamaps1, jamaphu, jamapanc
 use network_data, only: numk, numl, numl1d
@@ -567,6 +568,7 @@ integer :: ndims, i
 integer :: which_meshdim_
 integer                         :: jabndnd_      !< Flag specifying whether boundary nodes are to be written.
 integer                         :: ndxndxi       !< Last node to be saved. Equals ndx when boundary nodes are written, or ndxi otherwise.
+integer :: varid
 
    ierr = DFM_NOERR
 
@@ -831,6 +833,26 @@ integer                         :: ndxndxi       !< Last node to be saved. Equal
       ierr = UG_INVALID_DATALOCATION
       goto 888
    end select
+
+
+   select case (iloc)
+   case(UNC_LOC_S3D)
+      if (nf90_inq_varid( ncid, trim(mesh2dname)//'_flowelem_zcc', varid)==NF90_NOERR) then 
+         ierr = ncu_append_atts( ncid, id_var(2), 'coordinates', ' '//trim(mesh2dname)//'_flowelem_zcc')
+      end if
+      if (nf90_inq_varid( ncid, trim(mesh2dname)//'_layer_z', varid)==NF90_NOERR) then 
+         ierr = ncu_append_atts( ncid, id_var(2), 'coordinates', ' '//trim(mesh2dname)//'_layer_z')
+      end if
+   case(UNC_LOC_W)
+      if (nf90_inq_varid( ncid, trim(mesh2dname)//'_flowelem_zw', varid)==NF90_NOERR) then 
+         ierr = ncu_append_atts( ncid, id_var(2), 'coordinates', ' '//trim(mesh2dname)//'_flowelem_zw')
+      end if
+      if (nf90_inq_varid( ncid, trim(mesh2dname)//'_interface_z', varid)==NF90_NOERR) then 
+         ierr = ncu_append_atts( ncid, id_var(2), 'coordinates', ' '//trim(mesh2dname)//'_interface_z')
+      end if
+   end select
+
+! RL: separate cases needed for iloc==UNC_LOC_U3D and UNC_LOC_WU, see Issue UNST-4880
 
    return ! Successful return.
 
@@ -13436,7 +13458,7 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd)
    use m_save_ugrid_state !stores the contactname and other saved ugrid names
    use m_CrossSections
    use unstruc_channel_flow, only: network
-   use m_flowparameters, only: jamd1dfile
+   use m_flowparameters, only: jamd1dfile, jafullgridoutput
    use m_oned_functions, only: gridpoint2cross
    implicit none
 
@@ -13823,9 +13845,16 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd)
       ! face_nodes does not need to be re-mapped: 2d cells come first
       ! TODO: AvD: lnx1d+1:lnx includes open bnd links, which may *also* be 1D boundaries (don't want that in mesh2d)
       ! note edge_faces does not need re-indexing, cell number are flow variables and 2d comes first
+      if (jafullgridoutput.eq.0) then
+          unc_writeopts = unc_writeopts .or. UG_WRITE_LYRVAR
+      else
+          unc_writeopts = unc_writeopts .and. (.not.UG_WRITE_LYRVAR)
+      endif
+
       ierr = ug_write_mesh_arrays(ncid, id_tsp%meshids2d, mesh2dname, 2, UG_LOC_EDGE + UG_LOC_FACE, numk2d, numl2d, ndx2d, numNodes, &
                                     edge_nodes, face_nodes, edge_faces, null(), null(),x2dn, y2dn, xue, yue, xz(1:ndx2d), yz(1:ndx2d), &
-                                    crs, -999, dmiss, start_index, layer_count, layer_type, layer_zs, interface_zs, writeopts=unc_writeopts)
+                                    crs, -999, dmiss, start_index, layer_count, layer_type, &
+                                    layer_zs=layer_zs, interface_zs=interface_zs, writeopts=unc_writeopts)
 
       ! Add edge type variable (edge-flowlink relation)
       call write_edge_type_variable(ncid, id_tsp%meshids2d, mesh2dname, edge_type)

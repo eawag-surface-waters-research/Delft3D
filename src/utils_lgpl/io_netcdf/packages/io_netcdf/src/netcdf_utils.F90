@@ -38,6 +38,7 @@ private
 public :: ncu_format_to_cmode
 public :: ncu_inq_var_fill, ncu_copy_atts, ncu_copy_chunking_deflate
 public :: ncu_clone_vardef
+public :: ncu_append_atts
 
 ! Copied from official NetCDF: typeSizes.f90
 integer, parameter ::   OneByteInt = selected_int_kind(2), &
@@ -120,6 +121,30 @@ function ncu_copy_atts( ncidin, ncidout, varidin, varidout ) result(ierr)
    ierr = nf90_noerr
 end function ncu_copy_atts
 
+!> For variable varid in netcdf file ncid append extension to attribute attname 
+!! Returns:
+!     nf90_noerr if all okay, otherwise an error code
+!!
+function ncu_append_atts( ncid, varid, attname, extension) result(ierr)
+   integer                        :: ierr
+   integer, intent(in)            :: ncid      !< ID of the NetCDF file
+   integer, intent(in)            :: varid     !< ID of the NetCDF variable, or NF90_GLOBAL for global attributes.
+   character(len=*), intent(in)   :: extension !< name of the attribute
+   character(len=*), intent(in)   :: attname   !< name of the attribute
+   integer                        :: atttype   !< attribute data type
+   character(len=:), allocatable  :: atttext
+   integer                        :: attlen    !< attribute length
+   
+   ierr = -1
+   atttype = 0
+   ierr = nf90_inquire_attribute(ncid, varid, attname, xtype=atttype, len=attlen)
+   if (atttype == NF90_CHAR) then
+      allocate(character(len=attlen) :: atttext)
+      ierr = nf90_get_att(ncid, varid, attname, atttext)
+      ierr = nf90_put_att(ncid, varid, attname, atttext//trim(extension))
+      ierr = nf90_noerr
+   endif
+end function ncu_append_atts
 
 !> Clones a NetCDF variable definition.
 !!
