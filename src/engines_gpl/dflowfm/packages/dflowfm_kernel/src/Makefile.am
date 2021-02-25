@@ -53,6 +53,7 @@ libdflowfm_la_SOURCES=\
         hydrology_data.f90 \
         bedform_data.f90 \
         modules.f90 \
+        volume_table.f90 \
         dfm_signals.F90 \
         inquire_flowgeom.f90 \
         partition.F90 \
