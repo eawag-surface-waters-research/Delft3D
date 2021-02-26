@@ -176,8 +176,8 @@
       character*255 inifil
       logical       lfound
       integer       idummy, ierr2
+      integer       lunini
       real          rdummy
-      DATA          IOBALI /   85 /
       DATA          LUMPEM /.true./
       DATA          LUMPPR /.true./
       DATA          SUPPFT /.true./
@@ -226,20 +226,20 @@
           else
              inifil = 'delwaq.ini'
           endif
-          open ( 1801 , file=inifil , status='old' , err=123 )
-          call gkwini ( 1801 ,'Balance Options','LumpProcessesContributions' , c2 )
+          open ( newunit = lunini, file=inifil , status='old' , err=123 )
+          call gkwini ( lunini ,'Balance Options','LumpProcessesContributions' , c2 )
           if ( c2 .eq. '-1' ) lumppr = .true.
           if ( c2 .eq. '0' ) lumppr = .false.
-          call gkwini ( 1801 ,'Balance Options','LumpBoundaryContributions' , c2 )
+          call gkwini ( lunini ,'Balance Options','LumpBoundaryContributions' , c2 )
           if ( c2 .eq. '-1' ) lumpem = .true.
           if ( c2 .eq. '0' ) lumpem = .false.
-          call gkwini ( 1801 ,'Balance Options','SumOfMonitoringAreas' , c2 )
+          call gkwini ( lunini ,'Balance Options','SumOfMonitoringAreas' , c2 )
           if ( c2 .eq. '-1' ) onlysm = .true.
           if ( c2 .eq. '0' ) onlysm = .false.
-          call gkwini ( 1801 ,'Balance Options','SuppressTimeDependentOutput' , c2 )
+          call gkwini ( lunini ,'Balance Options','SuppressTimeDependentOutput' , c2 )
           if ( c2 .eq. '-1' ) suppft = .true.
           if ( c2 .eq. '0' ) suppft = .false.
-          close ( 1801 )
+          close ( lunini )
   123     continue
 
           ! count number of output dump areas
@@ -868,7 +868,7 @@
           ELSE
              FILNAM = 'sobwqbal.prn'
           ENDIF
-          OPEN ( IOBALI , FILE = FILNAM )
+          OPEN ( NEWUNIT = IOBALI , FILE = FILNAM )
 
 !         In mass
           CALL OUTBAI (IOBALI, MONAME      , IBSTRT, IBSTOP, NOOUT ,
@@ -1119,7 +1119,7 @@
 
       use timers
       use bloom_data_mass_balance
-      
+
       implicit none
 
       integer            nosum , notot , nocons

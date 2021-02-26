@@ -85,6 +85,7 @@
       integer                 :: idummy
       real                    :: rdummy
       integer                 :: ierr2
+      integer                 :: lunini
       integer                 :: ioerr
       character(len=20)       :: c20
       character(len=2)        :: c2
@@ -107,11 +108,11 @@
             inifil = 'delwaq.ini'
          endif
 
-         open ( 1801 , file=inifil , status='old' , iostat = ioerr )
+         open ( newunit = lunini , file=inifil , status='old' , iostat = ioerr )
 
          if ( ioerr .eq. 0 ) then
 
-            call gkwini ( 1801 , 'SimulationOptions', 'waq2flow' , c2 )
+            call gkwini ( lunini , 'SimulationOptions', 'waq2flow' , c2 )
             if ( c2 .eq. '-1' ) then
 
                l_waq2flow = .true.
@@ -119,7 +120,7 @@
 
 	       ! parameter one
 
-               call gkwini ( 1801 , 'SimulationOptions', 'parameter_waq2flow01' , c20 )
+               call gkwini ( lunini , 'SimulationOptions', 'parameter_waq2flow01' , c20 )
                if ( c20 .ne. ' ' ) then
                   parnam(1) = c20
                   write(lunrep,*) ' using parameter_waq2flow01 :',trim(parnam(1))
@@ -148,7 +149,7 @@
 
 	       ! parameter two
 
-               call gkwini ( 1801 , 'SimulationOptions', 'parameter_waq2flow02' , c20 )
+               call gkwini ( lunini , 'SimulationOptions', 'parameter_waq2flow02' , c20 )
                if ( c20 .ne. ' ' ) then
                   parnam(2) = c20
                   write(lunrep,*) ' using parameter_waq2flow02 :',trim(parnam(2))
@@ -192,9 +193,9 @@
                diooutstream = diocreatestreamsynched(dio_binary_stream, streamname, 'w')
 !jvb           diooutset    = diofpltdefine_11(datasetname, dio_plt_real, nrvar, parnam, noseg)
                diooutset    = diodefinepltdataset(diooutstream,datasetname, dio_plt_real, nrvar, parnam, noseg, locs)
-			 write(*,*)  'success in waq2flow!'
+               write(*,*)  'success in waq2flow!'
             endif
-            close ( 1801 )
+            close ( lunini )
          endif
 
       endif

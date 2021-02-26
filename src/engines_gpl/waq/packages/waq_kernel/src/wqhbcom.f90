@@ -87,7 +87,7 @@ function WQHBInit(WQHBComm, HisFileName, nosys, nobnd, syname, bndid) result(suc
 
     ! locals
 
-    integer, parameter :: luhis = 1961
+    integer            :: luhis
     integer            :: ivar
     integer            :: ipar                     ! loop counter/index  substances other domain
     integer            :: ipoint
@@ -118,7 +118,7 @@ function WQHBInit(WQHBComm, HisFileName, nosys, nobnd, syname, bndid) result(suc
 
 !   Read metadata from HIS file
 
-    open (luhis,file=WQHBComm % filename,form='unformatted',access='stream')
+    open (newunit = luhis,file=WQHBComm % filename,form='unformatted',access='stream')
     read (luhis) moname
     read (luhis) WQHBComm % numVars, WQHBComm % numPoints
     allocate(WQHBComm % namVars  (WQHBComm % numVars))
@@ -193,7 +193,7 @@ function WQHBGetValues(WQHBComm) result(success)
     integer            :: ipar                     ! loop counter/index  substances other domain
     integer            :: isys                     ! loop counter/index  substances this domain
     integer            :: lunrep                   ! unit number report file
-    integer, parameter :: luhis = 1961
+    integer            :: luhis
     integer            :: ivar
     integer            :: ipoint
     integer            :: itime
@@ -212,7 +212,7 @@ function WQHBGetValues(WQHBComm) result(success)
 
 !   Skip heading from HIS file
 
-    open (luhis,file=WQHBComm % filename,form='unformatted',access='stream')
+    open (newunit = luhis,file=WQHBComm % filename,form='unformatted',access='stream')
     read (luhis) moname
     read (luhis) ipoint,ivar
     read (luhis) ( c20, ivar = 1,WQHBComm % numVars )

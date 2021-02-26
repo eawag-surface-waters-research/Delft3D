@@ -505,25 +505,25 @@
          case ( 40 )                          !     Binary segment attribute file
             select case ( opmode )
                case (  1 )
-                  open ( lun, file = finam, err = 910, form='unformatted', access='stream', status = 'replace'  )
+                  open ( newunit=lun, file = finam, err = 910, form='unformatted', access='stream', status = 'replace'  )
                case (  2 )
-                  open ( lun, file = finam, err = 910, form='unformatted', access='stream', status = 'old' )
+                  open ( newunit=lun, file = finam, err = 910, form='unformatted', access='stream', status = 'old' )
                case ( 11 )
-                  open ( lun, file = finam, err = 910, form='unformatted' )
+                  open ( newunit=lun, file = finam, err = 910, form='unformatted' )
                case ( 12 )
-                  open ( lun, file = finam, err = 910, form='unformatted', status = 'old' )
+                  open ( newunit=lun, file = finam, err = 910, form='unformatted', status = 'old' )
                case ( 21 )
-                  open ( lun, file = finam, err = 910, form   ='unformatted', access='stream',
-     &                                                 convert='big_endian' )
+                  open ( newunit=lun, file = finam, err = 910, form   ='unformatted', access='stream',
+     &                                                         convert='big_endian' )
                case ( 22 )
-                  open ( lun, file = finam, err = 910, form='unformatted', access='stream', status = 'old',
-     &                                                 convert='big_endian' )
+                  open ( newunit=lun, file = finam, err = 910, form='unformatted', access='stream', status = 'old',
+     &                                                         convert='big_endian' )
                case ( 31 )
-                  open ( lun, file = finam, err = 910, form   ='unformatted',
-     &                                                 convert='big_endian' )
+                  open ( newunit=lun, file = finam, err = 910, form   ='unformatted',
+     &                                                         convert='big_endian' )
                case ( 32 )
-                  open ( lun, file = finam, err = 910, form='unformatted', status = 'old',
-     &                                                 convert='big_endian' )
+                  open ( newunit=lun, file = finam, err = 910, form='unformatted', status = 'old',
+     &                                                         convert='big_endian' )
                case default
                   ierr = 3
             end select

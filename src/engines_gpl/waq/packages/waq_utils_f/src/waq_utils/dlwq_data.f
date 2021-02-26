@@ -141,7 +141,7 @@
       end type t_dlwq_item
 
 !     this is a collection of data_items
-      
+
       type t_dlwq_data_items
          type(t_dlwq_item), pointer       :: dlwq_foritem(:) ! pointer
          character(LEN=NAME_SIZE),pointer :: name(:)         ! names of item
@@ -901,7 +901,22 @@
          ftype = 2
          if ( mod(dlwqdata%filetype,10) .eq. FILE_UNFORMATTED ) ftype = ftype + 10
          if ( dlwqdata%filetype/10 .eq. 1 ) ftype = ftype + 20       ! I am in for a better solution (lp)
-         call dhopnf( lun, dlwqdata%filename, 3  , ftype , ierror )
+
+         select case (ftype)
+             case ( 2 )
+                 open ( newunit = lun, file = dlwqdata%filename, iostat = ierror, form='unformatted', access='stream'  , 
+     &                  status = 'old' )
+             case ( 12 )
+                 open ( newunit = lun, file = dlwqdata%filename, iostat = ierror, form='unformatted' , status = 'old' )
+             case ( 32 )
+                 open ( newunit = lun, file = dlwqdata%filename, iostat = ierror, form='unformatted' , status = 'old',
+     &                  convert='big_endian' )
+             case default
+                 write(lunrep,'(a,a)')  'Error opening file: ', trim(dlwqdata%filename)
+                 write(lunrep,'(a,i5)') 'Impossible case in dlwq_data - ', ftype
+                 ierror = 1
+         end select
+
          if ( ierror .ne. 0 ) then
             write(lunrep,1000) trim(dlwqdata%filename)
             write(lunrep,1010) ierror

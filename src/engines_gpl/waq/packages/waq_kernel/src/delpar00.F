@@ -84,11 +84,7 @@
             else if ( lunitp(21) .gt. 0 ) then
                if (  fnamep(21)(1:4) .ne. 'none' ) then
                   write ( lunut, * ) ' Opening the tau    file:', fnamep(21)(1:len_trim(fnamep(21)))
-#ifdef HAVE_FC_FORM_BINARY
-                  open ( lunitp(21), file = fnamep(21), form = 'binary', status = 'old', iostat = ierr )
-#else
                   open ( lunitp(21), file = fnamep(21), form = 'unformatted', access='stream', status = 'old', iostat = ierr )
-#endif
                   if ( ierr .ne. 0 ) then
                      write ( lunut, * ) ' Warning: could not open the tau file! Tau will be computed.'
                      lunitp(21) = 0
@@ -105,11 +101,7 @@
             else if ( lunitp(20) .gt. 0 ) then
                if ( fnamep(20)(1:4) .ne. 'none' ) then
                   write ( lunut, * ) ' Opening the vdf    file:', fnamep(20)(1:len_trim(fnamep(20)))
-#ifdef HAVE_FC_FORM_BINARY
-                  open ( lunitp(20), file = fnamep(20), form = 'binary', status = 'old', iostat = ierr )
-#else
                   open ( lunitp(20), file = fnamep(20), form = 'unformatted', access='stream', status = 'old', iostat = ierr )
-#endif
                   if ( ierr .ne. 0 ) then
                      write ( lunut, * ) ' Warning: could not open the vdf file! vdf will be set to zero!'
                      lunitp(20) = 0

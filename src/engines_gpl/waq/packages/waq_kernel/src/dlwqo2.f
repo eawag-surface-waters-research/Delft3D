@@ -740,6 +740,8 @@
      j                       volume, surf  , noseg , lunout   , lchout,
      j                       iniout, dmpbal, nowst , nowtyp   , wsttyp,
      j                       iwaste, inxtyp, wstdmp, isegcol  , imstep)
+
+               lun(ifi) = lunout ! Ad hoc: routine dhopnf sets the LU-number via newunit
                deallocate (surf)
 !
             endif
