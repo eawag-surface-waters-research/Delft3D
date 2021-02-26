@@ -179,8 +179,6 @@
       real(4) TempCof     !    Temperature coefficient
       real(4) rVB1        !    Ratio between current biomass and target biomass       (-)
       real(4) maxfMrtVB   !    Maximum biomass flux                              (g/m2/d)
-
-      integer, save :: cnt = 0
 !
 !*******************************************************************************
 !
@@ -201,8 +199,6 @@
       IdMrtS1VB01 = 12
       IdMrtS3VB01 = 13
       IdMrtS4VB01 = 14
-
-      cnt = cnt + 1
 !
       do  iseg = 1 , noseg
 

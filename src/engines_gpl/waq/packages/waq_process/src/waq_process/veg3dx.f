@@ -89,12 +89,12 @@
       integer                      :: ilay                ! Layer index
       integer                      :: isx                 ! Index into sedconc
       integer, dimension(16), save :: isidx =             ! List of indices into the sedconc array, mirrors the fluxes
-     &     [is_POC1, is_POC2, is_POC3, is_PON1, is_PON2, is_PON3, 
-     &      is_POP1, is_POP2, is_POP3, is_POS1, is_POS2, is_POS3, 
+     &     [is_POC1, is_POC2, is_POC3, is_PON1, is_PON2, is_PON3,
+     &      is_POP1, is_POP2, is_POP3, is_POS1, is_POS2, is_POS3,
      &      is_POC4, is_PON4, is_POP4, is_POS4]           ! Note: using POC4 instead of POC5 - omission in DelwaqG?
 
       alt_delwaqg = allocated(sedconc)
-      delt        = pmsa(ipnt(8))
+      delt        = pmsa(ipoint(8))
 
       nvbxx = nint(pmsa(ipoint(9)))
       npnt  = nipfix + nivar*nvbxx + nopfix + novar*nvbxx

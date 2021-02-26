@@ -21,6 +21,7 @@ FMODULES += \
 #Sources
 libwaq_process_la_SOURCES = \
        bottom_set.f \
+       layeredsed.f90 \
        get_effi.f \
        adspo4.f \
        advtra.f \
@@ -51,6 +52,7 @@ libwaq_process_la_SOURCES = \
        decpc5.f \
        dectra.f \
        degmp.f \
+       DelwaqG.f90 \
        densed.f \
        denwat.f \
        depave.f \
@@ -68,15 +70,21 @@ libwaq_process_la_SOURCES = \
        extina.f \
        extinc.f \
        flxfrc.f90 \
+       gemmpb.f \
        harves.f \
        hdisp.f \
        hdispa.f \
        hdispv.f \
        heatfl.f \
        intpol.f \
+       inverm.f \
        makpoc.f \
        meteo.f \
        methox.f \
+       mpbllm.f \
+       mpbnlm.f \
+       mpbnut.f \
+       mpbtmp.f \
        nh3fre.f \
        nitrif.f \
        nlalg.f \
@@ -112,6 +120,7 @@ libwaq_process_la_SOURCES = \
        secchi.f \
        sedaap.f \
        sedcar.f \
+       sedbal.f \
        sedcom.f \
        sedhm.f \
        sedim.f \
