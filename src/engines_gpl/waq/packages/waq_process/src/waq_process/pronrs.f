@@ -53,7 +53,7 @@
 !
 !     Local declarations
 !
-      PARAMETER   ( NOMODU = 154)
+      PARAMETER   ( NOMODU = 161)
       CHARACTER*6   MODNAM(NOMODU)
       SAVE          MODNAM
       DATA MODNAM /
@@ -210,7 +210,14 @@
      +   'PLASTC',
      +   'WLCWOC',
      +   'HDISS' ,
-     +   'TMODE'
+     +   'TMODE' ,
+     +   'DLWQG2',
+     +   'SEDBAL',
+     +   'GEMMPB',
+     +   'MPBNUT',
+     +   'MPBTMP',
+     +   'MPBLLM',
+     +   'MPBNLM'
      +   /
 !
 !     Set module number

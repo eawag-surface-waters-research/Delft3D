@@ -10670,27 +10670,28 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VB01_Mrt3W","SwDisVB01 ",   5,"Y","x",1
 "VB01_Mrt3W","VegHeVB01 ",   6,"Y","x",1
 "VB01_Mrt3W","FfacVB01  ",   7,"Y","x",1
-"VB01_Mrt3W","nfVB_wat  ",   8,"Y"," ",1
-"VB01_Mrt3W","fC2VB01P1 ",   9,"N","x",1
-"VB01_Mrt3W","fC2VB01P2 ",  10,"N","x",1
-"VB01_Mrt3W","fC2VB01P3 ",  11,"N","x",1
-"VB01_Mrt3W","fN2VB01P1 ",  12,"N","x",1
-"VB01_Mrt3W","fN2VB01P2 ",  13,"N","x",1
-"VB01_Mrt3W","fN2VB01P3 ",  14,"N","x",1
-"VB01_Mrt3W","fP2VB01P1 ",  15,"N","x",1
-"VB01_Mrt3W","fP2VB01P2 ",  16,"N","x",1
-"VB01_Mrt3W","fP2VB01P3 ",  17,"N","x",1
-"VB01_Mrt3W","fS2VB01P1 ",  18,"N","x",1
-"VB01_Mrt3W","fS2VB01P2 ",  19,"N","x",1
-"VB01_Mrt3W","fS2VB01P3 ",  20,"N","x",1
-"VB01_Mrt3W","fC1VB01P5 ",  21,"N","x",1
-"VB01_Mrt3W","fC3VB01P5 ",  22,"N","x",1
-"VB01_Mrt3W","fN1VB01P5 ",  23,"N","x",1
-"VB01_Mrt3W","fN3VB01P5 ",  24,"N","x",1
-"VB01_Mrt3W","fP1VB01P5 ",  25,"N","x",1
-"VB01_Mrt3W","fP3VB01P5 ",  26,"N","x",1
-"VB01_Mrt3W","fS1VB01P5 ",  27,"N","x",1
-"VB01_Mrt3W","fS3VB01P5 ",  28,"N","x",1
+"VB01_Mrt3W","DELT      ",   8,"N","x",1
+"VB01_Mrt3W","nfVB_wat  ",   9,"Y"," ",1
+"VB01_Mrt3W","fC2VB01P1 ",  10,"N","x",1
+"VB01_Mrt3W","fC2VB01P2 ",  11,"N","x",1
+"VB01_Mrt3W","fC2VB01P3 ",  12,"N","x",1
+"VB01_Mrt3W","fN2VB01P1 ",  13,"N","x",1
+"VB01_Mrt3W","fN2VB01P2 ",  14,"N","x",1
+"VB01_Mrt3W","fN2VB01P3 ",  15,"N","x",1
+"VB01_Mrt3W","fP2VB01P1 ",  16,"N","x",1
+"VB01_Mrt3W","fP2VB01P2 ",  17,"N","x",1
+"VB01_Mrt3W","fP2VB01P3 ",  18,"N","x",1
+"VB01_Mrt3W","fS2VB01P1 ",  19,"N","x",1
+"VB01_Mrt3W","fS2VB01P2 ",  20,"N","x",1
+"VB01_Mrt3W","fS2VB01P3 ",  21,"N","x",1
+"VB01_Mrt3W","fC1VB01P5 ",  22,"N","x",1
+"VB01_Mrt3W","fC3VB01P5 ",  23,"N","x",1
+"VB01_Mrt3W","fN1VB01P5 ",  24,"N","x",1
+"VB01_Mrt3W","fN3VB01P5 ",  25,"N","x",1
+"VB01_Mrt3W","fP1VB01P5 ",  26,"N","x",1
+"VB01_Mrt3W","fP3VB01P5 ",  27,"N","x",1
+"VB01_Mrt3W","fS1VB01P5 ",  28,"N","x",1
+"VB01_Mrt3W","fS3VB01P5 ",  29,"N","x",1
 "VB01_Mrt3S","Depth     ",   1,"N","x",1
 "VB01_Mrt3S","TotalDepth",   2,"N","x",1
 "VB01_Mrt3S","LocSedDept",   3,"N","x",1
@@ -10698,23 +10699,24 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VB01_Mrt3S","SwDisVB01 ",   5,"Y","x",1
 "VB01_Mrt3S","RootDeVB01",   6,"Y","x",1
 "VB01_Mrt3S","FfacVB01  ",   7,"Y","x",1
-"VB01_Mrt3S","nfVB_sed  ",   8,"Y"," ",1
-"VB01_Mrt3S","fC5VB01P1 ",   9,"N","x",1
-"VB01_Mrt3S","fC5VB01P2 ",  10,"N","x",1
-"VB01_Mrt3S","fC5VB01P3 ",  11,"N","x",1
-"VB01_Mrt3S","fN5VB01P1 ",  12,"N","x",1
-"VB01_Mrt3S","fN5VB01P2 ",  13,"N","x",1
-"VB01_Mrt3S","fN5VB01P3 ",  14,"N","x",1
-"VB01_Mrt3S","fP5VB01P1 ",  15,"N","x",1
-"VB01_Mrt3S","fP5VB01P2 ",  16,"N","x",1
-"VB01_Mrt3S","fP5VB01P3 ",  17,"N","x",1
-"VB01_Mrt3S","fS5VB01P1 ",  18,"N","x",1
-"VB01_Mrt3S","fS5VB01P2 ",  19,"N","x",1
-"VB01_Mrt3S","fS5VB01P3 ",  20,"N","x",1
-"VB01_Mrt3S","fC4VB01P5 ",  21,"N","x",1
-"VB01_Mrt3S","fN4VB01P5 ",  22,"N","x",1
-"VB01_Mrt3S","fP4VB01P5 ",  23,"N","x",1
-"VB01_Mrt3S","fS4VB01P5 ",  24,"N","x",1
+"VB01_Mrt3S","DELT      ",   8,"N","x",1
+"VB01_Mrt3S","nfVB_sed  ",   9,"Y"," ",1
+"VB01_Mrt3S","fC5VB01P1 ",  10,"N","x",1
+"VB01_Mrt3S","fC5VB01P2 ",  11,"N","x",1
+"VB01_Mrt3S","fC5VB01P3 ",  12,"N","x",1
+"VB01_Mrt3S","fN5VB01P1 ",  13,"N","x",1
+"VB01_Mrt3S","fN5VB01P2 ",  14,"N","x",1
+"VB01_Mrt3S","fN5VB01P3 ",  15,"N","x",1
+"VB01_Mrt3S","fP5VB01P1 ",  16,"N","x",1
+"VB01_Mrt3S","fP5VB01P2 ",  17,"N","x",1
+"VB01_Mrt3S","fP5VB01P3 ",  18,"N","x",1
+"VB01_Mrt3S","fS5VB01P1 ",  19,"N","x",1
+"VB01_Mrt3S","fS5VB01P2 ",  20,"N","x",1
+"VB01_Mrt3S","fS5VB01P3 ",  21,"N","x",1
+"VB01_Mrt3S","fC4VB01P5 ",  22,"N","x",1
+"VB01_Mrt3S","fN4VB01P5 ",  23,"N","x",1
+"VB01_Mrt3S","fP4VB01P5 ",  24,"N","x",1
+"VB01_Mrt3S","fS4VB01P5 ",  25,"N","x",1
 "VB01Upt   ","fVB01     ",   1,"N","x",1
 "VB01Upt   ","SwVB01Gro ",   2,"Y","x",1
 "VB01Upt   ","F1VB01    ",   3,"Y","x",1
@@ -10898,27 +10900,28 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VB02_Mrt3W","SwDisVB02 ",   5,"Y","x",1
 "VB02_Mrt3W","VegHeVB02 ",   6,"Y","x",1
 "VB02_Mrt3W","FfacVB02  ",   7,"Y","x",1
-"VB02_Mrt3W","nfVB_wat  ",   8,"Y"," ",1
-"VB02_Mrt3W","fC2VB02P1 ",   9,"N","x",1
-"VB02_Mrt3W","fC2VB02P2 ",  10,"N","x",1
-"VB02_Mrt3W","fC2VB02P3 ",  11,"N","x",1
-"VB02_Mrt3W","fN2VB02P1 ",  12,"N","x",1
-"VB02_Mrt3W","fN2VB02P2 ",  13,"N","x",1
-"VB02_Mrt3W","fN2VB02P3 ",  14,"N","x",1
-"VB02_Mrt3W","fP2VB02P1 ",  15,"N","x",1
-"VB02_Mrt3W","fP2VB02P2 ",  16,"N","x",1
-"VB02_Mrt3W","fP2VB02P3 ",  17,"N","x",1
-"VB02_Mrt3W","fS2VB02P1 ",  18,"N","x",1
-"VB02_Mrt3W","fS2VB02P2 ",  19,"N","x",1
-"VB02_Mrt3W","fS2VB02P3 ",  20,"N","x",1
-"VB02_Mrt3W","fC1VB02P5 ",  21,"N","x",1
-"VB02_Mrt3W","fC3VB02P5 ",  22,"N","x",1
-"VB02_Mrt3W","fN1VB02P5 ",  23,"N","x",1
-"VB02_Mrt3W","fN3VB02P5 ",  24,"N","x",1
-"VB02_Mrt3W","fP1VB02P5 ",  25,"N","x",1
-"VB02_Mrt3W","fP3VB02P5 ",  26,"N","x",1
-"VB02_Mrt3W","fS1VB02P5 ",  27,"N","x",1
-"VB02_Mrt3W","fS3VB02P5 ",  28,"N","x",1
+"VB02_Mrt3W","DELT      ",   8,"N","x",1
+"VB02_Mrt3W","nfVB_wat  ",   9,"Y"," ",1
+"VB02_Mrt3W","fC2VB02P1 ",  10,"N","x",1
+"VB02_Mrt3W","fC2VB02P2 ",  11,"N","x",1
+"VB02_Mrt3W","fC2VB02P3 ",  12,"N","x",1
+"VB02_Mrt3W","fN2VB02P1 ",  13,"N","x",1
+"VB02_Mrt3W","fN2VB02P2 ",  14,"N","x",1
+"VB02_Mrt3W","fN2VB02P3 ",  15,"N","x",1
+"VB02_Mrt3W","fP2VB02P1 ",  16,"N","x",1
+"VB02_Mrt3W","fP2VB02P2 ",  17,"N","x",1
+"VB02_Mrt3W","fP2VB02P3 ",  18,"N","x",1
+"VB02_Mrt3W","fS2VB02P1 ",  19,"N","x",1
+"VB02_Mrt3W","fS2VB02P2 ",  20,"N","x",1
+"VB02_Mrt3W","fS2VB02P3 ",  21,"N","x",1
+"VB02_Mrt3W","fC1VB02P5 ",  22,"N","x",1
+"VB02_Mrt3W","fC3VB02P5 ",  23,"N","x",1
+"VB02_Mrt3W","fN1VB02P5 ",  24,"N","x",1
+"VB02_Mrt3W","fN3VB02P5 ",  25,"N","x",1
+"VB02_Mrt3W","fP1VB02P5 ",  26,"N","x",1
+"VB02_Mrt3W","fP3VB02P5 ",  27,"N","x",1
+"VB02_Mrt3W","fS1VB02P5 ",  28,"N","x",1
+"VB02_Mrt3W","fS3VB02P5 ",  29,"N","x",1
 "VB02_Mrt3S","Depth     ",   1,"N","x",1
 "VB02_Mrt3S","TotalDepth",   2,"N","x",1
 "VB02_Mrt3S","LocSedDept",   3,"N","x",1
@@ -10926,23 +10929,24 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VB02_Mrt3S","SwDisVB02 ",   5,"Y","x",1
 "VB02_Mrt3S","RootDeVB02",   6,"Y","x",1
 "VB02_Mrt3S","FfacVB02  ",   7,"Y","x",1
-"VB02_Mrt3S","nfVB_sed  ",   8,"Y"," ",1
-"VB02_Mrt3S","fC5VB02P1 ",   9,"N","x",1
-"VB02_Mrt3S","fC5VB02P2 ",  10,"N","x",1
-"VB02_Mrt3S","fC5VB02P3 ",  11,"N","x",1
-"VB02_Mrt3S","fN5VB02P1 ",  12,"N","x",1
-"VB02_Mrt3S","fN5VB02P2 ",  13,"N","x",1
-"VB02_Mrt3S","fN5VB02P3 ",  14,"N","x",1
-"VB02_Mrt3S","fP5VB02P1 ",  15,"N","x",1
-"VB02_Mrt3S","fP5VB02P2 ",  16,"N","x",1
-"VB02_Mrt3S","fP5VB02P3 ",  17,"N","x",1
-"VB02_Mrt3S","fS5VB02P1 ",  18,"N","x",1
-"VB02_Mrt3S","fS5VB02P2 ",  19,"N","x",1
-"VB02_Mrt3S","fS5VB02P3 ",  20,"N","x",1
-"VB02_Mrt3S","fC4VB02P5 ",  21,"N","x",1
-"VB02_Mrt3S","fN4VB02P5 ",  22,"N","x",1
-"VB02_Mrt3S","fP4VB02P5 ",  23,"N","x",1
-"VB02_Mrt3S","fS4VB02P5 ",  24,"N","x",1
+"VB02_Mrt3S","DELT      ",   8,"N","x",1
+"VB02_Mrt3S","nfVB_sed  ",   9,"Y"," ",1
+"VB02_Mrt3S","fC5VB02P1 ",  10,"N","x",1
+"VB02_Mrt3S","fC5VB02P2 ",  11,"N","x",1
+"VB02_Mrt3S","fC5VB02P3 ",  12,"N","x",1
+"VB02_Mrt3S","fN5VB02P1 ",  13,"N","x",1
+"VB02_Mrt3S","fN5VB02P2 ",  14,"N","x",1
+"VB02_Mrt3S","fN5VB02P3 ",  15,"N","x",1
+"VB02_Mrt3S","fP5VB02P1 ",  16,"N","x",1
+"VB02_Mrt3S","fP5VB02P2 ",  17,"N","x",1
+"VB02_Mrt3S","fP5VB02P3 ",  18,"N","x",1
+"VB02_Mrt3S","fS5VB02P1 ",  19,"N","x",1
+"VB02_Mrt3S","fS5VB02P2 ",  20,"N","x",1
+"VB02_Mrt3S","fS5VB02P3 ",  21,"N","x",1
+"VB02_Mrt3S","fC4VB02P5 ",  22,"N","x",1
+"VB02_Mrt3S","fN4VB02P5 ",  23,"N","x",1
+"VB02_Mrt3S","fP4VB02P5 ",  24,"N","x",1
+"VB02_Mrt3S","fS4VB02P5 ",  25,"N","x",1
 "VB02Upt   ","fVB02     ",   1,"N","x",1
 "VB02Upt   ","SwVB02Gro ",   2,"Y","x",1
 "VB02Upt   ","F1VB02    ",   3,"Y","x",1
@@ -11126,27 +11130,28 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VB03_Mrt3W","SwDisVB03 ",   5,"Y","x",1
 "VB03_Mrt3W","VegHeVB03 ",   6,"Y","x",1
 "VB03_Mrt3W","FfacVB03  ",   7,"Y","x",1
-"VB03_Mrt3W","nfVB_wat  ",   8,"Y"," ",1
-"VB03_Mrt3W","fC2VB03P1 ",   9,"N","x",1
-"VB03_Mrt3W","fC2VB03P2 ",  10,"N","x",1
-"VB03_Mrt3W","fC2VB03P3 ",  11,"N","x",1
-"VB03_Mrt3W","fN2VB03P1 ",  12,"N","x",1
-"VB03_Mrt3W","fN2VB03P2 ",  13,"N","x",1
-"VB03_Mrt3W","fN2VB03P3 ",  14,"N","x",1
-"VB03_Mrt3W","fP2VB03P1 ",  15,"N","x",1
-"VB03_Mrt3W","fP2VB03P2 ",  16,"N","x",1
-"VB03_Mrt3W","fP2VB03P3 ",  17,"N","x",1
-"VB03_Mrt3W","fS2VB03P1 ",  18,"N","x",1
-"VB03_Mrt3W","fS2VB03P2 ",  19,"N","x",1
-"VB03_Mrt3W","fS2VB03P3 ",  20,"N","x",1
-"VB03_Mrt3W","fC1VB03P5 ",  21,"N","x",1
-"VB03_Mrt3W","fC3VB03P5 ",  22,"N","x",1
-"VB03_Mrt3W","fN1VB03P5 ",  23,"N","x",1
-"VB03_Mrt3W","fN3VB03P5 ",  24,"N","x",1
-"VB03_Mrt3W","fP1VB03P5 ",  25,"N","x",1
-"VB03_Mrt3W","fP3VB03P5 ",  26,"N","x",1
-"VB03_Mrt3W","fS1VB03P5 ",  27,"N","x",1
-"VB03_Mrt3W","fS3VB03P5 ",  28,"N","x",1
+"VB03_Mrt3W","DELT      ",   8,"N","x",1
+"VB03_Mrt3W","nfVB_wat  ",   9,"Y"," ",1
+"VB03_Mrt3W","fC2VB03P1 ",  10,"N","x",1
+"VB03_Mrt3W","fC2VB03P2 ",  11,"N","x",1
+"VB03_Mrt3W","fC2VB03P3 ",  12,"N","x",1
+"VB03_Mrt3W","fN2VB03P1 ",  13,"N","x",1
+"VB03_Mrt3W","fN2VB03P2 ",  14,"N","x",1
+"VB03_Mrt3W","fN2VB03P3 ",  15,"N","x",1
+"VB03_Mrt3W","fP2VB03P1 ",  16,"N","x",1
+"VB03_Mrt3W","fP2VB03P2 ",  17,"N","x",1
+"VB03_Mrt3W","fP2VB03P3 ",  18,"N","x",1
+"VB03_Mrt3W","fS2VB03P1 ",  19,"N","x",1
+"VB03_Mrt3W","fS2VB03P2 ",  20,"N","x",1
+"VB03_Mrt3W","fS2VB03P3 ",  21,"N","x",1
+"VB03_Mrt3W","fC1VB03P5 ",  22,"N","x",1
+"VB03_Mrt3W","fC3VB03P5 ",  23,"N","x",1
+"VB03_Mrt3W","fN1VB03P5 ",  24,"N","x",1
+"VB03_Mrt3W","fN3VB03P5 ",  25,"N","x",1
+"VB03_Mrt3W","fP1VB03P5 ",  26,"N","x",1
+"VB03_Mrt3W","fP3VB03P5 ",  27,"N","x",1
+"VB03_Mrt3W","fS1VB03P5 ",  28,"N","x",1
+"VB03_Mrt3W","fS3VB03P5 ",  29,"N","x",1
 "VB03_Mrt3S","Depth     ",   1,"N","x",1
 "VB03_Mrt3S","TotalDepth",   2,"N","x",1
 "VB03_Mrt3S","LocSedDept",   3,"N","x",1
@@ -11154,23 +11159,24 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VB03_Mrt3S","SwDisVB03 ",   5,"Y","x",1
 "VB03_Mrt3S","RootDeVB03",   6,"Y","x",1
 "VB03_Mrt3S","FfacVB03  ",   7,"Y","x",1
-"VB03_Mrt3S","nfVB_sed  ",   8,"Y"," ",1
-"VB03_Mrt3S","fC5VB03P1 ",   9,"N","x",1
-"VB03_Mrt3S","fC5VB03P2 ",  10,"N","x",1
-"VB03_Mrt3S","fC5VB03P3 ",  11,"N","x",1
-"VB03_Mrt3S","fN5VB03P1 ",  12,"N","x",1
-"VB03_Mrt3S","fN5VB03P2 ",  13,"N","x",1
-"VB03_Mrt3S","fN5VB03P3 ",  14,"N","x",1
-"VB03_Mrt3S","fP5VB03P1 ",  15,"N","x",1
-"VB03_Mrt3S","fP5VB03P2 ",  16,"N","x",1
-"VB03_Mrt3S","fP5VB03P3 ",  17,"N","x",1
-"VB03_Mrt3S","fS5VB03P1 ",  18,"N","x",1
-"VB03_Mrt3S","fS5VB03P2 ",  19,"N","x",1
-"VB03_Mrt3S","fS5VB03P3 ",  20,"N","x",1
-"VB03_Mrt3S","fC4VB03P5 ",  21,"N","x",1
-"VB03_Mrt3S","fN4VB03P5 ",  22,"N","x",1
-"VB03_Mrt3S","fP4VB03P5 ",  23,"N","x",1
-"VB03_Mrt3S","fS4VB03P5 ",  24,"N","x",1
+"VB03_Mrt3S","DELT      ",   8,"N","x",1
+"VB03_Mrt3S","nfVB_sed  ",   9,"Y"," ",1
+"VB03_Mrt3S","fC5VB03P1 ",  10,"N","x",1
+"VB03_Mrt3S","fC5VB03P2 ",  11,"N","x",1
+"VB03_Mrt3S","fC5VB03P3 ",  12,"N","x",1
+"VB03_Mrt3S","fN5VB03P1 ",  13,"N","x",1
+"VB03_Mrt3S","fN5VB03P2 ",  14,"N","x",1
+"VB03_Mrt3S","fN5VB03P3 ",  15,"N","x",1
+"VB03_Mrt3S","fP5VB03P1 ",  16,"N","x",1
+"VB03_Mrt3S","fP5VB03P2 ",  17,"N","x",1
+"VB03_Mrt3S","fP5VB03P3 ",  18,"N","x",1
+"VB03_Mrt3S","fS5VB03P1 ",  19,"N","x",1
+"VB03_Mrt3S","fS5VB03P2 ",  20,"N","x",1
+"VB03_Mrt3S","fS5VB03P3 ",  21,"N","x",1
+"VB03_Mrt3S","fC4VB03P5 ",  22,"N","x",1
+"VB03_Mrt3S","fN4VB03P5 ",  23,"N","x",1
+"VB03_Mrt3S","fP4VB03P5 ",  24,"N","x",1
+"VB03_Mrt3S","fS4VB03P5 ",  25,"N","x",1
 "VB03Upt   ","fVB03     ",   1,"N","x",1
 "VB03Upt   ","SwVB03Gro ",   2,"Y","x",1
 "VB03Upt   ","F1VB03    ",   3,"Y","x",1
@@ -11354,27 +11360,28 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VB04_Mrt3W","SwDisVB04 ",   5,"Y","x",1
 "VB04_Mrt3W","VegHeVB04 ",   6,"Y","x",1
 "VB04_Mrt3W","FfacVB04  ",   7,"Y","x",1
-"VB04_Mrt3W","nfVB_wat  ",   8,"Y"," ",1
-"VB04_Mrt3W","fC2VB04P1 ",   9,"N","x",1
-"VB04_Mrt3W","fC2VB04P2 ",  10,"N","x",1
-"VB04_Mrt3W","fC2VB04P3 ",  11,"N","x",1
-"VB04_Mrt3W","fN2VB04P1 ",  12,"N","x",1
-"VB04_Mrt3W","fN2VB04P2 ",  13,"N","x",1
-"VB04_Mrt3W","fN2VB04P3 ",  14,"N","x",1
-"VB04_Mrt3W","fP2VB04P1 ",  15,"N","x",1
-"VB04_Mrt3W","fP2VB04P2 ",  16,"N","x",1
-"VB04_Mrt3W","fP2VB04P3 ",  17,"N","x",1
-"VB04_Mrt3W","fS2VB04P1 ",  18,"N","x",1
-"VB04_Mrt3W","fS2VB04P2 ",  19,"N","x",1
-"VB04_Mrt3W","fS2VB04P3 ",  20,"N","x",1
-"VB04_Mrt3W","fC1VB04P5 ",  21,"N","x",1
-"VB04_Mrt3W","fC3VB04P5 ",  22,"N","x",1
-"VB04_Mrt3W","fN1VB04P5 ",  23,"N","x",1
-"VB04_Mrt3W","fN3VB04P5 ",  24,"N","x",1
-"VB04_Mrt3W","fP1VB04P5 ",  25,"N","x",1
-"VB04_Mrt3W","fP3VB04P5 ",  26,"N","x",1
-"VB04_Mrt3W","fS1VB04P5 ",  27,"N","x",1
-"VB04_Mrt3W","fS3VB04P5 ",  28,"N","x",1
+"VB04_Mrt3W","DELT      ",   8,"N","x",1
+"VB04_Mrt3W","nfVB_wat  ",   9,"Y"," ",1
+"VB04_Mrt3W","fC2VB04P1 ",  10,"N","x",1
+"VB04_Mrt3W","fC2VB04P2 ",  11,"N","x",1
+"VB04_Mrt3W","fC2VB04P3 ",  12,"N","x",1
+"VB04_Mrt3W","fN2VB04P1 ",  13,"N","x",1
+"VB04_Mrt3W","fN2VB04P2 ",  14,"N","x",1
+"VB04_Mrt3W","fN2VB04P3 ",  15,"N","x",1
+"VB04_Mrt3W","fP2VB04P1 ",  16,"N","x",1
+"VB04_Mrt3W","fP2VB04P2 ",  17,"N","x",1
+"VB04_Mrt3W","fP2VB04P3 ",  18,"N","x",1
+"VB04_Mrt3W","fS2VB04P1 ",  19,"N","x",1
+"VB04_Mrt3W","fS2VB04P2 ",  20,"N","x",1
+"VB04_Mrt3W","fS2VB04P3 ",  21,"N","x",1
+"VB04_Mrt3W","fC1VB04P5 ",  22,"N","x",1
+"VB04_Mrt3W","fC3VB04P5 ",  23,"N","x",1
+"VB04_Mrt3W","fN1VB04P5 ",  24,"N","x",1
+"VB04_Mrt3W","fN3VB04P5 ",  25,"N","x",1
+"VB04_Mrt3W","fP1VB04P5 ",  26,"N","x",1
+"VB04_Mrt3W","fP3VB04P5 ",  27,"N","x",1
+"VB04_Mrt3W","fS1VB04P5 ",  28,"N","x",1
+"VB04_Mrt3W","fS3VB04P5 ",  29,"N","x",1
 "VB04_Mrt3S","Depth     ",   1,"N","x",1
 "VB04_Mrt3S","TotalDepth",   2,"N","x",1
 "VB04_Mrt3S","LocSedDept",   3,"N","x",1
@@ -11382,23 +11389,24 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VB04_Mrt3S","SwDisVB04 ",   5,"Y","x",1
 "VB04_Mrt3S","RootDeVB04",   6,"Y","x",1
 "VB04_Mrt3S","FfacVB04  ",   7,"Y","x",1
-"VB04_Mrt3S","nfVB_sed  ",   8,"Y"," ",1
-"VB04_Mrt3S","fC5VB04P1 ",   9,"N","x",1
-"VB04_Mrt3S","fC5VB04P2 ",  10,"N","x",1
-"VB04_Mrt3S","fC5VB04P3 ",  11,"N","x",1
-"VB04_Mrt3S","fN5VB04P1 ",  12,"N","x",1
-"VB04_Mrt3S","fN5VB04P2 ",  13,"N","x",1
-"VB04_Mrt3S","fN5VB04P3 ",  14,"N","x",1
-"VB04_Mrt3S","fP5VB04P1 ",  15,"N","x",1
-"VB04_Mrt3S","fP5VB04P2 ",  16,"N","x",1
-"VB04_Mrt3S","fP5VB04P3 ",  17,"N","x",1
-"VB04_Mrt3S","fS5VB04P1 ",  18,"N","x",1
-"VB04_Mrt3S","fS5VB04P2 ",  19,"N","x",1
-"VB04_Mrt3S","fS5VB04P3 ",  20,"N","x",1
-"VB04_Mrt3S","fC4VB04P5 ",  21,"N","x",1
-"VB04_Mrt3S","fN4VB04P5 ",  22,"N","x",1
-"VB04_Mrt3S","fP4VB04P5 ",  23,"N","x",1
-"VB04_Mrt3S","fS4VB04P5 ",  24,"N","x",1
+"VB04_Mrt3S","DELT      ",   8,"N","x",1
+"VB04_Mrt3S","nfVB_sed  ",   9,"Y"," ",1
+"VB04_Mrt3S","fC5VB04P1 ",  10,"N","x",1
+"VB04_Mrt3S","fC5VB04P2 ",  11,"N","x",1
+"VB04_Mrt3S","fC5VB04P3 ",  12,"N","x",1
+"VB04_Mrt3S","fN5VB04P1 ",  13,"N","x",1
+"VB04_Mrt3S","fN5VB04P2 ",  14,"N","x",1
+"VB04_Mrt3S","fN5VB04P3 ",  15,"N","x",1
+"VB04_Mrt3S","fP5VB04P1 ",  16,"N","x",1
+"VB04_Mrt3S","fP5VB04P2 ",  17,"N","x",1
+"VB04_Mrt3S","fP5VB04P3 ",  18,"N","x",1
+"VB04_Mrt3S","fS5VB04P1 ",  19,"N","x",1
+"VB04_Mrt3S","fS5VB04P2 ",  20,"N","x",1
+"VB04_Mrt3S","fS5VB04P3 ",  21,"N","x",1
+"VB04_Mrt3S","fC4VB04P5 ",  22,"N","x",1
+"VB04_Mrt3S","fN4VB04P5 ",  23,"N","x",1
+"VB04_Mrt3S","fP4VB04P5 ",  24,"N","x",1
+"VB04_Mrt3S","fS4VB04P5 ",  25,"N","x",1
 "VB04Upt   ","fVB04     ",   1,"N","x",1
 "VB04Upt   ","SwVB04Gro ",   2,"Y","x",1
 "VB04Upt   ","F1VB04    ",   3,"Y","x",1
@@ -11582,27 +11590,28 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VB05_Mrt3W","SwDisVB05 ",   5,"Y","x",1
 "VB05_Mrt3W","VegHeVB05 ",   6,"Y","x",1
 "VB05_Mrt3W","FfacVB05  ",   7,"Y","x",1
-"VB05_Mrt3W","nfVB_wat  ",   8,"Y"," ",1
-"VB05_Mrt3W","fC2VB05P1 ",   9,"N","x",1
-"VB05_Mrt3W","fC2VB05P2 ",  10,"N","x",1
-"VB05_Mrt3W","fC2VB05P3 ",  11,"N","x",1
-"VB05_Mrt3W","fN2VB05P1 ",  12,"N","x",1
-"VB05_Mrt3W","fN2VB05P2 ",  13,"N","x",1
-"VB05_Mrt3W","fN2VB05P3 ",  14,"N","x",1
-"VB05_Mrt3W","fP2VB05P1 ",  15,"N","x",1
-"VB05_Mrt3W","fP2VB05P2 ",  16,"N","x",1
-"VB05_Mrt3W","fP2VB05P3 ",  17,"N","x",1
-"VB05_Mrt3W","fS2VB05P1 ",  18,"N","x",1
-"VB05_Mrt3W","fS2VB05P2 ",  19,"N","x",1
-"VB05_Mrt3W","fS2VB05P3 ",  20,"N","x",1
-"VB05_Mrt3W","fC1VB05P5 ",  21,"N","x",1
-"VB05_Mrt3W","fC3VB05P5 ",  22,"N","x",1
-"VB05_Mrt3W","fN1VB05P5 ",  23,"N","x",1
-"VB05_Mrt3W","fN3VB05P5 ",  24,"N","x",1
-"VB05_Mrt3W","fP1VB05P5 ",  25,"N","x",1
-"VB05_Mrt3W","fP3VB05P5 ",  26,"N","x",1
-"VB05_Mrt3W","fS1VB05P5 ",  27,"N","x",1
-"VB05_Mrt3W","fS3VB05P5 ",  28,"N","x",1
+"VB05_Mrt3W","DELT      ",   8,"N","x",1
+"VB05_Mrt3W","nfVB_wat  ",   9,"Y"," ",1
+"VB05_Mrt3W","fC2VB05P1 ",  10,"N","x",1
+"VB05_Mrt3W","fC2VB05P2 ",  11,"N","x",1
+"VB05_Mrt3W","fC2VB05P3 ",  12,"N","x",1
+"VB05_Mrt3W","fN2VB05P1 ",  13,"N","x",1
+"VB05_Mrt3W","fN2VB05P2 ",  14,"N","x",1
+"VB05_Mrt3W","fN2VB05P3 ",  15,"N","x",1
+"VB05_Mrt3W","fP2VB05P1 ",  16,"N","x",1
+"VB05_Mrt3W","fP2VB05P2 ",  17,"N","x",1
+"VB05_Mrt3W","fP2VB05P3 ",  18,"N","x",1
+"VB05_Mrt3W","fS2VB05P1 ",  19,"N","x",1
+"VB05_Mrt3W","fS2VB05P2 ",  20,"N","x",1
+"VB05_Mrt3W","fS2VB05P3 ",  21,"N","x",1
+"VB05_Mrt3W","fC1VB05P5 ",  22,"N","x",1
+"VB05_Mrt3W","fC3VB05P5 ",  23,"N","x",1
+"VB05_Mrt3W","fN1VB05P5 ",  24,"N","x",1
+"VB05_Mrt3W","fN3VB05P5 ",  25,"N","x",1
+"VB05_Mrt3W","fP1VB05P5 ",  26,"N","x",1
+"VB05_Mrt3W","fP3VB05P5 ",  27,"N","x",1
+"VB05_Mrt3W","fS1VB05P5 ",  28,"N","x",1
+"VB05_Mrt3W","fS3VB05P5 ",  29,"N","x",1
 "VB05_Mrt3S","Depth     ",   1,"N","x",1
 "VB05_Mrt3S","TotalDepth",   2,"N","x",1
 "VB05_Mrt3S","LocSedDept",   3,"N","x",1
@@ -11610,23 +11619,24 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VB05_Mrt3S","SwDisVB05 ",   5,"Y","x",1
 "VB05_Mrt3S","RootDeVB05",   6,"Y","x",1
 "VB05_Mrt3S","FfacVB05  ",   7,"Y","x",1
-"VB05_Mrt3S","nfVB_sed  ",   8,"Y"," ",1
-"VB05_Mrt3S","fC5VB05P1 ",   9,"N","x",1
-"VB05_Mrt3S","fC5VB05P2 ",  10,"N","x",1
-"VB05_Mrt3S","fC5VB05P3 ",  11,"N","x",1
-"VB05_Mrt3S","fN5VB05P1 ",  12,"N","x",1
-"VB05_Mrt3S","fN5VB05P2 ",  13,"N","x",1
-"VB05_Mrt3S","fN5VB05P3 ",  14,"N","x",1
-"VB05_Mrt3S","fP5VB05P1 ",  15,"N","x",1
-"VB05_Mrt3S","fP5VB05P2 ",  16,"N","x",1
-"VB05_Mrt3S","fP5VB05P3 ",  17,"N","x",1
-"VB05_Mrt3S","fS5VB05P1 ",  18,"N","x",1
-"VB05_Mrt3S","fS5VB05P2 ",  19,"N","x",1
-"VB05_Mrt3S","fS5VB05P3 ",  20,"N","x",1
-"VB05_Mrt3S","fC4VB05P5 ",  21,"N","x",1
-"VB05_Mrt3S","fN4VB05P5 ",  22,"N","x",1
-"VB05_Mrt3S","fP4VB05P5 ",  23,"N","x",1
-"VB05_Mrt3S","fS4VB05P5 ",  24,"N","x",1
+"VB05_Mrt3S","DELT      ",   8,"N","x",1
+"VB05_Mrt3S","nfVB_sed  ",   9,"Y"," ",1
+"VB05_Mrt3S","fC5VB05P1 ",  10,"N","x",1
+"VB05_Mrt3S","fC5VB05P2 ",  11,"N","x",1
+"VB05_Mrt3S","fC5VB05P3 ",  12,"N","x",1
+"VB05_Mrt3S","fN5VB05P1 ",  13,"N","x",1
+"VB05_Mrt3S","fN5VB05P2 ",  14,"N","x",1
+"VB05_Mrt3S","fN5VB05P3 ",  15,"N","x",1
+"VB05_Mrt3S","fP5VB05P1 ",  16,"N","x",1
+"VB05_Mrt3S","fP5VB05P2 ",  17,"N","x",1
+"VB05_Mrt3S","fP5VB05P3 ",  18,"N","x",1
+"VB05_Mrt3S","fS5VB05P1 ",  19,"N","x",1
+"VB05_Mrt3S","fS5VB05P2 ",  20,"N","x",1
+"VB05_Mrt3S","fS5VB05P3 ",  21,"N","x",1
+"VB05_Mrt3S","fC4VB05P5 ",  22,"N","x",1
+"VB05_Mrt3S","fN4VB05P5 ",  23,"N","x",1
+"VB05_Mrt3S","fP4VB05P5 ",  24,"N","x",1
+"VB05_Mrt3S","fS4VB05P5 ",  25,"N","x",1
 "VB05Upt   ","fVB05     ",   1,"N","x",1
 "VB05Upt   ","SwVB05Gro ",   2,"Y","x",1
 "VB05Upt   ","F1VB05    ",   3,"Y","x",1
@@ -11810,27 +11820,28 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VB06_Mrt3W","SwDisVB06 ",   5,"Y","x",1
 "VB06_Mrt3W","VegHeVB06 ",   6,"Y","x",1
 "VB06_Mrt3W","FfacVB06  ",   7,"Y","x",1
-"VB06_Mrt3W","nfVB_wat  ",   8,"Y"," ",1
-"VB06_Mrt3W","fC2VB06P1 ",   9,"N","x",1
-"VB06_Mrt3W","fC2VB06P2 ",  10,"N","x",1
-"VB06_Mrt3W","fC2VB06P3 ",  11,"N","x",1
-"VB06_Mrt3W","fN2VB06P1 ",  12,"N","x",1
-"VB06_Mrt3W","fN2VB06P2 ",  13,"N","x",1
-"VB06_Mrt3W","fN2VB06P3 ",  14,"N","x",1
-"VB06_Mrt3W","fP2VB06P1 ",  15,"N","x",1
-"VB06_Mrt3W","fP2VB06P2 ",  16,"N","x",1
-"VB06_Mrt3W","fP2VB06P3 ",  17,"N","x",1
-"VB06_Mrt3W","fS2VB06P1 ",  18,"N","x",1
-"VB06_Mrt3W","fS2VB06P2 ",  19,"N","x",1
-"VB06_Mrt3W","fS2VB06P3 ",  20,"N","x",1
-"VB06_Mrt3W","fC1VB06P5 ",  21,"N","x",1
-"VB06_Mrt3W","fC3VB06P5 ",  22,"N","x",1
-"VB06_Mrt3W","fN1VB06P5 ",  23,"N","x",1
-"VB06_Mrt3W","fN3VB06P5 ",  24,"N","x",1
-"VB06_Mrt3W","fP1VB06P5 ",  25,"N","x",1
-"VB06_Mrt3W","fP3VB06P5 ",  26,"N","x",1
-"VB06_Mrt3W","fS1VB06P5 ",  27,"N","x",1
-"VB06_Mrt3W","fS3VB06P5 ",  28,"N","x",1
+"VB06_Mrt3W","DELT      ",   8,"N","x",1
+"VB06_Mrt3W","nfVB_wat  ",   9,"Y"," ",1
+"VB06_Mrt3W","fC2VB06P1 ",  10,"N","x",1
+"VB06_Mrt3W","fC2VB06P2 ",  11,"N","x",1
+"VB06_Mrt3W","fC2VB06P3 ",  12,"N","x",1
+"VB06_Mrt3W","fN2VB06P1 ",  13,"N","x",1
+"VB06_Mrt3W","fN2VB06P2 ",  14,"N","x",1
+"VB06_Mrt3W","fN2VB06P3 ",  15,"N","x",1
+"VB06_Mrt3W","fP2VB06P1 ",  16,"N","x",1
+"VB06_Mrt3W","fP2VB06P2 ",  17,"N","x",1
+"VB06_Mrt3W","fP2VB06P3 ",  18,"N","x",1
+"VB06_Mrt3W","fS2VB06P1 ",  19,"N","x",1
+"VB06_Mrt3W","fS2VB06P2 ",  20,"N","x",1
+"VB06_Mrt3W","fS2VB06P3 ",  21,"N","x",1
+"VB06_Mrt3W","fC1VB06P5 ",  22,"N","x",1
+"VB06_Mrt3W","fC3VB06P5 ",  23,"N","x",1
+"VB06_Mrt3W","fN1VB06P5 ",  24,"N","x",1
+"VB06_Mrt3W","fN3VB06P5 ",  25,"N","x",1
+"VB06_Mrt3W","fP1VB06P5 ",  26,"N","x",1
+"VB06_Mrt3W","fP3VB06P5 ",  27,"N","x",1
+"VB06_Mrt3W","fS1VB06P5 ",  28,"N","x",1
+"VB06_Mrt3W","fS3VB06P5 ",  29,"N","x",1
 "VB06_Mrt3S","Depth     ",   1,"N","x",1
 "VB06_Mrt3S","TotalDepth",   2,"N","x",1
 "VB06_Mrt3S","LocSedDept",   3,"N","x",1
@@ -11838,23 +11849,24 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VB06_Mrt3S","SwDisVB06 ",   5,"Y","x",1
 "VB06_Mrt3S","RootDeVB06",   6,"Y","x",1
 "VB06_Mrt3S","FfacVB06  ",   7,"Y","x",1
-"VB06_Mrt3S","nfVB_sed  ",   8,"Y"," ",1
-"VB06_Mrt3S","fC5VB06P1 ",   9,"N","x",1
-"VB06_Mrt3S","fC5VB06P2 ",  10,"N","x",1
-"VB06_Mrt3S","fC5VB06P3 ",  11,"N","x",1
-"VB06_Mrt3S","fN5VB06P1 ",  12,"N","x",1
-"VB06_Mrt3S","fN5VB06P2 ",  13,"N","x",1
-"VB06_Mrt3S","fN5VB06P3 ",  14,"N","x",1
-"VB06_Mrt3S","fP5VB06P1 ",  15,"N","x",1
-"VB06_Mrt3S","fP5VB06P2 ",  16,"N","x",1
-"VB06_Mrt3S","fP5VB06P3 ",  17,"N","x",1
-"VB06_Mrt3S","fS5VB06P1 ",  18,"N","x",1
-"VB06_Mrt3S","fS5VB06P2 ",  19,"N","x",1
-"VB06_Mrt3S","fS5VB06P3 ",  20,"N","x",1
-"VB06_Mrt3S","fC4VB06P5 ",  21,"N","x",1
-"VB06_Mrt3S","fN4VB06P5 ",  22,"N","x",1
-"VB06_Mrt3S","fP4VB06P5 ",  23,"N","x",1
-"VB06_Mrt3S","fS4VB06P5 ",  24,"N","x",1
+"VB06_Mrt3S","DELT      ",   8,"N","x",1
+"VB06_Mrt3S","nfVB_sed  ",   9,"Y"," ",1
+"VB06_Mrt3S","fC5VB06P1 ",  10,"N","x",1
+"VB06_Mrt3S","fC5VB06P2 ",  11,"N","x",1
+"VB06_Mrt3S","fC5VB06P3 ",  12,"N","x",1
+"VB06_Mrt3S","fN5VB06P1 ",  13,"N","x",1
+"VB06_Mrt3S","fN5VB06P2 ",  14,"N","x",1
+"VB06_Mrt3S","fN5VB06P3 ",  15,"N","x",1
+"VB06_Mrt3S","fP5VB06P1 ",  16,"N","x",1
+"VB06_Mrt3S","fP5VB06P2 ",  17,"N","x",1
+"VB06_Mrt3S","fP5VB06P3 ",  18,"N","x",1
+"VB06_Mrt3S","fS5VB06P1 ",  19,"N","x",1
+"VB06_Mrt3S","fS5VB06P2 ",  20,"N","x",1
+"VB06_Mrt3S","fS5VB06P3 ",  21,"N","x",1
+"VB06_Mrt3S","fC4VB06P5 ",  22,"N","x",1
+"VB06_Mrt3S","fN4VB06P5 ",  23,"N","x",1
+"VB06_Mrt3S","fP4VB06P5 ",  24,"N","x",1
+"VB06_Mrt3S","fS4VB06P5 ",  25,"N","x",1
 "VB06Upt   ","fVB06     ",   1,"N","x",1
 "VB06Upt   ","SwVB06Gro ",   2,"Y","x",1
 "VB06Upt   ","F1VB06    ",   3,"Y","x",1
@@ -12038,27 +12050,28 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VB07_Mrt3W","SwDisVB07 ",   5,"Y","x",1
 "VB07_Mrt3W","VegHeVB07 ",   6,"Y","x",1
 "VB07_Mrt3W","FfacVB07  ",   7,"Y","x",1
-"VB07_Mrt3W","nfVB_wat  ",   8,"Y"," ",1
-"VB07_Mrt3W","fC2VB07P1 ",   9,"N","x",1
-"VB07_Mrt3W","fC2VB07P2 ",  10,"N","x",1
-"VB07_Mrt3W","fC2VB07P3 ",  11,"N","x",1
-"VB07_Mrt3W","fN2VB07P1 ",  12,"N","x",1
-"VB07_Mrt3W","fN2VB07P2 ",  13,"N","x",1
-"VB07_Mrt3W","fN2VB07P3 ",  14,"N","x",1
-"VB07_Mrt3W","fP2VB07P1 ",  15,"N","x",1
-"VB07_Mrt3W","fP2VB07P2 ",  16,"N","x",1
-"VB07_Mrt3W","fP2VB07P3 ",  17,"N","x",1
-"VB07_Mrt3W","fS2VB07P1 ",  18,"N","x",1
-"VB07_Mrt3W","fS2VB07P2 ",  19,"N","x",1
-"VB07_Mrt3W","fS2VB07P3 ",  20,"N","x",1
-"VB07_Mrt3W","fC1VB07P5 ",  21,"N","x",1
-"VB07_Mrt3W","fC3VB07P5 ",  22,"N","x",1
-"VB07_Mrt3W","fN1VB07P5 ",  23,"N","x",1
-"VB07_Mrt3W","fN3VB07P5 ",  24,"N","x",1
-"VB07_Mrt3W","fP1VB07P5 ",  25,"N","x",1
-"VB07_Mrt3W","fP3VB07P5 ",  26,"N","x",1
-"VB07_Mrt3W","fS1VB07P5 ",  27,"N","x",1
-"VB07_Mrt3W","fS3VB07P5 ",  28,"N","x",1
+"VB07_Mrt3W","DELT      ",   8,"N","x",1
+"VB07_Mrt3W","nfVB_wat  ",   9,"Y"," ",1
+"VB07_Mrt3W","fC2VB07P1 ",  10,"N","x",1
+"VB07_Mrt3W","fC2VB07P2 ",  11,"N","x",1
+"VB07_Mrt3W","fC2VB07P3 ",  12,"N","x",1
+"VB07_Mrt3W","fN2VB07P1 ",  13,"N","x",1
+"VB07_Mrt3W","fN2VB07P2 ",  14,"N","x",1
+"VB07_Mrt3W","fN2VB07P3 ",  15,"N","x",1
+"VB07_Mrt3W","fP2VB07P1 ",  16,"N","x",1
+"VB07_Mrt3W","fP2VB07P2 ",  17,"N","x",1
+"VB07_Mrt3W","fP2VB07P3 ",  18,"N","x",1
+"VB07_Mrt3W","fS2VB07P1 ",  19,"N","x",1
+"VB07_Mrt3W","fS2VB07P2 ",  20,"N","x",1
+"VB07_Mrt3W","fS2VB07P3 ",  21,"N","x",1
+"VB07_Mrt3W","fC1VB07P5 ",  22,"N","x",1
+"VB07_Mrt3W","fC3VB07P5 ",  23,"N","x",1
+"VB07_Mrt3W","fN1VB07P5 ",  24,"N","x",1
+"VB07_Mrt3W","fN3VB07P5 ",  25,"N","x",1
+"VB07_Mrt3W","fP1VB07P5 ",  26,"N","x",1
+"VB07_Mrt3W","fP3VB07P5 ",  27,"N","x",1
+"VB07_Mrt3W","fS1VB07P5 ",  28,"N","x",1
+"VB07_Mrt3W","fS3VB07P5 ",  29,"N","x",1
 "VB07_Mrt3S","Depth     ",   1,"N","x",1
 "VB07_Mrt3S","TotalDepth",   2,"N","x",1
 "VB07_Mrt3S","LocSedDept",   3,"N","x",1
@@ -12066,23 +12079,24 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VB07_Mrt3S","SwDisVB07 ",   5,"Y","x",1
 "VB07_Mrt3S","RootDeVB07",   6,"Y","x",1
 "VB07_Mrt3S","FfacVB07  ",   7,"Y","x",1
-"VB07_Mrt3S","nfVB_sed  ",   8,"Y"," ",1
-"VB07_Mrt3S","fC5VB07P1 ",   9,"N","x",1
-"VB07_Mrt3S","fC5VB07P2 ",  10,"N","x",1
-"VB07_Mrt3S","fC5VB07P3 ",  11,"N","x",1
-"VB07_Mrt3S","fN5VB07P1 ",  12,"N","x",1
-"VB07_Mrt3S","fN5VB07P2 ",  13,"N","x",1
-"VB07_Mrt3S","fN5VB07P3 ",  14,"N","x",1
-"VB07_Mrt3S","fP5VB07P1 ",  15,"N","x",1
-"VB07_Mrt3S","fP5VB07P2 ",  16,"N","x",1
-"VB07_Mrt3S","fP5VB07P3 ",  17,"N","x",1
-"VB07_Mrt3S","fS5VB07P1 ",  18,"N","x",1
-"VB07_Mrt3S","fS5VB07P2 ",  19,"N","x",1
-"VB07_Mrt3S","fS5VB07P3 ",  20,"N","x",1
-"VB07_Mrt3S","fC4VB07P5 ",  21,"N","x",1
-"VB07_Mrt3S","fN4VB07P5 ",  22,"N","x",1
-"VB07_Mrt3S","fP4VB07P5 ",  23,"N","x",1
-"VB07_Mrt3S","fS4VB07P5 ",  24,"N","x",1
+"VB07_Mrt3S","DELT      ",   8,"N","x",1
+"VB07_Mrt3S","nfVB_sed  ",   9,"Y"," ",1
+"VB07_Mrt3S","fC5VB07P1 ",  10,"N","x",1
+"VB07_Mrt3S","fC5VB07P2 ",  11,"N","x",1
+"VB07_Mrt3S","fC5VB07P3 ",  12,"N","x",1
+"VB07_Mrt3S","fN5VB07P1 ",  13,"N","x",1
+"VB07_Mrt3S","fN5VB07P2 ",  14,"N","x",1
+"VB07_Mrt3S","fN5VB07P3 ",  15,"N","x",1
+"VB07_Mrt3S","fP5VB07P1 ",  16,"N","x",1
+"VB07_Mrt3S","fP5VB07P2 ",  17,"N","x",1
+"VB07_Mrt3S","fP5VB07P3 ",  18,"N","x",1
+"VB07_Mrt3S","fS5VB07P1 ",  19,"N","x",1
+"VB07_Mrt3S","fS5VB07P2 ",  20,"N","x",1
+"VB07_Mrt3S","fS5VB07P3 ",  21,"N","x",1
+"VB07_Mrt3S","fC4VB07P5 ",  22,"N","x",1
+"VB07_Mrt3S","fN4VB07P5 ",  23,"N","x",1
+"VB07_Mrt3S","fP4VB07P5 ",  24,"N","x",1
+"VB07_Mrt3S","fS4VB07P5 ",  25,"N","x",1
 "VB07Upt   ","fVB07     ",   1,"N","x",1
 "VB07Upt   ","SwVB07Gro ",   2,"Y","x",1
 "VB07Upt   ","F1VB07    ",   3,"Y","x",1
@@ -12266,27 +12280,28 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VB08_Mrt3W","SwDisVB08 ",   5,"Y","x",1
 "VB08_Mrt3W","VegHeVB08 ",   6,"Y","x",1
 "VB08_Mrt3W","FfacVB08  ",   7,"Y","x",1
-"VB08_Mrt3W","nfVB_wat  ",   8,"Y"," ",1
-"VB08_Mrt3W","fC2VB08P1 ",   9,"N","x",1
-"VB08_Mrt3W","fC2VB08P2 ",  10,"N","x",1
-"VB08_Mrt3W","fC2VB08P3 ",  11,"N","x",1
-"VB08_Mrt3W","fN2VB08P1 ",  12,"N","x",1
-"VB08_Mrt3W","fN2VB08P2 ",  13,"N","x",1
-"VB08_Mrt3W","fN2VB08P3 ",  14,"N","x",1
-"VB08_Mrt3W","fP2VB08P1 ",  15,"N","x",1
-"VB08_Mrt3W","fP2VB08P2 ",  16,"N","x",1
-"VB08_Mrt3W","fP2VB08P3 ",  17,"N","x",1
-"VB08_Mrt3W","fS2VB08P1 ",  18,"N","x",1
-"VB08_Mrt3W","fS2VB08P2 ",  19,"N","x",1
-"VB08_Mrt3W","fS2VB08P3 ",  20,"N","x",1
-"VB08_Mrt3W","fC1VB08P5 ",  21,"N","x",1
-"VB08_Mrt3W","fC3VB08P5 ",  22,"N","x",1
-"VB08_Mrt3W","fN1VB08P5 ",  23,"N","x",1
-"VB08_Mrt3W","fN3VB08P5 ",  24,"N","x",1
-"VB08_Mrt3W","fP1VB08P5 ",  25,"N","x",1
-"VB08_Mrt3W","fP3VB08P5 ",  26,"N","x",1
-"VB08_Mrt3W","fS1VB08P5 ",  27,"N","x",1
-"VB08_Mrt3W","fS3VB08P5 ",  28,"N","x",1
+"VB08_Mrt3W","DELT      ",   8,"N","x",1
+"VB08_Mrt3W","nfVB_wat  ",   9,"Y"," ",1
+"VB08_Mrt3W","fC2VB08P1 ",  10,"N","x",1
+"VB08_Mrt3W","fC2VB08P2 ",  11,"N","x",1
+"VB08_Mrt3W","fC2VB08P3 ",  12,"N","x",1
+"VB08_Mrt3W","fN2VB08P1 ",  13,"N","x",1
+"VB08_Mrt3W","fN2VB08P2 ",  14,"N","x",1
+"VB08_Mrt3W","fN2VB08P3 ",  15,"N","x",1
+"VB08_Mrt3W","fP2VB08P1 ",  16,"N","x",1
+"VB08_Mrt3W","fP2VB08P2 ",  17,"N","x",1
+"VB08_Mrt3W","fP2VB08P3 ",  18,"N","x",1
+"VB08_Mrt3W","fS2VB08P1 ",  19,"N","x",1
+"VB08_Mrt3W","fS2VB08P2 ",  20,"N","x",1
+"VB08_Mrt3W","fS2VB08P3 ",  21,"N","x",1
+"VB08_Mrt3W","fC1VB08P5 ",  22,"N","x",1
+"VB08_Mrt3W","fC3VB08P5 ",  23,"N","x",1
+"VB08_Mrt3W","fN1VB08P5 ",  24,"N","x",1
+"VB08_Mrt3W","fN3VB08P5 ",  25,"N","x",1
+"VB08_Mrt3W","fP1VB08P5 ",  26,"N","x",1
+"VB08_Mrt3W","fP3VB08P5 ",  27,"N","x",1
+"VB08_Mrt3W","fS1VB08P5 ",  28,"N","x",1
+"VB08_Mrt3W","fS3VB08P5 ",  29,"N","x",1
 "VB08_Mrt3S","Depth     ",   1,"N","x",1
 "VB08_Mrt3S","TotalDepth",   2,"N","x",1
 "VB08_Mrt3S","LocSedDept",   3,"N","x",1
@@ -12294,23 +12309,24 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VB08_Mrt3S","SwDisVB08 ",   5,"Y","x",1
 "VB08_Mrt3S","RootDeVB08",   6,"Y","x",1
 "VB08_Mrt3S","FfacVB08  ",   7,"Y","x",1
-"VB08_Mrt3S","nfVB_sed  ",   8,"Y"," ",1
-"VB08_Mrt3S","fC5VB08P1 ",   9,"N","x",1
-"VB08_Mrt3S","fC5VB08P2 ",  10,"N","x",1
-"VB08_Mrt3S","fC5VB08P3 ",  11,"N","x",1
-"VB08_Mrt3S","fN5VB08P1 ",  12,"N","x",1
-"VB08_Mrt3S","fN5VB08P2 ",  13,"N","x",1
-"VB08_Mrt3S","fN5VB08P3 ",  14,"N","x",1
-"VB08_Mrt3S","fP5VB08P1 ",  15,"N","x",1
-"VB08_Mrt3S","fP5VB08P2 ",  16,"N","x",1
-"VB08_Mrt3S","fP5VB08P3 ",  17,"N","x",1
-"VB08_Mrt3S","fS5VB08P1 ",  18,"N","x",1
-"VB08_Mrt3S","fS5VB08P2 ",  19,"N","x",1
-"VB08_Mrt3S","fS5VB08P3 ",  20,"N","x",1
-"VB08_Mrt3S","fC4VB08P5 ",  21,"N","x",1
-"VB08_Mrt3S","fN4VB08P5 ",  22,"N","x",1
-"VB08_Mrt3S","fP4VB08P5 ",  23,"N","x",1
-"VB08_Mrt3S","fS4VB08P5 ",  24,"N","x",1
+"VB08_Mrt3S","DELT      ",   8,"N","x",1
+"VB08_Mrt3S","nfVB_sed  ",   9,"Y"," ",1
+"VB08_Mrt3S","fC5VB08P1 ",  10,"N","x",1
+"VB08_Mrt3S","fC5VB08P2 ",  11,"N","x",1
+"VB08_Mrt3S","fC5VB08P3 ",  12,"N","x",1
+"VB08_Mrt3S","fN5VB08P1 ",  13,"N","x",1
+"VB08_Mrt3S","fN5VB08P2 ",  14,"N","x",1
+"VB08_Mrt3S","fN5VB08P3 ",  15,"N","x",1
+"VB08_Mrt3S","fP5VB08P1 ",  16,"N","x",1
+"VB08_Mrt3S","fP5VB08P2 ",  17,"N","x",1
+"VB08_Mrt3S","fP5VB08P3 ",  18,"N","x",1
+"VB08_Mrt3S","fS5VB08P1 ",  19,"N","x",1
+"VB08_Mrt3S","fS5VB08P2 ",  20,"N","x",1
+"VB08_Mrt3S","fS5VB08P3 ",  21,"N","x",1
+"VB08_Mrt3S","fC4VB08P5 ",  22,"N","x",1
+"VB08_Mrt3S","fN4VB08P5 ",  23,"N","x",1
+"VB08_Mrt3S","fP4VB08P5 ",  24,"N","x",1
+"VB08_Mrt3S","fS4VB08P5 ",  25,"N","x",1
 "VB08Upt   ","fVB08     ",   1,"N","x",1
 "VB08Upt   ","SwVB08Gro ",   2,"Y","x",1
 "VB08Upt   ","F1VB08    ",   3,"Y","x",1
@@ -12494,27 +12510,28 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VB09_Mrt3W","SwDisVB09 ",   5,"Y","x",1
 "VB09_Mrt3W","VegHeVB09 ",   6,"Y","x",1
 "VB09_Mrt3W","FfacVB09  ",   7,"Y","x",1
-"VB09_Mrt3W","nfVB_wat  ",   8,"Y"," ",1
-"VB09_Mrt3W","fC2VB09P1 ",   9,"N","x",1
-"VB09_Mrt3W","fC2VB09P2 ",  10,"N","x",1
-"VB09_Mrt3W","fC2VB09P3 ",  11,"N","x",1
-"VB09_Mrt3W","fN2VB09P1 ",  12,"N","x",1
-"VB09_Mrt3W","fN2VB09P2 ",  13,"N","x",1
-"VB09_Mrt3W","fN2VB09P3 ",  14,"N","x",1
-"VB09_Mrt3W","fP2VB09P1 ",  15,"N","x",1
-"VB09_Mrt3W","fP2VB09P2 ",  16,"N","x",1
-"VB09_Mrt3W","fP2VB09P3 ",  17,"N","x",1
-"VB09_Mrt3W","fS2VB09P1 ",  18,"N","x",1
-"VB09_Mrt3W","fS2VB09P2 ",  19,"N","x",1
-"VB09_Mrt3W","fS2VB09P3 ",  20,"N","x",1
-"VB09_Mrt3W","fC1VB09P5 ",  21,"N","x",1
-"VB09_Mrt3W","fC3VB09P5 ",  22,"N","x",1
-"VB09_Mrt3W","fN1VB09P5 ",  23,"N","x",1
-"VB09_Mrt3W","fN3VB09P5 ",  24,"N","x",1
-"VB09_Mrt3W","fP1VB09P5 ",  25,"N","x",1
-"VB09_Mrt3W","fP3VB09P5 ",  26,"N","x",1
-"VB09_Mrt3W","fS1VB09P5 ",  27,"N","x",1
-"VB09_Mrt3W","fS3VB09P5 ",  28,"N","x",1
+"VB09_Mrt3W","DELT      ",   8,"N","x",1
+"VB09_Mrt3W","nfVB_wat  ",   9,"Y"," ",1
+"VB09_Mrt3W","fC2VB09P1 ",  10,"N","x",1
+"VB09_Mrt3W","fC2VB09P2 ",  11,"N","x",1
+"VB09_Mrt3W","fC2VB09P3 ",  12,"N","x",1
+"VB09_Mrt3W","fN2VB09P1 ",  13,"N","x",1
+"VB09_Mrt3W","fN2VB09P2 ",  14,"N","x",1
+"VB09_Mrt3W","fN2VB09P3 ",  15,"N","x",1
+"VB09_Mrt3W","fP2VB09P1 ",  16,"N","x",1
+"VB09_Mrt3W","fP2VB09P2 ",  17,"N","x",1
+"VB09_Mrt3W","fP2VB09P3 ",  18,"N","x",1
+"VB09_Mrt3W","fS2VB09P1 ",  19,"N","x",1
+"VB09_Mrt3W","fS2VB09P2 ",  20,"N","x",1
+"VB09_Mrt3W","fS2VB09P3 ",  21,"N","x",1
+"VB09_Mrt3W","fC1VB09P5 ",  22,"N","x",1
+"VB09_Mrt3W","fC3VB09P5 ",  23,"N","x",1
+"VB09_Mrt3W","fN1VB09P5 ",  24,"N","x",1
+"VB09_Mrt3W","fN3VB09P5 ",  25,"N","x",1
+"VB09_Mrt3W","fP1VB09P5 ",  26,"N","x",1
+"VB09_Mrt3W","fP3VB09P5 ",  27,"N","x",1
+"VB09_Mrt3W","fS1VB09P5 ",  28,"N","x",1
+"VB09_Mrt3W","fS3VB09P5 ",  29,"N","x",1
 "VB09_Mrt3S","Depth     ",   1,"N","x",1
 "VB09_Mrt3S","TotalDepth",   2,"N","x",1
 "VB09_Mrt3S","LocSedDept",   3,"N","x",1
@@ -12522,23 +12539,24 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VB09_Mrt3S","SwDisVB09 ",   5,"Y","x",1
 "VB09_Mrt3S","RootDeVB09",   6,"Y","x",1
 "VB09_Mrt3S","FfacVB09  ",   7,"Y","x",1
-"VB09_Mrt3S","nfVB_sed  ",   8,"Y"," ",1
-"VB09_Mrt3S","fC5VB09P1 ",   9,"N","x",1
-"VB09_Mrt3S","fC5VB09P2 ",  10,"N","x",1
-"VB09_Mrt3S","fC5VB09P3 ",  11,"N","x",1
-"VB09_Mrt3S","fN5VB09P1 ",  12,"N","x",1
-"VB09_Mrt3S","fN5VB09P2 ",  13,"N","x",1
-"VB09_Mrt3S","fN5VB09P3 ",  14,"N","x",1
-"VB09_Mrt3S","fP5VB09P1 ",  15,"N","x",1
-"VB09_Mrt3S","fP5VB09P2 ",  16,"N","x",1
-"VB09_Mrt3S","fP5VB09P3 ",  17,"N","x",1
-"VB09_Mrt3S","fS5VB09P1 ",  18,"N","x",1
-"VB09_Mrt3S","fS5VB09P2 ",  19,"N","x",1
-"VB09_Mrt3S","fS5VB09P3 ",  20,"N","x",1
-"VB09_Mrt3S","fC4VB09P5 ",  21,"N","x",1
-"VB09_Mrt3S","fN4VB09P5 ",  22,"N","x",1
-"VB09_Mrt3S","fP4VB09P5 ",  23,"N","x",1
-"VB09_Mrt3S","fS4VB09P5 ",  24,"N","x",1
+"VB09_Mrt3S","DELT      ",   8,"N","x",1
+"VB09_Mrt3S","nfVB_sed  ",   9,"Y"," ",1
+"VB09_Mrt3S","fC5VB09P1 ",  10,"N","x",1
+"VB09_Mrt3S","fC5VB09P2 ",  11,"N","x",1
+"VB09_Mrt3S","fC5VB09P3 ",  12,"N","x",1
+"VB09_Mrt3S","fN5VB09P1 ",  13,"N","x",1
+"VB09_Mrt3S","fN5VB09P2 ",  14,"N","x",1
+"VB09_Mrt3S","fN5VB09P3 ",  15,"N","x",1
+"VB09_Mrt3S","fP5VB09P1 ",  16,"N","x",1
+"VB09_Mrt3S","fP5VB09P2 ",  17,"N","x",1
+"VB09_Mrt3S","fP5VB09P3 ",  18,"N","x",1
+"VB09_Mrt3S","fS5VB09P1 ",  19,"N","x",1
+"VB09_Mrt3S","fS5VB09P2 ",  20,"N","x",1
+"VB09_Mrt3S","fS5VB09P3 ",  21,"N","x",1
+"VB09_Mrt3S","fC4VB09P5 ",  22,"N","x",1
+"VB09_Mrt3S","fN4VB09P5 ",  23,"N","x",1
+"VB09_Mrt3S","fP4VB09P5 ",  24,"N","x",1
+"VB09_Mrt3S","fS4VB09P5 ",  25,"N","x",1
 "VB09Upt   ","fVB09     ",   1,"N","x",1
 "VB09Upt   ","SwVB09Gro ",   2,"Y","x",1
 "VB09Upt   ","F1VB09    ",   3,"Y","x",1

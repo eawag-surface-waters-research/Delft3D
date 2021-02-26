@@ -539,6 +539,27 @@
          case (154 ) ;  call TMODE  ( pmsa   , flux   , ipoint , increm , noseg  ,               ! &
      &                                 noflux , iexpnt , iknmrk , noq1   , noq2   ,               ! &
      &                                 noq3   , noq4   )
+         case (155 ) ;  call DLWQG2 ( pmsa   , flux   , ipoint , increm , noseg  ,               ! &
+     &                                 noflux , iexpnt , iknmrk , noq1   , noq2   ,               ! &
+     &                                 noq3   , noq4   )
+         case (156 ) ;  call SEDBAL ( pmsa   , flux   , ipoint , increm , noseg  ,               ! &
+     &                                 noflux , iexpnt , iknmrk , noq1   , noq2   ,               ! &
+     &                                 noq3   , noq4   )
+         case (157 ) ;  call GEMMPB ( pmsa   , flux   , ipoint , increm , noseg  ,               ! &
+     &                                 noflux , iexpnt , iknmrk , noq1   , noq2   ,               ! &
+     &                                 noq3   , noq4   )
+         case (158 ) ;  call MPBNUT ( pmsa   , flux   , ipoint , increm , noseg  ,               ! &
+     &                                 noflux , iexpnt , iknmrk , noq1   , noq2   ,               ! &
+     &                                 noq3   , noq4   )
+         case (159 ) ;  call MPBTMP ( pmsa   , flux   , ipoint , increm , noseg  ,               ! &
+     &                                 noflux , iexpnt , iknmrk , noq1   , noq2   ,               ! &
+     &                                 noq3   , noq4   )
+         case (160 ) ;  call MPBLLM ( pmsa   , flux   , ipoint , increm , noseg  ,               ! &
+     &                                 noflux , iexpnt , iknmrk , noq1   , noq2   ,               ! &
+     &                                 noq3   , noq4   )
+         case (161 ) ;  call MPBNLM ( pmsa   , flux   , ipoint , increm , noseg  ,               ! &
+     &                                 noflux , iexpnt , iknmrk , noq1   , noq2   ,               ! &
+     &                                 noq3   , noq4   )
          case default
 
 !     assumed from dll
@@ -566,7 +587,7 @@
                write(lunrep,*) 'ERROR  : requested module not available, no open process library dll/so loaded'
                write(lunrep,*) 'module       : ', pronam
                call srstop(1)
-            endif   
+            endif
 
       end select
 

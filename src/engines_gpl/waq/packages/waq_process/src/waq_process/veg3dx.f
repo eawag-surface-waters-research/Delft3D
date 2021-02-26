@@ -25,6 +25,8 @@
      +                        noflux , iexpnt , iknmrk , noq1  , noq2  ,
      +                        noq3   , noq4   )
 
+      use layered_sediment
+
       ! function distribute multiple vegetation fluxes over the vertical
 
       implicit none
@@ -54,6 +56,7 @@
       real(4) ffac        ! i  form factor macropyhyte                        (m)
       integer nvbxx       ! i  number of vb fractions to be distributed       (-)
       real(4) vb          ! i  macrophyte submerged                          (gc)
+      real(4) delt        ! i  time step                                      (d)
       real(4) frbmlay     ! o  fraction bm per layer                          (-)
       real(4) bmlayvb     ! o  biomass layer vb                              (gc)
 
@@ -72,7 +75,7 @@
       integer ito         !    from segment
       integer iflux       !    index in the fl array
 
-      integer, parameter           :: nipfix =  8         ! first number of entries in pmsa independent of number of parameters
+      integer, parameter           :: nipfix =  9         ! first number of entries in pmsa independent of number of parameters
       integer, parameter           :: nopfix =  1         ! first output entries in pmsa independent of number of parameters
       integer, parameter           :: nivar  =  1         ! number of variable inputs per nvbxx
       integer, parameter           :: novar  =  1         ! number of variable outputs per nvbxx
@@ -81,7 +84,19 @@
       integer, allocatable         :: ipnt(:)             ! local work array for the pointering
       integer                      :: ibotseg             ! bottom segment for macrophyte
 
-      nvbxx = nint(pmsa(ipoint(8)))
+      logical                      :: alt_delwaqg         ! Use the classical layered sediment approach (.false.) or the
+                                                          ! new one (process DelwaqG, .true.)
+      integer                      :: ilay                ! Layer index
+      integer                      :: isx                 ! Index into sedconc
+      integer, dimension(16), save :: isidx =             ! List of indices into the sedconc array, mirrors the fluxes
+     &     [is_POC1, is_POC2, is_POC3, is_PON1, is_PON2, is_PON3, 
+     &      is_POP1, is_POP2, is_POP3, is_POS1, is_POS2, is_POS3, 
+     &      is_POC4, is_PON4, is_POP4, is_POS4]           ! Note: using POC4 instead of POC5 - omission in DelwaqG?
+
+      alt_delwaqg = allocated(sedconc)
+      delt        = pmsa(ipnt(8))
+
+      nvbxx = nint(pmsa(ipoint(9)))
       npnt  = nipfix + nivar*nvbxx + nopfix + novar*nvbxx
       allocate(ipnt(npnt))
       ipnt  = ipoint(1:npnt)
@@ -97,6 +112,7 @@
          ffac        = pmsa(ipnt(7))
 
          call dhkmrk(1,iknmrk(iseg),ikmrk1)
+         call dhkmrk(2,iknmrk(iseg),ikmrk2)
          if (ikmrk1.lt.3) then ! also when dry!
 
             ! active water segment
@@ -138,15 +154,23 @@
 
             endif
 
-         elseif (ikmrk1.eq.3) then
+         endif
 
-            ! delwaq-g segment
+         if (ikmrk1.eq.3 .or. ( ikmrk2 == 0 .or. ikmrk2 == 3 ) ) then
 
-            if ( hmax .lt. 0.0 ) then
+            ! delwaq-g segment or alternative layered sediment approach
 
-               ! distribution over the bottom segments
+            if ( ikmrk1.eq.3 .and. hmax .ge. 0.0 ) then
 
-               hmax = -hmax
+               ! distribution over the water column, no values for bottom segment
+
+               frbmlay = 0.0
+
+            else
+
+               ! distribution over the bottom segments (or the segments adjacent to the bottom)
+
+               hmax = abs(hmax)
                hmax = min(hmax,totaldepth)
                zm = totaldepth - hmax
                z1 = totaldepth - localdepth
@@ -172,37 +196,49 @@
                   frbmlay = (a/2)  * (z2*z2 - zm*zm) + b * (z2 - zm)
                endif
 
-            else
-
-               ! distribution over the water column, no values for bottom segment
-
-               frbmlay = 0.0
-
             endif
-         else
-
-            ! inactive segment
-
-            frbmlay = 0.0
 
          endif
 
          pmsa(ipnt(nipfix+nivar*nvbxx+1)) = frbmlay
-         do ivbxx = 1, nvbxx
+
+         if ( .not. alt_delwaqg ) then
+            !
+            ! Use the classic approach - all sediment layers are separate segments and
+            ! there is no difference between POC etc. in the water phase or the sediment
+            !
+            do ivbxx = 1, nvbxx
 ! alway calculate the fluxes, even in dry cells...
-!            if (ikmrk1.ne.0) then
                vb      = pmsa(ipoint(nipfix+ivbxx)+(ibotseg-1)*increm(nipfix+ivbxx))
                bmlayvb = frbmlay * vb
-!            else
-!               bmlayvb = 0.0
-!            endif
-            pmsa(ipnt(nipfix+nivar*nvbxx+1+ivbxx)) = bmlayvb
-            if (depth.gt.0.0) then
-               fl(ivbxx+iflux) =  bmlayvb/depth
-            else
+               pmsa(ipnt(nipfix+nivar*nvbxx+1+ivbxx)) = bmlayvb
+               if (depth.gt.0.0) then
+                  fl(ivbxx+iflux) =  bmlayvb/depth
+               else
+                  fl(ivbxx+iflux) =  0.0
+               end if
+            enddo
+         else
+            !
+            ! The alternative approach - sediment layers are represented in a different data structure
+            ! Less flexible, so we need to make sure the process definition is in sync with this code!
+            !
+            do ivbxx = 1, nvbxx
+               vb      = pmsa(ipoint(nipfix+ivbxx)+(ibotseg-1)*increm(nipfix+ivbxx))
+               bmlayvb = frbmlay * vb
+               pmsa(ipnt(nipfix+nivar*nvbxx+1+ivbxx)) = bmlayvb
                fl(ivbxx+iflux) =  0.0
-            end if
-         enddo
+            enddo
+            do ivbxx = 1,size(isidx)
+               isx     = isidx(ivbxx)
+               vb      = pmsa(ipoint(nipfix+ivbxx)+(ibotseg-1)*increm(nipfix+ivbxx))
+               bmlayvb = frbmlay * vb
+
+               do ilay = 1,nolay
+                  sedconc(ilay,isx,iseg) = sedconc(ilay,isx,iseg) + bmlayvb * dl(ilay) / bd(nolay) * delt
+               enddo
+            enddo
+         endif
 
          ipnt  = ipnt  + increm(1:npnt)
          iflux = iflux + noflux

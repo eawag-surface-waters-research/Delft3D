@@ -25,6 +25,8 @@
      +                        noflux , iexpnt , iknmrk , noq1  , noq2  ,
      +                        noq3   , noq4   )
 
+      use layered_sediment
+
       ! function : vegetation module uptake of nutrients
 
       implicit none
@@ -57,6 +59,12 @@
       real(4) no3         ! i  no3                                         (g/m3)
       real(4) po4         ! i  po4                                         (g/m3)
       real(4) sud         ! i  sud                                         (g/m3)
+      real(4) s1_nh4      ! i  nh4 in sediment                             (g/m3)
+      real(4) s1_aap      ! i  aap in sediment                             (g/m3)
+      real(4) s1_so4      ! i  so4 in sediment                             (g/m3)
+      real(4) s1_no3      ! i  no3 in sediment                             (g/m3)
+      real(4) s1_po4      ! i  po4 in sediment                             (g/m3)
+      real(4) s1_sud      ! i  sud in sediment                             (g/m3)
       real(4) inicovvbxx  ! i  percentage coverage                            (%)
       real(4) vbxxnavail  ! i  available nitrogen                          (g/m2)
       real(4) vbxxpavail  ! i  available phosphorus                        (g/m2)
@@ -70,6 +78,12 @@
       real(4) fp2vbxxupy  ! o  3d uptake flux                            (g/m2/d)
       real(4) fs1vbxxupy  ! o  3d uptake flux                            (g/m2/d)
       real(4) fs2vbxxupy  ! o  3d uptake flux                            (g/m2/d)
+      real(4) s1_fn1vbxxupy  ! o  uptake flux sediment                   (g/m2/d)
+      real(4) s1_fn2vbxxupy  ! o  uptake flux sediment                   (g/m2/d)
+      real(4) s1_fp1vbxxupy  ! o  uptake flux sediment                   (g/m2/d)
+      real(4) s1_fp2vbxxupy  ! o  uptake flux sediment                   (g/m2/d)
+      real(4) s1_fs1vbxxupy  ! o  uptake flux sediment                   (g/m2/d)
+      real(4) s1_fs2vbxxupy  ! o  uptake flux sediment                   (g/m2/d)
       real(4) fl_fn1vbxxupy  ! o  3d uptake flux N pool 1                (g/m3/d)
       real(4) fl_fn2vbxxupy  ! o  3d uptake flux N pool 2                (g/m3/d)
       real(4) fl_fp1vbxxupy  ! o  3d uptake flux P pool 1                (g/m3/d)
@@ -90,15 +104,27 @@
       integer ifrom       !    from segment
       integer ito         !    from segment
       integer iflux       !    index in the fl array
-      real(4) pnvbxxup   !    2d uptake percentage n pool 1 and 2             (-)
-      real(4) ppvbxxup   !    2d uptake percentage p pool 1 and 2             (-)
-      real(4) psvbxxup   !    2d uptake percentage s pool 1 and 2             (-)
+      real(4) pnvbxxup    !    2d uptake percentage n pool 1 and 2            (-)
+      real(4) ppvbxxup    !    2d uptake percentage p pool 1 and 2            (-)
+      real(4) psvbxxup    !    2d uptake percentage s pool 1 and 2            (-)
+      real(4) hroot       !    effective root length                          (m)
+      real(4) hsed        !    total thickness of the sediment layers         (m)
+      real(4) factor      !    auxiliary variable
 
-      integer, parameter           :: npnt = 25           ! number of pointers
+      integer, parameter           :: npnt = 31           ! number of pointers
       integer                      :: ipnt(npnt)          ! local work array for the pointering
       integer                      :: ibotseg             ! bottom segment for macrophyte
+      integer                      :: ilay                ! index into layers
+
+      real :: hcum(0:nolay)
 
       ! accumulate mass in the rooting zone in the pool of the bottom segment
+
+      hsed    = sum(dl)
+      hcum(0) = 0.0
+      do ilay = 1,nolay
+         hcum(ilay) = hcum(ilay-1) + dl(ilay)
+      enddo
 
       ipnt  = ipoint(1:npnt)
       iflux = 0
@@ -117,142 +143,187 @@
          fl_fs1vbxxupy =  0.0
          fl_fs2vbxxupy =  0.0
 
+         s1_fn1vbxxupy = 0.0
+         s1_fn2vbxxupy = 0.0
+         s1_fp1vbxxupy = 0.0
+         s1_fp2vbxxupy = 0.0
+         s1_fs1vbxxupy = 0.0
+         s1_fs2vbxxupy = 0.0
+
          call dhkmrk(1,iknmrk(iseg),ikmrk1)
+         call dhkmrk(2,iknmrk(iseg),ikmrk2)
 !         if (ikmrk1.eq.1 .or. ikmrk1 .eq. 3) then !=> NO TESTING ON IKMRK1, PROCESS IS ALLWAYS ON!
 
-            ibotseg     = NINT(pmsa(ipnt(4)))
-            inicovvbxx  = pmsa(ipoint( 13)+(ibotseg-1)*increm( 13)) / 100.
+         ibotseg     = NINT(pmsa(ipnt(4)))
+         inicovvbxx  = pmsa(ipoint( 19)+(ibotseg-1)*increm( 19)) / 100.
 
-            if (inicovvbxx .gt. 0.001) then
+         if (inicovvbxx .gt. 0.001) then
 
-               depth       = pmsa(ipnt(1))
-               totaldepth  = pmsa(ipnt(2))
-               localdepth  = pmsa(ipnt(3))
-               hmax        = pmsa(ipnt(5))
-               delt        = pmsa(ipnt(6))
-               nh4         = pmsa(ipnt(7))
-               no3         = pmsa(ipnt(8))
-               aap         = pmsa(ipnt(9))
-               po4         = pmsa(ipnt(10))
-               so4         = pmsa(ipnt(11))
-               sud         = pmsa(ipnt(12))
+            depth       = pmsa(ipnt(1))
+            totaldepth  = pmsa(ipnt(2))
+            localdepth  = pmsa(ipnt(3))
+            hmax        = pmsa(ipnt(5))
+            delt        = pmsa(ipnt(6))
+            nh4         = pmsa(ipnt(7))
+            no3         = pmsa(ipnt(8))
+            aap         = pmsa(ipnt(9))
+            po4         = pmsa(ipnt(10))
+            so4         = pmsa(ipnt(11))
+            sud         = pmsa(ipnt(12))
+            s1_nh4      = pmsa(ipnt(13))
+            s1_no3      = pmsa(ipnt(14))
+            s1_aap      = pmsa(ipnt(15))
+            s1_po4      = pmsa(ipnt(16))
+            s1_so4      = pmsa(ipnt(17))
+            s1_sud      = pmsa(ipnt(18))
 
-               vbxxnavail  = pmsa(ipoint(14)+(ibotseg-1)*increm(14))
-               vbxxpavail  = pmsa(ipoint(15)+(ibotseg-1)*increm(15))
-               vbxxsavail  = pmsa(ipoint(16)+(ibotseg-1)*increm(16))
-               fnvbxxup    = pmsa(ipoint(17)+(ibotseg-1)*increm(17))
-               fpvbxxup    = pmsa(ipoint(18)+(ibotseg-1)*increm(18))
-               fsvbxxup    = pmsa(ipoint(19)+(ibotseg-1)*increm(19))
+            vbxxnavail  = pmsa(ipoint(20)+(ibotseg-1)*increm(20))
+            vbxxpavail  = pmsa(ipoint(21)+(ibotseg-1)*increm(21))
+            vbxxsavail  = pmsa(ipoint(22)+(ibotseg-1)*increm(22))
+            fnvbxxup    = pmsa(ipoint(23)+(ibotseg-1)*increm(23))
+            fpvbxxup    = pmsa(ipoint(24)+(ibotseg-1)*increm(24))
+            fsvbxxup    = pmsa(ipoint(25)+(ibotseg-1)*increm(25))
 
+            ! percentage uptake = uptake/available/percentage coverage
 
-               ! percentage uptake = uptake/available/percentage coverage
+            if ( vbxxnavail .gt. 1e-20 ) then
+               pNvbxxup=fNvbxxup*delt/vbxxNavail
+!              pn5vbxxup=fn5vbxxup*delt/vbxxnavail
+            else
+               pNvbxxup=0.0
+!              pn5vbxxup=0.0
+            endif
+            if ( vbxxpavail .gt. 1e-20 ) then
+               pPvbxxup=fPvbxxup*delt/vbxxPavail
+!              pp5vbxxup=fp5vbxxup*delt/vbxxpavail
+            else
+               pPvbxxup=0.0
+!              pp5vbxxup=0.0
+            endif
+            if ( vbxxsavail .gt. 1e-20 ) then
+               pSvbxxup=fSvbxxup*delt/vbxxSavail
+!              ps5vbxxup=fs5vbxxup*delt/vbxxsavail
+            else
+               pSvbxxup=0.0
+!              ps5vbxxup=0.0
+            endif
 
-               if ( vbxxnavail .gt. 1e-20 ) then
-                  pNvbxxup=fNvbxxup*delt/vbxxNavail
-!                 pn5vbxxup=fn5vbxxup*delt/vbxxnavail
+            if ( ikmrk1.eq.1 .and. hmax .gt. 0.0 ) then
+
+               ! active water segment
+
+               hmax = min(hmax,totaldepth)
+               zm = totaldepth - hmax
+               z1 = localdepth - depth
+               z2 = localdepth
+
+               if (zm .gt. z2) then
+                  ! not in segment:
+               elseif (zm . lt. z1 ) then
+                  ! partialy in segment:
+                  frlay = (z2-zm)/depth
+                  fN1vbxxupy = pNvbxxup*nh4*frlay*depth/delt
+                  fN2vbxxupy = pNvbxxup*no3*frlay*depth/delt
+                  fP1vbxxupy = pPvbxxup*aap*frlay*depth/delt
+                  fP2vbxxupy = pPvbxxup*po4*frlay*depth/delt
+                  fS1vbxxupy = pSvbxxup*so4*frlay*depth/delt
+                  fS2vbxxupy = pSvbxxup*sud*frlay*depth/delt
                else
-                  pNvbxxup=0.0
-!                 pn5vbxxup=0.0
+                  ! completely in segment:
+                  fN1vbxxupy = pNvbxxup*nh4*depth/delt
+                  fN2vbxxupy = pNvbxxup*no3*depth/delt
+                  fP1vbxxupy = pPvbxxup*aap*depth/delt
+                  fP2vbxxupy = pPvbxxup*po4*depth/delt
+                  fS1vbxxupy = pSvbxxup*so4*depth/delt
+                  fS2vbxxupy = pSvbxxup*sud*depth/delt
                endif
-               if ( vbxxpavail .gt. 1e-20 ) then
-                  pPvbxxup=fPvbxxup*delt/vbxxPavail
-!                 pp5vbxxup=fp5vbxxup*delt/vbxxpavail
-               else
-                  pPvbxxup=0.0
-!                 pp5vbxxup=0.0
-               endif
-               if ( vbxxsavail .gt. 1e-20 ) then
-                  pSvbxxup=fSvbxxup*delt/vbxxSavail
-!                 ps5vbxxup=fs5vbxxup*delt/vbxxsavail
-               else
-                  pSvbxxup=0.0
-!                 ps5vbxxup=0.0
-               endif
+            endif
 
-               if ( ikmrk1.eq.1 .and. hmax .gt. 0.0 ) then
+            ! Alternative layered sediment - the segment might be dry or wet, does not matter
 
-                  ! active water segment
+            if ( (ikmrk2 .eq. 0 .or. ikmrk2 .eq. 3) .and. hmax < 0.0 ) then
+               hroot = min(-hmax,hsed)
+               s1_fN1vbxxupy = pNvbxxup*s1_nh4*hroot/delt
+               s1_fN2vbxxupy = pNvbxxup*s1_no3*hroot/delt
+               s1_fP1vbxxupy = pPvbxxup*s1_aap*hroot/delt
+               s1_fP2vbxxupy = pPvbxxup*s1_po4*hroot/delt
+               s1_fS1vbxxupy = pSvbxxup*s1_so4*hroot/delt
+               s1_fS2vbxxupy = pSvbxxup*s1_sud*hroot/delt
 
-                  hmax = min(hmax,totaldepth)
-                  zm = totaldepth - hmax
-                  z1 = localdepth - depth
-                  z2 = localdepth
+               ! Take this from the nutrient pool in the sediment
 
-                  if (zm .gt. z2) then
-                     ! not in segment:
-                  elseif (zm . lt. z1 ) then
-                     ! partialy in segment:
-                     frlay = (z2-zm)/depth
-                     fN1vbxxupy = pNvbxxup*nh4*frlay*depth/delt
-                     fN2vbxxupy = pNvbxxup*no3*frlay*depth/delt
-                     fP1vbxxupy = pPvbxxup*aap*frlay*depth/delt
-                     fP2vbxxupy = pPvbxxup*po4*frlay*depth/delt
-                     fS1vbxxupy = pSvbxxup*so4*frlay*depth/delt
-                     fS2vbxxupy = pSvbxxup*sud*frlay*depth/delt
+               do ilay = 1,nolay
+                  if ( hcum(ilay) <= hroot ) then
+                     factor = (hcum(ilay) - hcum(ilay-1)) * delt / hroot
                   else
-                     ! completely in segment:
-                     fN1vbxxupy = pNvbxxup*nh4*depth/delt
-                     fN2vbxxupy = pNvbxxup*no3*depth/delt
-                     fP1vbxxupy = pPvbxxup*aap*depth/delt
-                     fP2vbxxupy = pPvbxxup*po4*depth/delt
-                     fS1vbxxupy = pSvbxxup*so4*depth/delt
-                     fS2vbxxupy = pSvbxxup*sud*depth/delt
+                     factor = max(0.0, hroot - hcum(ilay-1)) * delt / hroot
                   endif
+                  sedconc(ilay,is_NH4,ibotseg) = sedconc(ilay,is_NH4,ibotseg) - s1_fN1vbxxupy * factor
+                  sedconc(ilay,is_NO3,ibotseg) = sedconc(ilay,is_NO3,ibotseg) - s1_fN2vbxxupy * factor
+                  sedconc(ilay,is_AAP,ibotseg) = sedconc(ilay,is_AAP,ibotseg) - s1_fP1vbxxupy * factor
+                  sedconc(ilay,is_PO4,ibotseg) = sedconc(ilay,is_PO4,ibotseg) - s1_fP2vbxxupy * factor
+                  sedconc(ilay,is_SO4,ibotseg) = sedconc(ilay,is_SO4,ibotseg) - s1_fS1vbxxupy * factor
+                  sedconc(ilay,is_SUD,ibotseg) = sedconc(ilay,is_SUD,ibotseg) - s1_fS2vbxxupy * factor
+               enddo
+            endif
 
-               elseif (ikmrk1.eq.3 .and. hmax .lt. 0.0) then
+            if (ikmrk1.eq.3 .and. hmax .lt. 0.0) then
 
-                  ! delwaq-g segment, distribution over the bottom segments
+               ! delwaq-g segment, distribution over the bottom segments
 
-                  hmax = -hmax
-                  hmax = min(hmax,totaldepth)
-                  z1 = localdepth - depth
+               hmax = -hmax
+               hmax = min(hmax,totaldepth)
+               z1 = localdepth - depth
 
-                  if (hmax .gt. localdepth) then
-                     ! completely in segment:
-                     fN1vbxxupy = pNvbxxup*nh4*depth/delt
-                     fN2vbxxupy = pNvbxxup*no3*depth/delt
-                     fP1vbxxupy = pPvbxxup*aap*depth/delt
-                     fP2vbxxupy = pPvbxxup*po4*depth/delt
-                     fS1vbxxupy = pSvbxxup*so4*depth/delt
-                     fS2vbxxupy = pSvbxxup*sud*depth/delt
-                  elseif (hmax .gt. z1 ) then
-                     ! partialy in segment:
-                     frlay = (hmax-z1)/depth
-                     fN1vbxxupy = pNvbxxup*nh4*frlay*depth/delt
-                     fN2vbxxupy = pNvbxxup*no3*frlay*depth/delt
-                     fP1vbxxupy = pPvbxxup*aap*frlay*depth/delt
-                     fP2vbxxupy = pPvbxxup*po4*frlay*depth/delt
-                     fS1vbxxupy = pSvbxxup*so4*frlay*depth/delt
-                     fS2vbxxupy = pSvbxxup*sud*frlay*depth/delt
-                  else
-                     ! not in segment:
-                  endif
-
+               if (hmax .gt. localdepth) then
+                  ! completely in segment:
+                  fN1vbxxupy = pNvbxxup*nh4*depth/delt
+                  fN2vbxxupy = pNvbxxup*no3*depth/delt
+                  fP1vbxxupy = pPvbxxup*aap*depth/delt
+                  fP2vbxxupy = pPvbxxup*po4*depth/delt
+                  fS1vbxxupy = pSvbxxup*so4*depth/delt
+                  fS2vbxxupy = pSvbxxup*sud*depth/delt
+               elseif (hmax .gt. z1 ) then
+                  ! partialy in segment:
+                  frlay = (hmax-z1)/depth
+                  fN1vbxxupy = pNvbxxup*nh4*frlay*depth/delt
+                  fN2vbxxupy = pNvbxxup*no3*frlay*depth/delt
+                  fP1vbxxupy = pPvbxxup*aap*frlay*depth/delt
+                  fP2vbxxupy = pPvbxxup*po4*frlay*depth/delt
+                  fS1vbxxupy = pSvbxxup*so4*frlay*depth/delt
+                  fS2vbxxupy = pSvbxxup*sud*frlay*depth/delt
+               else
+                  ! not in segment:
                endif
-
-               fl_fn1vbxxupy =  fn1vbxxupy/depth
-               fl_fn2vbxxupy =  fn2vbxxupy/depth
-               fl_fp1vbxxupy =  fp1vbxxupy/depth
-               fl_fp2vbxxupy =  fp2vbxxupy/depth
-               fl_fs1vbxxupy =  fs1vbxxupy/depth
-               fl_fs2vbxxupy =  fs2vbxxupy/depth
 
             endif
 
-!!         endif
+            fl_fn1vbxxupy =  fn1vbxxupy/depth
+            fl_fn2vbxxupy =  fn2vbxxupy/depth
+            fl_fp1vbxxupy =  fp1vbxxupy/depth
+            fl_fp2vbxxupy =  fp2vbxxupy/depth
+            fl_fs1vbxxupy =  fs1vbxxupy/depth
+            fl_fs2vbxxupy =  fs2vbxxupy/depth
 
-         pmsa(ipnt(20)) =  fn1vbxxupy
-         pmsa(ipnt(21)) =  fn2vbxxupy
-         pmsa(ipnt(22)) =  fp1vbxxupy
-         pmsa(ipnt(23)) =  fp2vbxxupy
-         pmsa(ipnt(24)) =  fs1vbxxupy
-         pmsa(ipnt(25)) =  fs2vbxxupy
-         fl(iflux+1) =  fl_fn1vbxxupy
-         fl(iflux+2) =  fl_fn2vbxxupy
-         fl(iflux+3) =  fl_fp1vbxxupy
-         fl(iflux+4) =  fl_fp2vbxxupy
-         fl(iflux+5) =  fl_fs1vbxxupy
-         fl(iflux+6) =  fl_fs2vbxxupy
+         endif
+
+         !
+         ! Note: for the alternative layered sediment approach,
+         !       the nutrients are extracted directly from the storage in the bottom
+         !       but we need to show the total amount in the output
+         !
+         pmsa(ipnt(26)) =  fn1vbxxupy + s1_fn1vbxxupy
+         pmsa(ipnt(27)) =  fn2vbxxupy + s1_fn2vbxxupy
+         pmsa(ipnt(28)) =  fp1vbxxupy + s1_fp1vbxxupy
+         pmsa(ipnt(29)) =  fp2vbxxupy + s1_fp2vbxxupy
+         pmsa(ipnt(30)) =  fs1vbxxupy + s1_fs1vbxxupy
+         pmsa(ipnt(31)) =  fs2vbxxupy + s1_fs2vbxxupy
+         fl(iflux+1)    =  fl_fn1vbxxupy
+         fl(iflux+2)    =  fl_fn2vbxxupy
+         fl(iflux+3)    =  fl_fp1vbxxupy
+         fl(iflux+4)    =  fl_fp2vbxxupy
+         fl(iflux+5)    =  fl_fs1vbxxupy
+         fl(iflux+6)    =  fl_fs2vbxxupy
 
          ipnt  = ipnt  + increm(1:npnt)
          iflux = iflux + noflux

@@ -2454,6 +2454,7 @@ src/engines_gpl/waq/packages/waq_process/src/proc_preprocess/wripro.f -text
 src/engines_gpl/waq/packages/waq_process/src/proc_preprocess/wrstoc.f -text
 src/engines_gpl/waq/packages/waq_process/src/proc_preprocess/wrtoys.f -text
 src/engines_gpl/waq/packages/waq_process/src/proc_preprocess/wrwrko.f -text
+src/engines_gpl/waq/packages/waq_process/src/waq_process/DelwaqG.f90 -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/ESpace.f90 -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/Makefile.am -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/adspo4.f -text
@@ -2506,6 +2507,7 @@ src/engines_gpl/waq/packages/waq_process/src/waq_process/extina.f -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/extinc.f -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/floceq.f90 -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/flxfrc.f90 -text
+src/engines_gpl/waq/packages/waq_process/src/waq_process/gemmpb.f -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/get_effi.f -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/grzmac.f -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/harves.f -text
@@ -2514,8 +2516,10 @@ src/engines_gpl/waq/packages/waq_process/src/waq_process/hdispa.f -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/hdispv.f -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/heatfl.f -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/intpol.f -text
+src/engines_gpl/waq/packages/waq_process/src/waq_process/inverm.f -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/ironox.f90 -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/ironre.f90 -text
+src/engines_gpl/waq/packages/waq_process/src/waq_process/layeredsed.f90 -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/mac3du.f90 -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/macdis.f -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/macnut.f90 -text
@@ -2524,6 +2528,10 @@ src/engines_gpl/waq/packages/waq_process/src/waq_process/makpoc.f -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/maxmac.f -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/meteo.f -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/methox.f -text
+src/engines_gpl/waq/packages/waq_process/src/waq_process/mpbllm.f -text
+src/engines_gpl/waq/packages/waq_process/src/waq_process/mpbnlm.f -text
+src/engines_gpl/waq/packages/waq_process/src/waq_process/mpbnut.f -text
+src/engines_gpl/waq/packages/waq_process/src/waq_process/mpbtmp.f -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/nh3fre.f -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/nitrif.f -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/nlalg.f -text
@@ -2563,6 +2571,7 @@ src/engines_gpl/waq/packages/waq_process/src/waq_process/satoxy.f -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/sdppro.f -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/secchi.f -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/sedaap.f -text
+src/engines_gpl/waq/packages/waq_process/src/waq_process/sedbal.f90 -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/sedcar.f -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/sedcom.f -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/sedhm.f -text

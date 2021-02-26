@@ -483,7 +483,6 @@
                   SWDying = 0.0
                end if
 !
-
                fl  ( IdVB1       ) = dVB1                              ! g/m3/d
                pmsa( ipnt( nrofinputs + 1)   ) = ageVB1
                pmsa( ipnt( nrofinputs + 2)   ) = VB1ha
