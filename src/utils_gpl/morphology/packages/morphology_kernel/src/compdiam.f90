@@ -182,7 +182,7 @@ subroutine compdiam(frac      ,seddm     ,sedd50    ,sedtyp    ,lsedtot   , &
              ! separate loop required as dg needs to be calculated first
              !
              do l = 1, lsedtot
-                if (sedtyp(l) /= SEDTYP_COHESIVE) then
+                if ((sedtyp(l) /= SEDTYP_COHESIVE) .and. (comparereal(frac(nm,l),0.0_fp) == 1)) then
                    dgsd(nm) = dgsd(nm) + (frac(nm,l)/fracnonmud)*(log(sedd50(l))-log(dg(nm)))**2
                 endif
              enddo
