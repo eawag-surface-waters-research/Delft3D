@@ -1389,8 +1389,9 @@
             ! at layer interfaces, but not at bed and surface
             do k = kb, kt-1
                do l = 1, lsed
-                  seddif(l, k) = vicwws(k)+dicoww        ! sigrhoi * vicwws(k) + difsed(l), with sigrhoi = 1d0
-               enddo                                     ! consistent with eqtran.f90, line 265
+                  !seddif(l, k) = vicwws(k)+dicoww        ! sigrhoi * vicwws(k) + difsed(l), with sigrhoi = 1d0
+                  seddif(l, k) = max(vicwws(k),dicoww)                
+               enddo                                      
             enddo
             ! in layers
             do k = kb, kt
@@ -1673,11 +1674,9 @@
             !
             if (kmx > 0) then
                klc = 0
-               !dcwwlc = 0.0_fp
                wslc   = 0.0_fp
                do kk = kt, kb-1, -1                  ! should follow sigma conventions
-                  !dcwwlc(klc) = vicwws(kk) + dicoww  ! to check: why different for Z and sigma in D3D?
-                  wslc(klc)   = ws(kk, l)            ! to do: repair for 2d and 3d
+                  wslc(klc)   = ws(kk, l)            
                   klc=klc+1
                enddo
             else
@@ -1733,7 +1732,7 @@
                !
                klc    = 0
                do k = kt, kb-1, -1
-                  seddif(l, k) = vicwws(k)+dicoww     ! constant value from mdu; JRE to check
+                  seddif(l, k) = max(vicwws(k),dicoww)
                   klc=klc+1
                enddo
             endif
@@ -1828,8 +1827,8 @@
                klc    = 0
                dcwwlc = 0.0_fp
                wslc   = 0.0_fp
-               do kk = kt, kb-1, -1                ! sigma convention
-                  dcwwlc(klc) = vicwws(kk)+dicoww  ! JRE to check for double counting
+               do kk = kt, kb-1, -1                        ! sigma convention
+                  dcwwlc(klc) = max(vicwws(kk),dicoww)     ! maximalisation is safety
                   wslc(klc)   = ws(kk, l)
                   klc=klc+1
                enddo
@@ -2035,9 +2034,9 @@
    if (bed > 0.0_fp) then
       call fm_adjust_bedload(e_sbcn, e_sbct, .true.)
    endif
-   !
-   ! Determine incoming discharge and transport at nodes
-   !
+   !!
+   !! Determine incoming discharge and transport at nodes
+   !!
    qb_out = 0d0; width_out = 0d0; sb_in = 0d0; sb_dir = 1
    BranInIDLn = 0
    do inod = 1, network%nds%Count
@@ -2097,21 +2096,21 @@
    !
    ! loop over sediment fractions
    do ised = 1, lsedtot
-
+   
       ! mor%nrd%nFractions = or 1 (One for All Fractions) or lsedtot (One for Every Fraction)
       iFrac = min(ised, stmpar%nrd%nFractions)
-
+   
       pFrac => stmpar%nrd%nodefractions(iFrac)
-
+   
       do inod = 1, network%nds%Count
          pnod => network%nds%node(inod)
          if (pnod%nodeType == nt_LinkNode) then  ! connection node
-
+   
             facCheck = 0.d0
-
+   
             if (pnod%numberofconnections == 1) cycle
-
-
+   
+   
             ! loop over branches and determine redistribution of incoming sediment
             k3 = pnod%gridnumber
             do j=1,nd(k3)%lnx
@@ -2119,32 +2118,32 @@
                Ldir = sign(1,nd(k3)%ln(j))
                qb1d = -qa(L)*Ldir
                wb1d = wu_mor(L)
-
+   
                ! Get Nodal Point Relation Data
                nrd_idx = get_noderel_idx(inod, pFrac, pnod%gridnumber, branInIDLn(inod), pnod%numberofconnections)
-
+   
                pNodRel => pFrac%noderelations(nrd_idx)
-
+   
                if (sb_dir(inod, ised, j) == -1) then ! is outgoing
-
+   
                   if (qb_out(inod) > 0.0_fp) then
-
+   
                      if (pNodRel%Method == 'function') then
-
+   
                         expQ = pNodRel%expQ
                         expW = pNodRel%expW
-
+   
                         facQ = (qb1d / qb_out(inod))**expQ
                         facW = (wb1d / width_out(inod))**expW
-
+   
                         facCheck = facCheck + facQ * facW
-
+   
                         e_sbcn(L,ised) = -Ldir * facQ * facW * sb_in(inod, ised) / wu_mor(L)
-
+   
                      elseif (pNodRel%Method == 'table') then
-
+   
                         facCheck = 1.0d0
-
+   
                         if (L == pNodRel%BranchOut1Ln) then
                            Qbr1 = qb1d
                            Qbr2 = qb_out(inod) - qb1d
@@ -2154,11 +2153,11 @@
                         else
                            call SetMessage(LEVEL_FATAL, 'Unknown Branch Out (This should never happen!)')
                         endif
-
+   
                         QbrRatio = Qbr1 / Qbr2
-
+   
                         SbrRatio = interpolate(pNodRel%Table, QbrRatio)
-
+   
                         if (L == pNodRel%BranchOut1Ln) then
                            e_sbcn(L,ised) = -Ldir * SbrRatio * sb_in(inod, ised) / (1 + SbrRatio) / wu_mor(L)
                            e_sbct(L,ised) = 0.0
@@ -2166,21 +2165,21 @@
                            e_sbcn(L,ised) = -Ldir * sb_in(inod, ised) / (1 + SbrRatio) / wu_mor(L)
                            e_sbct(L,ised) = 0.0
                         endif
-
-
+   
+   
                      else
                         call SetMessage(LEVEL_FATAL, 'Unknown Nodal Point Relation Method Specified')
                      endif
-
+   
                   else
                      e_sbcn(L,ised) = 0.0_fp
                      e_sbct(L,ised) = 0.0
                   endif
-
+   
                endif
-
+   
             enddo    ! Branches
-
+   
             ! Correct Total Outflow
             if ((facCheck /= 1.0_fp) .and. (facCheck > 0.0_fp)) then
                ! loop over branches and correct redistribution of incoming sediment
@@ -2193,9 +2192,9 @@
             endif
          endif
       enddo      ! Nodes
-
+   
    enddo    ! Fractions
-
+   
    !
    ! Bed-slope and sediment availability effects for
    ! wave-related bed load transport
