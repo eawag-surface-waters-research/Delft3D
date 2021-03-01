@@ -34,6 +34,8 @@
 !> I/O module for reading and writing NetCDF files with UGRID-compliant data on unstructured grids.
 !! UGRID Conventions website: https://github.com/ugrid-conventions/ugrid-conventions
 !! Deltares 1D network proposal: https://content.oss.deltares.nl/delft3d/manuals/D-Flow_FM_User_Manual.pdf#section.B.2
+!!
+!! Note:  all IDs in ugrid/nf90 are 1-based!
 
 module io_ugrid
 use netcdf
@@ -433,7 +435,7 @@ end function ug_addglobalatts
 !! @see ug_put_var_attset
 function ug_get_var_attset(ncid, varid, attset) result(ierr)
    integer,                         intent(in)  :: ncid      !< NetCDF dataset id
-   integer,                         intent(in)  :: varid     !< NetCDF variable id
+   integer,                         intent(in)  :: varid     !< NetCDF variable id (1-based).
    type(nc_attribute), allocatable, intent(out) :: attset(:) !< Resulting attribute set.
    integer                                      :: ierr      !< Result status (UG_NOERR==NF90_NOERR) if successful.
 
@@ -501,7 +503,7 @@ end function ug_get_var_attset
 !! @see ug_get_var_attset
 function ug_put_var_attset(ncid, varid, attset) result(ierr)
    integer,             intent(in)  :: ncid      !< NetCDF dataset id
-   integer,             intent(in)  :: varid     !< NetCDF variable id
+   integer,             intent(in)  :: varid     !< NetCDF variable id (1-based).
    type(nc_attribute),  intent(in)  :: attset(:) !< Attribute set to be put into the variable.
    integer                          :: ierr      !< Result status (UG_NOERR==NF90_NOERR) if successful.
 
@@ -1873,7 +1875,7 @@ function ug_init_dataset(ncid, ug_file) result(ierr)
 
    integer :: im, nmesh, numvar, il, ncontacts,i, nnetworks, inet
    logical :: is_mesh_topo, is_link_topo, is_network_topo
-   integer :: varid         !< NetCDF variable ID (this is a 0-based index).
+   integer :: varid         !< NetCDF variable ID (1-based).
 
    ! Count nr of meshes present in the file
    ierr = ug_get_mesh_count(ncid, nmesh)
@@ -1923,7 +1925,7 @@ function ug_init_dataset(ncid, ug_file) result(ierr)
    im = 0
    il = 0
    inet = 0
-   do varid = 0, numVar-1 ! loop over the netCDF variable IDs (which are 0-based)
+   do varid = 1,numVar
       is_mesh_topo = ug_is_mesh_topology(ncid, varid)
       is_network_topo = ug_is_network_topology(ncid, varid)
       is_link_topo = ug_is_link_topology(ncid, varid)
@@ -1965,7 +1967,7 @@ end function ug_init_dataset
 function ug_init_link_topology(ncid, varid, contactids) result(ierr)
 
    integer,            intent(in   ) :: ncid          !< ID of already opened data set.
-   integer,            intent(in   ) :: varid         !< NetCDF variable ID that contains the link topology information.
+   integer,            intent(in   ) :: varid         !< NetCDF variable ID that contains the link topology information (1-based).
    type(t_ug_contacts),intent(inout) :: contactids !< vector in which all link topology dimension and variables ids will be stored.
    integer                           :: ierr          !< Result status (UG_NOERR if successful).
 
@@ -1992,7 +1994,7 @@ function ug_init_link_topology(ncid, varid, contactids) result(ierr)
 function ug_init_network_topology(ncid, varid, netids) result(ierr)
 
    integer,            intent(in)    :: ncid          !< ID of already opened data set.
-   integer,            intent(in)    :: varid         !< NetCDF variable ID that contains the network topology information.
+   integer,            intent(in)    :: varid         !< NetCDF variable ID that contains the network topology information (1-based).
    type(t_ug_network), intent(inout) :: netids        !< vector in which all mesh topology dimension and variables ids will be stored.
    character(len=nf90_max_name)      :: varname       !< char array  to hold the network name
    integer                           :: ierr          !< Result status (UG_NOERR if successful).
@@ -2086,7 +2088,7 @@ end function ug_init_network_topology
 function ug_init_mesh_topology(ncid, varid, meshids) result(ierr)
 
    integer,         intent(in   )    :: ncid          !< ID of already opened data set.
-   integer,         intent(in   )    :: varid         !< NetCDF variable ID that contains the mesh topology information.
+   integer,         intent(in   )    :: varid         !< NetCDF variable ID that contains the mesh topology information (1-based).
    type(t_ug_mesh), intent(inout)    :: meshids          !< vector in which all mesh topology dimension and variables ids will be stored.
    integer                           :: ierr          !< Result status (UG_NOERR if successful).
    character(len=:), allocatable     :: coordspaceind !< The name of the network used by the mesh
@@ -2228,7 +2230,7 @@ end function ug_init_mesh_topology
 !! For example: mesh1d:node_coordinates
 function att_to_coordvarids(ncid, varid, attname, idx, idy, idz, idw) result(ierr)
    integer         ,  intent(in   ) :: ncid     !< NetCDF dataset ID
-   integer         ,  intent(in   ) :: varid    !< NetCDF variable ID from which the coordinate attribute will be gotten.
+   integer         ,  intent(in   ) :: varid    !< NetCDF variable ID from which the coordinate attribute will be gotten (1-based).
    character(len=*),  intent(in   ) :: attname  !< Name of attribute in varid that contains the coordinate variable names.
    integer         ,  intent(  out) :: idx, idy !< NetCDF variable ID for x,y-coordinates.
    integer, optional, intent(  out) :: idz      !< NetCDF variable ID for z-coordinates.
@@ -2303,7 +2305,7 @@ end function att_to_coordvarids
 function att_to_varid(ncid, varid, attname, id) result(ierr)
 
    integer         , intent(in   ) :: ncid    !< NetCDF dataset ID
-   integer         , intent(in   ) :: varid   !< NetCDF variable ID from which the attribute will be gotten.
+   integer         , intent(in   ) :: varid   !< NetCDF variable ID from which the attribute will be gotten (1-based).
    character(len=*), intent(in   ) :: attname !< Name of attribute in varid that contains the variable name.
    integer         , intent(  out) :: id      !< NetCDF variable ID that was found.
    integer                         :: ierr    !< Result status. UG_NOERR if successful.
@@ -2340,7 +2342,7 @@ end function att_to_varid
 !! For example: mesh2d:edge_dimension
 function att_to_dimid(ncid, varid, attname, id) result(ierr)
    integer         , intent(in   ) :: ncid    !< NetCDF dataset ID
-   integer         , intent(in   ) :: varid   !< NetCDF variable ID from which the attribute will be gotten.
+   integer         , intent(in   ) :: varid   !< NetCDF variable ID from which the attribute will be gotten (1-based).
    character(len=*), intent(in   ) :: attname !< Name of attribute in varid that contains the dimension name.
    integer         , intent(  out) :: id      !< NetCDF dimension ID that was found.
    integer                         :: ierr    !< Result status. UG_NOERR if successful.
@@ -2376,7 +2378,7 @@ end function att_to_dimid
 function varid_to_dimid(ncid, varid, dimid, dimidx) result(ierr)
 
    integer         , intent(in   ) :: ncid   !< NetCDF dataset ID
-   integer         , intent(in   ) :: varid  !< NetCDF variable ID from which the dimension ID will be gotten.
+   integer         , intent(in   ) :: varid  !< NetCDF variable ID from which the dimension ID will be gotten (1-based).
    integer         , intent(  out) :: dimid  !< NetCDF dimension ID that was found.
    integer,optional, intent(in   ) :: dimidx !< Optional index of the desired dimension, in case of a multidimensional variable. Default: 1.
    integer                         :: ierr   !< Result status. UG_NOERR if successful.
@@ -2410,7 +2412,7 @@ end function varid_to_dimid
 !> Returns whether a given variable is a mesh topology variable.
 function ug_is_mesh_topology(ncid, varid) result(is_mesh_topo)
    integer,        intent(in)  :: ncid         !< NetCDF dataset id
-   integer,        intent(in)  :: varid        !< NetCDF variable id
+   integer,        intent(in)  :: varid        !< NetCDF variable id (1-based).
    logical                     :: is_mesh_topo !< Return value
 
    integer :: ierr, topology_dimension
@@ -2453,7 +2455,7 @@ end function ug_is_mesh_topology
 !> Returns whether a given variable is a mesh topology variable.
 function ug_is_network_topology(ncid, varid) result(is_mesh_topo)
    integer,        intent(in)  :: ncid         !< NetCDF dataset id
-   integer,        intent(in)  :: varid        !< NetCDF variable id
+   integer,        intent(in)  :: varid        !< NetCDF variable id (1-based).
    logical                     :: is_mesh_topo !< Return value
 
    integer :: cfrole, nodeidvar, edgeGeometryId, edgecoord
@@ -2482,7 +2484,7 @@ end function ug_is_network_topology
 !> Returns whether a given variable is a link topology
 function ug_is_link_topology(ncid, varid) result(ug_is_link_topo)
    integer,        intent(in)  :: ncid         !< NetCDF dataset id
-   integer,        intent(in)  :: varid        !< NetCDF variable id
+   integer,        intent(in)  :: varid        !< NetCDF variable id (1-based).
    logical                     :: ug_is_link_topo !< Return value
    integer                     :: cfrole
    character(len=:), allocatable :: buffer
@@ -2509,12 +2511,12 @@ function ug_get_mesh_count(ncid, numMesh) result(ierr)
 
    integer :: numVar
    logical :: is_mesh_topo
-   integer :: varid         !< NetCDF variable ID (this is a 0-based index).
+   integer :: varid         !< NetCDF variable ID (1-based).
 
    ierr = nf90_inquire(ncid, nVariables = numVar)
 
    numMesh = 0
-   do varid = 0, numVar-1 ! loop over the netCDF variable IDs (which are 0-based)
+   do varid = 1,numVar
       is_mesh_topo = ug_is_mesh_topology(ncid, varid)
       if (is_mesh_topo) then
          numMesh = numMesh + 1
@@ -2531,7 +2533,7 @@ function ug_get_network_count(ncid, numNet) result(ierr)
    integer :: numVar
    logical :: is_net_topo
    integer :: iworkaround1
-   integer :: varid         !< NetCDF variable ID (this is a 0-based index).
+   integer :: varid         !< NetCDF variable ID (1-based).
 
    ! NOTE: AvD:
    ! Just like in ug_is_network_topology(), we suffer from a same Heisenbug in netcdf lib:
@@ -2541,7 +2543,7 @@ function ug_get_network_count(ncid, numNet) result(ierr)
    ierr = nf90_inquire(iworkaround1, nVariables = numVar)
 
    numNet = 0
-   do varid = 0, numVar-1 ! loop over the netCDF variable IDs (which are 0-based)
+   do varid = 1,numVar
       is_net_topo = ug_is_network_topology(ncid, varid)
       if (is_net_topo) then
          numNet = numNet + 1
@@ -2556,13 +2558,13 @@ function ug_get_contact_topo_count(ncid, ncontacts) result(ierr)
    integer,        intent(out) :: ncontacts !< Number of links (>= 0).
    integer                     :: ierr      !< Result status (UG_NOERR==NF90_NOERR) if successful.
    integer                     :: numVar    !< number of variables in the netCDF file.
-   integer                     :: varid     !< NetCDF variable ID (this is a 0-based index).
+   integer                     :: varid     !< NetCDF variable ID (1-based).
    logical                     :: is_link_topo
 
    ierr = nf90_inquire(ncid, nVariables = numVar)
 
    ncontacts = 0
-   do varid = 0, numVar-1 ! loop over the netCDF variable IDs (which are 0-based)
+   do varid = 1, numVar
       is_link_topo = ug_is_link_topology(ncid, varid)
       if (is_link_topo) then
          ncontacts = ncontacts + 1
@@ -3103,7 +3105,7 @@ function ug_get_var_count(ncid, meshids, iloctype, nvar) result(ierr)
 
    integer :: numVar, ivarloc
    character(len=nf90_max_name) :: str, meshname
-   integer :: varid         !< NetCDF variable ID (this is a 0-based index).
+   integer :: varid         !< NetCDF variable ID (1-based).
    str = ''
    meshname = ''
    ierr = nf90_inquire_variable(ncid, meshids%varids(mid_meshtopo), name=meshname)
@@ -3116,7 +3118,7 @@ function ug_get_var_count(ncid, meshids, iloctype, nvar) result(ierr)
    ierr = nf90_inquire(ncid, nVariables = numVar)
 
    nvar = 0
-   do varid = 0, numVar-1 ! loop over the netCDF variable IDs (which are 0-based)
+   do varid = 1,numVar
       ! Step 1 of 2: check mesh name
       str = ''
       ierr = nf90_get_att(ncid, varid, 'mesh', str)
@@ -3168,7 +3170,7 @@ function ug_inq_varids(ncid, meshids, iloctype, varids, nvar) result(ierr)
    integer :: numVar, ivarloc, maxvar
    character(len=nf90_max_name) :: meshname
    character(len=:), allocatable :: str
-   integer :: varid         !< NetCDF variable ID (this is a 0-based index).
+   integer :: varid         !< NetCDF variable ID (1-based).
    allocate(character(len=0) :: str)
 
    meshname = ''
@@ -3184,7 +3186,7 @@ function ug_inq_varids(ncid, meshids, iloctype, varids, nvar) result(ierr)
 
    maxvar = size(varids)
    nvar = 0
-   do varid = 0, numVar-1 ! loop over the netCDF variable IDs (which are 0-based)
+   do varid = 1,numVar
       ! Step 1 of 2: check mesh name
       str = ''
       ierr = ug_get_attribute(ncid, varid, 'mesh', str)
@@ -3234,15 +3236,15 @@ end function ug_inq_varids
 function ug_inq_varid(ncid, meshids, varname, varid) result(ierr)
    use string_module
    integer,             intent(in)    :: ncid     !< NetCDF dataset id, should be already open.
-   type(t_ug_mesh),  intent(in)    :: meshids !< Set of NetCDF-ids for all mesh geometry arrays.
+   type(t_ug_mesh),  intent(in)       :: meshids  !< Set of NetCDF-ids for all mesh geometry arrays.
    character(len=*),    intent(in)    :: varname  !< The name of the variable to be found. Should be without any "meshnd_" prefix.
-   integer,             intent(  out) :: varid    !< The resulting variable id, if found.
+   integer,             intent(  out) :: varid    !< The resulting variable id, if found (1-based).
    integer                            :: ierr     !< Result status, ug_noerr if successful.
 
    integer :: numVar, ivarloc, nvar, maxvar
    character(len=nf90_max_name) ::meshname
    character(len=:), allocatable :: str
-   integer :: loc_varid     !< NetCDF variable ID (this is a 0-based index).
+   integer :: loc_varid     !< NetCDF variable ID (1-based).
 
    allocate(character(len=0) :: str)
    meshname = ''
@@ -3306,7 +3308,7 @@ function ug_inq_varid_by_standard_name(ncid, meshids, iloctype, stdname, varid) 
    type(t_ug_mesh),  intent(in)    :: meshids  !< Set of NetCDF-ids for all mesh geometry arrays.
    integer,          intent(in)    :: iloctype !< The topological location on which to check for the data variable (one of UG_LOC_FACE/EDGE/NODE/ALL2D).
    character(len=*), intent(in)    :: stdname  !< The standard_name value that is searched for.
-   integer,          intent(  out) :: varid    !< The netCDF variable id (when found).
+   integer,          intent(  out) :: varid    !< The netCDF variable id (when found) (1-based).
    integer                         :: ierr     !< Result status, ug_noerr if successful.
 
    integer, allocatable :: varids(:) !< Array to store the candidate variable ids in.
@@ -5470,7 +5472,7 @@ end function ug_get_contact_name
 !> Gets the STRING-attribute of a variable from the nc-file.
 function ug_get_attribute(ncid, varid, att_name, att_value) result(status)
    integer,                       intent(in   ) :: ncid         !< NetCDF dataset id, should be already open.
-   integer,                       intent(in   ) :: varid        !< NetCDF variable id
+   integer,                       intent(in   ) :: varid        !< NetCDF variable id (1-based).
    character(len=*),              intent(in   ) :: att_name     !< The name of the attribute.
    character(len=:), allocatable, intent(inout) :: att_value    !< The value of the attribute (unchanged when an error occurred).
    integer                                      :: status       !< Result status, ug_noerr if successful.

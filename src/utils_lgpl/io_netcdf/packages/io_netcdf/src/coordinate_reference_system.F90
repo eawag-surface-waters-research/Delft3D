@@ -81,11 +81,12 @@ module coordinate_reference_system
 !! 4. The first variable that has an attribute :grid_mapping_name
 function find_grid_mapping_var(ncid, varid, preferred_name) result(ierr)
    integer,                    intent(in   ) :: ncid           !< NetCDF dataset id
-   integer,                    intent(  out) :: varid          !< The NetCDF variable ID pointing to the grid mapping variable, if found,
+   integer,                    intent(  out) :: varid          !< The NetCDF variable ID pointing to the grid mapping variable, if found (1-based).
    character(len=*), optional, intent(in   ) :: preferred_name !< Searches first for the given variable name, before trying the defaults.
    integer                                   :: ierr           !< Result status (IONC_NOERR==NF90_NOERR) if successful.
 
-   integer :: numVar        !< number of variables in the netCDF file.
+   integer :: numvar        !< number of variables in the netCDF file.
+   integer :: loc_varid     !< The NetCDF variable ID used in loop (1-based).
    logical :: found
 
    ierr = 0 ! TODO: AvD: into separate ionc_constants.F90
@@ -127,16 +128,16 @@ function find_grid_mapping_var(ncid, varid, preferred_name) result(ierr)
    end if
 
    ! 4. remaining variables
-   ierr = nf90_inquire(ncid, nVariables = numVar)
-   do varid = 0, numVar-1 ! loop over the netCDF variable IDs (which are 0-based)
-      found = is_grid_mapping(ncid, varid)
+   ierr = nf90_inquire(ncid, nVariables = numvar)
+   do loc_varid = 1,numvar
+      found = is_grid_mapping(ncid, loc_varid)
       if (found) then
+         varid = loc_varid
          return
       end if
    end do
    
    ! X. Nothing found
-   varid = -1 ! set varid to invalid value
    ierr = 123 ! TODO: AvD: make a separate ionc_constants.F90 for this
 
 end function find_grid_mapping_var
