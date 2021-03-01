@@ -509,24 +509,24 @@
             !
             select case ( opmode )
                case (  1 )
-                  open ( newunit=lun, file = finam, err = 910, form='unformatted', access='stream', status = 'replace'  )
+                  open ( lun, file = finam, err = 910, form='unformatted', access='stream', status = 'replace'  )
                case (  2 )
-                  open ( newunit=lun, file = finam, err = 910, form='unformatted', access='stream', status = 'old' )
+                  open ( lun, file = finam, err = 910, form='unformatted', access='stream', status = 'old' )
                case ( 11 )
-                  open ( newunit=lun, file = finam, err = 910, form='unformatted' )
+                  open ( lun, file = finam, err = 910, form='unformatted' )
                case ( 12 )
-                  open ( newunit=lun, file = finam, err = 910, form='unformatted', status = 'old' )
+                  open ( lun, file = finam, err = 910, form='unformatted', status = 'old' )
                case ( 21 )
-                  open ( newunit=lun, file = finam, err = 910, form   ='unformatted', access='stream',
+                  open ( lun, file = finam, err = 910, form   ='unformatted', access='stream',
      &                                                         convert='big_endian' )
                case ( 22 )
-                  open ( newunit=lun, file = finam, err = 910, form='unformatted', access='stream', status = 'old',
+                  open ( lun, file = finam, err = 910, form='unformatted', access='stream', status = 'old',
      &                                                         convert='big_endian' )
                case ( 31 )
-                  open ( newunit=lun, file = finam, err = 910, form   ='unformatted',
+                  open ( lun, file = finam, err = 910, form   ='unformatted',
      &                                                         convert='big_endian' )
                case ( 32 )
-                  open ( newunit=lun, file = finam, err = 910, form='unformatted', status = 'old',
+                  open ( lun, file = finam, err = 910, form='unformatted', status = 'old',
      &                                                         convert='big_endian' )
                case default
                   ierr = 3
