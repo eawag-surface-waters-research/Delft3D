@@ -503,6 +503,10 @@
             end select
 
          case ( 40 )                          !     Binary segment attribute file
+            !
+            ! Because of the reserved range of LU-numbers (see dlwqt4.f) it is not all that easy to
+            ! use NEWUNIT= here - leave the old method for the moment
+            !
             select case ( opmode )
                case (  1 )
                   open ( newunit=lun, file = finam, err = 910, form='unformatted', access='stream', status = 'replace'  )
