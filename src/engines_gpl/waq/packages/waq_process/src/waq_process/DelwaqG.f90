@@ -546,13 +546,19 @@
 
       integer :: luout
 
-      character*160 :: moname
-      character*20  :: syname(nototsed) = ['CH4-pore','DOC-pore','DON-pore','DOP-pore','DOS-pore','NH4-pore','NO3-pore', &
-                                           'OXY-pore','PO4-pore','Si-pore','SO4-pore','SUD-pore','AAP-bulk', &
-                                           'APATP-bulk','FeIIIpa-bulk','Opal-bulk','POC1-bulk','POC2-bulk','POC3-bulk', &
-                                           'POC4-bulk','PON1-bulk', 'PON2-bulk','PON3-bulk','PON4-bulk','POP1-bulk','POP2-bulk', &
-                                           'POP3-bulk','POP4-bulk','POS1-bulk','POS2-bulk','POS3-bulk','POS4-bulk','SUP-bulk', &
-                                           'VIVP-bulk']
+      character*160 :: moname                                                             12345678901234567890
+      character*20  :: syname(nototsed) = ['CH4-pore            ','DOC-pore            ','DON-pore            ', &
+                                           'DOP-pore            ','DOS-pore            ','NH4-pore            ', &
+                                           'NO3-pore            ','OXY-pore            ','PO4-pore            ', &
+                                           'Si-pore             ','SO4-pore            ','SUD-pore            ', &
+                                           'AAP-bulk            ','APATP-bulk          ','FeIIIpa-bulk        ', &
+                                           'Opal-bulk           ','POC1-bulk           ','POC2-bulk           ', &
+                                           'POC3-bulk           ','POC4-bulk           ','PON1-bulk           ', &
+                                           'PON2-bulk           ','PON3-bulk           ','PON4-bulk           ', &
+                                           'POP1-bulk           ','POP2-bulk           ','POP3-bulk           ', &
+                                           'POP4-bulk           ','POS1-bulk           ','POS2-bulk           ', &
+                                           'POS3-bulk           ','POS4-bulk           ','SUP-bulk            ', &
+                                           'VIVP-bulk           ']
 
       logical :: first = .true.
       logical :: only_ox, dissub
@@ -881,7 +887,7 @@
           enddo
 
           ! Header
-          open (newunit = luout,file='delwaqg.map',form='binary')
+          open (newunit = luout,file='delwaqg.map',access='stream')
           moname = ''
           write (luout) moname
           write (luout) nototsed,nolay*noseg2d
