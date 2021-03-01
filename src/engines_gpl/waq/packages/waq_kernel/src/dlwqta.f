@@ -133,6 +133,10 @@
                   nobrk = 1
                   proc_par%no_brk=nobrk
                   allocate(proc_par%values(ndim1,ndim2,nobrk))
+                  !
+                  ! Some obscure magic going on with LU-numbers - keep it for the moment
+                  !
+                  call dhnlun(801,proc_par%lun)
                   ftype = 2
                   if ( mod(proc_par%filetype,10) .eq. FILE_UNFORMATTED ) ftype = ftype + 10
                   if ( proc_par%filetype/10 .eq. 1 ) ftype = ftype + 20       ! I am in for a better solution (lp)
