@@ -1769,18 +1769,13 @@ if(q /= 0) then
 
     do n = ndx2d+1, ndxi
        hh = max(0d0, s1(n)-bl(n) )
-       vol1_f(n) = ba(n)*hh
        vol1(n) = ba(n)*hh
        a1(n)   = ba(n)
     enddo
 
  else
-
-    vol1_f(ndx2D+1:ndxi) = 0d0
-
     vol1  (ndx2D+1:ndxi) = 0d0
     a1    (ndx2D+1:ndxi) = 0d0
-
  endif
 
  if (nonlin >= 2) then
@@ -1795,7 +1790,6 @@ if(q /= 0) then
     k1 = ln(1,L) ; k2 = ln(2,L)
     a1  (k1) = ba(k2)                                   ! set bnd a1 to ba of inside point
     vol1(k1) = vol1(k2) ! a1(k1)*(s1(k1) - bl(k1))
-    vol1_f(k1) = vol1_f(k2)
  enddo
 
  call timstop(handle)
@@ -1825,6 +1819,7 @@ subroutine addlink1D(L,japerim)                        ! and add area's and volu
  use m_missing
  use m_flowparameters
  use unstruc_channel_flow
+ use precision_basics
  
  implicit none
  
@@ -1834,12 +1829,11 @@ subroutine addlink1D(L,japerim)                        ! and add area's and volu
  double precision  :: ar1, wid1, cf1, ar2, wid2, cf2, dx1, dx2, widu, diam, perim
  double precision  :: hpr
 
- if (japerim == 0) then
- 
-    calcConv = 0
-    k1  = ln(1,L) ; k2 = ln(2,L)
+ dx1 = 0.5d0*dx(L)
+ dx2 = dx1
+ k1 = ln(1,L)
+ k2 = ln(2,L)
 
-    dx1 = 0.5d0*dx(L) ; dx2 = dx1
  if (dxDoubleAt1DEndNodes) then
     if (kcu(L) == 1) then
        if ( nd(k1)%lnx == 1 ) then
@@ -1851,6 +1845,10 @@ subroutine addlink1D(L,japerim)                        ! and add area's and volu
     endif
  endif
 
+ if (japerim == 0) then
+
+    calcConv = 0
+
     if (kcs(k1) == 1) then ! TODO: consider *also* adding storage area to the 2D side k1, if kcu(L)==5, maybe not for kcu(L)==7
        hpr = s1(k1)-bob0(1,L)
        if (hpr >= 0d0) then
@@ -1861,15 +1859,7 @@ subroutine addlink1D(L,japerim)                        ! and add area's and volu
              call getprof_1D(L, epshu, ar1, wid1, japerim, calcConv, perim)
           endif
           a1(k1) =   a1(k1) + dx1*wid1
-
-          ! flow volume
-          if(network%loaded) then
-             call getprof_1D(L, hpr, ar1, wid1, 1, calcConv, perim)
-             vol1_f(k1) = vol1_f(k1) + dx1*ar1
-          else
-             vol1_f(k1) = vol1(k1)
        endif
-    endif
     endif
 
     if (kcs(k2) == 1) then ! TODO: consider *also* adding storage area to the 2D side k2, if kcu(L)==5, maybe not for kcu(L)==7
@@ -1882,14 +1872,7 @@ subroutine addlink1D(L,japerim)                        ! and add area's and volu
              call getprof_1D(L, epshu, ar2, wid2, japerim, calcConv, perim)
           endif
           a1(k2) =   a1(k2) + dx2*wid2
-          ! flow volume
-          if(network%loaded) then
-             call getprof_1D(L, hpr, ar2, wid2, 1, calcConv, perim)
-             vol1_f(k2) = vol1_f(k2) + dx2*ar2
-          else
-             vol1_f(k2) = vol1(k2)
        endif
-    endif
     endif
 
     if (nonlin >= 2) then
@@ -1935,12 +1918,50 @@ subroutine addlink1D(L,japerim)                        ! and add area's and volu
 
     endif
 
- else if (hu(L) > 0) then
+ else
 
     calcConv = 1
-    call getprof_1D(L, hu(L), au(L), widu, japerim, calcConv, perim)  ! memory closeness of profiles causes this statement here instead of in setau
+
     ! getprof1D sets cfu
+    if (hu(L) > 0) then
+       call getprof_1D(L, hu(L), au(L), widu, japerim, calcConv, perim)  ! memory closeness of profiles causes this statement here instead of in setau
+    endif
+
+    ! calculate VOL1_F to be used for 1d-advection
+
+    calcConv = 0
+    if(network%loaded) then
+       ! Only in case of a 1d-network, vol1 and vol1_f can be different
+      if (kcs(k1) == 1) then 
+         ! flow volume
+         hpr = s1(k1)-bob0(1,L)
+         if (hpr > 0d0) then
+            if (comparereal(hu(L), hpr)== 0) then
+               vol1_f(k1) = vol1_f(k1) + dx1*au(L)
+            else
+               call getprof_1D(L, hpr, ar1, wid1, 1, calcConv, perim)
+               vol1_f(k1) = vol1_f(k1) + dx1*ar1
             endif
+         endif
+      endif
+
+      if (kcs(k2) == 1) then 
+         hpr = s1(k2)-bob0(2,L)
+         if (hpr > 0d0) then
+            ! flow volume
+            if (comparereal(hu(L), hpr)== 0) then
+               vol1_f(k2) = vol1_f(k2) + dx2*au(L)
+            else
+               call getprof_1D(L, hpr, ar2, wid2, 1, calcConv, perim)
+               vol1_f(k2) = vol1_f(k2) + dx2*ar2
+            endif
+         endif
+      endif
+    else
+       vol1_f(k1) = vol1(k1)
+       vol1_f(k2) = vol1(k2)
+    endif
+ endif
 
  end subroutine addlink1D
 
@@ -1948,6 +1969,8 @@ subroutine addlink1D(L,japerim)                        ! and add area's and volu
  use m_flowgeom
  use m_flow
  use m_missing
+ use unstruc_channel_flow
+ use precision_basics
 
  implicit none
 
@@ -1967,7 +1990,6 @@ subroutine addlink1D(L,japerim)                        ! and add area's and volu
        dx1  = dx(L)*acl(L)
        a1(k1) =   a1(k1) + dx1*wid1
        vol1(k1)   = vol1(k1)   + dx1*ar1
-       vol1_f(k1) = vol1_f(k1) + dx1*ar1
     endif
 
     hpr = max(0d0,s1(k2)-bl(k2))
@@ -1976,13 +1998,46 @@ subroutine addlink1D(L,japerim)                        ! and add area's and volu
        dx2  = dx(L)*(1d0-acl(L))
        a1(k2) =   a1(k2) + dx2*wid2
        vol1(k2)   = vol1(k2)   + dx2*ar2
-       vol1_f(k2) = vol1_f(k2) + dx2*ar2
     endif
 
- else if (hu(L) > 0) then
-    calcConv = 1
-       call getprof_1D(L, hu(L), au(L), widu, japerim, calcConv, perim)  ! memory closeness of profiles causes this statement here instead of in setau
-                                                               ! getprof1D sets cfu
+ else 
+    if (hu(L) > 0) then
+       calcConv = 1
+       call getprof_1D(L, hu(L), au(L), widu, japerim, calcConv, perim)
+    endif
+    
+    calcConv = 0
+    if(network%loaded) then
+       ! Only in case of a 1d-network, vol1 and vol1_f can be different
+       if (kcs(k1) == 1) then ! TODO: consider *also* adding storage area to the 2D side k1, if kcu(L)==5, maybe not for kcu(L)==7
+          hpr = s1(k1)-bob0(1,L)
+          if (hpr >= 0d0) then
+             if (comparereal(hu(L), hpr)== 0) then
+                vol1_f(k1) = vol1_f(k1) + dx1*au(L)
+             else
+                call getprof_1D(L, hpr, ar1, wid1, 1, calcConv, perim)
+                vol1_f(k1) = vol1_f(k1) + dx1*ar1
+             endif
+          endif
+       endif
+       if (kcs(k2) == 1) then ! TODO: consider *also* adding storage area to the 2D side k2, if kcu(L)==5, maybe not for kcu(L)==7
+          hpr = s1(k2)-bob0(2,L)
+          if (hpr >= 0d0) then
+             ! flow volume
+             if (comparereal(hu(L), hpr)== 0) then
+                vol1_f(k2) = vol1_f(k2) + dx2*au(L)
+             else
+                call getprof_1D(L, hpr, ar2, wid2, 1, calcConv, perim)
+                vol1_f(k2) = vol1_f(k2) + dx2*ar2
+             endif
+          endif
+       endif
+    else
+       
+       vol1_f(k1) = vol1(k1)
+       vol1_f(k2) = vol1(k2)
+    endif
+   
  endif
  end subroutine addlink1Dkcu3
 
@@ -1991,6 +2046,7 @@ subroutine addlink1D(L,japerim)                        ! and add area's and volu
  use m_flowgeom
  use m_flow
  use m_missing
+ use unstruc_channel_flow
 
  implicit none
 
@@ -2003,7 +2059,7 @@ subroutine addlink1D(L,japerim)                        ! and add area's and volu
 
 
  k1  = ln(1,L) ; k2 = ln(2,L)
-  if (bob0(1,L) < bob0(2,L)) then
+ if (bob0(1,L) < bob0(2,L)) then
     BL1 = bob0(1,L); BL2 = bob0(2,L)
  else
     BL1 = bob0(2,L); BL2 = bob0(1,L)
@@ -2020,7 +2076,6 @@ subroutine addlink1D(L,japerim)                        ! and add area's and volu
        dx1   = 0.5d0*dx(L)*acl(L)
        if (k1 > ndx2D) dx1 = 2*dx1
        a1(k1)   = a1(k1)   + dx1*wid1
-       vol1_f(k1) = vol1_f(k1) + dx1*ar1
        vol1(k1)   = vol1(k1)   + dx1*ar1
     endif
 
@@ -2030,29 +2085,53 @@ subroutine addlink1D(L,japerim)                        ! and add area's and volu
        dx2      = 0.5d0*dx(L)*(1d0-acl(L))
        if (k2 > ndx2D) dx2 = 2*dx2
        a1(k2)   = a1(k2)   + dx2*wid2
-       vol1_f(k2) = vol1_f(k2) + dx2*ar2
        vol1(k2)   = vol1(k2)   + dx2*ar2
     endif
 
- else if (hu(L) > 0d0) then
+ else 
+    if (hu(L) > 0d0) then
 
-    hpr1    = hu(L)
-
-    if (jaconveyance2D > 0) then
-
-       jaconv = min(2,jaconveyance2D)
-       frcn = frcu(L) ; ifrctyp = ifrcutp(L)
-       CALL getprof2d(hpr1,wu2,b21,ai,frcn,ifrctyp, widu,aru,aconvu,jaconv, beta, deltaa,hyr)
-
-       if (frcn >  0) then
-           cfuhi(L) = aifu(L)*ag*aconvu
+       hpr1    = hu(L)
+   
+       if (jaconveyance2D > 0) then
+   
+          jaconv = min(2,jaconveyance2D)
+          frcn = frcu(L) ; ifrctyp = ifrcutp(L)
+          CALL getprof2d(hpr1,wu2,b21,ai,frcn,ifrctyp, widu,aru,aconvu,jaconv, beta, deltaa,hyr)
+   
+          if (frcn >  0) then
+              cfuhi(L) = aifu(L)*ag*aconvu
+          else
+              cfuhi(L) = 0d0
+          endif
+          au(L) = aru
        else
-           cfuhi(L) = 0d0
+          au(L) = hpr1*wu(L)
        endif
-       au(L) = aru
-    else
-       au(L) = hpr1*wu(L)
     endif
+
+    if(network%loaded) then
+       ! Only in case of a 1d-network, vol1 and vol1_f can be different
+       hpr1   = s1(k1)-BL1                                                                            ! == 1,2: (ibedlevtyp=3), hrad = A/P   , link or node
+       if (hpr1 > 0) then
+          call getlinkareawid2D(L,wu2,b21,ai,hpr1,ar1,wid1)
+          dx1   = 0.5d0*dx(L)*acl(L)
+          if (k1 > ndx2D) dx1 = 2*dx1
+          vol1_f(k1) = vol1_f(k1) + dx1*ar1
+       endif
+   
+       hpr2 = s1(k2)-BL1                                                                              ! == 5,6: (ibedlevtyp=3), 2D conveyance, link or node
+       if (hpr2 > 0) then
+          call getlinkareawid2D(L,wu2,b21,ai,hpr2,ar2,wid2)
+          dx2      = 0.5d0*dx(L)*(1d0-acl(L))
+          if (k2 > ndx2D) dx2 = 2*dx2
+          vol1_f(k2) = vol1_f(k2) + dx2*ar2
+       endif
+    else
+       vol1_f(k1) = vol1(k1)
+       vol1_f(k2) = vol1(k2)
+    endif
+
  endif
  end subroutine addlink1D2D
 
@@ -2061,6 +2140,7 @@ subroutine addlink1D(L,japerim)                        ! and add area's and volu
  use m_flowgeom
  use m_flow
  use m_missing
+ use unstruc_channel_flow
 
  implicit none
 
@@ -2092,7 +2172,6 @@ subroutine addlink1D(L,japerim)                        ! and add area's and volu
        !if (k1 > ndx2D) dx1 = 2*dx1
        a1(k1)   = a1(k1)   + dx1*wid1
        vol1(k1)   = vol1(k1)   + dx1*ar1
-       vol1_f(k1) = vol1_f(k1) + dx1*ar1
     endif
 
     hpr2 = s1(k2)-BL1                                                                              ! == 5,6: (ibedlevtyp=3), 2D conveyance, link or node
@@ -2103,35 +2182,57 @@ subroutine addlink1D(L,japerim)                        ! and add area's and volu
        !if (k2 > ndx2D) dx2 = 2*dx2
        a1(k2)   = a1(k2)   + dx2*wid2
        vol1(k2)   = vol1(k2)   + dx2*ar2
-       vol1_f(k2) = vol1_f(k2) + dx2*ar2
     endif
 
- else if (hu(L) > 0d0) then
+ else 
+    if (hu(L) > 0d0) then
 
-    hpr1    = hu(L)
-    frcn    = frcu(L)
-    ifrctyp = ifrcutp(L)
-    if (jaconveyance2D > 0) then
-
-       jaconv = min(2,jaconveyance2D)
-       CALL getprof2d(hpr1,wu2,b21,ai,frcn,ifrctyp, widu,aru,aconvu,jaconv, beta, deltaa,hyr)
-
-       if (frcn >  0) then
-           cfuhi(L) = aifu(L)*ag*aconvu
+       hpr1    = hu(L)
+       frcn    = frcu(L)
+       ifrctyp = ifrcutp(L)
+       if (jaconveyance2D > 0) then
+   
+          jaconv = min(2,jaconveyance2D)
+          CALL getprof2d(hpr1,wu2,b21,ai,frcn,ifrctyp, widu,aru,aconvu,jaconv, beta, deltaa,hyr)
+   
+          if (frcn >  0) then
+              cfuhi(L) = aifu(L)*ag*aconvu
+          else
+              cfuhi(L) = 0d0
+          endif
+          au(L) = aru
        else
-           cfuhi(L) = 0d0
+          au(L) = hpr1*wu(L)
+          if (frcn >  0) then
+             call getcz(hpr1, frcn, ifrctyp, Cz, L)
+             cfuhi(L) = ag / (hpr1*Cz*Cz)
+          else
+             cfuhi(L) = 0d0
+          end if
        endif
-       au(L) = aru
-    else
-       au(L) = hpr1*wu(L)
-       if (frcn >  0) then
-          call getcz(hpr1, frcn, ifrctyp, Cz, L)
-          cfuhi(L) = ag / (hpr1*Cz*Cz)
-       else
-          cfuhi(L) = 0d0
-       end if
+    endif
+
+    if(network%loaded) then
+       hpr1   = s1(k1)-BL1
+       ! Also include waterdepth ==0 in order to make a1 /=0, this prevents SAAD errors                                                                       ! == 1,2: (ibedlevtyp=3), hrad = A/P   , link or node
+       if (hpr1 >= 0) then
+          call getlinkareawid2D(L,wu2,b21,ai,hpr1,ar1,wid1)
+          dx1   = 0.5d0*dx(L)*0.5d0 ! acl(L)
+          !if (k1 > ndx2D) dx1 = 2*dx1
+          vol1_f(k1) = vol1_f(k1) + dx1*ar1
+       endif
+   
+       hpr2 = s1(k2)-BL1                                                                              ! == 5,6: (ibedlevtyp=3), 2D conveyance, link or node
+       ! Also include waterdepth ==0 in order to make a1 /=0, this prevents SAAD errors
+       if (hpr2 >= 0) then
+          call getlinkareawid2D(L,wu2,b21,ai,hpr2,ar2,wid2)
+          dx2      = 0.5d0*dx(L)*0.5d0 ! (1d0-acl(L))
+          !if (k2 > ndx2D) dx2 = 2*dx2
+          vol1_f(k2) = vol1_f(k2) + dx2*ar2
+       endif
     endif
  endif
+
  end subroutine addlink1D2Dinternal
 
  subroutine addlink2D(L,japerim)                           ! and add area's and volumes of 2D links
@@ -3436,6 +3537,15 @@ end subroutine sethu
 
  if (kmx == 0) then
 
+   if (nonlin == 0) then
+      do n = ndx2d+1, ndxi
+         hh = max(0d0, s1(n)-bl(n) )
+         vol1_f(n) = ba(n)*hh
+         a1(n)   = ba(n)
+      enddo
+   else
+      vol1_f(ndx2D+1:ndxi) = 0d0
+   endif
 
     call vol12D(1)
 
@@ -3661,11 +3771,6 @@ end subroutine sethu
     endif
  enddo
 
- do L = lnxi+1,Lnx
-    k1 = ln(1,L) ; k2 = ln(2,L)
-    a1  (k1) = ba(k2)                                   ! set bnd a1 to ba of inside point
-    vol1_f(k1) = vol1_f(k2)
- enddo
 
  end subroutine setau
 
@@ -48446,7 +48551,7 @@ if (jagrounlay > 0) then
    endif
 endif
 
-if (japerim == 1) then
+if (japerim == 1 .and. calcconv==1) then
 
    if (abs(itp) == 101) then                      ! 1D conveyance
 
