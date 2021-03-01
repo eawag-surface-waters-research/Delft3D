@@ -1007,6 +1007,12 @@ subroutine readMDUFile(filename, istat)
           tableOutputFile = 'TableOutputFile.bin'
           call prop_get_string  (md_ptr, 'volumeTables', 'outputFilename', tableOutputFile)
        endif
+       call prop_get_logical(md_ptr, 'volumeTables', 'read', readTables)
+       if (readTables) then
+          tableInputFile = 'TableInputFile.bin'
+          call prop_get_string(md_ptr, 'volumeTables', 'inputFilename', tableInputFile)
+       endif
+    
     endif
 
     ! Numerics
@@ -2684,6 +2690,10 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
           call prop_set(md_ptr, 'volumeTables', 'write', merge(1, 0, writeTables), 'Write volume table (1:yes, 0: no)')
           if (writeTables) then
              call prop_set(md_ptr, 'volumeTables', 'outputFilename', tableOutputFile, 'Name of the outputfile for volume tables')
+          endif
+          call prop_set(md_ptr, 'volumeTables', 'read', merge(1, 0, readTables), 'Read a saved volume table for this model (1:yes, 0: no)')
+          if (readTables) then
+             call prop_set(md_ptr, 'volumeTables', 'inputFilename', tableInputFile, 'Name of the inputfile for volume tables')
           endif
        endif
     endif

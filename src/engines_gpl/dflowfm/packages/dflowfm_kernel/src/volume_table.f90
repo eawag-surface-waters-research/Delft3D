@@ -45,6 +45,8 @@ module m_VolumeTables
    double precision,       public :: tableIncrement = 0.1               !< Increment for volume tables
    character(len=charln),  public :: tableOutputFile                    !< Name of the table output file
    logical,                public :: writeTables                        !< Write the volume tables to file (or not)
+   character(len=charln),  public :: tableInputFile                     !< Name of the table input file
+   logical,                public :: readTables                         !< Read the volume tables from file (or not)
 
    contains
    
@@ -121,7 +123,12 @@ module m_VolumeTables
       type(t_chainage2cross), dimension(:,:), pointer :: line2cross
       type(t_CrossSection), pointer, dimension(:)     :: cross
       type(t_storage), dimension(:), pointer          :: stors
-      
+      if (readTables) then
+         if (readVolumeTables()) then
+            return
+         endif
+      endif
+
       line2cross => network%adm%line2cross
       cross => network%crs%cross
       stors => network%storS%stor
@@ -195,7 +202,6 @@ module m_VolumeTables
       do n = 1, ndx1d
 
          nod = n+ndx2d
-         
             
          ! compute volumes, NOTE the volume at the first level is 0 by design
          do j = 2, vltb(n)%count
@@ -257,7 +263,6 @@ module m_VolumeTables
       
    end subroutine deallocVolTables
    
-
    !> write the volume table to a binary file.
    subroutine writeVolumeTables()
 
@@ -301,5 +306,67 @@ module m_VolumeTables
       close(ibin)
 
    end subroutine writeVolumeTables
+
+   !> read the volume tables from a previously saved binary file.
+   logical function readVolumeTables()
+
+      use m_flowgeom
+      use m_GlobalParameters
+
+      integer :: ibin
+      integer :: i, n, istat
+      integer :: ndx1d
+      integer :: count
+      logical :: fileExist
+
+      readVolumeTables = .false.
+      inquire(file=tableInputFile, exist=fileExist)
+
+      if (.not. fileExist) then
+         call SetMessage(LEVEL_WARN, 'Volume table file: '//trim(tableInputFile)//' does not exist, generating volume tables from scratch.')
+         return
+      endif
+
+      open(newunit=ibin, file=tableInputFile, status='old', form='unformatted', access='stream', action='read', iostat=istat)
+
+      if (istat/=0) then
+         call SetMessage(LEVEL_WARN, 'Something went wrong during the opening of binary volume table file: '// trim(tableInputFile))
+         return
+      endif
+
+      read(ibin) ndx1d
+      
+      if (ndx1d /= ndx - ndx2d) then
+         call SetMessage(LEVEL_WARN, trim(tableInputFile)//' is not compatible with the current model, the number of 1d cells are different.')
+         return
+      endif
+
+      allocate(vltb(ndx1d))
+
+      do n = 1, ndx1d
+         read(ibin) count
+         vltb(n)%count = count
+         read(ibin) vltb(n)%hasSummerdike
+         read(ibin) vltb(n)%hasNegativeWidths
+         read(ibin) vltb(n)%hysteresis
+         read(ibin) vltb(n)%bedLevel
+         read(ibin) vltb(n)%topLevel
+         call vltb(n)%alloc()
+         read(ibin) (vltb(n)%vol(i), i = 1, count)
+         read(ibin) (vltb(n)%sur(i), i = 1, count)
+         if (vltb(n)%hasSummerdike) then
+            read(ibin) (vltb(n)%volSummerdike(i), i = 1, count)
+            read(ibin) (vltb(n)%surSummerdike(i), i = 1, count)
+         endif
+         if (vltb(n)%hasNegativeWidths) then
+            read(ibin) (vltb(n)%volDecreasing(i), i = 1, count)
+            read(ibin) (vltb(n)%surDecreasing(i), i = 1, count)
+         endif
+      enddo
+      
+      close(ibin)
+      readVolumeTables = .true.
+
+   end function readVolumeTables
 
 end module m_volumeTables
