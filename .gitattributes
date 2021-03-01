@@ -16561,6 +16561,7 @@ src/tools_lgpl/matlab/quickplot/progsrc/private/findseries.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/flexmeshfil.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/fls.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/flsfil.m -text
+src/tools_lgpl/matlab/quickplot/progsrc/private/fnc2enc.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/gencontour.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/genfaces.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/genmarkers.m -text
