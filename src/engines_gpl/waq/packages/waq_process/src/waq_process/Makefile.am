@@ -120,7 +120,7 @@ libwaq_process_la_SOURCES = \
        secchi.f \
        sedaap.f \
        sedcar.f \
-       sedbal.f \
+       sedbal.f90 \
        sedcom.f \
        sedhm.f \
        sedim.f \
