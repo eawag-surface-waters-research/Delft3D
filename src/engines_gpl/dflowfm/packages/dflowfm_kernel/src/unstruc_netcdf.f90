@@ -13846,9 +13846,9 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd)
       ! TODO: AvD: lnx1d+1:lnx includes open bnd links, which may *also* be 1D boundaries (don't want that in mesh2d)
       ! note edge_faces does not need re-indexing, cell number are flow variables and 2d comes first
       if (jafullgridoutput.eq.0) then
-          unc_writeopts = unc_writeopts .or. UG_WRITE_LYRVAR
+          unc_writeopts = ior(unc_writeopts,UG_WRITE_LYRVAR)
       else
-          unc_writeopts = unc_writeopts .and. (.not.UG_WRITE_LYRVAR)
+          unc_writeopts = iand(unc_writeopts,not(UG_WRITE_LYRVAR))
       endif
 
       ierr = ug_write_mesh_arrays(ncid, id_tsp%meshids2d, mesh2dname, 2, UG_LOC_EDGE + UG_LOC_FACE, numk2d, numl2d, ndx2d, numNodes, &
