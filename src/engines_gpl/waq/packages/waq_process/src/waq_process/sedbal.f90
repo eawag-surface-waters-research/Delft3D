@@ -401,7 +401,7 @@
           enddo
 
           ! Header
-          open (newunit=lunsedbal,file='delwaqg-bal.his',form='binary')
+          open (newunit=lunsedbal,file='delwaqg-bal.his',access='stream')
           moname = ''
           write (lunsedbal) moname
           write (lunsedbal) notermtot,one
