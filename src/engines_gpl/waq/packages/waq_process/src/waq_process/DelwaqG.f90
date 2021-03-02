@@ -546,7 +546,7 @@
 
       integer :: luout
 
-      character*160 :: moname                                                             12345678901234567890
+      character*160 :: moname
       character*20  :: syname(nototsed) = ['CH4-pore            ','DOC-pore            ','DON-pore            ', &
                                            'DOP-pore            ','DOS-pore            ','NH4-pore            ', &
                                            'NO3-pore            ','OXY-pore            ','PO4-pore            ', &
