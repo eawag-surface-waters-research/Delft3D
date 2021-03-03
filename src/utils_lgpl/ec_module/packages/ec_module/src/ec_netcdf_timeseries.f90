@@ -414,6 +414,7 @@ module m_ec_netcdf_timeseries
     
     allocate(character(len=0) :: str)
     success = .False. 
+    str = ''
     ierr = ug_get_attribute(ncptr%ncid,q_id,'vectormax',str)
     if (ierr/=NF90_NOERR) return 
     read(str,*,iostat=ierr) vectormax

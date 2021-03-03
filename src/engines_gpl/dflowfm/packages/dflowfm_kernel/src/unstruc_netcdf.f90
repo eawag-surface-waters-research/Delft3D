@@ -11687,6 +11687,7 @@ subroutine unc_read_map(filename, ierr)
     um%jamergedmap_same = 1
 
     ! do not support a rst file of UGRID format
+    convformat = ''
     ierr = ug_get_attribute(imapfile, nf90_global, 'Conventions', convformat)
     lugrid = index(convformat, 'UGRID-1')
     deallocate(convformat)
@@ -11879,6 +11880,7 @@ subroutine unc_read_map(filename, ierr)
         ! Seconds since yyyy-dd-mm HH:MM:SS
         ! 123456789012345678901234567890123
         ierr = nf90_inq_varid(imapfile, 'time', id_time)
+        refdat_map = ''
         ierr = ug_get_attribute(imapfile, id_time, "units", refdat_map)
         tmpstr = ' '
         tmpstr  = refdat_map(15:18)//refdat_map(20:21)//refdat_map(23:24)//refdat_map(26:27)//refdat_map(29:30)//refdat_map(32:33)

@@ -2121,6 +2121,7 @@ function ug_init_mesh_topology(ncid, varid, meshids) result(ierr)
    endif
 
    !check here if this is a mapped mesh
+   coordspaceind = ''
    isMappedMesh = ug_get_attribute(ncid, varid, 'coordinate_space', coordspaceind)  
    deallocate(coordspaceind)  ! not used anymore
    if (isMappedMesh == nf90_noerr) then

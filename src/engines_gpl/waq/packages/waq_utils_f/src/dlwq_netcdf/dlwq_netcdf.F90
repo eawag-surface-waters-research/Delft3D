@@ -137,6 +137,7 @@ integer function dlwqnc_find_var_with_att( ncid, attribute, varid, expected_valu
             ierror = nf90_inquire_variable( ncid, varid, name=varname )
 
             if ( present(expected_value) ) then
+                att_value = ''
                 ierror = ug_get_attribute( ncid, varid, attribute, att_value )
                 if ( ierror /= nf90_noerr ) then
                     cycle ! Not the right type, it appears

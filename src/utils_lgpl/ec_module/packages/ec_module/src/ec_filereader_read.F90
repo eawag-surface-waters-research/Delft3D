@@ -2163,6 +2163,7 @@ module m_ec_filereader_read
                   ierror = nf90_get_var(fileHandle, varid, data_block, start=start, count=cnt)
 
                   if ( ierror /= 0 ) then
+                     standard_name = ''
                      ierr = ug_get_attribute(fileHandle, varid, 'standard_name', standard_name)
                      if (ierr /= 0) write(standard_name,*) 'varid = ', varid
                      call setECMessage("Read error in read_data_sparse for " // trim(standard_name))
