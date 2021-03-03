@@ -34,10 +34,12 @@ module m_VolumeTables
       double precision, allocatable, dimension(:) :: volDecreasing  !< Volume table for decreasing widths (Nested Newton)
       double precision, allocatable, dimension(:) :: surDecreasing  !< Surface area table for decreasing widths (Nested Newton)
    contains
-      procedure, pass :: alloc   => allocVoltable                   !< Allocates the allocatable arrays in this structure
-      procedure, pass :: dealloc => deallocVoltable                 !< Deallocates the allocatable arrays in this structure
-      procedure, pass :: getVolume => getVolumeVoltable             !< Returns the volume for a given water level
-      procedure, pass :: getSurface => getSurfaceVoltable           !< Returns the surface area for a given water level
+      procedure, pass :: alloc               => allocVoltable                   !< Allocates the allocatable arrays in this structure
+      procedure, pass :: dealloc             => deallocVoltable                 !< Deallocates the allocatable arrays in this structure
+      procedure, pass :: getVolume           => getVolumeVoltable             !< Returns the volume for a given water level
+      procedure, pass :: getSurface          => getSurfaceVoltable           !< Returns the surface area for a given water level
+      procedure, pass :: getVolumeDecreasing => getVolumeDecreasingVoltable             !< Returns the volume for a given water level
+      procedure, pass :: getSurfaceDecreasing=> getSurfaceDecreasingVoltable           !< Returns the surface area for a given water level
    end type
    
    type(t_voltable),       public, allocatable, dimension(:)   :: vltb  !< 1D Volume tables
@@ -52,20 +54,33 @@ module m_VolumeTables
    
    !> Allocate the volume table arrays and initialize to 0
    subroutine allocVoltable(this)
+      use m_flowparameters
+   
       class(t_voltable) :: this
       
       allocate(this%vol(this%count))
       allocate(this%sur(this%count))
       this%vol   = 0.0d0
       this%sur   = 0.0d0
+
+      if (this%hasNegativeWidths) then
+         allocate(this%volDecreasing(this%count))
+         allocate(this%surDecreasing(this%count))
+         this%volDecreasing   = 0.0d0
+         this%surDecreasing   = 0.0d0
+      endif
    end subroutine allocVoltable
    
    !> Deallocate the volume table arrays
    subroutine deallocVoltable(this)
       class(t_voltable) :: this
       
-      if (allocated(this%vol))   deallocate(this%vol)
-      if (allocated(this%sur))   deallocate(this%sur)
+      if (allocated(this%vol))            deallocate(this%vol)
+      if (allocated(this%sur))            deallocate(this%sur)
+      if (this%hasNegativeWidths) then
+         if (allocated(this%volDecreasing))  deallocate(this%volDecreasing)
+         if (allocated(this%surDecreasing))  deallocate(this%surDecreasing)
+      endif
    end subroutine deallocVoltable
 
    !> Retrieve the volume for given volume table and water level
@@ -94,6 +109,33 @@ module m_VolumeTables
       getSurfaceVoltable = this%sur(index)
       
    end function getSurfaceVoltable
+
+   !> Retrieve the decreasing volume for given volume table and water level
+   double precision function getVolumeDecreasingVoltable(this, level)
+      class(t_voltable)             :: this
+      double precision, intent(in)  :: level    !< water level
+      
+      integer           :: index
+      double precision  :: heightIncrement
+      index = min(int( max(0d0,level-this%bedLevel)/ tableIncrement)+1,this%count)
+      
+      heightIncrement = ( (level-this%bedLevel) - dble(index-1) * tableIncrement )
+      
+      getVolumeDecreasingVoltable = this%volDecreasing(index) + this%surDecreasing(index) * heightIncrement
+      
+   end function getVolumeDecreasingVoltable
+   
+   !> Retrieve the surface area for given volume table and water level
+   double precision function getSurfaceDecreasingVoltable(this, level)
+      class(t_voltable)             :: this
+      double precision, intent(in)  :: level    !< water level
+      
+      integer           :: index
+      index = min(int( max(0d0,level-this%bedLevel)/ tableIncrement)+1,this%count)
+      
+      getSurfaceDecreasingVoltable = this%surDecreasing(index)
+      
+   end function getSurfaceDecreasingVoltable
 
    !> Generate the volume tables, by using GetCSParsTotal.
    subroutine makeVolumeTables()
@@ -152,6 +194,7 @@ module m_VolumeTables
       endif
       
       do n = 1, ndx1d
+         vltb(n)%hasNegativeWidths = nonlin1D >= 2
          nod = n+ndx2d
          vltb(n)%bedLevel = bl(nod)
          
@@ -188,7 +231,7 @@ module m_VolumeTables
          enddo
 
          ! Make sure the volume table consists of at least two levels
-         vltb(n)%count = max(2,int(vltb(n)%topLevel / tableIncrement) + 1)
+         vltb(n)%count = max(2,int(vltb(n)%topLevel / tableIncrement) + 2)
          call vltb(n)%alloc()
       enddo
 
@@ -235,17 +278,29 @@ module m_VolumeTables
                if (kcu(L)==1) then
                   ! The bed level is the lowest point of all flow links and possibly storage nodes. 
                   ! In order to take this difference into account the variable bobAboveBedLevel is used
-                  call GetCSParsTotal(line2cross(L, 2), cross, height-bobAboveBedLevel, area, width, CSCalculationOption, network%adm%hysteresis_for_summerdike(:,L))
+                  call GetCSParsTotal(line2cross(L, 2), cross, height-bobAboveBedLevel, area, width, CSCalculationOption)
                   vltb(n)%vol(j) = vltb(n)%vol(j) + dxL*area
                   
                   if (j==vltb(n)%count) then
                      ! water surface at the highest level is equal to the width*dx of the cross section at the highest level.
                      vltb(n)%sur(vltb(n)%count) = vltb(n)%sur(vltb(n)%count) + dxL*width
                   endif
+                  ! compute the decreasing volumes and areas
+                  if (vltb(n)%hasNegativeWidths) then
+                     call GetCSParsTotal(network%adm%line2cross(L, 2), cross, height-bobAboveBedLevel, area, width, CS_TYPE_MIN)
+                     vltb(n)%volDecreasing(j) = vltb(n)%volDecreasing(j) + dxL*area
+                     if (j==vltb(n)%count) then
+                        ! water surface at the highest level is equal to the width*dx of the cross section at the highest level.
+                        vltb(n)%surDecreasing(vltb(n)%count) = vltb(n)%surDecreasing(vltb(n)%count) + dxL*width
+                     endif
+                  endif
                endif
             enddo
             ! compute water surface area
             vltb(n)%sur(j-1) = (vltb(n)%vol(j) - vltb(n)%vol(j-1))/tableIncrement
+            if (vltb(n)%hasNegativeWidths) then
+               vltb(n)%surDecreasing(j-1) = (vltb(n)%volDecreasing(j) - vltb(n)%volDecreasing(j-1))/tableIncrement
+            endif
          enddo
       enddo
 
@@ -273,6 +328,7 @@ module m_VolumeTables
    subroutine writeVolumeTables()
 
       use m_flowgeom
+      use m_flowparameters
       use m_GlobalParameters
 
       integer :: ibin
@@ -287,7 +343,7 @@ module m_VolumeTables
       endif
 
       ndx1d = ndx - ndx2d
-      write(ibin) ndx1d
+      write(ibin) ndx1d, nonlin1D
 
       do n = 1, ndx1d
          count = vltb(n)%count
@@ -318,11 +374,15 @@ module m_VolumeTables
 
       use m_flowgeom
       use m_GlobalParameters
+      use unstruc_channel_flow
+      use m_flowparameters
+      use messageHandling
 
       integer :: ibin
       integer :: i, n, istat
       integer :: ndx1d
       integer :: count
+      integer :: nonlin1D_file
       logical :: fileExist
 
       readVolumeTables = .false.
@@ -340,10 +400,18 @@ module m_VolumeTables
          return
       endif
 
-      read(ibin) ndx1d
+      read(ibin) ndx1d, nonlin1D_file
       
       if (ndx1d /= ndx - ndx2d) then
          call SetMessage(LEVEL_WARN, trim(tableInputFile)//' is not compatible with the current model, the number of 1d cells are different.')
+         return
+      endif
+
+      if (nonlin1D_file /= nonlin1d) then
+         msgbuf = 'The selected method for solving the nonlinear iteration (='''// trim(getNonlin(nonlin1d))//'''), and the nonlinear iteration method '
+         call warn_flush()
+         msgbuf = 'on ''' // trim(tableInputFile)// ''' are different (='''//trim(getNonlin(nonlin1D_file))//''').'
+         call warn_flush()
          return
       endif
 
@@ -374,5 +442,20 @@ module m_VolumeTables
       readVolumeTables = .true.
 
    end function readVolumeTables
+
+   function getNonlin(nlin1D) result(string)
+
+      character(len=30) :: string
+      integer, intent(in) ::nlin1d
+
+      select case(nlin1d)
+      case(1)
+         string = 'Preismann'
+      case(2)
+         string = 'Nested Newton'
+      case(3)
+         string= 'Improved Nested Newton'
+      end select
+   end function
 
 end module m_volumeTables
