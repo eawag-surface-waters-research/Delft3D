@@ -222,7 +222,7 @@ module m_VolumeTables
                   bobAboveBedLevel = bob0(2,L) - bl(nod)
                endif
                L = iabs(nd(nod)%ln(LL))
-               if (L > lnxi) then                      ! for 1D boundary links, refer to attached link
+               if (L > lnxi.and. kcu(L)==-1) then                      ! for 1D boundary links, refer to attached link
                   L = LBND1D(L)
                   if (dxDoubleAt1DEndNodes .and. nd(nod)%lnx == 1 ) then
                      dxL = dx(L)
