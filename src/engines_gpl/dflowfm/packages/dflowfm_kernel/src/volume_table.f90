@@ -171,13 +171,19 @@ module m_VolumeTables
             if (L > lnxi) then                      ! for 1D boundary links, refer to attached link
                L = LBND1D(L)
             endif
-            charheight = cross(line2cross(L,index)%c1)%charheight
-            if (charheight > vltb(n)%topLevel) then
-               vltb(n)%topLevel = charheight
-            endif
-            charheight = cross(line2cross(L,index)%c2)%charheight
-            if (charheight > vltb(n)%topLevel) then
-               vltb(n)%topLevel = charheight
+            if (L > 0) then
+               if (kcu(L) ==1) then
+                  if (line2cross(L,index)%c1 > 0) then
+                     charheight = cross(line2cross(L,index)%c1)%charheight
+                     if (charheight > vltb(n)%topLevel) then
+                        vltb(n)%topLevel = charheight
+                     endif
+                     charheight = cross(line2cross(L,index)%c2)%charheight
+                     if (charheight > vltb(n)%topLevel) then
+                        vltb(n)%topLevel = charheight
+                     endif
+                  endif
+               endif
             endif
          enddo
 
