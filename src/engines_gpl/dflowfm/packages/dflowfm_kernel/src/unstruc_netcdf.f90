@@ -10725,7 +10725,7 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
    use dfm_error
    use m_alloc
    use gridoperations
-   use m_partitioninfo, only : jampi
+   use m_partitioninfo, only : jampi, my_rank
    use m_flowparameters, only : jarstignorebl
 
    use unstruc_channel_flow
@@ -10911,13 +10911,20 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
       else
          ! 1d part
          koffset1dmesh = numk_last
-         ierr = odu_get_xy_coordinates(meshgeom%nodebranchidx, meshgeom%nodeoffsets, meshgeom%ngeopointx, meshgeom%ngeopointy, meshgeom%nbranchgeometrynodes, meshgeom%nbranchlengths, jsferic, meshgeom%nodeX, meshgeom%nodeY)
-         XK(numk_last+1:numk_last + meshgeom%numnode) = meshgeom%nodeX
-         YK(numk_last+1:numk_last + meshgeom%numnode) = meshgeom%nodeY
+         if (jampi == 0) then
+            ierr = odu_get_xy_coordinates(meshgeom%nodebranchidx, meshgeom%nodeoffsets, meshgeom%ngeopointx, meshgeom%ngeopointy, &
+               meshgeom%nbranchgeometrynodes, meshgeom%nbranchlengths, jsferic, meshgeom%nodeX, meshgeom%nodeY)
+            XK(numk_last+1:numk_last + meshgeom%numnode) = meshgeom%nodeX
+            YK(numk_last+1:numk_last + meshgeom%numnode) = meshgeom%nodeY
+         else
+            ierr = ionc_get_node_coordinates(ioncid, im, XK(numk_last+1:numk_last + meshgeom%numnode), YK(numk_last+1:numk_last + meshgeom%numnode))
+            meshgeom%nodeX = XK(numk_last+1:numk_last + meshgeom%numnode)
+            meshgeom%nodeY = YK(numk_last+1:numk_last + meshgeom%numnode)
+         end if
          network%numk = meshgeom%numnode
          ! construct network and administrate
          ierr = construct_network_from_meshgeom(network, meshgeom, nbranchids, nbranchlongnames, nnodeids, &
-            nnodelongnames, nodeids, nodelongnames, network1dname, mesh1dname, nodesOnBranchVertices, jampi)
+            nnodelongnames, nodeids, nodelongnames, network1dname, mesh1dname, nodesOnBranchVertices, jampi, my_rank)
          ! get the edge nodes, usually not available (needs to be generated)
          if (meshgeom%numedge.eq.-1) then
             ierr = ggeo_count_or_create_edge_nodes(meshgeom%nodebranchidx, meshgeom%nodeoffsets, meshgeom%nedge_nodes(1,:), meshgeom%nedge_nodes(2,:), meshgeom%nbranchlengths, start_index, meshgeom%numedge)

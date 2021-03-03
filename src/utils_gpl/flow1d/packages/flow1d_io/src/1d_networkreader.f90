@@ -28,7 +28,7 @@ module m_1d_networkreader
 !  $Id$
 !  $HeadURL$
 !-------------------------------------------------------------------------------
-   
+
    use MessageHandling
    use properties
    use m_hash_search
@@ -137,12 +137,13 @@ module m_1d_networkreader
    !! but the input meshgeom often will only have one unique grid point on a connection node.
    !! In that case, parameter nodesOnBranchVertices allows to automatically create duplicate start/end points.
    integer function construct_network_from_meshgeom(network, meshgeom, branchids, branchlongnames, nodeids, nodelongnames, & !1d network character variables
-      gpsID, gpsIDLongnames, network1dname, mesh1dname, nodesOnBranchVertices, jampi) result(ierr)
+      gpsID, gpsIDLongnames, network1dname, mesh1dname, nodesOnBranchVertices, jampi, my_rank) result(ierr)
 
    use gridgeom
    use meshdata
    use m_hash_search
    use odugrid
+   use io_netcdf, only : ionc_get_node_coordinates
 
    !in variables
    type(t_network),                             intent(inout) :: network
@@ -158,6 +159,7 @@ module m_1d_networkreader
    integer,                                     intent(in   ) :: nodesOnBranchVertices !< Whether or not (1/0) the input meshgeom itself already contains duplicate points on each connection node between multiple branches.
                                                                                        !! If not (0), additional grid points will be created.
    integer,                                     intent(in   ), optional :: jampi       !< running in parallel mode (1) or not (0)
+   integer,                                     intent(in   ), optional :: my_rank     !< my rank in parallel mode, for (debugging) output
 
    !locals
    integer, allocatable, dimension(:)               :: gpFirst
@@ -168,7 +170,7 @@ module m_1d_networkreader
    integer                                          :: gridPointsCount
    double precision, allocatable, dimension(:)      :: localOffsets
    double precision, allocatable, dimension(:)      :: localOffsetsSorted
-   integer, allocatable, dimension(:)               :: localSortedIndexses  
+   integer, allocatable, dimension(:)               :: localSortedIndexses
    double precision, allocatable, dimension(:)      :: localGpsX
    double precision, allocatable, dimension(:)      :: localGpsY
    character(len=len(gpsId)), allocatable, dimension(:)  :: localGpsID
@@ -243,9 +245,13 @@ module m_1d_networkreader
    else
       jsferic = 0
    endif
-   ierr = ggeo_get_xy_coordinates(meshgeom%nodebranchidx, meshgeom%nodeoffsets, meshgeom%ngeopointx, meshgeom%ngeopointy, &
-      meshgeom%nbranchgeometrynodes, meshgeom%nbranchlengths, jsferic, gpsX, gpsY)
-   if (ierr .ne. 0) then
+   if (jampi_ == 0) then
+      ierr = ggeo_get_xy_coordinates(meshgeom%nodebranchidx, meshgeom%nodeoffsets, meshgeom%ngeopointx, meshgeom%ngeopointy, &
+         meshgeom%nbranchgeometrynodes, meshgeom%nbranchlengths, jsferic, gpsX, gpsY)
+   else
+      ierr = ionc_get_node_coordinates(1, 1, gpsX, gpsY)
+   end if
+   if (ierr /= 0) then
       call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Error Getting Mesh Coordinates From UGrid Data')
    endif
 
@@ -253,12 +259,16 @@ module m_1d_networkreader
    ibran = 0
    allocate(gpFirst(meshgeom%nbranches), stat = ierr)
    if (ierr == 0) allocate(gpLast(meshgeom%nbranches), stat = ierr)
-   if (ierr .ne. 0) then
+   if (ierr /= 0) then
       call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Error Allocating Memory for Branches')
    endif
 
-   ierr = ggeo_get_start_end_nodes_of_branches(meshgeom%nodebranchidx, gpFirst, gpLast)
-   if (ierr .ne. 0) then
+   if (jampi_ == 0) then
+      ierr = ggeo_get_start_end_nodes_of_branches(meshgeom%nodebranchidx, gpFirst, gpLast)
+   else
+      ierr = find_gpFirst_gpLast_parallel(meshgeom, gpFirst, gpLast)
+   end if
+   if (ierr /= 0) then
       call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Error Getting first and last nodes of the network branches')
    endif
 
@@ -359,6 +369,31 @@ module m_1d_networkreader
    deallocate(gpsY)
 
    end function construct_network_from_meshgeom
+
+   !> find first and last grid point for all branches in case of parallel computing
+   function find_gpFirst_gpLast_parallel(meshgeom, gpFirst, gpLast) result(ierr)
+   use meshdata, only : t_ug_meshgeom
+   type(t_ug_meshgeom), intent(in   ) :: meshgeom    !< struct for mesh geometry
+   integer            , intent(  out) :: gpFirst(:)  !< all starting points
+   integer            , intent(  out) :: gpLast(:)   !< all ending points
+   integer                            :: ierr        !< function result (0=success)
+
+   integer                            :: ibran
+   integer                            :: i
+
+   gpFirst = -1
+   gpLast  = -1
+   do ibran = 1,  meshgeom%nbranches
+      do i = 1, meshgeom%numedge
+         if (meshgeom%edgebranchidx(i) == ibran) then
+            gpFirst(ibran) = minval(meshgeom%edge_nodes(:,i))
+            gpLast (ibran) = maxval(meshgeom%edge_nodes(:,i))
+            exit
+         end if
+      end do
+   end do
+   ierr = 0
+   end function find_gpFirst_gpLast_parallel
 
    !> helper function to add a point at the start or end of a branch
    subroutine add_point(atStart, localOffsets, localGpsX, localGpsY, localGpsID, idMeshNodesInNetworkNodes, gridPointsCount, ibran, meshgeom)
