@@ -14,6 +14,8 @@ module m_VolumeTables
       module procedure deallocVolTables
    end interface
    
+   !> Derived type for storing multiple tables relevant for volume calculations.
+   !! Includes type-bound procedures for accessing the tables.
    type, public :: t_voltable
       integer :: count                                              !< Number of levels in the volume table. 
       logical :: hasSummerdike                                      !< Indicates whether on 1 or more links a summerdike is attached. 
@@ -58,6 +60,10 @@ module m_VolumeTables
    
       class(t_voltable) :: this
       
+      if (this%count < 0) then
+         return
+      end if
+
       allocate(this%vol(this%count))
       allocate(this%sur(this%count))
       this%vol   = 0.0d0
@@ -92,7 +98,7 @@ module m_VolumeTables
       double precision  :: heightIncrement
       index = min(int( max(0d0,level-this%bedLevel)/ tableIncrement)+1,this%count)
       
-      heightIncrement = ( (level-this%bedLevel) - dble(index-1) * tableIncrement )
+      heightIncrement = max(0d0, ( (level-this%bedLevel) - dble(index-1) * tableIncrement ))
       
       getVolumeVoltable = this%vol(index) + this%sur(index) * heightIncrement
       
@@ -243,6 +249,7 @@ module m_VolumeTables
          do j = 1, vltb(n)%count
             level = bl(nod) + (j-1)*tableIncrement
             vltb(n)%vol(j) = vltb(n)%vol(j) + getVolume(stors(i), level)
+            ! NOTE: %sur follows at the end as an average for each level
          enddo
          vltb(n)%sur(vltb(n)%count) = vltb(n)%sur(vltb(n)%count) + GetSurface(stors(i), level)
       enddo
@@ -270,10 +277,10 @@ module m_VolumeTables
                   if (dxDoubleAt1DEndNodes .and. nd(nod)%lnx == 1 ) then
                      dxL = dx(L)
                   else 
-                     dxL = 0.5*dx(L)
+                     dxL = 0.5d0*dx(L)
                   endif
                else
-                  dxL = 0.5*dx(L)
+                  dxL = 0.5d0*dx(L)
                endif
                if (kcu(L)==1) then
                   ! The bed level is the lowest point of all flow links and possibly storage nodes. 

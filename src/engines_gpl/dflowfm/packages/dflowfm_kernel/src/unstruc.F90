@@ -2803,13 +2803,12 @@ subroutine getseg1D(hpr,wu2,dz,ai,frcn,ifrctyp, wid,ar,conv,perim,jaconv)  ! cop
 
  if (japerim == 1 .or. nonlin > 0) then
 
- nstor = network%stors%count
  if (japerim == 0 .and. useVolumeTables) then
-    ! Compute 1d volumes, using volume tables
+    ! Compute 1d volumes, using volume tables (still excl. 1D2D contributions)
     do n = ndx2d+1, ndx
        n1d = n - ndx2d
-       vol1(n) = vol1(n) + vltb(n1d)%getVolume(s1(n))
-       a1(n)   = a1(n)   + vltb(n1d)%getSurface(s1(n))
+       vol1(n) = vltb(n1d)%getVolume(s1(n))
+       a1(n)   = vltb(n1d)%getSurface(s1(n))
     enddo
     if (nonlin1D >= 2) then
       do n = ndx2d+1, ndx
@@ -2818,7 +2817,10 @@ subroutine getseg1D(hpr,wu2,dz,ai,frcn,ifrctyp, wid,ar,conv,perim,jaconv)  ! cop
          a1m(n)   = a1m(n) + vltb(n1d)%getSurfaceDecreasing(s1m(n))
       enddo
     endif
- else if (japerim == 0 .and. nstor > 0) then
+ end if
+
+ nstor = network%stors%count
+ if (japerim == 0 .and. nstor > 0 .and. .not. useVolumeTables) then
     stors => network%stors%stor
     do i = 1, nstor
        k1 = stors(i)%gridPoint
@@ -15613,7 +15615,7 @@ else if (nodval == 27) then
 
  ! Generate the volume tables for 1d nodes
  if (useVolumeTables) then
-    call makeVolumeTables
+    call makeVolumeTables()
  endif
 
  call inisferic()                                    ! also set coriolis :<
