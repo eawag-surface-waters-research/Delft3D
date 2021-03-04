@@ -428,11 +428,27 @@ end type t_unc_netelem_ids
 
 !> type for the administration of reading a merged map/rst file
 type t_unc_merged
-   integer              :: jamergedmap, jafillghost
-   integer              :: jamergedmap_same, idmn_ghost, ndxi_own, lnx_own, nbnd_read
-   integer              :: ndxi_ghost, lnx_ghost, id_bnddim, ndxi_read, lnx_read   !< number of nodes/links that are a domain's own (if jampi==0, ndxi_own===ndxi, lnx_own===lnx)
-   integer, allocatable :: inode_own(:), ilink_own(:), inode_ghost(:), ilink_ghost(:) !< Mapping from unique flow nodes/links that are a domain's own to the actual index in 1:ndxi and 1:lnx
-   integer, allocatable :: inodeghost_merge(:), ilinkghost_merge(:), ibnd_merge(:), inode_merge(:), ilink_merge(:) !< Mapping from subdomain flow nodes/links to merged map files
+   integer              :: jamergedmap         !< 0:input was NOT read from a merged map file (i.e. requires no shift), 1:input WAS read from a merged map file
+   integer              :: jafillghost         !< 0:omit (use kdtree for this) or 1:perform filling certain variables at ghostcells from the map
+   integer              :: jamergedmap_same    !< 0:merged, but NOT from the same partitioning, 1:merged and from the same partitioning
+   integer              :: idmn_ghost          !< domain number of links to ghostcells
+   integer              :: ndxi_own            !< number of internal flow nodes in the current domain
+   integer              :: ndxi_ghost          !< number of internal flow nodes in the current domain belonging to a neighbouring domain
+   integer              :: lnx_own             !< number of internal links in the current domain
+   integer              :: lnx_ghost           !< number of internal links in the current domain belonging to a neighbouring domain
+   integer              :: nbnd_read           !< number of boundary flow nodes read
+   integer              :: ndxi_read           !< number of internal flow nodes read
+   integer              :: lnx_read            !< number of nodes/links that are a domain's own (if jampi==0, ndxi_own===ndxi, lnx_own===lnx)
+   integer              :: id_bnddim           !< id for boundary flow elements dimension
+   integer, allocatable :: inode_own(:)        !< mapping of the local administration of internal flow cells to the global flow cell numbering
+   integer, allocatable :: inode_ghost(:)      !< mapping of the local administration of ghost cells to the global flow cell numbering
+   integer, allocatable :: ilink_own(:)        !< mapping of the local administration of internal flow links to the global flow link numbering 
+   integer, allocatable :: ilink_ghost(:)      !< mapping of the local administration of ghost links to the global flow cell numbering
+   integer, allocatable :: inodeghost_merge(:) !< like inode_ghost, but from the merged restart file 
+   integer, allocatable :: ilinkghost_merge(:) !< like ilink_ghost, but from the merged restart file
+   integer, allocatable :: ibnd_merge(:)       !< mapping of the local administration of boundary flow cells to the global flow cell numbering
+   integer, allocatable :: inode_merge(:)      !< like inode_own, but from the merged restart file
+   integer, allocatable :: ilink_merge(:)      !< like ilink_own, but from the merged restart file
 end type t_unc_merged
 
 type(t_unc_mapids) :: mapids       !< Global descriptor for the (open) map-file
