@@ -1,12 +1,12 @@
 #-------------------------------------------------------------------------------
-#   Makefile for delftflow
+#   Makefile for Swan
 #
-#   Irv.Elshoff@deltares.nl
 #   Adri.Mourits@deltares.nl
 #   Fedor.Baart@deltares.nl
-#   26 aug 10
+#   Bert.Jagers@deltares.nl
+#   4 mar 21
 #
-#   Copyright (C)  Stichting Deltares, 2011-2013.
+#   Copyright (C)  Stichting Deltares, 2011-2021.
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am

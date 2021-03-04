@@ -1,7 +1,7 @@
 !
 !       swell wave height for FEWS
 !
-        IVTYPE = 76
+        IVTYPE = POS_FHSWE
         IF (OQPROC(IVTYPE)) THEN
           ETOT = 0.
           FSWELL = PI2 * OUTPAR(5)
@@ -26,7 +26,7 @@
 !
 !       swell wave period TM01 for FEWS
 !
-        IVTYPE = 77
+        IVTYPE = POS_FTM01
         IF (OQPROC(IVTYPE)) THEN
           ETOT = 0.
           FSWELL = PI2 * OUTPAR(5)
@@ -56,7 +56,7 @@
 !
 !       swell wave DIR for FEWS
 !
-        IVTYPE = 78
+        IVTYPE = POS_FDIR
         IF (OQPROC(IVTYPE)) THEN
           ETOT = 0.
           FSWELL = PI2 * OUTPAR(5)
