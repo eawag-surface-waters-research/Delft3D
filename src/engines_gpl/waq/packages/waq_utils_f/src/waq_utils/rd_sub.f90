@@ -81,12 +81,13 @@
                     'waste-load-unit     ','unit                ', & 
                     'value               ','name                ' /  
 
+   call getmlu(lunut)
    ilun    = 0
    lch (1) = input_file
    open (newunit=ilun(1), file=lch(1), status='old', iostat=ierr)
    if(ierr.ne.0) then 
-       write(*,*) 'Error reading file: ',trim(lch(1))
-       call srstop(1)
+      cerr = 'Error reading file: '//trim(lch(1))
+      return
    endif
    npos   = 1000
    cchar  = ';'
@@ -95,12 +96,14 @@
    notot  = 0
    nocons = 0
    noout  = 0
+   cerr = 'Error: Something went wrong during the reading of the substance file.'
 
    do 
       if ( gettoken ( ctag, anint, areal, itype, ierr) .ne. 0 ) exit
       if (itype .ne. 1) then
-         write(*,*) 'Error: Expected a keyword, but found a real of integer while reading file: ',trim(lch(1))
-         call srstop(1)
+         ierr = 101
+         cerr = 'Error: Expected a keyword, but found a real or integer while reading file: '//trim(lch(1))
+         return
       endif
       
       call zoekns(ctag,ntag,starttag,20,itag)
@@ -214,7 +217,10 @@
             cerr='Expected attribute ''value'' for parameter '//trim(cpar)//', but read: '//trim(catt)
             exit
          endif
-         if ( gettoken ( rdata, ierr ) .ne. 0 ) exit
+         if ( gettoken ( rdata, ierr ) .ne. 0 ) then
+            cerr = 'Error: Couldn''t read value for parameter '//trim(cpar)//' in the substance file'
+            exit
+         endif
          if (allocated) covalue(nocons) = rdata
    !  parameter end-tag
 
@@ -304,8 +310,9 @@
       end select
    end do
    
-   if ( ierr.lt.100) then
-       ierr = 0
+   if ( ierr.eq.3) then
+      ! end of file
+      ierr = 0
    endif
 !  append inactive substances to substances list
    if (allocated) then

@@ -39,7 +39,7 @@
       use m_partitioninfo
       use unstruc_model
       use m_flowparameters, only: jawriteDetailedTimers
-      use unstruc_files
+      use unstruc_files, only: mdia
       use m_flowtimes
       use timers
       use m_wind, only: jawind, jarain
@@ -200,6 +200,7 @@
       ierr=0
 
       call mess(LEVEL_INFO, 'Opening substance file: ', trim(substance_file))
+      call setmlu(mdia)
       Lallocated = .false.
 
       if ( .not. allocated(syname_sub) ) then
