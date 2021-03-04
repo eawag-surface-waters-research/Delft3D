@@ -86,6 +86,9 @@ C     local decalrations
       INTEGER            :: IP(NO_POINTER)     ! index pointer in PMSA array updated for each segment
       REAL               :: FNS1               ! N nutrient limitation
       REAL               :: FN                 ! N nutrient limitation S1
+      REAL               :: CNN                ! Weigthed nitrogen concentration (a la DYNAMO)     (gN/m3)
+      REAL               :: CNNS1              ! Weigthed nitrogen concentration, bottom           (gN/m3)
+      REAL               :: AMOPRF = 1.0       ! Preference factor ammomium over nitrate (DYNAMO)      (-)
 
 C     initialise pointers for PMSA and FL array
 
@@ -112,20 +115,24 @@ C     loop over the segments
          CPHOS1    = MAX(PMSA(IP(12)),0.0)
          CSIS1     = MAX(PMSA(IP(13)),0.0)
 
+         CNN       = CAM   + CNI   / AMOPRF
+         CNNS1     = CAMS1 + CNIS1 / AMOPRF
+
 C        water en delwaq-g bodem
 
          IF ( (IKMRK1.EQ.1) .OR. (IKMRK1.EQ.2) ) THEN
 
-            FAM  = CAM/(KAM+CAM)
-            FNI  = CNI/(KNI+CNI)
+            !FAM  = CAM/(KAM+CAM)
+            !FNI  = CNI/(KNI+CNI)
+            FN   = CNN/(KNI+CNN)
             FPHO = CPHO/(KPHO+CPHO)
             IF ( KSI .LT. 1E-20 ) THEN
                FSI = 1.0
             ELSE
                FSI  = CSI/(KSI+CSI)
             ENDIF
-            FN   = FAM + ( 1.0 - FAM ) * FNI
-            FNUT = MIN(FN,FPHO,FSI)
+            !FN   = FAM + ( 1.0 - FAM ) * FNI
+            FNUT = MAX( 0.0, MIN(FN,FPHO,FSI) )
 
          ELSE
 
@@ -141,16 +148,17 @@ C        s1 bodem
 
          IF ( S1_BOTTOM .AND. (IKMRK2.EQ.0 .OR. IKMRK2.EQ.3) ) THEN
 
-            FAMS1  = CAMS1/(KAM+CAMS1)
-            FNIS1  = CNIS1/(KNI+CNIS1)
+            !FAMS1  = CAMS1/(KAM+CAMS1)
+            !FNIS1  = CNIS1/(KNI+CNIS1)
+            FNS1   = CNNS1/(KNI+CNNS1)
             FPHOS1 = CPHOS1/(KPHO+CPHOS1)
             IF ( KSI .LT. 1E-20 ) THEN
                FSIS1 = 1.0
             ELSE
                FSIS1  = CSIS1/(KSI+CSIS1)
             ENDIF
-            FNS1   = FAMS1 + ( 1.0 - FAMS1 ) * FNIS1
-            FNUTS1 = MIN(FNS1,FPHOS1,FSIS1)
+            !FNS1   = FAMS1 + ( 1.0 - FAMS1 ) * FNIS1
+            FNUTS1 = MAX( 0.0, MIN(FNS1,FPHOS1,FSIS1) )
 
          ELSE
 
@@ -162,13 +170,13 @@ C        s1 bodem
 
          ENDIF
 
-         PMSA(IP(14)) = FAM
-         PMSA(IP(15)) = FNI
+         PMSA(IP(14)) = FNN !FAM
+         PMSA(IP(15)) = FNN !FNI
          PMSA(IP(16)) = FPHO
          PMSA(IP(17)) = FSI
          PMSA(IP(18)) = FNUT
-         PMSA(IP(19)) = FAMS1
-         PMSA(IP(20)) = FNIS1
+         PMSA(IP(19)) = FNNS1 !FAMS1
+         PMSA(IP(20)) = FNNS1 !FNIS1
          PMSA(IP(21)) = FPHOS1
          PMSA(IP(22)) = FSIS1
          PMSA(IP(23)) = FNUTS1
