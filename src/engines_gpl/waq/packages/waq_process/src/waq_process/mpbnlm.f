@@ -124,6 +124,9 @@ C        water en delwaq-g bodem
 
             !FAM  = CAM/(KAM+CAM)
             !FNI  = CNI/(KNI+CNI)
+            ! Use KNI as half-saturation concentration
+            FAM  = CAM/(KNI+CNN)
+            FNI  = CNI/(KNI+CNN)
             FN   = CNN/(KNI+CNN)
             FPHO = CPHO/(KPHO+CPHO)
             IF ( KSI .LT. 1E-20 ) THEN
@@ -150,6 +153,9 @@ C        s1 bodem
 
             !FAMS1  = CAMS1/(KAM+CAMS1)
             !FNIS1  = CNIS1/(KNI+CNIS1)
+
+            FAMS1  = CAMS1/(KNI+CNNS1)
+            FNIS1  = CNIS1/(KNI+CNNS1)
             FNS1   = CNNS1/(KNI+CNNS1)
             FPHOS1 = CPHOS1/(KPHO+CPHOS1)
             IF ( KSI .LT. 1E-20 ) THEN
@@ -170,13 +176,13 @@ C        s1 bodem
 
          ENDIF
 
-         PMSA(IP(14)) = FN !FAM
-         PMSA(IP(15)) = FN !FNI
+         PMSA(IP(14)) = FAM
+         PMSA(IP(15)) = FNI
          PMSA(IP(16)) = FPHO
          PMSA(IP(17)) = FSI
          PMSA(IP(18)) = FNUT
-         PMSA(IP(19)) = FNS1 !FAMS1
-         PMSA(IP(20)) = FNS1 !FNIS1
+         PMSA(IP(19)) = FAMS1
+         PMSA(IP(20)) = FNIS1
          PMSA(IP(21)) = FPHOS1
          PMSA(IP(22)) = FSIS1
          PMSA(IP(23)) = FNUTS1
