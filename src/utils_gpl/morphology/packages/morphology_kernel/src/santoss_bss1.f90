@@ -79,7 +79,7 @@ subroutine santoss_bss1(i2d3d, g, d, d50, d90, delta, aw, uw, &
 !
 ! local variables
 !
-    integer                             :: istat
+    integer                 :: istat
     integer                 :: j
     real(fp)                :: fw_wblt
     real(fp)                :: wblt_sett
@@ -104,7 +104,7 @@ subroutine santoss_bss1(i2d3d, g, d, d50, d90, delta, aw, uw, &
 !   loop to find total Shields [-] with 0.001 difference and 100 iterations
 !   as stop criteria.
     ksw1 = d50
-    ksc1 = 3*d90
+    ksc1 = 3.0_fp*d90
     do j = 0, 99
 !       mobile bed roughness [m]
         if (j == 0) then

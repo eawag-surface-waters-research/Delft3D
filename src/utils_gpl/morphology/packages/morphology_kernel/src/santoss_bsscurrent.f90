@@ -87,7 +87,7 @@ subroutine santoss_bsscurrent(i2d3d, g, d, d50, d90, delta, unet, ang, &
 
 !   loop to find total Shields [-] with 0.001 difference and 100 iterations
 !   as stop criteria.
-    ksc1 = 3*d90
+    ksc1 = 3.0_fp*d90
     do j = 0, 99
 !       mobile bed roughness [m]
         if (j==0) then
@@ -118,14 +118,13 @@ subroutine santoss_bsscurrent(i2d3d, g, d, d50, d90, delta, unet, ang, &
         endif
         theta1 = theta
     enddo
-
 !
 !   (ii) bed shear stress for only currents: tc, tt and x,y components stx, sty
 !
     ustarc=sqrt(0.5_fp*fcc)*unet      ! friction velocity [m/s]
 
-!   standard, fixed level above the bed of 0.1 m for net current	
-    delwblt = 0.1_fp;
+!   standard, fixed level above the bed of 0.1 m for net current
+    delwblt = 0.1_fp
 
 !   net current strength at this standard vertical level [m/s]
     unet_delwblt=(ustarc/0.4_fp)*log(delwblt/z0c)
