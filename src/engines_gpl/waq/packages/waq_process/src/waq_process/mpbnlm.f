@@ -170,13 +170,13 @@ C        s1 bodem
 
          ENDIF
 
-         PMSA(IP(14)) = FNN !FAM
-         PMSA(IP(15)) = FNN !FNI
+         PMSA(IP(14)) = FN !FAM
+         PMSA(IP(15)) = FN !FNI
          PMSA(IP(16)) = FPHO
          PMSA(IP(17)) = FSI
          PMSA(IP(18)) = FNUT
-         PMSA(IP(19)) = FNNS1 !FAMS1
-         PMSA(IP(20)) = FNNS1 !FNIS1
+         PMSA(IP(19)) = FNS1 !FAMS1
+         PMSA(IP(20)) = FNS1 !FNIS1
          PMSA(IP(21)) = FPHOS1
          PMSA(IP(22)) = FSIS1
          PMSA(IP(23)) = FNUTS1
