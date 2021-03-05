@@ -5383,7 +5383,7 @@ end subroutine partition_make_globalnumbers
 
 !> generate partition numbering with METIS
 !!   1D links are supported now
-   subroutine partition_METIS_to_idomain(Nparts, jacontiguous, method)
+   subroutine partition_METIS_to_idomain(Nparts, jacontiguous, method, iseed)
       use network_data
       use m_partitioninfo
       use m_metis
@@ -5395,6 +5395,7 @@ end subroutine partition_make_globalnumbers
       integer,                         intent(in) :: Nparts          !< number of partitions
       integer,                         intent(in) :: method          !< partition method. 1: K-Way, 2: Recursive, 3: Mesh-dual
       integer,                         intent(in) :: jacontiguous    !< enforce contiguous domains (1) or not (0)
+      integer,                         intent(in) :: iseed           !< User defined random seed, passed to METIS'option "SEED". Useful for reproducible partitionings, but only used when /= 0.
 
       integer                                     :: ierror
 
@@ -5481,6 +5482,11 @@ end subroutine partition_make_globalnumbers
 
       ierror = metisopts(opts, "NITER", 100)    ! observation: increasing this number will visually improve the partitioning
       if ( ierror /= 0 ) goto 1234
+
+      if ( iseed /= 0) then
+         ierror = metisopts(opts, "SEED", iseed)! User-defined seed value, for reproducible partitionings.
+         if ( ierror /= 0 ) goto 1234
+      end if
 
       vwgt   = 1                         ! weights of vertices
       vsize  = 1                         ! size of vertices for computing the total communication volume
@@ -5672,7 +5678,7 @@ end subroutine partition_make_globalnumbers
                 call getint('Enforce contiguous domains? (0:no, 1:yes)', jacontiguous)
              enddo
          endif
-         call partition_METIS_to_idomain(Ndomains, jacontiguous, method)
+         call partition_METIS_to_idomain(Ndomains, jacontiguous, method, 0)
       
          japolygon = -1
          do while (japolygon.ne.1 .and. japolygon.ne.0)

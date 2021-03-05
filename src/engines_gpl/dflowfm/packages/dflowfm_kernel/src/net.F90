@@ -34520,7 +34520,7 @@ end subroutine make_dual_mesh
 
 
 !>  perform partitioning from command line
-subroutine partition_from_commandline(fnam, md_Ndomains, md_jacontiguous, md_icgsolver, md_pmethod, md_dryptsfile, md_encfile, md_genpolygon, md_partugrid)
+subroutine partition_from_commandline(fnam, md_Ndomains, md_jacontiguous, md_icgsolver, md_pmethod, md_dryptsfile, md_encfile, md_genpolygon, md_partugrid, md_partseed)
 
    use network_data
    use m_partitioninfo
@@ -34540,6 +34540,7 @@ subroutine partition_from_commandline(fnam, md_Ndomains, md_jacontiguous, md_icg
    character(len=255), intent(in) :: md_encfile       !< Enclosure file to clip outer parts from the grid *.pol
    integer,            intent(in) :: md_genpolygon    !< make partition file (1) or not (0)
    integer,            intent(in) :: md_partugrid     !< write partitioning in ugrid format (1) or not (0)
+   integer,            intent(in) :: md_partseed      !< User defined random seed, passed to METIS'option "SEED". Useful for reproducible partitionings, but only used when /= 0.
 
    integer                        :: jacells
    integer                        :: japolygon
@@ -34571,7 +34572,7 @@ subroutine partition_from_commandline(fnam, md_Ndomains, md_jacontiguous, md_icg
    call cosphiunetcheck(1)
 
    if ( md_Ndomains.gt.0 ) then ! use METIS
-      call partition_METIS_to_idomain(md_Ndomains, md_jacontiguous, md_pmethod)
+      call partition_METIS_to_idomain(md_Ndomains, md_jacontiguous, md_pmethod, md_partseed)
 !     generate partitioning polygons
       Ndomains = md_Ndomains
       if ( japolygon.eq.1 ) then
@@ -34677,6 +34678,8 @@ function read_commandline() result(istat)
             md_genpolygon = 0          ! default: no polygon
             md_pmethod = 1             ! partition method using Metis: K-way (=1, default), Recursive Bisection(=2), Mesh-dual(=3)
             md_partugrid = 0           ! ugrid for partitioned netfiles is work-in-progress
+            md_partseed = 0            ! Default: no user-defined seed value, random METIS partitioning.
+
 !           key-value pairs
             do ikey = 1, Nkeys
                select case (Skeys(ikey))
@@ -34692,6 +34695,8 @@ function read_commandline() result(istat)
                   md_genpolygon   = ivals(ikey)
                case ('ugrid')
                   md_partugrid    = ivals(ikey)
+               case ('seed')
+                  md_partseed     = ivals(ikey)
                case default
                   write(*,*) 'Partitioning option "', trim(Skeys(ikey)), '" not recoqnized; skipping.'
                end select
@@ -35065,6 +35070,8 @@ end if
    write (*,*) '        icgsolver = [67]  Parallel CG solver (When MDUFILE is specified).'
    write (*,*) '                          6: PETSc (recommended), 7: parallel GS+CG.'
    write (*,*) '        ugrid     = [01]  write cf UGRID 0.8 (0, default) or UGRID 1.0 (1)'
+   write (*,*) '        seed      = i     User-defined random seed value, for reproducible'
+   write (*,*) '                          partitionings. Only used when i not equal to 0.'
    write (*,*) ' '
    write (*,*) '  -t N, --threads N'
    write (*,*) '      Set maximum number of OpenMP threads. N must be a positive integer.'

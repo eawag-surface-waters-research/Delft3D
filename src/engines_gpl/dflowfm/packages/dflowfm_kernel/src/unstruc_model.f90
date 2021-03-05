@@ -224,6 +224,7 @@ implicit none
     integer            :: md_icgsolver       = 0   !< intended solver
     integer            :: md_genpolygon      = 0   !< generate partition polygons and use it in parallel runs (1) or writing cell subdomain information to partitioned net files (0)
     integer            :: md_partugrid       = 0   !< partitioned netfile is ugrid or not
+    integer            :: md_partseed        = 0   !< User-defined seed value, passed to METIS. Useful for reproducible partitionings, but only used when /= 0.
     integer            :: md_jaopenGL        = 0   !< use openGL (1) or not (0)
     integer            :: md_jagridgen       = 0   !< Commandline-based simple grid generation.
     integer            :: md_jarefine        = 0   !< sample based mesh refinement or not
