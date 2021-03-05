@@ -178,12 +178,14 @@ module m_1d_networkreader
    integer                                          :: firstNode, lastNode
    double precision, parameter                      :: snapping_tolerance = 1e-10
    double precision                                 :: distance, meanLength
-   integer                                          :: jampi_
+   integer                                          :: jampi_, my_rank_
 
    ierr = -1
 
    jampi_ = 0
    if (present(jampi)) jampi_ = jampi
+   my_rank_ = -1
+   if (present(my_rank)) my_rank_ = my_rank
 
    ! check data are present and correct
    if (meshgeom%numnode .eq. -1) then
@@ -356,7 +358,7 @@ module m_1d_networkreader
       endif
 
       call storeBranch(network%brs, network%nds, branchids(ibran), nodeids(meshgeom%nedge_nodes(1,ibran)), nodeids(meshgeom%nedge_nodes(2,ibran)), meshgeom%nbranchorder(ibran),&
-         gridPointsCount, localGpsX(1:gridPointsCount), localGpsY(1:gridPointsCount),localOffsets(1:gridPointsCount), localGpsID(1:gridPointsCount))
+         gridPointsCount, localGpsX(1:gridPointsCount), localGpsY(1:gridPointsCount),localOffsets(1:gridPointsCount), localGpsID(1:gridPointsCount), my_rank_)
    enddo
 
    call adminBranchOrders(network%brs)
@@ -829,7 +831,7 @@ module m_1d_networkreader
       
    end subroutine readBranch
 
-   subroutine storeBranch(brs, nds, branchId, begNodeId, endNodeId, ordernumber, gridPointsCount, gpX, gpY, gpchainages, gpID)
+   subroutine storeBranch(brs, nds, branchId, begNodeId, endNodeId, ordernumber, gridPointsCount, gpX, gpY, gpchainages, gpID, my_rank)
    
       use m_branch
       
@@ -841,13 +843,14 @@ module m_1d_networkreader
       character(len=*), intent(in)                   :: begNodeId
       character(len=*), intent(in)                   :: endNodeId
       integer, intent(in)                            :: orderNumber
-      
+
       integer, intent(in)                                          :: gridPointsCount
       double precision, dimension(gridPointsCount), intent(in)     :: gpX
       double precision, dimension(gridPointsCount), intent(in)     :: gpY
       double precision, dimension(gridPointsCount), intent(in)     :: gpchainages
       character(len=*), dimension(gridPointsCount), intent(in)     :: gpID
-      
+      integer                                     , intent(in)     :: my_rank
+
       ! Local Variables
       integer                                  :: ibr
       type(t_branch), pointer                  :: pbr
@@ -904,8 +907,11 @@ module m_1d_networkreader
       do igr = 1, gridPointsCount - 1
          if (gpchainages(igr) + minSectionLength > gpchainages(igr + 1)) then
             ! Two adjacent gridpoints too close
-            write (msgbuf, '(a, a, a, g11.4, a, g11.4)' ) 'Two grid points on branch ''', trim(branchid), ''' are too close at chainage ',               &
+            write (msgbuf, '(3a, g11.4, a, g11.4)' ) 'Two grid points on branch ''', trim(branchid), ''' are too close at chainage ',               &
                                     gpchainages(igr), ' and ', gpchainages(igr + 1)
+            if (my_rank >= 0) then
+               write(msgbuf,'(a,i4,2a)') 'Rank = ', my_rank, ': ', msgbuf
+            end if
             call SetMessage(LEVEL_WARN, msgbuf)
          endif 
       enddo
