@@ -16623,6 +16623,7 @@ end if
        call setucxucyucxuucyunew() !reconstruct cell-center velocities
        u1     = u1_tmp
        deallocate(u1_tmp)
+       call setbobs()
      end if
  end if
 
@@ -25402,8 +25403,10 @@ end subroutine unc_write_shp
  call aerr( 'lncn (2,lnx)', ierr, 2*lnx)
  allocate (  bob  (2,lnx) , stat=ierr  )
  call aerr( 'bob  (2,lnx)', ierr, 2*lnx)
+ bob = 0d0
  allocate (  bob0  (2,lnx) , stat=ierr  )
  call aerr( 'bob0  (2,lnx)', ierr, 2*lnx)
+ bob0 = 0d0
  allocate (  dx   (  lnx) , stat=ierr )
  call aerr( 'dx   (  lnx)', ierr, lnx )
  allocate (  dxi  (  lnx) , stat=ierr )
