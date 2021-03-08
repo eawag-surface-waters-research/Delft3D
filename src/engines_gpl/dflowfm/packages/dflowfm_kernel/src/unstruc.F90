@@ -2814,7 +2814,7 @@ subroutine getseg1D(hpr,wu2,dz,ai,frcn,ifrctyp, wid,ar,conv,perim,jaconv)  ! cop
       do n = ndx2d+1, ndx
          n1d = n - ndx2d
          vol1(n) = vol1(n) - vltb(n1d)%getVolumeDecreasing(s1m(n))
-         a1m(n)   = a1m(n) + vltb(n1d)%getSurfaceDecreasing(s1m(n))
+         a1m(n)  = vltb(n1d)%getSurfaceDecreasing(s1m(n))
       enddo
     endif
  end if
