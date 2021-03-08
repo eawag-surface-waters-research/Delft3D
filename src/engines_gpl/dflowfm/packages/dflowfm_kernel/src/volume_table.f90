@@ -429,8 +429,8 @@ module m_VolumeTables
 
       read(ibin) majorVersion, minorVersion
       if (majorVersion /= VolumeTableFileMajorVersion) then
-         write(msgbuf,'(''The major version of '' // trim(volumeTableFile) // ''the volume table file = '', i0, ''. This is not compatible with the current version'', i0)') &
-                  majorVersion, VolumeTableFileMajorVersion
+         write(msgbuf,'(''The major version of '' , a,  '' = '', i0, ''. This is not compatible with the current version'', i0)') &
+                  trim(volumeTableFile), majorVersion, VolumeTableFileMajorVersion
          call warn_flush()
          close(ibin)
          return
