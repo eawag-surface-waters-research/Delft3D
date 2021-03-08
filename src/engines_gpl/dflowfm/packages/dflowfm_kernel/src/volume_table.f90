@@ -26,7 +26,7 @@ module m_VolumeTables
       logical :: hasSummerdike                                      !< Indicates whether on 1 or more links a summerdike is attached. 
                                                                     !< A summerdike has a hysteresis. As a result the array vol contains
                                                                     !< the volumes corresponding to the rising part of the hysteresis
-      logical :: hasNegativeWidths                                  !< In case of a simulation with the Nested Newton solver, a distinction
+      logical :: hasDecreasingWidths                                  !< In case of a simulation with the Nested Newton solver, a distinction
                                                                     !< between a non-decreasing part of the cross section is made and a
                                                                     !< non-increasing part. In case of Nested Newton and 1 or more 
                                                                     !< surrounding closed cross sections, volDecreasing is allocated and
@@ -41,12 +41,12 @@ module m_VolumeTables
       double precision, allocatable, dimension(:) :: volDecreasing  !< Volume table for decreasing widths (Nested Newton)
       double precision, allocatable, dimension(:) :: surDecreasing  !< Surface area table for decreasing widths (Nested Newton)
    contains
-      procedure, pass :: alloc               => allocVoltable                   !< Allocates the allocatable arrays in this structure
-      procedure, pass :: dealloc             => deallocVoltable                 !< Deallocates the allocatable arrays in this structure
-      procedure, pass :: getVolume           => getVolumeVoltable             !< Returns the volume for a given water level
+      procedure, pass :: alloc               => allocVoltable                !< Allocates the allocatable arrays in this structure
+      procedure, pass :: dealloc             => deallocVoltable              !< Deallocates the allocatable arrays in this structure
+      procedure, pass :: getVolume           => getVolumeVoltable            !< Returns the volume for a given water level
       procedure, pass :: getSurface          => getSurfaceVoltable           !< Returns the surface area for a given water level
-      procedure, pass :: getVolumeDecreasing => getVolumeDecreasingVoltable             !< Returns the volume for a given water level
-      procedure, pass :: getSurfaceDecreasing=> getSurfaceDecreasingVoltable           !< Returns the surface area for a given water level
+      procedure, pass :: getVolumeDecreasing => getVolumeDecreasingVoltable  !< Returns the volume which is the result of a decreasing width for a given water level
+      procedure, pass :: getSurfaceDecreasing=> getSurfaceDecreasingVoltable !< Returns the decreasing surface area for a given water level
    end type
    
    type(t_voltable),       public, allocatable, dimension(:)   :: vltb  !< 1D Volume tables
@@ -68,7 +68,7 @@ module m_VolumeTables
       this%vol   = 0.0d0
       this%sur   = 0.0d0
 
-      if (this%hasNegativeWidths) then
+      if (this%hasDecreasingWidths) then
          allocate(this%volDecreasing(this%count))
          allocate(this%surDecreasing(this%count))
          this%volDecreasing   = 0.0d0
@@ -82,7 +82,7 @@ module m_VolumeTables
       
       if (allocated(this%vol))            deallocate(this%vol)
       if (allocated(this%sur))            deallocate(this%sur)
-      if (this%hasNegativeWidths) then
+      if (this%hasDecreasingWidths) then
          if (allocated(this%volDecreasing))  deallocate(this%volDecreasing)
          if (allocated(this%surDecreasing))  deallocate(this%surDecreasing)
       endif
@@ -118,7 +118,7 @@ module m_VolumeTables
       
    end function getSurfaceVoltable
 
-   !> Retrieve the decreasing volume for given volume table and water level
+   !> Returns the volume which is the result of a decreasing width for a given water level
    double precision function getVolumeDecreasingVoltable(this, level)
       use unstruc_channel_flow
    
@@ -208,7 +208,7 @@ module m_VolumeTables
       endif
       
       do n = 1, ndx1d
-         vltb(n)%hasNegativeWidths = nonlin1D >= 2
+         vltb(n)%hasDecreasingWidths = nonlin1D >= 2
          nod = n+ndx2d
          vltb(n)%bedLevel = bl(nod)
          
@@ -299,7 +299,7 @@ module m_VolumeTables
                      vltb(n)%sur(vltb(n)%count) = vltb(n)%sur(vltb(n)%count) + dxL*width
                   endif
                   ! compute the decreasing volumes and areas
-                  if (vltb(n)%hasNegativeWidths) then
+                  if (vltb(n)%hasDecreasingWidths) then
                      call GetCSParsTotal(network%adm%line2cross(L, 2), cross, height-bobAboveBedLevel, area, width, CS_TYPE_MIN)
                      vltb(n)%volDecreasing(j) = vltb(n)%volDecreasing(j) + dxL*area
                      if (j==vltb(n)%count) then
@@ -311,7 +311,7 @@ module m_VolumeTables
             enddo
             ! compute water surface area
             vltb(n)%sur(j-1) = (vltb(n)%vol(j) - vltb(n)%vol(j-1))/tableIncrement
-            if (vltb(n)%hasNegativeWidths) then
+            if (vltb(n)%hasDecreasingWidths) then
                vltb(n)%surDecreasing(j-1) = (vltb(n)%volDecreasing(j) - vltb(n)%volDecreasing(j-1))/tableIncrement
             endif
          enddo
@@ -366,7 +366,7 @@ module m_VolumeTables
          count = vltb(n)%count
          write(ibin) count
          write(ibin) vltb(n)%hasSummerdike
-         write(ibin) vltb(n)%hasNegativeWidths
+         write(ibin) vltb(n)%hasDecreasingWidths
          write(ibin) vltb(n)%hysteresis
          write(ibin) vltb(n)%bedLevel
          write(ibin) vltb(n)%topLevel
@@ -376,7 +376,7 @@ module m_VolumeTables
             write(ibin) (vltb(n)%volSummerdike(i), i = 1, count)
             write(ibin) (vltb(n)%surSummerdike(i), i = 1, count)
          endif
-         if (vltb(n)%hasNegativeWidths) then
+         if (vltb(n)%hasDecreasingWidths) then
             write(ibin) (vltb(n)%volDecreasing(i), i = 1, count)
             write(ibin) (vltb(n)%surDecreasing(i), i = 1, count)
          endif
@@ -457,7 +457,7 @@ module m_VolumeTables
          read(ibin) count
          vltb(n)%count = count
          read(ibin) vltb(n)%hasSummerdike
-         read(ibin) vltb(n)%hasNegativeWidths
+         read(ibin) vltb(n)%hasDecreasingWidths
          read(ibin) vltb(n)%hysteresis
          read(ibin) vltb(n)%bedLevel
          read(ibin) vltb(n)%topLevel
@@ -468,7 +468,7 @@ module m_VolumeTables
             read(ibin) (vltb(n)%volSummerdike(i), i = 1, count)
             read(ibin) (vltb(n)%surSummerdike(i), i = 1, count)
          endif
-         if (vltb(n)%hasNegativeWidths) then
+         if (vltb(n)%hasDecreasingWidths) then
             read(ibin) (vltb(n)%volDecreasing(i), i = 1, count)
             read(ibin) (vltb(n)%surDecreasing(i), i = 1, count)
          endif
@@ -491,6 +491,8 @@ module m_VolumeTables
          string = 'Nested Newton'
       case(3)
          string= 'Improved Nested Newton'
+      case default
+         string = 'Unknown'   
       end select
    end function
 
