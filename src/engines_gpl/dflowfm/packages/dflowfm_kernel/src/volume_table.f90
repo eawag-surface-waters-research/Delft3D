@@ -8,7 +8,7 @@ module m_VolumeTables
 
    private
 
-   character(len=10), parameter :: volumeTableFileType = 'volumeTable'
+   character(len=11), parameter :: volumeTableFileType = 'volumeTable'
    integer, parameter :: VolumeTableFileMajorVersion      = 1
    integer, parameter :: VolumeTableFileMinorVersion      = 0
 
@@ -386,7 +386,8 @@ module m_VolumeTables
 
    end subroutine writeVolumeTables
 
-   !> read the volume tables from a previously saved binary file.
+   !> Read the volume tables from a previously saved binary file.
+   !> The function returns .true. when succesfull, otherwise .false. is returned
    logical function readVolumeTables()
 
       use m_flowgeom
@@ -402,7 +403,7 @@ module m_VolumeTables
       integer :: nonlin1D_file
       integer :: majorVersion, minorVersion
       logical :: fileExist
-      character(len=10) :: fileType_
+      character(len=11) :: fileType_
 
       readVolumeTables = .false.
       inquire(file=volumeTableFile, exist=fileExist)
@@ -428,7 +429,7 @@ module m_VolumeTables
 
       read(ibin) majorVersion, minorVersion
       if (majorVersion /= VolumeTableFileMajorVersion) then
-         write(msgbuf,'(''The major version of the volume table file = '', i0, ''. This is not compatible with the current version'', i0)') &
+         write(msgbuf,'(''The major version of '' // trim(volumeTableFile) // ''the volume table file = '', i0, ''. This is not compatible with the current version'', i0)') &
                   majorVersion, VolumeTableFileMajorVersion
          call warn_flush()
          close(ibin)
