@@ -8,6 +8,11 @@ module m_VolumeTables
 
    private
 
+   character(len=10), parameter :: volumeTableFileType = 'volumeTable'
+   integer, parameter :: VolumeTableFileMajorVersion      = 1
+   integer, parameter :: VolumeTableFileMinorVersion      = 0
+
+
    public makeVolumeTables
 
    interface dealloc
@@ -45,12 +50,6 @@ module m_VolumeTables
    end type
    
    type(t_voltable),       public, allocatable, dimension(:)   :: vltb  !< 1D Volume tables
-   logical,                public :: useVolumeTables                    !< Indicates whether 1d volume tables are useds
-   double precision,       public :: tableIncrement = 0.1               !< Increment for volume tables
-   character(len=charln),  public :: tableOutputFile                    !< Name of the table output file
-   logical,                public :: writeTables                        !< Write the volume tables to file (or not)
-   character(len=charln),  public :: tableInputFile                     !< Name of the table input file
-   logical,                public :: readTables                         !< Read the volume tables from file (or not)
 
    contains
    
@@ -91,6 +90,7 @@ module m_VolumeTables
 
    !> Retrieve the volume for given volume table and water level
    double precision function getVolumeVoltable(this, level)
+      use unstruc_channel_flow
       class(t_voltable)             :: this
       double precision, intent(in)  :: level    !< water level
       
@@ -106,6 +106,8 @@ module m_VolumeTables
    
    !> Retrieve the surface area for given volume table and water level
    double precision function getSurfaceVoltable(this, level)
+      use unstruc_channel_flow
+      
       class(t_voltable)             :: this
       double precision, intent(in)  :: level    !< water level
       
@@ -118,6 +120,8 @@ module m_VolumeTables
 
    !> Retrieve the decreasing volume for given volume table and water level
    double precision function getVolumeDecreasingVoltable(this, level)
+      use unstruc_channel_flow
+   
       class(t_voltable)             :: this
       double precision, intent(in)  :: level    !< water level
       
@@ -133,6 +137,8 @@ module m_VolumeTables
    
    !> Retrieve the surface area for given volume table and water level
    double precision function getSurfaceDecreasingVoltable(this, level)
+      use unstruc_channel_flow
+   
       class(t_voltable)             :: this
       double precision, intent(in)  :: level    !< water level
       
@@ -147,6 +153,7 @@ module m_VolumeTables
    subroutine makeVolumeTables()
 
       use unstruc_channel_flow
+      use unstruc_files
       use m_flowparameters
       use m_flowgeom
       use m_GlobalParameters
@@ -171,7 +178,8 @@ module m_VolumeTables
       type(t_chainage2cross), dimension(:,:), pointer :: line2cross
       type(t_CrossSection), pointer, dimension(:)     :: cross
       type(t_storage), dimension(:), pointer          :: stors
-      if (readTables) then
+      if (useVolumeTableFile) then
+         volumeTableFile = defaultFilename('volumeTables')
          if (readVolumeTables()) then
             return
          endif
@@ -309,7 +317,7 @@ module m_VolumeTables
          enddo
       enddo
 
-      if (writeTables) then
+      if (useVolumeTableFile) then
          call writeVolumeTables()
       endif
 
@@ -335,17 +343,21 @@ module m_VolumeTables
       use m_flowgeom
       use m_flowparameters
       use m_GlobalParameters
+      use unstruc_channel_flow
 
       integer :: ibin
       integer :: i, n, istat
       integer :: ndx1d
       integer :: count
 
-      open(newunit=ibin, file=tableOutputFile, form='unformatted', access='stream', iostat=istat)
+      open(newunit=ibin, file=volumeTableFile, form='unformatted', access='stream', iostat=istat)
       if (istat/=0) then
-         call SetMessage(LEVEL_WARN, 'Something went wrong during the opening of binary volume table file: '// trim(tableOutputFile))
+         call SetMessage(LEVEL_WARN, 'Something went wrong during the opening of binary volume table file: '// trim(volumeTableFile))
          return
       endif
+
+      write(ibin) volumeTableFileType
+      write(ibin) VolumeTableFileMajorVersion, VolumeTableFileMinorVersion
 
       ndx1d = ndx - ndx2d
       write(ibin) ndx1d, nonlin1D
@@ -388,35 +400,53 @@ module m_VolumeTables
       integer :: ndx1d
       integer :: count
       integer :: nonlin1D_file
+      integer :: majorVersion, minorVersion
       logical :: fileExist
+      character(len=10) :: fileType_
 
       readVolumeTables = .false.
-      inquire(file=tableInputFile, exist=fileExist)
+      inquire(file=volumeTableFile, exist=fileExist)
 
       if (.not. fileExist) then
-         call SetMessage(LEVEL_WARN, 'Volume table file: '//trim(tableInputFile)//' does not exist, generating volume tables from scratch.')
+         call SetMessage(LEVEL_INFO, 'Volume table file: '//trim(volumeTableFile)//' does not exist, generating volume tables from scratch.')
          return
       endif
 
-      open(newunit=ibin, file=tableInputFile, status='old', form='unformatted', access='stream', action='read', iostat=istat)
+      open(newunit=ibin, file=volumeTableFile, status='old', form='unformatted', access='stream', action='read', iostat=istat)
 
       if (istat/=0) then
-         call SetMessage(LEVEL_WARN, 'Something went wrong during the opening of binary volume table file: '// trim(tableInputFile))
+         call SetMessage(LEVEL_WARN, 'Something went wrong during the opening of binary volume table file: '// trim(volumeTableFile))
          return
       endif
 
+      read(ibin, iostat = istat) fileType_
+      if (trim(fileType_) /= volumeTableFileType .or. istat/=0) then
+         call SetMessage(LEVEL_WARN, trim(volumeTableFile) // ' is not a volume table file, the file type on the file is '''//trim(fileType_)// '''.')
+         close(ibin)
+         return
+      endif
+
+      read(ibin) majorVersion, minorVersion
+      if (majorVersion /= VolumeTableFileMajorVersion) then
+         write(msgbuf,'(''The major version of the volume table file = '', i0, ''. This is not compatible with the current version'', i0)') &
+                  majorVersion, VolumeTableFileMajorVersion
+         call warn_flush()
+         close(ibin)
+         return
+      endif
       read(ibin) ndx1d, nonlin1D_file
       
       if (ndx1d /= ndx - ndx2d) then
-         call SetMessage(LEVEL_WARN, trim(tableInputFile)//' is not compatible with the current model, the number of 1d cells are different.')
+         call SetMessage(LEVEL_WARN, trim(volumeTableFile)//' is not compatible with the current model, the number of 1d cells are different.')
          return
       endif
 
       if (nonlin1D_file /= nonlin1d) then
          msgbuf = 'The selected method for solving the nonlinear iteration (='''// trim(getNonlin(nonlin1d))//'''), and the nonlinear iteration method '
          call warn_flush()
-         msgbuf = 'on ''' // trim(tableInputFile)// ''' are different (='''//trim(getNonlin(nonlin1D_file))//''').'
+         msgbuf = 'on ''' // trim(volumeTableFile)// ''' are different (='''//trim(getNonlin(nonlin1D_file))//''').'
          call warn_flush()
+         close(ibin)
          return
       endif
 

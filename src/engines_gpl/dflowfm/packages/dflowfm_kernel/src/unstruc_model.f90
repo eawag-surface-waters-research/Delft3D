@@ -735,7 +735,6 @@ subroutine readMDUFile(filename, istat)
     use m_commandline_option, only: iarg_usecaching
     use m_subsidence, only: sdu_update_s1
     use unstruc_channel_flow
-    use m_VolumeTables
 
     use m_sediment
     use m_waves, only: hwavuni, twavuni, phiwavuni
@@ -1000,21 +999,9 @@ subroutine readMDUFile(filename, istat)
     ! 1D Volume tables
     useVolumeTables = .false.
     call prop_get_logical( md_ptr, 'volumeTables', 'useVolumeTables', useVolumeTables)
-    if (useVolumeTables) then
-       call prop_get_double  (md_ptr, 'volumeTables', 'increment', tableIncrement)
-       writeTables = .false.
-       call prop_get_logical(md_ptr, 'volumeTables', 'write', writeTables)
-       if (writeTables) then
-          tableOutputFile = 'TableOutputFile.bin'
-          call prop_get_string  (md_ptr, 'volumeTables', 'outputFilename', tableOutputFile)
-       endif
-       call prop_get_logical(md_ptr, 'volumeTables', 'read', readTables)
-       if (readTables) then
-          tableInputFile = 'TableInputFile.bin'
-          call prop_get_string(md_ptr, 'volumeTables', 'inputFilename', tableInputFile)
-       endif
-    
-    endif
+    call prop_get_double  (md_ptr, 'volumeTables', 'increment', tableIncrement)
+    useVolumeTableFile = .false.
+    call prop_get_logical(md_ptr, 'volumeTables', 'useVolumeTableFile', useVolumeTableFile)
 
     ! Numerics
     call prop_get_double( md_ptr, 'numerics', 'CFLMax'          , cflmx)
@@ -2407,7 +2394,6 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     use m_sobekdfm,              only : sbkdfm_umin, sbkdfm_umin_method, minimal_1d2d_embankment, sbkdfm_relax
     use m_subsidence, only: sdu_update_s1
     use unstruc_channel_flow
-    use m_VolumeTables
 
     integer, intent(in)  :: mout  !< File pointer where to write to.
     logical, intent(in)  :: writeall !< Write all fields, including default values
@@ -2688,14 +2674,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
        call prop_set (prop_ptr, 'volumeTables', 'useVolumeTables',  merge(1, 0, useVolumeTables), 'Use 1D volume tables (1: yes, 0: no).')
        if (useVolumeTables) then
           call prop_set(md_ptr, 'volumeTables', 'increment', tableIncrement, 'Desired increment for volume tables')
-          call prop_set(md_ptr, 'volumeTables', 'write', merge(1, 0, writeTables), 'Write volume table (1:yes, 0: no)')
-          if (writeTables) then
-             call prop_set(md_ptr, 'volumeTables', 'outputFilename', tableOutputFile, 'Name of the outputfile for volume tables')
-          endif
-          call prop_set(md_ptr, 'volumeTables', 'read', merge(1, 0, readTables), 'Read a saved volume table for this model (1:yes, 0: no)')
-          if (readTables) then
-             call prop_set(md_ptr, 'volumeTables', 'inputFilename', tableInputFile, 'Name of the inputfile for volume tables')
-          endif
+          call prop_set(md_ptr, 'volumeTables', 'useVolumeTableFile', merge(1, 0, useVolumeTableFile), 'Use volume table file (1:yes, 0: no)')
        endif
     endif
 

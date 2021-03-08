@@ -2248,6 +2248,11 @@ implicit none
 type(t_network), target       :: network
 integer                       :: CSCalculationOption  !< Calculation option for total area computation in 1d
 
+logical,                public :: useVolumeTables                    !< Indicates whether 1d volume tables are useds
+double precision,       public :: tableIncrement                     !< Increment for volume tables
+logical,                public :: useVolumeTableFile                 !< Write the volume tables to file (or not)
+character(len=charln),  public :: volumeTableFile                    !< Name of the table input file
+
 contains
 
 
@@ -2255,6 +2260,9 @@ contains
 !! For a reinit prior to flow computation, only call reset_*() instead.
 subroutine default_channel_flow()
     CSCalculationOption = CS_TYPE_PREISMAN     !< calculation option for total area computation in 1d
+    useVolumeTables     = .false.
+    useVolumeTableFile  = .false.
+    tableIncrement      = 0.1d0
 !call dealloc(network)
 end subroutine default_channel_flow
 
@@ -3522,8 +3530,8 @@ end module m_vegetation
  double precision, allocatable         :: s00(:)      !< waterlevel    (m ) for checking iteration in nonlin
  double precision, allocatable, target :: a0(:)       !< [m2] storage area at start of timestep {"location": "face", "shape": ["ndx"]}
  double precision, allocatable, target :: a1(:)       !< [m2] storage area at end of timestep {"location": "face", "shape": ["ndx"]}
- double precision, allocatable, target :: vol0(:)     !< [m3] total volume at start of timestep {"location": "face", "shape": ["ndx"]}
  double precision, allocatable, target :: vol1(:)     !< [m3] total volume at end of timestep {"location": "face", "shape": ["ndx"]}
+ double precision, allocatable, target :: vol0(:)     !< [m3] total volume at start of timestep {"location": "face", "shape": ["ndx"]}
  double precision, allocatable, target :: vol1_f(:)     !< [m3] flow volume volume at end of timestep {"location": "face", "shape": ["ndx"]}
  double precision, allocatable         :: sq(:)       !< total  influx (m3/s) at s point
  double precision, allocatable         :: sqa(:)      !< total  out! flux (m3/s) at s point, u1 based, non-conservative for iadvec == 38

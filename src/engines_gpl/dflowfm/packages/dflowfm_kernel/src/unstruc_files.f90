@@ -328,6 +328,9 @@ function defaultFilename(filecat, timestamp, prefixWithDirectory, allowWildcard)
     case ('timers_init')
         activeFile = ''
         suffix = '_detailed_timers_init.txt'
+    case ('volumeTables')
+        activeFile = ''
+        suffix = '_tbl.bin'
     end select
 
     if (present(timestamp)) then
