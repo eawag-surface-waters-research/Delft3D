@@ -15572,6 +15572,7 @@ else if (nodval == 27) then
  use m_waves
  use m_structures
  use m_longculverts
+ use unstruc_channel_flow, only: useVolumeTables
  use m_VolumeTables
 
  implicit none
