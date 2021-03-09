@@ -53,7 +53,6 @@ libdflowfm_la_SOURCES=\
         hydrology_data.f90 \
         bedform_data.f90 \
         modules.f90 \
-        volume_table.f90 \
         dfm_signals.F90 \
         inquire_flowgeom.f90 \
         partition.F90 \
@@ -79,6 +78,7 @@ libdflowfm_la_SOURCES=\
         meteo1.f90 \
         fourier_analysis.f90 \
         unstruc_files.f90 \
+        volume_table.f90 \
         unstruc_netcdf_incremental.f90 \
         unstruc_shapefile.F90 \
         bedform_io.f90 \
