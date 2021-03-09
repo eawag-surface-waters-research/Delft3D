@@ -1,11 +1,12 @@
-subroutine wrsedh(lundia    ,error     ,filename  ,ithisc    , &
-                & nostat    ,kmax      ,lsed      ,lsedtot   , &
+subroutine wrsedh(lundia    ,error     ,filename  ,ithisc    ,ntruv     , &
+                & nostat    ,kmax      ,lsed      ,lsedtot   ,zmodel    , &
                 & zws       ,zrsdeq    ,zbdsed    ,zdpsed    ,zdps      , &
-                & ntruv     ,zmodel    , &
                 & zsbu      ,zsbv      ,zssu      ,zssv      ,sbtr      , &
-                & sstr      ,sbtrc     ,sstrc     ,zrca      ,irequest  , &
-                & fds       ,nostatto  ,nostatgl  ,order_sta ,ntruvto   , &
-                & ntruvgl   ,order_tra ,gdp       )
+                & sstr      ,sbtrc     ,sstrc     ,zrca      ,zsourse   , &
+                & zsinkse   ,zfrac     ,zmudfrac  ,zsandfrac ,zfixfac   , &
+                & ztaub     ,zhidexp   ,zseddif   , &
+                & irequest  ,fds       ,nostatto  ,nostatgl  ,order_sta , &
+                & ntruvto   ,ntruvgl   ,order_tra ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2021.                                
@@ -36,10 +37,11 @@ subroutine wrsedh(lundia    ,error     ,filename  ,ithisc    , &
 !  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
-!    Function: Writes the time varying data for sediment (4 & 5)
-!              to the FLOW HIS file.
-!              Output is performed conform the times of history
-!              file and only in case lsed > 0.
+!    Function: Writes the time varying data for sediment to the Delft3D-FLOW
+!              TRIH file. Output is performed conform the times of history
+!              file. The routine is called if LSEDTOT > 0 or in case of
+!              subsidence and uplift (to store time varying bed level), so we
+!              still have to check for lsedtot > 0.
 ! Method used:
 !
 !!--pseudo code and references--------------------------------------------------
@@ -73,40 +75,47 @@ subroutine wrsedh(lundia    ,error     ,filename  ,ithisc    , &
 !
 ! Global variables
 !
-    integer                                                             , intent(in)  :: irequest !  REQUESTTYPE_DEFINE: define variables, REQUESTTYPE_WRITE: write variables
-    integer                                                             , intent(in)  :: ithisc   !!  Current time counter for the history data file
-    integer                                                                           :: ithisi   !  Description and declaration in inttim.igs
-    integer                                                                           :: itstrt   !  Description and declaration in inttim.igs
-    integer                                                                           :: kmax     !  Description and declaration in esm_alloc_int.f90
-    integer                                                                           :: lsed     !  Description and declaration in esm_alloc_int.f90
-    integer                                                                           :: lsedtot  !  Description and declaration in esm_alloc_int.f90
-    integer                                                                           :: lundia   !  Description and declaration in inout.igs
-    integer                                                                           :: nostat   !  Description and declaration in dimens.igs
-    integer                                                                           :: ntruv    !  Description and declaration in dimens.igs
-    logical                                                             , intent(in)  :: zmodel   !  Description and declaration in procs.igs
-    logical                                                             , intent(out) :: error    !!  Flag=TRUE if an error is encountered
-    real(fp), dimension(nostat)                                                       :: zdps     !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(nostat)                                                       :: zdpsed   !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(nostat, 0:kmax, lsed)                                         :: zws      !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(nostat, lsed)                 :: zrsdeq !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(nostat, lsedtot)                                              :: zbdsed   !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(nostat, lsed)                                                 :: zrca     !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(nostat, lsedtot)                                , intent(in)  :: zsbu     !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(nostat, lsedtot)                                , intent(in)  :: zsbv     !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(nostat, lsed)                                   , intent(in)  :: zssu     !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(nostat, lsed)                                   , intent(in)  :: zssv     !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(ntruv, lsedtot)                                 , intent(in)  :: sbtr     !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(ntruv, lsedtot)                                 , intent(in)  :: sbtrc    !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(ntruv, lsed)                                    , intent(in)  :: sstr     !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(ntruv, lsed)                                    , intent(in)  :: sstrc    !  Description and declaration in esm_alloc_real.f90
-    character(*)                                                        , intent(in)  :: filename !  File name
-    integer                                                             , intent(in)  :: fds      !  File handle of output NEFIS/NetCDF file
-    integer                                                             , intent(in)  :: nostatgl ! global number of stations (i.e. original number excluding duplicate stations located in the halo regions)
-    integer                                                             , intent(in)  :: nostatto ! total number of stations (including "duplicate" stations located in halo regions)
-    integer       , dimension(nostat)                                   , intent(in)  :: order_sta
-    integer                                                             , intent(in)  :: ntruvgl  ! global number of tracks (i.e. original number excluding duplicate stations located in the halo regions)
-    integer                                                             , intent(in)  :: ntruvto  ! total number of tracks (including "duplicate" stations located in halo regions)
-    integer       , dimension(ntruv)                                    , intent(in)  :: order_tra
+    integer                                                             , intent(in)  :: irequest  !< REQUESTTYPE_DEFINE: define variables, REQUESTTYPE_WRITE: write variables
+    integer                                                             , intent(in)  :: ithisc    !< current time counter for the history data file
+    integer                                                             , intent(in)  :: kmax      !< number of layers in water column
+    integer                                                             , intent(in)  :: lsed      !< number of suspended sediment fractions
+    integer                                                             , intent(in)  :: lsedtot   !< total number of sediment fractions
+    integer                                                             , intent(in)  :: lundia    !< unit number of diagnostic output file
+    integer                                                             , intent(in)  :: nostat    !< number of stations
+    integer                                                             , intent(in)  :: ntruv     !< number of cross-sections
+    logical                                                             , intent(in)  :: zmodel    !< flag indicating z-model
+    logical                                                             , intent(out) :: error     !< flag indicating error while writing output
+    real(fp), dimension(nostat)                                         , intent(in)  :: zdps      !< bed level at station
+    real(fp), dimension(nostat)                                         , intent(in)  :: zdpsed    !< thickness of sediment layer at station
+    real(fp), dimension(nostat, 0:kmax, lsed)                           , intent(in)  :: zws       !< settling velocity profile at station
+    real(fp), dimension(nostat, lsed)                                   , intent(in)  :: zrsdeq    !< equilibrium concentration at station (2D only)
+    real(fp), dimension(nostat, lsedtot)                                , intent(in)  :: zbdsed    !< composition of sediment layer at station
+    real(fp), dimension(nostat, lsed)                                   , intent(in)  :: zrca      !< near-bed reference concentration at station
+    real(fp), dimension(nostat, lsed)                                   , intent(in)  :: zsourse   !< suspended sediment sourse term at station
+    real(fp), dimension(nostat, lsed)                                   , intent(in)  :: zsinkse   !< suspended sediment sink term at station
+    real(fp), dimension(nostat, lsedtot)                                , intent(in)  :: zfrac     !< sediment fraction in top layer at station
+    real(fp), dimension(nostat)                                         , intent(in)  :: zmudfrac  !< total mud fraction in top layer at station
+    real(fp), dimension(nostat)                                         , intent(in)  :: zsandfrac !< total sand fraction in top layer at station
+    real(fp), dimension(nostat, lsedtot)                                , intent(in)  :: zfixfac   !< reduction factor due to limited sediment availability at station
+    real(fp), dimension(nostat)                                         , intent(in)  :: ztaub     !< bed shear stress used in morphology at station
+    real(fp), dimension(nostat, lsedtot)                                , intent(in)  :: zhidexp   !< hiding and exposure factor at station
+    real(fp), dimension(nostat, 0:kmax, lsed)                           , intent(in)  :: zseddif   !< vertical sediment diffusion profile at station
+    real(fp), dimension(nostat, lsedtot)                                , intent(in)  :: zsbu      !< instataneous bed load (due to currents and waves) plus suspended transport due to waves in M direction at station
+    real(fp), dimension(nostat, lsedtot)                                , intent(in)  :: zsbv      !< instataneous bed load (due to currents and waves) plus suspended transport due to waves in N direction at station
+    real(fp), dimension(nostat, lsed)                                   , intent(in)  :: zssu      !< instataneous suspended load transport due to currents in M direction at station
+    real(fp), dimension(nostat, lsed)                                   , intent(in)  :: zssv      !< instataneous suspended load transport due to currents in N direction at station
+    real(fp), dimension(ntruv, lsedtot)                                 , intent(in)  :: sbtr      !< instataneous bed load (due to currents and waves) plus suspended transport due to waves through cross-section
+    real(fp), dimension(ntruv, lsedtot)                                 , intent(in)  :: sbtrc     !< cumulative bed load (due to currents and waves) plus suspended transport due to waves through cross-section
+    real(fp), dimension(ntruv, lsed)                                    , intent(in)  :: sstr      !< instataneous suspended load transport due to currents through cross-section
+    real(fp), dimension(ntruv, lsed)                                    , intent(in)  :: sstrc     !< cumulative suspended load transport due to currents through cross-section
+    character(*)                                                        , intent(in)  :: filename  !< file name
+    integer                                                             , intent(in)  :: fds       !< file handle of output NEFIS/NetCDF file
+    integer                                                             , intent(in)  :: nostatgl  !< global number of stations (i.e. original number excluding duplicate stations located in the halo regions)
+    integer                                                             , intent(in)  :: nostatto  !< total number of stations (including "duplicate" stations located in halo regions)
+    integer       , dimension(nostat)                                   , intent(in)  :: order_sta !< order of stations in input configuration
+    integer                                                             , intent(in)  :: ntruvgl   !< global number of tracks (i.e. original number excluding duplicate stations located in the halo regions)
+    integer                                                             , intent(in)  :: ntruvto   !< total number of tracks (including "duplicate" stations located in halo regions)
+    integer       , dimension(ntruv)                                    , intent(in)  :: order_tra !< order of cross-sections in input configuration
 !
 ! Local variables
 !
@@ -170,8 +179,16 @@ subroutine wrsedh(lundia    ,error     ,filename  ,ithisc    , &
        iddim_time    = adddim(gdp, lundia, FILOUT_HIS, 'time', nf90_unlimited)
        iddim_nostat  = adddim(gdp, lundia, FILOUT_HIS, 'NOSTAT', nostatgl)
        iddim_ntruv   = adddim(gdp, lundia, FILOUT_HIS, 'NTRUV', ntruvgl)
-       iddim_lsed    = adddim(gdp, lundia, FILOUT_HIS, 'LSED', lsed)
-       iddim_lsedtot = adddim(gdp, lundia, FILOUT_HIS, 'LSEDTOT', lsedtot)
+       if (lsed>0) then
+          iddim_lsed    = adddim(gdp, lundia, FILOUT_HIS, 'LSED', lsed)
+       else
+          iddim_lsed    = -1
+       endif
+       if (lsedtot>0) then
+          iddim_lsedtot = adddim(gdp, lundia, FILOUT_HIS, 'LSEDTOT', lsedtot)
+       else
+          iddim_lsedtot = -1
+       endif
        if (zmodel) then
           iddim_kmax    = adddim(gdp, lundia, FILOUT_HIS, 'K_LYR'  , kmax) ! Number of layers
        else
@@ -206,6 +223,9 @@ subroutine wrsedh(lundia    ,error     ,filename  ,ithisc    , &
        if (nostat > 0) then
          if (lsed > 0) then
            call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'ZWS', ' ', io_prec      , 3, dimids=(/iddim_nostat, iddim_kmaxout, iddim_lsed/), longname='Settling velocity in station', unit='m/s', attribs=(/idatt_sta/) )
+           if (moroutput%seddif) then
+              call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'ZSEDDIF', ' ', io_prec      , 3, dimids=(/iddim_nostat, iddim_kmaxout, iddim_lsed/), longname='Vertical sediment diffusion (zeta point)', unit='m2/s', attribs=(/idatt_sta/) )
+           endif
            if (kmax == 1) then
              call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'ZRSDEQ', ' ', io_prec , 3, dimids=(/iddim_nostat, iddim_kmax, iddim_lsed/), longname='Equilibrium concentration of sediment at station (2D only)', unit='kg/m3', attribs=(/idatt_sta/) )
            endif
@@ -213,6 +233,12 @@ subroutine wrsedh(lundia    ,error     ,filename  ,ithisc    , &
          if (lsedtot > 0) then
             call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'ZBDSED', ' ', io_prec     , 2, dimids=(/iddim_nostat, iddim_lsedtot/), longname='Available mass of sediment at bed at station', unit='kg/m2', attribs=(/idatt_sta/) )
             call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'ZDPSED', ' ', io_prec     , 1, dimids=(/iddim_nostat/), longname='Sediment thickness at bed at station (zeta point)', unit='m', attribs=(/idatt_sta/) )
+            !
+            ! nlyr is unknown in esm_alloc_real and therefore we can't follow the same method as for the other station quantities using an old fashioned esm/fsm array
+            !call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'ZMSED', ' ', io_prec      , 3, dimids=(/iddim_nostat, iddim_nlyr, iddim_lsedtot/), longname='Mass of sediment in layer at station', unit='kg/m2', attribs=(/idatt_sta/) )
+            !call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'ZLYRFRAC', ' ', io_prec   , 3, dimids=(/iddim_nostat, iddim_nlyr, iddim_lsedtot/), longname='Volume fraction of sediment in layer at station', attribs=(/idatt_sta/) )
+            !call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'ZDP_BEDLYR', ' ', io_prec , 2, dimids=(/iddim_nostat, iddim_nlyrp1/), longname='Vertical position of sediment layer interface at station', units='m', attribs=(/idatt_sta/) )
+            !call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'ZEPSPOR', ' ', io_prec    , 2, dimids=(/iddim_nostat, iddim_nlyr/), longname='Porosity coefficient in layer at station', attribs=(/idatt_sta/) )
          endif
          call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'ZDPS', ' ', io_prec       , 1, dimids=(/iddim_nostat/), longname='Morphological depth at station (zeta point)', unit='m', attribs=(/idatt_sta/) )
          if (lsedtot > 0) then
@@ -224,6 +250,37 @@ subroutine wrsedh(lundia    ,error     ,filename  ,ithisc    , &
            call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'ZSSU', ' ', io_prec     , 2, dimids=(/iddim_nostat, iddim_lsed/), longname='Susp. load transport in u-direction at station (zeta point)', unit=transpunit, attribs=(/idatt_sta/) )
            call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'ZSSV', ' ', io_prec     , 2, dimids=(/iddim_nostat, iddim_lsed/), longname='Susp. load transport in v-direction at station (zeta point)', unit=transpunit, attribs=(/idatt_sta/) )
            call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'ZRCA', ' ', io_prec     , 2, dimids=(/iddim_nostat, iddim_lsed/), longname='Near-bed reference concentration of sediment at station', unit='kg/m3', attribs=(/idatt_sta/) )
+           !
+           if (moroutput%sourcesink) then
+             call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'ZSOURSE', ' ', io_prec  , 2, dimids=(/iddim_nostat, iddim_lsed/), longname='Source term suspended sediment transport at station', unit='kg/m3/s', attribs=(/idatt_sta/) )
+             call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'ZSINKSE', ' ', io_prec  , 2, dimids=(/iddim_nostat, iddim_lsed/), longname='Sink term suspended sediment transport at station', unit='1/s', attribs=(/idatt_sta/) )
+           endif
+         endif
+         !
+         if (lsedtot > 0) then
+           if (moroutput%frac) then
+             call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'ZFRAC', ' ', io_prec    , 2, dimids=(/iddim_nostat, iddim_lsedtot/), longname='Availability fraction in top layer at station', attribs=(/idatt_sta/) )
+           endif
+           !
+           if (moroutput%mudfrac) then
+             call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'ZMUDFRAC', ' ', io_prec , 1, dimids=(/iddim_nostat/), longname='Mud fraction in top layer at station', attribs=(/idatt_sta/) )
+           endif
+           !
+           if (moroutput%sandfrac) then
+             call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'ZSANDFRAC', ' ', io_prec, 1, dimids=(/iddim_nostat/), longname='Sand fraction in top layer at station', attribs=(/idatt_sta/) )
+           endif
+           !
+           if (moroutput%fixfac) then
+             call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'ZFIXFAC', ' ', io_prec  , 2, dimids=(/iddim_nostat, iddim_lsedtot/), longname='Reduction factor due to limited sediment thickness at station', attribs=(/idatt_sta/) )
+           endif
+           !
+           if (moroutput%taub) then
+             call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'ZTAUB', ' ', io_prec    , 1, dimids=(/iddim_nostat/), longname='Bed shear stress for morphology at station', unit='N/m2', attribs=(/idatt_sta/) )
+           endif
+           !
+           if (moroutput%hidexp) then
+             call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'ZHIDEXP', ' ', io_prec  , 2, dimids=(/iddim_nostat, iddim_lsedtot/), longname='Hiding and exposure factor at station', attribs=(/idatt_sta/) )
+           endif
          endif
        endif
        !
@@ -298,6 +355,17 @@ subroutine wrsedh(lundia    ,error     ,filename  ,ithisc    , &
                     & ierror, lundia, zws, 'ZWS', station)
              if (ierror/= 0) goto 9999
              !
+             if (moroutput%seddif) then
+                !
+                ! element 'ZSEDDIF'
+                !
+                call wrtarray_n(fds, filename, filetype, grnam5, &
+                       & celidt, nostat, nostatto, nostatgl, order_sta, gdp, &
+                       & shlay, kmaxout, 0, kmax, lsed, &
+                       & ierror, lundia, zseddif, 'ZSEDDIF', station)
+                if (ierror/= 0) goto 9999
+             endif
+             !
              if (kmax == 1) then
                 !
                 ! element 'ZRSDEQ'
@@ -330,6 +398,15 @@ subroutine wrsedh(lundia    ,error     ,filename  ,ithisc    , &
                     & celidt, nostat, nostatto, nostatgl, order_sta, gdp, &
                     & ierror, lundia, zdpsed, 'ZDPSED', station)
              if (ierror/= 0) goto 9999
+             !
+             ! need to add these quantities to be consistent with FM his-file
+             ! however, the number of layers is not (yet) known in esm_alloc_real
+             ! where all Z arrays are currently allocated. Consider restructuring.
+             !
+             ! element 'ZMSED'
+             ! element 'ZLYRFRAC'
+             ! element 'ZDP_BEDLYR'
+             ! element 'ZEPSPOR'
           endif
           !
           ! element 'ZDPS'
@@ -439,6 +516,90 @@ subroutine wrsedh(lundia    ,error     ,filename  ,ithisc    , &
                     & lsed, &
                     & ierror, lundia, zrca, 'ZRCA', station)
              if (ierror/= 0) goto 9999
+             !
+             if (moroutput%sourcesink) then
+                !
+                ! element 'ZSOURSE'
+                !
+                call wrtarray_n(fds, filename, filetype, grnam5, &
+                       & celidt, nostat, nostatto, nostatgl, order_sta, gdp, &
+                       & lsed, &
+                       & ierror, lundia, zsourse, 'ZSOURSE', station)
+                if (ierror/= 0) goto 9999
+                !
+                ! element 'ZSINKSE'
+                !
+                call wrtarray_n(fds, filename, filetype, grnam5, &
+                       & celidt, nostat, nostatto, nostatgl, order_sta, gdp, &
+                       & lsed, &
+                       & ierror, lundia, zsinkse, 'ZSINKSE', station)
+                if (ierror/= 0) goto 9999
+             endif
+          endif
+          !
+          if (lsedtot > 0) then
+             if (moroutput%frac) then 
+                !
+                ! element 'ZFRAC'
+                !
+                call wrtarray_n(fds, filename, filetype, grnam5, &
+                       & celidt, nostat, nostatto, nostatgl, order_sta, gdp, &
+                       & lsedtot, &
+                       & ierror, lundia, zfrac, 'ZFRAC', station)
+                if (ierror/= 0) goto 9999
+             endif
+             !
+             if (moroutput%mudfrac) then
+                !
+                ! element 'ZMUDFRAC'
+                !
+                call wrtarray_n(fds, filename, filetype, grnam5, &
+                       & celidt, nostat, nostatto, nostatgl, order_sta, gdp, &
+                       & ierror, lundia, zmudfrac, 'ZMUDFRAC', station)
+                if (ierror/= 0) goto 9999
+             endif
+             !
+             if (moroutput%sandfrac) then
+                !
+                ! element 'ZSANDFRAC'
+                !
+                call wrtarray_n(fds, filename, filetype, grnam5, &
+                       & celidt, nostat, nostatto, nostatgl, order_sta, gdp, &
+                       & ierror, lundia, zsandfrac, 'ZSANDFRAC', station)
+                if (ierror/= 0) goto 9999
+             endif
+             !
+             if (moroutput%fixfac) then
+                !
+                ! element 'ZFIXFAC'
+                !
+                call wrtarray_n(fds, filename, filetype, grnam5, &
+                       & celidt, nostat, nostatto, nostatgl, order_sta, gdp, &
+                       & lsedtot, &
+                       & ierror, lundia, zfixfac, 'ZFIXFAC', station)
+                if (ierror/= 0) goto 9999
+             endif
+             !
+             if (moroutput%taub) then
+                !
+                ! element 'ZTAUB'
+                !
+                call wrtarray_n(fds, filename, filetype, grnam5, &
+                       & celidt, nostat, nostatto, nostatgl, order_sta, gdp, &
+                       & ierror, lundia, ztaub, 'ZTAUB', station)
+                if (ierror/= 0) goto 9999
+             endif
+             !
+             if (moroutput%hidexp) then
+                !
+                ! element 'ZHIDEXP'
+                !
+                call wrtarray_n(fds, filename, filetype, grnam5, &
+                       & celidt, nostat, nostatto, nostatgl, order_sta, gdp, &
+                       & lsedtot, &
+                       & ierror, lundia, zhidexp, 'ZHIDEXP', station)
+                if (ierror/= 0) goto 9999
+             endif
           endif
        endif
        !

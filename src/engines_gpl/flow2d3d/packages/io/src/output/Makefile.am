@@ -28,7 +28,7 @@ FMODULES += \
 	-I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common_mpi/src \
 	-I$(top_builddir)/utils_lgpl/ec_module/packages/ec_module/src \
 	-I$(top_builddir)/utils_lgpl/io_netcdf/packages/io_netcdf/src \
-    -I$(top_builddir)/utils_lgpl/io_hyd/packages/io_hyd/src \
+	-I$(top_builddir)/utils_lgpl/io_hyd/packages/io_hyd/src \
 	-I$(top_builddir)/utils_lgpl/delftio/packages/delftio/src/diof90 \
 	-I$(top_builddir)/utils_lgpl/delftio/packages/delftio/src/delftio_sync \
 	-I$(top_builddir)/engines_gpl/flow2d3d/packages/data/src/basics \
@@ -69,6 +69,7 @@ libIOOutput_la_SOURCES = \
          setwav.f90 \
          tcross.f90 \
          tstat.f90 \
+         tstat_sed.f90 \
          tstat_bed.f90 \
          update_stat_locations.f90 \
          updbnddps.f90 \

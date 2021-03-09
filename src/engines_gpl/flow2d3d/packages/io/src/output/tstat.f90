@@ -1,25 +1,22 @@
 subroutine tstat(prshis    ,selhis    ,rhow      ,zmodel    ,nostat    , &
                & nmax      ,mmax      ,kmax      ,lmax      ,lstsci    , &
-               & ltur      ,lsal      ,ltem      ,lsed      ,lsedtot   , &
-               & kfs       ,kfu       ,kfv       ,kcs       ,kfuz1     , &
-               & kfvz1     ,kfumin    ,kfumax    ,kfvmin    ,kfvmax    , &
-               & kfsmin    ,kfsmax    ,zkfs      ,s1        ,u1        , &
-               & v1        ,r1        ,rtur1     ,wphy      ,qxk       , &
-               & qyk       ,taubpu    ,taubpv    ,taubsu    ,taubsv    , &
-               & alfas     ,vicww     ,dicww     ,rich      ,rho       , &
-               & ws        ,dps       , &
-               & zwl       ,zalfas    ,zcuru     ,zcurv     ,zcurw     , &
-               & zqxk      ,zqyk      ,gro       ,ztur      , &
-               & ztauks    ,ztauet    ,zvicww    ,zdicww    ,zrich     , &
-               & zrho      ,zbdsed    ,zrsdeq    ,zdpsed    ,zdps      , &
-               & zws       ,hydprs    ,p1        ,vortic    ,enstro    , &
-               & zvort     ,zenst     ,zsbu      ,zsbv      ,zssu      , &
-               & zssv      ,sbuu      ,sbvv      , &
-               & zhs       ,ztp       ,zdir      ,zrlabd    ,zuorb     , &
-               & hrms      ,tp        ,teta      ,rlabda    ,uorb      , &
-               & wave      ,zrca      ,windu     ,windv     ,windcd    , &
+               & ltur      ,lsal      ,ltem      ,kfs       ,kfu       , &
+               & kfv       ,kcs       ,kfuz1     ,kfvz1     ,kfumin    , &
+               & kfumax    ,kfvmin    ,kfvmax    ,kfsmin    ,kfsmax    , &
+               & zkfs      ,s1        ,u1        ,v1        ,r1        , &
+               & rtur1     ,wphy      ,qxk       ,qyk       ,taubpu    , &
+               & taubpv    ,taubsu    ,taubsv    ,alfas     ,vicww     , &
+               & dicww     ,rich      ,rho       ,dps       ,zwl       , &
+               & zalfas    ,zcuru     ,zcurv     ,zcurw     ,zqxk      , &
+               & zqyk      ,gro       ,ztur      ,ztauks    ,ztauet    , &
+               & zvicww    ,zdicww    ,zrich     ,zrho      ,zdps      , &
+               & hydprs    ,p1        ,vortic    ,enstro    ,zvort     , &
+               & zenst     ,zhs       ,ztp       ,zdir      ,zrlabd    , &
+               & zuorb     ,hrms      ,tp        ,teta      ,rlabda    , &
+               & uorb      ,wave      ,windu     ,windv     ,windcd    , &
                & zwndsp    ,zwnddr    ,patm      ,zairp     ,wind      , &
-               & precip    ,evap      ,zprecp    ,zevap     ,zwndcd    , gdp       )
+               & precip    ,evap      ,zprecp    ,zevap     ,zwndcd    , &
+               & gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2021.                                
@@ -78,12 +75,10 @@ subroutine tstat(prshis    ,selhis    ,rhow      ,zmodel    ,nostat    , &
 ! Global variables
 !
     integer                                                                      , intent(in)  :: kmax   !  Description and declaration in esm_alloc_int.f90
-    integer                                                                                    :: lmax   !  Description and declaration in dimens.igs
-    integer                                                                                    :: lsal   !  Description and declaration in dimens.igs
-    integer                                                                      , intent(in)  :: lsed   !  Description and declaration in esm_alloc_int.f90
-    integer                                                                      , intent(in)  :: lsedtot!  Description and declaration in esm_alloc_int.f90
+    integer                                                                      , intent(in)  :: lmax   !  Description and declaration in dimens.igs
+    integer                                                                      , intent(in)  :: lsal   !  Description and declaration in dimens.igs
     integer                                                                      , intent(in)  :: lstsci !  Description and declaration in esm_alloc_int.f90
-    integer                                                                                    :: ltem   !  Description and declaration in dimens.igs
+    integer                                                                      , intent(in)  :: ltem   !  Description and declaration in dimens.igs
     integer                                                                      , intent(in)  :: ltur   !  Description and declaration in esm_alloc_int.f90
     integer                                                                      , intent(in)  :: mmax   !  Description and declaration in esm_alloc_int.f90
     integer                                                                      , intent(in)  :: nmax   !  Description and declaration in esm_alloc_int.f90
@@ -120,7 +115,6 @@ subroutine tstat(prshis    ,selhis    ,rhow      ,zmodel    ,nostat    , &
     real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 0:kmax)      , intent(in)  :: dicww  !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 0:kmax)      , intent(in)  :: rich   !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 0:kmax)      , intent(in)  :: vicww  !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 0:kmax, lsed), intent(in)  :: ws     !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 0:kmax, ltur), intent(in)  :: rtur1  !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax)        , intent(in)  :: enstro !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax)        , intent(in)  :: p1     !  Description and declaration in esm_alloc_real.f90
@@ -132,8 +126,6 @@ subroutine tstat(prshis    ,selhis    ,rhow      ,zmodel    ,nostat    , &
     real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax)        , intent(in)  :: vortic !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax)        , intent(in)  :: wphy   !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax, lstsci), intent(in)  :: r1     !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, lsedtot)     , intent(in)  :: sbuu   !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, lsedtot)     , intent(in)  :: sbvv   !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              , intent(in)  :: windcd !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              , intent(in)  :: windu  !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              , intent(in)  :: windv  !  Description and declaration in esm_alloc_real.f90
@@ -141,9 +133,8 @@ subroutine tstat(prshis    ,selhis    ,rhow      ,zmodel    ,nostat    , &
     real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              , intent(in)  :: precip !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              , intent(in)  :: evap   !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(nostat)                                                , intent(out) :: zalfas !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(nostat)                                                              :: zdir
+    real(fp)  , dimension(nostat)                                                , intent(out) :: zdir
     real(fp)  , dimension(nostat)                                                , intent(out) :: zdps   !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(nostat)                                                , intent(out) :: zdpsed !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(nostat)                                                , intent(out) :: zhs
     real(fp)  , dimension(nostat)                                                , intent(out) :: zrlabd
     real(fp)  , dimension(nostat)                                                , intent(out) :: ztauet !  Description and declaration in esm_alloc_real.f90
@@ -160,7 +151,6 @@ subroutine tstat(prshis    ,selhis    ,rhow      ,zmodel    ,nostat    , &
     real(fp)  , dimension(nostat, 0:kmax)                                        , intent(out) :: zdicww !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(nostat, 0:kmax)                                        , intent(out) :: zrich  !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(nostat, 0:kmax)                                        , intent(out) :: zvicww !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(nostat, 0:kmax, lsed)                                  , intent(out) :: zws    !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(nostat, 0:kmax, ltur)                                  , intent(out) :: ztur   !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(nostat, kmax)                                          , intent(out) :: hydprs !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(nostat, kmax)                                          , intent(out) :: zcuru  !  Description and declaration in esm_alloc_real.f90
@@ -171,14 +161,7 @@ subroutine tstat(prshis    ,selhis    ,rhow      ,zmodel    ,nostat    , &
     real(fp)  , dimension(nostat, kmax)                                          , intent(out) :: zqyk   !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(nostat, kmax)                                          , intent(out) :: zrho   !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(nostat, kmax)                                          , intent(out) :: zvort  !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(nostat, lsed)                                          , intent(out) :: zrsdeq !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(nostat, kmax, lstsci)                                  , intent(out) :: gro    !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(nostat, lsedtot)                                       , intent(out) :: zbdsed !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(nostat, lsed)                                          , intent(out) :: zrca   !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(nostat, lsedtot)                                       , intent(out) :: zsbu   !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(nostat, lsedtot)                                       , intent(out) :: zsbv   !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(nostat, lsed)                                          , intent(out) :: zssu   !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(nostat, lsed)                                          , intent(out) :: zssv   !  Description and declaration in esm_alloc_real.f90
     character(23)                                                                , intent(in)  :: prshis !  Description and declaration in tricom.igs
     character(23)                                                                , intent(in)  :: selhis !  Description and declaration in tricom.igs
 !
@@ -600,55 +583,6 @@ subroutine tstat(prshis    ,selhis    ,rhow      ,zmodel    ,nostat    , &
        if (n<0) cycle
        zdps(ii)   = real(dps(n, m),fp)
     enddo
-    !
-    ! Store quantities specific for sediment in defined stations
-    !
-    if (lsed>0) then
-       zrca   = -999.0_fp
-       zsbu   = -999.0_fp
-       zsbv   = -999.0_fp
-       zssu   = -999.0_fp
-       zssv   = -999.0_fp
-       zws    = -999.0_fp
-       zrsdeq = -999.0_fp
-       do ii = 1, nostat
-          m  = mnstat(1, ii)
-          if (m<0) cycle
-          n  = mnstat(2, ii)
-          if (n<0) cycle
-          md = max(1, m - 1)
-          nd = max(1, n - 1)
-          !
-          call n_and_m_to_nm(n , m , nm , gdp)
-          call n_and_m_to_nm(n , md, nmd, gdp)
-          call n_and_m_to_nm(nd, m , ndm, gdp)
-          !
-          zdps(ii)   = real(dps(n, m),fp)
-          do l = 1, lsed
-             zrca(ii, l)   = rca(nm, l)
-             zrsdeq(ii, l) = rsedeq(nm, l)
-             zsbu(ii, l) = abs(kcs(n,m))                          &
-                         & * (         kfu(n,m )*sbuu(n,m ,l)     &
-                         &    + (m-md)*kfu(n,md)*sbuu(n,md,l) )/2.0_fp
-             zsbv(ii, l) = abs(kcs(n,m))                          &
-                         & * (         kfv(n ,m)*sbvv(n ,m,l)     &
-                         &    + (n-nd)*kfv(nd,m)*sbvv(nd,m,l) )/2.0_fp
-             zssu(ii, l) = abs(kcs(n,m))                          &
-                         & * (         kfu(n,m )*ssuu(nm ,l)      &
-                         &    + (m-md)*kfu(n,md)*ssuu(nmd,l) )/2.0_fp
-             zssv(ii, l) = abs(kcs(n,m))                          &
-                         & * (         kfv(n ,m)*ssvv(nm ,l)      &
-                         &    + (n-nd)*kfv(nd,m)*ssvv(ndm,l) )/2.0_fp
-             do k = 0, kmax
-                zws(ii, k, l) = ws(n, m, k, l)
-             enddo
-          enddo
-       enddo
-    endif
-    !
-    if (lsedtot>0) then
-       call tstat_bed(nostat, lsedtot, nmax, zdpsed, zbdsed, gdp)
-    endif
     !
     ! Store wind speed and direction in defined stations
     !

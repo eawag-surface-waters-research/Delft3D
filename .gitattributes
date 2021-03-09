@@ -1262,6 +1262,7 @@ src/engines_gpl/flow2d3d/packages/io/src/output/setwav.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/output/tcross.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/output/tstat.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/output/tstat_bed.f90 -text
+src/engines_gpl/flow2d3d/packages/io/src/output/tstat_sed.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/output/update_stat_locations.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/output/updbnddps.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/output/uv2zeta.f90 -text

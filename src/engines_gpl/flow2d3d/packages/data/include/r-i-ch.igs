@@ -338,19 +338,28 @@ type gd_r_i_ch
        integer(pntrsize) :: zetabl     !  Description and declaration in esm_alloc_real.f90
        integer(pntrsize) :: zetaif     !  Description and declaration in esm_alloc_real.f90
        integer(pntrsize) :: zetail     !  Description and declaration in esm_alloc_real.f90
+       integer(pntrsize) :: zfixfac    !  Description and declaration in esm_alloc_real.f90
+       integer(pntrsize) :: zfrac      !  Description and declaration in esm_alloc_real.f90
+       integer(pntrsize) :: zhidexp    !  Description and declaration in esm_alloc_real.f90
        integer(pntrsize) :: zmeanf     !  Description and declaration in esm_alloc_real.f90
        integer(pntrsize) :: zmeanl     !  Description and declaration in esm_alloc_real.f90
+       integer(pntrsize) :: zmudfrac   !  Description and declaration in esm_alloc_real.f90
        integer(pntrsize) :: zqxk       !  Description and declaration in esm_alloc_real.f90
        integer(pntrsize) :: zqyk       !  Description and declaration in esm_alloc_real.f90
        integer(pntrsize) :: zrca       !  Description and declaration in esm_alloc_real.f90
        integer(pntrsize) :: zrho       !  Description and declaration in esm_alloc_real.f90
        integer(pntrsize) :: zrich      !  Description and declaration in esm_alloc_real.f90
        integer(pntrsize) :: zrsdeq     !  Description and declaration in esm_alloc_real.f90
+       integer(pntrsize) :: zsandfrac  !  Description and declaration in esm_alloc_real.f90
        integer(pntrsize) :: zsbu       !  Description and declaration in esm_alloc_real.f90
        integer(pntrsize) :: zsbv       !  Description and declaration in esm_alloc_real.f90
+       integer(pntrsize) :: zseddif    !  Description and declaration in esm_alloc_real.f90
+       integer(pntrsize) :: zsinkse    !  Description and declaration in esm_alloc_real.f90
+       integer(pntrsize) :: zsourse    !  Description and declaration in esm_alloc_real.f90
        integer(pntrsize) :: zssu       !  Description and declaration in esm_alloc_real.f90
        integer(pntrsize) :: zssv       !  Description and declaration in esm_alloc_real.f90
        integer(pntrsize) :: zstep      !  Description and declaration in esm_alloc_real.f90
+       integer(pntrsize) :: ztaub      !  Description and declaration in esm_alloc_real.f90
        integer(pntrsize) :: ztauet     !  Description and declaration in esm_alloc_real.f90
        integer(pntrsize) :: ztauks     !  Description and declaration in esm_alloc_real.f90
        integer(pntrsize) :: ztur       !  Description and declaration in esm_alloc_real.f90

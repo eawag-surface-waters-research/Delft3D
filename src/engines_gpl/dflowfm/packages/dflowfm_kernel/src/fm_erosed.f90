@@ -203,6 +203,7 @@
    real(fp)         , dimension(:,:)    , pointer :: sourse
    real(fp)         , dimension(:,:)    , pointer :: sour_im
    real(fp)         , dimension(:,:)    , pointer :: srcmax
+   real(fp)         , dimension(:)      , pointer :: taub
    real(fp)         , dimension(:,:)    , pointer :: taurat
    real(fp)         , dimension(:)      , pointer :: ust2
    real(fp)         , dimension(:)      , pointer :: umod
@@ -769,6 +770,7 @@
    sourse              => sedtra%sourse
    sour_im             => sedtra%sour_im
    srcmax              => sedtra%srcmax
+   taub                => sedtra%taub
    taurat              => sedtra%taurat
    ust2                => sedtra%ust2
    umod                => sedtra%umod
@@ -974,7 +976,7 @@
    integer                       :: ierr, kk, kkk, Lf, kmxvel, kb, kt, snL, csL
    integer                       :: Ldir
    double precision, allocatable :: dzdx(:), dzdy(:), u1_tmp(:), ucxq_tmp(:), ucyq_tmp(:)
-   double precision, allocatable :: z0rouk(:), z0curk(:),taub(:), deltas(:), ua(:), va(:)
+   double precision, allocatable :: z0rouk(:), z0curk(:), deltas(:), ua(:), va(:)
    double precision              :: dzdn, dzds
    integer                       :: mout
    double precision              :: z0u, czu
@@ -1006,7 +1008,7 @@
    allocate(dzdx(1:ndx), dzdy(1:ndx), stat=istat)
    if (istat == 0) allocate(localpar (npar), stat = istat)
    if (istat == 0) allocate(ua(1:ndx), va(1:ndx), stat=istat)
-   if (istat == 0) allocate(z0rouk(1:ndx), z0curk(1:ndx), taub(1:ndx), deltas(1:ndx), stat=istat)
+   if (istat == 0) allocate(z0rouk(1:ndx), z0curk(1:ndx), deltas(1:ndx), stat=istat)
    if (istat == 0) allocate(qb_out(network%nds%Count), stat = istat)
    if (istat == 0) allocate(width_out(network%nds%Count), stat = istat)
    if (istat == 0) allocate(sb_in(network%nds%Count, lsedtot), stat = istat)
@@ -1580,7 +1582,7 @@
       dll_reals(RP_TEMP ) = real(temperature    ,hp)
       dll_reals(RP_GRAV ) = real(ag             ,hp)
       dll_reals(RP_VICML) = real(vismol         ,hp)
-      dll_reals(RP_TAUB ) = real(taub(nm)       ,hp) !      taus=taubmx
+      dll_reals(RP_TAUB ) = real(taub(nm)       ,hp)
       dll_reals(RP_UBED ) = real(ubed           ,hp)
       dll_reals(RP_VBED ) = real(vbed           ,hp)
       dll_reals(RP_VELBD) = real(velb           ,hp)
@@ -4303,7 +4305,6 @@
                      ! note taurat=(taubcw/taucrb) stored above
                      !
                      tratio = (taurat(k1, l) + taurat(k2, l)) / 2.0_fp
-
                      if (tratio >= 1.0) then
                         fnorm = alfabn * (1.0/tratio)**0.5 * dzdp
                      else

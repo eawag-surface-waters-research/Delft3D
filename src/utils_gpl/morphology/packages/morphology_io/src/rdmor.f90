@@ -717,7 +717,8 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
        !
        ! Output options
        !
-       call prop_get_logical(mor_ptr, 'Output', 'OutDefault', ldef, success = found)
+       call prop_get_logical(mor_ptr, 'Output', 'Default', ldef, success = found)
+       if (.not.found) call prop_get_logical(mor_ptr, 'Output', 'OutDefault', ldef, success = found) ! backward compatibility
        if (found) then
            call initmoroutput(moroutput, ldef)
        endif
@@ -754,6 +755,7 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
        call prop_get_logical(mor_ptr, 'Output', 'SedPar'                      , moroutput%sedpar)
        !
        call prop_get_logical(mor_ptr, 'Output', 'Bedslope'                    , moroutput%dzduuvv)
+       call prop_get_logical(mor_ptr, 'Output', 'Taub'                        , moroutput%taub)
        call prop_get_logical(mor_ptr, 'Output', 'Taurat'                      , moroutput%taurat)
        !
        call prop_get_logical(mor_ptr, 'Output', 'Dm'                          , moroutput%dm)

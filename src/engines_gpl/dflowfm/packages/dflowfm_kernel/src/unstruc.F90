@@ -19543,7 +19543,7 @@ subroutine unc_write_his(tim)            ! wrihis
                      id_sscx, id_sscy, id_sswx, id_sswy, id_sbcx, id_sbcy, id_sbwx, id_sbwy, &
                      id_varucxq, id_varucyq, id_sf, id_ws, id_seddif, id_sink, id_sour, id_sedsusdim, &
                      id_latdim, id_lat_id, id_lat_predis_inst, id_lat_predis_ave, id_lat_realdis_inst, id_lat_realdis_ave, &
-                     id_ustx, id_usty, id_nlyrdim, id_bodsed, id_dpsed, id_msed, id_thlyr, id_poros, id_lyrfrac, id_frac, id_mudfrac, id_sandfrac, id_fixfac, id_hidexp, id_mfluff, &
+                     id_ustx, id_usty, id_nlyrdim, id_bodsed, id_dpsed, id_msed, id_thlyr, id_poros, id_lyrfrac, id_frac, id_mudfrac, id_sandfrac, id_fixfac, id_hidexp, id_taub, id_mfluff, &
                      id_rugdim, id_rugx, id_rugy, id_rugid, id_rugname, id_varruh
     ! ids for geometry variables, only use them once at the first time of history output
     integer :: id_statgeom_node_count,        id_statgeom_node_coordx,        id_statgeom_node_coordy,    &
@@ -20183,6 +20183,15 @@ subroutine unc_write_his(tim)            ! wrihis
                !
             endif
             !
+            if (stmpar%morpar%moroutput%taub) then
+               ierr = nf90_def_var(ihisfile, 'taub', nf90_double, (/ id_statdim, id_timedim /), id_taub)
+               ierr = nf90_put_att(ihisfile, id_taub, 'long_name', 'Bed shear stress for morphology')
+               ierr = nf90_put_att(ihisfile, id_taub, 'units', 'Pa')
+               ierr = nf90_put_att(ihisfile, id_taub, '_FillValue', dmiss)
+               ierr = nf90_put_att(ihisfile, id_taub, 'coordinates', statcoordstring)
+               ierr = nf90_put_att(ihisfile, id_taub, 'geometry', station_geom_container_name)
+            endif
+            !
             ! Sediment transports
             !
             if (jased > 0 .and. stm_included .and. jahissed > 0) then
@@ -20302,8 +20311,8 @@ subroutine unc_write_his(tim)            ! wrihis
                         ierr = nf90_put_att(ihisfile, id_poros, '_FillValue', dmiss)
                         ierr = nf90_put_att(ihisfile, id_poros, 'coordinates', statcoordstring)
                         ierr = nf90_put_att(ihisfile, id_poros, 'geometry', station_geom_container_name)
-            endif
-            !
+                     endif
+                     !
                      ierr = nf90_def_var(ihisfile, 'Volume fraction in a layer of the bed', nf90_double, (/ id_nlyrdim, id_statdim,  id_sedtotdim, id_timedim /), id_lyrfrac)
                      ierr = nf90_put_att(ihisfile, id_lyrfrac, 'long_name', 'Volume fraction in a layer of the bed')
                      ierr = nf90_put_att(ihisfile, id_lyrfrac, 'units', 'm')
@@ -20311,8 +20320,8 @@ subroutine unc_write_his(tim)            ! wrihis
                      ierr = nf90_put_att(ihisfile, id_lyrfrac, 'coordinates', statcoordstring)
                      ierr = nf90_put_att(ihisfile, id_lyrfrac, 'geometry', station_geom_container_name)
                end select
-		         !
-		         if (stmpar%morpar%moroutput%frac) then
+               !
+               if (stmpar%morpar%moroutput%frac) then
                   ierr = nf90_def_var(ihisfile, 'Availability fraction in top layer', nf90_double, (/ id_statdim, id_sedtotdim, id_timedim /), id_frac)
                   ierr = nf90_put_att(ihisfile, id_frac, 'long_name', 'Availability fraction in top layer')
                   ierr = nf90_put_att(ihisfile, id_frac, 'units', '-')
@@ -22351,6 +22360,9 @@ subroutine unc_write_his(tim)            ! wrihis
     !
     ! Bed composition variables
     if (jahissed>0 .and. jased>0 .and. stm_included) then
+       if (stmpar%morpar%moroutput%taub) then
+          ierr = nf90_put_var(ihisfile, id_taub, valobsT(:,IPNT_TAUB), start = (/ 1, it_his /), count = (/ ntot, 1 /))
+       endif
        !
        select case (stmpar%morlyr%settings%iunderlyr)
           case (1)
@@ -23559,6 +23571,7 @@ subroutine fill_valobs()
                enddo
             endif
             !
+            valobs(IPNT_TAUB,i) = sedtra%taub(k)
             ! bed composition
             if (stmpar%morlyr%settings%iunderlyr==1) then
                do j = IVAL_BODSED1, IVAL_BODSEDN
@@ -23566,9 +23579,7 @@ subroutine fill_valobs()
                   valobs(IPNT_BODSED1+ii-1,i) = stmpar%morlyr%state%bodsed(ii,k)
                enddo
                valobs(IPNT_DPSED,i) = stmpar%morlyr%state%dpsed(k)
-            endif
-            !
-            if (stmpar%morlyr%settings%iunderlyr==2) then
+            elseif (stmpar%morlyr%settings%iunderlyr==2) then
                nlyrs=stmpar%morlyr%settings%nlyr
                do l = 1, stmpar%lsedtot
                   if (stmpar%morlyr%settings%iporosity==0) then

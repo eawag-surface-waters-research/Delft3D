@@ -2291,6 +2291,42 @@ subroutine esm_alloc_real(lundia, error, gdp)
     ierr = mkfpnt(pntnam, nostat*lsed, gdp)
     if (ierr <= -9) goto 9999
     !
+    pntnam = 'zseddf'         !  Veritcal sediment diffusion at station
+    ierr = mkfpnt(pntnam, nostat*(kmax + 1)*lsed, gdp)
+    if (ierr <= -9) goto 9999
+    !
+    pntnam = 'zsours'         !  Suspended sediment source term at station
+    ierr = mkfpnt(pntnam, nostat*lsed, gdp)
+    if (ierr <= -9) goto 9999
+    !
+    pntnam = 'zsinks'         !  Suspended sediment sink term at station
+    ierr = mkfpnt(pntnam, nostat*lsed, gdp)
+    if (ierr <= -9) goto 9999
+    !
+    pntnam = 'zfrac'          !  Sediment fraction at station
+    ierr = mkfpnt(pntnam, nostat*lsedtot, gdp)
+    if (ierr <= -9) goto 9999
+    !
+    pntnam = 'zmudfr'         !  Total mud fraction at station
+    ierr = mkfpnt(pntnam, nostat, gdp)
+    if (ierr <= -9) goto 9999
+    !
+    pntnam = 'zsandf'         !  Total sand fraction at station
+    ierr = mkfpnt(pntnam, nostat, gdp)
+    if (ierr <= -9) goto 9999
+    !
+    pntnam = 'zfixfc'         !  Reduction factor for limited sediment availability at station
+    ierr = mkfpnt(pntnam, nostat*lsedtot, gdp)
+    if (ierr <= -9) goto 9999
+    !
+    pntnam = 'zhidex'         !  Hiding and exposure factor at station
+    ierr = mkfpnt(pntnam, nostat*lsedtot, gdp)
+    if (ierr <= -9) goto 9999
+    !
+    pntnam = 'ztaub'          !  Bed shear stress for morphology at station
+    ierr = mkfpnt(pntnam, nostat, gdp)
+    if (ierr <= -9) goto 9999
+    !
     pntnam = 'zvort'         !  Vorticity at station
     ierr = mkfpnt(pntnam, nostat*kmax, gdp)
     if (ierr <= -9) goto 9999

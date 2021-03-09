@@ -159,6 +159,7 @@ implicit none
     integer                           :: IVAL_SINKN 
     integer                           :: IVAL_BODSED1
     integer                           :: IVAL_BODSEDN
+    integer                           :: IVAL_TAUB
     integer                           :: IVAL_DPSED
     integer                           :: IVAL_MSED1
     integer                           :: IVAL_MSEDN
@@ -262,6 +263,7 @@ implicit none
     integer                           :: IPNT_SINKN 
     integer                           :: IPNT_BODSED1
     integer                           :: IPNT_BODSEDN
+    integer                           :: IPNT_TAUB
     integer                           :: IPNT_DPSED
     integer                           :: IPNT_MSED1
     integer                           :: IPNT_MSEDN
@@ -421,6 +423,7 @@ subroutine init_valobs_pointers()
    IVAL_UCYST      = 0
    IVAL_BODSED1    = 0
    IVAL_BODSEDN    = 0
+   IVAL_TAUB       = 0
    IVAL_DPSED      = 0
    IVAL_MSED1      = 0
    IVAL_MSEDN      = 0
@@ -517,6 +520,7 @@ subroutine init_valobs_pointers()
          i=i+1;          IVAL_SSWY1      = i   
          i=i+numfracs-1; IVAL_SSWYN      = i
       end if
+      i=i+1;          IVAL_TAUB       = i
       if (stmpar%morlyr%settings%iunderlyr==1) then
          i=i+1;          IVAL_DPSED      = i      
          i=i+1;          IVAL_BODSED1    = i
@@ -717,6 +721,7 @@ subroutine init_valobs_pointers()
    IPNT_SINKN    = ivalpoint(IVAL_SINKN   ,kmx, nlyrs)
    IPNT_BODSED1  = ivalpoint(IVAL_BODSED1 ,kmx, nlyrs)
    IPNT_BODSEDN  = ivalpoint(IVAL_BODSEDN ,kmx, nlyrs)
+   IPNT_TAUB     = ivalpoint(IVAL_TAUB    ,kmx, nlyrs)
    IPNT_DPSED    = ivalpoint(IVAL_DPSED   ,kmx, nlyrs)
    IPNT_MSED1    = ivalpoint(IVAL_MSED1   ,kmx, nlyrs)
    IPNT_MSEDN    = ivalpoint(IVAL_MSEDN   ,kmx, nlyrs)

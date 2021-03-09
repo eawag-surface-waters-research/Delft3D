@@ -90,6 +90,7 @@ subroutine u_ppr(lundia    ,lunprt    ,error     ,versio    ,prsmap    , &
     integer(pntrsize)      , pointer :: sbtrc
     integer(pntrsize)      , pointer :: sbuu
     integer(pntrsize)      , pointer :: sbvv
+    integer(pntrsize)      , pointer :: seddif
     integer(pntrsize)      , pointer :: sstr
     integer(pntrsize)      , pointer :: sstrc
     integer(pntrsize)      , pointer :: taubpu
@@ -108,6 +109,7 @@ subroutine u_ppr(lundia    ,lunprt    ,error     ,versio    ,prsmap    , &
     integer(pntrsize)      , pointer :: vmnldf
     integer(pntrsize)      , pointer :: vortic
     integer(pntrsize)      , pointer :: w1
+    integer(pntrsize)      , pointer :: windcd
     integer(pntrsize)      , pointer :: windu
     integer(pntrsize)      , pointer :: windv
     integer(pntrsize)      , pointer :: wphy
@@ -124,17 +126,26 @@ subroutine u_ppr(lundia    ,lunprt    ,error     ,versio    ,prsmap    , &
     integer(pntrsize)      , pointer :: zdps
     integer(pntrsize)      , pointer :: zdpsed
     integer(pntrsize)      , pointer :: zenst
+    integer(pntrsize)      , pointer :: zfixfac
+    integer(pntrsize)      , pointer :: zfrac
+    integer(pntrsize)      , pointer :: zhidexp
     integer(pntrsize)      , pointer :: zkfs
+    integer(pntrsize)      , pointer :: zmudfrac
     integer(pntrsize)      , pointer :: zqxk
     integer(pntrsize)      , pointer :: zqyk
     integer(pntrsize)      , pointer :: zrca
     integer(pntrsize)      , pointer :: zrho
     integer(pntrsize)      , pointer :: zrich
     integer(pntrsize)      , pointer :: zrsdeq
+    integer(pntrsize)      , pointer :: zsandfrac
     integer(pntrsize)      , pointer :: zsbu
     integer(pntrsize)      , pointer :: zsbv
+    integer(pntrsize)      , pointer :: zseddif
+    integer(pntrsize)      , pointer :: zsinkse
+    integer(pntrsize)      , pointer :: zsourse
     integer(pntrsize)      , pointer :: zssu
     integer(pntrsize)      , pointer :: zssv
+    integer(pntrsize)      , pointer :: ztaub
     integer(pntrsize)      , pointer :: ztauet
     integer(pntrsize)      , pointer :: ztauks
     integer(pntrsize)      , pointer :: ztur
@@ -147,6 +158,7 @@ subroutine u_ppr(lundia    ,lunprt    ,error     ,versio    ,prsmap    , &
     integer(pntrsize)      , pointer :: zairp
     integer(pntrsize)      , pointer :: zprecp
     integer(pntrsize)      , pointer :: zevap
+    integer(pntrsize)      , pointer :: zwndcd
     integer(pntrsize)      , pointer :: rl
     integer(pntrsize)      , pointer :: p1
     integer(pntrsize)      , pointer :: hydprs
@@ -333,6 +345,7 @@ subroutine u_ppr(lundia    ,lunprt    ,error     ,versio    ,prsmap    , &
     sbtrc       => gdp%gdr_i_ch%sbtrc
     sbuu        => gdp%gdr_i_ch%sbuu
     sbvv        => gdp%gdr_i_ch%sbvv
+    seddif      => gdp%gdr_i_ch%seddif
     sstr        => gdp%gdr_i_ch%sstr
     sstrc       => gdp%gdr_i_ch%sstrc
     taubpu      => gdp%gdr_i_ch%taubpu
@@ -351,6 +364,7 @@ subroutine u_ppr(lundia    ,lunprt    ,error     ,versio    ,prsmap    , &
     vmnldf      => gdp%gdr_i_ch%vmnldf
     vortic      => gdp%gdr_i_ch%vortic
     w1          => gdp%gdr_i_ch%w1
+    windcd      => gdp%gdr_i_ch%windcd
     windu       => gdp%gdr_i_ch%windu
     windv       => gdp%gdr_i_ch%windv
     wphy        => gdp%gdr_i_ch%wphy
@@ -367,17 +381,26 @@ subroutine u_ppr(lundia    ,lunprt    ,error     ,versio    ,prsmap    , &
     zdps        => gdp%gdr_i_ch%zdps
     zdpsed      => gdp%gdr_i_ch%zdpsed
     zenst       => gdp%gdr_i_ch%zenst
+    zfixfac     => gdp%gdr_i_ch%zfixfac
+    zfrac       => gdp%gdr_i_ch%zfrac
+    zhidexp     => gdp%gdr_i_ch%zhidexp
     zkfs        => gdp%gdr_i_ch%zkfs
+    zmudfrac    => gdp%gdr_i_ch%zmudfrac
     zqxk        => gdp%gdr_i_ch%zqxk
     zqyk        => gdp%gdr_i_ch%zqyk
     zrca        => gdp%gdr_i_ch%zrca
     zrho        => gdp%gdr_i_ch%zrho
     zrich       => gdp%gdr_i_ch%zrich
     zrsdeq      => gdp%gdr_i_ch%zrsdeq
+    zsandfrac   => gdp%gdr_i_ch%zsandfrac
     zsbu        => gdp%gdr_i_ch%zsbu
     zsbv        => gdp%gdr_i_ch%zsbv
+    zseddif     => gdp%gdr_i_ch%zseddif
+    zsinkse     => gdp%gdr_i_ch%zsinkse
+    zsourse     => gdp%gdr_i_ch%zsourse
     zssu        => gdp%gdr_i_ch%zssu
     zssv        => gdp%gdr_i_ch%zssv
+    ztaub       => gdp%gdr_i_ch%ztaub
     ztauet      => gdp%gdr_i_ch%ztauet
     ztauks      => gdp%gdr_i_ch%ztauks
     ztur        => gdp%gdr_i_ch%ztur
@@ -390,6 +413,7 @@ subroutine u_ppr(lundia    ,lunprt    ,error     ,versio    ,prsmap    , &
     zairp       => gdp%gdr_i_ch%zairp
     zprecp      => gdp%gdr_i_ch%zprecp
     zevap       => gdp%gdr_i_ch%zevap
+    zwndcd      => gdp%gdr_i_ch%zwndcd
     rl          => gdp%gdr_i_ch%rl
     p1          => gdp%gdr_i_ch%p1
     hydprs      => gdp%gdr_i_ch%hydprs
@@ -466,26 +490,30 @@ subroutine u_ppr(lundia    ,lunprt    ,error     ,versio    ,prsmap    , &
     if (.not.ftstat) then
        call tstat(prshis    ,selhis    ,rhow      ,zmodel    ,nostat    , &
                 & nmax      ,mmax      ,kmax      ,lmax      ,lstsci    , &
-                & ltur      ,lsal      ,ltem      ,lsed      ,lsedtot   , &
-                & i(kfs)    ,i(kfu)    ,i(kfv)    ,i(kcs)    ,i(kfuz1)  , &
-                & i(kfvz1)  ,i(kfumin) ,i(kfumax) ,i(kfvmin) ,i(kfvmax) , &
-                & i(kfsmin) ,i(kfsmax) ,i(zkfs)   ,r(s1)     ,r(wrkb3)  , &
-                & r(wrkb4)  ,r(r1)     ,r(rtur1)  ,r(wphy)   ,r(qxk)    , &
-                & r(qyk)    ,r(taubpu) ,r(taubpv) ,r(taubsu) ,r(taubsv) , &
-                & r(alfas)  ,r(vicww)  ,r(dicww)  ,r(rich)   ,r(rho)    , &
-                & r(ws)     ,d(dps)    , &
-                & r(zwl)    ,r(zalfas) ,r(zcuru)  ,r(zcurv)  ,r(zcurw)  , &
-                & r(zqxk)   ,r(zqyk)   ,r(gro)    ,r(ztur)   ,            &
-                & r(ztauks) ,r(ztauet) ,r(zvicww) ,r(zdicww) ,r(zrich)  , &
-                & r(zrho)   ,r(zbdsed) ,r(zrsdeq) ,r(zdpsed) ,r(zdps)   , &
-                & r(zws)    ,r(hydprs) ,r(p1)     ,r(vortic) ,r(enstro) , &
-                & r(zvort)  ,r(zenst)  ,r(zsbu)   ,r(zsbv)   ,r(zssu)   , &
-                & r(zssv)   ,r(sbuu)   ,r(sbvv)   , &
-                & r(wrka1)  ,r(wrka2)  ,r(wrka3)  ,r(wrka4)  ,r(wrka5)  , &
-                & r(hrms)   ,r(tp)     ,r(teta)   ,r(rlabda) ,r(uorb)   , &
-                & wave      ,r(zrca)   ,r(windu)  ,r(windv)  , &
+                & ltur      ,lsal      ,ltem      ,i(kfs)    ,i(kfu)    , &
+                & i(kfv)    ,i(kcs)    ,i(kfuz1)  ,i(kfvz1)  ,i(kfumin) , &
+                & i(kfumax) ,i(kfvmin) ,i(kfvmax) ,i(kfsmin) ,i(kfsmax) , &
+                & i(zkfs)   ,r(s1)     ,r(wrkb3)  ,r(wrkb4)  ,r(r1)     , &
+                & r(rtur1)  ,r(wphy)   ,r(qxk)    ,r(qyk)    ,r(taubpu) , &
+                & r(taubpv) ,r(taubsu) ,r(taubsv) ,r(alfas)  ,r(vicww)  , &
+                & r(dicww)  ,r(rich)   ,r(rho)    ,d(dps)    ,r(zwl)    , &
+                & r(zalfas) ,r(zcuru)  ,r(zcurv)  ,r(zcurw)  ,r(zqxk)   , &
+                & r(zqyk)   ,r(gro)    ,r(ztur)   ,r(ztauks) ,r(ztauet) , &
+                & r(zvicww) ,r(zdicww) ,r(zrich)  ,r(zrho)   ,r(zdps)   , &
+                & r(hydprs) ,r(p1)     ,r(vortic) ,r(enstro) ,r(zvort)  , &
+                & r(zenst)  ,r(wrka1)  ,r(wrka2)  ,r(wrka3)  ,r(wrka4)  , &
+                & r(wrka5)  ,r(hrms)   ,r(tp)     ,r(teta)   ,r(rlabda) , &
+                & r(uorb)   ,wave      ,r(windu)  ,r(windv)  ,r(windcd) , &
                 & r(zwndsp) ,r(zwnddr) ,r(patm)   ,r(zairp)  ,wind      , &
-                & r(precip) ,r(evap)   ,r(zprecp) ,r(zevap)  ,gdp       )
+                & r(precip) ,r(evap)   ,r(zprecp) ,r(zevap)  ,r(zwndcd) , &
+                & gdp       )
+       call tstat_sed(nostat    ,nmax      ,mmax      ,kmax      , &
+                & lsed      ,lsedtot   ,i(kfu)    ,i(kfv)    ,i(kcs)    , &
+                & r(ws)     ,r(zbdsed) ,r(zrsdeq) ,r(zdpsed) ,r(zws)    , &
+                & r(zsbu)   ,r(zsbv)   ,r(zssu)   ,r(zssv)   ,r(sbuu)   , &
+                & r(sbvv)   ,r(zrca)   ,r(zsourse),r(zsinkse),r(zfrac)  , &
+                & r(zmudfrac),r(zsandfrac),r(zfixfac),r(ztaub)  ,r(zhidexp), &
+                & r(seddif) ,r(zseddif),gdp       )
     endif
     !
     ! HIS data (USE LUNUS1)

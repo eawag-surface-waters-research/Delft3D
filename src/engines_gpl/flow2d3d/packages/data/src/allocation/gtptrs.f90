@@ -360,19 +360,28 @@ subroutine gtptrs(gdp)
     integer(pntrsize), pointer :: zetabl
     integer(pntrsize), pointer :: zetaif
     integer(pntrsize), pointer :: zetail
+    integer(pntrsize), pointer :: zfixfac
+    integer(pntrsize), pointer :: zfrac
+    integer(pntrsize), pointer :: zhidexp
     integer(pntrsize), pointer :: zmeanf
     integer(pntrsize), pointer :: zmeanl
+    integer(pntrsize), pointer :: zmudfrac
     integer(pntrsize), pointer :: zqxk
     integer(pntrsize), pointer :: zqyk
     integer(pntrsize), pointer :: zrca
     integer(pntrsize), pointer :: zrho
     integer(pntrsize), pointer :: zrich
     integer(pntrsize), pointer :: zrsdeq
+    integer(pntrsize), pointer :: zsandfrac
     integer(pntrsize), pointer :: zsbu
     integer(pntrsize), pointer :: zsbv
+    integer(pntrsize), pointer :: zseddif
+    integer(pntrsize), pointer :: zsinkse
+    integer(pntrsize), pointer :: zsourse
     integer(pntrsize), pointer :: zssu
     integer(pntrsize), pointer :: zssv
     integer(pntrsize), pointer :: zstep
+    integer(pntrsize), pointer :: ztaub
     integer(pntrsize), pointer :: ztauet
     integer(pntrsize), pointer :: ztauks
     integer(pntrsize), pointer :: ztur
@@ -837,19 +846,28 @@ subroutine gtptrs(gdp)
     zetabl     => gdp%gdr_i_ch%zetabl
     zetaif     => gdp%gdr_i_ch%zetaif
     zetail     => gdp%gdr_i_ch%zetail
+    zfixfac    => gdp%gdr_i_ch%zfixfac
+    zfrac      => gdp%gdr_i_ch%zfrac
+    zhidexp    => gdp%gdr_i_ch%zhidexp
     zmeanf     => gdp%gdr_i_ch%zmeanf
     zmeanl     => gdp%gdr_i_ch%zmeanl
+    zmudfrac   => gdp%gdr_i_ch%zmudfrac
     zqxk       => gdp%gdr_i_ch%zqxk
     zqyk       => gdp%gdr_i_ch%zqyk
     zrca       => gdp%gdr_i_ch%zrca
     zrho       => gdp%gdr_i_ch%zrho
     zrich      => gdp%gdr_i_ch%zrich
     zrsdeq     => gdp%gdr_i_ch%zrsdeq
+    zsandfrac  => gdp%gdr_i_ch%zsandfrac
     zsbu       => gdp%gdr_i_ch%zsbu
     zsbv       => gdp%gdr_i_ch%zsbv
+    zseddif    => gdp%gdr_i_ch%zseddif
+    zsinkse    => gdp%gdr_i_ch%zsinkse
+    zsourse    => gdp%gdr_i_ch%zsourse
     zssu       => gdp%gdr_i_ch%zssu
     zssv       => gdp%gdr_i_ch%zssv
     zstep      => gdp%gdr_i_ch%zstep
+    ztaub      => gdp%gdr_i_ch%ztaub
     ztauet     => gdp%gdr_i_ch%ztauet
     ztauks     => gdp%gdr_i_ch%ztauks
     ztur       => gdp%gdr_i_ch%ztur
@@ -1385,19 +1403,28 @@ subroutine gtptrs(gdp)
     zetabl     = gtrpnt('zetabl', gdp)
     zetaif     = gtrpnt('zetaif', gdp)
     zetail     = gtrpnt('zetail', gdp)
+    zfixfac    = gtrpnt('zfixfc', gdp)
+    zfrac      = gtrpnt('zfrac' , gdp)
+    zhidexp    = gtrpnt('zhidex', gdp)
     zmeanf     = gtrpnt('zmeanf', gdp)
     zmeanl     = gtrpnt('zmeanl', gdp)
+    zmudfrac   = gtrpnt('zmudfr', gdp)
     zqxk       = gtrpnt('zqxk'  , gdp)
     zqyk       = gtrpnt('zqyk'  , gdp)
     zrca       = gtrpnt('zrca'  , gdp)
     zrho       = gtrpnt('zrho'  , gdp)
     zrich      = gtrpnt('zrich' , gdp)
     zrsdeq     = gtrpnt('zrsdeq', gdp)
+    zsandfrac  = gtrpnt('zsandf', gdp)
     zsbu       = gtrpnt('zsbu'  , gdp)
     zsbv       = gtrpnt('zsbv'  , gdp)
+    zseddif    = gtrpnt('zseddf', gdp)
+    zsinkse    = gtrpnt('zsinks', gdp)
+    zsourse    = gtrpnt('zsours', gdp)
     zssu       = gtrpnt('zssu'  , gdp)
     zssv       = gtrpnt('zssv'  , gdp)
     zstep      = gtrpnt('zstep' , gdp)
+    ztaub      = gtrpnt('ztaub' , gdp)
     ztauet     = gtrpnt('ztauet', gdp)
     ztauks     = gtrpnt('ztauks', gdp)
     ztur       = gtrpnt('ztur'  , gdp)

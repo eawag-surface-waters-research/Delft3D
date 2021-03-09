@@ -249,6 +249,7 @@ type moroutputtype
     logical :: sswuuvv
     logical :: suvcor
     logical :: sourcesink
+    logical :: taub
     logical :: taurat
     logical :: umod
     logical :: ustar
@@ -725,6 +726,7 @@ type sedtra_type
     !
     real(fp)         , dimension(:,:)    , pointer :: srcmax   !(nc1:nc2,lsedtot)
     real(fp)         , dimension(:,:)    , pointer :: fixfac   !(nc1:nc2,lsedtot)
+    real(fp)         , dimension(:)      , pointer :: taub     !(nc1:nc2)
     real(fp)         , dimension(:,:)    , pointer :: taurat   !(nc1:nc2,lsedtot)
     !
     real(fp)         , dimension(:,:)    , pointer :: statqnt  !(nc1:nc2,nstatistics)
@@ -824,6 +826,7 @@ subroutine nullsedtra(sedtra)
     !
     nullify(sedtra%srcmax)
     nullify(sedtra%fixfac)
+    nullify(sedtra%taub)
     nullify(sedtra%taurat)
     !
     nullify(sedtra%statqnt)
@@ -951,6 +954,7 @@ subroutine allocsedtra(sedtra, moroutput, kmax, lsed, lsedtot, nc1, nc2, nu1, nu
     !
     if (istat==0) allocate(sedtra%srcmax  (nc1:nc2,lsedtot), STAT = istat)
     if (istat==0) allocate(sedtra%fixfac  (nc1:nc2,lsedtot), STAT = istat)
+    if (istat==0) allocate(sedtra%taub    (nc1:nc2), STAT = istat)
     if (istat==0) allocate(sedtra%taurat  (nc1:nc2,lsedtot), STAT = istat)
     !
     if (istat==0) allocate(sedtra%statqnt (nc1:nc2,nstatqnt), STAT = istat)
@@ -1029,6 +1033,7 @@ subroutine allocsedtra(sedtra, moroutput, kmax, lsed, lsedtot, nc1, nc2, nu1, nu
     !
     sedtra%srcmax   = 0.0_fp
     sedtra%fixfac   = 1.0_fp
+    sedtra%taub     = 0.0_fp
     sedtra%taurat   = 0.0_fp
     !
     sedtra%statqnt  = 0.0_fp
@@ -1137,6 +1142,7 @@ subroutine clrsedtra(istat, sedtra)
     !
     if (associated(sedtra%srcmax  ))   deallocate(sedtra%srcmax  , STAT = istat)
     if (associated(sedtra%fixfac  ))   deallocate(sedtra%fixfac  , STAT = istat)
+    if (associated(sedtra%taub    ))   deallocate(sedtra%taub    , STAT = istat)
     if (associated(sedtra%taurat  ))   deallocate(sedtra%taurat  , STAT = istat)
     !
     if (associated(sedtra%statqnt ))   deallocate(sedtra%statqnt , STAT = istat)
@@ -1614,6 +1620,7 @@ subroutine initmoroutput(moroutput, def)
     moroutput%sswuuvv       = no
     moroutput%suvcor        = no
     moroutput%sourcesink    = no
+    moroutput%taub          = no
     moroutput%taurat        = no
     moroutput%umod          = no
     moroutput%ustar         = no

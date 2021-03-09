@@ -363,6 +363,7 @@ type t_unc_mapids
    integer :: id_ksmr(MAX_ID_VAR)       = -1 !
    integer :: id_ksd(MAX_ID_VAR)        = -1 !
    integer :: id_ks(MAX_ID_VAR)         = -1 !
+   integer :: id_taub(MAX_ID_VAR)       = -1 !
    integer :: id_taurat(MAX_ID_VAR)     = -1 !
    integer :: id_dm(MAX_ID_VAR)         = -1 !
    integer :: id_dg(MAX_ID_VAR)         = -1 !
@@ -5179,6 +5180,9 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
                ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp  , mapids%id_lyrfrac  , nf90_double, UNC_LOC_S, 'lyrfrac'  , '', 'Volume fraction in a layer of the bed in flow cell center', '-', dimids = (/ -2, mapids%id_tsp%id_nlyrdim, mapids%id_tsp%id_sedtotdim, -1 /), jabndnd=jabndnd_)
          end select
          !
+         if (stmpar%morpar%moroutput%taub) then
+            ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp  , mapids%id_taub  , nf90_double, UNC_LOC_S, 'taub'  , '', 'Bed shear stress for morphology', 'N m-2', dimids = (/ -2, -1 /), jabndnd=jabndnd_)
+         endif
          if (stmpar%morpar%moroutput%taurat) then
             ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp  , mapids%id_taurat  , nf90_double, UNC_LOC_S, 'taurat'  , '', 'Excess bed shear ratio', '-', dimids = (/ -2, mapids%id_tsp%id_sedtotdim, -1 /), jabndnd=jabndnd_)
          endif
@@ -6445,6 +6449,9 @@ if (jamapsed > 0 .and. jased > 0 .and. stm_included) then
          ! do nothing
       end select
 
+      if (stmpar%morpar%moroutput%taub) then
+         ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp  , mapids%id_taub  , UNC_LOC_S, sedtra%taub, jabndnd=jabndnd_)
+      endif
       if (stmpar%morpar%moroutput%taurat) then
          ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp  , mapids%id_taurat, UNC_LOC_S, sedtra%taurat, jabndnd=jabndnd_)
       endif

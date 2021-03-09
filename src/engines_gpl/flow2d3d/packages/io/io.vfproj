@@ -191,6 +191,7 @@
 		<File RelativePath="src\output\setwav.f90"/>
 		<File RelativePath="src\output\tcross.f90"/>
 		<File RelativePath="src\output\tstat.f90"/>
+		<File RelativePath="src\output\tstat_sed.f90"/>
 		<File RelativePath="src\output\tstat_bed.f90"/>
 		<File RelativePath="src\output\update_stat_locations.f90"/>
 		<File RelativePath="src\output\updbnddps.f90"/>

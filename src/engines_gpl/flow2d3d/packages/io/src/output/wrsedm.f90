@@ -101,6 +101,7 @@ subroutine wrsedm(lundia    ,error     ,mmax      ,kmax      ,nmaxus    , &
     real(fp), dimension(:,:)             , pointer :: svcor
     real(fp), dimension(:,:)             , pointer :: sinkse
     real(fp), dimension(:,:)             , pointer :: sourse
+    real(fp), dimension(:)               , pointer :: taub
     real(fp), dimension(:,:)             , pointer :: taurat
     real(fp), dimension(:)               , pointer :: ust2
     real(fp), dimension(:)               , pointer :: umod
@@ -222,6 +223,7 @@ subroutine wrsedm(lundia    ,error     ,mmax      ,kmax      ,nmaxus    , &
     svcor          => gdp%gderosed%e_scrt
     sinkse         => gdp%gderosed%sinkse
     sourse         => gdp%gderosed%sourse
+    taub           => gdp%gderosed%taub
     taurat         => gdp%gderosed%taurat
     ust2           => gdp%gderosed%ust2
     umod           => gdp%gderosed%umod
@@ -356,6 +358,9 @@ subroutine wrsedm(lundia    ,error     ,mmax      ,kmax      ,nmaxus    , &
        endif
        if (scour) then
           call addelm(gdp, lundia, FILOUT_MAP, grpnam, 'TAUADD', ' ', io_prec    , 2, dimids=(/iddim_n, iddim_m/), longname='Extra shear stress due to scour feature', unit='N/m2', acl='z')
+       endif
+       if (moroutput%taub) then
+          call addelm(gdp, lundia, FILOUT_MAP, grpnam, 'TAUB', ' ', io_prec    , 2, dimids=(/iddim_n, iddim_m/), longname='Bed shear stress used for morphology', unit='N/m2', acl='z')
        endif
        if (moroutput%taurat) then
           call addelm(gdp, lundia, FILOUT_MAP, grpnam, 'TAURAT', ' ', io_prec    , 3, dimids=(/iddim_n, iddim_m, iddim_lsedtot/), longname='Excess bed shear ratio', acl='z')
@@ -1121,6 +1126,16 @@ subroutine wrsedm(lundia    ,error     ,mmax      ,kmax      ,nmaxus    , &
                         & nf, nl, mf, ml, iarrc, gdp, &
                         & ierror, lundia, rbuff2, 'TAUADD')
           deallocate(rbuff2)
+          if (ierror /= 0) goto 9999
+       endif
+       !
+       if (moroutput%taub) then
+          !
+          ! element 'TAUB'
+          !
+          call wrtarray_nm_ptr(fds, filename, filetype, grpnam, celidt, &
+                        & nf, nl, mf, ml, iarrc, gdp, &
+                        & ierror, lundia, taub, 'TAUB')
           if (ierror /= 0) goto 9999
        endif
        !

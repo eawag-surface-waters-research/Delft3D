@@ -159,6 +159,7 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     real(fp)         , dimension(:,:)    , pointer :: sour_im
     real(fp)         , dimension(:,:)    , pointer :: sinkf
     real(fp)         , dimension(:,:)    , pointer :: sourf
+    real(fp)         , dimension(:)      , pointer :: taub
     real(fp)         , dimension(:,:)    , pointer :: taurat
     real(fp)         , dimension(:)      , pointer :: ust2
     real(fp)         , dimension(:)      , pointer :: umod
@@ -350,7 +351,6 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     real(fp)                        :: taks
     real(fp)                        :: taks0
     real(fp)                        :: tauadd
-    real(fp)                        :: taub
     real(fp)                        :: tauc
     real(fp)                        :: tdss      ! temporary variable for dss
     real(fp)                        :: temperature
@@ -480,6 +480,7 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     sourf               => gdp%gdmorpar%flufflyr%sourf
     iflufflyr           => gdp%gdmorpar%flufflyr%iflufflyr
     srcmax              => gdp%gderosed%srcmax
+    taub                => gdp%gderosed%taub
     taurat              => gdp%gderosed%taurat
     ust2                => gdp%gderosed%ust2
     umod                => gdp%gderosed%umod
@@ -573,6 +574,7 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     !
     ! Reset Bed Shear Ratio for all nm and l = 1:lsedtot
     !                        
+    taub   = 0.0_fp
     taurat = 0.0_fp
     !
     ! Set zero bedload transport for all nm and l = 1:lsedtot
@@ -850,13 +852,13 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
              afluff = 0.0_fp
           endif
           call compbsskin(umean, vmean, h1, wave, uorb(nm), tp(nm), &
-                           & teta(nm), thcmud(nm), mudfrac(nm), taub, &
+                           & teta(nm), thcmud(nm), mudfrac(nm), taub(nm), &
                            & rhowat(nm,kbed), vicmol, gdp%gdsedpar, afluff)
        else
           !
           ! use max bed shear stress, rather than mean
           !
-          taub = taubmx(nm)
+          taub(nm) = taubmx(nm)
        endif
        !
        ustarc = umod(nm)*vonkar/log(1.0_fp + zumod(nm)/z0rou)
@@ -866,7 +868,7 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
           ! user input. Increment TAUB(MX) and USTARC.
           !
           call shearx(tauadd, nm, gdp)
-          taub = sqrt(taub**2 + tauadd**2)
+          taub(nm) = sqrt(taub(nm)**2 + tauadd**2)
           !
           tauc = rhowat(nm,kbed)*ustarc**2
           tauc = sqrt(tauc**2 + tauadd**2)
@@ -951,7 +953,7 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
        dll_reals(RP_TEMP ) = real(temperature    ,hp)
        dll_reals(RP_GRAV ) = real(ag             ,hp)
        dll_reals(RP_VICML) = real(vicmol         ,hp)
-       dll_reals(RP_TAUB ) = real(taub           ,hp) !taubmx incremented with tauadd
+       dll_reals(RP_TAUB ) = real(taub(nm)       ,hp)
        dll_reals(RP_UBED ) = real(ubed           ,hp)
        dll_reals(RP_VBED ) = real(vbed           ,hp)
        dll_reals(RP_VELBD) = real(velb           ,hp)
