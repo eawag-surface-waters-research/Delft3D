@@ -3293,6 +3293,12 @@ subroutine sethu(jazws0)                            ! Set upwind waterdepth hu
                              dtefri,iadv(L), crestlxw(nfw),                &
                              taludlxw(nfw), taludrxw(nfw), vegxw(nfw) )
                  weirdte(nfw) = (1d0 - waquaweirthetaw)*weirdte(nfw) + waquaweirthetaw*dte0
+                 !
+                 ! test for Villemonte and sillheightmin, only for sillheightmin = 0.2626 (10 March 2021)
+                 if ( min(shlxw(nfw),shlxw(nfw)) <= sillheightmin .and. sillheightmin > 0.2625 .and. sillheightmin < 0.2627) then
+                     weirdte(nfw) = 0.0
+                 endif
+                 !
                  ! attention total waterdepth instead of water above crest
                  if ( toest == 'volk' ) then
                      vbov = qvolk/max(hunoweir, 1d-6 )
@@ -49354,7 +49360,7 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
                 jaweir = 1
              elseif (ifixedweirscheme == 8 .or. ifixedweirscheme == 9) then
                 ! For Villemonte and Tabellenboek weirs with low sills are also applied, in order to be consistent with Simona
-                ! jaweir = 1   SWITCHED OFF (as a test on 10 March 2021)
+                jaweir = 1
              endif
 
              if (jaconveyance2D > 0) then   ! now set adjacent bobs of netlinks | sufficiently perpendicular to fixedweir to local ground level
