@@ -523,6 +523,11 @@ integer :: N, L
     time1  = time0 + dts                             ! progress without pressure coupling
  endif
 
+ if (jaeverydt > 0) then
+    if ((comparereal(time1, ti_maps, eps10) >= 0) .and. (comparereal(time1, ti_mape, eps10) <= 0)) then
+       call wrimap(time1)
+    end if 
+ end if 
    ! Finalize timestep code used to be here, now flow_finalize_single_timestep()
 
    if (iresult /= DFM_TIMESETBACK) then
@@ -19204,7 +19209,9 @@ subroutine flow_setexternalforcingsonboundaries(tim, iresult)
            end if
         end if
 
-        call wrimap(tim)
+        if (jaeverydt == 0) then         
+            call wrimap(tim)
+        endif    
 !         if ( jatidep > 0 ) then
 !            call writidep(tim)
 !         end if

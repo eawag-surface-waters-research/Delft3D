@@ -2856,6 +2856,7 @@ end subroutine default_turbulence
  integer                           :: jarstbnd                  !< Waterlevel, bedlevel and coordinates of boundaries, 0: no, 1: yes
  integer                           :: jamapbnd                  !< Includes boundary points in map output
  integer                           :: jamapqin                  !< Includes sum of all influxes in map output
+ integer                           :: jaeverydt                 !< Write output to map file every dt, based on start and stop from MapInterval, 0=no (default), 1=yes
 
 ! read from restart
  integer                           :: jarstignorebl             !< Flag indicating if bed level on restart file should be ignored (0/1, default: 0)
@@ -3292,6 +3293,7 @@ subroutine default_flowparameters()
     jarstbnd = 1
     jamapbnd = 0
     jamapqin = 0
+    jaeverydt = 0
     japartdomain = 1
     jashp_crs = 0
     jashp_obs = 0

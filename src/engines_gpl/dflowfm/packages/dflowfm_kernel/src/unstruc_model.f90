@@ -1782,6 +1782,7 @@ subroutine readMDUFile(filename, istat)
     call prop_get_integer(md_ptr, 'output', 'Writepart_domain', japartdomain, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_bnd', jamapbnd, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_Qin', jamapqin, success)
+    call prop_get_integer(md_ptr, 'output', 'Wrimap_every_dt', jaeverydt, success)
     
     if (md_mapformat /= 4 .and. jamapwindstress /= 0) then
        call mess(LEVEL_ERROR, 'writing windstress to mapfile is only implemented for NetCDF - UGrid (mapformat=4)')
@@ -3718,6 +3719,9 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     endif
     if (jamapqin > 0 .or. writeall) then
       call prop_set(prop_ptr, 'output', 'Wrimap_Qin', jamapqin, 'Write sum of all influxes to map file (1: yes, 0: no)')
+    endif
+    if (jaeverydt > 0 .or. writeall) then
+      call prop_set(prop_ptr, 'output', 'Wrimap_every_dt', jaeverydt, 'Write output to map file every dt, based on start and stop from MapInterval, 0=no (default), 1=yes')
     endif
 
     if ( get_japart() .or. writeall ) then
