@@ -2435,43 +2435,41 @@ subroutine unc_append_3dflowgeom_def(imapfile)
      ierr = nf90_def_dim(imapfile, 'laydim', kmx, id_laydim)
      ierr = nf90_def_dim(imapfile, 'wdim', kmx+1, id_wdim)
      !
-     if (layertype<3) then  !time-independent sigma layer and z layer
-        ierr = nf90_def_var(imapfile, 'LayCoord_cc', nf90_double, (/id_laydim/), id_laycoordcc)
-        ierr = nf90_def_var(imapfile, 'LayCoord_w' , nf90_double, (/id_wdim/), id_laycoordw)
-        !
-        !define and write compact form output of sigma or z-layer
-        if (layertype==1) then  !all sigma layers
-           ierr = nf90_put_att(imapfile, id_laycoordcc,  'standard_name', 'ocean_sigma_coordinate')
-           ierr = nf90_put_att(imapfile, id_laycoordcc,  'long_name'    , 'sigma layer coordinate at flow element center')
-           ierr = nf90_put_att(imapfile, id_laycoordcc,  'units'        , '')
-           ierr = nf90_put_att(imapfile, id_laycoordcc,  'positive'     , 'up')
-           ierr = nf90_put_att(imapfile, id_laycoordcc,  'formula_terms', 'sigma: LayCoord_cc eta: s1 bedlevel: FlowElem_bl')
+     if ( jafullgridoutput == 0 ) then
+        if (layertype<3) then  !time-independent sigma layer and z layer
+           ierr = nf90_def_var(imapfile, 'LayCoord_cc', nf90_double, (/id_laydim/), id_laycoordcc)
+           ierr = nf90_def_var(imapfile, 'LayCoord_w' , nf90_double, (/id_wdim/), id_laycoordw)
            !
-           ierr = nf90_put_att(imapfile, id_laycoordw ,  'standard_name', 'ocean_sigma_coordinate')
-           ierr = nf90_put_att(imapfile, id_laycoordw ,  'long_name'    , 'sigma layer coordinate at vertical interface')
-           ierr = nf90_put_att(imapfile, id_laycoordw ,  'units'        , '')
-           ierr = nf90_put_att(imapfile, id_laycoordw ,  'positive'     , 'up')
-           ierr = nf90_put_att(imapfile, id_laycoordw ,  'formula_terms', 'sigma: LayCoord_w eta: s1 bedlevel: FlowElem_bl')
-           !
-        elseif (layertype==2) then   !all z layers
-           ierr = nf90_put_att(imapfile, id_laycoordcc,  'standard_name', '')
-           ierr = nf90_put_att(imapfile, id_laycoordcc,  'long_name'    , 'z layer coordinate at flow element center')
-           ierr = nf90_put_att(imapfile, id_laycoordcc,  'positive'     , 'up')
-           ierr = nf90_put_att(imapfile, id_laycoordcc,  'units'        , 'm')
-           !
-           ierr = nf90_put_att(imapfile, id_laycoordw ,  'standard_name', '')
-           ierr = nf90_put_att(imapfile, id_laycoordw ,  'long_name'    , 'z layer coordinate at vertical interface')
-           ierr = nf90_put_att(imapfile, id_laycoordw ,  'positive'     , 'up')
-           ierr = nf90_put_att(imapfile, id_laycoordw ,  'units'        , 'm')
-           !
-        endif
-     else
-        if (jafullgridoutput==0) then
+           !define and write compact form output of sigma or z-layer
+           if (layertype==1) then  !all sigma layers
+              ierr = nf90_put_att(imapfile, id_laycoordcc,  'standard_name', 'ocean_sigma_coordinate')
+              ierr = nf90_put_att(imapfile, id_laycoordcc,  'long_name'    , 'sigma layer coordinate at flow element center')
+              ierr = nf90_put_att(imapfile, id_laycoordcc,  'units'        , '')
+              ierr = nf90_put_att(imapfile, id_laycoordcc,  'positive'     , 'up')
+              ierr = nf90_put_att(imapfile, id_laycoordcc,  'formula_terms', 'sigma: LayCoord_cc eta: s1 bedlevel: FlowElem_bl')
+              !
+              ierr = nf90_put_att(imapfile, id_laycoordw ,  'standard_name', 'ocean_sigma_coordinate')
+              ierr = nf90_put_att(imapfile, id_laycoordw ,  'long_name'    , 'sigma layer coordinate at vertical interface')
+              ierr = nf90_put_att(imapfile, id_laycoordw ,  'units'        , '')
+              ierr = nf90_put_att(imapfile, id_laycoordw ,  'positive'     , 'up')
+              ierr = nf90_put_att(imapfile, id_laycoordw ,  'formula_terms', 'sigma: LayCoord_w eta: s1 bedlevel: FlowElem_bl')
+              !
+           elseif (layertype==2) then   !all z layers
+              ierr = nf90_put_att(imapfile, id_laycoordcc,  'standard_name', '')
+              ierr = nf90_put_att(imapfile, id_laycoordcc,  'long_name'    , 'z layer coordinate at flow element center')
+              ierr = nf90_put_att(imapfile, id_laycoordcc,  'positive'     , 'up')
+              ierr = nf90_put_att(imapfile, id_laycoordcc,  'units'        , 'm')
+              !
+              ierr = nf90_put_att(imapfile, id_laycoordw ,  'standard_name', '')
+              ierr = nf90_put_att(imapfile, id_laycoordw ,  'long_name'    , 'z layer coordinate at vertical interface')
+              ierr = nf90_put_att(imapfile, id_laycoordw ,  'positive'     , 'up')
+              ierr = nf90_put_att(imapfile, id_laycoordw ,  'units'        , 'm')
+              !
+           endif
+        else
            call mess(LEVEL_WARN, 'No grid outputdata given - Set "FullGridOutput = 1" in .mdu file to output grid data')
         endif
-     endif
-     !
-     if ( jafullgridoutput.eq.1 ) then
+     else
         ! structured 3d time-dependant output data
         ierr = nf90_inq_dimid(imapfile, 'time', id_timedim)
         ierr = nf90_inq_dimid(imapfile, 'nFlowElem', id_flowelemdim)
@@ -2540,25 +2538,25 @@ subroutine unc_append_3dflowgeom_put(imapfile, jaseparate, itim_in)
        ierr = nf90_inq_dimid(imapfile, 'laydim', id_laydim(iid))
        ierr = nf90_inq_dimid(imapfile, 'wdim', id_wdim(iid))
        !
-       if (layertype<3) then
-          !time-independent sigma layer and z layer
-          ierr = nf90_inq_varid(imapfile, 'LayCoord_cc', id_laycoordcc(iid))
-          ierr = nf90_inq_varid(imapfile, 'LayCoord_w' , id_laycoordw(iid))
-          !
-          ! write 3d time-independent output data to netcdf file
-          !
-          if (layertype == 1) then
-             ! structured 3d time-independent output data (sigma-layer)
-             ierr = nf90_put_var(imapfile, id_laycoordcc(iid), 0.5d0*(zslay(1:kmx,1)+zslay(0:kmx-1,1)), start=(/ 1 /), count=(/ kmx /))
-             ierr = nf90_put_var(imapfile, id_laycoordw (iid), zslay(0:kmx,1), start=(/ 1 /), count=(/ kmx+1 /))
-          elseif (layertype == 2) then
-             ! structured 3d time-independent output data (z-layer)
-           !  ierr = nf90_put_var(imapfile, id_laycoordcc(iid), 0.5d0*(zslay(1:kmx,1)+zslay(0:kmx-1,1)), start=(/ 1 /), count=(/ kmx /))
-           !  ierr = nf90_put_var(imapfile, id_laycoordw(iid) , zslay(0:kmx,1), start=(/ 1 /), count=(/ kmx+1 /))
+       if ( jafullgridoutput == 0 ) then
+          if (layertype<3) then
+             !time-independent sigma layer and z layer
+             ierr = nf90_inq_varid(imapfile, 'LayCoord_cc', id_laycoordcc(iid))
+             ierr = nf90_inq_varid(imapfile, 'LayCoord_w' , id_laycoordw(iid))
+             !
+             ! write 3d time-independent output data to netcdf file
+             !
+             if (layertype == 1) then
+                ! structured 3d time-independent output data (sigma-layer)
+                ierr = nf90_put_var(imapfile, id_laycoordcc(iid), 0.5d0*(zslay(1:kmx,1)+zslay(0:kmx-1,1)), start=(/ 1 /), count=(/ kmx /))
+                ierr = nf90_put_var(imapfile, id_laycoordw (iid), zslay(0:kmx,1), start=(/ 1 /), count=(/ kmx+1 /))
+             elseif (layertype == 2) then
+                ! structured 3d time-independent output data (z-layer)
+              !  ierr = nf90_put_var(imapfile, id_laycoordcc(iid), 0.5d0*(zslay(1:kmx,1)+zslay(0:kmx-1,1)), start=(/ 1 /), count=(/ kmx /))
+              !  ierr = nf90_put_var(imapfile, id_laycoordw(iid) , zslay(0:kmx,1), start=(/ 1 /), count=(/ kmx+1 /))
+             endif
           endif
-       endif
-       !
-       if ( jafullgridoutput.eq.1 ) then
+       else
           ! get id's for structured 3d time-dependant output data
           ierr = nf90_inq_dimid(imapfile, 'time', id_timedim(iid))
           ierr = nf90_inq_dimid(imapfile, 'nFlowElem', id_flowelemdim(iid))
@@ -2571,9 +2569,6 @@ subroutine unc_append_3dflowgeom_put(imapfile, jaseparate, itim_in)
           ierr = nf90_inq_varid(imapfile, 'FlowElem_zw' , id_flowelemzw(iid))
           !
        end if
-    endif
-    !
-    if ( jafullgridoutput.eq.1 ) then
        ! write structured 3d time-dependant output data
        do kk=1,Ndxi
           call getkbotktop(kk,kb,kt)
@@ -6868,6 +6863,7 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
     use m_missing
     use m_partitioninfo, only: jampi
     use string_module, only: replace_multiple_spaces_by_single_spaces
+    use netcdf_utils, only: ncu_append_atts
 
     implicit none
 
@@ -6923,7 +6919,7 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
 
     integer,          dimension(:), allocatable :: idum
 
-    integer :: iid, i, j, jj, numContPts, numNodes, itim, k, kb, kt, kk, n, LL, Ltx, Lb, L, nm, nlayb,nrlay, nlaybL, nrlayLx
+    integer :: iid, i, j, jj, numContPts, numNodes, itim, k, kb, kt, kk, n, LL, Ltx, Lb, L, nm, nlayb,nrlay, nlaybL, nrlayLx, varid, ndims
     integer :: ndxndxi ! Either ndx or ndxi, depending on whether boundary nodes also need to be written.
     double precision, dimension(:), allocatable :: windx, windy, windang
     double precision, dimension(:), allocatable :: numlimdtdbl ! TODO: WO/AvD: remove this once integer version of unc_def_map_var is available
@@ -6931,7 +6927,7 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
     integer :: jaeulerloc
 
     double precision   :: rhol
-    character(16)      :: dxname
+    character(16)      :: dxname, zw_elem, zcc_elem, zw_link, zcc_link
     character(64)      :: dxdescr
     character(10)      :: transpunit
     character(len=255) :: tmpstr
@@ -8249,6 +8245,44 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
         !
         ierr = unc_add_gridmapping_att(imapfile, (/ id_windx(iid), id_windy(iid), id_windxu(iid), id_windyu(iid),  nf90_global /), jsferic)
 
+
+        ! For all 3D variables, expand the coordinate attribute with a vertical coordinate
+        ierr = nf90_inq_varid( imapfile, 'LayCoord_cc', varid)
+        if (ierr==NF90_NOERR) then 
+           zcc_elem = ' LayCoord_cc'
+           zw_elem = ' LayCoord_w'
+           zcc_link = ''                        ! To be added, Issue UNST-4880
+           zw_link = ''
+        else
+           zcc_elem = ' FlowElem_zcc'
+           zw_elem = ' FlowElem_zw'
+           zcc_link = ''                        ! To be added, Issue UNST-4880
+           zw_link = ''
+        endif
+        if (nf90_inquire(imapfile, nVariables=varid)==NF90_NOERR) then
+           do while (varid>0)
+              if (nf90_inquire_variable(imapfile, varid, ndims=ndims)==NF90_NOERR) then
+                 call realloc(idum,ndims,keepexisting=.False.)
+                 if (nf90_inquire_variable(imapfile, varid, dimids=idum)==NF90_NOERR) then
+                    if (any(idum==id_wdim(iid)) .and. any(idum==id_flowelemdim(iid))) then
+                        ierr = ncu_append_atts( imapfile, varid, 'coordinates', trim(zw_elem))
+                    endif
+                    if (any(idum==id_laydim(iid)) .and. any(idum==id_flowelemdim(iid))) then
+                        ierr = ncu_append_atts( imapfile, varid, 'coordinates', trim(zcc_elem))
+                    endif
+                    if (any(idum==id_wdim(iid)) .and. any(idum==id_flowlinkdim(iid))) then
+                        ierr = ncu_append_atts( imapfile, varid, 'coordinates', trim(zw_link))
+                    endif
+                    if (any(idum==id_laydim(iid)) .and. any(idum==id_flowelemdim(iid))) then
+                        ierr = ncu_append_atts( imapfile, varid, 'coordinates', trim(zcc_link))
+                    endif
+                 endif
+              endif
+              varid = varid - 1
+           enddo
+        endif
+        
+        
         ierr = nf90_enddef(imapfile)
 
         ! 1D2D boundaries
@@ -14020,6 +14054,7 @@ subroutine unc_write_flowgeom_filepointer(igeomfile, jabndnd)
     use netcdf
     use m_partitioninfo
     use m_flow, only: kmx
+    use m_flowparameters, only: jafullgridoutput
     integer, intent(in) :: igeomfile
     integer, optional, intent(in) :: jabndnd !< Whether to include boundary nodes (1) or not (0). Default: no.
 
@@ -14125,7 +14160,9 @@ subroutine unc_write_flowgeom_filepointer(igeomfile, jabndnd)
     ! Flow cells
     ierr = nf90_def_var(igeomfile, 'FlowElem_xcc', nf90_double, id_flowelemdim, id_flowelemxcc)
     ierr = nf90_def_var(igeomfile, 'FlowElem_ycc', nf90_double, id_flowelemdim, id_flowelemycc)
-    ierr = nf90_def_var(igeomfile, 'FlowElem_zcc', nf90_double, id_flowelemdim, id_flowelemzcc)
+    if (jafullgridoutput == 0) then
+       ierr = nf90_def_var(igeomfile, 'FlowElem_zcc', nf90_double, id_flowelemdim, id_flowelemzcc)
+    endif
     ierr = nf90_def_var(igeomfile, 'FlowElem_bac', nf90_double, id_flowelemdim, id_flowelemba)
 
     ierr = unc_addcoordatts(igeomfile, id_flowelemxcc, id_flowelemycc, jsferic)
