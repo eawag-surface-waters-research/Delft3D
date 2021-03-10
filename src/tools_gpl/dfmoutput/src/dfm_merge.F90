@@ -698,6 +698,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
             var_kxdimpos(ivarcandidate)    = -1
             var_laydimpos(ivarcandidate)   = -1
             var_wdimpos(ivarcandidate)     = -1
+            var_seddimpos(ivarcandidate)   = -1
             isfound = .false.
          end if
       end if
