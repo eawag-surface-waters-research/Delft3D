@@ -49354,7 +49354,7 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
                 jaweir = 1
              elseif (ifixedweirscheme == 8 .or. ifixedweirscheme == 9) then
                 ! For Villemonte and Tabellenboek weirs with low sills are also applied, in order to be consistent with Simona
-                jaweir = 1
+                ! jaweir = 1   SWITCHED OFF (as a test on 10 March 2021)
              endif
 
              if (jaconveyance2D > 0) then   ! now set adjacent bobs of netlinks | sufficiently perpendicular to fixedweir to local ground level
