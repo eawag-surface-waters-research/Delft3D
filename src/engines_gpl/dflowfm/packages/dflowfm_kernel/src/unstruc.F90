@@ -16629,7 +16629,9 @@ end if
        call setucxucyucxuucyunew() !reconstruct cell-center velocities
        u1     = u1_tmp
        deallocate(u1_tmp)
-       call setbobs()
+       if (jased > 0 .and. stm_included) then
+          call setbobs()
+       endif
      end if
  end if
 
