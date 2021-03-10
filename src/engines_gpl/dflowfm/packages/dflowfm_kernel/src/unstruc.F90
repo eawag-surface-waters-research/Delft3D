@@ -20192,18 +20192,18 @@ subroutine unc_write_his(tim)            ! wrihis
                !
             endif
             !
-            if (stmpar%morpar%moroutput%taub) then
-               ierr = nf90_def_var(ihisfile, 'taub', nf90_double, (/ id_statdim, id_timedim /), id_taub)
-               ierr = nf90_put_att(ihisfile, id_taub, 'long_name', 'Bed shear stress for morphology')
-               ierr = nf90_put_att(ihisfile, id_taub, 'units', 'Pa')
-               ierr = nf90_put_att(ihisfile, id_taub, '_FillValue', dmiss)
-               ierr = nf90_put_att(ihisfile, id_taub, 'coordinates', statcoordstring)
-               ierr = nf90_put_att(ihisfile, id_taub, 'geometry', station_geom_container_name)
-            endif
-            !
             ! Sediment transports
             !
             if (jased > 0 .and. stm_included .and. jahissed > 0) then
+               !
+               if (stmpar%morpar%moroutput%taub) then
+                  ierr = nf90_def_var(ihisfile, 'taub', nf90_double, (/ id_statdim, id_timedim /), id_taub)
+                  ierr = nf90_put_att(ihisfile, id_taub, 'long_name', 'Bed shear stress for morphology')
+                  ierr = nf90_put_att(ihisfile, id_taub, 'units', 'Pa')
+                  ierr = nf90_put_att(ihisfile, id_taub, '_FillValue', dmiss)
+                  ierr = nf90_put_att(ihisfile, id_taub, 'coordinates', statcoordstring)
+                  ierr = nf90_put_att(ihisfile, id_taub, 'geometry', station_geom_container_name)
+               endif
                !
                select case(stmpar%morpar%moroutput%transptype)
                   case (0)
