@@ -8251,8 +8251,8 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
         if (ierr==NF90_NOERR) then 
            zcc_elem = ' LayCoord_cc'
            zw_elem = ' LayCoord_w'
-           zcc_link = ''                        ! To be added, Issue UNST-4880
-           zw_link = ''
+           zcc_link = ' LayCoord_cc'
+           zw_link = ' LayCoord_w'
         else
            zcc_elem = ' FlowElem_zcc'
            zw_elem = ' FlowElem_zw'
