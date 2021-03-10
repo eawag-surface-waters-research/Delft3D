@@ -265,11 +265,10 @@ module m_1d_networkreader
       call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Error Allocating Memory for Branches')
    endif
 
-   !if (jampi_ == 0) then
-      ierr = ggeo_get_start_end_nodes_of_branches(meshgeom%nodebranchidx, gpFirst, gpLast)
-   !else
-   !   ierr = find_gpFirst_gpLast_parallel(meshgeom, gpFirst, gpLast)
-   !end if
+   ierr = ggeo_get_start_end_nodes_of_branches(meshgeom%nodebranchidx, gpFirst, gpLast)
+   if (jampi_ /= 0) then
+      call update_gpFirst_gpLast_parallel(meshgeom, gpFirst, gpLast)
+   end if
    if (ierr /= 0) then
       call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Error Getting first and last nodes of the network branches')
    endif
@@ -282,7 +281,7 @@ module m_1d_networkreader
          firstNode = gpFirst(ibran)
          lastNode  = gpLast(ibran)
          ! if no mesh points in the branch, cycle
-         if(firstNode==-1 .or. lastNode==-1) then
+         if(firstNode < 0 .or. lastNode < 0) then
             cycle
          endif
          do inode = firstNode, lastNode
@@ -310,7 +309,7 @@ module m_1d_networkreader
       firstNode = gpFirst(ibran)
       lastNode  = gpLast(ibran)
       ! if no mesh points in the branch, cycle
-      if(firstNode==-1 .or. lastNode==-1) then
+      if(firstNode < 0 .or. lastNode < 0) then
          ! end node and begin node are missing and no internal gridpoints on branch.
          localOffsets = 0d0
          gridpointscount = 0
@@ -327,7 +326,7 @@ module m_1d_networkreader
          localGpsID(1:gridPointsCount)   = gpsID(firstNode:lastNode)
       endif
 
-      if(nodesOnBranchVertices==0 .and. jampi_ == 0) then
+      if (nodesOnBranchVertices==0 .and. (jampi_ == 0 .or. (firstNode == -1 .and. lastNode == -1))) then
          if(localOffsets(1)>snapping_tolerance .or. gridpointsCount == 0) then
             !start point missing
             call add_point(.true., localOffsets, localGpsX, localGpsY, localGpsID, idMeshNodesInNetworkNodes, gridPointsCount, ibran, meshgeom)
@@ -338,7 +337,7 @@ module m_1d_networkreader
             call add_point(.false., localOffsets, localGpsX, localGpsY, localGpsID, idMeshNodesInNetworkNodes, gridPointsCount, ibran, meshgeom)
          endif
       else if(nodesOnBranchVertices==0 .and. jampi_ == 1) then
-         if(firstNode /= -1 .and. lastNode /= -1) then
+         if (firstNode > 0 .and. lastNode > 0) then
             if (gridPointsCount > 1) then
                meanLength = (localOffsets(gridPointsCount) - localOffsets(1)) / dble(gridPointsCount - 1)
             else
@@ -372,30 +371,26 @@ module m_1d_networkreader
 
    end function construct_network_from_meshgeom
 
-   !> find first and last grid point for all branches in case of parallel computing
-   function find_gpFirst_gpLast_parallel(meshgeom, gpFirst, gpLast) result(ierr)
+   !> update gpFirst and gpLast for all branches in case of parallel computing:
+   !! set gpFirst and gpLast to -2 for branches in another domain
+   subroutine update_gpFirst_gpLast_parallel(meshgeom, gpFirst, gpLast)
    use meshdata, only : t_ug_meshgeom
    type(t_ug_meshgeom), intent(in   ) :: meshgeom    !< struct for mesh geometry
-   integer            , intent(  out) :: gpFirst(:)  !< all starting points
-   integer            , intent(  out) :: gpLast(:)   !< all ending points
-   integer                            :: ierr        !< function result (0=success)
+   integer            , intent(inout) :: gpFirst(:)  !< all starting points
+   integer            , intent(inout) :: gpLast(:)   !< all ending points
 
    integer                            :: ibran
-   integer                            :: i
 
-   gpFirst = -1
-   gpLast  = -1
    do ibran = 1,  meshgeom%nbranches
-      do i = 1, meshgeom%numedge
-         if (meshgeom%edgebranchidx(i) == ibran) then
-            gpFirst(ibran) = minval(meshgeom%edge_nodes(:,i))
-            gpLast (ibran) = maxval(meshgeom%edge_nodes(:,i))
-            exit
+      if (gpFirst(ibran) == -1 .and. gpLast(ibran) == -1) then
+         if (all(meshgeom%edgebranchidx(:) /= ibran)) then
+            gpFirst(ibran) = -2
+            gpLast(ibran)  = -2
          end if
-      end do
+      endif
    end do
-   ierr = 0
-   end function find_gpFirst_gpLast_parallel
+
+   end subroutine update_gpFirst_gpLast_parallel
 
    !> helper function to add a point at the start or end of a branch
    subroutine add_point(atStart, localOffsets, localGpsX, localGpsY, localGpsID, idMeshNodesInNetworkNodes, gridPointsCount, ibran, meshgeom)
@@ -910,7 +905,7 @@ module m_1d_networkreader
             write (msgbuf, '(3a, g11.4, a, g11.4)' ) 'Two grid points on branch ''', trim(branchid), ''' are too close at chainage ',               &
                                     gpchainages(igr), ' and ', gpchainages(igr + 1)
             if (my_rank >= 0) then
-               write(msgbuf,'(a,i4,2a)') 'Rank = ', my_rank, ': ', msgbuf
+               write(msgbuf,'(a,i4,2a)') 'Rank = ', my_rank, ': ', trim(msgbuf)
             end if
             call SetMessage(LEVEL_WARN, msgbuf)
          endif 
