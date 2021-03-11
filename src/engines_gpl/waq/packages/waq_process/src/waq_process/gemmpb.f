@@ -384,9 +384,15 @@ C           to avoid a whole lot of scaling of the fluxes etc we do this by enha
             BIOMAS_MPB2_EUF = BIOMAS_MPB2*EUF_FACT
 
 C           logistic growth restraint (o.a. CO2 limitation)
+C           (only for the bottom segments)
 
-            MPB1FMC = MAX((CCAP_MPB1-BIOMAS_MPB1_EUF)/CCAP_MPB1,0.0)
-            MPB2FMC = MAX((CCAP_MPB2-BIOMAS_MPB2_EUF)/CCAP_MPB2,0.0)
+            IF ( IKMRK1 .EQ. 2 ) THEN
+               MPB1FMC = MAX((CCAP_MPB1-BIOMAS_MPB1_EUF)/CCAP_MPB1,0.0)
+               MPB2FMC = MAX((CCAP_MPB2-BIOMAS_MPB2_EUF)/CCAP_MPB2,0.0)
+            ELSE
+               MPB1FMC = 1.0
+               MPB2FMC = 1.0
+            ENDIF
 
 C           Gross primary production
 
@@ -811,23 +817,34 @@ C           Mortality
             FMOR_MPB2 = MT_MPB2**(TEMP-20.) * BIOMAS_S1_MPB2 * (M1_20_MPB2 + M2_20_MPB2 * BIOMAS_S1_MPB2)
 
 C           NH4 over NO3 preferency
+!
+!           Note: this does not work properly, as the mineralisation flux is assigned exclusively to NH4.
+!           The original code assumes however that part can be consumed as NH4 and part as NO3, so that
+!           you get a correction on both fluxes. The fact that there is no flux to NO3 in the water means
+!           you have an exclusively negative contribution to NO3 in the water.
 
-            FN_MPB1 = FAM_S1_MPB1 + (1.-FAM_S1_MPB1)*FNI_S1_MPB1
-            IF ( FN_MPB1 .GT. 1.E-20 ) THEN
-               FNO3_MPB1 = (1.0 -FAM_S1_MPB1/FN_MPB1)
-               FNH4_MPB1 =       FAM_S1_MPB1/FN_MPB1
-            ELSE
-               FNO3_MPB1 = 0.0
-               FNH4_MPB1 = 1.0
-            ENDIF
-            FN_MPB2 = FAM_S1_MPB2 + (1.-FAM_S1_MPB2)*FNI_S1_MPB2
-            IF ( FN_MPB2 .GT. 1.E-20 ) THEN
-               FNO3_MPB2 = (1.0 -FAM_S1_MPB2/FN_MPB2)
-               FNH4_MPB2 =       FAM_S1_MPB2/FN_MPB2
-            ELSE
-               FNO3_MPB2 = 0.0
-               FNH4_MPB2 = 1.0
-            ENDIF
+            !FN_MPB1 = FAM_S1_MPB1 + (1.-FAM_S1_MPB1)*FNI_S1_MPB1
+            FN_MPB1 = FNI_S1_MPB1 + FAM_S1_MPB1
+!           IF ( FN_MPB1 .GT. 1.E-20 ) THEN
+!              FNO3_MPB1 = FNI_S1_MPB1 / FN_MPB1
+!              FNH4_MPB1 = FAM_S1_MPB1 / FN_MPB1
+!           ELSE
+!              FNO3_MPB1 = 0.0
+!              FNH4_MPB1 = 1.0
+!           ENDIF
+            !FN_MPB2 = FAM_S1_MPB2 + (1.-FAM_S1_MPB2)*FNI_S1_MPB2
+            FN_MPB2 = FNI_S1_MPB2 + FAM_S1_MPB2
+!           IF ( FN_MPB2 .GT. 1.E-20 ) THEN
+!              FNO3_MPB2 = FNI_S1_MPB2 / FN_MPB2
+!              FNH4_MPB2 = FAM_S1_MPB2 / FN_MPB2
+!           ELSE
+!              FNO3_MPB2 = 0.0
+!              FNH4_MPB2 = 1.0
+!           ENDIF
+            FNO3_MPB1 = 0.0
+            FNH4_MPB1 = 1.0
+            FNO3_MPB2 = 0.0
+            FNH4_MPB2 = 1.0
 
 C           uptake and production fluxes
 
