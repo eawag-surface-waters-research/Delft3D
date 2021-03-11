@@ -2572,8 +2572,8 @@ subroutine unc_append_3dflowgeom_put(imapfile, jaseparate, itim_in)
        ! write structured 3d time-dependant output data
        do kk=1,Ndxi
           call getkbotktop(kk,kb,kt)
-          ierr = nf90_put_var(imapfile, id_flowelemzcc(iid), 0.5d0*(zws(kb:kt)+zws(kb-1:kt-1)),  start=(/ 1, kk, itim /), count=(/ kt-kb+1, 1, 1 /))
-          ierr = nf90_put_var(imapfile, id_flowelemzw(iid), zws(kb-1:kt),  start=(/ 1, kk, itim /), count=(/ kt-kb+2, 1, 1 /))
+          ierr = nf90_put_var(imapfile, id_flowelemzcc(iid), 0.5d0*(zws(kb:kt)+zws(kb-1:kt-1)),  start=(/kmx-(kt-kb+1), kk, itim /), count=(/ kt-kb+1, 1, 1 /))
+          ierr = nf90_put_var(imapfile, id_flowelemzw(iid), zws(kb-1:kt),  start=(/(kmx+1)-(kt-kb+2)+1, kk, itim /), count=(/ kt-kb+2, 1, 1 /))
        end do
     end if
     !
