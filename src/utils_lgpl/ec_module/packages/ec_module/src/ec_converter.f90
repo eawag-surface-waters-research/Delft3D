@@ -1558,16 +1558,6 @@ module m_ec_converter
                      return
                   end select
             case (interpolate_spacetimeSaveWeightFactors, interpolate_spacetime)
-               !! RL: Deze check kan eruit, is al bij de aanleg van de items vastgesteld
-               !if (connection%targetItemsPtr(1)%ptr%vectorMax /= connection%sourceItemsPtr(1)%ptr%vectorMax) then
-               !   write(errormsg, '(a,i0,a,i0,a,i0,a,i0,a)') &
-               !                   'ERROR: ec_converter::ecConverterPolytim: Vector max size in source item ', connection%sourceItemsPtr(1)%ptr%id, &
-               !                   ' does not match the target item ', connection%targetItemsPtr(1)%ptr%id, &
-               !                   ' (', vectormax, '<>', vectormax_tgt, ').'
-               !   call setECMessage(errormsg)
-               !   return
-               !endif
-
                vectormax = connection%sourceItemsPtr(1)%ptr%quantityPtr%vectorMax
                missing = connection%sourceItemsPtr(1)%ptr%quantityPtr%fillvalue
                allocate(valL1(vectormax))
@@ -1576,18 +1566,15 @@ module m_ec_converter
                allocate(valR2(vectormax))
                allocate(val(vectormax))
 
+               ! Determine maximum number of layers on the target side
                if (associated(connection%targetItemsPtr(1)%ptr%elementSetPtr%z)) then
                   maxlay_tgt = size(connection%targetItemsPtr(1)%ptr%elementSetPtr%z) /   &
                                size(connection%targetItemsPtr(1)%ptr%elementSetPtr%x)
                else
                   maxlay_tgt = 1
                end if
-               if (associated(connection%targetItemsPtr(1)%ptr%elementSetPtr%z)) then
-                  maxlay_tgt = size(connection%targetItemsPtr(1)%ptr%elementSetPtr%z) /   &
-                               size(connection%targetItemsPtr(1)%ptr%elementSetPtr%x)
-               else
-                  maxlay_tgt = 1
-               end if
+
+               ! Determine maximum number of layers on the source side
                if (associated(connection%sourceItemsPtr(1)%ptr%elementSetPtr%z)) then
                   maxlay_src = size(connection%sourceItemsPtr(1)%ptr%elementSetPtr%z) /   &
                                size(connection%sourceItemsPtr(1)%ptr%elementSetPtr%x)
@@ -1623,8 +1610,8 @@ module m_ec_converter
                   select case(connection%converterPtr%operandType)
                      case(operand_replace_element, operand_replace, operand_add)
                         ! Are the subproviders 3D or 2D?
-                        if (associated(connection%sourceItemsPtr(1)%ptr%elementSetPtr%z) .and. &     ! source has sigma
-                               associated(connection%targetItemsPtr(1)%ptr%elementSetPtr%z)) then    ! target has sigma
+                        if (associated(connection%sourceItemsPtr(1)%ptr%elementSetPtr%z) .and. &     ! source has a vertical coordinate
+                               associated(connection%targetItemsPtr(1)%ptr%elementSetPtr%z)) then    ! target has a vertical coordinate
                            ! deal with one-sided interpolation
                            if ( kL == 0 .and. kR /= 0 ) then
                               kL = kR
