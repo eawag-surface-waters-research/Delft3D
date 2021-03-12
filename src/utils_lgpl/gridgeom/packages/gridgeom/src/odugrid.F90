@@ -208,7 +208,7 @@ function odu_get_start_end_nodes_of_branches(branchidx, branchStartNode, branchE
    integer, dimension(:), intent(inout)   :: branchEndNode
    integer                                :: ierr, i, ibran, numnode, nbranches 
 
-   ! Get the starting and endig indexes of the grid points
+   ! Get the starting and ending indexes of the grid points
    ierr  =  0
    ibran =  0
    numnode = size(branchidx)

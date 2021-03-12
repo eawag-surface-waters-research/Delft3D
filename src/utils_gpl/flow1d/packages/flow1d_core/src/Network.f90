@@ -116,7 +116,7 @@ contains
       if (.not. allocated(adm%lin2ibr))      allocate(adm%lin2ibr   (links_count))   
       if (.not. allocated(adm%lin2local))    allocate(adm%lin2local (links_count)) 
       if (.not. allocated(adm%lin2grid))     allocate(adm%lin2grid  (links_count)) 
-      if (.not. associated(adm%line2cross))  allocate(adm%line2cross(links_count+1, 3))
+      if (.not. associated(adm%line2cross))  allocate(adm%line2cross(links_count, 3))
       if (.not. associated(adm%gpnt2cross))  allocate(adm%gpnt2cross(gridp_count))
       if (.not. allocated(adm%hysteresis_for_summerdike)) allocate(adm%hysteresis_for_summerdike(2,links_count))
       adm%hysteresis_for_summerdike = .true.
@@ -232,12 +232,21 @@ contains
       integer                            :: icrsEnd
       double precision                   :: xBeg
       double precision                   :: xEnd
-      integer                            :: i, j
+      integer                            :: i, j, maxlink
       integer                            :: timerHandle
       logical                            :: interpolDone
       logical                            :: initError = .false.
 
-      call realloc(network%adm, linall, linall + network%brs%Count)
+      ! maxlink may be <> linall in case of parallel computing
+      ! at least in current phase of development
+      maxlink = 0
+      do i = 1, network%brs%Count
+         j = size(network%brs%branch(i)%lin)
+         if (j > 0) then
+            maxlink = max(maxlink, network%brs%branch(i)%lin(j))
+         end if
+      end do
+      call realloc(network%adm, maxlink, linall + network%brs%Count)
       
       timerHandle = 0
       call timstrt('line administration', timerHandle)

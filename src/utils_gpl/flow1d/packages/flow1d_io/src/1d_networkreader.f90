@@ -179,6 +179,8 @@ module m_1d_networkreader
    double precision, parameter                      :: snapping_tolerance = 1e-10
    double precision                                 :: distance, meanLength
    integer                                          :: jampi_, my_rank_
+   logical, allocatable                             :: active_nodes(:)
+   integer, allocatable                             :: active_branches(:)
 
    ierr = -1
 
@@ -267,7 +269,10 @@ module m_1d_networkreader
 
    ierr = ggeo_get_start_end_nodes_of_branches(meshgeom%nodebranchidx, gpFirst, gpLast)
    if (jampi_ /= 0) then
-      call update_gpFirst_gpLast_parallel(meshgeom, gpFirst, gpLast)
+      call active_network_nodes_branches(meshgeom, active_nodes, active_branches)
+   else
+      allocate(active_branches(meshgeom%nbranches))
+      active_branches = 1
    end if
    if (ierr /= 0) then
       call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Error Getting first and last nodes of the network branches')
@@ -326,7 +331,7 @@ module m_1d_networkreader
          localGpsID(1:gridPointsCount)   = gpsID(firstNode:lastNode)
       endif
 
-      if (nodesOnBranchVertices==0 .and. (jampi_ == 0 .or. (firstNode == -1 .and. lastNode == -1))) then
+      if (nodesOnBranchVertices==0 .and. (jampi_ == 0 .or. active_branches(ibran) == 1)) then
          if(localOffsets(1)>snapping_tolerance .or. gridpointsCount == 0) then
             !start point missing
             call add_point(.true., localOffsets, localGpsX, localGpsY, localGpsID, idMeshNodesInNetworkNodes, gridPointsCount, ibran, meshgeom)
@@ -336,7 +341,7 @@ module m_1d_networkreader
             !end point missing
             call add_point(.false., localOffsets, localGpsX, localGpsY, localGpsID, idMeshNodesInNetworkNodes, gridPointsCount, ibran, meshgeom)
          endif
-      else if(nodesOnBranchVertices==0 .and. jampi_ == 1) then
+      else if(nodesOnBranchVertices==0 .and. jampi_ == 1 .and. active_branches(ibran) == -1) then
          if (firstNode > 0 .and. lastNode > 0) then
             if (gridPointsCount > 1) then
                meanLength = (localOffsets(gridPointsCount) - localOffsets(1)) / dble(gridPointsCount - 1)
@@ -371,26 +376,71 @@ module m_1d_networkreader
 
    end function construct_network_from_meshgeom
 
-   !> update gpFirst and gpLast for all branches in case of parallel computing:
-   !! set gpFirst and gpLast to -2 for branches in another domain
-   subroutine update_gpFirst_gpLast_parallel(meshgeom, gpFirst, gpLast)
+   !> determine which network_nodes and network_branches are active in the current domain.
+   !! TODO: move to partitioner or part of t_ug_meshgeom
+   subroutine active_network_nodes_branches(meshgeom, active_nodes, active_branches)
    use meshdata, only : t_ug_meshgeom
-   type(t_ug_meshgeom), intent(in   ) :: meshgeom    !< struct for mesh geometry
-   integer            , intent(inout) :: gpFirst(:)  !< all starting points
-   integer            , intent(inout) :: gpLast(:)   !< all ending points
+   type(t_ug_meshgeom), intent(in   ) :: meshgeom          !< struct for mesh geometry
+   logical, allocatable, intent(out) :: active_nodes(:)    !< true if node is in current domain
+   integer, allocatable, intent(out) :: active_branches(:) !< 0 if outside current domain; 1 if completely in current domain; -1 if partly in current domain
 
-   integer                            :: ibran
+   integer :: ibran, istart, istop
+   logical, allocatable :: active_b(:)  ! array for simple check if branch is at least partly in current domain
 
+   if (allocated(active_nodes))    deallocate(active_nodes)
+   if (allocated(active_branches)) deallocate(active_branches)
+
+   allocate(active_nodes(meshgeom%nnodes))
+   allocate(active_branches(meshgeom%nbranches))
+
+   allocate(active_b(meshgeom%nbranches))
    do ibran = 1,  meshgeom%nbranches
-      if (gpFirst(ibran) == -1 .and. gpLast(ibran) == -1) then
-         if (all(meshgeom%edgebranchidx(:) /= ibran)) then
-            gpFirst(ibran) = -2
-            gpLast(ibran)  = -2
-         end if
-      endif
+      active_b(ibran) = (any(meshgeom%edgebranchidx(:) == ibran))
+   enddo
+
+   active_nodes(:) = .false.
+   do ibran = 1,  meshgeom%nbranches
+      if (.not. active_b(ibran)) then
+         active_branches(ibran) = 0  ! outside current domain
+         cycle
+      end if
+      istart = meshgeom%nedge_nodes(1, ibran)
+      istop  = meshgeom%nedge_nodes(2, ibran)
+      if (.not. active_nodes(istart)) then
+         ! behind if to minimize calls to coordinate_check
+         active_nodes(istart) = coordinate_check(istart)
+      end if
+      if (.not. active_nodes(istop)) then
+         active_nodes(istop)  = coordinate_check(istop)
+      end if
+
+      if (active_nodes(istart) .and. active_nodes(istop)) then
+         active_branches(ibran) = 1   ! completely in current domain
+      else if (active_b(ibran)) then
+         active_branches(ibran) = -1  ! partly in current domain
+      else
+         active_branches(ibran) = 0   ! outside current domain
+      end if
    end do
 
-   end subroutine update_gpFirst_gpLast_parallel
+   contains
+
+   function coordinate_check(icmp) result (found)
+      integer, intent(in) :: icmp
+      logical             :: found
+
+      integer             :: i
+
+      found = .false.
+      do i = 1, meshgeom%numnode
+         if (meshgeom%nnodex(icmp) == meshgeom%nodex(i) .and. meshgeom%nnodey(icmp) == meshgeom%nodey(i)) then
+            found = .true.
+            exit
+         endif
+      end do
+   end function coordinate_check
+
+   end subroutine active_network_nodes_branches
 
    !> helper function to add a point at the start or end of a branch
    subroutine add_point(atStart, localOffsets, localGpsX, localGpsY, localGpsID, idMeshNodesInNetworkNodes, gridPointsCount, ibran, meshgeom)
