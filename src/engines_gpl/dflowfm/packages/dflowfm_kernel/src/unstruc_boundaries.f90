@@ -799,40 +799,27 @@ function addtimespacerelation_boundaries(qid, filename, filetype, method, operan
       success = ec_addtimespacerelation(qid, xbndu, ybndu, kdu, kx, filename, filetype, method, operand, xy2bndu, forcingfile=forcingfile, targetindex=targetindex)
 
    else if (nbndu > 0 .and. qid == 'velocitybnd' ) then
-      if (kmx == 0) then
-         success = ec_addtimespacerelation(qid, xbndu, ybndu, kdu, kx, filename, filetype, method, operand, xy2bndu, forcingfile=forcingfile, targetindex=targetindex)
-      else
-         pzmin => zminmaxu(1:nbndu)
-         pzmax => zminmaxu(nbndu+1:2*nbndu)
-         success = ec_addtimespacerelation(qid, xbndu, ybndu, kdu, kx, filename, filetype, method, operand,   &
+      pzmin => zminmaxu(1:nbndu)
+      pzmax => zminmaxu(nbndu+1:2*nbndu)
+      success = ec_addtimespacerelation(qid, xbndu, ybndu, kdu, kx, filename, filetype, method, operand,   &
                                            xy2bndu, z=sigmabndu, pzmin=pzmin, pzmax=pzmax, forcingfile=forcingfile, targetindex=targetindex)
-      endif
 
    else if (nbnds > 0 .and. qid == 'salinitybnd' ) then ! 2D
-      if (kmx == 0) then
-         success = ec_addtimespacerelation(qid, xbnds, ybnds, kds, kx, filename, filetype, method, operand, xy2bnds, forcingfile=forcingfile, targetindex=targetindex)
-      else
-         pzmin => zminmaxs(1:nbnds)
-         pzmax => zminmaxs(nbnds+1:2*nbnds)
-         success = ec_addtimespacerelation(qid, xbnds, ybnds, kds, kx, filename, filetype, method, operand, xy2bnds,    &
+      pzmin => zminmaxs(1:nbnds)
+      pzmax => zminmaxs(nbnds+1:2*nbnds)
+      success = ec_addtimespacerelation(qid, xbnds, ybnds, kds, kx, filename, filetype, method, operand, xy2bnds,    &
                                            z=sigmabnds, pzmin=pzmin, pzmax=pzmax, forcingfile=forcingfile, targetindex=targetindex)
-      endif
 
    else if (nbndTM > 0 .and. qid == 'temperaturebnd') then
-
-      if (kmx == 0) then ! 2D
-         success = ec_addtimespacerelation(qid, xbndTM, ybndTM, kdtm, kx, filename, filetype, method, operand, xy2bndtm, forcingfile=forcingfile, targetindex=targetindex)
-      else               ! 3D
-         pzmin => zminmaxtm(1:nbndTM)
-         pzmax => zminmaxtm(nbndTM+1:2*nbndTM)
-         success = ec_addtimespacerelation(qid, xbndTM, ybndTM, kdtm, kx, filename, filetype, method, operand, xy2bndtm,   &
+      pzmin => zminmaxtm(1:nbndTM)
+      pzmax => zminmaxtm(nbndTM+1:2*nbndTM)
+      success = ec_addtimespacerelation(qid, xbndTM, ybndTM, kdtm, kx, filename, filetype, method, operand, xy2bndtm,   &
                                            z=sigmabndtm, pzmin=pzmin, pzmax=pzmax, forcingfile=forcingfile, targetindex=targetindex)
-      endif
 
    else if (nbndsd > 0 .and. (qid == 'sedimentbnd')) then
-         pzmin => zminmaxsd(1:nbndsd)
-         pzmax => zminmaxsd(nbndsd+1:2*nbndsd)
-         success = ec_addtimespacerelation(qid, xbndsd, ybndsd, kdsd, kx, filename, filetype, method, operand, xy2bndsd,   &
+      pzmin => zminmaxsd(1:nbndsd)
+      pzmax => zminmaxsd(nbndsd+1:2*nbndsd)
+      success = ec_addtimespacerelation(qid, xbndsd, ybndsd, kdsd, kx, filename, filetype, method, operand, xy2bndsd,   &
                                            z=sigmabndsd, pzmin=pzmin, pzmax=pzmax, forcingfile=forcingfile, targetindex=targetindex)
 
    else if ( numtracers > 0 .and. (qid(1:9) == 'tracerbnd') ) then
@@ -845,14 +832,10 @@ function addtimespacerelation_boundaries(qid, filename, filetype, method, operan
 !      update: all tracers are counted first and allocated later
 
       if ( nbndtr(itrac).gt.0 ) then
-         if ( kmx.eq.0 ) then  ! 2D
-            success = ec_addtimespacerelation(qid, bndtr(itrac)%x, bndtr(itrac)%y, bndtr(itrac)%kd, kx, filename, filetype, method, operand, bndtr(itrac)%xy2, forcingfile=forcingfile, targetindex=targetindex)
-         else                  ! 3D
-            pzmin => bndtr(itrac)%zminmax(1:nbndtr(itrac))
-            pzmax => bndtr(itrac)%zminmax(nbndtr(itrac)+1:2*nbndtr(itrac))
-            success = ec_addtimespacerelation(qid, bndtr(itrac)%x, bndtr(itrac)%y, bndtr(itrac)%kd, kx, filename, filetype, method, operand, bndtr(itrac)%xy2,    &
-                                              z=bndtr(itrac)%sigma, forcingfile=forcingfile, pzmin=pzmin, pzmax=pzmax, targetindex=targetindex)
-         end if
+         pzmin => bndtr(itrac)%zminmax(1:nbndtr(itrac))
+         pzmax => bndtr(itrac)%zminmax(nbndtr(itrac)+1:2*nbndtr(itrac))
+         success = ec_addtimespacerelation(qid, bndtr(itrac)%x, bndtr(itrac)%y, bndtr(itrac)%kd, kx, filename, filetype, method, operand, bndtr(itrac)%xy2,    &
+                                           z=bndtr(itrac)%sigma, forcingfile=forcingfile, pzmin=pzmin, pzmax=pzmax, targetindex=targetindex)
       else
          success = .true.
       end if
@@ -864,14 +847,10 @@ function addtimespacerelation_boundaries(qid, filename, filetype, method, operan
 
       if (isf > 0) then
          if ( nbndsf(isf).gt.0 ) then
-            if ( kmx.eq.0 ) then
-               success = ec_addtimespacerelation(qid, bndsf(isf)%x, bndsf(isf)%y, bndsf(isf)%kd, kx, filename, filetype, method, operand, bndsf(isf)%xy2, forcingfile=forcingfile, targetindex=targetindex)
-            else
-               pzmin => bndsf(isf)%zminmax(1:nbndsf(isf))
-               pzmax => bndsf(isf)%zminmax(nbndsf(isf)+1:2*nbndsf(isf))
-               success = ec_addtimespacerelation(qid, bndsf(isf)%x, bndsf(isf)%y, bndsf(isf)%kd, kx, filename, filetype, method, operand, bndsf(isf)%xy2,    &
-                                                 z=bndsf(isf)%sigma, forcingfile=forcingfile, pzmin=pzmin, pzmax=pzmax, targetindex=targetindex)
-            end if
+            pzmin => bndsf(isf)%zminmax(1:nbndsf(isf))
+            pzmax => bndsf(isf)%zminmax(nbndsf(isf)+1:2*nbndsf(isf))
+            success = ec_addtimespacerelation(qid, bndsf(isf)%x, bndsf(isf)%y, bndsf(isf)%kd, kx, filename, filetype, method, operand, bndsf(isf)%xy2,    &
+                                              z=bndsf(isf)%sigma, forcingfile=forcingfile, pzmin=pzmin, pzmax=pzmax, targetindex=targetindex)
          else
             success = .true.
          end if
@@ -884,16 +863,11 @@ function addtimespacerelation_boundaries(qid, filename, filetype, method, operan
       success = ec_addtimespacerelation(qid, xbndt, ybndt, kdt, kx, filename, filetype, method, operand, xy2bndt, forcingfile=forcingfile, targetindex=targetindex)
 
    else if (nbnduxy > 0 .and. (qid == 'uxuyadvectionvelocitybnd')) then
-
       kx = 2
-      if (kmx == 0) then ! 2D
-         success = ec_addtimespacerelation(qid, xbnduxy, ybnduxy, kduxy, kx, filename, filetype, method, operand, xy2bnduxy, forcingfile=forcingfile, targetindex=targetindex)
-      else
-         pzmin => zminmaxuxy(1:nbnduxy)
-         pzmax => zminmaxuxy(nbnduxy+1:2*nbnduxy)
-         success = ec_addtimespacerelation(qid, xbnduxy, ybnduxy, kduxy, kx, filename, filetype, method, operand, xy2bnduxy,   &
-                                           z=sigmabnduxy, pzmin=pzmin, pzmax=pzmax, forcingfile=forcingfile)
-      endif
+      pzmin => zminmaxuxy(1:nbnduxy)
+      pzmax => zminmaxuxy(nbnduxy+1:2*nbnduxy)
+      success = ec_addtimespacerelation(qid, xbnduxy, ybnduxy, kduxy, kx, filename, filetype, method, operand, xy2bnduxy,   &
+                                        z=sigmabnduxy, pzmin=pzmin, pzmax=pzmax, forcingfile=forcingfile)
 
    else if (nbndn > 0 .and. (qid == 'normalvelocitybnd')) then
       success = ec_addtimespacerelation(qid, xbndn, ybndn, kdn, kx, filename, filetype, method, operand, xy2bndn, forcingfile=forcingfile, targetindex=targetindex)

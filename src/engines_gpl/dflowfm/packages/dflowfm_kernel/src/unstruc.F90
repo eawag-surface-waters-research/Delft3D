@@ -29866,6 +29866,50 @@ integer          :: k1, k3, kb3, Lt1, Lt2, Lt3, Ld1, Ld2, Ld3, kk1, kk2, kk3
              end do
           end do
        end if
+    else                          ! For a kmx=0 model: set min and max to bedlevel and waterlevel respectively
+       do i  = 1, nbnds
+          ki = kbnds(2,i)
+          zminmaxs(i) = bl(ki)
+          zminmaxs(i+nbnds) = s1(ki)
+       end do
+       do i  = 1, nbndTM
+          ki = kbndTM(2,i)
+          zminmaxTM(i) = bl(ki)
+          zminmaxTM(i+nbndTM) = s1(ki)
+       end do
+       do i  = 1, nbnduxy
+          ki = kbnduxy(2,i)
+          zminmaxuxy(i) = bl(ki)
+          zminmaxuxy(i+nbnduxy) = s1(ki)
+       end do
+       do i  = 1, nbndu
+          ki = kbndu(2,i)
+          zminmaxu(i) = bl(ki)
+          zminmaxu(i+nbndu) = s1(ki)
+       end do
+       do itrac=1,numtracers
+          do i=1,nbndtr(itrac)
+             ki = bndtr(itrac)%k(2,i)
+             bndtr(itrac)%zminmax(i) = bl(ki)
+             bndtr(itrac)%zminmax(i+nbndtr(itrac)) = s1(ki)
+          end do
+       end do
+       do i  = 1, nbndsd
+          ki = kbndsd(2,i)
+          zminmaxsd(i) = bl(ki)
+          zminmaxsd(i+nbndsd) = s1(ki)
+       end do
+
+       if (jased==4 .and. stm_included) then
+          do isf=1,numfracs
+             do i=1,nbndsf(isf)
+                ki = bndsf(isf)%k(2,i)
+                call getkbotktop(ki,kb,kt)
+                bndsf(isf)%zminmax(i) = bl(ki)
+                bndsf(isf)%zminmax(i+nbndsf(isf)) = s1(ki)
+             end do
+          end do
+       end if
     endif
  end subroutine setzminmax
 
@@ -29882,10 +29926,10 @@ integer          :: k1, k3, kb3, Lt1, Lt2, Lt3, Ld1, Ld2, Ld3, kk1, kk2, kk3
  !   if (layertype == 2) return
 
     if ( kmx.eq.0 ) then   ! 2D, set dummy values
-       if ( allocated(sigmabnds)  ) sigmabnds  = 0d0
-       if ( allocated(sigmabndTM) ) sigmabndTM = 0d0
-!       if ( allocated(sigmabndtr) ) sigmabndtr = 0d0
-       if ( allocated(sigmabndu) ) sigmabndu = 0d0
+       if ( allocated(sigmabnds)  ) sigmabnds  = 0.5d0
+       if ( allocated(sigmabndTM) ) sigmabndTM = 0.5d0
+!      if ( allocated(sigmabndtr) ) sigmabndtr = 0.5d0
+       if ( allocated(sigmabndu) ) sigmabndu = 0.5d0
     else                   ! 3D
        do i  = 1, nbnds
           ki = kbnds(2,i)
@@ -44132,8 +44176,6 @@ end function is_1d_boundary_candidate
     if (kmx >= 1) then
        allocate ( sigmabndu(kmx*nbndu) , stat=ierr )
        call aerr('sigmabndu(kmx*nbndu)', ierr, kmx*nbndu )
-       allocate ( zminmaxu(2*nbndu) , stat=ierr )
-       call aerr('zminmaxu(2*nbndu)', ierr, 2*nbndu )
        allocate(zbndu(nbndu*kmxd), stat=ierr)
        call aerr('zbndu(nbndu*kmxd)', ierr, nbndu*kmxd )
        allocate(zbndu0(nbndu*kmxd), stat=ierr) ! TODO: Spee/Reyns: the zbndu array was made 3D by Spee, but Reyns's zbndu0 changes have not been updated for this yet.
@@ -44141,6 +44183,8 @@ end function is_1d_boundary_candidate
        allocate(zbndq(nbndu*kmxd), stat=ierr)
        call aerr('zbndq(nbndu*kmxd)', ierr, nbndu*kmxd )
     else
+       allocate ( sigmabndu(nbndu) , stat=ierr )
+       call aerr('sigmabndu(nbndu)', ierr, kmx*nbndu )
        allocate(zbndu(nbndu), stat=ierr)
        call aerr('zbndu(nbndu)', ierr, nbndu )
        allocate(zbndu0(nbndu), stat=ierr)
@@ -44148,6 +44192,8 @@ end function is_1d_boundary_candidate
        allocate(zbndq(nbndu), stat=ierr)
        call aerr('zbndq(nbndu)', ierr, nbndu )
     endif
+    allocate ( zminmaxu(2*nbndu) , stat=ierr )
+    call aerr('zminmaxu(2*nbndu)', ierr, 2*nbndu )
 
     !allocate ( zbndu_store(nbndu) , stat=ierr   )
     !call aerr('zbndu_store(nbndu)', ierr, nbndu )
@@ -44198,9 +44244,12 @@ end function is_1d_boundary_candidate
        if ( kmx.gt.0 ) then   ! also allocate 3D-sigma bnd distribution for EC
           allocate ( sigmabnds(kmx*nbnds) )
           call aerr('sigmabnds(kmx*nbnds)', ierr, kmx*nbnds )
-          allocate ( zminmaxs(2*nbnds) )
-          call aerr('zminmaxs(2*nbnds)', ierr, 2*nbnds )
+       else
+          allocate ( sigmabnds(nbnds) )
+          call aerr('sigmabnds(nbnds)', ierr, nbnds )
        end if
+       allocate ( zminmaxs(2*nbnds) )
+       call aerr('zminmaxs(2*nbnds)', ierr, 2*nbnds )
 
        zbnds   = DMISS ; kbnds = 0 ; kds = 1
        do k = 1, nbnds
@@ -44250,9 +44299,12 @@ end function is_1d_boundary_candidate
        if ( kmx.gt.0 ) then   ! also allocate 3D-sigma bnd distribution for EC
           allocate ( sigmabndTM(kmx*nbndTM) , stat=ierr )
           call aerr('sigmabndTM(kmx*nbndTM)', ierr, kmx*nbndTM )
-          allocate ( zminmaxTM(2*nbndTM) , stat=ierr )
-          call aerr('zminmaxTM(2*nbndTM)', ierr, 2*nbndTM )
+       else
+          allocate ( sigmabndTM(nbndTM) , stat=ierr )
+          call aerr('sigmabndTM(nbndTM)', ierr, nbndTM )
        end if
+       allocate ( zminmaxTM(2*nbndTM) , stat=ierr )
+       call aerr('zminmaxTM(2*nbndTM)', ierr, 2*nbndTM )
        zbndTM = DMISS ;  kbndTM = 0 ; kdTM = 1
        do k = 1, nbndTM
           L = keTM(k)
@@ -44353,9 +44405,12 @@ end function is_1d_boundary_candidate
     if ( kmx.gt.0 ) then   ! also allocate 3D-sigma bnd distribution for EC
        allocate ( sigmabndsd(kmx*nbndsd) , stat=ierr )
        call aerr('sigmabndsd(kmx*nbndsd)', ierr, kmx*nbndsd )
-       allocate ( zminmaxsd(2*nbndsd) , stat=ierr )
-       call aerr('zminmaxsd(2*nbndsd)', ierr, 2*nbndsd )
+    else
+       allocate ( sigmabndsd(nbndsd) , stat=ierr )
+       call aerr('sigmabndsd(nbndsd)', ierr, nbndsd )
     end if
+    allocate ( zminmaxsd(2*nbndsd) , stat=ierr )
+    call aerr('zminmaxsd(2*nbndsd)', ierr, 2*nbndsd )
 
     kbndsd = 0 ; kdsd = 1
 
@@ -44542,9 +44597,12 @@ end function is_1d_boundary_candidate
     if ( kmx.gt.0 ) then   ! also allocate 3D-sigma bnd distribution for EC
        allocate ( sigmabnduxy(kmx*nbnduxy) , stat=ierr )
        call aerr('sigmabnduxy(kmx*nbnduxy)', ierr, kmx*nbnduxy )
-       allocate ( zminmaxuxy(2*nbnduxy) , stat=ierr )
-       call aerr('zminmaxuxy(2*nbnduxy)', ierr, 2*nbnduxy )
+    else
+       allocate ( sigmabnduxy(nbnduxy) , stat=ierr )
+       call aerr('sigmabnduxy(nbnduxy)', ierr, nbnduxy )
     end if
+    allocate ( zminmaxuxy(2*nbnduxy) , stat=ierr )
+    call aerr('zminmaxuxy(2*nbnduxy)', ierr, 2*nbnduxy )
 
     kbnduxy= 0 ; kduxy= 1
     do k = 1, nbnduxy
