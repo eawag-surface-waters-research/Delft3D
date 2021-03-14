@@ -684,6 +684,16 @@ module m_readCrossSections
       pCs%levelsCount = numlevels
       pCS%height      = height(1:numlevels)
       pCS%flowWidth   = width(1:numlevels)
+
+      ! Add Preisman slot to totalwidth for closed cross sections.
+      ! The flow width remains unchanged.
+      if (totalwidth(numlevels) <= sl) then
+         pcs%closed = .true.
+         do i = 2, numlevels
+            totalwidth(i) = max(totalwidth(i), sl)
+         enddo
+      endif
+      
       pCS%totalWidth  = totalwidth(1:numlevels)
       
       if (pCs%plains(3) > 0.0d0) then
