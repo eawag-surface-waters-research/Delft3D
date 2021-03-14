@@ -44498,6 +44498,15 @@ end function is_1d_boundary_candidate
            end if
 
        enddo
+       if ( kmx.gt.0 ) then   ! also allocate 3D-sigma bnd distribution for EC
+          allocate ( bndtr(itrac)%sigma(kmx*nbndtr(itrac)) , stat=ierr )
+          call aerr('sigma(kmx*nbndtr(itrac))', ierr, kmx*nbndtr(itrac) )
+       else
+          allocate ( bndtr(itrac)%sigma(nbndtr(itrac)) , stat=ierr )
+          call aerr('sigma(nbndtr(itrac))', ierr, nbndtr(itrac) )
+       end if
+       allocate ( bndtr(itrac)%zminmax(2*nbndtr(itrac)) , stat=ierr )
+       call aerr('bndtr(itrac)%zminmax(2*nbndtr(itrac))', ierr, 2*nbndtr(itrac) )
 
     end do   ! itrac
 
@@ -44545,6 +44554,16 @@ end function is_1d_boundary_candidate
                   goto 888
               end if
           enddo ! nbndsf(isf)
+          if ( kmx.gt.0 ) then   ! also allocate 3D-sigma bnd distribution for EC
+             allocate ( bndsf(isf)%sigma(kmx*nbndsf(isf)) , stat=ierr )
+             call aerr('sigma(kmx*nbndsf(isf))', ierr, kmx*nbndsf(isf) )
+          else
+             allocate ( bndsf(isf)%sigma(nbndsf(isf)) , stat=ierr )
+             call aerr('sigma(nbndsf(isf))', ierr, nbndsf(isf) )
+          end if
+          allocate ( bndsf(isf)%zminmax(2*nbndsf(isf)) , stat=ierr )
+          call aerr('bndsf(isf)%zminmax(2*nbndsf(isf))', ierr, 2*nbndsf(isf) )
+
        end do   ! ised
     endif
  endif
