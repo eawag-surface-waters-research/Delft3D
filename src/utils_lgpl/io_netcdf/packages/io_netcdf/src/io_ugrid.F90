@@ -2941,6 +2941,10 @@ function ug_get_edge_faces(ncid, meshids, edge_faces, ifill, startIndex) result(
    integer                        :: k, varStartIndex  !< Temp variables
 
    ierr = nf90_get_var(ncid, meshids%varids(mid_edgefaces), edge_faces)
+   if (ierr /= nf90_noerr) then
+      goto 999
+   end if
+
    if (present(ifill)) then
       ierr = nf90_get_att(ncid, meshids%varids(mid_edgefaces), '_FillValue', ifill)
    end if
@@ -2957,6 +2961,13 @@ function ug_get_edge_faces(ncid, meshids, edge_faces, ifill, startIndex) result(
       endif
    endif
 
+   ierr = UG_NOERR
+   return ! Return with success
+
+999 continue
+    ! Some error (status was set earlier)
+
+
 end function ug_get_edge_faces
 
 
@@ -2972,6 +2983,10 @@ function ug_get_edge_nodes(ncid, meshids, edge_nodes, startIndex) result(ierr)
    integer                        :: varStartIndex    !< The index stored in the netCDF file
 
    ierr = nf90_get_var(ncid, meshids%varids(mid_edgenodes), edge_nodes)
+   if (ierr /= nf90_noerr) then
+      goto 999
+   end if
+
 
    if (present(startIndex)) then
       !we check for the start_index, we do not know if the variable was written as 0 based
@@ -2986,6 +3001,13 @@ function ug_get_edge_nodes(ncid, meshids, edge_nodes, startIndex) result(ierr)
    endif
 
    ! Getting fillvalue is unnecessary because each edge should have a begin- and end-point
+
+   ierr = UG_NOERR
+   return ! Return with success
+
+999 continue
+    ! Some error (status was set earlier)
+
 end function ug_get_edge_nodes
 
 
@@ -3038,6 +3060,10 @@ function ug_get_face_edges(ncid, meshids, face_edges, ifill, startIndex) result(
    integer                        :: ierr            !< Result status (UG_NOERR==NF90_NOERRif successful).
 
    ierr = nf90_get_var(ncid, meshids%varids(mid_faceedges), face_edges)
+   if (ierr /= nf90_noerr) then
+      goto 999
+   end if
+
    if (present(ifill)) then
       ierr = nf90_get_att(ncid, meshids%varids(mid_faceedges), '_FillValue', ifill)
    end if
@@ -3056,6 +3082,12 @@ function ug_get_face_edges(ncid, meshids, face_edges, ifill, startIndex) result(
       endif
    endif
 
+   ierr = UG_NOERR
+   return ! Return with success
+
+999 continue
+    ! Some error (status was set earlier)
+
 end function ug_get_face_edges
 
 
@@ -3072,6 +3104,10 @@ function ug_get_face_nodes(ncid, meshids, face_nodes, ifill, startIndex) result(
    integer                        :: ierr            !< Result status (UG_NOERR==NF90_NOERRif successful).
 
    ierr = nf90_get_var(ncid, meshids%varids(mid_facenodes), face_nodes)
+   if (ierr /= nf90_noerr) then
+      goto 999
+   end if
+
    if (present(ifill)) then
       ierr = nf90_get_att(ncid, meshids%varids(mid_facenodes), '_FillValue', ifill)
    end if
@@ -3089,6 +3125,12 @@ function ug_get_face_nodes(ncid, meshids, face_nodes, ifill, startIndex) result(
          enddo
       endif
    endif
+
+   ierr = UG_NOERR
+   return ! Return with success
+
+999 continue
+    ! Some error (status was set earlier)
 
 end function ug_get_face_nodes
 

@@ -19,6 +19,7 @@
    public :: ggeo_count_or_create_edge_nodes
    public :: ggeo_deallocate
    public :: ggeo_initialize
+   public :: ggeo_construct_netcelllin_from_netcellnod
 
 
    !from net.f90
@@ -31,6 +32,7 @@
    public :: CROSSED2d_BNDCELL
    public :: OTHERNODE
    public :: OTHERNODECHK
+   public :: getlink_between_nodes
    public :: SETNODADM_GRD_OP
    public :: INIALLOCnetcell
    public :: update_cell_circumcenters
@@ -624,6 +626,40 @@
 
    RETURN
    END SUBROUTINE OTHERNODECHK
+
+
+   !> Find the netlink that connects two netnodes (in either direction).
+   !! When not found, negative value is returned.
+   !!
+   !! Note: setnodadm_grd_op() must have been run already.
+   subroutine getlink_between_nodes(k1, k2, L)
+      use network_data
+      implicit none
+      integer, intent(in   ) :: k1 !< One end node of the link
+      integer, intent(in   ) :: k2 !< Other end node of the link
+      integer, intent(  out) :: L  !< Resulting link number, -1 when no such link exists between k1 and k2.
+
+      integer ::  iL, kother
+
+      L = -1
+
+      if (k1 <= 0 .or. k1 > numk) then
+         return ! Invalid node
+      end if
+      
+      if (.not. allocated(nod)) then
+         return ! setnodadm has not been called yet
+      end if
+
+      do iL=1,nmk(k1)
+         call othernode(k1, nod(k1)%lin(iL), kother)
+         if (kother == k2) then
+            L = nod(k1)%lin(iL)
+         end if
+      end do
+
+   end subroutine getlink_between_nodes
+
 
    SUBROUTINE SETNODADM_GRD_OP(JACROSSCHECK_)
 
@@ -2100,6 +2136,38 @@
    end if
    RETURN
    END SUBROUTINE CHKLINSIZTONODE
+
+
+   !> Constructs the connectivity table of netlinks that form each netcell.
+   !! Construction is based on given vertex nodes of each cell.
+   !! Resulting array could be used on call site to fill netcell%lin(:).
+   subroutine ggeo_construct_netcelllin_from_netcellnod(numcell, netcellnod, netcelllin)
+      use network_data
+      implicit none
+
+      integer, intent(in   ) :: numcell          !< Number of cells in table (may be used to only operate on a piece of the connectivity tables, e.g., only the 2D cells), typically called with global nump.
+      integer, intent(in   ) :: netcellnod(:,:)  !< connectivity table with vertex nodes for all netcells (faces)
+      integer, intent(  out) :: netcelllin(:,:) !< Resulting connectivity table with side edges for all netcells (faces), in same order as the nodes.
+
+      integer :: N, ik, inext, kcur, knext, nv
+      nv = size(netcellnod, 1)
+
+      do N=1,numcell
+         do ik=1,nv
+            inext = mod(ik,nv)+1
+            if (netcellnod(inext, N) <= 0) then
+               inext = 1
+            end if
+
+            call getlink_between_nodes(netcellnod(ik, N), netcellnod(inext, N), netcelllin(ik, N))
+
+            if (inext == 1) then
+               exit ! Round completed for this cell
+            end if
+         end do
+      end do
+   end subroutine ggeo_construct_netcelllin_from_netcellnod
+
 
    SUBROUTINE GIVENEWNODENUM(KNU)
    !LC use m_netw

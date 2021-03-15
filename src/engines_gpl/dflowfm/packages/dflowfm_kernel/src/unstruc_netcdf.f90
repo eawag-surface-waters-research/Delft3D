@@ -14645,6 +14645,7 @@ subroutine readcells(filename, ierr, jaidomain, jaiglobal_s, jareinitialize)
     use m_partitioninfo, only: idomain, ndomains, iglobal_s, Nglobal_s
     use dfm_error
     use gridoperations
+    use io_netcdf
 
     character(len=*), intent(in)  :: filename  !< Name of NetCDF file.
     integer,          intent(out) :: ierr      !< Return status (NetCDF operations)
@@ -14661,10 +14662,19 @@ subroutine readcells(filename, ierr, jaidomain, jaiglobal_s, jareinitialize)
                                      id_netelemnode, id_netelemlink, &    !< Netcell variables
                                      id_idomain, id_iglobal_s
 
-    integer                       :: ja_oldformatread, L, nv, k, s, jaidomain_, jaiglobal_s_, fillvalue, jareinitialize_
+    integer                       :: L, nv, n, k, s, jaidomain_, jaiglobal_s_, fillvalue, jareinitialize_
     integer                       :: nerr_store
     integer, allocatable          :: netcellnod(:,:), netcelllin(:,:), kn_tmp(:,:), ltype_tmp(:)
-    integer                       :: numl_read, numk_read
+    integer                       :: numl_read, numk_read, numl1d_read, numl2d_read, numk2d_read
+    integer, allocatable          :: kn12(:,:) !< Placeholder array for the edge_nodes
+
+    integer :: jaugrid    !< Whether UGRID file was read or not (1/0)
+    integer :: ioncid     !< io_netcdf dataset id
+    integer :: iconvtype  !< io_netcdf conventions type (from NetCDF :Conventions)
+    integer :: im1d, im2d !< mesh ids in ioncid dataset, for 1D and 2D
+    integer :: nump1d     !< Local counter for number of 1d nodes ("cells")
+    double precision :: convversion !< io_netcdf conventions version number
+
     ierr = DFM_NOERR
 
     if ( len_trim(filename)<1 ) then
@@ -14684,39 +14694,96 @@ subroutine readcells(filename, ierr, jaidomain, jaiglobal_s, jareinitialize)
     if(present(jareinitialize)) jareinitialize_ = jareinitialize
 
     call readyy('Reading net data',0d0)
-    ja_oldformatread = 0
 
     call prepare_error('Could not read net cells from NetCDF file '''//trim(filename)//''' (is not critical). Details follow:', LEVEL_DEBUG)
 
     nerr_ = 0
 
-    ierr = unc_open(filename, nf90_nowrite, inetfile)
-    call check_error(ierr, 'file '''//trim(filename)//'''')
-    if (nerr_ > 0) goto 888
+    ! First attempt UGRID:
+    ierr = ionc_open(filename, NF90_NOWRITE, ioncid, iconvtype, convversion)
+    if (ierr == ionc_noerr .and. iconvtype == IONC_CONV_UGRID .and. convversion >= 1.0) then
+       jaugrid = 1
+       numl_read = 0
+       numk_read = 0
 
-    ! Get nr of cells
-    ierr = nf90_inq_dimid(inetfile, 'nNetElem', id_netelemdim)
-    call check_error(ierr, 'nNetElem')
-    if (nerr_ > 0) goto 888
+       ! 1D mesh
+       nump1d      = 0
+       numl1d_read = 0
+       ierr = ionc_get_1d_mesh_id_ugrid(ioncid, im1d)
+       if (ierr == ionc_noerr) then
+          ierr = ionc_get_node_count(ioncid, im1d, nump1d)
+          ierr = ionc_get_edge_count(ioncid, im1d, numl1d_read)
+       end if
+       numl_read = numl1d_read
+       numk_read = nump1d ! nodes == cells in 1D
+       
+       ! 2D mesh
+       nump        = 0
+       numl2d_read = 0
+       numk2d_read = 0
+       nv          = 0
+       ierr = ionc_get_2d_mesh_id_ugrid(ioncid, im2d)
+       if (ierr == ionc_noerr) then
+          ierr = ionc_get_face_count(ioncid, im2d, nump)
+          ierr = ionc_get_edge_count(ioncid, im2d, numl2d_read)
+          ierr = ionc_get_node_count(ioncid, im2d, numk2d_read)
+          ierr = ionc_get_max_face_nodes(ioncid, im2d, nv)
+       end if
+       
+       nump1d2d = nump1d + nump
+       numl_read = numl_read + numl2d_read
+       numk_read = numk_read + numk2d_read
+       nv = max(nv, 1)
 
-    ierr = nf90_inquire_dimension(inetfile, id_netelemdim, len=nump1d2d)
-    call check_error(ierr, 'Elem count')
-    if (nerr_ > 0) goto 888
+       ! TODO: also read contacts
+       continue
+       
+
+    else
+       ! No UGRID, not a problem, code below will fall back to trying old format.
+       jaugrid = 0
+
+       ierr = unc_open(filename, nf90_nowrite, inetfile)
+       call check_error(ierr, 'file '''//trim(filename)//'''')
+       if (nerr_ > 0) goto 888
+
+       ! Get nr of cells
+       ierr = nf90_inq_dimid(inetfile, 'nNetElem', id_netelemdim)
+       call check_error(ierr, 'nNetElem')
+       if (nerr_ > 0) goto 888
+
+       ierr = nf90_inquire_dimension(inetfile, id_netelemdim, len=nump1d2d)
+       call check_error(ierr, 'Elem count')
+       if (nerr_ > 0) goto 888
+
+       ! check number of netlinks in the network file
+       ierr = nf90_inq_dimid(inetfile, 'nNetLink', id_netlinkdim)
+       call check_error(ierr, 'nNetLink')
+       ierr = nf90_inquire_dimension(inetfile, id_netlinkdim, len=numl_read)
+       call check_error(ierr, 'link count')
+
+       ! check number of netnodes in the network file
+       ierr = nf90_inq_dimid(inetfile, 'nNetNode', id_netnodedim)
+       call check_error(ierr, 'nNetNode')
+       ierr = nf90_inquire_dimension(inetfile, id_netnodedim, len=numk_read)
+       call check_error(ierr, 'Node count')
+
+       ! check max number of vertices
+       ierr = nf90_inq_dimid(inetfile, 'nNetElemMaxNode', id_netelemmaxnodedim)
+   !    call check_error(ierr, 'nNetElemMaxNode')
+       if ( ierr /= NF90_NOERR ) goto 888
+       ierr = nf90_inquire_dimension(inetfile, id_netelemmaxnodedim, len = nv)
+       if ( ierr /= NF90_NOERR ) goto 888
+
+    end if
+
 
     ! check number of netlinks in the network file
-    ierr = nf90_inq_dimid(inetfile, 'nNetLink', id_netlinkdim)
-    call check_error(ierr, 'nNetLink')
-    ierr = nf90_inquire_dimension(inetfile, id_netlinkdim, len=numl_read)
-    call check_error(ierr, 'link count')
     if (numl_read .ne. numl) then
        goto 888
     end if
 
     ! check number of netnodes in the network file
-    ierr = nf90_inq_dimid(inetfile, 'nNetNode', id_netnodedim)
-    call check_error(ierr, 'nNetNode')
-    ierr = nf90_inquire_dimension(inetfile, id_netnodedim, len=numk_read)
-    call check_error(ierr, 'Node count')
     if (numk_read .ne. numk) then
        goto 888
     end if
@@ -14725,19 +14792,6 @@ subroutine readcells(filename, ierr, jaidomain, jaiglobal_s, jareinitialize)
 
 
 
-    ! Read Netcell and cell center
-    ierr = nf90_inq_varid(inetfile, 'NetElemNode',  id_netelemnode)
-!    call check_error(ierr, 'NetElemNode')
-    if ( ierr /= NF90_NOERR ) goto 888
-    ierr = nf90_inq_varid(inetfile, 'NetElemLink',  id_netelemlink)
-!    call check_error(ierr, 'NetElemLink')
-    if ( ierr /= NF90_NOERR ) goto 888
-
-    ierr = nf90_inq_dimid(inetfile, 'nNetElemMaxNode', id_netelemmaxnodedim)
-!    call check_error(ierr, 'nNetElemMaxNode')
-    if ( ierr /= NF90_NOERR ) goto 888
-    ierr = nf90_inquire_dimension(inetfile, id_netelemmaxnodedim, len = nv)
-    if ( ierr /= NF90_NOERR ) goto 888
 
 !    if (nerr_ > 0) goto 888
 
@@ -14750,96 +14804,148 @@ subroutine readcells(filename, ierr, jaidomain, jaiglobal_s, jareinitialize)
     call readyy('Reading net data',.3d0)
 
     call increasenetcells(nump1d2d, 1.0, .false.)
-    ierr = nf90_get_att(inetfile, id_netelemnode, '_FillValue', fillvalue)
 
-    allocate(netcellnod(nv, nump1d2d))
-    allocate(netcelllin(nv, nump1d2d))
-    ierr = nf90_get_var(inetfile, id_netelemnode, netcellnod)
-    call check_error(ierr, 'cell elem.')
-    ierr = nf90_get_var(inetfile, id_netelemlink, netcelllin)
-    call check_error(ierr, 'cell link')
+    allocate(netcellnod(nv, nump1d2d)); netcellnod = 0
+    allocate(netcelllin(nv, nump1d2d)); netcelllin = 0
+    if (jaugrid == 1) then
+       if (im2d > 0) then
+          ierr = ionc_get_face_nodes(ioncid, im2d, netcellnod, fillvalue, 1)
+          ierr = ionc_get_face_edges(ioncid, im2d, netcelllin, fillvalue, 1)
+          if (ierr /= ionc_noerr) then
+             ! Face-edge-connectivity is optional in UGRID, so when not found, reconstruct them ourselves.
+             call ggeo_construct_netcelllin_from_netcellnod(nump, netcellnod, netcelllin)
+          end if
+       else
+          fillvalue = 0
+       end if
+       ! Fill 1D netcells with default linear order 1:nump1d
+       do n=1,nump1d
+          netcellnod(1, nump+n) = n ! Is node order correct here? (in line with xk?, because 1D order comes from 1d *links*)
+       end do
+       
+    else
+       ierr = nf90_get_att(inetfile, id_netelemnode, '_FillValue', fillvalue)
+       ! Read Netcell connectivity arrays
+       ierr = nf90_inq_varid(inetfile, 'NetElemNode',  id_netelemnode)
+   !    call check_error(ierr, 'NetElemNode')
+       if ( ierr /= NF90_NOERR ) goto 888
+       ierr = nf90_inq_varid(inetfile, 'NetElemLink',  id_netelemlink)
+   !    call check_error(ierr, 'NetElemLink')
+       if ( ierr /= NF90_NOERR ) goto 888
+
+
+       ierr = nf90_get_var(inetfile, id_netelemnode, netcellnod)
+       call check_error(ierr, 'cell elem.')
+       ierr = nf90_get_var(inetfile, id_netelemlink, netcelllin)
+       call check_error(ierr, 'cell link')
+    end if
+    
+    ! Now reconstruct the netcell array for 1D and 2D (in two halves), same for UGRID and non-UGRID.
     nump = 0
-    do L = 1, nump1d2d
-       if (netcelllin(1 ,L) == 0) then ! this is a 1d cell
-          call realloc(netcell(L)%nod, 1, keepExisting=.false.)
-          call realloc(netcell(L)%lin, 1, keepExisting=.false.)
-          netcell(L)%nod = netcellnod(1, L)
-          netcell(L)%lin = 0
-          netcell(L)%n   = 1
+    do n = 1, nump1d2d
+       if (netcelllin(1 ,n) == 0) then ! this is a 1d cell
+          call realloc(netcell(n)%nod, 1, keepExisting=.false.)
+          call realloc(netcell(n)%lin, 1, keepExisting=.false.)
+          netcell(n)%nod = netcellnod(1, n)
+          netcell(n)%lin = 0
+          netcell(n)%n   = 1
        else
           nump = nump + 1              ! update Nr of 2D cells
           s = nv                       ! s will be computed to for Nr of nodes of this cell
           do k = nv,1,-1
-             if (netcellnod(k, L) /= fillvalue) then
+             if (netcellnod(k, n) /= fillvalue) then
                 s = k
                 exit
              end if
           enddo
-          call realloc(netcell(L)%nod, s, keepExisting=.false.)
-          call realloc(netcell(L)%lin, s, keepExisting=.false.)
-          netcell(L)%nod = netcellnod(1:s, L)
-          netcell(L)%lin = netcelllin(1:s, L)
-          netcell(L)%n   = s
+          call realloc(netcell(n)%nod, s, keepExisting=.false.)
+          call realloc(netcell(n)%lin, s, keepExisting=.false.)
+          netcell(n)%nod = netcellnod(1:s, n)
+          netcell(n)%lin = netcelllin(1:s, n)
+          netcell(n)%n   = s
        endif
     enddo
 
     call readyy('Reading net data',.8d0)
-    call check_error(ierr, 'net elem')
 
-    ! read idomain
+    ! read idomain ! TODO: UNST-3752: this does not distinguish yet between UGRID and non-UGRID. In the future idomain and iglobal_s on separate vars for mesh1d and mesh2d /?
     if (jaidomain_ .ne. 0) then
-      ierr = nf90_inq_varid(inetfile, 'idomain', id_idomain)
-      call check_error(ierr, 'idomain')
-      if ( ierr.eq.nf90_noerr ) then
-         call realloc(idomain, nump1d2d, stat = ierr, keepExisting = .false.)
-         ierr = nf90_get_var(inetfile, id_idomain, idomain, count = (/ nump1d2d /))
-         ierr = nf90_get_att(inetfile, id_idomain, 'valid_max', ndomains)
-      else  ! no subdomain numbers in netfile
-         ndomains = 0
-         if ( allocated(idomain) ) deallocate(idomain)
-      end if
+       if (jaugrid == 1) then
+          ! TODO: UNST-4919: read idomain using ionc_* calls
+          ierr = nf90_noerr
+          continue
+       else
+          ierr = nf90_inq_varid(inetfile, 'idomain', id_idomain)
+          call check_error(ierr, 'idomain')
+          if ( ierr.eq.nf90_noerr ) then
+             call realloc(idomain, nump1d2d, stat = ierr, keepExisting = .false.)
+             ierr = nf90_get_var(inetfile, id_idomain, idomain, count = (/ nump1d2d /))
+             ierr = nf90_get_att(inetfile, id_idomain, 'valid_max', ndomains)
+          else  ! no subdomain numbers in netfile
+             ndomains = 0
+             if ( allocated(idomain) ) deallocate(idomain)
+          end if
+       end if
     endif
 
     if ( jaiglobal_s_.eq.1 ) then
 !      store nerr_
        nerr_store = nerr_
-       ierr = nf90_inq_varid(inetfile, 'iglobal_s', id_iglobal_s)
-       call check_error(ierr, 'iglobal_s')
-       if ( ierr.eq.nf90_noerr ) then
-          call realloc(iglobal_s, nump1d2d, stat = ierr, keepExisting = .false.)
-          ierr = nf90_get_var(inetfile, id_iglobal_s, iglobal_s, count = (/ nump1d2d /))
-          ierr = nf90_get_att(inetfile, id_iglobal_s, 'valid_max', Nglobal_s)
-       else  ! no global cell numbers in netfile (not a problem)
-          Nglobal_s = 0
-          if ( allocated(iglobal_s) ) deallocate(iglobal_s)
-!         restore nerr_
-          nerr_ = nerr_store
+       if (jaugrid == 1) then
+          ! TODO: UNST-4919: read iglobal_s using ionc_* calls
+          ierr = nf90_noerr
+          continue
+       else
+          ierr = nf90_inq_varid(inetfile, 'iglobal_s', id_iglobal_s)
+          call check_error(ierr, 'iglobal_s')
+          if ( ierr.eq.nf90_noerr ) then
+             call realloc(iglobal_s, nump1d2d, stat = ierr, keepExisting = .false.)
+             ierr = nf90_get_var(inetfile, id_iglobal_s, iglobal_s, count = (/ nump1d2d /))
+             ierr = nf90_get_att(inetfile, id_iglobal_s, 'valid_max', Nglobal_s)
+          else  ! no global cell numbers in netfile (not a problem)
+             Nglobal_s = 0
+             if ( allocated(iglobal_s) ) deallocate(iglobal_s)
+   !         restore nerr_
+             nerr_ = nerr_store
+          end if
        end if
     end if
 
     if (jareinitialize_ .ne. 0) then ! when re-initialize in GUI, need to read KN, since KN has been changed in renumberflownode
-      ierr = nf90_inq_dimid(inetfile, 'nNetLink', id_netlinkdim)
-      call check_error(ierr, 'nNetLink')
-      ierr = nf90_inquire_dimension(inetfile, id_netlinkdim, len=numl)
-      call check_error(ierr, 'link count')
-      if (nerr_ > 0) goto 888
-
-      ierr = nf90_inq_varid(inetfile, 'NetLink', id_netlink)
-      call check_error(ierr, 'NetLink')
-      if (ierr == 0) then
-         allocate(kn_tmp(2, numl))
-         allocate(ltype_tmp(numl))
-         ierr = nf90_get_var(inetfile, id_netlink, kn_tmp)
-         call check_error(ierr, 'NetLink')
-         kn(1:2,1:numl) = kn_tmp(1:2, 1:numl)
-
-         ierr = nf90_inq_varid(inetfile, 'NetLinkType', id_netlinktype)
-         ierr = nf90_get_var(inetfile, id_netlinktype, ltype_tmp)
-         call check_error(ierr, 'NetLinkType')
-         kn(3,1:numl) = ltype_tmp(1:numl)
-         deallocate(kn_tmp,ltype_tmp)
-         call check_error(ierr, 'NetLink')
-      end if
+       if (jaugrid == 1) then
+          if (im2d > 0) then
+             ! Fortunately, only the 2D net links have been permuted by renumberFlowNodes(), so we only re-read the 2D edges here.
+             allocate(kn12(2, numl2d_read))
+             ierr = ionc_get_edge_nodes(ioncid, im2d, kn12, 1)
+             do L=1,numl2d_read
+                kn(1:2, numl1d+L) = kn12(1:2,L)
+                kn(3,   numl1d+L) = 2
+             end do
+          end if
+       else
+          ierr = nf90_inq_dimid(inetfile, 'nNetLink', id_netlinkdim)
+          call check_error(ierr, 'nNetLink')
+          ierr = nf90_inquire_dimension(inetfile, id_netlinkdim, len=numl)
+          call check_error(ierr, 'link count')
+          if (nerr_ > 0) goto 888
+    
+          ierr = nf90_inq_varid(inetfile, 'NetLink', id_netlink)
+          call check_error(ierr, 'NetLink')
+          if (ierr == 0) then
+             allocate(kn_tmp(2, numl))
+             allocate(ltype_tmp(numl))
+             ierr = nf90_get_var(inetfile, id_netlink, kn_tmp)
+             call check_error(ierr, 'NetLink')
+             kn(1:2,1:numl) = kn_tmp(1:2, 1:numl)
+    
+             ierr = nf90_inq_varid(inetfile, 'NetLinkType', id_netlinktype)
+             ierr = nf90_get_var(inetfile, id_netlinktype, ltype_tmp)
+             call check_error(ierr, 'NetLinkType')
+             kn(3,1:numl) = ltype_tmp(1:numl)
+             deallocate(kn_tmp,ltype_tmp)
+             call check_error(ierr, 'NetLink')
+          end if
+       end if
     endif
 
     call readyy('Reading net data',1d0)
