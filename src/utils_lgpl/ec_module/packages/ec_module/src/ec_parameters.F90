@@ -138,6 +138,7 @@ module m_ec_parameters
    integer, parameter :: zinterpolate_linear                    = 1 !< linear interpolation
    integer, parameter :: zinterpolate_block                     = 2 !< piecewise constant interpolation (block-from)
    integer, parameter :: zinterpolate_log                       = 3 !< logarithmic
+   integer, parameter :: zinterpolate_mean                      = 4 !< mean values, averaging
 
    ! enumeration for vertical coordinate types
    integer, parameter :: ztype_sigma                            = 0 !< sigma coordinates

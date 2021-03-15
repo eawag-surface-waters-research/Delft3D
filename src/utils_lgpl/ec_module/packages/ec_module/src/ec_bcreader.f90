@@ -564,6 +564,8 @@ contains
              bc%zInterpolationType = zinterpolate_log
           case ('BLOCK')
              bc%zInterpolationType = zinterpolate_block
+          case ('MEAN')
+             bc%zInterpolationType = zinterpolate_mean
           case default
              bc%zInterpolationType = zinterpolate_unknown
              call setECMessage("Unknown vertical interpolation '"//trim(adjustl(hdrvals(ifld)%s))//           &
