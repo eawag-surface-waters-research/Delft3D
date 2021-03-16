@@ -159,7 +159,7 @@ AX_CHECK_COMPILE_FLAG([-r8],
 AC_SUBST(POLYPACK_FFLAGS)
 
 SWAN_FFLAGS=
-AX_CHECK_COMPILE_FLAG([-r8],
+AX_CHECK_COMPILE_FLAG([-72],
         [
         # Intel ifort
         SWAN_FFLAGS=-72
@@ -167,7 +167,7 @@ AX_CHECK_COMPILE_FLAG([-r8],
         # GNU gfortran
         SWAN_FFLAGS=-ffixed-line-length-72
         ])
-AC_SUBST(POLYPACK_FFLAGS)
+AC_SUBST(SWAN_FFLAGS)
 
 AC_LANG_POP
 
@@ -738,6 +738,8 @@ third_party_open/polypack/src/Makefile
 third_party_open/swan/bin/linux/Makefile
 third_party_open/swan/bin/Makefile
 third_party_open/swan/src/Makefile
+third_party_open/swan/swan_mpi/Makefile
+third_party_open/swan/swan_omp/Makefile
 third_party_open/swan/Makefile
 third_party_open/swan/scripts/Makefile
 third_party_open/triangle/Makefile

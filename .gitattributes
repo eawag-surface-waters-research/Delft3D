@@ -15827,8 +15827,10 @@ src/third_party_open/swan/src/swmod1.for -text
 src/third_party_open/swan/src/swmod2.F -text
 src/third_party_open/swan/src/swn_outnc.f90 -text
 src/third_party_open/swan/swan_license_info.txt -text
+src/third_party_open/swan/swan_mpi/Makefile.am -text
 src/third_party_open/swan/swan_mpi/swan_mpi_exe.vfproj -text
 src/third_party_open/swan/swan_mpi_lib.vfproj -text
+src/third_party_open/swan/swan_omp/Makefile.am -text
 src/third_party_open/swan/swan_omp/swan_omp_exe.vfproj -text
 src/third_party_open/tcl/bin/win64/tclkitsh852.exe -text
 src/third_party_open/triangle/Makefile.am -text
