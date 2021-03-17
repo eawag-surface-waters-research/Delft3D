@@ -3670,16 +3670,17 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "Res_Pickup","GRAIN50   ",   6,"Y","x",1
 "Res_Pickup","GRAV      ",   7,"Y","x",1
 "Res_Pickup","KinViscos ",   8,"Y","x",1
-"Res_Pickup","RHOSAND   ",   9,"Y","x",1
-"Res_Pickup","RhoWater  ",  10,"N","x",1
-"Res_Pickup","PORS2     ",  11,"Y","x",1
-"Res_Pickup","ThickS2   ",  12,"Y","x",1
-"Res_Pickup","Surf      ",  13,"N","x",1
-"Res_Pickup","Depth     ",  14,"N","x",1
-"Res_Pickup","DELT      ",  15,"N","x",1
-"Res_Pickup","MinDepth  ",  16,"Y","x",1
-"Res_Pickup","MaxResPup ",  17,"Y","x",1
-"Res_Pickup","FactResPup",  18,"Y","x",1
+"Res_Pickup","PowNS2Pup ",   9,"Y","x",1
+"Res_Pickup","RHOSAND   ",  10,"Y","x",1
+"Res_Pickup","RhoWater  ",  11,"N","x",1
+"Res_Pickup","PORS2     ",  12,"Y","x",1
+"Res_Pickup","ThickS2   ",  13,"Y","x",1
+"Res_Pickup","Surf      ",  14,"N","x",1
+"Res_Pickup","Depth     ",  15,"N","x",1
+"Res_Pickup","DELT      ",  16,"N","x",1
+"Res_Pickup","MinDepth  ",  17,"Y","x",1
+"Res_Pickup","MaxResPup ",  18,"Y","x",1
+"Res_Pickup","FactResPup",  19,"Y","x",1
 "Sed_IM1   ","IM1       ",   1,"N","x",1
 "Sed_IM1   ","ZSedIM1   ",   2,"Y","x",1
 "Sed_IM1   ","VSedIM1   ",   3,"Y","x",1

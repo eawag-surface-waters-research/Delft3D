@@ -12194,3 +12194,4 @@ itemid,itemse,itemex,itemde,itemun,itemnm,itemag,itemda,itemwk,itemgr
 "ExtUVMPB1 ","x"," ",   0.150000    ,"(m2/gC)             ","VL specific extinction coefficient MPB epipelic   ","volume    ","volume    "," ","                              "
 "ExtUVMPB2 ","x"," ",   0.150000    ,"(m2/gC)             ","VL specific extinction coefficient MPB epipsammic ","volume    ","volume    "," ","                              "
 "NAlgDynSed","x"," ",    2.00000    ,"(-)                 ","number of algae types in DYNAMO (sum sedimentation","volume    ","volume    "," ","                              "
+"PowNS2Pup ","x"," ",    1.50000    ,"(-)                 ","Pow. of shear stress pick-up resuspension layer S2","volume    ","volume    "," ","                              "
