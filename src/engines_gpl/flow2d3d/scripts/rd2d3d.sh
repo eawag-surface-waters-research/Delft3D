@@ -146,7 +146,7 @@ fi
 if [ $withrtc -ne 0 ] ; then
     echo "    Online with RTC      : YES"
 fi
-if [ $NNODES -ne 1 ]; then
+if [ $NSLOTS -ne 1 ]; then
     testmpiexec=$(type mpiexec 2>/dev/null)
     if [[ $testmpiexec != "mpiexec is"* ]]; then
         # Try to module load mpi.

@@ -152,7 +152,7 @@ echo "    PROC_DEF_DIR     : $PROC_DEF_DIR"
 echo "    Working directory: $workdir"
 echo "    Number of slots  : $NSLOTS"
 echo "    Docker parallel  : $dockerprl"
-if [ $NNODES -ne 1 ]; then
+if [ $NSLOTS -ne 1 ]; then
     testmpiexec=$(type mpiexec 2>/dev/null)
     if [[ $testmpiexec != "mpiexec is"* ]]; then
         # Try to module load mpi.
