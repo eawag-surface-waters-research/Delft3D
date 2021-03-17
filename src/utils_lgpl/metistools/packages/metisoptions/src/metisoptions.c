@@ -55,6 +55,10 @@ int metisoptions(int *options, const char *optionname, const int *optionval)
 	{
 		i = (int)METIS_OPTION_NCUTS;
 	}
+	else if ( strcasecmp(optionname,"SEED")==0 )
+	{
+		i = (int)METIS_OPTION_SEED;
+	}
 	
 	if (i>=0)
 	{
