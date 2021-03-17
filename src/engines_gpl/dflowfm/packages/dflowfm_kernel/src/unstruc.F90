@@ -3294,8 +3294,8 @@ subroutine sethu(jazws0)                            ! Set upwind waterdepth hu
                              taludlxw(nfw), taludrxw(nfw), vegxw(nfw) )
                  weirdte(nfw) = (1d0 - waquaweirthetaw)*weirdte(nfw) + waquaweirthetaw*dte0
                  !
-                 ! test for Villemonte and sillheightmin, only for sillheightmin = 0.2626 (10 March 2021)
-                 if ( min(shlxw(nfw),shlxw(nfw)) <= sillheightmin .and. sillheightmin > 0.2625 .and. sillheightmin < 0.2627) then
+                 ! test for Villemonte and kademuren sillheightmin, only for sillheightmin = 0.111 (17 March 2021)
+                 if ( max(shlxw(nfw),shlxw(nfw)) <= sillheightmin .and. sillheightmin > 0.110 .and. sillheightmin < 0.112) then
                      weirdte(nfw) = 0.0
                  endif
                  !
