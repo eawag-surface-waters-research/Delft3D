@@ -106,10 +106,10 @@ integer, parameter :: UG_LOC_ALL2D = UG_LOC_NODE + UG_LOC_EDGE + UG_LOC_FACE !< 
 
 !> The following edge type codes define for each netlink (UGRID 'edge') the type (or absence) of flowlink.
 !! Note: these are different from contact types (but intentionally the numbers do not overlap).
-integer, parameter :: UG_EDGETYPE_INTERNAL_CLOSED = 20 !< Edge that is closed/no flow link
-integer, parameter :: UG_EDGETYPE_INTERNAL        = 21 !< Regular edge with an open flow link
-integer, parameter :: UG_EDGETYPE_BND             = 22 !< Boundary edge with open boundary
-integer, parameter :: UG_EDGETYPE_BND_CLOSED      = 23 !< Boundary edge with closed boundary
+integer, parameter :: UG_EDGETYPE_INTERNAL_CLOSED = 0 !< Edge that is closed/no flow link
+integer, parameter :: UG_EDGETYPE_INTERNAL        = 1 !< Regular edge with an open flow link
+integer, parameter :: UG_EDGETYPE_BND             = 2 !< Boundary edge with open boundary
+integer, parameter :: UG_EDGETYPE_BND_CLOSED      = 3 !< Boundary edge with closed boundary
 
 !! Dimension types (form a supplement to the preceding location types)
 integer, parameter :: UG_DIM_MAXFACENODES = 128 !< The dimension containing the max number of nodes in the face_node_connectivity table.
