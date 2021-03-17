@@ -447,7 +447,11 @@ contains
          do ibran = 1, network%brs%Count
             
             pbran   => network%brs%branch(ibran)
-            
+
+            if (size(pbran%grd) == 0) then
+               cycle
+            endif
+
             if (ibran .eq. 1) then
                icrsBeg = 1
             else
