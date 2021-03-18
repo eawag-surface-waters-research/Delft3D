@@ -636,7 +636,7 @@
       use network_data
       implicit none
       integer, intent(in   ) :: k1 !< One end node of the link
-      integer, intent(in   ) :: k2 !< Other end node of the link
+      integer, intent(in   ) :: k2 !< The other end node of the link
       integer, intent(  out) :: L  !< Resulting link number, -1 when no such link exists between k1 and k2.
 
       integer ::  iL, kother
@@ -2147,7 +2147,7 @@
 
       integer, intent(in   ) :: numcell          !< Number of cells in table (may be used to only operate on a piece of the connectivity tables, e.g., only the 2D cells), typically called with global nump.
       integer, intent(in   ) :: netcellnod(:,:)  !< connectivity table with vertex nodes for all netcells (faces)
-      integer, intent(  out) :: netcelllin(:,:) !< Resulting connectivity table with side edges for all netcells (faces), in same order as the nodes.
+      integer, intent(  out) :: netcelllin(:,:)  !< Resulting connectivity table with side edges for all netcells (faces), in same order as the nodes.
 
       integer :: N, ik, inext, kcur, knext, nv
       nv = size(netcellnod, 1)
