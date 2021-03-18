@@ -14880,9 +14880,14 @@ subroutine readcells(filename, ierr, jaidomain, jaiglobal_s, jareinitialize)
 
     call readyy('Reading net data',.8d0)
 
+    if (jaugrid == 1) then
+       ! TODO: UNST-4919: this is temporary code to fall back to reading idomain+iglobal_s in the legacy way, until UNST-4919 is implemented.
+       ierr = ionc_get_ncid(ioncid, inetfile)
+    end if
+
     ! read idomain ! TODO: UNST-3752: this does not distinguish yet between UGRID and non-UGRID. In the future idomain and iglobal_s on separate vars for mesh1d and mesh2d /?
     if (jaidomain_ .ne. 0) then
-       if (jaugrid == 1) then
+       if (.false. .and. jaugrid == 1) then
           ! TODO: UNST-4919: read idomain using ionc_* calls
           ierr = nf90_noerr
           continue
@@ -14903,7 +14908,7 @@ subroutine readcells(filename, ierr, jaidomain, jaiglobal_s, jareinitialize)
     if ( jaiglobal_s_.eq.1 ) then
 !      store nerr_
        nerr_store = nerr_
-       if (jaugrid == 1) then
+       if (.false. .and. jaugrid == 1) then
           ! TODO: UNST-4919: read iglobal_s using ionc_* calls
           ierr = nf90_noerr
           continue
