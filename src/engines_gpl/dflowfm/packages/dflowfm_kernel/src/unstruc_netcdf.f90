@@ -14672,6 +14672,7 @@ subroutine readcells(filename, ierr, jaidomain, jaiglobal_s, jareinitialize)
     integer :: ioncid     !< io_netcdf dataset id
     integer :: iconvtype  !< io_netcdf conventions type (from NetCDF :Conventions)
     integer :: im1d, im2d !< mesh ids in ioncid dataset, for 1D and 2D
+    integer :: numk1d     !< Local counter for number of 1d net nodes ("grid points")
     integer :: nump1d     !< Local counter for number of 1d nodes ("cells")
     double precision :: convversion !< io_netcdf conventions version number
 
@@ -14707,15 +14708,17 @@ subroutine readcells(filename, ierr, jaidomain, jaiglobal_s, jareinitialize)
        numk_read = 0
 
        ! 1D mesh
+       numk1d      = 0
        nump1d      = 0
        numl1d_read = 0
        ierr = ionc_get_1d_mesh_id_ugrid(ioncid, im1d)
        if (ierr == ionc_noerr) then
-          ierr = ionc_get_node_count(ioncid, im1d, nump1d)
+          ierr = ionc_get_node_count(ioncid, im1d, numk1d)
           ierr = ionc_get_edge_count(ioncid, im1d, numl1d_read)
        end if
        numl_read = numl1d_read
-       numk_read = nump1d ! nodes == cells in 1D
+       numk_read = numk1d
+       nump1d    = numk1d ! cells == nodes in 1D
        
        ! 2D mesh
        nump        = 0
@@ -14809,9 +14812,18 @@ subroutine readcells(filename, ierr, jaidomain, jaiglobal_s, jareinitialize)
     allocate(netcelllin(nv, nump1d2d)); netcelllin = 0
     if (jaugrid == 1) then
        if (im2d > 0) then
-          ierr = ionc_get_face_nodes(ioncid, im2d, netcellnod, fillvalue, 1)
-          ierr = ionc_get_face_edges(ioncid, im2d, netcelllin, fillvalue, 1)
-          if (ierr /= ionc_noerr) then
+          ierr = ionc_get_face_nodes(ioncid, im2d, netcellnod(:,1:nump), fillvalue, 1)
+          ! face-node indices:
+          ! read from UGRID file:    1:numk2d
+          ! stored in network_data:  numk1d+1:numk1d+numk2d (because unc_read_net_ugrid() has read in order: 1D first, 2D second, 1D2D last.)
+          ! face-edge indices:
+          ! read from UGRID file:    1:numl2d
+          ! stored in network_data:  numl1d+1:numl1d+numl2d (because setnodadm() has placed in order: 1D first (incl 1D2D), 2D second.)
+          netcellnod(:,1:nump) = numk1d + netcellnod(:,1:nump) ! 1D+2D net nodes are stored together in our arrays, so increment the local UGRID 2D face-node indices.
+          ierr = ionc_get_face_edges(ioncid, im2d, netcelllin(:,1:nump), fillvalue, 1)
+          if (ierr == ionc_noerr) then
+             netcelllin(:,1:nump) = numl1d + netcelllin(:,1:nump) ! 1D+2D net links are stored together in our arrays, so increment the local UGRID 2D face-edge indices.
+          else
              ! Face-edge-connectivity is optional in UGRID, so when not found, reconstruct them ourselves.
              call ggeo_construct_netcelllin_from_netcellnod(nump, netcellnod, netcelllin)
           end if
@@ -14918,7 +14930,7 @@ subroutine readcells(filename, ierr, jaidomain, jaiglobal_s, jareinitialize)
              allocate(kn12(2, numl2d_read))
              ierr = ionc_get_edge_nodes(ioncid, im2d, kn12, 1)
              do L=1,numl2d_read
-                kn(1:2, numl1d+L) = kn12(1:2,L)
+                kn(1:2, numl1d+L) = numk1d + kn12(1:2,L)
                 kn(3,   numl1d+L) = 2
              end do
           end if
