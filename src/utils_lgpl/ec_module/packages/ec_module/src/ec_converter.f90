@@ -1698,8 +1698,7 @@ module m_ec_converter
                                  end if
 
                                  
-                                 if (connection%sourceItemsPtr(1)%ptr%quantityPtr%zInterpolationType == zinterpolate_mean .and. &
-                                     connection%sourceItemsPtr(2)%ptr%quantityPtr%zInterpolationType == zinterpolate_mean) then
+                                 if (connection%sourceItemsPtr(1)%ptr%quantityPtr%zInterpolationType == zinterpolate_mean) then
                                     vmaskL=((sigmaLL-zmin(i))*(sigmaLL-zmax(i))<=0)
                                     if (count(vmaskL)>0) then
                                        valL1 = 0.0_hp 
