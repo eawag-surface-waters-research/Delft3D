@@ -390,6 +390,14 @@ fi
 
 
 #---------------------
+# swan - copy source files to folders for building executables
+cp third_party_open/swan/src/*.f* third_party_open/swan/swan_mpi
+cp third_party_open/swan/src/*.F* third_party_open/swan/swan_mpi
+cp third_party_open/swan/src/*.f* third_party_open/swan/swan_omp
+cp third_party_open/swan/src/*.F* third_party_open/swan/swan_omp
+
+
+#---------------------
 # netcdf
 netcdfModule=""
 if [ "$compiler" = 'gnu' ]; then
