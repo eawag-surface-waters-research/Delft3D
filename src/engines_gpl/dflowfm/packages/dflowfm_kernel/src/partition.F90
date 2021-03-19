@@ -63,7 +63,7 @@ module m_partitioninfo
 
 use m_tpoly
 use precision_basics, only : hp
-use meshdata, only : ug_idsLen
+use meshdata, only : ug_idsLen, ug_idsLongNamesLen
 
 #ifdef HAVE_MPI
    use mpi, only: NAMECLASH_MPI_COMM_WORLD => MPI_COMM_WORLD ! Apparently PETSc causes a name clash, see commit #28532.
@@ -246,7 +246,7 @@ use meshdata, only : ug_idsLen
 
 !  1D global arrays that are stored during partitioning
    character(len=ug_idsLen), private, allocatable :: nodeids_g(:)                   !< backup for nodeids during partitioning
-   character(len=ug_idsLen), private, allocatable :: nodelongnames_g(:)             !< backup for nodelongnames during partitioning
+   character(len=ug_idsLongNamesLen), private, allocatable :: nodelongnames_g(:)    !< backup for nodelongnames during partitioning
    real(kind=hp)           , private, pointer     :: nodeoffsets_g(:)               !< backup for nodeoffsets during partitioning
    integer                 , private, pointer     :: nodebranchidx_g(:)             !< backup for nodebranchidx during partitioning
    integer                 , private, pointer     :: edgebranchidx_g(:)             !< backup for edgebranchidx during partitioning
@@ -803,7 +803,8 @@ use meshdata, only : ug_idsLen
 
       integer, allocatable                  :: edge_nodes(:,:)
       integer                               :: hulp(2), i, ii, n1dedges, numk1d
-      character(len=ug_idsLen), allocatable :: nodeids_p(:), nodelongnames_p(:)
+      character(len=ug_idsLen), allocatable :: nodeids_p(:)
+      character(len=ug_idsLongNamesLen), allocatable :: nodelongnames_p(:)
       real(kind=hp)           , pointer     :: nodeoffsets_p(:)
       integer                 , pointer     :: nbranchids_p(:)
       integer                 , pointer     :: edgebranchidx_p(:)
