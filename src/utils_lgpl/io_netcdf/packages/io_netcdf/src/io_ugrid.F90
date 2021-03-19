@@ -5072,6 +5072,157 @@ function ug_clone_mesh_data( ncidin, ncidout, meshidsin, meshidsout ) result(ier
 
 end function ug_clone_mesh_data
 
+
+!> Clones a network topology variable from an input dataset into an output dataset,
+!! including all underlying dimensions and variables.
+!!
+!! The cloning of the actual data must be done later, using ug_clone_network_data().
+function ug_clone_network_definition( ncidin, ncidout, netidsin, netidsout) result(ierr)
+    integer,            intent(in   ) :: ncidin    !< NetCDF id of input dataset
+    integer,            intent(in   ) :: ncidout   !< NetCDF id of output dataset
+    type(t_ug_network), intent(in   ) :: netidsin  !< network struct with dim+varids in input dataset
+    type(t_ug_network), intent(inout) :: netidsout !< network struct with newly created dim+varids in output dataset
+
+    integer                               :: i, j, ierr, xtype, ndims, nAtts, dimvalue
+    integer, dimension(nf90_max_var_dims) :: dimids
+    character(len=nf90_max_name)          :: name
+    integer, dimension(nf90_max_dims)     :: dimmap, outdimids
+
+    logical :: wasInDefineMode
+
+    ierr = UG_SOMEERR
+
+    ierr = nf90_redef(ncidout) !open NetCDF in define mode
+    wasInDefineMode = (ierr == nf90_eindefine) ! Was already in define mode.
+
+    !copy dimensions
+    do i= ntdim_start + 1, ntdim_end - 1
+       if (netidsin%dimids(i)/=-1) then
+          !get variable attributes
+          ierr = nf90_inquire_dimension( ncidin, netidsin%dimids(i), name = name, len = dimvalue )
+          if ( ierr /= nf90_noerr ) then
+             return
+          endif
+          !define variable in the new file, first check if it is already present.
+          !if is not present we will get an error, and we know we have to define the variable.
+          ierr = nf90_inq_dimid(ncidout, name, netidsout%dimids(i))
+          if ( ierr /= nf90_noerr) then
+             ierr = nf90_def_dim( ncidout, name, dimvalue, netidsout%dimids(i))
+          endif
+          if ( ierr /= nf90_noerr ) then
+             return
+          endif
+          !now maps the dimensions
+          dimmap(netidsin%dimids(i))=netidsout%dimids(i);
+       end if
+    end do
+
+    !copy variables and attributes
+    do i= ntid_start + 1, ntid_end - 1
+       if (netidsin%varids(i)/=-1) then
+          !get variable attributes
+          dimids =0
+          outdimids = 0
+          ierr = nf90_inquire_variable( ncidin, netidsin%varids(i), name = name, xtype = xtype, ndims = ndims, dimids = dimids, nAtts = nAtts)
+          if ( ierr /= nf90_noerr ) then
+             return
+          end if
+          !inquire if the variable is already present
+          outdimids(1:ndims) = dimmap(dimids(1:ndims))
+          ierr = nf90_inquire_variable( ncidout, netidsout%varids(i), name = name, xtype = xtype, ndims = ndims, dimids = dimids, nAtts = nAtts)
+          if ( ierr == nf90_noerr ) then
+             !the variable is already present, here we should issue an error
+             return
+          end if
+          if (ndims > 0) then
+             ierr = nf90_def_var( ncidout, trim(name), xtype, outdimids(1:ndims), netidsout%varids(i) )
+          else
+             ierr = nf90_def_var( ncidout, trim(name), xtype, netidsout%varids(i) )
+          endif
+          if ( ierr /= nf90_noerr ) then
+             !the variable will not be copied because not present
+             return
+          end if
+
+          ierr = ug_copy_var_atts( ncidin, ncidout, netidsin%varids(i), netidsout%varids(i) )
+
+          if ( ierr /= nf90_noerr ) then
+             return
+          end if
+       endif
+    end do
+
+    ! Leave the dataset in the same mode as we got it.
+    if (.not. wasInDefineMode) then
+       ierr = nf90_enddef(ncidout)
+    end if
+
+end function ug_clone_network_definition
+
+
+!> Clones the data for a network topology variable from an input dataset into an output dataset.
+!!
+!! The cloning of the dim+var dimensions must have been done before, using ug_clone_network_definition().
+function ug_clone_network_data( ncidin, ncidout, netidsin, netidsout ) result(ierr)
+    integer,            intent(in   ) :: ncidin    !< NetCDF id of input dataset
+    integer,            intent(in   ) :: ncidout   !< NetCDF id of output dataset
+    type(t_ug_network), intent(in   ) :: netidsin  !< network struct with dim+varids in input dataset
+    type(t_ug_network), intent(in   ) :: netidsout !< network struct with already existing dim+varids in output dataset
+
+    integer                               :: i, dim, ierr, xtype, ndims, nAtts, dimvalue
+    integer, dimension(nf90_max_var_dims) :: dimids, dimsizes
+    character(len=nf90_max_name)          :: name
+
+    logical :: wasInDefineMode
+
+    ierr = UG_SOMEERR
+
+    ierr = nf90_enddef(ncidout) ! end definition phase
+    wasInDefineMode = (ierr /= nf90_enotindefine) ! Was in define mode.
+
+    do i= mid_start + 1, mid_end - 1
+       if (netidsin%varids(i)/=-1) then
+
+          !get the variable attributes
+          ierr = nf90_inquire_variable( ncidin, netidsin%varids(i), name = name, xtype = xtype, ndims = ndims, dimids = dimids, nAtts = nAtts)
+          if ( ierr /= nf90_noerr ) then
+             return
+          end if
+          !inquire the variable dimensions
+          dimsizes = 0
+          do dim = 1, ndims
+             ierr = nf90_inquire_dimension(ncidin, dimids(dim), len=dimsizes(dim))
+          enddo
+
+          !get and write the variables
+          select case ( xtype )
+          case( nf90_int )
+             ierr = ug_copy_int_var(ncidin, ncidout, netidsin%varids(i), netidsout%varids(i), ndims, dimsizes)
+          case( nf90_real )
+             ierr = ug_copy_real_var(ncidin, ncidout, netidsin%varids(i), netidsout%varids(i), ndims, dimsizes)
+          case( nf90_double )
+             ierr = ug_copy_double_var(ncidin, ncidout, netidsin%varids(i), netidsout%varids(i), ndims, dimsizes)
+          case( nf90_char )
+             ierr = ug_copy_char_var(ncidin, ncidout, netidsin%varids(i), netidsout%varids(i), ndims, dimsizes)
+          case default
+             ierr = UG_SOMEERR
+          end select
+
+          if ( ierr /= nf90_noerr ) then
+             return
+          endif
+
+       endif
+    end do
+
+    ! Leave the dataset in the same mode as we got it.
+    if (wasInDefineMode) then
+      ierr = nf90_redef(ncidout)
+    end if
+
+end function ug_clone_network_data
+
+
 !integer copy function
 function ug_copy_int_var( ncidin, ncidout, meshidin, meshidout, ndims, dimsizes )  result(ierr)
 

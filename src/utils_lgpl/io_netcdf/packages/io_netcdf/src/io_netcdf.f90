@@ -117,6 +117,7 @@ public :: ionc_create_1d_network_ugrid
 public :: ionc_write_1d_network_nodes_ugrid
 public :: ionc_put_1d_network_branches_ugrid
 public :: ionc_write_1d_network_branches_geometry_ugrid
+public :: ionc_get_1d_netids
 public :: ionc_get_1d_network_nodes_count_ugrid
 public :: ionc_get_1d_network_branches_count_ugrid
 public :: ionc_get_1d_network_branches_geometry_coordinate_count_ugrid
@@ -1670,6 +1671,45 @@ function ionc_write_1d_network_branches_geometry_ugrid(ioncid, networkid, geopoi
        geopointsY)
 
 end function ionc_write_1d_network_branches_geometry_ugrid
+
+!> Returns the netids struct contains dimension and variable ids
+!! for a given networkid in a given io_netcdf dataset, if present.
+!!
+!! \see get_1d_networkid_ugrid()
+function ionc_get_1d_netids(ioncid, networkid, netids) result(ierr)
+   integer,            intent(in)    :: ioncid    !< The io_netcdf dataset id (this is not the
+   integer,            intent(in)    :: networkid !< The id of the requested network in the dataset's subset of network(s).
+   type(t_ug_network), intent(inout) :: netids    !< The netids set of dimension and variable ids for the requested networkid.
+   integer                           :: ierr      !< Result status (IONC_NOERR if successful).   
+
+   ierr = IONC_NOERR
+
+   if (ioncid <= 0 .or. ioncid > ndatasets) then
+      ierr = IONC_EBADID
+      goto 888
+   end if
+
+   if (.not. associated(datasets(ioncid)%ug_file)) then
+      ierr = IONC_ENOTAVAILABLE
+      goto 888
+   end if
+
+   if (networkid <= 0 .or. networkid > datasets(ioncid)%ug_file%numnet) then
+      ierr = IONC_EBADID
+      goto 888
+   end if
+   
+   netids = datasets(ioncid)%ug_file%netids(networkid)
+   
+   ! Success
+   return
+
+
+888 continue
+    ! Some error occurred
+
+end function ionc_get_1d_netids
+
 
 function ionc_get_1d_network_nodes_count_ugrid(ioncid, networkid, nNodes) result(ierr)
 
