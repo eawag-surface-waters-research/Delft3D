@@ -5448,9 +5448,8 @@ end subroutine partition_make_globalnumbers
 !     allocate
       allocate(tpwgts(Nparts))
       if (method == 3) then
-         !if (nump < nump1d2d) Ne = nump1d2d   ! if 1d netlink exists
          Nn = numk
-         allocate(eptr(nump+1))
+         allocate(eptr(nump1d2d+1))
          allocate(eind(4*max(Ne,Nn)))
          allocate(vwgt(max(Ne,Nn)))
          allocate(vsize(max(Ne,Nn)))
@@ -5498,7 +5497,7 @@ end subroutine partition_make_globalnumbers
           ncommon  = 2    !  number of nodes shared by two cells on each side of an edge
           ipoint   = 1
           icursize = size(eind)
-          do ic=1,nump
+          do ic=1,nump1d2d
              eptr(ic) = ipoint
              N=netcell(ic)%N
              do k=1,N
@@ -5511,7 +5510,7 @@ end subroutine partition_make_globalnumbers
                 ipoint = ipoint+1
              end do
           end do
-          eptr(nump+1) = ipoint
+          eptr(nump1d2d+1) = ipoint
 !
 !!       make mesh arrays zero-based
          eptr = eptr-1
