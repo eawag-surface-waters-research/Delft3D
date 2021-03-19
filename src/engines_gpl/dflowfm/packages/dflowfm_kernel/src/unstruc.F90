@@ -44241,13 +44241,9 @@ end function is_1d_boundary_candidate
        numnos = 0
        allocate ( xbnds(nbnds), ybnds(nbnds), xy2bnds(2,nbnds), zbnds(kmxd*nbnds), kbnds(5,nbnds), kds(nbnds), stat=ierr     )
        call aerr('xbnds(nbnds), ybnds(nbnds), xy2bnds(2,nbnds), zbnds(kmxd*nbnds), kbnds(5,nbnds), kds(nbnds)', ierr, nbnds*9 )
-       if ( kmx.gt.0 ) then   ! also allocate 3D-sigma bnd distribution for EC
-          allocate ( sigmabnds(kmx*nbnds) )
-          call aerr('sigmabnds(kmx*nbnds)', ierr, kmx*nbnds )
-       else
-          allocate ( sigmabnds(nbnds) )
-          call aerr('sigmabnds(nbnds)', ierr, nbnds )
-       end if
+       ! also allocate 3D-sigma bnd distribution for EC
+       allocate ( sigmabnds(kmxd*nbnds) )
+       call aerr('sigmabnds(kmxd*nbnds)', ierr, kmxd*nbnds )
        allocate ( zminmaxs(2*nbnds) )
        call aerr('zminmaxs(2*nbnds)', ierr, 2*nbnds )
 
@@ -44296,13 +44292,9 @@ end function is_1d_boundary_candidate
        numnos = 0
        allocate ( xbndTM(nbndTM), ybndTM(nbndTM), xy2bndTM(2,nbndTM), zbndTM(kmxd*nbndTM), kbndTM(5,nbndTM), kdTM(nbndTM) , stat=ierr     )
        call aerr('xbndTM(nbndTM), ybndTM(nbndTM), xy2bndTM(2,nbndTM), zbndTM(kmxd*nbndTM), kbndTM(5,nbndTM), kdTM(nbndTM)', ierr, nbndTM*9 )
-       if ( kmx.gt.0 ) then   ! also allocate 3D-sigma bnd distribution for EC
-          allocate ( sigmabndTM(kmx*nbndTM) , stat=ierr )
-          call aerr('sigmabndTM(kmx*nbndTM)', ierr, kmx*nbndTM )
-       else
-          allocate ( sigmabndTM(nbndTM) , stat=ierr )
-          call aerr('sigmabndTM(nbndTM)', ierr, nbndTM )
-       end if
+       ! also allocate 3D-sigma bnd distribution for EC
+       allocate ( sigmabndTM(kmxd*nbndTM) , stat=ierr )
+       call aerr('sigmabndTM(kmxd*nbndTM)', ierr, kmxd*nbndTM )
        allocate ( zminmaxTM(2*nbndTM) , stat=ierr )
        call aerr('zminmaxTM(2*nbndTM)', ierr, 2*nbndTM )
        zbndTM = DMISS ;  kbndTM = 0 ; kdTM = 1
@@ -44402,13 +44394,9 @@ end function is_1d_boundary_candidate
     numnos = 0
     allocate ( xbndsd(nbndsd), ybndsd(nbndsd), xy2bndsd(2,nbndsd), zbndsd(nbndsd), kbndsd(5,nbndsd), kdsd(nbndsd) , stat=ierr     )
     call aerr('xbndsd(nbndsd), ybndsd(nbndsd), xy2bndsd(2,nbndsd), zbndsd(nbndsd), kbndsd(5,nbndsd), kdsd(nbndsd)', ierr, nbndsd*9 )
-    if ( kmx.gt.0 ) then   ! also allocate 3D-sigma bnd distribution for EC
-       allocate ( sigmabndsd(kmx*nbndsd) , stat=ierr )
-       call aerr('sigmabndsd(kmx*nbndsd)', ierr, kmx*nbndsd )
-    else
-       allocate ( sigmabndsd(nbndsd) , stat=ierr )
-       call aerr('sigmabndsd(nbndsd)', ierr, nbndsd )
-    end if
+    ! also allocate 3D-sigma bnd distribution for EC
+    allocate ( sigmabndsd(kmxd*nbndsd) , stat=ierr )
+    call aerr('sigmabndsd(kmxd*nbndsd)', ierr, kmxd*nbndsd )
     allocate ( zminmaxsd(2*nbndsd) , stat=ierr )
     call aerr('zminmaxsd(2*nbndsd)', ierr, 2*nbndsd )
 
@@ -44498,13 +44486,9 @@ end function is_1d_boundary_candidate
            end if
 
        enddo
-       if ( kmx.gt.0 ) then   ! also allocate 3D-sigma bnd distribution for EC
-          allocate ( bndtr(itrac)%sigma(kmx*nbndtr(itrac)) , stat=ierr )
-          call aerr('sigma(kmx*nbndtr(itrac))', ierr, kmx*nbndtr(itrac) )
-       else
-          allocate ( bndtr(itrac)%sigma(nbndtr(itrac)) , stat=ierr )
-          call aerr('sigma(nbndtr(itrac))', ierr, nbndtr(itrac) )
-       end if
+       ! also allocate 3D-sigma bnd distribution for EC
+       allocate ( bndtr(itrac)%sigma(kmxd*nbndtr(itrac)) , stat=ierr )
+       call aerr('sigma(kmxd*nbndtr(itrac))', ierr, kmxd*nbndtr(itrac) )
        allocate ( bndtr(itrac)%zminmax(2*nbndtr(itrac)) , stat=ierr )
        call aerr('bndtr(itrac)%zminmax(2*nbndtr(itrac))', ierr, 2*nbndtr(itrac) )
 
@@ -44554,13 +44538,9 @@ end function is_1d_boundary_candidate
                   goto 888
               end if
           enddo ! nbndsf(isf)
-          if ( kmx.gt.0 ) then   ! also allocate 3D-sigma bnd distribution for EC
-             allocate ( bndsf(isf)%sigma(kmx*nbndsf(isf)) , stat=ierr )
-             call aerr('sigma(kmx*nbndsf(isf))', ierr, kmx*nbndsf(isf) )
-          else
-             allocate ( bndsf(isf)%sigma(nbndsf(isf)) , stat=ierr )
-             call aerr('sigma(nbndsf(isf))', ierr, nbndsf(isf) )
-          end if
+          ! also allocate 3D-sigma bnd distribution for EC
+          allocate ( bndsf(isf)%sigma(kmxd*nbndsf(isf)) , stat=ierr )
+          call aerr('sigma(kmxd*nbndsf(isf))', ierr, kmxd*nbndsf(isf) )
           allocate ( bndsf(isf)%zminmax(2*nbndsf(isf)) , stat=ierr )
           call aerr('bndsf(isf)%zminmax(2*nbndsf(isf))', ierr, 2*nbndsf(isf) )
 
@@ -44613,13 +44593,9 @@ end function is_1d_boundary_candidate
     numnos = 0
     allocate ( xbnduxy(nbnduxy), ybnduxy(nbnduxy), xy2bnduxy(2,nbnduxy), zbnduxy(2*kmxd*nbnduxy), kbnduxy(4,nbnduxy), kduxy(nbnduxy) , stat=ierr     )
     call aerr('xbnduxy(nbnduxy), ybnduxy(nbnduxy), xy2bnduxy(2,nbnduxy), zbnduxy(2*kmxd*nbnduxy), kbnduxy(4,nbnduxy), kduxy(nbnduxy)', ierr, nbnduxy*10 )
-    if ( kmx.gt.0 ) then   ! also allocate 3D-sigma bnd distribution for EC
-       allocate ( sigmabnduxy(kmx*nbnduxy) , stat=ierr )
-       call aerr('sigmabnduxy(kmx*nbnduxy)', ierr, kmx*nbnduxy )
-    else
-       allocate ( sigmabnduxy(nbnduxy) , stat=ierr )
-       call aerr('sigmabnduxy(nbnduxy)', ierr, nbnduxy )
-    end if
+    ! also allocate 3D-sigma bnd distribution for EC
+    allocate ( sigmabnduxy(kmxd*nbnduxy) , stat=ierr )
+    call aerr('sigmabnduxy(kmxd*nbnduxy)', ierr, kmxd*nbnduxy )
     allocate ( zminmaxuxy(2*nbnduxy) , stat=ierr )
     call aerr('zminmaxuxy(2*nbnduxy)', ierr, 2*nbnduxy )
 
