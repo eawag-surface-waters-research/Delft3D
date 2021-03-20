@@ -5180,7 +5180,7 @@ function ug_clone_network_data( ncidin, ncidout, netidsin, netidsout ) result(ie
     ierr = nf90_enddef(ncidout) ! end definition phase
     wasInDefineMode = (ierr /= nf90_enotindefine) ! Was in define mode.
 
-    do i= mid_start + 1, mid_end - 1
+    do i= ntid_start + 1, ntid_end - 1
        if (netidsin%varids(i)/=-1) then
 
           !get the variable attributes

@@ -55,7 +55,10 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
    use m_alloc
    use string_module
    use io_netcdf
-   use io_ugrid, only: mdim_face, mdim_node, mdim_edge, mdim_maxfacenodes, mdim_layer, mdim_interface
+   use io_ugrid, only: mdim_face, mdim_node, mdim_edge, mdim_maxfacenodes, mdim_layer, mdim_interface, mdim_two, &
+                       t_ug_network, ntdim_1dnodes, ntdim_1dgeopoints, ntdim_1dedges, ntdim_two, &
+                       ntid_start, ntid_end, &
+                       ug_clone_network_definition, ug_clone_network_data
    implicit none
 
    character(len=MAXNAMELEN), intent(inout) :: infiles(:) !< Input files names, will be sorted if not sorted already.
@@ -113,7 +116,10 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
    integer :: nnetedgeglob, nnetedgeglob0, nnetedgecount
    integer :: nitemglob, nitemglob0, nitemcount, maxitems
    integer :: nkmxglob
-
+   integer :: id_network ! ID of 'network1d' in one input file
+   integer :: varid
+   type(t_ug_network) :: netids_input, netids_output
+   integer, allocatable :: varids_allowmerge(:) ! IDs of variables, =1 allows to merge, =0 does not merge
    integer :: idom, n1, n2, n3, k1, k2
    integer :: tmpdimids(NF90_MAX_VAR_DIMS)
    ! TODO: Consider to change the type of the following i-variables from double precision to integer.
@@ -135,6 +141,8 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
    double precision, allocatable, target  :: tmpvar2D_tmpmax(:,:)
    double precision, allocatable, target  :: tmpvar3D(:,:,:) !< array buffer for a single global variable slice, size: (kmx1, max(ndx(noutfile),lnx(noutfile)))
    double precision,              pointer :: tmpvarptr(:,:,:)
+   character, allocatable :: ctmpvar2D(:,:) !< Character arrays
+   character, allocatable :: ctmpvar2D_tmp(:,:)
    character(len=4) :: fmtstr
    character(len=4096) :: tmpstr1, tmpstr2
    integer,                      allocatable :: varids(:,:)        !< Variable IDs for the selected variables in the input files. Support having different variables in differnt input files.
@@ -362,6 +370,9 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
 
    allocate(dimids(nDims, nfiles+1))
    dimids = -999 ! missing
+   allocate(dimids_uses(nDims));
+   dimids_uses = 0
+   id_network  = -1
    do ii=1,nfiles
       if (ncids(ii) <= 0) then
          if (verbose_mode) then
@@ -383,6 +394,31 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
             if (topodim == 2 .or. topodim == 1) then
                meshid = im
                meshname = mesh_names(meshid,ii)
+
+               if (topodim == 1 .and. ii == ifile) then
+                  ! Check whether the mesh1d is defined on a network1d coordinate space or not:
+                  ierr = ionc_get_network_id_from_mesh_id_ugrid(ioncids(ifile), im, id_network)
+                  if (ierr == nf90_noerr .and. id_network > 0) then
+                     write (*,'(a,I4)') 'Info: mapmerge: detect network data, they will be copied from one input map file to the merged file.'
+
+                     ierr = ionc_get_1d_netids(ioncids(ifile), id_network,netids_input)
+                     if (ierr /= nf90_noerr) then
+                         write (*,'(a)') 'Error: mapmerge: cannot read dimemsion/variable ids of the network data.'
+                         goto 888
+                     end if
+                     ! netids_input does not include the dimension "Two", because "network1d" does not have this attribute.
+                     ! Add it manually here
+                     ierr = ionc_get_dimid(ioncids(ifile), im, mdim_two, netids_input%dimids(ntdim_two))
+                     if (ierr /= nf90_noerr .and. netids_input%dimids(ntdim_two) < 0) then
+                         write (*,'(a)') 'Error: mapmerge: cannot read id of dimension Two of the network data.'
+                         goto 888
+                     end if
+                     ! Mark dimids_uses to -1 for the 3 dimensions that are used for network data
+                     dimids_uses(netids_input%dimids(ntdim_1dnodes))     = -1
+                     dimids_uses(netids_input%dimids(ntdim_1dgeopoints)) = -1
+                     dimids_uses(netids_input%dimids(ntdim_1dedges))     = -1
+                  end if
+               end if
                exit ! We found the correct mesh in #im, no further searching
                     ! Currently we support only 2D/3D, or only 1D mesh. 
                     ! TODO: for 1D2D meshes, a loop needs to be added
@@ -452,6 +488,9 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
 
          ! other dimensions
          do id = 1, nDims
+            if (dimids_uses(id) == - 1) then
+               cycle ! Do not scan the 3 dimensions that are used for network data
+            end if
             ierr = nf90_inquire_dimension(ncids(ii), id, name = dimname, len = nlen)
             if (ierr /= nf90_noerr) then
                write (*,'(a,i0,a)') 'Error: mapmerge: unable to read dimension information from file `'//trim(infiles(ii))//''' for #', id,'.'
@@ -579,6 +618,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
 
    allocate(varids(nfiles, nvars));
    allocate(varids_out(nvars))
+   allocate(varids_allowmerge(nvars)); varids_allowmerge = 1
    allocate(var_names(nvars))
    allocate(var_types(nvars))
    allocate(var_dimids(MAX_VAR_DIMS,nvars))
@@ -590,9 +630,23 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
    allocate(var_seddimpos(nvars));   var_seddimpos   = -1
    allocate(var_ndims(nvars));       var_ndims       =  0
    allocate(var_loctype(nvars));     var_loctype     =  0
-   allocate(dimids_uses(nDims));     dimids_uses     =  0
+
+   ! If network data exist, then mark varids_allowmerge to 0 for these variables, 
+   ! and these variables will be copied from one input file, instead of merging.
+   if (topodim == 1 .and. id_network > 0) then
+      do id = ntid_start+1, ntid_end - 1
+         varid = netids_input%varids(id)
+         if (varid > 0) then
+            varids_allowmerge(varid) = 0
+         end if
+      end do
+   end if
+
    nvarsel = 0
    do iv = 1,nvars
+      if (varids_allowmerge(iv) == 0) then ! Do not scan on network data variables
+         cycle
+      end if
       ierr = nf90_inquire_variable(ncids(ifile), iv, name=varname, xtype=vartype, ndims=nvardims, dimids=tmpdimids)
 
       if (nvardims == 1) then
@@ -1388,8 +1442,10 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
    do id=1,ndims
       if (dimids(id,ifile) > 0) then ! For now, just copy the vectormax dimids (if any) from file #1 to output file. Assume same length in all files.
          ierr = nf90_inquire_dimension(ncids(ifile), dimids(id,ifile), name = dimname, len = nlen)
-         if (dimids_uses(id) <= 0) then
+         if (dimids_uses(id) == 0) then
             write (*,'(a)') 'Info: mapmerge: Dimension `'//trim(dimname)//''' is not merged because no merged variable uses it. '
+            cycle
+         else if (dimids_uses(id) == -1) then ! if the dimension is one of the 3 network data dimention, then it will be defined later in ug_clone_network_definition.
             cycle
          endif
          ! When one file has only triangular mesh and one file has only rectangular mesh, then a variable, e.g. 'NetElemNode'
@@ -1409,6 +1465,14 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
          end if
       end if
    end do
+
+   if(topodim == 1 .and. id_network > 0) then ! If network data exist, then clone the definition of dimensions and variables from input file ifile.
+      ierr = ug_clone_network_definition(ncids(ifile), ncids(noutfile), netids_input, netids_output)
+      if (ierr /= nf90_noerr) then
+          write (*,'(a)') 'Error: mapmerge: cannot define dimemsions/variables of the network data for the merged file.'
+          goto 888
+      end if
+   end if
 
    !! 4b. Define all variables, based on previously detected dimension information.
    ! var_dimids = -1 ! NOTE: can't do this, as we still need the vectormax dimensions that are stored in here.
@@ -1526,6 +1590,13 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
    if (verbose_mode) then
       write (*,'(a)') '## Writing merged variables to output file...'
    end if
+   if (topodim == 1 .and. id_network > 0) then ! If network data exist, then clone them from input file ifile to the merged file.
+      ierr = ug_clone_network_data(ncids(ifile), ncids(noutfile), netids_input, netids_output)
+      if (ierr /= nf90_noerr) then
+         write (*,'(a)') 'Error: mapmerge: cannot clone variable of the network data from one input file to the merged file.'
+         goto 888
+      end if
+   end if
 
    ! 1D tmp array: take largest of all topological position counts:
    maxitems = max(nedgecount, nfacecount, nnodecount, nnetedgecount, nbndcount, kmx(noutfile)+1)
@@ -1637,7 +1708,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
       ! NOTE: AvD: below we assume that order is kx, kmx, ndx, nt, so not as generic anymore as the var_*dimpos analysis would allow.
       ! Allocate the proper memory space for nf90_get_var without risk of stack overflows in the netcdf lib
 
-      if (var_types(iv) /= nf90_double .and. var_types(iv) /= nf90_int .and. var_types(iv) /= nf90_short .and. var_types(iv) /= nf90_byte) then
+      if (var_types(iv) /= nf90_double .and. var_types(iv) /= nf90_int .and. var_types(iv) /= nf90_short .and. var_types(iv) /= nf90_byte .and. var_types(iv) /= nf90_char) then
          write (*,'(a,i0,a)') 'Error: mapmerge: encountered unsupported data type ', var_types(iv), ' for variable `'//trim(var_names(iv))//'''.'
          if (.not. verbose_mode) goto 888
       end if
@@ -1669,6 +1740,9 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
                call realloc(itmpvar2D, (/  count_read(var_kxdimpos(iv)), maxitems /), keepExisting=.false., fill=intfillv)
                itmpvarptr(1:count_read(var_kxdimpos(iv)),1:1,1:maxitems) => itmpvar2D(:,:)
                call realloc(itmpvar2D_tmp, (/  count_read(var_kxdimpos(iv)), maxitems /), keepExisting=.false., fill=intfillv)
+            else if (var_types(iv) == nf90_char) then ! for variables such as mesh1d_node_id
+               call realloc(ctmpvar2D, (/ count_read(var_kxdimpos(iv)), maxitems /), keepExisting=.false., fill='')
+               call realloc(ctmpvar2D_tmp, (/ count_read(var_kxdimpos(iv)), maxitems /), keepExisting=.false., fill='')
             end if
             tmpvarDim = 2
          end if
@@ -1795,6 +1869,8 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
                      else
                         ierr = nf90_get_var(ncids(ii), varids(ii,iv), itmpvar2D(  :,nitemglob0+1:), count=count_read(is:ie), start=start_idx(is:ie))
                      end if
+                  else if (var_types(iv) == nf90_char) then
+                        ierr = nf90_get_var(ncids(ii), varids(ii,iv), ctmpvar2D(:,nitemglob0+1:), count=count_read(is:ie), start=start_idx(is:ie))
                   end if
                 else if (var_kxdimpos(iv) /= -1 .neqv. var_wdimpos(iv) /= -1) then ! Either a vectormax OR a wdim
                   if (var_types(iv) == nf90_double) then
@@ -1997,6 +2073,8 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
                               itmpvar1D_tmp(inodeglob) = itmpvar1D(nnodecount+ip)
                            else if (var_types(iv) == nf90_byte) then
                               btmpvar1D_tmp(inodeglob,itm:itm) = btmpvar1D(nnodecount+ip,itm:itm)
+                           else if (var_types(iv) == nf90_char) then
+                              ctmpvar2D_tmp(:,inodeglob) = ctmpvar2D(:,nnodecount+ip)
                            end if
                         end if
                      end if
@@ -2011,6 +2089,8 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
                         itmpvar1D(1:nitemglob) = itmpvar1D_tmp(1:nitemglob)
                      else if (var_types(iv) == nf90_byte) then
                         btmpvar1D(1:nitemglob,itm:itm) = btmpvar1D_tmp(1:nitemglob,itm:itm)
+                     else if (var_types(iv) == nf90_char) then
+                        ctmpvar2D(:,1:nitemglob) = ctmpvar2D_tmp(:,1:nitemglob)
                      end if
                   end if
                else
@@ -2077,6 +2157,8 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
                   end if
                else if (var_types(iv) == nf90_int .or. var_types(iv) == nf90_short) then
                   ierr = nf90_put_var(ncids(noutfile), varids_out(iv), itmpvar2D, count = count_write(is:ie), start = start_idx(is:ie))
+               else if (var_types(iv) == nf90_char) then
+                  ierr = nf90_put_var(ncids(noutfile), varids_out(iv), ctmpvar2D, count = count_write(is:ie), start = start_idx(is:ie))
                end if
             else if (var_kxdimpos(iv) /= -1 .neqv. var_wdimpos(iv) /= -1) then ! Either a vectormax OR a laydim
                if (var_types(iv) == nf90_double) then
@@ -2183,6 +2265,8 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
    if (allocated(tmpvar3D))        deallocate(tmpvar3D)
    if (allocated(btmpvar1D))       deallocate(btmpvar1D)
    if (allocated(btmpvar1D_tmp))   deallocate(btmpvar1D_tmp)
+   if (allocated(ctmpvar2D))       deallocate(ctmpvar2D)
+   if (allocated(ctmpvar2D_tmp))   deallocate(ctmpvar2D_tmp)
 end function dfm_merge_mapfiles
 
 !> Orders a filename list by increasing partition number.
