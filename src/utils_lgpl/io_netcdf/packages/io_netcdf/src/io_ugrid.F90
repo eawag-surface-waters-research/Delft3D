@@ -2065,6 +2065,8 @@ function ug_init_network_topology(ncid, varid, netids) result(ierr)
    endif
 
    !dim variables
+   ierr = nf90_inquire_variable( ncid, netids%varids(ntid_1dedgenodes),dimids = dimids)
+   netids%dimids(ntdim_Two) = dimids(1)
    ierr = nf90_inquire_variable( ncid, netids%varids(ntid_1dbranchids),dimids = dimids)
    netids%dimids(ntdim_idstring) = dimids(1)
    ierr = nf90_inquire_variable( ncid, netids%varids(ntid_1dbranchlongnames),dimids = dimids)

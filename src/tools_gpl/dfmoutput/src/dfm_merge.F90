@@ -406,15 +406,9 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
                          write (*,'(a)') 'Error: mapmerge: cannot read dimemsion/variable ids of the 1D network data.'
                          goto 888
                      end if
-                     ! netids_input does not include the dimension "Two", because "network1d" does not have this attribute.
-                     ! Add it manually here
-                     ierr = ionc_get_dimid(ioncids(ifile), im, mdim_two, netids_input%dimids(ntdim_two))
-                     if (ierr /= nf90_noerr .and. netids_input%dimids(ntdim_two) < 0) then
-                         write (*,'(a)') 'Error: mapmerge: cannot read id of dimension Two of the 1D network data.'
-                         goto 888
-                     end if
+
                      ! Mark dimids_uses to -1 for the 3 dimensions that are used for network data
-                     ! This means: do not copy them her in dfm_merge (instead done by io_netcdf), but also do not give a warning about them.
+                     ! This means: do not copy them here in dfm_merge (instead done by io_netcdf), but also do not give a warning about them.
                      dimids_uses(netids_input%dimids(ntdim_1dnodes))     = -1
                      dimids_uses(netids_input%dimids(ntdim_1dgeopoints)) = -1
                      dimids_uses(netids_input%dimids(ntdim_1dedges))     = -1
