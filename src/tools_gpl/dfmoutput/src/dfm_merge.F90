@@ -398,22 +398,23 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
                if (topodim == 1 .and. ii == ifile) then
                   ! Check whether the mesh1d is defined on a network1d coordinate space or not:
                   ierr = ionc_get_network_id_from_mesh_id_ugrid(ioncids(ifile), im, id_network)
-                  if (ierr == nf90_noerr .and. id_network > 0) then
-                     write (*,'(a,I4)') 'Info: mapmerge: detect network data, they will be copied from one input map file to the merged file.'
+                  if (ierr == ionc_noerr .and. id_network > 0) then
+                     write (*,'(a)') 'Info: mapmerge: detected 1D network definition, this will be copied from '''//trim(infiles(ifile))//''' to the merged file '''//trim(outfile)//'''.'
 
-                     ierr = ionc_get_1d_netids(ioncids(ifile), id_network,netids_input)
+                     ierr = ionc_get_1d_netids(ioncids(ifile), id_network, netids_input)
                      if (ierr /= nf90_noerr) then
-                         write (*,'(a)') 'Error: mapmerge: cannot read dimemsion/variable ids of the network data.'
+                         write (*,'(a)') 'Error: mapmerge: cannot read dimemsion/variable ids of the 1D network data.'
                          goto 888
                      end if
                      ! netids_input does not include the dimension "Two", because "network1d" does not have this attribute.
                      ! Add it manually here
                      ierr = ionc_get_dimid(ioncids(ifile), im, mdim_two, netids_input%dimids(ntdim_two))
                      if (ierr /= nf90_noerr .and. netids_input%dimids(ntdim_two) < 0) then
-                         write (*,'(a)') 'Error: mapmerge: cannot read id of dimension Two of the network data.'
+                         write (*,'(a)') 'Error: mapmerge: cannot read id of dimension Two of the 1D network data.'
                          goto 888
                      end if
                      ! Mark dimids_uses to -1 for the 3 dimensions that are used for network data
+                     ! This means: do not copy them her in dfm_merge (instead done by io_netcdf), but also do not give a warning about them.
                      dimids_uses(netids_input%dimids(ntdim_1dnodes))     = -1
                      dimids_uses(netids_input%dimids(ntdim_1dgeopoints)) = -1
                      dimids_uses(netids_input%dimids(ntdim_1dedges))     = -1
@@ -489,7 +490,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
          ! other dimensions
          do id = 1, nDims
             if (dimids_uses(id) == - 1) then
-               cycle ! Do not scan the 3 dimensions that are used for network data
+               cycle ! -1 means "silently ignore": do not scan these dimensions (e.g., the 3 dimensions that are used for network data)
             end if
             ierr = nf90_inquire_dimension(ncids(ii), id, name = dimname, len = nlen)
             if (ierr /= nf90_noerr) then
@@ -631,8 +632,8 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
    allocate(var_ndims(nvars));       var_ndims       =  0
    allocate(var_loctype(nvars));     var_loctype     =  0
 
-   ! If network data exist, then mark varids_allowmerge to 0 for these variables, 
-   ! and these variables will be copied from one input file, instead of merging.
+   ! If 1D network data exist, then mark varids_allowmerge to 0 for these variables, 
+   ! The copying of these variables will handled in io_netcdf, not by dfm_merge here.
    if (topodim == 1 .and. id_network > 0) then
       do id = ntid_start+1, ntid_end - 1
          varid = netids_input%varids(id)
@@ -644,11 +645,10 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
 
    nvarsel = 0
    do iv = 1,nvars
-      if (varids_allowmerge(iv) == 0) then ! Do not scan on network data variables
+      if (varids_allowmerge(iv) == 0) then ! Skip variables that don't need merging (e.g., 1D network data variables)
          cycle
       end if
       ierr = nf90_inquire_variable(ncids(ifile), iv, name=varname, xtype=vartype, ndims=nvardims, dimids=tmpdimids)
-
       if (nvardims == 1) then
          if (tmpdimids(1) == id_timedim(ifile) .and. trim(varname) == 'time') then
             id_time(ifile) = iv ! TODO: AvD: do this for all ii files, not only for 'ifile'
@@ -1445,7 +1445,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
          if (dimids_uses(id) == 0) then
             write (*,'(a)') 'Info: mapmerge: Dimension `'//trim(dimname)//''' is not merged because no merged variable uses it. '
             cycle
-         else if (dimids_uses(id) == -1) then ! if the dimension is one of the 3 network data dimention, then it will be defined later in ug_clone_network_definition.
+         else if (dimids_uses(id) == -1) then ! -1 means "silently ignore", for example: if the dimension is one of the 1D network data dimension, then it will be defined later in ug_clone_network_definition.
             cycle
          endif
          ! When one file has only triangular mesh and one file has only rectangular mesh, then a variable, e.g. 'NetElemNode'
@@ -1466,10 +1466,10 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
       end if
    end do
 
-   if(topodim == 1 .and. id_network > 0) then ! If network data exist, then clone the definition of dimensions and variables from input file ifile.
+   if (topodim == 1 .and. id_network > 0) then ! If network data exist, then clone the definition of dimensions and variables from input file ifile.
       ierr = ug_clone_network_definition(ncids(ifile), ncids(noutfile), netids_input, netids_output)
       if (ierr /= nf90_noerr) then
-          write (*,'(a)') 'Error: mapmerge: cannot define dimemsions/variables of the network data for the merged file.'
+          write (*,'(a)') 'Error: mapmerge: cannot define dimensions/variables of the 1D network data for the merged file.'
           goto 888
       end if
    end if
@@ -1593,7 +1593,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
    if (topodim == 1 .and. id_network > 0) then ! If network data exist, then clone them from input file ifile to the merged file.
       ierr = ug_clone_network_data(ncids(ifile), ncids(noutfile), netids_input, netids_output)
       if (ierr /= nf90_noerr) then
-         write (*,'(a)') 'Error: mapmerge: cannot clone variable of the network data from one input file to the merged file.'
+         write (*,'(a)') 'Error: mapmerge: cannot clone variable of the 1D network data from one input file to the merged file.'
          goto 888
       end if
    end if
