@@ -16639,6 +16639,7 @@ src/tools_lgpl/matlab/quickplot/progsrc/private/ps2pdf.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/qncmap.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/qnhls.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/qp_basedir.m -text
+src/tools_lgpl/matlab/quickplot/progsrc/private/qp_clipvalues.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/qp_cmdstr.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/qp_colormap.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/qp_createaxes.m -text
