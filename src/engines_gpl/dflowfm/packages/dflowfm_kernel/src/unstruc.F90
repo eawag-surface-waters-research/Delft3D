@@ -48497,7 +48497,7 @@ if (jacustombnd1d == 1) then ! This link is a 1D bnd *and* has a custom width.
    ! Use the water level at the inner point of the boundary link
    k2 = ln(2,L)
 
-   if (japerim == 1) then
+   if ((japerim == 1) .and. (calcConv==1)) then
       hydrad = area / perim
       perim_sub = (/perim, 0d0, 0d0/)
       af_sub = (/area, 0d0, 0d0/)
