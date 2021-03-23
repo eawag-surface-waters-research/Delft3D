@@ -14836,8 +14836,6 @@ subroutine readcells(filename, ierr, jaidomain, jaiglobal_s, jareinitialize)
        end do
        
     else
-       ierr = nf90_get_att(inetfile, id_netelemnode, '_FillValue', fillvalue)
-       ! Read Netcell connectivity arrays
        ierr = nf90_inq_varid(inetfile, 'NetElemNode',  id_netelemnode)
    !    call check_error(ierr, 'NetElemNode')
        if ( ierr /= NF90_NOERR ) goto 888
@@ -14845,7 +14843,8 @@ subroutine readcells(filename, ierr, jaidomain, jaiglobal_s, jareinitialize)
    !    call check_error(ierr, 'NetElemLink')
        if ( ierr /= NF90_NOERR ) goto 888
 
-
+       ierr = nf90_get_att(inetfile, id_netelemnode, '_FillValue', fillvalue)
+       ! Read Netcell connectivity arrays
        ierr = nf90_get_var(inetfile, id_netelemnode, netcellnod)
        call check_error(ierr, 'cell elem.')
        ierr = nf90_get_var(inetfile, id_netelemlink, netcelllin)
