@@ -1080,6 +1080,8 @@ end function dlwqnc_create_wqtime
 !     time ID? mesh ID? Roles?
 !
 integer function dlwqnc_create_wqvariable( ncidout, mesh_name, wqname, longname, stdname, unit, ntimeid, noseglid, nolayid, wqid )
+    use netcdf_utils, only: ncu_get_att
+    
     integer, intent(in)                        :: ncidout
     character(len=*), intent(in)               :: mesh_name
     character(len=*), intent(in)               :: wqname
@@ -1100,7 +1102,9 @@ integer function dlwqnc_create_wqvariable( ncidout, mesh_name, wqname, longname,
     character(len=nf90_max_name)               :: name2D
     character(len=nf90_max_name), dimension(5) :: dimname
     character(len=3*nf90_max_name)             :: methods
-    character(len=5*nf90_max_name)             :: coords
+    character(len=:), allocatable             :: coords
+    
+    allocate(character(len=0) :: coords)
 
     dlwqnc_create_wqvariable = nf90_noerr
 
@@ -1222,9 +1226,11 @@ integer function dlwqnc_create_wqvariable( ncidout, mesh_name, wqname, longname,
     endif
 
     ierror = nf90_inq_varid( ncidout, mesh_name, meshid )
-    ierror = nf90_get_att( ncidout, meshid, "face_coordinates", coords )
+    coords = ''
+    ierror = ncu_get_att( ncidout, meshid, "face_coordinates", coords )
     if ( ierror /= 0 ) then
-       ierror = nf90_get_att( ncidout, meshid, "node_coordinates", coords )
+       coords = ''
+       ierror = ncu_get_att( ncidout, meshid, "node_coordinates", coords )
     endif
 
     ierror = nf90_put_att( ncidout, wqid, "coordinates", coords )
