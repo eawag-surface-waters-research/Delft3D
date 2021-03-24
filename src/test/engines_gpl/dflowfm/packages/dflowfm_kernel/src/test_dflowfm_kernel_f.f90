@@ -30,6 +30,7 @@ program test_dflowfm_kernel
     use test_ini_Field_1dField
     use test_MDU_File_Version
     use test_storage_nodes
+    use test_1d_grid
     
     implicit none
     
@@ -46,6 +47,7 @@ program test_dflowfm_kernel
     call tests_iniField_1dField
     call tests_MDU_fileversion
     call tests_storageNodes
+    call tests_1d_grid
     !
     ! Done - properly finalize
     !
