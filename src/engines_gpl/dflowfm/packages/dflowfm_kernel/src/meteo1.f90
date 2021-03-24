@@ -3277,7 +3277,9 @@ llnk( 1024  )= -0.2780315803D-02
    !
    ! ==========================================================================
    !> 
-   subroutine tforce( jul0, TIME , xzeta , yzeta , TIDEP, IDIM1, dstart, dstop , eps) 
+   subroutine tforce( jul0, TIME , xzeta , yzeta , TIDEP, IDIM1, dstart, dstop , eps)
+
+   use messagehandling 
    !
    ! ====================================================================
    !
@@ -3719,6 +3721,11 @@ llnk( 1024  )= -0.2780315803D-02
             argum = argum * d2r
             can(i) = cos(argum) * amps(i)
             san(i) = sin(argum) * amps(i)
+
+            !msgbuf = 'Tide generating component i, argum, amps(i) : '
+            !write(msgbuf(50:),'(I8,2F10.4)') i,argum,amps(i)
+            !call SetMessage(LEVEL_INFO, msgbuf)
+
          enddo
    !
    !     --- compute tables cansum, sansum
@@ -6179,9 +6186,13 @@ contains
       end if
 
       if (method == 5) then
-          jdla = 1
-          call triinterp2(xu,yu,zh,nx,jdla, XS, YS, ZS, NS, dmiss, jsferic, jins, jasfer3D, & 
-                          NPL, MXSAM, MYSAM, XPL, YPL, ZPL, transformcoef, kcc)
+          if (filetype == arcinfo) then 
+             call bilinarc(xu,yu,zh,nx)
+          else 
+             jdla = 1
+             call triinterp2(xu,yu,zh,nx,jdla, XS, YS, ZS, NS, dmiss, jsferic, jins, jasfer3D, & 
+                             NPL, MXSAM, MYSAM, XPL, YPL, ZPL, transformcoef, kcc)
+          endif
 
       else if (method == 6) then                ! and this only applies to flow-link data
 
@@ -6338,6 +6349,41 @@ contains
    if (allocated (zh) ) deallocate(zh)
 
    end function timespaceinitialfield
+
+  
+   subroutine bilinarc(xk,yk,zk,n)
+   use m_missing
+   integer          :: n
+   double precision :: xk(n),yk(n),zk(n) 
+   integer          :: k
+   do k = 1,n
+      if (zk(k) == dmiss) then 
+         call bilinarcinfo( xk(k), yk(k), zk(k))
+      endif 
+   enddo
+   end subroutine bilinarc
+
+   subroutine bilinarcinfo( x, y, z)
+   use m_arcinfo
+   use m_missing
+   double precision :: x, y, z
+   double precision :: dm, dn, am, an
+   integer          :: m, n
+
+   dm = (x - x0)/dxa ; m = int(dm) ; am = dm - m ; m = m + 1
+   dn = (y - y0)/dya ; n = int(dn) ; an = dn - n ; n = n + 1
+   z  = dmiss
+   if (m < mca .and. n < nca .and. m >= 1 .and. n >= 1) then 
+      z  =        am  *        an    * d(m+1 , n+1) + &
+           (1d0 - am) *        an    * d(m   , n+1) + &
+           (1d0 - am) * (1d0 - an)   * d(m   , n  ) + &
+                  am  * (1d0 - an)   * d(m+1 , n  ) 
+   endif
+
+   end subroutine bilinarcinfo
+
+
+
    !
    !
    ! ==========================================================================
@@ -6833,7 +6879,7 @@ module m_meteo
          case ('waterlevelbnd', 'neumannbnd', 'riemannbnd', 'outflowbnd')
             itemPtr1 => item_waterlevelbnd
             dataPtr1 => zbndz
-         case ('velocitybnd', 'criticaloutflowbnd','weiroutflowbnd', 'absgenbnd')
+         case ('velocitybnd', 'criticaloutflowbnd','weiroutflowbnd', 'absgenbnd', 'riemannubnd')
             itemPtr1 => item_velocitybnd
             dataPtr1 => zbndu
          case ('dischargebnd')
@@ -7738,7 +7784,7 @@ module m_meteo
          case ('velocitybnd', 'dischargebnd', 'waterlevelbnd', 'salinitybnd', 'tracerbnd',           &
                'neumannbnd', 'riemannbnd', 'absgenbnd', 'outflowbnd',                      &
                'temperaturebnd', 'sedimentbnd', 'tangentialvelocitybnd', 'uxuyadvectionvelocitybnd', & 
-               'normalvelocitybnd', 'criticaloutflowbnd','weiroutflowbnd', 'sedfracbnd')    
+               'normalvelocitybnd', 'criticaloutflowbnd','weiroutflowbnd', 'sedfracbnd','riemannubnd')    
             if ( (.not. checkFileType(ec_filetype, provFile_poly_tim, target_name)) .and.            &  
                  (.not. checkFileType(ec_filetype, provFile_bc, target_name))  ) then
                return
