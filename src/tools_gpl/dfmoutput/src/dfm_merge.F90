@@ -216,6 +216,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
    ncids      = -1
    id_timedim = -1
    id_facedim = -1
+   id_netfacedim = -1
    id_edgedim = -1
    id_time    = -1
    id_timestep= -1
