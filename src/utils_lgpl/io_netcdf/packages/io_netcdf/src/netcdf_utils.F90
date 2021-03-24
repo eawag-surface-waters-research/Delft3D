@@ -39,6 +39,7 @@ public :: ncu_format_to_cmode
 public :: ncu_inq_var_fill, ncu_copy_atts, ncu_copy_chunking_deflate
 public :: ncu_clone_vardef
 public :: ncu_append_atts
+public :: ncu_get_att
 
 ! Copied from official NetCDF: typeSizes.f90
 integer, parameter ::   OneByteInt = selected_int_kind(2), &
@@ -311,5 +312,36 @@ function ncu_copy_chunking_deflate( ncidin, ncidout, varidin, varidout, ndx ) re
 
    ierr = nf90_noerr
 end function ncu_copy_chunking_deflate
+
+!> Get the STRING-attribute of a variable from the nc-file.
+function ncu_get_att(ncid, varid, att_name, att_value) result(status)
+   integer,                       intent(in   ) :: ncid         !< NetCDF dataset id, should be already open.
+   integer,                       intent(in   ) :: varid        !< NetCDF variable id (1-based).
+   character(len=*),              intent(in   ) :: att_name     !< The name of the attribute.
+   character(len=:), allocatable, intent(inout) :: att_value    !< The value of the attribute (unchanged when an error occurred).
+   integer                                      :: status       !< Result status, ug_noerr if successful.
+
+   integer :: att_value_len       !< Length of the attribute value on the netCDF file.
+   integer :: istat
+
+   status    = nf90_inquire_attribute(ncid, varid, att_name, len=att_value_len)
+   if ( status == nf90_noerr ) then
+      if (allocated(att_value)) then
+         deallocate(att_value, stat = istat)
+         if (istat /= 0) then
+            status = istat
+            return
+         end if
+      end if 
+
+      allocate( character(len=att_value_len) :: att_value, stat = istat )
+      if (istat /= 0) then
+         status = istat
+         return
+      end if
+      status = nf90_get_att(ncid, varid, att_name, att_value)
+   end if
+
+end function ncu_get_att
 
 end module netcdf_utils

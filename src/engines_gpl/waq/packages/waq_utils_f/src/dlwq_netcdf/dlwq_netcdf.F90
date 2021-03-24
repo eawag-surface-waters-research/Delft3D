@@ -101,6 +101,7 @@ end function dlwqnc_lowercase
 !
 integer function dlwqnc_find_var_with_att( ncid, attribute, varid, expected_value )
     use io_ugrid
+    use netcdf_utils, only: ncu_get_att
 
     implicit none
 
@@ -138,7 +139,7 @@ integer function dlwqnc_find_var_with_att( ncid, attribute, varid, expected_valu
 
             if ( present(expected_value) ) then
                 att_value = ''
-                ierror = ug_get_attribute( ncid, varid, attribute, att_value )
+                ierror = ncu_get_att( ncid, varid, attribute, att_value )
                 if ( ierror /= nf90_noerr ) then
                     cycle ! Not the right type, it appears
                 else
@@ -511,6 +512,7 @@ end function dlwqnc_copy_dims
 recursive function dlwqnc_copy_associated( ncidin, ncidout, meshidin, meshidout, attribute, &
                                                    dimsizes, use_attrib ) result(dlwqnc_result)
     use io_ugrid
+    use netcdf_utils, only: ncu_get_att
 
     integer, intent(in)               :: ncidin, ncidout, meshidin, meshidout
     character(len=*), intent(in)      :: attribute
@@ -555,7 +557,7 @@ recursive function dlwqnc_copy_associated( ncidin, ncidout, meshidin, meshidout,
 
     if ( use_names_in_attrib ) then
         att_value = ''
-        ierror   = ug_get_attribute( ncidin, meshidin, attribute, att_value )
+        ierror   = ncu_get_att( ncidin, meshidin, attribute, att_value )
         if ( ierror /= nf90_noerr .and. .not. suppress_message ) then
             if (warning_message) then
                 if (dlwqnc_debug) write(*,*) 'Warning: retrieving attribute ', trim(attribute), ' failed -- ', ierror

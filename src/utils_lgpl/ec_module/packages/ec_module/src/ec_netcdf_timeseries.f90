@@ -144,6 +144,7 @@ module m_ec_netcdf_timeseries
     function ecNetCDFInit (ncname, ncptr, iostat) result (success)
     use string_module
     use io_ugrid
+    use netcdf_utils, only: ncu_get_att
     
     implicit none
 !   Open a netCDF file, store ncid, standard names and long names ....
@@ -212,7 +213,7 @@ module m_ec_netcdf_timeseries
 
        ! Check for important var: was it the stations?
        cf_role = ''
-       ierr = ug_get_attribute(ncptr%ncid,iVars,'cf_role',cf_role)
+       ierr = ncu_get_att(ncptr%ncid,iVars,'cf_role',cf_role)
        if (cf_role == 'timeseries_id') then 
              nDims = 0                
              ierr = nf90_inquire_variable(ncptr%ncid, iVars, ndims = nDims)
@@ -246,7 +247,7 @@ module m_ec_netcdf_timeseries
        ! Check for important var: was it vertical layering?
        positive = ''
        zunits = ''
-       ierr = ug_get_attribute(ncptr%ncid,iVars,'positive',positive)
+       ierr = ncu_get_att(ncptr%ncid,iVars,'positive',positive)
        if (len_trim(positive) > 0) then ! Identified a layercoord variable, by its positive:up/down attribute
           ! NOTE: officially, a vertical coord var may also be identified by a unit of pressure, but we don't support that here.
           ncptr%layervarid = iVars
@@ -254,7 +255,7 @@ module m_ec_netcdf_timeseries
           ncptr%nLayer = ncptr%dimlen(ncptr%layerdimid)
           allocate(ncptr%vp(ncptr%nLayer))
           ierr = nf90_get_var(ncptr%ncid,ncptr%layervarid,ncptr%vp,(/1/),(/ncptr%nLayer/))
-          ierr = ug_get_attribute(ncptr%ncid,iVars,'units',zunits)
+          ierr = ncu_get_att(ncptr%ncid,iVars,'units',zunits)
           if (strcmpi(zunits,'m')) then
              if (strcmpi(positive,'up'))   ncptr%vptyp=BC_VPTYP_ZDATUM         ! z upward from datum, unmodified z-values 
              if (strcmpi(positive,'down')) ncptr%vptyp=BC_VPTYP_ZSURF          ! z downward
@@ -401,6 +402,7 @@ module m_ec_netcdf_timeseries
     !>     This should be dealt with analogous to the ascii-bc format: a string attribute named 'vector'
     !>     with a list of names of variables to be packed into a vector.
     function ecNetCDFGetVectormax (ncptr, q_id, vectormax) result (success)   
+    use netcdf_utils, only: ncu_get_att
     use io_ugrid
     
     implicit none
@@ -415,7 +417,7 @@ module m_ec_netcdf_timeseries
     allocate(character(len=0) :: str)
     success = .False. 
     str = ''
-    ierr = ug_get_attribute(ncptr%ncid,q_id,'vectormax',str)
+    ierr = ncu_get_att(ncptr%ncid,q_id,'vectormax',str)
     if (ierr/=NF90_NOERR) return 
     read(str,*,iostat=ierr) vectormax
     if (ierr/=0) return 

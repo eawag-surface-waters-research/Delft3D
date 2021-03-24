@@ -165,10 +165,11 @@ module m_ec_quantity
       !> obtained from the variable varid in the netcdf file ncid 
       !> all in try-catch fashion: if not available, leave empty or use default
       function ecQuantitySetUnitsFillScaleOffsetFromNcidVarid(instancePtr, quantityId, ncid, varid) result(success)
-      use netcdf
-      use string_module
-      use physicalconsts, only : CtoKelvin
-      use io_ugrid 
+         use netcdf
+         use netcdf_utils, only: ncu_get_att
+         use string_module
+         use physicalconsts, only : CtoKelvin
+         use io_ugrid 
 
          implicit none
          logical                               :: success     !< function status
@@ -189,7 +190,7 @@ module m_ec_quantity
          fillvalue = ec_undef_hp
 
          units = ''
-         if (ug_get_attribute(ncid, varid, 'units', units)==NF90_NOERR) then 
+         if (ncu_get_att(ncid, varid, 'units', units)==NF90_NOERR) then 
             call str_upper(units) ! make units attribute case-insensitive 
             if (.not.(ecQuantitySet(instancePtr, quantityId, units=units))) then
                 deallocate(units)

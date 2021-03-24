@@ -10776,6 +10776,7 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
    use io_netcdf
    use odugrid
    use netcdf
+   use netcdf_utils, only: ncu_get_att
    use m_sferic
    use m_missing
    use unstruc_messages
@@ -10870,7 +10871,7 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
    nodesOnBranchVertices = 1
    ierr = ionc_get_ncid(ioncid, ncid)
    tmpstring = ''
-   ierr = ug_get_attribute(ncid, nf90_global, 'Conventions', tmpstring)
+   ierr = ncu_get_att(ncid, nf90_global, 'Conventions', tmpstring)
    if (ierr == NF90_ENOTATT) then
       nodesOnBranchVertices = 0 ! New format.
       call mess(LEVEL_DEBUG,  'No NetCDF Conventions found. Defaulting to current format (>= "CF-1.8 UGRID-1.0 Deltares-0.10") for '''//trim(filename)//'''.')
@@ -11244,12 +11245,12 @@ end subroutine unc_read_net_ugrid
 !> Reads the net data from a NetCDF file.
 !! Processing is done elsewhere.
 subroutine unc_read_net(filename, numk_keep, numl_keep, numk_read, numl_read, ierr)
-
     use network_data
     use m_sferic
     use m_missing
     use dfm_error
     use gridoperations
+    use netcdf_utils, only: ncu_get_att
 
     character(len=*), intent(in)     :: filename  !< Name of NetCDF file.
     integer,          intent(inout)  :: numk_keep !< Number of netnodes to keep in existing net.
@@ -11372,7 +11373,7 @@ subroutine unc_read_net(filename, numk_keep, numl_keep, numk_read, numl_read, ie
     call readyy('Reading net data',.7d0)
 
     coordsyscheck = ''
-    ierr = ug_get_attribute(inetfile, id_netnodex, 'standard_name', coordsyscheck)
+    ierr = ncu_get_att(inetfile, id_netnodex, 'standard_name', coordsyscheck)
     if (stringsequalinsens(coordsyscheck, 'longitude')) then
         jsferic  = 1
     else
@@ -11645,6 +11646,7 @@ subroutine unc_read_map(filename, ierr)
     use m_save_ugrid_state,   only: mesh1dname
     use unstruc_channel_flow, only: network
     use m_GlobalParameters
+    use netcdf_utils, only: ncu_get_att
 
     character(len=*),  intent(in)       :: filename   !< Name of NetCDF file.
     integer,           intent(out)      :: ierr       !< Return status (NetCDF operations)
@@ -11752,7 +11754,7 @@ subroutine unc_read_map(filename, ierr)
 
     ! do not support a rst file of UGRID format
     convformat = ''
-    ierr = ug_get_attribute(imapfile, nf90_global, 'Conventions', convformat)
+    ierr = ncu_get_att(imapfile, nf90_global, 'Conventions', convformat)
     lugrid = index(convformat, 'UGRID-1')
     deallocate(convformat)
     if (lugrid > 0) then
@@ -11945,7 +11947,7 @@ subroutine unc_read_map(filename, ierr)
         ! 123456789012345678901234567890123
         ierr = nf90_inq_varid(imapfile, 'time', id_time)
         refdat_map = ''
-        ierr = ug_get_attribute(imapfile, id_time, "units", refdat_map)
+        ierr = ncu_get_att(imapfile, id_time, "units", refdat_map)
         tmpstr = ' '
         tmpstr  = refdat_map(15:18)//refdat_map(20:21)//refdat_map(23:24)//refdat_map(26:27)//refdat_map(29:30)//refdat_map(32:33)
         call maketimeinverse(trim(tmpstr),trefdat_map,iostat)             ! result: refdatold in seconds  w.r.t. absolute t0
