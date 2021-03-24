@@ -214,18 +214,20 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
    nvars      = 0
    max_nvars  = 0
    ncids      = -1
-   id_timedim = -1
-   id_facedim = -1
-   id_netfacedim = -1
-   id_edgedim = -1
-   id_time    = -1
-   id_timestep= -1
-   id_laydim  = -1
-   id_wdim    = -1
    id_bnddim  = -1
-   id_sedtotdim = -1
-   id_sedsusdim = -1
+   id_edgedim = -1
+   id_facedim = -1
+   id_laydim  = -1
+   id_netedgedim = -1
+   id_netfacedim = -1
    id_netfacemaxnodesdim = -1
+   id_nodedim = -1
+   id_sedsusdim = -1
+   id_sedtotdim = -1
+   id_time    = -1
+   id_timedim = -1
+   id_timestep= -1
+   id_wdim    = -1
    ndx        =  0
    lnx        =  0
    kmx        =  0
@@ -416,7 +418,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
                   end if
                end if
                exit ! We found the correct mesh in #im, no further searching
-                    ! Currently we support only 2D/3D, or only 1D mesh. 
+                    ! Currently we support only 2D/3D, or only 1D mesh.
                     ! TODO: for 1D2D meshes, a loop needs to be added
             end if
          end do
@@ -502,7 +504,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
                   ! No special dimension, so probably just some vectormax-type dimension that
                   ! we may need later for some variables, so store it.
                   dimids(id, ii) = id ! Only stored to filter on non-missing values in def_dim loop later
-                  
+
                   ! check if it is a dimension for sediment variables
                   if (strcmpi(dimname, 'nSedTot')) then
                      id_sedtotdim(ii) = id
@@ -520,19 +522,19 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
                write (*,'(a,i0,a)') 'Error: mapmerge: unable to read dimension information from file `'//trim(infiles(ii))//''' for #', id,'.'
                if (.not. verbose_mode) goto 888
             end if
-         
+
             if (trim(dimname) == 'nFlowElem') then
             !! Flow nodes (face) dimension
                id_facedim(ii) = id
                facedimname    = dimname
                ndx(ii)        = nlen
-         
+
             else if (trim(dimname) == 'nFlowLink') then
             !! Flow links (edge) dimension
                id_edgedim(ii) = id
                edgedimname    = dimname
                lnx(ii)        = nlen
-         
+
             else if (trim(dimname) == 'laydim') then ! TODO: AvD: also wdim?
                id_laydim(ii) = id
                laydimname    = dimname
@@ -540,34 +542,34 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
             else if (trim(dimname) == 'wdim') then
                id_wdim(ii) = id
                wdimname    = dimname
-         
+
          !! Now some Net* related dimensions (in addition to Flow*).
-         
+
             else if (trim(dimname) == 'nNetElem') then
             !! Net cells (again face) dimension
                id_netfacedim(ii) = id
                netfacedimname    = dimname
                nump(ii)          = nlen
-         
-         
+
+
             else if (trim(dimname) == 'nNetElemMaxNode') then ! TODO: AvD: now we detect nNetElemMaxNode, but should be not change to nFlowElemMaxNode, now that facedim is the overall counter and netfacedim is hardly used anymore?
                dimids(id, ii) = id ! Store this now, because later it is just a vectormax dim, so should be available in dim filter
                id_netfacemaxnodesdim(ii) = id
                netfacemaxnodesdimname    = dimname
                netfacemaxnodes(ii)       = nlen
-         
+
             else if (trim(dimname) == 'nNetNode') then
             !! Net nodes (node) dimension
                id_nodedim(ii) = id
                nodedimname    = dimname
                numk(ii)       = nlen
-         
+
             else if (trim(dimname) == 'nNetLink') then
             !! Net links (again edge) dimension
                id_netedgedim(ii) = id
                netedgedimname    = dimname
                numl(ii)          = nlen
-         
+
             else if (trim(dimname) == 'time') then
             !! Time dimension
                id_timedim(ii) = id
@@ -585,7 +587,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
                ! No special dimension, so probably just some vectormax-type dimension that
                ! we may need later for some variables, so store it.
                dimids(id, ii) = id ! Only stored to filter on non-missing values in def_dim loop later
-               
+
                ! check if it is a dimension for sediment variables
                if (strcmpi(dimname, 'nSedTot')) then
                   id_sedtotdim(ii) = id
@@ -627,7 +629,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
    allocate(var_ndims(nvars));       var_ndims       =  0
    allocate(var_loctype(nvars));     var_loctype     =  0
 
-   ! If 1D network data exist, then mark varids_allowmerge to 0 for these variables, 
+   ! If 1D network data exist, then mark varids_allowmerge to 0 for these variables,
    ! The copying of these variables will handled in io_netcdf, not by dfm_merge here.
    if (topodim == 1 .and. id_network > 0) then
       do id = ntid_start+1, ntid_end - 1
@@ -795,7 +797,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
       end if
    end if
 
-   
+
    !! 2a. Write top level attributes to file as a copy from input file.
    ierr = ncu_copy_atts(ncids(ifile), ncids(noutfile), nf90_global, nf90_global)
 
@@ -1029,7 +1031,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
       end if
 
       !! 3a.3: handle net nodes (nodes)
-      
+
       ! Only for 2D/3D map files: face-node connectivity
       if (topodim /= 1) then
          nnodeglob0 = nnodeglob
@@ -1063,7 +1065,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
             if (.not. verbose_mode) goto 888
          end if
       end if
-      
+
       ! read coordinates of net nodes
       if (jaugrid==0) then
          ierr = nf90_inq_varid(ncids(ii), 'NetNode_x', id_nodex)
@@ -1143,7 +1145,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
             end if
             if (.not. verbose_mode) goto 888
          end if
-         
+
          if (jaugrid==0) then
             ierr = nf90_inq_varid(ncids(ii), 'NetElemLink', id_netfaceedges)
             if (ierr == nf90_noerr) then
@@ -1291,7 +1293,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
 
       !! for 2D/3D, fulfill netedge_c2g, because in domain larger than 0000, there are netedges which are in this domain
       !  but their domain numbers are another domain.
-      if (topodim /= 1) then 
+      if (topodim /= 1) then
          do ii = 2, nfiles
             netedgecount = sum(numl(1:ii-1))
             nfacecount = sum(nump(1:ii-1))
@@ -1576,7 +1578,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
          ierr = nf90_get_var(ncids(ifile), id_time(ifile), times(it), start = (/ itimsel(it) /)) ! count=1
          ierr = nf90_get_var(ncids(ifile), id_timestep(ifile), timestep(it), start = (/ itimsel(it) /)) ! count=1
       end do
-      
+
       ierr = nf90_put_var(ncids(noutfile), id_time(noutfile), times, count = (/ ntsel /))
       ierr = nf90_put_var(ncids(noutfile), id_timestep(noutfile), timestep, count = (/ ntsel /))
    end if
@@ -1661,14 +1663,14 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
       select case (var_loctype(iv))
       case (UNC_LOC_S)
          item_counts => ndx
-         if (topodim /= 1) then 
+         if (topodim /= 1) then
             item_domain => face_domain
          else
             item_domain => node_domain
          end if
       case (UNC_LOC_SN)
          item_counts => ndx
-         if (topodim /= 1) then 
+         if (topodim /= 1) then
             item_domain => face_domain
          else
             item_domain => node_domain
@@ -1764,7 +1766,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
          end if
          tmpvarDim = 2
       end if
-      
+
       !! 1D array of vertical coordinates are COPIED from file "ifile" to the merged file
       if (var_ndims(iv) == 1 .and. (var_laydimpos(iv) > 0 .or. var_wdimpos(iv) > 0)) then
          nlen = count_read(ie)
@@ -1799,17 +1801,17 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
             if (verbose_mode) then
                call progress(tmpstr1, ceiling((it-1)*100.0/ntsel)) ! generate the progress bar.
             end if
-         
+
             ! 5a.4 Time dimension: Which timestep to read from input files
             if (var_timdimpos(iv) /= -1) then
                start_idx(var_timdimpos(iv)) = itimsel(it)
             end if
-         
+
             nitemglob  = 0
             nitemcount = 0
             do ii=1,nfiles
                nitemglob0 = nitemglob
-         
+
                if (var_spacedimpos(iv) /= -1) then
                   if (item_counts(ii) == 0) then
                      cycle
@@ -1817,9 +1819,9 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
                      count_read(var_spacedimpos(iv)) = item_counts(ii) ! How many flow face/edges/nodes to read from file #ii
                   endif
                end if
-         
+
                ! Do the actual reading
-         
+
                ! When one file has only triangular mesh and one file has only rectangular mesh, then a variable, e.g. 'NetElemNode'
                ! in the target merged map has vectormax dimension nlen=4. To read such a variable from each file, the vectormax dimension
                ! should be consistent in the current file. If this dimension is smaller than the maximal nlen, then a seperate array
@@ -1831,7 +1833,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
                      jaread_sep = 1
                   end if
                end if
-         
+
                if (var_kxdimpos(iv) == -1 .and. var_laydimpos(iv) == -1  .and. var_wdimpos(iv) == -1) then ! 1D array with no layers and no vectormax (possibly time-dep)
                   if (var_types(iv) == nf90_double) then
                      ierr = nf90_get_var(ncids(ii), varids(ii,iv), tmpvar1D(    nitemglob0+1:), count=count_read(is:ie), start=start_idx(is:ie))
@@ -1848,7 +1850,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
                         tmpvar2D(1:netfacemaxnodes(ii),nitemglob0+1:nitemglob0+count_read(ie)) = tmpvar2D_tmpmax(1:count_read(is),1:count_read(ie))
                         jaread_sep = 0
                      else
-                        if (var_seddimpos(iv) /= -1) then 
+                        if (var_seddimpos(iv) /= -1) then
                            ! Reading a sediment variable needs to specify the "map" argument in nf90_get_var, because its dimensions are in a different order than other vectormax variables
                            ierr = nf90_get_var(ncids(ii), varids(ii,iv),  tmpvar2D(  :,nitemglob0+1:), count=count_read(is:ie), start=start_idx(is:ie), map = (/ count_read (var_kxdimpos(iv)), 1, count_read (var_kxdimpos(iv))*item_counts(ii) /))
                         else
@@ -1882,7 +1884,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
                   write (*,'(a,i0,a)') 'Error: mapmerge: could not read `'//trim(var_names(iv))//''' from file `'//trim(infiles(ii))//''' (it=', itimsel(it), ').'
                   if (.not. verbose_mode) goto 888
                end if
-         
+
                ! Now shift all items (in space) that really belong to *current* domain ii to the left,
                ! such that global item (edge/node) nrs form one increasing range in tmpvar.
                ! Faces related variables in the merged file are numbered by 'FlowElemGlobalNr'
@@ -2127,7 +2129,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
                nitemcount = nitemcount + item_counts(ii)
               end if
             end do ! ii
-         
+
             if (item_counts(noutfile) /= nitemglob) then
                write (*,'(a,i0,a,i0,a)') 'Error: mapmerge: accumulated ', nitemglob, ' items, but expected ', item_counts(noutfile), ', for `'//var_names(iv)//'''.'
                if (.not. verbose_mode) goto 888
@@ -2175,12 +2177,12 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
             !   write (*,'(a,i0,a)') 'Error: mapmerge: could not write merged variable `'//trim(var_names(iv))//''' into output file `'//trim(outfile)//''' (itime=', it, ').'
             !   if (.not. verbose_mode) goto 888
             !end if
-         
+
             ! Check: if this was time-independent variable, first iteration-step was enough for reading+writing.
             if (var_timdimpos(iv) == -1) then
                exit ! it
             end if
-         
+
          end do ! it
       end if
 
