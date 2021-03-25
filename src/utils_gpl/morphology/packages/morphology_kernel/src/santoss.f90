@@ -349,7 +349,6 @@ subroutine santoss(numrealpar, realpar ,par ,npar, dzduu ,dzdvv , i2d3d, &
         delta = (rhosol-rhowat)/rhowat
 !
 !       calculate ripple height and length
-!       if ripple_pred=1    then prediction ripples, if ripple_pred=0 then rh=0, rl=0
 !
         call santoss_ripple(d50, uwc, uwt, delta, ag, aw, rh, rl)
 !
