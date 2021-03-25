@@ -767,7 +767,7 @@ end subroutine read_land_boundary_netcdf
       !! as 'L00x' otherwise.
       SUBROUTINE WRILDB(MPOL, XSH, YSH, NSH, NCLAN, nnclan, ZSH, nzsh, names, namlen, nnam)
       USE M_MISSING
-      use m_polygon, only : zpl, DZL, DZR, jakol45
+      use m_polygon ! , only : zpl, DZL, DZR, jakol45
       implicit none
       integer,       intent(inout) :: mpol !< Open file pointer where to write to.
       double precision, intent(in) :: XSH(NSH), YSH(NSH) !< Coordinates, polylines can be separated by dmiss value.
@@ -782,12 +782,13 @@ end subroutine read_land_boundary_netcdf
 
       integer :: L
 
-      integer :: i, ipli, npli, mbna, ncol
+      integer :: i, ipli, npli, mbna, ncol, inscreen
       integer, allocatable :: istart(:), iend(:)
       character(len=max(namlen,10)) :: name
       character(len=1)  :: cdigits
       character(len=40) :: rec
       logical :: jaNCLAN, jaZSH
+      logical :: inview
       
       ! Only include third column when size is equal to XSH array (or larger).
       jaNCLAN = nNCLAN >= NSH
@@ -834,11 +835,26 @@ end subroutine read_land_boundary_netcdf
           ncol = 3
           if (jakol45 == 1) then
               ncol = 5
+          else if (jakol45 == 2) then 
+              ncol = 9
           endif    
       else
           ncol = 2
       end if
       do ipli=1,npli
+
+        if (jakol45 == 2) then 
+            inscreen  = 0
+            DO I = istart(ipli),iend(ipli)
+               if ( inview(xpl(i), ypl(i) ) ) then 
+                  inscreen = 1
+               endif
+            enddo
+            if (inscreen == 0) then 
+               cycle
+            endif
+        endif
+
         if (ipli <= nnam) then
             name = names(ipli)
         else
@@ -864,14 +880,18 @@ end subroutine read_land_boundary_netcdf
         WRITE(MPOL,'(I6,I6)') iend(ipli)-istart(ipli)+1, ncol
         
 !        rec = '"324","",-2
+
+ 
         DO I = istart(ipli),iend(ipli)
             IF (jaNCLAN) THEN
                WRITE(MPOL,'(2F15.6,I5)') XSH(I), YSH(I), NCLAN(I)
             elseif (jaZSH) then
                if (jakol45 == 1) then  
                   WRITE(MPOL,'(5F15.6)') XSH(I), YSH(I), zpl(i), DZL(i), DZR(i) 
+               else if (jakol45 == 2) then  
+                  WRITE(MPOL,'(2F15.6, 7F7.2)') XSH(I), YSH(I), zpl(i), DZL(i), DZR(i), dcrest(i), dtL(i), dtr(i), dveg(i)  
                else
-               WRITE(MPOL,'(3F15.6)') XSH(I), YSH(I), ZSH(I)
+                  WRITE(MPOL,'(3F15.6)') XSH(I), YSH(I), ZSH(I)
                endif   
                IF (MBNA > 0) WRITE(Mbna,'(2F15.6)') XSH(I), YSH(I)
             else    
@@ -1682,24 +1702,22 @@ end subroutine read_land_boundary_netcdf
       integer :: istart, iend, jstart, jend  !< block to be read in file-index numbering
 
       double precision :: distep, djstep, dsqrtnumcur
-
-      logical :: LdirectReadBlock = .false.
-
+    
       integer, parameter :: MAXSAMSIZE = 1000000
 
       CALL READARCINFOHEADER(MINP,MCa,NCa,X0,Y0,DXa,DYa,RMIS)
 
       IF ( ALLOCATED(D) ) THEN
-            DEALLOCATE(D)
+           DEALLOCATE(D)
       ENDIF
-      
-      if (japrompt == -1 ) LdirectReadBlock = .true.
+         
+      if ( japrompt == 0 ) then
 
-      if ( LdirectReadBlock ) then
          ALLOCATE ( D(MCa,NCa),STAT=IERR)
          CALL AERR('D(MCa,NCa)',IERR,MCa*NCa)
 
          CALL READARCINFOBLOCK (MINP,D,MCa,NCa,RMIS)
+
       else
          istep = 1
          jstep = 1
@@ -3011,14 +3029,9 @@ subroutine read_samples_from_arcinfo(filnam, jadoorladen, japrompt)  ! reaasc
     integer :: ndraw
     COMMON /DRAWTHIS/ ndraw(50)
 
-    japrompt_ = japrompt
-    if (jagui /= 1) then
-       japrompt_ = 0
-    end if
-
     CALL READYY('Reading arcinfo file',0d0)
     call oldfil(marc, filnam)
-    call reaarc (marc,japrompt_)
+    call reaarc(marc, japrompt)
     CALL DOCLOSE(marc)
     CALL READYY('Reading arcinfo file',1d0)
 
@@ -3061,7 +3074,7 @@ subroutine read_samples_from_arcinfo(filnam, jadoorladen, japrompt)  ! reaasc
 !   new sample set: no Hessians computed yet
     iHesstat = iHesstat_DIRTY
 
-    deallocate(d) ! Save memory, arcinfo block is no longer needed.
+    ! deallocate(d) ! Save memory, arcinfo block is no longer needed.
 
     IF (NS .GT. 100000) NDRAW(32) = 7 ! Squares (faster than circles)
     IF (NS .GT. 500000) NDRAW(32) = 3 ! Small dots (fastest)
@@ -4844,7 +4857,7 @@ end subroutine timdat
         zp = 0d0
         CALL ISNODE(KP, XPL(i), YPL(i), zp)
         IF (KP .EQ. 0) THEN
-            CALL SETNEWPOINT(XPL(i), YPL(i), zp,KP)
+            CALL dSETNEWPOINT(XPL(i), YPL(i), KP)
         ENDIF
         IF (K1 .NE. 0) THEN
             CALL CONNECTDBN(K1,KP,LNU)

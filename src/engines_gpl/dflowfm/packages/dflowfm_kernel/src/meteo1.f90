@@ -6072,6 +6072,7 @@ contains
    use gridoperations
    use unstruc_model, only: getoutputdir
    use string_module, only: get_dirsep
+   use m_arcinfo
    
    implicit none
    
@@ -6311,6 +6312,9 @@ contains
 
 !     SPvdP: sample set can be large, delete it and do not make a copy
       call delsam(-1)
+      if (allocated (d) ) then 
+          deallocate(d) 
+      endif
 
    end if
    success = .true.
