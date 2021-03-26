@@ -6927,7 +6927,7 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
     integer :: jaeulerloc
 
     double precision   :: rhol
-    character(16)      :: dxname, zw_elem, zcc_elem, zw_link, zcc_link
+    character(16)      :: dxname, zw_elem, zcc_elem, zwu_link, zu_link
     character(64)      :: dxdescr
     character(10)      :: transpunit
     character(len=255) :: tmpstr
@@ -8251,13 +8251,13 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
         if (ierr==NF90_NOERR) then 
            zcc_elem = ' LayCoord_cc'
            zw_elem = ' LayCoord_w'
-           zcc_link = ' LayCoord_cc'
-           zw_link = ' LayCoord_w'
+           zu_link = ' LayCoord_cc'   ! z/sigma coords are the same for u-positions and cc-positions.
+           zwu_link = ' LayCoord_w'
         else
            zcc_elem = ' FlowElem_zcc'
            zw_elem = ' FlowElem_zw'
-           zcc_link = ''                        ! To be added, Issue UNST-4880
-           zw_link = ''
+           zu_link = ''                        ! To be added, Issue UNST-4880
+           zwu_link = ''
         endif
         if (nf90_inquire(imapfile, nVariables=varid)==NF90_NOERR) then
            do while (varid>0)
@@ -8271,10 +8271,10 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
                         ierr = ncu_append_atts( imapfile, varid, 'coordinates', trim(zcc_elem))
                     endif
                     if (any(idum==id_wdim(iid)) .and. any(idum==id_flowlinkdim(iid))) then
-                        ierr = ncu_append_atts( imapfile, varid, 'coordinates', trim(zw_link))
+                        ierr = ncu_append_atts( imapfile, varid, 'coordinates', trim(zwu_link))
                     endif
                     if (any(idum==id_laydim(iid)) .and. any(idum==id_flowelemdim(iid))) then
-                        ierr = ncu_append_atts( imapfile, varid, 'coordinates', trim(zcc_link))
+                        ierr = ncu_append_atts( imapfile, varid, 'coordinates', trim(zw_link))
                     endif
                  endif
               endif
@@ -13742,6 +13742,8 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd)
             continue
          endif
       enddo
+! TODO: UNST-4711: Maas model crash #2 about "ug_get_mesh_name: could not find meshname for topology var id -1"
+! is caused by the fact that n1dedges=0, but still we have a 1D2D mesh contact to be written later.
 
       !define 1dmesh
       if (n1dedges.gt.0) then
