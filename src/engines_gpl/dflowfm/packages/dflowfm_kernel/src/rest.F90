@@ -768,6 +768,7 @@ end subroutine read_land_boundary_netcdf
       SUBROUTINE WRILDB(MPOL, XSH, YSH, NSH, NCLAN, nnclan, ZSH, nzsh, names, namlen, nnam)
       USE M_MISSING
       use m_polygon ! , only : zpl, DZL, DZR, jakol45
+      use gridoperations
       implicit none
       integer,       intent(inout) :: mpol !< Open file pointer where to write to.
       double precision, intent(in) :: XSH(NSH), YSH(NSH) !< Coordinates, polylines can be separated by dmiss value.
@@ -788,7 +789,7 @@ end subroutine read_land_boundary_netcdf
       character(len=1)  :: cdigits
       character(len=40) :: rec
       logical :: jaNCLAN, jaZSH
-      logical :: inview
+      !logical :: inview
       
       ! Only include third column when size is equal to XSH array (or larger).
       jaNCLAN = nNCLAN >= NSH
