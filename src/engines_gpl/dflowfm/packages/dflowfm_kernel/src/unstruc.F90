@@ -40244,7 +40244,8 @@ end subroutine setbobs_fixedweirs
                       call GetCSParsFlow(network%adm%line2cross(L, 2), network%crs%cross, dpt, as2, perimeter, width)
                    ! WU(L) is the average width at the bridge (max of up/downstream side).
                       wu(L) = max(wu(L), as2/dpt)
-                      call ComputeBridge(pstru%bridge, fu(L), ru(L), au(L), wu(L), kfu, s1(k1), s1(k2), pstru%u1(L0), dx(L), dts,                            &
+                      width = wu(L)
+                      call ComputeBridge(pstru%bridge, fu(L), ru(L), au(L), width, kfu, s1(k1), s1(k2), pstru%u1(L0), dx(L), dts,                            &
                                as1, as2, bob0(:,L))
                    case (ST_LONGCULVERT)
                       ! NOTE: UNST-4328: long culverts are no actual structures, but rather just normal 1D flow links, no furu-step needed here.

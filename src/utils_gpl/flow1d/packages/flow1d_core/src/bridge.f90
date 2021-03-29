@@ -242,7 +242,7 @@ contains
          cmus = min(cmus, 1.0d0)    ! Limit to maximum of 1.0
 
          aum   = wArea
-
+         dadsm = wWidth
       endif
 
 
