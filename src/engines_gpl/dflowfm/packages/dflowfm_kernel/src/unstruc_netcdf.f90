@@ -11250,7 +11250,7 @@ subroutine unc_read_net(filename, numk_keep, numl_keep, numk_read, numl_read, ie
     use m_missing
     use dfm_error
     use gridoperations
-    use netcdf_utils, only: ncu_get_att
+    use netcdf_utils, only: ncu_get_att, ncu_get_var_attset
 
     character(len=*), intent(in)     :: filename  !< Name of NetCDF file.
     integer,          intent(inout)  :: numk_keep !< Number of netnodes to keep in existing net.
@@ -11328,7 +11328,7 @@ subroutine unc_read_net(filename, numk_keep, numl_keep, numk_read, numl_read, ie
            !   read(tmpstring, '(a,i0)') dummy, datasets(ioncid)%crs%epsg_code
            !end if
         end if
-        ierr = ug_get_var_attset(inetfile, id_crsvar, crs%attset)
+        ierr = ncu_get_var_attset(inetfile, id_crsvar, crs%attset)
     end if
 
 ! Prepare net vars for new data and fill with values from file

@@ -429,118 +429,7 @@ function ug_addglobalatts(ncid, meta) result(ierr)
 end function ug_addglobalatts
 
 
-!> Gets all NetCDF-attributes for a given variable.
-!!
-!! This function is non-UGRID-specific: only used to read grid mapping variables.
-!! @see ug_put_var_attset
-function ug_get_var_attset(ncid, varid, attset) result(ierr)
-   use netcdf_utils, only: ncu_get_att
 
-   integer,                         intent(in)  :: ncid      !< NetCDF dataset id
-   integer,                         intent(in)  :: varid     !< NetCDF variable id (1-based).
-   type(nc_attribute), allocatable, intent(out) :: attset(:) !< Resulting attribute set.
-   integer                                      :: ierr      !< Result status (UG_NOERR==NF90_NOERR) if successful.
-
-   character(len=64) :: attname
-   character(len=:), allocatable     :: tmpstr !< The name of the network used by the mesh
-   integer :: i, j, natts, atttype, attlen, nlen
-
-   ierr = UG_NOERR
-   allocate( character(len=0) :: tmpstr )
-
-   ierr = nf90_inquire_variable(ncid, varid, natts = natts)
-   if (ierr /= nf90_noerr) then
-      goto 888
-   end if
-
-   if (allocated(attset)) deallocate(attset)
-   allocate(attset(natts), stat=ierr)
-
-   do i = 1,natts
-      ierr = nf90_inq_attname(ncid, varid, i, attname)    ! get attribute name
-      ierr = nf90_inquire_attribute(ncid, varid, trim(attname), xtype = atttype, len=attlen) ! get other attribute information
-
-      select case(atttype)
-      case(NF90_CHAR)
-         tmpstr = ''
-         ierr = ncu_get_att(ncid, varid, attname, tmpstr)   
-         
-         allocate(attset(i)%strvalue(attlen))
-         nlen = min(len(tmpstr), attlen)
-         do j=1,nlen
-            attset(i)%strvalue(j) = tmpstr(j:j)
-         end do
-      case(NF90_INT)
-         allocate(attset(i)%intvalue(attlen))
-         ierr = nf90_get_att(ncid, varid, attname, attset(i)%intvalue)
-      case(NF90_FLOAT)
-         allocate(attset(i)%fltvalue(attlen))
-         ierr = nf90_get_att(ncid, varid, attname, attset(i)%fltvalue)
-      case(NF90_DOUBLE)
-         allocate(attset(i)%dblvalue(attlen))
-         ierr = nf90_get_att(ncid, varid, attname, attset(i)%dblvalue)
-      case default
-         ! NF90_BYTE
-         ! NF90_SHORT
-         ug_messagestr = 'ug_get_var_attset: error for attribute '''//trim(attname)//'''. Data types byte/short not implemented.'
-         ierr = UG_NOTIMPLEMENTED
-         goto 888
-      end select
-      attset(i)%attname = attname
-      attset(i)%xtype   = atttype
-      attset(i)%len     = attlen
-   end do
-   deallocate(tmpstr)
-
-   return ! Return with success
-
-888 continue
-
-end function ug_get_var_attset
-
-
-!> Puts a set of NetCDF-attributes onto a given variable.
-!!
-!! This function is non-UGRID-specific: only used to write grid mapping variables.
-!! @see ug_get_var_attset
-function ug_put_var_attset(ncid, varid, attset) result(ierr)
-   integer,             intent(in)  :: ncid      !< NetCDF dataset id
-   integer,             intent(in)  :: varid     !< NetCDF variable id (1-based).
-   type(nc_attribute),  intent(in)  :: attset(:) !< Attribute set to be put into the variable.
-   integer                          :: ierr      !< Result status (UG_NOERR==NF90_NOERR) if successful.
-
-   character(len=1024) :: tmpstr
-   integer :: i, j, natts, nlen
-
-   ierr = UG_NOERR
-
-   natts = size(attset)
-
-   do i = 1,natts
-      select case(attset(i)%xtype)
-      case(NF90_CHAR)
-         tmpstr = ' '
-         nlen = min(len(tmpstr), attset(i)%len)
-         do j=1,nlen
-            tmpstr(j:j) = attset(i)%strvalue(j)
-         end do
-
-         ierr = nf90_put_att(ncid, varid, attset(i)%attname, tmpstr)
-      case(NF90_INT)
-         ierr = nf90_put_att(ncid, varid, attset(i)%attname, attset(i)%intvalue(1:attset(i)%len))
-      case(NF90_FLOAT)
-         ierr = nf90_put_att(ncid, varid, attset(i)%attname, attset(i)%fltvalue(1:attset(i)%len))
-      case(NF90_DOUBLE)
-         ierr = nf90_put_att(ncid, varid, attset(i)%attname, attset(i)%dblvalue(1:attset(i)%len))
-      case default
-         ! NF90_BYTE
-         ! NF90_SHORT
-         ug_messagestr = 'ug_put_var_attset: error for attribute '''//trim(attset(i)%attname)//'''. Data types byte/short not implemented.'
-         ierr = UG_NOTIMPLEMENTED
-      end select
-   end do
-
-end function ug_put_var_attset
 
 ! -- COORDINATES ------------
 !> Adds coordinate variables according to CF conventions.
@@ -653,6 +542,8 @@ end function ug_addlonlatcoordatts
 !> Adds coordinate mapping attributes according to CF conventions, based on jsferic.
 !! Attributes are put in a scalar integer variable.
 function ug_add_coordmapping(ncid, crs) result(ierr)
+   use netcdf_utils, only: ncu_put_var_attset
+   
    integer,      intent(in) :: ncid   !< NetCDF dataset id
    type(t_crs), intent(in)  :: crs   !< Coordinate reference system that was used for the coordinate mapping.
    integer                  :: ierr   !< Result status (UG_NOERR==NF90_NOERR) if successful.
@@ -703,7 +594,7 @@ function ug_add_coordmapping(ncid, crs) result(ierr)
 !      ierr = nf90_put_att(ncid, id_crs, 'comment',                     ' '                )
       ierr = nf90_put_att(ncid, id_crs, 'value',                       'value is equal to EPSG code')
    else if (allocated(crs%attset)) then
-      ierr = ug_put_var_attset(ncid, id_crs, crs%attset)
+      ierr = ncu_put_var_attset(ncid, id_crs, crs%attset)
    else
       ierr_missing = UG_INVALID_CRS      ! TODO: remove hardcoded defaults below. Replace by cloning the crs%attset  into this new NetCDF var.
       write (epsgstring, '("EPSG:",I0)') crs%epsg_code
@@ -1967,6 +1858,7 @@ function ug_init_dataset(ncid, ug_file) result(ierr)
 end function ug_init_dataset
 
 function ug_init_link_topology(ncid, varid, contactids) result(ierr)
+   use netcdf_utils, only: ncu_att_to_dimid, ncu_att_to_varid
 
    integer,            intent(in   ) :: ncid          !< ID of already opened data set.
    integer,            intent(in   ) :: varid         !< NetCDF variable ID that contains the link topology information (1-based).
@@ -1976,25 +1868,26 @@ function ug_init_link_topology(ncid, varid, contactids) result(ierr)
    ierr = UG_NOERR
 
    contactids%varids(cid_contacttopo) = varid
-   ierr = att_to_dimid(ncid, varid, 'link_dimension'   , contactids%dimids(cdim_ncontacts))
-   ierr = att_to_varid(ncid, varid, 'contact_id'       , contactids%varids(cid_contactids))
+   ierr = ncu_att_to_dimid(ncid, varid, 'link_dimension'   , contactids%dimids(cdim_ncontacts))
+   ierr = ncu_att_to_varid(ncid, varid, 'contact_id'       , contactids%varids(cid_contactids))
    if (ierr /= UG_NOERR) then
       ! Backwards compatible read of Deltares-0.9 plural-names.
-      ierr = att_to_varid(ncid, varid, 'contact_ids'   , contactids%varids(cid_contactids))
+      ierr = ncu_att_to_varid(ncid, varid, 'contact_ids'   , contactids%varids(cid_contactids))
    end if
-   ierr = att_to_varid(ncid, varid, 'contact_long_name', contactids%varids(cid_contactlongnames))
+   ierr = ncu_att_to_varid(ncid, varid, 'contact_long_name', contactids%varids(cid_contactlongnames))
    if (ierr /= UG_NOERR) then
       ! Backwards compatible read of Deltares-0.9 plural-names.
-      ierr = att_to_varid(ncid, varid, 'contact_long_names', contactids%varids(cid_contactlongnames))
+      ierr = ncu_att_to_varid(ncid, varid, 'contact_long_names', contactids%varids(cid_contactlongnames))
    end if
-   ierr = att_to_varid(ncid, varid, 'contact_type', contactids%varids(cid_contacttype))
+   ierr = ncu_att_to_varid(ncid, varid, 'contact_type', contactids%varids(cid_contacttype))
 
    ierr = UG_NOERR
 
    end function ug_init_link_topology
 
 function ug_init_network_topology(ncid, varid, netids) result(ierr)
-
+   use netcdf_utils, only: ncu_att_to_dimid, ncu_att_to_varid
+   
    integer,            intent(in)    :: ncid          !< ID of already opened data set.
    integer,            intent(in)    :: varid         !< NetCDF variable ID that contains the network topology information (1-based).
    type(t_ug_network), intent(inout) :: netids        !< vector in which all mesh topology dimension and variables ids will be stored.
@@ -2007,17 +1900,17 @@ function ug_init_network_topology(ncid, varid, netids) result(ierr)
    netids%varids(ntid_1dtopo) = varid
    ierr = nf90_inquire_variable(ncid, varid, name = varname)
 
-   ierr = att_to_dimid(ncid, varid, 'edge_dimension',  netids%dimids(ntdim_1dedges))
+   ierr = ncu_att_to_dimid(ncid, varid, 'edge_dimension',  netids%dimids(ntdim_1dedges))
    if (ierr /= UG_NOERR) then
       call SetMessage(LEVEL_WARN, 'ug_init_network_topology: Could not find dimension for network edges (see '//trim(varname)//':edge_dimension).')
    end if
 
-   ierr = att_to_dimid(ncid, varid, 'node_dimension',  netids%dimids(ntdim_1dnodes))
+   ierr = ncu_att_to_dimid(ncid, varid, 'node_dimension',  netids%dimids(ntdim_1dnodes))
    if (ierr /= UG_NOERR) then
       call SetMessage(LEVEL_WARN, 'ug_init_network_topology: Could not find dimension for network nodes (see '//trim(varname)//':node_dimension).')
    end if
    !edge_geometry container
-   ierr = att_to_varid(ncid, varid, 'edge_geometry'  ,  netids%varids(ntid_1dgeometry))
+   ierr = ncu_att_to_varid(ncid, varid, 'edge_geometry'  ,  netids%varids(ntid_1dgeometry))
    if (ierr /= UG_NOERR) then
       call SetMessage(LEVEL_WARN, 'ug_init_network_topology: Could not find variable with network geometry (see '//trim(varname)//':edge_geometry).')
    end if
@@ -2028,42 +1921,42 @@ function ug_init_network_topology(ncid, varid, netids) result(ierr)
 
    !node variables ids
    ierr = att_to_coordvarids(ncid, varid, 'node_coordinates', netids%varids(ntid_1dnodex), netids%varids(ntid_1dnodey))
-   ierr = att_to_varid(ncid, varid, 'node_id'        , netids%varids(ntid_1dnodids))
+   ierr = ncu_att_to_varid(ncid, varid, 'node_id'        , netids%varids(ntid_1dnodids))
    if (ierr /= UG_NOERR) then
       ! Backwards compatible read of Deltares-0.9 plural-names.
-      ierr = att_to_varid(ncid, varid, 'node_ids'    , netids%varids(ntid_1dnodids))
+      ierr = ncu_att_to_varid(ncid, varid, 'node_ids'    , netids%varids(ntid_1dnodids))
    end if
-   ierr = att_to_varid(ncid, varid, 'node_long_name' , netids%varids(ntid_1dnodlongnames))
+   ierr = ncu_att_to_varid(ncid, varid, 'node_long_name' , netids%varids(ntid_1dnodlongnames))
    if (ierr /= UG_NOERR) then
       ! Backwards compatible read of Deltares-0.9 plural-names.
-      ierr = att_to_varid(ncid, varid, 'node_long_names', netids%varids(ntid_1dnodlongnames))
+      ierr = ncu_att_to_varid(ncid, varid, 'node_long_names', netids%varids(ntid_1dnodlongnames))
    end if
    !branch variables ids
-   ierr = att_to_varid(ncid, varid, 'edge_node_connectivity', netids%varids(ntid_1dedgenodes))
-   ierr = att_to_varid(ncid, varid, 'branch_id'             , netids%varids(ntid_1dbranchids))
+   ierr = ncu_att_to_varid(ncid, varid, 'edge_node_connectivity', netids%varids(ntid_1dedgenodes))
+   ierr = ncu_att_to_varid(ncid, varid, 'branch_id'             , netids%varids(ntid_1dbranchids))
    if (ierr /= UG_NOERR) then
       ! Backwards compatible read of Deltares-0.9 plural-names.
-      ierr = att_to_varid(ncid, varid, 'branch_ids'         , netids%varids(ntid_1dbranchids))
+      ierr = ncu_att_to_varid(ncid, varid, 'branch_ids'         , netids%varids(ntid_1dbranchids))
    end if
-   ierr = att_to_varid(ncid, varid, 'branch_long_name'      , netids%varids(ntid_1dbranchlongnames)) ! TODO: LC: error when not found
+   ierr = ncu_att_to_varid(ncid, varid, 'branch_long_name'      , netids%varids(ntid_1dbranchlongnames)) ! TODO: LC: error when not found
    if (ierr /= UG_NOERR) then
       ! Backwards compatible read of Deltares-0.9 plural-names.
-      ierr = att_to_varid(ncid, varid, 'branch_long_names'  , netids%varids(ntid_1dbranchlongnames)) ! TODO: LC: error when not found
+      ierr = ncu_att_to_varid(ncid, varid, 'branch_long_names'  , netids%varids(ntid_1dbranchlongnames)) ! TODO: LC: error when not found
    end if
 
    ! branch_lengths/edge_length
-   ierr = att_to_varid(ncid, varid, 'edge_length'           , netids%varids(ntid_1dbranchlengths))
+   ierr = ncu_att_to_varid(ncid, varid, 'edge_length'           , netids%varids(ntid_1dbranchlengths))
    if ( ierr /= UG_NOERR ) then
       ! for backward compatibility: branch_lengths was used rather than edge_length. If there get the varid of the attribute
-      ierr = att_to_varid(ncid, varid, 'branch_lengths'     , netids%varids(ntid_1dbranchlengths))
+      ierr = ncu_att_to_varid(ncid, varid, 'branch_lengths'     , netids%varids(ntid_1dbranchlengths))
    endif
 
    ! get the number of geometric points for each branch
    ! try to get the node_count
-   ierr = att_to_varid(ncid, netids%varids(ntid_1dgeometry), 'node_count', netids%varids(ntid_1dgeopointsperbranch))
+   ierr = ncu_att_to_varid(ncid, netids%varids(ntid_1dgeometry), 'node_count', netids%varids(ntid_1dgeopointsperbranch))
    if (ierr /= UG_NOERR) then
       ! for backward compatibility: part_node_count was used rather than node_count. If there get the varid of the attribute
-      ierr = att_to_varid(ncid, netids%varids(ntid_1dgeometry), 'part_node_count', netids%varids(ntid_1dgeopointsperbranch))
+      ierr = ncu_att_to_varid(ncid, netids%varids(ntid_1dgeometry), 'part_node_count', netids%varids(ntid_1dgeopointsperbranch))
    endif
 
    !dim variables
@@ -2090,7 +1983,7 @@ end function ug_init_network_topology
 
 !> Reads the mesh_topology attributes from a NetCDF variable.
 function ug_init_mesh_topology(ncid, varid, meshids) result(ierr)
-   use netcdf_utils, only: ncu_get_att
+   use netcdf_utils, only: ncu_get_att, ncu_att_to_dimid, ncu_att_to_varid
 
    integer,         intent(in   )    :: ncid          !< ID of already opened data set.
    integer,         intent(in   )    :: varid         !< NetCDF variable ID that contains the mesh topology information (1-based).
@@ -2112,10 +2005,10 @@ function ug_init_mesh_topology(ncid, varid, meshids) result(ierr)
    !
    ! Dimensions:
    !
-   ierr = att_to_dimid(ncid, varid, 'node_dimension', meshids%dimids(mdim_node))
-   ierr = att_to_dimid(ncid, varid, 'edge_dimension', meshids%dimids(mdim_edge))
-   ierr = att_to_dimid(ncid, varid, 'face_dimension', meshids%dimids(mdim_face))
-   ierr = att_to_dimid(ncid, varid, 'max_face_nodes_dimension', meshids%dimids(mdim_maxfacenodes))
+   ierr = ncu_att_to_dimid(ncid, varid, 'node_dimension', meshids%dimids(mdim_node))
+   ierr = ncu_att_to_dimid(ncid, varid, 'edge_dimension', meshids%dimids(mdim_edge))
+   ierr = ncu_att_to_dimid(ncid, varid, 'face_dimension', meshids%dimids(mdim_face))
+   ierr = ncu_att_to_dimid(ncid, varid, 'max_face_nodes_dimension', meshids%dimids(mdim_maxfacenodes))
    ! Dimension 2 might already be present
    ierr = nf90_inq_dimid(ncid, 'Two', meshids%dimids(mdim_two))
    ! Otherwise check another possible definitions
@@ -2131,7 +2024,7 @@ function ug_init_mesh_topology(ncid, varid, meshids) result(ierr)
    deallocate(coordspaceind)  ! not used anymore
    if (isMappedMesh == nf90_noerr) then
       !inquire the variable with that name
-      ierr = att_to_varid(ncid, varid, 'coordinate_space', meshids%varids(mid_1dtopo))
+      ierr = ncu_att_to_varid(ncid, varid, 'coordinate_space', meshids%varids(mid_1dtopo))
       !read branch id and offsets
       ierr = att_to_coordvarids(ncid, meshids%varids(mid_meshtopo), 'node_coordinates', meshids%varids(mid_1dnodebranch), meshids%varids(mid_1dnodeoffset), meshids%varids(mid_nodex), meshids%varids(mid_nodey))
       ierr = att_to_coordvarids(ncid, meshids%varids(mid_meshtopo), 'edge_coordinates', meshids%varids(mid_1dedgebranch), meshids%varids(mid_1dedgeoffset), meshids%varids(mid_edgex),meshids%varids(mid_edgey))
@@ -2155,7 +2048,7 @@ function ug_init_mesh_topology(ncid, varid, meshids) result(ierr)
    ! Topology variables
    !
 
-   ierr = att_to_varid(ncid, varid, 'edge_node_connectivity', meshids%varids(mid_edgenodes)) !< Variable ID for edge-to-node mapping table.
+   ierr = ncu_att_to_varid(ncid, varid, 'edge_node_connectivity', meshids%varids(mid_edgenodes)) !< Variable ID for edge-to-node mapping table.
    if (ierr == nf90_noerr) then
       ! The optional edge_dimension attribute was not found, so auto-detect it from the edge_node topology.
       if (meshids%dimids(mdim_edge) == -1) then
@@ -2163,7 +2056,7 @@ function ug_init_mesh_topology(ncid, varid, meshids) result(ierr)
       end if
    end if
 
-   ierr = att_to_varid(ncid, varid, 'face_node_connectivity', meshids%varids(mid_facenodes)) !< Variable ID for face-to-node mapping table.
+   ierr = ncu_att_to_varid(ncid, varid, 'face_node_connectivity', meshids%varids(mid_facenodes)) !< Variable ID for face-to-node mapping table.
    if (ierr == nf90_noerr) then
       ! The optional face_dimension attribute was not found, so auto-detect it from the face_node topology.
       if (meshids%dimids(mdim_face) == -1) then
@@ -2184,46 +2077,46 @@ function ug_init_mesh_topology(ncid, varid, meshids) result(ierr)
       end if
    end if
 
-   ierr = att_to_varid(ncid, varid, 'edge_face_connectivity', meshids%varids(mid_edgefaces)) !< Variable ID for edge-to-face mapping table (optional, can be -1).
-   ierr = att_to_varid(ncid, varid, 'face_edge_connectivity', meshids%varids(mid_faceedges)) !< Variable ID for face-to-edge mapping table (optional, can be -1).
-   ierr = att_to_varid(ncid, varid, 'face_face_connectivity', meshids%varids(mid_facelinks)) !< Variable ID for face-to-face mapping table (optional, can be -1).
+   ierr = ncu_att_to_varid(ncid, varid, 'edge_face_connectivity', meshids%varids(mid_edgefaces)) !< Variable ID for edge-to-face mapping table (optional, can be -1).
+   ierr = ncu_att_to_varid(ncid, varid, 'face_edge_connectivity', meshids%varids(mid_faceedges)) !< Variable ID for face-to-edge mapping table (optional, can be -1).
+   ierr = ncu_att_to_varid(ncid, varid, 'face_face_connectivity', meshids%varids(mid_facelinks)) !< Variable ID for face-to-face mapping table (optional, can be -1).
 
    !
    ! Get the ids defined in nodes/edges/faces
    !
-   ierr = att_to_varid(ncid, varid, 'node_id',     meshids%varids(mid_node_ids)) !< Variable ID for node ids
+   ierr = ncu_att_to_varid(ncid, varid, 'node_id',     meshids%varids(mid_node_ids)) !< Variable ID for node ids
    if (ierr /= UG_NOERR) then
       ! Backwards compatible read of Deltares-0.9 plural-names.
-      ierr = att_to_varid(ncid, varid, 'node_ids', meshids%varids(mid_node_ids)) !< Variable ID for node ids
+      ierr = ncu_att_to_varid(ncid, varid, 'node_ids', meshids%varids(mid_node_ids)) !< Variable ID for node ids
    end if
-   ierr = att_to_varid(ncid, varid, 'edge_id',     meshids%varids(mid_edge_ids)) !< Variable ID for edge ids
+   ierr = ncu_att_to_varid(ncid, varid, 'edge_id',     meshids%varids(mid_edge_ids)) !< Variable ID for edge ids
    if (ierr /= UG_NOERR) then
       ! Backwards compatible read of Deltares-0.9 plural-names.
-      ierr = att_to_varid(ncid, varid, 'edge_ids', meshids%varids(mid_edge_ids)) !< Variable ID for edge ids
+      ierr = ncu_att_to_varid(ncid, varid, 'edge_ids', meshids%varids(mid_edge_ids)) !< Variable ID for edge ids
    end if
-   ierr = att_to_varid(ncid, varid, 'face_id',     meshids%varids(mid_face_ids)) !< Variable ID for face ids
+   ierr = ncu_att_to_varid(ncid, varid, 'face_id',     meshids%varids(mid_face_ids)) !< Variable ID for face ids
    if (ierr /= UG_NOERR) then
       ! Backwards compatible read of Deltares-0.9 plural-names.
-      ierr = att_to_varid(ncid, varid, 'face_ids', meshids%varids(mid_face_ids)) !< Variable ID for face ids
+      ierr = ncu_att_to_varid(ncid, varid, 'face_ids', meshids%varids(mid_face_ids)) !< Variable ID for face ids
    end if
 
    !
    ! Get the longnames defined in nodes/edges/faces
    !
-   ierr = att_to_varid(ncid, varid, 'node_long_name',     meshids%varids(mid_node_longnames)) !< Variable ID for node ids
+   ierr = ncu_att_to_varid(ncid, varid, 'node_long_name',     meshids%varids(mid_node_longnames)) !< Variable ID for node ids
    if (ierr /= UG_NOERR) then
       ! Backwards compatible read of Deltares-0.9 plural-names.
-      ierr = att_to_varid(ncid, varid, 'node_long_names', meshids%varids(mid_node_longnames)) !< Variable ID for node ids
+      ierr = ncu_att_to_varid(ncid, varid, 'node_long_names', meshids%varids(mid_node_longnames)) !< Variable ID for node ids
    end if
-   ierr = att_to_varid(ncid, varid, 'edge_long_name',     meshids%varids(mid_edge_longnames)) !< Variable ID for edge ids
+   ierr = ncu_att_to_varid(ncid, varid, 'edge_long_name',     meshids%varids(mid_edge_longnames)) !< Variable ID for edge ids
    if (ierr /= UG_NOERR) then
       ! Backwards compatible read of Deltares-0.9 plural-names.
-      ierr = att_to_varid(ncid, varid, 'edge_long_names', meshids%varids(mid_edge_longnames)) !< Variable ID for edge ids
+      ierr = ncu_att_to_varid(ncid, varid, 'edge_long_names', meshids%varids(mid_edge_longnames)) !< Variable ID for edge ids
    end if
-   ierr = att_to_varid(ncid, varid, 'face_long_name',     meshids%varids(mid_face_longnames)) !< Variable ID for face ids
+   ierr = ncu_att_to_varid(ncid, varid, 'face_long_name',     meshids%varids(mid_face_longnames)) !< Variable ID for face ids
    if (ierr /= UG_NOERR) then
       ! Backwards compatible read of Deltares-0.9 plural-names.
-      ierr = att_to_varid(ncid, varid, 'face_long_names', meshids%varids(mid_face_longnames)) !< Variable ID for face ids
+      ierr = ncu_att_to_varid(ncid, varid, 'face_long_names', meshids%varids(mid_face_longnames)) !< Variable ID for face ids
    end if
 
    ierr = UG_NOERR
@@ -2308,78 +2201,7 @@ function att_to_coordvarids(ncid, varid, attname, idx, idy, idz, idw) result(ier
     ! Some error
 end function att_to_coordvarids
 
-!> Inquire for a NetCDF variable ID based on an attribute in another variable.
-!! For example: mesh2d:face_node_connectivity
-function att_to_varid(ncid, varid, attname, id) result(ierr)
-   use netcdf_utils, only: ncu_get_att
 
-   integer         , intent(in   ) :: ncid    !< NetCDF dataset ID
-   integer         , intent(in   ) :: varid   !< NetCDF variable ID from which the attribute will be gotten (1-based).
-   character(len=*), intent(in   ) :: attname !< Name of attribute in varid that contains the variable name.
-   integer         , intent(  out) :: id      !< NetCDF variable ID that was found.
-   integer                         :: ierr    !< Result status. UG_NOERR if successful.
-
-   character(len=:), allocatable  :: varname
-
-   ierr = UG_NOERR
-   allocate( character(len=0) :: varname )
-
-   varname = ''
-   ierr = ncu_get_att(ncid, varid, attname, varname)
-   if (ierr /= nf90_noerr) then
-      ierr = UG_ENOTATT
-      goto 999
-   end if
-   ierr = nf90_inq_varid(ncid, trim(varname), id)
-   if (ierr /= nf90_noerr) then
-      ierr = UG_ENOTVAR
-      goto 999
-   end if
-
-   ! Return with success
-   deallocate(varname)
-   return
-
-999 continue
-   ! An error occurred, keep ierr nonzero and set undefined id.
-   deallocate(varname)
-   id = -1         ! undefined id
-end function att_to_varid
-
-
-!> Inquire for a NetCDF dimension ID based on an attribute in another variable.
-!! For example: mesh2d:edge_dimension
-function att_to_dimid(ncid, varid, attname, id) result(ierr)
-   integer         , intent(in   ) :: ncid    !< NetCDF dataset ID
-   integer         , intent(in   ) :: varid   !< NetCDF variable ID from which the attribute will be gotten (1-based).
-   character(len=*), intent(in   ) :: attname !< Name of attribute in varid that contains the dimension name.
-   integer         , intent(  out) :: id      !< NetCDF dimension ID that was found.
-   integer                         :: ierr    !< Result status. UG_NOERR if successful.
-
-   character(len=nf90_max_name)    :: varname
-
-   ierr = UG_NOERR
-
-   varname = ''
-   ierr = nf90_get_att(ncid, varid, attname, varname)
-   if (ierr /= nf90_noerr) then
-      ierr = UG_ENOTATT
-      goto 999
-   end if
-
-   ierr = nf90_inq_dimid(ncid, trim(varname), id)
-   if (ierr /= nf90_noerr) then
-      ierr = UG_ENOTDIM
-      goto 999
-   end if
-   ! Return with success
-   return
-
-999 continue
-   ! An error occurred, keep ierr nonzero and set undefined id.
-   id = -1         ! undefined id
-
-end function att_to_dimid
 
 
 !> Gets a single dimension ID for a given variable ID.
@@ -4957,6 +4779,7 @@ end function  ug_get_1d_mesh_edge_coordinates
 
 ! we assume  global attributes are already present in the file (it is needed to read the file back in later)
 function ug_clone_mesh_definition( ncidin, ncidout, meshidsin, meshidsout ) result(ierr)
+    use netcdf_utils, only: ncu_copy_atts
 
     integer, intent(in)                   :: ncidin, ncidout
     type(t_ug_mesh), intent(in)           :: meshidsin
@@ -5030,7 +4853,7 @@ function ug_clone_mesh_definition( ncidin, ncidout, meshidsin, meshidsout ) resu
              !we have a 1d mesh topology, we need to put the right index for the coordinate variable.
              ierr = ug_copy_var_atts_mesh1d( ncidin, ncidout, meshidsin%varids(i), meshidsout%varids(i), meshidsout%varids(mid_1dtopo))
           else
-             ierr = ug_copy_var_atts( ncidin, ncidout, meshidsin%varids(i), meshidsout%varids(i) )
+             ierr = ncu_copy_atts( ncidin, ncidout, meshidsin%varids(i), meshidsout%varids(i) )
           endif
           if ( ierr /= nf90_noerr ) then
              return
@@ -5098,6 +4921,8 @@ end function ug_clone_mesh_data
 !!
 !! The cloning of the actual data must be done later, using ug_clone_network_data().
 function ug_clone_network_definition( ncidin, ncidout, netidsin, netidsout) result(ierr)
+    use netcdf_utils, only: ncu_copy_atts
+    
     integer,            intent(in   ) :: ncidin    !< NetCDF id of input dataset
     integer,            intent(in   ) :: ncidout   !< NetCDF id of output dataset
     type(t_ug_network), intent(in   ) :: netidsin  !< network struct with dim+varids in input dataset
@@ -5164,7 +4989,7 @@ function ug_clone_network_definition( ncidin, ncidout, netidsin, netidsout) resu
              return
           end if
 
-          ierr = ug_copy_var_atts( ncidin, ncidout, netidsin%varids(i), netidsout%varids(i) )
+          ierr = ncu_copy_atts( ncidin, ncidout, netidsin%varids(i), netidsout%varids(i) )
 
           if ( ierr /= nf90_noerr ) then
              return
@@ -5332,39 +5157,6 @@ function ug_copy_char_var( ncidin, ncidout, meshidin, meshidout, ndims, dimsizes
     ierr = nf90_put_var( ncidout, meshidout, value2d )
 
 end function
-
-!copy the variable attributes
-function ug_copy_var_atts( ncidin, ncidout, varidin, varidout ) result(ierr)
-
-    integer, intent(in)            :: ncidin, ncidout, varidin, varidout
-    integer                        :: ierr
-    integer                        :: i
-    character(len=nf90_max_name)   :: attname
-    integer                        :: natts
-    integer                        :: attvalue
-
-    ierr = -1
-    ierr = nf90_inquire_variable( ncidin, varidin, nAtts=natts )
-    if ( ierr == nf90_enotvar ) then
-        ierr = nf90_inquire( ncidin, nAttributes=natts )
-    endif
-    if ( ierr /= nf90_noerr ) then
-        return
-    endif
-
-    do i = 1,natts
-        ierr = nf90_inq_attname( ncidin, varidin, i, attname )
-        if ( ierr /= nf90_noerr ) then
-            return
-        endif
-
-        ierr = nf90_copy_att( ncidin, varidin, attname, ncidout, varidout )
-        if ( ierr /= nf90_noerr ) then
-            return
-        endif
-    enddo
-
-end function ug_copy_var_atts
 
 
 !copy the variable attributes

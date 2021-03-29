@@ -53,7 +53,7 @@
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
 			<FileConfiguration Name="Release|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
-      <File RelativePath=".\src\simple_geometry.f90"/>      
+		<File RelativePath=".\src\io_constants.f90"/>
 		<File RelativePath=".\src\io_netcdf.f90"/>
 		<File RelativePath=".\src\io_netcdf_version.F90">
 			<FileConfiguration Name="Debug|Win32">
@@ -83,5 +83,6 @@
 			<FileConfiguration Name="Debug|x64">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
 			<FileConfiguration Name="Release|Win32">
-				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File></Filter></Files>
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
+		<File RelativePath=".\src\simple_geometry.f90"/></Filter></Files>
 	<Globals/></VisualStudioProject>

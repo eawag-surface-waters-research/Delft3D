@@ -1406,6 +1406,8 @@ end function detect_conventions
 !! Detection is based on the :projected_coordinate_system attribute in the file/data set.
 !! Detected type is stored in the global datasets's attribute.
 function detect_coordinate_system(ioncid) result(ierr)
+    use netcdf_utils, only: ncu_get_var_attset
+   
    integer, intent(in)  :: ioncid    !< The IONC data set id.
    integer              :: ierr      !< Result status, ionc_noerr if successful.
 
@@ -1445,7 +1447,7 @@ function detect_coordinate_system(ioncid) result(ierr)
          end if
       end if
 
-      ierr = ug_get_var_attset(datasets(ioncid)%ncid, id_crs, datasets(ioncid)%crs%attset)
+      ierr = ncu_get_var_attset(datasets(ioncid)%ncid, id_crs, datasets(ioncid)%crs%attset)
       ierr = detect_proj_string(datasets(ioncid)%crs)
       ierr = IONC_NOERR ! NOTE: AvD: PROJ-string errors should not be fatal now, so always return success.
    else 

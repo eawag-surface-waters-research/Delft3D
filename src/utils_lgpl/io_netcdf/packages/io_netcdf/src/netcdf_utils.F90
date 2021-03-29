@@ -40,6 +40,14 @@ public :: ncu_inq_var_fill, ncu_copy_atts, ncu_copy_chunking_deflate
 public :: ncu_clone_vardef
 public :: ncu_append_atts
 public :: ncu_get_att
+public :: ncu_get_var_attset
+public :: ncu_put_var_attset
+public :: ncu_att_to_varid
+public :: ncu_att_to_dimid
+!public :: ncu_copy_var_atts 
+
+integer, parameter :: maxMessageLen = 1024  ! copy taken from io_ugrid
+character(len=maxMessageLen) :: ncu_messagestr !< Placeholder string for storing diagnostic messages. /see{ug_get_message}
 
 ! Copied from official NetCDF: typeSizes.f90
 integer, parameter ::   OneByteInt = selected_int_kind(2), &
@@ -343,5 +351,232 @@ function ncu_get_att(ncid, varid, att_name, att_value) result(status)
    end if
 
 end function ncu_get_att
+
+!> Gets all NetCDF-attributes for a given variable.
+!!
+!! This function is non-UGRID-specific: only used to read grid mapping variables.
+!! @see ug_put_var_attset
+function ncu_get_var_attset(ncid, varid, attset) result(ierr)
+   use coordinate_reference_system
+   use ionc_constants
+
+   integer,                         intent(in)  :: ncid      !< NetCDF dataset id
+   integer,                         intent(in)  :: varid     !< NetCDF variable id (1-based).
+   type(nc_attribute), allocatable, intent(out) :: attset(:) !< Resulting attribute set.
+   integer                                      :: ierr      !< Result status (UG_NOERR==NF90_NOERR) if successful.
+
+   character(len=64) :: attname
+   character(len=:), allocatable     :: tmpstr !< The name of the network used by the mesh
+   integer :: i, j, natts, atttype, attlen, nlen
+
+   ierr = IONC_NOERR
+   allocate( character(len=0) :: tmpstr )
+
+   ierr = nf90_inquire_variable(ncid, varid, natts = natts)
+   if (ierr /= nf90_noerr) then
+      goto 888
+   end if
+
+   if (allocated(attset)) deallocate(attset)
+   allocate(attset(natts), stat=ierr)
+
+   do i = 1,natts
+      ierr = nf90_inq_attname(ncid, varid, i, attname)    ! get attribute name
+      ierr = nf90_inquire_attribute(ncid, varid, trim(attname), xtype = atttype, len=attlen) ! get other attribute information
+
+      select case(atttype)
+      case(NF90_CHAR)
+         tmpstr = ''
+         ierr = ncu_get_att(ncid, varid, attname, tmpstr)   
+         
+         allocate(attset(i)%strvalue(attlen))
+         nlen = min(len(tmpstr), attlen)
+         do j=1,nlen
+            attset(i)%strvalue(j) = tmpstr(j:j)
+         end do
+      case(NF90_INT)
+         allocate(attset(i)%intvalue(attlen))
+         ierr = nf90_get_att(ncid, varid, attname, attset(i)%intvalue)
+      case(NF90_FLOAT)
+         allocate(attset(i)%fltvalue(attlen))
+         ierr = nf90_get_att(ncid, varid, attname, attset(i)%fltvalue)
+      case(NF90_DOUBLE)
+         allocate(attset(i)%dblvalue(attlen))
+         ierr = nf90_get_att(ncid, varid, attname, attset(i)%dblvalue)
+      case default
+         ! NF90_BYTE
+         ! NF90_SHORT
+         ncu_messagestr = 'ncu_get_var_attset: error for attribute '''//trim(attname)//'''. Data types byte/short not implemented.'
+         ierr = IONC_ENOTAVAILABLE
+         goto 888
+      end select
+      attset(i)%attname = attname
+      attset(i)%xtype   = atttype
+      attset(i)%len     = attlen
+   end do
+   deallocate(tmpstr)
+
+   return ! Return with success
+
+888 continue
+
+end function ncu_get_var_attset
+
+!> Puts a set of NetCDF-attributes onto a given variable.
+!!
+!! This function is non-UGRID-specific: only used to write grid mapping variables.
+!! @see ug_get_var_attset
+function ncu_put_var_attset(ncid, varid, attset) result(ierr)
+   use coordinate_reference_system
+   use ionc_constants
+
+   integer,             intent(in)  :: ncid      !< NetCDF dataset id
+   integer,             intent(in)  :: varid     !< NetCDF variable id (1-based).
+   type(nc_attribute),  intent(in)  :: attset(:) !< Attribute set to be put into the variable.
+   integer                          :: ierr      !< Result status (UG_NOERR==NF90_NOERR) if successful.
+
+   character(len=1024) :: tmpstr
+   integer :: i, j, natts, nlen
+
+   ierr = IONC_NOERR
+
+   natts = size(attset)
+
+   do i = 1,natts
+      select case(attset(i)%xtype)
+      case(NF90_CHAR)
+         tmpstr = ' '
+         nlen = min(len(tmpstr), attset(i)%len)
+         do j=1,nlen
+            tmpstr(j:j) = attset(i)%strvalue(j)
+         end do
+
+         ierr = nf90_put_att(ncid, varid, attset(i)%attname, tmpstr)
+      case(NF90_INT)
+         ierr = nf90_put_att(ncid, varid, attset(i)%attname, attset(i)%intvalue(1:attset(i)%len))
+      case(NF90_FLOAT)
+         ierr = nf90_put_att(ncid, varid, attset(i)%attname, attset(i)%fltvalue(1:attset(i)%len))
+      case(NF90_DOUBLE)
+         ierr = nf90_put_att(ncid, varid, attset(i)%attname, attset(i)%dblvalue(1:attset(i)%len))
+      case default
+         ! NF90_BYTE
+         ! NF90_SHORT
+         ncu_messagestr = 'ug_put_var_attset: error for attribute '''//trim(attset(i)%attname)//'''. Data types byte/short not implemented.'
+         ierr = IONC_ENOTAVAILABLE
+      end select
+   end do
+
+end function ncu_put_var_attset
+
+
+!> Inquire for a NetCDF variable ID based on an attribute in another variable.
+!! For example: mesh2d:face_node_connectivity
+function ncu_att_to_varid(ncid, varid, attname, id) result(ierr)
+   use ionc_constants
+   
+   integer         , intent(in   ) :: ncid    !< NetCDF dataset ID
+   integer         , intent(in   ) :: varid   !< NetCDF variable ID from which the attribute will be gotten (1-based).
+   character(len=*), intent(in   ) :: attname !< Name of attribute in varid that contains the variable name.
+   integer         , intent(  out) :: id      !< NetCDF variable ID that was found.
+   integer                         :: ierr    !< Result status. UG_NOERR if successful.
+
+   character(len=:), allocatable  :: varname
+
+   ierr = IONC_NOERR
+   allocate( character(len=0) :: varname )
+
+   varname = ''
+   ierr = ncu_get_att(ncid, varid, attname, varname)
+   if (ierr /= nf90_noerr) then
+      ierr = IONC_ENOTATT
+      goto 999
+   end if
+   ierr = nf90_inq_varid(ncid, trim(varname), id)
+   if (ierr /= nf90_noerr) then
+      ierr = IONC_ENOTVAR
+      goto 999
+   end if
+
+   ! Return with success
+   deallocate(varname)
+   return
+
+999 continue
+   ! An error occurred, keep ierr nonzero and set undefined id.
+   deallocate(varname)
+   id = -1         ! undefined id
+end function ncu_att_to_varid
+
+
+!> Inquire for a NetCDF dimension ID based on an attribute in another variable.
+!! For example: mesh2d:edge_dimension
+function ncu_att_to_dimid(ncid, varid, attname, id) result(ierr)
+   use ionc_constants
+
+   integer         , intent(in   ) :: ncid    !< NetCDF dataset ID
+   integer         , intent(in   ) :: varid   !< NetCDF variable ID from which the attribute will be gotten (1-based).
+   character(len=*), intent(in   ) :: attname !< Name of attribute in varid that contains the dimension name.
+   integer         , intent(  out) :: id      !< NetCDF dimension ID that was found.
+   integer                         :: ierr    !< Result status. UG_NOERR if successful.
+
+   character(len=nf90_max_name)    :: varname
+
+   ierr = IONC_NOERR
+
+   varname = ''
+   ierr = nf90_get_att(ncid, varid, attname, varname)
+   if (ierr /= nf90_noerr) then
+      ierr = IONC_ENOTATT
+      goto 999
+   end if
+
+   ierr = nf90_inq_dimid(ncid, trim(varname), id)
+   if (ierr /= nf90_noerr) then
+      ierr = IONC_ENOTDIM
+      goto 999
+   end if
+   ! Return with success
+   return
+
+999 continue
+   ! An error occurred, keep ierr nonzero and set undefined id.
+   id = -1         ! undefined id
+
+end function ncu_att_to_dimid
+
+
+!copy the variable attributes
+function ncu_copy_var_atts( ncidin, ncidout, varidin, varidout ) result(ierr)
+
+    integer, intent(in)            :: ncidin, ncidout, varidin, varidout
+    integer                        :: ierr
+    integer                        :: i
+    character(len=nf90_max_name)   :: attname
+    integer                        :: natts
+    integer                        :: attvalue
+
+    ierr = -1
+    ierr = nf90_inquire_variable( ncidin, varidin, nAtts=natts )
+    if ( ierr == nf90_enotvar ) then
+        ierr = nf90_inquire( ncidin, nAttributes=natts )
+    endif
+    if ( ierr /= nf90_noerr ) then
+        return
+    endif
+
+    do i = 1,natts
+        ierr = nf90_inq_attname( ncidin, varidin, i, attname )
+        if ( ierr /= nf90_noerr ) then
+            return
+        endif
+
+        ierr = nf90_copy_att( ncidin, varidin, attname, ncidout, varidout )
+        if ( ierr /= nf90_noerr ) then
+            return
+        endif
+    enddo
+
+end function ncu_copy_var_atts
+
 
 end module netcdf_utils
