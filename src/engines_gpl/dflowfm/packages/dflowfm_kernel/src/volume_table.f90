@@ -36,8 +36,8 @@ module m_VolumeTables
       double precision :: topLevel                                  !< Highest level (w.r.t. the bed level) of the surrounding cross sections
       double precision, allocatable, dimension(:) :: vol            !< Volume at each level of the table.
       double precision, allocatable, dimension(:) :: sur            !< Surface area at each level of the table.
-      double precision, allocatable, dimension(:) :: volSummerdike  !< Volume table for decreasing levels
-      double precision, allocatable, dimension(:) :: surSummerdike  !< Surface area table for decreasing levels
+      double precision, allocatable, dimension(:) :: volSummerdike  !< Volume table for decreasing levels behind summer dikes (for hysteresis)
+      double precision, allocatable, dimension(:) :: surSummerdike  !< Surface area table for decreasing levels behind summer dikes (for hysteresis)
       double precision, allocatable, dimension(:) :: volDecreasing  !< Volume table for decreasing widths (Nested Newton)
       double precision, allocatable, dimension(:) :: surDecreasing  !< Surface area table for decreasing widths (Nested Newton)
    contains
