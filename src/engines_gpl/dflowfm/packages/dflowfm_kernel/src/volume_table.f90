@@ -158,6 +158,7 @@ module m_VolumeTables
       use m_flowgeom
       use m_GlobalParameters
       use m_Storage
+      use m_flow
 
       integer :: ndx1d
       integer :: nstor
@@ -166,13 +167,14 @@ module m_VolumeTables
       integer :: LL, L
       integer :: i, j
       integer :: index
+      integer :: jacustombnd1d
 
       double precision :: height
       double precision :: level
       double precision :: dxL
       double precision :: area
       double precision :: width
-      double precision :: charheight
+      double precision :: topLevel
       double precision :: bobAboveBedLevel
 
       type(t_chainage2cross), dimension(:,:), pointer :: line2cross
@@ -203,7 +205,7 @@ module m_VolumeTables
          do i = 1, nstor
             nod = stors(i)%gridPoint
             n = nod-ndx2d
-            vltb(n)%topLevel = max(vltb(n)%topLevel, getTopLevel(stors(i)))
+            vltb(n)%topLevel = max(vltb(n)%topLevel, getTopLevel(stors(i))) - bl(nod)
          enddo
       endif
       
@@ -215,28 +217,30 @@ module m_VolumeTables
          ! determine highest level (characteristic height) of all incoming and outgoing links to node nod
          do LL = 1, nd(nod)%lnx
             L = nd(nod)%ln(LL)
-            ! for compatibility use index = 2
             index = 2
-            ! if (L < 0) then
-            !    ! link from this flow node
-            !    index = 1
-            ! else
-            !    ! link to this node
-            !    index = 3
-            ! endif
+            if (L < 0) then
+               ! link from this flow node
+               bobAboveBedLevel = bob0(1,-L) - bl(nod) 
+            else
+               ! link to this node
+               bobAboveBedLevel = bob0(2,L) - bl(nod) 
+            endif
             L = iabs(L)
             if (iabs(kcu(L)) ==1) then
                if (L > lnxi) then                      ! for 1D boundary links, refer to attached link
                   L = LBND1D(L)
                endif
                if (line2cross(L,index)%c1 > 0) then
-                  charheight = cross(line2cross(L,index)%c1)%charheight
-                  if (charheight > vltb(n)%topLevel) then
-                     vltb(n)%topLevel = charheight
+                  ! The toplevel is the highest point w.r.t. the bedlevel in that point.
+                  ! Since the bed level and the bob of the link can be different, the actual highest point of the 
+                  ! cross section is the characteristic height + bob - bl
+                  topLevel = cross(line2cross(L,index)%c1)%charheight + bobAboveBedLevel
+                  if (topLevel > vltb(n)%topLevel) then
+                     vltb(n)%topLevel = topLevel
                   endif
-                  charheight = cross(line2cross(L,index)%c2)%charheight
-                  if (charheight > vltb(n)%topLevel) then
-                     vltb(n)%topLevel = charheight
+                  topLevel = cross(line2cross(L,index)%c2)%charheight + bobAboveBedLevel
+                  if (topLevel > vltb(n)%topLevel) then
+                     vltb(n)%topLevel = topLevel
                   endif
                endif
             endif
@@ -278,17 +282,18 @@ module m_VolumeTables
                   bobAboveBedLevel = bob0(2,L) - bl(nod)
                endif
                L = iabs(nd(nod)%ln(LL))
-               if (L > lnxi.and. kcu(L)==-1) then                      ! for 1D boundary links, refer to attached link
-                  L = LBND1D(L)
+               if (iabs(kcu(L))==1) then                      ! for 1D boundary links, refer to attached link
+
                   if (dxDoubleAt1DEndNodes .and. nd(nod)%lnx == 1 ) then
                      dxL = dx(L)
                   else 
                      dxL = 0.5d0*dx(L)
                   endif
-               else
-                  dxL = 0.5d0*dx(L)
-               endif
-               if (kcu(L)==1) then
+
+                  if (L > lnxi) then                      ! for 1D boundary links, refer to attached link
+                     L = LBND1D(L)
+                  endif
+                  
                   ! The bed level is the lowest point of all flow links and possibly storage nodes. 
                   ! In order to take this difference into account the variable bobAboveBedLevel is used
                   call GetCSParsTotal(line2cross(L, 2), cross, height-bobAboveBedLevel, area, width, CSCalculationOption)
