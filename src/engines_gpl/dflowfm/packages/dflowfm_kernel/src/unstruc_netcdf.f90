@@ -8274,7 +8274,7 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
                         ierr = ncu_append_atts( imapfile, varid, 'coordinates', trim(zwu_link))
                     endif
                     if (any(idum==id_laydim(iid)) .and. any(idum==id_flowelemdim(iid))) then
-                        ierr = ncu_append_atts( imapfile, varid, 'coordinates', trim(zw_link))
+                        ierr = ncu_append_atts( imapfile, varid, 'coordinates', trim(zu_link))
                     endif
                  endif
               endif
