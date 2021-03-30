@@ -5574,7 +5574,10 @@ end subroutine partition_make_globalnumbers
       case (0,1)
          ierror = METIS_PartGraphKway(Ne, Ncon, iadj, jadj, vwgt, vsize, adjw, Nparts, tpwgts, ubvec, opts, objval, idomain)
          if (ierror /= METIS_OK .and. jacontiguous == 1) then
-            call mess(LEVEL_INFO, 'The above METIS error message is not a problem. It means that partitioning failed for k-way method with option contiguous=1 because the input graph is not contiguous. Retrying partitioning now with contiguous=0.')
+            call mess(LEVEL_INFO, 'The above METIS error message is not a problem.')
+            call mess(LEVEL_INFO, 'It means that partitioning failed for k-way method with option contiguous=1')
+            call mess(LEVEL_INFO, 'because the input graph is not contiguous. Retrying partitioning now with')
+            call mess(LEVEL_INFO, 'contiguous=0.')
             ierror = metisopts(opts, "CONTIG", 0) ! Fallback, allow non-contiguous domains in case of non-contiguous network.
             if (ierror == 0) then ! Note: metisopts does not use METIS_OK status, but simply 0 instead.
                ierror = METIS_PartGraphKway(Ne, Ncon, iadj, jadj, vwgt, vsize, adjw, Nparts, tpwgts, ubvec, opts, objval, idomain)
