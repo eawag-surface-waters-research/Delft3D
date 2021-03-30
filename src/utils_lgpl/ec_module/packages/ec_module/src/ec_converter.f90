@@ -1514,6 +1514,43 @@ module m_ec_converter
 
       ! =======================================================================
 
+      function ecConverterVerticalMean(zpos,val,zmin,zmax,ndxmin,ndxmax) result (integral)
+         real(hp)                           :: integral
+         real(hp), dimension(:), intent(in) :: zpos, val
+         real(hp)              , intent(in) :: zmin, zmax
+         integer               , intent(out):: ndxmin, ndxmax
+
+         real(hp) :: wt, minz, maxz, dz
+         integer  :: ndx
+         ndxmin = size(zpos)
+         ndxmax = 1
+         do ndx=1,size(zpos)
+            if (zpos(ndx)>=zmin .and. zpos(ndx)<=zmax) then
+               ndxmin=min(ndxmin,ndx)
+               ndxmax=max(ndxmax,ndx)
+            end if
+         enddo
+         integral = sum(abs(zpos(ndxmin+1:ndxmax)-zpos(ndxmin:ndxmax-1))  &
+                        *(val(ndxmin+1:ndxmax)+ val(ndxmin:ndxmax-1))*0.5)
+         dz = min(abs(zpos(ndxmin)-zmin),abs(zpos(ndxmin)-zmax))
+         if (ndxmin>1) then
+            wt = dz/abs((zpos(ndxmin-1)-zpos(ndxmin)))*0.5
+            integral = integral + ((1_hp-wt)*val(ndxmin)+wt*val(ndxmin-1))*dz
+         else
+            integral = integral + val(ndxmin)*dz
+         end if
+         dz = min(abs(zpos(ndxmax)-zmin),abs(zpos(ndxmax)-zmax))
+         if (ndxmax<size(zpos)) then
+            wt = dz/abs((zpos(ndxmax-1)-zpos(ndxmax)))*0.5
+            integral = integral + ((1_hp-wt)*val(ndxmax)+wt*val(ndxmax-1))*dz
+         else
+            wt = 0_hp
+            integral = integral + val(ndxmax)*dz
+         end if
+         integral = integral/(zmax-zmin)
+      end function ecConverterVerticalMean
+      ! =======================================================================
+
       !> Execute the Converters in the Connection sequentially.
       !! meteo1 : polyint
       function ecConverterPolytim(connection, timesteps) result (success)
@@ -1531,6 +1568,7 @@ module m_ec_converter
          integer  :: maxlay_srcL      !< number of layers at the LEFT interpolation support point
          integer  :: maxlay_srcR      !< number of layers at the RIGHT interpolation support point
          integer  :: kbegin, kend, kbeginL, kendL, kbeginR, kendR, idxL1, idxR1, idxL2, idxR2 !<
+         integer  :: ndxmin, ndxmax
          logical, save :: alreadyPrinted = .false.
          real(hp) :: wwL, wwR  !<
          real(hp), dimension(:), allocatable :: valL, valR, valL1, valL2, valR1, valR2, val !<
@@ -1699,35 +1737,15 @@ module m_ec_converter
 
                                  
                                  if (connection%sourceItemsPtr(1)%ptr%quantityPtr%zInterpolationType == zinterpolate_mean) then
-                                    vmaskL=((sigmaLL-zmin(i))*(sigmaLL-zmax(i))<=0)
-                                    if (count(vmaskL)>0) then
-                                       valL1 = 0.0_hp 
-                                       do idxL1=1,maxlay_srcL
-                                          if (vmaskL(idxL1)) then
-                                             do j = 1, vectormax
-                                                valL1(j) = valL1(j) + valL((idxL1-1)*vectormax+j)
-                                             end do
-                                          end if
-                                       end do
-                                       valL1 = valL1/count(vmaskL)
-                                    else
+                                    valL1 = ecConverterVerticalMean(sigmaLL,valL,zmin(i),zmax(i),ndxmin,ndxmax)
+                                    if (ndxmax-ndxmin<1) then
                                        write(errormsg,'(a,i0,a,i5.5)') "ERROR: ec_converter::ecConverterPolytim: No valid layer for averaging for point ", &
                                                                          kL," of polytim item ", connection%sourceItemsPtr(1)%ptr%id
                                        call setECMessage(errormsg)
                                        return
                                     end if
-                                    vmaskR=((sigmaRR-zmin(i))*(sigmaRR-zmax(i))<=0)
-                                    if (count(vmaskR)>0) then
-                                       valR1 = 0.0_hp 
-                                       do idxR1=1,maxlay_srcR
-                                          if (vmaskR(idxR1)) then
-                                             do j = 1, vectormax
-                                                valR1(j) = valR1(j) + valR((idxR1-1)*vectormax+j)
-                                             end do
-                                          end if
-                                       end do
-                                       valR1 = valR1/count(vmaskR)
-                                    else
+                                    valR1 = ecConverterVerticalMean(sigmaRR,valR,zmin(i),zmax(i),ndxmin,ndxmax)
+                                    if (ndxmax-ndxmin<1) then
                                        write(errormsg,'(a,i0,a,i5.5)') "ERROR: ec_converter::ecConverterPolytim: No valid layer for averaging for point ", &
                                                                          kR," of polytim item ", connection%sourceItemsPtr(1)%ptr%id
                                        call setECMessage(errormsg)
