@@ -2496,6 +2496,7 @@ end subroutine unc_append_3dflowgeom_def
 subroutine unc_append_3dflowgeom_put(imapfile, jaseparate, itim_in)
     use m_flow            !only kmx, zws, layertype
     use m_flowgeom        !only Ndxi
+    use m_missing
     use m_flowparameters  !only jafullgridoutput
 !    use network_data      !
 
@@ -2504,6 +2505,7 @@ subroutine unc_append_3dflowgeom_put(imapfile, jaseparate, itim_in)
     integer,optional,  intent(in) :: itim_in
 
     integer :: iid, kk, kb, kt, itim
+    integer :: nrlay, nlayb, k
 
     integer, save :: ierr
     integer, dimension(2), save :: &
@@ -2570,11 +2572,25 @@ subroutine unc_append_3dflowgeom_put(imapfile, jaseparate, itim_in)
           !
        end if
        ! write structured 3d time-dependant output data
-       do kk=1,Ndxi
+       work1 = dmiss
+       do kk=1,ndxi
           call getkbotktop(kk,kb,kt)
-          ierr = nf90_put_var(imapfile, id_flowelemzcc(iid), 0.5d0*(zws(kb:kt)+zws(kb-1:kt-1)),  start=(/kmx-(kt-kb+1), kk, itim /), count=(/ kt-kb+1, 1, 1 /))
-          ierr = nf90_put_var(imapfile, id_flowelemzw(iid), zws(kb-1:kt),  start=(/(kmx+1)-(kt-kb+2)+1, kk, itim /), count=(/ kt-kb+2, 1, 1 /))
+          call getlayerindices(kk, nlayb, nrlay)
+          do k = kb,kt
+             work1(k-kb+nlayb, kk) = zws(k)
+          enddo
        end do
+       ierr = nf90_put_var(imapfile, id_flowelemzw(iid), work1(1:kmx,1:ndxi), (/ 1, 1, itim /), (/ kmx, ndxi, 1 /))
+       
+       work1 = dmiss
+       do kk=1,ndxi
+          call getkbotktop(kk,kb,kt)
+          call getlayerindices(kk, nlayb, nrlay)
+          do k = kb,kt
+             work1(k-kb+nlayb,kk) =  0.5*(zws(k)+ zws(k-1))
+          enddo
+       enddo
+       ierr = nf90_put_var(imapfile, id_flowelemzcc(iid), work1(1:kmx,1:ndxi), start=(/ 1, 1, itim /), count=(/ kmx, ndxi, 1 /))
     end if
     !
 end subroutine unc_append_3dflowgeom_put
