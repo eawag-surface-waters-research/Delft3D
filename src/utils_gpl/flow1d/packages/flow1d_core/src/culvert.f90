@@ -46,7 +46,6 @@ module m_Culvert
    end interface dealloc
    
    type, public :: t_culvert
-      integer                         :: culvertType           !< ST_CULVERT
       double precision                :: leftlevel             !< Left invert level of culvert
       double precision                :: rightlevel            !< Right invert level of culvert
       type(t_crosssection), pointer   :: pcross => null()      !< Pointer to cross section of culvert
@@ -67,6 +66,8 @@ module m_Culvert
                                                                !< 1 = Free Culvert Flow 
                                                                !< 2 = Submerged Culvert Flow 
       double precision, dimension(2) :: bob_orig               !< Original bob0 values before the actual bobs are lowered
+      logical                        :: isSiphon               !< Indicates wether the culvert is of subtype (inverted) siphon.
+      double precision               :: bendLoss               !< Bend loss of siphon
    end type
 
 contains
@@ -248,8 +249,10 @@ contains
 
       ! Calculate cross-section values in culvert
       dpt = smax - inflowCrest
-      
-      call GetCSParsFlow(CrossSection, dpt, wArea, wPerimiter, wWidth)     
+      if (culvert%isSiphon) then
+         dpt = max(CrossSection%charHeight, dpt)
+      endif
+      call GetCSParsFlow(CrossSection, dpt, wArea, wPerimiter, wWidth)
       chezyCulvert = getchezy(CrossSection%frictionTypePos(1), CrossSection%frictionValuePos(1), warea/wPerimiter, dpt, 1d0)
                   
       ! Valve Loss
@@ -293,7 +296,7 @@ contains
          
       endif
       
-      totalLoss = exitloss + frictloss + culvert%inletlosscoeff + valveloss
+      totalLoss = exitloss + frictloss + culvert%inletlosscoeff + valveloss + culvert%bendLoss
             
       totalLoss = max(totalLoss, 0.01d0)
       

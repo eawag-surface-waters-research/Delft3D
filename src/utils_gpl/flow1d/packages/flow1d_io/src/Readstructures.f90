@@ -620,7 +620,6 @@ module m_readstructures
             
             case(ST_CULVERT)
                allocate(pstr%culvert)
-               read(ibin) pstr%culvert%culvertType
                read(ibin) pstr%culvert%leftlevel
                read(ibin) pstr%culvert%rightlevel
                read(ibin) pstr%culvert%crosssectionnr
@@ -775,7 +774,6 @@ module m_readstructures
                call write_table_cache(ibin, pstr%pump%reducfact)
             
             case(ST_CULVERT)
-               write(ibin) pstr%culvert%culvertType
                write(ibin) pstr%culvert%leftlevel
                write(ibin) pstr%culvert%rightlevel
                write(ibin) pstr%culvert%crosssectionnr      
@@ -956,6 +954,7 @@ module m_readstructures
       double precision, allocatable, dimension(:) :: relOpen
       double precision, allocatable, dimension(:) :: lossCoeff
       logical                                     :: success1 
+      character(len=IdLen)                        :: subtype 
 
       success = .true.
       allocate(culvert)
@@ -996,8 +995,6 @@ module m_readstructures
       culvert%pcross         => network%crs%cross(icross)
       culvert%crosssectionnr = icross
       
-      culvert%culvertType    = ST_CULVERT
-      
       call prop_get_string(md_ptr, '', 'allowedFlowDir', txt, success1)
       success = success .and. check_input_result(success1, st_id, 'allowedFlowDir')
       if (success) culvert%allowedflowdir = allowedFlowDirToInt(txt)
@@ -1016,6 +1013,28 @@ module m_readstructures
       
       call prop_get_double(md_ptr, '', 'outletLossCoeff', culvert%outletlosscoeff, success1) 
       success = success .and. check_input_result(success1, st_id, 'outletLossCoeff')
+
+      subtype = 'culvert'
+      call prop_get_string(md_ptr, '', 'subtype', subtype)
+      call prop_get_double(md_ptr, '', 'bendLosses', culvert%bendLoss, success1)
+      call str_lower(subtype)
+      select case(trim(subtype))
+      case ('invertedsiphon')
+         if (.not. success1) then
+            call SetMessage(LEVEL_ERROR, 'Parameter bendLosses is missing for culvert ''' // trim(st_id) // '''.')
+         endif
+         if (culvert%bendLoss < 0d0) then
+            call SetMessage(LEVEL_ERROR, 'Bendloss is less than 0 for culvert '''  // trim(st_id) // '''.')
+         endif
+         culvert%isSiphon = .true.
+      case ('culvert')   
+         if (success1) then
+            call SetMessage(LEVEL_ERROR, 'The use of bendLoss is only allowed for subtype invertedSiphon, please check ''' // trim(st_id) // '''.')
+         endif
+         culvert%isSiphon = .false.
+      case default
+         call SetMessage(LEVEL_ERROR, 'Incorrect subtype (= '''//trim(subtype) // ''') found for culvert ''' // trim(st_id) // '''.')
+      end select
 
       call prop_get_integer(md_ptr, '', 'valveOnOff', valveonoff, success1)
       success = success .and. check_input_result(success1, st_id, 'valveOnOff')
