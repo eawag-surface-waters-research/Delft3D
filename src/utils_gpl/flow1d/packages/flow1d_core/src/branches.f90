@@ -240,6 +240,11 @@ module m_branch
       
       integer :: i
       
+      if (branch%uPointsCount == 0) then
+         getGridPointNumber = 0
+         return
+      end if
+
       do i = 1, branch%uPointsCount
           if (branch%uPointschainages(i) > chainage) then !found
               getGridPointNumber     = branch%grd(i)

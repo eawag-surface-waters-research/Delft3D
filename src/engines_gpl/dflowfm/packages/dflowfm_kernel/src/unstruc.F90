@@ -22948,9 +22948,11 @@ subroutine unc_write_his(tim)            ! wrihis
             do i = 1, numlatsg
                do k1=n1latsg(i),n2latsg(i)
                   k = nnlat(k1)
-                  geom_x(j) = xz(k)
-                  geom_y(j) = yz(k)
-                  j = j + 1
+                  if (k > 0) then
+                     geom_x(j) = xz(k)
+                     geom_y(j) = yz(k)
+                     j = j + 1
+                  end if
                end do
                node_count(i) = n2latsg(i)-n1latsg(i)+1
             end do
