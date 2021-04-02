@@ -484,7 +484,7 @@ use unstruc_version_module
    ug_meta_fm%modelname   = ''
 
    unc_cmode              = NF90_CLOBBER ! Default: 0, use NetCDF library default.
-   unc_writeopts          = UG_WRITE_LATLON ! Default: 0, no special write options.
+   unc_writeopts          = UG_WRITE_NOOPTS ! Default: 0, no special write options.
 
 end subroutine init_unstruc_netcdf
 
