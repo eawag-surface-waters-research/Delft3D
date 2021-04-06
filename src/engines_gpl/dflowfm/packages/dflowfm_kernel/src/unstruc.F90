@@ -49233,18 +49233,17 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
  allocate (ihu(lnx))      ; ihu = 0
  allocate (csh(lnx))      ; csh = 0d0
  allocate (snh(lnx))      ; snh = 0d0
- allocate (zcrest(lnx))  ; zcrest = -1000d0   ! starting from a low value
+ allocate (zcrest(lnx))   ; zcrest = -1000d0   ! starting from a low value
  allocate (dzsillu(lnx))  ; dzsillu = 0d0
  allocate (dzsilld(lnx))  ; dzsilld = 0d0
- allocate (ztoeu(lnx))   ; ztoeu = 1000d0  ! starting from a high value
- allocate (ztoed(lnx))   ; ztoed = 1000d0  ! starting from a high value
+ allocate (ztoeu(lnx))    ; ztoeu = 1000d0  ! starting from a high value
+ allocate (ztoed(lnx))    ; ztoed = 1000d0  ! starting from a high value
  allocate (crestlen(lnx)) ; crestlen = 3d0
  allocate (taludu(lnx))   ; taludu = 4d0
  allocate (taludd(lnx))   ; taludd = 4d0
  allocate (vegetat(lnx))  ; vegetat = 0d0
  allocate (iweirtyp(lnx)) ; iweirtyp = 0
  allocate (ifirstweir(lnx)) ; ifirstweir = 1                       ! added to check whether fixed weir data is set for the first time at a net link (1=true, 0=false)
- 
 
  call klok(t0)
  t_extra(1,1) = t0
@@ -49601,13 +49600,10 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
  end if
 
  if (jakol45 == 2 .and. sillheightmin > 0d0) then  ! when a minimum threshold is specified    
-                                                   ! and toe heights are known, and agreed upon  
+                                                   ! and toe heights are known, and agreed upon 
     do L = 1,lnxi
        if (ihu(L) > 0) then                        ! when flagged as weir
-           if (L == 6023) then
-               continue
-           endif
-
+ 
            do ii = 1,2                             ! loop over adjacent cells
               k = 0
               if (ii == 1 .and. dzsillu(L) < sillheightmin .and. dzsilld(L) > sillheightmin .or. & 
@@ -49615,8 +49611,7 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
                   k = ln(ii,L) 
               endif
               if (k > 0) then                                          ! flatland on node k 
-                  BL(k) = zcrest(L)                                    ! level of cell is level of weir
-                  nx    = nd(k)%lnx 
+                  nx      = nd(k)%lnx 
                   do LL   = 1, nx                                      ! loop over all attached links
                      LLL  = nd(k)%ln(LL) ; LLLa = iabs(LLL)
                      if (LLLa == L) then                                
@@ -49624,7 +49619,7 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
                          LLLa = iabs(nd(k)%ln(LLLa))
                          if (ihu(LLLa) == 0) then                      ! if not already marked as weir 
                             bob(1,LLLa) = max( zcrest(L),bob(1,LLLa) ) ! raise both bobs 
-                            bob(2,LLLa) = max( zcrest(L),bob(2,LLLa) ) ! raise both bobs 
+                            bob(2,LLLa) = max( zcrest(L),bob(2,LLLa) ) ! raise both bobs
                          endif
                          LLLa = LL+1 ; if (LLLa > nx) LLLa = 1         ! right of weir link
                          LLLa = iabs(nd(k)%ln(LLLa))
@@ -49634,23 +49629,25 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
                          endif
                      endif
                   enddo
-                  BLmn   = 1d10
-                  do LL   = 1, nx                                      ! bL is min of attached links 
-                     LLL  = nd(k)%ln(LL) ; LLLa = iabs(LLL)
-                     BLmn = min(BLmn,bob(1,LLLa), bob(2,LLLa))
-                  enddo
-                  BL(k) = max( BL(k), BLmn) 
-              endif
+               endif
           enddo 
        endif
     enddo
 
-    do L = 1,lnxi            ! switch off weirs that do not need weir treatment
-       if ( ihu(L) > 0 .and. dzsillu(L) < sillheightmin .or. dzsilld(L) < sillheightmin  ) then
+    BL = 1d9 
+    do L = 1,lnx                         ! switch off weirs that do not need weir treatment
+       if ( ihu(L) > 0 .and. (dzsillu(L) < sillheightmin .or. dzsilld(L) < sillheightmin) ) then
           ihu(L) = 0 ; iadv(L) = iadvec
+          if (slopedrop2D > 0d0) then 
+             iadv(L) = 8
+          endif
        endif
+       BLmn   = min( bob(1,L),bob(2,L) ) ! and reset BL to lowest attached link
+       n1     = ln(1,L) ; n2 = ln(2,L)
+       BL(n1) = min(BL(n1),BLmn) 
+       BL(n2) = min(BL(n2),BLmn) 
     enddo
-
+ 
  endif
 
  nfxw = 0
@@ -51368,8 +51365,8 @@ subroutine anticreep( L )
             Lambda = FrcInternalTides2D(k) * dum**2 / hs(k)
             if ( Lambda*dts.gt.1d0 ) then
                dfac = 1d0 / (Lambda*dts)
-               write(str, "('k = ', I8, ': gamma ||grad H||^2 / H = ', E15.5, ' > 1/Delta t =', E15.5, ', H=', E15.5, ', ||grad H||=', E15.5, ', gamma=', E15.5, ', reduce factor=', E15.5)") k, Lambda, 1d0/dts, hs(k), dum, FrcInternalTides2D(k), dfac
-               call mess(LEVEL_WARN, trim(str))
+ !              write(str, "('k = ', I8, ': gamma ||grad H||^2 / H = ', E15.5, ' > 1/Delta t =', E15.5, ', H=', E15.5, ', ||grad H||=', E15.5, ', gamma=', E15.5, ', reduce factor=', E15.5)") k, Lambda, 1d0/dts, hs(k), dum, FrcInternalTides2D(k), dfac
+ !              call mess(LEVEL_WARN, trim(str))
 !               ierror = 1
 
                workx(k) = dfac * workx(k)
