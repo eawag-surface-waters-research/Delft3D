@@ -179,6 +179,7 @@ module m_1d_networkreader
    double precision, parameter                      :: snapping_tolerance = 1e-10
    double precision                                 :: distance, meanLength
    integer                                          :: jampi_, my_rank_
+   integer                                          :: maxGridPointCount
    logical, allocatable                             :: active_nodes(:)
    integer, allocatable                             :: active_branches(:)
 
@@ -301,12 +302,13 @@ module m_1d_networkreader
    endif
 
    ! allocate local arrays
-   allocate(localOffsets(meshgeom%numnode))
-   allocate(localOffsetsSorted(meshgeom%numnode))
-   allocate(localSortedIndexses(meshgeom%numnode))
-   allocate(localGpsX(meshgeom%numnode))
-   allocate(localGpsY(meshgeom%numnode))
-   allocate(localGpsID(meshgeom%numnode))
+   maxGridPointCount = 1 + maxval(gpLast - gpFirst)
+   allocate(localOffsets(maxGridPointCount))
+   allocate(localOffsetsSorted(maxGridPointCount))
+   allocate(localSortedIndexses(maxGridPointCount))
+   allocate(localGpsX(maxGridPointCount))
+   allocate(localGpsY(maxGridPointCount))
+   allocate(localGpsID(maxGridPointCount))
 
    ! Store the branches + computational grid points on them into Data Structures.
    do ibran = 1, meshgeom%nbranches
