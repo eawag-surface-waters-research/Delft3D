@@ -91,6 +91,8 @@
    integer                           :: jsfertek= 0       ! drawn in 0=cart, 1=stereografisch
    integer                           :: jasfer3D = 0      ! 0 = org, 1 = sqrt(dx2+dy2+dz2), 2= greatcircle
    integer                           :: jglobe  = 0       ! if (jsferic==1) do we need extra tests for 360-0 transgression
+   integer                           :: jamidlat = 0      ! if (jsferic==1) use middle latitude in refinement
+   
    double precision                  :: pi                ! pi
    double precision                  :: twopi             ! 2pi
    double precision                  :: dg2rd             ! degrees to radians
@@ -102,6 +104,8 @@
    double precision                  :: anglon = 0d0      ! 26.0     ! dubai 52.5     ! angle of longitude (vertical)
    double precision                  :: dy2dg             ! from dy in m to lat in degrees
    double precision                  :: csphi             ! cosphi of latest requested
+   double precision                  :: xwleft = -180d0   ! leftmost world coordinate degreees
+
 
    double precision, parameter       :: dtol_pole = 1d-4   ! pole tolerance in degrees
 
@@ -313,9 +317,14 @@
    double precision :: ortho_pure      = 0.5d0   !< curvi-linear-like (0d0) or pure (1d0) orthogonalisation
 
    end module m_ggeo_orthosettings
+
    module m_WEARELT
    double precision :: XMIN,YMIN,XMAX,YMAX,X1,Y1,X2,Y2,RCIR,CR,DSIX
    end module m_WEARELT
+
+   module m_sferzoom
+   double precision :: X0,Y0,dyh,FAC,X1W,Y1W,X2W,Y2W
+   end module m_sferzoom
 
 
    !> Main sample set
