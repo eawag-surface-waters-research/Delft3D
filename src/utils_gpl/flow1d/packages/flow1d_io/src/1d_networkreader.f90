@@ -302,7 +302,7 @@ module m_1d_networkreader
    endif
 
    ! allocate local arrays
-   maxGridPointCount = 1 + maxval(gpLast - gpFirst)
+   maxGridPointCount = 3 + maxval(gpLast - gpFirst)
    allocate(localOffsets(maxGridPointCount))
    allocate(localOffsetsSorted(maxGridPointCount))
    allocate(localSortedIndexses(maxGridPointCount))
