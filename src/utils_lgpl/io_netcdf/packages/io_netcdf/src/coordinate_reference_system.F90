@@ -239,7 +239,7 @@ end function get_proj_string_from_epsg
       projection = pj_init_plus(trim(proj_string)//char(0))
       if (.not. pj_associated(projection)) then
          message = 'get_projection: could not initialize projection for proj_string '''//trim(proj_string)//'''.'
-         call mess(LEVEL_ERROR, trim(message))
+         call mess(LEVEL_WARN, trim(message))
          return
       endif
    end function
@@ -311,7 +311,9 @@ end function get_proj_string_from_epsg
       src_projection = get_projection(src_proj_string)
       dst_projection = get_projection(dst_proj_string)
 
-      call transform(src_projection, dst_projection, src_x, src_y, dst_x, dst_y)
+      if (pj_associated(src_projection) .and. pj_associated(dst_projection)) then
+         call transform(src_projection, dst_projection, src_x, src_y, dst_x, dst_y)
+      end if
 
       call pj_free(src_projection)
       call pj_free(dst_projection)
