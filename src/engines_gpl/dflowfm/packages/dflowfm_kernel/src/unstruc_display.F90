@@ -189,17 +189,18 @@ implicit none
     
 contains
 
+ 
 subroutine load_displaysettings(filename)
     use properties
     use unstruc_messages
     use unstruc_version_module
     use m_missing
     use M_RAAITEK
-    use m_wearelt
     use M_isoscaleunit
     use m_transport, only: iconst_cur
     USE M_FLOW, only: kplot, nplot, kplotfrombedorsurface, kplotordepthaveraged
     use m_observations, only : jafahrenheit
+    use m_sferic
 !   use unstruc_opengl    ! circular dependency
  
 
@@ -221,10 +222,7 @@ subroutine load_displaysettings(filename)
     integer          :: ncols2, nv2,nis2,nie2,jaAUTO2
     double precision :: VMAX2,VMIN2,DV2,VAL2
     COMMON /DEPMAX2/    VMAX2,VMIN2,DV2,VAL2(256),NCOLS2(256),NV2,NIS2,NIE2,JAAUTO2
- 
-    double precision :: DX, DY, X0, Y0, RMISS, DXSHOW, XD  
-    COMMON /ARCINFO/    DX, DY, X0, Y0, RMISS, DXSHOW, XD
-
+   
     integer          :: nvec 
     double precision :: vfac, vfacforce
     COMMON /VFAC/       VFAC,VFACFORCE,NVEC
@@ -243,7 +241,8 @@ subroutine load_displaysettings(filename)
     double precision :: tsize
     COMMON /TEXTSIZE/   TSIZE
      
-    integer :: jaopengl_loc
+    integer          :: jaopengl_loc
+    double precision :: x, y, dy
 
 
     ! Put .dis file into a property tree
@@ -316,6 +315,11 @@ subroutine load_displaysettings(filename)
        VAL2(I) = VMIN2 + (I-1)*DV2/(NV2-1)
     ENDDO
     
+    call prop_Get_DOUBLE (dis_ptr, '*', 'XSC          '  , XSC             , success) 
+    call prop_Get_DOUBLE (dis_ptr, '*', 'YSC          '  , YSC             , success)
+    call prop_Get_DOUBLE (dis_ptr, '*', 'SCALESIZE    '  , SCALESIZE       , success)
+    call prop_Get_INTEGER(dis_ptr, '*', 'NDEC         '  , NDEC            , success)
+ 
     call prop_Get_string (dis_ptr, '*', 'UNIT(1)      '  , UNIT(1)         , success)
     call prop_Get_string (dis_ptr, '*', 'PARAMTEX(1)  '  , PARAMTEX(1)     , success)
     call prop_Get_string (dis_ptr, '*', 'UNIT(2)      '  , UNIT(2)         , success)
@@ -325,6 +329,11 @@ subroutine load_displaysettings(filename)
     call prop_Get_DOUBLE (dis_ptr, '*', 'Y1           '  , Y1              , success)
     call prop_Get_DOUBLE (dis_ptr, '*', 'X2           '  , X2              , success)
 
+    call prop_Get_DOUBLE (dis_ptr, '*', 'X0           '  , X               , success) ! should override previous set
+    call prop_Get_DOUBLE (dis_ptr, '*', 'Y0           '  , Y               , success)
+    call prop_Get_DOUBLE (dis_ptr, '*', 'DYH          '  , DY              , success)
+    call prop_Get_integer(dis_ptr, '*', 'SFERTEK      '  , JSFERTEK        , success)
+    call setwynew(x,y,dy)
 
     ! Color scheme isolines
     call prop_get_string(dis_ptr, 'isocol', 'COLTABFILE', coltabfile)
@@ -397,9 +406,7 @@ subroutine load_displaysettings(filename)
        IF (XLEFT .EQ. 0) XLEFT = .15
        IF (YBOT  .EQ. 0) YBOT  = .10
     ENDIF
-    !CALL NEWWORLD()
-    call setwY(x1,y1,x2,y2)
-
+ 
     DO I = 1,NUMHCOPTS
        IF (IHCOPTS(1,I) .EQ. 22) IHCOPTS(2,I) = JAEPS
        IF (IHCOPTS(1,I) .EQ. 5)  IHCOPTS(2,I) = JALAND
@@ -420,11 +427,12 @@ subroutine save_displaysettings(filename)
     use unstruc_version_module
     use m_missing
     use M_RAAITEK
-    use m_wearelt
+    use m_sferzoom
     use M_isoscaleunit
     use m_transport, only: iconst_cur
     use m_flow
     use m_observations
+    use m_sferic
 !   use unstruc_opengl    ! circular dependency
 
 
@@ -445,10 +453,7 @@ subroutine save_displaysettings(filename)
     integer          :: ncols2, nv2,nis2,nie2,jaAUTO2
     double precision :: VMAX2,VMIN2,DV2,VAL2
     COMMON /DEPMAX2/    VMAX2,VMIN2,DV2,VAL2(256),NCOLS2(256),NV2,NIS2,NIE2,JAAUTO2
- 
-    double precision :: DX, DY, X0, Y0, RMISS, DXSHOW, XD  
-    COMMON /ARCINFO/    DX, DY, X0, Y0, RMISS, DXSHOW, XD
-
+   
     integer          :: nvec 
     double precision :: vfac, vfacforce
     COMMON /VFAC/       VFAC,VFACFORCE,NVEC
@@ -566,16 +571,25 @@ subroutine save_displaysettings(filename)
     call prop_set(dis_ptr, '*', 'VMAX2        '  , VMAX2           )
     call prop_set(dis_ptr, '*', 'DV2          '  , DV2             )
 
+    call prop_set(dis_ptr, '*', 'XSC          '  , XSC             )
+    call prop_set(dis_ptr, '*', 'YSC          '  , YSC             )
+    call prop_set(dis_ptr, '*', 'SCALESIZE    '  , SCALESIZE       )
+    call prop_set(dis_ptr, '*', 'NDEC         '  , NDEC            )
+ 
     call prop_set(dis_ptr, '*', 'UNIT(1)      '  , UNIT(1)         )
     call prop_set(dis_ptr, '*', 'PARAMTEX(1)  '  , PARAMTEX(1)     )
     call prop_set(dis_ptr, '*', 'UNIT(2)      '  , UNIT(2)         )
     call prop_set(dis_ptr, '*', 'PARAMTEX(2)  '  , PARAMTEX(2)     )
 
-    call prop_set(dis_ptr, '*', 'X1           '  , X1              )
-    call prop_set(dis_ptr, '*', 'Y1           '  , Y1              )
-    call prop_set(dis_ptr, '*', 'X2           '  , X2              )
+   ! call prop_set(dis_ptr, '*', 'X1           '  , X1              )
+   ! call prop_set(dis_ptr, '*', 'Y1           '  , Y1              )
+   ! call prop_set(dis_ptr, '*', 'X2           '  , X2              )
 
-   !  call prop_set_string(dis_ptr, '*', 'isocol', 'COLTABFILE', coltabfile)
+    call prop_set(dis_ptr, '*', 'X0           '  , X0              ) 
+    call prop_set(dis_ptr, '*', 'Y0           '  , Y0              )
+    call prop_set(dis_ptr, '*', 'DYH          '  , DYH             )
+    call prop_set(dis_ptr, '*', 'SFERTEK      '  , JSFERTEK        )
+
     call prop_set_string(dis_ptr, '*', 'COLTABFILE',  coltabfile)
     call prop_set_string(dis_ptr, '*', 'COLTABFILE2', coltabfile2)
 
@@ -636,11 +650,12 @@ subroutine plotObservations() ! TEKOBS
     use m_observations
     use M_FLOWGEOM
     use m_flow
-    use gridoperations
     use m_transport, only: NUMCONST, itemp, ITRA1, ITRAN, constituents
+
     integer      :: n, NN, K, kb, kt
     character*40 :: tex
     double precision  :: znod, temb, temt
+    logical inview
 
     if (ndrawobs == 1 ) return
 
@@ -721,6 +736,7 @@ subroutine plotManholes()
     use gridoperations
     
     integer      :: n
+    logical inview
     if (ndrawmanholes == 1 ) return
 
     call setcol(klobs)
@@ -1062,7 +1078,8 @@ subroutine plotCrossSectionPath(path, met, ncol, jaArrow, label)
     integer,          intent(in) :: ncol    !< Drawing color
     character(len=*), intent(in) :: label   !< Text label to be displayed.
     integer,          intent(in) :: jaArrow !< Whether or not (1/0) to draw an outgoing arrow.
-
+    logical inview
+ 
     integer :: j, jj, jmin, jmax
     double precision :: xt, yt, rn, rt, xx1, yy1, xx2, yy2, xx, yy
 
@@ -1260,31 +1277,16 @@ SUBROUTINE MINMXNS()
       CALL DMINMAX(     XH,      N,   XMIN,   XMAX, 10)
       CALL DMINMAX(     YH,      N,   YMIN,   YMAX, 10)
 
-      CALL INQASP(ASPECT)
-
+ 
       IF (XMAX .EQ. XMIN .and. YMAX .EQ. YMIN) THEN
-         XMIN = 0d0     ; YMIN = 0d0
-         XMAX = 1000d0  ; Ymax = aspect*1000d0
+          XMIN = 0d0     ; YMIN = 0d0
+          CALL INQASP(ASPECT)
+          XMAX = 1000d0  ; Ymax = aspect*1000d0
       ENDIF
 
-      DX   =  XMAX - XMIN
-      DY   =  YMAX - YMIN
-      XM   =  XMIN + DX/2
-      YM   =  YMIN + DY/2
+      CALL MINMAXWORLD(XMIN,YMIN,XMAX,YMAX)
 
-      IF (DY .LT. ASPECT*DX) THEN
-         XMIN = XM - 0.55d0*DX
-         XMAX = XM + 0.65d0*DX
-         YMIN = YM - 0.5d0*DY - 0.05d0*DX
-      ELSE
-         YMIN = YM - 0.6d0*DY
-         XMIN = XM - 0.6d0*DY/ASPECT
-         XMAX = XM + 0.6d0*DY/ASPECT
-      ENDIF
-
-      CALL WEAREL()
-
-       RETURN
+      RETURN
 END subroutine minmxns
 
 !> Plot all structures in the current viewport
@@ -1303,7 +1305,7 @@ integer              :: is,link
 double precision     :: icon_rw_size !< Size of plotted icons in real-world coordinates.
 double precision     :: x, y
 character(len=Idlen) :: text
-logical              :: active
+logical              :: active, inview
 
 if (ndrawStructures <= 1) then
    return
@@ -1779,21 +1781,46 @@ subroutine tekwindvector()
  use m_xbeach_data, only: csx, snx, itheta_view
  use m_flowparameters, only: jawave
  use m_missing
+ use m_statistics
+ use messagehandling
+
  implicit none
  COMMON /DRAWTHIS/   ndraw(50)
  integer :: ndraw 
  double precision :: xp, yp, vfw, ws, dyp, upot, ukin, rv
- character tex*30 
- integer :: ncol, k, kk, vlatin, vlatout
+ character tex*60 
+ integer :: ncol, k, kk, vlatin, vlatout, i, mout
  
- if (a1ini == 0d0) return
  
- if (ndraw(40) == -1) return
+ if (ndraw(40) == 0 .and. npdf == 0) return
  
- call thicklinetexcol(ncolln)  
+ call thicklinetexcol(ncolln) 
 
  yp  = 0.15*y1 + 0.85*y2
  dyp = 0.025*(y2-y1)
+
+ if (npdf > 0) then
+    xp = 0.97*x1 + 0.03*x2 
+  
+    call newfil(mout, 'cumulative.tek')
+    write(mout,'(a)') '* Column 1 : cos ()'
+    write(mout,'(a)') '* Column 2 : fraction ()'
+
+    msgbuf = 'BL01'
+    call msg_flush(); write(mout,'(a)') msgbuf
+    write (msgbuf,'(i4,A)') npdf, ' 2 ' 
+    call msg_flush() ; write(mout,'(a)') msgbuf
+     
+    do i = npdf-1,1,-1
+       yp  = yp - dyp
+       tex = '                                 '
+       write(tex(1:), '(2F10.6)') ypdf(i), xpdf(i)     
+       call GTEXT(tex, xp, yp, ncolln)
+       write (msgbuf,'(a)') tex
+       call msg_flush(); write(mout,'(a)') msgbuf
+    enddo
+    call doclose(mout)
+ endif
  
  if (jawind > 0 ) then 
     xp  = 0.90*x1 + 0.10*x2
@@ -1807,6 +1834,11 @@ subroutine tekwindvector()
     call GTEXT(tex, xp, yp, ncolln)
  endif
   
+ if (a1ini == 0d0) then
+    call resetlinesizesetc()
+    return
+ endif
+
  yp = 0.25*y1 + 0.75*y2
  xp = 0.97*x1 + 0.03*x2    
  if (vinraincum > 0) then   
@@ -1974,18 +2006,9 @@ subroutine tekwindvector()
     call thicklinetexcol(ncolln)  
     call arrowsxy( xp, yp, csx(itheta_view), snx(itheta_view), 0.1d0*(x2-x1))
  end if
- 
+
  call resetlinesizesetc()
- 
   
- !double precision                  :: QSUNav          ! Solar influx              (W/m2)
- !double precision                  :: QEVAav          ! Evaporative heat loss     (W/m2)
- !double precision                  :: QCONav          ! Convective heat loss      (W/m2)
- !double precision                  :: QLongav         ! Long wave back radiation  (W/m2)
- !double precision                  :: Qfreeav         ! Free conv + evap heat loss (W/m2)
- !double precision                  :: Qfrconav        ! Free convection heat loss (W/m2)
- !double precision                  :: Qfrevaav        ! Free evaporation heat loss (W/m2)
- 
 end subroutine tekwindvector
 
    SUBROUTINE GETINTRGB(KRGB) ! GET interacter RGB FOR NCOL

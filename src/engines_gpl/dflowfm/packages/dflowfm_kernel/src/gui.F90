@@ -1,3 +1,4 @@
+
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2017-2021.                                
@@ -347,13 +348,15 @@
         OPTION(9) = 'Copy samples              to particles  '
         OPTION(10) = 'Copy dots                 to samples    '
         OPTION(11) = 'Copy samples              to dots       '
-        MAXOPT    = 10
+        OPTION(12) = 'Copy netnode Zk to samples              '
+ 
+        MAXOPT    = 12
         NWHAT2    = 0
         CALL MENUV3(NWHAT2,OPTION,MAXOPT,EXP,MAXEXP)
         if (nwhat2 == 1) then
          call copypolygontosamples()
         else if (nwhat2 == 2) then
-         call copynetnodestosam()
+         call copynetnodestosam(1)
         else if (nwhat2 == 3) then
          call copynetlinkstosam()
         else if (nwhat2 == 4) then 
@@ -373,6 +376,8 @@
          call copy_dots2sam()
         else if (nwhat2 == 11 ) then
          call copy_sam2dots()
+        else if (nwhat2 == 12 ) then
+         call copynetnodestosam(0)
         end if
         KEY = 3
       ELSE IF (NWHAT .EQ.26) THEN
@@ -398,6 +403,8 @@
          call shift1Dnetnodestoduikers()
       ELSE iF (NWHAT .EQ.35) THEN   
          call convert_cross_to_prof(md_ident)
+      ELSE iF (NWHAT .EQ.36) THEN   
+         call connecthangingnodes()
       ENDIF
       NUM  = 0
       KEY  = 3
@@ -416,7 +423,7 @@
       ELSE IF (NWHAT .EQ. 4) THEN
          CALL CHANGEorthoparameters()
       ELSE IF (NWHAT .EQ. 5) THEN
-         CALL CHANGEGRIDPARAMETERS()
+         CALL CHANGEGRIDPARAMETERS() ; KEY = 3
       ELSE IF (NWHAT .EQ. 6) THEN
          CALL CHANGEINTERPOLATIONPARAMETERS()
       ELSE IF (NWHAT .EQ. 7) THEN
@@ -450,6 +457,8 @@
 
    SUBROUTINE MENUV1(NUM,NWHAT)
    use m_netw
+   !use m_sferic
+
    implicit none
    integer :: NUM, NWHAT
    integer :: maxexp
@@ -658,7 +667,8 @@
       OPTION(33)= 'Delete netlinks to improve orthogonality'
       OPTION(34)= 'Shift 1D netnodes to duikers.pliz (5col)'
       OPTION(35)= 'Convert crsdef/loc to profdef/loc files '
-      MAXOPT    =  35
+      OPTION(36)= 'Connecthangingnodes                     '
+      MAXOPT    =  36
    ELSE IF (NUM .EQ. 6) THEN
       EXP(1)     = 'MENU 6                                  '
       EXP(2)     = 'VARIOUS                                 '
@@ -876,7 +886,7 @@
          ENDIF
       ENDIF
    ELSE IF (NWHAT .EQ. 6) THEN
-      FILNAM = '*.pol,*.pli'
+      FILNAM = '*.pol,*.pli,*.pliz'
       MLAN   = 0
       CALL FILEMENU(MLAN,FILNAM,ierror)
       IF (ierror .EQ. -2) THEN
@@ -1169,7 +1179,11 @@
          ELSE
             call doclose(mtek)
             if (nwhat.eq.21) then
-               call unc_write_net(filnam, janetcell = 0, janetbnd = 0)
+               if (index(filnam, '.net') > 0) then 
+                   CALL NEWFIL(MTEK, filnam) ; CALL WRINET(MTEK) 
+               else
+                   call unc_write_net(filnam, janetcell = 0, janetbnd = 0)
+               endif
             else if ( nwhat .eq. 22) then ! _net.nc with extra cell info (for example necessary for Baseline/Bas2FM input)
                if ( netstat.ne.NETSTAT_OK ) then
                   call findcells(0)
@@ -1188,10 +1202,7 @@
             md_netfile = ' '
             md_netfile = filnam
 
-            !CALL NEWFIL(MTEK, 'NET.NET' )
-            !CALL WRINET(MTEK)
-            !CALL MESSAGE('AUTOSAVED NET.NET',' ',' ')
-
+            
             NUM = 0
          ENDIF
       ENDIF
@@ -1246,7 +1257,7 @@
          CALL QNERROR('THERE IS NO POLYGON TO SAVE',' ',' ')
          NUM = 0
       ELSE
-         FILNAM = '*.pol,*.pli'
+         FILNAM = '*.pol,*.pli,*.pliz'
          MIDP   = 1
          CALL FILEMENU(MIDP,FILNAM,ierror)
          IF (ierror /= 0) THEN
@@ -1475,11 +1486,7 @@
             CALL MESSAGE('YOU SAVED ' , filnam, ' partitions')
             md_netfile = ' '
             md_netfile = filnam
-
-            !CALL NEWFIL(MTEK, 'NET.NET' )
-            !CALL WRINET(MTEK)
-            !CALL MESSAGE('AUTOSAVED NET.NET',' ',' ')
-
+  
             NUM = 0
          ENDIF
       end if
@@ -1658,36 +1665,29 @@
    END SUBROUTINE DRAWNU
  
 
-
    subroutine tekpolygon()
    use m_polygon
    use unstruc_display
    use m_missing
-   use gridoperations
-
+   
    implicit none
 
    integer           :: k,ncol,kk, key,k2
-   double precision  :: a,b,f,x,y,z,s,c,d,dx,dy,dz
+   double precision  :: a,b,f,x,y,z,s,c,d,dx,dy,dz,dc,dl,dr,ds,dxL,dyL,dxR,dyR,sL,sR, dcxR, dcyR, dcxL, dcyL
+   logical inview
 
    if (ndrawpol == 2) then
       CALL DISP2C(XPL, YPL, NPL, RCIR, NCOLPL)
 
    else if (ndrawpol == 3) then
 
-      call linewidth(3)  
       do k = 1,npl-1
-         if (zpl(k) .ne. dmiss) then
-            if ( inview( xpl(k), ypl(k) ) .AND. inview ( xpl(k+1), ypl(k+1) )  ) then
-               call isocol( (zpl(k)+zpl(k+1))/2, ncol)
-               call movabs(xpl(k)  , ypl(k))
-               call lnabs (xpl(k+1), ypl(k+1))
-            endif
+         if (zpl(k) .ne. dmiss .and. zpl(k+1) .ne. dmiss) then
+            call isoline( xpl(k), ypl(k), zpl(k), xpl(k+1), ypl(k+1), zpl(k+1) )
          endif
       enddo
-      call linewidth(1)
-
-   else if (ndrawpol == 4 .or. ndrawpol == 5 .or. ndrawpol == 6) then
+ 
+   else if (ndrawpol >= 4 .and. ndrawpol <= 9) then
 
       CALL DISP2C(XPL, YPL, NPL, 0d0, NCOLPL)
       CALL SETCOL(NCOLBLACK)
@@ -1696,14 +1696,21 @@
             if ( ndrawpol == 4) then
                call HTEXT(Zpl(k),Xpl(k),Ypl(k))
             else if ( ndrawpol == 5 .and. jakol45 > 0) then
-               call HTEXT(dzL(k),Xpl(k),Ypl(k))
+               call HTEXT(dcrest(k),Xpl(k),Ypl(k))
             else if ( ndrawpol == 6 .and. jakol45 > 0) then
+               call HTEXT(dzL(k),Xpl(k),Ypl(k))
+            else if ( ndrawpol == 7 .and. jakol45 > 0) then
                call HTEXT(dzr(k),Xpl(k),Ypl(k))
+            else if ( ndrawpol == 8 .and. jakol45 > 0) then
+               call HTEXT(dtL(k),Xpl(k),Ypl(k))
+            else if ( ndrawpol == 9 .and. jakol45 > 0) then
+               call HTEXT(dtR(k),Xpl(k),Ypl(k))
+ 
             endif
          endif
       enddo
 
-     else if (ndrawpol == 7 .and. jakol45 > 0) then
+     else if (ndrawpol == 10 .and. jakol45 > 0) then
 
       do k = 1,npl-1
 
@@ -1712,41 +1719,69 @@
              IF (KEY .EQ. 1) RETURN
          ENDIF
 
-         if (zpl(k) .ne. dmiss) then
-            if ( inview( xpl(k), ypl(k) ) .AND. inview ( xpl(k+1), ypl(k+1) )  ) then
-               call isocol( (zpl(k)+zpl(k+1))/2, ncol)
-               call movabs(xpl(k)  , ypl(k))
-               call lnabs (xpl(k+1), ypl(k+1))
-
+         if (xpl(k) .ne. dmiss .and. xpl(k+1) .ne. dmiss ) then
+            if ( inview( xpl(k), ypl(k) ) .or. inview ( xpl(k+1), ypl(k+1) )  ) then
+               call isoline( xpl(k), ypl(k), zpl(k), xpl(k+1), ypl(k+1), zpl(k+1) )
+  
                call sincosdis (xpl(k), ypl(k), xpl(k+1), ypl(k+1), s, c, d)
 
-               dy = rcir*c
+               dy =  rcir*c
                dx = -rcir*s
 
                k2 = max(2, int (d /(3d0*rcir)) )
                do kk = 1, k2
                   a  = 1d0 - dble(kk)/dble(k2)
-                  b = 1d0-a
+                  b  = 1d0-a
                   x  = a*xpl(k) + b*xpl(k+1)
                   y  = a*ypl(k) + b*ypl(k+1)
                   z  = a*zpl(k) + b*zpl(k+1)
-                  dz = a*dzl(k) + b*dzl(k+1)
-                  f  = dz/5d0
-                  call isocol( z-dz, ncol )
-                  call movabs( x+f*dx, y+f*dy )
-                  call  lnabs( x, y )
 
-                  dz = a*dzr(k) + b*dzr(k+1)
-                  f  = dz/5d0
-                  call isocol( z-dz, ncol )
-                  call lnabs ( x-f*dx, y-f*dy )
+                  dc = a*dcrest(k) + b*dcrest(k+1) ; dc = 0.5d0*dc ! crest width
+                  dy =  dc*c ; dcyR = dy ; dcyL = dy
+                  dx = -dc*s ; dcxR = dx ; dcxL = dx 
+         
+                  dL = a*dzL(k) + b*dzL(k+1)  ! step left
+                  dR = a*dzR(k) + b*dzR(k+1)  ! step right
+                  
+                  sL = a*dtL(k) + b*dtL(k+1)  ! slope left
+                  sR = a*dtR(k) + b*dtR(k+1)  ! slope right
+
+                  if (dL > 0d0 .and. dR == 0d0) then ! baseline is probably wrong with slope, set 1 instead of 10 
+                     sL = 1d0 ; dcxL = 0 ; dcyL = 0d0
+                  endif
+
+                 if (dR > 0d0 .and. dL == 0d0) then ! baseline is probably wrong with slope, set 1 instead of 10 
+                     sR = 1d0 ; dcxR = 0 ; dcyR = 0d0
+                  endif
+
+
+                  dc  = dR*sR
+                  dyR =  dc*c
+                  dxR = -dc*s
+                  call isoline( x-dcxR, y-dcyR, z, x         , y         , z   ) ! half crest width to right
+                  if (dR == 0d0) then 
+                      call rcirc(x-dcxR, y-dcyR)
+                  else
+                      call isoline( x-dcxR, y-dcyR, z, x-dcxR-dxR, y-dcyR-dyR, z-dR) ! slope to right
+                  endif                
+
+                  dc  = dL*sL
+                  dyL =  dc*c
+                  dxL = -dc*s
+                  call isoline( x+dcxL, y+dcyL, z, x         , y         , z   ) ! half crest width to left
+                  if (dL == 0d0) then 
+                      call rcirc(x+dcxL, y+dcyL)
+                  else 
+                      call isoline( x+dcxL, y+dcyL, z, x+dcxL+dxL, y+dcyL+dyL, z-dL) 
+                  endif 
+
                enddo
             endif
          endif
       enddo
 
       
-    else if ( ndrawpol == 8 ) then
+    else if ( ndrawpol == 11 ) then
          
          CALL DISP2C(XPL, YPL, NPL, RCIR, NCOLPL)
          do k = 1,npl
@@ -1837,7 +1872,7 @@
    use unstruc_messages
    use m_sferic, only: jsferic, dg2rd
    use gridoperations
-   
+    
    implicit none
 
    integer, intent (in)          :: netwhat, jahalt, jacol
@@ -1854,10 +1889,11 @@
 
    double precision, external    :: znetcell
    double precision, external    :: coarsening_info
-
+ 
    COMMON /VFAC/ VFAC,VFACFORCE,NVEC
    COMMON /DRAWTHIS/                ndraw(50)
    integer                       :: ndraw !, ierr, jaidomain
+   logical inview
 
    if ( netwhat .le. 1 ) return
 
@@ -2380,7 +2416,9 @@
       OPTION(15)= 'decrease in topology functional (   )   '
       OPTION(16)= 'smoothness indicator            (   )   '
       OPTION(17)= 'small flow link criterion, dx/(ba12) ( )'
-      MAXOPT    = 17
+      OPTION(18)= 'dzk / dx                             ( )'
+
+      MAXOPT    = 18
       if ( jatrt.eq.1 ) then 
           MAXOPT    = 18
           if (ifrctypuni == 0) then 
@@ -2478,8 +2516,12 @@
       OPTION(44)= 'Solar radiation                   (W/m2)'
       
       OPTION(45)= 'Constituents                            '
-
+ 
+      if ( allocated(FrcInternalTides2D) ) then 
+      OPTION(46)= 'FrcInternalTides2D                      '
+      else
       OPTION(46)= 'turkinws                                '
+      endif
          
       if (jagrw > 0 .or. jadhyd > 0) then 
          OPTION(47)= 'Hydrology & groundwater parameters      '
@@ -2487,6 +2529,8 @@
          
       if (nonlin >= 2) then
          OPTION(48)= 'a1m                                 (m2)'
+      else if(lnx1D > 0d0) then
+         OPTION(48)= 'uc1d                               (m/s)'
       endif
          
       if (nshiptxy > 0) then 
@@ -2640,12 +2684,16 @@
       OPTION(43)= 'vicwwu                           (m2/s )'
       OPTION(44)= 'ustb                             (     )'
       if (jawind > 0) then 
-         OPTION(45)= 'ustw                             (m/s  )'
+      OPTION(45)= 'ustw                             (m/s  )'
       else 
-         OPTION(45)= 'womegu                           (m/s  )'
+      OPTION(45)= 'womegu                           (m/s  )'
       endif
       OPTION(46)= 'Layer Thickness at u             (m    )'
+      if (jafrculin > 0) then 
       OPTION(47)= 'Linear friction coefficient      (m/s  )'
+      else 
+      OPTION(47)= 'Coriolis parameter fcorio        (1/s  )'
+      endif
       OPTION(48)= '                                        '
       OPTION(49)= 'Number of active layers          (     )'
       OPTION(50)= 'Maximum nr of layers             (     )'
@@ -2742,7 +2790,8 @@
       OPTION(2) = 'Show All flow links                     '
       OPTION(3) = 'Show All flow link directions           '
       OPTION(4) = 'Show All dry flow links                 '
-      MAXOPT    = 4
+      OPTION(5) = 'Show All 3D flow links sideview         '
+      MAXOPT    = 5
       NWHAT2    = NDRAW(30)
       CALL MENUV3(NWHAT2,OPTION,MAXOPT,EXP,MAXEXP)
       IF (NWHAT2 .NE. NDRAW(30) ) KEY = 3
@@ -2950,14 +2999,17 @@
       EXP(2)    = 'SHOW ORTHO YES/NO                       '
       OPTION(1) = 'No Polygon                              '
       OPTION(2) = 'Polygon red + white dots                '
-      OPTION(3) = 'Polygon isocolour ZPL values            '
-      OPTION(4) = 'Polygon + numbers ZPL values            '
-      OPTION(5) = 'Polygon + numbers Left  Sillheights     '
-      OPTION(6) = 'Polygon + numbers Right Sillheights     '
-      OPTION(7) = 'Polygon isocolour Left/Right levels     '
-      OPTION(8) = 'Polygon index nrs                       '
+      OPTION(3) = 'Polygon isocolour ZPL   Crest levels    '
+      OPTION(4) = 'Polygon + numbers ZPL   Crest levels    '
+      OPTION(5) = 'Polygon + numbers ZPL   Crest widths    '
+      OPTION(6) = 'Polygon + numbers Left  Toe heights     '
+      OPTION(7) = 'Polygon + numbers Right Toe heights     '
+      OPTION(8) = 'Polygon + numbers Left  Slopes          '
+      OPTION(9) = 'Polygon + numbers Right Slopes          '
+      OPTION(10)= 'Polygon isocolour Left/Right levels     '
+      OPTION(11)= 'Polygon index nrs                       '
 
-      MAXOPT    = 8
+      MAXOPT    = 11
       NWHAT2    = NDRAWPOL
       CALL MENUV3(NWHAT2,OPTION,MAXOPT,EXP,MAXEXP)
       NDRAWPOL  = NWHAT2
@@ -3211,6 +3263,7 @@
 
 
    SUBROUTINE changenetworkPARAMETERS()
+   use m_sferic
    use network_data
    use unstruc_display
    use m_ec_triangle
@@ -3240,7 +3293,7 @@
    integer :: iselect, minp
    CHARACTER*128 select(3)
 
-   integer, parameter :: NUMPAR = 21, NUMFLD = 2*NUMPAR
+   integer, parameter :: NUMPAR = 22, NUMFLD = 2*NUMPAR
    INTEGER  IX(NUMFLD),IY(NUMFLD),IS(NUMFLD),IT(NUMFLD)
    CHARACTER WRDKEY*40, OPTION(NUMPAR)*40, HELPM(NUMPAR)*60
    COMMON /HELPNOW/ WRDKEY,NLEVEL
@@ -3278,8 +3331,7 @@
    IT(19*2) = 4
    OPTION(20)= '1D2D link generation algorithm          ' ; IT(20*2)  = 2
    OPTION(21)= 'Lateral algorithm search radius         ' ; IT(21*2)  = 6
-
-
+   OPTION(22)= 'Use middle latitude (1/0)               ' ; IT(22*2)  = 2
 
 !   123456789012345678901234567890123456789012345678901234567890
 !            1         2         3         4         5         6
@@ -3326,6 +3378,8 @@
    'choose                                                      '
    WRITE(HELPM (20), '(I0,A,I0,A,I0,A)') &
    I1D2DTP_1TO1, ': default (1-to-1), ', I1D2DTP_1TON_EMB, ': embedded 1-to-n, ', I1D2DTP_1TON_LAT, ': lateral 1-to-n.'
+    HELPM (22)= &
+   '1 = yes, 0 = no                                             '
 
 
    CALL SAVEKEYS()
@@ -3413,6 +3467,8 @@
 
    CALL IFormputinteger (2*20, imake1d2dtype)
    call IFormputDouble  (2*21, searchRadius1D2DLateral,'(F7.3)')
+   CALL IFormputinteger (2*22, jamidlat)
+  
 
    ! Display the form with numeric fields left justified and set the initial field to number 2
    CALL IOUTJUSTIFYNUM('L')
@@ -3485,7 +3541,8 @@
 
            CALL IFormGetinteger (2*20, imake1d2dtype)
            call IFormGetDouble  (2*21, searchRadius1D2DLateral)
-   
+           CALL IFormGetinteger (2*22, jamidlat)
+     
        ENDIF
        CALL IWinClose(1)
        CALL IWinClose(1)
@@ -3748,7 +3805,7 @@
    integer :: numfldactual
    integer :: numparactual
 
-   integer, parameter :: NUMPAR = 13, NUMFLD = 2*NUMPAR
+   integer, parameter :: NUMPAR = 15, NUMFLD = 2*NUMPAR
    INTEGER  IX(NUMFLD),IY(NUMFLD),IS(NUMFLD),IT(NUMFLD)
    CHARACTER WRDKEY*40, OPTION(NUMPAR)*40, HELPM(NUMPAR)*60
    COMMON /HELPNOW/ WRDKEY,NLEVEL
@@ -3769,10 +3826,14 @@
    OPTION(11)= 'DY (FOR TYPE 0 ONLY)                 (m)' ; IT(11*2) = 6
    OPTION(12)= '                                        ' ; IT(12*2) = 1001
    OPTION(13)= 'MAZE SIZE HORIZONTAL PART HEXAGON   (cm)' ; IT(13*2) = 6
+   OPTION(14)= 'Hanging nodes when dx <              (m)' ; IT(14*2) = 6
+   OPTION(15)= 'Radius                               (m)' ; IT(15*2) = 6
+
+
 !   123456789012345678901234567890123456789012345678901234567890
 !            1         2         3         4         5         6
    HELPM (1) = &
-   'SQUARE = 0, WIEBER = 1, HEX1 = 2, HEX2 = 3, TRIANGLE = 4    '
+   'SQUARE=0, WIEBER=1, HEX1=2, HEX2=3, TRIA=4, GLOBALNET=6     '
    HELPM (2) = &
    '                                                            '
    HELPM (3) = &
@@ -3799,6 +3860,9 @@
    '                                                            '
    HELPM (13)= &
    'ONLY VALID FOR MAZE TYPE = 2, HEXAGON                       '
+   HELPM (13)= &
+   'ONLY VALID FOR MAZE TYPE = 6, GLOBALNET                     '
+
 
    CALL SAVEKEYS()
    NUMPARACTUAL = NUMPAR
@@ -3868,6 +3932,9 @@
    CALL IFormPutDouble  (2*10,DX0  , '(F7.3)')
    CALL IFormPutDouble  (2*11,DY0  , '(F7.3)')
    CALL IFormPutDouble  (2*13,HSIZE, '(F7.3)')
+   CALL IFormPutDouble  (2*14,DXdouble, '(F7.0)')
+   CALL IFormPutDouble  (2*15,Radius,   '(F7.0)')
+
 
    ! Display the form with numeric fields left justified and set the initial field to number 2
    CALL IOUTJUSTIFYNUM('L')
@@ -3916,6 +3983,7 @@
            CALL IFormGetDouble  (2*10, DX0  )
            CALL IFormGetDouble  (2*11, DY0  )
            CALL IFormGetDouble  (2*13, HSIZE)
+           CALL IFormGetDouble  (2*14, DXdouble)
        ENDIF
        CALL IWinClose(1)
        CALL IWinClose(1)
@@ -4294,6 +4362,7 @@
 
 
    SUBROUTINE EDITPOL(MODE,KEY,NETFLOW)
+   use m_sferic
    USE M_POLYGON
    use network_data, only: netstat, NETSTAT_CELLS_DIRTY
    USE M_MISSING
@@ -4695,6 +4764,10 @@
          key = 3
       ELSE IF (KEY .EQ. 47) THEN                                        ! /
          call nPLOTPLUSMIN(-1)
+         key = 3
+      ELSE IF (KEY .EQ. 55) THEN                                        ! 7
+         jsfertek=1-jsfertek
+         call WEAREL()
          key = 3
       ELSE IF (                 KEY .EQ. 87+32) THEN                    ! w for water  + 1 (m)
 
@@ -5335,7 +5408,6 @@
            CALL IFORMGETINTEGER(2*32, kplotfrombedorsurface ) 
            CALL IFORMGETINTEGER(2*33, kplotordepthaveraged  ) 
 
-           RCIR  = CR*(X2 - X1)
            VFAC  = MAX( 0d0, VFAC)
            VFACFORCE  = MAX( 0d0, VFACFORCE)
            XLEFT = MAX( 0d0,(MIN(XLEFT,0.25d0) ) )
@@ -5345,8 +5417,7 @@
               IF (XLEFT .EQ. 0) XLEFT = .15
               IF (YBOT  .EQ. 0) YBOT  = .10
            ENDIF
-           !CALL NEWWORLD()
-           call setwor(x1,y1,x2,y2)
+           ! call WEAREL()
            DO I = 1,NUMHCOPTS
               IF (IHCOPTS(1,I) .EQ. 22) IHCOPTS(2,I) = JAEPS
               IF (IHCOPTS(1,I) .EQ. 5)  IHCOPTS(2,I) = JALAND
@@ -5830,7 +5901,7 @@ subroutine getLtoplot(kk,k)
             netstat = NETSTAT_CELLS_DIRTY
             IF (KP .EQ. 0) THEN
                ! CALL GIVENEWNODENUM(KP)
-               CALL SETNEWPOINT(XP,YP,ZP,KP)
+               CALL DSETNEWPOINT(XP,YP,KP)
             ELSE
                CALL DCIRR (XK(KP),YK(KP),ZK(KP),NCOLDN)
             ENDIF
@@ -6210,7 +6281,7 @@ subroutine getLtoplot(kk,k)
 
      SUBROUTINE EDITflow(MODE,KEY,NL)
       use m_netw
-      use m_flowgeom, only : iadv
+      use m_flowgeom, only : iadv, kcu
       use m_flow
       use unstruc_colors
       USE M_MISSING
@@ -7188,7 +7259,7 @@ subroutine getLtoplot(kk,k)
       use m_netw
       use unstruc_colors
       use geometry_module, only: dbdistance
-      use gridoperations
+      use unstruc_display
       
       implicit none
       integer :: ncol, ja
@@ -7206,6 +7277,7 @@ subroutine getLtoplot(kk,k)
 !      double precision :: t0, t1
       integer :: is, ie, ip
       integer :: iflip = 1
+      logical inview
 
 
       COMMON /DRAWTHIS/ ndraw(50)
@@ -7240,7 +7312,7 @@ subroutine getLtoplot(kk,k)
                K1 = KN(1,L)
                K2 = KN(2,L)
                IF (K1 .NE. 0 .AND. K2 .NE. 0) THEN
-                  IF (INVIEW(XK(K1),YK(K1)) .OR. INVIEW(XK(K2),YK(K2)) ) THEN
+                  IF (INVIEW(XK(K1),YK(K1)) .or. INVIEW(XK(K2),YK(K2)) ) THEN
                      CALL MOVABS( XK(K1),YK(K1))   
                      CALL  LNABS( XK(K2),YK(K2))
                   ENDIF
@@ -7593,6 +7665,7 @@ SUBROUTINE DISPFLOWNODEVALS(KP)
   use geometry_module, only: dbdistance, dcosphi
   use m_sferic, only: jsferic, jasfer3D
   use gridoperations
+  use m_statistics
 
   implicit none
 
@@ -7608,9 +7681,7 @@ SUBROUTINE DISPFLOWNODEVALS(KP)
   integer :: jaauto
   integer :: k1, k2, L, jaxz, kL, kR
   integer :: ncols
-  integer :: nie
-  integer :: nis
-  integer :: nv
+  integer :: nie, nis, nv, i
   double precision :: pi
   double precision :: rd
   double precision :: rek
@@ -7748,14 +7819,57 @@ SUBROUTINE DISPFLOWNODEVALS(KP)
             if (jacftrt .eq. 1) then 
                 V = cftrt(L,2)
             else
-                V = 0
+                V = DBDISTANCE( XK(K1), YK(K1), XK(K2), YK(K2), jsferic, jasfer3D, dmiss)
+                if (v > 0) then
+                   V = (zk(k2) - zk(k1)) / v
+                endif
             end if
         ENDIF
         RLIN(L) = V
      ENDIF
   ENDDO
+ 
+  if (met == 4) then
+     npdf = 20
+     if (allocated (xpdf) ) deallocate (xpdf,ypdf) ; allocate( xpdf(npdf), ypdf(npdf) ) ; xpdf = 0d0
+     aa = 1d0
+     do i = 1,npdf-1
+        aa = 0.6666d0*aa
+        ypdf(i) = aa  
+     enddo 
+     ypdf(npdf) = 0d0
+     call makepdf(rlin,numL)
+  endif
+
   RETURN
   END SUBROUTINE NETLINKVALS
+
+  subroutine makepdf(r,n)
+  use m_statistics
+  integer :: n
+  real    :: r(n), s
+  integer :: k,L
+  if (n == 0) return
+  xpdf = 0d0
+  do L = 1,n 
+     do k = 1,npdf
+        if (r(L)  >= ypdf(k)) then
+           xpdf(k) = xpdf(k) + 1d0
+           exit  
+        endif
+     enddo
+  enddo
+
+  s = 0
+  do k = 1,npdf
+     s = s+xpdf(k)
+  enddo
+  if (s == 0) return
+  xpdf = xpdf / s
+  do k = 2,npdf
+     xpdf(k) = xpdf(k) + xpdf(k-1)
+  enddo
+  end subroutine makepdf
 
   SUBROUTINE NETNODEVALS(MET)
   USE M_FLOW
@@ -7863,8 +7977,7 @@ SUBROUTINE DISPFLOWNODEVALS(KP)
   
   use m_netw
   use m_missing
-  use gridoperations
-  
+ 
   implicit none
   double precision :: dv
   integer :: i
@@ -7888,10 +8001,11 @@ SUBROUTINE DISPFLOWNODEVALS(KP)
   double precision :: yp2
   double precision :: zp1
   double precision :: zp2
+  logical inview
   ! BEPAAL MINIMUM EN MAXIMUM VAN WAARDES BINNEN VIEWING AREA
   COMMON /DEPMAX2/ VMAX,VMIN,DV,VAL(256),NCOLS(256),NV,NIS,NIE,JAAUTO
 
-  IF (JAAUTO .EQ. 1) THEN
+  IF (JAAUTO > 0) THEN
      RMIN =  1.0D30
      linmin = 0
      RMAX = -1.0d30
@@ -7906,7 +8020,7 @@ SUBROUTINE DISPFLOWNODEVALS(KP)
            XP2  = XK(K2)
            YP2  = YK(K2)
            ZP2  = ZK(K2)
-           IF (DINVIEW(XK(K1),YK(K1),ZK(K1)) .OR. DINVIEW(XK(K2),YK(K2),ZK(K2)) ) THEN
+           IF (INVIEW(XK(K1),YK(K1)) .OR. INVIEW(XK(K2),YK(K2)) ) THEN
                RD = RLIN(L)
                IF (RD < RMIN) THEN
                    RMIN = RD
@@ -7935,7 +8049,7 @@ SUBROUTINE DISPFLOWNODEVALS(KP)
   SUBROUTINE MINMXNETNODS()
   use m_netw
   use m_missing
-  use gridoperations
+  use unstruc_display
   
   implicit none
 
@@ -7945,16 +8059,18 @@ SUBROUTINE DISPFLOWNODEVALS(KP)
   double precision :: VMAX, VMIN, DV, VAL
   integer          :: NCOLS,NV,NIS,NIE,JAAUTO
   COMMON /DEPMAX/ VMAX,VMIN,DV,VAL(256),NCOLS(256),NV,NIS,NIE,JAAUTO
+  logical inview
+
 
   ! BEPAAL MINIMUM EN MAXIMUM VAN DIEPTES BINNEN VIEWING AREA
 
-  IF (JAAUTO .EQ. 1) THEN
+  IF (JAAUTO > 0) THEN
      RMIN =  1.0D30
      NODMIN = 0
      RMAX = -1.0D30
      NODMAX = 0
      DO K = 1,NUMK
-        IF ( DINVIEW(XK(K),YK(K),ZK(K)) ) THEN
+        IF ( INVIEW(XK(K),YK(K) ) ) THEN
            RD = RNOD(K)
            IF (rd .ne. dmiss) then
               IF (RD < RMIN ) THEN
@@ -7985,8 +8101,7 @@ SUBROUTINE MINMXNETCELLS()
   use m_netw
   use m_flowgeom
   use m_missing
-  use gridoperations 
-
+ 
   implicit none
 
   double precision :: dv
@@ -8005,17 +8120,18 @@ SUBROUTINE MINMXNETCELLS()
   double precision :: vmin
 
   double precision, external :: znetcell
+  logical inview
 
   ! BEPAAL MINIMUM EN MAXIMUM VAN DIEPTES BINNEN VIEWING AREA
   COMMON /DEPMAX/ VMAX,VMIN,DV,VAL(256),NCOLS(256),NV,NIS,NIE,JAAUTO
 
-  IF (JAAUTO .EQ. 1) THEN
+  IF (JAAUTO > 0) THEN
      RMIN =  1.0D30
      NODMIN = 0
      RMAX = -1.0D30
      NODMAX = 0
      DO K = 1,max(NUMP,nump1d2d)
-        IF ( DINVIEW(XZ(K),YZ(K),YZ(K)) ) THEN
+        IF ( INVIEW(XZ(K),YZ(K)) ) THEN
            RD = RLIN(K)
            IF (rd .ne. dmiss) then
               IF (RD < RMIN ) THEN
@@ -8048,6 +8164,7 @@ SUBROUTINE MINMXNETCELLS()
   use geometry_module, only: getdxdy, getdx, getdy 
   use m_sferic, only: jsferic
   use unstruc_colors ! , ONLY :NCOLWARN1, ncolhl
+  use unstruc_display
   use gridoperations
   
   implicit none
@@ -8069,7 +8186,7 @@ SUBROUTINE MINMXNETCELLS()
   DOUBLE PRECISION XD,YD,ZD,DX,DY,DZ,XX1,YY1,ZZ1,XX2,YY2,ZZ2,X3,Y3,Z3,H
   double precision :: X(4), Y(4), Z(4)
   double precision :: getrcir
-  LOGICAL INVNOD
+  LOGICAL INVNOD, inview
 
   COMMON /HOWTOVIEW/ JVIEW, JAV, XYZ ! 1,2,3 OF 4
 
@@ -8891,7 +9008,7 @@ end subroutine highlight_nodesnlinks
       use unstruc_colors
       use m_missing, only: DMISS
       use unstruc_opengl, only: jaopengl
-      use gridoperations
+      use unstruc_display
       
       implicit none
       double precision :: deltx, RC
@@ -8922,6 +9039,8 @@ end subroutine highlight_nodesnlinks
       COMMON /DRAWTHIS/ ndraw(50)
       COMMON /SAMPLESADM/  MCS,NCS,NS1
       double precision :: VS(4,4)
+      logical inview
+
       IF (NS .EQ. 0 .OR. MET .EQ. 0) RETURN
       IF (MET .EQ. 4 .OR. MET .EQ. 5) CALL SETTEXTSIZE()
       RC      = 1.7d0*RCIR
@@ -9014,7 +9133,7 @@ end subroutine highlight_nodesnlinks
    SUBROUTINE JGRLINE8(X,Y,N) ! TEKEN LIJN, INCL XYMISSEN, GEBRUIK VAN INVIEW EN PROJECTIE
    
    use m_missing
-   use gridoperations
+  ! use gridoperations
    
    implicit none
    double precision   :: X(N), Y(N)
@@ -9024,10 +9143,10 @@ end subroutine highlight_nodesnlinks
    integer            :: in
    integer            :: k
    integer            :: l
-   double precision   :: xa
-   double precision   :: ya
+   double precision   :: XA, YA
    integer, parameter :: KMAX=4096     ! BEPERKING VAN INTERACTER
    real               :: XX(KMAX), YY(KMAX)
+   logical inview2
 
    K  = 0
    L  = 0
@@ -9036,13 +9155,11 @@ end subroutine highlight_nodesnlinks
    DO WHILE (I .LT. N)
       I = I + 1
       IF ( X(I) .NE. dXYMIS) THEN
-         IF ( INVIEW( X(I) ,Y(I) ) ) IN = 1
+         IF ( INVIEW2( X(I) ,Y(I), XA, YA ) ) IN = 1
          IF (K .EQ. 0 .OR. IN .EQ. 1 .OR. I .EQ. L+1) K  = K + 1
          IF (K .EQ. 1 .OR. IN .EQ. 1 .OR. I .EQ. L+1) THEN
-            !XX(K) = XA
-            ! YY(K) = YA
-            XX(K) = X(i)
-            YY(K) = Y(i)
+            XX(K) = XA
+            YY(K) = YA
          ENDIF
          IF (IN .EQ. 1) L = I
       ENDIF
@@ -9060,98 +9177,7 @@ end subroutine highlight_nodesnlinks
    END SUBROUTINE JGRLINE8
 
 
-   LOGICAL FUNCTION INVIEW2(X,Y,XX,YY)
-   USE M_MISSING
-   use m_wearelt
-   implicit none
-   double precision :: x,y,xx,yy
 
-   ! ZIT IK IN ZOOMGEBIED? NULLEN EN DEFAULTS NIET, IN WERELDCOORD
-
-   INVIEW2 = .FALSE.
-   IF (X .NE. XYMIS) THEN
-      CALL dPROJECT(X,Y,XX,YY,1)
-      IF (XX .GT. X1 .AND. XX .LT. X2 .AND.  &
-          YY .GT. Y1 .AND. YY .LT. Y2     ) THEN
-         INVIEW2 = .TRUE.
-      ENDIF
-   ELSE
-      XX = XYMIS
-      YY = XYMIS
-   ENDIF
-   RETURN
-   END FUNCTION INVIEW2
-
-      SUBROUTINE dPROJECT(X8,Y8,XX4,YY4,MODE)
-      use m_sferic
-      implicit none
-      double precision :: x8, y8, xx4, yy4
-      integer          :: mode
-
-      COMMON /SFERZOOM/ X0,Y0,FAC,X1W,Y1W,X2W,Y2W  ! GRADEN
-
-
-      double precision :: X0,Y0,FAC,X1W,Y1W,X2W,Y2W
-      double precision :: X,Y,XX,YY,SX,CX,SY,CY,SY0,CY0,RR,C,SC,CC,RN
-      double precision, save :: EPS = 1.D-20
-      X = X8
-      Y = Y8
-      IF (JSFERTEK .EQ. 0) THEN        ! Just Transfer
-         XX  = X
-         YY  = Y
-      ELSE IF (JSFERTEK .EQ. 1) THEN   ! Stereographic
-         SY0 = SIN(DG2RD*Y0)
-         CY0 = COS(DG2RD*Y0)
-         IF (MODE .EQ. 1) THEN         ! LON,LAT to X,Y
-            SX = SIN(DG2RD*(X-X0))
-            CX = COS(DG2RD*(X-X0))
-            SY = SIN(DG2RD*(Y))
-            CY = COS(DG2RD*(Y))
-            RN = 1.D0+SY0*SY+CY0*CY*CX
-            IF (ABS(RN) .LT. EPS) THEN
-               RN = SIGN(1.D0,RN)*EPS
-            ENDIF
-            RR = FAC*2.D0*RD2DG/RN     ! FAC om naar X1,Y1,X2,Y2 te schalen
-            XX = RR*CY*SX              ! Stereographic to Degrees
-            YY = RR*(CY0*SY-SY0*CY*CX)
-         ELSE IF (MODE .EQ. 2) THEN    ! X,Y to LON,LAT
-            XX = X / FAC
-            YY = Y / FAC
-            RR = SQRT(XX*XX + YY*YY)
-            IF (RR .GT. EPS) THEN
-               SX = SIN(DG2RD*(XX-X0))
-               CX = COS(DG2RD*(XX-X0))
-               SY = SIN(DG2RD*(YY))
-               CY = COS(DG2RD*(YY))
-               C  = 2.D0*ATAN2(RR,2.D0*RD2DG)
-               SC = SIN(C)
-               CC = COS(C)
-               XX = X0*DG2RD + ATAN2(XX*SC,RR*CY0*CC-YY*SY0*SC)
-               YY = ASIN(CC*SY0+YY*SC*CY0/RR)
-               XX = XX*RD2DG
-               YY = YY*RD2DG
-            ELSE
-               XX = X
-               YY = Y
-            ENDIF
-         ENDIF
-      ELSE IF (JSFERTEK .EQ. 2) THEN     ! MERCATOR
-         IF (MODE .EQ. 1) THEN
-            IF (Y .GE.  89D0) Y =  89.D0
-            IF (Y .LE. -89D0) Y = -89.D0
-            YY = DG2RD*Y
-            YY = DLOG( 1D0 + SIN(YY) ) / COS(YY)
-            XX = DG2RD*X
-         ELSE IF (MODE .EQ. 2) THEN
-            YY = DATAN( SINH( Y ) )
-            YY = RD2DG*YY
-            XX = RD2DG*X
-         ENDIF
-      ENDIF
-      XX4 = XX
-      YY4 = YY
-      RETURN
-      END SUBROUTINE dPROJECT
 
       SUBROUTINE TEKTRI(XL,YL,NCOL)
       implicit none
@@ -9619,7 +9645,7 @@ end subroutine change_kml_parameters
          KEY = 0
          RETURN
       ELSE
-         IF (NWHAT .LE. 8) THEN
+         IF (NWHAT .LE. 6 .or. NWHAT .EQ. 8 .or. NWHAT .EQ. 9) THEN
             ICHANGE = NWHAT
             IF (A .EQ. dmiss) THEN
                CALL GETREAL('FIRST SPECIFY UNIFORM VALUE = ',A)
@@ -9628,12 +9654,12 @@ end subroutine change_kml_parameters
             ELSE
                JA = 1
             ENDIF
-         ELSE IF (NWHAT == 9) THEN
-            ICHANGE = NWHAT
          ELSE IF (NWHAT == 10) THEN
             CALL GETREAL('SPECIFY UNIFORM VALUE = ',A)
             IF (A .NE. dmiss) JA = 1
             GOTO 10
+         ELSE
+            JA = 1 ; ICHANGE = NWHAT
          ENDIF
       ENDIF
 
@@ -9831,7 +9857,7 @@ end subroutine change_kml_parameters
   USE M_LANDBOUNDARY
   use m_wearelt
   USE unstruc_colors
-  use gridoperations
+  use unstruc_display
 
   implicit none
   integer :: NCOL
@@ -9843,6 +9869,8 @@ end subroutine change_kml_parameters
   integer :: ncl
   integer :: ncold
   double precision :: rh
+  logical inview
+
 
   IF (NDRAW(3) .EQ. 0) return
   
@@ -10032,6 +10060,8 @@ subroutine change_samples_refine_param(jacancelled)
    use unstruc_display
    use unstruc_version_module, only : unstruc_company, unstruc_program
    use m_samples_refine
+   use m_ec_interpolationsettings
+   use m_arcinfo
 
    implicit none
    integer, intent(out) :: jacancelled !< Whether or not (1/0) user has pressed 'Esc' in parameter screen.
@@ -10053,7 +10083,7 @@ subroutine change_samples_refine_param(jacancelled)
    integer :: numfldactual
    integer :: numparactual
 
-   integer, parameter :: NUMPAR = 14, NUMFLD = 2*NUMPAR
+   integer, parameter :: NUMPAR = 15, NUMFLD = 2*NUMPAR
    INTEGER  IX(NUMFLD),IY(NUMFLD),IS(NUMFLD),IT(NUMFLD)
    CHARACTER WRDKEY*40, OPTION(NUMPAR)*60, HELPM(NUMPAR)*60
    character(len=60) :: text
@@ -10063,7 +10093,9 @@ subroutine change_samples_refine_param(jacancelled)
    external :: highlight_form_line
 
    jacancelled = 0
-   NLEVEL    = 4
+   NLEVEL      = 4
+
+   if (mca > 0) interpolationtype = 4
    
    text = ''
    WRITE(text, "('TYPE: RIDGES (', I1, '), WAVE COURANT NUMBER (', I1,  ')')") ITYPE_RIDGE, ITYPE_WAVECOURANT
@@ -10077,11 +10109,13 @@ subroutine change_samples_refine_param(jacancelled)
    OPTION(7)  = 'NUMBER OF SAMPLE SMOOTHING ITERATIONS [-] ' ; IT(7*2)  = 2
    OPTION(8)  = '                                          ' ; IT(8*2)  = 0
    OPTION(9)  = 'WAVE COURANT NUMBER                       ' ; IT(9*2)  = 0
-   OPTION(10) = 'MAXIMUM TIME-STEP                     [s] ' ; IT(10*2) = 6
-   OPTION(11) = 'MINIMUM CELL EDGE LENGTH              [m] ' ; IT(11*2) = 6
+   OPTION(10) = 'MAXIMUM TIME-STEP        Dt_maxcour   [s] ' ; IT(10*2) = 6
+   OPTION(11) = 'MINIMUM CELL EDGE LENGTH Dx_mincour   [m] ' ; IT(11*2) = 6
    OPTION(12) = 'DIRECTIONAL REFINEMENT (1) OR NOT (0)     ' ; IT(12*2) = 2
    OPTION(13) = 'USE SAMPLES OUTSIDE CELL (1) OR NOT (0)   ' ; IT(13*2) = 2
-   OPTION(14) = '                                          ' ; IT(14*2) = 0
+   OPTION(14) = 'Number of non-interactive refine cycles ()' ; IT(14*2) = 2
+   OPTION(15) = 'Interpolationtype 2 or 4                ()' ; IT(15*2) = 2
+
 
    HELPM (1)  = 'INTEGER VALUE <                                             '
    HELPM (2)  = '                                                            '
@@ -10096,7 +10130,8 @@ subroutine change_samples_refine_param(jacancelled)
    HELPM (11) = 'REAL    VALUE <                                             '
    HELPM (12) = 'INTEGER VALUE <                                             '
    HELPM (13) = 'INTEGER VALUE <                                             '
-   HELPM (14) = '                                                            '
+   HELPM (14) = '0=interactive, > 0=automatic nr of ref. cycles              '
+   HELPM (15) = '2=averaging, 4=bilinarc                                     '
 
    CALL SAVEKEYS()
    NUMPARACTUAL = NUMPAR
@@ -10158,15 +10193,19 @@ subroutine change_samples_refine_param(jacancelled)
       CALL IFORMATTRIBUTEN(IR,0,0,7)
    ENDDO
 
-   CALL IFORMPUTINTEGER(2*1, irefinetype,  '(F12.3)')
-   CALL IFORMPUTDOUBLE(2*4,  threshold,    '(F12.3)')
-   CALL IFORMPUTDOUBLE(2*5,  thresholdmin, '(F12.3)')
-   CALL IFORMPUTDOUBLE(2*6,  hmin,         '(F12.3)')
-   CALL IFORMPUTINTEGER(2*7, Nsamplesmooth)
-   CALL IFORMPUTDOUBLE(2*10, Dt_maxcour,         '(F12.3)')
-   CALL IFORMPUTDOUBLE(2*11, hmin,           '(F12.3)')
+   CALL IFORMPUTINTEGER(2*1 , irefinetype,  '(F12.3)')
+   CALL IFORMPUTDOUBLE (2*4 , threshold,    '(F12.3)')
+   CALL IFORMPUTDOUBLE (2*5 , thresholdmin, '(F12.3)')
+   CALL IFORMPUTDOUBLE (2*6 , hmin,         '(F12.3)')
+   CALL IFORMPUTINTEGER(2*7 , Nsamplesmooth)
+
+   CALL IFORMPUTDOUBLE (2*10, Dt_maxcour,   '(F12.3)')
+   CALL IFORMPUTDOUBLE (2*11, Dx_mincour,   '(F12.3)')
    CALL IFORMPUTINTEGER(2*12, jadirectional)
    CALL IFORMPUTINTEGER(2*13, jaoutsidecell)
+   CALL IFORMPUTINTEGER(2*14, numrefcycles)
+   CALL IFORMPUTINTEGER(2*15, interpolationtype)
+
 
    ! Display the form with numeric fields left justified and set the initial field to number 2
    CALL IOUTJUSTIFYNUM('L')
@@ -10203,16 +10242,18 @@ subroutine change_samples_refine_param(jacancelled)
        CALL HELP(WRDKEY,NLEVEL)
    ELSE IF (KEY .EQ. 22 .OR. KEY .EQ. 23) THEN
        IF (KEY .EQ. 22) THEN
-           CALL IFORMGETINTEGER(2*1, irefinetype)
-           CALL IFORMGETDOUBLE(2*4 , threshold)
-           CALL IFORMGETDOUBLE(2*5 , thresholdmin)
-           CALL IFORMGETDOUBLE(2*6 , hmin)
-           CALL IFORMGETINTEGER(2*7 , Nsamplesmooth)
-           CALL IFORMGETDOUBLE(2*10 , Dt_maxcour)
-           CALL IFORMGETDOUBLE(2*11 , hmin)
+           CALL IFORMGETINTEGER(2*1  , irefinetype)
+           CALL IFORMGETDOUBLE (2*4  , threshold)
+           CALL IFORMGETDOUBLE (2*5  , thresholdmin)
+           CALL IFORMGETDOUBLE (2*6  , hmin)
+           CALL IFORMGETINTEGER(2*7  , Nsamplesmooth)
+
+           CALL IFORMGETDOUBLE (2*10 , Dt_maxcour)
+           CALL IFORMGETDOUBLE (2*11 , Dx_mincour)
            CALL IFORMGETINTEGER(2*12 , jadirectional)
            CALL IFORMGETINTEGER(2*13 , jaoutsidecell)
-           
+           CALL IFORMGETINTEGER(2*14 , numrefcycles)
+           CALL IFORMGETINTEGER(2*15 , interpolationtype)
        ELSEIF (KEY .EQ. 23) THEN
           jacancelled = 1
        ENDIF
@@ -10542,9 +10583,9 @@ end subroutine plot_ridges
             YC = YL + Y*DY
             CALL SETCOL(NCOL)
             NCOL = NCOL + 1
-            CALL FBOX(XC-DXC,YC-DYC,XC+DXC,YC+DYC)
+            CALL FBOXnop(XC-DXC,YC-DYC,XC+DXC,YC+DYC)
             CALL SETCOL(0)
-            CALL  BOX(XC-DXC,YC-DYC,XC+DXC,YC+DYC)
+            CALL  BOXnop(XC-DXC,YC-DYC,XC+DXC,YC+DYC)
    10 CONTINUE
       RETURN
       END
@@ -10650,6 +10691,98 @@ end subroutine plot_ridges
       RETURN
       END
 
+      SUBROUTINE SETWYnew(X,Y,DY)
+!     Set zoomwindow limits at proper aspect ratio
+      use m_wearelt
+      use m_sferic
+      use m_sferzoom
+      use unstruc_display
+      !COMMON /WEARELT/  XMIN,YMIN,XMAX,YMAX,X1,Y1,X2,Y2,RCIR,CR,DSIX
+      !COMMON /SFERIC/   JSFERIC, JSFERTEK
+      !COMMON /SFERZOOM/ X0,Y0,FAC,X1W,Y1W,X2W,Y2W  ! GRADEN
+      !COMMON /MFILES/   MDIA,MINI,MFRM,MRRR,MHLP
+      !real*8 X0,Y0,FAC,X1W,Y1W,X2W,Y2W
+      ! X1W = Links, X2W = Rechts, Y1W = Onder, Y2W = Boven v/h Scherm
+      implicit none
+      double precision :: asp, x,y,dy, dx, XA,Y1A,y2a
+
+
+      FAC = 1
+      CALL INQASP(ASP)
+      DY  = MAX(DY,1E-8)
+      dyh = dy
+
+      IF (JSFERTEK .GE. 1) THEN
+         DY = MIN(DY,180d0)
+         X  = MAX(-360.0,MIN(X,360.0))
+         Y  = MAX(- 89.9,MIN(Y, 89.9))
+      ENDIF
+
+      Y0 = Y
+      X0 = X
+
+      Y1 = Y-DY/2
+      Y2 = Y+DY/2
+
+      IF (JSFERTEK .GE. 1) THEN
+         FAC = 1d0
+         CALL dPROJECT(X,Y1,XA,Y1A,1)
+         CALL dPROJECT(X,Y2,XA,Y2A,1)
+         IF (Y2 - Y1 .GT. 1E-10) FAC = (Y2-Y1)/(Y2A-Y1A)
+      ENDIF
+
+      DX  = DY/ASP
+      X1  = X-DX/2
+      X2  = X+DX/2
+
+      X1W = X1
+      Y1W = Y1
+      X2W = X2
+      Y2W = Y2
+
+      IF (JSFERTEK .GE. 1) THEN
+         X1 = X1 - X0      ! SCHERMPJE ROND 0,0
+         X2 = X2 - X0
+         Y1 = Y1 - Y0
+         Y2 = Y2 - Y0
+      ENDIF
+
+      CALL SETWOR(X1,Y1,X2,Y2)
+
+      RCIR = CR*dx
+      DSIX = dx/6
+      CALL XYDISFORMAT()
+      RETURN
+      END
+
+      subroutine setrcirxy(x,y,rcx,rcy) ! determine x and y search tols on the spot where you click
+      use m_wearelt
+      use m_sferic
+      use m_devices
+      use m_sferzoom
+      implicit none
+      double precision :: x,y,rcx,rcy,xx,yy,xa,ya,rpx,rpy
+      real :: xloc, yloc
+      integer          :: nx,ny
+      rcx = rcir ; rcy = rcir
+      if (jsfertek .ge. 1) then
+         call dPROJECT(x,y,xa,ya,2)
+
+         rpy = 28*(y2-y1)/npy
+         call dPROJECT(xa,ya+rpy,xx,yy,1)  ! you still have to project in 
+         call dbdistancehk(x,y,xx,yy,rcy)  
+         rcy = rcy*rd2dg/ra    
+     
+         rpx = 28*(x2-x1)/npx
+         call dPROJECT(xa+rpx,ya,xx,yy,1)
+         call dbdistancehk(x,y,xx,yy,rcx)  
+         rcx = rcx*rd2dg/ra    
+ 
+         rcx = sqrt(rcx*rcx + rcy*rcy) 
+         rcy = rcx
+
+       endif
+      end
 
 !
       SUBROUTINE SETWY(X1,Y1,X2,Y2)
@@ -10657,23 +10790,14 @@ end subroutine plot_ridges
       use m_sferic
       implicit none
       double precision :: x1, x2, y1, y2
-      double precision :: yw, asp, xw, x0, y0
+      double precision :: yw, asp, xw, x, y, dy
 !     SET WORLD COORDINATES WITH Y2 AS 1.0 ASPECT RATIO VALUE
 !     AND RETURN Y2
-      CALL ASPECT(X1,Y1,X2,Y2)
-      IF (JSFERIC .EQ. 1 .and. jsfertek==1) THEN
-         call inqasp(asp)
-         x0 = 0.5*(x1+x2)
-         y0 = 0.5*(y1+y2)
-         YW = y2 - y1
-         xw = yw/ ( asp*COS( DG2RD*y0) )
-         x1 = x0 - 0.5*xw
-         x2 = x0 + 0.5*xw
-      ENDIF
-      CALL SETWOR(X1,Y1,X2,Y2)
-      RCIR = CR*(X2 - X1)
-      DSIX = (X2 - X1)/6
-      CALL XYDISFORMAT()
+      call INQASP(asp)
+      x  = 0.5*(x1+x2)
+      dy = (x2-x1)*asp
+      y  = y1 + dy/2 
+      call SETWYnew(x,y,dy)
       RETURN
       END
 !
@@ -10717,7 +10841,21 @@ end subroutine plot_ridges
       SUBROUTINE MOVABS(X,Y)
       use unstruc_opengl
       implicit none
+      double precision :: x,y,xx,yy
+     
+      CALL DPROJECT(X,Y,XX,YY,1)
+      IF (InOpenGLRendering) THEN
+        CALL MoveTo(XX,YY)
+      ELSE
+        CALL IGRMOVETO(real(XX),real(YY))
+      ENDIF
+      END
+
+      SUBROUTINE MOVABSnop(X,Y)
+      use unstruc_opengl
+      implicit none
       double precision :: x,y
+     
       IF (InOpenGLRendering) THEN
         CALL MoveTo(X,Y)
       ELSE
@@ -10725,19 +10863,44 @@ end subroutine plot_ridges
       ENDIF
       END
 
+
       SUBROUTINE LNABS(X,Y)
       use unstruc_opengl
       implicit none
+      double precision :: x,y,xx,yy
+      
+      CALL DPROJECT(X,Y,XX,YY,1)
+      IF (InOpenGLRendering) THEN
+        CALL LineTo(XX,YY)
+      ELSE
+        CALL IGRLINETO(REAL(XX),REAL(yy))
+      ENDIF
+      END
+
+      SUBROUTINE LNABSnop(X,Y)
+      use unstruc_opengl
+      implicit none
       double precision :: x,y
-      real             :: xx, yy
-    
+      
       IF (InOpenGLRendering) THEN
         CALL LineTo(X,Y)
       ELSE
-        xx = x ; yy = y 
-        CALL IGRLINETO(xx,yy)
+        CALL IGRLINETO(REAL(X),REAL(y))
       ENDIF
       END
+
+      SUBROUTINE PTABS(X,Y)
+      use unstruc_opengl
+      implicit none
+      double precision :: x,y,xx,yy
+      CALL DPROJECT(X,Y,XX,YY,1)
+      if (InOpenGLRendering) THEN
+          CALL DrawPoint(real(Xx),real(Yy))
+      ELSE
+          CALL IGRPOINT(real(XX),real(YY))
+      ENDIF
+      END
+
 
       SUBROUTINE LINEWIDTH(iW)
       use unstruc_opengl
@@ -10782,16 +10945,6 @@ end subroutine plot_ridges
       END SUBROUTINE
 
 
-      SUBROUTINE PTABS(X,Y)
-      use unstruc_opengl
-      implicit none
-      double precision :: x,y
-      if (InOpenGLRendering) THEN
-          CALL DrawPoint(real(x),real(y))
-      ELSE
-          CALL IGRPOINT(real(X),real(Y))
-      ENDIF
-      END
 
       SUBROUTINE DTEKTRI(X1,Y1,Z1,X2,Y2,Z2,X3,Y3,Z3,NCOL,NCOLR)
       use gridoperations
@@ -10903,13 +11056,42 @@ end subroutine plot_ridges
       RETURN
       END
 
-      SUBROUTINE FBOX(XB1,YB1,XB2,YB2)
+      SUBROUTINE BOXnop(XB1,YB1,XB2,YB2)
       implicit none
-      integer :: ndraw
       double precision :: xb1
       double precision :: xb2
       double precision :: yb1
       double precision :: yb2
+      call MOVABSnop(XB1,YB1)
+      call LNABSnop(XB2,YB1)
+      call LNABSnop(XB2,YB2)
+      call LNABSnop(XB1,YB2)
+      call LNABSnop(XB1,YB1)
+      RETURN
+      END
+
+      SUBROUTINE FBOX(X1,Y1,X2,Y2)
+      implicit none
+      integer :: ndraw
+      double precision :: x1 , x2 , y1 , y2
+      double precision :: xb1, xb2, yb1, yb2
+
+      COMMON /DRAWTHIS/  ndraw(50)
+      CALL DPROJECT(X1,Y1,XB1,YB1,1)
+      CALL DPROJECT(X2,Y2,XB2,YB2,1)
+      if (ndraw(10) == 0) then
+         call RECTANGLE(real(XB1),real(YB1),real(XB2),real(YB2))
+      else
+         call fboxold(XB1,YB1,XB2,YB2)
+      endif
+      RETURN
+      END
+
+      SUBROUTINE FBOXNOP(XB1,YB1,XB2,YB2)
+      implicit none
+      integer :: ndraw
+      double precision :: xb1, xb2, yb1, yb2
+
       COMMON /DRAWTHIS/  ndraw(50)
       if (ndraw(10) == 0) then
          call RECTANGLE(real(XB1),real(YB1),real(XB2),real(YB2))
@@ -10975,7 +11157,7 @@ end subroutine plot_ridges
 
       CALL SETCOL(2)
 
-      CALL FBOX(X1,Y1,X2,Y2)
+      CALL FBOXnop(X1,Y1,X2,Y2)
 
       RETURN
       END
@@ -11107,10 +11289,11 @@ end subroutine plot_ridges
 !
       SUBROUTINE DISP2C(X,Y,N,RCIR,NCOL)
       use m_missing
-      use gridoperations
+ !     use gridoperations
       implicit none
       integer          :: n, ncol
       double precision :: X(N), Y(N), rcir
+      logical          :: inview
 
       integer          :: i, istart, key, in
 !     LAAT EEN TWEEDIMENSIONALE FUNCTIE ZIEN MET CIRKELS
@@ -11552,17 +11735,17 @@ end subroutine plot_ridges
 
     SUBROUTINE PFILLER(X,Y,N_,NCOL,NCLR)
     use unstruc_opengl
+    use m_sferic
+    
     implicit none
     integer :: N_
     integer :: nclr
-    integer :: ncol
+    integer :: ncol, i, n
     integer :: ncolnow
     integer :: ndraw
-    double precision :: X(N_), Y(N_)
+    double precision :: X(N_), Y(N_), xx, yy
     COMMON /DRAWTHIS/ ndraw(50)
     COMMON /COLNOW/ NCOLNOW
-    
-    integer :: N
     
     integer, parameter :: NMAX = 128
     real xr(NMAX), yr(NMAX)
@@ -11572,8 +11755,15 @@ end subroutine plot_ridges
 !   safety
     N = min(N_, NMAX)
 
-    xr(1:N) = x(1:N)
-    yr(1:N) = y(1:N)
+    if (jsfertek == 1) then 
+       do i = 1,n
+          call dproject(x(i), y(i), xx, yy, 1)
+          xr(i) = xx ; yr(i) = yy
+       enddo
+    else 
+       xr(1:N) = x(1:N)
+       yr(1:N) = y(1:N)
+    endif
 
     CALL PFILLERCORE(xr,yr,N)
 
@@ -11645,12 +11835,12 @@ end subroutine plot_ridges
     real xr(N), yr(N)
 
     IF (InOpenGLRendering) THEN
-      CALL MOVABS(dble(XR(1)),dble(YR(1)))
+      CALL MOVABSNOP(dble(XR(1)),dble(YR(1)))
       DO 10 I = 2,N
-         call LNABS(dble(XR(I)),dble(YR(I)))
+         call LNABSNOP(dble(XR(I)),dble(YR(I)))
       10 CONTINUE
     ELSE
-        CALL IGRPOLYLINE(XR,YR,N)
+         CALL IGRPOLYLINE(XR,YR,N)
     ENDIF
 
     END SUBROUTINE
@@ -11692,23 +11882,25 @@ end subroutine plot_ridges
 
       LOGICAL FUNCTION INVNOD(K)
       use m_netw
-      use gridoperations
+      use unstruc_display
       implicit none
       integer :: k
+      logical inview
       INVNOD = INVIEW( XK(K), YK(K) )
       RETURN
       END
 
       LOGICAL FUNCTION INVLIN(L)
       use m_netw
-      use gridoperations
       implicit none
       integer :: k1
       integer :: k2
       integer :: l
+      logical inview
+
       K1 = KN(1,L)
       K2 = KN(2,L)
-	  INVLIN = INVIEW( XK(K1), YK(K1) ) .OR. INVIEW( XK(K2), YK(K2) )
+	   INVLIN = INVIEW( XK(K1), YK(K1) ) .OR. INVIEW( XK(K2), YK(K2) )
       RETURN
       END
 
@@ -12216,6 +12408,26 @@ end subroutine plot_ridges
       RETURN
       END
 
+      subroutine isoline(xa,ya,za,xb,yb,zb) 
+      use unstruc_display
+      implicit none
+      double precision :: xa,ya,za,xb,yb,zb,dx,s,c,d,xh(4),yh(4),zh(4)
+      dx = 0.2d0*rcir
+      call sincosdis(xa,ya,xb,yb,s,c,d)
+      xh(1) = xa + dx*s
+      yh(1) = ya - dx*c
+      xh(2) = xb + dx*s
+      yh(2) = yb - dx*c
+      xh(3) = xb - dx*s
+      yh(3) = yb + dx*c
+      xh(4) = xa - dx*s
+      yh(4) = ya + dx*c
+      zh(1) = za
+      zh(2) = zb
+      zh(3) = zb
+      zh(4) = za
+      CALL ISOFIL(Xh,Yh,Zh,4,0)
+      end subroutine isoline
 
       SUBROUTINE FILLUP(TEXT,CHAR,LEN)
       implicit none
@@ -12358,34 +12570,9 @@ end subroutine plot_ridges
       SUBROUTINE ISOCEL(X,Y,P,NCOLR)
       implicit none
       double precision :: dv
-      integer :: i
-      integer :: ih
-      integer :: ja
-      integer :: jaauto
-      integer :: ncolr
-      integer :: ncols
-      integer :: nh
-      integer :: nie
-      integer :: nis
-      integer :: nplus
-      integer :: nv
-      double precision :: p
-      double precision :: p1
-      double precision :: p2
-      double precision :: val
-      double precision :: vmax
-      double precision :: vmin
-      double precision :: vn
-      double precision :: x
-      double precision :: x1
-      double precision :: x2
-      double precision :: xh
-      double precision :: xhit
-      double precision :: y
-      double precision :: y1
-      double precision :: y2
-      double precision :: yh
-      double precision :: yhit
+      integer          :: i, ih, ja, jaauto, ncolr, ncols, nh, nie, nis, nplus, nv 
+      double precision :: p, p1, p2, val, vmax, vmin, vn, x, x1, x2, xh, xhit, y, y1, y2, yh, yhit
+  
 !     TEKENT ALLE NV ISOLIJNEN IN EEN CEL TEKAL-METHODE
       DIMENSION P(4),X(4),Y(4),XH(4),YH(4)
       COMMON /DEPMAX/ VMAX,VMIN,DV,VAL(256),NCOLS(256),NV,NIS,NIE,JAAUTO
@@ -12420,35 +12607,10 @@ end subroutine plot_ridges
 
       SUBROUTINE ISOCELTRI(X,Y,P,NCOLR)
       implicit none
-      double precision :: dv
-      integer :: i
-      integer :: ih
-      integer :: ja
-      integer :: jaauto
-      integer :: ncolr
-      integer :: ncols
-      integer :: nh
-      integer :: nie
-      integer :: nis
-      integer :: nplus
-      integer :: nv
-      double precision :: p
-      double precision :: p1
-      double precision :: p2
-      double precision :: val
-      double precision :: vmax
-      double precision :: vmin
-      double precision :: vn
-      double precision :: x
-      double precision :: x1
-      double precision :: x2
-      double precision :: xh
-      double precision :: xhit
-      double precision :: y
-      double precision :: y1
-      double precision :: y2
-      double precision :: yh
-      double precision :: yhit
+      integer          :: i, ih, ja, jaauto, ncolr, ncols, nh, nie, nis, nplus, nv 
+      double precision :: dv, p, p1, p2, val, vmax, vmin, vn, x, x1, x2, xh, xhit, y, y1, y2, yh, yhit
+  
+
 !     TEKENT ALLE NV ISOLIJNEN IN EEN CEL TEKAL-METHODE
       DIMENSION P(3),X(3),Y(3),XH(3),YH(3)
       COMMON /DEPMAX/ VMAX,VMIN,DV,VAL(256),NCOLS(256),NV,NIS,NIE,JAAUTO
@@ -12483,22 +12645,9 @@ end subroutine plot_ridges
 
       SUBROUTINE HITLIN(P1,P2,X1,Y1,X2,Y2,V,XHIT,YHIT,JA)
       implicit none
-      double precision :: dp
-      double precision :: dv
-      double precision :: dx
-      double precision :: dy
-      double precision :: frac
-      integer :: ja
-      double precision :: p1
-      double precision :: p2
-      double precision :: v
-      double precision :: x1
-      double precision :: x2
-      double precision :: xhit
-      double precision :: y1
-      double precision :: y2
-      double precision :: yhit
-!     SNIJDT EEN ISOLIJN EEN LIJNTJE ?
+      double precision :: dp, dv, dx, dy, frac, p1, p2, v, x1, x2, xhit, y1, y2, yhit
+      integer          :: ja
+      ! SNIJDT EEN ISOLIJN EEN LIJNTJE ?
       DX   = X2 - X1
       DY   = Y2 - Y1
       DP   = P2 - P1
@@ -12522,32 +12671,42 @@ end subroutine plot_ridges
 
       SUBROUTINE DISPOS()
       use m_devices
+      use m_sferic
       implicit none
-      integer :: jashow
-      integer :: jav
-      integer :: jmouse
-      integer :: jview
-      double precision :: xa
-      double precision :: xlc
+      integer :: jashow, jav, jmouse, jview, ixmax, ixmin, ixy, ndec, nxy
+      double precision :: xa, ya, xlc, ylc
       double precision :: xyz
-      double precision :: ya
-      double precision :: ylc
       COMMON /HOWTOVIEW/ JVIEW, JAV, XYZ ! 1,2,3 OF 4
       COMMON /LOCATORA/  XLC,YLC,XA,YA,JMOUSE,JASHOW
       common /dispfor/ xyform, zform, disform
-      character*6      xyform, zform, disform
-      CHARACTER POSITI*23
+      character*7      xyform, zform, disform
+      CHARACTER POSITI*25
 
-      POSITI = 'X,Y:         ,         '
+      POSITI =    'X,Y:          ,          '
       IF (JVIEW .EQ. 2) THEN
-         POSITI = 'Z,Y:         ,         '
+         POSITI = 'Z,Y:          ,          '
       ELSE IF (JVIEW .EQ. 3) THEN
-         POSITI = 'X-Z:         ,         '
+         POSITI = 'X-Z:          ,          '
       ENDIF
 
-      WRITE(POSITI (5:13),xyform) XLC
-      WRITE(POSITI(15:23),xyform) YLC
-      CALL KTEXT(POSITI,IWS-22,2,15)
+      if (jsferic == 1) then ! nou ja, laat maar even staan
+         IXMIN = INT(LOG10(MAX(1d-6,min(abs(xlc),abs(ylc)))))
+         IXMax = INT(LOG10(MAX(1d-6,max(abs(xlc),abs(ylc)))))
+
+         Ixy  = abs(max(ixmin,ixmax))
+         NXY  = IXY + 3
+         NDEC = 9 - NXY
+         IF (NDEC .GE. 1) THEN
+            XYFORM = '(F10.1)'
+            WRITE ( XYFORM(6:6),'(I1)') NDEC
+         ELSE
+           disFORM = '(E10.3)'
+         ENDIF
+      endif
+
+      WRITE(POSITI (5:14),xyform) XLC
+      WRITE(POSITI(16:25),xyform) YLC
+      CALL KTEXT(POSITI,IWS-24,2,15)
 
       RETURN
       END
@@ -12558,13 +12717,14 @@ end subroutine plot_ridges
       double precision :: x
       double precision :: y
       common /dispfor/ xyform, zform, disform
-      character*6      xyform, zform, disform
-      CHARACTER POSITI*23
+      character*7      xyform, zform, disform
+      CHARACTER POSITI*25
 
       POSITI = 'X,Y:         ,         '
-      WRITE(POSITI (5:13),xyform) X
-      WRITE(POSITI(15:23),xyform) Y
-      CALL KTEXT(POSITI,IWS-22,2,15)
+      WRITE(POSITI (5:14),xyform) X
+      WRITE(POSITI(16:25),xyform) Y
+
+      CALL KTEXT(POSITI,IWS-24,2,15)
       CALL DISDIS()
 
       RETURN
@@ -12767,14 +12927,58 @@ end subroutine plot_ridges
       RETURN
       END
 
+      SUBROUTINE INILCA()
+      use m_wearelt
+      implicit none
+      integer :: jashow
+      integer :: jmouse
+      double precision :: XLC,YLC,XA,YA
+      double precision :: xla,yla
+      COMMON /LOCATORA/  XLC,YLC,XA,YA,JMOUSE,JASHOW
+       !CALL ORGLOCATOR(XLA,XLB)
+      XLA    = 0.05*xmax +0.95*xmin 
+      yLA    = 0.05*ymax +0.95*ymin
+      CALL ANCHOR(XLA,yla)
+      RETURN
+      END
+
+       
+      SUBROUTINE MINMAXWORLD(XMI,YMI,XMA,YMA)
+      ! ASPECT RATIO VAN HET DEFAULTGEBIED GOED ZETTEN
+      USE M_WEARELT
+      use m_sferic
+      DOUBLE PRECISION :: XMI,YMI,XMA,YMA,ASPECT,XC,YC,DY,dx
+      XMIN = XMI
+      YMIN = YMI
+      XMAX = XMA
+      YMAX = YMA
+      DX   =  XMAX - XMIN
+      DY   =  YMAX - YMIN
+      XC   =  XMIN + DX/2
+      YC   =  YMIN + DY/2
+      DX   = 1.2*DX
+      DY   = 1.2*DY
+      CALL INQASP(ASPECT)
+      IF (DY .LT. ASPECT*DX) THEN
+          DY  = ASPECT*DX
+      ENDIF
+     
+      CALL SETWYNEW(XC,YC,DY)
+      RETURN
+      END
+
       SUBROUTINE WEAREL()
       use m_wearelt
       implicit none
       integer, save :: ini = 0
-      X1   = XMIN
-      Y1   = YMIN
-      X2   = XMAX
-      CALL SETWY(X1,Y1,X2,Y2)
+      DOUBLE PRECISION :: X0,Y0,DY
+      
+      CALL MINMAXWORLD(XMIN,YMIN,XMAX,YMAX)
+
+      !X1   = XMIN
+      !Y1   = YMIN
+      !X2   = XMAX
+      !CALL SETWY(X1,Y1,X2,Y2)
       !IF (INI .EQ. 1) THEN
          CALL INILCA()
       !ELSE
@@ -12783,25 +12987,7 @@ end subroutine plot_ridges
       RETURN
       END
 
-      SUBROUTINE INILCA()
-      implicit none
-      integer :: jashow
-      integer :: jmouse
-      double precision :: xa
-      double precision :: xla
-      double precision :: xlb
-      double precision :: xlc
-      double precision :: ya
-      double precision :: ylc
-      COMMON /LOCATORA/  XLC,YLC,XA,YA,JMOUSE,JASHOW
-      XLA    = 0
-      XLB    = 0
-!      CALL ORGLOCATOR(XLA,XLB)
-      XLA    = 0
-      XLB    = 0
-      CALL ANCHOR(XLA,XLB)
-      RETURN
-      END
+  
 
       SUBROUTINE TEKHOOK(XP,YP)
       use m_sferic
@@ -12838,13 +13024,9 @@ end subroutine plot_ridges
       integer :: ma
       integer :: na
       integer :: k
-      double precision :: x
-      double precision :: xa
-      double precision :: xlc
-      double precision :: y
-      double precision :: ya
-      double precision :: ylc
-!     VEEG OUDE CROSS UIT EN ZET NIEUWE
+      double precision :: x, y, xa, ya, xlc, ylc, xx, yy
+      real             :: xr, yr
+ !    VEEG OUDE CROSS UIT EN ZET NIEUWE
       COMMON /LOCATORA/  XLC,YLC,XA,YA,JMOUSE,JASHOW
 
       IF (X .EQ. 0 .AND. Y .EQ. 0) THEN
@@ -12854,7 +13036,8 @@ end subroutine plot_ridges
       ELSE
          CALL SETXOR(1)
          CALL SETCOL(KLANK)
-         CALL IGrMARKER(real(XA),real(YA),2)
+         call dPROJECT(xa,ya,xx,yy,1) ; xr = xx ; yr = yy
+         CALL IGrMARKER(xr,yr,2)
          CALL SETXOR(0)
          XA = X
          YA = Y
@@ -12864,8 +13047,9 @@ end subroutine plot_ridges
       if (k > 0) nplot = k
 
       CALL SETXOR(1)
-      CALL SETCOL(KLANK)
-      CALL IGrMARKER(real(XA),real(YA),2)
+      CALL SETCOL(KLANK) 
+      call dPROJECT(xa,ya,xx,yy,1) ; xr = xx ; yr = yy
+      CALL IGrMARKER(xr,yr,2)
       CALL SETXOR(0)
 
       CALL DISDIS()
@@ -12995,18 +13179,11 @@ end subroutine plot_ridges
       implicit none
       double precision :: dpx
       double precision, save :: f = 1d0
-      integer :: ini
-      integer :: jashow
-      integer :: jmouse
-      integer :: key, key_all
+      integer :: ini, jashow, jmouse, key, key_all, ixp, iyp
       integer, save :: keyold = 0
       real :: xloc, yloc
-      double precision :: x
-      double precision :: xa
-      double precision :: xlc
-      double precision :: y
-      double precision :: ya
-      double precision :: ylc
+      double precision :: x, y
+      double precision :: xa, ya, xlc, ylc
       COMMON /LOCATORA/  XLC,YLC,XA,YA,JMOUSE,JASHOW
 
       REAL, external :: INFOGRAPHICS
@@ -13063,27 +13240,57 @@ end subroutine plot_ridges
       ENDIF
 
 !     muisbeweging
-      Xloc   = InfoGraphics(5)
-      Yloc   = InfoGraphics(6)
-      X=dble(xloc)
-      y=dble(yloc)
-      y = min(max(y, y1), y2)
+      Xloc = InfoGraphics(5)
+      Yloc = InfoGraphics(6)
+      X    = dble(xloc)
+      y    = dble(yloc)
+
+      CALL IGRUNITSTOPIXELS(Xloc,Yloc,IXP,IYP)
+      CALL dPROJECT(X,Y,XLC,YLC,2)
+      X = XLC
+      Y = YLC
 
 !     buiten veld?
       IF (INI .NE. 999) THEN
-         IF (Y .GT. Y1 + 0.98d0*(Y2-Y1) ) THEN
+         IF (IYP .GT. NPY-15) THEN
             KEY = 1
             CALL IMOUSECURSORSHAPE(0,'G')
             RETURN
-         ELSE IF (Y .LT. Y1 + 0.02d0*(Y2-Y1) ) THEN
+         ELSE IF (IYP .LT. 15) THEN
             KEY = 2
             CALL IMOUSECURSORSHAPE(0,'G')
             RETURN
          ENDIF
       ENDIF
 
-      XLC = X
-      YLC = Y
+
+
+!     muisbeweging
+!      Xloc   = InfoGraphics(5)
+!      Yloc   = InfoGraphics(6)
+!      X=dble(xloc)
+!      y=dble(yloc)
+!      y = min(max(y, y1), y2)
+
+!      CALL dPROJECT(X,Y,XLC,YLC,2)
+!      X = XLC
+!      Y = YLC
+
+!     buiten veld?
+!      IF (INI .NE. 999) THEN
+!         IF (Y .GT. Y1 + 0.98d0*(Y2-Y1) ) THEN
+!            KEY = 1
+!            CALL IMOUSECURSORSHAPE(0,'G')
+!            RETURN
+!         ELSE IF (Y .LT. Y1 + 0.02d0*(Y2-Y1) ) THEN
+!            KEY = 2
+!            CALL IMOUSECURSORSHAPE(0,'G')
+!            RETURN
+!         ENDIF
+!      ENDIF
+
+!      XLC = X
+!      YLC = Y
 
       IF (INI .EQ. 999) THEN
          IF (KEY .GE. 254 .AND. KEY .LE. 257) THEN
@@ -13295,7 +13502,8 @@ end subroutine plot_ridges
       double precision :: y
       double precision :: z
       DOUBLE PRECISION XD,YD,ZD
-      CALL DRIETWEE(XD,YD,ZD,X,Y,Z)
+      !CALL DRIETWEE(XD,YD,ZD,X,Y,Z)
+      CALL DPROJECT(Xd,Yd,X,Y,1)
       CALL HITEXT(IVAL,X,Y)
       RETURN
       END
@@ -13325,55 +13533,6 @@ end subroutine plot_ridges
       END
 
 
-      SUBROUTINE ZOOM2(KEY)
-      use m_wearelt
-      implicit none
-      double precision :: aspect
-      double precision :: dsixn
-      double precision :: dxh
-      double precision :: dyh
-      integer :: jashow
-      integer :: jmouse
-      integer :: key
-
-      double precision :: x1b
-      double precision :: x2b
-      double precision :: xa
-      double precision :: xl
-      double precision :: xlc
-      double precision :: xln
-      double precision :: y1b
-      double precision :: y2b
-      double precision :: ya
-      double precision :: yl
-      double precision :: ylc
-      double precision :: yln
-      COMMON /LOCATORA/  XLC,YLC,XA,YA,JMOUSE,JASHOW
-!     ALLEEN ENTRY BIJ KEY = 90  (Z BIJ CAPS LOCK ON !)
-!     EN NIET ALS NET BEZIG PUNT TE ZETTEN
-!     BIJ VERLATEN MET KEY = 3, TEKEN OPNIEUW
-
-      CALL INQASP(ASPECT)
-      DXH   = (X2 - X1)
-      DYH   = DXH*ASPECT
-      DSIXN = DSIX
-      XL    = (X1+X2)/2
-      YL    = (Y1+Y2)/2
-      X1B   = XL - DSIXN
-      X2B   = XL + DSIXN
-      Y1B   = YL - DSIXN*ASPECT
-      Y2B   = YL + DSIXN*ASPECT
-      X1    = X1B
-      Y1    = Y1B
-      X2    = X2B
-      CALL SETWY(X1,Y1,X2,Y2)
-      XLN   = 0d0
-      YLN   = 0d0
-      CALL ORGLOCATOR(XLN,YLN)
-      KEY   = 3
-      RETURN
-      END
-
       SUBROUTINE ZOOM3(KEY,NPUT)
       use m_wearelt
       implicit none
@@ -13395,111 +13554,85 @@ end subroutine plot_ridges
 
       SUBROUTINE ZOOMIN(KEY,NPUT)
       use unstruc_colors
-      implicit none
-      double precision :: aspect
-      double precision :: dsixn
-      double precision :: dxh
-      double precision :: dyh
-      integer :: ja
-      integer :: jadraw
-      integer :: jashow
-      integer :: jmouse
-      integer :: k
-      integer :: key
-      integer :: maxzoom
-      integer :: nlevel
-      integer :: nnn
-      integer :: nput
-      integer, save :: numzoom = 0
-      double precision :: x1b
-      double precision :: x2b
-      double precision :: xa
-      double precision :: xl
-      double precision :: xlc
-      double precision :: xln
-      double precision :: y1b
-      double precision :: y2b
-      double precision :: ya
-      double precision :: yl
-      double precision :: ylc
-      double precision :: yln
-
-      integer :: ndraw
-      COMMON /DRAWTHIS/ ndraw(50)
-
+      use m_wearelt
+      use m_sferic
+      use m_sferzoom
+      
       COMMON /LOCATORA/ XLC,YLC,XA,YA,JMOUSE,JASHOW
-      CHARACTER WRDKEY*40
-      PARAMETER (MAXZOOM = 4)
-      double precision, save :: XYWOLD(MAXZOOM,4)
+      double precision :: xlc, ylc, xa, ya
+      integer          :: JMOUSE,JASHOW
+     
+      double precision :: aspect, dx, dy, xln, yln, xl, yl, X1B,Y1B,X2B,Y2B, c, xl2, yl2
+      integer          :: k,nlevel, jadraw, nput, nnn, ja, key
+     
 
+      CHARACTER WRDKEY*40
+      integer, PARAMETER :: MAXZOOM = 4
+      REAL XYWOLD(MAXZOOM,4)
+      SAVE XYWOLD
+      integer , save :: NUMZOOM = 0
       IF (NUMZOOM .EQ. 0) THEN
          DO 5 K = 1,MAXZOOM
-            XYWOLD(K,1) = XMIN
-            XYWOLD(K,2) = YMIN
-            XYWOLD(K,3) = XMAX
-            XYWOLD(K,4) = YMAX
+            XYWOLD(K,1) = (XMIN + XMAX)/2
+            XYWOLD(K,2) = (YMIN + YMAX)/2
+            XYWOLD(K,3) = (YMAX-YMIN)
     5    CONTINUE
          NUMZOOM = 1
       ENDIF
 !     geen entry ALS NET BEZIG PUNT TE ZETTEN
 !     BIJ VERLATEN MET KEY = 3, TEKEN OPNIEUW
-      WRDKEY   = 'Z   = ZOOMIN ;'
-      NLEVEL   = 3
-      JADRAW   = 1
-      ndraw(1) = 1 ! set cls on
-
+      WRDKEY = 'Z   = ZOOMIN ;'
+      NLEVEL = 3
+      JADRAW = 1
+!
       IF (NPUT .EQ. 1) RETURN
 
-      CALL LINEWIDTH(2)
+      CALL IGRLINEWIDTH(2,-1)
       CALL SETCOL(KLZM)
       CALL SETXOR(1)
       CALL BOTLIN(0,5,NNN)
       CALL INQASP(ASPECT)
-      DXH   = (X2 - X1)
-      DYH   = DXH*ASPECT
-      DSIXN = DSIX
       XL    = XLC
       YL    = YLC
-      X1B   = XL - DSIXN
-      X2B   = XL + DSIXN
-      Y1B   = YL - DSIXN*ASPECT
-      Y2B   = YL + DSIXN*ASPECT
+      dy    = dyh/3d0
+      DX    = DY/ASPECT
+      IF (JSFERTEK .GE. 1) then
+          CALL dPROJECT(XLC,YLC,XL,YL,1)
+      !   c   = max(1d-4, cos(dg2rd*min(90d0, abs(yl) ) ) )
+      !   dx = dx/c
+      endif
+      X1B   = XL - DX/2
+      X2B   = XL + DX/2
+      Y1B   = YL - DY/2
+      Y2B   = YL + DY/2
 
    10 CONTINUE
 
       IF (JADRAW .EQ. 1) THEN
-         CALL BOX(X1B,Y1B,X2B,Y2B)
+         CALL BOXnop(X1B,Y1B,X2B,Y2B)
          JADRAW = 0
       ENDIF
       JA   = 0
       KEY  = 999
       CALL READLOCATOR(XL,YL,KEY)
+      IF (JSFERTEK .GE. 1) CALL dPROJECT(XLC,YLC,XL,YL,1)
 
       IF (X2B .GT. X2 .OR. X1B .LT. X1 .OR. Y2B .GT. Y2 .OR. Y1B .LT. Y1    ) THEN
-         X1 = XL - DXH/2
-         Y1 = YL - DYH/2
-         JA = 1
+         dy  = dyh
+         JA  = 1
       ELSE IF (KEY .EQ. 21) THEN
-         X1  = X1B
-         Y1  = Y1B
-         DXH = MAX((X2B - X1B),1.0D-3)
          JA  = 1
       ELSE IF (KEY .EQ. 22) THEN
-         X1  = XMIN
-         Y1  = YMIN
-         DXH = XMAX - XMIN
          JA  = 3
       ELSE IF (KEY .EQ. 90 .OR. KEY .EQ. 90+32) THEN
-         DXH = 3*DXH
-         DYH = 3*DYH
-         X1  = XL - DXH/2
-         Y1  = YL - DYH/2
+         DY  = 3d0*dyh
+         IF (JSFERTEK .GE. 1) DY = MIN (DY, 179D0)
          JA  = 1
       ELSE IF (KEY .EQ. 23) THEN
          KEY = 3
          CALL SETXOR(0)
-         CALL LINEWIDTH(1)
          CALL IMOUSECURSORHIDE()
+         CALL IGRLINEWIDTH(1,-1)
          RETURN
       ELSE IF (KEY .EQ. 24) THEN
 !        F1
@@ -13508,52 +13641,58 @@ end subroutine plot_ridges
       ELSE IF (KEY .EQ. 25) THEN
 !        F2
          CALL HISTOR()
-      ELSE IF (KEY .EQ. 162 .OR. KEY .EQ. 160 .OR. KEY .EQ. 45 .OR.    &
-               KEY .EQ. 43  .OR. KEY .LT. 0                  ) THEN
-         CALL BOX(X1B,Y1B,X2B,Y2B)
+      ELSE IF (KEY .EQ. 162 .OR. KEY .EQ. 160 .OR. KEY .EQ. 45 .OR. KEY .EQ. 43  .OR. KEY .LT. 0  ) THEN
+         CALL BOXnop(X1B,Y1B,X2B,Y2B)
          JADRAW = 1
          IF (KEY .EQ. 162 .OR. KEY .EQ. 43) THEN
-            DSIXN  = DSIXN + RCIR/2
+            DY = DY*1.01 ; IF (JSFERTEK .GE. 1) DY = MIN (DY, 179D0)
          ELSE IF (KEY .EQ. 160 .OR. KEY .EQ. 45) THEN
-            DSIXN  = MAX(RCIR,DSIXN - RCIR/2)
+            DY = DY/1.01
          ENDIF
-         X1B  = XL - DSIXN
-         X2B  = XL + DSIXN
-         Y1B  = YL - DSIXN*ASPECT
-         Y2B  = YL + DSIXN*ASPECT
+         DX  = DY/ASPECT
+         X1B = XL - DX/2
+         X2B = XL + DX/2
+         Y1B = YL - DY/2
+         Y2B = YL + DY/2
       ELSE IF (KEY .EQ. 143) THEN
          NUMZOOM = NUMZOOM - 1
          IF (NUMZOOM .EQ. 0) NUMZOOM = MAXZOOM
-         X1  = XYWOLD(NUMZOOM,1)
-         Y1  = XYWOLD(NUMZOOM,2)
-         DXH = XYWOLD(NUMZOOM,3) - XYWOLD(NUMZOOM,1)
+         XL  = XYWOLD(NUMZOOM,1)
+         YL  = XYWOLD(NUMZOOM,2)
+         DY  = XYWOLD(NUMZOOM,3)
          JA  = 2
       ENDIF
-
+ 
       IF (JA .GE. 1) THEN
          CALL IMOUSECURSORHIDE()
-         X2   = X1 + DXH
-         CALL SETWY(X1,Y1,X2,Y2)
+         IF (JA .NE. 3) THEN
+            IF (JSFERTEK .GE. 1) then 
+                CALL dPROJECT(XL,YL,XL2,YL2,2) ; xl = xl2 ; yl = yl2
+            endif
+            CALL SETWYnew(XL,YL,DY)
+         ELSE
+            CALL WEAREL()
+         ENDIF
          IF ( JA .NE. 2) THEN
 !           alleen opslaan als in of uitgezoomd, niet als teruggezoomd
             NUMZOOM = NUMZOOM + 1
             IF (NUMZOOM .EQ. MAXZOOM+1) NUMZOOM = 1
-            XYWOLD(NUMZOOM,1) = X1
-            XYWOLD(NUMZOOM,2) = Y1
-            XYWOLD(NUMZOOM,3) = X2
-            XYWOLD(NUMZOOM,4) = Y2
+            XYWOLD(NUMZOOM,1) = XL
+            XYWOLD(NUMZOOM,2) = YL
+            XYWOLD(NUMZOOM,3) = DY
          ENDIF
-         XLN  = 0d0
-         YLN  = 0d0
+         XLN  = 0.0
+         YLN  = 0.0
          CALL ORGLOCATOR(XLN,YLN)
          KEY  = 3
-         CALL LINEWIDTH(1)
          CALL SETXOR(0)
+         CALL IGRLINEWIDTH(1,-1)
          RETURN
       ENDIF
       GOTO 10
 
       END
+
 
       SUBROUTINE XYDISFORMAT ()
       use m_sferic
@@ -13587,7 +13726,7 @@ end subroutine plot_ridges
       COMMON /DEPMAX/ VMAX,VMIN,DV,VAL(256),NCOLS(256),NV,NIS,NIE,JAAUTO
 
       COMMON /DISPFOR/ XYFORM, ZFORM, DISFORM
-      CHARACTER*6      XYFORM, ZFORM, DISFORM
+      CHARACTER*7      XYFORM, ZFORM, DISFORM
 
       COMMON /LOCATORA/  XLC,YLC,XA,YA,JMOUSE,JASHOW
 
@@ -13614,28 +13753,17 @@ end subroutine plot_ridges
 !     1 VOOR LOG(100) = 2
 !     -------------------
 
-      NXY  = IXY + 3
-      NDEC = 9 - NXY
+      NXY  = IXY + 4
+      NDEC = 10  - NXY
       IF (NDEC .GE. 0) THEN
-         XYFORM = '(F9.1)'
-         WRITE ( XYFORM(5:5),'(I1)') NDEC
+         XYFORM = '(F10.1)'
+         WRITE ( XYFORM(6:6),'(I1)') NDEC
       ELSE
-         XYFORM = '(E9.3)'
+         XYFORM = '(E10.3)'
       ENDIF
 
-      !if (jsferic == 1) then ! nou ja, laat maar even staan
-      !   dlen = DbdISTANCE( X1,Y1,X2,Y2)
-      !   Ixy  = INT(LOG10(MAX(1d0,dlen ) ) )
-      !   NXY  = IXY + 3
-      !   NDEC = 9 - NXY
-      !   IF (NDEC .GE. 1) THEN
-      !      disFORM = '(F9.1)'
-      !      WRITE ( disform(5:5),'(I1)') NDEC
-      !   ELSE
-      !     disFORM = '(E9.3)'
-      !   ENDIF
-      !endif
-      ! DISFORM='F17.5'
+ 
+      DISFORM='F17.5'
 
 
       NZ  = IZMAX + 3
@@ -13875,13 +14003,13 @@ end subroutine plot_ridges
 !     -------------------------------
       COMMON /LOCATORA/  XLC,YLC,XA,YA,JMOUSE,JASHOW
       common /dispfor/ xyform, zform, disform
-      character*6      xyform, zform, disform
-      CHARACTER DISTAN*24
+      character*7      xyform, zform, disform
+      CHARACTER DISTAN*25
 
       DISTAN = 'DIS:'
       DIS    = dbdistance(xa,ya,xlc,ylc, jsferic, jasfer3D, dmiss)
       WRITE(DISTAN(6:),'(F17.5)') min(DIS,1d9)
-      CALL KTEXT(DISTAN,IWS-22,3,15)
+      CALL KTEXT(DISTAN,IWS-24,3,15)
 
   !   checkdislin()
 
@@ -13991,9 +14119,9 @@ end subroutine plot_ridges
       XT = X1 + X*(X2-X1)
       YT = Y1 + Y*(Y2-Y1)
       CALL SETCOL(KLSCL)
-      CALL FBOX(XT-WIDTH/2,YT-HEIGTH/2,XT+WIDTH/2+w1/2,YT+HEIGTH/2)
+      CALL FBOXnop(XT-WIDTH/2,YT-HEIGTH/2,XT+WIDTH/2+w1/2,YT+HEIGTH/2)
       CALL SETCOL(NCOL)
-      CALL BOX (XT-WIDTH/2,YT-HEIGTH/2,XT+WIDTH/2+w1/2,YT+HEIGTH/2)
+      CALL BOXnop(XT-WIDTH/2,YT-HEIGTH/2,XT+WIDTH/2+w1/2,YT+HEIGTH/2)
       CALL DRAWTEXT(real(XT+W1/2-WIDTH/2),real(YT),TEX)
       RETURN
       END
@@ -14045,40 +14173,7 @@ end subroutine plot_ridges
       RETURN
       END
 
-      SUBROUTINE NEWWORLD()
-      use m_wearelt
-      implicit none
-      double precision :: asp
-      integer :: jaxis
-      double precision :: xleft
-      double precision :: xright
-      double precision :: xw
-      double precision :: ybot
-      double precision :: yc
-      double precision :: ytop
-      double precision :: ywn
-      COMMON /SCREENAREA/ XLEFT,YBOT,JAXIS
 
-      CALL INQASP(ASP)
-      YTOP   = MAX(0.95d0,1 - YBOT)
-      XRIGHT = MAX(0.90d0,1 - XLEFT)
-
-      YC     = (Y1+Y2)/2
-      XW     =  X2-X1
-      YWN    =  XW*ASP
-      Y1     =  YC - YWN/2
-      Y2     =  YC + YWN/2
-
-      CALL SETWY(X1,Y1,X2,Y2)
-
-      YC     = (YMAX+YMIN)/2
-      XW     =  XMAX-XMIN
-      YWN    =  XW*ASP
-      YMIN   =  YC - YWN/2
-      YMAX   =  YC + YWN/2
-
-      RETURN
-      END
 
       SUBROUTINE VECSCALE_DFLOWFM(VFAC2)
       USE M_WEARELT
@@ -14269,7 +14364,8 @@ end subroutine plot_ridges
       NCOLNOW = 31
       XLC = 0
       YLC = 0
-      CALL WEAREL()
+
+      CALL MINMAXWORLD(XMIN,YMIN,XMAX,YMAX)
 
       RETURN
       END
@@ -14336,19 +14432,39 @@ end subroutine highlight_form_line
       RETURN
       END
 
+      SUBROUTINE SETISOSCALE2IS1()
+      implicit none
+      double precision :: VMAX,VMIN,DV,VAL
+      integer          :: NCOLS,NV,NIS,NIE,JAAUTO
+
+      double precision :: VMAX2,VMIN2,DV2,VAL2
+      integer          :: NCOLS2,NV2,NIS2,NIE2,JAAUTO2
+
+      integer          :: i
+    
+      COMMON /DEPMAX/ VMAX,VMIN,DV,VAL(256),NCOLS(256),NV,NIS,NIE,JAAUTO
+      COMMON /DEPMAX2/ VMAX2,VMIN2,DV2,VAL2(256),NCOLS2(256),NV2,NIS2,NIE2,JAAUTO2
+
+      if (jaauto2 == 2) then 
+         nv2   = nv
+         VMAX2 = VMAX
+         VMIN2 = VMIN
+         DV2   = DV
+         VAL2  = VAL
+      endif
+   
+      end SUBROUTINE SETISOSCALE2IS1
 
       SUBROUTINE SETCOLORTABLE()
       implicit none
-      double precision :: dv, dv2
-      integer :: i
-      integer :: jaauto, jaauto2
-      integer :: ncols, ncols2
-      integer :: nie, nie2
-      integer :: nis, nis2
-      integer :: nv, nv2
-      double precision :: val, val2
-      double precision :: vmax, vmax2
-      double precision :: vmin, vmin2
+      double precision :: VMAX,VMIN,DV,VAL
+      integer          :: NCOLS,NV,NIS,NIE,JAAUTO
+
+      double precision :: VMAX2,VMIN2,DV2,VAL2
+      integer          :: NCOLS2,NV2,NIS2,NIE2,JAAUTO2
+
+      integer          :: i
+    
       COMMON /DEPMAX/ VMAX,VMIN,DV,VAL(256),NCOLS(256),NV,NIS,NIE,JAAUTO
       COMMON /DEPMAX2/ VMAX2,VMIN2,DV2,VAL2(256),NCOLS2(256),NV2,NIS2,NIE2,JAAUTO2
 
@@ -15734,7 +15850,7 @@ double precision :: value
       ELSE IF (KEY .EQ. 22 .OR. KEY .EQ. 23) THEN
           IF (KEY .EQ. 22) THEN
               CALL IFORMGETINTEGER( 2,JAAUTO)
-              JAAUTO = MAX(0,MIN(JAAUTO,1) )
+              JAAUTO = MAX(0,MIN(JAAUTO,2) )
               CALL IFORMGETINTEGER( 4,NVN)
               CALL IFormGetDouble ( 6,VMINN)
               CALL IFormGetDouble ( 8,VMAXN)
@@ -17324,10 +17440,10 @@ double precision :: value
   ENDIF
 
   CALL SETCOL(KLSCL)
-  CALL FBOX(XSC1,YSC1,XSC2,YSC2)
+  CALL FBOXNOP(XSC1,YSC1,XSC2,YSC2)
 
   CALL SETCOL(KLTEX)
-  CALL BOX(XSC1,YSC1,XSC2,YSC2)
+  CALL BOXNOP(XSC1,YSC1,XSC2,YSC2)
 
   CALL IGRCHARJUSTIFY('L')
 
@@ -17440,8 +17556,8 @@ double precision :: value
 
   MINTEX = 'MIN:            '
   MAXTEX = 'MAX:            '
-  WRITE(MINTEX(6:16),'(E11.4)') VMIN
-  WRITE(MAXTEX(6:16),'(E11.4)') VMAX
+  WRITE(MINTEX(6:16),'(E11.5)') VMIN
+  WRITE(MAXTEX(6:16),'(E11.5)') VMAX
 
   IF (VMAX .GT. VMIN .AND. NDRAW(11) .GE. 2) THEN
      YSC2 = MIN(YSC1 + (NV/INC+1d0)*HIC + 2.5d0*HIC,Y2)
@@ -17451,10 +17567,10 @@ double precision :: value
   ENDIF
 
   CALL SETCOL(KLSCL)
-  CALL FBOX(XSC1,YSC1,XSC2,YSC2)
+  CALL FBOXnop(XSC1,YSC1,XSC2,YSC2)
 
   CALL SETCOL(KLTEX)
-  CALL BOX(XSC1,YSC1,XSC2,YSC2)
+  CALL BOXnop(XSC1,YSC1,XSC2,YSC2)
 
   CALL IGRCHARJUSTIFY('L')
 
@@ -17486,9 +17602,9 @@ double precision :: value
   IF (NDRAW(15) .EQ. 11 .OR. NDRAW(15) .EQ. 13 .OR. NDRAW(15) .EQ. 15 .OR. NDRAW(15) .EQ. 16) THEN
       CALL SETCOL(KLSCL)
       YT = YSC1-5*HIC
-      CALL FBOX(XSC1,YT-4*HIC,XSC2,YT)
+      CALL FBOXnop(XSC1,YT-4*HIC,XSC2,YT)
       CALL SETCOL(KLTEX)
-      CALL BOX(XSC1,YT-4*HIC,XSC2,YT)
+      CALL BOXnop(XSC1,YT-4*HIC,XSC2,YT)
       VFAC2 = 0.3d0*(XSC2-XSC1)
       CALL SETCOL(KLVEC)
       CALL ARROWS(XSC1+WIC,YT-2*HIC,1d0,0d0,0d0,VFAC2)
@@ -17572,11 +17688,11 @@ double precision :: value
   IF (NCOL .NE. 0) THEN
      CALL SETCOL(NCOL)
      IF (JAHOOG .EQ. 0) THEN
-        CALL FBOX(XA,YA,XB,YB)
+        CALL FBOXnop(XA,YA,XB,YB)
         CALL SETCOL(KLTEX)
-        CALL  BOX(XA,YA,XB,YB)
+        CALL  BOXnop(XA,YA,XB,YB)
      ELSE
-        CALL FBOX(XA,YA,XB,YB)
+        CALL FBOXnop(XA,YA,XB,YB)
      ENDIF
   ENDIF
   RETURN
@@ -17693,7 +17809,7 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
    implicit none
 
    integer :: numpar, numfld, numparactual, numfldactual
-   PARAMETER  (NUMPAR = 23, NUMFLD = 2*NUMPAR)
+   PARAMETER  (NUMPAR = 24, NUMFLD = 2*NUMPAR)
    INTEGER  IX(NUMFLD),IY(NUMFLD),IS(NUMFLD),IT(NUMFLD)
    CHARACTER WRDKEY*40, OPTION(NUMPAR)*40, HELPM(NUMPAR)*60
    integer :: nlevel
@@ -17728,7 +17844,8 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
    OPTION(21) = 'Corioadamsbashfordfac               ( ) ' ; it(2*21) = 6
    OPTION(22) = 'Newcorio                            ( ) ' ; it(2*22) = 2
    OPTION(23) = 'Barocterm                           ( ) ' ; it(2*23) = 2
- 
+   OPTION(24) = 'Barocadamsbashfordfac               ( ) ' ; it(2*24) = 6
+
  
 !   123456789012345678901234567890123456789012345678901234567890
 !            1         2         3         4         5         6
@@ -17756,7 +17873,8 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
    HELPM (21) = '>0 = Adams Bashford, standard= 0.5, only for Newcorio=1     '
    HELPM (22) = '0=prior to 27-11-2019, 1=no normal forcing on open bnds, 12#'
    HELPM (23) = '3=default, 4=new                                            '
-   
+   HELPM (24) = '>0 = Adams Bashford, standard= 0.5, only for Baroctimeint=4 '
+ 
    
    CALL SAVEKEYS()
    NUMPARACTUAL = NUMPAR
@@ -17848,7 +17966,7 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
    CALL IFormputDouble  (2*21 ,Corioadamsbashfordfac,'(e10.5)')        
    CALL IFormputinteger (2*22 ,Newcorio)        
    CALL IFormputinteger (2*23 ,Jabarocterm)        
-
+   CALL IFormputDouble  (2*24 ,Barocadamsbashfordfac,'(e10.5)')    
 
    !  Display the form with numeric fields left justified
    !  and set the initial field to number 2
@@ -17910,6 +18028,7 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
           CALL IFormgetDouble  (2*21 ,Corioadamsbashfordfac)        
           CALL IFormgetinteger (2*22 ,Newcorio)            
           CALL IFormgetinteger (2*23 ,Jabarocterm)        
+          CALL IFormgetDouble  (2*24 ,Barocadamsbashfordfac)  
 
           epshs    = 0.2d0*epshu  ! minimum waterdepth for setting cfu
           if (niadvec .ne. iadvec) then
@@ -18426,7 +18545,7 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
    implicit none
 
    integer :: numpar, numfld, numparactual, numfldactual
-   PARAMETER  (NUMPAR = 17, NUMFLD = 2*NUMPAR)
+   PARAMETER  (NUMPAR = 18, NUMFLD = 2*NUMPAR)
    INTEGER  IX(NUMFLD),IY(NUMFLD),IS(NUMFLD),IT(NUMFLD), L
    CHARACTER WRDKEY*40, OPTION(NUMPAR)*40, HELPM(NUMPAR)*60
    integer :: nlevel
@@ -18457,6 +18576,8 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
    OPTION(15) = 'Uchileaf                         ( )   ' ; it(2*15) = 6
    OPTION(16) = 'Cdleaf                           ( )   ' ; it(2*16) = 6
    OPTION(17) = 'Arealeaf                         ( )   ' ; it(2*17) = 6
+   OPTION(18) = 'Pure1D                           ( )   ' ; it(2*18) = 6
+ 
    
 !   123456789012345678901234567890123456789012345678901234567890
 !            1         2         3         4         5         6
@@ -18478,6 +18599,8 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
    HELPM (15) = '                                                        ( ) '
    HELPM (16) = '                                                        ( ) '
    HELPM (17) = '                                                        ( ) '
+   HELPM (18) = '                                                        ( ) '
+
       
    CALL SAVEKEYS()
    NUMPARACTUAL = NUMPAR
@@ -18567,6 +18690,8 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
    CALL IFORMputdouble  (2*15 , Uchileaf,   '(F7.3)' )  
    CALL IFORMputdouble  (2*16 , Cdleaf,     '(F7.3)' ) 
    CALL IFORMputdouble  (2*17 , Arealeaf,   '(F7.3)' ) 
+   CALL IFORMputdouble  (2*18 , Pure1D,     '(F7.3)' ) 
+
 
    !  Display the form with numeric fields left justified
    !  and set the initial field to number 2
@@ -18623,6 +18748,8 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
           CALL IFORMgetdouble  (2*15 , Uchileaf   ) 
           CALL IFORMgetdouble  (2*16 , Cdleaf     ) 
           CALL IFORMgetdouble  (2*17 , Arealeaf   ) 
+          CALL IFORMgetdouble  (2*18 , Pure1D     ) 
+
           do L = 1,Lnx1D
              if (prof1D(1,L) >= 0) then  ! only direct profiles
                 if (kcu(L) == 1 ) then 
@@ -18648,6 +18775,7 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
                 if (abs(prof1D(3,L)) == 1) then ! circles are round 
                     prof1D(2,L) = prof1D(1,L)
                 endif
+ 
              endif   
           enddo  
           
@@ -19405,7 +19533,7 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
    implicit none
 
    integer :: numpar, numfld, numparactual, numfldactual
-   PARAMETER  (NUMPAR = 25, NUMFLD = 2*NUMPAR)
+   PARAMETER  (NUMPAR = 26, NUMFLD = 2*NUMPAR)
    INTEGER  IX(NUMFLD),IY(NUMFLD),IS(NUMFLD),IT(NUMFLD)
    CHARACTER WRDKEY*40, OPTION(NUMPAR)*40, HELPM(NUMPAR)*60
    integer :: nlevel
@@ -19420,7 +19548,7 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
 
    OPTION( 1)= 'sini                                (m) ' ; it(2* 1) = 6
    OPTION( 2)= 'zkuni                               (m) ' ; it(2* 2) = 6
-   OPTION( 3)= 'numtopsig                           ( ) ' ; it(2* 3) = 2
+   OPTION( 3)= 'bedslope                            ( ) ' ; it(2* 3) = 6
    OPTION( 4)= 'anglat                            (deg) ' ; it(2* 4) = 6
    OPTION( 5)= 'ibedlevtyp                          ( ) ' ; it(2* 5) = 2
    OPTION( 6)= 'Kmx, nr of Vertical sigma layers    ( ) ' ; it(2* 6) = 2
@@ -19443,14 +19571,15 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
    OPTION(23)= 'Output full time-varying grid data  ( ) ' ; it(2*23) = 2
    OPTION(24)= 'Keepzlayering at bed                ( ) ' ; it(2*24) = 2
    OPTION(25)= 'Numtopsig (only for z-layers)       ( ) ' ; it(2*25) = 2
-  
+   OPTION(26)= 'Numtopsiguniform (only for z-)  ( ) '     ; it(2*26) = 2
+ 
 
 !   123456789012345678901234567890123456789012345678901234567890
 !            1         2         3         4         5         6
 
    HELPM (1) = 'initial waterlevel                                          '
    HELPM (2) = 'uniform bottom level                                        '
-   HELPM (3) = 'number of sigma top layers in Z-model                       '
+   HELPM (3) = 'bedslope                                                    '
    HELPM (4) = 'angle of latitude, Delft = 52.0                             '
    HELPM (5) = '1=cell tiledep bl, 2=u-point blu, 3=netw,mean-u 4=netw, maxu'
    HELPM (6) = '0=2D ORIGINAL CODE, 1=2D IN 3D CODE, >1= 3D CODE            '
@@ -19474,6 +19603,7 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
    HELPM (23)= '0=compact, 1=full                                           '
    HELPM (24)= '0=no, 1=yes, 2=kb/kb+1 50/50                                '
    HELPM (25)= 'only for zlayers: numer of top layers behaving sigma like   '
+   HELPM (26)= 'only for zlayers: keep numtopsig constant 1=yes, 0=no       '
 
 
    CALL SAVEKEYS()
@@ -19546,7 +19676,7 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
 
    CALL IFormPutDouble  (2*1 ,sini,     '(F8.3)')
    CALL IFormPutDouble  (2*2 ,zkuni,    '(F8.3)')
-   CALL IFormPutInteger (2*3 ,numtopsig         )
+   CALL IFormPutDouble  (2*3 ,bedslope, '(F8.3)')
    CALL IFormPutDouble  (2*4 ,anglat,   '(F8.3)')
    CALL IFORMPUTINTEGER (2*5 ,ibedlevtyp        )
    CALL IFORMPUTINTEGER (2*6 ,kmx               )
@@ -19569,7 +19699,7 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
    CALL IFORMPUTINTEGER (2*23,jafullgridoutput    )
    CALL IFORMPUTINTEGER (2*24,keepzlayeringatbed  )
    CALL IFORMPUTINTEGER (2*25,numtopsig )
-
+   CALL IFORMPUTINTEGER (2*26,janumtopsiguniform )
 
 
    !  Display the form with numeric fields left justified
@@ -19610,7 +19740,7 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
        IF (KEY .EQ. 22) THEN
            CALL IFormGetDouble  (2*1 ,sini  )
            CALL IFormGetDouble  (2*2 ,zkuni )
-           CALL IFormGetinteger (2*3 ,numtopsig   )
+           CALL IFormGetDouble  (2*3 ,bedslope    )
            CALL IFormGetDouble  (2*4 ,anglat      )
            CALL IFORMgeTINTEGER (2*5 ,ibedlevtyp  )
            CALL IFORMgeTINTEGER (2*6 ,kmx         ) 
@@ -19633,6 +19763,7 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
            CALL IFORMgeTINTEGER (2*23,jafullgridoutput)
            CALL IFORMgeTINTEGER (2*24,keepzlayeringatbed)
            CALL IFORMgeTINTEGER (2*25,numtopsig)
+           CALL IFORMgeTINTEGER (2*26,janumtopsiguniform)
 
 
            if (kmx > 0 .or. mxlayz > 0) then
@@ -20672,7 +20803,7 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
       use unstruc_display
       use geometry_module, only: dbpinpol
       use gridoperations
-
+      
       implicit none
       integer          :: i,j,n,ncol,jatel,in,k,im,jm,mxnum
       double precision :: xx(4),yy(4),x,y,z
@@ -20680,6 +20811,7 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
       double precision :: vmax, vmin, dv, val
       integer          :: ncols, nv, nis, nie, jaauto
       COMMON /DEPMAX/ VMAX,VMIN,DV,VAL(256),NCOLS(256),NV,NIS,NIE,JAAUTO
+      logical inview
 
 
       call savepol()
@@ -21033,6 +21165,7 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
 
  double precision :: rt, rr0, dddx, dddy, uux, uuy 
  integer          :: n, ja, ja2, nsiz
+ logical inview
 
  ! ndraw(28)= show what on nodes   ndraw(19)=how to show on nodes , NDRAW(8) = SHOW WHAT ON NETNODES
  ! ndraw(29)= show what on links   ndraw(11)=how to show on links , NDRAW(7) = SHOW WHAT ON NETLINKS
@@ -21153,6 +21286,7 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
     call igrcolourmodel(8)
  endif
 
+  
  
  call tekflowlinks()
 
@@ -21313,6 +21447,7 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
  integer :: k, ja, nn, ncol
  double precision :: znod, zn
  common /drawthis/ ndraw(50)
+ logical inview
 
  if (ndraw(39) == 0) return
  
@@ -21376,7 +21511,6 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
  use m_flow
  use m_sferic
  use m_missing
- use gridoperations
  implicit none
  integer :: nodemode, nodewhat,ndraw(50)
  integer :: k, L, ja, ja2, k1, k2, nn, ncol, linkmode
@@ -21387,12 +21521,15 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
  double precision :: x3, y3, x4, y4                  ! help only
  double precision :: x(4), y(4), z(4), hw, cs, sn
  real             :: xr(4), yr(4)
+ logical inview
 
  common /drawthis/ ndraw
 
  linkmode = ndraw(11)
  if (LINKMODE > 1 .AND. ndraw(29) .ge. 2) then                          ! show VALUES AT links
    IF (NDRAW(7) == 1) call minmxlns()    ! ONLY ADAPT VERTICAL LIMITS FOR FLOW links IF NO NET links ASKED
+   
+     call setisoscale2is1()
 
      IF (linkmode == 3 .OR. linkmode == 6) THEN
 
@@ -21501,12 +21638,13 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
  use m_flow
  use m_missing
  use m_transport
- use gridoperations
  implicit none
  integer :: nodemode, nodewhat,ndraw(50)
  integer :: k, ja, ja2, nn, ncol
  double precision :: znod, zn, x(8), y(8)
  common /drawthis/ ndraw
+ logical inview
+
 
  nodemode = ndraw(19)
  nodewhat = ndraw(28)
@@ -21632,8 +21770,7 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
  use m_sediment
  use m_strucs
  use m_flowexternalforcings
- use gridoperations
- 
+  
  implicit none
 
  integer          :: nsiz, ja
@@ -21654,6 +21791,7 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
  common /drawthis/ ndraw(50)
  integer :: ndraw, kts
 
+ double precision :: zz1, zz2, xz1, xz2
  double precision :: xmn, xmx, ymx, zmx, zmx2, bot, top, xx, yy, bup
  double precision :: xp(4), yp(4), zp(4), xxmn, xxmx, zn, dlay, dl, xp1, yp1, qsrck
  integer          :: mx, kb, kt, Lb, Lt, LL, kplotfrombedorsurfacesav
@@ -21661,6 +21799,8 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
 
  double precision, allocatable ::   plotlin2(:)
  integer         , allocatable :: ip(:), ip2(:)
+ logical inview
+
 
  if (ndx  < 1) return
 
@@ -22038,6 +22178,22 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
     endif   
  endif
 
+ if (ndraw(30) == 5) then
+    call setcol(2)
+    do LL = 1,lnx
+       n1  = ln(1,LL)  ; n2  = ln(2,LL)
+       xz1 = xz(n1)    ; xz2 = xz(n2)
+       do L = Lbot(LL) , Ltop(LL) 
+          k1 = ln(1,L) ; k2 = ln(2,L)
+          zz1 = 0.5d0*( zws(k1) + zws(k1-1) ) 
+          zz2 = 0.5d0*( zws(k2) + zws(k2-1) ) 
+          call movabs(xz1, zz1 )
+          call  lnabs(xz2, zz2 )
+       enddo 
+    enddo
+ endif
+
+
  call setcol(ncolblack) ! NCOLANA)
  ! call LINEWIDTH(2)
 
@@ -22391,6 +22547,25 @@ kplotfrombedorsurface = kplotfrombedorsurfacesav
     call movabs(xx1, zz1 )
     call  lnabs(xx2, zz2 )
  enddo
+
+ do L = 1,lnx1D
+    k1  = ln(1,L)
+    k2  = ln(2,L)
+    xx1 = xk(k1)
+    xx2 = xk(k2)
+    zz1 = bl(k1) 
+    zz2 = bl(k2) 
+    if (yfac > 0) then
+        yy1 = yk(k1)
+        yy2 = yk(k2)
+        zz1 = zz1 + (yy1 - ymn)*yfac
+        zz2 = zz2 + (yy1 - ymn)*yfac
+    endif
+    call movabs(xx1, zz1 )
+    call  lnabs(xx2, zz2 )
+ enddo
+
+
 
  if (jaceneqtr == 2 .and. ityp ==4) then
      do kk  = 1,mxban
@@ -22783,11 +22958,7 @@ subroutine isosmoothflownode2(k) ! smooth isolines in flow cells use depmax2
 
  call maketime(tex,time1)
 
- if (dnt-1 > 0) then
-    dtav = (time1-Tstart_user)/ dnt
- else
-    dtav = dts
- endif
+ dtav = (time1 - tstart_user)/max(1d0, dnt)
 
  WRITE (TEX(18:),'( A4,F8.3, A8,F7.3, A10,F7.3, A5,F8.1, A,E8.2, A8,E14.8,  A8,E14.8)') &
  'dt: ', dts, ' Avg.dt: ', dtav, &
@@ -23695,13 +23866,15 @@ subroutine teksorsin()      ! teksrc
 use m_flowexternalforcings
 use unstruc_display
 use m_transport, only: isalt, itemp 
-use gridoperations
+
 implicit none
 COMMON /DRAWTHIS/  ndraw(50)
 integer           :: ndraw
 integer           :: n, k, kb, kt, n2, ncol
 character*40      :: tex
 double precision  :: znod, temb, temt, xp, yp
+logical inview
+
 
 if (ndraw(41) <= 1 .or. numsrc == 0) return
 
@@ -23769,3 +23942,211 @@ enddo
 
 end subroutine teksorsin 
 
+ sUBROUTINE dPROJECT(X8,Y8,XX4,YY4,MODE)
+  use m_sferic
+  use m_wearelt
+  use m_sferzoom
+  implicit none
+  double precision :: x8, y8, xx4, yy4
+  integer          :: mode
+
+  ! COMMON /SFERZOOM/ X0,Y0,FAC,X1W,Y1W,X2W,Y2W  ! GRADEN
+
+  double precision :: X,Y,XX,YY,SX,CX,SY,CY,SY0,CY0,RR,C,SC,CC,RN
+  double precision, save :: EPS = 1.D-20
+  X = X8
+  Y = Y8
+  IF (JSFERTEK .EQ. 0) THEN        ! Just Transfer
+     XX  = X
+     YY  = Y
+  ELSE IF (JSFERTEK .EQ. 1) THEN   ! Stereographic
+     SY0 = SIN(DG2RD*Y0)
+     CY0 = COS(DG2RD*Y0)
+     IF (MODE .EQ. 1) THEN         ! LON,LAT to X,Y
+        SX = SIN(DG2RD*(X-X0))
+        CX = COS(DG2RD*(X-X0))
+        SY = SIN(DG2RD*(Y))
+        CY = COS(DG2RD*(Y))
+        RN = 1.D0+SY0*SY+CY0*CY*CX
+        IF (ABS(RN) .LT. EPS) THEN
+           RN = SIGN(1.D0,RN)*EPS
+        ENDIF
+        RR = FAC*2.D0*RD2DG/RN     ! FAC om naar X1,Y1,X2,Y2 te schalen
+        XX = RR*CY*SX              ! Stereographic to Degrees
+        YY = RR*(CY0*SY-SY0*CY*CX)
+     ELSE IF (MODE .EQ. 2) THEN    ! X,Y to LON,LAT
+        XX = X / FAC
+        YY = Y / FAC
+        RR = SQRT(XX*XX + YY*YY)
+        IF (RR .GT. EPS) THEN
+           SX = SIN(DG2RD*(XX-X0))
+           CX = COS(DG2RD*(XX-X0))
+           SY = SIN(DG2RD*(YY))
+           CY = COS(DG2RD*(YY))
+           C  = 2.D0*ATAN2(RR,2.D0*RD2DG)
+           SC = SIN(C)
+           CC = COS(C)
+           XX = X0*DG2RD + ATAN2(XX*SC,RR*CY0*CC-YY*SY0*SC)
+           YY = ASIN(CC*SY0+YY*SC*CY0/RR)
+           XX = XX*RD2DG
+           YY = YY*RD2DG
+        ELSE
+           XX = X
+           YY = Y
+        ENDIF
+        call inworld(xx)
+     ENDIF
+
+  ELSE IF (JSFERTEK .EQ. 2) THEN     ! MERCATOR
+     IF (MODE .EQ. 1) THEN
+        IF (Y .GE.  89D0) Y =  89.D0
+        IF (Y .LE. -89D0) Y = -89.D0
+        YY = DG2RD*Y
+        YY = DLOG( 1D0 + SIN(YY) ) / COS(YY)
+        XX = DG2RD*X
+     ELSE IF (MODE .EQ. 2) THEN
+        YY = DATAN( SINH( Y ) )
+        YY = RD2DG*YY
+        XX = RD2DG*X
+     ENDIF
+  ENDIF
+
+  XX4 = XX
+  YY4 = YY
+  RETURN
+  END SUBROUTINE dPROJECT
+
+  LOGICAL FUNCTION INVIEW(X,Y)
+  ! ZIT IK IN ZOOMGEBIED? NULLEN EN DEFAULTS NIET, IN WERELDCOORD inview3
+  use m_wearelt
+  use m_missing
+  doubleprecision :: x,y,xx,yy
+  INVIEW = .FALSE.
+  IF (X .NE. XYMIS) THEN
+     CALL dPROJECT(X,Y,XX,YY,1)
+     IF (XX .GT. X1 .AND. XX .LT. X2 .AND. YY .GT. Y1 .AND. YY .LT. Y2     ) THEN
+        INVIEW = .TRUE.
+     ENDIF
+  ENDIF
+  RETURN
+  END
+
+  LOGICAL FUNCTION INVIEW2(X,Y,XX,YY)
+  USE M_MISSING
+  use m_wearelt
+  implicit none
+  double precision :: x,y,xx,yy
+
+  ! ZIT IK IN ZOOMGEBIED? NULLEN EN DEFAULTS NIET, IN WERELDCOORD
+
+  INVIEW2 = .FALSE.
+  IF (X .NE. XYMIS) THEN
+     CALL dPROJECT(X,Y,XX,YY,1)
+     IF (XX .GT. X1 .AND. XX .LT. X2 .AND.  &
+         YY .GT. Y1 .AND. YY .LT. Y2     ) THEN
+        INVIEW2 = .TRUE.
+     ENDIF
+  ELSE
+     XX = XYMIS
+     YY = XYMIS
+  ENDIF
+  RETURN
+  END FUNCTION INVIEW2
+
+   SUBROUTINE DRIETWEE(XD,YD,ZD,X,Y,Z)
+   implicit none
+   integer :: jav
+   integer :: jview
+   double precision :: xyz
+   DOUBLE PRECISION XD,YD,ZD,X,Y,Z
+   COMMON /HOWTOVIEW/ JVIEW, JAV, XYZ ! 1,2,3 OF 4
+   IF (JVIEW .EQ. 1) THEN        ! NORMAL
+      X = XD
+      Y = YD
+      Z = ZD
+   ELSE IF (JVIEW .EQ. 2) THEN   ! FROM LEFT
+      X = ZD
+      Y = YD
+      Z = XD
+   ELSE IF (JVIEW .EQ. 3) THEN   ! FROM TOP
+      X = XD
+      Y = -ZD
+      Z = YD
+   ELSE IF (JVIEW .EQ. 4) THEN
+      !    CALL DVIEW(XD,YD,-ZD,X,Y,Z)
+      CALL DVIEW(XD,YD,-ZD,X,Y,Z)
+   ELSE !In all other cases (e.g. when HOWTOVIEW is not set, e.g. in the gridgeom library)
+      x = xd
+      y = yd
+      z = zd
+   ENDIF
+   RETURN
+   END SUBROUTINE DRIETWEE
+
+   SUBROUTINE TWEEDRIE(X,Y,XD,YD,ZD)
+   implicit none
+   integer :: jav
+   integer :: jview
+   double precision :: xyz
+   double precision :: X,Y,XD,YD,ZD
+   COMMON /HOWTOVIEW/ JVIEW, JAV, XYZ ! 1,2,3 OF 4
+   IF (JVIEW .EQ. 1) THEN
+      XD = X
+      YD = Y
+      ZD = XYZ
+   ELSE IF (JVIEW .EQ. 2) THEN
+      ZD = X
+      YD = Y
+      XD = XYZ
+   ELSE IF (JVIEW .EQ. 3) THEN
+      XD = X
+      ZD = -Y
+      YD = XYZ
+   ELSE IF (JVIEW .EQ. 4) THEN
+      !    CALL DVIEW(XD,YD,ZD,X,Y,Z)  ! MOET NOG INVERS MAKEN
+      XD = X
+      YD = Y
+      ZD = XYZ
+   ELSE !In all other cases (e.g. when HOWTOVIEW is not set, e.g. in the gridgeom library)
+      xd = x
+      yd = y
+      zd = xyz
+   ENDIF
+
+   RETURN
+   END SUBROUTINE TWEEDRIE
+
+   SUBROUTINE DVIEW(XD,YD,ZD,X,Y,Z)
+   use m_missing
+   implicit none
+   double precision :: ce
+   integer :: i
+   double precision :: vs
+   double precision :: x0s
+   double precision :: y0s
+   ! GEEF perspectievische COORDINATEN
+   ! xD,yD,zD                             :coordinaten te tekenen punt
+   ! x0s,y0s                              :waar op scherm ligt kijklijn
+   ! X,Y,Z                                :scherm coordinaten
+   ! Vs                                   :viewing matrix na viema
+
+   DOUBLE PRECISION XD,YD,ZD,X,Y,Z
+   COMMON /VIEWMAT/ VS(4,4), X0S, Y0S
+   DIMENSION CE(4)
+   ! use z as zd temporarily (zet to zero when zd==dmiss)
+   if (zd == dmiss) then
+      z = 0
+   else
+      z = zd
+   end if
+   DO I = 1,3
+      CE(I) = VS(I,1)*XD + VS(I,2)*YD + VS(I,3)*Z + VS(I,4)
+   ENDDO
+   Z  = CE(3)
+   IF (Z .LT. 0) THEN
+      Z = dmiss
+   ELSE
+      X = CE(1)/Z  + X0S
+      Y = CE(2)/Z  + Y0S
+   ENDIF
+   END SUBROUTINE DVIEW

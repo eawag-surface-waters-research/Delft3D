@@ -13091,7 +13091,6 @@ subroutine writesomeinitialoutput()
  use m_partitioninfo
  use m_monitoring_crosssections
  use m_observations, only : mxls
- use unstruc_model, only : md_subfile
  use unstruc_files, only : defaultFilename
  use m_GlobalParameters, only: callcount, wccount, countstop, rate
 #ifdef _OPENMP
@@ -13969,7 +13968,7 @@ subroutine copynetcellstonetnodes() ! for smooth plotting only
  ndx = 0
  end subroutine copyflowcellsizetosamples
 
- subroutine copynetnodestosam() !jarnod)
+ subroutine copynetnodestosam(jarnod)
 
  use m_samples
  use m_netw
@@ -13980,7 +13979,7 @@ subroutine copynetcellstonetnodes() ! for smooth plotting only
  implicit none
  integer :: in, k, n, jarnod
  real    :: r
- jarnod = 1
+
  in = -1
  k  = ns
 
@@ -14642,7 +14641,7 @@ end subroutine land_change_callback
  character(len=256) :: buffer
  common /depmax2/ vmax,vmin,dv,val,ncols,nv,nis,nie,jaauto
  integer :: k, i
- logical inviewq
+ logical inview
 
  if (jaauto > 0) then
     rmin =  1d30
@@ -14650,7 +14649,7 @@ end subroutine land_change_callback
 
     do k = 1,ns
        if ( zs(k)==DMISS ) cycle
-       if ( inviewq( xs(k), ys(k) ) ) then
+       if ( inview( xs(k), ys(k) ) ) then
            if (zs(k) < rmin) then
                rmin  = zs(k)
            endif
@@ -14691,7 +14690,7 @@ end subroutine land_change_callback
  integer :: NCOLS(256),NIS,NIE,nv,JAAUTO
  common /depmax/ vmax,vmin,dv,val,ncols,nv,nis,nie,jaauto
  COMMON /DRAWTHIS/ ndraw(50)
- logical inviewq
+ logical inview
 
  if (jaauto > 0) then
     rmin =  1d30; ndmin = 0
@@ -14706,7 +14705,7 @@ end subroutine land_change_callback
           endif
        endif
        if ( ja2 == 1 .or. ndraw(28) == 3) then        ! crash
-          if ( inviewq( xz(n), yz(n) ) ) then
+          if ( inview( xz(n), yz(n) ) ) then
              zn = znod(n)
              if ( zn.eq.DMISS ) cycle
              if (zn < rmin) then
@@ -14743,7 +14742,7 @@ end subroutine land_change_callback
  double precision :: VMAX,VMIN,DV,VAL(256)
  integer :: NCOLS(256),NIS,NIE,nv,JAAUTO
  common /depmax2/ vmax,vmin,dv,val,ncols,nv,nis,nie,jaauto
-logical inviewq
+logical inview
 
  if (jaauto > 0) then
     rmin =  1d30; lnmin = 0
@@ -14751,7 +14750,7 @@ logical inviewq
     do L = 1,lnx
        k1 = ln(1,L)
        k2 = ln(2,L)
-       if (inviewq( xz(k1), yz(k1) ) .or. inviewq( xz(k2), yz(k2) ) ) then
+       if (inview( xz(k1), yz(k1) ) .or. inview( xz(k2), yz(k2) ) ) then
            zn   = zlin(L)
            if ( zn.eq.DMISS ) cycle
            if (zn < rmin) then
@@ -17552,7 +17551,7 @@ end subroutine flow_initfloodfill
  double precision :: dep, xz(ndx), yz(ndx), s1(ndx), bl(ndx), t
  integer          :: is, k
  double precision :: omeg, r, r0, rr0, psi, samp, st, ct, ux, uy, s1k, dif, xx, yy, period
-logical inviewq
+logical inview
 
  dep    = 10d0
  fcorio = 0d0
@@ -17600,7 +17599,7 @@ logical inviewq
 
     if ( s1k > bl(k) ) then
        dif = abs(s1(k) - s1k)
-       if ( inviewq( xz(k), yz(k) )  ) then
+       if ( inview( xz(k), yz(k) )  ) then
           call statisticsonemorepoint(dif)
        endif
        if (is == 0) then
@@ -36469,14 +36468,14 @@ integer :: mmax
 double precision :: s(0:mmax),u(0:mmax),x(0:mmax)
 double precision :: alf, dif, si, aa
 integer          :: n, i, ii
-logical inviewq
+logical inview
 
 call statisticsnewstep()
 
 call setcol(221)
 do n = 1,ndx
 
-   if (.not. inviewq( xz(n), yz(n) ) ) cycle
+   if (.not. inview( xz(n), yz(n) ) ) cycle
 
    i = 0
    do ii = 1, mmax-1
@@ -36501,25 +36500,6 @@ enddo
 call statisticsfinalise()
 
 end subroutine compareanalytic
-
-   LOGICAL FUNCTION INVIEWq(X,Y)
-   use m_WEARELT
-   use m_missing, only: dmiss
-   implicit none
-   double precision :: x
-   double precision :: y
-   !     ZIT IK IN ZOOMGEBIED? NULLEN EN DEFAULTS NIET
-
-   IF (               X .NE. dmiss .AND.     &
-      X .GT. X1 .AND. X .LT. X2 .AND.             &
-      Y .GT. Y1 .AND. Y .LT. Y2     ) THEN
-   INVIEWq = .TRUE.
-   ELSE
-      INVIEWq = .FALSE.
-   ENDIF
-   RETURN
-   END FUNCTION INVIEWq
-
 
       subroutine weirexact()
       use unstruc_colors

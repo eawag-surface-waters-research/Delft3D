@@ -789,7 +789,7 @@ end subroutine read_land_boundary_netcdf
       character(len=1)  :: cdigits
       character(len=40) :: rec
       logical :: jaNCLAN, jaZSH
-      !logical :: inview
+      logical :: inview
       
       ! Only include third column when size is equal to XSH array (or larger).
       jaNCLAN = nNCLAN >= NSH

@@ -428,7 +428,7 @@
 
 
    COMMON /DEPMAX/ VMAX,VMIN,DV,VAL(256),NCOLS(256),NV,NIS,NIE,JAAUTO
-     VMAX2   =  VMAX
+   VMAX2   =  VMAX
    VMIN2   =  VMIN
    NV2     =  NV
    ! Actual ncols2 set later in setcoltabfile
@@ -739,219 +739,461 @@
    use m_sferic
    use geometry_module, only: pinpok
    use gridoperations
+   use m_flowparameters, only : bedslope
 
    implicit none
 
    integer, intent(in) :: japaramscreen !< Load parameter screen or not (1/0)
-   double precision :: ael
-   double precision :: ag
-   double precision :: cfl
-   double precision :: cs
-   double precision :: dx
-   double precision :: dy
-   double precision :: e0
-   double precision :: eps
-   double precision :: hs
-   integer :: in, jn, k0, l0, m, mh, n, nh, nn, numkn, numln
-   double precision :: rho
-   double precision :: rhow
+   double precision :: ael, ag, cfl, cs, dx, dy, e0, eps, hs
+   integer          :: in, jn, k0, l0, m, mh, n, nh, nn, numkn, numln, jaklaar, jafive, L, k1, k2, n12, i, k, LL, mou2
    double precision :: siz
    double precision :: sn
-   double precision :: xplmax
-   double precision :: xplmin
-   double precision :: xx
-   double precision :: yplmax
-   double precision :: yplmin
-   double precision :: yy
+   double precision :: xplmax, xplmin, xx, yplmax, yplmin, yy, asp, c, phi, dphi, dxt, rr, f, rl, dd, z2, zbn
 
    double precision :: X(8), Y(8), Z(8), XD, YD
+   character(len = 20) :: fnam
 !   COMMON /CONSTANTS/ E0, RHO, RHOW, CFL, EPS, AG, PI
 
+   
    if (japaramscreen == 1) then
+      ntyp = 7 ; nrx = 32 ; bedslope = 1d-4 
       CALL MAKENETPARAMETERS()
    end if
 
-!  get parameters from polygon if available
-   call pol2netparams()
 
-!   IF (NPL > 0) THEN
-!       CALL  DMINMAX(   XPL ,  NPL  ,  XPLMIN,  XPLMAX, NPL)
-!       CALL  DMINMAX(   YPL ,  NPL  ,  YPLMIN,  YPLMAX, NPL)
-!       X0 = XPLMIN ; Y0 = YPLMIN
-!   ENDIF
+   if (ntyp .le. 5) then 
 
-   AEL = PI*THICK*THICK/4  ! RDIAM in mm
-   SIZ = SIZE
-   HS  = SIZE*0.5d0
-   CS  = COS(ANGLE*PI/180.) ; SN = SIN(ANGLE*PI/180.)
-   IF (NTYP .EQ. 0) THEN
-      DX = DX0
-      DY = DY0
-   ELSE IF (NTYP .LE. 3) THEN
-      DX = SIZ*COS(ANGLE*PI/180.)
-      DY = SIZ*SIN(ANGLE*PI/180.)
-   ELSE IF (NTYP .EQ. 4) THEN
-      DX = 0.5d0*SIZ ; DY = DX*SQRT(3d0)
-   ELSE IF (NTYP .EQ. 5) THEN
-      DX = HS; DY = sqrt(3d0)*DX
-   ENDIF
-
-   IF (NPL > 0) THEN
-      IF (NRX <= 1) THEN
-         NRX = (XPLMAX-XPLMIN)/DX
-         NRY = (YPLMAX-YPLMIN)/DY
-      ELSE IF (DX == 0) THEN
-         DX  = (XPLMAX-XPLMIN)/NRX
-         DY  = (YPLMAX-YPLMIN)/NRY
+      ! get parameters from polygon if available
+      call pol2netparams()
+    
+      AEL = PI*THICK*THICK/4  ! RDIAM in mm
+      SIZ = SIZE
+      HS  = SIZE*0.5d0
+      CS  = COS(ANGLE*PI/180.) ; SN = SIN(ANGLE*PI/180.)
+      
+      IF (NTYP .LE. 2) THEN
+         DX = DX0
+         DY = DY0
+      ELSE IF (NTYP .LE. 3) THEN
+         DX = SIZ*COS(ANGLE*PI/180.)
+         DY = SIZ*SIN(ANGLE*PI/180.)
+      ELSE IF (NTYP .EQ. 4) THEN
+         DX = 0.5d0*SIZ ; DY = DX*SQRT(3d0)
+      ELSE IF (NTYP .EQ. 5) THEN
+         DX = HS; DY = sqrt(3d0)*DX
       ENDIF
-   ENDIF
+ 
 
-
-   IF (NTYP == 0) THEN
-      MC = NRX+1 ; NC = NRY+1
-      CALL INCREASEGRID(MC,NC)
-      DO N = 1,NC
-          DO M = 1,MC
-             XC(M,N) = X0 + (M-1)*DX*CS - (N-1)*DY*SN
-             YC(M,N) = Y0 + (M-1)*DX*SN + (N-1)*DY*CS
-             if (jsferic == 1 .and. n > 1)  then
-                dy = dx*cos(dg2rd*yc(m,n-1))
-                YC(M,N) = YC(M,N-1) + dy
+      IF (NPL > 0) THEN
+         IF (NRX <= 1) THEN
+            NRX = (XPLMAX-XPLMIN)/DX
+            NRY = (YPLMAX-YPLMIN)/DY
+         ELSE IF (DX == 0) THEN
+            DX  = (XPLMAX-XPLMIN)/NRX
+            DY  = (YPLMAX-YPLMIN)/NRY
+         ENDIF
+      ENDIF
+    
+    
+      IF (NTYP == 0) THEN
+         MC = NRX+1 ; NC = NRY+1
+         CALL INCREASEGRID(MC,NC)
+         DO N = 1,NC
+             DO M = 1,MC
+                XC(M,N) = X0 + (M-1)*DX*CS - (N-1)*DY*SN
+                YC(M,N) = Y0 + (M-1)*DX*SN + (N-1)*DY*CS
+                if (jsferic == 1 .and. n > 1)  then
+                   c   = cos(dg2rd*yc(m,n-1))
+                   asp = c*1d0 + (1d0-c)*0.3d0
+                   dy  = dx*c*asp
+                   YC(M,N) = YC(M,N-1) + dy
+                endif
+    
+             ENDDO
+             if (jsferic == 1) then 
+                if (dy*dg2rd*ra < 20000.d0) then
+                    nc = n+1
+                    yc(1:mc,nc) = 90d0
+                    xc(1:mc,nc) = xc(1:mc,nc-1)
+                    exit
+                endif
              endif
-
+         ENDDO
+    
+         call del_grid_outside_pol()
+    
+         ! CALL GRIDTONET()
+         ! MC = 0 ; NC = 0; XC = DMISS; YC = DMISS
+    
+      ELSE
+    
+         K0    = NUMK
+         L0    = NUML
+         NUMKN = (NRX+1)*(NRY+1)
+         NUMLN = 6*NUMKN
+    
+         CALL INCREASENETW(K0+NUMKN, L0 + NUMLN)
+    
+         call readyy('makenet',0d0)
+    
+         Z    = Z0
+         DO N = 1,NRY
+            call readyy('makenet', dble(n-1)/dble(nry-1) )
+            DO M = 1,NRX
+               IF (NTYP .EQ. 0) THEN
+                  XX   = dble(M-1)*DX0
+                  YY   = dble(N-1)*DY0
+                  X(1) = X0 + XX*CS - YY*SN                   ; NN = 4
+                  Y(1) = Y0 + YY*CS + XX*SN
+                  XX   = XX + DX0
+                  X(2) = X0 + XX*CS - YY*SN                   ; NN = 4
+                  Y(2) = Y0 + YY*CS + XX*SN
+                  YY   = YY + DY0
+                  X(3) = X0 + XX*CS - YY*SN                   ; NN = 4
+                  Y(3) = Y0 + YY*CS + XX*SN
+                  XX   = XX - DX0
+                  X(4) = X0 + XX*CS - YY*SN                   ; NN = 4
+                  Y(4) = Y0 + YY*CS + XX*SN
+                  XD   = 0.25d0*(X(1)+X(2)+X(3)+X(4))
+                  YD   = 0.25d0*(Y(1)+Y(2)+Y(3)+Y(4))
+               ELSE IF (NTYP .EQ. 1) THEN
+                  XD   = X0 + DX + dble(M-1)*2*DX              ; NN = 4
+                  YD   = Y0 + DY + dble(N-1)*2*DY
+                  X(1) = XD      ; Y(1) = YD - DY
+                  X(2) = XD + DX ; Y(2) = YD
+                  X(3) = XD      ; Y(3) = YD + DY
+                  X(4) = XD - DX ; Y(4) = YD
+               ELSE IF (NTYP .EQ. 2) THEN
+                  JN   = MOD(M-1,2)
+                  XD   = X0 + DX + HS    + dble(M-1)*(DX+2*HS) ; NN = 6
+                  YD   = Y0 + DY + JN*DY + dble(N-1)*(2*DY)
+                  X(1) = XD - HS      ; Y(1) = YD - DY
+                  X(2) = XD + HS      ; Y(2) = YD - DY
+                  X(3) = XD + HS + DX ; Y(3) = YD
+                  X(4) = XD + HS      ; Y(4) = YD + DY
+                  X(5) = XD - HS      ; Y(5) = YD + DY
+                  X(6) = XD - HS - DX ; Y(6) = YD
+               ELSE IF (NTYP .EQ. 3) THEN
+                  XD   = X0 + DX + HS + dble(M-1)*2*(DX+HS)   ; NN = 6
+                  YD   = Y0 + DY + dble(N-1)*2*DY
+                  X(1) = XD - HS      ; Y(1) = YD - DY
+                  X(2) = XD + HS      ; Y(2) = YD - DY
+                  X(3) = XD + HS + DX ; Y(3) = YD
+                  X(4) = XD + HS      ; Y(4) = YD + DY
+                  X(5) = XD - HS      ; Y(5) = YD + DY
+                  X(6) = XD - HS - DX ; Y(6) = YD
+               ELSE IF (NTYP .EQ. 4) THEN
+                  XD   = X0 + DX + dble(M-1)*2*DX             ; NN = 6
+                  YD   = Y0 + DY + dble(N-1)*2*DY
+                  X(1) = XD - DX      ; Y(1) = YD - DY
+                  X(2) = XD + DX      ; Y(2) = YD - DY
+                  X(3) = XD + DX + DX ; Y(3) = YD
+                  X(4) = XD + DX      ; Y(4) = YD + DY
+                  X(5) = XD - DX      ; Y(5) = YD + DY
+                  X(6) = XD           ; Y(6) = YD
+               ELSE IF (NTYP .EQ. 5) THEN
+                  mh = nrx/2 ; nh = nry/2
+                  JN   = MOD(M-1,2)
+                  XD   = X0 + DX - HS    + dble(M-1-mh)*(DX+2*HS) ; NN = 6
+                  YD   = Y0 + JN*DY + dble(N-1-nh)*(2*DY) - dy
+                  X(1) = XD - HS      ; Y(1) = YD - DY
+                  X(2) = XD + HS      ; Y(2) = YD - DY
+                  X(3) = XD + HS + DX ; Y(3) = YD
+                  X(4) = XD + HS      ; Y(4) = YD + DY
+                  X(5) = XD - HS      ; Y(5) = YD + DY
+                  X(6) = XD - HS - DX ; Y(6) = YD
+              ENDIF
+              CALL PINPOK(XD,YD,NPL,XPL,YPL,IN, jins, dmiss)
+               IF (IN == 1) THEN
+                   CALL ADDMAZE(X,Y,Z,NN,JAFIVE)
+               ENDIF
+            ENDDO
           ENDDO
-      ENDDO
+      ENDIF
 
-      call del_grid_outside_pol()
+   else IF (NTYP .EQ. 6) THEN
 
-      ! CALL GRIDTONET()
-      ! MC = 0 ; NC = 0; XC = DMISS; YC = DMISS
-
-   ELSE
-
+      dx0     = 360d0/nrx 
+      dy0     = dx0 
+      JAFIVE  = 0
+      jsferic = 1 ; jasfer3D = 1 ; jaklaar = 0 ; z = dmiss
+      YY      = 0d0 
+      dy0     = dx0
+  
       K0    = NUMK
       L0    = NUML
       NUMKN = (NRX+1)*(NRY+1)
       NUMLN = 6*NUMKN
-
       CALL INCREASENETW(K0+NUMKN, L0 + NUMLN)
-
-      call readyy('makenet',0d0)
-
-      Z    = Z0
+ 
       DO N = 1,NRY
          call readyy('makenet', dble(n-1)/dble(nry-1) )
+   
+         call getdeltay(yy, dx0, dy0)
+
+         if (yy + 1.5d0*dy0 > 90d0) then 
+            dy0 = 90d0 - YY ; jaklaar = 1 ; jafive = 0
+         else 
+            if (dy0*dg2rd*ra < dxdouble .and. jafive == 0) then 
+                dx0 = 2d0*dx0 ; jafive = 1 
+                call getdeltay(yy, dx0, dy0)
+            else 
+                jafive = 0; n12 = 0
+            endif
+            if (yy + 1.5d0*dy0 > 90d0) then 
+               dy0 = 0.51d0*(90d0 - yy)
+            endif
+         endif
+   
          DO M = 1,NRX
-            IF (NTYP .EQ. 0) THEN
-               XX   = dble(M-1)*DX0
-               YY   = dble(N-1)*DY0
-               X(1) = X0 + XX*CS - YY*SN                   ; NN = 4
-               Y(1) = Y0 + YY*CS + XX*SN
-               XX   = XX + DX0
-               X(2) = X0 + XX*CS - YY*SN                   ; NN = 4
-               Y(2) = Y0 + YY*CS + XX*SN
-               YY   = YY + DY0
-               X(3) = X0 + XX*CS - YY*SN                   ; NN = 4
-               Y(3) = Y0 + YY*CS + XX*SN
-               XX   = XX - DX0
-               X(4) = X0 + XX*CS - YY*SN                   ; NN = 4
-               Y(4) = Y0 + YY*CS + XX*SN
-               XD   = 0.25d0*(X(1)+X(2)+X(3)+X(4))
-               YD   = 0.25d0*(Y(1)+Y(2)+Y(3)+Y(4))
-            ELSE IF (NTYP .EQ. 1) THEN
-               XD   = X0 + DX + dble(M-1)*2*DX              ; NN = 4
-               YD   = Y0 + DY + dble(N-1)*2*DY
-               X(1) = XD      ; Y(1) = YD - DY
-               X(2) = XD + DX ; Y(2) = YD
-               X(3) = XD      ; Y(3) = YD + DY
-               X(4) = XD - DX ; Y(4) = YD
-            ELSE IF (NTYP .EQ. 2) THEN
-               JN   = MOD(M-1,2)
-               XD   = X0 + DX + HS    + dble(M-1)*(DX+2*HS) ; NN = 6
-               YD   = Y0 + DY + JN*DY + dble(N-1)*(2*DY)
-               X(1) = XD - HS      ; Y(1) = YD - DY
-               X(2) = XD + HS      ; Y(2) = YD - DY
-               X(3) = XD + HS + DX ; Y(3) = YD
-               X(4) = XD + HS      ; Y(4) = YD + DY
-               X(5) = XD - HS      ; Y(5) = YD + DY
-               X(6) = XD - HS - DX ; Y(6) = YD
-            ELSE IF (NTYP .EQ. 3) THEN
-               XD   = X0 + DX + HS + dble(M-1)*2*(DX+HS)   ; NN = 6
-               YD   = Y0 + DY + dble(N-1)*2*DY
-               X(1) = XD - HS      ; Y(1) = YD - DY
-               X(2) = XD + HS      ; Y(2) = YD - DY
-               X(3) = XD + HS + DX ; Y(3) = YD
-               X(4) = XD + HS      ; Y(4) = YD + DY
-               X(5) = XD - HS      ; Y(5) = YD + DY
-               X(6) = XD - HS - DX ; Y(6) = YD
-            ELSE IF (NTYP .EQ. 4) THEN
-               XD   = X0 + DX + dble(M-1)*2*DX             ; NN = 6
-               YD   = Y0 + DY + dble(N-1)*2*DY
-               X(1) = XD - DX      ; Y(1) = YD - DY
-               X(2) = XD + DX      ; Y(2) = YD - DY
-               X(3) = XD + DX + DX ; Y(3) = YD
-               X(4) = XD + DX      ; Y(4) = YD + DY
-               X(5) = XD - DX      ; Y(5) = YD + DY
-               X(6) = XD           ; Y(6) = YD
-            ELSE IF (NTYP .EQ. 5) THEN
-               mh = nrx/2 ; nh = nry/2
-               JN   = MOD(M-1,2)
-               XD   = X0 + DX - HS    + dble(M-1-mh)*(DX+2*HS) ; NN = 6
-               YD   = Y0 + JN*DY + dble(N-1-nh)*(2*DY) - dy
-               X(1) = XD - HS      ; Y(1) = YD - DY
-               X(2) = XD + HS      ; Y(2) = YD - DY
-               X(3) = XD + HS + DX ; Y(3) = YD
-               X(4) = XD + HS      ; Y(4) = YD + DY
-               X(5) = XD - HS      ; Y(5) = YD + DY
-               X(6) = XD - HS - DX ; Y(6) = YD
-            ENDIF
+            XX  = dble(M-1)*DX0 + xwleft
+    
+            X(1) = XX                  
+            Y(1) = YY    
+  
+            if (jafive == 0) then 
+               X(2) = XX + dx0           
+               Y(2) = YY      
+               X(3) = XX + dx0             
+               Y(3) = YY + dy0       
+               X(4) = XX                            
+               Y(4) = YY + dy0  
+               NN   = 4
+            else 
+               x(2) = XX + 0.5D0*DX0 
+               y(2) = YY 
+               X(3) = XX + dx0           
+               Y(3) = YY    
+               X(4) = XX + dx0             
+               Y(4) = YY + dy0        
+               X(5) = XX                            
+               Y(5) = YY + dy0 
+               NN   = 5
+            endif
+ 
             CALL PINPOK(XD,YD,NPL,XPL,YPL,IN, jins, dmiss)
-            IF (IN == 1) THEN
-               ! CALL ADDMAZE(X,Y,Z,AEL,NN,NTYP)
-                CALL ADDMAZE(X,Y,Z,NN)
+            IF (IN == 1 .and. x(3) <= xwleft + 360d0) THEN
+                jafive = 0 
+                CALL ADDMAZE(X,Y,Z,NN,JAFIVE)
+                CALL ADDMAZE(X,-Y,Z,NN,JAFIVE)
             ENDIF
          ENDDO
+         if (jaklaar == 1) exit
+
+         yy  = yy + dy0
       ENDDO
-   ENDIF
+      call MERGENODESINPOLYGON()
+      
+      do L = 1, numL
+         k1 = kn(1,L) ; k2 = kn(2,L) 
+         if (k1 .ne. 0 .and. k2 .ne. 0) then ! jammer dan, nb na setnodadm nog zooi
+            if ( (nmk(k1) == 5 .or. nmk(k1) == 6) .and. (nmk(k2) == 5 .or. nmk(k2) == 6) ) then
+               if (yk(k1) == yk(k2) ) then 
+                  call DELLINK(L)
+               endif
+            endif
+         endif
+      enddo
+
+   else IF (NTYP .EQ. 7 .and. radius > 0) THEN
+
+      K0    = 0
+      L0    = 0
+      NUMKN = NRX+1
+      NUMLN = NRX
+      CALL INCREASENETW(2*NUMKN, 2*NUMLN)
+      dphi  = -pi/nrx
+      dxt   = 0d0 
+      rr    = radius
+      dx0   = dphi*rr 
+      do i = 1,3
+         phi   = angle + pi + 0.5d0*dphi
+         dxt   = 0d0 
+         k     = k0 + 1
+         L     = L0 
+         xk(k) = x0 + rr*cos(phi)
+         yk(k) = y0 + rr*sin(phi)
+         zk(k) = zkuni - 0.5d0*dx0*bedslope
+         do LL = 1,nrx-1 
+            phi = phi  + dphi ; k = k + 1; L = L + 1
+            xk(k) = x0 + rr*cos(phi) 
+            yk(k) = y0 + rr*sin(phi)
+            call dbdistancehk(xk(k-1), yk(k-1), xk(k), yk(k), dx0)
+            zk(k) = zk(k-1) - bedslope*dx0
+            dxt   = dxt + dx0
+            kn(1,L+L0) = k-1
+            kn(2,L+L0) = k  
+            kn(3,L+L0) = 1
+         enddo
+         dxt = dxt + dx0
+         f   = pi*radius/dxt
+         rr  = rr*f
+      enddo
+    
+      k = k + 1
+      xk(k) = x0 - 1.5d0*radius
+      yk(k) = y0 + 0.5d0*dx0
+      zk(k) = zkuni - 0.5d0*dx0*bedslope
+
+      !call add2Dcell(xk(k)+3d0*radius,yk(k),zkuni,bedslope)
+
+      do LL =  1,nrx-1
+         k = k + 1; L = L + 1
+         xk(k) = xk(k-1)
+         yk(k) = yk(k-1) + dx0
+         zk(k) = zk(k-1) - bedslope*dx0
+         kn(1,L+L0) = k-1
+         kn(2,L+L0) = k  
+         kn(3,L+L0) = 1
+      enddo
+
+      numk = k; numl = L
+
+   
+      rl = pi*radius
+      dd = rl/dble(nrx)
+      z2 = -(rl+dd)*bedslope
+      zbn = -5d0 - (rl-0.5d0*dd)*bedslope
+     
+ 
+      fnam = 'c128_0001.tim'
+      write(fnam(2:4) , '(i3.3)') nrx
+      call newfil(mou2, fnam) 
+      write(mou2,*) '0d0  ', z2  ! zk(k) + 5d0 - bedslope*dx0
+      write(mou2,*) '9d10 ', z2  ! zk(k) + 5d0 - bedslope*dx0
+      call doclose(mou2)
+
+   else IF (NTYP .EQ. 8) THEN ! 90 degrees bend 1D
+
+      NUMKN = NRX+1
+      NUMLN = NRX
+      CALL INCREASENETW(2*NUMKN, 2*NUMLN)
+
+      K = 1 ; xk(k) = x0; yk(k) = y0 ; zk(k) = zkuni - 0.5*bedslope*dx0
+      L = 0 ; xd = 1d0 ; yd = 0d0 
+      do LL = 1,nrx
+         k = k + 1; L = L + 1
+         if (LL > nrx/2) then
+            xd = -0.5d0*sqrt(2d0)
+            yd = xd
+         endif 
+         xk(k) = xk(k-1) + dx0*xd
+         yk(k) = yk(k-1) + dx0*yd
+         zk(k) = zk(k-1) - bedslope*dx0
+         kn(1,L) = k-1
+         kn(2,L) = k  
+         kn(3,L) = 1
+      enddo
+
+      numk = k; numl = L
+
+
+   endif
+
 
    CALL SETNODADM(0)
    call readyy('makenet', -1d0 )
 
+
    RETURN
    END SUBROUTINE MAKENET
 
+   subroutine getdeltay(y, dx0, dy0) ! find dy=dx*cos(y0+0.5*dy) newton iteration
+   use m_sferic
+   double precision ::  y, dx0, dy0, f, df, yd, c, s, phi
+   integer :: k
+   dy0 = dx0*cos(dg2rd*y)
+   do k   = 1,5
+      phi = dg2rd*(y+0.5*dy0) ; c = cos(phi) ; s = sqrt(1d0-c*c)
+      f   = dy0 -             dx0*c
+      df  = 1d0 + 0.5d0*dg2rd*dx0*s 
+      yd  = f/df
+      dy0 = dy0 - yd
+      if (yd < 1d-14) return
+   enddo   
+   end
 
-   SUBROUTINE ADDMAZE(X,Y,Z,N)    ! FOR FLOW GRIDS
+
+   SUBROUTINE ADDMAZE(X,Y,Z,N,JAFIVE)    ! FOR FLOW GRIDS
    use m_netw
    use gridoperations
 
    implicit none
    double precision :: X(N), Y(N), Z(N)
-   integer :: N
+   integer :: N, nn
    integer :: k
    integer :: k2
    integer :: lnu
-   INTEGER KK(8)
-
+   INTEGER KK(8), JAFIVE
 
    DO K = 1,N
-      CALL ISNODEDB( KK(K), X(K), Y(K))
-      IF (KK(K) .LE. 0) THEN
-         ! CALL GIVENEWNODENUM(KK(K))
-         numk  = numk + 1
-         kk(k) = numk
-         ! SETPOINTDB MAKEN
-         XK(KK(K)) = X(K) ; YK(KK(K)) = Y(K) ; ZK(KK(K))  = Z(K)
-         IF (KC(KK(K)) .EQ. 0) KC(KK(K)) = 1
-      ENDIF
-   ENDDO
+      CALL ISNODEDB( KK(k), X(k), Y(k))
+      if (kk(k) == 0) then 
+          numk   = numk + 1
+          XK(numk) = X(K) ; YK(numk) = Y(K) ; ZK(numk)  = Z(K) ; KC(numk) = 1; kk(k) = numk
+      endif
+    enddo
 
    DO K  = 1,N
       K2 = K+1 ; IF (K .EQ. N) K2 = 1
-      CALL CONNECTDB(KK(K),KK(K2),lnu)
+      CALL CONNECTDB(kk(k),kk(k2),lnu)
    ENDDO
+
+   IF (JAFIVE == 1) THEN 
+      CALL CONNECTDB(kk(2),kk(4),lnu)
+      CALL CONNECTDB(kk(2),kk(5),lnu)
+   ENDIF
+
    RETURN
    END SUBROUTINE ADDMAZE
+
+subroutine connecthangingnodes()
+use m_netw
+use m_flowgeom
+use m_missing
+use gridoperations
+implicit none 
+ 
+integer :: mout, np, ih, kk, k, kk3, kkx, k1,k2,lnu, km, kp, i
+
+call findcells(0)
+call newfil(mout, 'hang.xyz')
+
+lnu =numL
+do np  = 1,nump
+   kk3 = 0 
+   kkx = netcell(np)%n
+   if (kkx <= 4 .or. kkx == 6) then 
+      cycle
+   endif
+   do kk = 1,netcell(np)%n
+      k  =netcell(np)%nod(kk)
+      if (nmk(k) == 3) then
+         km = kk - 1; if (km < 1  ) km = km + kkx
+         kp = kk + 1; if (kp > kkx) kp = kp - kkx
+         km = netcell(np)%nod(km)
+         kp = netcell(np)%nod(kp)
+         if (yk(km) == yk(k) .and. yk(kp) == yk(k) ) then 
+            km  = kk - 2; if (km < 1)   km = km + kkx
+            kp  = kk + 2; if (kp > kkx) kp = kp - kkx
+            km  = netcell(np)%nod(km)
+            kp  = netcell(np)%nod(kp)
+            lnu = lnu + 1
+            kn(1,lnu) = k ; kn(2,lnu) = km; kn(3,lnu) = 2
+            lnu = lnu + 1
+            kn(1,lnu) = k ; kn(2,lnu) = kp; kn(3,lnu) = 2
+            !call connectdbn(k,km,lnu)
+            !call connectdbn(k,kp,lnu)
+         endif
+      endif
+   enddo
+enddo
+numL = Lnu
+call doclose(mout)
+call findcells(0)
+
+end subroutine connecthangingnodes
+
 
 
    SUBROUTINE MERGENET()
@@ -3119,27 +3361,10 @@ end subroutine mergepoly
 
 
 
-
-
-
-  SUBROUTINE DSETNEWPOINT(XP,YP,K)
-
-  use m_netw
-  use m_missing
-  use gridoperations
-
-  implicit none
-  DOUBLE PRECISION :: XP, YP
-  INTEGER          :: K
-  CALL GIVENEWNODENUM(K)
-  XK(K) = XP; YK(K) = YP ; ZK(K) = dmiss; KC(K) = K
-  RETURN
-  END SUBROUTINE DSETNEWPOINT
-
+ 
   SUBROUTINE SETPOINT(XP,YP,ZP,K1)
 
   use m_netw
-  use gridoperations
 
   implicit none
   double precision :: XP, YP, ZP
@@ -3199,7 +3424,8 @@ end subroutine mergepoly
   use m_netw
   use m_wearelt
   use m_missing
-  use gridoperations
+  use m_sferic
+  use m_sferzoom
 
   implicit none
 
@@ -3207,9 +3433,7 @@ end subroutine mergepoly
   double precision :: XP, YP, ZP
 
   integer :: ll
-  double precision :: xkk
-  double precision :: ykk
-  double precision :: zkk
+  double precision :: xkk, ykk, zkk, rcx,rcy,dis
   integer :: K, KPREV
 
   IF (KP < 0) THEN
@@ -3218,15 +3442,27 @@ end subroutine mergepoly
      KPREV = 0
   ENDIF
 
+  if (jsfertek > 0) then
+       rcy = cr*dyh*ra*dg2rd 
+     ! call setrcirxy(xp,yp,rcx,rcy) 
+  endif
+
   KP = 0
   ZP = dmiss
   DO K = 1,NUMK
-     IF (K == KPREV) CYCLE
-     CALL DRIETWEE(XK(K),YK(K),ZK(K),XKK,YKK,ZKK)
-     IF (ABS(XKK-XP) .LT. RCIR .AND. ABS(YKK-YP) .LT. RCIR) THEN
-         KP = K
+     if (jsfertek > 0) then 
+        call dbdistancehk(xk(k),yk(k),xp,yp,dis) 
+        if (dis< rcy) then 
+           kp = k 
+        endif
+     else
+        IF (ABS(XK(k)-XP) .LT. rcir .AND. ABS(YK(k)-YP) .LT. rcir) THEN
+            KP = K
+        endif
+     endif
+     if (kp > 0) then
          CALL DISPNODE(KP)
-         ZP  = ZKK
+         ZP  = ZK(kp)
 !         XYZ = ZKK
          RETURN
      ENDIF
@@ -3702,6 +3938,7 @@ SUBROUTINE ISflowlink(XP, YP, LL) ! IS THIS A flow NODE OR A flow LINK ?
 
      ENDDO
      CALL READYY(' ',-1d0)
+     call setnodadm(0)
      netstat = NETSTAT_OK
   ENDIF
 
@@ -3848,8 +4085,8 @@ SUBROUTINE ISflowlink(XP, YP, LL) ! IS THIS A flow NODE OR A flow LINK ?
               IF (JASTART == 1) THEN
                  IBR = IBR + 1
                  CALL WALK1D(K1,IBR,NRL,JASTOP,KN316)
-                 ENDIF
               ENDIF
+           ENDIF
         ENDDO
 
         IF (NRL == NRLO) THEN ! REPAIR CODE, FILL IN ISOLATED BRANCHES
@@ -5775,6 +6012,7 @@ SUBROUTINE CUTCELWU(n12, jamasks, ipoly)
 
   SUBROUTINE REFINELINK2(L12,K12)
   use m_netw
+  use gridoperations
   implicit none
   integer :: L12,K12
 
@@ -7786,6 +8024,7 @@ end subroutine checknetwork
   RETURN
   END SUBROUTINE GIVENEWLINKNUM
 
+ 
 
   SUBROUTINE OGIVENEWNODENUM(KNU)
   use m_netw
@@ -7925,7 +8164,7 @@ end subroutine checknetwork
  ! call setnodadm(0); return
 
 
-  DEALLOCATE(NOD(K2)%LIN)
+  if ( allocated(nod(k2)%lin) ) DEALLOCATE(NOD(K2)%LIN) ! hk did same as sp few lines below
   ALLOCATE ( NOD(K2)%LIN(NMK(K2)) )
 
   NOD(K2)%LIN(1:NMK(K2)) = NODLIN(1:NMK(K2))
@@ -9344,6 +9583,7 @@ end subroutine checknetwork
 
 subroutine getnetnodenr(x,y,k)
 use m_missing
+use gridoperations
 double precision :: x,y,z
 integer          :: k 
 
@@ -11071,6 +11311,7 @@ numka:DO K0 = 1,NUMK                 ! ATTRACTION PARAMETERS
             AF = dble(I) / dble(NS)
             CALL READYY('Writing Samples File',AF)
          ENDIF
+         ! if (xs(i) > 179.87d0) xs(i) = xs(i) - 360d0 
          if ( abs(zs(i)).lt.1d6 ) then
             WRITE (MSAM,'(3(F16.7))') XS(I), YS(I), ZS(I)
          else if ( abs(zs(i)).lt.1d16 ) then
@@ -13488,11 +13729,11 @@ numka:DO K0 = 1,NUMK                 ! ATTRACTION PARAMETERS
 
          IF (Xa .NE. dXYMIS .AND. XB .NE. dXYMIS) THEN
 
-            if ( JAINVIEW.eq.1 ) then
-               Ldoit = dINVIEW(Xa,Ya,ya) .OR. dINVIEW(Xb,Yb,yb)
-            else
+            !if ( JAINVIEW.eq.1 ) then
+            !   Ldoit = dINVIEW(Xa,Ya,ya) .OR. dINVIEW(Xb,Yb,yb)
+            !else
                Ldoit = .true.
-            end if
+            !end if
 
             if ( JAINVIEW.eq.2 ) then
                call pinpok(xa,ya,NPL,XPL,YPL,ina,jins,dmiss)
@@ -17192,7 +17433,7 @@ tp:do no = 1,itatp
          where( zk.ne.DMISS ) zk = (smpmaxx-zk) / (smpmaxx-smpminn)
 
 !        create the samples at the netnodes locations
-         call copynetnodestosam()
+         call copynetnodestosam(0)
 
 !        not to be repeated hereafter
          Lcopymu = .false.
@@ -28796,7 +29037,9 @@ subroutine splitlink(xp, yp, L_, dcosmin, jatek, ierror)
    !  non-2D netlink, or isolated 2D netlink, or netlink outside selecting polygon
       if ( N2Dcells.eq.0 ) then
    !  add node
-      call setnewpoint(0.5d0*(xk(k1)+xk(k2)), 0.5d0*(yk(k1)+yk(k2)), zp, kp)
+      !call setnewpoint(0.5d0*(xk(k1)+xk(k2)), 0.5d0*(yk(k1)+yk(k2)), zp, kp)
+      call dsetnewpoint(0.5d0*(xk(k1)+xk(k2)), 0.5d0*(yk(k1)+yk(k2)), kp)
+ 
       call connectdbn(k1,kp,LnL)
       if ( jatek.eq.1 ) call teklink (LnL,ncoldn)
       kn(3,LnL) = k3
@@ -28855,7 +29098,7 @@ subroutine splitlink(xp, yp, L_, dcosmin, jatek, ierror)
 !     add node and make new links (once)
       if ( i.eq.1 ) then
       !  add node
-         call setnewpoint(0.5d0*(xk(kL)+xk(kR)), 0.5d0*(yk(kL)+yk(kR)), zp, kp)
+         call dsetnewpoint(0.5d0*(xk(kL)+xk(kR)), 0.5d0*(yk(kL)+yk(kR)), kp)
          call connectdbn(kL,kp,LnL)
          if ( jatek.eq.1 ) call teklink (LnL,ncoldn)
          kn(3,LnL) = k3
@@ -29436,6 +29679,7 @@ subroutine refinecellsandfaces2()
    use kdtree2Factory
    use m_sferic
    use gridoperations
+   use timespace
 
    implicit none
 
@@ -29493,7 +29737,8 @@ subroutine refinecellsandfaces2()
       call findcells(0)
 !   end if
 
-   if ( Ns.ge. 1 .and. jakdtree.eq.1 ) then
+   ! if ( Ns.ge. 1 .and. jakdtree.eq.1 .and. interpolationtype == 2) then
+   if ( Ns.ge. 1 .and. jakdtree.eq.1) then
 !      initialize kdtree
        call build_kdtree(treeglob,Ns,xs,ys, ierror, jsferic, dmiss)
        if ( ierror.ne.0 ) then
@@ -29501,7 +29746,6 @@ subroutine refinecellsandfaces2()
           call delete_kdtree2(treeglob)
           jakdtree = 0
        end if
-
    end if
 
 !  store original interpolation settings
@@ -29639,8 +29883,13 @@ subroutine refinecellsandfaces2()
             dxxmax = max(dxxmax, dl)
          enddo
          write (tex,'(2F14.3,I14)') dxxmin, dxxmax, nump
-         call confrm('Smallest and largest netlinks and number of cells: '//trim(tex)//' Continue? ', ja)
-         if ( ja.ne.1 ) exit   ! done
+         if (numrefcycles == 0) then 
+            call confrm('Smallest and largest netlinks and number of cells: '//trim(tex)//' Continue? ', ja)
+            if ( ja.ne.1 ) exit   ! done
+         else 
+            numrefcyc = numrefcyc + 1   
+            if (numrefcyc == numrefcycles) exit
+         endif
       end if
 
 !     reallocate
@@ -29658,7 +29907,9 @@ subroutine refinecellsandfaces2()
 !  connect hanging nodes
    if ( jagui.eq.1 ) then
       jaconnect = 1
-      call confrm('connect hanging nodes?', jaconnect)
+      if (numrefcycles == 0) then ! interactive
+         call confrm('connect hanging nodes?', jaconnect)
+      endif
    end if
    if ( jaconnect.eq.1 ) then
       where( kc.eq.-1 ) kc=1
@@ -29815,6 +30066,7 @@ subroutine refinecellsandfaces2()
    end subroutine set_initial_mask
 
 
+
 !> compute refinement criterion from sample data
    subroutine compute_jarefine(jarefine, jalink, jakdtree, ierror)
       use m_netw
@@ -29894,7 +30146,7 @@ subroutine refinecellsandfaces2()
          call find_hangingnodes(ic, jalink, linkbrother, numhang, Lhang, numhangnod, ishangingnod, numrefine)
 
 !        compute refinement criterion
-         call compute_jarefine_poly(N, xloc, yloc, jarefine(ic), jarefinelink, jakdtree, Lhang)
+         call compute_jarefine_poly(ic, N, xloc, yloc, jarefine(ic), jarefinelink, jakdtree, Lhang)
 
 !        fill jalink from jarefinelink
          do kk=1,N
@@ -29941,23 +30193,25 @@ subroutine refinecellsandfaces2()
 
 
 !> compute refinement criterion in a polygon
-!>    always based on averaging2
-   subroutine compute_jarefine_poly(N, x, y, jarefine, jarefinelink, jakdtree, Lhang)
+!>    always based on averaging2 or bilinarc
+   subroutine compute_jarefine_poly(ic, N, x, y, jarefine, jarefinelink, jakdtree, Lhang)
 
       use m_ec_interpolationsettings
       use m_samples, only: NS, xs, ys, zs
+      use m_arcinfo
       use m_samples_refine
       use m_physcoef
       use kdtree2Factory
       use m_missing, only: dmiss, JINS
       use m_polygon, only: NPL, xpl, ypl, zpl
-      use m_ec_basic_interpolation, only: averaging2, TerrorInfo
+      use m_ec_basic_interpolation, only: averaging2, TerrorInfo, triinterp2
       use m_sferic, only: jsferic, jasfer3D
       use geometry_module, only: dbdistance, comp_masscenter
 
 
       implicit none
 
+      integer,                            intent(in)    :: ic        !< polygon nr
       integer,                            intent(in)    :: N         !< polygon size
       integer                                           :: nnn(1)    !< polygon size
 
@@ -29980,10 +30234,12 @@ subroutine refinecellsandfaces2()
 
       double precision                                  :: dval, C, Courant, dlinklengthnew
 
-      integer                                           :: ivar, k, kp1, num, ierror
+      integer                                           :: ivar, k, kp1, num, ierror, jdla
       integer                                           :: jacounterclockwise          ! counterclockwise (1) or not (0) (not used here)
 
       double precision, parameter                       :: FAC = 1d0
+      double precision, dimension (6)                   :: transformcoef = 0
+      integer                                           :: mxsam,mysam
       type(TerrorInfo)                                  :: errorInfo
 !      double precision, parameter                       :: dtol = 1d-8
 
@@ -30056,17 +30312,31 @@ subroutine refinecellsandfaces2()
 
           if ( interpolationtype.ne.INTP_AVG .or. IAV.ne.6) then
     !         call qnerror('Interpolation type is set to averaging and averaging type to minabs', ' ', ' ')
-             interpolationtype = 2
-             IAV = AVGTP_MINABS    ! minabs
+              !interpolationtype = 2
+              IAV = AVGTP_MINABS    ! minabs
           end if
 
 !        only interpolate samples if necessary
          if ( Dt_maxcour.gt.0d0 .or. irefinetype.eq.ITYPE_MESHWIDTH ) then
             zc = DMISS
-            call averaging2(1,NS,xs,ys,zs,ipsam,xc,yc,zc,1,x,y,N,nnn,jakdtree, &
-                            dmiss, jsferic, jasfer3D, JINS, NPL, xpl, ypl, zpl, errorInfo)
+            if (interpolationtype == 1) then
+               if (ic == 1) then 
+                   jdla = 1 ; jakdtree = 1
+               else
+                   jdla = 0 ; jakdtree = 2
+               endif
+               mxsam = mca; mysam = nca
+               CALL triinterp2(Xc,Yc,zc,1,JDLA, &  !attemp to allow for smooth refinement used to be ok through jdla, does not work anymore icw kdtree
+               XS, YS, ZS, NS, dmiss, jsferic, jins, jasfer3D, NPL, MXSAM, MYSAM, XPL, YPL, ZPL, transformcoef)
+            else if (interpolationtype == 2) then 
+               call averaging2(1,NS,xs,ys,zs,ipsam,xc,yc,zc,1,x,y,N,nnn,jakdtree, &
+               dmiss, jsferic, jasfer3D, JINS, NPL, xpl, ypl, zpl, errorInfo)
+            else if (interpolationtype == 4) then 
+               call bilinarcinfo( xc(1), yc(1), zc(1) )
+            endif
+
 !           check if a value is found, use nearest sample from cell center if not so
-               if ( zc(1).eq.DMISS .and. jakdtree.eq.1 .and. jaoutsidecell.eq.1 ) then
+            if ( zc(1).eq.DMISS .and. jakdtree.eq.1 .and. jaoutsidecell.eq.1 ) then
                call find_nearest_sample_kdtree(treeglob,Ns,1,xs,ys,zs,xc(1),yc(1),1,isam,ierror, jsferic, dmiss)
                if ( ierror.ne.0 ) then
                   jakdtree=0
@@ -30095,13 +30365,14 @@ subroutine refinecellsandfaces2()
 
             if ( irefinetype.eq.ITYPE_WAVECOURANT ) then
 !              compute wave speed
+               !if (dval > 2d0 ) dval = 10000d0
                C = sqrt(AG*abs(dval))
-!               C = sqrt(AG*max(-dval,0d0))
+               ! C = sqrt(AG*max(-dval,0d0))
 
 !              compute wave Courant number
                Courant = C * Dt_maxcour / dlinklength(k)
                !if ( Courant.lt.1 .and. 0.5d0*dlinklength(k).gt.FAC*hmin ) then
-               if ( Courant.lt.1 .and. abs(dlinklengthnew-hmin).lt.abs(dlinklength(k)-hmin) ) then
+               if ( Courant.lt.1 .and. abs(dlinklengthnew-Dx_mincour).lt.abs(dlinklength(k)-Dx_mincour) ) then
                   num = num+1
                   jarefinelink(k) = 1
                else
@@ -30367,6 +30638,8 @@ subroutine refinecellsandfaces2()
          end if
       end do
 
+  
+
 !     connect new nodes in cells
       do k=1,nump
 !         write(6,*) k, jacell(k)
@@ -30572,9 +30845,17 @@ subroutine refinecellsandfaces2()
 !     error handling
  1234 continue
 
+      if (jsferic > 0) then 
+         do k = 1,numk
+            call inworld(xk(k))
+         enddo
+      endif 
+      
       return
    end subroutine refine_cells
 
+
+  
 
 !> split cells before refinement that:
 !>   have more nodes than allowed
@@ -30804,6 +31085,7 @@ subroutine refinecellsandfaces2()
    subroutine comp_jalink(jarefine, linkbrother, jalink)
       use m_netw
       use m_plotdots
+      use messagehandling
       implicit none
 
       integer, dimension(:), intent(inout) :: jarefine     !< refine cell (>0), or not
@@ -30820,8 +31102,8 @@ subroutine refinecellsandfaces2()
       integer                              :: numrefine    ! number of links to be refined
 
       integer, dimension(MMAX)             :: numlink      ! link identifier for quads
-      integer, dimension(4)                :: jaquadlink   ! refine quad edge (<>0) or not (0)
-
+      integer, dimension(5)                :: jaquadlink   ! refine quad edge (<>0) or not (0)
+                        ! was 4
       integer                              :: num, nump2, N_eff
 
       integer                              :: k, kk, kkm1, kkp1, L, N, k1, k2
@@ -30879,7 +31161,11 @@ subroutine refinecellsandfaces2()
 
 !                 check if we found all quad edges
                   if ( num.ne.4 ) then
-                    call qnerror('comp_jalink: numbering error', ' ', ' ')
+                    if (numrefcycles == 0) then 
+                       call qnerror('comp_jalink: numbering error', ' ', ' ')
+                    else
+                       call mess(level_warn,'comp_jalink: numbering error', ' ', ' ')
+                    endif
                     goto 1234
                   end if
 
@@ -31221,7 +31507,8 @@ subroutine remove_isolated_hanging_nodes(linkbrother, num)
                call find_common_node(L,Lother,k)
 
 !              check if node exists and if it is connected by two links only (an isolated hanging node)
-               if ( k.gt.0 .and. nmk(k).eq.2 ) then
+               if ( k.gt.0) then 
+                 if (nmk(k).eq.2 ) then
 !                 update netcell admin
                   do ii=1,lnn(L)
                      ic = lne(ii,L)
@@ -31282,6 +31569,7 @@ subroutine remove_isolated_hanging_nodes(linkbrother, num)
                   lnn(Lother) = 0
 
                   num = num+1
+                 end if
                end if
             end if
          end if
@@ -36313,11 +36601,9 @@ subroutine preparecells(md_netfile, jaidomain, jaiglobal_s, ierr)
     integer,          parameter   :: MAXITER = 1000
 
     y2 = 0.5d0*(y1_+y3_)
-    return
-
-    if ( jsferic.eq.0 .or. y1_.eq.y3_ ) then
-       y2 = 0.5d0*(y1_+y3_)
-       ierr = 0
+  
+    if ( jsferic.eq.0 .or. y1_.eq.y3_ .or. jamidlat == 0) then
+        ierr = 0
        return
     end if
 
@@ -37191,3 +37477,18 @@ ilp:do isplit=1,MAXSPLIT
 
    return
  end subroutine del_grid_outside_pol
+
+
+ subroutine inworld(xx) ! shifts x coordinates in world window, only call if jsferic == 1
+   use m_missing 
+   use m_sferic
+   double precision :: xx
+   if (xx .ne. dmiss) then 
+      do while (xx < xwleft) 
+         xx = xx + 360d0
+      enddo
+      do while (xx >  xwleft + 360d0) 
+         xx = xx - 360d0
+      enddo
+   endif
+   end subroutine inworld

@@ -2245,7 +2245,7 @@ end module m_flowexternalforcings
 module unstruc_channel_flow
 use m_network
 implicit none
-type(t_network), target       :: network
+type(t_network), target              :: network
 integer                       :: CSCalculationOption  !< Calculation option for total area computation in 1d
 
 logical,                public :: useVolumeTables                    !< Indicates whether 1d volume tables are useds
@@ -2462,11 +2462,25 @@ end subroutine default_turbulence
 
  integer                           :: icorio            !< Coriolis weigthing
 
- integer                           :: newcorio = 0      !< 0=up to 27-11-2019 , 1 = after
+ integer                           :: newcorio = 1      !< 0=up to 27-11-2019 , 1 = after
 
- integer                           :: jacorioconstant=0 !< Coriolis constant in sferic models anyway if set to 1
+ integer                           :: jacorioconstant=0 !< 0=default, 1=Coriolis constant in sferic models anyway,2=beta plane, both in cart. and spher. coor.
+
+ double precision                  :: Oceaneddyamp = 0.05d0  !< Amplitude of testcase Oceaneddy, negative = anticyclone
+
+ double precision                  :: Oceaneddyvel = 0.0d0   !< Velocity of testcase Oceaneddy, negative = anticyclone
+
+ double precision                  :: Oceaneddysizefrac = 0.05d0  !< Length scale relative to diagonal domain size
+
+ double precision                  :: Oceaneddysize = 0.0d0  !< Length scale relative to diagonal domain size
+
+ double precision                  :: Oceaneddyxoff = 0.0d0  !< relative domain size xoffset from centre
+
+ double precision                  :: Oceaneddyyoff = 0.0d0  !< relative domain size yoffset from centre
 
  double precision                  :: Corioadamsbashfordfac = 0d0  !< Coriolis Adams Bashford , 0d0 = explicit, 0.5 = AB
+
+ double precision                  :: Barocadamsbashfordfac = .5d0 !< Baroclinic Adams Bashford , 0d0 = explicit, 0.5 = AB
 
  double precision                  :: hhtrshcor         !< if > 0 safety for hu/hs in corio for now, ==0
 
@@ -2614,7 +2628,7 @@ end subroutine default_turbulence
  double precision                  :: drop3D            !< Apply losses in or 3D if downwind z below bob + 2/3 hu
  double precision                  :: zwsbtol = 0d0     !< zws(kb0) = bl - zwsbtol
  integer                           :: keepzlayeringatbed=2 !< only for z layers zws(kb0) = zslay instead of bl
-
+ integer                           :: jahusigmaupws = 1 !< Sigma oriented (1) or absolute (2) 
  double precision                  :: cflmx             !< max Courant nr ()
  double precision                  :: cflw              !< wave velocity fraction, total courant vel = u + cflw*wavevelocity
  double precision                  :: teta0             !< 1.00d0   ! .52      ! uniform teta in horizontal (),
@@ -2635,14 +2649,14 @@ end subroutine default_turbulence
  integer                           :: jalimnor          !< 0=limit x/y components, 1=limit normal/tangetial components
  integer                           :: limtypw           !< 0=no, 1=minmod, 2=vanleer, 3=koren 4=MC, 21=central voor wave action transport
 
- integer                           :: ifixedweirscheme     !< 0 = no, 1 = compact stencil, 2 = whole tile lifted, full subgrid weir + factor
+ integer                           :: ifixedweirscheme       !< 0 = no, 1 = compact stencil, 2 = whole tile lifted, full subgrid weir + factor
  integer                           :: ifxedweirfrictscheme   !< 0 = friction based on hu, 1 = friction based on subgrid weirfriction scheme
- double precision                  :: fixedweircontraction !< flow width = flow width*fixedweircontraction
- double precision                  :: fixedweirtopwidth    !< , e.g. 4.00 (m)
- double precision                  :: fixedweirtopfrictcoef     !< if .ne. dmiss, use this friction coefficient on top width
- double precision                  :: fixedweirtalud       !< , e.g. 4 ( ) for 1 to 4 talud
- double precision                  :: waquaweirthetaw=0.6d0 !< , e.g. 0.6
-
+ integer                           :: jasetadjacentbobs = 0  !< also lift adjacent bobs and bl of kadecel   
+ double precision                  :: fixedweircontraction   !< flow width = flow width*fixedweircontraction
+ double precision                  :: fixedweirtopwidth      !< , e.g. 4.00 (m)
+ double precision                  :: fixedweirtopfrictcoef  !< if .ne. dmiss, use this friction coefficient on top width
+ double precision                  :: fixedweirtalud         !< , e.g. 4 ( ) for 1 to 4 talud
+ double precision                  :: waquaweirthetaw=0.6d0  !< , e.g. 0.6
 
  double precision                  :: sini              !< uniform initial waterlevel (m),     (uniform bottom level = zkuni)
  double precision                  :: waterdepthini1D   !< uniform initial depth (m)
@@ -2678,6 +2692,7 @@ end subroutine default_turbulence
  double precision                  :: epswav            !< minimum waterdepth for wave calculations
  double precision                  :: chkhuexpl         !< only for step_explicit:  check computed flux beneath this waterdepth
  double precision                  :: chkadvd           !< check advection  for 'drying' below this (upwind) waterdepth
+ double precision                  :: chkwndd           !< check windstress for 'drying' below this waterdepth
  double precision                  :: chktempdep        !< check heatfluxes for 'drying' below this waterdepth
  double precision                  :: trsh_u1Lb = 0.0d0
  integer                           :: jposhchk          !< check for positive waterdepth; 0 = no
@@ -3162,7 +3177,8 @@ subroutine default_flowparameters()
     epswav     = 1d-2    ! minimum waterdepth for wave calculations
     chkhuexpl  = 0.1d0   ! only for step_explicit:  check computed flux beneath this waterdepth
     chkadvd    = 0.1d0   ! check advection  for 'drying' below this (upwind) waterdepth
-    chktempdep = 0.1d0   ! check heatfluxes for 'drying' below this waterdepth
+    chkwndd    = 0.1d0   ! check windstress              below this waterdepth
+    chktempdep = 0.1d0   ! check heatfluxes              below this waterdepth
 
     jposhchk   = 2       ! check for positive waterdepth; 0 = no
                          !                                1 = 0.7*dts, just redo
@@ -4549,6 +4565,7 @@ end subroutine reset_flowgeom
 
  double precision                  :: Tspinupturblogprof = 0d0    !< From Tstart to Tstart+Tspinupturblogprof, Turbulent profiles based on log profiles
                                                                   !< 0d0 = No
+ double precision                  :: alfaspin
  double precision                  :: dt_UpdateRoughness          !< Update interval for time dependent roughness values (from frictFile).
  double precision                  :: times_update_roughness(2)   !< Time window for wich the current time dependent roughness values (from FrictFile) are valid.
 
@@ -5483,9 +5500,10 @@ module m_transport
 
    double precision :: dsum
 
+
    double precision, dimension(:),   allocatable :: u1sed
    double precision, dimension(:),   allocatable :: q1sed
-end module m_transport
+ end module m_transport
 
 module m_fm_wq_processes
    use precision
@@ -6129,7 +6147,7 @@ contains
    end subroutine reset_save_ugrid_state
 
    end module m_save_ugrid_state
-
+   
    module m_subsidence
       logical                                              :: sdu_first     !< Flag indicating whether this is the first call to obtain the 'bedrock_surface_elevation'
       integer                                              :: sdu_update_s1 !< Flag indicating whether water levels at wet point should be updated (0 = no, 1 = yes)
@@ -6139,13 +6157,13 @@ contains
       double precision, dimension(:), allocatable          :: subsupl_tp    !< Previous field of 'bedrock_surface_elevation'
       double precision, dimension(:), allocatable          :: subsout       !< Output field of subsidence/uplift: latest field - initial field
       double precision, dimension(:), allocatable          :: sdu_blp       !< Previous field of bed level values at cell centres (temporary copy of bl(:))
-
+      
    contains
-
+   
       subroutine default_subsupl()
          jasubsupl     = 0
          sdu_first     = .true.
          sdu_update_s1 = 0
       end subroutine
-
+   
    end module m_subsidence
