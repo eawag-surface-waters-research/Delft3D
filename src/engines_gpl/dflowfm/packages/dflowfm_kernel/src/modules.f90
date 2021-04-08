@@ -2462,7 +2462,7 @@ end subroutine default_turbulence
 
  integer                           :: icorio            !< Coriolis weigthing
 
- integer                           :: newcorio = 1      !< 0=up to 27-11-2019 , 1 = after
+ integer                           :: newcorio = 0      !< 0=up to 27-11-2019 , 1 = after
 
  integer                           :: jacorioconstant=0 !< 0=default, 1=Coriolis constant in sferic models anyway,2=beta plane, both in cart. and spher. coor.
 
@@ -2628,7 +2628,7 @@ end subroutine default_turbulence
  double precision                  :: drop3D            !< Apply losses in or 3D if downwind z below bob + 2/3 hu
  double precision                  :: zwsbtol = 0d0     !< zws(kb0) = bl - zwsbtol
  integer                           :: keepzlayeringatbed=2 !< only for z layers zws(kb0) = zslay instead of bl
- integer                           :: jahusigmaupws = 1 !< Sigma oriented (1) or absolute (2) 
+ integer                           :: jahusigmaupws = 1 !< Sigma oriented (1) or absolute (2)
  double precision                  :: cflmx             !< max Courant nr ()
  double precision                  :: cflw              !< wave velocity fraction, total courant vel = u + cflw*wavevelocity
  double precision                  :: teta0             !< 1.00d0   ! .52      ! uniform teta in horizontal (),
@@ -2651,7 +2651,7 @@ end subroutine default_turbulence
 
  integer                           :: ifixedweirscheme       !< 0 = no, 1 = compact stencil, 2 = whole tile lifted, full subgrid weir + factor
  integer                           :: ifxedweirfrictscheme   !< 0 = friction based on hu, 1 = friction based on subgrid weirfriction scheme
- integer                           :: jasetadjacentbobs = 0  !< also lift adjacent bobs and bl of kadecel   
+ integer                           :: jasetadjacentbobs = 0  !< also lift adjacent bobs and bl of kadecel
  double precision                  :: fixedweircontraction   !< flow width = flow width*fixedweircontraction
  double precision                  :: fixedweirtopwidth      !< , e.g. 4.00 (m)
  double precision                  :: fixedweirtopfrictcoef  !< if .ne. dmiss, use this friction coefficient on top width
@@ -6147,7 +6147,7 @@ contains
    end subroutine reset_save_ugrid_state
 
    end module m_save_ugrid_state
-   
+
    module m_subsidence
       logical                                              :: sdu_first     !< Flag indicating whether this is the first call to obtain the 'bedrock_surface_elevation'
       integer                                              :: sdu_update_s1 !< Flag indicating whether water levels at wet point should be updated (0 = no, 1 = yes)
@@ -6157,13 +6157,13 @@ contains
       double precision, dimension(:), allocatable          :: subsupl_tp    !< Previous field of 'bedrock_surface_elevation'
       double precision, dimension(:), allocatable          :: subsout       !< Output field of subsidence/uplift: latest field - initial field
       double precision, dimension(:), allocatable          :: sdu_blp       !< Previous field of bed level values at cell centres (temporary copy of bl(:))
-      
+
    contains
-   
+
       subroutine default_subsupl()
          jasubsupl     = 0
          sdu_first     = .true.
          sdu_update_s1 = 0
       end subroutine
-   
+
    end module m_subsidence
