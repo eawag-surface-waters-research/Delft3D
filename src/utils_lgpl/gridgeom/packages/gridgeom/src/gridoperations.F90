@@ -6,7 +6,7 @@
    implicit none
 
    !new functions
-   public :: make1D2Dinternalnetlinks
+   public :: make1D2Dinternalnetlinks 
    public :: make1D2Droofgutterpipes
    public :: make1D2Dstreetinletpipes
    public :: make1D2DLongCulverts
@@ -29,6 +29,7 @@
    public :: increasenetcells
    public :: alreadycell
    public :: setnewpoint
+   public :: dsetnewpoint
    public :: CROSSED2d_BNDCELL
    public :: OTHERNODE
    public :: OTHERNODECHK
@@ -49,17 +50,11 @@
    public :: SETNODLIN
    public :: CHKLINSIZTONODE
    public :: GIVENEWNODENUM
-   public :: DRIETWEE
-   public :: TWEEDRIE
-   public :: DVIEW
    public :: INCELLS
    public :: sort_links_ccw
    public :: get_cellpolygon
    public :: make_dual_cell
-   
-   ! rest.f90
-   public ::INVIEW
-   public ::DINVIEW
+ 
    
    ! unstruct.F90
    public :: getcellsurface
@@ -82,6 +77,28 @@
    ! net.f90
    !-----------------------------------------------------------------!
 
+   !> TODO: Document me
+
+
+   SUBROUTINE GIVENEWNODENUM(KNU)
+   !LC use m_netw
+   use network_data
+   implicit none
+   integer :: KNU
+
+   integer :: kx
+   integer :: lx
+
+   IF ( NUMK == SIZE(KC) ) THEN
+      KX = 1.2*NUMK ; LX = 1.2*NUML
+      CALL INCREASENETW(KX, LX)
+   ENDIF
+   NUMK = NUMK + 1
+   KNU  = NUMK
+   RETURN
+   END SUBROUTINE GIVENEWNODENUM
+
+  
    !> Restore variables with backup data
    SUBROUTINE RESTORE()
    use network_data
@@ -504,17 +521,24 @@
 
    COMMON /HOWTOVIEW/ JVIEW, JAV, XYZ ! 1,2,3 OF 4
    CALL GIVENEWNODENUM(K1)
-   CALL TWEEDRIE(XP,YP,XK(K1),YK(K1),ZK(K1))
-   IF (JVIEW .EQ. 1) THEN
-      ZK(K1) = dmiss ! AvD: Was changed from XYZ to dmiss. TODO: What about other views. Used at all?
-   ELSE IF (JVIEW .EQ. 2) THEN
-      XK(K1) = XYZ
-   ELSE IF (JVIEW .EQ. 3) THEN
-      YK(K1) = XYZ
-   ENDIF
+   xk(k1) = xp
+   yk(k1) = yp
+   zk(k1) = zp
    IF (KC(K1) .EQ. 0) KC(K1) = 1
    RETURN
    END SUBROUTINE SETNEWPOINT
+
+  SUBROUTINE DSETNEWPOINT(XP,YP,K)
+  use network_data
+  use m_missing
+ 
+  implicit none
+  DOUBLE PRECISION :: XP, YP
+  INTEGER          :: K
+  CALL GIVENEWNODENUM(K)
+  XK(K) = XP; YK(K) = YP ; ZK(K) = dmiss; KC(K) = K
+  RETURN
+  END SUBROUTINE DSETNEWPOINT
 
    SUBROUTINE CROSSED2d_BNDCELL(NML, XP1, YP1, XP2, YP2 , NC1, Lfound)
    !use m_netw
@@ -729,7 +753,7 @@
             cycle ! 1D links mogen blijven
          endif
 
-         IF (DINVIEW(XK(K1),YK(K1),ZK(K1)) .OR. DINVIEW(XK(K2),YK(K2),ZK(K2)) ) THEN
+         !IF (DINVIEW(XK(K1),YK(K1),ZK(K1)) .OR. DINVIEW(XK(K2),YK(K2),ZK(K2)) ) THEN
             DO LLL = MAX(1,L-1), 1 ,-1
                KA = KN(1,LLL) ; KB = KN(2,LLL)
                ! If interfaces share same node, no further action:
@@ -747,7 +771,7 @@
                   KN(1,L) = 0; KN(2,L) = 0 ; KN(3, L) = -1; EXIT
                ENDIF
             ENDDO
-         ENDIF
+         !ENDIF
       ENDDO
    ENDIF
 
@@ -2168,123 +2192,6 @@
       end do
    end subroutine ggeo_construct_netcelllin_from_netcellnod
 
-
-   SUBROUTINE GIVENEWNODENUM(KNU)
-   !LC use m_netw
-   use network_data
-   implicit none
-   integer :: KNU
-
-   integer :: kx
-   integer :: lx
-
-   IF ( NUMK == SIZE(KC) ) THEN
-      KX = 1.2*NUMK ; LX = 1.2*NUML
-      CALL INCREASENETW(KX, LX)
-   ENDIF
-   NUMK = NUMK + 1
-   KNU  = NUMK
-   RETURN
-   END SUBROUTINE GIVENEWNODENUM
-
-   SUBROUTINE DRIETWEE(XD,YD,ZD,X,Y,Z)
-   implicit none
-   integer :: jav
-   integer :: jview
-   double precision :: xyz
-   DOUBLE PRECISION XD,YD,ZD,X,Y,Z
-   COMMON /HOWTOVIEW/ JVIEW, JAV, XYZ ! 1,2,3 OF 4
-   IF (JVIEW .EQ. 1) THEN        ! NORMAL
-      X = XD
-      Y = YD
-      Z = ZD
-   ELSE IF (JVIEW .EQ. 2) THEN   ! FROM LEFT
-      X = ZD
-      Y = YD
-      Z = XD
-   ELSE IF (JVIEW .EQ. 3) THEN   ! FROM TOP
-      X = XD
-      Y = -ZD
-      Z = YD
-   ELSE IF (JVIEW .EQ. 4) THEN
-      !    CALL DVIEW(XD,YD,-ZD,X,Y,Z)
-      CALL DVIEW(XD,YD,-ZD,X,Y,Z)
-   ELSE !In all other cases (e.g. when HOWTOVIEW is not set, e.g. in the gridgeom library)
-      x = xd
-      y = yd
-      z = zd
-   ENDIF
-   RETURN
-   END SUBROUTINE DRIETWEE
-
-   SUBROUTINE TWEEDRIE(X,Y,XD,YD,ZD)
-   implicit none
-   integer :: jav
-   integer :: jview
-   double precision :: xyz
-   double precision :: X,Y,XD,YD,ZD
-   COMMON /HOWTOVIEW/ JVIEW, JAV, XYZ ! 1,2,3 OF 4
-   IF (JVIEW .EQ. 1) THEN
-      XD = X
-      YD = Y
-      ZD = XYZ
-   ELSE IF (JVIEW .EQ. 2) THEN
-      ZD = X
-      YD = Y
-      XD = XYZ
-   ELSE IF (JVIEW .EQ. 3) THEN
-      XD = X
-      ZD = -Y
-      YD = XYZ
-   ELSE IF (JVIEW .EQ. 4) THEN
-      !    CALL DVIEW(XD,YD,ZD,X,Y,Z)  ! MOET NOG INVERS MAKEN
-      XD = X
-      YD = Y
-      ZD = XYZ
-   ELSE !In all other cases (e.g. when HOWTOVIEW is not set, e.g. in the gridgeom library)
-      xd = x
-      yd = y
-      zd = xyz
-   ENDIF
-
-   RETURN
-   END SUBROUTINE TWEEDRIE
-
-   SUBROUTINE DVIEW(XD,YD,ZD,X,Y,Z)
-   use m_missing
-   implicit none
-   double precision :: ce
-   integer :: i
-   double precision :: vs
-   double precision :: x0s
-   double precision :: y0s
-   ! GEEF perspectievische COORDINATEN
-   ! xD,yD,zD                             :coordinaten te tekenen punt
-   ! x0s,y0s                              :waar op scherm ligt kijklijn
-   ! X,Y,Z                                :scherm coordinaten
-   ! Vs                                   :viewing matrix na viema
-
-   DOUBLE PRECISION XD,YD,ZD,X,Y,Z
-   COMMON /VIEWMAT/ VS(4,4), X0S, Y0S
-   DIMENSION CE(4)
-   ! use z as zd temporarily (zet to zero when zd==dmiss)
-   if (zd == dmiss) then
-      z = 0
-   else
-      z = zd
-   end if
-   DO I = 1,3
-      CE(I) = VS(I,1)*XD + VS(I,2)*YD + VS(I,3)*Z + VS(I,4)
-   ENDDO
-   Z  = CE(3)
-   IF (Z .LT. 0) THEN
-      Z = dmiss
-   ELSE
-      X = CE(1)/Z  + X0S
-      Y = CE(2)/Z  + Y0S
-   ENDIF
-   END SUBROUTINE DVIEW
-
    SUBROUTINE INCELLS(XA,YA,KIN)
    !use m_netw
    use network_data
@@ -2590,34 +2497,7 @@
    ! rest.f90
    !-----------------------------------------------------------------!
 
-   LOGICAL FUNCTION INVIEW(X,Y)
-   use m_WEARELT
-   use m_missing, only: dmiss
-   implicit none
-   double precision :: x
-   double precision :: y
-   !     ZIT IK IN ZOOMGEBIED? NULLEN EN DEFAULTS NIET
 
-   IF (               X .NE. dmiss .AND.     &
-      X .GT. X1 .AND. X .LT. X2 .AND.             &
-      Y .GT. Y1 .AND. Y .LT. Y2     ) THEN
-   INVIEW = .TRUE.
-   ELSE
-      INVIEW = .FALSE.
-   ENDIF
-   RETURN
-   END FUNCTION INVIEW
-
-   LOGICAL FUNCTION DINVIEW(XD,YD,ZD)
-   implicit none
-   double precision :: x
-   double precision :: y
-   double precision :: z
-   DOUBLE PRECISION XD,YD,ZD
-   CALL DRIETWEE(XD,YD,ZD,X,Y,Z)
-   DINVIEW = INVIEW(X,Y)
-   RETURN
-   END FUNCTION DINVIEW
 
    !-----------------------------------------------------------------!
    ! unstruct.F90
@@ -2670,9 +2550,9 @@
    integer,          dimension(MMAX) :: LnnL
    integer                           :: nn
    integer                           :: jaccw  ! counterclockwise (1) or not (0) (not used here)
-   integer                           :: i, k
+   integer                           :: i, k, k2, k3, iv, ih
 
-   double precision                  :: ba, xzw, yzw
+   double precision                  :: ba, xzw, yzw, xh(4), yh(4)
 
    if ( jsferic.eq.1 .and. jasfer3D.eq.1 ) then
       nn = netcell(n)%N
@@ -2683,6 +2563,27 @@
       end do
 
       call comp_circumcenter3D(nn, xv, yv, xz, yz, jsferic, dmiss, dcenterinside)
+
+      if (nn == 3) then ! test: triangle both horizontal and vertical edges present => rectangle circumcentre
+         iv = 0 ; ih = 0
+         do k  = 1,3
+            k2 = k+ 1 ; if (k==3) k2 = 1
+            if ( xv(k) == xv(k2) ) then 
+                 iv = k 
+            else if (yv(k) == yv(k2) ) then 
+                 ih = k
+            endif
+         enddo
+         if ( iv .ne. 0 .and. ih .ne. 0) then 
+            xh(1) = minval(xv(1:3)) ; yh(1) = minval(yv(1:3)) 
+            xh(2) = maxval(xv(1:3)) ; yh(2) = minval(yv(1:3)) 
+            xh(3) = maxval(xv(1:3)) ; yh(3) = maxval(yv(1:3)) 
+            xh(4) = minval(xv(1:3)) ; yh(4) = maxval(yv(1:3)) 
+            call comp_circumcenter3D(4, xh, yh, xz, yz, jsferic, dmiss, dcenterinside)
+         endif
+
+      endif
+
    else
       !   get the cell polygon that is safe for periodic, spherical coordinates, inluding poles
       call get_cellpolygon(n,Mmax,nn,1d0,xv,yv,LnnL,Lorg,zz)
@@ -2699,6 +2600,7 @@
    ! CALL CIRR(XZ,YZ,31)
 
    end subroutine getcellweightedcenter
+
 
 
    !-----------------------------------------------------------------!
@@ -2828,7 +2730,7 @@
             NC1 = 0
             CALL INCELLS(XK(K), YK(K), NC1)
             IF (NC1 > 1) THEN
-               CALL SETNEWPOINT(XZ(NC1),YZ(NC1),ZK(K), NC2)
+               CALL dSETNEWPOINT(XZ(NC1),YZ(NC1), NC2)
                call connectdbn(NC2, K, L)
                KN(3,L) = kn3typ
                numValidLinks = numValidLinks + 1
@@ -2857,7 +2759,7 @@
                IF (NC1 > 0) THEN
                   call CROSSEDanother1Dlink(NuML, Xk(k), Yk(k), NC1, Lfound)
                   if (nc1 > 0) then 
-                     CALL SETNEWPOINT(XZ(NC1),YZ(NC1),ZK(K) ,NC2)
+                     CALL dSETNEWPOINT(XZ(NC1),YZ(NC1),NC2)
                      call connectdbn(NC2, K, L)
                      KN(3,L) = kn3typ
                      numValidLinks = numValidLinks + 1
@@ -2873,7 +2775,7 @@
                IF (NC1 > 0) THEN
                   call CROSSEDanother1Dlink(NuML, Xk(k), Yk(k), NC1, Lfound)
                   if (nc1 > 0) then 
-                     CALL SETNEWPOINT(XZ(NC1),YZ(NC1),ZK(K) ,NC2)
+                     CALL dSETNEWPOINT(XZ(NC1),YZ(NC1),NC2)
                      call connectdbn(NC2, K, L)
                      KN(3,L) = 3
                      numValidLinks = numValidLinks + 1
@@ -2981,7 +2883,7 @@
    do ip = 1,npoly
       n1 = nodroof(ip)
       if (n1 > 0) then
-         call setnewpoint(xz(n1),yz(n1),dmiss,k1)
+         call dsetnewpoint(xz(n1),yz(n1),k1)
          k2 = nod1D(ip)
          call connectdbn(k1,k2,l)
          kn(3,l) = 7
@@ -3050,7 +2952,7 @@
             call CLOSETO1Dnetnode(xzw(k), yzw(k), n1, dist)
          endif
          if (n1.ne.0) then
-            call setnewpoint(xzw(k),yzw(k),dmiss,k1)
+            call dsetnewpoint(xzw(k),yzw(k),k1)
             call connectdbn(k1,n1,l)
             kn(3,L) = 5
             numValidLinks = numValidLinks + 1
@@ -3988,12 +3890,14 @@
                   if (validOneDMask) then !again, Fortran does not have logical and two nested if statement are needed
                      k1ClientIndex = mesh1dInternalToClientMapping(k1)
                      if(oneDmask(k1ClientIndex)==1) then
-                        call setnewpoint(xz(cellId),yz(cellId),zk(cellId), newPointIndex)
+                        !call setnewpoint(xz(cellId),yz(cellId),zk(cellId), newPointIndex)
+                        call dsetnewpoint(xz(cellId),yz(cellId), newPointIndex)
                         call connectdbn(newPointIndex, k1, newLinkIndex)
                         oneDNode = k1
                      endif
                   else
-                     call setnewpoint(xz(cellId),yz(cellId),zk(cellId), newPointIndex)
+                     !call setnewpoint(xz(cellId),yz(cellId),zk(cellId), newPointIndex)
+                     call dsetnewpoint(xz(cellId),yz(cellId), newPointIndex)
                      call connectdbn(newPointIndex, k1, newLinkIndex)
                      oneDNode = k1
                   endif
@@ -4001,12 +3905,14 @@
                   if (validOneDMask) then !again, Fortran does not have logical and two nested if statement are needed
                      k2ClientIndex = mesh1dInternalToClientMapping(k2)
                      if(oneDmask(k2ClientIndex)==1) then
-                        call setnewpoint(xz(cellId),yz(cellId),zk(cellId), newPointIndex)
+                        !call setnewpoint(xz(cellId),yz(cellId),zk(cellId), newPointIndex)
+                        call dsetnewpoint(xz(cellId),yz(cellId), newPointIndex)
                         call connectdbn(newPointIndex, k2, newLinkIndex)
                         oneDNode = k2
                      endif
                   else
-                     call setnewpoint(xz(cellId),yz(cellId),zk(cellId), newPointIndex)
+                     !call setnewpoint(xz(cellId),yz(cellId),zk(cellId), newPointIndex)
+                     call dsetnewpoint(xz(cellId),yz(cellId), newPointIndex)
                      call connectdbn(newPointIndex, k2, newLinkIndex)
                      oneDNode = k2
                   endif
@@ -4198,11 +4104,13 @@
          if (validOneDMask) then
             clientIndex =  mesh1dInternalToClientMapping(cellTo1DNode(cellId))
             if (oneDMask(clientIndex)==1) then
-               call setnewpoint(xz(cellId), yz(cellId), zk(cellId), newPointIndex)
+               ! call setnewpoint(xz(cellId), yz(cellId), zk(cellId), newPointIndex)
+               call dsetnewpoint(xz(cellId), yz(cellId), newPointIndex)
                call connectdbn(newPointIndex, cellTo1DNode(cellId), newLinkIndex)
             endif
          else
-            call setnewpoint(xz(cellId),yz(cellId),zk(cellId), newPointIndex)
+            ! call setnewpoint(xz(cellId),yz(cellId),zk(cellId), newPointIndex)
+            call dsetnewpoint(xz(cellId),yz(cellId), newPointIndex)
             call connectdbn(newPointIndex, cellTo1DNode(cellId), newLinkIndex)
          endif
          if (newLinkIndex.ne.-1) then
