@@ -38,18 +38,25 @@
 !<
 
 !> \mainpage Unstruc API docs
-!! \li \b Main \b program: net.f90
+!! \li \b Main \b program: net_main.f90
 !! \li \b Model \b setup: unstruc_model.f90
 !! \li \b Network \b data: network.f90 + network_data.f90
 !! \li \b Global \b data: modules.f90 (flow, geometry, times, parameters, ...)
-!! \li \b GUI \b and \b network \b algorithms: net.f90
+
+!! \li \b GUI \b and \b network \b algorithms: net.f90 (and utils_lgpl/gridgeom)
 !! \li \b Unstructured \b flow \b solver: unstruc.f90
-!! \li \b Matrix \b solver: solve_guus.f90
+!! \li \b Matrix \b solver: solve_guus.f90, saadf90.F90, solve_petsc.F90
 !! \li \b Stations \b and \b cross-sections: monitoring.f90
+!! \li \b Hydraulic \b structures: unstruc_structures.F90
+!! \li \b 1D \b specifics: utils_gpl/flow1d
 !! \li \b Various \b helpers: REST.F90 unstruc_ini.f90, unstruc_files.f90, unstruc_startup.f90, unstruc_display.f90, rcm.f90
 !! \li \b RGFgrid \b routines: RGFSTUFF.f90
-!! \li \b NetCDF-IO: unstruc_netcdf.f90
+!! \li \b NetCDF-IO: unstruc_netcdf.f90 (and utils_lgpl/io_netcdf)
 !! \li \b WAQ-output: waq.f90, wrwaq.f90
+!! \li \b Sediment \b transport \b and \b morphology: fm_erosed.f90
+!! \li \b Waves: waves.f90
+!! \li \b Hydrology \b (distributed): hydrology.f90
+
 !! \li \b More: see file list
    PROGRAM unstruc
    USE M_GRID
