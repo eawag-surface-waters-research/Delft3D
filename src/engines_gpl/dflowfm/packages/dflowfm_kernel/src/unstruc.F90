@@ -44471,9 +44471,9 @@ end function is_1d_boundary_candidate
 
        enddo
        ! also allocate 3D-sigma bnd distribution for EC
-       allocate ( bndtr(itrac)%sigma(kmxd*nbndtr(itrac)) , stat=ierr )
+       call realloc(bndtr(itrac)%sigma, kmxd*nbndtr(itrac), stat=ierr, fill=0d0)
        call aerr('sigma(kmxd*nbndtr(itrac))', ierr, kmxd*nbndtr(itrac) )
-       allocate ( bndtr(itrac)%zminmax(2*nbndtr(itrac)) , stat=ierr )
+       call realloc(bndtr(itrac)%zminmax, 2*nbndtr(itrac), stat=ierr, fill=0d0)
        call aerr('bndtr(itrac)%zminmax(2*nbndtr(itrac))', ierr, 2*nbndtr(itrac) )
 
     end do   ! itrac
