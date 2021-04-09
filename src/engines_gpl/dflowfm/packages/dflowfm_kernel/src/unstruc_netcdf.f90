@@ -2572,17 +2572,17 @@ subroutine unc_append_3dflowgeom_put(imapfile, jaseparate, itim_in)
           !
        end if
        ! write structured 3d time-dependant output data
-       work1 = dmiss
+       work0 = dmiss ! For zws, can start at index 0 (kmx+1 vertical values)
        do kk=1,ndxi
           call getkbotktop(kk,kb,kt)
           call getlayerindices(kk, nlayb, nrlay)
-          do k = kb,kt
-             work1(k-kb+nlayb, kk) = zws(k)
+          do k = kb-1,kt
+             work0(k-kb+nlayb, kk) = zws(k)
           enddo
        end do
-       ierr = nf90_put_var(imapfile, id_flowelemzw(iid), work1(1:kmx,1:ndxi), (/ 1, 1, itim /), (/ kmx, ndxi, 1 /))
+       ierr = nf90_put_var(imapfile, id_flowelemzw(iid), work0(0:kmx,1:ndxi), (/ 1, 1, itim /), (/ kmx+1, ndxi, 1 /))
        
-       work1 = dmiss
+       work1 = dmiss ! For zcc, can start at index 1 (kmx   vertical values)
        do kk=1,ndxi
           call getkbotktop(kk,kb,kt)
           call getlayerindices(kk, nlayb, nrlay)
