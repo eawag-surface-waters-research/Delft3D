@@ -6350,3 +6350,54 @@ end subroutine partition_make_globalnumbers
          vsize = val
       end if
    end subroutine set_weights_for_METIS
+
+!> Gathers integer data from all processes and delivers it to a speicified root process.
+!! Note: the same number of data from each subdomain are sent.
+subroutine gather_int_data_mpi(ndata_send, data_send, ndata_gat, data_gat, ndata_recv, root, ierror)
+      use m_partitioninfo
+#ifdef HAVE_MPI
+      use mpi
+#endif
+
+      implicit none
+      integer,                        intent(in   ) :: ndata_send      !< Number of data in array data_send
+      integer, dimension(ndata_send), intent(in   ) :: data_send       !< Array of data on one subdomain to send
+      integer,                        intent(in   ) :: ndata_gat       !< Number of data in array data_gat
+      integer, dimension(ndata_gat),  intent(inout) :: data_gat        !< Array of data gathered from all subdomains to receive
+      integer,                        intent(in   ) :: ndata_recv      !< Number of data to receive from each subdomain
+      integer,                        intent(in   ) :: root            !< Rank of receiving process
+      integer,                        intent(inout) :: ierror          !< Error index
+
+      ierror = -1
+#ifdef HAVE_MPI
+      call mpi_gather(data_send, ndata_send, mpi_integer, data_gat, ndata_recv, mpi_integer, root, DFM_COMM_DFMWORLD, ierror)
+#endif
+
+end subroutine gather_int_data_mpi
+
+!> Gathers double precision data into specified locations from all processes in a group and delivers to a specified root process.
+!! Note: Different numbers of data on different subdomains can be sent.
+subroutine gather_double_data_mpi(ndata_send, data_send, ndata_gat, data_gat, ngroups, recvCount, displs, root, ierror)
+      use m_partitioninfo
+#ifdef HAVE_MPI
+      use mpi
+#endif
+
+      implicit none
+      integer,                                 intent(in   ) :: ndata_send !< Number of data in array data_send
+      double precision, dimension(ndata_send), intent(in   ) :: data_send  !< Array of data on one subdomain to send
+      integer,                                 intent(in   ) :: ndata_gat  !< Number of data in array data_gat
+      double precision, dimension(ndata_gat),  intent(inout) :: data_gat   !< Array of data gathered from all subdomains to receive
+      integer,                                 intent(in   ) :: ngroups    !< Number of groups (subdomains)
+      integer,          dimension(ngroups),    intent(in   ) :: recvCount  !< Array containing the number of elements that are received from each subdomain
+      integer,          dimension(ngroups),    intent(in   ) :: displs     !< Entry i in this array specifies the displacement (relative to data_gat) at which
+                                                                           !< to place the incoming data from process i (significant only at root)
+      integer,                                 intent(in   ) :: root       !< Rank of receiving process
+      integer,                                 intent(inout) :: ierror     !< Error index
+
+      ierror = -1
+#ifdef HAVE_MPI
+      call mpi_gatherv(data_send, ndata_send, mpi_double_precision, data_gat, recvCount, displs, mpi_double_precision, root, DFM_COMM_DFMWORLD, ierror)
+#endif
+
+end subroutine gather_double_data_mpi

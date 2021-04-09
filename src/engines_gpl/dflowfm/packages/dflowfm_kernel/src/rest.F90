@@ -6540,6 +6540,7 @@ subroutine init_lateral_his()
 use m_wind
 use m_flowparameters, only: jahislateral
 use m_alloc
+use m_partitioninfo, only: jampi
 implicit none
    ! At the starting time of history output, initialize variables
    if (jahislateral > 0.and. numlatsg > 0) then
@@ -6550,23 +6551,129 @@ implicit none
       call realloc(qLatRealCum,    numlatsg, keepExisting = .false., fill = 0d0)
       call realloc(qLatRealCumPre, numlatsg, keepExisting = .false., fill = 0d0)
       call realloc(qLatRealAve,    numlatsg, keepExisting = .false., fill = 0d0)
-   end if
-end subroutine init_lateral_his
 
+      if (jampi == 1) then
+         call realloc(qLatRealMPI, numlatsg, keepExisting = .false., fill = 0d0)
+      end if
+   end if
+   end subroutine init_lateral_his
+
+!> Fills in the geometry arrays of laterals for history output
+subroutine fill_geometry_arrays_lateral()
+   use m_wind
+   use m_alloc
+   use m_partitioninfo
+   use m_cell_geometry, only: xz, yz
+   implicit none
+
+   integer,          allocatable :: nodeCountLatGat(:), nlatndGat(:), recvCount(:), displs(:)
+   double precision, allocatable :: xGat(:), yGat(:) ! Coordinates that are gatherd data from all subdomains
+   integer                       :: i, j, k, k1, ierror, is, ie, n, nnode, ii
+
+   ! Allocate and construct geometry variable arrays (on one subdomain)
+   call realloc(nodeCountLat,   numlatsg, keepExisting = .false., fill = 0  )
+   call realloc(geomXLat,       nlatnd,   keepExisting = .false., fill = 0d0)
+   call realloc(geomyLat,       nlatnd,   keepExisting = .false., fill = 0d0)
+
+   j = 1
+   do i = 1, numlatsg
+      do k1=n1latsg(i),n2latsg(i)
+         k = nnlat(k1)
+         if (k > 0) then
+            geomXLat(j) = xz(k)
+            geomYLat(j) = yz(k)
+            j = j + 1
+         end if
+      end do
+      nodeCountLat(i) = n2latsg(i)-n1latsg(i)+1
+   end do
+
+   ! For parallel simulation: since only process 0000 writes the history output, the related arrays
+   ! are only made on 00000.
+   if (jampi > 0) then
+      call reduce_int_sum(nlatnd, nlatndMPI) ! Get total number of nodes among all subdomains
+
+      if (my_rank == 0) then
+         ! Allocate history output arrays
+         call realloc(nodeCountLatMPI, numlatsg,  keepExisting = .false., fill = 0  )
+         call realloc(geomXLatMPI,     nlatndMPI, keepExisting = .false., fill = 0d0)
+         call realloc(geomyLatMPI,     nlatndMPI, keepExisting = .false., fill = 0d0)
+
+         ! Allocate arrays that gather information from all subdomains
+         ! Data on all subdomains will be gathered in a contiguous way
+         call realloc(nodeCountLatGat, numlatsg*ndomains, keepExisting = .false., fill = 0  )
+         call realloc(xGat,            nlatndMPI,         keepExisting = .false., fill = 0d0)
+         call realloc(yGat,            nlatndMPI,         keepExisting = .false., fill = 0d0)
+         call realloc(displs,          ndomains,          keepExisting = .false., fill = 0  )
+         call realloc(nlatndGat,       ndomains,          keepExisting = .false., fill = 0  )
+      end if
+
+      ! Gather integer data, where the same number of data, i.e. numlatsg, are gathered from each subdomain to process 0000
+      call gather_int_data_mpi(numlatsg, nodeCountLat, numlatsg*ndomains, nodeCountLatGat, numlatsg, 0, ierror)
+
+      if (my_rank == 0) then
+         ! To use mpi gather call, construct displs, and nlatndGat (used as receive count for mpi gather call)
+         displs(1) = 0
+         do i = 1, ndomains
+            is = (i-1)*numlatsg+1 ! Starting index in nodeCountLatGat
+            ie = is+numlatsg-1    ! Endding index in nodeCountLatGat
+            nlatndGat(i) = sum(nodeCountLatGat(is:ie)) ! Total number of nodes on subdomain i
+            if (i > 1) then
+               displs(i) = displs(i-1) + nlatndGat(i-1)
+            end if
+         end do
+      end if
+
+      ! Gather double precision data, here, different number of data are gatherd from different subdomains to process 0000
+      call gather_double_data_mpi(nlatnd, geomXLat, nlatndMPI, xGat, ndomains, nlatndGat, displs, 0, ierror)
+      call gather_double_data_mpi(nlatnd, geomYLat, nlatndMPI, yGat, ndomains, nlatndGat, displs, 0, ierror)
+
+      if (my_rank == 0) then
+         ! Construct nodeCountLatMPI for history output
+         do i = 1, numlatsg
+            do n = 1, ndomains
+               k = (n-1)*numlatsg+i
+               nodeCountLatMPI(i) = nodeCountLatMPI(i) + nodeCountLatGat(k) ! Total number of nodes for later i among all subdomains
+            end do
+         end do
+
+         ! Construct geomXLatMPI and geomyLatMPI for history output
+         j = 1
+         do i = 1, numlatsg    ! for each lateral
+            do n = 1, ndomains ! on each sudomain
+               k = (n-1)*numlatsg+i        ! index in nodeCountLatGat
+               nnode = nodeCountLatGat(k)  ! lateral i on sumdomain n has nnode nodes
+               if (nnode > 0) then
+                  ii = (n-1)*numlatsg
+                  is = sum(nlatndGat(1:n-1)) + sum(nodeCountLatGat(ii+1:ii+i-1))! starting index in xGat
+                  do k1 = 1, nnode
+                     geomXLatMPI(j) = xGat(is+k1)
+                     geomyLatMPI(j) = yGat(is+k1)
+                     j = j + 1
+                  end do
+               end if
+            end do
+         end do
+      end if
+   end if
+end subroutine fill_geometry_arrays_lateral
 
 !> Updates values on laterals for history output, starting from the starting time of history output
+!! ! Note: if it is a parallel simulation, qplat is already for all subdomains, so no need for mpi communication.
 subroutine updateValuesOnLaterals(tim1, timestep)
    use m_flowtimes, only: ti_his, time_his, ti_hiss
    use m_wind, only: qqLat, numlatsg, qplat, qplatCum, qplatCumPre, qplatAve, qLatReal, &
-                     qLatRealCum, qLatRealCumPre, qLatRealAve, n1latsg,  n1latsg, n2latsg, nnlat
+                     qLatRealCum, qLatRealCumPre, qLatRealAve, n1latsg,  n1latsg, n2latsg, nnlat, qLatRealMPI
    use precision
    use m_alloc
    use m_flowparameters, only: eps10
+   use m_partitioninfo, only: jampi, reduce_double_sum
    implicit none
    double precision, intent(in) :: tim1     !< Current (new) time
    double precision, intent(in) :: timestep !< Timestep is the difference between tim1 and the last update time
 
    integer :: i, k, k1
+   double precision, allocatable :: qLatRealCumTmp(:)
 
    ! If current time has not reached the history output start time yet, do not update
    if (comparereal(tim1, ti_hiss, eps10) < 0) then
@@ -6578,8 +6685,6 @@ subroutine updateValuesOnLaterals(tim1, timestep)
    do i = 1,numlatsg
       do k1=n1latsg(i),n2latsg(i)
          k = nnlat(k1)
-         ! TODO: UNST-3639: this needs a jampi == 1 treatment
-         ! k > 0 prevents using laterals in another domain (in case of 1D / 1D2D)
          if (k > 0) then
             qLatReal(i) = qLatReal(i) + qqLat(k)
          end if
@@ -6600,13 +6705,22 @@ subroutine updateValuesOnLaterals(tim1, timestep)
 
    ! At the history output time, compute average discharge in the past His-interval
    if (comparereal(tim1, time_his, eps10)== 0 .and. ti_his > 0) then
-      ! TODO: UNST-3639: this needs MPI reduction sum first.
+      if (jampi == 1) then
+         call reduce_double_sum(numlatsg, qLatReal, qLatRealMPI)
+
+         call realloc(qLatRealCumTmp, numlatsg, keepExisting = .false., fill=0d0)
+         call reduce_double_sum(numlatsg, qLatRealCum, qLatRealCumTmp)
+      end if
       do i = 1, numlatsg
          qplatAve(i) = (qplatCum(i) - qplatCumPre(i)) / ti_his
-         qLatRealAve(i) = (qLatRealCum(i) - qLatRealCumPre(i)) / ti_his
-
          qplatCumPre(i) = qplatCum(i)
-         qLatRealCumPre(i) = qLatRealCum(i)
+         if (jampi == 1) then
+            qLatRealAve(i) = (qLatRealCumTmp(i) - qLatRealCumPre(i)) / ti_his
+            qLatRealCumPre(i) = qLatRealCumTmp(i)
+         else
+            qLatRealAve(i) = (qLatRealCum(i) - qLatRealCumPre(i)) / ti_his
+            qLatRealCumPre(i) = qLatRealCum(i)
+         end if
       enddo
    endif
 

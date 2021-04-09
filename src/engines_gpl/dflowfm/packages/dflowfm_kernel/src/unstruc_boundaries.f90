@@ -897,6 +897,7 @@ logical function initboundaryblocksforcings(filename)
  use unstruc_model, only: ExtfileNewMajorVersion, ExtfileNewMinorVersion
  use m_missing
  use m_ec_parameters, only: provFile_uniform
+ use m_partitioninfo, only: my_rank, idomain, jampi
 
  implicit none
 
@@ -936,7 +937,7 @@ logical function initboundaryblocksforcings(filename)
  double precision             :: tmpval
  integer                      :: iostat, ierr
  integer                      :: ilattype, nlat
- integer                      :: k, n, k1, nini
+ integer                      :: k, n, k1, nini, nLatTmp
  integer                      :: fmmethod
  integer, dimension(1)        :: targetindex
  integer                      :: ib, ibqh, ibt
@@ -1237,6 +1238,21 @@ logical function initboundaryblocksforcings(filename)
        call realloc(nnlat, max(2*ndxi, nlatnd+ndxi), keepExisting = .true., fill = 0)
        call selectelset_internal_nodes(xz, yz, kclat, ndxi, nnLat(nlatnd+1:), nlat, &
                                        loc_spec_type, locationfile, numcoordinates, xcoordinates, ycoordinates, branchid, chainage, nodeId)
+       ! If 0 is filled in nnLat, then adjust nlat so that 0 will be removed from nnLat (n1latsg, n2latsg and nlatnd will be ajusted automatically).
+       ! For parallel simulation, if the node is a ghost node, then also set it to 0 to remove it from the current subdomain.
+       nlattmp = nlat
+       do n = nlatnd+1, nlatnd + nlattmp
+          k = nnLat(n)
+          if (k == 0) then
+             nlat = nlat - 1
+          else
+             if (jampi == 1 .and. idomain(nnLat(n)) .ne. my_rank) then ! The node is a ghost node for the current subdomain
+                nnLat(n) = 0
+                nlat = nlat - 1
+             end if
+          end if
+       end do
+
        n1latsg(numlatsg) = nlatnd + 1
        n2latsg(numlatsg) = nlatnd + nlat
 

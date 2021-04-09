@@ -11448,6 +11448,7 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
 
  if (numlatsg > 0) then
     call init_lateral_his()
+    call fill_geometry_arrays_lateral()
  end if
 
  ! initialize waq and add to tracer administration
@@ -21779,7 +21780,11 @@ subroutine unc_write_his(tim)            ! wrihis
 
             ! Define geometry related variables
             lat_geom_container_name = 'lateral_geom'
-            nNodeTot = nlatnd
+            if (jampi == 0) then
+               nNodeTot = nlatnd
+            else
+               nNodeTot = nlatndMPI
+            end if
             ierr = sgeom_def_geometry_variables(ihisfile, lat_geom_container_name, 'lateral', 'point', nNodeTot, id_latdim, &
                id_latgeom_node_count, id_latgeom_node_coordx, id_latgeom_node_coordy)
 
@@ -22936,29 +22941,23 @@ subroutine unc_write_his(tim)            ! wrihis
       if (jahislateral > 0 .and. numlatsg > 0) then
          ierr = nf90_put_var(ihisfile, id_lat_predis_inst,  qplat,       start = (/1,it_his/), count = (/numlatsg,1/))
          ierr = nf90_put_var(ihisfile, id_lat_predis_ave,   qplatAve,    start = (/1,it_his/), count = (/numlatsg,1/))
-         ierr = nf90_put_var(ihisfile, id_lat_realdis_inst, qLatReal,    start = (/1,it_his/), count = (/numlatsg,1/))
+         if (jampi == 0) then
+            ierr = nf90_put_var(ihisfile, id_lat_realdis_inst, qLatReal,    start = (/1,it_his/), count = (/numlatsg,1/))
+         else
+            ierr = nf90_put_var(ihisfile, id_lat_realdis_inst, qLatRealMPI,    start = (/1,it_his/), count = (/numlatsg,1/))
+         end if
          ierr = nf90_put_var(ihisfile, id_lat_realdis_ave,  qLatRealAve, start = (/1,it_his/), count = (/numlatsg,1/))
          ! write geometry variables at the first time of history output
          if (it_his == 1) then
-            j = 1
-            call realloc(node_count, numlatsg, fill = 0)
-            call realloc(geom_x, nlatnd)
-            call realloc(geom_y, nlatnd)
-            do i = 1, numlatsg
-               do k1=n1latsg(i),n2latsg(i)
-                  k = nnlat(k1)
-                  if (k > 0) then
-                     geom_x(j) = xz(k)
-                     geom_y(j) = yz(k)
-                     j = j + 1
-                  end if
-               end do
-               node_count(i) = n2latsg(i)-n1latsg(i)+1
-            end do
-
-            ierr = nf90_put_var(ihisfile, id_latgeom_node_coordx, geom_x(1:nlatnd), start = (/ 1 /), count = (/ nlatnd /))
-            ierr = nf90_put_var(ihisfile, id_latgeom_node_coordy, geom_y(1:nlatnd), start = (/ 1 /), count = (/ nlatnd /))
-            ierr = nf90_put_var(ihisfile, id_latgeom_node_count, node_count)
+            if (jampi == 0) then
+               ierr = nf90_put_var(ihisfile, id_latgeom_node_coordx, geomXLat(1:nlatnd), start = (/ 1 /), count = (/ nlatnd /))
+               ierr = nf90_put_var(ihisfile, id_latgeom_node_coordy, geomYLat(1:nlatnd), start = (/ 1 /), count = (/ nlatnd /))
+               ierr = nf90_put_var(ihisfile, id_latgeom_node_count,  nodeCountLat)
+            else
+               ierr = nf90_put_var(ihisfile, id_latgeom_node_coordx, geomXLatMPI(1:nlatndMPI), start = (/ 1 /), count = (/ nlatndMPI /))
+               ierr = nf90_put_var(ihisfile, id_latgeom_node_coordy, geomYLatMPI(1:nlatndMPI), start = (/ 1 /), count = (/ nlatndMPI /))
+               ierr = nf90_put_var(ihisfile, id_latgeom_node_count,  nodeCountLatMPI)
+            end if
          end if
       end if
 
