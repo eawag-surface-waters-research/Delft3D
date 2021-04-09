@@ -727,8 +727,8 @@ void Dimr::runParallelUpdate (dimr_control_block * cb, double tStep) {
                 // subBlock.tNext:
                 //     tNext must be tStart, also when tStart=0,
                 //     to distinguish "start at begin of simulatione" and "after one time step"
-                cb->subBlocks[i].tNext = *currentTime + cb->subBlocks[i].tStart;
-                cb->subBlocks[i].tEnd  = *currentTime + cb->subBlocks[i].tEnd;
+                cb->subBlocks[i].tNext = cb->subBlocks[i].tStart;
+                cb->subBlocks[i].tEnd  = cb->subBlocks[i].tEnd;
             }
         }
     }
@@ -746,7 +746,7 @@ void Dimr::runParallelUpdate (dimr_control_block * cb, double tStep) {
                 // follower.tNext is the next point in time that this follower must be executed
                 // For this follower, the allowed timestep is "follower.tNext - currentTime"
                 double tStepFollower = cb->subBlocks[i].tNext - *currentTime;
-                if (tStepFollower == 0.0) {
+                if (tStepFollower <= 0.0) {
                     // This follower is already active
                     if (i < cb->masterSubBlockId) {
                         // Before MasterComponent:
@@ -809,7 +809,7 @@ void Dimr::runParallelUpdate (dimr_control_block * cb, double tStep) {
                             // tUpdate is the timeInterval since the last time this component was executed
                             // This is not the overall tStep!
                             double tUpdate;
-                            tUpdate = *currentTime - cb->subBlocks[i].tCur;
+                            tUpdate = *currentTime - masterComponent->tStart - cb->subBlocks[i].tCur;
                             // Hack: Always call RTCTools.Update with argument -1.0
                             if (cb->subBlocks[i].subBlocks[j].unit.component->type == COMP_TYPE_RTC) {
                                 tUpdate = -1.0;
@@ -905,7 +905,7 @@ void Dimr::runParallelUpdate (dimr_control_block * cb, double tStep) {
                         }
                     }
                     // All child blocks are executed. Update tCur and define the next time step that this block has to be executed.
-                    cb->subBlocks[i].tCur  = *currentTime;
+                    cb->subBlocks[i].tCur = *currentTime - masterComponent->tStart;
                     cb->subBlocks[i].tNext = cb->subBlocks[i].tNext + cb->subBlocks[i].tStep;
                     if (cb->subBlocks[i].tNext > cb->subBlocks[i].tEnd)
                         // This subBlock does not have to be executed anymore
