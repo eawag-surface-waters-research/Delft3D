@@ -24,12 +24,10 @@
      subroutine DLWQG2     ( pmsa   , fl     , ipoint , increm, noseg , &
                               noflux , iexpnt , iknmrk , noq1  , noq2  , &
                               noq3   , noq4   )
-!XXX DEC$ ATTRIBUTES DLLEXPORT, ALIAS: 'DLWQG2' :: DLWQG2
+!XXXDEC$ ATTRIBUTES DLLEXPORT, ALIAS: 'DLWQG2' :: DLWQG2
 !
 !*******************************************************************************
 !
-      use layered_sediment
-
       IMPLICIT NONE
 !
 !     Type    Name         I/O Description
@@ -50,7 +48,12 @@
 !*******************************************************************************
 !     This process replaces DELWAQ G in stand alone DELWAQ in the context of DFM-WAQ
 !
-!     PRELIMINARY VERSION for feasibility checks
+!     PRELIMINARY VERSION for feasibility checks Nov 2019
+!     UPDATE              for first practical application April 2021
+!                         (1) all S1 variables are now DELWAQ non-transportable states (so DELWAQ can take care of balances and initials)
+!                         (2) the arrays ext%%%% have been removed for simplicity
+!                             as the pdf and the code are made during developmen, mismatches between the two should/could not occur
+!                         (3) provision added for VB related uptake and release
 
 !     Author Jos van Gils
 !
@@ -67,13 +70,13 @@
       real, parameter  :: CSU_RATIO = 2.67
       real, parameter  :: rhodm = 2.6e6  ! g/m3 solid phase
 
-      integer,parameter   :: nofl = 79
-      integer             :: extpsys(nototsedpart)
-      integer             :: extssys(nototsedpart)
-      integer             :: extdsys(nototseddis)
-      integer             :: extfsys(nototseddis)
+      integer,parameter   :: nototsed = 34
+      integer,parameter   :: nototseddis = 12
+      integer,parameter   :: nototsedpart = 22
+      integer,parameter   :: nofl = 101
 
       ! pointers to concrete items
+      ! constants
       integer,parameter :: ip_ku_dFdcC20 = 1
       integer,parameter :: ip_kl_dFdcC20 = 2
       integer,parameter :: ip_ku_dFdcN20 = 3
@@ -206,79 +209,58 @@
       integer,parameter :: ip_DELT = 130
       integer,parameter :: ip_Poros = 131
       integer,parameter :: ip_Th_DelwaqG = 132
-      integer,parameter :: linsconstant = 132
+      integer,parameter :: ip_OutInt = 133
+      integer,parameter :: ip_ITIME = 134
+      integer,parameter :: ip_Exp_Dif = 135
+      integer,parameter :: ip_Exp_Tur = 136
+      integer,parameter :: linsconstant = 136
 
-      integer,parameter :: ip_pH = 133
-      integer,parameter :: ip_Temp = 134
-      integer,parameter :: ip_DifLen = 135
-      integer,parameter :: ip_TurCoef = 136
-      integer,parameter :: ip_DifCoef = 137
-      integer,parameter :: ip_Depth = 138
+      ! variables
+      integer,parameter :: ip_pH = 137
+      integer,parameter :: ip_Temp = 138
+      integer,parameter :: ip_Diflen = 139
+      integer,parameter :: ip_TurCoef = 140
+      integer,parameter :: ip_DifCoef = 141
+      integer,parameter :: ip_Depth = 142
 
-      ! dissolved concentrations in overlying water (dissolved) and S1 concentrations (particulate)
-      integer,parameter :: ip_CH4 = 139
-      integer,parameter :: ip_DOC = 140
-      integer,parameter :: ip_DON = 141
-      integer,parameter :: ip_DOP = 142
-      integer,parameter :: ip_DOS = 143
-      integer,parameter :: ip_NH4 = 144
-      integer,parameter :: ip_NO3 = 145
-      integer,parameter :: ip_OXY = 146
-      integer,parameter :: ip_PO4 = 147
-      integer,parameter :: ip_Si = 148
-      integer,parameter :: ip_SO4 = 149
-      integer,parameter :: ip_SUD = 150
-      integer,parameter :: ip_AAPS1 = 151
-      integer,parameter :: ip_APATPS1 = 152
-      integer,parameter :: ip_FeIIIpaS1 = 153
-      integer,parameter :: ip_OpalS1 = 154
-      integer,parameter :: ip_POC1S1 = 155
-      integer,parameter :: ip_POC2S1 = 156
-      integer,parameter :: ip_POC3S1 = 157
-      integer,parameter :: ip_POC4S1 = 158
-      integer,parameter :: ip_PON1S1 = 159
-      integer,parameter :: ip_PON2S1 = 160
-      integer,parameter :: ip_PON3S1 = 161
-      integer,parameter :: ip_PON4S1 = 162
-      integer,parameter :: ip_POP1S1 = 163
-      integer,parameter :: ip_POP2S1 = 164
-      integer,parameter :: ip_POP3S1 = 165
-      integer,parameter :: ip_POP4S1 = 166
-      integer,parameter :: ip_POS1S1 = 167
-      integer,parameter :: ip_POS2S1 = 168
-      integer,parameter :: ip_POS3S1 = 169
-      integer,parameter :: ip_POS4S1 = 170
-      integer,parameter :: ip_SUPS1 = 171
-      integer,parameter :: ip_VIVPS1 = 172
+      ! dissolved concentrations in overlying water (dissolved)
+      integer,parameter :: OFFSET_cwater = ip_Depth
 
-      ! settling fluxes
-      integer,parameter :: ip_fSedAAP = 173
-      integer,parameter :: ip_fSedAPATP = 174
-      integer,parameter :: ip_fSedFeIIIpa = 175
-      integer,parameter :: ip_fSedOpal = 176
-      integer,parameter :: ip_fSedPOC1 = 177
-      integer,parameter :: ip_fSedPOC2 = 178
-      integer,parameter :: ip_fSedPOC3 = 179
-      integer,parameter :: ip_fSedPOC4 = 180
-      integer,parameter :: ip_fSedPON1 = 181
-      integer,parameter :: ip_fSedPON2 = 182
-      integer,parameter :: ip_fSedPON3 = 183
-      integer,parameter :: ip_fSedPON4 = 184
-      integer,parameter :: ip_fSedPOP1 = 185
-      integer,parameter :: ip_fSedPOP2 = 186
-      integer,parameter :: ip_fSedPOP3 = 187
-      integer,parameter :: ip_fSedPOP4 = 188
-      integer,parameter :: ip_fSedPOS1 = 189
-      integer,parameter :: ip_fSedPOS2 = 190
-      integer,parameter :: ip_fSedPOS3 = 191
-      integer,parameter :: ip_fSedPOS4 = 192
-      integer,parameter :: ip_fSedSUP = 193
-      integer,parameter :: ip_fSedVIVP = 194
-      integer,parameter :: ip_OutInt = 195
-      integer,parameter :: ip_Itime = 196
-      integer,parameter :: lins = 196
+      ! S1 concentrations (dissolved+particulate)
+      integer,parameter :: OFFSET_S1 = ip_Depth + nototseddis
 
-      ! input constants
+      ! settling fluxes (particulate)
+      integer,parameter :: OFFSET_Setl = ip_Depth + nototseddis + nototsed
+
+      ! VB fluxes
+      integer,parameter :: OFFSET_VB = ip_Depth + nototseddis + nototsed + nototsedpart
+      integer,parameter :: nflvb = 22
+      integer,parameter :: ip_fN1VBup = OFFSET_VB + 1
+      integer,parameter :: ip_fN2VBup = OFFSET_VB + 2
+      integer,parameter :: ip_fP1VBup = OFFSET_VB + 3
+      integer,parameter :: ip_fP2VBup = OFFSET_VB + 4
+      integer,parameter :: ip_fS1VBup = OFFSET_VB + 5
+      integer,parameter :: ip_fS2VBup = OFFSET_VB + 6
+      integer,parameter :: ip_fC1VBrel = OFFSET_VB + 7
+      integer,parameter :: ip_fC2VBrel = OFFSET_VB + 8
+      integer,parameter :: ip_fC3VBrel = OFFSET_VB + 9
+      integer,parameter :: ip_fC4VBrel = OFFSET_VB + 10
+      integer,parameter :: ip_fN1VBrel = OFFSET_VB + 11
+      integer,parameter :: ip_fN2VBrel = OFFSET_VB + 12
+      integer,parameter :: ip_fN3VBrel = OFFSET_VB + 13
+      integer,parameter :: ip_fN4VBrel = OFFSET_VB + 14
+      integer,parameter :: ip_fP1VBrel = OFFSET_VB + 15
+      integer,parameter :: ip_fP2VBrel = OFFSET_VB + 16
+      integer,parameter :: ip_fP3VBrel = OFFSET_VB + 17
+      integer,parameter :: ip_fP4VBrel = OFFSET_VB + 18
+      integer,parameter :: ip_fS1VBrel = OFFSET_VB + 19
+      integer,parameter :: ip_fS2VBrel = OFFSET_VB + 20
+      integer,parameter :: ip_fS3VBrel = OFFSET_VB + 21
+      integer,parameter :: ip_fS4VBrel = OFFSET_VB + 22
+
+      integer,parameter :: lins = ip_Depth + nototseddis + nototsed + nototsedpart + nflvb
+
+      ! input constants and variables
       real :: ku_dFdcC20
       real :: kl_dFdcC20
       real :: ku_dFdcN20
@@ -408,21 +390,44 @@
       real :: RCdisSi20
       real :: TCdisSi
       real :: SWDisSi
-
-      ! not yet input
-      real,parameter :: exp_dif = 50.
-      real,parameter :: exp_tur = 10.
-
-      ! environment
       real :: DELT
       real :: Poros
       real :: Th_DelwaqG
+      integer :: OutInt
+      integer :: Itime
+      real :: Exp_Dif
+      real :: Exp_Tur
       real :: pH
       real :: Temp
-      real :: DifLen
+      real :: Diflen
       real :: TurCoef
       real :: DifCoef
       real :: Depth
+
+      ! VB fluxes
+      real :: fN1VBup
+      real :: fN2VBup
+      real :: fP1VBup
+      real :: fP2VBup
+      real :: fS1VBup
+      real :: fS2VBup
+      real :: fC1VBrel
+      real :: fC2VBrel
+      real :: fC3VBrel
+      real :: fC4VBrel
+      real :: fN1VBrel
+      real :: fN2VBrel
+      real :: fN3VBrel
+      real :: fN4VBrel
+      real :: fP1VBrel
+      real :: fP2VBrel
+      real :: fP3VBrel
+      real :: fP4VBrel
+      real :: fS1VBrel
+      real :: fS2VBrel
+      real :: fS3VBrel
+      real :: fS4VBrel
+
 
       ! states (2 versions for particulates, local without "S1", external with "S1"
       real :: CH4
@@ -461,32 +466,6 @@
       real :: SUP
       real :: VIVP
 
-      !real :: AAPS1
-      !real :: APATPS1
-      !real :: FeIIIpaS1
-      !real :: OpalS1
-      !real :: POC1S1
-      !real :: POC2S1
-      !real :: POC3S1
-      !real :: POC4S1
-      !real :: PON1S1
-      !real :: PON2S1
-      !real :: PON3S1
-      !real :: PON4S1
-      !real :: POP1S1
-      !real :: POP2S1
-      !real :: POP3S1
-      !real :: POP4S1
-      !real :: POS1S1
-      !real :: POS2S1
-      !real :: POS3S1
-      !real :: POS4S1
-      !real :: SUPS1
-      !real :: VIVPS1
-      !
-      integer :: OutInt
-      integer :: Itime
-
       ! local declarations per parent subroutine
       ! adspo4
       real tfe     , cads    , kads    , oh      , fra     , eqaapm  , im1     , im2     , im3     , cadst   , eqaap   , fads
@@ -517,55 +496,75 @@
       real tempcp  , tempcd  , fluxpr  , fluxds
       !OXIDCH4
       real chfunc  , sufunc  , lifunc  , flcox   , flcsu   , k0metox , k1metox , k0metsu , k1metsu
+      !     INTERFACE TO VB
+      real s1_nh4, s1_no3, s1_aap, s1_po4, s1_so4, s1_sud, vbflux
       !     other
       real temp20  , thick
 
-      ! sediment substances definition - in module layered_sediment
-
-      ! dissolved return fluxes
-      integer,parameter :: if_CH4 = 1
-      integer,parameter :: if_DOC = 2
-      integer,parameter :: if_DON = 3
-      integer,parameter :: if_DOP = 4
-      integer,parameter :: if_DOS = 5
-      integer,parameter :: if_NH4 = 6
-      integer,parameter :: if_NO3 = 7
-      integer,parameter :: if_OXY = 8
-      integer,parameter :: if_PO4 = 9
-      integer,parameter :: if_Si = 10
-      integer,parameter :: if_SO4 = 11
-      integer,parameter :: if_SUD = 12
+      ! sediment substances definition
+      integer,parameter :: is_CH4 = 1
+      integer,parameter :: is_DOC = 2
+      integer,parameter :: is_DON = 3
+      integer,parameter :: is_DOP = 4
+      integer,parameter :: is_DOS = 5
+      integer,parameter :: is_NH4 = 6
+      integer,parameter :: is_NO3 = 7
+      integer,parameter :: is_OXY = 8
+      integer,parameter :: is_PO4 = 9
+      integer,parameter :: is_Si = 10
+      integer,parameter :: is_SO4 = 11
+      integer,parameter :: is_SUD = 12
+      integer,parameter :: is_AAP = 13
+      integer,parameter :: is_APATP = 14
+      integer,parameter :: is_FeIIIpa = 15
+      integer,parameter :: is_Opal = 16
+      integer,parameter :: is_POC1 = 17
+      integer,parameter :: is_POC2 = 18
+      integer,parameter :: is_POC3 = 19
+      integer,parameter :: is_POC4 = 20
+      integer,parameter :: is_PON1 = 21
+      integer,parameter :: is_PON2 = 22
+      integer,parameter :: is_PON3 = 23
+      integer,parameter :: is_PON4 = 24
+      integer,parameter :: is_POP1 = 25
+      integer,parameter :: is_POP2 = 26
+      integer,parameter :: is_POP3 = 27
+      integer,parameter :: is_POP4 = 28
+      integer,parameter :: is_POS1 = 29
+      integer,parameter :: is_POS2 = 30
+      integer,parameter :: is_POS3 = 31
+      integer,parameter :: is_POS4 = 32
+      integer,parameter :: is_SUP = 33
+      integer,parameter :: is_VIVP = 34
 
       character*255 errorstring
       integer item, iflux, iseg, itel, noseg2d, iatt1, iatt2, ilay, isys, iseg2d, ip, ifl
       real :: mass3d, sedwatflx, cwater, totmas
+      integer, allocatable :: bottomsegments(:)
+      real, allocatable :: sedconc(:,:,:)
 
-      real*8 av(nolay,nolay), bv(nolay), rwork(nolay), term
-      real kp(nolay,nototsed), lp(nolay,nototsed)
-      integer iwork(nolay), ierror
+      integer,parameter :: nolay = 7
+      real :: tt(nolay), td(nolay)
+      real :: dl(nolay) = [ 0.001, 0.002, 0.004, 0.008, 0.016, 0.032, 0.037 ]   ! layer thickness
+      real :: sd(nolay) = [ 0.000, 0.001, 0.003, 0.007, 0.015, 0.031, 0.063 ]   ! depth of upper surface of layer
+      real :: bd(nolay) = [ 0.001, 0.003, 0.007, 0.015, 0.031, 0.063, 0.100 ]   ! bottomdepth (depth of lower surface of layer)
+      real(kind=kind(1.0d0)) :: av(nolay,nolay), bv(nolay), rwork(nolay), term
+      real :: kp(nolay,nototsed), lp(nolay,nototsed)
+      integer :: iwork(nolay), ierror
 
-      integer :: luout
+      character(len=160) :: moname
+      character(len=20)  :: syname(nototsed) = &
+                  ['CH4-pore    ', 'DOC-pore    ', 'DON-pore    ', 'DOP-pore    ', 'DOS-pore    ', 'NH4-pore    ', &
+                   'NO3-pore    ', 'OXY-pore    ', 'PO4-pore    ', 'Si-pore     ', 'SO4-pore    ', 'SUD-pore    ', &
+                   'AAP-bulk    ', 'APATP-bulk  ', 'FeIIIpa-bulk', 'Opal-bulk   ', 'POC1-bulk   ', 'POC2-bulk   ', &
+                   'POC3-bulk   ', 'POC4-bulk   ', 'PON1-bulk   ', 'PON2-bulk   ', 'PON3-bulk   ', 'PON4-bulk   ', &
+                   'POP1-bulk   ', 'POP2-bulk   ', 'POP3-bulk   ', 'POP4-bulk   ', 'POS1-bulk   ', 'POS2-bulk   ', &
+                   'POS3-bulk   ', 'POS4-bulk   ', 'SUP-bulk    ', 'VIVP-bulk   ']
 
-      character*160 :: moname
-      character*20  :: syname(nototsed) = ['CH4-pore            ','DOC-pore            ','DON-pore            ', &
-                                           'DOP-pore            ','DOS-pore            ','NH4-pore            ', &
-                                           'NO3-pore            ','OXY-pore            ','PO4-pore            ', &
-                                           'Si-pore             ','SO4-pore            ','SUD-pore            ', &
-                                           'AAP-bulk            ','APATP-bulk          ','FeIIIpa-bulk        ', &
-                                           'Opal-bulk           ','POC1-bulk           ','POC2-bulk           ', &
-                                           'POC3-bulk           ','POC4-bulk           ','PON1-bulk           ', &
-                                           'PON2-bulk           ','PON3-bulk           ','PON4-bulk           ', &
-                                           'POP1-bulk           ','POP2-bulk           ','POP3-bulk           ', &
-                                           'POP4-bulk           ','POS1-bulk           ','POS2-bulk           ', &
-                                           'POS3-bulk           ','POS4-bulk           ','SUP-bulk            ', &
-                                           'VIVP-bulk           ']
+      integer, save :: lumap
 
       logical :: first = .true.
-      logical :: only_ox, dissub
-
-      !
-      ! For efficiency
-      !
+      logical :: only_ox, dissub, sw_vb
       save
 
 !
@@ -766,132 +765,60 @@
           ! Switches
           ONLY_OX = .FALSE.
           IF (SWOxCon .GT. 0.5) ONLY_OX = .TRUE.
+          SW_VB = .false. ! VB part only if defined
+          if (increm(ip_fN1VBup).gt.0) SW_VB = .true.
 
           ! Check if sum of array dl equals input fixed layer thickness
           thick = sum(dl)
-          IF (abs(thick-Th_DelwaqG).gt.0.01*Th_DelwaqG) CALL ERRSYS ('Inconsistent layer definition',1)
+           IF (abs(thick-Th_DelwaqG).gt.0.01*Th_DelwaqG) CALL ERRSYS ('Inconsistent layer definition',1)
 
           ! Determine 2D structure, first find dimension and next fill a mapping array
           noseg2d = 0
           do iseg = 1,noseg
-              !CALL DHKMRK(1,IKNMRK(iseg),iatt1) ! pick up first attribute
+              CALL DHKMRK(1,IKNMRK(iseg),iatt1) ! pick up first attribute
               CALL DHKMRK(2,IKNMRK(iseg),iatt2) ! pick up second attribute
-              !if (iatt1.gt.0) then
+              if (iatt1.gt.0) then
                   if (iatt2.eq.0.or.iatt2.eq.3) then
                       noseg2d = noseg2d+1
                   endif
-              !endif
+              endif
           enddo
           allocate(bottomsegments(noseg2d))
           itel = 0
           do iseg = 1,noseg
-              !CALL DHKMRK(1,IKNMRK(iseg),iatt1) ! pick up first attribute
+              CALL DHKMRK(1,IKNMRK(iseg),iatt1) ! pick up first attribute
               CALL DHKMRK(2,IKNMRK(iseg),iatt2) ! pick up second attribute
-              !if (iatt1.gt.0) then
+              if (iatt1.gt.0) then
                   if (iatt2.eq.0.or.iatt2.eq.3) then
                       itel = itel+1
                       bottomsegments(itel) = iseg
                   endif
-              !endif
+              endif
           enddo
 
           ! create layered structure
           allocate (sedconc(nolay,nototsed,noseg2d))
 
-          ! establish administration for S1 states that are present outside and inside
-          extpsys(1) = ip_AAPS1
-          extpsys(2) = ip_APATPS1
-          extpsys(3) = ip_FeIIIpaS1
-          extpsys(4) = ip_OpalS1
-          extpsys(5) = ip_POC1S1
-          extpsys(6) = ip_POC2S1
-          extpsys(7) = ip_POC3S1
-          extpsys(8) = ip_POC4S1
-          extpsys(9) = ip_PON1S1
-          extpsys(10) = ip_PON2S1
-          extpsys(11) = ip_PON3S1
-          extpsys(12) = ip_PON4S1
-          extpsys(13) = ip_POP1S1
-          extpsys(14) = ip_POP2S1
-          extpsys(15) = ip_POP3S1
-          extpsys(16) = ip_POP4S1
-          extpsys(17) = ip_POS1S1
-          extpsys(18) = ip_POS2S1
-          extpsys(19) = ip_POS3S1
-          extpsys(20) = ip_POS4S1
-          extpsys(21) = ip_SUPS1
-          extpsys(22) = ip_VIVPS1
-
-          ! establish administration for dissolved states in overlying water
-          extdsys(1) = ip_CH4
-          extdsys(2) = ip_DOC
-          extdsys(3) = ip_DON
-          extdsys(4) = ip_DOP
-          extdsys(5) = ip_DOS
-          extdsys(6) = ip_NH4
-          extdsys(7) = ip_NO3
-          extdsys(8) = ip_OXY
-          extdsys(9) = ip_PO4
-          extdsys(10) = ip_Si
-          extdsys(11) = ip_SO4
-          extdsys(12) = ip_SUD
-
-          ! idem settling fluxes
-          extssys(1) = ip_fSedAAP
-          extssys(2) = ip_fSedAPATP
-          extssys(3) = ip_fSedFeIIIpa
-          extssys(4) = ip_fSedOpal
-          extssys(5) = ip_fSedPOC1
-          extssys(6) = ip_fSedPOC2
-          extssys(7) = ip_fSedPOC3
-          extssys(8) = ip_fSedPOC4
-          extssys(9) = ip_fSedPON1
-          extssys(10) = ip_fSedPON2
-          extssys(11) = ip_fSedPON3
-          extssys(12) = ip_fSedPON4
-          extssys(13) = ip_fSedPOP1
-          extssys(14) = ip_fSedPOP2
-          extssys(15) = ip_fSedPOP3
-          extssys(16) = ip_fSedPOP4
-          extssys(17) = ip_fSedPOS1
-          extssys(18) = ip_fSedPOS2
-          extssys(19) = ip_fSedPOS3
-          extssys(20) = ip_fSedPOS4
-          extssys(21) = ip_fSedSUP
-          extssys(22) = ip_fSedVIVP
-
-          ! idem return fluxes
-          extfsys(1) = if_CH4
-          extfsys(2) = if_DOC
-          extfsys(3) = if_DON
-          extfsys(4) = if_DOP
-          extfsys(5) = if_DOS
-          extfsys(6) = if_NH4
-          extfsys(7) = if_NO3
-          extfsys(8) = if_OXY
-          extfsys(9) = if_PO4
-          extfsys(10) = if_Si
-          extfsys(11) = if_SO4
-          extfsys(12) = if_SUD
-
           ! create initial values for sedconc; zero except parameters taken from external model
+          ! substance dependent profile to be added!!
           sedconc = 0.0
           do iseg2d = 1,noseg2d
               iseg = bottomsegments(iseg2d)
-              do isys = 1,nototsedpart
-                  mass3d = PMSA(IPOINT(extpsys(isys))+(iseg-1)*INCREM(extpsys(isys))) / Th_DelwaqG ! g/m2 to g/m3
+              do isys = 1,nototsed
+                  ip = offset_s1 + isys
+                  mass3d = PMSA(IPOINT(ip)+(iseg-1)*INCREM(ip)) / Th_DelwaqG ! g/m2 to g/m3
                   do ilay = 1,nolay
-                      sedconc(ilay,nototseddis+isys,iseg2d) = mass3d
+                      sedconc(ilay,isys,iseg2d) = mass3d
                   enddo
               enddo
           enddo
 
           ! Header
-          open (newunit = luout,file='delwaqg.map',access='stream')
+          open (newunit=lumap,file='delwaqg.map',access='stream')
           moname = ''
-          write (luout) moname
-          write (luout) nototsed,nolay*noseg2d
-          write (luout) syname
+          write (lumap) moname
+          write (lumap) nototsed,nolay*noseg2d
+          write (lumap) syname
 
           first = .false.
 
@@ -900,8 +827,8 @@
       ! output
       Itime = nint(PMSA(IPOINT(ip_Itime)))
       if (mod(itime,outint*3600).eq.0) then
-          write (luout) itime,(((sedconc(ilay,isys,iseg2d)/poros,isys=1,nototseddis), &
-                                (sedconc(ilay,isys,iseg2d),isys=nototseddis+1,nototsed),iseg2d=1,noseg2d),ilay=1,nolay)
+          write (lumap) itime,(((sedconc(ilay,isys,iseg2d)/poros,isys=1,nototseddis), &
+                               (sedconc(ilay,isys,iseg2d),isys=nototseddis+1,nototsed),iseg2d=1,noseg2d),ilay=1,nolay)
       endif
 
       ! loop over bottom segments
@@ -930,22 +857,63 @@
               ip  = lins+isys
               pmsa(ipoint(ip)+(iseg-1)*increm(ip)) = totmas
           enddo
+          if (SW_VB) then
+              ip = lins+is_nh4
+              s1_nh4 = pmsa(ipoint(ip)+(iseg-1)*increm(ip))
+              ip = lins+is_no3
+              s1_no3 = pmsa(ipoint(ip)+(iseg-1)*increm(ip))
+              ip = lins+is_aap
+              s1_aap = pmsa(ipoint(ip)+(iseg-1)*increm(ip))
+              ip = lins+is_po4
+              s1_po4 = pmsa(ipoint(ip)+(iseg-1)*increm(ip))
+              ip = lins+is_so4
+              s1_so4 = pmsa(ipoint(ip)+(iseg-1)*increm(ip))
+              ip = lins+is_sud
+              s1_sud = pmsa(ipoint(ip)+(iseg-1)*increm(ip))
+
+              fN1VBup = PMSA(IPOINT(ip_fN1VBup)+(iseg-1)*INCREM(ip_fN1VBup))
+              fN2VBup = PMSA(IPOINT(ip_fN2VBup)+(iseg-1)*INCREM(ip_fN2VBup))
+              fP1VBup = PMSA(IPOINT(ip_fP1VBup)+(iseg-1)*INCREM(ip_fP1VBup))
+              fP2VBup = PMSA(IPOINT(ip_fP2VBup)+(iseg-1)*INCREM(ip_fP2VBup))
+              fS1VBup = PMSA(IPOINT(ip_fS1VBup)+(iseg-1)*INCREM(ip_fS1VBup))
+              fS2VBup = PMSA(IPOINT(ip_fS2VBup)+(iseg-1)*INCREM(ip_fS2VBup))
+
+              fC1VBrel = PMSA(IPOINT(ip_fC1VBrel)+(iseg-1)*INCREM(ip_fC1VBrel))
+              fC2VBrel = PMSA(IPOINT(ip_fC2VBrel)+(iseg-1)*INCREM(ip_fC2VBrel))
+              fC3VBrel = PMSA(IPOINT(ip_fC3VBrel)+(iseg-1)*INCREM(ip_fC3VBrel))
+              fC4VBrel = PMSA(IPOINT(ip_fC4VBrel)+(iseg-1)*INCREM(ip_fC4VBrel))
+              fN1VBrel = PMSA(IPOINT(ip_fN1VBrel)+(iseg-1)*INCREM(ip_fN1VBrel))
+              fN2VBrel = PMSA(IPOINT(ip_fN2VBrel)+(iseg-1)*INCREM(ip_fN2VBrel))
+              fN3VBrel = PMSA(IPOINT(ip_fN3VBrel)+(iseg-1)*INCREM(ip_fN3VBrel))
+              fN4VBrel = PMSA(IPOINT(ip_fN4VBrel)+(iseg-1)*INCREM(ip_fN4VBrel))
+              fP1VBrel = PMSA(IPOINT(ip_fP1VBrel)+(iseg-1)*INCREM(ip_fP1VBrel))
+              fP2VBrel = PMSA(IPOINT(ip_fP2VBrel)+(iseg-1)*INCREM(ip_fP2VBrel))
+              fP3VBrel = PMSA(IPOINT(ip_fP3VBrel)+(iseg-1)*INCREM(ip_fP3VBrel))
+              fP4VBrel = PMSA(IPOINT(ip_fP4VBrel)+(iseg-1)*INCREM(ip_fP4VBrel))
+              fS1VBrel = PMSA(IPOINT(ip_fS1VBrel)+(iseg-1)*INCREM(ip_fS1VBrel))
+              fS2VBrel = PMSA(IPOINT(ip_fS2VBrel)+(iseg-1)*INCREM(ip_fS2VBrel))
+              fS3VBrel = PMSA(IPOINT(ip_fS3VBrel)+(iseg-1)*INCREM(ip_fS3VBrel))
+              fS4VBrel = PMSA(IPOINT(ip_fS4VBrel)+(iseg-1)*INCREM(ip_fS4VBrel))
+          endif
 
           ! update sedconc for settling
           do isys = 1,nototsedpart
-              sedwatflx = PMSA(IPOINT(extssys(isys))+(iseg-1)*INCREM(extssys(isys))) * delt ! g/m2
-              sedconc(1,nototseddis+isys,iseg2d) = sedconc(1,nototseddis+isys,iseg2d) + sedwatflx/dl(1) ! to g/m3
+              ip = offset_setl + isys
+              sedwatflx = PMSA(IPOINT(ip)+(iseg-1)*INCREM(ip))  ! g/m2/d
+              sedconc(1,nototseddis+isys,iseg2d) = sedconc(1,nototseddis+isys,iseg2d) + sedwatflx/dl(1)*delt ! to g/m3
+              iflux = nototseddis + nofl + isys
+              fl(iflux+(iseg-1)*noflux) = sedwatflx/depth
           enddo
 
           kp = 0.0
           lp = 0.0
           do ifl = 1,nofl
-              ip = lins + nototsed + ifl
-              pmsa(ipoint(ip)+(iseg-1)*increm(ip)) = 0.0
+              iflux = nototseddis + ifl
+              fl(iflux+(iseg-1)*noflux) = 0.0
           enddo
 
           do ilay = 1,nolay
-          ! Derive states from sedconc
+         ! Derive states from sedconc
           CH4 = sedconc(ilay,is_CH4,iseg2d)
           DOC = sedconc(ilay,is_DOC,iseg2d)
           DON = sedconc(ilay,is_DON,iseg2d)
@@ -1092,8 +1060,8 @@
           kp(ilay,is_po4) = kp(ilay,is_po4) - fads
           kp(ilay,is_aap) = kp(ilay,is_aap) + fads
     !     store in output
-          ip = lins + nototsed + 1
-          pmsa(ipoint(ip)+(iseg-1)*increm(ip)) = pmsa(ipoint(ip)+(iseg-1)*increm(ip)) + fads*dl(ilay)
+          iflux = nototseddis + 1
+          fl(iflux+(iseg-1)*noflux) = fl(iflux+(iseg-1)*noflux) + fads*dl(ilay) /depth
 
 
           ! +++++++++++++++++++++++++++++++++++++++++++
@@ -1132,8 +1100,8 @@
           kp(ilay,is_no3) = kp(ilay,is_no3) + flnit
           kp(ilay,is_oxy) = kp(ilay,is_oxy) - flnit * 4.571
     !     store in output
-          ip = lins + nototsed + 2
-          pmsa(ipoint(ip)+(iseg-1)*increm(ip)) = pmsa(ipoint(ip)+(iseg-1)*increm(ip)) + flnit*dl(ilay)
+          iflux = nototseddis + 2
+          fl(iflux+(iseg-1)*noflux) = fl(iflux+(iseg-1)*noflux) + flnit*dl(ilay) /depth
 
           ! +++++++++++++++++++++++++++++++++++++++++++
           ! Existing process DecFast DecMedium DecSlow DecRefr DecDOC
@@ -1382,8 +1350,8 @@
 
           !     store in output (fluxes 3-14
                 do ifl = 1,12
-                  ip = lins + nototsed + 2 + ifl
-                  pmsa(ipoint(ip)+(iseg-1)*increm(ip)) = pmsa(ipoint(ip)+(iseg-1)*increm(ip)) + decflx(ifl)*dl(ilay)
+                  iflux = nototseddis + 2 + ifl
+                  fl(iflux+(iseg-1)*noflux) = fl(iflux+(iseg-1)*noflux) + decflx(ifl)*dl(ilay) /depth
                 enddo
 
             elseif (icfrac.eq.2) then
@@ -1414,8 +1382,8 @@
 
           !     store in output (fluxes 15-26
                 do ifl = 1,12
-                  ip = lins + nototsed + 14 + ifl
-                  pmsa(ipoint(ip)+(iseg-1)*increm(ip)) = pmsa(ipoint(ip)+(iseg-1)*increm(ip)) + decflx(ifl)*dl(ilay)
+                  iflux = nototseddis + 14 + ifl
+                  fl(iflux+(iseg-1)*noflux) = fl(iflux+(iseg-1)*noflux) + decflx(ifl)*dl(ilay) /depth
                 enddo
 
             elseif (icfrac.eq.3) then
@@ -1446,8 +1414,8 @@
                 !
           !     store in output (fluxes 27-38
                 do ifl = 1,12
-                  ip = lins + nototsed + 26 + ifl
-                  pmsa(ipoint(ip)+(iseg-1)*increm(ip)) = pmsa(ipoint(ip)+(iseg-1)*increm(ip)) + decflx(ifl)*dl(ilay)
+                  iflux = nototseddis + 26 + ifl
+                  fl(iflux+(iseg-1)*noflux) = fl(iflux+(iseg-1)*noflux) + decflx(ifl)*dl(ilay) /depth
                 enddo
 
             elseif (icfrac.eq.4) then
@@ -1462,8 +1430,8 @@
 
           !     store in output (fluxes 39-50
                 do ifl = 1,12
-                  ip = lins + nototsed + 38 + ifl
-                  pmsa(ipoint(ip)+(iseg-1)*increm(ip)) = pmsa(ipoint(ip)+(iseg-1)*increm(ip)) + decflx(ifl)*dl(ilay)
+                  iflux = nototseddis + 38 + ifl
+                  fl(iflux+(iseg-1)*noflux) = fl(iflux+(iseg-1)*noflux) + decflx(ifl)*dl(ilay) /depth
                 enddo
                 !
             elseif (icfrac.eq.5) then
@@ -1478,8 +1446,8 @@
 
           !     store in output (fluxes 51-62
                 do ifl = 1,12
-                  ip = lins + nototsed + 50 + ifl
-                  pmsa(ipoint(ip)+(iseg-1)*increm(ip)) = pmsa(ipoint(ip)+(iseg-1)*increm(ip)) + decflx(ifl)*dl(ilay)
+                  iflux = nototseddis + 50 + ifl
+                  fl(iflux+(iseg-1)*noflux) = fl(iflux+(iseg-1)*noflux) + decflx(ifl)*dl(ilay) /depth
                 enddo
                 !
             endif
@@ -1509,10 +1477,10 @@
           kp(ilay,is_po4 ) = kp(ilay,is_po4 ) - fprc + fsol
           kp(ilay,is_vivp) = kp(ilay,is_vivp) + fprc - fsol
     !     store in output
-          ip = lins + nototsed + 63
-          pmsa(ipoint(ip)+(iseg-1)*increm(ip)) = pmsa(ipoint(ip)+(iseg-1)*increm(ip)) + fprc*dl(ilay)
-          ip = lins + nototsed + 64
-          pmsa(ipoint(ip)+(iseg-1)*increm(ip)) = pmsa(ipoint(ip)+(iseg-1)*increm(ip)) + fsol*dl(ilay)
+          iflux = nototseddis + 63
+          fl(iflux+(iseg-1)*noflux) = fl(iflux+(iseg-1)*noflux) + fprc*dl(ilay) /depth
+          iflux = nototseddis + 64
+          fl(iflux+(iseg-1)*noflux) = fl(iflux+(iseg-1)*noflux) + fsol*dl(ilay) /depth
 !
           ! +++++++++++++++++++++++++++++++++++++++++++
           ! Existing process DisSi
@@ -1540,8 +1508,8 @@
           kp(ilay,is_opal) = kp(ilay,is_opal) - fsol
           kp(ilay,is_si  ) = kp(ilay,is_si  ) + fsol
     !     store in output
-          ip = lins + nototsed + 65
-          pmsa(ipoint(ip)+(iseg-1)*increm(ip)) = pmsa(ipoint(ip)+(iseg-1)*increm(ip)) + fsol*dl(ilay)
+          iflux = nototseddis + 65
+          fl(iflux+(iseg-1)*noflux) = fl(iflux+(iseg-1)*noflux) + fsol*dl(ilay) /depth
 
           ! +++++++++++++++++++++++++++++++++++++++++++
           ! Existing process CONSELAC
@@ -1685,8 +1653,8 @@
 
           !     store in output
           do ifl = 1,6
-            ip = lins + nototsed + 65 + ifl
-            pmsa(ipoint(ip)+(iseg-1)*increm(ip)) = pmsa(ipoint(ip)+(iseg-1)*increm(ip)) + conflx(ifl)*dl(ilay)
+              iflux = nototseddis + 65 + ifl
+              fl(iflux+(iseg-1)*noflux) = fl(iflux+(iseg-1)*noflux) + conflx(ifl)*dl(ilay) /depth
           enddo
 
           ! +++++++++++++++++++++++++++++++++++++++++++
@@ -1713,8 +1681,8 @@
     !     Output of original proces: CCH4S
           kp(ilay,is_ch4) = kp(ilay,is_ch4) - ebulfl
     !     store in output
-          ip = lins + nototsed + 72
-          pmsa(ipoint(ip)+(iseg-1)*increm(ip)) = pmsa(ipoint(ip)+(iseg-1)*increm(ip)) + ebulfl*dl(ilay)
+          iflux = nototseddis + 72
+          fl(iflux+(iseg-1)*noflux) = fl(iflux+(iseg-1)*noflux) + ebulfl*dl(ilay) /depth
 
           ! +++++++++++++++++++++++++++++++++++++++++++
           !     Existing process specsud
@@ -1783,8 +1751,8 @@
           kp(ilay,is_oxy) = kp(ilay,is_oxy) - fluxox * 2.
           kp(ilay,is_so4) = kp(ilay,is_so4) + fluxox
     !     store in output
-          ip = lins + nototsed + 73
-          pmsa(ipoint(ip)+(iseg-1)*increm(ip)) = pmsa(ipoint(ip)+(iseg-1)*increm(ip)) + fluxox*dl(ilay)
+          iflux = nototseddis + 73
+          fl(iflux+(iseg-1)*noflux) = fl(iflux+(iseg-1)*noflux) + fluxox*dl(ilay) /depth
 !
           ! +++++++++++++++++++++++++++++++++++++++++++
           ! Existing process PRECSUL
@@ -1809,10 +1777,10 @@
           kp(ilay,is_sud) = kp(ilay,is_sud) - fluxpr + fluxds
           kp(ilay,is_sup) = kp(ilay,is_sup) + fluxpr - fluxds
     !     store in output
-          ip = lins + nototsed + 74
-          pmsa(ipoint(ip)+(iseg-1)*increm(ip)) = pmsa(ipoint(ip)+(iseg-1)*increm(ip)) + fluxpr*dl(ilay)
-          ip = lins + nototsed + 75
-          pmsa(ipoint(ip)+(iseg-1)*increm(ip)) = pmsa(ipoint(ip)+(iseg-1)*increm(ip)) + fluxds*dl(ilay)
+          iflux = nototseddis + 74
+          fl(iflux+(iseg-1)*noflux) = fl(iflux+(iseg-1)*noflux) + fluxpr*dl(ilay) /depth
+          iflux = nototseddis + 75
+          fl(iflux+(iseg-1)*noflux) = fl(iflux+(iseg-1)*noflux) + fluxds*dl(ilay) /depth
 
           ! +++++++++++++++++++++++++++++++++++++++++++
           ! Existing process OXIDCH4
@@ -1885,10 +1853,10 @@
           kp(ilay,is_so4) = kp(ilay,is_so4) - flcsu * 2.67
           kp(ilay,is_sud) = kp(ilay,is_sud) + flcsu * 2.67
    !      store in output
-          ip = lins + nototsed + 76
-          pmsa(ipoint(ip)+(iseg-1)*increm(ip)) = pmsa(ipoint(ip)+(iseg-1)*increm(ip)) + flcox*dl(ilay)
-          ip = lins + nototsed + 77
-          pmsa(ipoint(ip)+(iseg-1)*increm(ip)) = pmsa(ipoint(ip)+(iseg-1)*increm(ip)) + flcsu*dl(ilay)
+          iflux = nototseddis + 76
+          fl(iflux+(iseg-1)*noflux) = fl(iflux+(iseg-1)*noflux) + flcox*dl(ilay) /depth
+          iflux = nototseddis + 77
+          fl(iflux+(iseg-1)*noflux) = fl(iflux+(iseg-1)*noflux) + flcsu*dl(ilay) /depth
 
           ! +++++++++++++++++++++++++++++++++++++++++++
           ! Existing process APATITE
@@ -1912,17 +1880,125 @@
           kp(ilay,is_po4  ) = kp(ilay,is_po4  ) - fprc + fsol
           kp(ilay,is_apatp) = kp(ilay,is_apatp) + fprc - fsol
   !       store in output
-          ip = lins + nototsed + 78
-          pmsa(ipoint(ip)+(iseg-1)*increm(ip)) = pmsa(ipoint(ip)+(iseg-1)*increm(ip)) + fprc*dl(ilay)
-          ip = lins + nototsed + 79
-          pmsa(ipoint(ip)+(iseg-1)*increm(ip)) = pmsa(ipoint(ip)+(iseg-1)*increm(ip)) + fsol*dl(ilay)
+          iflux = nototseddis + 78
+          fl(iflux+(iseg-1)*noflux) = fl(iflux+(iseg-1)*noflux) + fprc*dl(ilay) /depth
+          iflux = nototseddis + 79
+          fl(iflux+(iseg-1)*noflux) = fl(iflux+(iseg-1)*noflux) + fsol*dl(ilay) /depth
+
+          ! +++++++++++++++++++++++++++++++++++++++++++
+          ! Interface to VB, programmed as an extra "process" to avoid further logistics
+          ! +++++++++++++++++++++++++++++++++++++++++++
+          if (sw_vb) then
+
+              ! 6 uptake fluxes, distributed over the layers according to availability
+              vbflux = 0.0
+              if ( s1_nh4 > 0.0 ) vbflux = fN1VBup * nh4/s1_nh4
+              kp(ilay,is_nh4  ) = kp(ilay,is_nh4  ) - vbflux
+              iflux = nototseddis + 80
+              fl(iflux+(iseg-1)*noflux) = fl(iflux+(iseg-1)*noflux) + vbflux*dl(ilay) /depth
+
+              vbflux = 0.0
+              if ( s1_no3 > 0.0 ) vbflux = fN2VBup * no3/s1_no3
+              kp(ilay,is_no3  ) = kp(ilay,is_no3  ) - vbflux
+              iflux = nototseddis + 81
+              fl(iflux+(iseg-1)*noflux) = fl(iflux+(iseg-1)*noflux) + vbflux*dl(ilay) /depth
+
+              vbflux = 0.0
+              if ( s1_aap > 0.0 ) vbflux = fP1VBup * aap/s1_aap
+              kp(ilay,is_aap  ) = kp(ilay,is_aap  ) - vbflux
+              iflux = nototseddis + 82
+              fl(iflux+(iseg-1)*noflux) = fl(iflux+(iseg-1)*noflux) + vbflux*dl(ilay) /depth
+
+              vbflux = 0.0
+              if ( s1_po4 > 0.0 ) vbflux = fP2VBup * po4/s1_po4
+              kp(ilay,is_po4  ) = kp(ilay,is_po4  ) - vbflux
+              iflux = nototseddis + 83
+              fl(iflux+(iseg-1)*noflux) = fl(iflux+(iseg-1)*noflux) + vbflux*dl(ilay) /depth
+
+              vbflux = 0.0
+              if ( s1_so4 > 0.0 ) vbflux = fS1VBup * so4/s1_so4
+              kp(ilay,is_so4  ) = kp(ilay,is_so4  ) - vbflux
+              iflux = nototseddis + 84
+              fl(iflux+(iseg-1)*noflux) = fl(iflux+(iseg-1)*noflux) + vbflux*dl(ilay) /depth
+
+              vbflux = 0.0
+              if ( s1_sud > 0.0 ) vbflux = fS2VBup * sud/s1_sud
+              kp(ilay,is_sud  ) = kp(ilay,is_sud  ) - vbflux
+              iflux = nototseddis + 85
+              fl(iflux+(iseg-1)*noflux) = fl(iflux+(iseg-1)*noflux) + vbflux*dl(ilay) /depth
+
+              ! 16 release fluxes distributed homogeneously
+              vbflux = fC1VBrel / Th_DelwaqG
+              kp(ilay,is_poc1 ) = kp(ilay,is_poc1 ) + vbflux
+              iflux = nototseddis + 86
+              fl(iflux+(iseg-1)*noflux) = fl(iflux+(iseg-1)*noflux) + vbflux*dl(ilay) /depth
+              vbflux = fC2VBrel / Th_DelwaqG
+              kp(ilay,is_poc2 ) = kp(ilay,is_poc2 ) + vbflux
+              iflux = nototseddis + 87
+              fl(iflux+(iseg-1)*noflux) = fl(iflux+(iseg-1)*noflux) + vbflux*dl(ilay) /depth
+              vbflux = fC3VBrel / Th_DelwaqG
+              kp(ilay,is_poc3 ) = kp(ilay,is_poc3 ) + vbflux
+              iflux = nototseddis + 88
+              fl(iflux+(iseg-1)*noflux) = fl(iflux+(iseg-1)*noflux) + vbflux*dl(ilay) /depth
+              vbflux = fC4VBrel / Th_DelwaqG
+              kp(ilay,is_poc4 ) = kp(ilay,is_poc4 ) + vbflux
+              iflux = nototseddis + 89
+              fl(iflux+(iseg-1)*noflux) = fl(iflux+(iseg-1)*noflux) + vbflux*dl(ilay) /depth
+              vbflux = fN1VBrel / Th_DelwaqG
+              kp(ilay,is_pon1 ) = kp(ilay,is_pon1 ) + vbflux
+              iflux = nototseddis + 90
+              fl(iflux+(iseg-1)*noflux) = fl(iflux+(iseg-1)*noflux) + vbflux*dl(ilay) /depth
+              vbflux = fN2VBrel / Th_DelwaqG
+              kp(ilay,is_pon2 ) = kp(ilay,is_pon2 ) + vbflux
+              iflux = nototseddis + 91
+              fl(iflux+(iseg-1)*noflux) = fl(iflux+(iseg-1)*noflux) + vbflux*dl(ilay) /depth
+              vbflux = fN3VBrel / Th_DelwaqG
+              kp(ilay,is_pon3 ) = kp(ilay,is_pon3 ) + vbflux
+              iflux = nototseddis + 92
+              fl(iflux+(iseg-1)*noflux) = fl(iflux+(iseg-1)*noflux) + vbflux*dl(ilay) /depth
+              vbflux = fN4VBrel / Th_DelwaqG
+              kp(ilay,is_pon4 ) = kp(ilay,is_pon4 ) + vbflux
+              iflux = nototseddis + 93
+              fl(iflux+(iseg-1)*noflux) = fl(iflux+(iseg-1)*noflux) + vbflux*dl(ilay) /depth
+              vbflux = fP1VBrel / Th_DelwaqG
+              kp(ilay,is_pop1 ) = kp(ilay,is_pop1 ) + vbflux
+              iflux = nototseddis + 94
+              fl(iflux+(iseg-1)*noflux) = fl(iflux+(iseg-1)*noflux) + vbflux*dl(ilay) /depth
+              vbflux = fP2VBrel / Th_DelwaqG
+              kp(ilay,is_pop2 ) = kp(ilay,is_pop2 ) + vbflux
+              iflux = nototseddis + 95
+              fl(iflux+(iseg-1)*noflux) = fl(iflux+(iseg-1)*noflux) + vbflux*dl(ilay) /depth
+              vbflux = fP3VBrel / Th_DelwaqG
+              kp(ilay,is_pop3 ) = kp(ilay,is_pop3 ) + vbflux
+              iflux = nototseddis + 96
+              fl(iflux+(iseg-1)*noflux) = fl(iflux+(iseg-1)*noflux) + vbflux*dl(ilay) /depth
+              vbflux = fP4VBrel / Th_DelwaqG
+              kp(ilay,is_pop4 ) = kp(ilay,is_pop4 ) + vbflux
+              iflux = nototseddis + 97
+              fl(iflux+(iseg-1)*noflux) = fl(iflux+(iseg-1)*noflux) + vbflux*dl(ilay) /depth
+              vbflux = fS1VBrel / Th_DelwaqG
+              kp(ilay,is_pos1 ) = kp(ilay,is_pos1 ) + vbflux
+              iflux = nototseddis + 98
+              fl(iflux+(iseg-1)*noflux) = fl(iflux+(iseg-1)*noflux) + vbflux*dl(ilay) /depth
+              vbflux = fS2VBrel / Th_DelwaqG
+              kp(ilay,is_pos2 ) = kp(ilay,is_pos2 ) + vbflux
+              iflux = nototseddis + 99
+              fl(iflux+(iseg-1)*noflux) = fl(iflux+(iseg-1)*noflux) + vbflux*dl(ilay) /depth
+              vbflux = fS3VBrel / Th_DelwaqG
+              kp(ilay,is_pos3 ) = kp(ilay,is_pos3 ) + vbflux
+              iflux = nototseddis + 100
+              fl(iflux+(iseg-1)*noflux) = fl(iflux+(iseg-1)*noflux) + vbflux*dl(ilay) /depth
+              vbflux = fS4VBrel / Th_DelwaqG
+              kp(ilay,is_pos4 ) = kp(ilay,is_pos4 ) + vbflux
+              iflux = nototseddis + 101
+              fl(iflux+(iseg-1)*noflux) = fl(iflux+(iseg-1)*noflux) + vbflux*dl(ilay) /depth
+          endif
 
           ! end of loop over layers in present cell
           enddo
 
 
 ! ENDPROC
-
           do isys = 1,nototsed
               dissub = (isys.le.nototseddis)
 
@@ -1937,7 +2013,7 @@
               ! sedconc(nolay,nototsed,noseg2d)
 
               if (dissub) then
-                ip = extdsys(isys)
+                ip = offset_cwater + isys
                 cwater = pmsa(IPOINT(ip)+(iseg-1)*INCREM(ip))
               endif
 
@@ -1997,37 +2073,18 @@
               !all printstelsel(av,bv,nolay,'OUT',isys)
               if (ierror.ne.0) CALL ERRSYS ('Error Solving Local Equations', 1 )
               do ilay = 1,nolay
-                  sedconc(ilay,isys,iseg2d) = bv(ilay)
+                  sedconc(ilay,isys,iseg2d) = sngl(bv(ilay))
               enddo
 
               ! export solute fluxes
               if (dissub) then
                   !             g/m3                   / m                   * m2/d  / m  = g/m3/d, positive TOWARDS water column
                   sedwatflx = -(cwater*poros-sngl(bv(1)))/(diflen/2.+dl(1)/2.) * td(1) / depth
-                  iflux = extfsys(isys)
+                  iflux = isys
                   fl(iflux+(iseg-1)*noflux) = sedwatflx
-                  ! export
-                  ip  = lins+nototsed+nofl+isys
-                  pmsa(ipoint(ip)+(iseg-1)*increm(ip)) = sedwatflx*depth ! g/m2/d
               endif
-
           enddo
 
       enddo
 
-      return
-      end
-
-      subroutine printstelsel(av,bv,nolay,comment,isys)
-      integer isys,nolay, ilay,ii
-      real*8 av(nolay,nolay),bv(nolay)
-      character*(*) comment
-
-      write (1961,'(a,1x,''System '',i5)') trim(comment),isys
-      write (1961,'(5x,7(7x,i5))') (ii,ii=1,nolay)
-      do ilay=1,nolay
-          write (1961,'(i4,1x,8(d12.5))') ilay,(av(ii,ilay),ii=1,nolay),bv(ilay)
-      enddo
-      write (1961,*)
-      return
       end

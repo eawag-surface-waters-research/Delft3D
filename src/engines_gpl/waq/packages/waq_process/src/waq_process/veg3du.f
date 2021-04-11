@@ -241,22 +241,22 @@
 
             ! Alternative layered sediment - the segment might be dry or wet, does not matter
 
-            if ( (ikmrk2 .eq. 0 .or. ikmrk2 .eq. 3) .and. hmax < 0.0 ) then
+            if ( ikmrk1 .ne. 3 .and. (ikmrk2 .eq. 0 .or. ikmrk2 .eq. 3) .and. hmax < 0.0 ) then
                hroot = min(-hmax,hsed)
-               s1_fN1vbxxupy = pNvbxxup*s1_nh4*hroot/delt
-               s1_fN2vbxxupy = pNvbxxup*s1_no3*hroot/delt
-               s1_fP1vbxxupy = pPvbxxup*s1_aap*hroot/delt
-               s1_fP2vbxxupy = pPvbxxup*s1_po4*hroot/delt
-               s1_fS1vbxxupy = pSvbxxup*s1_so4*hroot/delt
-               s1_fS2vbxxupy = pSvbxxup*s1_sud*hroot/delt
+               s1_fN1vbxxupy = pNvbxxup*s1_nh4/delt      ! removed factor hroot ...
+               s1_fN2vbxxupy = pNvbxxup*s1_no3/delt
+               s1_fP1vbxxupy = pPvbxxup*s1_aap/delt
+               s1_fP2vbxxupy = pPvbxxup*s1_po4/delt
+               s1_fS1vbxxupy = pSvbxxup*s1_so4/delt
+               s1_fS2vbxxupy = pSvbxxup*s1_sud/delt
 
                ! Take this from the nutrient pool in the sediment
 
                do ilay = 1,nolay
                   if ( hcum(ilay) <= hroot ) then
-                     factor = (hcum(ilay) - hcum(ilay-1)) * delt / hroot
+                     factor = delt
                   else
-                     factor = max(0.0, hroot - hcum(ilay-1)) * delt / hroot
+                     factor = 0.0
                   endif
                   sedconc(ilay,is_NH4,ibotseg) = sedconc(ilay,is_NH4,ibotseg) - s1_fN1vbxxupy * factor
                   sedconc(ilay,is_NO3,ibotseg) = sedconc(ilay,is_NO3,ibotseg) - s1_fN2vbxxupy * factor

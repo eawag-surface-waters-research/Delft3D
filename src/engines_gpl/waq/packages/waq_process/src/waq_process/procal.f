@@ -542,22 +542,25 @@
          case (155 ) ;  call DLWQG2 ( pmsa   , flux   , ipoint , increm , noseg  ,               ! &
      &                                 noflux , iexpnt , iknmrk , noq1   , noq2   ,               ! &
      &                                 noq3   , noq4   )
-         case (156 ) ;  call SEDBAL ( pmsa   , flux   , ipoint , increm , noseg  ,               ! &
+         case (156 ) ;  call GEMMPB ( pmsa   , flux   , ipoint , increm , noseg  ,               ! &
      &                                 noflux , iexpnt , iknmrk , noq1   , noq2   ,               ! &
      &                                 noq3   , noq4   )
-         case (157 ) ;  call GEMMPB ( pmsa   , flux   , ipoint , increm , noseg  ,               ! &
+         case (157 ) ;  call MPBNUT ( pmsa   , flux   , ipoint , increm , noseg  ,               ! &
      &                                 noflux , iexpnt , iknmrk , noq1   , noq2   ,               ! &
      &                                 noq3   , noq4   )
-         case (158 ) ;  call MPBNUT ( pmsa   , flux   , ipoint , increm , noseg  ,               ! &
+         case (158 ) ;  call MPBTMP ( pmsa   , flux   , ipoint , increm , noseg  ,               ! &
      &                                 noflux , iexpnt , iknmrk , noq1   , noq2   ,               ! &
      &                                 noq3   , noq4   )
-         case (159 ) ;  call MPBTMP ( pmsa   , flux   , ipoint , increm , noseg  ,               ! &
+         case (159 ) ;  call MPBLLM ( pmsa   , flux   , ipoint , increm , noseg  ,               ! &
      &                                 noflux , iexpnt , iknmrk , noq1   , noq2   ,               ! &
      &                                 noq3   , noq4   )
-         case (160 ) ;  call MPBLLM ( pmsa   , flux   , ipoint , increm , noseg  ,               ! &
+         case (160 ) ;  call MPBNLM ( pmsa   , flux   , ipoint , increm , noseg  ,               ! &
      &                                 noflux , iexpnt , iknmrk , noq1   , noq2   ,               ! &
      &                                 noq3   , noq4   )
-         case (161 ) ;  call MPBNLM ( pmsa   , flux   , ipoint , increm , noseg  ,               ! &
+         case (161 ) ;  call VBXS12 ( pmsa   , flux   , ipoint , increm , noseg  ,               ! &
+     &                                 noflux , iexpnt , iknmrk , noq1   , noq2   ,               ! &
+     &                                 noq3   , noq4   )
+         case (162 ) ;  call VBXSUM ( pmsa   , flux   , ipoint , increm , noseg  ,               ! &
      &                                 noflux , iexpnt , iknmrk , noq1   , noq2   ,               ! &
      &                                 noq3   , noq4   )
          case default

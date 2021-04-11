@@ -37,6 +37,11 @@
 !!       general input parameters. This is slightly more efficient.
 
 !
+!        Conversion of radiation units: https://www.remm.nlm.gov/radmeasurement.htm
+!        Half-life constants: https://en.wikipedia.org/wiki/List_of_radioactive_nuclides_by_half-life
+!
+
+!
 !     Description of the module :
 !
 ! Name      T   L I/O   Description                                    Units

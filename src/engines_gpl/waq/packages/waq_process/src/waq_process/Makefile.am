@@ -177,6 +177,8 @@ libwaq_process_la_SOURCES = \
        specfe.f90 \
        sulfid.f90 \
        sulpho.f90 \
+       vbxs12.f90 \
+       vbxsum.f90 \
        vbgro.f90 \
        vbmrt.f90 \
        vbstat.f90 \

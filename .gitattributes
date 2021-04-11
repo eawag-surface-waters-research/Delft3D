@@ -2636,6 +2636,8 @@ src/engines_gpl/waq/packages/waq_process/src/waq_process/vbgro.f90 -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/vbmrt.f90 -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/vbstat.f90 -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/vbupt.f90 -text
+src/engines_gpl/waq/packages/waq_process/src/waq_process/vbxs12.f90 -text
+src/engines_gpl/waq/packages/waq_process/src/waq_process/vbxsum.f90 -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/veg2dn.f -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/veg3du.f -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/veg3dx.f -text

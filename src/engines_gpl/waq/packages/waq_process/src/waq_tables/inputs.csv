@@ -10541,7 +10541,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VB01availN","Volume    ",   4,"N","x",1
 "VB01availN","Surf      ",   5,"N","x",1
 "VB01availN","botsegVB01",   6,"N","x",1
-"VB01availN","RootDeVB01",   7,"Y","x",1
+"VB01availN","RootDeVB01",   7,"O","x",1
 "VB01availN","NH4       ",   8,"Y","x",1
 "VB01availN","NO3       ",   9,"Y","x",1
 "VB01availN","AAP       ",  10,"Y","x",1
@@ -10698,7 +10698,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VB01_Mrt3S","LocSedDept",   3,"N","x",1
 "VB01_Mrt3S","botsegVB01",   4,"N","x",1
 "VB01_Mrt3S","SwDisVB01 ",   5,"Y","x",1
-"VB01_Mrt3S","RootDeVB01",   6,"Y","x",1
+"VB01_Mrt3S","RootDeVB01",   6,"O","x",1
 "VB01_Mrt3S","FfacVB01  ",   7,"Y","x",1
 "VB01_Mrt3S","DELT      ",   8,"N","x",1
 "VB01_Mrt3S","nfVB_sed  ",   9,"Y"," ",1
@@ -10744,7 +10744,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VB01_Upt3D","TotalDepth",   2,"N","x",1
 "VB01_Upt3D","LocSedDept",   3,"N","x",1
 "VB01_Upt3D","botsegVB01",   4,"N","x",1
-"VB01_Upt3D","RootDeVB01",   5,"Y","x",1
+"VB01_Upt3D","RootDeVB01",   5,"O","x",1
 "VB01_Upt3D","DELT      ",   6,"N","x",1
 "VB01_Upt3D","NH4       ",   7,"Y","x",1
 "VB01_Upt3D","NO3       ",   8,"Y","x",1
@@ -10771,7 +10771,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VB02availN","Volume    ",   4,"N","x",1
 "VB02availN","Surf      ",   5,"N","x",1
 "VB02availN","botsegVB02",   6,"N","x",1
-"VB02availN","RootDeVB02",   7,"Y","x",1
+"VB02availN","RootDeVB02",   7,"O","x",1
 "VB02availN","NH4       ",   8,"Y","x",1
 "VB02availN","NO3       ",   9,"Y","x",1
 "VB02availN","AAP       ",  10,"Y","x",1
@@ -10928,7 +10928,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VB02_Mrt3S","LocSedDept",   3,"N","x",1
 "VB02_Mrt3S","botsegVB02",   4,"N","x",1
 "VB02_Mrt3S","SwDisVB02 ",   5,"Y","x",1
-"VB02_Mrt3S","RootDeVB02",   6,"Y","x",1
+"VB02_Mrt3S","RootDeVB02",   6,"O","x",1
 "VB02_Mrt3S","FfacVB02  ",   7,"Y","x",1
 "VB02_Mrt3S","DELT      ",   8,"N","x",1
 "VB02_Mrt3S","nfVB_sed  ",   9,"Y"," ",1
@@ -10974,7 +10974,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VB02_Upt3D","TotalDepth",   2,"N","x",1
 "VB02_Upt3D","LocSedDept",   3,"N","x",1
 "VB02_Upt3D","botsegVB02",   4,"N","x",1
-"VB02_Upt3D","RootDeVB02",   5,"Y","x",1
+"VB02_Upt3D","RootDeVB02",   5,"O","x",1
 "VB02_Upt3D","DELT      ",   6,"N","x",1
 "VB02_Upt3D","NH4       ",   7,"Y","x",1
 "VB02_Upt3D","NO3       ",   8,"Y","x",1
@@ -11001,7 +11001,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VB03availN","Volume    ",   4,"N","x",1
 "VB03availN","Surf      ",   5,"N","x",1
 "VB03availN","botsegVB03",   6,"N","x",1
-"VB03availN","RootDeVB03",   7,"Y","x",1
+"VB03availN","RootDeVB03",   7,"O","x",1
 "VB03availN","NH4       ",   8,"Y","x",1
 "VB03availN","NO3       ",   9,"Y","x",1
 "VB03availN","AAP       ",  10,"Y","x",1
@@ -11158,7 +11158,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VB03_Mrt3S","LocSedDept",   3,"N","x",1
 "VB03_Mrt3S","botsegVB03",   4,"N","x",1
 "VB03_Mrt3S","SwDisVB03 ",   5,"Y","x",1
-"VB03_Mrt3S","RootDeVB03",   6,"Y","x",1
+"VB03_Mrt3S","RootDeVB03",   6,"O","x",1
 "VB03_Mrt3S","FfacVB03  ",   7,"Y","x",1
 "VB03_Mrt3S","DELT      ",   8,"N","x",1
 "VB03_Mrt3S","nfVB_sed  ",   9,"Y"," ",1
@@ -11204,7 +11204,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VB03_Upt3D","TotalDepth",   2,"N","x",1
 "VB03_Upt3D","LocSedDept",   3,"N","x",1
 "VB03_Upt3D","botsegVB03",   4,"N","x",1
-"VB03_Upt3D","RootDeVB03",   5,"Y","x",1
+"VB03_Upt3D","RootDeVB03",   5,"O","x",1
 "VB03_Upt3D","DELT      ",   6,"N","x",1
 "VB03_Upt3D","NH4       ",   7,"Y","x",1
 "VB03_Upt3D","NO3       ",   8,"Y","x",1
@@ -11231,7 +11231,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VB04availN","Volume    ",   4,"N","x",1
 "VB04availN","Surf      ",   5,"N","x",1
 "VB04availN","botsegVB04",   6,"N","x",1
-"VB04availN","RootDeVB04",   7,"Y","x",1
+"VB04availN","RootDeVB04",   7,"O","x",1
 "VB04availN","NH4       ",   8,"Y","x",1
 "VB04availN","NO3       ",   9,"Y","x",1
 "VB04availN","AAP       ",  10,"Y","x",1
@@ -11388,7 +11388,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VB04_Mrt3S","LocSedDept",   3,"N","x",1
 "VB04_Mrt3S","botsegVB04",   4,"N","x",1
 "VB04_Mrt3S","SwDisVB04 ",   5,"Y","x",1
-"VB04_Mrt3S","RootDeVB04",   6,"Y","x",1
+"VB04_Mrt3S","RootDeVB04",   6,"O","x",1
 "VB04_Mrt3S","FfacVB04  ",   7,"Y","x",1
 "VB04_Mrt3S","DELT      ",   8,"N","x",1
 "VB04_Mrt3S","nfVB_sed  ",   9,"Y"," ",1
@@ -11434,7 +11434,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VB04_Upt3D","TotalDepth",   2,"N","x",1
 "VB04_Upt3D","LocSedDept",   3,"N","x",1
 "VB04_Upt3D","botsegVB04",   4,"N","x",1
-"VB04_Upt3D","RootDeVB04",   5,"Y","x",1
+"VB04_Upt3D","RootDeVB04",   5,"O","x",1
 "VB04_Upt3D","DELT      ",   6,"N","x",1
 "VB04_Upt3D","NH4       ",   7,"Y","x",1
 "VB04_Upt3D","NO3       ",   8,"Y","x",1
@@ -11461,7 +11461,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VB05availN","Volume    ",   4,"N","x",1
 "VB05availN","Surf      ",   5,"N","x",1
 "VB05availN","botsegVB05",   6,"N","x",1
-"VB05availN","RootDeVB05",   7,"Y","x",1
+"VB05availN","RootDeVB05",   7,"O","x",1
 "VB05availN","NH4       ",   8,"Y","x",1
 "VB05availN","NO3       ",   9,"Y","x",1
 "VB05availN","AAP       ",  10,"Y","x",1
@@ -11618,7 +11618,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VB05_Mrt3S","LocSedDept",   3,"N","x",1
 "VB05_Mrt3S","botsegVB05",   4,"N","x",1
 "VB05_Mrt3S","SwDisVB05 ",   5,"Y","x",1
-"VB05_Mrt3S","RootDeVB05",   6,"Y","x",1
+"VB05_Mrt3S","RootDeVB05",   6,"O","x",1
 "VB05_Mrt3S","FfacVB05  ",   7,"Y","x",1
 "VB05_Mrt3S","DELT      ",   8,"N","x",1
 "VB05_Mrt3S","nfVB_sed  ",   9,"Y"," ",1
@@ -11664,7 +11664,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VB05_Upt3D","TotalDepth",   2,"N","x",1
 "VB05_Upt3D","LocSedDept",   3,"N","x",1
 "VB05_Upt3D","botsegVB05",   4,"N","x",1
-"VB05_Upt3D","RootDeVB05",   5,"Y","x",1
+"VB05_Upt3D","RootDeVB05",   5,"O","x",1
 "VB05_Upt3D","DELT      ",   6,"N","x",1
 "VB05_Upt3D","NH4       ",   7,"Y","x",1
 "VB05_Upt3D","NO3       ",   8,"Y","x",1
@@ -11691,7 +11691,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VB06availN","Volume    ",   4,"N","x",1
 "VB06availN","Surf      ",   5,"N","x",1
 "VB06availN","botsegVB06",   6,"N","x",1
-"VB06availN","RootDeVB06",   7,"Y","x",1
+"VB06availN","RootDeVB06",   7,"O","x",1
 "VB06availN","NH4       ",   8,"Y","x",1
 "VB06availN","NO3       ",   9,"Y","x",1
 "VB06availN","AAP       ",  10,"Y","x",1
@@ -11848,7 +11848,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VB06_Mrt3S","LocSedDept",   3,"N","x",1
 "VB06_Mrt3S","botsegVB06",   4,"N","x",1
 "VB06_Mrt3S","SwDisVB06 ",   5,"Y","x",1
-"VB06_Mrt3S","RootDeVB06",   6,"Y","x",1
+"VB06_Mrt3S","RootDeVB06",   6,"O","x",1
 "VB06_Mrt3S","FfacVB06  ",   7,"Y","x",1
 "VB06_Mrt3S","DELT      ",   8,"N","x",1
 "VB06_Mrt3S","nfVB_sed  ",   9,"Y"," ",1
@@ -11894,7 +11894,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VB06_Upt3D","TotalDepth",   2,"N","x",1
 "VB06_Upt3D","LocSedDept",   3,"N","x",1
 "VB06_Upt3D","botsegVB06",   4,"N","x",1
-"VB06_Upt3D","RootDeVB06",   5,"Y","x",1
+"VB06_Upt3D","RootDeVB06",   5,"O","x",1
 "VB06_Upt3D","DELT      ",   6,"N","x",1
 "VB06_Upt3D","NH4       ",   7,"Y","x",1
 "VB06_Upt3D","NO3       ",   8,"Y","x",1
@@ -11921,7 +11921,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VB07availN","Volume    ",   4,"N","x",1
 "VB07availN","Surf      ",   5,"N","x",1
 "VB07availN","botsegVB07",   6,"N","x",1
-"VB07availN","RootDeVB07",   7,"Y","x",1
+"VB07availN","RootDeVB07",   7,"O","x",1
 "VB07availN","NH4       ",   8,"Y","x",1
 "VB07availN","NO3       ",   9,"Y","x",1
 "VB07availN","AAP       ",  10,"Y","x",1
@@ -12078,7 +12078,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VB07_Mrt3S","LocSedDept",   3,"N","x",1
 "VB07_Mrt3S","botsegVB07",   4,"N","x",1
 "VB07_Mrt3S","SwDisVB07 ",   5,"Y","x",1
-"VB07_Mrt3S","RootDeVB07",   6,"Y","x",1
+"VB07_Mrt3S","RootDeVB07",   6,"O","x",1
 "VB07_Mrt3S","FfacVB07  ",   7,"Y","x",1
 "VB07_Mrt3S","DELT      ",   8,"N","x",1
 "VB07_Mrt3S","nfVB_sed  ",   9,"Y"," ",1
@@ -12124,7 +12124,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VB07_Upt3D","TotalDepth",   2,"N","x",1
 "VB07_Upt3D","LocSedDept",   3,"N","x",1
 "VB07_Upt3D","botsegVB07",   4,"N","x",1
-"VB07_Upt3D","RootDeVB07",   5,"Y","x",1
+"VB07_Upt3D","RootDeVB07",   5,"O","x",1
 "VB07_Upt3D","DELT      ",   6,"N","x",1
 "VB07_Upt3D","NH4       ",   7,"Y","x",1
 "VB07_Upt3D","NO3       ",   8,"Y","x",1
@@ -12151,7 +12151,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VB08availN","Volume    ",   4,"N","x",1
 "VB08availN","Surf      ",   5,"N","x",1
 "VB08availN","botsegVB08",   6,"N","x",1
-"VB08availN","RootDeVB08",   7,"Y","x",1
+"VB08availN","RootDeVB08",   7,"O","x",1
 "VB08availN","NH4       ",   8,"Y","x",1
 "VB08availN","NO3       ",   9,"Y","x",1
 "VB08availN","AAP       ",  10,"Y","x",1
@@ -12308,7 +12308,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VB08_Mrt3S","LocSedDept",   3,"N","x",1
 "VB08_Mrt3S","botsegVB08",   4,"N","x",1
 "VB08_Mrt3S","SwDisVB08 ",   5,"Y","x",1
-"VB08_Mrt3S","RootDeVB08",   6,"Y","x",1
+"VB08_Mrt3S","RootDeVB08",   6,"O","x",1
 "VB08_Mrt3S","FfacVB08  ",   7,"Y","x",1
 "VB08_Mrt3S","DELT      ",   8,"N","x",1
 "VB08_Mrt3S","nfVB_sed  ",   9,"Y"," ",1
@@ -12354,7 +12354,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VB08_Upt3D","TotalDepth",   2,"N","x",1
 "VB08_Upt3D","LocSedDept",   3,"N","x",1
 "VB08_Upt3D","botsegVB08",   4,"N","x",1
-"VB08_Upt3D","RootDeVB08",   5,"Y","x",1
+"VB08_Upt3D","RootDeVB08",   5,"O","x",1
 "VB08_Upt3D","DELT      ",   6,"N","x",1
 "VB08_Upt3D","NH4       ",   7,"Y","x",1
 "VB08_Upt3D","NO3       ",   8,"Y","x",1
@@ -12381,7 +12381,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VB09availN","Volume    ",   4,"N","x",1
 "VB09availN","Surf      ",   5,"N","x",1
 "VB09availN","botsegVB09",   6,"N","x",1
-"VB09availN","RootDeVB09",   7,"Y","x",1
+"VB09availN","RootDeVB09",   7,"O","x",1
 "VB09availN","NH4       ",   8,"Y","x",1
 "VB09availN","NO3       ",   9,"Y","x",1
 "VB09availN","AAP       ",  10,"Y","x",1
@@ -12538,7 +12538,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VB09_Mrt3S","LocSedDept",   3,"N","x",1
 "VB09_Mrt3S","botsegVB09",   4,"N","x",1
 "VB09_Mrt3S","SwDisVB09 ",   5,"Y","x",1
-"VB09_Mrt3S","RootDeVB09",   6,"Y","x",1
+"VB09_Mrt3S","RootDeVB09",   6,"O","x",1
 "VB09_Mrt3S","FfacVB09  ",   7,"Y","x",1
 "VB09_Mrt3S","DELT      ",   8,"N","x",1
 "VB09_Mrt3S","nfVB_sed  ",   9,"Y"," ",1
@@ -12584,7 +12584,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VB09_Upt3D","TotalDepth",   2,"N","x",1
 "VB09_Upt3D","LocSedDept",   3,"N","x",1
 "VB09_Upt3D","botsegVB09",   4,"N","x",1
-"VB09_Upt3D","RootDeVB09",   5,"Y","x",1
+"VB09_Upt3D","RootDeVB09",   5,"O","x",1
 "VB09_Upt3D","DELT      ",   6,"N","x",1
 "VB09_Upt3D","NH4       ",   7,"Y","x",1
 "VB09_Upt3D","NO3       ",   8,"Y","x",1
@@ -15759,220 +15759,106 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "DELWAQG   ","DELT      ", 130,"N"," ",1
 "DELWAQG   ","PorSed    ", 131,"Y"," ",1
 "DELWAQG   ","Th_DelwaqG", 132,"Y"," ",1
-"DELWAQG   ","pHSed     ", 133,"Y"," ",1
-"DELWAQG   ","Temp      ", 134,"Y"," ",1
-"DELWAQG   ","Diflen    ", 135,"Y"," ",1
-"DELWAQG   ","TurCoef   ", 136,"N"," ",1
-"DELWAQG   ","DifCoef   ", 137,"N"," ",1
-"DELWAQG   ","Depth     ", 138,"N"," ",1
-"DELWAQG   ","CH4       ", 139,"N"," ",1
-"DELWAQG   ","DOC       ", 140,"Y"," ",1
-"DELWAQG   ","DON       ", 141,"Y"," ",1
-"DELWAQG   ","DOP       ", 142,"Y"," ",1
-"DELWAQG   ","DOS       ", 143,"Y"," ",1
-"DELWAQG   ","NH4       ", 144,"Y"," ",1
-"DELWAQG   ","NO3       ", 145,"Y"," ",1
-"DELWAQG   ","OXY       ", 146,"Y"," ",1
-"DELWAQG   ","PO4       ", 147,"Y"," ",1
-"DELWAQG   ","Si        ", 148,"Y"," ",1
-"DELWAQG   ","SO4       ", 149,"Y"," ",1
-"DELWAQG   ","SUD       ", 150,"N"," ",1
-"DELWAQG   ","AAPS1     ", 151,"Y"," ",1
-"DELWAQG   ","APATPS1   ", 152,"Y"," ",1
-"DELWAQG   ","FeIIIpaS1 ", 153,"Y"," ",1
-"DELWAQG   ","OpalS1    ", 154,"Y"," ",1
-"DELWAQG   ","POC1S1    ", 155,"Y"," ",1
-"DELWAQG   ","POC2S1    ", 156,"Y"," ",1
-"DELWAQG   ","POC3S1    ", 157,"Y"," ",1
-"DELWAQG   ","POC4S1    ", 158,"Y"," ",1
-"DELWAQG   ","PON1S1    ", 159,"Y"," ",1
-"DELWAQG   ","PON2S1    ", 160,"Y"," ",1
-"DELWAQG   ","PON3S1    ", 161,"Y"," ",1
-"DELWAQG   ","PON4S1    ", 162,"Y"," ",1
-"DELWAQG   ","POP1S1    ", 163,"Y"," ",1
-"DELWAQG   ","POP2S1    ", 164,"Y"," ",1
-"DELWAQG   ","POP3S1    ", 165,"Y"," ",1
-"DELWAQG   ","POP4S1    ", 166,"Y"," ",1
-"DELWAQG   ","POS1S1    ", 167,"Y"," ",1
-"DELWAQG   ","POS2S1    ", 168,"Y"," ",1
-"DELWAQG   ","POS3S1    ", 169,"Y"," ",1
-"DELWAQG   ","POS4S1    ", 170,"Y"," ",1
-"DELWAQG   ","SUPS1     ", 171,"Y"," ",1
-"DELWAQG   ","VIVPS1    ", 172,"Y"," ",1
-"DELWAQG   ","fSedCAAP  ", 173,"N"," ",1
-"DELWAQG   ","fSedAPATP ", 174,"N"," ",1
-"DELWAQG   ","fSedFeIIIp", 175,"Y"," ",1
-"DELWAQG   ","fSedOpal  ", 176,"N"," ",1
-"DELWAQG   ","fSedPOC1  ", 177,"Y"," ",1
-"DELWAQG   ","fSedPOC2  ", 178,"Y"," ",1
-"DELWAQG   ","fSedPOC3  ", 179,"Y"," ",1
-"DELWAQG   ","fSedPOC4  ", 180,"Y"," ",1
-"DELWAQG   ","fSedPON1  ", 181,"N"," ",1
-"DELWAQG   ","fSedPON2  ", 182,"N"," ",1
-"DELWAQG   ","fSedPON3  ", 183,"N"," ",1
-"DELWAQG   ","fSedPON4  ", 184,"N"," ",1
-"DELWAQG   ","fSedPOP1  ", 185,"N"," ",1
-"DELWAQG   ","fSedPOP2  ", 186,"N"," ",1
-"DELWAQG   ","fSedPOP3  ", 187,"N"," ",1
-"DELWAQG   ","fSedPOP4  ", 188,"N"," ",1
-"DELWAQG   ","fSedPOS1  ", 189,"N"," ",1
-"DELWAQG   ","fSedPOS2  ", 190,"N"," ",1
-"DELWAQG   ","fSedPOS3  ", 191,"N"," ",1
-"DELWAQG   ","fSedPOS4  ", 192,"N"," ",1
-"DELWAQG   ","fSedSUP   ", 193,"Y"," ",1
-"DELWAQG   ","fSedVIVP  ", 194,"N"," ",1
-"DELWAQG   ","OutInt    ", 195,"Y"," ",1
-"DELWAQG   ","ITIME     ", 196,"N"," ",1
-"DELWAQGbal","OutBal    ",   1,"Y"," ",1
-"DELWAQGbal","ITIME     ",   2,"N"," ",1
-"DELWAQGbal","DELT      ",   3,"N"," ",1
-"DELWAQGbal","S1_CH4    ",   4,"N"," ",1
-"DELWAQGbal","S1_DOC    ",   5,"N"," ",1
-"DELWAQGbal","S1_DON    ",   6,"N"," ",1
-"DELWAQGbal","S1_DOP    ",   7,"N"," ",1
-"DELWAQGbal","S1_DOS    ",   8,"N"," ",1
-"DELWAQGbal","S1_NH4    ",   9,"N"," ",1
-"DELWAQGbal","S1_NO3    ",  10,"N"," ",1
-"DELWAQGbal","S1_OXY    ",  11,"N"," ",1
-"DELWAQGbal","S1_PO4    ",  12,"N"," ",1
-"DELWAQGbal","S1_Si     ",  13,"N"," ",1
-"DELWAQGbal","S1_SO4    ",  14,"N"," ",1
-"DELWAQGbal","S1_SUD    ",  15,"N"," ",1
-"DELWAQGbal","S1_AAP    ",  16,"N"," ",1
-"DELWAQGbal","S1_APATP  ",  17,"N"," ",1
-"DELWAQGbal","S1_FeIIIpa",  18,"N"," ",1
-"DELWAQGbal","S1_Opal   ",  19,"N"," ",1
-"DELWAQGbal","S1_POC1   ",  20,"N"," ",1
-"DELWAQGbal","S1_POC2   ",  21,"N"," ",1
-"DELWAQGbal","S1_POC3   ",  22,"N"," ",1
-"DELWAQGbal","S1_POC4   ",  23,"N"," ",1
-"DELWAQGbal","S1_PON1   ",  24,"N"," ",1
-"DELWAQGbal","S1_PON2   ",  25,"N"," ",1
-"DELWAQGbal","S1_PON3   ",  26,"N"," ",1
-"DELWAQGbal","S1_PON4   ",  27,"N"," ",1
-"DELWAQGbal","S1_POP1   ",  28,"N"," ",1
-"DELWAQGbal","S1_POP2   ",  29,"N"," ",1
-"DELWAQGbal","S1_POP3   ",  30,"N"," ",1
-"DELWAQGbal","S1_POP4   ",  31,"N"," ",1
-"DELWAQGbal","S1_POS1   ",  32,"N"," ",1
-"DELWAQGbal","S1_POS2   ",  33,"N"," ",1
-"DELWAQGbal","S1_POS3   ",  34,"N"," ",1
-"DELWAQGbal","S1_POS4   ",  35,"N"," ",1
-"DELWAQGbal","S1_SUP    ",  36,"N"," ",1
-"DELWAQGbal","S1_VIVP   ",  37,"N"," ",1
-"DELWAQGbal","fSedCH4   ",  38,"N"," ",1
-"DELWAQGbal","fSedDOC   ",  39,"N"," ",1
-"DELWAQGbal","fSedDON   ",  40,"N"," ",1
-"DELWAQGbal","fSedDOP   ",  41,"N"," ",1
-"DELWAQGbal","fSedDOS   ",  42,"N"," ",1
-"DELWAQGbal","fSedNH4   ",  43,"N"," ",1
-"DELWAQGbal","fSedNO3   ",  44,"N"," ",1
-"DELWAQGbal","fSedOXY   ",  45,"N"," ",1
-"DELWAQGbal","fSedPO4   ",  46,"N"," ",1
-"DELWAQGbal","fSedSi    ",  47,"N"," ",1
-"DELWAQGbal","fSedSO4   ",  48,"N"," ",1
-"DELWAQGbal","fSedSUD   ",  49,"N"," ",1
-"DELWAQGbal","fSedCAAP  ",  50,"N"," ",1
-"DELWAQGbal","fSedAPATP ",  51,"N"," ",1
-"DELWAQGbal","fSedFeIIIp",  52,"Y"," ",1
-"DELWAQGbal","fSedOpal  ",  53,"N"," ",1
-"DELWAQGbal","fSedPOC1  ",  54,"Y"," ",1
-"DELWAQGbal","fSedPOC2  ",  55,"Y"," ",1
-"DELWAQGbal","fSedPOC3  ",  56,"Y"," ",1
-"DELWAQGbal","fSedPOC4  ",  57,"Y"," ",1
-"DELWAQGbal","fSedPON1  ",  58,"N"," ",1
-"DELWAQGbal","fSedPON2  ",  59,"N"," ",1
-"DELWAQGbal","fSedPON3  ",  60,"N"," ",1
-"DELWAQGbal","fSedPON4  ",  61,"N"," ",1
-"DELWAQGbal","fSedPOP1  ",  62,"N"," ",1
-"DELWAQGbal","fSedPOP2  ",  63,"N"," ",1
-"DELWAQGbal","fSedPOP3  ",  64,"N"," ",1
-"DELWAQGbal","fSedPOP4  ",  65,"N"," ",1
-"DELWAQGbal","fSedPOS1  ",  66,"N"," ",1
-"DELWAQGbal","fSedPOS2  ",  67,"N"," ",1
-"DELWAQGbal","fSedPOS3  ",  68,"N"," ",1
-"DELWAQGbal","fSedPOS4  ",  69,"N"," ",1
-"DELWAQGbal","fSedSUP   ",  70,"Y"," ",1
-"DELWAQGbal","fSedVIVP  ",  71,"N"," ",1
-"DELWAQGbal","SF_dAdsPO4",  72,"N"," ",1
-"DELWAQGbal","SF_dNitrif",  73,"N"," ",1
-"DELWAQGbal","SF_dCPPOC1",  74,"N"," ",1
-"DELWAQGbal","SF_dCPPON1",  75,"N"," ",1
-"DELWAQGbal","SF_dCPPOP1",  76,"N"," ",1
-"DELWAQGbal","SF_dCPPOS1",  77,"N"," ",1
-"DELWAQGbal","SF_dCDPOC1",  78,"N"," ",1
-"DELWAQGbal","SF_dCDPON1",  79,"N"," ",1
-"DELWAQGbal","SF_dCDPOP1",  80,"N"," ",1
-"DELWAQGbal","SF_dCDPOS1",  81,"N"," ",1
-"DELWAQGbal","SF_dMPOC1 ",  82,"N"," ",1
-"DELWAQGbal","SF_dMPON1 ",  83,"N"," ",1
-"DELWAQGbal","SF_dMPOP1 ",  84,"N"," ",1
-"DELWAQGbal","SF_dMPOS1 ",  85,"N"," ",1
-"DELWAQGbal","SF_dCPPOC2",  86,"N"," ",1
-"DELWAQGbal","SF_dCPPON2",  87,"N"," ",1
-"DELWAQGbal","SF_dCPPOP2",  88,"N"," ",1
-"DELWAQGbal","SF_dCPPOS2",  89,"N"," ",1
-"DELWAQGbal","SF_dCDPOC2",  90,"N"," ",1
-"DELWAQGbal","SF_dCDPON2",  91,"N"," ",1
-"DELWAQGbal","SF_dCDPOP2",  92,"N"," ",1
-"DELWAQGbal","SF_dCDPOS2",  93,"N"," ",1
-"DELWAQGbal","SF_dMPOC2 ",  94,"N"," ",1
-"DELWAQGbal","SF_dMPON2 ",  95,"N"," ",1
-"DELWAQGbal","SF_dMPOP2 ",  96,"N"," ",1
-"DELWAQGbal","SF_dMPOS2 ",  97,"N"," ",1
-"DELWAQGbal","SF_dCPPOC3",  98,"N"," ",1
-"DELWAQGbal","SF_dCPPON3",  99,"N"," ",1
-"DELWAQGbal","SF_dCPPOP3", 100,"N"," ",1
-"DELWAQGbal","SF_dCPPOS3", 101,"N"," ",1
-"DELWAQGbal","SF_dCDPOC3", 102,"N"," ",1
-"DELWAQGbal","SF_dCDPON3", 103,"N"," ",1
-"DELWAQGbal","SF_dCDPOP3", 104,"N"," ",1
-"DELWAQGbal","SF_dCDPOS3", 105,"N"," ",1
-"DELWAQGbal","SF_dMPOC3 ", 106,"N"," ",1
-"DELWAQGbal","SF_dMPON3 ", 107,"N"," ",1
-"DELWAQGbal","SF_dMPOP3 ", 108,"N"," ",1
-"DELWAQGbal","SF_dMPOS3 ", 109,"N"," ",1
-"DELWAQGbal","SF_dCPPOC4", 110,"N"," ",1
-"DELWAQGbal","SF_dCPPON4", 111,"N"," ",1
-"DELWAQGbal","SF_dCPPOP4", 112,"N"," ",1
-"DELWAQGbal","SF_dCPPOS4", 113,"N"," ",1
-"DELWAQGbal","SF_dCDPOC4", 114,"N"," ",1
-"DELWAQGbal","SF_dCDPON4", 115,"N"," ",1
-"DELWAQGbal","SF_dCDPOP4", 116,"N"," ",1
-"DELWAQGbal","SF_dCDPOS4", 117,"N"," ",1
-"DELWAQGbal","SF_dMPOC4 ", 118,"N"," ",1
-"DELWAQGbal","SF_dMPON4 ", 119,"N"," ",1
-"DELWAQGbal","SF_dMPOP4 ", 120,"N"," ",1
-"DELWAQGbal","SF_dMPOS4 ", 121,"N"," ",1
-"DELWAQGbal","SF_dCXDOC ", 122,"N"," ",1
-"DELWAQGbal","SF_dCXDON ", 123,"N"," ",1
-"DELWAQGbal","SF_dCXDOP ", 124,"N"," ",1
-"DELWAQGbal","SF_dCXDOS ", 125,"N"," ",1
-"DELWAQGbal","SF_dCYDOC ", 126,"N"," ",1
-"DELWAQGbal","SF_dCYDON ", 127,"N"," ",1
-"DELWAQGbal","SF_dCYDOP ", 128,"N"," ",1
-"DELWAQGbal","SF_dCYDOS ", 129,"N"," ",1
-"DELWAQGbal","SF_dMDOC  ", 130,"N"," ",1
-"DELWAQGbal","SF_dMDON  ", 131,"N"," ",1
-"DELWAQGbal","SF_dMDOP  ", 132,"N"," ",1
-"DELWAQGbal","SF_dMDOS  ", 133,"N"," ",1
-"DELWAQGbal","SF_dPrcPO4", 134,"N"," ",1
-"DELWAQGbal","SF_dDisPO4", 135,"N"," ",1
-"DELWAQGbal","SF_dDisSi ", 136,"N"," ",1
-"DELWAQGbal","SF_dOxCon ", 137,"N"," ",1
-"DELWAQGbal","SF_dNiDen ", 138,"N"," ",1
-"DELWAQGbal","SF_dFeRed ", 139,"N"," ",1
-"DELWAQGbal","SF_dSuRed ", 140,"N"," ",1
-"DELWAQGbal","SF_dMetCH4", 141,"N"," ",1
-"DELWAQGbal","SF_dMetCO2", 142,"N"," ",1
-"DELWAQGbal","SF_dMetEbl", 143,"N"," ",1
-"DELWAQGbal","SF_dSUDox ", 144,"N"," ",1
-"DELWAQGbal","SF_dSUDprc", 145,"N"," ",1
-"DELWAQGbal","SF_dSUDdis", 146,"N"," ",1
-"DELWAQGbal","SF_dMetoxD", 147,"N"," ",1
-"DELWAQGbal","SF_dMetoxS", 148,"N"," ",1
-"DELWAQGbal","SF_dPrcAPP", 149,"N"," ",1
-"DELWAQGbal","SF_dDisAPP", 150,"N"," ",1
+"DELWAQG   ","OutInt    ", 133,"Y"," ",1
+"DELWAQG   ","ITIME     ", 134,"N"," ",1
+"DELWAQG   ","Exp_Dif   ", 135,"Y"," ",1
+"DELWAQG   ","Exp_Tur   ", 136,"Y"," ",1
+"DELWAQG   ","pHSed     ", 137,"Y"," ",1
+"DELWAQG   ","Temp      ", 138,"Y"," ",1
+"DELWAQG   ","Diflen    ", 139,"Y"," ",1
+"DELWAQG   ","TurCoef   ", 140,"N"," ",1
+"DELWAQG   ","DifCoef   ", 141,"N"," ",1
+"DELWAQG   ","Depth     ", 142,"N"," ",1
+"DELWAQG   ","CH4       ", 143,"Y"," ",1
+"DELWAQG   ","DOC       ", 144,"Y"," ",1
+"DELWAQG   ","DON       ", 145,"Y"," ",1
+"DELWAQG   ","DOP       ", 146,"Y"," ",1
+"DELWAQG   ","DOS       ", 147,"Y"," ",1
+"DELWAQG   ","NH4       ", 148,"Y"," ",1
+"DELWAQG   ","NO3       ", 149,"Y"," ",1
+"DELWAQG   ","OXY       ", 150,"Y"," ",1
+"DELWAQG   ","PO4       ", 151,"Y"," ",1
+"DELWAQG   ","Si        ", 152,"Y"," ",1
+"DELWAQG   ","SO4       ", 153,"Y"," ",1
+"DELWAQG   ","SUD       ", 154,"Y"," ",1
+"DELWAQG   ","S1_CH4    ", 155,"N"," ",1
+"DELWAQG   ","S1_DOC    ", 156,"N"," ",1
+"DELWAQG   ","S1_DON    ", 157,"N"," ",1
+"DELWAQG   ","S1_DOP    ", 158,"N"," ",1
+"DELWAQG   ","S1_DOS    ", 159,"N"," ",1
+"DELWAQG   ","S1_NH4    ", 160,"N"," ",1
+"DELWAQG   ","S1_NO3    ", 161,"N"," ",1
+"DELWAQG   ","S1_OXY    ", 162,"Y"," ",1
+"DELWAQG   ","S1_PO4    ", 163,"N"," ",1
+"DELWAQG   ","S1_Si     ", 164,"N"," ",1
+"DELWAQG   ","S1_SO4    ", 165,"N"," ",1
+"DELWAQG   ","S1_SUD    ", 166,"N"," ",1
+"DELWAQG   ","S1_AAP    ", 167,"N"," ",1
+"DELWAQG   ","S1_APATP  ", 168,"N"," ",1
+"DELWAQG   ","S1_FeIIIpa", 169,"N"," ",1
+"DELWAQG   ","S1_Opal   ", 170,"N"," ",1
+"DELWAQG   ","S1_PC1    ", 171,"N"," ",1
+"DELWAQG   ","S1_PC2    ", 172,"N"," ",1
+"DELWAQG   ","S1_PC3    ", 173,"N"," ",1
+"DELWAQG   ","S1_PC4    ", 174,"N"," ",1
+"DELWAQG   ","S1_PN1    ", 175,"N"," ",1
+"DELWAQG   ","S1_PN2    ", 176,"N"," ",1
+"DELWAQG   ","S1_PN3    ", 177,"N"," ",1
+"DELWAQG   ","S1_PN4    ", 178,"N"," ",1
+"DELWAQG   ","S1_PP1    ", 179,"N"," ",1
+"DELWAQG   ","S1_PP2    ", 180,"N"," ",1
+"DELWAQG   ","S1_PP3    ", 181,"N"," ",1
+"DELWAQG   ","S1_PP4    ", 182,"N"," ",1
+"DELWAQG   ","S1_PS1    ", 183,"N"," ",1
+"DELWAQG   ","S1_PS2    ", 184,"N"," ",1
+"DELWAQG   ","S1_PS3    ", 185,"N"," ",1
+"DELWAQG   ","S1_PS4    ", 186,"N"," ",1
+"DELWAQG   ","S1_SUP    ", 187,"N"," ",1
+"DELWAQG   ","S1_VIVP   ", 188,"N"," ",1
+"DELWAQG   ","fSedCAAP  ", 189,"Y"," ",1
+"DELWAQG   ","fSedAPATP ", 190,"Y"," ",1
+"DELWAQG   ","fSedFeIIIp", 191,"Y"," ",1
+"DELWAQG   ","fSedOpal  ", 192,"Y"," ",1
+"DELWAQG   ","fSedPOC1  ", 193,"Y"," ",1
+"DELWAQG   ","fSedPOC2  ", 194,"Y"," ",1
+"DELWAQG   ","fSedPOC3  ", 195,"Y"," ",1
+"DELWAQG   ","fSedPOC4  ", 196,"Y"," ",1
+"DELWAQG   ","fSedPON1  ", 197,"Y"," ",1
+"DELWAQG   ","fSedPON2  ", 198,"Y"," ",1
+"DELWAQG   ","fSedPON3  ", 199,"Y"," ",1
+"DELWAQG   ","fSedPON4  ", 200,"Y"," ",1
+"DELWAQG   ","fSedPOP1  ", 201,"Y"," ",1
+"DELWAQG   ","fSedPOP2  ", 202,"Y"," ",1
+"DELWAQG   ","fSedPOP3  ", 203,"Y"," ",1
+"DELWAQG   ","fSedPOP4  ", 204,"Y"," ",1
+"DELWAQG   ","fSedPOS1  ", 205,"Y"," ",1
+"DELWAQG   ","fSedPOS2  ", 206,"Y"," ",1
+"DELWAQG   ","fSedPOS3  ", 207,"Y"," ",1
+"DELWAQG   ","fSedPOS4  ", 208,"Y"," ",1
+"DELWAQG   ","fSedSUP   ", 209,"Y"," ",1
+"DELWAQG   ","fSedVIVP  ", 210,"Y"," ",1
+"DELWAQG   ","fN1VBups  ", 211,"Y"," ",1
+"DELWAQG   ","fN2VBups  ", 212,"Y"," ",1
+"DELWAQG   ","fP1VBups  ", 213,"Y"," ",1
+"DELWAQG   ","fP2VBups  ", 214,"Y"," ",1
+"DELWAQG   ","fS1VBups  ", 215,"Y"," ",1
+"DELWAQG   ","fS2VBups  ", 216,"Y"," ",1
+"DELWAQG   ","fC1VBrels ", 217,"Y"," ",1
+"DELWAQG   ","fC2VBrels ", 218,"Y"," ",1
+"DELWAQG   ","fC3VBrels ", 219,"Y"," ",1
+"DELWAQG   ","fC4VBrels ", 220,"Y"," ",1
+"DELWAQG   ","fN1VBrels ", 221,"Y"," ",1
+"DELWAQG   ","fN2VBrels ", 222,"Y"," ",1
+"DELWAQG   ","fN3VBrels ", 223,"Y"," ",1
+"DELWAQG   ","fN4VBrels ", 224,"Y"," ",1
+"DELWAQG   ","fP1VBrels ", 225,"Y"," ",1
+"DELWAQG   ","fP2VBrels ", 226,"Y"," ",1
+"DELWAQG   ","fP3VBrels ", 227,"Y"," ",1
+"DELWAQG   ","fP4VBrels ", 228,"Y"," ",1
+"DELWAQG   ","fS1VBrels ", 229,"Y"," ",1
+"DELWAQG   ","fS2VBrels ", 230,"Y"," ",1
+"DELWAQG   ","fS3VBrels ", 231,"Y"," ",1
+"DELWAQG   ","fS4VBrels ", 232,"Y"," ",1
 "MPBNUT    ","Nutlen    ",   1,"Y","x",1
 "MPBNUT    ","DIF       ",   2,"Y","x",1
 "MPBNUT    ","dMinDetNS1",   3,"Y"," ",1
@@ -16159,3 +16045,1058 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "MPBenthos ","MPBOXYCRIT",  72,"Y","x",1
 "MPBenthos ","MPB1mO_20 ",  73,"Y","x",1
 "MPBenthos ","MPB2mO_20 ",  74,"Y","x",1
+"VB01Procs ","SwEmersion",   1,"Y","x",1
+"VB01Procs ","SwVegMod  ",   2,"Y","x",1
+"VB01Procs ","VBType01  ",   3,"Y","x",1
+"VB01Procs ","nsfVB01   ",   4,"Y","x",1
+"VB01Procs ","CrnsfVB01 ",   5,"Y","x",1
+"VB01Procs ","Initnsfd  ",   6,"Y","x",1
+"VB01Procs ","CrdepVB01 ",   7,"Y","x",1
+"VB01Procs ","nscdVB01  ",   8,"Y","x",1
+"VB01Procs ","InnscdVB01",   9,"Y","x",1
+"VB01Procs ","DELT      ",  10,"N","x",1
+"VB01Procs ","TotalDepth",  11,"N","x",1
+"VB01Procs ","Depth     ",  12,"N","x",1
+"VB01Procs ","LocalDepth",  13,"N","x",1
+"VB01Procs ","Volume    ",  14,"N","x",1
+"VB01Procs ","Surf      ",  15,"N","x",1
+"VB01Procs ","RootDeVB01",  16,"O","x",1
+"VB01Procs ","NH4       ",  17,"Y","x",1
+"VB01Procs ","NO3       ",  18,"Y","x",1
+"VB01Procs ","AAP       ",  19,"Y","x",1
+"VB01Procs ","PO4       ",  20,"Y","x",1
+"VB01Procs ","SO4       ",  21,"N","x",1
+"VB01Procs ","SUD       ",  22,"N","x",1
+"VB01Procs ","SWRootVB01",  23,"Y","x",1
+"VB01Procs ","VmaxVB01  ",  24,"Y","x",1
+"VB01Procs ","KmVB01    ",  25,"Y","x",1
+"VB01Procs ","ViniVB01  ",  26,"Y","x",1
+"VB01Procs ","PorSed    ",  27,"Y","x",1
+"VB01Procs ","S1_NH4    ",  28,"Y","x",1
+"VB01Procs ","S1_NO3    ",  29,"Y","x",1
+"VB01Procs ","S1_AAP    ",  30,"Y","x",1
+"VB01Procs ","S1_PO4    ",  31,"Y","x",1
+"VB01Procs ","S1_SO4    ",  32,"Y","x",1
+"VB01Procs ","S1_SUD    ",  33,"Y","x",1
+"VB01Procs ","HSED      ",  34,"Y","x",1
+"VB01Procs ","VB01      ",  35,"N","x",1
+"VB01Procs ","maxVB01   ",  36,"Y","x",1
+"VB01Procs ","minVB01   ",  37,"Y","x",1
+"VB01Procs ","hlfAgeVB01",  38,"Y","x",1
+"VB01Procs ","sfVB01    ",  39,"Y","x",1
+"VB01Procs ","dmCfVB01  ",  40,"Y","x",1
+"VB01Procs ","iniVB01   ",  41,"Y","x",1
+"VB01Procs ","iniCovVB01",  42,"Y","x",1
+"VB01Procs ","SWiniVB01 ",  43,"Y","x",1
+"VB01Procs ","ageVB01   ",  44,"N","x",1
+"VB01Procs ","VB01Navail",  45,"N","x",1
+"VB01Procs ","VB01Pavail",  46,"N","x",1
+"VB01Procs ","VB01Savail",  47,"N","x",1
+"VB01Procs ","VBFrMaxU  ",  48,"Y","x",1
+"VB01Procs ","F1VB01    ",  49,"Y","x",1
+"VB01Procs ","F2VB01    ",  50,"Y","x",1
+"VB01Procs ","F3VB01    ",  51,"Y","x",1
+"VB01Procs ","F4VB01    ",  52,"Y","x",1
+"VB01Procs ","F5VB01    ",  53,"Y","x",1
+"VB01Procs ","CNf1VB01  ",  54,"Y","x",1
+"VB01Procs ","CNf2VB01  ",  55,"Y","x",1
+"VB01Procs ","CNf3VB01  ",  56,"Y","x",1
+"VB01Procs ","CNf4VB01  ",  57,"Y","x",1
+"VB01Procs ","CNf5VB01  ",  58,"Y","x",1
+"VB01Procs ","CPf1VB01  ",  59,"Y","x",1
+"VB01Procs ","CPf2VB01  ",  60,"Y","x",1
+"VB01Procs ","CPf3VB01  ",  61,"Y","x",1
+"VB01Procs ","CPf4VB01  ",  62,"Y","x",1
+"VB01Procs ","CPf5VB01  ",  63,"Y","x",1
+"VB01Procs ","CSf1VB01  ",  64,"Y","x",1
+"VB01Procs ","CSf2VB01  ",  65,"Y","x",1
+"VB01Procs ","CSf3VB01  ",  66,"Y","x",1
+"VB01Procs ","CSf4VB01  ",  67,"Y","x",1
+"VB01Procs ","CSf5VB01  ",  68,"Y","x",1
+"VB01Procs ","SWRegrVB01",  69,"Y","x",1
+"VB01Procs ","SWVB01Dec ",  70,"Y","x",1
+"VB01Procs ","IniAgeVB01",  71,"Y","x",1
+"VB01Procs ","IniVB01dec",  72,"Y","x",1
+"VB01Procs ","Rc0GWV01  ",  73,"Y","x",1
+"VB01Procs ","TcGWV01   ",  74,"Y","x",1
+"VB01Procs ","AcGWV01   ",  75,"Y","x",1
+"VB01Procs ","MinRWV01  ",  76,"Y","x",1
+"VB01Procs ","TBmWV01   ",  77,"Y","x",1
+"VB01Procs ","TempAir   ",  78,"Y","x",1
+"VB01Procs ","MinVB     ",  79,"Y","x",1
+"VB01Procs ","FfolPOC1  ",  80,"Y","x",1
+"VB01Procs ","FfolPOC2  ",  81,"Y","x",1
+"VB01Procs ","FfrootPOC1",  82,"Y","x",1
+"VB01Procs ","FfrootPOC2",  83,"Y","x",1
+"VB01Procs ","RcMrtVB01 ",  84,"Y","x",1
+"VB01Procs ","Rc0MSWV01 ",  85,"Y","x",1
+"VB01Procs ","TcMSWV01  ",  86,"Y","x",1
+"VB01Procs ","RcMGRWV01 ",  87,"Y","x",1
+"VB01Procs ","AcMWV01   ",  88,"Y","x",1
+"VB01Procs ","MaxRWV01  ",  89,"Y","x",1
+"VB01Procs ","SwDisVB01 ",  90,"Y","x",1
+"VB01Procs ","VegHeVB01 ",  91,"Y","x",1
+"VB01Procs ","FfacVB01  ",  92,"Y","x",1
+"VB01Procs ","fNVB01up  ",  93,"N","x",1
+"VB01Procs ","fPVB01up  ",  94,"N","x",1
+"VB01Procs ","fSVB01up  ",  95,"N","x",1
+"VB02Procs ","SwEmersion",   1,"Y","x",1
+"VB02Procs ","SwVegMod  ",   2,"Y","x",1
+"VB02Procs ","VBType01  ",   3,"Y","x",1
+"VB02Procs ","nsfVB02   ",   4,"Y","x",1
+"VB02Procs ","CrnsfVB02 ",   5,"Y","x",1
+"VB02Procs ","Initnsfd  ",   6,"Y","x",1
+"VB02Procs ","CrdepVB02 ",   7,"Y","x",1
+"VB02Procs ","nscdVB02  ",   8,"Y","x",1
+"VB02Procs ","InnscdVB02",   9,"Y","x",1
+"VB02Procs ","DELT      ",  10,"N","x",1
+"VB02Procs ","TotalDepth",  11,"N","x",1
+"VB02Procs ","Depth     ",  12,"N","x",1
+"VB02Procs ","LocalDepth",  13,"N","x",1
+"VB02Procs ","Volume    ",  14,"N","x",1
+"VB02Procs ","Surf      ",  15,"N","x",1
+"VB02Procs ","RootDeVB02",  16,"O","x",1
+"VB02Procs ","NH4       ",  17,"Y","x",1
+"VB02Procs ","NO3       ",  18,"Y","x",1
+"VB02Procs ","AAP       ",  19,"Y","x",1
+"VB02Procs ","PO4       ",  20,"Y","x",1
+"VB02Procs ","SO4       ",  21,"N","x",1
+"VB02Procs ","SUD       ",  22,"N","x",1
+"VB02Procs ","SWRootVB02",  23,"Y","x",1
+"VB02Procs ","VmaxVB02  ",  24,"Y","x",1
+"VB02Procs ","KmVB02    ",  25,"Y","x",1
+"VB02Procs ","ViniVB02  ",  26,"Y","x",1
+"VB02Procs ","PorSed    ",  27,"Y","x",1
+"VB02Procs ","S1_NH4    ",  28,"Y","x",1
+"VB02Procs ","S1_NO3    ",  29,"Y","x",1
+"VB02Procs ","S1_AAP    ",  30,"Y","x",1
+"VB02Procs ","S1_PO4    ",  31,"Y","x",1
+"VB02Procs ","S1_SO4    ",  32,"Y","x",1
+"VB02Procs ","S1_SUD    ",  33,"Y","x",1
+"VB02Procs ","HSED      ",  34,"Y","x",1
+"VB02Procs ","VB02      ",  35,"N","x",1
+"VB02Procs ","maxVB02   ",  36,"Y","x",1
+"VB02Procs ","minVB02   ",  37,"Y","x",1
+"VB02Procs ","hlfAgeVB02",  38,"Y","x",1
+"VB02Procs ","sfVB02    ",  39,"Y","x",1
+"VB02Procs ","dmCfVB02  ",  40,"Y","x",1
+"VB02Procs ","iniVB02   ",  41,"Y","x",1
+"VB02Procs ","iniCovVB02",  42,"Y","x",1
+"VB02Procs ","SWiniVB02 ",  43,"Y","x",1
+"VB02Procs ","ageVB02   ",  44,"N","x",1
+"VB02Procs ","VB02Navail",  45,"N","x",1
+"VB02Procs ","VB02Pavail",  46,"N","x",1
+"VB02Procs ","VB02Savail",  47,"N","x",1
+"VB02Procs ","VBFrMaxU  ",  48,"Y","x",1
+"VB02Procs ","F1VB02    ",  49,"Y","x",1
+"VB02Procs ","F2VB02    ",  50,"Y","x",1
+"VB02Procs ","F3VB02    ",  51,"Y","x",1
+"VB02Procs ","F4VB02    ",  52,"Y","x",1
+"VB02Procs ","F5VB02    ",  53,"Y","x",1
+"VB02Procs ","CNf1VB02  ",  54,"Y","x",1
+"VB02Procs ","CNf2VB02  ",  55,"Y","x",1
+"VB02Procs ","CNf3VB02  ",  56,"Y","x",1
+"VB02Procs ","CNf4VB02  ",  57,"Y","x",1
+"VB02Procs ","CNf5VB02  ",  58,"Y","x",1
+"VB02Procs ","CPf1VB02  ",  59,"Y","x",1
+"VB02Procs ","CPf2VB02  ",  60,"Y","x",1
+"VB02Procs ","CPf3VB02  ",  61,"Y","x",1
+"VB02Procs ","CPf4VB02  ",  62,"Y","x",1
+"VB02Procs ","CPf5VB02  ",  63,"Y","x",1
+"VB02Procs ","CSf1VB02  ",  64,"Y","x",1
+"VB02Procs ","CSf2VB02  ",  65,"Y","x",1
+"VB02Procs ","CSf3VB02  ",  66,"Y","x",1
+"VB02Procs ","CSf4VB02  ",  67,"Y","x",1
+"VB02Procs ","CSf5VB02  ",  68,"Y","x",1
+"VB02Procs ","SWRegrVB02",  69,"Y","x",1
+"VB02Procs ","SWVB02Dec ",  70,"Y","x",1
+"VB02Procs ","IniAgeVB02",  71,"Y","x",1
+"VB02Procs ","IniVB02dec",  72,"Y","x",1
+"VB02Procs ","Rc0GWV01  ",  73,"Y","x",1
+"VB02Procs ","TcGWV01   ",  74,"Y","x",1
+"VB02Procs ","AcGWV01   ",  75,"Y","x",1
+"VB02Procs ","MinRWV01  ",  76,"Y","x",1
+"VB02Procs ","TBmWV01   ",  77,"Y","x",1
+"VB02Procs ","TempAir   ",  78,"Y","x",1
+"VB02Procs ","MinVB     ",  79,"Y","x",1
+"VB02Procs ","FfolPOC1  ",  80,"Y","x",1
+"VB02Procs ","FfolPOC2  ",  81,"Y","x",1
+"VB02Procs ","FfrootPOC1",  82,"Y","x",1
+"VB02Procs ","FfrootPOC2",  83,"Y","x",1
+"VB02Procs ","RcMrtVB02 ",  84,"Y","x",1
+"VB02Procs ","Rc0MSWV01 ",  85,"Y","x",1
+"VB02Procs ","TcMSWV01  ",  86,"Y","x",1
+"VB02Procs ","RcMGRWV01 ",  87,"Y","x",1
+"VB02Procs ","AcMWV01   ",  88,"Y","x",1
+"VB02Procs ","MaxRWV01  ",  89,"Y","x",1
+"VB02Procs ","SwDisVB02 ",  90,"Y","x",1
+"VB02Procs ","VegHeVB02 ",  91,"Y","x",1
+"VB02Procs ","FfacVB02  ",  92,"Y","x",1
+"VB02Procs ","fNVB02up  ",  93,"N","x",1
+"VB02Procs ","fPVB02up  ",  94,"N","x",1
+"VB02Procs ","fSVB02up  ",  95,"N","x",1
+"VB03Procs ","SwEmersion",   1,"Y","x",1
+"VB03Procs ","SwVegMod  ",   2,"Y","x",1
+"VB03Procs ","VBType01  ",   3,"Y","x",1
+"VB03Procs ","nsfVB03   ",   4,"Y","x",1
+"VB03Procs ","CrnsfVB03 ",   5,"Y","x",1
+"VB03Procs ","Initnsfd  ",   6,"Y","x",1
+"VB03Procs ","CrdepVB03 ",   7,"Y","x",1
+"VB03Procs ","nscdVB03  ",   8,"Y","x",1
+"VB03Procs ","InnscdVB03",   9,"Y","x",1
+"VB03Procs ","DELT      ",  10,"N","x",1
+"VB03Procs ","TotalDepth",  11,"N","x",1
+"VB03Procs ","Depth     ",  12,"N","x",1
+"VB03Procs ","LocalDepth",  13,"N","x",1
+"VB03Procs ","Volume    ",  14,"N","x",1
+"VB03Procs ","Surf      ",  15,"N","x",1
+"VB03Procs ","RootDeVB03",  16,"O","x",1
+"VB03Procs ","NH4       ",  17,"Y","x",1
+"VB03Procs ","NO3       ",  18,"Y","x",1
+"VB03Procs ","AAP       ",  19,"Y","x",1
+"VB03Procs ","PO4       ",  20,"Y","x",1
+"VB03Procs ","SO4       ",  21,"N","x",1
+"VB03Procs ","SUD       ",  22,"N","x",1
+"VB03Procs ","SWRootVB03",  23,"Y","x",1
+"VB03Procs ","VmaxVB03  ",  24,"Y","x",1
+"VB03Procs ","KmVB03    ",  25,"Y","x",1
+"VB03Procs ","ViniVB03  ",  26,"Y","x",1
+"VB03Procs ","PorSed    ",  27,"Y","x",1
+"VB03Procs ","S1_NH4    ",  28,"Y","x",1
+"VB03Procs ","S1_NO3    ",  29,"Y","x",1
+"VB03Procs ","S1_AAP    ",  30,"Y","x",1
+"VB03Procs ","S1_PO4    ",  31,"Y","x",1
+"VB03Procs ","S1_SO4    ",  32,"Y","x",1
+"VB03Procs ","S1_SUD    ",  33,"Y","x",1
+"VB03Procs ","HSED      ",  34,"Y","x",1
+"VB03Procs ","VB03      ",  35,"N","x",1
+"VB03Procs ","maxVB03   ",  36,"Y","x",1
+"VB03Procs ","minVB03   ",  37,"Y","x",1
+"VB03Procs ","hlfAgeVB03",  38,"Y","x",1
+"VB03Procs ","sfVB03    ",  39,"Y","x",1
+"VB03Procs ","dmCfVB03  ",  40,"Y","x",1
+"VB03Procs ","iniVB03   ",  41,"Y","x",1
+"VB03Procs ","iniCovVB03",  42,"Y","x",1
+"VB03Procs ","SWiniVB03 ",  43,"Y","x",1
+"VB03Procs ","ageVB03   ",  44,"N","x",1
+"VB03Procs ","VB03Navail",  45,"N","x",1
+"VB03Procs ","VB03Pavail",  46,"N","x",1
+"VB03Procs ","VB03Savail",  47,"N","x",1
+"VB03Procs ","VBFrMaxU  ",  48,"Y","x",1
+"VB03Procs ","F1VB03    ",  49,"Y","x",1
+"VB03Procs ","F2VB03    ",  50,"Y","x",1
+"VB03Procs ","F3VB03    ",  51,"Y","x",1
+"VB03Procs ","F4VB03    ",  52,"Y","x",1
+"VB03Procs ","F5VB03    ",  53,"Y","x",1
+"VB03Procs ","CNf1VB03  ",  54,"Y","x",1
+"VB03Procs ","CNf2VB03  ",  55,"Y","x",1
+"VB03Procs ","CNf3VB03  ",  56,"Y","x",1
+"VB03Procs ","CNf4VB03  ",  57,"Y","x",1
+"VB03Procs ","CNf5VB03  ",  58,"Y","x",1
+"VB03Procs ","CPf1VB03  ",  59,"Y","x",1
+"VB03Procs ","CPf2VB03  ",  60,"Y","x",1
+"VB03Procs ","CPf3VB03  ",  61,"Y","x",1
+"VB03Procs ","CPf4VB03  ",  62,"Y","x",1
+"VB03Procs ","CPf5VB03  ",  63,"Y","x",1
+"VB03Procs ","CSf1VB03  ",  64,"Y","x",1
+"VB03Procs ","CSf2VB03  ",  65,"Y","x",1
+"VB03Procs ","CSf3VB03  ",  66,"Y","x",1
+"VB03Procs ","CSf4VB03  ",  67,"Y","x",1
+"VB03Procs ","CSf5VB03  ",  68,"Y","x",1
+"VB03Procs ","SWRegrVB03",  69,"Y","x",1
+"VB03Procs ","SWVB03Dec ",  70,"Y","x",1
+"VB03Procs ","IniAgeVB03",  71,"Y","x",1
+"VB03Procs ","IniVB03dec",  72,"Y","x",1
+"VB03Procs ","Rc0GWV01  ",  73,"Y","x",1
+"VB03Procs ","TcGWV01   ",  74,"Y","x",1
+"VB03Procs ","AcGWV01   ",  75,"Y","x",1
+"VB03Procs ","MinRWV01  ",  76,"Y","x",1
+"VB03Procs ","TBmWV01   ",  77,"Y","x",1
+"VB03Procs ","TempAir   ",  78,"Y","x",1
+"VB03Procs ","MinVB     ",  79,"Y","x",1
+"VB03Procs ","FfolPOC1  ",  80,"Y","x",1
+"VB03Procs ","FfolPOC2  ",  81,"Y","x",1
+"VB03Procs ","FfrootPOC1",  82,"Y","x",1
+"VB03Procs ","FfrootPOC2",  83,"Y","x",1
+"VB03Procs ","RcMrtVB03 ",  84,"Y","x",1
+"VB03Procs ","Rc0MSWV01 ",  85,"Y","x",1
+"VB03Procs ","TcMSWV01  ",  86,"Y","x",1
+"VB03Procs ","RcMGRWV01 ",  87,"Y","x",1
+"VB03Procs ","AcMWV01   ",  88,"Y","x",1
+"VB03Procs ","MaxRWV01  ",  89,"Y","x",1
+"VB03Procs ","SwDisVB03 ",  90,"Y","x",1
+"VB03Procs ","VegHeVB03 ",  91,"Y","x",1
+"VB03Procs ","FfacVB03  ",  92,"Y","x",1
+"VB03Procs ","fNVB03up  ",  93,"N","x",1
+"VB03Procs ","fPVB03up  ",  94,"N","x",1
+"VB03Procs ","fSVB03up  ",  95,"N","x",1
+"VB04Procs ","SwEmersion",   1,"Y","x",1
+"VB04Procs ","SwVegMod  ",   2,"Y","x",1
+"VB04Procs ","VBType01  ",   3,"Y","x",1
+"VB04Procs ","nsfVB04   ",   4,"Y","x",1
+"VB04Procs ","CrnsfVB04 ",   5,"Y","x",1
+"VB04Procs ","Initnsfd  ",   6,"Y","x",1
+"VB04Procs ","CrdepVB04 ",   7,"Y","x",1
+"VB04Procs ","nscdVB04  ",   8,"Y","x",1
+"VB04Procs ","InnscdVB04",   9,"Y","x",1
+"VB04Procs ","DELT      ",  10,"N","x",1
+"VB04Procs ","TotalDepth",  11,"N","x",1
+"VB04Procs ","Depth     ",  12,"N","x",1
+"VB04Procs ","LocalDepth",  13,"N","x",1
+"VB04Procs ","Volume    ",  14,"N","x",1
+"VB04Procs ","Surf      ",  15,"N","x",1
+"VB04Procs ","RootDeVB04",  16,"O","x",1
+"VB04Procs ","NH4       ",  17,"Y","x",1
+"VB04Procs ","NO3       ",  18,"Y","x",1
+"VB04Procs ","AAP       ",  19,"Y","x",1
+"VB04Procs ","PO4       ",  20,"Y","x",1
+"VB04Procs ","SO4       ",  21,"N","x",1
+"VB04Procs ","SUD       ",  22,"N","x",1
+"VB04Procs ","SWRootVB04",  23,"Y","x",1
+"VB04Procs ","VmaxVB04  ",  24,"Y","x",1
+"VB04Procs ","KmVB04    ",  25,"Y","x",1
+"VB04Procs ","ViniVB04  ",  26,"Y","x",1
+"VB04Procs ","PorSed    ",  27,"Y","x",1
+"VB04Procs ","S1_NH4    ",  28,"Y","x",1
+"VB04Procs ","S1_NO3    ",  29,"Y","x",1
+"VB04Procs ","S1_AAP    ",  30,"Y","x",1
+"VB04Procs ","S1_PO4    ",  31,"Y","x",1
+"VB04Procs ","S1_SO4    ",  32,"Y","x",1
+"VB04Procs ","S1_SUD    ",  33,"Y","x",1
+"VB04Procs ","HSED      ",  34,"Y","x",1
+"VB04Procs ","VB04      ",  35,"N","x",1
+"VB04Procs ","maxVB04   ",  36,"Y","x",1
+"VB04Procs ","minVB04   ",  37,"Y","x",1
+"VB04Procs ","hlfAgeVB04",  38,"Y","x",1
+"VB04Procs ","sfVB04    ",  39,"Y","x",1
+"VB04Procs ","dmCfVB04  ",  40,"Y","x",1
+"VB04Procs ","iniVB04   ",  41,"Y","x",1
+"VB04Procs ","iniCovVB04",  42,"Y","x",1
+"VB04Procs ","SWiniVB04 ",  43,"Y","x",1
+"VB04Procs ","ageVB04   ",  44,"N","x",1
+"VB04Procs ","VB04Navail",  45,"N","x",1
+"VB04Procs ","VB04Pavail",  46,"N","x",1
+"VB04Procs ","VB04Savail",  47,"N","x",1
+"VB04Procs ","VBFrMaxU  ",  48,"Y","x",1
+"VB04Procs ","F1VB04    ",  49,"Y","x",1
+"VB04Procs ","F2VB04    ",  50,"Y","x",1
+"VB04Procs ","F3VB04    ",  51,"Y","x",1
+"VB04Procs ","F4VB04    ",  52,"Y","x",1
+"VB04Procs ","F5VB04    ",  53,"Y","x",1
+"VB04Procs ","CNf1VB04  ",  54,"Y","x",1
+"VB04Procs ","CNf2VB04  ",  55,"Y","x",1
+"VB04Procs ","CNf3VB04  ",  56,"Y","x",1
+"VB04Procs ","CNf4VB04  ",  57,"Y","x",1
+"VB04Procs ","CNf5VB04  ",  58,"Y","x",1
+"VB04Procs ","CPf1VB04  ",  59,"Y","x",1
+"VB04Procs ","CPf2VB04  ",  60,"Y","x",1
+"VB04Procs ","CPf3VB04  ",  61,"Y","x",1
+"VB04Procs ","CPf4VB04  ",  62,"Y","x",1
+"VB04Procs ","CPf5VB04  ",  63,"Y","x",1
+"VB04Procs ","CSf1VB04  ",  64,"Y","x",1
+"VB04Procs ","CSf2VB04  ",  65,"Y","x",1
+"VB04Procs ","CSf3VB04  ",  66,"Y","x",1
+"VB04Procs ","CSf4VB04  ",  67,"Y","x",1
+"VB04Procs ","CSf5VB04  ",  68,"Y","x",1
+"VB04Procs ","SWRegrVB04",  69,"Y","x",1
+"VB04Procs ","SWVB04Dec ",  70,"Y","x",1
+"VB04Procs ","IniAgeVB04",  71,"Y","x",1
+"VB04Procs ","IniVB04dec",  72,"Y","x",1
+"VB04Procs ","Rc0GWV01  ",  73,"Y","x",1
+"VB04Procs ","TcGWV01   ",  74,"Y","x",1
+"VB04Procs ","AcGWV01   ",  75,"Y","x",1
+"VB04Procs ","MinRWV01  ",  76,"Y","x",1
+"VB04Procs ","TBmWV01   ",  77,"Y","x",1
+"VB04Procs ","TempAir   ",  78,"Y","x",1
+"VB04Procs ","MinVB     ",  79,"Y","x",1
+"VB04Procs ","FfolPOC1  ",  80,"Y","x",1
+"VB04Procs ","FfolPOC2  ",  81,"Y","x",1
+"VB04Procs ","FfrootPOC1",  82,"Y","x",1
+"VB04Procs ","FfrootPOC2",  83,"Y","x",1
+"VB04Procs ","RcMrtVB04 ",  84,"Y","x",1
+"VB04Procs ","Rc0MSWV01 ",  85,"Y","x",1
+"VB04Procs ","TcMSWV01  ",  86,"Y","x",1
+"VB04Procs ","RcMGRWV01 ",  87,"Y","x",1
+"VB04Procs ","AcMWV01   ",  88,"Y","x",1
+"VB04Procs ","MaxRWV01  ",  89,"Y","x",1
+"VB04Procs ","SwDisVB04 ",  90,"Y","x",1
+"VB04Procs ","VegHeVB04 ",  91,"Y","x",1
+"VB04Procs ","FfacVB04  ",  92,"Y","x",1
+"VB04Procs ","fNVB04up  ",  93,"N","x",1
+"VB04Procs ","fPVB04up  ",  94,"N","x",1
+"VB04Procs ","fSVB04up  ",  95,"N","x",1
+"VB05Procs ","SwEmersion",   1,"Y","x",1
+"VB05Procs ","SwVegMod  ",   2,"Y","x",1
+"VB05Procs ","VBType01  ",   3,"Y","x",1
+"VB05Procs ","nsfVB05   ",   4,"Y","x",1
+"VB05Procs ","CrnsfVB05 ",   5,"Y","x",1
+"VB05Procs ","Initnsfd  ",   6,"Y","x",1
+"VB05Procs ","CrdepVB05 ",   7,"Y","x",1
+"VB05Procs ","nscdVB05  ",   8,"Y","x",1
+"VB05Procs ","InnscdVB05",   9,"Y","x",1
+"VB05Procs ","DELT      ",  10,"N","x",1
+"VB05Procs ","TotalDepth",  11,"N","x",1
+"VB05Procs ","Depth     ",  12,"N","x",1
+"VB05Procs ","LocalDepth",  13,"N","x",1
+"VB05Procs ","Volume    ",  14,"N","x",1
+"VB05Procs ","Surf      ",  15,"N","x",1
+"VB05Procs ","RootDeVB05",  16,"O","x",1
+"VB05Procs ","NH4       ",  17,"Y","x",1
+"VB05Procs ","NO3       ",  18,"Y","x",1
+"VB05Procs ","AAP       ",  19,"Y","x",1
+"VB05Procs ","PO4       ",  20,"Y","x",1
+"VB05Procs ","SO4       ",  21,"N","x",1
+"VB05Procs ","SUD       ",  22,"N","x",1
+"VB05Procs ","SWRootVB05",  23,"Y","x",1
+"VB05Procs ","VmaxVB05  ",  24,"Y","x",1
+"VB05Procs ","KmVB05    ",  25,"Y","x",1
+"VB05Procs ","ViniVB05  ",  26,"Y","x",1
+"VB05Procs ","PorSed    ",  27,"Y","x",1
+"VB05Procs ","S1_NH4    ",  28,"Y","x",1
+"VB05Procs ","S1_NO3    ",  29,"Y","x",1
+"VB05Procs ","S1_AAP    ",  30,"Y","x",1
+"VB05Procs ","S1_PO4    ",  31,"Y","x",1
+"VB05Procs ","S1_SO4    ",  32,"Y","x",1
+"VB05Procs ","S1_SUD    ",  33,"Y","x",1
+"VB05Procs ","HSED      ",  34,"Y","x",1
+"VB05Procs ","VB05      ",  35,"N","x",1
+"VB05Procs ","maxVB05   ",  36,"Y","x",1
+"VB05Procs ","minVB05   ",  37,"Y","x",1
+"VB05Procs ","hlfAgeVB05",  38,"Y","x",1
+"VB05Procs ","sfVB05    ",  39,"Y","x",1
+"VB05Procs ","dmCfVB05  ",  40,"Y","x",1
+"VB05Procs ","iniVB05   ",  41,"Y","x",1
+"VB05Procs ","iniCovVB05",  42,"Y","x",1
+"VB05Procs ","SWiniVB05 ",  43,"Y","x",1
+"VB05Procs ","ageVB05   ",  44,"N","x",1
+"VB05Procs ","VB05Navail",  45,"N","x",1
+"VB05Procs ","VB05Pavail",  46,"N","x",1
+"VB05Procs ","VB05Savail",  47,"N","x",1
+"VB05Procs ","VBFrMaxU  ",  48,"Y","x",1
+"VB05Procs ","F1VB05    ",  49,"Y","x",1
+"VB05Procs ","F2VB05    ",  50,"Y","x",1
+"VB05Procs ","F3VB05    ",  51,"Y","x",1
+"VB05Procs ","F4VB05    ",  52,"Y","x",1
+"VB05Procs ","F5VB05    ",  53,"Y","x",1
+"VB05Procs ","CNf1VB05  ",  54,"Y","x",1
+"VB05Procs ","CNf2VB05  ",  55,"Y","x",1
+"VB05Procs ","CNf3VB05  ",  56,"Y","x",1
+"VB05Procs ","CNf4VB05  ",  57,"Y","x",1
+"VB05Procs ","CNf5VB05  ",  58,"Y","x",1
+"VB05Procs ","CPf1VB05  ",  59,"Y","x",1
+"VB05Procs ","CPf2VB05  ",  60,"Y","x",1
+"VB05Procs ","CPf3VB05  ",  61,"Y","x",1
+"VB05Procs ","CPf4VB05  ",  62,"Y","x",1
+"VB05Procs ","CPf5VB05  ",  63,"Y","x",1
+"VB05Procs ","CSf1VB05  ",  64,"Y","x",1
+"VB05Procs ","CSf2VB05  ",  65,"Y","x",1
+"VB05Procs ","CSf3VB05  ",  66,"Y","x",1
+"VB05Procs ","CSf4VB05  ",  67,"Y","x",1
+"VB05Procs ","CSf5VB05  ",  68,"Y","x",1
+"VB05Procs ","SWRegrVB05",  69,"Y","x",1
+"VB05Procs ","SWVB05Dec ",  70,"Y","x",1
+"VB05Procs ","IniAgeVB05",  71,"Y","x",1
+"VB05Procs ","IniVB05dec",  72,"Y","x",1
+"VB05Procs ","Rc0GWV01  ",  73,"Y","x",1
+"VB05Procs ","TcGWV01   ",  74,"Y","x",1
+"VB05Procs ","AcGWV01   ",  75,"Y","x",1
+"VB05Procs ","MinRWV01  ",  76,"Y","x",1
+"VB05Procs ","TBmWV01   ",  77,"Y","x",1
+"VB05Procs ","TempAir   ",  78,"Y","x",1
+"VB05Procs ","MinVB     ",  79,"Y","x",1
+"VB05Procs ","FfolPOC1  ",  80,"Y","x",1
+"VB05Procs ","FfolPOC2  ",  81,"Y","x",1
+"VB05Procs ","FfrootPOC1",  82,"Y","x",1
+"VB05Procs ","FfrootPOC2",  83,"Y","x",1
+"VB05Procs ","RcMrtVB05 ",  84,"Y","x",1
+"VB05Procs ","Rc0MSWV01 ",  85,"Y","x",1
+"VB05Procs ","TcMSWV01  ",  86,"Y","x",1
+"VB05Procs ","RcMGRWV01 ",  87,"Y","x",1
+"VB05Procs ","AcMWV01   ",  88,"Y","x",1
+"VB05Procs ","MaxRWV01  ",  89,"Y","x",1
+"VB05Procs ","SwDisVB05 ",  90,"Y","x",1
+"VB05Procs ","VegHeVB05 ",  91,"Y","x",1
+"VB05Procs ","FfacVB05  ",  92,"Y","x",1
+"VB05Procs ","fNVB05up  ",  93,"N","x",1
+"VB05Procs ","fPVB05up  ",  94,"N","x",1
+"VB05Procs ","fSVB05up  ",  95,"N","x",1
+"VB06Procs ","SwEmersion",   1,"Y","x",1
+"VB06Procs ","SwVegMod  ",   2,"Y","x",1
+"VB06Procs ","VBType01  ",   3,"Y","x",1
+"VB06Procs ","nsfVB06   ",   4,"Y","x",1
+"VB06Procs ","CrnsfVB06 ",   5,"Y","x",1
+"VB06Procs ","Initnsfd  ",   6,"Y","x",1
+"VB06Procs ","CrdepVB06 ",   7,"Y","x",1
+"VB06Procs ","nscdVB06  ",   8,"Y","x",1
+"VB06Procs ","InnscdVB06",   9,"Y","x",1
+"VB06Procs ","DELT      ",  10,"N","x",1
+"VB06Procs ","TotalDepth",  11,"N","x",1
+"VB06Procs ","Depth     ",  12,"N","x",1
+"VB06Procs ","LocalDepth",  13,"N","x",1
+"VB06Procs ","Volume    ",  14,"N","x",1
+"VB06Procs ","Surf      ",  15,"N","x",1
+"VB06Procs ","RootDeVB06",  16,"O","x",1
+"VB06Procs ","NH4       ",  17,"Y","x",1
+"VB06Procs ","NO3       ",  18,"Y","x",1
+"VB06Procs ","AAP       ",  19,"Y","x",1
+"VB06Procs ","PO4       ",  20,"Y","x",1
+"VB06Procs ","SO4       ",  21,"N","x",1
+"VB06Procs ","SUD       ",  22,"N","x",1
+"VB06Procs ","SWRootVB06",  23,"Y","x",1
+"VB06Procs ","VmaxVB06  ",  24,"Y","x",1
+"VB06Procs ","KmVB06    ",  25,"Y","x",1
+"VB06Procs ","ViniVB06  ",  26,"Y","x",1
+"VB06Procs ","PorSed    ",  27,"Y","x",1
+"VB06Procs ","S1_NH4    ",  28,"Y","x",1
+"VB06Procs ","S1_NO3    ",  29,"Y","x",1
+"VB06Procs ","S1_AAP    ",  30,"Y","x",1
+"VB06Procs ","S1_PO4    ",  31,"Y","x",1
+"VB06Procs ","S1_SO4    ",  32,"Y","x",1
+"VB06Procs ","S1_SUD    ",  33,"Y","x",1
+"VB06Procs ","HSED      ",  34,"Y","x",1
+"VB06Procs ","VB06      ",  35,"N","x",1
+"VB06Procs ","maxVB06   ",  36,"Y","x",1
+"VB06Procs ","minVB06   ",  37,"Y","x",1
+"VB06Procs ","hlfAgeVB06",  38,"Y","x",1
+"VB06Procs ","sfVB06    ",  39,"Y","x",1
+"VB06Procs ","dmCfVB06  ",  40,"Y","x",1
+"VB06Procs ","iniVB06   ",  41,"Y","x",1
+"VB06Procs ","iniCovVB06",  42,"Y","x",1
+"VB06Procs ","SWiniVB06 ",  43,"Y","x",1
+"VB06Procs ","ageVB06   ",  44,"N","x",1
+"VB06Procs ","VB06Navail",  45,"N","x",1
+"VB06Procs ","VB06Pavail",  46,"N","x",1
+"VB06Procs ","VB06Savail",  47,"N","x",1
+"VB06Procs ","VBFrMaxU  ",  48,"Y","x",1
+"VB06Procs ","F1VB06    ",  49,"Y","x",1
+"VB06Procs ","F2VB06    ",  50,"Y","x",1
+"VB06Procs ","F3VB06    ",  51,"Y","x",1
+"VB06Procs ","F4VB06    ",  52,"Y","x",1
+"VB06Procs ","F5VB06    ",  53,"Y","x",1
+"VB06Procs ","CNf1VB06  ",  54,"Y","x",1
+"VB06Procs ","CNf2VB06  ",  55,"Y","x",1
+"VB06Procs ","CNf3VB06  ",  56,"Y","x",1
+"VB06Procs ","CNf4VB06  ",  57,"Y","x",1
+"VB06Procs ","CNf5VB06  ",  58,"Y","x",1
+"VB06Procs ","CPf1VB06  ",  59,"Y","x",1
+"VB06Procs ","CPf2VB06  ",  60,"Y","x",1
+"VB06Procs ","CPf3VB06  ",  61,"Y","x",1
+"VB06Procs ","CPf4VB06  ",  62,"Y","x",1
+"VB06Procs ","CPf5VB06  ",  63,"Y","x",1
+"VB06Procs ","CSf1VB06  ",  64,"Y","x",1
+"VB06Procs ","CSf2VB06  ",  65,"Y","x",1
+"VB06Procs ","CSf3VB06  ",  66,"Y","x",1
+"VB06Procs ","CSf4VB06  ",  67,"Y","x",1
+"VB06Procs ","CSf5VB06  ",  68,"Y","x",1
+"VB06Procs ","SWRegrVB06",  69,"Y","x",1
+"VB06Procs ","SWVB06Dec ",  70,"Y","x",1
+"VB06Procs ","IniAgeVB06",  71,"Y","x",1
+"VB06Procs ","IniVB06dec",  72,"Y","x",1
+"VB06Procs ","Rc0GWV01  ",  73,"Y","x",1
+"VB06Procs ","TcGWV01   ",  74,"Y","x",1
+"VB06Procs ","AcGWV01   ",  75,"Y","x",1
+"VB06Procs ","MinRWV01  ",  76,"Y","x",1
+"VB06Procs ","TBmWV01   ",  77,"Y","x",1
+"VB06Procs ","TempAir   ",  78,"Y","x",1
+"VB06Procs ","MinVB     ",  79,"Y","x",1
+"VB06Procs ","FfolPOC1  ",  80,"Y","x",1
+"VB06Procs ","FfolPOC2  ",  81,"Y","x",1
+"VB06Procs ","FfrootPOC1",  82,"Y","x",1
+"VB06Procs ","FfrootPOC2",  83,"Y","x",1
+"VB06Procs ","RcMrtVB06 ",  84,"Y","x",1
+"VB06Procs ","Rc0MSWV01 ",  85,"Y","x",1
+"VB06Procs ","TcMSWV01  ",  86,"Y","x",1
+"VB06Procs ","RcMGRWV01 ",  87,"Y","x",1
+"VB06Procs ","AcMWV01   ",  88,"Y","x",1
+"VB06Procs ","MaxRWV01  ",  89,"Y","x",1
+"VB06Procs ","SwDisVB06 ",  90,"Y","x",1
+"VB06Procs ","VegHeVB06 ",  91,"Y","x",1
+"VB06Procs ","FfacVB06  ",  92,"Y","x",1
+"VB06Procs ","fNVB06up  ",  93,"N","x",1
+"VB06Procs ","fPVB06up  ",  94,"N","x",1
+"VB06Procs ","fSVB06up  ",  95,"N","x",1
+"VB07Procs ","SwEmersion",   1,"Y","x",1
+"VB07Procs ","SwVegMod  ",   2,"Y","x",1
+"VB07Procs ","VBType01  ",   3,"Y","x",1
+"VB07Procs ","nsfVB07   ",   4,"Y","x",1
+"VB07Procs ","CrnsfVB07 ",   5,"Y","x",1
+"VB07Procs ","Initnsfd  ",   6,"Y","x",1
+"VB07Procs ","CrdepVB07 ",   7,"Y","x",1
+"VB07Procs ","nscdVB07  ",   8,"Y","x",1
+"VB07Procs ","InnscdVB07",   9,"Y","x",1
+"VB07Procs ","DELT      ",  10,"N","x",1
+"VB07Procs ","TotalDepth",  11,"N","x",1
+"VB07Procs ","Depth     ",  12,"N","x",1
+"VB07Procs ","LocalDepth",  13,"N","x",1
+"VB07Procs ","Volume    ",  14,"N","x",1
+"VB07Procs ","Surf      ",  15,"N","x",1
+"VB07Procs ","RootDeVB07",  16,"O","x",1
+"VB07Procs ","NH4       ",  17,"Y","x",1
+"VB07Procs ","NO3       ",  18,"Y","x",1
+"VB07Procs ","AAP       ",  19,"Y","x",1
+"VB07Procs ","PO4       ",  20,"Y","x",1
+"VB07Procs ","SO4       ",  21,"N","x",1
+"VB07Procs ","SUD       ",  22,"N","x",1
+"VB07Procs ","SWRootVB07",  23,"Y","x",1
+"VB07Procs ","VmaxVB07  ",  24,"Y","x",1
+"VB07Procs ","KmVB07    ",  25,"Y","x",1
+"VB07Procs ","ViniVB07  ",  26,"Y","x",1
+"VB07Procs ","PorSed    ",  27,"Y","x",1
+"VB07Procs ","S1_NH4    ",  28,"Y","x",1
+"VB07Procs ","S1_NO3    ",  29,"Y","x",1
+"VB07Procs ","S1_AAP    ",  30,"Y","x",1
+"VB07Procs ","S1_PO4    ",  31,"Y","x",1
+"VB07Procs ","S1_SO4    ",  32,"Y","x",1
+"VB07Procs ","S1_SUD    ",  33,"Y","x",1
+"VB07Procs ","HSED      ",  34,"Y","x",1
+"VB07Procs ","VB07      ",  35,"N","x",1
+"VB07Procs ","maxVB07   ",  36,"Y","x",1
+"VB07Procs ","minVB07   ",  37,"Y","x",1
+"VB07Procs ","hlfAgeVB07",  38,"Y","x",1
+"VB07Procs ","sfVB07    ",  39,"Y","x",1
+"VB07Procs ","dmCfVB07  ",  40,"Y","x",1
+"VB07Procs ","iniVB07   ",  41,"Y","x",1
+"VB07Procs ","iniCovVB07",  42,"Y","x",1
+"VB07Procs ","SWiniVB07 ",  43,"Y","x",1
+"VB07Procs ","ageVB07   ",  44,"N","x",1
+"VB07Procs ","VB07Navail",  45,"N","x",1
+"VB07Procs ","VB07Pavail",  46,"N","x",1
+"VB07Procs ","VB07Savail",  47,"N","x",1
+"VB07Procs ","VBFrMaxU  ",  48,"Y","x",1
+"VB07Procs ","F1VB07    ",  49,"Y","x",1
+"VB07Procs ","F2VB07    ",  50,"Y","x",1
+"VB07Procs ","F3VB07    ",  51,"Y","x",1
+"VB07Procs ","F4VB07    ",  52,"Y","x",1
+"VB07Procs ","F5VB07    ",  53,"Y","x",1
+"VB07Procs ","CNf1VB07  ",  54,"Y","x",1
+"VB07Procs ","CNf2VB07  ",  55,"Y","x",1
+"VB07Procs ","CNf3VB07  ",  56,"Y","x",1
+"VB07Procs ","CNf4VB07  ",  57,"Y","x",1
+"VB07Procs ","CNf5VB07  ",  58,"Y","x",1
+"VB07Procs ","CPf1VB07  ",  59,"Y","x",1
+"VB07Procs ","CPf2VB07  ",  60,"Y","x",1
+"VB07Procs ","CPf3VB07  ",  61,"Y","x",1
+"VB07Procs ","CPf4VB07  ",  62,"Y","x",1
+"VB07Procs ","CPf5VB07  ",  63,"Y","x",1
+"VB07Procs ","CSf1VB07  ",  64,"Y","x",1
+"VB07Procs ","CSf2VB07  ",  65,"Y","x",1
+"VB07Procs ","CSf3VB07  ",  66,"Y","x",1
+"VB07Procs ","CSf4VB07  ",  67,"Y","x",1
+"VB07Procs ","CSf5VB07  ",  68,"Y","x",1
+"VB07Procs ","SWRegrVB07",  69,"Y","x",1
+"VB07Procs ","SWVB07Dec ",  70,"Y","x",1
+"VB07Procs ","IniAgeVB07",  71,"Y","x",1
+"VB07Procs ","IniVB07dec",  72,"Y","x",1
+"VB07Procs ","Rc0GWV01  ",  73,"Y","x",1
+"VB07Procs ","TcGWV01   ",  74,"Y","x",1
+"VB07Procs ","AcGWV01   ",  75,"Y","x",1
+"VB07Procs ","MinRWV01  ",  76,"Y","x",1
+"VB07Procs ","TBmWV01   ",  77,"Y","x",1
+"VB07Procs ","TempAir   ",  78,"Y","x",1
+"VB07Procs ","MinVB     ",  79,"Y","x",1
+"VB07Procs ","FfolPOC1  ",  80,"Y","x",1
+"VB07Procs ","FfolPOC2  ",  81,"Y","x",1
+"VB07Procs ","FfrootPOC1",  82,"Y","x",1
+"VB07Procs ","FfrootPOC2",  83,"Y","x",1
+"VB07Procs ","RcMrtVB07 ",  84,"Y","x",1
+"VB07Procs ","Rc0MSWV01 ",  85,"Y","x",1
+"VB07Procs ","TcMSWV01  ",  86,"Y","x",1
+"VB07Procs ","RcMGRWV01 ",  87,"Y","x",1
+"VB07Procs ","AcMWV01   ",  88,"Y","x",1
+"VB07Procs ","MaxRWV01  ",  89,"Y","x",1
+"VB07Procs ","SwDisVB07 ",  90,"Y","x",1
+"VB07Procs ","VegHeVB07 ",  91,"Y","x",1
+"VB07Procs ","FfacVB07  ",  92,"Y","x",1
+"VB07Procs ","fNVB07up  ",  93,"N","x",1
+"VB07Procs ","fPVB07up  ",  94,"N","x",1
+"VB07Procs ","fSVB07up  ",  95,"N","x",1
+"VB08Procs ","SwEmersion",   1,"Y","x",1
+"VB08Procs ","SwVegMod  ",   2,"Y","x",1
+"VB08Procs ","VBType01  ",   3,"Y","x",1
+"VB08Procs ","nsfVB08   ",   4,"Y","x",1
+"VB08Procs ","CrnsfVB08 ",   5,"Y","x",1
+"VB08Procs ","Initnsfd  ",   6,"Y","x",1
+"VB08Procs ","CrdepVB08 ",   7,"Y","x",1
+"VB08Procs ","nscdVB08  ",   8,"Y","x",1
+"VB08Procs ","InnscdVB08",   9,"Y","x",1
+"VB08Procs ","DELT      ",  10,"N","x",1
+"VB08Procs ","TotalDepth",  11,"N","x",1
+"VB08Procs ","Depth     ",  12,"N","x",1
+"VB08Procs ","LocalDepth",  13,"N","x",1
+"VB08Procs ","Volume    ",  14,"N","x",1
+"VB08Procs ","Surf      ",  15,"N","x",1
+"VB08Procs ","RootDeVB08",  16,"O","x",1
+"VB08Procs ","NH4       ",  17,"Y","x",1
+"VB08Procs ","NO3       ",  18,"Y","x",1
+"VB08Procs ","AAP       ",  19,"Y","x",1
+"VB08Procs ","PO4       ",  20,"Y","x",1
+"VB08Procs ","SO4       ",  21,"N","x",1
+"VB08Procs ","SUD       ",  22,"N","x",1
+"VB08Procs ","SWRootVB08",  23,"Y","x",1
+"VB08Procs ","VmaxVB08  ",  24,"Y","x",1
+"VB08Procs ","KmVB08    ",  25,"Y","x",1
+"VB08Procs ","ViniVB08  ",  26,"Y","x",1
+"VB08Procs ","PorSed    ",  27,"Y","x",1
+"VB08Procs ","S1_NH4    ",  28,"Y","x",1
+"VB08Procs ","S1_NO3    ",  29,"Y","x",1
+"VB08Procs ","S1_AAP    ",  30,"Y","x",1
+"VB08Procs ","S1_PO4    ",  31,"Y","x",1
+"VB08Procs ","S1_SO4    ",  32,"Y","x",1
+"VB08Procs ","S1_SUD    ",  33,"Y","x",1
+"VB08Procs ","HSED      ",  34,"Y","x",1
+"VB08Procs ","VB08      ",  35,"N","x",1
+"VB08Procs ","maxVB08   ",  36,"Y","x",1
+"VB08Procs ","minVB08   ",  37,"Y","x",1
+"VB08Procs ","hlfAgeVB08",  38,"Y","x",1
+"VB08Procs ","sfVB08    ",  39,"Y","x",1
+"VB08Procs ","dmCfVB08  ",  40,"Y","x",1
+"VB08Procs ","iniVB08   ",  41,"Y","x",1
+"VB08Procs ","iniCovVB08",  42,"Y","x",1
+"VB08Procs ","SWiniVB08 ",  43,"Y","x",1
+"VB08Procs ","ageVB08   ",  44,"N","x",1
+"VB08Procs ","VB08Navail",  45,"N","x",1
+"VB08Procs ","VB08Pavail",  46,"N","x",1
+"VB08Procs ","VB08Savail",  47,"N","x",1
+"VB08Procs ","VBFrMaxU  ",  48,"Y","x",1
+"VB08Procs ","F1VB08    ",  49,"Y","x",1
+"VB08Procs ","F2VB08    ",  50,"Y","x",1
+"VB08Procs ","F3VB08    ",  51,"Y","x",1
+"VB08Procs ","F4VB08    ",  52,"Y","x",1
+"VB08Procs ","F5VB08    ",  53,"Y","x",1
+"VB08Procs ","CNf1VB08  ",  54,"Y","x",1
+"VB08Procs ","CNf2VB08  ",  55,"Y","x",1
+"VB08Procs ","CNf3VB08  ",  56,"Y","x",1
+"VB08Procs ","CNf4VB08  ",  57,"Y","x",1
+"VB08Procs ","CNf5VB08  ",  58,"Y","x",1
+"VB08Procs ","CPf1VB08  ",  59,"Y","x",1
+"VB08Procs ","CPf2VB08  ",  60,"Y","x",1
+"VB08Procs ","CPf3VB08  ",  61,"Y","x",1
+"VB08Procs ","CPf4VB08  ",  62,"Y","x",1
+"VB08Procs ","CPf5VB08  ",  63,"Y","x",1
+"VB08Procs ","CSf1VB08  ",  64,"Y","x",1
+"VB08Procs ","CSf2VB08  ",  65,"Y","x",1
+"VB08Procs ","CSf3VB08  ",  66,"Y","x",1
+"VB08Procs ","CSf4VB08  ",  67,"Y","x",1
+"VB08Procs ","CSf5VB08  ",  68,"Y","x",1
+"VB08Procs ","SWRegrVB08",  69,"Y","x",1
+"VB08Procs ","SWVB08Dec ",  70,"Y","x",1
+"VB08Procs ","IniAgeVB08",  71,"Y","x",1
+"VB08Procs ","IniVB08dec",  72,"Y","x",1
+"VB08Procs ","Rc0GWV01  ",  73,"Y","x",1
+"VB08Procs ","TcGWV01   ",  74,"Y","x",1
+"VB08Procs ","AcGWV01   ",  75,"Y","x",1
+"VB08Procs ","MinRWV01  ",  76,"Y","x",1
+"VB08Procs ","TBmWV01   ",  77,"Y","x",1
+"VB08Procs ","TempAir   ",  78,"Y","x",1
+"VB08Procs ","MinVB     ",  79,"Y","x",1
+"VB08Procs ","FfolPOC1  ",  80,"Y","x",1
+"VB08Procs ","FfolPOC2  ",  81,"Y","x",1
+"VB08Procs ","FfrootPOC1",  82,"Y","x",1
+"VB08Procs ","FfrootPOC2",  83,"Y","x",1
+"VB08Procs ","RcMrtVB08 ",  84,"Y","x",1
+"VB08Procs ","Rc0MSWV01 ",  85,"Y","x",1
+"VB08Procs ","TcMSWV01  ",  86,"Y","x",1
+"VB08Procs ","RcMGRWV01 ",  87,"Y","x",1
+"VB08Procs ","AcMWV01   ",  88,"Y","x",1
+"VB08Procs ","MaxRWV01  ",  89,"Y","x",1
+"VB08Procs ","SwDisVB08 ",  90,"Y","x",1
+"VB08Procs ","VegHeVB08 ",  91,"Y","x",1
+"VB08Procs ","FfacVB08  ",  92,"Y","x",1
+"VB08Procs ","fNVB08up  ",  93,"N","x",1
+"VB08Procs ","fPVB08up  ",  94,"N","x",1
+"VB08Procs ","fSVB08up  ",  95,"N","x",1
+"VB09Procs ","SwEmersion",   1,"Y","x",1
+"VB09Procs ","SwVegMod  ",   2,"Y","x",1
+"VB09Procs ","VBType01  ",   3,"Y","x",1
+"VB09Procs ","nsfVB09   ",   4,"Y","x",1
+"VB09Procs ","CrnsfVB09 ",   5,"Y","x",1
+"VB09Procs ","Initnsfd  ",   6,"Y","x",1
+"VB09Procs ","CrdepVB09 ",   7,"Y","x",1
+"VB09Procs ","nscdVB09  ",   8,"Y","x",1
+"VB09Procs ","InnscdVB09",   9,"Y","x",1
+"VB09Procs ","DELT      ",  10,"N","x",1
+"VB09Procs ","TotalDepth",  11,"N","x",1
+"VB09Procs ","Depth     ",  12,"N","x",1
+"VB09Procs ","LocalDepth",  13,"N","x",1
+"VB09Procs ","Volume    ",  14,"N","x",1
+"VB09Procs ","Surf      ",  15,"N","x",1
+"VB09Procs ","RootDeVB09",  16,"O","x",1
+"VB09Procs ","NH4       ",  17,"Y","x",1
+"VB09Procs ","NO3       ",  18,"Y","x",1
+"VB09Procs ","AAP       ",  19,"Y","x",1
+"VB09Procs ","PO4       ",  20,"Y","x",1
+"VB09Procs ","SO4       ",  21,"N","x",1
+"VB09Procs ","SUD       ",  22,"N","x",1
+"VB09Procs ","SWRootVB09",  23,"Y","x",1
+"VB09Procs ","VmaxVB09  ",  24,"Y","x",1
+"VB09Procs ","KmVB09    ",  25,"Y","x",1
+"VB09Procs ","ViniVB09  ",  26,"Y","x",1
+"VB09Procs ","PorSed    ",  27,"Y","x",1
+"VB09Procs ","S1_NH4    ",  28,"Y","x",1
+"VB09Procs ","S1_NO3    ",  29,"Y","x",1
+"VB09Procs ","S1_AAP    ",  30,"Y","x",1
+"VB09Procs ","S1_PO4    ",  31,"Y","x",1
+"VB09Procs ","S1_SO4    ",  32,"Y","x",1
+"VB09Procs ","S1_SUD    ",  33,"Y","x",1
+"VB09Procs ","HSED      ",  34,"Y","x",1
+"VB09Procs ","VB09      ",  35,"N","x",1
+"VB09Procs ","maxVB09   ",  36,"Y","x",1
+"VB09Procs ","minVB09   ",  37,"Y","x",1
+"VB09Procs ","hlfAgeVB09",  38,"Y","x",1
+"VB09Procs ","sfVB09    ",  39,"Y","x",1
+"VB09Procs ","dmCfVB09  ",  40,"Y","x",1
+"VB09Procs ","iniVB09   ",  41,"Y","x",1
+"VB09Procs ","iniCovVB09",  42,"Y","x",1
+"VB09Procs ","SWiniVB09 ",  43,"Y","x",1
+"VB09Procs ","ageVB09   ",  44,"N","x",1
+"VB09Procs ","VB09Navail",  45,"N","x",1
+"VB09Procs ","VB09Pavail",  46,"N","x",1
+"VB09Procs ","VB09Savail",  47,"N","x",1
+"VB09Procs ","VBFrMaxU  ",  48,"Y","x",1
+"VB09Procs ","F1VB09    ",  49,"Y","x",1
+"VB09Procs ","F2VB09    ",  50,"Y","x",1
+"VB09Procs ","F3VB09    ",  51,"Y","x",1
+"VB09Procs ","F4VB09    ",  52,"Y","x",1
+"VB09Procs ","F5VB09    ",  53,"Y","x",1
+"VB09Procs ","CNf1VB09  ",  54,"Y","x",1
+"VB09Procs ","CNf2VB09  ",  55,"Y","x",1
+"VB09Procs ","CNf3VB09  ",  56,"Y","x",1
+"VB09Procs ","CNf4VB09  ",  57,"Y","x",1
+"VB09Procs ","CNf5VB09  ",  58,"Y","x",1
+"VB09Procs ","CPf1VB09  ",  59,"Y","x",1
+"VB09Procs ","CPf2VB09  ",  60,"Y","x",1
+"VB09Procs ","CPf3VB09  ",  61,"Y","x",1
+"VB09Procs ","CPf4VB09  ",  62,"Y","x",1
+"VB09Procs ","CPf5VB09  ",  63,"Y","x",1
+"VB09Procs ","CSf1VB09  ",  64,"Y","x",1
+"VB09Procs ","CSf2VB09  ",  65,"Y","x",1
+"VB09Procs ","CSf3VB09  ",  66,"Y","x",1
+"VB09Procs ","CSf4VB09  ",  67,"Y","x",1
+"VB09Procs ","CSf5VB09  ",  68,"Y","x",1
+"VB09Procs ","SWRegrVB09",  69,"Y","x",1
+"VB09Procs ","SWVB09Dec ",  70,"Y","x",1
+"VB09Procs ","IniAgeVB09",  71,"Y","x",1
+"VB09Procs ","IniVB09dec",  72,"Y","x",1
+"VB09Procs ","Rc0GWV01  ",  73,"Y","x",1
+"VB09Procs ","TcGWV01   ",  74,"Y","x",1
+"VB09Procs ","AcGWV01   ",  75,"Y","x",1
+"VB09Procs ","MinRWV01  ",  76,"Y","x",1
+"VB09Procs ","TBmWV01   ",  77,"Y","x",1
+"VB09Procs ","TempAir   ",  78,"Y","x",1
+"VB09Procs ","MinVB     ",  79,"Y","x",1
+"VB09Procs ","FfolPOC1  ",  80,"Y","x",1
+"VB09Procs ","FfolPOC2  ",  81,"Y","x",1
+"VB09Procs ","FfrootPOC1",  82,"Y","x",1
+"VB09Procs ","FfrootPOC2",  83,"Y","x",1
+"VB09Procs ","RcMrtVB09 ",  84,"Y","x",1
+"VB09Procs ","Rc0MSWV01 ",  85,"Y","x",1
+"VB09Procs ","TcMSWV01  ",  86,"Y","x",1
+"VB09Procs ","RcMGRWV01 ",  87,"Y","x",1
+"VB09Procs ","AcMWV01   ",  88,"Y","x",1
+"VB09Procs ","MaxRWV01  ",  89,"Y","x",1
+"VB09Procs ","SwDisVB09 ",  90,"Y","x",1
+"VB09Procs ","VegHeVB09 ",  91,"Y","x",1
+"VB09Procs ","FfacVB09  ",  92,"Y","x",1
+"VB09Procs ","fNVB09up  ",  93,"N","x",1
+"VB09Procs ","fPVB09up  ",  94,"N","x",1
+"VB09Procs ","fSVB09up  ",  95,"N","x",1
+"VBSum     ","nVBCohorts",   1,"Y"," ",1
+"VBSum     ","nVBFluxes ",   2,"Y"," ",1
+"VBSum     ","fN1VB01ups",   3,"Y","x",1
+"VBSum     ","fN2VB01ups",   4,"Y","x",1
+"VBSum     ","fP1VB01ups",   5,"Y","x",1
+"VBSum     ","fP2VB01ups",   6,"Y","x",1
+"VBSum     ","fS1VB01ups",   7,"Y","x",1
+"VBSum     ","fS2VB01ups",   8,"Y","x",1
+"VBSum     ","fC4VB01rel",   9,"Y","x",1
+"VBSum     ","fN4VB01rel",  10,"Y","x",1
+"VBSum     ","fP4VB01rel",  11,"Y","x",1
+"VBSum     ","fS4VB01rel",  12,"Y","x",1
+"VBSum     ","fC1VB01rel",  13,"Y","x",1
+"VBSum     ","fC2VB01rel",  14,"Y","x",1
+"VBSum     ","fC3VB01rel",  15,"Y","x",1
+"VBSum     ","fN1VB01rel",  16,"Y","x",1
+"VBSum     ","fN2VB01rel",  17,"Y","x",1
+"VBSum     ","fN3VB01rel",  18,"Y","x",1
+"VBSum     ","fP1VB01rel",  19,"Y","x",1
+"VBSum     ","fP2VB01rel",  20,"Y","x",1
+"VBSum     ","fP3VB01rel",  21,"Y","x",1
+"VBSum     ","fS1VB01rel",  22,"Y","x",1
+"VBSum     ","fS2VB01rel",  23,"Y","x",1
+"VBSum     ","fS3VB01rel",  24,"Y","x",1
+"VBSum     ","fN1VB02ups",  25,"Y","x",1
+"VBSum     ","fN2VB02ups",  26,"Y","x",1
+"VBSum     ","fP1VB02ups",  27,"Y","x",1
+"VBSum     ","fP2VB02ups",  28,"Y","x",1
+"VBSum     ","fS1VB02ups",  29,"Y","x",1
+"VBSum     ","fS2VB02ups",  30,"Y","x",1
+"VBSum     ","fC4VB02rel",  31,"Y","x",1
+"VBSum     ","fN4VB02rel",  32,"Y","x",1
+"VBSum     ","fP4VB02rel",  33,"Y","x",1
+"VBSum     ","fS4VB02rel",  34,"Y","x",1
+"VBSum     ","fC1VB02rel",  35,"Y","x",1
+"VBSum     ","fC2VB02rel",  36,"Y","x",1
+"VBSum     ","fC3VB02rel",  37,"Y","x",1
+"VBSum     ","fN1VB02rel",  38,"Y","x",1
+"VBSum     ","fN2VB02rel",  39,"Y","x",1
+"VBSum     ","fN3VB02rel",  40,"Y","x",1
+"VBSum     ","fP1VB02rel",  41,"Y","x",1
+"VBSum     ","fP2VB02rel",  42,"Y","x",1
+"VBSum     ","fP3VB02rel",  43,"Y","x",1
+"VBSum     ","fS1VB02rel",  44,"Y","x",1
+"VBSum     ","fS2VB02rel",  45,"Y","x",1
+"VBSum     ","fS3VB02rel",  46,"Y","x",1
+"VBSum     ","fN1VB03ups",  47,"Y","x",1
+"VBSum     ","fN2VB03ups",  48,"Y","x",1
+"VBSum     ","fP1VB03ups",  49,"Y","x",1
+"VBSum     ","fP2VB03ups",  50,"Y","x",1
+"VBSum     ","fS1VB03ups",  51,"Y","x",1
+"VBSum     ","fS2VB03ups",  52,"Y","x",1
+"VBSum     ","fC4VB03rel",  53,"Y","x",1
+"VBSum     ","fN4VB03rel",  54,"Y","x",1
+"VBSum     ","fP4VB03rel",  55,"Y","x",1
+"VBSum     ","fS4VB03rel",  56,"Y","x",1
+"VBSum     ","fC1VB03rel",  57,"Y","x",1
+"VBSum     ","fC2VB03rel",  58,"Y","x",1
+"VBSum     ","fC3VB03rel",  59,"Y","x",1
+"VBSum     ","fN1VB03rel",  60,"Y","x",1
+"VBSum     ","fN2VB03rel",  61,"Y","x",1
+"VBSum     ","fN3VB03rel",  62,"Y","x",1
+"VBSum     ","fP1VB03rel",  63,"Y","x",1
+"VBSum     ","fP2VB03rel",  64,"Y","x",1
+"VBSum     ","fP3VB03rel",  65,"Y","x",1
+"VBSum     ","fS1VB03rel",  66,"Y","x",1
+"VBSum     ","fS2VB03rel",  67,"Y","x",1
+"VBSum     ","fS3VB03rel",  68,"Y","x",1
+"VBSum     ","fN1VB04ups",  69,"Y","x",1
+"VBSum     ","fN2VB04ups",  70,"Y","x",1
+"VBSum     ","fP1VB04ups",  71,"Y","x",1
+"VBSum     ","fP2VB04ups",  72,"Y","x",1
+"VBSum     ","fS1VB04ups",  73,"Y","x",1
+"VBSum     ","fS2VB04ups",  74,"Y","x",1
+"VBSum     ","fC4VB04rel",  75,"Y","x",1
+"VBSum     ","fN4VB04rel",  76,"Y","x",1
+"VBSum     ","fP4VB04rel",  77,"Y","x",1
+"VBSum     ","fS4VB04rel",  78,"Y","x",1
+"VBSum     ","fC1VB04rel",  79,"Y","x",1
+"VBSum     ","fC2VB04rel",  80,"Y","x",1
+"VBSum     ","fC3VB04rel",  81,"Y","x",1
+"VBSum     ","fN1VB04rel",  82,"Y","x",1
+"VBSum     ","fN2VB04rel",  83,"Y","x",1
+"VBSum     ","fN3VB04rel",  84,"Y","x",1
+"VBSum     ","fP1VB04rel",  85,"Y","x",1
+"VBSum     ","fP2VB04rel",  86,"Y","x",1
+"VBSum     ","fP3VB04rel",  87,"Y","x",1
+"VBSum     ","fS1VB04rel",  88,"Y","x",1
+"VBSum     ","fS2VB04rel",  89,"Y","x",1
+"VBSum     ","fS3VB04rel",  90,"Y","x",1
+"VBSum     ","fN1VB05ups",  91,"Y","x",1
+"VBSum     ","fN2VB05ups",  92,"Y","x",1
+"VBSum     ","fP1VB05ups",  93,"Y","x",1
+"VBSum     ","fP2VB05ups",  94,"Y","x",1
+"VBSum     ","fS1VB05ups",  95,"Y","x",1
+"VBSum     ","fS2VB05ups",  96,"Y","x",1
+"VBSum     ","fC4VB05rel",  97,"Y","x",1
+"VBSum     ","fN4VB05rel",  98,"Y","x",1
+"VBSum     ","fP4VB05rel",  99,"Y","x",1
+"VBSum     ","fS4VB05rel", 100,"Y","x",1
+"VBSum     ","fC1VB05rel", 101,"Y","x",1
+"VBSum     ","fC2VB05rel", 102,"Y","x",1
+"VBSum     ","fC3VB05rel", 103,"Y","x",1
+"VBSum     ","fN1VB05rel", 104,"Y","x",1
+"VBSum     ","fN2VB05rel", 105,"Y","x",1
+"VBSum     ","fN3VB05rel", 106,"Y","x",1
+"VBSum     ","fP1VB05rel", 107,"Y","x",1
+"VBSum     ","fP2VB05rel", 108,"Y","x",1
+"VBSum     ","fP3VB05rel", 109,"Y","x",1
+"VBSum     ","fS1VB05rel", 110,"Y","x",1
+"VBSum     ","fS2VB05rel", 111,"Y","x",1
+"VBSum     ","fS3VB05rel", 112,"Y","x",1
+"VBSum     ","fN1VB06ups", 113,"Y","x",1
+"VBSum     ","fN2VB06ups", 114,"Y","x",1
+"VBSum     ","fP1VB06ups", 115,"Y","x",1
+"VBSum     ","fP2VB06ups", 116,"Y","x",1
+"VBSum     ","fS1VB06ups", 117,"Y","x",1
+"VBSum     ","fS2VB06ups", 118,"Y","x",1
+"VBSum     ","fC4VB06rel", 119,"Y","x",1
+"VBSum     ","fN4VB06rel", 120,"Y","x",1
+"VBSum     ","fP4VB06rel", 121,"Y","x",1
+"VBSum     ","fS4VB06rel", 122,"Y","x",1
+"VBSum     ","fC1VB06rel", 123,"Y","x",1
+"VBSum     ","fC2VB06rel", 124,"Y","x",1
+"VBSum     ","fC3VB06rel", 125,"Y","x",1
+"VBSum     ","fN1VB06rel", 126,"Y","x",1
+"VBSum     ","fN2VB06rel", 127,"Y","x",1
+"VBSum     ","fN3VB06rel", 128,"Y","x",1
+"VBSum     ","fP1VB06rel", 129,"Y","x",1
+"VBSum     ","fP2VB06rel", 130,"Y","x",1
+"VBSum     ","fP3VB06rel", 131,"Y","x",1
+"VBSum     ","fS1VB06rel", 132,"Y","x",1
+"VBSum     ","fS2VB06rel", 133,"Y","x",1
+"VBSum     ","fS3VB06rel", 134,"Y","x",1
+"VBSum     ","fN1VB07ups", 135,"Y","x",1
+"VBSum     ","fN2VB07ups", 136,"Y","x",1
+"VBSum     ","fP1VB07ups", 137,"Y","x",1
+"VBSum     ","fP2VB07ups", 138,"Y","x",1
+"VBSum     ","fS1VB07ups", 139,"Y","x",1
+"VBSum     ","fS2VB07ups", 140,"Y","x",1
+"VBSum     ","fC4VB07rel", 141,"Y","x",1
+"VBSum     ","fN4VB07rel", 142,"Y","x",1
+"VBSum     ","fP4VB07rel", 143,"Y","x",1
+"VBSum     ","fS4VB07rel", 144,"Y","x",1
+"VBSum     ","fC1VB07rel", 145,"Y","x",1
+"VBSum     ","fC2VB07rel", 146,"Y","x",1
+"VBSum     ","fC3VB07rel", 147,"Y","x",1
+"VBSum     ","fN1VB07rel", 148,"Y","x",1
+"VBSum     ","fN2VB07rel", 149,"Y","x",1
+"VBSum     ","fN3VB07rel", 150,"Y","x",1
+"VBSum     ","fP1VB07rel", 151,"Y","x",1
+"VBSum     ","fP2VB07rel", 152,"Y","x",1
+"VBSum     ","fP3VB07rel", 153,"Y","x",1
+"VBSum     ","fS1VB07rel", 154,"Y","x",1
+"VBSum     ","fS2VB07rel", 155,"Y","x",1
+"VBSum     ","fS3VB07rel", 156,"Y","x",1
+"VBSum     ","fN1VB08ups", 157,"Y","x",1
+"VBSum     ","fN2VB08ups", 158,"Y","x",1
+"VBSum     ","fP1VB08ups", 159,"Y","x",1
+"VBSum     ","fP2VB08ups", 160,"Y","x",1
+"VBSum     ","fS1VB08ups", 161,"Y","x",1
+"VBSum     ","fS2VB08ups", 162,"Y","x",1
+"VBSum     ","fC4VB08rel", 163,"Y","x",1
+"VBSum     ","fN4VB08rel", 164,"Y","x",1
+"VBSum     ","fP4VB08rel", 165,"Y","x",1
+"VBSum     ","fS4VB08rel", 166,"Y","x",1
+"VBSum     ","fC1VB08rel", 167,"Y","x",1
+"VBSum     ","fC2VB08rel", 168,"Y","x",1
+"VBSum     ","fC3VB08rel", 169,"Y","x",1
+"VBSum     ","fN1VB08rel", 170,"Y","x",1
+"VBSum     ","fN2VB08rel", 171,"Y","x",1
+"VBSum     ","fN3VB08rel", 172,"Y","x",1
+"VBSum     ","fP1VB08rel", 173,"Y","x",1
+"VBSum     ","fP2VB08rel", 174,"Y","x",1
+"VBSum     ","fP3VB08rel", 175,"Y","x",1
+"VBSum     ","fS1VB08rel", 176,"Y","x",1
+"VBSum     ","fS2VB08rel", 177,"Y","x",1
+"VBSum     ","fS3VB08rel", 178,"Y","x",1
+"VBSum     ","fN1VB09ups", 179,"Y","x",1
+"VBSum     ","fN2VB09ups", 180,"Y","x",1
+"VBSum     ","fP1VB09ups", 181,"Y","x",1
+"VBSum     ","fP2VB09ups", 182,"Y","x",1
+"VBSum     ","fS1VB09ups", 183,"Y","x",1
+"VBSum     ","fS2VB09ups", 184,"Y","x",1
+"VBSum     ","fC4VB09rel", 185,"Y","x",1
+"VBSum     ","fN4VB09rel", 186,"Y","x",1
+"VBSum     ","fP4VB09rel", 187,"Y","x",1
+"VBSum     ","fS4VB09rel", 188,"Y","x",1
+"VBSum     ","fC1VB09rel", 189,"Y","x",1
+"VBSum     ","fC2VB09rel", 190,"Y","x",1
+"VBSum     ","fC3VB09rel", 191,"Y","x",1
+"VBSum     ","fN1VB09rel", 192,"Y","x",1
+"VBSum     ","fN2VB09rel", 193,"Y","x",1
+"VBSum     ","fN3VB09rel", 194,"Y","x",1
+"VBSum     ","fP1VB09rel", 195,"Y","x",1
+"VBSum     ","fP2VB09rel", 196,"Y","x",1
+"VBSum     ","fP3VB09rel", 197,"Y","x",1
+"VBSum     ","fS1VB09rel", 198,"Y","x",1
+"VBSum     ","fS2VB09rel", 199,"Y","x",1
+"VBSum     ","fS3VB09rel", 200,"Y","x",1
