@@ -674,8 +674,10 @@ def do_work():
     vs = -999
     ifort = -999
 
-    root.quit()
-
+    try:
+        root.quit()
+    except Exception as e:
+        sys.stdout.write("\n\n\n")
 
 #
 #
