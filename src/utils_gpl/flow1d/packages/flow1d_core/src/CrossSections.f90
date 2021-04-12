@@ -2411,34 +2411,44 @@ subroutine CircleProfile(dpt, diameter, area, width, maxwidth, perimeter, calcul
    !
    !
    !
-   ra = 0.5*diameter
+   if (diameter > 0d0) then
+      
+      ra = 0.5*diameter
 
-   ! normal circle profile
-   do i = 1, 2
-      if (i==1) then
-         dpt2 = min(dpt, ra)  ! first step only increasing part.
-      else
-         dpt2 = dpt              ! second step full egg profile up to water depth
-      endif
-      fi = dacos(max((ra-dpt2)/ra, -1d0))
-      sq = dsqrt(max(dpt2*(diameter - dpt2),0d0))
+      ! normal circle profile
+      do i = 1, 2
+         if (i==1) then
+            dpt2 = min(dpt, ra)  ! first step only increasing part.
+         else
+            dpt2 = dpt              ! second step full egg profile up to water depth
+         endif
+         fi = dacos(max((ra-dpt2)/ra, -1d0))
+         sq = dsqrt(max(dpt2*(diameter - dpt2),0d0))
       
-      if (dpt2<diameter) then
-         area      = dabs(fi*ra*ra - sq*(ra-dpt2))
-         perimeter       = dabs(2d0*fi*ra)
-         width     = 2d0*sq
-      else
-         area      = pi*ra*ra
-         perimeter       = 2d0*pi*ra
-         width     = 0d0
-      endif
+         if (dpt2<diameter) then
+            area      = dabs(fi*ra*ra - sq*(ra-dpt2))
+            perimeter       = dabs(2d0*fi*ra)
+            width     = 2d0*sq
+         else
+            area      = pi*ra*ra
+            perimeter       = 2d0*pi*ra
+            width     = 0d0
+         endif
       
-      if (i==1) then
-         area_plus = area + width*(dpt-dpt2)
-         width_plus = width
-      endif
+         if (i==1) then
+            area_plus = area + width*(dpt-dpt2)
+            width_plus = width
+         endif
       
-   enddo
+      enddo
+   else
+      area = 0d0
+      area_plus = 0d0
+      perimeter = sl
+      width = sl
+      width_plus = sl
+   endif
+   
    
    select case(calculationOption)
    case(CS_TYPE_NORMAL)

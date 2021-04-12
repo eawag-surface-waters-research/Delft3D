@@ -253,6 +253,17 @@ contains
          dpt = max(CrossSection%charHeight, dpt)
       endif
       call GetCSParsFlow(CrossSection, dpt, wArea, wPerimiter, wWidth)
+      if (warea==0) then 
+         kfum  = 0
+         fum   = 0.0d0
+         rum   = 0.0d0
+         u1m   = 0.0d0
+         u0m   = 0.0d0
+         qm    = 0.0d0
+         q0m   = 0.0d0
+         culvert%state = 0
+         return
+      endif
       chezyCulvert = getchezy(CrossSection%frictionTypePos(1), CrossSection%frictionValuePos(1), warea/wPerimiter, dpt, 1d0)
                   
       ! Valve Loss
