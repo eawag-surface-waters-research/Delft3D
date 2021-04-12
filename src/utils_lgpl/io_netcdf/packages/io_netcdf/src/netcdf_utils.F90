@@ -44,7 +44,6 @@ public :: ncu_get_var_attset
 public :: ncu_put_var_attset
 public :: ncu_att_to_varid
 public :: ncu_att_to_dimid
-!public :: ncu_copy_var_atts 
 
 integer, parameter :: maxMessageLen = 1024  ! copy taken from io_ugrid
 character(len=maxMessageLen) :: ncu_messagestr !< Placeholder string for storing diagnostic messages. /see{ug_get_message}

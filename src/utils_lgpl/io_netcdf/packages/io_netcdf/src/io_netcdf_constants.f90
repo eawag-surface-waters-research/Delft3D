@@ -29,10 +29,10 @@
 ! $HeadURL$
 
 
-!> I/O module for containing parameters and error codes for netCDF i/o based on selected NetCDF conventions (UGRID, and more in the future).
+!> The parameters and error codes for io_netcdf, I/O based on selected NetCDF conventions (UGRID, and more in the future).
 !! @see io_ugrid
 module ionc_constants
-use netcdf
+use netcdf, only: NF90_NOERR
 
 implicit none
 
@@ -68,17 +68,17 @@ private
 ! all types below must be powers of two, to allow all combinations in one number.
 !
 integer, parameter :: IONC_CONV_NULL  = 0   !< Dataset conventions not yet detected
-integer, parameter :: IONC_CONV_CF    = 1   !< Dataset conventions not yet detected
-integer, parameter :: IONC_CONV_UGRID = 2   !< Dataset based on UGRID-conventions
-integer, parameter :: IONC_CONV_SGRID = 4   !< Dataset based on SGRID-conventions
-integer, parameter :: IONC_CONV_OTHER = -99 !< Dataset based on unknown or unsupported conventions (user should fall back to NetCDF native API calls)
+integer, parameter :: IONC_CONV_CF    = 1   !< Dataset adhering to Climate and Forecast (CF) conventions
+integer, parameter :: IONC_CONV_UGRID = 2   !< Dataset adhering to UGRID-conventions
+integer, parameter :: IONC_CONV_SGRID = 4   !< Dataset adhering to SGRID-conventions
+integer, parameter :: IONC_CONV_OTHER = -99 !< Dataset adhering to unknown or unsupported conventions (user should fall back to NetCDF native API calls)
 
 integer, public, parameter :: MAXSTRLEN = 255 !< Max string length (e.g. for inquiring attribute values.
 
 !
 ! Error statuses
 !
-integer, parameter :: IONC_NOERR         = NF90_NOERR !< Successful
+integer, parameter :: IONC_NOERR         = NF90_NOERR !< Successful: same error code as native NetCDF library.
 integer, parameter :: IONC_EBADID        = -2001 !< Not a valid IONC dataset id.
 integer, parameter :: IONC_ENOPEN        = -2002 !< File could not be opened.
 integer, parameter :: IONC_ENOMEM        = -2003 !< Memory allocation error.

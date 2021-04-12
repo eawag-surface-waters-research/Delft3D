@@ -45,7 +45,7 @@ FMODULES += \
 #Sources
 libIONetcdf_la_SOURCES = \
          io_netcdf_version.F90 \
-         io_constants.f90 \
+         io_netcdf_constants.f90 \
          coordinate_reference_system.F90 \
          netcdf_utils.F90 \
          meshdata.F90 \
