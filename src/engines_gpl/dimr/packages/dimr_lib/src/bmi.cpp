@@ -3,7 +3,7 @@
 #include "dimr.h"
 #include "dimr_lib_version.h"
 
-#if defined(HAVE_CONFIG_H)
+#ifndef _WIN32
 #include "config.h"
 #include <dlfcn.h>
 #include <libgen.h>
@@ -15,7 +15,7 @@
 #endif
 
 
-#if defined (WIN32)
+#ifdef _WIN32
 #  include <Strsafe.h>
 #  include <windows.h>
 #  include <direct.h>
@@ -96,7 +96,7 @@ extern "C" {
 				//       Put CWD in redirectfile
 				//       redirectfile = redirectfile + / + copy
 				char *fileBasename = new char[MAXSTRING];
-#if defined(HAVE_CONFIG_H)
+#ifndef _WIN32
 				fileBasename = strdup(basename(thisDimr->redirectFile));
 #else
 				char * ext = new char[5];

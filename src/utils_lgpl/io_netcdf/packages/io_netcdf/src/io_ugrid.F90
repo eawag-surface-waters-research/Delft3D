@@ -1132,6 +1132,7 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
    ierr = ug_add_coordmapping(ncid, crs)
 
    is1dugridnetwork = .false.
+   lengthofnetworkname = 0
    if (present(network1dname)) then
       call remove_all_spaces(network1dname, lengthofnetworkname)
       if (lengthofnetworkname.gt.0) then

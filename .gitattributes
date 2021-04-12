@@ -1,5 +1,7 @@
 * text=auto !eol
 /agpl-3.0.txt -text
+/build.bat -text
+/build.sh -text
 doc/readme_building_netcdf.txt -text
 doc/readme_debug_dimr.txt -text
 examples/01_standard/config_d_hydro.xml -text
@@ -420,6 +422,7 @@ examples/sed_in_file.tcl -text
 src/AUTHORS -text
 src/COPYING -text
 src/ChangeLog -text
+src/Copyright.txt -text
 src/INSTALL -text
 src/Makefile.am -text
 src/NEWS -text
@@ -440,6 +443,7 @@ src/build_test.sh -text
 src/build_test_c7.sh -text
 src/build_ubuntu.16.04LT.readme -text
 src/build_ubuntu1604.sh -text
+src/buildfm_cmake.sh -text
 src/buildvs15.cmd -text
 src/buildvs15_dev.cmd -text
 src/buildvs15_dimr.cmd -text
@@ -454,6 +458,39 @@ src/buildvs17_test.cmd -text
 src/buildvs17fm.cmd -text
 src/clean.cmd -text
 src/clean.sh -text
+src/cmake/CMakeLists.txt -text
+src/cmake/compiler_options/intel.cmake -text
+src/cmake/configurations/d_waq_configuration.cmake -text
+src/cmake/configurations/d_waves_configuration.cmake -text
+src/cmake/configurations/dflowfm_configuration.cmake -text
+src/cmake/configurations/dflowfm_open_configuration.cmake -text
+src/cmake/configurations/dimr_open_configuration.cmake -text
+src/cmake/configurations/flow2d3d_configuration.cmake -text
+src/cmake/configurations/tests_configuration.cmake -text
+src/cmake/configurations/tools_configuration.cmake -text
+src/cmake/doc/CMake[!!-~]Inventory.xlsx -text
+src/cmake/doc/CMake_for_OSS_tree_[!!-~]project_report.docx -text
+src/cmake/doc/README -text svneol=unset#application/octet-stream
+src/cmake/doc/Readme-CMake-GUI.docx -text
+src/cmake/functions.cmake -text
+src/cmake/install_dimr/CMakeLists.txt -text
+src/cmake/install_dimr/ReadMe.txt -text
+src/cmake/install_dimr/install_and_bundle.cmake -text
+src/cmake/install_fm/CMakeLists.txt -text
+src/cmake/install_fm/ReadMe.txt -text
+src/cmake/install_fm/install_and_bundle.cmake -text
+src/cmake/install_wq/CMakeLists.txt -text
+src/cmake/install_wq/ReadMe.txt -text
+src/cmake/install_wq/install_and_bundle.cmake -text
+src/cmake/linux_scripts.cmake -text
+src/cmake/modules.cmake -text
+src/cmake/modules/engines_gpl.cmake -text
+src/cmake/modules/third_parties.cmake -text
+src/cmake/modules/tools_gpl.cmake -text
+src/cmake/modules/utils_gpl.cmake -text
+src/cmake/modules/utils_lgpl.cmake -text
+src/cmake/templates/example_CMakeLists.txt -text
+src/cmake/windows_scripts.cmake -text
 src/common.am -text
 src/configure.ac -text
 src/doxyfile_delft3d -text
@@ -475,11 +512,18 @@ src/engines_gpl/d_hydro/scripts/test_xml_creation.bat -text
 src/engines_gpl/d_hydro/scripts/test_xml_creation.tcl -text
 src/engines_gpl/dflowfm/Makefile.am -text
 src/engines_gpl/dflowfm/packages/Makefile.am -text
+src/engines_gpl/dflowfm/packages/dflowfm-cli_exe/CMakeLists.txt -text
 src/engines_gpl/dflowfm/packages/dflowfm-cli_exe/Makefile.am -text
 src/engines_gpl/dflowfm/packages/dflowfm-cli_exe/dflowfm-cli.vfproj -text
 src/engines_gpl/dflowfm/packages/dflowfm-cli_exe/src/Makefile.am -text
 src/engines_gpl/dflowfm/packages/dflowfm-cli_exe/src/net_main.F90 -text
+src/engines_gpl/dflowfm/packages/dflowfm/CMakeLists.txt -text
+src/engines_gpl/dflowfm/packages/dflowfm/Makefile.am -text
+src/engines_gpl/dflowfm/packages/dflowfm/src/Makefile.am -text
+src/engines_gpl/dflowfm/packages/dflowfm/src/net_main.F90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_esmf/src/unstruc_esmf.F90 -text
+src/engines_gpl/dflowfm/packages/dflowfm_kernel/CMakeLists.txt -text
+src/engines_gpl/dflowfm/packages/dflowfm_kernel/CMakeLists_refactoring_branch.txt -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/Makefile.am -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/dflowfm_kernel.vfproj -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/include/RF.inc -text
@@ -572,6 +616,7 @@ src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/xbeach_wave_boundary_init.f9
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/xbeach_wave_boundary_main.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/xbeach_wave_boundary_update.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/xbeachwaves.f90 -text
+src/engines_gpl/dflowfm/packages/dflowfm_lib/CMakeLists.txt -text
 src/engines_gpl/dflowfm/packages/dflowfm_lib/dflowfm_dll.vfproj -text
 src/engines_gpl/dflowfm/packages/dflowfm_lib/include/bmi_get_var.inc -text
 src/engines_gpl/dflowfm/packages/dflowfm_lib/include/bmi_get_var_count.inc -text
@@ -731,6 +776,7 @@ src/engines_gpl/dimr/doc/common/pictures/directory_structure.png -text
 src/engines_gpl/dimr/doc/parseLogs.py -text
 src/engines_gpl/dimr/doc/use_dimr_dll_example.c -text
 src/engines_gpl/dimr/packages/Makefile.am -text
+src/engines_gpl/dimr/packages/dimr/CMakeLists.txt -text
 src/engines_gpl/dimr/packages/dimr/Makefile.am -text
 src/engines_gpl/dimr/packages/dimr/dimr_class_diagram.cd -text
 src/engines_gpl/dimr/packages/dimr/dimr_exe.vcxproj -text
@@ -743,7 +789,9 @@ src/engines_gpl/dimr/packages/dimr/src/Makefile.am -text
 src/engines_gpl/dimr/packages/dimr/src/dimr_exe.cpp -text
 src/engines_gpl/dimr/packages/dimr/src/dimr_exe_version.cpp -text
 src/engines_gpl/dimr/packages/dimr/src/readme.txt -text
+src/engines_gpl/dimr/packages/dimr_lib/CMakeLists.txt -text
 src/engines_gpl/dimr/packages/dimr_lib/Makefile.am -text
+src/engines_gpl/dimr/packages/dimr_lib/config.h.cmake.in -text
 src/engines_gpl/dimr/packages/dimr_lib/dimr_lib.vcxproj -text
 src/engines_gpl/dimr/packages/dimr_lib/dimr_lib.vcxproj.filters -text
 src/engines_gpl/dimr/packages/dimr_lib/dimr_lib_class_diagram.cd -text
@@ -837,6 +885,7 @@ src/engines_gpl/flow2d3d/doc/delft3d/hydra.html -text
 src/engines_gpl/flow2d3d/doc/delft3d/im/hydranet.gif -text
 src/engines_gpl/flow2d3d/doc/parallel_status.txt -text
 src/engines_gpl/flow2d3d/packages/Makefile.am -text
+src/engines_gpl/flow2d3d/packages/data/CMakeLists.txt -text
 src/engines_gpl/flow2d3d/packages/data/Makefile.am -text
 src/engines_gpl/flow2d3d/packages/data/data.vfproj -text
 src/engines_gpl/flow2d3d/packages/data/include/address.igs -text
@@ -1061,6 +1110,7 @@ src/engines_gpl/flow2d3d/packages/data/src/parallel_mpi/removeDuplicateDDBFiles.
 src/engines_gpl/flow2d3d/packages/data/src/parallel_mpi/strgrd.F90 -text
 src/engines_gpl/flow2d3d/packages/data/src/parallel_mpi/writetofile.c -text
 src/engines_gpl/flow2d3d/packages/data/src/parallel_mpi/wrscr.F90 -text
+src/engines_gpl/flow2d3d/packages/flow2d3d/CMakeLists.txt -text
 src/engines_gpl/flow2d3d/packages/flow2d3d/Makefile.am -text
 src/engines_gpl/flow2d3d/packages/flow2d3d/flow2d3d.vcxproj -text
 src/engines_gpl/flow2d3d/packages/flow2d3d/include/blob.h -text
@@ -1135,6 +1185,7 @@ src/engines_gpl/flow2d3d/packages/flow2d3d/src/flow2d3d.cpp -text
 src/engines_gpl/flow2d3d/packages/flow2d3d/src/flow2d3d_version.cpp -text
 src/engines_gpl/flow2d3d/packages/flow2d3d/src/flowol.cpp -text
 src/engines_gpl/flow2d3d/packages/flow2d3d/src/readxmldd.cpp -text
+src/engines_gpl/flow2d3d/packages/io/CMakeLists.txt -text
 src/engines_gpl/flow2d3d/packages/io/Makefile.am -text
 src/engines_gpl/flow2d3d/packages/io/io.vfproj -text
 src/engines_gpl/flow2d3d/packages/io/src/Makefile.am -text
@@ -1359,6 +1410,7 @@ src/engines_gpl/flow2d3d/packages/io/src/preprocessor/rdtold.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/preprocessor/rwbcb.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/preprocessor/tdatom.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/preprocessor/wrtbch.f90 -text
+src/engines_gpl/flow2d3d/packages/io_dol_f/CMakeLists.txt -text
 src/engines_gpl/flow2d3d/packages/io_dol_f/Makefile.am -text
 src/engines_gpl/flow2d3d/packages/io_dol_f/include/delftonline.i -text
 src/engines_gpl/flow2d3d/packages/io_dol_f/io_dol_f.vfproj -text
@@ -1366,6 +1418,7 @@ src/engines_gpl/flow2d3d/packages/io_dol_f/src/Makefile.am -text
 src/engines_gpl/flow2d3d/packages/io_dol_f/src/d3d_olv_class.f90 -text
 src/engines_gpl/flow2d3d/packages/io_dol_f/src/d3donline.f90 -text
 src/engines_gpl/flow2d3d/packages/io_dol_f/src/d3dpublish.f90 -text
+src/engines_gpl/flow2d3d/packages/kernel/CMakeLists.txt -text
 src/engines_gpl/flow2d3d/packages/kernel/Makefile.am -text
 src/engines_gpl/flow2d3d/packages/kernel/kernel.vfproj -text
 src/engines_gpl/flow2d3d/packages/kernel/src/Makefile.am -text
@@ -1735,10 +1788,12 @@ src/engines_gpl/flow2d3d/packages/kernel/src/timedep/updveg3d.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/timedep/wetdis.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/timedep/windtogridc.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/timedep/windtostress.f90 -text
+src/engines_gpl/flow2d3d/packages/kernel_dd_f/CMakeLists.txt -text
 src/engines_gpl/flow2d3d/packages/kernel_dd_f/Makefile.am -text
 src/engines_gpl/flow2d3d/packages/kernel_dd_f/kernel_dd_f.vfproj -text
 src/engines_gpl/flow2d3d/packages/kernel_dd_f/src/Makefile.am -text
 src/engines_gpl/flow2d3d/packages/kernel_dd_f/src/flow_nextstep.f90 -text
+src/engines_gpl/flow2d3d/packages/manager/CMakeLists.txt -text
 src/engines_gpl/flow2d3d/packages/manager/Makefile.am -text
 src/engines_gpl/flow2d3d/packages/manager/manager.vfproj -text
 src/engines_gpl/flow2d3d/packages/manager/src/Makefile.am -text
@@ -1750,10 +1805,12 @@ src/engines_gpl/flow2d3d/packages/manager/src/triend.F90 -text
 src/engines_gpl/flow2d3d/packages/manager/src/tripoi.F90 -text
 src/engines_gpl/flow2d3d/packages/manager/src/trisim.F90 -text
 src/engines_gpl/flow2d3d/packages/manager/src/trisim_mod.F90 -text
+src/engines_gpl/flow2d3d/packages/plugin_culvert_c/CMakeLists.txt -text
 src/engines_gpl/flow2d3d/packages/plugin_culvert_c/Makefile.am -text
 src/engines_gpl/flow2d3d/packages/plugin_culvert_c/plugin_culvert_c.vcxproj -text
 src/engines_gpl/flow2d3d/packages/plugin_culvert_c/src/Makefile.am -text
 src/engines_gpl/flow2d3d/packages/plugin_culvert_c/src/f902c.c -text
+src/engines_gpl/flow2d3d/packages/plugin_user/CMakeLists.txt -text
 src/engines_gpl/flow2d3d/packages/plugin_user/Makefile.am -text
 src/engines_gpl/flow2d3d/packages/plugin_user/plugin_user.vfproj -text
 src/engines_gpl/flow2d3d/packages/plugin_user/src/Makefile.am -text
@@ -1790,6 +1847,7 @@ src/engines_gpl/flow2d3d/scripts/run_dflow2d3d_rtc.bat -text
 src/engines_gpl/flow2d3d/scripts/submit_dflow2d3d.sh -text
 src/engines_gpl/part/Makefile.am -text
 src/engines_gpl/part/packages/Makefile.am -text
+src/engines_gpl/part/packages/data_f/CMakeLists.txt -text
 src/engines_gpl/part/packages/data_f/Makefile.am -text
 src/engines_gpl/part/packages/data_f/part_data_f.vfproj -text
 src/engines_gpl/part/packages/data_f/src/Makefile.am -text
@@ -1803,6 +1861,7 @@ src/engines_gpl/part/packages/delpar/Makefile.am -text
 src/engines_gpl/part/packages/delpar/delpar.vfproj -text
 src/engines_gpl/part/packages/delpar/src/Makefile.am -text
 src/engines_gpl/part/packages/delpar/src/main.f -text
+src/engines_gpl/part/packages/io_f/CMakeLists.txt -text
 src/engines_gpl/part/packages/io_f/Makefile.am -text
 src/engines_gpl/part/packages/io_f/part_io_f.vfproj -text
 src/engines_gpl/part/packages/io_f/src/Makefile.am -text
@@ -1837,6 +1896,7 @@ src/engines_gpl/part/packages/io_f/src/report.f90 -text
 src/engines_gpl/part/packages/io_f/src/report_date_time.f90 -text
 src/engines_gpl/part/packages/io_f/src/writrk.f90 -text
 src/engines_gpl/part/packages/io_f/src/wrttrk.f90 -text
+src/engines_gpl/part/packages/kernel_f/CMakeLists.txt -text
 src/engines_gpl/part/packages/kernel_f/Makefile.am -text
 src/engines_gpl/part/packages/kernel_f/part_kernel_f.vfproj -text
 src/engines_gpl/part/packages/kernel_f/src/Makefile.am -text
@@ -1868,6 +1928,7 @@ src/engines_gpl/part/packages/kernel_f/src/partwq.f90 -text
 src/engines_gpl/part/packages/kernel_f/src/plotgr.f90 -text
 src/engines_gpl/part/packages/kernel_f/src/umagi.f90 -text
 src/engines_gpl/part/packages/kernel_f/src/vdisp.f90 -text
+src/engines_gpl/part/packages/utils_f/CMakeLists.txt -text
 src/engines_gpl/part/packages/utils_f/Makefile.am -text
 src/engines_gpl/part/packages/utils_f/part_utils_f.vfproj -text
 src/engines_gpl/part/packages/utils_f/src/Makefile.am -text
@@ -1944,6 +2005,7 @@ src/engines_gpl/waq/include/wfarin.inc -text
 src/engines_gpl/waq/include/wfarout.inc -text
 src/engines_gpl/waq/include/wflxout.inc -text
 src/engines_gpl/waq/packages/Makefile.am -text
+src/engines_gpl/waq/packages/delwaq/CMakeLists.txt -text
 src/engines_gpl/waq/packages/delwaq/Makefile.am -text
 src/engines_gpl/waq/packages/delwaq/delwaq_dll.vfproj -text
 src/engines_gpl/waq/packages/delwaq/src/Makefile.am -text
@@ -1958,11 +2020,13 @@ src/engines_gpl/waq/packages/delwaq/src/waq_mt3d_api.f90 -text
 src/engines_gpl/waq/packages/delwaq/src/waq_omi_api.f90 -text
 src/engines_gpl/waq/packages/delwaq/src/waq_omi_lib.f90 -text
 src/engines_gpl/waq/packages/delwaq/src/waq_omi_substances.f90 -text
+src/engines_gpl/waq/packages/delwaq1/CMakeLists.txt -text
 src/engines_gpl/waq/packages/delwaq1/Makefile.am -text
 src/engines_gpl/waq/packages/delwaq1/delwaq1.vfproj -text
 src/engines_gpl/waq/packages/delwaq1/src/Makefile.am -text
 src/engines_gpl/waq/packages/delwaq1/src/delwaq1_version.F90.svn -text
 src/engines_gpl/waq/packages/delwaq1/src/dlwq1.f -text
+src/engines_gpl/waq/packages/delwaq2/CMakeLists.txt -text
 src/engines_gpl/waq/packages/delwaq2/Makefile.am -text
 src/engines_gpl/waq/packages/delwaq2/delwaq2.vfproj -text
 src/engines_gpl/waq/packages/delwaq2/src/Makefile.am -text
@@ -2000,6 +2064,7 @@ src/engines_gpl/waq/packages/delwaq_lib_examples/unit_tests_waq/src/unit_tests_w
 src/engines_gpl/waq/packages/delwaq_lib_examples/unit_tests_waq/unit_tests_waq.vfproj -text
 src/engines_gpl/waq/packages/delwaq_lib_examples/unit_tests_waq_omi/src/unit_tests_waq_omi.f90 -text
 src/engines_gpl/waq/packages/delwaq_lib_examples/unit_tests_waq_omi/unit_tests_waq_omi.vfproj -text
+src/engines_gpl/waq/packages/waq_io/CMakeLists.txt -text
 src/engines_gpl/waq/packages/waq_io/Makefile.am -text
 src/engines_gpl/waq/packages/waq_io/src/Makefile.am -text
 src/engines_gpl/waq/packages/waq_io/src/mpidum/Makefile.am -text
@@ -2078,6 +2143,7 @@ src/engines_gpl/waq/packages/waq_io/src/waq_io/timer.f -text
 src/engines_gpl/waq/packages/waq_io/src/waq_io/uniset.f -text
 src/engines_gpl/waq/packages/waq_io/src/waq_io/varpoi.f -text
 src/engines_gpl/waq/packages/waq_io/waq_io.vfproj -text
+src/engines_gpl/waq/packages/waq_kernel/CMakeLists.txt -text
 src/engines_gpl/waq/packages/waq_kernel/Makefile.am -text
 src/engines_gpl/waq/packages/waq_kernel/src/Makefile.am -text
 src/engines_gpl/waq/packages/waq_kernel/src/actloc.f -text
@@ -2301,6 +2367,7 @@ src/engines_gpl/waq/packages/waq_kernel/src/xerbla.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/zercum.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/zlayer.f -text
 src/engines_gpl/waq/packages/waq_kernel/waq_kernel.vfproj -text
+src/engines_gpl/waq/packages/waq_plugin_wasteload/CMakeLists.txt -text
 src/engines_gpl/waq/packages/waq_plugin_wasteload/Makefile.am -text
 src/engines_gpl/waq/packages/waq_plugin_wasteload/src/Makefile.am -text
 src/engines_gpl/waq/packages/waq_plugin_wasteload/src/delwaq_user_wasteloads.f -text
@@ -2308,6 +2375,7 @@ src/engines_gpl/waq/packages/waq_plugin_wasteload/src/srstop.f -text
 src/engines_gpl/waq/packages/waq_plugin_wasteload/src/waq_plugin_wasteload_version.F90.svn -text
 src/engines_gpl/waq/packages/waq_plugin_wasteload/src/zoekns.f -text
 src/engines_gpl/waq/packages/waq_plugin_wasteload/waq_plugin_wasteload.vfproj -text
+src/engines_gpl/waq/packages/waq_process/CMakeLists.txt -text
 src/engines_gpl/waq/packages/waq_process/Makefile.am -text
 src/engines_gpl/waq/packages/waq_process/src/Makefile.am -text
 src/engines_gpl/waq/packages/waq_process/src/bloom/Makefile.am -text
@@ -2671,11 +2739,13 @@ src/engines_gpl/waq/packages/waq_process/src/waq_tables/waqpb_help.bat -text
 src/engines_gpl/waq/packages/waq_process/src/waq_tables/waqpb_import.bat -text
 src/engines_gpl/waq/packages/waq_process/src/waq_tables/waqpb_import_old_format.bat -text
 src/engines_gpl/waq/packages/waq_process/waq_process.vfproj -text
+src/engines_gpl/waq/packages/waq_utils_c/CMakeLists.txt -text
 src/engines_gpl/waq/packages/waq_utils_c/Makefile.am -text
 src/engines_gpl/waq/packages/waq_utils_c/src/Makefile.am -text
 src/engines_gpl/waq/packages/waq_utils_c/src/f902c.cpp -text
 src/engines_gpl/waq/packages/waq_utils_c/src/getuuid.c -text
 src/engines_gpl/waq/packages/waq_utils_c/waq_utils_c.vcxproj -text
+src/engines_gpl/waq/packages/waq_utils_f/CMakeLists.txt -text
 src/engines_gpl/waq/packages/waq_utils_f/Makefile.am -text
 src/engines_gpl/waq/packages/waq_utils_f/src/Makefile.am -text
 src/engines_gpl/waq/packages/waq_utils_f/src/dlwq_netcdf/Makefile.am -text
@@ -2788,6 +2858,7 @@ src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/wrwrk3.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/zero.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/zoek.f -text
 src/engines_gpl/waq/packages/waq_utils_f/waq_utils_f.vfproj -text
+src/engines_gpl/waq/packages/wq_processes/CMakeLists.txt -text
 src/engines_gpl/waq/packages/wq_processes/Makefile.am -text
 src/engines_gpl/waq/packages/wq_processes/src/Makefile.am -text
 src/engines_gpl/waq/packages/wq_processes/src/getidentification.f -text
@@ -2815,6 +2886,7 @@ src/engines_gpl/waq/version/waq.ico -text
 src/engines_gpl/waq/version/waq_icon.rc -text
 src/engines_gpl/wave/Makefile.am -text
 src/engines_gpl/wave/packages/Makefile.am -text
+src/engines_gpl/wave/packages/data/CMakeLists.txt -text
 src/engines_gpl/wave/packages/data/Makefile.am -text
 src/engines_gpl/wave/packages/data/data.vfproj -text
 src/engines_gpl/wave/packages/data/src/Makefile.am -text
@@ -2844,6 +2916,7 @@ src/engines_gpl/wave/packages/data/src/timdat.f90 -text
 src/engines_gpl/wave/packages/data/src/wave_data.f90 -text
 src/engines_gpl/wave/packages/data/src/wave_mpi.F90 -text
 src/engines_gpl/wave/packages/data/src/wavestop.f90 -text
+src/engines_gpl/wave/packages/io/CMakeLists.txt -text
 src/engines_gpl/wave/packages/io/Makefile.am -text
 src/engines_gpl/wave/packages/io/io.vfproj -text
 src/engines_gpl/wave/packages/io/src/Makefile.am -text
@@ -2881,6 +2954,7 @@ src/engines_gpl/wave/packages/io/src/write_wave_map_wind.f90 -text
 src/engines_gpl/wave/packages/io/src/writek.f90 -text
 src/engines_gpl/wave/packages/io/src/wrivek.f90 -text
 src/engines_gpl/wave/packages/io/src/wrpara.f90 -text
+src/engines_gpl/wave/packages/kernel/CMakeLists.txt -text
 src/engines_gpl/wave/packages/kernel/Makefile.am -text
 src/engines_gpl/wave/packages/kernel/kernel.vfproj -text
 src/engines_gpl/wave/packages/kernel/src/Makefile.am -text
@@ -2900,6 +2974,7 @@ src/engines_gpl/wave/packages/kernel/src/update_wavecond.f90 -text
 src/engines_gpl/wave/packages/kernel/src/wapar.f90 -text
 src/engines_gpl/wave/packages/kernel/src/wave2com.f90 -text
 src/engines_gpl/wave/packages/kernel/src/wave2flow.f90 -text
+src/engines_gpl/wave/packages/manager/CMakeLists.txt -text
 src/engines_gpl/wave/packages/manager/Makefile.am -text
 src/engines_gpl/wave/packages/manager/include/version_number.ini -text
 src/engines_gpl/wave/packages/manager/manager.vfproj -text
@@ -2910,6 +2985,7 @@ src/engines_gpl/wave/packages/manager/src/usage.f90 -text
 src/engines_gpl/wave/packages/manager/src/wave_main.f90 -text
 src/engines_gpl/wave/packages/manager/src/wave_version.F90.svn -text
 src/engines_gpl/wave/packages/manager/src/wave_version.rc.svn -text
+src/engines_gpl/wave/packages/wave/CMakeLists.txt -text
 src/engines_gpl/wave/packages/wave/Makefile.am -text
 src/engines_gpl/wave/packages/wave/resource/wave_dll.def -text
 src/engines_gpl/wave/packages/wave/resource/wl.ico -text
@@ -2917,6 +2993,8 @@ src/engines_gpl/wave/packages/wave/src/Makefile.am -text
 src/engines_gpl/wave/packages/wave/src/wave_bmi.f90 -text
 src/engines_gpl/wave/packages/wave/src/wave_exe.f90 -text
 src/engines_gpl/wave/packages/wave/wave.vfproj -text
+src/engines_gpl/wave/packages/wave/wave_dll.cmake -text
+src/engines_gpl/wave/packages/wave/wave_exe.cmake -text
 src/engines_gpl/wave/packages/wave/wave_exe.vfproj -text
 src/engines_gpl/wave/scripts/Makefile.am -text
 src/engines_gpl/wave/scripts/run_dwaves.bat -text
@@ -2985,6 +3063,7 @@ src/prepare_sln.cmd -text
 src/prepare_sln.py -text
 src/scripts_lgpl/Makefile.am -text
 src/scripts_lgpl/linux/Makefile.am -text
+src/scripts_lgpl/linux/cmake_postbuild.sh -text
 src/scripts_lgpl/linux/gatherlibraries.rb -text
 src/scripts_lgpl/linux/make_revision.sh -text
 src/scripts_lgpl/linux/oss-install.sh -text
@@ -2994,6 +3073,7 @@ src/scripts_lgpl/win32/oss-install.cmd -text
 src/scripts_lgpl/win32/oss-install_debug.cmd -text
 src/scripts_lgpl/win32/update_version.cmd -text
 src/scripts_lgpl/win64/NUnit_tests_template.sln -text
+src/scripts_lgpl/win64/cmake_postbuild.cmd -text
 src/scripts_lgpl/win64/delft3d_open_template.sln -text
 src/scripts_lgpl/win64/ec_module_template.sln -text
 src/scripts_lgpl/win64/io_netcdf_template.sln -text
@@ -3001,12 +3081,14 @@ src/scripts_lgpl/win64/list_all_what_strings.py -text
 src/scripts_lgpl/win64/nefis_template.sln -text
 src/scripts_lgpl/win64/oss-install_debug_x64.cmd -text
 src/scripts_lgpl/win64/oss-install_x64.cmd -text
+src/scripts_lgpl/win64/oss-post_build.cmd -text
 src/scripts_lgpl/win64/testcoverage/addcovoptions.py -text
 src/scripts_lgpl/win64/testcoverage/catfiles.py -text
 src/scripts_lgpl/win64/testcoverage/readcov.lst -text
 src/scripts_lgpl/win64/testcoverage/readcov.py -text
 src/scripts_lgpl/win64/tests_template.sln -text
 src/scripts_lgpl/win64/utils_lgpl_template.sln -text
+src/setenv.sh -text
 src/test/Makefile.am -text
 src/test/engines_gpl/Makefile.am -text
 src/test/engines_gpl/dflowfm/Makefile.am -text
@@ -3093,6 +3175,7 @@ src/test/engines_gpl/waq/packages/waq_utils_f/waq_utils_f_test.vfproj -text
 src/test/utils_lgpl/Makefile.am -text
 src/test/utils_lgpl/deltares_common/Makefile.am -text
 src/test/utils_lgpl/deltares_common/packages/Makefile.am -text
+src/test/utils_lgpl/deltares_common/packages/test_deltares_common/CMakeLists.txt -text
 src/test/utils_lgpl/deltares_common/packages/test_deltares_common/Makefile.am -text
 src/test/utils_lgpl/deltares_common/packages/test_deltares_common/src/Makefile.am -text
 src/test/utils_lgpl/deltares_common/packages/test_deltares_common/src/test_bilin5.f90 -text
@@ -3334,6 +3417,7 @@ src/test/utils_lgpl/ec_module/packages/ec_module_test/tests/FMtests/f18_boundar_
 src/test/utils_lgpl/ec_module/packages/ec_module_test/tests/readme.txt -text
 src/test/utils_lgpl/ec_module/packages/ec_module_test/tests/tests.lst -text
 src/third_party/Makefile.am -text
+src/third_party/interacter_stub/CMakeLists.txt -text
 src/third_party/interacter_stub/Makefile.am -text
 src/third_party/interacter_stub/README -text
 src/third_party/interacter_stub/interacter_stub.vfproj -text
@@ -3347,6 +3431,8 @@ src/third_party_open/FLAP/LICENSE.bsd-3.md -text
 src/third_party_open/FLAP/LICENSE.gpl3.md -text
 src/third_party_open/FLAP/LICENSE.mit.md -text
 src/third_party_open/FLAP/README.md -text
+src/third_party_open/FLAP/cmake_deltares/CMakeLists.txt -text
+src/third_party_open/FLAP/cmake_deltares/config.h.cmake.in -text
 src/third_party_open/FLAP/doc/ChangeLog-FLAP.md -text
 src/third_party_open/FLAP/doc/ChangeLog-IR_Precision.md -text
 src/third_party_open/FLAP/doc/README-FLAP.md -text
@@ -7049,6 +7135,7 @@ src/third_party_open/expat/bcb5/setup.bat -text
 src/third_party_open/expat/bcb5/xmlwf.bpf -text
 src/third_party_open/expat/bcb5/xmlwf.bpr -text
 src/third_party_open/expat/bcb5/xmlwf.mak -text
+src/third_party_open/expat/cmake_deltares/CMakeLists.txt -text
 src/third_party_open/expat/configure -text
 src/third_party_open/expat/configure.in -text
 src/third_party_open/expat/conftools/PrintPath -text
@@ -7486,6 +7573,8 @@ src/third_party_open/fortrangis/COPYING -text
 src/third_party_open/fortrangis/Makefile.am -text
 src/third_party_open/fortrangis/README.md -text
 src/third_party_open/fortrangis/autogen.sh -text
+src/third_party_open/fortrangis/cmake_deltares/CMakeLists.txt -text
+src/third_party_open/fortrangis/cmake_deltares/config.h.cmake.in -text
 src/third_party_open/fortrangis/configure.ac -text
 src/third_party_open/fortrangis/doc/Doxyfile.in -text
 src/third_party_open/fortrangis/doc/Makefile.am -text
@@ -7576,6 +7665,7 @@ src/third_party_open/kdtree2/LICENSE -text
 src/third_party_open/kdtree2/Makefile.am -text
 src/third_party_open/kdtree2/README -text
 src/third_party_open/kdtree2/autogen.sh -text
+src/third_party_open/kdtree2/cmake_deltares/CMakeLists.txt -text
 src/third_party_open/kdtree2/configure -text
 src/third_party_open/kdtree2/configure.ac -text
 src/third_party_open/kdtree2/kdtree2-README -text
@@ -7597,6 +7687,7 @@ src/third_party_open/libsigwatch/Makefile.in -text
 src/third_party_open/libsigwatch/NEWS -text
 src/third_party_open/libsigwatch/README -text
 src/third_party_open/libsigwatch/aclocal.m4 -text
+src/third_party_open/libsigwatch/cmake_deltares/CMakeLists.txt -text
 src/third_party_open/libsigwatch/config.guess -text
 src/third_party_open/libsigwatch/config.h -text
 src/third_party_open/libsigwatch/config.h.in -text
@@ -7620,6 +7711,7 @@ src/third_party_open/libsigwatch/sigwatch.html -text svneol=unset#application/xm
 src/third_party_open/libsigwatch/sigwatch.html.in -text svneol=unset#application/xml
 src/third_party_open/libsigwatch/style.css -text
 src/third_party_open/md5/Makefile.am -text
+src/third_party_open/md5/cmake_deltares/CMakeLists.txt -text
 src/third_party_open/md5/md5digest/Makefile.am -text
 src/third_party_open/md5/md5digest/md5.c -text
 src/third_party_open/md5/md5digest/md5.h -text
@@ -7631,6 +7723,7 @@ src/third_party_open/md5/md5file/md5file.vfproj -text
 src/third_party_open/md5/readme.txt -text
 src/third_party_open/metis/LICENSE.txt -text
 src/third_party_open/metis/README.txt -text
+src/third_party_open/metis/cmake_deltares/CMakeLists.txt -text
 src/third_party_open/metis/metis-5.1.0/BUILD-Windows.txt -text
 src/third_party_open/metis/metis-5.1.0/BUILD.txt -text
 src/third_party_open/metis/metis-5.1.0/CMakeLists.txt -text
@@ -7876,6 +7969,7 @@ src/third_party_open/mpich2/x64/lib/mpich2p.dll -text
 src/third_party_open/mpich2/x64/lib/rlog.lib -text
 src/third_party_open/mpich2/x64/readme.txt -text
 src/third_party_open/mpich2/x64/setup.jpg -text
+src/third_party_open/netcdf/cmake_deltares/CMakeLists.txt -text
 src/third_party_open/netcdf/matlab/mexnc/AUTHORS -text
 src/third_party_open/netcdf/matlab/mexnc/COPYING -text
 src/third_party_open/netcdf/matlab/mexnc/ChangeLog -text
@@ -8598,6 +8692,7 @@ src/third_party_open/openda/tests/test_dll_noise/test_dll_noise.vfproj -text
 src/third_party_open/openda/tests/test_seq_dlls/test_seq_dlls.F90 -text
 src/third_party_open/openda/tests/test_seq_dlls/test_seq_dlls.vfproj -text
 src/third_party_open/openda/tests/test_seq_dlls/test_seq_dlls_exe.F90 -text
+src/third_party_open/petsc/cmake_deltares/CMakeLists.txt -text
 src/third_party_open/petsc/petsc-3.10.2/CONTRIBUTING -text
 src/third_party_open/petsc/petsc-3.10.2/LICENSE -text
 src/third_party_open/petsc/petsc-3.10.2/include/makefile -text
@@ -15354,6 +15449,7 @@ src/third_party_open/petsc/petsc.vfproj -text
 src/third_party_open/polypack/Copyright -text
 src/third_party_open/polypack/Makefile.am -text
 src/third_party_open/polypack/README -text
+src/third_party_open/polypack/cmake_deltares/CMakeLists.txt -text
 src/third_party_open/polypack/polypack.vfproj -text
 src/third_party_open/polypack/src/Makefile.am -text
 src/third_party_open/polypack/src/ppdipo.f -text
@@ -15377,6 +15473,7 @@ src/third_party_open/proj4/NEWS -text
 src/third_party_open/proj4/README -text
 src/third_party_open/proj4/appveyor.yml -text
 src/third_party_open/proj4/autogen.sh -text
+src/third_party_open/proj4/cmake_deltares/CMakeLists.txt -text
 src/third_party_open/proj4/configure.ac -text
 src/third_party_open/proj4/makefile.vc -text
 src/third_party_open/proj4/nmake.opt -text
@@ -15596,6 +15693,7 @@ src/third_party_open/pthreads/pthreads_license_info.txt -text
 src/third_party_open/pthreads/pthreads_license_info_x64.txt -text
 src/third_party_open/shapelib/AUTHORS -text
 src/third_party_open/shapelib/COPYING -text
+src/third_party_open/shapelib/cmake_deltares/CMakeLists.txt -text
 src/third_party_open/shapelib/src/dbfopen.c -text
 src/third_party_open/shapelib/src/safileio.c -text
 src/third_party_open/shapelib/src/sbnsearch.c -text
@@ -15837,6 +15935,7 @@ src/third_party_open/swan/swan_omp/Makefile.am -text
 src/third_party_open/swan/swan_omp/swan_omp_exe.vfproj -text
 src/third_party_open/tcl/bin/win64/tclkitsh852.exe -text
 src/third_party_open/triangle/Makefile.am -text
+src/third_party_open/triangle/cmake_deltares/CMakeLists.txt -text
 src/third_party_open/triangle/f2c.h -text
 src/third_party_open/triangle/triangle.c -text
 src/third_party_open/triangle/triangle.h -text
@@ -15873,6 +15972,7 @@ src/third_party_open/version_number/Makefile.am -text
 src/third_party_open/version_number/Subversion_license_info.txt -text
 src/third_party_open/version_number/bin/win32/version_number.exe -text
 src/third_party_open/version_number/packages/Makefile.am -text
+src/third_party_open/version_number/packages/version_number/CMakeLists.txt -text
 src/third_party_open/version_number/packages/version_number/Makefile.am -text
 src/third_party_open/version_number/packages/version_number/src/Makefile.am -text
 src/third_party_open/version_number/packages/version_number/src/version_number.f90 -text
@@ -15882,10 +15982,12 @@ src/third_party_open/version_number/version_number_2010.sln -text
 src/tools_gpl/Makefile.am -text
 src/tools_gpl/datsel/Makefile.am -text
 src/tools_gpl/datsel/packages/Makefile.am -text
+src/tools_gpl/datsel/packages/datsel/CMakeLists.txt -text
 src/tools_gpl/datsel/packages/datsel/Makefile.am -text
 src/tools_gpl/datsel/packages/datsel/datsel.vcxproj -text
 src/tools_gpl/datsel/packages/datsel/src/Makefile.am -text
 src/tools_gpl/datsel/packages/datsel/src/main.cpp -text
+src/tools_gpl/datsel/packages/datsel_f/CMakeLists.txt -text
 src/tools_gpl/datsel/packages/datsel_f/Makefile.am -text
 src/tools_gpl/datsel/packages/datsel_f/datsel_f.vfproj -text
 src/tools_gpl/datsel/packages/datsel_f/include/datsel_f.svn -text
@@ -15903,6 +16005,7 @@ src/tools_gpl/datsel/packages/datsel_f/src/precision.f90 -text
 src/tools_gpl/datsel/packages/datsel_f/src/util.f90 -text
 src/tools_gpl/datsel/packages/datsel_f/src/uv2cen.f90 -text
 src/tools_gpl/datsel/packages/datsel_f/src/vecmag.f90 -text
+src/tools_gpl/datsel/packages/datsel_version_number/CMakeLists.txt -text
 src/tools_gpl/datsel/packages/datsel_version_number/Makefile.am -text
 src/tools_gpl/datsel/packages/datsel_version_number/datsel_version_number.vcxproj -text
 src/tools_gpl/datsel/packages/datsel_version_number/include/resource.h -text
@@ -15913,6 +16016,7 @@ src/tools_gpl/datsel/packages/datsel_version_number/src/Makefile.am -text
 src/tools_gpl/datsel/packages/datsel_version_number/src/c2c.c -text
 src/tools_gpl/datsel/packages/datsel_version_number/src/f2c.c -text
 src/tools_gpl/datsel/packages/datsel_version_number/src/version.c -text
+src/tools_gpl/dfmoutput/CMakeLists.txt -text
 src/tools_gpl/dfmoutput/Makefile.am -text
 src/tools_gpl/dfmoutput/dfmoutput.vfproj -text
 src/tools_gpl/dfmoutput/res/version_number.ini -text
@@ -15933,6 +16037,7 @@ src/tools_gpl/duprol2delwaq/example/step2_build_dll_with_MinGW_example.bat -text
 src/tools_gpl/duprol2delwaq/example/updateNEF.ini -text
 src/tools_gpl/duprol2delwaq/packages/hydduflow/errsys.f90 -text
 src/tools_gpl/duprol2delwaq/packages/hydduflow/hydduflow.f90 -text
+src/tools_gpl/duprol2delwaq/packages/parse/CMakeLists.txt -text
 src/tools_gpl/duprol2delwaq/packages/parse/Parse.vcxproj -text
 src/tools_gpl/duprol2delwaq/packages/parse/Parse_vs2012.vcxproj -text
 src/tools_gpl/duprol2delwaq/packages/parse/src/parse.c -text
@@ -15999,6 +16104,7 @@ src/tools_gpl/lint/packages/lint_version_number/src/f2c.c -text
 src/tools_gpl/lint/packages/lint_version_number/src/version.c -text
 src/tools_gpl/mormerge/Makefile.am -text
 src/tools_gpl/mormerge/packages/Makefile.am -text
+src/tools_gpl/mormerge/packages/mormerge/CMakeLists.txt -text
 src/tools_gpl/mormerge/packages/mormerge/Makefile.am -text
 src/tools_gpl/mormerge/packages/mormerge/mormerge.vfproj -text
 src/tools_gpl/mormerge/packages/mormerge/src/Makefile.am -text
@@ -16131,11 +16237,13 @@ src/tools_gpl/vs/packages/vs_version_number/src/version.c -text
 src/tools_gpl/vs/packages/vs_version_number/vs_version_number.vcxproj -text
 src/tools_gpl/waq_run_processes/Makefile.am -text
 src/tools_gpl/waq_run_processes/packages/Makefile.am -text
+src/tools_gpl/waq_run_processes/packages/waq_run_processes/CMakeLists.txt -text
 src/tools_gpl/waq_run_processes/packages/waq_run_processes/Makefile.am -text
 src/tools_gpl/waq_run_processes/packages/waq_run_processes/src/Makefile.am -text
 src/tools_gpl/waq_run_processes/packages/waq_run_processes/src/run_processes.f90 -text
 src/tools_gpl/waq_run_processes/packages/waq_run_processes/src/run_processes.inp -text
 src/tools_gpl/waq_run_processes/packages/waq_run_processes/waq_run_processes.vfproj -text
+src/tools_gpl/waq_run_processes/packages/waq_run_processes_version_number/CMakeLists.txt -text
 src/tools_gpl/waq_run_processes/packages/waq_run_processes_version_number/Makefile.am -text
 src/tools_gpl/waq_run_processes/packages/waq_run_processes_version_number/include/version_number.h.svn -text
 src/tools_gpl/waq_run_processes/packages/waq_run_processes_version_number/include/version_number.ini -text
@@ -16149,14 +16257,17 @@ src/tools_gpl/waqpb/Makefile.am -text
 src/tools_gpl/waqpb/packages/Makefile.am -text
 src/tools_gpl/waqpb/packages/include/data.inc -text
 src/tools_gpl/waqpb/packages/include/pdf.inc -text
+src/tools_gpl/waqpb/packages/waqpb_export/CMakeLists.txt -text
 src/tools_gpl/waqpb/packages/waqpb_export/Makefile.am -text
 src/tools_gpl/waqpb/packages/waqpb_export/src/Makefile.am -text
 src/tools_gpl/waqpb/packages/waqpb_export/src/waqpb_export.f -text
 src/tools_gpl/waqpb/packages/waqpb_export/waqpb_export.vfproj -text
+src/tools_gpl/waqpb/packages/waqpb_import/CMakeLists.txt -text
 src/tools_gpl/waqpb/packages/waqpb_import/Makefile.am -text
 src/tools_gpl/waqpb/packages/waqpb_import/src/Makefile.am -text
 src/tools_gpl/waqpb/packages/waqpb_import/src/waqpb_import.f -text
 src/tools_gpl/waqpb/packages/waqpb_import/waqpb_import.vfproj -text
+src/tools_gpl/waqpb/packages/waqpb_lib/CMakeLists.txt -text
 src/tools_gpl/waqpb/packages/waqpb_lib/Makefile.am -text
 src/tools_gpl/waqpb/packages/waqpb_lib/src/Makefile.am -text
 src/tools_gpl/waqpb/packages/waqpb_lib/src/ch1to1.f -text
@@ -16860,6 +16971,7 @@ src/utils_gpl/dhydrology/packages/dhydrology_io/Makefile.am -text
 src/utils_gpl/dhydrology/packages/dhydrology_io/dhydrology_io.vfproj -text
 src/utils_gpl/dhydrology/packages/dhydrology_io/src/Makefile.am -text
 src/utils_gpl/dhydrology/packages/dhydrology_io/src/dhydrology_reader.f90 -text
+src/utils_gpl/dhydrology/packages/dhydrology_kernel/CMakeLists.txt -text
 src/utils_gpl/dhydrology/packages/dhydrology_kernel/Makefile.am -text
 src/utils_gpl/dhydrology/packages/dhydrology_kernel/dhydrology_kernel.vfproj -text
 src/utils_gpl/dhydrology/packages/dhydrology_kernel/src/Makefile.am -text
@@ -16881,10 +16993,12 @@ src/utils_gpl/flow1d/include/get_structure_by_id.inc -text
 src/utils_gpl/flow1d/include/set_structure_by_id.inc -text
 src/utils_gpl/flow1d/include/update_structures.inc -text
 src/utils_gpl/flow1d/packages/Makefile.am -text
+src/utils_gpl/flow1d/packages/flow1d/CMakeLists.txt -text
 src/utils_gpl/flow1d/packages/flow1d/Makefile.am -text
 src/utils_gpl/flow1d/packages/flow1d/flow1d.vfproj -text
 src/utils_gpl/flow1d/packages/flow1d/src/Makefile.am -text
 src/utils_gpl/flow1d/packages/flow1d/src/flow1d_api.F90 -text
+src/utils_gpl/flow1d/packages/flow1d_core/CMakeLists.txt -text
 src/utils_gpl/flow1d/packages/flow1d_core/Makefile.am -text
 src/utils_gpl/flow1d/packages/flow1d_core/flow1d_core.vfproj -text
 src/utils_gpl/flow1d/packages/flow1d_core/src/CrossSections.f90 -text
@@ -16924,6 +17038,7 @@ src/utils_gpl/flow1d/packages/flow1d_core/src/temperature.f90 -text
 src/utils_gpl/flow1d/packages/flow1d_core/src/universal_weir.f90 -text
 src/utils_gpl/flow1d/packages/flow1d_core/src/weir.f90 -text
 src/utils_gpl/flow1d/packages/flow1d_core/src/wetcrs_modules.F90 -text
+src/utils_gpl/flow1d/packages/flow1d_io/CMakeLists.txt -text
 src/utils_gpl/flow1d/packages/flow1d_io/Makefile.am -text
 src/utils_gpl/flow1d/packages/flow1d_io/flow1d_io.vfproj -text
 src/utils_gpl/flow1d/packages/flow1d_io/src/1d_networkreader.f90 -text
@@ -16946,12 +17061,14 @@ src/utils_gpl/morphology/include/Makefile.am -text
 src/utils_gpl/morphology/include/RF.inc -text
 src/utils_gpl/morphology/include/global_config.inc -text
 src/utils_gpl/morphology/packages/Makefile.am -text
+src/utils_gpl/morphology/packages/morphology_data/CMakeLists.txt -text
 src/utils_gpl/morphology/packages/morphology_data/Makefile.am -text
 src/utils_gpl/morphology/packages/morphology_data/morphology_data.vfproj -text
 src/utils_gpl/morphology/packages/morphology_data/src/Makefile.am -text
 src/utils_gpl/morphology/packages/morphology_data/src/dredge_data_module.f90 -text
 src/utils_gpl/morphology/packages/morphology_data/src/morphology_data_module.f90 -text
 src/utils_gpl/morphology/packages/morphology_data/src/sediment_basics_module.f90 -text
+src/utils_gpl/morphology/packages/morphology_io/CMakeLists.txt -text
 src/utils_gpl/morphology/packages/morphology_io/Makefile.am -text
 src/utils_gpl/morphology/packages/morphology_io/morphology_io.vfproj -text
 src/utils_gpl/morphology/packages/morphology_io/src/Makefile.am -text
@@ -16963,6 +17080,7 @@ src/utils_gpl/morphology/packages/morphology_io/src/rdmorlyr.f90 -text
 src/utils_gpl/morphology/packages/morphology_io/src/rdsed.f90 -text
 src/utils_gpl/morphology/packages/morphology_io/src/rdstm.f90 -text
 src/utils_gpl/morphology/packages/morphology_io/src/rdtrafrm.f90 -text
+src/utils_gpl/morphology/packages/morphology_kernel/CMakeLists.txt -text
 src/utils_gpl/morphology/packages/morphology_kernel/Makefile.am -text
 src/utils_gpl/morphology/packages/morphology_kernel/morphology_kernel.vfproj -text
 src/utils_gpl/morphology/packages/morphology_kernel/src/Makefile.am -text
@@ -17028,7 +17146,9 @@ src/utils_gpl/morphology/packages/morphology_kernel/src/ua_rvr.f90 -text
 src/utils_gpl/morphology/packages/morphology_kernel/src/ua_vt.f90 -text
 src/utils_gpl/morphology/packages/morphology_kernel/src/updmorfac.f90 -text
 src/utils_gpl/morphology/packages/morphology_kernel/src/wave.f90 -text
+src/utils_gpl/morphology/packages/morphology_plugins_c/CMakeLists.txt -text
 src/utils_gpl/morphology/packages/morphology_plugins_c/Makefile.am -text
+src/utils_gpl/morphology/packages/morphology_plugins_c/config.h.cmake.in -text
 src/utils_gpl/morphology/packages/morphology_plugins_c/morphology_plugins_c.vcproj -text
 src/utils_gpl/morphology/packages/morphology_plugins_c/morphology_plugins_c.vcxproj -text
 src/utils_gpl/morphology/packages/morphology_plugins_c/src/Makefile.am -text
@@ -17061,10 +17181,12 @@ src/utils_gpl/morphology/packages/morphology_waq/src/waqsim_module.F90 -text
 src/utils_gpl/morphology/packages/morphology_waq/src/wrwaq.F90 -text
 src/utils_gpl/trachytopes/Makefile.am -text
 src/utils_gpl/trachytopes/packages/Makefile.am -text
+src/utils_gpl/trachytopes/packages/trachytopes_io/CMakeLists.txt -text
 src/utils_gpl/trachytopes/packages/trachytopes_io/Makefile.am -text
 src/utils_gpl/trachytopes/packages/trachytopes_io/src/Makefile.am -text
 src/utils_gpl/trachytopes/packages/trachytopes_io/src/rdtrt.f90 -text
 src/utils_gpl/trachytopes/packages/trachytopes_io/trachytopes_io.vfproj -text
+src/utils_gpl/trachytopes/packages/trachytopes_kernel/CMakeLists.txt -text
 src/utils_gpl/trachytopes/packages/trachytopes_kernel/Makefile.am -text
 src/utils_gpl/trachytopes/packages/trachytopes_kernel/src/Makefile.am -text
 src/utils_gpl/trachytopes/packages/trachytopes_kernel/src/calrou.f90 -text
@@ -17083,6 +17205,7 @@ src/utils_lgpl/d_hydro_lib/include/log.h -text
 src/utils_lgpl/d_hydro_lib/include/stringutils.h -text
 src/utils_lgpl/d_hydro_lib/include/xmltree.h -text
 src/utils_lgpl/d_hydro_lib/packages/Makefile.am -text
+src/utils_lgpl/d_hydro_lib/packages/d_hydro_lib/CMakeLists.txt -text
 src/utils_lgpl/d_hydro_lib/packages/d_hydro_lib/Makefile.am -text
 src/utils_lgpl/d_hydro_lib/packages/d_hydro_lib/d_hydro_lib.vcproj -text
 src/utils_lgpl/d_hydro_lib/packages/d_hydro_lib/d_hydro_lib.vcxproj -text
@@ -17138,6 +17261,7 @@ src/utils_lgpl/delftio/include/dio-time.inc -text
 src/utils_lgpl/delftio/include/dio_function77.inc -text
 src/utils_lgpl/delftio/include/nefis.inc -text
 src/utils_lgpl/delftio/packages/Makefile.am -text
+src/utils_lgpl/delftio/packages/delftio/CMakeLists.txt -text
 src/utils_lgpl/delftio/packages/delftio/Makefile.am -text
 src/utils_lgpl/delftio/packages/delftio/delftio.vfproj -text
 src/utils_lgpl/delftio/packages/delftio/diofdll.vfproj -text
@@ -17186,6 +17310,7 @@ src/utils_lgpl/delftio/packages/delftio_dll/diofDll.dsp -text
 src/utils_lgpl/delftio/packages/delftio_dll/diofDll.dsw -text
 src/utils_lgpl/delftio/packages/delftio_dll/resource.fd -text
 src/utils_lgpl/delftio/packages/delftio_dll/resource.h -text
+src/utils_lgpl/delftio/packages/delftio_shm/CMakeLists.txt -text
 src/utils_lgpl/delftio/packages/delftio_shm/Makefile.am -text
 src/utils_lgpl/delftio/packages/delftio_shm/delftio_shm.vcproj -text
 src/utils_lgpl/delftio/packages/delftio_shm/delftio_shm.vcxproj -text
@@ -17565,6 +17690,7 @@ src/utils_lgpl/deltares_common/Makefile.am -text
 src/utils_lgpl/deltares_common/doc/readme.txt -text
 src/utils_lgpl/deltares_common/doc/readme_inifiles.txt -text
 src/utils_lgpl/deltares_common/packages/Makefile.am -text
+src/utils_lgpl/deltares_common/packages/deltares_common/CMakeLists.txt -text
 src/utils_lgpl/deltares_common/packages/deltares_common/Makefile.am -text
 src/utils_lgpl/deltares_common/packages/deltares_common/deltares_common.vfproj -text
 src/utils_lgpl/deltares_common/packages/deltares_common/include/tri-dyn.igd -text
@@ -17616,7 +17742,9 @@ src/utils_lgpl/deltares_common/packages/deltares_common/src/timers.f90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/tree_struct.f90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/util.f90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/wavenr.f90 -text
+src/utils_lgpl/deltares_common/packages/deltares_common_c/CMakeLists.txt -text
 src/utils_lgpl/deltares_common/packages/deltares_common_c/Makefile.am -text
+src/utils_lgpl/deltares_common/packages/deltares_common_c/config.h.cmake.in -text
 src/utils_lgpl/deltares_common/packages/deltares_common_c/deltares_common_c.vcproj -text
 src/utils_lgpl/deltares_common/packages/deltares_common_c/deltares_common_c.vcxproj -text
 src/utils_lgpl/deltares_common/packages/deltares_common_c/include/Makefile.am -text
@@ -17641,6 +17769,7 @@ src/utils_lgpl/deltares_common/packages/deltares_common_c/src/shared_library_for
 src/utils_lgpl/deltares_common/packages/deltares_common_c/src/stream-mpi.cpp -text
 src/utils_lgpl/deltares_common/packages/deltares_common_c/src/stream.cpp -text
 src/utils_lgpl/deltares_common/packages/deltares_common_c/src/throwexception.cpp -text
+src/utils_lgpl/deltares_common/packages/deltares_common_mpi/CMakeLists.txt -text
 src/utils_lgpl/deltares_common/packages/deltares_common_mpi/Makefile.am -text
 src/utils_lgpl/deltares_common/packages/deltares_common_mpi/deltares_common_mpi.vfproj -text
 src/utils_lgpl/deltares_common/packages/deltares_common_mpi/src/Makefile.am -text
@@ -17717,6 +17846,7 @@ src/utils_lgpl/deltares_common/tests/09_system_info/system_info.vcxproj -text
 src/utils_lgpl/deltares_common/tests/Makefile.am -text
 src/utils_lgpl/ec_module/Makefile.am -text
 src/utils_lgpl/ec_module/packages/Makefile.am -text
+src/utils_lgpl/ec_module/packages/ec_module/CMakeLists.txt -text
 src/utils_lgpl/ec_module/packages/ec_module/Makefile.am -text
 src/utils_lgpl/ec_module/packages/ec_module/ec_module.vfproj -text
 src/utils_lgpl/ec_module/packages/ec_module/ec_module_dll.vfproj -text
@@ -17798,12 +17928,14 @@ src/utils_lgpl/esmfsm/include/esm.h -text
 src/utils_lgpl/esmfsm/include/fsm.i -text
 src/utils_lgpl/esmfsm/include/win32/shm.h -text
 src/utils_lgpl/esmfsm/packages/Makefile.am -text
+src/utils_lgpl/esmfsm/packages/esmfsm/CMakeLists.txt -text
 src/utils_lgpl/esmfsm/packages/esmfsm/Makefile.am -text
 src/utils_lgpl/esmfsm/packages/esmfsm/esmfsm.vfproj -text
 src/utils_lgpl/esmfsm/packages/esmfsm/include/globals-fsm.i -text
 src/utils_lgpl/esmfsm/packages/esmfsm/src/Makefile.am -text
 src/utils_lgpl/esmfsm/packages/esmfsm/src/fsm/Makefile.am -text
 src/utils_lgpl/esmfsm/packages/esmfsm/src/fsm/fortapi.f90 -text
+src/utils_lgpl/esmfsm/packages/esmfsm_c/CMakeLists.txt -text
 src/utils_lgpl/esmfsm/packages/esmfsm_c/Makefile.am -text
 src/utils_lgpl/esmfsm/packages/esmfsm_c/esmfsm_c.vcproj -text
 src/utils_lgpl/esmfsm/packages/esmfsm_c/esmfsm_c.vcxproj -text
@@ -17820,6 +17952,7 @@ src/utils_lgpl/esmfsm/packages/esmfsm_c/src/esm/local.cpp -text
 src/utils_lgpl/esmfsm/packages/esmfsm_c/src/esm/shared.cpp -text
 src/utils_lgpl/esmfsm/packages/esmfsm_c/src/fsm/Makefile.am -text
 src/utils_lgpl/esmfsm/packages/esmfsm_c/src/fsm/fsm.cpp -text
+src/utils_lgpl/esmfsm/packages/esmfsm_version_number/CMakeLists.txt -text
 src/utils_lgpl/esmfsm/packages/esmfsm_version_number/Makefile.am -text
 src/utils_lgpl/esmfsm/packages/esmfsm_version_number/esmfsm_version_number.vcproj -text
 src/utils_lgpl/esmfsm/packages/esmfsm_version_number/esmfsm_version_number.vcxproj -text
@@ -17874,6 +18007,7 @@ src/utils_lgpl/esmfsm/tests/testfsm/testfsm.f90 -text
 src/utils_lgpl/ftnunit/Makefile.am -text
 src/utils_lgpl/ftnunit/doc/runtests.bat -text
 src/utils_lgpl/ftnunit/packages/Makefile.am -text
+src/utils_lgpl/ftnunit/packages/ftnunit/CMakeLists.txt -text
 src/utils_lgpl/ftnunit/packages/ftnunit/Makefile.am -text
 src/utils_lgpl/ftnunit/packages/ftnunit/ftnunit.vfproj -text
 src/utils_lgpl/ftnunit/packages/ftnunit/src/Makefile.am -text
@@ -17883,6 +18017,7 @@ src/utils_lgpl/ftnunit/packages/ftnunit/src/ftnunit_hooks_teamcity.f90 -text
 src/utils_lgpl/ftnunit/packages/ftnunit/src/ftnunit_store.f90 -text
 src/utils_lgpl/gridgeom/Makefile.am -text
 src/utils_lgpl/gridgeom/packages/Makefile.am -text
+src/utils_lgpl/gridgeom/packages/gridgeom/CMakeLists.txt -text
 src/utils_lgpl/gridgeom/packages/gridgeom/Makefile.am -text
 src/utils_lgpl/gridgeom/packages/gridgeom/gridgeom.vfproj -text
 src/utils_lgpl/gridgeom/packages/gridgeom/gridgeom_dll.vfproj -text
@@ -17910,6 +18045,7 @@ src/utils_lgpl/gridgeom/packages/tests/gridgeom.Tests/Properties/AssemblyInfo.cs
 src/utils_lgpl/gridgeom/packages/tests/gridgeom.Tests/gridgeom.Tests.csproj -text
 src/utils_lgpl/io_hyd/Makefile.am -text
 src/utils_lgpl/io_hyd/packages/Makefile.am -text
+src/utils_lgpl/io_hyd/packages/io_hyd/CMakeLists.txt -text
 src/utils_lgpl/io_hyd/packages/io_hyd/Makefile.am -text
 src/utils_lgpl/io_hyd/packages/io_hyd/io_hyd.vfproj -text
 src/utils_lgpl/io_hyd/packages/io_hyd/src/Makefile.am -text
@@ -17961,6 +18097,7 @@ src/utils_lgpl/io_netcdf/Makefile.am -text
 src/utils_lgpl/io_netcdf/nuget/Deltares.UGrid.nuspec -text
 src/utils_lgpl/io_netcdf/nuget/Deltares.UGrid.targets -text
 src/utils_lgpl/io_netcdf/packages/Makefile.am -text
+src/utils_lgpl/io_netcdf/packages/io_netcdf/CMakeLists.txt -text
 src/utils_lgpl/io_netcdf/packages/io_netcdf/Makefile.am -text
 src/utils_lgpl/io_netcdf/packages/io_netcdf/include/io_netcdf.h -text
 src/utils_lgpl/io_netcdf/packages/io_netcdf/include/resource.h -text
@@ -18043,12 +18180,14 @@ src/utils_lgpl/io_netcdf/packages/tests/UGrid.tests/UGrid.tests.csproj -text
 src/utils_lgpl/io_netcdf/packages/tests/UGrid.tests/UGridTests.cs -text
 src/utils_lgpl/kdtree_wrapper/Makefile.am -text
 src/utils_lgpl/kdtree_wrapper/packages/Makefile.am -text
+src/utils_lgpl/kdtree_wrapper/packages/kdtree_wrapper/CMakeLists.txt -text
 src/utils_lgpl/kdtree_wrapper/packages/kdtree_wrapper/Makefile.am -text
 src/utils_lgpl/kdtree_wrapper/packages/kdtree_wrapper/kdtree_wrapper.vfproj -text
 src/utils_lgpl/kdtree_wrapper/packages/kdtree_wrapper/src/Makefile.am -text
 src/utils_lgpl/kdtree_wrapper/packages/kdtree_wrapper/src/kdtreeWrapper.f90 -text
 src/utils_lgpl/metistools/Makefile.am -text
 src/utils_lgpl/metistools/packages/Makefile.am -text
+src/utils_lgpl/metistools/packages/metisoptions/CMakeLists.txt -text
 src/utils_lgpl/metistools/packages/metisoptions/Makefile.am -text
 src/utils_lgpl/metistools/packages/metisoptions/metisoptions.vcxproj -text
 src/utils_lgpl/metistools/packages/metisoptions/src/Makefile.am -text
@@ -18070,7 +18209,9 @@ src/utils_lgpl/nefis/doc/nefis5_testen.xls -text
 src/utils_lgpl/nefis/meta.yaml -text
 src/utils_lgpl/nefis/nefis5.dsw -text
 src/utils_lgpl/nefis/packages/Makefile.am -text
+src/utils_lgpl/nefis/packages/nefis/CMakeLists.txt -text
 src/utils_lgpl/nefis/packages/nefis/Makefile.am -text
+src/utils_lgpl/nefis/packages/nefis/config.h.cmake.in -text
 src/utils_lgpl/nefis/packages/nefis/include/btps.h -text
 src/utils_lgpl/nefis/packages/nefis/include/c2c.h -text
 src/utils_lgpl/nefis/packages/nefis/include/df.h -text

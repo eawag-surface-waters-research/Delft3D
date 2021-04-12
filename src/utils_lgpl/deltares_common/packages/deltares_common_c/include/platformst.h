@@ -42,7 +42,7 @@
 //  Linux
 
 
-#if defined (HAVE_CONFIG_H) || defined (IRIX)
+#if defined (linux) || defined (IRIX)
 
 #include <arpa/inet.h>
 #include <netdb.h>

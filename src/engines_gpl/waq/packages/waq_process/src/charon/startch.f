@@ -27,7 +27,7 @@
 !    Version:    6.00.00
 !    Programmer: Nicolaas M de Rooij
 !
-      subroutine startch
+      subroutine start_ch
 !        4-69
 !        clears data arrays and sets standard values for parameters.
       include  'char1.inc'
@@ -154,4 +154,4 @@
       pf = ipf
       intitl = intit2
       return
-      end
+      end subroutine start_ch

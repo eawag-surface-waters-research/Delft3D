@@ -39,7 +39,7 @@
 #  include <windows.h>
 #elif defined(salford32)
 #  include <windows.h>
-#elif defined(HAVE_CONFIG_H)
+#elif defined(linux)
 #  include <dlfcn.h>
 #endif
 
@@ -49,7 +49,7 @@
 #elif defined(salford32)
 #  define PERFORM_FUNCTION_FALLVE  PERF_FUNCTION_FALLVE
 #  define STDCALL __stdcall
-#elif defined(HAVE_CONFIG_H)
+#elif defined(linux)
 #   include "config.h"
 #  define PERFORM_FUNCTION_FALLVE  FC_FUNC(perf_function_fallve,PERFORM_FUNCTION_FALLVE)
 #  define STDCALL
@@ -66,7 +66,7 @@
     typedef HMODULE DllHandle;
 #elif defined(salford32)
     typedef HMODULE DllHandle;
-#elif defined(HAVE_CONFIG_H)
+#elif defined(linux)
     typedef void * DllHandle;
 #endif
 
@@ -111,7 +111,7 @@ extern "C" PERFORM_FUNCTION_FALLVE(  long   * sharedDLLHandle    ,
                               long     length_function    ,
                               long     length_dll_strings)
 	                          // message is a c-string: no length specification added
-#elif defined (HAVE_CONFIG_H)
+#elif defined (linux)
 long STDCALL PERFORM_FUNCTION_FALLVE(long   * sharedDLLHandle    ,
                               char   * function           ,
                               long   * dll_integers       ,
@@ -136,7 +136,7 @@ long STDCALL PERFORM_FUNCTION_FALLVE(long   * sharedDLLHandle    ,
                                     char   *, long   *,
                                     double *, char   *, long );
                                     // message is a c-string: no length specification added
-#elif defined (HAVE_CONFIG_H)
+#elif defined (linux)
   typedef void * (STDCALL * MyProc)(long   *, long   *,
                                     double *, long   *,
                                     char   *, long   *,
@@ -154,7 +154,7 @@ long STDCALL PERFORM_FUNCTION_FALLVE(long   * sharedDLLHandle    ,
   proc = (MyProc) GetProcAddress( sharedDLL->dllHandle, fun_name);
 #elif defined(salford32)
   proc = (MyProc) GetProcAddress( sharedDLL->dllHandle, fun_name);
-#elif defined(HAVE_CONFIG_H)
+#elif defined(linux)
   proc = (MyProc) dlsym( sharedDLL->dllHandle, fun_name);
 #endif
 
@@ -168,7 +168,7 @@ long STDCALL PERFORM_FUNCTION_FALLVE(long   * sharedDLLHandle    ,
                       ws          , message     ,
                       length_dll_strings);
 	                  // message is a c-string: no length specification added
-#elif defined (HAVE_CONFIG_H)
+#elif defined (linux)
      (void *) (*proc)(dll_integers, max_integers,
                       dll_reals   , max_reals   ,
                       dll_strings , max_strings ,

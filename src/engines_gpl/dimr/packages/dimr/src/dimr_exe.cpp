@@ -41,7 +41,7 @@
 #include "dimr.h"
 #include "dimr_exe_version.h"
 
-#if defined(HAVE_CONFIG_H)
+#ifndef _WIN32
 #include "config.h"
 #include <dlfcn.h>
 #include <libgen.h>
@@ -394,7 +394,7 @@ void DimrExe::initialize (int     argc,
                               char *  envp []) {
     this->exePath = strdup (argv[0]);
 
-#if defined(HAVE_CONFIG_H)
+#ifndef _WIN32
     this->exeName = strdup (basename (argv[0]));
 #else
     char * ext = new char[5];
@@ -506,7 +506,7 @@ DimrExe::~DimrExe (void) {
 
     this->log->Write (DEBUG, my_rank, "dimr shutting down normally");
 
-#if defined(HAVE_CONFIG_H)
+#ifndef _WIN32
     free (this->exeName);
 #else
     delete [] this->exeName;
@@ -534,12 +534,12 @@ void DimrExe::openLibrary (void) {
     // Macintosh:VERY SIMILAR TO LINUX
     throw Exception (true, Exception::ERR_OS, "ABORT: %s has not be ported to Apple Mac OS/X yet", this->exeName);
 #endif
-#if defined (HAVE_CONFIG_H)
+#ifndef _WIN32
     char *err;
 #endif
 
 
-#if defined (HAVE_CONFIG_H)
+#ifndef _WIN32
         this->library = new char[14];
         sprintf(this->library, "libdimr.so\0");
 #else
@@ -549,7 +549,7 @@ void DimrExe::openLibrary (void) {
 
         this->log->Write (DEBUG, my_rank, "Loading dimr library \"%s\"", this->library);
 
-#if defined (HAVE_CONFIG_H)
+#ifndef _WIN32
         dlerror(); /* clear error code */
         void * dllhandle = dlopen (this->library, RTLD_LAZY);
         this->libHandle = dllhandle;
@@ -565,7 +565,7 @@ void DimrExe::openLibrary (void) {
 
         if (dllhandle == NULL) {
 
-#if defined (HAVE_CONFIG_H)
+#ifndef _WIN32
             if ((err = dlerror()) != NULL)
                 throw Exception (true, Exception::ERR_OS, "Cannot load component library \"%s\". Error: %s\n", this->library, err);
 #else
@@ -642,12 +642,12 @@ void DimrExe::freeLib (void) {
     // Macintosh:VERY SIMILAR TO LINUX
     throw Exception (true, Exception::ERR_OS, "ABORT: %s has not be ported to Apple Mac OS/X yet", this->exeName);
 #endif
-#if defined (HAVE_CONFIG_H)
+#ifndef _WIN32
     char *err;
 #endif
 
         this->log->Write (ALL, my_rank, "Freeing library \"%s\"", this->library);
-#if defined (HAVE_CONFIG_H)
+#ifndef _WIN32
         dlerror(); /* clear error code */
         int ierr = dlclose(this->libHandle);
         if ((err = dlerror()) != NULL) {

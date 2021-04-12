@@ -39,7 +39,7 @@
 // The following definition is needed since VisualStudio2015 before including <pthread.h>:
 #define HAVE_STRUCT_TIMESPEC
 
-#if HAVE_CONFIG_H
+#ifndef _WIN32
 #   include "config.h"
 #endif
 
@@ -57,7 +57,7 @@
 #include <sys/types.h>
 #include "clock.h"
 #include <ctime>
-#if HAVE_CONFIG_H
+#ifndef _WIN32
 #   include <sys/wait.h>
 #   include <unistd.h>
 // #else

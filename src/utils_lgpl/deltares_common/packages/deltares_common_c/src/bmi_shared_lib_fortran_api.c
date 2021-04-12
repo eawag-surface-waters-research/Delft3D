@@ -42,7 +42,7 @@
 #  include <windows.h>
 #elif defined(salford32)
 #  include <windows.h>
-#elif defined(HAVE_CONFIG_H)
+#elif defined(linux)
 #  include <dlfcn.h>
 #endif
 
@@ -60,8 +60,8 @@
 #  define BMI_SET_VAR           BMI_SET_VAR
 #  define BMI_GET_VAR           BMI_GET_VAR
 #  define STDCALL
-#elif defined(HAVE_CONFIG_H)
-#   include "config.h"
+#elif defined(linux)
+#  include "config.h"
 #  define BMI_INITIALIZE        FC_FUNC(bmi_initialize,BMI_INITIALIZE)
 #  define BMI_UPDATE            FC_FUNC(bmi_update,BMI_UPDATE)
 #  define BMI_FINALIZE          FC_FUNC(bmi_finalize,BMI_FINALIZE)
@@ -90,7 +90,7 @@
 #if defined(WIN32)
 typedef HMODULE DllHandle;
 typedef WINBASEAPI FARPROC WINAPI DllProcedureAddress;
-#elif defined(HAVE_CONFIG_H)
+#elif defined(linux)
 typedef void * DllHandle;
 typedef void * DllProcedureAddress;
 #endif
@@ -109,7 +109,7 @@ DllProcedureAddress GetDllProcedure(
 	DllProcedureAddress procedure;
 #if defined(WIN32)
 	procedure = GetProcAddress(sharedDLL->dllHandle, fun_name);
-#elif defined(HAVE_CONFIG_H)
+#elif defined(linux)
 	procedure = (DllProcedureAddress)dlsym(sharedDLL->dllHandle, fun_name);
 #endif
 	return procedure;

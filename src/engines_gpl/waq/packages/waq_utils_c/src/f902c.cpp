@@ -32,8 +32,7 @@
 
 #if defined(WIN32) || defined(SALF)
 #  include <windows.h>
-#elif HAVE_CONFIG_H
-#  define LINUX
+#elif defined(linux)
 #  include <dlfcn.h>
 #endif
 
@@ -49,7 +48,7 @@
 #  define PERFORM_FUNCTION perf_function_
 #  define LOAD____FUNCTION load_function_
 #  define STDCALL
-#elif defined(LINUX)
+#elif defined(linux)
 #  define OPEN_SHARED_LIBRARY  open_shared_library_
 #  define CLOSE_SHARED_LIBRARY close_shared_library_
 #  define PERFORM_FUNCTION perf_function_
@@ -65,7 +64,7 @@
 
 #if defined(WIN32) || defined (SALF)
     typedef HINSTANCE DllHandle;
-#elif defined(LINUX)
+#elif defined(linux)
     typedef void * DllHandle;
 #endif
 
@@ -123,7 +122,7 @@ long STDCALL PERFORM_FUNCTION(DllHandle * sharedDLLHandle  ,
                               long  * noq3    ,
                               long  * noq4    ,
                               long    length_function)
-#elif defined(LINUX) || defined(SALF)
+#elif defined(linux) || defined(SALF)
 /* TODO: This requires thinking about! */
 long STDCALL PERFORM_FUNCTION(long  * sharedDLLHandle ,
                               char  * function,
@@ -157,7 +156,7 @@ long STDCALL PERFORM_FUNCTION(long  * sharedDLLHandle ,
 
 #if defined(WIN32) || defined (SALF)
   proc = (MyProc) GetProcAddress( sharedDLL->dllHandle, fun_name);
-#elif defined(LINUX)
+#elif defined(linux)
   proc = (MyProc) dlsym( sharedDLL->dllHandle, fun_name);
 #endif
 

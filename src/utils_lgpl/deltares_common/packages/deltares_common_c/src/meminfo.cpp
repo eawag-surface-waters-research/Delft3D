@@ -1,5 +1,5 @@
 #include "meminfo.h"
-#if HAVE_CONFIG_H
+#if linux
 #include <sys/sysctl.h>
 #endif
 

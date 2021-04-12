@@ -52,7 +52,7 @@
 #if defined(_WIN32) || defined(salford32)
 #  include <io.h>
 #  include <sys\stat.h>
-#elif defined(HAVE_CONFIG_H)
+#elif defined(linux)
 #  include <sys/types.h>
 #  include <sys/stat.h>
 #  include <fcntl.h>
@@ -62,7 +62,7 @@
 #  include <sys/fcntl.h>
 #endif
 
-#if defined(GNU_PC) || defined (HAVE_CONFIG_H)
+#if defined(GNU_PC) || defined (linux)
 #  include <unistd.h>
 #endif
 
@@ -73,7 +73,7 @@
 #  define FILE_READ_ONLY  (_O_RDONLY | _O_BINARY)
 #  define FILE_CREATE     (_O_CREAT  | _O_TRUNC | _O_RDWR     | _O_BINARY)
 #  define FILE_MODE       (_S_IREAD  | _S_IWRITE)
-#elif defined(GNU_PC) || defined(HAVE_CONFIG_H) || defined(salford32)
+#elif defined(GNU_PC) || defined(linux) || defined(salford32)
 #  define FILE_OPEN        open
 #  define FILE_CLOSE       close
 #  define FILE_READ_WRITE  O_RDWR;

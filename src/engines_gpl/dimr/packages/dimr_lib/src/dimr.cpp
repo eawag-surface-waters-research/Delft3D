@@ -42,7 +42,7 @@ using namespace std;
 #include "dimr.h"
 #include "dimr_lib_version.h"
 
-#if defined(HAVE_CONFIG_H)
+#ifndef _WIN32
 #include "config.h"
 #include <dlfcn.h>
 #include <libgen.h>
@@ -115,7 +115,7 @@ Dimr::Dimr(void) {
     redirectFile                 = (char *) malloc((len+1)*sizeof(char));
     strncpy(redirectFile, (const char*)filename, len);
     redirectFile[len]            = '\0';
-#if defined(HAVE_CONFIG_H)
+#ifndef _WIN32
     dirSeparator = "/";
 #else
     dirSeparator = "\\";
@@ -160,7 +160,7 @@ Dimr::~Dimr (void) {
 
     log->Write (DEBUG, my_rank, "dimr shutting down normally");
 
-#if defined(HAVE_CONFIG_H)
+#ifndef _WIN32
     free (exeName);
 #else
     delete [] exeName;
@@ -1582,7 +1582,7 @@ void Dimr::connectLibs (void) {
     // Macintosh:VERY SIMILAR TO LINUX
     throw Exception (true, Exception::ERR_OS, "ABORT: %s has not be ported to Apple Mac OS/X yet", exeName);
 #endif
-#if defined (HAVE_CONFIG_H)
+#ifndef _WIN32
     char *err;
 #endif
 
@@ -1593,7 +1593,7 @@ void Dimr::connectLibs (void) {
             continue;
         }
 
-#if defined (HAVE_CONFIG_H)
+#ifndef _WIN32
         char * lib = new char[strlen (componentsList.components[i].library) + 3+3+1];
         sprintf (lib, "lib%s%s", componentsList.components[i].library, D3D_PLUGIN_EXT);
         if (   strchr (componentsList.components[i].library, '/' ) != NULL
@@ -1613,7 +1613,7 @@ void Dimr::connectLibs (void) {
 
         log->Write (ALL, my_rank, "Loading library \"%s\"", lib);
 
-#if defined (HAVE_CONFIG_H)
+#ifndef _WIN32
         dlerror(); /* clear error code */
         void * dllhandle = dlopen (lib, RTLD_LAZY);
         componentsList.components[i].libHandle = dllhandle;
@@ -1629,7 +1629,7 @@ void Dimr::connectLibs (void) {
 
         if (dllhandle == NULL) {
 
-#if defined (HAVE_CONFIG_H)
+#ifndef _WIN32
             if ((err = dlerror()) != NULL)
                 throw Exception (true, Exception::ERR_OS, "Cannot load component library \"%s\". Error: %s\n", lib, err);
 #else
@@ -1771,7 +1771,7 @@ void Dimr::freeLibs (void) {
     // Macintosh:VERY SIMILAR TO LINUX
     throw Exception (true, Exception::ERR_OS, "ABORT: %s has not be ported to Apple Mac OS/X yet", exeName);
 #endif
-#if defined (HAVE_CONFIG_H)
+#ifndef _WIN32
     char *err;
 #endif
 
@@ -1782,7 +1782,7 @@ void Dimr::freeLibs (void) {
         }
 
         log->Write (ALL, my_rank, "Freeing library \"%s\"", componentsList.components[i].library);
-#if defined (HAVE_CONFIG_H)
+#ifndef _WIN32
         dlerror(); /* clear error code */
         int ierr = dlclose(componentsList.components[i].libHandle);
         if ((err = dlerror()) != NULL) {

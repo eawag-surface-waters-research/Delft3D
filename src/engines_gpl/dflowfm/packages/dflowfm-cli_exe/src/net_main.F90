@@ -196,7 +196,7 @@
 
 !   set jaopengl from commandline option (if available)
     call iset_jaopengl(md_jaopengl)
-    CALL START()
+    CALL START_PROGRAM()
     call resetFullFlowModel()
     CALL INIDAT()
     CALL RESETB(0)

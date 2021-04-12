@@ -41,7 +41,7 @@
 #define HAVE_STRUCT_TIMESPEC
 
 
-#if HAVE_CONFIG_H
+#ifndef _WIN32
 #   include "config.h"
 #endif
 
@@ -57,7 +57,7 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#if HAVE_CONFIG_H
+#ifndef _WIN32
 #   include <sys/wait.h>
 #   include <unistd.h>
 // #else
@@ -101,7 +101,7 @@ class DimrExe {
         int lib_update(void);
         void lib_update_test(void);
         void lib_finalize(void);
-		void timerFinish(void);
+        void timerFinish(void);
 
     public:
         bool       ready;          // true means constructor succeeded and DH ready to run
@@ -116,9 +116,10 @@ class DimrExe {
         char  *    configfile;     // name of configuration file
         bool       done;           // set to true when it's time to stop
         char  *    library;        // Component library name, without extension/prefix
-		Clock::Timestamp  timerStartStamp;
-		Clock::Timestamp  timerSumStamp;
-#if HAVE_CONFIG_H
+        Clock::Timestamp  timerStartStamp;
+        Clock::Timestamp  timerSumStamp;
+
+#ifndef _WIN32
     void          *    libHandle;         // (Linux) Handle to the loaded library for this component.
 #else
     HINSTANCE          libHandle;         // (Windows) Handle to the loaded library for this component.

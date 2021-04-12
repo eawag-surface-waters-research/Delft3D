@@ -36,10 +36,10 @@
 #pragma once
 
 #include <stdio.h>
-#if HAVE_CONFIG_H
-#   include <sys/time.h>
-#else
+#ifdef _WIN32
 #   include <windows.h>
+#else
+#   include <sys/time.h>
 #endif
 
 

@@ -805,7 +805,7 @@ Stream::lookup_dotaddr (
     if (sscanf (ipdotaddr, "%d.%d.%d.%d", &a, &b, &c, &d) != 4)
         error ("Cannot parse dotted IP address \"%s\"\n", ipdotaddr);
 
-#if defined(HAVE_CONFIG_H) || defined(IRIX)
+#if defined(linux) || defined(IRIX)
     IPaddr addr = a | b << 8 | c << 16 | d << 24;
 #elif defined(WIN32)
     struct in_addr addr;

@@ -72,7 +72,7 @@
  * MIXED_STR_LEN_ARG: string length argument direct behind the string
  */
 
-#if HAVE_CONFIG_H
+#if defined(linux)
 #   include "config.h"
 #   define FTN_CALL  /* nothing */
 #   define CLOSE_DAT_FILE          FC_FUNC(cldtnf,CLDTNF)

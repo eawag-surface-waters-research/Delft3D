@@ -34,7 +34,7 @@
 #  include <windows.h>
 #elif defined(salford32)
 #  include <windows.h>
-#elif defined(HAVE_CONFIG_H)
+#elif defined(linux)
 #  include <dlfcn.h>
 #endif
 
@@ -46,7 +46,7 @@
 #  define PERFORM_FUNCTION_EQTRAN  PERF_FUNCTION_EQTRAN
 #  define PERFORM_FUNCTION_EROSILT PERF_FUNCTION_EROSILT
 #  define STDCALL __stdcall
-#elif defined(HAVE_CONFIG_H)
+#elif defined(linux)
 #   include "config.h"
 #  define PERFORM_FUNCTION_EQTRAN  FC_FUNC(perf_function_eqtran,PERFORM_FUNCTION_EQTRAN)
 #  define PERFORM_FUNCTION_EROSILT FC_FUNC(perf_function_erosilt,PERFORM_FUNCTION_EROSILT)
@@ -64,7 +64,7 @@
     typedef HMODULE DllHandle;
 #elif defined(salford32)
     typedef HMODULE DllHandle;
-#elif defined(HAVE_CONFIG_H)
+#elif defined(linux)
     typedef void * DllHandle;
 #endif
 
@@ -131,7 +131,7 @@ extern "C" PERFORM_FUNCTION_EQTRAN(  long   * sharedDLLHandle    ,
                               long     length_function    ,
                               long     length_dll_strings )
                               // message is a c-string: no length specification added
-#elif defined (HAVE_CONFIG_H)
+#elif defined (linux)
 long STDCALL PERFORM_FUNCTION_EQTRAN(long   * sharedDLLHandle    ,
                               char   * function           ,
                               long   * dll_integers       ,
@@ -169,7 +169,7 @@ long STDCALL PERFORM_FUNCTION_EQTRAN(long   * sharedDLLHandle    ,
                                     long   *, double *, double *, double *, double *, double *,
                                     char   *, long    );
                                     // message is a c-string: no length specification added
-#elif defined (HAVE_CONFIG_H)
+#elif defined (linux)
   typedef void * (STDCALL * MyProc)(long   *, long   *,
                                     double *, long   *,
                                     char   *, long   *,
@@ -189,7 +189,7 @@ long STDCALL PERFORM_FUNCTION_EQTRAN(long   * sharedDLLHandle    ,
   proc = (MyProc) GetProcAddress( sharedDLL->dllHandle, fun_name);
 #elif defined(salford32)
   proc = (MyProc) GetProcAddress( sharedDLL->dllHandle, fun_name);
-#elif defined(HAVE_CONFIG_H)
+#elif defined(linux)
   proc = (MyProc) dlsym( sharedDLL->dllHandle, fun_name);
 #endif
 
@@ -215,7 +215,7 @@ long STDCALL PERFORM_FUNCTION_EQTRAN(long   * sharedDLLHandle    ,
                       message     ,
                       length_dll_strings);
                       // message is a c-string: no length specification added
-#elif defined (HAVE_CONFIG_H)
+#elif defined (linux)
      (void *) (*proc)(dll_integers, max_integers,
                       dll_reals   , max_reals   ,
                       dll_strings , max_strings ,
@@ -273,7 +273,7 @@ extern "C" PERFORM_FUNCTION_EROSILT(  long   * sharedDLLHandle    ,
                               long     length_function    ,
                               long     length_dll_strings )
 	                          // message is a c-string: no length specification added
-#elif defined (HAVE_CONFIG_H)
+#elif defined (linux)
 long STDCALL PERFORM_FUNCTION_EROSILT(long   * sharedDLLHandle    ,
                               char   * function           ,
                               long   * dll_integers       ,
@@ -300,7 +300,7 @@ long STDCALL PERFORM_FUNCTION_EROSILT(long   * sharedDLLHandle    ,
                                     double *, double *,
                                     char   *, long    );
                                     // message is a c-string: no length specification added
-#elif defined (HAVE_CONFIG_H)
+#elif defined (linux)
   typedef void * (STDCALL * MyProc)(long   *, long   *,
                                     double *, long   *,
                                     char   *, long   *,
@@ -319,7 +319,7 @@ long STDCALL PERFORM_FUNCTION_EROSILT(long   * sharedDLLHandle    ,
   proc = (MyProc) GetProcAddress( sharedDLL->dllHandle, fun_name);
 #elif defined(salford32)
   proc = (MyProc) GetProcAddress( sharedDLL->dllHandle, fun_name);
-#elif defined(HAVE_CONFIG_H)
+#elif defined(linux)
   proc = (MyProc) dlsym( sharedDLL->dllHandle, fun_name);
 #endif
 
@@ -333,7 +333,7 @@ long STDCALL PERFORM_FUNCTION_EROSILT(long   * sharedDLLHandle    ,
                       sink        , source      ,
                       message     , length_dll_strings);
 	                  // message is a c-string: no length specification added
-#elif defined (HAVE_CONFIG_H)
+#elif defined (linux)
      (void *) (*proc)(dll_integers, max_integers,
                       dll_reals   , max_reals   ,
                       dll_strings , max_strings ,

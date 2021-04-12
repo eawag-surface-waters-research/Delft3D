@@ -1344,7 +1344,7 @@ end subroutine read_land_boundary_netcdf
       STOP
       END
 
-      SUBROUTINE START()
+      SUBROUTINE START_PROGRAM()
       use M_dimens
       USE M_DEVICES
       use unstruc_files
@@ -1426,7 +1426,7 @@ end subroutine read_land_boundary_netcdf
       ENDIF
 
       RETURN
-      END
+      END SUBROUTINE START_PROGRAM
 
   
       SUBROUTINE REACLASSES(MINP,CLASS,NUMQ,NUMCLASS)

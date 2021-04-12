@@ -47,7 +47,7 @@
 #  define FILE_WRITE _write
 #  define FILE_SEEK  _fseeki64
 #  define FILE_TELL  _ftelli64
-#elif defined(HAVE_CONFIG_H)
+#elif defined(linux)
 #  define FILE_READ  read
 #  define FILE_WRITE write
 #  if defined(HAVE_FSEEKO64)
@@ -492,7 +492,7 @@ static    void    report_error    (char *);
 
 /* FTN_CAPITAL is assumed to be the default value */
 
-#if HAVE_CONFIG_H
+#if linux
 #   include "config.h"
 #   define STDCALL  /* nothing */
 #   define CUTIL_GETEXEDIR FC_FUNC(cutil_getexedir,CUTIL_GETEXEDIR)

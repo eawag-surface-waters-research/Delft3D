@@ -58,7 +58,7 @@
 
 /* FTN_CAPITAL is assumed to be the default value */
 
-#if HAVE_CONFIG_H
+#if defined(linux)
 #   include "config.h"
 #   define STDCALL  /* nothing */
 #   define CUTIL_GETMP  FC_FUNC(cutil_getmp,CUTIL_GETMP)

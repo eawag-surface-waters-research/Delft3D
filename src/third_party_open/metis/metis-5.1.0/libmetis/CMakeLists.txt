@@ -14,3 +14,5 @@ if(METIS_INSTALL)
     RUNTIME DESTINATION lib
     ARCHIVE DESTINATION lib)
 endif()
+
+set_target_properties (metis PROPERTIES FOLDER third_party_open/metis)

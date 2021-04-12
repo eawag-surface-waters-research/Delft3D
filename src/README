@@ -66,6 +66,11 @@ The OSX version is only tested with Macports gcc45 + openmpi compilers. Make sur
 ** Set DYLD_LIBRARY_PATH to the directory containing DelftOnline if it's not in your default path
 
 
+Compiling with CMake
+====================
+To compile with CMake, see the Readme in "..\src\cmake\"
+
+
 Running examples without GUI
 ============================
 In directory "examples\01_standard":

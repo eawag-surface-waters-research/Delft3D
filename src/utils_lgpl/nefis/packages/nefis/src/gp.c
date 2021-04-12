@@ -39,7 +39,7 @@
 /*
  *   Comment:
  */
-#if defined(HAVE_CONFIG_H)
+#if defined(linux)
 #include "config.h"
 #endif
 
@@ -69,7 +69,7 @@
 #  define FILE_READ  _read
 #  define FILE_SEEK  _lseeki64
 #  define FILE_WRITE _write
-#elif defined(HAVE_CONFIG_H)
+#elif defined(linux)
 #  define FILE_READ  read
 #  if defined(HAVE_LSEEK64)
 #    define FILE_SEEK lseek64
