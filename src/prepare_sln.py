@@ -776,6 +776,8 @@ if __name__ == "__main__":
                               help='Specify the template solution path to prepare (if not specified => all solutions will be made)')
     parser.add_argument('-cmakeConfig', '--cmakeConfig',
                               help='Specify the CMake configuration (if not specified => the DIMR and D-Flow FM solutions will be made using CMake)')
+    parser.add_argument('-cmakePreparationOnly', '--cmakePreparationOnly',
+                              help='Specify whether the solutions should only be prepared or also built (if not specified => all solutions will only be prepared)')
     args = parser.parse_args()
     if args.visualstudio:
         vs = int(args.visualstudio)
@@ -787,10 +789,12 @@ if __name__ == "__main__":
         templateSolutionPath = args.templatePath
     if args.cmakeConfig:
         cmakeConfig = args.cmakeConfig
-
+    if args.cmakePreparationOnly:
+        preparationOnly = args.cmakePreparationOnly
+        
     # Both vs and ifort defined via command line arguments: do_work
     # Else: Create GUI to select them
-    if vs == -999 or ifort == -999 or cmakeConfig == "":
+    if vs == -999 or ifort == -999 or cmakeConfig == "" or preparationOnly == "unknown":
         if sys.version_info<(3,0,0):
             from Tkinter import *
         else:
