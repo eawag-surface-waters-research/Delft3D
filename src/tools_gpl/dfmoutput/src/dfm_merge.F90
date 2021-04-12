@@ -198,6 +198,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
    character*10 :: ctime
    character*5  :: czone
    integer      :: meshid, nMaxMeshes
+   integer, allocatable :: ncontactmeshes(:)
 
    if (nfiles <= 1) then
       write (*,'(a)') 'Error: mapmerge: At least two input files required.'
@@ -1560,11 +1561,17 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
       ierr = nf90_def_var(ncids(noutfile), 'partitions_facebnd_start', nf90_int, (/ id_npartdim /), id_part_facebnd_start)
       ierr = nf90_put_att(ncids(noutfile), id_part_facebnd_start, 'long_name', 'start index in global data arrays for boundary points for all partititions')
    endif
-   ! 4. Write new flow geom to output file
-   ! 5. Write all timedep fields from all files into output file
+
+   ! For 1D2D contact meshes
+   call realloc(ncontactmeshes, nfiles, keepExisting=.false., fill = 0)
+   do ii = 1, nfiles
+      ierr = ionc_get_contact_topo_count(ioncids(ii), ncontactmeshes(ii))
+   end do
 
    ierr = nf90_enddef(ncids(noutfile))
 
+   ! 4. Write new flow geom to output file
+   ! 5. Write all timedep fields from all files into output file
    if (nt(ifile) == 0) then! Time-independent data file
       ntsel = 1 ! This enables writing a single snapshot of time-independent data variables in the merging code later on.
    else
