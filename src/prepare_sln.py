@@ -646,9 +646,10 @@ def do_work():
     sys.stdout.write("Solution path          : " + templateSolutionPath + "\n")
     sys.stdout.write("Preparation only       : " + str(preparationOnly) + "\n")
     
-    if config_gui.get() >= 1:
-        sys.stdout.write("Only CMake project selected. Skipping Traditional preparations")
-        exit()
+    if cmakeConfig != "none":
+        if config_gui.get() >= 1:
+            sys.stdout.write("Only CMake project selected. Skipping Traditional preparations")
+            exit()
 
     # Needed for VS2015 and higher:
     getUCRTVersionNumber()
