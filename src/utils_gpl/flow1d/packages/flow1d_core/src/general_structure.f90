@@ -1118,7 +1118,12 @@ contains
       if (numlinks==1) then
          genstru%widthcenteronlink(1) = genstru%ws_actual
          ! gateclosedfraction will always be between 0 (= fully opened) and 1 (= fully closed)
-         genstru%gateclosedfractiononlink(1) = 1d0 - genstru%gateopeningwidth_actual/genstru%ws_actual
+         if (genstru%ws_actual /= 0d0) then
+            genstru%gateclosedfractiononlink(1) = 1d0 - genstru%gateopeningwidth_actual/genstru%ws_actual
+         else
+            genstru%gateclosedfractiononlink(1) = 1d0
+         endif
+         
       else
 
          ! 2a: the desired crest width for this overall structure (hereafter, the open links for this genstru should add up to this width)
