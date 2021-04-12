@@ -512,7 +512,10 @@ integer :: N, L
  iresult = DFM_GENERICERROR
 
  if (itstep >= 2) then
+    call timstrt('step_reduce', handle_extra(51)) ! step_reduce
     call step_reduce(key)                            ! set a computational timestep implicit, reduce, elim conj grad substi
+    call timstop(handle_extra(51)) ! step_reduce
+
     if (dsetb > 0) then
        iresult = DFM_TIMESETBACK ! Warning about setbacks, but don't return directly, continue function normally
     end if
@@ -1211,8 +1214,6 @@ if(q /= 0) then
     qsrcwaq0 = qsrcwaq ! store current cumulative qsrc for waq at the beginning of this time step
  end if
 
- call timstrt('step_reduce', handle_extra(51)) ! step_reduce
-
  111 continue
 
  time1    = time0 + dts                               ! try to reach time1
@@ -1515,7 +1516,6 @@ if(q /= 0) then
 
  endif
 
- call timstop(handle_extra(51)) ! step_reduce
  end subroutine step_reduce
 
  subroutine update_s_explicit()
