@@ -152,8 +152,10 @@ if(UNIX)
     set_target_properties(${executable_name} PROPERTIES LINK_FLAGS ${openmp_flag})
 endif(UNIX)
 
+
 if(WIN32)
     set_target_properties(${executable_name} PROPERTIES COMPILE_FLAGS ${openmp_flag})
+    set_target_properties(${executable_name} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/x64/Debug)
     set(build_config $<CONFIG>) 
     if(${build_config} STREQUAL "Debug")
         target_compile_options(${executable_name} PRIVATE "${check_bounds_flag} ${check_pointer}" )
