@@ -1827,26 +1827,28 @@ subroutine init_threttimes()
     enddo
  endif
 
- do ifrac = 1, numfracs
-    if(allocated(bndsf(ifrac)%tht)) deallocate(bndsf(ifrac)%tht)
-    if(allocated(bndsf(ifrac)%thz)) deallocate(bndsf(ifrac)%thz)
+ if (allocated(bndsf)) then
+    do ifrac = 1, numfracs
+       if(allocated(bndsf(ifrac)%tht)) deallocate(bndsf(ifrac)%tht)
+       if(allocated(bndsf(ifrac)%thz)) deallocate(bndsf(ifrac)%thz)
 
-    n = nbndsf(ifrac)
+       n = nbndsf(ifrac)
 
-    allocate(bndsf(ifrac)%tht(n), bndsf(ifrac)%thz(n*kmxd), stat=ierr)
-    call aerr('bndsf(ifrac)%tht(n), bndsf(ifrac)%thz(n*kmxd)', ierr, n*(kmxd+1))
+       allocate(bndsf(ifrac)%tht(n), bndsf(ifrac)%thz(n*kmxd), stat=ierr)
+       call aerr('bndsf(ifrac)%tht(n), bndsf(ifrac)%thz(n*kmxd)', ierr, n*(kmxd+1))
 
-    bndsf(ifrac)%thz = dmiss
-    ! mapping to constituents, just in case fracs do not map sequentially to ised1 and so on
-    iconst = ifrac2const(ifrac)
-    if (iconst==0) then
-       bndsf(ifrac)%tht = 0d0
-    else
-       do i = 1,n
-         bndsf(ifrac)%tht(i) = threttim(iconst,bndsf(ifrac)%k(5,i))
-       enddo
-    end if
- enddo
+       bndsf(ifrac)%thz = dmiss
+       ! mapping to constituents, just in case fracs do not map sequentially to ised1 and so on
+       iconst = ifrac2const(ifrac)
+       if (iconst==0) then
+          bndsf(ifrac)%tht = 0d0
+       else
+          do i = 1,n
+             bndsf(ifrac)%tht(i) = threttim(iconst,bndsf(ifrac)%k(5,i))
+          enddo
+       end if
+    enddo
+ endif
 
 end subroutine
 
