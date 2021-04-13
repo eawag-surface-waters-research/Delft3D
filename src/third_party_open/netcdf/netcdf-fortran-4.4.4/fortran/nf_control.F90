@@ -279,43 +279,43 @@
 
  End Function nf__open_mp
 !-------------------------------- nf_open_mem --------------------------------
- Function nf_open_mem(path, mode, size, memory, ncid) RESULT(status)
-
-! Open a block of memory passed as an array of C_CHAR bytes as a
-! netcdf file. Note the file can only be opened as read-only
-
-   USE netcdf_nc_interfaces
-
-   Implicit NONE
-
-   Character(LEN=*),       Intent(IN)           :: path
-   Integer,                Intent(IN)           :: mode
-   Integer,                Intent(IN)           :: size
-   Character(KIND=C_CHAR), Intent(IN),   TARGET :: memory(*)
-   Integer,                Intent(INOUT)        :: ncid
-
-   Integer                            :: status
- 
-   Integer(C_INT)             :: cstatus, cmode, cncid
-   Character(LEN=LEN(path)+1) :: cpath
-   Integer(C_SIZE_T)          :: csize
-   Type(C_PTR)                :: cmemoryptr
-
-   Integer :: ie
-
-   cpath = addCNullChar(path, ie)
-   cmode = mode
-   csize = size
-
-   cmemoryptr = C_LOC(memory)
-
-   cstatus = nc_open_mem(cpath(1:ie), cmode, csize, cmemoryptr, cncid)
-
-   ncid = cncid
-
-   status = cstatus
- 
- End Function nf_open_mem
+! Function nf_open_mem(path, mode, size, memory, ncid) RESULT(status)
+!
+!! Open a block of memory passed as an array of C_CHAR bytes as a
+!! netcdf file. Note the file can only be opened as read-only
+!
+!   USE netcdf_nc_interfaces
+!
+!   Implicit NONE
+!
+!   Character(LEN=*),       Intent(IN)           :: path
+!   Integer,                Intent(IN)           :: mode
+!   Integer,                Intent(IN)           :: size
+!   Character(KIND=C_CHAR), Intent(IN),   TARGET :: memory(*)
+!   Integer,                Intent(INOUT)        :: ncid
+!
+!   Integer                            :: status
+! 
+!   Integer(C_INT)             :: cstatus, cmode, cncid
+!   Character(LEN=LEN(path)+1) :: cpath
+!   Integer(C_SIZE_T)          :: csize
+!   Type(C_PTR)                :: cmemoryptr
+!
+!   Integer :: ie
+!
+!   cpath = addCNullChar(path, ie)
+!   cmode = mode
+!   csize = size
+!
+!   cmemoryptr = C_LOC(memory)
+!
+!   cstatus = nc_open_mem(cpath(1:ie), cmode, csize, cmemoryptr, cncid)
+!
+!   ncid = cncid
+!
+!   status = cstatus
+! 
+! End Function nf_open_mem
 !-------------------------------- nf_inq_path ------------------------------
  Function nf_inq_path(ncid, pathlen, path) RESULT(status)
 

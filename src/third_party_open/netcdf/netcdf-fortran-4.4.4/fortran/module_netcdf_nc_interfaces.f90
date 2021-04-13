@@ -178,21 +178,21 @@ Interface
  End Function nc__open_mp
 End Interface
 !---------------------------------- nc_open_mem -------------------------------
-Interface
- Function nc_open_mem(path, mode, size, memory, ncid) BIND(C)
-
- USE ISO_C_BINDING, ONLY: C_CHAR, C_INT, C_SIZE_T, C_PTR
-
- Character(KIND=C_CHAR), Intent(IN)  :: path(*)
- Integer(C_INT),         VALUE       :: mode
- Integer(C_SIZE_T),      VALUE       :: size
- Type(C_PTR),            VALUE       :: memory
- Integer(C_INT),         Intent(OUT) :: ncid
-
- Integer(C_INT)                      :: nc_open_mem
-
- End Function nc_open_mem
-End Interface
+!Interface
+! Function nc_open_mem(path, mode, size, memory, ncid) BIND(C)
+!
+! USE ISO_C_BINDING, ONLY: C_CHAR, C_INT, C_SIZE_T, C_PTR
+!
+! Character(KIND=C_CHAR), Intent(IN)  :: path(*)
+! Integer(C_INT),         VALUE       :: mode
+! Integer(C_SIZE_T),      VALUE       :: size
+! Type(C_PTR),            VALUE       :: memory
+! Integer(C_INT),         Intent(OUT) :: ncid
+!
+! Integer(C_INT)                      :: nc_open_mem
+!
+! End Function nc_open_mem
+!End Interface
 !---------------------------------- nc_inq_path -----------------------------
 Interface
  Function nc_inq_path(ncid, pathlen, path) BIND(C)
