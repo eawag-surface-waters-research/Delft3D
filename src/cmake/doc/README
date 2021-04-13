@@ -36,9 +36,9 @@ Compiling on Windows/Linux
      <Target Directory>          : The target directory define in step 1 and where the generated files should go
                                    (e.g. ".")
      <Configuration_Type>        : The configuration to generate the .sln for. Valid values are:
-                                   "dflowfm_open" (default),        # configure D-Flow FM only
-                                   "dimr_open",                     # configure DIMR      only
-                                   "dflowfm",                       # configure D-Flow FM (with Interacter) only
+                                   "dflowfm" (default),             # configure D-Flow FM only
+                                   "dimr",                          # configure DIMR      only
+                                   "dflowfm_interacter",            # configure D-Flow FM (with Interacter) only
                                    "flow2d3d",                      # configure Delft3D4  only
                                    "d-waq",                         # configure D-WAQ     only
                                    "d-waves",                       # configure D-WAVES   only
@@ -46,8 +46,8 @@ Compiling on Windows/Linux
                                    "tools",                         # configure TOOLS     only
                                    "tests"                          # configure TESTS     only
    Examples:
-       WINDOWS: cmake ..\src\cmake -G "Visual Studio 15 2017" -A x64 -B "." -D CONFIGURATION_TYPE="dflowfm_open"
-       LINUX  : cmake ../src/cmake -G "Unix Makefiles"               -B "." -D CONFIGURATION_TYPE="dflowfm_open" -D CMAKE_BUILD_TYPE=Release
+       WINDOWS: cmake ..\src\cmake -G "Visual Studio 15 2017" -A x64 -B "." -D CONFIGURATION_TYPE="dflowfm"
+       LINUX  : cmake ../src/cmake -G "Unix Makefiles"               -B "." -D CONFIGURATION_TYPE="dflowfm" -D CMAKE_BUILD_TYPE=Release
 
 3. WINDOWS
    - Open the generated .sln in the <Target Directory> in Visual Studio
