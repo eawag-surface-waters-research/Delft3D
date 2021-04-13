@@ -44521,10 +44521,10 @@ end function is_1d_boundary_candidate
                   goto 888
               end if
           enddo ! nbndsf(isf)
-          ! also allocate 3D-sigma bnd distribution for EC
-          allocate ( bndsf(isf)%sigma(kmxd*nbndsf(isf)) , stat=ierr )
+          ! also allocate 3D-sigma bnd distribution for EC          
+          call realloc(bndsf(isf)%sigma, kmxd*nbndsf(isf), stat=ierr, fill=0d0)
           call aerr('sigma(kmxd*nbndsf(isf))', ierr, kmxd*nbndsf(isf) )
-          allocate ( bndsf(isf)%zminmax(2*nbndsf(isf)) , stat=ierr )
+          call realloc(bndtr(isf)%zminmax, 2*nbndsf(isf), stat=ierr, fill=0d0)
           call aerr('bndsf(isf)%zminmax(2*nbndsf(isf))', ierr, 2*nbndsf(isf) )
 
        end do   ! ised
