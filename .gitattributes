@@ -3067,6 +3067,7 @@ src/scripts_lgpl/linux/cmake_postbuild.sh -text
 src/scripts_lgpl/linux/gatherlibraries.rb -text
 src/scripts_lgpl/linux/make_revision.sh -text
 src/scripts_lgpl/linux/oss-install.sh -text
+src/scripts_lgpl/linux/oss-post_build.sh -text
 src/scripts_lgpl/linux/update_version.sh -text
 src/scripts_lgpl/win32/make_revision.bat -text
 src/scripts_lgpl/win32/oss-install.cmd -text
