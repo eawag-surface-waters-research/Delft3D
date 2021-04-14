@@ -734,24 +734,32 @@ module string_module
       end function char_array_to_string_by_len
 
 
-      subroutine get_substr_ndx(tgt,ndx0,ndx)
+      subroutine get_substr_ndx(tgt,ndx0,ndx,sep)
          implicit none
-         character(len=*), intent(in)   ::  tgt
-         integer, intent(inout)         ::  ndx0
-         integer, intent(inout)         ::  ndx
+         character(len=*), intent(in)           ::  tgt
+         integer, intent(inout)                 ::  ndx0
+         integer, intent(inout)                 ::  ndx
+         character(len=*), intent(in), optional ::  sep
          integer           :: ltrim
          logical           :: single_quoted
          logical           :: double_quoted
+         character(len=:), allocatable  :: sep_
+
+         if (present(sep)) then
+             sep_ = sep
+         else
+             sep_ = " "
+         endif
          single_quoted = .false.
          double_quoted = .false.
          ltrim = len_trim(tgt)
-         do while(is_whitespace(tgt(ndx0:ndx0)) .and. (ndx0<=ltrim))
+         do while((is_whitespace(tgt(ndx0:ndx0)) .or. index(tgt(ndx0:),sep_)==1) .and. (ndx0<=ltrim))
             ndx0 = ndx0 + 1
          enddo
          ndx = ndx0
          do while(ndx<=ltrim)
             if (.not.(single_quoted .or. double_quoted)) then
-               if (is_whitespace(tgt(ndx:ndx))) exit
+               if (is_whitespace(tgt(ndx:ndx)) .or. index(tgt(ndx:),sep_)==1) exit
             endif
             if (tgt(ndx:ndx)=='"') double_quoted = .not.double_quoted
             if (tgt(ndx:ndx)=="'") single_quoted = .not.single_quoted
@@ -761,19 +769,20 @@ module string_module
 
       !> Fill allocatable string array with elements of a space-delimited string
       !> The incoming string array must be unallocated
-      recursive subroutine strsplit(tgt, ndx0, pcs, npc)
+      recursive subroutine strsplit(tgt, ndx0, pcs, npc, sep)
          implicit none
          integer,          intent(in)                                 ::  npc   !< element index
          character(len=*), intent(in)                                 ::  tgt   !< input string
          integer, intent(in)                                          ::  ndx0  !< start position in string tgt
          character(len=*), intent(inout), dimension(:), allocatable   ::  pcs   !< resulting array of strings
+         character(len=*), intent(in), optional                       ::  sep   !< optional separator
 
          integer                          ::  ndx, ndx1    ! position in string
 
          ndx1 = ndx0
-         call get_substr_ndx(tgt,ndx1,ndx)
+         call get_substr_ndx(tgt,ndx1,ndx, sep)
          if (ndx<=len_trim(tgt)) then
-            call strsplit(tgt, ndx, pcs, npc+1)
+            call strsplit(tgt, ndx, pcs, npc+1, sep)
          else
             allocate(pcs(npc))
          endif

@@ -201,27 +201,45 @@ module time_module
 !---------------------------------------------------------------------------------------------
       !> calculates reduced Julian Date base on a string 'yyyyddmm' with or without separators
       function ymd2reduced_jul_string(date, reduced_jul_date) result (success)
+         use string_module, only: strsplit
          character(len=*), intent(in) :: date             !< date as string 'yyyyddmm' or 'yyyy dd mm' or 'yyyy d m'
          real(kind=hp), intent(out)   :: reduced_jul_date !< returned date as reduced modified julian
          logical                      :: success          !< function result
 
-         integer :: year, month, day, ierr
+         integer :: year, month, day, ierr, npc, intdate
          character :: separator
          logical :: has_separators
          character(len=20) :: fmt
+         character(len=8), dimension(:), allocatable :: date_elements
 
-         separator = date(5:5)
-         has_separators = (separator < '0' .or. separator > '9')
 
-         if (len_trim(date) >= 10) then
-            fmt = '(i4,x,i2,x,i2)'     ! yyyy*dd*mm
-         else if (has_separators) then
-            fmt = '(i4,x,i1,x,i1)'     ! yyyy*d*m
+         if (index(date,'/') > 0) then
+             separator = '/'
+         elseif (index(date,'-') > 0) then
+             separator = '-'
          else
-            fmt = '(i4,i2,i2)'         ! yyyymmdd
+             separator = ' '
          endif
+         call strsplit(date,1,date_elements,1,separator)
 
-         read(date, fmt, iostat=ierr) year, month, day
+         npc = size(date_elements)
+         if (npc > 1) then
+            read(date_elements(1),*,iostat=ierr) year
+            if (ierr == 0) then
+               read(date_elements(2),*,iostat=ierr) month
+               if (ierr == 0) then
+                  read(date_elements(3),*,iostat=ierr) day
+               endif
+            endif
+         elseif (npc == 1) then
+            read(date_elements(1),*,iostat=ierr) intdate
+            year = int(intdate/10000)
+            month = int(mod(intdate,10000)/100)
+            day = mod(intdate,100)
+         else
+            success = .false.
+            return
+         endif
 
          success = (ierr == 0 .and. month <= 12)
          if (success) then
