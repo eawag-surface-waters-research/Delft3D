@@ -641,6 +641,10 @@ module m_ec_module
 
       type(c_time)                                            :: ecReqTime    !< time stamp for request to EC
       real(hp)                                                :: tUnitFactor  !< factor for time step unit
+      character(len=20) :: datestring
+      integer       :: year, month, day, hour, minute
+      real(kind=hp) :: second
+      
 
       if (itemId == ec_undef_int) then       ! We isolate the case that itemId was uninitialized,
          success = .true.                    ! in which case we simply ignore the Get-request
@@ -651,6 +655,10 @@ module m_ec_module
          tUnitFactor = ecSupportTimeUnitConversionFactor(tgt_tunit)
          call ecReqTime%set2(JULIAN(tgt_refdate, 0), timesteps * tUnitFactor / 86400.0_hp - tgt_tzone / 24.0_hp)
          if (.not. ecGetValues(instancePtr, itemId, ecReqTime, target_array)) then
+            if (mjd2date(ecReqTime%mjd(),year,month,day,hour,minute,second)) then
+               write(datestring,'(i5,a1,i2.2,a1,i2.2,a1,i2.2,a1,i2.2,a1,i2.2)') year,'-',month,'-',day,' ',hour,':',minute,':',int(second)
+               call setECMessage('Requested time was: '//datestring//' ! ')
+            end if
             return
          end if
          success = .true.
