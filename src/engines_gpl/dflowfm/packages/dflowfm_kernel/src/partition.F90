@@ -944,7 +944,7 @@ use meshdata, only : ug_idsLen, ug_idsLongNamesLen
 !> find original cell numbers
    subroutine find_original_cell_numbers(L2Lorg, Lne_org, iorg)
       use unstruc_messages
-      use network_data, only: nump1d2d, numL, lnn, lne, numl1d, xk, yk
+      use network_data, only: nump1d2d, numL, lnn, lne, numl1d, xk, yk, zk
       use sorting_algorithms, only : indexxi
       implicit none
       
@@ -1041,6 +1041,7 @@ use meshdata, only : ug_idsLen, ug_idsLongNamesLen
       if (numl1d > 0) then
          ! sort the nodes (and their coordinates) in case of 1D,
          ! to keep it in line with network numbering
+         ! TODO (?): also sort xzw, yzw and netcell(:)%nod(:)
          allocate(indx(nump1d2d), cellnrs(nump1d2d), tmpCoord(nump1d2d))
          cellnrs = iorg
          call indexxi(size(iorg), cellnrs, indx)
@@ -1054,6 +1055,10 @@ use meshdata, only : ug_idsLen, ug_idsLongNamesLen
          tmpCoord = yk(1:nump1d2d)
          do i = 1, nump1d2d
             yk(i) = tmpCoord(indx(i))
+         enddo
+         tmpCoord = zk(1:nump1d2d)
+         do i = 1, nump1d2d
+            zk(i) = tmpCoord(indx(i))
          enddo
       endif
 
