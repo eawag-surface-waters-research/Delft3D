@@ -210,9 +210,9 @@ module time_module
          character :: separator
          logical :: has_separators
          character(len=20) :: fmt
-         character(len=8), dimension(:), allocatable :: date_elements
+         character(len=12), dimension(:), allocatable :: date_elements
 
-
+         success = .false.
          if (index(date,'/') > 0) then
              separator = '/'
          elseif (index(date,'-') > 0) then
@@ -223,29 +223,30 @@ module time_module
          call strsplit(date,1,date_elements,1,separator)
 
          npc = size(date_elements)
-         if (npc > 1) then
+         if (npc >= 3) then
             read(date_elements(1),*,iostat=ierr) year
-            if (ierr == 0) then
-               read(date_elements(2),*,iostat=ierr) month
-               if (ierr == 0) then
-                  read(date_elements(3),*,iostat=ierr) day
-               endif
-            endif
+            if (ierr /= 0) return
+            read(date_elements(2),*,iostat=ierr) month
+            if (ierr /= 0) return
+            read(date_elements(3),*,iostat=ierr) day
+            if (ierr /= 0) return
          elseif (npc == 1) then
             read(date_elements(1),*,iostat=ierr) intdate
+            if (ierr /= 0) return
             year = int(intdate/10000)
             month = int(mod(intdate,10000)/100)
             day = mod(intdate,100)
          else
-            success = .false.
             return
          endif
 
-         success = (ierr == 0 .and. month <= 12)
-         if (success) then
+         if (month>=1 .and. month <= 12 .and. day>=1 .and. year>=1) then
             reduced_jul_date = julian(year*10000 + month * 100 + day, 0)
+            if (reduced_jul_date == -1) return 
+         else
+            return
          endif
-
+         success = .true. 
       end function ymd2reduced_jul_string
 
       !> calculates reduced Julian Date base on a integer yyyyddmm

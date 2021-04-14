@@ -54,6 +54,8 @@ module test_time_module
          call test( test_split_date_time_invalid, 'Test split_date_time with invalid input')
          call test( test_parse_time_valid, 'Test parse_time with valid input')
          call test( test_parse_time_invalid, 'Test parse_time with invalid input')
+         call test( test_ymd2reduced_jul_string_valid, 'Test ymd2reduced_jul_string with valid input')
+         call test( test_ymd2reduced_jul_string_invalid, 'Test ymd2reduced_jul_string with invalid input')
       end subroutine tests_time_module
 
       !> test CalendarYearMonthDayToJulianDateNumber
@@ -209,5 +211,50 @@ module test_time_module
             call assert_false( ok, "unexpected success status (must fail)")
          end do
       end subroutine test_parse_time_invalid
+
+      subroutine test_ymd2reduced_jul_string_valid
+         integer, parameter           :: nr_cases = 9
+         character(len=16), parameter :: date(nr_cases) = (/ &
+            "20200904        ", &   ! no separators
+            "0020200904        ", & ! no separators, six digit year
+            "2020-09-04      ", &   ! - separators
+            "2020-09-4       ", &   ! - separators, one digit day, two digit month
+            "2020-9-4        ", &   ! - seperators, one digit day, one digit month
+            "2020-9-004       ", &  ! - separator, three digit day, one digit month
+            "2020 9 04       ", &   ! space separator, two digit day, one digit month
+            "002020 9 04       ", & ! space separator, six digit year
+            "2020/9/04       "/)    ! / separator, one digit day, two digit month
+         real(kind=hp), parameter :: mjd_expected = 59096
+         integer                  :: i
+         logical                  :: ok
+         real(kind=hp)            :: mjd
+
+         do i = 1, nr_cases
+            ok = ymd2reduced_jul(date(i), mjd)
+            call assert_true( ok, "unexpected success status (must succeed)")
+            call assert_comparable(mjd, mjd_expected, tol, "difference in Modified Julian Day")
+         end do
+      end subroutine test_ymd2reduced_jul_string_valid
+      
+      subroutine test_ymd2reduced_jul_string_invalid
+         integer, parameter           :: nr_cases = 7
+         character(len=16), parameter :: date(nr_cases) = (/ &
+            "20201904        ", &   ! no separators, month 19
+            "2020-09-00      ", &   ! - separators, day zero
+            "2A21-04-31      ", &   ! mutilated year
+            "2021-B2-28      ", &   ! mutilated month
+            "20A1-02-2C      ", &   ! mutilated day
+            "202103-01       ", &   ! - seperators, one digit day, one digit month, 29 feb in no-leapyear
+            "2020/0/04       "/)    ! / separator, one digit day, two digit month, month 0
+         integer                  :: i
+         logical                  :: ok
+         real(kind=hp)            :: mjd
+
+         do i = 1, nr_cases
+            ok = ymd2reduced_jul(date(i), mjd)
+            call assert_false( ok, "unexpected success status (must fail)")
+         end do
+      end subroutine test_ymd2reduced_jul_string_invalid
+      
 
 end module test_time_module
