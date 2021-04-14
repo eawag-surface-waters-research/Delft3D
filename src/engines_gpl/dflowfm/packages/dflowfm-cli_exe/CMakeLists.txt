@@ -6,7 +6,7 @@ set(src_path src)
 set(dflowfm_path "${CMAKE_CURRENT_SOURCE_DIR}/../../")
 set(dflowfm_cli_path "${CMAKE_CURRENT_SOURCE_DIR}/src/")
 
-# Set the directory referring to the ref folder
+# Set the directory referring to the res folder
 set(res_path ${dflowfm_path}/res)
 
 # Set version file variables
