@@ -647,7 +647,7 @@ use meshdata, only : ug_idsLen, ug_idsLongNamesLen
 
       integer                              :: ic1, ic2, k1, k2, L
       integer                              :: i
-      integer, dimension(:,:), allocatable :: lne_org(:,:)
+      integer, dimension(:,:), allocatable :: lne_org
       integer                              :: nLink2Dhang  ! number of hanging 2D links found
       integer                              :: i_old
       character(len=128)                   :: message
@@ -944,7 +944,8 @@ use meshdata, only : ug_idsLen, ug_idsLongNamesLen
 !> find original cell numbers
    subroutine find_original_cell_numbers(L2Lorg, Lne_org, iorg)
       use unstruc_messages
-      use network_data, only: nump1d2d, numL, lnn, lne
+      use network_data, only: nump1d2d, numL, lnn, lne, numl1d, xk, yk
+      use sorting_algorithms, only : indexxi
       implicit none
       
       integer,  intent(in)  :: L2Lorg(:)   !< original Link numbers
@@ -952,9 +953,9 @@ use meshdata, only : ug_idsLen, ug_idsLongNamesLen
       integer,  intent(out) :: iorg(:)     !< original cell numbers
 
       integer, dimension(:,:),      allocatable :: icandidate  ! two original cell number candidates, dim(nump1d2d)
-      
+      integer, dimension(:)  ,      allocatable :: indx, cellnrs
+      real(kind=hp), dimension(:),  allocatable :: tmpCoord
       integer                                   :: i, k, kother, L, L_org
-      integer                                   :: k1, k2
       integer                                   :: ic1, ic2, ic3, ic4
       integer                                   :: nump1d2d_org
      
@@ -1036,11 +1037,26 @@ use meshdata, only : ug_idsLen, ug_idsLongNamesLen
 !            continue
 !         end if
 !      end do
-      
-!     deallocate
-      if ( allocated(icandidate) ) deallocate(icandidate)
-      
-      return
+
+      if (numl1d > 0) then
+         ! sort the nodes (and their coordinates) in case of 1D,
+         ! to keep it in line with network numbering
+         allocate(indx(nump1d2d), cellnrs(nump1d2d), tmpCoord(nump1d2d))
+         cellnrs = iorg
+         call indexxi(size(iorg), cellnrs, indx)
+         do i = 1, nump1d2d
+            iorg(i) = cellnrs(indx(i))
+         enddo
+         tmpCoord = xk(1:nump1d2d)
+         do i = 1, nump1d2d
+            xk(i) = tmpCoord(indx(i))
+         enddo
+         tmpCoord = yk(1:nump1d2d)
+         do i = 1, nump1d2d
+            yk(i) = tmpCoord(indx(i))
+         enddo
+      endif
+
    end subroutine find_original_cell_numbers
    
    
@@ -5603,8 +5619,15 @@ end subroutine partition_make_globalnumbers
                     //'so the option of partitioning a mesh is not available.')
 #endif
 
- 1234 continue
+1234 continue
 
+     !if (ne == 46) then
+     !idomain(1:10) = 1
+     !idomain(11:20) = 1
+     !idomain(21:30) = 1
+     !idomain(31:46) = 0
+     !idomain(38:40) = 1
+     !end if
       return
    end subroutine partition_METIS_to_idomain
 
