@@ -43,8 +43,7 @@ oss_include_libraries(${library_name} oss_dependencies)
 
 if(UNIX)
    target_link_libraries(${library_name} waq_process deltares_common)
-   target_compile_options(${library_name}  PRIVATE ${c_compiler_flags})
-endif()
+endif(UNIX)
 
 # Set additional compilation properties
 target_compile_options(${library_name} PRIVATE "${extend_source132_flag}")

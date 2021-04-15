@@ -35,7 +35,6 @@ if(UNIX)
    set(oss_dependencies deltares_common_c)
    oss_include_libraries(${library_name} oss_dependencies)
    target_link_libraries(${library_name} ${oss_dependencies})
-   target_compile_options(${library_name}  PRIVATE ${c_compiler_flags})
 endif(UNIX)
 
 # Set additional compilation properties
@@ -60,3 +59,4 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${source}
                                                     ${svn_version_file})
                                                     
  set_target_properties (${library_name} PROPERTIES FOLDER utils_lgpl/deltares_common)
+ 

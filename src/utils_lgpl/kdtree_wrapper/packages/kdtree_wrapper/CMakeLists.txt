@@ -7,7 +7,6 @@ oss_include_libraries(${library_name} dependecies)
 
 if (UNIX)
     target_link_libraries(${library_name} ${dependecies})
-    target_compile_options(${library_name}  PRIVATE ${c_compiler_flags})
 endif(UNIX)
 
 # Set additional compilation properties

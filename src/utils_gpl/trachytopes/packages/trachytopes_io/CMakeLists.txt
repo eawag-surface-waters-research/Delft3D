@@ -11,7 +11,6 @@ target_compile_options(${library_name} PRIVATE "${check_bounds_flag}")
 
 if (UNIX)
    target_link_libraries(${library_name} ${oss_dependencies})
-   target_compile_options(${library_name}  PRIVATE ${c_compiler_flags})
 endif(UNIX)
 
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${source_files})

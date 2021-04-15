@@ -53,10 +53,6 @@ source_group(${visual_studio_source_group_name} FILES ${source})
 source_group("${visual_studio_source_group_name}\\Header Files" FILES ${headers})
 source_group("Version Files" FILES ${ini_version_file})
 
-if(UNIX)
-    target_compile_options(${library_name}  PRIVATE ${c_compiler_flags})
-endif()
-
 # Create the folder structure in vfproj
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${headers} ${source})
 set_target_properties (${library_name} PROPERTIES FOLDER utils_lgpl/nefis)

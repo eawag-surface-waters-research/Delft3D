@@ -147,7 +147,6 @@ set_target_properties(${library_name} PROPERTIES LINK_FLAGS ${openmp_flag})
 if(UNIX)
     message(STATUS "Setting target_compile_definitions in Unix")    
     target_compile_definitions(${library_name} PRIVATE "HAVE_DISPLAY=0;HAVE_METIS;HAVE_POLYPACK;HAVE_MPI;HAVE_PROJ;HAVE_SHAPELIB;HAVE_GDAL;HAVE_PETSC")
-    target_compile_options(${library_name}  PRIVATE ${c_compiler_flags})
 endif(UNIX)
 
 if(WIN32)

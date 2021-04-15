@@ -16,10 +16,6 @@ file(GLOB source ${src_path}/*.c)
 # Define the library
 add_library(morphology_plugins_c ${source})
 
-if (UNIX)
-   target_compile_options(morphology_plugins_c PRIVATE ${c_compiler_flags})
-endif(UNIX)
-
 # Define how the files should be structured within Visual Studion
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${source})
 set_target_properties (morphology_plugins_c PROPERTIES FOLDER utils_gpl/morphology)

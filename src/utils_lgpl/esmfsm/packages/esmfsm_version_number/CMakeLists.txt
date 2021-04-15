@@ -41,10 +41,6 @@ prebuild_version_number(${library_name} ${h_version_file}
                                         ${ini_version_file}
                                         ON)
 
-if(UNIX)
-    target_compile_options(${library_name}  PRIVATE ${c_compiler_flags})
-endif()
-
 # Define how the files should be structured within Visual Studio
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${source_files}
                                                     ${h_version_file})

@@ -12,7 +12,6 @@ endif(WIN32)
 
 if (UNIX)
     target_link_libraries(${library_name} ${dependecies})
-    target_compile_options(${library_name}  PRIVATE ${c_compiler_flags})
 endif(UNIX)
 
 # Create the folder structure in vfproj

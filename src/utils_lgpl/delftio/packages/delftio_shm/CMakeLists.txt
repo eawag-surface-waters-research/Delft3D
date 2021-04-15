@@ -17,11 +17,6 @@ set(library_name delftio_shm)
 add_library(${library_name} ${source_files}
                             ${headers})
 
-# Set additional compilation flags
-if (UNIX)
-   target_compile_options(${library_name}  PRIVATE ${c_compiler_flags})
-endif(UNIX)
-
 # Define how the files should be structured within Visual Studio
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${source_files}
                                                     ${headers})

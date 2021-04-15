@@ -13,9 +13,6 @@ set(c_sources ${source_path}/nf_lib.c)
 
 # Add library
 add_library(netcdf4 ${c_sources})
-if(UNIX)
-   target_compile_options(netcdf4 PRIVATE ${c_compiler_flags})
-endif(UNIX)
 
 # Create the folder structure in vfproj
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/.." FILES ${c_sources} )

@@ -38,8 +38,7 @@ oss_include_libraries(${library_name} oss_dependencies)
 
 if(UNIX)
     target_link_libraries(${library_name} ${oss_dependencies})
-    target_compile_options(${library_name}  PRIVATE ${c_compiler_flags})
-endif()
+endif(UNIX)
 
 # Define prebuild events
 prebuild_version_number(${library_name} ${fortran_version_file} 
@@ -50,7 +49,7 @@ prebuild_version_number(${library_name} ${fortran_version_file}
 # Set preprocessor definitions
 if(WIN32)
     target_compile_definitions(${library_name} PRIVATE "WIN32")
-endif()
+endif(WIN32)
 
 # Define how the files should be structured within Visual Studio
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${delftio_sync}

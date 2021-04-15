@@ -52,8 +52,7 @@ endif(WIN32)
 
 if(UNIX)
     target_link_libraries(${executable_name} ${exe_dependencies})
-    target_compile_options(${executable_name}  PRIVATE ${c_compiler_flags})
-endif()
+endif(UNIX)
 
 # Define how the files should be structured within Visual Studio
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${executable_files})

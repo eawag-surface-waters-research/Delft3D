@@ -25,7 +25,6 @@ target_link_libraries(${executable_name} ${oss_dependencies})
 
 if(UNIX)
     target_link_libraries(${executable_name} ${oss_dependencies})
-    target_compile_options(${executable_name}  PRIVATE ${c_compiler_flags})
 endif()
 
 # Define how the files should be structured within Visual Studio

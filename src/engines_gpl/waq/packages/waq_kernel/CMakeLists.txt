@@ -46,8 +46,7 @@ oss_include_libraries(${library_name} oss_dependencies)
 
 if(UNIX)
     target_link_libraries(${library_name} ${oss_dependencies})
-    target_compile_options(${library_name} PRIVATE ${c_compiler_flags})
-endif()
+endif(UNIX)
 
 # Define additional compilation flags
 set_property(SOURCE ${preproccessor_files}

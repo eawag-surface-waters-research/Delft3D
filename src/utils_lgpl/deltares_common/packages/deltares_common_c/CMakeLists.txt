@@ -39,10 +39,6 @@ set(source  src/bmi_shared_lib_fortran_api.c
 set(library_name deltares_common_c)
 add_library(${library_name} ${source} ${headers})
 
-if (UNIX)
-   target_compile_options(${library_name}  PRIVATE ${c_compiler_flags})
-endif(UNIX)
-
 # Create the folder structure in vfproj
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${source} ${headers})
 set_target_properties (${library_name} PROPERTIES FOLDER utils_lgpl/deltares_common)

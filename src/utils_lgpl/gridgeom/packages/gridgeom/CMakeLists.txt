@@ -36,7 +36,6 @@ if (UNIX)
     target_link_libraries(${library_name} triangle_c)
     message(STATUS "Setting oss_target_link_libraries in Unix")   
     target_link_libraries(${library_name} ${oss_dependencies})
-    target_compile_options(${library_name}  PRIVATE ${c_compiler_flags})
 endif(UNIX)
 
 if (WIN32)

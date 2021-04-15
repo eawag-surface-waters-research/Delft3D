@@ -69,7 +69,6 @@ if(UNIX)
     target_link_directories(${executable_name} PRIVATE ${NETCDF_LIBRARY_DIRS})
 
     message(STATUS "Setting target_compile_definitions in Unix")    
-    target_compile_options(${executable_name}  PRIVATE ${c_compiler_flags})
    set_property(TARGET ${executable_name} PROPERTY LINKER_LANGUAGE Fortran)
 endif(UNIX)
 

@@ -48,8 +48,7 @@ oss_include_libraries(${library_name} oss_dependencies)
 
 if(UNIX)
     target_link_libraries(${library_name} ${oss_dependencies})
-    target_compile_options(${library_name}  PRIVATE ${c_compiler_flags})
-endif()
+endif(UNIX)
 
 target_include_directories(${library_name}  PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../../include")
 

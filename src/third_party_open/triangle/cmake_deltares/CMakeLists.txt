@@ -16,10 +16,6 @@ source_group("${visual_studio_source_group_name}\\Header Files" FILES ${headers}
 # Set preprocessor definitions
 target_compile_definitions(${library_name} PRIVATE _LIB)
 
-if (UNIX)
-   target_compile_options(${library_name}  PRIVATE ${c_compiler_flags})
-endif(UNIX)
-
 # Create the folder structure in project
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/.." FILES   ${headers} ${source} )
 set_target_properties (${library_name} PROPERTIES FOLDER third_party_open)

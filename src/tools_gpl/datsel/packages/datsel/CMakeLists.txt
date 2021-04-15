@@ -44,10 +44,6 @@ endif(WIN32)
 # Explicitly link the libraries to the target or the compilation will fail as the linker cannot find the Fortran libs
 target_link_libraries(${executable_name} ${oss_dependencies})
 
-if(UNIX)
-    target_compile_options(${executable_name}  PRIVATE ${c_compiler_flags})
-endif()
-
 # Define how the files should be structured within Visual Studio
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${source_files})
 source_group("Resource" FILES ${version_files})

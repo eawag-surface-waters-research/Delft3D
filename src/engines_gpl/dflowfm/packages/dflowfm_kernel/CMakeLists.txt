@@ -181,7 +181,6 @@ endif(WIN32)
 
 if (UNIX)
     target_link_libraries(${library_name} ${oss_dependencies})
-    target_compile_options(${library_name}  PRIVATE ${c_compiler_flags})
     target_compile_definitions(${library_name} PRIVATE "HAVE_METIS;HAVE_POLYPACK;HAVE_MPI;HAVE_PROJ;HAVE_SHAPELIB;HAVE_GDAL;HAVE_PETSC")
 endif(UNIX)
 

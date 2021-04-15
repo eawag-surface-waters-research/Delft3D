@@ -35,7 +35,6 @@ if(UNIX)
     oss_include_libraries(${library_name} oss_dependencies)
 
     target_link_libraries(${library_name} ${oss_dependencies} PkgConfig::NETCDF PkgConfig::NETCDF_FTN)
-    target_compile_options(${library_name} PRIVATE ${c_compiler_flags})
 endif(UNIX)
 
 if (WIN32)
@@ -74,9 +73,7 @@ if ( ${configuration_type} STREQUAL "DFLOWFM" OR ${configuration_type} STREQUAL 
 
     if(UNIX)
         target_link_directories(${library_name} PRIVATE ${NETCDF_LIBRARY_DIRS}) 
-        target_compile_options(${library_name}  PRIVATE ${c_compiler_flags})
-        set(oss_dependencies deltares_common 
-                             io_netcdf)
+        set(oss_dependencies deltares_common  io_netcdf)
         oss_include_libraries(${library_name} oss_dependencies)
         target_link_libraries(${library_name} deltares_common
                                               io_netcdf

@@ -32,7 +32,6 @@ oss_include_libraries(${library_name} oss_dependencies)
 
 if(UNIX)
     target_link_libraries(${library_name} ${oss_dependencies})
-    target_compile_options(${library_name} PRIVATE ${c_compiler_flags})
 endif(UNIX)
 
 set_source_files_properties(${source_path}/ec_parameters.F90
