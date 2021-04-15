@@ -655,7 +655,7 @@ module m_ec_module
          tUnitFactor = ecSupportTimeUnitConversionFactor(tgt_tunit)
          call ecReqTime%set2(JULIAN(tgt_refdate, 0), timesteps * tUnitFactor / 86400.0_hp - tgt_tzone / 24.0_hp)
          if (.not. ecGetValues(instancePtr, itemId, ecReqTime, target_array)) then
-            if (mjd2date(ecReqTime%mjd(),year,month,day,hour,minute,second)) then
+            if (mjd2date(ecReqTime%mjd(),year,month,day,hour,minute,second)==1) then
                write(datestring,'(i5,a1,i2.2,a1,i2.2,a1,i2.2,a1,i2.2,a1,i2.2)') year,'-',month,'-',day,' ',hour,':',minute,':',int(second)
                call setECMessage('Requested time was: '//datestring//' ! ')
             end if
