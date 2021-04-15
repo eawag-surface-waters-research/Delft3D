@@ -100,12 +100,12 @@ if [ "$config" = "dflowfm" ] || [ "$config" = "all"  ]; then
 
     #
     # CMake
-    echo "cmake ../src/cmake -G "Unix Makefiles" -B "." -D CONFIGURATION_TYPE="dflowfm" -D CMAKE_BUILD_TYPE=Release &>build_dflowfm/cmake.log"
-          cmake ../src/cmake -G "Unix Makefiles" -B "." -D CONFIGURATION_TYPE="dflowfm" -D CMAKE_BUILD_TYPE=Release &>cmake.log
+    echo "cmake ../src/cmake -G "Unix Makefiles" -B "." -D CONFIGURATION_TYPE="dflowfm" -D CMAKE_BUILD_TYPE=Release &>build_dflowfm/cmake_dflowfm.log"
+          cmake ../src/cmake -G "Unix Makefiles" -B "." -D CONFIGURATION_TYPE="dflowfm" -D CMAKE_BUILD_TYPE=Release &>cmake_dflowfm.log
 
     # Make
-    echo "make VERBOSE=1 install &>build_dflowfm/make.log"
-          make VERBOSE=1 install &>make.log
+    echo "make VERBOSE=1 install &>build_dflowfm/make_dflowfm.log"
+          make VERBOSE=1 install &>make_dflowfm.log
           
     cd $root
  fi 
@@ -123,12 +123,12 @@ if [ "$config" = "dimr" ] || [ "$config" = "all"  ]; then
 
     #
     # CMake
-    echo "cmake ../src/cmake -G "Unix Makefiles" -B "." -D CONFIGURATION_TYPE="dimr" -D CMAKE_BUILD_TYPE=Release &>build_dimr/cmake.log"
-          cmake ../src/cmake -G "Unix Makefiles" -B "." -D CONFIGURATION_TYPE="dimr" -D CMAKE_BUILD_TYPE=Release &>cmake.log
+    echo "cmake ../src/cmake -G "Unix Makefiles" -B "." -D CONFIGURATION_TYPE="dimr" -D CMAKE_BUILD_TYPE=Release &>build_dimr/cmake_dimr.log"
+          cmake ../src/cmake -G "Unix Makefiles" -B "." -D CONFIGURATION_TYPE="dimr" -D CMAKE_BUILD_TYPE=Release &>cmake_dimr.log
 
     # Make
-    echo "make VERBOSE=1 install &>build_dimr;/make.log"
-          make VERBOSE=1 install &>make.log
+    echo "make VERBOSE=1 install &>build_dimr/make_dimr.log"
+          make VERBOSE=1 install &>make_dimr.log
           
     cd $root
  fi 
