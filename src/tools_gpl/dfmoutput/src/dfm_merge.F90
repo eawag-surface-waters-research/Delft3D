@@ -1563,10 +1563,12 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
    endif
 
    ! For 1D2D contact meshes
-   call realloc(ncontactmeshes, nfiles, keepExisting=.false., fill = 0)
-   do ii = 1, nfiles
-      ierr = ionc_get_contact_topo_count(ioncids(ii), ncontactmeshes(ii))
-   end do
+   if (jaugrid == 1) then
+      call realloc(ncontactmeshes, nfiles, keepExisting=.false., fill = 0)
+      do ii = 1, nfiles
+         ierr = ionc_get_contact_topo_count(ioncids(ii), ncontactmeshes(ii))
+      end do
+   end if
 
    ierr = nf90_enddef(ncids(noutfile))
 
