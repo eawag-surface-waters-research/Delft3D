@@ -6354,12 +6354,16 @@ contains
 
    end function timespaceinitialfield
 
-  
-   subroutine bilinarc(xk,yk,zk,n)
+   !> Bilinear interpolation for uniform rectangular.
+   !! TODO: move to ec_basic_interpolation or bilin5
+   subroutine bilinarc(xk, yk, zk, n)
    use m_missing
-   integer          :: n
-   double precision :: xk(n),yk(n),zk(n) 
+   integer      , intent(in)    :: n
+   real(kind=hp), intent(in)    :: xk(:), yk(:)
+   real(kind=hp), intent(  out) :: zk(:)
+
    integer          :: k
+
    do k = 1,n
       if (zk(k) == dmiss) then 
          call bilinarcinfo( xk(k), yk(k), zk(k))
@@ -6367,11 +6371,15 @@ contains
    enddo
    end subroutine bilinarc
 
+   !> Bilinear interpolation for uniform rectangular for 1 point
+   !! TODO: move to ec_basic_interpolation or bilin5
    subroutine bilinarcinfo( x, y, z)
    use m_arcinfo
    use m_missing
-   double precision :: x, y, z
-   double precision :: dm, dn, am, an
+   real(kind=hp), intent(in)    :: x, y
+   real(kind=hp), intent(  out) :: z
+
+   real(kind=hp)    :: dm, dn, am, an
    integer          :: m, n
 
    dm = (x - x0)/dxa ; m = int(dm) ; am = dm - m ; m = m + 1

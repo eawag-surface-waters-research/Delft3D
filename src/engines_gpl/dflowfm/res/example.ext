@@ -48,7 +48,7 @@
 *         =2  : first intp space (update), next intp. time (getval) keep 2 flowfields in memory
 *         =3  : save weightfactors, intp space and time (getval),   keep 2 pointer- and weight sets in memory.
 *         =4  : only spatial, inside polygon
-*         =5  : only spatial, triangulation, (if samples from *.asc file then biliniar)
+*         =5  : only spatial, triangulation, (if samples from *.asc file then bilinear)
 *         =6  : only spatial, averaging
 *         =7  : only spatial, index triangulation
 *         =8  : only spatial, smoothing
