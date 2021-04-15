@@ -31,6 +31,7 @@ if (UNIX)
    include_directories( ${PROJECT_BINARY_DIR}/md5 )
    target_link_libraries(${md5file_library_name} md5digest)
    target_compile_options(${md5file_library_name} PRIVATE ${c_compiler_flags})
+endif(UNIX)
 
 # Set additional compilation properties
 target_compile_options(${md5file_library_name} PRIVATE "${check_bounds_flag}")
