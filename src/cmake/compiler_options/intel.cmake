@@ -30,7 +30,14 @@ if (UNIX)
     message(STATUS "Setting optional Fortran compiler flags in Unix")
     # On Linux preprocessing is on by default, but the flag is inserted for
     # at least one C file as well (netCDF). Use a neutral flag to avoid problems
-    set(c_compiler_flags "-fPIC")
+    set(CMAKE_CXX_FLAGS_RELEASE  "-O2")
+    set(CMAKE_C_FLAGS_RELEASE    "-O2")
+    set(CMAKE_CXX_FLAGS_DEBUG    "-O0")
+    set(CMAKE_C_FLAGS_DEBUG      "-O0")
+    set (CMAKE_Fortran_FLAGS_RELEASE "-O2")
+    set (CMAKE_Fortran_FLAGS_DEBUG   "-O0")
+
+    set(c_compiler_flags -fPIC)
     set(cpp_compiler_flags "-std=c++11")
     set(file_preprocessor_flag -v)
     set(extend_source132_flag -extend_source 132)
