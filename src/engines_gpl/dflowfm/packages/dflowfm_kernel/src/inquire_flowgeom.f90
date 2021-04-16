@@ -272,6 +272,7 @@ module m_inquire_flowgeom
       branch_count = network%brs%Count
       do ibr = 1, branch_count
          pbranch => network%brs%branch(ibr)
+         if (pbranch%active_branch == 0) cycle
          if (pbranch%fromnode%index == nodeindex) then
             if (L == -1) then
                L = pbranch%lin(1)

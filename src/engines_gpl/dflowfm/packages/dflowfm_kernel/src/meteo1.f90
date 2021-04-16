@@ -5622,7 +5622,8 @@ contains
      use geometry_module, only: cross
      use m_missing, only: dmiss
      use m_sferic, only: jsferic
-     
+     use m_partitioninfo, only : jampi
+
      implicit none
 
    
@@ -5706,8 +5707,10 @@ contains
         
         ierr = findlink_by_nodeid(filename, m)
         if (m <= 0) then
-           errormessage = 'Boundary nodeId '''// trim(filename) // ''' was not found in the network.'
-           call mess(LEVEL_WARN, errormessage)
+           if (jampi == 0) then
+              errormessage = 'Boundary nodeId '''// trim(filename) // ''' was not found in the network.'
+              call mess(LEVEL_WARN, errormessage)
+           end if
            return
         else if (m > size(kc)) then
            errormessage = 'Boundary nodeId '''// trim(filename) // ''' exceeds the network size.'
