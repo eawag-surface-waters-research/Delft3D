@@ -16608,9 +16608,9 @@ end if
          endif
      else ! Restart from *_yyyymmdd_hhmmss_rst.nc or from *_map.nc
        call read_restart_from_map(md_restartfile, iresult) !TODO:JZ modify the name of this subroutine, since it also restarts from rst files.
-       if ((.not. network%loaded) .and. (network%sts%count > 0)) then
+       if (jased > 0 .and. stm_included) then
           call setbobs()
-       end if
+       endif
 
        if (jampi == 1) then
           ! globally reduce the error
@@ -16636,9 +16636,6 @@ end if
        call setucxucyucxuucyunew() !reconstruct cell-center velocities
        u1     = u1_tmp
        deallocate(u1_tmp)
-       if (jased > 0 .and. stm_included) then
-          call setbobs()
-       endif
      end if
  end if
 
