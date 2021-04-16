@@ -12498,7 +12498,7 @@ itemid,itemse,itemex,itemde,itemun,itemnm,itemag,itemda,itemwk,itemgr
 "dS1VB09upw","x"," ",   -999.000    ,"(gS/m3/d)           ","uptake VB09 through roots S pool 1                ","volume    ","volume    "," ","                              "
 "dS2VB09upw","x"," ",   -999.000    ,"(gS/m3/d)           ","uptake VB09 through  roots S pool 2               ","volume    ","volume    "," ","                              "
 "nVBCohorts","x"," ",    9.00000    ,"{no unit}           ","Maximum number of cohorts supported - DO NOT EDIT ","volume    ","volume    "," ","                              "
-"nVBFluxes ","x"," ",    12.0000    ,"{no unit}           ","Number of fluxes per cohort supported - DO NOT EDI","volume    ","volume    "," ","                              "
+"nVBFluxes ","x"," ",    22.0000    ,"{no unit}           ","Number of fluxes per cohort supported - DO NOT EDI","volume    ","volume    "," ","                              "
 "fC4VBrel  ","x"," ",   -999.000    ,"(gC/m2/d)           ","Total release of POC5 from comp 4 VB              ","volume    ","volume    "," ","                              "
 "fN4VBrel  ","x"," ",   -999.000    ,"(gN/m2/d)           ","Total release of PON5 from comp 4 VB              ","volume    ","volume    "," ","                              "
 "fP4VBrel  ","x"," ",   -999.000    ,"(gP/m2/d)           ","Total release of POP5 from comp 4 VB              ","volume    ","volume    "," ","                              "
