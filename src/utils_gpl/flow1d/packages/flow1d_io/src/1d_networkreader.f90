@@ -363,8 +363,9 @@ module m_1d_networkreader
          endif
       endif
 
-      call storeBranch(network%brs, network%nds, branchids(ibran), nodeids(meshgeom%nedge_nodes(1,ibran)), nodeids(meshgeom%nedge_nodes(2,ibran)), meshgeom%nbranchorder(ibran),&
-         gridPointsCount, localGpsX(1:gridPointsCount), localGpsY(1:gridPointsCount),localOffsets(1:gridPointsCount), localGpsID(1:gridPointsCount), my_rank_)
+      call storeBranch(network%brs, network%nds, branchids(ibran), nodeids(meshgeom%nedge_nodes(1,ibran)), &
+         nodeids(meshgeom%nedge_nodes(2,ibran)), meshgeom%nbranchorder(ibran), gridPointsCount, localGpsX(1:gridPointsCount), &
+         localGpsY(1:gridPointsCount),localOffsets(1:gridPointsCount), localGpsID(1:gridPointsCount), active_branches(ibran), my_rank_)
    enddo
 
    call adminBranchOrders(network%brs)
@@ -878,7 +879,7 @@ module m_1d_networkreader
       
    end subroutine readBranch
 
-   subroutine storeBranch(brs, nds, branchId, begNodeId, endNodeId, ordernumber, gridPointsCount, gpX, gpY, gpchainages, gpID, my_rank)
+   subroutine storeBranch(brs, nds, branchId, begNodeId, endNodeId, ordernumber, gridPointsCount, gpX, gpY, gpchainages, gpID, active_branch, my_rank)
    
       use m_branch
       
@@ -897,6 +898,7 @@ module m_1d_networkreader
       double precision, dimension(gridPointsCount), intent(in)     :: gpchainages
       character(len=*), dimension(gridPointsCount), intent(in)     :: gpID
       integer                                     , intent(in)     :: my_rank
+      integer                                     , intent(in)     :: active_branch
 
       ! Local Variables
       integer                                  :: ibr
@@ -947,6 +949,7 @@ module m_1d_networkreader
       pbr%nextBranch                   = -1
       pbr%nodeIndex(1)                 = ibegNode
       pbr%nodeIndex(2)                 = iendNode
+      pbr%active_branch                = active_branch
 
       ! The Gridpoints
 

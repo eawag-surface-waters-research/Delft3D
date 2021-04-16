@@ -95,7 +95,7 @@ module m_branch
 
       integer, allocatable           :: lin(:)                  !< link numbers for links in this channel
       integer, allocatable           :: grd(:)                  !< gridpoint numbers for links in this channel
-   
+      integer                        :: active_branch           !< 0 if outside current domain; 1 if completely in current domain; -1 if partly in current domain
    end type t_branch
 
    !> Set of branches in network
