@@ -1,6 +1,9 @@
 #!/bin/bash
 
 
+# ================
+# === Usage    ===
+# ================
 function print_usage_info {
     echo
     echo
@@ -12,7 +15,7 @@ function print_usage_info {
     echo "- Execute 'make install'"
     echo
     echo "<CONFIG>:"
-    echo "- missing: print_usage_info"
+    echo "- If <CONFIG> is missing, this usage will be print"
     echo "- 'all':"
     echo "  - build dflowfm"
     echo "  - build dimr"
@@ -30,6 +33,57 @@ function print_usage_info {
 }
 
 
+
+# =========================
+# === CreateCMakedir    ===
+# =========================
+function CreateCMakedir () {
+    if [ "$config" = "$1" ] || [ "$config" = "all"  ]; then
+        echo
+        echo "Create CMake dir for $1 ..."
+        cd     $root
+        rm -rf $root/build_$1
+        mkdir  $root/build_$1
+    fi
+    
+    return
+}
+
+
+
+# ==================
+# === DoCMake    ===
+# ==================
+function DoCMake () {
+    if [ "$config" = "$1" ] || [ "$config" = "all"  ]; then
+        echo
+        echo "Executing CMake for $1 ..."
+        cd    $root/build_$1
+        echo "cmake ../src/cmake -G "$generator" -B "." -D CONFIGURATION_TYPE="$1" -D CMAKE_BUILD_TYPE=Release &>build_$1/cmake_$1.log"
+              cmake ../src/cmake -G "$generator" -B "." -D CONFIGURATION_TYPE="$1" -D CMAKE_BUILD_TYPE=Release &>cmake_$1
+    fi
+
+    return
+}
+
+
+
+# =====================
+# === BuildCMake    ===
+# =====================
+function BuildCMake () {
+    if [ "$config" = "$1" ] || [ "$config" = "all"  ]; then
+        echo
+        echo "Building (make) based on CMake preparations for $1 ..."
+        cd    $root/build_$1
+        echo "make VERBOSE=1 install &>build_$1/make_$1.log"
+              make VERBOSE=1 install &>make_$1.log
+    fi
+
+    return
+}
+
+
 # ============
 # === MAIN ===
 # ============
@@ -37,7 +91,10 @@ function print_usage_info {
 #
 ## Defaults
 prepareonly=0
+mode=quiet
 config=
+generator="Unix Makefiles"
+compiler=intel18
 
 
 #
@@ -46,8 +103,8 @@ config=
 while [[ $# -ge 1 ]]
 do
 key="$1"
-shift
 
+echo key:$key
 case $key in
     -p|--prepareonly)
     prepareonly=1
@@ -72,7 +129,7 @@ esac
 done
 
 #
-# Check configfile    
+# Check config parameter    
 if [ -z $config ]; then
     print_usage_info
 fi
@@ -88,50 +145,35 @@ root=$scriptdir
  
 #
 # Dot setenv.sh to load the modules needed
-. $root/src/setenv.sh
+echo ". $root/src/setenv.sh"
+      . $root/src/setenv.sh
 
-#
-# D-Flow FM:
-if [ "$config" = "dflowfm" ] || [ "$config" = "all"  ]; then
-    cd     $root
-    rm -rf $root/build_dflowfm
-    mkdir  $root/build_dflowfm
-    cd     $root/build_dflowfm
+CreateCMakedir dimr
+CreateCMakedir dflowfm
 
-    #
-    # CMake
-    echo "cmake ../src/cmake -G "Unix Makefiles" -B "." -D CONFIGURATION_TYPE="dflowfm" -D CMAKE_BUILD_TYPE=Release &>build_dflowfm/cmake_dflowfm.log"
-          cmake ../src/cmake -G "Unix Makefiles" -B "." -D CONFIGURATION_TYPE="dflowfm" -D CMAKE_BUILD_TYPE=Release &>cmake_dflowfm.log
+DoCMake dimr
+DoCMake dflowfm
 
-    # Make
-    echo "make VERBOSE=1 install &>build_dflowfm/make_dflowfm.log"
-          make VERBOSE=1 install &>make_dflowfm.log
-          
-    cd $root
- fi 
- 
+if [ "$prepareonly" = "1" ]; then
+    echo Finished with preparations only
+    exit 0
+fi
 
+BuildCMake dimr
+BuildCMake dflowfm
 
+echo "Building the traditional way ..."
+echo "First some svn cleaning is needed in third_party_open..."
+cd $root/src/third_party_open
+echo "module purge"
+      module purge
+echo "svn revert . -R"
+      svn revert . -R
+echo "svn status --no-ignore | grep '^[I?]' | cut -c 9- | while IFS= read -r f; do rm -rf "$f"; done"
+      svn status --no-ignore | grep '^[I?]' | cut -c 9- | while IFS= read -r f; do rm -rf "$f"; done
+echo "Build in src..."
+cd $root/src
+echo "./build_h6c7.sh -$compiler"
+      ./build_h6c7.sh -$compiler
 
-#
-# DIMR:
-if [ "$config" = "dimr" ] || [ "$config" = "all"  ]; then
-    cd     $root
-    rm -rf $root/build_dimr
-    mkdir  $root/build_dimr
-    cd     $root/build_dimr
-
-    #
-    # CMake
-    echo "cmake ../src/cmake -G "Unix Makefiles" -B "." -D CONFIGURATION_TYPE="dimr" -D CMAKE_BUILD_TYPE=Release &>build_dimr/cmake_dimr.log"
-          cmake ../src/cmake -G "Unix Makefiles" -B "." -D CONFIGURATION_TYPE="dimr" -D CMAKE_BUILD_TYPE=Release &>cmake_dimr.log
-
-    # Make
-    echo "make VERBOSE=1 install &>build_dimr/make_dimr.log"
-          make VERBOSE=1 install &>make_dimr.log
-          
-    cd $root
- fi 
-
-
-
+echo Finished
