@@ -271,7 +271,7 @@ rem =======================
         echo.
         call :createCMakeDir build_%~1
         echo "Running CMake for %~1 ..."
-        cd /d "%root%\%~1\"
+        cd /d "%root%\build_%~1\"
         cmake ..\src\cmake -G %generator% -A x64 -B "." -D CONFIGURATION_TYPE="%~1" 1>cmake_%~1.log 2>&1
     )
     goto :endproc
