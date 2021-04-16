@@ -3,111 +3,47 @@
 setlocal enabledelayedexpansion
 set globalErrorLevel=0
 set prepareonly=0
+set mode=
 set config=
 set generator=
+set vs=
+set ifort=
 
-rem Jump to the directory where this build.bat script is
+rem # Jump to the directory where this build.bat script is
 cd %~dp0
 set root=%CD%
 
 
 
-rem ===
-rem === Check CMake installation
-rem ===
-echo.
-echo "Checking whether CMake is installed ..."
-set count=1
-for /f "tokens=* usebackq" %%f in (`cmake --version`) do (
-  set var!count!=%%f
-  set /a count=!count!+1
-)
-if "!var1:~0,13!" == "cmake version" (
-    echo cmake version: !var1:~13,20!
-) else (
-    echo ERROR: CMake not found.
-    echo        Download page: https://cmake.org/download/
-    echo        Be sure that the cmake directory is added to environment parameter PATH
-    goto :end
-)
+
+call :CheckCMakeInstallation
+call :GetArguments %1 %2 %3 %4 %5
+call :GetEnvironmentVars
+call :PrepareSln
+call :SetGenerator
 
 
-
-rem ===
-rem === Command line argument
-rem ===
-rem No arguments: call prepare_sln.py
-if [%1] EQU [] (
-    call :preparesln
-)
-if [%1] EQU [--help] (
-    goto usage
-)
-if [%1] EQU [-p] (
-    set prepareonly=1
-    set config=%2
-)
-if [%2] EQU [-p] (
-    set prepareonly=1
-    set config=%1
-)
-if [%1] EQU [--prepareonly] (
-    set prepareonly=1
-    set config=%2
-)
-if [%2] EQU [--prepareonly] (
-    set prepareonly=1
-    set config=%1
-)
-
-
-
-rem ===
-rem === Echo
-rem ===
 echo.
 echo     config      : !config!
 echo     generator   : !generator!
+echo     ifort       : !ifort!
+echo     mode        : !mode!
 echo     prepareonly : !prepareonly!
+echo     vs          : !vs!
 echo.
-if "!config!" == "" (
-    echo ERROR: config is empty.
-    goto :end
-)
-if "!generator!" == "" (
-    echo ERROR: generator is empty.
-    echo        Possible causes:
-    echo            In prepare_sln.py:
-    echo                Choosen Visual Studio version is not installed
-    goto :end
-)
 
 
-rem ===
-rem === vcvarsall
-rem ===
-rem Execute vcvarsall.bat in case of compilation
-if NOT !prepareonly! EQU 1 (
-    echo.
-    if NOT !generator!=="Visual Studio 15 2017" (
-        echo ERROR build.bat: compilation is only implemented bases on !generator!
-        goto :end
-    )
-    echo "Calling vcvarsall.bat for VisualStudio 2017 ..."
-    call "%VS2017INSTALLDIR%\VC\Auxiliary\Build\vcvarsall.bat" amd64
+call :Checks
+call :vcvarsall
 
-    rem Execution of vcvarsall results in a jump to the C-drive. Jump back to the script directory
-    cd /d "%root%\"
-)
-    
+exit /b
 
-
-rem ===
-rem === CMake and build
-rem ===
-call :CMakeBuild dimr
-call :CMakeBuild dflowfm
+call :CMake dimr
+call :CMake dflowfm
+call :Build dimr
+call :Build dflowfm
 call :traditionalBuild
+call :installall
 
 
 
@@ -124,67 +60,240 @@ echo             %root%\src\utils_lgpl.sln
 echo.
 echo Finished
 goto :end
+
+
+
+
+
+
+
+
+
+
 rem ===
-rem === Finished
+rem === PROCEDURES
 rem ===
 
 
 
+rem =================================
+rem === Command line arguments    ===
+rem =================================
+:GetArguments
+    echo.
+    echo "Get command line arguments ..."
+    set mode=quiet
+    set prepareonly=0
+    if [%1] EQU [] (
+        set mode=interactive
+        set prepareonly=1
+    )
+    if "%1" == "--help" (
+        goto usage
+    )
+    if "%1" == "all" (
+        set prepareonly=0
+        set config=%1
+        set mode=quiet
+    )
+    goto :endproc
 
 
 
-rem ===
-rem === Subroutines
-rem ===
+rem =================================
+rem === Get environment variables ===
+rem =================================
+:GetEnvironmentVars
+    echo.
+    echo "Get environment variables ..."
+    rem # The order is important:
+    rem # On TeamCity VS2019 is installed without IFORT
+    rem # Check from new to old, overwriting when it was already found
+    if NOT "%VS2019INSTALLDIR%" == "" (
+        set vs=2019
+        echo Found: VisualStudio 16 2019
+    )
+    if NOT "%VS2017INSTALLDIR%" == "" (
+        set vs=2017
+        echo Found: VisualStudio 15 2017
+    )
+    if NOT "%VS2015INSTALLDIR%" == "" (
+        set vs=2015
+        echo Found: VisualStudio 14 2015
+    )
+    if NOT "%IFORT_COMPILER21%" == "" (
+        set ifort=21
+        echo Found: Intel Fortran 2021
+    )
+    if NOT "%IFORT_COMPILER19%" == "" (
+        set ifort=19
+        echo Found: Intel Fortran 2019
+    )
+    if NOT "%IFORT_COMPILER18%" == "" (
+        set ifort=18
+        echo Found: Intel Fortran 2018
+    )
+    if NOT "%IFORT_COMPILER16%" == "" (
+        set ifort=16
+        echo Found: Intel Fortran 2016
+    )
+    goto :endproc
+
+
+
+rem ================================
+rem === Check CMake installation ===
+rem ================================
+:CheckCMakeInstallation
+    echo.
+    echo "Checking whether CMake is installed ..."
+    set count=1
+    for /f "tokens=* usebackq" %%f in (`cmake --version`) do (
+      if !count! LEQ 1 (
+          set var!count!=%%f
+          set /a count=!count!+1
+      )
+    )
+    if "!var1:~0,13!" == "cmake version" (
+        echo cmake version: !var1:~13,20!
+    ) else (
+        echo ERROR: CMake not found.
+        echo        Download page: https://cmake.org/download/
+        echo        Be sure that the cmake directory is added to environment parameter PATH
+        goto :end
+    )
+    goto :endproc
 
 
 
 rem =======================
 rem === Prepare_sln    ====
 rem =======================
-:preparesln
+:PrepareSln
     echo.
     echo "Calling prepare_sln.py ..."
     cd /d "%root%\src\"
 
-    rem Catch stdout, each line in parameter var1, var2 etc.
-    set count=1
-    for /f "tokens=* usebackq" %%f in (`python prepare_sln.py`) do (
-      set var!count!=%%f
-      set /a count=!count!+1
+    echo mode:!mode!
+    if "!mode!" == "quiet" (
+        echo executing prepare_sln in quiet mode
+        python prepare_sln.py -vs !vs! -ifort !ifort! -cmakeConfig none -cmakePreparationOnly no
+    ) else (
+        rem # Catch stdout, each line in parameter var1, var2 etc.
+        for /f "tokens=* usebackq" %%f in (`python prepare_sln.py`) do (
+            set var=%%f
+            if "!var:~0,19!" == "CMake configuration"    (
+                echo cmake configuration found
+                set config=!var:~25,20!
+            )
+            if "!var:~0,22!" == "Visual Studio  Version" (
+                echo Visual Studio version found
+                set vs=!var:~25,4!
+            )
+            if "!var:~0,16!" == "Preparation only"       (
+                echo preparation only flag found
+                set prepareonly=!var:~25,1!
+            )
+        )
     )
-
-    rem Get config      from var1="CMake configuration    : all"
-    set config=!var1:~25,20!
-
-    rem Get generator   from var2="Visual Studio  Version : 2017"
-    set VS=!var2:~25,4!
-    if "!VS!" == "2017" set generator="Visual Studio 15 2017"
-    if "!VS!" == "2019" set generator="Visual Studio 16 2019"
-
-    rem Get prepareonly from var6="Preparation only       : 0"
-    if "!var6:~25,1!" == "0" set prepareonly=0
-    if "!var6:~25,1!" == "1" set prepareonly=1
     goto :endproc
 
 
 
 rem =======================
-rem === CMakeBuild     ====
+rem === SetGenerator   ====
 rem =======================
-:CMakeBuild
+:SetGenerator
+    if "!vs!" == "2015" (
+        set generator="Visual Studio 14 2015"
+    )
+    if "!vs!" == "2017" (
+        set generator="Visual Studio 15 2017"
+    )
+    if "!vs!" == "2019" (
+        set generator="Visual Studio 16 2019"
+    )
+    goto :endproc
+
+
+
+rem =======================
+rem === Checks         ====
+rem =======================
+:Checks
+    if "!config!" == "" (
+        echo ERROR: config is empty.
+        goto :end
+    )
+    if "!generator!" == "" (
+        echo ERROR: generator is empty.
+        echo        Possible causes:
+        echo            In prepare_sln.py:
+        echo                Choosen Visual Studio version is not installed
+        goto :end
+    )
+    goto :endproc
+
+
+
+rem =================
+rem === vcvarsall ===
+rem =================
+:vcvarsall
+    rem # Execute vcvarsall.bat in case of compilation
+    if %prepareonly% EQU 1 goto :endproc
+    
+    echo.
+    if !generator! == "Visual Studio 14 2015" (
+        echo "Calling vcvarsall.bat for VisualStudio 2015 ..."
+        call "%VS140COMNTOOLS%..\..\VC\vcvarsall.bat" amd64
+    )
+    if !generator! == "Visual Studio 15 2017" (
+        echo "Calling vcvarsall.bat for VisualStudio 2017 ..."
+        call "%VS2017INSTALLDIR%\VC\Auxiliary\Build\vcvarsall.bat" amd64
+    )
+    if !generator! == "Visual Studio 16 2019" (
+        echo "Calling vcvarsall.bat for VisualStudio 2019 ..."
+        call "%VS2019INSTALLDIR%\VC\Auxiliary\Build\vcvarsall.bat" amd64
+    )
+    
+    rem # Execution of vcvarsall results in a jump to the C-drive. Jump back to the script directory
+    cd /d "%root%\"
+    goto :endproc
+
+
+
+rem =======================
+rem === CMake          ====
+rem =======================
+:CMake
     set result=false
     if "%config%" == "%~1"  set result=true
     if "%config%" == "all"  set result=true
     if "%result%" == "true" (
         echo.
-        echo "Processing %~1 ..."
         call :createCMakeDir build_%~1
-        call :runCMake %~1
-        if NOT %prepareonly% EQU 1 (
-            cd /d "%root%\build_%~1\"
-            call :VSbuild %~1
-        )
+        echo "Running CMake for %~1 ..."
+        cmake ..\src\cmake -G %generator% -A x64 -B "." -D CONFIGURATION_TYPE="%~1" 1>cmake_%~1.log 2>&1
+    )
+    goto :endproc
+
+
+
+rem =======================
+rem === Build          ====
+rem =======================
+:Build
+    if %prepareonly% EQU 1 goto :endproc
+    
+    set result=false
+    if "%config%" == "%~1"  set result=true
+    if "%config%" == "all"  set result=true
+    if "%result%" == "true" (
+        echo.
+        echo "Building %~1 ..."
+        cd /d "%root%\build_%~1\"
+        call :VSbuild %~1
         cd /d "%root%\"
     )
     goto :endproc
@@ -195,18 +304,18 @@ rem =========================
 rem === traditionalBuild ====
 rem =========================
 :traditionalBuild
-    if NOT !prepareonly! EQU 1 (
-        set result=false
-        if "!config!" == "all"  set result="true"
-        if !result! == "true" (
-            echo.
-            echo "Building in the traditional way (only when config is all) ..."
-            cd /d "%root%\src\"
-            call :VSbuild delft3d_open
-            call :VSbuild io_netcdf
-            call :VSbuild nefis
-            cd /d "%root%\"
-        )
+    if %prepareonly% EQU 1 goto :endproc
+    
+    set result=false
+    if "!config!" == "all"  set result="true"
+    if !result! == "true" (
+        echo.
+        echo "Building in the traditional way (only when config is all) ..."
+        cd /d "%root%\src\"
+        call :VSbuild delft3d_open
+        call :VSbuild io_netcdf
+        call :VSbuild nefis
+        cd /d "%root%\"
     )
     goto :endproc
 
@@ -227,17 +336,6 @@ rem =======================
 
 
 rem =======================
-rem === runCMake       ====
-rem =======================
-:runCMake
-    echo.
-    echo "Running CMake for %~1 ..."
-    cmake ..\src\cmake -G %generator% -A x64 -B "." -D CONFIGURATION_TYPE="%~1" 1>cmake_%~1.log 2>&1
-    goto :endproc
-
-
-
-rem =======================
 rem === VSbuild        ====
 rem =======================
 :VSbuild
@@ -252,8 +350,30 @@ rem =======================
         set globalErrorLevel=%ErrorLevel%
     )
 
-    rem In build.log, replace "error" by TeamCity messages
+    rem # In build.log, replace "error" by TeamCity messages
     %root%\src\third_party_open\commandline\bin\win32\sed.exe -e "/[Ee]rror[\:\ ]/s/^/\#\#teamcity\[buildStatus status\=\'FAILURE\' text\=\' /g;/buildStatus/s/$/\'\]/g" build_%~1.log 
+    goto :endproc
+
+
+
+rem =======================
+rem === InstallAll     ====
+rem =======================
+:installall
+    if %prepareonly% EQU 1 goto :endproc
+
+    echo.
+    echo "Installing in build_all ..."
+    call :createCMakeDir build_all
+    mkdir "%root%\build_all\x64"                               > del.log 2>&1
+    xcopy %root%\src\bin\x64                                    %root%\build_all\x64\                 /E /C /Y /Q > del.log 2>&1
+    xcopy %root%\build_dimr\x64\Release\dimr                    %root%\build_all\x64\dimr\            /E /C /Y /Q > del.log 2>&1
+    xcopy %root%\build_dflowfm\x64\Release\dflowfm\bin\dflowfm* %root%\build_all\x64\dflowfm\bin\     /E /C /Y /Q > del.log 2>&1
+    xcopy %root%\build_dflowfm\x64\Release\dflowfm\bin\dfm*     %root%\build_all\x64\dflowfm\bin\     /E /C /Y /Q > del.log 2>&1
+    xcopy %root%\build_dflowfm\x64\Release\dflowfm\default      %root%\build_all\x64\dflowfm\default\ /E /C /Y /Q > del.log 2>&1
+    xcopy %root%\build_dflowfm\x64\Release\dflowfm\scripts      %root%\build_all\x64\dflowfm\scripts\ /E /C /Y /Q > del.log 2>&1
+    xcopy %root%\build_dflowfm\x64\Release\share\bin            %root%\build_all\x64\share\bin\       /E /C /Y /Q > del.log 2>&1
+    del /f/q del.log
     goto :endproc
 
 
@@ -281,12 +401,11 @@ rem =======================
     echo "  - build dimr"
     echo "  - build all other engines in the traditional way"
     echo "  - combine all binaries"
-    echo "- dflowfm_open"
+    echo "- dflowfm"
     echo "- dimr"
     echo.
     echo "Options:"
-    echo "-p, --preparationsonly"
-    echo "       Only CMake, no make, no src/build.cmd"
+    echo " Not implemented yet"
     goto :end
 
 
@@ -301,17 +420,17 @@ if NOT %globalErrorLevel% EQU 0 (
     exit /B %globalErrorLevel%
 )
 
-    rem To prevent the DOS box from disappearing immediately: remove the rem on the following line
-pause
-
-
+    rem # To prevent the DOS box from disappearing immediately: remove the rem on the following line
+if "!mode!" == "interactive" (
+    pause
+)
+exit /B
 
 rem =======================
 rem === ENDPROC TAG  ======
 rem =======================
 :endproc
-   rem
-   rem No exit  here, otherwise the script exits directly at the first missing artefact
-   rem No pause here, otherwise a pause will appear after each procedure execution
+   rem # No exit  here, otherwise the script exits directly at the first missing artefact
+   rem # No pause here, otherwise a pause will appear after each procedure execution
    
 
