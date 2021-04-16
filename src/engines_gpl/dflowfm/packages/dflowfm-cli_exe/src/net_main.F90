@@ -100,14 +100,12 @@
    COMMON /DEMO/ JDEMO
    integer :: ierr, lastmode, IDUM
    LOGICAL :: JAWEL
-   character*4 domain 
-   
-   integer                   :: i, L, istat, n12
+
+   integer                   :: i, L, n12
    integer                   :: Lrst = 0, Lmap = 0, L_merge = 0, jamergedrst = 0, Lmap1 = 0
    integer, parameter        :: numlen=4        !< number of digits in domain number string/filename
    integer, parameter        :: maxnamelen=256  !< number of digits in filename 
    character(len=numlen)     :: sdmn_loc        !< domain number string
-   character(len=maxnamelen) :: filename        
    character(len=maxnamelen) :: restartfile     !< storing the name of the restart files
    character(len=maxnamelen) :: md_mapfile_base !< storing the user-defined map file
    character(len=maxnamelen) :: md_flowgeomfile_base !< storing the user-defined flowgeom file
