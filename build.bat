@@ -341,14 +341,16 @@ rem =======================
     echo     In case of crash:
     echo          Is the Fortran compiler installed and available?
     echo          Common problem: NetExtender needs to be switched on to reach the license server
-    devenv.com %~1.sln /Build "Release|x64" /Out build_%~1.log 1>devenv.log 2>&1
+    
+    set currentWorkDir=%CD%
+    devenv.com %~1.sln /Build "Release|x64" 1>%currentWorkDir%\build_%~1.log 2>&1
     if NOT %ErrorLevel% EQU 0 (
         echo "Error in compiling %~1.sln: %ErrorLevel%"
         set globalErrorLevel=%ErrorLevel%
     )
 
     rem # In build.log, replace "error" by TeamCity messages
-    %root%\src\third_party_open\commandline\bin\win32\sed.exe -e "/[Ee]rror[\:\ ]/s/^/\#\#teamcity\[buildStatus status\=\'FAILURE\' text\=\' /g;/buildStatus/s/$/\'\]/g" build_%~1.log 
+    %root%\src\third_party_open\commandline\bin\win32\sed.exe -e "/[Ee]rror[\:\ ]/s/^/\#\#teamcity\[buildStatus status\=\'FAILURE\' text\=\' /g;/buildStatus/s/$/\'\]/g" %currentWorkDir%\build_%~1.log 
     goto :endproc
 
 

@@ -373,7 +373,7 @@ rem ==========================
         call :copyFile "!checkout_src_root!\engines_gpl\waq\default\proc_def.dat"                                          !dest_default!
         call :copyFile "!checkout_src_root!\engines_gpl\waq\default\proc_def.def"                                          !dest_default!
         
-        call :copyFile "!checkout_src_root!\engines_gpl\dflowfm\scripts\MSDOS\run_dflowfm_processes.bat"                   !dest_scripts!
+        call :copyFile "!checkout_src_root!\engines_gpl\dflowfm\scripts\team-city\run_dflowfm_processes.bat"               !dest_scripts!
         call :copyFile "!checkout_src_root!\engines_gpl\dflowfm\scripts\team-city\run_dflowfm.bat"                         !dest_scripts!
         call :copyFile "!checkout_src_root!\engines_gpl\dflowfm\scripts\team-city\run_dfmoutput.bat"                       !dest_scripts!
     )
