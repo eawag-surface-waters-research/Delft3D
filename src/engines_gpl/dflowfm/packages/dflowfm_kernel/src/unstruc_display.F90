@@ -242,7 +242,7 @@ subroutine load_displaysettings(filename)
     COMMON /TEXTSIZE/   TSIZE
      
     integer          :: jaopengl_loc
-    double precision :: x, y, dy
+    double precision :: x, y, dy, asp
 
 
     ! Put .dis file into a property tree
@@ -332,6 +332,13 @@ subroutine load_displaysettings(filename)
     call prop_Get_DOUBLE (dis_ptr, '*', 'X0           '  , X               , success) ! should override previous set
     call prop_Get_DOUBLE (dis_ptr, '*', 'Y0           '  , Y               , success)
     call prop_Get_DOUBLE (dis_ptr, '*', 'DYH          '  , DY              , success)
+    if (.not. success) then ! to also use old cfg files
+       x = 0.5d0*(x1+x2)
+       call inqasp(asp)
+       dy = (x2-x1)*asp
+       y  = y1 + 0.5d0*dy
+    endif
+
     call prop_Get_integer(dis_ptr, '*', 'SFERTEK      '  , JSFERTEK        , success)
     call setwynew(x,y,dy)
 
