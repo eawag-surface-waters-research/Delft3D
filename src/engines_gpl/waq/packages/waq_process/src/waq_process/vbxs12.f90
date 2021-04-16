@@ -351,9 +351,6 @@
       DELT       = pmsa(ipnt(ip_Delt))
       SwVegMod   = NINT(pmsa( ipnt(ip_SwVegMod) ))   ! check that this is indeed a constant
 
-
-      !!write(88,*) '---'
-
       ! set bottom segment number for all (water only in this approach) segments
       if (first) then
           CALL GETMLU(ILUMON)
@@ -443,8 +440,6 @@
                   pmsa(ipb) = pmsa(ipb) + (so4+sud)*volume*frlay
               endif
 
-              !!write(88,*) iseg, nh4, no3, aap, po4, so4, sud
-
           ! End Plant height check
           endif
           ipnt = ipnt + increm(1:nin+nout)
@@ -453,6 +448,8 @@
 !*** Now follows a loop over water segments with a bottom only
 
       ipnt = ipoint(1:nin+nout)
+      work = 0.0
+
       do iseg = 1 , noseg
 !         lowest water and 2d segments only, also dry, ikmrk1 = 0
           call dhkmrk(1,iknmrk(iseg),ikmrk1)
@@ -948,7 +945,6 @@
                  fMrtVB = rMrtVB * VB
               end if
 
-              work = 0.0
               flxsed = 0.0
     !         check if vegetation cohort is dead or still dying off or we use the Wetland Vegetation option
               if ( ( ( NINT (SwVBMrt) .eq. 1) .or. ( SWVBDec .eq. 1) .or. (SwVegMod .eq. 1) ) .and. (fMrtVB .gt. 0.0) ) then
@@ -979,6 +975,7 @@
                   work( 4,iseg) = fMrtVB * F1VB / CSf1VB
 
     !             from foliage to POX 1-2-3 for C-N-P-S
+
                   work( 5,iseg) = fMrtVB * F2VB * FfolPOC1
                   work( 6,iseg) = fMrtVB * F2VB * FfolPOC2
                   work( 7,iseg) = fMrtVB * F2VB * (1.0 - FfolPOC1 -FfolPOC2)
@@ -1110,6 +1107,7 @@
                       fl(if_firstWat + itel + (iseg-1)*noflux) = 0.0
                   enddo
               endif
+
           ! end attribute test
           endif
           ipnt  = ipnt  + increm(1:nin+nout)
