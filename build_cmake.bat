@@ -3,7 +3,8 @@
 rem ===
 rem Fill in or select your Visual Studio version here (CMake will find your newest Fortran compiler)
 rem ===
-set generator="Visual Studio 15 2017"
+set generator="Visual Studio 14 2015"
+rem set generator="Visual Studio 15 2017"
 rem set generator="Visual Studio 16 2019"
 
 
