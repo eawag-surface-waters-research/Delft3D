@@ -232,22 +232,13 @@ contains
       integer                            :: icrsEnd
       double precision                   :: xBeg
       double precision                   :: xEnd
-      integer                            :: i, j, maxlink
+      integer                            :: i, j
       integer                            :: timerHandle
       logical                            :: interpolDone
       logical                            :: initError = .false.
 
-      ! maxlink may be <> linall in case of parallel computing
-      ! at least in current phase of development
-      maxlink = 0
-      do i = 1, network%brs%Count
-         j = size(network%brs%branch(i)%lin)
-         if (j > 0) then
-            maxlink = max(maxlink, network%brs%branch(i)%lin(j))
-         end if
-      end do
-      call realloc(network%adm, maxlink, linall + network%brs%Count)
-      
+      call realloc(network%adm, linall, linall + network%brs%Count)
+
       timerHandle = 0
       call timstrt('line administration', timerHandle)
       adm => network%adm
