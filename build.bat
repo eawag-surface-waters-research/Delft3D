@@ -35,8 +35,8 @@ echo.
 
 call :Checks
 call :vcvarsall
-call :CMake dimr
-call :CMake dflowfm
+call :DoCMake dimr
+call :DoCMake dflowfm
 call :Build dimr
 call :Build dflowfm
 call :traditionalBuild
@@ -261,9 +261,9 @@ rem =================
 
 
 rem =======================
-rem === CMake          ====
+rem === DoCMake        ====
 rem =======================
-:CMake
+:DoCMake
     set result=false
     if "%config%" == "%~1"  set result=true
     if "%config%" == "all"  set result=true
@@ -271,6 +271,7 @@ rem =======================
         echo.
         call :createCMakeDir build_%~1
         echo "Running CMake for %~1 ..."
+        cd /d "%root%\%~1\"
         cmake ..\src\cmake -G %generator% -A x64 -B "." -D CONFIGURATION_TYPE="%~1" 1>cmake_%~1.log 2>&1
     )
     goto :endproc
@@ -327,7 +328,6 @@ rem =======================
     if exist "%root%\%~1\" rmdir /s/q "%root%\%~1\" > del.log 2>&1
     mkdir    "%root%\%~1\"                          > del.log 2>&1
     del /f/q del.log
-    cd /d "%root%\%~1\"
     goto :endproc
 
 
