@@ -35,9 +35,6 @@ echo.
 
 call :Checks
 call :vcvarsall
-
-exit /b
-
 call :CMake dimr
 call :CMake dflowfm
 call :Build dimr
