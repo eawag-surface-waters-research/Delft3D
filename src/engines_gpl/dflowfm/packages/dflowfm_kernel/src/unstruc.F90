@@ -17806,11 +17806,14 @@ subroutine flow_setexternalforcings(tim, l_initPhase, iresult)
    end if
 
    if (jawind == 1 .or. japatm > 0) then   ! setwind
-      if (allocated(wx)) then
+      if (allocated(wx)) then              ! initialize all winds to zero
         wx = 0.d0
       end if
       if (allocated(wy)) then
         wy = 0.d0
+      end if
+      if (allocated(wcharnock)) then
+        wcharnock = 0.d0
       end if
       if (allocated(ec_pwxwy_x)) then
         ec_pwxwy_x = 0.d0
@@ -17843,10 +17846,10 @@ subroutine flow_setexternalforcings(tim, l_initPhase, iresult)
                ! FM performs an additional spatial interpolation:
                do L  = 1,lnx ! i
                   k1 = ln(1,L) ; k2 = ln(2,L)
-                  wx(L) = 0.5d0*( ec_pwxwy_x(k1) + ec_pwxwy_x(k2) )
-                  wy(L) = 0.5d0*( ec_pwxwy_y(k1) + ec_pwxwy_y(k2) )
+                  wx(L) = wx(L) + 0.5d0*( ec_pwxwy_x(k1) + ec_pwxwy_x(k2) )
+                  wy(L) = wy(L) + 0.5d0*( ec_pwxwy_y(k1) + ec_pwxwy_y(k2) )
                   if (allocated(ec_pwxwy_c)) then
-                     wcharnock(L) = 0.5d0*( ec_pwxwy_c(k1) + ec_pwxwy_c(k2) )
+                     wcharnock(L) = wcharnock(L) + 0.5d0*( ec_pwxwy_c(k1) + ec_pwxwy_c(k2) )
                   endif
                enddo
             end if
