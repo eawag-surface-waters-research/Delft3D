@@ -529,8 +529,8 @@ integer :: N, L
  if (jaeverydt > 0) then
     if ((comparereal(time1, ti_maps, eps10) >= 0) .and. (comparereal(time1, ti_mape, eps10) <= 0)) then
        call wrimap(time1)
-    end if 
- end if 
+    end if
+ end if
    ! Finalize timestep code used to be here, now flow_finalize_single_timestep()
 
    if (iresult /= DFM_TIMESETBACK) then
@@ -1825,11 +1825,11 @@ subroutine addlink1D(L,japerim)                        ! and add area's and volu
  use m_flowparameters
  use unstruc_channel_flow
  use precision_basics
- 
+
  implicit none
- 
+
  integer           :: japerim, L, ja, calcConv
- 
+
  integer           :: k1, k2, K, LL
  double precision  :: ar1, wid1, cf1, ar2, wid2, cf2, dx1, dx2, widu, diam, perim
  double precision  :: hpr
@@ -1937,7 +1937,7 @@ subroutine addlink1D(L,japerim)                        ! and add area's and volu
     calcConv = 0
     if(network%loaded) then
        ! Only in case of a 1d-network, vol1 and vol1_f can be different
-      if (kcs(k1) == 1) then 
+      if (kcs(k1) == 1) then
          ! flow volume
          hpr = s1(k1)-bob0(1,L)
          if (hpr > 0d0) then
@@ -1950,7 +1950,7 @@ subroutine addlink1D(L,japerim)                        ! and add area's and volu
          endif
       endif
 
-      if (kcs(k2) == 1) then 
+      if (kcs(k2) == 1) then
          hpr = s1(k2)-bob0(2,L)
          if (hpr > 0d0) then
             ! flow volume
@@ -2005,12 +2005,12 @@ subroutine addlink1D(L,japerim)                        ! and add area's and volu
        vol1(k2)   = vol1(k2)   + dx2*ar2
     endif
 
- else 
+ else
     if (hu(L) > 0) then
        calcConv = 1
        call getprof_1D(L, hu(L), au(L), widu, japerim, calcConv, perim)
     endif
-    
+
     calcConv = 0
     if(network%loaded) then
        ! Only in case of a 1d-network, vol1 and vol1_f can be different
@@ -2038,11 +2038,11 @@ subroutine addlink1D(L,japerim)                        ! and add area's and volu
           endif
        endif
     else
-       
+
        vol1_f(k1) = vol1(k1)
        vol1_f(k2) = vol1(k2)
     endif
-   
+
  endif
  end subroutine addlink1Dkcu3
 
@@ -2093,17 +2093,17 @@ subroutine addlink1D(L,japerim)                        ! and add area's and volu
        vol1(k2)   = vol1(k2)   + dx2*ar2
     endif
 
- else 
+ else
     if (hu(L) > 0d0) then
 
        hpr1    = hu(L)
-   
+
        if (jaconveyance2D > 0) then
-   
+
           jaconv = min(2,jaconveyance2D)
           frcn = frcu(L) ; ifrctyp = ifrcutp(L)
           CALL getprof2d(hpr1,wu2,b21,ai,frcn,ifrctyp, widu,aru,aconvu,jaconv, beta, deltaa,hyr)
-   
+
           if (frcn >  0) then
               cfuhi(L) = aifu(L)*ag*aconvu
           else
@@ -2124,7 +2124,7 @@ subroutine addlink1D(L,japerim)                        ! and add area's and volu
           if (k1 > ndx2D) dx1 = 2*dx1
           vol1_f(k1) = vol1_f(k1) + dx1*ar1
        endif
-   
+
        hpr2 = s1(k2)-BL1                                                                              ! == 5,6: (ibedlevtyp=3), 2D conveyance, link or node
        if (hpr2 > 0) then
           call getlinkareawid2D(L,wu2,b21,ai,hpr2,ar2,wid2)
@@ -2189,17 +2189,17 @@ subroutine addlink1D(L,japerim)                        ! and add area's and volu
        vol1(k2)   = vol1(k2)   + dx2*ar2
     endif
 
- else 
+ else
     if (hu(L) > 0d0) then
 
        hpr1    = hu(L)
        frcn    = frcu(L)
        ifrctyp = ifrcutp(L)
        if (jaconveyance2D > 0) then
-   
+
           jaconv = min(2,jaconveyance2D)
           CALL getprof2d(hpr1,wu2,b21,ai,frcn,ifrctyp, widu,aru,aconvu,jaconv, beta, deltaa,hyr)
-   
+
           if (frcn >  0) then
               cfuhi(L) = aifu(L)*ag*aconvu
           else
@@ -2226,7 +2226,7 @@ subroutine addlink1D(L,japerim)                        ! and add area's and volu
           !if (k1 > ndx2D) dx1 = 2*dx1
           vol1_f(k1) = vol1_f(k1) + dx1*ar1
        endif
-   
+
        hpr2 = s1(k2)-BL1                                                                              ! == 5,6: (ibedlevtyp=3), 2D conveyance, link or node
        ! Also include waterdepth ==0 in order to make a1 /=0, this prevents SAAD errors
        if (hpr2 >= 0) then
@@ -3054,10 +3054,10 @@ subroutine sethu(jazws0)                            ! Set upwind waterdepth hu
  double precision  :: dp, d2, aa, hucrest, hunoweir, qweirsimple, ufac, efac
 
  double precision  :: avolk, hkruin, wsbov, wsben, d1, ewben, eweir, qvolk, qunit, hov, vov, vbov, hvolk, dte0, dtefri, qov, tol
- double precision  :: sl1, sl2, sl3, sku
+ double precision  :: sl1, sl2, sl3, sku, hskub, hub, sigmd
  character (len=4) :: toest
 
- integer           :: k3, k4, itel, kuu, ku2, kku, ip , Lnu
+ integer           :: k3, k4, itel, kuu, ku2, kku, ip , Lnu, kbd, ktd, kbd0, LLbup
 
  double precision, external :: dslim,  nod2linx, nod2liny
 
@@ -3328,11 +3328,9 @@ subroutine sethu(jazws0)                            ! Set upwind waterdepth hu
 
     if (kmx > 0) then
        Lb       = Lbot(L)
-       ! hu(Lb:Lb+kmxL(L)-1 ) = 0d0 ! visualise
        if(hu(L) > 0d0) then
           kt      = ktop(ku)
-          ! kb      = min ( ln( iup,Lb ) , kt )
-          kb      = min ( ln0( iup,Lb ) , kt )  ! dickv
+          kb      = min ( ln0( iup,Lb ) , kt )  ! dickv, was ln
 
           kb0     = kb - 1                   ! kbot(ku) - 1
           Ltop(L) = Lb + kt - kb
@@ -3343,15 +3341,61 @@ subroutine sethu(jazws0)                            ! Set upwind waterdepth hu
 
           hsku  = zws(kt) - zws(kb0)
           au(L) = 0d0
-          do LL = Lb, Ltop(L)
-             sigm   = (zws(kb+LL-Lb)-zws(kb0)) / hsku
-             hu(LL) = sigm *hu(L)
-             au(LL) = wu(L)*hu(LL)  ! this is only for now here, later move to addlink etc
-             if (LL > Lb) then
-                 au(LL) = wu(L)*(hu(LL)-hu(LL-1))
-             endif
-             au(L) = au(L) + au(LL) ! add to integrated 2Dh layer
-          enddo
+          hu(Lb-1) = 0d0
+        
+          if (layertype == 2 .and. keepzlayeringatbed == 3) then  ! split in a central sigma oriented part  
+
+             if ( Lb == Ltop(L) ) then                ! one layer
+                LL     = Lb 
+                hu(LL) = hu(L) 
+                au(LL) = wu(L)*(hu(LL) - hu(LL-1))    ! this is only for now here, later move to addlink etc
+                au(L)  = au(L) + au(LL)               ! add to integrated 2Dh layer
+
+             else                                     ! two or more
+            
+                ktd  = ktop(kd) 
+                kbd  = min ( ln0(3-iup,Lb ) , ktd )  
+                kbd0 = kbd - 1
+   
+              
+                hub  = 0d0
+                do LL  = Lb+1, Ltop(L)                ! search upwind cell for first layer above local bob 
+                   hub = zws(kb+LL-Lb) - bup
+                   if (hub > 0) then 
+                      LLbup = LL
+                      exit
+                   endif
+                enddo
+   
+                do LL  = Lb, LLbup                    ! central in lower part
+                   sigm   = ( zws(kb+LL-Lb)  - zws(kb0)  ) / ( zws(kb+LLbup-Lb)  - zws(kb0)  )
+                   sigmd  = ( zws(kbd+LL-Lb) - zws(kbd0) ) / ( zws(kbd+LLbup-Lb) - zws(kbd0) )
+                   sigm   = 0.5d0*(sigm + sigmd)
+                   hu(LL) = sigm*hub
+                   au(LL) = wu(L)*(hu(LL) - hu(LL-1)) ! this is only for now here, later move to addlink etc
+                   au(L)  = au(L) + au(LL)            ! add to integrated 2Dh layer
+                enddo
+   
+                hub = hu(L) - hub 
+                do LL  = LLbup+1, Ltop(L)             ! upwind in upper part
+                   sigm   = ( zws(kb+LL-Lb) - zws(kb+LLbup-Lb) ) / ( zws(kt) - zws(kb+LLbup-Lb) )
+                   hu(LL) = hu(LLbup) + sigm*hub
+                   au(LL) = wu(L)*(hu(LL) - hu(LL-1)) ! this is only for now here, later move to addlink etc
+                   au(L)  = au(L) + au(LL)            ! add to integrated 2Dh layer
+                enddo
+
+            endif
+
+          else                                     ! default: upwind sigma oriented distribution of hu(L) 
+
+             do LL = Lb, Ltop(L)
+                sigm   = (zws(kb+LL-Lb)-zws(kb0)) / hsku
+                hu(LL) = sigm*hu(L)
+                au(LL) = wu(L)*(hu(LL)-hu(LL-1))   ! this is only for now here, later move to addlink etc
+                au(L)  = au(L) + au(LL)            ! add to integrated 2Dh layer
+             enddo
+         
+          endif
 
        else
           Ltop(L) = 1 ! lb - 1 ! 1 ! flag dry
@@ -7360,7 +7404,7 @@ if (ihorvic > 0 .or. NDRAW(29) == 37) then
     endif
 
  endif
- 
+
    if (kmx == 0 .and. lnx1D > 0) then ! setuc
       call setuc1D ()
    endif
@@ -8989,7 +9033,7 @@ end subroutine setucxucyucxuucyunew
       use m_flowgeom
       implicit none
       integer :: L, LL, La, n, nx, ip, i12, k2, ja1D
-      
+
       if (kmx == 0 .and. lnx1D > 0) then ! setuc
          uc1D  = 0d0
          do n  = ndx2D+1,ndxi
@@ -9032,9 +9076,9 @@ end subroutine setucxucyucxuucyunew
             endif
          enddo
       endif
-      
+
    end subroutine setuc1D
-   
+
 ! =================================================================================================
 ! =================================================================================================
 subroutine setucxy1D() ! give ucx,ucy magnitude of uc1D, Pure1D
@@ -11160,7 +11204,7 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
  use m_fm_wq_processes, only: jawaqproc
  use m_vegetation
  use m_hydrology, only: jadhyd, init_hydrology
- use m_integralstats 
+ use m_integralstats
  use m_xbeach_data, only: instat, newstatbc, bccreated
  use m_oned_functions
  use unstruc_display, only : ntek, jaGUI
@@ -11169,7 +11213,7 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
  use m_fm_update_crosssections, only: fm_update_mor_width_area, fm_update_mor_width_mean_bedlevel
  use unstruc_netcdf_map_class
  use unstruc_caching
- 
+
  !use m_mormerge
  !
  ! To raise floating-point invalid, divide-by-zero, and overflow exceptions:
@@ -13703,13 +13747,13 @@ subroutine getczz0(h1, frcn, ifrctyp, cz, z0)       ! basic get z0 (m),  this ro
  use m_physcoef, only : sag, vonkar, ee, ee9, c9of1
  use m_flowparameters, only: epshu
  implicit none
- 
+
  double precision, intent(in) :: h1
  integer, intent(in) :: ifrctyp
  double precision, intent(in) :: frcn
  double precision, intent(out) :: cz
  double precision, intent(out) :: z0
- 
+
  double precision    :: h0, sqcf, hurou  ! hydraulic radius, friction coeff, friction typ, chezy coeff
  double precision    :: sixth = 1d0/6d0
 
@@ -19218,9 +19262,9 @@ subroutine flow_setexternalforcingsonboundaries(tim, iresult)
            end if
         end if
 
-        if (jaeverydt == 0) then         
+        if (jaeverydt == 0) then
             call wrimap(tim)
-        endif    
+        endif
 !         if ( jatidep > 0 ) then
 !            call writidep(tim)
 !         end if
@@ -19651,7 +19695,7 @@ subroutine unc_write_his(tim)            ! wrihis
     add_latlon = jsferic == 0 .and. iand(unc_writeopts, UG_WRITE_LATLON) == UG_WRITE_LATLON
 #else
     add_latlon = .false.
-#endif    
+#endif
 
     if (ihisfile == 0) then
 
@@ -19722,7 +19766,7 @@ subroutine unc_write_his(tim)            ! wrihis
             nNodeTot = numobs+nummovobs
             ierr = sgeom_def_geometry_variables(ihisfile, station_geom_container_name, 'station', 'point', nNodeTot, id_statdim, &
                id_statgeom_node_count, id_statgeom_node_coordx, id_statgeom_node_coordy, add_latlon, id_statgeom_node_lon, id_statgeom_node_lat)
-            
+
 
             if ( jahiswatlev > 0 ) then
                ierr = nf90_def_var(ihisfile, 'waterlevel', nf90_double, (/ id_statdim, id_timedim /), id_vars)
@@ -39990,7 +40034,7 @@ end subroutine setbobs_fixedweirs
     itpbn = kbndu(4,n)
     call getLbotLtop(LL,Lb,Lt)
 
-    !Original:    
+    !Original:
     !zbndun = zbndu( (n-1)*kmxd + 1 )
     if (kbndu(4,n) .ne. 5) then
        zbndun = zbndu(n)
@@ -44521,7 +44565,7 @@ end function is_1d_boundary_candidate
                   goto 888
               end if
           enddo ! nbndsf(isf)
-          ! also allocate 3D-sigma bnd distribution for EC          
+          ! also allocate 3D-sigma bnd distribution for EC
           call realloc(bndsf(isf)%sigma, kmxd*nbndsf(isf), stat=ierr, fill=0d0)
           call aerr('sigma(kmxd*nbndsf(isf))', ierr, kmxd*nbndsf(isf) )
           call realloc(bndsf(isf)%zminmax, 2*nbndsf(isf), stat=ierr, fill=0d0)
@@ -49434,19 +49478,19 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
                           endif
 
                           if (Lf > 0 .and. adjacentbob .ne. dmiss) then
-                             if (jaconveyance2D >= 1) then 
+                             if (jaconveyance2D >= 1) then
                                 if (lncn(1,Lf) == n1) then
                                     bob(1,Lf) = adjacentbob
                                 else
                                     bob(2,Lf) = adjacentbob
                                 endif
-                             else 
+                             else
                                  bob(1,Lf) = adjacentbob
                                  bob(2,Lf) = adjacentbob
                              endif
                              !nl1 = ln(1,Lf) ; nl2 = ln(2,Lf)
                              !bl(nl1) = min(bl(nl1), adjacentbob )
-                             !bl(nl2) = min(bl(nl2), adjacentbob ) ! still needs to be done 
+                             !bl(nl2) = min(bl(nl2), adjacentbob ) ! still needs to be done
                           endif
 
                       endif
@@ -49461,10 +49505,10 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
        if (jaweir > 0) then                                      ! set weir treatment
           ihu(L) = k
           call normalout( XPL(k), YPL(k), XPL(k+1), YPL(k+1) , xn, yn, jsferic, jasfer3D, dmiss, dxymis)
-          
+
           k3 = lncn(1,L) ; k4 = lncn(2,L)
           wu(L) = dbdistance ( xk(k3), yk(k3), xk(k4), yk(k4), jsferic, jasfer3D, dmiss)  ! set 2D link width
-          
+
           wu(L) = wu(L) * abs( xn*csu(L) + yn*snu(L) )           ! projected length of fixed weir
 
 
@@ -49525,7 +49569,7 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
              endif
           endif
 
- 
+
           ! 21 = Ifixedweirscheme 6
           ! 22 = General structure
           ! 23 = Rajaratnam
@@ -49559,9 +49603,9 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
          ! Check whether toe is lower. If so, also adjust toe level and the ground height
          ! If ground height is smaller than 1 cm, then this neglected
          !
-         if (zc-zhu .lt. ztoeu(L) .and. zhu .gt. 0.01) then 
-            ztoeu(L)   = zc - zhu                            
-            dzsillu(L) = zcrest(L) - ztoeu(L)              
+         if (zc-zhu .lt. ztoeu(L) .and. zhu .gt. 0.01) then
+            ztoeu(L)   = zc - zhu
+            dzsillu(L) = zcrest(L) - ztoeu(L)
             !! write (msgbuf,'(a,i5,f10.3)') 'Larger sill up:     ', L,  dzsillu(L); call msg_flush()
          endif
          if (zc-zhd .lt. ztoed(L) .and. zhd .gt. 0.01) then
@@ -49578,55 +49622,55 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
     call doclose(mout)
  end if
 
- if (jakol45 == 2 .and. sillheightmin > 0d0) then  ! when a minimum threshold is specified    
-                                                   ! and toe heights are known, and agreed upon 
+ if (jakol45 == 2 .and. sillheightmin > 0d0) then  ! when a minimum threshold is specified
+                                                   ! and toe heights are known, and agreed upon
     do L = 1,lnxi
        if (ihu(L) > 0) then                        ! when flagged as weir
- 
+
            do ii = 1,2                             ! loop over adjacent cells
               k = 0
-              if (ii == 1 .and. dzsillu(L) < sillheightmin .and. dzsilld(L) > sillheightmin .or. & 
+              if (ii == 1 .and. dzsillu(L) < sillheightmin .and. dzsilld(L) > sillheightmin .or. &
                   ii == 2 .and. dzsilld(L) < sillheightmin .and. dzsillu(L) > sillheightmin ) then
-                  k = ln(ii,L) 
+                  k = ln(ii,L)
               endif
-              if (k > 0) then                                          ! flatland on node k 
-                  nx      = nd(k)%lnx 
+              if (k > 0) then                                          ! flatland on node k
+                  nx      = nd(k)%lnx
                   do LL   = 1, nx                                      ! loop over all attached links
                      LLL  = nd(k)%ln(LL) ; LLLa = iabs(LLL)
-                     if (LLLa == L) then                                
+                     if (LLLa == L) then
                          LLLa = LL-1 ; if (LLLa == 0) LLLa = nx        ! left of weir link
                          LLLa = iabs(nd(k)%ln(LLLa))
-                         if (ihu(LLLa) == 0) then                      ! if not already marked as weir 
-                            bob(1,LLLa) = max( zcrest(L),bob(1,LLLa) ) ! raise both bobs 
+                         if (ihu(LLLa) == 0) then                      ! if not already marked as weir
+                            bob(1,LLLa) = max( zcrest(L),bob(1,LLLa) ) ! raise both bobs
                             bob(2,LLLa) = max( zcrest(L),bob(2,LLLa) ) ! raise both bobs
                          endif
                          LLLa = LL+1 ; if (LLLa > nx) LLLa = 1         ! right of weir link
                          LLLa = iabs(nd(k)%ln(LLLa))
-                         if (ihu(LLLa) == 0) then                      ! if not already marked as weir 
-                            bob(1,LLLa) = max( zcrest(L),bob(1,LLLa) ) ! raise both bobs 
+                         if (ihu(LLLa) == 0) then                      ! if not already marked as weir
+                            bob(1,LLLa) = max( zcrest(L),bob(1,LLLa) ) ! raise both bobs
                             bob(2,LLLa) = max( zcrest(L),bob(2,LLLa) ) ! raise both bobs o
                          endif
                      endif
                   enddo
                endif
-          enddo 
+          enddo
        endif
     enddo
 
-    BL = 1d9 
+    BL = 1d9
     do L = 1,lnx                         ! switch off weirs that do not need weir treatment
        if ( ihu(L) > 0 .and. (dzsillu(L) < sillheightmin .or. dzsilld(L) < sillheightmin) ) then
           ihu(L) = 0 ; iadv(L) = iadvec
-          if (slopedrop2D > 0d0) then 
+          if (slopedrop2D > 0d0) then
              iadv(L) = 8
           endif
        endif
        BLmn   = min( bob(1,L),bob(2,L) ) ! and reset BL to lowest attached link
        n1     = ln(1,L) ; n2 = ln(2,L)
-       BL(n1) = min(BL(n1),BLmn) 
-       BL(n2) = min(BL(n2),BLmn) 
+       BL(n1) = min(BL(n1),BLmn)
+       BL(n2) = min(BL(n2),BLmn)
     enddo
- 
+
  endif
 
  nfxw = 0
