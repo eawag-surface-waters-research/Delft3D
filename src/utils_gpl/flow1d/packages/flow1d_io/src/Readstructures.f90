@@ -1015,25 +1015,25 @@ module m_readstructures
       success = success .and. check_input_result(success1, st_id, 'outletLossCoeff')
 
       subtype = 'culvert'
-      call prop_get_string(md_ptr, '', 'subtype', subtype)
-      call prop_get_double(md_ptr, '', 'bendLosses', culvert%bendLoss, success1)
+      call prop_get_string(md_ptr, '', 'subType', subtype)
+      call prop_get_double(md_ptr, '', 'bendLossCoeff', culvert%bendLossCoeff, success1)
       call str_lower(subtype)
-      select case(trim(subtype))
+      select case(str_tolower(trim(subtype)))
       case ('invertedsiphon')
          if (.not. success1) then
-            call SetMessage(LEVEL_ERROR, 'Parameter bendLosses is missing for culvert ''' // trim(st_id) // '''.')
+            call SetMessage(LEVEL_ERROR, 'Parameter bendLossCoeff is missing for culvert ''' // trim(st_id) // '''.')
          endif
-         if (culvert%bendLoss < 0d0) then
-            call SetMessage(LEVEL_ERROR, 'Bendloss is less than 0 for culvert '''  // trim(st_id) // '''.')
+         if (culvert%bendLossCoeff < 0d0) then
+            call SetMessage(LEVEL_ERROR, 'Parameter bendLossCoeff is less than 0 for culvert '''  // trim(st_id) // '''.')
          endif
-         culvert%isSiphon = .true.
+         culvert%isInvertedSiphon = .true.
       case ('culvert')   
          if (success1) then
-            call SetMessage(LEVEL_ERROR, 'The use of bendLoss is only allowed for subtype invertedSiphon, please check ''' // trim(st_id) // '''.')
+            call SetMessage(LEVEL_ERROR, 'The use of bendLossCoeff is only allowed for subtype invertedSiphon, please check ''' // trim(st_id) // '''.')
          endif
-         culvert%isSiphon = .false.
+         culvert%isInvertedSiphon = .false.
       case default
-         call SetMessage(LEVEL_ERROR, 'Incorrect subtype (= '''//trim(subtype) // ''') found for culvert ''' // trim(st_id) // '''.')
+         call SetMessage(LEVEL_ERROR, 'Incorrect subType (= '''//trim(subtype) // ''') found for culvert ''' // trim(st_id) // '''.')
       end select
 
       call prop_get_integer(md_ptr, '', 'valveOnOff', valveonoff, success1)

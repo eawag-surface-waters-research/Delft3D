@@ -66,8 +66,8 @@ module m_Culvert
                                                                !< 1 = Free Culvert Flow 
                                                                !< 2 = Submerged Culvert Flow 
       double precision, dimension(2) :: bob_orig               !< Original bob0 values before the actual bobs are lowered
-      logical                        :: isSiphon               !< Indicates wether the culvert is of subtype (inverted) siphon.
-      double precision               :: bendLoss               !< Bend loss of siphon
+      logical                        :: isInvertedSiphon       !< Indicates wether the culvert is of subtype inverted siphon.
+      double precision               :: bendLossCoeff          !< Bend loss coefficient of siphon
    end type
 
 contains
@@ -249,7 +249,8 @@ contains
 
       ! Calculate cross-section values in culvert
       dpt = smax - inflowCrest
-      if (culvert%isSiphon) then
+      if (culvert%isInvertedSiphon) then
+         ! When flowing, always assume that the (lower lying) inverted siphon is fully filled.
          dpt = max(CrossSection%charHeight, dpt)
       endif
       call GetCSParsFlow(CrossSection, dpt, wArea, wPerimiter, wWidth)
@@ -307,7 +308,7 @@ contains
          
       endif
       
-      totalLoss = exitloss + frictloss + culvert%inletlosscoeff + valveloss + culvert%bendLoss
+      totalLoss = exitloss + frictloss + culvert%inletlosscoeff + valveloss + culvert%bendLossCoeff
             
       totalLoss = max(totalLoss, 0.01d0)
       
