@@ -37,8 +37,8 @@ set(dflowfm_kernel_compute_sediment_path ${dflowfm_kernel_path}/compute_sediment
 set(dflowfm_kernel_compute_sediment_netnode_based_path ${dflowfm_kernel_path}/compute_sediment/netnode_based)
 set(dflowfm_kernel_compute_transport_path ${dflowfm_kernel_path}/compute_transport)
 set(dflowfm_kernel_compute_waq_path ${dflowfm_kernel_path}/compute_waq)
-set(dflowfm_kernel_compute_wave_path ${dflowfm_kernel_path}/compute_wave)
-set(dflowfm_kernel_compute_xbeach_path ${dflowfm_kernel_path}/compute_xbeach)
+set(dflowfm_kernel_compute_waves_path ${dflowfm_kernel_path}/compute_waves)
+set(dflowfm_kernel_compute_waves_surfbeat_path ${dflowfm_kernel_path}/compute_waves/surfbeat)
 set(dflowfm_kernel_limiters_path ${dflowfm_kernel_path}/limiters)
 set(dflowfm_kernel_main_path ${dflowfm_kernel_path}/main)
 set(dflowfm_kernel_model_specific_path ${dflowfm_kernel_path}/model_specific)
@@ -54,15 +54,15 @@ get_fortran_source_files(${dflowfm_kernel_compute_sediment_path} dflowfm_kernel_
 get_fortran_source_files(${dflowfm_kernel_compute_sediment_netnode_based_path} dflowfm_kernel_compute_sediment_netnode_based)
 get_fortran_source_files(${dflowfm_kernel_compute_transport_path} dflowfm_kernel_compute_transport)
 get_fortran_source_files(${dflowfm_kernel_compute_waq_path} dflowfm_kernel_compute_waq)
-get_fortran_source_files(${dflowfm_kernel_compute_wave_path} dflowfm_kernel_compute_wave)
-get_fortran_source_files(${dflowfm_kernel_compute_xbeach_path} dflowfm_kernel_compute_xbeach)
+get_fortran_source_files(${dflowfm_kernel_compute_waves_path} dflowfm_kernel_compute_waves)
+get_fortran_source_files(${dflowfm_kernel_compute_waves_surfbeat_path} dflowfm_kernel_compute_waves_surfbeat)
 get_fortran_source_files(${dflowfm_kernel_path}/limiters dflowfm_kernel_limiters)
 get_fortran_source_files(${dflowfm_kernel_path}/main dflowfm_kernel_main)
 get_fortran_source_files(${dflowfm_kernel_path}/model_specific dflowfm_kernel_model_specific)
 get_fortran_source_files(${dflowfm_kernel_prepost_path} dflowfm_kernel_prepost)
 get_fortran_source_files(${dflowfm_kernel_timespace_path} dflowfm_kernel_timespace)
 
-list(REMOVE_ITEM dflowfm_kernel_compute_xbeach ${CMAKE_CURRENT_SOURCE_DIR}/${dflowfm_kernel_compute_xbeach_path}/xbeach_wave_boundary_init.f90)
+list(REMOVE_ITEM dflowfm_kernel_compute_waves_surfbeat ${CMAKE_CURRENT_SOURCE_DIR}/${dflowfm_kernel_compute_waves_surfbeat_path}/xbeach_wave_boundary_init.f90)
 
 # Gather source files
 set(dflowfm_manager_path ${src_path}/dflowfm_manager/)
@@ -99,8 +99,8 @@ set(library_source_list     ${fortran_version_file}
                             ${dflowfm_kernel_compute_sediment_netnode_based}
                             ${dflowfm_kernel_compute_transport}
                             ${dflowfm_kernel_compute_waq}
-                            ${dflowfm_kernel_compute_wave}
-                            ${dflowfm_kernel_compute_xbeach}
+                            ${dflowfm_kernel_compute_waves}
+                            ${dflowfm_kernel_compute_waves_surfbeat}
                             ${dflowfm_kernel_limiters}
                             ${dflowfm_kernel_main}
                             ${dflowfm_kernel_model_specific}
@@ -233,16 +233,16 @@ prebuild_version_number(${library_name} ${fortran_version_file}
 
 set_source_files_properties(${fortran_version_file}
                             ${CMAKE_CURRENT_SOURCE_DIR}/${dflowfm_data_path}/partition.F90
-                            ${CMAKE_CURRENT_SOURCE_DIR}/${dflowfm_gui_path}/SETWOR.F90
+                            ${CMAKE_CURRENT_SOURCE_DIR}/${dflowfm_gui_path}/setwor.F90
                             ${CMAKE_CURRENT_SOURCE_DIR}/${dflowfm_io_path}/read_commandline.F90
                             ${CMAKE_CURRENT_SOURCE_DIR}/${dflowfm_io_path}/writesomefinaloutput.F90
                             ${CMAKE_CURRENT_SOURCE_DIR}/${dflowfm_io_path}/wrwaq.F90
                             ${CMAKE_CURRENT_SOURCE_DIR}/${dflowfm_kernel_compute_path}/filter.F90
                             ${CMAKE_CURRENT_SOURCE_DIR}/${dflowfm_kernel_compute_particles_path}/sendrecv_particledata.F90
                             ${CMAKE_CURRENT_SOURCE_DIR}/${dflowfm_kernel_compute_particles_path}/update_particles.F90
-                            ${CMAKE_CURRENT_SOURCE_DIR}/${dflowfm_kernel_compute_xbeach_path}/xbeach_filefunctions.F90
+                            ${CMAKE_CURRENT_SOURCE_DIR}/${dflowfm_kernel_compute_waves_surbeat_path}/xbeach_filefunctions.F90
                             ${CMAKE_CURRENT_SOURCE_DIR}/${dflowfm_kernel_prepost_path}/flow_modelinit.F90
-                            ${CMAKE_CURRENT_SOURCE_DIR}/${dflowfm_kernel_prepost_path}/INIDAT.F90
+                            ${CMAKE_CURRENT_SOURCE_DIR}/${dflowfm_kernel_prepost_path}/inidat.F90
                             ${CMAKE_CURRENT_SOURCE_DIR}/${dflowfm_kernel_prepost_path}/print_help_commandline.F90
                             ${CMAKE_CURRENT_SOURCE_DIR}/${dflowfm_kernel_timespace_path}/timespaceinitialfield_mpi.F90
                             ${CMAKE_CURRENT_SOURCE_DIR}/${dflowfm_manager_path}/inctime_user.F90
@@ -252,11 +252,11 @@ set_source_files_properties(${fortran_version_file}
                             ${CMAKE_CURRENT_SOURCE_DIR}/${dflowfm_utils_path}/solve_guus.F90
                             ${CMAKE_CURRENT_SOURCE_DIR}/${dflowfm_utils_path}/saadf.F90
                             ${CMAKE_CURRENT_SOURCE_DIR}/${dflowfm_utils_path}/saadf90.F90
-                            ${CMAKE_CURRENT_SOURCE_DIR}/${dflowfm_utils_path}/SCHERM.F90
+                            ${CMAKE_CURRENT_SOURCE_DIR}/${dflowfm_utils_path}/scherm.F90
                             ${CMAKE_CURRENT_SOURCE_DIR}/${dflowfm_utils_path}/unstruc_shapefile.F90
                             ${CMAKE_CURRENT_SOURCE_DIR}/${dflowfm_utils_path}/unstruc_display.F90
                             ${CMAKE_CURRENT_SOURCE_DIR}/${dflowfm_utils_path}/unstruc_opengl.F90
-                            ${CMAKE_CURRENT_SOURCE_DIR}/${dflowfm_utils_path}/rest_f90/dCROSS.F90
+                            ${CMAKE_CURRENT_SOURCE_DIR}/${dflowfm_utils_path}/rest_f90/dcross.F90
                             ${CMAKE_CURRENT_SOURCE_DIR}/${dflowfm_utils_path}/rest_f90/makedir.F90
                             ${CMAKE_CURRENT_SOURCE_DIR}/${dflowfm_utils_path}/rest_f90/read_samples_from_geotiff.F90
                             PROPERTIES COMPILE_OPTIONS "${file_preprocessor_flag}")
