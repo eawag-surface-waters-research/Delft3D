@@ -162,6 +162,8 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
    integer,                      allocatable :: dimids_uses(:)     !< Nr. vectormax-like dimensions that are used
    character(len=NF90_MAX_NAME), allocatable :: mesh_names(:,:)    !< Mesh names in every input file.
    integer,                      allocatable :: nMesh(:)           !< Nr. meshes in every input file
+   integer,                      allocatable :: ncontacts(:)       !< Nr. of mesh contacts in every input file.
+
    integer :: ivarcandidate, ifirstdim, ilastdim
    integer, parameter :: MAX_VAR_DIMS = 4 !< Max nr of dimensions for a single var. Support: (vectormax, layers, space, time).
    integer, dimension(MAX_VAR_DIMS) :: start_idx   !< Start index array for calling nf90_get_var(..., start=...)
@@ -198,7 +200,6 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
    character*10 :: ctime
    character*5  :: czone
    integer      :: meshid, nMaxMeshes
-   integer, allocatable :: ncontactmeshes(:)
 
    if (nfiles <= 1) then
       write (*,'(a)') 'Error: mapmerge: At least two input files required.'
@@ -1564,9 +1565,9 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
 
    ! For 1D2D contact meshes
    if (jaugrid == 1) then
-      call realloc(ncontactmeshes, nfiles, keepExisting=.false., fill = 0)
+      call realloc(ncontacts, nfiles, keepExisting=.false., fill = 0)
       do ii = 1, nfiles
-         ierr = ionc_get_contact_topo_count(ioncids(ii), ncontactmeshes(ii))
+         ierr = ionc_get_contact_topo_count(ioncids(ii), ncontacts(ii))
       end do
    end if
 
