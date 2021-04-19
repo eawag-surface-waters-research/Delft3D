@@ -23,10 +23,12 @@ Debugging a coupled Delft3D4 - D-Waves computation in Visual Studio
 0. Run prepare_sln.py
 1. Compile a Release version of d_hydro, flow2d3d and D-Waves
 2. Compile a Debug version of d_hydro, flow2d3d and D-Waves
+3. Copy dll files from src/bin/x64/flow2d3d/bin folder to the Debug folder of the flow2d3d project
+4. Delete the flow2d3d.dll file from the src/bin/x64/flow2d3d/bin folder
    d_hydro is the StartUp Project, in properties->Debugging:
    a. Set modeldir as workdir
    b. Set input file (config_d_hydro.xml)
-3. Add a <waitfile> statement to your model's config_d_hydro xml file
+3. Add a <waitfile> statement to your model's config_d_hydro xml file under the <flow2D3D name="myNameFlow"> section
 4. Adapt the runscript run_dflow2d3d_dwaves.bat, so that the paths refer to the debug versions of your flow and wave libraries
 5. Run the runscript; in VS, attach the Debug solution to the d_hydro process; 
 6. Set your breakpoints
