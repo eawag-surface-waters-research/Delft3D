@@ -84,6 +84,36 @@ function BuildCMake () {
 }
 
 
+
+# =========================
+# === InstallAll        ===
+# =========================
+function InstallAll () {
+    if [ "$config" = "all"  ]; then
+        echo
+        echo "Installing in build_all ..."
+        cd     $root
+        rm -rf $root/build_all
+        mkdir -p $root/build_all/lnx64
+        # Start with artifacts from traditional build
+        cp -rf $root/src/bin/ $root/build_all/lnx64/ &>/dev/null
+        cp -rf $root/src/lib/ $root/build_all/lnx64/ &>/dev/null
+        cp -rf $root/src/share/ $root/build_all/lnx64/ &>/dev/null
+
+        # DIMR
+        cp -rf $root/build_dimr/install/* $root/build_all/lnx64/ &>/dev/null
+        cp -f  $root/build_dimr/lnx64/scripts/*_dimr.sh $root/build_all/lnx64/bin/ &>/dev/null
+
+        # D-Flow FM
+        cp -rf $root/build_dflowfm/install/bin/* $root/build_all/lnx64/bin/ &>/dev/null
+        cp -rf $root/build_dflowfm/install/lib/* $root/build_all/lnx64/lib/ &>/dev/null
+    fi
+    
+    return
+}
+
+
+
 # ============
 # === MAIN ===
 # ============
@@ -162,18 +192,26 @@ fi
 BuildCMake dimr
 BuildCMake dflowfm
 
+
+
+
 echo "Building the traditional way ..."
-echo "First some svn cleaning is needed in third_party_open..."
-cd $root/src/third_party_open
+echo "First some svn cleaning is needed in src ..."
+cd $root/src
 echo "module purge"
       module purge
 echo "svn revert . -R"
       svn revert . -R
 echo "svn status --no-ignore | grep '^[I?]' | cut -c 9- | while IFS= read -r f; do rm -rf "$f"; done"
       svn status --no-ignore | grep '^[I?]' | cut -c 9- | while IFS= read -r f; do rm -rf "$f"; done
-echo "Build in src..."
-cd $root/src
+echo "svn stat in src ..."
+      svn stat
 echo "./build_h6c7.sh -$compiler"
       ./build_h6c7.sh -$compiler
 
+
+
+InstallAll
+
 echo Finished
+
