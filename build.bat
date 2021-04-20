@@ -343,6 +343,7 @@ rem =======================
     echo          Common problem: NetExtender needs to be switched on to reach the license server
     
     set currentWorkDir=%CD%
+    devenv.com %~1.sln /Clean "Release|x64"
     devenv.com %~1.sln /Build "Release|x64" 1>%currentWorkDir%\build_%~1.log 2>&1
     if NOT %ErrorLevel% EQU 0 (
         echo "Error in compiling %~1.sln: %ErrorLevel%"
