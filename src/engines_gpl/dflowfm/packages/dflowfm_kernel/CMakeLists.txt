@@ -17,21 +17,102 @@ set(svn_version_file ${fortran_version_file}.svn)
 # Gather the source files
 set(headers include/blasfm.h)
 
-get_fortran_source_files(${src_path} source)
+set(dflowfm_data_path ${src_path}/dflowfm_data)
+get_fortran_source_files(${dflowfm_data_path} dflowfm_data)
+
+set(dflowfm_gui_path ${src_path}/dflowfm_gui)
+get_fortran_source_files(${dflowfm_gui_path} dflowfm_gui)
+
+set(dflowfm_io_path ${src_path}/dflowfm_io)
+get_fortran_source_files(${dflowfm_io_path} dflowfm_io)
+
+list(REMOVE_ITEM dflowfm_io ${CMAKE_CURRENT_SOURCE_DIR}/${dflowfm_io_path}/io_openfoam.f90
+                            ${CMAKE_CURRENT_SOURCE_DIR}/${dflowfm_io_path}/read_forcings.f90)
+
+set(dflowfm_kernel_path ${src_path}/dflowfm_kernel)
+set(dflowfm_kernel_compute_path ${dflowfm_kernel_path}/compute)
+set(dflowfm_kernel_compute_hydrology_path ${dflowfm_kernel_path}/compute_hydrology)
+set(dflowfm_kernel_compute_particles_path ${dflowfm_kernel_path}/compute_particles)
+set(dflowfm_kernel_compute_sediment_path ${dflowfm_kernel_path}/compute_sediment)
+set(dflowfm_kernel_compute_sediment_netnode_based_path ${dflowfm_kernel_path}/compute_sediment/netnode_based)
+set(dflowfm_kernel_compute_transport_path ${dflowfm_kernel_path}/compute_transport)
+set(dflowfm_kernel_compute_waq_path ${dflowfm_kernel_path}/compute_waq)
+set(dflowfm_kernel_compute_waves_path ${dflowfm_kernel_path}/compute_waves)
+set(dflowfm_kernel_compute_waves_surfbeat_path ${dflowfm_kernel_path}/compute_waves/surfbeat)
+set(dflowfm_kernel_limiters_path ${dflowfm_kernel_path}/limiters)
+set(dflowfm_kernel_main_path ${dflowfm_kernel_path}/main)
+set(dflowfm_kernel_model_specific_path ${dflowfm_kernel_path}/model_specific)
+set(dflowfm_kernel_prepost_path ${dflowfm_kernel_path}/prepost)
+set(dflowfm_kernel_timespace_path ${dflowfm_kernel_path}/timespace)
 
 
-list(REMOVE_ITEM source ${CMAKE_CURRENT_SOURCE_DIR}/${src_path}/io_openfoam.f90
-                        ${CMAKE_CURRENT_SOURCE_DIR}/${src_path}/read_forcings.f90
-                        ${CMAKE_CURRENT_SOURCE_DIR}/${src_path}/solve_parms.F90
-                        ${CMAKE_CURRENT_SOURCE_DIR}/${src_path}/xbeach_wave_boundary_init.f90
-                        ${CMAKE_CURRENT_SOURCE_DIR}/${src_path}/solve_petsc_v34.F90)
+get_fortran_source_files(${dflowfm_kernel_path} dflowfm_kernel)
+get_fortran_source_files(${dflowfm_kernel_compute_path} dflowfm_kernel_compute)
+get_fortran_source_files(${dflowfm_kernel_compute_hydrology_path} dflowfm_kernel_compute_hydrology)
+get_fortran_source_files(${dflowfm_kernel_compute_particles_path} dflowfm_kernel_compute_particles)
+get_fortran_source_files(${dflowfm_kernel_compute_sediment_path} dflowfm_kernel_compute_sediment)
+get_fortran_source_files(${dflowfm_kernel_compute_sediment_netnode_based_path} dflowfm_kernel_compute_sediment_netnode_based)
+get_fortran_source_files(${dflowfm_kernel_compute_transport_path} dflowfm_kernel_compute_transport)
+get_fortran_source_files(${dflowfm_kernel_compute_waq_path} dflowfm_kernel_compute_waq)
+get_fortran_source_files(${dflowfm_kernel_compute_waves_path} dflowfm_kernel_compute_waves)
+get_fortran_source_files(${dflowfm_kernel_compute_waves_surfbeat_path} dflowfm_kernel_compute_waves_surfbeat)
+get_fortran_source_files(${dflowfm_kernel_path}/limiters dflowfm_kernel_limiters)
+get_fortran_source_files(${dflowfm_kernel_path}/main dflowfm_kernel_main)
+get_fortran_source_files(${dflowfm_kernel_path}/model_specific dflowfm_kernel_model_specific)
+get_fortran_source_files(${dflowfm_kernel_prepost_path} dflowfm_kernel_prepost)
+get_fortran_source_files(${dflowfm_kernel_timespace_path} dflowfm_kernel_timespace)
+
+list(REMOVE_ITEM dflowfm_kernel_compute_waves_surfbeat ${CMAKE_CURRENT_SOURCE_DIR}/${dflowfm_kernel_compute_waves_surfbeat_path}/xbeach_wave_boundary_init.f90)
+
+# Gather source files
+set(dflowfm_manager_path ${src_path}/dflowfm_manager/)
+get_fortran_source_files(${dflowfm_manager_path} dflowfm_manager)
+
+# Gather source files
+set(dflowfm_rgf_path ${src_path}/dflowfm_rgf/)
+get_fortran_source_files(${dflowfm_rgf_path} dflowfm_rgf)
+
+# Gather source files
+set(dflowfm_utils_path ${src_path}/dflowfm_utils/)
+get_fortran_source_files(${dflowfm_utils_path} dflowfm_utils)
+
+get_fortran_source_files(${dflowfm_utils_path}/rest_f90 dflowfm_utils_rest_f90)
+get_fortran_source_files(${dflowfm_utils_path}/to_deltares_common dflowfm_utils_to_deltares_common)
+
+list(REMOVE_ITEM dflowfm_utils ${CMAKE_CURRENT_SOURCE_DIR}/${dflowfm_utils_path}/solve_parms.F90
+                               ${CMAKE_CURRENT_SOURCE_DIR}/${dflowfm_utils_path}/solve_petsc_v34.F90)
+
+get_fortran_source_files(${src_path}/to_thirdparty to_thirdparty)
 
 # Define library
 set(library_name dflowfm_kernel)
 set(library_source_list     ${fortran_version_file}
                             ${headers}
-                            ${source})
-                            
+                            ${dflowfm_data}
+                            ${dflowfm_gui}
+                            ${dflowfm_io}
+                            ${dflowfm_kernel}
+                            ${dflowfm_kernel_compute}
+                            ${dflowfm_kernel_compute_hydrology}
+                            ${dflowfm_kernel_compute_particles}
+                            ${dflowfm_kernel_compute_sediment}
+                            ${dflowfm_kernel_compute_sediment_netnode_based}
+                            ${dflowfm_kernel_compute_transport}
+                            ${dflowfm_kernel_compute_waq}
+                            ${dflowfm_kernel_compute_waves}
+                            ${dflowfm_kernel_compute_waves_surfbeat}
+                            ${dflowfm_kernel_limiters}
+                            ${dflowfm_kernel_main}
+                            ${dflowfm_kernel_model_specific}
+                            ${dflowfm_kernel_prepost}
+                            ${dflowfm_kernel_timespace}
+                            ${dflowfm_manager}
+                            ${dflowfm_rgf}
+                            ${dflowfm_utils}
+                            ${dflowfm_utils_rest_f90}
+                            ${dflowfm_utils_to_deltares_common}
+                            ${to_thirdparty})
+
 add_library(${library_name}  ${svn_version_file} ${ini_version_file} ${library_source_list})
 
 # Add dependencies
@@ -96,49 +177,49 @@ if (UNIX)
 endif(UNIX)
 
 if (WIN32)
-    set(oss_dependencies    deltares_common
-                            deltares_common_c
-                            deltares_common_mpi
-                            dhydrology_kernel
-                            ec_module
-                            flow1d
-                            flow1d_core
-                            flow1d_io
-                            gridgeom
-                            io_netcdf
-                            kdtree_wrapper
-                            kdtree2
-                            fortrangis
-                            libsigwatch
-                            md5digest
-                            md5
-                            metis
-                            metisoptions
-                            morphology_data
-                            morphology_io
-                            morphology_kernel
-                            morphology_plugins_c
-                            netcdf4
-                            netcdff
-                            petsc
-                            polypack
-                            shp
-                            trachytopes_io
-                            trachytopes_kernel
-                            triangle_c
-                            waq_process
-                            waq_utils_c
-                            waq_utils_f
-                            wq_processes
-                            interacter_stub)
+set(oss_dependencies    deltares_common
+                        deltares_common_c
+                        deltares_common_mpi
+                        dhydrology_kernel
+                        ec_module
+                        flow1d
+                        flow1d_core
+                        flow1d_io
+                        gridgeom
+                        io_netcdf
+                        kdtree_wrapper
+                        kdtree2
+                        fortrangis
+                        libsigwatch
+                        md5digest
+                        md5
+                        metis
+                        metisoptions
+                        morphology_data
+                        morphology_io
+                        morphology_kernel
+                        morphology_plugins_c
+                        netcdf4
+                        netcdff
+                        petsc
+                        polypack
+                        shp
+                        trachytopes_io
+                        trachytopes_kernel
+                        triangle_c
+                        waq_process
+                        waq_utils_c
+                        waq_utils_f
+                        wq_processes
+                        interacter_stub)
 
-    oss_include_libraries(${library_name} oss_dependencies)
-    target_link_libraries(${library_name} ${oss_dependencies})
+oss_include_libraries(${library_name} oss_dependencies)
+target_link_libraries(${library_name} ${oss_dependencies})
 
-    include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include"
-                        ${mpich2_path}
-                        ${tecplot_path}
-                        ${petsc_path})
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include"
+                    ${mpich2_path}
+                    ${tecplot_path}
+                    ${petsc_path})
 endif(WIN32)
 
 
@@ -151,26 +232,33 @@ prebuild_version_number(${library_name} ${fortran_version_file}
 # Define additional compilation flags
 
 set_source_files_properties(${fortran_version_file}
-                            ${CMAKE_CURRENT_SOURCE_DIR}/${src_path}/dfm_signals.F90
-                            ${CMAKE_CURRENT_SOURCE_DIR}/${src_path}/filter.F90
-                            ${CMAKE_CURRENT_SOURCE_DIR}/${src_path}/gui.F90
-                            ${CMAKE_CURRENT_SOURCE_DIR}/${src_path}/net.F90
-                            ${CMAKE_CURRENT_SOURCE_DIR}/${src_path}/part.F90
-                            ${CMAKE_CURRENT_SOURCE_DIR}/${src_path}/partition.F90
-                            ${CMAKE_CURRENT_SOURCE_DIR}/${src_path}/rest.F90
-                            ${CMAKE_CURRENT_SOURCE_DIR}/${src_path}/saadf.F
-                            ${CMAKE_CURRENT_SOURCE_DIR}/${src_path}/saadf90.F90
-                            ${CMAKE_CURRENT_SOURCE_DIR}/${src_path}/solve_guus.F90
-                            ${CMAKE_CURRENT_SOURCE_DIR}/${src_path}/solve_petsc.F90
-                            ${CMAKE_CURRENT_SOURCE_DIR}/${src_path}/Tecplot.F90
-                            ${CMAKE_CURRENT_SOURCE_DIR}/${src_path}/unstruc.F90
-                            ${CMAKE_CURRENT_SOURCE_DIR}/${src_path}/unstruc_api.F90
-                            ${CMAKE_CURRENT_SOURCE_DIR}/${src_path}/unstruc_display.F90
-                            ${CMAKE_CURRENT_SOURCE_DIR}/${src_path}/unstruc_opengl.F90
-                            ${CMAKE_CURRENT_SOURCE_DIR}/${src_path}/unstruc_shapefile.F90
-                            ${CMAKE_CURRENT_SOURCE_DIR}/${src_path}/unstruc_version.F90
-                            ${CMAKE_CURRENT_SOURCE_DIR}/${src_path}/wrwaq.F90
-                            ${CMAKE_CURRENT_SOURCE_DIR}/${src_path}/xbeach_filefunctions.F90
+                            ${CMAKE_CURRENT_SOURCE_DIR}/${dflowfm_data_path}/partition.F90
+                            ${CMAKE_CURRENT_SOURCE_DIR}/${dflowfm_gui_path}/setwor.F90
+                            ${CMAKE_CURRENT_SOURCE_DIR}/${dflowfm_io_path}/read_commandline.F90
+                            ${CMAKE_CURRENT_SOURCE_DIR}/${dflowfm_io_path}/writesomefinaloutput.F90
+                            ${CMAKE_CURRENT_SOURCE_DIR}/${dflowfm_io_path}/wrwaq.F90
+                            ${CMAKE_CURRENT_SOURCE_DIR}/${dflowfm_kernel_compute_path}/filter.F90
+                            ${CMAKE_CURRENT_SOURCE_DIR}/${dflowfm_kernel_compute_particles_path}/sendrecv_particledata.F90
+                            ${CMAKE_CURRENT_SOURCE_DIR}/${dflowfm_kernel_compute_particles_path}/update_particles.F90
+                            ${CMAKE_CURRENT_SOURCE_DIR}/${dflowfm_kernel_compute_waves_surbeat_path}/xbeach_filefunctions.F90
+                            ${CMAKE_CURRENT_SOURCE_DIR}/${dflowfm_kernel_prepost_path}/flow_modelinit.F90
+                            ${CMAKE_CURRENT_SOURCE_DIR}/${dflowfm_kernel_prepost_path}/inidat.F90
+                            ${CMAKE_CURRENT_SOURCE_DIR}/${dflowfm_kernel_prepost_path}/print_help_commandline.F90
+                            ${CMAKE_CURRENT_SOURCE_DIR}/${dflowfm_kernel_timespace_path}/timespaceinitialfield_mpi.F90
+                            ${CMAKE_CURRENT_SOURCE_DIR}/${dflowfm_manager_path}/inctime_user.F90
+                            ${CMAKE_CURRENT_SOURCE_DIR}/${dflowfm_manager_path}/dfm_signals.F90
+                            ${CMAKE_CURRENT_SOURCE_DIR}/${dflowfm_manager_path}/flow_externaloutput.F90
+                            ${CMAKE_CURRENT_SOURCE_DIR}/${dflowfm_utils_path}/solve_petsc.F90
+                            ${CMAKE_CURRENT_SOURCE_DIR}/${dflowfm_utils_path}/solve_guus.F90
+                            ${CMAKE_CURRENT_SOURCE_DIR}/${dflowfm_utils_path}/saadf.F90
+                            ${CMAKE_CURRENT_SOURCE_DIR}/${dflowfm_utils_path}/saadf90.F90
+                            ${CMAKE_CURRENT_SOURCE_DIR}/${dflowfm_utils_path}/scherm.F90
+                            ${CMAKE_CURRENT_SOURCE_DIR}/${dflowfm_utils_path}/unstruc_shapefile.F90
+                            ${CMAKE_CURRENT_SOURCE_DIR}/${dflowfm_utils_path}/unstruc_display.F90
+                            ${CMAKE_CURRENT_SOURCE_DIR}/${dflowfm_utils_path}/unstruc_opengl.F90
+                            ${CMAKE_CURRENT_SOURCE_DIR}/${dflowfm_utils_path}/rest_f90/dcross.F90
+                            ${CMAKE_CURRENT_SOURCE_DIR}/${dflowfm_utils_path}/rest_f90/makedir.F90
+                            ${CMAKE_CURRENT_SOURCE_DIR}/${dflowfm_utils_path}/rest_f90/read_samples_from_geotiff.F90
                             PROPERTIES COMPILE_OPTIONS "${file_preprocessor_flag}")
 
 # Define preprocessor definitions 
