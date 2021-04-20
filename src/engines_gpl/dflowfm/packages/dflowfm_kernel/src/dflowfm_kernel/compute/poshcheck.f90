@@ -1,0 +1,120 @@
+ subroutine poshcheck(key)
+ use m_flow                                          ! when entering this subroutine, s1=s0, u1=u0, etc
+ use m_flowgeom
+ use m_flowtimes
+ use m_partitioninfo
+ use m_timer
+ use unstruc_display, only: jaGUI
+
+ implicit none
+
+ integer :: key
+
+ integer :: n, L, LL, LLL
+
+ integer, dimension(2) :: idum
+
+ Nodneg = 0 ; key = 0
+
+ if ( jaGUI.eq.1 ) then
+      call setcol(221) ! white
+ end if
+
+
+ if (jposhchk == 0) return
+
+ do n = 1,ndxi                                                  ! check result
+
+    if ( jampi.eq.1 ) then
+!      exclude ghost cells
+       if ( idomain(n).ne.my_rank ) cycle
+    end if
+
+    if (kfs(n) > 0) then
+       if ( s1(n) < bl(n) ) then
+           if ( s1(n) < bl(n) - 1d-10 ) then                     ! if ( s1(n) < bl(n) ) then
+
+              nodneg = n ; numnodneg = numnodneg + 1
+              if ( jaGUI.eq.1 ) then
+                 call rcirc( xz(n), yz(n) )
+              end if
+
+              if (jposhchk == -1) then                           ! only detect dry cells and return (for Nested Newton restart)
+                 key = 2
+                 exit
+              else if (jposhchk == 1) then                       ! only timestep reduction
+                 key = 2                                         ! flag redo timestep
+                 exit
+
+              else if (jposhchk == 2 .or. jposhchk == 3) then    ! set dry all attached links
+
+                 key = 2                                         ! flag redo setkfs
+
+                 do LL  = 1, nd(n)%lnx
+                    L   = iabs(nd(n)%ln(LL))
+                    hu(L) = 0d0
+                 enddo
+
+              else if (jposhchk == 4 .or. jposhchk == 5) then    ! reduce links au
+
+                 do LL  = 1, nd(n)%lnx
+                    LLL = nd(n)%ln(LL); L = iabs(LLL)
+                    if (hu(L) > 0) then
+                       au(L) = 0.2d0*au(L)
+                       if (au(L) < eps6) then
+                          hu(L) = 0d0 ;  key = 2                 ! flag redo setkfs
+                       endif
+                    endif
+                 enddo
+
+              else if (jposhchk == 6 .or. jposhchk == 7) then    ! only set dry outflowing links
+
+                 do LL  = 1, nd(n)%lnx
+                    LLL = nd(n)%ln(LL); L = iabs(LLL)
+                    if (LLL < 0 .and. u1(L) > 0 .or. &
+                        LLL > 0 .and. u1(L) < 0 ) then
+                        hu(L) = 0d0   ; key = 2                  !  flag redo setkfs
+                    endif
+                 enddo
+
+
+              endif
+
+
+           endif
+
+
+           s1(n) = bl(n)
+        endif
+    endif
+
+ enddo
+
+ if ( jampi.eq.1 ) then
+!   reduce nodneg and key
+    idum = (/ key, nodneg /)
+
+    if ( jatimer.eq.1 ) call starttimer(IMPIREDUCE)
+!    call reduce_key(key)
+    call reduce_int_max(2,idum)
+    if ( jatimer.eq.1 ) call stoptimer(IMPIREDUCE)
+
+    key = idum(1)
+    nodneg = idum(2)
+ end if
+
+ if (nodneg /= 0 .and. jposhchk /= -1) then
+    if (jposhchk == 1 .or. jposhchk == 3   .or. jposhchk == 5 .or. jposhchk == 7) then
+        dts = 0.7d0*dts
+    endif
+    dsetb  = dsetb + 1                               ! total nr of setbacks
+    s1     = s0
+    vol1 = vol0
+    if (dts .lt. dtmin) then
+        s1 = max(s1,bl)                              ! above bottom
+        call okay(0)
+        key = 1                                      ! for easier mouse interrupt
+    endif
+ endif
+
+ end subroutine poshcheck

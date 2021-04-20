@@ -1,0 +1,11 @@
+  SUBROUTINE LESSNODES()
+  use m_netw
+  USE M_AFMETING
+  implicit none
+
+  integer :: k
+  DO K = 1,NUMK
+     CALL ONELINE(K,RLMIN) ! TWEE LIJNTJES WORDEN 1
+  ENDDO
+  RETURN
+  END SUBROUTINE LESSNODES

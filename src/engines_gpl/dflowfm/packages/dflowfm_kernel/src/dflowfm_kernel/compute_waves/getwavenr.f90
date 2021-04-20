@@ -1,0 +1,36 @@
+ subroutine getwavenr(h, T, k)
+ use m_sferic
+ use m_physcoef
+ implicit none
+ ! get wavenr from waterdepth and period, see d3d doc
+
+ double precision, parameter    :: a1 = 5.060219360721177D-01, a2 = 2.663457535068147D-01,  &
+                                   a3 = 1.108728659243231D-01, a4 = 4.197392043833136D-02,  &
+                                   a5 = 8.670877524768146D-03, a6 = 4.890806291366061D-03,  &
+                                   b1 = 1.727544632667079D-01, b2 = 1.191224998569728D-01,  &
+                                   b3 = 4.165097693766726D-02, b4 = 8.674993032204639D-03
+
+ double precision , intent(in)  :: h                    !  Waterheight
+ double precision , intent(in)  :: t                    !  Period
+ double precision , intent(out) :: k                    !  Approximation of wave lenght
+
+
+ double precision               :: den                  ! Denominator
+ double precision               :: kd                   ! Double value for K
+ double precision               :: num                  ! Numerator
+ double precision               :: ome2 , rk, fac, rlabda, rlab0, rn    ! Omega
+
+ ome2 = ( (twopi/T)**2 )*h/ag
+ num  = 1.0D0 + ome2*(a1 + ome2*(a2 + ome2*(a3 + ome2*(a4 + ome2*(a5 + ome2*a6)))))
+ den  = 1.0D0 + ome2*(b1 + ome2*(b2 + ome2*(b3 + ome2*(b4 + ome2*a6))))
+ k    = sqrt(ome2*num/den)/ h
+
+ return
+
+ call getwavenrqn(h,T,RK)
+ fac    = k/rk                    ! check
+ rlabda = twopi / k
+ rlab0  = T*sqrt(9.81*h)
+ rn     = rlabda/rlab0
+
+ end subroutine getwavenr

@@ -1,0 +1,114 @@
+!> Finalizes a single time step, should be called directly after flow_run_single_timestep
+subroutine flow_finalize_single_timestep(iresult)
+use m_flow
+use m_flowgeom
+use m_flowtimes
+use unstruc_model, only : jawritebalancefile
+use unstruc_model, only : md_fou_step
+use unstruc_netcdf
+use timers
+use m_timer
+use unstruc_display, only : jaGUI
+use dfm_error
+use dfm_signals
+use m_mass_balance_areas, only: jamba
+use m_partitioninfo, only: jampi, sdmn, my_rank
+use m_integralstats
+use m_fourier_analysis
+use m_oned_functions, only: updateTimeWetOnGround, updateTotalInflow1d2d, updateTotalInflowLat
+use unstruc_channel_flow, only : network
+implicit none
+integer, intent(out) :: iresult
+character(len=255)   :: filename_fou_out
+
+   ! Timestep has been performed, now finalize it.
+
+   if (ti_waqproc < 0d0) then
+      if ( jatimer.eq.1 ) call starttimer(IFMWAQ)
+      call fm_wq_processes_step(dts,time1)
+      if ( jatimer.eq.1 ) call stoptimer (IFMWAQ)
+   endif
+
+   if (jamba > 0) then  ! at moment, this function is only required for the mass balance areas
+      call comp_horflowmba()
+   endif
+
+ call flow_f0isf1()                                  ! mass balance and vol0 = vol1
+
+ ! Update water depth at pressure points (for output).
+ ! TODO: UNST-3415: investigate if this statement can be moved to step_reduce.
+ hs = s1 - bl
+
+ call structure_parameters()
+
+ dnt    = dnt + 1
+ time0  = time1                                      ! idem
+ dtprev = dts                                        ! save previous timestep
+
+ if ( jatimer.eq.1 ) then ! TODO: AvD: consider moving timers to flow_perform_*
+   call stoptimer(ITIMESTEP)
+   numtsteps = numtsteps + 1
+ end if
+
+ ! call wriinc(time1)
+
+  if (jaQext > 0) then
+     call updateCumulativeInflow(dts)
+  end if
+
+  call updateValuesOnCrossSections(time1)             ! Compute sum values across cross sections.
+  call updateValuesOnRunupGauges()
+ if (jampi == 0 .or. (jampi == 1 .and. my_rank==0)) then
+    if (numsrc > 0) then
+       call updateValuesonSourceSinks(time1)         ! Compute discharge and volume on sources and sinks
+    endif
+ endif
+
+ if (jahislateral > 0 .and. numlatsg > 0 .and. ti_his > 0) then
+    call updateValuesOnLaterals(time1, dts)
+ end if
+
+
+ ! for 1D only
+ if (network%loaded .and. ndxi-ndx2d > 0) then
+    if (jamapTimeWetOnGround > 0) then
+       call updateTimeWetOnGround(dts)
+    end if
+    if (jamapTotalInflow1d2d > 0) then
+       call updateTotalInflow1d2d(dts)
+    end if
+    if (jamapTotalInflowLat > 0) then
+       call updateTotalInflowLat(dts)
+    end if
+ end if
+ ! note updateValuesOnObservationStations() in flow_usertimestep
+
+ ! Time-integral statistics on all flow nodes.
+ if (is_numndvals > 0) then
+    call update_integralstats()
+ end if
+
+ if ( jaGUI.eq.1 ) then
+    call TEXTFLOW()
+ end if
+
+ call timstop(handle_steps)
+ iresult = dfm_check_signals()                      ! Abort when Ctrl-C was pressed
+ if (iresult /= DFM_NOERR) goto 888
+
+ if (validateon) then
+    call flow_validatestate(iresult)                ! abort when the solution becomes unphysical
+ endif
+ validateon = .true.
+ if (iresult /= DFM_NOERR) goto 888
+
+888 continue
+
+   if (fourierIsActive() .and. md_fou_step == 1) then
+      if (fourierWithUc()) then
+         call getucxucyeulmag(ndkx, workx, worky, ucmag, jaeulervel, 1)
+      endif
+      call postpr_fourier(time0, dts)
+   endif
+
+end subroutine flow_finalize_single_timestep
