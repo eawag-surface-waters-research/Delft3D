@@ -57,9 +57,7 @@ set_source_files_properties(${fortran_version_file}
 set(oss_dependencies    delwaq_dll) 
 oss_include_libraries(${executable_name} oss_dependencies)
 
-if(UNIX)
-    target_link_libraries(${executable_name} ${oss_dependencies})
-endif(UNIX)
+target_link_libraries(${executable_name} ${oss_dependencies})
 
 # Define how the files should be structured within Visual Studio
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${source_files})

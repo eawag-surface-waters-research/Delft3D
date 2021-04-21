@@ -43,6 +43,11 @@ if(NOT TARGET netcdff)
 	add_subdirectory(${checkout_src_root}/${netcdf_module} netcdff)
 endif()
 
+# io_netcdf
+if(NOT TARGET io_netcdf)
+	add_subdirectory(${checkout_src_root}/${io_netcdf_module} io_netcdf)
+endif()
+
 # Nefis
 if(NOT TARGET nefis)
 	add_subdirectory(${checkout_src_root}/${nefis_module} nefis)

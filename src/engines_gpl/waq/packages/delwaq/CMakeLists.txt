@@ -57,6 +57,7 @@ set(oss_dependencies    deltares_common
                         delftio
                         delftio_shm
                         esmfsm
+                        io_netcdf
                         nefis
                         netcdf4
                         netcdff
@@ -74,16 +75,19 @@ oss_include_libraries(${library_name} oss_dependencies)
 target_link_libraries(${library_name} ${oss_dependencies})
 
 if (WIN32)
+
+    include_directories(${mpich2_path})
+
     # Set linker properties
     message(STATUS "Setting linker properties in windows")
     target_link_directories(${library_name}
-                            PRIVATE
+                            PUBLIC
                             "${checkout_src_root}/third_party_open/netcdf/netCDF 4.6.1/lib"
                             "${checkout_src_root}/third_party_open/mpich2/x64/lib"
                             "${checkout_src_root}/third_party_open/pthreads/bin/x64")
 
 
-    target_link_libraries(${library_name}                                                   
+    target_link_libraries(${library_name}
                             "libiomp5md.lib"
                             "fmpich2.lib"
                             "WbeMuuid.lib"
