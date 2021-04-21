@@ -34,8 +34,8 @@ echo.
 
 
 call :Checks
-call :traditionalBuild
 call :vcvarsall
+call :traditionalBuild
 call :DoCMake dimr
 call :DoCMake dflowfm
 call :Build dimr
