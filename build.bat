@@ -103,7 +103,7 @@ rem =================================
 :GetEnvironmentVars
     echo.
     echo "Get environment variables ..."
-    rem # The order is important:
+    rem # VISUAL STUDIO: The order is important:
     rem # On TeamCity VS2019 is installed without IFORT
     rem # Check from new to old, overwriting when it was already found
     if NOT "%VS2019INSTALLDIR%" == "" (
@@ -118,21 +118,23 @@ rem =================================
         set vs=2015
         echo Found: VisualStudio 14 2015
     )
-    if NOT "%IFORT_COMPILER21%" == "" (
-        set ifort=21
-        echo Found: Intel Fortran 2021
-    )
-    if NOT "%IFORT_COMPILER19%" == "" (
-        set ifort=19
-        echo Found: Intel Fortran 2019
+    rem # IFORT: The order is important:
+    rem # Check from old to new, overwriting when it was already found
+    if NOT "%IFORT_COMPILER16%" == "" (
+        set ifort=16
+        echo Found: Intel Fortran 2016
     )
     if NOT "%IFORT_COMPILER18%" == "" (
         set ifort=18
         echo Found: Intel Fortran 2018
     )
-    if NOT "%IFORT_COMPILER16%" == "" (
-        set ifort=16
-        echo Found: Intel Fortran 2016
+    if NOT "%IFORT_COMPILER19%" == "" (
+        set ifort=19
+        echo Found: Intel Fortran 2019
+    )
+    if NOT "%IFORT_COMPILER21%" == "" (
+        set ifort=21
+        echo Found: Intel Fortran 2021
     )
     goto :endproc
 
