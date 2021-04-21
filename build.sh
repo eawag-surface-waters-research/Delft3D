@@ -172,6 +172,16 @@ echo
 scriptdirname=`readlink \-f \$0`
 scriptdir=`dirname $scriptdirname`
 root=$scriptdir
+
+
+
+
+
+echo "Building the traditional way ..."
+echo "./build_h6c7.sh -$compiler"
+      ./build_h6c7.sh -$compiler
+
+
  
 #
 # Dot setenv.sh to load the modules needed
@@ -191,23 +201,6 @@ fi
 
 BuildCMake dimr
 BuildCMake dflowfm
-
-
-
-
-echo "Building the traditional way ..."
-echo "First some svn cleaning is needed in src ..."
-cd $root/src
-echo "module purge"
-      module purge
-echo "svn revert . -R"
-      svn revert . -R
-echo "svn status --no-ignore | grep '^[I?]' | cut -c 9- | while IFS= read -r f; do rm -rf "$f"; done"
-      svn status --no-ignore | grep '^[I?]' | cut -c 9- | while IFS= read -r f; do rm -rf "$f"; done
-echo "svn stat in src ..."
-      svn stat
-echo "./build_h6c7.sh -$compiler"
-      ./build_h6c7.sh -$compiler
 
 
 

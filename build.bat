@@ -34,12 +34,12 @@ echo.
 
 
 call :Checks
+call :traditionalBuild
 call :vcvarsall
 call :DoCMake dimr
 call :DoCMake dflowfm
 call :Build dimr
 call :Build dflowfm
-call :traditionalBuild
 call :installall
 
 
