@@ -311,7 +311,7 @@ rem =========================
         cd /d "%root%\src\"
         call :VSbuild delft3d_open
         call :VSbuild io_netcdf
-        call :VSbuild nefis
+        rem # Disabled: causes errors: call :VSbuild nefis
         cd /d "%root%\"
     )
     goto :endproc
