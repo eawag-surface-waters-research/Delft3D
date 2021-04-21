@@ -1043,7 +1043,7 @@ integer function dlwqnc_create_wqtime( ncidout, mesh_name, t0string, timeid, bnd
         return
     endif
 
-    t0_date_time = t0string(5:23) // " 00:00" ! DELWAQ has no timezone information!
+    t0_date_time = t0string(5:23) // " +00:00" ! DELWAQ has no timezone information!
     t0_date_time(5:5) = '-'
     t0_date_time(8:8) = '-'
 
@@ -1081,7 +1081,7 @@ end function dlwqnc_create_wqtime
 !
 integer function dlwqnc_create_wqvariable( ncidout, mesh_name, wqname, longname, stdname, unit, ntimeid, noseglid, nolayid, wqid )
     use netcdf_utils, only: ncu_get_att
-    
+
     integer, intent(in)                        :: ncidout
     character(len=*), intent(in)               :: mesh_name
     character(len=*), intent(in)               :: wqname
@@ -1103,7 +1103,7 @@ integer function dlwqnc_create_wqvariable( ncidout, mesh_name, wqname, longname,
     character(len=nf90_max_name), dimension(5) :: dimname
     character(len=3*nf90_max_name)             :: methods
     character(len=:), allocatable             :: coords
-    
+
     allocate(character(len=0) :: coords)
 
     dlwqnc_create_wqvariable = nf90_noerr
