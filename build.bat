@@ -180,15 +180,12 @@ rem =======================
         for /f "tokens=* usebackq" %%f in (`python prepare_sln.py`) do (
             set var=%%f
             if "!var:~0,19!" == "CMake configuration"    (
-                echo cmake configuration found
                 set config=!var:~25,20!
             )
             if "!var:~0,22!" == "Visual Studio  Version" (
-                echo Visual Studio version found
                 set vs=!var:~25,4!
             )
             if "!var:~0,16!" == "Preparation only"       (
-                echo preparation only flag found
                 set prepareonly=!var:~25,1!
             )
         )
