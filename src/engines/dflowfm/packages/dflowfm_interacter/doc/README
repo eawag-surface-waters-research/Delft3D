@@ -1,0 +1,13 @@
+
+1. Create on toplevel (next to "src", "examples") directory "build_dflowfm_interacter"
+2. In "build_dflowfm_interacter", execute:
+   cmake ..\src\cmake -G "Visual Studio 15 2017" -A x64 -B "." -D CONFIGURATION_TYPE="dflowfm_interacter"
+3. Copy https://repos.deltares.nl/repos/ds/branches/dflowfm/dflowfm_interacter/third_party/interacter
+   To
+   "third_party\interacter"
+4. In "build_dflowfm_interacter\dflowfm_interacter.sln":
+   dflowfm_interacter project -> properties -> Linker -> General -> Link Library Dependencies = Yes
+5. Compile
+6. To debug:
+   - Add to working dir: .ini/.hlp files from "src\engines_gpl\dflowfm\res"
+   - Add to command line options: --display:opengl=0

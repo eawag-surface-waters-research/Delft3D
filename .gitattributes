@@ -464,8 +464,8 @@ src/cmake/compiler_options/intel.cmake -text
 src/cmake/configurations/d_waq_configuration.cmake -text
 src/cmake/configurations/d_waves_configuration.cmake -text
 src/cmake/configurations/dflowfm_configuration.cmake -text
-src/cmake/configurations/dflowfm_open_configuration.cmake -text
-src/cmake/configurations/dimr_open_configuration.cmake -text
+src/cmake/configurations/dflowfm_interacter_configuration.cmake -text
+src/cmake/configurations/dimr_configuration.cmake -text
 src/cmake/configurations/flow2d3d_configuration.cmake -text
 src/cmake/configurations/tests_configuration.cmake -text
 src/cmake/configurations/tools_configuration.cmake -text
@@ -497,6 +497,8 @@ src/configure.ac -text
 src/doxyfile_delft3d -text
 src/doxyfile_delwaq -text
 src/engines/dflowfm/packages/dflowfm_interacter/CMakeLists.txt -text
+src/engines/dflowfm/packages/dflowfm_interacter/doc/Interacter_steps.docx -text
+src/engines/dflowfm/packages/dflowfm_interacter/doc/README -text
 src/engines_gpl/Makefile.am -text
 src/engines_gpl/d_hydro/Makefile.am -text
 src/engines_gpl/d_hydro/packages/Makefile.am -text

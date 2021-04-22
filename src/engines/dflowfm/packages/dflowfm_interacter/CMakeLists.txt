@@ -6,8 +6,7 @@ if(WIN32)
     set(src_path src) 
 
     # Set the DFlow FM component path 
-    set(dflowfm_path "${CMAKE_CURRENT_SOURCE_DIR}/../../")
-    set(dflowfm_gui_path "${CMAKE_CURRENT_SOURCE_DIR}/src/")
+    set(dflowfm_path "${CMAKE_CURRENT_SOURCE_DIR}/../../../../engines_gpl/dflowfm/")
 
     # Set the directory referring to the res folder
     set(res_path ${dflowfm_path}/res)
@@ -21,12 +20,12 @@ if(WIN32)
     set(svn_version_file ${rc_version_file}.svn)
 
     # Gather the source files
-    file(GLOB source    ${dflowfm_gui_path}/net_main.F90)
+    file(GLOB source    ${dflowfm_path}/packages/dflowfm-cli_exe/src/net_main.F90)
 
     set(icon_file ${res_path}/dflowfm_icon.rc)
 
     # Define the executable
-    set(executable_name dflowfm)
+    set(executable_name dflowfm_interacter)
     add_executable(${executable_name}   ${source}
                                         ${icon_file}
                                         ${rc_version_file} 
@@ -92,7 +91,7 @@ if(WIN32)
     set_target_properties (${executable_name} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_BINARY_DIR}/x64/Debug")
 
     # Define additional compilation flags
-    set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/${src_path}/net_main.F90
+    set_source_files_properties(${dflowfm_path}/packages/dflowfm-cli_exe/src/net_main.F90
                                 PROPERTIES COMPILE_OPTIONS "${file_preprocessor_flag}")
 
 
@@ -146,15 +145,15 @@ if(WIN32)
     source_group("Resources" FILES  ${icon_file})
 
     # Create the folder structure in vfproj
-    source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${source})
+    source_group(TREE ${dflowfm_path}/packages FILES ${source})
 
     # Set the folder for storing the target. 
-    set_target_properties (${executable_name} PROPERTIES FOLDER dflowfm)
+    set_target_properties (${executable_name} PROPERTIES FOLDER dflowfm_interacter)
 
     # post-build
     set(install_dir ${CMAKE_BINARY_DIR})
     set(build_dir ${CMAKE_BINARY_DIR})
-    set(build_project dflowfm)
+    set(build_project dflowfm_interacter)
 
     post_build_target( ${executable_name}
                        ${install_dir} 

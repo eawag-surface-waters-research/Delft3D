@@ -1,4 +1,4 @@
-project(dflowfm_interacter)
+project(dflowfm)
 
 # Specify the modules to be included
 add_subdirectory(${checkout_src_root}/${deltares_common_module} deltares_common)
@@ -31,8 +31,8 @@ add_subdirectory(${checkout_src_root}/${hydrology_kernel_module} dhydrology_kern
 
 # Dflowfm modules 
 add_subdirectory(${checkout_src_root}/${dflowfm_kernel_module} dflowfm_kernel)
+add_subdirectory(${checkout_src_root}/${dflowfm_cli_exe_module} dflowfm_cli_exe)
 add_subdirectory(${checkout_src_root}/${dflowfm_lib_module} dflowfm_lib)
-add_subdirectory(${checkout_src_root}/${dflowfm_module} dflowfm)
 
 # Tools_gpl
 # DFMoutput
@@ -95,3 +95,8 @@ add_subdirectory(${checkout_src_root}/${polypack_module} polypack)
 
 # Nefis
 add_subdirectory(${checkout_src_root}/${nefis_module} nefis)
+
+if(UNIX)
+    # install
+    add_subdirectory(${checkout_src_root}/${install_dflowfm_module} install_dflowfm)
+endif()
