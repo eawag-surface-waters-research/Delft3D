@@ -710,11 +710,11 @@ subroutine ug_loctype_to_location(locType,locName)
 
    select case (locType)
    case (UG_LOC_FACE)
-      locName = 'node'
+      locName = 'face'
    case (UG_LOC_EDGE)
       locName = 'edge'
    case (UG_LOC_NODE)
-      locName = 'face'
+      locName = 'node'
    case (UG_LOC_VOL)
       locName = 'volume'
    case default
