@@ -2453,12 +2453,12 @@ module m_ec_provider
             ncvarnames(1) = 'u10'                            ! 10 meter eastward wind
             ncstdnames(1) = 'eastward_wind'
          case ('windy') 
-            ncvarnames(1) = 'v10'                            ! 10 meter eastward wind
+            ncvarnames(1) = 'v10'                            ! 10 meter northward wind
             ncstdnames(1) = 'northward_wind'
          case ('windxy') 
             ncvarnames(1) = 'u10'                            ! 10 meter eastward wind
             ncstdnames(1) = 'eastward_wind'
-            ncvarnames(2) = 'v10'                            ! 10 meter eastward wind
+            ncvarnames(2) = 'v10'                            ! 10 meter northward wind
             ncstdnames(2) = 'northward_wind'
          case ('stressxy')
             ncvarnames(1) = 'tauu'                           ! eastward wind stress
