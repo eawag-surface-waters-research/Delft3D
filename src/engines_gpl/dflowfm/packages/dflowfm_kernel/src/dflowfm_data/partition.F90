@@ -5624,15 +5624,8 @@ end subroutine partition_make_globalnumbers
                     //'so the option of partitioning a mesh is not available.')
 #endif
 
-1234 continue
+ 1234 continue
 
-     !if (ne == 46) then
-     !idomain(1:10) = 1
-     !idomain(11:20) = 1
-     !idomain(21:30) = 1
-     !idomain(31:46) = 0
-     !idomain(38:40) = 1
-     !end if
       return
    end subroutine partition_METIS_to_idomain
 
