@@ -120,10 +120,10 @@ set(visual_studio_source_group_name "Source Files")
 
 # Determine the configuration to make 
 string(TOUPPER ${CONFIGURATION_TYPE} configuration_type)
-set(dflowfm_open_configuration "DFLOWFM")
-set(dflowfm_configuration "DFLOWFM_INTERACTER")
+set(dflowfm_configuration "DFLOWFM")
+set(dflowfm_interacter_configuration "DFLOWFM_INTERACTER")
 set(tests_configuration "TESTS")
-set(dimr_open_configuration "DIMR")
+set(dimr_configuration "DIMR")
 set(d_waq_configuration "D-WAQ")
 set(d_waves_configuration "D-WAVES")
 set(flow2d3d_configuration "FLOW2D3D")
@@ -131,9 +131,9 @@ set(tools_configuration "TOOLS")
 set(all_configuration "ALL")
 
 if(NOT (${configuration_type} STREQUAL ${tests_configuration} 
-        OR ${configuration_type} STREQUAL ${dflowfm_open_configuration}
         OR ${configuration_type} STREQUAL ${dflowfm_configuration}
-        OR ${configuration_type} STREQUAL ${dimr_open_configuration}
+        OR ${configuration_type} STREQUAL ${dflowfm_interacter_configuration}
+        OR ${configuration_type} STREQUAL ${dimr_configuration}
         OR ${configuration_type} STREQUAL ${d_waq_configuration}
         OR ${configuration_type} STREQUAL ${d_waves_configuration}
         OR ${configuration_type} STREQUAL ${flow2d3d_configuration}
@@ -148,19 +148,19 @@ if(${configuration_type} STREQUAL ${tests_configuration})
     include(configurations/tests_configuration.cmake)
 endif()
 
-if(${configuration_type} STREQUAL ${dflowfm_open_configuration} OR ${configuration_type} STREQUAL ${all_configuration}) 
+if(${configuration_type} STREQUAL ${dflowfm_configuration} OR ${configuration_type} STREQUAL ${all_configuration}) 
     message(STATUS "Generating solution for D-Flow FM ...")
-    include(configurations/dflowfm_open_configuration.cmake)
-endif()
-
-if(${configuration_type} STREQUAL ${dflowfm_configuration})
-    message(STATUS "Generating solution for D-Flow FM (with interacter) ...")
     include(configurations/dflowfm_configuration.cmake)
 endif()
 
-if(${configuration_type} STREQUAL ${dimr_open_configuration} OR ${configuration_type} STREQUAL ${all_configuration})
+if(${configuration_type} STREQUAL ${dflowfm_interacter_configuration})
+    message(STATUS "Generating solution for D-Flow FM (with interacter) ...")
+    include(configurations/dflowfm_interacter_configuration.cmake)
+endif()
+
+if(${configuration_type} STREQUAL ${dimr_configuration} OR ${configuration_type} STREQUAL ${all_configuration})
     message(STATUS "Generating solution for DIMR ...")
-    include(configurations/dimr_open_configuration.cmake)
+    include(configurations/dimr_configuration.cmake)
 endif()
 
 if(${configuration_type} STREQUAL ${d_waq_configuration} OR ${configuration_type} STREQUAL ${all_configuration})

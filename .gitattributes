@@ -485,6 +485,7 @@ src/cmake/install_wq/ReadMe.txt -text
 src/cmake/install_wq/install_and_bundle.cmake -text
 src/cmake/linux_scripts.cmake -text
 src/cmake/modules.cmake -text
+src/cmake/modules/engines.cmake -text
 src/cmake/modules/engines_gpl.cmake -text
 src/cmake/modules/third_parties.cmake -text
 src/cmake/modules/tools_gpl.cmake -text

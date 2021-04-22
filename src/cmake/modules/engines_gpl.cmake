@@ -1,12 +1,10 @@
 # File to define the engines_gpl components and their corresponding tests
 set(engines_gpl_path engines_gpl)
-set(engines_path engines)
 
 # D-Flow Flexible Mesh
 set(dflowfm_kernel_module ${engines_gpl_path}/dflowfm/packages/dflowfm_kernel)
 set(dflowfm_cli_exe_module ${engines_gpl_path}/dflowfm/packages/dflowfm-cli_exe)
 set(dflowfm_lib_module ${engines_gpl_path}/dflowfm/packages/dflowfm_lib)
-set(dflowfm_interacter_module ${engines_path}/dflowfm/packages/dflowfm_interacter)
 
 # Waq
 set(waq_module_path "${engines_gpl_path}/waq/packages")
