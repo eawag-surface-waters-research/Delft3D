@@ -106,6 +106,22 @@ if(WIN32)
 
     # Set linker properties
     message(STATUS "Setting linker properties in windows")
+
+
+    message(CHECK_START "Looking for Interacter library (intmwi64.lib)")
+    find_library (lib_interacter intmwi64.lib
+                  HINTS ENV INTERACTER_DIR
+                  PATHS "${checkout_src_root}/third_party/interacter/bin/win32/x64")
+
+    if(NOT lib_interacter)
+       message(CHECK_FAIL "not found")
+       message(SEND_ERROR "Required Interacter library is missing.")
+    else()
+       message(CHECK_PASS "found")
+       target_link_libraries(${executable_name} ${lib_interacter})
+    endif()
+
+
     target_link_directories(${executable_name}
                             PRIVATE
                             ${gisinternals_path}
@@ -113,8 +129,7 @@ if(WIN32)
                             "${checkout_src_root}/third_party_open/netcdf/netCDF 4.6.1/lib"
                             "${checkout_src_root}/third_party_open/petsc/petsc-3.10.2/lib/x64/Release"
                             "${checkout_src_root}/third_party_open/pthreads/bin/x64"
-                            "${checkout_src_root}/third_party_open/Tecplot/lib/x64"
-                            "${checkout_src_root}/third_party/interacter/bin/win32/x64")
+                            "${checkout_src_root}/third_party_open/Tecplot/lib/x64")
 
     target_link_libraries(${executable_name}
                           "comctl32.lib"
@@ -130,8 +145,7 @@ if(WIN32)
                           "fmpich2.lib"
                           "libpetsc.lib"
                           "gdal_i.lib"
-                          "tecio.lib"
-                          "intmwi64.lib")
+                          "tecio.lib")
                       
     message(STATUS "Setting target_compile_definitions in windows")
     target_compile_definitions(${executable_name} PRIVATE "HAVE_DISPLAY=1;WIN32;HAVE_OPENGL;HAVE_METIS;HAVE_POLYPACK;HAVE_MPI;HAVE_PROJ;HAVE_SHAPELIB;HAVE_GDAL")
