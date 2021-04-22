@@ -176,11 +176,13 @@ root=$scriptdir
 
 
 
-cd $root/src
-echo "Building the traditional way ..."
-echo "./build_h6c7.sh -$compiler"
-      ./build_h6c7.sh -$compiler
-cd $root
+if [ "$prepareonly" = "0" ]; then
+    cd $root/src
+    echo "Building the traditional way ..."
+    echo "./build_h6c7.sh -$compiler"
+          ./build_h6c7.sh -$compiler
+    cd $root
+fi
 
 
 
