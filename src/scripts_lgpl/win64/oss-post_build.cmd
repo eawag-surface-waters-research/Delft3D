@@ -384,7 +384,7 @@ goto :endproc
 rem ==========================
 rem === POST_BUILD_DFLOWFM
 rem ==========================
-:dflowfm
+:dflowfm_interacter
     echo "postbuild dflowfm . . ."
     
     if "%configuration%" == "Debug" (
