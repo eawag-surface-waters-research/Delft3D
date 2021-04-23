@@ -54,6 +54,7 @@ echo             %root%\src\io_netcdf.sln
 echo             %root%\src\nefis.sln
 echo             %root%\src\tests.sln
 echo             %root%\src\utils_lgpl.sln
+echo             %root%\src\utils_lgpl_no_tests.sln
 echo.
 echo Finished
 goto :end
@@ -310,7 +311,7 @@ rem =========================
         echo "Building in the traditional way (only when config is all) ..."
         cd /d "%root%\src\"
         call :VSbuild delft3d_open
-        call :VSbuild io_netcdf
+        call :VSbuild utils_lgpl_no_tests
         rem # Disabled: causes errors: call :VSbuild nefis
         cd /d "%root%\"
     )

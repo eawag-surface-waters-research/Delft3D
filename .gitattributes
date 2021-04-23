@@ -4681,6 +4681,7 @@ src/scripts_lgpl/win64/testcoverage/catfiles.py -text
 src/scripts_lgpl/win64/testcoverage/readcov.lst -text
 src/scripts_lgpl/win64/testcoverage/readcov.py -text
 src/scripts_lgpl/win64/tests_template.sln -text
+src/scripts_lgpl/win64/utils_lgpl_no_tests_template.sln -text
 src/scripts_lgpl/win64/utils_lgpl_template.sln -text
 src/setenv.sh -text
 src/test/Makefile.am -text

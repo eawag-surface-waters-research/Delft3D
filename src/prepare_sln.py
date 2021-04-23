@@ -660,10 +660,11 @@ def do_work():
         process_solution_file("dimr_open.sln", os.path.join("engines_gpl", "dimr", "scripts", "template", "dimr_open_template.sln"))
 
         # TODO: Consider making this optional via cmdline args:
-        process_solution_file("io_netcdf.sln",    os.path.join("scripts_lgpl", "win64", "io_netcdf_template.sln"))
-        process_solution_file("nefis.sln",        os.path.join("scripts_lgpl", "win64", "nefis_template.sln"))
-        process_solution_file("utils_lgpl.sln",   os.path.join("scripts_lgpl", "win64", "utils_lgpl_template.sln"))
-        process_solution_file("tests.sln",        os.path.join("scripts_lgpl", "win64", "tests_template.sln"))
+        process_solution_file("io_netcdf.sln"          , os.path.join("scripts_lgpl", "win64", "io_netcdf_template.sln"))
+        process_solution_file("nefis.sln"              , os.path.join("scripts_lgpl", "win64", "nefis_template.sln"))
+        process_solution_file("utils_lgpl.sln"         , os.path.join("scripts_lgpl", "win64", "utils_lgpl_template.sln"))
+        process_solution_file("utils_lgpl_no_tests.sln", os.path.join("scripts_lgpl", "win64", "utils_lgpl_no_tests_template.sln"))
+        process_solution_file("tests.sln"              , os.path.join("scripts_lgpl", "win64", "tests_template.sln"))
     else:
         slnName = os.path.basename(templateSolutionPath).replace("_template","")
         process_solution_file(slnName, templateSolutionPath)
