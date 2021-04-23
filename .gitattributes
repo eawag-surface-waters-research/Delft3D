@@ -4603,13 +4603,6 @@ src/exclude.list -text
 src/global_config.inc -text
 src/install.cmd -text
 src/install.sh -text
-src/logs/VS2010_Intel12_Release_Win32_Output.txt -text
-src/logs/autogen_gnu4.6.2.log -text
-src/logs/autogen_intel11.1.log -text
-src/logs/configure_gnu4.6.2.log -text
-src/logs/configure_intel11.1.log -text
-src/logs/make_gnu4.6.2.log -text
-src/logs/make_intel11.1.log -text
 src/m4/COPYING.gwqt -text
 src/m4/ac_check_java_home.m4 -text
 src/m4/ac_check_old_compilers.m4 -text
