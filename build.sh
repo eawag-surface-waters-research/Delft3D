@@ -176,7 +176,7 @@ root=$scriptdir
 
 
 
-if [ "$prepareonly" = "0" ]; then
+if [ "$prepareonly" = "0" ] && [ "$config" = "all"  ]; then
     cd $root/src
     echo "Building the traditional way ..."
     echo "./build_h6c7.sh -$compiler"
