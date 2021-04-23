@@ -33,13 +33,21 @@ echo     vs          : !vs!
 echo.
 
 
+
 call :Checks
+
 call :vcvarsall
+
 call :traditionalBuild
+
 call :DoCMake dimr
 call :DoCMake dflowfm
+if "%config%" == "tests" call :DoCMake tests
+
 call :Build dimr
 call :Build dflowfm
+if "%config%" == "tests" call :Build tests
+
 call :installall
 
 
@@ -48,6 +56,7 @@ echo.
 echo Visual Studio sln-files:
 echo D-Flow FM : %root%\build_dflowfm\dflowfm.sln
 echo DIMR      : %root%\build_dimr\dimr.sln
+echo DIMR      : %root%\build_tests\tests.sln
 echo Other     : %root%\src\delft3d_open.sln
 echo             %root%\src\ec_module.sln
 echo             %root%\src\io_netcdf.sln
@@ -90,6 +99,21 @@ rem =================================
         goto usage
     )
     if "%1" == "all" (
+        set prepareonly=0
+        set config=%1
+        set mode=quiet
+    )
+    if "%1" == "dimr" (
+        set prepareonly=0
+        set config=%1
+        set mode=quiet
+    )
+    if "%1" == "dflowfm" (
+        set prepareonly=0
+        set config=%1
+        set mode=quiet
+    )
+    if "%1" == "tests" (
         set prepareonly=0
         set config=%1
         set mode=quiet
@@ -170,15 +194,17 @@ rem =======================
 rem === Prepare_sln    ====
 rem =======================
 :PrepareSln
-    echo.
-    echo "Calling prepare_sln.py ..."
-    cd /d "%root%\src\"
-
-    echo mode:!mode!
     if "!mode!" == "quiet" (
-        echo executing prepare_sln in quiet mode
-        python prepare_sln.py -vs !vs! -ifort !ifort! -cmakeConfig none -cmakePreparationOnly no
+        if "%config%" == "all" (
+            echo.
+            echo "Calling prepare_sln.py in quiet mode ..."
+            cd /d "%root%\src\"
+            python prepare_sln.py -vs !vs! -ifort !ifort! -cmakeConfig none -cmakePreparationOnly no
+        )
     ) else (
+        echo.
+        echo "Calling prepare_sln.py in interactive mode ..."
+        cd /d "%root%\src\"
         rem # Catch stdout, each line in parameter var1, var2 etc.
         for /f "tokens=* usebackq" %%f in (`python prepare_sln.py`) do (
             set var=%%f
@@ -360,8 +386,8 @@ rem =======================
 rem === InstallAll     ====
 rem =======================
 :installall
-    if %prepareonly% EQU 1 goto :endproc
-
+    if %prepareonly% EQU 1   goto :endproc
+    if "%config%" == "tests" goto :endproc
     echo.
     echo "Installing in build_all ..."
     call :createCMakeDir build_all

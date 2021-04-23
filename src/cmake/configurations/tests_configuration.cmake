@@ -6,8 +6,6 @@ add_subdirectory(${checkout_src_root}/${deltares_common_c_module} deltares_commo
 add_subdirectory(${checkout_src_root}/${deltares_common_mpi_module} deltares_common_mpi)
 add_subdirectory(${checkout_src_root}/${ftnunit_module} ftnunit)
 
-add_subdirectory(${checkout_src_root}/${test_deltares_common_module} test_deltares_common)
-
 # Trachytopes
 add_subdirectory(${checkout_src_root}/${trachytopes_kernel_module} trachytopes_kernel)
 add_subdirectory(${checkout_src_root}/${trachytopes_io_module} trachytopes_io)
@@ -60,6 +58,9 @@ add_subdirectory(${checkout_src_root}/${triangle_c_module} triangle_c)
 # libsigwatch
 add_subdirectory(${checkout_src_root}/${libsigwatch_module} libsigwatch)
 
+# FLAP
+add_subdirectory(${checkout_src_root}/${FLAP_module} FLAP)
+
 # fortrangis
 add_subdirectory(${checkout_src_root}/${fortrangis_module} fortrangis)
 add_subdirectory(${checkout_src_root}/${shp_module} shp)
@@ -69,7 +70,7 @@ endif(WIN32)
 
 # netcdf
 if(WIN32)
-    add_subdirectory(${checkout_src_root}/${netcdf_module} netcdf)
+    add_subdirectory(${checkout_src_root}/${netcdf_module} netcdff)
 endif(WIN32)
 
 # io_netcdf
@@ -80,3 +81,18 @@ add_subdirectory(${checkout_src_root}/${ec_module} ec_module)
 
 # gridgeom
 add_subdirectory(${checkout_src_root}/${gridgeom_module} gridgeom)
+
+# interacter_stub
+add_subdirectory(${checkout_src_root}/${interacter_stub_module} interacter_stub)
+
+# polypack
+add_subdirectory(${checkout_src_root}/${polypack_module} polypack)
+
+# Nefis
+add_subdirectory(${checkout_src_root}/${nefis_module} nefis)
+
+# Test binaries
+add_subdirectory(${checkout_src_root}/${test_deltares_common_module} test_deltares_common)
+add_subdirectory(${checkout_src_root}/${test_ec_module}              test_ec_module)
+add_subdirectory(${checkout_src_root}/${test_waq_utils_f}            test_waq_utils_f)
+add_subdirectory(${checkout_src_root}/${test_dflowfm_kernel}         test_dflowfm_kernel)

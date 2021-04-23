@@ -1,13 +1,4 @@
-file(GLOB source    src/test_bilin5.f90
-                    src/test_combinepaths.f90
-                    src/test_deltares_common.f90
-                    src/test_distance.f90
-                    src/test_geometry_module.f90
-                    src/test_hash_search.f90
-                    src/test_precision_basics.f90
-                    src/test_properties.f90
-                    src/test_sorting_algorithms.f90
-                    src/test_string_module.f90)
+file(GLOB source    src/*.f90)
 
 add_executable(test_deltares_common ${source})
 

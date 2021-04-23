@@ -4688,6 +4688,7 @@ src/test/Makefile.am -text
 src/test/engines_gpl/Makefile.am -text
 src/test/engines_gpl/dflowfm/Makefile.am -text
 src/test/engines_gpl/dflowfm/packages/Makefile.am -text
+src/test/engines_gpl/dflowfm/packages/dflowfm_kernel/CMakeLists.txt -text
 src/test/engines_gpl/dflowfm/packages/dflowfm_kernel/Makefile.am -text
 src/test/engines_gpl/dflowfm/packages/dflowfm_kernel/dflowfm_kernel_test.vfproj -text
 src/test/engines_gpl/dflowfm/packages/dflowfm_kernel/src/Makefile.am -text
@@ -4761,6 +4762,7 @@ src/test/engines_gpl/dflowfm/packages/test_dflowfm/test_data/storageNodes_nodeId
 src/test/engines_gpl/dflowfm/packages/test_dflowfm/test_data/storageNodes_nodeId_useTable/storageNodes_table.ini -text
 src/test/engines_gpl/waq/Makefile.am -text
 src/test/engines_gpl/waq/packages/Makefile.am -text
+src/test/engines_gpl/waq/packages/waq_utils_f/CMakeLists.txt -text
 src/test/engines_gpl/waq/packages/waq_utils_f/Makefile.am -text
 src/test/engines_gpl/waq/packages/waq_utils_f/src/Makefile.am -text
 src/test/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/Makefile.am -text
@@ -4792,6 +4794,7 @@ src/test/utils_lgpl/deltares_common/packages/test_deltares_common/test_data/test
 src/test/utils_lgpl/deltares_common/packages/test_deltares_common/test_deltares_common.vfproj -text
 src/test/utils_lgpl/ec_module/Makefile.am -text
 src/test/utils_lgpl/ec_module/packages/Makefile.am -text
+src/test/utils_lgpl/ec_module/packages/ec_module_test/CMakeLists.txt -text
 src/test/utils_lgpl/ec_module/packages/ec_module_test/Makefile.am -text
 src/test/utils_lgpl/ec_module/packages/ec_module_test/ReadMe.txt -text
 src/test/utils_lgpl/ec_module/packages/ec_module_test/build_ec_module_testprog.sh -text
