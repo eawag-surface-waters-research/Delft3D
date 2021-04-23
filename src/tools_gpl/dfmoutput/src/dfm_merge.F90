@@ -91,7 +91,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
    integer, allocatable :: netfacenodesl(:,:) !< Net cell - to - net node mapping for local usage (per cell)
    ! A summary of global numbering of nodes/edges/faces in map merge can be found in the description of UNST-3929.
    integer, allocatable :: face_c2g(:), node_c2g(:), netedge_c2g(:), edge_c2g(:) !< Concatenated index - to - global index mapping.
-   integer, allocatable :: node_g2c(:), edge_g2c(:), face_g2c(:), face_g2cc(:), netedge_g2c(:) !< Global index - to - concatenated index mapping.
+   integer, allocatable :: node_g2c(:), edge_g2c(:), face_g2c(:), face_c2cc(:), netedge_g2c(:) !< Global index - to - concatenated index mapping.
    integer, allocatable :: node_faces(:,:) ! faces that surrounds the node
    integer, allocatable :: nfaceedges(:)   ! total number of edges that surround a face
    double precision, allocatable :: node_x(:), node_y(:), edge_x(:), edge_y(:) !< coordinates
@@ -866,7 +866,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
    call realloc(face_domain, ndxc, keepExisting=.false., fill=-1)
    call realloc(face_c2g,    ndxc, keepExisting=.false.)
    call realloc(face_g2c,    ndxc, keepExisting=.false.)
-   call realloc(face_g2cc,   ndxc, keepExisting=.false., fill=-1)
+   call realloc(face_c2cc,   ndxc, keepExisting=.false., fill=-1)
 
    lnxc = sum(lnx(1:nfiles))
    call realloc(edge_domain, lnxc, keepExisting=.false., fill=-1)
@@ -974,7 +974,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
                nfaceglob = nfaceglob+1
                ifaceglob = face_c2g(nfacecount+ip)
                face_g2c(ifaceglob) = nfacecount + ip
-               face_g2cc(ifaceglob) = nfaceglob
+               face_c2cc(nfacecount + ip) = nfaceglob ! "contiguous to concatinated", meaning: mapping from including ghost nodes to excluding ghost nodes.
             end if
          end do
          ndxg(ii)   = nfaceglob-nfaceglob0
@@ -1977,7 +1977,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
                                    g1 = itmpvar2D(ikk, nitemglob)
                                    if (g1 > 0) then
                                        g1 = g1 + nfacecount
-                                       itmpvar2D(ikk,nitemglob) = face_g2cc(face_c2g(g1))
+                                       itmpvar2D(ikk,nitemglob) = face_c2cc(g1)
                                    else if (g1 == 0) then
                                        itmpvar2D(ikk,nitemglob) = 0
                                    end if
