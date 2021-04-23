@@ -2407,7 +2407,6 @@ src/engines_gpl/dimr/packages/dimr_lib/include/dimr_control_block.h -text
 src/engines_gpl/dimr/packages/dimr_lib/include/dimr_couple_item.h -text
 src/engines_gpl/dimr/packages/dimr_lib/include/dimr_coupler.h -text
 src/engines_gpl/dimr/packages/dimr_lib/include/dimr_couplers.h -text
-src/engines_gpl/dimr/packages/dimr_lib/include/dimr_lib_version.h -text
 src/engines_gpl/dimr/packages/dimr_lib/include/dimr_lib_version.h.svn -text
 src/engines_gpl/dimr/packages/dimr_lib/include/dimr_lib_version.rc.svn -text
 src/engines_gpl/dimr/packages/dimr_lib/include/dimr_logger.h -text
