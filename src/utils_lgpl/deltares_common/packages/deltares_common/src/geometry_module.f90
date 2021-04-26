@@ -924,8 +924,8 @@ module geometry_module
          ENDIF
       end do   ! do ipoly=1,Npoly
 
-      if (jins == 1) then 
-         if (mod(count,2) == 1) then ! and, even more handy: 
+      if (jins == 1) then !< NB: here, it is checked based on jins, while in the loop based on jins_opt, need to be fixed
+         if (mod(count,2) == 1) then 
             in = 1
          else
             in = 0
