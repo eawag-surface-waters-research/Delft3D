@@ -814,7 +814,7 @@ module geometry_module
       double precision, intent(in)                    :: dmiss
       integer, intent(in)                             :: JINS, NPL
       double precision, optional, intent(in)          :: xpl(NPL), ypl(NPL), zpl(NPL)
-      
+      integer                                         :: count
       numselect = 0
 
       if ( NPL.eq.0 ) then
@@ -872,7 +872,7 @@ module geometry_module
 
          !         write(6,"('done, Npoly=', I4)") Npoly
       end if
-
+      count  = 0
       do ipoly=1,Npoly
          istart = iistart(ipoly)
          iend   = iiend(ipoly)
@@ -895,37 +895,47 @@ module geometry_module
          IF (jins_opt == 1) THEN  ! inside polygon
             if (xp >= xpmin(ipoly) .and. xp <= xpmax(ipoly) .and. &
                yp >= ypmin(ipoly) .and. yp <= ypmax(ipoly) ) then
-            call PINPOK(Xp, Yp, iend-istart+1, xpl(istart), ypl(istart), IN, jins, dmiss)
-            if (jins_opt > 0 .neqv. JINS > 0) then ! PINPOK has used global jins, but polygon asked the exact opposite, so negate the result here.
-               IN = 1-in   ! IN-1
-            end if
+               call PINPOK(Xp, Yp, iend-istart+1, xpl(istart), ypl(istart), IN, jins, dmiss)
+               if (jins_opt > 0 .neqv. JINS > 0) then ! PINPOK has used global jins, but polygon asked the exact opposite, so negate the result here.
+                  IN = 1-in   ! IN-1
+               end if
 
-            if ( in.eq.1 ) then
-               exit
-            end if
+               if (in == 1) then
+                  count  = count + 1
+               end if
             endif
          ELSE                 ! outside polygon
             if (xp >= xpmin(ipoly) .and. xp <= xpmax(ipoly) .and. &
                yp >= ypmin(ipoly) .and. yp <= ypmax(ipoly) ) then
-            call PINPOK(Xp, Yp, iend-istart+1, xpl(istart), ypl(istart), IN, jins, dmiss)
-            if (jins_opt > 0 .neqv. JINS > 0) then ! PINPOK has used global jins, but polygon asked the exact opposite, so negate the result here.
-               IN = 1-in   ! IN-1
-            end if
+               call PINPOK(Xp, Yp, iend-istart+1, xpl(istart), ypl(istart), IN, jins, dmiss)
+               if (jins_opt > 0 .neqv. JINS > 0) then ! PINPOK has used global jins, but polygon asked the exact opposite, so negate the result here.
+                  IN = 1-in   ! IN-1
+               end if
 
-            if ( in.eq.1 ) then
-               exit ! outside check succeeded, return 'true'.
-            end if
-            else
-               in = 1 ! outside check succeeded (completely outside of polygon's bounding box), return 'true'.
-               exit
+               if (in == 1) then
+                  continue
+               else
+                  count = count + 1
+               end if
+            !else
+            !   in = 1 ! outside check succeeded (completely outside of polygon's bounding box), return 'true'.
+            !   exit
             endif
          ENDIF
       end do   ! do ipoly=1,Npoly
 
-      if (in == 1) then ! and, even more handy: 
-         ipolyfound = ipoly 
+      if (jins == 1) then 
+         if (mod(count,2) == 1) then ! and, even more handy: 
+            in = 1
+         else
+            in = 0
+         endif
       else
-         ipolyfound = 0
+         if (mod(count,2) == 1) then
+            in = 0
+         else
+            in = 1
+         endif
       endif
 
       return
