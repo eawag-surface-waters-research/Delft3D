@@ -64,6 +64,7 @@
  use m_longculverts
  use unstruc_channel_flow, only: useVolumeTables
  use m_VolumeTables
+ use timers
 
  implicit none
 
@@ -80,6 +81,7 @@
  double precision, allocatable:: u1_tmp(:)
 
  integer :: itest = 1, ispecials, ierr, mrst, kk, La, j, nq, ierror, N1, N2, Lb, Lt, nat, ntmp
+ integer :: ihandle
  double precision :: psi, samp, ct, st, omeg, t, rr, rmx, x0, y0, dxx, dyy, blmn, blmx, dbl, bot, rms, ucmk, phi, dphi
  character(len=255) :: rstfile
  character(len=4)   :: EXT
@@ -103,11 +105,6 @@
 
  Lnmax = 0 ; Lnmin = 0
  ndmax = 0 ; ndmin = 0
-
- ! Generate the volume tables for 1d nodes
- if (useVolumeTables) then
-    call makeVolumeTables()
- endif
 
  call inisferic()                                    ! also set coriolis :<
  if (icorio > 0) then
@@ -915,6 +912,14 @@ end if
  call timstrt('Initialise external forcings', handle_iniext)
  iresult = flow_initexternalforcings()               ! this is the general hook-up to wind and boundary conditions
  call timstop(handle_iniext)
+
+  ! Generate the volume tables for 1d nodes
+ihandle = 0
+call timstrt('makeVolumeTables', ihandle)
+if (useVolumeTables) then
+    call makeVolumeTables()
+endif
+call timstop(ihandle)
 
  ! from hereon, the processes are in sync
  if (jampi == 1) then

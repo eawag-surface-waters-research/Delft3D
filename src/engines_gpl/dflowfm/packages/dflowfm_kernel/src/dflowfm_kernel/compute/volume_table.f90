@@ -191,6 +191,7 @@ module m_VolumeTables
       use m_GlobalParameters
       use m_Storage
       use m_flow
+      use m_missing
 
       integer :: ndx1d
       integer :: nstor
@@ -199,7 +200,7 @@ module m_VolumeTables
       integer :: LL, L
       integer :: i, j
       integer :: index
-      integer :: jacustombnd1d
+      integer :: jacustombnd1d, ibndsect
 
       double precision :: height
       double precision :: level
@@ -322,13 +323,31 @@ module m_VolumeTables
                      dxL = 0.5d0*dx(L)
                   endif
 
-                  if (L > lnxi) then                      ! for 1D boundary links, refer to attached link
-                     L = LBND1D(L)
+                  jacustombnd1d = 0
+                  if (kcu(L) == -1 .and. allocated(bndWidth1D)) then
+                     ibndsect = lnxbnd(L-lnxi)
+                     if (ibndsect > 0) then
+                        if (bndWidth1D(ibndsect) /= dmiss) then
+                           jacustombnd1d = 1
+                        end if
+                     end if
+                  end if
+
+                  if (jacustombnd1d == 1) then ! This link is a 1D bnd *and* has a custom width.
+                     width = bndwidth1D(ibndsect)
+                     area = (height-bobAboveBedLevel)*width
+                     ! Use the water level at the inner point of the boundary link
+
+                  else 
+                     if (L > lnxi) then                      ! for 1D boundary links, refer to attached link
+                        L = LBND1D(L)
+                     endif
+                  
+                     ! The bed level is the lowest point of all flow links and possibly storage nodes. 
+                     ! In order to take this difference into account the variable bobAboveBedLevel is used
+                     call GetCSParsTotal(line2cross(L, 2), cross, height-bobAboveBedLevel, area, width, CSCalculationOption)
                   endif
                   
-                  ! The bed level is the lowest point of all flow links and possibly storage nodes. 
-                  ! In order to take this difference into account the variable bobAboveBedLevel is used
-                  call GetCSParsTotal(line2cross(L, 2), cross, height-bobAboveBedLevel, area, width, CSCalculationOption)
                   vltb(n)%vol(j) = vltb(n)%vol(j) + dxL*area
                   
                   if (j==vltb(n)%count) then
