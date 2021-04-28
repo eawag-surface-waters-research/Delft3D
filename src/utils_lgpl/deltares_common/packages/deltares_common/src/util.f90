@@ -36,14 +36,6 @@
 !-------------------------------------------------------------------------------
 !
 
-subroutine get_versionstring (versionstring)
-    use deltares_common_version_module
-    implicit none
-    character(*) :: versionstring
-    call getfullversionstring_deltares_common(versionstring)
-end subroutine get_versionstring
-
-
 subroutine cgetcp (cpu)
     implicit none
     double precision, intent (out) :: cpu
