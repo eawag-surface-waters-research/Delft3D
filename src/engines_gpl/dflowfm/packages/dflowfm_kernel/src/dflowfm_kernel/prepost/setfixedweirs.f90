@@ -253,7 +253,10 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
        bobL = max(bob(1,L), bob(2,L))
     endif
 
-    if ( (zc > bobL .and. zc > zcrest(L)) .or. ( (ifixedweirscheme == 8 .or. ifixedweirscheme == 9) .and. ifirstweir(L) == 1) ) then   ! For Villemonte and Tabellenboek fixed weirs under bed level are also possible
+    ! if ( (zc > bobL .and. zc > zcrest(L)) .or. ( (ifixedweirscheme == 8 .or. ifixedweirscheme == 9) .and. ifirstweir(L) == 1) ) then   ! For Villemonte and Tabellenboek fixed weirs under bed level are also possible
+
+    if ( (zc > bobL .and. zc > zcrest(L)) .or. ifirstweir(L) == 1 ) then   ! For Villemonte and Tabellenboek fixed weirs under bed level are also possible
+
 
        ! Set whether this is the first time that for this link weir values are set:
        ! As a result, only the first fixed weir under the bed level is used
@@ -266,20 +269,20 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
           cycle  ! weirs only on regular links and 1d2d links
        endif
 
-       jaweir   = 0
+       jaweir   = 1 ! 0
        if (ifixedweirscheme > 0) then
           if (jakol45 == 0) then ! no dzl or dzr specified
-             jaweir = 1
+             ! jaweir = 1
           else
              dz1   = sl*dzL(k+1) + (1d0-sl)*dzL(k)
              dz2   = sl*dzR(k+1) + (1d0-sl)*dzR(k)
 
-             if (min (dz1,dz2) >= sillheightmin) then  ! weir if sufficiently high and regular link
-                jaweir = 1
-             elseif (ifixedweirscheme == 8 .or. ifixedweirscheme == 9) then
+             ! if (min (dz1,dz2) >= sillheightmin) then  ! weir if sufficiently high and regular link
+             !   jaweir = 1
+             !elseif (ifixedweirscheme == 8 .or. ifixedweirscheme == 9) then
                 ! For Villemonte and Tabellenboek weirs with low sills are also applied, in order to be consistent with Simona
-                jaweir = 1
-             endif
+             !   jaweir = 1
+             !endif
 
              if (jaconveyance2D >=1) then   ! now set adjacent bobs of netlinks | sufficiently perpendicular to fixedweir to local ground level
                 do i = 1,2
@@ -316,19 +319,19 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
                           endif
 
                           if (Lf > 0 .and. adjacentbob .ne. dmiss) then
-                             if (jaconveyance2D >= 1) then
+                             if (jaconveyance2D >= 1) then 
                                 if (lncn(1,Lf) == n1) then
                                     bob(1,Lf) = adjacentbob
                                 else
                                     bob(2,Lf) = adjacentbob
                                 endif
-                             else
+                             else 
                                  bob(1,Lf) = adjacentbob
                                  bob(2,Lf) = adjacentbob
                              endif
                              !nl1 = ln(1,Lf) ; nl2 = ln(2,Lf)
                              !bl(nl1) = min(bl(nl1), adjacentbob )
-                             !bl(nl2) = min(bl(nl2), adjacentbob ) ! still needs to be done
+                             !bl(nl2) = min(bl(nl2), adjacentbob ) ! still needs to be done 
                           endif
 
                       endif
@@ -343,10 +346,10 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
        if (jaweir > 0) then                                      ! set weir treatment
           ihu(L) = k
           call normalout( XPL(k), YPL(k), XPL(k+1), YPL(k+1) , xn, yn, jsferic, jasfer3D, dmiss, dxymis)
-
+          
           k3 = lncn(1,L) ; k4 = lncn(2,L)
           wu(L) = dbdistance ( xk(k3), yk(k3), xk(k4), yk(k4), jsferic, jasfer3D, dmiss)  ! set 2D link width
-
+          
           wu(L) = wu(L) * abs( xn*csu(L) + yn*snu(L) )           ! projected length of fixed weir
 
 
@@ -407,7 +410,7 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
              endif
           endif
 
-
+ 
           ! 21 = Ifixedweirscheme 6
           ! 22 = General structure
           ! 23 = Rajaratnam
@@ -421,7 +424,7 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
           nh = nh + 1                                            ! just raised bobs
        endif
     else
-       if ( ifirstweir(L) == 0  .and. (ifixedweirscheme == 8 .or. ifixedweirscheme == 9) ) then   !  only for fixed weirs under the bed level for Tabellenboek or Villemonte and not for the first time that a fixed weir is set on this link
+       if ( ifirstweir(L) == 0) then !  .and. (ifixedweirscheme == 8 .or. ifixedweirscheme == 9) ) then   !  only for fixed weirs under the bed level for Tabellenboek or Villemonte and not for the first time that a fixed weir is set on this link
           ! check for larger ground height height values if at this link already a fixed weir exist
 
           call normalout( XPL(k), YPL(k), XPL(k+1), YPL(k+1) , xn, yn, jsferic, jasfer3D, dmiss, dxymis)  ! test EdG
@@ -441,9 +444,9 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
          ! Check whether toe is lower. If so, also adjust toe level and the ground height
          ! If ground height is smaller than 1 cm, then this neglected
          !
-         if (zc-zhu .lt. ztoeu(L) .and. zhu .gt. 0.01) then
-            ztoeu(L)   = zc - zhu
-            dzsillu(L) = zcrest(L) - ztoeu(L)
+         if (zc-zhu .lt. ztoeu(L) .and. zhu .gt. 0.01) then 
+            ztoeu(L)   = zc - zhu                            
+            dzsillu(L) = zcrest(L) - ztoeu(L)              
             !! write (msgbuf,'(a,i5,f10.3)') 'Larger sill up:     ', L,  dzsillu(L); call msg_flush()
          endif
          if (zc-zhd .lt. ztoed(L) .and. zhd .gt. 0.01) then
@@ -460,55 +463,55 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
     call doclose(mout)
  end if
 
- if (jakol45 == 2 .and. sillheightmin > 0d0) then  ! when a minimum threshold is specified
-                                                   ! and toe heights are known, and agreed upon
+ if (jakol45 == 2 .and. sillheightmin > 0d0) then  ! when a minimum threshold is specified    
+                                                   ! and toe heights are known, and agreed upon 
     do L = 1,lnxi
        if (ihu(L) > 0) then                        ! when flagged as weir
-
+ 
            do ii = 1,2                             ! loop over adjacent cells
               k = 0
-              if (ii == 1 .and. dzsillu(L) < sillheightmin .and. dzsilld(L) > sillheightmin .or. &
+              if (ii == 1 .and. dzsillu(L) < sillheightmin .and. dzsilld(L) > sillheightmin .or. & 
                   ii == 2 .and. dzsilld(L) < sillheightmin .and. dzsillu(L) > sillheightmin ) then
-                  k = ln(ii,L)
+                  k = ln(ii,L) 
               endif
-              if (k > 0) then                                          ! flatland on node k
-                  nx      = nd(k)%lnx
+              if (k > 0) then                                          ! flatland on node k 
+                  nx      = nd(k)%lnx 
                   do LL   = 1, nx                                      ! loop over all attached links
                      LLL  = nd(k)%ln(LL) ; LLLa = iabs(LLL)
-                     if (LLLa == L) then
+                     if (LLLa == L) then                                
                          LLLa = LL-1 ; if (LLLa == 0) LLLa = nx        ! left of weir link
                          LLLa = iabs(nd(k)%ln(LLLa))
-                         if (ihu(LLLa) == 0) then                      ! if not already marked as weir
-                            bob(1,LLLa) = max( zcrest(L),bob(1,LLLa) ) ! raise both bobs
+                         if (ihu(LLLa) == 0) then                      ! if not already marked as weir 
+                            bob(1,LLLa) = max( zcrest(L),bob(1,LLLa) ) ! raise both bobs 
                             bob(2,LLLa) = max( zcrest(L),bob(2,LLLa) ) ! raise both bobs
                          endif
                          LLLa = LL+1 ; if (LLLa > nx) LLLa = 1         ! right of weir link
                          LLLa = iabs(nd(k)%ln(LLLa))
-                         if (ihu(LLLa) == 0) then                      ! if not already marked as weir
-                            bob(1,LLLa) = max( zcrest(L),bob(1,LLLa) ) ! raise both bobs
+                         if (ihu(LLLa) == 0) then                      ! if not already marked as weir 
+                            bob(1,LLLa) = max( zcrest(L),bob(1,LLLa) ) ! raise both bobs 
                             bob(2,LLLa) = max( zcrest(L),bob(2,LLLa) ) ! raise both bobs o
                          endif
                      endif
                   enddo
                endif
-          enddo
+          enddo 
        endif
     enddo
 
-    BL = 1d9
+    BL = 1d9 
     do L = 1,lnx                         ! switch off weirs that do not need weir treatment
        if ( ihu(L) > 0 .and. (dzsillu(L) < sillheightmin .or. dzsilld(L) < sillheightmin) ) then
           ihu(L) = 0 ; iadv(L) = iadvec
-          if (slopedrop2D > 0d0) then
+          if (slopedrop2D > 0d0) then 
              iadv(L) = 8
           endif
        endif
        BLmn   = min( bob(1,L),bob(2,L) ) ! and reset BL to lowest attached link
        n1     = ln(1,L) ; n2 = ln(2,L)
-       BL(n1) = min(BL(n1),BLmn)
-       BL(n2) = min(BL(n2),BLmn)
+       BL(n1) = min(BL(n1),BLmn) 
+       BL(n2) = min(BL(n2),BLmn) 
     enddo
-
+ 
  endif
 
  nfxw = 0
@@ -611,4 +614,4 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
     if ( allocated(dSL)   ) deallocate(dSL)
  end if
 
- end subroutine setfixedweirs
+end subroutine setfixedweirs
