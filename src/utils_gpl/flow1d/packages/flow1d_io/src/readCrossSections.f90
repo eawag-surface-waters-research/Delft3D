@@ -379,7 +379,11 @@ module m_readCrossSections
                 call SetMessage(LEVEL_ERROR, 'Incorrect CrossSection input for CrossSection Definition with type '//trim(typestr)//' and id: '//trim(id)// &
                '. No width was given.')
             endif
-            
+            if (width(1) == 0d0) then
+               ! THe width of a rectangular cross section must be > 0
+               call SetMessage(LEVEL_ERROR, 'Incorrect CrossSection input for CrossSection Definition with type '//trim(typestr)//' and id: '//trim(id)// &
+               '. width = 0.00 was found in the input.')
+            endif
             call prop_get_logical(md_ptr%child_nodes(i)%node_ptr, '', 'closed', closed, success)
             if (.not. success) closed = .true. ! Default
             
@@ -389,6 +393,10 @@ module m_readCrossSections
                   call SetMessage(LEVEL_ERROR, 'Incorrect CrossSection input for CrossSection Definition with type '//trim(typestr)//' and id: '//trim(id)// &
                   '. No height was given.')
                   cycle
+               elseif (height == 0d0) then
+                  ! THe height of a rectangular cross section must be > 0
+                  call SetMessage(LEVEL_ERROR, 'Incorrect CrossSection input for CrossSection Definition with type '//trim(typestr)//' and id: '//trim(id)// &
+                  '. height = 0.00 was found in the input.')
                endif
                numlevels = numlevels + 1
                level(numLevels) = height
@@ -416,8 +424,12 @@ module m_readCrossSections
             if (.not. success) then
                call SetMessage(LEVEL_ERROR, 'Incorrect CrossSection input for CrossSection Definition with type '//trim(typestr)//' and id: '//trim(id)// &
                '. No diameter was given.')
+            elseif (diameter == 0d0) then
+               ! The diameter of a circular cross sections must be > 0
+               call SetMessage(LEVEL_ERROR, 'Incorrect CrossSection input for CrossSection Definition with type '//trim(typestr)//' and id: '//trim(id)// &
+               '. diameter = 0.00 was found in the input.')
             endif
-
+   
             pCs%frictionSectionsCount = 1
             inext = AddCrossSectionDefinition(network%CSDefinitions, id, diameter, crossType, groundlayerUsed, groundlayer)
             
