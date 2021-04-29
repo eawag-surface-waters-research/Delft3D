@@ -130,7 +130,7 @@ integer          :: k1, k3, kb3, Lt1, Lt2, Lt3, Ld1, Ld2, Ld3, kk1, kk2, kk3
           endif
        endif
 
-       if (keepzlayeringatbed == 2) then
+       if (keepzlayeringatbed >= 2) then
            if (ktop(n) > kb) then
                zws(kb) = 0.5d0*( zws(kb+1) + zws(kb-1) )
            endif
