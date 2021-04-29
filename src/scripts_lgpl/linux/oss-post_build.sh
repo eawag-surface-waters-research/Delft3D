@@ -1,5 +1,11 @@
 #!/bin/bash
 
+scriptdirname=`readlink \-f \$0`
+scriptdir=`dirname $scriptdirname`
+echo
+echo "Executing $scriptdir\oss-post_build.sh ..."
+
+
 if [ "$1" == '' ]; then
     echo "ERROR: No install_dir directory specified as argument of install.sh"
     exit 1
@@ -31,23 +37,26 @@ else
     project=$5
 fi
 
-echo "Script arguments "
-echo "install_dir $install_dir"
-echo "build_dir $build_dir"
-echo "checkout_src_root $checkout_src_root"
-echo "configuration $configuration"
-echo "project $project"
+echo "Script arguments: "
+echo "    install_dir      : $install_dir"
+echo "    build_dir        : $build_dir"
+echo "    checkout_src_root: $checkout_src_root"
+echo "    configuration    : $configuration"
+echo "    project          : $project"
 
 install_folder="lnx64"
 if [ $configuration == 'Debug' ]; then
    install_folder="lnx64_debug"
 fi
 
+
 # set directories
-dest_bin="$install_dir/$install_folder/bin/"
+dest_bin="$install_dir/$install_folder/bin"
 dest_menu="$install_dir/$install_folder/menu"
 dest_scripts="$install_dir/$install_folder/scripts"
 dest_lib="$install_dir/$install_folder/lib"
+
+
 
 # The following libraries must be removed from the list created by gatherScript:
 # - system dependent libraries in the directories /lib and /lib64
@@ -83,13 +92,20 @@ function copyFile () {
 # ===============================
 function make_directories() {
 
+    echo "Creating directory    $dest_bin"
     mkdir -p $dest_bin
+    echo "Creating directory    $dest_lib"
     mkdir -p $dest_lib
+    echo "Creating directory    $dest_menu"
     mkdir -p $dest_menu
+    echo "Creating directory    $dest_scripts"
     mkdir -p $dest_scripts
     
 }
 
+# ===============================
+# === copy_binaries           ===
+# ===============================
 function copy_binaries() {
 
     copyFile $binary_file $dest_bin
@@ -120,7 +136,6 @@ function dflowfm () {
 
     echo "postbuild dflowfm . . ."
 
-    make_directories
     binary_file="$build_dir/dflowfm_cli_exe/dflowfm-cli" 
     copy_binaries
 
@@ -134,7 +149,6 @@ function dflowfm_dll () {
 
     echo "postbuild dflowfm_dll . . ."
 
-    make_directories
     binary_file="$build_dir/dflowfm_lib/libdflowfm.so" 
     copy_binaries
 
@@ -148,7 +162,6 @@ function dimr () {
 
     echo "postbuild dimr . . ."
     
-    make_directories    
     binary_file="$build_dir/dimr/dimr"
     copy_binaries
 
@@ -162,7 +175,6 @@ function dimr_lib () {
 
     echo "postbuild dimr lib . . ."
     
-    make_directories    
     binary_file="$build_dir/dimr_lib/libdimr.so"
     copy_binaries
     
@@ -172,11 +184,28 @@ function dimr_lib () {
     return
 }
 
+
+# =========================
+# === POSTBUILD DIMR_LIB ==
+# =========================
+function dflowfm_kernel_test () {
+    echo "postbuild dflowfm_kernel_test . . ."
+
+    binary_file="$build_dir/test_dflowfm_kernel/dflowfm_kernel_test"
+    copy_binaries
+    
+    return
+}
+
+
 # =======================
 # === INSTALL_ESMF ======
 # =======================
 function gatherESMF () {
-    cp $srcroot/third_party_open/esmf/lnx64/bin/libesmf.so                                              $dest_lib
+    echo "Gathering ESMF related binaries . . ."
+
+    echo Copying $checkout_src_root/third_party_open/esmf/lnx64/bin/libesmf.so to $dest_lib
+    cp $checkout_src_root/third_party_open/esmf/lnx64/bin/libesmf.so                                   $dest_lib
 }
 
 # =======================
@@ -187,16 +216,34 @@ function gatherDependencies () {
     echo "Gathering dependent libraries . . ."
 
     echo "Gathering libraries for lib/* ..."
-    cp -u `$gatherScript $install_dir/lib/* | eval grep -v $gatherExcludeFilter`                       $dest_lib
-    cp -u `$gatherScript $install_dir/lib/* | eval grep $gatherIncludeFilter`                          $dest_lib
+    if [ -d $dest_lib ] && [ "$(ls -A $dest_lib)" ]; then
+        cp -u `$gatherScript $dest_lib/* | eval grep -v $gatherExcludeFilter`                       $dest_lib
+        cp -u `$gatherScript $dest_lib/* | eval grep $gatherIncludeFilter`                          $dest_lib
+    else
+        echo "Directory $dest_lib is empty or does not exist"
+    fi
 
 
     echo "Gathering libraries for bin/* ..."
-    cp -u `$gatherScript $install_dir/bin/* | eval grep -v $gatherExcludeFilter`                       $dest_lib
-    cp -u `$gatherScript $install_dir/bin/* | eval grep $gatherIncludeFilter`                          $dest_lib
+    if [ -d $dest_bin ] && [ "$(ls -A $dest_bin)" ]; then
+        cp -u `$gatherScript $dest_bin/* | eval grep -v $gatherExcludeFilter`                       $dest_lib
+        cp -u `$gatherScript $dest_bin/* | eval grep $gatherIncludeFilter`                          $dest_lib
+    else
+        echo "Directory $dest_bin is empty or does not exist"
+    fi
 
     return
 }
+
+
+
+
+######
+# MAIN
+######
+
+make_directories    
+
 
 # post build project
 $project
@@ -210,3 +257,7 @@ cd $dest_bin
 chmod a+x `find . -type f -exec file {} \; | grep executable | grep -v "\.svn" | cut -d ":" -f 1 | xargs`
 
 cd $srcdir
+echo "oss-post_build.sh finished"
+echo
+
+
