@@ -1,5 +1,10 @@
 @echo off
 
+rem ######
+rem # MAIN
+rem ######
+
+setlocal enabledelayedexpansion
 set globalErrorLevel=0
 
 echo oss-post_build...
@@ -32,7 +37,6 @@ rem >  oss-post_build.cmd install_dir Debug            # postbuild all debug
 rem >  oss-post_build.cmd install_dir Debug dimr       # postbuild debug dimr
 
 rem  The next statement is needed in order for the set commands to work inside the if statement
-setlocal enabledelayedexpansion
 
 set install_dir=%1
 set build_dir=%2
@@ -42,22 +46,13 @@ set project=%5
 
 rem substitute backslashes
 set "install_dir=!install_dir:/=\!"
-echo install_dir after backslashes substitution !install_dir!
-
 set "build_dir=!build_dir:/=\!"
-echo build_dir after backslashes substitution !build_dir!
-
 set "checkout_src_root=!checkout_src_root:/=\!"
-echo checkout_src_root after backslashes substitution !checkout_src_root!
-
-echo configuration !configuration!
 
 if [%5] EQU [] (
     rem Install all engines
     set project=install_all
-    echo Source          : all engines
 ) 
-echo Source          : package/engine !project!
 
 if [%6] EQU [] (
     set compiler_redist_dir=""
@@ -80,6 +75,20 @@ if [%7] EQU [] (
 )
 
 
+
+
+echo install_dir         : !install_dir!
+echo build_dir           : !build_dir!
+echo checkout_src_root   : !checkout_src_root!
+echo configuration       : !configuration!
+echo project             : !project!
+echo compiler_redist_dir : !compiler_redist_dir!
+echo mkl_redist_dir      : !mkl_redist_dir!
+
+
+
+
+
 rem Change to directory tree where this batch file resides (necessary when oss-install.cmd is called from outside of oss/trunk/src)
 cd %~dp0\..\..
 
@@ -87,7 +96,13 @@ call :!project!
 
 goto end
 
-rem  Actual install "routines"
+
+
+
+
+rem ############
+rem # PROCEDURES
+rem ############
 
 rem =============================================================
 rem === copyFile takes two arguments: the name of the file to ===
@@ -877,10 +892,159 @@ rem ==========================
     
 goto :endproc
 
-:end
+
+
+rem ==========================
+rem === POST_BUILD_DFLOWFM_KERNEL_TEST
+rem ==========================
+:dflowfm_kernel_test
+    echo "postbuild dflowfm_kernel_test . . ."
+    
+    if "%configuration%" == "Debug" (
+    
+    echo "Debug postbuild"
+    set dest_bin="!install_dir!\x64\Debug"
+
+    call :makeDir !dest_bin!
+
+    call :copyFile "!build_dir!\test_dflowfm_kernel\!configuration!\dflowfm_kernel_test.exe"                              !dest_bin!
+
+    )
+    
+    if "%configuration%" == "Release" (
+    
+    echo "Release postbuild"
+    
+    set dest_bin="!install_dir!\x64\Release\tests\bin"
+    set dest_default="!install_dir!\x64\Release\tests\default"
+    set dest_scripts="!install_dir!\x64\Release\tests\scripts"
+    set dest_plugins="!install_dir!\x64\Release\plugins\bin"
+    set dest_share="!install_dir!\x64\Release\share\bin"
+    
+    call :makeAllDirs 
+    call :copyFile "!build_dir!\test_dflowfm_kernel\!configuration!\dflowfm_kernel_test.exe"                                !dest_bin!
+    
+    )
+
+goto :endproc
+
+
+rem ==========================
+rem === POST_BUILD_WAQ_UTILS_F_TEST
+rem ==========================
+:waq_utils_f_test
+    echo "postbuild waq_utils_f_test . . ."
+    
+    if "%configuration%" == "Debug" (
+    
+    echo "Debug postbuild"
+    set dest_bin="!install_dir!\x64\Debug"
+
+    call :makeDir !dest_bin!
+
+    call :copyFile "!build_dir!\test_waq_utils_f\!configuration!\waq_utils_f_test.exe"                              !dest_bin!
+
+    )
+    
+    if "%configuration%" == "Release" (
+    
+    echo "Release postbuild"
+    
+    set dest_bin="!install_dir!\x64\Release\tests\bin"
+    set dest_default="!install_dir!\x64\Release\tests\default"
+    set dest_scripts="!install_dir!\x64\Release\tests\scripts"
+    set dest_plugins="!install_dir!\x64\Release\plugins\bin"
+    set dest_share="!install_dir!\x64\Release\share\bin"
+    
+    call :makeAllDirs 
+    call :copyFile "!build_dir!\test_waq_utils_f\!configuration!\waq_utils_f_test.exe"                                !dest_bin!
+    
+    )
+
+goto :endproc
+
+
+
+rem ==========================
+rem === POST_BUILD_EC_MODULE_TEST
+rem ==========================
+:ec_module_test
+    echo "postbuild ec_module_test . . ."
+    
+    if "%configuration%" == "Debug" (
+    
+    echo "Debug postbuild"
+    set dest_bin="!install_dir!\x64\Debug"
+
+    call :makeDir !dest_bin!
+
+    call :copyFile "!build_dir!\test_ec_module\!configuration!\ec_module_test.exe"                              !dest_bin!
+
+    )
+    
+    if "%configuration%" == "Release" (
+    
+    echo "Release postbuild"
+    
+    set dest_bin="!install_dir!\x64\Release\tests\bin"
+    set dest_default="!install_dir!\x64\Release\tests\default"
+    set dest_scripts="!install_dir!\x64\Release\tests\scripts"
+    set dest_plugins="!install_dir!\x64\Release\plugins\bin"
+    set dest_share="!install_dir!\x64\Release\share\bin"
+    
+    call :makeAllDirs 
+    call :copyFile "!build_dir!\test_ec_module\!configuration!\ec_module_test.exe"                                !dest_bin!
+    
+    )
+
+goto :endproc
+
+
+
+rem ==========================
+rem === POST_BUILD_TEST_DELTARES_COMMON
+rem ==========================
+:test_deltares_common
+    echo "postbuild test_deltares_common . . ."
+    
+    if "%configuration%" == "Debug" (
+    
+    echo "Debug postbuild"
+    set dest_bin="!install_dir!\x64\Debug"
+
+    call :makeDir !dest_bin!
+
+    call :copyFile "!build_dir!\test_deltares_common\!configuration!\test_deltares_common.exe"                              !dest_bin!
+
+    )
+    
+    if "%configuration%" == "Release" (
+    
+    echo "Release postbuild"
+    
+    set dest_bin="!install_dir!\x64\Release\tests\bin"
+    set dest_default="!install_dir!\x64\Release\tests\default"
+    set dest_scripts="!install_dir!\x64\Release\tests\scripts"
+    set dest_plugins="!install_dir!\x64\Release\plugins\bin"
+    set dest_share="!install_dir!\x64\Release\share\bin"
+    
+    call :makeAllDirs 
+    call :copyFile "!build_dir!\test_deltares_common\!configuration!\test_deltares_common.exe"                                !dest_bin!
+    
+    )
+
+goto :endproc
+
+
+
+
+
+
+
+
 
 :end
-
+echo oss-post_build.cmd finished
 if NOT %ErrorLevel% EQU 0 (
       rem
       rem Only jump to :end when the script is completely finished
