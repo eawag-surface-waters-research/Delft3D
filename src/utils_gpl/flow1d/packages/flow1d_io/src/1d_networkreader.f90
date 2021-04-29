@@ -800,8 +800,7 @@ module m_1d_networkreader
       ip1 = brs%gridPointsCount + 1
       brs%gridPointsCount = brs%gridPointsCount + gridPointsCount
       ip2 = brs%gridPointsCount
-      pbr%Points(1)         = ip1
-      pbr%Points(2)         = ip2
+      pbr%StartPoint        = ip1
       pbr%gridPointschainages = gpchainages
       pbr%uPointschainages    = (pbr%gridPointschainages(1:uPointsCount) + pbr%gridPointschainages(2:uPointsCount+1) ) / 2.0d0
       pbr%length            = gpchainages(gridPointsCount)
@@ -967,8 +966,7 @@ module m_1d_networkreader
       ip1 = brs%gridPointsCount + 1
       brs%gridPointsCount = brs%gridPointsCount + gridPointsCount
       ip2 = brs%gridPointsCount
-      pbr%Points(1)         = ip1
-      pbr%Points(2)         = ip2
+      pbr%StartPoint         = ip1
       pbr%gridPointschainages = gpchainages
       pbr%uPointschainages    = (pbr%gridPointschainages(1:uPointsCount) + pbr%gridPointschainages(2:uPointsCount+1) ) / 2.0d0
       pbr%length            = gpchainages(gridPointsCount)
@@ -1170,7 +1168,7 @@ module m_1d_networkreader
 
          read(ibin) (pbrn%uPointschainages(j), j = 1, pbrn%uPointsCount)   
 
-         read(ibin) (pbrn%Points(j), j = 1, 2)
+         read(ibin) pbrn%StartPoint
 
       enddo
  
@@ -1216,7 +1214,7 @@ module m_1d_networkreader
          write(ibin) pbrn%uPointsCount
          write(ibin) (pbrn%uPointschainages(j), j = 1, pbrn%uPointsCount)   
 
-         write(ibin) (pbrn%Points(j), j = 1, 2)
+         write(ibin) pbrn%StartPoint
 
       enddo
  

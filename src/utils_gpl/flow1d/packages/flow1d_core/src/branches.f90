@@ -87,7 +87,7 @@ module m_branch
       integer                        :: uPointsCount            !< number of u points on branch (gridpointsCount -1)
       double precision, allocatable  :: uPointsChainages(:)     !< chainage of velocity points on branch (each upoint 
 
-      integer                        :: Points(2)               !< Calculation Points at Start and End of Branch
+      integer                        :: StartPoint              !< Calculation Point at Start of Branch
       integer, allocatable           :: lin(:)                  !< link numbers for links in this channel
       integer, allocatable           :: grd(:)                  !< gridpoint numbers for links in this channel
       integer                        :: active_branch = 1       !< 0 if outside current domain; 1 if completely in current domain; -1 if partly in current domain
@@ -288,7 +288,7 @@ module m_branch
          
          if (allocated(pbr%grd)) deallocate(pbr%grd) 
          allocate(pbr%grd(pbr%gridPointsCount))
-         ngrid = pbr%Points(1) - 1
+         ngrid = pbr%StartPoint - 1
          if (pbr%FromNode%gridNumber == -1) then
             pbr%FromNode%gridNumber = ngrid + 1
          endif
