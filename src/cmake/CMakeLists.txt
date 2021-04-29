@@ -118,8 +118,11 @@ set(postbuild_event_path ${checkout_src_root}/${postbuild_event_script})
 # Set root name of the projects in the root UI of Visual Studio
 set(visual_studio_source_group_name "Source Files")
 
-# Determine the configuration to make 
+### Configuration names
+
 string(TOUPPER ${CONFIGURATION_TYPE} configuration_type)
+
+# Basic (single-component) configurations
 set(dflowfm_configuration "DFLOWFM")
 set(dflowfm_interacter_configuration "DFLOWFM_INTERACTER")
 set(tests_configuration "TESTS")
@@ -128,57 +131,93 @@ set(d_waq_configuration "D-WAQ")
 set(d_waves_configuration "D-WAVES")
 set(flow2d3d_configuration "FLOW2D3D")
 set(tools_configuration "TOOLS")
+
+# Combined (multi-component) configurations
+set(dimr_dflowfm_configuration "DIMR_DFLOWFM")
+set(dimr_dflowfm_dwaq_configuration "DIMR_DFLOWFM_DWAQ")
 set(all_configuration "ALL")
 
+# Determine the configuration to make
 if(NOT (${configuration_type} STREQUAL ${tests_configuration} 
-        OR ${configuration_type} STREQUAL ${dflowfm_configuration}
-        OR ${configuration_type} STREQUAL ${dflowfm_interacter_configuration}
-        OR ${configuration_type} STREQUAL ${dimr_configuration}
-        OR ${configuration_type} STREQUAL ${d_waq_configuration}
-        OR ${configuration_type} STREQUAL ${d_waves_configuration}
-        OR ${configuration_type} STREQUAL ${flow2d3d_configuration}
-        OR ${configuration_type} STREQUAL ${tools_configuration}
-        OR ${configuration_type} STREQUAL ${all_configuration}))
+     OR ${configuration_type} STREQUAL ${dflowfm_configuration}
+     OR ${configuration_type} STREQUAL ${dflowfm_interacter_configuration}
+     OR ${configuration_type} STREQUAL ${dimr_configuration}
+     OR ${configuration_type} STREQUAL ${d_waq_configuration}
+     OR ${configuration_type} STREQUAL ${d_waves_configuration}
+     OR ${configuration_type} STREQUAL ${flow2d3d_configuration}
+     OR ${configuration_type} STREQUAL ${tools_configuration}
+     OR ${configuration_type} STREQUAL ${dimr_dflowfm_configuration}
+     OR ${configuration_type} STREQUAL ${dimr_dflowfm_dwaq_configuration}
+     OR ${configuration_type} STREQUAL ${all_configuration}))
    message(FATAL_ERROR "${configuration_type} not recognized. CMake will abort solution generation now.")
 endif()
 
+### Basic configurations
 
+# Tests configuration
 if(${configuration_type} STREQUAL ${tests_configuration})
     message(STATUS "Generating solution for Tests ...")
     include(configurations/tests_configuration.cmake)
 endif()
 
-if(${configuration_type} STREQUAL ${dflowfm_configuration} OR ${configuration_type} STREQUAL ${all_configuration}) 
+# D-Flow FM configuration
+if(${configuration_type} STREQUAL ${dflowfm_configuration}) 
     message(STATUS "Generating solution for D-Flow FM ...")
     include(configurations/dflowfm_configuration.cmake)
 endif()
 
+# D-Flow FM (with Interacter-GUI) configuration
 if(${configuration_type} STREQUAL ${dflowfm_interacter_configuration})
     message(STATUS "Generating solution for D-Flow FM (with interacter) ...")
     include(configurations/dflowfm_interacter_configuration.cmake)
 endif()
 
-if(${configuration_type} STREQUAL ${dimr_configuration} OR ${configuration_type} STREQUAL ${all_configuration})
+# DIMR configuration
+if(${configuration_type} STREQUAL ${dimr_configuration})
     message(STATUS "Generating solution for DIMR ...")
     include(configurations/dimr_configuration.cmake)
 endif()
 
-if(${configuration_type} STREQUAL ${d_waq_configuration} OR ${configuration_type} STREQUAL ${all_configuration})
+# D-WAQ configuration
+if(${configuration_type} STREQUAL ${d_waq_configuration})
     message(STATUS "Generating solution for D-Waq ...")
     include(configurations/d_waq_configuration.cmake)
 endif()
 
+# D-Waves configuration
 if(${configuration_type} STREQUAL ${d_waves_configuration})
     message(STATUS "Generating solution for D-Waves ...")
     include(configurations/d_waves_configuration.cmake)
 endif()
 
+# Flow2D3D (Delft3D4) configuration
 if(${configuration_type} STREQUAL ${flow2d3d_configuration})
     message(STATUS "Generating solution for Flow2D3D ...")
     include(configurations/flow2d3d_configuration.cmake)
 endif()
 
+# Tools configuration
 if(${configuration_type} STREQUAL ${tools_configuration})
     message(STATUS "Generating solution for Tools ...")
     include(configurations/tools_configuration.cmake)
+endif()
+
+### Composed configurations
+
+# DIMR with D-Flow FM configuration
+if(${configuration_type} STREQUAL ${dimr_dflowfm_configuration}) 
+    message(STATUS "Generating solution for combined DIMR and D-Flow FM ...")
+    include(configurations/dimr_dflowfm_configuration.cmake)
+endif()
+
+# DIMR with D-Flow FM and D-WAQ configuration
+if(${configuration_type} STREQUAL ${dimr_dflowfm_dwaq_configuration}) 
+    message(STATUS "Generating solution for combined DIMR, D-Flow FM and D-WAQ ...")
+    include(configurations/dimr_dflowfm_dwaq_configuration.cmake)
+endif()
+
+# ALL configuration
+if(${configuration_type} STREQUAL ${all_configuration}) 
+    message(STATUS "Generating solution for all (open-source) projects in OSS tree ...")
+    include(configurations/all_configuration.cmake)
 endif()

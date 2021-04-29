@@ -25,7 +25,9 @@ add_subdirectory(${checkout_src_root}/${kdtree_wrapper_module} kdtree_wrapper)
 add_subdirectory(${checkout_src_root}/${triangle_c_module} triangle_c)
 
 # netcdf
-add_subdirectory(${checkout_src_root}/${netcdf_module} netcdff)
+if(WIN32)
+    add_subdirectory(${checkout_src_root}/${netcdf_module} netcdff)
+endif()
 
 # io_netcdf
 add_subdirectory(${checkout_src_root}/${io_netcdf_module} io_netcdf)
