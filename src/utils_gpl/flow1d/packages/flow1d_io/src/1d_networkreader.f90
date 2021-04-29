@@ -794,22 +794,16 @@ module m_1d_networkreader
       
       call realloc(pbr%gridPointschainages, pbr%gridPointsCount)
       call realloc(pbr%uPointschainages, pbr%uPointsCount)
-      call realloc(pbr%dx, pbr%uPointsCount)
       call realloc(pbr%Xs, pbr%gridPointsCount)
       call realloc(pbr%Ys, pbr%gridPointsCount)
-      call realloc(pbr%Xu, pbr%uPointsCount)
-      call realloc(pbr%Yu, pbr%uPointsCount)
-      
+
       ip1 = brs%gridPointsCount + 1
       brs%gridPointsCount = brs%gridPointsCount + gridPointsCount
       ip2 = brs%gridPointsCount
       pbr%Points(1)         = ip1
       pbr%Points(2)         = ip2
-      pbr%upoints(1)        = ip1
-      pbr%upoints(2)        = ip2 - 1
       pbr%gridPointschainages = gpchainages
       pbr%uPointschainages    = (pbr%gridPointschainages(1:uPointsCount) + pbr%gridPointschainages(2:uPointsCount+1) ) / 2.0d0
-      pbr%dx                = pbr%gridPointschainages(2:uPointsCount+1) - pbr%gridPointschainages(1:uPointsCount)
       pbr%length            = gpchainages(gridPointsCount)
       pbr%Xs                = gpX
       pbr%Ys                = gpY
@@ -818,12 +812,7 @@ module m_1d_networkreader
       pbr%toNode%x          = gpX(gridPointsCount)
       pbr%toNode%y          = gpY(gridPointsCount)
       pbr%iTrench           = 0
-         
-      do j = 1, gridPointsCount-1
-         pbr%Xu(j) = 0.5d0 * (pbr%Xs(j) + pbr%Xs(j + 1))
-         pbr%Yu(j) = 0.5d0 * (pbr%Ys(j) + pbr%Ys(j + 1))
-      enddo
-         
+
       do j = 1, 2
          if (j==1) then
             node => pbr%fromNode
@@ -972,22 +961,16 @@ module m_1d_networkreader
       
       call realloc(pbr%gridPointschainages, pbr%gridPointsCount)
       call realloc(pbr%uPointschainages, pbr%uPointsCount)
-      call realloc(pbr%dx, pbr%uPointsCount)
       call realloc(pbr%Xs, pbr%gridPointsCount)
       call realloc(pbr%Ys, pbr%gridPointsCount)
-      call realloc(pbr%Xu, pbr%uPointsCount)
-      call realloc(pbr%Yu, pbr%uPointsCount)
-      
+
       ip1 = brs%gridPointsCount + 1
       brs%gridPointsCount = brs%gridPointsCount + gridPointsCount
       ip2 = brs%gridPointsCount
       pbr%Points(1)         = ip1
       pbr%Points(2)         = ip2
-      pbr%upoints(1)        = ip1
-      pbr%upoints(2)        = ip2 - 1
       pbr%gridPointschainages = gpchainages
       pbr%uPointschainages    = (pbr%gridPointschainages(1:uPointsCount) + pbr%gridPointschainages(2:uPointsCount+1) ) / 2.0d0
-      pbr%dx                = pbr%gridPointschainages(2:uPointsCount+1) - pbr%gridPointschainages(1:uPointsCount)
       pbr%length            = gpchainages(gridPointsCount)
       pbr%Xs                = gpX
       pbr%Ys                = gpY
@@ -996,12 +979,7 @@ module m_1d_networkreader
       pbr%toNode%x          = gpX(gridPointsCount)
       pbr%toNode%y          = gpY(gridPointsCount)
       pbr%iTrench           = 0
-         
-      do j = 1, gridPointsCount-1
-         pbr%Xu(j) = 0.5d0 * (pbr%Xs(j) + pbr%Xs(j + 1))
-         pbr%Yu(j) = 0.5d0 * (pbr%Ys(j) + pbr%Ys(j + 1))
-      enddo
-         
+
       do j = 1, 2
          if (j==1) then
             node => pbr%fromNode
@@ -1189,17 +1167,10 @@ module m_1d_networkreader
          read(ibin) pbrn%uPointsCount
          
          allocate(pbrn%uPointschainages(pbrn%uPointsCount))
-         allocate(pbrn%Xu(pbrn%uPointsCount))
-         allocate(pbrn%Yu(pbrn%uPointsCount))
-         allocate(pbrn%dx(pbrn%uPointsCount))
-         
+
          read(ibin) (pbrn%uPointschainages(j), j = 1, pbrn%uPointsCount)   
-         read(ibin) (pbrn%Xu(j), j = 1, pbrn%uPointsCount)   
-         read(ibin) (pbrn%Yu(j), j = 1, pbrn%uPointsCount)   
-         read(ibin) (pbrn%dx(j), j = 1, pbrn%uPointsCount)   
-      
+
          read(ibin) (pbrn%Points(j), j = 1, 2)
-         read(ibin) (pbrn%uPoints(j), j = 1, 2)
 
       enddo
  
@@ -1244,12 +1215,8 @@ module m_1d_networkreader
       
          write(ibin) pbrn%uPointsCount
          write(ibin) (pbrn%uPointschainages(j), j = 1, pbrn%uPointsCount)   
-         write(ibin) (pbrn%Xu(j), j = 1, pbrn%uPointsCount)   
-         write(ibin) (pbrn%Yu(j), j = 1, pbrn%uPointsCount)   
-         write(ibin) (pbrn%dx(j), j = 1, pbrn%uPointsCount)   
-      
+
          write(ibin) (pbrn%Points(j), j = 1, 2)
-         write(ibin) (pbrn%uPoints(j), j = 1, 2)
 
       enddo
  

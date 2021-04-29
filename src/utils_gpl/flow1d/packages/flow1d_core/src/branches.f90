@@ -86,13 +86,8 @@ module m_branch
 
       integer                        :: uPointsCount            !< number of u points on branch (gridpointsCount -1)
       double precision, allocatable  :: uPointsChainages(:)     !< chainage of velocity points on branch (each upoint 
-      double precision, allocatable  :: Xu(:)                   !< X-coordinates of u points
-      double precision, allocatable  :: Yu(:)                   !< Y-coordinates of u points
-      double precision, allocatable  :: dx(:)                   !< distance between two gridpoints  
 
       integer                        :: Points(2)               !< Calculation Points at Start and End of Branch
-      integer                        :: uPoints(2)              !< Velocity Points at Start and End of Branch
-
       integer, allocatable           :: lin(:)                  !< link numbers for links in this channel
       integer, allocatable           :: grd(:)                  !< gridpoint numbers for links in this channel
       integer                        :: active_branch = 1       !< 0 if outside current domain; 1 if completely in current domain; -1 if partly in current domain
@@ -135,11 +130,8 @@ module m_branch
             if (allocated(brs%branch(i)%gridPointschainages)) deallocate(brs%branch(i)%gridPointschainages)
             if (allocated(brs%branch(i)%gridPointIDs))      deallocate(brs%branch(i)%gridPointIDs)
             if (allocated(brs%branch(i)%uPointschainages))    deallocate(brs%branch(i)%uPointschainages)
-            if (allocated(brs%branch(i)%dx))                deallocate(brs%branch(i)%dx)
             if (allocated(brs%branch(i)%xs))                deallocate(brs%branch(i)%xs)
             if (allocated(brs%branch(i)%ys))                deallocate(brs%branch(i)%ys)
-            if (allocated(brs%branch(i)%xu))                deallocate(brs%branch(i)%xu)
-            if (allocated(brs%branch(i)%yu))                deallocate(brs%branch(i)%yu)
             if (allocated(brs%branch(i)%lin))               deallocate(brs%branch(i)%lin)
             if (allocated(brs%branch(i)%grd))               deallocate(brs%branch(i)%grd)
          enddo   

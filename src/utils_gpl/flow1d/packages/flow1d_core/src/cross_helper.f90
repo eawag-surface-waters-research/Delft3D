@@ -78,17 +78,7 @@ contains
       res(2) = getBob(cross1, cross2, factor)      
 
    end function getbobs   
-   
-   double precision function getdeltax(network, ilink)
-      type(t_network), intent(in) :: network
-      integer, intent(in) :: ilink
-      
-      integer :: ibr, ll
-      
-      ibr = network%adm%lin2ibr(ilink)
-      ll  = network%adm%lin2local(ilink)
-      getdeltax = network%brs%branch(ibr)%dx(ll)
-   end function getdeltax
+
 ! =================================================================================================
 ! =================================================================================================
    subroutine getConveyance(network, dpt, u1L, q1L, s1L, L, perim_sub, flowarea_sub, conv, cz_sub, cz, flowArea, wetPerimeter, factor_time_interpolation)

@@ -1270,10 +1270,7 @@ subroutine update_flow1d_admin(network, lc)
             else
                write(msgbuf, '(a, a, a, f10.2, a )')'Flow link on branch ''', trim(pbr%id), ''' at chainage ', pbr%uPointsChainages(LL), ' is removed.'
                call msg_flush()
-               if (LL < upointscount) then
-                  pbr%dx(LL+1) = pbr%dx(LL)+ pbr%dx(LL+1)
-               endif
-               
+
                pbr%uPointsCount = pbr%uPointsCount -1
                pbr%gridPointsCount = pbr%gridPointsCount - 1
             endif
@@ -1285,9 +1282,6 @@ subroutine update_flow1d_admin(network, lc)
             pbr%Xs(LL_new+1)                  = pbr%Xs(LL+1)                 
             pbr%Ys(LL_new+1)                  = pbr%Ys(LL+1)                 
             pbr%uPointsChainages(LL_new)      = pbr%uPointsChainages(LL)   
-            pbr%Xu(LL_new)                    = pbr%Xu(LL)                 
-            pbr%Yu(LL_new)                    = pbr%Yu(LL)                 
-            pbr%dx(LL_new)                    = pbr%dx(LL)                 
             pbr%lin(LL_new)                   = Lnew               
             pbr%grd(LL_new+1)                 = pbr%grd(LL+1)                
          endif
