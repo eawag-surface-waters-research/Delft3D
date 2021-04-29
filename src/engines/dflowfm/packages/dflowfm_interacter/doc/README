@@ -1,15 +1,21 @@
 
 1. Create on toplevel (next to "src", "examples") directory "build_dflowfm_interacter"
-2. In "build_dflowfm_interacter", execute:
+2. EITHER:
+       Define environment parameter:
+       INTERACTER_DIR
+       To point to a directory containing intmwi64.lib
+   OR:
+       Copy:
+       https://repos.deltares.nl/repos/ds/branches/dflowfm/dflowfm_interacter/third_party/interacter
+       To:
+       "third_party\interacter"
+3. In "build_dflowfm_interacter", execute:
    cmake ..\src\cmake -G "Visual Studio 15 2017" -A x64 -B "." -D CONFIGURATION_TYPE="dflowfm_interacter"
-3. Copy https://repos.deltares.nl/repos/ds/branches/dflowfm/dflowfm_interacter/third_party/interacter
-   To
-   "third_party\interacter"
 4. In "build_dflowfm_interacter\dflowfm_interacter.sln":
    dflowfm_interacter project -> properties -> Linker -> General -> Link Library Dependencies = Yes
 5. Compile
 6. To debug:
-   - Add to working dir: .ini/.hlp files from "src\engines_gpl\dflowfm\res"
+   - Add to working dir: .ini/.hlp/.hls files from "src\engines_gpl\dflowfm\res"
    - Add to command line options: --display:opengl=0
 7. When running D-Flow FM via Interacter, the GUI may possibly be blocked (and does not open). To solve this:
    Open "Task Manager" -> tab "Performance" -> "Open Resource Manager" link at the bottom, right-click on "dflowfm.exe" process, "Analyze Wait Chain", end all processes in the list.
