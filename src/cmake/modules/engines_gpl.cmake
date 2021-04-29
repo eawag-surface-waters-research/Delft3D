@@ -57,3 +57,5 @@ set(dflowfm_kernel_test_module test/engines_gpl/dflowfm/packages/dflowfm_kernel)
 # Install
 set(install_dflowfm_module cmake/install_fm)
 set(install_dimr_module cmake/install_dimr)
+set(install_tests_module cmake/install_tests)
+

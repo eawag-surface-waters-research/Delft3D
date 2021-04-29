@@ -23,6 +23,7 @@ function print_usage_info {
     echo "  - combine all binaries"
     echo "- dflowfm"
     echo "- dimr"
+    echo "- tests"
     echo
     echo "Options:"
     echo "-p, --prepareonly"
@@ -134,7 +135,6 @@ while [[ $# -ge 1 ]]
 do
 key="$1"
 
-echo key:$key
 case $key in
     -p|--prepareonly)
     prepareonly=1
@@ -154,6 +154,14 @@ case $key in
     dimr)
     config="dimr"
     shift
+    ;;
+    tests)
+    config="tests"
+    shift
+    ;;
+    *)
+    echo ERROR: Unknown command line argument $key
+    exit 1
     ;;
 esac
 done
@@ -194,9 +202,15 @@ echo ". $root/src/setenv.sh"
 
 CreateCMakedir dimr
 CreateCMakedir dflowfm
+if [ "$config" = "tests" ]; then
+    CreateCMakedir tests
+fi
 
 DoCMake dimr
 DoCMake dflowfm
+if [ "$config" = "tests" ]; then
+    DoCMake tests
+fi
 
 if [ "$prepareonly" = "1" ]; then
     echo Finished with preparations only
@@ -205,6 +219,9 @@ fi
 
 BuildCMake dimr
 BuildCMake dflowfm
+if [ "$config" = "tests" ]; then
+    BuildCMake tests
+fi
 
 
 
