@@ -56,12 +56,11 @@ echo.
 echo Visual Studio sln-files:
 echo D-Flow FM : %root%\build_dflowfm\dflowfm.sln
 echo DIMR      : %root%\build_dimr\dimr.sln
-echo DIMR      : %root%\build_tests\tests.sln
+echo Tests     : %root%\build_tests\tests.sln
 echo Other     : %root%\src\delft3d_open.sln
 echo             %root%\src\ec_module.sln
 echo             %root%\src\io_netcdf.sln
 echo             %root%\src\nefis.sln
-echo             %root%\src\tests.sln
 echo             %root%\src\utils_lgpl.sln
 echo             %root%\src\utils_lgpl_no_tests.sln
 echo.
