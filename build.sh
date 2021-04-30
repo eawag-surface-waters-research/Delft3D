@@ -100,6 +100,11 @@ function InstallAll () {
         cp -rf $root/src/bin/ $root/build_all/lnx64/ &>/dev/null
         cp -rf $root/src/lib/ $root/build_all/lnx64/ &>/dev/null
         cp -rf $root/src/share/ $root/build_all/lnx64/ &>/dev/null
+        # Delete DIMR/D-Flow FM related files: they will be added from the CMake build tasks
+        rm -f $root/build_all/lnx64/bin/dflowfm        &>/dev/null
+        rm -f $root/build_all/lnx64/bin/dimr           &>/dev/null
+        rm -f $root/build_all/lnx64/lib/libdflowfm.so* &>/dev/null
+        rm -f $root/build_all/lnx64/lib/libdimr.so*    &>/dev/null
 
         # DIMR
         cp -rf $root/build_dimr/install/* $root/build_all/lnx64/ &>/dev/null
