@@ -601,9 +601,9 @@ rem ==========================
     
         echo "Release postbuild"
 
-        set dest_bin="!install_dir!\x64\Release\delwaq\bin"
-        set dest_default="!install_dir!\x64\Release\delwaq\default"
-        set dest_scripts="!install_dir!\x64\Release\delwaq\scripts"
+        set dest_bin="!install_dir!\x64\Release\dwaq\bin"
+        set dest_default="!install_dir!\x64\Release\dwaq\default"
+        set dest_scripts="!install_dir!\x64\Release\dwaq\scripts"
         set dest_plugins="!install_dir!\x64\Release\plugins\bin"
         set dest_share="!install_dir!\x64\Release\share\bin"
         
@@ -613,7 +613,7 @@ rem ==========================
         rem Temporarily rename dest_bin to share_bin to copy libraries there as well
         set dest_bin=!dest_share!
         call :copyDwaqDependentRuntimeLibraries                                                                             !dest_bin!
-        set dest_bin="!install_dir!\x64\Release\delwaq\bin"
+        set dest_bin="!install_dir!\x64\Release\dwaq\bin"
         
         rem copy binaries and dll 
         call :copyFile "!build_dir!\waq_plugin_wasteload\!configuration!\waq_plugin_wasteload.dll"                          !dest_bin! 
@@ -656,9 +656,9 @@ rem ==========================
     
         echo "Release postbuild"
 
-        set dest_bin="!install_dir!\x64\Release\delwaq1\bin"
-        set dest_default="!install_dir!\x64\Release\delwaq1\default"
-        set dest_scripts="!install_dir!\x64\Release\delwaq1\scripts"
+        set dest_bin="!install_dir!\x64\Release\dwaq\bin"
+        set dest_default="!install_dir!\x64\Release\dwaq\default"
+        set dest_scripts="!install_dir!\x64\Release\dwaq\scripts"
         set dest_plugins="!install_dir!\x64\Release\plugins\bin"
         set dest_share="!install_dir!\x64\Release\share\bin"
         
@@ -668,7 +668,7 @@ rem ==========================
         rem Temporarily rename dest_bin to share_bin to copy libraries there as well
         set dest_bin=!dest_share!
         call :copyDwaqDependentRuntimeLibraries                                                                             !dest_bin!
-        set dest_bin="!install_dir!\x64\Release\delwaq1\bin"
+        set dest_bin="!install_dir!\x64\Release\dwaq\bin"
         
         rem copy binaries and dll 
         call :copyFile "!build_dir!\waq_plugin_wasteload\!configuration!\waq_plugin_wasteload.dll"                          !dest_bin! 
@@ -714,9 +714,9 @@ rem ==========================
     
         echo "Release postbuild"
 
-        set dest_bin="!install_dir!\x64\Release\delwaq2\bin"
-        set dest_default="!install_dir!\x64\Release\delwaq2\default"
-        set dest_scripts="!install_dir!\x64\Release\delwaq2\scripts"
+        set dest_bin="!install_dir!\x64\Release\dwaq\bin"
+        set dest_default="!install_dir!\x64\Release\dwaq\default"
+        set dest_scripts="!install_dir!\x64\Release\dwaq\scripts"
         set dest_plugins="!install_dir!\x64\Release\plugins\bin"
         set dest_share="!install_dir!\x64\Release\share\bin"
         
@@ -726,7 +726,7 @@ rem ==========================
         rem Temporarily rename dest_bin to share_bin to copy libraries there as well
         set dest_bin=!dest_share!
         call :copyDwaqDependentRuntimeLibraries                                                                             !dest_bin!
-        set dest_bin="!install_dir!\x64\Release\delwaq2\bin"
+        set dest_bin="!install_dir!\x64\Release\dwaq\bin"
         
         rem copy binaries and dll 
         call :copyFile "!build_dir!\waq_plugin_wasteload\!configuration!\waq_plugin_wasteload.dll"                          !dest_bin! 
@@ -767,9 +767,9 @@ rem ==========================
     
         echo "Release postbuild"
 
-        set dest_bin="!install_dir!\x64\Release\wave\bin"
-        set dest_default="!install_dir!\x64\Release\wave\default"
-        set dest_scripts="!install_dir!\x64\Release\wave\scripts"
+        set dest_bin="!install_dir!\x64\Release\dwaves\bin"
+        set dest_default="!install_dir!\x64\Release\dwaves\default"
+        set dest_scripts="!install_dir!\x64\Release\dwaves\scripts"
         set dest_plugins="!install_dir!\x64\Release\plugins\bin"
         set dest_share="!install_dir!\x64\Release\share\bin"
         
@@ -779,7 +779,7 @@ rem ==========================
         rem Temporarily rename dest_bin to share_bin to copy libraries there as well
         set dest_bin=!dest_share!
         call :copyDwaqDependentRuntimeLibraries                                                                              !dest_bin!
-        set dest_bin="!install_dir!\x64\Release\wave\bin"
+        set dest_bin="!install_dir!\x64\Release\dwaves\bin"
         
         rem copy binaries and dll 
         call :copyFile "!build_dir!\wave\!configuration!\wave.dll"                                                           !dest_bin! 
@@ -816,9 +816,9 @@ rem ==========================
     
         echo "Release postbuild"
 
-        set dest_bin="!install_dir!\x64\Release\wave\bin"
-        set dest_default="!install_dir!\x64\Release\wave\default"
-        set dest_scripts="!install_dir!\x64\Release\wave\scripts"
+        set dest_bin="!install_dir!\x64\Release\dwaves\bin"
+        set dest_default="!install_dir!\x64\Release\dwaves\default"
+        set dest_scripts="!install_dir!\x64\Release\dwaves\scripts"
         set dest_plugins="!install_dir!\x64\Release\plugins\bin"
         set dest_share="!install_dir!\x64\Release\share\bin"
         
@@ -828,7 +828,7 @@ rem ==========================
         rem Temporarily rename dest_bin to share_bin to copy libraries there as well
         set dest_bin=!dest_share!
         call :copyDwaveDependentRuntimeLibraries                                                                            !dest_bin!
-        set dest_bin="!install_dir!\x64\Release\wave\bin"
+        set dest_bin="!install_dir!\x64\Release\dwaves\bin"
         
         rem copy binaries and dll 
         call :copyFile "!build_dir!\wave\!configuration!\wave_exe.exe"                                                      !dest_bin! 
@@ -867,9 +867,9 @@ rem ==========================
     
         echo "Release postbuild"
 
-        set dest_bin="!install_dir!\x64\Release\flow2d3d\bin"
-        set dest_default="!install_dir!\x64\Release\flow2d3d\default"
-        set dest_scripts="!install_dir!\x64\Release\flow2d3d\scripts"
+        set dest_bin="!install_dir!\x64\Release\dflow2d3d\bin"
+        set dest_default="!install_dir!\x64\Release\dflow2d3d\default"
+        set dest_scripts="!install_dir!\x64\Release\dflow2d3d\scripts"
         set dest_plugins="!install_dir!\x64\Release\plugins\bin"
         set dest_share="!install_dir!\x64\Release\share\bin"
         
@@ -879,7 +879,7 @@ rem ==========================
         rem Temporarily rename dest_bin to share_bin to copy libraries there as well
         set dest_bin=!dest_share!
         call :copyFlow2D3DDependentRuntimeLibraries                                                                             !dest_bin!
-        set dest_bin="!install_dir!\x64\Release\flow2d3d\bin"
+        set dest_bin="!install_dir!\x64\Release\dflow2d3d\bin"
         
         rem copy binaries and dll 
         call :copyFile "!build_dir!\flow2d3d\!configuration!\flow2d3d.dll"                                                      !dest_bin! 

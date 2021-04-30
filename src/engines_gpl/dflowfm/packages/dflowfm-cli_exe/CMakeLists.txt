@@ -82,8 +82,6 @@ if(UNIX)
                             wq_processes
                             dflowfm_kernel)
 
-    oss_include_libraries(${executable_name} oss_dependencies)
-
     target_link_libraries(${executable_name}
          ${oss_dependencies}
          PkgConfig::NETCDF
@@ -92,8 +90,6 @@ if(UNIX)
          PkgConfig::PROJ
          "metis")
 endif(UNIX)
-
-
 
 if(WIN32)
     set(oss_dependencies    deltares_common
@@ -136,11 +132,12 @@ if(WIN32)
                             wq_processes
                             dflowfm_kernel)
 
-    oss_include_libraries(${executable_name} oss_dependencies)
+
 
     target_link_libraries(${executable_name} ${oss_dependencies})
 endif(WIN32)
 
+oss_include_libraries(${executable_name} oss_dependencies)
 
 if(UNIX)
     message(STATUS "netcdf lib dir is ${NETCDF_LIBRARY_DIRS}")
@@ -218,7 +215,7 @@ source_group("Resources" FILES  ${icon_file})
 
 # Create the folder structure in vfproj
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${source})
-set_target_properties (${executable_name} PROPERTIES FOLDER dflowfm)
+set_target_properties (${executable_name} PROPERTIES FOLDER engines_gpl/dflowfm)
 
 # post-build
 set(install_dir ${CMAKE_BINARY_DIR})

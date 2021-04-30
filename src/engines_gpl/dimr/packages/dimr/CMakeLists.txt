@@ -104,8 +104,9 @@ if (WIN32)
                                                 "pthreadVC2.lib")
 endif()
 
-# Create the vfproj structure
-source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/.." FILES ${source} ${dimr_lib_sources} ${header_version_file}  ${rc_version_file})
+# Create the folder structure in vfproj
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${source} ${dimr_lib_sources} ${header_version_file}  ${rc_version_file})
+set_target_properties (${executable_name} PROPERTIES FOLDER engines_gpl/dimr)
 
 # post-build
 set(install_dir ${CMAKE_BINARY_DIR})

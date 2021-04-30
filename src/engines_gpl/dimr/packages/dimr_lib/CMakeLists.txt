@@ -98,7 +98,7 @@ endif()
 
 # Create the vfproj structure
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${source} ${headers} ${rc_version_file})
-
+set_target_properties (${library_name} PROPERTIES FOLDER engines_gpl/dimr)
 
 # post-build
 set(install_dir ${CMAKE_BINARY_DIR})
