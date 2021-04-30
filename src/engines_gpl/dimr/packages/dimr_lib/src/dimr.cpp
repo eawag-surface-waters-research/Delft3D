@@ -727,15 +727,8 @@ void Dimr::runParallelUpdate (dimr_control_block * cb, double tStep) {
                 // subBlock.tNext:
                 //     tNext must be tStart, also when tStart=0,
                 //     to distinguish "start at begin of simulatione" and "after one time step"
-                for (int j = 0; j < cb->subBlocks[i].numSubBlocks; j++) {  // look for the WAVE component (wave-library)
-                    if (j != cb->masterSubBlockId && cb->subBlocks[i].subBlocks[j].unit.component != nullptr && cb->subBlocks[i].subBlocks[j].unit.component->type == COMP_TYPE_WAVE) {
-                        cb->subBlocks[i].tNext = *currentTime + cb->subBlocks[i].tStart;
-                        cb->subBlocks[i].tEnd = *currentTime + cb->subBlocks[i].tEnd;
-                    } else {
-                        cb->subBlocks[i].tNext = cb->subBlocks[i].tStart;
-                        cb->subBlocks[i].tEnd  = cb->subBlocks[i].tEnd;
-                    }
-                }
+                cb->subBlocks[i].tNext = cb->subBlocks[i].tStart;
+                cb->subBlocks[i].tEnd  = cb->subBlocks[i].tEnd;
             }
         }
     }
@@ -744,10 +737,10 @@ void Dimr::runParallelUpdate (dimr_control_block * cb, double tStep) {
     //
     while (*currentTime < masterComponent->tNext) {
         //
-        // define tStep, 
-        // tStep is the minimum allowed time step over all followers
+        // define tStep
         // Start with maximum value defined by masterComponent
         double tStep = masterComponent->tNext - *currentTime;
+        // tStep is the minimum allowed time step over all followers
         for (int i = 0 ; i < cb->numSubBlocks ; i++) {
             if (i != cb->masterSubBlockId) {
                 // follower.tNext is the next point in time that this follower must be executed
@@ -828,10 +821,6 @@ void Dimr::runParallelUpdate (dimr_control_block * cb, double tStep) {
                                 if (cb->subBlocks[i].tCur == 0.0) {
                                     tUpdate = 0.0;
                                 }
-                            }
-                            if (cb->subBlocks[i].subBlocks[j].unit.component->type == COMP_TYPE_WAVE) {
-                                // dwaves is using the time-frame of the master coponent
-                                tUpdate += masterComponent->tStart;
                             }
                             // Update
                             chdir(thisComponent->workingDir);
@@ -916,13 +905,7 @@ void Dimr::runParallelUpdate (dimr_control_block * cb, double tStep) {
                         }
                     }
                     // All child blocks are executed. Update tCur and define the next time step that this block has to be executed.
-                    for (int j = 0; j < cb->subBlocks[i].numSubBlocks; j++) {  // look for the WAVE component (wave-library)
-                        if (j != cb->masterSubBlockId && cb->subBlocks[i].subBlocks[j].unit.component != nullptr && cb->subBlocks[i].subBlocks[j].unit.component->type == COMP_TYPE_WAVE) {
-                            cb->subBlocks[i].tCur = *currentTime;
-                        } else {
-                            cb->subBlocks[i].tCur = *currentTime - masterComponent->tStart;
-                        }
-                    }
+                    cb->subBlocks[i].tCur = *currentTime - masterComponent->tStart;
                     cb->subBlocks[i].tNext = cb->subBlocks[i].tNext + cb->subBlocks[i].tStep;
                     if (cb->subBlocks[i].tNext > cb->subBlocks[i].tEnd)
                         // This subBlock does not have to be executed anymore
