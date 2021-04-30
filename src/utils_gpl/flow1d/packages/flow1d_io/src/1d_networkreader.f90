@@ -323,29 +323,28 @@ module m_1d_networkreader
 
       firstNode = gpFirst(ibran)
       lastNode  = gpLast(ibran)
-      firstLink = lnkFirst(ibran)
-      lastLink  = lnkLast(ibran)
 
-      ! if no mesh points in the branch, cycle
       if(firstNode < 0 .or. lastNode < 0) then
          ! end node and begin node are missing and no internal gridpoints on branch.
          localOffsets = 0d0
          localUOffsets = 0d0
          gridpointscount = 0
-         linkCount       = 0
          ! set dummy local offset to half the branch length
          localGpsX   = 0d0
          localGpsY   = 0d0
          localGpsID  = ''
       else
          gridPointsCount                 = lastNode - firstNode + 1
-         linkCount                       = lastLink - firstLink + 1
          localOffsets(1:gridPointsCount) = meshgeom%nodeoffsets(firstNode:lastNode)
-         localUOffsets(1:linkCount)      = meshgeom%edgeoffsets(firstLink:lastLink)
          localGpsX(1:gridPointsCount)    = gpsX(firstNode:lastNode)
          localGpsY(1:gridPointsCount)    = gpsY(firstNode:lastNode)
          localGpsID(1:gridPointsCount)   = gpsID(firstNode:lastNode)
       endif
+
+      firstLink = lnkFirst(ibran)
+      lastLink  = lnkLast(ibran)
+      linkCount                       = lastLink - firstLink + 1
+      localUOffsets(1:linkCount)      = meshgeom%edgeoffsets(firstLink:lastLink)
 
       if (nodesOnBranchVertices==0 .and. (jampi_ == 0 .or. active_branches(ibran) == 1)) then
          if(localOffsets(1)>snapping_tolerance .or. gridpointsCount == 0) then
