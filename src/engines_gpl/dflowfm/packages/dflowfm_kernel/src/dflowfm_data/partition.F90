@@ -5041,7 +5041,7 @@ end subroutine partition_make_globalnumbers
       results(2,ns) = sumWeights
    end do
 
-   if ( jampi.eq.1 .and. japartqbnd.eq.1 ) then
+   if (jampi.eq.1) then
       ! Here we reduce the results
       if ( jatimer.eq.1 ) call starttimer(IMPIREDUCE)
 #ifdef HAVE_MPI

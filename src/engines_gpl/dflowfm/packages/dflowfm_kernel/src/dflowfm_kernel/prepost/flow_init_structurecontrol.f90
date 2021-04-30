@@ -1194,10 +1194,10 @@ endif
 !
 ! dambreak
 !
-if (ndambreak > 0) then
+if (ndambreaksg > 0) then
 
    if (allocated(maximumDambreakWidths)) deallocate(maximumDambreakWidths)
-   allocate(maximumDambreakWidths(ndambreak))
+   allocate(maximumDambreakWidths(ndambreaksg))
    maximumDambreakWidths = 0d0;
 
    if (allocated(kdambreak)) deallocate(kdambreak)
@@ -1337,9 +1337,19 @@ if (ndambreak > 0) then
          call prop_get_string(str_ptr, '', 'type', strtype, success)
          istrtype  = getStructype_from_string(strtype)
          ! flow1d_io library: add and read SOBEK dambreak
-         ! just use the first link of the the structure (the network%sts%struct(istrtmp)%link_number is not used in computations)
-         k = L1dambreaksg(n)
-         istrtmp = addStructure(network%sts, kdambreak(1,k), kdambreak(2,k), iabs(kdambreak(3,k)), -1, "", strid, istrtype)
+         if (L2dambreaksg(n) >= L1dambreaksg(n)) then
+            ! structure is active in current grid on one or more flow links: just use the first link of the the structure (the network%sts%struct(istrtmp)%link_number is not used in computations)
+            k = L1dambreaksg(n)
+            k1 = kdambreak(1,k)
+            k2 = kdambreak(2,k)
+            Lf = iabs(kdambreak(3,k))
+         else
+            ! Structure is not active in current grid: use dummy calc points and flow links, not used in computations.
+            k1 = 0
+            k2 = 0
+            Lf = 0
+         end if
+         istrtmp = addStructure(network%sts, k1, k2, Lf, -1, "", strid, istrtype)
          call readDambreak(network%sts%struct(istrtmp)%dambreak, str_ptr, strid, network%forcinglist, success)
       end if
 

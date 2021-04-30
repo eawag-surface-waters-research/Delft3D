@@ -474,6 +474,9 @@
                valdambreak(9,n) = 0d0                                    ! No breach started yet, set crest width to 0
                cycle
             end if
+            ! TODO: UNST-5102: code below needs checking: when dambreak #n not active in current partition,
+            ! most values below *are* available (based on other partitions). And in the code ahead, a call to reduce_crs
+            ! assumes that all values are present and will be sum-reduced in a flowlinkwidth-weighted manner.
             valdambreak(3,n)  = waterLevelsDambreakUpStream(n)
             valdambreak(4,n)  = waterLevelsDambreakDownStream(n)
             valdambreak(5,n)  = valdambreak(3,n) - valdambreak(4,n)
