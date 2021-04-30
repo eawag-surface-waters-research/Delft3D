@@ -1,4 +1,4 @@
-project(D-Waq)
+project(dwaq)
 
 # Specify the modules to be included
 if(NOT TARGET deltares_common) 

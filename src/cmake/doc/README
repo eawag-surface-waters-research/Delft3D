@@ -40,8 +40,8 @@ Compiling on Windows/Linux
                                    "dimr",                          # configure DIMR      only
                                    "dflowfm_interacter",            # configure D-Flow FM (with Interacter) only
                                    "flow2d3d",                      # configure Delft3D4  only
-                                   "d-waq",                         # configure D-WAQ     only
-                                   "d-waves",                       # configure D-WAVES   only
+                                   "dwaq",                          # configure D-WAQ     only
+                                   "dwaves",                        # configure D-WAVES   only
                                    "all",                           # configure all configurations (except for TESTS)
                                    "tools",                         # configure TOOLS     only
                                    "tests"                          # configure TESTS     only

@@ -4,7 +4,7 @@
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/configurations/dflowfm_configuration.cmake)
 
-include(${CMAKE_CURRENT_SOURCE_DIR}/configurations/d_waq_configuration.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/configurations/dwaq_configuration.cmake)
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/configurations/dimr_configuration.cmake)
 

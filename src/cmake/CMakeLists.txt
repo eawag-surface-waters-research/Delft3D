@@ -127,8 +127,8 @@ set(dflowfm_configuration "DFLOWFM")
 set(dflowfm_interacter_configuration "DFLOWFM_INTERACTER")
 set(tests_configuration "TESTS")
 set(dimr_configuration "DIMR")
-set(d_waq_configuration "D-WAQ")
-set(d_waves_configuration "D-WAVES")
+set(dwaq_configuration "DWAQ")
+set(dwaves_configuration "DWAVES")
 set(flow2d3d_configuration "FLOW2D3D")
 set(tools_configuration "TOOLS")
 
@@ -142,8 +142,8 @@ if(NOT (${configuration_type} STREQUAL ${tests_configuration}
      OR ${configuration_type} STREQUAL ${dflowfm_configuration}
      OR ${configuration_type} STREQUAL ${dflowfm_interacter_configuration}
      OR ${configuration_type} STREQUAL ${dimr_configuration}
-     OR ${configuration_type} STREQUAL ${d_waq_configuration}
-     OR ${configuration_type} STREQUAL ${d_waves_configuration}
+     OR ${configuration_type} STREQUAL ${dwaq_configuration}
+     OR ${configuration_type} STREQUAL ${dwaves_configuration}
      OR ${configuration_type} STREQUAL ${flow2d3d_configuration}
      OR ${configuration_type} STREQUAL ${tools_configuration}
      OR ${configuration_type} STREQUAL ${dimr_dflowfm_configuration}
@@ -179,15 +179,15 @@ if(${configuration_type} STREQUAL ${dimr_configuration})
 endif()
 
 # D-WAQ configuration
-if(${configuration_type} STREQUAL ${d_waq_configuration})
+if(${configuration_type} STREQUAL ${dwaq_configuration})
     message(STATUS "Generating solution for D-Waq ...")
-    include(configurations/d_waq_configuration.cmake)
+    include(configurations/dwaq_configuration.cmake)
 endif()
 
 # D-Waves configuration
-if(${configuration_type} STREQUAL ${d_waves_configuration})
+if(${configuration_type} STREQUAL ${dwaves_configuration})
     message(STATUS "Generating solution for D-Waves ...")
-    include(configurations/d_waves_configuration.cmake)
+    include(configurations/dwaves_configuration.cmake)
 endif()
 
 # Flow2D3D (Delft3D4) configuration
