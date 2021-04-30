@@ -32,7 +32,7 @@ file(GLOB headers ${header_path}/*.h)
 
 # Define library
 include_directories(${header_path})
-set(library_name dimr_lib)
+set(library_name dimr)
 add_library(${library_name} SHARED  ${source}
                                     ${headers}
                                     ${ini_version_file}

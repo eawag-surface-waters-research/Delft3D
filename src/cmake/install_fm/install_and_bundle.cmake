@@ -37,4 +37,6 @@ execute_process(COMMAND find "${CMAKE_INSTALL_PREFIX}/share" -type f -exec echo 
 execute_process(COMMAND find "${CMAKE_INSTALL_PREFIX}/lib" -type l -exec echo "remove destination of symlink:" {} \; -exec bash -c "cp --remove-destination $(readlink {}) {};"  {} \; WORKING_DIRECTORY "${CMAKE_INSTALL_PREFIX}/lib" )
 
 file(RENAME ${CMAKE_INSTALL_PREFIX}/bin/dflowfm-cli ${CMAKE_INSTALL_PREFIX}/bin/dflowfm)
+# The following files are left-overs from the traditional build. "libdimr.so_from_traditional_build" is already replaced by "libdimr.so_from_CMake_build".
+file(REMOVE ${CMAKE_INSTALL_PREFIX}/lib/libdimr.so.0 ${CMAKE_INSTALL_PREFIX}/lib/libdimr.so.0.0.0)
 
