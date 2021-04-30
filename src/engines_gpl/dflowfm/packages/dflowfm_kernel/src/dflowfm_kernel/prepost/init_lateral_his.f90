@@ -46,9 +46,5 @@ implicit none
       call realloc(qLatRealCum,    numlatsg, keepExisting = .false., fill = 0d0)
       call realloc(qLatRealCumPre, numlatsg, keepExisting = .false., fill = 0d0)
       call realloc(qLatRealAve,    numlatsg, keepExisting = .false., fill = 0d0)
-
-      if (jampi == 1) then
-         call realloc(qLatRealMPI, numlatsg, keepExisting = .false., fill = 0d0)
-      end if
    end if
    end subroutine init_lateral_his

@@ -62,7 +62,6 @@ double precision, allocatable, target :: qplatCum(:)       !< [m3/s] Cumulative 
 double precision, allocatable, target :: qplatCumPre(:)    !< [m3/s] Cumulative lateral discharge of provider at previous history output time{"shape": ["numlatsg"]}
 double precision, allocatable, target :: qplatAve(:)       !< [m3/s] Average lateral discharge of provider during the past history output interal {"shape": ["numlatsg"]}
 double precision, allocatable, target :: qLatReal(:)       !< [m3/s] Realized lateral discharge {"shape": ["numlatsg"]}
-double precision, allocatable, target :: qLatRealMPI(:)    !< [m3/s] Realized lateral discharge after MPI communication {"shape": ["numlatsg"]}
 double precision, allocatable, target :: qLatRealCum(:)    !< [m3/s] Cumulative realized lateral discharge {"shape": ["numlatsg"]}
 double precision, allocatable, target :: qLatRealCumPre(:) !< [m3/s] Cumulative realized lateral discharge at previous history output time{"shape": ["numlatsg"]}
 double precision, allocatable, target :: qLatRealAve(:)    !< [m3/s] Average realized lateral discharge during the past history output interal{"shape": ["numlatsg"]}
@@ -73,15 +72,11 @@ integer,          allocatable, target :: n1latsg(:)  !< [-] first  nlatnd point 
 integer,          allocatable, target :: n2latsg(:)  !< [-] second nlatnd point in lateral signal numlatsg {"shape": ["numlatsg"]}
 integer,          allocatable, target :: nnlat(:)    !< [-] for each lateral node, flow node number == pointer to qplat/balat {"shape": ["nlatnd"]}
 integer,          allocatable, target :: kclat(:)    !< [-] for each cell: 0 when not accepting lateral discharge (e.g. pipe) {"location": "face", "shape": ["ndx"]}
-integer                               :: nlatndMPI   !< lateral nodes dimension after mpi communication.
 
 !! Lateral geometry variables
 integer,          allocatable, target :: nodeCountLat(:)     !< [-] Count of nodes per lateral.
 double precision, allocatable, target :: geomXLat(:)         !< [m] x coordinates of laterals.
 double precision, allocatable, target :: geomYLat(:)         !< [m] y coordinates of laterals.
-integer,          allocatable, target :: nodeCountLatMPI(:)  !< [-] Count of nodes per lateral after mpi communication.
-double precision, allocatable, target :: geomXLatMPI(:)      !< [m] x coordinates of laterals after mpi communication.
-double precision, allocatable, target :: geomYLatMPI(:)      !< [m] y coordinates of laterals after mpi communication.
 
 double precision, allocatable, target :: qext(:)     !< [m3/s] External discharge per cell {"location": "face", "shape": ["ndkx"]}
 double precision, allocatable, target :: qextreal(:) !< [m3/s] Realized external discharge per cell {"location": "face", "shape": ["ndkx"]}

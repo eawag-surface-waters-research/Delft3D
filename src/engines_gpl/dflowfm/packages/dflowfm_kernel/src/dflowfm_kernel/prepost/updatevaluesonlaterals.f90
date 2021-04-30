@@ -35,7 +35,7 @@
 subroutine updateValuesOnLaterals(tim1, timestep)
    use m_flowtimes, only: ti_his, time_his, ti_hiss
    use m_wind, only: qqLat, numlatsg, qplat, qplatCum, qplatCumPre, qplatAve, qLatReal, &
-                     qLatRealCum, qLatRealCumPre, qLatRealAve, n1latsg,  n1latsg, n2latsg, nnlat, qLatRealMPI
+                     qLatRealCum, qLatRealCumPre, qLatRealAve, n1latsg,  n1latsg, n2latsg, nnlat
    use precision
    use m_alloc
    use m_flowparameters, only: eps10
@@ -45,7 +45,7 @@ subroutine updateValuesOnLaterals(tim1, timestep)
    double precision, intent(in) :: timestep !< Timestep is the difference between tim1 and the last update time
 
    integer :: i, k, k1
-   double precision, allocatable :: qLatRealCumTmp(:)
+   double precision, allocatable :: qLatRealCumTmp(:), qLatRealMPI(:)
 
    ! If current time has not reached the history output start time yet, do not update
    if (comparereal(tim1, ti_hiss, eps10) < 0) then
@@ -78,7 +78,9 @@ subroutine updateValuesOnLaterals(tim1, timestep)
    ! At the history output time, compute average discharge in the past His-interval
    if (comparereal(tim1, time_his, eps10)== 0 .and. ti_his > 0) then
       if (jampi == 1) then
+         call realloc(qLatRealMPI, numlatsg, keepExisting = .false., fill = 0d0)
          call reduce_double_sum(numlatsg, qLatReal, qLatRealMPI)
+         qLatReal(1:numlatsg) = qLatRealMPI(1:numlatsg)
 
          call realloc(qLatRealCumTmp, numlatsg, keepExisting = .false., fill=0d0)
          call reduce_double_sum(numlatsg, qLatRealCum, qLatRealCumTmp)

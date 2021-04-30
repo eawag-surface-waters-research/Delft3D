@@ -968,7 +968,7 @@ logical function initboundaryblocksforcings(filename)
  double precision             :: tmpval
  integer                      :: iostat, ierr
  integer                      :: ilattype, nlat
- integer                      :: k, n, k1, nini, nLatTmp
+ integer                      :: k, n, k1, k2, nini, nLatTmp
  integer                      :: fmmethod
  integer, dimension(1)        :: targetindex
  integer                      :: ib, ibqh, ibt
@@ -980,6 +980,7 @@ logical function initboundaryblocksforcings(filename)
  double precision, allocatable :: xdum(:), ydum(:)!, xy2dum(:,:)
  integer, allocatable          :: kdum(:)
  integer, allocatable          :: itpenzr(:), itpenur(:)
+ integer, allocatable          :: nnLatTmp(:)
 
  if (allocated(xdum  )) deallocate(xdum, ydum, kdum) !, xy2dum)
  allocate ( xdum(1), ydum(1), kdum(1)) !, xy2dum(2,1) , stat=ierr)
@@ -1271,18 +1272,22 @@ logical function initboundaryblocksforcings(filename)
                                        loc_spec_type, locationfile, numcoordinates, xcoordinates, ycoordinates, branchid, chainage, nodeId)
        ! If 0 is filled in nnLat, then adjust nlat so that 0 will be removed from nnLat (n1latsg, n2latsg and nlatnd will be ajusted automatically).
        ! For parallel simulation, if the node is a ghost node, then also set it to 0 to remove it from the current subdomain.
+       call realloc(nnLatTmp, nlat, keepExisting=.false., fill = -1)
        nlattmp = nlat
-       do n = nlatnd+1, nlatnd + nlattmp
+       k1 = 0
+       do k2 = 1, nlattmp
+          n = nlatnd+k2
           k = nnLat(n)
           if (k == 0) then
              nlat = nlat - 1
+          else if (jampi == 1 .and. idomain(nnLat(n)) .ne. my_rank) then ! The node is a ghost node for the current subdomain
+             nlat = nlat - 1
           else
-             if (jampi == 1 .and. idomain(nnLat(n)) .ne. my_rank) then ! The node is a ghost node for the current subdomain
-                nnLat(n) = 0
-                nlat = nlat - 1
-             end if
+             k1 = k1 + 1
+             nnLatTmp(k1) = nnLat(n)
           end if
        end do
+       nnLat(nlatnd+1:nlatnd+nlat) = nnLatTmp(1:nlat)
 
        n1latsg(numlatsg) = nlatnd + 1
        n2latsg(numlatsg) = nlatnd + nlat

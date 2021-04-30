@@ -40,7 +40,10 @@ subroutine fill_geometry_arrays_lateral()
 
    integer,          allocatable :: nodeCountLatGat(:), nlatndGat(:), recvCount(:), displs(:)
    double precision, allocatable :: xGat(:), yGat(:) ! Coordinates that are gatherd data from all subdomains
-   integer                       :: i, j, k, k1, ierror, is, ie, n, nnode, ii
+   integer                       :: i, j, k, k1, ierror, is, ie, n, nnode, ii, nlatndMPI
+   integer,          allocatable :: nodeCountLatMPI(:)  ! Count of nodes per lateral after mpi communication.
+   double precision, allocatable :: geomXLatMPI(:)      ! [m] x coordinates of laterals after mpi communication.
+   double precision, allocatable :: geomYLatMPI(:)      ! [m] y coordinates of laterals after mpi communication.
 
    ! Allocate and construct geometry variable arrays (on one subdomain)
    call realloc(nodeCountLat,   numlatsg, keepExisting = .false., fill = 0  )
@@ -81,7 +84,7 @@ subroutine fill_geometry_arrays_lateral()
       end if
 
       ! Gather integer data, where the same number of data, i.e. numlatsg, are gathered from each subdomain to process 0000
-      call gather_int_data_mpi(numlatsg, nodeCountLat, numlatsg*ndomains, nodeCountLatGat, numlatsg, 0, ierror)
+      call gather_int_data_mpi_same(numlatsg, nodeCountLat, numlatsg*ndomains, nodeCountLatGat, numlatsg, 0, ierror)
 
       if (my_rank == 0) then
          ! To use mpi gather call, construct displs, and nlatndGat (used as receive count for mpi gather call)
@@ -97,8 +100,8 @@ subroutine fill_geometry_arrays_lateral()
       end if
 
       ! Gather double precision data, here, different number of data are gatherd from different subdomains to process 0000
-      call gather_double_data_mpi(nlatnd, geomXLat, nlatndMPI, xGat, ndomains, nlatndGat, displs, 0, ierror)
-      call gather_double_data_mpi(nlatnd, geomYLat, nlatndMPI, yGat, ndomains, nlatndGat, displs, 0, ierror)
+      call gatherv_double_data_mpi_dif(nlatnd, geomXLat, nlatndMPI, xGat, ndomains, nlatndGat, displs, 0, ierror)
+      call gatherv_double_data_mpi_dif(nlatnd, geomYLat, nlatndMPI, yGat, ndomains, nlatndGat, displs, 0, ierror)
 
       if (my_rank == 0) then
          ! Construct nodeCountLatMPI for history output
@@ -126,6 +129,13 @@ subroutine fill_geometry_arrays_lateral()
                end if
             end do
          end do
+         ! Copy the MPI-arrays to nodeCoutLat, geomXLat and geomYLat for the his-output
+         nlatnd = nlatndMPI
+         nodeCountLat(1:numlatsg) = nodeCountLatMPI(1:numlatsg)
+         call realloc(geomXLat, nlatnd, keepExisting = .false., fill = 0d0)
+         call realloc(geomyLat, nlatnd, keepExisting = .false., fill = 0d0)
+         geomXLat(1:nlatnd) = geomXLatMPI(1:nlatnd)
+         geomYLat(1:nlatnd) = geomYLatMPI(1:nlatnd)
       end if
    end if
 end subroutine fill_geometry_arrays_lateral
