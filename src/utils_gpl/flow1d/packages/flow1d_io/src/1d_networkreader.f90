@@ -162,26 +162,28 @@ module m_1d_networkreader
    integer,                                     intent(in   ), optional :: my_rank     !< my rank in parallel mode, for (debugging) output
 
    !locals
-   integer, allocatable, dimension(:)               :: gpFirst
-   integer, allocatable, dimension(:)               :: gpLast
-   double precision, allocatable, dimension(:)      :: gpsX
-   double precision, allocatable, dimension(:)      :: gpsY
-   integer                                          :: ibran, inode, jsferic
-   integer                                          :: gridPointsCount
-   double precision, allocatable, dimension(:)      :: localOffsets
-   double precision, allocatable, dimension(:)      :: localOffsetsSorted
-   integer, allocatable, dimension(:)               :: localSortedIndexses
-   double precision, allocatable, dimension(:)      :: localGpsX
-   double precision, allocatable, dimension(:)      :: localGpsY
-   character(len=len(gpsId)), allocatable, dimension(:)  :: localGpsID
-   character(len=len(gpsId)), allocatable, dimension(:)  :: idMeshNodesInNetworkNodes
-   integer                                          :: firstNode, lastNode
-   double precision, parameter                      :: snapping_tolerance = 1e-10
-   double precision                                 :: distance, meanLength
-   integer                                          :: jampi_, my_rank_
-   integer                                          :: maxGridPointCount
-   logical, allocatable                             :: active_nodes(:)
-   integer, allocatable                             :: active_branches(:)
+   integer, allocatable, dimension(:)                   :: gpFirst
+   integer, allocatable, dimension(:)                   :: gpLast
+   integer, allocatable, dimension(:)                   :: lnkFirst
+   integer, allocatable, dimension(:)                   :: lnkLast
+   double precision, allocatable, dimension(:)          :: gpsX
+   double precision, allocatable, dimension(:)          :: gpsY
+   integer                                              :: ibran, inode, jsferic
+   integer                                              :: gridPointsCount, linkCount
+   double precision, allocatable, dimension(:)          :: localOffsets, localUOffsets
+   double precision, allocatable, dimension(:)          :: localOffsetsSorted
+   integer, allocatable, dimension(:)                   :: localSortedIndexses
+   double precision, allocatable, dimension(:)          :: localGpsX
+   double precision, allocatable, dimension(:)          :: localGpsY
+   character(len=ug_idsLen), allocatable, dimension(:)  :: localGpsID
+   character(len=ug_idsLen), allocatable, dimension(:)  :: idMeshNodesInNetworkNodes
+   integer                                              :: firstNode, lastNode, firstLink, LastLink
+   double precision, parameter                          :: snapping_tolerance = 1e-10
+   double precision                                     :: distance, meanLength
+   integer                                              :: jampi_, my_rank_
+   integer                                              :: maxGridPointCount, maxLinkCount
+   logical, allocatable                                 :: active_nodes(:)
+   integer, allocatable                                 :: active_branches(:)
 
    ierr = -1
 
@@ -261,23 +263,27 @@ module m_1d_networkreader
    endif
 
    ! Get the starting and ending mesh1d grid point indexes for each network branch.
-   ibran = 0
-   allocate(gpFirst(meshgeom%nbranches), stat = ierr)
-   if (ierr == 0) allocate(gpLast(meshgeom%nbranches), stat = ierr)
+   allocate(gpFirst (meshgeom%nbranches), gpLast (meshgeom%nbranches), &
+            lnkFirst(meshgeom%nbranches), lnkLast(meshgeom%nbranches), stat = ierr)
    if (ierr /= 0) then
       call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Error Allocating Memory for Branches')
    endif
 
    ierr = ggeo_get_start_end_nodes_of_branches(meshgeom%nodebranchidx, gpFirst, gpLast)
+   if (ierr /= 0) then
+      call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Error Getting first and last nodes of the network branches')
+   endif
+   ierr = ggeo_get_start_end_nodes_of_branches(meshgeom%edgebranchidx, lnkFirst, lnkLast)
+   if (ierr /= 0) then
+      call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Error Getting first and last links of the network branches')
+   endif
+
    if (jampi_ /= 0) then
       call active_network_nodes_branches(meshgeom, active_nodes, active_branches)
    else
       allocate(active_branches(meshgeom%nbranches))
       active_branches = 1
    end if
-   if (ierr /= 0) then
-      call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Error Getting first and last nodes of the network branches')
-   endif
 
    ! Fill the array storing the mesh1d node ids for each network node.
    if(nodesOnBranchVertices==0) then
@@ -302,8 +308,10 @@ module m_1d_networkreader
    endif
 
    ! allocate local arrays
-   maxGridPointCount = 3 + maxval(gpLast - gpFirst)
+   maxGridPointCount = 3 + maxval(gpLast  - gpFirst)
+   maxLinkCount      = 1 + maxval(lnkLast - lnkFirst)
    allocate(localOffsets(maxGridPointCount))
+   allocate(localUOffsets(maxLinkCount))
    allocate(localOffsetsSorted(maxGridPointCount))
    allocate(localSortedIndexses(maxGridPointCount))
    allocate(localGpsX(maxGridPointCount))
@@ -315,19 +323,25 @@ module m_1d_networkreader
 
       firstNode = gpFirst(ibran)
       lastNode  = gpLast(ibran)
+      firstLink = lnkFirst(ibran)
+      lastLink  = lnkLast(ibran)
+
       ! if no mesh points in the branch, cycle
       if(firstNode < 0 .or. lastNode < 0) then
          ! end node and begin node are missing and no internal gridpoints on branch.
          localOffsets = 0d0
+         localUOffsets = 0d0
          gridpointscount = 0
+         linkCount       = 0
          ! set dummy local offset to half the branch length
          localGpsX   = 0d0
          localGpsY   = 0d0
          localGpsID  = ''
       else
-         localOffsets = 0d0
          gridPointsCount                 = lastNode - firstNode + 1
+         linkCount                       = lastLink - firstLink + 1
          localOffsets(1:gridPointsCount) = meshgeom%nodeoffsets(firstNode:lastNode)
+         localUOffsets(1:linkCount)      = meshgeom%edgeoffsets(firstLink:lastLink)
          localGpsX(1:gridPointsCount)    = gpsX(firstNode:lastNode)
          localGpsY(1:gridPointsCount)    = gpsY(firstNode:lastNode)
          localGpsID(1:gridPointsCount)   = gpsID(firstNode:lastNode)
@@ -365,7 +379,8 @@ module m_1d_networkreader
 
       call storeBranch(network%brs, network%nds, branchids(ibran), nodeids(meshgeom%nedge_nodes(1,ibran)), &
          nodeids(meshgeom%nedge_nodes(2,ibran)), meshgeom%nbranchorder(ibran), gridPointsCount, localGpsX(1:gridPointsCount), &
-         localGpsY(1:gridPointsCount),localOffsets(1:gridPointsCount), localGpsID(1:gridPointsCount), active_branches(ibran), my_rank_)
+         localGpsY(1:gridPointsCount),localOffsets(1:gridPointsCount), localUoffsets(1:linkCount), &
+         localGpsID(1:gridPointsCount), active_branches(ibran), my_rank_)
    enddo
 
    call adminBranchOrders(network%brs)
@@ -867,7 +882,8 @@ module m_1d_networkreader
       
    end subroutine readBranch
 
-   subroutine storeBranch(brs, nds, branchId, begNodeId, endNodeId, ordernumber, gridPointsCount, gpX, gpY, gpchainages, gpID, active_branch, my_rank)
+   subroutine storeBranch(brs, nds, branchId, begNodeId, endNodeId, ordernumber, gridPointsCount, gpX, gpY, &
+                          gpchainages, gpUchainages, gpID, active_branch, my_rank)
    
       use m_branch
       
@@ -880,13 +896,14 @@ module m_1d_networkreader
       character(len=*), intent(in)                   :: endNodeId
       integer, intent(in)                            :: orderNumber
 
-      integer, intent(in)                                          :: gridPointsCount
-      double precision, dimension(gridPointsCount), intent(in)     :: gpX
-      double precision, dimension(gridPointsCount), intent(in)     :: gpY
-      double precision, dimension(gridPointsCount), intent(in)     :: gpchainages
-      character(len=*), dimension(gridPointsCount), intent(in)     :: gpID
-      integer                                     , intent(in)     :: my_rank
-      integer                                     , intent(in)     :: active_branch
+      integer, intent(in)                            :: gridPointsCount
+      double precision, dimension(:), intent(in)     :: gpX
+      double precision, dimension(:), intent(in)     :: gpY
+      double precision, dimension(:), intent(in)     :: gpchainages
+      double precision, dimension(:), intent(in)     :: gpUchainages
+      character(len=*), dimension(:), intent(in)     :: gpID
+      integer                       , intent(in)     :: my_rank
+      integer                       , intent(in)     :: active_branch
 
       ! Local Variables
       integer                                  :: ibr
@@ -955,7 +972,7 @@ module m_1d_networkreader
       enddo
 
       pbr%gridPointsCount = gridPointsCount
-      uPointsCount        = max(0, pbr%gridPointsCount - 1)
+      uPointsCount        = size(gpUchainages)
       pbr%uPointsCount    = uPointsCount
       
       call realloc(pbr%gridPointschainages, pbr%gridPointsCount)
@@ -968,7 +985,7 @@ module m_1d_networkreader
       ip2 = brs%gridPointsCount
       pbr%StartPoint         = ip1
       pbr%gridPointschainages = gpchainages
-      pbr%uPointschainages    = (pbr%gridPointschainages(1:uPointsCount) + pbr%gridPointschainages(2:uPointsCount+1) ) / 2.0d0
+      pbr%uPointschainages    = gpUchainages(1:uPointsCount)
       pbr%length            = gpchainages(gridPointsCount)
       pbr%Xs                = gpX
       pbr%Ys                = gpY
