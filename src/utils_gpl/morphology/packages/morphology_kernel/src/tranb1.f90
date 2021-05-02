@@ -54,13 +54,10 @@ subroutine tranb1(utot      ,d50       ,c         ,h         ,npar       , &
 ! 
     real(fp)   :: acal    ! user-specified calibration coefficient
     real(fp)   :: ag      ! gravity acceleration
-    real(fp)   :: cc
-    real(fp)   :: cf
     real(fp)   :: delta   ! relative density of sediment particle
-    real(fp)   :: rk
     real(fp)   :: suspfac ! user-specified suspended sediment factor
-    real(fp)   :: temp
-    real(fp)   :: ustar   ! shear velocity magnitue
+    real(fp)   :: temp    ! total transport (not yet split into bedload and suspended load)
+    real(fp)   :: th      ! Shields number
 !
 !! executable statements -------------------------------------------------------
 !
@@ -70,23 +67,13 @@ subroutine tranb1(utot      ,d50       ,c         ,h         ,npar       , &
     ag      = par(1)
     delta   = par(4)
     acal    = par(11)
-    rk      = par(12)
+    !rk      = par(12) ! obsolete
     suspfac = par(13)
-    !
-    if ((utot<1.0e-6_fp) .or. (h<0.001_fp)) then
-       return
-    endif
-    if (c < 1.0e-6_fp) then
-       cc = 18.0_fp * log10(12.0_fp*h/rk)
-    else
-       cc = c
-    endif
     !
     ! bed load
     !
-    cf    = ag / cc / cc
-    ustar = sqrt(cf) * utot
-    temp  = acal * 0.05_fp * utot * ustar**4 / ag**2 / sqrt(cf) / delta**2 / d50
+    th = (utot/c)**2 / (delta * d50)
+    temp  = 0.05_fp * acal * (c**2 / ag) * d50**1.5_fp * sqrt(ag * delta) * th**2.5_fp
     sbot  = (1.0_fp-suspfac) * temp
     !
     ! suspended sediment transport
