@@ -3,7 +3,7 @@ subroutine rdbcg(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                & lstsc     ,bndneu    ,cstbnd    ,nambnd    ,typbnd    , &
                & rettim    ,ntoq      ,thetqh    ,thetqt    ,restid    , &
                & filic     ,paver     ,pcorr     ,tstart    ,tstop     , &
-               & gdp       )
+               & mxdnto    ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2021.                                
@@ -46,6 +46,7 @@ subroutine rdbcg(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
 !!--declarations----------------------------------------------------------------
     use precision
     use properties
+    use dfparall, only: parll
     !
     use globaldata
     !
@@ -59,6 +60,7 @@ subroutine rdbcg(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     integer , pointer :: ltem
     integer , pointer :: itis
     logical , pointer :: use_zavg_for_qtot
+    integer, dimension(:), pointer :: bct_order
 !
 ! Global variables
 !
@@ -66,6 +68,7 @@ subroutine rdbcg(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     integer                      , intent(in)  :: lstsc  !  Description and declaration in dimens.igs
     integer                                    :: lundia !  Description and declaration in inout.igs
     integer                                    :: lunmd  !  Description and declaration in inout.igs
+    integer                      , intent(in)  :: mxdnto !  Total number of open boundaries across all partitions of a parallel simulation
     integer                                    :: nrrec  !  Pointer to the record number in the MD-file
     integer                      , intent(in)  :: nto    !  Description and declaration in esm_alloc_int.f90
     integer                      , intent(in)  :: ntoq   !  Description and declaration in dimens.igs
@@ -90,8 +93,10 @@ subroutine rdbcg(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
 !
 ! Local variables
 !
+    integer                :: i       ! Local open boundary index
     integer                :: intor
     integer                :: it      ! Help integer var. for time par.
+    integer                :: j       ! Global open boundary index
     integer                :: l       ! Loop parameter for constituents
     integer                :: lenc
     integer                :: lkw     ! Length of keyword 
@@ -109,7 +114,8 @@ subroutine rdbcg(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     real(sp)               :: rhelp   ! Help var. for reading paver from MDF-file 
     real(fp)               :: t
     real(fp)               :: smofrac ! Fraction of smoothing time over total simulation time (0-100.0).
-    real(fp), dimension(1) :: rval    ! Help array (real) where the data, recently read from the MD-file, are stored temporarily 
+    real(fp), dimension(1) :: rval    ! Help array (real) where the data, recently read from the MD-file, are stored temporarily
+    real(fp), allocatable, dimension(:, :, :) :: tmp_rettim ! Local array for the RETTIM values of all boundaries (for parallel computations).
     character(1)           :: cdef    ! Default value for character string
     character(1)           :: chulp   ! Help string to read character string
     character(300)         :: errmsg  ! Help text for error messages
@@ -122,6 +128,7 @@ subroutine rdbcg(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     ltem  => gdp%d%ltem
     itis  => gdp%gdrdpara%itis
     use_zavg_for_qtot => gdp%gdnumeco%use_zavg_for_qtot
+    bct_order => gdp%gdbcdat%bct_order
     !
     lerror  = .false.
     newkw   = .true.
@@ -191,46 +198,56 @@ subroutine rdbcg(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     ! (only if lstsc > 0) possible keyword not in md-file
     !
     if (lstsc > 0) then
-       rettim = 0.0_fp
-          !
-          ! Old parameter Rettim: use it for both the bottom and the surface layer
-          !
-          call prop_get(gdp%mdfile_ptr, '*', 'Rettim', rettim(:,1,1), nto)
-          do n = 1, nto
-             do l = 2, lstsc
-                rettim(n,:,:) = rettim(n,1,1)
-             enddo
+       allocate(tmp_rettim(mxdnto, lstsc, 2))
+       tmp_rettim = 0.0_fp
+       !
+       ! Old parameter Rettim: use it for both the bottom and the surface layer
+       !
+       call prop_get(gdp%mdfile_ptr, '*', 'Rettim', tmp_rettim(:,1,1), mxdnto)
+       do n = 1, mxdnto
+          do l = 2, lstsc
+             tmp_rettim(n,:,:) = tmp_rettim(n,1,1)
           enddo
-          !
-          ! Constituent independent input: if present, overwrite current values
-          !
-          call prop_get(gdp%mdfile_ptr, '*', 'Rettis', rettim(:,1,1), nto)
-          call prop_get(gdp%mdfile_ptr, '*', 'Rettib', rettim(:,1,2), nto)
-          !
-          ! Copy to all constituents
-          !
-          do n =  1, nto
-             do l = 2, lstsc
-                rettim(n,l,:) = rettim(n,1,:)
-             enddo
+       enddo
+       !
+       ! Constituent independent input: if present, overwrite current values
+       !
+       call prop_get(gdp%mdfile_ptr, '*', 'Rettis', tmp_rettim(:,1,1), mxdnto)
+       call prop_get(gdp%mdfile_ptr, '*', 'Rettib', tmp_rettim(:,1,2), mxdnto)
+       !
+       ! Copy to all constituents
+       !
+       do n =  1, mxdnto
+          do l = 2, lstsc
+             tmp_rettim(n,l,:) = tmp_rettim(n,1,:)
           enddo
-          !
-          ! Constituent dependent input: if present, overwrite current values
-          !
-          do l = 1, lstsc
-             if (l == lsal) then
-                call prop_get(gdp%mdfile_ptr, '*', 'RetsS', rettim(:,l,1), nto)
-                call prop_get(gdp%mdfile_ptr, '*', 'RetbS', rettim(:,l,2), nto)
-             elseif (l == ltem) then
-                call prop_get(gdp%mdfile_ptr, '*', 'RetsT', rettim(:,l,1), nto)
-                call prop_get(gdp%mdfile_ptr, '*', 'RetbT', rettim(:,l,2), nto)
-             else
-                write(keyw,'(a,i2.2)') "Rets", l-max(ltem,lsal)
-                call prop_get(gdp%mdfile_ptr, '*', keyw, rettim(:,l,1), nto)
-                write(keyw,'(a,i2.2)') "Retb", l-max(ltem,lsal)
-                call prop_get(gdp%mdfile_ptr, '*', keyw, rettim(:,l,2), nto)
-             endif
+       enddo
+       !
+       ! Constituent dependent input: if present, overwrite current values
+       !
+       do l = 1, lstsc
+          if (l == lsal) then
+             call prop_get(gdp%mdfile_ptr, '*', 'RetsS', tmp_rettim(:,l,1), mxdnto)
+             call prop_get(gdp%mdfile_ptr, '*', 'RetbS', tmp_rettim(:,l,2), mxdnto)
+          elseif (l == ltem) then
+             call prop_get(gdp%mdfile_ptr, '*', 'RetsT', tmp_rettim(:,l,1), mxdnto)
+             call prop_get(gdp%mdfile_ptr, '*', 'RetbT', tmp_rettim(:,l,2), mxdnto)
+          else
+             write(keyw,'(a,i2.2)') "Rets", l-max(ltem,lsal)
+             call prop_get(gdp%mdfile_ptr, '*', keyw, tmp_rettim(:,l,1), mxdnto)
+             write(keyw,'(a,i2.2)') "Retb", l-max(ltem,lsal)
+             call prop_get(gdp%mdfile_ptr, '*', keyw, rettim(:,l,2), mxdnto)
+          endif
+       enddo
+       if (parll) then
+          do i = 1, nto
+             j = bct_order(i)
+             rettim(i,:,:) = tmp_rettim(j,:,:)
           enddo
+       else
+          rettim = tmp_rettim
+       endif
+       deallocate(tmp_rettim)
        do n = 1, nto
           do l = 1, lstsc
           !
