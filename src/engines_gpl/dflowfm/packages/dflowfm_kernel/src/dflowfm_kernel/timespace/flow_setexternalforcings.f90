@@ -128,17 +128,6 @@ subroutine flow_setexternalforcings(tim, l_initPhase, iresult)
             else
                success = ec_gettimespacevalue(ecInstancePtr, 'airpressure_windx_windy', tim)
             endif
-            if (success) then
-               ! FM performs an additional spatial interpolation:
-               do L  = 1,lnx ! i
-                  k1 = ln(1,L) ; k2 = ln(2,L)
-                  wx(L) = wx(L) + 0.5d0*( ec_pwxwy_x(k1) + ec_pwxwy_x(k2) )
-                  wy(L) = wy(L) + 0.5d0*( ec_pwxwy_y(k1) + ec_pwxwy_y(k2) )
-                  if (allocated(ec_pwxwy_c)) then
-                     wcharnock(L) = wcharnock(L) + 0.5d0*( ec_pwxwy_c(k1) + ec_pwxwy_c(k2) )
-                  endif
-               enddo
-            end if
          ! Retrieve wind's x-component for ext-file quantity 'windx'.
          else if (itemPtr%id == item_windx) then
             success = ec_gettimespacevalue(ecInstancePtr, item_windx, irefdate, tzone, tunit, tim)
@@ -157,6 +146,18 @@ subroutine flow_setexternalforcings(tim, l_initPhase, iresult)
             id_last_wind  = max(i, id_last_wind)
          endif
       enddo
+
+      ! FM performs an additional spatial interpolation:
+      if (allocated(ec_pwxwy_x) .and. allocated( ec_pwxwy_y)) then
+         do L  = 1,lnx ! i
+            k1 = ln(1,L) ; k2 = ln(2,L)
+            wx(L) = wx(L) + 0.5d0*( ec_pwxwy_x(k1) + ec_pwxwy_x(k2) )
+            wy(L) = wy(L) + 0.5d0*( ec_pwxwy_y(k1) + ec_pwxwy_y(k2) )
+            if (allocated(ec_pwxwy_c)) then
+               wcharnock(L) = wcharnock(L) + 0.5d0*( ec_pwxwy_c(k1) + ec_pwxwy_c(k2) )
+            endif
+         enddo
+      endif
 
       if (item_atmosphericpressure /= ec_undef_int) then
          do k = 1,ndx
