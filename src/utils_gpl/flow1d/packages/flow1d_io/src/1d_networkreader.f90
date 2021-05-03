@@ -343,8 +343,12 @@ module m_1d_networkreader
 
       firstLink = lnkFirst(ibran)
       lastLink  = lnkLast(ibran)
-      linkCount                       = lastLink - firstLink + 1
-      localUOffsets(1:linkCount)      = meshgeom%edgeoffsets(firstLink:lastLink)
+      if (firstLink < 0 .or. lastLink < 0) then
+         linkCount = 0
+      else
+         linkCount                       = lastLink - firstLink + 1
+         localUOffsets(1:linkCount)      = meshgeom%edgeoffsets(firstLink:lastLink)
+      end if
 
       if (nodesOnBranchVertices==0 .and. (jampi_ == 0 .or. active_branches(ibran) == 1)) then
          if(localOffsets(1)>snapping_tolerance .or. gridpointsCount == 0) then
