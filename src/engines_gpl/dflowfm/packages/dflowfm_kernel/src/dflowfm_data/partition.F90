@@ -945,6 +945,7 @@ use meshdata, only : ug_idsLen, ug_idsLongNamesLen
    subroutine find_original_cell_numbers(L2Lorg, Lne_org, iorg)
       use unstruc_messages
       use network_data, only: nump1d2d, numL, lnn, lne, numl1d, xk, yk, zk
+      use unstruc_channel_flow, only: network
       use sorting_algorithms, only : indexxi
       implicit none
       
@@ -1038,7 +1039,7 @@ use meshdata, only : ug_idsLen, ug_idsLongNamesLen
 !         end if
 !      end do
 
-      if (numl1d > 0) then
+      if (network%loaded .and. numl1d > 0) then
          ! sort the nodes (and their coordinates) in case of 1D,
          ! to keep it in line with network numbering
          ! TODO (?): also sort xzw, yzw and netcell(:)%nod(:)
