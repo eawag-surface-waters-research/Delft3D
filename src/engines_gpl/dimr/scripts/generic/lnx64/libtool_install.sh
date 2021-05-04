@@ -1,5 +1,13 @@
 #!/bin/bash
 
+echo libtool_install.sh
+echo This script is no longer needed, since DIMR is compiled using CMake instead of Automake.
+echo Exiting directly
+
+exit 0
+
+
+
 function fcheck {
     if [ ! -f "$1" ]; then
         echo "ERROR: file $1 does not exist"
