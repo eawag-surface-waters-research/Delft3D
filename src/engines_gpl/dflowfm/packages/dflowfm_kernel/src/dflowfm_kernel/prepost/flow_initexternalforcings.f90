@@ -1605,6 +1605,10 @@ if (mext /= 0) then
               japatm = 1
            endif
 
+        else if (qid == 'air_temperature') then
+           call mess(LEVEL_WARN, 'Reading *.ext forcings file '''//trim(md_extfile)//''', please replace air_temperature by airtemperature' )
+           success = .false.
+
         else if (qid == 'airtemperature') then
 
            if (.not. allocated(tair) ) then
