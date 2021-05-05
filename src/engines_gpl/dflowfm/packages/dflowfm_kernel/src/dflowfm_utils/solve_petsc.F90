@@ -855,9 +855,8 @@ end module m_petsc
 
 !     mark fail by setting number of iterations to -999
       if ( jasucces /= 1 ) then
-         call flow_externaloutput_direct() ! Last-minute save of emergency snapshot in map/his/rst
          its = -999
-         call mess(LEVEL_DEBUG, 'conjugategradientPETSC: error. Last model state written to file.')
+         call mess(LEVEL_DEBUG, 'conjugategradientPETSC: error.')
       end if
 
    end subroutine conjugategradientPETSC
