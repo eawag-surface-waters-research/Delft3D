@@ -210,8 +210,13 @@ set(oss_dependencies    deltares_common
                         waq_process
                         waq_utils_c
                         waq_utils_f
-                        wq_processes
-                        interacter_stub)
+                        wq_processes)
+
+    if(NOT WITH_INTERACTER)
+        set(oss_dependencies ${oss_dependencies} interacter_stub)
+    endif()
+
+
 
 oss_include_libraries(${library_name} oss_dependencies)
 target_link_libraries(${library_name} ${oss_dependencies})
@@ -263,8 +268,13 @@ set_source_files_properties(${fortran_version_file}
 
 # Define preprocessor definitions 
 set_target_properties(${library_name} PROPERTIES COMPILE_FLAGS ${openmp_flag})
-if (WIN32) 
-    target_compile_definitions(${library_name} PRIVATE "WIN32;HAVE_TECPLOT;HAVE_OPENGL;HAVE_METIS;HAVE_POLYPACK;HAVE_MPI;HAVE_PROJ;HAVE_SHAPELIB;HAVE_GDAL;HAVE_PETSC")
+if (WIN32)
+    if(WITH_INTERACTER)
+        # Add HAVE_DISPLAY=1
+        target_compile_definitions(${library_name} PRIVATE "WIN32;HAVE_TECPLOT;HAVE_METIS;HAVE_POLYPACK;HAVE_MPI;HAVE_PROJ;HAVE_SHAPELIB;HAVE_GDAL;HAVE_PETSC;HAVE_OPENGL;HAVE_DISPLAY=1")
+    else()
+        target_compile_definitions(${library_name} PRIVATE "WIN32;HAVE_TECPLOT;HAVE_METIS;HAVE_POLYPACK;HAVE_MPI;HAVE_PROJ;HAVE_SHAPELIB;HAVE_GDAL;HAVE_PETSC;HAVE_OPENGL;HAVE_DISPLAY=0")
+    endif()
 endif(WIN32)
 
 if (UNIX)

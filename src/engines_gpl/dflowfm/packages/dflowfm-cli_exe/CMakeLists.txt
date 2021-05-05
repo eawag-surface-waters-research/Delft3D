@@ -17,6 +17,21 @@ set(rc_version_file ${res_path}/version_number-cli.rc)
 generate_version_files(${rc_version_file} ${checkout_src_root} ${ini_version_file} TRUE)
 set(svn_version_file ${rc_version_file}.svn)
 
+# Interacter
+if(WITH_INTERACTER)
+    message(CHECK_START "Looking for Interacter library (intmwi64.lib)")
+    find_library (lib_interacter intmwi64.lib
+              HINTS ENV INTERACTER_DIR
+                  PATHS "${checkout_src_root}/third_party/interacter/bin/win32/x64")
+    
+    if(NOT lib_interacter)
+       message(CHECK_FAIL "not found")
+       message(SEND_ERROR "Required Interacter library is missing.")
+    else()
+       message(CHECK_PASS "found")
+    endif()
+endif()
+
 # Gather the source files
 file(GLOB source    ${dflowfm_cli_path}/net_main.F90)
 
@@ -102,7 +117,6 @@ if(WIN32)
                             flow1d_io
                             gridgeom
                             io_netcdf
-                            interacter_stub
                             kdtree_wrapper
                             kdtree2
                             fortranc
@@ -133,6 +147,12 @@ if(WIN32)
                             dflowfm_kernel)
 
 
+    if(WITH_INTERACTER)
+        # Add lib_interacter before adding the other libraries. Sometimes it seems to make a difference
+        target_link_libraries(${executable_name} ${lib_interacter})
+    else()
+        set(oss_dependencies ${oss_dependencies} interacter_stub)
+    endif()
 
     target_link_libraries(${executable_name} ${oss_dependencies})
 endif(WIN32)
@@ -202,7 +222,13 @@ if (WIN32)
                           "tecio.lib")
 
     message(STATUS "Setting target_compile_definitions in windows")
-    target_compile_definitions(${executable_name} PRIVATE "WIN32;HAVE_DISPLAY=0;HAVE_METIS;HAVE_POLYPACK;HAVE_MPI;HAVE_PROJ;HAVE_SHAPELIB;HAVE_GDAL;HAVE_PETSC")
+    if(WITH_INTERACTER)
+        # Add HAVE_DISPLAY=1
+        target_compile_definitions(${executable_name} PRIVATE "WIN32;HAVE_METIS;HAVE_POLYPACK;HAVE_MPI;HAVE_PROJ;HAVE_SHAPELIB;HAVE_GDAL;HAVE_PETSC;HAVE_OPENGL;HAVE_DISPLAY=1")
+    else()
+        target_compile_definitions(${executable_name} PRIVATE "WIN32;HAVE_METIS;HAVE_POLYPACK;HAVE_MPI;HAVE_PROJ;HAVE_SHAPELIB;HAVE_GDAL;HAVE_PETSC;HAVE_OPENGL;HAVE_DISPLAY=0")
+    endif()
+
 
     # Set linker options
     message(STATUS "Setting target_link_options in windows")

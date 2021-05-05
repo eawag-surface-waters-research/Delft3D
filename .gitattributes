@@ -463,6 +463,7 @@ src/cmake/CMakeLists.txt -text
 src/cmake/compiler_options/intel.cmake -text
 src/cmake/configurations/all_configuration.cmake -text
 src/cmake/configurations/dflowfm_configuration.cmake -text
+src/cmake/configurations/dflowfm_configuration_basic.cmake -text
 src/cmake/configurations/dflowfm_interacter_configuration.cmake -text
 src/cmake/configurations/dimr_configuration.cmake -text
 src/cmake/configurations/dimr_dflowfm_configuration.cmake -text
@@ -503,9 +504,6 @@ src/common.am -text
 src/configure.ac -text
 src/doxyfile_delft3d -text
 src/doxyfile_delwaq -text
-src/engines/dflowfm/packages/dflowfm_interacter/CMakeLists.txt -text
-src/engines/dflowfm/packages/dflowfm_interacter/doc/Interacter_steps.docx -text
-src/engines/dflowfm/packages/dflowfm_interacter/doc/README -text
 src/engines_gpl/Makefile.am -text
 src/engines_gpl/d_hydro/Makefile.am -text
 src/engines_gpl/d_hydro/packages/Makefile.am -text
@@ -522,6 +520,8 @@ src/engines_gpl/d_hydro/scripts/create_config_xml.tcl -text
 src/engines_gpl/d_hydro/scripts/test_xml_creation.bat -text
 src/engines_gpl/d_hydro/scripts/test_xml_creation.tcl -text
 src/engines_gpl/dflowfm/Makefile.am -text
+src/engines_gpl/dflowfm/interacter/Interacter_steps.docx -text
+src/engines_gpl/dflowfm/interacter/README -text
 src/engines_gpl/dflowfm/packages/Makefile.am -text
 src/engines_gpl/dflowfm/packages/dflowfm-cli_exe/CMakeLists.txt -text
 src/engines_gpl/dflowfm/packages/dflowfm-cli_exe/Makefile.am -text
