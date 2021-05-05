@@ -27,5 +27,6 @@ execute_process(COMMAND find "${CMAKE_INSTALL_PREFIX}/bin" -type f -exec echo "p
 execute_process(COMMAND find "${CMAKE_INSTALL_PREFIX}/lib" -type f -exec echo "patched rpath of: " {} \; -exec bash -c "patchelf --set-rpath '$ORIGIN' $1" _ {} \;)
 execute_process(COMMAND find "${CMAKE_INSTALL_PREFIX}/lib" -type l -exec echo "remove destination of symlink:" {} \; -exec bash -c "cp --remove-destination $(readlink {}) {};"  {} \; WORKING_DIRECTORY "${CMAKE_INSTALL_PREFIX}/lib" )
 
-
-file(RENAME ${CMAKE_INSTALL_PREFIX}/lib/libdimr_lib.so ${CMAKE_INSTALL_PREFIX}/lib/libdimr.so)
+# Ugly way to copy file "libdimr_lib.so" to "libdimr.so" in the same directory. They are currently both needed in the testbench
+file(COPY ${CMAKE_INSTALL_PREFIX}/lib/libdimr_lib.so DESTINATION ${CMAKE_INSTALL_PREFIX})
+file(RENAME ${CMAKE_INSTALL_PREFIX}/libdimr_lib.so ${CMAKE_INSTALL_PREFIX}/lib/libdimr.so)
