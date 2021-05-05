@@ -884,11 +884,8 @@ endif
        if ( res .le. 1d4*epscg ) then ! allow a larger error
          call mess(LEVEL_INFO, 'conjugategradientSAAD: non-fatal error')
        else
-          ! write system state
-          call flow_externaloutput_direct() ! Last-minute save of emergency snapshot in map/his/rst
-          ! Report error
           call qnerror('conjugategradientSAAD: error', ' ', ' ')
-          call mess(LEVEL_WARN, 'conjugategradientSAAD: error. Last system state written to file.')
+          call mess(LEVEL_WARN, 'conjugategradientSAAD: error')
        end if
        
        !if ( jampi.eq.0 ) then
