@@ -23,10 +23,12 @@ set(BU_CHMOD_BUNDLE_ITEMS 1)
 
 fixup_bundle("${CMAKE_INSTALL_PREFIX}/bin/dimr" "${BUILD_LIBRARIES}" "${THIRDPARTY_x64_LIB_FOLDERS}")
 
+# Ugly way to rename file "libdimr_lib.so" to "libdimr.so", repairing the reference in dimr
+file(RENAME ${CMAKE_INSTALL_PREFIX}/lib/libdimr_lib.so ${CMAKE_INSTALL_PREFIX}/lib/libdimr.so)
+execute_process(COMMAND bash -c "patchelf --replace-needed libdimr_lib.so libdimr.so ${CMAKE_INSTALL_PREFIX}/bin/dimr")
+
+
 execute_process(COMMAND find "${CMAKE_INSTALL_PREFIX}/bin" -type f -exec echo "patched rpath of: " {} \; -exec bash -c "patchelf --set-rpath '$ORIGIN:$ORIGIN/../lib' $1" _ {} \;)
 execute_process(COMMAND find "${CMAKE_INSTALL_PREFIX}/lib" -type f -exec echo "patched rpath of: " {} \; -exec bash -c "patchelf --set-rpath '$ORIGIN' $1" _ {} \;)
 execute_process(COMMAND find "${CMAKE_INSTALL_PREFIX}/lib" -type l -exec echo "remove destination of symlink:" {} \; -exec bash -c "cp --remove-destination $(readlink {}) {};"  {} \; WORKING_DIRECTORY "${CMAKE_INSTALL_PREFIX}/lib" )
 
-# Ugly way to copy file "libdimr_lib.so" to "libdimr.so" in the same directory. They are currently both needed in the testbench
-file(COPY ${CMAKE_INSTALL_PREFIX}/lib/libdimr_lib.so DESTINATION ${CMAKE_INSTALL_PREFIX})
-file(RENAME ${CMAKE_INSTALL_PREFIX}/libdimr_lib.so ${CMAKE_INSTALL_PREFIX}/lib/libdimr.so)
