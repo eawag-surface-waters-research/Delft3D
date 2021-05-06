@@ -1,30 +1,30 @@
 !----- AGPL --------------------------------------------------------------------
-!                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2021.                                
-!                                                                               
-!  This file is part of Delft3D (D-Flow Flexible Mesh component).               
-!                                                                               
-!  Delft3D is free software: you can redistribute it and/or modify              
-!  it under the terms of the GNU Affero General Public License as               
-!  published by the Free Software Foundation version 3.                         
-!                                                                               
-!  Delft3D  is distributed in the hope that it will be useful,                  
-!  but WITHOUT ANY WARRANTY; without even the implied warranty of               
-!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the                
-!  GNU Affero General Public License for more details.                          
-!                                                                               
-!  You should have received a copy of the GNU Affero General Public License     
-!  along with Delft3D.  If not, see <http://www.gnu.org/licenses/>.             
-!                                                                               
-!  contact: delft3d.support@deltares.nl                                         
-!  Stichting Deltares                                                           
-!  P.O. Box 177                                                                 
-!  2600 MH Delft, The Netherlands                                               
-!                                                                               
-!  All indications and logos of, and references to, "Delft3D",                  
-!  "D-Flow Flexible Mesh" and "Deltares" are registered trademarks of Stichting 
+!
+!  Copyright (C)  Stichting Deltares, 2017-2021.
+!
+!  This file is part of Delft3D (D-Flow Flexible Mesh component).
+!
+!  Delft3D is free software: you can redistribute it and/or modify
+!  it under the terms of the GNU Affero General Public License as
+!  published by the Free Software Foundation version 3.
+!
+!  Delft3D  is distributed in the hope that it will be useful,
+!  but WITHOUT ANY WARRANTY; without even the implied warranty of
+!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+!  GNU Affero General Public License for more details.
+!
+!  You should have received a copy of the GNU Affero General Public License
+!  along with Delft3D.  If not, see <http://www.gnu.org/licenses/>.
+!
+!  contact: delft3d.support@deltares.nl
+!  Stichting Deltares
+!  P.O. Box 177
+!  2600 MH Delft, The Netherlands
+!
+!  All indications and logos of, and references to, "Delft3D",
+!  "D-Flow Flexible Mesh" and "Deltares" are registered trademarks of Stichting
 !  Deltares, and remain the property of Stichting Deltares. All rights reserved.
-!                                                                               
+!
 !-------------------------------------------------------------------------------
 
 ! $Id$
@@ -338,72 +338,90 @@ subroutine sethu(jazws0)                            ! Set upwind waterdepth hu
 
     if (kmx > 0) then
        Lb       = Lbot(L)
-       if(hu(L) > 0d0) then
+       if (hu(L) > 0d0) then
+
           kt      = ktop(ku)
           kb      = min ( ln0( iup,Lb ) , kt )  ! dickv, was ln
-
-          kb0     = kb - 1                   ! kbot(ku) - 1
+          kb0     = kb - 1                      ! kbot(ku) - 1
           Ltop(L) = Lb + kt - kb
 
-          if (Ltop(L) > Lb + kmxL(L) - 1) then
-             call qnerror('Ltop too large',' ',' ')
-          endif
-
-          hsku  = zws(kt) - zws(kb0)
-          au(L) = 0d0
+          au(L)    = 0d0
           hu(Lb-1) = 0d0
 
-          if (layertype == 2 .and. keepzlayeringatbed == 3) then  ! split in a central sigma oriented part
+          if ( Lb == Ltop(L) ) then                ! one layer
 
-             if ( Lb == Ltop(L) ) then                ! one layer
-                LL     = Lb
-                hu(LL) = hu(L)
-                au(LL) = wu(L)*(hu(LL) - hu(LL-1))    ! this is only for now here, later move to addlink etc
-                au(L)  = au(L) + au(LL)               ! add to integrated 2Dh layer
+              LL     = Lb
+              hu(LL) = hu(L)
+              au(LL) = wu(L)*(hu(LL) - hu(LL-1))   ! this is only for now here, later move to addlink etc
+              au(L)  = au(L) + au(LL)              ! add to integrated 2Dh layer
 
-             else                                     ! two or more
+          else
+
+             hsku    = zws(kt) - zws(kb0)
+             if (Ltop(L) > Lb + kmxL(L) - 1) then
+                call qnerror('Ltop too large',' ',' ')
+             endif
+
+             if (layertype == 2 .and. keepzlayeringatbed == 3) then  ! split in a central sigma oriented part
 
                 ktd  = ktop(kd)
                 kbd  = min ( ln0(3-iup,Lb ) , ktd )
                 kbd0 = kbd - 1
 
+                if (ktd == kbd) then
 
-                hub  = 0d0
-                do LL  = Lb+1, Ltop(L)                ! search upwind cell for first layer above local bob
-                   hub = zws(kb+LL-Lb) - bup
-                   if (hub > 0) then
-                      LLbup = LL
-                      exit
-                   endif
-                enddo
+                   do LL = Lb, Ltop(L)
+                      sigm   = (zws(kb+LL-Lb)-zws(kb0)) / hsku
+                      hu(LL) = sigm*hu(L)
+                      au(LL) = wu(L)*(hu(LL)-hu(LL-1))   ! this is only for now here, later move to addlink etc
+                      au(L)  = au(L) + au(LL)            ! add to integrated 2Dh layer
+                   enddo
 
-                do LL  = Lb, LLbup                    ! central in lower part
-                   sigm   = ( zws(kb+LL-Lb)  - zws(kb0)  ) / ( zws(kb+LLbup-Lb)  - zws(kb0)  )
-                   sigmd  = ( zws(kbd+LL-Lb) - zws(kbd0) ) / ( zws(kbd+LLbup-Lb) - zws(kbd0) )
-                   sigm   = 0.5d0*(sigm + sigmd)
-                   hu(LL) = sigm*hub
-                   au(LL) = wu(L)*(hu(LL) - hu(LL-1)) ! this is only for now here, later move to addlink etc
+                else
+
+                   hub   = 0d0
+                   LLbup = Lb
+                   do LL  = Lb+1, Ltop(L)                ! search upwind cell for first layer above local bob
+                      hub = zws(kb+LL-Lb) - bup
+                      if (hub > 0) then
+                         LLbup = LL
+                         exit
+                      endif
+                   enddo
+
+                   do LL  = Lb, LLbup                    ! central in lower part
+                      sigm   = ( zws(kb+LL-Lb)  - zws(kb0)  ) / ( zws(kb+LLbup-Lb)  - zws(kb0)  )
+                      if (zws(kbd+LL-Lb) - zws(kbd0) > 0d0 .and. zws(kbd+LLbup-Lb) - zws(kbd0) > 0d0 ) then
+                          sigmd  = ( zws(kbd+LL-Lb) - zws(kbd0) ) / ( zws(kbd+LLbup-Lb) - zws(kbd0) )
+                      else
+                          sigmd  = dble(LL-Lb+1)/ dble(LLbup-Lb+1)
+                      endif
+                      sigm = 0.5d0*(sigm + sigmd)
+                      hu(LL) = sigm*hub
+                      au(LL) = wu(L)*(hu(LL) - hu(LL-1)) ! this is only for now here, later move to addlink etc
+                      au(L)  = au(L) + au(LL)            ! add to integrated 2Dh layer
+                   enddo
+
+                   hub = hu(L) - hub
+                   do LL  = LLbup+1, Ltop(L)             ! upwind in upper part
+                      sigm   = ( zws(kb+LL-Lb) - zws(kb+LLbup-Lb) ) / ( zws(kt) - zws(kb+LLbup-Lb) )
+                      hu(LL) = hu(LLbup) + sigm*hub
+                      au(LL) = wu(L)*(hu(LL) - hu(LL-1)) ! this is only for now here, later move to addlink etc
+                      au(L)  = au(L) + au(LL)            ! add to integrated 2Dh layer
+                   enddo
+
+                endif
+
+             else                                     ! default: upwind sigma oriented distribution of hu(L)
+
+                do LL = Lb, Ltop(L)
+                   sigm   = (zws(kb+LL-Lb)-zws(kb0)) / hsku
+                   hu(LL) = sigm*hu(L)
+                   au(LL) = wu(L)*(hu(LL)-hu(LL-1))   ! this is only for now here, later move to addlink etc
                    au(L)  = au(L) + au(LL)            ! add to integrated 2Dh layer
                 enddo
 
-                hub = hu(L) - hub
-                do LL  = LLbup+1, Ltop(L)             ! upwind in upper part
-                   sigm   = ( zws(kb+LL-Lb) - zws(kb+LLbup-Lb) ) / ( zws(kt) - zws(kb+LLbup-Lb) )
-                   hu(LL) = hu(LLbup) + sigm*hub
-                   au(LL) = wu(L)*(hu(LL) - hu(LL-1)) ! this is only for now here, later move to addlink etc
-                   au(L)  = au(L) + au(LL)            ! add to integrated 2Dh layer
-                enddo
-
-            endif
-
-          else                                     ! default: upwind sigma oriented distribution of hu(L)
-
-             do LL = Lb, Ltop(L)
-                sigm   = (zws(kb+LL-Lb)-zws(kb0)) / hsku
-                hu(LL) = sigm*hu(L)
-                au(LL) = wu(L)*(hu(LL)-hu(LL-1))   ! this is only for now here, later move to addlink etc
-                au(L)  = au(L) + au(LL)            ! add to integrated 2Dh layer
-             enddo
+             endif
 
           endif
 
