@@ -1,5 +1,14 @@
 set(library_name ftnunit)
-create_library(${library_name} ${visual_studio_source_group_name})
+
+file(GLOB source    src/*.f90)
+
+list(REMOVE_ITEM sources src/ftnunit_hooks.f90)
+
+add_library(${library_name} ${source})
+
+# Create the folder structure in vfproj
+source_group(${visual_studio_source_group_name} FILES ${source})
+
 
 # Set additional compilation properties
 target_compile_options(${library_name} PRIVATE "${check_bounds_flag}")
