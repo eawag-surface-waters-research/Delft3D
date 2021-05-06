@@ -253,7 +253,7 @@ use meshdata, only : ug_idsLen, ug_idsLongNamesLen
    real(kind=hp)           , private, pointer     :: edgeoffsets_g(:)               !< backup for edgeoffsets during partitioning
    logical                 , private              :: branches_partitioned = .false. !< 1D arrays above are in use
 
-   private :: partition_make_1dugrid_in_domain, get_edge_nodes_in_domain
+   private :: partition_make_1dugrid_in_domain, get_1d_edges_in_domain
    private :: hp, ug_idsLen
 
    contains
@@ -733,6 +733,7 @@ use meshdata, only : ug_idsLen, ug_idsLongNamesLen
       NPL = 0           ! number of polygon points, we set no polygon
       call findcells(100000)  ! output link permutation array "Lperm" (only used if jacells.eq.1)
       call find1dcells()
+      netstat = NETSTAT_OK
 
       call delete_dry_points_and_areas()
 
@@ -781,7 +782,7 @@ use meshdata, only : ug_idsLen, ug_idsLongNamesLen
 !        remove masked netcells
          call remove_masked_netcells()
 
-         call partition_make_1dugrid_in_domain(idmn, numl1d, ierror)
+         call partition_make_1dugrid_in_domain(idmn, numl1d, Lperm, ierror)
          if (ierror /= 0) goto 1234
       endif
       ierror = DFM_NOERR
@@ -794,15 +795,18 @@ use meshdata, only : ug_idsLen, ug_idsLongNamesLen
 
    !> partition (only) the 1D mesh part of the 1D UGRID, not the 1D network part.
    !! NOTE: mesh1dNodeIds is not partitioned.
-   subroutine partition_make_1dugrid_in_domain(idmn, numl1d, ierror)
+   subroutine partition_make_1dugrid_in_domain(idmn, numl1d, L2Lorg, ierror)
       use m_save_ugrid_state, only : meshgeom1d, nodeids, nodelongnames
+      use network_data, only: netcell, netcell0, nump, nump1d2d
       implicit none
       integer, intent(in   )                :: idmn   !< domain number
       integer, intent(in   )                :: numl1d !< number of 1D links
+      integer, intent(in   )                :: L2Lorg(:) !< Mapping table current (new) to original net link numbers
       integer, intent(  out)                :: ierror !< (allocation) error code. 0=success
 
       integer, allocatable                  :: edge_nodes(:,:)
-      integer                               :: hulp(2), i, ii, n1dedges, numk1d
+      integer, allocatable                  :: iglobal_edge(:) !< Original global number of all current 1D edges.
+      integer                               :: hulp(2), i, ii, ic_p, ic_g, i_p, i_g, n1dedges, numk1d
       character(len=ug_idsLen), allocatable :: nodeids_p(:)
       character(len=ug_idsLongNamesLen), allocatable :: nodelongnames_p(:)
       real(kind=hp)           , pointer     :: nodeoffsets_p(:)
@@ -829,34 +833,40 @@ use meshdata, only : ug_idsLen, ug_idsLongNamesLen
       end if
 
       ! create edge_nodes (Edge-to-node mapping array)
-      call get_edge_nodes_in_domain(numl1d, numk1d, n1dedges, edge_nodes, ierror)
+      call get_1d_edges_in_domain(numl1d, L2Lorg, numk1d, n1dedges, edge_nodes, iglobal_edge, ierror)
       if (ierror /= 0) return
 
       ! partition node arrays
       allocate(nbranchids_p(numk1d), nodeids_p(numk1d), nodeoffsets_p(numk1d), nodelongnames_p(numk1d), stat=ierror)
       if (ierror /= 0) return
-      do i = 1, numk1d
-         ii = iglobal_s(i)
-         nodeids_p(i) = nodeids_g(ii)
-         nbranchids_p(i) = nodebranchidx_g(ii)
-         nodeoffsets_p(i) = nodeoffsets_g(ii)
-         nodelongnames_p(i) = nodelongnames_g(ii)
+      ! 1D cells have already been sorted in original global order
+      ! and 1D net should be written in original order (with other partitions removed, that is: in the current 1:numk1d order)
+      do ic_p = nump+1, nump1d2d
+         i_p  = netcell(ic_p)%nod(1) ! 1D netcell -> 1D net node
+         ic_g = iglobal_s(ic_p)
+         i_g  = netcell0(ic_g)%nod(1) ! netcell0 currently still contains backup of unpartitioned original full grid.
+         nodeids_p(i_p)       = nodeids_g(i_g)
+         nbranchids_p(i_p)    = nodebranchidx_g(i_g)
+         nodeoffsets_p(i_p)   = nodeoffsets_g(i_g)
+         nodelongnames_p(i_p) = nodelongnames_g(i_g)
       end do
 
       ! partition edge arrays
       n1dedges = size(edge_nodes, 2)
+      
       allocate(edgebranchidx_p(n1dedges), edgeoffsets_p(n1dedges), stat=ierror)
       if (ierror /= 0) return
       do i = 1, n1dedges
-         hulp(1) = iglobal_s(edge_nodes(1,i))
-         hulp(2) = iglobal_s(edge_nodes(2,i))
-         do ii = 1, size(meshgeom1d%edge_nodes, 2)
-            if (all(hulp == meshgeom1d%edge_nodes(:,ii))) then
-               edgebranchidx_p(i) = edgebranchidx_g(ii)
-               edgeoffsets_p(i) = edgeoffsets_g(ii)
-               exit
-            end if
-         end do
+         ii = iglobal_edge(i)
+         edgebranchidx_p(i) = edgebranchidx_g(ii)
+         edgeoffsets_p(i) = edgeoffsets_g(ii)
+         !hulp(1) = iglobal_s(edge_nodes(1,i))
+         !hulp(2) = iglobal_s(edge_nodes(2,i))
+         !do ii = 1, size(meshgeom1d%edge_nodes, 2)
+         !   if (all(hulp == meshgeom1d%edge_nodes(:,ii))) then
+         !      exit
+         !   end if
+         !end do
       end do
 
       ! finally, set pointers and allocatables in meshgeom1d and m_save_ugrid_state
@@ -868,14 +878,17 @@ use meshdata, only : ug_idsLen, ug_idsLongNamesLen
       meshgeom1d%edgeoffsets   => edgeoffsets_p
    end subroutine partition_make_1dugrid_in_domain
 
-   !> Helper routine to get 1D edge_nodes for current domain while partitioning.
-   subroutine get_edge_nodes_in_domain(numl1d, numk1d, n1dedges, edge_nodes, ierror)
+   !> Helper routine to get 1D edge_nodes and original edge number for current domain while partitioning.
+   !! A 1D edge is a true 1D netlink, i.e., not a 1D2D link.
+   subroutine get_1d_edges_in_domain(numl1d, L2Lorg, numk1d, n1dedges, edge_nodes, Lorg, ierror)
       use network_data, only : kn
       implicit none
       integer,              intent(in   ) :: numl1d          !< number of 1D links in original 1d mesh
+      integer,              intent(in   ) :: L2Lorg(:)       !< Mapping table current (new) to original net link numbers
       integer,              intent(  out) :: numk1d          !< number of 1D nodes returned
       integer,              intent(  out) :: n1dedges        !< number of 1D edges returned
       integer, allocatable, intent(  out) :: edge_nodes(:,:) !< Edge-to-node mapping array.
+      integer, allocatable, intent(  out) :: Lorg(:)         !< Original edge numbers for current (new) edges (edges can be subset of 1D net links, namely: excluding the 1D2D net links).
       integer,              intent(  out) :: ierror          !< error code
 
       integer              :: k1, k2, l, size
@@ -893,6 +906,8 @@ use meshdata, only : ug_idsLen, ug_idsLongNamesLen
          end if
       end do
       allocate(edge_nodes(2, n1dedges), stat=ierror)
+      if (ierror /= 0) return
+      allocate(Lorg(n1dedges), stat=ierror)
       if (ierror /= 0) return
 
       n1dedges = 0
@@ -914,9 +929,10 @@ use meshdata, only : ug_idsLen, ug_idsLongNamesLen
 
             edge_nodes(1,n1dedges) = abs(kc(kn(1,l)))
             edge_nodes(2,n1dedges) = abs(kc(kn(2,l)))
+            Lorg(n1dedges) = L2Lorg(L) ! Note: this assumes that in original net, all 1D net links come first in the range 1:numl1d, and the 1D2D links are all togather at the end of that numl1d range.
          end if
       end do
-   end subroutine get_edge_nodes_in_domain
+   end subroutine get_1d_edges_in_domain
 
    !> restore 1D arrays that are partitioned in partition_make_1dugrid_in_domain
    !! also clean up of 1D arrays from the last domain
@@ -941,22 +957,25 @@ use meshdata, only : ug_idsLen, ug_idsLongNamesLen
       end if
    end subroutine restore_1dugrid_state
 
-!> find original cell numbers
+!> find original cell numbers for the current subset of cells.
+!! Typically used for reconstructing the global cell numbers for all cells in the current partition.
    subroutine find_original_cell_numbers(L2Lorg, Lne_org, iorg)
       use unstruc_messages
-      use network_data, only: nump1d2d, numL, lnn, lne, numl1d, xk, yk, zk
+      use network_data, only: nump, nump1d2d, numk, numL, lnn, lne, numl1d, xk, yk, zk, netcell, xzw, yzw
+      use m_flowgeom, only: xz, yz
       use unstruc_channel_flow, only: network
       use sorting_algorithms, only : indexxi
       implicit none
       
-      integer,  intent(in)  :: L2Lorg(:)   !< original Link numbers
-      integer,  intent(in)  :: Lne_org(:,:)  !< original Lne
-      integer,  intent(out) :: iorg(:)     !< original cell numbers
+      integer,  intent(in   ) :: L2Lorg(:)     !< Mapping table current (new) to original net link numbers
+      integer,  intent(in   ) :: Lne_org(:,:)  !< Original Lne netlink-netcell connectivity (of global model)
+      integer,  intent(  out) :: iorg(:)       !< Original cell numbers for current (new) cells.
 
       integer, dimension(:,:),      allocatable :: icandidate  ! two original cell number candidates, dim(nump1d2d)
-      integer, dimension(:)  ,      allocatable :: indx, cellnrs
+      integer, dimension(:,:),      allocatable :: tmp_lne
+      integer, dimension(:)  ,      allocatable :: indx, indxinv, cellnrs, tmpNetcellNod
       real(kind=hp), dimension(:),  allocatable :: tmpCoord
-      integer                                   :: i, k, kother, L, L_org
+      integer                                   :: i, k, kother, LL, L, L_org
       integer                                   :: ic1, ic2, ic3, ic4
       integer                                   :: nump1d2d_org
      
@@ -1040,27 +1059,73 @@ use meshdata, only : ug_idsLen, ug_idsLongNamesLen
 !      end do
 
       if (network%loaded .and. numl1d > 0) then
-         ! sort the nodes (and their coordinates) in case of 1D,
-         ! to keep it in line with network numbering
+         ! sort the 1D flow nodes (and their coordinates + underlying net nodes),
+         ! such that the network principles continue to be satisfied:
+         ! * calculation points (flow nodes) are order such that branch indices are always increasing,
+         ! * and calculation points (flow nodes) within a branch are always ordered by increasing offset/chainage.
          ! TODO (?): also sort xzw, yzw and netcell(:)%nod(:)
-         allocate(indx(nump1d2d), cellnrs(nump1d2d), tmpCoord(nump1d2d))
+
+         
+         allocate(indx(nump1d2d), indxinv(nump1d2d), cellnrs(nump1d2d), tmpCoord(nump1d2d), tmpNetcellNod(nump1d2d))
          cellnrs = iorg
          call indexxi(size(iorg), cellnrs, indx)
-         do i = 1, nump1d2d
-            iorg(i) = cellnrs(indx(i))
+
+         do i = 1,nump1d2d
+            indxinv(indx(i)) = i       ! Construct helper table with inverse of sorting permutation indx.
+            iorg(i) = cellnrs(indx(i)) ! Global cell numbers, after the 1D netcell sorting
+         end do
+
+         do i = nump+1,nump1d2d
+            tmpNetcellNod(i) = netcell(i)%nod(1) ! Note: AvD: Can we ever have more than 1?? I don't think so, but find1dcells() has generic code for %N>1...
+         end do
+
+         ! 1D netcells reordering only needs re-assignment of the %nod(1) values, no other changed fields.
+         do i = nump+1,nump1d2d
+            netcell(i)%nod(1) = tmpNetCellNod(indx(i))
          enddo
-         tmpCoord = xk(1:nump1d2d)
-         do i = 1, nump1d2d
-            xk(i) = tmpCoord(indx(i))
+
+         ! 1D flow nodes (net cells) have been reordered. Also update xz(w)/yz(w) coords. Not needed:ba and tnod, comes later in flow_geominit().
+         tmpCoord(nump+1:nump1d2d) = xzw(nump+1:nump1d2d)
+         do i = nump+1,nump1d2d
+            xzw(i) = tmpCoord(indx(i))
          enddo
-         tmpCoord = yk(1:nump1d2d)
-         do i = 1, nump1d2d
-            yk(i) = tmpCoord(indx(i))
+         tmpCoord(nump+1:nump1d2d) = yzw(nump+1:nump1d2d)
+         do i = nump+1,nump1d2d
+            yzw(i) = tmpCoord(indx(i))
          enddo
-         tmpCoord = zk(1:nump1d2d)
-         do i = 1, nump1d2d
-            zk(i) = tmpCoord(indx(i))
+         tmpCoord(nump+1:nump1d2d) = xz (nump+1:nump1d2d)
+         do i = nump+1,nump1d2d
+            xz (i) = tmpCoord(indx(i))
          enddo
+         tmpCoord(nump+1:nump1d2d) = yz (nump+1:nump1d2d)
+         do i = nump+1,nump1d2d
+            yz (i) = tmpCoord(indx(i))
+         enddo
+
+         ! New (reordered) netcell numbers in LNE array for netlink-netcell connectivity
+         allocate(tmp_lne(2, numl1d))
+         tmp_lne(1:2,1:numl1d) = lne(1:2,1:numl1d)
+         do LL=1,numl1D
+            do i=1,LNN(LL) ! 0/1/2
+               L = tmp_lne(i,LL)
+               if (L /= 0) then ! Should not be needed?
+                  lne(i,LL) = sign(indxinv(abs(L)), L) ! Use sorted cell numbers, but keep original sign ('-' denoting 1D cells)
+               end if
+            end do
+         end do
+
+         !tmpCoord = xk(1:nump1d2d)
+         !do i = 1, nump1d2d
+         !   xk(i) = tmpCoord(indx(i))
+         !enddo
+         !tmpCoord = yk(1:nump1d2d)
+         !do i = 1, nump1d2d
+         !   yk(i) = tmpCoord(indx(i))
+         !enddo
+         !tmpCoord = zk(1:nump1d2d)
+         !do i = 1, nump1d2d
+         !   zk(i) = tmpCoord(indx(i))
+         !enddo
       endif
 
    end subroutine find_original_cell_numbers

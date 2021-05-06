@@ -10335,7 +10335,7 @@ subroutine unc_write_net_ugrid2(ncid, id_tsp, janetcell, jaidomain, jaiglobal_s)
    real(kind=hp), dimension(:), pointer :: layer_zs=>null(), interface_zs =>null()
 
    integer :: ierr
-   integer :: i, ii, k, k1, k2, numl2d, numk1d, numk2d, L, Lnew, nv, n1, n2
+   integer :: i, ii, k, k1, k2, numl2d, numk1d, numk2d, nump1d, L, Lnew, nv, n1, n2
    integer :: jaInDefine
 
    real(kind=hp), allocatable :: xn(:), yn(:), zn(:), xe(:), ye(:)
@@ -10368,11 +10368,11 @@ subroutine unc_write_net_ugrid2(ncid, id_tsp, janetcell, jaidomain, jaiglobal_s)
 
    !We need the cells for the face_nodes
    if (janetcell_ /= 0) then
-   !    if (size(lnn) < numl .or. netstat == NETSTAT_CELLS_DIRTY ) then
-          call setnodadm(0)
-          call findcells(0)
-          call find1dcells()
-   !    end if
+      if (size(lnn) < numl .or. netstat == NETSTAT_CELLS_DIRTY ) then
+         call setnodadm(0)
+         call findcells(0)
+         call find1dcells()
+      end if
    endif
 
    if (NUMK <= 0) then
@@ -10459,43 +10459,61 @@ subroutine unc_write_net_ugrid2(ncid, id_tsp, janetcell, jaidomain, jaiglobal_s)
       n1d2dcontacts = 0
       NUMK1D = 0
       KC(:) = 0
-      do L=1,NUML1D
-         if (janetcell_ == 0 .or. (kn(3,L) == 1 .or. kn(3,L) == 6)) then
-            n1dedges = n1dedges + 1
+      nump1d = nump1d2d - nump
+      if (janetcell_ == 1 .and. nump1d > 0) then
+         ! Determine 1D net nodes directly from 1D net cells
+         do N1 = nump+1,nump1d2d
+            k1 = netcell(N1)%nod(1)
 
-            K1 = KN(1,L)
-            K2 = KN(2,L)
-            if (KC(K1) == 0) then
-               NUMK1D = NUMK1D+1
-               xn(NUMK1D) = xk(K1)
-               yn(NUMK1D) = yk(K1)
-               zn(NUMK1D) = zk(K1)
-               KC(K1) = -NUMK1D ! Remember new node number
+            numk1d = numk1d+1
+            xn(numk1d) = xk(k1)
+            yn(numk1d) = yk(k1)
+            zn(numk1d) = zk(k1)
+            kc(k1) = -numk1d ! Remember new node number
+         end do
+
+         do L=1,NUML1D
+            if (kn(3,L) == 1 .or. kn(3,L) == 6) then
+               n1dedges = n1dedges + 1
+               K1 = KN(1,L)
+               K2 = KN(2,L)
+
+               edge_nodes(1,n1dedges) = abs(KC(K1))
+               edge_nodes(2,n1dedges) = abs(KC(K2))
+               edge_type(n1dedges)    = KN(3,L)
+
+               xe(n1dedges) = .5d0*(xk(K1) + xk(K2)) ! TODO: AvD: make this sferic+3D-safe
+               ye(n1dedges) = .5d0*(yk(K1) + yk(K2)) ! TODO: AvD: make this sferic+3D-safe
+
+            else if (kn(3,L) == 3 .or. kn(3,L) == 4 .or. kn(3,L) == 5 .or. kn(3,L) == 7) then  ! 1d2d, lateralLinks, streetinlet, roofgutterpipe
+               ! 1D2D-type net links, with cell info available.
+               n1d2dcontacts = n1d2dcontacts + 1
+
+               N1 = abs(lne(1,L))
+               N2 = abs(lne(2,L))
+
+               if (N1 > nump) then  ! First point of 1D link is 1D cell
+                  contacts(1,n1d2dcontacts) = abs(KC(netcell(N1)%nod(1))) ! cell -> orig node -> new node
+                  contacts(2,n1d2dcontacts) = N2   ! 2D cell number in network_data is the same in UGRID mesh2d numbering (see below).
+               end if
+
+               if (N2 > nump) then  ! First point of 1D link is 1D cell
+                  contacts(1,n1d2dcontacts) = abs(KC(netcell(N2)%nod(1))) ! cell -> orig node -> new node
+                  contacts(2,n1d2dcontacts) = N1   ! 2D cell number in network_data is the same in UGRID mesh2d numbering (see below).
+               end if
+
+               contacttype(n1d2dcontacts) = kn(3,L)
             end if
-            if (KC(K2) == 0) then
-               NUMK1D = NUMK1D+1
-               xn(NUMK1D) = xk(K2)
-               yn(NUMK1D) = yk(K2)
-               zn(NUMK1D) = zk(K2)
-               KC(K2) = -NUMK1D ! Remember new node number
-            end if
+         end do
 
-            edge_nodes(1,n1dedges) = abs(KC(KN(1,L)))
-            edge_nodes(2,n1dedges) = abs(KC(KN(2,L)))
-            edge_type(n1dedges)    = KN(3,L)
+      else ! not directly 1D netcell based, indirectly 1D netlink based
+         
+         do L=1,NUML1D
+            if (janetcell_ == 0 .or. (kn(3,L) == 1 .or. kn(3,L) == 6)) then
+               n1dedges = n1dedges + 1
 
-            xe(n1dedges) = .5d0*(xk(K1) + xk(K2)) ! TODO: AvD: make this sferic+3D-safe
-            ye(n1dedges) = .5d0*(yk(K1) + yk(K2)) ! TODO: AvD: make this sferic+3D-safe
-
-         else if (kn(3,L) == 3 .or. kn(3,L) == 4 .or. kn(3,L) == 5 .or. kn(3,L) == 7) then  ! 1d2d, lateralLinks, streetinlet, roofgutterpipe
-            ! 1D2D-type net links, with cell info available.
-            n1d2dcontacts = n1d2dcontacts + 1
-
-            N1 = abs(lne(1,L))
-            N2 = abs(lne(2,L))
-
-            if (N1 > nump) then  ! First point of 1D link is 1D cell
-               K1 = netcell(N1)%nod(1)
+               K1 = KN(1,L)
+               K2 = KN(2,L)
                if (KC(K1) == 0) then
                   NUMK1D = NUMK1D+1
                   xn(NUMK1D) = xk(K1)
@@ -10503,13 +10521,6 @@ subroutine unc_write_net_ugrid2(ncid, id_tsp, janetcell, jaidomain, jaiglobal_s)
                   zn(NUMK1D) = zk(K1)
                   KC(K1) = -NUMK1D ! Remember new node number
                end if
-
-               contacts(1,n1d2dcontacts) = abs(KC(netcell(N1)%nod(1))) ! cell -> orig node -> new node
-               contacts(2,n1d2dcontacts) = N2   ! 2D cell number in network_data is the same in UGRID mesh2d numbering (see below).
-            end if
-
-            if (N2 > nump) then  ! First point of 1D link is 1D cell
-               K2 = netcell(N2)%nod(1)
                if (KC(K2) == 0) then
                   NUMK1D = NUMK1D+1
                   xn(NUMK1D) = xk(K2)
@@ -10517,14 +10528,52 @@ subroutine unc_write_net_ugrid2(ncid, id_tsp, janetcell, jaidomain, jaiglobal_s)
                   zn(NUMK1D) = zk(K2)
                   KC(K2) = -NUMK1D ! Remember new node number
                end if
-               contacts(1,n1d2dcontacts) = abs(KC(netcell(N2)%nod(1))) ! cell -> orig node -> new node
-               contacts(2,n1d2dcontacts) = N1   ! 2D cell number in network_data is the same in UGRID mesh2d numbering (see below).
-            end if
 
-            contacttype(n1d2dcontacts) = kn(3,L)
-         endif
-      enddo
+               edge_nodes(1,n1dedges) = abs(KC(KN(1,L)))
+               edge_nodes(2,n1dedges) = abs(KC(KN(2,L)))
+               edge_type(n1dedges)    = KN(3,L)
 
+               xe(n1dedges) = .5d0*(xk(K1) + xk(K2)) ! TODO: AvD: make this sferic+3D-safe
+               ye(n1dedges) = .5d0*(yk(K1) + yk(K2)) ! TODO: AvD: make this sferic+3D-safe
+
+            else if (kn(3,L) == 3 .or. kn(3,L) == 4 .or. kn(3,L) == 5 .or. kn(3,L) == 7) then  ! 1d2d, lateralLinks, streetinlet, roofgutterpipe
+               ! 1D2D-type net links, with cell info available.
+               n1d2dcontacts = n1d2dcontacts + 1
+
+               N1 = abs(lne(1,L))
+               N2 = abs(lne(2,L))
+
+               if (N1 > nump) then  ! First point of 1D link is 1D cell
+                  K1 = netcell(N1)%nod(1)
+                  if (KC(K1) == 0) then
+                     NUMK1D = NUMK1D+1
+                     xn(NUMK1D) = xk(K1)
+                     yn(NUMK1D) = yk(K1)
+                     zn(NUMK1D) = zk(K1)
+                     KC(K1) = -NUMK1D ! Remember new node number
+                  end if
+
+                  contacts(1,n1d2dcontacts) = abs(KC(netcell(N1)%nod(1))) ! cell -> orig node -> new node
+                  contacts(2,n1d2dcontacts) = N2   ! 2D cell number in network_data is the same in UGRID mesh2d numbering (see below).
+               end if
+
+               if (N2 > nump) then  ! First point of 1D link is 1D cell
+                  K2 = netcell(N2)%nod(1)
+                  if (KC(K2) == 0) then
+                     NUMK1D = NUMK1D+1
+                     xn(NUMK1D) = xk(K2)
+                     yn(NUMK1D) = yk(K2)
+                     zn(NUMK1D) = zk(K2)
+                     KC(K2) = -NUMK1D ! Remember new node number
+                  end if
+                  contacts(1,n1d2dcontacts) = abs(KC(netcell(N2)%nod(1))) ! cell -> orig node -> new node
+                  contacts(2,n1d2dcontacts) = N1   ! 2D cell number in network_data is the same in UGRID mesh2d numbering (see below).
+               end if
+
+               contacttype(n1d2dcontacts) = kn(3,L)
+            endif
+         enddo
+      end if ! not netcell-based
 
 
       if (associated(meshgeom1d%ngeopointx)) then
