@@ -143,7 +143,6 @@ module m_1d_networkreader
    use meshdata
    use m_hash_search
    use odugrid
-   use io_netcdf, only : ionc_get_node_coordinates
 
    !in variables
    type(t_network),                             intent(inout) :: network
@@ -252,12 +251,8 @@ module m_1d_networkreader
    else
       jsferic = 0
    endif
-   if (jampi_ == 0) then
-      ierr = ggeo_get_xy_coordinates(meshgeom%nodebranchidx, meshgeom%nodeoffsets, meshgeom%ngeopointx, meshgeom%ngeopointy, &
-         meshgeom%nbranchgeometrynodes, meshgeom%nbranchlengths, jsferic, gpsX, gpsY)
-   else
-      ierr = ionc_get_node_coordinates(1, 1, gpsX, gpsY)
-   end if
+   ierr = ggeo_get_xy_coordinates(meshgeom%nodebranchidx, meshgeom%nodeoffsets, meshgeom%ngeopointx, meshgeom%ngeopointy, &
+      meshgeom%nbranchgeometrynodes, meshgeom%nbranchlengths, jsferic, gpsX, gpsY)
    if (ierr /= 0) then
       call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Error Getting Mesh Coordinates From UGrid Data')
    endif
