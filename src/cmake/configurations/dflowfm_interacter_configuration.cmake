@@ -8,4 +8,4 @@ if(UNIX)
     message(SEND_ERROR "dflowfm_interacter is not available on Linux.")
 endif()
 
-include(${CMAKE_CURRENT_SOURCE_DIR}/configurations/dflowfm_configuration_basic.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/configurations/include/dflowfm_configuration_basic.cmake)
