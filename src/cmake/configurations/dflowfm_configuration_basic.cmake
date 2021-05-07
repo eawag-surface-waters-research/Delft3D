@@ -188,6 +188,15 @@ if(NOT TARGET nefis)
     add_subdirectory(${checkout_src_root}/${nefis_module} nefis)
 endif()
 
+# Unit tests for dflowfm
+if(NOT TARGET ftnunit)
+    add_subdirectory(${checkout_src_root}/${ftnunit_module} ftnunit)
+endif()
+
+if(NOT TARGET test_dflowfm_kernel)
+    add_subdirectory(${checkout_src_root}/${test_dflowfm_kernel} test_dflowfm_kernel)
+endif()
+
 if(UNIX)
     # install
     add_subdirectory(${checkout_src_root}/${install_dflowfm_module} install_dflowfm)

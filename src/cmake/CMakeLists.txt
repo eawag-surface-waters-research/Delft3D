@@ -133,8 +133,8 @@ set(flow2d3d_configuration "FLOW2D3D")
 set(tools_configuration "TOOLS")
 
 # Combined (multi-component) configurations
-set(dimr_dflowfm_configuration "DIMR_DFLOWFM")
-set(dimr_dflowfm_dwaq_configuration "DIMR_DFLOWFM_DWAQ")
+set(delft3dfm_configuration "DELFT3DFM")
+set(delft3d4_configuration "DELFT3D4")
 set(all_configuration "ALL")
 
 # Determine the configuration to make
@@ -146,8 +146,8 @@ if(NOT (${configuration_type} STREQUAL ${tests_configuration}
      OR ${configuration_type} STREQUAL ${dwaves_configuration}
      OR ${configuration_type} STREQUAL ${flow2d3d_configuration}
      OR ${configuration_type} STREQUAL ${tools_configuration}
-     OR ${configuration_type} STREQUAL ${dimr_dflowfm_configuration}
-     OR ${configuration_type} STREQUAL ${dimr_dflowfm_dwaq_configuration}
+     OR ${configuration_type} STREQUAL ${delft3dfm_configuration}
+     OR ${configuration_type} STREQUAL ${delft3d4_configuration}
      OR ${configuration_type} STREQUAL ${all_configuration}))
    message(FATAL_ERROR "${configuration_type} not recognized. CMake will abort solution generation now.")
 endif()
@@ -204,16 +204,16 @@ endif()
 
 ### Composed configurations
 
-# DIMR with D-Flow FM configuration
-if(${configuration_type} STREQUAL ${dimr_dflowfm_configuration}) 
-    message(STATUS "Generating solution for combined DIMR and D-Flow FM ...")
-    include(configurations/dimr_dflowfm_configuration.cmake)
+# Delft3D-FM configuration (dimr, dflowfm, dwaq, dwaves, and some tools)
+if(${configuration_type} STREQUAL ${delft3dfm_configuration}) 
+    message(STATUS "Generating solution for Delft3D-FM ...")
+    include(configurations/delft3dfm_configuration.cmake)
 endif()
 
-# DIMR with D-Flow FM and D-WAQ configuration
-if(${configuration_type} STREQUAL ${dimr_dflowfm_dwaq_configuration}) 
-    message(STATUS "Generating solution for combined DIMR, D-Flow FM and D-WAQ ...")
-    include(configurations/dimr_dflowfm_dwaq_configuration.cmake)
+# Delft3D4 configuration (dflow2d3d, dwaq, dwaves, and some tools)
+if(${configuration_type} STREQUAL ${delft3d4_configuration}) 
+    message(STATUS "Generating solution for Delft3D4 ...")
+    include(configurations/delft3d4_configuration.cmake)
 endif()
 
 # ALL configuration
