@@ -42,11 +42,13 @@ call :traditionalBuild
 
 call :DoCMake dimr
 call :DoCMake dflowfm
-if "%config%" == "tests" call :DoCMake tests
+if "%config%" == "tests"              call :DoCMake tests
+if "%config%" == "dflowfm_interacter" call :DoCMake dflowfm_interacter
 
 call :Build dimr
 call :Build dflowfm
-if "%config%" == "tests" call :Build tests
+if "%config%" == "tests"              call :Build tests
+if "%config%" == "dflowfm_interacter" call :Build dflowfm_interacter
 
 call :installall
 
@@ -108,6 +110,11 @@ rem =================================
         set mode=quiet
     )
     if "%1" == "dflowfm" (
+        set prepareonly=0
+        set config=%1
+        set mode=quiet
+    )
+    if "%1" == "dflowfm_interacter" (
         set prepareonly=0
         set config=%1
         set mode=quiet
@@ -385,8 +392,9 @@ rem =======================
 rem === InstallAll     ====
 rem =======================
 :installall
-    if %prepareonly% EQU 1   goto :endproc
-    if "%config%" == "tests" goto :endproc
+    if %prepareonly% EQU 1                goto :endproc
+    if "%config%" == "tests"              goto :endproc
+    if "%config%" == "dflowfm_interacter" goto :endproc
     echo.
     echo "Installing in build_all ..."
     call :createCMakeDir build_all
@@ -427,6 +435,7 @@ rem =======================
     echo "  - build all other engines in the traditional way"
     echo "  - combine all binaries"
     echo "- dflowfm"
+    echo "- dflowfm_interacter"
     echo "- dimr"
     echo.
     echo "Options:"
