@@ -12,8 +12,8 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/configurations/dflow2d3d_configuration.cmake
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/configurations/dimr_configuration.cmake)
 
-include(${CMAKE_CURRENT_SOURCE_DIR}/configurations/include/tools_configuration.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/configurations/tests_configuration.cmake)
 
-include(${CMAKE_CURRENT_SOURCE_DIR}/configurations/include/tests_configuration.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/configurations/include/tools_configuration.cmake)
 
 project(all)
