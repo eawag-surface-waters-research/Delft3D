@@ -242,6 +242,9 @@ source_group("Resources" FILES  ${icon_file})
 # Create the folder structure in vfproj
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${source})
 set_target_properties (${executable_name} PROPERTIES FOLDER engines_gpl/dflowfm)
+if (WIN32)
+    set_target_properties(${executable_name} PROPERTIES LINK_FLAGS "/LARGEADDRESSAWARE /STACK:20000000")
+endif(WIN32)
 
 # post-build
 set(install_dir ${CMAKE_BINARY_DIR})

@@ -63,6 +63,9 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${source_files})
 source_group(Resources FILES    ${icon_file} 
                                 ${rc_version_file})
 set_target_properties (${executable_name} PROPERTIES FOLDER engines_gpl/waq)
+if (WIN32)
+    set_target_properties(${executable_name} PROPERTIES LINK_FLAGS "/LARGEADDRESSAWARE /STACK:20000000")
+endif(WIN32)
 
 # Set post-build step
 set(install_dir ${CMAKE_BINARY_DIR})

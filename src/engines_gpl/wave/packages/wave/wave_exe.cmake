@@ -62,6 +62,9 @@ set_target_properties (${executable_name} PROPERTIES FOLDER engines_gpl/wave)
 
 # Change the name of the target library to wave.exe
 set_target_properties (${executable_name} PROPERTIES OUTPUT_NAME wave_exe)
+if (WIN32)
+    set_target_properties(${executable_name} PROPERTIES LINK_FLAGS "/LARGEADDRESSAWARE /STACK:20000000")
+endif(WIN32)
 
 # Set post-build step
 set(install_dir ${CMAKE_BINARY_DIR})
