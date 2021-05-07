@@ -178,7 +178,7 @@ module m_1d_networkreader
    character(len=ug_idsLen), allocatable, dimension(:)  :: idMeshNodesInNetworkNodes
    integer                                              :: firstNode, lastNode, firstLink, LastLink
    double precision, parameter                          :: snapping_tolerance = 1e-10
-   double precision                                     :: distance, meanLength
+   double precision                                     :: dx, offset
    integer                                              :: jampi_, my_rank_
    integer                                              :: maxGridPointCount, maxLinkCount
    logical, allocatable                                 :: active_nodes(:)
@@ -356,21 +356,17 @@ module m_1d_networkreader
             call add_point(.false., localOffsets, localGpsX, localGpsY, localGpsID, idMeshNodesInNetworkNodes, gridPointsCount, ibran, meshgeom)
          endif
       else if(nodesOnBranchVertices==0 .and. jampi_ == 1 .and. active_branches(ibran) == -1) then
-         if (firstNode > 0 .and. lastNode > 0) then
-            if (gridPointsCount > 1) then
-               meanLength = (localOffsets(gridPointsCount) - localOffsets(1)) / dble(gridPointsCount - 1)
-            else
-               meanLength = meshgeom%nbranchlengths(ibran)
-            end if
-            distance = localOffsets(1)
-            if (distance > snapping_tolerance .and. distance < 2d0 * meanLength) then
+         if (gridPointsCount > 0 .and. gridPointsCount == linkCount) then
+            if (localOffsets(1) > localUOffsets(1)) then
                !start point missing
-               call add_point(.true., localOffsets, localGpsX, localGpsY, localGpsID, idMeshNodesInNetworkNodes, gridPointsCount, ibran, meshgeom)
-            endif
-            distance = abs(localOffsets(gridPointsCount)-meshgeom%nbranchlengths(ibran))
-            if (distance > snapping_tolerance .and. distance < 2d0 * meanLength) then
+               dx     = localOffsets(1) - localUOffsets(1)
+               offset = localUOffsets(1) - dx
+               call add_point(.true., localOffsets, localGpsX, localGpsY, localGpsID, idMeshNodesInNetworkNodes, gridPointsCount, ibran, meshgeom, offset)
+            else
                !end point missing
-               call add_point(.false., localOffsets, localGpsX, localGpsY, localGpsID, idMeshNodesInNetworkNodes, gridPointsCount, ibran, meshgeom)
+               dx     = localUOffsets(linkCount) - localOffsets(gridPointsCount)
+               offset = localUOffsets(1) + dx
+               call add_point(.false., localOffsets, localGpsX, localGpsY, localGpsID, idMeshNodesInNetworkNodes, gridPointsCount, ibran, meshgeom, offset)
             endif
          endif
       endif
@@ -459,8 +455,9 @@ module m_1d_networkreader
    end subroutine active_network_nodes_branches
 
    !> helper function to add a point at the start or end of a branch
-   subroutine add_point(atStart, localOffsets, localGpsX, localGpsY, localGpsID, idMeshNodesInNetworkNodes, gridPointsCount, ibran, meshgeom)
+   subroutine add_point(atStart, localOffsets, localGpsX, localGpsY, localGpsID, idMeshNodesInNetworkNodes, gridPointsCount, ibran, meshgeom, offset)
    use meshdata, only : t_ug_meshgeom
+   use precision
    logical,                                         intent(in   ) :: atStart     !< add point at start (true) or end (false) of branch
    double precision,     allocatable, dimension(:), intent(inout) :: localGpsX
    double precision,     allocatable, dimension(:), intent(inout) :: localGpsY
@@ -470,14 +467,21 @@ module m_1d_networkreader
    integer,                                         intent(inout) :: gridPointsCount
    integer,                                         intent(in   ) :: ibran
    type(t_ug_meshgeom),                             intent(in   ) :: meshgeom
+   real(kind=hp), optional,                         intent(in   ) :: offset
+
+   real(kind=hp) :: offset_
 
    if (atStart) then
-      localOffsets(1:gridPointsCount+1)=(/ 0.0d0, localOffsets(1:gridPointsCount) /)
+      offset_ = 0.0
+      if (present(offset)) offset_ = offset
+      localOffsets(1:gridPointsCount+1)=(/ offset_, localOffsets(1:gridPointsCount) /)
       localGpsX(1:gridPointsCount+1)=(/ meshgeom%nnodex(meshgeom%nedge_nodes(1,ibran)), localGpsX(1:gridPointsCount) /)
       localGpsY(1:gridPointsCount+1)=(/ meshgeom%nnodey(meshgeom%nedge_nodes(1,ibran)), localGpsY(1:gridPointsCount) /)
       localGpsID(1:gridPointsCount+1)=(/ idMeshNodesInNetworkNodes(meshgeom%nedge_nodes(1,ibran)), localGpsID(1:gridPointsCount) /)
    else
-      localOffsets(1:gridPointsCount+1)=(/ localOffsets(1:gridPointsCount), meshgeom%nbranchlengths(ibran) /)
+      offset_ = meshgeom%nbranchlengths(ibran)
+      if (present(offset)) offset_ = offset
+      localOffsets(1:gridPointsCount+1)=(/ localOffsets(1:gridPointsCount), offset_ /)
       localGpsX(1:gridPointsCount+1)=(/ localGpsX(1:gridPointsCount), meshgeom%nnodex(meshgeom%nedge_nodes(2,ibran)) /)
       localGpsY(1:gridPointsCount+1)=(/ localGpsY(1:gridPointsCount), meshgeom%nnodey(meshgeom%nedge_nodes(2,ibran)) /)
       localGpsID(1:gridPointsCount+1)=(/ localGpsID(1:gridPointsCount), idMeshNodesInNetworkNodes(meshgeom%nedge_nodes(2,ibran)) /)
