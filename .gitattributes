@@ -465,13 +465,14 @@ src/cmake/configurations/all_configuration.cmake -text
 src/cmake/configurations/delft3dfm_configuration.cmake -text
 src/cmake/configurations/dflow2d3d_configuration.cmake -text
 src/cmake/configurations/dflowfm_configuration.cmake -text
-src/cmake/configurations/dflowfm_configuration_basic.cmake -text
 src/cmake/configurations/dflowfm_interacter_configuration.cmake -text
 src/cmake/configurations/dimr_configuration.cmake -text
 src/cmake/configurations/dwaq_configuration.cmake -text
 src/cmake/configurations/dwaves_configuration.cmake -text
-src/cmake/configurations/tests_configuration.cmake -text
-src/cmake/configurations/tools_configuration.cmake -text
+src/cmake/configurations/include/dflowfm_configuration_basic.cmake -text
+src/cmake/configurations/include/tests_configuration.cmake -text
+src/cmake/configurations/include/tools_configuration.cmake -text
+src/cmake/configurations/include/tools_delft3dfm_configuration.cmake -text
 src/cmake/doc/CMake[!!-~]Inventory.xlsx -text
 src/cmake/doc/CMake_for_OSS_tree_[!!-~]project_report.docx -text
 src/cmake/doc/README -text svneol=unset#application/octet-stream
