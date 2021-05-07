@@ -149,6 +149,10 @@ include_directories(${gisinternals_path}
                     ${petsc_path}
                     ${tecplot_path})
 
+# Create the folder structure in vfproj
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${source})
+set_target_properties (${executable_name} PROPERTIES FOLDER tests/engines_gpl/dflowfm)
+
 # post-build
 set(install_dir ${CMAKE_BINARY_DIR})
 set(build_dir ${CMAKE_BINARY_DIR})
