@@ -47,6 +47,7 @@ if (UNIX)
          PkgConfig::NETCDF_FTN
          PkgConfig::PROJ)
 endif(UNIX)
+
 if (WIN32)
     set(oss_dependencies deltares_common
                          io_netcdf
@@ -58,11 +59,9 @@ if (WIN32)
                          proj
                          shp)
 
-oss_include_libraries(${executable_name} oss_dependencies)
-
-target_link_libraries(${executable_name} ${oss_dependencies})
+    oss_include_libraries(${executable_name} oss_dependencies)
+    target_link_libraries(${executable_name} ${oss_dependencies})
 endif(WIN32)
-
 
 if(UNIX)
     message(STATUS "netcdf lib dir is ${NETCDF_LIBRARY_DIRS}")
@@ -80,8 +79,6 @@ endif(WIN32)
 # Define additional compilation flags
 set_source_files_properties(${fortran_version_file}
                             PROPERTIES COMPILE_OPTIONS "${file_preprocessor_flag}")
-
-
 
 target_link_libraries(${executable_name} netcdf)
 
