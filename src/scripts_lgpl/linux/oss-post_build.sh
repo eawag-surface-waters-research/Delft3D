@@ -6,6 +6,14 @@ echo
 echo "Executing $scriptdir\oss-post_build.sh ..."
 
 
+echo "This script is temporary disabled. Exiting now"
+echo
+exit 0
+
+
+
+
+
 if [ "$1" == '' ]; then
     echo "ERROR: No install_dir directory specified as argument of install.sh"
     exit 1

@@ -108,7 +108,6 @@ function InstallAll () {
 
         # DIMR
         cp -rf $root/build_dimr/install/* $root/build_all/lnx64/ &>/dev/null
-        cp -f  $root/build_dimr/lnx64/scripts/*_dimr.sh $root/build_all/lnx64/bin/ &>/dev/null
 
         # D-Flow FM
         cp -rf $root/build_dflowfm/install/bin/* $root/build_all/lnx64/bin/ &>/dev/null
