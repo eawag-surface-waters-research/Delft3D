@@ -189,13 +189,18 @@ if(NOT TARGET nefis)
 endif()
 
 # Unit tests for dflowfm
-if(NOT TARGET ftnunit)
-    add_subdirectory(${checkout_src_root}/${ftnunit_module} ftnunit)
-endif()
+# Only for the version without interacter
+if(NOT WITH_INTERACTER)
 
-if(NOT TARGET test_dflowfm_kernel)
-    add_subdirectory(${checkout_src_root}/${test_dflowfm_kernel} test_dflowfm_kernel)
-endif()
+    if(NOT TARGET ftnunit)
+        add_subdirectory(${checkout_src_root}/${ftnunit_module} ftnunit)
+    endif()
+
+    if(NOT TARGET test_dflowfm_kernel)
+        add_subdirectory(${checkout_src_root}/${test_dflowfm_kernel} test_dflowfm_kernel)
+    endif()
+endif(NOT WITH_INTERACTER)
+
 
 if(UNIX)
     # install
