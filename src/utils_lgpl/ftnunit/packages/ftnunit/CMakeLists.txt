@@ -4,7 +4,7 @@ set(library_name ftnunit)
 # Gather the source files
 file(GLOB source    src/*.f90)
 
-list(REMOVE_ITEM sources src/ftnunit_hooks.f90)
+list(REMOVE_ITEM source src/ftnunit_hooks.f90)
 
 add_library(${library_name} ${source})
 
