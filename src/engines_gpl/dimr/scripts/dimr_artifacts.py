@@ -83,7 +83,7 @@ def platformArtifacts(platform):
     for (path, dirs, files) in os.walk(pltdir):
         for aFile in files:
             name, extension = os.path.splitext(aFile)
-            if extension == ".exp" or extension == ".lib" or extension == ".pdb" or extension == ".msm" or extension == ".a" or extension == ".la" or extension == ".lai":
+            if extension == ".exp" or extension == ".lib" or extension == ".pdb" or extension == ".msm" or extension == ".la" or extension == ".lai":
                 print("      To be removed: " + os.path.join(path,aFile))
                 os.remove(os.path.join(path,aFile))
             # libifcore.so: replace by libifcoremt.so, unless it's inside share
