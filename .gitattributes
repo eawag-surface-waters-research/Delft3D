@@ -4660,6 +4660,7 @@ src/prebuild-h6_buildserver_intel16.sh -text
 src/prepare_sln.cmd -text
 src/prepare_sln.py -text
 src/scripts_lgpl/Makefile.am -text
+src/scripts_lgpl/artifacts_cleaner.py -text
 src/scripts_lgpl/linux/Makefile.am -text
 src/scripts_lgpl/linux/cmake_postbuild.sh -text
 src/scripts_lgpl/linux/gatherlibraries.rb -text
