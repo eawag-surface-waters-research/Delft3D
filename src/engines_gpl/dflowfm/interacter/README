@@ -1,4 +1,4 @@
-When executing "build.bat" on the toplevel of the source code tree, the items 1 and 3 are handled automatically.
+When executing "build.bat" on the toplevel of the source code tree, the items 1, 3 and 4 below are handled automatically.
 
 1. Create on toplevel (next to "src", "examples") directory "build_dflowfm_interacter"
 2. EITHER:
