@@ -44,6 +44,7 @@ call :DoCMake dimr
 call :DoCMake dflowfm
 if "%config%" == "tests"              call :DoCMake tests
 if "%config%" == "dflowfm_interacter" call :DoCMake dflowfm_interacter
+if "%config%" == "dflowfm_interacter" call :set_dflowfm_interacter_link_flag
 
 call :Build dimr
 call :Build dflowfm
@@ -309,6 +310,17 @@ rem =======================
     goto :endproc
 
 
+
+rem =======================
+rem === DoCMake        ====
+rem =======================
+:set_dflowfm_interacter_link_flag
+    rem Ugly workaround to change "LinkLibraryDependencies=false" into "LinkLibraryDependencies=true"
+    %root%\src\third_party_open\commandline\bin\win32\sed.exe -e "s/LinkLibraryDependencies=\"false\"/LinkLibraryDependencies=\"true\"/g" "%root%\build_dflowfm_interacter\dflowfm_cli_exe\dflowfm-cli.vfproj" >"%root%\build_dflowfm_interacter\dflowfm_cli_exe\dflowfm-cli_new.vfproj"
+    del "%root%\build_dflowfm_interacter\dflowfm_cli_exe\dflowfm-cli.vfproj"  > del.log 2>&1
+    del /f/q del.log
+    rename %root%\build_dflowfm_interacter\dflowfm_cli_exe\dflowfm-cli_new.vfproj dflowfm-cli.vfproj
+    goto :endproc
 
 rem =======================
 rem === Build          ====

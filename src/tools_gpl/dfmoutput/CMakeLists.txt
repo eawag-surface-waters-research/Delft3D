@@ -126,3 +126,13 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${sources} ${fortran_version
 set_target_properties (${executable_name} PROPERTIES FOLDER tools_gpl/dfmoutput)
 install(TARGETS ${executable_name} RUNTIME  DESTINATION bin)
 
+
+# Set post-build step
+set(install_dir ${CMAKE_BINARY_DIR})
+set(build_dir ${CMAKE_BINARY_DIR})
+
+post_build_target (${executable_name}
+                   ${install_dir} 
+                   ${build_dir} 
+                   ${checkout_src_root} 
+                   ${executable_name})

@@ -136,6 +136,7 @@ rem ===============
     call :dimr_dll
     call :dflowfm
     call :dflowfm_dll
+    call :dfmoutput
     call :waq_plugin_wasteload
     call :delwaq_dll
     call :delwaq1
@@ -316,9 +317,7 @@ rem ==========================
         call :copyDflowfmDependentRuntimeLibraries
         
         rem copy binaries and dll 
-        call :copyFile "!build_dir!\dflowfm_lib\!configuration!\dflowfm.dll"                                           !dest_bin!
-        call :copyFile "!build_dir!\dflowfm_lib\!configuration!\dflowfm.pdb"                                           !dest_bin!
-        call :copyFile "!build_dir!\dfmoutput\!configuration!\dfmoutput.exe"                                           !dest_bin!
+        call :copyFile "!build_dir!\dflowfm_lib\!configuration!\dflowfm.*"                                           !dest_bin!
     )
     
     if "%configuration%" == "Release" ( 
@@ -341,7 +340,6 @@ rem ==========================
         
         rem copy binaries and dll 
         call :copyFile "!build_dir!\dflowfm_lib\!configuration!\dflowfm.dll"                                           !dest_bin! 
-        call :copyFile "!build_dir!\dfmoutput\!configuration!\dfmoutput.exe"                                           !dest_bin!
     
     )
     
@@ -360,10 +358,7 @@ rem ==========================
 
         call :makeDir !dest_bin!
         call :copyDflowfmDependentRuntimeLibraries
-        call :copyFile "!build_dir!\dflowfm_cli_exe\!configuration!\dflowfm-cli.exe"                                            !dest_bin!
-        call :copyFile "!build_dir!\dflowfm_cli_exe\!configuration!\dflowfm-cli.pdb"                                            !dest_bin!
-        call :copyFile "!build_dir!\dflowfm_cli_exe\!configuration!\dflowfm-cli.lib"                                            !dest_bin!
-        call :copyFile "!build_dir!\dfmoutput\!configuration!\dfmoutput.exe"                                                    !dest_bin!
+        call :copyFile "!build_dir!\dflowfm_cli_exe\!configuration!\dflowfm-cli.*"                                            !dest_bin!
     )
     
     if "%configuration%" == "Release" ( 
@@ -379,9 +374,7 @@ rem ==========================
         call :makeAllDirs 
         call :copyDflowfmDependentRuntimeLibraries
         
-        call :copyFile "!build_dir!\dflowfm_cli_exe\!configuration!\dflowfm-cli.exe"                                           !dest_bin!
-        call :copyFile "!build_dir!\dflowfm_cli_exe\!configuration!\dflowfm-cli.lib"                                           !dest_bin!
-        call :copyFile "!build_dir!\dfmoutput\!configuration!\dfmoutput.exe"                                                   !dest_bin!
+        call :copyFile "!build_dir!\dflowfm_cli_exe\!configuration!\dflowfm-cli.*"                                           !dest_bin!
 
         call :copyFile "!checkout_src_root!\engines_gpl\waq\default\bloom.spe"                                             !dest_default!
         call :copyFile "!checkout_src_root!\engines_gpl\waq\default\bloominp.d09"                                          !dest_default!
@@ -390,7 +383,6 @@ rem ==========================
         
         call :copyFile "!checkout_src_root!\engines_gpl\dflowfm\scripts\team-city\run_dflowfm_processes.bat"               !dest_scripts!
         call :copyFile "!checkout_src_root!\engines_gpl\dflowfm\scripts\team-city\run_dflowfm.bat"                         !dest_scripts!
-        call :copyFile "!checkout_src_root!\engines_gpl\dflowfm\scripts\team-city\run_dfmoutput.bat"                       !dest_scripts!
     )
     
 goto :endproc
@@ -409,9 +401,7 @@ rem ==========================
 
         call :makeDir !dest_bin!
         call :copyDflowfmDependentRuntimeLibraries
-        call :copyFile "!build_dir!\dflowfm\!configuration!\dflowfm.exe"                                                   !dest_bin!
-        call :copyFile "!build_dir!\dflowfm\!configuration!\dflowfm.pdb"                                                   !dest_bin!
-        call :copyFile "!build_dir!\dfmoutput\!configuration!\dfmoutput.exe"                                               !dest_bin!
+        call :copyFile "!build_dir!\dflowfm\!configuration!\dflowfm.*"                                                   !dest_bin!
     )
     
     if "%configuration%" == "Release" ( 
@@ -428,7 +418,6 @@ rem ==========================
         call :copyDflowfmDependentRuntimeLibraries
         
         call :copyFile "!build_dir!\dflowfm\!configuration!\dflowfm.exe"                                                   !dest_bin!
-        call :copyFile "!build_dir!\dfmoutput\!configuration!\dfmoutput.exe"                                               !dest_bin!
 
         call :copyFile "!checkout_src_root!\engines_gpl\waq\default\bloom.spe"                                             !dest_default!
         call :copyFile "!checkout_src_root!\engines_gpl\waq\default\bloominp.d09"                                          !dest_default!
@@ -437,49 +426,86 @@ rem ==========================
         
         call :copyFile "!checkout_src_root!\engines_gpl\dflowfm\scripts\MSDOS\run_dflowfm_processes.bat"                   !dest_scripts!
         call :copyFile "!checkout_src_root!\engines_gpl\dflowfm\scripts\team-city\run_dflowfm.bat"                         !dest_scripts!
-        call :copyFile "!checkout_src_root!\engines_gpl\dflowfm\scripts\team-city\run_dfmoutput.bat"                       !dest_scripts!
     )
     
 goto :endproc
 
-
 rem ==========================
-rem === POST_BUILD_DIMR
+rem === POST_BUILD_DFLOWFM-CLI
 rem ==========================
-:dimr
-    echo "postbuild dimr . . ."
+:dflowfm-cli
+    echo "postbuild dflowfm-cli . . ."
     
     if "%configuration%" == "Debug" (
     
-    echo "Debug postbuild"
-    set dest_bin="!install_dir!\x64\Debug"
+        echo "Debug postbuild"
+        set dest_bin="%install_dir%\x64\Debug"
 
-    call :makeDir !dest_bin!
-
-    call :copyDimrDependentRuntimeLibraries                                                                               !dest_bin!
-    call :copyFile "!build_dir!\dimr\!configuration!\dimr.exe"                                                            !dest_bin!
+        call :makeDir !dest_bin!
+        call :copyDflowfmDependentRuntimeLibraries
+        call :copyFile "!build_dir!\dflowfm_cli_exe\!configuration!\dflowfm-cli.*"                                        !dest_bin!
     )
     
+    if "%configuration%" == "Release" ( 
     
-    if "%configuration%" == "Release" (
-    
-    echo "Release postbuild"
+        echo "Release postbuild"
 
-    set dest_bin="!install_dir!\x64\Release\dimr\bin"
-    set dest_default="!install_dir!\x64\Release\dimr\default"
-    set dest_scripts="!install_dir!\x64\Release\dimr\scripts"
-    set dest_plugins="!install_dir!\x64\Release\plugins\bin"
-    set dest_share="!install_dir!\x64\Release\share\bin"
+        set dest_bin="!install_dir!\x64\Release\dflowfm\bin"
+        set dest_default="!install_dir!\x64\Release\dflowfm\default"
+        set dest_scripts="!install_dir!\x64\Release\dflowfm\scripts"
+        set dest_plugins="!install_dir!\x64\Release\plugins\bin"
+        set dest_share="!install_dir!\x64\Release\share\bin"
 
-    call :makeAllDirs 
-    call :copyDimrDependentRuntimeLibraries                                                                             !dest_share!
-    call :copyFile "!build_dir!\dimr\!configuration!\dimr.exe"                                                          !dest_bin!
+        call :makeAllDirs 
+        call :copyDflowfmDependentRuntimeLibraries
+        
+        call :copyFile "!build_dir!\dflowfm_cli_exe\!configuration!\dflowfm-cli.*"                                         !dest_bin!
 
-    call :copyFile "!checkout_src_root!\engines_gpl\d_hydro\scripts\create_config_xml.tcl"                              !dest_menu!
-    call :copyFile "!checkout_src_root!\engines_gpl\dimr\scripts\generic\win64\*.*"                                     !dest_scripts!
-
+        call :copyFile "!checkout_src_root!\engines_gpl\waq\default\bloom.spe"                                             !dest_default!
+        call :copyFile "!checkout_src_root!\engines_gpl\waq\default\bloominp.d09"                                          !dest_default!
+        call :copyFile "!checkout_src_root!\engines_gpl\waq\default\proc_def.dat"                                          !dest_default!
+        call :copyFile "!checkout_src_root!\engines_gpl\waq\default\proc_def.def"                                          !dest_default!
+        
+        call :copyFile "!checkout_src_root!\engines_gpl\dflowfm\scripts\team-city\run_dflowfm_processes.bat"               !dest_scripts!
+        call :copyFile "!checkout_src_root!\engines_gpl\dflowfm\scripts\team-city\run_dflowfm.bat"                         !dest_scripts!
     )
+    
+goto :endproc
 
+rem ==========================
+rem === POST_BUILD_DFMOUTPUT
+rem ==========================
+:dfmoutput
+    echo "postbuild dflowfm-cli . . ."
+    
+    if "%configuration%" == "Debug" (
+    
+        echo "Debug postbuild"
+        set dest_bin="%install_dir%\x64\Debug"
+
+        call :makeDir !dest_bin!
+        call :copyDflowfmDependentRuntimeLibraries
+        call :copyFile "!build_dir!\dfmoutput\!configuration!\dfmoutput.exe"                                                    !dest_bin!
+    )
+    
+    if "%configuration%" == "Release" ( 
+    
+        echo "Release postbuild"
+
+        set dest_bin="!install_dir!\x64\Release\dflowfm\bin"
+        set dest_default="!install_dir!\x64\Release\dflowfm\default"
+        set dest_scripts="!install_dir!\x64\Release\dflowfm\scripts"
+        set dest_plugins="!install_dir!\x64\Release\plugins\bin"
+        set dest_share="!install_dir!\x64\Release\share\bin"
+
+        call :makeAllDirs 
+        call :copyDflowfmDependentRuntimeLibraries
+        
+        call :copyFile "!build_dir!\dfmoutput\!configuration!\dfmoutput.exe"                                                   !dest_bin!
+
+        call :copyFile "!checkout_src_root!\engines_gpl\dflowfm\scripts\team-city\run_dfmoutput.bat"                       !dest_scripts!
+    )
+    
 goto :endproc
 
 rem ==========================
@@ -496,8 +522,7 @@ rem ==========================
     call :makeDir !dest_bin!
 
     call :copyDimrDependentRuntimeLibraries                                                                               !dest_bin!
-    call :copyFile "!build_dir!\dimr_lib\!configuration!\dimr_dll.dll"                                                    !dest_bin!
-    call :copyFile "!build_dir!\dimr_lib\!configuration!\dimr_dll.pdb"                                                    !dest_bin!
+    call :copyFile "!build_dir!\dimr_lib\!configuration!\dimr_dll.*"                                                      !dest_bin!
 
     )
     
@@ -513,7 +538,7 @@ rem ==========================
     
     call :makeAllDirs 
     call :copyDimrDependentRuntimeLibraries                                                                               !dest_share!
-    call :copyFile "!build_dir!\dimr_lib\!configuration!\dimr_dll.dll"                                                    !dest_bin!
+    call :copyFile "!build_dir!\dimr_lib\!configuration!\dimr_dll.*"                                                      !dest_bin!
     
     )
 
@@ -541,8 +566,7 @@ rem ==========================
         call :copyDwaqDependentRuntimeLibraries                                                                            !dest_bin!
         
         rem copy binaries and dll 
-        call :copyFile "!build_dir!\waq_plugin_wasteload\!configuration!\waq_plugin_wasteload.dll"                         !dest_bin!
-        call :copyFile "!build_dir!\waq_plugin_wasteload\!configuration!\waq_plugin_wasteload.pdb"                         !dest_bin!
+        call :copyFile "!build_dir!\waq_plugin_wasteload\!configuration!\waq_plugin_wasteload.*"                           !dest_bin!
     )
     
     if "%configuration%" == "Release" ( 
@@ -564,7 +588,7 @@ rem ==========================
         set dest_bin="!install_dir!\x64\Release\waq_plugin_wasteload\bin"
         
         rem copy binaries and dll 
-        call :copyFile "!build_dir!\waq_plugin_wasteload\!configuration!\waq_plugin_wasteload.dll"                          !dest_bin! 
+        call :copyFile "!build_dir!\waq_plugin_wasteload\!configuration!\waq_plugin_wasteload.*"                            !dest_bin! 
     )
     
 goto :endproc
@@ -591,10 +615,8 @@ rem ==========================
         call :copyDwaqDependentRuntimeLibraries                                                                            !dest_bin!
         
         rem copy binaries and dll 
-        call :copyFile "!build_dir!\waq_plugin_wasteload\!configuration!\waq_plugin_wasteload.dll"                         !dest_bin!
-        call :copyFile "!build_dir!\waq_plugin_wasteload\!configuration!\waq_plugin_wasteload.pdb"                         !dest_bin!
-        call :copyFile "!build_dir!\delwaq\!configuration!\delwaq.dll"                                                     !dest_bin!
-        call :copyFile "!build_dir!\delwaq\!configuration!\delwaq.pdb"                                                     !dest_bin!
+        call :copyFile "!build_dir!\waq_plugin_wasteload\!configuration!\waq_plugin_wasteload.*"                         !dest_bin!
+        call :copyFile "!build_dir!\delwaq\!configuration!\delwaq.*"                                                     !dest_bin!
     )
     
     if "%configuration%" == "Release" ( 
@@ -644,12 +666,9 @@ rem ==========================
         call :copyDwaqDependentRuntimeLibraries                                                                            !dest_bin!
         
         rem copy binaries and dll 
-        call :copyFile "!build_dir!\waq_plugin_wasteload\!configuration!\waq_plugin_wasteload.dll"                         !dest_bin!
-        call :copyFile "!build_dir!\waq_plugin_wasteload\!configuration!\waq_plugin_wasteload.pdb"                         !dest_bin!
-        call :copyFile "!build_dir!\delwaq\!configuration!\delwaq.dll"                                                     !dest_bin!
-        call :copyFile "!build_dir!\delwaq\!configuration!\delwaq.pdb"                                                     !dest_bin!
-        call :copyFile "!build_dir!\delwaq1\!configuration!\delwaq1.exe"                                                   !dest_bin!
-        call :copyFile "!build_dir!\delwaq1\!configuration!\delwaq1.pdb"                                                   !dest_bin!
+        call :copyFile "!build_dir!\waq_plugin_wasteload\!configuration!\waq_plugin_wasteload.*"                         !dest_bin!
+        call :copyFile "!build_dir!\delwaq\!configuration!\delwaq.*"                                                     !dest_bin!
+        call :copyFile "!build_dir!\delwaq1\!configuration!\delwaq1.*"                                                   !dest_bin!
     )
     
     if "%configuration%" == "Release" ( 
@@ -702,12 +721,9 @@ rem ==========================
         call :copyDwaqDependentRuntimeLibraries                                                                            !dest_bin!
         
         rem copy binaries and dll 
-        call :copyFile "!build_dir!\waq_plugin_wasteload\!configuration!\waq_plugin_wasteload.dll"                         !dest_bin!
-        call :copyFile "!build_dir!\waq_plugin_wasteload\!configuration!\waq_plugin_wasteload.pdb"                         !dest_bin!
-        call :copyFile "!build_dir!\delwaq\!configuration!\delwaq.dll"                                                     !dest_bin!
-        call :copyFile "!build_dir!\delwaq\!configuration!\delwaq.pdb"                                                     !dest_bin!
-        call :copyFile "!build_dir!\delwaq2\!configuration!\delwaq2.exe"                                                   !dest_bin!
-        call :copyFile "!build_dir!\delwaq2\!configuration!\delwaq2.pdb"                                                   !dest_bin!
+        call :copyFile "!build_dir!\waq_plugin_wasteload\!configuration!\waq_plugin_wasteload.*"                         !dest_bin!
+        call :copyFile "!build_dir!\delwaq\!configuration!\delwaq.*"                                                     !dest_bin!
+        call :copyFile "!build_dir!\delwaq2\!configuration!\delwaq2.*"                                                   !dest_bin!
     )
     
     if "%configuration%" == "Release" ( 
@@ -729,9 +745,9 @@ rem ==========================
         set dest_bin="!install_dir!\x64\Release\dwaq\bin"
         
         rem copy binaries and dll 
-        call :copyFile "!build_dir!\waq_plugin_wasteload\!configuration!\waq_plugin_wasteload.dll"                          !dest_bin! 
-        call :copyFile "!build_dir!\delwaq\!configuration!\delwaq.dll"                                                      !dest_bin! 
-        call :copyFile "!build_dir!\delwaq2\!configuration!\delwaq2.exe"                                                    !dest_bin!
+        call :copyFile "!build_dir!\waq_plugin_wasteload\!configuration!\waq_plugin_wasteload.*"                          !dest_bin! 
+        call :copyFile "!build_dir!\delwaq\!configuration!\delwaq.*"                                                      !dest_bin! 
+        call :copyFile "!build_dir!\delwaq2\!configuration!\delwaq2.*"                                                    !dest_bin!
 
         call :copyFile "!checkout_src_root!\engines_gpl\waq\scripts\run_delwaq.bat"                                         !dest_scripts! 
     )
@@ -760,7 +776,7 @@ rem ==========================
         call :copyDwavesDependentRuntimeLibraries                                                                           !dest_bin!
         
         rem copy binaries and dll 
-        call :copyFile "!build_dir!\wave\!configuration!\wave.dll"                                                          !dest_bin!
+        call :copyFile "!build_dir!\wave\!configuration!\wave.*"                                                          !dest_bin!
     )
     
     if "%configuration%" == "Release" ( 
@@ -782,7 +798,7 @@ rem ==========================
         set dest_bin="!install_dir!\x64\Release\dwaves\bin"
         
         rem copy binaries and dll 
-        call :copyFile "!build_dir!\wave\!configuration!\wave.dll"                                                           !dest_bin! 
+        call :copyFile "!build_dir!\wave\!configuration!\wave.*"                                                           !dest_bin! 
     )
     
 goto :endproc
@@ -809,7 +825,7 @@ rem ==========================
         call :copyDwavesDependentRuntimeLibraries                                                                           !dest_bin!
         
         rem copy binaries and dll 
-        call :copyFile "!build_dir!\wave\!configuration!\wave_exe.exe"                                                      !dest_bin!
+        call :copyFile "!build_dir!\wave\!configuration!\wave_exe.*"                                                      !dest_bin!
     )
     
     if "%configuration%" == "Release" ( 
@@ -831,7 +847,7 @@ rem ==========================
         set dest_bin="!install_dir!\x64\Release\dwaves\bin"
         
         rem copy binaries and dll 
-        call :copyFile "!build_dir!\wave\!configuration!\wave_exe.exe"                                                      !dest_bin! 
+        call :copyFile "!build_dir!\wave\!configuration!\wave_exe.*"                                                      !dest_bin! 
 
         call :copyFile "!checkout_src_root!\engines_gpl\wave\scripts\run_dwaves.bat"                                        !dest_scripts!
     )
@@ -860,7 +876,7 @@ rem ==========================
         call :copyFlow2D3DDependentRuntimeLibraries                                                                             !dest_bin!
         
         rem copy binaries and dll 
-        call :copyFile "!build_dir!\flow2d3d\!configuration!\flow2d3d.dll"                                                      !dest_bin!
+        call :copyFile "!build_dir!\flow2d3d\!configuration!\flow2d3d.*"                                                      !dest_bin!
     )
     
     if "%configuration%" == "Release" ( 
@@ -882,7 +898,7 @@ rem ==========================
         set dest_bin="!install_dir!\x64\Release\dflow2d3d\bin"
         
         rem copy binaries and dll 
-        call :copyFile "!build_dir!\flow2d3d\!configuration!\flow2d3d.dll"                                                      !dest_bin! 
+        call :copyFile "!build_dir!\flow2d3d\!configuration!\flow2d3d.*"                                                      !dest_bin! 
 
         call :copyFile "!checkout_src_root!\engines_gpl\flow2d3d\scripts\*.bat"                                                 !dest_scripts!
         call :copyFile "!checkout_src_root!\engines_gpl\flow2d3d\scripts\*.m"                                                   !dest_scripts!
@@ -907,7 +923,7 @@ rem ==========================
 
     call :makeDir !dest_bin!
 
-    call :copyFile "!build_dir!\test_dflowfm_kernel\!configuration!\dflowfm_kernel_test.exe"                              !dest_bin!
+    call :copyFile "!build_dir!\test_dflowfm_kernel\!configuration!\dflowfm_kernel_test.*"                              !dest_bin!
 
     )
     
@@ -922,7 +938,7 @@ rem ==========================
     set dest_share="!install_dir!\x64\Release\share\bin"
     
     call :makeAllDirs 
-    call :copyFile "!build_dir!\test_dflowfm_kernel\!configuration!\dflowfm_kernel_test.exe"                                !dest_bin!
+    call :copyFile "!build_dir!\test_dflowfm_kernel\!configuration!\dflowfm_kernel_test.*"                                !dest_bin!
     
     )
 
@@ -942,7 +958,7 @@ rem ==========================
 
     call :makeDir !dest_bin!
 
-    call :copyFile "!build_dir!\test_waq_utils_f\!configuration!\waq_utils_f_test.exe"                              !dest_bin!
+    call :copyFile "!build_dir!\test_waq_utils_f\!configuration!\waq_utils_f_test.*"                              !dest_bin!
 
     )
     
@@ -957,7 +973,7 @@ rem ==========================
     set dest_share="!install_dir!\x64\Release\share\bin"
     
     call :makeAllDirs 
-    call :copyFile "!build_dir!\test_waq_utils_f\!configuration!\waq_utils_f_test.exe"                                !dest_bin!
+    call :copyFile "!build_dir!\test_waq_utils_f\!configuration!\waq_utils_f_test.*"                                !dest_bin!
     
     )
 
@@ -978,7 +994,7 @@ rem ==========================
 
     call :makeDir !dest_bin!
 
-    call :copyFile "!build_dir!\test_ec_module\!configuration!\ec_module_test.exe"                              !dest_bin!
+    call :copyFile "!build_dir!\test_ec_module\!configuration!\ec_module_test.*"                              !dest_bin!
 
     )
     
@@ -993,7 +1009,7 @@ rem ==========================
     set dest_share="!install_dir!\x64\Release\share\bin"
     
     call :makeAllDirs 
-    call :copyFile "!build_dir!\test_ec_module\!configuration!\ec_module_test.exe"                                !dest_bin!
+    call :copyFile "!build_dir!\test_ec_module\!configuration!\ec_module_test.*"                                !dest_bin!
     
     )
 
@@ -1014,7 +1030,7 @@ rem ==========================
 
     call :makeDir !dest_bin!
 
-    call :copyFile "!build_dir!\test_deltares_common\!configuration!\test_deltares_common.exe"                              !dest_bin!
+    call :copyFile "!build_dir!\test_deltares_common\!configuration!\test_deltares_common.*"                              !dest_bin!
 
     )
     
@@ -1029,7 +1045,7 @@ rem ==========================
     set dest_share="!install_dir!\x64\Release\share\bin"
     
     call :makeAllDirs 
-    call :copyFile "!build_dir!\test_deltares_common\!configuration!\test_deltares_common.exe"                                !dest_bin!
+    call :copyFile "!build_dir!\test_deltares_common\!configuration!\test_deltares_common.*"                                !dest_bin!
     
     )
 
