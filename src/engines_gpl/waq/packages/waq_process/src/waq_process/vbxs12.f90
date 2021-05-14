@@ -332,6 +332,7 @@
       integer,parameter   :: ncohort = 9
       integer, save       :: ifirst(2*ncohort) = 0    ! Separate actions required per cohort
       logical, save       :: first = .true.           ! Actions independent of cohort
+      logical, save       :: first_handled = .false.  ! Actions independent of cohort - but keep in mind multiple threads
       integer,allocatable, save :: botseg(:)
       real,allocatable, save    :: work(:,:)          ! local workarray, used for items that can be "forgotten" between calls
       integer             :: ipnt(nin+nout)
@@ -341,6 +342,7 @@
       integer, save       :: ilumon
 
       real, parameter     :: tinyavail = 1.0e-10 ! Avoid division by zero
+
 !
 !******************************************************************************* INITIAL PROCESSING
 
@@ -352,7 +354,9 @@
       SwVegMod   = NINT(pmsa( ipnt(ip_SwVegMod) ))   ! check that this is indeed a constant
 
       ! set bottom segment number for all (water only in this approach) segments
+!$omp critical
       if (first) then
+          first_handled = .true.
           CALL GETMLU(ILUMON)
 
           allocate(botseg(noseg))
@@ -364,9 +368,12 @@
           do iseg = 1,noseg
               call dhkmrk(1,iknmrk(iseg),ikmrk1)
               call dhkmrk(2,iknmrk(iseg),ikmrk2)
-              if (ikmrk1.lt.3 .and. (ikmrk2.eq.0).or.(ikmrk2.eq.3)) then
-                  botseg(iseg) = iseg
+              if (ikmrk1 == 1 ) then
+                  if (ikmrk1.lt.3 .and. (ikmrk2.eq.0).or.(ikmrk2.eq.3)) then
+                      botseg(iseg) = iseg
+                  endif
               endif
+
           enddo
 
           ! loop to find bottom segment in water columns
@@ -378,6 +385,7 @@
               endif
           enddo
       endif
+!$omp end critical
 
 !*** VEG2DN ************************ first part
 
@@ -401,12 +409,12 @@
           depth = pmsa(ipnt(ip_depth))
           VegHeVB = pmsa(ipnt(ip_VegHeVB))
           volume = pmsa(ipnt(ip_volume))
-          nh4 = pmsa(ipnt(ip_nh4))
-          no3 = pmsa(ipnt(ip_no3))
-          aap = pmsa(ipnt(ip_aap))
-          po4 = pmsa(ipnt(ip_po4))
-          so4 = pmsa(ipnt(ip_so4))
-          sud = pmsa(ipnt(ip_sud))
+          nh4 = max( 0.0, pmsa(ipnt(ip_nh4)) )
+          no3 = max( 0.0, pmsa(ipnt(ip_no3)) )
+          aap = max( 0.0, pmsa(ipnt(ip_aap)) )
+          po4 = max( 0.0, pmsa(ipnt(ip_po4)) )
+          so4 = max( 0.0, pmsa(ipnt(ip_so4)) )
+          sud = max( 0.0, pmsa(ipnt(ip_sud)) )
 
           if ( VegHeVB .gt. 0.0 ) then
 
@@ -508,13 +516,13 @@
               RootDeVB = pmsa(ipnt(ip_RootDeVB))
               HSed = pmsa(ipnt(ip_HSed))
               surf = pmsa(ipnt(ip_surf))
-              PorSed = pmsa(ipnt(ip_PorSed))
-              s1_nh4 = pmsa(ipnt(ip_s1_nh4))
-              s1_no3 = pmsa(ipnt(ip_s1_no3))
-              s1_aap = pmsa(ipnt(ip_s1_aap))
-              s1_po4 = pmsa(ipnt(ip_s1_po4))
-              s1_so4 = pmsa(ipnt(ip_s1_so4))
-              s1_sud = pmsa(ipnt(ip_s1_sud))
+              PorSed = max( 0.0, pmsa(ipnt(ip_PorSed)) )
+              s1_nh4 = max( 0.0, pmsa(ipnt(ip_s1_nh4)) )
+              s1_no3 = max( 0.0, pmsa(ipnt(ip_s1_no3)) )
+              s1_aap = max( 0.0, pmsa(ipnt(ip_s1_aap)) )
+              s1_po4 = max( 0.0, pmsa(ipnt(ip_s1_po4)) )
+              s1_so4 = max( 0.0, pmsa(ipnt(ip_s1_so4)) )
+              s1_sud = max( 0.0, pmsa(ipnt(ip_s1_sud)) )
               SWRootVB = pmsa(ipnt(ip_SWRootVB))
               VmaxVB = pmsa(ipnt(ip_VmaxVB))
               KmVB = pmsa(ipnt(ip_KmVB))
@@ -1037,7 +1045,6 @@
               pmsa( ipnt(ip_rMrtVB)   ) = rMrtVB
               pmsa( ipnt(ip_fMrtVB)   ) = fMrtVB
 
-
 !         end bottom and 2d segments only
           endif
 
@@ -1144,12 +1151,12 @@
           localdepth = pmsa(ipnt(ip_localdepth))
           VegHeVB = pmsa(ipnt(ip_VegHeVB))
           delt = pmsa(ipnt(ip_delt))
-          nh4 = pmsa(ipnt(ip_nh4))
-          no3 = pmsa(ipnt(ip_no3))
-          aap = pmsa(ipnt(ip_aap))
-          po4 = pmsa(ipnt(ip_po4))
-          so4 = pmsa(ipnt(ip_so4))
-          sud = pmsa(ipnt(ip_sud))
+          nh4 = max( 0.0, pmsa(ipnt(ip_nh4)) )
+          no3 = max( 0.0, pmsa(ipnt(ip_no3)) )
+          aap = max( 0.0, pmsa(ipnt(ip_aap)) )
+          po4 = max( 0.0, pmsa(ipnt(ip_po4)) )
+          so4 = max( 0.0, pmsa(ipnt(ip_so4)) )
+          sud = max( 0.0, pmsa(ipnt(ip_sud)) )
 
           ibotseg = botseg(iseg)
           VBNavail = pmsa(ipoint(ip_VBNavail)+(ibotseg-1)*increm(ip_VBNavail))
@@ -1246,7 +1253,11 @@
 
       enddo
 
-      first = .false.
+!$omp critical
+      if ( first_handled ) then
+          first = .false.
+      endif
+!$omp end critical
 
       ! THIS IS LTERALLY COPIED FROM PRE_EXISTING CODE, WOULD THIS WORK??
       ! from Status

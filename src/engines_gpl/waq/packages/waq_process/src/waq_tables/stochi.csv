@@ -845,6 +845,8 @@ stocfl,stocsu,stocsc
 "dSedPOC4  ","POC4      ",  -1.00000
 "dSedPOC4  ","OOCS1     ",   1.00000
 "dSedPOC4  ","S1_PC4    ",   1.00000
+"dSedVIVP  ","S1_VIVP   ",   1.00000
+"dSedAPATP ","S1_APATP  ",   1.00000
 "dSedPON1  ","PON1      ",  -1.00000
 "dSedPON1  ","DetNS1    ",   1.00000
 "dSedPON1  ","S1_PN1    ",   1.00000
@@ -3007,10 +3009,8 @@ stocfl,stocsu,stocsc
 "SF_dS2VBre","S1_PS2    ",   1.00000
 "SF_dS3VBre","S1_PS3    ",   1.00000
 "SF_dS4VBre","S1_PS4    ",   1.00000
-"dSedAPATP ","S1_APATP  ",   1.00000
 "dSedFeIIIp","S1_FeIIIp ",   1.00000
 "dSedSUP   ","S1_SUP    ",   1.00000
-"dSedVIVP  ","S1_VIVP   ",   1.00000
 "dMPB1Fgp  ","MPB1peli  ",   1.00000
 "dMPB2Fgp  ","MPB2psam  ",   1.00000
 "dMPB1Res  ","MPB1peli  ",  -1.00000

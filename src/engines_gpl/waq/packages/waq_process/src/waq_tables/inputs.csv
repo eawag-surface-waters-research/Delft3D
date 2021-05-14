@@ -15769,7 +15769,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "DELWAQG   ","TurCoef   ", 140,"N"," ",1
 "DELWAQG   ","DifCoef   ", 141,"N"," ",1
 "DELWAQG   ","Depth     ", 142,"N"," ",1
-"DELWAQG   ","CH4       ", 143,"Y"," ",1
+"DELWAQG   ","CH4       ", 143,"N"," ",1
 "DELWAQG   ","DOC       ", 144,"Y"," ",1
 "DELWAQG   ","DON       ", 145,"Y"," ",1
 "DELWAQG   ","DOP       ", 146,"Y"," ",1
@@ -15780,7 +15780,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "DELWAQG   ","PO4       ", 151,"Y"," ",1
 "DELWAQG   ","Si        ", 152,"Y"," ",1
 "DELWAQG   ","SO4       ", 153,"Y"," ",1
-"DELWAQG   ","SUD       ", 154,"Y"," ",1
+"DELWAQG   ","SUD       ", 154,"N"," ",1
 "DELWAQG   ","S1_CH4    ", 155,"N"," ",1
 "DELWAQG   ","S1_DOC    ", 156,"N"," ",1
 "DELWAQG   ","S1_DON    ", 157,"N"," ",1
@@ -15788,7 +15788,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "DELWAQG   ","S1_DOS    ", 159,"N"," ",1
 "DELWAQG   ","S1_NH4    ", 160,"N"," ",1
 "DELWAQG   ","S1_NO3    ", 161,"N"," ",1
-"DELWAQG   ","S1_OXY    ", 162,"Y"," ",1
+"DELWAQG   ","S1_OXY    ", 162,"N"," ",1
 "DELWAQG   ","S1_PO4    ", 163,"N"," ",1
 "DELWAQG   ","S1_Si     ", 164,"N"," ",1
 "DELWAQG   ","S1_SO4    ", 165,"N"," ",1
@@ -15815,28 +15815,28 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "DELWAQG   ","S1_PS4    ", 186,"N"," ",1
 "DELWAQG   ","S1_SUP    ", 187,"N"," ",1
 "DELWAQG   ","S1_VIVP   ", 188,"N"," ",1
-"DELWAQG   ","fSedCAAP  ", 189,"Y"," ",1
-"DELWAQG   ","fSedAPATP ", 190,"Y"," ",1
+"DELWAQG   ","fSedCAAP  ", 189,"N"," ",1
+"DELWAQG   ","fSedAPATP ", 190,"N"," ",1
 "DELWAQG   ","fSedFeIIIp", 191,"Y"," ",1
-"DELWAQG   ","fSedOpal  ", 192,"Y"," ",1
+"DELWAQG   ","fSedOpal  ", 192,"N"," ",1
 "DELWAQG   ","fSedPOC1  ", 193,"Y"," ",1
 "DELWAQG   ","fSedPOC2  ", 194,"Y"," ",1
 "DELWAQG   ","fSedPOC3  ", 195,"Y"," ",1
 "DELWAQG   ","fSedPOC4  ", 196,"Y"," ",1
-"DELWAQG   ","fSedPON1  ", 197,"Y"," ",1
-"DELWAQG   ","fSedPON2  ", 198,"Y"," ",1
-"DELWAQG   ","fSedPON3  ", 199,"Y"," ",1
-"DELWAQG   ","fSedPON4  ", 200,"Y"," ",1
-"DELWAQG   ","fSedPOP1  ", 201,"Y"," ",1
-"DELWAQG   ","fSedPOP2  ", 202,"Y"," ",1
-"DELWAQG   ","fSedPOP3  ", 203,"Y"," ",1
-"DELWAQG   ","fSedPOP4  ", 204,"Y"," ",1
-"DELWAQG   ","fSedPOS1  ", 205,"Y"," ",1
-"DELWAQG   ","fSedPOS2  ", 206,"Y"," ",1
-"DELWAQG   ","fSedPOS3  ", 207,"Y"," ",1
-"DELWAQG   ","fSedPOS4  ", 208,"Y"," ",1
+"DELWAQG   ","fSedPON1  ", 197,"N"," ",1
+"DELWAQG   ","fSedPON2  ", 198,"N"," ",1
+"DELWAQG   ","fSedPON3  ", 199,"N"," ",1
+"DELWAQG   ","fSedPON4  ", 200,"N"," ",1
+"DELWAQG   ","fSedPOP1  ", 201,"N"," ",1
+"DELWAQG   ","fSedPOP2  ", 202,"N"," ",1
+"DELWAQG   ","fSedPOP3  ", 203,"N"," ",1
+"DELWAQG   ","fSedPOP4  ", 204,"N"," ",1
+"DELWAQG   ","fSedPOS1  ", 205,"N"," ",1
+"DELWAQG   ","fSedPOS2  ", 206,"N"," ",1
+"DELWAQG   ","fSedPOS3  ", 207,"N"," ",1
+"DELWAQG   ","fSedPOS4  ", 208,"N"," ",1
 "DELWAQG   ","fSedSUP   ", 209,"Y"," ",1
-"DELWAQG   ","fSedVIVP  ", 210,"Y"," ",1
+"DELWAQG   ","fSedVIVP  ", 210,"N"," ",1
 "DELWAQG   ","fN1VBups  ", 211,"Y"," ",1
 "DELWAQG   ","fN2VBups  ", 212,"Y"," ",1
 "DELWAQG   ","fP1VBups  ", 213,"Y"," ",1
@@ -16142,7 +16142,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VB01Procs ","fSVB01up  ",  95,"N","x",1
 "VB02Procs ","SwEmersion",   1,"Y","x",1
 "VB02Procs ","SwVegMod  ",   2,"Y","x",1
-"VB02Procs ","VBType01  ",   3,"Y","x",1
+"VB02Procs ","VBType02  ",   3,"Y","x",1
 "VB02Procs ","nsfVB02   ",   4,"Y","x",1
 "VB02Procs ","CrnsfVB02 ",   5,"Y","x",1
 "VB02Procs ","Initnsfd  ",   6,"Y","x",1
@@ -16212,11 +16212,11 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VB02Procs ","SWVB02Dec ",  70,"Y","x",1
 "VB02Procs ","IniAgeVB02",  71,"Y","x",1
 "VB02Procs ","IniVB02dec",  72,"Y","x",1
-"VB02Procs ","Rc0GWV01  ",  73,"Y","x",1
-"VB02Procs ","TcGWV01   ",  74,"Y","x",1
-"VB02Procs ","AcGWV01   ",  75,"Y","x",1
-"VB02Procs ","MinRWV01  ",  76,"Y","x",1
-"VB02Procs ","TBmWV01   ",  77,"Y","x",1
+"VB02Procs ","Rc0GWV02  ",  73,"Y","x",1
+"VB02Procs ","TcGWV02   ",  74,"Y","x",1
+"VB02Procs ","AcGWV02   ",  75,"Y","x",1
+"VB02Procs ","MinRWV02  ",  76,"Y","x",1
+"VB02Procs ","TBmWV02   ",  77,"Y","x",1
 "VB02Procs ","TempAir   ",  78,"Y","x",1
 "VB02Procs ","MinVB     ",  79,"Y","x",1
 "VB02Procs ","FfolPOC1  ",  80,"Y","x",1
@@ -16224,11 +16224,11 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VB02Procs ","FfrootPOC1",  82,"Y","x",1
 "VB02Procs ","FfrootPOC2",  83,"Y","x",1
 "VB02Procs ","RcMrtVB02 ",  84,"Y","x",1
-"VB02Procs ","Rc0MSWV01 ",  85,"Y","x",1
-"VB02Procs ","TcMSWV01  ",  86,"Y","x",1
-"VB02Procs ","RcMGRWV01 ",  87,"Y","x",1
-"VB02Procs ","AcMWV01   ",  88,"Y","x",1
-"VB02Procs ","MaxRWV01  ",  89,"Y","x",1
+"VB02Procs ","Rc0MSWV02 ",  85,"Y","x",1
+"VB02Procs ","TcMSWV02  ",  86,"Y","x",1
+"VB02Procs ","RcMGRWV02 ",  87,"Y","x",1
+"VB02Procs ","AcMWV02   ",  88,"Y","x",1
+"VB02Procs ","MaxRWV02  ",  89,"Y","x",1
 "VB02Procs ","SwDisVB02 ",  90,"Y","x",1
 "VB02Procs ","VegHeVB02 ",  91,"Y","x",1
 "VB02Procs ","FfacVB02  ",  92,"Y","x",1
@@ -16237,7 +16237,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VB02Procs ","fSVB02up  ",  95,"N","x",1
 "VB03Procs ","SwEmersion",   1,"Y","x",1
 "VB03Procs ","SwVegMod  ",   2,"Y","x",1
-"VB03Procs ","VBType01  ",   3,"Y","x",1
+"VB03Procs ","VBType03  ",   3,"Y","x",1
 "VB03Procs ","nsfVB03   ",   4,"Y","x",1
 "VB03Procs ","CrnsfVB03 ",   5,"Y","x",1
 "VB03Procs ","Initnsfd  ",   6,"Y","x",1
@@ -16307,11 +16307,11 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VB03Procs ","SWVB03Dec ",  70,"Y","x",1
 "VB03Procs ","IniAgeVB03",  71,"Y","x",1
 "VB03Procs ","IniVB03dec",  72,"Y","x",1
-"VB03Procs ","Rc0GWV01  ",  73,"Y","x",1
-"VB03Procs ","TcGWV01   ",  74,"Y","x",1
-"VB03Procs ","AcGWV01   ",  75,"Y","x",1
-"VB03Procs ","MinRWV01  ",  76,"Y","x",1
-"VB03Procs ","TBmWV01   ",  77,"Y","x",1
+"VB03Procs ","Rc0GWV03  ",  73,"Y","x",1
+"VB03Procs ","TcGWV03   ",  74,"Y","x",1
+"VB03Procs ","AcGWV03   ",  75,"Y","x",1
+"VB03Procs ","MinRWV03  ",  76,"Y","x",1
+"VB03Procs ","TBmWV03   ",  77,"Y","x",1
 "VB03Procs ","TempAir   ",  78,"Y","x",1
 "VB03Procs ","MinVB     ",  79,"Y","x",1
 "VB03Procs ","FfolPOC1  ",  80,"Y","x",1
@@ -16319,11 +16319,11 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VB03Procs ","FfrootPOC1",  82,"Y","x",1
 "VB03Procs ","FfrootPOC2",  83,"Y","x",1
 "VB03Procs ","RcMrtVB03 ",  84,"Y","x",1
-"VB03Procs ","Rc0MSWV01 ",  85,"Y","x",1
-"VB03Procs ","TcMSWV01  ",  86,"Y","x",1
-"VB03Procs ","RcMGRWV01 ",  87,"Y","x",1
-"VB03Procs ","AcMWV01   ",  88,"Y","x",1
-"VB03Procs ","MaxRWV01  ",  89,"Y","x",1
+"VB03Procs ","Rc0MSWV03 ",  85,"Y","x",1
+"VB03Procs ","TcMSWV03  ",  86,"Y","x",1
+"VB03Procs ","RcMGRWV03 ",  87,"Y","x",1
+"VB03Procs ","AcMWV03   ",  88,"Y","x",1
+"VB03Procs ","MaxRWV03  ",  89,"Y","x",1
 "VB03Procs ","SwDisVB03 ",  90,"Y","x",1
 "VB03Procs ","VegHeVB03 ",  91,"Y","x",1
 "VB03Procs ","FfacVB03  ",  92,"Y","x",1
@@ -16332,7 +16332,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VB03Procs ","fSVB03up  ",  95,"N","x",1
 "VB04Procs ","SwEmersion",   1,"Y","x",1
 "VB04Procs ","SwVegMod  ",   2,"Y","x",1
-"VB04Procs ","VBType01  ",   3,"Y","x",1
+"VB04Procs ","VBType04  ",   3,"Y","x",1
 "VB04Procs ","nsfVB04   ",   4,"Y","x",1
 "VB04Procs ","CrnsfVB04 ",   5,"Y","x",1
 "VB04Procs ","Initnsfd  ",   6,"Y","x",1
@@ -16402,11 +16402,11 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VB04Procs ","SWVB04Dec ",  70,"Y","x",1
 "VB04Procs ","IniAgeVB04",  71,"Y","x",1
 "VB04Procs ","IniVB04dec",  72,"Y","x",1
-"VB04Procs ","Rc0GWV01  ",  73,"Y","x",1
-"VB04Procs ","TcGWV01   ",  74,"Y","x",1
-"VB04Procs ","AcGWV01   ",  75,"Y","x",1
-"VB04Procs ","MinRWV01  ",  76,"Y","x",1
-"VB04Procs ","TBmWV01   ",  77,"Y","x",1
+"VB04Procs ","Rc0GWV04  ",  73,"Y","x",1
+"VB04Procs ","TcGWV04   ",  74,"Y","x",1
+"VB04Procs ","AcGWV04   ",  75,"Y","x",1
+"VB04Procs ","MinRWV04  ",  76,"Y","x",1
+"VB04Procs ","TBmWV04   ",  77,"Y","x",1
 "VB04Procs ","TempAir   ",  78,"Y","x",1
 "VB04Procs ","MinVB     ",  79,"Y","x",1
 "VB04Procs ","FfolPOC1  ",  80,"Y","x",1
@@ -16414,11 +16414,11 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VB04Procs ","FfrootPOC1",  82,"Y","x",1
 "VB04Procs ","FfrootPOC2",  83,"Y","x",1
 "VB04Procs ","RcMrtVB04 ",  84,"Y","x",1
-"VB04Procs ","Rc0MSWV01 ",  85,"Y","x",1
-"VB04Procs ","TcMSWV01  ",  86,"Y","x",1
-"VB04Procs ","RcMGRWV01 ",  87,"Y","x",1
-"VB04Procs ","AcMWV01   ",  88,"Y","x",1
-"VB04Procs ","MaxRWV01  ",  89,"Y","x",1
+"VB04Procs ","Rc0MSWV04 ",  85,"Y","x",1
+"VB04Procs ","TcMSWV04  ",  86,"Y","x",1
+"VB04Procs ","RcMGRWV04 ",  87,"Y","x",1
+"VB04Procs ","AcMWV04   ",  88,"Y","x",1
+"VB04Procs ","MaxRWV04  ",  89,"Y","x",1
 "VB04Procs ","SwDisVB04 ",  90,"Y","x",1
 "VB04Procs ","VegHeVB04 ",  91,"Y","x",1
 "VB04Procs ","FfacVB04  ",  92,"Y","x",1
@@ -16427,7 +16427,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VB04Procs ","fSVB04up  ",  95,"N","x",1
 "VB05Procs ","SwEmersion",   1,"Y","x",1
 "VB05Procs ","SwVegMod  ",   2,"Y","x",1
-"VB05Procs ","VBType01  ",   3,"Y","x",1
+"VB05Procs ","VBType05  ",   3,"Y","x",1
 "VB05Procs ","nsfVB05   ",   4,"Y","x",1
 "VB05Procs ","CrnsfVB05 ",   5,"Y","x",1
 "VB05Procs ","Initnsfd  ",   6,"Y","x",1
@@ -16497,11 +16497,11 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VB05Procs ","SWVB05Dec ",  70,"Y","x",1
 "VB05Procs ","IniAgeVB05",  71,"Y","x",1
 "VB05Procs ","IniVB05dec",  72,"Y","x",1
-"VB05Procs ","Rc0GWV01  ",  73,"Y","x",1
-"VB05Procs ","TcGWV01   ",  74,"Y","x",1
-"VB05Procs ","AcGWV01   ",  75,"Y","x",1
-"VB05Procs ","MinRWV01  ",  76,"Y","x",1
-"VB05Procs ","TBmWV01   ",  77,"Y","x",1
+"VB05Procs ","Rc0GWV05  ",  73,"Y","x",1
+"VB05Procs ","TcGWV05   ",  74,"Y","x",1
+"VB05Procs ","AcGWV05   ",  75,"Y","x",1
+"VB05Procs ","MinRWV05  ",  76,"Y","x",1
+"VB05Procs ","TBmWV05   ",  77,"Y","x",1
 "VB05Procs ","TempAir   ",  78,"Y","x",1
 "VB05Procs ","MinVB     ",  79,"Y","x",1
 "VB05Procs ","FfolPOC1  ",  80,"Y","x",1
@@ -16509,11 +16509,11 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VB05Procs ","FfrootPOC1",  82,"Y","x",1
 "VB05Procs ","FfrootPOC2",  83,"Y","x",1
 "VB05Procs ","RcMrtVB05 ",  84,"Y","x",1
-"VB05Procs ","Rc0MSWV01 ",  85,"Y","x",1
-"VB05Procs ","TcMSWV01  ",  86,"Y","x",1
-"VB05Procs ","RcMGRWV01 ",  87,"Y","x",1
-"VB05Procs ","AcMWV01   ",  88,"Y","x",1
-"VB05Procs ","MaxRWV01  ",  89,"Y","x",1
+"VB05Procs ","Rc0MSWV05 ",  85,"Y","x",1
+"VB05Procs ","TcMSWV05  ",  86,"Y","x",1
+"VB05Procs ","RcMGRWV05 ",  87,"Y","x",1
+"VB05Procs ","AcMWV05   ",  88,"Y","x",1
+"VB05Procs ","MaxRWV05  ",  89,"Y","x",1
 "VB05Procs ","SwDisVB05 ",  90,"Y","x",1
 "VB05Procs ","VegHeVB05 ",  91,"Y","x",1
 "VB05Procs ","FfacVB05  ",  92,"Y","x",1
@@ -16522,7 +16522,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VB05Procs ","fSVB05up  ",  95,"N","x",1
 "VB06Procs ","SwEmersion",   1,"Y","x",1
 "VB06Procs ","SwVegMod  ",   2,"Y","x",1
-"VB06Procs ","VBType01  ",   3,"Y","x",1
+"VB06Procs ","VBType06  ",   3,"Y","x",1
 "VB06Procs ","nsfVB06   ",   4,"Y","x",1
 "VB06Procs ","CrnsfVB06 ",   5,"Y","x",1
 "VB06Procs ","Initnsfd  ",   6,"Y","x",1
@@ -16592,11 +16592,11 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VB06Procs ","SWVB06Dec ",  70,"Y","x",1
 "VB06Procs ","IniAgeVB06",  71,"Y","x",1
 "VB06Procs ","IniVB06dec",  72,"Y","x",1
-"VB06Procs ","Rc0GWV01  ",  73,"Y","x",1
-"VB06Procs ","TcGWV01   ",  74,"Y","x",1
-"VB06Procs ","AcGWV01   ",  75,"Y","x",1
-"VB06Procs ","MinRWV01  ",  76,"Y","x",1
-"VB06Procs ","TBmWV01   ",  77,"Y","x",1
+"VB06Procs ","Rc0GWV06  ",  73,"Y","x",1
+"VB06Procs ","TcGWV06   ",  74,"Y","x",1
+"VB06Procs ","AcGWV06   ",  75,"Y","x",1
+"VB06Procs ","MinRWV06  ",  76,"Y","x",1
+"VB06Procs ","TBmWV06   ",  77,"Y","x",1
 "VB06Procs ","TempAir   ",  78,"Y","x",1
 "VB06Procs ","MinVB     ",  79,"Y","x",1
 "VB06Procs ","FfolPOC1  ",  80,"Y","x",1
@@ -16604,11 +16604,11 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VB06Procs ","FfrootPOC1",  82,"Y","x",1
 "VB06Procs ","FfrootPOC2",  83,"Y","x",1
 "VB06Procs ","RcMrtVB06 ",  84,"Y","x",1
-"VB06Procs ","Rc0MSWV01 ",  85,"Y","x",1
-"VB06Procs ","TcMSWV01  ",  86,"Y","x",1
-"VB06Procs ","RcMGRWV01 ",  87,"Y","x",1
-"VB06Procs ","AcMWV01   ",  88,"Y","x",1
-"VB06Procs ","MaxRWV01  ",  89,"Y","x",1
+"VB06Procs ","Rc0MSWV06 ",  85,"Y","x",1
+"VB06Procs ","TcMSWV06  ",  86,"Y","x",1
+"VB06Procs ","RcMGRWV06 ",  87,"Y","x",1
+"VB06Procs ","AcMWV06   ",  88,"Y","x",1
+"VB06Procs ","MaxRWV06  ",  89,"Y","x",1
 "VB06Procs ","SwDisVB06 ",  90,"Y","x",1
 "VB06Procs ","VegHeVB06 ",  91,"Y","x",1
 "VB06Procs ","FfacVB06  ",  92,"Y","x",1
@@ -16617,7 +16617,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VB06Procs ","fSVB06up  ",  95,"N","x",1
 "VB07Procs ","SwEmersion",   1,"Y","x",1
 "VB07Procs ","SwVegMod  ",   2,"Y","x",1
-"VB07Procs ","VBType01  ",   3,"Y","x",1
+"VB07Procs ","VBType07  ",   3,"Y","x",1
 "VB07Procs ","nsfVB07   ",   4,"Y","x",1
 "VB07Procs ","CrnsfVB07 ",   5,"Y","x",1
 "VB07Procs ","Initnsfd  ",   6,"Y","x",1
@@ -16687,11 +16687,11 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VB07Procs ","SWVB07Dec ",  70,"Y","x",1
 "VB07Procs ","IniAgeVB07",  71,"Y","x",1
 "VB07Procs ","IniVB07dec",  72,"Y","x",1
-"VB07Procs ","Rc0GWV01  ",  73,"Y","x",1
-"VB07Procs ","TcGWV01   ",  74,"Y","x",1
-"VB07Procs ","AcGWV01   ",  75,"Y","x",1
-"VB07Procs ","MinRWV01  ",  76,"Y","x",1
-"VB07Procs ","TBmWV01   ",  77,"Y","x",1
+"VB07Procs ","Rc0GWV07  ",  73,"Y","x",1
+"VB07Procs ","TcGWV07   ",  74,"Y","x",1
+"VB07Procs ","AcGWV07   ",  75,"Y","x",1
+"VB07Procs ","MinRWV07  ",  76,"Y","x",1
+"VB07Procs ","TBmWV07   ",  77,"Y","x",1
 "VB07Procs ","TempAir   ",  78,"Y","x",1
 "VB07Procs ","MinVB     ",  79,"Y","x",1
 "VB07Procs ","FfolPOC1  ",  80,"Y","x",1
@@ -16699,11 +16699,11 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VB07Procs ","FfrootPOC1",  82,"Y","x",1
 "VB07Procs ","FfrootPOC2",  83,"Y","x",1
 "VB07Procs ","RcMrtVB07 ",  84,"Y","x",1
-"VB07Procs ","Rc0MSWV01 ",  85,"Y","x",1
-"VB07Procs ","TcMSWV01  ",  86,"Y","x",1
-"VB07Procs ","RcMGRWV01 ",  87,"Y","x",1
-"VB07Procs ","AcMWV01   ",  88,"Y","x",1
-"VB07Procs ","MaxRWV01  ",  89,"Y","x",1
+"VB07Procs ","Rc0MSWV07 ",  85,"Y","x",1
+"VB07Procs ","TcMSWV07  ",  86,"Y","x",1
+"VB07Procs ","RcMGRWV07 ",  87,"Y","x",1
+"VB07Procs ","AcMWV07   ",  88,"Y","x",1
+"VB07Procs ","MaxRWV07  ",  89,"Y","x",1
 "VB07Procs ","SwDisVB07 ",  90,"Y","x",1
 "VB07Procs ","VegHeVB07 ",  91,"Y","x",1
 "VB07Procs ","FfacVB07  ",  92,"Y","x",1
@@ -16712,7 +16712,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VB07Procs ","fSVB07up  ",  95,"N","x",1
 "VB08Procs ","SwEmersion",   1,"Y","x",1
 "VB08Procs ","SwVegMod  ",   2,"Y","x",1
-"VB08Procs ","VBType01  ",   3,"Y","x",1
+"VB08Procs ","VBType08  ",   3,"Y","x",1
 "VB08Procs ","nsfVB08   ",   4,"Y","x",1
 "VB08Procs ","CrnsfVB08 ",   5,"Y","x",1
 "VB08Procs ","Initnsfd  ",   6,"Y","x",1
@@ -16782,11 +16782,11 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VB08Procs ","SWVB08Dec ",  70,"Y","x",1
 "VB08Procs ","IniAgeVB08",  71,"Y","x",1
 "VB08Procs ","IniVB08dec",  72,"Y","x",1
-"VB08Procs ","Rc0GWV01  ",  73,"Y","x",1
-"VB08Procs ","TcGWV01   ",  74,"Y","x",1
-"VB08Procs ","AcGWV01   ",  75,"Y","x",1
-"VB08Procs ","MinRWV01  ",  76,"Y","x",1
-"VB08Procs ","TBmWV01   ",  77,"Y","x",1
+"VB08Procs ","Rc0GWV08  ",  73,"Y","x",1
+"VB08Procs ","TcGWV08   ",  74,"Y","x",1
+"VB08Procs ","AcGWV08   ",  75,"Y","x",1
+"VB08Procs ","MinRWV08  ",  76,"Y","x",1
+"VB08Procs ","TBmWV08   ",  77,"Y","x",1
 "VB08Procs ","TempAir   ",  78,"Y","x",1
 "VB08Procs ","MinVB     ",  79,"Y","x",1
 "VB08Procs ","FfolPOC1  ",  80,"Y","x",1
@@ -16794,11 +16794,11 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VB08Procs ","FfrootPOC1",  82,"Y","x",1
 "VB08Procs ","FfrootPOC2",  83,"Y","x",1
 "VB08Procs ","RcMrtVB08 ",  84,"Y","x",1
-"VB08Procs ","Rc0MSWV01 ",  85,"Y","x",1
-"VB08Procs ","TcMSWV01  ",  86,"Y","x",1
-"VB08Procs ","RcMGRWV01 ",  87,"Y","x",1
-"VB08Procs ","AcMWV01   ",  88,"Y","x",1
-"VB08Procs ","MaxRWV01  ",  89,"Y","x",1
+"VB08Procs ","Rc0MSWV08 ",  85,"Y","x",1
+"VB08Procs ","TcMSWV08  ",  86,"Y","x",1
+"VB08Procs ","RcMGRWV08 ",  87,"Y","x",1
+"VB08Procs ","AcMWV08   ",  88,"Y","x",1
+"VB08Procs ","MaxRWV08  ",  89,"Y","x",1
 "VB08Procs ","SwDisVB08 ",  90,"Y","x",1
 "VB08Procs ","VegHeVB08 ",  91,"Y","x",1
 "VB08Procs ","FfacVB08  ",  92,"Y","x",1
@@ -16807,7 +16807,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VB08Procs ","fSVB08up  ",  95,"N","x",1
 "VB09Procs ","SwEmersion",   1,"Y","x",1
 "VB09Procs ","SwVegMod  ",   2,"Y","x",1
-"VB09Procs ","VBType01  ",   3,"Y","x",1
+"VB09Procs ","VBType09  ",   3,"Y","x",1
 "VB09Procs ","nsfVB09   ",   4,"Y","x",1
 "VB09Procs ","CrnsfVB09 ",   5,"Y","x",1
 "VB09Procs ","Initnsfd  ",   6,"Y","x",1
@@ -16877,11 +16877,11 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VB09Procs ","SWVB09Dec ",  70,"Y","x",1
 "VB09Procs ","IniAgeVB09",  71,"Y","x",1
 "VB09Procs ","IniVB09dec",  72,"Y","x",1
-"VB09Procs ","Rc0GWV01  ",  73,"Y","x",1
-"VB09Procs ","TcGWV01   ",  74,"Y","x",1
-"VB09Procs ","AcGWV01   ",  75,"Y","x",1
-"VB09Procs ","MinRWV01  ",  76,"Y","x",1
-"VB09Procs ","TBmWV01   ",  77,"Y","x",1
+"VB09Procs ","Rc0GWV09  ",  73,"Y","x",1
+"VB09Procs ","TcGWV09   ",  74,"Y","x",1
+"VB09Procs ","AcGWV09   ",  75,"Y","x",1
+"VB09Procs ","MinRWV09  ",  76,"Y","x",1
+"VB09Procs ","TBmWV09   ",  77,"Y","x",1
 "VB09Procs ","TempAir   ",  78,"Y","x",1
 "VB09Procs ","MinVB     ",  79,"Y","x",1
 "VB09Procs ","FfolPOC1  ",  80,"Y","x",1
@@ -16889,11 +16889,11 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VB09Procs ","FfrootPOC1",  82,"Y","x",1
 "VB09Procs ","FfrootPOC2",  83,"Y","x",1
 "VB09Procs ","RcMrtVB09 ",  84,"Y","x",1
-"VB09Procs ","Rc0MSWV01 ",  85,"Y","x",1
-"VB09Procs ","TcMSWV01  ",  86,"Y","x",1
-"VB09Procs ","RcMGRWV01 ",  87,"Y","x",1
-"VB09Procs ","AcMWV01   ",  88,"Y","x",1
-"VB09Procs ","MaxRWV01  ",  89,"Y","x",1
+"VB09Procs ","Rc0MSWV09 ",  85,"Y","x",1
+"VB09Procs ","TcMSWV09  ",  86,"Y","x",1
+"VB09Procs ","RcMGRWV09 ",  87,"Y","x",1
+"VB09Procs ","AcMWV09   ",  88,"Y","x",1
+"VB09Procs ","MaxRWV09  ",  89,"Y","x",1
 "VB09Procs ","SwDisVB09 ",  90,"Y","x",1
 "VB09Procs ","VegHeVB09 ",  91,"Y","x",1
 "VB09Procs ","FfacVB09  ",  92,"Y","x",1

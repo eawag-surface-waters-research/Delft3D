@@ -565,6 +565,9 @@
 
       logical :: first = .true.
       logical :: only_ox, dissub, sw_vb
+
+      integer, save :: ipnt(1) = -999
+      integer       :: i
       save
 
 !
@@ -784,6 +787,7 @@
               endif
           enddo
           allocate(bottomsegments(noseg2d))
+          bottomsegments = 0
           itel = 0
           do iseg = 1,noseg
               CALL DHKMRK(1,IKNMRK(iseg),iatt1) ! pick up first attribute
@@ -854,21 +858,21 @@
               do ilay = 1,nolay
                   totmas = totmas + sedconc(ilay,isys,iseg2d)*dl(ilay)
               enddo
-              ip  = lins+isys
+              ip  = OFFSET_S1+isys
               pmsa(ipoint(ip)+(iseg-1)*increm(ip)) = totmas
           enddo
           if (SW_VB) then
-              ip = lins+is_nh4
+              ip = OFFSET_S1+is_nh4
               s1_nh4 = pmsa(ipoint(ip)+(iseg-1)*increm(ip))
-              ip = lins+is_no3
+              ip = OFFSET_S1+is_no3
               s1_no3 = pmsa(ipoint(ip)+(iseg-1)*increm(ip))
-              ip = lins+is_aap
+              ip = OFFSET_S1+is_aap
               s1_aap = pmsa(ipoint(ip)+(iseg-1)*increm(ip))
-              ip = lins+is_po4
+              ip = OFFSET_S1+is_po4
               s1_po4 = pmsa(ipoint(ip)+(iseg-1)*increm(ip))
-              ip = lins+is_so4
+              ip = OFFSET_S1+is_so4
               s1_so4 = pmsa(ipoint(ip)+(iseg-1)*increm(ip))
-              ip = lins+is_sud
+              ip = OFFSET_S1+is_sud
               s1_sud = pmsa(ipoint(ip)+(iseg-1)*increm(ip))
 
               fN1VBup = PMSA(IPOINT(ip_fN1VBup)+(iseg-1)*INCREM(ip_fN1VBup))
@@ -903,6 +907,7 @@
               sedconc(1,nototseddis+isys,iseg2d) = sedconc(1,nototseddis+isys,iseg2d) + sedwatflx/dl(1)*delt ! to g/m3
               iflux = nototseddis + nofl + isys
               fl(iflux+(iseg-1)*noflux) = sedwatflx/depth
+
           enddo
 
           kp = 0.0
@@ -914,40 +919,40 @@
 
           do ilay = 1,nolay
          ! Derive states from sedconc
-          CH4 = sedconc(ilay,is_CH4,iseg2d)
-          DOC = sedconc(ilay,is_DOC,iseg2d)
-          DON = sedconc(ilay,is_DON,iseg2d)
-          DOP = sedconc(ilay,is_DOP,iseg2d)
-          DOS = sedconc(ilay,is_DOS,iseg2d)
-          NH4 = sedconc(ilay,is_NH4,iseg2d)
-          NO3 = sedconc(ilay,is_NO3,iseg2d)
-          OXY = sedconc(ilay,is_OXY,iseg2d)
-          PO4 = sedconc(ilay,is_PO4,iseg2d)
-          Si = sedconc(ilay,is_Si,iseg2d)
-          SO4 = sedconc(ilay,is_SO4,iseg2d)
-          SUD = sedconc(ilay,is_SUD,iseg2d)
-          AAP = sedconc(ilay,is_AAP,iseg2d)
-          APATP = sedconc(ilay,is_APATP,iseg2d)
-          FeIIIpa = sedconc(ilay,is_FeIIIpa,iseg2d)
-          Opal = sedconc(ilay,is_Opal,iseg2d)
-          POC1 = sedconc(ilay,is_POC1,iseg2d)
-          POC2 = sedconc(ilay,is_POC2,iseg2d)
-          POC3 = sedconc(ilay,is_POC3,iseg2d)
-          POC4 = sedconc(ilay,is_POC4,iseg2d)
-          PON1 = sedconc(ilay,is_PON1,iseg2d)
-          PON2 = sedconc(ilay,is_PON2,iseg2d)
-          PON3 = sedconc(ilay,is_PON3,iseg2d)
-          PON4 = sedconc(ilay,is_PON4,iseg2d)
-          POP1 = sedconc(ilay,is_POP1,iseg2d)
-          POP2 = sedconc(ilay,is_POP2,iseg2d)
-          POP3 = sedconc(ilay,is_POP3,iseg2d)
-          POP4 = sedconc(ilay,is_POP4,iseg2d)
-          POS1 = sedconc(ilay,is_POS1,iseg2d)
-          POS2 = sedconc(ilay,is_POS2,iseg2d)
-          POS3 = sedconc(ilay,is_POS3,iseg2d)
-          POS4 = sedconc(ilay,is_POS4,iseg2d)
-          SUP = sedconc(ilay,is_SUP,iseg2d)
-          VIVP = sedconc(ilay,is_VIVP,iseg2d)
+          CH4 = max( 0.0, sedconc(ilay,is_CH4,iseg2d) )
+          DOC = max( 0.0, sedconc(ilay,is_DOC,iseg2d) )
+          DON = max( 0.0, sedconc(ilay,is_DON,iseg2d) )
+          DOP = max( 0.0, sedconc(ilay,is_DOP,iseg2d) )
+          DOS = max( 0.0, sedconc(ilay,is_DOS,iseg2d) )
+          NH4 = max( 0.0, sedconc(ilay,is_NH4,iseg2d) )
+          NO3 = max( 0.0, sedconc(ilay,is_NO3,iseg2d) )
+          OXY = max( 0.0, sedconc(ilay,is_OXY,iseg2d) )
+          PO4 = max( 0.0, sedconc(ilay,is_PO4,iseg2d) )
+          Si = max( 0.0, sedconc(ilay,is_Si,iseg2d) )
+          SO4 = max( 0.0, sedconc(ilay,is_SO4,iseg2d) )
+          SUD = max( 0.0, sedconc(ilay,is_SUD,iseg2d) )
+          AAP = max( 0.0, sedconc(ilay,is_AAP,iseg2d) )
+          APATP = max( 0.0, sedconc(ilay,is_APATP,iseg2d) )
+          FeIIIpa = max( 0.0, sedconc(ilay,is_FeIIIpa,iseg2d) )
+          Opal = max( 0.0, sedconc(ilay,is_Opal,iseg2d) )
+          POC1 = max( 0.0, sedconc(ilay,is_POC1,iseg2d) )
+          POC2 = max( 0.0, sedconc(ilay,is_POC2,iseg2d) )
+          POC3 = max( 0.0, sedconc(ilay,is_POC3,iseg2d) )
+          POC4 = max( 0.0, sedconc(ilay,is_POC4,iseg2d) )
+          PON1 = max( 0.0, sedconc(ilay,is_PON1,iseg2d) )
+          PON2 = max( 0.0, sedconc(ilay,is_PON2,iseg2d) )
+          PON3 = max( 0.0, sedconc(ilay,is_PON3,iseg2d) )
+          PON4 = max( 0.0, sedconc(ilay,is_PON4,iseg2d) )
+          POP1 = max( 0.0, sedconc(ilay,is_POP1,iseg2d) )
+          POP2 = max( 0.0, sedconc(ilay,is_POP2,iseg2d) )
+          POP3 = max( 0.0, sedconc(ilay,is_POP3,iseg2d) )
+          POP4 = max( 0.0, sedconc(ilay,is_POP4,iseg2d) )
+          POS1 = max( 0.0, sedconc(ilay,is_POS1,iseg2d) )
+          POS2 = max( 0.0, sedconc(ilay,is_POS2,iseg2d) )
+          POS3 = max( 0.0, sedconc(ilay,is_POS3,iseg2d) )
+          POS4 = max( 0.0, sedconc(ilay,is_POS4,iseg2d) )
+          SUP = max( 0.0, sedconc(ilay,is_SUP,iseg2d) )
+          VIVP = max( 0.0, sedconc(ilay,is_VIVP,iseg2d) )
 
           TEMP20   = Temp - 20.0
           IM1 = (1.0-poros)*rhodm
@@ -1315,7 +1320,7 @@
               decflx(12) = RC20S * TEMPC * ELFACT * S_FACT * POS
               decflx(4) = (1/S_FACT) * B_DTP * decflx(12)
               decflx(8) = (1/S_FACT) * B_DTD * decflx(12)
-!
+
             ENDIF
 
             rtmin  = rtmin + decflx(9) ! accumulate C mineralisation for later processing in CONSELAC
