@@ -58,7 +58,7 @@ contains
 !==============================================================================
 subroutine tests_observations
     call test( test_read_obs_points, 'Tests the reading of observation points' )
-    call test( test_read_snapped_obs_points, 'Tests the reading of snapped observation points' )
+    !call test( test_read_snapped_obs_points, 'Tests the reading of snapped observation points' )
 end subroutine tests_observations
 !
 !
