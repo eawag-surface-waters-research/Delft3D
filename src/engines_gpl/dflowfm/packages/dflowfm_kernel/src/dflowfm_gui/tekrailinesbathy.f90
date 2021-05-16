@@ -122,13 +122,13 @@
  do L = 1,lnx1D
     k1  = ln(1,L)
     k2  = ln(2,L)
-    xx1 = xk(k1)
-    xx2 = xk(k2)
+    xx1 = xz(k1)
+    xx2 = xz(k2)
     zz1 = bl(k1)
     zz2 = bl(k2)
     if (yfac > 0) then
-        yy1 = yk(k1)
-        yy2 = yk(k2)
+        yy1 = yz(k1)
+        yy2 = yz(k2)
         zz1 = zz1 + (yy1 - ymn)*yfac
         zz2 = zz2 + (yy1 - ymn)*yfac
     endif
