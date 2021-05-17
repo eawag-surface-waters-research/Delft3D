@@ -445,8 +445,6 @@ use meshdata, only : ug_idsLen, ug_idsLongNamesLen
 
       implicit none
 
-      integer :: L
-      
 !     copy polygons to partition polygons
       call pol_to_tpoly(npartition_pol, partition_pol)
 
@@ -516,9 +514,8 @@ use meshdata, only : ug_idsLen, ug_idsLongNamesLen
 !> initialize partitioning
    subroutine partition_init_1D2D(md_ident, ierror)
 !      use unstruc_model, only: md_ident  !<---- circular dependency
-      use network_data, only : xzw, yzw, nump1d2d
-      use m_flowgeom,   only : xu, yu, Ndx, Ndxi
-!      use m_flow,       only : kmx
+      use network_data, only : nump1d2d
+      use m_flowgeom,   only : Ndx, Ndxi
       use m_flowparameters, only: icgsolver
       use m_polygon
       use m_missing
@@ -632,7 +629,6 @@ use meshdata, only : ug_idsLen, ug_idsLongNamesLen
       use MessageHandling
       use dfm_error
       use m_polygon
-      use m_missing, only: dmiss, intmiss
       use network_data
       use m_alloc
       use gridoperations
@@ -806,7 +802,7 @@ use meshdata, only : ug_idsLen, ug_idsLongNamesLen
 
       integer, allocatable                  :: edge_nodes(:,:)
       integer, allocatable                  :: iglobal_edge(:) !< Original global number of all current 1D edges.
-      integer                               :: hulp(2), i, ii, ic_p, ic_g, i_p, i_g, n1dedges, numk1d
+      integer                               :: i, ii, ic_p, ic_g, i_p, i_g, n1dedges, numk1d
       character(len=ug_idsLen), allocatable :: nodeids_p(:)
       character(len=ug_idsLongNamesLen), allocatable :: nodelongnames_p(:)
       real(kind=hp)           , pointer     :: nodeoffsets_p(:)
@@ -860,13 +856,6 @@ use meshdata, only : ug_idsLen, ug_idsLongNamesLen
          ii = iglobal_edge(i)
          edgebranchidx_p(i) = edgebranchidx_g(ii)
          edgeoffsets_p(i) = edgeoffsets_g(ii)
-         !hulp(1) = iglobal_s(edge_nodes(1,i))
-         !hulp(2) = iglobal_s(edge_nodes(2,i))
-         !do ii = 1, size(meshgeom1d%edge_nodes, 2)
-         !   if (all(hulp == meshgeom1d%edge_nodes(:,ii))) then
-         !      exit
-         !   end if
-         !end do
       end do
 
       ! finally, set pointers and allocatables in meshgeom1d and m_save_ugrid_state
@@ -961,7 +950,7 @@ use meshdata, only : ug_idsLen, ug_idsLongNamesLen
 !! Typically used for reconstructing the global cell numbers for all cells in the current partition.
    subroutine find_original_cell_numbers(L2Lorg, Lne_org, iorg)
       use unstruc_messages
-      use network_data, only: nump, nump1d2d, numk, numL, lnn, lne, numl1d, xk, yk, zk, netcell, xzw, yzw
+      use network_data, only: nump, nump1d2d, numL, lnn, lne, numl1d, netcell, xzw, yzw
       use m_flowgeom, only: xz, yz
       use unstruc_channel_flow, only: network
       use sorting_algorithms, only : indexxi
@@ -1063,9 +1052,7 @@ use meshdata, only : ug_idsLen, ug_idsLongNamesLen
          ! such that the network principles continue to be satisfied:
          ! * calculation points (flow nodes) are order such that branch indices are always increasing,
          ! * and calculation points (flow nodes) within a branch are always ordered by increasing offset/chainage.
-         ! TODO (?): also sort xzw, yzw and netcell(:)%nod(:)
 
-         
          allocate(indx(nump1d2d), indxinv(nump1d2d), cellnrs(nump1d2d), tmpCoord(nump1d2d), tmpNetcellNod(nump1d2d))
          cellnrs = iorg
          call indexxi(size(iorg), cellnrs, indx)
@@ -1114,18 +1101,6 @@ use meshdata, only : ug_idsLen, ug_idsLongNamesLen
             end do
          end do
 
-         !tmpCoord = xk(1:nump1d2d)
-         !do i = 1, nump1d2d
-         !   xk(i) = tmpCoord(indx(i))
-         !enddo
-         !tmpCoord = yk(1:nump1d2d)
-         !do i = 1, nump1d2d
-         !   yk(i) = tmpCoord(indx(i))
-         !enddo
-         !tmpCoord = zk(1:nump1d2d)
-         !do i = 1, nump1d2d
-         !   zk(i) = tmpCoord(indx(i))
-         !enddo
       endif
 
    end subroutine find_original_cell_numbers
@@ -2657,7 +2632,7 @@ use meshdata, only : ug_idsLen, ug_idsLongNamesLen
       
       integer, intent(out) :: ierror
       
-      integer              :: LL, L
+      integer              :: L
       integer, allocatable :: kmxL1(:)
       
       ierror = 0   ! so far, so good
@@ -2739,7 +2714,6 @@ use meshdata, only : ug_idsLen, ug_idsLongNamesLen
 !> generate non-overlapping ghost/sendlists (for solver)
    subroutine partition_fill_ghostsendlist_nonoverlap(ierror)
       use m_alloc
-      use m_flowgeom, only: Ndx
       implicit none
       
       integer,               intent(out) :: ierror   !< error (1) or not (0)
@@ -2883,7 +2857,7 @@ use meshdata, only : ug_idsLen, ug_idsLongNamesLen
       use mpi
 #endif      
       use m_flowgeom
-      use m_flow, only: kmx, kmxn, kmxL, kbot, Lbot, Ndkx, Lnkx
+      use m_flow, only: kmxn, kmxL, kbot, Lbot, Ndkx, Lnkx
       use messageHandling
 
       implicit none
@@ -3438,7 +3412,6 @@ end subroutine partition_make_globalnumbers
       use mpi
 #endif
       use m_timer
-      use m_flowgeom, only: xz, yz
 
       implicit none
 
@@ -4367,12 +4340,12 @@ end subroutine partition_make_globalnumbers
    
 !> exclude water-level ghostnodes from solution vector via kfs
    subroutine partition_setkfs()
-      use m_flowgeom, only: kfs, Ndx, xz, yz, Ndxi, nd, wu, Lnxi, Lnx, ln
+      use m_flowgeom, only: kfs, xz, yz, Ndxi, nd, wu
       use m_plotdots
       implicit none
       
       integer :: i
-      integer :: k, L, LL, n
+      integer :: k, L, LL
       
       if ( jaoverlap.eq.0 ) then 
          do i=1,nghostlist_sall(ndomains-1)
@@ -4410,7 +4383,6 @@ end subroutine partition_make_globalnumbers
 
 !> finalize before exit
    subroutine partition_finalize()
-      use m_flowparameters, only: Icgsolver
 #ifdef HAVE_MPI
       use mpi
 #endif
@@ -4484,7 +4456,7 @@ end subroutine partition_make_globalnumbers
       integer                                       :: iglobalbranch_first
       integer                                       :: ibr, ibrr, idmn, i, iglob, k, N, num, L, LL, LR
       integer                                       :: istart, iend, ioff, ibr_other, ibr_glob
-      integer                                       :: inext, icount, Lconnect
+      integer                                       :: icount, Lconnect
       
       integer                                       :: ierror           ! error (1) or not (0)
       
@@ -4961,7 +4933,7 @@ end subroutine partition_make_globalnumbers
    
    
    subroutine diff_ghosts(itype, var)
-      use m_flowgeom, only: Lnx, Lnxi, ln
+      use m_flowgeom, only: Lnxi, ln
       implicit none
       
       integer,                        intent(in)    :: itype
@@ -5546,15 +5518,12 @@ end subroutine gatherv_double_data_mpi_dif
       integer                                     :: objval          ! edgecut or total communication volume
       integer,          allocatable, dimension(:) :: npart           ! node    partition number, dim(Nn)
       integer                                     :: ic, k, N, ipoint, icursize
-      integer,          allocatable, dimension(:) :: xadj, adjncy    ! Adjacency structure of a graph, using compressed storage format (CSR)
       integer,          allocatable, dimension(:) :: ncon            ! number of balancing constrains, at least 1
       real,             allocatable, dimension(:) :: ubvec           ! specify the allowed load imbalance tolerance for each constraint.=1.001 when ncon=1
-      integer                                     :: c_xadj, c_adjncy, nod_j, edgej_k, nlinkj, icellj, cellk, ilink, ncellj ! these variables are used when build dual graph for 1d network
-      integer                                     :: j, kk, i, length, n0, ierr, L, nc1, nc2, k1, k2
+      integer                                     :: L, k1, k2
 
       integer,          allocatable, dimension(:)  :: iadj_tmp
       integer,          allocatable, dimension(:)  :: iadj, jadj, adjw
-      integer                                      :: LL
 
       integer,                       external      :: metisopts, METIS_PartGraphKway, METIS_PartGraphRecursive, METIS_PARTMESHDUAL
 
@@ -5976,7 +5945,6 @@ end subroutine gatherv_double_data_mpi_dif
       use network_data
       use m_alloc
       use unstruc_messages
-      use m_flowgeom, only: ndx, ndxi
       use geometry_module, only: dbdistance
       use m_missing, only: dmiss
       use m_sferic, only: jsferic, jasfer3D
@@ -6443,7 +6411,7 @@ end subroutine gatherv_double_data_mpi_dif
 !> Sets weights of edges and vsize on mesh that is to be partitioned by METIS
 !! If there are structures defined by polylines, then for structure related cells and edges, it gives special values to edges weights and vertex size.
 !! The purpose is to avoid structures intercross partition boundaries.
-!! NOTE: It uses "Ne/Nparts" as the speical weights on structures, othere weight values can also be investigated.
+!! NOTE: It uses "Ne/Nparts" as the special weights on structures, othere weight values can also be investigated.
 !! Now ONLY support structures defined by polylines. TODO: support setting special weights on structures that are defined by other ways.
    subroutine set_weights_for_METIS(Ne, Nparts, njadj, iadj, jadj,vsize, adjw)
       use m_alloc
