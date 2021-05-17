@@ -816,17 +816,17 @@
                 endif
 
                 if (jarhoxu > 0) then
-                   if (kcu(LL) ==1) then
-                      volu  = ac1*vol1_f(k1)*rho(k1) + ac2*vol1_f(k2)*rho(k2)
-                   else
+                   !if (kcu(LL) ==1) then
+                   !   volu  = ac1*vol1_f(k1)*rho(k1) + ac2*vol1_f(k2)*rho(k2)
+                   !else
                       volu  = ac1*vol1(k1)*rho(k1) + ac2*vol1(k2)*rho(k2)
-                   endif
+                   !endif
                 else
-                   if (kcu(LL) ==1) then
-                      volu  = ac1*vol1_f(k1)         + ac2*vol1_f(k2)
-                   else
+                   !if (kcu(LL) ==1) then
+                   !   volu  = ac1*vol1_f(k1)         + ac2*vol1_f(k2)
+                   !else
                       volu  = ac1*vol1(k1)         + ac2*vol1(k2)
-                   endif
+                   !endif
                 endif
 
                 if (volu > 0) then
