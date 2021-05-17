@@ -973,6 +973,8 @@ subroutine readMDUFile(filename, istat)
        call prop_get_doubles( md_ptr, 'geometry', 'StretchCoef'   , laycof, 3)
     endif
 
+    call prop_get_integer(md_ptr, 'geometry', 'Keepzlayeringatbed'      , keepzlayeringatbed)
+    
     call prop_get_integer( md_ptr, 'geometry', 'Makeorthocenters' , Makeorthocenters)
     call prop_get_double ( md_ptr, 'geometry', 'Dcenterinside'    , Dcenterinside)
     call prop_get_string ( md_ptr, 'geometry', 'PartitionFile'    , md_partitionfile, success)
@@ -1109,10 +1111,6 @@ subroutine readMDUFile(filename, istat)
     call prop_get_double (md_ptr, 'numerics', 'Zwsbtol'      , zwsbtol)
     call prop_get_double (md_ptr, 'numerics', 'Trsh_u1Lb'    , Trsh_u1Lb)
     call prop_get_double (md_ptr, 'numerics', 'Epshstem'     , epshstem)
-
-    call prop_get_integer(md_ptr, 'numerics', 'Keepzlayeringatbed'      , keepzlayeringatbed)
-    call prop_get_integer(md_ptr, 'geometry', 'Keepzlayeringatbed'      , keepzlayeringatbed)
-
 
     call prop_get_double (md_ptr, 'numerics', 'Teta0'        , teta0)
     call prop_get_double (md_ptr, 'numerics', 'Qhrelax'      , qhrelax)
