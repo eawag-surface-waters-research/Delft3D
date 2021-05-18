@@ -182,10 +182,9 @@ module m_oned_functions
       nbr = network%brs%count
       do ibr = 1, nbr
          pbr => network%brs%branch(ibr)
-         if (pbr%active_branch == 0) cycle
 
          ! branches can have no grid points in case of parallel computing
-         if (pbr%gridPointsCount == 0) then
+         if (pbr%uPointsCount == 0) then
             foundFrom = .false.
             foundTo = .false.
             do jbr = 1, ibr - 1
@@ -218,7 +217,7 @@ module m_oned_functions
             upointscount = pbr%uPointsCount
             do i = 1, uPointsCount
                L = lin(i)
-                  k1 = abs(ln(1,L))
+               k1 = abs(ln(1,L))
                grd(i) = k1
             enddo
             k2 = ln(2,iabs(lin(upointscount)))

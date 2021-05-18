@@ -273,21 +273,20 @@ module m_branch
       type (t_branchSet), target, intent(inout) :: brs   !< Branch set from the network.
       integer,                    intent(inout) :: nlink !< Total number of links. (Upon input, any existing links from the call site.
                                                          !< Upon output: total number of links after administering all branches.)
-      
-      integer ibr, i, ngrid
+
+      integer                 :: ibr, i, ngrid
       type(t_branch), pointer :: pbr
-      
+
       do ibr= 1, brs%count
          pbr => brs%branch(ibr)
-         if (allocated(pbr%lin)) deallocate(pbr%lin) 
-         allocate(pbr%lin(pbr%uPointsCount))
+         call realloc(pbr%lin, pbr%uPointsCount)
          do i = 1, pbr%uPointsCount
             nlink = nlink + 1
             pbr%lin(i) = nlink
          enddo
-         
-         if (allocated(pbr%grd)) deallocate(pbr%grd) 
-         allocate(pbr%grd(pbr%gridPointsCount))
+
+         ! NB: the values for pbr%...Node%gridNumber and pbr%grd(:) will be recalculated in set_linknumbers_in_branches
+         call realloc(pbr%grd, pbr%gridPointsCount)
          ngrid = pbr%StartPoint - 1
          if (pbr%FromNode%gridNumber == -1) then
             pbr%FromNode%gridNumber = ngrid + 1
@@ -300,7 +299,7 @@ module m_branch
             pbr%ToNode%gridNumber = ngrid
          endif
       enddo
-      
+
    end subroutine admin_branch
-   
+
 end module m_branch
