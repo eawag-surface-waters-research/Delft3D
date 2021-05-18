@@ -180,7 +180,6 @@ def dimrsetRemove():
         'rr_dll_runner.exe',
         'FBCTools.exe',
         'FBCTools_OpenMI.dll',
-        'tclkitsh852.exe',
         'run_dflow2d3d.sh',
         'run_dflow2d3d_dwaves.sh',
         'run_dflow2d3d_fluidmud.sh',
