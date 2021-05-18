@@ -122,7 +122,7 @@
        znod = 0d0
     endif
  else if (nodval == 15) then
-    znod = k
+    znod = kk
  else if (nodval == 16) then
     znod = nd(kk)%lnx
  else if (nodval == 17) then
@@ -269,6 +269,8 @@ else if (nodval == 27) then
       znod = a1m(kk)
    else if (pure1D > 0d0) then ! visualise
       znod = uc1d(kk)
+   else if (kmx > 0) then 
+      znod = kmxn(kk)
    endif
  else if (nodval == 49) then
     if (nshiptxy > 0) then

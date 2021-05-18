@@ -409,6 +409,8 @@
          OPTION(48)= 'a1m                                 (m2)'
       else if(lnx1D > 0d0) then
          OPTION(48)= 'uc1d                               (m/s)'
+      else if (kmx > 0) then 
+         OPTION(48)= 'max nr of layers                   (   )'
       endif
 
       if (nshiptxy > 0) then
