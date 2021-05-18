@@ -126,6 +126,7 @@ rem =============================================================
 goto :endproc
 
 
+
 rem ===============
 rem === POSTBUILD_ALL
 rem ===============
@@ -147,6 +148,8 @@ rem ===============
 
 goto :endproc
 
+
+
 rem =============================================================
 rem === makeDir accepts one argument: the name of the         ===
 rem === directory it will create if it doesn't already exists ===
@@ -163,6 +166,8 @@ rem =============================================================
     )
 goto :endproc
 
+
+
 rem =============================================================
 rem === makeAllDirs makes all needed directories              ===
 rem =============================================================
@@ -175,6 +180,8 @@ rem =============================================================
     call :makeDir !dest_share!
     
 goto :endproc     
+
+
 
 rem =============================================================
 rem === copies runtime libraries for dflowfm and dflowfm_dll  ===
@@ -243,6 +250,8 @@ rem =============================================================
 
 goto :endproc
 
+
+
 rem =============================================================
 rem === copies runtime libraries for dimr and dimr_lib        ===
 rem =============================================================
@@ -255,6 +264,8 @@ rem =============================================================
     call :copyFile "!checkout_src_root!\third_party_open\expat\x64\x64\%configuration%\libexpat.dll"                    !destination!
 
 goto :endproc
+
+
 
 rem =============================================================
 rem === copies runtime libraries for DWaq                     ===
@@ -269,6 +280,8 @@ rem =============================================================
 
 goto :endproc
 
+
+
 rem =============================================================
 rem === copies runtime libraries for DWaves                   ===
 rem =============================================================
@@ -279,6 +292,8 @@ rem =============================================================
     call :copyFile "!checkout_src_root!\third_party_open\pthreads\bin\x64\*.dll"                                        !destination!
 
 goto :endproc
+
+
 
 rem =============================================================
 rem === copies runtime libraries for flow2d3d                 ===
@@ -293,6 +308,7 @@ rem =============================================================
     call :copyFile "!checkout_src_root!\third_party_open\expat\x64\x64\%configuration%\libexpat.dll"                    !destination!
 
 goto :endproc
+
 
 
 rem ==========================
@@ -345,6 +361,8 @@ rem ==========================
     
 goto :endproc
 
+
+
 rem ==========================
 rem === POST_BUILD_DFLOWFM-CLI
 rem ==========================
@@ -388,11 +406,12 @@ rem ==========================
 goto :endproc
 
 
-rem ==========================
-rem === POST_BUILD_DFLOWFM
-rem ==========================
+
+rem =================================
+rem === POST_BUILD_DFLOWFM_INTERACTER
+rem =================================
 :dflowfm_interacter
-    echo "postbuild dflowfm . . ."
+    echo "postbuild dflowfm_interacter . . ."
     
     if "%configuration%" == "Debug" (
     
@@ -430,53 +449,13 @@ rem ==========================
     
 goto :endproc
 
-rem ==========================
-rem === POST_BUILD_DFLOWFM-CLI
-rem ==========================
-:dflowfm-cli
-    echo "postbuild dflowfm-cli . . ."
-    
-    if "%configuration%" == "Debug" (
-    
-        echo "Debug postbuild"
-        set dest_bin="%install_dir%\x64\Debug"
 
-        call :makeDir !dest_bin!
-        call :copyDflowfmDependentRuntimeLibraries
-        call :copyFile "!build_dir!\dflowfm_cli_exe\!configuration!\dflowfm-cli.*"                                        !dest_bin!
-    )
-    
-    if "%configuration%" == "Release" ( 
-    
-        echo "Release postbuild"
-
-        set dest_bin="!install_dir!\x64\Release\dflowfm\bin"
-        set dest_default="!install_dir!\x64\Release\dflowfm\default"
-        set dest_scripts="!install_dir!\x64\Release\dflowfm\scripts"
-        set dest_plugins="!install_dir!\x64\Release\plugins\bin"
-        set dest_share="!install_dir!\x64\Release\share\bin"
-
-        call :makeAllDirs 
-        call :copyDflowfmDependentRuntimeLibraries
-        
-        call :copyFile "!build_dir!\dflowfm_cli_exe\!configuration!\dflowfm-cli.*"                                         !dest_bin!
-
-        call :copyFile "!checkout_src_root!\engines_gpl\waq\default\bloom.spe"                                             !dest_default!
-        call :copyFile "!checkout_src_root!\engines_gpl\waq\default\bloominp.d09"                                          !dest_default!
-        call :copyFile "!checkout_src_root!\engines_gpl\waq\default\proc_def.dat"                                          !dest_default!
-        call :copyFile "!checkout_src_root!\engines_gpl\waq\default\proc_def.def"                                          !dest_default!
-        
-        call :copyFile "!checkout_src_root!\engines_gpl\dflowfm\scripts\team-city\run_dflowfm_processes.bat"               !dest_scripts!
-        call :copyFile "!checkout_src_root!\engines_gpl\dflowfm\scripts\team-city\run_dflowfm.bat"                         !dest_scripts!
-    )
-    
-goto :endproc
 
 rem ==========================
 rem === POST_BUILD_DFMOUTPUT
 rem ==========================
 :dfmoutput
-    echo "postbuild dflowfm-cli . . ."
+    echo "postbuild dfmoutput . . ."
     
     if "%configuration%" == "Debug" (
     
@@ -485,7 +464,7 @@ rem ==========================
 
         call :makeDir !dest_bin!
         call :copyDflowfmDependentRuntimeLibraries
-        call :copyFile "!build_dir!\dfmoutput\!configuration!\dfmoutput.exe"                                                    !dest_bin!
+        call :copyFile "!build_dir!\dfmoutput\!configuration!\dfmoutput.*"                                                    !dest_bin!
     )
     
     if "%configuration%" == "Release" ( 
@@ -507,6 +486,49 @@ rem ==========================
     )
     
 goto :endproc
+
+
+
+rem ==========================
+rem === POST_BUILD_DIMR
+rem ==========================
+:dimr
+    echo "postbuild dimr . . ."
+    
+    if "%configuration%" == "Debug" (
+    
+    echo "Debug postbuild"
+    set dest_bin="!install_dir!\x64\Debug"
+
+    call :makeDir !dest_bin!
+
+    call :copyDimrDependentRuntimeLibraries                                                                               !dest_bin!
+    call :copyFile "!build_dir!\dimr\!configuration!\dimr.*"                                                              !dest_bin!
+    )
+    
+    
+    if "%configuration%" == "Release" (
+    
+    echo "Release postbuild"
+
+    set dest_bin="!install_dir!\x64\Release\dimr\bin"
+    set dest_default="!install_dir!\x64\Release\dimr\default"
+    set dest_scripts="!install_dir!\x64\Release\dimr\scripts"
+    set dest_plugins="!install_dir!\x64\Release\plugins\bin"
+    set dest_share="!install_dir!\x64\Release\share\bin"
+
+    call :makeAllDirs 
+    call :copyDimrDependentRuntimeLibraries                                                                             !dest_share!
+    call :copyFile "!build_dir!\dimr\!configuration!\dimr.exe"                                                          !dest_bin!
+
+    call :copyFile "!checkout_src_root!\engines_gpl\d_hydro\scripts\create_config_xml.tcl"                              !dest_menu!
+    call :copyFile "!checkout_src_root!\engines_gpl\dimr\scripts\generic\win64\*.*"                                     !dest_scripts!
+
+    )
+
+goto :endproc
+
+
 
 rem ==========================
 rem === POST_BUILD_DIMR_LIB
@@ -544,9 +566,11 @@ rem ==========================
 
 goto :endproc
 
-rem ==========================
+
+
+rem ===================================
 rem === POST_BUILD_waq_plugin_wasteload
-rem ==========================
+rem ===================================
 :waq_plugin_wasteload
 
     echo "postbuild waq_plugin_wasteload . . ."
@@ -592,6 +616,8 @@ rem ==========================
     )
     
 goto :endproc
+
+
 
 rem ==========================
 rem === POST_BUILD_delwaq_dll
@@ -643,6 +669,8 @@ rem ==========================
     )
     
 goto :endproc
+
+
 
 rem ==========================
 rem === POST_BUILD_delwaq1
@@ -699,6 +727,8 @@ rem ==========================
     
 goto :endproc
 
+
+
 rem ==========================
 rem === POST_BUILD_delwaq2
 rem ==========================
@@ -753,6 +783,8 @@ rem ==========================
     )
     
 goto :endproc
+
+
 
 rem ==========================
 rem === POST_BUILD_wave
@@ -910,9 +942,9 @@ goto :endproc
 
 
 
-rem ==========================
+rem ==================================
 rem === POST_BUILD_DFLOWFM_KERNEL_TEST
-rem ==========================
+rem ==================================
 :dflowfm_kernel_test
     echo "postbuild dflowfm_kernel_test . . ."
     
@@ -945,9 +977,9 @@ rem ==========================
 goto :endproc
 
 
-rem ==========================
+rem ===============================
 rem === POST_BUILD_WAQ_UTILS_F_TEST
-rem ==========================
+rem ===============================
 :waq_utils_f_test
     echo "postbuild waq_utils_f_test . . ."
     
@@ -981,9 +1013,9 @@ goto :endproc
 
 
 
-rem ==========================
+rem =============================
 rem === POST_BUILD_EC_MODULE_TEST
-rem ==========================
+rem =============================
 :ec_module_test
     echo "postbuild ec_module_test . . ."
     
@@ -1017,9 +1049,9 @@ goto :endproc
 
 
 
-rem ==========================
+rem ===================================
 rem === POST_BUILD_TEST_DELTARES_COMMON
-rem ==========================
+rem ===================================
 :test_deltares_common
     echo "postbuild test_deltares_common . . ."
     
