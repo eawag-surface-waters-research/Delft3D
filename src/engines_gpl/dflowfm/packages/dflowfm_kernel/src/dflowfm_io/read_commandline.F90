@@ -113,7 +113,7 @@ function read_commandline() result(istat)
 !           default settings
             md_ndomains = 0
             md_jacontiguous = 1        ! by default enforce contiguous
-            md_icgsolver = 0
+            md_icgsolver = 6           ! default for parallel: PetSC
             md_genpolygon = 0          ! default: no polygon
             md_pmethod = 1             ! partition method using Metis: K-way (=1, default), Recursive Bisection(=2), Mesh-dual(=3)
             md_partugrid = 0           ! ugrid for partitioned netfiles is work-in-progress
