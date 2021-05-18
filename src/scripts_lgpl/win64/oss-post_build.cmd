@@ -14,6 +14,7 @@ rem > oss-install.cmd <install_dir> <build_dir> <checkout_src_root> <configurati
 rem > oss-install.cmd <install_dir> <build_dir> <checkout_src_root> <configuration> [project] 
 rem > oss-install.cmd <install_dir> <build_dir> <checkout_src_root> <configuration> [project] ["compiler_redist_dir"]
 rem > oss-install.cmd <install_dir> <build_dir> <checkout_src_root> <configuration> [project] ["compiler_redist_dir"] ["mkl_redist_dir"]
+rem > oss-install.cmd <install_dir> <build_dir> <checkout_src_root> <configuration> [project] ["compiler_redist_dir"] ["mkl_redist_dir"] ["mpi_redist_dir"]
 
 rem with:
 rem   <install_dir>           : Target directory where all binaries etc. are going to be installed by this script
@@ -22,6 +23,7 @@ rem   <configuration>         : Debug or release configuration. Configuration de
 rem   [project]               : (optional) project to install. If missing, "everything" is installed
 rem   ["compiler_redist_dir"] : (optional) Directory containing compiler specific dll's to be installed
 rem   ["mkl_redist_dir"]      : (optional) Directory containing Intel math kernel library specific dll's to be installed
+rem   ["mpi_redist_dir"]      : (optional) Directory containing Intel MPI library specific dll's to be installed
 
 rem
 rem Example calls:
@@ -74,6 +76,15 @@ if [%7] EQU [] (
     set "mkl_redist_dir=!mkl_redist_dir:/=\!"
 )
 
+if [%8] EQU [] (
+    set mpi_redist_dir=""
+) else (
+    set mpi_redist_dir_read=%8
+    rem Remove leading and trailing quote (")
+    rem These quotes MUST be present in argument number 8, because "mpi_redist_dir_read" may contain white spaces
+    set mpi_redist_dir=!mpi_redist_dir_read:~1,-1!
+    set "mpi_redist_dir=!mpi_redist_dir:/=\!"
+)
 
 
 
@@ -214,6 +225,8 @@ rem =============================================================
     call :copyFile "!checkout_src_root!\third_party_open\GISInternals\release-1911-x64\bin\iconv.dll"                        !dest_bin!
     call :copyFile "!checkout_src_root!\third_party_open\GISInternals\release-1911-x64\bin\geos.dll"                         !dest_bin!
     call :copyFile "!checkout_src_root!\third_party_open\GISInternals\release-1911-x64\bin\freexl.dll"                       !dest_bin!
+    rem pthreads depends on MSVCR100.DLL
+    call :copyFile "!checkout_src_root!\third_party_open\vcredist\x64\Microsoft.VC100.CRT\msvcr100.dll"                      !dest_bin!
     
 
     if !compiler_redist_dir!=="" (
@@ -231,22 +244,38 @@ rem =============================================================
     if !mkl_redist_dir!=="" (
         rem mkl_redist_dir not set
     ) else (
-        set localstring="!mkl_redist_dir!mkl_core.dll"
+        rem note that for onaApi MKL, the DLL names end in '.1.dll'
+        set localstring="!mkl_redist_dir!mkl_core*.dll"
         call :copyFile !!localstring! !dest_bin!
-        set localstring="!mkl_redist_dir!mkl_def.dll"
+        set localstring="!mkl_redist_dir!mkl_def*.dll"
         call :copyFile !!localstring! !dest_bin!
-        set localstring="!mkl_redist_dir!mkl_core.dll"
+        set localstring="!mkl_redist_dir!mkl_core*.dll"
         call :copyFile !!localstring! !dest_bin!
-        set localstring="!mkl_redist_dir!mkl_avx.dll"
+        set localstring="!mkl_redist_dir!mkl_avx*.dll"
         call :copyFile !!localstring! !dest_bin!
         rem is needed for dimr nuget package? please check
         call :copyFile !!localstring! !dest_share!
-        set localstring="!mkl_redist_dir!mkl_intel_thread.dll"
+        set localstring="!mkl_redist_dir!mkl_intel_thread*.dll"
         call :copyFile !!localstring! !dest_bin!
         rem is needed for dimr nuget package?  please check
         call :copyFile !!localstring! !dest_share!
-        call :copyFile "!checkout_src_root!\third_party_open\petsc\petsc-3.10.2\lib\x64\Release\libpetsc.dll"             !dest_bin!
+
+        rem if 'mkl_redist_dir' contains 'oneAPI', use the version of petsc built with oneAPI Fortran
+        if not "x!mkl_redist_dir:oneAPI=!"=="x!mkl_redist_dir!" (
+            call :copyFile "!checkout_src_root!\third_party_open\petsc\petsc-3.10.2\lib\x64\Release-oneAPI\libpetsc.dll"             !dest_bin!            
+        ) else (
+            call :copyFile "!checkout_src_root!\third_party_open\petsc\petsc-3.10.2\lib\x64\Release\libpetsc.dll"             !dest_bin!
+        )
     )    
+
+    if !mpi_redist_dir!=="" (
+        rem mpi_redist_dir not set
+    ) else (
+        set localstring="!mpi_redist_dir!bin\release\impi.dll"
+        call :copyFile !!localstring! !dest_bin!
+        set localstring="!mpi_redist_dir!libfabric\bin\libfabric.dll"
+        call :copyFile !!localstring! !dest_bin!
+    )
 
 goto :endproc
 

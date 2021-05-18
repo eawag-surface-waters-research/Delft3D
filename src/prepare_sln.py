@@ -142,10 +142,10 @@ redistdir["fortran1932"] = "$(IFORT_COMPILER19)redist\\ia32\\compiler\\&quot"
 redistdir["c1932"] = "$(IFORT_COMPILER19)redist\\ia32\\compiler\\"
 redistdir["fortran1964"] = "$(IFORT_COMPILER19)redist\\intel64\\compiler\\&quot"
 redistdir["c1964"] = "$(IFORT_COMPILER19)redist\\intel64\\compiler\\"
-redistdir["fortran2132"] = "$(IFORT_COMPILER21)redist\\ia32\\compiler\\&quot"
-redistdir["c2132"] = "$(IFORT_COMPILER21)redist\\ia32\\compiler\\"
-redistdir["fortran2164"] = "$(IFORT_COMPILER21)redist\\intel64\\compiler\\&quot"
-redistdir["c2164"] = "$(IFORT_COMPILER21)redist\\intel64\\compiler\\"
+redistdir["fortran2132"] = "$(IFORT_COMPILER21)redist\\ia32_win\\compiler\\&quot"
+redistdir["c2132"] = "$(IFORT_COMPILER21)redist\\ia32_win\\compiler\\"
+redistdir["fortran2164"] = "$(IFORT_COMPILER21)redist\\intel64_win\\compiler\\&quot"
+redistdir["c2164"] = "$(IFORT_COMPILER21)redist\\intel64_win\\compiler\\"
 
 # redistdir specifies the directory containing the ifort redistributable dlls
 # The string to be added can be set depending on:
@@ -189,10 +189,10 @@ mkldir["fortran1932"] = "$(IFORT_COMPILER19)redist\\ia32\\mkl\\&quot"
 mkldir["c1932"] = "$(IFORT_COMPILER19)redist\\ia32\\mkl\\"
 mkldir["fortran1964"] = "$(IFORT_COMPILER19)redist\\intel64\\mkl\\&quot"
 mkldir["c1964"] = "$(IFORT_COMPILER19)redist\\intel64\\mkl\\"
-mkldir["fortran2132"] = "$(IFORT_COMPILER21)redist\\ia32\\mkl\\&quot"
-mkldir["c2132"] = "$(IFORT_COMPILER21)redist\\ia32\\mkl\\"
-mkldir["fortran2164"] = "$(IFORT_COMPILER21)redist\\intel64\\mkl\\&quot"
-mkldir["c2164"] = "$(IFORT_COMPILER21)redist\\intel64\\mkl\\"
+mkldir["fortran2132"] = "$(ONEAPI_ROOT)mkl\\latest\\redist\\ia32\\&quot"
+mkldir["c2132"] = "$(ONEAPI_ROOT)mkl\\latest\\redist\\ia32\\"
+mkldir["fortran2164"] = "$(ONEAPI_ROOT)mkl\\latest\\redist\\intel64\\&quot"
+mkldir["c2164"] = "$(ONEAPI_ROOT)mkl\\latest\\redist\\intel64\\"
 
 #
 #

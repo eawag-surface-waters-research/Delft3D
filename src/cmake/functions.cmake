@@ -167,8 +167,16 @@ function(post_build_target target_name install_dir build_dir checkout_src_root b
     # compiler_redist_dir : Compiler dlls (Windows only)
     # mkl_redist_dir      : mkl dlls (Windows only)
 
-      set(compiler_redist_dir "C:/Program Files (x86)/IntelSWTools/compilers_and_libraries/windows/redist/intel64_win/compiler/")
-      set(mkl_redist_dir   "C:/Program Files (x86)/IntelSWTools/compilers_and_libraries/windows/redist/intel64_win/mkl/")   
+      if (DEFINED ENV{ONEAPI_ROOT})  
+         set(oneapi_root $ENV{ONEAPI_ROOT})
+         set(compiler_redist_dir "${oneapi_root}/compiler/latest/windows/redist/intel64_win/compiler/")
+         set(mkl_redist_dir   "${oneapi_root}/mkl/latest/redist/intel64/")   
+         set(mpi_redist_dir "${oneapi_root}/mpi/latest/")
+      else()
+         set(compiler_redist_dir "C:/Program Files (x86)/IntelSWTools/compilers_and_libraries/windows/redist/intel64_win/compiler/")
+         set(mkl_redist_dir   "C:/Program Files (x86)/IntelSWTools/compilers_and_libraries/windows/redist/intel64_win/mkl/")   
+      endif()
+
       set(build_config $<CONFIG>) 
 
       add_custom_command(TARGET ${target_name}
@@ -180,7 +188,8 @@ function(post_build_target target_name install_dir build_dir checkout_src_root b
                          ${build_config}
                          ${build_project}
                          ${compiler_redist_dir}
-                         ${mkl_redist_dir}) 
+                         ${mkl_redist_dir}
+                         ${mpi_redist_dir}) 
    endif(WIN32)
 
    if(UNIX)

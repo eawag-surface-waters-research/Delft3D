@@ -10455,6 +10455,9 @@ src/third_party_open/petsc/petsc-3.10.2/include/petscviewerhdf5.h -text
 src/third_party_open/petsc/petsc-3.10.2/include/petscviewersaws.h -text
 src/third_party_open/petsc/petsc-3.10.2/include/petscviewertypes.h -text
 src/third_party_open/petsc/petsc-3.10.2/include/petscwebclient.h -text
+src/third_party_open/petsc/petsc-3.10.2/lib/x64/Release-oneAPI/libpetsc.dll -text
+src/third_party_open/petsc/petsc-3.10.2/lib/x64/Release-oneAPI/libpetsc.exp -text
+src/third_party_open/petsc/petsc-3.10.2/lib/x64/Release-oneAPI/libpetsc.lib -text
 src/third_party_open/petsc/petsc-3.10.2/lib/x64/Release/libpetsc.dll -text
 src/third_party_open/petsc/petsc-3.10.2/lib/x64/Release/libpetsc.exp -text
 src/third_party_open/petsc/petsc-3.10.2/lib/x64/Release/libpetsc.lib -text
