@@ -249,7 +249,8 @@ double precision, allocatable      :: thindam(:,:)
  integer                           :: jarenumber       !< renumberFlowNodes
  integer                           :: jaFlowNetChanged !< To enforce various net(link)-related init routines after renumbering
  integer                           :: jaAllowBndAtBifurcation !< allow 1d boundary at endnode when connecting branch leads to bifurcation
-
+ integer                           :: janooptimizedpolygon !< removes the optimization of polygons
+ 
 ! JRE Stuff related to setting up wave directional grid
  integer                                     :: ntheta          !< Number of wave direction bins
  double precision                            :: thetamax        !< upper limit wave directional sector
@@ -294,6 +295,8 @@ subroutine default_flowgeom()
 
 
     jarenumber = 1
+    
+    janooptimizedpolygon = 0
     ! Remaining of variables is handled in reset_flowgeom()
     call reset_flowgeom()
 end subroutine default_flowgeom

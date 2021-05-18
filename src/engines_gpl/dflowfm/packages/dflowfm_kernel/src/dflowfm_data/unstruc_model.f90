@@ -998,6 +998,8 @@ subroutine readMDUFile(filename, istat)
     call prop_get_integer( md_ptr, 'geometry', 'RenumberFlowNodes',  jarenumber) ! hidden option for testing renumbering
     call prop_get_logical( md_ptr, 'geometry', 'dxDoubleAt1DEndNodes', dxDoubleAt1DEndNodes)
 
+    call prop_get_integer( md_ptr, 'geometry', 'NoOptimizedPolygon', janooptimizedpolygon)
+    
     ! 1D Volume tables
     useVolumeTables = .false.
     call prop_get_logical( md_ptr, 'volumeTables', 'useVolumeTables', useVolumeTables)
@@ -2665,7 +2667,10 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
        if (keepzlayeringatbed .le. 2) then
           call prop_set(prop_ptr, 'geometry', 'Keepzlayeringatbed'  , keepzlayeringatbed, '0:bedlayerthickness == zlayerthickness, 1:possibly very thin layer at bed, 2=equal thickness first two layers')
        endif
-
+       
+       if (janooptimizedpolygon > 0) then
+          call prop_set(prop_ptr, 'geometry', 'NoOptimizedPolygon', janooptimizedpolygon, '0:polygon optimization ON, 1: OFF')
+       endif
     endif
     
     ! 1D Volume tables
