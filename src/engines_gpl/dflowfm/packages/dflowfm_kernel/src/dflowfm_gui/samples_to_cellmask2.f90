@@ -40,7 +40,7 @@ subroutine samples_to_cellmask2()
 
    implicit none
 
-   integer :: i, in, k, kk, n, nn
+   integer :: i, in, k, kk, n, nn, num
    double precision :: xx(6), yy(6)
 
    if ( allocated(cellmask) ) deallocate(cellmask)
@@ -70,8 +70,9 @@ subroutine samples_to_cellmask2()
 
    do i=1,NS    !  generate cell mask
 
-      call dbpinpol(xs(i), ys(i), in, dmiss, 1, NPL, xpl, ypl, zpl) ! ALS JE VOOR VEEL PUNTEN MOET NAGAAN OF ZE IN POLYGON ZITTEN
+      !call dbpinpol(xs(i), ys(i), in, dmiss, 1, NPL, xpl, ypl, zpl) ! ALS JE VOOR VEEL PUNTEN MOET NAGAAN OF ZE IN POLYGON ZITTEN
 
+      call dbpinpol_optinside_perpol2(xs(i), ys(i), 0, 0, in, num, dmiss, 1, NPL, xpl, ypl, zpl)
       ! call pinpok(xs(i), ys(i), nn, xx, yy, in, jins, dmiss)
 
       if ( ipolyfound > 0 ) then

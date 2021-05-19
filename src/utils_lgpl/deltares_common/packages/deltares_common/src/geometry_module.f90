@@ -58,6 +58,7 @@ module geometry_module
    public :: dbpinpol
    public :: cross
    public :: dbpinpol_optinside_perpol
+   public :: dbpinpol_optinside_perpol2
    public :: get_startend
    public :: pinpok3D
    public :: cross3D
@@ -939,11 +940,158 @@ module geometry_module
       endif
 
       return
-      end subroutine dbpinpol_optinside_perpol
+   end subroutine dbpinpol_optinside_perpol
 
+   ! ==============================================================================================
+   ! ==============================================================================================
+   subroutine dbpinpol_optinside_perpol2(xp, yp, inside_perpol, iselect, in, numselect, dmiss, JINS, NPL, xpl, ypl, zpl) ! ALS JE VOOR VEEL PUNTEN MOET NAGAAN OF ZE IN POLYGON ZITTEN
 
-      !>  get the start and end index of the first enclosed non-DMISS subarray
-      subroutine get_startend(num, x, y, jstart, jend, dmiss)
+      use m_alloc
+
+      implicit none
+
+      double precision,                 intent(in)    :: xp, yp        !< point coordinates
+      integer,                          intent(in)    :: inside_perpol !< Specify whether or not (1/0) to use each polygon's first point zpl-value as the jins(ide)-option (only 0 or 1 allowed), or use the global JINS variable.
+      integer,                          intent(in)    :: iselect       !< use all polygons (0), only first-zpl<0 polygons (-1), or all but first-zpl<0 polygons (1)
+      integer,                          intent(inout) :: in            !< in(-1): initialization, out(0): outside polygon, out(1): inside polygon
+      integer,                          intent(inout) :: numselect     !< number of polygons of "iselect" type considered
+
+      integer                                         :: MAXPOLY=1000 ! will grow if needed
+
+      double precision, allocatable, save             :: xpmin(:), ypmin(:), xpmax(:), ypmax(:)
+      integer,                       save             :: Npoly
+      integer,          allocatable, save             :: iistart(:), iiend(:)
+
+      integer                                         :: ipoint         ! points to first part of a polygon-subsection in polygon array
+      integer                                         :: istart, iend   ! point to start and and node of a polygon in polygon array respectively
+      integer                                         :: ipoly          ! polygon number
+
+      logical                                         :: Linit          ! initialization of polygon bounds, and start and end nodes respectively
+
+      integer :: jins_opt !< The actual used jins-mode (either global, or per poly)
+      double precision, intent(in)                    :: dmiss
+      integer, intent(in)                             :: JINS, NPL
+      double precision, optional, intent(in)          :: xpl(NPL), ypl(NPL), zpl(NPL)
+      
+      numselect = 0
+
+      if ( NPL.eq.0 ) then
+         in = 1
+         return
+      end if
+
+      Linit =  ( in.lt.0 )
+
+      in = 0
+
+      !     initialization
+      if ( Linit ) then
+         !         write(6,"('dbpinpol: init... ', $)")
+         ipoint = 1
+         ipoly = 0
+         call realloc(xpmin, maxpoly, keepExisting=.false.)
+         call realloc(xpmax, maxpoly, keepExisting=.false.)
+         call realloc(ypmin, maxpoly, keepExisting=.false.)
+         call realloc(ypmax, maxpoly, keepExisting=.false.)
+         call realloc(iistart, maxpoly, keepExisting=.false.)
+         call realloc(iiend, maxpoly, keepExisting=.false.)
+
+         do while ( ipoint.lt.NPL )
+            ipoly = ipoly+1
+            if (ipoly > maxpoly) then
+               maxpoly = ceiling(maxpoly*1.1)
+               call realloc(xpmin, maxpoly, keepExisting=.true.)
+               call realloc(xpmax, maxpoly, keepExisting=.true.)
+               call realloc(ypmin, maxpoly, keepExisting=.true.)
+               call realloc(ypmax, maxpoly, keepExisting=.true.)
+               call realloc(iistart, maxpoly, keepExisting=.true.)
+               call realloc(iiend, maxpoly, keepExisting=.true.)
+            end if
+
+            !           get polygon start and end pointer respectively
+            call get_startend(NPL-ipoint+1,xpl(ipoint:NPL),ypl(ipoint:NPL), istart, iend, dmiss)
+            istart = istart+ipoint-1
+            iend   = iend  +ipoint-1
+
+            if ( istart.ge.iend .or. iend.gt.NPL ) exit ! done
+
+            xpmin(ipoly) = minval(xpl(istart:iend))
+            xpmax(ipoly) = maxval(xpl(istart:iend))
+            ypmin(ipoly) = minval(ypl(istart:iend))
+            ypmax(ipoly) = maxval(ypl(istart:iend))
+
+            iistart(ipoly) = istart
+            iiend(ipoly)   = iend
+
+            !           advance pointer
+            ipoint = iend+2
+         end do   ! do while ( ipoint.lt.NPL .and. ipoly.lt.MAXPOLY )
+         Npoly = ipoly
+
+         !         write(6,"('done, Npoly=', I4)") Npoly
+      end if
+
+      do ipoly=1,Npoly
+         istart = iistart(ipoly)
+         iend   = iiend(ipoly)
+
+         !         write(6,"('dbpinpol: ipoly=', I4, ', istart=', I16, ', iend=', I16)") ipoly, istart, iend
+
+         if ( istart.ge.iend .or. iend.gt.NPL ) exit ! done
+
+         if ( iselect.eq.-1 .and. (zpl(istart).eq.DMISS .or.  zpl(istart).ge.0) ) cycle
+         if ( iselect.eq. 1 .and. (zpl(istart).ne.DMISS .and. zpl(istart).lt.0) ) cycle
+
+         numselect = numselect+1
+
+         if ( inside_perpol.eq.1 .and. zpl(istart) /= dmiss ) then   ! only if third column was actually supplied
+            jins_opt = int(zpl(istart)) ! Use inside-option per each polygon.
+         else
+            jins_opt = JINS ! Use global inside-option.
+         end if
+
+         IF (jins_opt == 1) THEN  ! inside polygon
+            if (xp >= xpmin(ipoly) .and. xp <= xpmax(ipoly) .and. &
+               yp >= ypmin(ipoly) .and. yp <= ypmax(ipoly) ) then
+            call PINPOK(Xp, Yp, iend-istart+1, xpl(istart), ypl(istart), IN, jins, dmiss)
+            if (jins_opt > 0 .neqv. JINS > 0) then ! PINPOK has used global jins, but polygon asked the exact opposite, so negate the result here.
+               IN = 1-in   ! IN-1
+            end if
+
+            if ( in.eq.1 ) then
+               exit
+            end if
+            endif
+         ELSE                 ! outside polygon
+            if (xp >= xpmin(ipoly) .and. xp <= xpmax(ipoly) .and. &
+               yp >= ypmin(ipoly) .and. yp <= ypmax(ipoly) ) then
+            call PINPOK(Xp, Yp, iend-istart+1, xpl(istart), ypl(istart), IN, jins, dmiss)
+            if (jins_opt > 0 .neqv. JINS > 0) then ! PINPOK has used global jins, but polygon asked the exact opposite, so negate the result here.
+               IN = 1-in   ! IN-1
+            end if
+
+            if ( in.eq.1 ) then
+               exit ! outside check succeeded, return 'true'.
+            end if
+            else
+               in = 1 ! outside check succeeded (completely outside of polygon's bounding box), return 'true'.
+               exit
+            endif
+         ENDIF
+      end do   ! do ipoly=1,Npoly
+
+      if (in == 1) then ! and, even more handy: 
+         ipolyfound = ipoly 
+      else
+         ipolyfound = 0
+      endif
+
+      return
+   end subroutine dbpinpol_optinside_perpol2
+      
+      
+   !>  get the start and end index of the first enclosed non-DMISS subarray
+   subroutine get_startend(num, x, y, jstart, jend, dmiss)
 
       implicit none
 
