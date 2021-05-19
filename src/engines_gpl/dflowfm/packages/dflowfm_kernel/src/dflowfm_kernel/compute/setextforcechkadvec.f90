@@ -53,8 +53,6 @@
 if (jawind > 0) then
 
     if (kmx == 0) then
-       !$OMP PARALLEL DO                                          &
-       !$OMP PRIVATE(L)
         do LL = 1,lnx
            if ( hu(LL) > 0 ) then
                wfac = 1d0
@@ -72,7 +70,6 @@ if (jawind > 0) then
                endif
            endif
         enddo
-        !$OMP END PARALLEL DO
 
     else
 
@@ -115,22 +112,16 @@ if (jawind > 0) then
  if (jawave == 3) then      ! if a SWAN computation is performed, add wave forces to adve
     !
     if ( kmx.eq.0 ) then  ! 2D
-       !$OMP PARALLEL DO                                          &
-       !$OMP PRIVATE(L)
        do L  = 1,lnx
           adve(L) = adve(L) - wavfu(L)
        enddo
-       !$OMP END PARALLEL DO
     else
-       !$OMP PARALLEL DO                                          &
-       !$OMP PRIVATE(LL, Lb, Lt)
        do LL  = 1,lnx
           call getLbotLtop(LL,Lb,Lt)
           do L=Lb,Lt
              adve(L) = adve(L) - wavfu(L)           ! Dimensions [m/s^2]
           end do
        enddo
-    !$OMP END PARALLEL DO
     end if
  endif
 
@@ -138,19 +129,14 @@ if (jawind > 0) then
  if (jawave .eq. 4) then                              ! wave forcing from XBeach
     call xbeach_wave_compute_flowforcing2D()
     if (lwave==1)  then
-      !! !$OMP PARALLEL DO                                          &
-      !! !$OMP PRIVATE(L, floc)
        do L  = 1,Lnx
           floc = Fx(L)*csu(L) + Fy(L)*snu(L)
           adve(L) = adve(L) - floc/ (rhomean*max(hu(L), hminlw) )    ! Johan+Dano: lower depth set to 20cm, cf XBeach
        enddo
-      !! !$OMP END PARALLEL DO
     endif
  endif
 
  if (japatm > 0 .or. jatidep > 0) then
-    !$OMP PARALLEL DO                                          &
-    !$OMP PRIVATE(L,k1,k2,dpatm,tidp)
     do L  = 1,lnx
        if ( hu(L) > 0 ) then
           k1     = ln(1,L) ; k2 = ln(2,L)
@@ -187,7 +173,6 @@ if (jawind > 0) then
           endif
        endif
     enddo
-    !$OMP END PARALLEL DO
 
     if ( jatidep.gt.0 .or. jaselfal.gt.0 .and. kmx.eq.0 ) then
        call comp_GravInput()
@@ -204,13 +189,11 @@ if (jawind > 0) then
     if ( jacreep == 1) then
        dsalL = 0d0
        dtemL = 0d0
-       !$OMP PARALLEL DO PRIVATE(L)
        do L = 1,lnx
           if (hu(L) > 0d0) then
              call anticreep( L )
           endif
        enddo
-       !$OMP END PARALLEL DO
 
      else
 
@@ -256,9 +239,6 @@ if (jawind > 0) then
 
     if (kmx == 0) then
 
-       !$OMP PARALLEL DO                             &
-       !$OMP PRIVATE(L,k1,k2)
-       !$XOMP REDUCTION(+:nochkadv)
        do L  = 1,lnx
 
           if ( hu(L) > 0 ) then
@@ -276,12 +256,9 @@ if (jawind > 0) then
           endif
 
        enddo
-       !$OMP END PARALLEL DO
 
     else
 
-       !$OMP PARALLEL DO                             &
-       !$OMP PRIVATE(L,k1,k2,LL,Lb,Lt)
 
        do LL  = 1,lnx
           if (hu(LL) > 0d0) then
@@ -301,7 +278,6 @@ if (jawind > 0) then
           endif
       enddo
 
-      !$OMP END PARALLEL DO
 
     endif
 
