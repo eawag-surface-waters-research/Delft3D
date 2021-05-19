@@ -7,7 +7,8 @@ subroutine bedtr2004(u2dh      ,d50       ,d90       ,h1        ,rhosol    , &
                    & concin    ,kmax      ,deltas    ,ws        ,rksrs     , &
                    & dzduu     ,dzdvv     ,rhowat    ,ag        ,bedw      , &
                    & pangle    ,fpco      ,susw      ,wave      ,eps       , &
-                   & subiw     ,vcr       ,error     ,message   )
+                   & subiw     ,vcr       ,error     ,message   ,wform     , &
+                   & r         ,phi_phase ,uw_lt     )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2021.                                
@@ -87,8 +88,8 @@ subroutine bedtr2004(u2dh      ,d50       ,d90       ,h1        ,rhosol    , &
     real(fp)                 , intent(in)  :: tp       !  Description and declaration in esm_alloc_real.f90
     real(fp)                 , intent(in)  :: u2dh
     real(fp)                 , intent(in)  :: ubw
-    real(fp)                 , intent(in)  :: uon  
-    real(fp)                 , intent(in)  :: uoff 
+    real(fp)                 , intent(inout)  :: uon  
+    real(fp)                 , intent(inout)  :: uoff 
     real(fp)                 , intent(in)  :: z0cur
     real(fp)                 , intent(in)  :: rksrs
     real(fp)                 , intent(in)  :: ws
@@ -108,6 +109,10 @@ subroutine bedtr2004(u2dh      ,d50       ,d90       ,h1        ,rhosol    , &
     real(fp)                 , intent(out) :: vcr
     logical                  , intent(out) :: error
     character(*)             , intent(out) :: message  !  Contains error message
+    integer                  , intent(in)  :: wform
+    real(fp)                 , intent(in)  :: r
+    real(fp)                 , intent(in)  :: phi_phase
+    real(fp)                 , intent(in)  :: uw_lt
 !
 ! Local variables
 !
@@ -164,6 +169,10 @@ subroutine bedtr2004(u2dh      ,d50       ,d90       ,h1        ,rhosol    , &
     real(fp)      :: rpower
     real(fp)      :: z
     real(fp)      :: ceavgtmp
+    real(fp)      :: omega
+    real(fp)      :: deltat
+    real(fp)      :: f
+    real(fp)      :: tc	
 !
 !! executable statements -------------------------------------------------------
 !
@@ -227,49 +236,94 @@ subroutine bedtr2004(u2dh      ,d50       ,d90       ,h1        ,rhosol    , &
        plead2 = sin(pangle*degrad)
     endif
     !
-    ! Split peak period Tp in an onshore and offshore period
-    !
-    tfor = 0.0_fp
-    if (ubw > 0.0_fp) then
-        tfor = uoff / (uon+uoff) * tp
-        tback    = tp - tfor
-        pi_tfor  = pi / tfor
-        pi_tback = pi / tback
-    endif
-    !
-    ! wave period subdivision
-    !
     if (wave .and. tp>1.0_fp .and. bedw>0.0_fp) then
        ntime = subiw
     else
        ntime = 1
     endif
-    dtt    = tp / real(ntime,fp)
+    dtt      = tp / real(ntime,fp)
+    !
+    if (wform == 1) then
+       !
+       ! WAVE VELOCITY ASYMMETRY ACCORDING TO ISOBE-HORIKAWA
+       !
+       ! Split peak period Tp in an onshore and offshore period
+       !
+       if (ubw > 0.0_fp) then
+           tfor = uoff / (uon+uoff) * tp
+           tback    = tp - tfor
+           pi_tfor  = pi / tfor
+           pi_tback = pi / tback
+       endif
+    elseif (wform == 2) then
+       !
+       ! WAVE VELOCITY SKEWNESS & ASYMMETRY ACCORDING TO RUESSINK et al 2012 CE 
+       ! Adition made by Marcio Boechat Albernaz
+       !
+       ! Makes u(0)=0 from ABREU et al 2010 CE (Part 1)
+       omega  = 2.0_fp*pi/tp
+       f      = sqrt(1.0_fp-r**2.0_fp)                            ! this ensures that (umax-umin)/2 equals Uw
+       deltat = (1.0_fp/omega)*asin(r*sin(phi_phase)/(1.0_fp+f))
+       !
+       ! substitute the algebraic solution computed @bedbc2004]
+       uon    = 0.0_fp
+       uoff   = 0.0_fp
+    endif
+    !
+    ! wave period subdivision
+    !
     do ii = 1,ntime
        !
        ! Construct instantaneous wave velocity
        !
-       if (ubw>0.0_fp .and. tp>1.0_fp) then
-          time = real(ii-1,fp) * dtt
-          if (time < tfor) then
-             udt = uon * sin(pi*time/tfor)
+       if (wform == 1) then
+          !
+          ! WAVE VELOCITY ASYMMETRY ACCORDING TO ISOBE-HORIKAWA
+          !
+          if (ubw>0.0_fp .and. tp>1.0_fp) then
+             time = real(ii-1,fp) * dtt
+             if (time < tfor) then
+                udt = uon * sin(pi_tfor*time)
+                if (pangle > 0.0_fp) then
+                  udt2 = uon * sin(pi_tfor*(time+dtt))
+                  udt1 = uon * sin(pi_tfor*(time-dtt))
+                endif
+             else
+                udt = -uoff * sin(pi_tback*(time-tfor))
+                if (pangle > 0.0_fp) then
+                  udt2 = -uoff * sin(pi_tback*(time+dtt-tfor))
+                  udt1 = -uoff * sin(pi_tback*(time-dtt-tfor))
+                endif
+             endif
              if (pangle > 0.0_fp) then
-               udt2 = uon * sin(pi_tfor*(time+dtt))
-               udt1 = uon * sin(pi_tfor*(time-dtt))
+                udt = plead1*udt + plead2*tp*(udt2-udt1)/(4.0_fp*pi*dtt)
              endif
           else
-             udt = -uoff * sin(pi_tback*(time-tfor))
-             if (pangle > 0.0_fp) then
-               udt2 = -uoff * sin(pi_tback*(time+dtt-tfor))
-               udt1 = -uoff * sin(pi_tback*(time-dtt-tfor))
+             udt  = 0.0_fp
+             dudt = 0.0_fp
+          endif
+       elseif (wform == 2) then
+          !
+          ! WAVE VELOCITY SKEWNESS & ASYMMETRY ACCORDING TO RUESSINK et al 2012 CE 
+          !
+          if (ubw>0.0_fp .and. tp>1.0_fp) then
+             time = real(ii-1,fp) * dtt
+             ! Makes u(0)=0 from ABREU et al 2010 CE (Part 2)
+             tc     = time-deltat
+             !
+             udt = uw_lt*f*(sin(omega*tc)+(r*sin(phi_phase))/(1.0_fp+f))/(1.0_fp-r*cos(omega*tc+phi_phase))   ! Velocity u(t) from Eq. (4)
+             if (pangle > 0.0_fp) then !pangle is phase lead defined in .tra file
+                udt2 = uw_lt*f*(sin(omega*(tc+dtt))+(r*sin(phi_phase))/(1.0_fp+f))/(1.0_fp-r*cos(omega*(tc+dtt)+phi_phase))   ! Velocity u(t) from Eq. (4) with phase lead to t+dtt
+                udt1 = uw_lt*f*(sin(omega*(tc-dtt))+(r*sin(phi_phase))/(1.0_fp+f))/(1.0_fp-r*cos(omega*(tc-dtt)+phi_phase))   ! Velocity u(t) from Eq. (4) with phase lead to t-dtt
+                udt  = plead1*udt + plead2*tp*(udt2-udt1)/(4.0_fp*pi*dtt)                                                     ! Velocity u(t) with phase lead
              endif
+             ! update uon and uoff values
+             uon  = max(udt,uon )
+             uoff = min(udt,uoff)
+          else
+             udt  = 0.0_fp
+             dudt = 0.0_fp
           endif
-          if (pangle > 0.0_fp) then
-             udt = plead1*udt + plead2*tp*(udt2-udt1)/(4.0_fp*pi*dtt)
-          endif
-       else
-          udt  = 0.0_fp
-          dudt = 0.0_fp
        endif
        !
        ! Total instantaneous velocity
@@ -307,7 +361,7 @@ subroutine bedtr2004(u2dh      ,d50       ,d90       ,h1        ,rhosol    , &
        !
        qbcu    = qbcu + ubtotu/utvec*sbt
        qbcv    = qbcv + ubtotv/utvec*sbt
-    enddo
+    enddo 
     !
     qbcu = qbcu/real(ntime,fp)
     qbcv = qbcv/real(ntime,fp)

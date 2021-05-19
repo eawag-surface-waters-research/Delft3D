@@ -90,8 +90,6 @@ subroutine santoss(numrealpar, realpar ,par ,npar, dzduu ,dzdvv , i2d3d, &
       real(fp)                 :: u
       real(fp)                 :: umod
       real(fp)                 :: uorb
-      real(fp)                 :: uon
-      real(fp)                 :: uoff
       real(fp)                 :: utot
       real(fp)                 :: uuu
       real(fp)                 :: v
@@ -261,10 +259,10 @@ subroutine santoss(numrealpar, realpar ,par ,npar, dzduu ,dzdvv , i2d3d, &
     uwcrepr =  0.0_fp
     uwtrepr =  0.0_fp
 
-    sw_effects = int(par(18))
-    as_effects = int(par(19))
-    pl_effects = int(par(20))
-    sl_effects = int(par(21))
+    sw_effects = int(par(20))
+    as_effects = int(par(21))
+    pl_effects = int(par(22))
+    sl_effects = int(par(23))
 
     error = .false.
 !

@@ -37,6 +37,7 @@ subroutine tranb7(utot      ,d50       ,d90       ,h         ,npar      , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
+    use sed_support_routines, only: shld
     implicit none
 !
 ! Arguments
@@ -80,7 +81,6 @@ subroutine tranb7(utot      ,d50       ,d90       ,h         ,npar      , &
     real(fp)       :: ustar
     real(fp)       :: ws     ! settling velocity
     real(fp)       :: zc
-    real(fp), external :: shld
 !
 !! executable statements -------------------------------------------------------
 !

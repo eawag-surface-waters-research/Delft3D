@@ -26,6 +26,7 @@ FMODULES += \
 #Sources
 libMorphologyKernel_la_SOURCES = \
          bedcomposition_module.f90 \
+         sed_support_routines.f90 \
          bailtr.f90 \
          bedbc1993.f90 \
          bedbc2004.f90 \
@@ -60,7 +61,6 @@ libMorphologyKernel_la_SOURCES = \
          santoss_ripple.f90 \
          santoss_rrr12.f90 \
          santoss_sfltd99.f90 \
-         shld.f90 \
          sortindices.f90 \
          soursin_2d.f90 \
          soursin_3d.f90 \

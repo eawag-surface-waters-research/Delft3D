@@ -35,6 +35,7 @@ subroutine tran9t(utot      ,d50       ,d90       ,chezy     ,h         , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
+    use sed_support_routines, only: shld
     implicit none
 !
 ! Arguments
@@ -67,7 +68,6 @@ subroutine tran9t(utot      ,d50       ,d90       ,chezy     ,h         , &
     real(fp)                            :: t            ! time in seconds
     real(fp)                            :: ust2         ! shear stress velocity ^ 2
     real(fp)                            :: wamu         ! viscosity of water
-    real(fp), external                  :: shld
 !
 !
 !! executable statements -------------------------------------------------------

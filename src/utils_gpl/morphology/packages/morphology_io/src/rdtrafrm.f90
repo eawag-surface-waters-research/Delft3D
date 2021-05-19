@@ -1017,7 +1017,7 @@ subroutine traparams(iform     ,name      ,nparreq   ,nparopt   ,parkeyw   , &
     pardef  = nodef
     if (iform == -4) then
        name       = 'Van der A et al. (2013): SANTOSS extended Van Rijn (2007)'
-       nparopt    = 11
+       nparopt    = 13
        parkeyw(1) = 'IopSus'
        pardef(1)  = 0.0_fp
        parkeyw(2) = 'Pangle'
@@ -1032,14 +1032,19 @@ subroutine traparams(iform     ,name      ,nparreq   ,nparopt   ,parkeyw   , &
        pardef(6)  = 1.5_fp
        parkeyw(7) = 'SalMax'
        pardef(7)  = 0.0_fp
-       parkeyw(8) ='SW_effects'
-       pardef(8)  = 1.0_fp
-       parkeyw(9) ='AS_effects'
+       parkeyw(8) = 'BetaM'
+       pardef(8)  = 3.0_fp
+       parkeyw(9) = 'Wform'
        pardef(9)  = 1.0_fp
-       parkeyw(10) ='PL_effects'
-       pardef(10)  = 1.0_fp
-       parkeyw(11)='SL_effects'
-       pardef(11) =  1.0_fp
+       ! NOTE UP TO HERE IDENTICAL TO VAN RIJN (2007) FORMULA -2: Numbers/parameters must match!
+       parkeyw(10)='SW_effects'
+       pardef(10) = 1.0_fp
+       parkeyw(11)='AS_effects'
+       pardef(11) = 1.0_fp
+       parkeyw(12)='PL_effects'
+       pardef(12) = 1.0_fp
+       parkeyw(13)='SL_effects'
+       pardef(13) =  1.0_fp
        if (present(noutpar)) then
           noutpar = 24
           outpar_name( 1)     = 'uwc'
@@ -1113,7 +1118,7 @@ subroutine traparams(iform     ,name      ,nparreq   ,nparopt   ,parkeyw   , &
        pardef(8)  = 1.0_fp
     elseif (iform == -2) then
        name       = 'Van Rijn (2007): TRANSPOR2004'
-       nparopt    = 8
+       nparopt    = 9
        parkeyw(1) = 'IopSus'
        pardef(1)  = 0.0_fp
        parkeyw(2) = 'Pangle'
@@ -1130,6 +1135,9 @@ subroutine traparams(iform     ,name      ,nparreq   ,nparopt   ,parkeyw   , &
        pardef(7)  = 0.0_fp
        parkeyw(8) = 'BetaM'
        pardef(8)  = 3.0_fp
+       parkeyw(9) = 'Wform'
+       pardef(9)  = 1.0_fp
+       ! NOTE PARAMETERS ADDED HERE MUST BE COPIED TO SANTOSS FORMULA -4: Numbers/parameters must match!
        if (present(noutpar)) then
           noutpar = 17
           outpar_name( 1)     = 'tauc'
