@@ -1274,6 +1274,7 @@ subroutine set_var(c_var_name, xptr) bind(C, name="set_var")
    character(len=strlen(c_var_name))            :: var_name
    character(kind=c_char),dimension(:), pointer :: c_value => null()
    character(len=:), allocatable                :: levels
+   character(len=10)                            :: threadsString = ' '
    integer :: i, k, kb, kt, ipos, n
 
    ! Store the name
@@ -1283,6 +1284,18 @@ subroutine set_var(c_var_name, xptr) bind(C, name="set_var")
 
    ! custom overrides
    select case(var_name)
+   case("threads")
+      ! max #threads (component setting in dimr config, passed as string)
+      call c_f_pointer(xptr, c_value,[MAXSTRLEN])
+      if (associated(c_value)) then
+         threadsString = ' '
+         do i=1,MAXSTRLEN
+            if (c_value(i) == c_null_char) exit
+            threadsString(i:i) = c_value(i)
+         enddo
+         read(threadsString,'(I)') md_numthreads
+      endif
+      return
    case("zk")
       do i = 1, numk
             call update_land_nodes(i, x_1d_double_ptr(i))
