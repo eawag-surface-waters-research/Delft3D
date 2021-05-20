@@ -30,8 +30,8 @@ if (WIN32)
     add_dependencies(${fortranc_library_name} proj) # Note that this is an optional dependency. It was introduced to remain consistent with the tests.sln
 endif(WIN32)
 
-# Set additional compilation properties
-target_compile_options(${fortranc_library_name} PRIVATE "${check_bounds_flag}")
+# Set additional compilation properties, specific for Debug mode
+target_compile_options(${fortranc_library_name} PRIVATE "$<$<CONFIG:Debug>:${check_bounds_flag}>")
 
 # Create the folder structure in project
 source_group("${visual_studio_source_group_name}" FILES ${fortranc_sources})
@@ -57,8 +57,8 @@ target_include_directories(${fortrangis_library_name} PRIVATE ${src_path}/includ
 add_dependencies(${fortrangis_library_name} shp) # Note that this is an optional dependency. It was introduced to remain consistent with the tests.sln
 add_dependencies(${fortrangis_library_name} ${fortranc_library_name})
 
-# Set additional compilation properties
-target_compile_options(${fortrangis_library_name} PRIVATE "${check_bounds_flag}")
+# Set additional compilation properties, specific for Debug mode
+target_compile_options(${fortrangis_library_name} PRIVATE "$<$<CONFIG:Debug>:${check_bounds_flag}>")
 
 # Create the folder structure in vfproj
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/.." FILES ${fortran_sources})

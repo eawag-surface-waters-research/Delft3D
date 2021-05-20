@@ -73,10 +73,11 @@ endif(UNIX)
 
 if (WIN32)
    target_compile_definitions(${executable_name} PRIVATE WIN64)
-   target_compile_options(${executable_name} PRIVATE "${check_bounds_flag}")
 endif(WIN32)
 
-# Define additional compilation flags
+# Set additional compilation properties, specific for Debug mode
+target_compile_options(${executable_name} PRIVATE "$<$<CONFIG:Debug>:${check_bounds_flag}>")
+
 set_source_files_properties(${fortran_version_file}
                             PROPERTIES COMPILE_OPTIONS "${file_preprocessor_flag}")
 

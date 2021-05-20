@@ -19,11 +19,8 @@ if(UNIX)
     target_link_libraries(${library_name} ${oss_dependencies})
 endif()
 
-if (WIN32)
-   # Set additional compilation properties
-   target_compile_options(${library_name} PRIVATE "${check_bounds_flag}")
-endif(WIN32)
-
+# Set additional compilation properties, specific for Debug mode
+target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${check_bounds_flag}>")
 
  # Create the folder structure in vfproj
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${source_files})

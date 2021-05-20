@@ -44,7 +44,10 @@ set (netcdf_library_name netcdff)
 add_library(${netcdf_library_name} ${fortran_sources})
 
 # Set additional compilation properties for the netcdf library
-target_compile_options(${netcdf_library_name} PRIVATE ${check_bounds_flag} ${file_preprocessor_flag})
+target_compile_options(${netcdf_library_name} PRIVATE ${file_preprocessor_flag})
+
+# Set additional compilation properties, specific for Debug mode
+target_compile_options(${netcdf_library_name} PRIVATE "$<$<CONFIG:Debug>:${check_bounds_flag}>")
 
 # Set dependencies
 set(oss_dependencies netcdf4)

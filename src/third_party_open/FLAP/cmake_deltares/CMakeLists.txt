@@ -21,8 +21,8 @@ endif(UNIX)
 set(libFLAP_library_name FLAP)
 add_library(${libFLAP_library_name} ${libFLAP_sources})
 
-# Set additional compilation properties
-target_compile_options(${libFLAP_library_name} PRIVATE "${check_bounds_flag}")
+# Set additional compilation properties, specific for Debug mode
+target_compile_options(${libFLAP_library_name} PRIVATE "$<$<CONFIG:Debug>:${check_bounds_flag}>")
 
 # Create the folder structure in project
 source_group("${visual_studio_source_group_name}" FILES ${libFLAP_sources})

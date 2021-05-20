@@ -266,6 +266,9 @@ set_source_files_properties(${fortran_version_file}
                             ${CMAKE_CURRENT_SOURCE_DIR}/${dflowfm_utils_path}/rest_f90/read_samples_from_geotiff.F90
                             PROPERTIES COMPILE_OPTIONS "${file_preprocessor_flag}")
 
+# Set additional compilation properties, specific for Debug mode
+target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${check_bounds_flag}>")
+
 # Define preprocessor definitions 
 set_target_properties(${library_name} PROPERTIES COMPILE_FLAGS ${openmp_flag})
 if (WIN32)

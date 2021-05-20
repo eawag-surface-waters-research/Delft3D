@@ -37,8 +37,8 @@ if(UNIX)
    target_link_libraries(${library_name} ${oss_dependencies})
 endif(UNIX)
 
-# Set additional compilation properties
-target_compile_options(${library_name} PRIVATE "${check_bounds_flag}")
+# Set additional compilation properties, specific for Debug mode
+target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${check_bounds_flag}>")
 
 set_source_files_properties(${fortran_version_file}
                             ${src_path}/system_utils.f90

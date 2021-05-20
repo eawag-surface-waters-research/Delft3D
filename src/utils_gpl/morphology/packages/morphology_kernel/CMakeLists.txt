@@ -16,8 +16,8 @@ endif(UNIX)
 
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../../include")
 
-# Set additional compilation flags
-target_compile_options(${library_name} PRIVATE "${debug_bounds_flag}")
+# Set additional compilation properties, specific for Debug mode
+target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${check_bounds_flag}>")
 
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${source_files})
 set_target_properties (${library_name} PROPERTIES FOLDER utils_gpl/morphology)

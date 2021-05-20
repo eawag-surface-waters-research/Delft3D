@@ -21,8 +21,8 @@ add_compile_options("${file_preprocessor_flag}")
 set(library_name petsc)
 add_library(${library_name} ${sources})
 
-# Set additional compilation properties
-target_compile_options(${library_name} PRIVATE "${check_bounds_flag}")
+# Set additional compilation properties, specific for Debug mode
+target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${check_bounds_flag}>")
 
 # Create the vfproj structure
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/.." FILES ${sources} )

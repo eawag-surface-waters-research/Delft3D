@@ -172,12 +172,12 @@ endif(UNIX)
 
 if(WIN32)
     set_target_properties(${executable_name} PROPERTIES COMPILE_FLAGS ${openmp_flag})
-    set_target_properties(${executable_name} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/x64/Debug)
-    set(build_config $<CONFIG>) 
-    if(${build_config} STREQUAL "Debug")
-        target_compile_options(${executable_name} PRIVATE "${check_bounds_flag} ${check_pointer}" )
-    endif()   
+    set_target_properties(${executable_name} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/x64/Debug)   
 endif(WIN32)
+
+# Set additional compilation properties, specific for Debug mode
+target_compile_options(${executable_name} PRIVATE "$<$<CONFIG:Debug>:${check_bounds_flag}>")
+target_compile_options(${executable_name} PRIVATE "$<$<CONFIG:Debug>:${check_pointer}>")
 
 # Define additional compilation flags
 set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/${src_path}/net_main.F90
