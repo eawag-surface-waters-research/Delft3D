@@ -976,6 +976,7 @@ logical function initboundaryblocksforcings(filename)
  integer                      :: major, minor
  integer                      :: loc_spec_type
  integer                      :: numcoordinates
+ logical                      :: domainCheck
  double precision, allocatable :: xcoordinates(:), ycoordinates(:)
  double precision, allocatable :: xdum(:), ydum(:)!, xy2dum(:,:)
  integer, allocatable          :: kdum(:)
@@ -1275,12 +1276,16 @@ logical function initboundaryblocksforcings(filename)
        call realloc(nnLatTmp, nlat, keepExisting=.false., fill = -1)
        nlattmp = nlat
        k1 = 0
+       domainCheck = .true.
        do k2 = 1, nlattmp
           n = nlatnd+k2
+          if (allocated(idomain)) then
+             domainCheck = (idomain(nnLat(n)) /= my_rank)
+            end if
           k = nnLat(n)
           if (k == 0) then
              nlat = nlat - 1
-          else if (jampi == 1 .and. idomain(nnLat(n)) .ne. my_rank) then ! The node is a ghost node for the current subdomain
+          else if (jampi == 1 .and. domainCheck) then ! The node is a ghost node for the current subdomain
              nlat = nlat - 1
           else
              k1 = k1 + 1
