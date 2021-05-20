@@ -244,6 +244,7 @@ void Dimr::runStartBlock(dimr_control_block* cb, double tStep, int phase) {
     if (phase == GLOBAL_PHASE_FINISH) {
         log->Write(INFO, my_rank, "%s.Initialize(%s)", cb->unit.component->name, cb->unit.component->inputFile);
         timerStart(cb->unit.component);
+        int nSettingsSet = cb->unit.component->dllSetKeyVals(cb->unit.component->settings);
         cb->unit.component->result = (cb->unit.component->dllInitialize) (cb->unit.component->inputFile);
         if (cb->unit.component->result != 0)
         {
@@ -301,6 +302,7 @@ void Dimr::runParallelInit(dimr_control_block* cb) {
     int ierr;
     MPI_Group mpiGroupWorld;
     MPI_Group mpiGroupComp;
+    int nSettingsSet;
 
     if (use_mpi) {
         ierr = MPI_Comm_group(MPI_COMM_WORLD, &mpiGroupWorld);
@@ -355,6 +357,7 @@ void Dimr::runParallelInit(dimr_control_block* cb) {
         chdir(masterComponent->workingDir);
         log->Write(INFO, my_rank, "%s.Initialize(%s)", masterComponent->name, masterComponent->inputFile);
         timerStart(masterComponent);
+        nSettingsSet = masterComponent->dllSetKeyVals(masterComponent->settings);
         masterComponent->result = (masterComponent->dllInitialize) (masterComponent->inputFile);
         if (masterComponent->result != 0)
         {
@@ -419,6 +422,7 @@ void Dimr::runParallelInit(dimr_control_block* cb) {
                         chdir(thisComponent->workingDir);
                         log->Write(INFO, my_rank, "%s.Initialize(%s)", thisComponent->name, thisComponent->inputFile);
                         timerStart(thisComponent);
+                        nSettingsSet = thisComponent->dllSetKeyVals(thisComponent->settings);
                         thisComponent->result = (thisComponent->dllInitialize) (thisComponent->inputFile);
                         if (thisComponent->result != 0)
                         {
