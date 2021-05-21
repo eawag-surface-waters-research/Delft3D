@@ -84,7 +84,7 @@ subroutine fill_geometry_arrays_lateral()
       end if
 
       ! Gather integer data, where the same number of data, i.e. numlatsg, are gathered from each subdomain to process 0000
-      call gather_int_data_mpi_same(numlatsg, nodeCountLat, numlatsg*ndomains, nodeCountLatGat, numlatsg, 0, ierror)
+      call gather_int_data_mpi(numlatsg, nodeCountLat, numlatsg*ndomains, nodeCountLatGat, numlatsg, 0, ierror)
 
       if (my_rank == 0) then
          ! To use mpi gather call, construct displs, and nlatndGat (used as receive count for mpi gather call)
@@ -100,8 +100,8 @@ subroutine fill_geometry_arrays_lateral()
       end if
 
       ! Gather double precision data, here, different number of data are gatherd from different subdomains to process 0000
-      call gatherv_double_data_mpi_dif(nlatnd, geomXLat, nlatndMPI, xGat, ndomains, nlatndGat, displs, 0, ierror)
-      call gatherv_double_data_mpi_dif(nlatnd, geomYLat, nlatndMPI, yGat, ndomains, nlatndGat, displs, 0, ierror)
+      call gatherv_double_data_mpi(nlatnd, geomXLat, nlatndMPI, xGat, ndomains, nlatndGat, displs, 0, ierror)
+      call gatherv_double_data_mpi(nlatnd, geomYLat, nlatndMPI, yGat, ndomains, nlatndGat, displs, 0, ierror)
 
       if (my_rank == 0) then
          ! Construct nodeCountLatMPI for history output

@@ -2115,7 +2115,7 @@ if (mext /= 0) then
        balat(n) = 0d0
        do k1=n1latsg(n),n2latsg(n)
           k = nnlat(k1)
-          if (jampi == 1) then
+          if (jampi == 1 .and. k > 0) then
              if (idomain(k) /= my_rank) then
                 nnlat(k1) = 0
              endif

@@ -976,12 +976,11 @@ logical function initboundaryblocksforcings(filename)
  integer                      :: major, minor
  integer                      :: loc_spec_type
  integer                      :: numcoordinates
- logical                      :: domainCheck
+ logical                      :: latOK
  double precision, allocatable :: xcoordinates(:), ycoordinates(:)
  double precision, allocatable :: xdum(:), ydum(:)!, xy2dum(:,:)
  integer, allocatable          :: kdum(:)
  integer, allocatable          :: itpenzr(:), itpenur(:)
- integer, allocatable          :: nnLatTmp(:)
 
  if (allocated(xdum  )) deallocate(xdum, ydum, kdum) !, xy2dum)
  allocate ( xdum(1), ydum(1), kdum(1)) !, xy2dum(2,1) , stat=ierr)
@@ -1272,28 +1271,24 @@ logical function initboundaryblocksforcings(filename)
        call selectelset_internal_nodes(xz, yz, kclat, ndxi, nnLat(nlatnd+1:), nlat, &
                                        loc_spec_type, locationfile, numcoordinates, xcoordinates, ycoordinates, branchid, chainage, nodeId)
        ! If 0 is filled in nnLat, then adjust nlat so that 0 will be removed from nnLat (n1latsg, n2latsg and nlatnd will be ajusted automatically).
-       ! For parallel simulation, if the node is a ghost node, then also set it to 0 to remove it from the current subdomain.
-       call realloc(nnLatTmp, nlat, keepExisting=.false., fill = -1)
+       ! For parallel simulation, if the node is a ghost node, then also remove it from the current subdomain.
        nlattmp = nlat
-       k1 = 0
-       domainCheck = .true.
-       do k2 = 1, nlattmp
-          n = nlatnd+k2
-          if (allocated(idomain)) then
-             domainCheck = (idomain(nnLat(n)) /= my_rank)
-            end if
+       nlat = 0
+       do n = nlatnd+1, nlatnd+nlattmp
           k = nnLat(n)
-          if (k == 0) then
-             nlat = nlat - 1
-          else if (jampi == 1 .and. domainCheck) then ! The node is a ghost node for the current subdomain
-             nlat = nlat - 1
-          else
-             k1 = k1 + 1
-             nnLatTmp(k1) = nnLat(n)
+          latOK = .false.
+          if (k > 0) then
+             if (jampi == 1) then
+                latOK = (idomain(k) == my_rank) ! OK if the node is not a ghost node for the current subdomain
+             else
+                latOK = .true.
+             end if
+          end if
+          if (latOK) then
+             nlat = nlat + 1
+             nnLat(nlatnd+nlat) = k ! shift to the left
           end if
        end do
-       nnLat(nlatnd+1:nlatnd+nlat) = nnLatTmp(1:nlat)
-
        n1latsg(numlatsg) = nlatnd + 1
        n2latsg(numlatsg) = nlatnd + nlat
 
