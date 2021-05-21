@@ -234,6 +234,12 @@ module m_1d_networkreader
    if (.not.allocated(gpsIDLongnames)) then
       call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Error in gpsIDLongnames')
    endif
+   if (.not.associated(meshgeom%edgebranchidx)) then
+      call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Error in meshgeom%edgebranchidx')
+   endif
+   if (meshgeom%edgebranchidx(1) < 0) then
+      call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Error in meshgeom%edgebranchidx: found missing values')
+   endif
 
    ! Store Network Node Data ('connection nodes') into Data Structures.
    call storeNodes(network%nds, meshgeom%nnodes, meshgeom%nnodex, meshgeom%nnodey, nodeids, nodelongnames)

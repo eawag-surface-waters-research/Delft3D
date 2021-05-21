@@ -153,6 +153,7 @@ DtInit            = 1
 Tunit             = S
 TStart            = 0
 TStop             = 3600
+UpdateRoughnessInterval = 60
 
 [restart]
 RestartFile       =

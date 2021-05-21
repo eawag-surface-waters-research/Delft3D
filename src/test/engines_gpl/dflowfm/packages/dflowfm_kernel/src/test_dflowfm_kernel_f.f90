@@ -44,10 +44,10 @@ program test_dflowfm_kernel
     call tests_cross_sections
     call tests_observations
     call tests_observCrossSections
-    call tests_iniField_1dField
     call tests_MDU_fileversion
-    call tests_storageNodes
     call tests_1d_grid
+    call tests_storageNodes
+    call tests_iniField_1dField
     !
     ! Done - properly finalize
     !
