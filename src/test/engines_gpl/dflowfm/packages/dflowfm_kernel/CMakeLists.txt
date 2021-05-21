@@ -69,7 +69,6 @@ if(UNIX)
          "metis")
 
     set_property(TARGET ${executable_name} PROPERTY LINKER_LANGUAGE Fortran)
-    set_target_properties(${executable_name} PROPERTIES LINK_FLAGS ${openmp_flag})
 endif(UNIX)
 
 

@@ -143,7 +143,10 @@ if (WIN32)
 endif(WIN32)
 
 
-set_target_properties(${library_name} PROPERTIES LINK_FLAGS ${openmp_flag})
+if (WIN32)
+    set_target_properties(${library_name} PROPERTIES LINK_FLAGS ${openmp_flag})
+endif(WIN32)
+
 if(UNIX)
     message(STATUS "Setting target_compile_definitions in Unix")    
     target_compile_definitions(${library_name} PRIVATE "HAVE_DISPLAY=0;HAVE_METIS;HAVE_POLYPACK;HAVE_MPI;HAVE_PROJ;HAVE_SHAPELIB;HAVE_GDAL;HAVE_PETSC")

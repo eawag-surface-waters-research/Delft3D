@@ -52,11 +52,17 @@ endif(UNIX)
 set_property(SOURCE ${preproccessor_files}
              PROPERTY COMPILE_OPTIONS "${file_preprocessor_flag}")
 
-set_property(SOURCE ${openmq_files}
+if(WIN32)
+    set_property(SOURCE ${openmq_files}
             PROPERTY COMPILE_OPTIONS "${openmp_flag}")
-
-set_property(SOURCE ${proces_file}
+    set_property(SOURCE ${proces_file}
              PROPERTY COMPILE_OPTIONS "${openmp_flag}" "${generate_reentrancy_threaded_flag}" "${extend_source132_flag}")
+endif(WIN32)
+
+if(UNIX)
+    set_property(SOURCE ${proces_file}
+             PROPERTY COMPILE_OPTIONS "${generate_reentrancy_threaded_flag}" "${extend_source132_flag}")
+endif(UNIX)
 
 # Set additional compilation properties
 target_compile_options(${library_name} PRIVATE "${extend_source132_flag}")
