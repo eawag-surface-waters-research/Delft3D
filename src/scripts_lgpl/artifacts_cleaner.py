@@ -139,6 +139,7 @@ def ossRemove():
 # Remove files specifically for an OSS build (Windows/Linux)
 def dimrsetRemove():
     removeFiles = [
+        'dflowfm_kernel_test',
         'libtool',
         'libtool_install.sh',
         'libDelftOnline.a',
