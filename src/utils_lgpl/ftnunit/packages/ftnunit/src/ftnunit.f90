@@ -70,7 +70,7 @@ module ftnunit
     integer, private, save :: failed_asserts = 0
     logical, private, save :: has_run        = .false.
     character(len=20), private, save :: html_file = 'ftnunit.html'
-    character(len=80), private, save :: testname
+    character(len=:), allocatable, private, save :: testname
 
     interface assert_equal
         module procedure assert_equal_int

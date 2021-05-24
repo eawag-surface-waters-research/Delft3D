@@ -32,8 +32,8 @@ contains
 !
 !==============================================================================
 subroutine tests_MDU_fileversion
-    call test( test_MDU_fileversion_model, 'Tests checking MDU file version (old [model] block).' )
-    call test( test_MDU_fileversion_general, 'Tests checking MDU file version (new [General] block).' )
+    call test( test_MDU_fileversion_model, 'Tests checking MDU file version (old ~model~ block).' )
+    call test( test_MDU_fileversion_general, 'Tests checking MDU file version (new ~General~ block).' )
 end subroutine tests_MDU_fileversion
 !
 !
