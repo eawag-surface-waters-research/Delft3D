@@ -129,7 +129,6 @@
      +            D3Hs =    3.6276  ,
      +            D4Hs =    0.043219   )
 
-
       IP1  = IPOINT( 1)
       IP2  = IPOINT( 2)
       IP3  = IPOINT( 3)
