@@ -497,7 +497,7 @@ subroutine dfm_compute_1d2d_coefficients() bind(C, name="dfm_compute_1d2d_coeffi
 end subroutine dfm_compute_1d2d_coefficients
 
 subroutine get_time_units(unit)  bind(C, name="get_time_units")
-   ! returns unit string for model time, e.g. �days since 1970-01-01'
+   ! returns unit string for model time, e.g. 'days since 1970-01-01'
    character(kind=c_char), intent(in) :: unit(*)
 end subroutine get_time_units
 
