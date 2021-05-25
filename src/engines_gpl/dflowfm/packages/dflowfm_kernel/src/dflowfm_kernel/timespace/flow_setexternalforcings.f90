@@ -149,8 +149,9 @@ subroutine flow_setexternalforcings(tim, l_initPhase, iresult)
 
       ! FM performs an additional spatial interpolation:
       if (allocated(ec_pwxwy_x) .and. allocated( ec_pwxwy_y)) then
-         do L  = 1,lnx ! i
-            k1 = ln(1,L) ; k2 = ln(2,L)
+         do L  = 1, lnx
+            k1 = ln(1,L)
+            k2 = ln(2,L)
             wx(L) = wx(L) + 0.5d0*( ec_pwxwy_x(k1) + ec_pwxwy_x(k2) )
             wy(L) = wy(L) + 0.5d0*( ec_pwxwy_y(k1) + ec_pwxwy_y(k2) )
             if (allocated(ec_pwxwy_c)) then
