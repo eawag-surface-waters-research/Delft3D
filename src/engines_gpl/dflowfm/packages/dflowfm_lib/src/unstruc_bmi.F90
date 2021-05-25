@@ -497,7 +497,7 @@ subroutine dfm_compute_1d2d_coefficients() bind(C, name="dfm_compute_1d2d_coeffi
 end subroutine dfm_compute_1d2d_coefficients
 
 subroutine get_time_units(unit)  bind(C, name="get_time_units")
-   ! returns unit string for model time, e.g. ‘days since 1970-01-01'
+   ! returns unit string for model time, e.g. ï¿½days since 1970-01-01'
    character(kind=c_char), intent(in) :: unit(*)
 end subroutine get_time_units
 
@@ -1946,6 +1946,12 @@ subroutine get_compound_field(c_var_name, c_item_name, c_field_name, x) bind(C, 
          return
       case("temperature")
          x = c_loc(valobs(IPNT_TEM1, item_index))
+         return
+      case("velocity")
+         x = c_loc(valobs(IPNT_UMAG, item_index))
+         return
+      case("discharge")
+         x = c_loc(valobs(IPNT_QMAG, item_index))
          return
       case default
    !       assume this is a tracer

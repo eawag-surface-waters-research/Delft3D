@@ -83,7 +83,7 @@ subroutine unc_write_his(tim)            ! wrihis
                      id_mstatx, id_mstaty, id_mstatname, &
                      id_crsx, id_crsy, id_crsname, &
                      id_vars, id_varucx, id_varucy, id_varucz, id_varsal, id_vartem, id_varsed, id_varrho, &
-                     id_varQ, id_varQint, id_varb, & ! id_varQavg,
+                     id_varQ, id_varQint, id_varb, id_varumag, id_varqmag,& ! id_varQavg,
                      id_varAu,  & ! id_varAuavg,
                      id_varu,  id_varwx, id_varwy, id_varrain, id_varpatm, &!id_varuavg,
                      id_infiltcap, id_infiltact, &
@@ -450,6 +450,36 @@ subroutine unc_write_his(tim)            ! wrihis
                ierr = nf90_put_att(ihisfile, id_varsal, '_FillValue', dmiss)
                ierr = nf90_put_att(ihisfile, id_varsal, 'standard_name', 'salinity')
             endif
+
+            if ( jahisvelocity > 0 ) then
+               if (kmx==0) then
+                  ierr = nf90_def_var(ihisfile, 'velocity_magnitude', nf90_double, (/ id_statdim, id_timedim /), id_varumag)
+               else 
+                  ierr = nf90_def_var(ihisfile, 'velocity_magnitude', nf90_double, (/ id_laydim, id_statdim, id_timedim /), id_varumag)
+               endif
+               ierr = nf90_put_att(ihisfile, id_varumag, 'standard_name', 'water_velocity_magnitude') 
+               ierr = nf90_put_att(ihisfile, id_varumag, 'long_name', 'velocity magnitude')
+               ierr = nf90_put_att(ihisfile, id_varumag, 'units', 'm s-1')
+               ierr = nf90_put_att(ihisfile, id_varumag, 'coordinates', statcoordstring)
+               ierr = nf90_put_att(ihisfile, id_varumag, 'geometry', station_geom_container_name)
+               ierr = nf90_put_att(ihisfile, id_varumag, '_FillValue', dmiss)
+            endif
+
+            if ( jahisdischarge > 0 ) then
+               if (kmx==0) then
+                  ierr = nf90_def_var(ihisfile, 'discharge_magnitude', nf90_double, (/ id_statdim, id_timedim /), id_varqmag)
+               else
+                  ierr = nf90_def_var(ihisfile, 'discharge_magnitude', nf90_double, (/ id_laydim, id_statdim, id_timedim /), id_varqmag)
+               endif
+               
+               ierr = nf90_put_att(ihisfile, id_varqmag, 'standard_name', 'water_discharge_magnitude') 
+               ierr = nf90_put_att(ihisfile, id_varqmag, 'long_name', 'discharge magnitude')
+               ierr = nf90_put_att(ihisfile, id_varqmag, 'units', 'm s-3')
+               ierr = nf90_put_att(ihisfile, id_varqmag, 'coordinates', statcoordstring)
+               ierr = nf90_put_att(ihisfile, id_varqmag, 'geometry', station_geom_container_name)
+               ierr = nf90_put_att(ihisfile, id_varqmag, '_FillValue', dmiss)
+            endif
+
 
 !           JRE surfbeat
             if (jawave .eq. 4) then
@@ -2744,18 +2774,21 @@ subroutine unc_write_his(tim)            ! wrihis
           ierr = nf90_put_var(ihisfile,    id_varucx, valobsT(:,IPNT_UCX+kk-1),  start = (/ kk, 1, it_his /), count = (/ 1, ntot, 1 /))
           ierr = nf90_put_var(ihisfile,    id_varucy, valobsT(:,IPNT_UCY+kk-1),  start = (/ kk, 1, it_his /), count = (/ 1, ntot, 1 /))
           ierr = nf90_put_var(ihisfile,    id_varucz, valobsT(:,IPNT_UCZ+kk-1),  start = (/ kk, 1, it_his /), count = (/ 1, ntot, 1 /))
-       if (jasal > 0) then
-             ierr = nf90_put_var(ihisfile, id_varsal, valobsT(:,IPNT_SA1 +kk-1), start = (/ kk, 1, it_his /), count = (/ 1, ntot, 1 /))
-       end if
-       if (jatem > 0) then
-             ierr = nf90_put_var(ihisfile, id_vartem, valobsT(:,IPNT_TEM1+kk-1), start = (/ kk, 1, it_his /), count = (/ 1, ntot, 1 /))
-       end if
-       if (jasal > 0 .or. jatem > 0 .or. jased > 0) then
-             ierr = nf90_put_var(ihisfile, id_varrho, valobsT(:,IPNT_RHO +kk-1), start = (/ kk, 1, it_his /), count = (/ 1, ntot, 1 /))
-       end if
-       if (jased > 0 .and. .not. stm_included) then
-             ierr = nf90_put_var(ihisfile, id_varsed, valobsT(:,IPNT_SED +kk-1), start = (/ kk, 1, it_his /), count = (/ 1, ntot, 1 /))
-       end if
+          if (jasal > 0) then
+            ierr = nf90_put_var(ihisfile, id_varsal, valobsT(:,IPNT_SA1 +kk-1), start = (/ kk, 1, it_his /), count = (/ 1, ntot, 1 /))
+         end if
+         if (jatem > 0) then
+            ierr = nf90_put_var(ihisfile, id_vartem, valobsT(:,IPNT_TEM1+kk-1), start = (/ kk, 1, it_his /), count = (/ 1, ntot, 1 /))
+         end if
+         if (jasal > 0 .or. jatem > 0 .or. jased > 0) then
+            ierr = nf90_put_var(ihisfile, id_varrho, valobsT(:,IPNT_RHO +kk-1), start = (/ kk, 1, it_his /), count = (/ 1, ntot, 1 /))
+         end if
+         if (jased > 0 .and. .not. stm_included) then
+            ierr = nf90_put_var(ihisfile, id_varsed, valobsT(:,IPNT_SED +kk-1), start = (/ kk, 1, it_his /), count = (/ 1, ntot, 1 /))
+         end if
+         ierr = nf90_put_var(ihisfile, id_varumag, valobsT(:,IPNT_UMAG+kk-1),  start = (/ kk, 1, it_his /), count = (/ 1, ntot, 1 /))
+         ierr = nf90_put_var(ihisfile, id_varqmag, valobsT(:,IPNT_QMAG+kk-1),  start = (/ kk, 1, it_his /), count = (/ 1, ntot, 1 /))
+          
           if (IVAL_TRA1 > 0) then
              do j = IVAL_TRA1,IVAL_TRAN   ! enumerators of tracers in valobs array (not the pointer)
                i = j - IVAL_TRA1 + 1
@@ -2795,15 +2828,18 @@ subroutine unc_write_his(tim)            ! wrihis
 !      2D
        ierr = nf90_put_var(ihisfile,    id_varucx, valobsT(:,IPNT_UCX),  start = (/ 1, it_his /), count = (/ ntot, 1 /))
        ierr = nf90_put_var(ihisfile,    id_varucy, valobsT(:,IPNT_UCY),  start = (/ 1, it_his /), count = (/ ntot, 1 /))
+       ierr = nf90_put_var(ihisfile, id_varumag, valobsT(:,IPNT_UMAG),  start = (/ 1, it_his /), count = (/ ntot, 1 /))
+       ierr = nf90_put_var(ihisfile, id_varqmag, valobsT(:,IPNT_QMAG),  start = (/ 1, it_his /), count = (/ ntot, 1 /))
        if (jasal > 0) then
           ierr = nf90_put_var(ihisfile, id_varsal, valobsT(:,IPNT_SA1),  start = (/ 1, it_his /), count = (/ ntot, 1 /))
-       endif
-       if (jatem > 0) then
-          ierr = nf90_put_var(ihisfile, id_vartem, valobsT(:,IPNT_TEM1), start = (/ 1, it_his /), count = (/ ntot, 1 /))
-       end if
-       if(jasal > 0 .or. jatem > 0 .or. jased > 0 ) then
-          ierr = nf90_put_var(ihisfile, id_varrho, valobsT(:,IPNT_RHO),  start = (/ 1, it_his /), count = (/ ntot, 1 /))
-       end if
+         endif
+         if (jatem > 0) then
+            ierr = nf90_put_var(ihisfile, id_vartem, valobsT(:,IPNT_TEM1), start = (/ 1, it_his /), count = (/ ntot, 1 /))
+         end if
+         if(jasal > 0 .or. jatem > 0 .or. jased > 0 ) then
+            ierr = nf90_put_var(ihisfile, id_varrho, valobsT(:,IPNT_RHO),  start = (/ 1, it_his /), count = (/ ntot, 1 /))
+         end if
+
        if (IVAL_TRA1 > 0) then
           do j = IVAL_TRA1,IVAL_TRAN   ! enumerators of tracers in valobs array (not the pointer)
             i = j - IVAL_TRA1 + 1

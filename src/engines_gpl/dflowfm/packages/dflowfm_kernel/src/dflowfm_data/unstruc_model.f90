@@ -1695,6 +1695,8 @@ subroutine readMDUFile(filename, istat)
     call prop_get_integer(md_ptr, 'output', 'Wrihis_zcor', jahiszcor, success)
     call prop_get_integer(md_ptr, 'output', 'Wrihis_lateral', jahislateral, success)
     call prop_get_integer(md_ptr, 'output', 'Wrihis_taucurrent', jahistaucurrent, success)
+    call prop_get_integer(md_ptr, 'output', 'Wrihis_velocity', jahisvelocity, success)
+    call prop_get_integer(md_ptr, 'output', 'Wrihis_discharge', jahisdischarge, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_waterlevel_s0', jamaps0, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_waterlevel_s1', jamaps1, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_evaporation', jamapevap, success)
@@ -3513,6 +3515,12 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     endif
     if (writeall .or. jahistaucurrent /= 1) then
        call prop_set(prop_ptr, 'output', 'Wrihis_taucurrent', jahistaucurrent, 'Write mean bed shear stress to his file (1: yes, 0: no)' )
+    endif
+    if (writeall .or. jahisvelocity /= 0) then
+       call prop_set(prop_ptr, 'output', 'Wrihis_taucurrent', jahisvelocity, 'Write velocity magnitude to his file (1: yes, 0: no)' )
+    endif
+    if (writeall .or. jahisdischarge /= 0) then
+       call prop_set(prop_ptr, 'output', 'Wrihis_taucurrent', jahisdischarge, 'Write discharge magnitude to his file (1: yes, 0: no)' )
     endif
     if (writeall .or. jamaps0 /= 1) then
         call prop_set(prop_ptr, 'output', 'Wrimap_waterlevel_s0', jamaps0, 'Write water levels for previous time step to map file (1: yes, 0: no)')

@@ -132,6 +132,8 @@ implicit none
     integer                           :: IVAL_UCYST
     integer                           :: IVAL_SA1
     integer                           :: IVAL_TEM1
+    integer                           :: IVAL_UMAG
+    integer                           :: IVAL_QMAG
     integer                           :: IVAL_TRA1
     integer                           :: IVAL_TRAN
     integer                           :: IVAL_HWQ1
@@ -233,6 +235,8 @@ implicit none
     integer                           :: IPNT_UCXST
     integer                           :: IPNT_UCYST
     integer                           :: IPNT_SA1
+    integer                           :: IPNT_UMAG
+    integer                           :: IPNT_QMAG
     integer                           :: IPNT_TEM1
     integer                           :: IPNT_TRA1
     integer                           :: IPNT_TRAN
@@ -391,6 +395,8 @@ subroutine init_valobs_pointers()
    IVAL_UCYQ       = 0
    IVAL_SA1        = 0
    IVAL_TEM1       = 0
+   IVAL_UMAG       = 0
+   IVAL_QMAG       = 0
    IVAL_TRA1       = 0
    IVAL_TRAN       = 0
    IVAL_HWQ1       = 0
@@ -594,6 +600,8 @@ subroutine init_valobs_pointers()
    if ( jatem.gt.0 ) then
       i=i+1;            IVAL_TEM1       = i
    end if
+   i=i+1;            IVAL_UMAG        = i
+   i=i+1;            IVAL_QMAG        = i
    if ( ITRA1.gt.0 ) then
       i=i+1;            IVAL_TRA1       = i
       i=i+ITRAN-ITRA1;  IVAL_TRAN       = i  !< All tracers (NOT only the ones with bnd)
@@ -676,6 +684,8 @@ subroutine init_valobs_pointers()
    IPNT_UCYST  = ivalpoint(IVAL_UCYST,kmx, nlyrs)
    IPNT_SA1   = ivalpoint(IVAL_SA1,   kmx, nlyrs)
    IPNT_TEM1  = ivalpoint(IVAL_TEM1,  kmx, nlyrs)
+   IPNT_UMAG  = ivalpoint(IVAL_UMAG,  kmx, nlyrs)
+   IPNT_QMAG  = ivalpoint(IVAL_QMAG,  kmx, nlyrs)
    IPNT_TRA1  = ivalpoint(IVAL_TRA1,  kmx, nlyrs)
    IPNT_TRAN  = ivalpoint(IVAL_TRAN,  kmx, nlyrs)
    IPNT_HWQ1  = ivalpoint(IVAL_HWQ1,  kmx, nlyrs)
