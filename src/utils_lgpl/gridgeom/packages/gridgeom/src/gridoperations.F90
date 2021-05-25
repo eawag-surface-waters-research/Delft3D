@@ -813,8 +813,16 @@
          JA = 1
          IF (XK(K1) == DMISS .OR. XK(K2) == DMISS) THEN          ! EXTRA CHECK: ONE MISSING
             JA = 0
-         ELSE IF (XK(K1) == XK(K2) .AND. YK(K1) == YK(K2) ) THEN !            : OR BOTH EQUAL
-            JA = 0
+         ELSE                                                    !            : OR BOTH EQUAL
+            if ((K3 == 1 .or. k3 == 6) .and. allocated(dxe)) then ! User-defined net link lengths
+               if (dxe(L) <= 0d0) then                           ! X/Y of K1, K2 may be equal, as long as length > 0
+                  ja = 0
+               end if
+            else
+               IF (XK(K1) == XK(K2) .AND. YK(K1) == YK(K2) ) THEN
+                  JA = 0
+               ENDIF
+            end if
          ENDIF
          IF (JA == 1) THEN
             IF (K3 == 0 .or. K3 == 2) THEN
