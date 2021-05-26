@@ -973,7 +973,10 @@ subroutine readMDUFile(filename, istat)
        call prop_get_doubles( md_ptr, 'geometry', 'StretchCoef'   , laycof, 3)
     endif
 
-    call prop_get_integer(md_ptr, 'geometry', 'Keepzlayeringatbed'      , keepzlayeringatbed)
+    call prop_get_integer(md_ptr, 'geometry', 'Keepzlayeringatbed'      , keepzlayeringatbed , success)
+    if (.not. success) then
+       call prop_get_integer(md_ptr, 'numerics', 'Keepzlayeringatbed', keepzlayeringatbed)
+    endif
     
     call prop_get_integer( md_ptr, 'geometry', 'Makeorthocenters' , Makeorthocenters)
     call prop_get_double ( md_ptr, 'geometry', 'Dcenterinside'    , Dcenterinside)
@@ -2666,7 +2669,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
           call prop_set(prop_ptr, 'geometry', 'Tsigma', Tsigma ,'Sigma Adaptation period for Layertype==4 (s)')
        endif
 
-       if (keepzlayeringatbed .le. 2) then
+       if (keepzlayeringatbed /= 2) then
           call prop_set(prop_ptr, 'geometry', 'Keepzlayeringatbed'  , keepzlayeringatbed, '0:bedlayerthickness == zlayerthickness, 1:possibly very thin layer at bed, 2=equal thickness first two layers')
        endif
        
