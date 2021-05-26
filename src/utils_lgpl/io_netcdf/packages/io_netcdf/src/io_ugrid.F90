@@ -384,6 +384,17 @@ integer function ug_get_constant(constname, constvalue) result(ierr)
    end select
 end function ug_get_constant
 
+! Resets a complete t_ug_mesh type variable, making it ready for re-reading
+! a dataset. Effectively resets all dimension and variable ids.
+function ug_reset_mesh(meshids) result(ierr)
+   type(t_ug_mesh), intent(inout) :: meshids ! UGRID mesh variable to be reset.
+   integer                        :: ierr    !< Result status (UG_NOERR==NF90_NOERR) if successful.
+
+   ierr = UG_NOERR
+   meshids%dimids(1:mdim_end) = -1
+   meshids%varids(1:mid_end)  = -1
+end function ug_reset_mesh
+
 
 !
 ! -- Writing-related routines ---------------------------------------------

@@ -477,11 +477,17 @@ contains
 subroutine init_unstruc_netcdf()
 use unstruc_version_module
 
+   integer :: ierr
+
    ug_meta_fm%institution = trim(unstruc_company)
    ug_meta_fm%source      = trim(unstruc_program)
    ug_meta_fm%references  = trim(unstruc_company_url)
    ug_meta_fm%version     = trim(unstruc_version)
    ug_meta_fm%modelname   = ''
+
+   ierr = ug_reset_mesh(mapids%id_tsp%meshids1d)
+   ierr = ug_reset_mesh(mapids%id_tsp%meshids2d)
+   ierr = ug_reset_mesh(mapids%id_tsp%meshids3d)
 
    unc_cmode              = NF90_CLOBBER ! Default: 0, use NetCDF library default.
    unc_writeopts          = UG_WRITE_NOOPTS ! Default: 0, no special write options.
