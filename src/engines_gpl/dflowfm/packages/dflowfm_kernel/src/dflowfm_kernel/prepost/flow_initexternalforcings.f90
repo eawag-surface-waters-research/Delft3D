@@ -71,7 +71,6 @@
  use m_sferic, only: jsferic
  use m_trachy, only: trachy_resistance
  use unstruc_inifields, only: initInitialFields
- use m_flowtimes, only: handle_extra
  use Timers
  use m_subsidence
 
@@ -2328,12 +2327,12 @@ if (mext /= 0) then
 
  if (numsrc > 0) then
 
-
-    ja = 1 ; rewind (mext)
+    ja = 1
+    rewind (mext)
     kx = numconst+1
     ! TODO: UNST-537/UNST-190: we now support timeseries, the constant values should come from new format ext file, not from transformcoef
     numsrc = 0
-    do while (ja .eq. 1)                                 ! for sorsin again read *.ext file
+    do while (ja == 1)                                 ! for sorsin again read *.ext file
        call readprovider(mext,qid,filename,filetype,method,operand,transformcoef,ja,varname)
        if (ja == 1 .and. qid == 'discharge_salinity_temperature_sorsin') then
           call resolvePath(filename, md_extfile_dir, filename)
@@ -2349,7 +2348,9 @@ if (mext /= 0) then
              ! Converter will put 'qsrc, sasrc and tmsrc' values in array qstss on positions: (3*numsrc-2), (3*numsrc-1), and (3*numsrc), respectively.
              success  = ec_addtimespacerelation(qid, xdum, ydum, kdum, kx, filename0, filetype0, method, operand='O', targetIndex=numsrc)
           else
-            success = .false.
+             msgbuf = 'No .tim-series file found for source/sinks and file ''' // trim(filename) // '''. Ignoring this entry.'
+             call warn_flush()
+             success = .false.
           endif
        endif
     enddo
