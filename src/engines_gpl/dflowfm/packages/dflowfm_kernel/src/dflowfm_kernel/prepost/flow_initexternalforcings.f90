@@ -216,8 +216,9 @@
        if (allocated(zkbndz) ) deallocate (zkbndz, kbanz)
        allocate ( zkbndz(2,nbndz) ,stat= ierr    )
        call aerr('zkbndz(2,nbndz)',ierr, 2*nbndz )
-       allocate ( kbanz(2,nbndz) ,stat= ierr    ) ; kbanz = 0
+       allocate ( kbanz(2,nbndz) ,stat= ierr    )
        call aerr('kban2(2,nbndz)',ierr, 2*nbndz )
+       kbanz = 0
     endif
 
     kbndz = 0 ; kdz = 1
@@ -304,8 +305,9 @@
        if (allocated (zkbndu) ) deallocate(zkbndu, kbanu)
        allocate ( zkbndu(2,nbndu) ,stat= ierr    )
        call aerr('zkbndu(2,nbndu)',ierr, 2*nbndu )
-       allocate ( kbanu(2,nbndu) ,stat= ierr    ) ; kbanu = 0
+       allocate ( kbanu(2,nbndu) ,stat= ierr    )
        call aerr('kbanu(2,nbndu)',ierr, 2*nbndu )
+       kbanu = 0
     endif
     if (kmx >= 1) then
        allocate ( sigmabndu(kmx*nbndu) , stat=ierr )
@@ -814,7 +816,9 @@
 
  if (jased > 0) then
     mx = size(grainlay,2)
-    allocate ( grainlayerthickness  (mx,mxgr) , stat=ierr) ; grainlayerthickness   = dmiss
+    allocate ( grainlayerthickness  (mx,mxgr) , stat=ierr)
+    call aerr('grainlayerthickness(mx,mxgr)', ierr, mx*mxgr)
+    grainlayerthickness   = dmiss
  else
     mxgr = 0          ! jre dangerous...
  endif
@@ -899,8 +903,9 @@ if (mext /= 0) then
                call mess(LEVEL_WARN, 'Reading *.ext forcings file '''//trim(md_extfile)//''', getting QUANTITY '//trim(qid)//', but [trachytopes] is not switched on in MDU file. Ignoring this block.')
             else
                if (.not. allocated(cftrtfac) ) then
-                  allocate ( cftrtfac(lnx), stat=ierr) ; cftrtfac = 1d0
+                  allocate ( cftrtfac(lnx), stat=ierr)
                   call aerr('cftrtfac(lnx)', ierr, lnx)
+                  cftrtfac = 1d0
                endif
 
                success = timespaceinitialfield(xu, yu, cftrtfac, lnx, filename, filetype, method,  operand, transformcoef, 1) ! zie meteo module
@@ -936,7 +941,8 @@ if (mext /= 0) then
             if (javiusp == 0) then
                if (allocated (viusp) ) deallocate(viusp)
                allocate ( viusp(lnx) , stat=ierr )
-               call aerr('viusp(lnx)', ierr, lnx ) ; viusp = dmiss
+               call aerr('viusp(lnx)', ierr, lnx )
+               viusp = dmiss
                javiusp = 1
             endif
 
@@ -947,7 +953,8 @@ if (mext /= 0) then
             if (jadiusp == 0) then
                if (allocated (diusp) ) deallocate(diusp)
                allocate ( diusp(lnx) , stat=ierr )
-               call aerr('diusp(lnx)', ierr, lnx ) ; diusp = dmiss
+               call aerr('diusp(lnx)', ierr, lnx )
+               diusp = dmiss
                jadiusp = 1
             endif
 
@@ -958,7 +965,8 @@ if (mext /= 0) then
             if (jaCdwusp == 0) then
                if (allocated (Cdwusp) ) deallocate(Cdwusp)
                allocate ( Cdwusp(lnx) , stat=ierr )
-               call aerr('Cdwusp(lnx)', ierr, lnx ) ; Cdwusp = dmiss
+               call aerr('Cdwusp(lnx)', ierr, lnx )
+               Cdwusp = dmiss
                jaCdwusp = 1
             endif
 
@@ -970,7 +978,8 @@ if (mext /= 0) then
             if (jawindspeedfac == 0) then
                if (allocated (Windspeedfac) ) deallocate(Windspeedfac)
                allocate ( Windspeedfac(lnx) , stat=ierr )
-               call aerr('Windspeedfac(lnx)', ierr, lnx ) ; Windspeedfac = dmiss
+               call aerr('Windspeedfac(lnx)', ierr, lnx )
+               Windspeedfac = dmiss
             endif
 
             jawindspeedfac = 1
@@ -981,7 +990,8 @@ if (mext /= 0) then
             if (jaSecchisp == 0) then
                if (allocated (Secchisp) ) deallocate(Secchisp)
                allocate ( Secchisp(ndx) , stat=ierr )
-               call aerr('Secchisp(ndx)', ierr, lnx ) ; Secchisp = dmiss
+               call aerr('Secchisp(ndx)', ierr, lnx )
+               Secchisp = dmiss
                jaSecchisp = 1
             endif
 
@@ -1059,7 +1069,9 @@ if (mext /= 0) then
         else if (qid == 'initialunsaturedzonethickness' .or. qid == 'interceptionlayerthickness') then ! HK-style, in module grw. See initInitialFields() for the new hydrology module.
 
             if (.not. allocated (h_unsat) ) then
-               allocate (h_unsat(ndx)) ; h_unsat = -999d0
+               allocate (h_unsat(ndx), stat=ierr)
+               call aerr('h_unsat(ndx)', ierr, ndx)
+               h_unsat = -999d0
             endif
             success = timespaceinitialfield(xz, yz, h_unsat, ndx, filename, filetype, method, operand, transformcoef, 2) ! zie meteo module
             where (h_unsat == -999d0) h_unsat = 0d0
@@ -1130,7 +1142,9 @@ if (mext /= 0) then
 
             if (jasal > 0) then
                if (.not. allocated(satop) ) then
-                  allocate(satop(ndx)) ; satop = dmiss
+                  allocate(satop(ndx), stat=ierr)
+                  call aerr('satop(ndx)', ierr, ndx)
+                  satop = dmiss
                endif
                success = timespaceinitialfield(xz, yz, satop, ndx, filename, filetype, method, operand, transformcoef, 2) ! zie meteo module
                if (success) then
@@ -1144,7 +1158,9 @@ if (mext /= 0) then
 
             if (jasal > 0) then
                if (.not. allocated(sabot) ) then
-                  allocate(sabot(ndx)) ; sabot = dmiss
+                  allocate(sabot(ndx), stat=ierr)
+                  call aerr('sabot(ndx)', ierr, ndx)
+                  sabot = dmiss
                endif
                success = timespaceinitialfield(xz, yz, sabot, ndx, filename, filetype, method, operand, transformcoef, 2) ! zie meteo module
                if (success .and. transformcoef(3) .ne. dmiss) then
@@ -1379,24 +1395,27 @@ if (mext /= 0) then
         else if (qid == 'stemdiameter') then
 
            if (.not. allocated(stemdiam) ) then
-              allocate ( stemdiam(ndx) , stat=ierr ) ; stemdiam = dmiss
+              allocate ( stemdiam(ndx) , stat=ierr )
               call aerr('stemdiam(ndx)', ierr, ndx )
+              stemdiam = dmiss
            endif
            success = timespaceinitialfield(xz, yz, stemdiam, ndx, filename, filetype, method, operand, transformcoef, 2) ! zie meteo module
 
         else if (qid == 'stemdensity') then
 
            if (.not. allocated(stemdens) ) then
-              allocate ( stemdens(ndx) , stat=ierr ) ; stemdens = dmiss
+              allocate ( stemdens(ndx) , stat=ierr )
               call aerr('stemdens(ndx)', ierr, ndx )
+              stemdens = dmiss
            endif
            success = timespaceinitialfield(xz, yz, stemdens, ndx, filename, filetype, method, operand, transformcoef, 2) ! zie meteo module
 
         else if (qid == 'stemheight') then
 
            if (.not. allocated(stemheight) ) then
-              allocate ( stemheight(ndx) , stat=ierr ) ; stemheight = dmiss
+              allocate ( stemheight(ndx) , stat=ierr )
               call aerr('stemheight(ndx)', ierr, ndx )
+              stemheight = dmiss
            endif
            success = timespaceinitialfield(xz, yz, stemheight, ndx, filename, filetype, method, operand, transformcoef, 2) ! zie meteo module
 
@@ -1529,7 +1548,9 @@ if (mext /= 0) then
 
            ! Meteo1
            kx = 3 ; itempforcingtyp = 1
-           if (allocated (kcw) ) deallocate(kcw) ; allocate( kcw(ndx) ) ; kcw = 1
+           if (allocated (kcw) ) deallocate(kcw)
+           allocate( kcw(ndx) )
+           kcw = 1
            jatair = 3 ; jarhum = 3 ; jaclou = 3 ; jasol = 2    ! flag all three in one line
 
            success = ec_addtimespacerelation(qid, xz(1:ndx), yz(1:ndx), kcw, kx, filename, filetype, method, operand, varname=varname) ! vectormax=3
@@ -1538,7 +1559,9 @@ if (mext /= 0) then
 
            ! Meteo1
            kx = 3 ; itempforcingtyp = 3
-           if (allocated (kcw) ) deallocate(kcw) ; allocate( kcw(ndx) ) ; kcw = 1
+           if (allocated (kcw) ) deallocate(kcw)
+           allocate( kcw(ndx) )
+           kcw = 1
            jatair = 3 ; jarhum = 4 ; jaclou = 3 ;   ! flag all four in one line
            ! nb: jarhum = 3 means relative humidity is being read directly as a fraction
            !     jarhum = 4 means dewpoint is read directly and still needs conversion to RH
@@ -1552,7 +1575,9 @@ if (mext /= 0) then
 
            ! Meteo1
            kx = 4 ; itempforcingtyp = 2
-           if (allocated (kcw) ) deallocate(kcw) ; allocate( kcw(ndx) ) ; kcw = 1
+           if (allocated (kcw) ) deallocate(kcw)
+           allocate( kcw(ndx) )
+           kcw = 1
            jatair = 3 ; jarhum = 3 ; jaclou = 3 ; jasol = 1    ! flag all four in one line
 
            success = ec_addtimespacerelation(qid, xz(1:ndx), yz(1:ndx), kcw, kx, filename, filetype, method, operand, varname=varname) ! vectormax = 4
@@ -1561,7 +1586,9 @@ if (mext /= 0) then
 
            ! Meteo1
            kx = 4 ; itempforcingtyp = 4
-           if (allocated (kcw) ) deallocate(kcw) ; allocate( kcw(ndx) ) ; kcw = 1
+           if (allocated (kcw) ) deallocate(kcw)
+           allocate( kcw(ndx) )
+           kcw = 1
            jatair = 3 ; jarhum = 4 ; jaclou = 3 ; jasol = 1    ! flag all four in one line
            ! nb: jarhum = 3 means relative humidity is being read directly as a fraction
            !     jarhum = 4 means dewpoint is read directly and still needs conversion to RH
@@ -1575,7 +1602,9 @@ if (mext /= 0) then
            pkbot => kbot
            pktop => ktop
 
-           if (allocated (kcw) ) deallocate(kcw) ; allocate( kcw(ndx) ) ; kcw = 1
+           if (allocated (kcw) ) deallocate(kcw)
+           allocate( kcw(ndx) )
+           kcw = 1
            success = ec_addtimespacerelation(qid, xz(1:ndx), yz(1:ndx), kcw, kx, filename, filetype, method, operand, z=zcs, pkbot=pkbot, pktop=pktop, varname=varname)
 
            if ( success ) then
@@ -1670,8 +1699,9 @@ if (mext /= 0) then
         else if (qid(1:8) == 'rainfall' ) then
 
            if (.not. allocated(rain) ) then
-              allocate ( rain(ndx) , stat=ierr) ; rain = 0d0
+              allocate ( rain(ndx) , stat=ierr)
               call aerr('rain(ndx)', ierr, ndx)
+              rain = 0d0
            endif
 
            ! TODO: AvD: consider adding mask to all quantities.
@@ -1868,14 +1898,18 @@ if (mext /= 0) then
 
            select case (ibedlevtyp)
               case (1)
-                 allocate ( subsupl(ndx) , stat=ierr); subsupl = 0d0
+                 allocate ( subsupl(ndx) , stat=ierr)
                  call aerr('subsupl(ndx)', ierr, ndx)
-                 allocate ( subsupl_t0(ndx) , stat=ierr); subsupl_t0 = 0d0
+                 subsupl = 0d0
+                 allocate ( subsupl_t0(ndx) , stat=ierr)
                  call aerr('subsupl_t0(ndx)', ierr, ndx)
-                 allocate ( subsupl_tp(ndx) , stat=ierr); subsupl_tp = 0d0
+                 subsupl_t0 = 0d0
+                 allocate ( subsupl_tp(ndx) , stat=ierr)
                  call aerr('subsupl_tp(ndx)', ierr, ndx)
-                 allocate ( subsout(ndx) , stat=ierr); subsout = 0d0
+                 subsupl_tp = 0d0
+                 allocate ( subsout(ndx) , stat=ierr)
                  call aerr('subsout(ndx)', ierr, ndx)
+                 subsout = 0d0
                  success = ec_addtimespacerelation(qid, xz, yz, kcs, kx, filename, filetype, method, operand)
 
               case (2)
@@ -1883,14 +1917,18 @@ if (mext /= 0) then
                  allocate(kcw(lnx), stat=ierr)
                  call aerr('kcw(lnx)', ierr, lnx)
                  kcw = 1
-                 allocate ( subsupl(lnx) , stat=ierr); subsupl = 0d0
+                 allocate ( subsupl(lnx) , stat=ierr)
                  call aerr('subsupl(lnx)', ierr, lnx)
-                 allocate ( subsupl_t0(lnx) , stat=ierr); subsupl_t0 = 0d0
+                 subsupl = 0d0
+                 allocate ( subsupl_t0(lnx) , stat=ierr)
                  call aerr('subsupl_t0(lnx)', ierr, lnx)
-                 allocate ( subsupl_tp(lnx) , stat=ierr); subsupl_tp = 0d0
+                 subsupl_t0 = 0d0
+                 allocate ( subsupl_tp(lnx) , stat=ierr)
                  call aerr('subsupl_tp(lnx)', ierr, lnx)
-                 allocate ( subsout(lnx) , stat=ierr); subsout = 0d0
+                 subsupl_tp = 0d0
+                 allocate ( subsout(lnx) , stat=ierr)
                  call aerr('subsout(lnx)', ierr, lnx)
+                 subsout = 0d0
                  success = ec_addtimespacerelation(qid, xu, yu, kcw, kx, filename, filetype, method, operand, varname=varname)
 
              case (3,4,5,6)
@@ -1898,18 +1936,23 @@ if (mext /= 0) then
                  allocate(kcw(numk), stat=ierr)
                  call aerr('kcw(numk)', ierr, numk)
                  kcw = 1
-                 allocate ( subsupl(numk) , stat=ierr); subsupl = 0d0
+                 allocate ( subsupl(numk) , stat=ierr)
                  call aerr('subsupl(numk)', ierr, numk)
-                 allocate ( subsupl_t0(numk) , stat=ierr); subsupl_t0 = 0d0
+                 subsupl = 0d0
+                 allocate ( subsupl_t0(numk) , stat=ierr)
                  call aerr('subsupl_t0(numk)', ierr, numk)
-                 allocate ( subsupl_tp(numk) , stat=ierr); subsupl_tp = 0d0
+                 subsupl_t0 = 0d0
+                 allocate ( subsupl_tp(numk) , stat=ierr)
                  call aerr('subsupl_tp(numk)', ierr, numk)
-                 allocate ( subsout(numk) , stat=ierr); subsout = 0d0
+                 subsupl_tp = 0d0
+                 allocate ( subsout(numk) , stat=ierr)
                  call aerr('subsout(numk)', ierr, numk)
+                 subsout = 0d0
                  success = ec_addtimespacerelation(qid, xk(1:numk), yk(1:numk), kcw, kx, filename, filetype, method, operand, varname=varname)
            end select
-           allocate ( sdu_blp(ndx) , stat=ierr); sdu_blp = 0d0
+           allocate ( sdu_blp(ndx) , stat=ierr)
            call aerr('sdu_blp(ndx)', ierr, ndx)
+           sdu_blp = 0d0
 
            if (success) then
               jasubsupl = 1
@@ -2167,7 +2210,8 @@ if (mext /= 0) then
 
  if (jaoldstr > 0 .and. ncgensg > 0) then
     if (allocated   (xcgen)   ) deallocate( xcgen, ycgen, zcgen)
-    if (allocated   (kcgen)   ) deallocate( kcgen)         ; kx = 3
+    if (allocated   (kcgen)   ) deallocate( kcgen)
+    kx = 3
     allocate ( xcgen(ncgensg), ycgen(ncgensg), zcgen(ncgensg*kx), xy2cgen(2,ncgensg), kcgen(4,ncgen), kdgen(ncgensg) , stat=ierr     )
     call aerr('xcgen(ncgensg), ycgen(ncgensg), zcgen(ncgensg*kx), xy2cgen(2,ncgensg), kcgen(4,ncgen), kdgen(ncgensg)',ierr, ncgen*10 )
     kcgen = 0d0; zcgen = 1d10; kdgen = 1
