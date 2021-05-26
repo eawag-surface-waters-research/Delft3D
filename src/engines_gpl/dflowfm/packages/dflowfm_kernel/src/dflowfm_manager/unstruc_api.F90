@@ -367,6 +367,7 @@ use m_meteo, only: ecInstancePtr
     ihisfile = 0       !< Reset global his-file ncid
     call FinalizeMessageHandling()
     close(mdia)
+    mdia = 0
     
 end subroutine flowfinalize
 

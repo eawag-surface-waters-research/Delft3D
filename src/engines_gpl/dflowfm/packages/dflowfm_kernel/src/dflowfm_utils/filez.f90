@@ -618,6 +618,7 @@ subroutine unstruc_errorhandler(level)
     if (level >= threshold_abort) then
         call close_all_files()
         close(mdia)
+        mdia = 0
 #ifdef HAVE_MPI
          call MPI_Abort(DFM_COMM_DFMWORLD, DFM_GENERICERROR, ierr)
 #endif
