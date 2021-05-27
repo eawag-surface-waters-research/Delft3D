@@ -1,7 +1,6 @@
 @ echo off
 
 setlocal enabledelayedexpansion
-set globalErrorLevel=0
 set prepareonly=0
 set mode=
 set config=
@@ -54,20 +53,21 @@ if "%config%" == "dflowfm_interacter" call :Build dflowfm_interacter
 call :installall
 
 
-
-echo.
-echo Visual Studio sln-files:
-echo D-Flow FM : %root%\build_dflowfm\dflowfm.sln
-echo DIMR      : %root%\build_dimr\dimr.sln
-echo Tests     : %root%\build_tests\tests.sln
-echo Other     : %root%\src\delft3d_open.sln
-echo             %root%\src\ec_module.sln
-echo             %root%\src\io_netcdf.sln
-echo             %root%\src\nefis.sln
-echo             %root%\src\utils_lgpl.sln
-echo             %root%\src\utils_lgpl_no_tests.sln
-echo.
-echo Finished
+if !ERRORLEVEL! EQU 0 (
+    echo.
+    echo Visual Studio sln-files:
+    echo D-Flow FM : %root%\build_dflowfm\dflowfm.sln
+    echo DIMR      : %root%\build_dimr\dimr.sln
+    echo Tests     : %root%\build_tests\tests.sln
+    echo Other     : %root%\src\delft3d_open.sln
+    echo             %root%\src\ec_module.sln
+    echo             %root%\src\io_netcdf.sln
+    echo             %root%\src\nefis.sln
+    echo             %root%\src\utils_lgpl.sln
+    echo             %root%\src\utils_lgpl_no_tests.sln
+    echo.
+    echo Finished
+)
 goto :end
 
 
@@ -296,6 +296,7 @@ rem =================
 :vcvarsall
     rem # Execute vcvarsall.bat in case of compilation
     if %prepareonly% EQU 1 goto :endproc
+    if !ERRORLEVEL! NEQ 0 goto :endproc
     
     echo.
     if !generator! == "Visual Studio 14 2015" (
@@ -313,6 +314,7 @@ rem =================
     
     rem # Execution of vcvarsall results in a jump to the C-drive. Jump back to the script directory
     cd /d "%root%\"
+    if !ERRORLEVEL! NEQ 0 call :errorMessage
     goto :endproc
 
 
@@ -321,6 +323,7 @@ rem =======================
 rem === DoCMake        ====
 rem =======================
 :DoCMake
+    if !ERRORLEVEL! NEQ 0 goto :endproc
     set result=false
     if "%config%" == "%~1"  set result=true
     if "%config%" == "all"  set result=true
@@ -330,27 +333,31 @@ rem =======================
         echo "Running CMake for %~1 ..."
         cd /d "%root%\build_%~1\"
         cmake ..\src\cmake -G %generator% -A x64 -B "." -D CONFIGURATION_TYPE="%~1" 1>cmake_%~1.log 2>&1
+        if !ERRORLEVEL! NEQ 0 call :errorMessage
     )
     goto :endproc
 
 
 
-rem =======================
-rem === DoCMake        ====
-rem =======================
+rem =========================================
+rem === set_dflowfm_interacter_link_flag ====
+rem =========================================
 :set_dflowfm_interacter_link_flag
-    rem Ugly workaround to change "LinkLibraryDependencies=false" into "LinkLibraryDependencies=true"
+    rem # Ugly workaround to change "LinkLibraryDependencies=false" into "LinkLibraryDependencies=true"
     %root%\src\third_party_open\commandline\bin\win32\sed.exe -e "s/LinkLibraryDependencies=\"false\"/LinkLibraryDependencies=\"true\"/g" "%root%\build_dflowfm_interacter\dflowfm_cli_exe\dflowfm-cli.vfproj" >"%root%\build_dflowfm_interacter\dflowfm_cli_exe\dflowfm-cli_new.vfproj"
     del "%root%\build_dflowfm_interacter\dflowfm_cli_exe\dflowfm-cli.vfproj"  > del.log 2>&1
     del /f/q del.log
     rename %root%\build_dflowfm_interacter\dflowfm_cli_exe\dflowfm-cli_new.vfproj dflowfm-cli.vfproj
     goto :endproc
 
+
+
 rem =======================
 rem === Build          ====
 rem =======================
 :Build
     if %prepareonly% EQU 1 goto :endproc
+    if !ERRORLEVEL! NEQ 0 goto :endproc
     
     set result=false
     if "%config%" == "%~1"  set result=true
@@ -371,6 +378,7 @@ rem === traditionalBuild ====
 rem =========================
 :traditionalBuild
     if %prepareonly% EQU 1 goto :endproc
+    if !ERRORLEVEL! NEQ 0 goto :endproc
     
     set result=false
     if "!config!" == "all"  set result="true"
@@ -406,17 +414,11 @@ rem =======================
 :VSbuild
     echo.
     echo "Building with VisualStudio: %~1 ..."
-    echo     In case of crash:
-    echo          Is the Fortran compiler installed and available?
-    echo          Common problem: NetExtender needs to be switched on to reach the license server
     
     set currentWorkDir=%CD%
     devenv.com %~1.sln /Clean "Release|x64"
     devenv.com %~1.sln /Build "Release|x64" 1>%currentWorkDir%\build_%~1.log 2>&1
-    if NOT %ErrorLevel% EQU 0 (
-        echo "Error in compiling %~1.sln: %ErrorLevel%"
-        set globalErrorLevel=%ErrorLevel%
-    )
+    if !ERRORLEVEL! NEQ 0 call :errorMessage
 
     rem # In build.log, replace "error" by TeamCity messages
     %root%\src\third_party_open\commandline\bin\win32\sed.exe -e "/[Ee]rror[\:\ ]/s/^/\#\#teamcity\[buildStatus status\=\'FAILURE\' text\=\' /g;/buildStatus/s/$/\'\]/g" %currentWorkDir%\build_%~1.log 
@@ -431,6 +433,7 @@ rem =======================
     if %prepareonly% EQU 1                goto :endproc
     if "%config%" == "tests"              goto :endproc
     if "%config%" == "dflowfm_interacter" goto :endproc
+    if !ERRORLEVEL! NEQ 0                 goto :endproc
     echo.
     echo "Installing in build_all ..."
     call :createCMakeDir build_all
@@ -479,22 +482,33 @@ rem =======================
     goto :end
 
 
+
+rem =======================
+rem === errorMessage ======
+rem =======================
+:errorMessage
+    echo.
+    echo.
+    echo.
+    echo ERROR: Check log files in build_* directories
+    echo        Is the correct Fortran compiler installed, available and selected?
+    echo        Common problem: NetExtender needs to be switched on to reach the license server.
+    goto :endproc
+
+
 rem =======================
 rem === END TAG      ======
 rem =======================
 :end
-
-if NOT %globalErrorLevel% EQU 0 (
-    echo An error occurred in one or more compilation steps
-    echo Returning with error number %globalErrorLevel%
-    exit /B %globalErrorLevel%
-)
-
     rem # To prevent the DOS box from disappearing immediately: remove the rem on the following line
-if "!mode!" == "interactive" (
-    pause
-)
-exit /B
+    if "!mode!" == "interactive" (
+        pause
+    )
+    if !ERRORLEVEL! NEQ 0 (
+        exit /B %~1
+    ) else (
+        exit /B
+    )
 
 rem =======================
 rem === ENDPROC TAG  ======
