@@ -1314,7 +1314,7 @@ end subroutine deallocstructure
       if (numberOfWarnings == Maxwarnings+1) then
          numberOfWarnings = numberOfWarnings+1
          write (msgbuf, '(a,i0,a)') 'The number of warnings for changed structure parameters exceeds ', &
-                     Maxwarnings, ', subsequent warnings are supppressed'
+                     Maxwarnings, ', subsequent warnings are suppressed'
          call setmessage(LEVEL_INFO,msgbuf)
       else if (numberOfWarnings <= Maxwarnings) then
          if (comparereal(val_org, val_new) /= 0) then
