@@ -494,9 +494,11 @@
         IF (COMPUT.EQ.'STOP') THEN                                        40.13
           IUNIT  = 0                                                      40.13
           IOSTAT = 0                                                      40.13
+          IF (INODE.EQ.MASTER) THEN
           FILENM = 'norm_end'                                             40.13
           CALL FOR (IUNIT, FILENM, 'UF', IOSTAT)                          40.13
           WRITE (IUNIT, *) ' Normal end of run ', PROJNR                  40.13
+          ENDIF
           GOTO 900                                                        40.13
         ENDIF                                                             40.13
 
