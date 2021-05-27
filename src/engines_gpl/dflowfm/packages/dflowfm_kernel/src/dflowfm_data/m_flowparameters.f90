@@ -857,8 +857,8 @@ subroutine default_flowparameters()
     jahiswav = 1
     jahislateral = 1
     jahistaucurrent = 1
-    jahisvelocity = 0
-    jahisdischarge = 0
+    jahisvelocity = 1
+    jahisdischarge = 1
 
     jamaps0 = 1
     jamaps1 = 1

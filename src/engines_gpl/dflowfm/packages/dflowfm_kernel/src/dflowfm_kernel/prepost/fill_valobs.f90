@@ -56,7 +56,7 @@ subroutine fill_valobs()
    nlyrs     = 0
 
    if (jaeulervel==1 .and. jawave > 0) then
-      call getucxucyeuler(ndkx, workx, worky)
+      call getucxucyeulmag(ndkx, workx, worky, ucmag, jaeulervel, jahisvelocity)
    endif
 
    if (jawave>0) then

@@ -519,7 +519,7 @@
  call aerr('uqcx(ndkx) , uqcy(ndkx)', ierr, 2*ndkx) ; uqcx = 0 ; uqcy = 0
  allocate ( ucxq(ndkx) , ucyq(ndkx) , stat = ierr)
  call aerr('ucxq(ndkx) , ucyq(ndkx)', ierr, 2*ndkx) ; ucxq = 0 ; ucyq = 0
- if (jamapucmag == 1 .or. len_trim(md_foufile) > 0 .or. allocated(map_classes_ucmag)) then
+ if (jamapucmag == 1 .or. jahisvelocity == 1 .or. len_trim(md_foufile) > 0 .or. allocated(map_classes_ucmag)) then
     call realloc(ucmag, ndkx, keepExisting=.false.)
  end if
  allocate ( qin (ndkx) , vih (ndkx) , stat = ierr)

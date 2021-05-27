@@ -3520,10 +3520,10 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
        call prop_set(prop_ptr, 'output', 'Wrihis_taucurrent', jahistaucurrent, 'Write mean bed shear stress to his file (1: yes, 0: no)' )
     endif
     if (writeall .or. jahisvelocity /= 0) then
-       call prop_set(prop_ptr, 'output', 'Wrihis_taucurrent', jahisvelocity, 'Write velocity magnitude to his file (1: yes, 0: no)' )
+       call prop_set(prop_ptr, 'output', 'Wrihis_velocity', jahisvelocity, 'Write velocity magnitude to his file (1: yes, 0: no)' )
     endif
     if (writeall .or. jahisdischarge /= 0) then
-       call prop_set(prop_ptr, 'output', 'Wrihis_taucurrent', jahisdischarge, 'Write discharge magnitude to his file (1: yes, 0: no)' )
+       call prop_set(prop_ptr, 'output', 'Wrihis_discharge', jahisdischarge, 'Write discharge magnitude to his file (1: yes, 0: no)' )
     endif
     if (writeall .or. jamaps0 /= 1) then
         call prop_set(prop_ptr, 'output', 'Wrimap_waterlevel_s0', jamaps0, 'Write water levels for previous time step to map file (1: yes, 0: no)')
