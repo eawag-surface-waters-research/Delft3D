@@ -818,10 +818,8 @@
                if (dxe(L) <= 0d0) then                           ! X/Y of K1, K2 may be equal, as long as length > 0
                   ja = 0
                end if
-            else
-               IF (XK(K1) == XK(K2) .AND. YK(K1) == YK(K2) ) THEN
-                  JA = 0
-               ENDIF
+            else IF (XK(K1) == XK(K2) .AND. YK(K1) == YK(K2) ) THEN
+               JA = 0
             end if
          ENDIF
          IF (JA == 1) THEN
