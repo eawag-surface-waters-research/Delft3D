@@ -430,18 +430,10 @@ src/NEWS -text
 src/README -text
 src/TODO -text
 src/autogen.sh -text
-src/build.sh -text
-src/build_dimr.sh -text
 src/build_dimr_c7.sh -text
 src/build_gnu.sh -text
-src/build_h5.sh -text
-src/build_h6.sh -text
 src/build_h6c7.sh -text
-src/build_test.sh -text
 src/build_test_c7.sh -text
-src/build_ubuntu.16.04LT.readme -text
-src/build_ubuntu1604.sh -text
-src/buildfm_cmake.sh -text
 src/buildvs15.cmd -text
 src/buildvs15_dev.cmd -text
 src/buildvs15_dimr.cmd -text
@@ -4623,7 +4615,6 @@ src/m4/fortranbinary.m4 -text
 src/m4/fortranextra.m4 -text
 src/m4/gwqt.m4 -text
 src/m4/pkg.m4 -text
-src/myconfig.sh -text
 src/plugins_lgpl/Makefile.am -text
 src/plugins_lgpl/plugin_culvert/Makefile.am -text
 src/plugins_lgpl/plugin_culvert/plugin_culvert.sln -text
@@ -4644,8 +4635,6 @@ src/plugins_lgpl/plugin_delftflow_traform/src/settling_velocity.f90 -text
 src/plugins_lgpl/plugin_delftflow_traform/src/shld.f90 -text
 src/plugins_lgpl/plugin_delftflow_traform/src/vrijn84_hxbs.f90 -text
 src/plugins_lgpl/plugin_delftflow_traform/src/vrijn84_riv_77.f90 -text
-src/prebuild-h6_buildserver.sh -text
-src/prebuild-h6_buildserver_intel16.sh -text
 src/prepare_sln.cmd -text
 src/prepare_sln.py -text
 src/scripts_lgpl/Makefile.am -text
