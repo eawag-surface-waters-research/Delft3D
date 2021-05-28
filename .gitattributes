@@ -522,13 +522,11 @@ src/engines_gpl/dflowfm/interacter/README -text
 src/engines_gpl/dflowfm/packages/Makefile.am -text
 src/engines_gpl/dflowfm/packages/dflowfm-cli_exe/CMakeLists.txt -text
 src/engines_gpl/dflowfm/packages/dflowfm-cli_exe/Makefile.am -text
-src/engines_gpl/dflowfm/packages/dflowfm-cli_exe/dflowfm-cli.vfproj -text
 src/engines_gpl/dflowfm/packages/dflowfm-cli_exe/src/Makefile.am -text
 src/engines_gpl/dflowfm/packages/dflowfm-cli_exe/src/net_main.F90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_esmf/src/unstruc_esmf.F90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/CMakeLists.txt -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/Makefile.am -text
-src/engines_gpl/dflowfm/packages/dflowfm_kernel/dflowfm_kernel.vfproj -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/include/RF.inc -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/include/blasfm.h -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/Makefile.am -text
@@ -2220,7 +2218,6 @@ src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_utils/unstruc_startu
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/to_thirdparty/rcm.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/unstruc_version.F90.svn -text
 src/engines_gpl/dflowfm/packages/dflowfm_lib/CMakeLists.txt -text
-src/engines_gpl/dflowfm/packages/dflowfm_lib/dflowfm_dll.vfproj -text
 src/engines_gpl/dflowfm/packages/dflowfm_lib/include/bmi_get_var.inc -text
 src/engines_gpl/dflowfm/packages/dflowfm_lib/include/bmi_get_var_count.inc -text
 src/engines_gpl/dflowfm/packages/dflowfm_lib/include/bmi_get_var_location.inc -text
@@ -2288,7 +2285,6 @@ src/engines_gpl/dflowfm/scripts/team-city/run_dflowfm_processes.sh -text
 src/engines_gpl/dflowfm/scripts/team-city/run_dfmoutput.bat -text
 src/engines_gpl/dflowfm/scripts/team-city/run_dfmoutput.sh -text
 src/engines_gpl/dflowfm/scripts/team-city/zip_code.py -text
-src/engines_gpl/dflowfm/scripts/template/dflowfm_open_template.sln -text
 src/engines_gpl/dflowfm/scripts/template/dflowfm_unit_tests_template.sln -text
 src/engines_gpl/dflowfm/scripts/template/generate.py -text
 src/engines_gpl/dflowfm/tests/DFlowFMTests/DFlowFmTests.cs -text
@@ -2382,7 +2378,6 @@ src/engines_gpl/dimr/packages/Makefile.am -text
 src/engines_gpl/dimr/packages/dimr/CMakeLists.txt -text
 src/engines_gpl/dimr/packages/dimr/Makefile.am -text
 src/engines_gpl/dimr/packages/dimr/dimr_class_diagram.cd -text
-src/engines_gpl/dimr/packages/dimr/dimr_exe.vcxproj -text
 src/engines_gpl/dimr/packages/dimr/include/dimr_exe.h -text
 src/engines_gpl/dimr/packages/dimr/include/dimr_exe_version.h.svn -text
 src/engines_gpl/dimr/packages/dimr/include/dimr_exe_version.rc.svn -text
@@ -2395,8 +2390,6 @@ src/engines_gpl/dimr/packages/dimr/src/readme.txt -text
 src/engines_gpl/dimr/packages/dimr_lib/CMakeLists.txt -text
 src/engines_gpl/dimr/packages/dimr_lib/Makefile.am -text
 src/engines_gpl/dimr/packages/dimr_lib/config.h.cmake.in -text
-src/engines_gpl/dimr/packages/dimr_lib/dimr_lib.vcxproj -text
-src/engines_gpl/dimr/packages/dimr_lib/dimr_lib.vcxproj.filters -text
 src/engines_gpl/dimr/packages/dimr_lib/dimr_lib_class_diagram.cd -text
 src/engines_gpl/dimr/packages/dimr_lib/include/Makefile.am -text
 src/engines_gpl/dimr/packages/dimr_lib/include/bmi.h -text
@@ -2470,7 +2463,6 @@ src/engines_gpl/dimr/scripts/generic/win32/run_dimr_parallel.bat -text
 src/engines_gpl/dimr/scripts/generic/win64/dimr_config_example.xml -text
 src/engines_gpl/dimr/scripts/generic/win64/run_dimr.bat -text
 src/engines_gpl/dimr/scripts/generic/win64/run_dimr_parallel.bat -text
-src/engines_gpl/dimr/scripts/template/dimr_open_template.sln -text
 src/engines_gpl/dimr/scripts/waq/dimr_config.xml -text
 src/engines_gpl/dimr/scripts/waq/dimr_config_linux.xml -text
 src/engines_gpl/dimr/scripts/waq/parameter_substitution/dimr_config.xml -text
@@ -4683,7 +4675,6 @@ src/scripts_lgpl/win64/testcoverage/addcovoptions.py -text
 src/scripts_lgpl/win64/testcoverage/catfiles.py -text
 src/scripts_lgpl/win64/testcoverage/readcov.lst -text
 src/scripts_lgpl/win64/testcoverage/readcov.py -text
-src/scripts_lgpl/win64/tests_template.sln -text
 src/scripts_lgpl/win64/utils_lgpl_no_tests_template.sln -text
 src/scripts_lgpl/win64/utils_lgpl_template.sln -text
 src/setenv.sh -text
@@ -4693,7 +4684,6 @@ src/test/engines_gpl/dflowfm/Makefile.am -text
 src/test/engines_gpl/dflowfm/packages/Makefile.am -text
 src/test/engines_gpl/dflowfm/packages/dflowfm_kernel/CMakeLists.txt -text
 src/test/engines_gpl/dflowfm/packages/dflowfm_kernel/Makefile.am -text
-src/test/engines_gpl/dflowfm/packages/dflowfm_kernel/dflowfm_kernel_test.vfproj -text
 src/test/engines_gpl/dflowfm/packages/dflowfm_kernel/src/Makefile.am -text
 src/test/engines_gpl/dflowfm/packages/dflowfm_kernel/src/test_1d_grid.f90 -text
 src/test/engines_gpl/dflowfm/packages/dflowfm_kernel/src/test_MDU_File_Version.f90 -text
@@ -4771,7 +4761,6 @@ src/test/engines_gpl/waq/packages/waq_utils_f/src/Makefile.am -text
 src/test/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/Makefile.am -text
 src/test/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/basic_tests.f90 -text
 src/test/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/test_waq_utils_f.f90 -text
-src/test/engines_gpl/waq/packages/waq_utils_f/waq_utils_f_test.vfproj -text
 src/test/utils_lgpl/Makefile.am -text
 src/test/utils_lgpl/deltares_common/Makefile.am -text
 src/test/utils_lgpl/deltares_common/packages/Makefile.am -text
@@ -4794,14 +4783,12 @@ src/test/utils_lgpl/deltares_common/packages/test_deltares_common/test_data/no-c
 src/test/utils_lgpl/deltares_common/packages/test_deltares_common/test_data/simple-file.ini -text
 src/test/utils_lgpl/deltares_common/packages/test_deltares_common/test_data/test_fileversion.ini -text
 src/test/utils_lgpl/deltares_common/packages/test_deltares_common/test_data/test_strings.ini -text
-src/test/utils_lgpl/deltares_common/packages/test_deltares_common/test_deltares_common.vfproj -text
 src/test/utils_lgpl/ec_module/Makefile.am -text
 src/test/utils_lgpl/ec_module/packages/Makefile.am -text
 src/test/utils_lgpl/ec_module/packages/ec_module_test/CMakeLists.txt -text
 src/test/utils_lgpl/ec_module/packages/ec_module_test/Makefile.am -text
 src/test/utils_lgpl/ec_module/packages/ec_module_test/ReadMe.txt -text
 src/test/utils_lgpl/ec_module/packages/ec_module_test/build_ec_module_testprog.sh -text
-src/test/utils_lgpl/ec_module/packages/ec_module_test/ec_module_test.vfproj -text
 src/test/utils_lgpl/ec_module/packages/ec_module_test/run_all_tests.py -text
 src/test/utils_lgpl/ec_module/packages/ec_module_test/run_ec_module_testprog.sh -text
 src/test/utils_lgpl/ec_module/packages/ec_module_test/src/Makefile.am -text

@@ -57,26 +57,6 @@ config[3] = "dimr"
 # - ifort version
 # - 32/64 bit settings
 libdir = {}
-libdir["fortran1132"] = "$(IFORT_COMPILER11)\\compiler\\lib\\ia32"
-libdir["c1132"] = libdir["fortran1132"]
-libdir["fortran1164"] = "$(IFORT_COMPILER11)\\compiler\\lib\\intel64"
-libdir["c1164"] = libdir["fortran1164"]
-libdir["fortran1232"] = "$(IFORT_COMPILER12)\\compiler\\lib\\ia32"
-libdir["c1232"] = libdir["fortran1232"]
-libdir["fortran1264"] = "$(IFORT_COMPILER12)\\compiler\\lib\\intel64"
-libdir["c1264"] = libdir["fortran1264"]
-libdir["fortran1332"] = "$(IFORT_COMPILER13)\\compiler\\lib\\ia32"
-libdir["c1332"] = libdir["fortran1332"]
-libdir["fortran1364"] = "$(IFORT_COMPILER13)\\compiler\\lib\\intel64"
-libdir["c1364"] = libdir["fortran1364"]
-libdir["fortran1432"] = "$(IFORT_COMPILER14)\\compiler\\lib\\ia32"
-libdir["c1432"] = libdir["fortran1432"]
-libdir["fortran1464"] = "$(IFORT_COMPILER14)\\compiler\\lib\\intel64"
-libdir["c1464"] = libdir["fortran1464"]
-libdir["fortran1532"] = "$(IFORT_COMPILER15)\\compiler\\lib\\ia32"
-libdir["c1532"] = libdir["fortran1532"]
-libdir["fortran1564"] = "$(IFORT_COMPILER15)\\compiler\\lib\\intel64"
-libdir["c1564"] = libdir["fortran1564"]
 libdir["fortran1632"] = "$(IFORT_COMPILER16)\\compiler\\lib\\ia32"
 libdir["c1632"] = libdir["fortran1632"]
 libdir["fortran1664"] = "$(IFORT_COMPILER16)\\compiler\\lib\\intel64"
@@ -106,26 +86,6 @@ libdir["c2164"] = libdir["fortran2164"]
 # - ifort version
 # - 32/64 bit settings
 redistdir = {}
-redistdir["fortran1132"] = "$(IFORT_COMPILER11)redist\\ia32\\compiler\\&quot"
-redistdir["c1132"] = "$(IFORT_COMPILER11)redist\\ia32\\compiler\\"
-redistdir["fortran1164"] = "$(IFORT_COMPILER11)redist\\intel64\\compiler\\&quot"
-redistdir["c1164"] = "$(IFORT_COMPILER11)redist\\intel64\\compiler\\"
-redistdir["fortran1232"] = "$(IFORT_COMPILER12)redist\\ia32\\compiler\\&quot"
-redistdir["c1232"] = "$(IFORT_COMPILER12)redist\\ia32\\compiler\\"
-redistdir["fortran1264"] = "$(IFORT_COMPILER12)redist\\intel64\\compiler\\&quot"
-redistdir["c1264"] = "$(IFORT_COMPILER12)redist\\intel64\\compiler\\"
-redistdir["fortran1332"] = "$(IFORT_COMPILER13)redist\\ia32\\compiler\\&quot"
-redistdir["c1332"] = "$(IFORT_COMPILER13)redist\\ia32\\compiler\\"
-redistdir["fortran1364"] = "$(IFORT_COMPILER13)redist\\intel64\\compiler\\&quot"
-redistdir["c1364"] = "$(IFORT_COMPILER13)redist\\intel64\\compiler\\"
-redistdir["fortran1432"] = "$(IFORT_COMPILER14)redist\\ia32\\compiler\\&quot"
-redistdir["c1432"] = "$(IFORT_COMPILER14)redist\\ia32\\compiler\\"
-redistdir["fortran1464"] = "$(IFORT_COMPILER14)redist\\intel64\\compiler\\&quot"
-redistdir["c1464"] = "$(IFORT_COMPILER14)redist\\intel64\\compiler\\"
-redistdir["fortran1532"] = "$(IFORT_COMPILER15)redist\\ia32\\compiler\\&quot"
-redistdir["c1532"] = "$(IFORT_COMPILER15)redist\\ia32\\compiler\\"
-redistdir["fortran1564"] = "$(IFORT_COMPILER15)redist\\intel64\\compiler\\&quot"
-redistdir["c1564"] = "$(IFORT_COMPILER15)redist\\intel64\\compiler\\"
 redistdir["fortran1632"] = "$(IFORT_COMPILER16)redist\\ia32\\compiler\\&quot"
 redistdir["c1632"] = "$(IFORT_COMPILER16)redist\\ia32\\compiler\\"
 redistdir["fortran1664"] = "$(IFORT_COMPILER16)redist\\intel64\\compiler\\&quot"
@@ -153,26 +113,6 @@ redistdir["c2164"] = "$(IFORT_COMPILER21)redist\\intel64_win\\compiler\\"
 # - ifort version
 # - 32/64 bit settings
 mkldir = {}
-mkldir["fortran1132"] = "$(IFORT_COMPILER11)redist\\ia32\\mkl\\&quot"
-mkldir["c1132"] = "$(IFORT_COMPILER11)redist\\ia32\\mkl\\"
-mkldir["fortran1164"] = "$(IFORT_COMPILER11)redist\\intel64\\mkl\\&quot"
-mkldir["c1164"] = "$(IFORT_COMPILER11)redist\\intel64\\mkl\\"
-mkldir["fortran1232"] = "$(IFORT_COMPILER12)redist\\ia32\\mkl\\&quot"
-mkldir["c1232"] = "$(IFORT_COMPILER12)redist\\ia32\\mkl\\"
-mkldir["fortran1264"] = "$(IFORT_COMPILER12)redist\\intel64\\mkl\\&quot"
-mkldir["c1264"] = "$(IFORT_COMPILER12)redist\\intel64\\mkl\\"
-mkldir["fortran1332"] = "$(IFORT_COMPILER13)redist\\ia32\\mkl\\&quot"
-mkldir["c1332"] = "$(IFORT_COMPILER13)redist\\ia32\\mkl\\"
-mkldir["fortran1364"] = "$(IFORT_COMPILER13)redist\\intel64\\mkl\\&quot"
-mkldir["c1364"] = "$(IFORT_COMPILER13)redist\\intel64\\mkl\\"
-mkldir["fortran1432"] = "$(IFORT_COMPILER14)redist\\ia32\\mkl\\&quot"
-mkldir["c1432"] = "$(IFORT_COMPILER14)redist\\ia32\\mkl\\"
-mkldir["fortran1464"] = "$(IFORT_COMPILER14)redist\\intel64\\mkl\\&quot"
-mkldir["c1464"] = "$(IFORT_COMPILER14)redist\\intel64\\mkl\\"
-mkldir["fortran1532"] = "$(IFORT_COMPILER15)redist\\ia32\\mkl\\&quot"
-mkldir["c1532"] = "$(IFORT_COMPILER15)redist\\ia32\\mkl\\"
-mkldir["fortran1564"] = "$(IFORT_COMPILER15)redist\\intel64\\mkl\\&quot"
-mkldir["c1564"] = "$(IFORT_COMPILER15)redist\\intel64\\mkl\\"
 mkldir["fortran1632"] = "$(IFORT_COMPILER16)redist\\ia32\\mkl\\&quot"
 mkldir["c1632"] = "$(IFORT_COMPILER16)redist\\ia32\\mkl\\"
 mkldir["fortran1664"] = "$(IFORT_COMPILER16)redist\\intel64\\mkl\\&quot"
@@ -198,10 +138,6 @@ mkldir["c2164"] = "$(ONEAPI_ROOT)mkl\\latest\\redist\\intel64\\"
 #
 # toolsversion specifies the vs toolsversion number
 toolsversion = {}
-toolsversion[2010] = "4.0"
-toolsversion[2012] = "4.0"
-toolsversion[2013] = "12.0"
-toolsversion[2014] = "12.0"
 toolsversion[2015] = "14.0"
 toolsversion[2016] = "14.0"
 toolsversion[2017] = "15.0"
@@ -211,9 +147,6 @@ toolsversion[2019] = "15.0"
 #
 # frameworkversion specifies the .Net frameworknumber
 frameworkversion = {}
-frameworkversion[42] = "4.2"
-frameworkversion[43] = "4.3"
-frameworkversion[44] = "4.4"
 frameworkversion[45] = "4.5"
 frameworkversion[46] = "4.6"
 frameworkversion[47] = "4.7"
@@ -223,10 +156,6 @@ frameworkversion[48] = "4.8"
 #
 # platformtoolset specifies the vs platformtoolset version number
 platformtoolset = {}
-platformtoolset[2010] = ""
-platformtoolset[2012] = "    <PlatformToolset>v110</PlatformToolset>"
-platformtoolset[2013] = "    <PlatformToolset>v120</PlatformToolset>"
-platformtoolset[2014] = "    <PlatformToolset>v120</PlatformToolset>"
 platformtoolset[2015] = "    <PlatformToolset>v140</PlatformToolset>"
 platformtoolset[2016] = "    <PlatformToolset>v140</PlatformToolset>"
 platformtoolset[2017] = "    <PlatformToolset>v141</PlatformToolset>"
@@ -307,15 +236,7 @@ def process_solution_file(sln, slntemplate):
             # Changes to the sln file based on VS version
             startpos = line.find("Microsoft Visual Studio Solution File, Format Version")
             if startpos == 0:
-                if vs == 2010:
-                    line = "Microsoft Visual Studio Solution File, Format Version 11.00\r\n"
-                elif vs == 2012:
-                    line = "Microsoft Visual Studio Solution File, Format Version 12.00\r\n"
-                elif vs == 2013:
-                    line = "Microsoft Visual Studio Solution File, Format Version 12.00\r\n"
-                elif vs == 2014:
-                    line = "Microsoft Visual Studio Solution File, Format Version 12.00\r\n"
-                elif vs == 2015:
+                if vs == 2015:
                     line = "Microsoft Visual Studio Solution File, Format Version 12.00\r\n"
                 elif vs == 2016:
                     line = "Microsoft Visual Studio Solution File, Format Version 12.00\r\n"
@@ -327,15 +248,7 @@ def process_solution_file(sln, slntemplate):
                     pass
             startpos = line.find("# Visual Studio")
             if startpos == 0:
-                if vs == 2010:
-                    line = "# Visual Studio 2010\r\n"
-                elif vs == 2012:
-                    line = "# Visual Studio 2012\r\n"
-                elif vs == 2013:
-                    line = "# Visual Studio 2013\r\n"
-                elif vs == 2014:
-                    line = "# Visual Studio 2014\r\n"
-                elif vs == 2015:
+                if vs == 2015:
                     line = "# Visual Studio 2015\r\n"
                 elif vs == 2016:
                     line = "# Visual Studio 2016\r\n"
@@ -657,15 +570,12 @@ def do_work():
 
     if not templateSolutionPath:
         process_solution_file("delft3d_open.sln", os.path.join("scripts_lgpl", "win64", "delft3d_open_template.sln"))
-        process_solution_file("dflowfm_open.sln", os.path.join("engines_gpl", "dflowfm", "scripts", "template", "dflowfm_open_template.sln"))
-        process_solution_file("dimr_open.sln", os.path.join("engines_gpl", "dimr", "scripts", "template", "dimr_open_template.sln"))
 
         # TODO: Consider making this optional via cmdline args:
         process_solution_file("io_netcdf.sln"          , os.path.join("scripts_lgpl", "win64", "io_netcdf_template.sln"))
         process_solution_file("nefis.sln"              , os.path.join("scripts_lgpl", "win64", "nefis_template.sln"))
         process_solution_file("utils_lgpl.sln"         , os.path.join("scripts_lgpl", "win64", "utils_lgpl_template.sln"))
         process_solution_file("utils_lgpl_no_tests.sln", os.path.join("scripts_lgpl", "win64", "utils_lgpl_no_tests_template.sln"))
-        process_solution_file("tests.sln"              , os.path.join("scripts_lgpl", "win64", "tests_template.sln"))
     else:
         slnName = os.path.basename(templateSolutionPath).replace("_template","")
         process_solution_file(slnName, templateSolutionPath)
@@ -716,11 +626,8 @@ def build_gui():
     Radiobutton(root, text="VS 2019                           ", variable=vs_gui, value=2019).grid(row= 6, column=0, sticky=W)
     Radiobutton(root, text="VS 2017                           ", variable=vs_gui, value=2017).grid(row= 7, column=0, sticky=W)
     Radiobutton(root, text="VS 2015, Update 3                 ", variable=vs_gui, value=2015).grid(row= 8, column=0, sticky=W)
-    Radiobutton(root, text="VS 2013                           ", variable=vs_gui, value=2013).grid(row= 9, column=0, sticky=W)
-    Radiobutton(root, text="VS 2012                           ", variable=vs_gui, value=2012).grid(row=10, column=0, sticky=W)
-    Radiobutton(root, text="VS 2010                           ", variable=vs_gui, value=2010).grid(row=11, column=0, sticky=W)
     # default value
-    vs_gui.set(2015)
+    vs_gui.set(2017)
     
     Label(text=".Net Framwork Version:", relief=RIDGE, width=20).grid(row=5, column=1)
     
@@ -728,9 +635,6 @@ def build_gui():
     Radiobutton(root, text=".Net Framework 4.7", variable=fw_gui, value=47).grid(row= 7, column=1, sticky=W)
     Radiobutton(root, text=".Net Framework 4.6", variable=fw_gui, value=46).grid(row= 8, column=1, sticky=W)
     Radiobutton(root, text=".Net Framework 4.5", variable=fw_gui, value=45).grid(row= 9, column=1, sticky=W)
-    Radiobutton(root, text=".Net Framework 4.4", variable=fw_gui, value=44).grid(row=10, column=1, sticky=W)
-    Radiobutton(root, text=".Net Framework 4.3", variable=fw_gui, value=43).grid(row=11, column=1, sticky=W)
-    Radiobutton(root, text=".Net Framework 4.2", variable=fw_gui, value=42).grid(row=12, column=1, sticky=W)
     # default value
     fw_gui.set(46)
     
@@ -741,12 +645,8 @@ def build_gui():
         Radiobutton(root, text="IFORT18: Intel Parallel Studio XE 2018 Update 4", variable=ifort_gui, value=18).grid(row= 8, column=2, sticky=W)
         Radiobutton(root, text="IFORT17: (Not Recommended)                     ", variable=ifort_gui, value=17).grid(row= 9, column=2, sticky=W)
         Radiobutton(root, text="IFORT16: Intel Parallel Studio XE 2016 Update 4", variable=ifort_gui, value=16).grid(row=10, column=2, sticky=W)
-        Radiobutton(root, text="IFORT15: Intel Parallel Studio XE 2015 Update 6", variable=ifort_gui, value=15).grid(row=11, column=2, sticky=W)
-        Radiobutton(root, text="IFORT14: Intel Visual Fortran Composer XE 2014 ", variable=ifort_gui, value=14).grid(row=12, column=2, sticky=W)
-        Radiobutton(root, text="IFORT13: Intel Visual Fortran Composer XE 2013 ", variable=ifort_gui, value=13).grid(row=13, column=2, sticky=W)
-        Radiobutton(root, text="IFORT12: Intel Visual Fortran Composer XE 2011 ", variable=ifort_gui, value=12).grid(row=14, column=2, sticky=W)
         # default value
-        ifort_gui.set(16)
+        ifort_gui.set(18)
     else:
         ifort_gui.set(-999)
         
