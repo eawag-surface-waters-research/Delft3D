@@ -32,7 +32,7 @@ contains
 !
 !==============================================================================
 subroutine tests_observCrossSections
-    !call test( test_read_snapped_observ_crs, 'Tests the reading and snapping of observation cross sections' )
+    call test( test_read_snapped_observ_crs, 'Tests the reading and snapping of observation cross sections' )
 end subroutine tests_observCrossSections
 !
 !
