@@ -33,7 +33,7 @@
    subroutine setucxqucyq_mor (u1, ucxq, ucyq)
    use m_fm_erosed, only: ucxq_mor, ucyq_mor, hs_mor, link1, link1sign
    use m_flowgeom, only: ndx, lnx, lnxi, ln, nd, wcx1, wcx2, wcy1, wcy2, csu, snu, bl, ndxi, lnx1D, kcs
-   use m_flow, only: hs, hu, zws, kmx, kmxL, au, q1, ucx_mor, ucy_mor
+   use m_flow, only: hs, hu, zws, kmx, kmxL, au, q1, ucx_mor, ucy_mor, lnkx, ndkx
    use m_flowparameters ,only: jacstbnd, epshs, eps10
    use m_sediment, only: stmpar
    use m_turbulence, only:ln0
@@ -41,9 +41,9 @@
    use unstruc_channel_flow, only: network
 
    implicit none
-   double precision, dimension(lnx), intent(in ) :: u1
-   double precision, dimension(ndx), intent(in ) :: ucxq
-   double precision, dimension(ndx), intent(in ) :: ucyq
+   double precision, dimension(lnkx), intent(in ) :: u1
+   double precision, dimension(ndkx), intent(in ) :: ucxq
+   double precision, dimension(ndkx), intent(in ) :: ucyq
    integer          :: L, LL, k, k1, k2, Lt, Lb, kk, kb, kt
    double precision :: wcxu, wcyu, cs, sn, uin, huL
    logical, pointer :: maximumwaterdepth

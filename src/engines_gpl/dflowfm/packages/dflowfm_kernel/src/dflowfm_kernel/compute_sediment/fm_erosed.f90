@@ -634,12 +634,8 @@
                   seddif(l, k) = max(vicwws(k),dicoww)
                enddo
             enddo
-            ! in layers
-            do k = kb, kt
-               do l = 1, lsed
-                  rsedeq(k, l) = 0d0
-               enddo
-            enddo
+            !
+            rsedeq(nm,:) = 0d0
          endif
          cycle
       endif
@@ -933,8 +929,8 @@
             endif
             !
             kmaxsd        = 1                       ! for mud fractions kmaxsd points to the grid cell at the bottom of the water column
-            thick0        = max(thicklc(kmaxsd) * h0, epshs)
-            thick1        = max(thicklc(kmaxsd) * h1, epshs)
+            thick0        = thicklc(kmaxsd) * h0
+            thick1        = thicklc(kmaxsd) * h1
             !
             call erosilt(thicklc        ,kmaxlc       , wslc        , mdia          , &
                        & thick1         ,thick1       , fixfac(nm,l), srcmax(nm, l) , &                         ! mass conservation

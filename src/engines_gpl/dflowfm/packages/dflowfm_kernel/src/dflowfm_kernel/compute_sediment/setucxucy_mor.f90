@@ -42,7 +42,7 @@
    use m_flowparameters, only: jabarrieradvection
    use m_sferic
    implicit none
-   double precision, dimension(lnx), intent(in ) :: u1_loc
+   double precision, dimension(lnkx), intent(in ) :: u1_loc
 
    integer          :: L, KK, k1, k2, k, nw, Lb, Lt, LL, nn, n, kt,kb, kbk, k2k
    integer          :: itpbn, newucxq=0
