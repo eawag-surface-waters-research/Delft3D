@@ -37,7 +37,7 @@ subroutine run_swan (casl)
 ! NONE
 !!--declarations----------------------------------------------------------------
     use swan_input
-    use wave_mpi
+    use wave_mpi, only: numranks, wave_mpi_bcast, wave_mpi_barrier, engine_comm_world, MPI_SUCCESS, SWAN_GO
     use system_utils, only: SCRIPT_EXTENSION
     !
     implicit none
@@ -117,12 +117,17 @@ subroutine run_swan (casl)
        write(*,'(a)')'>>...Start SWAN run'
        if (numranks > 1) then
           call wave_mpi_bcast(SWAN_GO, ierr)
+          if ( ierr == MPI_SUCCESS ) then
+             call swan(engine_comm_world)
+             call wave_mpi_barrier(ierr)
+          endif
           if ( ierr /= MPI_SUCCESS ) then
              write (*,'(a,i5)') 'MPI produces some internal error - return code is ',ierr
              call wavestop(1, '*** ERROR: MPI produced an internal error')
           endif
+       else
+          call swan(engine_comm_world)
        endif
-       call swan(engine_comm_world)
     else
        !
        ! As executable

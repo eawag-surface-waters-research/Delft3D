@@ -36,7 +36,7 @@ subroutine run_swan_slave (command, retval)
 !!--pseudo code and references--------------------------------------------------
 ! NONE
 !!--declarations----------------------------------------------------------------
-   use wave_mpi
+   use wave_mpi, only: wave_mpi_bcast, wave_mpi_barrier, engine_comm_world, MPI_SUCCESS, SWAN_GO
    implicit none
 !
 ! Global variables
@@ -51,13 +51,19 @@ subroutine run_swan_slave (command, retval)
 !! executable statements -----------------------------------------------
 !
    call wave_mpi_bcast(command, ierr)
+   if ( ierr == MPI_SUCCESS ) then
+      if (command == SWAN_GO) then
+         call swan(engine_comm_world)
+         ! include barrier to make sure that all SWAN instances have
+         ! finished accessing files that the master WAVE thread owill read
+         ! and delete
+         call wave_mpi_barrier(ierr)
+      endif
+   endif
    if ( ierr /= MPI_SUCCESS ) then
       write (*,'(a,i5)') 'MPI produces some internal error - return code is ',ierr
       retval = -1
    else
-      if (command == SWAN_GO) then
-         call swan(engine_comm_world)
-      endif
       retval = 0
    endif
 end subroutine run_swan_slave

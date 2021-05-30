@@ -301,7 +301,7 @@ end subroutine grid_dd_corrections
 !
 !==============================================================================
 subroutine make_grid_map(i1, i2, g1, g2, gm, external_mapper)
-   use wave_data
+   use system_utils, only: ARCH
    use netcdf
    use m_polygon
    use m_tpoly
@@ -372,7 +372,7 @@ subroutine make_grid_map(i1, i2, g1, g2, gm, external_mapper)
          call wavestop(1, 'unable to locate "'//trim(searchstring)//'" in "'//trim(gm%w_tmp_filename)// '"')
       endif
       write(*,'(a)') '<<Run ESMF_RegridWeightGen...'
-      if (arch == 'linux') then
+      if (ARCH == 'linux') then
          write(*,'(a)')'>>...Check file esmf_sh.log'
          write(command, '(a)') 'ESMF_RegridWeightGen_in_Delft3D-WAVE.sh'
       else

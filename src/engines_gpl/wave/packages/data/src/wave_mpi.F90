@@ -192,4 +192,12 @@ subroutine wave_mpi_bcast(command, ierr)
 #endif
 end subroutine wave_mpi_bcast
 
+
+subroutine wave_mpi_barrier(ierr)
+   integer :: ierr
+#ifdef HAVE_MPI
+   call mpi_barrier ( engine_comm_world, ierr )
+#endif
+end subroutine wave_mpi_barrier
+
 end module wave_mpi

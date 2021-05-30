@@ -86,14 +86,6 @@ type wave_data_type
    type(wave_output_type) :: output
 end type wave_data_type
 !
-! Module parameters
-!
-! arch is currently 'win32' or 'linux'
-!
-character(10) :: arch
-!
-!
-!
 contains
 !
 !
@@ -119,18 +111,6 @@ subroutine initialize_wavedata(wavedata)
    wavedata%output%nexttim            =  0.0
    wavedata%output%timseckeephot      =  0.0
    wavedata%output%write_wavm         =  .false.
-   !
-   ! platform definition
-   !
-   call util_getenv('ARCH',txthlp)
-   call small(txthlp,999)
-   if (txthlp == 'win32' .or. txthlp == 'w32' .or. txthlp == 'x86') then
-      arch = 'win32'
-   elseif (txthlp == 'win64' .or. txthlp == 'x64') then
-      arch = 'win64'
-   else
-      arch = 'linux'
-   endif
 end subroutine initialize_wavedata
 !
 !
