@@ -39,16 +39,10 @@ call :vcvarsall
 
 call :traditionalBuild
 
-call :DoCMake dimr
-call :DoCMake dflowfm
-if "%config%" == "tests"              call :DoCMake tests
-if "%config%" == "dflowfm_interacter" call :DoCMake dflowfm_interacter
-if "%config%" == "dflowfm_interacter" call :set_dflowfm_interacter_link_flag
+call :DoCMake !config!
+if "!config!" == "dflowfm_interacter" call :set_dflowfm_interacter_link_flag
 
-call :Build dimr
-call :Build dflowfm
-if "%config%" == "tests"              call :Build tests
-if "%config%" == "dflowfm_interacter" call :Build dflowfm_interacter
+call :Build !config!
 
 call :installall
 
@@ -324,17 +318,12 @@ rem === DoCMake        ====
 rem =======================
 :DoCMake
     if !ERRORLEVEL! NEQ 0 goto :endproc
-    set result=false
-    if "%config%" == "%~1"  set result=true
-    if "%config%" == "all"  set result=true
-    if "%result%" == "true" (
-        echo.
-        call :createCMakeDir build_%~1
-        echo "Running CMake for %~1 ..."
-        cd /d "%root%\build_%~1\"
-        cmake ..\src\cmake -G %generator% -A x64 -B "." -D CONFIGURATION_TYPE="%~1" 1>cmake_%~1.log 2>&1
-        if !ERRORLEVEL! NEQ 0 call :errorMessage
-    )
+    echo.
+    call :createCMakeDir build_%~1
+    echo "Running CMake for %~1 ..."
+    cd /d "%root%\build_%~1\"
+    cmake ..\src\cmake -G %generator% -A x64 -B "." -D CONFIGURATION_TYPE="%~1" 1>cmake_%~1.log 2>&1
+    if !ERRORLEVEL! NEQ 0 call :errorMessage
     goto :endproc
 
 
@@ -358,17 +347,11 @@ rem =======================
 :Build
     if %prepareonly% EQU 1 goto :endproc
     if !ERRORLEVEL! NEQ 0 goto :endproc
-    
-    set result=false
-    if "%config%" == "%~1"  set result=true
-    if "%config%" == "all"  set result=true
-    if "%result%" == "true" (
-        echo.
-        echo "Building %~1 ..."
-        cd /d "%root%\build_%~1\"
-        call :VSbuild %~1
-        cd /d "%root%\"
-    )
+    echo.
+    echo "Building %~1 ..."
+    cd /d "%root%\build_%~1\"
+    call :VSbuild %~1
+    cd /d "%root%\"
     goto :endproc
 
 
@@ -380,9 +363,7 @@ rem =========================
     if %prepareonly% EQU 1 goto :endproc
     if !ERRORLEVEL! NEQ 0 goto :endproc
     
-    set result=false
-    if "!config!" == "all"  set result="true"
-    if !result! == "true" (
+    if "!config!" == "all" (
         echo.
         echo "Building in the traditional way (only when config is all) ..."
         cd /d "%root%\src\"
@@ -431,21 +412,21 @@ rem === InstallAll     ====
 rem =======================
 :installall
     if %prepareonly% EQU 1                goto :endproc
-    if "%config%" == "tests"              goto :endproc
-    if "%config%" == "dflowfm_interacter" goto :endproc
     if !ERRORLEVEL! NEQ 0                 goto :endproc
-    echo.
-    echo "Installing in build_all ..."
-    call :createCMakeDir build_all
-    mkdir "%root%\build_all\x64"                               > del.log 2>&1
-    xcopy %root%\src\bin\x64                                    %root%\build_all\x64\                 /E /C /Y /Q > del.log 2>&1
-    xcopy %root%\build_dimr\x64\Release\dimr                    %root%\build_all\x64\dimr\            /E /C /Y /Q > del.log 2>&1
-    xcopy %root%\build_dflowfm\x64\Release\dflowfm\bin\dflowfm* %root%\build_all\x64\dflowfm\bin\     /E /C /Y /Q > del.log 2>&1
-    xcopy %root%\build_dflowfm\x64\Release\dflowfm\bin\dfm*     %root%\build_all\x64\dflowfm\bin\     /E /C /Y /Q > del.log 2>&1
-    xcopy %root%\build_dflowfm\x64\Release\dflowfm\default      %root%\build_all\x64\dflowfm\default\ /E /C /Y /Q > del.log 2>&1
-    xcopy %root%\build_dflowfm\x64\Release\dflowfm\scripts      %root%\build_all\x64\dflowfm\scripts\ /E /C /Y /Q > del.log 2>&1
-    xcopy %root%\build_dflowfm\x64\Release\share\bin            %root%\build_all\x64\share\bin\       /E /C /Y /Q > del.log 2>&1
-    del /f/q del.log
+
+    if "!config!" == "all" (
+        echo.
+        echo "Installing in build_all ..."
+        xcopy %root%\src\bin\x64                                %root%\build_all\x64\                 /E /C /Y /Q > del.log 2>&1
+        xcopy %root%\build_all\x64\Release\dimr                 %root%\build_all\x64\dimr\            /E /C /Y /Q > del.log 2>&1
+        xcopy %root%\build_all\x64\Release\dflowfm\bin\dflowfm* %root%\build_all\x64\dflowfm\bin\     /E /C /Y /Q > del.log 2>&1
+        xcopy %root%\build_all\x64\Release\dflowfm\bin\dfm*     %root%\build_all\x64\dflowfm\bin\     /E /C /Y /Q > del.log 2>&1
+        xcopy %root%\build_all\x64\Release\dflowfm\default      %root%\build_all\x64\dflowfm\default\ /E /C /Y /Q > del.log 2>&1
+        xcopy %root%\build_all\x64\Release\dflowfm\scripts      %root%\build_all\x64\dflowfm\scripts\ /E /C /Y /Q > del.log 2>&1
+        xcopy %root%\build_all\x64\Release\share\bin            %root%\build_all\x64\share\bin\       /E /C /Y /Q > del.log 2>&1
+        rmdir /s /q %root%\build_all\x64\Release > del.log 2>&1
+        del /f/q del.log
+    )
     goto :endproc
 
 
@@ -458,18 +439,22 @@ rem =======================
     echo.
     echo.
     echo Usage:
-    echo "build.bat <CONFIG> [OPTIONS]"
-    echo "- Create directory 'build_<CONFIG>'"
-    echo "  Delete it when it already existed"
-    echo "- Execute 'CMake <CONFIG>' to create makefile inside 'build_<CONFIG>'"
-    echo "- Execute 'make install'"
-    echo "- Execute prepare_sln.py"
-    echo "- Compile all engines that are not CMaked yet"
+    echo "build.bat"
+    echo "build.bat <CONFIG>"
+    echo "  Without <CONFIG>:"
+    echo "    The prepare_sln.py window will pop-up. Related commands will be executed."
+    echo "  With    <CONFIG>:"
+    echo "    - (Only when <CONFIG>='all'Execute prepare_sln.py in silent mode"
+    echo "    - Compile all engines that are not CMaked yet in the traditional way"
+    echo "    - Create directory 'build_<CONFIG>'"
+    echo "      Delete it when it already existed"
+    echo "    - Execute 'CMake <CONFIG>' to create file '<CONFIG>.sln' inside 'build_<CONFIG>'"
+    echo "    - Execute 'devenv.com <CONFIG>.sln /Build'"
+    echo "    - Combine all binaries in 'build_<CONFIG>\x64'"
     echo.
     echo "<CONFIG>:"
-    echo "- missing: execute prepare_sln.py"
     echo "- 'all':"
-    echo "  - build dflowfm_open"
+    echo "  All CMaked project, currently D-Flow FM and DIMR"
     echo "  - build dimr"
     echo "  - build all other engines in the traditional way"
     echo "  - combine all binaries"
