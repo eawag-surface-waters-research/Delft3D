@@ -615,7 +615,7 @@ def build_gui():
 
     Label(text="CMake configuration:", relief=RIDGE, width=20).grid(row=0, column=0)
     
-    Radiobutton(root, text="all                               ", variable=config_gui, value=0).grid(row=1, column=0, sticky=W)
+    Radiobutton(root, text="all (build full OSS tree)         ", variable=config_gui, value=0).grid(row=1, column=0, sticky=W)
     Radiobutton(root, text="dflowfm                           ", variable=config_gui, value=1).grid(row=2, column=0, sticky=W)
     Radiobutton(root, text="dflowfm_interacter (check .../src/engines_gpl/dflowfm/interacter/README)", variable=config_gui, value=2).grid(row=3, column=0, columnspan=3, sticky=W)
     Radiobutton(root, text="dimr                              ", variable=config_gui, value=3).grid(row=4, column=0, sticky=W)
