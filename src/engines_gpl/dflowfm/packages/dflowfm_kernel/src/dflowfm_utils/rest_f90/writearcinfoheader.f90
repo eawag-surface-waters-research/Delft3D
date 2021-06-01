@@ -39,11 +39,11 @@
       integer :: nc
       double precision :: x0
       double precision :: y0
-      WRITE(MARC,'(A,I8)')    'ncols         ', MC
-      WRITE(MARC,'(A,I8)')    'nrows         ', NC
-      WRITE(MARC,'(A,F13.3)') 'xllcorner     ', X0 - DX/2
-      WRITE(MARC,'(A,F13.3)') 'yllcorner     ', Y0 - DY/2
-      WRITE(MARC,'(A,2F13.3)') 'cellsize      ', DX, DY
-      WRITE(MARC,'(A,F13.3)') 'NODATA_value  ', dmiss
+      WRITE(MARC,'(A,I8)')     'ncols         ', MC
+      WRITE(MARC,'(A,I8)')     'nrows         ', NC
+      WRITE(MARC,'(A,F16.6)')  'xllcorner     ', X0 - DX/2
+      WRITE(MARC,'(A,F16.6)')  'yllcorner     ', Y0 - DY/2
+      WRITE(MARC,'(A,2F16.6)') 'cellsize      ', DX, DY
+      WRITE(MARC,'(A,F16.6)')  'NODATA_value  ', dmiss
       RETURN
       END

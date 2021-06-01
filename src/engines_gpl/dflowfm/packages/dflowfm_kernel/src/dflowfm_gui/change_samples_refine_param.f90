@@ -37,6 +37,7 @@ subroutine change_samples_refine_param(jacancelled)
    use m_samples_refine
    use m_ec_interpolationsettings
    use m_arcinfo
+   use network_data, only: NUMITCOURANT
 
    implicit none
    integer, intent(out) :: jacancelled !< Whether or not (1/0) user has pressed 'Esc' in parameter screen.
@@ -58,7 +59,7 @@ subroutine change_samples_refine_param(jacancelled)
    integer :: numfldactual
    integer :: numparactual
 
-   integer, parameter :: NUMPAR = 15, NUMFLD = 2*NUMPAR
+   integer, parameter :: NUMPAR = 16, NUMFLD = 2*NUMPAR
    INTEGER  IX(NUMFLD),IY(NUMFLD),IS(NUMFLD),IT(NUMFLD)
    CHARACTER WRDKEY*40, OPTION(NUMPAR)*60, HELPM(NUMPAR)*60
    character(len=60) :: text
@@ -69,9 +70,7 @@ subroutine change_samples_refine_param(jacancelled)
 
    jacancelled = 0
    NLEVEL      = 4
-
-   if (mca > 0) interpolationtype = 4
-
+   
    text = ''
    WRITE(text, "('TYPE: RIDGES (', I1, '), WAVE COURANT NUMBER (', I1,  ')')") ITYPE_RIDGE, ITYPE_WAVECOURANT
 
@@ -90,6 +89,7 @@ subroutine change_samples_refine_param(jacancelled)
    OPTION(13) = 'USE SAMPLES OUTSIDE CELL (1) OR NOT (0)   ' ; IT(13*2) = 2
    OPTION(14) = 'Number of non-interactive refine cycles ()' ; IT(14*2) = 2
    OPTION(15) = 'Interpolationtype 2 or 4                ()' ; IT(15*2) = 2
+   OPTION(16) = 'Numitcourant smoothing cycles           ()' ; IT(16*2) = 2
 
 
    HELPM (1)  = 'INTEGER VALUE <                                             '
@@ -107,6 +107,7 @@ subroutine change_samples_refine_param(jacancelled)
    HELPM (13) = 'INTEGER VALUE <                                             '
    HELPM (14) = '0=interactive, > 0=automatic nr of ref. cycles              '
    HELPM (15) = '2=averaging, 4=bilinarc                                     '
+   HELPM (16) = '                                                            '
 
    CALL SAVEKEYS()
    NUMPARACTUAL = NUMPAR
@@ -180,7 +181,7 @@ subroutine change_samples_refine_param(jacancelled)
    CALL IFORMPUTINTEGER(2*13, jaoutsidecell)
    CALL IFORMPUTINTEGER(2*14, numrefcycles)
    CALL IFORMPUTINTEGER(2*15, interpolationtype)
-
+   CALL IFORMPUTINTEGER(2*16, numitcourant)
 
    ! Display the form with numeric fields left justified and set the initial field to number 2
    CALL IOUTJUSTIFYNUM('L')
@@ -229,6 +230,8 @@ subroutine change_samples_refine_param(jacancelled)
            CALL IFORMGETINTEGER(2*13 , jaoutsidecell)
            CALL IFORMGETINTEGER(2*14 , numrefcycles)
            CALL IFORMGETINTEGER(2*15 , interpolationtype)
+           CALL IFORMGETINTEGER(2*16 , numitcourant)
+
        ELSEIF (KEY .EQ. 23) THEN
           jacancelled = 1
        ENDIF

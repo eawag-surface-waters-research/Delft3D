@@ -198,7 +198,7 @@ function read_commandline() result(istat)
             do ikey=1,Nkeys
                call str_lower(Skeys(ikey))
                if (trim(Skeys(ikey)) == 'hmin') then
-                  read (Svals(ikey), *) hmin
+                  read (Svals(ikey), *) hmin ; Dx_mincour = hmin
                else if (trim(Skeys(ikey)) == 'dtmax') then
                   read (Svals(ikey), *) Dt_maxcour
                else if (trim(Skeys(ikey)) == 'maxlevel') then

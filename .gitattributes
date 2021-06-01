@@ -19571,6 +19571,7 @@ src/utils_lgpl/gridgeom/packages/gridgeom/src/gridgeom.F90 -text
 src/utils_lgpl/gridgeom/packages/gridgeom/src/gridgeom_api.F90 -text
 src/utils_lgpl/gridgeom/packages/gridgeom/src/gridgeom_version.F90.svn -text
 src/utils_lgpl/gridgeom/packages/gridgeom/src/gridoperations.F90 -text
+src/utils_lgpl/gridgeom/packages/gridgeom/src/m_arcinfo.f90 -text
 src/utils_lgpl/gridgeom/packages/gridgeom/src/network_data.f90 -text
 src/utils_lgpl/gridgeom/packages/gridgeom/src/odugrid.F90 -text
 src/utils_lgpl/gridgeom/packages/gridgeom/src/polygon.f90 -text

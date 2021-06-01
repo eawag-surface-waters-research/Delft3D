@@ -6397,6 +6397,38 @@ contains
 
    end subroutine bilinarcinfo
 
+   subroutine bilinarcinfocheck( x, y, z, landsea)
+   use m_arcinfo
+   use m_missing
+   real(kind=hp), intent(in)  :: x, y
+   real(kind=hp), intent(out) :: z
+   integer,       intent(out) :: landsea
+   real(kind=hp)    :: dm, dn, am, an, zmx, zmn
+   integer          :: m, n
+
+   dm = (x - x0)/dxa ; m = int(dm) ; am = dm - m ; m = m + 1
+   dn = (y - y0)/dya ; n = int(dn) ; an = dn - n ; n = n + 1
+   z  = dmiss
+   landsea = 0
+   if (m < mca .and. n < nca .and. m >= 1 .and. n >= 1) then 
+      z  =        am  *        an    * d(m+1 , n+1) + &
+           (1d0 - am) *        an    * d(m   , n+1) + &
+           (1d0 - am) * (1d0 - an)   * d(m   , n  ) + &
+                  am  * (1d0 - an)   * d(m+1 , n  ) 
+      zmx = max( d(m+1 , n+1), d(m   , n+1), d(m   , n  ), d(m+1 , n  ) )
+      zmn = min( d(m+1 , n+1), d(m   , n+1), d(m   , n  ), d(m+1 , n  ) )
+      if      ( zmn > 0d0 ) then 
+         landsea = 3
+      else if ( zmx < 0d0 ) then  
+         landsea = 2
+      else 
+         landsea = 1
+      endif
+
+   endif
+
+   end subroutine bilinarcinfocheck
+
 
 
    !

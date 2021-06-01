@@ -45,6 +45,7 @@ subroutine refinecellsandfaces2()
    use m_sferic
    use gridoperations
    use timespace
+   use m_polygon
 
    implicit none
 
@@ -81,41 +82,55 @@ subroutine refinecellsandfaces2()
 !   jaCourantnetwork = 1
 !   if ( Ns.lt.3 .or. MXSAM*MYSAM.ne.NS ) jacourantnetwork = 0
 
-   jaCourantnetwork = 0
-   if ( Ns.ge.1 .or. jaGUI.eq.0 ) then
-       jacourantnetwork = 1
-      if ( MXSAM*MYSAM.eq.NS ) then
-         irefinetype = ITYPE_WAVECOURANT
-      end if
-   end if
-
-   if ( jacourantnetwork.eq.1 ) then
-       if ( IPSTAT.ne.IPSTAT_OK ) then
-         write (6,"('tidysamples')")
-         call tidysamples(xs,ys,zs,IPSAM,NS,MXSAM,MYSAM) ! uses global kdtree
-         call get_samples_boundingbox()
-         IPSTAT = IPSTAT_OK
-      end if
-   end if
-
-!   if ( netstat.ne.netstat_OK .or. NPL.gt.0 ) then ! in case of selecting polygon: always call findcells
-      call findcells(0)
-!   end if
-
-   ! if ( Ns.ge. 1 .and. jakdtree.eq.1 .and. interpolationtype == 2) then
-   if ( Ns.ge. 1 .and. jakdtree.eq.1) then
-!      initialize kdtree
-       call build_kdtree(treeglob,Ns,xs,ys, ierror, jsferic, dmiss)
-       if ( ierror.ne.0 ) then
-!         disable kdtree
-          call delete_kdtree2(treeglob)
-          jakdtree = 0
-       end if
-   end if
-
 !  store original interpolation settings
    interpolationtype_old = interpolationtype
    IAV_old               = IAV
+
+   jaCourantnetwork      = 0
+
+   if (npl > 0) then 
+       irefinetype    = ITYPE_MESHWIDTH               ! Polygon refinement:
+       numrefcycles   = 0                             !    make sure interactive
+   else if ( jaGUI.eq.0 ) then                        ! Commandline: only wave courant for now
+      irefinetype     = ITYPE_WAVECOURANT  
+   else                                               ! Interactive:
+      call change_samples_refine_param(jacancelled)   ! get the settings from a parameter screen
+      if ( jacancelled.eq.1 ) goto 1234
+   end if
+  
+   if (ns > 0 .and. irefinetype == ITYPE_WAVECOURANT .or.  irefinetype == ITYPE_RIDGE ) then  
+       jacourantnetwork = 1              ! use samples 
+
+       if ( MXSAM*MYSAM.eq.NS ) then     ! bilinarc, so no need for samplekdtree
+           interpolationtype = 4
+           jakdtree          = 0        
+       else !  if ( IPSTAT.ne.IPSTAT_OK ) then
+          write (6,"('tidysamples')")
+          call tidysamples(xs,ys,zs,IPSAM,NS,MXSAM,MYSAM) ! uses global kdtree 
+          call get_samples_boundingbox()
+          IPSTAT = IPSTAT_OK
+          call build_kdtree(treeglob,Ns,xs,ys, ierror, jsferic, dmiss)
+          if ( ierror.ne.0 ) then !         disable kdtree
+              call delete_kdtree2(treeglob)
+              jakdtree = 0
+          endif
+       end if
+
+       if ( irefinetype.eq.ITYPE_RIDGE ) then
+          call prepare_sampleHessian(ierror)
+          if ( ierror.ne.0 ) goto 1234
+       end if
+
+    end if
+
+ 
+   ! if ( netstat.ne.netstat_OK .or. NPL.gt.0 ) then ! in case of selecting polygon: always call findcells
+   call findcells(0)
+   ! end if
+
+   !if ( Ns.ge. 1 .and. jakdtree.eq.1 .and. interpolationtype == 2) then
+ 
+
    !IPSTAT                = IPSTAT_NOTOK
 
 !  allocate
@@ -136,25 +151,7 @@ subroutine refinecellsandfaces2()
    if ( jsferic.eq.1 ) then
       call get_meshbounds(xboundmin, xboundmax)
    end if
-
-
-   if ( jacourantnetwork.eq.1 ) then
-!     store samples
-      call savesam()
-
-
-!     get the settings from a parameter screen
-      if ( jaGUI.eq.1 ) then
-      call change_samples_refine_param(jacancelled)
-      if ( jacancelled.eq.1 ) goto 1234
-      end if
-
-      if ( irefinetype.eq.ITYPE_RIDGE ) then
-         call prepare_sampleHessian(ierror)
-         if ( ierror.ne.0 ) goto 1234
-      end if
-   end if
-
+ 
 !  take dry cells into account (after findcells)
    call delete_dry_points_and_areas()
 
@@ -217,7 +214,10 @@ subroutine refinecellsandfaces2()
          if ( jarefine(k).ne.0 ) numrefine = numrefine+1
       end do
 
-      if ( numrefine.eq.0 ) exit ! done
+      if ( numrefine.eq.0 ) then 
+           exit ! done
+      endif
+
 
 !     perform the actual refinement
       nump_virtual = nump_virtual*4
@@ -581,6 +581,7 @@ subroutine refinecellsandfaces2()
       integer                                           :: nnn(1)    !< polygon size
 
       double precision,  intent(in)                     :: x(:), y(:)   !< polygon coordinates
+      double precision                                  :: z(8)         !< idem, z 
 
 !      double precision, dimension(N),     intent(in)    :: x, y      !< polygon coordinates
 !      double precision, dimension(2),     intent(in)    :: u, v      !< orientation vectors of polygon
@@ -597,14 +598,15 @@ subroutine refinecellsandfaces2()
 
       integer,          dimension(1)                    :: isam
 
-      double precision                                  :: dval, C, Courant, dlinklengthnew
+      double precision                                  :: dval, C, Courant, dlinklengthnew, zmn, zmx
 
       integer                                           :: ivar, k, kp1, num, ierror, jdla
-      integer                                           :: jacounterclockwise          ! counterclockwise (1) or not (0) (not used here)
-
+      integer                                           :: jacounterclockwise    ! counterclockwise (1) or not (0) (not used here)
+      integer                                           :: landsea               ! cell: 0=sea, 1=landsea, 2=land
+      integer                                           :: linkcourant           ! link oriented courant icw cell landsea 
       double precision, parameter                       :: FAC = 1d0
       double precision, dimension (6)                   :: transformcoef = 0
-      integer                                           :: mxsam,mysam
+      integer                                           :: mxsam,mysam, m
       type(TerrorInfo)                                  :: errorInfo
 !      double precision, parameter                       :: dtol = 1d-8
 
@@ -697,7 +699,19 @@ subroutine refinecellsandfaces2()
                call averaging2(1,NS,xs,ys,zs,ipsam,xc,yc,zc,1,x,y,N,nnn,jakdtree, &
                dmiss, jsferic, jasfer3D, JINS, NPL, xpl, ypl, zpl, errorInfo)
             else if (interpolationtype == 4) then
-               call bilinarcinfo( xc(1), yc(1), zc(1) )
+               landsea = 0
+               call bilinarcinfocheck( xc(1), yc(1), zc(1), landsea ) 
+               zmx = -1d9; zmn = 1d9
+               do m = 1,N
+                   call bilinarcinfo( x(m), y(m), z(m) )
+                   zmx = max(zmx, z(m))
+                   zmn = min(zmn, z(m))
+               enddo
+               if (zmn > 0d0 ) then          ! land 
+                  zc(1) = 9d9                ! no refine
+               else if (zmx >= 0d0 .and. zmn <= 0d0) then ! land/sea
+                  zc(1) = 0d9                ! always refine 
+               endif
             endif
 
 !           check if a value is found, use nearest sample from cell center if not so
@@ -714,7 +728,9 @@ subroutine refinecellsandfaces2()
             dval = 0d0
          end if
 
-         if ( dval.eq.DMISS ) goto 1234
+         if ( dval.eq.DMISS ) then  
+             goto 1234
+         endif
 
          jarefine = 0
 
@@ -731,13 +747,34 @@ subroutine refinecellsandfaces2()
             if ( irefinetype.eq.ITYPE_WAVECOURANT ) then
 !              compute wave speed
                !if (dval > 2d0 ) dval = 10000d0
-               C = sqrt(AG*abs(dval))
                ! C = sqrt(AG*max(-dval,0d0))
 
+               linkcourant =  1 ! checking land sea mask of arcinfo grid and Courant based upon links instead of cells
+               if (linkcourant == 1) then 
+                  if (landsea == 1) then 
+                      C  = 0d0
+                  else 
+                      k2 = k + 1 ; if (k2 == num) k2 = 1
+                      if (z(k)*z(k2) < 0d0) then 
+                          C = 0d0
+                      else 
+                          dval = 0.5d0*(z(k) + z(k2))
+                          C    = sqrt(AG*abs(dval))
+                      endif
+                  endif
+               else 
+                  if (dval == 0d0) then 
+                     C = 0d0
+                  else 
+                     C = sqrt(AG*abs(dval))
+                  endif
+               endif
+    
 !              compute wave Courant number
                Courant = C * Dt_maxcour / dlinklength(k)
                !if ( Courant.lt.1 .and. 0.5d0*dlinklength(k).gt.FAC*hmin ) then
-               if ( Courant.lt.1 .and. abs(dlinklengthnew-Dx_mincour).lt.abs(dlinklength(k)-Dx_mincour) ) then
+               !if ( Courant.lt.1 .and. abs(dlinklengthnew-Dx_mincour).lt.abs(dlinklength(k)-Dx_mincour) ) then
+               if ( Courant < 1d0 .and. dlinklengthnew > Dx_mincour ) then
                   num = num+1
                   jarefinelink(k) = 1
                else
@@ -1527,9 +1564,9 @@ subroutine refinecellsandfaces2()
 !                 check if we found all quad edges
                   if ( num.ne.4 ) then
                     if (numrefcycles == 0) then
-                       call qnerror('comp_jalink: numbering error', ' ', ' ')
+                       call qnerror('comp_jalink: numbering error numrefcycles=0', ' ', ' ')
                     else
-                       call mess(level_warn,'comp_jalink: numbering error', ' ', ' ')
+                       call mess(level_warn,'comp_jalink: numbering error numrefcycles>0', ' ', ' ')
                     endif
                     goto 1234
                   end if

@@ -44,10 +44,6 @@
    integer, allocatable          :: indxx(:,:)     ! to be dimensioned by yourselves 3,*
    real(kind=hp)   , allocatable :: wfxx (:,:)
 
-   real(kind=hp)                 :: TRIANGLEMINANGLE =  5d0 ! MINIMUM ANGLE IN CREATED TRIANGLES  IF MINANGLE > MAXANGLE: NO CHECK
-   real(kind=hp)                 :: TRIANGLEMAXANGLE =  150 ! MAXIMUM ANGLE IN CREATED TRIANGLES
-   real(kind=hp)                 :: TRIANGLESIZEFAC  =  1.0 ! TRIANGLE SIZEFACTOR, SIZE INSIDE VS AVERAGE SIZE ON POLYGON BORDER
-
    type t_nodi
       integer                    :: NUMTRIS       ! total number of TRIANGLES ATtached to this node
       integer, allocatable       :: TRINRS(:)     ! numbers of ATTACHED TRIANGLES
@@ -122,7 +118,8 @@
    use kdtree2Factory
    use m_alloc, only : aerr, realloc
    use sorting_algorithms, only: indexx
-
+   !use gridgeom
+ 
    interface triinterp2
       module procedure triinterp2_dbldbl
       module procedure triinterp2_realdbl
@@ -153,6 +150,48 @@
    public   ::  TerrorInfo
 
    contains
+
+   !> Bilinear interpolation for uniform rectangular.
+   !! TODO: move to ec_basic_interpolation or bilin5
+   subroutine bilinarc(xk, yk, zk, n)
+   use m_missing
+   integer      , intent(in)    :: n
+   real(kind=hp), intent(in)    :: xk(:), yk(:)
+   real(kind=hp), intent(  out) :: zk(:)
+   
+   integer          :: k
+   
+   do k = 1,n
+      if (zk(k) == dmiss) then 
+         call bilinarcinfo( xk(k), yk(k), zk(k))
+      endif 
+   enddo
+   end subroutine bilinarc
+
+   !> Bilinear interpolation for uniform rectangular for 1 point
+   !! TODO: move to ec_basic_interpolation or bilin5
+   subroutine bilinarcinfo( x, y, z)
+   use m_arcinfo
+   use m_missing
+   real(kind=hp), intent(in)    :: x, y
+   real(kind=hp), intent(  out) :: z
+   
+   real(kind=hp)    :: dm, dn, am, an
+   integer          :: m, n
+   
+   dm = (x - x0)/dxa ; m = int(dm) ; am = dm - m ; m = m + 1
+   dn = (y - y0)/dya ; n = int(dn) ; an = dn - n ; n = n + 1
+   z  = dmiss
+   if (m < mca .and. n < nca .and. m >= 1 .and. n >= 1) then 
+      z  =        am  *        an    * d(m+1 , n+1) + &
+           (1d0 - am) *        an    * d(m   , n+1) + &
+           (1d0 - am) * (1d0 - an)   * d(m   , n  ) + &
+                  am  * (1d0 - an)   * d(m+1 , n  ) 
+   endif
+
+   end subroutine bilinarcinfo
+
+
 
    !---------------------------------------------------------------------------!
    !   Triinterp
@@ -195,7 +234,8 @@
    jakdtree = 1
 
    if ( MXSAM > 0 .and. MYSAM >  0 ) then  ! bi-linear interpolation
-      call bilin_interp(NDX, XZ, YZ, BL, dmiss, XS, YS, ZS, MXSAM, MYSAM, jsferic, kcc)
+      ! call bilin_interp(NDX, XZ, YZ, BL, dmiss, XS, YS, ZS, MXSAM, MYSAM, jsferic, kcc) ! does not work on globe%
+      call bilinarc(xz, yz, bl, ndx)
    else  ! Delauny
       call TRIINTfast(XS,YS,ZS,NS,1,XZ,YZ,BL,Ndx,JDLA, jakdtree, jsferic, Npl, jins, dmiss, jasfer3D, XPL, YPL, ZPL, transformcoef, kcc)
 

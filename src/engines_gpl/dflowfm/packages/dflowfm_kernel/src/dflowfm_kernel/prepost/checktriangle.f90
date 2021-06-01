@@ -34,6 +34,7 @@
 
    use m_samples
    use m_ec_triangle
+   use network_data, only: TRIANGLEMINANGLE, TRIANGLEMAXANGLE
    use m_sferic
    use geometry_module, only: dcosphi
    use m_missing, only : dmiss, dxymis

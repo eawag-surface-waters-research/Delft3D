@@ -690,7 +690,6 @@
    use network_data
 
    use mathconsts, only: degrad_hp
-   use m_ec_triangle, only: triangleminangle
    use geometry_module, only: getdx, getdy, dcosphi, cross
    use m_missing, only : dmiss, dxymis
    use m_sferic, only: pi, jsferic, jasfer3D
@@ -719,6 +718,7 @@
    integer :: jacrosscheck ! remove 2D crossing netlinks (1) or not (0)
    integer :: japermout    ! output permutation array (1) or not (0)
    integer :: janodperm    ! output node permutation array (1) or not (0)
+
    
    logical :: need_to_allocate_kc
 

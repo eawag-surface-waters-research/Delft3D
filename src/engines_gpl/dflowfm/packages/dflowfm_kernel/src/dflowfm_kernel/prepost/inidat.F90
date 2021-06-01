@@ -338,7 +338,7 @@
             ELSE IF (EXT .EQ. '.asc' .OR. EXT .EQ. '.ASC' ) THEN
                CALL OLDFIL(MINP, inarg)
                call doclose(MINP)
-               call read_samples_from_arcinfo(trim(inarg), 1, 1)
+               call read_samples_from_arcinfo(trim(inarg), 1, 0) ! indeed do not prompt anymore, so japrompt = 0
             ELSE IF (EXT .EQ. '.pol' .OR. EXT .EQ. '.POL' ) THEN
                CALL OLDFIL(MINP, inarg)
                CALL REAPOL(MINP, 0)

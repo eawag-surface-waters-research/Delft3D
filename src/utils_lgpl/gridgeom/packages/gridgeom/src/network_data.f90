@@ -162,7 +162,7 @@ module network_data
 
   integer                          :: maxfaceallow = 4                  !< Nr. of faces allowed in removesmallflowlinks
 
-  INTEGER                          :: NUMITCOURANT = 0                  !< Nr. of smooth. iter. in Courant network (need samples).
+  INTEGER                          :: NUMITCOURANT = 5                  !< Nr. of smooth. iter. in Courant network (need samples).
 
   double precision                 :: SMALLESTSIZEINCOURANT = 100d0     !< Smallest cellsize generated in Courant network.
 
@@ -197,6 +197,7 @@ module network_data
  
   double precision                 :: xkmin, xkmax , ykmin, ykmax
 
+ 
 ! 1d NET BRANCHES
   type tNETbr                                        !< this is a NET branch type
    integer                         :: nx             !< with nx links and nx + 1 nodes in it
@@ -229,6 +230,10 @@ module network_data
    integer, dimension(:), allocatable :: Lperminv !< Inverse permutation of netlinks by setnodadm, dim(numl): from old to current link numbers
 !  netnode permutation by setnodadm
    integer, dimension(:), allocatable :: nodePermutation   !< permutation of netnodes by setnodadm, dim(numk)
+
+   double precision                 :: TRIANGLEMINANGLE =  5d0 ! MINIMUM ANGLE IN CREATED TRIANGLES  IF MINANGLE > MAXANGLE: NO CHECK
+   double precision                 :: TRIANGLEMAXANGLE =  150 ! MAXIMUM ANGLE IN CREATED TRIANGLES
+   double precision                 :: TRIANGLESIZEFAC  =  1.0 ! TRIANGLE SIZEFACTOR, SIZE INSIDE VS AVERAGE SIZE ON POLYGON BORDER
 
    contains
    

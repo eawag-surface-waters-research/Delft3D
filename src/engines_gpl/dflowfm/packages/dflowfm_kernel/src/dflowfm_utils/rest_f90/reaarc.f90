@@ -48,7 +48,7 @@
 
       double precision :: distep, djstep, dsqrtnumcur
 
-      integer, parameter :: MAXSAMSIZE = 1000000
+      integer, parameter :: MAXSAMSIZE = 9000*4500 ! 1000000
 
       CALL READARCINFOHEADER(MINP,MCa,NCa,X0,Y0,DXa,DYa,RMIS)
 

@@ -32,6 +32,7 @@
 
    SUBROUTINE CREATESAMPLESINPOLYGON2()
    use m_ec_triangle
+   use network_data, only:TRIANGLESIZEFAC
    !use m_netw
    USE M_SAMPLES
    use M_MISSING
