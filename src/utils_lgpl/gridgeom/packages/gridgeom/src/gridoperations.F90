@@ -2574,9 +2574,11 @@
          iv = 0 ; ih = 0
          do k  = 1,3
             k2 = k+ 1 ; if (k==3) k2 = 1
-            if ( xv(k) == xv(k2) ) then 
+  !          if ( xv(k) == xv(k2) ) then 
+            if ( abs( xv(k) - xv(k2) ) < 1d-10 ) then 
                  iv = k 
-            else if (yv(k) == yv(k2) ) then 
+  !          else if (yv(k) == yv(k2) ) then 
+            else if ( abs( yv(k) - yv(k2) ) < 1d-10 ) then 
                  ih = k
             endif
          enddo

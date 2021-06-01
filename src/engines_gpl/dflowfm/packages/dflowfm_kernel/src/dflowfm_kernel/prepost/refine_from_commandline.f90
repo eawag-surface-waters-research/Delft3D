@@ -38,16 +38,13 @@ subroutine refine_from_commandline()
    use m_samples_refine
    implicit none
 
-   integer           :: MPOL
-
-   character(len=10) :: snum
    character(len=128) :: filnam
 
-   !call generate_partitioning_from_pol()
-   !write(snum, "(I4.4)") ndomains
-   !call partition_write_domains('par'//trim(snum)//'_net.nc')
-
-   filnam = 'out_net.nc'
    CALL REFINECELLSANDFACES2()
+
+   filnam = 'outdtmax120dxmin1500_net.nc'
+   write(filnam(9:11)  , '(i3.3)') int(dt_maxcour)
+   write(filnam(17:20) , '(i4.4)') int(dx_mincour)
    call unc_write_net(trim(filnam))
+
 end subroutine refine_from_commandline
