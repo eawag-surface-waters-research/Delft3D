@@ -1195,11 +1195,6 @@ subroutine transport()                           ! transport for now, advect sal
 
  endif
  
- ! Pass updated rho to sediment transport
- if (jased>0 .and. stm_included) then
-    mtd%rhowat = rho   
- endif
-
  if (jarhoxu > 0 .and. jacreep == 1) then
      do LL = 1,lnx
         do L = Lbot(LL), Ltop(LL)

@@ -57,7 +57,7 @@
    use bedcomposition_module
    use morphology_data_module
    use sediment_basics_module
-   use m_physcoef, only: ag, vonkar, sag, ee, backgroundsalinity, backgroundwatertemperature,dicoww, rhomean
+   use m_physcoef, only: ag, vonkar, sag, ee, backgroundsalinity, backgroundwatertemperature,dicoww
    use m_sediment, only: stmpar, sedtra, stm_included, mtd, vismol, jatranspvel, sbcx_raw,sbcy_raw,sswx_raw,sswy_raw,sbwx_raw,sbwy_raw
    use m_flowgeom, only: ndxi, bl, kfs, lnxi, lnx, ln, dxi, ndx, csu, snu, wcx1, wcx2, wcy1, wcy2, acl, nd, csu, snu, wcl, xz, yz, xu, yu, wu, wu_mor
    use m_flow, only: s0, s1, u1, u0, v, ucx, ucy, kbot, ktop, kmx, kmxn, plotlin, sa1, tem1, zws, hs, ucxq, ucyq, layertype, &

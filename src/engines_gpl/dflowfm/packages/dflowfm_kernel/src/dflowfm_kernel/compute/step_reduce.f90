@@ -33,7 +33,7 @@
  subroutine step_reduce(key)                         ! do a flow timestep dts guus, reduce once, then elimin conjugate grad substi
  use m_flow                                          ! when entering this subroutine, s1=s0, u1=u0, etc
  use m_flowgeom
- use m_sediment, only: stm_included, stmpar
+ use m_sediment, only: stm_included, stmpar, mtd
  use Timers
  use m_flowtimes
  use m_sferic
@@ -315,6 +315,7 @@
  endif
 
  if (jased > 0 .and. stm_included) then
+    mtd%rhowat = rho                   ! update density at start sediment transport
     if ( jatimer.eq.1 ) call starttimer(IEROSED)
     if (jawave==0) then
        call settaubxu_nowave()         ! set taubxu for no wave conditions BEFORE erosed

@@ -285,11 +285,7 @@ subroutine flow_sedmorinit()
     !
     mtd%dzbdt       = 0.0_fp
     mtd%uau         = 0.0_fp
-    if (kmx .eq. 0) then
-       mtd%rhowat   = rhomean
-    else
-       mtd%rhowat   = rho        ! TO DO JRE: update every timestep when 3D and jasal>0 or jatem>0
-    end if
+    mtd%rhowat      = rho     
     mtd%seddif      = 0.0_fp
     mtd%sed         = 0.0_fp
     mtd%ws          = 0.0_fp

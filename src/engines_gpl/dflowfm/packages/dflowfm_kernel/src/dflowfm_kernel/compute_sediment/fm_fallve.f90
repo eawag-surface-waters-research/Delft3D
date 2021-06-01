@@ -39,7 +39,7 @@
    !              Fall velocity at layer interfaces.
    !!--declarations----------------------------------------------------------------
    use precision
-   use m_physcoef, only: ee, ag, sag, vonkar, frcuni, backgroundsalinity, backgroundwatertemperature, rhomean
+   use m_physcoef, only: ee, ag, sag, vonkar, frcuni, backgroundsalinity, backgroundwatertemperature
    use m_sediment, only: stmpar, sedtra, stm_included, mtd, vismol
    use m_flowtimes, only: time1
    use m_flowgeom, only: ndx, ln, kfs,bl, wcl, lnx
@@ -231,7 +231,7 @@
                   temint = backgroundwatertemperature
                endif
                !
-               rhoint = (tka*rho(kk+1) + tkb*rho(kk)) / tkt
+               rhoint = (tka*mtd%rhowat(kk+1) + tkb*mtd%rhowat(kk)) / tkt
                !
                u = (tka*ucx_mor(kk+1)+tkb*ucx_mor(kk)) / tkt   ! x component
                v = (tka*ucy_mor(kk+1)+tkb*ucy_mor(kk)) / tkt   ! y component
@@ -327,7 +327,7 @@
                temint = backgroundwatertemperature
             endif
             !
-            rhoint = rhomean   ! JRE to do: depends on idensform
+            rhoint = mtd%rhowat(k)   
             !
             u       = ucx_mor(k)   ! x component
             v       = ucy_mor(k)   ! y component
