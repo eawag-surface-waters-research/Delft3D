@@ -26,7 +26,6 @@ prebuild_version_number(${library_name} ${fortran_version_file}
 
 # Set the dependencies of this library
 set(oss_dependencies    deltares_common
-                        ec_module
                         io_netcdf
                         kdtree_wrapper
                         kdtree2)

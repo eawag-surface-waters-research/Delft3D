@@ -16,12 +16,14 @@ add_library(${library_name} ${meteo_sources}
 # Add dependencies
 if (UNIX)
     set(oss_dependencies deltares_common
+                         gridgeom
                          kdtree2
                          kdtree_wrapper
                          io_netcdf)
 endif(UNIX)
 if (WIN32)
     set(oss_dependencies deltares_common
+                         gridgeom
                          kdtree2
                          kdtree_wrapper
                          io_netcdf
