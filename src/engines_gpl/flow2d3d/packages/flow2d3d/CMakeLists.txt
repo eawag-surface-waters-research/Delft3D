@@ -83,6 +83,7 @@ set(oss_dependencies    data
                         deltares_common_mpi
                         deltares_common_c
                         d_hydro_lib
+                        gridgeom
                         ec_module
                         esmfsm
                         esmfsm_c
