@@ -444,26 +444,24 @@ rem =======================
     echo "  Without <CONFIG>:"
     echo "    The prepare_sln.py window will pop-up. Related commands will be executed."
     echo "  With    <CONFIG>:"
-    echo "    - (Only when <CONFIG>='all'Execute prepare_sln.py in silent mode"
-    echo "    - Compile all engines that are not CMaked yet in the traditional way"
+    echo "    - Only when <CONFIG>=all: Execute prepare_sln.py in silent mode"
+    echo "    - Only when <CONFIG>=all: Compile all engines that are not CMaked yet in the traditional way"
     echo "    - Create directory 'build_<CONFIG>'"
     echo "      Delete it when it already existed"
     echo "    - Execute 'CMake <CONFIG>' to create file '<CONFIG>.sln' inside 'build_<CONFIG>'"
     echo "    - Execute 'devenv.com <CONFIG>.sln /Build'"
-    echo "    - Combine all binaries in 'build_<CONFIG>\x64'"
+    echo "    - Only when <CONFIG>=all: Combine all binaries in 'build_<CONFIG>\x64'"
     echo.
     echo "<CONFIG>:"
-    echo "- 'all':"
-    echo "  All CMaked project, currently D-Flow FM and DIMR"
-    echo "  - build dimr"
-    echo "  - build all other engines in the traditional way"
-    echo "  - combine all binaries"
+    echo "- all: All CMaked projects, currently D-Flow FM and DIMR"
     echo "- dflowfm"
     echo "- dflowfm_interacter"
     echo "- dimr"
+    echo "- tests"
     echo.
-    echo "Options:"
-    echo " Not implemented yet"
+    echo "More info  : https://oss.deltares.nl/web/delft3d/source-code"
+    echo "About CMake: https://svn.oss.deltares.nl/repos/delft3d/trunk/src/cmake/doc/README"
+    echo.
     goto :end
 
 
