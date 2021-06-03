@@ -47,6 +47,7 @@
 		<File RelativePath=".\src\generalmodules.f90"/>
 		<File RelativePath=".\src\gridgeom.F90"/>
 		<File RelativePath=".\src\gridoperations.F90"/>
+		<File RelativePath=".\src\m_arcinfo.f90"/>
 		<File RelativePath=".\src\network_data.f90"/>
 		<File RelativePath=".\src\odugrid.F90"/>
 		<File RelativePath=".\src\polygon.f90"/></Filter></Files>
