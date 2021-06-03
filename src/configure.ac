@@ -844,6 +844,10 @@ utils_lgpl/d_hydro_lib/packages/d_hydro_lib/include/Makefile
 utils_lgpl/d_hydro_lib/packages/d_hydro_lib/Makefile
 utils_lgpl/d_hydro_lib/packages/d_hydro_lib/src/Makefile
 utils_lgpl/d_hydro_lib/packages/Makefile
+utils_lgpl/gridgeom/Makefile
+utils_lgpl/gridgeom/packages/gridgeom/Makefile
+utils_lgpl/gridgeom/packages/gridgeom/src/Makefile
+utils_lgpl/gridgeom/packages/Makefile
 utils_lgpl/ec_module/Makefile
 utils_lgpl/ec_module/packages/ec_module/Makefile
 utils_lgpl/ec_module/packages/ec_module/src/ectest/Makefile
@@ -879,10 +883,6 @@ utils_lgpl/ftnunit/Makefile
 utils_lgpl/ftnunit/packages/ftnunit/Makefile
 utils_lgpl/ftnunit/packages/ftnunit/src/Makefile
 utils_lgpl/ftnunit/packages/Makefile
-utils_lgpl/gridgeom/Makefile
-utils_lgpl/gridgeom/packages/gridgeom/Makefile
-utils_lgpl/gridgeom/packages/gridgeom/src/Makefile
-utils_lgpl/gridgeom/packages/Makefile
 utils_lgpl/io_hyd/Makefile
 utils_lgpl/io_hyd/packages/io_hyd/Makefile
 utils_lgpl/io_hyd/packages/io_hyd/src/Makefile

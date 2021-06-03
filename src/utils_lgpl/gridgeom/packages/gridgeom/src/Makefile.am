@@ -42,12 +42,12 @@ FMODULES += \
     -I$(top_builddir)/utils_lgpl/io_netcdf/packages/io_netcdf/src \
     -I$(top_builddir)/third_party_open/kdtree2/src-f90 \
     -I$(top_builddir)/utils_lgpl/kdtree_wrapper/packages/kdtree_wrapper/src \
-    -I$(top_builddir)/utils_lgpl/ec_module/packages/ec_module/src \
     -I$(builddir)/../include
 
 #-------------------------------------------------------------------------------
 #Sources
 libgridgeom_la_SOURCES = \
+         m_arcinfo.f90 \
          generalmodules.f90 \
          polygon.f90 \
          network_data.f90 \
