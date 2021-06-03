@@ -8,19 +8,17 @@ function print_usage_info {
     echo
     echo
     echo "Usage: ${0##*/} <CONFIG> [OPTIONS]"
+    echo "- Only when <CONFIG>=all: Compile all engines that are not CMaked yet in the traditional way"
     echo "- Create directory 'build_<CONFIG>'"
     echo "  Delete it when it already existed"
-    echo "- Execute 'src/setenv.sh' to load modules"
+    echo "- Execute '. src/setenv.sh' to load modules"
     echo "- Execute 'CMake <CONFIG>' to create makefile inside 'build_<CONFIG>'"
-    echo "- Execute 'make install'"
+    echo "- Execute 'make VERBOSE=1 install'"
+    echo "- Only when <CONFIG>=all: Combine all binaries in 'build_<CONFIG>\lnx64'"
     echo
     echo "<CONFIG>:"
     echo "- If <CONFIG> is missing, this usage will be print"
-    echo "- 'all':"
-    echo "  - build dflowfm"
-    echo "  - build dimr"
-    echo "  - src/build_h6c7.sh -intel18"
-    echo "  - combine all binaries"
+    echo "- all: All CMaked projects, currently D-Flow FM and DIMR"
     echo "- dflowfm"
     echo "- dimr"
     echo "- tests"
@@ -29,6 +27,8 @@ function print_usage_info {
     echo "-p, --prepareonly"
     echo "       Only CMake, no make, no src/build_h6c7.sh"
     echo
+    echo "More info  : https://oss.deltares.nl/web/delft3d/source-code"
+    echo "About CMake: https://svn.oss.deltares.nl/repos/delft3d/trunk/src/cmake/doc/README"
     echo
     exit 1
 }
@@ -39,13 +39,11 @@ function print_usage_info {
 # === CreateCMakedir    ===
 # =========================
 function CreateCMakedir () {
-    if [ "$config" = "$1" ] || [ "$config" = "all"  ]; then
-        echo
-        echo "Create CMake dir for $1 ..."
-        cd     $root
-        rm -rf $root/build_$1
-        mkdir  $root/build_$1
-    fi
+    echo
+    echo "Create CMake dir for $1 ..."
+    cd     $root
+    rm -rf $root/build_$1
+    mkdir  $root/build_$1
     
     return
 }
@@ -56,13 +54,11 @@ function CreateCMakedir () {
 # === DoCMake    ===
 # ==================
 function DoCMake () {
-    if [ "$config" = "$1" ] || [ "$config" = "all"  ]; then
-        echo
-        echo "Executing CMake for $1 ..."
-        cd    $root/build_$1
-        echo "cmake ../src/cmake -G "$generator" -B "." -D CONFIGURATION_TYPE="$1" -D CMAKE_BUILD_TYPE=Release &>build_$1/cmake_$1.log"
-              cmake ../src/cmake -G "$generator" -B "." -D CONFIGURATION_TYPE="$1" -D CMAKE_BUILD_TYPE=Release &>cmake_$1.log
-    fi
+    echo
+    echo "Executing CMake for $1 ..."
+    cd    $root/build_$1
+    echo "cmake ../src/cmake -G "$generator" -B "." -D CONFIGURATION_TYPE="$1" -D CMAKE_BUILD_TYPE=Release &>build_$1/cmake_$1.log"
+          cmake ../src/cmake -G "$generator" -B "." -D CONFIGURATION_TYPE="$1" -D CMAKE_BUILD_TYPE=Release &>cmake_$1.log
 
     return
 }
@@ -73,13 +69,11 @@ function DoCMake () {
 # === BuildCMake    ===
 # =====================
 function BuildCMake () {
-    if [ "$config" = "$1" ] || [ "$config" = "all"  ]; then
-        echo
-        echo "Building (make) based on CMake preparations for $1 ..."
-        cd    $root/build_$1
-        echo "make VERBOSE=1 install &>build_$1/make_$1.log"
-              make VERBOSE=1 install &>make_$1.log
-    fi
+    echo
+    echo "Building (make) based on CMake preparations for $1 ..."
+    cd    $root/build_$1
+    echo "make VERBOSE=1 install &>build_$1/make_$1.log"
+          make VERBOSE=1 install &>make_$1.log
 
     return
 }
@@ -94,7 +88,7 @@ function InstallAll () {
         echo
         echo "Installing in build_all ..."
         cd     $root
-        rm -rf $root/build_all
+        rm -rf $root/build_all/lnx64
         mkdir -p $root/build_all/lnx64
         # Start with artifacts from traditional build
         cp -rf $root/src/bin/ $root/build_all/lnx64/ &>/dev/null
@@ -106,12 +100,8 @@ function InstallAll () {
         rm -f $root/build_all/lnx64/lib/libdflowfm.so* &>/dev/null
         rm -f $root/build_all/lnx64/lib/libdimr.so*    &>/dev/null
 
-        # DIMR
-        cp -rf $root/build_dimr/install/* $root/build_all/lnx64/ &>/dev/null
-
-        # D-Flow FM
-        cp -rf $root/build_dflowfm/install/bin/* $root/build_all/lnx64/bin/ &>/dev/null
-        cp -rf $root/build_dflowfm/install/lib/* $root/build_all/lnx64/lib/ &>/dev/null
+        # CMaked stuff
+        cp -rf $root/build_all/install/* $root/build_all/lnx64/ &>/dev/null
     fi
     
     return
@@ -204,30 +194,16 @@ fi
 echo ". $root/src/setenv.sh"
       . $root/src/setenv.sh
 
-CreateCMakedir dimr
-CreateCMakedir dflowfm
-if [ "$config" = "tests" ]; then
-    CreateCMakedir tests
-fi
+CreateCMakedir $config
 
-DoCMake dimr
-DoCMake dflowfm
-if [ "$config" = "tests" ]; then
-    DoCMake tests
-fi
+DoCMake $config
 
 if [ "$prepareonly" = "1" ]; then
     echo Finished with preparations only
     exit 0
 fi
 
-BuildCMake dimr
-BuildCMake dflowfm
-if [ "$config" = "tests" ]; then
-    BuildCMake tests
-fi
-
-
+BuildCMake $config
 
 InstallAll
 
