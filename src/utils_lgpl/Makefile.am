@@ -10,7 +10,7 @@ SUBDIRS = \
          metistools \
          nefis \
          kdtree_wrapper \
+         gridgeom \
          ec_module \
          d_hydro_lib \
-         gridgeom \
          ods
