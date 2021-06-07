@@ -879,17 +879,18 @@
       EXP(2)    = 'SHOW ORTHO YES/NO                       '
       OPTION(1) = 'No Polygon                              '
       OPTION(2) = 'Polygon red + white dots                '
-      OPTION(3) = 'Polygon isocolour ZPL   Crest levels    '
-      OPTION(4) = 'Polygon + numbers ZPL   Crest levels    '
-      OPTION(5) = 'Polygon + numbers ZPL   Crest widths    '
-      OPTION(6) = 'Polygon + numbers Left  Toe heights     '
-      OPTION(7) = 'Polygon + numbers Right Toe heights     '
-      OPTION(8) = 'Polygon + numbers Left  Slopes          '
-      OPTION(9) = 'Polygon + numbers Right Slopes          '
-      OPTION(10)= 'Polygon isocolour Left/Right levels     '
-      OPTION(11)= 'Polygon index nrs                       '
+      OPTION(3) = 'Polygon no dots                         '
+      OPTION(4) = 'Polygon isocolour ZPL   Crest levels    '
+      OPTION(5) = 'Polygon + numbers ZPL   Crest levels    '
+      OPTION(6) = 'Polygon + numbers ZPL   Crest widths    '
+      OPTION(7) = 'Polygon + numbers Left  Toe heights     '
+      OPTION(8) = 'Polygon + numbers Right Toe heights     '
+      OPTION(9) = 'Polygon + numbers Left  Slopes          '
+      OPTION(10)= 'Polygon + numbers Right Slopes          '
+      OPTION(11)= 'Polygon isocolour Left/Right levels     '
+      OPTION(12)= 'Polygon index nrs                       '
 
-      MAXOPT    = 11
+      MAXOPT    = 12
       NWHAT2    = NDRAWPOL
       CALL MENUV3(NWHAT2,OPTION,MAXOPT,EXP,MAXEXP)
       NDRAWPOL  = NWHAT2

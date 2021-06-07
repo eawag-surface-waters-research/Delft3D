@@ -41,9 +41,9 @@
       integer,                                     intent(inout) :: MINP           !< input file unit number
       double precision,                            intent(in)    :: RMIS           !< missing value
       integer,                                     intent(out)   :: istep, jstep   !< subblock sizes
-      double precision, dimension(Marray, Narray), intent(inout) :: D              !< sample data array
+      real   , dimension(Marray, Narray), intent(inout) :: D              !< sample data array
 
-      double precision, dimension(:), allocatable                :: dline
+      real   , dimension(:), allocatable                :: dline
 
       integer                                                    :: iarray, jarray, ifile, jfile, ja3
       integer                                                    :: isub, jsub

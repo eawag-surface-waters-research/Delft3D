@@ -48,15 +48,13 @@
 
       double precision :: distep, djstep, dsqrtnumcur
 
-      integer, parameter :: MAXSAMSIZE = 9000*4500 ! 1000000
-
       CALL READARCINFOHEADER(MINP,MCa,NCa,X0,Y0,DXa,DYa,RMIS)
 
       IF ( ALLOCATED(D) ) THEN
            DEALLOCATE(D)
       ENDIF
 
-      if ( japrompt == 0 ) then
+      if ( japrompt == 0 .or. mca*nca < MAXARCTILE) then
 
          ALLOCATE ( D(MCa,NCa),STAT=IERR)
          CALL AERR('D(MCa,NCa)',IERR,MCa*NCa)
@@ -90,7 +88,7 @@
          if ( japrompt.eq.1 ) then
 !           automatic istep, jstep
             dsqrtnumcur = sqrt(dble(iend-istart+1))*sqrt(dble(jend-jstart+1))
-            distep = dsqrtnumcur/sqrt(dble(MAXSAMSIZE))
+            distep = dsqrtnumcur/sqrt(dble(MAXARCTILE))
             distep = dble(int(distep+0.5d0))
             djstep = distep
 

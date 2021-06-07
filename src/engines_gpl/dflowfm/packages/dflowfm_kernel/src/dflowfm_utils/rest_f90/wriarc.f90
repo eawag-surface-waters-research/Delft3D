@@ -49,7 +49,7 @@
       CALL WRITEARCINFOHEADER(MARC,MC,NC,X0,Y0,DX,DY,dmiss)
 
       DO 10 J = NC,1,-1
-         WRITE(MARC,'(5000F10.2)') ( DP(I,J),I = 1,MC)
+         WRITE(MARC,'(15000F10.2)') ( DP(I,J),I = 1,MC)
    10 CONTINUE
       RETURN
       END

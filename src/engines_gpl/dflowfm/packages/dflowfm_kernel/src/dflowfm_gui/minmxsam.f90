@@ -63,15 +63,64 @@
     enddo
     vmax = rmax
     vmin = rmin
+    dv   = vmax - vmin
+    do i = 1,nv
+       val(i) = vmin + (i-1)*dv/(nv-1)
+    enddo
  endif
-
- dv   = vmax - vmin
- do i = 1,nv
-    val(i) = vmin + (i-1)*dv/(nv-1)
- enddo
 
  !Samples have the same unit of the displayed values
  write(buffer, '(a,a)') 'Samples                              ',UNIT(1)
  CALL PARAMTEXT(buffer, 2 )
 
  end subroutine minmxsam
+
+ subroutine minmxarc()
+
+ use m_arcinfo
+ use m_missing
+ use m_isoscaleunit
+
+ implicit none
+
+ double precision :: rmin, rmax, x,y,z
+ double precision :: VMAX,VMIN,DV,VAL(256)
+ integer :: NCOLS(256),NIS,NIE,nv,JAAUTO
+ character(len=256) :: buffer
+ common /depmax2/ vmax,vmin,dv,val,ncols,nv,nis,nie,jaauto
+ integer :: m,n,i
+ logical inview
+
+ if (jaauto > 0) then
+    rmin =  1d30
+    rmax = -1d30
+
+    do n= 1,nca
+        do m = 1,mca
+         
+           x = x0 + dxa*(m-1)
+           y = y0 + dya*(n-1)
+           z = d(m,n)
+           if ( inview(x, y).and. z .ne. dmiss ) then
+               if (z < rmin) then
+                   rmin = z
+               endif
+               if (z > rmax) then
+                   rmax = z
+               endif
+           endif
+        enddo
+     enddo
+     vmax = rmax
+     vmin = rmin
+     dv   = vmax - vmin
+     do i = 1,nv
+        val(i) = vmin + (i-1)*dv/(nv-1)
+     enddo
+ endif
+ 
+ !Samples have the same unit of the displayed values
+ write(buffer, '(a,a)') 'Samples                              ',UNIT(1)
+ CALL PARAMTEXT(buffer, 2 )
+
+ end subroutine minmxarc

@@ -73,7 +73,7 @@
  type (griddimtype)                :: griddim
 
  ! Flow node numbering:
- ! 1:ndx2D, ndx2D+1:ndxi, ndxi+1:ndx1Db, ndx1Db:ndx
+ ! 1:ndx2D, ndx2D+1:ndxi, ndxi+1:ndx1Db, ndx1Db+1:ndx
  ! ^ 2D int ^ 1D int      ^ 1D bnd       ^ 2D bnd ^ total
  ! the following variables have been moved in m_cell_geometry (module of gridgeom)
  ! integer, target                   :: ndx2d          !< [-] Number of 2D flow cells (= NUMP). {"rank": 0}

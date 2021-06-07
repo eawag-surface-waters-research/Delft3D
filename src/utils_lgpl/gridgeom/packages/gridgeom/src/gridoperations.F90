@@ -1281,6 +1281,8 @@
    ! set network status
    netstat = NETSTAT_OK
 
+   call netdimensionsmessage()
+
    RETURN
    END SUBROUTINE FINDCELLS
 

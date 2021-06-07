@@ -199,6 +199,7 @@
 
    subroutine triinterp2_dbldbl(XZ, YZ, BL, NDX, JDLA, XS, YS, ZS, NS, dmiss, jsferic, jins, &
                                jasfer3D, NPL, MXSAM, MYSAM, XPL, YPL, ZPL, transformcoef, kcc)
+   use m_arcinfo
    implicit none
    !
    ! Parameters
@@ -234,11 +235,11 @@
    jakdtree = 1
 
    if ( MXSAM > 0 .and. MYSAM >  0 ) then  ! bi-linear interpolation
-      ! call bilin_interp(NDX, XZ, YZ, BL, dmiss, XS, YS, ZS, MXSAM, MYSAM, jsferic, kcc) ! does not work on globe%
+      call bilin_interp(NDX, XZ, YZ, BL, dmiss, XS, YS, ZS, MXSAM, MYSAM, jsferic, kcc) ! does not work on globe%
+   else if (mca > 0) then 
       call bilinarc(xz, yz, bl, ndx)
    else  ! Delauny
       call TRIINTfast(XS,YS,ZS,NS,1,XZ,YZ,BL,Ndx,JDLA, jakdtree, jsferic, Npl, jins, dmiss, jasfer3D, XPL, YPL, ZPL, transformcoef, kcc)
-
    end if
 
    end subroutine triinterp2_dbldbl

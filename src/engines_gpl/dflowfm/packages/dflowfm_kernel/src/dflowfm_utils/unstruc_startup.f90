@@ -203,6 +203,7 @@ subroutine initGUI(INTINIT)
     USE M_MISSING
     use unstruc_display
     use unstruc_version_module, only : unstruc_basename
+    use m_arcinfo
 
     implicit none
     double precision :: croshrsz
@@ -210,7 +211,7 @@ subroutine initGUI(INTINIT)
     double precision :: dx
     double precision :: dxshow
     double precision :: dy
-    integer :: i, INTINIT, ISTAT
+    integer :: i, INTINIT, ISTAT, maxarctiler, maxsamarcr
     integer :: iblue
     integer :: icl
     integer :: ifltyp
@@ -248,10 +249,8 @@ subroutine initGUI(INTINIT)
     double precision :: vfacforce
     double precision :: vmax
     double precision :: vmin
-    double precision :: x0
     double precision :: xd
     double precision :: xsc
-    double precision :: y0
     double precision :: ysc
     double precision :: tsize
     integer, dimension(4,50) :: rgbvalues
@@ -271,7 +270,6 @@ subroutine initGUI(INTINIT)
     COMMON /STARTDIR/  KEEPSTARTDIR
     COMMON /SCALEPOS/ XSC,YSC,SCALESIZE,NDEC
     COMMON /VFAC/ VFAC, VFACFORCE, NVEC
-    COMMON /ARCINFO/ DX, DY, X0, Y0, RMISS, DXSHOW, XD
     COMMON /DRAWTHIS/ ndraw(50)
 
 
@@ -561,11 +559,17 @@ subroutine initGUI(INTINIT)
       NDEC   = 3
       SCALESIZE = 0.5d0
 
-      X0         = 1d0
-      Y0         = 1d0
-      DX         = 100
-      DY         = 100
+      maxarctiler = 0 ; maxsamarcr = 0
+      call prop_get_integer(ini_ptr, 'ARCINFOSAMPLES', 'MAXARCTILE', maxarctiler)
+      call prop_get_integer(ini_ptr, 'ARCINFOSAMPLES', 'MAXSAMARC' , maxsamarcr)
 
+      if (maxarctiler > 0) then 
+          maxarctile = maxarctiler*maxarctiler
+      endif
+      if (maxsamarcr  > 0) then 
+          maxsamarc = maxsamarcr*maxsamarcr
+      endif
+ 
 
       RETURN
 END subroutine initGUI

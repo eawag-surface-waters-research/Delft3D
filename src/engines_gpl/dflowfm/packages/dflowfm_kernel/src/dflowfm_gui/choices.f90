@@ -431,6 +431,8 @@
          call convert_cross_to_prof(md_ident)
       ELSE iF (NWHAT .EQ.36) THEN
          call connecthangingnodes()
+      ELSE iF (NWHAT .EQ.37) THEN
+         call removelinksofhangingnodes()
       ENDIF
       NUM  = 0
       KEY  = 3

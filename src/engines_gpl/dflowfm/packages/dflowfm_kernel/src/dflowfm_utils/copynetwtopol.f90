@@ -34,8 +34,9 @@ subroutine copynetwtopol( )
 use m_polygon
 use m_missing
 use network_data
+use unstruc_display
 implicit none
-integer :: n, L, k1, k2
+integer :: n, L, k1, k2, key
 
 call increasepol(3*numl+1000, 0)
 
@@ -46,5 +47,7 @@ do L = 1,numL
    n = n + 1 ; k2 = kn(2,L) ; xpl(n) = dmiss  ; ypl(n) = dmiss  ; zpl(n) = dmiss
 enddo
 npl = n
+ndrawpol = 3
+numk = 0 ; numL = 0; kn = 0
 
-   end subroutine copynetwtopol
+end subroutine copynetwtopol

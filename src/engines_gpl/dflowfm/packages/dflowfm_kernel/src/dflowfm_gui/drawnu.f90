@@ -94,18 +94,20 @@
 
       call highlight_nodesnlinks()
 
-      call TEKgrid(key)
-
-      if (ns > 0) then
-        call teksam(xs,ys,zs,ns,ndraw(32))
+      if (ndrawpol == 3) then
+         call tekpolygon()
       endif
 
+      call TEKgrid(key)
+
+      call teksam(xs,ys,zs,ns,ndraw(32))
+    
       if (ndraw(2) == 6) then
          CALL TEKNET(NCOLDN,key) ! network on top
          call tekpartmesh()
       end if
 
-      if (ndraw(3) <= 4) CALL TEKLAN(NCOLLN)
+      if (ndraw(3) <= 4)  CALL TEKLAN(NCOLLN)
 
       call plotObservations()
 
@@ -130,7 +132,7 @@
 
       call tekwindvector()
 
-      if (ndrawpol > 1) then
+      if (ndrawpol > 1 .and. ndrawpol .ne. 3) then
          call tekpolygon()
       endif
 

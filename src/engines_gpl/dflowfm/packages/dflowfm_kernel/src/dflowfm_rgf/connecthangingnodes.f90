@@ -46,7 +46,7 @@ lnu =numL
 do np  = 1,nump
    kk3 = 0
    kkx = netcell(np)%n
-   if (kkx <= 4 .or. kkx == 6) then
+   if (kkx <= 4) then
       cycle
    endif
    do kk = 1,netcell(np)%n
@@ -56,7 +56,8 @@ do np  = 1,nump
          kp = kk + 1; if (kp > kkx) kp = kp - kkx
          km = netcell(np)%nod(km)
          kp = netcell(np)%nod(kp)
-         if (yk(km) == yk(k) .and. yk(kp) == yk(k) ) then
+         if (abs(yk(km) - yk(k)) < 1d-10 .and. abs (yk(kp) - yk(k)) < 1d-10  .or. & 
+             abs(xk(km) - xk(k)) < 1d-10 .and. abs (xk(kp) - xk(k)) < 1d-10) then
             km  = kk - 2; if (km < 1)   km = km + kkx
             kp  = kk + 2; if (kp > kkx) kp = kp - kkx
             km  = netcell(np)%nod(km)
@@ -76,3 +77,22 @@ call doclose(mout)
 call findcells(0)
 
 end subroutine connecthangingnodes
+
+subroutine removelinksofhangingnodes()
+use m_netw
+use m_flowgeom
+
+implicit none
+
+integer :: L, k1, k2 
+
+do L = 1,numL
+   k1 = kn(1,L) ; k2 = kn(2,L)
+   if (abs(xk(k1)-xk(k2)) > 1d-10 .and. abs(yk(k1)-yk(k2)) > 1d-10) then  
+      kn(1,L) = 0 ; kn(2,L) = 0 ; kn(3,L) = 0
+   endif
+enddo
+
+call setnodadm(0)
+end subroutine removelinksofhangingnodes
+

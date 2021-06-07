@@ -243,7 +243,9 @@
       OPTION(34)= 'Shift 1D netnodes to duikers.pliz (5col)'
       OPTION(35)= 'Convert crsdef/loc to profdef/loc files '
       OPTION(36)= 'Connecthangingnodes                     '
-      MAXOPT    =  36
+      OPTION(37)= 'Removelinksofhangingnodes               '
+
+      MAXOPT    =  37
    ELSE IF (NUM .EQ. 6) THEN
       EXP(1)     = 'MENU 6                                  '
       EXP(2)     = 'VARIOUS                                 '

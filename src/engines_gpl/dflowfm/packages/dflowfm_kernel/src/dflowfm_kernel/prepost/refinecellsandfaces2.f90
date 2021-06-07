@@ -46,6 +46,7 @@ subroutine refinecellsandfaces2()
    use gridoperations
    use timespace
    use m_polygon
+   use m_arcinfo
 
    implicit none
 
@@ -88,6 +89,8 @@ subroutine refinecellsandfaces2()
 
    jaCourantnetwork      = 0
 
+   if (mxsam == 0) mxsam = mca ! mca was there first
+
    if (npl > 0) then 
        irefinetype    = ITYPE_MESHWIDTH               ! Polygon refinement:
        numrefcycles   = 0                             !    make sure interactive
@@ -98,8 +101,8 @@ subroutine refinecellsandfaces2()
       if ( jacancelled.eq.1 ) goto 1234
    end if
   
-   if (ns > 0 .and. irefinetype == ITYPE_WAVECOURANT .or.  irefinetype == ITYPE_RIDGE ) then  
-       jacourantnetwork = 1              ! use samples 
+   if ( (ns > 0 .or. mxsam > 0) .and. (irefinetype == ITYPE_WAVECOURANT .or.  irefinetype == ITYPE_RIDGE) ) then  
+       jacourantnetwork = 1              ! use samples or arcinfo
 
        if ( MXSAM*MYSAM.eq.NS ) then     ! bilinarc, so no need for samplekdtree
            interpolationtype = 4
@@ -617,7 +620,8 @@ subroutine refinecellsandfaces2()
       nnn(1) = N
 
 !     compute cell center
-      call comp_masscenter(N, x, y, xc(1), yc(1), area, jacounterclockwise, jsferic, jasfer3D, dmiss)
+      !call comp_masscenter(N, x, y, xc(1), yc(1), area, jacounterclockwise, jsferic, jasfer3D, dmiss) ! try cheap alternative below
+      
 
 !     initialization
       zc = DMISS
@@ -625,14 +629,20 @@ subroutine refinecellsandfaces2()
 
       dmincellsize = 1d99
       dmaxcellsize = 0d0
+      xc(1) = 0d0 ; yc(1) = 0d0
       do k=1,N
           kp1 = k+1; if ( kp1.gt.N ) kp1=kp1-N
           dsize = dbdistance(x(k),y(k),x(kp1),y(kp1),jsferic, jasfer3D, dmiss)
           dlinklength(k) = dsize
           dmincellsize = min(dmincellsize, dsize)
           dmaxcellsize = max(dmaxcellsize, dsize)
+          xc(1) = xc(1) + x(k)
+          yc(1) = yc(1) + y(k)
       end do
       dcellsize = dmaxcellsize
+
+      xc(1) = xc(1)/dble(N)
+      yc(1) = yc(1)/dble(N)
 
       if ( irefinetype.eq.ITYPE_RIDGE ) then
 !------------------------------------------------------------------------
@@ -710,7 +720,7 @@ subroutine refinecellsandfaces2()
                if (zmn > 0d0 ) then          ! land 
                   zc(1) = 9d9                ! no refine
                else if (zmx >= 0d0 .and. zmn <= 0d0) then ! land/sea
-                  zc(1) = 0d9                ! always refine 
+                  zc(1)   = 0d9              ! always refine 
                endif
             endif
 
@@ -751,8 +761,10 @@ subroutine refinecellsandfaces2()
 
                linkcourant =  1 ! checking land sea mask of arcinfo grid and Courant based upon links instead of cells
                if (linkcourant == 1) then 
-                  if (landsea == 1) then 
+                  if (landsea == 1) then       ! coast always refine
                       C  = 0d0
+                  else if (landsea == 3) then  ! land no refine
+                      C  = 9d9
                   else 
                       k2 = k + 1 ; if (k2 == num) k2 = 1
                       if (z(k)*z(k2) < 0d0) then 

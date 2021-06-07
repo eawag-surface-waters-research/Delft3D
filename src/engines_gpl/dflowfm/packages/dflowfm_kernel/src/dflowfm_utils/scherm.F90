@@ -34,6 +34,8 @@
    use m_netw
    use m_flowgeom
    use m_grid
+   use m_arcinfo
+   use m_samples
    use unstruc_messages
    implicit none
    integer :: i
@@ -90,10 +92,14 @@
 
    omp_numt = 0
 #ifdef _OPENMP
-   WRITE(msgbuf,'(A,i8)') 'number of threads: ', omp_get_num_threads()  ; call msg_flush()
+   WRITE(msgbuf,'(A,i8)') 'number of threads           : ', omp_get_num_threads()  ; call msg_flush()
 #else
-   WRITE(msgbuf,'(A,i8)') 'number of threads: OMP disabled'  ; call msg_flush()
+   WRITE(msgbuf,'(A,i8)') 'number of threads           : OMP disabled'  ; call msg_flush()
 #endif
+
+   WRITE(msgbuf,'(A,i8)') 'number of samples                    :', ns  ; call msg_flush()
+   WRITE(msgbuf,'(A,i8)') 'arcinfo columns mca                  :', mca ; call msg_flush()
+   WRITE(msgbuf,'(A,i8)') 'arcinfo columns nca                  :', nca ; call msg_flush()
 
 
    WRDKEY = 'ACTUAL AND MAXIMUM DIMENSIONS OF DATA'

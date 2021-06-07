@@ -49,8 +49,10 @@
       if ( MCA*NCA.eq.NS ) then
          call wriarcsam(MSAM,ZS,MCA,NCA,MCA,NCA,X0,Y0,DXA,DYA,DMISS)
          goto 1234
+      else if (mca*nca > maxsamarc) then 
+         call wriarc(MSAM,D,mca,nca,mca,nca,X0,Y0,DXA,DYA,DMISS)
+         goto 1234
       end if
-
 
       KMOD = MAX(1,NS/100)
       DO 10 I = 1,NS

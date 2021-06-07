@@ -11359,7 +11359,7 @@ subroutine unc_read_net(filename, numk_keep, numl_keep, numk_read, numl_read, ie
        ! No UGRID, but just try to use the 'old' format now.
        continue
     end if
-
+  
     ierr = unc_open(filename, nf90_nowrite, inetfile)
     call check_error(ierr, 'file '''//trim(filename)//'''')
     if (nerr_ > 0) return

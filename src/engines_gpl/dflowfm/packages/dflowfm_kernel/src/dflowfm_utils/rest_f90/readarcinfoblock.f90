@@ -39,7 +39,7 @@
       integer :: minp
       integer :: nc
       double precision :: rmis
-      double precision :: D(MC,NC)
+      real    :: D(MC,NC)
       double precision, dimension(MC) :: dline
       CHARACTER TEX*16
 

@@ -52,7 +52,7 @@ module m_samples_refine     ! used in refinecellsandfaces2 and in sample paths
    integer                                         :: irefinetype       = ITYPE_WAVECOURANT     !< refinement criterion type
    integer                                         :: jaconnect         = 1     !< connect hanging nodes (1) or not (0)
    double precision                                :: Dt_maxcour        = 120d0 !< maximum time-step in courant grid
-   double precision                                :: Dx_mincour        = 500.  !< minimum edge length in courant grid
+   double precision                                :: Dx_mincour        = 750.  !< minimum edge length in courant grid
    double precision                                :: dminsampledist    = 0d0   !< minimum sample distance
    integer                                         :: jaoutsidecell     = 1     !< take samples outside cell into account (1) or not (0)
    integer                                         :: numrefcycles=20, numrefcyc=0     !< max and act nr of non interactive cycles

@@ -57,14 +57,8 @@ subroutine writesomeinitialoutput()
  msgbuf = ' ' ; call msg_flush()
  msgbuf = ' ' ; call msg_flush()
 
- write(msgbuf,'(a,I25)')    'nr of netnodes         ( )  :' , numk                       ; call msg_flush()
- write(msgbuf,'(a,I25)')    'nr of netlinks         ( )  :' , numl                       ; call msg_flush()
- write(msgbuf,'(a,I25)')    'nr of flownodes        ( )  :' , ndx                        ; call msg_flush()
- write(msgbuf,'(a,I25)')    'nr of openbnd cells    ( )  :' , ndx - ndxi                 ; call msg_flush()
- write(msgbuf,'(a,I25)')    'nr of 1D-flownodes     ( )  :' , ndxi - ndx2d               ; call msg_flush()
- write(msgbuf,'(a,I25)')    'nr of flowlinks        ( )  :' , lnx                        ; call msg_flush()
- write(msgbuf,'(a,I25)')    'nr of internal links   ( )  :' , lnxi                       ; call msg_flush()
- write(msgbuf,'(a,I25)')    'nr of 1D links         ( )  :' , lnx1D                      ; call msg_flush()
+ call netdimensionsmessage()
+ 
  write(msgbuf,'(a,I25)')    'nr of closed walls     ( )  :' , mxwalls                    ; call msg_flush()
 
  if (kmx > 0) then
@@ -145,3 +139,34 @@ subroutine writesomeinitialoutput()
 
 
  end subroutine writesomeinitialoutput
+
+ subroutine netdimensionsmessage()
+
+ use m_netw
+ use m_flowgeom
+ use unstruc_messages
+
+ write(msgbuf,'(a,I25)')    'nr of netnodes               ( )  :' , numk                       ; call msg_flush()
+ write(msgbuf,'(a,I25)')    'nr of netlinks               ( )  :' , numL                       ; call msg_flush() ; msgbuf = ' ' ; call msg_flush()
+
+ write(msgbuf,'(a,I25)')    'nr of 2D netlinks            ( )  :' , numL - numL1D              ; call msg_flush()
+ write(msgbuf,'(a,I25)')    'nr of 1D netlinks            ( )  :' , numL1D                     ; call msg_flush() ; msgbuf = ' ' ; call msg_flush()
+
+ write(msgbuf,'(a,I25)')    'nr of netcells               ( )  :' , nump                       ; call msg_flush()
+ write(msgbuf,'(a,I25)')    'nr of netcells 1D2D          ( )  :' , nump1D2D                   ; call msg_flush() ; msgbuf = ' ' ; call msg_flush()
+
+ if (ndx > 0) then 
+ write(msgbuf,'(a,I25)')    'nr of flownodes              ( )  :' , ndx                        ; call msg_flush()
+ write(msgbuf,'(a,I25)')    'nr of internal flownodes     ( )  :' , ndxi                       ; call msg_flush()
+ write(msgbuf,'(a,I25)')    'nr of 2D internal flownodes  ( )  :' , ndx2D                      ; call msg_flush()
+ write(msgbuf,'(a,I25)')    'nr of 1D internal flownodes  ( )  :' , ndxi - ndx2D               ; call msg_flush() ; msgbuf = ' ' ; call msg_flush()
+
+ write(msgbuf,'(a,I25)')    'nr of openbnd cells       ( )     :' , ndx - ndxi                 ; call msg_flush()
+ write(msgbuf,'(a,I25)')    'nr of 2D boundaries       ( )     :' , ndx - ndx1Db               ; call msg_flush()
+ write(msgbuf,'(a,I25)')    'nr of 1D boundaries       ( )     :' , ndx1Db - ndxi              ; call msg_flush()
+ write(msgbuf,'(a,I25)')    'nr of flowlinks           ( )     :' , Lnx                        ; call msg_flush()
+ write(msgbuf,'(a,I25)')    'nr of internal links      ( )     :' , Lnxi                       ; call msg_flush()
+ write(msgbuf,'(a,I25)')    'nr of 1D links            ( )     :' , Lnx1D                      ; call msg_flush() ; msgbuf = ' ' ; call msg_flush()
+ endif
+
+ end subroutine netdimensionsmessage

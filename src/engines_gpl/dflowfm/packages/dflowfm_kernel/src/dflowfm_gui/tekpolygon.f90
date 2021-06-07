@@ -42,9 +42,14 @@
    logical inview
 
    if (ndrawpol == 2) then
+
       CALL DISP2C(XPL, YPL, NPL, RCIR, NCOLPL)
 
    else if (ndrawpol == 3) then
+
+      CALL DISP2C(XPL, YPL, NPL, 0d0, NCOLPL)
+
+   else if (ndrawpol == 4) then
 
       do k = 1,npl-1
          if (zpl(k) .ne. dmiss .and. zpl(k+1) .ne. dmiss) then
@@ -52,30 +57,30 @@
          endif
       enddo
 
-   else if (ndrawpol >= 4 .and. ndrawpol <= 9) then
+   else if (ndrawpol >= 5 .and. ndrawpol <= 10) then
 
       CALL DISP2C(XPL, YPL, NPL, 0d0, NCOLPL)
       CALL SETCOL(NCOLBLACK)
       do k = 1,npl
          if ( inview(xpl(k), ypl(k) ) ) then
-            if ( ndrawpol == 4) then
+            if ( ndrawpol == 5) then
                call HTEXT(Zpl(k),Xpl(k),Ypl(k))
-            else if ( ndrawpol == 5 .and. jakol45 > 0) then
-               call HTEXT(dcrest(k),Xpl(k),Ypl(k))
             else if ( ndrawpol == 6 .and. jakol45 > 0) then
-               call HTEXT(dzL(k),Xpl(k),Ypl(k))
+               call HTEXT(dcrest(k),Xpl(k),Ypl(k))
             else if ( ndrawpol == 7 .and. jakol45 > 0) then
-               call HTEXT(dzr(k),Xpl(k),Ypl(k))
+               call HTEXT(dzL(k),Xpl(k),Ypl(k))
             else if ( ndrawpol == 8 .and. jakol45 > 0) then
-               call HTEXT(dtL(k),Xpl(k),Ypl(k))
+               call HTEXT(dzr(k),Xpl(k),Ypl(k))
             else if ( ndrawpol == 9 .and. jakol45 > 0) then
+               call HTEXT(dtL(k),Xpl(k),Ypl(k))
+            else if ( ndrawpol == 10 .and. jakol45 > 0) then
                call HTEXT(dtR(k),Xpl(k),Ypl(k))
 
             endif
          endif
       enddo
 
-     else if (ndrawpol == 10 .and. jakol45 > 0) then
+     else if (ndrawpol == 11 .and. jakol45 > 0) then
 
       do k = 1,npl-1
 
@@ -146,7 +151,7 @@
       enddo
 
 
-    else if ( ndrawpol == 11 ) then
+    else if ( ndrawpol == 12 ) then
 
          CALL DISP2C(XPL, YPL, NPL, RCIR, NCOLPL)
          do k = 1,npl
