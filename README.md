@@ -36,4 +36,3 @@ Linux:
 More information:
 https://oss.deltares.nl/web/delft3d/source-code
 CMake: ...\src\cmake\doc\README
-
