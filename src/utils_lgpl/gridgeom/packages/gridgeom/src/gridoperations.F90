@@ -61,6 +61,8 @@
    public :: getcellweightedcenter
    public :: getcellcircumcenter
 
+   public :: network_dimensions_message
+
    private
 
    ! for mapping 1d internal nodes to the client, which can be different
@@ -1281,7 +1283,7 @@
    ! set network status
    netstat = NETSTAT_OK
 
-   call netdimensionsmessage()
+   call network_dimensions_message()
 
    RETURN
    END SUBROUTINE FINDCELLS
@@ -4219,6 +4221,26 @@
    ierr = 0
 
    end function ggeo_map_2d_cells
+
+   subroutine network_dimensions_message()
+   use network_data
+   use MessageHandling
+   use m_cell_geometry
+   implicit none
+
+   write(msgbuf,'(a,I25)')    'nr of netnodes               ( )  :' , numk                       ; call msg_flush()
+   write(msgbuf,'(a,I25)')    'nr of netlinks               ( )  :' , numL                       ; call msg_flush()
+   msgbuf = ' ' ; call msg_flush()
+
+   write(msgbuf,'(a,I25)')    'nr of 2D netlinks            ( )  :' , numL - numL1D              ; call msg_flush()
+   write(msgbuf,'(a,I25)')    'nr of 1D netlinks            ( )  :' , numL1D                     ; call msg_flush()
+   msgbuf = ' ' ; call msg_flush()
+
+   write(msgbuf,'(a,I25)')    'nr of netcells               ( )  :' , nump                       ; call msg_flush()
+   write(msgbuf,'(a,I25)')    'nr of netcells 1D2D          ( )  :' , nump1D2D                   ; call msg_flush()
+   msgbuf = ' ' ; call msg_flush()
+
+   end subroutine network_dimensions_message
 
 
    end module gridoperations

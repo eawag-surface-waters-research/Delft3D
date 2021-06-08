@@ -42,6 +42,7 @@ subroutine writesomeinitialoutput()
  use m_samples
  use unstruc_model, only: md_ident
  use geometry_module, only: dbdistance
+ use gridoperations, only: network_dimensions_message
 
  implicit none
  integer          :: k, mbalat,mwrong,L,msam, n, nf, jacheckba = 0
@@ -57,7 +58,8 @@ subroutine writesomeinitialoutput()
  msgbuf = ' ' ; call msg_flush()
  msgbuf = ' ' ; call msg_flush()
 
- call netdimensionsmessage()
+ call network_dimensions_message()
+ call flowgeom_dimensions_message()
  
  write(msgbuf,'(a,I25)')    'nr of closed walls     ( )  :' , mxwalls                    ; call msg_flush()
 
@@ -140,33 +142,25 @@ subroutine writesomeinitialoutput()
 
  end subroutine writesomeinitialoutput
 
- subroutine netdimensionsmessage()
-
- use m_netw
+ subroutine flowgeom_dimensions_message()
+ use MessageHandling
  use m_flowgeom
- use unstruc_messages
-
- write(msgbuf,'(a,I25)')    'nr of netnodes               ( )  :' , numk                       ; call msg_flush()
- write(msgbuf,'(a,I25)')    'nr of netlinks               ( )  :' , numL                       ; call msg_flush() ; msgbuf = ' ' ; call msg_flush()
-
- write(msgbuf,'(a,I25)')    'nr of 2D netlinks            ( )  :' , numL - numL1D              ; call msg_flush()
- write(msgbuf,'(a,I25)')    'nr of 1D netlinks            ( )  :' , numL1D                     ; call msg_flush() ; msgbuf = ' ' ; call msg_flush()
-
- write(msgbuf,'(a,I25)')    'nr of netcells               ( )  :' , nump                       ; call msg_flush()
- write(msgbuf,'(a,I25)')    'nr of netcells 1D2D          ( )  :' , nump1D2D                   ; call msg_flush() ; msgbuf = ' ' ; call msg_flush()
+ implicit none
 
  if (ndx > 0) then 
- write(msgbuf,'(a,I25)')    'nr of flownodes              ( )  :' , ndx                        ; call msg_flush()
- write(msgbuf,'(a,I25)')    'nr of internal flownodes     ( )  :' , ndxi                       ; call msg_flush()
- write(msgbuf,'(a,I25)')    'nr of 2D internal flownodes  ( )  :' , ndx2D                      ; call msg_flush()
- write(msgbuf,'(a,I25)')    'nr of 1D internal flownodes  ( )  :' , ndxi - ndx2D               ; call msg_flush() ; msgbuf = ' ' ; call msg_flush()
+    write(msgbuf,'(a,I25)')    'nr of flownodes              ( )  :' , ndx                        ; call msg_flush()
+    write(msgbuf,'(a,I25)')    'nr of internal flownodes     ( )  :' , ndxi                       ; call msg_flush()
+    write(msgbuf,'(a,I25)')    'nr of 2D internal flownodes  ( )  :' , ndx2D                      ; call msg_flush()
+    write(msgbuf,'(a,I25)')    'nr of 1D internal flownodes  ( )  :' , ndxi - ndx2D               ; call msg_flush()
+    msgbuf = ' '; call msg_flush()
 
- write(msgbuf,'(a,I25)')    'nr of openbnd cells       ( )     :' , ndx - ndxi                 ; call msg_flush()
- write(msgbuf,'(a,I25)')    'nr of 2D boundaries       ( )     :' , ndx - ndx1Db               ; call msg_flush()
- write(msgbuf,'(a,I25)')    'nr of 1D boundaries       ( )     :' , ndx1Db - ndxi              ; call msg_flush()
- write(msgbuf,'(a,I25)')    'nr of flowlinks           ( )     :' , Lnx                        ; call msg_flush()
- write(msgbuf,'(a,I25)')    'nr of internal links      ( )     :' , Lnxi                       ; call msg_flush()
- write(msgbuf,'(a,I25)')    'nr of 1D links            ( )     :' , Lnx1D                      ; call msg_flush() ; msgbuf = ' ' ; call msg_flush()
+    write(msgbuf,'(a,I25)')    'nr of openbnd cells       ( )     :' , ndx - ndxi                 ; call msg_flush()
+    write(msgbuf,'(a,I25)')    'nr of 2D boundaries       ( )     :' , ndx - ndx1Db               ; call msg_flush()
+    write(msgbuf,'(a,I25)')    'nr of 1D boundaries       ( )     :' , ndx1Db - ndxi              ; call msg_flush()
+    write(msgbuf,'(a,I25)')    'nr of flowlinks           ( )     :' , Lnx                        ; call msg_flush()
+    write(msgbuf,'(a,I25)')    'nr of internal links      ( )     :' , Lnxi                       ; call msg_flush()
+    write(msgbuf,'(a,I25)')    'nr of 1D links            ( )     :' , Lnx1D                      ; call msg_flush()
+    msgbuf = ' '; call msg_flush()
  endif
 
- end subroutine netdimensionsmessage
+ end subroutine flowgeom_dimensions_message
