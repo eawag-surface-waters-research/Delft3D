@@ -5,16 +5,16 @@ set(waq_version_path ${waq_root_path}/version)
 
 set(ini_version_file ${waq_version_path}/version_number.ini)
 set(fortran_version_file ${CMAKE_CURRENT_SOURCE_DIR}/src/waq_plugin_wasteload_version.F90)
-set(rc_version_file ${waq_version_path}/version_number_waq_plugin_wasteload_version.rc.svn)
+set(rc_version_file ${waq_version_path}/version_number_waq_plugin_wasteload_version.rc)
 
 # Generate version files
 generate_version_files(${rc_version_file} 
-                       ${waq_root_path}
+                       ${checkout_src_root}
                        ${ini_version_file} 
                        ON)
 
 generate_version_files(${fortran_version_file} 
-                       ${waq_root_path}
+                       ${checkout_src_root}
                        ${ini_version_file} 
                        ON)
 
@@ -45,6 +45,7 @@ set_source_files_properties(${fortran_version_file}
 
 # Set additional compilation properties
 target_compile_options(${library_name} PRIVATE "${extend_source132_flag}")
+target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${check_bounds_flag}>")
 
 # Set dependencies
 set(oss_dependencies    deltares_common

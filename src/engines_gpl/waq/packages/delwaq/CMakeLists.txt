@@ -12,12 +12,12 @@ set(rc_version_file ${waq_version_path}/version_number.rc)
 
 # Generate version files
 generate_version_files(${rc_version_file} 
-                       ${waq_root_path}
+                       ${checkout_src_root}
                        ${ini_version_file} 
                        ON)
 
 generate_version_files(${fortran_version_file} 
-                       ${waq_root_path}
+                       ${checkout_src_root}
                        ${ini_version_file} 
                        ON)
 
@@ -46,71 +46,73 @@ prebuild_version_number(${library_name} ${fortran_version_file}
 
 # Set additional compilation properties
 target_compile_options(${library_name} PRIVATE "${extend_source132_flag}")
+target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${check_bounds_flag}>")
+
 
 set_source_files_properties(${fortran_version_file}
                             ${preprocessor_files}
                             PROPERTIES COMPILE_OPTIONS "${file_preprocessor_flag}")
 
-# Set dependencies
-set(oss_dependencies    deltares_common
-                        deltares_common_c
-                        delftio
-                        delftio_shm
-                        esmfsm
-                        io_netcdf
-                        nefis
-                        netcdf4
-                        netcdff
-                        part_data_f
-                        part_io_f
-                        part_kernel_f
-                        part_utils_f
-                        waq_io
-                        waq_kernel
-                        waq_plugin_wasteload
-                        waq_process
-                        waq_utils_c
-                        waq_utils_f) 
-oss_include_libraries(${library_name} oss_dependencies)
-target_link_libraries(${library_name} ${oss_dependencies})
+# Add dependencies
+if(UNIX)
+    # the `pkg_check_modules` function is created with this call
+    find_package(PkgConfig REQUIRED)
 
-if (WIN32)
+    # these calls create special `PkgConfig::<MODULE>` variables
+    pkg_check_modules(NETCDF REQUIRED IMPORTED_TARGET netcdf)
+    pkg_check_modules(NETCDF_FTN REQUIRED IMPORTED_TARGET netcdf-fortran)
 
-    include_directories(${mpich2_path})
+    set(oss_dependencies    deltares_common
+                            deltares_common_c
+                            delftio
+                            delftio_shm
+                            esmfsm
+                            io_netcdf
+                            nefis
+                            part_data_f
+                            part_io_f
+                            part_kernel_f
+                            part_utils_f
+                            waq_io
+                            waq_kernel
+                            waq_plugin_wasteload
+                            waq_process
+                            waq_utils_c
+                            waq_utils_f) 
+    oss_include_libraries(${library_name} oss_dependencies)
+    target_link_libraries(${library_name} ${oss_dependencies}
+         PkgConfig::NETCDF
+         PkgConfig::NETCDF_FTN)
+endif(UNIX)
 
-    # Set linker properties
-    message(STATUS "Setting linker properties in windows")
-    target_link_directories(${library_name}
-                            PUBLIC
-                            "${checkout_src_root}/third_party_open/netcdf/netCDF 4.6.1/lib"
-                            "${checkout_src_root}/third_party_open/mpich2/x64/lib"
-                            "${checkout_src_root}/third_party_open/pthreads/bin/x64")
-
-
-    target_link_libraries(${library_name}
-                            "libiomp5md.lib"
-                            "fmpich2.lib"
-                            "WbeMuuid.lib"
-                            "ole32.lib"
-                            "oleaut32.lib"
-                            "wsock32.lib"
-                            "netapi32.lib"
-                            "comctl32.lib"
-                            "user32.lib"
-                            "advapi32.lib"
-                            "comdlg32.lib"
-                            "gdi32.lib"
-                            "winspool.lib" 
-                            "netcdf.lib")
-
-    # Set linker options
-    message(STATUS "Setting target_link_options in windows")
-    target_link_options(${library_name} PRIVATE ${nologo_flag})
+if(WIN32)
+    set(oss_dependencies    deltares_common
+                            deltares_common_c
+                            delftio
+                            delftio_shm
+                            esmfsm
+                            io_netcdf
+                            nefis
+                            netcdf4
+                            netcdff
+                            part_data_f
+                            part_io_f
+                            part_kernel_f
+                            part_utils_f
+                            waq_io
+                            waq_kernel
+                            waq_plugin_wasteload
+                            waq_process
+                            waq_utils_c
+                            waq_utils_f) 
+    oss_include_libraries(${library_name} oss_dependencies)
+    target_link_libraries(${library_name} ${oss_dependencies})
 endif(WIN32)
 
-if(UNIX)
-    target_link_libraries(${library_name} ${oss_dependencies})
-endif(UNIX)
+# Define preprocessor definitions 
+if (WIN32)
+    set_target_properties(${library_name} PROPERTIES COMPILE_FLAGS ${openmp_flag})
+endif(WIN32)
 
 # Define how the files should be structured within Visual Studio
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${source_files})
@@ -132,3 +134,4 @@ post_build_target (${library_name}
                    ${library_name})
 
 install(TARGETS ${library_name} DESTINATION lib)
+
