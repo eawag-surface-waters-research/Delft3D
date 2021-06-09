@@ -10,10 +10,12 @@ function print_usage_info {
     exit 1
 }
 
-# Main
+# Variables
 executable=run_dimr.sh
 executable_extraopts=
+container_libdir=/opt/delft3dfm_latest/lnx64/bin/ # The directory WITHIN the container that contains all the executables
 
+# Main
 while [[ $# -ge 1 ]]
 do
 key="$1"
@@ -40,12 +42,22 @@ done
 scriptdirname=`readlink \-f \$0`
 scriptdir=`dirname $scriptdirname`
 
-# Set container properties
-container_name=delft3dfm-cli-hmwq_lnx64.sif
-container_libdir=/opt/delft3dfm_latest/lnx64/bin/ # The directory WITHIN the container that contains all the executables
+# Scan script directory for sif containers
+shopt -s nullglob
+container_file_paths=($(ls $scriptdir/*.sif))
+container_file_path=
 
+if [ ${#container_file_paths[@]} -eq 1 ]; then
+    container_file_path=${container_file_paths[0]}
+else
+    echo "ERROR: Directory must contain one and only one *.sif file."
+    exit 2 # Exit code 2 to indicate that no such file is present
+fi
+shopt -u nullglob
+
+# Set container properties
 echo "Executing Singularity container with:"
 echo "Singularity container directory   :   $scriptdir"
-echo "Singularity container name        :   $container_name"
+echo "Singularity container name        :   $container_file_path"
 echo "Extra executable flags            :   $executable_extraopts"
-singularity exec $scriptdir/$container_name $container_libdir/$executable $executable_extraopts
+singularity exec $container_file_path $container_libdir/$executable $executable_extraopts
