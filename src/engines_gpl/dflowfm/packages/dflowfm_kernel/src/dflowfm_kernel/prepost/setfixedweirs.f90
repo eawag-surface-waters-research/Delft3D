@@ -424,7 +424,7 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
           nh = nh + 1                                            ! just raised bobs
        endif
     else
-       if ( ifirstweir(L) == 0) then !  .and. (ifixedweirscheme == 8 .or. ifixedweirscheme == 9) ) then   !  only for fixed weirs under the bed level for Tabellenboek or Villemonte and not for the first time that a fixed weir is set on this link
+       if ( ifirstweir(L) == 0 .and. jakol45 == 2) then !  .and. (ifixedweirscheme == 8 .or. ifixedweirscheme == 9) ) then   !  only for fixed weirs under the bed level for Tabellenboek or Villemonte and not for the first time that a fixed weir is set on this link
           ! check for larger ground height height values if at this link already a fixed weir exist
 
           call normalout( XPL(k), YPL(k), XPL(k+1), YPL(k+1) , xn, yn, jsferic, jasfer3D, dmiss, dxymis)  ! test EdG
