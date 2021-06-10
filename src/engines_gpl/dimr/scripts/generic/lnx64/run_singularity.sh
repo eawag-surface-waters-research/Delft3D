@@ -27,19 +27,19 @@ fi
 
 # Parse the first argument of the script
 if [[ $# -ge 1 ]]; then
-arg=$1
-case $arg in
-    -h|--help)
-    print_usage_info
-    ;;
-    *)
-    dimr_config_file=$arg
-    ;;
-esac
-shift
+    arg=$1
+    case $arg in
+        -h|--help)
+        print_usage_info
+        ;;
+        *)
+        dimr_config_file=$arg
+        ;;
+    esac
+    shift
 
-# Parse the remaining arguments and pass it as additional arguments to the executable as extra options
-executable_extraopts="$*"
+    # Parse the remaining arguments and pass it as additional arguments to the executable as extra options
+    executable_extraopts="$*"
 fi
 
 # Check if the dimr_config_file exists
