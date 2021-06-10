@@ -584,6 +584,9 @@ module m_readCrossSections
       if (success) call prop_get_double(node_ptr, '', 'leveeBaseLevel', baseLevel, success)
       if (success) call prop_get_double(node_ptr, '', 'leveeFlowArea',  flowArea,  success)
       if (success) call prop_get_double(node_ptr, '', 'leveeTotalArea', totalArea, success)
+      if (success .and. flowArea > totalArea) then
+            call SetMessage(LEVEL_WARN, 'Total area behind levee should be larger then flow area behind levee. Cross-Section Definition id: '//trim(pCS%id)//'.')
+      endif      
       if (success) then
          if (flowArea > 1.0d-5 .or. totalArea > 1.0d-5) then
             allocate(pCS%summerdike)
@@ -791,6 +794,9 @@ module m_readCrossSections
       if (success) call prop_get_double(node_ptr, '', 'sd_baseLevel', baseLevel, success)
       if (success) call prop_get_double(node_ptr, '', 'sd_flowArea',  flowArea,  success)
       if (success) call prop_get_double(node_ptr, '', 'sd_totalArea', totalArea, success)
+      if (success .and. flowArea > totalArea) then
+         call SetMessage(LEVEL_WARN, 'Total area behind summerdike should be larger then flow area behind summerdike. Cross-Section Definition id: '//trim(pCS%id)//'.')
+      endif      
       if (success) then
          if (flowArea > 1.0d-5 .or. totalArea > 1.0d-5) then
             allocate(pCS%summerdike)
