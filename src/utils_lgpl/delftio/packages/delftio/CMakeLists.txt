@@ -11,7 +11,7 @@ set(ini_version_file ${CMAKE_CURRENT_SOURCE_DIR}/include/version_number.ini)
 set(fortran_version_file ${CMAKE_CURRENT_SOURCE_DIR}/src/diof90/delftio_version.F90)
 
 # Generate the F90 version file
-generate_version_files(${fortran_version_file} ${checkout_src_root} ${ini_version_file} ON)
+generate_version_files(${fortran_version_file} ${checkout_src_root} ${ini_version_file})
 
 # Set directory which contains all source files
 set(src_path src)

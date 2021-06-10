@@ -55,5 +55,5 @@ Compiling on Windows/Linux
    - <Ctrl><Shift>B will compile the full solution (build artifacts will be gathered by the post-build script in the X64 folder)
 
 3. LINUX
-   - make VERBOSE=1 install
+   - make install
 

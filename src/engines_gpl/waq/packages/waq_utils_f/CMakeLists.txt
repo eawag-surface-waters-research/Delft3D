@@ -29,34 +29,24 @@ add_library(${library_name} ${dlwq_netcdf_source}
 
 # Set dependencies
 if (UNIX)
-    # the `pkg_check_modules` function is created with this call
-    find_package(PkgConfig REQUIRED)
-
-    # these calls create special `PkgConfig::<MODULE>` variables
-    pkg_check_modules(NETCDF REQUIRED IMPORTED_TARGET netcdf)
-    pkg_check_modules(NETCDF_FTN REQUIRED IMPORTED_TARGET netcdf-fortran)
-
     set(oss_dependencies    deltares_common
                             io_netcdf)
-    oss_include_libraries(${library_name} oss_dependencies)
-    target_link_libraries(${library_name} ${oss_dependencies}
-         PkgConfig::NETCDF
-         PkgConfig::NETCDF_FTN)
 endif(UNIX)
-
 if (WIN32)
     set(oss_dependencies    deltares_common
                             io_netcdf
                             netcdf4
                             netcdff)
-    oss_include_libraries(${library_name} oss_dependencies)
-    target_link_libraries(${library_name} ${oss_dependencies})
 endif(WIN32)
 
+oss_include_libraries(${library_name} oss_dependencies)
+
+if(UNIX)
+   target_link_libraries(${library_name} waq_process deltares_common)
+endif(UNIX)
 
 # Set additional compilation properties
 target_compile_options(${library_name} PRIVATE "${extend_source132_flag}")
-target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${check_bounds_flag}>")
 set_source_files_properties(${src_path}/mod_couplib/m_couplib.F90
                             ${src_path}/mod_couplib/m_globcomm.F90
                             ${src_path}/mod_couplib/m_sndrcv.F90
@@ -71,5 +61,5 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES  ${dlwq_netcdf_source}
                                                      ${mod_timings_source}
                                                      ${waq_utils_source})
 
-set_target_properties (${library_name} PROPERTIES FOLDER engines_gpl/waq)
+set_target_properties (${library_name} PROPERTIES FOLDER utils_gpl/wq_processes)
 

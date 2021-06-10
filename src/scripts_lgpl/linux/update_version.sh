@@ -9,15 +9,13 @@
 
 #===============================================================================
 # Initialize svn
-# Do not load svn/1.x: "svnversion" is executed during CMake and must match with the SVN version used to checkout the source code
-#
-#initSvn="module load svn/1.9.12_gcc7.3.0"
-#eval $initSvn
-#if [ $? -ne 0 ]; then
-#    echo 'WARNING: Module svn 1.9.12_gcc7.3.0 initialization fails!'
-#    echo 'using svn : '
-#    eval "module display svn"
-#fi
+initSvn="module load svn/1.9.12_gcc7.3.0"
+eval $initSvn
+if [ $? -ne 0 ]; then
+    echo 'WARNING: Module svn 1.9.12_gcc7.3.0 initialization fails!'
+    echo 'using svn : '
+    eval "module display svn"
+fi
 
 echo Generating version number in the $1
 curdir=`pwd`
@@ -42,13 +40,12 @@ SVN_VERSION="000000";
 cd $MODDIR
 if svnversion . >/dev/null 2>/dev/null ; then
    SVN_VERSION=`svnversion -n $MODDIR`;
-   #   if [[ "$SVN_VERSION" =~ ^.*exported.*$ || "$SVN_VERSION" =~ ^Unversioned.* ]]; then
+
+#   if [[ "$SVN_VERSION" =~ ^.*exported.*$ || "$SVN_VERSION" =~ ^Unversioned.* ]]; then
    if [[ "$SVN_VERSION" =~ ^exported.*$ || "$SVN_VERSION" =~ ^Unversioned.*$ ]]; then
       SVN_VERSION="000000"
    fi
-else
-   echo "WARNING: 'svnversion .' cannot be executed. VersionNumber will be 000000"
-fi
+fi;
 #   also write it to file
 # echo $SVN_VERSION > $MODDIR/$SVN_VERSION
 

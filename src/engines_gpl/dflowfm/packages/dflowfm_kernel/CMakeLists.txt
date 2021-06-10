@@ -177,52 +177,54 @@ if (UNIX)
 endif(UNIX)
 
 if (WIN32)
-    set(oss_dependencies    deltares_common
-                            deltares_common_c
-                            deltares_common_mpi
-                            dhydrology_kernel
-                            ec_module
-                            flow1d
-                            flow1d_core
-                            flow1d_io
-                            gridgeom
-                            io_netcdf
-                            kdtree_wrapper
-                            kdtree2
-                            fortrangis
-                            libsigwatch
-                            md5digest
-                            md5
-                            metis
-                            metisoptions
-                            morphology_data
-                            morphology_io
-                            morphology_kernel
-                            morphology_plugins_c
-                            netcdf4
-                            netcdff
-                            petsc
-                            polypack
-                            shp
-                            trachytopes_io
-                            trachytopes_kernel
-                            triangle_c
-                            waq_process
-                            waq_utils_c
-                            waq_utils_f
-                            wq_processes)
+set(oss_dependencies    deltares_common
+                        deltares_common_c
+                        deltares_common_mpi
+                        dhydrology_kernel
+                        ec_module
+                        flow1d
+                        flow1d_core
+                        flow1d_io
+                        gridgeom
+                        io_netcdf
+                        kdtree_wrapper
+                        kdtree2
+                        fortrangis
+                        libsigwatch
+                        md5digest
+                        md5
+                        metis
+                        metisoptions
+                        morphology_data
+                        morphology_io
+                        morphology_kernel
+                        morphology_plugins_c
+                        netcdf4
+                        netcdff
+                        petsc
+                        polypack
+                        shp
+                        trachytopes_io
+                        trachytopes_kernel
+                        triangle_c
+                        waq_process
+                        waq_utils_c
+                        waq_utils_f
+                        wq_processes)
 
     if(NOT WITH_INTERACTER)
         set(oss_dependencies ${oss_dependencies} interacter_stub)
     endif()
 
-    oss_include_libraries(${library_name} oss_dependencies)
-    target_link_libraries(${library_name} ${oss_dependencies})
 
-    include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include"
-                        ${mpich2_path}
-                        ${tecplot_path}
-                        ${petsc_path})
+
+oss_include_libraries(${library_name} oss_dependencies)
+target_link_libraries(${library_name} ${oss_dependencies})
+
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include"
+                    ${mpich2_path}
+                    ${tecplot_path}
+                    ${petsc_path})
 endif(WIN32)
 
 
@@ -279,6 +281,7 @@ if (WIN32)
 endif(WIN32)
 
 if (UNIX)
+    target_link_libraries(${library_name} ${oss_dependencies})
     target_compile_definitions(${library_name} PRIVATE "HAVE_METIS;HAVE_POLYPACK;HAVE_MPI;HAVE_PROJ;HAVE_SHAPELIB;HAVE_GDAL;HAVE_PETSC")
 endif(UNIX)
 

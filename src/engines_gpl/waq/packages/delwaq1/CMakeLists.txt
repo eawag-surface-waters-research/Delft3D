@@ -14,12 +14,12 @@ set(icon_file ${waq_version_path}/waq_icon.rc)
 
 # Generate version files
 generate_version_files(${rc_version_file} 
-                       ${checkout_src_root}
+                       ${waq_root_path}
                        ${ini_version_file} 
                        ON)
 
 generate_version_files(${fortran_version_file} 
-                       ${checkout_src_root}
+                       ${waq_root_path}
                        ${ini_version_file} 
                        ON)
 
@@ -48,7 +48,6 @@ prebuild_version_number(${executable_name} ${fortran_version_file}
 
 # Set additional compilation properties
 target_compile_options(${executable_name} PRIVATE "${extend_source132_flag}")
-target_compile_options(${executable_name} PRIVATE "$<$<CONFIG:Debug>:${check_bounds_flag}>")
 
 set_source_files_properties(${fortran_version_file}
                             ${preprocessor_files}

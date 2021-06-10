@@ -13,7 +13,7 @@ if(UNIX)
 endif(UNIX)
 
 # Generate the F90 version file
-generate_version_files(${fortran_version_file} ${checkout_src_root} ${ini_version_file} ON)
+generate_version_files(${fortran_version_file} ${checkout_src_root} ${ini_version_file})
             
 set(src_path src)
 get_fortran_source_files(${src_path} sources)
@@ -53,8 +53,7 @@ target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${check_bounds
 # Prebuild events
 prebuild_version_number(${library_name} ${fortran_version_file} 
                                         ${checkout_src_root} 
-                                        ${ini_version_file}
-                                        ON)
+                                        ${ini_version_file})
 
 # Set additional compilation properties
 set_source_files_properties(${fortran_version_file}
