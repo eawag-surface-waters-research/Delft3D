@@ -74,5 +74,5 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${bloom_source}
                                                     ${waq_process_source}
                                                     ${waq_tables_source})
 
-set_target_properties (${library_name} PROPERTIES FOLDER utils_gpl/wq_processes)
+set_target_properties (${library_name} PROPERTIES FOLDER engines_gpl/waq)
 

@@ -49,8 +49,8 @@ if (WIN32)
                             io_netcdf
                             netcdf4
                             netcdff)
-oss_include_libraries(${library_name} oss_dependencies)
-target_link_libraries(${library_name} waq_process deltares_common)
+    oss_include_libraries(${library_name} oss_dependencies)
+    target_link_libraries(${library_name} ${oss_dependencies})
 endif(WIN32)
 
 
@@ -71,5 +71,5 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES  ${dlwq_netcdf_source}
                                                      ${mod_timings_source}
                                                      ${waq_utils_source})
 
-set_target_properties (${library_name} PROPERTIES FOLDER utils_gpl/wq_processes)
+set_target_properties (${library_name} PROPERTIES FOLDER engines_gpl/waq)
 

@@ -19,8 +19,8 @@ if (UNIX)
 endif(UNIX)
 
 # Generate the version files
-generate_version_files(${header_version_file} ${checkout_src_root} ${ini_version_file})
-generate_version_files(${rc_version_file} ${checkout_src_root} ${ini_version_file})
+generate_version_files(${header_version_file} ${checkout_src_root} ${ini_version_file} ON)
+generate_version_files(${rc_version_file} ${checkout_src_root} ${ini_version_file} ON)
 
 # Gather source files
 file(GLOB headers include/*.h)
@@ -37,10 +37,12 @@ add_library(${library_name} ${headers}
 # Define prebuild events
 prebuild_version_number(${library_name} ${header_version_file} 
                                         ${checkout_src_root} 
-                                        ${ini_version_file})
+                                        ${ini_version_file}
+                                        ON)
 prebuild_version_number(${library_name} ${rc_version_file} 
                                         ${checkout_src_root} 
-                                        ${ini_version_file})
+                                        ${ini_version_file}
+                                        ON)
 
 # Set additional dependencies
 target_include_directories(${library_name}  PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/include")

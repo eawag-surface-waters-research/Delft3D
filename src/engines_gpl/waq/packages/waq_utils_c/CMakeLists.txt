@@ -14,5 +14,5 @@ target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${check_bounds
 
 # Define how the files should be structured in Visual studio
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${source} )
-set_target_properties (${library_name} PROPERTIES FOLDER utils_gpl/wq_processes)
+set_target_properties (${library_name} PROPERTIES FOLDER engines_gpl/waq)
 

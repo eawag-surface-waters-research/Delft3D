@@ -49,7 +49,7 @@ target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${check_bounds
 
 # Set dependencies
 set(oss_dependencies    deltares_common
-                        waq_utils_f) 
+                        waq_utils_f)
 oss_include_libraries(${library_name} oss_dependencies)
 target_link_libraries(${library_name} ${oss_dependencies})
 

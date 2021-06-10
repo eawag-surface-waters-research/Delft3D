@@ -78,7 +78,7 @@ if(UNIX)
                             waq_plugin_wasteload
                             waq_process
                             waq_utils_c
-                            waq_utils_f) 
+                            waq_utils_f)
     oss_include_libraries(${library_name} oss_dependencies)
     target_link_libraries(${library_name} ${oss_dependencies}
          PkgConfig::NETCDF
@@ -104,7 +104,7 @@ if(WIN32)
                             waq_plugin_wasteload
                             waq_process
                             waq_utils_c
-                            waq_utils_f) 
+                            waq_utils_f)
     oss_include_libraries(${library_name} oss_dependencies)
     target_link_libraries(${library_name} ${oss_dependencies})
 endif(WIN32)
@@ -112,6 +112,36 @@ endif(WIN32)
 # Define preprocessor definitions 
 if (WIN32)
     set_target_properties(${library_name} PROPERTIES COMPILE_FLAGS ${openmp_flag})
+endif(WIN32)
+
+# Set additional compilation properties, specific for Debug mode
+target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${check_bounds_flag}>")
+target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${check_pointer}>")
+    
+if (WIN32)
+    # Set linker properties
+    message(STATUS "Setting linker properties in windows")
+    target_link_directories(${library_name}
+                            PRIVATE
+                            "${checkout_src_root}/third_party_open/netcdf/netCDF 4.6.1/lib"
+                            "${checkout_src_root}/third_party_open/pthreads/bin/x64")
+
+
+    target_link_libraries(${library_name}   
+                            "comctl32.lib"
+                            "wsock32.lib"
+                            "netapi32.lib"
+                            "kernel32.lib"
+                            "user32.lib" 
+                            "Shlwapi.lib"
+                            "Gdi32.lib"
+                            "Winspool.lib"
+                            "netcdf.lib"
+                            "pthreadVC2.lib")
+
+    # Set linker options
+    message(STATUS "Setting target_link_options in windows")
+    target_link_options(${library_name} PRIVATE ${nologo_flag})
 endif(WIN32)
 
 # Define how the files should be structured within Visual Studio
