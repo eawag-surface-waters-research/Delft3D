@@ -1977,7 +1977,15 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
                                    g1 = itmpvar2D(ikk, nitemglob)
                                    if (g1 > 0) then
                                        g1 = g1 + nfacecount
-                                       itmpvar2D(ikk,nitemglob) = face_c2cc(g1)
+                                       if (face_c2cc(g1) < 0) then 
+                                          ! This means that the face is not in the current domain when constructing face_c2cc array.
+                                          ! Need to find the valid number for this face.
+                                          ifaceglob = face_c2g(g1)
+                                          ifacec    = face_g2c(ifaceglob)
+                                          itmpvar2D(ikk,nitemglob) = face_c2cc(ifacec)
+                                       else
+                                          itmpvar2D(ikk,nitemglob) = face_c2cc(g1)
+                                       end if
                                    else if (g1 == 0) then
                                        itmpvar2D(ikk,nitemglob) = 0
                                    end if
