@@ -19267,6 +19267,7 @@ src/utils_lgpl/deltares_common/packages/deltares_common/src/rd_token/gettok.f -t
 src/utils_lgpl/deltares_common/packages/deltares_common/src/rd_token/mestok.f -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/rd_token/rd_token.f90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/rd_token/rdtok1.f -text
+src/utils_lgpl/deltares_common/packages/deltares_common/src/runsum.f90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/scannr.f90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/skipstarlines.f90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/small.f90 -text
