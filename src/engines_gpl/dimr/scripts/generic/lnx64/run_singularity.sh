@@ -2,15 +2,12 @@
 
 function print_usage_info {
     echo "Usage: ${0##*/} dimr_config_file [RUN_DIMR.SH OPTIONS]..."
+    echo "       ${0##*/} [-h | --help]"
     echo "Runs the run_dimr.sh command of a Singularity container by wrapping and passing additional arguments."
     echo
     echo "Options:"
     echo "-h, --help"
     echo "       Print this help message and exit"
-    echo
-    echo "Examples:"
-    echo "run_dimr dimr_config_file.xml [RUN_DIMR.SH OPTIONS]"
-    echo "run_dimr [-h | --help]"
     exit 1
 }
 
