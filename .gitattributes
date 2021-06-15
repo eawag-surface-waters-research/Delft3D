@@ -525,7 +525,6 @@ src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/deprecated/copyflowcellsizet
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/deprecated/correctiefile.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/deprecated/csmfinebnds2unstruc.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/deprecated/depumin.f90 -text
-src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/deprecated/einstein_init.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/deprecated/flow_externalinput.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/deprecated/getavcor.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/deprecated/gethg.f90 -text
@@ -572,7 +571,6 @@ src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_data/m_bnd.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_data/m_boat.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_data/m_commandline_option.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_data/m_dad.f90 -text
-src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_data/m_einstein_garcia.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_data/m_equatorial.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_data/m_filter.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_data/m_flow.f90 -text
