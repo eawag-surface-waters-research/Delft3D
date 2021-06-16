@@ -63,9 +63,16 @@ fi
 shopt -u nullglob
 
 # Set container properties
+# Note that the working directory is set to a custom mounting directory
+# for the container runtime environment. This mounting is to prevent 
+# clashes with the internal opt directory of the container
+workingdir=`pwd`
+mountdir=/mnt/data
 echo "Executing Singularity container with:"
 echo "Singularity container directory   :   $scriptdir"
 echo "Singularity container name        :   $container_file_path"
 echo "Dimr file                         :   $dimr_config_file"
+echo "Working directory                 :   $workingdir"
+echo "Mounting directory                :   $mountdir"
 echo "Extra executable flags            :   $executable_extraopts"
-singularity exec $container_file_path $container_libdir/$executable -m $dimr_config_file $executable_extraopts
+singularity exec --bind $workingdir:$mountdir --pwd $mountdir $container_file_path $container_libdir/$executable -m $dimr_config_file $executable_extraopts
