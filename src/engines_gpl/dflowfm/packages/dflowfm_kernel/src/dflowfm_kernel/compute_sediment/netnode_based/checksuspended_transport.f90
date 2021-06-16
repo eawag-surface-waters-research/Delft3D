@@ -109,16 +109,10 @@
  if (Tmob > 0d0) then
 
     rouse  = ws/(vonkar*ustar)
-    !deltaa = aref/hsk
-    !call einstein_garcia(deltaa,rouse,dj1,dj2)                      ! einstein integrals following garcia 2008
-    !garciaeinstein = dj1*log(hsk/z0k) + dj2                       ! garcia 2008(2-219) ( )
-    !garciaeinstein = max(0d0,garciaeinstein)
     crefa = 0.015d0*(D50/aref)*(Tmob**1.5d0)/(Dstar**0.3d0)       ! dimensionless reference concentration ( ), (book vRijn 1993, (7.3.31) )
     if (crefa > 0.65d0) then
        crefa =  0.65d0                                            ! max ref concentration ( )               or (book Garcia 2008, (2-226) )
     endif
-    !qsseq = (crefa*ustar*hsk/vonkar)*garciaeinstein               ! equilibrium suspended transport, ( ). (m/s) . (m) =  ( m2/s) )
-    !sseq  = qsseq/ ( max(ucur,1d-2)*hsk )                         ! ( ) dimensionless equilibrium suspended sediment concentration
 
     call check_einstein_garcia(aref,hsk,z0k,rouse, eincheck)      ! numerical check einstein integrals slow, height is already in eincheck
 
