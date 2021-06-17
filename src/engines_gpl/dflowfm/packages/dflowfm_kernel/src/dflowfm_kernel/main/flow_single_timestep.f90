@@ -50,9 +50,6 @@
 
  iresult = DFM_GENERICERROR
 
-! double precision :: t
-! call checkspeed(t)
-
    call flow_init_single_timestep(iresult)
    if (iresult /= DFM_NOERR) then
       goto 888
