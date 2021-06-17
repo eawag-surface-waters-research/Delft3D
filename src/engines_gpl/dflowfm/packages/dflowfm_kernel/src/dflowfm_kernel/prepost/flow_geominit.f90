@@ -1382,13 +1382,6 @@
     itheta_view = max(ntheta/2, 1)
  end if
 
- !call makeba()
- !sf = ba(4) / ba(1588)
- !write(*,*) sf
-
- !sf = ba(96) / ba(1674)
- !write(*,*) sf
-
  blmin = minval(bl)
 
  if (dxwuimin2D > 0d0) then
