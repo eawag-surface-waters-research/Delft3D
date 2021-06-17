@@ -57,8 +57,6 @@
  if ( janudge.eq.1 ) call setzcs()
  call flow_setexternalforcings(tim1fld ,.false., ierr)    ! set field oriented forcings. boundary oriented forcings are in
 
- ! call flow_externalinput(time_user)                  ! receive RTC signals etc
-
  call flow_single_timestep(key, ierr)
 
  call updateValuesOnObservationStations()

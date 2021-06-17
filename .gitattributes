@@ -520,7 +520,6 @@ src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/deprecated/checkspeed.f90 -t
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/deprecated/copyflowcellsizetosamples.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/deprecated/correctiefile.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/deprecated/csmfinebnds2unstruc.f90 -text
-src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/deprecated/flow_externalinput.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/deprecated/getavcor.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/deprecated/makeba.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/deprecated/refinecellsonly.f90 -text
