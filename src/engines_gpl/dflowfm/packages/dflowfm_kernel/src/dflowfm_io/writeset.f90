@@ -44,7 +44,6 @@
  call newfil(mout, fnam)
  write(mout,'(a)') '*'//a(1)
  do k = 2,kk
-    ! call correctiefile(a(k))
     write(mout,'(a)') a(k)
  enddo
  call doclose(mout)
