@@ -228,8 +228,16 @@
  logical                           :: drop1D            !< Apply losses for all 1d links,
  double precision                  :: drop3D            !< Apply losses in or 3D if downwind z below bob + 2/3 hu
  double precision                  :: zwsbtol = 0d0     !< zws(kb0) = bl - zwsbtol
- integer                           :: keepzlayeringatbed=2 !< only for z layers zws(kb0) = zslay instead of bl
- integer                           :: jahusigmaupws = 1 !< Sigma oriented (1) or absolute (2)
+ integer                           :: keepzlayeringatbed=2 
+!< only for z, 0=thin bed layer, 1=bedlayer=zlayer, 2,3: 0.5*(z2+z0) 4 = max(z1,0.5*(z2+z0)), 5 = max(z1,0.9*z2+0.1*z0)    
+ integer                           :: ihuz= 1           !< 1= : central from bed til second or first above local bob (in sethu)
+                                                        !< 2= : all central  
+                                                        !< 3= : central from bed till highest layer with equal levels 
+ integer                           :: ihuzcsig= 1        !< 1= : sig = 0.5*(Leftsig,Rightsig)                       (in sethu)
+                                                        !< 2= : sig = max (Leftsig,Rightsig)
+                                                        !< 3= : sig = min (Leftsig,Rightsig)
+                                                        !< 4= : sig = dble(LL-Lb+1) / dble(LLbc-Lb+1), uniform independent of L,R 
+
  double precision                  :: cflmx             !< max Courant nr ()
  double precision                  :: cflw              !< wave velocity fraction, total courant vel = u + cflw*wavevelocity
  double precision                  :: teta0             !< 1.00d0   ! .52      ! uniform teta in horizontal (),

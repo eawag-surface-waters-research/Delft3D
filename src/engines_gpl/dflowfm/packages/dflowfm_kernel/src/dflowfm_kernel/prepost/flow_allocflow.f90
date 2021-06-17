@@ -55,10 +55,11 @@
  integer :: ierr, n, k, mxn, j, kj, kk, LL, L, k1, k2, k3, k4, n1, n2, n3, n4, nL, kb1, kb2, numkmin, numkmax, kbc1, kbc2
  integer :: nlayb, nrlay, nlayb1, nrlay1, nlayb2, nrlay2, Lb, Lt, mx, ltn, mpol, Lt1, Lt2, Lt3, Ld1, Ld2, Ld3, Ldn
  integer :: laybed, laytop, nrlayL, Lf, kuni, kb
+ integer :: nlayb1L,nrlay1L,nlayb2L,nrlay2L
 
  double precision :: zmn, zmx, dzm, zw, zkk  ! for 3D
  double precision :: xL, xR, dLR, alf, xfixed, xsigma, gf, d1, di, w1, w2, w3, zbt, zbb, dzb, gfi, gfk, sumcof
- logical          :: jawel
+ logical          :: jawel  
 
  integer          :: ierror
 
@@ -401,6 +402,12 @@
     do L  = 1,lnx
        n1 = ln(1,L)   ; n2 = ln(2,L)
        kmxL(L) = min( kmxn(n1), kmxn(n2) ) ! 30-04       !  kmxL(L) = max ( kmxn(n1), kmxn(n2) )
+       
+       if (jaZlayeratubybob == 1 .and. kmxL(L) > numtopsig) then 
+           call getzlayerindicesbobL(n1,nlayb1,nrlay1, min( bob(1,L), bob(2,L) )  )
+           call getzlayerindicesbobL(n2,nlayb2,nrlay2, min( bob(1,L), bob(2,L) )  )    
+           kmxL(L) = min(nrlay1, nrlay2) 
+       endif
 
        if (abs(kcu(L)) == 2) then
           n3 = lncn(1,L) ; n4 = lncn(2,L)
@@ -441,16 +448,20 @@
        endif
 
        if ( Lt1 == 2 .and. Lt2 == 2) then
-          if (jaZlayeratubybob == 1) then
-             call getzlayerindicesbobL(n1,nlayb1,nrlay1, 0.5d0*( bob(1,L) + bob(2,L) )  )
-             call getzlayerindicesbobL(n2,nlayb2,nrlay2, 0.5d0*( bob(1,L) + bob(2,L) )  )
-          else
-             call getzlayerindices(n1,nlayb1,nrlay1)
-             call getzlayerindices(n2,nlayb2,nrlay2)
-          endif
 
+          call getzlayerindices(n1,nlayb1,nrlay1)                               ! connection to be made at bedcell of highest adjacent cell
+          call getzlayerindices(n2,nlayb2,nrlay2)
           kb1 = max(0, nlayb2-nlayb1)
           kb2 = max(0, nlayb1-nlayb2)
+  
+          if (jaZlayeratubybob == 1 .and. kmxL(L) > numtopsig)  then ! min(nrlay1,nrlay2) > numtopsig ) then ! connection to be made at first cell above local bob 
+                                                                                ! but not if you are in numtopsig country
+             call getzlayerindicesbobL(n1,nlayb1L,nrlay1L, min( bob(1,L), bob(2,L) )  )
+             call getzlayerindicesbobL(n2,nlayb2L,nrlay2L, min( bob(1,L), bob(2,L) )  )
+             kb1 = nlayb1L-nlayb1
+             kb2 = nlayb2L-nlayb2
+                                                 
+          endif
 
           laybed = max( nlayb1,nlayb2 )
           laytop = min( nlayb1+nrlay1, nlayb2+nrlay2 ) ! should be identical for n1,n2,n3,n4

@@ -132,7 +132,13 @@ integer          :: k1, k3, kb3, Lt1, Lt2, Lt3, Ld1, Ld2, Ld3, kk1, kk2, kk3
 
        if (keepzlayeringatbed >= 2) then
            if (ktop(n) > kb) then
-               zws(kb) = 0.5d0*( zws(kb+1) + zws(kb-1) )
+               if (keepzlayeringatbed <= 3) then   
+                   zws(kb) = 0.5d0*( zws(kb+1) + zws(kb-1) ) 
+               else if (keepzlayeringatbed <= 4) then 
+                   zws(kb) = max(zws(kb), 0.5d0*( zws(kb+1) + zws(kb-1) ) )
+               else 
+                   zws(kb) = max(zws(kb), 0.1d0*zws(kb+1) + 0.9d0*zws(kb-1) )
+               endif
            endif
        endif
 

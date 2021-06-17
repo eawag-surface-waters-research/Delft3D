@@ -973,10 +973,13 @@ subroutine readMDUFile(filename, istat)
        call prop_get_doubles( md_ptr, 'geometry', 'StretchCoef'   , laycof, 3)
     endif
 
-    call prop_get_integer(md_ptr, 'geometry', 'Keepzlayeringatbed'      , keepzlayeringatbed , success)
+    call prop_get_integer(md_ptr, 'geometry', 'Keepzlayeringatbed'   , keepzlayeringatbed , success)
     if (.not. success) then
        call prop_get_integer(md_ptr, 'numerics', 'Keepzlayeringatbed', keepzlayeringatbed)
     endif
+    call prop_get_integer(md_ptr, 'geometry', 'Ihuz'    , ihuz    , success)
+    call prop_get_integer(md_ptr, 'geometry', 'ihuzcsig' , ihuzcsig , success)
+    call prop_get_integer(md_ptr, 'geometry', 'Zlayeratubybob'    , jaZlayeratubybob, success)
     
     call prop_get_integer( md_ptr, 'geometry', 'Makeorthocenters' , Makeorthocenters)
     call prop_get_double ( md_ptr, 'geometry', 'Dcenterinside'    , Dcenterinside)
@@ -1065,8 +1068,6 @@ subroutine readMDUFile(filename, istat)
 
     call prop_get_integer(md_ptr, 'numerics', 'Zlayercenterbedvel', jaZlayercenterbedvel)
     call prop_get_integer(md_ptr, 'numerics', 'Zerozbndinflowadvection', jaZerozbndinflowadvection)
-
-    call prop_get_integer(md_ptr, 'numerics', 'Zlayeratubybob' , jaZlayeratubybob)
 
     call prop_get_integer(md_ptr, 'numerics', 'Jarhoxu' , Jarhoxu)
     if (Jarhoxu > 0) then
@@ -2672,7 +2673,19 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
        if (keepzlayeringatbed /= 2) then
           call prop_set(prop_ptr, 'geometry', 'Keepzlayeringatbed'  , keepzlayeringatbed, '0:bedlayerthickness == zlayerthickness, 1:possibly very thin layer at bed, 2=equal thickness first two layers')
        endif
-       
+  
+       if (ihuz .ne. 1) then 
+           call prop_set(prop_ptr, 'geometry', 'Ihuz'  , ihuz, 'if keepzlayeratbed>=3 : 1=central from bed til second, 2=all central, 3=from bed till highest equal levels')
+       endif     
+
+       if (ihuzcsig .ne. 1) then 
+           call prop_set(prop_ptr, 'geometry', 'ihuzcsig'  , ihuzcsig, 'if keepzlayeratbed>=3 : 1,2,3=av,mx,mn of Leftsig,Rightsig,4=uniform')
+       endif     
+
+       if (writeall .or. jaZlayeratubybob .ne. 0 .and. layertype .ne. 1) then
+         call prop_set(prop_ptr, 'geometry', 'Zlayeratubybob', JaZlayeratubybob, 'Lowest connected cells governed by bob instead of by bL L/R' )
+       endif
+
        if (janooptimizedpolygon > 0) then
           call prop_set(prop_ptr, 'geometry', 'NoOptimizedPolygon', janooptimizedpolygon, '0:polygon optimization ON, 1: OFF')
        endif
@@ -2729,9 +2742,9 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
 
     call prop_set(prop_ptr, 'numerics', 'Vertadvtypsal', Javasal,   'Vertical advection type for salinity (0: none, 1: upwind explicit, 2: central explicit, 3: upwind implicit, 4: central implicit, 5: central implicit but upwind for neg. stratif., 6: higher order explicit, no Forester)')
     call prop_set(prop_ptr, 'numerics', 'Vertadvtyptem', Javatem,   'Vertical advection type for temperature (0: none, 1: upwind explicit, 2: central explicit, 3: upwind implicit, 4: central implicit, 5: central implicit but upwind for neg. stratif., 6: higher order explicit, no Forester)')
-    call prop_set(prop_ptr, 'numerics', 'Vertadvtypmom', javau, 'Vertical advection type for u1: 0: No, 3: Upwind implicit, 4: Central implicit, 5: QUICKEST implicit., 6: centerbased upwind expl' )
+    call prop_set(prop_ptr, 'numerics', 'Vertadvtypmom', javau, 'Vertical advection type for u1: 0: No, 3: Upwind implicit, 4: Central implicit, 5: QUICKEST implicit., 6: centerbased upwind expl, 7=6 HO' )
     if (writeall .or. javau3onbnd .ne. 0) then
-        call prop_set(prop_ptr, 'numerics', 'Vertadvtypmom3onbnd', javau3onbnd, 'vert. adv. u1 bnd UpwimpL: 0=follow javau , 1 = on bnd, 2= on and near bnd' )
+      call prop_set(prop_ptr, 'numerics', 'Vertadvtypmom3onbnd', javau3onbnd, 'vert. adv. u1 bnd UpwimpL: 0=follow javau , 1 = on bnd, 2= on and near bnd' )
     endif
     if (writeall .or. cffacver .ne. 0d0 ) then
       call prop_set(prop_ptr, 'numerics', 'Cffacver', Cffacver,   'Factor for including (1-CFL) in HO term vertical   (0d0: no, 1d0: yes)')
@@ -2752,9 +2765,6 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     endif
     if (jaZlayercenterbedvel == 1) then
        call prop_set(prop_ptr, 'numerics', 'Zlayercenterbedvel', JaZlayercenterbedvel, 'reconstruction of center velocity at half closed bedcells (0=no, 1: copy bed link velocities)')
-    endif
-    if (writeall .or. jaZlayeratubybob .ne. 0 .and. layertype .ne. 1) then
-      call prop_set(prop_ptr, 'numerics', 'Zlayeratubybob', JaZlayeratubybob, 'Lowest connected cells governed by bob instead of by bL L/R' )
     endif
     call prop_set(prop_ptr, 'numerics', 'Icgsolver',       Icgsolver, 'Solver type (1: sobekGS_OMP, 2: sobekGS_OMPthreadsafe, 3: sobekGS, 4: sobekGS + Saadilud, 5: parallel/global Saad, 6: parallel/Petsc, 7: parallel/GS)')
     if (writeall .or. Maxdge .ne. 6) then

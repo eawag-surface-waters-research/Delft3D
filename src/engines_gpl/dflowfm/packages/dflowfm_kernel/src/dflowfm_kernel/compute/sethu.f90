@@ -67,7 +67,7 @@ subroutine sethu(jazws0)                            ! Set upwind waterdepth hu
  double precision  :: sl1, sl2, sl3, sku, hskub, hub, sigmd
  character (len=4) :: toest
 
- integer           :: k3, k4, itel, kuu, ku2, kku, ip , Lnu, kbd, ktd, kbd0, LLbup
+ integer           :: k3, k4, itel, kuu, ku2, kku, ip , Lnu, kbd, ktd, kbd0, LLbc
 
  double precision, external :: dslim,  nod2linx, nod2liny
 
@@ -337,7 +337,7 @@ subroutine sethu(jazws0)                            ! Set upwind waterdepth hu
     endif
 
     if (kmx > 0) then
-       Lb       = Lbot(L)
+       Lb       = Lbot(L) 
        if (hu(L) > 0d0) then
 
           kt      = ktop(ku)
@@ -350,67 +350,108 @@ subroutine sethu(jazws0)                            ! Set upwind waterdepth hu
 
           if ( Lb == Ltop(L) ) then                ! one layer
 
-              LL     = Lb
-              hu(LL) = hu(L)
-              au(LL) = wu(L)*(hu(LL) - hu(LL-1))   ! this is only for now here, later move to addlink etc
-              au(L)  = au(L) + au(LL)              ! add to integrated 2Dh layer
+             LL     = Lb
+             hu(LL) = hu(L)
+             au(LL) = wu(L)*(hu(LL) - hu(LL-1))   ! this is only for now here, later move to addlink etc
+             au(L)  = au(L) + au(LL)              ! add to integrated 2Dh layer
 
           else
 
-             hsku    = zws(kt) - zws(kb0)
+             hsku   = zws(kt) - zws(kb0)
              if (Ltop(L) > Lb + kmxL(L) - 1) then
                 call qnerror('Ltop too large',' ',' ')
              endif
 
-             if (layertype == 2 .and. keepzlayeringatbed == 3) then  ! split in a central sigma oriented part
+             if (layertype == 2 .and. keepzlayeringatbed >= 3 ) then  ! split in a central and sigma oriented part to avoid flipflop
 
                 ktd  = ktop(kd)
                 kbd  = min ( ln0(3-iup,Lb ) , ktd )
                 kbd0 = kbd - 1
 
-                if (ktd == kbd) then
+                hub  = 0d0
 
-                   do LL = Lb, Ltop(L)
-                      sigm   = (zws(kb+LL-Lb)-zws(kb0)) / hsku
-                      hu(LL) = sigm*hu(L)
-                      au(LL) = wu(L)*(hu(LL)-hu(LL-1))   ! this is only for now here, later move to addlink etc
-                      au(L)  = au(L) + au(LL)            ! add to integrated 2Dh layer
-                   enddo
+                if (ktd == kbd) then                     
 
-                else
+                                                         ! downwind side one layer => default upwind sigma
+                    LLbc = Lb - 1                        ! => default upwind sigma 
 
-                   hub   = 0d0
-                   LLbup = Lb
-                   do LL  = Lb+1, Ltop(L)                ! search upwind cell for first layer above local bob
-                      hub = zws(kb+LL-Lb) - bup
-                      if (hub > 0) then
-                         LLbup = LL
-                         exit
-                      endif
-                   enddo
 
-                   do LL  = Lb, LLbup                    ! central in lower part
-                      sigm   = ( zws(kb+LL-Lb)  - zws(kb0)  ) / ( zws(kb+LLbup-Lb)  - zws(kb0)  )
-                      if (zws(kbd+LL-Lb) - zws(kbd0) > 0d0 .and. zws(kbd+LLbup-Lb) - zws(kbd0) > 0d0 ) then
-                          sigmd  = ( zws(kbd+LL-Lb) - zws(kbd0) ) / ( zws(kbd+LLbup-Lb) - zws(kbd0) )
-                      else
-                          sigmd  = dble(LL-Lb+1)/ dble(LLbup-Lb+1)
-                      endif
-                      sigm = 0.5d0*(sigm + sigmd)
-                      hu(LL) = sigm*hub
-                      au(LL) = wu(L)*(hu(LL) - hu(LL-1)) ! this is only for now here, later move to addlink etc
-                      au(L)  = au(L) + au(LL)            ! add to integrated 2Dh layer
-                   enddo
+                else if (kt - kb == ktd - kbd .and. kt - kbot(ku) + 1 <= numtopsig .and. ktd - kbot(kd) + 1 <= numtopsig) then 
 
-                   hub = hu(L) - hub
-                   do LL  = LLbup+1, Ltop(L)             ! upwind in upper part
-                      sigm   = ( zws(kb+LL-Lb) - zws(kb+LLbup-Lb) ) / ( zws(kt) - zws(kb+LLbup-Lb) )
-                      hu(LL) = hu(LLbup) + sigm*hub
-                      au(LL) = wu(L)*(hu(LL) - hu(LL-1)) ! this is only for now here, later move to addlink etc
-                      au(L)  = au(L) + au(LL)            ! add to integrated 2Dh layer
-                   enddo
+                                                         ! same number of layers on both sides within numtopsig
+                    LLbc = Lb - 1                        ! => default upwind sigma 
+
+                else 
+                  
+                    if (ihuz == 1) then                  ! central from bed til second or first above local bob
+
+                       do LL = Lb+1, Ltop(L)             ! search upwind cell for first layer above local bob
+                          hub = zws(kb+LL-Lb) - bup
+                          if (hub > 0) then
+                              LLbc = LL
+                              exit
+                          endif
+                       enddo 
+
+                    else if (ihuz == 2) then             ! all central  
+
+                       LLbc = Ltop(L)
+                       hub  = hu(L)                     
+
+                    else if (ihuz == 3) then             ! central from bed till highest layer with equal levels 
+
+                       LLbc  = Ltop(L)
+                       do LL = Ltop(L)-1, Lb+1, -1       ! search for highest layer with equal zws
+                          if (abs( zws(kb+LL-Lb) - zws(kbd+LL-Lb) ) < 1d-10) then 
+                              LLbc = LL
+                              exit
+                          endif
+                       enddo
+                       hub = zws(kb+LLbc-Lb) - bup
+
+                    else if (ihuz == 4) then             ! central from bed till one below highest downwind layer, much like 3 
+
+                       LLbc = Ltop(L)
+                       do LL = Ltop(L)-1, Lb+1, -1       ! search for second layer from top on downwind side
+                          if (ln(3-iup,LL ) == ktd-1) then 
+                             LLbc = LL
+                             exit
+                          endif
+                       enddo
+                       hub = zws(kb+LLbc-Lb) - bup
+     
+                    endif
+
+                    do LL  = Lb, LLbc                    ! central in lower part
+                       if (ihuzcsig == 4) then 
+                          sigm = dble(LL-Lb+1) / dble(LLbc-Lb+1)                                          ! fifty/fifty, .33 or so
+                       else 
+                          sigm = ( zws(kb+LL-Lb)  - zws(kb0)  ) / ( zws(kb+LLbc-Lb)  - zws(kb0)  )        ! sigmaup
+                          if (zws(kbd+LL-Lb) - zws(kbd0) > 0d0 .and. zws(kbd+LLbc-Lb) - zws(kbd0) > 0d0) then
+                              sigmd  = ( zws(kbd+LL-Lb) - zws(kbd0) ) / ( zws(kbd+LLbc-Lb) - zws(kbd0) )  ! sigmadown
+                              if (ihuzcsig == 1) then 
+                                  sigm = 0.5d0*(sigm + sigmd)
+                              else if (ihuzcsig == 2) then 
+                                  sigm = max(sigm, sigmd) 
+                              else if (ihuzcsig == 3) then 
+                                  sigm = min(sigm, sigmd) 
+                              endif
+                          endif
+                       endif
+                       hu(LL) = sigm*hub
+                       au(LL) = wu(L)*(hu(LL) - hu(LL-1)) ! this is only for now here, later move to addlink etc
+                       au(L)  = au(L) + au(LL)            ! add to integrated 2Dh layer
+                    enddo
 
                 endif
+
+                hub = hu(L) - hub
+                do LL = LLbc+1, Ltop(L)              ! upwind in upper part
+                   sigm   = ( zws(kb+LL-Lb) - zws(kb+LLbc-Lb) ) / ( zws(kt) - zws(kb+LLbc-Lb) )
+                   hu(LL) = hu(LLbc) + sigm*hub
+                   au(LL) = wu(L)*(hu(LL) - hu(LL-1)) ! this is only for now here, later move to addlink etc
+                   au(L)  = au(L) + au(LL)            ! add to integrated 2Dh layer
+                enddo
 
              else                                     ! default: upwind sigma oriented distribution of hu(L)
 
@@ -433,7 +474,8 @@ subroutine sethu(jazws0)                            ! Set upwind waterdepth hu
 
  enddo
 
- do L = 1,lnx
+
+  do L = 1,lnx
     k1 = ln(1,L) ; k2 = ln(2,L)
     hsav  = max(epshs, acl(L)*hs(k1) + (1d0-acl(L))*hs(k2) )
     huvli(L) = 1d0 / hsav
