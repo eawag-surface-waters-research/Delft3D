@@ -135,7 +135,6 @@
          end do
       ELSE IF (NWHAT .EQ. 9) THEN
       ELSE IF (NWHAT .EQ. 10) THEN
-         ! call csmfinebnds2unstruc()
          call REFINEPOLYGON ()
       ELSE IF (NWHAT .EQ. 11) THEN
          CALL SAVENET()
@@ -147,9 +146,9 @@
       ELSE IF (NWHAT .EQ. 13) THEN
 !         CALL RELINK()
 !         CALL SAVENET()
-!         CALL REFINECELLSANDFACES() !  REFINECELLSONLY()
+!         CALL REFINECELLSANDFACES()
          CALL SAVENET()
-         CALL REFINECELLSANDFACES2() !  REFINECELLSONLY()
+         CALL REFINECELLSANDFACES2()
       ELSE IF (NWHAT .EQ. 14) THEN
          CALL SAVENET()
          call derefine_mesh(0d0, 0d0, .false.)
@@ -386,7 +385,6 @@
         else if (nwhat2 == 3) then
          call copynetlinkstosam()
         else if (nwhat2 == 4) then
-        ! call copyflowcellsizetosamples ! copyzktosam()
          call copycellstosam() !subroutine to display the scalar values calculated in the cells
         else if (nwhat2 == 5) then
          CALL copywaterlevelstosamples()

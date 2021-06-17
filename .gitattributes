@@ -517,12 +517,8 @@ src/engines_gpl/dflowfm/packages/dflowfm_kernel/include/RF.inc -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/include/blasfm.h -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/deprecated/axpy.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/deprecated/checkspeed.f90 -text
-src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/deprecated/copyflowcellsizetosamples.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/deprecated/correctiefile.f90 -text
-src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/deprecated/csmfinebnds2unstruc.f90 -text
-src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/deprecated/getavcor.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/deprecated/makeba.f90 -text
-src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/deprecated/refinecellsonly.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/deprecated/riemann_setmean.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_data/alloc_jacobi.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_data/allocateandset1dnodexyarrays.f90 -text
