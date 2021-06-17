@@ -221,7 +221,7 @@ module rdhydr_mod
 
 !.. vertical diffusions
 
-         if ( lunit(20) .gt. 0 ) then
+         if ( lunit(20) .ne. 0 ) then
             call dlwqbl ( lunit(20), lunut   , itime    , idtimd  , itimd1  ,   &
                           itimd2   , idelt   , noseg    , mnmaxk  , vdiff1  ,   &
                           vdiff    , cellpnt , fname(20), isflag  , ifflag  ,   &
@@ -245,7 +245,7 @@ module rdhydr_mod
 
 !.. salinity
 
-         if ( lunit(22) .gt. 0 ) then
+         if ( lunit(22) .ne. 0 ) then
             call dlwqbl ( lunit(22), lunut   , itime    , idtimt , itimt1 ,   &
                           itimt2   , idelt   , noseg    , mnmaxk , salin1 ,   &
                           salin    , cellpnt , fname(22), isflag , ifflag ,   &
@@ -254,7 +254,7 @@ module rdhydr_mod
 
 !.. temperature
 
-         if ( lunit(23) .gt. 0 ) then
+         if ( lunit(23) .ne. 0 ) then
             call dlwqbl ( lunit(23), lunut   , itime    , idtimt , itimt1 ,   &
                           itimt2   , idelt   , noseg    , mnmaxk , temper1,   &
                           temper   , cellpnt , fname(23), isflag , ifflag ,   &
@@ -291,7 +291,7 @@ module rdhydr_mod
 !
 !     end of routine
 !
-      if ( lunit(22) .gt. 0 .and. lunit(23) .gt. 0 ) then
+      if ( lunit(22) .ne. 0 .and. lunit(23) .ne. 0 ) then
          do i = 1, noseg
             rhowatc(i) = densty(max(0.0e0,salin1(i)), temper1(i))
          enddo
@@ -300,7 +300,7 @@ module rdhydr_mod
             rhowatc(i) = rhow
          enddo
       endif
-      
+
       if ( timon ) call timstop ( ithndl )
       return
 !
