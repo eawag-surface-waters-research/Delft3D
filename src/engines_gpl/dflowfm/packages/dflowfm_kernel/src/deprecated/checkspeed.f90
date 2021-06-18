@@ -30,39 +30,56 @@
 ! $Id$
 ! $HeadURL$
 
- subroutine flow_spatietimestep()                 ! do 1 flowstep
- use m_flowtimes
- use m_flowgeom, only: ndx
- use m_flowexternalforcings, only: nbndz, zbndz
- use m_flowparameters, only: janudge
-
+ subroutine checkspeed(rr)
+ use unstruc_messages
  implicit none
- integer :: key, ierr
- integer :: i
- integer, external :: flow_modelinit
+ double precision :: mult0, mult1, mult, divt0, divt1, divt
+ double precision :: t, ti, r, rr, rrm, rrd
+ integer :: k, key
 
- if (ndx == 0) then
-     ierr = flow_modelinit()
- end if
+ call klok(mult0)
 
- if (ndx == 0) return                                ! No valid flow network was initialized
 
- call inctime_user()
- if (time0 >= time_user) then
-    Tstop_user = tstop_user + dt_user
-    time_user  = time_user  + dt_user
- endif
-                                                     ! ipv time0
- tim1fld = max(time_user,tim1fld)
- if ( janudge.eq.1 ) call setzcs()
- call flow_setexternalforcings(tim1fld ,.false., ierr)    ! set field oriented forcings. boundary oriented forcings are in
+ do k   = 1,10000
+    t   = 1d0*k - 1d0*k + 1.5155155d0
+    ti  = 1d0/t
+    r   = 0
+    rrm = 0
+    do key = 1,1000000
+       r   = r + 1d0
+       rr  = r*ti
+       rrm = rrm + rr            ! remove this line and both loops will have identical perf on compaq visual
+    enddo
+ enddo
 
- ! call flow_externalinput(time_user)                  ! receive RTC signals etc
+ call klok(mult1)
 
- call flow_single_timestep(key, ierr)
+ call klok(divt0)
 
- call updateValuesOnObservationStations()
+ do k   = 1,10000
+    t   = 1d0*k - 1d0*k + 1.5155155d0
+    ti  = 1d0/t
+    r   = 0
+    rrd = 0
+    do key = 1,1000000
+       r   = r + 1d0
+       rr  = r/t
+       rrd = rrd + rr
+    enddo
+ enddo
 
- call flow_externaloutput(time1)                     ! receive signals etc, write map, his etc
-                                                     ! these two functions are explicit. therefore, they are in the usertimestep
- end subroutine flow_spatietimestep
+ call klok(divt1)
+
+ mult = mult1-mult0
+ divt = divt1-divt0
+
+ write(msgbuf,*) 'mult ', mult
+ call msg_flush()
+ write(msgbuf,*) 'divt ', divt
+ call msg_flush()
+ write(msgbuf,*) 'divt/mult ', divt/mult
+ call msg_flush()
+ write(msgbuf,*) 'rrm, rrd, rrd-rrm ', rrm, rrd, rrd-rrm
+ call msg_flush()
+
+ end subroutine checkspeed

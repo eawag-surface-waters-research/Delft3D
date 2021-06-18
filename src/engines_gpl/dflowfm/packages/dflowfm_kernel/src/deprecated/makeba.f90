@@ -30,39 +30,31 @@
 ! $Id$
 ! $HeadURL$
 
- subroutine flow_spatietimestep()                 ! do 1 flowstep
- use m_flowtimes
- use m_flowgeom, only: ndx
- use m_flowexternalforcings, only: nbndz, zbndz
- use m_flowparameters, only: janudge
-
+ subroutine makeba()  ! recompute ba
+ use m_flow
+ use m_flowgeom
+ use m_netw
  implicit none
- integer :: key, ierr
- integer :: i
- integer, external :: flow_modelinit
+ integer          :: k,L,m,n,k1,k2
+ double precision :: dxw, aa1
 
- if (ndx == 0) then
-     ierr = flow_modelinit()
- end if
+ ba = 0d0   ! ; acl = 0.5d0
+ Do L = 1,lnx
+    k1 = ln(1,L) ; k2 = ln(2,L)
+    dxw    = 0.5d0*dx(L)*wu(L)
+    ba(k1) = ba(k1) + dxw*acl(L)
+    ba(k2) = ba(k2) + dxw*(1d0-acl(L))
+ enddo
 
- if (ndx == 0) return                                ! No valid flow network was initialized
+ do n   = 1, mxwalls
+    k1  = walls(1,n)
+    aa1 = walls(17,n)
+    ba(k1) = ba(k1) + aa1
+ enddo
 
- call inctime_user()
- if (time0 >= time_user) then
-    Tstop_user = tstop_user + dt_user
-    time_user  = time_user  + dt_user
- endif
-                                                     ! ipv time0
- tim1fld = max(time_user,tim1fld)
- if ( janudge.eq.1 ) call setzcs()
- call flow_setexternalforcings(tim1fld ,.false., ierr)    ! set field oriented forcings. boundary oriented forcings are in
+ do L = Lnxi, Lnx
+    k1 = ln(1,L) ; k2 = ln(2,L)
+    ba(k1) = ba(k2)
+ enddo
 
- ! call flow_externalinput(time_user)                  ! receive RTC signals etc
-
- call flow_single_timestep(key, ierr)
-
- call updateValuesOnObservationStations()
-
- call flow_externaloutput(time1)                     ! receive signals etc, write map, his etc
-                                                     ! these two functions are explicit. therefore, they are in the usertimestep
- end subroutine flow_spatietimestep
+ end subroutine makeba

@@ -30,39 +30,22 @@
 ! $Id$
 ! $HeadURL$
 
- subroutine flow_spatietimestep()                 ! do 1 flowstep
- use m_flowtimes
- use m_flowgeom, only: ndx
- use m_flowexternalforcings, only: nbndz, zbndz
- use m_flowparameters, only: janudge
+subroutine einstein_init()
+use m_einstein_garcia
+implicit none
 
- implicit none
- integer :: key, ierr
- integer :: i
- integer, external :: flow_modelinit
+c1(1,:)  = (/    8.03210,  -26.27300, -114.69000,  501.43000, -229.51000,   41.94000,   -2.77220  /)
+c1(2,:)  = (/    2.11420,   -3.45020,   12.49100,   60.34500,  -29.42100,    5.42150,   -0.35770  /)
+c1(3,:)  = (/    1.48520,    0.20250,   14.08700,   20.91800,  -10.91000,    2.03400,   -0.13450  /)
+c1(4,:)  = (/    1.10380,    2.66260,    5.64970,    0.38220,   -0.61740,    0.13150,   -0.00910  /)
+c1(5,:)  = (/    1.12660,    2.62390,    3.08380,   -0.36360,   -0.07340,    0.02460,   -0.00190  /)
 
- if (ndx == 0) then
-     ierr = flow_modelinit()
- end if
+c2(1,:)  = (/    2.57790,  -12.41800,   47.35300,   17.63900,  -13.55400,    2.83920,   -0.20030  /)
+c2(2,:)  = (/    1.26230,    1.03300,   13.54300,    0.76550,   -1.66460,    0.38030,   -0.02750  /)
+c2(3,:)  = (/    1.15100,    2.17870,    7.65720,   -0.27770,   -0.57000,    0.14240,   -0.01050  /)
+c2(4,:)  = (/    1.25740,    2.31590,    1.92390,   -0.35580,    0.00750,    0.00640,   -0.00060  /)
+c2(5,:)  = (/    1.49520,    2.20410,    1.05520,   -0.23720,    0.02650,   -0.00080,   -0.00005  /)
 
- if (ndx == 0) return                                ! No valid flow network was initialized
+d(1:5)   = (/    0.001d0,    0.005d0,     0.01d0,     0.05d0,      0.1d0                          /)
 
- call inctime_user()
- if (time0 >= time_user) then
-    Tstop_user = tstop_user + dt_user
-    time_user  = time_user  + dt_user
- endif
-                                                     ! ipv time0
- tim1fld = max(time_user,tim1fld)
- if ( janudge.eq.1 ) call setzcs()
- call flow_setexternalforcings(tim1fld ,.false., ierr)    ! set field oriented forcings. boundary oriented forcings are in
-
- ! call flow_externalinput(time_user)                  ! receive RTC signals etc
-
- call flow_single_timestep(key, ierr)
-
- call updateValuesOnObservationStations()
-
- call flow_externaloutput(time1)                     ! receive signals etc, write map, his etc
-                                                     ! these two functions are explicit. therefore, they are in the usertimestep
- end subroutine flow_spatietimestep
+end subroutine einstein_init

@@ -30,39 +30,90 @@
 ! $Id$
 ! $HeadURL$
 
- subroutine flow_spatietimestep()                 ! do 1 flowstep
- use m_flowtimes
- use m_flowgeom, only: ndx
- use m_flowexternalforcings, only: nbndz, zbndz
- use m_flowparameters, only: janudge
-
+ subroutine sortnetlinks()
+ use m_netw
+ use sorting_algorithms, only: indexxi
  implicit none
- integer :: key, ierr
- integer :: i
- integer, external :: flow_modelinit
+ integer, allocatable :: n1(:), in(:), ni(:)
+ integer              :: L1, k, kk, L
 
- if (ndx == 0) then
-     ierr = flow_modelinit()
- end if
+ if (numL == 0) return
 
- if (ndx == 0) return                                ! No valid flow network was initialized
+ allocate ( n1(numL), in(numL), ni(numL) )
 
- call inctime_user()
- if (time0 >= time_user) then
-    Tstop_user = tstop_user + dt_user
-    time_user  = time_user  + dt_user
- endif
-                                                     ! ipv time0
- tim1fld = max(time_user,tim1fld)
- if ( janudge.eq.1 ) call setzcs()
- call flow_setexternalforcings(tim1fld ,.false., ierr)    ! set field oriented forcings. boundary oriented forcings are in
+ L1   = numl1D+1
+ do L = L1, numL
+    n1(L) = lne(1,L)
+ enddo
 
- ! call flow_externalinput(time_user)                  ! receive RTC signals etc
+ call indexxi(numL-L1+1, n1(L1:), IN(L1:) )
 
- call flow_single_timestep(key, ierr)
+ do L = 1,numl1D
+    in(L) = L
+ enddo
 
- call updateValuesOnObservationStations()
+ do L = L1, numL
+   in(L) = in(L) + numL1D
+ enddo
 
- call flow_externaloutput(time1)                     ! receive signals etc, write map, his etc
-                                                     ! these two functions are explicit. therefore, they are in the usertimestep
- end subroutine flow_spatietimestep
+ do L = 1,numL
+    ni(in(L)) = L
+ enddo
+
+ do L = L1, numL
+    n1(L)    = lne(1,L)
+ enddo
+ do L = L1, numL
+    lne(1,L) = n1(in(L))
+ enddo
+
+ do L = L1, numL
+    n1(L)   = lne(2,L)
+ enddo
+ do L = L1, numL
+    lne(2,L) = n1(in(L))
+ enddo
+
+  do L = L1, numL
+    n1(L)    = kn(1,L)
+ enddo
+ do L = L1, numL
+    kn(1,L) = n1(in(L))
+ enddo
+
+ do L = L1, numL
+    n1(L)   = kn(2,L)
+ enddo
+ do L = L1, numL
+    kn(2,L) = n1(in(L))
+ enddo
+
+ do L = L1, numL
+    n1(L)   = kn(3,L)
+ enddo
+ do L = L1, numL
+    kn(3,L) = n1(in(L))
+ enddo
+
+ do L = L1, numL
+    n1(L)  = lnn(L)
+ enddo
+ do L = L1, numL
+    lnn(L) = n1(in(L))
+ enddo
+
+ do k = 1,numk
+    do kk = 1,nmk(k)
+       NOD(K)%LIN(kk) = ni(NOD(K)%LIN(kk))
+    enddo
+ enddo
+
+ do k = 1,nump
+    do kk = 1,netcell(k)%n
+       netcell(K)%LIN(kk) = ni(netcell(K)%LIN(kk))
+    enddo
+ enddo
+
+ deallocate(n1, in, ni)
+
+ end  subroutine sortnetlinks

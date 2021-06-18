@@ -30,39 +30,31 @@
 ! $Id$
 ! $HeadURL$
 
- subroutine flow_spatietimestep()                 ! do 1 flowstep
- use m_flowtimes
- use m_flowgeom, only: ndx
- use m_flowexternalforcings, only: nbndz, zbndz
- use m_flowparameters, only: janudge
+ !> apply Dirichlet conditions to non-overlapping ghost cells (i.e. effectively remove from the system)
+ subroutine apply_ghost_bc(ierror)
+    use m_flow
+    use m_flowgeom
+    use m_reduce
+    use m_partitioninfo
+    use m_alloc
+    implicit none
 
- implicit none
- integer :: key, ierr
- integer :: i
- integer, external :: flow_modelinit
+    integer, intent(out) :: ierror  ! error (1) or not (0)
 
- if (ndx == 0) then
-     ierr = flow_modelinit()
- end if
+    integer              :: i, k, kother, L, LL
 
- if (ndx == 0) return                                ! No valid flow network was initialized
+    do i=1,nghostlist_snonoverlap(ndomains-1)
+       k = ighostlist_snonoverlap(i)
+       do LL=1,nd(k)%lnx
+          L = iabs(nd(k)%ln(LL))
+          kother = ln(1,L)+ln(2,L)-k
+          ddr(kother) = ddr(kother)-ccr(Lv2(L))*s1(k)
+          ccr(Lv2(L)) = 0
+          ddr(k) = ddr(k)-ccr(Lv2(L))*s1(k)
+       end do
+    end do
 
- call inctime_user()
- if (time0 >= time_user) then
-    Tstop_user = tstop_user + dt_user
-    time_user  = time_user  + dt_user
- endif
-                                                     ! ipv time0
- tim1fld = max(time_user,tim1fld)
- if ( janudge.eq.1 ) call setzcs()
- call flow_setexternalforcings(tim1fld ,.false., ierr)    ! set field oriented forcings. boundary oriented forcings are in
+    ierror = 0
 
- ! call flow_externalinput(time_user)                  ! receive RTC signals etc
-
- call flow_single_timestep(key, ierr)
-
- call updateValuesOnObservationStations()
-
- call flow_externaloutput(time1)                     ! receive signals etc, write map, his etc
-                                                     ! these two functions are explicit. therefore, they are in the usertimestep
- end subroutine flow_spatietimestep
+    return
+ end subroutine apply_ghost_bc

@@ -30,39 +30,31 @@
 ! $Id$
 ! $HeadURL$
 
- subroutine flow_spatietimestep()                 ! do 1 flowstep
- use m_flowtimes
- use m_flowgeom, only: ndx
- use m_flowexternalforcings, only: nbndz, zbndz
- use m_flowparameters, only: janudge
+ subroutine checkcellfile(mout)                      ! check first two lines for consistency
+ use m_netw
+ use m_flowgeom
 
  implicit none
- integer :: key, ierr
- integer :: i
- integer, external :: flow_modelinit
+ integer             :: mout, numkr, numlr, L1
+ character (len=256) :: rec
 
- if (ndx == 0) then
-     ierr = flow_modelinit()
- end if
-
- if (ndx == 0) return                                ! No valid flow network was initialized
-
- call inctime_user()
- if (time0 >= time_user) then
-    Tstop_user = tstop_user + dt_user
-    time_user  = time_user  + dt_user
+ read(mout,'(A)',end = 999) rec
+ L1 = index(rec,'=') + 1
+ read (rec(L1:), *, err = 888) numkr
+ if (numkr .ne. numk) then
+    call doclose(mout) ; mout = 0 ; return
  endif
-                                                     ! ipv time0
- tim1fld = max(time_user,tim1fld)
- if ( janudge.eq.1 ) call setzcs()
- call flow_setexternalforcings(tim1fld ,.false., ierr)    ! set field oriented forcings. boundary oriented forcings are in
 
- ! call flow_externalinput(time_user)                  ! receive RTC signals etc
+ read(mout,'(A)',end = 999) rec
+ L1 = index(rec,'=') + 1
+ read (rec(L1:), *, err = 777) numlr
+ if (numLr .ne. numL) then
+    call doclose(mout) ; mout = 0 ; return
+ endif
+ return
 
- call flow_single_timestep(key, ierr)
+ 999 call    eoferror(mout)
+ 888 call qnreaderror('trying to read nr of net nodes but getting',rec,mout)
+ 777 call qnreaderror('trying to read nr of net links but getting',rec,mout)
 
- call updateValuesOnObservationStations()
-
- call flow_externaloutput(time1)                     ! receive signals etc, write map, his etc
-                                                     ! these two functions are explicit. therefore, they are in the usertimestep
- end subroutine flow_spatietimestep
+ end subroutine checkcellfile

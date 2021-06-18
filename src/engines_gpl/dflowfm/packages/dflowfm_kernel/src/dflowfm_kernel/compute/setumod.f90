@@ -68,6 +68,7 @@ subroutine setumod(jazws0)                          ! set cell center Perot velo
 
  integer           :: nw, L1, L2, kbk, k2k, Ld, Lu, kt, Lb, Lt, Lb1, Lt1, Lb2, Lt2, kb1, kb2, ntmp
 
+ double precision  :: depumin  ! external
  double precision  :: horvic   ! external
  double precision  :: horvic3  ! external
 

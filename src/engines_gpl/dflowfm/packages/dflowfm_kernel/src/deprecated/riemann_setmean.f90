@@ -30,39 +30,41 @@
 ! $Id$
 ! $HeadURL$
 
- subroutine flow_spatietimestep()                 ! do 1 flowstep
- use m_flowtimes
- use m_flowgeom, only: ndx
- use m_flowexternalforcings, only: nbndz, zbndz
- use m_flowparameters, only: janudge
+!> compute riemann boundary reference state
+   subroutine riemann_setmean()
+      use m_flow, only: s1, u1
+      use m_flowgeom, only: bl
+      use m_flowexternalforcings
+      use m_flowtimes, only: dts
+      use m_physcoef, only: ag
+      implicit none
 
- implicit none
- integer :: key, ierr
- integer :: i
- integer, external :: flow_modelinit
+      double precision :: dfac, dfac1
+      double precision :: h
 
- if (ndx == 0) then
-     ierr = flow_modelinit()
- end if
+      integer          :: n, kb, k2, L, itpbn
 
- if (ndx == 0) return                                ! No valid flow network was initialized
+      double precision :: Tref
 
- call inctime_user()
- if (time0 >= time_user) then
-    Tstop_user = tstop_user + dt_user
-    time_user  = time_user  + dt_user
- endif
-                                                     ! ipv time0
- tim1fld = max(time_user,tim1fld)
- if ( janudge.eq.1 ) call setzcs()
- call flow_setexternalforcings(tim1fld ,.false., ierr)    ! set field oriented forcings. boundary oriented forcings are in
+      if ( nbndz.gt.0 ) then
+         do n=1,nbndz
+            itpbn   = kbndz(4,n)
+            Tref    = dble(kbndz(6,n))  ! integer, but can get away with it, nobody uses fractional seconds..
+            dfac  = max(min(dts/Tref, 1d0), 0d0)
+            dfac1 = 1d0 - dfac
 
- ! call flow_externalinput(time_user)                  ! receive RTC signals etc
+            if ( itpbn.eq.5 ) then
+               kb      = kbndz(1,n)
+               k2      = kbndz(2,n)
+               L       = kbndz(3,n)
 
- call flow_single_timestep(key, ierr)
+               k2 = kbndz(2,n)
 
- call updateValuesOnObservationStations()
+               h = s1(k2) - bl(k2)
+               zbndz0(n) = dfac1*zbndz0(n) + dfac*(s1(k2) - sqrt(h/ag)*u1(L))
+            end if
+         end do
+      end if
 
- call flow_externaloutput(time1)                     ! receive signals etc, write map, his etc
-                                                     ! these two functions are explicit. therefore, they are in the usertimestep
- end subroutine flow_spatietimestep
+      return
+   end subroutine riemann_setmean

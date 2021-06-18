@@ -30,39 +30,57 @@
 ! $Id$
 ! $HeadURL$
 
- subroutine flow_spatietimestep()                 ! do 1 flowstep
- use m_flowtimes
- use m_flowgeom, only: ndx
- use m_flowexternalforcings, only: nbndz, zbndz
- use m_flowparameters, only: janudge
-
+ subroutine csmfinebnds2unstruc()
  implicit none
- integer :: key, ierr
- integer :: i
- integer, external :: flow_modelinit
+ double precision x,y,amp,phas, x0, y0, d
+ character fnam*132, cmp*8, rec*132
+ integer :: mou2, k, kkk, L, minp, mout
 
- if (ndx == 0) then
-     ierr = flow_modelinit()
- end if
+ mou2 = 0
 
- if (ndx == 0) return                                ! No valid flow network was initialized
+ do k = 1,3
+    kkk = 0
+    if (k == 1) fnam = 'zuid'
+    if (k == 2) fnam = 'west'
+    if (k == 3) fnam = 'noord'
 
- call inctime_user()
- if (time0 >= time_user) then
-    Tstop_user = tstop_user + dt_user
-    time_user  = time_user  + dt_user
- endif
-                                                     ! ipv time0
- tim1fld = max(time_user,tim1fld)
- if ( janudge.eq.1 ) call setzcs()
- call flow_setexternalforcings(tim1fld ,.false., ierr)    ! set field oriented forcings. boundary oriented forcings are in
+    L  = len_trim(fnam)
 
- ! call flow_externalinput(time_user)                  ! receive RTC signals etc
+    call oldfil (minp, fnam(1:L)//'rand_new10')
+    call newfil (mout, fnam(1:L)//'.pli')
+    write(mout,'(a)') 'bl01'
+    if (k == 1) write(mout,'(a)') ' 23  2 '
+    if (k == 2) write(mout,'(a)') ' 85  2 '
+    if (k == 3) write(mout,'(a)') ' 99  2 '
 
- call flow_single_timestep(key, ierr)
 
- call updateValuesOnObservationStations()
+8      continue
+       read(minp,'(a)',end = 999) rec
+       read (rec,*) cmp,y,x,d,d,amp,phas
+       if (cmp == 'Q1') then
+          if (mou2>0) call doclose(mou2)
+          write(mout, *) x, y
+          kkk = kkk + 1
+          write(fnam(l+1:l+1) , '(a)'   )  '_'
+          write(fnam(l+2:l+5) , '(i4.4)') kkk
+          call newfil (mou2, fnam(1:L+5)//'.cmp')
+          write(mou2,'(a)') '* COLUMNN=3'
+          write(mou2,'(a)') '* COLUMN1=Period (min) or Astronomical Componentname'
+          write(mou2,'(a)') '* COLUMN2=Amplitude (m)'
+          write(mou2,'(a)') '* COLUMN3=Phase (deg)'
+        endif
 
- call flow_externaloutput(time1)                     ! receive signals etc, write map, his etc
-                                                     ! these two functions are explicit. therefore, they are in the usertimestep
- end subroutine flow_spatietimestep
+       if (cmp == 'PHI1')    cmp = 'FI1'
+       if (cmp == 'LAMBDA2') cmp = 'LABDA2'
+       if (cmp == 'RHO1')    cmp = 'RO1'
+
+       write(mou2,'(a,2f14.6)') cmp, 0.01d0*amp, phas
+       goto 8
+
+
+
+999 call doclose(minp)
+    call doclose(mout)
+    call doclose(mou2); mou2 = 0
+ enddo
+ end subroutine csmfinebnds2unstruc

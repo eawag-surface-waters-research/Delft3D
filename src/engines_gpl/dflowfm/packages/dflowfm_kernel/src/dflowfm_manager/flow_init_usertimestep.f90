@@ -54,6 +54,7 @@ subroutine flow_init_usertimestep(iresult)
     goto 888
  end if
 
+ ! call flow_externalinput (time_user)                 ! receive signals etc
    iresult = DFM_NOERR
    return ! Return with success.
 

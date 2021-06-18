@@ -30,39 +30,63 @@
 ! $Id$
 ! $HeadURL$
 
- subroutine flow_spatietimestep()                 ! do 1 flowstep
- use m_flowtimes
- use m_flowgeom, only: ndx
- use m_flowexternalforcings, only: nbndz, zbndz
- use m_flowparameters, only: janudge
+subroutine einstein_garcia(da,rs,dj1,dj2)
+use m_einstein_garcia
+implicit none
+double precision :: da,rs, dj1, dj2
 
- implicit none
- integer :: key, ierr
- integer :: i
- integer, external :: flow_modelinit
+double precision :: aa, cck, rsk, dj12, dj22
+integer          :: i1, i2,k
 
- if (ndx == 0) then
-     ierr = flow_modelinit()
- end if
+if      (da < 0.001d0) then
+   i1 = 1; i2  = 1
+else if (da < 0.005d0) then
+   i1 = 1; i2  = 2
+else if (da < 0.01d0) then
+   i1 = 2; i2  = 3
+else if (da < 0.05d0) then
+   i1 = 3; i2  = 4
+else if (da < 0.1d0) then
+   i1 = 4; i2  = 5
+else
+   i1 = 5; i2  = 5
+endif
+if (i1 == i2) then
+    aa = 0d0
+else
+    aa = ( da - d(i1) ) / ( d(i2) - d(i1) )
+endif
 
- if (ndx == 0) return                                ! No valid flow network was initialized
+dj1   = 0d0
+dj2   = 0d0
+dj12  = 0d0
+dj22  = 0d0
 
- call inctime_user()
- if (time0 >= time_user) then
-    Tstop_user = tstop_user + dt_user
-    time_user  = time_user  + dt_user
- endif
-                                                     ! ipv time0
- tim1fld = max(time_user,tim1fld)
- if ( janudge.eq.1 ) call setzcs()
- call flow_setexternalforcings(tim1fld ,.false., ierr)    ! set field oriented forcings. boundary oriented forcings are in
+do k  = 0,6
+  rsk = rs**k
+  !cck = (1d0-aa)*c1(i1,k) + aa*c1(i2,k)
+  !dj1 = dj1 + cck*rsk
+  !cck = (1d0-aa)*c2(i1,k) + aa*c2(i2,k)
+  !dj2 = dj2 + cck*rsk
 
- ! call flow_externalinput(time_user)                  ! receive RTC signals etc
+  dj1  = dj1  + c1(i1,k)*rsk
+  dj12 = dj12 + c1(i2,k)*rsk
+  dj2  = dj2  + c2(i1,k)*rsk
+  dj22 = dj22 + c2(i2,k)*rsk
 
- call flow_single_timestep(key, ierr)
+enddo
 
- call updateValuesOnObservationStations()
+dj1 = (1d0-aa)*dj1 + aa*dj12
+dj2 = (1d0-aa)*dj2 + aa*dj22
 
- call flow_externaloutput(time1)                     ! receive signals etc, write map, his etc
-                                                     ! these two functions are explicit. therefore, they are in the usertimestep
- end subroutine flow_spatietimestep
+if (dj1 .ne. 0d0) then
+    dj1 = 1d0/dj1
+endif
+
+
+if (dj2 .ne. 0d0) then
+    dj2 = -1d0/dj2
+endif
+
+
+end subroutine einstein_garcia

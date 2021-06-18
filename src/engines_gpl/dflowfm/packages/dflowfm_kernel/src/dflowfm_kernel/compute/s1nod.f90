@@ -156,6 +156,9 @@
  enddo
  !$OMP END PARALLEL DO
 
+ ! compute riemann bnd mean state
+ ! call  riemann_setmean()
+
  ! compute right-hand sides
  do n  = 1, nbndz                                    ! overrides for waterlevel boundaries
     kb      = kbndz(1,n)

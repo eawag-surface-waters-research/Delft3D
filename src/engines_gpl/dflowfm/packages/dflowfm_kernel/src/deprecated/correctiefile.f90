@@ -30,39 +30,34 @@
 ! $Id$
 ! $HeadURL$
 
- subroutine flow_spatietimestep()                 ! do 1 flowstep
- use m_flowtimes
- use m_flowgeom, only: ndx
- use m_flowexternalforcings, only: nbndz, zbndz
- use m_flowparameters, only: janudge
-
+ subroutine correctiefile(a)
  implicit none
- integer :: key, ierr
- integer :: i
- integer, external :: flow_modelinit
+ character*(*) a
+ double precision :: am, ph
+ character*8   cmp
 
- if (ndx == 0) then
-     ierr = flow_modelinit()
- end if
+ read (a,'(a)') cmp
+ read (a(8:),*) am, ph
 
- if (ndx == 0) return                                ! No valid flow network was initialized
-
- call inctime_user()
- if (time0 >= time_user) then
-    Tstop_user = tstop_user + dt_user
-    time_user  = time_user  + dt_user
+ if ( index(cmp,'O1')        .ne. 0 ) then
+     am = am*1.100d0  ; ph = ph -  10d0
+ else if ( index(cmp,'K1')   .ne. 0 ) then
+     am = am*1.050d0  ; ph = ph -   5d0
+ else if ( index(cmp,'P1')   .ne. 0 ) then
+     am = am*1.050d0  ; ph = ph -   0d0
+ else if ( index(cmp,'N2')   .ne. 0 ) then
+     am = am*1.000d0  ; ph = ph -   5d0
+ else if ( index(cmp,'M2')   .ne. 0 ) then
+     am = am*1.150d0  ; ph = ph -   5d0
+ else if ( index(cmp,'S2')   .ne. 0 ) then
+     am = am*1.100d0  ; ph = ph -   0d0
+ else if ( index(cmp,'L2')   .ne. 0 ) then
+     am = am*1.000d0  ; ph = ph -  20d0
+ else if ( index(cmp,'K2')   .ne. 0 ) then
+     am = am*1.100d0  ; ph = ph - 0d0
  endif
-                                                     ! ipv time0
- tim1fld = max(time_user,tim1fld)
- if ( janudge.eq.1 ) call setzcs()
- call flow_setexternalforcings(tim1fld ,.false., ierr)    ! set field oriented forcings. boundary oriented forcings are in
 
- ! call flow_externalinput(time_user)                  ! receive RTC signals etc
+ a =  ' '
+ write(a,*) cmp, am, ph
 
- call flow_single_timestep(key, ierr)
-
- call updateValuesOnObservationStations()
-
- call flow_externaloutput(time1)                     ! receive signals etc, write map, his etc
-                                                     ! these two functions are explicit. therefore, they are in the usertimestep
- end subroutine flow_spatietimestep
+ end subroutine correctiefile

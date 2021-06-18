@@ -30,39 +30,30 @@
 ! $Id$
 ! $HeadURL$
 
- subroutine flow_spatietimestep()                 ! do 1 flowstep
- use m_flowtimes
- use m_flowgeom, only: ndx
- use m_flowexternalforcings, only: nbndz, zbndz
- use m_flowparameters, only: janudge
-
+ double precision function Qsum(k)                   ! sum of Q out of k (m3/s)
+ use m_flow
+ use m_flowgeom
  implicit none
- integer :: key, ierr
- integer :: i
- integer, external :: flow_modelinit
 
- if (ndx == 0) then
-     ierr = flow_modelinit()
- end if
+ integer :: k                                        ! for node k,
 
- if (ndx == 0) return                                ! No valid flow network was initialized
+ ! locals
+ integer :: LL, LLL, LLLL                            ! for links LL,
 
- call inctime_user()
- if (time0 >= time_user) then
-    Tstop_user = tstop_user + dt_user
-    time_user  = time_user  + dt_user
- endif
-                                                     ! ipv time0
- tim1fld = max(time_user,tim1fld)
- if ( janudge.eq.1 ) call setzcs()
- call flow_setexternalforcings(tim1fld ,.false., ierr)    ! set field oriented forcings. boundary oriented forcings are in
+ Qsum = 0d0
 
- ! call flow_externalinput(time_user)                  ! receive RTC signals etc
+ do LL   = 1, nd(k)%lnx                              ! loop over all attached links
+    LLL  = nd(k)%ln(LL)
+    LLLL = iabs(LLL)
 
- call flow_single_timestep(key, ierr)
+    if ( q1(LLLL) == 0d0 ) then                      ! skip, this is link L itself, net result = 0
 
- call updateValuesOnObservationStations()
+    else if (LLL > 0) then                           ! incoming link
+       Qsum = Qsum - q1(LLLL)
+    else
+       Qsum = Qsum + q1(LLLL)
+    endif
 
- call flow_externaloutput(time1)                     ! receive signals etc, write map, his etc
-                                                     ! these two functions are explicit. therefore, they are in the usertimestep
- end subroutine flow_spatietimestep
+ enddo
+
+ end function Qsum

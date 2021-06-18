@@ -30,39 +30,43 @@
 ! $Id$
 ! $HeadURL$
 
- subroutine flow_spatietimestep()                 ! do 1 flowstep
- use m_flowtimes
- use m_flowgeom, only: ndx
- use m_flowexternalforcings, only: nbndz, zbndz
- use m_flowparameters, only: janudge
-
+ subroutine getucxucynoweirswrong(ku, ucxku, ucyku, ischeme)  !wrong
+ use m_flow
+ use m_flowgeom
  implicit none
- integer :: key, ierr
- integer :: i
- integer, external :: flow_modelinit
 
- if (ndx == 0) then
-     ierr = flow_modelinit()
- end if
+ integer           :: ku, LL, L, Ls, ischeme
+ double precision  :: ucxku, ucyku, wwx, wwy, ww, wwt, ac1, wwxt, wwyt, ux, uy
 
- if (ndx == 0) return                                ! No valid flow network was initialized
+ ucxku = 0d0 ; ucyku = 0d0; wwt = 0d0; wwxt = 0d0 ; wwyt = 0d0
+ do LL = 1,nd(ku)%lnx
+    Ls = nd(ku)%ln(LL); L = iabs(Ls)
+    if ( iadv(L) < 21 .or. iadv(L) > 25 ) then  ! no weir
+       if (Ls < 0) then
+          ac1 = acL(L)
+       else
+          ac1 = 1d0 - acL(L)
+       endif
+       ww    = ac1*dx(L)*wu(L)
+       if (ischeme == 3) then
+          wwx   = csu(L)*ww
+          wwy   = snu(L)*ww
+          ucxku = ucxku + wwx*u0(L)
+          ucyku = ucyku + wwy*u0(L)
+       else
+          wwx   = abs(csu(L))*ww
+          wwy   = abs(snu(L))*ww
+          ux    = csu(L)*u0(L)
+          uy    = snu(L)*u0(L)
+          ucxku = ucxku + ux*wwx
+          ucyku = ucyku + uy*wwy
+       endif
+       wwxt = wwxt + abs(wwx)
+       wwyt = wwyt + abs(wwy)
+    endif
+ enddo
 
- call inctime_user()
- if (time0 >= time_user) then
-    Tstop_user = tstop_user + dt_user
-    time_user  = time_user  + dt_user
- endif
-                                                     ! ipv time0
- tim1fld = max(time_user,tim1fld)
- if ( janudge.eq.1 ) call setzcs()
- call flow_setexternalforcings(tim1fld ,.false., ierr)    ! set field oriented forcings. boundary oriented forcings are in
+ if (wwxt > 0d0) ucxku = ucxku / wwxt
+ if (wwyt > 0d0) ucyku = ucyku / wwyt
 
- ! call flow_externalinput(time_user)                  ! receive RTC signals etc
-
- call flow_single_timestep(key, ierr)
-
- call updateValuesOnObservationStations()
-
- call flow_externaloutput(time1)                     ! receive signals etc, write map, his etc
-                                                     ! these two functions are explicit. therefore, they are in the usertimestep
- end subroutine flow_spatietimestep
+ end subroutine getucxucynoweirswrong
