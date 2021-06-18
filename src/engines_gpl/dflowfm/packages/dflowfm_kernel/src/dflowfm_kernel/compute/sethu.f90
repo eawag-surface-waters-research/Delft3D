@@ -402,22 +402,23 @@ subroutine sethu(jazws0)                            ! Set upwind waterdepth hu
 
                        LLbc  = Ltop(L)
                        do LL = Ltop(L)-1, Lb+1, -1       ! search for highest layer with equal zws
-                          if (abs( zws(kb+LL-Lb) - zws(kbd+LL-Lb) ) < 1d-10) then 
+                          if ( zws(kb+LL-Lb) > bup .and. abs( zws(kb+LL-Lb) - zws(kbd+LL-Lb) ) < 1d-10) then 
                               LLbc = LL
                               exit
                           endif
                        enddo
                        hub = zws(kb+LLbc-Lb) - bup
-
+  
                     else if (ihuz == 4) then             ! central from bed till one below highest downwind layer, much like 3 
 
                        LLbc = Ltop(L)
                        do LL = Ltop(L)-1, Lb+1, -1       ! search for second layer from top on downwind side
-                          if (ln(3-iup,LL ) == ktd-1) then 
+                          if (zws(kb+LL-Lb) > bup .and. ln(3-iup,LL ) == ktd-1) then 
                              LLbc = LL
                              exit
                           endif
                        enddo
+                      
                        hub = zws(kb+LLbc-Lb) - bup
      
                     endif
@@ -465,6 +466,12 @@ subroutine sethu(jazws0)                            ! Set upwind waterdepth hu
              endif
 
           endif
+
+          do LL = Lb, Ltop(L)
+             if (hu(LL) - hu(LL-1)  <= 0d0 ) then 
+                sigm = hu(LL)
+             endif
+          enddo
 
        else
           Ltop(L) = 1 ! lb - 1 ! 1 ! flag dry
