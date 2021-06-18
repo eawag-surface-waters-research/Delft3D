@@ -40,11 +40,12 @@ module runsum
    private
    public :: TRunSum
 
-   type TRunSum
-      integer                     :: ndx = 0
-      integer                     :: nvalue
-      integer                     :: nstep
-      real(kind=hp), allocatable, dimension (:,:) :: buffer
+   type TRunSum(buffer_kind)
+      integer, kind  :: buffer_kind = 8
+      integer        :: ndx = 0
+      integer        :: nvalue
+      integer        :: nstep
+      real(kind=buffer_kind), allocatable, dimension (:,:) :: buffer
       real(kind=hp), allocatable, dimension (:)   :: state     ! state lives inside the instance
       real(kind=hp), pointer,     dimension (:)   :: dataPtr   ! dataPtr lives in the calling code
    contains
