@@ -124,14 +124,14 @@ end module runsum
 
 
 
-module runsum_weighted
+module AR1MA
    use precision
    use runsum
    implicit none
 
 
 ! ------------------------------------------------------------------------------
-!   Class:      TRunSumWeighted
+!   Class:      TAR1MA
 !   Purpose:    Keeps track of running sum/mean with a weight for each time level
 !   Summary:    This class needs a buffer keeping a given number of values that are given in an update method
 !               keeping track of a running mean.
@@ -140,26 +140,38 @@ module runsum_weighted
 ! ------------------------------------------------------------------------------
 
    private
-   public :: TRunSumWeighted
+   public :: TAR1MA
 
-   type, extends (TRunSum) :: TRunSumWeighted
+   type, extends (TRunSum) :: TAR1MA
       real(kind=hp), pointer,     dimension (:)   :: weights   ! dataPtr lives in the calling code
+      real(kind=hp)                               :: a1 = 0_hp   ! dataPtr lives in the calling code
+      real(kind=hp)                               :: b1 = 1_hp   ! dataPtr lives in the calling code
    contains
-      procedure, pass :: setweights    => TRunSumWeighted_setweights
-      procedure, pass :: update_state  => TRunSumWeighted_update_state
-   end type TRunSumWeighted
+      procedure, pass :: setpar    => TAR1MA_setpar
+      procedure, pass :: update_state  => TAR1MA_update_state
+   end type TAR1MA
  
 
 contains
 
-subroutine TRunSumWeighted_setweights(self, pweights)
-   class(TRunSumWeighted), intent(inout)    :: self
-   real(kind=hp), pointer,  dimension (:)   :: pweights   ! dataPtr lives in the calling code
-   self%weights => pweights
-end subroutine TRunSumWeighted_setweights
+subroutine TAR1MA_setpar(self, pweights, a1, b1)
+   class(TAR1MA), intent(inout)    :: self
+   real(kind=hp), optional, pointer,  dimension (:) :: pweights   ! dataPtr lives in the calling code
+   real(kind=hp), optional                          :: a1
+   real(kind=hp), optional                          :: b1
+   if (present(pweights)) then
+      self%weights => pweights
+   end if
+   if (present(a1)) then
+      self%a1 = a1
+   end if
+   if (present(b1)) then
+      self%b1 = b1
+   end if
+end subroutine TAR1MA_setpar
 
-subroutine TRunSumWeighted_update_state(self, pnew, nx, nd)
-   class(TRunSumWeighted), intent(inout)   :: self
+subroutine TAR1MA_update_state(self, pnew, nx, nd)
+   class(TAR1MA), intent(inout)            :: self
    real(kind=hp), dimension(:), pointer    :: pnew
    integer, intent(in)                     :: nx
    integer, intent(in)                     :: nd
@@ -167,19 +179,18 @@ subroutine TRunSumWeighted_update_state(self, pnew, nx, nd)
    integer :: id, idm
 
    self%buffer(1:nx, self%ndx) = pnew(1:nx)
-   self%state(1:nx) = 0.d0
+   self%state(1:nx) = self%a1 * self%state(1:nx)
    do id = 0, nd-1
       idm = mod(self%ndx - id + nd, nd)
       if (associated(self%weights)) then
-         self%state(1:nx) = self%state(1:nx) + self%weights(id)*self%buffer(1:nx, idm)   ! weighted sum
+         self%state(1:nx) = self%state(1:nx) + self%b1 * self%weights(id)*self%buffer(1:nx, idm)   ! weighted sum
       else
-         self%state(1:nx) = self%state(1:nx) + self%buffer(1:nx, idm)   ! weighted sum
+         self%state(1:nx) = self%state(1:nx) + self%b1 * self%buffer(1:nx, idm)
       end if
    end do
-   self%state(1:nx) = self%state(1:nx) + pnew(1:nx) - self%buffer(1:nx, self%ndx)
-end subroutine TRunSumWeighted_update_state
+end subroutine TAR1MA_update_state
 
-end module runsum_weighted
+end module AR1MA
 
 
 module AR1smooth
