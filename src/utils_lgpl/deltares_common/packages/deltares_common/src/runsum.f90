@@ -182,3 +182,84 @@ end subroutine TRunSumWeighted_update_state
 end module runsum_weighted
 
 
+module AR1smooth
+   use precision
+   implicit none
+
+! ------------------------------------------------------------------------------
+!   Class:      TAR1smooth
+!   Purpose:    Smooth signal using Auto Regressive order 1
+!   Descendand: None
+!   Parent:     None
+! ------------------------------------------------------------------------------
+
+   private
+   public :: TAR1smooth
+
+   type TAR1smooth
+      integer        :: nvalue
+      real(kind=hp)  :: a1
+      real(kind=hp)  :: b
+      logical        :: isFirst = .True.
+      real(kind=hp), allocatable, dimension (:)   :: state     ! state lives inside the instance
+      real(kind=hp), pointer,     dimension (:)   :: dataPtr   ! dataPtr lives in the calling code
+   contains
+      procedure, pass :: init          => TAR1smooth_init         ! 
+      procedure, pass :: update_state  => TAR1smooth_update_state ! 
+   end type TAR1smooth
+
+contains
+
+
+! ------------------------------------------------------------------------------
+!   Method:     init
+!   Purpose:    set AR1 parameters a1 and b in instance, set data pointer
+!   Arguments:  a1, b, dataPtr
+! ------------------------------------------------------------------------------
+subroutine TAR1smooth_init(self, a1, b, dataptr)
+   class(TAR1smooth), intent(inout)                :: self
+   real(kind=hp), intent(in) :: a1
+   real(kind=hp), intent(in) :: b
+   real(kind=hp), dimension(:), pointer, optional  :: dataPtr
+
+   self%isFirst = .True.
+   self%a1 = a1
+   self%b  = b
+   self%dataPtr => null()
+   if (present(dataPtr)) then
+      if (associated(dataPtr)) then
+         self%dataPtr => dataPtr
+      end if
+   end if
+end subroutine TAR1smooth_init
+
+
+! ------------------------------------------------------------------------------
+!   Method:     update_state
+!   Purpose:    update the state with a new value
+!   Arguments:  newvalue
+! ------------------------------------------------------------------------------
+subroutine TAR1smooth_update_state(self, newvalue)
+   class(TAR1smooth), intent(inout)                          :: self
+   real(kind=hp), dimension(:), intent(in), optional, target :: newvalue
+
+   integer :: nx
+   real(kind=hp), dimension(:), pointer :: pnew
+
+   nx = size(self%state)
+   if (present(newvalue)) then
+       pnew => newvalue                  ! update value(s) explicit
+   else
+       pnew => self%dataPtr              ! update value(s) pointered to
+   end if
+   if (self%isFirst) then
+      self%state(1:nx) = pnew(1:nx)
+      self%isFirst = .False.
+   else
+      self%state(1:nx) = self%a1 * self%state(1:nx) + self%b * pnew(1:nx)
+   end if
+end subroutine TAR1smooth_update_state
+
+end module AR1smooth
+
+
