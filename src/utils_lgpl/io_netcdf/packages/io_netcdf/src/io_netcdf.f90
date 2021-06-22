@@ -1882,7 +1882,7 @@ function ionc_get_1d_mesh_edges(ioncid, meshid, edgebranchidx, edgeoffset, start
   double precision,intent(inout) :: edgeoffset(:), edgex(:), edgey(:) 
   integer                        :: ierr
     
-  ierr=ug_get_1d_mesh_edge_coordinates(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(meshid), edgebranchidx, edgeoffset, startIndex, edgex, edgey)  
+  ierr=ug_get_1d_mesh_edge_coordinates(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(meshid), edgebranchidx, edgeoffset, startIndex, edgex, edgey, .false.)  
   
 end function ionc_get_1d_mesh_edges
 

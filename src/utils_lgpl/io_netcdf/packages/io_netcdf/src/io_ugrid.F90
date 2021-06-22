@@ -4689,7 +4689,7 @@ end function  ug_get_1d_mesh_discretisation_points
 !> This function reads the coordinate values for the mesh edges.
 !! That is, branch index and offsets, and optionally the x/y-coordinates.
 !! For x/y-coordinates: these are only read from file when present, not calculated from offsets.
-function ug_get_1d_mesh_edge_coordinates(ncid, meshids, edgebranchidx, edgeoffsets, startIndex, edgex, edgey) result(ierr)
+function ug_get_1d_mesh_edge_coordinates(ncid, meshids, edgebranchidx, edgeoffsets, startIndex, edgex, edgey, requireOptionals) result(ierr)
    use array_module
    integer,         intent(in)              :: ncid               !< NetCDF dataset id, should be already open.
    integer,         intent(in)              :: startIndex         !< Desired startIndex in output arrays. May be different from startIndex in the file's variables.
@@ -4698,11 +4698,18 @@ function ug_get_1d_mesh_edge_coordinates(ncid, meshids, edgebranchidx, edgeoffse
    real(kind=dp),   intent(  out)           :: edgeoffsets(:)     !< Array in which the offset for all edges will be stored.
 
    real(kind=dp),   intent(  out), optional :: edgex(:), edgey(:) !< The array in which the x and y-coordinates for all edges will be stored (if present).
+   logical,         intent(  in ), optional :: requireOptionals   !< The array in which the x and y-coordinates for all edges will be stored (if present).
    integer                                  :: ierr               !< Result status, ug_noerr if successful. Nonzero if some arrays could not be read from file.
    integer :: ierrloc, numerr
+   logical :: optionalsRequired ! local version of req.optionals (to avoid many if(present(...))s)
 
    integer :: varStartIndex
    character(len=ug_nameLen) :: meshname, varname
+
+   optionalsRequired = .true.     ! .true. to make the behaviour of the method backwards compatible.
+   if (present(requireOptionals)) then
+      optionalsRequired = requireOptionals
+   endif
 
    numerr = 0
    ierr = nf90_inquire_variable(ncid, meshids%varids(mid_meshtopo), name = meshname)
@@ -4745,30 +4752,34 @@ function ug_get_1d_mesh_edge_coordinates(ncid, meshids, edgebranchidx, edgeoffse
    if (present(edgex)) then
       ierr = nf90_get_var(ncid, meshids%varids(mid_edgex), edgex)
       if (ierr /= nf90_noerr) then
-         if (meshids%varids(mid_edgex) <= 0) then
-            call SetMessage(LEVEL_WARN, 'ug_get_1d_mesh_edge_coordinates: could not find the 1D mesh edge x-coordinates variable for ''' &
-               //trim(meshname)//'''. Is the :edge_coordinates attribute complete?')
-         else
-            ierrloc = nf90_inquire_variable(ncid, meshids%varids(mid_edgex), name = varname)
-            call SetMessage(LEVEL_WARN, 'ug_get_1d_mesh_edge_coordinates: could not read the 1D mesh edge x-coordinates for ''' &
-               //trim(meshname)//''' from '''//trim(varname)//'''. Check any previous warnings.')
+         if (optionalsRequired) then
+            if (meshids%varids(mid_edgex) <= 0) then
+               call SetMessage(LEVEL_WARN, 'ug_get_1d_mesh_edge_coordinates: could not find the 1D mesh edge x-coordinates variable for ''' &
+                  //trim(meshname)//'''. Is the :edge_coordinates attribute complete?')
+            else
+               ierrloc = nf90_inquire_variable(ncid, meshids%varids(mid_edgex), name = varname)
+               call SetMessage(LEVEL_WARN, 'ug_get_1d_mesh_edge_coordinates: could not read the 1D mesh edge x-coordinates for ''' &
+                  //trim(meshname)//''' from '''//trim(varname)//'''. Check any previous warnings.')
+            end if
+            numerr = numerr + 1
          end if
-         numerr = numerr + 1
       end if
    endif
 
    if (present(edgey)) then
       ierr = nf90_get_var(ncid, meshids%varids(mid_edgey), edgey)
       if (ierr /= nf90_noerr) then
-         if (meshids%varids(mid_edgey) <= 0) then
-            call SetMessage(LEVEL_WARN, 'ug_get_1d_mesh_edge_coordinates: could not find the 1D mesh edge y-coordinates variable for ''' &
-               //trim(meshname)//'''. Is the :edge_coordinates attribute complete?')
-         else
-            ierrloc = nf90_inquire_variable(ncid, meshids%varids(mid_edgey), name = varname)
-            call SetMessage(LEVEL_WARN, 'ug_get_1d_mesh_edge_coordinates: could not read the 1D mesh edge y-coordinates for ''' &
-               //trim(meshname)//''' from '''//trim(varname)//'''. Check any previous warnings.')
+         if (optionalsRequired) then
+            if (meshids%varids(mid_edgey) <= 0) then
+               call SetMessage(LEVEL_WARN, 'ug_get_1d_mesh_edge_coordinates: could not find the 1D mesh edge y-coordinates variable for ''' &
+                  //trim(meshname)//'''. Is the :edge_coordinates attribute complete?')
+            else
+               ierrloc = nf90_inquire_variable(ncid, meshids%varids(mid_edgey), name = varname)
+               call SetMessage(LEVEL_WARN, 'ug_get_1d_mesh_edge_coordinates: could not read the 1D mesh edge y-coordinates for ''' &
+                  //trim(meshname)//''' from '''//trim(varname)//'''. Check any previous warnings.')
+            end if
+            numerr = numerr + 1
          end if
-         numerr = numerr + 1
       end if
    endif
 
