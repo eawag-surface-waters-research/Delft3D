@@ -626,6 +626,10 @@ endif
  if (allocated(rho) ) deallocate(rho)
  allocate ( rho (ndkx) , stat= ierr )
  call aerr('rho (ndkx)', ierr, ndkx ) ; rho  = rhomean
+ 
+ if (allocated(rhowat) ) deallocate(rhowat)
+ allocate ( rhowat (ndkx) , stat= ierr )
+ call aerr('rhowat (ndkx)', ierr, ndkx ) ; rhowat  = rhomean
 
  if (jasal > 0 .or. jatem > 0 .or. jased> 0 .or. stm_included ) then
     if (abs(jabaroctimeint) >= 2) then

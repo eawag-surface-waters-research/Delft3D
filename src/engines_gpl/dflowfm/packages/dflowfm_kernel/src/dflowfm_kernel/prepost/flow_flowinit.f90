@@ -1556,6 +1556,7 @@ call timstop(ihandle)
        enddo
        do k = kt+1 , kb + kmxn(kk) - 1
           rho(k) = rho(kt)
+          rhowat(k) = rhowat(kt)   ! UNST-5170
        enddo
     enddo
  endif

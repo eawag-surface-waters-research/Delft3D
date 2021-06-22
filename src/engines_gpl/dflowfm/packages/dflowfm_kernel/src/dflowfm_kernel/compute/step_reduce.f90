@@ -122,7 +122,7 @@
        call update_ghosts(itype, 1, Ndx, s1, ierror)
        if ( jatimer == 1 ) call stoptimer(IUPDSALL)
     end if
-
+    
     if (firstnniteration .and. nonlin1D >=3) then
        ! At first try only check for positive water depths only
        ! Temporarily save the current JPOSCHK value
@@ -166,7 +166,7 @@
  else
     s1 = s0
  end if
-
+ 
  call volsur()
 
  if (nonlin > 0) then
@@ -315,7 +315,6 @@
  endif
 
  if (jased > 0 .and. stm_included) then
-    mtd%rhowat = rho                   ! update density at start sediment transport
     if ( jatimer.eq.1 ) call starttimer(IEROSED)
     if (jawave==0) then
        call settaubxu_nowave()         ! set taubxu for no wave conditions BEFORE erosed

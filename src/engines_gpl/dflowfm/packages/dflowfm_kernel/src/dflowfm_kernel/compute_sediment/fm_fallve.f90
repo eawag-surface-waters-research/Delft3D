@@ -46,7 +46,7 @@
    use m_flow    , only: ifrctypuni, z0, hs, iturbulencemodel,kbot,ktop,kmx,zws,ucxq,ucyq,sa1,tem1,ucx,ucy,ucz,ndkx,s1,z0urou,ifrcutp,hu,frcu,ucx_mor,ucy_mor
    use m_flowparameters, only: jasal, jatem, jawave, epshs
    use m_transport, only: constituents, ised1
-   use m_turbulence, only:turkinepsws, rho
+   use m_turbulence, only:turkinepsws, rhowat
    use morphology_data_module
    use message_module, only: write_error
    use unstruc_files, only: mdia
@@ -231,7 +231,7 @@
                   temint = backgroundwatertemperature
                endif
                !
-               rhoint = (tka*mtd%rhowat(kk+1) + tkb*mtd%rhowat(kk)) / tkt
+               rhoint = (tka*rhowat(kk+1) + tkb*rhowat(kk)) / tkt
                !
                u = (tka*ucx_mor(kk+1)+tkb*ucx_mor(kk)) / tkt   ! x component
                v = (tka*ucy_mor(kk+1)+tkb*ucy_mor(kk)) / tkt   ! y component
@@ -327,7 +327,7 @@
                temint = backgroundwatertemperature
             endif
             !
-            rhoint = mtd%rhowat(k)   
+            rhoint = rhowat(k)   
             !
             u       = ucx_mor(k)   ! x component
             v       = ucy_mor(k)   ! y component

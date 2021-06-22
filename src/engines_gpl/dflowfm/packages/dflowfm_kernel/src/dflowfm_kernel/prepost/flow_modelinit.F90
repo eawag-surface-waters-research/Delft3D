@@ -456,18 +456,6 @@
  call timstop(handle_extra(36)) ! End remainder
  call writesomeinitialoutput()
 
- ! JRE moved to sedmorinit
- ! Initialise mormerge: parallel online mor run for multiple conditions
- !if (jased>0 .and. stm_included) then
- !   if (stmpar%morpar%multi) then
- !      call initmerge(iresult, ndxi, stmpar%lsedtot, "singledomain", stmpar%morpar)
- !      if (iresult /= DFM_NOERR) then
- !         call mess(LEVEL_FATAL, 'Mormerge initialization failed')
- !         goto 1234
- !      endif
- !   endif
- !endif
-
  iresult = DFM_NOERR
  return
 1234 continue

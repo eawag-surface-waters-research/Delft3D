@@ -121,6 +121,7 @@
  !real            , allocatable     :: tkedis   (:)      ! vertical dissipation
  double precision, allocatable     :: rho      (:)      ! density at cell centres (kg/m3)
  double precision, allocatable     :: rho0     (:)      ! density at cell centres (kg/m3), previous step
+ double precision, allocatable     :: rhowat   (:)      ! density at cell centres (kg/m3), only salt and temp
  double precision, allocatable     :: dpbdx0   (:)      ! previous step baroclinic pressure gradient, at u points
  double precision, allocatable     :: rvdn     (:)      ! help integral of (rho-rhomean)*deltaz at pressure points (kg/m2)
  double precision, allocatable     :: grn      (:)      ! help integral of baroclinic pressure at pressure points  (kg/m)

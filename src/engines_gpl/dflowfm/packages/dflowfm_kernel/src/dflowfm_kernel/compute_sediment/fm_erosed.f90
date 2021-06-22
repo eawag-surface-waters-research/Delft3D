@@ -72,7 +72,7 @@
    use m_alloc
    use m_missing
    use m_physcoef, only: frcuni, ifrctypuni
-   use m_turbulence, only: vicwws, turkinepsws
+   use m_turbulence, only: vicwws, turkinepsws, rhowat
    use m_flowparameters, only: jasal, jatem, jawave, epshs, jasecflow, eps10, jasourcesink, v2dwbl
    use m_fm_erosed
    use m_bedform

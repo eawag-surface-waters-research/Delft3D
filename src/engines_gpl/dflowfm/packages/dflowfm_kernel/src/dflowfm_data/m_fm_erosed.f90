@@ -75,7 +75,6 @@
    integer, dimension(:),                 pointer :: link1sign => NULL()
    logical                                        :: link1_initialized = .false.
 
-   real(fp), dimension(:),                pointer :: rhowat
    real(fp), dimension(:,:),              pointer :: seddif
    real(fp), dimension(:,:),              pointer :: sed
    real(fp), dimension(:),                pointer :: blchg         !< Bed level change (> 0 = sedimentation, < 0 = erosion)

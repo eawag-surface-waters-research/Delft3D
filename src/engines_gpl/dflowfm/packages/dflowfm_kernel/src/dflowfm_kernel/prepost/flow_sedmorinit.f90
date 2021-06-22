@@ -43,7 +43,6 @@ subroutine flow_sedmorinit()
     use m_flowgeom
     use m_flowtimes
     use m_physcoef, only: rhomean, ag, backgroundwatertemperature
-    use m_turbulence, only: rho
     use m_initsedtra, only: initsedtra
     use m_rdmorlyr, only: rdinimorlyr
     use m_flowexternalforcings, only: sfnames, numfracs, nopenbndsect, openbndname, openbndlin, nopenbndlin
@@ -261,7 +260,6 @@ subroutine flow_sedmorinit()
     if ( associated(mtd%seddif) .and. .false.) then ! for re-initialize
        deallocate(mtd%dzbdt)
        deallocate(mtd%uau)
-       deallocate(mtd%rhowat)
 
        deallocate(mtd%seddif)
        deallocate(mtd%sed)
@@ -275,7 +273,6 @@ subroutine flow_sedmorinit()
     ! ad hoc allocation of dummy variables
     allocate(mtd%dzbdt(ndx))
     allocate(mtd%uau(lnkx))
-    allocate(mtd%rhowat(ndkx))
     allocate(mtd%seddif(stmpar%lsedsus,ndkx))
     allocate(mtd%sed(stmpar%lsedsus,ndkx))
     allocate(mtd%ws(ndkx,stmpar%lsedsus))
@@ -284,8 +281,7 @@ subroutine flow_sedmorinit()
     call initstack     (mtd%messages)
     !
     mtd%dzbdt       = 0.0_fp
-    mtd%uau         = 0.0_fp
-    mtd%rhowat      = rho     
+    mtd%uau         = 0.0_fp    
     mtd%seddif      = 0.0_fp
     mtd%sed         = 0.0_fp
     mtd%ws          = 0.0_fp

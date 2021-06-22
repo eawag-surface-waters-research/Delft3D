@@ -41,7 +41,6 @@ module m_sediment
  !-------------------------------------------------- new sediment transport and morphology
  type mortmpdummy
     real(fp), dimension(:), pointer        :: uau      !< velocity asymmetry in u points
-    real(fp), dimension(:), pointer        :: rhowat   !< Temporary dummy variable for flow rhowat
     real(fp), dimension(:,:), pointer      :: ws       !< Temporary variable Fall velocity
     real(fp), dimension(:,:), pointer      :: seddif   !< Temporary variable vertical sediment diffusivity
     real(fp), dimension(:,:), pointer      :: sed      !< sediment concentration

@@ -44,7 +44,6 @@
 
    ! mtd: Pointer to dummies to fill later
    dzbdt               => mtd%dzbdt
-   rhowat              => mtd%rhowat
    seddif              => mtd%seddif
    blchg               => mtd%blchg
    sed                 => mtd%sed

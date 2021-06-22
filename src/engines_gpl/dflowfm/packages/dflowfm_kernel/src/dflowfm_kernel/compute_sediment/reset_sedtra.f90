@@ -46,7 +46,6 @@
    if ( associated(mtd%dzbdt)) then
       deallocate(mtd%dzbdt)
       deallocate(mtd%uau)
-      deallocate(mtd%rhowat)
       deallocate(mtd%seddif)
       deallocate(mtd%sed)
       deallocate(mtd%ws)
