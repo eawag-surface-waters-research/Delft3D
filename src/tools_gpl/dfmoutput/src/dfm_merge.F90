@@ -232,6 +232,10 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
    id_wdim    = -1
    ndx        =  0
    lnx        =  0
+   lnxg       =  0
+   numlg      =  0
+   numkg      =  0
+   ndxg       =  0
    kmx        =  0
    nt         =  0
    ndxbnd     =  0
@@ -517,7 +521,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
             endif
          enddo
       else ! old format
-
+         topodim = 2 ! for old format, the topology of mesh is 2
          do id=1,file_ndims(ii)
             ierr = nf90_inquire_dimension(ncids(ii), id, name = dimname, len = nlen) ! NetCDF-F90 allows us to assume that the dim IDs are 1:ndims
             if (ierr /= nf90_noerr) then
