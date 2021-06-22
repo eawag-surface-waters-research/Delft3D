@@ -66,7 +66,7 @@ shopt -u nullglob
 # Note that the working directory is set to a custom mounting directory
 # for the container runtime environment. This mounting is to prevent 
 # clashes with the internal opt directory of the container
-workingdir=`pwd`
+workingdir=$(pwd)
 mountdir=/mnt/data
 echo "Executing Singularity container with:"
 echo "Singularity container directory   :   $scriptdir"
