@@ -40,6 +40,9 @@ endif(UNIX)
 if (WIN32)
     target_link_libraries(${library_name} kdtree2
                                           triangle_c)
+
+    # Set additional compilation properties
+    target_compile_options(${library_name} PRIVATE "${heap_arrays_one_flag}")
 endif(WIN32)
 
 # Set additional compilation properties, specific for Debug mode
@@ -48,3 +51,57 @@ target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${check_bounds
 # Create the folder structure in vfproj
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${source_files} ${fortran_version_file})
 set_target_properties (${library_name} PROPERTIES FOLDER utils_lgpl/gridgeom)
+
+###############
+# GRIDGEOM_DLL
+###############
+set(library_name gridgeom_dll)
+set(library_output_name gridgeom)
+
+# Add dynamic gridgeom library
+add_library(${library_name} SHARED ${src_path}/gridgeom_api.F90)
+
+# Set the dependencies of this library
+set(oss_dependencies    deltares_common
+                        io_netcdf
+                        kdtree_wrapper
+                        kdtree2
+                        gridgeom)
+oss_include_libraries(${library_name} oss_dependencies)
+
+if (UNIX)
+    target_link_libraries(${library_name} triangle_c)
+    message(STATUS "Setting oss_target_link_libraries in Unix")
+    target_link_libraries(${library_name} ${oss_dependencies})
+endif(UNIX)
+
+if (WIN32)
+    target_link_libraries(${library_name} ${oss_dependencies}
+                                          triangle_c)
+
+    # Set additional compilation properties
+    target_compile_options(${library_name} PRIVATE "${heap_arrays_one_flag}")
+endif(WIN32)
+
+# Set additional compilation properties, specific for Debug mode
+target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${check_bounds_flag}>")
+
+# Create the folder structure in vfproj
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${src_path}/gridgeom_api.F90)
+set_target_properties (${library_name} PROPERTIES FOLDER utils_lgpl/gridgeom)
+
+if(WIN32)
+    # post-build
+    set(install_dir ${CMAKE_BINARY_DIR})
+    set(build_dir ${CMAKE_BINARY_DIR})
+    set(build_project ${library_name})
+
+    post_build_target( ${library_name}
+                       ${install_dir} 
+                       ${build_dir} 
+                       ${checkout_src_root} 
+                       ${build_project} )
+
+endif(WIN32)
+
+install(TARGETS ${library_name} DESTINATION lib)

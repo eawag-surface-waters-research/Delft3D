@@ -969,6 +969,35 @@ rem ==========================
     
 goto :endproc
 
+rem ===========================
+rem === POST_BUILD_GRIDGEOM_DLL
+rem ===========================
+:gridgeom_dll
+    echo "postbuild gridgeom_dll. . ."
+
+    if "%configuration%" == "Debug" (
+    
+    echo "Debug postbuild"
+    set dest_bin="!install_dir!\x64\Debug"
+    
+    call :makeDir !dest_bin!
+    
+    call :copyFile "!build_dir!\gridgeom\!configuration!\gridgeom_dll.dll"                                           !dest_bin!
+    
+    )
+
+    if "%configuration%" == "Release" (
+    
+    echo "Release postbuild"
+    
+    set dest_share="!install_dir!\x64\Release\share\bin"
+    
+    call :makeDir !dest_share!
+    call :copyFile "!build_dir!\gridgeom\!configuration!\gridgeom_dll.dll"                                           !dest_share!
+    
+    )
+
+goto :endproc
 
 
 rem ==================================
