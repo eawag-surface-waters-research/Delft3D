@@ -78,13 +78,17 @@ subroutine setbedlevelfromextfile()    ! setbedlevels()  ! check presence of old
  kc_size_store = 0
  inifield_ptr => null()
 
- inquire(file = md_xybfile, exist=jawel)
- jawel = jawel .and. (len_trim(md_xybfile) > 0) ! strange behavior on some Linux systems if file name is empty, but reported exist=.true.
-
- if (jawel) then                                   ! set tegeldiepte optie als bl file aanwezig
-     call oldfil(mxyb,md_xybfile)
-     call reabl(mxyb)
-     call mess(LEVEL_INFO, 'setbedlevelfromextfile: Setting bedlevel from file '''//trim(md_xybfile)//'''.')
+ if (len_trim(md_xybfile) > 0) then 
+    inquire(file = md_xybfile, exist=jawel)
+    if (jawel) then                                   ! set tegeldiepte optie als bl file aanwezig
+        ! BathymetryFile available and used for initialisation of the bed levels
+        call oldfil(mxyb,md_xybfile)
+        call reabl(mxyb)
+        call mess(LEVEL_INFO, 'setbedlevelfromextfile: Setting bedlevel from file '''//trim(md_xybfile)//'''.')
+    else
+        ! BathymetryFile specified but not available     
+        call mess(LEVEL_FATAL, 'setbedlevelfromextfile: Bedlevel from file '''//trim(md_xybfile)//''' not found.')
+    endif     
  else
      ! When no BathymetryFile, attempt to read cell centred bed levels directly from net file:
      call setbedlevelfromnetfile()
