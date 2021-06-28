@@ -95,7 +95,7 @@
      2        NIN   ,        NINGRZ,
      3        IP
 
-      PARAMETER (NTOGRZ =  5, NTONUT =  4, NTOALG = 32,
+      PARAMETER (NTOGRZ =  5, NTONUT =  4, NTOALG = 34,
      1           NINGRZ = 25,
      2           NIN    = 5+(NTONUT+2*NTOGRZ)*NTOALG+2*NTONUT+
      3                    NTOGRZ*NINGRZ)

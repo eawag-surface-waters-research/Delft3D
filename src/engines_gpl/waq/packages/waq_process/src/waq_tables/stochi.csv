@@ -1204,6 +1204,8 @@ stocfl,stocsu,stocsc
 "dGrzDetSS1","DetSiS1   ",   1.00000
 "dGrzGreen ","Green     ",  -1.00000
 "dGrzDiat  ","Diat      ",  -1.00000
+"dGrzPeli  ","MPB1peli  ",  -1.00000
+"dGrzPsam  ","MPB2psam  ",  -1.00000
 "dGrzALG01 ","BLOOMALG01",  -1.00000
 "dGrzALG02 ","BLOOMALG02",  -1.00000
 "dGrzALG03 ","BLOOMALG03",  -1.00000
@@ -2419,8 +2421,8 @@ stocfl,stocsu,stocsc
 "dM_ALG28  ","BLOOMALG28",  -1.00000
 "dM_ALG29  ","BLOOMALG29",  -1.00000
 "dM_ALG30  ","BLOOMALG30",  -1.00000
-"dM_F1     ","F1        ",  -1.00000
-"dM_F2     ","F2        ",  -1.00000
+"dM_MPB1   ","MPB1peli  ",  -1.00000
+"dM_MPB2   ","MPB2psam  ",  -1.00000
 "dM_F3     ","F3        ",  -1.00000
 "dM_F4     ","F4        ",  -1.00000
 "dM_F5     ","F5        ",  -1.00000
@@ -2502,8 +2504,8 @@ stocfl,stocsu,stocsc
 "dZ_ALG28  ","BLOOMALG28",  -1.00000
 "dZ_ALG29  ","BLOOMALG29",  -1.00000
 "dZ_ALG30  ","BLOOMALG30",  -1.00000
-"dZ_F1     ","F1        ",  -1.00000
-"dZ_F2     ","F2        ",  -1.00000
+"dZ_MPB1   ","MPB1peli  ",  -1.00000
+"dZ_MPB2   ","MPB2psam  ",  -1.00000
 "dZ_F3     ","F3        ",  -1.00000
 "dZ_F4     ","F4        ",  -1.00000
 "dZ_F5     ","F5        ",  -1.00000
@@ -2585,8 +2587,8 @@ stocfl,stocsu,stocsc
 "dG3_ALG28 ","BLOOMALG28",  -1.00000
 "dG3_ALG29 ","BLOOMALG29",  -1.00000
 "dG3_ALG30 ","BLOOMALG30",  -1.00000
-"dG3_F1    ","F1        ",  -1.00000
-"dG3_F2    ","F2        ",  -1.00000
+"dG3_MPB1  ","MPB1peli  ",  -1.00000
+"dG3_MPB2  ","MPB2psam  ",  -1.00000
 "dG3_F3    ","F3        ",  -1.00000
 "dG3_F4    ","F4        ",  -1.00000
 "dG3_F5    ","F5        ",  -1.00000
@@ -2668,8 +2670,8 @@ stocfl,stocsu,stocsc
 "dG4_ALG28 ","BLOOMALG28",  -1.00000
 "dG4_ALG29 ","BLOOMALG29",  -1.00000
 "dG4_ALG30 ","BLOOMALG30",  -1.00000
-"dG4_F1    ","F1        ",  -1.00000
-"dG4_F2    ","F2        ",  -1.00000
+"dG4_MPB1  ","MPB1peli  ",  -1.00000
+"dG4_MPB2  ","MPB2psam  ",  -1.00000
 "dG4_F3    ","F3        ",  -1.00000
 "dG4_F4    ","F4        ",  -1.00000
 "dG4_F5    ","F5        ",  -1.00000
@@ -2751,8 +2753,8 @@ stocfl,stocsu,stocsc
 "dG5_ALG28 ","BLOOMALG28",  -1.00000
 "dG5_ALG29 ","BLOOMALG29",  -1.00000
 "dG5_ALG30 ","BLOOMALG30",  -1.00000
-"dG5_F1    ","F1        ",  -1.00000
-"dG5_F2    ","F2        ",  -1.00000
+"dG5_MPB1  ","MPB1peli  ",  -1.00000
+"dG5_MPB2  ","MPB2psam  ",  -1.00000
 "dG5_F3    ","F3        ",  -1.00000
 "dG5_F4    ","F4        ",  -1.00000
 "dG5_F5    ","F5        ",  -1.00000

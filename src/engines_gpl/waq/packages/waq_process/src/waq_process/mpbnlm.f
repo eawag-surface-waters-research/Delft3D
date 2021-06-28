@@ -57,38 +57,33 @@ C     from PMSA array
       REAL               :: CNI                !  2 in  Nitrate (NO3)                              (gN/m3)
       REAL               :: CPHO               !  3 in  Ortho-Phosphate (PO4)                      (gP/m3)
       REAL               :: CSI                !  4 in  dissolved Silica (Si)                     (gSi/m3)
-      REAL               :: KAM                !  5 in  MPB1 half saturation constant NH4          (gN/m3)
-      REAL               :: KNI                !  6 in  MPB1 half saturation constant NO3          (gN/m3)
-      REAL               :: KPHO               !  7 in  MPB1 half saturation constant PO4          (gP/m3)
-      REAL               :: KSI                !  8 in  MPB1 half saturation constant Si          (gSi/m3)
-      LOGICAL            :: S1_BOTTOM          !  9 in  switch for MPB model (0=segment,1=S1)          (-)
-      REAL               :: CAMS1              ! 10 in  Ammonium concentration in the bottom       (gN/m3)
-      REAL               :: CNIS1              ! 11 in  Nitrate concentration in layer S1          (gN/m3)
-      REAL               :: CPHOS1             ! 12 in  Phosphate concentration in the bottom      (gP/m3)
-      REAL               :: CSIS1              ! 13 in  Silicium concentration in layer S1        (gSi/m3)
-      REAL               :: FAM                ! 14 out MPB ammonium limitation                        (-)
-      REAL               :: FNI                ! 15 out MPB nitrate limitation                         (-)
-      REAL               :: FPHO               ! 16 out MPB phosphate limitation                       (-)
-      REAL               :: FSI                ! 17 out MPB silicate limitation                        (-)
-      REAL               :: FNUT               ! 18 out MPB nutrient limitation                        (-)
-      REAL               :: FAMS1              ! 19 out MPB ammonium limitation S1                     (-)
-      REAL               :: FNIS1              ! 20 out MPB nitrate limitation S1                      (-)
-      REAL               :: FPHOS1             ! 21 out MPB phosphate limitation S1                    (-)
-      REAL               :: FSIS1              ! 22 out MPB silicate limitation S1                     (-)
-      REAL               :: FNUTS1             ! 23 out MPB nutrient limitation S1                     (-)
+      REAL               :: KDIN               !  5 in  MPB1 half saturation constant N            (gN/m3)
+      REAL               :: KPHO               !  6 in  MPB1 half saturation constant P            (gP/m3)
+      REAL               :: KSI                !  7 in  MPB1 half saturation constant Si          (gSi/m3)
+      LOGICAL            :: S1_BOTTOM          !  8 in  switch for MPB model (0=segment,1=S1)          (-)
+      REAL               :: CAMS1              !  9 in  Ammonium concentration in the bottom       (gN/m3)
+      REAL               :: CNIS1              ! 10 in  Nitrate concentration in layer S1          (gN/m3)
+      REAL               :: CPHOS1             ! 11 in  Phosphate concentration in the bottom      (gP/m3)
+      REAL               :: CSIS1              ! 12 in  Silicium concentration in layer S1        (gSi/m3)
+      REAL               :: FN                 ! 13 out MPB nitrogen limitation                        (-)
+      REAL               :: FPHO               ! 14 out MPB phosphate limitation                       (-)
+      REAL               :: FSI                ! 15 out MPB silicate limitation                        (-)
+      REAL               :: FNUT               ! 16 out MPB nutrient limitation                        (-)
+      REAL               :: FNS1               ! 17 out MPB nitrogen limitation S1                     (-)
+      REAL               :: FPHOS1             ! 18 out MPB phosphate limitation S1                    (-)
+      REAL               :: FSIS1              ! 19 out MPB silicate limitation S1                     (-)
+      REAL               :: FNUTS1             ! 20 out MPB nutrient limitation S1                     (-)
+      REAL               :: AMOPRF             ! Preference factor ammomium over nitrate (DYNAMO)      (-)
 
-C     local decalrations
+C     local declarations
 
       INTEGER            :: ISEG               ! loop counter segment loop
       INTEGER            :: IKMRK1             ! first feature inactive(0)-active(1)-bottom(2) segment
       INTEGER            :: IKMRK2             ! second feature 2D(0)-surface(1)-middle(2)-bottom(3) segment
-      INTEGER, parameter :: NO_POINTER = 23    ! number of input output variables in PMSA array
+      INTEGER, parameter :: NO_POINTER = 21    ! number of input output variables in PMSA array
       INTEGER            :: IP(NO_POINTER)     ! index pointer in PMSA array updated for each segment
-      REAL               :: FNS1               ! N nutrient limitation
-      REAL               :: FN                 ! N nutrient limitation S1
       REAL               :: CNN                ! Weigthed nitrogen concentration (a la DYNAMO)     (gN/m3)
       REAL               :: CNNS1              ! Weigthed nitrogen concentration, bottom           (gN/m3)
-      REAL               :: AMOPRF = 1.0       ! Preference factor ammomium over nitrate (DYNAMO)      (-)
 
 C     initialise pointers for PMSA and FL array
 
@@ -105,15 +100,15 @@ C     loop over the segments
          CNI       = MAX(PMSA(IP(2)),0.0)
          CPHO      = MAX(PMSA(IP(3)),0.0)
          CSI       = MAX(PMSA(IP(4)),0.0)
-         KAM       = PMSA(IP(5))
-         KNI       = PMSA(IP(6))
-         KPHO      = PMSA(IP(7))
-         KSI       = PMSA(IP(8))
-         S1_BOTTOM = NINT(PMSA(IP(9))) .EQ. 1
-         CAMS1     = MAX(PMSA(IP(10)),0.0)
-         CNIS1     = MAX(PMSA(IP(11)),0.0)
-         CPHOS1    = MAX(PMSA(IP(12)),0.0)
-         CSIS1     = MAX(PMSA(IP(13)),0.0)
+         KDIN      = PMSA(IP(5))
+         KPHO      = PMSA(IP(6))
+         KSI       = PMSA(IP(7))
+         S1_BOTTOM = NINT(PMSA(IP(8))) .EQ. 1
+         CAMS1     = MAX(PMSA(IP(9)),0.0)
+         CNIS1     = MAX(PMSA(IP(10)),0.0)
+         CPHOS1    = MAX(PMSA(IP(11)),0.0)
+         CSIS1     = MAX(PMSA(IP(12)),0.0)
+         AMOPRF    = PMSA(IP(13))
 
          CNN       = CAM   + CNI   / AMOPRF
          CNNS1     = CAMS1 + CNIS1 / AMOPRF
@@ -122,25 +117,18 @@ C        water en delwaq-g bodem
 
          IF ( (IKMRK1.EQ.1) .OR. (IKMRK1.EQ.2) ) THEN
 
-            !FAM  = CAM/(KAM+CAM)
-            !FNI  = CNI/(KNI+CNI)
-            ! Use KNI as half-saturation concentration
-            FAM  = CAM/(KNI+CNN)
-            FNI  = CNI/(KNI+CNN)
-            FN   = CNN/(KNI+CNN)
+            FN   = CNN/(KDIN+CNN)
             FPHO = CPHO/(KPHO+CPHO)
             IF ( KSI .LT. 1E-20 ) THEN
                FSI = 1.0
             ELSE
                FSI  = CSI/(KSI+CSI)
             ENDIF
-            !FN   = FAM + ( 1.0 - FAM ) * FNI
             FNUT = MAX( 0.0, MIN(FN,FPHO,FSI) )
 
          ELSE
 
-            FAM  = 0.0
-            FNI  = 0.0
+            FN   = 0.0
             FPHO = 0.0
             FSI  = 0.0
             FNUT = 0.0
@@ -151,41 +139,32 @@ C        s1 bodem
 
          IF ( S1_BOTTOM .AND. (IKMRK2.EQ.0 .OR. IKMRK2.EQ.3) ) THEN
 
-            !FAMS1  = CAMS1/(KAM+CAMS1)
-            !FNIS1  = CNIS1/(KNI+CNIS1)
-
-            FAMS1  = CAMS1/(KNI+CNNS1)
-            FNIS1  = CNIS1/(KNI+CNNS1)
-            FNS1   = CNNS1/(KNI+CNNS1)
+            FNS1   = CNNS1/(KDIN+CNNS1)
             FPHOS1 = CPHOS1/(KPHO+CPHOS1)
             IF ( KSI .LT. 1E-20 ) THEN
                FSIS1 = 1.0
             ELSE
                FSIS1  = CSIS1/(KSI+CSIS1)
             ENDIF
-            !FNS1   = FAMS1 + ( 1.0 - FAMS1 ) * FNIS1
             FNUTS1 = MAX( 0.0, MIN(FNS1,FPHOS1,FSIS1) )
 
          ELSE
 
-            FAMS1  = 0.0
-            FNIS1  = 0.0
+            FNS1   = 0.0
             FPHOS1 = 0.0
             FSIS1  = 0.0
             FNUTS1 = 0.0
 
          ENDIF
 
-         PMSA(IP(14)) = FAM
-         PMSA(IP(15)) = FNI
-         PMSA(IP(16)) = FPHO
-         PMSA(IP(17)) = FSI
-         PMSA(IP(18)) = FNUT
-         PMSA(IP(19)) = FAMS1
-         PMSA(IP(20)) = FNIS1
-         PMSA(IP(21)) = FPHOS1
-         PMSA(IP(22)) = FSIS1
-         PMSA(IP(23)) = FNUTS1
+         PMSA(IP(14)) = FN
+         PMSA(IP(15)) = FPHO
+         PMSA(IP(16)) = FSI
+         PMSA(IP(17)) = FNUT
+         PMSA(IP(18)) = FNS1
+         PMSA(IP(19)) = FPHOS1
+         PMSA(IP(20)) = FSIS1
+         PMSA(IP(21)) = FNUTS1
 
 C        update pointering in PMSA
 

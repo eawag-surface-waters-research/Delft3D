@@ -128,8 +128,8 @@ C     from PMSA array
       REAL               :: dGSP               ! 65 in
       REAL               :: dBotSi             ! 66 in
       REAL               :: dSWSi              ! 67 in
-      REAL               :: CCAP_MPB1          ! 68 in   carrying capacity MPB1                     (gC/m3)
-      REAL               :: CCAP_MPB2          ! 69 in   carrying capacity MPB2                     (gC/m3)
+      REAL               :: CCAP_MPB1          ! 68 in   carrying capacity MPB1                     (gC/m2)
+      REAL               :: CCAP_MPB2          ! 69 in   carrying capacity MPB2                     (gC/m2)
       REAL               :: LOCSEDDEPT         ! 70 in   Sediment layer depth to bottom of segment      (m)
       REAL               :: OXY                ! 71 in   Dissolved Oxygen                            (g/m3)
       REAL               :: MPBOXYCRIT         ! 72 in   Crit. oxygen conc. for growth and resp. MPB (g/m3)
@@ -315,10 +315,10 @@ C     loop over the segments
          PCRAT_MPB2     = PMSA(IP(31))
          SCRAT_MPB1     = PMSA(IP(32))
          SCRAT_MPB2     = PMSA(IP(33))
-         FAM_MPB1       = PMSA(IP(34))
-         FAM_MPB2       = PMSA(IP(35))
-         FNI_MPB1       = PMSA(IP(36))
-         FNI_MPB2       = PMSA(IP(37))
+         !FAM_MPB1       = PMSA(IP(34))  -- no longer used: change in nutrient preference
+         !FAM_MPB2       = PMSA(IP(35))
+         !FNI_MPB1       = PMSA(IP(36))
+         !FNI_MPB2       = PMSA(IP(37))
          TRESH_MPB1     = PMSA(IP(38))
          TRESH_MPB2     = PMSA(IP(39))
          S1_BOTTOM      = NINT(PMSA(IP(40))) .EQ. 1
@@ -328,10 +328,10 @@ C     loop over the segments
          FTMP_S1_MPB2   = PMSA(IP(44))
          FNUT_S1_MPB1   = PMSA(IP(45))
          FNUT_S1_MPB2   = PMSA(IP(46))
-         FAM_S1_MPB1    = PMSA(IP(47))
-         FAM_S1_MPB2    = PMSA(IP(48))
-         FNI_S1_MPB1    = PMSA(IP(49))
-         FNI_S1_MPB2    = PMSA(IP(50))
+         !FAM_S1_MPB1    = PMSA(IP(47))  -- no longer used
+         !FAM_S1_MPB2    = PMSA(IP(48))
+         !FNI_S1_MPB1    = PMSA(IP(49))
+         !FNI_S1_MPB2    = PMSA(IP(50))
          NH4            = MAX(0.0,PMSA(IP(51)))
          NO3            = MAX(0.0,PMSA(IP(52)))
          PO4            = MAX(0.0,PMSA(IP(53)))
@@ -349,13 +349,18 @@ C     loop over the segments
          dGSP           = PMSA(IP(65))
          dBotSi         = PMSA(IP(66))
          dSWSi          = PMSA(IP(67))
-         CCAP_MPB1      = PMSA(IP(68))
-         CCAP_MPB2      = PMSA(IP(69))
+         CCAP_MPB1      = PMSA(IP(68)) / ZSED
+         CCAP_MPB2      = PMSA(IP(69)) / ZSED
          LOCSEDDEPT     = PMSA(IP(70))
          OXY            = PMSA(IP(71))
          MPBOXYCRIT     = PMSA(IP(72))
          MPB1MO_20      = PMSA(IP(73))
          MPB2MO_20      = PMSA(IP(74))
+
+         FAM_MPB1       = NH4
+         FAM_MPB2       = NO3
+         FNI_MPB1       = NH4
+         FNI_MPB2       = NO3
 
 C           check proces parameters
 
@@ -824,7 +829,7 @@ C           NH4 over NO3 preferency
 !           you have an exclusively negative contribution to NO3 in the water.
 
             !FN_MPB1 = FAM_S1_MPB1 + (1.-FAM_S1_MPB1)*FNI_S1_MPB1
-            FN_MPB1 = FNI_S1_MPB1 + FAM_S1_MPB1
+!            FN_MPB1 = FNI_S1_MPB1 + FAM_S1_MPB1
 !           IF ( FN_MPB1 .GT. 1.E-20 ) THEN
 !              FNO3_MPB1 = FNI_S1_MPB1 / FN_MPB1
 !              FNH4_MPB1 = FAM_S1_MPB1 / FN_MPB1
@@ -833,7 +838,7 @@ C           NH4 over NO3 preferency
 !              FNH4_MPB1 = 1.0
 !           ENDIF
             !FN_MPB2 = FAM_S1_MPB2 + (1.-FAM_S1_MPB2)*FNI_S1_MPB2
-            FN_MPB2 = FNI_S1_MPB2 + FAM_S1_MPB2
+!            FN_MPB2 = FNI_S1_MPB2 + FAM_S1_MPB2
 !           IF ( FN_MPB2 .GT. 1.E-20 ) THEN
 !              FNO3_MPB2 = FNI_S1_MPB2 / FN_MPB2
 !              FNH4_MPB2 = FAM_S1_MPB2 / FN_MPB2

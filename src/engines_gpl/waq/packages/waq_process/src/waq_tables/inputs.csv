@@ -7693,452 +7693,480 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "CONSBL    ","Opal      ", 138,"Y"," ",1
 "CONSBL    ","Green     ", 139,"Y"," ",1
 "CONSBL    ","Diat      ", 140,"Y"," ",1
-"CONSBL    ","BLOOMALG01", 141,"B"," ",1
-"CONSBL    ","BLOOMALG02", 142,"B"," ",1
-"CONSBL    ","BLOOMALG03", 143,"B"," ",1
-"CONSBL    ","BLOOMALG04", 144,"B"," ",1
-"CONSBL    ","BLOOMALG05", 145,"B"," ",1
-"CONSBL    ","BLOOMALG06", 146,"B"," ",1
-"CONSBL    ","BLOOMALG07", 147,"B"," ",1
-"CONSBL    ","BLOOMALG08", 148,"B"," ",1
-"CONSBL    ","BLOOMALG09", 149,"B"," ",1
-"CONSBL    ","BLOOMALG10", 150,"B"," ",1
-"CONSBL    ","BLOOMALG11", 151,"B"," ",1
-"CONSBL    ","BLOOMALG12", 152,"B"," ",1
-"CONSBL    ","BLOOMALG13", 153,"B"," ",1
-"CONSBL    ","BLOOMALG14", 154,"B"," ",1
-"CONSBL    ","BLOOMALG15", 155,"B"," ",1
-"CONSBL    ","BLOOMALG16", 156,"B"," ",1
-"CONSBL    ","BLOOMALG17", 157,"B"," ",1
-"CONSBL    ","BLOOMALG18", 158,"B"," ",1
-"CONSBL    ","BLOOMALG19", 159,"B"," ",1
-"CONSBL    ","BLOOMALG20", 160,"B"," ",1
-"CONSBL    ","BLOOMALG21", 161,"B"," ",1
-"CONSBL    ","BLOOMALG22", 162,"B"," ",1
-"CONSBL    ","BLOOMALG23", 163,"B"," ",1
-"CONSBL    ","BLOOMALG24", 164,"B"," ",1
-"CONSBL    ","BLOOMALG25", 165,"B"," ",1
-"CONSBL    ","BLOOMALG26", 166,"B"," ",1
-"CONSBL    ","BLOOMALG27", 167,"B"," ",1
-"CONSBL    ","BLOOMALG28", 168,"B"," ",1
-"CONSBL    ","BLOOMALG29", 169,"B"," ",1
-"CONSBL    ","BLOOMALG30", 170,"B"," ",1
-"CONSBL    ","NCRatGreen", 171,"Y"," ",1
-"CONSBL    ","NCRatDiat ", 172,"Y"," ",1
-"CONSBL    ","NCRAlg01  ", 173,"Y"," ",1
-"CONSBL    ","NCRAlg02  ", 174,"Y"," ",1
-"CONSBL    ","NCRAlg03  ", 175,"Y"," ",1
-"CONSBL    ","NCRAlg04  ", 176,"Y"," ",1
-"CONSBL    ","NCRAlg05  ", 177,"Y"," ",1
-"CONSBL    ","NCRAlg06  ", 178,"Y"," ",1
-"CONSBL    ","NCRAlg07  ", 179,"Y"," ",1
-"CONSBL    ","NCRAlg08  ", 180,"Y"," ",1
-"CONSBL    ","NCRAlg09  ", 181,"Y"," ",1
-"CONSBL    ","NCRAlg10  ", 182,"Y"," ",1
-"CONSBL    ","NCRAlg11  ", 183,"Y"," ",1
-"CONSBL    ","NCRAlg12  ", 184,"Y"," ",1
-"CONSBL    ","NCRAlg13  ", 185,"Y"," ",1
-"CONSBL    ","NCRAlg14  ", 186,"Y"," ",1
-"CONSBL    ","NCRAlg15  ", 187,"Y"," ",1
-"CONSBL    ","NCRAlg16  ", 188,"Y"," ",1
-"CONSBL    ","NCRAlg17  ", 189,"Y"," ",1
-"CONSBL    ","NCRAlg18  ", 190,"Y"," ",1
-"CONSBL    ","NCRAlg19  ", 191,"Y"," ",1
-"CONSBL    ","NCRAlg20  ", 192,"Y"," ",1
-"CONSBL    ","NCRAlg21  ", 193,"Y"," ",1
-"CONSBL    ","NCRAlg22  ", 194,"Y"," ",1
-"CONSBL    ","NCRAlg23  ", 195,"Y"," ",1
-"CONSBL    ","NCRAlg24  ", 196,"Y"," ",1
-"CONSBL    ","NCRAlg25  ", 197,"Y"," ",1
-"CONSBL    ","NCRAlg26  ", 198,"Y"," ",1
-"CONSBL    ","NCRAlg27  ", 199,"Y"," ",1
-"CONSBL    ","NCRAlg28  ", 200,"Y"," ",1
-"CONSBL    ","NCRAlg29  ", 201,"Y"," ",1
-"CONSBL    ","NCRAlg30  ", 202,"Y"," ",1
-"CONSBL    ","PCRatGreen", 203,"Y"," ",1
-"CONSBL    ","PCRatDiat ", 204,"Y"," ",1
-"CONSBL    ","PCRAlg01  ", 205,"Y"," ",1
-"CONSBL    ","PCRAlg02  ", 206,"Y"," ",1
-"CONSBL    ","PCRAlg03  ", 207,"Y"," ",1
-"CONSBL    ","PCRAlg04  ", 208,"Y"," ",1
-"CONSBL    ","PCRAlg05  ", 209,"Y"," ",1
-"CONSBL    ","PCRAlg06  ", 210,"Y"," ",1
-"CONSBL    ","PCRAlg07  ", 211,"Y"," ",1
-"CONSBL    ","PCRAlg08  ", 212,"Y"," ",1
-"CONSBL    ","PCRAlg09  ", 213,"Y"," ",1
-"CONSBL    ","PCRAlg10  ", 214,"Y"," ",1
-"CONSBL    ","PCRAlg11  ", 215,"Y"," ",1
-"CONSBL    ","PCRAlg12  ", 216,"Y"," ",1
-"CONSBL    ","PCRAlg13  ", 217,"Y"," ",1
-"CONSBL    ","PCRAlg14  ", 218,"Y"," ",1
-"CONSBL    ","PCRAlg15  ", 219,"Y"," ",1
-"CONSBL    ","PCRAlg16  ", 220,"Y"," ",1
-"CONSBL    ","PCRAlg17  ", 221,"Y"," ",1
-"CONSBL    ","PCRAlg18  ", 222,"Y"," ",1
-"CONSBL    ","PCRAlg19  ", 223,"Y"," ",1
-"CONSBL    ","PCRAlg20  ", 224,"Y"," ",1
-"CONSBL    ","PCRAlg21  ", 225,"Y"," ",1
-"CONSBL    ","PCRAlg22  ", 226,"Y"," ",1
-"CONSBL    ","PCRAlg23  ", 227,"Y"," ",1
-"CONSBL    ","PCRAlg24  ", 228,"Y"," ",1
-"CONSBL    ","PCRAlg25  ", 229,"Y"," ",1
-"CONSBL    ","PCRAlg26  ", 230,"Y"," ",1
-"CONSBL    ","PCRAlg27  ", 231,"Y"," ",1
-"CONSBL    ","PCRAlg28  ", 232,"Y"," ",1
-"CONSBL    ","PCRAlg29  ", 233,"Y"," ",1
-"CONSBL    ","PCRAlg30  ", 234,"Y"," ",1
-"CONSBL    ","SCRatGreen", 235,"Y"," ",1
-"CONSBL    ","SCRatDiat ", 236,"Y"," ",1
-"CONSBL    ","SCRAlg01  ", 237,"Y"," ",1
-"CONSBL    ","SCRAlg02  ", 238,"Y"," ",1
-"CONSBL    ","SCRAlg03  ", 239,"Y"," ",1
-"CONSBL    ","SCRAlg04  ", 240,"Y"," ",1
-"CONSBL    ","SCRAlg05  ", 241,"Y"," ",1
-"CONSBL    ","SCRAlg06  ", 242,"Y"," ",1
-"CONSBL    ","SCRAlg07  ", 243,"Y"," ",1
-"CONSBL    ","SCRAlg08  ", 244,"Y"," ",1
-"CONSBL    ","SCRAlg09  ", 245,"Y"," ",1
-"CONSBL    ","SCRAlg10  ", 246,"Y"," ",1
-"CONSBL    ","SCRAlg11  ", 247,"Y"," ",1
-"CONSBL    ","SCRAlg12  ", 248,"Y"," ",1
-"CONSBL    ","SCRAlg13  ", 249,"Y"," ",1
-"CONSBL    ","SCRAlg14  ", 250,"Y"," ",1
-"CONSBL    ","SCRAlg15  ", 251,"Y"," ",1
-"CONSBL    ","SCRAlg16  ", 252,"Y"," ",1
-"CONSBL    ","SCRAlg17  ", 253,"Y"," ",1
-"CONSBL    ","SCRAlg18  ", 254,"Y"," ",1
-"CONSBL    ","SCRAlg19  ", 255,"Y"," ",1
-"CONSBL    ","SCRAlg20  ", 256,"Y"," ",1
-"CONSBL    ","SCRAlg21  ", 257,"Y"," ",1
-"CONSBL    ","SCRAlg22  ", 258,"Y"," ",1
-"CONSBL    ","SCRAlg23  ", 259,"Y"," ",1
-"CONSBL    ","SCRAlg24  ", 260,"Y"," ",1
-"CONSBL    ","SCRAlg25  ", 261,"Y"," ",1
-"CONSBL    ","SCRAlg26  ", 262,"Y"," ",1
-"CONSBL    ","SCRAlg27  ", 263,"Y"," ",1
-"CONSBL    ","SCRAlg28  ", 264,"Y"," ",1
-"CONSBL    ","SCRAlg29  ", 265,"Y"," ",1
-"CONSBL    ","SCRAlg30  ", 266,"Y"," ",1
-"CONSBL    ","ZALGPRGrn ", 267,"Y"," ",1
-"CONSBL    ","ZALGPRDiat", 268,"Y"," ",1
-"CONSBL    ","ZALGPR01  ", 269,"Y"," ",1
-"CONSBL    ","ZALGPR02  ", 270,"Y"," ",1
-"CONSBL    ","ZALGPR03  ", 271,"Y"," ",1
-"CONSBL    ","ZALGPR04  ", 272,"Y"," ",1
-"CONSBL    ","ZALGPR05  ", 273,"Y"," ",1
-"CONSBL    ","ZALGPR06  ", 274,"Y"," ",1
-"CONSBL    ","ZALGPR07  ", 275,"Y"," ",1
-"CONSBL    ","ZALGPR08  ", 276,"Y"," ",1
-"CONSBL    ","ZALGPR09  ", 277,"Y"," ",1
-"CONSBL    ","ZALGPR10  ", 278,"Y"," ",1
-"CONSBL    ","ZALGPR11  ", 279,"Y"," ",1
-"CONSBL    ","ZALGPR12  ", 280,"Y"," ",1
-"CONSBL    ","ZALGPR13  ", 281,"Y"," ",1
-"CONSBL    ","ZALGPR14  ", 282,"Y"," ",1
-"CONSBL    ","ZALGPR15  ", 283,"Y"," ",1
-"CONSBL    ","ZALGPR16  ", 284,"Y"," ",1
-"CONSBL    ","ZALGPR17  ", 285,"Y"," ",1
-"CONSBL    ","ZALGPR18  ", 286,"Y"," ",1
-"CONSBL    ","ZALGPR19  ", 287,"Y"," ",1
-"CONSBL    ","ZALGPR20  ", 288,"Y"," ",1
-"CONSBL    ","ZALGPR21  ", 289,"Y"," ",1
-"CONSBL    ","ZALGPR22  ", 290,"Y"," ",1
-"CONSBL    ","ZALGPR23  ", 291,"Y"," ",1
-"CONSBL    ","ZALGPR24  ", 292,"Y"," ",1
-"CONSBL    ","ZALGPR25  ", 293,"Y"," ",1
-"CONSBL    ","ZALGPR26  ", 294,"Y"," ",1
-"CONSBL    ","ZALGPR27  ", 295,"Y"," ",1
-"CONSBL    ","ZALGPR28  ", 296,"Y"," ",1
-"CONSBL    ","ZALGPR29  ", 297,"Y"," ",1
-"CONSBL    ","ZALGPR30  ", 298,"Y"," ",1
-"CONSBL    ","MALGPRGrn ", 299,"Y"," ",1
-"CONSBL    ","MALGPRDiat", 300,"Y"," ",1
-"CONSBL    ","MALGPR01  ", 301,"Y"," ",1
-"CONSBL    ","MALGPR02  ", 302,"Y"," ",1
-"CONSBL    ","MALGPR03  ", 303,"Y"," ",1
-"CONSBL    ","MALGPR04  ", 304,"Y"," ",1
-"CONSBL    ","MALGPR05  ", 305,"Y"," ",1
-"CONSBL    ","MALGPR06  ", 306,"Y"," ",1
-"CONSBL    ","MALGPR07  ", 307,"Y"," ",1
-"CONSBL    ","MALGPR08  ", 308,"Y"," ",1
-"CONSBL    ","MALGPR09  ", 309,"Y"," ",1
-"CONSBL    ","MALGPR10  ", 310,"Y"," ",1
-"CONSBL    ","MALGPR11  ", 311,"Y"," ",1
-"CONSBL    ","MALGPR12  ", 312,"Y"," ",1
-"CONSBL    ","MALGPR13  ", 313,"Y"," ",1
-"CONSBL    ","MALGPR14  ", 314,"Y"," ",1
-"CONSBL    ","MALGPR15  ", 315,"Y"," ",1
-"CONSBL    ","MALGPR16  ", 316,"Y"," ",1
-"CONSBL    ","MALGPR17  ", 317,"Y"," ",1
-"CONSBL    ","MALGPR18  ", 318,"Y"," ",1
-"CONSBL    ","MALGPR19  ", 319,"Y"," ",1
-"CONSBL    ","MALGPR20  ", 320,"Y"," ",1
-"CONSBL    ","MALGPR21  ", 321,"Y"," ",1
-"CONSBL    ","MALGPR22  ", 322,"Y"," ",1
-"CONSBL    ","MALGPR23  ", 323,"Y"," ",1
-"CONSBL    ","MALGPR24  ", 324,"Y"," ",1
-"CONSBL    ","MALGPR25  ", 325,"Y"," ",1
-"CONSBL    ","MALGPR26  ", 326,"Y"," ",1
-"CONSBL    ","MALGPR27  ", 327,"Y"," ",1
-"CONSBL    ","MALGPR28  ", 328,"Y"," ",1
-"CONSBL    ","MALGPR29  ", 329,"Y"," ",1
-"CONSBL    ","MALGPR30  ", 330,"Y"," ",1
-"CONSBL    ","G3ALGPRGrn", 331,"Y"," ",1
-"CONSBL    ","G3ALGPRDia", 332,"Y"," ",1
-"CONSBL    ","G3ALGPR01 ", 333,"Y"," ",1
-"CONSBL    ","G3ALGPR02 ", 334,"Y"," ",1
-"CONSBL    ","G3ALGPR03 ", 335,"Y"," ",1
-"CONSBL    ","G3ALGPR04 ", 336,"Y"," ",1
-"CONSBL    ","G3ALGPR05 ", 337,"Y"," ",1
-"CONSBL    ","G3ALGPR06 ", 338,"Y"," ",1
-"CONSBL    ","G3ALGPR07 ", 339,"Y"," ",1
-"CONSBL    ","G3ALGPR08 ", 340,"Y"," ",1
-"CONSBL    ","G3ALGPR09 ", 341,"Y"," ",1
-"CONSBL    ","G3ALGPR10 ", 342,"Y"," ",1
-"CONSBL    ","G3ALGPR11 ", 343,"Y"," ",1
-"CONSBL    ","G3ALGPR12 ", 344,"Y"," ",1
-"CONSBL    ","G3ALGPR13 ", 345,"Y"," ",1
-"CONSBL    ","G3ALGPR14 ", 346,"Y"," ",1
-"CONSBL    ","G3ALGPR15 ", 347,"Y"," ",1
-"CONSBL    ","G3ALGPR16 ", 348,"Y"," ",1
-"CONSBL    ","G3ALGPR17 ", 349,"Y"," ",1
-"CONSBL    ","G3ALGPR18 ", 350,"Y"," ",1
-"CONSBL    ","G3ALGPR19 ", 351,"Y"," ",1
-"CONSBL    ","G3ALGPR20 ", 352,"Y"," ",1
-"CONSBL    ","G3ALGPR21 ", 353,"Y"," ",1
-"CONSBL    ","G3ALGPR22 ", 354,"Y"," ",1
-"CONSBL    ","G3ALGPR23 ", 355,"Y"," ",1
-"CONSBL    ","G3ALGPR24 ", 356,"Y"," ",1
-"CONSBL    ","G3ALGPR25 ", 357,"Y"," ",1
-"CONSBL    ","G3ALGPR26 ", 358,"Y"," ",1
-"CONSBL    ","G3ALGPR27 ", 359,"Y"," ",1
-"CONSBL    ","G3ALGPR28 ", 360,"Y"," ",1
-"CONSBL    ","G3ALGPR29 ", 361,"Y"," ",1
-"CONSBL    ","G3ALGPR30 ", 362,"Y"," ",1
-"CONSBL    ","G4ALGPRGrn", 363,"Y"," ",1
-"CONSBL    ","G4ALGPRDia", 364,"Y"," ",1
-"CONSBL    ","G4ALGPR01 ", 365,"Y"," ",1
-"CONSBL    ","G4ALGPR02 ", 366,"Y"," ",1
-"CONSBL    ","G4ALGPR03 ", 367,"Y"," ",1
-"CONSBL    ","G4ALGPR04 ", 368,"Y"," ",1
-"CONSBL    ","G4ALGPR05 ", 369,"Y"," ",1
-"CONSBL    ","G4ALGPR06 ", 370,"Y"," ",1
-"CONSBL    ","G4ALGPR07 ", 371,"Y"," ",1
-"CONSBL    ","G4ALGPR08 ", 372,"Y"," ",1
-"CONSBL    ","G4ALGPR09 ", 373,"Y"," ",1
-"CONSBL    ","G4ALGPR10 ", 374,"Y"," ",1
-"CONSBL    ","G4ALGPR11 ", 375,"Y"," ",1
-"CONSBL    ","G4ALGPR12 ", 376,"Y"," ",1
-"CONSBL    ","G4ALGPR13 ", 377,"Y"," ",1
-"CONSBL    ","G4ALGPR14 ", 378,"Y"," ",1
-"CONSBL    ","G4ALGPR15 ", 379,"Y"," ",1
-"CONSBL    ","G4ALGPR16 ", 380,"Y"," ",1
-"CONSBL    ","G4ALGPR17 ", 381,"Y"," ",1
-"CONSBL    ","G4ALGPR18 ", 382,"Y"," ",1
-"CONSBL    ","G4ALGPR19 ", 383,"Y"," ",1
-"CONSBL    ","G4ALGPR20 ", 384,"Y"," ",1
-"CONSBL    ","G4ALGPR21 ", 385,"Y"," ",1
-"CONSBL    ","G4ALGPR22 ", 386,"Y"," ",1
-"CONSBL    ","G4ALGPR23 ", 387,"Y"," ",1
-"CONSBL    ","G4ALGPR24 ", 388,"Y"," ",1
-"CONSBL    ","G4ALGPR25 ", 389,"Y"," ",1
-"CONSBL    ","G4ALGPR26 ", 390,"Y"," ",1
-"CONSBL    ","G4ALGPR27 ", 391,"Y"," ",1
-"CONSBL    ","G4ALGPR28 ", 392,"Y"," ",1
-"CONSBL    ","G4ALGPR29 ", 393,"Y"," ",1
-"CONSBL    ","G4ALGPR30 ", 394,"Y"," ",1
-"CONSBL    ","G5ALGPRGrn", 395,"Y"," ",1
-"CONSBL    ","G5ALGPRDia", 396,"Y"," ",1
-"CONSBL    ","G5ALGPR01 ", 397,"Y"," ",1
-"CONSBL    ","G5ALGPR02 ", 398,"Y"," ",1
-"CONSBL    ","G5ALGPR03 ", 399,"Y"," ",1
-"CONSBL    ","G5ALGPR04 ", 400,"Y"," ",1
-"CONSBL    ","G5ALGPR05 ", 401,"Y"," ",1
-"CONSBL    ","G5ALGPR06 ", 402,"Y"," ",1
-"CONSBL    ","G5ALGPR07 ", 403,"Y"," ",1
-"CONSBL    ","G5ALGPR08 ", 404,"Y"," ",1
-"CONSBL    ","G5ALGPR09 ", 405,"Y"," ",1
-"CONSBL    ","G5ALGPR10 ", 406,"Y"," ",1
-"CONSBL    ","G5ALGPR11 ", 407,"Y"," ",1
-"CONSBL    ","G5ALGPR12 ", 408,"Y"," ",1
-"CONSBL    ","G5ALGPR13 ", 409,"Y"," ",1
-"CONSBL    ","G5ALGPR14 ", 410,"Y"," ",1
-"CONSBL    ","G5ALGPR15 ", 411,"Y"," ",1
-"CONSBL    ","G5ALGPR16 ", 412,"Y"," ",1
-"CONSBL    ","G5ALGPR17 ", 413,"Y"," ",1
-"CONSBL    ","G5ALGPR18 ", 414,"Y"," ",1
-"CONSBL    ","G5ALGPR19 ", 415,"Y"," ",1
-"CONSBL    ","G5ALGPR20 ", 416,"Y"," ",1
-"CONSBL    ","G5ALGPR21 ", 417,"Y"," ",1
-"CONSBL    ","G5ALGPR22 ", 418,"Y"," ",1
-"CONSBL    ","G5ALGPR23 ", 419,"Y"," ",1
-"CONSBL    ","G5ALGPR24 ", 420,"Y"," ",1
-"CONSBL    ","G5ALGPR25 ", 421,"Y"," ",1
-"CONSBL    ","G5ALGPR26 ", 422,"Y"," ",1
-"CONSBL    ","G5ALGPR27 ", 423,"Y"," ",1
-"CONSBL    ","G5ALGPR28 ", 424,"Y"," ",1
-"CONSBL    ","G5ALGPR29 ", 425,"Y"," ",1
-"CONSBL    ","G5ALGPR30 ", 426,"Y"," ",1
-"CONSBL    ","ZALGFFGrn ", 427,"Y"," ",1
-"CONSBL    ","ZALGFFDiat", 428,"Y"," ",1
-"CONSBL    ","ZALGFF01  ", 429,"Y"," ",1
-"CONSBL    ","ZALGFF02  ", 430,"Y"," ",1
-"CONSBL    ","ZALGFF03  ", 431,"Y"," ",1
-"CONSBL    ","ZALGFF04  ", 432,"Y"," ",1
-"CONSBL    ","ZALGFF05  ", 433,"Y"," ",1
-"CONSBL    ","ZALGFF06  ", 434,"Y"," ",1
-"CONSBL    ","ZALGFF07  ", 435,"Y"," ",1
-"CONSBL    ","ZALGFF08  ", 436,"Y"," ",1
-"CONSBL    ","ZALGFF09  ", 437,"Y"," ",1
-"CONSBL    ","ZALGFF10  ", 438,"Y"," ",1
-"CONSBL    ","ZALGFF11  ", 439,"Y"," ",1
-"CONSBL    ","ZALGFF12  ", 440,"Y"," ",1
-"CONSBL    ","ZALGFF13  ", 441,"Y"," ",1
-"CONSBL    ","ZALGFF14  ", 442,"Y"," ",1
-"CONSBL    ","ZALGFF15  ", 443,"Y"," ",1
-"CONSBL    ","ZALGFF16  ", 444,"Y"," ",1
-"CONSBL    ","ZALGFF17  ", 445,"Y"," ",1
-"CONSBL    ","ZALGFF18  ", 446,"Y"," ",1
-"CONSBL    ","ZALGFF19  ", 447,"Y"," ",1
-"CONSBL    ","ZALGFF20  ", 448,"Y"," ",1
-"CONSBL    ","ZALGFF21  ", 449,"Y"," ",1
-"CONSBL    ","ZALGFF22  ", 450,"Y"," ",1
-"CONSBL    ","ZALGFF23  ", 451,"Y"," ",1
-"CONSBL    ","ZALGFF24  ", 452,"Y"," ",1
-"CONSBL    ","ZALGFF25  ", 453,"Y"," ",1
-"CONSBL    ","ZALGFF26  ", 454,"Y"," ",1
-"CONSBL    ","ZALGFF27  ", 455,"Y"," ",1
-"CONSBL    ","ZALGFF28  ", 456,"Y"," ",1
-"CONSBL    ","ZALGFF29  ", 457,"Y"," ",1
-"CONSBL    ","ZALGFF30  ", 458,"Y"," ",1
-"CONSBL    ","MALGFFGrn ", 459,"Y"," ",1
-"CONSBL    ","MALGFFDiat", 460,"Y"," ",1
-"CONSBL    ","MALGFF01  ", 461,"Y"," ",1
-"CONSBL    ","MALGFF02  ", 462,"Y"," ",1
-"CONSBL    ","MALGFF03  ", 463,"Y"," ",1
-"CONSBL    ","MALGFF04  ", 464,"Y"," ",1
-"CONSBL    ","MALGFF05  ", 465,"Y"," ",1
-"CONSBL    ","MALGFF06  ", 466,"Y"," ",1
-"CONSBL    ","MALGFF07  ", 467,"Y"," ",1
-"CONSBL    ","MALGFF08  ", 468,"Y"," ",1
-"CONSBL    ","MALGFF09  ", 469,"Y"," ",1
-"CONSBL    ","MALGFF10  ", 470,"Y"," ",1
-"CONSBL    ","MALGFF11  ", 471,"Y"," ",1
-"CONSBL    ","MALGFF12  ", 472,"Y"," ",1
-"CONSBL    ","MALGFF13  ", 473,"Y"," ",1
-"CONSBL    ","MALGFF14  ", 474,"Y"," ",1
-"CONSBL    ","MALGFF15  ", 475,"Y"," ",1
-"CONSBL    ","MALGFF16  ", 476,"Y"," ",1
-"CONSBL    ","MALGFF17  ", 477,"Y"," ",1
-"CONSBL    ","MALGFF18  ", 478,"Y"," ",1
-"CONSBL    ","MALGFF19  ", 479,"Y"," ",1
-"CONSBL    ","MALGFF20  ", 480,"Y"," ",1
-"CONSBL    ","MALGFF21  ", 481,"Y"," ",1
-"CONSBL    ","MALGFF22  ", 482,"Y"," ",1
-"CONSBL    ","MALGFF23  ", 483,"Y"," ",1
-"CONSBL    ","MALGFF24  ", 484,"Y"," ",1
-"CONSBL    ","MALGFF25  ", 485,"Y"," ",1
-"CONSBL    ","MALGFF26  ", 486,"Y"," ",1
-"CONSBL    ","MALGFF27  ", 487,"Y"," ",1
-"CONSBL    ","MALGFF28  ", 488,"Y"," ",1
-"CONSBL    ","MALGFF29  ", 489,"Y"," ",1
-"CONSBL    ","MALGFF30  ", 490,"Y"," ",1
-"CONSBL    ","G3ALGFFGrn", 491,"Y"," ",1
-"CONSBL    ","G3ALGFFDia", 492,"Y"," ",1
-"CONSBL    ","G3ALGFF01 ", 493,"Y"," ",1
-"CONSBL    ","G3ALGFF02 ", 494,"Y"," ",1
-"CONSBL    ","G3ALGFF03 ", 495,"Y"," ",1
-"CONSBL    ","G3ALGFF04 ", 496,"Y"," ",1
-"CONSBL    ","G3ALGFF05 ", 497,"Y"," ",1
-"CONSBL    ","G3ALGFF06 ", 498,"Y"," ",1
-"CONSBL    ","G3ALGFF07 ", 499,"Y"," ",1
-"CONSBL    ","G3ALGFF08 ", 500,"Y"," ",1
-"CONSBL    ","G3ALGFF09 ", 501,"Y"," ",1
-"CONSBL    ","G3ALGFF10 ", 502,"Y"," ",1
-"CONSBL    ","G3ALGFF11 ", 503,"Y"," ",1
-"CONSBL    ","G3ALGFF12 ", 504,"Y"," ",1
-"CONSBL    ","G3ALGFF13 ", 505,"Y"," ",1
-"CONSBL    ","G3ALGFF14 ", 506,"Y"," ",1
-"CONSBL    ","G3ALGFF15 ", 507,"Y"," ",1
-"CONSBL    ","G3ALGFF16 ", 508,"Y"," ",1
-"CONSBL    ","G3ALGFF17 ", 509,"Y"," ",1
-"CONSBL    ","G3ALGFF18 ", 510,"Y"," ",1
-"CONSBL    ","G3ALGFF19 ", 511,"Y"," ",1
-"CONSBL    ","G3ALGFF20 ", 512,"Y"," ",1
-"CONSBL    ","G3ALGFF21 ", 513,"Y"," ",1
-"CONSBL    ","G3ALGFF22 ", 514,"Y"," ",1
-"CONSBL    ","G3ALGFF23 ", 515,"Y"," ",1
-"CONSBL    ","G3ALGFF24 ", 516,"Y"," ",1
-"CONSBL    ","G3ALGFF25 ", 517,"Y"," ",1
-"CONSBL    ","G3ALGFF26 ", 518,"Y"," ",1
-"CONSBL    ","G3ALGFF27 ", 519,"Y"," ",1
-"CONSBL    ","G3ALGFF28 ", 520,"Y"," ",1
-"CONSBL    ","G3ALGFF29 ", 521,"Y"," ",1
-"CONSBL    ","G3ALGFF30 ", 522,"Y"," ",1
-"CONSBL    ","G4ALGFFGrn", 523,"Y"," ",1
-"CONSBL    ","G4ALGFFDia", 524,"Y"," ",1
-"CONSBL    ","G4ALGFF01 ", 525,"Y"," ",1
-"CONSBL    ","G4ALGFF02 ", 526,"Y"," ",1
-"CONSBL    ","G4ALGFF03 ", 527,"Y"," ",1
-"CONSBL    ","G4ALGFF04 ", 528,"Y"," ",1
-"CONSBL    ","G4ALGFF05 ", 529,"Y"," ",1
-"CONSBL    ","G4ALGFF06 ", 530,"Y"," ",1
-"CONSBL    ","G4ALGFF07 ", 531,"Y"," ",1
-"CONSBL    ","G4ALGFF08 ", 532,"Y"," ",1
-"CONSBL    ","G4ALGFF09 ", 533,"Y"," ",1
-"CONSBL    ","G4ALGFF10 ", 534,"Y"," ",1
-"CONSBL    ","G4ALGFF11 ", 535,"Y"," ",1
-"CONSBL    ","G4ALGFF12 ", 536,"Y"," ",1
-"CONSBL    ","G4ALGFF13 ", 537,"Y"," ",1
-"CONSBL    ","G4ALGFF14 ", 538,"Y"," ",1
-"CONSBL    ","G4ALGFF15 ", 539,"Y"," ",1
-"CONSBL    ","G4ALGFF16 ", 540,"Y"," ",1
-"CONSBL    ","G4ALGFF17 ", 541,"Y"," ",1
-"CONSBL    ","G4ALGFF18 ", 542,"Y"," ",1
-"CONSBL    ","G4ALGFF19 ", 543,"Y"," ",1
-"CONSBL    ","G4ALGFF20 ", 544,"Y"," ",1
-"CONSBL    ","G4ALGFF21 ", 545,"Y"," ",1
-"CONSBL    ","G4ALGFF22 ", 546,"Y"," ",1
-"CONSBL    ","G4ALGFF23 ", 547,"Y"," ",1
-"CONSBL    ","G4ALGFF24 ", 548,"Y"," ",1
-"CONSBL    ","G4ALGFF25 ", 549,"Y"," ",1
-"CONSBL    ","G4ALGFF26 ", 550,"Y"," ",1
-"CONSBL    ","G4ALGFF27 ", 551,"Y"," ",1
-"CONSBL    ","G4ALGFF28 ", 552,"Y"," ",1
-"CONSBL    ","G4ALGFF29 ", 553,"Y"," ",1
-"CONSBL    ","G4ALGFF30 ", 554,"Y"," ",1
-"CONSBL    ","G5ALGFFGrn", 555,"Y"," ",1
-"CONSBL    ","G5ALGFFDia", 556,"Y"," ",1
-"CONSBL    ","G5ALGFF01 ", 557,"Y"," ",1
-"CONSBL    ","G5ALGFF02 ", 558,"Y"," ",1
-"CONSBL    ","G5ALGFF03 ", 559,"Y"," ",1
-"CONSBL    ","G5ALGFF04 ", 560,"Y"," ",1
-"CONSBL    ","G5ALGFF05 ", 561,"Y"," ",1
-"CONSBL    ","G5ALGFF06 ", 562,"Y"," ",1
-"CONSBL    ","G5ALGFF07 ", 563,"Y"," ",1
-"CONSBL    ","G5ALGFF08 ", 564,"Y"," ",1
-"CONSBL    ","G5ALGFF09 ", 565,"Y"," ",1
-"CONSBL    ","G5ALGFF10 ", 566,"Y"," ",1
-"CONSBL    ","G5ALGFF11 ", 567,"Y"," ",1
-"CONSBL    ","G5ALGFF12 ", 568,"Y"," ",1
-"CONSBL    ","G5ALGFF13 ", 569,"Y"," ",1
-"CONSBL    ","G5ALGFF14 ", 570,"Y"," ",1
-"CONSBL    ","G5ALGFF15 ", 571,"Y"," ",1
-"CONSBL    ","G5ALGFF16 ", 572,"Y"," ",1
-"CONSBL    ","G5ALGFF17 ", 573,"Y"," ",1
-"CONSBL    ","G5ALGFF18 ", 574,"Y"," ",1
-"CONSBL    ","G5ALGFF19 ", 575,"Y"," ",1
-"CONSBL    ","G5ALGFF20 ", 576,"Y"," ",1
-"CONSBL    ","G5ALGFF21 ", 577,"Y"," ",1
-"CONSBL    ","G5ALGFF22 ", 578,"Y"," ",1
-"CONSBL    ","G5ALGFF23 ", 579,"Y"," ",1
-"CONSBL    ","G5ALGFF24 ", 580,"Y"," ",1
-"CONSBL    ","G5ALGFF25 ", 581,"Y"," ",1
-"CONSBL    ","G5ALGFF26 ", 582,"Y"," ",1
-"CONSBL    ","G5ALGFF27 ", 583,"Y"," ",1
-"CONSBL    ","G5ALGFF28 ", 584,"Y"," ",1
-"CONSBL    ","G5ALGFF29 ", 585,"Y"," ",1
-"CONSBL    ","G5ALGFF30 ", 586,"Y"," ",1
+"CONSBL    ","MPB1peli  ", 141,"Y","x",1
+"CONSBL    ","MPB2psam  ", 142,"Y","x",1
+"CONSBL    ","BLOOMALG01", 143,"B"," ",1
+"CONSBL    ","BLOOMALG02", 144,"B"," ",1
+"CONSBL    ","BLOOMALG03", 145,"B"," ",1
+"CONSBL    ","BLOOMALG04", 146,"B"," ",1
+"CONSBL    ","BLOOMALG05", 147,"B"," ",1
+"CONSBL    ","BLOOMALG06", 148,"B"," ",1
+"CONSBL    ","BLOOMALG07", 149,"B"," ",1
+"CONSBL    ","BLOOMALG08", 150,"B"," ",1
+"CONSBL    ","BLOOMALG09", 151,"B"," ",1
+"CONSBL    ","BLOOMALG10", 152,"B"," ",1
+"CONSBL    ","BLOOMALG11", 153,"B"," ",1
+"CONSBL    ","BLOOMALG12", 154,"B"," ",1
+"CONSBL    ","BLOOMALG13", 155,"B"," ",1
+"CONSBL    ","BLOOMALG14", 156,"B"," ",1
+"CONSBL    ","BLOOMALG15", 157,"B"," ",1
+"CONSBL    ","BLOOMALG16", 158,"B"," ",1
+"CONSBL    ","BLOOMALG17", 159,"B"," ",1
+"CONSBL    ","BLOOMALG18", 160,"B"," ",1
+"CONSBL    ","BLOOMALG19", 161,"B"," ",1
+"CONSBL    ","BLOOMALG20", 162,"B"," ",1
+"CONSBL    ","BLOOMALG21", 163,"B"," ",1
+"CONSBL    ","BLOOMALG22", 164,"B"," ",1
+"CONSBL    ","BLOOMALG23", 165,"B"," ",1
+"CONSBL    ","BLOOMALG24", 166,"B"," ",1
+"CONSBL    ","BLOOMALG25", 167,"B"," ",1
+"CONSBL    ","BLOOMALG26", 168,"B"," ",1
+"CONSBL    ","BLOOMALG27", 169,"B"," ",1
+"CONSBL    ","BLOOMALG28", 170,"B"," ",1
+"CONSBL    ","BLOOMALG29", 171,"B"," ",1
+"CONSBL    ","BLOOMALG30", 172,"B"," ",1
+"CONSBL    ","NCRatGreen", 173,"Y"," ",1
+"CONSBL    ","NCRatDiat ", 174,"Y"," ",1
+"CONSBL    ","MPB1NCrat ", 175,"Y","x",1
+"CONSBL    ","MPB2NCrat ", 176,"Y","x",1
+"CONSBL    ","NCRAlg01  ", 177,"Y"," ",1
+"CONSBL    ","NCRAlg02  ", 178,"Y"," ",1
+"CONSBL    ","NCRAlg03  ", 179,"Y"," ",1
+"CONSBL    ","NCRAlg04  ", 180,"Y"," ",1
+"CONSBL    ","NCRAlg05  ", 181,"Y"," ",1
+"CONSBL    ","NCRAlg06  ", 182,"Y"," ",1
+"CONSBL    ","NCRAlg07  ", 183,"Y"," ",1
+"CONSBL    ","NCRAlg08  ", 184,"Y"," ",1
+"CONSBL    ","NCRAlg09  ", 185,"Y"," ",1
+"CONSBL    ","NCRAlg10  ", 186,"Y"," ",1
+"CONSBL    ","NCRAlg11  ", 187,"Y"," ",1
+"CONSBL    ","NCRAlg12  ", 188,"Y"," ",1
+"CONSBL    ","NCRAlg13  ", 189,"Y"," ",1
+"CONSBL    ","NCRAlg14  ", 190,"Y"," ",1
+"CONSBL    ","NCRAlg15  ", 191,"Y"," ",1
+"CONSBL    ","NCRAlg16  ", 192,"Y"," ",1
+"CONSBL    ","NCRAlg17  ", 193,"Y"," ",1
+"CONSBL    ","NCRAlg18  ", 194,"Y"," ",1
+"CONSBL    ","NCRAlg19  ", 195,"Y"," ",1
+"CONSBL    ","NCRAlg20  ", 196,"Y"," ",1
+"CONSBL    ","NCRAlg21  ", 197,"Y"," ",1
+"CONSBL    ","NCRAlg22  ", 198,"Y"," ",1
+"CONSBL    ","NCRAlg23  ", 199,"Y"," ",1
+"CONSBL    ","NCRAlg24  ", 200,"Y"," ",1
+"CONSBL    ","NCRAlg25  ", 201,"Y"," ",1
+"CONSBL    ","NCRAlg26  ", 202,"Y"," ",1
+"CONSBL    ","NCRAlg27  ", 203,"Y"," ",1
+"CONSBL    ","NCRAlg28  ", 204,"Y"," ",1
+"CONSBL    ","NCRAlg29  ", 205,"Y"," ",1
+"CONSBL    ","NCRAlg30  ", 206,"Y"," ",1
+"CONSBL    ","PCRatGreen", 207,"Y"," ",1
+"CONSBL    ","PCRatDiat ", 208,"Y"," ",1
+"CONSBL    ","MPB1PCrat ", 209,"Y","x",1
+"CONSBL    ","MPB2PCrat ", 210,"Y","x",1
+"CONSBL    ","PCRAlg01  ", 211,"Y"," ",1
+"CONSBL    ","PCRAlg02  ", 212,"Y"," ",1
+"CONSBL    ","PCRAlg03  ", 213,"Y"," ",1
+"CONSBL    ","PCRAlg04  ", 214,"Y"," ",1
+"CONSBL    ","PCRAlg05  ", 215,"Y"," ",1
+"CONSBL    ","PCRAlg06  ", 216,"Y"," ",1
+"CONSBL    ","PCRAlg07  ", 217,"Y"," ",1
+"CONSBL    ","PCRAlg08  ", 218,"Y"," ",1
+"CONSBL    ","PCRAlg09  ", 219,"Y"," ",1
+"CONSBL    ","PCRAlg10  ", 220,"Y"," ",1
+"CONSBL    ","PCRAlg11  ", 221,"Y"," ",1
+"CONSBL    ","PCRAlg12  ", 222,"Y"," ",1
+"CONSBL    ","PCRAlg13  ", 223,"Y"," ",1
+"CONSBL    ","PCRAlg14  ", 224,"Y"," ",1
+"CONSBL    ","PCRAlg15  ", 225,"Y"," ",1
+"CONSBL    ","PCRAlg16  ", 226,"Y"," ",1
+"CONSBL    ","PCRAlg17  ", 227,"Y"," ",1
+"CONSBL    ","PCRAlg18  ", 228,"Y"," ",1
+"CONSBL    ","PCRAlg19  ", 229,"Y"," ",1
+"CONSBL    ","PCRAlg20  ", 230,"Y"," ",1
+"CONSBL    ","PCRAlg21  ", 231,"Y"," ",1
+"CONSBL    ","PCRAlg22  ", 232,"Y"," ",1
+"CONSBL    ","PCRAlg23  ", 233,"Y"," ",1
+"CONSBL    ","PCRAlg24  ", 234,"Y"," ",1
+"CONSBL    ","PCRAlg25  ", 235,"Y"," ",1
+"CONSBL    ","PCRAlg26  ", 236,"Y"," ",1
+"CONSBL    ","PCRAlg27  ", 237,"Y"," ",1
+"CONSBL    ","PCRAlg28  ", 238,"Y"," ",1
+"CONSBL    ","PCRAlg29  ", 239,"Y"," ",1
+"CONSBL    ","PCRAlg30  ", 240,"Y"," ",1
+"CONSBL    ","SCRatGreen", 241,"Y"," ",1
+"CONSBL    ","SCRatDiat ", 242,"Y"," ",1
+"CONSBL    ","MPB1SiCrat", 243,"Y","x",1
+"CONSBL    ","MPB2SiCrat", 244,"Y","x",1
+"CONSBL    ","SCRAlg01  ", 245,"Y"," ",1
+"CONSBL    ","SCRAlg02  ", 246,"Y"," ",1
+"CONSBL    ","SCRAlg03  ", 247,"Y"," ",1
+"CONSBL    ","SCRAlg04  ", 248,"Y"," ",1
+"CONSBL    ","SCRAlg05  ", 249,"Y"," ",1
+"CONSBL    ","SCRAlg06  ", 250,"Y"," ",1
+"CONSBL    ","SCRAlg07  ", 251,"Y"," ",1
+"CONSBL    ","SCRAlg08  ", 252,"Y"," ",1
+"CONSBL    ","SCRAlg09  ", 253,"Y"," ",1
+"CONSBL    ","SCRAlg10  ", 254,"Y"," ",1
+"CONSBL    ","SCRAlg11  ", 255,"Y"," ",1
+"CONSBL    ","SCRAlg12  ", 256,"Y"," ",1
+"CONSBL    ","SCRAlg13  ", 257,"Y"," ",1
+"CONSBL    ","SCRAlg14  ", 258,"Y"," ",1
+"CONSBL    ","SCRAlg15  ", 259,"Y"," ",1
+"CONSBL    ","SCRAlg16  ", 260,"Y"," ",1
+"CONSBL    ","SCRAlg17  ", 261,"Y"," ",1
+"CONSBL    ","SCRAlg18  ", 262,"Y"," ",1
+"CONSBL    ","SCRAlg19  ", 263,"Y"," ",1
+"CONSBL    ","SCRAlg20  ", 264,"Y"," ",1
+"CONSBL    ","SCRAlg21  ", 265,"Y"," ",1
+"CONSBL    ","SCRAlg22  ", 266,"Y"," ",1
+"CONSBL    ","SCRAlg23  ", 267,"Y"," ",1
+"CONSBL    ","SCRAlg24  ", 268,"Y"," ",1
+"CONSBL    ","SCRAlg25  ", 269,"Y"," ",1
+"CONSBL    ","SCRAlg26  ", 270,"Y"," ",1
+"CONSBL    ","SCRAlg27  ", 271,"Y"," ",1
+"CONSBL    ","SCRAlg28  ", 272,"Y"," ",1
+"CONSBL    ","SCRAlg29  ", 273,"Y"," ",1
+"CONSBL    ","SCRAlg30  ", 274,"Y"," ",1
+"CONSBL    ","ZALGPRGrn ", 275,"Y"," ",1
+"CONSBL    ","ZALGPRDiat", 276,"Y"," ",1
+"CONSBL    ","ZALGPRPeli", 277,"Y"," ",1
+"CONSBL    ","ZALGPRPsam", 278,"Y"," ",1
+"CONSBL    ","ZALGPR01  ", 279,"Y"," ",1
+"CONSBL    ","ZALGPR02  ", 280,"Y"," ",1
+"CONSBL    ","ZALGPR03  ", 281,"Y"," ",1
+"CONSBL    ","ZALGPR04  ", 282,"Y"," ",1
+"CONSBL    ","ZALGPR05  ", 283,"Y"," ",1
+"CONSBL    ","ZALGPR06  ", 284,"Y"," ",1
+"CONSBL    ","ZALGPR07  ", 285,"Y"," ",1
+"CONSBL    ","ZALGPR08  ", 286,"Y"," ",1
+"CONSBL    ","ZALGPR09  ", 287,"Y"," ",1
+"CONSBL    ","ZALGPR10  ", 288,"Y"," ",1
+"CONSBL    ","ZALGPR11  ", 289,"Y"," ",1
+"CONSBL    ","ZALGPR12  ", 290,"Y"," ",1
+"CONSBL    ","ZALGPR13  ", 291,"Y"," ",1
+"CONSBL    ","ZALGPR14  ", 292,"Y"," ",1
+"CONSBL    ","ZALGPR15  ", 293,"Y"," ",1
+"CONSBL    ","ZALGPR16  ", 294,"Y"," ",1
+"CONSBL    ","ZALGPR17  ", 295,"Y"," ",1
+"CONSBL    ","ZALGPR18  ", 296,"Y"," ",1
+"CONSBL    ","ZALGPR19  ", 297,"Y"," ",1
+"CONSBL    ","ZALGPR20  ", 298,"Y"," ",1
+"CONSBL    ","ZALGPR21  ", 299,"Y"," ",1
+"CONSBL    ","ZALGPR22  ", 300,"Y"," ",1
+"CONSBL    ","ZALGPR23  ", 301,"Y"," ",1
+"CONSBL    ","ZALGPR24  ", 302,"Y"," ",1
+"CONSBL    ","ZALGPR25  ", 303,"Y"," ",1
+"CONSBL    ","ZALGPR26  ", 304,"Y"," ",1
+"CONSBL    ","ZALGPR27  ", 305,"Y"," ",1
+"CONSBL    ","ZALGPR28  ", 306,"Y"," ",1
+"CONSBL    ","ZALGPR29  ", 307,"Y"," ",1
+"CONSBL    ","ZALGPR30  ", 308,"Y"," ",1
+"CONSBL    ","MALGPRGrn ", 309,"Y"," ",1
+"CONSBL    ","MALGPRDiat", 310,"Y"," ",1
+"CONSBL    ","MALGPRPeli", 311,"Y"," ",1
+"CONSBL    ","MALGPRPsam", 312,"Y"," ",1
+"CONSBL    ","MALGPR01  ", 313,"Y"," ",1
+"CONSBL    ","MALGPR02  ", 314,"Y"," ",1
+"CONSBL    ","MALGPR03  ", 315,"Y"," ",1
+"CONSBL    ","MALGPR04  ", 316,"Y"," ",1
+"CONSBL    ","MALGPR05  ", 317,"Y"," ",1
+"CONSBL    ","MALGPR06  ", 318,"Y"," ",1
+"CONSBL    ","MALGPR07  ", 319,"Y"," ",1
+"CONSBL    ","MALGPR08  ", 320,"Y"," ",1
+"CONSBL    ","MALGPR09  ", 321,"Y"," ",1
+"CONSBL    ","MALGPR10  ", 322,"Y"," ",1
+"CONSBL    ","MALGPR11  ", 323,"Y"," ",1
+"CONSBL    ","MALGPR12  ", 324,"Y"," ",1
+"CONSBL    ","MALGPR13  ", 325,"Y"," ",1
+"CONSBL    ","MALGPR14  ", 326,"Y"," ",1
+"CONSBL    ","MALGPR15  ", 327,"Y"," ",1
+"CONSBL    ","MALGPR16  ", 328,"Y"," ",1
+"CONSBL    ","MALGPR17  ", 329,"Y"," ",1
+"CONSBL    ","MALGPR18  ", 330,"Y"," ",1
+"CONSBL    ","MALGPR19  ", 331,"Y"," ",1
+"CONSBL    ","MALGPR20  ", 332,"Y"," ",1
+"CONSBL    ","MALGPR21  ", 333,"Y"," ",1
+"CONSBL    ","MALGPR22  ", 334,"Y"," ",1
+"CONSBL    ","MALGPR23  ", 335,"Y"," ",1
+"CONSBL    ","MALGPR24  ", 336,"Y"," ",1
+"CONSBL    ","MALGPR25  ", 337,"Y"," ",1
+"CONSBL    ","MALGPR26  ", 338,"Y"," ",1
+"CONSBL    ","MALGPR27  ", 339,"Y"," ",1
+"CONSBL    ","MALGPR28  ", 340,"Y"," ",1
+"CONSBL    ","MALGPR29  ", 341,"Y"," ",1
+"CONSBL    ","MALGPR30  ", 342,"Y"," ",1
+"CONSBL    ","G3ALGPRGrn", 343,"Y"," ",1
+"CONSBL    ","G3ALGPRDia", 344,"Y"," ",1
+"CONSBL    ","G3ALGPRPel", 345,"Y"," ",1
+"CONSBL    ","G3ALGPRPsa", 346,"Y"," ",1
+"CONSBL    ","G3ALGPR01 ", 347,"Y"," ",1
+"CONSBL    ","G3ALGPR02 ", 348,"Y"," ",1
+"CONSBL    ","G3ALGPR03 ", 349,"Y"," ",1
+"CONSBL    ","G3ALGPR04 ", 350,"Y"," ",1
+"CONSBL    ","G3ALGPR05 ", 351,"Y"," ",1
+"CONSBL    ","G3ALGPR06 ", 352,"Y"," ",1
+"CONSBL    ","G3ALGPR07 ", 353,"Y"," ",1
+"CONSBL    ","G3ALGPR08 ", 354,"Y"," ",1
+"CONSBL    ","G3ALGPR09 ", 355,"Y"," ",1
+"CONSBL    ","G3ALGPR10 ", 356,"Y"," ",1
+"CONSBL    ","G3ALGPR11 ", 357,"Y"," ",1
+"CONSBL    ","G3ALGPR12 ", 358,"Y"," ",1
+"CONSBL    ","G3ALGPR13 ", 359,"Y"," ",1
+"CONSBL    ","G3ALGPR14 ", 360,"Y"," ",1
+"CONSBL    ","G3ALGPR15 ", 361,"Y"," ",1
+"CONSBL    ","G3ALGPR16 ", 362,"Y"," ",1
+"CONSBL    ","G3ALGPR17 ", 363,"Y"," ",1
+"CONSBL    ","G3ALGPR18 ", 364,"Y"," ",1
+"CONSBL    ","G3ALGPR19 ", 365,"Y"," ",1
+"CONSBL    ","G3ALGPR20 ", 366,"Y"," ",1
+"CONSBL    ","G3ALGPR21 ", 367,"Y"," ",1
+"CONSBL    ","G3ALGPR22 ", 368,"Y"," ",1
+"CONSBL    ","G3ALGPR23 ", 369,"Y"," ",1
+"CONSBL    ","G3ALGPR24 ", 370,"Y"," ",1
+"CONSBL    ","G3ALGPR25 ", 371,"Y"," ",1
+"CONSBL    ","G3ALGPR26 ", 372,"Y"," ",1
+"CONSBL    ","G3ALGPR27 ", 373,"Y"," ",1
+"CONSBL    ","G3ALGPR28 ", 374,"Y"," ",1
+"CONSBL    ","G3ALGPR29 ", 375,"Y"," ",1
+"CONSBL    ","G3ALGPR30 ", 376,"Y"," ",1
+"CONSBL    ","G4ALGPRGrn", 377,"Y"," ",1
+"CONSBL    ","G4ALGPRDia", 378,"Y"," ",1
+"CONSBL    ","G4ALGPRPel", 379,"Y"," ",1
+"CONSBL    ","G4ALGPRPsa", 380,"Y"," ",1
+"CONSBL    ","G4ALGPR01 ", 381,"Y"," ",1
+"CONSBL    ","G4ALGPR02 ", 382,"Y"," ",1
+"CONSBL    ","G4ALGPR03 ", 383,"Y"," ",1
+"CONSBL    ","G4ALGPR04 ", 384,"Y"," ",1
+"CONSBL    ","G4ALGPR05 ", 385,"Y"," ",1
+"CONSBL    ","G4ALGPR06 ", 386,"Y"," ",1
+"CONSBL    ","G4ALGPR07 ", 387,"Y"," ",1
+"CONSBL    ","G4ALGPR08 ", 388,"Y"," ",1
+"CONSBL    ","G4ALGPR09 ", 389,"Y"," ",1
+"CONSBL    ","G4ALGPR10 ", 390,"Y"," ",1
+"CONSBL    ","G4ALGPR11 ", 391,"Y"," ",1
+"CONSBL    ","G4ALGPR12 ", 392,"Y"," ",1
+"CONSBL    ","G4ALGPR13 ", 393,"Y"," ",1
+"CONSBL    ","G4ALGPR14 ", 394,"Y"," ",1
+"CONSBL    ","G4ALGPR15 ", 395,"Y"," ",1
+"CONSBL    ","G4ALGPR16 ", 396,"Y"," ",1
+"CONSBL    ","G4ALGPR17 ", 397,"Y"," ",1
+"CONSBL    ","G4ALGPR18 ", 398,"Y"," ",1
+"CONSBL    ","G4ALGPR19 ", 399,"Y"," ",1
+"CONSBL    ","G4ALGPR20 ", 400,"Y"," ",1
+"CONSBL    ","G4ALGPR21 ", 401,"Y"," ",1
+"CONSBL    ","G4ALGPR22 ", 402,"Y"," ",1
+"CONSBL    ","G4ALGPR23 ", 403,"Y"," ",1
+"CONSBL    ","G4ALGPR24 ", 404,"Y"," ",1
+"CONSBL    ","G4ALGPR25 ", 405,"Y"," ",1
+"CONSBL    ","G4ALGPR26 ", 406,"Y"," ",1
+"CONSBL    ","G4ALGPR27 ", 407,"Y"," ",1
+"CONSBL    ","G4ALGPR28 ", 408,"Y"," ",1
+"CONSBL    ","G4ALGPR29 ", 409,"Y"," ",1
+"CONSBL    ","G4ALGPR30 ", 410,"Y"," ",1
+"CONSBL    ","G5ALGPRGrn", 411,"Y"," ",1
+"CONSBL    ","G5ALGPRDia", 412,"Y"," ",1
+"CONSBL    ","G5ALGPRPel", 413,"Y"," ",1
+"CONSBL    ","G5ALGPRPsa", 414,"Y"," ",1
+"CONSBL    ","G5ALGPR01 ", 415,"Y"," ",1
+"CONSBL    ","G5ALGPR02 ", 416,"Y"," ",1
+"CONSBL    ","G5ALGPR03 ", 417,"Y"," ",1
+"CONSBL    ","G5ALGPR04 ", 418,"Y"," ",1
+"CONSBL    ","G5ALGPR05 ", 419,"Y"," ",1
+"CONSBL    ","G5ALGPR06 ", 420,"Y"," ",1
+"CONSBL    ","G5ALGPR07 ", 421,"Y"," ",1
+"CONSBL    ","G5ALGPR08 ", 422,"Y"," ",1
+"CONSBL    ","G5ALGPR09 ", 423,"Y"," ",1
+"CONSBL    ","G5ALGPR10 ", 424,"Y"," ",1
+"CONSBL    ","G5ALGPR11 ", 425,"Y"," ",1
+"CONSBL    ","G5ALGPR12 ", 426,"Y"," ",1
+"CONSBL    ","G5ALGPR13 ", 427,"Y"," ",1
+"CONSBL    ","G5ALGPR14 ", 428,"Y"," ",1
+"CONSBL    ","G5ALGPR15 ", 429,"Y"," ",1
+"CONSBL    ","G5ALGPR16 ", 430,"Y"," ",1
+"CONSBL    ","G5ALGPR17 ", 431,"Y"," ",1
+"CONSBL    ","G5ALGPR18 ", 432,"Y"," ",1
+"CONSBL    ","G5ALGPR19 ", 433,"Y"," ",1
+"CONSBL    ","G5ALGPR20 ", 434,"Y"," ",1
+"CONSBL    ","G5ALGPR21 ", 435,"Y"," ",1
+"CONSBL    ","G5ALGPR22 ", 436,"Y"," ",1
+"CONSBL    ","G5ALGPR23 ", 437,"Y"," ",1
+"CONSBL    ","G5ALGPR24 ", 438,"Y"," ",1
+"CONSBL    ","G5ALGPR25 ", 439,"Y"," ",1
+"CONSBL    ","G5ALGPR26 ", 440,"Y"," ",1
+"CONSBL    ","G5ALGPR27 ", 441,"Y"," ",1
+"CONSBL    ","G5ALGPR28 ", 442,"Y"," ",1
+"CONSBL    ","G5ALGPR29 ", 443,"Y"," ",1
+"CONSBL    ","G5ALGPR30 ", 444,"Y"," ",1
+"CONSBL    ","ZALGFFGrn ", 445,"Y"," ",1
+"CONSBL    ","ZALGFFDiat", 446,"Y"," ",1
+"CONSBL    ","ZALGFFPeli", 447,"Y"," ",1
+"CONSBL    ","ZALGFFPsam", 448,"Y"," ",1
+"CONSBL    ","ZALGFF01  ", 449,"Y"," ",1
+"CONSBL    ","ZALGFF02  ", 450,"Y"," ",1
+"CONSBL    ","ZALGFF03  ", 451,"Y"," ",1
+"CONSBL    ","ZALGFF04  ", 452,"Y"," ",1
+"CONSBL    ","ZALGFF05  ", 453,"Y"," ",1
+"CONSBL    ","ZALGFF06  ", 454,"Y"," ",1
+"CONSBL    ","ZALGFF07  ", 455,"Y"," ",1
+"CONSBL    ","ZALGFF08  ", 456,"Y"," ",1
+"CONSBL    ","ZALGFF09  ", 457,"Y"," ",1
+"CONSBL    ","ZALGFF10  ", 458,"Y"," ",1
+"CONSBL    ","ZALGFF11  ", 459,"Y"," ",1
+"CONSBL    ","ZALGFF12  ", 460,"Y"," ",1
+"CONSBL    ","ZALGFF13  ", 461,"Y"," ",1
+"CONSBL    ","ZALGFF14  ", 462,"Y"," ",1
+"CONSBL    ","ZALGFF15  ", 463,"Y"," ",1
+"CONSBL    ","ZALGFF16  ", 464,"Y"," ",1
+"CONSBL    ","ZALGFF17  ", 465,"Y"," ",1
+"CONSBL    ","ZALGFF18  ", 466,"Y"," ",1
+"CONSBL    ","ZALGFF19  ", 467,"Y"," ",1
+"CONSBL    ","ZALGFF20  ", 468,"Y"," ",1
+"CONSBL    ","ZALGFF21  ", 469,"Y"," ",1
+"CONSBL    ","ZALGFF22  ", 470,"Y"," ",1
+"CONSBL    ","ZALGFF23  ", 471,"Y"," ",1
+"CONSBL    ","ZALGFF24  ", 472,"Y"," ",1
+"CONSBL    ","ZALGFF25  ", 473,"Y"," ",1
+"CONSBL    ","ZALGFF26  ", 474,"Y"," ",1
+"CONSBL    ","ZALGFF27  ", 475,"Y"," ",1
+"CONSBL    ","ZALGFF28  ", 476,"Y"," ",1
+"CONSBL    ","ZALGFF29  ", 477,"Y"," ",1
+"CONSBL    ","ZALGFF30  ", 478,"Y"," ",1
+"CONSBL    ","MALGFFGrn ", 479,"Y"," ",1
+"CONSBL    ","MALGFFDiat", 480,"Y"," ",1
+"CONSBL    ","MALGFFPeli", 481,"Y"," ",1
+"CONSBL    ","MALGFFPsam", 482,"Y"," ",1
+"CONSBL    ","MALGFF01  ", 483,"Y"," ",1
+"CONSBL    ","MALGFF02  ", 484,"Y"," ",1
+"CONSBL    ","MALGFF03  ", 485,"Y"," ",1
+"CONSBL    ","MALGFF04  ", 486,"Y"," ",1
+"CONSBL    ","MALGFF05  ", 487,"Y"," ",1
+"CONSBL    ","MALGFF06  ", 488,"Y"," ",1
+"CONSBL    ","MALGFF07  ", 489,"Y"," ",1
+"CONSBL    ","MALGFF08  ", 490,"Y"," ",1
+"CONSBL    ","MALGFF09  ", 491,"Y"," ",1
+"CONSBL    ","MALGFF10  ", 492,"Y"," ",1
+"CONSBL    ","MALGFF11  ", 493,"Y"," ",1
+"CONSBL    ","MALGFF12  ", 494,"Y"," ",1
+"CONSBL    ","MALGFF13  ", 495,"Y"," ",1
+"CONSBL    ","MALGFF14  ", 496,"Y"," ",1
+"CONSBL    ","MALGFF15  ", 497,"Y"," ",1
+"CONSBL    ","MALGFF16  ", 498,"Y"," ",1
+"CONSBL    ","MALGFF17  ", 499,"Y"," ",1
+"CONSBL    ","MALGFF18  ", 500,"Y"," ",1
+"CONSBL    ","MALGFF19  ", 501,"Y"," ",1
+"CONSBL    ","MALGFF20  ", 502,"Y"," ",1
+"CONSBL    ","MALGFF21  ", 503,"Y"," ",1
+"CONSBL    ","MALGFF22  ", 504,"Y"," ",1
+"CONSBL    ","MALGFF23  ", 505,"Y"," ",1
+"CONSBL    ","MALGFF24  ", 506,"Y"," ",1
+"CONSBL    ","MALGFF25  ", 507,"Y"," ",1
+"CONSBL    ","MALGFF26  ", 508,"Y"," ",1
+"CONSBL    ","MALGFF27  ", 509,"Y"," ",1
+"CONSBL    ","MALGFF28  ", 510,"Y"," ",1
+"CONSBL    ","MALGFF29  ", 511,"Y"," ",1
+"CONSBL    ","MALGFF30  ", 512,"Y"," ",1
+"CONSBL    ","G3ALGFFGrn", 513,"Y"," ",1
+"CONSBL    ","G3ALGFFDia", 514,"Y"," ",1
+"CONSBL    ","G3ALGFFPel", 515,"Y"," ",1
+"CONSBL    ","G3ALGFFPsa", 516,"Y"," ",1
+"CONSBL    ","G3ALGFF01 ", 517,"Y"," ",1
+"CONSBL    ","G3ALGFF02 ", 518,"Y"," ",1
+"CONSBL    ","G3ALGFF03 ", 519,"Y"," ",1
+"CONSBL    ","G3ALGFF04 ", 520,"Y"," ",1
+"CONSBL    ","G3ALGFF05 ", 521,"Y"," ",1
+"CONSBL    ","G3ALGFF06 ", 522,"Y"," ",1
+"CONSBL    ","G3ALGFF07 ", 523,"Y"," ",1
+"CONSBL    ","G3ALGFF08 ", 524,"Y"," ",1
+"CONSBL    ","G3ALGFF09 ", 525,"Y"," ",1
+"CONSBL    ","G3ALGFF10 ", 526,"Y"," ",1
+"CONSBL    ","G3ALGFF11 ", 527,"Y"," ",1
+"CONSBL    ","G3ALGFF12 ", 528,"Y"," ",1
+"CONSBL    ","G3ALGFF13 ", 529,"Y"," ",1
+"CONSBL    ","G3ALGFF14 ", 530,"Y"," ",1
+"CONSBL    ","G3ALGFF15 ", 531,"Y"," ",1
+"CONSBL    ","G3ALGFF16 ", 532,"Y"," ",1
+"CONSBL    ","G3ALGFF17 ", 533,"Y"," ",1
+"CONSBL    ","G3ALGFF18 ", 534,"Y"," ",1
+"CONSBL    ","G3ALGFF19 ", 535,"Y"," ",1
+"CONSBL    ","G3ALGFF20 ", 536,"Y"," ",1
+"CONSBL    ","G3ALGFF21 ", 537,"Y"," ",1
+"CONSBL    ","G3ALGFF22 ", 538,"Y"," ",1
+"CONSBL    ","G3ALGFF23 ", 539,"Y"," ",1
+"CONSBL    ","G3ALGFF24 ", 540,"Y"," ",1
+"CONSBL    ","G3ALGFF25 ", 541,"Y"," ",1
+"CONSBL    ","G3ALGFF26 ", 542,"Y"," ",1
+"CONSBL    ","G3ALGFF27 ", 543,"Y"," ",1
+"CONSBL    ","G3ALGFF28 ", 544,"Y"," ",1
+"CONSBL    ","G3ALGFF29 ", 545,"Y"," ",1
+"CONSBL    ","G3ALGFF30 ", 546,"Y"," ",1
+"CONSBL    ","G4ALGFFGrn", 547,"Y"," ",1
+"CONSBL    ","G4ALGFFDia", 548,"Y"," ",1
+"CONSBL    ","G4ALGFFPel", 549,"Y"," ",1
+"CONSBL    ","G4ALGFFPsa", 550,"Y"," ",1
+"CONSBL    ","G4ALGFF01 ", 551,"Y"," ",1
+"CONSBL    ","G4ALGFF02 ", 552,"Y"," ",1
+"CONSBL    ","G4ALGFF03 ", 553,"Y"," ",1
+"CONSBL    ","G4ALGFF04 ", 554,"Y"," ",1
+"CONSBL    ","G4ALGFF05 ", 555,"Y"," ",1
+"CONSBL    ","G4ALGFF06 ", 556,"Y"," ",1
+"CONSBL    ","G4ALGFF07 ", 557,"Y"," ",1
+"CONSBL    ","G4ALGFF08 ", 558,"Y"," ",1
+"CONSBL    ","G4ALGFF09 ", 559,"Y"," ",1
+"CONSBL    ","G4ALGFF10 ", 560,"Y"," ",1
+"CONSBL    ","G4ALGFF11 ", 561,"Y"," ",1
+"CONSBL    ","G4ALGFF12 ", 562,"Y"," ",1
+"CONSBL    ","G4ALGFF13 ", 563,"Y"," ",1
+"CONSBL    ","G4ALGFF14 ", 564,"Y"," ",1
+"CONSBL    ","G4ALGFF15 ", 565,"Y"," ",1
+"CONSBL    ","G4ALGFF16 ", 566,"Y"," ",1
+"CONSBL    ","G4ALGFF17 ", 567,"Y"," ",1
+"CONSBL    ","G4ALGFF18 ", 568,"Y"," ",1
+"CONSBL    ","G4ALGFF19 ", 569,"Y"," ",1
+"CONSBL    ","G4ALGFF20 ", 570,"Y"," ",1
+"CONSBL    ","G4ALGFF21 ", 571,"Y"," ",1
+"CONSBL    ","G4ALGFF22 ", 572,"Y"," ",1
+"CONSBL    ","G4ALGFF23 ", 573,"Y"," ",1
+"CONSBL    ","G4ALGFF24 ", 574,"Y"," ",1
+"CONSBL    ","G4ALGFF25 ", 575,"Y"," ",1
+"CONSBL    ","G4ALGFF26 ", 576,"Y"," ",1
+"CONSBL    ","G4ALGFF27 ", 577,"Y"," ",1
+"CONSBL    ","G4ALGFF28 ", 578,"Y"," ",1
+"CONSBL    ","G4ALGFF29 ", 579,"Y"," ",1
+"CONSBL    ","G4ALGFF30 ", 580,"Y"," ",1
+"CONSBL    ","G5ALGFFGrn", 581,"Y"," ",1
+"CONSBL    ","G5ALGFFDia", 582,"Y"," ",1
+"CONSBL    ","G5ALGFFPel", 583,"Y"," ",1
+"CONSBL    ","G5ALGFFPsa", 584,"Y"," ",1
+"CONSBL    ","G5ALGFF01 ", 585,"Y"," ",1
+"CONSBL    ","G5ALGFF02 ", 586,"Y"," ",1
+"CONSBL    ","G5ALGFF03 ", 587,"Y"," ",1
+"CONSBL    ","G5ALGFF04 ", 588,"Y"," ",1
+"CONSBL    ","G5ALGFF05 ", 589,"Y"," ",1
+"CONSBL    ","G5ALGFF06 ", 590,"Y"," ",1
+"CONSBL    ","G5ALGFF07 ", 591,"Y"," ",1
+"CONSBL    ","G5ALGFF08 ", 592,"Y"," ",1
+"CONSBL    ","G5ALGFF09 ", 593,"Y"," ",1
+"CONSBL    ","G5ALGFF10 ", 594,"Y"," ",1
+"CONSBL    ","G5ALGFF11 ", 595,"Y"," ",1
+"CONSBL    ","G5ALGFF12 ", 596,"Y"," ",1
+"CONSBL    ","G5ALGFF13 ", 597,"Y"," ",1
+"CONSBL    ","G5ALGFF14 ", 598,"Y"," ",1
+"CONSBL    ","G5ALGFF15 ", 599,"Y"," ",1
+"CONSBL    ","G5ALGFF16 ", 600,"Y"," ",1
+"CONSBL    ","G5ALGFF17 ", 601,"Y"," ",1
+"CONSBL    ","G5ALGFF18 ", 602,"Y"," ",1
+"CONSBL    ","G5ALGFF19 ", 603,"Y"," ",1
+"CONSBL    ","G5ALGFF20 ", 604,"Y"," ",1
+"CONSBL    ","G5ALGFF21 ", 605,"Y"," ",1
+"CONSBL    ","G5ALGFF22 ", 606,"Y"," ",1
+"CONSBL    ","G5ALGFF23 ", 607,"Y"," ",1
+"CONSBL    ","G5ALGFF24 ", 608,"Y"," ",1
+"CONSBL    ","G5ALGFF25 ", 609,"Y"," ",1
+"CONSBL    ","G5ALGFF26 ", 610,"Y"," ",1
+"CONSBL    ","G5ALGFF27 ", 611,"Y"," ",1
+"CONSBL    ","G5ALGFF28 ", 612,"Y"," ",1
+"CONSBL    ","G5ALGFF29 ", 613,"Y"," ",1
+"CONSBL    ","G5ALGFF30 ", 614,"Y"," ",1
 "SwOXYParWK","OXY       ",   1,"N","x",1
 "SwOXYParWK","COXPart   ",   2,"Y","x",1
 "SwOXYParWK","Poros     ",   3,"Y","x",1
@@ -13464,8 +13492,8 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "DEBGRZ_M  ","BLOOMALG28",  99,"B"," ",1
 "DEBGRZ_M  ","BLOOMALG29", 100,"B"," ",1
 "DEBGRZ_M  ","BLOOMALG30", 101,"B"," ",1
-"DEBGRZ_M  ","F1        ", 102,"Y"," ",1
-"DEBGRZ_M  ","F2        ", 103,"Y"," ",1
+"DEBGRZ_M  ","MPB1peli  ", 102,"Y","x",1
+"DEBGRZ_M  ","MPB2psam  ", 103,"Y","x",1
 "DEBGRZ_M  ","F3        ", 104,"Y"," ",1
 "DEBGRZ_M  ","F4        ", 105,"Y"," ",1
 "DEBGRZ_M  ","F5        ", 106,"Y"," ",1
@@ -13504,8 +13532,8 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "DEBGRZ_M  ","NCRAlg28  ", 139,"Y"," ",1
 "DEBGRZ_M  ","NCRAlg29  ", 140,"Y"," ",1
 "DEBGRZ_M  ","NCRAlg30  ", 141,"Y"," ",1
-"DEBGRZ_M  ","NCRatF1   ", 142,"Y"," ",1
-"DEBGRZ_M  ","NCRatF2   ", 143,"Y"," ",1
+"DEBGRZ_M  ","MPB1NCrat ", 142,"Y"," ",1
+"DEBGRZ_M  ","MPB2NCrat ", 143,"Y"," ",1
 "DEBGRZ_M  ","NCRatF3   ", 144,"Y"," ",1
 "DEBGRZ_M  ","NCRatF4   ", 145,"Y"," ",1
 "DEBGRZ_M  ","NCRatF5   ", 146,"Y"," ",1
@@ -13544,8 +13572,8 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "DEBGRZ_M  ","PCRAlg28  ", 179,"Y"," ",1
 "DEBGRZ_M  ","PCRAlg29  ", 180,"Y"," ",1
 "DEBGRZ_M  ","PCRAlg30  ", 181,"Y"," ",1
-"DEBGRZ_M  ","PCRatF1   ", 182,"Y"," ",1
-"DEBGRZ_M  ","PCRatF2   ", 183,"Y"," ",1
+"DEBGRZ_M  ","MPB1PCrat ", 182,"Y"," ",1
+"DEBGRZ_M  ","MPB2PCrat ", 183,"Y"," ",1
 "DEBGRZ_M  ","PCRatF3   ", 184,"Y"," ",1
 "DEBGRZ_M  ","PCRatF4   ", 185,"Y"," ",1
 "DEBGRZ_M  ","PCRatF5   ", 186,"Y"," ",1
@@ -13584,8 +13612,8 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "DEBGRZ_M  ","SCRAlg28  ", 219,"Y"," ",1
 "DEBGRZ_M  ","SCRAlg29  ", 220,"Y"," ",1
 "DEBGRZ_M  ","SCRAlg30  ", 221,"Y"," ",1
-"DEBGRZ_M  ","SCRatF1   ", 222,"Y"," ",1
-"DEBGRZ_M  ","SCRatF2   ", 223,"Y"," ",1
+"DEBGRZ_M  ","MPB1SiCrat", 222,"Y"," ",1
+"DEBGRZ_M  ","MPB2SiCrat", 223,"Y"," ",1
 "DEBGRZ_M  ","SCRatF3   ", 224,"Y"," ",1
 "DEBGRZ_M  ","SCRatF4   ", 225,"Y"," ",1
 "DEBGRZ_M  ","SCRatF5   ", 226,"Y"," ",1
@@ -13624,8 +13652,8 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "DEBGRZ_M  ","M_PrAlg28 ", 259,"Y"," ",1
 "DEBGRZ_M  ","M_PrAlg29 ", 260,"Y"," ",1
 "DEBGRZ_M  ","M_PrAlg30 ", 261,"Y"," ",1
-"DEBGRZ_M  ","M_Pr1     ", 262,"Y"," ",1
-"DEBGRZ_M  ","M_Pr2     ", 263,"Y"," ",1
+"DEBGRZ_M  ","M_PrMPB1  ", 262,"Y"," ",1
+"DEBGRZ_M  ","M_PrMPB2  ", 263,"Y"," ",1
 "DEBGRZ_M  ","M_Pr3     ", 264,"Y"," ",1
 "DEBGRZ_M  ","M_Pr4     ", 265,"Y"," ",1
 "DEBGRZ_M  ","M_Pr5     ", 266,"Y"," ",1
@@ -13664,8 +13692,8 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "DEBGRZ_M  ","BenAlg28  ", 299,"Y"," ",1
 "DEBGRZ_M  ","BenAlg29  ", 300,"Y"," ",1
 "DEBGRZ_M  ","BenAlg30  ", 301,"Y"," ",1
-"DEBGRZ_M  ","Ben1      ", 302,"Y"," ",1
-"DEBGRZ_M  ","Ben2      ", 303,"Y"," ",1
+"DEBGRZ_M  ","BenMPB1   ", 302,"Y"," ",1
+"DEBGRZ_M  ","BenMPB2   ", 303,"Y"," ",1
 "DEBGRZ_M  ","Ben3      ", 304,"Y"," ",1
 "DEBGRZ_M  ","Ben4      ", 305,"Y"," ",1
 "DEBGRZ_M  ","Ben5      ", 306,"Y"," ",1
@@ -13704,8 +13732,8 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "DEBGRZ_M  ","M_ALGFF28 ", 339,"Y"," ",1
 "DEBGRZ_M  ","M_ALGFF29 ", 340,"Y"," ",1
 "DEBGRZ_M  ","M_ALGFF30 ", 341,"Y"," ",1
-"DEBGRZ_M  ","M_FF01    ", 342,"Y"," ",1
-"DEBGRZ_M  ","M_FF02    ", 343,"Y"," ",1
+"DEBGRZ_M  ","M_FFMPB1  ", 342,"Y"," ",1
+"DEBGRZ_M  ","M_FFMPB2  ", 343,"Y"," ",1
 "DEBGRZ_M  ","M_FF03    ", 344,"Y"," ",1
 "DEBGRZ_M  ","M_FF04    ", 345,"Y"," ",1
 "DEBGRZ_M  ","M_FF05    ", 346,"Y"," ",1
@@ -13813,8 +13841,8 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "DEBGRZ_Z  ","BLOOMALG28",  99,"B"," ",1
 "DEBGRZ_Z  ","BLOOMALG29", 100,"B"," ",1
 "DEBGRZ_Z  ","BLOOMALG30", 101,"B"," ",1
-"DEBGRZ_Z  ","F1        ", 102,"Y"," ",1
-"DEBGRZ_Z  ","F2        ", 103,"Y"," ",1
+"DEBGRZ_Z  ","MPB1peli  ", 102,"Y","x",1
+"DEBGRZ_Z  ","MPB2psam  ", 103,"Y","x",1
 "DEBGRZ_Z  ","F3        ", 104,"Y"," ",1
 "DEBGRZ_Z  ","F4        ", 105,"Y"," ",1
 "DEBGRZ_Z  ","F5        ", 106,"Y"," ",1
@@ -13853,8 +13881,8 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "DEBGRZ_Z  ","NCRAlg28  ", 139,"Y"," ",1
 "DEBGRZ_Z  ","NCRAlg29  ", 140,"Y"," ",1
 "DEBGRZ_Z  ","NCRAlg30  ", 141,"Y"," ",1
-"DEBGRZ_Z  ","NCRatF1   ", 142,"Y"," ",1
-"DEBGRZ_Z  ","NCRatF2   ", 143,"Y"," ",1
+"DEBGRZ_Z  ","MPB1NCrat ", 142,"Y"," ",1
+"DEBGRZ_Z  ","MPB2NCrat ", 143,"Y"," ",1
 "DEBGRZ_Z  ","NCRatF3   ", 144,"Y"," ",1
 "DEBGRZ_Z  ","NCRatF4   ", 145,"Y"," ",1
 "DEBGRZ_Z  ","NCRatF5   ", 146,"Y"," ",1
@@ -13893,8 +13921,8 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "DEBGRZ_Z  ","PCRAlg28  ", 179,"Y"," ",1
 "DEBGRZ_Z  ","PCRAlg29  ", 180,"Y"," ",1
 "DEBGRZ_Z  ","PCRAlg30  ", 181,"Y"," ",1
-"DEBGRZ_Z  ","PCRatF1   ", 182,"Y"," ",1
-"DEBGRZ_Z  ","PCRatF2   ", 183,"Y"," ",1
+"DEBGRZ_Z  ","MPB1PCrat ", 182,"Y"," ",1
+"DEBGRZ_Z  ","MPB2PCrat ", 183,"Y"," ",1
 "DEBGRZ_Z  ","PCRatF3   ", 184,"Y"," ",1
 "DEBGRZ_Z  ","PCRatF4   ", 185,"Y"," ",1
 "DEBGRZ_Z  ","PCRatF5   ", 186,"Y"," ",1
@@ -13933,8 +13961,8 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "DEBGRZ_Z  ","SCRAlg28  ", 219,"Y"," ",1
 "DEBGRZ_Z  ","SCRAlg29  ", 220,"Y"," ",1
 "DEBGRZ_Z  ","SCRAlg30  ", 221,"Y"," ",1
-"DEBGRZ_Z  ","SCRatF1   ", 222,"Y"," ",1
-"DEBGRZ_Z  ","SCRatF2   ", 223,"Y"," ",1
+"DEBGRZ_Z  ","MPB1SiCrat", 222,"Y"," ",1
+"DEBGRZ_Z  ","MPB2SiCrat", 223,"Y"," ",1
 "DEBGRZ_Z  ","SCRatF3   ", 224,"Y"," ",1
 "DEBGRZ_Z  ","SCRatF4   ", 225,"Y"," ",1
 "DEBGRZ_Z  ","SCRatF5   ", 226,"Y"," ",1
@@ -13973,8 +14001,8 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "DEBGRZ_Z  ","Z_PrAlg28 ", 259,"Y"," ",1
 "DEBGRZ_Z  ","Z_PrAlg29 ", 260,"Y"," ",1
 "DEBGRZ_Z  ","Z_PrAlg30 ", 261,"Y"," ",1
-"DEBGRZ_Z  ","Z_Pr1     ", 262,"Y"," ",1
-"DEBGRZ_Z  ","Z_Pr2     ", 263,"Y"," ",1
+"DEBGRZ_Z  ","Z_PrMPB1  ", 262,"Y"," ",1
+"DEBGRZ_Z  ","Z_PrMPB2  ", 263,"Y"," ",1
 "DEBGRZ_Z  ","Z_Pr3     ", 264,"Y"," ",1
 "DEBGRZ_Z  ","Z_Pr4     ", 265,"Y"," ",1
 "DEBGRZ_Z  ","Z_Pr5     ", 266,"Y"," ",1
@@ -14013,8 +14041,8 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "DEBGRZ_Z  ","BenAlg28  ", 299,"Y"," ",1
 "DEBGRZ_Z  ","BenAlg29  ", 300,"Y"," ",1
 "DEBGRZ_Z  ","BenAlg30  ", 301,"Y"," ",1
-"DEBGRZ_Z  ","Ben1      ", 302,"Y"," ",1
-"DEBGRZ_Z  ","Ben2      ", 303,"Y"," ",1
+"DEBGRZ_Z  ","BenMPB1   ", 302,"Y"," ",1
+"DEBGRZ_Z  ","BenMPB2   ", 303,"Y"," ",1
 "DEBGRZ_Z  ","Ben3      ", 304,"Y"," ",1
 "DEBGRZ_Z  ","Ben4      ", 305,"Y"," ",1
 "DEBGRZ_Z  ","Ben5      ", 306,"Y"," ",1
@@ -14053,8 +14081,8 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "DEBGRZ_Z  ","Z_ALGFF28 ", 339,"Y"," ",1
 "DEBGRZ_Z  ","Z_ALGFF29 ", 340,"Y"," ",1
 "DEBGRZ_Z  ","Z_ALGFF30 ", 341,"Y"," ",1
-"DEBGRZ_Z  ","Z_FF01    ", 342,"Y"," ",1
-"DEBGRZ_Z  ","Z_FF02    ", 343,"Y"," ",1
+"DEBGRZ_Z  ","Z_FFMPB1  ", 342,"Y"," ",1
+"DEBGRZ_Z  ","Z_FFMPB2  ", 343,"Y"," ",1
 "DEBGRZ_Z  ","Z_FF03    ", 344,"Y"," ",1
 "DEBGRZ_Z  ","Z_FF04    ", 345,"Y"," ",1
 "DEBGRZ_Z  ","Z_FF05    ", 346,"Y"," ",1
@@ -14162,8 +14190,8 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "DEBGRZ_G3 ","BLOOMALG28",  99,"B"," ",1
 "DEBGRZ_G3 ","BLOOMALG29", 100,"B"," ",1
 "DEBGRZ_G3 ","BLOOMALG30", 101,"B"," ",1
-"DEBGRZ_G3 ","F1        ", 102,"Y"," ",1
-"DEBGRZ_G3 ","F2        ", 103,"Y"," ",1
+"DEBGRZ_G3 ","MPB1peli  ", 102,"Y","x",1
+"DEBGRZ_G3 ","MPB2psam  ", 103,"Y","x",1
 "DEBGRZ_G3 ","F3        ", 104,"Y"," ",1
 "DEBGRZ_G3 ","F4        ", 105,"Y"," ",1
 "DEBGRZ_G3 ","F5        ", 106,"Y"," ",1
@@ -14202,8 +14230,8 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "DEBGRZ_G3 ","NCRAlg28  ", 139,"Y"," ",1
 "DEBGRZ_G3 ","NCRAlg29  ", 140,"Y"," ",1
 "DEBGRZ_G3 ","NCRAlg30  ", 141,"Y"," ",1
-"DEBGRZ_G3 ","NCRatF1   ", 142,"Y"," ",1
-"DEBGRZ_G3 ","NCRatF2   ", 143,"Y"," ",1
+"DEBGRZ_G3 ","MPB1NCrat ", 142,"Y"," ",1
+"DEBGRZ_G3 ","MPB2NCrat ", 143,"Y"," ",1
 "DEBGRZ_G3 ","NCRatF3   ", 144,"Y"," ",1
 "DEBGRZ_G3 ","NCRatF4   ", 145,"Y"," ",1
 "DEBGRZ_G3 ","NCRatF5   ", 146,"Y"," ",1
@@ -14242,8 +14270,8 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "DEBGRZ_G3 ","PCRAlg28  ", 179,"Y"," ",1
 "DEBGRZ_G3 ","PCRAlg29  ", 180,"Y"," ",1
 "DEBGRZ_G3 ","PCRAlg30  ", 181,"Y"," ",1
-"DEBGRZ_G3 ","PCRatF1   ", 182,"Y"," ",1
-"DEBGRZ_G3 ","PCRatF2   ", 183,"Y"," ",1
+"DEBGRZ_G3 ","MPB1PCrat ", 182,"Y"," ",1
+"DEBGRZ_G3 ","MPB2PCrat ", 183,"Y"," ",1
 "DEBGRZ_G3 ","PCRatF3   ", 184,"Y"," ",1
 "DEBGRZ_G3 ","PCRatF4   ", 185,"Y"," ",1
 "DEBGRZ_G3 ","PCRatF5   ", 186,"Y"," ",1
@@ -14282,8 +14310,8 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "DEBGRZ_G3 ","SCRAlg28  ", 219,"Y"," ",1
 "DEBGRZ_G3 ","SCRAlg29  ", 220,"Y"," ",1
 "DEBGRZ_G3 ","SCRAlg30  ", 221,"Y"," ",1
-"DEBGRZ_G3 ","SCRatF1   ", 222,"Y"," ",1
-"DEBGRZ_G3 ","SCRatF2   ", 223,"Y"," ",1
+"DEBGRZ_G3 ","MPB1SiCrat", 222,"Y"," ",1
+"DEBGRZ_G3 ","MPB2SiCrat", 223,"Y"," ",1
 "DEBGRZ_G3 ","SCRatF3   ", 224,"Y"," ",1
 "DEBGRZ_G3 ","SCRatF4   ", 225,"Y"," ",1
 "DEBGRZ_G3 ","SCRatF5   ", 226,"Y"," ",1
@@ -14322,8 +14350,8 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "DEBGRZ_G3 ","G3_PrAlg28", 259,"Y"," ",1
 "DEBGRZ_G3 ","G3_PrAlg29", 260,"Y"," ",1
 "DEBGRZ_G3 ","G3_PrAlg30", 261,"Y"," ",1
-"DEBGRZ_G3 ","G3_Pr1    ", 262,"Y"," ",1
-"DEBGRZ_G3 ","G3_Pr2    ", 263,"Y"," ",1
+"DEBGRZ_G3 ","G3_PrMPB1 ", 262,"Y"," ",1
+"DEBGRZ_G3 ","G3_PrMPB2 ", 263,"Y"," ",1
 "DEBGRZ_G3 ","G3_Pr3    ", 264,"Y"," ",1
 "DEBGRZ_G3 ","G3_Pr4    ", 265,"Y"," ",1
 "DEBGRZ_G3 ","G3_Pr5    ", 266,"Y"," ",1
@@ -14362,8 +14390,8 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "DEBGRZ_G3 ","BenAlg28  ", 299,"Y"," ",1
 "DEBGRZ_G3 ","BenAlg29  ", 300,"Y"," ",1
 "DEBGRZ_G3 ","BenAlg30  ", 301,"Y"," ",1
-"DEBGRZ_G3 ","Ben1      ", 302,"Y"," ",1
-"DEBGRZ_G3 ","Ben2      ", 303,"Y"," ",1
+"DEBGRZ_G3 ","BenMPB1   ", 302,"Y"," ",1
+"DEBGRZ_G3 ","BenMPB2   ", 303,"Y"," ",1
 "DEBGRZ_G3 ","Ben3      ", 304,"Y"," ",1
 "DEBGRZ_G3 ","Ben4      ", 305,"Y"," ",1
 "DEBGRZ_G3 ","Ben5      ", 306,"Y"," ",1
@@ -14402,8 +14430,8 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "DEBGRZ_G3 ","G3_ALGFF28", 339,"Y"," ",1
 "DEBGRZ_G3 ","G3_ALGFF29", 340,"Y"," ",1
 "DEBGRZ_G3 ","G3_ALGFF30", 341,"Y"," ",1
-"DEBGRZ_G3 ","G3_FF01   ", 342,"Y"," ",1
-"DEBGRZ_G3 ","G3_FF02   ", 343,"Y"," ",1
+"DEBGRZ_G3 ","G3_FFMPB1 ", 342,"Y"," ",1
+"DEBGRZ_G3 ","G3_FFMPB2 ", 343,"Y"," ",1
 "DEBGRZ_G3 ","G3_FF03   ", 344,"Y"," ",1
 "DEBGRZ_G3 ","G3_FF04   ", 345,"Y"," ",1
 "DEBGRZ_G3 ","G3_FF05   ", 346,"Y"," ",1
@@ -14511,8 +14539,8 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "DEBGRZ_G4 ","BLOOMALG28",  99,"B"," ",1
 "DEBGRZ_G4 ","BLOOMALG29", 100,"B"," ",1
 "DEBGRZ_G4 ","BLOOMALG30", 101,"B"," ",1
-"DEBGRZ_G4 ","F1        ", 102,"Y"," ",1
-"DEBGRZ_G4 ","F2        ", 103,"Y"," ",1
+"DEBGRZ_G4 ","MPB1peli  ", 102,"Y","x",1
+"DEBGRZ_G4 ","MPB2psam  ", 103,"Y","x",1
 "DEBGRZ_G4 ","F3        ", 104,"Y"," ",1
 "DEBGRZ_G4 ","F4        ", 105,"Y"," ",1
 "DEBGRZ_G4 ","F5        ", 106,"Y"," ",1
@@ -14551,8 +14579,8 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "DEBGRZ_G4 ","NCRAlg28  ", 139,"Y"," ",1
 "DEBGRZ_G4 ","NCRAlg29  ", 140,"Y"," ",1
 "DEBGRZ_G4 ","NCRAlg30  ", 141,"Y"," ",1
-"DEBGRZ_G4 ","NCRatF1   ", 142,"Y"," ",1
-"DEBGRZ_G4 ","NCRatF2   ", 143,"Y"," ",1
+"DEBGRZ_G4 ","MPB1NCrat ", 142,"Y"," ",1
+"DEBGRZ_G4 ","MPB2NCrat ", 143,"Y"," ",1
 "DEBGRZ_G4 ","NCRatF3   ", 144,"Y"," ",1
 "DEBGRZ_G4 ","NCRatF4   ", 145,"Y"," ",1
 "DEBGRZ_G4 ","NCRatF5   ", 146,"Y"," ",1
@@ -14591,8 +14619,8 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "DEBGRZ_G4 ","PCRAlg28  ", 179,"Y"," ",1
 "DEBGRZ_G4 ","PCRAlg29  ", 180,"Y"," ",1
 "DEBGRZ_G4 ","PCRAlg30  ", 181,"Y"," ",1
-"DEBGRZ_G4 ","PCRatF1   ", 182,"Y"," ",1
-"DEBGRZ_G4 ","PCRatF2   ", 183,"Y"," ",1
+"DEBGRZ_G4 ","MPB1PCrat ", 182,"Y"," ",1
+"DEBGRZ_G4 ","MPB2PCrat ", 183,"Y"," ",1
 "DEBGRZ_G4 ","PCRatF3   ", 184,"Y"," ",1
 "DEBGRZ_G4 ","PCRatF4   ", 185,"Y"," ",1
 "DEBGRZ_G4 ","PCRatF5   ", 186,"Y"," ",1
@@ -14631,8 +14659,8 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "DEBGRZ_G4 ","SCRAlg28  ", 219,"Y"," ",1
 "DEBGRZ_G4 ","SCRAlg29  ", 220,"Y"," ",1
 "DEBGRZ_G4 ","SCRAlg30  ", 221,"Y"," ",1
-"DEBGRZ_G4 ","SCRatF1   ", 222,"Y"," ",1
-"DEBGRZ_G4 ","SCRatF2   ", 223,"Y"," ",1
+"DEBGRZ_G4 ","MPB1SiCrat", 222,"Y"," ",1
+"DEBGRZ_G4 ","MPB2SiCrat", 223,"Y"," ",1
 "DEBGRZ_G4 ","SCRatF3   ", 224,"Y"," ",1
 "DEBGRZ_G4 ","SCRatF4   ", 225,"Y"," ",1
 "DEBGRZ_G4 ","SCRatF5   ", 226,"Y"," ",1
@@ -14671,8 +14699,8 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "DEBGRZ_G4 ","G4_PrAlg28", 259,"Y"," ",1
 "DEBGRZ_G4 ","G4_PrAlg29", 260,"Y"," ",1
 "DEBGRZ_G4 ","G4_PrAlg30", 261,"Y"," ",1
-"DEBGRZ_G4 ","G4_Pr1    ", 262,"Y"," ",1
-"DEBGRZ_G4 ","G4_Pr2    ", 263,"Y"," ",1
+"DEBGRZ_G4 ","G4_PrMPB1 ", 262,"Y"," ",1
+"DEBGRZ_G4 ","G4_PrMPB2 ", 263,"Y"," ",1
 "DEBGRZ_G4 ","G4_Pr3    ", 264,"Y"," ",1
 "DEBGRZ_G4 ","G4_Pr4    ", 265,"Y"," ",1
 "DEBGRZ_G4 ","G4_Pr5    ", 266,"Y"," ",1
@@ -14711,8 +14739,8 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "DEBGRZ_G4 ","BenAlg28  ", 299,"Y"," ",1
 "DEBGRZ_G4 ","BenAlg29  ", 300,"Y"," ",1
 "DEBGRZ_G4 ","BenAlg30  ", 301,"Y"," ",1
-"DEBGRZ_G4 ","Ben1      ", 302,"Y"," ",1
-"DEBGRZ_G4 ","Ben2      ", 303,"Y"," ",1
+"DEBGRZ_G4 ","BenMPB1   ", 302,"Y"," ",1
+"DEBGRZ_G4 ","BenMPB2   ", 303,"Y"," ",1
 "DEBGRZ_G4 ","Ben3      ", 304,"Y"," ",1
 "DEBGRZ_G4 ","Ben4      ", 305,"Y"," ",1
 "DEBGRZ_G4 ","Ben5      ", 306,"Y"," ",1
@@ -14751,8 +14779,8 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "DEBGRZ_G4 ","G4_ALGFF28", 339,"Y"," ",1
 "DEBGRZ_G4 ","G4_ALGFF29", 340,"Y"," ",1
 "DEBGRZ_G4 ","G4_ALGFF30", 341,"Y"," ",1
-"DEBGRZ_G4 ","G4_FF01   ", 342,"Y"," ",1
-"DEBGRZ_G4 ","G4_FF02   ", 343,"Y"," ",1
+"DEBGRZ_G4 ","G4_FFMPB1 ", 342,"Y"," ",1
+"DEBGRZ_G4 ","G4_FFMPB2 ", 343,"Y"," ",1
 "DEBGRZ_G4 ","G4_FF03   ", 344,"Y"," ",1
 "DEBGRZ_G4 ","G4_FF04   ", 345,"Y"," ",1
 "DEBGRZ_G4 ","G4_FF05   ", 346,"Y"," ",1
@@ -14860,8 +14888,8 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "DEBGRZ_G5 ","BLOOMALG28",  99,"B"," ",1
 "DEBGRZ_G5 ","BLOOMALG29", 100,"B"," ",1
 "DEBGRZ_G5 ","BLOOMALG30", 101,"B"," ",1
-"DEBGRZ_G5 ","F1        ", 102,"Y"," ",1
-"DEBGRZ_G5 ","F2        ", 103,"Y"," ",1
+"DEBGRZ_G5 ","MPB1peli  ", 102,"Y","x",1
+"DEBGRZ_G5 ","MPB2psam  ", 103,"Y","x",1
 "DEBGRZ_G5 ","F3        ", 104,"Y"," ",1
 "DEBGRZ_G5 ","F4        ", 105,"Y"," ",1
 "DEBGRZ_G5 ","F5        ", 106,"Y"," ",1
@@ -14900,8 +14928,8 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "DEBGRZ_G5 ","NCRAlg28  ", 139,"Y"," ",1
 "DEBGRZ_G5 ","NCRAlg29  ", 140,"Y"," ",1
 "DEBGRZ_G5 ","NCRAlg30  ", 141,"Y"," ",1
-"DEBGRZ_G5 ","NCRatF1   ", 142,"Y"," ",1
-"DEBGRZ_G5 ","NCRatF2   ", 143,"Y"," ",1
+"DEBGRZ_G5 ","MPB1NCrat ", 142,"Y"," ",1
+"DEBGRZ_G5 ","MPB2NCrat ", 143,"Y"," ",1
 "DEBGRZ_G5 ","NCRatF3   ", 144,"Y"," ",1
 "DEBGRZ_G5 ","NCRatF4   ", 145,"Y"," ",1
 "DEBGRZ_G5 ","NCRatF5   ", 146,"Y"," ",1
@@ -14940,8 +14968,8 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "DEBGRZ_G5 ","PCRAlg28  ", 179,"Y"," ",1
 "DEBGRZ_G5 ","PCRAlg29  ", 180,"Y"," ",1
 "DEBGRZ_G5 ","PCRAlg30  ", 181,"Y"," ",1
-"DEBGRZ_G5 ","PCRatF1   ", 182,"Y"," ",1
-"DEBGRZ_G5 ","PCRatF2   ", 183,"Y"," ",1
+"DEBGRZ_G5 ","MPB1PCrat ", 182,"Y"," ",1
+"DEBGRZ_G5 ","MPB2PCrat ", 183,"Y"," ",1
 "DEBGRZ_G5 ","PCRatF3   ", 184,"Y"," ",1
 "DEBGRZ_G5 ","PCRatF4   ", 185,"Y"," ",1
 "DEBGRZ_G5 ","PCRatF5   ", 186,"Y"," ",1
@@ -14980,8 +15008,8 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "DEBGRZ_G5 ","SCRAlg28  ", 219,"Y"," ",1
 "DEBGRZ_G5 ","SCRAlg29  ", 220,"Y"," ",1
 "DEBGRZ_G5 ","SCRAlg30  ", 221,"Y"," ",1
-"DEBGRZ_G5 ","SCRatF1   ", 222,"Y"," ",1
-"DEBGRZ_G5 ","SCRatF2   ", 223,"Y"," ",1
+"DEBGRZ_G5 ","MPB1SiCrat", 222,"Y"," ",1
+"DEBGRZ_G5 ","MPB2SiCrat", 223,"Y"," ",1
 "DEBGRZ_G5 ","SCRatF3   ", 224,"Y"," ",1
 "DEBGRZ_G5 ","SCRatF4   ", 225,"Y"," ",1
 "DEBGRZ_G5 ","SCRatF5   ", 226,"Y"," ",1
@@ -15020,8 +15048,8 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "DEBGRZ_G5 ","G5_PrAlg28", 259,"Y"," ",1
 "DEBGRZ_G5 ","G5_PrAlg29", 260,"Y"," ",1
 "DEBGRZ_G5 ","G5_PrAlg30", 261,"Y"," ",1
-"DEBGRZ_G5 ","G5_Pr1    ", 262,"Y"," ",1
-"DEBGRZ_G5 ","G5_Pr2    ", 263,"Y"," ",1
+"DEBGRZ_G5 ","G5_PrMPB1 ", 262,"Y"," ",1
+"DEBGRZ_G5 ","G5_PrMPB2 ", 263,"Y"," ",1
 "DEBGRZ_G5 ","G5_Pr3    ", 264,"Y"," ",1
 "DEBGRZ_G5 ","G5_Pr4    ", 265,"Y"," ",1
 "DEBGRZ_G5 ","G5_Pr5    ", 266,"Y"," ",1
@@ -15060,8 +15088,8 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "DEBGRZ_G5 ","BenAlg28  ", 299,"Y"," ",1
 "DEBGRZ_G5 ","BenAlg29  ", 300,"Y"," ",1
 "DEBGRZ_G5 ","BenAlg30  ", 301,"Y"," ",1
-"DEBGRZ_G5 ","Ben1      ", 302,"Y"," ",1
-"DEBGRZ_G5 ","Ben2      ", 303,"Y"," ",1
+"DEBGRZ_G5 ","BenMPB1   ", 302,"Y"," ",1
+"DEBGRZ_G5 ","BenMPB2   ", 303,"Y"," ",1
 "DEBGRZ_G5 ","Ben3      ", 304,"Y"," ",1
 "DEBGRZ_G5 ","Ben4      ", 305,"Y"," ",1
 "DEBGRZ_G5 ","Ben5      ", 306,"Y"," ",1
@@ -15100,8 +15128,8 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "DEBGRZ_G5 ","G5_ALGFF28", 339,"Y"," ",1
 "DEBGRZ_G5 ","G5_ALGFF29", 340,"Y"," ",1
 "DEBGRZ_G5 ","G5_ALGFF30", 341,"Y"," ",1
-"DEBGRZ_G5 ","G5_FF01   ", 342,"Y"," ",1
-"DEBGRZ_G5 ","G5_FF02   ", 343,"Y"," ",1
+"DEBGRZ_G5 ","G5_FFMPB1 ", 342,"Y"," ",1
+"DEBGRZ_G5 ","G5_FFMPB2 ", 343,"Y"," ",1
 "DEBGRZ_G5 ","G5_FF03   ", 344,"Y"," ",1
 "DEBGRZ_G5 ","G5_FF04   ", 345,"Y"," ",1
 "DEBGRZ_G5 ","G5_FF05   ", 346,"Y"," ",1
@@ -15900,77 +15928,75 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "MPB1LLim  ","ExtVl     ",   3,"N","x",1
 "MPB1LLim  ","a_enh     ",   4,"Y","x",1
 "MPB1LLim  ","fPAR      ",   5,"Y","x",1
-"MPB1LLim  ","MPB1Pmax20",   6,"Y","x",1
-"MPB1LLim  ","MPB1alpha ",   7,"Y","x",1
-"MPB1LLim  ","SwEmersion",   8,"Y","x",1
-"MPB1LLim  ","MPB1migrd1",   9,"Y","x",1
-"MPB1LLim  ","MPB1migrd2",  10,"Y","x",1
-"MPB1LLim  ","Depth     ",  11,"N","x",1
-"MPB1LLim  ","LocSedDept",  12,"N","x",1
-"MPB1LLim  ","Nr_dz     ",  13,"Y"," ",1
-"MPB1LLim  ","ITIME     ",  14,"N"," ",1
-"MPB1LLim  ","IDT       ",  15,"N"," ",1
-"MPB1LLim  ","ITSTRT    ",  16,"N"," ",1
-"MPB1LLim  ","AuxSys    ",  17,"Y"," ",1
-"MPB1LLim  ","SwMPBGEM  ",  18,"Y","x",1
-"MPB1LLim  ","RadBotDay ",  19,"N","x",1
-"MPB1LLim  ","ExtVlSed  ",  20,"Y","x",1
-"MPB1LLim  ","ZSED      ",  21,"Y","x",1
-"MPB1LLim  ","MPB1WS01  ",  22,"N"," ",1
-"MPB1LLim  ","MPB1WS02  ",  23,"N"," ",1
-"MPB1LLim  ","MPB1WS03  ",  24,"N"," ",1
-"MPB1LLim  ","MPB1WS04  ",  25,"N"," ",1
+"MPB1LLim  ","RadSatMPB1",   6,"Y","x",1
+"MPB1LLim  ","SwEmersion",   7,"Y","x",1
+"MPB1LLim  ","MPB1migrd1",   8,"Y","x",1
+"MPB1LLim  ","MPB1migrd2",   9,"Y","x",1
+"MPB1LLim  ","Depth     ",  10,"N","x",1
+"MPB1LLim  ","LocSedDept",  11,"N","x",1
+"MPB1LLim  ","Nr_dz     ",  12,"Y"," ",1
+"MPB1LLim  ","ITIME     ",  13,"N"," ",1
+"MPB1LLim  ","IDT       ",  14,"N"," ",1
+"MPB1LLim  ","ITSTRT    ",  15,"N"," ",1
+"MPB1LLim  ","AuxSys    ",  16,"Y"," ",1
+"MPB1LLim  ","SwMPBGEM  ",  17,"Y","x",1
+"MPB1LLim  ","RadBotDay ",  18,"N","x",1
+"MPB1LLim  ","ExtVlSed  ",  19,"Y","x",1
+"MPB1LLim  ","ZSED      ",  20,"Y","x",1
+"MPB1LLim  ","MPB1WS01  ",  21,"N"," ",1
+"MPB1LLim  ","MPB1WS02  ",  22,"N"," ",1
+"MPB1LLim  ","MPB1WS03  ",  23,"N"," ",1
+"MPB1LLim  ","MPB1WS04  ",  24,"N"," ",1
 "MPB2LLim  ","DayRadSurf",   1,"N","x",1
 "MPB2LLim  ","RadDay    ",   2,"N","x",1
 "MPB2LLim  ","ExtVl     ",   3,"N","x",1
 "MPB2LLim  ","a_enh     ",   4,"Y","x",1
 "MPB2LLim  ","fPAR      ",   5,"Y","x",1
-"MPB2LLim  ","MPB2Pmax20",   6,"Y","x",1
-"MPB2LLim  ","MPB2alpha ",   7,"Y","x",1
-"MPB2LLim  ","SwEmersion",   8,"Y","x",1
-"MPB2LLim  ","MPB2migrd1",   9,"Y","x",1
-"MPB2LLim  ","MPB2migrd2",  10,"Y","x",1
-"MPB2LLim  ","Depth     ",  11,"N","x",1
-"MPB2LLim  ","LocSedDept",  12,"N","x",1
-"MPB2LLim  ","Nr_dz     ",  13,"Y"," ",1
-"MPB2LLim  ","ITIME     ",  14,"N"," ",1
-"MPB2LLim  ","IDT       ",  15,"N"," ",1
-"MPB2LLim  ","ITSTRT    ",  16,"N"," ",1
-"MPB2LLim  ","AuxSys    ",  17,"Y"," ",1
-"MPB2LLim  ","SwMPBGEM  ",  18,"Y","x",1
-"MPB2LLim  ","RadBotDay ",  19,"N","x",1
-"MPB2LLim  ","ExtVlSed  ",  20,"Y","x",1
-"MPB2LLim  ","ZSED      ",  21,"Y","x",1
-"MPB2LLim  ","MPB2WS01  ",  22,"N"," ",1
-"MPB2LLim  ","MPB2WS02  ",  23,"N"," ",1
-"MPB2LLim  ","MPB2WS03  ",  24,"N"," ",1
-"MPB2LLim  ","MPB2WS04  ",  25,"N"," ",1
+"MPB2LLim  ","RadSatMPB2",   6,"Y","x",1
+"MPB2LLim  ","SwEmersion",   7,"Y","x",1
+"MPB2LLim  ","MPB2migrd1",   8,"Y","x",1
+"MPB2LLim  ","MPB2migrd2",   9,"Y","x",1
+"MPB2LLim  ","Depth     ",  10,"N","x",1
+"MPB2LLim  ","LocSedDept",  11,"N","x",1
+"MPB2LLim  ","Nr_dz     ",  12,"Y"," ",1
+"MPB2LLim  ","ITIME     ",  13,"N"," ",1
+"MPB2LLim  ","IDT       ",  14,"N"," ",1
+"MPB2LLim  ","ITSTRT    ",  15,"N"," ",1
+"MPB2LLim  ","AuxSys    ",  16,"Y"," ",1
+"MPB2LLim  ","SwMPBGEM  ",  17,"Y","x",1
+"MPB2LLim  ","RadBotDay ",  18,"N","x",1
+"MPB2LLim  ","ExtVlSed  ",  19,"Y","x",1
+"MPB2LLim  ","ZSED      ",  20,"Y","x",1
+"MPB2LLim  ","MPB2WS01  ",  21,"N"," ",1
+"MPB2LLim  ","MPB2WS02  ",  22,"N"," ",1
+"MPB2LLim  ","MPB2WS03  ",  23,"N"," ",1
+"MPB2LLim  ","MPB2WS04  ",  24,"N"," ",1
 "MPB1NLim  ","NH4       ",   1,"Y","x",1
 "MPB1NLim  ","NO3       ",   2,"Y","x",1
 "MPB1NLim  ","PO4       ",   3,"Y","x",1
 "MPB1NLim  ","Si        ",   4,"Y","x",1
-"MPB1NLim  ","MPB1Kam   ",   5,"Y","x",1
-"MPB1NLim  ","MPB1Kni   ",   6,"Y","x",1
-"MPB1NLim  ","MPB1Kpho  ",   7,"Y","x",1
-"MPB1NLim  ","MPB1Ksi   ",   8,"Y","x",1
-"MPB1NLim  ","SwMPBGEM  ",   9,"Y","x",1
-"MPB1NLim  ","NH4S1     ",  10,"Y","x",1
-"MPB1NLim  ","NO3S1     ",  11,"Y","x",1
-"MPB1NLim  ","PO4S1     ",  12,"Y","x",1
-"MPB1NLim  ","SiS1      ",  13,"Y","x",1
+"MPB1NLim  ","KMDINMPB1 ",   5,"Y","x",1
+"MPB1NLim  ","KMPMPB1   ",   6,"Y","x",1
+"MPB1NLim  ","KMSMPB1   ",   7,"Y","x",1
+"MPB1NLim  ","SwMPBGEM  ",   8,"Y","x",1
+"MPB1NLim  ","NH4S1     ",   9,"Y","x",1
+"MPB1NLim  ","NO3S1     ",  10,"Y","x",1
+"MPB1NLim  ","PO4S1     ",  11,"Y","x",1
+"MPB1NLim  ","SiS1      ",  12,"Y","x",1
+"MPB1NLim  ","PrfNH4MPB1",  13,"Y","x",1
 "MPB2NLim  ","NH4       ",   1,"Y","x",1
 "MPB2NLim  ","NO3       ",   2,"Y","x",1
 "MPB2NLim  ","PO4       ",   3,"Y","x",1
 "MPB2NLim  ","Si        ",   4,"Y","x",1
-"MPB2NLim  ","MPB2Kam   ",   5,"Y","x",1
-"MPB2NLim  ","MPB2Kni   ",   6,"Y","x",1
-"MPB2NLim  ","MPB2Kpho  ",   7,"Y","x",1
-"MPB2NLim  ","MPB2Ksi   ",   8,"Y","x",1
-"MPB2NLim  ","SwMPBGEM  ",   9,"Y","x",1
-"MPB2NLim  ","NH4S1     ",  10,"Y","x",1
-"MPB2NLim  ","NO3S1     ",  11,"Y","x",1
-"MPB2NLim  ","PO4S1     ",  12,"Y","x",1
-"MPB2NLim  ","SiS1      ",  13,"Y","x",1
+"MPB2NLim  ","KMDINMPB2 ",   5,"Y","x",1
+"MPB2NLim  ","KMPMPB2   ",   6,"Y","x",1
+"MPB2NLim  ","KMSMPB2   ",   7,"Y","x",1
+"MPB2NLim  ","SwMPBGEM  ",   8,"Y","x",1
+"MPB2NLim  ","NH4S1     ",   9,"Y","x",1
+"MPB2NLim  ","NO3S1     ",  10,"Y","x",1
+"MPB2NLim  ","PO4S1     ",  11,"Y","x",1
+"MPB2NLim  ","SiS1      ",  12,"Y","x",1
+"MPB2NLim  ","PrfNH4MPB2",  13,"Y","x",1
 "MPBenthos ","Temp      ",   1,"Y","x",1
 "MPBenthos ","MPB1peli  ",   2,"Y","x",1
 "MPBenthos ","MPB2psam  ",   3,"Y","x",1
@@ -16004,10 +16030,10 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "MPBenthos ","MPB2PCrat ",  31,"Y","x",1
 "MPBenthos ","MPB1SiCrat",  32,"Y","x",1
 "MPBenthos ","MPB2SiCrat",  33,"Y","x",1
-"MPBenthos ","MPB1fam   ",  34,"N","x",1
-"MPBenthos ","MPB2fam   ",  35,"N","x",1
-"MPBenthos ","MPB1fni   ",  36,"N","x",1
-"MPBenthos ","MPB2fni   ",  37,"N","x",1
+"MPBenthos ","MPB1fam   ",  34,"Y","x",1
+"MPBenthos ","MPB2fam   ",  35,"Y","x",1
+"MPBenthos ","MPB1fni   ",  36,"Y","x",1
+"MPBenthos ","MPB2fni   ",  37,"Y","x",1
 "MPBenthos ","MPB1Tresh ",  38,"Y","x",1
 "MPBenthos ","MPB2Tresh ",  39,"Y","x",1
 "MPBenthos ","SwMPBGEM  ",  40,"Y","x",1
@@ -16017,10 +16043,10 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "MPBenthos ","MPB2ftmpS1",  44,"N","x",1
 "MPBenthos ","MPB1fnutS1",  45,"N","x",1
 "MPBenthos ","MPB2fnutS1",  46,"N","x",1
-"MPBenthos ","MPB1famS1 ",  47,"N","x",1
-"MPBenthos ","MPB2famS1 ",  48,"N","x",1
-"MPBenthos ","MPB1fniS1 ",  49,"N","x",1
-"MPBenthos ","MPB2fniS1 ",  50,"N","x",1
+"MPBenthos ","MPB1famS1 ",  47,"Y","x",1
+"MPBenthos ","MPB2famS1 ",  48,"Y","x",1
+"MPBenthos ","MPB1fniS1 ",  49,"Y","x",1
+"MPBenthos ","MPB2fniS1 ",  50,"Y","x",1
 "MPBenthos ","NH4       ",  51,"Y","x",1
 "MPBenthos ","NO3       ",  52,"Y","x",1
 "MPBenthos ","PO4       ",  53,"Y","x",1

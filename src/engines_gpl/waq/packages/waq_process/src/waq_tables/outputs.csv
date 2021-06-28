@@ -4271,26 +4271,22 @@ outppr,outpit,outpnm,outpdo,outpsx
 "MPB2LLim  ","MPB2WS02  ",   4," ",1
 "MPB2LLim  ","MPB2WS03  ",   5," ",1
 "MPB2LLim  ","MPB2WS04  ",   6," ",1
-"MPB1NLim  ","MPB1fam   ",   1,"x",1
-"MPB1NLim  ","MPB1fni   ",   2,"x",1
-"MPB1NLim  ","MPB1fpho  ",   3,"x",1
-"MPB1NLim  ","MPB1fsi   ",   4,"x",1
-"MPB1NLim  ","MPB1fnut  ",   5,"x",1
-"MPB1NLim  ","MPB1famS1 ",   6,"x",1
-"MPB1NLim  ","MPB1fniS1 ",   7,"x",1
-"MPB1NLim  ","MPB1fphoS1",   8,"x",1
-"MPB1NLim  ","MPB1fsiS1 ",   9,"x",1
-"MPB1NLim  ","MPB1fnutS1",  10,"x",1
-"MPB2NLim  ","MPB2fam   ",   1,"x",1
-"MPB2NLim  ","MPB2fni   ",   2,"x",1
-"MPB2NLim  ","MPB2fpho  ",   3,"x",1
-"MPB2NLim  ","MPB2fsi   ",   4,"x",1
-"MPB2NLim  ","MPB2fnut  ",   5,"x",1
-"MPB2NLim  ","MPB2famS1 ",   6,"x",1
-"MPB2NLim  ","MPB2fniS1 ",   7,"x",1
-"MPB2NLim  ","MPB2fphoS1",   8,"x",1
-"MPB2NLim  ","MPB2fsiS1 ",   9,"x",1
-"MPB2NLim  ","MPB2fnutS1",  10,"x",1
+"MPB1NLim  ","MPB1fnit  ",   1,"x",1
+"MPB1NLim  ","MPB1fpho  ",   2,"x",1
+"MPB1NLim  ","MPB1fsi   ",   3,"x",1
+"MPB1NLim  ","MPB1fnut  ",   4,"x",1
+"MPB1NLim  ","MPB1fnitS1",   5,"x",1
+"MPB1NLim  ","MPB1fphoS1",   6,"x",1
+"MPB1NLim  ","MPB1fsiS1 ",   7,"x",1
+"MPB1NLim  ","MPB1fnutS1",   8,"x",1
+"MPB2NLim  ","MPB2fnit  ",   1,"x",1
+"MPB2NLim  ","MPB2fpho  ",   2,"x",1
+"MPB2NLim  ","MPB2fsi   ",   3,"x",1
+"MPB2NLim  ","MPB2fnut  ",   4,"x",1
+"MPB2NLim  ","MPB2fnitS1",   5,"x",1
+"MPB2NLim  ","MPB2fphoS1",   6,"x",1
+"MPB2NLim  ","MPB2fsiS1 ",   7,"x",1
+"MPB2NLim  ","MPB2fnutS1",   8,"x",1
 "MPBenthos ","MPB1M2    ",   1,"x",1
 "MPBenthos ","MPB2M2    ",   2,"x",1
 "MPBenthos ","MPB1S1M3  ",   3,"x",1

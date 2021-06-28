@@ -77,7 +77,7 @@ C     from PMSA array
       REAL               :: A_ENH              !  4 in  , enhancement factor in radiation calculation    (-)
       REAL               :: FPAR               !  5 in  , fraction Photosynthetic Active Radiance        (-)
       REAL               :: PM                 !  6 in  , MPB maximum photosynthesis           (gC/(gChl)/d)
-      REAL               :: ALPHA              !  7 in  , MPB Initial slope PI          (gC/gChl/h/(uE/m2/s)
+      REAL               :: RADSAT             !  7 in  , MPB saturation radiation                    (W/m2)
       INTEGER            :: SWEMERSION         !  8 in  , switch indicating submersion(0) or emersion(1) (-)
       REAL               :: MIGRDEPTH1         !  9 in  , MPB migration depth 1                          (m)
       REAL               :: MIGRDEPTH2         ! 10 in  , MPB migration depth 2                          (m)
@@ -106,7 +106,7 @@ C     local
       INTEGER            :: IZ                 ! loop counter integration layers
       INTEGER            :: IKMRK1             ! first feature inactive(0)-active(1)-bottom(2) segment
       INTEGER            :: IKMRK2             ! second feature 2D(0)-surface(1)-middle(2)-bottom(3) segment
-      INTEGER, parameter :: NO_POINTER = 31    ! number of input output variables in PMSA array
+      INTEGER, parameter :: NO_POINTER = 30    ! number of input output variables in PMSA array
       INTEGER            :: IP(NO_POINTER)     ! index pointer in PMSA array updated for each segment
       REAL               :: ACTDEP             ! actual depth
       REAL               :: ACTLIM             ! limitation at actual radiance
@@ -139,26 +139,25 @@ C     loop over the segments
          EXTVL      = PMSA(IP(3))
          A_ENH      = PMSA(IP(4))
          FPAR       = PMSA(IP(5))
-         PM         = PMSA(IP(6))
-         ALPHA      = PMSA(IP(7))
-         SWEMERSION = NINT(PMSA(IP(8)))
-         MIGRDEPTH1 = PMSA(IP(9))
-         MIGRDEPTH2 = PMSA(IP(10))
-         DEPTH      = PMSA(IP(11))
-         LOCSEDDEPT = PMSA(IP(12))
-         I_NRDZ     = NINT(PMSA(IP(13)))
-         RTIME      = PMSA(IP(14))
-         RDT        = PMSA(IP(15))
-         RTSTRT     = PMSA(IP(16))
-         AUXSYS     = NINT(PMSA(IP(17)))
-         S1_BOTTOM  = NINT(PMSA(IP(18))) .EQ. 1
-         RADBOT     = PMSA(IP(19))
-         EXTVLS1    = PMSA(IP(20))
-         ZSED       = PMSA(IP(21))
-         WS1        = PMSA(IP(22))
-         WS2        = PMSA(IP(23))
-         WS3        = PMSA(IP(24))
-         WS4        = PMSA(IP(25))
+         RADSAT     = PMSA(IP(6))
+         SWEMERSION = NINT(PMSA(IP(7)))
+         MIGRDEPTH1 = PMSA(IP(8))
+         MIGRDEPTH2 = PMSA(IP(9))
+         DEPTH      = PMSA(IP(10))
+         LOCSEDDEPT = PMSA(IP(11))
+         I_NRDZ     = NINT(PMSA(IP(12)))
+         RTIME      = PMSA(IP(13))
+         RDT        = PMSA(IP(14))
+         RTSTRT     = PMSA(IP(15))
+         AUXSYS     = NINT(PMSA(IP(16)))
+         S1_BOTTOM  = NINT(PMSA(IP(17))) .EQ. 1
+         RADBOT     = PMSA(IP(18))
+         EXTVLS1    = PMSA(IP(19))
+         ZSED       = PMSA(IP(20))
+         WS1        = PMSA(IP(21))
+         WS2        = PMSA(IP(22))
+         WS3        = PMSA(IP(23))
+         WS4        = PMSA(IP(24))
 
          ISTEP      = NINT((RTIME-RTSTRT)/RDT)
          IDT        = NINT(RDT)
@@ -191,7 +190,7 @@ C           for top layer thicker then euphotic depth all production in euphotic
 
 C           Bereken totale lichthoeveelheid en lichtlimitatie per laagje
 
-            LIMSURF = 1.0 - EXP(- ALPHA * RADSURF / PM)
+            LIMSURF = 1.0 - EXP(- RADSURF / RADSAT)
             DO IZ = 1 , I_NRDZ
                IF (IZ .EQ. 1) THEN
                   ACTDEP = 0.5 * DZ
@@ -214,7 +213,7 @@ C              bereken de fractie algen die naar het sediment oppervlak zijn gem
                ENDIF
 
                ACTRAD = RADTOP * EXP ( -EXTVL * ACTDEP )
-               ACTLIM = 1.0 - EXP(- ALPHA * ACTRAD / PM)
+               ACTLIM = 1.0 - EXP(- ACTRAD / RADSAT)
 
                CUMLIM = CUMLIM + FRACSURF*LIMSURF + (1.0-FRACSURF)*ACTLIM
 
@@ -239,8 +238,8 @@ C           Integratie over de dag
             FLT          = WS2
             WS1          = WS1 + CUMLIM * IDT
 
-            PMSA(IP(22)) = WS1
-            PMSA(IP(26)) = FLT
+            PMSA(IP(21)) = WS1
+            PMSA(IP(25)) = FLT
 
 C         ENDIF
 
@@ -253,7 +252,7 @@ C        S1_BOTTOM
 
 C           Bereken totale lichthoeveelheid en lichtlimitatie per laagje
 
-            LIMSURF = 1.0 - EXP(- ALPHA * RADBOT / PM)
+            LIMSURF = 1.0 - EXP(- RADBOT / RADSAT)
             DO IZ = 1 , I_NRDZ
                IF (IZ .EQ. 1) THEN
                   ACTDEP = 0.5 * DZ
@@ -275,7 +274,7 @@ C              bereken de fractie algen die naar het sediment oppervlak zijn gem
                ENDIF
 
                ACTRAD = RADBOT * EXP ( -EXTVLS1 * ACTDEP )
-               ACTLIM = 1.0 - EXP(- ALPHA * ACTRAD / PM)
+               ACTLIM = 1.0 - EXP(- ACTRAD / RADSAT)
 
                CUMLIM = CUMLIM + FRACSURF*LIMSURF + (1.0-FRACSURF)*ACTLIM
             ENDDO
@@ -293,14 +292,14 @@ C           Integratie over de dag
                   WS4       = WS3 / AUXSYS
                ENDIF
                WS3          = 0.0
-               PMSA(IP(25)) = WS4
+               PMSA(IP(24)) = WS4
             ENDIF
 
             FLTS1        = WS4
             WS3          = WS3 + CUMLIM * IDT
 
-            PMSA(IP(24)) = WS3
-            PMSA(IP(27)) = FLTS1
+            PMSA(IP(23)) = WS3
+            PMSA(IP(26)) = FLTS1
 
          ENDIF
 
