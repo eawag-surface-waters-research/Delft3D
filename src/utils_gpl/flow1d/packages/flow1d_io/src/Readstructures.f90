@@ -73,8 +73,8 @@ module m_readstructures
    !!   is incremented.
    
    ! Structure file current version: 1.00
-   integer, parameter :: StructureFileMajorVersion = 2
-   integer, parameter :: StructureFileMinorVersion = 1
+   integer, parameter :: StructureFileMajorVersion = 3
+   integer, parameter :: StructureFileMinorVersion = 0
    
    ! History structure file versions:
 
@@ -85,6 +85,7 @@ module m_readstructures
    !                    * universal weir: levelsCount -> numLevels
    ! 2.00 (2019-07-22): Consistent renaming,
    ! 2.01 (2020-10-20): Added new type=longCulvert.
+   ! 3.00 (2021-06-17): Bridge field 'bedLevel' removed and replaced by 'shift' (UNST-5177).
    
 
    contains
@@ -191,7 +192,8 @@ module m_readstructures
       minor = 0
       call prop_get_version_number(md_ptr, major = major, minor = minor, success = success1)
       ! by exception, we backwards-support majorVersion=1 (for orifice and weir)
-      if ((major /= StructureFileMajorVersion .and. major /= 1) .or. minor > StructureFileMinorversion) then
+      ! For now majorVersion = 2.xx is supported for all structures, except for the bridge. 
+      if ((major /= StructureFileMajorVersion .and. major /= 1 .and. major /= 2) .or. (major == StructureFileMajorVersion .and. minor > StructureFileMinorversion)) then
          write (msgbuf, '(a,i0,".",i2.2,a,i0,".",i2.2,a)') 'Unsupported format of structure file detected in '''//trim(structurefile)//''': v', major, minor, '. Current format: v',StructureFileMajorVersion,StructureFileMinorVersion,'. Ignoring this file.'
          call err_flush()
          ierr = 1
@@ -301,7 +303,12 @@ module m_readstructures
             case (ST_CULVERT)
                call readCulvert(pstru%culvert, network, md_ptr%child_nodes(i)%node_ptr, st_id, network%forcinglist, success)
             case (ST_BRIDGE)
-               call readBridge(pstru%bridge, network, md_ptr%child_nodes(i)%node_ptr, st_id, success)
+               if (major /= StructureFileMajorVersion) then
+                  call SetMessage(LEVEL_ERROR, 'The file version in ' // structureFile //' should be at least 3.0 or higher' )
+                  call SetMessage(-LEVEL_ERROR, 'when using bridges (parameter bedLevel must be changed to a shift).' )
+               else
+                  call readBridge(pstru%bridge, network, md_ptr%child_nodes(i)%node_ptr, st_id, success)
+               endif 
             case (ST_PUMP)
                call readPump(pstru%pump, md_ptr%child_nodes(i)%node_ptr, st_id, network%forcinglist, success)
             case (ST_ORIFICE, ST_GATE)
@@ -1096,6 +1103,7 @@ module m_readstructures
       integer                                    :: icross
       logical                                    :: isPillarBridge
       logical                                    :: success1
+      double precision                           :: shift  
       
       
       success = .true.
@@ -1169,8 +1177,9 @@ module m_readstructures
 
          endif
          
-         call prop_get_double(md_ptr, '', 'bedLevel', bridge%bedLevel, success1)
-         success = success .and. check_input_result(success1, st_id, 'bedLevel')
+         call prop_get_double(md_ptr, '', 'shift', shift, success1)
+         success = success .and. check_input_result(success1, st_id, 'shift')
+         bridge%bedLevel = bridge%pcross%bedlevel + shift
          
          call prop_get_double(md_ptr, '', 'length', bridge%length, success1)
          success = success .and. check_input_result(success1, st_id, 'length')
