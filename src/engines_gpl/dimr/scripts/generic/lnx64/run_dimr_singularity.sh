@@ -8,6 +8,8 @@ function print_usage_info {
     echo "Options:"
     echo "-h, --help"
     echo "       Print this help message and exit"
+    echo
+    echo "Note: this script will mount the parent of the current directory to the Singularity container."
     exit 1
 }
 
@@ -66,13 +68,16 @@ shopt -u nullglob
 # Note that the working directory is set to a custom mounting directory
 # for the container runtime environment. This mounting is to prevent 
 # clashes with the internal opt directory of the container
-workingdir=$(pwd)
+workingdir=$(pwd)/..
+workingdir_name=$(basename $(pwd))
 mountdir=/mnt/data
 echo "Executing Singularity container with:"
 echo "Singularity container directory   :   $scriptdir"
 echo "Singularity container name        :   $container_file_path"
-echo "Dimr file                         :   $dimr_config_file"
+echo "Executable                        :   $executable"
 echo "Working directory                 :   $workingdir"
+echo "Working directory name            :   $workingdir_name"
 echo "Mounting directory                :   $mountdir"
+echo "Pwd of container                  :   $mountdir/$workingdir_name"
 echo "Extra executable flags            :   $executable_extraopts"
-singularity exec --bind $workingdir:$mountdir --pwd $mountdir $container_file_path $container_libdir/$executable -m $dimr_config_file $executable_extraopts
+singularity exec --bind $workingdir:$mountdir --pwd $mountdir/$workingdir_name $container_file_path $container_libdir/$executable -m $dimr_config_file $executable_extraopts
