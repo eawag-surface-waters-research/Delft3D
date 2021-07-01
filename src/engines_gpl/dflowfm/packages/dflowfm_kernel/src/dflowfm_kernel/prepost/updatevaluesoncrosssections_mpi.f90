@@ -61,6 +61,7 @@ subroutine updateValuesOnCrossSections_mpi(tim1)
       if( stmpar%lsedsus > 0 ) then
          numvals = numvals + 1
       endif
+      numvals = numvals + stmpar%lsedtot
    endif
 
    timtot = tim1 - tstart_user
