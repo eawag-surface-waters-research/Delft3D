@@ -1,19 +1,21 @@
 #!/bin/sh
 
 function print_usage_info {
-    echo "Usage: ${0##*/} dimr_config_file [RUN_DIMR.SH OPTIONS]..."
-    echo "       ${0##*/} [-h | --help]"
+    echo "Usage: ${0##*/} dimr_config_file [run_dimr.sh OPTIONS]..."
+    echo "       ${0##*/} [-p | --parentlevel] 3 dimr_config_file [run_dimr.sh OPTIONS]..."
     echo "Runs the run_dimr.sh command of a Singularity container by wrapping and passing additional arguments."
     echo
     echo "Options:"
     echo "-h, --help"
     echo "       Print this help message and exit"
-    echo
-    echo "Note: this script will mount the parent of the current directory to the Singularity container."
+    echo "-p, --parentlevel"
+    echo "       A numeric value which specifies the amount of levels to navigate to the parent directory to mount"
+    echo "       (Default value: 1)"
     exit 1
 }
 
 # Variables
+parent_level=1
 executable=run_dimr.sh
 executable_extraopts=
 dimr_config_file=
@@ -25,21 +27,25 @@ if [[ $# -eq 0 ]]; then
 fi
 
 # Parse the first argument of the script
-if [[ $# -ge 1 ]]; then
-    arg=$1
-    case $arg in
-        -h|--help)
+while [[ $# -ge 1 ]]
+do
+    key="$1"
+    shift
+    case $key in
+         -h|--help)
         print_usage_info
         ;;
+        -p|--parentlevel)
+        parent_level=$1
+        shift
+        ;;
         *)
-        dimr_config_file=$arg
+        dimr_config_file=$key # Assume that the first unknown argument is the dimr_config_file
+        executable_extraopts=$* # Parse the remaining arguments and pass it as additional arguments to the executable as extra options
+        break
         ;;
     esac
-    shift
-
-    # Parse the remaining arguments and pass it as additional arguments to the executable as extra options
-    executable_extraopts="$*"
-fi
+done
 
 # Check if the dimr_config_file exists
 if [ ! -z "$dimr_config_file" ] && [ ! -f "$dimr_config_file" ]; then
@@ -68,16 +74,33 @@ shopt -u nullglob
 # Note that the working directory is set to a custom mounting directory
 # for the container runtime environment. This mounting is to prevent 
 # clashes with the internal opt directory of the container
-workingdir=$(pwd)/..
-workingdir_name=$(basename $(pwd))
+current_working_dir=$(pwd)
 mountdir=/mnt/data
+
+working_dir=
+container_working_dir=
+
+if [[ $parent_level -ge 1 ]]; then 
+    let target_workingdir_level=$parent_level+1
+    working_dir=$(echo $current_working_dir | rev | cut -d'/' -f$target_workingdir_level- | rev) # Returns the desired mounting parent directory 
+    container_working_dir=$mountdir/$(echo $current_working_dir | rev | cut -d'/' -f-$parent_level | rev) # Extract the directories that are traversed
+elif [[ $parent_level -eq 0 ]]; then
+    # Parent directory is equal to the current directory and as such there is no need to traverse the directory structure
+    # while mounting
+    working_dir=$current_working_dir
+    container_working_dir=$mountdir
+else 
+    echo "Invalid parent level setting: value must be greater or equal to 0"
+    exit 1
+fi
+
 echo "Executing Singularity container with:"
-echo "Singularity container directory   :   $scriptdir"
-echo "Singularity container name        :   $container_file_path"
+echo "Dimr config file                  :   $dimr_config_file"
+echo "Container file                    :   $container_file_path"
+echo "Current working directory         :   $current_working_dir"
+echo "Mounting source directory         :   $working_dir"
+echo "Mounting target directory         :   $mountdir"
+echo "Container working directory       :   $container_working_dir"
 echo "Executable                        :   $executable"
-echo "Working directory                 :   $workingdir"
-echo "Working directory name            :   $workingdir_name"
-echo "Mounting directory                :   $mountdir"
-echo "Pwd of container                  :   $mountdir/$workingdir_name"
 echo "Extra executable flags            :   $executable_extraopts"
-singularity exec --bind $workingdir:$mountdir --pwd $mountdir/$workingdir_name $container_file_path $container_libdir/$executable -m $dimr_config_file $executable_extraopts
+singularity exec --bind $working_dir:$mountdir --pwd $container_working_dir $container_file_path $container_libdir/$executable -m $dimr_config_file $executable_extraopts
