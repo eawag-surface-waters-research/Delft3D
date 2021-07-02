@@ -4703,7 +4703,7 @@ function ug_get_1d_mesh_edge_coordinates(ncid, meshids, edgebranchidx, edgeoffse
    integer :: ierrloc, numerr
    logical :: optionalsRequired ! local version of req.optionals (to avoid many if(present(...))s)
 
-   integer :: varStartIndex
+   integer :: varStartIndex, ierrOptional
    character(len=ug_nameLen) :: meshname, varname
 
    optionalsRequired = .true.     ! .true. to make the behaviour of the method backwards compatible.
@@ -4712,6 +4712,7 @@ function ug_get_1d_mesh_edge_coordinates(ncid, meshids, edgebranchidx, edgeoffse
    endif
 
    numerr = 0
+   ierrOptional = 0
    ierr = nf90_inquire_variable(ncid, meshids%varids(mid_meshtopo), name = meshname)
 
    ierr = nf90_get_var(ncid, meshids%varids(mid_1dedgebranch), edgebranchidx)
@@ -4750,8 +4751,8 @@ function ug_get_1d_mesh_edge_coordinates(ncid, meshids, edgebranchidx, edgeoffse
    end if
 
    if (present(edgex)) then
-      ierr = nf90_get_var(ncid, meshids%varids(mid_edgex), edgex)
-      if (ierr /= nf90_noerr) then
+      ierrOptional = nf90_get_var(ncid, meshids%varids(mid_edgex), edgex)
+      if (ierrOptional /= nf90_noerr) then
          if (optionalsRequired) then
             if (meshids%varids(mid_edgex) <= 0) then
                call SetMessage(LEVEL_WARN, 'ug_get_1d_mesh_edge_coordinates: could not find the 1D mesh edge x-coordinates variable for ''' &
@@ -4762,13 +4763,14 @@ function ug_get_1d_mesh_edge_coordinates(ncid, meshids, edgebranchidx, edgeoffse
                   //trim(meshname)//''' from '''//trim(varname)//'''. Check any previous warnings.')
             end if
             numerr = numerr + 1
+            ierr = ierrOptional
          end if
       end if
    endif
 
    if (present(edgey)) then
-      ierr = nf90_get_var(ncid, meshids%varids(mid_edgey), edgey)
-      if (ierr /= nf90_noerr) then
+      ierrOptional = nf90_get_var(ncid, meshids%varids(mid_edgey), edgey)
+      if (ierrOptional /= nf90_noerr) then
          if (optionalsRequired) then
             if (meshids%varids(mid_edgey) <= 0) then
                call SetMessage(LEVEL_WARN, 'ug_get_1d_mesh_edge_coordinates: could not find the 1D mesh edge y-coordinates variable for ''' &
@@ -4779,6 +4781,7 @@ function ug_get_1d_mesh_edge_coordinates(ncid, meshids, edgebranchidx, edgeoffse
                   //trim(meshname)//''' from '''//trim(varname)//'''. Check any previous warnings.')
             end if
             numerr = numerr + 1
+            ierr = ierrOptional
          end if
       end if
    endif
