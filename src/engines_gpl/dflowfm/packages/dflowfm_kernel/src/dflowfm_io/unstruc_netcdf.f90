@@ -12545,7 +12545,7 @@ subroutine unc_read_map(filename, ierr)
              end do
              call check_error(ierr, 'bodsed')
           end do
-          stmpar%morlyr%state%bodsed = rst_bodsed
+          stmpar%morlyr%state%bodsed(:,1:ndxi) = rst_bodsed(:,1:ndxi)
           call bedcomp_use_bodsed(stmpar%morlyr)
        case (2)
           ! msed (/ id_sedtotdim(iid) , id_nlyrdim(iid) , id_flowelemdim(iid) , id_timedim(iid) /)
