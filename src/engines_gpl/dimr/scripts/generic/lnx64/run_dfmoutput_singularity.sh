@@ -94,4 +94,4 @@ echo "Mounting target directory         :   $mountdir"
 echo "Container working directory       :   $container_working_dir"
 echo "Executable                        :   $executable"
 echo "Extra executable flags            :   $executable_extraopts"
-singularity exec --bind $working_dir:$mountdir --pwd $container_working_dir $container_file_path $container_libdir/$executable $executable_extraopts
+singularity exec --bind $working_dir:$mountdir --pwd $container_working_dir $container_file_path $container_libdir/$executable -- $executable_extraopts
