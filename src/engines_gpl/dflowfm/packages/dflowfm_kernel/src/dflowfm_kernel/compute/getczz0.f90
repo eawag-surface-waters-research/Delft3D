@@ -35,7 +35,7 @@ subroutine getczz0(h1, frcn, ifrctyp, cz, z0)       ! basic get z0 (m),  this ro
  use m_flowparameters, only: epshu
  implicit none
 
- double precision, intent(in) :: h1
+ double precision, intent(inout) :: h1
  integer, intent(in) :: ifrctyp
  double precision, intent(in) :: frcn
  double precision, intent(out) :: cz
