@@ -2370,17 +2370,16 @@ if (mext /= 0) then
  endif
 
  if (numsrc > 0) then
-
     ja = 1
     rewind (mext)
     kx = numconst+1
     ! TODO: UNST-537/UNST-190: we now support timeseries, the constant values should come from new format ext file, not from transformcoef
     numsrc = 0
+    success = .true. 
     do while (ja == 1)                                 ! for sorsin again read *.ext file
        call readprovider(mext,qid,filename,filetype,method,operand,transformcoef,ja,varname)
        if (ja == 1 .and. qid == 'discharge_salinity_temperature_sorsin') then
           call resolvePath(filename, md_extfile_dir, filename)
-
           numsrc = numsrc + 1
           ! 2. Prepare time series relation, if the .pli file has an associated .tim file.
           L = index(filename,'.', back=.true.) - 1
@@ -2390,14 +2389,26 @@ if (mext /= 0) then
              filetype0 = uniform            ! uniform=single time series vectormax = ..
              method = min(1, method)        ! only method 0 and 1 are allowed, methods > 1 are set to 1 (no spatial interpolation possible here).
              ! Converter will put 'qsrc, sasrc and tmsrc' values in array qstss on positions: (3*numsrc-2), (3*numsrc-1), and (3*numsrc), respectively.
-             success  = ec_addtimespacerelation(qid, xdum, ydum, kdum, kx, filename0, filetype0, method, operand='O', targetIndex=numsrc)
+             call clearECMessage()
+             if (.not.ec_addtimespacerelation(qid, xdum, ydum, kdum, kx, filename0, filetype0, method, operand='O', targetIndex=numsrc)) then
+                msgbuf = 'Connecting time series file ''' // trim(filename0) // ''' and polyline file ''' // trim(filename) &
+                                                          // '''. for source/sinks failed:' // dumpECMessageStack(LEVEL_WARN,callback_msg)
+                call warn_flush()
+                success = .false.
+             endif
           else
-             msgbuf = 'No .tim-series file found for source/sinks and file ''' // trim(filename) // '''. Ignoring this entry.'
+             msgbuf = 'File: ''' // trim(filename0) // '''  does not exist (associated with ''' // trim(filename) // ''').'
              call warn_flush()
              success = .false.
           endif
        endif
     enddo
+    if (.not.success) then
+       msgbuf = 'One or more source/sinks entries resulted in a fatal error.'
+       call warn_flush()
+       iresult = DFM_EXTFORCERROR
+       goto 888
+    endif
  endif
 
 
