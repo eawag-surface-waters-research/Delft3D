@@ -2670,7 +2670,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
           call prop_set(prop_ptr, 'geometry', 'Tsigma', Tsigma ,'Sigma Adaptation period for Layertype==4 (s)')
        endif
 
-       if (keepzlayeringatbed /= 2) then
+       if (writeall .or. keepzlayeringatbed /= 2) then
           call prop_set(prop_ptr, 'geometry', 'Keepzlayeringatbed'  , keepzlayeringatbed, '0:bedlayerthickness == zlayerthickness, 1:possibly very thin layer at bed, 2=equal thickness first two layers')
        endif
   
