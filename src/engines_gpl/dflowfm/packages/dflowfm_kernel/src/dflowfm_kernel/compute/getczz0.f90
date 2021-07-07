@@ -45,13 +45,6 @@ subroutine getczz0(h1, frcn, ifrctyp, cz, z0)       ! basic get z0 (m),  this ro
  double precision    :: sixth = 1d0/6d0
 
  h0    = max(h1,epshu)
- !
- ! (UNST-5230) AD HOC SOLUTION to circumvent the problems with the Bangladesh model, for which a very quick fix is needed.
- ! This can also be seen as a code revert for #68271 of 10 February 2021.
- ! In near future a 'sustainable' approach will be implemented, which will replace this ad hoc solution.
- !  
- ! h1 = h0  (statement switched off on request of Johan Reyns; otherwise other models will crash) 
- 
  if (ifrctyp == 0) then                              ! Chezy type
      cz   = frcn
      ! z0   = h0 / ( exp (vonkar*cz/sag + 1d0) - c9of1) !
