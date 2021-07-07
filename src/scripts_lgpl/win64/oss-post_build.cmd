@@ -982,7 +982,7 @@ rem ===========================
     
     call :makeDir !dest_bin!
     
-    call :copyFile "!build_dir!\gridgeom\!configuration!\gridgeom_dll.dll"                                           !dest_bin!
+    call :copyFile "!build_dir!\gridgeom\!configuration!\gridgeom.dll"                                           !dest_bin!
     
     )
 
@@ -993,7 +993,7 @@ rem ===========================
     set dest_share="!install_dir!\x64\Release\share\bin"
     
     call :makeDir !dest_share!
-    call :copyFile "!build_dir!\gridgeom\!configuration!\gridgeom_dll.dll"                                           !dest_share!
+    call :copyFile "!build_dir!\gridgeom\!configuration!\gridgeom.dll"                                           !dest_share!
     
     )
 

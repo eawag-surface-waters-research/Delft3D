@@ -11,6 +11,8 @@ generate_version_files(${fortran_version_file} ${checkout_src_root} ${ini_versio
 # Gather source files
 get_fortran_source_files(${src_path} source_files)
 
+list(REMOVE_ITEM source_files ${CMAKE_CURRENT_SOURCE_DIR}/${src_path}/gridgeom_api.F90)
+
 set(library_name gridgeom)
 add_library(${library_name} ${source_files}
                             ${fortran_version_file}
@@ -28,12 +30,12 @@ prebuild_version_number(${library_name} ${fortran_version_file}
 set(oss_dependencies    deltares_common
                         io_netcdf
                         kdtree_wrapper
-                        kdtree2)
+                        kdtree2
+                        triangle_c)
 oss_include_libraries(${library_name} oss_dependencies)
 
 if (UNIX)
-    target_link_libraries(${library_name} triangle_c)
-    message(STATUS "Setting oss_target_link_libraries in Unix")   
+    message(STATUS "Setting oss_target_link_libraries in Unix")
     target_link_libraries(${library_name} ${oss_dependencies})
 endif(UNIX)
 
@@ -63,14 +65,15 @@ add_library(${library_name} SHARED ${src_path}/gridgeom_api.F90)
 
 # Set the dependencies of this library
 set(oss_dependencies    deltares_common
+                        ec_module
                         io_netcdf
                         kdtree_wrapper
                         kdtree2
+                        triangle_c
                         gridgeom)
 oss_include_libraries(${library_name} oss_dependencies)
 
 if (UNIX)
-    target_link_libraries(${library_name} triangle_c)
     message(STATUS "Setting oss_target_link_libraries in Unix")
     target_link_libraries(${library_name} ${oss_dependencies})
 endif(UNIX)
@@ -90,6 +93,24 @@ target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${check_bounds
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${src_path}/gridgeom_api.F90)
 set_target_properties (${library_name} PROPERTIES FOLDER utils_lgpl/gridgeom)
 
+# Rename the gridgeom_dll shared object to one without the "_dll"
+# A simple change of the output name of the gridgeom_dll project to gridgeom does not work
+# because CMake then gives an error when trying to replace the static library artifacts from the gridgeom project
+# Another solution would be to split gridgeom and gridgeom_dll in two separate components with their own CMakeLists.txt
+if(WIN32)
+    SET(library_renamed ${CMAKE_BINARY_DIR}/gridgeom/$<CONFIG>/gridgeom.dll)
+    ADD_CUSTOM_COMMAND(TARGET gridgeom_dll POST_BUILD
+                       COMMAND ${CMAKE_COMMAND} -E rename
+                           $<TARGET_FILE:${library_name}>
+                           ${library_renamed}
+                       COMMENT "Renaming '${library_name}' library to '${library_renamed}'")
+endif(WIN32)
+
+if(UNIX)
+    SET(library_renamed libgridgeom.so)
+    # Actual rename is done in the the install step below
+endif(UNIX)
+
 if(WIN32)
     # post-build
     set(install_dir ${CMAKE_BINARY_DIR})
@@ -97,11 +118,12 @@ if(WIN32)
     set(build_project ${library_name})
 
     post_build_target( ${library_name}
-                       ${install_dir} 
+                       ${install_dir}
                        ${build_dir} 
                        ${checkout_src_root} 
                        ${build_project} )
 
 endif(WIN32)
 
-install(TARGETS ${library_name} DESTINATION lib)
+# Install the shared library in the lib folder with rename
+install(FILES $<TARGET_FILE:${library_name}> RENAME ${library_renamed} DESTINATION lib)
