@@ -6415,8 +6415,8 @@ contains
            (1d0 - am) *        an    * d(m   , n+1) + &
            (1d0 - am) * (1d0 - an)   * d(m   , n  ) + &
                   am  * (1d0 - an)   * d(m+1 , n  ) 
-      zmx = max( d(m+1 , n+1), d(m   , n+1), d(m   , n  ), d(m+1 , n  ) )
-      zmn = min( d(m+1 , n+1), d(m   , n+1), d(m   , n  ), d(m+1 , n  ) )
+      zmx = dble (max( d(m+1 , n+1), d(m   , n+1), d(m   , n  ), d(m+1 , n  ) ) )
+      zmn = dble (min( d(m+1 , n+1), d(m   , n+1), d(m   , n  ), d(m+1 , n  ) ) )
       if      ( zmn > 0d0 ) then ! land
          landsea = 3
       else if ( zmx < 0d0 ) then ! sea
