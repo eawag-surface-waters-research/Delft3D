@@ -629,7 +629,7 @@ def build_gui():
     # default value
     vs_gui.set(2017)
     
-    Label(text=".Net Framwork Version:", relief=RIDGE, width=20).grid(row=5, column=1)
+    Label(text=".Net Framework Version:", relief=RIDGE, width=20).grid(row=5, column=1)
     
     Radiobutton(root, text=".Net Framework 4.8", variable=fw_gui, value=48).grid(row= 6, column=1, sticky=W)
     Radiobutton(root, text=".Net Framework 4.7", variable=fw_gui, value=47).grid(row= 7, column=1, sticky=W)
