@@ -34,34 +34,39 @@ echo.
 
 
 call :Checks
+if !ERRORLEVEL! NEQ 0 exit /B %~1
 
 call :vcvarsall
+if !ERRORLEVEL! NEQ 0 exit /B %~1
 
 call :traditionalBuild
+if !ERRORLEVEL! NEQ 0 exit /B %~1
 
 call :DoCMake !config!
+if !ERRORLEVEL! NEQ 0 exit /B %~1
+
 if "!config!" == "dflowfm_interacter" call :set_dflowfm_interacter_link_flag
+if !ERRORLEVEL! NEQ 0 exit /B %~1
 
 call :Build !config!
+if !ERRORLEVEL! NEQ 0 exit /B %~1
 
 call :installall
+if !ERRORLEVEL! NEQ 0 exit /B %~1
 
-
-if !ERRORLEVEL! EQU 0 (
-    echo.
-    echo Visual Studio sln-files:
-    echo D-Flow FM : %root%\build_dflowfm\dflowfm.sln
-    echo DIMR      : %root%\build_dimr\dimr.sln
-    echo Tests     : %root%\build_tests\tests.sln
-    echo Other     : %root%\src\delft3d_open.sln
-    echo             %root%\src\ec_module.sln
-    echo             %root%\src\io_netcdf.sln
-    echo             %root%\src\nefis.sln
-    echo             %root%\src\utils_lgpl.sln
-    echo             %root%\src\utils_lgpl_no_tests.sln
-    echo.
-    echo Finished
-)
+echo.
+echo Visual Studio sln-files:
+echo D-Flow FM : %root%\build_dflowfm\dflowfm.sln
+echo DIMR      : %root%\build_dimr\dimr.sln
+echo Tests     : %root%\build_tests\tests.sln
+echo Other     : %root%\src\delft3d_open.sln
+echo             %root%\src\ec_module.sln
+echo             %root%\src\io_netcdf.sln
+echo             %root%\src\nefis.sln
+echo             %root%\src\utils_lgpl.sln
+echo             %root%\src\utils_lgpl_no_tests.sln
+echo.
+echo Finished
 goto :end
 
 
@@ -271,6 +276,7 @@ rem =======================
 :Checks
     if "!config!" == "" (
         echo ERROR: config is empty.
+        set ERRORLEVEL=1
         goto :end
     )
     if "!generator!" == "" (
@@ -278,6 +284,7 @@ rem =======================
         echo        Possible causes:
         echo            In prepare_sln.py:
         echo                Choosen Visual Studio version is not installed
+        set ERRORLEVEL=1
         goto :end
     )
     goto :endproc
