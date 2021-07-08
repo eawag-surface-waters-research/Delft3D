@@ -373,8 +373,15 @@ rem =========================
     if "!config!" == "all" (
         echo.
         echo "Building in the traditional way (only when config is all) ..."
+
+        echo "    Clean directory %root%\src\bin\x64 ..."
+        rmdir /s /q "%root%\src\bin\x64"  > del.log 2>&1
+        del /f/q del.log
+
         cd /d "%root%\src\"
+        echo "    Compiling delft3d_open.sln ..."
         call :VSbuild delft3d_open
+        echo "    Compiling utils_lgpl_no_tests.sln ..."
         call :VSbuild utils_lgpl_no_tests
         rem # Disabled: causes errors: call :VSbuild nefis
         cd /d "%root%\"

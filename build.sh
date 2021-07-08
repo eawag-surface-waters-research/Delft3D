@@ -181,8 +181,12 @@ root=$scriptdir
 if [ "$prepareonly" = "0" ] && [ "$config" = "all"  ]; then
     cd $root/src
     echo "Building the traditional way ..."
-    echo "./build_h6c7.sh -$compiler"
-          ./build_h6c7.sh -$compiler
+    echo "    Clean directories bin, lib, share in $root/src ..."
+    rm -rf $root/src/bin/ &>/dev/null
+    rm -rf $root/src/lib/ &>/dev/null
+    rm -rf $root/src/share/ &>/dev/null
+    echo "    ./build_h6c7.sh -$compiler"
+              ./build_h6c7.sh -$compiler
     cd $root
 fi
 
