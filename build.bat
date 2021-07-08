@@ -16,7 +16,7 @@ set root=%CD%
 
 
 call :CheckCMakeInstallation
-call :GetArguments %1 %2 %3 %4 %5
+call :GetArguments %1
 call :GetEnvironmentVars
 call :PrepareSln
 call :SetGenerator
