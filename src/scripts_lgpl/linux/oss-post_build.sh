@@ -9,7 +9,11 @@ echo "Executing $scriptdir\oss-post_build.sh ..."
 echo "This script is temporary disabled. Exiting now"
 echo
 exit 0
-
+echo "Reason for disabling:"
+echo "Two installation mechanisms are implemented:"
+echo "- this oss-post_build.sh"
+echo "- CMake install"
+echo "For now, only the CMake install is being used."
 
 
 
