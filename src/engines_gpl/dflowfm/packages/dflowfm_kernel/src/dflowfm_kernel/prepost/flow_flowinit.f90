@@ -999,6 +999,9 @@ call timstop(ihandle)
     call oldfil(msam, md_s1inifile)
     if (msam /= 0) then
         call reasam(msam, 0)
+        if (jampi > 0) then 
+            call mess(LEVEL_WARN, 'Filling water level using [geometry] WaterLevIniFile in .mdu does not exchange information between partitions')
+        endif 
         call flow_initfloodfill()
     end if
     call restoresam()

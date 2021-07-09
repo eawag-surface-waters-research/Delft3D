@@ -113,7 +113,7 @@ implicit none
     character(len=255) :: md_xybfile       = ' ' !< Bathymetry file                   (e.g., *.xyb)
     character(len=255) :: md_dryptsfile    = ' ' !< Dry points file (list)            (e.g., *.xyz, *.pol)
     character(len=255) :: md_encfile       = ' ' !< Enclosure file (list)             (e.g., *.xyz, *.pol)
-    character(len=255) :: md_s1inifile     = ' ' !< Initial water levels sample file  (e.g., *.xyz)
+    character(len=255) :: md_s1inifile     = ' ' !< Initial water levels sample file using floodfill  (e.g., *.xyz)
     character(len=255) :: md_ldbfile       = ' ' !< Land boundary file    (show)      (e.g., *.ldb)
     character(len=255) :: md_plifile       = ' ' !< polylinefile file     (show)      (e.g., *.pli)
     character(len=255) :: md_thdfile       = ' ' !< Thin dam file (polygons)          (e.g., *_thd.pli) (block flow)
@@ -2455,7 +2455,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
        ! pending code merge, structure file either applies to v2.00 structure file, or the old one.
        call prop_set(prop_ptr,'geometry', 'StructureFile',    trim(md_structurefile), 'File *.ini containing list of structures (pumps, weirs, gates and general structures)')
     end if
-    call prop_set(prop_ptr, 'geometry', 'WaterLevIniFile',  trim(md_s1inifile),     'Initial water levels sample file *.xyz')
+    call prop_set(prop_ptr, 'geometry', 'WaterLevIniFile',  trim(md_s1inifile),     'Initial water levels sample file *.xyz using flood fill algorithm')
     call prop_set(prop_ptr, 'geometry', 'LandBoundaryFile', trim(md_ldbfile),       'Land boundaries file *.ldb, used for visualization')
     call prop_set(prop_ptr, 'geometry', 'ThinDamFile',      trim(md_thdfile),       'Polyline file *_thd.pli, containing thin dams')
     call prop_set(prop_ptr, 'geometry', 'Cutcelllist',      trim(md_Cutcelllist),   'File with names of cutcell polygons, e.g. cutcellpolygons.lst')
@@ -2530,7 +2530,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
        call prop_set(prop_ptr, 'geometry', 'ShipdefFile',   trim(md_shipdeffile),   'File *.shd containing ship definitions'  )
     endif
 
-    call prop_set(prop_ptr, 'geometry', 'WaterLevIni',      sini,                   'Initial water level at missing s0 values')
+    call prop_set(prop_ptr, 'geometry', 'WaterLevIni',      sini,                   'Initial water levels sample file *.xyz using flood fill algorithm')
     if (waterdepthini1D .ne. dmiss) then
        call prop_set(prop_ptr,'geometry','waterdepthini1D', waterdepthini1D,        'Initial waterdepth in 1D ')
     endif
