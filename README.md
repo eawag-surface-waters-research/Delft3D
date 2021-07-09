@@ -13,25 +13,12 @@ At Deltares, this works fine (not tested outside Deltares):
 
 At the toplevel, https://svn.oss.deltares.nl/repos/delft3d/trunk :
 Windows:
-
 - build.bat
-  prepare_sln.py interface pops up, all sln-files are prepared when clicking "Apply"
-
-- build.bat all
-
-  Silent building of the full tree
-
-- build.bat dflowfm
-  Only create an sln-file for D-Flow FM (without Interacter)
-
-- build.bat dflowfm_interacter
-  Only create an sln-file for D-Flow FM with the not-open-source Interacter. You have to provide an Interacter library yourself.
-  See ...\src\engines_gpl\dflowfm\interacter\README
+  Execute "build.bat --help" to show the usage
 
 Linux:
-
-- ./build.sh all
-- ./build.sh dflowfm
+- build.sh
+  Execute "./build.sh --help" to show the usage
 
 More information:
 https://oss.deltares.nl/web/delft3d/source-code
