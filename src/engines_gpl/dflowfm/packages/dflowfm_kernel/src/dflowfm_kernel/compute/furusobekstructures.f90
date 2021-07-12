@@ -55,13 +55,6 @@ do ng = 1, ncgensg      ! loop over generalstruc signals, sethu
       if (hu(L) > 0d0) then ! hu is above lowest sill
          call flgsfm( n, ng, Ls, firstiter , jarea )
       endif
-      if (kmx > 0) then
-         call getLbotLtop(L,Lb,Lt)
-         do LL = Lb, Lt
-            fu(LL) = fu(L) ; ru(LL) = ru(L)
-            au(LL) = au(L)*( hu(LL)-hu(LL-1) ) / ( hu(Lt)-hu(Lb-1) )
-         enddo
-      endif
    enddo
 enddo
 

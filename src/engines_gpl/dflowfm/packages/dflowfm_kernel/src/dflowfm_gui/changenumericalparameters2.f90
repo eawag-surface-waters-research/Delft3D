@@ -44,7 +44,7 @@
    implicit none
 
    integer :: numpar, numfld, numparactual, numfldactual
-   PARAMETER  (NUMPAR = 19, NUMFLD = 2*NUMPAR)
+   PARAMETER  (NUMPAR = 22, NUMFLD = 2*NUMPAR)
    INTEGER  IX(NUMFLD),IY(NUMFLD),IS(NUMFLD),IT(NUMFLD)
    CHARACTER WRDKEY*40, OPTION(NUMPAR)*40, HELPM(NUMPAR)*60
    integer :: nlevel
@@ -75,6 +75,11 @@
    OPTION(17) = 'jaLogprofatubndin                       ' ; it(2*17) = 2
    OPTION(18) = 'javau                                   ' ; it(2*18) = 2
    OPTION(19) = 'jacomp                                  ' ; it(2*19) = 2
+   OPTION(20) = 'Drop2D                                  ' ; it(2*20) = 6
+   OPTION(21) = 'Drop3D                                  ' ; it(2*21) = 6
+   OPTION(22) = 'jaStructurelayersactive                 ' ; it(2*22) = 2
+
+
 
 !   123456789012345678901234567890123456789012345678901234567890
 !            1         2         3         4         5         6
@@ -98,7 +103,10 @@
    HELPM (17) = 'at ubnd in: 0 = uniform U1, 1 = log U1, 2 = also k-eps      '
    HELPM (18) = '0=no, 3 = impli upw, 5 = Quickest                           '
    HELPM (19) = '0=standard, 1 = use csu snu in weights, 2 = scalarx,y banf  '
-
+   HELPM (20) = '0=no, 1 = yes                                               '
+   HELPM (21) = '0=no, 1 = yes                                               '
+   HELPM (22) = '0=no, 1 = yes                                               '
+ 
 
    CALL SAVEKEYS()
    NUMPARACTUAL = NUMPAR
@@ -185,6 +193,9 @@
    CALL IFORMputINTEGER (2*17 ,jaLogprofatubndin)
    CALL IFORMputINTEGER (2*18 ,javau)
    CALL IFORMputINTEGER (2*19 ,jacomp)
+   CALL IFORMPUTdouble  (2*20 ,drop2D           , '(F7.3)' )
+   CALL IFORMPUTdouble  (2*21 ,drop3D           , '(F7.3)' )
+   CALL IFORMputINTEGER (2*22 ,jastructurelayersactive)
 
 
    !  Display the form with numeric fields left justified
@@ -241,9 +252,11 @@
           CALL IFORMGETdouble  (2*15 ,addksources      )
           CALL IFORMGETINTEGER (2*16 ,jainirho         )
           CALL IFORMGETINTEGER (2*17 ,jaLogprofatubndin)
-          CALL IFORMGETINTEGER (2*18 ,javau)
-          CALL IFORMGETINTEGER (2*19 ,jacomp)
-
+          CALL IFORMGETINTEGER (2*18 ,javau            )
+          CALL IFORMGETINTEGER (2*19 ,jacomp           )
+          CALL IFORMGETdouble  (2*20 ,Drop2D           )
+          CALL IFORMGETdouble  (2*21 ,Drop3D           )
+          CALL IFORMGETINTEGER (2*22 ,jastructurelayersactive)
 
        ENDIF
        CALL IWinClose(1)

@@ -1,30 +1,30 @@
 !----- AGPL --------------------------------------------------------------------
-!                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2021.                                
-!                                                                               
-!  This file is part of Delft3D (D-Flow Flexible Mesh component).               
-!                                                                               
-!  Delft3D is free software: you can redistribute it and/or modify              
-!  it under the terms of the GNU Affero General Public License as               
-!  published by the Free Software Foundation version 3.                         
-!                                                                               
-!  Delft3D  is distributed in the hope that it will be useful,                  
-!  but WITHOUT ANY WARRANTY; without even the implied warranty of               
-!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the                
-!  GNU Affero General Public License for more details.                          
-!                                                                               
-!  You should have received a copy of the GNU Affero General Public License     
-!  along with Delft3D.  If not, see <http://www.gnu.org/licenses/>.             
-!                                                                               
-!  contact: delft3d.support@deltares.nl                                         
-!  Stichting Deltares                                                           
-!  P.O. Box 177                                                                 
-!  2600 MH Delft, The Netherlands                                               
-!                                                                               
-!  All indications and logos of, and references to, "Delft3D",                  
-!  "D-Flow Flexible Mesh" and "Deltares" are registered trademarks of Stichting 
+!
+!  Copyright (C)  Stichting Deltares, 2017-2021.
+!
+!  This file is part of Delft3D (D-Flow Flexible Mesh component).
+!
+!  Delft3D is free software: you can redistribute it and/or modify
+!  it under the terms of the GNU Affero General Public License as
+!  published by the Free Software Foundation version 3.
+!
+!  Delft3D  is distributed in the hope that it will be useful,
+!  but WITHOUT ANY WARRANTY; without even the implied warranty of
+!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+!  GNU Affero General Public License for more details.
+!
+!  You should have received a copy of the GNU Affero General Public License
+!  along with Delft3D.  If not, see <http://www.gnu.org/licenses/>.
+!
+!  contact: delft3d.support@deltares.nl
+!  Stichting Deltares
+!  P.O. Box 177
+!  2600 MH Delft, The Netherlands
+!
+!  All indications and logos of, and references to, "Delft3D",
+!  "D-Flow Flexible Mesh" and "Deltares" are registered trademarks of Stichting
 !  Deltares, and remain the property of Stichting Deltares. All rights reserved.
-!                                                                               
+!
 !-------------------------------------------------------------------------------
 
 ! $Id$
@@ -187,8 +187,8 @@
  double precision                  :: blmeanbelow       !<  : if not -999d0, below this level the cell centre bedlevel is the mean of surrouding netnodes
  double precision                  :: blminabove        !<  : if not -999d0, above this level the cell centre bedlevel is the min of surrouding netnodes
  double precision                  :: blmin             !<  : lowest bedlevel point in model
+
  double precision                  :: upot0=-999d0      !<  : initial potential energy
- double precision                  :: ukin0=-999d0      !<  : initial kinetic   energy
 
  integer                           :: jaupdbndbl        !< Update bl at boundary (1 = update, 0 = no update)
  integer                           :: jaupdbobbl1d     !< Update bl and bobs for 1d network (call to setbobs_1d only at initialization)
@@ -226,17 +226,22 @@
 
  double precision                  :: Slopedrop2D       !< Apply losses for 'rain from the roof', only if local bottom slope > Slopedrop2D, only for Slopedrop2D  > 0.0
  logical                           :: drop1D            !< Apply losses for all 1d links,
- double precision                  :: drop3D            !< Apply losses in or 3D if downwind z below bob + 2/3 hu
+ double precision                  :: drop2D            !< Apply losses in 2D if downwind z below bob + 2/3 hu
+ double precision                  :: drop3D            !< Apply losses in 3D if downwind z below bob + 2/3 hu
  double precision                  :: zwsbtol = 0d0     !< zws(kb0) = bl - zwsbtol
- integer                           :: keepzlayeringatbed=2 
-!< only for z, 0=thin bed layer, 1=bedlayer=zlayer, 2,3: 0.5*(z2+z0) 4 = max(z1,0.5*(z2+z0)), 5 = max(z1,0.9*z2+0.1*z0)    
+ integer                           :: keepzlayeringatbed=2 !< only for z, 0=thin bed layer
+                                                        !< 1= : bedlayer=zlayer
+                                                        !< 2= : 0.5*(z2+z0), z0 being floor level layer 1, z2 being ceiling layer 2
+                                                        !< 3= : 0.5*(z2+z0)
+                                                        !< 4= : max(z1,0.5*(z2+z0)), z1 being basic z-level of layer 1
+                                                        !< 5= : max(z1,0.9*z2+0.1*z0), just another smooth recipe
  integer                           :: ihuz= 4           !< 1= : central from bed til second or first above local bob (in sethu)
-                                                        !< 2= : all central  
-                                                        !< 3= : central from bed till highest layer with equal levels 
+                                                        !< 2= : all central
+                                                        !< 3= : central from bed till highest layer with equal levels
  integer                           :: ihuzcsig= 3        !< 1= : sig = 0.5*(Leftsig,Rightsig)                       (in sethu)
                                                         !< 2= : sig = max (Leftsig,Rightsig)
                                                         !< 3= : sig = min (Leftsig,Rightsig)
-                                                        !< 4= : sig = dble(LL-Lb+1) / dble(LLbc-Lb+1), uniform independent of L,R 
+                                                        !< 4= : sig = dble(LL-Lb+1) / dble(LLbc-Lb+1), uniform independent of L,R
 
  double precision                  :: cflmx             !< max Courant nr ()
  double precision                  :: cflw              !< wave velocity fraction, total courant vel = u + cflw*wavevelocity
@@ -340,6 +345,8 @@
  integer                           :: jaZlayeratubybob=0  !< 0 = BL left/right based, 1: Linkbob based
 
  integer                           :: jaZlayercenterbedvel=1 !< In z-layer model copy lowest u-velocity to lower cell centres
+
+ integer                           :: jastructurelayersactive = 0 !< 0=general structure over all layers , 1=only through open layers
 
  integer                           :: jaZerozbndinflowadvection=0 !< set zero advection velocity on inflow at z boundaries 0=no, 1=yes
 
@@ -718,6 +725,7 @@ subroutine default_flowparameters()
     bedslope    = 0d0    ! bottom inclination testcases
     Slopedrop2D = 0d0    ! Apply droplosses only if local bottom slope > Slopedrop2D, negative = no droplosses
     Drop1D      = .false.
+    Drop2D      = 0d0    ! Apply droblosses in 2D yes or no 1 or 0
     drop3D      = 1d0    ! Apply droplosses in 3D yes or no 1 or 0
     jacstbnd    = 0
     jajre       = 0
@@ -811,7 +819,8 @@ subroutine default_flowparameters()
     javased    = 6       !< vert. adv. suspended sediment concentrations : 0=No, 1=UpwexpL, 2=Centralexpl, 3=UpwimpL, 4=CentraLimpL, 5=switched to 3 for neg stratif., 6=higher-order upwind/explicit
     jahazlayer = 0       !<
     Pure1D     = 0d0     !< puur1D no yes
-    JaZlayercenterbedvel = 1
+    JaZlayercenterbedvel      = 1
+    jastructurelayersactive   = 0
     JaZerozbndinflowadvection = 0
 
     jabaroctimeint = -4  !< time integration baroclini pressure, 1 = expl., 2=AB rho , 3 = AB barocterm, 4=3dryfloodproof 5 = advect rho (n+1/2)

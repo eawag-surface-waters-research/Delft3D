@@ -298,6 +298,7 @@
  double precision, allocatable     :: Fusav(:,:)          !< only needed if gatedoorheight > 0 , dim = ncgen
  double precision, allocatable     :: Rusav(:,:)          !< only needed if gatedoorheight > 0
  double precision, allocatable     :: Ausav(:,:)          !< only needed if gatedoorheight > 0
+ double precision, allocatable     :: ff3  (:,:)          !< only needed if kmx>0 and jastructurelayersactive>0
 
  integer         , allocatable     :: kcgen(:,:)        !< cgen links index array, see lines above
                                                         !! 1,* = index in s1 point "left" of genstru

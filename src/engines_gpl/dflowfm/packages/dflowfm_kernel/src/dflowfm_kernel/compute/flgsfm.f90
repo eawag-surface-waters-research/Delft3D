@@ -1,30 +1,30 @@
 !----- AGPL --------------------------------------------------------------------
-!                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2021.                                
-!                                                                               
-!  This file is part of Delft3D (D-Flow Flexible Mesh component).               
-!                                                                               
-!  Delft3D is free software: you can redistribute it and/or modify              
-!  it under the terms of the GNU Affero General Public License as               
-!  published by the Free Software Foundation version 3.                         
-!                                                                               
-!  Delft3D  is distributed in the hope that it will be useful,                  
-!  but WITHOUT ANY WARRANTY; without even the implied warranty of               
-!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the                
-!  GNU Affero General Public License for more details.                          
-!                                                                               
-!  You should have received a copy of the GNU Affero General Public License     
-!  along with Delft3D.  If not, see <http://www.gnu.org/licenses/>.             
-!                                                                               
-!  contact: delft3d.support@deltares.nl                                         
-!  Stichting Deltares                                                           
-!  P.O. Box 177                                                                 
-!  2600 MH Delft, The Netherlands                                               
-!                                                                               
-!  All indications and logos of, and references to, "Delft3D",                  
-!  "D-Flow Flexible Mesh" and "Deltares" are registered trademarks of Stichting 
+!
+!  Copyright (C)  Stichting Deltares, 2017-2021.
+!
+!  This file is part of Delft3D (D-Flow Flexible Mesh component).
+!
+!  Delft3D is free software: you can redistribute it and/or modify
+!  it under the terms of the GNU Affero General Public License as
+!  published by the Free Software Foundation version 3.
+!
+!  Delft3D  is distributed in the hope that it will be useful,
+!  but WITHOUT ANY WARRANTY; without even the implied warranty of
+!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+!  GNU Affero General Public License for more details.
+!
+!  You should have received a copy of the GNU Affero General Public License
+!  along with Delft3D.  If not, see <http://www.gnu.org/licenses/>.
+!
+!  contact: delft3d.support@deltares.nl
+!  Stichting Deltares
+!  P.O. Box 177
+!  2600 MH Delft, The Netherlands
+!
+!  All indications and logos of, and references to, "Delft3D",
+!  "D-Flow Flexible Mesh" and "Deltares" are registered trademarks of Stichting
 !  Deltares, and remain the property of Stichting Deltares. All rights reserved.
-!                                                                               
+!
 !-------------------------------------------------------------------------------
 
 ! $Id$
@@ -60,35 +60,24 @@ use m_flowgeom
 ! Local variables
 !
     integer                        :: il, ir, k1, k2, kL, kR, m, Lf
-    integer                        :: L0
+    integer                        :: L0, Lb, Lt, LL, kk, iup
     logical                        :: velheight
-    double precision               :: cgd
-    double precision               :: cgf
+    double precision               :: cgd, cgf
     double precision               :: crest
-    double precision               :: cwd
-    double precision               :: cwf
-    double precision               :: dg
-    double precision               :: ds
-    double precision               :: ds1
-    double precision               :: ds2
-    double precision               :: hdsb
-    double precision               :: husb
-    double precision               :: lambda
-    double precision               :: mugf
+    double precision               :: cwd, cwf
+    double precision               :: dg, ds, ds1, ds2
+    double precision               :: hdsb, husb
+    double precision               :: lambda, mugf
     double precision               :: relax
-    double precision               :: rholeft
-    double precision               :: rhoright
+    double precision               :: rholeft, rhoright
     double precision               :: strdamf
     double precision               :: teken, tekenstr
-    double precision               :: ud
-    double precision               :: uu
-    double precision               :: w2
-    double precision               :: wsd
-    double precision               :: wstr
-    double precision               :: zb2
-    double precision               :: zs, gateloweredgelevel, gatedoorheight
-    double precision               :: DsL
-    double precision               :: gatefraction, fu_sav, ru_sav, au_sav
+    double precision               :: ud, uu
+    double precision               :: w2, wsd, wstr
+    double precision               :: zb2, zs
+    double precision               :: gateloweredgelevel, gatedoorheight
+    double precision               :: DsL, hh, zb, zt, au0, au1, au2, au3
+    double precision               :: gatefraction
 
 !
 !! executable statements -------------------------------------------------------
@@ -176,6 +165,11 @@ use m_flowgeom
 
     tekenstr = teken*sign(1, L) ! if flow link abs(L) is in opposite orientation to the structure's orientation, then negate the just computed upwind (flow) teken.
 
+    if (kmx > 0) then
+       call getLbotLtop(Lf,Lb,Lt)
+       ff3(:,:) = 0d0
+    endif
+
     if (husb > zs) then
        call flgtarfm(ng, L0, wu(Lf), bl(kL), bl(kR), tekenstr, zs, wstr, w2, wsd, zb2, dg, ds1, ds2, cgf, cgd,   &
                      cwf, cwd, mugf, lambda, strdamf, gatedoorheight)
@@ -185,10 +179,32 @@ use m_flowgeom
        call flqhgsfm(Lf, teken, husb, hdsb, uu, zs, gatefraction*wstr, w2, wsd, zb2, ds1, ds2, dg,  &
                      cgf, cgd, cwf, cwd, mugf, lambda, strdamf, jarea, ds)
        fusav(1,n) = fu(Lf) ; rusav(1,n) = ru(Lf) ; ausav(1,n) = au(Lf)
+
+       if (kmx > 0 .and. jastructurelayersactive == 1 .and. au(Lf) > 0d0) then
+
+          hh   = au(Lf) / (gatefraction*wstr)
+          zb   = zs
+          zt   = zb + hh
+          if (u1(Lf) > 0) then
+             iup = 1
+          else if (u1(Lf) < 0) then
+             iup = 2
+          else if (s1(k1) > s1(k2)) then
+             iup = 1
+          else
+             iup = 2
+          endif
+          ff3(1,0) = 0d0
+          do LL = Lb, Lt
+             kk = ln(iup, LL)
+             ff3(1,LL-Lb+1) = max( 0d0, min(zt, zws(kk)) - zb ) / hh
+          enddo
+       endif
+
     else
-      fusav(1,n) = 0d0
-      rusav(1,n) = 0d0
-      ausav(1,n) = 0d0
+       fusav(1,n) = 0d0
+       rusav(1,n) = 0d0
+       ausav(1,n) = 0d0
     endif
 
     if (gatedoorheight > 0d0) then  ! now add water overflowing top of gate
@@ -216,10 +232,6 @@ use m_flowgeom
     zs                 = min  ( bob(1,Lf), bob(2,Lf) )         ! == zcgen(3*ng - 2) crest/silllevel
 
     if ( husb >= zs .and. gatefraction < 1d0) then
-       fu_sav = fu(Lf)
-       ru_sav = ru(Lf)
-       au_sav = au(Lf)
-
        zs =  min  ( bob(1,Lf), bob(2,Lf) )
        dg = huge(1d0)
        u1(Lf) = rusav(3,n) - fusav(3,n)*dsL ; u0(Lf) = u1(Lf) ; q1(Lf) = ausav(3,n)*u1(Lf)
@@ -238,6 +250,29 @@ use m_flowgeom
     if (au(Lf) > 0d0) then
        fu(Lf) = (fusav(1, n)*ausav(1, n) + fusav(2, n)*ausav(2, n) + fusav(3, n)*ausav(3, n))/au(Lf)
        ru(Lf) = (rusav(1, n)*ausav(1, n) + rusav(2, n)*ausav(2, n) + rusav(3, n)*ausav(3, n))/au(Lf)
+       if (kmx > 0) then
+          if ( jastructurelayersactive == 1 ) then ! some layers are more equal than others
+             au0 = 0d0
+             do LL = Lb, Lt
+                au1    = ausav(1,n)*( ff3(1,LL-Lb+1) - ff3(1,LL-Lb) )
+                au2    = ausav(2,n)*( ff3(2,LL-Lb+1) - ff3(2,LL-Lb) )
+                au3    = ausav(3,n)*( ff3(3,LL-Lb+1) - ff3(3,LL-Lb) )
+                au(LL) = au1 + au2 + au3
+                if (au(LL) > 0) then
+                   fu(LL) = ( fusav(1, n)*au1 + fusav(2, n)*au2 + fusav(3, n)*au3 ) / au(LL)
+                   ru(LL) = ( rusav(1, n)*au1 + rusav(2, n)*au2 + rusav(3, n)*au3 ) / au(LL)
+                else
+                   fu(LL) = 0d0
+                   ru(LL) = 0d0
+                endif
+             enddo
+          else                                     ! default: all layers are equal
+             do LL = Lb, Lt
+                fu(LL) = fu(Lf) ; ru(LL) = ru(Lf)
+                au(LL) = au(Lf)*( hu(LL)-hu(LL-1) ) / ( hu(Lt)-hu(Lb-1) )
+             enddo
+          endif
+       endif ! now wait till these lines will be copied to the %environment
     else
        fu(Lf) = 0d0
        ru(Lf) = 0d0
