@@ -51,6 +51,8 @@ subroutine bubfil(lundia    ,filbub    ,error     ,mmax      ,nmax      , &
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
     real(fp), dimension(:)  , pointer :: zbubl
+    integer, pointer       :: mmaxgl
+    integer, pointer       :: nmaxgl
     integer, pointer       :: mfg 
     integer, pointer       :: nfg 
     integer, pointer       :: mlg 
@@ -119,6 +121,8 @@ subroutine bubfil(lundia    ,filbub    ,error     ,mmax      ,nmax      , &
 !! executable statements -------------------------------------------------------
 !
     zbubl   => gdp%gdbubble%zbubl
+    mmaxgl  => gdp%gdparall%mmaxgl
+    nmaxgl  => gdp%gdparall%nmaxgl
     mfg     => gdp%gdparall%mfg 
     mlg     => gdp%gdparall%mlg 
     nfg     => gdp%gdparall%nfg 
@@ -241,17 +245,17 @@ subroutine bubfil(lundia    ,filbub    ,error     ,mmax      ,nmax      , &
           goto 300
        endif
        !
-       ! Inside computational domain ?
+       ! Inside (global) computational domain ?
        !
-       if (m1>mmax .or. m1<1 .or. m2>mmax .or. m2<1) then
+       if (m1>mmaxgl .or. m1<1 .or. m2>mmaxgl .or. m2<1) then
           call prterr(lundia, 'V249', errmsg(:22))
-          ! error = .true.
-          ! goto 300
+          error = .true.
+          goto 300
        endif
-       if (n1>nmaxus .or. n1<1 .or. n2>nmaxus .or. n2<1) then
+       if (n1>nmaxgl .or. n1<1 .or. n2>nmaxgl .or. n2<1) then
           call prterr(lundia, 'V249', errmsg(:22))
-          ! error = .true.
-          ! goto 300
+          error = .true.
+          goto 300
        endif
        mcount           = abs(ival(3)-ival(1)) + 1
        ncount           = abs(ival(4)-ival(2)) + 1

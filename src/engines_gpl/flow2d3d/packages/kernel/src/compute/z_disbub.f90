@@ -161,6 +161,10 @@ subroutine z_disbub(kmax    ,nsrcd     ,nsrc      ,nxbub    , &
        nm = (mnksrc(2, ibub) + ddb) + ((mnksrc(1, ibub) - 1) + ddb)*icxy
        kk = mnksrc(3, ibub)
        !
+       ! skip this point when it is outside this partition
+       !
+       if (kk == -1) cycle
+       !
        ! check for enough layers (3 or more) for bubblescreen
        !
        if (kfsmax(nm) - kfsmin(nm) < 3) then
@@ -208,6 +212,10 @@ subroutine z_disbub(kmax    ,nsrcd     ,nsrc      ,nxbub    , &
           inam  = inam + 1
           chulp = namsrc(ibub)
        endif
+       !
+       ! skip this point when it is outside this partition
+       !
+       if (kk == -1) cycle
        !
        ! Determine layer number of injection point
        !
