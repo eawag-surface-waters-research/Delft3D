@@ -3011,8 +3011,6 @@ stocfl,stocsu,stocsc
 "SF_dS2VBre","S1_PS2    ",   1.00000
 "SF_dS3VBre","S1_PS3    ",   1.00000
 "SF_dS4VBre","S1_PS4    ",   1.00000
-"dSedFeIIIp","S1_FeIIIp ",   1.00000
-"dSedSUP   ","S1_SUP    ",   1.00000
 "dMPB1Fgp  ","MPB1peli  ",   1.00000
 "dMPB2Fgp  ","MPB2psam  ",   1.00000
 "dMPB1Res  ","MPB1peli  ",  -1.00000

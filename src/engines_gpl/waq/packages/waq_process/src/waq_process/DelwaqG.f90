@@ -568,8 +568,8 @@
 
       integer, save :: ipnt(1) = -999
       integer       :: i
-      save
 
+      save
 !
 !******************************************************************************* INITIAL PROCESSING
 
@@ -706,6 +706,9 @@
           TCdisSi = PMSA(IPOINT(ip_TCdisSi))
           SWDisSi = PMSA(IPOINT(ip_SWDisSi))
 
+          Exp_Tur = PMSA(IPOINT(ip_Exp_Tur))
+          Exp_Dif = PMSA(IPOINT(ip_Exp_Dif))
+
 !          ! hardcoded for the moment, needs to be input
 !          ! fraction of mixing 0.01 achieved at depth 0.1
 !          exp_dif = Log(1./0.01)/0.1
@@ -780,10 +783,12 @@
           do iseg = 1,noseg
               CALL DHKMRK(1,IKNMRK(iseg),iatt1) ! pick up first attribute
               CALL DHKMRK(2,IKNMRK(iseg),iatt2) ! pick up second attribute
-              if (iatt1.gt.0) then
-                  if (iatt2.eq.0.or.iatt2.eq.3) then
-                      noseg2d = noseg2d+1
-                  endif
+!             if (iatt1.gt.0) then
+!                 if (iatt2.eq.0.or.iatt2.eq.3) then
+!                     noseg2d = noseg2d+1
+!                 endif
+              if (iatt2.eq.0.or.iatt2.eq.3) then
+                  noseg2d = noseg2d+1
               endif
           enddo
           allocate(bottomsegments(noseg2d))
@@ -792,11 +797,15 @@
           do iseg = 1,noseg
               CALL DHKMRK(1,IKNMRK(iseg),iatt1) ! pick up first attribute
               CALL DHKMRK(2,IKNMRK(iseg),iatt2) ! pick up second attribute
-              if (iatt1.gt.0) then
-                  if (iatt2.eq.0.or.iatt2.eq.3) then
-                      itel = itel+1
-                      bottomsegments(itel) = iseg
-                  endif
+!             if (iatt1.gt.0) then
+!                 if (iatt2.eq.0.or.iatt2.eq.3) then
+!                     itel = itel+1
+!                     bottomsegments(itel) = iseg
+!                 endif
+!             endif
+              if (iatt2.eq.0.or.iatt2.eq.3) then
+                  itel = itel+1
+                  bottomsegments(itel) = iseg
               endif
           enddo
 
@@ -848,11 +857,12 @@
           Diflen  = PMSA(IPOINT(ip_Diflen )+(iseg-1)*INCREM(ip_Diflen ))
           Depth   = PMSA(IPOINT(ip_Depth  )+(iseg-1)*INCREM(ip_Depth  ))
           do ilay = 1,nolay
-          tt(ilay) = turcoef*exp(-exp_tur*bd(ilay))
-          td(ilay) = difcoef*exp(-exp_dif*sd(ilay))
+              tt(ilay) = turcoef*exp(-exp_tur*bd(ilay))
+              td(ilay) = difcoef*exp(-exp_dif*sd(ilay))
           enddo
 
           ! store total mass
+!AM - ugly, but a last resort (the values get overwritten later on by DELWAQ itself!)
           do isys = 1,nototsed
               totmas = 0.0
               do ilay = 1,nolay
@@ -905,8 +915,10 @@
               ip = offset_setl + isys
               sedwatflx = PMSA(IPOINT(ip)+(iseg-1)*INCREM(ip))  ! g/m2/d
               sedconc(1,nototseddis+isys,iseg2d) = sedconc(1,nototseddis+isys,iseg2d) + sedwatflx/dl(1)*delt ! to g/m3
-              iflux = nototseddis + nofl + isys
-              fl(iflux+(iseg-1)*noflux) = sedwatflx/depth
+
+              !AM: this flux is already handled via the individual sedimentation processes, so do not set it!
+              !iflux = nototseddis + nofl + isys
+              !fl(iflux+(iseg-1)*noflux) = sedwatflx/depth
 
           enddo
 
@@ -1064,6 +1076,11 @@
     !     fluxes in zero order term for relevant substances
           kp(ilay,is_po4) = kp(ilay,is_po4) - fads
           kp(ilay,is_aap) = kp(ilay,is_aap) + fads
+
+          if ( iseg2d == 1740 .or. iseg2d == 1940 ) then
+              !call print_kp( 'AdsP', ilay, kp )
+          endif
+
     !     store in output
           iflux = nototseddis + 1
           fl(iflux+(iseg-1)*noflux) = fl(iflux+(iseg-1)*noflux) + fads*dl(ilay) /depth
@@ -1107,6 +1124,10 @@
     !     store in output
           iflux = nototseddis + 2
           fl(iflux+(iseg-1)*noflux) = fl(iflux+(iseg-1)*noflux) + flnit*dl(ilay) /depth
+
+          if ( iseg2d == 1740 .or. iseg2d == 1940 ) then
+              !call print_kp( 'Nitrif', ilay, kp )
+          endif
 
           ! +++++++++++++++++++++++++++++++++++++++++++
           ! Existing process DecFast DecMedium DecSlow DecRefr DecDOC
@@ -1353,7 +1374,11 @@
                 kp(ilay,is_pos1) = kp(ilay,is_pos1) - decflx(12)
                 kp(ilay,is_sud ) = kp(ilay,is_sud ) + decflx(12)
 
-          !     store in output (fluxes 3-14
+          if ( iseg2d == 1740 .or. iseg2d == 1940 ) then
+              !call print_kp( 'Frac1', ilay, kp )
+          endif
+
+          !     store in output (fluxes 3-14)
                 do ifl = 1,12
                   iflux = nototseddis + 2 + ifl
                   fl(iflux+(iseg-1)*noflux) = fl(iflux+(iseg-1)*noflux) + decflx(ifl)*dl(ilay) /depth
@@ -1384,6 +1409,10 @@
                 kp(ilay,is_po4 ) = kp(ilay,is_po4 ) + decflx(11)
                 kp(ilay,is_pos2) = kp(ilay,is_pos2) - decflx(12)
                 kp(ilay,is_sud ) = kp(ilay,is_sud ) + decflx(12)
+
+          if ( iseg2d == 1740 .or. iseg2d == 1940 ) then
+              !call print_kp( 'Frac2', ilay, kp )
+          endif
 
           !     store in output (fluxes 15-26
                 do ifl = 1,12
@@ -1416,6 +1445,10 @@
                 kp(ilay,is_po4 ) = kp(ilay,is_po4 ) + decflx(11)
                 kp(ilay,is_pos3) = kp(ilay,is_pos3) - decflx(12)
                 kp(ilay,is_sud ) = kp(ilay,is_sud ) + decflx(12)
+
+          if ( iseg2d == 1740 .or. iseg2d == 1940 ) then
+              !call print_kp( 'Frac3', ilay, kp )
+          endif
                 !
           !     store in output (fluxes 27-38
                 do ifl = 1,12
@@ -1433,6 +1466,10 @@
                 kp(ilay,is_pos4) = kp(ilay,is_pos4) - decflx(12)
                 kp(ilay,is_sud ) = kp(ilay,is_sud ) + decflx(12)
 
+          if ( iseg2d == 1740 .or. iseg2d == 1940 ) then
+              !call print_kp( 'Frac4', ilay, kp )
+          endif
+
           !     store in output (fluxes 39-50
                 do ifl = 1,12
                   iflux = nototseddis + 38 + ifl
@@ -1448,6 +1485,10 @@
                 kp(ilay,is_po4) = kp(ilay,is_po4) + decflx(11)
                 kp(ilay,is_dos) = kp(ilay,is_dos) - decflx(12)
                 kp(ilay,is_sud) = kp(ilay,is_sud) + decflx(12)
+
+          if ( iseg2d == 1740 .or. iseg2d == 1940 ) then
+              !call print_kp( 'Frac5', ilay, kp )
+          endif
 
           !     store in output (fluxes 51-62
                 do ifl = 1,12
@@ -1486,6 +1527,10 @@
           fl(iflux+(iseg-1)*noflux) = fl(iflux+(iseg-1)*noflux) + fprc*dl(ilay) /depth
           iflux = nototseddis + 64
           fl(iflux+(iseg-1)*noflux) = fl(iflux+(iseg-1)*noflux) + fsol*dl(ilay) /depth
+
+          if ( iseg2d == 1740 .or. iseg2d == 1940 ) then
+              !call print_kp( 'VIVP', ilay, kp )
+          endif
 !
           ! +++++++++++++++++++++++++++++++++++++++++++
           ! Existing process DisSi
@@ -1515,6 +1560,10 @@
     !     store in output
           iflux = nototseddis + 65
           fl(iflux+(iseg-1)*noflux) = fl(iflux+(iseg-1)*noflux) + fsol*dl(ilay) /depth
+
+          if ( iseg2d == 1740 .or. iseg2d == 1940 ) then
+              !call print_kp( 'FSOL', ilay, kp )
+          endif
 
           ! +++++++++++++++++++++++++++++++++++++++++++
           ! Existing process CONSELAC
@@ -1662,6 +1711,10 @@
               fl(iflux+(iseg-1)*noflux) = fl(iflux+(iseg-1)*noflux) + conflx(ifl)*dl(ilay) /depth
           enddo
 
+          if ( iseg2d == 1740 .or. iseg2d == 1940 ) then
+              !call print_kp( 'FROXC', ilay, kp )
+          endif
+
           ! +++++++++++++++++++++++++++++++++++++++++++
           ! Existing process EBULCH4
           ! +++++++++++++++++++++++++++++++++++++++++++
@@ -1688,6 +1741,10 @@
     !     store in output
           iflux = nototseddis + 72
           fl(iflux+(iseg-1)*noflux) = fl(iflux+(iseg-1)*noflux) + ebulfl*dl(ilay) /depth
+
+          if ( iseg2d == 1740 .or. iseg2d == 1940 ) then
+              !call print_kp( 'CCH4S', ilay, kp )
+          endif
 
           ! +++++++++++++++++++++++++++++++++++++++++++
           !     Existing process specsud
@@ -1750,7 +1807,7 @@
           FLUXOX = k0sox + k1sox * TEMPC * SUD * oxy / POROS
           FLUXOX = MIN(FLUXOX,0.9*SUD/DELT)
           FLUXOX = MIN(FLUXOX,0.5*oxy/2.0/DELT)
-!
+
     !     Output of original proces:  -
           kp(ilay,is_sud) = kp(ilay,is_sud) - fluxox
           kp(ilay,is_oxy) = kp(ilay,is_oxy) - fluxox * 2.
@@ -1758,6 +1815,10 @@
     !     store in output
           iflux = nototseddis + 73
           fl(iflux+(iseg-1)*noflux) = fl(iflux+(iseg-1)*noflux) + fluxox*dl(ilay) /depth
+
+          if ( iseg2d == 1740 .or. iseg2d == 1940 ) then
+              !call print_kp( 'Fluxox', ilay, kp )
+          endif
 !
           ! +++++++++++++++++++++++++++++++++++++++++++
           ! Existing process PRECSUL
@@ -1786,6 +1847,10 @@
           fl(iflux+(iseg-1)*noflux) = fl(iflux+(iseg-1)*noflux) + fluxpr*dl(ilay) /depth
           iflux = nototseddis + 75
           fl(iflux+(iseg-1)*noflux) = fl(iflux+(iseg-1)*noflux) + fluxds*dl(ilay) /depth
+
+          if ( iseg2d == 1740 .or. iseg2d == 1940 ) then
+              !call print_kp( 'Precsul', ilay, kp )
+          endif
 
           ! +++++++++++++++++++++++++++++++++++++++++++
           ! Existing process OXIDCH4
@@ -1863,6 +1928,10 @@
           iflux = nototseddis + 77
           fl(iflux+(iseg-1)*noflux) = fl(iflux+(iseg-1)*noflux) + flcsu*dl(ilay) /depth
 
+          if ( iseg2d == 1740 .or. iseg2d == 1940 ) then
+              !call print_kp( 'Oxidch4', ilay, kp )
+          endif
+
           ! +++++++++++++++++++++++++++++++++++++++++++
           ! Existing process APATITE
           ! +++++++++++++++++++++++++++++++++++++++++++
@@ -1890,6 +1959,10 @@
           iflux = nototseddis + 79
           fl(iflux+(iseg-1)*noflux) = fl(iflux+(iseg-1)*noflux) + fsol*dl(ilay) /depth
 
+          if ( iseg2d == 1740 .or. iseg2d == 1940 ) then
+              !call print_kp( 'Apat', ilay, kp )
+          endif
+
           ! +++++++++++++++++++++++++++++++++++++++++++
           ! Interface to VB, programmed as an extra "process" to avoid further logistics
           ! +++++++++++++++++++++++++++++++++++++++++++
@@ -1897,37 +1970,38 @@
 
               ! 6 uptake fluxes, distributed over the layers according to availability
               vbflux = 0.0
-              if ( s1_nh4 > 0.0 ) vbflux = fN1VBup * nh4/s1_nh4
+              if ( s1_nh4 > 0.0 ) vbflux = fN1VBup * nh4 / s1_nh4 / poros
               kp(ilay,is_nh4  ) = kp(ilay,is_nh4  ) - vbflux
               iflux = nototseddis + 80
               fl(iflux+(iseg-1)*noflux) = fl(iflux+(iseg-1)*noflux) + vbflux*dl(ilay) /depth
 
               vbflux = 0.0
-              if ( s1_no3 > 0.0 ) vbflux = fN2VBup * no3/s1_no3
+              if ( s1_no3 > 0.0 ) vbflux = fN2VBup * no3 / s1_no3 / poros
               kp(ilay,is_no3  ) = kp(ilay,is_no3  ) - vbflux
               iflux = nototseddis + 81
               fl(iflux+(iseg-1)*noflux) = fl(iflux+(iseg-1)*noflux) + vbflux*dl(ilay) /depth
 
+
               vbflux = 0.0
-              if ( s1_aap > 0.0 ) vbflux = fP1VBup * aap/s1_aap
+              if ( s1_aap > 0.0 ) vbflux = fP1VBup * aap / s1_aap / poros
               kp(ilay,is_aap  ) = kp(ilay,is_aap  ) - vbflux
               iflux = nototseddis + 82
               fl(iflux+(iseg-1)*noflux) = fl(iflux+(iseg-1)*noflux) + vbflux*dl(ilay) /depth
 
               vbflux = 0.0
-              if ( s1_po4 > 0.0 ) vbflux = fP2VBup * po4/s1_po4
+              if ( s1_po4 > 0.0 ) vbflux = fP2VBup * po4 / s1_po4 / poros
               kp(ilay,is_po4  ) = kp(ilay,is_po4  ) - vbflux
               iflux = nototseddis + 83
               fl(iflux+(iseg-1)*noflux) = fl(iflux+(iseg-1)*noflux) + vbflux*dl(ilay) /depth
 
               vbflux = 0.0
-              if ( s1_so4 > 0.0 ) vbflux = fS1VBup * so4/s1_so4
+              if ( s1_so4 > 0.0 ) vbflux = fS1VBup * so4 / s1_so4 / poros
               kp(ilay,is_so4  ) = kp(ilay,is_so4  ) - vbflux
               iflux = nototseddis + 84
               fl(iflux+(iseg-1)*noflux) = fl(iflux+(iseg-1)*noflux) + vbflux*dl(ilay) /depth
 
               vbflux = 0.0
-              if ( s1_sud > 0.0 ) vbflux = fS2VBup * sud/s1_sud
+              if ( s1_sud > 0.0 ) vbflux = fS2VBup * sud / s1_sud / poros
               kp(ilay,is_sud  ) = kp(ilay,is_sud  ) - vbflux
               iflux = nototseddis + 85
               fl(iflux+(iseg-1)*noflux) = fl(iflux+(iseg-1)*noflux) + vbflux*dl(ilay) /depth
@@ -1997,11 +2071,18 @@
               kp(ilay,is_pos4 ) = kp(ilay,is_pos4 ) + vbflux
               iflux = nototseddis + 101
               fl(iflux+(iseg-1)*noflux) = fl(iflux+(iseg-1)*noflux) + vbflux*dl(ilay) /depth
+
+          if ( iseg2d == 1740 .or. iseg2d == 1940 ) then
+              !call print_kp( 'VB', ilay, kp )
+          endif
           endif
 
           ! end of loop over layers in present cell
-          enddo
 
+          if ( iseg2d == 1740 .or. iseg2d == 1940 ) then
+              !call print_kp( 'Total', ilay, kp )
+          endif
+          enddo
 
 ! ENDPROC
           do isys = 1,nototsed
@@ -2041,32 +2122,38 @@
                   if (dissub) then
                       ! dissolved upper
                       if (ilay.eq.1) then
-                        term = dble(td(ilay)/(diflen/2.+dl(ilay)/2.))
-                        bv(ilay)    = bv(ilay) + term*dble(cwater*poros)
-                        av(ilay,ilay) = av(ilay,ilay) + term
+                          !
+                          ! For the exchange with the overlying water we need the water segment to be active
+                          !
+                          CALL DHKMRK(1,IKNMRK(iseg),iatt1) ! pick up first attribute
+                          if ( iatt1 == 1 ) then
+                              term = dble(td(ilay)/(diflen/2.+dl(ilay)/2.))
+                              bv(ilay)    = bv(ilay) + term*dble(cwater*poros)
+                              av(ilay,ilay) = av(ilay,ilay) + term
+                          endif
                       else
-                        term = dble(td(ilay)/(dl(ilay-1)/2.+dl(ilay)/2.))
-                        av(ilay-1,ilay) = av(ilay-1,ilay) - term
-                        av(ilay,ilay) = av(ilay,ilay) + term
+                          term = dble(td(ilay)/(dl(ilay-1)/2.+dl(ilay)/2.))
+                          av(ilay-1,ilay) = av(ilay-1,ilay) - term
+                          av(ilay,ilay) = av(ilay,ilay) + term
                       endif
                       ! dissolved lower
                       if (ilay.ne.nolay) then
-                        term = dble(td(ilay+1)/(dl(ilay+1)/2.+dl(ilay)/2.))
-                        av(ilay+1,ilay) = av(ilay+1,ilay) - term
-                        av(ilay,ilay) = av(ilay,ilay) + term
+                          term = dble(td(ilay+1)/(dl(ilay+1)/2.+dl(ilay)/2.))
+                          av(ilay+1,ilay) = av(ilay+1,ilay) - term
+                          av(ilay,ilay) = av(ilay,ilay) + term
                       endif
                   else
                       ! solid upper
                       if (ilay.ne.1) then
-                        term = dble(tt(ilay-1)/(dl(ilay-1)/2.+dl(ilay)/2.))
-                        av(ilay-1,ilay) = av(ilay-1,ilay) - term
-                        av(ilay,ilay) = av(ilay,ilay) + term
+                          term = dble(tt(ilay-1)/(dl(ilay-1)/2.+dl(ilay)/2.))
+                          av(ilay-1,ilay) = av(ilay-1,ilay) - term
+                          av(ilay,ilay) = av(ilay,ilay) + term
                       endif
                       ! solid lower
                       if (ilay.ne.nolay) then
-                        term = dble(tt(ilay)/(dl(ilay+1)/2.+dl(ilay)/2.))
-                        av(ilay+1,ilay) = av(ilay+1,ilay) - term
-                        av(ilay,ilay) = av(ilay,ilay) + term
+                          term = dble(tt(ilay)/(dl(ilay+1)/2.+dl(ilay)/2.))
+                          av(ilay+1,ilay) = av(ilay+1,ilay) - term
+                          av(ilay,ilay) = av(ilay,ilay) + term
                       endif
                   endif
 
@@ -2077,19 +2164,18 @@
               call INVERM (av,bv,nolay,1,nolay,iwork,rwork,ierror)
               !all printstelsel(av,bv,nolay,'OUT',isys)
               if (ierror.ne.0) CALL ERRSYS ('Error Solving Local Equations', 1 )
+
               do ilay = 1,nolay
-                  sedconc(ilay,isys,iseg2d) = sngl(bv(ilay))
+                  sedconc(ilay,isys,iseg2d) = bv(ilay)
               enddo
 
               ! export solute fluxes
-              if (dissub) then
+              if (dissub .and. iatt1 == 1 ) then
                   !             g/m3                   / m                   * m2/d  / m  = g/m3/d, positive TOWARDS water column
                   sedwatflx = -(cwater*poros-sngl(bv(1)))/(diflen/2.+dl(1)/2.) * td(1) / depth
                   iflux = isys
                   fl(iflux+(iseg-1)*noflux) = sedwatflx
               endif
           enddo
-
       enddo
-
       end

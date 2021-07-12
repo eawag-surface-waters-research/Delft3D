@@ -198,6 +198,10 @@
 !      integer,parameter :: if_firstSed = if_firstWat + NFlxWat
       integer,parameter :: NFlxSed = 16
 
+      ! conversion of units
+      real, parameter :: tonha_gm2 = 100.0   ! Converts tons/ha to g/m2
+      real, parameter :: perc_frac = 100.0   ! Converts percentage to fraction
+
       ! input items
       real :: SwEmersion
       integer :: SwVegMod
@@ -368,10 +372,13 @@
           do iseg = 1,noseg
               call dhkmrk(1,iknmrk(iseg),ikmrk1)
               call dhkmrk(2,iknmrk(iseg),ikmrk2)
-              if (ikmrk1 == 1 ) then
-                  if (ikmrk1.lt.3 .and. (ikmrk2.eq.0).or.(ikmrk2.eq.3)) then
-                      botseg(iseg) = iseg
-                  endif
+!             if (ikmrk1 == 1 ) then
+!                 if (ikmrk1.lt.3 .and. (ikmrk2.eq.0).or.(ikmrk2.eq.3)) then
+!                     botseg(iseg) = iseg
+!                 endif
+!             endif
+              if (ikmrk1.lt.3 .and. (ikmrk2.eq.0).or.(ikmrk2.eq.3)) then
+                  botseg(iseg) = iseg
               endif
 
           enddo
@@ -459,6 +466,7 @@
       work = 0.0
 
       do iseg = 1 , noseg
+
 !         lowest water and 2d segments only, also dry, ikmrk1 = 0
           call dhkmrk(1,iknmrk(iseg),ikmrk1)
           call dhkmrk(2,iknmrk(iseg),ikmrk2)
@@ -474,6 +482,7 @@
               nscdVB     = pmsa( ipnt(ip_nscdVB) )
               InnscdVB   = pmsa( ipnt(ip_InnscdVB) )
               TotalDepth = pmsa( ipnt(ip_TotalDepth) )
+              depth      = pmsa( ipnt(ip_Depth) )
 
               SWVBGro = 1.0
               SWVBMrt = 0.0
@@ -538,7 +547,7 @@
               ipb = ipnt(ip_VBSavail)
               pmsa(ipb) = (pmsa(ipb) + (s1_so4+s1_sud)*fbot*surf)/surf
 
-              ! RootShoot Model using the Michelis-Menten eq.
+              ! RootShoot Model using the Michaelis-Menten eq.
               if ( Nint(SWRootVB) .eq. 1) then
                   ! express the availeble nitrogen conc in sediment as g/m3
                   if (PorSed .gt. 1.0e-10) then
@@ -603,6 +612,7 @@
               TBmWV = pmsa(ipnt(ip_TBmWV))
               TempAir = pmsa(ipnt(ip_TempAir))
               MinVBAll = pmsa(ipnt(ip_MinVBAll))
+              volume = pmsa(ipnt(ip_volume))
 
               if (ifirst (vbtype) .eq. 0) then
                    AgeVB = IniAgeVB
@@ -615,7 +625,7 @@
 !             evaluate use initialisation 0=no, 1=yes
 !             always use iniCovVB, 100% (default) means ha=haC, if unequal 100% ha<>haC
               IF (  (SWiniVB .EQ. 1) .or. (SWiniVB .eq. 0 ) ) THEN
-                   iniCovVB = iniCovVB / 100
+                   iniCovVB = iniCovVB / perc_frac
               ELSE
                   CALL ERRSYS ('(no valid value for SWiniVB <0,1>', 1 )
               ENDIF
@@ -638,16 +648,16 @@
 !                     original VEGMOD
 
 !                     convert Ton DM/hac to gC/m2-cohort
-                      iniVB = iniVB / dmCfVB * 100
-                      minVB = minVB / dmCfVB * 100
-                      maxVB = maxVB / dmCfVB * 100
+                      iniVB = iniVB / dmCfVB * tonha_gm2
+                      minVB = minVB / dmCfVB * tonha_gm2
+                      maxVB = maxVB / dmCfVB * tonha_gm2
                       NutLimVB = 1
 
 !                     input shape factor (range 1-10) scaled to halfAge
                       sfVB =  sfVB / hlfAgeVB
 
 !                     biomass at age=0 for later use to check if vegetation is dying after mortality
-                      VBAge0ha = (( minVB - maxVB) /(1+exp(sfVB * (- hlfAgeVB))) + maxVB  ) /100
+                      VBAge0ha = (( minVB - maxVB) /(1+exp(sfVB * (- hlfAgeVB))) + maxVB  ) / tonha_gm2
 
 !                     Check values growth limitation (only 0 or 1)
                       IF ( (NINT(SWVBGro) .NE. 1) .and. (NINT(SWVBGro) .NE. 0) ) THEN
@@ -696,10 +706,10 @@
                              ageVB =0.0
                          ENDIF
 
-                         VBAha = (( minVB - maxVB) /(1+exp(sfVB * (ageVB - hlfAgeVB))) + maxVB  ) /100
+                         VBAha = (( minVB - maxVB) /(1+exp(sfVB * (ageVB - hlfAgeVB))) + maxVB  ) / tonha_gm2
 
-                         VBha  = VB / iniCovVB /100
-                         dVB   = ( VBAha - VBha ) * 100.0 * surf / volume / delt * iniCovVB
+                         VBha  = VB / iniCovVB / tonha_gm2
+                         dVB   = ( VBAha - VBha ) * tonha_gm2 * surf / volume / delt * iniCovVB
 !                        no growth reduction during initialisation
 !                         if (dVB .gt. 1.E-20) then
 !                             NutLimVB = min (1.0, (dVBMaxNL / dVB) )
@@ -710,7 +720,7 @@
 
                       ELSE
 
-                          VBha  = VB / iniCovVB /100
+                          VBha  = VB / iniCovVB / tonha_gm2
 
 !                         vegetation is flooded
                           if ( NINT (SWVBMrt) .eq. 1 ) then
@@ -730,8 +740,8 @@
                           if ( SWVBDec .eq. 1) then
                               if ( VBha .le. VBAge0ha ) then
                                   ageVB = 0
-                              elseif ( (VBha*100/maxVB) .lt. 0.99 ) then
-                                  ageVB  = hlfAgeVB + LOG((minVB-maxVB) /(VBha*100-maxVB) - 1 ) / sfVB
+                              elseif ( (VBha* tonha_gm2/maxVB) .lt. 0.99 ) then
+                                  ageVB  = hlfAgeVB + LOG((minVB-maxVB) /(VBha*tonha_gm2-maxVB) - 1 ) / sfVB
                               else
 !                                 cannot calc age
                               endif
@@ -741,12 +751,12 @@
                           endif
 
 !                         calculate attainable biomass per ha using age
-                          VBAha = (( minVB - maxVB) /(1+exp(sfVB * (ageVB - hlfAgeVB))) + maxVB  ) /100
+                          VBAha = (( minVB - maxVB) /(1+exp(sfVB * (ageVB - hlfAgeVB))) + maxVB  ) / tonha_gm2
 
 !                         no growth for standing stock either
                           IF ( ( NINT(SWVBGro) .EQ. 1) .and. (SWVBDec .eq. 0) .and. SWRegrVB .eq. 1) THEN
 
-                              dVB   = ( VBAha - VBha ) * 100.0 * surf / volume / delt * iniCovVB
+                              dVB   = ( VBAha - VBha ) * tonha_gm2 * surf / volume / delt * iniCovVB
 !                             growth reduction?
                               if (dVB .gt. 1.E-20) then
                                   NutLimVB = min (1.0, (dVBMaxNL / dVB) )
@@ -786,7 +796,7 @@
 !                         Current density within covered area
                           VBha  = TBmWV / dmCfVB
 !                         Initialise by % times TBmWV
-                          dVB = (VBAha * 100.0 - VB) / volume * surf / DELT
+                          dVB = (VBAha * tonha_gm2 - VB) / volume * surf / DELT
                           fVB = 0.0
 !                         flux for nutrient uptake is zero
                           NutLimVB = 1.0
@@ -795,7 +805,7 @@
                       else if (VB .lt. MinVBAll) then
 !                         Very low/no biomass for species with significant coverage
 !                         Current density within covered area
-                          VBha  = MinVB / 100.0 / iniCovVB
+                          VBha  = MinVB / tonha_gm2 / iniCovVB
 !                         Initialise biomass using general minimum biomass without nutrient uptake
                           dVB = (MinVBAll - VB) / volume * surf / DELT
                           fVB = 0.0
@@ -806,11 +816,11 @@
                       else
 !                         Calculate actual growth
 !                         Current density within covered area
-                          VBha  = VB / 100.0 / iniCovVB
+                          VBha  = VB / tonha_gm2 / iniCovVB
 
 !                         Ratio of current biomass to attainable biomass
                           if ( VBAha > 0.0 ) then
-                              rVB = VB / (VBAha * 100.0)
+                              rVB = VB / (VBAha * tonha_gm2)
                           else
                               rVB = merge( 1.0, 0.0, VB > 0.0 )
                           endif
@@ -936,7 +946,7 @@
               if (SwVegMod .eq. 1) then
     !             if wetland vegetation model, also turnover due to senescence mortality and grazing
     !             Ratio of current biomass to attainable biomass
-                  rVB = VB / ((TBmWV + tiny(TBmWV)) * 100.0)
+                  rVB = VB / ((TBmWV + tiny(TBmWV)) * tonha_gm2)
                   TEMP20 = TempAir - 20.0
                   TempCof = TcMSWV ** TEMP20
 
@@ -1205,12 +1215,12 @@
           ! this segment has a bottom
           if ((ikmrk2.eq.0).or.(ikmrk2.eq.3)) then
 
-              s1_nh4 = pmsa(ipnt(ip_s1_nh4))
-              s1_no3 = pmsa(ipnt(ip_s1_no3))
-              s1_aap = pmsa(ipnt(ip_s1_aap))
-              s1_po4 = pmsa(ipnt(ip_s1_po4))
-              s1_so4 = pmsa(ipnt(ip_s1_so4))
-              s1_sud = pmsa(ipnt(ip_s1_sud))
+              s1_nh4 = max( 0.0, pmsa(ipnt(ip_s1_nh4)) )
+              s1_no3 = max( 0.0, pmsa(ipnt(ip_s1_no3)) )
+              s1_aap = max( 0.0, pmsa(ipnt(ip_s1_aap)) )
+              s1_po4 = max( 0.0, pmsa(ipnt(ip_s1_po4)) )
+              s1_so4 = max( 0.0, pmsa(ipnt(ip_s1_so4)) )
+              s1_sud = max( 0.0, pmsa(ipnt(ip_s1_sud)) )
               RootDeVB = pmsa(ipnt(ip_RootDeVB))
               hsed = pmsa(ipnt(ip_hsed))
               surf = pmsa(ipnt(ip_surf))
