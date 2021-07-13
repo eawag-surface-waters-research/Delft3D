@@ -12442,7 +12442,7 @@ subroutine unc_read_map(filename, ierr)
        end if
        !
        if ((sedtot_read .ne. stmpar%lsedtot .and. sedtot_read > 0 .and. stmpar%lsedtot > 0) .or.       &
-           (sedsus_read .ne. stmpar%lsedsus .and. sedsus_read > 0 .and. stmpar%lsedsus > 0))        then
+           (sedsus_read .ne. stmpar%lsedsus .and. sedsus_read .ge. 0 .and. stmpar%lsedsus .ge. 0))        then
           write (msgbuf, '(a)') 'Mismatch in number of sediment fractions in morphology restart file. Not reading restart data at all.'
           call warn_flush()
           ierr = DFM_WRONGINPUT
@@ -12524,7 +12524,7 @@ subroutine unc_read_map(filename, ierr)
        end if
 
        ! Bed composition
-       if(stmpar%morlyr%settings%iunderlyr > 0 .and. nlyr_read == stmpar%morlyr%settings%iunderlyr ) then
+       if(stmpar%morlyr%settings%iunderlyr > 0 .and. nlyr_read == stmpar%morlyr%settings%nlyr ) then
        select case(stmpar%morlyr%settings%iunderlyr)
        case (1)
           ! bodsed
