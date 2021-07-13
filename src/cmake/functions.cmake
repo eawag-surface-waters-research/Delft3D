@@ -243,7 +243,7 @@ function(configure_package_installer name description_file  mayor minor build ge
   set(CPACK_VERBATIM_VARIABLES YES)
   set(CPACK_INCLUDE_TOPLEVEL_DIRECTORY OFF)
   set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "${name}")
-  set(CPACK_PACKAGE_VENDOR "Deltares 2020")
+  set(CPACK_PACKAGE_VENDOR "Deltares 2021")
   set(CPACK_PACKAGE_DESCRIPTION_FILE "${description_file}")
   set(CPACK_RESOURCE_FILE_LICENSE "${checkout_src_root}/Copyright.txt")
   set(CPACK_PACKAGE_VERSION_MAJOR "${mayor}")
