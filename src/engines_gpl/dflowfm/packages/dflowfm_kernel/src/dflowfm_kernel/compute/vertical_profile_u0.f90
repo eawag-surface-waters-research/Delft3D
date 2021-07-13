@@ -110,12 +110,12 @@ integer            :: jav3
  enddo
 
  jav3 = 0
- if (javau3onbnd == 1) then
+ if (javau == 3) then
+                       jav3 = 1
+ else if (javau3onbnd == 1) then
     if (LL > lnxi)     jav3 = 1
  else if (javau3onbnd == 2) then
     if (iadv(LL) == 6) jav3 = 1
- else if (javau == 3) then
-                       jav3 = 1
  endif
 
  do L    = Lb, Lt - 1
