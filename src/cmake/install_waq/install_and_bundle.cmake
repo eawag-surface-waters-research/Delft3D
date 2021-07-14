@@ -1,6 +1,6 @@
 set(BUILD_LIBRARIES
    ${CMAKE_INSTALL_PREFIX}/lib/libwaq_plugin_wasteload.so
-   ${CMAKE_INSTALL_PREFIX}/lib/libdelwaq_dll.so
+   ${CMAKE_INSTALL_PREFIX}/lib/libdelwaq.so
    ${CMAKE_INSTALL_PREFIX}/share/libesmf.so
 )
 set(THIRDPARTY_x64_LIB_FOLDERS

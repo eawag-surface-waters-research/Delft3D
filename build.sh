@@ -20,6 +20,7 @@ function print_usage_info {
     echo "- If <CONFIG> is missing, this usage will be print"
     echo "- all: All CMaked projects, currently D-Flow FM and DIMR"
     echo "- dflowfm"
+    echo "- dwaq"
     echo "- dimr"
     echo "- tests"
     echo
@@ -143,6 +144,10 @@ case $key in
     ;;
     dflowfm)
     config="dflowfm"
+    shift
+    ;;
+    dwaq)
+    config="dwaq"
     shift
     ;;
     dimr)

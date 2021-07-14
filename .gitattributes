@@ -475,9 +475,9 @@ src/cmake/install_fm/install_and_bundle.cmake -text
 src/cmake/install_tests/CMakeLists.txt -text
 src/cmake/install_tests/ReadMe.txt -text
 src/cmake/install_tests/install_and_bundle.cmake -text
-src/cmake/install_wq/CMakeLists.txt -text
-src/cmake/install_wq/ReadMe.txt -text
-src/cmake/install_wq/install_and_bundle.cmake -text
+src/cmake/install_waq/CMakeLists.txt -text
+src/cmake/install_waq/ReadMe.txt -text
+src/cmake/install_waq/install_and_bundle.cmake -text
 src/cmake/linux_scripts.cmake -text
 src/cmake/modules.cmake -text
 src/cmake/modules/engines.cmake -text
@@ -18854,6 +18854,7 @@ src/utils_lgpl/delftio/packages/delftio_dll/resource.fd -text
 src/utils_lgpl/delftio/packages/delftio_dll/resource.h -text
 src/utils_lgpl/delftio/packages/delftio_shm/CMakeLists.txt -text
 src/utils_lgpl/delftio/packages/delftio_shm/Makefile.am -text
+src/utils_lgpl/delftio/packages/delftio_shm/config.h.cmake.in -text
 src/utils_lgpl/delftio/packages/delftio_shm/delftio_shm.vcproj -text
 src/utils_lgpl/delftio/packages/delftio_shm/delftio_shm.vcxproj -text
 src/utils_lgpl/delftio/packages/delftio_shm/include/Makefile.am -text
@@ -19480,6 +19481,7 @@ src/utils_lgpl/esmfsm/packages/esmfsm/src/fsm/Makefile.am -text
 src/utils_lgpl/esmfsm/packages/esmfsm/src/fsm/fortapi.f90 -text
 src/utils_lgpl/esmfsm/packages/esmfsm_c/CMakeLists.txt -text
 src/utils_lgpl/esmfsm/packages/esmfsm_c/Makefile.am -text
+src/utils_lgpl/esmfsm/packages/esmfsm_c/config.h.cmake.in -text
 src/utils_lgpl/esmfsm/packages/esmfsm_c/esmfsm_c.vcproj -text
 src/utils_lgpl/esmfsm/packages/esmfsm_c/esmfsm_c.vcxproj -text
 src/utils_lgpl/esmfsm/packages/esmfsm_c/esmfsm_c_vs2012.vcxproj -text

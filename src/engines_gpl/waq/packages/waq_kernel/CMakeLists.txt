@@ -30,42 +30,60 @@ add_library(${library_name} ${source_files}
                             ${proces_file})
 
 # Set dependencies
-set(oss_dependencies    deltares_common
-                        delftio
-                        netcdf4
-                        netcdff
-                        part_data_f
-                        part_io_f
-                        part_kernel_f
-                        part_utils_f
-                        waq_plugin_wasteload
-                        waq_process
-                        waq_utils_c
-                        waq_utils_f) 
-oss_include_libraries(${library_name} oss_dependencies)
-
 if(UNIX)
-    target_link_libraries(${library_name} ${oss_dependencies})
-endif(UNIX)
+    # the `pkg_check_modules` function is created with this call
+    find_package(PkgConfig REQUIRED)
 
-# Define additional compilation flags
-set_property(SOURCE ${preproccessor_files}
-             PROPERTY COMPILE_OPTIONS "${file_preprocessor_flag}")
+    # these calls create special `PkgConfig::<MODULE>` variables
+    pkg_check_modules(NETCDF REQUIRED IMPORTED_TARGET netcdf)
+    pkg_check_modules(NETCDF_FTN REQUIRED IMPORTED_TARGET netcdf-fortran)
+
+    set(oss_dependencies    deltares_common
+                            delftio
+                            part_data_f
+                            part_io_f
+                            part_kernel_f
+                            part_utils_f
+                            waq_plugin_wasteload
+                            waq_process
+                            waq_utils_c
+                            waq_utils_f) 
+    oss_include_libraries(${library_name} oss_dependencies)
+
+    target_link_libraries(${library_name}
+         ${oss_dependencies}
+         PkgConfig::NETCDF
+         PkgConfig::NETCDF_FTN)
+endif(UNIX)
 
 if(WIN32)
-    set_property(SOURCE ${openmq_files}
-            PROPERTY COMPILE_OPTIONS "${openmp_flag}")
-    set_property(SOURCE ${proces_file}
-             PROPERTY COMPILE_OPTIONS "${openmp_flag}" "${generate_reentrancy_threaded_flag}" "${extend_source132_flag}")
+    set(oss_dependencies    deltares_common
+                            delftio
+                            netcdf4
+                            netcdff
+                            part_data_f
+                            part_io_f
+                            part_kernel_f
+                            part_utils_f
+                            waq_plugin_wasteload
+                            waq_process
+                            waq_utils_c
+                            waq_utils_f) 
+    oss_include_libraries(${library_name} oss_dependencies)
+
+    target_link_libraries(${library_name} ${oss_dependencies})
 endif(WIN32)
 
-if(UNIX)
-    set_property(SOURCE ${proces_file}
-             PROPERTY COMPILE_OPTIONS "${generate_reentrancy_threaded_flag}" "${extend_source132_flag}")
-endif(UNIX)
+# Define additional compilation flags
+set_property(SOURCE ${preproccessor_files} PROPERTY COMPILE_OPTIONS "${file_preprocessor_flag}")
+set_property(SOURCE ${openmq_files}        PROPERTY COMPILE_OPTIONS "${openmp_flag}")
+set_property(SOURCE ${proces_file}         PROPERTY COMPILE_OPTIONS "${openmp_flag}" "${generate_reentrancy_threaded_flag}" "${extend_source132_flag}")
+
 
 # Set additional compilation properties
 target_compile_options(${library_name} PRIVATE "${extend_source132_flag}")
+target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${check_bounds_flag}>")
+target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${check_pointer}>")
 
 # Define how the files should be structured within Visual Studio
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${source_files}

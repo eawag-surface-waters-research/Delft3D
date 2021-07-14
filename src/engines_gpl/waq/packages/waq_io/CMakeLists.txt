@@ -21,20 +21,47 @@ add_library(${library_name} ${mpidum_files}
 target_compile_options(${library_name} PRIVATE "${extend_source132_flag}")
 
 # Set dependencies
-set(oss_dependencies    deltares_common
-                        netcdf4
-                        netcdff
-                        part_data_f
-                        part_io_f
-                        waq_kernel
-                        waq_plugin_wasteload
-                        waq_utils_c
-                        waq_utils_f) 
+if(UNIX)
+    # the `pkg_check_modules` function is created with this call
+    find_package(PkgConfig REQUIRED)
+
+    # these calls create special `PkgConfig::<MODULE>` variables
+    pkg_check_modules(NETCDF     REQUIRED IMPORTED_TARGET netcdf)
+    pkg_check_modules(NETCDF_FTN REQUIRED IMPORTED_TARGET netcdf-fortran)
+
+    set(oss_dependencies    deltares_common
+                            part_data_f
+                            part_io_f
+                            waq_kernel
+                            waq_plugin_wasteload
+                            waq_utils_c
+                            waq_utils_f) 
+
+    target_link_libraries(${library_name}
+         ${oss_dependencies}
+         PkgConfig::NETCDF
+         PkgConfig::NETCDF_FTN)
+endif(UNIX)
+if(WIN32)
+    set(oss_dependencies    deltares_common
+                            netcdf4
+                            netcdff
+                            part_data_f
+                            part_io_f
+                            waq_kernel
+                            waq_plugin_wasteload
+                            waq_utils_c
+                            waq_utils_f) 
+
+    target_link_libraries(${library_name} ${oss_dependencies})
+endif(WIN32)
+
 oss_include_libraries(${library_name} oss_dependencies)
 
-if(UNIX)
-    target_link_libraries(${library_name} ${oss_dependencies})
-endif(UNIX)
+# Set additional compilation properties
+target_compile_options(${library_name} PRIVATE "${extend_source132_flag}")
+target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${check_bounds_flag}>")
+target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${check_pointer}>")
 
 # Define how the files should be structured within Visual Studio
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${mpidum_files}

@@ -10,12 +10,12 @@ set(rc_version_file ${CMAKE_CURRENT_SOURCE_DIR}/${include_path}/version_number.r
 
 # Generate version files
 generate_version_files(${rc_version_file} 
-                       ${svn_version_path}
+                       ${checkout_src_root}
                        ${ini_version_file} 
                        ON)
 
 generate_version_files(${h_version_file} 
-                       ${svn_version_path}
+                       ${checkout_src_root}
                        ${ini_version_file} 
                        ON)
 
@@ -32,12 +32,12 @@ add_library(${library_name} ${source_files}
 
 # Define prebuild events
 prebuild_version_number(${library_name} ${rc_version_file} 
-                                        ${svn_version_path}
+                                        ${checkout_src_root}
                                         ${ini_version_file}
                                         ON)
 
 prebuild_version_number(${library_name} ${h_version_file} 
-                                        ${svn_version_path}
+                                        ${checkout_src_root}
                                         ${ini_version_file}
                                         ON)
 

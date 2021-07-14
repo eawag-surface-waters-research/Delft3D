@@ -63,6 +63,7 @@ echo.
 echo Visual Studio sln-files:
 echo D-Flow FM : %root%\build_dflowfm\dflowfm.sln
 echo DIMR      : %root%\build_dimr\dimr.sln
+echo DWAQ      : %root%\build_dwaq\dwaq.sln
 echo Tests     : %root%\build_tests\tests.sln
 echo Other     : %root%\src\delft3d_open.sln
 echo             %root%\src\ec_module.sln
@@ -120,6 +121,11 @@ rem =================================
         set mode=quiet
     )
     if "%1" == "dflowfm_interacter" (
+        set prepareonly=0
+        set config=%1
+        set mode=quiet
+    )
+    if "%1" == "dwaq" (
         set prepareonly=0
         set config=%1
         set mode=quiet
@@ -473,11 +479,12 @@ rem =======================
     echo "    - Only when <CONFIG>=all: Combine all binaries in 'build_<CONFIG>\x64'"
     echo.
     echo "<CONFIG>:"
-    echo "  all                : All CMaked projects, currently D-Flow FM and DIMR, and not-CMaked projects"
-    echo "  dflowfm            : D-Flow FM only, using CMake"
-    echo "  dflowfm_interacter : Please check file ...\src\engines_gpl\dflowfm\interacter\README"
-    echo "  dimr               : DIMR only, using CMake"
-    echo "  tests              : Test programs, using CMake"
+    echo "- all: All CMaked projects, currently D-Flow FM and DIMR, and not-CMaked projects"
+    echo "- dflowfm"
+    echo "- dflowfm_interacter"
+    echo "- dwaq"
+    echo "- dimr"
+    echo "- tests"
     echo.
     echo "More info  : https://oss.deltares.nl/web/delft3d/source-code"
     echo "About CMake: https://svn.oss.deltares.nl/repos/delft3d/trunk/src/cmake/doc/README"

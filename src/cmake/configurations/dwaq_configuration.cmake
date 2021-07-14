@@ -104,5 +104,5 @@ if(NOT TARGET part_kernel_f)
 endif()
 
 if(UNIX)
-    add_subdirectory(${checkout_src_root}/cmake/install_wq install_wq)
+    add_subdirectory(${checkout_src_root}/cmake/install_waq install_waq)
 endif()

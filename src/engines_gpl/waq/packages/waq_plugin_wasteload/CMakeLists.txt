@@ -9,12 +9,12 @@ set(rc_version_file ${waq_version_path}/version_number_waq_plugin_wasteload_vers
 
 # Generate version files
 generate_version_files(${rc_version_file} 
-                       ${waq_root_path}
+                       ${checkout_src_root}
                        ${ini_version_file} 
                        ON)
 
 generate_version_files(${fortran_version_file} 
-                       ${waq_root_path}
+                       ${checkout_src_root}
                        ${ini_version_file} 
                        ON)
 
@@ -30,12 +30,12 @@ add_library(${library_name} SHARED ${source_files})
 
 # Define prebuild events
 prebuild_version_number(${library_name} ${rc_version_file} 
-                                        ${waq_root_path}
+                                        ${checkout_src_root}
                                         ${ini_version_file}
                                         ON)
 
 prebuild_version_number(${library_name} ${fortran_version_file} 
-                                        ${waq_root_path}
+                                        ${checkout_src_root}
                                         ${ini_version_file}
                                         ON)
 

@@ -40,10 +40,21 @@ set_source_files_properties(${fortran_version_file}
 
 # Set dependencies
 if (UNIX)
+    # the `pkg_check_modules` function is created with this call
+    find_package(PkgConfig REQUIRED)
+
+    # these calls create special `PkgConfig::<MODULE>` variables
+    pkg_check_modules(NETCDF     REQUIRED IMPORTED_TARGET netcdf)
+    pkg_check_modules(NETCDF_FTN REQUIRED IMPORTED_TARGET netcdf-fortran)
+
     set(oss_dependencies    deltares_common
                             waq_process
                             waq_utils_c
                             waq_utils_f)
+    target_link_libraries(${library_name}
+         ${oss_dependencies}
+         PkgConfig::NETCDF
+         PkgConfig::NETCDF_FTN)
 endif(UNIX)
 if (WIN32)
     set(oss_dependencies    deltares_common
@@ -53,15 +64,17 @@ if (WIN32)
                             waq_utils_c
                             waq_utils_f)
 endif(WIN32)
+
 oss_include_libraries(${library_name} oss_dependencies)
 
-if(UNIX)
-    target_link_libraries(${library_name} ${oss_dependencies})
-endif(UNIX)
+# Set additional compilation properties
+target_compile_options(${library_name} PRIVATE "${extend_source132_flag}")
+target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${check_bounds_flag}>")
+target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${check_pointer}>")
 
 target_include_directories(${library_name}  PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../../include")
 
 # Define how the files should be structured in Visual studio
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES  ${source})
-set_target_properties (${library_name} PROPERTIES FOLDER utils_gpl/wq_processes)
+set_target_properties (${library_name} PROPERTIES FOLDER engines_gpl/waq)
 
