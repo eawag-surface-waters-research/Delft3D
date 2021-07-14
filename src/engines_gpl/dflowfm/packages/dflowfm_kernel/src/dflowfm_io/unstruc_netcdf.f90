@@ -5733,7 +5733,7 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
             end if
             call getLbotLtopmax(LL, Lb, Lt)
             do L = Lb,Lt
-               work1d(L) = viu(L) * 0.7 + dicc
+               work1d(L) = viu(L) / 0.7 + dicc
             end do
          end do
          ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_diu, iLocU, work1d, jabndnd=jabndnd_)
@@ -8853,7 +8853,7 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
                     dicc = dicouv
                 endif
                 do L = Lb,Ltx
-                    work1(L-Lb+nlaybL,LL) = viu(L) * 0.7 + dicc
+                    work1(L-Lb+nlaybL,LL) = viu(L) / 0.7 + dicc
                 enddo
              enddo
              ierr = nf90_put_var(imapfile, id_diu(iid)   , work1(1:kmx,1:lnx), start=(/ 1, 1, itim /), count=(/ kmx, lnx, 1 /))
