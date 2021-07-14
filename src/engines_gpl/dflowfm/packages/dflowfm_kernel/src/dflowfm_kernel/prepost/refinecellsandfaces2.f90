@@ -710,7 +710,7 @@ subroutine refinecellsandfaces2()
                dmiss, jsferic, jasfer3D, JINS, NPL, xpl, ypl, zpl, errorInfo)
             else if (interpolationtype == 4) then
                landsea = 0
-               !call bilinarcinfocheck( xc(1), yc(1), zc(1), landsea ) 
+               
                zmx = -1d9; zmn = 1d9
                do m = 1,N
                    call bilinarcinfo( x(m), y(m), z(m) )
@@ -721,6 +721,8 @@ subroutine refinecellsandfaces2()
                   zc(1) = 9d9  ; landsea = 3              ! no refine
                else if (zmx >= 0d0 .and. zmn <= 0d0) then ! land/sea
                   zc(1) = 0d9  ; landsea = 1              ! always refine 
+               else 
+                  call bilinarcinfo( xc(1), yc(1), zc(1)) ; landsea = 2 
                endif
             endif
 
