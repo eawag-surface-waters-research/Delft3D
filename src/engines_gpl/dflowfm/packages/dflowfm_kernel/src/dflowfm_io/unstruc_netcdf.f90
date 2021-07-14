@@ -5722,7 +5722,7 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
       end if
 
       if (jamapdiu > 0) then
-         ! For all flowlinks and layers add user defined part (diusp(LL) or dicouv) to modeled part (0.7*viu(LL)).
+         ! For all flowlinks and layers add user defined part (diusp(LL) or dicouv) to modeled part (viu(LL)/0.7).
          ! Values for inactive layers are set to missing in function unc_put_var_map.
          call realloc(work1d, lnkx, keepExisting = .false.)
          do LL = 1,lnx
@@ -5756,7 +5756,7 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
       end if
 
       if (jamapdiu > 0) then
-         ! For all flowlinks add user defined part (diusp(LL) or dicouv) to modeled part (0.7*viu(LL)).
+         ! For all flowlinks add user defined part (diusp(LL) or dicouv) to modeled part (viu(LL)/0.7).
          call realloc(work1d, lnx, keepExisting = .false.)
          do LL = 1,lnx
             if (jadiusp == 1) then ! If horizontal eddy viscosity is spatially varying.
@@ -5764,7 +5764,7 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
             else
                dicc = dicouv
             end if
-            work1d(LL) = viu(LL) * 0.7 + dicc
+            work1d(LL) = viu(LL) / 0.7 + dicc
          end do
          ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_diu, iLocU, work1d, jabndnd=jabndnd_)
       end if
