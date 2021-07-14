@@ -1843,7 +1843,6 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
                ! should be consistent in the current file. If this dimension is smaller than the maximal nlen, then a seperate array
                ! "itmpvar2D_tmpmax" will be defined by the current vectormax dimension. We first read values into this new array and then
                ! put them into array "itmpvar2D" (UNST-1842).
-               jaread_sep = 0
                if (var_kxdimpos(iv) /= -1 .and. (dimname == 'nNetElemMaxNode' .or. dimname == 'max_n'//trim(meshname)//'_face_nodes' .or. dimname == trim(meshname)//'_nMax_face_nodes' .or. dimname=='nFlowElemContourPts')) then
                   count_read(is) = netfacemaxnodes(ii)
                   if (netfacemaxnodes(ii) < nlen) then
@@ -1865,6 +1864,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
                         call realloc(tmpvar2D_tmpmax, (/  count_read(is), count_read(ie) /), keepExisting=.false., fill=dmiss)
                         ierr = nf90_get_var(ncids(ii), varids(ii,iv), tmpvar2D_tmpmax, count=count_read(is:ie), start=start_idx(is:ie))
                         tmpvar2D(1:netfacemaxnodes(ii),nitemglob0+1:nitemglob0+count_read(ie)) = tmpvar2D_tmpmax(1:count_read(is),1:count_read(ie))
+                        jaread_sep = 0
                      else
                         if (var_seddimpos(iv) /= -1) then
                            ! Reading a sediment variable needs to specify the "map" argument in nf90_get_var, because its dimensions are in a different order than other vectormax variables
@@ -1878,6 +1878,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
                         call realloc(itmpvar2D_tmpmax, (/  count_read(is), count_read(ie) /), keepExisting=.false., fill=intfillv)
                         ierr = nf90_get_var(ncids(ii), varids(ii,iv), itmpvar2D_tmpmax, count=count_read(is:ie), start=start_idx(is:ie))
                         itmpvar2D(1:netfacemaxnodes(ii),nitemglob0+1:nitemglob0+count_read(ie)) = itmpvar2D_tmpmax(1:count_read(is),1:count_read(ie))
+                        jaread_sep = 0
                      else
                         ierr = nf90_get_var(ncids(ii), varids(ii,iv), itmpvar2D(  :,nitemglob0+1:), count=count_read(is:ie), start=start_idx(is:ie))
                      end if
@@ -1939,9 +1940,6 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
                                        itmpvar2D_tmp(ikk,nitemglob) = node_c2g(g1)
                                    end if
                                end do
-                               if (jaread_sep > 0) then
-                                  itmpvar2D_tmp(netfacemaxnodes(ii)+1:,nitemglob) = -999
-                               end if
                            end if
                        end if
                    end do
@@ -2124,9 +2122,6 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
                         nitemglob = nitemglob+1
                         if (needshift) then
                            tmpvarptr(:,:,nitemglob) = tmpvarptr(:,:,nitemglob0+ip)
-                           if (jaread_sep > 0) then
-                              tmpvarptr(netfacemaxnodes(ii)+1:,:,nitemglob) = dmiss
-                           end if
                         end if
                      else
                         needshift = .true. ! From now on, all points from this var/file need one or more shifts to the left.
@@ -2138,9 +2133,6 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
                         nitemglob = nitemglob+1
                         if (needshift) then
                            itmpvarptr(:,:,nitemglob) = itmpvarptr(:,:,nitemglob0+ip)
-                           if (jaread_sep > 0) then
-                              itmpvarptr(netfacemaxnodes(ii)+1:,:,nitemglob) = -999
-                           end if
                         end if
                      else
                         needshift = .true. ! From now on, all points from this var/file need one or more shifts to the left.
@@ -2152,9 +2144,6 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
                         nitemglob = nitemglob+1
                         if (needshift) then
                            btmpvarptr(:,:,nitemglob,itm:itm) = btmpvarptr(:,:,nitemglob0+ip,itm:itm)
-                           if (jaread_sep > 0) then
-                              btmpvarptr(netfacemaxnodes(ii)+1:,:,nitemglob,itm:itm) = -999
-                           end if
                         end if
                      else
                         needshift = .true. ! From now on, all points from this var/file need one or more shifts to the left.
