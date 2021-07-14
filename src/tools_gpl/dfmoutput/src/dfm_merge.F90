@@ -1860,10 +1860,11 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
                   end if
                else if (var_kxdimpos(iv) /= -1 .neqv. var_laydimpos(iv) /= -1) then ! Either a vectormax OR a laydim
                   if (var_types(iv) == nf90_double) then
-                     if (jaread_sep == 1) then
+                     if (jaread_sep == 1) then ! This happens only for a vectormax, not for a laydim
                         call realloc(tmpvar2D_tmpmax, (/  count_read(is), count_read(ie) /), keepExisting=.false., fill=dmiss)
                         ierr = nf90_get_var(ncids(ii), varids(ii,iv), tmpvar2D_tmpmax, count=count_read(is:ie), start=start_idx(is:ie))
                         tmpvar2D(1:netfacemaxnodes(ii),nitemglob0+1:nitemglob0+count_read(ie)) = tmpvar2D_tmpmax(1:count_read(is),1:count_read(ie))
+                        tmpvar2D(netfacemaxnodes(ii)+1:,nitemglob0+1:nitemglob0+count_read(ie)) = dmiss
                         jaread_sep = 0
                      else
                         if (var_seddimpos(iv) /= -1) then
@@ -1874,10 +1875,11 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
                         end if
                      end if
                   else if (var_types(iv) == nf90_int .or. var_types(iv) == nf90_short) then
-                     if (jaread_sep == 1) then
+                     if (jaread_sep == 1) then ! This happens only for a vectormax, not for a laydim
                         call realloc(itmpvar2D_tmpmax, (/  count_read(is), count_read(ie) /), keepExisting=.false., fill=intfillv)
                         ierr = nf90_get_var(ncids(ii), varids(ii,iv), itmpvar2D_tmpmax, count=count_read(is:ie), start=start_idx(is:ie))
                         itmpvar2D(1:netfacemaxnodes(ii),nitemglob0+1:nitemglob0+count_read(ie)) = itmpvar2D_tmpmax(1:count_read(is),1:count_read(ie))
+                        itmpvar2D(netfacemaxnodes(ii)+1:,nitemglob0+1:nitemglob0+count_read(ie)) = -999
                         jaread_sep = 0
                      else
                         ierr = nf90_get_var(ncids(ii), varids(ii,iv), itmpvar2D(  :,nitemglob0+1:), count=count_read(is:ie), start=start_idx(is:ie))
