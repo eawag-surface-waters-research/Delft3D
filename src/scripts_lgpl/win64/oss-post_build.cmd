@@ -633,12 +633,7 @@ rem ===================================
         set dest_share="!install_dir!\x64\Release\share\bin"
         
         call :makeAllDirs   
-        call :copyDwaqDependentRuntimeLibraries                                                                             !dest_bin!
-        
-        rem Temporarily rename dest_bin to share_bin to copy libraries there as well
-        set dest_bin=!dest_share!
-        call :copyDwaqDependentRuntimeLibraries                                                                             !dest_bin!
-        set dest_bin="!install_dir!\x64\Release\waq_plugin_wasteload\bin"
+        call :copyDwaqDependentRuntimeLibraries                                                                             !dest_share!
         
         rem copy binaries and dll 
         call :copyFile "!build_dir!\waq_plugin_wasteload\!configuration!\waq_plugin_wasteload.*"                            !dest_bin! 
@@ -667,7 +662,7 @@ rem ==========================
         set dest_share="!install_dir!\x64\Debug"
         
         call :makeDir !dest_bin!   
-        call :copyDwaqDependentRuntimeLibraries                                                                            !dest_bin!
+        call :copyDwaqDependentRuntimeLibraries                                                                          !dest_bin!
         
         rem copy binaries and dll 
         call :copyFile "!build_dir!\waq_plugin_wasteload\!configuration!\waq_plugin_wasteload.*"                         !dest_bin!
@@ -685,16 +680,17 @@ rem ==========================
         set dest_share="!install_dir!\x64\Release\share\bin"
         
         call :makeAllDirs   
-        call :copyDwaqDependentRuntimeLibraries                                                                             !dest_bin!
-        
-        rem Temporarily rename dest_bin to share_bin to copy libraries there as well
-        set dest_bin=!dest_share!
-        call :copyDwaqDependentRuntimeLibraries                                                                             !dest_bin!
-        set dest_bin="!install_dir!\x64\Release\dwaq\bin"
+        call :copyDwaqDependentRuntimeLibraries                                                        !dest_share!
         
         rem copy binaries and dll 
-        call :copyFile "!build_dir!\waq_plugin_wasteload\!configuration!\waq_plugin_wasteload.dll"                          !dest_bin! 
-        call :copyFile "!build_dir!\delwaq\!configuration!\delwaq.dll"                                                      !dest_bin! 
+        call :copyFile "!build_dir!\delwaq\!configuration!\delwaq.dll"                                 !dest_bin! 
+
+        rem default
+        call :copyFile !checkout_src_root!\engines_gpl\waq\default\bloom.spe                           !dest_default!
+        call :copyFile !checkout_src_root!\engines_gpl\waq\default\bloominp.d09                        !dest_default!
+        call :copyFile !checkout_src_root!\engines_gpl\waq\default\proc_def.dat                        !dest_default!
+        call :copyFile !checkout_src_root!\engines_gpl\waq\default\proc_def.def                        !dest_default!
+
     )
     
 goto :endproc
@@ -720,12 +716,12 @@ rem ==========================
         set dest_share="!install_dir!\x64\Debug"
         
         call :makeDir !dest_bin!   
-        call :copyDwaqDependentRuntimeLibraries                                                                            !dest_bin!
+        call :copyDwaqDependentRuntimeLibraries                                                       !dest_bin!
         
         rem copy binaries and dll 
-        call :copyFile "!build_dir!\waq_plugin_wasteload\!configuration!\waq_plugin_wasteload.*"                         !dest_bin!
-        call :copyFile "!build_dir!\delwaq\!configuration!\delwaq.*"                                                     !dest_bin!
-        call :copyFile "!build_dir!\delwaq1\!configuration!\delwaq1.*"                                                   !dest_bin!
+        call :copyFile "!build_dir!\waq_plugin_wasteload\!configuration!\waq_plugin_wasteload.*"      !dest_bin!
+        call :copyFile "!build_dir!\delwaq\!configuration!\delwaq.*"                                  !dest_bin!
+        call :copyFile "!build_dir!\delwaq1\!configuration!\delwaq1.*"                                !dest_bin!
     )
     
     if "%configuration%" == "Release" ( 
@@ -739,19 +735,13 @@ rem ==========================
         set dest_share="!install_dir!\x64\Release\share\bin"
         
         call :makeAllDirs   
-        call :copyDwaqDependentRuntimeLibraries                                                                             !dest_bin!
-        
-        rem Temporarily rename dest_bin to share_bin to copy libraries there as well
-        set dest_bin=!dest_share!
-        call :copyDwaqDependentRuntimeLibraries                                                                             !dest_bin!
-        set dest_bin="!install_dir!\x64\Release\dwaq\bin"
+        call :copyDwaqDependentRuntimeLibraries                                                     !dest_share!
         
         rem copy binaries and dll 
-        call :copyFile "!build_dir!\waq_plugin_wasteload\!configuration!\waq_plugin_wasteload.dll"                          !dest_bin! 
-        call :copyFile "!build_dir!\delwaq\!configuration!\delwaq.dll"                                                      !dest_bin! 
-        call :copyFile "!build_dir!\delwaq1\!configuration!\delwaq1.exe"                                                    !dest_bin! 
+        call :copyFile "!build_dir!\delwaq\!configuration!\delwaq.dll"                              !dest_bin! 
+        call :copyFile "!build_dir!\delwaq1\!configuration!\delwaq1.exe"                            !dest_bin! 
 
-        call :copyFile "!checkout_src_root!\engines_gpl\waq\scripts\run_delwaq.bat"                                         !dest_scripts!
+        call :copyFile "!checkout_src_root!\engines_gpl\waq\scripts\run_delwaq.bat"                 !dest_scripts!
     )
     
 goto :endproc
@@ -777,12 +767,12 @@ rem ==========================
         set dest_share="!install_dir!\x64\Debug"
         
         call :makeDir !dest_bin!   
-        call :copyDwaqDependentRuntimeLibraries                                                                            !dest_bin!
+        call :copyDwaqDependentRuntimeLibraries                                                        !dest_bin!
         
         rem copy binaries and dll 
-        call :copyFile "!build_dir!\waq_plugin_wasteload\!configuration!\waq_plugin_wasteload.*"                         !dest_bin!
-        call :copyFile "!build_dir!\delwaq\!configuration!\delwaq.*"                                                     !dest_bin!
-        call :copyFile "!build_dir!\delwaq2\!configuration!\delwaq2.*"                                                   !dest_bin!
+        call :copyFile "!build_dir!\waq_plugin_wasteload\!configuration!\waq_plugin_wasteload.*"       !dest_bin!
+        call :copyFile "!build_dir!\delwaq\!configuration!\delwaq.*"                                   !dest_bin!
+        call :copyFile "!build_dir!\delwaq2\!configuration!\delwaq2.*"                                 !dest_bin!
     )
     
     if "%configuration%" == "Release" ( 
@@ -796,19 +786,13 @@ rem ==========================
         set dest_share="!install_dir!\x64\Release\share\bin"
         
         call :makeAllDirs   
-        call :copyDwaqDependentRuntimeLibraries                                                                             !dest_bin!
-        
-        rem Temporarily rename dest_bin to share_bin to copy libraries there as well
-        set dest_bin=!dest_share!
-        call :copyDwaqDependentRuntimeLibraries                                                                             !dest_bin!
-        set dest_bin="!install_dir!\x64\Release\dwaq\bin"
+        call :copyDwaqDependentRuntimeLibraries                                                         !dest_share!
         
         rem copy binaries and dll 
-        call :copyFile "!build_dir!\waq_plugin_wasteload\!configuration!\waq_plugin_wasteload.*"                          !dest_bin! 
-        call :copyFile "!build_dir!\delwaq\!configuration!\delwaq.*"                                                      !dest_bin! 
-        call :copyFile "!build_dir!\delwaq2\!configuration!\delwaq2.*"                                                    !dest_bin!
+        call :copyFile "!build_dir!\delwaq\!configuration!\delwaq.*"                                    !dest_bin! 
+        call :copyFile "!build_dir!\delwaq2\!configuration!\delwaq2.*"                                  !dest_bin!
 
-        call :copyFile "!checkout_src_root!\engines_gpl\waq\scripts\run_delwaq.bat"                                         !dest_scripts! 
+        call :copyFile "!checkout_src_root!\engines_gpl\waq\scripts\run_delwaq.bat"                     !dest_scripts! 
     )
     
 goto :endproc
