@@ -847,6 +847,13 @@
        call ecInstancePrintState(ecInstancePtr,callback_msg,LEVEL_DEBUG)
     end if
  endif
+ 
+ if (kmx > 0) then 
+    if (jastructurelayersactive > 0) then 
+       if (allocated (ff3)) deallocate (ff3)
+       allocate (ff3(3,0:kmxd)) ! and wait till similar lines appear in the %environment
+    endif
+ endif
 
  ! Finish with all remaining old-style ExtForceFile quantities.
 if (mext /= 0) then
@@ -2221,13 +2228,6 @@ if (mext /= 0) then
     if (allocated(rusav)) deallocate(rusav)
     if (allocated(ausav)) deallocate(ausav)
     allocate( Fusav(3,ncgen), Rusav(3,ncgen), Ausav(3,ncgen) , stat = ierr ) ; Fusav = 0d0 ; Rusav = 0d0 ; ausav = 0d0
-
-    if (kmxd > 0) then 
-       if (jastructurelayersactive > 0) then 
-          if (allocated (ff3) ) deallocate (ff3)
-          allocate (ff3(3,0:kmxd)) ! and wait till similar lines appear in the %environment
-       endif
-    endif
 
     if ( allocated(cgen_ids) ) deallocate( cgen_ids )
     allocate( cgen_ids(ncgensg) )
