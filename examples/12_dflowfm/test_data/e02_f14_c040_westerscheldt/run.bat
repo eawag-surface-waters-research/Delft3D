@@ -13,7 +13,15 @@
 rem call ..\..\..\..\src\bin\x64\dflowfm\scripts\run_dflowfm.bat "--partition:ndomains=3:icgsolver=6" westerscheldt.mdu
 
 
-call ..\..\..\..\src\bin\x64\dimr\scripts\run_dimr_parallel.bat 3 dimr_config.xml
+rem call ..\..\..\..\src\bin\x64\dimr\scripts\run_dimr_parallel.bat 3 dimr_config.xml
+
+rem At present, this runscript will only work with build_configuration = build_all
+rem For this to work, the build.bat script in the top folder of the source tree needs to be executed for the "all (build full OSS tree)" configuration
+rem with automatic build, i.e. with the following option switched OFF: "Prepare only, no automatic compilation"
+
+set build_configuration=build_all
+set dimr_script_path=..\..\..\..\%build_configuration%\x64\dimr\scripts
+call %dimr_script_path%\run_dimr_parallel.bat 3 dimr_config.xml
 
 
     rem To prevent the DOS box from disappearing immediately: remove the rem on the following line
