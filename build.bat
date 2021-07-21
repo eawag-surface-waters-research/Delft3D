@@ -448,6 +448,14 @@ rem =======================
         xcopy %root%\build_all\x64\Release\dflowfm\bin\dfm*     %root%\build_all\x64\dflowfm\bin\     /E /C /Y /Q > del.log 2>&1
         xcopy %root%\build_all\x64\Release\dflowfm\default      %root%\build_all\x64\dflowfm\default\ /E /C /Y /Q > del.log 2>&1
         xcopy %root%\build_all\x64\Release\dflowfm\scripts      %root%\build_all\x64\dflowfm\scripts\ /E /C /Y /Q > del.log 2>&1
+
+        xcopy %root%\build_all\x64\Release\dwaq\bin\delwaq.dll      %root%\build_all\x64\dwaq\bin\     /E /C /Y /Q > del.log 2>&1
+        xcopy %root%\build_all\x64\Release\dwaq\bin\delwaq*.exe     %root%\build_all\x64\dwaq\bin\     /E /C /Y /Q > del.log 2>&1
+        xcopy %root%\build_all\x64\Release\dwaq\bin\waq_plugin*.dll %root%\build_all\x64\dwaq\bin\     /E /C /Y /Q > del.log 2>&1
+        xcopy %root%\build_all\x64\Release\dwaq\default             %root%\build_all\x64\dwaq\default\ /E /C /Y /Q > del.log 2>&1
+        xcopy %root%\build_all\x64\Release\dwaq\scripts             %root%\build_all\x64\dwaq\scripts\ /E /C /Y /Q > del.log 2>&1
+
+
         xcopy %root%\build_all\x64\Release\share\bin            %root%\build_all\x64\share\bin\       /E /C /Y /Q > del.log 2>&1
         rmdir /s /q %root%\build_all\x64\Release > del.log 2>&1
         del /f/q del.log
@@ -479,7 +487,7 @@ rem =======================
     echo "    - Only when <CONFIG>=all: Combine all binaries in 'build_<CONFIG>\x64'"
     echo.
     echo "<CONFIG>:"
-    echo "- all: All CMaked projects, currently D-Flow FM and DIMR, and not-CMaked projects"
+    echo "- all: All CMaked projects, currently D-Flow FM, DWAQ and DIMR, and not-CMaked projects"
     echo "- dflowfm"
     echo "- dflowfm_interacter"
     echo "- dwaq"
