@@ -165,4 +165,11 @@ post_build_target (${library_name}
                    ${library_name})
 
 install(TARGETS ${library_name} DESTINATION lib)
+if (UNIX)
+    install(PROGRAMS ${CMAKE_SOURCE_DIR}/../engines_gpl/waq/default/bloom.spe      DESTINATION share/delft3d)
+    install(PROGRAMS ${CMAKE_SOURCE_DIR}/../engines_gpl/waq/default/bloominp.d09   DESTINATION share/delft3d)
+    install(PROGRAMS ${CMAKE_SOURCE_DIR}/../engines_gpl/waq/default/proc_def.dat   DESTINATION share/delft3d)
+    install(PROGRAMS ${CMAKE_SOURCE_DIR}/../engines_gpl/waq/default/proc_def.def   DESTINATION share/delft3d)
+endif(UNIX)
+
 
