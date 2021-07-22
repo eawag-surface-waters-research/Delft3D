@@ -17583,6 +17583,7 @@ src/tools_gpl/duprol2delwaq/packages/hydduflow/hydduflow.f90 -text
 src/tools_gpl/duprol2delwaq/packages/parse/CMakeLists.txt -text
 src/tools_gpl/duprol2delwaq/packages/parse/Parse.vcxproj -text
 src/tools_gpl/duprol2delwaq/packages/parse/Parse_vs2012.vcxproj -text
+src/tools_gpl/duprol2delwaq/packages/parse/config.h.cmake.in -text
 src/tools_gpl/duprol2delwaq/packages/parse/src/parse.c -text
 src/tools_gpl/kubint/Makefile.am -text
 src/tools_gpl/kubint/packages/Makefile.am -text
