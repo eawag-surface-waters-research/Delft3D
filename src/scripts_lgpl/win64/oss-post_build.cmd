@@ -630,9 +630,9 @@ rem ===================================
     
         echo "Release postbuild"
 
-        set dest_bin="!install_dir!\x64\Release\waq_plugin_wasteload\bin"
-        set dest_default="!install_dir!\x64\Release\waq_plugin_wasteload\default"
-        set dest_scripts="!install_dir!\x64\Release\waq_plugin_wasteload\scripts"
+        set dest_bin="!install_dir!\x64\Release\dwaq\bin"
+        set dest_default="!install_dir!\x64\Release\dwaq\default"
+        set dest_scripts="!install_dir!\x64\Release\dwaq\scripts"
         set dest_plugins="!install_dir!\x64\Release\plugins\bin"
         set dest_share="!install_dir!\x64\Release\share\bin"
         
