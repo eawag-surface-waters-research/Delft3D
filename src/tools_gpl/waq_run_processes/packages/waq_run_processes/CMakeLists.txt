@@ -16,13 +16,17 @@ set(oss_dependencies    deltares_common
                         waq_utils_f
                         waq_run_processes_version_number) 
 oss_include_libraries(${executable_name} oss_dependencies)
+target_link_libraries(${executable_name} ${oss_dependencies})
 
 
 # Set additional compilation properties
 target_compile_options(${executable_name} PRIVATE "${extend_source132_flag}")
 target_compile_options(${executable_name} PRIVATE "$<$<CONFIG:Debug>:${check_bounds_flag}>")
 target_compile_options(${executable_name} PRIVATE "$<$<CONFIG:Debug>:${check_pointer}>")
-target_link_libraries(${executable_name} ${oss_dependencies})
+
+if(UNIX)
+    set_property(TARGET ${executable_name} PROPERTY LINKER_LANGUAGE Fortran)
+endif(UNIX)
 
 # Define how the files should be structured within Visual Studio
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${source_files})

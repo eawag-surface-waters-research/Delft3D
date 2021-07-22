@@ -153,6 +153,8 @@ rem ===============
     call :delwaq_dll
     call :delwaq1
     call :delwaq2
+    call :waqpb_export
+    call :waqpb_import
     call :waq_run_processes
     call :duprol2delwaq
     call :wave
@@ -795,6 +797,98 @@ rem ==========================
         call :copyFile "!build_dir!\delwaq2\!configuration!\delwaq2.*"                                  !dest_bin!
 
         call :copyFile "!checkout_src_root!\engines_gpl\waq\scripts\run_delwaq.bat"                     !dest_scripts! 
+    )
+    
+goto :endproc
+
+
+
+rem ==========================
+rem === POST_BUILD_waqpb_export
+rem ==========================
+:waqpb_export
+
+    echo "postbuild waqpb_export . . ."
+    
+    if "%configuration%" == "Debug" (
+    
+        echo "Debug postbuild"
+        set dest_bin="%install_dir%\x64\Debug"
+        
+        set dest_bin="!install_dir!\x64\Debug"
+        set dest_default="!install_dir!\x64\Debug"
+        set dest_scripts="!install_dir!\x64\Debug"
+        set dest_plugins="!install_dir!\x64\Debug"
+        set dest_share="!install_dir!\x64\Debug"
+        
+        call :makeDir !dest_bin!   
+        call :copyDwaqDependentRuntimeLibraries                                           !dest_bin!
+        
+        rem copy binaries and dll 
+        call :copyFile "!build_dir!\waqpb_export\!configuration!\waqpb_export.*"          !dest_bin!
+    )
+    
+    if "%configuration%" == "Release" ( 
+    
+        echo "Release postbuild"
+
+        set dest_bin="!install_dir!\x64\Release\dwaq\bin"
+        set dest_default="!install_dir!\x64\Release\dwaq\default"
+        set dest_scripts="!install_dir!\x64\Release\dwaq\scripts"
+        set dest_plugins="!install_dir!\x64\Release\plugins\bin"
+        set dest_share="!install_dir!\x64\Release\share\bin"
+        
+        call :makeAllDirs   
+        call :copyDwaqDependentRuntimeLibraries                                               !dest_share!
+        
+        rem copy binaries and dll 
+        call :copyFile "!build_dir!\waqpb_export\!configuration!\waqpb_export.*"              !dest_bin! 
+    )
+    
+goto :endproc
+
+
+
+rem ==========================
+rem === POST_BUILD_waqpb_import
+rem ==========================
+:waqpb_import
+
+    echo "postbuild waqpb_import . . ."
+    
+    if "%configuration%" == "Debug" (
+    
+        echo "Debug postbuild"
+        set dest_bin="%install_dir%\x64\Debug"
+        
+        set dest_bin="!install_dir!\x64\Debug"
+        set dest_default="!install_dir!\x64\Debug"
+        set dest_scripts="!install_dir!\x64\Debug"
+        set dest_plugins="!install_dir!\x64\Debug"
+        set dest_share="!install_dir!\x64\Debug"
+        
+        call :makeDir !dest_bin!   
+        call :copyDwaqDependentRuntimeLibraries                                           !dest_bin!
+        
+        rem copy binaries and dll 
+        call :copyFile "!build_dir!\waqpb_import\!configuration!\waqpb_import.*"          !dest_bin!
+    )
+    
+    if "%configuration%" == "Release" ( 
+    
+        echo "Release postbuild"
+
+        set dest_bin="!install_dir!\x64\Release\dwaq\bin"
+        set dest_default="!install_dir!\x64\Release\dwaq\default"
+        set dest_scripts="!install_dir!\x64\Release\dwaq\scripts"
+        set dest_plugins="!install_dir!\x64\Release\plugins\bin"
+        set dest_share="!install_dir!\x64\Release\share\bin"
+        
+        call :makeAllDirs   
+        call :copyDwaqDependentRuntimeLibraries                                               !dest_share!
+        
+        rem copy binaries and dll 
+        call :copyFile "!build_dir!\waqpb_import\!configuration!\waqpb_import.*"              !dest_bin! 
     )
     
 goto :endproc
