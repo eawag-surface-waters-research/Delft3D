@@ -4628,6 +4628,10 @@ src/scripts_lgpl/linux/make_revision.sh -text
 src/scripts_lgpl/linux/oss-install.sh -text
 src/scripts_lgpl/linux/oss-post_build.sh -text
 src/scripts_lgpl/linux/update_version.sh -text
+src/scripts_lgpl/singularity/dflowfm_recipe.def -text
+src/scripts_lgpl/singularity/run_dflowfm_singularity.sh -text
+src/scripts_lgpl/singularity/run_dfmoutput_singularity.sh -text
+src/scripts_lgpl/singularity/run_dimr_singularity.sh -text
 src/scripts_lgpl/win32/make_revision.bat -text
 src/scripts_lgpl/win32/oss-install.cmd -text
 src/scripts_lgpl/win32/oss-install_debug.cmd -text

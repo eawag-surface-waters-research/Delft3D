@@ -1,0 +1,30 @@
+Bootstrap: yum
+OSVersion: 7
+MirrorURL: http://mirror.centos.org/centos-%{OSVERSION}/%{OSVERSION}/os/x86_64/
+include: yum
+
+%environment
+    export exedir=/opt/delft3dfm_latest/lnx64/scripts
+
+%files
+    delft3dfm*.rpm /opt/tmp/
+
+%labels
+    Author Deltares
+
+%post
+    echo "Installing required packages..."
+    mkdir -p /opt/tmp \
+        && yum -y -v install mpich &> /opt/tmp/yum.log \
+        && yum -y -v install libgomp &> /opt/tmp/libgomp.log
+    
+    # This sets the version in the metadata
+    filename=`ls /opt/tmp/delft3dfm*.rpm`
+    VERSION=$(echo $filename| cut -d'-' -f 4)
+    echo "Determining package version..."
+    echo "Version ${VERSION}" >> "$SINGULARITY_LABELS"
+
+    echo "Installing RPM..."
+    rm -rf /opt/delft3dfm_$VERSION \
+        && rpm -i /opt/tmp/delft3dfm-cli-hmwq_*.rpm --nofiledigest \
+        && ln -s /opt/delft3dfm_$VERSION /opt/delft3dfm_latest
