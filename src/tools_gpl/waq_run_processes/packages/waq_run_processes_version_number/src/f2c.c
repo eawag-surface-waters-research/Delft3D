@@ -1,3 +1,31 @@
+//---- LGPL --------------------------------------------------------------------
+//
+// Copyright (C)  Stichting Deltares, 2011-2021.
+//
+// This library is free software; you can redistribute it and/or
+// modify it under the terms of the GNU Lesser General Public
+// License as published by the Free Software Foundation version 2.1.
+//
+// This library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public
+// License along with this library; if not, see <http://www.gnu.org/licenses/>.
+//
+// contact: delft3d.support@deltares.nl
+// Stichting Deltares
+// P.O. Box 177
+// 2600 MH Delft, The Netherlands
+//
+// All indications and logos of, and references to, "Delft3D" and "Deltares"
+// are registered trademarks of Stichting Deltares, and remain the property of
+// Stichting Deltares. All rights reserved.
+//
+//------------------------------------------------------------------------------
+// $Id$
+// $HeadURL$
 #include <string.h>
 #if defined(WIN32) || defined (WIN64)
 #  include <io.h>
@@ -48,7 +76,7 @@ extern  char * FUNC_CAT( version_getFeatureNumberString_, MOD_NAME)(void);
 #   define F90_GETFEATURENUMBERSTRING    FUNC_CAT( FC_FUNC(getfeaturenumberstring,GETFEATURENUMBERSTRING), F90_MOD_NAME)
 #else
 /* WIN32 or WIN64 */
-#   define FTN_CALL  __cdecl
+#   define FTN_CALL
 #   define F90_GETFILEVERSIONSTRING      FUNC_CAT( GETFILEVERSIONSTRING_, MOD_NAME)
 #   define F90_GETFULLVERSIONSTRING      FUNC_CAT( GETFULLVERSIONSTRING_, MOD_NAME)
 #   define F90_GETCOMPANYSTRING          FUNC_CAT( GETCOMPANYSTRING_, MOD_NAME)
