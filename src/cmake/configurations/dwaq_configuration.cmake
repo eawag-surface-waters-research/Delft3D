@@ -85,11 +85,6 @@ if(NOT TARGET waq_run_processes_version_number)
     add_subdirectory(${checkout_src_root}/${waq_run_processes_version_number_module} waq_run_processes_version_number)
 endif()
 
-# duprol2delwaq
-if(NOT TARGET duprol2delwaq)
-    add_subdirectory(${checkout_src_root}/${duprol2delwaq_module} duprol2delwaq)
-endif()
-
 
 
 #
