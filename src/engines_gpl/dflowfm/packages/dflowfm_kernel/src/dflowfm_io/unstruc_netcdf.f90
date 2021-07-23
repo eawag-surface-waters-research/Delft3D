@@ -12532,19 +12532,17 @@ subroutine unc_read_map(filename, ierr)
           if (allocated(rst_bodsed)) deallocate(rst_bodsed)
           allocate(tmpvar(sedtot_read, ndxi))
           allocate(rst_bodsed(sedtot_read, ndxi))
-          do l = 1, stmpar%lsedtot
-             ierr = nf90_inq_varid(imapfile, 'bodsed', id_bodsed)
-             ierr = nf90_get_var(imapfile, id_bodsed, tmpvar(1:sedtot_read, 1:um%ndxi_own), start = (/ 1, kstart, it_read/), count = (/sedtot_read, ndxi,1/))
-             do kk = 1, ndxi
-                if (um%jamergedmap == 1) then
-                   kloc = um%inode_own(kk)
-                else
-                   kloc = kk
-                end if
-                rst_bodsed(:, kloc) = tmpvar(:, kk)
-             end do
-             call check_error(ierr, 'bodsed')
+          ierr = nf90_inq_varid(imapfile, 'bodsed', id_bodsed)
+          ierr = nf90_get_var(imapfile, id_bodsed, tmpvar(1:sedtot_read, 1:um%ndxi_own), start = (/ 1, kstart, it_read/), count = (/sedtot_read, ndxi,1/))
+          do kk = 1, ndxi
+             if (um%jamergedmap == 1) then
+                kloc = um%inode_own(kk)
+             else
+                kloc = kk
+             end if
+             rst_bodsed(:, kloc) = tmpvar(:, kk)
           end do
+          call check_error(ierr, 'bodsed')
           stmpar%morlyr%state%bodsed(:,1:ndxi) = rst_bodsed(:,1:ndxi)
           call bedcomp_use_bodsed(stmpar%morlyr)
        case (2)
