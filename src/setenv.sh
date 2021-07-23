@@ -38,6 +38,9 @@ module display cmake/3.18.0_intel18.0.3
 module load    gdal/3.1.2_gcc7.3.0
 module display gdal/3.1.2_gcc7.3.0
 
+module load    svn/1.9.12serf_gcc7.3.0
+module display svn/1.9.12serf_gcc7.3.0
+
 echo "Export environment variables"
 export FC=mpif90
 echo "FC=$FC"
