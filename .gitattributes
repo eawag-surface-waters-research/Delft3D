@@ -17789,6 +17789,7 @@ src/tools_gpl/waq_run_processes/packages/waq_run_processes/src/run_processes.inp
 src/tools_gpl/waq_run_processes/packages/waq_run_processes/waq_run_processes.vfproj -text
 src/tools_gpl/waq_run_processes/packages/waq_run_processes_version_number/CMakeLists.txt -text
 src/tools_gpl/waq_run_processes/packages/waq_run_processes_version_number/Makefile.am -text
+src/tools_gpl/waq_run_processes/packages/waq_run_processes_version_number/config.h.cmake.in -text
 src/tools_gpl/waq_run_processes/packages/waq_run_processes_version_number/include/version_number.h.svn -text
 src/tools_gpl/waq_run_processes/packages/waq_run_processes_version_number/include/version_number.ini -text
 src/tools_gpl/waq_run_processes/packages/waq_run_processes_version_number/include/version_number.rc.svn -text
