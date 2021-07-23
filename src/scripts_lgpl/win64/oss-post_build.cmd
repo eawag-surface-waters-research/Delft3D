@@ -138,6 +138,29 @@ goto :endproc
 
 
 
+rem =============================================================
+rem === copyDir takes two arguments: the name of the dir to   ===
+rem === copy to and the destiny directory                     ===
+rem ===                                                       ===
+rem === NOTE: errors will be reported and the script will     ===
+rem === with an error code after executing the rest of its    ===
+rem === statements                                            ===
+rem =============================================================
+:copyDir
+    set target=%~1
+    set dest=%~2
+    rem
+    rem "echo f |" is (only) needed when dest does not exist
+    rem and does not harm in other cases
+    rem
+    echo f | xcopy "%target%" %dest% /I /E /F /Y
+    if NOT !ErrorLevel! EQU 0 (
+        echo ERROR: while copying "!target!" to "!dest!"
+    )
+goto :endproc
+
+
+
 rem ===============
 rem === POSTBUILD_ALL
 rem ===============
@@ -549,14 +572,15 @@ rem ==========================
     set dest_scripts="!install_dir!\x64\Release\dimr\scripts"
     set dest_plugins="!install_dir!\x64\Release\plugins\bin"
     set dest_share="!install_dir!\x64\Release\share\bin"
+    set dest_schema="!install_dir!\x64\Release\dimr\schema"
 
-    call :makeAllDirs 
+    call :makeAllDirs
     call :copyDimrDependentRuntimeLibraries                                                                             !dest_share!
     call :copyFile "!build_dir!\dimr\!configuration!\dimr.exe"                                                          !dest_bin!
 
     call :copyFile "!checkout_src_root!\engines_gpl\d_hydro\scripts\create_config_xml.tcl"                              !dest_menu!
     call :copyFile "!checkout_src_root!\engines_gpl\dimr\scripts\generic\win64\*.*"                                     !dest_scripts!
-
+    call :copyDir  "!checkout_src_root!\engines_gpl\dimr\schemas"                                                       !dest_schema!
     )
 
 goto :endproc
