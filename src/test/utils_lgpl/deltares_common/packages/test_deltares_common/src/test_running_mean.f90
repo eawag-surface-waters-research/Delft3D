@@ -37,7 +37,7 @@ module test_running_mean
    use precision_basics, only : hp, sp
    use ftnunit
    use runsum
-   use runsum_weighted
+   use AR1MA
    implicit none
 
    private
@@ -109,7 +109,7 @@ contains
    subroutine testRunningMean3
       implicit none
 
-      type (TRunSumWeighted) :: running_wt
+      type (TAR1MA)  :: running_wt
       integer        :: nx, nd, nmax
       integer        :: i, j
       real(kind=hp)  :: f
@@ -124,7 +124,7 @@ contains
       allocate(dataptr(nx))
       allocate(weightptr(0:nd-1))
       call running_wt%init(nx,nd,dataptr)
-      call running_wt%setweights(weightptr)
+      call running_wt%setpar(weightptr)
       weightptr(0:nd-1) = 1.d0
       weightptr(3:4) = 0.d0
       do i = 1, nmax
