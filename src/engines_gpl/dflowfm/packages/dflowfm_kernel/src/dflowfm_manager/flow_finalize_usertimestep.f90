@@ -49,10 +49,13 @@ subroutine flow_finalize_usertimestep(iresult)
 
    integer, intent(out) :: iresult !< Error status, DFM_NOERR==0 if successful.
 
-   double precision :: tem_dif
+   double precision :: tem_dif, ti_fou
+   logical          :: do_fourier
    logical, external :: flow_trachy_needs_update
 
    iresult = DFM_GENERICERROR
+
+   do_fourier = (md_fou_step == 0)
 
 !   call fm_wq_processes_step(dt_user,time_user)
    if (ti_waqproc > 0) then
@@ -88,6 +91,7 @@ subroutine flow_finalize_usertimestep(iresult)
 !          alternative: move this to flow_externaloutput
       if (ti_his > 0) then
          if (comparereal(time1, time_his, eps10)>=0) then
+            do_fourier = do_fourier .or. (md_fou_step == 2)
             call updateValuesOnObservationStations()
             if (jampi == 1) then
                call updateValuesOnCrossSections_mpi(time1)
@@ -126,11 +130,12 @@ subroutine flow_finalize_usertimestep(iresult)
 
    endif
 
-   if (fourierIsActive() .and. md_fou_step == 0) then
+   if (fourierIsActive() .and. do_fourier) then
       if (fourierWithUc()) then
          call getucxucyeulmag(ndkx, workx, worky, ucmag, jaeulervel, 1)
       endif
-      call postpr_fourier(time0, dt_user)
+      ti_fou = merge(dt_user, ti_his, md_fou_step == 0)
+      call postpr_fourier(time0, ti_fou)
    endif
 
  iresult = DFM_NOERR

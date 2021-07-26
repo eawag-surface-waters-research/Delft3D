@@ -1771,6 +1771,7 @@ src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_kernel/prepost/reord
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_kernel/prepost/reset_movobs.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_kernel/prepost/resetflow.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_kernel/prepost/resetfullflowmodel.f90 -text
+src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_kernel/prepost/running_mean_wrapper.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_kernel/prepost/runupgauges_on_flowgeom.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_kernel/prepost/sam2net_curvi.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_kernel/prepost/samdif.f90 -text
@@ -4732,6 +4733,7 @@ src/test/utils_lgpl/deltares_common/packages/test_deltares_common/src/test_hash_
 src/test/utils_lgpl/deltares_common/packages/test_deltares_common/src/test_precision_basics.f90 -text
 src/test/utils_lgpl/deltares_common/packages/test_deltares_common/src/test_precision_body.f90 -text
 src/test/utils_lgpl/deltares_common/packages/test_deltares_common/src/test_properties.f90 -text
+src/test/utils_lgpl/deltares_common/packages/test_deltares_common/src/test_running_mean.f90 -text
 src/test/utils_lgpl/deltares_common/packages/test_deltares_common/src/test_sorting_algorithms.f90 -text
 src/test/utils_lgpl/deltares_common/packages/test_deltares_common/src/test_string_module.f90 -text
 src/test/utils_lgpl/deltares_common/packages/test_deltares_common/src/test_time_module.f90 -text
@@ -19273,7 +19275,6 @@ src/utils_lgpl/deltares_common/packages/deltares_common/src/rd_token/gettok.f -t
 src/utils_lgpl/deltares_common/packages/deltares_common/src/rd_token/mestok.f -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/rd_token/rd_token.f90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/rd_token/rdtok1.f -text
-src/utils_lgpl/deltares_common/packages/deltares_common/src/runsum.f90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/scannr.f90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/skipstarlines.f90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/small.f90 -text

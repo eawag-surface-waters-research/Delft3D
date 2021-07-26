@@ -40,13 +40,11 @@ module runsum
    private
    public :: TRunSum
 
-   type TRunSum(buffer_kind)
-      integer, kind  :: buffer_kind = 8
-      integer        :: ndx = 0
-      integer        :: nvalue
-      integer        :: nstep
-      real(kind=buffer_kind), allocatable, dimension (:,:) :: buffer
-      real(kind=hp), allocatable, dimension (:)   :: state     ! state lives inside the instance
+   type TRunSum
+      integer                     :: ndx = 0                   ! current index in circulair buffer
+      integer                     :: nstep = 0                 ! number of updates
+      real(kind=sp), allocatable, dimension (:,:) :: buffer    ! circulair buffer
+      real(kind=sp), allocatable, dimension (:)   :: state     ! state lives inside the instance
       real(kind=hp), pointer,     dimension (:)   :: dataPtr   ! dataPtr lives in the calling code
    contains
       procedure, pass :: init          => TRunSum_init         ! Init buffer and sum and index
@@ -71,10 +69,12 @@ subroutine TRunSum_init(self, nx, nd, dataptr)
 
    if (allocated(self%buffer)) deallocate(self%buffer)
    allocate (self%buffer(nx,0:nd-1))
+   self%buffer(1:nx,0:nd-1) = 0_hp
    if (allocated(self%state)) deallocate(self%state)
    allocate (self%state(nx))
    self%state(1:nx) = 0.d0
    self%ndx = 0
+   self%nstep = 0
    self%dataPtr => null()
    if (present(dataPtr)) then
       if (associated(dataPtr)) then
@@ -105,6 +105,7 @@ subroutine TRunSum_update(self, newvalue)
    end if
    call self%update_state(pnew,nx,nd)
    self%ndx = mod(self%ndx+1,nd)
+   self%nstep = self%nstep + 1
 end subroutine TRunSum_update
 
 

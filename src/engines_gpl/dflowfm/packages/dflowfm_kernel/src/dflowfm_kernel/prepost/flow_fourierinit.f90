@@ -34,23 +34,38 @@
 !! Opens and reads .fou file (md_foufile, specified in the mdu)
 !! and prepares the gd_fourier structure
 subroutine flow_fourierinit()
+use precision, only: fp
 use m_fourier_analysis
 use m_transport, only: NUMCONST, ISALT, ITEMP
-use unstruc_model, only: md_foufile, md_tunit, getoutputdir
+use unstruc_model, only: md_foufile, md_tunit, getoutputdir, md_fou_step
 use unstruc_files, only : defaultFilename
 use m_flow, only: kmxd
-use m_physcoef, only: ag
-use m_flowtimes, only: tstart_user, tstop_user
+use m_flowtimes, only: tstart_user, tstop_user, ti_his, dt_user
 
 implicit none
 integer  :: minp, ierr
 logical  :: success
+real(kind=fp) :: ti_fou
+
 call oldfil(minp, md_foufile)
-call fouini(minp, success, ag, md_tunit,'S')
+
+call fouini(minp, success, md_tunit,'S')
+
 FouOutputFile = trim(getoutputdir()) // defaultFilename('fou')
 
 call alloc_fourier_analysis_arrays()
-call reafou(minp, md_foufile, kmxd, NUMCONST, ISALT, ITEMP, tstart_user, tstop_user, success)
+
+select case (md_fou_step)
+   case (1)
+      ti_fou = -999.0_fp
+   case (0)
+      ti_fou = dt_user
+   case (2)
+      ti_fou = ti_his
+end select
+
+call reafou(minp, md_foufile, kmxd, NUMCONST, ISALT, ITEMP, tstart_user, tstop_user, ti_fou, success)
+
 call doclose(minp)
 
 end subroutine flow_fourierinit

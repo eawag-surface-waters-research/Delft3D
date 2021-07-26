@@ -76,9 +76,10 @@ logical :: force
 call cli%init(progname    = dfmoutput_basename,                                            &
               version     = dfmoutput_version,                                             &
               description = 'Tool for handling D-Flow FM output files',                    &
-              examples    = ["dfmoutput mapmerge  --infile model_0000_map.nc model_0001_map.nc", &
-                             "dfmoutput max25     --infile hisfile.nc                         ", &
-                             "dfmoutput genfilter --infile hisfile.nc  --intval 6             "])
+              examples    = ["dfmoutput mapmerge         --infile model_0000_map.nc model_0001_map.nc", &
+                             "dfmoutput max_running_mean --infile hisfile.nc                         ", &
+                             "dfmoutput max25            --infile hisfile.nc                         ", &
+                             "dfmoutput genfilter        --infile hisfile.nc  --intval 6             "])
 !                             "dfmoutput extract --station='stat A' model_his.nc         "])
 
 ! setting Command Line Arguments
@@ -98,6 +99,13 @@ call cli%add(group='mapmerge',switch='--time',    switch_ab='-t', help='Only sel
                                                                        '   ''{'' DATETIME ''}'' datetime (ISO8601, e.g., 2015-07-31T15:37:28)'//char(10)// &
                                                                        '   ''LAST''           last available time in input file.', &
              required=.false.,act='store',def='',valname='TIME[:TIME2]')
+
+!! Set up MAX_RUNNING_MEAN command
+call cli%add_group(group='max_running_mean',description='Get max_running_mean value and other derived properties from his file.')
+call cli%add(group='max_running_mean',switch='--infile',  switch_ab='-i', help='One input files.',required=.true.,act='store',def=char(0),valname='FILE')
+call cli%add(group='max_running_mean',switch='--filterlength', switch_ab='-l', help='Filter length. Default: 13,25',required=.false.,act='store',def='13,25',valname='FILTERLENGTH')
+call cli%add(group='max_running_mean',switch='--varname', help='Variable name. Default: waterlevel',required=.false.,act='store',def='waterlevel',valname='WATERLEVEL')
+call cli%add(group='max_running_mean',switch='--outfile', switch_ab='-o', help='Write output to file OUTFILE. Default: max_running_mean.out',required=.false.,act='store',def='max_running_mean.out',valname='OUTFILE')
 
 !! Set up MAX25 command
 call cli%add_group(group='max25',description='Get max25 value and other derived properties from his file.')
@@ -202,6 +210,25 @@ if (cli%run_command('mapmerge')) then
    if (ierr /= 0) goto 888
 
    ierr = dfm_merge_mapfiles(infiles, ninfiles, outfiles(1), force)
+
+! MAX_RUNNING_MEAN command for water levels
+else if (cli%run_command('max_running_mean')) then
+   allocate(infiles(1))
+   allocate(outfiles(1))
+   call cli%get(group='max_running_mean', switch='-i', val = infiles(1), error=ierr)
+   if (ierr /= 0) goto 888
+   call cli%get(group='max_running_mean', switch='-o', val = outfiles(1), error=ierr)
+   if (ierr /= 0) goto 888
+   call cli%get(group='max_running_mean', switch='--varname', val = var_name, error=ierr)
+   if (ierr /= 0) goto 888
+   call cli%get(group='max_running_mean', switch='-l', val = filter_length, error=ierr)
+   if (ierr /= 0) goto 888
+
+   if (verbose_mode) then
+      write(*,*) 'arguments for max25: ', trim(infiles(1)), ', ', trim(outfiles(1)), ', ', trim(var_name), ', ', trim(filter_length)
+   endif
+
+   call fmgetdata_running_mean(trim(infiles(1)), trim(outfiles(1)), trim(var_name), trim(filter_length))
 
 ! MAX25 command for water levels
 else if (cli%run_command('max25')) then

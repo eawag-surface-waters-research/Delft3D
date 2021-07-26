@@ -36,11 +36,73 @@ module dfm_max25_getdata
    use netcdf
    use write_extremes_his
    use read_nc_histories
+   use runsum
    implicit none
    private
-   public :: fmgetdata
+   public :: fmgetdata, fmgetdata_running_mean
 
    contains
+
+!> main routine to write max_running_mean output to file
+subroutine fmgetdata_running_mean(filename, filename_out, field_name, minmaxlst)
+   implicit none
+   character(len=*) , intent(in) :: filename      !< input filename (NetCDF)
+   character(len=*) , intent(in) :: field_name    !< input field name (e.g. 'waterlevel')
+   character(len=*) , intent(in) :: filename_out  !< output filename (ascii)
+   character(len=*),  intent(in) :: minmaxlst     !< list with filter lengths (e.g. '13,25')
+
+   type(TRunSum) :: runsum
+
+   integer :: ierr, i, j, k, nStations, nd, ntimes, iunit
+   real, allocatable :: hisdata(:,:), maxvalues(:), minvalues(:)
+   real(kind=8), allocatable :: onetime(:)
+   character(len=64), allocatable :: stations(:)
+   integer, allocatable :: stats_index(:), list(:)
+
+                           ierr = read_meta_data(filename, nStations)
+   if (ierr == nf90_noerr) ierr = read_station_names(stations, 'station_name')
+   if (ierr == nf90_noerr) ierr = read_data(hisdata, field_name)
+   if (ierr == nf90_noerr) ierr = close_nc_his_file()
+
+   if (ierr /= nf90_noerr) then
+      write(*,*) trim(nf90_strerror(ierr))
+   else
+      open(newunit=iunit, file=filename_out)
+      call parse_min_max_list(minmaxlst, list)
+      allocate(maxvalues(nStations), minvalues(nStations), onetime(nStations))
+      do k = 1, size(list)
+
+         nd = list(k)
+         ntimes = size(hisdata,1)
+         call runsum%init(nStations, nd)
+         do i = 1, ntimes
+            onetime = hisdata(i,:)
+            call runsum%update(onetime)
+            if (i == nd) then
+               maxvalues = runsum%state
+               minvalues = runsum%state
+            else if (i > nd) then
+               do j = 1, nStations
+                  maxvalues(j) = max(maxvalues(j), runsum%state(j))
+                  minvalues(j) = min(minvalues(j), runsum%state(j))
+               end do
+            end if
+         end do
+
+         ! sum -> mean
+         maxvalues = maxvalues / real(nd)
+         minvalues = minvalues / real(nd)
+
+         ! print values
+         write(iunit,*) 'width = ', nd
+         do j = 1, nStations
+            write(iunit,'(a32,x,f,x,f)') stations(j), maxvalues(j), minvalues(j)
+         end do
+      end do
+      close(iunit)
+   endif
+
+end subroutine fmgetdata_running_mean
 
 !> main routine to write max25 output to file
 subroutine fmgetdata(filename, filename_out, field_name, minmaxlst)

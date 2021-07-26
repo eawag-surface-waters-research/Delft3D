@@ -33,6 +33,7 @@ program test_deltares_common
     use test_properties
     use test_geometry_module
     use test_time_module
+    use test_running_mean
 
     implicit none
 
@@ -53,7 +54,7 @@ program test_deltares_common
     !
     call tests_properties
     call tests_geometry_module
-
+    call tests_running_mean
     !
     ! Done - properly finalize
     !
