@@ -96,7 +96,7 @@ subroutine fmgetdata_running_mean(filename, filename_out, field_name, minmaxlst)
          ! print values
          write(iunit,*) 'width = ', nd
          do j = 1, nStations
-            write(iunit,'(a32,x,f,x,f)') stations(j), maxvalues(j), minvalues(j)
+            write(iunit,'(a32,2(x,f10.4))') stations(j), maxvalues(j), minvalues(j)
          end do
       end do
       close(iunit)
