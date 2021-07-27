@@ -44,20 +44,20 @@ subroutine test_MDU_fileversion_model
     use m_partitioninfo, only: jampi
     use unstruc_files
     use ifport
-    ! Locals 
+    ! Locals
     integer                   :: istat, ierr
-    
+
     !
     ! Body
     jampi = 0
     !
     istat = CHANGEDIRQQ("MDUversion")
     ! read MDU
-    call readMDUFile('old_model.mdu', ierr)
+    call readMDUFile('old_model.mdu', ierr, 0)
     istat = CHANGEDIRQQ("..")
-        
-    call assert_equal(ierr, DFM_NOERR, 'Error when reading old MDU file version with [model] block.' ) 
- 
+
+    call assert_equal(ierr, DFM_NOERR, 'Error when reading old MDU file version with [model] block.' )
+
 
 end subroutine test_MDU_fileversion_model
 
@@ -67,9 +67,9 @@ subroutine test_MDU_fileversion_general
     use m_partitioninfo, only: jampi
     use unstruc_files
     use ifport
-    ! Locals 
+    ! Locals
     integer                   :: istat, ierr
-    
+
     !
     ! Body
     jampi = 0
@@ -78,9 +78,9 @@ subroutine test_MDU_fileversion_general
     ! read MDU
     call readMDUFile('new_general.mdu', ierr)
     istat = CHANGEDIRQQ("..")
-        
-    call assert_equal(ierr, DFM_NOERR, 'Error when reading new MDU file version with [General] block.' ) 
- 
+
+    call assert_equal(ierr, DFM_NOERR, 'Error when reading new MDU file version with [General] block.' )
+
 
 end subroutine test_MDU_fileversion_general
 
