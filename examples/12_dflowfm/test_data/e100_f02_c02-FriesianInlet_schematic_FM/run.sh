@@ -1,4 +1,4 @@
 #!/bin/bash
 
-../../../../src/bin/run_dimr.sh -d 0
+../../../../build_all/lnx64/bin/run_dimr.sh -d 0
 

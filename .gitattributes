@@ -128,8 +128,6 @@ examples/05_mormerge/merge/basin_linux.mm -text
 examples/05_mormerge/merge/basin_windows.mm -text
 examples/05_mormerge/merge/run.bat -text
 examples/05_mormerge/merge/run.sh -text
-examples/05_mormerge/merge/run_mormerge_alternative.bat -text
-examples/05_mormerge/merge/run_mormerge_alternative.sh -text
 examples/06_delwaq/coli_03.0 -text
 examples/06_delwaq/coli_03.doc -text
 examples/06_delwaq/coli_03.sub -text

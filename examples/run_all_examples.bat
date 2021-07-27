@@ -1,7 +1,7 @@
 @ echo off
 
    rem Relative from INSIDE a testcase:
-set TCL_EXE=..\..\src\third_party_open\tcl\bin\win32\tclkit.exe
+set TCL_EXE=..\..\build_all\x64\share\bin\tclkitsh852.exe
 
 
 echo "Running testcase 01_standard ..."

@@ -20,8 +20,8 @@ rem For this to work, the build.bat script in the top folder of the source tree 
 rem with automatic build, i.e. with the following option switched OFF: "Prepare only, no automatic compilation"
 
 set build_configuration=build_all
-set dimr_script_path=..\..\..\..\%build_configuration%\x64\dimr\scripts
-call %dimr_script_path%\run_dimr_parallel.bat 3 dimr_config.xml
+set script_path=..\..\..\..\%build_configuration%\x64\dimr\scripts
+call %script_path%\run_dimr_parallel.bat 3 dimr_config.xml
 
 
     rem To prevent the DOS box from disappearing immediately: remove the rem on the following line

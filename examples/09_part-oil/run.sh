@@ -1,4 +1,4 @@
 #!/bin/bash
 
-../../src/bin/run_dpart.sh fti_oil.inp
+../../build_all/lnx64/bin/run_dpart.sh fti_oil.inp
 
