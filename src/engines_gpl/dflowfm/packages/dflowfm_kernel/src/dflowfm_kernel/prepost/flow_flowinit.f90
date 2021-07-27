@@ -927,7 +927,7 @@ call timstop(ihandle)
     call reduce_error(iresult)
  end if
  if (iresult /= DFM_NOERR) then
-    call qnerror('Error occurred while initializing external forcings, please inspect your diagnostic output.',' ', ' ')
+    call qnerror('Error occurred while initializing external forcings, please inspect the preceding lines in the diagnostic output for more details.',' ', ' ')
     if (jampi == 1) then
         call qnerror('Error occurs on one or more processes when initializing external forcings.',' ', ' ')
     end if
