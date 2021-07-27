@@ -50,7 +50,7 @@
          call wriarcsam(MSAM,ZS,MCA,NCA,MCA,NCA,X0,Y0,DXA,DYA,DMISS)
          goto 1234
       else if (mca*nca > maxsamarc) then 
-         call wriarc(MSAM,D,mca,nca,mca,nca,X0,Y0,DXA,DYA,DMISS)
+         call wriarc(MSAM,D,MCA,NCA,MCA,NCA,X0,Y0,DXA,DYA,DMISS)
          goto 1234
       end if
 

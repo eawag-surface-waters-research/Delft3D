@@ -270,6 +270,7 @@ subroutine reset_flowtimes()
 
     call setTUDUnitString()
 
+    time_user    = tstart_user       !< lijkt me ook onderdeel
     time_map     = tstart_user       !< next time for map output
     time_wav     = tstart_user       !< same, wav
     time_sed     = tstart_user       !< same, morstats
