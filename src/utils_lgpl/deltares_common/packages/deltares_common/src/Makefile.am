@@ -61,6 +61,7 @@ libDeltaresCommon_la_SOURCES = \
 	hash_search.f90 \
 	wavenr.f90 \
 	sorting_algorithms.f90 \
+	runsum.f90 \
 	m_tablematrices.f90
 
 # For source distributions: the tar.gz will contain the correct version numbers in the generated *version.F90

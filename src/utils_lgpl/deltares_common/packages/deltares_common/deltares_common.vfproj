@@ -130,5 +130,6 @@
 				<Tool Name="VFFortranCompilerTool" FixedFormLineLength="fixedLength132"/></FileConfiguration></File>
 		<File RelativePath="src\tree_struct.f90"/>
 		<File RelativePath="src\util.f90"/>
+		<File RelativePath="src\runsum.f90"/>
 		<File RelativePath="src\wavenr.f90"/></Filter></Files>
 	<Globals/></VisualStudioProject>
