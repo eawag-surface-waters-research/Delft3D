@@ -2239,7 +2239,7 @@ subroutine readMDUFile(filename, istat, LU)
    !   istat = ierror
    !end if
 
-call tree_destroy(md_ptr)
+!call tree_destroy(md_ptr)
 
 end subroutine readMDUFile
 
