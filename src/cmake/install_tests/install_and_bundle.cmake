@@ -1,6 +1,3 @@
-set(BUILD_LIBRARIES
-   ${CMAKE_INSTALL_PREFIX}/share/libesmf.so
-)
 set(THIRDPARTY_x64_LIB_FOLDERS
   ${CMAKE_INSTALL_PREFIX}
   ${CMAKE_INSTALL_PREFIX}/bin
@@ -11,10 +8,7 @@ function(gp_resolved_file_type_override resolved_file type_var)
 endfunction()
 
 function(gp_item_default_embedded_path_override item default_embedded_path_var)
-  if(item MATCHES "libesmf.so")
-    set(path "@executable_path/../share" PARENT_SCOPE)
-    set( overridden 1 PARENT_SCOPE )
-  elseif(item MATCHES ".so")
+  if(item MATCHES ".so")
     set(path "@executable_path/../lib" PARENT_SCOPE)
     set( overridden 1 PARENT_SCOPE )
   endif()
@@ -23,8 +17,6 @@ endfunction(gp_item_default_embedded_path_override)
 include(BundleUtilities)
 
 set(BU_CHMOD_BUNDLE_ITEMS 1)
-
-fixup_bundle("${CMAKE_INSTALL_PREFIX}/bin/dflowfm_kernel_test" "${BUILD_LIBRARIES}" "${THIRDPARTY_x64_LIB_FOLDERS}")
 
 execute_process(COMMAND find "${CMAKE_INSTALL_PREFIX}/bin" -type f -exec echo "patched rpath of: " {} \; -exec bash -c "/opt/apps/patchelf/0.12/bin/patchelf --set-rpath '$ORIGIN:$ORIGIN/../lib' $1" _ {} \;)
 execute_process(COMMAND find "${CMAKE_INSTALL_PREFIX}/lib" -type f -exec echo "patched rpath of: " {} \; -exec bash -c "/opt/apps/patchelf/0.12/bin/patchelf --set-rpath '$ORIGIN' $1" _ {} \;)
