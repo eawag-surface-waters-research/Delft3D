@@ -76,7 +76,7 @@ subroutine test_MDU_fileversion_general
     !
     istat = CHANGEDIRQQ("MDUversion")
     ! read MDU
-    call readMDUFile('new_general.mdu', ierr)
+    call readMDUFile('new_general.mdu', ierr, 0)
     istat = CHANGEDIRQQ("..")
 
     call assert_equal(ierr, DFM_NOERR, 'Error when reading new MDU file version with [General] block.' )
