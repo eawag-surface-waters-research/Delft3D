@@ -180,6 +180,7 @@ rem ===============
     call :waqpb_import
     call :waq_run_processes
     call :duprol2delwaq
+    call :delpar
     call :wave
     call :wave_exe
     call :flow2d3d
@@ -1005,6 +1006,50 @@ rem ==========================
         
         rem copy binaries and dll 
         call :copyFile "!build_dir!\duprol2delwaq\!configuration!\duprol2delwaq.*"              !dest_bin! 
+    )
+    
+goto :endproc
+
+
+
+rem ==========================
+rem === POST_BUILD_delpar
+rem ==========================
+:delpar
+
+    echo "postbuild delpar . . ."
+    
+    if "%configuration%" == "Debug" (
+    
+        echo "Debug postbuild"
+        set dest_bin="%install_dir%\x64\Debug"
+        
+        set dest_bin="!install_dir!\x64\Debug"
+        set dest_default="!install_dir!\x64\Debug"
+        set dest_scripts="!install_dir!\x64\Debug"
+        set dest_plugins="!install_dir!\x64\Debug"
+        set dest_share="!install_dir!\x64\Debug"
+        
+        call :makeDir !dest_bin!   
+        
+        rem copy binaries and dll 
+        call :copyFile "!build_dir!\delpar\!configuration!\delpar.*"                                !dest_bin!
+    )
+    
+    if "%configuration%" == "Release" ( 
+    
+        echo "Release postbuild"
+
+        set dest_bin="!install_dir!\x64\Release\dpar\bin"
+        set dest_default="!install_dir!\x64\Release\dpar\default"
+        set dest_scripts="!install_dir!\x64\Release\dpar\scripts"
+        set dest_plugins="!install_dir!\x64\Release\plugins\bin"
+        set dest_share="!install_dir!\x64\Release\share\bin"
+        
+        call :makeAllDirs   
+        
+        rem copy binaries and dll 
+        call :copyFile "!build_dir!\delpar\!configuration!\delpar.exe"                            !dest_bin! 
     )
     
 goto :endproc

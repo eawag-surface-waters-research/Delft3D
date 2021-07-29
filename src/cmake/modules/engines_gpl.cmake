@@ -45,6 +45,7 @@ set(part_data_f_module "${part_module_path}/data_f")
 set(part_utils_f_module "${part_module_path}/utils_f")
 set(part_io_f_module "${part_module_path}/io_f")
 set(part_kernel_f_module "${part_module_path}/kernel_f")
+set(delpar_module "${part_module_path}/delpar")
 
 # Dimr
 set(dimr_module_path "${engines_gpl_path}/dimr/packages")

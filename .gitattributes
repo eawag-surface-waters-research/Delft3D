@@ -3421,6 +3421,7 @@ src/engines_gpl/part/packages/data_f/src/modeldim.f90 -text
 src/engines_gpl/part/packages/data_f/src/partmem.f90 -text
 src/engines_gpl/part/packages/data_f/src/precision.f90 -text
 src/engines_gpl/part/packages/data_f/src/typos_mod.f90 -text
+src/engines_gpl/part/packages/delpar/CMakeLists.txt -text
 src/engines_gpl/part/packages/delpar/Makefile.am -text
 src/engines_gpl/part/packages/delpar/delpar.vfproj -text
 src/engines_gpl/part/packages/delpar/src/Makefile.am -text

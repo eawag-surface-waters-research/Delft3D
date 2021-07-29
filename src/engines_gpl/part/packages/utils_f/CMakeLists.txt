@@ -3,7 +3,6 @@ set(src_path src)
 
 # Set version file variables
 # Note that the CMAKE_CURRENT_SOURCE_DIR has a path to THIS CMakeLists location
-set(svn_version_path ${CMAKE_CURRENT_SOURCE_DIR}/../) # Trace back to the part path
 set(ini_version_file ${CMAKE_CURRENT_SOURCE_DIR}/../../res/version_number.ini)
 set(fortran_version_file ${CMAKE_CURRENT_SOURCE_DIR}/${src_path}/part_version.F90)
 

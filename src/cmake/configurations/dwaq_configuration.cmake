@@ -61,6 +61,10 @@ if(NOT TARGET part_kernel_f)
     add_subdirectory(${checkout_src_root}/${part_kernel_f_module} part_kernel_f)
 endif()
 
+if(NOT TARGET delpar)
+    add_subdirectory(${checkout_src_root}/${delpar_module} delpar)
+endif()
+
 
 
 #
