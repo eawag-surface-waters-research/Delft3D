@@ -861,7 +861,7 @@
       !
       mfltot = 0.0_fp
       if (iflufflyr>0) then
-         do l = 1, lsedtot
+         do l = 1, lsed
             mfltot = mfltot + max(0.0_fp,mfluff(l,nm))
          enddo
       endif
