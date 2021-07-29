@@ -94,7 +94,7 @@
  double precision  :: xm, ym
  double precision  :: trshcorioi
  double precision  :: Ds
- double precision  :: hw,tw,csw,snw, uorbi,rkw,ustt,hh, upot, ukin, ueaa
+ double precision  :: hw,tw,csw,snw, uorbi,rkw,ustt,hh
 
  iresult = DFM_GENERICERROR
 
@@ -1623,8 +1623,6 @@ call timstop(ihandle)
        call set_max_volume_for_1d_nodes() ! set maximal volume, it will be used to update the volume on ground level for the output
     end if
  end if
-
- call upotukinueaa(upot, ukin, ueaa)
 
  iresult = DFM_NOERR
  return

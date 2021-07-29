@@ -227,11 +227,6 @@ subroutine prop_inifile_pointer(lu, tree)
 
         do ! Check on line continuation
             call GetLine(lu, lineconttemp, eof)
-            if (index(lineconttemp, 'END PARAMETERS') == 1) then 
-               eof = -1
-               return ! stop reading from file
-            endif
- 
             linecont = adjustl(lineconttemp)
             lcend = len_trim(linecont)
             if (lcend == 0) then

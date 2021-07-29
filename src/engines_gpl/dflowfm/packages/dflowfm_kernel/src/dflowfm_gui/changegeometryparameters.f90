@@ -43,7 +43,7 @@
    implicit none
 
    integer :: numpar, numfld, numparactual, numfldactual
-   PARAMETER  (NUMPAR = 28, NUMFLD = 2*NUMPAR)
+   PARAMETER  (NUMPAR = 26, NUMFLD = 2*NUMPAR)
    INTEGER  IX(NUMFLD),IY(NUMFLD),IS(NUMFLD),IT(NUMFLD)
    CHARACTER WRDKEY*40, OPTION(NUMPAR)*40, HELPM(NUMPAR)*60
    integer :: nlevel
@@ -65,26 +65,24 @@
    OPTION( 7)= 'Jazlayercenterbedvel                ( ) ' ; it(2* 7) = 2
    OPTION( 8)= 'Jasfer3D                            ( ) ' ; it(2* 8) = 2
    OPTION( 9)= 'Jalimnor                            ( ) ' ; it(2* 9) = 2
-   OPTION(10)= 'minimum 1D link length,             (m) ' ; it(2*10) = 6
-   OPTION(11)= 'Uniform 1D link width               (m) ' ; it(2*11) = 6
-   OPTION(12)= '1D profile type                     ( ) ' ; it(2*12) = 2
-   OPTION(13)= '2D conveyance                       ( ) ' ; it(2*13) = 2
-   OPTION(14)= 'non linear continuity 2D            ( ) ' ; it(2*14) = 2
-   OPTION(15)= 'non linear continuity 1D            ( ) ' ; it(2*15) = 2
+   OPTION(10)= 'minimum 1D link length,            (m ) ' ; it(2*10) = 6
+   OPTION(11)= 'Uniform 1D link width              (m ) ' ; it(2*11) = 6
+   OPTION(12)= '1D profile type                    (  ) ' ; it(2*12) = 2
+   OPTION(13)= '2D conveyance                      (  ) ' ; it(2*13) = 2
+   OPTION(14)= 'non linear continuity 2D           (  ) ' ; it(2*14) = 2
+   OPTION(15)= 'non linear continuity 1D           (  ) ' ; it(2*15) = 2
    OPTION(16)= 'sdropstep  when dropping water      (m) ' ; it(2*16) = 6
    OPTION(17)= 'zkdropstep when dropping land       (m) ' ; it(2*17) = 6
    OPTION(18)= 'Ifixedweirscheme                    ( ) ' ; it(2*18) = 2
    OPTION(19)= 'Layertype                           ( ) ' ; it(2*19) = 2
    OPTION(20)= 'Sigmagrowthfactor                   ( ) ' ; it(2*20) = 6
-   OPTION(21)= 'Sillheightmin                       (m) ' ; it(2*21) = 6
+   OPTION(21)= 'Sillheightmin                       ( ) ' ; it(2*21) = 6
    OPTION(22)= 'Mxlayz nr of vertical z-layers      ( ) ' ; it(2*22) = 2
-   OPTION(23)= 'ihuzcsig, L,R sig at u central part ( ) ' ; it(2*23) = 2
+   OPTION(23)= 'Output full time-varying grid data  ( ) ' ; it(2*23) = 2
    OPTION(24)= 'Keepzlayering at bed                ( ) ' ; it(2*24) = 2
    OPTION(25)= 'Numtopsig (only for z-layers)       ( ) ' ; it(2*25) = 2
-   OPTION(26)= 'Numtopsiguniform                    ( ) ' ; it(2*26) = 2
-   OPTION(27)= 'ihuz, only for keepzlayeringatbed>=3( ) ' ; it(2*27) = 2
-   OPTION(28)= 'jazlayeratubybob                    ( ) ' ; it(2*28) = 2
- 
+   OPTION(26)= 'Numtopsiguniform (only for z-)  ( ) '     ; it(2*26) = 2
+
 
 !   123456789012345678901234567890123456789012345678901234567890
 !            1         2         3         4         5         6
@@ -112,12 +110,10 @@
    HELPM (20)= '1d0=uniform, 1.1d0 = increase factor from bottom up         '
    HELPM (21)= 'Only Fixedweirs if both left and right sillheight > Sillmin '
    HELPM (22)= 'max nr of z-layers                                          '
-   HELPM (23)= '1=mean, 2=max, 3=min, 4= uniform                            '
+   HELPM (23)= '0=compact, 1=full                                           '
    HELPM (24)= '0=no, 1=yes, 2=kb/kb+1 50/50                                '
    HELPM (25)= 'only for zlayers: numer of top layers behaving sigma like   '
    HELPM (26)= 'only for zlayers: keep numtopsig constant 1=yes, 0=no       '
-   HELPM (27)= '(1-4): 1,2 lower 3,4 all, central 1,3 max 2,4               '
-   HELPM (28)= '0, 1                                                        '
 
 
    CALL SAVEKEYS()
@@ -210,12 +206,10 @@
    CALL IFormPutDouble  (2*20,Sigmagrowthfactor, '(F8.3)')
    CALL IFormPutDouble  (2*21,Sillheightmin    , '(F8.3)')
    CALL IFORMPUTINTEGER (2*22,Mxlayz              )
-   CALL IFORMPUTINTEGER (2*23,ihuzcsig            )
+   CALL IFORMPUTINTEGER (2*23,jafullgridoutput    )
    CALL IFORMPUTINTEGER (2*24,keepzlayeringatbed  )
-   CALL IFORMPUTINTEGER (2*25,numtopsig           )
-   CALL IFORMPUTINTEGER (2*26,janumtopsiguniform  )
-   CALL IFORMPUTINTEGER (2*27,ihuz                )
-   CALL IFORMPUTINTEGER (2*28,jaZlayeratubybob    )
+   CALL IFORMPUTINTEGER (2*25,numtopsig )
+   CALL IFORMPUTINTEGER (2*26,janumtopsiguniform )
 
 
    !  Display the form with numeric fields left justified
@@ -271,18 +265,17 @@
            CALL IFORMgeTINTEGER (2*15,nonlin1D       )
            CALL IFormGetDouble  (2*16,sdropstep)
            CALL IFormGetDouble  (2*17,zkdropstep)
-           CALL IFORMgeTINTEGER (2*18,ifixedweirscheme  )
-           CALL IFORMgeTINTEGER (2*19,Layertype         )
-           CALL IFormGetDouble  (2*20,Sigmagrowthfactor )
-           CALL IFormGetDouble  (2*21,Sillheightmin     )
-           CALL IFORMgetINTEGER (2*22,Mxlayz            )
-           CALL IFORMgeTINTEGER (2*23,ihuzcsig          )
+           CALL IFORMgeTINTEGER (2*18,ifixedweirscheme)
+           CALL IFORMgeTINTEGER (2*19,Layertype )
+           CALL IFormGetDouble  (2*20,Sigmagrowthfactor)
+           CALL IFormGetDouble  (2*21,Sillheightmin)
+           CALL IFORMgetINTEGER (2*22,Mxlayz       )
+           CALL IFORMgeTINTEGER (2*23,jafullgridoutput)
            CALL IFORMgeTINTEGER (2*24,keepzlayeringatbed)
-           CALL IFORMgeTINTEGER (2*25,numtopsig         )
+           CALL IFORMgeTINTEGER (2*25,numtopsig)
            CALL IFORMgeTINTEGER (2*26,janumtopsiguniform)
-           CALL IFORMgeTINTEGER (2*27,ihuz              )
-           CALL IFORMgeTINTEGER (2*28,jaZlayeratubybob  )
-    
+
+
            if (kmx > 0 .or. mxlayz > 0) then
               if (layertype > 1) then
                  kmx = max(kmx,mxlayz) ; iadvec = 33

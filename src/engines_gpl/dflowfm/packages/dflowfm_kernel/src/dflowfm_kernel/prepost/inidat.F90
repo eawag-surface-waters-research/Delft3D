@@ -89,16 +89,18 @@
    end interface
 
    double precision :: ag, cdflow, cfl, cfric, deltx, delty, deltz, dscr, dx, e0, eps, epsgs, fbouy, fdyn, gx, gy, gz
-   integer :: ierr, itgs
+   integer :: ierr
+   integer :: itgs
    integer :: ja, istat
-   integer :: janet, jav
+   integer :: janet
+   integer :: jav
    integer :: jqn
    integer :: jview
    integer :: k, i
    integer :: maxitgs
    integer :: minp
    integer :: moments
-   
+   integer :: n1, n2
    integer :: ndraw
    integer :: nlevel
    double precision :: pi
@@ -128,8 +130,8 @@
    COMMON /PLOTFIL/   PLOTJE
    CHARACTER PLOTJE*255
 
-  
-   CHARACTER WRDKEY*40
+   LOGICAL JAWEL
+   CHARACTER WRDKEY*40, inarg*255, EXT*4
 
 !  for command line options
    character(len=MAXOPTLEN)                     :: Soption    ! option
@@ -309,9 +311,54 @@
       iarg_autostart = -1
    else
       do k=1,numfiles
-
-         call loadfile(inputfiles(k))
- 
+         inarg = inputfiles(k)
+         INQUIRE(FILE = trim(inarg),EXIST = JAWEL)
+         if (JAWEL) then
+            ! Find file extention based on first full stop symbol '.' at the back of the string.
+            N1  = INDEX (inarg,'.', .true.)
+            N2  = len_trim(inarg)
+            EXT = ' '
+            EXT = inarg(N1:N2)
+            IF (EXT .EQ. '.ldb' .OR. EXT .EQ. '.LDB' ) THEN
+               CALL OLDFIL (MINP, inarg)
+               CALL REALAN (MINP)
+            ELSE IF (EXT .EQ. '.net' .OR. (EXT .EQ. '.nc' .and. inarg(max(1,N1-4):max(1,N1-1)) == '_net') ) THEN
+               !CALL OLDFIL (MINP, inarg)
+               CALL loadNetwork(trim(inarg),istat,1)
+               if (istat == 0) then
+                  md_netfile = ' ' ; md_netfile = trim(inarg)
+               endif
+            ELSE IF (EXT .EQ. '.bmp' .OR. EXT .EQ. '.BMP' ) THEN
+               CALL LOADBITMAP(inarg)
+            ELSE IF (EXT .EQ. '.mdu' .OR. EXT .EQ. '.MDU' ) THEN
+               CALL LOADMODEL(inarg)
+            ELSE IF (EXT .EQ. '.xyz' .OR. EXT .EQ. '.XYZ' ) THEN
+               CALL OLDFIL(MINP, inarg)
+               CALL REASAM(MINP, 1)
+            ELSE IF (EXT .EQ. '.asc' .OR. EXT .EQ. '.ASC' ) THEN
+               CALL OLDFIL(MINP, inarg)
+               call doclose(MINP)
+               call read_samples_from_arcinfo(trim(inarg), 1, 0) ! indeed do not prompt anymore, so japrompt = 0
+            ELSE IF (EXT .EQ. '.pol' .OR. EXT .EQ. '.POL' ) THEN
+               CALL OLDFIL(MINP, inarg)
+               CALL REAPOL(MINP, 0)
+            ELSE IF (EXT .EQ. '.pli' .OR. EXT .EQ. '.PLI' ) THEN
+               CALL OLDFIL(MINP, inarg)
+               CALL REAPOL(MINP, 0)
+            ELSE IF (EXT .EQ. '.spl' .OR. EXT .EQ. '.SPL' ) THEN
+               CALL OLDFIL (MINP, inarg)
+               CALL READSPLINES(MINP)
+            ELSE IF (EXT .EQ. '.grd' .OR. EXT .EQ. '.GRD' ) THEN
+               CALL OLDFIL(MINP, inarg)
+               CALL REAgrid(MINP, inarg,ja)
+            ELSE IF (EXT .EQ. '.rst' .OR. EXT .EQ. '.RST' ) THEN
+               md_restartfile = trim(inarg)
+            ELSE IF (EXT .EQ. '.cfg' .OR. EXT .EQ. '.CFG' ) THEN
+               md_cfgfile = inarg
+            ENDIF
+         else
+             call mess(LEVEL_INFO, 'File not found: '''//trim(inarg)//'''. Ignoring this commandline argument.')
+         end if
       end do
    end if
 
@@ -332,137 +379,3 @@
 
    RETURN
    END SUBROUTINE INIDAT
-
-   
-   subroutine loadfile(inarg)
-
-   USE m_missing
-   use m_netw
-   USE M_BOAT
-   USE M_AFMETING
-   USE M_SEASTATE
-   use unstruc_model
-   use unstruc_display
-   use unstruc_messages
-   use M_splines, only: increasespl, maxspl, maxsplen, readsplines
-   USE M_SAMPLES
-   use m_commandline_option
-   use dfm_signals
-   use gridoperations
-   use m_monitoring_crosssections, only: increaseCrossSections, maxcrs
-
-
-   implicit none
-   CHARACTER inarg*(*), EXT*4
-   LOGICAL JAWEL
-   integer :: minp, n1, n2, istat, ja
-
-   INQUIRE(FILE = trim(inarg),EXIST = JAWEL)
-   if (JAWEL) then
-      ! Find file extention based on first full stop symbol '.' at the back of the string.
-      N1  = INDEX (inarg,'.', .true.)
-      N2  = len_trim(inarg)
-      EXT = ' '
-      EXT = inarg(N1:N2)
-      IF (EXT .EQ. '.ldb' .OR. EXT .EQ. '.LDB' ) THEN
-         CALL OLDFIL (MINP, inarg)
-         CALL REALAN (MINP)
-      ELSE IF (EXT .EQ. '.net' .OR. (EXT .EQ. '.nc' .and. inarg(max(1,N1-4):max(1,N1-1)) == '_net') ) THEN
-         !CALL OLDFIL (MINP, inarg)
-         CALL loadNetwork(trim(inarg),istat,0)
-         if (istat == 0) then
-            md_netfile = ' ' ; md_netfile = trim(inarg)
-         endif
-      ELSE IF (EXT .EQ. '.bmp' .OR. EXT .EQ. '.BMP' ) THEN
-         CALL LOADBITMAP(inarg)
-      ELSE IF (EXT .EQ. '.mdu' .OR. EXT .EQ. '.MDU' ) THEN
-         CALL LOADMODEL(inarg)
-      ELSE IF (EXT .EQ. '.xyz' .OR. EXT .EQ. '.XYZ' ) THEN
-         CALL OLDFIL(MINP, inarg)
-         CALL REASAM(MINP, 1)
-      ELSE IF (EXT .EQ. '.asc' .OR. EXT .EQ. '.ASC' ) THEN
-         CALL OLDFIL(MINP, inarg)
-         call doclose(MINP)
-         call read_samples_from_arcinfo(trim(inarg), 1, 0) ! indeed do not prompt anymore, so japrompt = 0
-      ELSE IF (EXT .EQ. '.pol' .OR. EXT .EQ. '.POL' ) THEN
-         CALL OLDFIL(MINP, inarg)
-         CALL REAPOL(MINP, 0)
-      ELSE IF (EXT .EQ. '.pli' .OR. EXT .EQ. '.PLI' ) THEN
-         CALL OLDFIL(MINP, inarg)
-         CALL REAPOL(MINP, 0)
-      ELSE IF (EXT .EQ. '.spl' .OR. EXT .EQ. '.SPL' ) THEN
-         CALL OLDFIL (MINP, inarg)
-         CALL READSPLINES(MINP)
-      ELSE IF (EXT .EQ. '.grd' .OR. EXT .EQ. '.GRD' ) THEN
-         CALL OLDFIL(MINP, inarg)
-         CALL REAgrid(MINP, inarg,ja)
-      ELSE IF (EXT .EQ. '.rst' .OR. EXT .EQ. '.RST' ) THEN
-         md_restartfile = trim(inarg)
-      ELSE IF (EXT .EQ. '.cfg' .OR. EXT .EQ. '.CFG' ) THEN
-         md_cfgfile = inarg
-      ENDIF
-   else
-       call mess(LEVEL_INFO, 'File not found: '''//trim(inarg)//'''. Ignoring this commandline argument.')
-   end if
-   end subroutine loadfile
-
-   subroutine savefile(inarg)
-
-   USE m_missing
-   use m_netw
-   USE M_BOAT
-   USE M_AFMETING
-   USE M_SEASTATE
-   use unstruc_model
-   use unstruc_display
-   use unstruc_messages
-   use M_splines, only: increasespl, maxspl, maxsplen, readsplines
-   USE M_SAMPLES
-   use m_commandline_option
-   use dfm_signals
-   use gridoperations
-   use m_monitoring_crosssections, only: increaseCrossSections, maxcrs
-   use M_splines      ! need for wrispl
-   use unstruc_netcdf ! need for wrinet
-
-
-   implicit none
-   CHARACTER inarg*(*), EXT*4
-   LOGICAL JAWEL
-   integer :: minp, n1, n2, istat, ja  ! in this subroutine minp should be: mout
-
-       ! Find file extention based on first full stop symbol '.' at the back of the string.
-      N1  = INDEX (inarg,'.', .true.)
-      N2  = len_trim(inarg)
-      EXT = ' '
-      EXT = inarg(N1:N2)
-      IF (EXT .EQ. '.ldb' .OR. EXT .EQ. '.LDB' ) THEN
-         CALL newFIL (MINP, inarg)
-         CALL wriLAN (MINP)
-      ELSE IF (EXT .EQ. '.net' .OR. (EXT .EQ. '.nc' .and. inarg(max(1,N1-4):max(1,N1-1)) == '_net') ) THEN
-         call unc_write_net(inarg)
-       ELSE IF (EXT .EQ. '.bmp' .OR. EXT .EQ. '.BMP' ) THEN
-         ! CALL LOADBITMAP(inarg)
-      ELSE IF (EXT .EQ. '.mdu' .OR. EXT .EQ. '.MDU' ) THEN
-         call WriteMDUFile(inarg, istat)   
-      ELSE IF (EXT .EQ. '.xyz' .OR. EXT .EQ. '.XYZ' ) THEN
-         CALL newFIL(MINP, inarg)
-         CALL wriSAM(MINP)
-      ELSE IF (EXT .EQ. '.asc' .OR. EXT .EQ. '.ASC' ) THEN
-         CALL newFIL(MINP, inarg)
-         call wriSAM(MINP)
-      ELSE IF (EXT .EQ. '.pol' .OR. EXT .EQ. '.POL' .or. EXT .EQ. '.pli' .OR. EXT .EQ. '.PLI' ) THEN
-         CALL newFIL(MINP, inarg)
-         CALL wripol(MINP)
-      ELSE IF (EXT .EQ. '.spl' .OR. EXT .EQ. '.SPL' ) THEN
-         CALL newFIL (MINP, inarg)
-         CALL writeSPLINES(MINP)
-      ELSE IF (EXT .EQ. '.grd' .OR. EXT .EQ. '.GRD' ) THEN
-         CALL wrirgf(MINP, inarg)
-      ELSE IF (EXT .EQ. '.rst' .OR. EXT .EQ. '.RST' ) THEN
-         md_restartfile = trim(inarg)
-      ELSE IF (EXT .EQ. '.cfg' .OR. EXT .EQ. '.CFG' ) THEN
-         call save_displaysettings(inarg)
-      ENDIF
-     end subroutine savefile
-
