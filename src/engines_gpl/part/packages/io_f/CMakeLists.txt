@@ -10,6 +10,7 @@ add_library(${library_name} ${source_files})
 
 # Set dependencies
 set(oss_dependencies    deltares_common
+                        nefis
                         part_data_f
                         part_utils_f) 
 oss_include_libraries(${library_name} oss_dependencies)

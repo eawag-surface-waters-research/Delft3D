@@ -40,7 +40,6 @@ set_source_files_properties(${fortran_version_file} ${fortran_version_file}
 # Add dependencies
     set(oss_dependencies    deltares_common
                             deltares_common_c
-                            esmfsm 
                             nefis
                             part_data_f
                             part_io_f
@@ -56,6 +55,11 @@ target_compile_options(${executable_name} PRIVATE "${extend_source132_flag}")
 target_compile_options(${executable_name} PRIVATE "$<$<CONFIG:Debug>:${check_bounds_flag}>")
 target_compile_options(${executable_name} PRIVATE "$<$<CONFIG:Debug>:${check_pointer}>")
 
+
+if(UNIX)
+    target_link_options(${executable_name} PRIVATE ${openmp_flag})
+    set_property(TARGET ${executable_name} PROPERTY LINKER_LANGUAGE Fortran)
+endif(UNIX)
 
 if (WIN32)
     # Set linker properties
