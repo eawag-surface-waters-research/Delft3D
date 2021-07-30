@@ -1040,16 +1040,17 @@ rem ==========================
     
         echo "Release postbuild"
 
-        set dest_bin="!install_dir!\x64\Release\dpar\bin"
-        set dest_default="!install_dir!\x64\Release\dpar\default"
-        set dest_scripts="!install_dir!\x64\Release\dpar\scripts"
+        set dest_bin="!install_dir!\x64\Release\dpart\bin"
+        set dest_default="!install_dir!\x64\Release\dpart\default"
+        set dest_scripts="!install_dir!\x64\Release\dpart\scripts"
         set dest_plugins="!install_dir!\x64\Release\plugins\bin"
         set dest_share="!install_dir!\x64\Release\share\bin"
         
         call :makeAllDirs   
         
         rem copy binaries and dll 
-        call :copyFile "!build_dir!\delpar\!configuration!\delpar.exe"                            !dest_bin! 
+        call :copyFile "!build_dir!\delpar\!configuration!\delpar.exe"                            !dest_bin!
+        call :copyFile "!checkout_src_root!\engines_gpl\part\scripts\run_dpart.bat"               !dest_scripts!
     )
     
 goto :endproc
