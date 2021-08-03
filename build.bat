@@ -7,6 +7,7 @@ set config=
 set generator=
 set vs=
 set ifort=
+set coverage=0
 
 rem # Jump to the directory where this build.bat script is
 cd %~dp0
@@ -17,7 +18,7 @@ set root=%CD%
 
 call :CheckCMakeInstallation
 if !ERRORLEVEL! NEQ 0 exit /B %~1
-call :GetArguments %1
+call :GetArguments %1 %2
 if !ERRORLEVEL! NEQ 0 exit /B %~1
 call :GetEnvironmentVars
 if !ERRORLEVEL! NEQ 0 exit /B %~1
@@ -33,6 +34,7 @@ echo     generator   : !generator!
 echo     ifort       : !ifort!
 echo     mode        : !mode!
 echo     prepareonly : !prepareonly!
+echo     coverage    : !coverage!
 echo     vs          : !vs!
 echo.
 
@@ -51,6 +53,9 @@ call :DoCMake !config!
 if !ERRORLEVEL! NEQ 0 exit /B %~1
 
 if "!config!" == "dflowfm_interacter" call :set_dflowfm_interacter_link_flag
+if !ERRORLEVEL! NEQ 0 exit /B %~1
+
+if !coverage! EQU 1 call :insertCoverage !config!
 if !ERRORLEVEL! NEQ 0 exit /B %~1
 
 call :Build !config!
@@ -134,6 +139,9 @@ rem =================================
         set prepareonly=0
         set config=%1
         set mode=quiet
+    )
+    if "%2" == "--coverage" (
+        set coverage=1
     )
     goto :endproc
 
@@ -360,6 +368,15 @@ rem =========================================
 
 
 rem =======================
+rem === insertCoverage ====
+rem =======================
+:insertCoverage
+    rem Insert options to implement the build objects with hooks for the code-coverage tool.
+    rem This code is running from within build_%~1
+    python %root%\src\scripts_lgpl\win64\testcoverage\addcovoptions.py %~1.sln
+
+
+rem =======================
 rem === Build          ====
 rem =======================
 :Build
@@ -465,7 +482,7 @@ rem =======================
     echo.
     echo Usage:
     echo "build.bat"
-    echo "build.bat <CONFIG>"
+    echo "build.bat <CONFIG> [OPTIONS]"
     echo "  Without <CONFIG>:"
     echo "    The prepare_sln.py window will pop-up. Related commands will be executed."
     echo "  With    <CONFIG>:"
@@ -485,6 +502,10 @@ rem =======================
     echo "- dwaq"
     echo "- dimr"
     echo "- tests"
+    echo.
+    echo "Options:"
+    echo "--coverage"
+    echo "    Instrument object files for code-coverage tool (codecov)."
     echo.
     echo "More info  : https://oss.deltares.nl/web/delft3d/source-code"
     echo "About CMake: https://svn.oss.deltares.nl/repos/delft3d/trunk/src/cmake/doc/README"
