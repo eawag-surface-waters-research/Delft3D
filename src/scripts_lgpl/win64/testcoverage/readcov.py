@@ -3,14 +3,11 @@ import sys
 import os
 import shutil
 import subprocess
+import glob
 
-pathname = os.path.dirname(sys.argv[0])        
-scriptpath = os.path.abspath(pathname) 
-
-skipmerge = False
+do_merge = True
 version = sys.argv[1]                                # ifort version number
-fprname = os.path.join(scriptpath,sys.argv[2])       # name of the file with the projectlist
-slndir  = scriptpath        # path to the solution
+slndir  = sys.argv[2]                                # path to the solution
 
 env_ifortdir = "IFORT_COMPILER"+version
 try:
@@ -28,13 +25,14 @@ else:
     profmergetool = os.path.join(ifortdir,"bin","intel64_ia32","profmerge.exe") 
 
 # execute the profmerge tool
-if not skipmerge:
+if do_merge:
     cmd = profmergetool
     proc_rtn = subprocess.Popen(cmd).wait()    # proc_rtn!=0 in case of an error
 
-fpr = open(fprname,'r') 
-prlist = fpr.readlines()
-fpr.close()
+cwd = os.getcwd()
+os.chdir(slndir)
+prlist = glob.glob('**/*.SPI', recursive=True)
+os.chdir(cwd)
 
 cov_results = 'cov_results'
 if os.path.isdir(cov_results):
@@ -50,7 +48,7 @@ for entry in prlist:
     os.mkdir(prname)
     os.chdir(prname)
     cmd = codecovtool + ' -dpi ..\..\pgopti.dpi -spi ' +os.path.join(slndir,spi_file) \
-	                  +' -xmlbcvrgfull code_coverage.xml' +' -txtbcvrgfull code_coverage.txt'
+                      +' -xmlbcvrgfull code_coverage.xml' +' -txtbcvrgfull code_coverage.txt'
     print (cmd)
     proc_rtn = subprocess.Popen(cmd).wait()    # proc_rtn!=0 in case of an error
     print (prname)
