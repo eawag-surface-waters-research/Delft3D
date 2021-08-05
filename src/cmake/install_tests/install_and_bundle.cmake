@@ -18,6 +18,8 @@ include(BundleUtilities)
 
 set(BU_CHMOD_BUNDLE_ITEMS 1)
 
+fixup_bundle("${CMAKE_INSTALL_PREFIX}/bin/dflowfm_kernel_test" " " "${THIRDPARTY_x64_LIB_FOLDERS}")
+
 execute_process(COMMAND find "${CMAKE_INSTALL_PREFIX}/bin" -type f -exec echo "patched rpath of: " {} \; -exec bash -c "/opt/apps/patchelf/0.12/bin/patchelf --set-rpath '$ORIGIN:$ORIGIN/../lib' $1" _ {} \;)
 execute_process(COMMAND find "${CMAKE_INSTALL_PREFIX}/lib" -type f -exec echo "patched rpath of: " {} \; -exec bash -c "/opt/apps/patchelf/0.12/bin/patchelf --set-rpath '$ORIGIN' $1" _ {} \;)
 execute_process(COMMAND find "${CMAKE_INSTALL_PREFIX}/lib" -type l -exec echo "remove destination of symlink:" {} \; -exec bash -c "cp --remove-destination $(readlink {}) {};"  {} \; WORKING_DIRECTORY "${CMAKE_INSTALL_PREFIX}/lib" )
