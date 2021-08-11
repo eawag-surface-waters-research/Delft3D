@@ -197,7 +197,7 @@
       enddo
    else
       do LL = 1,lnx
-         if (u1(LL)<eps10) cycle
+         if (abs(u1(LL))<eps10) cycle
          call getLbotLtop(LL,lb,Lt)
          !Lb = Lbot(LL) ; Lt = Lb - 1 + kmxL(LL)
          do L = Lb, Lt
