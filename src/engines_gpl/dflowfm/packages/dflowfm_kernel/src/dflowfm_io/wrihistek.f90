@@ -98,8 +98,8 @@
       Te = 2*400/ue
 
       !write(mxls,'(13f14.6)') tim/Te ,  ucx(kobs(1)) / ue !   , s1(kobs(1)) - bl(kobs(1))
-      if (numobs > 0 .and. kobs(1) > 0 ) then
-
+      if (numobs > 1 .and. size(crs) > 0) then ! Calculation of Froude number seems to require at least 2 obs points and 1 crossection.
+  
          k1   = kobs(1)                                 ; k2  = kobs(2)
          ft   = 0.3048 ; dinch = 0.0254d0               ; wid = 6d0*dinch
          h1   = hs(k1)                                  ; h2  = hs(k2)
