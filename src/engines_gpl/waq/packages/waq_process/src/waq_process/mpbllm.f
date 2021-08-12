@@ -262,12 +262,12 @@ C           Bereken totale lichthoeveelheid en lichtlimitatie per laagje
 
 C              bereken de fractie algen die naar het sediment oppervlak zijn gemigreerd
 
-               IF ( IKMRK1 .EQ. 2 .AND. SWEMERSION .EQ. 1 ) THEN
+               IF ( SWEMERSION .EQ. 1 ) THEN
                   IF ( MIGRDEPTH2 .LE. 1E-20 ) THEN
                      FRACSURF = 0.0
                   ELSE
                      RELZ     = MIN(1.0,(MAX(0.0,(ACTDEP-MIGRDEPTH1)/(MIGRDEPTH2-MIGRDEPTH1))))
-                     FRACSURF = COS(PI*RELZ)
+                     FRACSURF = 0.5*COS(PI*RELZ)+0.5
                   ENDIF
                ELSE
                   FRACSURF = 0.0
