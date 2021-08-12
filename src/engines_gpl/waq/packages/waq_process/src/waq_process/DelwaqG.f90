@@ -10,7 +10,7 @@
 !!  GNU General Public License for more details.
 !!
 !!  You should have received a copy of the GNU General Public License
-!!  along with this program. If not, see <http://www.gnu.org/licenses/>.
+!!  along with this prooram. If not, see <http://www.gnu.org/licenses/>.
 !!
 !!  contact: delft3d.support@deltares.nl
 !!  Stichting Deltares
@@ -573,6 +573,7 @@
 !
 !******************************************************************************* INITIAL PROCESSING
 
+
       if (first) then
 
           ! load constants
@@ -731,41 +732,41 @@
 
           ! validity checks
           IF (kdpo4aap .LT. 0.0) CALL ERRSYS ('kdpo4aap negative', 1 )
-           IF (a_dNpr .LT. 1E-30) CALL ERRSYS ('DECDET: a_dNpr =< 0', 1 )
-           IF (a_dPpr .LT. 1E-30) CALL ERRSYS ('DECDET: a_dPpr =< 0', 1 )
-           IF (a_dSpr .LT. 1E-30) CALL ERRSYS ('DECDET: a_dSpr =< 0', 1 )
+          IF (a_dNpr .LT. 1E-30) CALL ERRSYS ('DECDET: a_dNpr =< 0', 1 )
+          IF (a_dPpr .LT. 1E-30) CALL ERRSYS ('DECDET: a_dPpr =< 0', 1 )
+          IF (a_dSpr .LT. 1E-30) CALL ERRSYS ('DECDET: a_dSpr =< 0', 1 )
 
-           IF (al_dNf .LT. 1E-30) CALL ERRSYS ('DECDET: al_dN/F/M/S/ =< 0', 1 )
-           IF (al_dPf .LT. 1E-30) CALL ERRSYS ('DECDET: al_dP/F/M/S/ =< 0', 1 )
-           IF (au_dNf .LT. 1E-30) CALL ERRSYS ('DECDET: au_dN/F/M/S/ =< 0', 1 )
-           IF (au_dPf .LT. 1E-30) CALL ERRSYS ('DECDET: au_dP/F/M/S/ =< 0', 1 )
-           IF (al_dNm .LT. 1E-30) CALL ERRSYS ('DECDET: al_dN/F/M/S/ =< 0', 1 )
-           IF (al_dPm .LT. 1E-30) CALL ERRSYS ('DECDET: al_dP/F/M/S/ =< 0', 1 )
-           IF (au_dNm .LT. 1E-30) CALL ERRSYS ('DECDET: au_dN/F/M/S/ =< 0', 1 )
-           IF (au_dPm .LT. 1E-30) CALL ERRSYS ('DECDET: au_dP/F/M/S/ =< 0', 1 )
-           IF (al_dNs .LT. 1E-30) CALL ERRSYS ('DECDET: al_dN/F/M/S/ =< 0', 1 )
-           IF (al_dPs .LT. 1E-30) CALL ERRSYS ('DECDET: al_dP/F/M/S/ =< 0', 1 )
-           IF (au_dNs .LT. 1E-30) CALL ERRSYS ('DECDET: au_dN/F/M/S/ =< 0', 1 )
-           IF (au_dPs .LT. 1E-30) CALL ERRSYS ('DECDET: au_dP/F/M/S/ =< 0', 1 )
+          IF (al_dNf .LT. 1E-30) CALL ERRSYS ('DECDET: al_dN/F/M/S/ =< 0', 1 )
+          IF (al_dPf .LT. 1E-30) CALL ERRSYS ('DECDET: al_dP/F/M/S/ =< 0', 1 )
+          IF (au_dNf .LT. 1E-30) CALL ERRSYS ('DECDET: au_dN/F/M/S/ =< 0', 1 )
+          IF (au_dPf .LT. 1E-30) CALL ERRSYS ('DECDET: au_dP/F/M/S/ =< 0', 1 )
+          IF (al_dNm .LT. 1E-30) CALL ERRSYS ('DECDET: al_dN/F/M/S/ =< 0', 1 )
+          IF (al_dPm .LT. 1E-30) CALL ERRSYS ('DECDET: al_dP/F/M/S/ =< 0', 1 )
+          IF (au_dNm .LT. 1E-30) CALL ERRSYS ('DECDET: au_dN/F/M/S/ =< 0', 1 )
+          IF (au_dPm .LT. 1E-30) CALL ERRSYS ('DECDET: au_dP/F/M/S/ =< 0', 1 )
+          IF (al_dNs .LT. 1E-30) CALL ERRSYS ('DECDET: al_dN/F/M/S/ =< 0', 1 )
+          IF (al_dPs .LT. 1E-30) CALL ERRSYS ('DECDET: al_dP/F/M/S/ =< 0', 1 )
+          IF (au_dNs .LT. 1E-30) CALL ERRSYS ('DECDET: au_dN/F/M/S/ =< 0', 1 )
+          IF (au_dPs .LT. 1E-30) CALL ERRSYS ('DECDET: au_dP/F/M/S/ =< 0', 1 )
 !
-!          Errors if upper limits =< lower limits
+!         Errors if upper limits =< lower limits
 !
-           IF (au_dNf .LT. al_dNf)  CALL ERRSYS ('DECDET: au_dN/F/M/S/ < al_dN/F/M/S/ ',1)
-           IF (au_dPf .LT. al_dPf)  CALL ERRSYS ('DECDET: au_dP/F/M/S/ < al_dP/F/M/S/ ',1)
-           IF (au_dNm .LT. al_dNm)  CALL ERRSYS ('DECDET: au_dN/F/M/S/ < al_dN/F/M/S/ ',1)
-           IF (au_dPm .LT. al_dPm)  CALL ERRSYS ('DECDET: au_dP/F/M/S/ < al_dP/F/M/S/ ',1)
-           IF (au_dNs .LT. al_dNs)  CALL ERRSYS ('DECDET: au_dN/F/M/S/ < al_dN/F/M/S/ ',1)
-           IF (au_dPs .LT. al_dPs)  CALL ERRSYS ('DECDET: au_dP/F/M/S/ < al_dP/F/M/S/ ',1)
+          IF (au_dNf .LT. al_dNf)  CALL ERRSYS ('DECDET: au_dN/F/M/S/ < al_dN/F/M/S/ ',1)
+          IF (au_dPf .LT. al_dPf)  CALL ERRSYS ('DECDET: au_dP/F/M/S/ < al_dP/F/M/S/ ',1)
+          IF (au_dNm .LT. al_dNm)  CALL ERRSYS ('DECDET: au_dN/F/M/S/ < al_dN/F/M/S/ ',1)
+          IF (au_dPm .LT. al_dPm)  CALL ERRSYS ('DECDET: au_dP/F/M/S/ < al_dP/F/M/S/ ',1)
+          IF (au_dNs .LT. al_dNs)  CALL ERRSYS ('DECDET: au_dN/F/M/S/ < al_dN/F/M/S/ ',1)
+          IF (au_dPs .LT. al_dPs)  CALL ERRSYS ('DECDET: au_dP/F/M/S/ < al_dP/F/M/S/ ',1)
 
-           IF (ku_dFdcC20 .LT. kl_dFdcC20) CALL ERRSYS ('DECDET: ku_d/F/M/S/dec20 < kl_d/F/M/S/dec20 ',1)
-           IF (ku_dFdcN20 .LT. kl_dFdcN20) CALL ERRSYS ('DECDET: ku_d/F/M/S/dcN20 < kl_d/F/M/S/dcN20 ',1)
-           IF (ku_dFdcP20 .LT. kl_dFdcP20) CALL ERRSYS ('DECDET: ku_d/F/M/S/dcP20 < kl_d/F/M/S/dcP20 ',1)
-           IF (ku_dMdcC20 .LT. kl_dMdcC20) CALL ERRSYS ('DECDET: ku_d/F/M/S/dec20 < kl_d/F/M/S/dec20 ',1)
-           IF (ku_dMdcN20 .LT. kl_dMdcN20) CALL ERRSYS ('DECDET: ku_d/F/M/S/dcN20 < kl_d/F/M/S/dcN20 ',1)
-           IF (ku_dMdcP20 .LT. kl_dMdcP20) CALL ERRSYS ('DECDET: ku_d/F/M/S/dcP20 < kl_d/F/M/S/dcP20 ',1)
-           IF (ku_dSdcC20 .LT. kl_dSdcC20) CALL ERRSYS ('DECDET: ku_d/F/M/S/dec20 < kl_d/F/M/S/dec20 ',1)
-           IF (ku_dSdcN20 .LT. kl_dSdcN20) CALL ERRSYS ('DECDET: ku_d/F/M/S/dcN20 < kl_d/F/M/S/dcN20 ',1)
-           IF (ku_dSdcP20 .LT. kl_dSdcP20) CALL ERRSYS ('DECDET: ku_d/F/M/S/dcP20 < kl_d/F/M/S/dcP20 ',1)
+          IF (ku_dFdcC20 .LT. kl_dFdcC20) CALL ERRSYS ('DECDET: ku_d/F/M/S/dec20 < kl_d/F/M/S/dec20 ',1)
+          IF (ku_dFdcN20 .LT. kl_dFdcN20) CALL ERRSYS ('DECDET: ku_d/F/M/S/dcN20 < kl_d/F/M/S/dcN20 ',1)
+          IF (ku_dFdcP20 .LT. kl_dFdcP20) CALL ERRSYS ('DECDET: ku_d/F/M/S/dcP20 < kl_d/F/M/S/dcP20 ',1)
+          IF (ku_dMdcC20 .LT. kl_dMdcC20) CALL ERRSYS ('DECDET: ku_d/F/M/S/dec20 < kl_d/F/M/S/dec20 ',1)
+          IF (ku_dMdcN20 .LT. kl_dMdcN20) CALL ERRSYS ('DECDET: ku_d/F/M/S/dcN20 < kl_d/F/M/S/dcN20 ',1)
+          IF (ku_dMdcP20 .LT. kl_dMdcP20) CALL ERRSYS ('DECDET: ku_d/F/M/S/dcP20 < kl_d/F/M/S/dcP20 ',1)
+          IF (ku_dSdcC20 .LT. kl_dSdcC20) CALL ERRSYS ('DECDET: ku_d/F/M/S/dec20 < kl_d/F/M/S/dec20 ',1)
+          IF (ku_dSdcN20 .LT. kl_dSdcN20) CALL ERRSYS ('DECDET: ku_d/F/M/S/dcN20 < kl_d/F/M/S/dcN20 ',1)
+          IF (ku_dSdcP20 .LT. kl_dSdcP20) CALL ERRSYS ('DECDET: ku_d/F/M/S/dcP20 < kl_d/F/M/S/dcP20 ',1)
 
 
           ! Switches
@@ -776,7 +777,7 @@
 
           ! Check if sum of array dl equals input fixed layer thickness
           thick = sum(dl)
-           IF (abs(thick-Th_DelwaqG).gt.0.01*Th_DelwaqG) CALL ERRSYS ('Inconsistent layer definition',1)
+          IF (abs(thick-Th_DelwaqG).gt.0.01*Th_DelwaqG) CALL ERRSYS ('Inconsistent layer definition',1)
 
           ! Determine 2D structure, first find dimension and next fill a mapping array
           noseg2d = 0
@@ -861,16 +862,6 @@
               td(ilay) = difcoef*exp(-exp_dif*sd(ilay))
           enddo
 
-          ! store total mass
-!AM - ugly, but a last resort (the values get overwritten later on by DELWAQ itself!)
-          do isys = 1,nototsed
-              totmas = 0.0
-              do ilay = 1,nolay
-                  totmas = totmas + sedconc(ilay,isys,iseg2d)*dl(ilay)
-              enddo
-              ip  = OFFSET_S1+isys
-              pmsa(ipoint(ip)+(iseg-1)*increm(ip)) = totmas
-          enddo
           if (SW_VB) then
               ip = OFFSET_S1+is_nh4
               s1_nh4 = pmsa(ipoint(ip)+(iseg-1)*increm(ip))
@@ -1077,14 +1068,9 @@
           kp(ilay,is_po4) = kp(ilay,is_po4) - fads
           kp(ilay,is_aap) = kp(ilay,is_aap) + fads
 
-          if ( iseg2d == 1740 .or. iseg2d == 1940 ) then
-              !call print_kp( 'AdsP', ilay, kp )
-          endif
-
     !     store in output
           iflux = nototseddis + 1
           fl(iflux+(iseg-1)*noflux) = fl(iflux+(iseg-1)*noflux) + fads*dl(ilay) /depth
-
 
           ! +++++++++++++++++++++++++++++++++++++++++++
           ! Existing process Nitrif_NH4 (CODE NEEDED CHANGE as constants were redefined ...
@@ -1124,10 +1110,6 @@
     !     store in output
           iflux = nototseddis + 2
           fl(iflux+(iseg-1)*noflux) = fl(iflux+(iseg-1)*noflux) + flnit*dl(ilay) /depth
-
-          if ( iseg2d == 1740 .or. iseg2d == 1940 ) then
-              !call print_kp( 'Nitrif', ilay, kp )
-          endif
 
           ! +++++++++++++++++++++++++++++++++++++++++++
           ! Existing process DecFast DecMedium DecSlow DecRefr DecDOC
@@ -1326,6 +1308,7 @@
 !
 !             Calculate the fluxes for mineralization and conversion
 !
+
               decflx(9) = RC20C * TEMPC * ELFACT * POC ! DECOC
               decflx(1) = B_DTP * decflx(9) ! CNVPC
               decflx(5) = B_DTD * decflx(9) ! CNVDC
@@ -1374,10 +1357,6 @@
                 kp(ilay,is_pos1) = kp(ilay,is_pos1) - decflx(12)
                 kp(ilay,is_sud ) = kp(ilay,is_sud ) + decflx(12)
 
-          if ( iseg2d == 1740 .or. iseg2d == 1940 ) then
-              !call print_kp( 'Frac1', ilay, kp )
-          endif
-
           !     store in output (fluxes 3-14)
                 do ifl = 1,12
                   iflux = nototseddis + 2 + ifl
@@ -1410,10 +1389,6 @@
                 kp(ilay,is_pos2) = kp(ilay,is_pos2) - decflx(12)
                 kp(ilay,is_sud ) = kp(ilay,is_sud ) + decflx(12)
 
-          if ( iseg2d == 1740 .or. iseg2d == 1940 ) then
-              !call print_kp( 'Frac2', ilay, kp )
-          endif
-
           !     store in output (fluxes 15-26
                 do ifl = 1,12
                   iflux = nototseddis + 14 + ifl
@@ -1445,10 +1420,6 @@
                 kp(ilay,is_po4 ) = kp(ilay,is_po4 ) + decflx(11)
                 kp(ilay,is_pos3) = kp(ilay,is_pos3) - decflx(12)
                 kp(ilay,is_sud ) = kp(ilay,is_sud ) + decflx(12)
-
-          if ( iseg2d == 1740 .or. iseg2d == 1940 ) then
-              !call print_kp( 'Frac3', ilay, kp )
-          endif
                 !
           !     store in output (fluxes 27-38
                 do ifl = 1,12
@@ -1466,10 +1437,6 @@
                 kp(ilay,is_pos4) = kp(ilay,is_pos4) - decflx(12)
                 kp(ilay,is_sud ) = kp(ilay,is_sud ) + decflx(12)
 
-          if ( iseg2d == 1740 .or. iseg2d == 1940 ) then
-              !call print_kp( 'Frac4', ilay, kp )
-          endif
-
           !     store in output (fluxes 39-50
                 do ifl = 1,12
                   iflux = nototseddis + 38 + ifl
@@ -1485,10 +1452,6 @@
                 kp(ilay,is_po4) = kp(ilay,is_po4) + decflx(11)
                 kp(ilay,is_dos) = kp(ilay,is_dos) - decflx(12)
                 kp(ilay,is_sud) = kp(ilay,is_sud) + decflx(12)
-
-          if ( iseg2d == 1740 .or. iseg2d == 1940 ) then
-              !call print_kp( 'Frac5', ilay, kp )
-          endif
 
           !     store in output (fluxes 51-62
                 do ifl = 1,12
@@ -1528,10 +1491,6 @@
           iflux = nototseddis + 64
           fl(iflux+(iseg-1)*noflux) = fl(iflux+(iseg-1)*noflux) + fsol*dl(ilay) /depth
 
-          if ( iseg2d == 1740 .or. iseg2d == 1940 ) then
-              !call print_kp( 'VIVP', ilay, kp )
-          endif
-!
           ! +++++++++++++++++++++++++++++++++++++++++++
           ! Existing process DisSi
           ! +++++++++++++++++++++++++++++++++++++++++++
@@ -1560,10 +1519,6 @@
     !     store in output
           iflux = nototseddis + 65
           fl(iflux+(iseg-1)*noflux) = fl(iflux+(iseg-1)*noflux) + fsol*dl(ilay) /depth
-
-          if ( iseg2d == 1740 .or. iseg2d == 1940 ) then
-              !call print_kp( 'FSOL', ilay, kp )
-          endif
 
           ! +++++++++++++++++++++++++++++++++++++++++++
           ! Existing process CONSELAC
@@ -1711,10 +1666,6 @@
               fl(iflux+(iseg-1)*noflux) = fl(iflux+(iseg-1)*noflux) + conflx(ifl)*dl(ilay) /depth
           enddo
 
-          if ( iseg2d == 1740 .or. iseg2d == 1940 ) then
-              !call print_kp( 'FROXC', ilay, kp )
-          endif
-
           ! +++++++++++++++++++++++++++++++++++++++++++
           ! Existing process EBULCH4
           ! +++++++++++++++++++++++++++++++++++++++++++
@@ -1741,10 +1692,6 @@
     !     store in output
           iflux = nototseddis + 72
           fl(iflux+(iseg-1)*noflux) = fl(iflux+(iseg-1)*noflux) + ebulfl*dl(ilay) /depth
-
-          if ( iseg2d == 1740 .or. iseg2d == 1940 ) then
-              !call print_kp( 'CCH4S', ilay, kp )
-          endif
 
           ! +++++++++++++++++++++++++++++++++++++++++++
           !     Existing process specsud
@@ -1848,10 +1795,6 @@
           iflux = nototseddis + 75
           fl(iflux+(iseg-1)*noflux) = fl(iflux+(iseg-1)*noflux) + fluxds*dl(ilay) /depth
 
-          if ( iseg2d == 1740 .or. iseg2d == 1940 ) then
-              !call print_kp( 'Precsul', ilay, kp )
-          endif
-
           ! +++++++++++++++++++++++++++++++++++++++++++
           ! Existing process OXIDCH4
           ! +++++++++++++++++++++++++++++++++++++++++++
@@ -1928,10 +1871,6 @@
           iflux = nototseddis + 77
           fl(iflux+(iseg-1)*noflux) = fl(iflux+(iseg-1)*noflux) + flcsu*dl(ilay) /depth
 
-          if ( iseg2d == 1740 .or. iseg2d == 1940 ) then
-              !call print_kp( 'Oxidch4', ilay, kp )
-          endif
-
           ! +++++++++++++++++++++++++++++++++++++++++++
           ! Existing process APATITE
           ! +++++++++++++++++++++++++++++++++++++++++++
@@ -1958,10 +1897,6 @@
           fl(iflux+(iseg-1)*noflux) = fl(iflux+(iseg-1)*noflux) + fprc*dl(ilay) /depth
           iflux = nototseddis + 79
           fl(iflux+(iseg-1)*noflux) = fl(iflux+(iseg-1)*noflux) + fsol*dl(ilay) /depth
-
-          if ( iseg2d == 1740 .or. iseg2d == 1940 ) then
-              !call print_kp( 'Apat', ilay, kp )
-          endif
 
           ! +++++++++++++++++++++++++++++++++++++++++++
           ! Interface to VB, programmed as an extra "process" to avoid further logistics
@@ -2071,17 +2006,9 @@
               kp(ilay,is_pos4 ) = kp(ilay,is_pos4 ) + vbflux
               iflux = nototseddis + 101
               fl(iflux+(iseg-1)*noflux) = fl(iflux+(iseg-1)*noflux) + vbflux*dl(ilay) /depth
-
-          if ( iseg2d == 1740 .or. iseg2d == 1940 ) then
-              !call print_kp( 'VB', ilay, kp )
-          endif
           endif
 
           ! end of loop over layers in present cell
-
-          if ( iseg2d == 1740 .or. iseg2d == 1940 ) then
-              !call print_kp( 'Total', ilay, kp )
-          endif
           enddo
 
 ! ENDPROC
@@ -2177,5 +2104,6 @@
                   fl(iflux+(iseg-1)*noflux) = sedwatflx
               endif
           enddo
+
       enddo
       end

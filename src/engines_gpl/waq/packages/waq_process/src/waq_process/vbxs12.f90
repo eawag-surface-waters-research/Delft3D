@@ -1235,7 +1235,6 @@
               dP2VBups =  s1_po4*fbot/max(tinyavail,vbpavail)*fpvbup/depth
               dS1VBups =  s1_so4*fbot/max(tinyavail,vbsavail)*fsvbup/depth
               dS2VBups =  s1_sud*fbot/max(tinyavail,vbsavail)*fsvbup/depth
-
           endif
 
           ! STORE FLUXES

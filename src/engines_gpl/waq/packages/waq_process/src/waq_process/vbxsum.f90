@@ -53,6 +53,7 @@
 !     Sum the uptake of nutrients from the sediment and release to the sediment by terrestrial vegetation (VEGMOD)
 !     (This is a workaround for having the fluxes per cohort in the process definition of the DelwaqG process)
 !
+
       if ( first ) then
           first    = .false.
           ncohorts = int(pmsa(ipoint(1)))
@@ -60,18 +61,22 @@
 
           allocate( ipnt(nfluxes,ncohorts+1) )
           allocate( incr(nfluxes,ncohorts+1) )
+
+          first = .true.
       endif
 
       ipnt = reshape( ipoint(3:2+(ncohorts+1) * nfluxes), [nfluxes, ncohorts+1] )
       incr = reshape( increm(3:2+(ncohorts+1) * nfluxes), [nfluxes, ncohorts+1] )
 
       do iseg = 1,noseg
+          do iflux = 1,nfluxes
+              pmsa(ipnt(iflux,ncohorts+1)) = 0.0
+          enddo
           do icohort = 1,ncohorts
               do iflux = 1,nfluxes
                   pmsa(ipnt(iflux,ncohorts+1)) = pmsa(ipnt(iflux,ncohorts+1)) + pmsa(ipnt(iflux,icohort))
               enddo
           enddo
-
           ipnt = ipnt + incr
       enddo
 
