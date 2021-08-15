@@ -312,7 +312,7 @@ subroutine write_error(message, string, unit)
     !! executable statements ---------------------------------------------------
     !
     if (present(string)) string = label // message
-    if (present(unit)) write(unit,*) label // trim(message)
+    if (present(unit)) write(unit,'(A)') label // trim(message)
 end subroutine write_error
 !
 !
@@ -336,7 +336,7 @@ subroutine write_warning(message, string, unit)
     !! executable statements ---------------------------------------------------
     !
     if (present(string)) string = label // message
-    if (present(unit)) write(unit,*) label // message
+    if (present(unit)) write(unit,'(A)') label // trim(message)
 end subroutine write_warning
 
 end module message_module

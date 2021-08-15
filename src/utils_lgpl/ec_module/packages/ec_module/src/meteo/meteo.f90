@@ -673,6 +673,69 @@ end function getmeteotypes
 !
 !
 !===============================================================================
+function getmeteoquantities(runid, meteoquantities) result(success)
+   use m_alloc
+   implicit none
+!
+! Return value
+!
+   logical :: success
+!
+! Global variables
+!
+   character(*) , intent(in)  :: runid
+   character(60), dimension(:), allocatable, intent(out)  :: meteoquantities
+!
+! Local variables
+!
+   integer                             :: dimmeteoquantities
+   integer                             :: i
+   integer                             :: j
+   integer                             :: k
+   integer                             :: ierr
+   logical                             :: newquant
+   character(60)                       :: curquant
+   type(tmeteo)              , pointer :: meteo     ! all meteo for one subdomain
+   type(tmeteoitem)          , pointer :: meteoitem
+!
+!! executable statements -------------------------------------------------------
+!
+   success = .true.
+   call getmeteopointer(runid, meteo)
+   if ( .not. associated(meteo) ) then
+      success = .false.
+      return
+   endif
+   ierr = 0
+   do i = 1, meteo%nummeteoitems
+      do k = 1, 3
+         curquant = meteo%item(i)%ptr%quantities(k)
+         if (curquant == ' ') cycle
+         newquant = .true.
+         if (allocated(meteoquantities)) then
+            dimmeteoquantities = size(meteoquantities)
+         else
+            dimmeteoquantities = 0
+         endif
+         do j = 1, dimmeteoquantities
+            if (meteoquantities(j) == curquant) then
+               newquant = .false.
+               exit
+            endif
+         enddo
+         if (newquant) then
+            call realloc(meteoquantities, size(meteoquantities)+1, stat=ierr, keepExisting=.true.)
+            meteoquantities(size(meteoquantities)) = curquant
+         endif
+      enddo
+   enddo
+   if (ierr /= 0) then
+      success = .false.
+   endif
+end function getmeteoquantities
+!
+!
+!===============================================================================
 function getmeteoval(runid, quantity, time, mfg, nfg, & 
                    & nlb, nub, mlb, mub, qarray, grid_size, gridnoise) result(success)
    !
