@@ -61,8 +61,6 @@
 
           allocate( ipnt(nfluxes,ncohorts+1) )
           allocate( incr(nfluxes,ncohorts+1) )
-
-          first = .true.
       endif
 
       ipnt = reshape( ipoint(3:2+(ncohorts+1) * nfluxes), [nfluxes, ncohorts+1] )
