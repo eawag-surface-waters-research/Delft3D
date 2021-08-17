@@ -59,7 +59,9 @@ integer                              :: IPNT_S1A = 4           ! pointers in sum
 integer                              :: IPNT_HUA = 5           ! pointers in sumval* arrays
 
 type (tcrs), allocatable, target     :: crs(:)
-integer                              :: ncrs = 0, maxcrs = 2, maxnval = 5
+integer                              :: ncrs = 0               !< Current number of monitoring cross sections in crs(:)
+integer                              :: maxcrs = 2             !< Current array size/max number of monitoring cross sections in crs(:)
+integer                              :: maxnval = 5            !< Current max number of quantities monitored on cross sections in the sumval* arrays.
 
 integer, private                     :: iUniq_ = 1
 character(len=*), parameter, private :: defaultName_ = 'Crs'
