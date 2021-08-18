@@ -696,18 +696,19 @@
       ENDIF
       key = 3
    ELSE IF (NWHAT .EQ. 16) THEN
-      EXP(1)    = 'MENU                                    '
-      EXP(2)    = 'SHOW observation stations               '
-      OPTION(1) = 'NO observation stations                 '
-      OPTION(2) = 'Cross                                   '
-      OPTION(3) = 'Cross + name                            '
-      OPTION(4) = 'Polyfil                                 '
-      OPTION(5) = 'Polyfil + name                          '
-      OPTION(6) = 'Cross   + waterlevel (m)                '
-      OPTION(7) = 'Cross   + waterdepth (m)                '
-      OPTION(8) = 'Cross   + velocity magnitudes (m/s)     '
-      OPTION(9) = 'Cross   + znod                          '
-      OPTION(10) = 'Cross   + temperatures surface + bed   '
+      EXP(1)     = 'MENU                                    '
+      EXP(2)     = 'SHOW observation stations               '
+      OPTION(1)  = 'NO observation stations                 '
+      OPTION(2)  = 'Cross                                   '
+      OPTION(3)  = 'Cross + name                            '
+      OPTION(4)  = 'Polyfil                                 '
+      OPTION(5)  = 'Polyfil + name                          '
+      OPTION(6)  = 'Cross   + waterlevel (m)                '
+      OPTION(7)  = 'Cross   + waterdepth (m)                '
+      OPTION(8)  = 'Cross   + velocity magnitudes (m/s)     '
+      OPTION(9)  = 'Cross   + znod                          '
+      OPTION(10) = 'Cross   + temperatures surface + bed    '
+      OPTION(11) = 'Cross   + kobs index number             '
 
       MAXOPT    = 10
       NWHAT2    = NDRAWobs
@@ -842,7 +843,8 @@
       OPTION(6) = 'NUMBERS MONOCOLOUR                      '
       OPTION(7) = 'NUMBERS ISOCOLOUR + COLOURED DOTS       '
       OPTION(8) = 'COLOURED SQUARES                        '
-      MAXOPT    = 8
+      OPTION(9) = 'INDEX NUMBERS                           '
+      MAXOPT    = 9
       NWHAT2    = max(0,NDRAW(32)) + 1
       CALL MENUV3(NWHAT2,OPTION,MAXOPT,EXP,MAXEXP)
       IF (NWHAT2 .GE. 1) THEN

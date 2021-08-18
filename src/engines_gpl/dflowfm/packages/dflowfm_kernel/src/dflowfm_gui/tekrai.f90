@@ -66,7 +66,7 @@
  integer :: ndraw, kts
 
  double precision :: zz1, zz2, xz1, xz2
- double precision :: xmn, xmx, ymx, zmx, zmx2, bot, top, xx, yy, bup
+ double precision :: xmn, xmx, ymx, zmx, zmx2, bot, top, xx, yy, bup, xxu, zzu
  double precision :: xp(4), yp(4), zp(4), xxmn, xxmx, zn, dlay, dl, xp1, yp1, qsrck
  integer          :: mx, kb, kt, Lb, Lt, LL, kplotfrombedorsurfacesav
  double precision, external    :: znod, zlin
@@ -348,22 +348,27 @@
     ! yp(3) = zws(k)    ; yp(4) = yp(3)
     ! call PFILLER(xp,yp,4,ncol, ncol )
 
-    if ( NDRAW(2) > 0 ) then  ! draw interface lines in white
+    if ( NDRAW(2) > 0 ) then  ! draw layer interface lines in white
 
         do LL  = 1,lnxi
            n1  = ln(1,LL)
            n2  = ln(2,LL)
            xx  = xz(n1)
            xx2 = xz(n2)
+           xxu = xu(LL)
 
            if (hu(LL) > 0) then
-              Lb  = Lbot(LL)
+              Lb = Lbot(LL)
               Lt = Ltop(LL)
-              do L  = Lb, Lt
+              do L = Lb, Lt
                  if (hu(L) > 0) then
                     k1 = ln(1,L)
                     k2 = ln(2,L)
                     call movabs(xx ,zws(k1))
+                    if (ndraw(42) > 0) then 
+                       zzu = min ( bob(1,LL), bob(2,LL) ) + hu(L)
+                       call lnabs(xxu,zzu)
+                    endif
                     call  lnabs(xx2,zws(k2))
                  endif
               enddo

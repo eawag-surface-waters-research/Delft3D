@@ -88,6 +88,95 @@ use m_samples
 
 end subroutine init_core
 
+subroutine batch(batfile) ! 
+use m_flow
+use m_flowgeom
+use m_monitoring_crosssections
+use unstruc_model
+implicit none
+integer :: k, ja, minp, mout, L1, istat, i
+integer :: MODE,NUM,NWHAT,KEY
+double precision    :: QQQ, upot,ukin,ueaa
+character *(*)      :: batfile
+character (len=256) :: rec, filnam, basemdu, tex
+
+call resetFullFlowModel()
+
+call default_flowtimes   ! anders crasht ie
+
+call oldfil (minp, batfile) 
+call newfil (mout, trim(batfile)//'.out')
+write(mout,'(A)') '                   mdu  : , kmx, numtopsig, numtopsiguniform, keepzlayeringatbed, ihuz, ihuzcsig, dtav : '//  & 
+                  ' Qcrs1  (m3/s), ueaa (kg/(ms2)),  upot(kg/(ms2)), ukin (kg/(ms2)), utot (kg/(ms2)) '
+
+111 read (minp, '( A )', end = 999) rec
+
+if (index (rec, 'LOAD') > 0) then              ! load a new model or file
+    L1 = index(rec,'=') + 1
+    read(rec(L1:),'(A)',err = 888) filnam
+    call loadfile(filnam)
+    if ( index(filnam, '.mdu') > 0) then
+       basemdu = filnam
+    endif 
+endif 
+
+if (index (rec, 'SAVE') > 0) then              ! save a model or file
+    L1 = index(rec,'=') + 1
+    read(rec(L1:),'(A)',err = 888) filnam
+    call savefile(filnam)
+endif 
+
+if (index (rec, 'CHOICES') > 0) then           ! first check your choices
+    L1 = index(rec,'=') + 1
+    read(rec(L1:),*,err = 888) NUM, NWHAT 
+    MODE = 1 ; KEY = 3
+    call CHOICES(MODE,NUM,NWHAT,KEY)
+endif 
+
+if (index (rec, 'START PARAMETERS') > 0) then  ! specify new model with only few parameters changed through readmdufile
+    call loadfile(basemdu)
+    L1 = index(rec,'=') + 1
+    read(rec(L1:),'(A)',err = 888) filnam
+
+    call readMDUFile(filnam, istat) ! , minp)          ! change few params from short mdu-like pieces in bat file
+
+    call WriteMDUFile(filnam, istat)               ! for logging, save new mdu file
+    call loadfile(filnam)                          ! 
+endif
+
+if (index (rec, 'RUN') > 0) then 
+    
+    call dodfm(ja) 
+ 
+    if (ncrs>0) then 
+
+        QQQ = crs(1)%sumvalcur(1)                                                 ; i = 1
+        write(tex(i: ),'(i2.0)')  kmx                                             ; i = i + 5
+        write(tex(i: ),'(i2.0)')  numtopsig                                       ; i = i + 5
+        write(tex(i: ),'(i2.0)')  janumtopsiguniform                              ; i = i + 5
+        write(tex(i: ),'(i2.0)')  keepzlayeringatbed                              ; i = i + 5
+        write(tex(i: ),'(i2.0)')  ihuz                                            ; i = i + 5
+        write(tex(i: ),'(i2.0)')  ihuzcsig                                        ; i = i + 5
+        write(tex(i: ),'(F5.2)')  (time1 - tstart_user)/max(1d0, dnt)             ; i = i + 5
+       
+        call upotukinueaa(upot,ukin,ueaa) 
+        write(mout,'(A30,A, 5F14.3)')  filnam(1:30), ' :    '//trim(tex)//' : ', QQQ, ueaa, upot, ukin, upot+ukin
+    endif
+
+endif
+
+goto 111
+
+888 CALL QNREADERROR('Trying to Read a filename but Getting',REC,MINP)
+    call doclose(MINP)
+    call doclose(Mout)
+    RETURN
+
+999 call doclose(mout) 
+return
+
+end subroutine batch
+
 subroutine dobatch() ! 
 use m_flow
 use m_flowgeom
@@ -137,10 +226,10 @@ end subroutine dobatch
 
 
 subroutine dodfm(ja) ! for those who like calling subroutines 
+use unstruc_netcdf
 integer :: ja
-ja        = 0
-time_user = tstart_user
-ja        = flow()
+ja = 0
+ja = flow()
 end subroutine dodfm
 
   integer function boundary_timeseries(location,quantity,t0,t1,dt,target_array) result(iresult)

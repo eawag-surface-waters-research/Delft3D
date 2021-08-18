@@ -727,6 +727,9 @@ subroutine plotObservations() ! TEKOBS
                 write (tex,'(2f6.1)') constituents(itemp,k)
                 call gtext(tex(1:14), xobs(n), yobs(n), ncolblack)
              endif   
+          else if (ndrawobs == 11) then
+             write (tex,'(I4.0)') k 
+             call gtext(tex(1:4), xobs(n), yobs(n), ncolblack)     
           endif
        ENDIF
     end do
@@ -1794,9 +1797,9 @@ subroutine tekwindvector()
  implicit none
  COMMON /DRAWTHIS/   ndraw(50)
  integer :: ndraw 
- double precision :: xp, yp, vfw, ws, dyp, upot, ukin, rv
+ double precision :: xp, yp, vfw, ws, dyp, upot,ukin,ueaa
  character tex*60 
- integer :: ncol, k, kk, vlatin, vlatout, i, mout
+ integer :: ncol, k, vlatin, vlatout, i, mout
  
  
  if (ndraw(40) == 0 .and. npdf == 0) return
@@ -1975,35 +1978,31 @@ subroutine tekwindvector()
  else if (ndraw(40) == 2) then 
     
     if (jasal > 0 .and. kmx > 0) then 
-       
-       upot = 0d0 ; ukin = 0d0
-       do kk = 1,ndxi
-          do k = kbot(kk), ktop(kk) 
-             rv   = rho(k)*vol1(k) 
-             ukin = ukin + 0.5d0*rv*sqrt(ucx(k)*ucx(k) + ucy(k)*ucy(k))
-             upot = upot + ag*rv*(zws(k)+zws(k-1))*0.5d0
-          enddo   
-       enddo   
+       call upotukinueaa(upot,ukin,ueaa)     
+
        yp  = yp - dyp
-       tex = 'Upot :             (kg.m2/s2)'
-       if (upot0 == dmiss) upot0 = upot
-       upot = upot - upot0
-       write(tex(10:20), '(E11.5)') upot    
+       tex = 'Upot :               (kg/(m.s2))'
+       write(tex(8:20), '(F11.2)') upot    
        ncol = ncoltx
        call GTEXT(tex, xp, yp, ncol)
    
        yp  = yp - dyp
-       tex = 'Ukin :             (kg.m2/s2)'
-       write(tex(10:20), '(E11.5)') ukin    
+       tex = 'Ukin :               (kg/(m.s2))'
+       write(tex(8:20), '(F11.2)') ukin    
        call GTEXT(tex, xp, yp, ncol)
    
        yp  = yp - dyp
-       tex = 'Utot :             (kg.m2/s2)'
-       write(tex(10:20), '(E11.5)') upot+ukin    
+       tex = 'Utot :               (kg/(m.s2))'
+       write(tex(8:20), '(F11.2)') upot+ukin    
        call GTEXT(tex, xp, yp, ncol)
-       
-    endif   
-       
+
+       yp  = yp - dyp
+       tex = 'Ueaa :               (kg/(m.s2))'
+       write(tex(8:20), '(F11.2)') ueaa    
+       call GTEXT(tex, xp, yp, ncol)
+
+   endif
+           
  endif   
  
  if ( jawave.eq.4 ) then
@@ -2017,6 +2016,51 @@ subroutine tekwindvector()
  call resetlinesizesetc()
   
 end subroutine tekwindvector
+
+
+subroutine upotukinueaa(upot,ukin,ueaa)
+use m_flow
+use m_flowgeom
+use m_missing
+implicit none
+double precision :: upot, ukin, ueaa
+double precision :: vtot, roav, hh, zz, dzz
+integer k, kk
+       
+upot = 0d0 ; ukin = 0d0 ; ueaa = 0d0 ; vtot = 0d0 ; roav = 0d0
+
+if (jasal > 0 .and. kmx > 0) then 
+
+   do kk = 1,ndx
+      if ( hs(kk) == 0 ) cycle
+      do k = kbot(kk), ktop(kk) 
+         zz   = (zws(k) + zws(k-1))*0.5d0                                      ! m
+         vtot = vtot + vol1(k)                                                 ! m3
+         roav = roav + vol1(k)*   rho(k)                                       ! kg
+      enddo  
+   enddo 
+   roav = roav / vtot                                                          ! kg/m3
+   
+   do kk = 1,ndx
+      if ( hs(kk) == 0 ) cycle
+      do k = kbot(kk), ktop(kk) 
+         zz   = (zws(k) + zws(k-1))*0.5d0                                      ! m
+         ueaa = ueaa + vol1(k)*zz*(rho(k) - roav)                              ! kg.m
+         upot = upot + vol1(k)*zz* rho(k)                                      ! kg.m
+         ukin = ukin + vol1(k)*    rho(k)*(ucx(k)*ucx(k) + ucy(k)*ucy(k))*0.5d0! kg.m2/s2
+      enddo  
+   enddo   
+   
+   ueaa  = ueaa*ag/vtot                                                        ! kg/(m.s2)
+   upot  = upot*ag/vtot  
+   ukin  = ukin*0.5/vtot        
+
+   if (upot0 == dmiss) upot0 = upot
+   upot = upot - upot0
+
+endif
+                                                                     ! 
+end subroutine upotukinueaa
 
    SUBROUTINE GETINTRGB(KRGB) ! GET interacter RGB FOR NCOL
     implicit none

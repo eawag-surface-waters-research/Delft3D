@@ -547,6 +547,7 @@ end subroutine default_flow
 !> Resets only flow variables intended for a restart of flow simulation.
 !! Upon loading of new model/MDU, call default_flow() instead.
 subroutine reset_flow()
+use m_missing
 ! node related
 
 ! basis
@@ -691,6 +692,8 @@ subroutine reset_flow()
     voltotname(IDX_PRECIP_GROUND)            = 'precipitation_on_ground'
 
     jacftrtfac  = 0   !< Whether or not (1/0) a multiplication factor field was specified for trachytopes's returned roughness values.
+
+    upot0 = dmiss
 
 end subroutine reset_flow
 

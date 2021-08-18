@@ -100,7 +100,7 @@
          
            x = x0 + dxa*(m-1)
            y = y0 + dya*(n-1)
-           z = d(m,n)
+           z = dble(d(m,n))
            if ( inview(x, y).and. z .ne. dmiss ) then
                if (z < rmin) then
                    rmin = z

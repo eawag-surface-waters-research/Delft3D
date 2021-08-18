@@ -220,7 +220,7 @@
 
  msgbuf = ' ' ; call msg_flush()
 
- if (mxls > 0 .and. ncrs>0) then
+ if (mxls .ne. 0 .and. ncrs>0) then
     write(msgbuf,'(a)')         'crosssection discharges (m3/s) : '  ; call msg_flush()
     do i = 1, ncrs
        write(msgbuf,'(F14.3)') crs(i)%sumvalcur(1) ; call msg_flush()

@@ -106,7 +106,7 @@
   
          if ( Z.EQ.DMISS ) cycle ! SPvdP: structured sample data may comprise missing values
 
-         call tek1sample (x,y,z,met,rc,hrc)
+         call tek1sample (x,y,z,met,rc,hrc,i,i)
   
       ENDDO 
 
@@ -133,13 +133,13 @@
             x = x0 + dxa*(m-1)
             y = y0 + dya*(n-1)
             z = d(m,n)
-            call tek1sample (x,y,z,met,rc,hrc)
+            call tek1sample (x,y,z,met,rc,hrc,m,n)
          enddo
      enddo
      end SUBROUTINE TEKarc
 
   
-     subroutine tek1sample(x,y,z,met,rc,hrc)
+     subroutine tek1sample(x,y,z,met,rc,hrc,m,n)
      use unstruc_colors
      use m_missing, only: DMISS
      use unstruc_opengl, only: jaopengl
@@ -147,7 +147,7 @@
      use m_arcinfo
 
      double precision :: x,y,z,rc,hrc
-     integer          :: met
+     integer          :: met,m,n
 
      COMMON /DRAWTHIS/ ndraw(50)
 
@@ -186,6 +186,8 @@
             CALL HTEXT(Z,X+rcir,Y)
          ELSE IF (MET .EQ. 7) THEN
             CALL KREC5(X,Y,HRC,HRC)
+         ELSE IF (MET .EQ. 8) THEN
+            CALL HITEXT(m,X,Y)
          ENDIF
      ENDIF
 
