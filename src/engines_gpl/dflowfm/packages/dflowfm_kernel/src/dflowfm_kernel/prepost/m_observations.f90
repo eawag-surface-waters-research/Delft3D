@@ -1167,27 +1167,28 @@ subroutine loadObservations_from_xyn(filename)
     implicit none
     character(len=*), intent(in) :: filename
 
-    integer :: mobs, n, L, L2
+    integer :: mobs, L, L2
     double precision :: xp, yp
     character (len=256) :: rec
     character (len=IdLen) :: nam
 
     call oldfil(mobs,filename)
 
-    n=0
 20  read(mobs,'(a)',end =889) rec
+    
+    if (len_trim(rec) > 0) then
+        read(rec,*,err=888) xp, yp, nam
+        
+        L  = index(rec,'''')     
+        if (L > 0) then
+            L  = L + 1
+            L2 = index(rec(L:),'''') - 2 + L
+            nam = rec(L:L2)
+        endif
 
-    read(rec,*,err=888) xp, yp, nam
-
-    L  = index(rec,'''')
-    if (L > 0) then
-        L  = L + 1
-        L2 = index(rec(L:),'''') - 2 + L
-        nam = rec(L:L2)
+        call addObservation(xp, yp, nam)
     endif
 
-    call addObservation(xp, yp, nam)
-    n = n+1
     goto 20
 
 889 call doclose(mobs)
