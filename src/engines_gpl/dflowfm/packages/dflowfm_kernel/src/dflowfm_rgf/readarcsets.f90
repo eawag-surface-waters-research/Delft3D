@@ -106,7 +106,9 @@
 
       endif
 
-999   if (allocated(d) ) deallocate(d)
+999   if (allocated(d) ) then 
+         deallocate(d); mca = 0 ; nca = 0
+      endif
 
       CALL READYY(' ',-1d0)
 

@@ -6316,7 +6316,7 @@ contains
 !     SPvdP: sample set can be large, delete it and do not make a copy
       call delsam(-1)
       if (allocated (d) ) then 
-          deallocate(d) 
+          deallocate(d) ; mca = 0 ; nca = 0
       endif
 
    end if

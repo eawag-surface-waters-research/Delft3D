@@ -80,7 +80,9 @@
          enddo
       enddo
 
-      if (allocated(d) ) deallocate(d)
+      if (allocated(d) ) then 
+         deallocate(d) ; mca = 0 ; nca = 0
+      endif
 
 !     disable grid outside selecting polygon
 !      if ( NPL.gt.0 ) then

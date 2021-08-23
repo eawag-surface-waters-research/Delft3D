@@ -187,6 +187,8 @@
            (1d0 - am) *        an    * d(m   , n+1) + &
            (1d0 - am) * (1d0 - an)   * d(m   , n  ) + &
                   am  * (1d0 - an)   * d(m+1 , n  ) 
+   else 
+      z  = dmiss
    endif
 
    end subroutine bilinarcinfo

@@ -58,7 +58,7 @@ subroutine read_samples_from_arcinfo(filnam, jadoorladen, japrompt)  ! reaasc
     if (mca <= 0 .or. nca <= 0) then
         call message('No samples read from file ', filnam, ' ')
         return
-    else if (mca*nca > maxsamarc) then 
+    else if (mca*nca > maxsamarc) then  ! todo: check if this line can be removed
         return 
     end if
 
