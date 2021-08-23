@@ -39,11 +39,13 @@
  use m_transport, only : constituents, itemp
  use m_hydrology_data, only : jadhyd, ActEvap, interceptionmodel, InterceptThickness, InterceptHs, DFM_HYD_INTERCEPT_LAYER
  use m_mass_balance_areas
+ use m_partitioninfo
  implicit none
 
  integer          :: L, k1, k2, k, kb, n, LL, kk, kt, idim, imba
  double precision :: aufu, auru, tetau
  double precision :: zb, dir, ds, qhs, hsk, buitje, Qeva_ow, Qeva_icept, Qrain, Qicept, Qextk, aloc
+ logical :: isGhost
 
  buitje = 0.013d0/300d0                                      ! 13 mm in 5 minutes
 
@@ -179,11 +181,18 @@
              idim = 1
           end if
 
+          !DIR$ FORCEINLINE
+          isGhost = is_ghost_node(k)
+
           if (QQLat(k) > 0) then
-             qinlat(idim) = qinlat(idim) + QQLat(k)                        ! Qlat can be pos or neg
+             if (.not. isGhost) then ! Do not count ghosts in mass balances
+                qinlat(idim) = qinlat(idim) + QQLat(k)                        ! Qlat can be pos or neg
+             end if
           else if (hs(k) > epshu) then
              QQlat(k) = - min(0.5d0*vol1(k)/dts , -QQlat(k))
-             qoutlat(idim) = qoutlat(idim) - QQlat(k)
+             if (.not. isGhost) then
+                qoutlat(idim) = qoutlat(idim) - QQlat(k)
+             end if
           else
              QQlat(k) = 0d0
           endif
@@ -256,7 +265,11 @@
        else
           dd(k) = 0
        endif
-       qincel = qincel + qin(k)
+       !DIR$ FORCEINLINE
+       isGhost = is_ghost_node(k)
+       if (.not. isGhost) then ! Do not count ghosts in mass balances
+         qincel = qincel + qin(k)
+       end if
     enddo
  endif
 

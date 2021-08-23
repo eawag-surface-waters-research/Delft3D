@@ -2383,7 +2383,7 @@ subroutine unc_write_his(tim)            ! wrihis
 
             ! Define geometry related variables
             lat_geom_container_name = 'lateral_geom'
-            nNodeTot = nlatnd
+            nNodeTot = nNodesLat
             ierr = sgeom_def_geometry_variables(ihisfile, lat_geom_container_name, 'lateral', 'point', nNodeTot, id_latdim, &
                id_latgeom_node_count, id_latgeom_node_coordx, id_latgeom_node_coordy)
 
@@ -3561,8 +3561,8 @@ subroutine unc_write_his(tim)            ! wrihis
          ierr = nf90_put_var(ihisfile, id_lat_realdis_ave,  qLatRealAve, start = (/1,it_his/), count = (/numlatsg,1/))
          ! write geometry variables at the first time of history output
          if (it_his == 1) then
-            ierr = nf90_put_var(ihisfile, id_latgeom_node_coordx, geomXLat(1:nlatnd), start = (/ 1 /), count = (/ nlatnd /))
-            ierr = nf90_put_var(ihisfile, id_latgeom_node_coordy, geomYLat(1:nlatnd), start = (/ 1 /), count = (/ nlatnd /))
+            ierr = nf90_put_var(ihisfile, id_latgeom_node_coordx, geomXLat(1:nNodesLat), start = (/ 1 /), count = (/ nlatnd /))
+            ierr = nf90_put_var(ihisfile, id_latgeom_node_coordy, geomYLat(1:nNodesLat), start = (/ 1 /), count = (/ nlatnd /))
             ierr = nf90_put_var(ihisfile, id_latgeom_node_count,  nodeCountLat)
          end if
       end if

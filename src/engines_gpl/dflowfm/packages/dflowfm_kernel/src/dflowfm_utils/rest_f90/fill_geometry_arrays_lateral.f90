@@ -30,7 +30,8 @@
 ! $Id$
 ! $HeadURL$
 
-!> Fills in the geometry arrays of laterals for history output
+!> Fills in the geometry arrays of laterals for history output.
+!! In parallel models, only process with rank 0 will have the complete geometry arrays filled.
 subroutine fill_geometry_arrays_lateral()
    use m_wind
    use m_alloc
@@ -40,7 +41,8 @@ subroutine fill_geometry_arrays_lateral()
 
    integer,          allocatable :: nodeCountLatGat(:), nlatndGat(:), recvCount(:), displs(:)
    double precision, allocatable :: xGat(:), yGat(:) ! Coordinates that are gatherd data from all subdomains
-   integer                       :: i, j, k, k1, ierror, is, ie, n, nnode, ii, nlatndMPI
+   integer                       :: i, j, jprev, k, k1, ierror, is, ie, n, nnode, n1gat, n2gat
+   integer                       :: nlatnd_noghosts, nlatndMPI
    integer,          allocatable :: nodeCountLatMPI(:)  ! Count of nodes per lateral after mpi communication.
    double precision, allocatable :: geomXLatMPI(:)      ! [m] x coordinates of laterals after mpi communication.
    double precision, allocatable :: geomYLatMPI(:)      ! [m] y coordinates of laterals after mpi communication.
@@ -50,23 +52,29 @@ subroutine fill_geometry_arrays_lateral()
    call realloc(geomXLat,       nlatnd,   keepExisting = .false., fill = 0d0)
    call realloc(geomyLat,       nlatnd,   keepExisting = .false., fill = 0d0)
 
-   j = 1
+   ! Count number of nodes per lateral in current subdomain, exclude ghosts.
+   jprev = 0
+   j = 0
    do i = 1, numlatsg
       do k1=n1latsg(i),n2latsg(i)
          k = nnlat(k1)
          if (k > 0) then
-            geomXLat(j) = xz(k)
-            geomYLat(j) = yz(k)
-            j = j + 1
+            if (.not. is_ghost_node(k)) then
+               j = j + 1
+               geomXLat(j) = xz(k)
+               geomYLat(j) = yz(k)
+            end if
          end if
       end do
-      nodeCountLat(i) = n2latsg(i)-n1latsg(i)+1
+      nodeCountLat(i) = j - jprev ! In current domain, for each lateral, number of non-ghost flow nodes.
+      jprev = j
    end do
+   nlatnd_noghosts = j
 
    ! For parallel simulation: since only process 0000 writes the history output, the related arrays
-   ! are only made on 00000.
+   ! are only made on 0000.
    if (jampi > 0) then
-      call reduce_int_sum(nlatnd, nlatndMPI) ! Get total number of nodes among all subdomains
+      call reduce_int_sum(nlatnd_noghosts, nlatndMPI) ! Get total number of nodes among all subdomains
 
       if (my_rank == 0) then
          ! Allocate history output arrays
@@ -84,58 +92,58 @@ subroutine fill_geometry_arrays_lateral()
       end if
 
       ! Gather integer data, where the same number of data, i.e. numlatsg, are gathered from each subdomain to process 0000
-      call gather_int_data_mpi(numlatsg, nodeCountLat, numlatsg*ndomains, nodeCountLatGat, numlatsg, 0, ierror)
+      call gather_int_data_mpi_same(numlatsg, nodeCountLat, numlatsg*ndomains, nodeCountLatGat, numlatsg, 0, ierror)
 
       if (my_rank == 0) then
-         ! To use mpi gather call, construct displs, and nlatndGat (used as receive count for mpi gather call)
+         ! To gather different number of nodes from each subdomain, construct displs, and nlatndGat (used as receive count for mpi_gatherv call)
          displs(1) = 0
-         do i = 1, ndomains
-            is = (i-1)*numlatsg+1 ! Starting index in nodeCountLatGat
-            ie = is+numlatsg-1    ! Endding index in nodeCountLatGat
-            nlatndGat(i) = sum(nodeCountLatGat(is:ie)) ! Total number of nodes on subdomain i
-            if (i > 1) then
-               displs(i) = displs(i-1) + nlatndGat(i-1)
+         do n = 1, ndomains
+            is = (n-1)*numlatsg+1 ! Starting index in nodeCountLatGat
+            ie = is+numlatsg-1    ! Ending index in nodeCountLatGat
+            nlatndGat(n) = sum(nodeCountLatGat(is:ie)) ! Total number of nodes on subdomain n
+            if (n > 1) then
+               displs(n) = displs(n-1) + nlatndGat(n-1)
             end if
          end do
       end if
 
       ! Gather double precision data, here, different number of data are gatherd from different subdomains to process 0000
-      call gatherv_double_data_mpi(nlatnd, geomXLat, nlatndMPI, xGat, ndomains, nlatndGat, displs, 0, ierror)
-      call gatherv_double_data_mpi(nlatnd, geomYLat, nlatndMPI, yGat, ndomains, nlatndGat, displs, 0, ierror)
+      call gatherv_double_data_mpi_dif(nlatnd_noghosts, geomXLat(1:nlatnd_noghosts), nlatndMPI, xGat, ndomains, nlatndGat, displs, 0, ierror)
+      call gatherv_double_data_mpi_dif(nlatnd_noghosts, geomYLat(1:nlatnd_noghosts), nlatndMPI, yGat, ndomains, nlatndGat, displs, 0, ierror)
 
       if (my_rank == 0) then
          ! Construct nodeCountLatMPI for history output
+         ! Construct geomXLatMPI and geomyLatMPI for history output
+         j = 0
          do i = 1, numlatsg
             do n = 1, ndomains
-               k = (n-1)*numlatsg+i
-               nodeCountLatMPI(i) = nodeCountLatMPI(i) + nodeCountLatGat(k) ! Total number of nodes for later i among all subdomains
-            end do
-         end do
+               is = (n-1)*numlatsg+1 ! Starting index in nodeCountLatGat
+               k =  (n-1)*numlatsg+i ! Current  index in nodeCountLatGat
+               nnode = nodeCountLatGat(k)  ! lateral i on subdomain n has nnode nodes
+               nodeCountLatMPI(i) = nodeCountLatMPI(i) + nnode ! Total number of nodes for lateral i among all subdomains
 
-         ! Construct geomXLatMPI and geomyLatMPI for history output
-         j = 1
-         do i = 1, numlatsg    ! for each lateral
-            do n = 1, ndomains ! on each sudomain
-               k = (n-1)*numlatsg+i        ! index in nodeCountLatGat
-               nnode = nodeCountLatGat(k)  ! lateral i on sumdomain n has nnode nodes
-               if (nnode > 0) then
-                  ii = (n-1)*numlatsg
-                  is = sum(nlatndGat(1:n-1)) + sum(nodeCountLatGat(ii+1:ii+i-1))! starting index in xGat
-                  do k1 = 1, nnode
-                     geomXLatMPI(j) = xGat(is+k1)
-                     geomyLatMPI(j) = yGat(is+k1)
-                     j = j + 1
-                  end do
-               end if
+               n1gat = displs(n) + sum(nodeCountLatGat(is:k-1)) + 1 ! starting index in xGat for domain n and lateral i
+               n2gat = n1gat+nnode-1
+               do k1 = n1gat,n2gat
+                  ! No k/ghost check needed here anymore: x/yGat contains only valid points.
+                  j = j + 1
+                  geomXLatMPI(j) = xGat(k1)
+                  geomyLatMPI(j) = yGat(k1)
+               end do
             end do
          end do
-         ! Copy the MPI-arrays to nodeCoutLat, geomXLat and geomYLat for the his-output
-         nlatnd = nlatndMPI
+         ! Copy the MPI-arrays to nodeCountLat, geomXLat and geomYLat for the his-output
+         nNodesLat = nlatndMPI
          nodeCountLat(1:numlatsg) = nodeCountLatMPI(1:numlatsg)
-         call realloc(geomXLat, nlatnd, keepExisting = .false., fill = 0d0)
-         call realloc(geomyLat, nlatnd, keepExisting = .false., fill = 0d0)
-         geomXLat(1:nlatnd) = geomXLatMPI(1:nlatnd)
-         geomYLat(1:nlatnd) = geomYLatMPI(1:nlatnd)
+         call realloc(geomXLat, nNodesLat, keepExisting = .false., fill = 0d0)
+         call realloc(geomyLat, nNodesLat, keepExisting = .false., fill = 0d0)
+         geomXLat(1:nNodesLat) = geomXLatMPI(1:nNodesLat)
+         geomYLat(1:nNodesLat) = geomYLatMPI(1:nNodesLat)
       end if
+
+      nNodesLat = nlatndMPI
+   else
+      nNodesLat = nlatnd_noghosts ! Might be less than nlatnd, if some laterals lie outside of grid.
+      ! In sequential mode, geomXLat, etc. are already correctly filled.
    end if
 end subroutine fill_geometry_arrays_lateral

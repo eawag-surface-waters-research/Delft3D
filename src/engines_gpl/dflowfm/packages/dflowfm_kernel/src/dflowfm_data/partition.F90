@@ -1898,6 +1898,17 @@ use meshdata, only : ug_idsLen, ug_idsLongNamesLen
       return
    end subroutine link_ghostdata
 
+   !> Tells whether a particular flow node is a ghost node in the current domain.
+   !! In sequential models, result is always .false.
+   pure function is_ghost_node(k) result(is_ghost)
+      integer, intent(in   ) :: k        !< Flow node number
+      logical                :: is_ghost !< Whether the flow node is a ghost
+      is_ghost = .false.
+      if (jampi == 1) then
+         is_ghost = (my_rank /= idomain(k))
+      end if
+   end function is_ghost_node
+
 
 !> fill sendghostlist
    subroutine partition_fill_sendlist(idmn, idmn_other, itype, N, x, y, ghost, isendlist, nsendlist, ierror)
@@ -5246,9 +5257,9 @@ end subroutine partition_make_globalnumbers
       return 
    end subroutine reduce_error 
    
-!> Gathers integer data from all processes and delivers it to a specified root process.
+!> Gathers integer data from all processes and delivers it to a speicified root process.
 !! Note: the same number of data from each subdomain are sent.
-subroutine gather_int_data_mpi(ndata_send, data_send, ndata_gat, data_gat, ndata_recv, root, ierror)
+subroutine gather_int_data_mpi_same(ndata_send, data_send, ndata_gat, data_gat, ndata_recv, root, ierror)
 #ifdef HAVE_MPI
       use mpi
 #endif
@@ -5267,11 +5278,11 @@ subroutine gather_int_data_mpi(ndata_send, data_send, ndata_gat, data_gat, ndata
       call mpi_gather(data_send, ndata_send, mpi_integer, data_gat, ndata_recv, mpi_integer, root, DFM_COMM_DFMWORLD, ierror)
 #endif
 
-end subroutine gather_int_data_mpi
+end subroutine gather_int_data_mpi_same
 
 !> Gathers double precision data into specified locations from all processes in a group and delivers to a specified root process.
 !! Note: Different numbers of data on different subdomains can be sent.
-subroutine gatherv_double_data_mpi(ndata_send, data_send, ndata_gat, data_gat, ngroups, recvCount, displs, root, ierror)
+subroutine gatherv_double_data_mpi_dif(ndata_send, data_send, ndata_gat, data_gat, ngroups, recvCount, displs, root, ierror)
 #ifdef HAVE_MPI
       use mpi
 #endif
@@ -5293,7 +5304,7 @@ subroutine gatherv_double_data_mpi(ndata_send, data_send, ndata_gat, data_gat, n
       call mpi_gatherv(data_send, ndata_send, mpi_double_precision, data_gat, recvCount, displs, mpi_double_precision, root, DFM_COMM_DFMWORLD, ierror)
 #endif
 
-end subroutine gatherv_double_data_mpi
+end subroutine gatherv_double_data_mpi_dif
 
 !> Abort all processes
    subroutine abort_all()

@@ -928,7 +928,7 @@ logical function initboundaryblocksforcings(filename)
  use unstruc_model, only: ExtfileNewMajorVersion, ExtfileNewMinorVersion
  use m_missing
  use m_ec_parameters, only: provFile_uniform
- use m_partitioninfo, only: my_rank, idomain, jampi
+ use m_partitioninfo, only: my_rank, idomain, jampi, reduce_sum, is_ghost_node
 
  implicit none
 
@@ -976,7 +976,6 @@ logical function initboundaryblocksforcings(filename)
  integer                      :: major, minor
  integer                      :: loc_spec_type
  integer                      :: numcoordinates
- logical                      :: latOK
  double precision, allocatable :: xcoordinates(:), ycoordinates(:)
  double precision, allocatable :: xdum(:), ydum(:)!, xy2dum(:,:)
  integer, allocatable          :: kdum(:)
@@ -1270,25 +1269,7 @@ logical function initboundaryblocksforcings(filename)
        call realloc(nnlat, max(2*ndxi, nlatnd+ndxi), keepExisting = .true., fill = 0)
        call selectelset_internal_nodes(xz, yz, kclat, ndxi, nnLat(nlatnd+1:), nlat, &
                                        loc_spec_type, locationfile, numcoordinates, xcoordinates, ycoordinates, branchid, chainage, nodeId)
-       ! If 0 is filled in nnLat, then adjust nlat so that 0 will be removed from nnLat (n1latsg, n2latsg and nlatnd will be ajusted automatically).
-       ! For parallel simulation, if the node is a ghost node, then also remove it from the current subdomain.
-       nlattmp = nlat
-       nlat = 0
-       do n = nlatnd+1, nlatnd+nlattmp
-          k = nnLat(n)
-          latOK = .false.
-          if (k > 0) then
-             if (jampi == 1) then
-                latOK = (idomain(k) == my_rank) ! OK if the node is not a ghost node for the current subdomain
-             else
-                latOK = .true.
-             end if
-          end if
-          if (latOK) then
-             nlat = nlat + 1
-             nnLat(nlatnd+nlat) = k ! shift to the left
-          end if
-       end do
+
        n1latsg(numlatsg) = nlatnd + 1
        n2latsg(numlatsg) = nlatnd + nlat
 
@@ -1469,18 +1450,21 @@ logical function initboundaryblocksforcings(filename)
 
  if (allocated(itpenzr)) deallocate(itpenzr)
  if (allocated(itpenur)) deallocate(itpenur)
-
  if (numlatsg > 0) then
     do n = 1,numlatsg
        balat(n) = 0d0
        do k1=n1latsg(n),n2latsg(n)
           k = nnlat(k1)
-          ! TODO: MPI, as in old ext handling. if (jampi == 1) then
           if (k > 0) then
-             balat(n) = balat(n) + ba(k)
+             if (.not. is_ghost_node(k)) then
+                balat(n) = balat(n) + ba(k)
+             end if
           endif
        end do
     end do
+    if (jampi > 0) then
+       call reduce_sum(numlatsg, balat)
+    end if
     if (allocated(kclat)) then
        deallocate(kclat)
     endif

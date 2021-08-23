@@ -2164,22 +2164,16 @@ if (mext /= 0) then
        balat(n) = 0d0
        do k1=n1latsg(n),n2latsg(n)
           k = nnlat(k1)
-          if (jampi == 1 .and. k > 0) then
-             if (idomain(k) /= my_rank) then
-                nnlat(k1) = 0
-             endif
-          endif
-          k = nnlat(k1)
           if (k > 0) then
-             balat(n) = balat(n) + ba(k)
+             if (.not. is_ghost_node(k)) then
+                balat(n) = balat(n) + ba(k)
+             end if
           endif
        end do
     end do
 
     if (jampi == 1) then
-       call reduce_double_sum(numlatsg, balat, qplat )  ! qplat is sum of balat over domains
-       balat = qplat
-       qplat = 0d0
+       call reduce_sum(numlatsg, balat)
     endif
     ja = 1 ; rewind (mext); kx = 1 ; numlatsg = 0
 

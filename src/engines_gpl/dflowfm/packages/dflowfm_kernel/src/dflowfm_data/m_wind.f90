@@ -74,6 +74,7 @@ integer,          allocatable, target :: nnlat(:)    !< [-] for each lateral nod
 integer,          allocatable, target :: kclat(:)    !< [-] for each cell: 0 when not accepting lateral discharge (e.g. pipe) {"location": "face", "shape": ["ndx"]}
 
 !! Lateral geometry variables
+integer                               :: nNodesLat           !< [-] Total number of geom nodes for all laterals.
 integer,          allocatable, target :: nodeCountLat(:)     !< [-] Count of nodes per lateral.
 double precision, allocatable, target :: geomXLat(:)         !< [m] x coordinates of laterals.
 double precision, allocatable, target :: geomYLat(:)         !< [m] y coordinates of laterals.

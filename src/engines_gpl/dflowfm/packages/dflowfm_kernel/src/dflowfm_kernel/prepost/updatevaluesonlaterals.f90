@@ -39,7 +39,7 @@ subroutine updateValuesOnLaterals(tim1, timestep)
    use precision
    use m_alloc
    use m_flowparameters, only: eps10
-   use m_partitioninfo, only: jampi, reduce_double_sum
+   use m_partitioninfo, only: jampi, reduce_double_sum, is_ghost_node
    implicit none
    double precision, intent(in) :: tim1     !< Current (new) time
    double precision, intent(in) :: timestep !< Timestep is the difference between tim1 and the last update time
@@ -58,7 +58,9 @@ subroutine updateValuesOnLaterals(tim1, timestep)
       do k1=n1latsg(i),n2latsg(i)
          k = nnlat(k1)
          if (k > 0) then
-            qLatReal(i) = qLatReal(i) + qqLat(k)
+            if (.not. is_ghost_node(k)) then
+               qLatReal(i) = qLatReal(i) + qqLat(k)
+            end if
          end if
       end do
    end do
