@@ -132,12 +132,12 @@ integer          :: k1, k3, kb3, Lt1, Lt2, Lt3, Ld1, Ld2, Ld3, kk1, kk2, kk3
 
        if (keepzlayeringatbed >= 2) then
            if (ktop(n) > kb) then
-               if (keepzlayeringatbed <= 3) then   
+               if (keepzlayeringatbed <= 3) then                              ! fifty/fifty btween bed and top of second layer 
                    zws(kb) = 0.5d0*( zws(kb+1) + zws(kb-1) ) 
-               else if (keepzlayeringatbed <= 4) then 
+               else if (keepzlayeringatbed <= 4) then                         ! idem, but never below current z-layer level of bed layer.
                    zws(kb) = max(zws(kb), 0.5d0*( zws(kb+1) + zws(kb-1) ) )
                else 
-                   zws(kb) = max(zws(kb), 0.1d0*zws(kb+1) + 0.9d0*zws(kb-1) )
+                   zws(kb) = max(zws(kb), 0.1d0*zws(kb+1) + 0.9d0*zws(kb-1) ) ! not important
                endif
            endif
        endif

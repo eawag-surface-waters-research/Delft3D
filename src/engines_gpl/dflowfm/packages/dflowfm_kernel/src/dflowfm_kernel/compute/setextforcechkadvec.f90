@@ -50,6 +50,7 @@
 
  trshcorioi = 1d0/trshcorio
 
+ 
 if (jawind > 0) then
 
     if (kmx == 0) then
@@ -135,7 +136,7 @@ if (jawind > 0) then
        enddo
     endif
  endif
-
+   
  if (japatm > 0 .or. jatidep > 0) then
     do L  = 1,lnx
        if ( hu(L) > 0 ) then
@@ -152,11 +153,13 @@ if (jawind > 0) then
              if (kmx == 0) then
                 adve(L) = adve(L) + dpatm
              else
-                adve( Lbot(L):Ltop(L) ) = adve( Lbot(L):Ltop(L) ) + dpatm
+                do LL = Lbot(L), Ltop(L)
+                   adve(LL) = adve(LL) + dpatm
+                enddo
              endif
 
           endif
-
+     
           if (jatidep > 0 .or. jaselfal > 0) then
              tidp  = ( tidep(1,k2) - tidep(1,k1) )*dxi(L)
              if ( hu(L) < trshcorio) then
@@ -165,15 +168,17 @@ if (jawind > 0) then
              if (kmx == 0) then
                 adve(L) = adve(L) - tidp
              else
-                adve( Lbot(L):Ltop(L) ) = adve( Lbot(L):Ltop(L) ) - tidp
+                do LL = Lbot(L), Ltop(L)
+                   adve(LL) = adve(LL) - tidp
+                enddo
              endif
 
-!            add to tidal forces
+ !           add to tidal forces
              tidef(L) = tidp
-          endif
+           endif
        endif
     enddo
-
+    
     if ( jatidep.gt.0 .or. jaselfal.gt.0 .and. kmx.eq.0 ) then
        call comp_GravInput()
     end if
@@ -228,13 +233,11 @@ if (jawind > 0) then
        call get_spiral3d()                                           ! compute equivalent secondary flow intensity
     endif
  end if
-
-
+ 
  if ( jaFrcInternalTides2D.gt.0 .and. kmx.eq.0 ) then   ! internal tides friction (2D only)
     call add_InternalTidesFrictionForces()
  end if
-
-
+ 
  if (chkadvd > 0) then                       ! niet droogtrekken door advectie, stress of wind (allen in adve)
 
     if (kmx == 0) then
@@ -259,27 +262,28 @@ if (jawind > 0) then
 
     else
 
-
        do LL  = 1,lnx
-          if (hu(LL) > 0d0) then
-             call getLbotLtop(LL,Lb,Lt)
-             k1   = ln(1,LL) ; k2 = ln(2,LL)
-             do L = Lb, Lt
-                if      (hs(k1) < 0.5d0*hs(k2) ) then
-                   if (adve(L)  < 0 .and. hs(k1) < chkadvd ) then
+           if (hu(LL) > 0d0) then
+              call getLbotLtop(LL,Lb,Lt)
+              k1   = ln(1,LL) ; k2 = ln(2,LL)
+              if      (hs(k1) < 0.5d0*hs(k2) ) then
+                 do L = Lb, Lt
+                    if (adve(L)  < 0 .and. hs(k1) < chkadvd ) then
                        adve(L)  = adve(L)*hs(k1) / chkadvd ! ; nochkadv = nochkadv + 1
-                   endif
-                else if (hs(k2) < 0.5d0*hs(k1) ) then
-                   if (adve(L)  > 0 .and. hs(k2) < chkadvd) then
-                       adve(L)  = adve(L)*hs(k2) / chkadvd ! ; nochkadv = nochkadv + 1
-                   endif
-                endif
-             enddo
+                    endif
+                 enddo
+              else if (hs(k2) < 0.5d0*hs(k1) ) then
+                 do L = Lb, Lt
+                    if (adve(L)  > 0 .and. hs(k2) < chkadvd) then
+                        adve(L)  = adve(L)*hs(k2) / chkadvd ! ; nochkadv = nochkadv + 1
+                    endif
+                 enddo
+              endif
           endif
-      enddo
-
+       enddo
 
     endif
 
  endif
-   end subroutine setextforcechkadvec
+ 
+ end subroutine setextforcechkadvec
