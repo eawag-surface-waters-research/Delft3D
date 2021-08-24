@@ -4768,8 +4768,8 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
       end if
       if(jamapucqvec > 0) then
          if (jaeulervel==1 .and. jawave>0) then ! TODO: AvD:refactor such that yes<->no Eulerian velocities are in parameters below:
-            ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_ucxq, nf90_double, iLocS, 'ucxq', 'ucxq_eulerian_velocity', 'Flow element center eulerian velocity vector, ucxq-component', 'm s-1', jabndnd=jabndnd_)
-            ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_ucyq, nf90_double, iLocS, 'ucyq', 'ucyq_eulerian_velocity', 'Flow element center eulerian velocity vector, ucyq-component', 'm s-1', jabndnd=jabndnd_)
+            ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_ucxq, nf90_double, iLocS, 'ucxq', 'ucxq_eulerian_velocity', 'Flow element center eulerian velocity vector, x-component', 'm s-1', jabndnd=jabndnd_)
+            ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_ucyq, nf90_double, iLocS, 'ucyq', 'ucyq_eulerian_velocity', 'Flow element center eulerian velocity vector, y-component', 'm s-1', jabndnd=jabndnd_)
          else
             ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_ucxq, nf90_double, iLocS, 'ucxq', 'ucxq_velocity', 'Flow element center velocity vector based discharge, x-component', 'm s-1', jabndnd=jabndnd_)
             ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_ucyq, nf90_double, iLocS, 'ucyq', 'ucyq_velocity', 'Flow element center velocity vector based discharge, y-component', 'm s-1', jabndnd=jabndnd_)
@@ -5109,8 +5109,8 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
          endif
 
          if (stmpar%morpar%moroutput%dzduuvv) then ! bedslope
-            ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp  , mapids%id_e_dzdn , nf90_double, UNC_LOC_U, 'e_dzdn'  , '', 'Bed slope parallel to flow link', '-', dimids = (/ -2, -1 /), jabndnd=jabndnd_)
-            ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp  , mapids%id_e_dzdt , nf90_double, UNC_LOC_U, 'e_dzdt'  , '', 'Bed slope normal to flow link', '-', dimids = (/ -2, -1 /), jabndnd=jabndnd_)
+            ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp  , mapids%id_e_dzdn , nf90_double, UNC_LOC_U, 'e_dzdn'  , '', 'Bed slope, n-component', '-', dimids = (/ -2, -1 /), jabndnd=jabndnd_)
+            ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp  , mapids%id_e_dzdt , nf90_double, UNC_LOC_U, 'e_dzdt'  , '', 'Bed slope, t-component', '-', dimids = (/ -2, -1 /), jabndnd=jabndnd_)
          end if
 
          if (stmpar%morpar%moroutput%uuuvvv) then
@@ -7607,12 +7607,12 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
               if (stmpar%morpar%moroutput%dzduuvv) then ! bedslope
                  ierr = nf90_def_var(imapfile, 'e_dzdn', nf90_double, (/ id_flowlinkdim(iid) , id_timedim(iid) /), id_dzdn(iid))
                  ierr = nf90_put_att(imapfile, id_dzdn(iid) ,  'coordinates'  , 'FlowLink_xu FlowLink_yu')
-                 ierr = nf90_put_att(imapfile, id_dzdn(iid) ,  'long_name'    , 'Bed slope parallel to flow link')
+                 ierr = nf90_put_att(imapfile, id_dzdn(iid) ,  'long_name'    , 'Bed slope, n-component')
                  ierr = nf90_put_att(imapfile, id_dzdn(iid) ,  'units'        , '-')
 
                  ierr = nf90_def_var(imapfile, 'e_dzdt', nf90_double, (/ id_flowlinkdim(iid) , id_timedim(iid) /), id_dzdt(iid))
                  ierr = nf90_put_att(imapfile, id_dzdt(iid) ,  'coordinates'  , 'FlowLink_xu FlowLink_yu')
-                 ierr = nf90_put_att(imapfile, id_dzdt(iid) ,  'long_name'    , 'Bed slope normal to flow link')
+                 ierr = nf90_put_att(imapfile, id_dzdt(iid) ,  'long_name'    , 'Bed slope, t-component')
                  ierr = nf90_put_att(imapfile, id_dzdt(iid) ,  'units'        , '-')
               end if
 
