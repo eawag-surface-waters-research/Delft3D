@@ -362,7 +362,11 @@ subroutine sethu(jazws0)                            ! Set upwind waterdepth hu
                 call qnerror('Ltop too large',' ',' ')
              endif
 
-             if (layertype == 2 .and. keepzlayeringatbed >= 3 ) then  ! split in a central and sigma oriented part to avoid flipflop
+            
+             ! UNST-5182: The code below has only been implemented for keepzlayeringatbed == 2
+             ! To be implemented for keepzlayeringatbed == 0 and 1 as well, because layer distribution is independent of value of keepzlayeringatbed?
+             !
+             if (layertype == 2 .and. keepzlayeringatbed == 2 ) then  ! split in a central and sigma oriented part to avoid flipflop
 
                 ktd  = ktop(kd)
                 kbd  = min ( ln0(3-iup,Lb ) , ktd )
