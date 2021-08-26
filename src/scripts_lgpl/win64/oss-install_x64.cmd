@@ -372,17 +372,18 @@ rem ====================
     if !mkl_redist_dir!=="" (
         rem mkl_redist_dir not set
     ) else (
-        set localstring="!mkl_redist_dir!mkl_core.dll"
+        rem note that for onaApi MKL, the DLL names end in '.1.dll'
+        set localstring="!mkl_redist_dir!mkl_core*.dll"
         call :copyFile !!localstring! !dest_share!
-        set localstring="!mkl_redist_dir!mkl_def.dll"
+        set localstring="!mkl_redist_dir!mkl_def*.dll"
         call :copyFile !!localstring! !dest_share!
-        set localstring="!mkl_redist_dir!mkl_core.dll"
+        set localstring="!mkl_redist_dir!mkl_core*.dll"
         call :copyFile !!localstring! !dest_share!
-        set localstring="!mkl_redist_dir!mkl_avx.dll"
+        set localstring="!mkl_redist_dir!mkl_avx*.dll"
         call :copyFile !!localstring! !dest_share!
         rem is needed for dimr nuget package? please check
         call :copyFile !!localstring! !dest_share!
-        set localstring="!mkl_redist_dir!mkl_intel_thread.dll"
+        set localstring="!mkl_redist_dir!mkl_intel_thread*.dll"
         call :copyFile !!localstring! !dest_share!
     )
 
