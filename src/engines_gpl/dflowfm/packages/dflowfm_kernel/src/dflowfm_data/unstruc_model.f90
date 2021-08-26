@@ -1178,13 +1178,19 @@ subroutine readMDUFile(filename, istat)
     !call prop_get_integer(md_ptr, 'numerics', 'filter'          , jafilter)
     !call prop_get_integer(md_ptr, 'numerics', 'filterorder'     , filterorder)
     call prop_get_integer(md_ptr, 'numerics', 'checkerboardmonitor', jacheckmonitor)
-    if (Layertype == 2 .and. jafilter /= 0) then
-      call mess(LEVEL_ERROR, 'The checkerboard-filter has not been implemented for Z-models yet', '.')
-    endif
-    if (Layertype == 2 .and. jacheckmonitor /= 0) then
-      call mess(LEVEL_WARN, 'The checkerboardmonitor has not been implemented for Z-models yet, is automatically switched off now.')
-      jacheckmonitor = 0
-    end if
+    !
+    ! Filter to suppress checkerboarding is also available for z-layers (so that ERROR message has been switched off)
+    !
+    ! if (Layertype == 2 .and. jafilter /= 0) then
+      ! call mess(LEVEL_ERROR, 'The checkerboard-filter has not been implemented for Z-models yet', '.')
+    ! endif
+    !
+    ! Filter to suppress checkerboarding is also available for z-layers (so that ERROR message has been switched off)
+    !
+    ! if (Layertype == 2 .and. jacheckmonitor /= 0) then
+      ! call mess(LEVEL_WARN, 'The checkerboardmonitor has not been implemented for Z-models yet, is automatically switched off now.')
+      ! jacheckmonitor = 0
+    ! end if
 
     call prop_get_double (md_ptr, 'numerics', 'LocSaltLev'      , locsaltlev)
     call prop_get_double (md_ptr, 'numerics', 'LocSaltMin'      , locsaltmin)

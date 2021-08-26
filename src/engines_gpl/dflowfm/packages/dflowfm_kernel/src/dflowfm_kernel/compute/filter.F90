@@ -110,18 +110,23 @@ subroutine ini_filter(jafilter, filterorder, jacheckmonitor, ierr)
    order = filterorder
    
    ierr = 1
-   
-!  check for sigma-layers
-   if ( layertype.ne.1 ) then
-      call mess(LEVEL_ERROR, 'filter: only sigma layers supported')
+   !
+   ! Filter to suppress checkerboarding is also available for z-layers (so that ERROR message has been switched off)
+   !
+   !  check for sigma-layers 
+   ! if ( layertype.ne.1 ) then
+      ! call mess(LEVEL_ERROR, 'filter: only sigma layers supported')
       
-      goto 1234
-   end if
+      ! goto 1234
+   ! end if
    
-!  check parallelization
-   if ( jampi.eq.1 .and. itype.ne.1 ) then
-      call mess(LEVEL_ERROR, 'filter: only explicit filter supported in parallel simulations')
-   end if
+   !
+   ! Filter to suppress checkerboarding is also available for z-layers (so that ERROR message has been switched off)
+   !
+   !  check parallelization
+   ! if ( jampi.eq.1 .and. itype.ne.1 ) then
+      ! call mess(LEVEL_ERROR, 'filter: only explicit filter supported in parallel simulations')
+   ! end if
    
 !  check explicit filter
    if ( itype.eq.1 .and. order.eq.1 ) then
