@@ -47,7 +47,7 @@ target_include_directories(${library_name}  PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}
 
 # Set preprocessor definitions
 if (UNIX)
-    target_compile_definitions(${library_name} PRIVATE "PTR8;_IA64_;_LIB;_CRT_SECURE_NO_WARNINGS")
+    target_compile_definitions(${library_name} PRIVATE "PTR8;linux;LINUX64;_IA64_;_LIB;_CRT_SECURE_NO_WARNINGS")    
 endif(UNIX)
 if (WIN32)
     target_compile_definitions(${library_name} PRIVATE "W64;PTR8;WIN64;_WIN64;_IA64_;_WINDOWS;_DEBUG;_LIB;_CRT_SECURE_NO_WARNINGS")
