@@ -55,6 +55,8 @@ oss_include_libraries(${library_name} oss_dependencies)
 target_link_libraries(${library_name} netcdf)
 
 if(UNIX)
+    target_compile_definitions(${library_name} PRIVATE LINUX64)
+
     target_link_libraries(${library_name} ${oss_dependencies})                      
     target_link_directories(${library_name} PRIVATE ${NETCDF_LIBRARY_DIRS})
     target_compile_options(${library_name} PRIVATE ${cpp_compiler_flags})        

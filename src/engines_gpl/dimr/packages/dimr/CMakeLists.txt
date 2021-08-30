@@ -55,7 +55,7 @@ if(UNIX)
 
    oss_include_libraries(${executable_name} oss_dependencies) 
    
-
+   target_compile_definitions(${executable_name} PRIVATE LINUX64)
    target_include_directories(${executable_name} 
                                PRIVATE  
                                ${header_path}
