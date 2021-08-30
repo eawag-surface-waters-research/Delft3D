@@ -400,7 +400,7 @@ module m_ec_typedefs
       logical                   :: periodic = .false.       !< Use timeseries periodically if True
       logical                   :: constant = .false.       !< Provide constant value if True
                                                             !< Intended for quantities from NetCDF:
-      real(hp)                  :: fillvalue = 0.d0         !<    default if NaN, missing value
+      real(hp)                  :: fillvalue = ec_undef_hp  !<    default if NaN, missing value
       real(hp)                  :: factor = 1.d0            !<    multiplication (scale) factor
       real(hp)                  :: offset = 0.d0            !<    offset (new = raw*factor + offset)
       integer                   :: ncid = -1                !<    NetCDF variable ID, only used in case of NetCDF format
