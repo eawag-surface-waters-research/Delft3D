@@ -32,6 +32,7 @@ set_target_properties (${library_name} PROPERTIES FOLDER utils_lgpl/io_netcdf)
 if(UNIX)
     # Add dependency
     set(oss_dependencies deltares_common)
+    target_compile_definitions(${library_name} PRIVATE LINUX64)    
     oss_include_libraries(${library_name} oss_dependencies)
 
     target_link_libraries(${library_name} ${oss_dependencies} PkgConfig::NETCDF PkgConfig::NETCDF_FTN)
@@ -42,6 +43,7 @@ if (WIN32)
     set(oss_dependencies deltares_common
                         netcdf4
                         netcdff)
+    target_compile_definitions(${library_name} PRIVATE WIN64)
     oss_include_libraries(${library_name} oss_dependencies)
     
     target_compile_options(${library_name} PRIVATE "${heap_arrays_one_flag}")
@@ -61,8 +63,6 @@ set_source_files_properties(${fortran_version_file}
                             ${src_path}/io_ugrid.F90
                             PROPERTIES COMPILE_OPTIONS "${file_preprocessor_flag}")
 
-# Set preprocessor definitions
-target_compile_definitions(${library_name} PRIVATE WIN64)
 
 ###############
 # IO_NETCDF_DLL

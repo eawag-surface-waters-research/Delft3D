@@ -43,6 +43,8 @@ implicit none
     character(*),  public, parameter :: io_netcdf_architecture = 'Win32' ! used in about box
 #elif defined(WIN64)
     character(*),  public, parameter :: io_netcdf_architecture = 'Win64' ! used in about box
+#elif defined(LINUX64)
+    character(*),  public, parameter :: io_netcdf_architecture = 'Linux64' ! used in about box
 #else
     character(*),  public, parameter :: io_netcdf_architecture = 'unknown' ! used in about box
 #endif
