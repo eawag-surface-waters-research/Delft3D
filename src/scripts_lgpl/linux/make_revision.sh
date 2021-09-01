@@ -13,6 +13,18 @@
 
 
 #   =====================================
+#   Initialize svn
+#   =====================================
+initSvn="module load svn/1.9.12serf_gcc7.3.0"
+eval $initSvn
+if [ $? -ne 0 ]; then
+    echo 'WARNING: Module svn 1.9.12serf_gcc7.3.0 initialization fails!'
+    echo 'using svn : '
+    eval "module display svn"
+fi
+
+
+#   =====================================
 #   Get all directories needed
 #   =====================================
 
