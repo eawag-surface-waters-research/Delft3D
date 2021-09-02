@@ -40,6 +40,7 @@ subroutine wrimap(tim)
     use m_dad, only: dad_included
     use m_fm_update_crosssections, only: fm_update_mor_width_mean_bedlevel
     use m_flowgeom, only: ndx2d, ndxi
+    use Timers
 
     implicit none
     double precision, intent(in) :: tim
@@ -64,16 +65,21 @@ subroutine wrimap(tim)
     end if
 
      if ( md_mapformat.eq.IFORMAT_NETCDF .or. md_mapformat.eq.IFORMAT_NETCDF_AND_TECPLOT .or. md_mapformat == IFORMAT_UGRID) then   !   NetCDF output
+       call timstrt('wrimap inq ncid', handle_extra(81))
        if (mapids%ncid /= 0 .and. ((md_unc_conv == UNC_CONV_UGRID .and. mapids%id_tsp%idx_curtime == 0) .or. (md_unc_conv == UNC_CONV_CFOLD .and. it_map == 0))) then
            ierr = unc_close(mapids%ncid)
            mapids%ncid = 0
        end if
+       call timstop(handle_extra(81))
 
+       call timstrt('wrimap inq ndims', handle_extra(80))
        if (mapids%ncid/=0) then  ! reset stord ncid to zero if file not open
 		  ierr = nf90_inquire(mapids%ncid, ndims)
 		  if (ierr/=0) mapids%ncid = 0
        end if
+       call timstop(handle_extra(80))
 
+       call timstrt('wrimap unc_create', handle_extra(82))
        if (mapids%ncid == 0) then
            if (ti_split > 0d0) then
                filnam = defaultFilename('map', timestamp=time_split0)
@@ -86,6 +92,7 @@ subroutine wrimap(tim)
                mapids%ncid = 0
            end if
        endif
+       call timstop(handle_extra(82))
 
        if (mapids%ncid .ne. 0) then
           if (md_unc_conv == UNC_CONV_UGRID) then
@@ -103,7 +110,11 @@ subroutine wrimap(tim)
           endif
        endif
 
-       ierr = nf90_sync(mapids%ncid) ! Flush file
+       call timstrt('wrimap nf90_sync', handle_extra(83))
+       if (unc_noforcedflush == 0) then
+          ierr = nf90_sync(mapids%ncid) ! Flush file
+       end if
+       call timstop(handle_extra(83))
     end if
 
     if ( md_mapformat.eq.IFORMAT_TECPLOT .or. md_mapformat.eq.IFORMAT_NETCDF_AND_TECPLOT ) then      ! TecPlot output

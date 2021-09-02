@@ -30,69 +30,29 @@
 ! $Id$
 ! $HeadURL$
 
-!> Performs a single computational timestep, but not the init and finalize of the timestep.
-subroutine flow_run_single_timestep(key, iresult)                ! do only 1 flow timestep
-use m_flow
-use timers
-use m_flowgeom
-use m_flowtimes
-use unstruc_model, only : jawritebalancefile
-use unstruc_netcdf
-use m_timer
-use unstruc_display, only : jaGUI
-use dfm_error
-implicit none
+!> Gets hydraulic radius at a flow link intended for use in flow area
+!! calculation for velocities, optionally ignoring any hydraulic structure
+!! on it, based on current water depth.
+!! By default, hu(L) is returned when no structure is present, or when the
+!! setting ChangeVelocityAtStructures is off (0).
+pure function get_hpr_nostruc(L) result(hpr)
+   use m_flowgeom, only: bob, bob0
+   use m_flow, only: hu, u1
+   use m_flowparameters, only: changeVelocityAtStructures
+   implicit none
+   integer, intent(in   ) :: L   !< Flow link number
+   double precision       :: hpr !< Hydraulic radius for current water depth.
 
-integer :: key
-integer, intent(out) :: iresult !< Error status, DFM_NOERR==0 if successful. DFM_TIMESETBACK if succesful, but with timestep setbacks.
-
-integer :: N, L
-
- iresult = DFM_GENERICERROR
-
- if (itstep >= 2) then
-    call timstrt('step_reduce', handle_extra(51)) ! step_reduce
-    call step_reduce(key)                            ! set a computational timestep implicit, reduce, elim conj grad substi
-    call timstop(handle_extra(51)) ! step_reduce
-
-    if (dsetb > 0) then
-       iresult = DFM_TIMESETBACK ! Warning about setbacks, but don't return directly, continue function normally
-    end if
- else
-    call velocities_explicit()                       ! progress without pressure coupling
-    call transport()                                 ! progress without pressure coupling
-    call update_part()
-    time1  = time0 + dts                             ! progress without pressure coupling
- endif
-
- if (jaeverydt > 0) then
-    if ((comparereal(time1, ti_maps, eps10) >= 0) .and. (comparereal(time1, ti_mape, eps10) <= 0)) then
-       if (jamapFlowAnalysis > 0) then
-          ! update the cumulative flow analysis parameters, and also compute the right CFL numbers
-          call updateFlowAnalysisParameters()
-       endif
-         
-       call wrimap(time1)
-       
-       if (jamapFlowAnalysis > 0) then
-          ! Reset the interval related flow analysis arrays
-          negativeDepths = 0
-          noiterations = 0
-          limitingTimestepEstimation = 0
-          flowCourantNumber = 0d0
-       endif
-    
-    end if
- end if
-   ! Finalize timestep code used to be here, now flow_finalize_single_timestep()
-
-   if (iresult /= DFM_TIMESETBACK) then
-      iresult = DFM_NOERR
-   end if
-
-   return ! Return with success
-
-888 continue
-   ! Error
-
-end subroutine flow_run_single_timestep
+   hpr = hu(L)
+   if (changeVelocityAtStructures) then
+      if ( bob(1,L) /= bob0(1,L) .or. bob(1,L) /= bob0(1,L) ) then
+         if (u1(L) > 0d0) then
+            ! In case of structure links Hu is the waterdepth at the crest. We want to use the waterdepth 
+            ! with respect to the channel bed level for a correct flow area of the channel
+            hpr = hu(L)+bob(1,L)-bob0(1,L)
+         else
+            hpr = hu(L)+bob(2,L)-bob0(2,L)
+         endif
+      endif
+   endif
+end function get_hpr_nostruc

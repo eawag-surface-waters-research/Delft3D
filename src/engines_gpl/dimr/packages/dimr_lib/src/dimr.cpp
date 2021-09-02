@@ -972,7 +972,7 @@ void Dimr::receive(const char* name,
             if (my_rank == processes[m]) {
                 log->Write(ALL, my_rank, "Dimr::receive(%s) %20.10f", name, *(double*)(transferValuePtr));
                 if (compType == COMP_TYPE_RTC
-                    || compType == COMP_TYPE_RR
+                    // || compType == COMP_TYPE_RR // SOBEK-51004: RR must use explicit set_var as long as get_var is not properly implemented for some variables.
                     || compType == COMP_TYPE_FLOW1D
                     || compType == COMP_TYPE_FLOW1D2D
                     || compType == COMP_TYPE_WANDA) {
@@ -1054,7 +1054,7 @@ void Dimr::getAddress(
             log->Write(ALL, my_rank, "Dimr::getAddress (%s)", name);
             if (compType == COMP_TYPE_DEFAULT_BMI ||
                 compType == COMP_TYPE_RTC ||
-                compType == COMP_TYPE_RR ||
+                // compType == COMP_TYPE_RR ||
                 compType == COMP_TYPE_FLOW1D ||
                 compType == COMP_TYPE_FLOW1D2D ||
                 compType == COMP_TYPE_FM || // NOTE: pending new feature of specifying get_var by value/by reference, we now always get the new pointer from dflowfm (needed for UNST-1713).

@@ -90,7 +90,6 @@ module network_data
   double precision, allocatable, target :: yzw(:)      !< [m] centre of gravity {"shape": ["nump"]}
   double precision, allocatable         :: yzw0(:)     ! Backup of yzw
 
-
   ! Net node related
   double precision, allocatable, target :: xk(:) !< [-] Net node x coordinate {"shape": ["numk"]}
   double precision, allocatable, target :: yk(:) !< [-] Net node y coordinate {"shape": ["numk"]}
@@ -261,7 +260,7 @@ module network_data
    if(allocated(xzw0))     deallocate(xzw0)
    if(allocated(yzw))      deallocate(yzw)
    if(allocated(yzw0))     deallocate(yzw0)
-   
+
    if(allocated(xk)) deallocate(xk)
    if(allocated(yk)) deallocate(yk)
    if(allocated(zk)) deallocate(zk)

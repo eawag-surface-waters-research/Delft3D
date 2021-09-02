@@ -34,6 +34,7 @@
  use m_flow
  use m_flowgeom
  use m_flowtimes
+ use m_flowparameters
  use m_general_structure
  use m_1d_structures
  use m_compound
@@ -86,7 +87,7 @@
           call computePump_all_links(pstru)
        else
           if (network%sts%struct(istru)%type == ST_GENERAL_ST )then
-             SkipDimensionChecks = .false.
+             SkipDimensionChecks = .not. changeStructureDimensions
              if (pstru%numlinks == 1) then
                 L = abs(pstru%linknumbers(1))
                 if (L <= lnx1D) then
@@ -132,7 +133,7 @@
                       endif
                       call getcz(hu(L), frcu(L), ifrcutp(L), Cz, L)
                       au(L) = pstru%au(L0)
-                      call computeGeneralStructure(pstru%generalst, direction, L0, wu(L), bob0(:,L), fu(L), ru(L), &
+                      call computeGeneralStructure(pstru%generalst, direction, L0, width, bob0(:,L), fu(L), ru(L), &
                           au(L), as1, as2, width, kfu, s1(k1), s1(k2), q1(L), Cz, dx(L), dts, SkipDimensionChecks)
                    case (ST_DAMBREAK)
                       continue
@@ -149,16 +150,14 @@
 
                        wetdown = max(wetdown, 0.0001d0)
                       call computeculvert(pstru%culvert, fu(L), ru(L), au(L), width, kfu, cmustr, s1(k1), s1(k2), &
-                          q1(L), q1(L), pstru%u1(L0), pstru%u0(L0), dx(L), dts, bob0(:,L), wetdown, .true.)
-                      bl(k1) = min(bl(k1), bob0(1,L))
-                      bl(k2) = min(bl(k2), bob0(2,L))
-
+                          q1(L), q1(L), pstru%u1(L0), pstru%u0(L0), dx(L), dts, wetdown, .true.)
+                      
                    case (ST_UNI_WEIR)
                       fu(L) = pstru%fu(L0)
                       ru(L) = pstru%ru(L0)
                       au(L) = pstru%au(L0)
                       call computeUniversalWeir(pstru%uniweir,  fu(L), ru(L), au(L), width, bob0(:,L), kfu, s1(k1), s1(k2), &
-                          q1(L), pstru%u1(L0), dx(L), dts)
+                          q1(L), pstru%u1(L0), dx(L), dts, changeStructureDimensions)
                    case (ST_BRIDGE)
                       dpt = max(epshu, s1(k1) - bob0(1,L))
                       call GetCSParsFlow(network%adm%line2cross(L, 2), network%crs%cross, dpt, as1, perimeter, width)
@@ -169,7 +168,7 @@
                       wu(L) = max(wu(L), as2/dpt)
                       width = wu(L)
                       call ComputeBridge(pstru%bridge, fu(L), ru(L), au(L), width, kfu, s1(k1), s1(k2), pstru%u1(L0), dx(L), dts,                            &
-                               as1, as2, bob0(:,L))
+                               as1, as2, bob0(:,L), changeStructureDimensions)
                    case (ST_LONGCULVERT)
                       ! NOTE: UNST-4328: long culverts are no actual structures, but rather just normal 1D flow links, no furu-step needed here.
                       continue

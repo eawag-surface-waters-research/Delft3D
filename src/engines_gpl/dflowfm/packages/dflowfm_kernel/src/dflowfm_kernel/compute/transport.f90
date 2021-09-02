@@ -634,7 +634,7 @@ subroutine transport()                           ! transport for now, advect sal
        !$OMP PARALLEL DO                        &
        !$OMP PRIVATE(kk,k,kb,kt,aa,n,L)
        do kk = 1,ndx
-          if (kfs(kk) == 0) cycle
+          if (kfs(kk) <= 0) cycle
           call getkbotktop(kk,kb,kt)
           do k = kb,kt
              if (vol1(k) > 0d0) then
@@ -795,7 +795,7 @@ subroutine transport()                           ! transport for now, advect sal
      !$xOMP REDUCTION(+:sam1tot)
 
      do kk = 1,ndxi
-        if (kfs(kk) == 0) cycle
+        if (kfs(kk) <= 0) cycle
         call getkbotktop(kk,kb,kt)
         !if ( kt < kb ) cycle
         !if ( vol1(kb) < eps10 ) cycle

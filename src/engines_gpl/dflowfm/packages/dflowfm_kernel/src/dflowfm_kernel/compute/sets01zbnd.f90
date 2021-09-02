@@ -96,6 +96,8 @@
           bl(kb) = min(bl(kb), zb - bndBlDepth(ibnd))
           bob(1,L) = bl(kb)
           bob(2,L) = bl(kb)
+          bob0(1,L) = bl(kb)
+          bob0(2,L) = bl(kb)
           bl(k2) = bl(kb)
        end if
     end if

@@ -57,12 +57,8 @@
 
  do n = 1,ndxi                                                  ! check result
 
-    if ( jampi.eq.1 ) then
-!      exclude ghost cells
-       if ( idomain(n).ne.my_rank ) cycle
-    end if
 
-    if (kfs(n) > 0) then
+    if (abs(kfs(n)) /= 0) then ! Also check ghost nodes for posh/setbacks
        if ( s1(n) < bl(n) ) then
            if ( s1(n) < bl(n) - 1d-10 ) then                     ! if ( s1(n) < bl(n) ) then
 
@@ -73,7 +69,6 @@
 
               if (jposhchk == -1) then                           ! only detect dry cells and return (for Nested Newton restart)
                  key = 2
-                 exit
               else if (jposhchk == 1) then                       ! only timestep reduction
                  key = 2                                         ! flag redo timestep
                  exit
@@ -115,6 +110,9 @@
 
            endif
 
+           if (jamapFlowAnalysis > 0) then
+              negativeDepths(n) = negativeDepths(n) + 1
+           end if
 
            s1(n) = bl(n)
         endif

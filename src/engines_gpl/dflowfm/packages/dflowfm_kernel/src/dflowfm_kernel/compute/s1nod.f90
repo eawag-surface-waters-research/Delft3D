@@ -57,6 +57,7 @@
  double precision, parameter :: HBMIN = 1d-3
  double precision, pointer, dimension(:)  :: gridPointsChainages
  type(t_branch), pointer, dimension(:)    :: branch
+ logical :: domainCheck
 
  !bbr = bb + dti*a1     !m2/s
  !ddr = dd + dti*a1*s1  !m3/s
@@ -87,7 +88,7 @@
  ! end do
 
  !$OMP PARALLEL DO           &
- !$OMP PRIVATE(n,dtiba)
+ !$OMP PRIVATE(n,dtiba,domaincheck,dim_text,L,i,LL,ibr,branch,gridPointsChainages,k)
  do n = 1,ndx                                        ! Waterlevels, = s1ini
     dtiba  = dti*a1(n)
     bbr(n) = bb(n) + dtiba                           ! need it also for kfs.ne.1 at the boundaries (for parallel runs, see partition_setkfs)
@@ -95,8 +96,13 @@
         bbr(n)  = bbr(n) - dti*a1m(n)
     endif
 
+    domaincheck = .true.
+    if (jampi == 1) then
+       domaincheck = (idomain(n) == my_rank)
+    end if
+
     ! Check for zero (0d0) value on diagonal, to print a warning before a resulting Saad crash.
-    if (comparerealdouble(bbr(n),0d0)==0) then
+    if (comparerealdouble(bbr(n),0d0)==0 .and. domainCheck) then
        if (n <= ndx2d) then
           dim_text = '2D'
        else
@@ -108,7 +114,7 @@
        write(msgbuf, '(a)') 'Current time is: '
        call maketime(msgbuf(18:), time1)
        call setMessage(-1, msgbuf)
-       write(msgbuf,'(a,f9.2,a,f9.2,a)') 'The location of the node is at (',xz(n),',',yz(n),')'
+       write(msgbuf,'(a,f10.2,a,f10.2,a)') 'The location of the node is at (',xz(n),',',yz(n),')'
        call setMessage(-1, msgbuf)
        L = -1
        if (n > ndx2d .and. network%loaded) then

@@ -89,6 +89,7 @@ subroutine flow_finalize_usertimestep(iresult)
 
 !       only update values at the observation stations when necessary
 !          alternative: move this to flow_externaloutput
+      call timstrt('update HIS data DtUser', handle_extra(75))
       if (ti_his > 0) then
          if (comparereal(time1, time_his, eps10)>=0) then
             do_fourier = do_fourier .or. (md_fou_step == 2)
@@ -107,6 +108,7 @@ subroutine flow_finalize_usertimestep(iresult)
             endif
          endif
       endif
+      call timstop(handle_extra(75))
 
 !       in case of water level or discharge dependent roughness,
 !       the observations and cross sections must be up todate each DtTrt s (if they are actually used)
@@ -123,7 +125,9 @@ subroutine flow_finalize_usertimestep(iresult)
          endif
       endif
 
+      call timstrt('call flow_externaloutput', handle_extra(79))
       call flow_externaloutput(time1)
+      call timstop(handle_extra(79))
 
       call timstop(handle_extra(53)) ! output
       if ( jatimer == 1 ) call stoptimer(IOUTPUT)

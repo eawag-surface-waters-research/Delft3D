@@ -44,6 +44,7 @@
  integer           :: k1, k2, K, calcConv
  double precision  :: ar1, wid1, cf1, ar2, wid2, cf2, dx1, dx2, widu, perim
  double precision  :: hpr
+ double precision, external :: get_hpr_nostruc
 
  if (japerim == 0) then
     calcConv = 0
@@ -67,8 +68,10 @@
 
  else
     if (hu(L) > 0) then
+       !DIR$ INLINE
+       hpr = get_hpr_nostruc(L)
        calcConv = 1
-       call getprof_1D(L, hu(L), au(L), widu, japerim, calcConv, perim)
+       call getprof_1D(L, hpr, au(L), widu, japerim, calcConv, perim)
     endif
 
     calcConv = 0

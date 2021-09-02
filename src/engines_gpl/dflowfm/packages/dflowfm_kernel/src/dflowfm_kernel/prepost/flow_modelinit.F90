@@ -69,14 +69,11 @@
  ! Activate the following line (See also statements below)
  !use ifcore
  !
-#ifdef _OPENMP
- use omp_lib
-#endif
-
  implicit none
 
  integer              :: jw, istat, L, ierr
  integer, external    :: flow_flowinit
+ integer, external    :: init_openmp
  !
  ! To raise floating-point invalid, divide-by-zero, and overflow exceptions:
  ! Activate the following 3 lines, See also statements below
@@ -256,25 +253,11 @@
       goto 1234
     end if
 
-#ifdef _OPENMP
-    ! If MPI is on for this model, *and* no user-define numthreads was set, then disable OpenMP.
-    if (md_numthreads == 0) then
-       call omp_set_num_threads(1)
-! TODO: AvD: else, reset to maximum? Especially in library mode when multiple models can be run after one another?
-    else
-       call omp_set_num_threads(md_numthreads)
-    end if
-#endif
-
- else ! No MPI, but handle OpenMP settings:
-#ifdef _OPENMP
-    if (md_numthreads /= 0) then
-       call omp_set_num_threads(md_numthreads)
-    end if
-#endif
  end if
  call timstop(handle_extra(12)) ! vertical administration
 
+ ierr = init_openmp(md_numthreads, jampi)
+ 
  call timstrt('Net link tree 0     ', handle_extra(13)) ! netlink tree 0
  if ((jatrt == 1) .or. (jacali == 1)) then
      call netlink_tree(0)

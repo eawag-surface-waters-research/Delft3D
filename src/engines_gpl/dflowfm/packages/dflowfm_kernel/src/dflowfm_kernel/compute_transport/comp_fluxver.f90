@@ -90,7 +90,7 @@ subroutine comp_fluxver(NUMCONST, limtyp, thetavert, Ndkx, kmx, zws, qw, kbot, k
    !$xOMP PRIVATE(kk,kb,kt,dz,k,cf,kL,kR,j,sedL,sedR,kLL,kRR,sl3L,sl3R,ds1L,ds1R,ds2L,ds2R,qw_loc) &
    !$xOMP FIRSTPRIVATE(dt_loc)
    do kk=1,Ndx
-      if (kfs(kk) == 0) cycle
+      if (kfs(kk) <= 0) cycle
 
       if ( nsubsteps.gt.1 ) then
          if (jaupdate(kk).eq.0 ) then

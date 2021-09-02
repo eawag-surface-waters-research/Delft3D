@@ -1051,6 +1051,7 @@ src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_io/unc_write_part_he
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_io/unc_write_shp.F90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_io/unstruc_netcdf.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_io/unstruc_netcdf_incremental.f90 -text
+src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_io/update_flowanalysis_parameters.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_io/wribal.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_io/wribl.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_io/wriblu.f90 -text
@@ -1140,6 +1141,7 @@ src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_kernel/compute/furu_
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_kernel/compute/furusobekstructures.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_kernel/compute/gate3d.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_kernel/compute/get_curvature.f90 -text
+src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_kernel/compute/get_hpr_nostruc.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_kernel/compute/get_spiral3d.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_kernel/compute/get_spiralforce.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_kernel/compute/getcz.f90 -text
@@ -2011,6 +2013,7 @@ src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_utils/dumpnetlink.f9
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_utils/filez.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_utils/hrfft.f -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_utils/inflowcell.f90 -text
+src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_utils/init_openmp.F90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_utils/m_crspath.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_utils/pol2netparams.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_utils/reconstructucz.f90 -text

@@ -45,6 +45,7 @@ subroutine addlink1D(L,japerim)                        ! and add area's and volu
  integer           :: k1, k2, K, LL
  double precision  :: ar1, wid1, cf1, ar2, wid2, cf2, dx1, dx2, widu, diam, perim
  double precision  :: hpr
+ double precision, external :: get_hpr_nostruc
 
  dx1 = 0.5d0*dx(L)
  dx2 = dx1
@@ -139,9 +140,11 @@ subroutine addlink1D(L,japerim)                        ! and add area's and volu
 
     calcConv = 1
 
-    ! getprof1D sets cfu
     if (hu(L) > 0) then
-       call getprof_1D(L, hu(L), au(L), widu, japerim, calcConv, perim)  ! memory closeness of profiles causes this statement here instead of in setau
+       !DIR$ INLINE
+       hpr = get_hpr_nostruc(L)
+       ! getprof1D sets cfu
+       call getprof_1D(L, hpr, au(L), widu, japerim, calcConv, perim)  ! memory closeness of profiles causes this statement here instead of in setau
     endif
 
     ! calculate VOL1_F to be used for 1d-advection

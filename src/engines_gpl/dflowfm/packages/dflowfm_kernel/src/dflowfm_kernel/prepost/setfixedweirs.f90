@@ -427,33 +427,35 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
        if ( ifirstweir(L) == 0 .and. jakol45 == 2) then !  .and. (ifixedweirscheme == 8 .or. ifixedweirscheme == 9) ) then   !  only for fixed weirs under the bed level for Tabellenboek or Villemonte and not for the first time that a fixed weir is set on this link
           ! check for larger ground height height values if at this link already a fixed weir exist
 
-          call normalout( XPL(k), YPL(k), XPL(k+1), YPL(k+1) , xn, yn, jsferic, jasfer3D, dmiss, dxymis)  ! test EdG
-          zhu =  (1d0-sl)*dzl(k) + sl*dzl(k+1)
-          zhd =  (1d0-sl)*dzR(k) + sl*dzR(k+1)
-          if (xn*csu(L) + yn*snu(L) < 0d0) then  ! check left/right
-             zh = zhd; zhd = zhu;  zhu = zh
-          endif
           !
           ! check whether crestlevel is higher
           !
           if (zc > zcrest(L)) then
              zcrest(L) = zc
              !! write (msgbuf,'(a,i5,f10.3)') 'Higher crest level: ', L,  zcrest(L); call msg_flush()
-         endif
-         !
-         ! Check whether toe is lower. If so, also adjust toe level and the ground height
-         ! If ground height is smaller than 1 cm, then this neglected
-         !
-         if (zc-zhu .lt. ztoeu(L) .and. zhu .gt. 0.01) then 
-            ztoeu(L)   = zc - zhu                            
-            dzsillu(L) = zcrest(L) - ztoeu(L)              
-            !! write (msgbuf,'(a,i5,f10.3)') 'Larger sill up:     ', L,  dzsillu(L); call msg_flush()
-         endif
-         if (zc-zhd .lt. ztoed(L) .and. zhd .gt. 0.01) then
-            ztoed(L)   = zc - zhd
-            dzsilld(L) = zcrest(L) - ztoed(L)
-            !! write (msgbuf,'(a,i5,f10.3)') 'Larger sill down:   ', L, dzsilld(L); call msg_flush()
-         endif
+          endif
+          if (jakol45/=0) then
+             call normalout( XPL(k), YPL(k), XPL(k+1), YPL(k+1) , xn, yn, jsferic, jasfer3D, dmiss, dxymis)  ! test EdG
+             zhu =  (1d0-sl)*dzl(k) + sl*dzl(k+1)
+             zhd =  (1d0-sl)*dzR(k) + sl*dzR(k+1)
+             if (xn*csu(L) + yn*snu(L) < 0d0) then  ! check left/right
+                zh = zhd; zhd = zhu;  zhu = zh
+             endif
+            !
+            ! Check whether toe is lower. If so, also adjust toe level and the ground height
+            ! If ground height is smaller than 1 cm, then this neglected
+            !
+            if (zc-zhu .lt. ztoeu(L) .and. zhu .gt. 0.01) then 
+               ztoeu(L)   = zc - zhu                            
+               dzsillu(L) = zcrest(L) - ztoeu(L)              
+               !! write (msgbuf,'(a,i5,f10.3)') 'Larger sill up:     ', L,  dzsillu(L); call msg_flush()
+            endif
+            if (zc-zhd .lt. ztoed(L) .and. zhd .gt. 0.01) then
+               ztoed(L)   = zc - zhd
+               dzsilld(L) = zcrest(L) - ztoed(L)
+               !! write (msgbuf,'(a,i5,f10.3)') 'Larger sill down:   ', L, dzsilld(L); call msg_flush()
+            endif
+          endif
        endif
     endif
     !! write (msgbuf,'(a,2i5,7f10.3)') 'Projected fixed weir', L, iweirtyp(L), zcrest(L), ztoeu(L), dzsillu(L),ztoed(L),dzsilld(L),taludu(L),taludd(L); call msg_flush()

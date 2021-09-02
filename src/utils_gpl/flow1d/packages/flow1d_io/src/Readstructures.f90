@@ -882,7 +882,7 @@ module m_readstructures
       logical,                   intent(  out) :: success    !< Result status, whether reading of the structure was successful.
 
       integer                                      :: istat
-      integer                                      :: i
+      integer                                      :: i, ilowest
       double precision                             :: lowestz
       character(len=Idlen)                         :: txt
       logical                                      :: success1
@@ -916,6 +916,14 @@ module m_readstructures
          call prop_get_doubles(md_ptr, '', 'yValues', uniweir%y, uniweir%yzcount, success1)
          success = success .and. check_input_result(success1, st_id, 'yValues')
       
+         ! Y values must be in non-descending order.
+         do i = 1, uniweir%yzcount-1
+            if (uniweir%y(i+1) < uniweir%y(i)) then
+               call SetMessage(LEVEL_ERROR, 'Reading Universal Weir: '''//trim(st_id)//'''. yValues are not in ascending order.')
+               success = .false. 
+               return
+            endif
+         enddo
          call prop_get_doubles(md_ptr, '', 'zValues', uniweir%z, uniweir%yzcount, success1)
          success = success .and. check_input_result(success1, st_id, 'zValues')
       endif
@@ -924,12 +932,21 @@ module m_readstructures
       ! As a result the minimal value for Z must be 0. Shift-user-specified values to 0.
       lowestz = huge(1d0)
       do i = 1, uniweir%yzcount
-         lowestz = min(lowestz, uniweir%z(i))
+         if (lowestz >  uniweir%z(i)) then
+            lowestz = uniweir%z(i)
+            ilowest = i
+         endif
       enddo
       do i = 1, uniweir%yzcount
          uniweir%z(i) = uniweir%z(i) - lowestz
       enddo
-
+      
+      ! Check whether a possible zero flow area can occurr
+      if ((uniweir%y(max(1,ilowest-1)) == uniweir%y(ilowest)) .and. (uniweir%y(ilowest) == uniweir%y(min(ilowest+1, uniweir%yzcount)))) then
+         call SetMessage(LEVEL_ERROR, 'Reading Universal Weir: '''//trim(st_id)//'''.  The flow area at the lowest point to the next point is 0.')
+         success = .false. 
+         return
+      endif
    end subroutine readUniversalWeir
 
 

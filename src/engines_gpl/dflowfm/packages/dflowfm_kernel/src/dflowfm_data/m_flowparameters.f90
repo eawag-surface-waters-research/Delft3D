@@ -48,6 +48,11 @@
  logical                           :: dxDoubleAt1DEndNodes !< indicaties whether a 1D grid cell at the end of a network has to be extended with 0.5*dx
  integer                           :: iadvec1D          !< same, now for 1D links
 
+ logical                           :: changeVelocityAtStructures !< Set the flow velocity at structures in setucxucyucxuucyu to the 
+                                                                 !< flow velocity upstream of the structure
+ logical                           :: changeStructureDimensions  !< Change the crestwidth of a structure, in case the crestwidth is larger than the 
+                                                                 !< wet surface width and make sure the crest level is equal or larger than the
+                                                                 !< bed level of the channel. 
  integer                           :: lincontin         !< 0 = no, 1 = yes linear continuity
 
  integer                           :: iPerot            !< Perot weigthing type of cell center velocities ucx, ucy
@@ -490,6 +495,7 @@
  integer                           :: jamapbnd                  !< Includes boundary points in map output
  integer                           :: jamapqin                  !< Includes sum of all influxes in map output
  integer                           :: jaeverydt                 !< Write output to map file every dt, based on start and stop from MapInterval, 0=no (default), 1=yes
+ integer                           :: jamapFlowAnalysis         !< Write flow analysis output to map file   
 
 ! read from restart
  integer                           :: jarstignorebl             !< Flag indicating if bed level on restart file should be ignored (0/1, default: 0)
@@ -564,7 +570,11 @@ subroutine default_flowparameters()
     maxNonlinearIterations   = 100     !< maximal iterations in non linear iteration loop before a time step reduction is applied
     setHorizontalBobsFor1d2d = .false. !< bobs are set to 2d bedlevel, to prevent incorrect storage in sewer system.
     dxDoubleAt1DEndNodes     = .true.  !< indicates whether a 1D grid cell at the end of a network has to be extended with 0.5*dx
-
+    changeVelocityAtStructures = .false. !< Set the flow velocity at structures in setucxucyucxuucyu to the 
+                                         !< flow velocity upstream of the structure
+    changeStructureDimensions = .true.   !< Change the crestwidth of a structure, in case the crestwidth is larger than the 
+                                         !< wet surface width and make sure the crest level is equal or larger than the
+                                         !< bed level of the channel. 
     lincontin= 0      ! 0 = no, 1 = yes linear continuity
 
     iPerot   = 1      ! Perot weigthing type of cell center velocities ucx, ucy
@@ -923,6 +933,7 @@ subroutine default_flowparameters()
     jamapTotalInflow1d2d = 0
     jamapTotalInflowLat = 0
     jamapS1Gradient = 0
+    jamapFlowAnalysis = 0
 
     jarstignorebl = 0
 

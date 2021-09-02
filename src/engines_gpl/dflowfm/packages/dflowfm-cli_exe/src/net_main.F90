@@ -78,6 +78,7 @@
    use dfm_error
    use gridoperations
    use m_commandline_option
+   use unstruc_channel_flow, only: network
    
    use m_partitioninfo
 #ifdef HAVE_MPI
@@ -257,7 +258,12 @@
     
 
     if ( md_japartition.eq.1 ) then
-        
+       if (network%loaded .and. md_partugrid /= 1) then
+          md_partugrid = 1
+          write (msgbuf, '(a,a,a)') 'Option --partition:ugrid=1 was automatically set, because network file ''', trim(md_netfile), ''' requires it for its 1D parts.'
+          call msg_flush()
+       end if
+
        if ( len_trim(md_ident) > 0 ) then ! partitionmduparse
           call partition_from_commandline(md_netfile, md_Ndomains, md_jacontiguous, md_icgsolver, md_pmethod, md_dryptsfile, md_encfile, md_genpolygon, md_partugrid, md_partseed)
           L    = index(md_netfile, '_net')-1

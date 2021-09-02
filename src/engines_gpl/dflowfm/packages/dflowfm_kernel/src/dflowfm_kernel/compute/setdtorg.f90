@@ -116,6 +116,10 @@
 
              if (squloc > eps10) then                   ! outflow only
                 if (hs(k) > epshu .and. vol1(k) > 0.0 .and. squloc > 0.0) then
+                   if (jamapFlowAnalysis > 0) then
+                      ! The flowCourantNumber will be multiplied by dt on a later stage
+                      flowCourantNumber(k) = squloc/vol1(k)
+                   endif
                    dtsc = cflmx*vol1(k)/squloc
 
                    if (jamapdtcell > 0) then
@@ -528,5 +532,7 @@
 !       write(mout, '(3F14.4, I8)')         time0/60d0, dts, dtsc, kkcflmx
 !    endif
 ! endif
-
+ if (kkcflmx > 0 .and. jamapFlowAnalysis > 0) then
+    limitingTimestepEstimation(kkcflmx) = limitingTimestepEstimation(kkcflmx) +1
+ endif
  end subroutine setdtorg

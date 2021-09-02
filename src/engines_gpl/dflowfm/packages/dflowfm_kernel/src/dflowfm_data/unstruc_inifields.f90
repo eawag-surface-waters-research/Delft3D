@@ -876,19 +876,12 @@ subroutine spaceInit1dField(sBranchId, sChainages, sValues, ipos, res)
          
          do j = 1, ncount
             if (ipos == 1) then
-               chai = pbr%uPointsChainages(j)
-               ierr = findlink(brid, chai, k) ! find flowlink index given branchId and chainage
+               k = pbr%lin(j)
             else if (ipos == 2) then
-               chai = pbr%gridPointsChainages(j)
-               ierr = findnode(brid, chai, k) ! find flownode/netnode index given branchId and chainage
+               k = pbr%grd(j)
             end if
          
-            if (ierr == DFM_NOERR) then
-               res(k) = sValues(1)
-            else
-               write(msgbuf,'(a, g11.4,a)') 'Error when finding the flow link/node which locates on branch '''//trim(brId)//''' and chainage =', chai , '.'
-               call err_flush()  
-            end if
+            res(k) = sValues(1)
          end do
       end do
             
@@ -911,41 +904,37 @@ subroutine spaceInit1dField(sBranchId, sChainages, sValues, ipos, res)
       do j = 1, ncount
          if (ipos == 1) then
             chai = pbr%uPointsChainages(j)
-            ierr = findlink(sBranchId, chai, k) ! find flowlink index given branchId and chainage
+            k = pbr%lin(j)
          else if (ipos == 2) then
             chai = pbr%gridPointsChainages(j)
-            ierr = findnode(sBranchId, chai, k) ! find flownode/netnode index given branchId and chainage
+            k = pbr%grd(j)
          end if
-   
-         if (ierr /= DFM_NOERR) then
-            write(msgbuf,'(a, g11.4,a)') 'Error when finding the flow link/node which locates on branch '''//trim(brId)//''' and chainage =', chai , '.'
-            call err_flush()  
-         else
-            if (comparereal(chai, minsChai, eps10) <= 0) then
-               res(k) = sValues(1)
-               cycle
-            else if (comparereal(chai, maxsChai, eps10) >= 0) then
-               res(k) = sValues(ns)
-               cycle
-            end if
-               
-            do i = ipre, ns
-               sChaiPrev = sChainages(i-1)
-               sChai     = sChainages(i)
-               sValPrev  = sValues(i-1)
-               sVal      = sValues(i)
-               
-               if (comparereal(chai, sChaiPrev, eps10) >= 0 .and. comparereal(chai, sChai, eps10) < 0) then
-                  if (comparereal(sChai, sChaiPrev, eps10)/=0) then
-                     res(k) = sValPrev + (sVal-sValPrev)/(sChai-sChaiPrev)*(chai-sChaiPrev)
-                  else
-                     res(k) = (sVal + sValPrev)/2
-                  end if
-                  ipre = i
-                  exit
-               end if  
-            end do
+         ! Constant value before the first data segment and after the last data segment.
+         if (comparereal(chai, minsChai, eps10) <= 0) then
+            res(k) = sValues(1)
+            cycle
+         else if (comparereal(chai, maxsChai, eps10) >= 0) then
+            res(k) = sValues(ns)
+            cycle
          end if
+               
+         ! Linear interpolation, find the data segment in which the current position k lies.
+         do i = ipre, ns
+            sChaiPrev = sChainages(i-1)
+            sChai     = sChainages(i)
+            sValPrev  = sValues(i-1)
+            sVal      = sValues(i)
+               
+            if (comparereal(chai, sChaiPrev, eps10) >= 0 .and. comparereal(chai, sChai, eps10) < 0) then
+               if (comparereal(sChai, sChaiPrev, eps10)/=0) then
+                  res(k) = sValPrev + (sVal-sValPrev)/(sChai-sChaiPrev)*(chai-sChaiPrev)
+               else
+                  res(k) = (sVal + sValPrev)/2
+               end if
+               ipre = i
+               exit
+            end if  
+         end do
       end do
    end if
 end subroutine spaceInit1dField

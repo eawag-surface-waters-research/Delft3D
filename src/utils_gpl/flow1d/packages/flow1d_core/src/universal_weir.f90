@@ -87,7 +87,7 @@ module m_Universal_Weir
    
    !> Compute the coefficients FU, RU and AU for this universal weir.
    subroutine ComputeUniversalWeir(uniweir, fum, rum, aum, dadsm, bob0, kfum, s1m1, s1m2, &
-                                   qm, u1m, dxm, dt)
+                                   qm, u1m, dxm, dt, changeStructureDimensions)
       implicit none
       !
       ! Global variables
@@ -105,6 +105,8 @@ module m_Universal_Weir
       double precision, intent(inout)             :: u1m      !< Computed flow velocity.
       double precision, intent(in   )             :: dxm      !< Length of flow link.
       double precision, intent(in   )             :: dt       !< Time step in seconds.
+      logical,          intent(in   )             :: changeStructureDimensions !< Indicates whether the crest level of the weir can be changed when
+                                                                               !< the crest level is below the bed level                                               
       !
       !
       ! Local variables
@@ -155,7 +157,11 @@ module m_Universal_Weir
          return
       endif
       
-      uniweir%crestlevel_actual = max(bob0(1), bob0(2), uniweir%crestlevel)
+      if (changeStructureDimensions) then
+         uniweir%crestlevel_actual = max(bob0(1), bob0(2), uniweir%crestlevel)
+      else
+         uniweir%crestlevel_actual = uniweir%crestlevel
+      endif
       !
       !     Check on flooding or drying with treshold
       if ((smax - uniweir%crestlevel_actual) < thresholdDry) then

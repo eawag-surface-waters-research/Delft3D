@@ -115,7 +115,7 @@ subroutine solve_vertical(NUMCONST, ISED1, ISEDN, limtyp, thetavert, Ndkx, Lnkx,
 
       kb  = kbot(kk)
       kt  = ktop(kk)
-      if (kfs(kk) == 0) cycle
+      if (kfs(kk) <= 0) cycle
 
       ktx = kb + kmxn(kk) - 1
       a   = 0d0

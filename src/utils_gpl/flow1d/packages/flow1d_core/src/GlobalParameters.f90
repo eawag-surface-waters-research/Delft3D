@@ -60,6 +60,7 @@ module m_GlobalParameters
    double precision                 :: minSectionLength              = 1.0
    double precision, public         :: dynstructext                  = 1.0d0
    double precision, public         :: missingvalue                  =-999.999d0
+   double precision, public         :: flow1d_eps10                  = 1d-10
    double precision, public         :: latitude                      = 52.25
    double precision, public         :: longitude                     = 0d0
    double precision, public         :: time_zone                     = 0d0

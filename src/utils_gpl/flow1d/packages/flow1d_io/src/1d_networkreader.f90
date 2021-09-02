@@ -341,7 +341,7 @@ module m_1d_networkreader
             startEndPointMissing(1) = (localUOffsets(1)         < localOffsets(1))
             startEndPointMissing(2) = (localUOffsets(linkCount) > localOffsets(gridPointsCount))
          else
-            startEndPointMissing = .true. ! both are missing
+            startEndPointMissing(1:2) = .true. ! both are missing
          end if
          do i = 1, 2
             if (startEndPointMissing(i)) then
@@ -351,7 +351,7 @@ module m_1d_networkreader
       endif
 
       call storeBranch(network%brs, network%nds, branchids(ibran), nodeids(meshgeom%nedge_nodes(1,ibran)), &
-         nodeids(meshgeom%nedge_nodes(2,ibran)), meshgeom%nbranchorder(ibran), gridPointsCount, localGpsX(1:gridPointsCount), &
+         nodeids(meshgeom%nedge_nodes(2,ibran)), meshgeom%nbranchlengths(ibran), meshgeom%nbranchorder(ibran), gridPointsCount, localGpsX(1:gridPointsCount), &
          localGpsY(1:gridPointsCount),localOffsets(1:gridPointsCount), localUoffsets(1:linkCount), &
          localGpsID(1:gridPointsCount), my_rank_)
    enddo
@@ -742,7 +742,7 @@ module m_1d_networkreader
          if (node%nodeType == nt_NotSet) then
             ! probably end node (until proved otherwise
             node%nodeType = nt_endNode
-         node%gridNumber = gridIndex
+         node%gridNumber = gridIndex ! TODO: Not safe in parallel models (check gridpointsseq as introduced in UNST-5013)
          elseif (node%nodeType == nt_endNode) then
             ! Already one branch connected, so not an endNode
             node%nodeType = nt_LinkNode
@@ -786,10 +786,11 @@ module m_1d_networkreader
       
    end subroutine readBranch
 
-   subroutine storeBranch(brs, nds, branchId, begNodeId, endNodeId, ordernumber, gridPointsCount, gpX, gpY, &
+   subroutine storeBranch(brs, nds, branchId, begNodeId, endNodeId, branchlength, ordernumber, gridPointsCount, gpX, gpY, &
                           gpchainages, gpUchainages, gpID, my_rank)
    
       use m_branch
+      use precision_basics, only: comparereal
       
       implicit none
 
@@ -798,6 +799,7 @@ module m_1d_networkreader
       character(len=*), intent(in)                   :: branchId
       character(len=*), intent(in)                   :: begNodeId
       character(len=*), intent(in)                   :: endNodeId
+      double precision, intent(in)                   :: branchlength !< Actual length of this branch
       integer, intent(in)                            :: orderNumber
 
       integer, intent(in)                            :: gridPointsCount
@@ -820,6 +822,8 @@ module m_1d_networkreader
       integer                                  :: j
       integer                                  :: ip1
       integer                                  :: ip2
+      integer                                  :: igpFrom
+      integer                                  :: igpTo
       character(len=IdLen)                     :: Chainage
       
       brs%Count = brs%Count + 1
@@ -876,7 +880,6 @@ module m_1d_networkreader
       pbr%gridPointsCount = gridPointsCount
       uPointsCount        = size(gpUchainages)
       pbr%uPointsCount    = uPointsCount
-      pbr%active_branch   = merge(1, 0, uPointsCount /= 0)
 
       call realloc(pbr%gridPointschainages, pbr%gridPointsCount)
       call realloc(pbr%uPointschainages, pbr%uPointsCount)
@@ -889,31 +892,39 @@ module m_1d_networkreader
       pbr%StartPoint         = ip1
       pbr%gridPointschainages = gpchainages
       pbr%uPointschainages    = gpUchainages(1:uPointsCount)
-      pbr%length            = gpchainages(gridPointsCount)
+      pbr%length            = branchlength ! NOTE: in parallel models, this is not necessarily equal to gpchainages(gridPointsCount)
       pbr%Xs                = gpX
       pbr%Ys                = gpY
-      pbr%fromNode%x        = gpX(1)
-      pbr%fromNode%y        = gpY(1)
-      pbr%toNode%x          = gpX(gridPointsCount)
-      pbr%toNode%y          = gpY(gridPointsCount)
+
+      igpFrom = -1
+      igpTo   = -1
+      if (gridPointsCount > 0) then
+         if (comparereal(gpchainages(1), 0d0) == 0) then
+            pbr%fromNode%x        = gpX(1)
+            pbr%fromNode%y        = gpY(1)
+            igpFrom               = ip1
+         end if
+         if (comparereal(gpchainages(gridPointsCount), branchlength) == 0) then
+            pbr%toNode%x          = gpX(gridPointsCount)
+            pbr%toNode%y          = gpY(gridPointsCount)
+            igpTo                 = ip2
+         end if
+      end if
+
       pbr%iTrench           = 0
 
       do j = 1, 2
          if (j==1) then
             node => pbr%fromNode
-            gridIndex = ip1
+            gridIndex = igpFrom
          else
             node => pbr%toNode
-            gridIndex = ip2
+            gridIndex = igpTo
          endif
          if (node%nodeType == nt_NotSet) then
             ! probably end node (until proved otherwise)
             node%nodeType = nt_endNode
-            if (gridPointsCount > 0) then
-               node%gridNumber = gridIndex
-            else
-               node%gridNumber = -1
-            endif
+            node%gridNumber = gridIndex
          elseif (node%nodeType == nt_endNode) then
             ! Already one branch connected, so not an endNode
             node%nodeType = nt_LinkNode

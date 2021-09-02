@@ -195,7 +195,9 @@ subroutine unc_write_wav(tim)
           endif
        endif
 
-       ierr = nf90_sync(wavids%ncid) ! Flush file
+       if (unc_noforcedflush == 0) then
+          ierr = nf90_sync(wavids%ncid) ! Flush file
+       end if
     end if
 
 end subroutine unc_write_wav
@@ -205,10 +207,10 @@ subroutine unc_write_wav_filepointer_ugrid(wavids, tim)
    use unstruc_netcdf
    use m_xbeach_avgoutput
    use m_flowgeom
-   use m_flowtimes, only: refdat
+   use m_flowtimes, only: refdat, ti_wav, ti_wavs, ti_wave
    use m_sferic, only: pi
    use m_flowtimes, only: Tudunitstr
-   
+
    implicit none
    
    type(t_unc_wavids), intent(inout)           :: wavids
@@ -238,7 +240,12 @@ subroutine unc_write_wav_filepointer_ugrid(wavids, tim)
       call unc_write_flowgeom_filepointer_ugrid(wavids%ncid, wavids%id_tsp)
 
       ! Current time t1
-      ierr = nf90_def_dim(wavids%ncid, 'time', nf90_unlimited, wavids%id_tsp%id_timedim)
+      if (unc_nounlimited > 0) then
+         ierr = nf90_def_dim(wavids%ncid, 'time', ceiling((ti_wave-ti_wavs)/ti_wav) + 1, wavids%id_tsp%id_timedim)
+      else
+         ierr = nf90_def_dim(wavids%ncid, 'time', nf90_unlimited, wavids%id_tsp%id_timedim)
+      end if
+
       call check_error(ierr, 'def time dim')
       ierr = unc_def_var_nonspatial(wavids%ncid, wavids%id_time, nf90_double, (/ wavids%id_tsp%id_timedim /), 'time', 'time', '', trim(Tudunitstr))
       

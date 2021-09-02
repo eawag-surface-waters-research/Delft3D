@@ -75,6 +75,16 @@
 
    contains
 
+   !> Initializes the gridoperations module.
+   !! Only initializes debug timers for now.
+   subroutine init_gridoperations()
+   use Timers
+   
+      call timini()
+      timon = .false. ! Set to .true. for performance timers
+
+   end subroutine init_gridoperations
+
    !-----------------------------------------------------------------!
    ! net.f90
    !-----------------------------------------------------------------!
@@ -2117,6 +2127,29 @@
    RETURN
    END SUBROUTINE CONNECTDB
 
+   !> Adds a new netlink, with as little as possible bookkeeping costs.
+   !! After a sequence of calls to this subroutine, the network_data must be
+   !! updated by calling setnodadm().
+   subroutine connectdbfast(k1,k2,lnu)
+   use network_data
+   implicit none
+   integer, intent(in   ) :: k1  !< Index of first netnode (must exist already).
+   integer, intent(in   ) :: k2  !< Index of second netnode (must exist already).
+   integer, intent(  out) :: lnu !< Result new netlink number (will be placed at end numl+1 of link table).
+
+      if (k1 == k2) return
+
+      numl = numl+1
+      if (numl >= lmax) then
+         call increasenetw(numk,numl)
+      endif
+      lnu = numl
+            
+      call addlinktonodes(k1,k2,lnu)
+      lc(lnu) = 1
+
+   end subroutine connectdbfast
+
    SUBROUTINE ADDLINKTONODES(KL,KR,LNU)
    use network_data
    implicit none
@@ -2235,6 +2268,81 @@
       ENDIF
    ENDDO
    END SUBROUTINE INCELLS
+
+   
+   subroutine incells_kdtree(xa, ya, kin, treeinst, searchradiussq)
+   !use m_netw
+   use network_data
+   use geometry_module, only: pinpok
+   use m_missing, only : jins, dmiss
+   use m_sferic, only: jsferic
+   use kdtree2Factory
+   implicit none
+   double precision,      intent(in   ) :: xa             !< Input/query point x-coordinate
+   double precision,      intent(in   ) :: ya             !< Input/query point y-coordinate
+   integer,               intent(  out) :: kin            !< netcell index found (0 when not found)
+   type(kdtree_instance), intent(in   ) :: treeinst       !< k-d tree for searching netcell mass centers
+   double precision,      intent(in   ) :: searchradiussq !< Squared search radius for k-d tree searching
+
+   integer :: nCellsInSearchRadius
+   integer :: ir
+
+   kin = 0 ! Reset cell finder
+ 
+   call make_queryvector_kdtree(treeinst, Xa, Ya, jsferic)
+   nCellsInSearchRadius = kdtree2_r_count(treeinst%tree, treeinst%qv, searchradiussq)
+
+   if (nCellsInSearchRadius == 0) return
+   !reallocate if necessary
+   call realloc_results_kdtree(treeinst, nCellsInSearchRadius)
+   !find nearest cells
+   call kdtree2_n_nearest(treeinst%tree,treeinst%qv,nCellsInSearchRadius,treeinst%results)
+
+   do ir = 1, nCellsInSearchRadius
+      kin = treeinst%results(ir)%idx
+      if (kin <= 0) cycle
+
+      if (is_in_netcell(xa, ya, kin)) then
+         ! Cell found, exit
+         exit
+      end if
+   end do
+   end subroutine incells_kdtree
+
+
+   !> Checks whether a given point lies inside one particular given 2D netcell.
+   !!
+   !! @see incells for the looped/search variant, which searches all netcells.
+   function is_in_netcell(x, y, k)
+   use network_data, only: nump, netcell, xk, yk
+   use geometry_module, only: pinpok
+   use m_missing, only : jins, dmiss
+   implicit none
+   double precision, intent(in   ) :: x !< Query point x coordinate
+   double precision, intent(in   ) :: y !< Query point y coordinate
+   integer,          intent(in   ) :: k !< Netcell index to check
+   logical                         :: is_in_netcell
+
+   integer :: nn, k1, n, in
+   double precision :: xh(6), yh(6)
+
+   is_in_netcell = .false.
+   
+   if (k <= 0 .or. k >= nump) then
+      return
+   end if
+
+   nn = netcell(k)%n
+   xh = dmiss
+   yh = dmiss
+   do n = 1,nn
+      k1 = netcell(k)%nod(n)
+      xh(n) = xk(k1) ; yh(n) = yk(k1)
+   enddo
+   call pinpok(x, y , nn, xh, yh, in, jins, dmiss)
+   
+   is_in_netcell = (in == 1)
+   end function is_in_netcell
 
    !> sort links in nod%lin counterclockwise (copy-paste from setnodadm)
    subroutine sort_links_ccw(k,maxlin,linnrs,arglin,inn)
@@ -2503,6 +2611,87 @@
    dist = dismin
    END SUBROUTINE CLOSETO1Dnetnode
 
+
+   SUBROUTINE CLOSETO1Dnetnode_kdtree(XP1,YP1,N1,dist, treeinst, searchradiussq, k1d, oneDMask) !
+
+   use network_data
+   use geometry_module, only: dbdistance
+   use m_sferic
+   use m_missing
+   use kdtree2Factory
+   use Timers
+
+   implicit none
+   double precision,      intent(in   ) :: XP1, YP1 !< Input/query point coordinates
+   double precision,      intent(  out) :: dist     !< Distance between query point and the 1D point found
+   integer         ,      intent(  out) :: n1       !< 1D point found
+   type(kdtree_instance), intent(in   ) :: treeinst !< k-d tree for searching 1D net nodes
+   double precision,      intent(in   ) :: searchradiussq !< Squared search radius for k-d tree searching
+   integer,               intent(in   ) :: k1d(:)   !< Mapping table from purely 1D net nodes to full set of netnodenumbers (1:numk1d) ==> (1:numk)
+   integer, optional,     intent(in   ) :: oneDMask(:)
+
+
+   double precision :: dismin
+   integer          :: ja, k, k1, k1ClientIndex
+   double precision :: dis
+   logical          :: validOneDMask
+   integer, save :: timerhandle(2) = 0
+   
+   integer :: nNodesInSearchRadius
+   integer :: ir
+
+   validOneDMask = .false.
+   if(present(oneDMask)) then
+      if(size(oneDMask,1).gt.0) then
+         validOneDMask = .true.
+      endif
+   endif
+   
+
+   if (timon) call timstrt('closeto1dnetnode_kdtree: treeops', timerhandle(1))
+   N1 = 0
+   DISMIN = 9E+33
+   call make_queryvector_kdtree(treeinst, xp1, yp1, jsferic)
+   nNodesInSearchRadius = kdtree2_r_count(treeinst%tree, treeinst%qv, searchradiussq)
+
+   if ( nNodesInSearchRadius == 0 ) then
+      if (timon) call timstop(timerhandle(1))
+      return
+   end if
+   
+   !reallocate if necessary
+   call realloc_results_kdtree(treeinst, nNodesInSearchRadius)
+   !find nearest cells
+   call kdtree2_n_nearest(treeinst%tree,treeinst%qv,nNodesInSearchRadius,treeinst%results)
+   if (timon) call timstop(timerhandle(1))
+   if (timon) call timstrt('closeto1dnetnode_kdtree: loop', timerhandle(2))
+
+   k = 0 ! Reset node finder
+   do ir = 1, nNodesInSearchRadius
+      k = treeinst%results(ir)%idx
+      if (k <= 0) cycle
+      k1 = k1d(k)
+
+      if (validOneDMask) then  
+         k1ClientIndex = mesh1dInternalToClientMapping(k1)
+         if (oneDMask(k1ClientIndex) == 0) then !! Fortran does not support logical and
+            cycle
+         endif
+         if (oneDMask(k1ClientIndex).eq.1) then 
+            dis =  dbdistance(XP1,YP1,Xk(K1),Yk(K1),jsferic, jasfer3D, dmiss)    
+         endif
+      else
+         dis = dbdistance(XP1,YP1,Xk(K1),Yk(K1),jsferic, jasfer3D, dmiss)
+      endif
+      if (dis < dismin) then
+         n1 = k1
+         dismin = dis
+      endif
+   end do
+   if (timon) call timstop(timerhandle(2))
+   dist = dismin
+   END SUBROUTINE CLOSETO1Dnetnode_kdtree
+
    !-----------------------------------------------------------------!
    ! rest.f90
    !-----------------------------------------------------------------!
@@ -2626,6 +2815,8 @@
    use m_missing, only:  dmiss, dxymis, jadelnetlinktyp, jins
    use geometry_module, only: dbdistance, normalout, dbpinpol
    use m_sferic, only: jsferic, jasfer3D  
+   use kdtree2Factory
+   use Timers
   
    implicit none
 
@@ -2641,6 +2832,18 @@
    integer                                :: insidePolygons, Lfound, k1ClientIndex, k2ClientIndex 
    integer                                :: inNet_
    logical                                :: validOneDMask
+   integer :: ifil
+   integer :: timerhandle(6)
+   type(kdtree_instance) :: treeinstcells
+   double precision :: searchradiussq
+
+   integer :: jakdtree = 1
+
+   timerhandle = 0
+
+   call init_gridoperations()
+
+   if (timon) call timstrt('make1D2Dinternalnetlinks', timerhandle(1))
    
    validOneDMask = .false.
    if(present(oneDMask)) then
@@ -2658,7 +2861,21 @@
 
    i = size(xk) ; deallocate(kc) ; allocate(kc(i))
    call savenet()
+
+   if (timon) call timstrt('findcells', timerhandle(2))
    call findcells(0)
+   if (timon) call timstop(timerhandle(2))
+
+   if (timon) call timstrt('make k-d tree', timerhandle(3))
+   if (jakdtree == 1) then
+      ierr = constructNetcellKdTree(treeinstcells, searchradiussq)
+      searchradiussq = 1.1d0 * searchradiussq**2
+      if (ierr /= 0) then
+         ! Fall back to without k-d tree
+         jakdtree = 0
+      end if
+   end if
+   if (timon) call timstop(timerhandle(3))
    
    if(allocated(connectionIndexes)) then
       deallocate(connectionIndexes)
@@ -2666,6 +2883,8 @@
    allocate(connectionIndexes(2,nump))
    connectionIndexes = 0
    numValidLinks = 0
+
+   if (timon) call timstrt('mask 1D nodes', timerhandle(6))
 
    KC = 2
    do L = 1,NUML  ! FLAG TO 1 ANY NODE TOUCHED BY SOMETHING 1D
@@ -2709,6 +2928,7 @@
           endif
       endif
    enddo
+   if (timon) call timstop(timerhandle(6))
 
    if (jadelnetlinktyp .ne. 0) then
       kn3typ = jadelnetlinktyp
@@ -2724,31 +2944,46 @@
 
       if (kc(k) == 1) then  
      
-         ! Option for considering only 1d nodes inside 2d net (inNet flag)
-         if (inNet_ == 1) then
-            nc1 = 0
-            call incells(xk(k), yk(k), nc1)
-            if (nc1 .eq. 0) cycle
-         endif
-
-         IF (allocated(KC) ) then 
-            if ( KC(K) == 1) THEN
                if ( present(xplLinks) .and. present(yplLinks) .and. present(zplLinks)) then
                    insidePolygons = - 1 
                    call dbpinpol(XK(K), YK(K), insidePolygons, dmiss, jins, size(xplLinks), xplLinks, yplLinks, zplLinks) 
                    if (insidePolygons .ne. 1) cycle
                endif
+
+         nc1 = 0
+         if (jakdtree == 1) then
+
+            if (timon) call timstrt('find cell k-d tree', timerhandle(4))
+            call incells_kdtree(xk(k), yk(k), nc1, treeinstcells, searchradiussq)
+            if (timon) call timstop(timerhandle(4))
+         else ! nokdtree
+            if (timon) call timstrt('find cell regular', timerhandle(4))
+            call incells(xk(k), yk(k), nc1) ! The old looped variant (pre-kdtree)
+            if (timon) call timstop(timerhandle(4))
             endif   
-            NC1 = 0
-            CALL INCELLS(XK(K), YK(K), NC1)
-            IF (NC1 > 1) THEN
+
+         ! Option for considering only 1d nodes inside 2d net (inNet flag)
+         if (inNet_ == 1) then
+            if (nc1 .eq. 0) cycle
+         endif
+
+         if (timon) call timstrt('create 1d2d link', timerhandle(5))
+!         IF (allocated(KC) ) then 
+            IF (NC1 > 0) THEN
                CALL dSETNEWPOINT(XZ(NC1),YZ(NC1), NC2)
+               if (.true.) then
+                  ! Cheap link addition: avoid expensive connectdbn() (setnodadm() will cleanup later)
+                  call connectdbfast(NC2, K, L)
+               else
+                  ! Old link code:
                call connectdbn(NC2, K, L)
+               end if
                KN(3,L) = kn3typ
                numValidLinks = numValidLinks + 1
                connectionIndexes(1,numValidLinks) = NC1 !2d
                connectionIndexes(2,numValidLinks) = K   !1d
             ELSE
+               ! Note: Code below has not been improved with k-d tree yet (CROSSED2d_BNDCELL, CROSSEDanother1Dlink)
                DO KK = 1, min(2, NMK(K))
                   L  = NOD(K)%LIN(KK)
                   KK2(KK) = KN(1,L) + KN(2,L) - K
@@ -2798,14 +3033,23 @@
 
             ENDIF
 
+         ! ENDIF
+         if (timon) call timstop(timerhandle(5))
+
          ENDIF
 
-      ENDIF
 
    ENDDO
 
    ! set network status
    netstat = NETSTAT_CELLS_DIRTY
+
+999 continue
+   call delete_kdtree2(treeinstcells)
+
+   if (timon) call timstop(timerhandle(1))
+
+   if (timon) call timdump ('timers_make1D2Dinternalnetlinks.txt', .true.)
 
    end function make1D2Dinternalnetlinks
    
@@ -2920,6 +3164,9 @@
    use network_data
    use m_cell_geometry
    use m_samples
+   use m_sferic
+   use kdtree2Factory
+   use Timers
 
    implicit none
 
@@ -2930,6 +3177,22 @@
    integer                                 :: n,k,n1,k1,l, ierr
    double precision                        :: dist
    logical                                 :: validOneDMask
+
+   integer :: timerhandle(5)
+   type(kdtree_instance) :: treeinstcells
+   type(kdtree_instance) :: treeinst1d
+   double precision :: searchradiussq, searchradius1dsq
+   integer, allocatable :: k1d(:)
+
+   integer :: isearch
+   integer, parameter :: MAXSEARCHIT1D = 10 !< Max number of repeated 1D searches with growing search radius
+   integer :: jakdtree = 1
+   
+   timerhandle = 0
+
+   call init_gridoperations()
+
+   if (timon) call timstrt('make1D2Dstreetinletpipes', timerhandle(1))
    
    validOneDMask = .false.
    if(present(oneDMask)) then
@@ -2939,7 +3202,34 @@
    endif
    ierr = -1
 
+   if (timon) call timstrt('findcells', timerhandle(2))
+
    call findcells(100)        ! include folded cells
+   if (timon) call timstop(timerhandle(2))
+   if (timon) call timstrt('make k-d tree', timerhandle(3))
+   if (jakdtree == 1) then
+      ierr = constructNetcellKdTree(treeinstcells, searchradiussq)
+      searchradiussq = 1.1d0 * searchradiussq**2
+      if (ierr /= 0) then
+         ! Fall back to without k-d tree
+         jakdtree = 0
+      end if
+
+      
+      ierr = constructNetnode1DKdTree(treeinst1d, searchradius1dsq, k1d)
+      if (ierr /= 0) then
+         if (k1d(1) == 0) then
+            ! No 1D nodes at all, no 1D2D links can be generated at all.
+            goto 999
+         else
+            ! Fall back to without k-d tree
+            jakdtree = 0
+         end if
+      else
+         searchradius1dsq = 3d0 * searchradius1dsq**2 ! safety factor
+      end if
+   end if
+   if (timon) call timstop(timerhandle(3))
 
    if(allocated(connectionIndexes)) then
       deallocate(connectionIndexes)
@@ -2956,27 +3246,178 @@
    endif
 
    do n  = 1,ns
-      call incells(Xs(n),Ys(n),K)
+      if (jakdtree == 1) then
+         if (timon) call timstrt('find cell k-d tree', timerhandle(4))
+         call incells_kdtree(xs(n), ys(n), k, treeinstcells, searchradiussq)
+         if (timon) call timstop(timerhandle(4))
+
+      else ! nokdtree
+         if (timon) call timstrt('find cell regular', timerhandle(4))
+         call incells(Xs(n),Ys(n),K) ! The old looped variant (pre-kdtree)
+         if (timon) call timstop(timerhandle(4))
+      end if
+
+      call timstrt('create 1d2d link', timerhandle(5))
       if (k > 0) then
-         if(validOneDMask) then
+         if (jakdtree == 1) then
+            do isearch=0,MAXSEARCHIT1D-1
+               if(validOneDMask) then
+                  call CLOSETO1Dnetnode_kdtree(xzw(k), yzw(k), n1, dist, treeinst1d, 2**isearch * searchradius1dsq, k1d, oneDMask)
+               else
+                  call CLOSETO1Dnetnode_kdtree(xzw(k), yzw(k), n1, dist, treeinst1d, 2**isearch * searchradius1dsq, k1d)
+               end if
+               if (n1 > 0) then
+                  exit
+               else
+                  ! Retry with 2x bigger search radius
+                  cycle
+               end if
+            end do
+         else
+            if(validOneDMask) then
             call CLOSETO1Dnetnode(xzw(k), yzw(k), n1, dist, oneDMask)
          else
             call CLOSETO1Dnetnode(xzw(k), yzw(k), n1, dist)
          endif
-         if (n1.ne.0) then
+         endif
+         if (n1 /= 0) then
             call dsetnewpoint(xzw(k),yzw(k),k1)
+            if (.true.) then
+               ! Cheap link addition: avoid expensive connectdbn() (setnodadm() will cleanup later)
+               call connectdbfast(k1,n1,L)
+            else
+               ! Old link code:
             call connectdbn(k1,n1,l)
+            end if
+
             kn(3,L) = 5
             numValidLinks = numValidLinks + 1
             connectionIndexes(1,numValidLinks) = k   !2d
             connectionIndexes(2,numValidLinks) = n1  !1d
          endif
       endif
+      if (timon) call timstop(timerhandle(5))
    enddo
    
    ierr = 0
+
+999 continue
+   call delete_kdtree2(treeinstcells)
+   call delete_kdtree2(treeinst1d)
+
+   if (timon) call timstop(timerhandle(1))
+
+   if (timon) call timdump ('timers_make1D2Dstreetinletpipes.txt', .true.)
    
    end subroutine make1D2Dstreetinletpipes
+
+
+   !> Construct a searchable k-d tree instance for all current net cells,
+   !! and a recommended maximum search radius.
+   !! The representative mass center coordinates of the net cells will be used.
+   function constructNetcellKdTree(treeinst, maxsearchradius) result(ierr)
+   use kdtree2Factory
+   use network_data
+   use m_sferic, only: jsferic, jasfer3D
+   use m_missing, only: dmiss
+   use geometry_module, only: dbdistance
+   implicit none
+
+   type(kdtree_instance), intent(inout) :: treeinst        !< k-d tree instance
+   double precision,      intent(inout) :: maxsearchradius !< Maximum recommended search radius based on largest distance from any cell corner to its mass center.
+   integer                              :: ierr     !< Error status (0 if successful)
+
+   integer :: i, numnetcells, k
+
+   ierr = 0
+
+   numnetcells = size(xzw(:))
+   if (numnetcells>0) then
+      call build_kdtree(treeinst, size(xzw(:)), xzw(:), yzw(:), ierr, jsferic, dmiss)
+   else
+      return
+   endif
+   
+   maxsearchradius = 0d0
+   do i=1,numnetcells
+      do k=1,netcell(i)%N
+         maxsearchradius = max(maxsearchradius, dbdistance(xzw(i), yzw(i), xk(netcell(i)%nod(k)), yk(netcell(i)%nod(k)), jsferic, jasfer3D, dmiss))
+      end do
+   end do
+
+   end function constructNetcellKdTree
+
+   !> Construct a searchable k-d tree instance for all current 1D net nodes,
+   !! and a recommended maximum search radius.
+   function constructNetnode1DKdTree(treeinst, maxsearchradius, k1d) result(ierr)
+   use kdtree2Factory
+   use network_data
+   use m_sferic, only: jsferic, jasfer3D
+   use m_missing, only: dmiss
+   use geometry_module, only: dbdistance
+   implicit none
+
+   type(kdtree_instance), intent(inout) :: treeinst        !< k-d tree instance
+   double precision,      intent(inout) :: maxsearchradius !< Maximum recommended search radius based on average 1d link length.
+   integer, allocatable,  intent(inout) :: k1d(:)          !< Mapping table from purely 1D net nodes to full set of netnodenumbers (1:numk1d) ==> (1:numk)
+   
+   integer                              :: ierr     !< Error status (0 if successful)
+
+   integer          :: k, k1, k2, L!, k1ClientIndex, k2ClientIndex
+   double precision :: dis,sumdis
+
+   ! logical                       :: validOneDMask
+
+   double precision, allocatable :: xk1d(:), yk1d(:)
+   integer, allocatable :: kcloc(:)
+   integer :: numk1d, numl1dregular
+
+
+   ierr = 0
+
+   ! TODO: consider having the oneDMask here already
+
+   allocate(kcloc(numk), stat = ierr); kcloc = 0
+   allocate(k1d(numk), stat = ierr); k1d = 0
+   numk1d = 0
+   numl1dregular = 0
+
+   sumdis = 0d0
+   DO L = 1,numl
+      IF (kn(3,L) == 1 .or. kn(3,L) == 6) then !  .or. kn(3,L) == 4) THEN
+         numl1dregular = numl1dregular + 1
+         K1 = kn(1,L) ; K2 = kn(2,L)         
+         if (kcloc(k1) == 0) then
+            numk1d = numk1d+1
+            k1d(numk1d) = k1
+            kcloc(k1) = numk1d ! Store 1D netnode number
+         end if
+         if (kcloc(k2) == 0) then
+            numk1d = numk1d+1
+            k1d(numk1d) = k2
+            kcloc(k2) = numk1d ! Store 1D netnode number
+         end if
+         dis = dbdistance(xk(k1), yk(k1), xk(k2), yk(k2),jsferic, jasfer3D, dmiss)
+         sumdis = sumdis + dis
+      end if
+   enddo
+   if (numk1d <= 0) then
+      ierr = 1
+      return
+   end if
+
+   ! Make the tree
+   allocate(xk1d(numk1d), yk1d(numk1d), stat = ierr); xk1d = dmiss; yk1d = dmiss
+   do k=1,numk1d
+      xk1d(k) = xk(k1d(k))
+      yk1d(k) = yk(k1d(k))
+   end do
+   call build_kdtree(treeinst, numk1d, xk1d(:), yk1d(:), ierr, jsferic, dmiss)
+
+   ! Suggested search radius
+   maxsearchradius = sumdis / numl1dregular ! Average distance
+
+   end function constructNetnode1DKdTree
 
    
    !> Generates 1D netlinks and 1D2D connections for a (multiple) new long culvert(s).

@@ -71,6 +71,8 @@ character(len=255)   :: filename_fou_out
  ! TODO: UNST-3415: investigate if this statement can be moved to step_reduce.
  hs = s1 - bl
 
+ ! The subroutine below is called in every time step.
+ ! TODO: consider to treat it as the cross section, that the mpi reduction is made at his-output time step.
  call structure_parameters()
 
  dnt    = dnt + 1

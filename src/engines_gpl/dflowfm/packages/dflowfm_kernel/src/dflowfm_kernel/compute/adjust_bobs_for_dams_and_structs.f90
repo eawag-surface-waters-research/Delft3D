@@ -90,6 +90,26 @@
            bob(2,L) = max(zcdamn, bob0(2, L))
            iadv(L) = 22
            call switchiadvnearlink(L)
+           if (pstru%type== ST_CULVERT) then
+              ! Culverts remain on the given invert level. The Bobs and bed level will be changed in case the invert level 
+              ! is below the bed level of the channel.
+              if (pstru%culvert%leftlevel < bob0(1,L)) then
+                 write(msgbuf,'(a,f8.2,a,f8.2,a)') 'The bedlevel of the channel at the left side for '''//trim(pstru%id)//''' is changed from ', &
+                           bob0(1,L), ' into ', pstru%culvert%leftlevel, '.'
+                 call warn_flush()
+                 bob0(1,L) = pstru%culvert%leftlevel
+                 bob (1,L) = pstru%culvert%leftlevel
+                 bl(k1) = min(bl(k1), bob0(1,L))
+              endif
+              if (pstru%culvert%rightlevel < bob0(2,L)) then
+                 write(msgbuf,'(a,f8.2,a,f8.2,a)') 'The bedlevel of the channel at the left side for '''//trim(pstru%id)//''' is changed from ', &
+                           bob0(2,L), ' into ', pstru%culvert%rightlevel, '.'
+                 call warn_flush()
+                 bob0(2,L) = pstru%culvert%rightlevel
+                 bob (2,L) = pstru%culvert%rightlevel
+                 bl(k2) = min(bl(k2), bob0(2,L))
+              endif
+           endif
         enddo
 
     enddo

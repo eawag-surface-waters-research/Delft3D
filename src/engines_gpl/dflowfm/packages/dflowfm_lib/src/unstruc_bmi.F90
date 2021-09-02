@@ -1250,11 +1250,14 @@ subroutine set_var(c_var_name, xptr) bind(C, name="set_var")
    !DEC$ ATTRIBUTES DLLEXPORT :: set_var
    ! Return a pointer to the variable
    use unstruc_model
+   use m_partitioninfo, only: jampi
    use MessageHandling
    use iso_c_binding, only: c_double, c_char, c_loc, c_f_pointer
 
    character(kind=c_char), intent(in) :: c_var_name(*)
    type(c_ptr), value, intent(in) :: xptr
+
+   integer, external :: init_openmp
 
    character(kind=c_char), dimension(:), pointer :: x_0d_char_ptr => null()
    real(c_double), pointer :: x_0d_double_ptr
@@ -1275,7 +1278,7 @@ subroutine set_var(c_var_name, xptr) bind(C, name="set_var")
    character(kind=c_char),dimension(:), pointer :: c_value => null()
    character(len=:), allocatable                :: levels
    character(len=10)                            :: threadsString = ' '
-   integer :: i, k, kb, kt, ipos, n
+   integer :: i, k, kb, kt, ipos, n, ierr
 
    ! Store the name
    var_name = char_array_to_string(c_var_name, strlen(c_var_name))
@@ -1289,11 +1292,15 @@ subroutine set_var(c_var_name, xptr) bind(C, name="set_var")
       call c_f_pointer(xptr, c_value,[MAXSTRLEN])
       if (associated(c_value)) then
          threadsString = ' '
-         do i=1,MAXSTRLEN
+         do i=1,min(len(threadsString), MAXSTRLEN)
             if (c_value(i) == c_null_char) exit
             threadsString(i:i) = c_value(i)
          enddo
-         read(threadsString,'(I)') md_numthreads
+         read(threadsString,'(I)', iostat = ierr) md_numthreads
+         if (ierr == 0) then
+            ! Activate the new OpenMP threads setting
+            ierr = init_openmp(md_numthreads, jampi)
+         end if
       endif
       return
    case("zk")

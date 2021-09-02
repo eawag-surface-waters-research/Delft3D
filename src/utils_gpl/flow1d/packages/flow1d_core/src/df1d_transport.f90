@@ -168,7 +168,7 @@ module m_df1d_transport
          
          pmp => trans%mp(1,ibr)
          pmp%nodeid        = pbr%FromNode%id
-         pmp%gridPoint     = pbr%FromNode%gridNumber     
+         pmp%gridPoint     = pbr%FromNode%gridNumber      ! TODO: Not safe in parallel models (check gridpointsseq as introduced in UNST-5013)
          pmp%branchIndex   = ibr       
          pmp%dis_loc       = pbr%lin(1)   
          pmp%dis_dir       = 1    

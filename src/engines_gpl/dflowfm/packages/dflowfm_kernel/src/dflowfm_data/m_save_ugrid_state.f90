@@ -60,7 +60,10 @@ contains
       mesh2dname    = 'mesh2d'
       contactname   = 'contacts'
       numMesh1dBeforeMerging = 0
-   end subroutine default_save_ugrid_state
+      if (allocated(contactnetlinks)) deallocate(contactnetlinks)
+      contactnlinks = 0
+      call dealloc(hashlist_contactids)
+  end subroutine default_save_ugrid_state
 
    !> Resets only waves variables intended for a restart of flow simulation.
    !! Upon loading of new model/MDU, call default_save_ugrid_state() instead.
@@ -69,10 +72,7 @@ contains
       if (allocated(mesh1dNodeIds)) deallocate(mesh1dNodeIds)
       if (allocated(mesh1dUnmergedToMerged)) deallocate(mesh1dUnmergedToMerged)
       !if (allocated(mesh1dMergedToUnMerged)) deallocate(mesh1dMergedToUnMerged)
-
-      if (allocated(contactnetlinks)) deallocate(contactnetlinks)
-      contactnlinks = 0
-      call dealloc(hashlist_contactids)
+      
    end subroutine reset_save_ugrid_state
 
    end module m_save_ugrid_state

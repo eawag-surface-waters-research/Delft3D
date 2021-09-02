@@ -42,6 +42,9 @@ implicit none
 
 contains
 
+!> Reads a 1D model from a *.md1d ini file.
+!! This routine is still used for Morphology model with network in INI-File (Willem Ottevanger)
+!! This subroutine does not support parallel models.
 subroutine load_network_from_flow1d(filenames, found_1d_network)
    use m_flow1d_reader
    use m_flowgeom
@@ -60,8 +63,6 @@ subroutine load_network_from_flow1d(filenames, found_1d_network)
    double precision, dimension(2) :: tempbob
    character(len=255) :: filename
    integer :: threshold_abort_current
-
-   ! This routine is still used for Morphology model with network in INI-File (Willem Ottevanger)
 
    filename = filenames%onednetwork
 
@@ -106,7 +107,7 @@ subroutine load_network_from_flow1d(filenames, found_1d_network)
 
       ! first step add coordinates and bed levels to nodes
       ngrd = pbr%gridPointsCount
-      pbr%grd(1) = pbr%FromNode%gridNumber
+      pbr%grd(1) = pbr%FromNode%gridNumber ! TODO: Not safe in parallel models (check gridpointsseq as introduced in UNST-5013)
       do k = 2, ngrd-1
          numk = numk+1
          pbr%grd(k) = numk

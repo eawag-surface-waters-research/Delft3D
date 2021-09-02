@@ -4360,11 +4360,11 @@ end subroutine partition_make_globalnumbers
       
       if ( jaoverlap.eq.0 ) then 
          do i=1,nghostlist_sall(ndomains-1)
-            kfs(ighostlist_sall(i)) = 0
+            kfs(ighostlist_sall(i)) = -abs(kfs(ighostlist_sall(i))) !0
          end do
       else 
          do i=1,nghostlist_snonoverlap(ndomains-1)
-            kfs(ighostlist_snonoverlap(i)) = 0
+            kfs(ighostlist_snonoverlap(i)) = -abs(kfs(ighostlist_snonoverlap(i))) ! 0
          end do
       end if
       
@@ -4377,7 +4377,7 @@ end subroutine partition_make_globalnumbers
                cycle klp
             end if
          end do
-         if ( kfs(k).ne.0 ) then
+         if ( kfs(k) > 0 ) then
             numdots = numdots+1
             call reallocdots(numdots)
             xdots(numdots) = xz(k)
@@ -6198,6 +6198,8 @@ end subroutine gatherv_double_data_mpi_dif
                if ( idomain(ke(L)).eq.other_domain ) then
                   num = num+1
                   if ( kce(L).ne.kcerec(num) ) then
+!                     write(str, "('my_rank: ', I0, ' setting kce(',I0,') = ', I0, ' (was: ',I0,'). And ke(',I0,') = ', I0, ', with idomain(ke(L))=',I0,'.')") my_rank, L, kcerec(num), kce(L), L, ke(L), idomain(ke(L))
+!                     call mess(LEVEL_INFO, trim(str))
                      numdisabled = numdisabled+1
                      kce(L) = kcerec(num)
                   end if

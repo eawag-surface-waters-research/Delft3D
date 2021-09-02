@@ -177,7 +177,7 @@
       timon   = .false.
       dlevel  =   0
       maxlvl  =   0
-      if (nohmax ==0) then
+      if (nohmax ==0 .and. .not. associated(ntimcal)) then
          nohmax = handinc
          allocate ( ntimcal(     nohmax) )
          allocate ( level  (     nohmax) )

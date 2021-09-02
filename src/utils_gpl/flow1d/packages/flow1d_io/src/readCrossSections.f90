@@ -191,9 +191,9 @@ module m_readCrossSections
             allocate(pCrs%frictionSectionFrom(pCrs%tabDef%frictionSectionsCount))    !<
             allocate(pCrs%frictionSectionTo(pCrs%tabDef%frictionSectionsCount))      !<
             allocate(pCrs%frictionTypePos(pCrs%tabDef%frictionSectionsCount))        !< Friction type for positive flow direction
-            allocate(pCrs%frictionValuePos(pCrs%tabDef%frictionSectionsCount))       !< Friction value for positive flow direction
             allocate(pCrs%frictionTypeNeg(pCrs%tabDef%frictionSectionsCount))        !< Friction type for negative flow direction
-            allocate(pCrs%frictionValueNeg(pCrs%tabDef%frictionSectionsCount))       !< Friction value for negative flow direction
+            call realloc(pCrs%frictionValuePos, pCrs%tabDef%frictionSectionsCount, fill=-999d0) !< Friction value for positive flow direction
+            call realloc(pCrs%frictionValueNeg, pCrs%tabDef%frictionSectionsCount, fill=-999d0) !< Friction value for negative flow direction
             call realloc(pCrs%tabdef%frictionSectionFrom, pCrs%tabDef%frictionSectionsCount)
             call realloc(pCrs%tabdef%frictionSectionto, pCrs%tabDef%frictionSectionsCount)
 

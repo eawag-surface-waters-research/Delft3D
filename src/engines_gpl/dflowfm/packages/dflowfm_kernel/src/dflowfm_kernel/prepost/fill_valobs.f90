@@ -33,6 +33,7 @@
 ! fill observation stations array
 subroutine fill_valobs()
    use m_flow
+   use m_flowtimes
    use m_transport
    use m_fm_wq_processes, only: kbx, wqbot, waqoutputs
    use m_flowgeom
@@ -41,6 +42,7 @@ subroutine fill_valobs()
    use m_waves, only: hwav, twav, phiwav, rlabda, uorb, ustokes
    use m_xbeach_data, only: R
    use m_ship
+   use Timers
 
    implicit none
 
@@ -54,6 +56,8 @@ subroutine fill_valobs()
 
    kmx_const = kmx
    nlyrs     = 0
+
+   if (timon) call timstrt ( "fill_valobs", handle_extra(55))
 
    if (jaeulervel==1 .and. jawave > 0) then
       call getucxucyeulmag(ndkx, workx, worky, ucmag, jaeulervel, jahisvelocity)
@@ -523,5 +527,6 @@ subroutine fill_valobs()
 
    if (allocated(wa)) deallocate(wa)
 
+   if (timon) call timstop (handle_extra(55))
    return
    end subroutine fill_valobs

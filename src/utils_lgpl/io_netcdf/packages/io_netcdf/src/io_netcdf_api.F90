@@ -1396,13 +1396,15 @@ function ionc_def_mesh_contact_dll(ioncid, contactsmesh, c_contactmeshname, ncon
 
 end function ionc_def_mesh_contact_dll 
 
-function ionc_get_contacts_count_dll(ioncid, contactsmesh, ncontacts) result(ierr) bind(C, name="ionc_get_contacts_count")
+!> Get the number of contact links in a specified meshcontact set.
+function ionc_get_contacts_count_dll(ioncid, contactid, ncontacts) result(ierr) bind(C, name="ionc_get_contacts_count")
 !DEC$ ATTRIBUTES DLLEXPORT :: ionc_get_contacts_count_dll
-   integer, intent(in)                :: ioncid, contactsmesh
-   integer, intent(inout)             :: ncontacts
-   integer                            :: ierr
+   integer, intent(in   )             :: ioncid     !< The IONC data set id.
+   integer, intent(in   )             :: contactid  !< The contact id in the specified data set.
+   integer, intent(inout)             :: ncontacts  !< Number of contact links in the specified meshcontact set.
+   integer                            :: ierr       !< Result status (IONC_NOERR if successful).
    
-   ierr = ionc_get_contacts_count_ugrid(ioncid, contactsmesh, ncontacts) 
+   ierr = ionc_get_contacts_count_ugrid(ioncid, contactid, ncontacts) 
    
 end function ionc_get_contacts_count_dll
 

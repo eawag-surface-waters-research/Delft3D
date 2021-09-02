@@ -2065,6 +2065,8 @@ subroutine GetTabulatedSizes(dpt, crossDef, doFlow, area, width, maxwidth, perim
       width     = width     + w_section(isec)
       perimeter = perimeter + perim_sub(isec)
    enddo
+      
+   maxwidth = max(maxwidth, width)
  
    select case (calculationOption)
    case(CS_TYPE_PLUS)
@@ -2832,7 +2834,7 @@ double precision function getHighest1dLevelSingle(cross)
          getHighest1dLevelSingle = 1.5d0 * cross%tabdef%diameter + cross%bedlevel
       case (CS_YZ_PROF)
          levelsCount = cross%convtab1%nru
-         getHighest1dLevelSingle = cross%convtab1%water_depth(levelsCount) - cross%convtab1%bedlevel
+         getHighest1dLevelSingle = cross%convtab1%water_depth(levelsCount) + cross%bedlevel
       case default
          call SetMessage(LEVEL_ERROR, 'INTERNAL ERROR: Unknown type of cross-section in getHighest1dLevelSingle')
    end select

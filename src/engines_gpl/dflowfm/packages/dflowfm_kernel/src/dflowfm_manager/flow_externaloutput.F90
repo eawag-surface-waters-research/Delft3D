@@ -51,6 +51,7 @@
  use m_oned_functions, only: updateFreeboard, updateDepthOnGround, updateVolOnGround, updateTotalInflow1d2d, updateTotalInflowLat, updateS1Gradient
  use m_structures, only: structure_parameters_rst
  use m_monitoring_runupgauges
+ use Timers
 #ifdef _OPENMP
  use omp_lib
 #endif
@@ -93,6 +94,7 @@
       allocate ( ti_mpt(1), ti_mpt_rel(1) ) ; ti_mpt(1) = 0 ; ti_mpt_rel(1) = 0
    endif
 
+   call timstrt('call wrimap', handle_extra(77))
    if (ti_map > 0 .or. ti_mpt(1) > 0) then
      if (comparereal(tim, time_map, eps10) >= 0) then
         ! update for output, only for 1D
@@ -117,7 +119,20 @@
         end if
 
         if (jaeverydt == 0) then
-            call wrimap(tim)
+           if (jamapFlowAnalysis > 0) then
+              ! update the cumulative flow analysis parameters, and also compute the right CFL numbers
+              call updateFlowAnalysisParameters()
+           endif
+             
+           call wrimap(tim)
+           
+           if (jamapFlowAnalysis > 0) then
+              ! Reset the interval related flow analysis arrays
+              negativeDepths = 0
+              noiterations = 0
+              limitingTimestepEstimation = 0
+              flowCourantNumber = 0d0
+           endif
         endif
 !         if ( jatidep > 0 ) then
 !            call writidep(tim)
@@ -140,7 +155,9 @@
          endif
      endif
    endif
+   call timstop(handle_extra(77))
 
+    call timstrt('call wriclm', handle_extra(78))
     if (ti_classmap > 0) then
        if (comparereal(tim, time_classmap, eps10) >= 0) then
          call write_map_classes_ugrid(m_incids, tim)
@@ -157,6 +174,7 @@
          endif
        endif
     endif
+    call timstop(handle_extra(78))
 
    ! FM does not know whether the com-file for this time step will be used
    ! To be safe: always write the com-file at each user_timestep
@@ -172,6 +190,7 @@
       endif
    endif
 
+   call timstrt('call wrirst', handle_extra(76))
    if (ti_rst > 0) then
       if (comparereal(tim, time_rst, eps10) == 0) then
          ! Update structure parameters
@@ -190,6 +209,7 @@
          endif
       endif
    endif
+   call timstop(handle_extra(76))
 
   if (ti_waq > 0) then
       if (comparereal(tim, time_waq, eps10) == 0) then

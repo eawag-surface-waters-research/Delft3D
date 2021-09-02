@@ -112,6 +112,7 @@ public :: ionc_write_geom_ugrid
 public :: ionc_write_mesh_struct
 public :: ionc_write_map_ugrid
 public :: ionc_initialize
+public :: ionc_check_dim_on_a_mesh
 !network 1d functions
 public :: ionc_create_1d_network_ugrid
 public :: ionc_write_1d_network_nodes_ugrid
@@ -140,7 +141,10 @@ public :: ionc_def_mesh_contact_ugrid
 public :: ionc_get_contacts_count_ugrid
 public :: ionc_put_mesh_contact_ugrid
 public :: ionc_get_mesh_contact_ugrid
+public :: ionc_get_mesh_contact_links
 public :: ionc_get_contact_name
+public :: ionc_get_contactids
+public :: ionc_get_contact_id_from_contact_name_ugrid
 !clone functions
 public :: ionc_clone_mesh_definition_ugrid
 public :: ionc_clone_mesh_data_ugrid
@@ -176,6 +180,7 @@ public :: ionc_get_contact_id_ugrid
 public :: ionc_put_meshgeom
 public :: ionc_put_meshgeom_v1
 public :: ionc_get_contact_topo_count
+public :: ionc_get_var_total_count
 
 private
 
@@ -758,6 +763,9 @@ function ionc_get_meshgeom(ioncid, meshid, networkid, meshgeom, start_index, inc
       meshgeom         = meshgeom,&
       start_index      = ded_start_index,&
       netid            = datasets(ioncid)%ug_file%netids(networkid) )
+   else
+      ierr = IONC_ENOTAVAILABLE
+      goto 999
    endif
 
    ! Successful
@@ -1010,6 +1018,57 @@ function ionc_get_var_count(ioncid, meshid, iloctype, nvar) result(ierr)
 
 end function ionc_get_var_count
 
+!> Returns the number of variables that are available on the specified mesh.
+!! If meshtype = 0, then the specified mesh is a 1D or 2d mesh. If meshtype = 1, then it is a mesh contact.
+!! If jaids > 0, then also return the ids of these variables.
+function ionc_get_var_total_count(ioncid, meshid, meshtype, jaids, nvar, varids) result(ierr)
+   integer,             intent(in   ) :: ioncid   !< The IONC data set id.
+   integer,             intent(in   ) :: meshid   !< The mesh id or contact id in the specified data set.
+   integer,             intent(in   ) :: meshtype !< mesh (0) or mesh contact (1)
+   integer,             intent(in   ) :: jaids    !< Returns variable ids (1) or not (0)
+   integer,             intent(  out) :: nvar     !< Number of variables defined on the requested mesh or contact.
+   integer, optional,   intent(  out) :: varids(:)!< Array to store the variable ids in.
+   integer                            :: ierr     !< Result status, ionc_noerr if successful.
+
+   if (meshtype == 0) then ! A 1D or 2D mesh
+      ierr = ug_get_var_total_count(datasets(ioncid)%ncid, mids=datasets(ioncid)%ug_file%meshids(meshid), jaid=jaids, nvars=nvar, id_vars=varids)
+   else if (meshtype == 1) then ! A mesh contact
+      ierr = ug_get_var_total_count(datasets(ioncid)%ncid, cids=datasets(ioncid)%ug_file%contactids(meshid), jaid=jaids, nvars=nvar, id_vars=varids)
+   end if
+
+end function ionc_get_var_total_count
+
+!> Checks if the dimension is on a specified mesh, given the dimension id.
+function ionc_check_dim_on_a_mesh(ioncid, meshid, topodim, id) result(ja)
+   integer,             intent(in   ) :: ioncid    !< The IONC data set id.
+   integer,             intent(in   ) :: meshid    !< The mesh id in the specified data set.
+   integer,             intent(in   ) :: topodim   !< Topology dimention of the specified mesh
+   integer,             intent(in   ) :: id        !< Id of the dimension that to be checked if this dimension is on the specified mesh
+   integer                            :: ja        !< Result, 1 if it is true
+   integer :: i, idtmp
+   type(t_ug_mesh) :: meshids
+   type(t_ug_file) :: ug_file
+   ja = 0
+   ug_file = datasets(ioncid)%ug_file
+   meshids = ug_file%meshids(meshid)
+   do i = mdim_start+1, mdim_end-1
+      idtmp = meshids%dimids(i)
+      if (idtmp == id) then
+         ja = 1
+         exit
+      end if
+   end do
+   
+   if (ja == 0 .and. topodim == 1) then
+      do i = ntdim_start+1, ntdim_end-1
+         idtmp = ug_file%netids(meshid)%dimids(i)
+         if (idtmp == id) then
+            ja = 1
+            exit
+         end if
+      end do
+   end if
+end function ionc_check_dim_on_a_mesh
 
 !> Gets a list of variable IDs that are available in the specified dataset on the specified mesh.
 !! The location type allows to select on specific topological mesh locations
@@ -1984,13 +2043,15 @@ function ionc_write_mesh_1d_edge_nodes (ioncid, meshid, numEdge, mesh_1d_edge_no
     
 end function ionc_write_mesh_1d_edge_nodes
 
-function ionc_get_contacts_count_ugrid(ioncid, contactsmesh, ncontacts) result(ierr) 
+!> Get the number of contact links in a specified meshcontact set.
+function ionc_get_contacts_count_ugrid(ioncid, contactid, ncontacts) result(ierr) 
 
-   integer, intent(in)      :: ioncid, contactsmesh
-   integer, intent(inout)   :: ncontacts
-   integer                  :: ierr
+   integer, intent(in)      :: ioncid     !< The IONC data set id.
+   integer, intent(in   )   :: contactid  !< The contact id in the specified data set.
+   integer, intent(inout)   :: ncontacts  !< Number of contact links in the specified meshcontact set.
+   integer                  :: ierr       !< Result status (IONC_NOERR if successful).
    
-   ierr = ug_get_contacts_count(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%contactids(contactsmesh), ncontacts) 
+   ierr = ug_get_contacts_count(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%contactids(contactid), ncontacts) 
    
 end function ionc_get_contacts_count_ugrid
 
@@ -2015,6 +2076,24 @@ function ionc_get_mesh_contact_ugrid(ioncid, contactsmesh, mesh1indexes, mesh2in
    ierr = ug_get_mesh_contact(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%contactids(contactsmesh), mesh1indexes, mesh2indexes, contactsids, contactslongnames,contacttype, startIndex) 
 
 end function ionc_get_mesh_contact_ugrid
+
+
+!> Gets the index table of the links in a given meshcontact set.
+!! The index table is renumbered automatically when the given.
+!! desired startIndex is different from the startIndex in the file.
+!! The arrays should be allocated at the correct size already.
+function ionc_get_mesh_contact_links(ioncid, contactid, contactlinksfromto, contacttype, startIndex)  result(ierr) 
+   integer, intent(in   ) :: ioncid         !< NetCDF dataset id
+   integer, intent(in   ) :: contactid      !< Mesh contact topology set
+   integer, intent(inout) :: contactlinksfromto(:, :) !< (2,numcontactlinks) table with from-to indices
+   integer, intent(inout) :: contacttype(:) !< Contact type for each link
+   integer, intent(in   ) :: startIndex     !< Desired start index for the table.
+   integer                :: ierr           !< Result status (UG_NOERR if succesful)
+
+   ierr = ug_get_mesh_contact_links(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%contactids(contactid), contactlinksfromto, contacttype, startIndex) 
+
+end function ionc_get_mesh_contact_links
+
 
 !
 ! Cloning functions
@@ -2207,4 +2286,51 @@ function ionc_get_contact_name(ioncid, contactid, contactname) result(ierr)
    ierr = ug_get_contact_name(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%contactids(contactid), contactname)
 end function ionc_get_contact_name
 
+!> Gets contact id from the name of a mesh contact.
+function ionc_get_contact_id_from_contact_name_ugrid(ioncid, contactmeshname, contactid) result(ierr)
+
+   integer,          intent(in   )   :: ioncid          !< The IONC data set id.
+   character(len=*), intent(in   )   :: contactmeshname !< The given name of a mesh contact.
+   integer,          intent(inout)   :: contactid       !< The requested contact id.
+   integer                           :: ierr            !< Result status, ionc_noerr if successful.
+
+   ierr = ug_get_contact_id_from_meshcontactname(datasets(ioncid)%ncid, datasets(ioncid)%ug_file, contactmeshname, contactid)
+
+end function ionc_get_contact_id_from_contact_name_ugrid
+
+!> Returns the contactids struct contains dimension and variable ids
+!! for a given contactid in a given io_netcdf dataset.
+function ionc_get_contactids(ioncid, contactid, contactids) result(ierr)
+   integer,             intent(in)    :: ioncid        !< The IONC dataset id.
+   integer,             intent(in)    :: contactid     !< The id of the requested mesh contact in the dataset's subset of contact(s).
+   type(t_ug_contacts), intent(inout) :: contactids    !< The contactids set of dimension and variable ids for the requested contactid.
+   integer                            :: ierr          !< Result status, ionc_noerr if successful.
+
+   ierr = IONC_NOERR
+
+   if (ioncid <= 0 .or. ioncid > ndatasets) then
+      ierr = IONC_EBADID
+      goto 888
+   end if
+
+   if (.not. associated(datasets(ioncid)%ug_file)) then
+      ierr = IONC_ENOTAVAILABLE
+      goto 888
+   end if
+
+   if (contactid <= 0) then
+      ierr = IONC_EBADID
+      goto 888
+   end if
+
+   contactids = datasets(ioncid)%ug_file%contactids(contactid)
+
+   ! Success
+   return
+
+
+888 continue
+    ! Some error occurred
+
+end function ionc_get_contactids
 end module io_netcdf

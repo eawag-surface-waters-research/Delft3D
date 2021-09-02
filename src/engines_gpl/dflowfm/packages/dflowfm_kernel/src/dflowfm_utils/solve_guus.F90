@@ -682,7 +682,7 @@ endif
           nietnul = 0
           do m=L1row(ndn), L2row(ndn)   
              if (ccr(iarow(m)) .ne. 0) then
-                if (kfs(jrow(m)) .ne. 0) then 
+                if (kfs(jrow(m)) > 0) then 
                     nietnul = nietnul + 1
                 endif 
              endif 
@@ -2487,7 +2487,7 @@ integer :: mout, n, i, jj, j, ntot
        L  = kbndint(3,n) ! flowlink
        jj = Lv2(L)       ! row number in the system
        
-       if ( kfs(kb).ne.0 .or. kfs(ki).ne.1 ) then ! make sure kb is the boundary flownode
+       if ( kfs(kb) > 0 .or. kfs(ki).ne.1 ) then ! make sure kb is the boundary flownode
           call mess(LEVEL_ERROR, 'testsolver: kfs error')
        end if
           
@@ -2535,7 +2535,7 @@ integer :: mout, n, i, jj, j, ntot
           !L  = kbndint(3,n) ! flowlink
           jj = Lv2(L)       ! row number in the system
           
-          if ( kfs(kb).ne.0 .or. kfs(ki).ne.1 ) then ! make sure kb is the boundary flownode
+          if ( kfs(kb) > 0 .or. kfs(ki).ne.1 ) then ! make sure kb is the boundary flownode
              call mess(LEVEL_ERROR, 'testsolver: kfs error')
           end if
           !   

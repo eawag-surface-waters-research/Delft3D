@@ -1279,7 +1279,7 @@
    do inod = 1, network%nds%Count
       pnod => network%nds%node(inod)
       if (pnod%numberofconnections > 1) then
-         k3 = pnod%gridnumber
+         k3 = pnod%gridnumber ! TODO: Not safe in parallel models (check gridpointsseq as introduced in UNST-5013)
          do j=1,nd(k3)%lnx
             L = iabs(nd(k3)%ln(j))
             Ldir = sign(1,nd(k3)%ln(j))
@@ -1312,7 +1312,7 @@
       pnod => network%nds%node(inod)
       if (pnod%numberofconnections == 1) cycle
       if (pnod%nodeType == nt_LinkNode) then  ! connection node
-         k1 = pnod%gridnumber
+         k1 = pnod%gridnumber ! TODO: Not safe in parallel models (check gridpointsseq as introduced in UNST-5013)
          do j=1,nd(k1)%lnx
             L = iabs(nd(k1)%ln(j))
             Ldir = sign(1,nd(k1)%ln(j))
@@ -1349,7 +1349,7 @@
 
 
             ! loop over branches and determine redistribution of incoming sediment
-            k3 = pnod%gridnumber
+            k3 = pnod%gridnumber ! TODO: Not safe in parallel models (check gridpointsseq as introduced in UNST-5013)
             do j=1,nd(k3)%lnx
                L = iabs(nd(k3)%ln(j))
                Ldir = sign(1,nd(k3)%ln(j))

@@ -172,6 +172,15 @@
  double precision, allocatable         :: s1mini(:)   !< initial of s1m
  double precision, allocatable         :: a1m(:)      !< surface area pressurized nonlin minus part
 
+ integer, allocatable                  :: negativeDepths(:)                 !< Number of negative depths during output interval at nodes.
+ integer, allocatable                  :: negativeDepths_cum(:)             !< Cumulative number of negative depths at nodes.
+ integer, allocatable                  :: noIterations(:)                   !< Number of no iteration locations during output interval at nodes.
+ integer, allocatable                  :: noIterations_cum(:)               !< Cumulative number of no iteration locations at nodes.
+ integer, allocatable                  :: limitingTimestepEstimation(:)     !< Number of times during the output interval the conditions in a node is limiting the time step
+ integer, allocatable                  :: limitingTimestepEstimation_cum(:) !< Cumulative number of times the conditions in a node is limiting the time step.
+                                                                            !< Note: this doubles with variable numlimdt(:), which contains the same cumulative count, under a different MDU option.
+ double precision, allocatable         :: flowCourantNumber(:)              !< Courant number
+ 
 ! node related, dim = ndkx
 
  double precision, allocatable         :: volau   (:)   !< trial, au based cell volume (m3)
@@ -292,6 +301,7 @@
  double precision, allocatable     :: cflj  (:)   !< courant nr link j to downwind volume i (    ) = Dt*Qj/Vi
  double precision, allocatable     :: tetaj (:)   !< 1-1/sum(upwind incoming courants)      (    )
  double precision, allocatable, target     :: au    (:)   !< [m2] flow area     (m2)   at u point {"location": "edge", "shape": ["lnkx"]}
+ double precision, allocatable, target     :: au_nostrucs    (:)   !< [m2] flow area     (m2)   at u point {"location": "edge", "shape": ["lnkx"]}
  double precision, allocatable     :: ucxu  (:)   !< upwind link ucx (m/s)
  double precision, allocatable     :: ucyu  (:)   !< upwind link ucy (m/s)
  double precision, allocatable     :: u1Du  (:)   !< upwind 1D link velocity (m/s) (only relevant for Pure1D)

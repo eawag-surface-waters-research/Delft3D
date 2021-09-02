@@ -913,14 +913,6 @@ end if
  iresult = flow_initexternalforcings()               ! this is the general hook-up to wind and boundary conditions
  call timstop(handle_iniext)
 
-  ! Generate the volume tables for 1d nodes
-ihandle = 0
-call timstrt('makeVolumeTables', ihandle)
-if (useVolumeTables) then
-    call makeVolumeTables()
-endif
-call timstop(ihandle)
-
  ! from hereon, the processes are in sync
  if (jampi == 1) then
     ! globally reduce the error
@@ -1387,6 +1379,13 @@ call timstop(ihandle)
        endif
     enddo
  endif
+
+  ihandle = 0
+ call timstrt('makeVolumeTables', ihandle)
+ if (useVolumeTables) then
+     call makeVolumeTables()
+ endif
+ call timstop(ihandle)
 
  call volsur()          ! flowinit
  call a1vol1tot()

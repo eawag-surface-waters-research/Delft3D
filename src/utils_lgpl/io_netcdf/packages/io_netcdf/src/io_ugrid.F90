@@ -89,6 +89,7 @@ integer, parameter :: UG_ENOTATT               = -1018 !< Some attribute was not
 integer, parameter :: UG_ENOTDIM               = -1019 !< Some dimension was not found. Probably due to a native NF90_EBADDIM
 integer, parameter :: UG_INVALID_CRS           = -1030 !< Invalid/missing coordinate reference system (using default)
 integer, parameter :: UG_INVALID_NETNAME       = -1031 !< Invalid network name
+integer, parameter :: UG_INVALID_CONTACTNAME   = -1032 !< Invalid contact name
 integer, parameter :: UG_NOTIMPLEMENTED        = -1099
 
 !! Geometry options
@@ -1869,28 +1870,73 @@ function ug_init_dataset(ncid, ug_file) result(ierr)
 
 end function ug_init_dataset
 
+!> Reads the mesh contact attributes from a NetCDF variable.
 function ug_init_link_topology(ncid, varid, contactids) result(ierr)
    use netcdf_utils, only: ncu_att_to_dimid, ncu_att_to_varid
+   use ionc_constants, only: IONC_NOERR
 
    integer,            intent(in   ) :: ncid          !< ID of already opened data set.
    integer,            intent(in   ) :: varid         !< NetCDF variable ID that contains the link topology information (1-based).
-   type(t_ug_contacts),intent(inout) :: contactids !< vector in which all link topology dimension and variables ids will be stored.
+   type(t_ug_contacts),intent(inout) :: contactids    !< vector in which all link topology dimension and variables ids will be stored.
    integer                           :: ierr          !< Result status (UG_NOERR if successful).
+   character(len=nf90_max_name)      :: varname
+   integer ::tabledims(2)
 
    ierr = UG_NOERR
 
    contactids%varids(cid_contacttopo) = varid
+
+   ierr = nf90_inquire_variable(ncid, varid, dimids=tabledims)
+   
    ierr = ncu_att_to_dimid(ncid, varid, 'link_dimension'   , contactids%dimids(cdim_ncontacts))
-   ierr = ncu_att_to_varid(ncid, varid, 'contact_id'       , contactids%varids(cid_contactids))
    if (ierr /= UG_NOERR) then
+      ! The optional link_dimension attribute was not found, so auto-detect it from this contact variable directly.
+      contactids%dimids(cdim_ncontacts) = tabledims(2)
+      contactids%dimids(cdim_two)       = tabledims(1)
+   else
+      if (contactids%dimids(cdim_ncontacts) == tabledims(1)) then
+         contactids%dimids(cdim_two)    = tabledims(2)
+      else
+         contactids%dimids(cdim_two)    = tabledims(1)
+      end if
+   end if
+
+   ierr = nf90_inquire_variable(ncid, varid, varname)
+
+   ierr = ncu_att_to_varid(ncid, varid, 'contact_id'       , contactids%varids(cid_contactids))
+   if (ierr /= IONC_NOERR) then
       ! Backwards compatible read of Deltares-0.9 plural-names.
       ierr = ncu_att_to_varid(ncid, varid, 'contact_ids'   , contactids%varids(cid_contactids))
    end if
+   ! Detect string length dimension for Ids:
+   if (ierr == IONC_NOERR) then
+      ierr = nf90_inquire_variable(ncid, contactids%varids(cid_contactids), dimids=tabledims) ! string array dimensions
+      if (ierr == nf90_noerr) then
+         contactids%dimids(cdim_idstring) = tabledims(1)
+      end if
+   end if
+   ! Fallback to old hardcoded name
+   if (ierr /= IONC_NOERR) then
+      ierr = nf90_inq_dimid(ncid, 'strLengthIds', contactids%dimids(cdim_idstring))
+   end if
+
    ierr = ncu_att_to_varid(ncid, varid, 'contact_long_name', contactids%varids(cid_contactlongnames))
    if (ierr /= UG_NOERR) then
       ! Backwards compatible read of Deltares-0.9 plural-names.
       ierr = ncu_att_to_varid(ncid, varid, 'contact_long_names', contactids%varids(cid_contactlongnames))
    end if
+   ! Detect string length dimension for longnames:
+   if (ierr == IONC_NOERR) then
+      ierr = nf90_inquire_variable(ncid, contactids%varids(cid_contactlongnames), dimids=tabledims) ! string array dimensions
+      if (ierr == nf90_noerr) then
+         contactids%dimids(cdim_longnamestring) = tabledims(1)
+      end if
+   end if
+   ! Fallback to old hardcoded name
+   if (ierr /= IONC_NOERR) then
+      ierr = nf90_inq_dimid(ncid, 'strLengthIds', contactids%dimids(cdim_longnamestring))
+   end if
+
    ierr = ncu_att_to_varid(ncid, varid, 'contact_type', contactids%varids(cid_contacttype))
 
    ierr = UG_NOERR
@@ -2029,6 +2075,13 @@ function ug_init_mesh_topology(ncid, varid, meshids) result(ierr)
       varname = 'n'//trim(varname)//'_Two'  ! varname has defined lenth of nf90_var_name
       ierr = nf90_inq_dimid(ncid, trim(varname), meshids%dimids(mdim_two))
    endif
+   ! Dimensions for 3D variables
+   ierr = ncu_att_to_dimid(ncid, varid, 'layer_dimension',     meshids%dimids(mdim_layer))
+   if (ierr /= UG_NOERR) then ! 3D dimension does not exist
+      ierr = UG_NOERR
+   else
+      ierr = ncu_att_to_dimid(ncid, varid, 'interface_dimension', meshids%dimids(mdim_interface))
+   end if
 
    !check here if this is a mapped mesh
    coordspaceind = ''
@@ -2328,7 +2381,7 @@ function ug_is_network_topology(ncid, varid) result(is_mesh_topo)
 
 end function ug_is_network_topology
 
-!> Returns whether a given variable is a link topology
+!> Returns whether a given variable is a link topology / mesh_topology_contact
 function ug_is_link_topology(ncid, varid) result(ug_is_link_topo)
    use netcdf_utils, only: ncu_get_att
 
@@ -2692,9 +2745,11 @@ function ug_get_meshgeom(ncid, meshgeom, start_index, meshids, netid, includeArr
 
 
          ! Get the node coordinates
-         if (meshgeom%dim == 2) then
+         if (meshgeom%dim == 2 .or. .not. present(netid)) then
             ierr = ug_get_node_coordinates(ncid, meshids, meshgeom%nodex, meshgeom%nodey)
             ! TODO: AvD: include zk coordinates
+         end if
+         if (meshgeom%dim == 2) then
             if (meshgeom%numface .ne.-1 ) then
                call reallocP(meshgeom%face_nodes, (/ meshgeom%maxnumfacenodes, meshgeom%numface /), keepExisting=.false.)
                call reallocP(meshgeom%facex, meshgeom%numface, keepExisting=.false.)
@@ -2709,7 +2764,7 @@ function ug_get_meshgeom(ncid, meshgeom, start_index, meshids, netid, includeArr
             endif
          endif
 
-         if (meshgeom%dim == 1) then
+         if (meshgeom%dim == 1 .and. present(netid)) then
             !Mesh variables
             call reallocP(meshgeom%nodebranchidx, meshgeom%numnode, keepExisting = .false., fill = -999)
             call reallocP(meshgeom%nodeoffsets, meshgeom%numnode, keepExisting = .false., fill = -999d0)
@@ -4114,13 +4169,15 @@ function ug_write_mesh_1d_edge_nodes (ncid, meshids, meshName, numEdge, mesh_1d_
 
 end function ug_write_mesh_1d_edge_nodes
 
-! Gets the number of contacts
+!> Get the number of contact links in a given meshcontact set.
 function ug_get_contacts_count(ncid, contactids, ncontacts) result(ierr)
 
-   integer, intent(in)               :: ncid
-   type(t_ug_contacts), intent(in)   :: contactids
-   integer, intent(out)              :: ncontacts
-   integer                           :: ierr, xtype, ndims, nAtts, dimvalue, ncontactsDim1, ncontactsDim2
+   integer,             intent(in   ) :: ncid       !< NetCDF data set id
+   type(t_ug_contacts), intent(in   ) :: contactids !< Mesh contact set
+   integer,             intent(  out) :: ncontacts  !< Number of contact links in the given meshcontact set.
+   integer                            :: ierr       !< Result status (IONC_NOERR if successful).
+
+   integer :: xtype, ndims, nAtts, dimvalue, ncontactsDim1, ncontactsDim2
    character(len=nf90_max_name)      :: name
    integer, dimension(nf90_max_dims) :: dimids
 
@@ -4182,7 +4239,7 @@ function ug_put_mesh_contact(ncid, contactids, mesh1indexes, mesh2indexes, conta
 
 end function ug_put_mesh_contact
 
-! Gets the indexses of the contacts and the ids and the descriptions of each link
+! Gets the indexes of the contacts and the ids and the descriptions of each link
 function ug_get_mesh_contact(ncid, contactids, mesh1indexes, mesh2indexes, contactsids, contactslongnames, contacttype, startIndex) result(ierr)
    use array_module
    integer, intent(in)               :: ncid, startIndex
@@ -4191,23 +4248,62 @@ function ug_get_mesh_contact(ncid, contactids, mesh1indexes, mesh2indexes, conta
    character(len=*), intent(out)     :: contactsids(:), contactslongnames(:)
    integer, allocatable              :: contacts(:,:)
    integer                           :: ierr, i, varStartIndex
+   integer                           :: ncontacts_file
+   integer :: idstrlen_file, idstrlen_local, longnamestrlen_file, longnamestrlen_local
+   character(len=:), allocatable :: tmpstring(:)
+   
 
    allocate(contacts(2,size(mesh1indexes)))
 
-   ierr = nf90_get_var(ncid, contactids%varids(cid_contacttopo), contacts)
-   ierr = nf90_get_var(ncid, contactids%varids(cid_contactids), contactsids)
-   ierr = nf90_get_var(ncid, contactids%varids(cid_contacttype), contacttype)
-   ierr = nf90_get_var(ncid, contactids%varids(cid_contactlongnames), contactslongnames)
+   ierr = ug_get_mesh_contact_links(ncid, contactids, contacts, contacttype, startIndex)
 
-   !we check for the start_index, we do not know if the variable was written as 0 based
-   ierr = nf90_get_att(ncid, contactids%varids(cid_contacttopo),'start_index', varStartIndex)
-   if (ierr .eq. UG_NOERR) then
-        ierr = convert_start_index(contacts(1,:), imiss, varStartIndex, startIndex)
-        ierr = convert_start_index(contacts(2,:), imiss, varStartIndex, startIndex)
-   else
-        ierr = convert_start_index(contacts(1,:), imiss, 0, startIndex)
-        ierr = convert_start_index(contacts(2,:), imiss, 0, startIndex)
+   ! The string length on the net file can be different from the internal ID-length of D-FlowFM
+   ! Retrieve the dimensions of the contact ids.
+   ierr = nf90_inquire_dimension(ncid, contactids%dimids(cdim_ncontacts), len = ncontacts_file)
+   ierr = nf90_inquire_dimension(ncid, contactids%dimids(cdim_idstring), len = idstrlen_file)
+   ierr = nf90_inquire_dimension(ncid, contactids%dimids(cdim_longnamestring), len = longnamestrlen_file)
+   
+   if (ncontacts_file /= size(contactsids) ) then
+      call setmessage(LEVEL_ERROR, 'The number of contacts in the network file is different from the number of contacts in the kernel')
    endif
+   if (ncontacts_file == 0) then
+      return
+   end if
+
+   idstrlen_local = len(contactsids(1))
+
+   if (idstrlen_file > idstrlen_local) then
+      write(msgbuf, '(''The number of characters in the id string for the contacts (= '', i0,''), exceeds the maximum string length (= '', i0,'')'')') idstrlen_file, idstrlen_local
+      call err_flush()
+   endif
+   
+
+   ! Use a temporary array for reading the id's
+   allocate(character(len=idstrlen_file)::tmpstring(ncontacts_file))
+   ierr = nf90_get_var(ncid, contactids%varids(cid_contactids), tmpstring)
+   
+   do i=1,ncontacts_file
+      contactsids(i) = tmpstring(i)
+   end do
+
+   deallocate(tmpstring)
+
+   longnamestrlen_local = len(contactslongnames(1))
+
+   if (longnamestrlen_file > longnamestrlen_local) then
+      write(msgbuf, '(''The number of characters in the longname string for the contacts (= '', i0,''), exceeds the maximum string length (= '', i0,'')'')') longnamestrlen_file, longnamestrlen_local
+      call err_flush()
+   endif
+
+   ! Use a temporary array for reading the longnames
+   allocate(character(len=longnamestrlen_file)::tmpstring(ncontacts_file))
+   ierr = nf90_get_var(ncid, contactids%varids(cid_contactlongnames), tmpstring)
+
+   do i=1,ncontacts_file
+      contactslongnames(i) = tmpstring(i)
+   end do
+
+   deallocate(tmpstring)
 
    do i = 1, size(mesh1indexes)
       mesh1indexes(i) = contacts(1,i)
@@ -4215,6 +4311,36 @@ function ug_get_mesh_contact(ncid, contactids, mesh1indexes, mesh2indexes, conta
    end do
 
 end function ug_get_mesh_contact
+
+!> Gets the index table of the links in a given meshcontact set.
+!! The index table is renumbered automatically when the given.
+!! desired startIndex is different from the startIndex in the file.
+!! The arrays should be allocated at the correct size already.
+function ug_get_mesh_contact_links(ncid, contactids, contactlinksfromto, contacttype, startIndex) result(ierr)
+   use array_module
+   integer,             intent(in   ) :: ncid           !< NetCDF dataset id
+   type(t_ug_contacts), intent(in   ) :: contactids     !< Mesh contact topology set
+   integer,             intent(  out) :: contactlinksfromto(:, :) !< (2,numcontactlinks) table with from-to indices
+   integer,             intent(  out) :: contacttype(:) !< Contact type for each link
+   integer,             intent(in   ) :: startIndex     !< Desired start index for the table.
+   integer                            :: ierr           !< Result status (UG_NOERR if succesful)
+
+   integer :: i, varStartIndex
+
+   ierr = nf90_get_var(ncid, contactids%varids(cid_contacttopo), contactlinksfromto)
+   ierr = nf90_get_var(ncid, contactids%varids(cid_contacttype), contacttype)
+
+   !we check for the start_index, we do not know if the variable was written as 0 based
+   ierr = nf90_get_att(ncid, contactids%varids(cid_contacttopo),'start_index', varStartIndex)
+   if (ierr .eq. UG_NOERR) then
+        ierr = convert_start_index(contactlinksfromto(1,:), imiss, varStartIndex, startIndex)
+        ierr = convert_start_index(contactlinksfromto(2,:), imiss, varStartIndex, startIndex)
+   else
+        ierr = convert_start_index(contactlinksfromto(1,:), imiss, 0, startIndex)
+        ierr = convert_start_index(contactlinksfromto(2,:), imiss, 0, startIndex)
+   endif
+
+end function ug_get_mesh_contact_links
 
 !> This function writes the nodes of the 1d network
 function ug_write_1d_network_nodes(ncid,netids, nodesX, nodesY, nodeids, nodelongnames) result(ierr)
@@ -5093,6 +5219,103 @@ function ug_clone_network_data( ncidin, ncidout, netidsin, netidsout ) result(ie
 
 end function ug_clone_network_data
 
+!> Clones a mesh topology contact variable from an input dataset into an output dataset,
+!! including all underlying dimensions. The related variables to be cloned are specified
+!! by the caller in the varidmap(:) array.
+!! All dimesions and variables definition are copied from an input file to the output file,
+!! except the mesh contact variable, whose second dimension (the merged link number) is obtained before calling this subroutine.
+function ug_clone_contact_definition( ncidin, ncidout, numl1d2d, nvars, varidmap, cidsin, cidsout, id_outvars) result(ierr)
+    use netcdf_utils, only: ncu_copy_atts
+
+    integer,                   intent(in   ) :: ncidin     !< NetCDF id of input dataset
+    integer,                   intent(in   ) :: ncidout    !< NetCDF id of output dataset
+    integer,                   intent(in   ) :: numl1d2d   !< Number of 1d2d links
+    integer,                   intent(in   ) :: nvars      !< Number of variables
+    integer, dimension(nvars), intent(in   ) :: varidmap   !< Mapping array of contact variable ids to all variables
+    type(t_ug_contacts),       intent(in   ) :: cidsin     !< Contact struct with dim+varids in input dataset
+    type(t_ug_contacts),       intent(inout) :: cidsout    !< Contact struct with newly created dim+varids in output dataset
+    integer, dimension(nvars), intent(  out) :: id_outvars !< Ids of contact variables in the output file
+
+    integer                                  :: i, j, ierr, xtype, ndims, nAtts, dimvalue, id, idout
+    integer, dimension(nf90_max_var_dims)    :: dimids
+    character(len=nf90_max_name)             :: varname, dimname
+    integer, dimension(nf90_max_dims)        :: outdimids
+
+    logical :: wasInDefineMode
+
+    ierr = UG_SOMEERR
+
+    ierr = nf90_redef(ncidout) !open NetCDF in define mode
+    wasInDefineMode = (ierr == nf90_eindefine) ! Was already in define mode.
+
+    !copy dimensions
+    do i= cdim_start + 1, cdim_end - 1
+       ! get dimension id from an input file
+       if (cidsin%dimids(i)/=-1) then
+          !get dimension attributes
+          ierr = nf90_inquire_dimension( ncidin, cidsin%dimids(i), name = dimname, len = dimvalue)
+          if ( ierr /= nf90_noerr ) then
+             return
+          endif
+          !define dimension in the new file, first check if it is already present.
+          !if is not present we will get an error, and we know we have to define the dimension.
+          ierr = nf90_inq_dimid(ncidout, dimname, cidsout%dimids(i))
+          if ( ierr /= nf90_noerr) then
+             if (i == cdim_ncontacts) then ! The second dimension of the contact connectivity variable, its length is the number of merged 1d2d links
+                ierr = nf90_def_dim( ncidout, dimname, numl1d2d, cidsout%dimids(i))
+             else
+                ierr = nf90_def_dim( ncidout, dimname, dimvalue, cidsout%dimids(i))
+             end if
+          endif
+          if ( ierr /= nf90_noerr ) then
+             return
+          endif
+       end if
+    end do
+
+    !copy variables and attributes
+    do i= 1, nvars
+       id = varidmap(i) ! the variable id in the input file
+       !get variable attributes
+       dimids =0
+       outdimids = 0
+       ierr = nf90_inquire_variable( ncidin, id, name = varname, xtype = xtype, ndims = ndims, dimids = dimids, nAtts = nAtts)
+       if ( ierr /= nf90_noerr ) then
+          return
+       end if
+
+       !inquire if the variable is already present
+       ierr = nf90_inq_varid(ncidout, varname, idout)
+       if ( ierr == nf90_noerr ) then
+          !the variable is already present
+          cycle
+       end if
+       ! Gets the dimension ids of this variable from the output file
+       do j = 1, ndims
+          ierr = nf90_inquire_dimension(ncidin, dimids(j), dimname)
+          ierr = nf90_inq_dimid(ncidout, dimname, outdimids(j))
+       end do
+
+       ierr = nf90_def_var(ncidout, trim(varname), xtype, outdimids(1:ndims), id_outvars(i))
+
+       if ( ierr /= nf90_noerr ) then
+          !the variable will not be copied because not present
+          return
+       end if
+
+       ierr = ncu_copy_atts( ncidin, ncidout, id, id_outvars(i))
+
+       if ( ierr /= nf90_noerr ) then
+          return
+       end if
+    end do
+
+    ! Leave the dataset in the same mode as we got it.
+    if (.not. wasInDefineMode) then
+       ierr = nf90_enddef(ncidout)
+    end if
+
+end function ug_clone_contact_definition
 
 !integer copy function
 function ug_copy_int_var( ncidin, ncidout, meshidin, meshidout, ndims, dimsizes )  result(ierr)
@@ -5485,6 +5708,32 @@ function ug_get_network_id_from_mesh_id(ncid, meshids, ug_file, networkid) resul
 
 end function ug_get_network_id_from_mesh_id
 
+!< Gets contact id from the name of a mesh contact.
+function ug_get_contact_id_from_meshcontactname(ncid, ug_file, meshContactName, contactid) result(ierr)
+
+   integer,          intent(in   )      :: ncid                 !< NetCDF dataset id, should be already open.
+   type(t_ug_file),  intent(in   )      :: ug_file              !< Ug_file struct
+   character(len=*), intent(in   )      :: meshContactName      !< the contact name associated with the mesh
+   integer,          intent(inout)      :: contactid            !< the requrestd contact id
+   character(len=nf90_max_name)         :: contactname          !< the contact name
+   
+   integer                           :: i, ierr
+
+   ierr = UG_NOERR
+   contactid = -1
+
+   if(ierr == 0) then
+      do i = 1 , size(ug_file%contactids)
+         ierr = ug_get_contact_name(ncid, ug_file%contactids(i), contactname)
+         if (trim(meshContactName) == trim(contactname) ) then
+            contactid = i
+            exit
+         end if
+      enddo
+   endif
+
+end function ug_get_contact_id_from_meshcontactname
+
 !> Gets the name of the contact topology variable in an open dataset.
 function ug_get_contact_name(ncid, contactids, meshContactName) result(ierr)
    integer,              intent(in)    :: ncid            !< NetCDF dataset id, should be already open.
@@ -5501,4 +5750,79 @@ function ug_get_contact_name(ncid, contactids, meshContactName) result(ierr)
    end if
 end function ug_get_contact_name
 
+!> Returns the total number of variables that are available on the specified mesh, which
+!! could be a 1D or 2D mesh, or a mesh contact.
+!! For example, for "mesh1d", all variables whose names contain "mesh1d" will be collected.
+!! If jaids > 0, then also returns the ids of these variables.
+function ug_get_var_total_count(ncid, mids, cids, jaid, nvars, id_vars) result(ierr)
+   use string_module
+   integer,                       intent(in   ) :: ncid       !< NetCDF dataset id, should be already open.
+   type(t_ug_mesh),     optional, intent(in   ) :: mids       !< Set of NetCDF-ids for all mesh geometry arrays.
+   type(t_ug_contacts), optional, intent(in   ) :: cids       !< Set of NetCDF-ids for all contact geometry arrays.
+   integer,                       intent(in   ) :: jaid       !< Returns variable ids (1) or not (0)
+   integer,                       intent(  out) :: nvars      !< Number of variables defined on the requested mesh.
+   integer,             optional, intent(  out) :: id_vars(:) !< Array to store the variable ids in.
+   integer                                      :: ierr       !< Result status, ug_noerr if successful.
+
+   integer :: numVar
+   character(len=nf90_max_name) :: str, meshname
+   integer :: varid         !< NetCDF variable ID (1-based).
+   str = ''
+   meshname = ''
+   if (present(mids)) then ! A 1D or 2D mesh
+      ierr = nf90_inquire_variable(ncid, mids%varids(mid_meshtopo), name=meshname)
+      if (ierr /= nf90_noerr) then
+         write (ug_messagestr, '(a,i0)') 'ug_get_var_total_count: could not find mesh name for topology var id ', mids%varids(mid_meshtopo)
+         ierr = UG_INVALID_MESHNAME
+         Call SetMessage(Level_Fatal, ug_messagestr)
+         goto 999
+      end if
+   else if (present(cids)) then ! A mesh contact
+      ierr = nf90_inquire_variable(ncid, cids%varids(cid_contacttopo), name=meshname)
+      if (ierr /= nf90_noerr) then
+         write (ug_messagestr, '(a,i0)') 'ug_get_var_total_count: could not find mesh contact name for topology var id ', cids%varids(cid_contacttopo)
+         ierr = UG_INVALID_CONTACTNAME
+         Call SetMessage(Level_Fatal, ug_messagestr)
+         goto 999
+      end if
+   else
+      write (ug_messagestr, '(a,i0)') 'ug_get_var_total_count: either mids or cids must be given '
+      ierr = UG_SOMEERR
+      Call SetMessage(Level_Fatal, ug_messagestr)
+      goto 999
+   end if
+
+   ! Now check all variables and if they're data variables on the right mesh.
+   ierr = nf90_inquire(ncid, nVariables = numVar)
+
+   nvars = 0
+   do varid = 1,numVar
+      ! check mesh name
+      str = ''
+      ierr = nf90_inquire_variable(ncid, varid, name=str)
+      if (ierr /= nf90_noerr) then
+         exit
+      end if
+
+      ! TODO: this should actually be based on a "mesh:" attribute (not on variable name substring) to match UGRID conventions.
+      if (index(str, trim(meshname)) > 0 ) then
+         nvars = nvars + 1
+         if (jaid > 0) then
+            id_vars(nvars) = varid
+         end if
+      end if
+   end do
+
+   if (ierr /= nf90_noerr) then
+      write (ug_messagestr, '(a)') 'ug_get_var_total_count: error occurred when inquiring variable names '
+      ierr = UG_ENOTVAR
+      Call SetMessage(Level_Fatal, ug_messagestr)
+      goto 999
+   else
+      ierr = UG_NOERR
+   end if
+
+999 continue
+
+end function ug_get_var_total_count
 end module io_ugrid

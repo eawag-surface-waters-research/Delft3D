@@ -64,7 +64,7 @@ module m_Bridge
 contains
 
    subroutine ComputeBridge(bridge, fum, rum, aum, dadsm, kfum, s1m1, s1m2, u1m,              &
-                            dxm, dt, as1, as2, bob)
+                            dxm, dt, as1, as2, bob, changeStructureDimensions)
       implicit none
       !
       ! Global variables
@@ -83,6 +83,8 @@ contains
       double precision,        intent(in   )    :: as1       !< Left flow area 
       double precision,        intent(in   )    :: as2       !< Right flow area 
       double precision,        intent(in   )    :: bob(2)    !< BOB's at left and right of the bridge
+      logical,                 intent(in   )    :: changeStructureDimensions !< Indicates whether the crest level and the flow area of the bridge
+                                                                             !< can be changed.
       !
       !
       ! Local variables
@@ -199,7 +201,11 @@ contains
          
          gl_thickness = getGroundLayer(bridge%pcross)
       
-         crestLevel = max(bob(1), bob(2), bridge%bedlevel)
+         if (changeStructureDimensions) then
+            crestLevel = max(bob(1), bob(2), bridge%bedlevel)
+         else
+            crestLevel = bridge%bedlevel
+         endif
          bridge%bedLevel_actual = crestLevel
 
          if ((smax - crestLevel - gl_thickness) < thresholdDry) then
@@ -223,7 +229,10 @@ contains
          hydrRadius = wArea / wPerimiter
          
          ! Limit the flow area to the upstream flow area
-         wArea = min(wArea, wetup)
+         if (changeStructureDimensions) then
+            wArea = min(wArea, wetup)
+         endif
+
          bridge%flowArea_actual = wArea
          
 

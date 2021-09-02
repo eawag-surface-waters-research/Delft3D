@@ -205,8 +205,8 @@ module m_VolumeTables
       double precision :: height
       double precision :: level
       double precision :: dxL
-      double precision :: area
-      double precision :: width
+      double precision :: area, areadecr
+      double precision :: width, widthdecr
       double precision :: topLevel
       double precision :: bobAboveBedLevel
 
@@ -236,7 +236,7 @@ module m_VolumeTables
       if (nstor > 0) then
          stors => network%stors%stor
          do i = 1, nstor
-            nod = stors(i)%gridPoint
+            nod = stors(i)%gridPoint ! TODO: 1D2D: UNST-5013/NST-5061 : is this safe against storage nodes outside of current domain?
             n = nod-ndx2d
             vltb(n)%topLevel = max(vltb(n)%topLevel, getTopLevel(stors(i))) - bl(nod)
          enddo
@@ -286,7 +286,7 @@ module m_VolumeTables
 
       ! Compute the contribution of all the storage nodes to the volume table of the corresponding node
       do i = 1, nstor
-         nod = stors(i)%gridPoint
+         nod = stors(i)%gridPoint ! TODO: 1D2D: UNST-5013/UNST-5061 : is this safe against storage nodes outside of current domain?
          n = nod-ndx2d
 
          do j = 1, vltb(n)%count
@@ -338,6 +338,10 @@ module m_VolumeTables
                      area = (height-bobAboveBedLevel)*width
                      ! Use the water level at the inner point of the boundary link
 
+                     if (vltb(n)%hasDecreasingWidths) then
+                        widthdecr = 0d0
+                        areadecr  = 0d0
+                     end if
                   else 
                      if (L > lnxi) then                      ! for 1D boundary links, refer to attached link
                         L = LBND1D(L)
@@ -346,6 +350,11 @@ module m_VolumeTables
                      ! The bed level is the lowest point of all flow links and possibly storage nodes. 
                      ! In order to take this difference into account the variable bobAboveBedLevel is used
                      call GetCSParsTotal(line2cross(L, 2), cross, height-bobAboveBedLevel, area, width, CSCalculationOption)
+
+                     if (vltb(n)%hasDecreasingWidths) then
+                        call GetCSParsTotal(network%adm%line2cross(L, 2), cross, height-bobAboveBedLevel, areadecr, widthdecr, CS_TYPE_MIN)
+                     end if
+
                   endif
                   
                   vltb(n)%vol(j) = vltb(n)%vol(j) + dxL*area
@@ -356,11 +365,10 @@ module m_VolumeTables
                   endif
                   ! compute the decreasing volumes and areas
                   if (vltb(n)%hasDecreasingWidths) then
-                     call GetCSParsTotal(network%adm%line2cross(L, 2), cross, height-bobAboveBedLevel, area, width, CS_TYPE_MIN)
-                     vltb(n)%volDecreasing(j) = vltb(n)%volDecreasing(j) + dxL*area
+                     vltb(n)%volDecreasing(j) = vltb(n)%volDecreasing(j) + dxL*areadecr
                      if (j==vltb(n)%count) then
                         ! water surface at the highest level is equal to the width*dx of the cross section at the highest level.
-                        vltb(n)%surDecreasing(vltb(n)%count) = vltb(n)%surDecreasing(vltb(n)%count) + dxL*width
+                        vltb(n)%surDecreasing(vltb(n)%count) = vltb(n)%surDecreasing(vltb(n)%count) + dxL*widthdecr
                      endif
                   endif
                endif

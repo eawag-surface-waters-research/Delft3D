@@ -398,7 +398,7 @@ end module m_petsc
       joff = joff-1
       
 !     diagonal row-indices need to be local
-      if ( jampi.eq.1 ) then
+      if ( jampi.eq.1 .and. numrows > 0) then
          jdia = jdia - iglobal(rowtoelem(1))+1
       end if
       
@@ -469,14 +469,14 @@ end module m_petsc
       do n=1,numdia
          i = guusidxdia(n)
          if ( i.lt.0 ) then   ! diagonal entry in diagonal block
-            if ( kfs(-i).ne.0 ) then   ! nonzero row
+            if ( kfs(-i) > 0 ) then   ! nonzero row
                adia(n) = bbr(-i)
             else  ! zero row
                numzerorows = numzerorows+1
                izerorow(numzerorows) = iglobal(-i)-1 ! global row number, zero based
 !               adia(n) = 1d0
                adia(n) = bbr(-i)
-            end if   ! if ( kfs(-i).ne.0 )
+            end if   ! if ( kfs(-i) > 0 )
          else  ! off-diagonal entry in diagonal block
             adia(n) = ccr(i)
          end if
@@ -489,7 +489,7 @@ end module m_petsc
 !      if ( my_rank.eq.1 ) then
 !         do i=1,numghost_sall
 !            ndn = ighostlist_sall(i)
-!            if ( kfs(ndn).ne.0 ) write(6,*) ndn, 'kfs=', kfs(ndn)
+!            if ( kfs(ndn) > 0 ) write(6,*) ndn, 'kfs=', kfs(ndn)
 !         end do
 !         do i=1,numoff
 !            if ( joff(i).ne.joffsav(i) ) then

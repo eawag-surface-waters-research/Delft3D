@@ -1294,9 +1294,6 @@ end subroutine deallocstructure
          call compare_and_warn(level, pstru%bridge%flowArea, pstru%bridge%flowArea_actual, 'flow area', pstru%id)
       case(ST_UNI_WEIR)
          call compare_and_warn(level, pstru%uniweir%crestlevel, pstru%uniweir%crestlevel_actual, 'crest level', pstru%id)
-      case(ST_CULVERT)
-         call compare_and_warn(level, pstru%culvert%bob_orig(1), bob0(1), 'bed level of the channel at the left side', pstru%id)
-         call compare_and_warn(level, pstru%culvert%bob_orig(2), bob0(2), 'bed level of the channel at the right side', pstru%id)
       end select
          
    end subroutine check_for_changes_on_structures

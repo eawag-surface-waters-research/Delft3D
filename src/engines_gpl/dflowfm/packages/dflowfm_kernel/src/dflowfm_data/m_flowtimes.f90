@@ -168,7 +168,7 @@
  integer                           :: handle_iniext   !< timer handle for init externalforcings
  integer                           :: handle_ext      !< timer handle for externalforcings
  integer                           :: handle_extbnd   !< timer handle for externalforcingsonbnd
- integer                           :: handle_extra(53)!< timer handles for extra timers
+ integer                           :: handle_extra(90)!< timer handles for extra timers
 
  double precision                  :: dsetb       !< number of setbacks ()
  double precision                  :: walltime0   !< wall time at start of timeloop (s)

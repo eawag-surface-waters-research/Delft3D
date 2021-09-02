@@ -127,6 +127,7 @@ subroutine test_iniField1dField
        chai = pbr%gridPointsChainages(i)
        ierr = findnode(brid, chai, k) ! find flownode/netnode index given branchId and chainage
        if (ierr == DFM_NOERR) then
+          ! TODO: UNST-5013: check for nodenr <= 0 in partitioned models.
           call assert_comparable(s1(k), refs1_br10, eps, 'initial waterlevel on branch 4 incorrect' )
        else
           write(msgbuf,'(a, g11.4,a)') 'Error when finding the flow link/node which locates on branch '''//trim(brId)//''' and chainage =', chai , '.'
@@ -142,6 +143,7 @@ subroutine test_iniField1dField
        chai = pbr%gridPointsChainages(2)
        ierr = findnode(brid, chai, k) ! find flownode/netnode index given branchId and chainage
        if (ierr == DFM_NOERR) then
+          ! TODO: UNST-5013: check for nodenr <= 0 in partitioned models.
           call assert_comparable(s1(k), refs1_other, eps, 'initial waterlevel on other branches incorrect' )
        else
           write(msgbuf,'(a, g11.4,a)') 'Error when finding the flow link/node which locates on branch '''//trim(brId)//''' and chainage =', chai , '.'

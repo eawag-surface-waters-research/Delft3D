@@ -5822,7 +5822,7 @@ contains
         !
         if (branchindex > 0) then
            ierr = findlink(branchindex, chainage, L) ! NOTE: L is here assumed to be a net link number
-           if (ierr==DFM_NOERR) then
+           if (ierr == DFM_NOERR .and. L > 0) then
               keg(1) = L
               numg = 1
            else
@@ -5834,7 +5834,7 @@ contains
         ! Match by contactId
         !
         ierr = findlink_by_contactid(contactId, L) ! NOTE: L is here assumed to be a net link number
-        if (ierr==DFM_NOERR) then
+        if (ierr==DFM_NOERR .and. L > 0) then
            keg(1) = L
            numg = 1
         else
@@ -5984,6 +5984,7 @@ contains
       end if
 
       numsel     = 1
+      ! TODO: UNST-5013: check for nodenr <= 0 in partitioned models.
       kp(numsel) = n
    case (LOCTP_NODEID)
       ierr = findnode(nodeId, n)

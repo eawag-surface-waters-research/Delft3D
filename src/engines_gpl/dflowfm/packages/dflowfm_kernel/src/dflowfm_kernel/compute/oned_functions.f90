@@ -152,6 +152,8 @@ module m_oned_functions
    end subroutine set_1d_indices_in_network
 
    !> set the flowgeom linknumbers and node numbers in the branches
+   !! (This replaces the netlink/netnode numbers that were originally
+   !! filled in during the network reading stage.)
    subroutine set_linknumbers_in_branches()
    
       use m_globalParameters
@@ -159,15 +161,19 @@ module m_oned_functions
       use m_flowgeom
       use m_sediment
       use messageHandling
+      use precision_basics, only: comparereal
+      use m_GlobalParameters, only: flow1d_eps10
 
       implicit none
 
       integer :: L
       integer                                 :: ibr, jbr
+      integer :: inod
       integer :: nbr, upointscount, pointscount
       integer :: storageCount
       integer :: i, j, jpos, linkcount
       integer :: k1, k2, igrid
+      integer :: is, ip1, ip2
       integer :: c1, c2
       integer :: storage_count
       type(t_branch), pointer                 :: pbr, qbr
@@ -179,50 +185,43 @@ module m_oned_functions
       type (t_CrossSection), pointer          :: cross1, cross2
       logical                                 :: foundFrom, foundTo
 
+      ! First reset the gridnumber of all network nodes.
+      ! These nodes are exactly the set into which the branches's fromNode/toNode are pointing.
+      do inod = 1,network%nds%count
+         network%nds%node(inod)%gridNumber = -1
+      end do
+
       nbr = network%brs%count
       do ibr = 1, nbr
          pbr => network%brs%branch(ibr)
 
-         ! branches can have no grid points in case of parallel computing
-         if (pbr%uPointsCount == 0) then
-            foundFrom = .false.
-            foundTo = .false.
-            do jbr = 1, ibr - 1
-               qbr => network%brs%branch(jbr)
-               if (qbr%FromNode%id == pbr%FromNode%id .or. qbr%ToNode%id == pbr%FromNode%id) then
-                  foundFrom = .true.
-               endif
-               if (qbr%FromNode%id == pbr%ToNode%id .or. qbr%ToNode%id == pbr%ToNode%id) then
-                  foundTo = .true.
-               endif
-            end do
-            !
-            ! if foundFrom / foundTo: do not change gridNumber as set for a lower branch number ibr
-            ! if not found: set to -1 as it is in another domain:
-            !
-            if (.not. foundFrom) then
-               pbr%FromNode%gridNumber = -1
-            endif
-            if (.not. foundTo) then
-               pbr%tonode%gridnumber = -1
-            endif
-         else
+         ! Set flow node numbers via all flow link numbers on current branch.
+         ! When uPointsCount == 0, any "orphan" flow node numbers will be set via another branch on which they *do* lie.
+         if (pbr%uPointsCount > 0) then
             call realloc(pbr%lin, pbr%uPointsCount)
             call realloc(pbr%grd, pbr%gridPointsCount)
             lin => pbr%lin
             grd => pbr%grd
             L = lin(1)
             k1  =  abs(ln(1,L))
-            pbr%FromNode%gridNumber = k1
-            upointscount = pbr%uPointsCount
-            do i = 1, uPointsCount
-               L = lin(i)
-               k1 = abs(ln(1,L))
-               grd(i) = k1
-            enddo
-            k2 = ln(2,iabs(lin(upointscount)))
-            pbr%tonode%gridnumber = k2
-            grd(upointscount+1) = k2
+            if (pbr%FromNode%gridNumber == -1 .and. comparereal(pbr%gridPointsChainages(1), 0d0, flow1d_eps10) == 0) then
+               pbr%FromNode%gridNumber = k1 ! Only when exactly at the branch start (need not be so in parallel models).
+            end if
+            do is=1,pbr%gridpointsseqcount
+               ip1 = pbr%k1gridpointsseq(is)
+               ip2 = pbr%k2gridpointsseq(is)
+               do i=ip1,ip2-1 ! upoints loop
+                  L = lin(i-(is-1)) ! is-1 corrects for any "holes" in between the previous is-1 gridpointssequences.
+                  k1 = abs(ln(1,L))
+                  grd(i) = k1
+               enddo
+               L = ip2-1-(is-1)
+               k2 = ln(2,iabs(lin(L)))
+               grd(ip2) = k2
+            end do
+            if (pbr%toNode%gridnumber == -1 .and. comparereal(pbr%gridPointsChainages(pbr%gridPointsCount), pbr%length, flow1d_eps10) == 0)  then
+               pbr%toNode%gridnumber = k2 ! Only when exactly at the branch end (need not be so in parallel models).
+            end if
          end if
       enddo
    end subroutine set_linknumbers_in_branches
@@ -367,6 +366,11 @@ module m_oned_functions
          ! allocate space for local cross section numbers on connection nodes (multiple cross sections)
          do i = 1, network%nds%count
             k1 = network%nds%node(i)%gridNumber
+            if (k1 <= 0) then
+                ! TODO: Only partially prepared for parallel models (check gridpointsseq as introduced in UNST-5013)
+               cycle
+            end if
+            
             linkcount = nd(k1)%lnx
             if (allocated(gridpoint2cross(k1)%cross)) deallocate(gridpoint2cross(k1)%cross)
             allocate(gridpoint2cross(k1)%cross(linkcount))
@@ -450,7 +454,7 @@ module m_oned_functions
                   do ibr = 1, network%brs%Count
                       pbr => network%brs%branch(ibr)
                       if (pNodRel%node == pbr%fromNode%id) then
-                          pNodRel%nodeIdx = pbr%fromNode%gridnumber
+                          pNodRel%nodeIdx = pbr%fromNode%gridnumber ! TODO: Not safe in parallel models (check gridpointsseq as introduced in UNST-5013)
                       endif
                       if (pNodRel%node == pbr%toNode%id) then
                           pNodRel%nodeIdx = pbr%toNode%gridnumber
@@ -704,7 +708,7 @@ module m_oned_functions
 
          ! Limit the pump discharge in case the volume in the cells at the suction side is limited.
           if (abs(qp) > 0.9d0*vp/dts) then
-            qp = sign(qp,0.9d0*vp/dts)
+            qp = sign(0.9d0*vp/dts, qp)
          endif
          
          do L0  = 1, struct%numlinks

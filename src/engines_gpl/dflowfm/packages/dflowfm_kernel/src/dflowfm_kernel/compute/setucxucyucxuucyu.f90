@@ -44,7 +44,7 @@
  integer          :: itpbn, newucxq=0
  double precision :: uu, vv, uucx, uucy, wcxu, wcyu, cs, sn, adx, ac1, ac2, wuw, hdx, hul, dzz, uin, duxdn, duydn
  double precision :: dischcorrection
- double precision :: uinx, uiny
+ double precision :: uinx, uiny, u1L
 
  double precision, external :: nod2linx, nod2liny
  double precision, external :: lin2nodx, lin2nody
@@ -55,18 +55,24 @@
  if (kmx < 1) then                                   ! original 2D coding
 
     do L = 1,lnx1D
-       if (u1(L) .ne. 0d0 .and. kcu(L) .ne. 3) then  ! link flows ; in 2D, the loop is split to save kcu check in 2D
+       if (u1(L) .ne. 0d0) then  ! link flows ; in 2D, the loop is split to save kcu check in 2D
+          if (( kcu(L)==3 .or. kcu(L)==4 .or. (iadv(L) >= 21 .and. iadv(L) <=29)) .and. ChangeVelocityAtStructures) then
+             ! Apply only on some barrier-like hydraulic structures, and typically on 1D2D links for dambreaks
+             u1L = q1(L)/au_nostrucs(L)
+          else
+             u1L = u1(L)
+          endif
           k1 = ln(1,L) ; k2 = ln(2,L)
-          wcxu      = wcx1(L)*u1(L)
+          wcxu      = wcx1(L)*u1L
           ucx  (k1) = ucx  (k1) + wcxu
           ucxq (k1) = ucxq (k1) + wcxu*hu(L)
-          wcyu      = wcy1(L)*u1(L)
+          wcyu      = wcy1(L)*u1L
           ucy  (k1) = ucy  (k1) + wcyu
           ucyq (k1) = ucyq (k1) + wcyu*hu(L)
-          wcxu      = wcx2(L)*u1(L)
+          wcxu      = wcx2(L)*u1L
           ucx  (k2) = ucx  (k2) + wcxu
           ucxq (k2) = ucxq (k2) + wcxu*hu(L)
-          wcyu      = wcy2(L)*u1(L)
+          wcyu      = wcy2(L)*u1L
           ucy  (k2) = ucy  (k2) + wcyu
           ucyq (k2) = ucyq (k2) + wcyu*hu(L)
        endif
@@ -75,19 +81,25 @@
     do L = lnx1D + 1,lnx
        if (jabarrieradvection == 3) then
           if ( struclink(L) == 1 ) cycle
-       endif
+       endif 
        if (u1(L) .ne. 0d0) then                      ! link flows
+          if (( kcu(L)==3 .or. kcu(L)==4 .or. (iadv(L) >= 21 .and. iadv(L) <=29)) .and. ChangeVelocityAtStructures) then
+             ! Apply only on some barrier-like hydraulic structures, and typically on 1D2D links for dambreaks
+             u1L = q1(L)/au_nostrucs(L)
+          else
+             u1L = u1(L)
+          endif
           k1 = ln(1,L) ; k2 = ln(2,L)
-          wcxu      = wcx1(L)*u1(L)
+          wcxu      = wcx1(L)*u1L
           ucx  (k1) = ucx  (k1) + wcxu
           ucxq (k1) = ucxq (k1) + wcxu*hu(L)
-          wcyu      = wcy1(L)*u1(L)
+          wcyu      = wcy1(L)*u1L
           ucy  (k1) = ucy  (k1) + wcyu
           ucyq (k1) = ucyq (k1) + wcyu*hu(L)
-          wcxu      = wcx2(L)*u1(L)
+          wcxu      = wcx2(L)*u1L
           ucx  (k2) = ucx  (k2) + wcxu
           ucxq (k2) = ucxq (k2) + wcxu*hu(L)
-          wcyu      = wcy2(L)*u1(L)
+          wcyu      = wcy2(L)*u1L
           ucy  (k2) = ucy  (k2) + wcyu
           ucyq (k2) = ucyq (k2) + wcyu*hu(L)
        endif

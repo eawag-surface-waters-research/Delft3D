@@ -44,6 +44,7 @@
  double precision  :: hpr1, ar1, wid1, aconv1, hpr2, ar2, wid2, aconv2, aru, widu, aconvu
  double precision  :: dx1, dx2, frcn, BL1, BL2, b21, wu2, ai
  double precision  :: beta, bt2, deltaa,hyr, uucn, ucna, Cz
+ double precision, external :: get_hpr_nostruc
 
  k1  = ln(1,L) ; k2 = ln(2,L)
   if (bob0(1,L) < bob0(2,L)) then
@@ -81,7 +82,8 @@
  else
     if (hu(L) > 0d0) then
 
-       hpr1    = hu(L)
+       !DIR$ INLINE
+       hpr1 = get_hpr_nostruc(L)
        frcn    = frcu(L)
        ifrctyp = ifrcutp(L)
        if (jaconveyance2D > 0) then
@@ -98,8 +100,8 @@
        else
           au(L) = hpr1*wu(L)
           if (frcn >  0) then
-             call getcz(hpr1, frcn, ifrctyp, Cz, L)
-             cfuhi(L) = ag / (hpr1*Cz*Cz)
+             call getcz(hu(L), frcn, ifrctyp, Cz, L)
+             cfuhi(L) = ag / (hu(L)*Cz*Cz)
           else
              cfuhi(L) = 0d0
           end if

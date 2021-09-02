@@ -1382,7 +1382,7 @@ if (ndambreaksg > 0) then
             yla = network%sts%struct(istrtmp)%dambreak%waterLevelUpstreamLocationY
             if (network%sts%struct(istrtmp)%dambreak%waterLevelUpstreamNodeId /= '') then
                ierr = findnode(network%sts%struct(istrtmp)%dambreak%waterLevelUpstreamNodeId, k)
-               if (ierr /= DFM_NOERR) then
+               if (ierr /= DFM_NOERR .or. k <= 0) then
                   write(msgbuf, '(a,a,a,a,a)') 'Cannot find the node for waterLevelUpstreamNodeId = ''', trim(network%sts%struct(istrtmp)%dambreak%waterLevelUpstreamNodeId), &
                      ''' in dambreak ''', trim(strid), '''.'
                   call err_flush()
@@ -1411,7 +1411,7 @@ if (ndambreaksg > 0) then
             yla = network%sts%struct(istrtmp)%dambreak%waterLevelDownstreamLocationY
             if (network%sts%struct(istrtmp)%dambreak%waterLevelDownstreamNodeId /= '') then
                ierr = findnode(network%sts%struct(istrtmp)%dambreak%waterLevelDownstreamNodeId, k)
-               if (ierr /= DFM_NOERR) then
+               if (ierr /= DFM_NOERR .or. k <= 0) then
                   write(msgbuf, '(a,a,a,a,a)') 'Cannot find the node for waterLevelDownstreamNodeId = ''', trim(network%sts%struct(istrtmp)%dambreak%waterLevelDownstreamNodeId), &
                      ''' in dambreak ''', trim(strid), '''.'
                   call err_flush()
@@ -1514,6 +1514,28 @@ else
    status = .false.
 endif
 
+! Fill geometry arrays for structures
+if(jahisweir > 0 .and. network%sts%numWeirs > 0 ) then
+   call fill_geometry_arrays_structure(ST_WEIR, network%sts%numWeirs, nNodesWeir, nodeCountWeir, geomXWeir, geomYWeir)
+end if
+if (jahiscgen > 0 .and. network%sts%numGeneralStructures > 0) then
+   call fill_geometry_arrays_structure(ST_GENERAL_ST, network%sts%numGeneralStructures, nNodesGenstru, nodeCountGenstru, geomXGenstru, geomYGenstru)
+end if
+if( jahisorif > 0 .and. network%sts%numOrifices > 0) then
+   call fill_geometry_arrays_structure(ST_ORIFICE, network%sts%numOrifices, nNodesOrif, nodeCountOrif, geomXOrif, geomYOrif)
+end if
+if( jahisuniweir > 0 .and. network%sts%numUniWeirs > 0) then
+   call fill_geometry_arrays_structure(ST_UNI_WEIR, network%sts%numuniweirs, nNodesUniweir, nodeCountUniweir, geomXUniweir, geomYUniweir)
+end if
+if(jahisculv > 0 .and. network%sts%numculverts > 0) then
+   call fill_geometry_arrays_structure(ST_CULVERT, network%sts%numculverts, nNodesCulv, nodeCountCulv, geomXCulv, geomYCulv)
+end if
+if(jahispump > 0 .and. network%sts%numPumps > 0) then
+   call fill_geometry_arrays_structure(ST_PUMP, network%sts%numPumps, nNodesPump, nodeCountPump, geomXPump, geomYPump)
+end if
+if(jahisbridge > 0 .and. network%sts%numBridges > 0) then
+   call fill_geometry_arrays_structure(ST_BRIDGE, network%sts%numBridges, nNodesBridge, nodeCountBridge, geomXBridge, geomYBridge)
+end if
 ! Cleanup:
 888 continue
 

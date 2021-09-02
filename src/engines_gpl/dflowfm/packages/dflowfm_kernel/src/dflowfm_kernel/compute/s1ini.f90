@@ -247,7 +247,7 @@
              ds  = -dts*qin(k)/ba(k)                            ! altijd minder dan daling bij niet-lin volumes
              aloc = ba(k)
           endif
-          if (kfs(k) == 0) then                              ! niet in matrix
+          if (kfs(k) <= 0) then                              ! niet in matrix
              if (ds  < hsk) then                             ! er is genoeg
                 s1(k) = s0(k) - ds
              else                                            ! leeg

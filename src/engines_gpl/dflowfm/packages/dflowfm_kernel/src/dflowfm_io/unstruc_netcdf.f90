@@ -69,12 +69,15 @@ integer            :: nopen_files_ = 0             !< Nr. of NetCDF files curren
 private :: nerr_, err_firsttime_, err_firstline_, &
            t_unc_netelem_ids, unc_def_net_elem, unc_write_net_elem, &
            unc_def_idomain, unc_def_iglobal, fill_netlink_geometry, &
-           open_files_, open_datasets_, nopen_files_, unc_read_merged_map, t_unc_merged
+           open_files_, open_datasets_, nopen_files_, unc_read_merged_map, t_unc_merged, &
+           blcell, read_mesh2d_face_z, face_z_stdname
 
 integer, parameter :: UNC_CONV_CFOLD = 1 !< Old CF-only conventions.
 integer, parameter :: UNC_CONV_UGRID = 2 !< New CF+UGRID conventions.
 
 integer            :: unc_cmode      = 0 !< Default NetCDF creation mode flag value, used in nf90_create calls (e.g., NF90_NETCDF4).
+integer            :: unc_nounlimited    !< NetCDF output with time dimension set to full length of simulation, avoids "unlimited dimension" overhead. Often requires md_ncformat=4/unc_cmode=NF90_NETCDF4.
+integer            :: unc_noforcedflush  !< Do not force NetCDF file flushing every output timestep (map-like files).
 
 integer            :: unc_writeopts !< Default write options (currently only: UG_WRITE_LATLON)
 
@@ -406,6 +409,14 @@ type t_unc_mapids
    integer :: id_wumor(MAX_ID_VAR)      = -1 !< Variable ID for main channel width at flow link
    integer :: id_flowelemzcc(MAX_ID_VAR)= -1 !< Variable ID for time dependent layer centre height
    integer :: id_flowelemzw(MAX_ID_VAR) = -1 !< Variable ID for time dependent layer interface height
+   integer :: id_negdpt(MAX_ID_VAR)       = -1 !< Variable ID for number of times negative depth is calculated in a node
+   integer :: id_negdpt_cum(MAX_ID_VAR)   = -1 !< Variable ID for cumulative number of times negative depth is calculated in a node
+   integer :: id_noiter(MAX_ID_VAR)       = -1 !< Variable ID for number of times no iteration is generated in a node
+   integer :: id_noiter_cum(MAX_ID_VAR)   = -1 !< Variable ID for cumulative number of times no iteration is generated in a node
+   integer :: id_limtstep(MAX_ID_VAR)     = -1 !< Variable ID for number of times a node was limiting for the computational time step
+   integer :: id_limtstep_cum(MAX_ID_VAR) = -1 !< Variable ID for cumulative number of times a node was limiting for the computational time step
+   integer :: id_courant(MAX_ID_VAR)      = -1 !< Variable ID for the Courant number in a node      
+
    !
    ! Other
    !
@@ -471,6 +482,9 @@ interface unc_put_att
    module procedure unc_put_att_char
 end interface unc_put_att
 
+real(kind=hp), allocatable :: blcell(:)
+character(len=:), allocatable :: face_z_stdname
+
 contains
 
 !> Initializes some global variables needed for writing NetCDF files during a run.
@@ -491,7 +505,8 @@ use unstruc_version_module
 
    unc_cmode              = NF90_CLOBBER ! Default: 0, use NetCDF library default.
    unc_writeopts          = UG_WRITE_NOOPTS ! Default: 0, no special write options.
-
+   unc_nounlimited        = 0               !< NetCDF output with time dimension set to full length of simulation, avoids "unlimited dimension" overhead. Often requires md_ncformat=4/unc_cmode=NF90_NETCDF4.
+   unc_noforcedflush      = 0               !< Do not force NetCDF file flushing every output timestep (map-like files).
 end subroutine init_unstruc_netcdf
 
 !> Sets the default NetCDF cmode flag values for all D-Flow FM's created files.
@@ -546,11 +561,11 @@ end function unc_def_var_nonspatial
 !! Produces a UGRID-compliant map file.
 !! Typical call: unc_def_var(mapids, mapids%id_s1(:), nf90_double, UNC_LOC_S, 's1', 'sea_surface_height', 'water level', 'm')
 !! Space-dependent variables will be multiply defined: on mesh1d and mesh2d-based variables (unless specified otherwise via which_meshdim argument).
-function unc_def_var_map(ncid,id_tsp, id_var, itype, iloc, var_name, standard_name, long_name, unit, is_timedep, dimids, cell_method, which_meshdim, jabndnd) result(ierr)
+function unc_def_var_map(ncid,id_tsp, id_var, itype, iloc, var_name, standard_name, long_name, unit, is_timedep, dimids, cell_method, which_meshdim, jabndnd, ivalid_max) result(ierr)
 use m_save_ugrid_state, only: network1dname, mesh2dname, mesh1dname, contactname
 use netcdf_utils, only: ncu_append_atts
 use m_flowgeom
-use m_flowparameters, only: jamapvol1, jamapau, jamaps1, jamaphu, jamapanc
+use m_flowparameters, only: jamapvol1, jamapau, jamaps1, jamaphu, jamapanc, jamapFlowAnalysis
 use network_data, only: numk, numl, numl1d
 use dfm_error
 use m_missing
@@ -571,6 +586,7 @@ integer, optional,  intent(in)  :: dimids(:)     !< (Optional) Array with dimens
 character(len=*), optional, intent(in) :: cell_method   !< cell_method for this variable (one of 'mean', 'point', see CF for details). Default: mean
 integer, optional,  intent(in)  :: which_meshdim !< Selects which (horizontal) mesh dimension(s) need to be defined and written (1: 1D, 2: 2D, 4: 1D2D contacts, 7: all) Default: 7: all.
 integer, optional,  intent(in)  :: jabndnd
+integer, optional,  intent(in)  :: ivalid_max    !< valid_max attribute for integer variables
 
 integer                         :: ierr          !< Result status, DFM_NOERR if successful.
 ! TODO: AvD: inject vectormax dim here AND timedim!!
@@ -857,6 +873,10 @@ integer :: varid
       goto 888
    end select
 
+   if (present(ivalid_max)) then
+      ierr = nf90_put_att(ncid, id_var(1), 'valid_max', ivalid_max)
+      ierr = nf90_put_att(ncid, id_var(2), 'valid_max', ivalid_max)
+   end if
 
    select case (iloc)
    case(UNC_LOC_S3D)
@@ -2159,13 +2179,29 @@ end function unc_open
 
 !> Creates or opens a NetCDF file for writing.
 !! The file is maintained in the open-file-list.
-function unc_create(filename, cmode, ncid)
-    character(len=*), intent(in ) :: filename
-    integer,          intent(in ) :: cmode
-    integer,          intent(out) :: ncid
-    integer                       :: unc_create
+function unc_create(filename, cmode, ncid, combine_cmode)
+    character(len=*),  intent(in   ) :: filename      !< Filename to be created
+    integer,           intent(in   ) :: cmode         !< Creation mode, must be a valid NetCDF flags integer.
+    integer,           intent(  out) :: ncid          !< Resulting NetCDF data set id, undefined in case an error occurred.
+    logical, optional, intent(in   ) :: combine_cmode !< (Optional) whether to combine given cmode with our global cmode setting. Default: .true.. Set to .false. when forcing a specific cmode.
+    integer                          :: unc_create    !< Integer result status (nf90_noerr if successful).
 
-    unc_create = nf90_create(filename, or(cmode, unc_cmode), ncid)
+    logical :: combine_cmode_
+    integer :: cmode_
+
+    if (present(combine_cmode)) then
+       combine_cmode_ = combine_cmode
+    else
+       combine_cmode_ = .true.
+    end if
+
+    if (combine_cmode_) then
+       cmode_ = ior(cmode, unc_cmode)
+    else
+       cmode_ = cmode
+    end if
+
+    unc_create = nf90_create(filename, cmode_, ncid)
     if (unc_create == nf90_noerr) then
         nopen_files_ = nopen_files_ + 1
         open_files_(nopen_files_)    = filename
@@ -4564,7 +4600,7 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
    use m_save_ugrid_state, only: mesh1dname
    use m_hydrology_data, only : jadhyd, ActEvap, PotEvap, interceptionmodel, DFM_HYD_NOINTERCEPT, InterceptHs
    use m_subsidence, only: jasubsupl, subsout, subsupl, subsupl_t0
-
+   use Timers
    implicit none
 
    type(t_unc_mapids), intent(inout) :: mapids   !< Set of file and variable ids for this map-type file.
@@ -4619,6 +4655,7 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
       call mess(LEVEL_WARN, 'No flow elements in model, will not write flow geometry.')
       return
    end if
+   if (timon) call timstrt ( "unc_write_map_filepointer_ugrid", handle_extra(70))
 
    if (present(jabndnd)) then
       jabndnd_ = jabndnd
@@ -4654,12 +4691,18 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
 
    ! Only write net and flow geometry data the first time, or for a separate map file.
    if (ndim == 0) then
+   if (timon) call timstrt ( "unc_write_flowgeom_filepointer_ugrid INIT", handle_extra(71))
 
       ierr = ug_addglobalatts(mapids%ncid, ug_meta_fm)
       call unc_write_flowgeom_filepointer_ugrid(mapids%ncid, mapids%id_tsp, jabndnd_)
 
       ! Current time t1
-      ierr = nf90_def_dim(mapids%ncid, 'time', nf90_unlimited, mapids%id_tsp%id_timedim)
+      if (unc_nounlimited > 0) then
+         ierr = nf90_def_dim(mapids%ncid, 'time', ceiling((ti_mape-ti_maps)/ti_map) + 1, mapids%id_tsp%id_timedim)
+      else
+         ierr = nf90_def_dim(mapids%ncid, 'time', nf90_unlimited, mapids%id_tsp%id_timedim)
+      end if
+
       call check_error(ierr, 'def time dim')
       ierr = unc_def_var_nonspatial(mapids%ncid, mapids%id_time, nf90_double, (/ mapids%id_tsp%id_timedim /), 'time', 'time', '', trim(Tudunitstr))
       mapids%id_tsp%idx_curtime = 0
@@ -4690,6 +4733,17 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
       ! Influx
       if (jamapqin > 0 .and. jaqin > 0) then
          ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_qin, nf90_double, UNC_LOC_S, 'qin', '', 'Sum of all water influx', 'm3 s-1', jabndnd=jabndnd_)
+      endif
+
+      if (jamapFlowAnalysis > 0) then
+         ! Flow analysis
+         ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_negdpt,       nf90_int, UNC_LOC_S, 'negdpt',         '', 'Number of times negative depth was calculated', '1', cell_method = 'point', jabndnd=jabndnd_)
+         ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_negdpt_cum,   nf90_int, UNC_LOC_S, 'negdpt_cum',     '', 'Cumulative number of times negative depth was calculated', '1', cell_method = 'point', jabndnd=jabndnd_)
+         ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_noiter,       nf90_int, UNC_LOC_S, 'noiter',         '', 'Number of times no nonlinear convergence was caused', '1', cell_method = 'point', jabndnd=jabndnd_)
+         ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_noiter_cum,   nf90_int, UNC_LOC_S, 'noiter_cum',     '', 'Cumulative number of times no nonlinear convergence was caused', '1', cell_method = 'point', jabndnd=jabndnd_)
+         ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_limtstep,     nf90_int, UNC_LOC_S, 'limtstep',       '', 'Number of times a node was limiting for the computational time step', '1', cell_method = 'point', jabndnd=jabndnd_)
+         ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_limtstep_cum, nf90_int, UNC_LOC_S, 'limtstep_cum',   '', 'Cumulative number of times a node was limiting for the computational time step', '1', cell_method = 'point', jabndnd=jabndnd_)
+         ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_courant,      nf90_double, UNC_LOC_S, 'courant',     '', 'Courant number', '1', cell_method = 'point', jabndnd=jabndnd_)
       endif
 
       ! Evaporation
@@ -5549,11 +5603,13 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
             enddo
          endif
       endif
+   if (timon) call timstop (handle_extra(71))
 
    endif
    ! End of writing time-independent flow geometry data.
 
    ! -- Start data writing (flow data) ------------------------
+   if (timon) call timstrt ( "unc_write_map_filepointer_ugrid TIME write", handle_extra(72))
 
    mapids%id_tsp%idx_curtime = mapids%id_tsp%idx_curtime+1      ! Increment time dimension index
    itim               = mapids%id_tsp%idx_curtime
@@ -5562,6 +5618,8 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
    ierr = nf90_put_var(mapids%ncid, mapids%id_time    , tim, (/ itim /))
    ierr = nf90_put_var(mapids%ncid, mapids%id_timestep, dts, (/ itim /))
 
+   if (timon) call timstop (handle_extra(72))
+   if (timon) call timstrt ( "unc_write_map_filepointer_ugrid vars", handle_extra(73))
    if (jamapnumlimdt > 0) then
       ! ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_numlimdt, UNC_LOC_S, numlimdt) ! TODO: AvD: integer version of this routine
       call realloc(numlimdtdbl, ndxndxi, keepExisting=.false.)
@@ -5619,6 +5677,16 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
    if (jamapau == 1) then
       ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_au, iLocU, au, jabndnd=jabndnd_)
    end if
+   
+   if (jamapflowanalysis == 1) then
+      ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_negdpt,       iLocS, negativeDepths,     jabndnd=jabndnd_)
+      ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_negdpt_cum,   iLocS, negativeDepths_cum, jabndnd=jabndnd_)
+      ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_noiter,       iLocS, noIterations,       jabndnd=jabndnd_)
+      ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_noiter_cum,   iLocS, noIterations_cum,   jabndnd=jabndnd_)
+      ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_limtstep,     iLocS, limitingTimestepEstimation,       jabndnd=jabndnd_)
+      ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_limtstep_cum, iLocS, limitingTimestepEstimation_cum,   jabndnd=jabndnd_)
+      ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_courant,      iLocS, flowCourantNumber,  jabndnd=jabndnd_)
+   endif
 
    ! Velocities
    if (jamapu1 == 1) then
@@ -6859,6 +6927,9 @@ if (jamapsed > 0 .and. jased > 0 .and. stm_included) then
          ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_s1Gradient, UNC_LOC_U, s1Gradient, jabndnd=jabndnd_)
       end if
    end if
+   if (timon) call timstop (handle_extra(73))
+   if (timon) call timstop (handle_extra(70))
+
 end subroutine unc_write_map_filepointer_ugrid
 
 
@@ -10314,7 +10385,8 @@ end function unc_def_iglobal
 !> Writes the unstructured network in UGRID format to an already opened netCDF dataset.
 subroutine unc_write_net_ugrid2(ncid, id_tsp, janetcell, jaidomain, jaiglobal_s)
    use network_data, xe_no=>xe, ye_no=>ye
-   use m_partitioninfo, only: idomain, ndomains, iglobal_s
+   use m_flowgeom, only: ndx2d, ndxi
+   use m_partitioninfo, only: idomain, ndomains, iglobal_s, Nglobal_s
    use m_sferic, only : jsferic
    use m_missing, only : dmiss
    use netcdf
@@ -10332,7 +10404,6 @@ subroutine unc_write_net_ugrid2(ncid, id_tsp, janetcell, jaidomain, jaiglobal_s)
    integer,        optional, intent(in   ) :: jaiglobal_s !< write global netcell numbers (1) or not (0, default)
 
    integer                          :: janetcell_, jaidomain_, jaiglobal_s_
-   integer                          :: id_idomain, id_iglobal_s
    integer                          :: id_mesh2d, id_netnodedim
    type(t_unc_netelem_ids)          :: ids_netelem
 
@@ -10341,14 +10412,15 @@ subroutine unc_write_net_ugrid2(ncid, id_tsp, janetcell, jaidomain, jaiglobal_s)
    real(kind=hp), dimension(:), pointer :: layer_zs=>null(), interface_zs =>null()
 
    integer :: ierr
-   integer :: i, ii, k, k1, k2, numl2d, numk1d, numk2d, nump1d, L, Lnew, nv, n1, n2
+   integer :: i, ii, k, k1, k2, numl2d, numk1d, numk2d, nump1d, L, Lnew, nv, n1, n2, n
    integer :: jaInDefine
+   integer :: id_zf
 
-   real(kind=hp), allocatable :: xn(:), yn(:), zn(:), xe(:), ye(:)
+   real(kind=hp), allocatable :: xn(:), yn(:), zn(:), xe(:), ye(:), zf(:)
    real(kind=hp), allocatable :: work2(:,:)
 
    integer                    :: n1dedges, n1d2dcontacts, start_index
-   integer, allocatable       :: contacttype(:)
+   integer, allocatable       :: contacttype(:), idomain1d(:), iglobal_s1d(:)
 
    call readyy('Writing net data', 0d0)
 
@@ -10400,6 +10472,7 @@ subroutine unc_write_net_ugrid2(ncid, id_tsp, janetcell, jaidomain, jaiglobal_s)
     end if
 
    ! 1D network geometry
+   NUMK1D = 0
    if (numl1d > 0) then
 
       ! count 1d mesh nodes, edges and 1d2d contacts
@@ -10449,6 +10522,12 @@ subroutine unc_write_net_ugrid2(ncid, id_tsp, janetcell, jaidomain, jaiglobal_s)
       call realloc(xn, NUMK1D)
       call realloc(yn, NUMK1D)
       call realloc(zn, NUMK1D)
+      if (jaidomain_ > 0) then
+         call realloc(idomain1d, NUMK1D, fill = -999)
+      end if
+      if (jaiglobal_s_ > 0) then
+         call realloc(iglobal_s1d, NUMK1D, fill = -999)
+      end if
 
       ! Allocate edges
       call realloc(edge_nodes, (/ 2, n1dedges /), fill = -999)
@@ -10581,6 +10660,21 @@ subroutine unc_write_net_ugrid2(ncid, id_tsp, janetcell, jaidomain, jaiglobal_s)
          enddo
       end if ! not netcell-based
 
+      if (jaidomain_ > 0) then
+         do n=nump+1,nump1d2d ! Loop over all 1D netcells
+            k1 = netcell(n)%nod(1) ! original 1D netnode index
+            k = abs(KC(k1)) ! This will only be k /= n if the reconstructed 1D netlink-based numbering in file differs from the input 1D netcell numbering.
+            idomain1d(k) = idomain(n) ! the node ordering in idomain1d is the same as in xn,yn,zn
+         end do
+      end if
+
+      if (jaiglobal_s_ > 0) then
+         do n=nump+1,nump1d2d
+            k1 = netcell(n)%nod(1)
+            k = abs(KC(k1)) ! This will only be k /= n if the reconstructed 1D netlink-based numbering in file differs from the input 1D netcell numbering.
+            iglobal_s1d(k) = iglobal_s(n)
+         end do
+      end if
 
       if (associated(meshgeom1d%ngeopointx)) then
          if (meshgeom1d%numnode >= 0) then ! TODO: LC:  check the number of mesh nodes has not changed
@@ -10662,6 +10756,7 @@ subroutine unc_write_net_ugrid2(ncid, id_tsp, janetcell, jaidomain, jaiglobal_s)
 
          ierr = nf90_enddef(ncid)
          ierr = nf90_put_var(ncid, id_tsp%id_netnodez(1), zn)
+
          ierr = nf90_redef(ncid) ! TODO: AvD: I know that all this redef is slow. Split definition and writing soon.
       end if
 
@@ -10731,6 +10826,13 @@ subroutine unc_write_net_ugrid2(ncid, id_tsp, janetcell, jaidomain, jaiglobal_s)
          ye(Lnew) = .5d0*(yk(K1) + yk(K2)) ! TODO: AvD: make this sferic+3D-safe
       enddo
 
+      if (allocated(iglobal_s) .and. size(blcell) > 0) then
+         call realloc(zf, nump, fill = dmiss, keepExisting = .false.)
+         do i = 1, nump
+            zf(i) = blcell(iglobal_s(i))
+         end do
+      end if
+
       ! Determine max nr of vertices and contour points
       nv =  0
       do i=1,NUMP ! 2D cells
@@ -10745,6 +10847,7 @@ subroutine unc_write_net_ugrid2(ncid, id_tsp, janetcell, jaidomain, jaiglobal_s)
             face_nodes(k,i) = abs(KC(netcell(i)%NOD(k))) ! Use permuted 2D node numbers
          end do
       end do
+
       ! TODO: AvD: lnx1d+1:lnx includes open bnd links, which may *also* be 1D boundaries (don't want that in mesh2d)
       ierr = ug_write_mesh_arrays(ncid, id_tsp%meshids2d, mesh2dname, 2, UG_LOC_EDGE + UG_LOC_FACE, numk2d, numl2d, nump, nv, &
                                     edge_nodes, face_nodes, null(), null(), null(), xn, yn, xe, ye, xzw(1:nump), yzw(1:nump), &
@@ -10755,10 +10858,21 @@ subroutine unc_write_net_ugrid2(ncid, id_tsp, janetcell, jaidomain, jaiglobal_s)
 
       if (numk2d > 0) then
          ierr = ug_inq_varid(ncid, id_tsp%meshids2d, 'node_z', id_tsp%id_netnodez(2)) ! TODO: AvD: keep this here as long as ug itself does not WRITE the zk data.
+
+         if (allocated(zf)) then
+            ierr = ug_def_var(ncid, id_zf, (/id_tsp%meshids2d%dimids(mdim_face) /), nf90_double, UG_LOC_FACE, &
+               mesh2dname, 'face_z', face_z_stdname, 'z-coordinate of mesh faces', 'm', '', '', crs, dfill=dmiss)
+         end if
+
          ierr = nf90_enddef(ncid)
          ierr = nf90_put_var(ncid, id_tsp%id_netnodez(2), zn)
-         ierr = nf90_redef(ncid) ! TODO: AvD: I know that all this redef is slow. Split definition and writing soon.
+         if (allocated(zf)) then
+            ierr = nf90_put_var(ncid, id_zf, zf)
+         end if
       end if
+
+      ierr = nf90_redef(ncid) ! TODO: AvD: I know that all this redef is slow. Split definition and writing soon.
+
 
       !define 1d2dcontacts only after mesh2d is completly defined
       if (n1d2dcontacts > 0) then
@@ -10794,13 +10908,15 @@ subroutine unc_write_net_ugrid2(ncid, id_tsp, janetcell, jaidomain, jaiglobal_s)
       ierr = nf90_def_dim(ncid, 'nNetElem', nump1d2d, ids_netelem%id_netelemdim)
    end if
 
-   if (jaidomain_ /= 0) then
-      ierr = unc_def_idomain(ncid, id_idomain, ids_netelem%id_netelemdim)
+   ! Define partitioned model variables:
+   ndx2d = nump     ! Needed to use helper routine unc_def_var_map below.
+   ndxi  = nump1d2d
+   if (jaidomain_ > 0) then
+      ierr = unc_def_var_map(ncid, id_tsp, id_tsp%id_flowelemdomain(:), nf90_int, UNC_LOC_S, 'netelem_domain', '', 'domain number of netcell', '', 0, cell_method = 'point', jabndnd = 0, ivalid_max = ndomains)
    end if
-
-   if (jaiglobal_s_ /= 0) then
-      ierr = unc_def_iglobal(ncid, id_iglobal_s, ids_netelem%id_netelemdim)
-   endif
+   if (jaiglobal_s_ > 0) then
+      ierr = unc_def_var_map(ncid, id_tsp, id_tsp%id_flowelemglobalnr(:), nf90_int, UNC_LOC_S, 'netelem_globalnr', '', 'global netcell number', '', 0, cell_method = 'point', jabndnd = 0, ivalid_max = Nglobal_s)
+   end if
 
    ierr = nf90_enddef(ncid)
 
@@ -10809,13 +10925,23 @@ subroutine unc_write_net_ugrid2(ncid, id_tsp, janetcell, jaidomain, jaiglobal_s)
        ierr = unc_write_net_elem(ncid, ids_netelem)
     end if
 
-   if ( jaidomain_ /= 0) then
-      ierr = nf90_put_var(ncid, id_idomain,   idomain,   count = (/ nump1d2d /))
-   endif
-   call readyy('Writing net data', 0.8d0)
+   ! Write partitioned model variables:
+   if (numk1d > 0) then
+      if (jaidomain_ > 0) then
+         ierr = nf90_put_var(ncid, id_tsp%id_flowelemdomain(1), idomain1d(1:numk1d))
+      end if
+      if (jaiglobal_s_ > 0) then
+         ierr = nf90_put_var(ncid, id_tsp%id_flowelemglobalnr(1), iglobal_s1d(1:numk1d))
+      end if
+   end if
 
-   if ( jaiglobal_s_ /= 0) then
-      ierr = nf90_put_var(ncid, id_iglobal_s, iglobal_s, count = (/ nump1d2d /))
+   if (nump > 0) then
+      if (jaidomain_ > 0) then
+         ierr = nf90_put_var(ncid, id_tsp%id_flowelemdomain(2), idomain(1:nump))
+      end if
+      if (jaiglobal_s_ > 0) then
+        ierr = nf90_put_var(ncid, id_tsp%id_flowelemglobalnr(2), iglobal_s(1:nump))
+      end if
    end if
    call readyy('Writing net data', 0.9d0)
 
@@ -10998,11 +11124,19 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
 
       ierr = ionc_get_meshgeom(ioncid, im, networkIndex, meshgeom)
 
-      if (meshgeom%dim == 1) then
+      if (meshgeom%dim == 1 .and. networkIndex > 0) then
          !Save meshgeom for later writing of the 1d network names
          ! Retrieve the 1d geometry twice one time in meshgeom to process in this subroutine, one time in meshgeom1d, that can be used later during initialisation.
          ierr = ionc_get_meshgeom(ioncid, im, networkIndex, meshgeom, start_index, includeArrays, nbranchids, nbranchlongnames, nnodeids, nnodelongnames, &
                                   nodeids, nodelongnames, network1dname, mesh1dname)
+         if (ierr /= IONC_NOERR) then
+            ! mesh1d could not be read (possibly network topology missing in file)
+            write(msgbuf, '(a,a,a,i0,a,i0,a)') 'unc_read_net_ugrid: Could not read 1D mesh from file ''', trim(filename), &
+               ''', for mesh #', im, ', error code: ', ierr, '.'
+            call warn_flush()
+            goto 999
+         end if
+
          ierr = ionc_get_meshgeom(ioncid, im, networkIndex, meshgeom1d, start_index, includeArrays, nbranchids, nbranchlongnames, nnodeids, nnodelongnames, &
                                   nodeids, nodelongnames, network1dname, mesh1dname)
          mesh1dname = meshgeom1d%meshname
@@ -11010,6 +11144,13 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
              !1d edge nodes (kn array) set above
              cycle
          endif
+      elseif (meshgeom%dim == 1 .and. networkIndex <= 0) then
+         ! 1D mesh without network topology (i.e., direct xk/yk)
+         if (meshgeom%numnode < 0) then
+            cycle
+         end if
+         ierr = ionc_get_meshgeom(ioncid, im, networkIndex, meshgeom, start_index, includeArrays)
+         mesh1dname = meshgeom%meshname
       elseif (meshgeom%dim == 2) then
          !Else 2d/3d mesh
          if (meshgeom%numnode < 0 .or. meshgeom%numface < 0) then
@@ -11021,6 +11162,7 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
          allocate(xface(meshgeom%numface)) ! TODO: LC: this is only used when there are mesh contacts. Also: have these not already been read into meshgeom%facex/y?
          allocate(yface(meshgeom%numface))
          ierr = ionc_get_face_coordinates(ioncid, im, xface, yface)
+         call read_mesh2d_face_z(ioncid, im, meshgeom%numface)
       else
          ! Only support 1D network and 2D grid
          write(msgbuf, '(a,i0,a,i0,a)') 'unc_read_net_ugrid: unsupported topology dimension ', meshgeom%dim, &
@@ -11034,10 +11176,10 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
 
       !increasenetw
       call increasenetw(numk_last + meshgeom%numnode, numl_last + meshgeom%numedge, also_dxe=need_edgelengths) ! increases XK, YK, KN, optionally dxe
-      if (meshgeom%dim.ne.1) then
-      ! not 1d
+      if (meshgeom%dim == 2 .or. networkIndex <= 0) then
+      ! 2D, or 1D without network topology
          ierr = ionc_get_node_coordinates(ioncid, im, XK(numk_last+1:numk_last + meshgeom%numnode), YK(numk_last+1:numk_last + meshgeom%numnode)) ! TODO: LC: this duplicates with the above get_meshgeom with includearrays=.true.
-      else
+      else if (networkIndex > 0) then
          ! 1d part
          koffset1dmesh = numk_last
          ierr = odu_get_xy_coordinates(meshgeom%nodebranchidx, meshgeom%nodeoffsets, meshgeom%ngeopointx, meshgeom%ngeopointy, &
@@ -11306,6 +11448,35 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
 
 end subroutine unc_read_net_ugrid
 
+!> read mesh2d_face_z and store result in module variable blcell.
+!! Also keep standard name used in face_z_stdname
+subroutine read_mesh2d_face_z(ioncid, im, numface)
+   use io_netcdf
+   use netcdf
+   use m_alloc
+   integer, intent(in) :: ioncid, im, numface
+
+   integer :: i, ierr, id_netnodef, ncid
+   character(len=*), parameter :: std_names(2) = (/ 'sea_floor_depth_below_geoid', 'altitude                   '/)
+
+   ierr = huge(ierr)
+   do i = 1, size(std_names)
+      ierr = ionc_inq_varid_by_standard_name(ioncid, im, UG_LOC_FACE, std_names(i) , id_netnodef)
+      face_z_stdname = trim(std_names(i))
+      if (ierr == nf90_noerr) exit
+   end do
+   if (ierr == nf90_noerr) then
+      call realloc(blcell, numface, keepExisting = .false.)
+      ierr = ionc_get_ncid(ioncid, ncid)
+      ierr = nf90_get_var(ncid, id_netnodef, blcell)
+      ! TODO: for future use inside setbedlevelfromnetfile(),
+      !       make sure to store vertical orientation of variable.
+      ! TODO: handle _FillValue correctly, and make sure that the mesh writing
+      !       stays consistent with the fill/dmiss value that we use here.
+   else
+      call realloc(blcell, 0)
+   end if
+end subroutine read_mesh2d_face_z
 
 !> Reads the net data from a NetCDF file.
 !! Processing is done elsewhere.
@@ -13591,6 +13762,8 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd)
    use unstruc_channel_flow, only: network
    use m_flowparameters, only: jamd1dfile, jafullgridoutput
    use m_oned_functions, only: gridpoint2cross
+   use m_flowtimes, only: handle_extra
+   use Timers
    implicit none
 
    integer, intent(in)                     :: ncid
@@ -13650,6 +13823,7 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd)
       return
    end if
 
+   if (timon) call timstrt ( "unc_write_flowgeom_filepointer_ugrid", handle_extra(69))
    if (present(jabndnd)) then
       jabndnd_ = jabndnd
    else
@@ -14021,8 +14195,8 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd)
 
    ! Define domain numbers when it is a parallel run
    if (jampi .eq. 1) then
-      ierr = unc_def_var_map(ncid, id_tsp, id_tsp%id_flowelemdomain(:), nf90_int, UNC_LOC_S, 'flowelem_domain', 'cell_domain_number', 'domain number of flow element', '', 0, jabndnd=jabndnd_)
-      ierr = unc_def_var_map(ncid, id_tsp, id_tsp%id_flowelemglobalnr(:), nf90_int, UNC_LOC_S, 'flowelem_globalnr', 'cell_global_number', 'global flow element numbering', '', 0, jabndnd=jabndnd_)
+      ierr = unc_def_var_map(ncid, id_tsp, id_tsp%id_flowelemdomain(:), nf90_int, UNC_LOC_S, 'flowelem_domain', 'cell_domain_number', 'domain number of flow element', '', 0, jabndnd=jabndnd_, ivalid_max = ndomains)
+      ierr = unc_def_var_map(ncid, id_tsp, id_tsp%id_flowelemglobalnr(:), nf90_int, UNC_LOC_S, 'flowelem_globalnr', 'cell_global_number', 'global flow element numbering', '', 0, jabndnd=jabndnd_, ivalid_max = Nglobal_s)
    endif
    ierr = nf90_enddef(ncid)
 
@@ -14102,6 +14276,7 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd)
    if (jaInDefine == 1) then
       ierr = nf90_redef(ncid)
    end if
+   if (timon) call timstop (handle_extra(69))
 
    !call readyy('Writing flow geometry data',-1d0)
    return
@@ -14530,8 +14705,6 @@ end subroutine check_error
 !
 !    ierr = nf90_close(inetfile)
 
-
-
 !> Reads the flow data from a map file for one single variable, specified by the user.
 !! Processing is done elsewhere.
 subroutine read_flowsamples_from_netcdf(fileName, quantityName, ierr)
@@ -14732,8 +14905,9 @@ subroutine readcells(filename, ierr, jaidomain, jaiglobal_s, jareinitialize)
     integer                       :: L, nv, n, k, s, jaidomain_, jaiglobal_s_, fillvalue, jareinitialize_
     integer                       :: nerr_store
     integer, allocatable          :: netcellnod(:,:), netcelllin(:,:), kn_tmp(:,:), ltype_tmp(:)
-    integer                       :: numl_read, numk_read, numl1d_read, numl2d_read, numk2d_read
+    integer                       :: numl_read, numk_read, numl1d_read, numl2d_read, numk2d_read, numl1d2d_read
     integer, allocatable          :: kn12(:,:) !< Placeholder array for the edge_nodes
+    integer, allocatable          :: idomain1d(:), iglobal_s1d(:)
 
     integer :: jaugrid    !< Whether UGRID file was read or not (1/0)
     integer :: ioncid     !< io_netcdf dataset id
@@ -14742,6 +14916,7 @@ subroutine readcells(filename, ierr, jaidomain, jaiglobal_s, jareinitialize)
     integer :: numk1d     !< Local counter for number of 1d net nodes ("grid points")
     integer :: nump1d     !< Local counter for number of 1d nodes ("cells")
     double precision :: convversion !< io_netcdf conventions version number
+    integer :: ncontacts, im
 
     ierr = DFM_NOERR
 
@@ -14805,10 +14980,15 @@ subroutine readcells(filename, ierr, jaidomain, jaiglobal_s, jareinitialize)
        numk_read = numk_read + numk2d_read
        nv = max(nv, 1)
 
-       ! TODO: also read contacts
-       continue
-       
-
+       ! read contacts
+       ncontacts = 0
+       numl1d2d_read = 0
+       ierr = ionc_get_contact_topo_count(ioncid, ncontacts)
+       do im = 1, ncontacts
+          ierr = ionc_get_contacts_count_ugrid(ioncid, im, numl1d2d_read)
+          numl_read = numl_read + numl1d2d_read
+          numk_read = numk_read + numl1d2d_read
+       end do
     else
        ! No UGRID, not a problem, code below will fall back to trying old format.
        jaugrid = 0
@@ -14886,10 +15066,10 @@ subroutine readcells(filename, ierr, jaidomain, jaiglobal_s, jareinitialize)
           ! face-edge indices:
           ! read from UGRID file:    1:numl2d
           ! stored in network_data:  numl1d+1:numl1d+numl2d (because setnodadm() has placed in order: 1D first (incl 1D2D), 2D second.)
-          netcellnod(:,1:nump) = numk1d + netcellnod(:,1:nump) ! 1D+2D net nodes are stored together in our arrays, so increment the local UGRID 2D face-node indices.
+          where (netcellnod(:,1:nump) /= fillvalue) netcellnod(:,1:nump) = numk1d + netcellnod(:,1:nump) ! 1D+2D net nodes are stored together in our arrays, so increment the local UGRID 2D face-node indices.
           ierr = ionc_get_face_edges(ioncid, im2d, netcelllin(:,1:nump), fillvalue, 1)
           if (ierr == ionc_noerr) then
-             netcelllin(:,1:nump) = numl1d + netcelllin(:,1:nump) ! 1D+2D net links are stored together in our arrays, so increment the local UGRID 2D face-edge indices.
+             where (netcelllin(:,1:nump) /= fillvalue) netcelllin(:,1:nump) = numl1d + netcelllin(:,1:nump) ! 1D+2D net links are stored together in our arrays, so increment the local UGRID 2D face-edge indices.
           else
              ! Face-edge-connectivity is optional in UGRID, so when not found, reconstruct them ourselves.
              call ggeo_construct_netcelllin_from_netcellnod(nump, netcellnod, netcelllin)
@@ -14947,51 +15127,114 @@ subroutine readcells(filename, ierr, jaidomain, jaiglobal_s, jareinitialize)
     call readyy('Reading net data',.8d0)
 
     if (jaugrid == 1) then
-       ! TODO: UNST-4919: this is temporary code to fall back to reading idomain+iglobal_s in the legacy way, until UNST-4919 is implemented.
        ierr = ionc_get_ncid(ioncid, inetfile)
     end if
 
-    ! read idomain ! TODO: UNST-3752: this does not distinguish yet between UGRID and non-UGRID. In the future idomain and iglobal_s on separate vars for mesh1d and mesh2d /?
-    if (jaidomain_ .ne. 0) then
-       if (.false. .and. jaugrid == 1) then
-          ! TODO: UNST-4919: read idomain using ionc_* calls
-          ierr = nf90_noerr
-          continue
-       else
+    ! read idomain
+    if (jaidomain_ == 1) then
+       if (jaugrid == 1) then
+          id_idomain = 0
+          call realloc(idomain, nump1d2d, stat = ierr, keepExisting = .false., fill = -999)
+          if (im1d > 0) then ! read 1d idomain
+             ierr = ionc_inq_varid(ioncid, im1d, 'netelem_domain', id_idomain)
+             call check_error(ierr, '1d netelem_domain')
+             if (ierr == nf90_noerr) then
+                call realloc(idomain1d, numk1d, keepExisting = .false., fill = -999)
+                ierr = nf90_get_var(inetfile, id_idomain, idomain1d)
+             end if
+          end if
+          if (im2d > 0) then ! read 2d idomain
+             ierr = ionc_inq_varid(ioncid, im2d, 'netelem_domain', id_idomain)
+             call check_error(ierr, '2d netelem_domain')
+             if (ierr == nf90_noerr) then
+                ierr = nf90_get_var(inetfile, id_idomain, idomain(1:nump))
+             end if
+          end if
+          ! Add idomain1d to idomain
+          if (id_idomain > 0 .and. ierr == nf90_noerr) then
+             do n = nump+1, nump1d2d
+                k = netcell(n)%nod(1)
+                idomain(n) = idomain1d(k)
+             end do
+             ierr = nf90_get_att(inetfile, id_idomain, 'valid_max', ndomains)
+             if (ierr /= nf90_noerr) then
+                ndomains = 0
+             end if
+          else
+             ndomains = 0
+          end if
+       else ! non-UGRID
           ierr = nf90_inq_varid(inetfile, 'idomain', id_idomain)
           call check_error(ierr, 'idomain')
-          if ( ierr.eq.nf90_noerr ) then
+          if (ierr == nf90_noerr) then
              call realloc(idomain, nump1d2d, stat = ierr, keepExisting = .false.)
              ierr = nf90_get_var(inetfile, id_idomain, idomain, count = (/ nump1d2d /))
              ierr = nf90_get_att(inetfile, id_idomain, 'valid_max', ndomains)
-          else  ! no subdomain numbers in netfile
+             if (ierr /= nf90_noerr) then
+                ndomains = 0
+             end if
+          else
              ndomains = 0
-             if ( allocated(idomain) ) deallocate(idomain)
           end if
+       end if
+       if (ndomains == 0) then  ! no subdomain numbers in netfile
+          if ( allocated(idomain) ) deallocate(idomain)
        end if
     endif
 
-    if ( jaiglobal_s_.eq.1 ) then
+    if (jaiglobal_s_ == 1) then
 !      store nerr_
        nerr_store = nerr_
-       if (.false. .and. jaugrid == 1) then
-          ! TODO: UNST-4919: read iglobal_s using ionc_* calls
-          ierr = nf90_noerr
-          continue
-       else
+       if (jaugrid == 1) then
+          id_iglobal_s = 0
+          call realloc(iglobal_s, nump1d2d, stat = ierr, keepExisting = .false., fill = -999)
+          if (im1d > 0) then ! read 1d globalnr
+             ierr = ionc_inq_varid(ioncid, im1d, 'netelem_globalnr', id_iglobal_s)
+             call check_error(ierr, '1d netelem_globalnr')
+             if (ierr == nf90_noerr) then
+                call realloc(iglobal_s1d, numk1d, keepExisting = .false., fill = -999)
+                ierr = nf90_get_var(inetfile, id_iglobal_s, iglobal_s1d)
+             end if
+          end if
+          if (im2d > 0) then ! read 2d globalnr
+             ierr = ionc_inq_varid(ioncid, im2d, 'netelem_globalnr', id_iglobal_s)
+             call check_error(ierr, '2d netelem_globalnr')
+             if (ierr == nf90_noerr) then
+                ierr = nf90_get_var(inetfile, id_iglobal_s, iglobal_s(1:nump))
+             end if
+          end if
+          ! Add iglobal_s1d to iglobal_s
+          if (id_iglobal_s > 0 .and. ierr == nf90_noerr) then
+             do n = nump+1, nump1d2d
+                k = netcell(n)%nod(1)
+                iglobal_s(n) = iglobal_s1d(k)
+             end do
+             ierr = nf90_get_att(inetfile, id_iglobal_s, 'valid_max', Nglobal_s)
+             if (ierr /= nf90_noerr) then
+                Nglobal_s = 0
+             end if
+          else
+             Nglobal_s = 0
+          end if
+       else ! non-UGRID
           ierr = nf90_inq_varid(inetfile, 'iglobal_s', id_iglobal_s)
           call check_error(ierr, 'iglobal_s')
-          if ( ierr.eq.nf90_noerr ) then
+          if (ierr == nf90_noerr) then
              call realloc(iglobal_s, nump1d2d, stat = ierr, keepExisting = .false.)
              ierr = nf90_get_var(inetfile, id_iglobal_s, iglobal_s, count = (/ nump1d2d /))
              ierr = nf90_get_att(inetfile, id_iglobal_s, 'valid_max', Nglobal_s)
-          else  ! no global cell numbers in netfile (not a problem)
+             if (ierr /= nf90_noerr) then
+                Nglobal_s = 0
+             end if
+          else
              Nglobal_s = 0
-             if ( allocated(iglobal_s) ) deallocate(iglobal_s)
-   !         restore nerr_
-             nerr_ = nerr_store
           end if
        end if
+       if (Nglobal_s == 0) then  ! no global cell numbers in netfile (not a problem)
+          if ( allocated(iglobal_s) ) deallocate(iglobal_s)
+       end if
+!      restore nerr_
+       nerr_ = nerr_store
     end if
 
     if (jareinitialize_ .ne. 0) then ! when re-initialize in GUI, need to read KN, since KN has been changed in renumberflownode
@@ -15336,6 +15579,7 @@ subroutine check_flownodesorlinks_numbering_rst(n, janode, x_rst, y_rst, ierror)
 end subroutine check_flownodesorlinks_numbering_rst
 
 !> Reads the 1d mesh assuming at least two nodes per branch (old file version)
+!! This old reader does not support parallel models.
 integer function read_1d_mesh_convention_one(ioncid, numk_keep, numl_keep, numk_last, numl_last) result (ierr)
 
    use network_data
@@ -15389,7 +15633,7 @@ integer function read_1d_mesh_convention_one(ioncid, numk_keep, numl_keep, numk_
          do ibr = 1, network%brs%Count
             pbr => network%brs%branch(ibr)
             ! first step add coordinates and bed levels to nodes
-            if ( pbr%FromNode%gridNumber == 0 ) then
+            if ( pbr%FromNode%gridNumber == 0 ) then ! TODO: Not safe in parallel models (check gridpointsseq as introduced in UNST-5013)
                numk = numk + 1
                pbr%FromNode%gridNumber = numk
                xk(numk) = pbr%Xs(1)

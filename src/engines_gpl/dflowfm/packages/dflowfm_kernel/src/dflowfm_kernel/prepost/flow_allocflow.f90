@@ -77,6 +77,10 @@
  if (allocated(s0) ) then
     deallocate(s0,s1,a0,a1,hs,s00,cfs)
  endif
+ if (allocated(negativeDepths)) then
+    deallocate(negativeDepths,negativeDepths_cum, noIterations, noIterations_cum, &
+               limitingTimestepEstimation, limitingTimestepEstimation_cum, flowCourantNumber)
+ end if
 
  allocate ( s0  (ndx) , s1 ( ndx) , stat = ierr)
  call aerr('s0  (ndx) , s1  (ndx)', ierr, 2*ndx) ; s0   = 0 ; s1   = 0
@@ -86,6 +90,30 @@
  call aerr('hs  (ndx) , s00 (ndx)', ierr, 2*ndx) ; hs   = 0 ; s00  = 0
  allocate ( cfs (ndx) , stat = ierr)
  call aerr('cfs (ndx)', ierr,   ndx) ; cfs = 0
+
+ if (jamapFlowAnalysis > 0) then
+    allocate ( negativeDepths (ndx) , stat = ierr)
+    call aerr('negativeDepths (ndx)', ierr,   ndx) 
+    negativeDepths = 0
+    allocate ( negativeDepths_cum (ndx) , stat = ierr)
+    call aerr('negativeDepths_cum (ndx)', ierr,   ndx)
+    negativeDepths_cum = 0
+    allocate ( noIterations (ndx) , stat = ierr)
+    call aerr('noIterations (ndx)', ierr,   ndx)
+    noIterations = 0
+    allocate ( noIterations_cum (ndx) , stat = ierr)
+    call aerr('noIterations_cum (ndx)', ierr,   ndx)
+    noIterations_cum = 0
+    allocate ( limitingTimestepEstimation (ndx) , stat = ierr)
+    call aerr('limitingTimestepEstimation (ndx)', ierr,   ndx)
+    limitingTimestepEstimation = 0
+    allocate ( limitingTimestepEstimation_cum (ndx) , stat = ierr)
+    call aerr('limitingTimestepEstimation_cum (ndx)', ierr,   ndx)
+    limitingTimestepEstimation_cum = 0
+    allocate ( flowCourantNumber (ndx) , stat = ierr)
+    call aerr('flowCourantNumber (ndx)', ierr,   ndx)
+    flowCourantNumber = 0d0
+ end if
 
  if (allocated (kbot) ) then
     deallocate( kbot,ktop,ktop0,kmxn,Lbot,Ltop,kmxL )
@@ -898,6 +926,7 @@ endif
  if (allocated(hu))       deallocate(hu)
  if (allocated(huvli))    deallocate(huvli)
  if (allocated(au))       deallocate(au)
+ if (allocated(au_nostrucs))       deallocate(au_nostrucs)
  if (allocated(viu))      deallocate(viu)
  if (allocated(vicLu))    deallocate(vicLu)
  if (allocated(suu))      deallocate(suu)
@@ -947,6 +976,8 @@ endif
  call aerr('huvli(lnkx)' , ierr, lnkx  )  ; huvli = 0
  allocate ( au   (lnkx)  , stat = ierr)
  call aerr('au   (lnkx)' , ierr , lnkx ) ; au    = 0
+ allocate ( au_nostrucs   (lnkx)  , stat = ierr)
+ call aerr('au_nostrucs   (lnkx)' , ierr , lnkx ) ; au_nostrucs    = 0
  allocate ( viu  (lnkx)  , stat =ierr )
  call aerr('viu  (lnkx)' , ierr, lnkx  ) ; viu   = 0
  allocate ( vicLu(lnkx)  , stat =ierr )

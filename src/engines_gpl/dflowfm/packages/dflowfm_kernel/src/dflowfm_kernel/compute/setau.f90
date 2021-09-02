@@ -62,7 +62,10 @@
    endif
 
     call vol12D(1)
-
+    if (ChangeVelocityAtStructures) then
+       au_nostrucs = au
+    endif
+    
     ! set correct flow areas for dambreaks, using the actual flow width
     do n = 1, ndambreaksg
        do k = L1dambreaksg(n), L2dambreaksg(n)

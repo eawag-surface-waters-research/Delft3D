@@ -257,7 +257,9 @@ module m_inquire_flowgeom
       use m_hash_search
       use unstruc_channel_flow
       use m_branch
-      
+      use precision_basics, only: comparereal
+      use m_GlobalParameters, only: flow1d_eps10
+
       integer                             :: ierr
       character(len=Idlen), intent(in   ) :: nodeId          !< Id of the connection node
       integer,              intent(  out) :: L               !< Found link number, -1 when not found.
@@ -268,22 +270,34 @@ module m_inquire_flowgeom
       ierr = DFM_NOERR
       L = -1
       nodeindex = hashsearch(network%nds%hashlist, nodeId)
-      
+      if (nodeindex == -1) then
+         ierr = -1
+         return
+      end if
+
       branch_count = network%brs%Count
       do ibr = 1, branch_count
          pbranch => network%brs%branch(ibr)
-         if (pbranch%active_branch == 0) cycle
-         if (pbranch%fromnode%index == nodeindex) then
+
+         if (pbranch%gridPointsCount == 0) cycle
+
+         ! If it is branch start node and first grid point is also on that start of branch:
+         if (pbranch%fromnode%index == nodeindex &
+             .and. comparereal(pbranch%gridPointsChainages(1), 0d0, flow1d_eps10) == 0) then
             if (L == -1) then
                L = pbranch%lin(1)
             else
+               ! Multiple branches attached to this node: cannot choose which link.
                ierr = -1
                return
             endif
-         elseif (pbranch%tonode%index == nodeindex) then
+         ! Else If it is branch end node and last grid point is also on that end of branch:
+         elseif (pbranch%tonode%index == nodeindex &
+             .and. comparereal(pbranch%gridPointsChainages(pbranch%gridPointsCount), pbranch%length, flow1d_eps10) == 0) then
             if (L == -1) then
                L = pbranch%lin(pbranch%uPointsCount)
             else
+               ! Multiple branches attached to this node: cannot choose which link.
                ierr = -1
                return
             endif

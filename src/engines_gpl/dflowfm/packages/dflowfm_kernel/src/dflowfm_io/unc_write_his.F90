@@ -48,12 +48,11 @@ subroutine unc_write_his(tim)            ! wrihis
     use unstruc_netcdf, only: unc_create, unc_close, unc_addcoordatts, unc_def_var_nonspatial, unc_write_flowgeom_filepointer, definencvar
     use unstruc_netcdf, only: ihisfile, mapids
     use unstruc_netcdf, only: UNC_LOC_S3D, UNC_LOC_WU, UNC_LOC_W
-    use unstruc_netcdf, only: unc_writeopts, UG_WRITE_LATLON, nccrs => crs
+    use unstruc_netcdf, only: unc_writeopts, unc_noforcedflush, UG_WRITE_LATLON, nccrs => crs
     use unstruc_messages
     use m_sferic, only: jsferic
     use m_partitioninfo
     use m_timer
-    use unstruc_model, only: md_ident, getoutputdir
     use m_sediment
     use m_flowexternalforcings, only: numtracers, trnames
     use m_transport, only: NUMCONST_MDU, ITRA1, ITRAN, ISED1, ISEDN, const_names, const_units, NUMCONST, itemp, isalt
@@ -151,6 +150,7 @@ subroutine unc_write_his(tim)            ! wrihis
     integer, allocatable, save :: id_const(:), id_const_cum(:), id_voltot(:)
     integer, allocatable, save :: id_sedbtransfrac(:)
     double precision, allocatable, save :: valobsT(:,:)
+    integer :: maxlocT, maxvalT !< row+column count of valobsT
 
     integer                      :: IP, num, ntmp, n, nlyrs
 
@@ -184,6 +184,8 @@ subroutine unc_write_his(tim)            ! wrihis
        jawrizc = 1
        jawrizw = 1
     endif
+
+    if (timon) call timstrt ( "unc_write_his", handle_extra(54))
 
     ! Another time-partitioned file needs to start, reset iteration count (and file).
     if (ti_split > 0d0 .and. curtime_split /= time_split0) then
@@ -219,6 +221,7 @@ subroutine unc_write_his(tim)            ! wrihis
 #endif
 
     if (ihisfile == 0) then
+        if (timon) call timstrt ( "unc_write_his INIT/DEF", handle_extra(61))
 
         call realloc(id_tra, ITRAN-ITRA1+1, keepExisting = .false.)
         call realloc(id_const, NUMCONST_MDU, keepExisting = .false.)
@@ -227,7 +230,15 @@ subroutine unc_write_his(tim)            ! wrihis
         call realloc(id_voltot, MAX_IDX, keepExisting = .false.)
 
         ! Possibly a different model, so make valobs transpose at correct size again.
-        call realloc(valobsT, (/ size(valobs, 2), size(valobs, 1) /), keepExisting = .false.)
+        maxlocT = max(size(valobs, 2), npumpsg, network%sts%numPumps, ngatesg, ncdamsg, ncgensg, ngategen, &
+                      nweirgen, network%sts%numWeirs, ngenstru,  network%sts%numGeneralStructures, &
+                      ndambreak, network%sts%numOrifices, network%sts%numBridges, network%sts%numculverts, &
+                      network%sts%numuniweirs, network%cmps%count, nlongculvertsg)
+        maxvalT = max(size(valobs, 1), NUMVALS_PUMP, NUMVALS_GATE, NUMVALS_CDAM, NUMVALS_CGEN, NUMVALS_GATEGEN, &
+                      NUMVALS_WEIRGEN, NUMVALS_GENSTRU, &
+                      NUMVALS_DAMBREAK, NUMVALS_ORIFGEN, NUMVALS_BRIDGE, NUMVALS_CULVERT, &
+                      NUMVALS_UNIWEIR, NUMVALS_CMPSTRU, NUMVALS_LONGCULVERT)
+        call realloc(valobsT, (/ maxlocT, maxvalT /), keepExisting = .false.)
 
         if (ti_split > 0d0) then
             filename = defaultFilename('his', timestamp=time_split0)
@@ -235,11 +246,12 @@ subroutine unc_write_his(tim)            ! wrihis
             filename = defaultFilename('his')
         end if
 
-        ierr = unc_create(filename, 0, ihisfile)
+        ierr = unc_create(filename, 0, ihisfile, .false.)
         if (ierr /= nf90_noerr) then
             call mess(LEVEL_WARN, 'Could not create history file.')
         end if
 
+        !if (unc_nounlimited > 0) then ! UNST-4764: His file has never shown good results with NcNoUnlimited option on.
         ierr = nf90_def_dim(ihisfile, 'time', nf90_unlimited, id_timedim)
 
         strlen_netcdf = idlen  !< Max string length of Ids.
@@ -1317,6 +1329,7 @@ subroutine unc_write_his(tim)            ! wrihis
            ierr = nf90_put_att(ihisfile, id_qsrcavg,    'geometry', src_geom_container_name)
         endif
 
+        if (timon) call timstrt ( "unc_write_his DEF bal", handle_extra(59))
         if (jahisbal > 0) then
            do num = 1,MAX_IDX
               if ( num.eq.IDX_InternalTidesDissipation ) then
@@ -1340,7 +1353,9 @@ subroutine unc_write_his(tim)            ! wrihis
               end if
            enddo
         end if
+        if (timon) call timstop (handle_extra(59))
 
+        if (timon) call timstrt ( "unc_write_his DEF structures", handle_extra(60))
         if (jaoldstr == 1) then
            ntmp = ncgensg
         else
@@ -1357,7 +1372,7 @@ subroutine unc_write_his(tim)            ! wrihis
             genstru_geom_container_name = 'general_structure_geom'
             nNodeTot = 0
             if (network%sts%numGeneralStructures > 0) then ! new general structure
-               nNodeTot = get_total_number_of_geom_nodes(ST_GENERAL_ST, network%sts%numGeneralStructures)
+               nNodeTot = nNodesGenstru
             else ! old general structure
                do n = 1, ngenstru
                   i = genstru2cgen(n)
@@ -1388,13 +1403,6 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = nf90_put_att(ihisfile, id_genstru_crestl, 'units', 'm')
             ierr = nf90_put_att(ihisfile, id_genstru_crestl, 'coordinates', 'general_structure_id')
             ierr = nf90_put_att(ihisfile, id_genstru_crestl, 'geometry', genstru_geom_container_name)
-
-            ierr = nf90_def_var(ihisfile, 'general_structure_crest_width', nf90_double, (/ id_genstrudim, id_timedim /), id_genstru_crestw)
-            !ierr = nf90_put_att(ihisfile, id_genstru_crestw, 'standard_name', 'genstru_crest_width')
-            ierr = nf90_put_att(ihisfile, id_genstru_crestw, 'long_name', 'Crest width of general structure')
-            ierr = nf90_put_att(ihisfile, id_genstru_crestw, 'units', 'm')
-            ierr = nf90_put_att(ihisfile, id_genstru_crestw, 'coordinates', 'general_structure_id')
-            ierr = nf90_put_att(ihisfile, id_genstru_crestw, 'geometry', genstru_geom_container_name)
 
             ierr = nf90_def_var(ihisfile, 'general_structure_gate_lower_edge_level', nf90_double, (/ id_genstrudim, id_timedim /), id_genstru_edgel)
             ierr = nf90_put_att(ihisfile, id_genstru_edgel, 'long_name', 'Gate lower edge level of general structure')
@@ -1441,6 +1449,12 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = nf90_put_att(ihisfile, id_genstru_vel, 'geometry', genstru_geom_container_name)
 
             if (network%sts%numGeneralStructures > 0) then ! write extra fields for new general structure
+               ierr = nf90_def_var(ihisfile, 'general_structure_crest_width', nf90_double, (/ id_genstrudim, id_timedim /), id_genstru_crestw)
+               ierr = nf90_put_att(ihisfile, id_genstru_crestw, 'long_name', 'Crest width of general structure')
+               ierr = nf90_put_att(ihisfile, id_genstru_crestw, 'units', 'm')
+               ierr = nf90_put_att(ihisfile, id_genstru_crestw, 'coordinates', 'general_structure_id')
+               ierr = nf90_put_att(ihisfile, id_genstru_crestw, 'geometry', genstru_geom_container_name)
+
                ierr = nf90_def_var(ihisfile, 'general_structure_discharge_through_gate_opening', nf90_double, (/ id_genstrudim, id_timedim /), id_genstru_dis_gate_open)
                ierr = nf90_put_att(ihisfile, id_genstru_dis_gate_open, 'long_name', 'Discharge through gate opening of general structure')
                ierr = nf90_put_att(ihisfile, id_genstru_dis_gate_open, 'units', 'm3 s-1')
@@ -1542,7 +1556,7 @@ subroutine unc_write_his(tim)            ! wrihis
             pump_geom_container_name = 'pump_geom'
             nNodeTot = 0
             if (network%sts%numPumps > 0) then ! newpump
-               nNodeTot = get_total_number_of_geom_nodes(ST_PUMP, network%sts%numPumps)
+               nNodeTot = nNodesPump
             else ! old pump
                do n = 1, npumpsg
                   nlinks = L2pumpsg(n) - L1pumpsg(n) + 1
@@ -1784,7 +1798,7 @@ subroutine unc_write_his(tim)            ! wrihis
             weir_geom_container_name = 'weirgen_geom'
             nNodeTot = 0
             if (network%sts%numWeirs > 0) then ! new weir
-               nNodeTot = get_total_number_of_geom_nodes(ST_WEIR, network%sts%numWeirs)
+               nNodeTot = nNodesWeir
             else ! old weir
                do n = 1, nweirgen
                   i = weir2cgen(n)
@@ -1888,8 +1902,7 @@ subroutine unc_write_his(tim)            ! wrihis
 
             ! Define geometry related variables
             orif_geom_container_name = 'orifice_geom'
-            nNodeTot = 0
-            nNodeTot = get_total_number_of_geom_nodes(ST_ORIFICE, network%sts%numOrifices)
+            nNodeTot = nNodesOrif
 
             ierr = sgeom_def_geometry_variables(ihisfile, orif_geom_container_name, 'orifice', 'line', nNodeTot, id_orifgendim, &
                id_orifgeom_node_count, id_orifgeom_node_coordx, id_orifgeom_node_coordy)
@@ -1989,8 +2002,7 @@ subroutine unc_write_his(tim)            ! wrihis
 
             ! Define geometry related variables
             bridge_geom_container_name = 'bridge_geom'
-            nNodeTot = 0
-            nNodeTot = get_total_number_of_geom_nodes(ST_BRIDGE, network%sts%numBridges)
+            nNodeTot = nNodesBridge
 
             ierr = sgeom_def_geometry_variables(ihisfile, bridge_geom_container_name, 'bridge', 'line', nNodeTot, id_bridgedim, &
                id_bridgegeom_node_count, id_bridgegeom_node_coordx, id_bridgegeom_node_coordy)
@@ -2064,8 +2076,7 @@ subroutine unc_write_his(tim)            ! wrihis
 
             ! Define geometry related variables
             culvert_geom_container_name = 'culvert_geom'
-            nNodeTot = 0
-            nNodeTot = get_total_number_of_geom_nodes(ST_CULVERT, network%sts%numculverts)
+            nNodeTot = nNodesCulv
 
             ierr = sgeom_def_geometry_variables(ihisfile, culvert_geom_container_name, 'culvert', 'line', nNodeTot, id_culvertdim, &
                id_culvertgeom_node_count, id_culvertgeom_node_coordx, id_culvertgeom_node_coordy)
@@ -2221,8 +2232,7 @@ subroutine unc_write_his(tim)            ! wrihis
 
             ! Define geometry related variables
             uniweir_geom_container_name = 'uniweir_geom'
-            nNodeTot = 0
-            nNodeTot = get_total_number_of_geom_nodes(ST_UNI_WEIR, network%sts%numuniweirs)
+            nNodeTot = nNodesUniweir
 
             ierr = sgeom_def_geometry_variables(ihisfile, uniweir_geom_container_name, 'uniweir', 'line', nNodeTot, id_uniweirdim, &
                id_uniweirgeom_node_count, id_uniweirgeom_node_coordx, id_uniweirgeom_node_coordy)
@@ -2411,6 +2421,7 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = nf90_put_att(ihisfile, id_lat_realdis_ave, 'coordinates', 'lateral_id')
             ierr = nf90_put_att(ihisfile, id_lat_realdis_ave, 'geometry', lat_geom_container_name)
         endif
+        if (timon) call timstop (handle_extra(60))
 
         if(dad_included) then  ! Output for dredging and dumping
             ierr = nf90_def_dim(ihisfile, 'ndredlink', dadpar%nalink, id_dredlinkdim)
@@ -2466,7 +2477,9 @@ subroutine unc_write_his(tim)            ! wrihis
         end if
 
         ierr = nf90_enddef(ihisfile)
+        if (timon) call timstop (handle_extra(61))
 
+        if (timon) call timstrt ('unc_write_his timeindep data', handle_extra(63))
         do i=1,numobs+nummovobs
 !           ierr = nf90_put_var(ihisfile, id_statx,    xobs(i),         (/ i /))
 !           ierr = nf90_put_var(ihisfile, id_staty,    yobs(i),         (/ i /))
@@ -2696,12 +2709,17 @@ subroutine unc_write_his(tim)            ! wrihis
               ierr = nf90_put_var(ihisfile, id_dump_name, trimexact(dadpar%dump_areas(i), strlen_netcdf), (/ 1, i /))
            enddo
         endif
+        if (timon) call timstop ( handle_extra(63))
     endif
     ! Increment output counters in m_flowtimes.
     time_his = tim
     it_his   = it_his + 1
+
+    if (timon) call timstrt ('unc_write_his time data', handle_extra(64))
+
     ierr = nf90_put_var(ihisfile, id_time, time_his, (/ it_his /))
     ierr = nf90_put_var(ihisfile, id_timestep, dts, (/ it_his /))
+    if (timon) call timstop ( handle_extra(64))
 
 !   write particles to hisfile (for now)
     if ( japart.gt.0 ) then
@@ -2710,8 +2728,8 @@ subroutine unc_write_his(tim)            ! wrihis
 
 !   Observation points (fixed+moving)
 
-    valobsT = transpose(valobs)
     ntot = numobs + nummovobs
+    valobsT(1:ntot, 1:IPNT_NUM) = transpose(valobs)
     if (ntot > 0) then
        ierr = nf90_put_var(ihisfile,    id_vars,   valobsT(:,IPNT_S1),    start = (/ 1, it_his /), count = (/ ntot, 1 /))
        ierr = nf90_put_var(ihisfile,    id_hs  ,   valobsT(:,IPNT_HS),    start = (/ 1, it_his /), count = (/ ntot, 1 /))
@@ -2754,6 +2772,7 @@ subroutine unc_write_his(tim)            ! wrihis
        endif
     endif
 
+    if (timon) call timstrt('unc_write_his obs data 1', handle_extra(56))
     if (japatm > 0) then
        ierr = nf90_put_var(ihisfile, id_varpatm, valobsT(:,IPNT_patm), start = (/ 1, it_his /), count = (/ ntot, 1 /))
     endif
@@ -2771,7 +2790,9 @@ subroutine unc_write_his(tim)            ! wrihis
        ierr = nf90_put_var(ihisfile, id_infiltcap,  valobsT(:,IPNT_infiltcap),    start = (/ 1, it_his /), count = (/ ntot, 1 /))
        ierr = nf90_put_var(ihisfile, id_infiltact,  valobsT(:,IPNT_infiltact),    start = (/ 1, it_his /), count = (/ ntot, 1 /))
     endif
+    if (timon) call timstop(handle_extra(56))
 
+    if (timon) call timstrt('unc_write_his obs/crs data 2', handle_extra(57))
     if (numobs+nummovobs > 0) then
        if ( kmx>0 ) then
 !         3D
@@ -3149,6 +3170,9 @@ subroutine unc_write_his(tim)            ! wrihis
           endif
        end do
     end if
+    if (timon) call timstop(handle_extra(57))
+
+    if (timon) call timstrt('unc_write_his RUG', handle_extra(65))
 
     ! runup gauges
     if (nrug>0) then
@@ -3165,7 +3189,9 @@ subroutine unc_write_his(tim)            ! wrihis
        ierr = nf90_put_var(ihisfile, id_varruh, toutput1(:), start = (/ 1, it_his /), count = (/ nrug, 1 /))
     endif
 
+    if (timon) call timstop(handle_extra(65))
 
+    if (timon) call timstrt ( "unc_write_his str write", handle_extra(62))
     if (jahissourcesink > 0 .and. numsrc > 0) then
       if (tim == tstart_user) then
         do i = 1, numsrc
@@ -3239,52 +3265,71 @@ subroutine unc_write_his(tim)            ! wrihis
             enddo
          end if
          if (ngenstru > 0) then
-            do i=1,ngenstru
-               !igen = genstru2cgen(i)
-               ierr = nf90_put_var(ihisfile, id_genstru_dis   , valgenstru(2,i),  (/ i, it_his /))
-               ierr = nf90_put_var(ihisfile, id_genstru_crestl, valgenstru(9,i),  (/ i, it_his /)) ! changed
-               ierr = nf90_put_var(ihisfile, id_genstru_edgel , valgenstru(14,i), (/ i, it_his /)) ! changed
-               ierr = nf90_put_var(ihisfile, id_genstru_openw , valgenstru(13,i), (/ i, it_his /)) ! changed
-               ierr = nf90_put_var(ihisfile, id_genstru_s1up  , valgenstru(3,i),  (/ i, it_his /))
-               ierr = nf90_put_var(ihisfile, id_genstru_s1dn  , valgenstru(4,i),  (/ i, it_his /))
-               ierr = nf90_put_var(ihisfile, id_genstru_head,          valgenstru(5,i),  (/ i, it_his /))
-               ierr = nf90_put_var(ihisfile, id_genstru_au,            valgenstru(6,i),  (/ i, it_his /))
-               ierr = nf90_put_var(ihisfile, id_genstru_vel,           valgenstru(7,i),  (/ i, it_his /))
-               if (network%sts%numGeneralStructures > 0) then
-                  ierr = nf90_put_var(ihisfile, id_genstru_s1crest,       valgenstru(8,i),  (/ i, it_his /))
-                  ierr = nf90_put_var(ihisfile, id_genstru_crestw,        valgenstru(10,i), (/ i, it_his /))
-                  ierr = nf90_put_var(ihisfile, id_genstru_stat,     int(valgenstru(11,i)), (/ i, it_his /))
-                  ierr = nf90_put_var(ihisfile, id_genstru_forcedif,      valgenstru(12,i), (/ i, it_his /))
-                  ierr = nf90_put_var(ihisfile, id_genstru_openh,         valgenstru(15,i), (/ i, it_his /))
-                  ierr = nf90_put_var(ihisfile, id_genstru_uppl,          valgenstru(16,i), (/ i, it_his /))
-                  ierr = nf90_put_var(ihisfile, id_genstru_dis_gate_open, valgenstru(17,i), (/ i, it_his /))
-                  ierr = nf90_put_var(ihisfile, id_genstru_dis_gate_over, valgenstru(18,i), (/ i, it_his /))
-                  ierr = nf90_put_var(ihisfile, id_genstru_dis_gate_under,valgenstru(19,i), (/ i, it_his /))
-                  ierr = nf90_put_var(ihisfile, id_genstru_au_open,       valgenstru(20,i), (/ i, it_his /))
-                  ierr = nf90_put_var(ihisfile, id_genstru_au_over,        valgenstru(21,i), (/ i, it_his /))
-                  ierr = nf90_put_var(ihisfile, id_genstru_au_under,      valgenstru(22,i), (/ i, it_his /))
-                  ierr = nf90_put_var(ihisfile, id_genstru_velgateopen,   valgenstru(23,i), (/ i, it_his /))
-                  ierr = nf90_put_var(ihisfile, id_genstru_velgateover,   valgenstru(24,i), (/ i, it_his /))
-                  ierr = nf90_put_var(ihisfile, id_genstru_velgateunder,  valgenstru(25,i), (/ i, it_his /))
-               end if
-            enddo
+            valobsT(1:ngenstru, 1:NUMVALS_GENSTRU) = transpose(valgenstru)
+            !do i=1,ngenstru
+            !   !igen = genstru2cgen(i)
+            !   ierr = nf90_put_var(ihisfile, id_genstru_dis   , valgenstru(2,i),  (/ i, it_his /))
+            !   ierr = nf90_put_var(ihisfile, id_genstru_crestl, valgenstru(9,i),  (/ i, it_his /)) ! changed
+            !   ierr = nf90_put_var(ihisfile, id_genstru_edgel , valgenstru(14,i), (/ i, it_his /)) ! changed
+            !   ierr = nf90_put_var(ihisfile, id_genstru_openw , valgenstru(13,i), (/ i, it_his /)) ! changed
+            !   ierr = nf90_put_var(ihisfile, id_genstru_s1up  , valgenstru(3,i),  (/ i, it_his /))
+            !   ierr = nf90_put_var(ihisfile, id_genstru_s1dn  , valgenstru(4,i),  (/ i, it_his /))
+            !   ierr = nf90_put_var(ihisfile, id_genstru_head,          valgenstru(5,i),  (/ i, it_his /))
+            !   ierr = nf90_put_var(ihisfile, id_genstru_au,            valgenstru(6,i),  (/ i, it_his /))
+            !   ierr = nf90_put_var(ihisfile, id_genstru_vel,           valgenstru(7,i),  (/ i, it_his /))
+            !   if (network%sts%numGeneralStructures > 0) then
+            !      ierr = nf90_put_var(ihisfile, id_genstru_s1crest,       valgenstru(8,i),  (/ i, it_his /))
+            !      ierr = nf90_put_var(ihisfile, id_genstru_crestw,        valgenstru(10,i), (/ i, it_his /))
+            !      ierr = nf90_put_var(ihisfile, id_genstru_stat,     int(valgenstru(11,i)), (/ i, it_his /))
+            !      ierr = nf90_put_var(ihisfile, id_genstru_forcedif,      valgenstru(12,i), (/ i, it_his /))
+            !      ierr = nf90_put_var(ihisfile, id_genstru_openh,         valgenstru(15,i), (/ i, it_his /))
+            !      ierr = nf90_put_var(ihisfile, id_genstru_uppl,          valgenstru(16,i), (/ i, it_his /))
+            !      ierr = nf90_put_var(ihisfile, id_genstru_dis_gate_open, valgenstru(17,i), (/ i, it_his /))
+            !      ierr = nf90_put_var(ihisfile, id_genstru_dis_gate_over, valgenstru(18,i), (/ i, it_his /))
+            !      ierr = nf90_put_var(ihisfile, id_genstru_dis_gate_under,valgenstru(19,i), (/ i, it_his /))
+            !      ierr = nf90_put_var(ihisfile, id_genstru_au_open,       valgenstru(20,i), (/ i, it_his /))
+            !      ierr = nf90_put_var(ihisfile, id_genstru_au_over,        valgenstru(21,i), (/ i, it_his /))
+            !      ierr = nf90_put_var(ihisfile, id_genstru_au_under,      valgenstru(22,i), (/ i, it_his /))
+            !      ierr = nf90_put_var(ihisfile, id_genstru_velgateopen,   valgenstru(23,i), (/ i, it_his /))
+            !      ierr = nf90_put_var(ihisfile, id_genstru_velgateover,   valgenstru(24,i), (/ i, it_his /))
+            !      ierr = nf90_put_var(ihisfile, id_genstru_velgateunder,  valgenstru(25,i), (/ i, it_his /))
+            !   end if
+            !enddo
+            ierr = nf90_put_var(ihisfile, id_genstru_dis   , valobsT(1:ngenstru,2),  (/ 1, it_his /))
+            ierr = nf90_put_var(ihisfile, id_genstru_crestl, valobsT(1:ngenstru,9),  (/ 1, it_his /)) ! changed
+            ierr = nf90_put_var(ihisfile, id_genstru_edgel , valobsT(1:ngenstru,14), (/ 1, it_his /)) ! changed
+            ierr = nf90_put_var(ihisfile, id_genstru_openw , valobsT(1:ngenstru,13), (/ 1, it_his /)) ! changed
+            ierr = nf90_put_var(ihisfile, id_genstru_s1up  , valobsT(1:ngenstru,3),  (/ 1, it_his /))
+            ierr = nf90_put_var(ihisfile, id_genstru_s1dn  , valobsT(1:ngenstru,4),  (/ 1, it_his /))
+            ierr = nf90_put_var(ihisfile, id_genstru_head,          valobsT(1:ngenstru,5),  (/ 1, it_his /))
+            ierr = nf90_put_var(ihisfile, id_genstru_au,            valobsT(1:ngenstru,6),  (/ 1, it_his /))
+            ierr = nf90_put_var(ihisfile, id_genstru_vel,           valobsT(1:ngenstru,7),  (/ 1, it_his /))
+            if (network%sts%numGeneralStructures > 0) then
+               ierr = nf90_put_var(ihisfile, id_genstru_s1crest,       valobsT(1:ngenstru,8),  (/ 1, it_his /))
+               ierr = nf90_put_var(ihisfile, id_genstru_crestw,        valobsT(1:ngenstru,10), (/ 1, it_his /))
+               ierr = nf90_put_var(ihisfile, id_genstru_stat,      int(valobsT(1:ngenstru,11)),(/ 1, it_his /))
+               ierr = nf90_put_var(ihisfile, id_genstru_forcedif,      valobsT(1:ngenstru,12), (/ 1, it_his /))
+               ierr = nf90_put_var(ihisfile, id_genstru_openh,         valobsT(1:ngenstru,15), (/ 1, it_his /))
+               ierr = nf90_put_var(ihisfile, id_genstru_uppl,          valobsT(1:ngenstru,16), (/ 1, it_his /))
+               ierr = nf90_put_var(ihisfile, id_genstru_dis_gate_open, valobsT(1:ngenstru,17), (/ 1, it_his /))
+               ierr = nf90_put_var(ihisfile, id_genstru_dis_gate_over, valobsT(1:ngenstru,18), (/ 1, it_his /))
+               ierr = nf90_put_var(ihisfile, id_genstru_dis_gate_under,valobsT(1:ngenstru,19), (/ 1, it_his /))
+               ierr = nf90_put_var(ihisfile, id_genstru_au_open,       valobsT(1:ngenstru,20), (/ 1, it_his /))
+               ierr = nf90_put_var(ihisfile, id_genstru_au_over,       valobsT(1:ngenstru,21), (/ 1, it_his /))
+               ierr = nf90_put_var(ihisfile, id_genstru_au_under,      valobsT(1:ngenstru,22), (/ 1, it_his /))
+               ierr = nf90_put_var(ihisfile, id_genstru_velgateopen,   valobsT(1:ngenstru,23), (/ 1, it_his /))
+               ierr = nf90_put_var(ihisfile, id_genstru_velgateover,   valobsT(1:ngenstru,24), (/ 1, it_his /))
+               ierr = nf90_put_var(ihisfile, id_genstru_velgateunder,  valobsT(1:ngenstru,25), (/ 1, it_his /))
+            end if
             ! write geometry variables at the first time of history output
             if (it_his == 1) then
                if (network%sts%numGeneralStructures > 0) then ! new general structure
-                  j = 1
-                  call realloc(node_count, network%sts%numGeneralStructures, fill = 0)
-                  do i = 1, network%sts%numGeneralStructures
-                     nNodes = get_number_of_geom_nodes(ST_GENERAL_ST, i)
-                     node_count(i) = nNodes
-
-                     if (nNodes > 0) then
-                        call get_geom_coordinates_of_structure(ST_GENERAL_ST, i, nNodes, geom_x, geom_y)
-                        ierr = nf90_put_var(ihisfile, id_genstrugeom_node_coordx, geom_x(1:nNodes), start = (/ j /), count = (/ nNodes /))
-                        ierr = nf90_put_var(ihisfile, id_genstrugeom_node_coordy, geom_y(1:nNodes), start = (/ j /), count = (/ nNodes /))
-                        j = j + nNodes
-                     end if
-                  end do
-                  ierr = nf90_put_var(ihisfile, id_genstrugeom_node_count, node_count, start = (/ 1 /), count = (/ network%sts%numGeneralStructures /))
+                  ierr = nf90_put_var(ihisfile, id_genstrugeom_node_coordx, geomXGenstru,     start = (/ 1 /), count = (/ nNodesGenstru /))
+                  ierr = nf90_put_var(ihisfile, id_genstrugeom_node_coordy, geomYGenstru,     start = (/ 1 /), count = (/ nNodesGenstru /))
+                  ierr = nf90_put_var(ihisfile, id_genstrugeom_node_count,  nodeCountGenstru, start = (/ 1 /), count = (/ network%sts%numGeneralStructures /))
+                  if (allocated(geomXGenstru))     deallocate(geomXGenstru) ! Deallocate the geometry arrays after writing them to his-file.
+                  if (allocated(geomYGenstru))     deallocate(geomYGenstru)
+                  if (allocated(nodeCountGenstru)) deallocate(nodeCountGenstru)
                else ! old general structure
                   j = 1
                   call realloc(node_count, ngenstru, fill = 0)
@@ -3312,36 +3357,40 @@ subroutine unc_write_his(tim)            ! wrihis
       endif
 
       if (jahispump > 0 .and. npumpsg > 0) then
-         do i=1,npumpsg
-            ierr = nf90_put_var(ihisfile, id_pump_dis,     valpump(2,i), (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_pump_s1up,    valpump(3,i), (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_pump_s1dn,    valpump(4,i), (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_pump_struhead,valpump(5,i), (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_pump_cap,     valpump(6,i), (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_pump_disdir,  valpump(12,i), (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_pump_stage,int(valpump(7,i)),(/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_pump_head,    valpump(8,i), (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_pump_redufact,valpump(9,i), (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_pump_s1del,   valpump(10,i),(/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_pump_s1suc,   valpump(11,i),(/ i, it_his /))
-         end do
+         valobsT(1:npumpsg, 1:NUMVALS_PUMP) = transpose(valpump)
+         !do i=1,npumpsg
+         !   ierr = nf90_put_var(ihisfile, id_pump_dis,     valpump(2,i), (/ i, it_his /))
+         !   ierr = nf90_put_var(ihisfile, id_pump_s1up,    valpump(3,i), (/ i, it_his /))
+         !   ierr = nf90_put_var(ihisfile, id_pump_s1dn,    valpump(4,i), (/ i, it_his /))
+         !   ierr = nf90_put_var(ihisfile, id_pump_struhead,valpump(5,i), (/ i, it_his /))
+         !   ierr = nf90_put_var(ihisfile, id_pump_cap,     valpump(6,i), (/ i, it_his /))
+         !   ierr = nf90_put_var(ihisfile, id_pump_disdir,  valpump(12,i), (/ i, it_his /))
+         !   ierr = nf90_put_var(ihisfile, id_pump_stage,int(valpump(7,i)),(/ i, it_his /))
+         !   ierr = nf90_put_var(ihisfile, id_pump_head,    valpump(8,i), (/ i, it_his /))
+         !   ierr = nf90_put_var(ihisfile, id_pump_redufact,valpump(9,i), (/ i, it_his /))
+         !   ierr = nf90_put_var(ihisfile, id_pump_s1del,   valpump(10,i),(/ i, it_his /))
+         !   ierr = nf90_put_var(ihisfile, id_pump_s1suc,   valpump(11,i),(/ i, it_his /))
+         !end do
+         ierr = nf90_put_var(ihisfile, id_pump_dis,     valobsT(1:npumpsg,2), (/ 1, it_his /))
+         ierr = nf90_put_var(ihisfile, id_pump_s1up,    valobsT(1:npumpsg,3), (/ 1, it_his /))
+         ierr = nf90_put_var(ihisfile, id_pump_s1dn,    valobsT(1:npumpsg,4), (/ 1, it_his /))
+         ierr = nf90_put_var(ihisfile, id_pump_struhead,valobsT(1:npumpsg,5), (/ 1, it_his /))
+         ierr = nf90_put_var(ihisfile, id_pump_cap,     valobsT(1:npumpsg,6), (/ 1, it_his /))
+         ierr = nf90_put_var(ihisfile, id_pump_disdir,  valobsT(1:npumpsg,12), (/ 1, it_his /))
+         ierr = nf90_put_var(ihisfile, id_pump_stage,int(valobsT(1:npumpsg,7)),(/ 1, it_his /))
+         ierr = nf90_put_var(ihisfile, id_pump_head,    valobsT(1:npumpsg,8), (/ 1, it_his /))
+         ierr = nf90_put_var(ihisfile, id_pump_redufact,valobsT(1:npumpsg,9), (/ 1, it_his /))
+         ierr = nf90_put_var(ihisfile, id_pump_s1del,   valobsT(1:npumpsg,10),(/ 1, it_his /))
+         ierr = nf90_put_var(ihisfile, id_pump_s1suc,   valobsT(1:npumpsg,11),(/ 1, it_his /))
          ! write geometry variables at the first time of history output
          if (it_his == 1) then
             if (network%sts%numPumps > 0) then ! new pump
-               j = 1
-               call realloc(node_count, network%sts%numPumps, fill = 0)
-               do i = 1, network%sts%numPumps
-                  nNodes = get_number_of_geom_nodes(ST_PUMP, i)
-                  node_count(i) = nNodes
-
-                  if (nNodes > 0) then
-                     call get_geom_coordinates_of_structure(ST_PUMP, i, nNodes, geom_x, geom_y)
-                     ierr = nf90_put_var(ihisfile, id_pumpgeom_node_coordx, geom_x(1:nNodes), start = (/ j /), count = (/ nNodes /))
-                     ierr = nf90_put_var(ihisfile, id_pumpgeom_node_coordy, geom_y(1:nNodes), start = (/ j /), count = (/ nNodes /))
-                     j = j + nNodes
-                  end if
-               end do
-               ierr = nf90_put_var(ihisfile, id_pumpgeom_node_count, node_count, start = (/ 1 /), count = (/ network%sts%numPumps /))
+               ierr = nf90_put_var(ihisfile, id_pumpgeom_node_coordx, geomXPump,     start = (/ 1 /), count = (/ nNodesPump /))
+               ierr = nf90_put_var(ihisfile, id_pumpgeom_node_coordy, geomYPump,     start = (/ 1 /), count = (/ nNodesPump /))
+               ierr = nf90_put_var(ihisfile, id_pumpgeom_node_count,  nodeCountPump, start = (/ 1 /), count = (/ network%sts%numPumps /))
+               if (allocated(geomXPump))     deallocate(geomXPump)
+               if (allocated(geomYPump))     deallocate(geomYPump)
+               if (allocated(nodeCountPump)) deallocate(nodeCountPump)
             else
                j = 1
                call realloc(node_count, npumpsg, fill = 0)
@@ -3405,53 +3454,50 @@ subroutine unc_write_his(tim)            ! wrihis
          enddo
          ! write geometry variables at the first time of history output
          if (it_his == 1) then
-            j = 1
-            call realloc(node_count, network%sts%numOrifices, fill = 0)
-            do i = 1, network%sts%numOrifices
-               nNodes = get_number_of_geom_nodes(ST_ORIFICE, i)
-               node_count(i) = nNodes
-
-               if (nNodes > 0) then
-                  call get_geom_coordinates_of_structure(ST_ORIFICE, i, nNodes, geom_x, geom_y)
-                  ierr = nf90_put_var(ihisfile, id_orifgeom_node_coordx, geom_x(1:nNodes), start = (/ j /), count = (/ nNodes /))
-                  ierr = nf90_put_var(ihisfile, id_orifgeom_node_coordy, geom_y(1:nNodes), start = (/ j /), count = (/ nNodes /))
-                  j = j + nNodes
-               end if
-            end do
-            ierr = nf90_put_var(ihisfile, id_orifgeom_node_count, node_count, start = (/ 1 /), count = (/ network%sts%numOrifices /))
+            ierr = nf90_put_var(ihisfile, id_orifgeom_node_coordx, geomXOrif,     start = (/ 1 /), count = (/ nNodesOrif /))
+            ierr = nf90_put_var(ihisfile, id_orifgeom_node_coordy, geomYOrif,     start = (/ 1 /), count = (/ nNodesOrif /))
+            ierr = nf90_put_var(ihisfile, id_orifgeom_node_count,  nodeCountOrif, start = (/ 1 /), count = (/ network%sts%numOrifices /))
+            if (allocated(geomXOrif))     deallocate(geomXOrif)
+            if (allocated(geomYOrif))     deallocate(geomYOrif)
+            if (allocated(nodeCountOrif)) deallocate(nodeCountOrif)
          end if
       end if
 
+      if (timon) call timstrt('unc_write_his bridge data', handle_extra(58))
       if (jahisbridge > 0 .and. network%sts%numBridges > 0) then
-         do i=1,network%sts%numBridges
-            ierr = nf90_put_var(ihisfile, id_bridge_dis,   valbridge(2,i), (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_bridge_s1up,  valbridge(3,i), (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_bridge_s1dn,  valbridge(4,i), (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_bridge_head,  valbridge(5,i), (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_bridge_au,    valbridge(6,i), (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_bridge_vel,   valbridge(7,i), (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_bridge_blup,  valbridge(8,i), (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_bridge_bldn,  valbridge(9,i), (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_bridge_bl_act,valbridge(10,i),(/ i, it_his /))
-         enddo
+         !do i=1,network%sts%numBridges
+         !   ierr = nf90_put_var(ihisfile, id_bridge_dis,   valbridge(2,i), (/ i, it_his /))
+         !   ierr = nf90_put_var(ihisfile, id_bridge_s1up,  valbridge(3,i), (/ i, it_his /))
+         !   ierr = nf90_put_var(ihisfile, id_bridge_s1dn,  valbridge(4,i), (/ i, it_his /))
+         !   ierr = nf90_put_var(ihisfile, id_bridge_head,  valbridge(5,i), (/ i, it_his /))
+         !   ierr = nf90_put_var(ihisfile, id_bridge_au,    valbridge(6,i), (/ i, it_his /))
+         !   ierr = nf90_put_var(ihisfile, id_bridge_vel,   valbridge(7,i), (/ i, it_his /))
+         !   ierr = nf90_put_var(ihisfile, id_bridge_blup,  valbridge(8,i), (/ i, it_his /))
+         !   ierr = nf90_put_var(ihisfile, id_bridge_bldn,  valbridge(9,i), (/ i, it_his /))
+         !   ierr = nf90_put_var(ihisfile, id_bridge_bl_act,valbridge(10,i),(/ i, it_his /))
+         !enddo
+            ierr = nf90_put_var(ihisfile, id_bridge_dis,   valbridge(2, 1:network%sts%numBridges), (/ 1, it_his /))
+            ierr = nf90_put_var(ihisfile, id_bridge_s1up,  valbridge(3, 1:network%sts%numBridges), (/ 1, it_his /))
+            ierr = nf90_put_var(ihisfile, id_bridge_s1dn,  valbridge(4, 1:network%sts%numBridges), (/ 1, it_his /))
+            ierr = nf90_put_var(ihisfile, id_bridge_head,  valbridge(5, 1:network%sts%numBridges), (/ 1, it_his /))
+            ierr = nf90_put_var(ihisfile, id_bridge_au,    valbridge(6, 1:network%sts%numBridges), (/ 1, it_his /))
+            ierr = nf90_put_var(ihisfile, id_bridge_vel,   valbridge(7, 1:network%sts%numBridges), (/ 1, it_his /))
+            ierr = nf90_put_var(ihisfile, id_bridge_blup,  valbridge(8, 1:network%sts%numBridges), (/ 1, it_his /))
+            ierr = nf90_put_var(ihisfile, id_bridge_bldn,  valbridge(9, 1:network%sts%numBridges), (/ 1, it_his /))
+            ierr = nf90_put_var(ihisfile, id_bridge_bl_act,valbridge(10,1:network%sts%numBridges), (/ 1, it_his /))
          ! write geometry variables at the first time of history output
          if (it_his == 1) then
-            j = 1
-            call realloc(node_count, network%sts%numBridges, fill = 0)
-            do i = 1, network%sts%numBridges
-               nNodes = get_number_of_geom_nodes(ST_BRIDGE, i)
-               node_count(i) = nNodes
-
-               if (nNodes > 0) then
-                  call get_geom_coordinates_of_structure(ST_BRIDGE, i, nNodes, geom_x, geom_y)
-                  ierr = nf90_put_var(ihisfile, id_bridgegeom_node_coordx, geom_x(1:nNodes), start = (/ j /), count = (/ nNodes /))
-                  ierr = nf90_put_var(ihisfile, id_bridgegeom_node_coordy, geom_y(1:nNodes), start = (/ j /), count = (/ nNodes /))
-                  j = j + nNodes
-               end if
-            end do
-            ierr = nf90_put_var(ihisfile, id_bridgegeom_node_count, node_count, start = (/ 1 /), count = (/ network%sts%numBridges /))
+            if (timon) call timstrt('Bridge geom', handle_extra(74))
+               ierr = nf90_put_var(ihisfile, id_bridgegeom_node_coordx, geomXBridge,     start = (/ 1 /), count = (/ nNodesBridge /))
+               ierr = nf90_put_var(ihisfile, id_bridgegeom_node_coordy, geomYBridge,     start = (/ 1 /), count = (/ nNodesBridge /))
+               ierr = nf90_put_var(ihisfile, id_bridgegeom_node_count,  nodeCountBridge, start = (/ 1 /), count = (/ network%sts%numBridges /))
+               if (allocated(geomXBridge))     deallocate(geomXBridge)
+               if (allocated(geomYBridge))     deallocate(geomYBridge)
+               if (allocated(nodeCountBridge)) deallocate(nodeCountBridge)
+            if (timon) call timstop(handle_extra(74))
          end if
       end if
+      if (timon) call timstop(handle_extra(58))
 
       if (jahisculv > 0 .and. network%sts%numCulverts > 0) then
          do i=1,network%sts%numCulverts
@@ -3468,20 +3514,12 @@ subroutine unc_write_his(tim)            ! wrihis
          enddo
          ! write geometry variables at the first time of history output
          if (it_his == 1) then
-            j = 1
-            call realloc(node_count, network%sts%numCulverts, fill = 0)
-            do i = 1, network%sts%numCulverts
-               nNodes = get_number_of_geom_nodes(ST_CULVERT, i)
-               node_count(i) = nNodes
-
-               if (nNodes > 0) then
-                  call get_geom_coordinates_of_structure(ST_CULVERT, i, nNodes, geom_x, geom_y)
-                  ierr = nf90_put_var(ihisfile, id_culvertgeom_node_coordx, geom_x(1:nNodes), start = (/ j /), count = (/ nNodes /))
-                  ierr = nf90_put_var(ihisfile, id_culvertgeom_node_coordy, geom_y(1:nNodes), start = (/ j /), count = (/ nNodes /))
-                  j = j + nNodes
-               end if
-            end do
-            ierr = nf90_put_var(ihisfile, id_culvertgeom_node_count, node_count, start = (/ 1 /), count = (/ network%sts%numCulverts /))
+            ierr = nf90_put_var(ihisfile, id_culvertgeom_node_coordx, geomXCulv,     start = (/ 1 /), count = (/ nNodesCulv /))
+            ierr = nf90_put_var(ihisfile, id_culvertgeom_node_coordy, geomYCulv,     start = (/ 1 /), count = (/ nNodesCulv /))
+            ierr = nf90_put_var(ihisfile, id_culvertgeom_node_count,  nodeCountCulv, start = (/ 1 /), count = (/ network%sts%numCulverts /))
+            if (allocated(geomXCulv))     deallocate(geomXCulv)
+            if (allocated(geomYCulv))     deallocate(geomYCulv)
+            if (allocated(nodeCountCulv)) deallocate(nodeCountCulv)
          end if
       end if
 
@@ -3497,20 +3535,12 @@ subroutine unc_write_his(tim)            ! wrihis
          enddo
          ! write geometry variables at the first time of history output
          if (it_his == 1) then
-            j = 1
-            call realloc(node_count, network%sts%numuniweirs, fill = 0)
-            do i = 1, network%sts%numuniweirs
-               nNodes = get_number_of_geom_nodes(ST_UNI_WEIR, i)
-               node_count(i) = nNodes
-
-               if (nNodes > 0) then
-                  call get_geom_coordinates_of_structure(ST_UNI_WEIR, i, nNodes, geom_x, geom_y)
-                  ierr = nf90_put_var(ihisfile, id_uniweirgeom_node_coordx, geom_x(1:nNodes), start = (/ j /), count = (/ nNodes /))
-                  ierr = nf90_put_var(ihisfile, id_uniweirgeom_node_coordy, geom_y(1:nNodes), start = (/ j /), count = (/ nNodes /))
-                  j = j + nNodes
-               end if
-            end do
-            ierr = nf90_put_var(ihisfile, id_uniweirgeom_node_count, node_count, start = (/ 1 /), count = (/ network%sts%numuniweirs /))
+            ierr = nf90_put_var(ihisfile, id_uniweirgeom_node_coordx, geomXUniweir,     start = (/ 1 /), count = (/ nNodesUniweir /))
+            ierr = nf90_put_var(ihisfile, id_uniweirgeom_node_coordy, geomYUniweir,     start = (/ 1 /), count = (/ nNodesUniweir /))
+            ierr = nf90_put_var(ihisfile, id_uniweirgeom_node_count,  nodeCountUniweir, start = (/ 1 /), count = (/ network%sts%numuniweirs /))
+            if (allocated(geomXUniweir))     deallocate(geomXUniweir)
+            if (allocated(geomYUniweir))     deallocate(geomYUniweir)
+            if (allocated(nodeCountUniweir)) deallocate(nodeCountUniweir)
          end if
       end if
 
@@ -3622,38 +3652,44 @@ subroutine unc_write_his(tim)            ! wrihis
       end if
 
       if (jahisweir > 0 .and. nweirgen > 0) then
-         do i = 1,nweirgen
-            ierr = nf90_put_var(ihisfile, id_weirgen_dis   , valweirgen(2,i), (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_weirgen_s1up  , valweirgen(3,i), (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_weirgen_s1dn  , valweirgen(4,i), (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_weirgen_crestl, valweirgen(9,i), (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_weirgen_crestw, valweirgen(10,i),(/ i, it_his /))
-            if (network%sts%numWeirs > 0) then ! write extra files for new weirs
-               ierr = nf90_put_var(ihisfile, id_weirgen_head  , valweirgen(5,i),  (/ i, it_his /))
-               ierr = nf90_put_var(ihisfile, id_weirgen_au    , valweirgen(6,i),  (/ i, it_his /))
-               ierr = nf90_put_var(ihisfile, id_weirgen_vel   , valweirgen(7,i),  (/ i, it_his /))
-               ierr = nf90_put_var(ihisfile, id_weirgen_s1crest,valweirgen(8,i),  (/ i, it_his /))
-               ierr = nf90_put_var(ihisfile, id_weir_stat, int(valweirgen(11,i)),(/ i, it_his /))
-               ierr = nf90_put_var(ihisfile, id_weirgen_forcedif,valweirgen(12,i),(/i, it_his /))
-            end if
-         end do
+         valobsT(1:nweirgen, 1:NUMVALS_WEIRGEN) = transpose(valweirgen)
+         !do i = 1,nweirgen
+         !   ierr = nf90_put_var(ihisfile, id_weirgen_dis   , valweirgen(2,i), (/ i, it_his /))
+         !   ierr = nf90_put_var(ihisfile, id_weirgen_s1up  , valweirgen(3,i), (/ i, it_his /))
+         !   ierr = nf90_put_var(ihisfile, id_weirgen_s1dn  , valweirgen(4,i), (/ i, it_his /))
+         !   ierr = nf90_put_var(ihisfile, id_weirgen_crestl, valweirgen(9,i), (/ i, it_his /))
+         !   ierr = nf90_put_var(ihisfile, id_weirgen_crestw, valweirgen(10,i),(/ i, it_his /))
+         !   if (network%sts%numWeirs > 0) then ! write extra files for new weirs
+         !      ierr = nf90_put_var(ihisfile, id_weirgen_head  , valweirgen(5,i),  (/ i, it_his /))
+         !      ierr = nf90_put_var(ihisfile, id_weirgen_au    , valweirgen(6,i),  (/ i, it_his /))
+         !      ierr = nf90_put_var(ihisfile, id_weirgen_vel   , valweirgen(7,i),  (/ i, it_his /))
+         !      ierr = nf90_put_var(ihisfile, id_weirgen_s1crest,valweirgen(8,i),  (/ i, it_his /))
+         !      ierr = nf90_put_var(ihisfile, id_weir_stat, int(valweirgen(11,i)),(/ i, it_his /))
+         !      ierr = nf90_put_var(ihisfile, id_weirgen_forcedif,valweirgen(12,i),(/i, it_his /))
+         !   end if
+         !end do
+         ierr = nf90_put_var(ihisfile, id_weirgen_dis   , valobsT(1:nweirgen,2), (/ 1, it_his /))
+         ierr = nf90_put_var(ihisfile, id_weirgen_s1up  , valobsT(1:nweirgen,3), (/ 1, it_his /))
+         ierr = nf90_put_var(ihisfile, id_weirgen_s1dn  , valobsT(1:nweirgen,4), (/ 1, it_his /))
+         ierr = nf90_put_var(ihisfile, id_weirgen_crestl, valobsT(1:nweirgen,9), (/ 1, it_his /))
+         ierr = nf90_put_var(ihisfile, id_weirgen_crestw, valobsT(1:nweirgen,10),(/ 1, it_his /))
+         if (network%sts%numWeirs > 0) then ! write extra files for new weirs
+            ierr = nf90_put_var(ihisfile, id_weirgen_head  , valobsT(1:nweirgen,5),  (/ 1, it_his /))
+            ierr = nf90_put_var(ihisfile, id_weirgen_au    , valobsT(1:nweirgen,6),  (/ 1, it_his /))
+            ierr = nf90_put_var(ihisfile, id_weirgen_vel   , valobsT(1:nweirgen,7),  (/ 1, it_his /))
+            ierr = nf90_put_var(ihisfile, id_weirgen_s1crest,valobsT(1:nweirgen,8),  (/ 1, it_his /))
+            ierr = nf90_put_var(ihisfile, id_weir_stat, int(valobsT(1:nweirgen,11)),(/ 1, it_his /))
+            ierr = nf90_put_var(ihisfile, id_weirgen_forcedif,valobsT(1:nweirgen,12),(/1, it_his /))
+         end if
          ! write geometry variables at the first time of history output
          if (it_his == 1) then
             if (network%sts%numWeirs > 0) then ! new weir
-               j = 1
-               call realloc(node_count, network%sts%numWeirs, fill = 0)
-               do i = 1, nweirgen
-                  nNodes = get_number_of_geom_nodes(ST_WEIR, i)
-                  node_count(i) = nNodes
-
-                  if (nNodes > 0) then
-                     call get_geom_coordinates_of_structure(ST_WEIR, i, nNodes, geom_x, geom_y)
-                     ierr = nf90_put_var(ihisfile, id_weirgeom_node_coordx, geom_x(1:nNodes), start = (/ j /), count = (/ nNodes /))
-                     ierr = nf90_put_var(ihisfile, id_weirgeom_node_coordy, geom_y(1:nNodes), start = (/ j /), count = (/ nNodes /))
-                     j = j + nNodes
-                  end if
-               end do
-               ierr = nf90_put_var(ihisfile, id_weirgeom_node_count, node_count, start = (/ 1 /), count = (/ network%sts%numWeirs /))
+               ierr = nf90_put_var(ihisfile, id_weirgeom_node_coordx, geomXWeir,     start = (/ 1 /), count = (/ nNodesWeir /))
+               ierr = nf90_put_var(ihisfile, id_weirgeom_node_coordy, geomYWeir,     start = (/ 1 /), count = (/ nNodesWeir /))
+               ierr = nf90_put_var(ihisfile, id_weirgeom_node_count,  nodeCountWeir, start = (/ 1 /), count = (/ network%sts%numWeirs /))
+               if (allocated(geomXWeir))     deallocate(geomXWeir)
+               if (allocated(geomYWeir))     deallocate(geomYWeir)
+               if (allocated(nodeCountWeir)) deallocate(nodeCountWeir)
             else
                j = 1
                call realloc(node_count, nweirgen, fill = 0)
@@ -3694,7 +3730,9 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = nf90_put_var(ihisfile, id_dambreak_cumulative_discharge,         valdambreak(12,i), (/ i, it_his /))
          end do
       end if
+      if (timon) call timstop ( handle_extra(62))
       !
+      if (timon) call timstrt('unc_write_his sed data', handle_extra(66))
       if (jased>0 .and. stm_included .and. jahissed>0 .and. stmpar%lsedtot>0) then
          if (stmpar%morpar%moroutput%sbcuv) then
             call realloc(toutputx, (/ntot, stmpar%lsedtot /), keepExisting=.false., fill = dmiss)
@@ -3794,7 +3832,9 @@ subroutine unc_write_his(tim)            ! wrihis
        ierr = nf90_put_var(ihisfile, id_dred_tfrac  , dadpar%tim_dredged/cof0  , start = (/ 1, it_his /), count = (/ dadpar%nadred+dadpar%nasupl, 1 /))
        ierr = nf90_put_var(ihisfile, id_plough_tfrac, dadpar%tim_ploughed/cof0 , start = (/ 1, it_his /), count = (/ dadpar%nadred+dadpar%nasupl, 1 /))
     endif
+    if (timon) call timstop(handle_extra(66))
 
+    if (timon) call timstrt('unc_write_his IDX data', handle_extra(67))
     do num = 1,MAX_IDX
        if ( num.eq.IDX_InternalTidesDissipation ) then
           if ( jaFrcInternalTides2D.eq.1 ) then
@@ -3812,7 +3852,7 @@ subroutine unc_write_his(tim)            ! wrihis
           ierr = nf90_put_var(ihisfile, id_voltot(num), voltot(num),  start=(/ it_his /))
        end if
     enddo
-
+    if (timon) call timstop(handle_extra(67))
 
     if( jahisgate > 0 .and. ngatesg+ngategen > 0) then
        ! todo: remove all do loops
@@ -3855,6 +3895,10 @@ subroutine unc_write_his(tim)            ! wrihis
       ierr = nf90_put_var(ihisfile, id_comp_time, tim_get_wallclock(handle_steps), start=(/ it_his /))
     end if
 
-    ierr = nf90_sync(ihisfile) ! Flush file
+    if (unc_noforcedflush == 0) then
+       ierr = nf90_sync(ihisfile) ! Flush file
+    end if
+
+    if (timon) call timstop (handle_extra(54))
 
 end subroutine unc_write_his

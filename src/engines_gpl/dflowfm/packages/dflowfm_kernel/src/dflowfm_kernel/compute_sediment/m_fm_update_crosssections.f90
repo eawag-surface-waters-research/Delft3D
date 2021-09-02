@@ -174,7 +174,7 @@
    do inod = 1, network%nds%Count
       pnod => network%nds%node(inod)
       if (pnod%nodeType == nt_LinkNode) then  ! connection node
-         nm = pnod%gridnumber
+         nm = pnod%gridnumber ! TODO: Not safe in parallel models (check gridpointsseq as introduced in UNST-5013)
          blmin = 999999d0
          do j = 1, gridpoint2cross(nm)%num_cross_sections
             c = gridpoint2cross(nm)%cross(j)

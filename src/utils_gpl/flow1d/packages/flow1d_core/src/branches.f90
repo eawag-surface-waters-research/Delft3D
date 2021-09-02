@@ -87,10 +87,23 @@ module m_branch
       integer                        :: uPointsCount            !< number of u points on branch (gridpointsCount -1)
       double precision, allocatable  :: uPointsChainages(:)     !< chainage of velocity points on branch (each upoint 
 
+      !!
+      !! Concept: Grid points sequences.
+      !! A network branch will typically be covered by grid points, e.g., in the gridPointsChainages(:) array.
+      !! In a single domain model, this will be a list of grid points from the branch's fromNode to its endNode.
+      !! In a parallel multi domain model, this may be several sequences of consecutive grid points, separated
+      !! by "holes" where the original grid points are owned by other domain(s).
+      !!
+      integer                        :: gridPointsSeqCount      !< Number of "gridpoint sequences" on a single branch.
+      integer, allocatable           :: k1gridPointsSeq(:)      !< Start indexes for all "gridpoint sequences" on a single branch. Can be used to index into arrays such as gridPointsChainages(:).
+      integer, allocatable           :: k2gridPointsSeq(:)      !< End indexes for all "gridpoint sequences" on a single branch. Can be used to index into arrays such as gridPointsChainages(:).
+      logical                        :: isGPFirstAtBranchStart = .true. !< Whether the first grid point lies at the start of the network branch (always true for sequential models, not per se for multi-partition parallel models.)
+      logical                        :: isGPLastAtBranchEnd    = .true. !< Whether the last grid point lies at the end of the network branch (always true for sequential models, not per se for multi-partition parallel models.)
+
+
       integer                        :: StartPoint              !< Calculation Point at Start of Branch
       integer, allocatable           :: lin(:)                  !< link numbers for links in this channel
       integer, allocatable           :: grd(:)                  !< gridpoint numbers for links in this channel
-      integer                        :: active_branch = 1       !< 0 if outside current domain; 1 if completely in current domain; -1 if partly in current domain
    end type t_branch
 
    !> Set of branches in network
@@ -180,72 +193,87 @@ module m_branch
    !> this function returns the link index based on (branch/chainage), to be used in FM, where subarray
    !! LIN is filled correctly
    integer function getLinkIndex(branch, chainage) 
+      use precision_basics, only: comparereal
+      use m_GlobalParameters, only: flow1d_eps10
 
        type(t_branch)                  :: branch
        double precision, intent(in)    :: chainage  !< Chainage
 
-       integer                         :: i
+       integer                         :: i, is, k1, k2
 
-       if (branch%gridPointsCount == 0) then
-          ! empty branch, could be in another domain
-          getLinkIndex = -1
-       else
-          do i = 2, branch%gridPointsCount
-              if (branch%gridPointschainages(i) >= chainage) then !found
-                 getLinkIndex = branch%lin(i-1)
-                 exit
-              endif
-          enddo
-          if (branch%gridPointschainages(branch%gridPointsCount) < chainage) then
-             getLinkIndex = branch%lin(branch%gridPointsCount-1)
-          endif
-       endif
+       getLinkIndex = -1
+       do is=1,branch%gridPointsSeqCount
+          k1 = branch%k1gridPointsSeq(is)
+          k2 = branch%k2gridPointsSeq(is)
+          if (comparereal(chainage, branch%gridPointschainages(k1), flow1d_eps10) >= 0 &
+             .and. comparereal(chainage, branch%gridPointschainages(k2), flow1d_eps10) <= 0) then
+             do i=k1+1,k2
+                if (comparereal(branch%gridPointschainages(i), chainage, flow1d_eps10) >= 0) then !found
+                   getLinkIndex = branch%lin(i-1 - (is-1)) ! is-1 corrects for any "holes" in between the previous is-1 gridpointssequences.
+                   exit
+                end if
+             end do
+             exit ! No need check any of the other gridpointssequences.
+          end if
+       end do
 
    end function getLinkIndex
    
-   integer function getLinkNumber(brs, ibranch, dist)
-       type(t_branchSet)               :: brs       !< Current branche set
-       integer, intent(in)             :: ibranch   !< Current branch
-       double precision, intent(inout) :: dist      !< Distance along current branch
 
-       integer                         :: i
-       double precision                :: dist_in_b
-       type(t_branch), pointer         :: pbran
-       
-       pbran => brs%branch(ibranch)
-       
-       dist_in_b= 0.0
-       dist = max(0.2, min(dist, pbran%length-0.2)) !< JanM: Waarom is de afstand afgeknot en bestaat er een minSectionLength
-       do i = 2, pbran%gridPointsCount
-           if (pbran%gridPointschainages(i) > dist) then !found
-              getLinkNumber = pbran%lin(i-1)
-              return
-           endif
-       enddo
-       
-       getlinknumber = -1
-   end function getLinkNumber
-   
+   !> Gets the grid point number for a location on a specific branch
+   !! at a specific offset/chainage.
+   !! The selected grid point is the furthest gridpoint whose following
+   !! u-point lies beyond the requested chainage.
+   !! For parallel models, an additional check is done that the location
+   !! lies in the current domain's gridpoint sequences.
    integer function getGridPointNumber(branch, chainage)
+      use precision_basics, only: comparereal
+      use m_GlobalParameters, only: flow1d_eps10
       type (t_branch)   , intent(in   ) :: branch              !< branch object
       double precision  , intent(in   ) :: chainage            !< chainage of object on branch
       
-      integer :: i
+      integer :: i, is, k1, k2, L1, L2
+      double precision :: lastchainage
       
-      if (branch%uPointsCount == 0) then
-         getGridPointNumber = 0
-         return
+      getGridPointNumber = 0
+      do is=1,branch%gridPointsSeqCount
+         k1 = branch%k1gridPointsSeq(is)
+         k2 = branch%k2gridPointsSeq(is)
+         L1 = k1 - (is-1) ! is-1 corrects for any "holes" in between the previous is-1 gridpointssequences.
+         L2 = k2 - is
+         ! Note: UNST-5013: the following "inside gridpointssequence check" has the unavoidable effect
+         ! that for branches with holes, if the chainage lies just after the end of an interior
+         ! gridpoints sequence, the current domain will not find the grid point, but the
+         ! neighbouring domain will find it.
+         if (comparereal(chainage, branch%gridPointschainages(k1), flow1d_eps10) >= 0 &
+            .and. comparereal(chainage, branch%gridPointschainages(k2), flow1d_eps10) <= 0) then
+            do i=L1,L2
+               if (comparereal(branch%uPointschainages(i), chainage, flow1d_eps10) > 0) then !found
+                  getGridPointNumber = branch%grd(i + (is-1))
+                  exit
+               end if
+            end do
+            exit ! No need check any of the other gridpointssequences.
+         end if
+      end do
+
+      ! for exceptional input, return start/end point of branch
+      if (getGridPointNumber <= 0 .and. branch%gridPointsCount > 0) then
+         if (comparereal(chainage, 0d0, flow1d_eps10) == -1 .and. branch%isGPFirstAtBranchStart) then
+            getGridPointNumber = branch%grd(1)
+         else
+            if (branch%uPointsCount > 0) then
+               ! Requested point chainage might lie *after* last uPointChainage, but *before* end of branch.
+               lastchainage = branch%uPointsChainages(branch%uPointsCount)
+            else
+               lastchainage = branch%length
+            end if
+            if (comparereal(chainage, lastchainage, flow1d_eps10) == 1 .and. branch%isGPLastAtBranchEnd) then
+               getGridPointNumber = branch%grd(branch%gridPointsCount)
+            end if
+         end if
       end if
 
-      do i = 1, branch%uPointsCount
-          if (branch%uPointschainages(i) > chainage) then !found
-              getGridPointNumber     = branch%grd(i)
-              return
-          endif
-      enddo
-      ! return end point of branch
-      getGridPointNumber = branch%grd(branch%gridpointscount)
-      
    end function getGridPointNumber
   
    subroutine fill_hashtable_brs(brs)
@@ -269,33 +297,82 @@ module m_branch
    !> Sets up the administration for all branches:
    !! * from/to topology and %grd and %lin discretization points.
    subroutine admin_branch(brs, nlink)
-   
+      use precision_basics, only: comparereal
+      use m_GlobalParameters, only: flow1d_eps10
+
       type (t_branchSet), target, intent(inout) :: brs   !< Branch set from the network.
       integer,                    intent(inout) :: nlink !< Total number of links. (Upon input, any existing links from the call site.
                                                          !< Upon output: total number of links after administering all branches.)
 
-      integer                 :: ibr, i, ngrid
+      integer                 :: ibr, i, ngrid, iUCandidate
       type(t_branch), pointer :: pbr
 
       do ibr= 1, brs%count
          pbr => brs%branch(ibr)
-         call realloc(pbr%lin, pbr%uPointsCount)
+         call realloc(pbr%lin, pbr%uPointsCount, keepExisting = .false.)
          do i = 1, pbr%uPointsCount
             nlink = nlink + 1
             pbr%lin(i) = nlink
          enddo
 
          ! NB: the values for pbr%...Node%gridNumber and pbr%grd(:) will be recalculated in set_linknumbers_in_branches
-         call realloc(pbr%grd, pbr%gridPointsCount)
+         call realloc(pbr%grd, pbr%gridPointsCount, keepExisting = .false.)
          ngrid = pbr%StartPoint - 1
-         if (pbr%FromNode%gridNumber == -1) then
+
+         ! Administer first grid points sequence, if present:
+         if (pbr%gridPointsCount <= 0) then
+            pbr%gridPointsSeqCount = 0
+
+            pbr%isGPFirstAtBranchStart = .false.
+            pbr%isGPLastAtBranchEnd    = .false.
+         else
+            pbr%gridPointsSeqCount = 1
+            call realloc(pbr%k1gridPointsSeq, pbr%gridPointsSeqCount, keepExisting = .false., fill = 0)
+            call realloc(pbr%k2gridPointsSeq, pbr%gridPointsSeqCount, keepExisting = .false., fill = 0)
+            pbr%k1gridPointsSeq(pbr%gridPointsSeqCount) = 1
+            iUCandidate = 1 ! This is the first u-point to be checked for this sequence. ! TODO: AvD: is #upoints always >0  then if gridpointscount>0?
+
+            pbr%isGPFirstAtBranchStart = (comparereal(pbr%gridPointsChainages(1), 0d0, flow1d_eps10) == 0)
+            pbr%isGPLastAtBranchEnd    = (comparereal(pbr%gridPointsChainages(pbr%gridPointsCount), pbr%length, flow1d_eps10) == 0)
+         end if
+
+         if (pbr%FromNode%gridNumber == -1 .and. pbr%isGPFirstAtBranchStart) then
             pbr%FromNode%gridNumber = ngrid + 1
          endif
-         do i = 1, pbr%gridPointsCount
+
+         do i = 1, pbr%gridPointsCount-1
             ngrid = ngrid + 1
             pbr%grd(i) = ngrid
+
+            ! Administer grid points sequences:
+            if (pbr%uPointsChainages(iUCandidate) > pbr%gridPointsChainages(i+1)) then
+               ! Next u-point does not lie between current gridpoint #i and next #i+1, so that must be a new gridpoints sequence
+               if (pbr%gridPointsSeqCount > 0) then
+                  ! Administer end point of current sequence.
+                  pbr%k2gridPointsSeq(pbr%gridPointsSeqCount)   = i
+               end if
+               if (i < pbr%gridPointsCount) then
+                  ! Administer start point of a new sequence.
+                  pbr%gridPointsSeqCount = pbr%gridPointsSeqCount + 1
+                  call realloc(pbr%k1gridPointsSeq, pbr%gridPointsSeqCount, keepExisting = .true., fill = 0)
+                  call realloc(pbr%k2gridPointsSeq, pbr%gridPointsSeqCount, keepExisting = .true., fill = 0)
+                  pbr%k1gridPointsSeq(pbr%gridPointsSeqCount) = i+1
+               end if
+            else
+               ! Next u-point simply lies between current gridpoint #i and next #i+1,
+               ! so this sequence still continues: advance u-point candidate index for next loop step.
+               iUCandidate = iUCandidate + 1
+            end if
+
          enddo
-         if (pbr%ToNode%gridNumber == -1) then
+         if (pbr%gridPointsSeqCount > 0) then
+            ! Administer end point of last sequence.
+            pbr%k2gridPointsSeq(pbr%gridPointsSeqCount) = pbr%gridPointsCount
+         end if
+
+         ngrid = ngrid + 1
+         pbr%grd(i) = ngrid
+         if (pbr%ToNode%gridNumber == -1.and. pbr%isGPLastAtBranchEnd) then
             pbr%ToNode%gridNumber = ngrid
          endif
       enddo

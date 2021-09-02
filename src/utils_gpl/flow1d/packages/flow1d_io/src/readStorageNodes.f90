@@ -305,7 +305,7 @@ module m_readStorageNodes
                network%storS%Count_xy = network%storS%Count_xy + 1
                pSto%x         = x
                pSto%y         = y
-               pSto%node_index = -1 ! node_index will be computed later when calling subroutine set_node_numbers_for_xy_storage_nodes 
+               pSto%node_index = -1 ! node_index will be computed later when calling subroutine set_node_numbers_for_storage_nodes 
             end if
             pSto%useStreetStorage = useStreetStorage
             pSto%useTable         = useTable1

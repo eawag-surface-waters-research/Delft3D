@@ -727,7 +727,7 @@ subroutine readMDUFile(filename, istat)
     use m_heatfluxes
     use m_fm_wq_processes
     use m_xbeach_avgoutput
-    use unstruc_netcdf, only: UNC_CONV_CFOLD, UNC_CONV_UGRID, unc_set_ncformat, unc_writeopts, UG_WRITE_LATLON, UG_WRITE_NOOPTS
+    use unstruc_netcdf, only: UNC_CONV_CFOLD, UNC_CONV_UGRID, unc_set_ncformat, unc_writeopts, UG_WRITE_LATLON, UG_WRITE_NOOPTS, unc_nounlimited, unc_noforcedflush
     use unstruc_version_module
     use dfm_error
     use MessageHandling
@@ -1003,6 +1003,7 @@ subroutine readMDUFile(filename, istat)
     call prop_get_integer( md_ptr, 'geometry', 'CreateLinks1D2D',  md_jamake1d2dlinks)
     call prop_get_integer( md_ptr, 'geometry', 'RenumberFlowNodes',  jarenumber) ! hidden option for testing renumbering
     call prop_get_logical( md_ptr, 'geometry', 'dxDoubleAt1DEndNodes', dxDoubleAt1DEndNodes)
+    call prop_get_logical( md_ptr, 'geometry', 'ChangeVelocityAtStructures', changeVelocityAtStructures)
 
     call prop_get_integer( md_ptr, 'geometry', 'NoOptimizedPolygon', janooptimizedpolygon)
 
@@ -1654,6 +1655,9 @@ subroutine readMDUFile(filename, istat)
     call prop_get_integer(md_ptr, 'output', 'NcFormat', md_ncformat, success)
     call unc_set_ncformat(md_ncformat)
 
+    call prop_get_integer(md_ptr, 'output', 'NcNoUnlimited', unc_nounlimited, success)
+    call prop_get_integer(md_ptr, 'output', 'NcNoForcedFlush',  unc_noforcedflush, success)
+
     ibuf = 0
     call prop_get_integer(md_ptr, 'output', 'NcWriteLatLon', ibuf, success)
     if (success .and. ibuf > 0) then
@@ -1730,6 +1734,7 @@ subroutine readMDUFile(filename, istat)
           call warn_flush()
        end if
     end if
+    call prop_get_integer(md_ptr, 'output', 'Wrimap_flow_analysis', jamapFlowAnalysis, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_flowarea_au', jamapau, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_velocity_component_u1', jamapu1, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_velocity_component_u0', jamapu0, success)
@@ -2393,7 +2398,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     use network_data,            only : zkuni, Dcenterinside, removesmalllinkstrsh, cosphiutrsh
     use m_sferic,                only : anglat, anglon, jsferic, jasfer3D
     use m_physcoef
-    use unstruc_netcdf, only: unc_writeopts, UG_WRITE_LATLON, UG_WRITE_NOOPTS
+    use unstruc_netcdf, only: unc_writeopts, UG_WRITE_LATLON, UG_WRITE_NOOPTS, unc_nounlimited, unc_noforcedflush
     use unstruc_version_module
     use m_equatorial
     use m_sediment
@@ -2632,7 +2637,12 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     if (writeall .or. .not. dxDoubleAt1DEndNodes) then
        call prop_set (prop_ptr, 'geometry', 'dxDoubleAt1DEndNodes',  merge(1, 0, dxDoubleAt1DEndNodes), 'Extend 1D end nodes by 0.5 dx (1: yes, 0: no).')
     endif
-
+    if (writeall .or. changeVelocityAtStructures) then
+      call prop_set( prop_ptr, 'geometry', 'ChangeVelocityAtStructures', merge(1, 0, changeVelocityAtStructures), 'Change the flow velocity at structures in the advection calculation')
+    end if
+    if (writeall .or. .not. changeStructureDimensions) then
+       call prop_set( prop_ptr, 'geometry', 'ChangeStructureDimensions', merge(1, 0, changeStructureDimensions), 'Change the structure dimensions of (universal) weirs, orifices, bridges and general structures in case these dimensions exceed the dimensions of the channel')
+    end if
     if (writeall .or. (kmx > 0)) then
        call prop_set(prop_ptr, 'geometry', 'Kmx' ,              kmx,               'Maximum number of vertical layers')
        call prop_set(prop_ptr, 'geometry', 'Layertype' ,        Layertype,         'Vertical layer type (1: all sigma, 2: all z, 3: use VertplizFile)')
@@ -3434,6 +3444,14 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
 
     call prop_set(prop_ptr, 'output', 'NcFormat',  md_ncformat, 'Format for all NetCDF output files (3: classic, 4: NetCDF4+HDF5)')
 
+    if (writeall .or. unc_nounlimited /= 0) then
+       call prop_set(prop_ptr, 'output', 'NcNoUnlimited',  unc_nounlimited, 'Write full-length time-dimension instead of unlimited dimension (1: yes, 0: no). (Might require NcFormat=4.)')
+    end if
+
+    if (writeall .or. unc_noforcedflush /= 0) then
+       call prop_set(prop_ptr, 'output', 'NcNoForcedFlush',  unc_noforcedflush, 'Do not force flushing of map-like files every output timestep (1: yes, 0: no).')
+    end if
+
     if (writeall .or. unc_writeopts /= UG_WRITE_NOOPTS) then
        if (iand(unc_writeopts, UG_WRITE_LATLON) == UG_WRITE_LATLON) then
           ibuf = 1
@@ -3554,6 +3572,9 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     if (writeall .or. jamaps1 /= 1) then
         call prop_set(prop_ptr, 'output', 'Wrimap_waterlevel_s1', jamaps1, 'Write water levels to map file (1: yes, 0: no)')
     endif
+    if (writeall .or. jamapFlowAnalysis /= 0) then
+       call prop_set(prop_ptr, 'output', 'Wrimap_flow_analysis', jamapFlowAnalysis, 'Write flow analysis data to map file (1: yes, 0: no)')
+    endif
     if (writeall .or. jamapevap /= 0) then
         call prop_set(prop_ptr, 'output', 'Wrimap_evaporation', jamapevap, 'Write evaporation to map file (1: yes, 0: no)')
     endif
@@ -3606,7 +3627,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
         call prop_set(prop_ptr, 'output', 'Wrimap_spiral_flow', jamapspir, 'Write spiral flow to map file (1: yes, 0: no)')
     endif
     if (writeall .or. jamapnumlimdt /= 1) then
-        call prop_set(prop_ptr, 'output', 'Wrimap_numlimdt', jamapnumlimdt, 'Write the number times a cell was Courant limiting to map file (1: yes, 0: no)')
+        call prop_set(prop_ptr, 'output', 'Wrimap_numlimdt', jamapnumlimdt, 'Write the number times a cell was Courant limiting to map file (1: yes, 0: no). (Consider using Wrimap_flow_analysis instead.)')
     endif
     if (writeall .or. jamaptaucurrent /= 1) then
         call prop_set(prop_ptr, 'output', 'Wrimap_taucurrent', jamaptaucurrent, 'Write the shear stress to map file (1: yes, 0: no)')
