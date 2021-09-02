@@ -3188,12 +3188,12 @@ subroutine unc_write_his(tim)            ! wrihis
              k1 = ksrc(1,i)
              k2 = ksrc(4,i)
              nNodes = 0
-             if (k1 /= 0) then
+             if (k1 > 0) then
                 nNodes = nNodes + 1
                 geom_x(nNodes) = xz(k1)
                 geom_y(nNodes) = yz(k1)
              end if
-             if (k2 /= 0) then
+             if (k2 > 0) then
                 nNodes = nNodes + 1
                 geom_x(nNodes) = xz(k2)
                 geom_y(nNodes) = yz(k2)

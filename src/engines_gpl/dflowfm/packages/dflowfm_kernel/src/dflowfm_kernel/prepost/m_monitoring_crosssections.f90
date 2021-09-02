@@ -42,7 +42,7 @@ implicit none
 
 type tcrs
     character(len=IdLen)          :: name          !< Name
-    integer                       :: nval          !< Nr. of different quantities monitored
+    integer                       :: nval          !< Amount of different quantities monitored
     type(tcrspath)                :: path          !< Polyline+crossed flow links that defines this cross section.
     integer                       :: loc2OC = 0    !< mapping from global obs index to obs that are defined by branchID and chainage
     double precision, allocatable :: sumvalcur(:)  !< Values integrated over the crs
@@ -66,8 +66,10 @@ integer                              :: maxnval = 5            !< Current max nu
 integer, private                     :: iUniq_ = 1
 character(len=*), parameter, private :: defaultName_ = 'Crs'
 double precision                     :: tlastupd_sumval        !< Time at which the sumval* arrays were last updated.
-double precision, allocatable        :: sumvalcur_tmp(:,:)     !< Store the temporary values for MPI communication of partial sums across cross sections monitoring.
-double precision, allocatable        :: sumvalcumQ_mpi(:)      !< Store the time-integrated discharge in each history output interval, only used for parallel run
+double precision, allocatable        :: sumvalcum_global(:,:)  !< Global cumulative values of monitored crs quantities, only needed by MPI_RANK_0 process 
+double precision, allocatable        :: sumvalcum_local(:,:)   !< Local cumulative values of monitored crs quantities 
+double precision, allocatable        :: sumvalcur_global(:,:)  !< Global current values of monitored crs quantities, only needed by MPI_RANK_0 process 
+double precision, allocatable        :: sumvalcur_local(:,:)   !< Local  current values of monitored crs quantities 
 double precision, allocatable        :: sumvalcum_timescale(:) !< Store the time-scale multiplication (e.g. morfac in the case of sediment).
 
 contains
@@ -243,8 +245,8 @@ subroutine delCrossSections()
     ncrs = 0
     iUniq_ = 1
 
-    if (allocated(sumvalcur_tmp)) then
-       deallocate(sumvalcur_tmp)
+    if (allocated(sumvalcur_local)) then
+       deallocate(sumvalcur_local)
     end if
     if (allocated(sumvalcum_timescale)) then
        deallocate(sumvalcum_timescale)

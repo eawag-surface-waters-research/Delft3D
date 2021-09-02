@@ -32,7 +32,7 @@
 
 !> Sums all monitored data on all cross sections, including time-integrated values.
 !! for sequential/non-MPI models: stored in crs()%sumvalcur/sumvalcum
-!! for parallel/MPI models: stored in sumvalcur_tmp, and needs later mpi_allreduce:
+!! for parallel/MPI models: stored in sumvalcur_local, and needs later mpi_allreduce:
 !! @see updateValuesOnCrossSections_mpi
 subroutine updateValuesOnCrossSections(tim1)
 use m_monitoring_crosssections
@@ -55,7 +55,7 @@ implicit none
        return
     end if
 
-    numvals  = 5 + NUMCONST_MDU
+    numvals  = 5  + NUMCONST_MDU
 
     if( jased == 4 .and. stmpar%lsedtot > 0 ) then
        numvals = numvals + 1
@@ -70,16 +70,11 @@ implicit none
        sumvalcum_timescale = 1d0
     endif
 
-    if (.not. allocated(sumvalcur_tmp)) then
-       allocate(sumvalcur_tmp(numvals,ncrs))
-       sumvalcur_tmp = 0d0
-       if (jampi==1) then
-          if (.not. allocated(sumvalcumQ_mpi)) then
-             allocate(sumvalcumQ_mpi(ncrs))
-             sumvalcumQ_mpi = 0d0
-          endif
-       endif
+    if (.not. allocated(sumvalcur_local)) then
+       allocate(sumvalcur_local(numvals,ncrs))
+       sumvalcur_local = 0d0
     endif
+    
 
     if (timprev == -1d0) then
         timstep  = 0d0
@@ -91,15 +86,15 @@ implicit none
     end if
 
 !   compute cross-section data for all cross-sections
-    call sumvalueOnCrossSections(sumvalcur_tmp, numvals)
+    call sumvalueOnCrossSections(sumvalcur_local, numvals)
 
     if (jampi == 0) then
-      tlastupd_sumval = tim1 ! Only when jampi==0 the sumval arrays are directly correct after filling. See also updateValuesOnCrossSections_mpi()
+      tlastupd_sumval = tim1
       ! NOTE: when jampi==1, the cross section sumvals on GUI screen are *not* correct, except at each ti_his interval.
       do icrs=1,ncrs
          do iv = 1, numvals ! Nu nog "5+ Numconst" standaard grootheden, in buitenlus
-            crs(icrs)%sumvalcur(iv) = sumvalcur_tmp(iv,icrs)
-            crs(icrs)%sumvalcum(iv) = crs(icrs)%sumvalcum(iv) + max(sumvalcum_timescale(iv),1d0)*timstep*sumvalcur_tmp(iv,icrs)
+            crs(icrs)%sumvalcur(iv) = sumvalcur_local(iv,icrs)
+            crs(icrs)%sumvalcum(iv) = crs(icrs)%sumvalcum(iv) + max(sumvalcum_timescale(iv),1d0)*timstep*sumvalcur_local(iv,icrs)
             if (timtot > 0d0) then
                 crs(icrs)%sumvalavg(iv) = crs(icrs)%sumvalcum(iv)/timtot/max(sumvalcum_timescale(iv),1d0)
             else
@@ -108,9 +103,18 @@ implicit none
           end do
       end do
     else
-       do icrs=1,ncrs ! Compute time-integrated discharge in current history output interval
-          sumvalcumQ_mpi(icrs) = sumvalcumQ_mpi(icrs) + max(sumvalcum_timescale(IPNT_Q1C),1d0)*timstep*sumvalcur_tmp(IPNT_Q1C,icrs)
-       enddo
+        
+    if (.not. allocated(sumvalcum_local)) then
+       allocate(sumvalcum_local(numvals,ncrs))
+       sumvalcum_local = 0d0      
+    endif
+    
+        do icrs=1,ncrs
+         do iv = 1, numvals 
+           ! if jampi = 1 we only update crs(icrs)%sumvalcur and crs(icrs)%sumvalcum every user timestep  
+           sumvalcum_local(iv,icrs) = sumvalcum_local(iv,icrs) +   max(sumvalcum_timescale(iv),1d0)*timstep*sumvalcur_local(iv,icrs)
+         enddo
+        enddo
     endif
 
     timprev = tim1

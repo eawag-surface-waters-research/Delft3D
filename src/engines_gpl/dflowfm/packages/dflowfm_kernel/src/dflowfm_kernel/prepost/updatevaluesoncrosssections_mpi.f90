@@ -45,63 +45,60 @@ subroutine updateValuesOnCrossSections_mpi(tim1)
    use m_flowtimes, only: tstart_user, ti_his
    implicit none
    double precision                 :: tim1, timtot
-   integer                          :: icrs, iv, numvals, ierror
+   integer                          :: iv, icrs, numvals, ierror
 
    ! This routine can now be called any time, but will only do the update
    ! of sumval* when necessary:
-   if (tlastupd_sumval == tim1) then
-      return
+   
+   !This method needs only be called on rank 0, but for some reason MPI processes desync and get deadlocked if we don't use allreduce with all processes
+   !It should be checked if this is due to testing with Intel MPI or a design choice. If the first, change mpi_allreduce below to mpi_reduce.
+   if (tlastupd_sumval == tim1 )then 
+     return
    end if
-   tlastupd_sumval = tim1 ! When jampi==1 the sumval arrays are only correct after the reductions below.
+   
+   tlastupd_sumval = tim1
 
-   numvals  = 5 + NUMCONST_MDU
+   ! This is done every time, why not save this in a module?
+   numvals  = 5 + NUMCONST_MDU 
 
    if( jased == 4 .and. stmpar%lsedtot > 0 ) then
-      numvals = numvals + 1
+      numvals = numvals + stmpar%lsedtot + 1      
       if( stmpar%lsedsus > 0 ) then
          numvals = numvals + 1
       endif
-      numvals = numvals + stmpar%lsedtot
    endif
 
    timtot = tim1 - tstart_user
-
-   ! MPI communication between subdomains
-   if ( jatimer.eq.1 ) call starttimer(IOUTPUTMPI)
-   call reduce_crs(sumvalcur_tmp,ncrs,numvals)
-   call reduce_crs(sumvalcumQ_mpi, ncrs, 1)
+   if (timtot == 0) then
+   timtot = 1 ! So that the first time we don't divide by zero, avoids if condition in loop.
+   endif
+   
+   ! Allocate separate arrays to store sum
+    if (.not. allocated(sumvalcur_global)) then
+       allocate(sumvalcur_global(numvals,ncrs))
+       sumvalcur_global = 0d0      
+    endif
+    if (.not. allocated(sumvalcum_global)) then
+       allocate(sumvalcum_global(numvals,ncrs))
+       sumvalcum_global = 0d0      
+    endif
+    
+   ! Sum current and cumulative values across MPI partitions
+   if ( jatimer.eq.1 ) call starttimer(IOUTPUTMPI)  
+   ! these two calls should happen asynchronously, currently they are blocking
+    call mpi_allreduce(sumvalcum_local, sumvalcum_global,numvals*ncrs,mpi_double_precision,mpi_sum,DFM_COMM_DFMWORLD,ierror)
+    call mpi_allreduce(sumvalcur_local, sumvalcur_global,numvals*ncrs,mpi_double_precision,mpi_sum,DFM_COMM_DFMWORLD,ierror)
    if ( jatimer.eq.1 ) call stoptimer(IOUTPUTMPI)
 
-   ! Update values
+   ! Update values of crs object
    do icrs=1,ncrs
-      if (sumvalcur_tmp(IPNT_AUC, icrs) > 0) then
-         sumvalcur_tmp(IPNT_U1A, icrs) = sumvalcur_tmp(IPNT_Q1C, icrs) / sumvalcur_tmp(IPNT_AUC, icrs)
-         sumvalcur_tmp(IPNT_S1A, icrs) = sumvalcur_tmp(IPNT_S1A, icrs) / sumvalcur_tmp(IPNT_AUC, icrs)
-         sumvalcur_tmp(IPNT_HUA, icrs) = sumvalcur_tmp(IPNT_HUA, icrs) / sumvalcur_tmp(IPNT_AUC, icrs)
-      endif
-      crs(icrs)%sumvalcur(1:numvals) = sumvalcur_tmp(1:numvals,icrs)
+   
+      crs(icrs)%sumvalcur(1:numvals) = sumvalcur_global(1:numvals,icrs)
+      crs(icrs)%sumvalcum(1:numvals) = sumvalcum_global(1:numvals,icrs)
+      crs(icrs)%sumvalavg(1:numvals) = sumvalcum_global(1:numvals,icrs) / timtot / max(sumvalcum_timescale(1:numvals),1d0) 
+      
    enddo
-
-   do icrs=1,ncrs
-      do iv = 1, numvals ! Nu nog "5+ Numconst" standaard grootheden, in buitenlus
-         if (iv == IPNT_Q1C) then
-            crs(icrs)%sumvalcum(iv) = crs(icrs)%sumvalcum(iv) + sumvalcumQ_mpi(icrs)
-         else
-            ! TODO: AvD/JZ: UNST-1281: cumulative Q fort MPI runs is now correct, but:
-            ! * jampi==1 code is quite different from jampi==0 for the sumvalcum.
-            ! * And: sumvalcum for all other quantities than Q1C are wrong:
-            crs(icrs)%sumvalcum(iv) = crs(icrs)%sumvalcum(iv) + max(sumvalcum_timescale(iv),1d0)*ti_his*sumvalcur_tmp(iv, icrs)
-         end if
-         if (timtot > 0d0) then
-             crs(icrs)%sumvalavg(iv) = crs(icrs)%sumvalcum(iv)/timtot/max(sumvalcum_timescale(iv),1d0)
-         else
-             crs(icrs)%sumvalavg(iv) = crs(icrs)%sumvalcur(iv)
-         endif
-       end do
-   end do
-
-   ! Total sums are now correctly in crs(:)%sumval*. Prepare for a new ti_his time interval with partial sums:
-   sumvalcur_tmp = 0d0
-   sumvalcumQ_mpi= 0d0
-
+   
+   return 
+   
 end subroutine updateValuesOnCrossSections_mpi
