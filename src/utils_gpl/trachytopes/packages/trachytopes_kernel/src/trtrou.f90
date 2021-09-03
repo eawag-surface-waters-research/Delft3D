@@ -549,6 +549,8 @@ subroutine trtrou(lundia    ,kmax      ,nmmax   , &
                 write (errmsg, '(a,i6,a,i4,a)') 'TRTROU: Maximum recursion depth reached for line ', &
                     & ita, ' containing roughness code ', ittaru(ita, 3), '.'
                 call write_error(errmsg, unit=lundia)
+                write (errmsg, '(a,i3,a)') 'TRTROU: Adjust composite roughness definition or increase recursion limit (now currently TrtMxR = ', max_cl, ')'
+                call write_error(errmsg, unit=lundia)
                 error = .true.
                 return
              endif
