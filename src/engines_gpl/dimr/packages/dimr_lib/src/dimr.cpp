@@ -925,7 +925,7 @@ void Dimr::runParallelUpdate(dimr_control_block* cb, double tStep) {
 
                                     int ncid = ncfiles[fileName];
                                     size_t indices[] = { timeIndexCounter, 0 };
-                                    int status = nc_put_var1_double(ncid, thisCoupler->logger->netcdfReferences->item_variables[k], indices, thisCoupler->items[k].sourceVarPtr);
+                                    int status = nc_put_var1_double(ncid, thisCoupler->logger->netcdfReferences->item_variables[k], indices, transferValuePtr);
                                     if (status != NC_NOERR)
                                         throw Exception(true, Exception::ERR_OS, "Could not write value at index (%i, 0).", timeIndexCounter);
                                 }
