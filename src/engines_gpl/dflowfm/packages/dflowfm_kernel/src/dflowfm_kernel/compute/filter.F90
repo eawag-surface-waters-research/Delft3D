@@ -798,7 +798,7 @@ end subroutine get_Deltax
 !> compute "checkerboard" mode monitor
 subroutine comp_checkmonitor()
    use m_flowgeom, only: Lnx, Dx, wu, ba, ln
-   use m_flow, only: qw, kmx
+   use m_flow, only: qw, kmx, Lbot, Ltop, kmxL
    use m_turbulence, only: ln0
    use m_filter
    use m_partitioninfo
@@ -829,9 +829,13 @@ subroutine comp_checkmonitor()
       end if
       
       call getLbotLtop(LL,Lb,Lt)
-      do klay=1,kmx
+!     Implementation of filter for both sigma and z layers:
+      do L   = Lbot(LL), Lbot(LL) + kmxL(LL) - 1
+         klay = L - Lbot(LL) +1    
+!
+!!      do klay=1,kmx
 !        get 3D link number (sigma only)
-         L = Lb+klay-1
+!!         L = Lb+klay-1
          
 !        get neighboring 3D cells
          k1 = ln0(1,L)
@@ -862,7 +866,7 @@ end subroutine comp_checkmonitor
 !> get filter coefficient (sigma only)
 subroutine get_filter_coeff()
    use m_flowgeom, only: Lnx, ln, nd, acL, wcx1, wcx2, wcy1, wcy2, csu, snu, Dx, ba
-   use m_flow, only: qa, vol1, kmx, vicLu, hu
+   use m_flow, only: qa, vol1, kmx, vicLu, hu, Lbot, Ltop, kmxL
    use m_filter, only: iLvec, jLvec, ALvec, jadebug, eps, order, Deltax
    
    double precision, dimension(kmx) :: eps1   ! first-order filter coefficient
@@ -950,9 +954,12 @@ subroutine get_filter_coeff()
             end if
    
 !           loop over water column
-            do klay=1,kmx
+!           Implementation of filter for both sigma and z layers:
+            do L   = Lbot(LL), Lbot(LL) + kmxL(LL) - 1
+              klay = L - Lbot(LL) +1    
+!!            do klay=1,kmx
 !              get 3D link number (sigma only)
-               L = Lb+klay-1
+!!               L = Lb+klay-1
                
 !              get advection volume
                k1 = ln(1,L)
@@ -966,9 +973,9 @@ subroutine get_filter_coeff()
                   L1 = Lb1+klay-1
                   
 !                 check if link is active                  
-                  if ( L1.gt.Lt1 ) then
-                     exit
-                  end if
+!!                  if ( L1.gt.Lt1 ) then
+!!                     exit
+!!                  end if
                   
 !                 get outward positive flux
                   Q = qa(L1)*dsign
@@ -995,10 +1002,13 @@ subroutine get_filter_coeff()
             end do
          end do
       end do
-      
-      do klay=1,kmx
+
+!    Implementation of filter for both sigma and z layers:
+     do L   = Lbot(LL), Lbot(LL) + kmxL(LL) - 1
+        klay =  L - Lbot(LL) + 1
+!!      do klay=1,kmx
 !       get 3D link number (sigma only)
-        L = Lb+klay-1
+!!        L = Lb+klay-1
         
         vicouv = vicLu(L)
                
