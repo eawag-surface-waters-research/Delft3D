@@ -36,7 +36,7 @@ io_netcdf_version.F90:
 
 #-------------------------------------------------------------------------------
 #Includes
-AM_FCFLAGS += $(NETCDF_CFLAGS) $(NETCDF_FORTRAN_CFLAGS)
+AM_FCFLAGS += -DLINUX64 $(NETCDF_CFLAGS) $(NETCDF_FORTRAN_CFLAGS)
 
 FMODULES += \
     -I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src
