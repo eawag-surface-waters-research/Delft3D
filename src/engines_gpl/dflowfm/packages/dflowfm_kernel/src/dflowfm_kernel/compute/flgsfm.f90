@@ -19,7 +19,7 @@
 !  contact: delft3d.support@deltares.nl
 !  Stichting Deltares
 !  P.O. Box 177
-!  2600 MH Delft, The  Netherlands
+!  2600 MH Delft, The Netherlands
 !
 !  All indications and logos of, and references to, "Delft3D",
 !  "D-Flow Flexible Mesh" and "Deltares" are registered trademarks of Stichting
@@ -78,6 +78,7 @@ use m_flowgeom
     double precision               :: gateloweredgelevel, gatedoorheight
     double precision               :: DsL, hh, zb, zt, au0, au1, au2, au3
     double precision               :: gatefraction
+    double precision               :: hhi(3), zbi(3), zti(3)
 
 !
 !! executable statements -------------------------------------------------------
@@ -143,6 +144,7 @@ use m_flowgeom
     L0 = n - L1cgensg(ng)+1
 
     zs                 = min  ( bob(1,Lf), bob(2,Lf) )         ! == zcgen(3*ng - 2) crest/silllevel
+    zbi(1)             = zs
     gateloweredgelevel = generalstruc(ng)%gateheightonlink(L0) ! == zcgen(3*ng - 1) under gate door and infinity in open part.
     gatefraction = generalstruc(ng)%gateclosedfractiononlink(L0)
 
@@ -171,36 +173,16 @@ use m_flowgeom
     endif
 
     if (husb > zs) then
+       zbi(1) = zs
        call flgtarfm(ng, L0, wu(Lf), bl(kL), bl(kR), tekenstr, zs, wstr, w2, wsd, zb2, dg, ds1, ds2, cgf, cgd,   &
                      cwf, cwd, mugf, lambda, strdamf, gatedoorheight)
 
-       DsL   = s1(k2) - s1(k1)
+       DsL    = s1(k2) - s1(k1)
        u1(Lf) = rusav(1,n) - fusav(1,n)*DsL ; u0(Lf) = u1(Lf) ; q1(Lf) = ausav(1,n)*u1(Lf)
        call flqhgsfm(Lf, teken, husb, hdsb, uu, zs, gatefraction*wstr, w2, wsd, zb2, ds1, ds2, dg,  &
                      cgf, cgd, cwf, cwd, mugf, lambda, strdamf, jarea, ds)
        fusav(1,n) = fu(Lf) ; rusav(1,n) = ru(Lf) ; ausav(1,n) = au(Lf)
-
-       if (kmx > 0 .and. jastructurelayersactive == 1 .and. au(Lf) > 0d0) then
-
-          hh   = au(Lf) / (gatefraction*wstr)
-          zb   = zs
-          zt   = zb + hh
-          if (u1(Lf) > 0) then
-             iup = 1
-          else if (u1(Lf) < 0) then
-             iup = 2
-          else if (s1(k1) > s1(k2)) then
-             iup = 1
-          else
-             iup = 2
-          endif
-          ff3(1,0) = 0d0
-          do LL = Lb, Lt
-             kk = ln(iup, LL)
-             ff3(1,LL-Lb+1) = max( 0d0, min(zt, zws(kk)) - zb ) / hh
-          enddo
-       endif
-
+ 
     else
        fusav(1,n) = 0d0
        rusav(1,n) = 0d0
@@ -208,7 +190,8 @@ use m_flowgeom
     endif
 
     if (gatedoorheight > 0d0) then  ! now add water overflowing top of gate
-       zs = gateloweredgelevel + gatedoorheight
+       zs     = gateloweredgelevel + gatedoorheight
+       zbi(2) = zs
        if (husb > zs) then          ! husb = upwind waterlevel instead of height
           dg    = 1d9               ! sky is the limit, this gate fully open
           u1(Lf) = rusav(2,n) - fusav(2,n)*dsL ; u0(Lf) = u1(Lf) ; q1(Lf) = ausav(2,n)*u1(Lf)
@@ -229,11 +212,12 @@ use m_flowgeom
        ausav(2,n) = 0d0
     endif
 
-    zs                 = min  ( bob(1,Lf), bob(2,Lf) )         ! == zcgen(3*ng - 2) crest/silllevel
+    zs = min  ( bob(1,Lf), bob(2,Lf) )         ! == zcgen(3*ng - 2) crest/silllevel
 
     if ( husb >= zs .and. gatefraction < 1d0) then
-       zs =  min  ( bob(1,Lf), bob(2,Lf) )
-       dg = huge(1d0)
+       !zs     =  min  ( bob(1,Lf), bob(2,Lf) )
+       zbi(3) = zs
+       dg     = huge(1d0)
        u1(Lf) = rusav(3,n) - fusav(3,n)*dsL ; u0(Lf) = u1(Lf) ; q1(Lf) = ausav(3,n)*u1(Lf)
        call flgtarfm(ng, L0, wu(Lf), bl(kL), bl(kR), tekenstr, zs, wstr, w2, wsd, zb2, dg, ds1, ds2, cgf, cgd,   &
                      cwf, cwd, mugf, lambda, strdamf, gatedoorheight)
@@ -252,6 +236,37 @@ use m_flowgeom
        ru(Lf) = (rusav(1, n)*ausav(1, n) + rusav(2, n)*ausav(2, n) + rusav(3, n)*ausav(3, n))/au(Lf)
        if (kmx > 0) then
           if ( jastructurelayersactive == 1 ) then ! some layers are more equal than others
+   
+             if (ausav(1,n) > 0) then 
+                hhi(1) = ausav(1,n) / (gatefraction*wstr)
+                zti(1) = zbi(1) + hhi(1)
+             endif
+             if (ausav(2,n) > 0) then 
+                hhi(2) = ausav(2,n) / (gatefraction*wstr)
+                zti(2) = zbi(2) + hhi(2)
+             endif
+             if (ausav(3,n) > 0) then
+                hhi(3) = ausav(3,n) / ( (1d0-gatefraction)*wstr)
+                zti(3) = zbi(3) + hhi(3)
+             endif
+
+             if (u1(Lf) > 0) then
+                iup = 1
+             else if (u1(Lf) < 0) then
+                iup = 2
+             else if (s1(k1) > s1(k2)) then
+                iup = 1
+             else
+                iup = 2
+             endif
+             ff3(:,0) = 0d0
+             do LL = Lb, Lt
+                kk = ln(iup, LL)
+                if (ausav(1,n) > 0) ff3(1,LL-Lb+1) = max( 0d0, min(zti(1), zws(kk)) - zbi(1) ) / hhi(1)
+                if (ausav(2,n) > 0) ff3(2,LL-Lb+1) = max( 0d0, min(zti(2), zws(kk)) - zbi(2) ) / hhi(2)
+                if (ausav(3,n) > 0) ff3(3,LL-Lb+1) = max( 0d0, min(zti(3), zws(kk)) - zbi(3) ) / hhi(3)
+             enddo
+
              au0 = 0d0
              do LL = Lb, Lt
                 au1    = ausav(1,n)*( ff3(1,LL-Lb+1) - ff3(1,LL-Lb) )
@@ -272,7 +287,7 @@ use m_flowgeom
                 au(LL) = au(Lf)*( hu(LL)-hu(LL-1) ) / ( hu(Lt)-hu(Lb-1) )
              enddo
           endif
-       endif ! now wait till these lines will be copied to the %environment
+       endif 
     else
        fu(Lf) = 0d0
        ru(Lf) = 0d0
