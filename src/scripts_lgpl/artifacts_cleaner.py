@@ -96,6 +96,7 @@ def platformArtifacts(platform):
 # Remove files specifically for an OSS build (Windows/Linux)
 def ossRemove():
     removeFiles = [
+        'libc.so.6',
         'libtool',
         'libtool_install.sh',
         'libDelftOnline.a',
@@ -139,6 +140,7 @@ def ossRemove():
 # Remove files specifically for an OSS build (Windows/Linux)
 def dimrsetRemove():
     removeFiles = [
+        'libc.so.6',
         'dflowfm_kernel_test',
         'libtool',
         'libtool_install.sh',
@@ -212,6 +214,7 @@ def dimrsetRemove():
 # Remove files specifically for an OSS build (Windows/Linux)
 def delft3d4Remove():
     removeFiles = [
+        'libc.so.6',
         'dflowfm',
         'dflowfm_kernel_test',
         'dfmoutput',
