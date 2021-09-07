@@ -830,12 +830,8 @@ subroutine comp_checkmonitor()
       
       call getLbotLtop(LL,Lb,Lt)
 !     Implementation of filter for both sigma and z layers:
-      do L   = Lbot(LL), Lbot(LL) + kmxL(LL) - 1
+      do L   = Lbot(LL), Ltop(LL)
          klay = L - Lbot(LL) +1    
-!
-!!      do klay=1,kmx
-!        get 3D link number (sigma only)
-!!         L = Lb+klay-1
          
 !        get neighboring 3D cells
          k1 = ln0(1,L)
@@ -955,11 +951,8 @@ subroutine get_filter_coeff()
    
 !           loop over water column
 !           Implementation of filter for both sigma and z layers:
-            do L   = Lbot(LL), Lbot(LL) + kmxL(LL) - 1
+            do L   = Lbot(LL), Ltop(LL)
               klay = L - Lbot(LL) +1    
-!!            do klay=1,kmx
-!              get 3D link number (sigma only)
-!!               L = Lb+klay-1
                
 !              get advection volume
                k1 = ln(1,L)
@@ -1004,11 +997,8 @@ subroutine get_filter_coeff()
       end do
 
 !    Implementation of filter for both sigma and z layers:
-     do L   = Lbot(LL), Lbot(LL) + kmxL(LL) - 1
+     do L   = Lbot(LL), Ltop(LL)
         klay =  L - Lbot(LL) + 1
-!!      do klay=1,kmx
-!       get 3D link number (sigma only)
-!!        L = Lb+klay-1
         
         vicouv = vicLu(L)
                
