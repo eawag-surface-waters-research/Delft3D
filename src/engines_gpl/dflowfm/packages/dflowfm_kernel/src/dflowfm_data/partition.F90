@@ -4367,7 +4367,9 @@ end subroutine partition_make_globalnumbers
             kfs(ighostlist_snonoverlap(i)) = -abs(kfs(ighostlist_snonoverlap(i))) ! 0
          end do
       end if
-      
+
+      return ! I do not understand the next code, switching it off did not alter results of my test computation, lets try it for the testbench 
+    
 !     disable disabled ghostnodes
       numdots = 0
   klp:do k=1,Ndxi
