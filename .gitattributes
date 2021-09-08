@@ -4629,6 +4629,7 @@ src/scripts_lgpl/linux/oss-install.sh -text
 src/scripts_lgpl/linux/oss-post_build.sh -text
 src/scripts_lgpl/linux/update_version.sh -text
 src/scripts_lgpl/singularity/dflowfm_recipe.def -text
+src/scripts_lgpl/singularity/dflowfm_recipe_external_mpi.def -text
 src/scripts_lgpl/singularity/readme.txt -text
 src/scripts_lgpl/singularity/run_dflowfm_singularity.sh -text
 src/scripts_lgpl/singularity/run_dfmoutput_singularity.sh -text
