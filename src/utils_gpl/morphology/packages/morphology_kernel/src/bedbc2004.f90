@@ -57,8 +57,8 @@ subroutine bedbc2004(tp        ,rhowat    , &
 ! Arguments
 !
     integer, intent(in)   :: i2d3d
-    real(fp), intent(out) :: aks    !  Description and declaration in esm_alloc_real.f90
-    real(fp), intent(out) :: awb
+    real(fp), intent(out) :: aks    !< reference height
+    real(fp), intent(out) :: awb    !< peak orbital excursion at edge of wave boundary layer
     real(fp), intent(in)  :: betam
     real(fp), intent(out) :: caks
     real(fp), intent(in)  :: d10
@@ -66,20 +66,20 @@ subroutine bedbc2004(tp        ,rhowat    , &
     real(fp), intent(in)  :: d90
     real(fp), intent(out) :: delw
     real(fp), intent(in)  :: drho
-    real(fp), intent(out) :: dss    !  Description and declaration in esm_alloc_real.f90
+    real(fp), intent(out) :: dss    !< characteristic diameter of sediment in suspension
     real(fp), intent(in)  :: dstar
     real(fp), intent(out) :: fc1
     real(fp), intent(out) :: fsilt
     real(fp), intent(in)  :: gamtcr
     real(fp), intent(in)  :: h1
-    real(fp), intent(in)  :: hrms   !  Description and declaration in esm_alloc_real.f90
+    real(fp), intent(in)  :: hrms   !< root mean square wave height
     real(fp), intent(in)  :: kscr
     real(fp), intent(out) :: muc
     real(fp), intent(in)  :: mudfrac
     real(fp), intent(out) :: phicur
     real(fp), intent(out) :: ra
-    real(fp), intent(in)  :: rhowat !  Description and declaration in esm_alloc_real.f90
-    real(fp), intent(in)  :: rlabda !  Description and declaration in esm_alloc_real.f90
+    real(fp), intent(in)  :: rhowat !< specific density of water
+    real(fp), intent(in)  :: rlabda !< wave length
     real(fp), intent(out) :: ta
     real(fp), intent(out) :: taubcw
     real(fp), intent(out) :: tauc
@@ -87,10 +87,10 @@ subroutine bedbc2004(tp        ,rhowat    , &
     real(fp), intent(out) :: taucr1
     real(fp), intent(out) :: taurat
     real(fp), intent(out) :: tauwav
-    real(fp), intent(in)  :: tp     !  Description and declaration in esm_alloc_real.f90
+    real(fp), intent(in)  :: tp     !< peak wave period
     real(fp), intent(in)  :: umod
     real(fp), intent(out) :: ustarc
-    real(fp), intent(out) :: usus   !  Description and declaration in esm_alloc_real.f90
+    real(fp), intent(out) :: usus
     real(fp), intent(in)  :: uuu
     real(fp), intent(out) :: uwb
     real(fp), intent(in)  :: vvv
@@ -100,10 +100,10 @@ subroutine bedbc2004(tp        ,rhowat    , &
     real(fp), intent(out) :: zusus
     real(fp), intent(out) :: uon  
     real(fp), intent(out) :: uoff 
-    real(fp), intent(out) :: uwbih
+    real(fp), intent(out) :: uwbih    !< representative peak orbital velocity near the bed
     real(fp), intent(out) :: psi
-    real(fp), intent(in)  :: dzduu    !  Description and declaration in esm_alloc_real.f90
-    real(fp), intent(in)  :: dzdvv    !  Description and declaration in esm_alloc_real.f90
+    real(fp), intent(in)  :: dzduu    !< bed slope in U-direction
+    real(fp), intent(in)  :: dzdvv    !< bed slope in V-direction
     real(fp), intent(in)  :: eps
     real(fp), intent(in)  :: camax
     integer , intent(in)  :: iopsus

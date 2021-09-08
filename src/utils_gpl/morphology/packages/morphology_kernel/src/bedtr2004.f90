@@ -1,5 +1,5 @@
 subroutine bedtr2004(u2dh      ,d50       ,d90       ,h1        ,rhosol    , &
-                   & tp        ,teta      ,uon       ,uoff      ,ubw       , &
+                   & tp        ,teta      ,uon       ,uoff      ,uwb       , &
                    & taucr     ,delm      ,ra        ,z0cur     ,fc1       , &
                    & fw1       ,dstar     ,drho      ,phicur    ,qbcu      , &
                    & qbcv      ,qbwu      ,qbwv      ,qswu      ,qswv      , &
@@ -60,15 +60,15 @@ subroutine bedtr2004(u2dh      ,d50       ,d90       ,h1        ,rhosol    , &
 !
 ! Arguments
 !
-    integer                  , intent(in)  :: kmax     !  Description and declaration in inout.igs
+    integer                  , intent(in)  :: kmax     !< number of layers (counted top to bottom)
     real(fp)                 , intent(in)  :: aks
     real(fp)                 , intent(in)  :: d50
     real(fp)                 , intent(in)  :: d90
     real(fp)                 , intent(in)  :: delm
     real(fp)                 , intent(in)  :: drho
     real(fp)                 , intent(in)  :: dstar
-    real(fp)                 , intent(in)  :: dzduu    !  Description and declaration in esm_alloc_real.f90
-    real(fp)                 , intent(in)  :: dzdvv    !  Description and declaration in esm_alloc_real.f90
+    real(fp)                 , intent(in)  :: dzduu    !< bed slope in U-direction
+    real(fp)                 , intent(in)  :: dzdvv    !< bed slope in V-direction
     real(fp)                 , intent(in)  :: fc1
     real(fp)                 , intent(in)  :: fsilt
     real(fp)                 , intent(in)  :: fw1
@@ -81,21 +81,21 @@ subroutine bedtr2004(u2dh      ,d50       ,d90       ,h1        ,rhosol    , &
     real(fp)                 , intent(out) :: qswu
     real(fp)                 , intent(out) :: qswv
     real(fp)                 , intent(in)  :: ra
-    real(fp)                 , intent(in)  :: rhosol   !  Description and declaration in esm_alloc_real.f90
-    real(fp)                 , intent(in)  :: teta     !  Description and declaration in esm_alloc_real.f90
-    real(fp)                 , intent(in)  :: tetacr   !  Description and declaration in esm_alloc_real.f90
+    real(fp)                 , intent(in)  :: rhosol   !< specific density of sediment
+    real(fp)                 , intent(in)  :: teta     !< wave direction in degrees
+    real(fp)                 , intent(in)  :: tetacr   !< critical Shields parameter
     real(fp)                 , intent(in)  :: taucr
-    real(fp)                 , intent(in)  :: tp       !  Description and declaration in esm_alloc_real.f90
+    real(fp)                 , intent(in)  :: tp       !< peak wave period
     real(fp)                 , intent(in)  :: u2dh
-    real(fp)                 , intent(in)  :: ubw
+    real(fp)                 , intent(in)  :: uwb
     real(fp)                 , intent(inout)  :: uon  
     real(fp)                 , intent(inout)  :: uoff 
     real(fp)                 , intent(in)  :: z0cur
     real(fp)                 , intent(in)  :: rksrs
     real(fp)                 , intent(in)  :: ws
     real(fp)                 , intent(in)  :: deltas
-    real(fp), dimension(kmax), intent(in)  :: sig      !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(kmax), intent(in)  :: thick    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(kmax), intent(in)  :: sig      !< sigma coordinate of the centre of each layer
+    real(fp), dimension(kmax), intent(in)  :: thick    !< thickness of each layer
     real(fp), dimension(kmax), intent(in)  :: concin
     real(fp)                 , intent(in)  :: rhowat
     real(fp)                 , intent(in)  :: ag
@@ -108,7 +108,7 @@ subroutine bedtr2004(u2dh      ,d50       ,d90       ,h1        ,rhosol    , &
     integer                  , intent(in)  :: subiw
     real(fp)                 , intent(out) :: vcr
     logical                  , intent(out) :: error
-    character(*)             , intent(out) :: message  !  Contains error message
+    character(*)             , intent(out) :: message  !< error message in case of error
     integer                  , intent(in)  :: wform
     real(fp)                 , intent(in)  :: r
     real(fp)                 , intent(in)  :: phi_phase
@@ -216,7 +216,7 @@ subroutine bedtr2004(u2dh      ,d50       ,d90       ,h1        ,rhosol    , &
     !
     ! coefficient related to relative strength of wave and current motion: uc/(uc+Uw)
     !
-    acw      = abs(u2dh) / max(1.0e-6_fp , (abs(ubw)+abs(u2dh)))
+    acw      = u2dh / max(1.0e-6_fp , uwb + u2dh)
     !
     ! grain friction coefficient due to currents and waves
     !
@@ -249,7 +249,7 @@ subroutine bedtr2004(u2dh      ,d50       ,d90       ,h1        ,rhosol    , &
        !
        ! Split peak period Tp in an onshore and offshore period
        !
-       if (ubw > 0.0_fp) then
+       if (uwb > 0.0_fp) then
            tfor = uoff / (uon+uoff) * tp
            tback    = tp - tfor
            pi_tfor  = pi / tfor
@@ -280,7 +280,7 @@ subroutine bedtr2004(u2dh      ,d50       ,d90       ,h1        ,rhosol    , &
           !
           ! WAVE VELOCITY ASYMMETRY ACCORDING TO ISOBE-HORIKAWA
           !
-          if (ubw>0.0_fp .and. tp>1.0_fp) then
+          if (uwb>0.0_fp .and. tp>1.0_fp) then
              time = real(ii-1,fp) * dtt
              if (time < tfor) then
                 udt = uon * sin(pi_tfor*time)
@@ -306,7 +306,7 @@ subroutine bedtr2004(u2dh      ,d50       ,d90       ,h1        ,rhosol    , &
           !
           ! WAVE VELOCITY SKEWNESS & ASYMMETRY ACCORDING TO RUESSINK et al 2012 CE 
           !
-          if (ubw>0.0_fp .and. tp>1.0_fp) then
+          if (uwb>0.0_fp .and. tp>1.0_fp) then
              time = real(ii-1,fp) * dtt
              ! Makes u(0)=0 from ABREU et al 2010 CE (Part 2)
              tc     = time-deltat
