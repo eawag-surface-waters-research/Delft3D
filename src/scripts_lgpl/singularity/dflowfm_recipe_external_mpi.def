@@ -32,6 +32,7 @@ include: yum
     MAINTAINER delft3d.support@deltares.nl
     LICENSE Affero General Public License
     ITERATION <singularityVersionNumberDelft3DFM>
+    MPI_LIBRARY Without MPI library, please refer to your local ones
 
 %post
     echo "Installing required packages..."
