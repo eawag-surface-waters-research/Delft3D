@@ -22,8 +22,6 @@ set(exe_dependencies    data
                         gridgeom
                         io
                         io_netcdf
-                        kdtree_wrapper
-                        kdtree
                         kernel
                         manager
                         nefis
