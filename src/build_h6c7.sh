@@ -46,6 +46,7 @@ function usage {
     echo "    -intel14 (-intel14.0.3)"
     echo "    -intel16 (-intel16.0.3)"
     echo "    -intel18 (-intel18.0.3)"
+    echo "    -intel21 (-intel21.2.0)"
     echo "WARNING: On h6 currently for Intel only -64bit is supported"
     }
 
@@ -127,6 +128,9 @@ while [ $# -gt 0 ]; do
         -intel18|-intel18.0.3)
             compiler='intel18'
             ;;
+        -intel21|-intel21.2.0)
+            compiler='intel21'
+            ;;
         -m|-make)
             noMake=1
             ;;
@@ -189,6 +193,13 @@ case $compiler in
         ifortInit="module load $fortranModule"
         iccInit=""
         echo "Using GNU compilers in `witch gfortran`"
+        ;;
+    
+    intel21)
+    fortranModule="intel/21.2.0"
+    ifortInit="module load $fortranModule"
+        iccInit=""
+        echo "Using Intel 21.2.0 Fortran ($platform) compiler"
         ;;
     
     intel19)
@@ -335,6 +346,8 @@ else
     mpichModule="mpich/3.3.2_intel18.0.3" 
     elif [ "$compiler" = 'intel19' ]; then
     mpichModule="mpich/3.3.2_intel19.1.1" 
+    elif [ "$compiler" = 'intel21' ]; then
+    mpichModule="mpich/3.3.2_intel21.2.0" 
     fi
 fi
 initMpich="module load $mpichModule"
@@ -362,6 +375,8 @@ else
     petscModule="petsc/3.13.3_intel18.0.3_mpich3.3.2"
     elif [ "$compiler" = 'intel19' ]; then
     petscModule="petsc/3.13.3_intel19.1.1_mpich3.3.2"
+    elif [ "$compiler" = 'intel21' ]; then
+    petscModule="petsc/3.13.3_intel21.2.0_mpich3.3.2"
     fi
 fi
 initPetsc="module load $petscModule"
@@ -389,6 +404,8 @@ else
         metisModule="metis/5.1.0_intel18.0.3"
     elif [ "$compiler" = 'intel19' ]; then
         metisModule="metis/5.1.0_intel19.1.1"
+    elif [ "$compiler" = 'intel21' ]; then
+        metisModule="metis/5.1.0_intel21.2.0"
     fi
 fi
 initMetis="module load $metisModule"
@@ -443,6 +460,8 @@ else
     netcdfModule="netcdf/v4.7.4_v4.5.3_intel18.0.3"
     elif [ "$compiler" = 'intel19' ]; then
     netcdfModule="netcdf/v4.7.4_v4.5.3_intel19.1.1"
+    elif [ "$compiler" = 'intel21' ]; then
+    netcdfModule="netcdf/v4.7.4_v4.5.3_intel21.2.0"
     fi
 fi
 initNetcdf="module load $netcdfModule"
@@ -521,7 +540,7 @@ fi
 # NEW: gdal only has C(++) parts, so no Intel Fortran compiler needed. Just use GCC here.
 # Update June 10, 2020: GDAL is still leading to linker errors in combination with GNU. Disabled until further notice.
 gdalModule=""
-if [[ "$compiler" = 'intel16' || "$compiler" = 'intel18' || "$compiler" = 'intel19' ]]; then
+if [[ "$compiler" = 'intel16' || "$compiler" = 'intel18' || "$compiler" = 'intel19' || "$compiler" = 'intel21' ]]; then
     gdalModule="gdal/3.1.2_gcc$gccVersion"
 fi
 
@@ -649,9 +668,9 @@ fi
 log='logs/configure.log'
 
 if [ $debug -eq 1 ]; then
-    flags='-g -O0'
+    flags='-g -O0 -fPIC'
 else
-    flags='-O2'
+    flags='-O2 -fPIC'
 fi
 
 # fPIC is the result of the mixing of static and libtool libraries. 
