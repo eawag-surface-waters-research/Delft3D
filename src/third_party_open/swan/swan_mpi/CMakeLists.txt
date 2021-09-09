@@ -51,9 +51,9 @@ if(UNIX)
     target_link_libraries(${executable_name}
          PkgConfig::NETCDF
          PkgConfig::NETCDF_FTN)
-endif(UNIX)
 
-set_target_properties(${executable_name} PROPERTIES COMPILE_FLAGS ${openmp_flag})
+    include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../include")
+endif(UNIX)
 
 # Define additional compilation flags
 set_source_files_properties(${checkout_src_root}/third_party_open/swan/src/ocpids.F

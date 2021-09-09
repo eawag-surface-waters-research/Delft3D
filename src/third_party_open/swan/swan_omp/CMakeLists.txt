@@ -49,6 +49,8 @@ if(UNIX)
     target_link_libraries(${executable_name}
          PkgConfig::NETCDF
          PkgConfig::NETCDF_FTN)
+
+    include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../include")
 endif(UNIX)
 
 # Define additional compilation flags
@@ -68,7 +70,7 @@ if (WIN32)
 endif(WIN32)
 
 if (UNIX)
-    # Not needed (yet): target_compile_definitions(${executable_name} PRIVATE "SWANEXE")
+    target_compile_definitions(${executable_name} PRIVATE "SWANEXE")
 endif(UNIX)
 
 
