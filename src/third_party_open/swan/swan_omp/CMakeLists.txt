@@ -17,12 +17,12 @@ add_executable(${executable_name}   ${headers}
                                     ${executable_files})
 
 # Set dependencies
-set(exe_dependencies    netcdf4
-                        netcdff) 
-oss_include_libraries(${executable_name} exe_dependencies)
-target_link_libraries(${executable_name} ${exe_dependencies})
-
 if (WIN32)
+    set(exe_dependencies    netcdf4
+                        netcdff) 
+    oss_include_libraries(${executable_name} exe_dependencies)
+    target_link_libraries(${executable_name} ${exe_dependencies})
+
     include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../include")
     # Set linker properties
     message(STATUS "Setting linker properties in windows")
@@ -46,7 +46,7 @@ if(UNIX)
     pkg_check_modules(NETCDF REQUIRED IMPORTED_TARGET netcdf)
     pkg_check_modules(NETCDF_FTN REQUIRED IMPORTED_TARGET netcdf-fortran)
 
-    target_link_libraries(${executable_name} ${exe_dependencies}
+    target_link_libraries(${executable_name}
          PkgConfig::NETCDF
          PkgConfig::NETCDF_FTN)
 endif(UNIX)
