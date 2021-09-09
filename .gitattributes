@@ -458,6 +458,7 @@ src/cmake/configurations/dwaves_configuration.cmake -text
 src/cmake/configurations/include/dflowfm_configuration_basic.cmake -text
 src/cmake/configurations/include/tools_configuration.cmake -text
 src/cmake/configurations/include/tools_delft3dfm_configuration.cmake -text
+src/cmake/configurations/swan_configuration.cmake -text
 src/cmake/configurations/tests_configuration.cmake -text
 src/cmake/doc/CMake[!!-~]Inventory.xlsx -text
 src/cmake/doc/CMake_for_OSS_tree_[!!-~]project_report.docx -text
@@ -17354,6 +17355,7 @@ src/third_party_open/subversion/bin/win32/svnversion.exe -text
 src/third_party_open/subversion/bin/win32/uninst.exe -text
 src/third_party_open/subversion/bin/win32/zlib1.dll -text
 src/third_party_open/subversion/subversion_license_info.txt -text
+src/third_party_open/swan/CMakeLists.txt -text
 src/third_party_open/swan/Makefile.am -text
 src/third_party_open/swan/bin/Makefile.am -text
 src/third_party_open/swan/bin/linux/Makefile.am -text
@@ -17478,9 +17480,11 @@ src/third_party_open/swan/src/swmod1.for -text
 src/third_party_open/swan/src/swmod2.F -text
 src/third_party_open/swan/src/swn_outnc.f90 -text
 src/third_party_open/swan/swan_license_info.txt -text
+src/third_party_open/swan/swan_mpi/CMakeLists.txt -text
 src/third_party_open/swan/swan_mpi/Makefile.am -text
 src/third_party_open/swan/swan_mpi/swan_mpi_exe.vfproj -text
 src/third_party_open/swan/swan_mpi_lib.vfproj -text
+src/third_party_open/swan/swan_omp/CMakeLists.txt -text
 src/third_party_open/swan/swan_omp/Makefile.am -text
 src/third_party_open/swan/swan_omp/swan_omp_exe.vfproj -text
 src/third_party_open/tcl/bin/win64/tclkitsh852.exe -text

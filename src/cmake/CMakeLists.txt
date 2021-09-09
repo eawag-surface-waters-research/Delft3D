@@ -6,7 +6,6 @@ project(CMake)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 if (UNIX)
-
     message(STATUS "Configuring in unix")
     include(linux_scripts.cmake)
     add_definitions(-DCOMMIT_VERSION=${COMMIT_VERSION})
@@ -129,6 +128,7 @@ set(tests_configuration "TESTS")
 set(dimr_configuration "DIMR")
 set(dwaq_configuration "DWAQ")
 set(dwaves_configuration "DWAVES")
+set(swan_configuration "SWAN")
 set(flow2d3d_configuration "FLOW2D3D")
 set(tools_configuration "TOOLS")
 
@@ -144,6 +144,7 @@ if(NOT (${configuration_type} STREQUAL ${tests_configuration}
      OR ${configuration_type} STREQUAL ${dimr_configuration}
      OR ${configuration_type} STREQUAL ${dwaq_configuration}
      OR ${configuration_type} STREQUAL ${dwaves_configuration}
+     OR ${configuration_type} STREQUAL ${swan_configuration}
      OR ${configuration_type} STREQUAL ${flow2d3d_configuration}
      OR ${configuration_type} STREQUAL ${tools_configuration}
      OR ${configuration_type} STREQUAL ${delft3dfm_configuration}
@@ -188,6 +189,12 @@ endif()
 if(${configuration_type} STREQUAL ${dwaves_configuration})
     message(STATUS "Generating solution for D-Waves ...")
     include(configurations/dwaves_configuration.cmake)
+endif()
+
+# SWAN configuration
+if(${configuration_type} STREQUAL ${swan_configuration})
+    message(STATUS "Generating solution for SWAN ...")
+    include(configurations/swan_configuration.cmake)
 endif()
 
 # Flow2D3D (Delft3D4) configuration

@@ -117,6 +117,7 @@ endfunction()
 function(get_fortran_source_files source_directory source_files)
     file(GLOB source    ${source_directory}/*.f90
                         ${source_directory}/*.F90
+                        ${source_directory}/*.for
                         ${source_directory}/*.f
                         ${source_directory}/*.F)
     set(${source_files} ${source} PARENT_SCOPE)

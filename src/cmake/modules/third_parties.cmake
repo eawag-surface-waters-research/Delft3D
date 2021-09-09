@@ -49,3 +49,8 @@ set(interacter_stub_module ${third_party_path}/interacter_stub)
 # expat
 set(expat_module ${third_party_open_path}/expat/${cmake_directory})
 
+# swan
+set(swan_mpi_lib_module ${third_party_open_path}/swan)
+set(swan_mpi_module ${third_party_open_path}/swan/swan_mpi)
+set(swan_omp_module ${third_party_open_path}/swan/swan_omp)
+
