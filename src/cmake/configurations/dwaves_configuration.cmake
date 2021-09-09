@@ -1,21 +1,25 @@
 project(dwaves)
 
-# Specify the modules to be included
+# Wave modules
+# ============
 add_subdirectory(${checkout_src_root}/${wave_data_module} wave_data)
 add_subdirectory(${checkout_src_root}/${wave_io_module} wave_io)
 add_subdirectory(${checkout_src_root}/${wave_kernel_module} wave_kernel)
 add_subdirectory(${checkout_src_root}/${wave_manager_module} wave_manager)
 add_subdirectory(${checkout_src_root}/${wave_module} wave)
 
+
+
+# Utils
+# =====
+
 # Deltares common 
 if(NOT TARGET deltares_common) 
     add_subdirectory(${checkout_src_root}/${deltares_common_module} deltares_common)
 endif()
-
 if(NOT TARGET deltares_common_c)
     add_subdirectory(${checkout_src_root}/${deltares_common_c_module} deltares_common_c)
 endif()
-
 if(NOT TARGET deltares_common_mpi)
     add_subdirectory(${checkout_src_root}/${deltares_common_mpi_module} deltares_common_mpi)
 endif()
@@ -24,31 +28,8 @@ endif()
 if(NOT TARGET delftio_shm)
     add_subdirectory(${checkout_src_root}/${delftio_shm_module} delftio_shm)
 endif()
-
 if(NOT TARGET delftio)
     add_subdirectory(${checkout_src_root}/${delftio_module} delftio)
-endif()
-
-# Third party libraries
-# kdtree2
-if(NOT TARGET kdtree2)
-    add_subdirectory(${checkout_src_root}/${kdtree_module} kdtree2)
-endif()
-
-if(NOT TARGET kdtree_wrapper)
-    add_subdirectory(${checkout_src_root}/${kdtree_wrapper_module} kdtree_wrapper)
-endif()
-
-# triangle
-if(NOT TARGET triangle_c)
-    add_subdirectory(${checkout_src_root}/${triangle_c_module} triangle_c)
-endif()
-
-# netcdf
-if(WIN32)
-    if(NOT TARGET netcdff)
-        add_subdirectory(${checkout_src_root}/${netcdf_module} netcdff)
-    endif()
 endif()
 
 # io_netcdf
@@ -70,3 +51,29 @@ endif()
 if(NOT TARGET nefis)
     add_subdirectory(${checkout_src_root}/${nefis_module} nefis)
 endif()
+
+
+
+
+# Third party
+# ===========
+
+# triangle
+if(NOT TARGET triangle_c)
+    add_subdirectory(${checkout_src_root}/${triangle_c_module} triangle_c)
+endif()
+
+# netcdf
+if(WIN32)
+    if(NOT TARGET netcdff)
+        add_subdirectory(${checkout_src_root}/${netcdf_module} netcdff)
+    endif()
+endif()
+
+# Swan
+if(NOT TARGET swan)
+    add_subdirectory(${checkout_src_root}/${swan_mpi_lib_module} swan_mpi_lib)
+    add_subdirectory(${checkout_src_root}/${swan_mpi_module} swan_mpi)
+    add_subdirectory(${checkout_src_root}/${swan_omp_module} swan_omp)
+endif()
+
