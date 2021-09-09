@@ -12,7 +12,7 @@ list(FILTER swan_sourcefiles EXCLUDE REGEX ".*swanhcat.for$")
 set(executable_files ${swan_sourcefiles})
 
 # Define executable
-set(executable_name swan_omp_exe)
+set(executable_name swan_omp)
 add_executable(${executable_name}   ${headers}
                                     ${executable_files})
 

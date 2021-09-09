@@ -13,7 +13,7 @@ list(FILTER swan_sourcefiles EXCLUDE REGEX ".*swanhcat.for$")
 
 
 # Define library
-set(library_name swan_lib)
+set(library_name swan)
 set(library_source_list     ${headers}
                             ${swan_sourcefiles})
 add_library(${library_name} ${library_source_list})
