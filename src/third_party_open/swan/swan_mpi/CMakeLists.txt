@@ -42,7 +42,15 @@ if (WIN32)
 endif(WIN32)
 
 if(UNIX)
-    target_link_libraries(${executable_name} ${exe_dependencies})
+    # the `pkg_check_modules` function is created with this call
+    find_package(PkgConfig REQUIRED)
+
+    # these calls create special `PkgConfig::<MODULE>` variables
+    pkg_check_modules(NETCDF REQUIRED IMPORTED_TARGET netcdf)
+    pkg_check_modules(NETCDF_FTN REQUIRED IMPORTED_TARGET netcdf-fortran)
+    target_link_libraries(${executable_name} ${exe_dependencies}
+         PkgConfig::NETCDF
+         PkgConfig::NETCDF_FTN)
 endif(UNIX)
 
 set_target_properties(${executable_name} PROPERTIES COMPILE_FLAGS ${openmp_flag})
