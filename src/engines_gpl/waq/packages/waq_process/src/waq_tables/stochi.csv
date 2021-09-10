@@ -3011,6 +3011,40 @@ stocfl,stocsu,stocsc
 "SF_dS2VBre","S1_PS2    ",   1.00000
 "SF_dS3VBre","S1_PS3    ",   1.00000
 "SF_dS4VBre","S1_PS4    ",   1.00000
+"INIS1_CH4 ","S1_CH4    ",   1.00000
+"INIS1_DOC ","S1_DOC    ",   1.00000
+"INIS1_DON ","S1_DON    ",   1.00000
+"INIS1_DOP ","S1_DOP    ",   1.00000
+"INIS1_DOS ","S1_DOS    ",   1.00000
+"INIS1_NH4 ","S1_NH4    ",   1.00000
+"INIS1_NO3 ","S1_NO3    ",   1.00000
+"INIS1_OXY ","S1_OXY    ",   1.00000
+"INIS1_PO4 ","S1_PO4    ",   1.00000
+"INIS1_Si  ","S1_Si     ",   1.00000
+"INIS1_SO4 ","S1_SO4    ",   1.00000
+"INIS1_SUD ","S1_SUD    ",   1.00000
+"INIS1_AAP ","S1_AAP    ",   1.00000
+"INIS1_APAT","S1_APATP  ",   1.00000
+"INIS1_Fe3p","S1_FeIIIpa",   1.00000
+"INIS1_Opal","S1_Opal   ",   1.00000
+"INIS1_POC1","S1_PC1    ",   1.00000
+"INIS1_POC2","S1_PC2    ",   1.00000
+"INIS1_POC3","S1_PC3    ",   1.00000
+"INIS1_POC4","S1_PC4    ",   1.00000
+"INIS1_PON1","S1_PN1    ",   1.00000
+"INIS1_PON2","S1_PN2    ",   1.00000
+"INIS1_PON3","S1_PN3    ",   1.00000
+"INIS1_PON4","S1_PN4    ",   1.00000
+"INIS1_POP1","S1_PP1    ",   1.00000
+"INIS1_POP2","S1_PP2    ",   1.00000
+"INIS1_POP3","S1_PP3    ",   1.00000
+"INIS1_POP4","S1_PP4    ",   1.00000
+"INIS1_POS1","S1_PS1    ",   1.00000
+"INIS1_POS2","S1_PS2    ",   1.00000
+"INIS1_POS3","S1_PS3    ",   1.00000
+"INIS1_POS4","S1_PS4    ",   1.00000
+"INIS1_SUP ","S1_SUP    ",   1.00000
+"INIS1_VIVP","S1_VIVP   ",   1.00000
 "dMPB1Fgp  ","MPB1peli  ",   1.00000
 "dMPB2Fgp  ","MPB2psam  ",   1.00000
 "dMPB1Res  ","MPB1peli  ",  -1.00000

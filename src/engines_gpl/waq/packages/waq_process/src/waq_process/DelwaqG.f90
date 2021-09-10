@@ -258,6 +258,9 @@
       integer,parameter :: ip_fS3VBrel = OFFSET_VB + 21
       integer,parameter :: ip_fS4VBrel = OFFSET_VB + 22
 
+      ! Initialisation "fluxes"
+      integer, parameter :: OFFSET_FL = nototseddis + 101
+
       integer,parameter :: lins = ip_Depth + nototseddis + nototsed + nototsedpart + nflvb
 
       ! input constants and variables
@@ -539,18 +542,21 @@
 
       character*255 errorstring
       integer item, iflux, iseg, itel, noseg2d, iatt1, iatt2, ilay, isys, iseg2d, ip, ifl
-      real :: mass3d, sedwatflx, cwater, totmas
+      real                 :: mass3d, sedwatflx, cwater, totmas
       integer, allocatable :: bottomsegments(:)
-      real, allocatable :: sedconc(:,:,:)
+      real, allocatable    :: sedconc(:,:,:)
 
-      integer,parameter :: nolay = 7
-      real :: tt(nolay), td(nolay)
-      real :: dl(nolay) = [ 0.001, 0.002, 0.004, 0.008, 0.016, 0.032, 0.037 ]   ! layer thickness
-      real :: sd(nolay) = [ 0.000, 0.001, 0.003, 0.007, 0.015, 0.031, 0.063 ]   ! depth of upper surface of layer
-      real :: bd(nolay) = [ 0.001, 0.003, 0.007, 0.015, 0.031, 0.063, 0.100 ]   ! bottomdepth (depth of lower surface of layer)
-      real(kind=kind(1.0d0)) :: av(nolay,nolay), bv(nolay), rwork(nolay), term
-      real :: kp(nolay,nototsed), lp(nolay,nototsed)
-      integer :: iwork(nolay), ierror
+      integer                             :: nolay
+      real, allocatable                   :: tt(:), td(:)
+      real, allocatable                   :: dl(:)  ! layer thickness
+      real, allocatable                   :: sd(:)  ! depth of upper surface of layer
+      real, allocatable                   :: bd(:)  ! bottomdepth (depth of lower surface of layer)
+      real(kind=kind(1.0d0)), allocatable :: av(:,:), bv(:), rwork(:)
+      real(kind=kind(1.0d0))              :: term
+      real, allocatable                   :: kp(:,:), lp(:,:)
+      integer, allocatable                :: iwork(:)
+
+      integer :: ierror
 
       character(len=160) :: moname
       character(len=20)  :: syname(nototsed) = &
@@ -561,10 +567,13 @@
                    'POP1-bulk   ', 'POP2-bulk   ', 'POP3-bulk   ', 'POP4-bulk   ', 'POS1-bulk   ', 'POS2-bulk   ', &
                    'POS3-bulk   ', 'POS4-bulk   ', 'SUP-bulk    ', 'VIVP-bulk   ']
 
-      integer, save :: lumap
+      integer, save      :: lumap, lurestart
+      character(len=200) :: mapfile
+      character(len=200) :: initfile
+      character(len=200) :: restartfile
 
-      logical :: first = .true.
-      logical :: only_ox, dissub, sw_vb
+      logical, save :: first = .true.
+      logical       :: only_ox, dissub, sw_vb
 
       integer, save :: ipnt(1) = -999
       integer       :: i
@@ -575,6 +584,9 @@
 
 
       if (first) then
+
+          call initialise_layers
+
 
           ! load constants
           ku_dFdcC20 = PMSA(IPOINT(ip_ku_dFdcC20))
@@ -777,7 +789,7 @@
 
           ! Check if sum of array dl equals input fixed layer thickness
           thick = sum(dl)
-          IF (abs(thick-Th_DelwaqG).gt.0.01*Th_DelwaqG) CALL ERRSYS ('Inconsistent layer definition',1)
+          IF (abs(thick-Th_DelwaqG).gt.0.01*Th_DelwaqG) CALL ERRSYS ('Inconsistent layer definition (check Th_DelwaqG)',1)
 
           ! Determine 2D structure, first find dimension and next fill a mapping array
           noseg2d = 0
@@ -815,24 +827,8 @@
 
           ! create initial values for sedconc; zero except parameters taken from external model
           ! substance dependent profile to be added!!
-          sedconc = 0.0
-          do iseg2d = 1,noseg2d
-              iseg = bottomsegments(iseg2d)
-              do isys = 1,nototsed
-                  ip = offset_s1 + isys
-                  mass3d = PMSA(IPOINT(ip)+(iseg-1)*INCREM(ip)) / Th_DelwaqG ! g/m2 to g/m3
-                  do ilay = 1,nolay
-                      sedconc(ilay,isys,iseg2d) = mass3d
-                  enddo
-              enddo
-          enddo
-
-          ! Header
-          open (newunit=lumap,file='delwaqg.map',access='stream')
-          moname = ''
-          write (lumap) moname
-          write (lumap) nototsed,nolay*noseg2d
-          write (lumap) syname
+          !
+          call initialise_sedconc
 
           first = .false.
 
@@ -841,9 +837,14 @@
       ! output
       Itime = nint(PMSA(IPOINT(ip_Itime)))
       if (mod(itime,outint*3600).eq.0) then
-          write (lumap) itime,(((sedconc(ilay,isys,iseg2d)/poros,isys=1,nototseddis), &
-                               (sedconc(ilay,isys,iseg2d),isys=nototseddis+1,nototsed),iseg2d=1,noseg2d),ilay=1,nolay)
+          call write_sedconc
       endif
+
+      !
+      ! Calculate correction fluxes - they synchronise the S1 substances with the sedconc array
+      ! (required for complicated reasons)
+      !
+      call sync_S1_sedconc
 
       ! loop over bottom segments
 
@@ -1362,6 +1363,14 @@
                   iflux = nototseddis + 2 + ifl
                   fl(iflux+(iseg-1)*noflux) = fl(iflux+(iseg-1)*noflux) + decflx(ifl)*dl(ilay) /depth
                 enddo
+
+                if ( iseg == 1900 ) then
+                    write(91,'(a,i5,10g15.6)') 'decflx', ilay, decflx(2), decflx(6), decflx(10), pon, poc, n_fact
+                endif
+
+                !if ( iseg == 1900 ) then
+                !    write(91,'(a,i5,10g15.6)') 'fl pon1', ilay, fl(15+(iseg-1)*noflux), fl(19+(iseg-1)*noflux), fl(23+(iseg-1)*noflux), pmsa(ipoint(171)+increm(171)*1899)
+                !endif
 
             elseif (icfrac.eq.2) then
                 !    ! POC2
@@ -2011,6 +2020,13 @@
           ! end of loop over layers in present cell
           enddo
 
+          if ( iseg == 1900 ) then
+              write(91,'(a,10g15.6)') 'fl pon1', fl(16+(iseg-1)*noflux), fl(20+(iseg-1)*noflux), fl(24+(iseg-1)*noflux), &
+                  pmsa(ipoint(175)+increm(175)*(iseg-1)), pmsa(ipoint(171)+increm(171)*(iseg-1)), depth
+              write(91,'(a,10g15.6)') 'conc   ', sum(sedconc(:,is_pon1,iseg2d)*dl(:)), sum(sedconc(:,is_poc1,iseg2d)*dl(:)), &
+                  pmsa(ipoint(175)+increm(175)*(iseg-1)), pmsa(ipoint(171)+increm(171)*(iseg-1))
+          endif
+
 ! ENDPROC
           do isys = 1,nototsed
               dissub = (isys.le.nototseddis)
@@ -2106,4 +2122,210 @@
           enddo
 
       enddo
-      end
+
+      contains
+
+      ! Routine to initialise the layer administration either from file or using defaults
+      ! Also use this file for the names of the auxiliary files
+      !
+      subroutine initialise_layers
+
+      integer, parameter :: nolay_default = 7
+      real, parameter    :: dl_default(nolay_default) = [ 0.001, 0.002, 0.004, 0.008, 0.016, 0.032, 0.037 ]   ! layer thickness
+
+      character(len=40), parameter :: param_file = 'delwaqg.parameters'
+      logical :: exists
+      integer :: i, lumon, luinp
+
+      call getmlu( lumon )
+
+      inquire( file = param_file, exist = exists )
+
+      if ( exists ) then
+          write( lumon, '(/,3a)' ) 'DELWAQG: use parameters from "', trim(param_file), '" to initialise the sediment layers'
+
+          open( newunit = luinp, file = param_file )
+          read( luinp, * ) mapfile
+          read( luinp, * ) restartfile
+          read( luinp, * ) initfile
+          read( luinp, * ) nolay
+      else
+          write( lumon, '(/,3a)' ) 'DELWAQG: file "', trim(param_file), '" not found - using default layer parameters instead'
+          mapfile     = 'delwaqg.map'
+          restartfile = 'delwaqg.restart'
+          initfile    = 'none'
+
+          nolay = nolay_default
+      endif
+
+      allocate( tt(nolay), td(nolay), dl(nolay), sd(nolay), bd(nolay), av(nolay,nolay), bv(nolay), rwork(nolay), &
+                kp(nolay,nototsed), lp(nolay,nototsed), iwork(nolay) )
+
+      write( lumon, '(2a)' ) 'Map file for detailed sediment concentrations:  ', trim(mapfile)
+      write( lumon, '(2a)' ) 'Restart file for subsequent calculations:       ', trim(restartfile)
+      if ( initfile /= 'none' ) then
+          write( lumon, '(2a)' ) 'Initial conditions for sediment to be used:     ', trim(initfile)
+      else
+          write( lumon, '(a)' )  'Initial conditions for sediment from "S1" substances'
+      endif
+
+      write( lumon, '(a,i0)' ) 'Number of layers: ', nolay
+      if ( exists ) then
+          do i = 1,nolay
+              read( luinp, * ) dl(i)
+          enddo
+
+          close( luinp )
+      else
+          dl = dl_default
+      endif
+      sd(1) = 0.0
+      do i = 1,nolay-1
+          sd(i+1) = sd(i) + dl(i)
+          bd(i)   = sd(i+1)
+      enddo
+      bd(nolay) = sd(nolay) + dl(nolay)
+
+      write( lumon, '(a)' ) 'Per layer (in m):'
+      write( lumon, '(a)' ) '        Thickness         Top      Bottom'
+      do i = 1,nolay
+          write( lumon, '(i5,3g12.4)' ) i, dl(i), sd(i), bd(i)
+      enddo
+      write( lumon, '(a)' ) ' '
+
+      end subroutine initialise_layers
+
+
+      ! Routine to initialise the sediment concentrations from the initial conditions file or from "S1" substances
+      !
+      subroutine initialise_sedconc
+
+      integer :: ilay, iseg, iseg2d, ip, isys, iflux
+      integer :: ierr, luinit, lumon
+      integer :: timeini, nosysini, nosegini
+      real    :: mass3d, totmas
+      character(len=20), allocatable :: synameinit(:)
+      character(len=40)              :: title(4)
+
+      if ( initfile == 'none' ) then
+          sedconc = 0.0
+          do iseg2d = 1,noseg2d
+              iseg = bottomsegments(iseg2d)
+              do isys = 1,nototsed
+                  ip = offset_s1 + isys
+                  mass3d = PMSA(IPOINT(ip)+(iseg-1)*INCREM(ip)) / Th_DelwaqG ! g/m2 to g/m3
+                  do ilay = 1,nolay
+                      sedconc(ilay,isys,iseg2d) = mass3d
+                  enddo
+              enddo
+          enddo
+      else
+          open( newunit = luinit, file = initfile, access = 'stream', iostat = ierr )
+          if ( ierr /= 0 ) then
+              call getmlu( lumon )
+              write( lumon, '(2a)' ) 'Error reading file: ', trim(initfile)
+              write( lumon, '(2a)' ) 'File does not exist - terminating calculation'
+              call errsys( 'Initial conditions file for sediment not found', 1 )
+          endif
+
+          read( luinit ) title
+          read( luinit ) nosysini, nosegini
+
+          if ( nosysini /= nototsed .or. nosegini /= nolay * noseg2d ) then
+              call getmlu( lumon )
+              write( lumon, '(2a)' )     'Error reading file: ', trim(initfile)
+              write( lumon, '(a,2i10)' ) 'Wrong size parameters:', nosysini, nosegini
+              write( lumon, '(a,2i10)' ) 'Expected parameters:  ', nototsed, nolay * noseg2d
+              call errsys( 'Initial conditions file for sediment inconsistent', 1 )
+          endif
+
+          allocate( synameinit(nosysini) )
+          read( luinit ) synameinit
+
+          read( luinit ) timeini, (((sedconc(ilay,isys,iseg2d),isys=1,nototsed), iseg2d=1,noseg2d), ilay=1,nolay)
+
+          sedconc(:,1:nototseddis,:) = sedconc(:,1:nototseddis,:) * poros
+
+          close( luinit )
+
+          !
+          ! Set up the fluxes required to bring the S1 substances in line with the detailed sediment
+          ! With this, a flux is calculated that compensates the difference in total mass between
+          ! detailed sediment concentrations and the S1 substances in one time step
+          !
+          call sync_S1_sedconc
+
+          write(91,*) 'DELWQG: 1860 1640', fl(OFFSET_FL+is_so4+(1860-1)*noflux), fl(OFFSET_FL+is_so4+(1640-1)*noflux)
+          write(91,*) 'TOTMAS           ', sedconc(1,is_so4,1860), sedconc(1,is_so4,1640)
+          write(91,*) 'S1_SO4           ', pmsa(ipoint(OFFSET_S1+is_so4)+(1860-1)*increm(OFFSET_S1+s1_so4)), &
+                                           pmsa(ipoint(OFFSET_S1+is_so4)+(1640-1)*increm(OFFSET_S1+s1_so4))
+          write(91,*) 'DEPTH            ', pmsa(ipoint(ip_depth)+(1860-1)*increm(ip_depth)), &
+                                           pmsa(ipoint(ip_depth)+(1640-1)*increm(ip_depth))
+
+      endif
+
+      end subroutine initialise_sedconc
+
+      subroutine sync_S1_sedconc
+          integer :: iseg2d, iseg, isys, ilay, iflux, ip
+          real    :: totmas
+
+          do iseg2d = 1,noseg2d
+              iseg = bottomsegments(iseg2d)
+              do isys = 1,nototsed
+                  totmas = 0.0
+                  do ilay = 1,nolay
+                      totmas = totmas + sedconc(ilay,isys,iseg2d)*dl(ilay)
+                  enddo
+                  iflux  = OFFSET_FL+isys
+                  ip     = OFFSET_S1+isys
+                  fl(iflux+(iseg-1)*noflux) = (totmas - pmsa(ipoint(ip)+(iseg-1)*increm(ip)))  / &
+                                              pmsa(ipoint(ip_depth)+(iseg-1)*increm(ip_depth)) / delt
+              enddo
+          enddo
+      end subroutine sync_S1_sedconc
+
+      ! Routine to store the sediment concentrations in a map file and a restart file
+      !
+      subroutine write_sedconc
+
+      logical, save :: first = .true.
+
+      !
+      ! Open the files and write the header information
+      !
+      if ( first ) then
+          first = .false.
+          open (newunit = lumap,     file = mapfile,     access = 'stream')
+          open (newunit = lurestart, file = restartfile, access = 'stream')
+          close( lumap,     status = 'delete' )
+          close( lurestart, status = 'delete' )
+
+          open (newunit = lumap,     file = mapfile,     access = 'stream')
+          open (newunit = lurestart, file = restartfile, access = 'stream')
+
+          moname = ''
+          write (lumap) moname
+          write (lumap) nototsed,nolay*noseg2d
+          write (lumap) syname
+      endif
+
+      write (lumap) itime,(((sedconc(ilay,isys,iseg2d)/poros,isys=1,nototseddis), &
+                            (sedconc(ilay,isys,iseg2d),isys=nototseddis+1,nototsed),iseg2d=1,noseg2d),ilay=1,nolay)
+
+      !
+      ! Rewrite the complete restart file
+      !
+      rewind( lurestart )
+
+      moname = ''
+      write (lurestart) moname
+      write (lurestart) nototsed,nolay*noseg2d
+      write (lurestart) syname
+
+      write (lurestart) itime,(((sedconc(ilay,isys,iseg2d)/poros,isys=1,nototseddis), &
+                                (sedconc(ilay,isys,iseg2d),isys=nototseddis+1,nototsed),iseg2d=1,noseg2d),ilay=1,nolay)
+
+      end subroutine write_sedconc
+
+      end subroutine dlwqg2
