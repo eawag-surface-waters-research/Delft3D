@@ -62,8 +62,7 @@ contains
 integer(c_int) function initialize(c_mdw_file) result(c_iresult) bind(C, name="initialize")
   !DEC$ ATTRIBUTES DLLEXPORT :: initialize
   use iso_c_binding, only: c_char
-  use wave_main
-  use swan_input
+  use wave_main, only: wave_main_init
   !
   ! Global
   character(kind=c_char),intent(in)    :: c_mdw_file(MAXSTRLEN)
@@ -182,8 +181,8 @@ end function finalize
 subroutine get_start_time(t) bind(C, name="get_start_time")
   !DEC$ ATTRIBUTES DLLEXPORT :: get_start_time
   use iso_c_binding, only: c_double
-  use wave_main
-  use swan_input
+  use precision
+  use wave_main, only: wavedata
   !
   ! Global
   real(c_double), intent(out) :: t
@@ -202,9 +201,9 @@ end subroutine get_start_time
 subroutine get_end_time(t) bind(C, name="get_end_time")
   !DEC$ ATTRIBUTES DLLEXPORT :: get_end_time
   use iso_c_binding, only: c_double
-  use wave_main
-  use wave_data
-  use swan_input
+  use precision
+  use wave_data, only: stand_alone, flow_online, flow_mud_online
+  use swan_input, only: swan_run
   !
   ! Global
   real(c_double), intent(out) :: t
@@ -237,9 +236,9 @@ end subroutine get_end_time
 subroutine get_time_step(dt) bind(C, name="get_time_step")
   !DEC$ ATTRIBUTES DLLEXPORT :: get_time_step
   use iso_c_binding, only: c_double
-  use wave_main
-  use wave_data
-  use swan_input
+  use precision
+  use wave_data, only: stand_alone, flow_online, flow_mud_online
+  use swan_input, only: swan_run
   !
   ! Global
   real(c_double), intent(out) :: dt
@@ -272,7 +271,8 @@ end subroutine get_time_step
 subroutine get_current_time(t) bind(C, name="get_current_time")
   !DEC$ ATTRIBUTES DLLEXPORT :: get_current_time
   use iso_c_binding, only: c_double
-  use wave_main
+  use precision
+  use wave_main, only: wavedata
   !
   ! Global
   real(c_double), intent(out) :: t

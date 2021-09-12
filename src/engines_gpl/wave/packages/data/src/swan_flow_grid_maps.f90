@@ -98,6 +98,8 @@ module swan_flow_grid_maps
        real   , dimension(:,:), pointer         :: dps             ! depth in water level points
        real   , dimension(:,:), pointer         :: windu           ! wind velocity component in x direction
        real   , dimension(:,:), pointer         :: windv           ! wind velocity component in y direction
+       real   , dimension(:,:), pointer         :: ice_frac        ! sea_ice_area_fraction
+       real   , dimension(:,:), pointer         :: floe_dia        ! floe_diameter
        real   , dimension(:,:), pointer         :: s1mud           ! mud level
        real   , dimension(:,:), pointer         :: dpsmud          ! mud related depth in water level points
        real   , dimension(:,:), pointer         :: veg             ! vegetation map - densities of plants per m2
@@ -556,13 +558,25 @@ end subroutine make_grid_map
 !
 !
 !==============================================================================
-subroutine alloc_input_fields (g,inpfld, mode)
+subroutine alloc_input_fields (g, inpfld, mode, ice)
    use wave_data
    implicit none
    !
+   ! arguments
    integer                 :: mode
    type(grid)              :: g
    type(input_fields)      :: inpfld
+   integer, optional       :: ice
+   !
+   ! locals
+   integer :: ice_
+   !
+   ! body
+   if (present(ice)) then
+      ice_ = ice
+   else
+      ice_ = 0
+   endif
    !
    ! Assign grid dimensions
    !
@@ -603,6 +617,12 @@ subroutine alloc_input_fields (g,inpfld, mode)
       inpfld%s1mud    = 0.0
       inpfld%dpsmud   = 0.0
    endif
+   if (ice_ > 0) then
+      allocate (inpfld%ice_frac(inpfld%mmax,inpfld%nmax))
+      allocate (inpfld%floe_dia(inpfld%mmax,inpfld%nmax))
+      inpfld%ice_frac = 0.0
+      inpfld%floe_dia = 0.0
+   endif
 end subroutine alloc_input_fields
 !
 !
@@ -642,13 +662,24 @@ end subroutine init_input_fields
 !
 !
 !==============================================================================
-subroutine dealloc_input_fields (inpfld, mode)
+subroutine dealloc_input_fields (inpfld, mode, ice)
    use wave_data
    implicit none
    !
    integer                 :: ierr
    integer                 :: mode
    type(input_fields)      :: inpfld
+   integer, optional       :: ice
+   !
+   ! locals
+   integer :: ice_
+   !
+   ! body
+   if (present(ice)) then
+      ice_ = ice
+   else
+      ice_ = -1
+   endif
    !
    deallocate (inpfld%s1   , stat=ierr)
    deallocate (inpfld%u1   , stat=ierr)
@@ -663,6 +694,10 @@ subroutine dealloc_input_fields (inpfld, mode)
    if (mode == flow_mud_online) then
       deallocate (inpfld%s1mud , stat=ierr)
       deallocate (inpfld%dpsmud, stat=ierr)
+   endif
+   if (ice_ > 0) then
+      deallocate (inpfld%ice_frac , stat=ierr)
+      deallocate (inpfld%floe_dia , stat=ierr)
    endif
 end subroutine dealloc_input_fields
 !

@@ -63,6 +63,7 @@
 		<File RelativePath=".\src\get_wind.f90"/>
 		<File RelativePath=".\src\grmap_esmf.f90"/>
 		<File RelativePath=".\src\out2d.f90"/>
+		<File RelativePath=".\src\postprocess_ice.f90"/>
 		<File RelativePath=".\src\put_wave_fields.f90"/>
 		<File RelativePath=".\src\read_swan_output.f90"/>
 		<File RelativePath=".\src\readn.f90"/>
@@ -75,6 +76,7 @@
 		<File RelativePath=".\src\write_wave_his_netcdf.f90"/>
 		<File RelativePath=".\src\write_wave_map.f90"/>
 		<File RelativePath=".\src\write_wave_map_netcdf.f90"/>
+		<File RelativePath=".\src\write_wave_map_ice.f90"/>
 		<File RelativePath=".\src\write_wave_map_wind.f90"/>
 		<File RelativePath=".\src\writek.f90"/>
 		<File RelativePath=".\src\wrivek.f90"/>

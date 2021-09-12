@@ -185,6 +185,7 @@ subroutine run_swan (casl)
     call rm_del('INSTU')
     call rm_del('BOTNOW')
     call rm_del('CURNOW')
+    call rm_del('AICENOW')
     string = casl(1:ncasl) // '.swn'
     call rm_del(string)
     string = casl(1:ncasl) // '.prt'

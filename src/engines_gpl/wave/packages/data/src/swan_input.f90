@@ -116,12 +116,14 @@ module swan_input
        integer                                 :: ndir             ! number of directional bins
        integer                                 :: nfreq            ! number of frequency bins
        integer                                 :: nestnr
-       integer                                 :: n_meteofiles_dom ! number of meteo input files
+       integer                                 :: n_meteofiles     ! number of meteo input files
+       integer                                 :: n_extforces      ! number of external forcing files
        integer                                 :: mxb
        integer                                 :: myb
        integer                                 :: mxc
        integer                                 :: myc
        integer                                 :: vegetation
+       integer                                 :: ice = 0
        integer       , dimension(4)            :: qextnd           ! 0: not used, 1: used and not extended, 2: used and extended
        integer                                 :: flowVelocityType = FVT_DEPTH_AVERAGED
                                                                    ! Possible values:
@@ -135,7 +137,7 @@ module swan_input
        character(256)                          :: nesfil
        character(37)                           :: vegfil
        character(20)                           :: nesnam           ! dummy
-       character(80), dimension(:), allocatable :: meteofile_dom
+       character(80), dimension(:), allocatable :: extforce_names
     end type swan_dom
     !
     type swan_bnd
@@ -184,6 +186,7 @@ module swan_input
        integer                                 :: frictype
        integer                                 :: genmode
        integer                                 :: inrhog
+       integer                                 :: icedamp          ! 0: off, 1: clip in D-Waves, 2: via SWAN
        integer                                 :: itermx
        integer                                 :: itest
        integer                                 :: itrace
@@ -200,6 +203,7 @@ module swan_input
        integer                                 :: ncurv
        integer                                 :: ndec
        integer                                 :: n_meteofiles_gen
+       integer                                 :: n_extforces_gen
        integer                                 :: nnest
        integer                                 :: nobst
        integer                                 :: npoints
@@ -210,6 +214,7 @@ module swan_input
        integer                                 :: nloc
        integer                                 :: swdis
        integer                                 :: msurpnts         ! minimum number of surrounding valid source-points for a target-point to be covered. default: 3, Delft3D: 4
+       integer                                 :: output_ice
        !
        integer       , dimension(4)            :: ts_wl
        integer       , dimension(4)            :: ts_xv
@@ -227,7 +232,6 @@ module swan_input
        logical                                 :: checkVersionNumber = .true.
        logical                                 :: compmode
        logical                                 :: corht
-       logical                                 :: curvi
        logical                                 :: curviwind
        logical                                 :: fshift
        logical                                 :: hotfile
@@ -241,7 +245,6 @@ module swan_input
        logical                                 :: refraction
        logical                                 :: setup
        logical                                 :: sferic
-       logical                                 :: swbot
        logical                                 :: swflux
        logical                                 :: swmor
        logical                                 :: swuvi
@@ -282,10 +285,13 @@ module swan_input
        real                                    :: frcof
        real                                    :: gamma0           ! Default gamma0, having a realistic value even if no boundaries are modelled. If boundaries are present gamma0 =  bnd(1)%gamma0
        real                                    :: grav
+       real, dimension(7)                      :: icecoeff
+       real                                    :: icewind
        real                                    :: northdir
        real                                    :: percwet
        real                                    :: rho
        real                                    :: rhomud
+       real                                    :: tzone            !> Time zone for communicating to external forcing module
        real                                    :: viscmud
        real                                    :: xw
        real                                    :: yw
@@ -319,7 +325,7 @@ module swan_input
        !
        character(4)                             :: prnumb
        character(7) , dimension(:), allocatable :: add_out_names
-       character(80), dimension(:), allocatable :: meteofile_gen
+       character(80), dimension(:), allocatable :: extforce_names_gen
        character(20)                            :: versionNumberOK = '40.51a' ! No capitals!!!
        character(16)                            :: prname
        character(37)                            :: rgfout
@@ -401,7 +407,7 @@ subroutine alloc_swan(sr)
       allocate (sr%bnd(i)%spectrum  (sr%maxsect(i)))
    enddo
    allocate (sr%dom     (sr%maxnest  ))
-   sr%dom(:)%n_meteofiles_dom = 0
+   sr%dom(:)%n_extforces = 0
 end subroutine alloc_swan
 !
 !
@@ -455,7 +461,7 @@ subroutine dealloc_swan(sr)
    if (allocated (sr%pntfilnam)) deallocate(sr%pntfilnam, stat=istat)
    if (allocated (sr%pntfilnamtab)) deallocate(sr%pntfilnamtab, stat=istat)
    if (allocated (sr%add_out_names)) deallocate(sr%add_out_names, stat=istat)
-   if (allocated (sr%meteofile_gen)) deallocate(sr%meteofile_gen, stat=istat)
+   if (allocated (sr%extforce_names_gen)) deallocate(sr%extforce_names_gen, stat=istat)
 end subroutine dealloc_swan
 !
 !
@@ -554,8 +560,8 @@ subroutine read_swan (filnam, sr, wavedata)
       endif
       call read_swan_mdw(sr%casl     ,wavedata   , &
                        & sr%swmor    ,sr%swwlt   ,sr%swuvt   , &
-                       & sr%swwav    ,sr%swuvi   ,sr%corht   ,sr%curvi  , &
-                       & sr%swbot    ,sr%swflux  ,sr%rgfout  ,sr%prname , &
+                       & sr%swwav    ,sr%swuvi   ,sr%corht   , &
+                       & sr%swflux   ,sr%rgfout  ,sr%prname  , &
                        & sr%prnumb   ,sr%title1  ,sr%title2  ,sr%title3 , &
                        & sr%nnest    ,sr%nttide  ,sr%itest   ,sr%itrace , &
                        & sr%zeta     ,sr%ux0     ,sr%uy0     ,sr%css    ,sr%cdd    , &
@@ -1134,6 +1140,7 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
     use string_module
     use netcdf_utils, only: ncu_format_to_cmode
     use system_utils, only: SCRIPT_EXTENSION
+    use wave_mpi, only: engine_comm_world, MPI_COMM_NULL
     implicit none
     !
     type(swan_type)             :: sr
@@ -1142,14 +1149,14 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
     !
     type(tree_data)   , pointer :: mdw_ptr
     type(tree_data)   , pointer :: gen_ptr
-    type(tree_data)   , pointer :: out_ptr    
+    type(tree_data)   , pointer :: out_ptr
     type(tree_data)   , pointer :: node_ptr
     type(tree_data)   , pointer :: obst_ptr
     type(tree_data)   , pointer :: pol_ptr
     type(tree_data)   , pointer :: bnd_ptr
-    type(tree_data)   , pointer :: dom_ptr
     type(tree_data)   , pointer :: tmp_ptr
     integer                     :: boundnr
+    integer                     :: count
     integer                     :: def_dirspace
     integer                     :: def_ndir
     integer                     :: def_nfreq
@@ -1199,7 +1206,7 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
     character(80)               :: parname
     character(256)              :: errorstring
     character(80),dimension(:), allocatable :: tmp_add_out_names
-    character(80),dimension(:), allocatable :: tmp_meteofile
+    character(80),dimension(:), allocatable :: tmp_extforce_names
     character(1), dimension(:), pointer     :: data_ptr
     type(swan_bnd)            , pointer     :: bnd
     type(swan_dom)            , pointer     :: dom
@@ -1252,6 +1259,10 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
         sr%exemode = SWAN_MODE_EXE
     case ('lib')
         sr%exemode = SWAN_MODE_LIB
+        if (engine_comm_world == MPI_COMM_NULL) then
+            write(*,*) 'SWAN_INPUT: SwanMode = lib only allowed when D-Waves is run using MPI.'
+            goto 999
+        endif
         call prop_get_string (mdw_ptr, 'General', 'ScriptName' , sr%scriptname)
         if (sr%scriptname /= ' ') then
             sr%scriptname = trim(sr%scriptname)//SCRIPT_EXTENSION
@@ -1346,6 +1357,9 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
     endif
     call setrefdate(wavedata%time,refdate)
     sr%refjulday = ymd2jul(refdate)
+    !
+    sr%tzone = 0.0
+    call prop_get_real   (mdw_ptr, 'General', 'TZone', sr%tzone)
     !
     tscale = 60.0
     call prop_get_real   (mdw_ptr, 'General', 'TScale', tscale)
@@ -1547,71 +1561,69 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
     call prop_get_real   (mdw_ptr, 'General', 'FreqMin' , def_freqmin)
     call prop_get_real   (mdw_ptr, 'General', 'FreqMax' , def_freqmax)
     !
-    ! Count number of meteofiles in group General
+    ! Count number of external forcing files listed in group General
     !
-    call count_occurrences(mdw_ptr, 'General', 'meteofile', sr%n_meteofiles_gen)
-    if (sr%n_meteofiles_gen  > 0) then
+    call count_occurrences(mdw_ptr, 'General', 'extforce' , count)
+    sr%n_extforces_gen = count
+    call count_occurrences(mdw_ptr, 'General', 'meteofile', count)
+    sr%n_extforces_gen = sr%n_extforces_gen + count
+    sr%n_meteofiles_gen = count
+    !
+    if (sr%n_extforces_gen  > 0) then
        !
-       ! Allocate temporary array for meteofiles
+       ! Allocate temporary array for names of external forcing files
        !
-       allocate(tmp_meteofile(sr%n_meteofiles_gen), stat = istat)
-       tmp_meteofile = ''
+       allocate(tmp_extforce_names(sr%n_extforces_gen), stat = istat)
+       tmp_extforce_names = ''
        !
        ! The input can be read
        !
        par     = 0
        call tree_get_node_by_name(mdw_ptr, 'General', tmp_ptr)
        do j = 1, size(tmp_ptr%child_nodes)
-          !
-          ! Does tmp_ptr contain one or more children with name MeteoFile?
-          !
           node_ptr => tmp_ptr%child_nodes(j)%node_ptr
-          !
-          parname = ''
-          call prop_get_string(node_ptr, '*', 'meteofile', parname)
-          if ( parname /= '') then
+          parname = tree_get_name( node_ptr )
+          if ( parname == 'extforce' .or. parname == 'meteofile') then
              par = par + 1
              !
-             ! Read value for keyword meteofile
+             ! Read value for keyword
              !
              call tree_get_data_string(node_ptr, parname, success)
              !
              ! Check double occurrences
              !
              do i = 1, par
-                if (tmp_meteofile(i) == parname) then
-                   write(*,'(a,a,a)') 'SWAN input: Group General: MeteoFile ', trim(parname), ' has already been read'
+                if (tmp_extforce_names(i) == parname) then
+                   write(*,'(a,a,a)') 'SWAN input: Group General: External forcing ', trim(parname), ' has already been read'
                    par = par - 1
-                   sr%n_meteofiles_gen = sr%n_meteofiles_gen - 1
+                   sr%n_extforces_gen = sr%n_extforces_gen - 1
+                   if (parname == 'meteofile') sr%n_meteofiles_gen = sr%n_meteofiles_gen - 1
                    exit
                 endif
              enddo
              !
-             if (tmp_meteofile(par) == '') then
+             if (tmp_extforce_names(par) == '') then
                 !
-                ! Array location for MeteoFile empty, so store the read item in the temporary meteofile array
+                ! Index par points to empty names, so store the file name in the array
                 !
-                tmp_meteofile(par) = trim(parname)
+                tmp_extforce_names(par) = trim(parname)
              endif
-             if (par == sr%n_meteofiles_gen) then
+             if (par == sr%n_extforces_gen) then
                 !
-                ! Correct number of meteofiles read
+                ! All external forces read, stop processing keywords
                 !
                 exit
              endif
           endif
        enddo
        !
-       ! Allocate array for meteofiles in group General
+       ! Allocate array for names of external forcings in group General
        !
-       allocate (sr%meteofile_gen(sr%n_meteofiles_gen), stat = istat)
+       allocate (sr%extforce_names_gen(sr%n_extforces_gen), stat = istat)
+       sr%extforce_names_gen(1:sr%n_extforces_gen) = tmp_extforce_names(1:sr%n_extforces_gen)
+       deallocate(tmp_extforce_names)
        !
-       ! Fill the array with meteofiles in group General
-       !
-       sr%meteofile_gen(1:sr%n_meteofiles_gen) = tmp_meteofile(1:sr%n_meteofiles_gen)
-       sr%swwindt = .true.
-       !
-       deallocate(tmp_meteofile)
+       if (sr%n_meteofiles_gen > 0) sr%swwindt = .true.
        !
     endif
     !
@@ -1764,6 +1776,29 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
        goto 999
     end select
     !
+    parname = ''
+    call prop_get_string (mdw_ptr, 'Processes', 'IceDamp', parname)
+    call str_lower(parname,len(parname))
+    select case (parname)
+    case ('none', ' ')
+      sr%icedamp = 0
+    case ('clip')
+      sr%icedamp = 1
+    case ('swan')
+      sr%icedamp = 2
+      ! Default settings of Meylan et al (2014)
+      sr%icecoeff = 0.0
+      sr%icecoeff(3) = 1.06e-3
+      sr%icecoeff(5) = 2.3e-2
+      call prop_get_reals (mdw_ptr, 'Processes', 'IceCoef', sr%icecoeff, 7)
+      ! Icewind
+      sr%icewind = 0.0
+      call prop_get_real (mdw_ptr, 'Processes', 'IceWind', sr%icewind)
+    case default
+       write(*,*) 'SWAN_INPUT: invalid method for wave damping due to ice'
+       goto 999
+    end select
+    !
     ! Numerics
     !
     sr%cdd     = 0.5
@@ -1825,6 +1860,13 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
     call prop_get_logical(mdw_ptr, 'Output', 'NetCDFSinglePrecision'  , sr%netcdf_sp)
     call prop_get_integer(mdw_ptr, 'Output', 'ncFormat'  , par)
     call set_ncmode(wavedata%output, ncu_format_to_cmode(par))
+    !
+    sr%output_ice = 0
+    if (sr%icedamp > 0) then
+       flag = .false.
+       call prop_get_logical(mdw_ptr, 'Output', 'IceOut'      , flag)
+       if (flag) sr%output_ice = sr%icedamp
+    endif
     !
     ! Check that the comfile is not a map file (not allowed. Was allowed in preliminary versions)
     !
@@ -1913,16 +1955,14 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
           !
           ! Does out_ptr contain one or more children with name AdditionalOutput?
           !
-          node_ptr => out_ptr%child_nodes(j)%node_ptr
-          !
-          parname = ''
-          call prop_get_string(node_ptr, '*', 'AdditionalOutput', parname)
-          if ( parname /= '') then
+          tmp_ptr => out_ptr%child_nodes(j)%node_ptr
+          parname = tree_get_name( tmp_ptr )
+          if ( parname == 'additionaloutput') then
              par = par + 1
              !
              ! Read the additional output parameter
              !
-             call tree_get_data_string(node_ptr, parname, success)
+             call tree_get_data_string(tmp_ptr, parname, success)
              do i = 1, par
                 if (tmp_add_out_names(i) == parname) then
                    write(*,'(3a)') 'SWAN input: Additional output parameter ', trim(parname), ' has already been read'
@@ -2207,103 +2247,98 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
        !
        call prop_get_logical(tmp_ptr, '*', 'Output', dom%cgnum)
        !
-       ! Count number of meteofiles in current group Domain
+       ! Count number of external forces in current group Domain
        !
-       dom%n_meteofiles_dom = 0
+       dom%n_extforces = 0
        do ii = 1, size(tmp_ptr%child_nodes)
-          dom_ptr => tmp_ptr%child_nodes(ii)%node_ptr
-          parname = tree_get_name( dom_ptr )
-          if (parname == 'meteofile') then
-             dom%n_meteofiles_dom = dom%n_meteofiles_dom + 1
+          node_ptr => tmp_ptr%child_nodes(ii)%node_ptr
+          parname = tree_get_name( node_ptr )
+          if (parname == 'extforce') then
+             dom%n_extforces = dom%n_extforces + 1
+          elseif (parname == 'meteofile') then
+             dom%n_extforces = dom%n_extforces + 1
+             dom%n_meteofiles = dom%n_meteofiles + 1
           endif
        enddo
        !
-       if (dom%n_meteofiles_dom  > 0) then
+       if (dom%n_extforces  > 0) then
           !
-          ! Allocate temporary array for meteofiles
+          ! Allocate temporary array for names of external forcing files
           !
-          allocate(tmp_meteofile(dom%n_meteofiles_dom), stat = istat)
-          tmp_meteofile = ''
+          allocate(tmp_extforce_names(dom%n_extforces), stat = istat)
+          tmp_extforce_names = ''
           !
           ! The input can be read
           !
           par = 0
           do j = 1, size(tmp_ptr%child_nodes)
-             !
-             ! Does tmp_ptr contain one or more children with name MeteoFile?
-             !
              node_ptr => tmp_ptr%child_nodes(j)%node_ptr
-             !
-             parname = ''
-             call prop_get_string(node_ptr, '*', 'MeteoFile', parname)
-             if ( parname /= '') then
+             parname = tree_get_name( node_ptr )
+             if ( parname == 'extforce' .or. parname == 'meteofile') then
                 par = par + 1
                 !
-                ! Read value for keyword meteofile
+                ! Read value for keyword
                 !
                 call tree_get_data_string(node_ptr, parname, success)
                 !
                 ! Check double occurrences
                 !
                 do ii = 1, par
-                   if (tmp_meteofile(ii) == parname) then
-                      write(*,'(a,a,a)') 'SWAN input: Group Domain: MeteoFile ', trim(parname), ' has already been read'
+                   if (tmp_extforce_names(ii) == parname) then
+                      write(*,'(a,a,a)') 'SWAN input: Group Domain: External forcing ', trim(parname), ' has already been read'
                       par = par - 1
-                      dom%n_meteofiles_dom = dom%n_meteofiles_dom - 1
+                      dom%n_extforces = dom%n_extforces - 1
+                      if (parname == 'meteofile') dom%n_meteofiles = dom%n_meteofiles - 1
                       exit
                    endif
                 enddo
                 !
-                if (tmp_meteofile(par) == '') then
+                if (tmp_extforce_names(par) == '') then
                    !
-                   ! Array location for MeteoFile empty, so store the read item in the temporary meteofile array
+                   ! Index par points to empty string, so store the read file name in the array
                    !
-                   tmp_meteofile(par) = trim(parname)
+                   tmp_extforce_names(par) = trim(parname)
                 endif
-                if (par == dom%n_meteofiles_dom) then
+                if (par == dom%n_extforces) then
                    !
-                   ! Correct number of meteofiles read
+                   ! All external forcings read, stop processing keywords
                    !
                    exit
                 endif
              endif
           enddo
           !
-          ! Allocate array for meteofiles in group Domain
+          ! Allocate array for external forcing files in group Domain
           !
-          allocate (dom%meteofile_dom(dom%n_meteofiles_dom), stat = istat)
+          allocate (dom%extforce_names(dom%n_extforces), stat = istat)
+          dom%extforce_names(1:dom%n_extforces) = tmp_extforce_names(1:dom%n_extforces)
+          deallocate(tmp_extforce_names)
           !
-          ! Fill the array with meteofiles in group Domain
-          !
-          dom%meteofile_dom(1:dom%n_meteofiles_dom) = tmp_meteofile(1:dom%n_meteofiles_dom)
-          sr%swwindt = .true.
-          !
-          deallocate(tmp_meteofile)
+          if (dom%n_meteofiles > 0) sr%swwindt = .true.
           !
        endif
        !
-       ! Check whether also global meteofiles were provided.
+       ! Check whether also global external forcing files were provided.
        ! If so, the meteofile(s) specified in the DOMAIN group are used.
        !
-       if     (sr%n_meteofiles_gen > 0 .and. dom%n_meteofiles_dom > 0) then
-          write(*, '(a,i0)') 'SWAN_INPUT: Meteofiles specified in group Domain used instead of meteofiles specified in group General for domain ', domainnr
-       elseif (sr%n_meteofiles_gen > 0 .and. dom%n_meteofiles_dom == 0) then
+       if     (sr%n_extforces_gen > 0 .and. dom%n_extforces > 0) then
+          write(*, '(a,i0)') 'SWAN_INPUT: External forcing files specified in group Domain used instead of those specified in group General for domain ', domainnr
+       elseif (sr%n_extforces_gen > 0 .and. dom%n_extforces == 0) then
           !
-          ! Meteofiles specified in group general will be used for this domain
+          ! External forcing files specified in group general will be used for this domain
           !
-          dom%n_meteofiles_dom = sr%n_meteofiles_gen
+          dom%n_extforces = sr%n_extforces_gen
+          dom%n_meteofiles = sr%n_meteofiles_gen
           !
           ! Allocate array for meteofiles in group Domain
           !
-          allocate (dom%meteofile_dom(dom%n_meteofiles_dom), stat = istat)
+          allocate (dom%extforce_names(dom%n_extforces), stat = istat)
+          dom%extforce_names = sr%extforce_names_gen
           !
-          ! Fill the array with meteofiles in group Domain
-          !
-          dom%meteofile_dom = sr%meteofile_gen 
-          sr%swwindt        = .true.
-          write(*, '(a,i0)') 'SWAN_INPUT: Meteofiles specified in group General used for domain ', domainnr
+          if (dom%n_meteofiles > 0) sr%swwindt = .true.
+          write(*, '(a,i0)') 'SWAN_INPUT: External forcing files specified in group General used for domain ', domainnr
        endif
-       if (dom%n_meteofiles_dom > 0 .and. dom%qextnd(q_wind) > 0) then
+       if (dom%n_meteofiles > 0 .and. dom%qextnd(q_wind) > 0) then
           !
           ! User specified wind to be read from COM-file (from FLOW simulation),
           ! but user also specified wind via one or more meteofiles.
@@ -2313,7 +2348,7 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
           write(*, '(a,i0)') 'SWAN_INPUT: Meteofiles specified in group Domain used instead of meteo input from FLOW for domain ', domainnr
           dom%qextnd(q_wind) = 0
        endif
-       !       
+       !
     enddo
     !
     if (sr%swwindt) then
@@ -2328,7 +2363,7 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
     !
     ! determine whether flow data is used
     !
-    sr%useflowdata = sr%swmor .or. sr%swwlt .or. sr%swuvt .or. (sr%swwindt .and. dom%n_meteofiles_dom == 0) 
+    sr%useflowdata = sr%swmor .or. sr%swwlt .or. sr%swuvt .or. (sr%swwindt .and. dom%n_meteofiles == 0) 
     !
     ! determine the number of boundaries
     !
@@ -2846,8 +2881,8 @@ end subroutine read_keyw_mdw
 !==============================================================================
 subroutine read_swan_mdw(casl      ,wavedata  , &
                        & swmor     ,swwlt     ,swuvt     , &
-                       & swwav     ,swuvi     ,corht     ,curvi     , &
-                       & swbot     ,swflux    ,rgfout    ,prname    , &
+                       & swwav     ,swuvi     ,corht     , &
+                       & swflux    ,rgfout    ,prname    , &
                        & prnumb    ,title1    ,title2    ,title3    , &
                        & nnest     ,nttide    ,itest     ,itrace    , &
                        & zeta      ,ux0       ,uy0       ,css       ,cdd       , &
@@ -2887,8 +2922,6 @@ subroutine read_swan_mdw(casl      ,wavedata  , &
     integer, dimension(maxcurv)                  :: nclin
     integer, dimension(maxobst)                  :: nlin
     logical                         ,intent(out) :: corht
-    logical                         ,intent(out) :: curvi
-    logical                         ,intent(out) :: swbot
     logical                         ,intent(out) :: swflux
     logical                         ,intent(out) :: swmor
     logical                         ,intent(out) :: swuvi
@@ -3004,7 +3037,6 @@ subroutine read_swan_mdw(casl      ,wavedata  , &
     !  Switches
     !
     !     SWMOR   bottom from MORFO
-    !     SWBOT   bottom/current from BOTTOM/CURREN file(s)
     !     SWWLT   water level from TRISU
     !     SWUVT   velocity from TRISU
     !     SWUVI   velocity from input (constant over field)
@@ -3012,8 +3044,6 @@ subroutine read_swan_mdw(casl      ,wavedata  , &
     !     SWWAV   wave data to WAVE
     !     SWDIS   wave forces from dissipation
     !     CORHT   correction HISWA wave height, period (CORRHT)
-    !     SWOUT   store HISWA output
-    !     CURVI   curvi linear FLOW grid
     !
     rccnt = rccnt + skcomc(iuni)
     rccnt = rccnt + 1
@@ -3089,7 +3119,6 @@ subroutine read_swan_mdw(casl      ,wavedata  , &
     else
        read (iuni, *, err = 1002, end = 1009) swmr, swwt, swut
     endif
-    swbot      = .true.
     swmor      = .false.
     swwlt      = .false.
     swuvt      = .false.
@@ -3097,7 +3126,6 @@ subroutine read_swan_mdw(casl      ,wavedata  , &
     swuvi      = .true.
     swflux     = .true.
     corht      = .false.
-    curvi      = .true.
     if (swmr  == 1) swmor      = .true.
     if (swwt  == 1) swwlt      = .true.
     if (swut  == 1) swuvt      = .true.
@@ -3992,6 +4020,7 @@ subroutine write_swan_inp (wavedata, calccount, &
     character(37)               :: curfil
     character(37)               :: mudfil
     character(37)               :: vegfil
+    character(37)               :: aicefil
     character(60)               :: lijn
     character(60)               :: outfirst
     character(85)               :: line
@@ -4020,12 +4049,13 @@ subroutine write_swan_inp (wavedata, calccount, &
     !
     !     *** additional swan arrays ***
     !
-    botfil = 'BOTNOW'
-    curfil = 'CURNOW'
-    mudfil = 'MUDNOW'
-    vegfil = 'VEGNOW'
+    botfil  = 'BOTNOW'
+    curfil  = 'CURNOW'
+    mudfil  = 'MUDNOW'
+    vegfil  = 'VEGNOW'
+    aicefil = 'AICENOW'
     !
-    if (dom%qextnd(q_wind)>0 .or. dom%n_meteofiles_dom > 0) wfil = 'WNDNOW'
+    if (dom%qextnd(q_wind)>0 .or. dom%n_extforces > 0) wfil = 'WNDNOW'
     nb     = sr%nbound
     !
     mxfr       = 0 !swani(11)
@@ -4302,11 +4332,31 @@ subroutine write_swan_inp (wavedata, calccount, &
        line        = ' '
     endif
 !-----------------------------------------------------------------------
-    line       = ' '
+    !
+    !     Definition of sea ice fraction
+    !
+    if (sr%icedamp == 2) then
+       write (luninp, '(1X,A)') '$'
+       line       = ' '
+       lijn = 'INPGRID _'
+       line(1:18) = 'AICE CURV 0. 0. '
+       write (line(19:28), '(2(I4,1X))')    dom%mxc, dom%myc
+       write (luninp, '(1X,A)') lijn
+       write (luninp, '(1X,A)') trim(line)
+       line       = ' '
+       !
+       !     File-name sea ice fraction (use temporary file)
+       !
+       line  = 'READINP AICE 1.0 ''' // trim(aicefil) // ''' 4 0 FREE'
+       write (luninp, '(1X,A)') trim(line)
+       line       = ' '
+    endif
+!-----------------------------------------------------------------------
     !
     !     Fluid Mud
     !
     if (wavedata%mode == flow_mud_online) then
+       write (luninp, '(1X,A)') '$'
        lijn = 'INPGRID _'
        line(1:18) = 'MUDL CURV 0. 0. '
        write (line(19:28), '(2(I4,1X))')    dom%mxc, dom%myc
@@ -4314,28 +4364,18 @@ subroutine write_swan_inp (wavedata, calccount, &
        write (luninp, '(1X,A)') trim(line)
        line       = ' '
        !
-       !     File-name mud depth  (use temporary file)
+       !     File-name mud depth (use temporary file)
        !
-       line(1:18) = 'READINP MUDL 1.0'
-       ind = index(mudfil, ' ')
-       i = 22
-       line(i:i) = ''''''
-       i = i+1
-       line(i:) = trim(mudfil)
-       i = i+(ind-1)
-       line(i:i) = ''''''
-       i = i+1
-       line(i:) = ' 4'
-       i = i+2
-       line(i:) = ' 0 FREE'
+       line  = 'READINP MUDL 1.0 ''' // trim(mudfil) // ''' 4 0 FREE'
        write (luninp, '(1X,A)') trim(line)
+       line       = ' '
     endif
+!-----------------------------------------------------------------------
     !
     !     Vegetation map
     !
-    line(1:2) = '$ '
-    write (luninp, '(1X,A)') line
     if (dom%vegetation == 1) then
+       write (luninp, '(1X,A)') '$'
        lijn = 'INPGRID _'
        line(1:19) = 'NPLANTS CURV 0. 0. '
        write (line(20:29), '(2(I4,1X))')    dom%mxc, dom%myc
@@ -4343,20 +4383,18 @@ subroutine write_swan_inp (wavedata, calccount, &
        write (luninp, '(1X,A)') trim(line)
        line       = ' '
        !
-       !     File-name vegetation map 
+       !     File-name vegetation map (use temporary file)
        !
        line  = 'READINP NPLANTS 1.0 ''' // trim(vegfil) // ''' 4 0 FREE'
        write (luninp, '(1X,A)') trim(line)
+       line       = ' '
     endif
 !-----------------------------------------------------------------------
-    line       = ' '
-    line(1:2) = '$ '
-    write (luninp, '(1X,A)') line
-    line       = ' '
     !
     !     diffraction
     !
     if (sr%diffraction == 1) then
+       write (luninp, '(1X,A)') '$'
        line(1:7) = 'DIFFRAC'
        write (line( 9: 9), '(I1)'   ) sr%diffraction
        write (line(11:20), '(F10.5)') sr%diffr_coeff
@@ -4366,15 +4404,13 @@ subroutine write_swan_inp (wavedata, calccount, &
        line        = ' '
     endif
 !-----------------------------------------------------------------------
-    line(1:2) = '$ '
-    write (luninp, '(1X,A)') line
-    line       = ' '
     !
     !     definition of grid for wind field
     !
-    if (dom%qextnd(q_wind)>0 .or. dom%n_meteofiles_dom > 0) then
+    if (dom%qextnd(q_wind)>0 .or. dom%n_extforces > 0) then
        !        *** definition of grid ***
        !
+       write (luninp, '(1X,A)') '$'
        if (.not.sr%curviwind) then
           lijn       = 'INPGRID _'
           line       = ' '
@@ -4428,7 +4464,7 @@ subroutine write_swan_inp (wavedata, calccount, &
     !
     !     Uniform wind velocity and direction
     !
-    if (.not.varwin .and. dom%n_meteofiles_dom == 0) then
+    if (.not.varwin .and. dom%n_extforces == 0) then
        if (sr%genmode==0) then
           line       = ' '
           write (luninp, '(1X,A)') line
@@ -4807,6 +4843,10 @@ subroutine write_swan_inp (wavedata, calccount, &
        write (line(15:), '(F6.2,1X,F7.4,1X,I4,1X,F7.4)') dom%veg_height, dom%veg_diamtr, dom%veg_nstems, dom%veg_drag
        write (luninp, '(1X,A)') line
        line       = ' '
+    endif
+    if (sr%icedamp == 2) then
+        write (luninp, '(1X,A,1X,E12.4,1X,E12.4,1X,E12.4,1X,E12.4,1X,E12.4,1X,E12.4,1X,E12.4)') 'IC4M2 0.0',sr%icecoeff
+        write (luninp, '(1X,A,1X,F7.4)') 'SET ICEWIND',sr%icewind
     endif
     if (sr%modsim == 3) then
        write (luninp, '(1X,A)') 'PROP BSBT'
@@ -5214,6 +5254,9 @@ subroutine write_swan_inp (wavedata, calccount, &
              write (luninp, '(1X,A)') line
              line        = ' '
              line(37:56) = 'DSPR UBOT WIND VEL  '
+             if (sr%icedamp == 2) then
+                 line(56:68) = 'AICE DISICE  '
+             endif
              write (luninp, '(1X,A)') line
           endif
           line       = ' '
@@ -5479,7 +5522,6 @@ subroutine outputCurvesFromFile()
           tmp_ptr => cur_ptr%child_nodes(j)%node_ptr
 
           write (parname,'(a,i0)') 'row_', j
-          ! call tree_get_node_by_name( polygon_ptr, parname, node_ptr )
           call tree_get_data_ptr( tmp_ptr, data_ptr, node_type )
           !
           ! inputvals is of type real(fp)

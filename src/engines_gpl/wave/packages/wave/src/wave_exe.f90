@@ -32,7 +32,7 @@ program waves_main
 !!--pseudo code and references--------------------------------------------------
 ! NONE
 !!--declarations----------------------------------------------------------------
-   use wave_main
+   use wave_main, only: wave_main_init, wave_main_step, wave_main_finish
    use precision
    !
    ! To raise floating-point invalid, divide-by-zero, and overflow exceptions:
@@ -48,10 +48,13 @@ program waves_main
 !
 ! Local variables
 !
+   integer                                      :: i
+   integer                                      :: ierr
    integer                                      :: mode_in
    integer                                      :: mtdim
    integer                                      :: retval
    real(hp)                                     :: stepsize
+   character(20)                                :: tmpchar
    character(256)                               :: mdw_file     ! filename mdw file
 
    !

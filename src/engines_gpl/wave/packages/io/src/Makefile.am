@@ -40,6 +40,7 @@ libio_la_SOURCES = \
          get_wind.f90 \
          grmap_esmf.f90 \
          out2d.f90 \
+         postprocess_ice.f90 \
          put_wave_fields.f90 \
          read_swan_output.f90 \
          readn.f90 \
@@ -52,6 +53,7 @@ libio_la_SOURCES = \
          write_wave_his_netcdf.f90 \
          write_wave_map.f90 \
          write_wave_map_netcdf.f90 \
+         write_wave_map_ice.f90 \
          write_wave_map_wind.f90 \
          writek.f90 \
          wrivek.f90 \

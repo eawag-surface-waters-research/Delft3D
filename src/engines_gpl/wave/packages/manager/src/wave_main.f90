@@ -40,33 +40,25 @@ module wave_main
    use wave_data
    use wave_mpi
    use meteo
+
+   implicit none
+
+   private
+
+   public wave_main_init
+   public wave_main_step
+   public wave_main_finish
+   
+   public wavedata
 !
 ! Module variables
 !
-   integer                                      :: i
-   integer                                      :: ierr
    integer                                      :: n_swan_grids ! number of SWAN grids
    integer                                      :: n_flow_grids ! number of FLOW grids
-   integer                                      :: i_flow       ! counter
-   integer                                      :: i_swan       ! counter
-   integer                                      :: i_meteo      ! counter
-   integer                                      :: timtscale    ! time in tscale units, integer representation
-   integer                                      :: it01flow     ! reference date obtained from FLOW
-   integer                                      :: command
-   real                                         :: tscaleflow   ! basic time unit == flow time step (s)
-   real(fp)       , dimension(:,:), allocatable :: x_fp         ! Copy of x-coordinate of grid in flexible precision, needed for meteo module
-   real(fp)       , dimension(:,:), allocatable :: y_fp         ! Copy of y-coordinate of grid in flexible precision, needed for meteo module
-   logical                                      :: success      ! flag indicating whether delftio communication went correct
-   logical                                      :: mud
-   character(20)                                :: tmpchar
-   character(256), dimension(:), pointer        :: meteotypes
-   character(500)                               :: message
    type(wave_data_type),target                  :: wavedata
-
+   integer :: tmpchar
 
 contains
-
-
 
 !
 ! ====================================================================================
@@ -131,8 +123,7 @@ function wave_main_init(mode_in, mdw_file) result(retval)
    write (*,'(2a)')   '*** ',trim(version_full)
    write (*,'(2a)')   '***           built from : ', trim(txthlp)
    write (*,'(a)')    '***'
-   write (*,'(2a)')   '***           runid      : ', mdw_file
-   ! write (*,'(4a)')   '***           date,time  : ', date, ',', rundat(11:19)
+   write (*,'(2a)')   '***           runid      : ', trim(mdw_file)
    write (*,'(a)')    '***'
    write (*,'(80a1)') ('*', n = 1, 80)
    write (*,'(a)')
@@ -176,7 +167,19 @@ function wave_master_init(mode_in, mdw_file) result(retval)
 !
 ! Local variables
 !
-   integer :: mtdim
+   logical                                      :: success      ! flag indicating whether delftio communication went correct
+   integer                                      :: i_icefrac    ! index of ice fraction
+   integer                                      :: i_floe       ! index of floe diameter
+   integer                                      :: i_flow       ! counter
+   integer                                      :: i_extfo      ! counter
+   integer                                      :: i_swan       ! counter
+   integer                                      :: it01flow     ! reference date obtained from FLOW
+   integer                                      :: mtdim
+   real                                         :: tscaleflow   ! basic time unit == flow time step (s)
+   real(fp)       , dimension(:,:), allocatable :: x_fp         ! Copy of x-coordinate of grid in flexible precision, needed for external forcing module
+   real(fp)       , dimension(:,:), allocatable :: y_fp         ! Copy of y-coordinate of grid in flexible precision, needed for external forcing module
+   character(60) , dimension(:), allocatable    :: extforce_quantities
+   character(256), dimension(:), pointer        :: extforce_types
    !
    ! To raise floating-point invalid, divide-by-zero, and overflow exceptions:
    ! Activate the following line
@@ -261,31 +264,30 @@ function wave_master_init(mode_in, mdw_file) result(retval)
    !
    swan_run%sferic = swan_grids(1)%sferic
    !
-   ! Meteo data from file?
-   ! Only if 1 or more meteoitems have been specified
-   ! and meteo information has not been received from FLOW
+   ! External forcing data from file?
+   ! Only if 1 or more external forcing have been specified.
    !
    do i_swan = 1, n_swan_grids
-      if (swan_run%dom(i_swan)%n_meteofiles_dom > 0 .and. swan_run%dom(i_swan)%qextnd(q_wind) == 0) then
+      if (swan_run%dom(i_swan)%n_extforces > 0) then
          !
-         ! Grid coordinates of all swan grids are needed by the meteo module
+         ! Grid coordinates of all swan grids are needed by the external forcing module
          !
          success  = initmeteo(swan_grids(i_swan)%grid_name)
          call checkmeteoresult_wave(success)
          !
-         ! Read the meteo files
+         ! Read the external forcing files
          !
-         do i_meteo = 1, swan_run%dom(i_swan)%n_meteofiles_dom
-            success = addmeteoitem(swan_grids(i_swan)%grid_name               , &
-                                 & swan_run%dom(i_swan)%meteofile_dom(i_meteo), &
-                                 & swan_grids(i_swan)%sferic                  , &
-                                 & swan_grids(i_swan)%mmax                    , &
-                                 & swan_grids(i_swan)%nmax                    )
+         do i_extfo = 1, swan_run%dom(i_swan)%n_extforces
+            success = addmeteoitem(swan_grids(i_swan)%grid_name                , &
+                                 & swan_run%dom(i_swan)%extforce_names(i_extfo), &
+                                 & swan_grids(i_swan)%sferic                   , &
+                                 & swan_grids(i_swan)%mmax                     , &
+                                 & swan_grids(i_swan)%nmax                     )
             call checkmeteoresult_wave(success)
          enddo
          !
          ! Allocate local copies of coordinate arrays
-         ! Must be in flexible precision for the meteo module
+         ! Must be in flexible precision for the external forcing module
          !
          allocate(x_fp(swan_grids(i_swan)%mmax,swan_grids(i_swan)%nmax))
          allocate(y_fp(swan_grids(i_swan)%mmax,swan_grids(i_swan)%nmax))
@@ -306,17 +308,61 @@ function wave_master_init(mode_in, mdw_file) result(retval)
          !
          deallocate(x_fp)
          deallocate(y_fp)
-         nullify(meteotypes)
+         nullify(extforce_types)
          mtdim = 0
-         success = getmeteotypes(swan_grids(i_swan)%grid_name, meteotypes,mtdim)
+         success = getmeteotypes(swan_grids(i_swan)%grid_name, extforce_types,mtdim)
          call checkmeteoresult_wave(success)
-         do i_meteo = 1, size(meteotypes)
-            if (meteotypes(i_meteo) == "meteo_on_computational_grid") then
+         do i_extfo = 1, size(extforce_types)
+            if (extforce_types(i_extfo) == "meteo_on_computational_grid") then
                write(*,'(a)') '*** ERROR: "meteo on computational grid" (flow grid) is not supported by Delft3D-WAVE'
                call wavestop(1, '*** ERROR: "meteo on computational grid" (flow grid) is not supported by Delft3D-WAVE')
             endif
          enddo
-         deallocate(meteotypes)
+         deallocate(extforce_types)
+         !
+         ! Some ice checks
+         !
+         if (swan_run%icedamp > 0) then
+            i_icefrac = 0
+            i_floe    = 0
+            success = getmeteoquantities(swan_grids(i_swan)%grid_name, extforce_quantities)
+            call checkmeteoresult_wave(success)
+            do i_extfo = 1, size(extforce_quantities)
+               if (extforce_quantities(i_extfo) == "sea_ice_area_fraction") then
+                  i_icefrac = i_extfo
+                  swan_run%dom(i_swan)%n_extforces = swan_run%dom(i_swan)%n_extforces - 1
+               elseif (extforce_quantities(i_extfo) == "floe_diameter") then
+                  i_floe = i_extfo
+                  swan_run%dom(i_swan)%n_extforces = swan_run%dom(i_swan)%n_extforces - 1
+               endif
+            enddo
+            !
+            if (swan_run%icedamp == 1) then
+               if (i_icefrac == 0 .and. i_floe == 0) then
+                  write(*,'(a)') '*** ERROR: ice cover effect needs "sea_ice_area_fraction" and "floe_diameter" specification'
+                  stop
+               elseif (i_icefrac /= 0 .and. i_floe == 0) then
+                  write(*,'(a)') '*** ERROR: "sea_ice_area_fraction" specified by a external forcing but "floe_diameter" is missing'
+                  stop
+               elseif (i_icefrac == 0 .and. i_floe /= 0) then
+                  write(*,'(a)') '*** ERROR: "floe_diameter" specified by a external forcing but "sea_ice_area_fraction" is missing'
+                  stop
+               else
+                  write(*,'(a)') '*** MESSAGE: Modelling ice cover effect, using "sea_ice_area_fraction" and "floe_diameter", specified by external forcing'
+                  swan_run%dom(i_swan)%ice = 1
+               endif
+            elseif (swan_run%icedamp == 2) then
+               if (i_icefrac == 0) then
+                  write(*,'(a)') '*** ERROR: ice cover effect needs "sea_ice_area_fraction" specification by external forcing'
+                  stop
+               else
+                  write(*,'(a)') '*** MESSAGE: Modelling ice cover effect, using "sea_ice_area_fraction", specified by external forcing'
+                  swan_run%dom(i_swan)%ice = 1
+               endif
+            endif
+         endif
+         !
+         deallocate(extforce_quantities)
       endif
    enddo
    !
@@ -341,6 +387,10 @@ function wave_main_step(stepsize) result(retval)
 ! Globals
 !
    real(hp) :: stepsize
+!
+! Local variables
+!
+   integer                                      :: command
 !
 !! executable statements -----------------------------------------------
 !
@@ -377,8 +427,14 @@ function wave_master_step(stepsize) result(retval)
 !
 ! Locals
 !
-   integer  :: iold
-   real(hp) :: tend
+   logical                                      :: mud
+   logical                                      :: success      ! flag indicating whether delftio communication went correct
+   integer                                      :: command
+   integer                                      :: i
+   integer                                      :: ierr
+   integer                                      :: iold
+   integer                                      :: timtscale    ! time in tscale units, integer representation
+   real(hp)                                     :: tend
 !
 !! executable statements -----------------------------------------------
 !
@@ -534,13 +590,17 @@ function wave_master_finish() result(retval)
 !
    integer :: retval
 !
+! local variables
+!
+   integer                                      :: i_swan       ! counter
+!
 !! executable statements -----------------------------------------------
 !
    retval = 0
    !
    call del_temp_files(n_swan_grids)
    !
-   ! Deallocate memory used by meteo module
+   ! Deallocate memory used by external forcing module
    !
    do i_swan = 1, n_swan_grids
       call deallocmeteo(swan_grids(i_swan)%grid_name)

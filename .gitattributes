@@ -4506,6 +4506,7 @@ src/engines_gpl/wave/packages/io/src/get_visc.f90 -text
 src/engines_gpl/wave/packages/io/src/get_wind.f90 -text
 src/engines_gpl/wave/packages/io/src/grmap_esmf.f90 -text
 src/engines_gpl/wave/packages/io/src/out2d.f90 -text
+src/engines_gpl/wave/packages/io/src/postprocess_ice.f90 -text
 src/engines_gpl/wave/packages/io/src/put_wave_fields.f90 -text
 src/engines_gpl/wave/packages/io/src/read_swan_output.f90 -text
 src/engines_gpl/wave/packages/io/src/readn.f90 -text
@@ -4518,6 +4519,7 @@ src/engines_gpl/wave/packages/io/src/write_swan_datafile.f90 -text
 src/engines_gpl/wave/packages/io/src/write_wave_grid_netcdf.f90 -text
 src/engines_gpl/wave/packages/io/src/write_wave_his_netcdf.f90 -text
 src/engines_gpl/wave/packages/io/src/write_wave_map.f90 -text
+src/engines_gpl/wave/packages/io/src/write_wave_map_ice.f90 -text
 src/engines_gpl/wave/packages/io/src/write_wave_map_netcdf.f90 -text
 src/engines_gpl/wave/packages/io/src/write_wave_map_wind.f90 -text
 src/engines_gpl/wave/packages/io/src/writek.f90 -text

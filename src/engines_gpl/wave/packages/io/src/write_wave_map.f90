@@ -1,4 +1,4 @@
-subroutine write_wave_map (sg, sof, n_swan_grids, wavedata, casl, prevtime, gamma0)
+subroutine write_wave_map (sg, sof, sif, n_swan_grids, wavedata, casl, prevtime, gamma0, output_ice)
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2021.                                
@@ -47,9 +47,11 @@ subroutine write_wave_map (sg, sof, n_swan_grids, wavedata, casl, prevtime, gamm
     character(*), intent(in)  :: casl         ! runid
     type (grid)               :: sg           ! swan grid
     type (output_fields)      :: sof          ! output fields defined on swan grid
+    type (input_fields)       :: sif          ! input fields defined on swan grid
     type (wave_data_type)     :: wavedata
     logical                   :: prevtime     ! true: the time to be written is the "previous time"
     real        , intent(in)  :: gamma0       ! JONSWAP peak enhancement factor
+    integer     , intent(in)  :: output_ice   ! switch for writing ice quantities
 !
 ! Local variables
 !
@@ -401,9 +403,14 @@ subroutine write_wave_map (sg, sof, n_swan_grids, wavedata, casl, prevtime, gamm
        deallocate (elmdes2)
     endif
     !
+    ! The ice field is written into another group on the wave-map file
+    !
+    if (output_ice > 0) then
+       call write_wave_map_ice (sg  , sif  , n_swan_grids, wavedata, casl)
+    endif
+    !
     ! The wind field is written into another group on the wave-map file
     ! it is always written!
     !
-    call write_wave_map_wind (sg  , sof  , n_swan_grids, wavedata, &
-                            & casl)
+    call write_wave_map_wind (sg  , sof  , n_swan_grids, wavedata, casl)
 end subroutine write_wave_map
