@@ -36,6 +36,12 @@ if (WIN32)
                           "fmpich2.lib"
                           "netcdf.lib")
 
+    # disable OpenMP
+    string(REPLACE "/MP" "" TEMP "${CMAKE_Fortran_FLAGS}") 
+    set(CMAKE_Fortran_FLAGS ${TEMP})
+    string(REPLACE "/MP" "" TEMP "${CMAKE_Fortran_FLAGS_DEBUG}") 
+    set(CMAKE_Fortran_FLAGS_DEBUG ${TEMP})
+
     # Set linker options
     message(STATUS "Setting target_link_options in windows")
     target_link_options(${executable_name} PRIVATE ${nologo_flag})
