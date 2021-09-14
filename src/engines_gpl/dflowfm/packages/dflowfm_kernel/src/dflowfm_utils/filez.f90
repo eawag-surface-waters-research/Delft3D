@@ -607,7 +607,7 @@ subroutine unstruc_errorhandler(level)
     use dfm_error
 #ifdef HAVE_MPI
     use mpi
-    use m_partitioninfo, only: DFM_COMM_DFMWORLD
+    use m_partitioninfo, only: DFM_COMM_DFMWORLD, jampi
 #endif
     implicit none
     integer, intent(in) :: level
@@ -620,7 +620,9 @@ subroutine unstruc_errorhandler(level)
         close(mdia)
         mdia = 0
 #ifdef HAVE_MPI
-         call MPI_Abort(DFM_COMM_DFMWORLD, DFM_GENERICERROR, ierr)
+        if (jampi == 1) then 
+            call MPI_Abort(DFM_COMM_DFMWORLD, DFM_GENERICERROR, ierr)
+        endif
 #endif
         stop
     end if
