@@ -57,7 +57,7 @@
 
 
    if (japaramscreen == 1) then
-      ntyp = 7 ; nrx = 32 ; bedslope = 1d-4
+      !ntyp = 7 ; nrx = 32 ; bedslope = 1d-4
       CALL MAKENETPARAMETERS()
    end if
 
