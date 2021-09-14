@@ -360,9 +360,9 @@ function wave_master_init(mode_in, mdw_file) result(retval)
                   swan_run%dom(i_swan)%ice = 1
                endif
             endif
+            !
+            deallocate(extforce_quantities)
          endif
-         !
-         deallocate(extforce_quantities)
       endif
    enddo
    !
