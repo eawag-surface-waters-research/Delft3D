@@ -50,17 +50,15 @@ subroutine updateValuesOnCrossSections_mpi(tim1)
    ! This routine can now be called any time, but will only do the update
    ! of sumval* when necessary:
    
-   !This method needs only be called on rank 0, but for some reason MPI processes desync and get deadlocked if we don't use allreduce with all processes
-   !It should be checked if this is due to testing with Intel MPI or a design choice. If the first, change mpi_allreduce below to mpi_reduce.
+   !TODO see UNST-5429
    if (tlastupd_sumval == tim1 )then 
      return
    end if
    
    tlastupd_sumval = tim1
 
-   ! This is done every time, why not save this in a module?
+   ! TODO: see UNST-5430
    numvals  = 5 + NUMCONST_MDU 
-
    if( jased == 4 .and. stmpar%lsedtot > 0 ) then
       numvals = numvals + stmpar%lsedtot + 1      
       if( stmpar%lsedsus > 0 ) then
@@ -85,7 +83,7 @@ subroutine updateValuesOnCrossSections_mpi(tim1)
     
    ! Sum current and cumulative values across MPI partitions
    if ( jatimer.eq.1 ) call starttimer(IOUTPUTMPI)  
-   ! these two calls should happen asynchronously, currently they are blocking
+   ! TODO: see UNST-5429
     call mpi_allreduce(sumvalcum_local, sumvalcum_global,numvals*ncrs,mpi_double_precision,mpi_sum,DFM_COMM_DFMWORLD,ierror)
     call mpi_allreduce(sumvalcur_local, sumvalcur_global,numvals*ncrs,mpi_double_precision,mpi_sum,DFM_COMM_DFMWORLD,ierror)
    if ( jatimer.eq.1 ) call stoptimer(IOUTPUTMPI)

@@ -614,8 +614,7 @@
          endif
          ! TODO: UNST-4644, add for long culvert
          if( n == 1 ) then
-            call reduce_crs(reducebuf,nreducebuf,1) !Reduce_crs is deprecated [UNST-4144], what to do with this call?
-            !call reduce_struc(reducebuf,nreducebuf)
+            call reduce_crs(reducebuf,nreducebuf,1) 
          endif
       end if
 
