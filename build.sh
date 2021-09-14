@@ -120,7 +120,7 @@ prepareonly=0
 mode=quiet
 config=
 generator="Unix Makefiles"
-compiler=intel18
+compiler=intel21
 
 
 #
@@ -200,8 +200,8 @@ fi
  
 #
 # Dot setenv.sh to load the modules needed
-echo ". $root/src/setenv.sh"
-      . $root/src/setenv.sh
+echo ". $root/src/setenv.sh -$compiler"
+      . $root/src/setenv.sh -$compiler
 
 CreateCMakedir $config
 
