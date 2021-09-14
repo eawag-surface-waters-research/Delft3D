@@ -750,6 +750,7 @@ subroutine readMDUFile(filename, istat)
     logical :: dummylog
     character(len=1000) :: charbuf = ' '
     character(len=255) :: tmpstr, fnam, bnam
+    double precision, allocatable ::tmpdouble(:)
     integer :: ibuf, ifil, mptfile, warn
     integer :: i, n, j, je, iostat, readerr, ierror
     integer :: jadum
@@ -760,7 +761,6 @@ subroutine readMDUFile(filename, istat)
     double precision :: tim
     integer :: major, minor
     external :: unstruc_errorhandler
-
     hkad = -999
     istat = 0 ! Success
 
@@ -956,17 +956,34 @@ subroutine readMDUFile(filename, istat)
     call prop_get_double ( md_ptr, 'geometry', 'Tsigma'           , Tsigma )
     call prop_get_double ( md_ptr, 'geometry', 'ZlayBot'          , zlaybot )
     call prop_get_double ( md_ptr, 'geometry', 'ZlayTop'          , zlaytop )
-
     call prop_get_integer( md_ptr, 'geometry', 'StretchType'      , iStrchType)
 
     if (Dztop > 0d0) then  ! hk claims back original functionality
         iStrchType = -1
     endif
 
-    if( iStrchType == STRCH_USER ) then
-       if( allocated(laycof) ) deallocate( laycof )
-       allocate( laycof(kmx) )
-       call prop_get_doubles( md_ptr, 'geometry', 'StretchCoef'   , laycof, kmx )
+    if( iStrchType == STRCH_USER ) then   
+        if( allocated(laycof) ) deallocate( laycof )
+        allocate( laycof(kmx) )
+        call prop_get_doubles( md_ptr, 'geometry', 'StretchCoef' , laycof, kmx )
+              
+        if (sum(laycof) /= 100) then
+          if (.not. allocated(tmpdouble)) allocate( tmpdouble(300) )
+          tmpdouble = 0d0
+          call prop_get_doubles( md_ptr, 'geometry', 'StretchCoef'   , tmpdouble, 300 )
+          n = 0
+          do i=1,300
+            if (.not.(tmpdouble(i)>0)) then
+               exit
+            endif 
+            n = n + 1
+          end do           
+          if ( kmx /= n ) then
+            call mess(LEVEL_ERROR, 'ERROR: The number of values specified in "StretchCoef" is inconsistent with "Kmx"!')
+          else
+            call mess(LEVEL_ERROR, 'ERROR: The values specified in "StretchCoef" do not add up to 100!')   
+          endif
+        endif
     else if( iStrchType == STRCH_EXPONENT ) then
        if( allocated(laycof) ) deallocate( laycof )
        allocate( laycof(3) )
