@@ -1,36 +1,36 @@
 !----- AGPL --------------------------------------------------------------------
-!                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2021.                                
-!                                                                               
-!  This file is part of Delft3D (D-Flow Flexible Mesh component).               
-!                                                                               
-!  Delft3D is free software: you can redistribute it and/or modify              
-!  it under the terms of the GNU Affero General Public License as               
-!  published by the Free Software Foundation version 3.                         
-!                                                                               
-!  Delft3D  is distributed in the hope that it will be useful,                  
-!  but WITHOUT ANY WARRANTY; without even the implied warranty of               
-!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the                
-!  GNU Affero General Public License for more details.                          
-!                                                                               
-!  You should have received a copy of the GNU Affero General Public License     
-!  along with Delft3D.  If not, see <http://www.gnu.org/licenses/>.             
-!                                                                               
-!  contact: delft3d.support@deltares.nl                                         
-!  Stichting Deltares                                                           
-!  P.O. Box 177                                                                 
-!  2600 MH Delft, The Netherlands                                               
-!                                                                               
-!  All indications and logos of, and references to, "Delft3D",                  
-!  "D-Flow Flexible Mesh" and "Deltares" are registered trademarks of Stichting 
+!
+!  Copyright (C)  Stichting Deltares, 2017-2021.
+!
+!  This file is part of Delft3D (D-Flow Flexible Mesh component).
+!
+!  Delft3D is free software: you can redistribute it and/or modify
+!  it under the terms of the GNU Affero General Public License as
+!  published by the Free Software Foundation version 3.
+!
+!  Delft3D  is distributed in the hope that it will be useful,
+!  but WITHOUT ANY WARRANTY; without even the implied warranty of
+!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+!  GNU Affero General Public License for more details.
+!
+!  You should have received a copy of the GNU Affero General Public License
+!  along with Delft3D.  If not, see <http://www.gnu.org/licenses/>.
+!
+!  contact: delft3d.support@deltares.nl
+!  Stichting Deltares
+!  P.O. Box 177
+!  2600 MH Delft, The Netherlands
+!
+!  All indications and logos of, and references to, "Delft3D",
+!  "D-Flow Flexible Mesh" and "Deltares" are registered trademarks of Stichting
 !  Deltares, and remain the property of Stichting Deltares. All rights reserved.
-!                                                                               
+!
 !-------------------------------------------------------------------------------
 
 ! $Id$
 ! $HeadURL$
 
- subroutine furu()                                   ! set fu, ru and kfs
+subroutine furu()                                   ! set fu, ru and kfs
  use m_flow                                          ! substitue u1 and q1
  use m_flowgeom
  use timers
@@ -260,11 +260,7 @@
 
  endif
 
- do n  = 1, nbndu
-    LL    = kbndu(3,n)
-    zbndu0(n) = u0(LL)
- enddo
-
+ 
  do n  = 1, nbndu                                    ! boundaries at u points
 
     k2    = kbndu(2,n)
@@ -272,17 +268,15 @@
     itpbn = kbndu(4,n)
     call getLbotLtop(LL,Lb,Lt)
 
-    !Original:
-    !zbndun = zbndu( (n-1)*kmxd + 1 )
-    if (kbndu(4,n) .ne. 5) then
+    !Original:  !zbndun = zbndu( (n-1)*kmxd + 1 )
+    if (itpbn .ne. 5) then
        zbndun = zbndu(n)
-       zbndu0n = zbndu0(n)
     else                    ! absgenbc
-       zbndu0n = u0(LL)
-       zbndun  = u1(LL)     ! set in xbeach_absgen_bc
+       zbndun = u1(LL)      ! set in xbeach_absgen_bc
     end if
 
     if (alfsmo < 1d0) then
+       zbndu0n = u0(LL)
        zbndun  = alfsmo*zbndun  + (1d0-alfsmo)*zbndu0n                     ! i.c. smoothing, start from 0
     endif
 
@@ -375,3 +369,4 @@
  call timstop(handle_furu)
 
  end subroutine furu
+
