@@ -103,7 +103,7 @@ do ng=1,ncgensg ! Loop over general structures
              closedGateWidthR = max(0d0, .5d0*(crestwidth - zcgen((ng-1)*3+3)))
           end if
       end if
-      generalstruc(ng)%gateheightonlink(1:generalstruc(ng)%numlinks) = 10**10 ! As a start, gate door is open everywhere. Below, we will close part of the gate doors.
+      generalstruc(ng)%gateheightonlink(1:generalstruc(ng)%numlinks) = 1d10 ! As a start, gate door is open everywhere. Below, we will close part of the gate doors.
     end if
 
    ! 2b: Determine the width that needs to be fully closed on 'left' side
