@@ -4,47 +4,46 @@
 ###############################################
 echo "Module Load"
 
-if [ "$1" == "-intel21" ]
-then
-  echo "Loading Intel21 compiled modules"
+if [ "$1" == "intel21" ]; then
+     echo "Loading Intel21 compiled modules"
   
-  module load    intel/21.2.0
-  module display intel/21.2.0
+     module load    intel/21.2.0
+     module display intel/21.2.0
     
-  module load    mpich/3.3.2_intel21.2.0
-  module display mpich/3.3.2_intel21.2.0
+     module load    mpich/3.3.2_intel21.2.0
+     module display mpich/3.3.2_intel21.2.0
   
-  module load    netcdf/v4.7.4_v4.5.3_intel21.2.0
-  module display netcdf/v4.7.4_v4.5.3_intel21.2.0
+     module load    netcdf/v4.7.4_v4.5.3_intel21.2.0
+     module display netcdf/v4.7.4_v4.5.3_intel21.2.0
   
-  module load    petsc/3.13.3_intel21.2.0_mpich3.3.2
-  module display petsc/3.13.3_intel21.2.0_mpich3.3.2
+     module load    petsc/3.13.3_intel21.2.0_mpich3.3.2
+     module display petsc/3.13.3_intel21.2.0_mpich3.3.2
   
-  module load    metis/5.1.0_intel21.2.0
-  module display metis/5.1.0_intel21.2.0
+     module load    metis/5.1.0_intel21.2.0
+     module display metis/5.1.0_intel21.2.0
   
-  module load    cmake/3.19.3_intel21.2.0 
-  module display cmake/3.19.3_intel21.2.0 
+     module load    cmake/3.19.3_intel21.2.0 
+     module display cmake/3.19.3_intel21.2.0 
 else 
-  echo "Loading Intel18 compiled modules"
+     echo "Loading Intel18 compiled modules"
   
-  module load    intel/18.0.3
-  module display intel/18.0.3
+     module load    intel/18.0.3
+     module display intel/18.0.3
     
-  module load    mpich/3.3.2_intel18.0.3
-  module display mpich/3.3.2_intel18.0.3
+     module load    mpich/3.3.2_intel18.0.3
+     module display mpich/3.3.2_intel18.0.3
   
-  module load    netcdf/v4.7.4_v4.5.3_intel18.0.3
-  module display netcdf/v4.7.4_v4.5.3_intel18.0.3
+     module load    netcdf/v4.7.4_v4.5.3_intel18.0.3
+     module display netcdf/v4.7.4_v4.5.3_intel18.0.3
   
-  module load    petsc/3.13.3_intel18.0.3_mpich3.3.2
-  module display petsc/3.13.3_intel18.0.3_mpich3.3.2
+     module load    petsc/3.13.3_intel18.0.3_mpich3.3.2
+     module display petsc/3.13.3_intel18.0.3_mpich3.3.2
   
-  module load    metis/5.1.0_intel18.0.3
-  module display metis/5.1.0_intel18.0.3
+     module load    metis/5.1.0_intel18.0.3
+     module display metis/5.1.0_intel18.0.3
   
-  module load    cmake/3.18.0_intel18.0.3 
-  module display cmake/3.18.0_intel18.0.3 
+     module load    cmake/3.18.0_intel18.0.3 
+     module display cmake/3.18.0_intel18.0.3 
 fi
 
 # Shapelib is intertangled with the code in third_party_open

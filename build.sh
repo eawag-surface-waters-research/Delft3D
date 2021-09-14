@@ -120,7 +120,7 @@ prepareonly=0
 mode=quiet
 config=
 generator="Unix Makefiles"
-compiler=intel21
+compiler=intel18
 
 
 #
@@ -131,6 +131,11 @@ do
 key="$1"
 
 case $key in
+    -c|--compiler)
+    shift
+    compiler="$1"
+    shift
+    ;;
     -p|--prepareonly)
     prepareonly=1
     shift
@@ -173,8 +178,10 @@ fi
 
 echo
 echo "    config      : $config"
+echo "    compiler    : $compiler"
 echo "    prepareonly : $prepareonly"
 echo
+
 
 scriptdirname=`readlink \-f \$0`
 scriptdir=`dirname $scriptdirname`
@@ -200,8 +207,8 @@ fi
  
 #
 # Dot setenv.sh to load the modules needed
-echo ". $root/src/setenv.sh -$compiler"
-      . $root/src/setenv.sh -$compiler
+echo ". $root/src/setenv.sh $compiler"
+      . $root/src/setenv.sh $compiler
 
 CreateCMakedir $config
 
