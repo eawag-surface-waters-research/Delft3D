@@ -1557,15 +1557,22 @@ subroutine GetCSParsTotalCross(cross, dpt, totalArea, totalWidth, calculationOpt
          !TODO:
          call EggProfile(dpt, crossDef%diameter, totalArea, totalWidth, wetPerimeter, calculationOption)
       case (CS_YZ_PROF)
+         if (calculationOption == CS_TYPE_MIN) then
+            ! YZ-profiles do not have declining cross sections
+            totalArea = 0d0
+            totalWidth = 0d0
+            wetPerimeter = 0d0
+         else
+            
          ! Also in case a conveyance table is time dependent, the geometry remains constant, so no need for interpolation of time dependent conveyance tables required.
-         call YZProfile(dpt, cross%convtab1, 1, totalArea, totalWidth, maxwidth, wetPerimeter)
-         if (totalWidth < sl) then
-            ! Assume a rectangular profile for widths < sl, in order to 
-            ! prevent "no convergence" in the non-linear solver. 
-            totalWidth= sl
-            totalArea = sl*dpt
-         endif
-         
+            call YZProfile(dpt, cross%convtab1, 1, totalArea, totalWidth, maxwidth, wetPerimeter)
+            if (totalWidth < sl) then
+               ! Assume a rectangular profile for widths < sl, in order to 
+               ! prevent "no convergence" in the non-linear solver. 
+               totalWidth= sl
+               totalArea = sl*dpt
+            endif
+         endif         
       case default
          call SetMessage(LEVEL_ERROR, 'INTERNAL ERROR: Unknown type of cross section')
    end select
