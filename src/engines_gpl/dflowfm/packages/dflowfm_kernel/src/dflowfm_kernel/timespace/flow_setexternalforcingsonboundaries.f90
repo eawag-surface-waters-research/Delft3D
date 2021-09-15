@@ -112,8 +112,15 @@ subroutine flow_setexternalforcingsonboundaries(tim, iresult)
       end do
    endif
 
-   if (nbndu > 0 ) then
+   if (item_velocitybnd /= ec_undef_int) then
        success = ec_gettimespacevalue(ecInstancePtr, item_velocitybnd, irefdate, tzone, tunit, tim)
+       if (.not. success) then
+          goto 888
+       end if
+   end if
+
+   if (item_dischargebnd /= ec_undef_int) then
+       success = ec_gettimespacevalue(ecInstancePtr, item_dischargebnd, irefdate, tzone, tunit, tim)
        if (.not. success) then
           goto 888
        end if

@@ -6535,6 +6535,7 @@ module m_meteo
    integer, target :: item_waterlevelbnd                                     !< Unique Item id of the ext-file's 'waterlevelbnd' quantity's ...-component.
    integer, target :: item_atmosphericpressure                               !< Unique Item id of the ext-file's 'atmosphericpressure' quantity
    integer, target :: item_velocitybnd                                       !< Unique Item id of the ext-file's 'velocitybnd' quantity
+   integer, target :: item_dischargebnd                                      !< Unique Item id of the ext-file's 'discharge' quantity
    integer, target :: item_salinitybnd                                       !< Unique Item id of the ext-file's 'salinitybnd' quantity
    integer, target :: item_temperaturebnd                                    !< Unique Item id of the ext-file's 'temperaturebnd' quantity
    integer, target :: item_sedimentbnd                                       !< Unique Item id of the ext-file's 'sedimentbnd' quantity
@@ -6642,6 +6643,7 @@ module m_meteo
       item_waterlevelbnd                         = ec_undef_int
       item_atmosphericpressure                   = ec_undef_int
       item_velocitybnd                           = ec_undef_int
+      item_dischargebnd                          = ec_undef_int
       item_salinitybnd                           = ec_undef_int
       item_temperaturebnd                        = ec_undef_int
       item_sedimentbnd                           = ec_undef_int
@@ -6931,7 +6933,7 @@ module m_meteo
             itemPtr1 => item_velocitybnd
             dataPtr1 => zbndu
          case ('dischargebnd')
-            itemPtr1 => item_velocitybnd
+            itemPtr1 => item_dischargebnd
             dataPtr1 => zbndq
          case ('salinitybnd')
             itemPtr1 => item_salinitybnd
