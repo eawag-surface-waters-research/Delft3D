@@ -4614,7 +4614,7 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
 
    integer, save                 :: ierr, ndim
 
-   double precision, allocatable                       :: ust_x(:), ust_y(:), wavout(:), wavout2(:)
+   double precision, allocatable                       :: ust_x(:), ust_y(:), wavout(:), wavout2(:), scaled_rain(:)
    character(len=255)                                  :: tmpstr
    integer                                             :: nm
    integer                                             :: Lf
@@ -5702,6 +5702,10 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
 
    ! TODO: AvD below: workx/y needs to be reset with miss/0 values before using.
    if (jamapucvec == 1 .or. jamapucmag == 1 .or. jamapucqvec == 1) then
+      if (size(workx) < ndkx .or. size(worky) < ndkx) then
+         call realloc(workx, ndkx)
+         call realloc(worky, ndkx)
+      end if
       call getucxucyeulmag(ndkx, workx, worky, ucmag, jaeulervel, jamapucmag)
 
       if (jamapucvec == 1) then
@@ -6682,11 +6686,12 @@ if (jamapsed > 0 .and. jased > 0 .and. stm_included) then
 
    ! Rain
    if (jamaprain > 0 .and. jarain /= 0) then
-      call realloc(workx, ndx, keepExisting = .false., fill = dmiss)
+      call realloc(scaled_rain, ndx, keepExisting = .false., fill = dmiss)
       do n=1,ndxndxi
-         workx(n) = rain(n)*bare(n)/ba(n)*1d-3/(24d0*3600d0) ! mm/day->(m3/s / m2) Average actual rainfall rate on grid cell area (maybe zero bare).
+         scaled_rain(n) = rain(n)*bare(n)/ba(n)*1d-3/(24d0*3600d0) ! mm/day->(m3/s / m2) Average actual rainfall rate on grid cell area (maybe zero bare).
       end do
-      ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_rain  , UNC_LOC_S, workx, jabndnd=jabndnd_)
+      ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_rain  , UNC_LOC_S, scaled_rain, jabndnd=jabndnd_)
+      deallocate(scaled_rain)
    endif
 
    ! Interception
