@@ -124,6 +124,8 @@ contains
       
       if (yz_conveyance) then
          call getYZConveyance(network%adm%line2cross(L, 2), network%crs%cross, dpt, u1L, cz, conv, factor_time_interpolation)
+         cz_sub(1)   = cz
+         cz_sub(2:3) = 0.0d0
 
       else
          igrid   = network%adm%lin2grid(L)
