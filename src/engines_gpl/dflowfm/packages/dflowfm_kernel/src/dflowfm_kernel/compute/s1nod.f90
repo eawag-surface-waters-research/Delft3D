@@ -44,6 +44,7 @@
  use m_sobekdfm
  use unstruc_channel_flow
  use unstruc_display, only : ntek, jaGUI
+ use iso_c_utils, only : MAXSTRINGLEN
 
  implicit none
 
@@ -57,7 +58,8 @@
  double precision, parameter :: HBMIN = 1d-3
  double precision, pointer, dimension(:)  :: gridPointsChainages
  type(t_branch), pointer, dimension(:)    :: branch
- logical :: domainCheck
+ logical                                  :: domainCheck
+ character(len=MAXSTRINGLEN)              :: msgbufpar   ! can not use msgbuf, as each OpenMP thread must have it's own
 
  !bbr = bb + dti*a1     !m2/s
  !ddr = dd + dti*a1*s1  !m3/s
@@ -108,14 +110,14 @@
        else
           dim_text = '1D'
        endif
-       write(msgbuf,'(a, i0, a)') 'The surface area of '//dim_text//'-node with node number ''', n, ''' is equal to 0'
-       call setMessage(LEVEL_WARN, msgbuf)
+       write(msgbufpar,'(a, i0, a)') 'The surface area of '//dim_text//'-node with node number ''', n, ''' is equal to 0'
+       call setMessage(LEVEL_WARN, msgbufpar)
        call SetMessage(-1, 'This might lead to a SAAD error in the solve process' )
-       write(msgbuf, '(a)') 'Current time is: '
-       call maketime(msgbuf(18:), time1)
-       call setMessage(-1, msgbuf)
-       write(msgbuf,'(a,f10.2,a,f10.2,a)') 'The location of the node is at (',xz(n),',',yz(n),')'
-       call setMessage(-1, msgbuf)
+       write(msgbufpar, '(a)') 'Current time is: '
+       call maketime(msgbufpar(18:), time1)
+       call setMessage(-1, msgbufpar)
+       write(msgbufpar,'(a,f10.2,a,f10.2,a)') 'The location of the node is at (',xz(n),',',yz(n),')'
+       call setMessage(-1, msgbufpar)
        L = -1
        if (n > ndx2d .and. network%loaded) then
           do i = 1, nd(n)%lnx
@@ -139,8 +141,8 @@
             else
                k = LL+1
             endif
-            write(msgbuf,'(a, f9.2)') 'The gridpoint lies at branch with id ''' //trim(branch(ibr)%id)// ''' at chainage: ', gridPointsChainages(k)
-            call setMessage(-1, msgbuf)
+            write(msgbufpar,'(a, f9.2)') 'The gridpoint lies at branch with id ''' //trim(branch(ibr)%id)// ''' at chainage: ', gridPointsChainages(k)
+            call setMessage(-1, msgbufpar)
          endif
       endif
       call adddot(xz(n), yz(n), colournumber = 247)
