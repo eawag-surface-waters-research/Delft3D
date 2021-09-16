@@ -261,7 +261,7 @@ subroutine furu()                                   ! set fu, ru and kfs
  endif
 
  
- do n  = 1, nbndu                                    ! boundaries at u points
+do n  = 1, nbndu                                    ! boundaries at u points
 
     k2    = kbndu(2,n)
     LL    = kbndu(3,n)
@@ -269,10 +269,12 @@ subroutine furu()                                   ! set fu, ru and kfs
     call getLbotLtop(LL,Lb,Lt)
 
     !Original:  !zbndun = zbndu( (n-1)*kmxd + 1 )
-    if (itpbn .ne. 5) then
-       zbndun = zbndu(n)
-    else                    ! absgenbc
-       zbndun = u1(LL)      ! set in xbeach_absgen_bc
+    if (itpbn == 4) then       ! dischargebnd
+       zbndun = zbndq(n)
+    else if (itpbn == 5) then  ! absgenbc
+       zbndun = u1(LL)         ! set in xbeach_absgen_bc
+    else                       ! other types that use alfsmo 
+       zbndun = zbndu( (n-1)*kmxd + 1 ) 
     end if
 
     if (alfsmo < 1d0) then
@@ -309,7 +311,7 @@ subroutine furu()                                   ! set fu, ru and kfs
        ru(L) = zbndun
 
        if (Lt > Lb ) then
-          if (jaLogprofatubndin == 2 .and. itpbn == 3) then
+          if (jaLogprofatubndin /= 1 .and. itpbn == 3) then ! non logprof and vertical profile specified
              ru(L) = zbndu( (n-1)*kmxd + L - Lb + 1 )*min(1d0,alfsmo)
           else if (abs(u1(Lb)) > 1d-4 .and. z00 > 0d0) then
              if( jaustarint == 0 .or. jaustarint == 3 .or. jaustarint == 1 ) then

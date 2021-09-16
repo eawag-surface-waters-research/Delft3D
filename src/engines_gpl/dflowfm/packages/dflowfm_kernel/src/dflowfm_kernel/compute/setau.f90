@@ -277,13 +277,13 @@
     if ( jatimer.eq.1 ) call stoptimer(IMPIREDUCE)
  end if
 
- do nq = 1,nqbnd
+ do nq = 1, nqbnd
     at = at_all(nq)
     if (at .ne. 0) then
        do n  = L1qbnd(nq), L2qbnd(nq)
           L  = kbndu(3,n)
 !          zbndu(n) = (zbndu(n)*hu(L)**FAC23)/at
-           zbndu(n) = (zbndq(n)*huqbnd(n)**FAC23)/at
+           zbndq(n) = (zbndq(n)*huqbnd(n)**FAC23)/at
        enddo
     endif
  enddo
