@@ -45,7 +45,7 @@ subroutine updateValuesOnCrossSections_mpi(tim1)
    use m_flowtimes, only: tstart_user, ti_his
    implicit none
    double precision                 :: tim1, timtot
-   integer                          :: iv, icrs, numvals, ierror
+   integer                          :: iv, icrs, ierror
 
    ! This routine can now be called any time, but will only do the update
    ! of sumval* when necessary:
@@ -57,15 +57,6 @@ subroutine updateValuesOnCrossSections_mpi(tim1)
    
    tlastupd_sumval = tim1
 
-   ! TODO: see UNST-5430
-   numvals  = 5 + NUMCONST_MDU 
-   if( jased == 4 .and. stmpar%lsedtot > 0 ) then
-      numvals = numvals + stmpar%lsedtot + 1      
-      if( stmpar%lsedsus > 0 ) then
-         numvals = numvals + 1
-      endif
-   endif
-
    timtot = tim1 - tstart_user
    if (timtot == 0) then
    timtot = 1 ! So that the first time we don't divide by zero, avoids if condition in loop.
@@ -73,27 +64,27 @@ subroutine updateValuesOnCrossSections_mpi(tim1)
    
    ! Allocate separate arrays to store sum
     if (.not. allocated(sumvalcur_global)) then
-       allocate(sumvalcur_global(numvals,ncrs))
+       allocate(sumvalcur_global(nval,ncrs))
        sumvalcur_global = 0d0      
     endif
     if (.not. allocated(sumvalcum_global)) then
-       allocate(sumvalcum_global(numvals,ncrs))
+       allocate(sumvalcum_global(nval,ncrs))
        sumvalcum_global = 0d0      
     endif
     
    ! Sum current and cumulative values across MPI partitions
    if ( jatimer.eq.1 ) call starttimer(IOUTPUTMPI)  
    ! TODO: see UNST-5429
-    call mpi_allreduce(sumvalcum_local, sumvalcum_global,numvals*ncrs,mpi_double_precision,mpi_sum,DFM_COMM_DFMWORLD,ierror)
-    call mpi_allreduce(sumvalcur_local, sumvalcur_global,numvals*ncrs,mpi_double_precision,mpi_sum,DFM_COMM_DFMWORLD,ierror)
+    call mpi_allreduce(sumvalcum_local, sumvalcum_global,nval*ncrs,mpi_double_precision,mpi_sum,DFM_COMM_DFMWORLD,ierror)
+    call mpi_allreduce(sumvalcur_local, sumvalcur_global,nval*ncrs,mpi_double_precision,mpi_sum,DFM_COMM_DFMWORLD,ierror)
    if ( jatimer.eq.1 ) call stoptimer(IOUTPUTMPI)
 
    ! Update values of crs object
    do icrs=1,ncrs
    
-      crs(icrs)%sumvalcur(1:numvals) = sumvalcur_global(1:numvals,icrs)
-      crs(icrs)%sumvalcum(1:numvals) = sumvalcum_global(1:numvals,icrs)
-      crs(icrs)%sumvalavg(1:numvals) = sumvalcum_global(1:numvals,icrs) / timtot / max(sumvalcum_timescale(1:numvals),1d0) 
+      crs(icrs)%sumvalcur(1:nval) = sumvalcur_global(1:nval,icrs)
+      crs(icrs)%sumvalcum(1:nval) = sumvalcum_global(1:nval,icrs)
+      crs(icrs)%sumvalavg(1:nval) = sumvalcum_global(1:nval,icrs) / timtot / max(sumvalcum_timescale(1:nval),1d0) 
       
    enddo
    
