@@ -3,6 +3,8 @@
 /agpl-3.0.txt -text
 /build.bat -text
 /build.sh -text
+doc/license/License.pdf -text
+doc/license/License.rtf -text
 doc/readme_building_netcdf.txt -text
 doc/readme_debug_dimr.txt -text
 examples/01_standard/config_d_hydro.xml -text
