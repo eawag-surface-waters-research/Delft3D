@@ -79,7 +79,7 @@ module running_mean_wrapper
 
       timesteps = 1 + nint((RMmeta%tstop - RMmeta%tstart) / RMmeta%ti_fou)
       if (RMmeta%ti_fou < 0.0_fp) then
-         msgbuf = 'min/max based on running mean only works for FouUpdateStep > 0'
+         msgbuf = 'min/max based on running mean only works for FouUpdateStep <> 1'
          call err_flush()
       else if (timesteps < RMmeta%nd) then
          write(msgbuf, '(a,i0,a)') 'not enough time steps for running mean with ', RMmeta%nd, ' points'
