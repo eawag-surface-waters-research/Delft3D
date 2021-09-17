@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 function print_usage_info {
     echo "Usage: ${0##*/} dimr_config_file [run_dimr.sh OPTIONS]..."

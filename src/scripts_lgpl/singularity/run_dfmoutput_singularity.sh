@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 function print_usage_info {
     echo "Usage: ${0##*/} [run_dfmoutput.sh OPTIONS]..."
