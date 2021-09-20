@@ -351,6 +351,30 @@ rem =============================================================
 goto :endproc
 
 
+rem =============================================================
+rem === copies runtime libraries for SwanOMP                  ===
+rem =============================================================
+:copySwanOmpDependentRuntimeLibraries
+
+    set destination=%~1
+    call :copyFile "!checkout_src_root!\third_party_open\netcdf\netCDF 4.6.1\bin\*"                                     !destination!  
+
+goto :endproc
+
+
+rem =============================================================
+rem === copies runtime libraries for SwanMPI                  ===
+rem =============================================================
+:copySwanMpiDependentRuntimeLibraries
+
+    set destination=%~1
+    call :copyFile "!checkout_src_root!\third_party_open\netcdf\netCDF 4.6.1\bin\*"                                     !destination!  
+    call :copyFile "!checkout_src_root!\third_party_open\mpich2\x64\bin\*.exe"                                          !destination!
+    call :copyFile "!checkout_src_root!\third_party_open\mpich2\x64\lib\*.dll"                                          !destination!
+
+goto :endproc
+
+
 
 rem =============================================================
 rem === copies runtime libraries for flow2d3d                 ===
@@ -1158,12 +1182,118 @@ rem ==========================
 goto :endproc
 
 rem ==========================
+rem === POST_BUILD_swan_omp
+rem ==========================
+:swan_omp
+
+    echo "postbuild swan_omp . . ."
+    
+    if "%configuration%" == "Debug" (
+    
+        echo "Debug postbuild"
+        set dest_bin="%install_dir%\x64\Debug"
+        
+        set dest_bin="!install_dir!\x64\Debug"
+        set dest_default="!install_dir!\x64\Debug"
+        set dest_scripts="!install_dir!\x64\Debug"
+        set dest_plugins="!install_dir!\x64\Debug"
+        set dest_share="!install_dir!\x64\Debug"
+        
+        call :makeDir !dest_bin!   
+        call :copySwanOmpDependentRuntimeLibraries                                                                           !dest_bin!
+        
+        rem copy binaries and dll 
+        call :copyFile "!build_dir!\swan_omp\!configuration!\swan_omp.*"                                                     !dest_bin!
+    )
+    
+    if "%configuration%" == "Release" ( 
+    
+        echo "Release postbuild"
+
+        set dest_bin="!install_dir!\x64\Release\swan\bin"
+        set dest_default="!install_dir!\x64\Release\swan\default"
+        set dest_scripts="!install_dir!\x64\Release\swan\scripts"
+        set dest_plugins="!install_dir!\x64\Release\plugins\bin"
+        set dest_share="!install_dir!\x64\Release\share\bin"
+        
+        call :makeAllDirs   
+        call :copySwanOmpDependentRuntimeLibraries                                                                           !dest_bin!
+        
+        rem Temporarily rename dest_bin to share_bin to copy libraries there as well
+        set dest_bin=!dest_share!
+        call :copySwanOmpDependentRuntimeLibraries                                                                           !dest_bin!
+        set dest_bin="!install_dir!\x64\Release\swan\bin"
+
+        rem copy binaries and dll
+        call :copyFile "!build_dir!\swan_omp\!configuration!\swan_omp.*"                                                     !dest_bin!
+
+        rem copy script
+        call :copyFile "!checkout_src_root!\third_party_open\swan\scripts\swan.bat"                                          !dest_scripts!
+
+    )
+ 
+goto :endproc
+
+
+rem ==========================
+rem === POST_BUILD_swan_mpi
+rem ==========================
+:swan_mpi
+
+    echo "postbuild swan_mpi . . ."
+ 
+    if "%configuration%" == "Debug" (
+ 
+        echo "Debug postbuild"
+        set dest_bin="%install_dir%\x64\Debug"
+ 
+        set dest_bin="!install_dir!\x64\Debug"
+        set dest_default="!install_dir!\x64\Debug"
+        set dest_scripts="!install_dir!\x64\Debug"
+        set dest_plugins="!install_dir!\x64\Debug"
+        set dest_share="!install_dir!\x64\Debug"
+
+        call :makeDir !dest_bin!
+        call :copySwanMpiDependentRuntimeLibraries                                                                           !dest_bin!
+
+        rem copy binaries and dll
+        call :copyFile "!build_dir!\swan_mpi\!configuration!\swan_mpi.*"                                                     !dest_bin!
+    )
+
+    if "%configuration%" == "Release" (
+
+        echo "Release postbuild"
+
+        set dest_bin="!install_dir!\x64\Release\swan\bin"
+        set dest_default="!install_dir!\x64\Release\swan\default"
+        set dest_scripts="!install_dir!\x64\Release\swan\scripts"
+        set dest_plugins="!install_dir!\x64\Release\plugins\bin"
+        set dest_share="!install_dir!\x64\Release\share\bin"
+
+        call :makeAllDirs
+        call :copySwanMpiDependentRuntimeLibraries                                                                           !dest_bin!
+
+        rem Temporarily rename dest_bin to share_bin to copy libraries there as well
+        set dest_bin=!dest_share!
+        call :copySwanMpiDependentRuntimeLibraries                                                                           !dest_bin!
+        set dest_bin="!install_dir!\x64\Release\swan\bin"
+
+        rem copy binaries and dll
+        call :copyFile "!build_dir!\swan_mpi\!configuration!\swan_mpi.*"                                                     !dest_bin!
+
+        rem copy script
+        call :copyFile "!checkout_src_root!\third_party_open\swan\scripts\swan.bat"                                          !dest_scripts!
+    )
+ 
+goto :endproc
+
+rem ==========================
 rem === POST_BUILD_flow2d3d
 rem ==========================
 :flow2d3d
 
     echo "postbuild flow2d3d. . ."
-    
+
     if "%configuration%" == "Debug" (
     
         echo "Debug postbuild"
