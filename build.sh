@@ -23,6 +23,7 @@ function print_usage_info {
     echo "- dwaq"
     echo "- dimr"
     echo "- tests"
+    echo "- swan"
     echo
     echo "Options:"
     echo "-p, --prepareonly"
@@ -161,6 +162,10 @@ case $key in
     ;;
     tests)
     config="tests"
+    shift
+    ;;
+    swan)
+    config="swan"
     shift
     ;;
     *)
