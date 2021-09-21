@@ -18,7 +18,7 @@ function print_usage_info {
     echo
     echo "<CONFIG>:"
     echo "- If <CONFIG> is missing, this usage will be print"
-    echo "- all: All CMaked projects, currently D-Flow FM and DIMR"
+    echo "- all: All CMaked projects, currently D-Flow FM, DWAQ and DIMR"
     echo "- dflowfm"
     echo "- dwaq"
     echo "- dimr"
@@ -96,11 +96,17 @@ function InstallAll () {
         cp -rf $root/src/bin/ $root/build_all/lnx64/ &>/dev/null
         cp -rf $root/src/lib/ $root/build_all/lnx64/ &>/dev/null
         cp -rf $root/src/share/ $root/build_all/lnx64/ &>/dev/null
-        # Delete DIMR/D-Flow FM related files: they will be added from the CMake build tasks
+        # Delete DIMR/D-Flow FM/D-WAQ related files: they will be added from the CMake build tasks
         rm -f $root/build_all/lnx64/bin/dflowfm        &>/dev/null
         rm -f $root/build_all/lnx64/bin/dimr           &>/dev/null
         rm -f $root/build_all/lnx64/lib/libdflowfm.so* &>/dev/null
         rm -f $root/build_all/lnx64/lib/libdimr.so*    &>/dev/null
+
+        rm -f $root/build_all/lnx64/bin/delwaq*                      &>/dev/null
+        rm -f $root/build_all/lnx64/lib/libdelwaq.so*                &>/dev/null
+        rm -f $root/build_all/lnx64/lib/libwaq_plugin_wasteload.so*  &>/dev/null
+        rm -f $root/build_all/lnx64/share/delft3d/bloom*             &>/dev/null
+        rm -f $root/build_all/lnx64/share/delft3d/proc_def*          &>/dev/null
 
         # CMaked stuff
         cp -rf $root/build_all/install/* $root/build_all/lnx64/ &>/dev/null
