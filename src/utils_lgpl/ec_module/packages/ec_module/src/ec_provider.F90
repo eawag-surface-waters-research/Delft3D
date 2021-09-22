@@ -1110,9 +1110,16 @@ module m_ec_provider
          success = ecSupportOpenExistingFile(minp, grid_file)
          if (.not. success) return
          ! Read the file header.
+         !
+         ! There is the RGF4.0 format description, and there is reality in the testbench:
+         ! -There can be no comments, or comments
+         ! -There can be RGF3.0 files or older with the SPHERICAL keyword in a comment
+         ! -There can be no, 1, or 2 keywords
          elmSetType = elmSetType_Cartesian
 20       call GetLine(minp, rec, istat)
-         if (index (rec,'=') == 0) then
+         !
+         ! handle comment lines
+         if (index (rec,'*') > 0) then     ! read comment lines where spherical might occur
          
             ! Backwards compatible: first line could contain spherical keyword         
             if (index(rec, 'Spherical') >= 1  .or. &
@@ -1122,10 +1129,24 @@ module m_ec_provider
             endif
          
             goto 20
-         end if
-         
-         read(minp,*) mx, nx
-         read(minp,*) ! skips a line
+         ! no comment, but keyword
+         elseif (index(rec, '=') >= 1) then
+            if (index(rec, 'Spherical') >= 1  .or. &
+                index(rec, 'SPHERICAL') >= 1  ) then
+               ! grid has spherical coordinates.
+               elmSetType = elmSetType_spheric
+            endif
+            !    
+            if (index(rec, 'Missing') >= 1) then
+               ! do nothing
+            endif  
+            goto 20
+         ! Comments and keywords done, read ncols and nrows from last record read   
+         else
+            read(rec,*) mx, nx
+            read(minp,*) ! skips line with 0 0 0 
+         endif   
+
          ! Read the file body.
          allocate(x(mx*nx))
          allocate(y(mx*nx))
