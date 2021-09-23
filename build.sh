@@ -21,6 +21,7 @@ function print_usage_info {
     echo "- all: All CMaked projects, currently D-Flow FM, DWAQ and DIMR"
     echo "- dflowfm"
     echo "- dwaq"
+    echo "- dwaves"
     echo "- dimr"
     echo "- tests"
     echo "- swan"
@@ -160,6 +161,10 @@ case $key in
     ;;
     dwaq)
     config="dwaq"
+    shift
+    ;;
+    dwaves)
+    config="dwaves"
     shift
     ;;
     dimr)

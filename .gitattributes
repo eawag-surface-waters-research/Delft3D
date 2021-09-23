@@ -479,6 +479,9 @@ src/cmake/install_tests/install_and_bundle.cmake -text
 src/cmake/install_waq/CMakeLists.txt -text
 src/cmake/install_waq/ReadMe.txt -text
 src/cmake/install_waq/install_and_bundle.cmake -text
+src/cmake/install_wave/CMakeLists.txt -text
+src/cmake/install_wave/ReadMe.txt -text
+src/cmake/install_wave/install_and_bundle.cmake -text
 src/cmake/linux_scripts.cmake -text
 src/cmake/modules.cmake -text
 src/cmake/modules/engines.cmake -text

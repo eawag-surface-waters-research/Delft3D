@@ -23,7 +23,7 @@ set(src_path src)
 get_fortran_source_files(${src_path} source_files)
 
 # Define library
-set(library_name manager)
+set(library_name wave_manager)
 add_library(${library_name} ${source_files})
 
 # Define prebuild events
@@ -39,17 +39,21 @@ set_source_files_properties(${fortran_version_file}
                             PROPERTIES COMPILE_OPTIONS "${file_preprocessor_flag}")
 
 # Set dependencies
-set(oss_dependencies    data
+set(oss_dependencies    wave_data
                         delftio
                         deltares_common
                         ec_module
-                        io
-                        kernel) 
-oss_include_libraries(${library_name} oss_dependencies)
+                        wave_io
+                        wave_kernel) 
 
-if(UNIX)
-    target_link_libraries(${library_name} ${oss_dependencies})
-endif(UNIX)
+oss_include_libraries(${library_name} oss_dependencies)
+target_link_libraries(${library_name} ${oss_dependencies})
+
+include_directories(${mpich2_path})
+
+# Set additional compilation properties, specific for Debug mode
+target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${check_bounds_flag}>")
+target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${check_pointer}>")
 
 # Define how the files should be structured within Visual Studio
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${source_files})

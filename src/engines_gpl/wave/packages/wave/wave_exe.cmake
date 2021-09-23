@@ -13,43 +13,98 @@ add_executable(${executable_name}   ${executable_files}
 target_compile_options(${executable_name} PRIVATE "${extend_source132_flag}")
 
 # Set dependencies
-set(exe_dependencies    data
-                        delftio
-                        delftio_shm
-                        deltares_common
-                        deltares_common_c
-                        ec_module
-                        gridgeom
-                        io
-                        io_netcdf
-                        kernel
-                        manager
-                        nefis
-                        netcdf4
-                        netcdff
-                        triangle_c) 
-oss_include_libraries(${executable_name} exe_dependencies)
-target_link_libraries(${executable_name} ${exe_dependencies})
+if (WIN32)
+    set(exe_dependencies    wave_data
+                            delftio
+                            delftio_shm
+                            deltares_common
+                            deltares_common_c
+                            ec_module
+                            gridgeom
+                            wave_io
+                            io_netcdf
+                            wave_kernel
+                            wave_manager
+                            nefis
+                            netcdf4
+                            netcdff
+                            triangle_c
+                            swan
+                            ) 
+
+    oss_include_libraries(${executable_name} exe_dependencies)
+    target_link_libraries(${executable_name} ${exe_dependencies})
+    
+    include_directories(${mpich2_path})
+
+endif(WIN32)
+
+# Add dependencies
+if(UNIX)
+    # the `pkg_check_modules` function is created with this call
+    find_package(PkgConfig REQUIRED)
+
+    # these calls create special `PkgConfig::<MODULE>` variables
+    pkg_check_modules(NETCDF     REQUIRED IMPORTED_TARGET netcdf)
+    pkg_check_modules(NETCDF_FTN REQUIRED IMPORTED_TARGET netcdf-fortran)
+
+    set(exe_dependencies    wave_data
+                            delftio
+                            delftio_shm
+                            deltares_common
+                            deltares_common_c
+                            ec_module
+                            gridgeom
+                            wave_io
+                            io_netcdf
+                            wave_kernel
+                            wave_manager
+                            nefis
+                            triangle_c
+                            swan
+                            esmfsm
+                            )
+    
+    oss_include_libraries(${executable_name} exe_dependencies)
+
+    target_link_libraries(${executable_name}
+         ${exe_dependencies}
+         PkgConfig::NETCDF
+         PkgConfig::NETCDF_FTN)
+
+    include_directories(${mpich2_path})
+    
+endif(UNIX)
+
 
 if (WIN32)
     # Set linker properties
-    message(STATUS "Setting linker properties in windows")
+    message(STATUS "Setting linker properties on windows")
     target_link_directories(${executable_name}
                             PRIVATE
                             "${checkout_src_root}/third_party_open/netcdf/netCDF 4.6.1/lib"
-                            "${checkout_src_root}/third_party_open/pthreads/bin/x64")
+                            "${checkout_src_root}/third_party_open/pthreads/bin/x64"
+                            "${checkout_src_root}/third_party_open/mpich2/x64/lib"
+                            "${checkout_src_root}/third_party_open/swan/x64")
 
     target_link_libraries(${executable_name}                                                   
                             "pthreadVC2.lib"
-                            "netcdf.lib")
+                            "netcdf.lib"
+                            "fmpich2.lib"
+                            "swan_mpi_lib.lib")
 
     # Set linker options
-    message(STATUS "Setting target_link_options in windows")
+    message(STATUS "Setting target_link_options on windows")
     target_link_options(${executable_name} PRIVATE ${nologo_flag})
 endif(WIN32)
 
-if(UNIX)
-    target_link_libraries(${executable_name} ${exe_dependencies})
+if (UNIX)
+    # Set linker properties
+    message(STATUS "netcdf lib dir is ${NETCDF_LIBRARY_DIRS}")
+    target_link_directories(${executable_name} PRIVATE ${NETCDF_LIBRARY_DIRS})
+    
+    #target_link_options(${executable_name} PRIVATE ${openmp_flag})
+    set_property(TARGET ${executable_name} PROPERTY LINKER_LANGUAGE Fortran)
 endif(UNIX)
 
 # Define how the files should be structured within Visual Studio
@@ -57,6 +112,10 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${executable_files})
 source_group(Resources FILES    ${rc_version_file}
                                 ${icon_file})
 set_target_properties (${executable_name} PROPERTIES FOLDER engines_gpl/wave)
+
+# Set additional compilation properties, specific for Debug mode
+target_compile_options(${executable_name} PRIVATE "$<$<CONFIG:Debug>:${check_bounds_flag}>")
+target_compile_options(${executable_name} PRIVATE "$<$<CONFIG:Debug>:${check_pointer}>")
 
 # Change the name of the target library to wave.exe
 set_target_properties (${executable_name} PROPERTIES OUTPUT_NAME wave_exe)
@@ -73,3 +132,8 @@ post_build_target (${executable_name}
                    ${build_dir} 
                    ${checkout_src_root} 
                    ${executable_name})
+
+install(TARGETS ${executable_name} RUNTIME  DESTINATION bin)
+if (UNIX)
+    install(PROGRAMS ${CMAKE_SOURCE_DIR}/../engines_gpl/wave/scripts/run_dwaves.sh  DESTINATION bin)
+endif(UNIX)
