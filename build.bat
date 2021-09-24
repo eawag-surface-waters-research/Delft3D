@@ -14,11 +14,9 @@ cd %~dp0
 set root=%CD%
 
 
-
-
 call :CheckCMakeInstallation
 if !ERRORLEVEL! NEQ 0 exit /B %~1
-call :GetArguments %1 %2
+call :GetArguments %*
 if !ERRORLEVEL! NEQ 0 exit /B %~1
 call :GetEnvironmentVars
 if !ERRORLEVEL! NEQ 0 exit /B %~1
@@ -26,7 +24,6 @@ call :PrepareSln
 if !ERRORLEVEL! NEQ 0 exit /B %~1
 call :SetGenerator
 if !ERRORLEVEL! NEQ 0 exit /B %~1
-
 
 echo.
 echo     config      : !config!
@@ -37,8 +34,6 @@ echo     prepareonly : !prepareonly!
 echo     coverage    : !coverage!
 echo     vs          : !vs!
 echo.
-
-
 
 call :Checks
 if !ERRORLEVEL! NEQ 0 exit /B %~1
@@ -135,11 +130,6 @@ rem =================================
         set config=%1
         set mode=quiet
     )
-    if "%1" == "dwaves" (
-        set prepareonly=0
-        set config=%1
-        set mode=quiet
-    )
     if "%1" == "swan" (
         set prepareonly=0
         set config=%1
@@ -150,10 +140,30 @@ rem =================================
         set config=%1
         set mode=quiet
     )
-    if "%2" == "--coverage" (
-        set coverage=1
+    
+     set "options=-vs:0 -ifort:0 -coverage:0"
+
+  rem see: https://stackoverflow.com/questions/3973824/windows-bat-file-optional-argument-parsing answer 2.
+  for %%O in (%options%) do for /f "tokens=1,* delims=:" %%A in ("%%O") do set "%%A=%%~B"
+  :loop
+  if not "%~2"=="" (
+    set "test=!options:*%~2:=! "
+    if "!test!"=="!options! " (
+        echo Error: Invalid option %~2
+    ) else if "!test:~0,1!"==" " (
+        set "%~2=1"
+    ) else (
+        set "%~2=%~3"
+        shift /2
     )
-    goto :endproc
+    shift /2
+    goto :loop
+  )
+  if NOT !-coverage! == 0 (
+  set coverage=1
+  )
+  goto :endproc
+
 
 
 
@@ -169,6 +179,9 @@ rem =================================
     rem #                                               in VS19: IFORT21, IFORT19
     rem #                                               in VS15: IFORT21, IFORT19, IFORT18, IFORT16(=previous official combination)
     rem # On TeamCity VS2019 is installed without IFORT
+
+
+    
     if NOT "%VS2017INSTALLDIR%" == "" (
         set vs=2017
         echo Found: VisualStudio 15 2017
@@ -184,7 +197,7 @@ rem =================================
             set ifort=18
             echo Found: Intel Fortran 2018
         )
-        goto :endproc
+        goto :endfun
     )
     if NOT "%VS2019INSTALLDIR%" == "" (
         set vs=2019
@@ -197,7 +210,7 @@ rem =================================
             set ifort=19
             echo Found: Intel Fortran 2019
         )
-        goto :endproc
+        goto :endfun
     )
     if NOT "%VS2015INSTALLDIR%" == "" (
         set vs=2015
@@ -218,11 +231,20 @@ rem =================================
             set ifort=16
             echo Found: Intel Fortran 2016
         )
-        goto :endproc
+        goto :endfun
+    )   
+    :endfun
+    if NOT !-vs! == 0 (
+    set vs=!-vs!
+    echo overriding vs with !-vs!
+    )
+
+    if NOT !-ifort! == 0 (
+    set ifort=!-ifort!
+    echo overriding ifort with !-ifort!
     )
     goto :endproc
-
-
+   
 
 rem ================================
 rem === Check CMake installation ===
@@ -521,9 +543,10 @@ rem =======================
     echo "- dimr"
     echo "- tests"
     echo.
-    echo "Options:"
-    echo "--coverage"
-    echo "    Instrument object files for code-coverage tool (codecov)."
+    echo "[OPTIONS]: usage [OPTION] followed by value, space separated, in any order"
+    echo "-coverage: Instrument object files for code-coverage tool (codecov) Example: -coverage 1"
+    echo "-vs: desired visual studio version. Example: -vs 2019
+    echo "-ifort: desired intel fortran compiler version. Example: -ifort 21
     echo.
     echo "More info  : https://oss.deltares.nl/web/delft3d/source-code"
     echo "About CMake: https://svn.oss.deltares.nl/repos/delft3d/trunk/src/cmake/doc/README"
