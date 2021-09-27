@@ -182,7 +182,6 @@ use m_flowgeom
        call flqhgsfm(Lf, teken, husb, hdsb, uu, zs, gatefraction*wstr, w2, wsd, zb2, ds1, ds2, dg,  &
                      cgf, cgd, cwf, cwd, mugf, lambda, strdamf, jarea, ds)
        fusav(1,n) = fu(Lf) ; rusav(1,n) = ru(Lf) ; ausav(1,n) = au(Lf)
- 
     else
        fusav(1,n) = 0d0
        rusav(1,n) = 0d0
@@ -214,16 +213,16 @@ use m_flowgeom
 
     zs = min  ( bob(1,Lf), bob(2,Lf) )         ! == zcgen(3*ng - 2) crest/silllevel
 
-    if ( husb >= zs .and. gatefraction < 1d0) then
+    if ( husb > zs .and. (1d0-gatefraction) > 0d0) then
        !zs     =  min  ( bob(1,Lf), bob(2,Lf) )
        zbi(3) = zs
        dg     = huge(1d0)
        u1(Lf) = rusav(3,n) - fusav(3,n)*dsL ; u0(Lf) = u1(Lf) ; q1(Lf) = ausav(3,n)*u1(Lf)
        call flgtarfm(ng, L0, wu(Lf), bl(kL), bl(kR), tekenstr, zs, wstr, w2, wsd, zb2, dg, ds1, ds2, cgf, cgd,   &
                      cwf, cwd, mugf, lambda, strdamf, gatedoorheight)
-       call flqhgsfm(Lf, teken, husb, hdsb, uu, zs, (1d0-gatefraction)*wstr, w2, wsd, zb2, ds1, ds2, dg,  &
+       call flqhgsfm(Lf, teken, husb, hdsb, uu, zs, wstr, wstr, wstr, zb2, ds1, ds2, dg,  &      ! zs, wstr, w2, wsd, zb2,  ! no contraction here
                      cgf, cgd, cwf, cwd, mugf, lambda, strdamf, jarea, ds)
-       fusav(3,n) = fu(Lf) ; rusav(3,n) = ru(Lf) ; ausav(3,n) = au(Lf)
+       fusav(3,n) = fu(Lf) ; rusav(3,n) = ru(Lf) ; ausav(3,n) = au(Lf)*(1d0-gatefraction)
     else
        fusav(3,n) = 0d0
        rusav(3,n) = 0d0
@@ -231,17 +230,20 @@ use m_flowgeom
     end if
 
     au(Lf) =  ausav(1,n) + ausav(2,n) + ausav(3,n)
+
+    ! write(*,*) au(Lf), ausav(1,n), ausav(3,n), gatefraction
+
     if (au(Lf) > 0d0) then
        fu(Lf) = (fusav(1, n)*ausav(1, n) + fusav(2, n)*ausav(2, n) + fusav(3, n)*ausav(3, n))/au(Lf)
        ru(Lf) = (rusav(1, n)*ausav(1, n) + rusav(2, n)*ausav(2, n) + rusav(3, n)*ausav(3, n))/au(Lf)
        if (kmx > 0) then
           if ( jastructurelayersactive == 1 ) then ! some layers are more equal than others
-   
-             if (ausav(1,n) > 0) then 
+
+             if (ausav(1,n) > 0) then
                 hhi(1) = ausav(1,n) / (gatefraction*wstr)
                 zti(1) = zbi(1) + hhi(1)
              endif
-             if (ausav(2,n) > 0) then 
+             if (ausav(2,n) > 0) then
                 hhi(2) = ausav(2,n) / (gatefraction*wstr)
                 zti(2) = zbi(2) + hhi(2)
              endif
@@ -287,7 +289,7 @@ use m_flowgeom
                 au(LL) = au(Lf)*( hu(LL)-hu(LL-1) ) / ( hu(Lt)-hu(Lb-1) )
              enddo
           endif
-       endif 
+       endif
     else
        fu(Lf) = 0d0
        ru(Lf) = 0d0
