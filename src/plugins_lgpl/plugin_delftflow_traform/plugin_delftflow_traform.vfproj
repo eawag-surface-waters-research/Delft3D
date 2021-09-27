@@ -47,6 +47,7 @@
 	<Files>
 		<Filter Name="Source Files" Filter="fi;fd">
 		<File RelativePath="src\engelund_hansen.f90"/>
+		<File RelativePath="src\general_engelund_hansen.f90"/>
 		<File RelativePath="src\partheniades_krone.f90"/>
 		<File RelativePath="src\settling_velocity.f90"/>
 		<File RelativePath="src\shld.f90"/>
