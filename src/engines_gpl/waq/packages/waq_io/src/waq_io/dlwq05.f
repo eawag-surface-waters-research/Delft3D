@@ -268,12 +268,28 @@
       ENDIF
 !
 !        Read time lags
+!        Note:
+!        We may encounter strings instead, in that case skip
+!        until we find an integer
 !
       ITYPE = 2
       CALL RDTOK1 ( LUNUT , ILUN  , LCH   , LSTACK, CCHAR ,
      *              IPOSR , NPOS  , CDUMMY, IAROPT, RHULP ,
      *              ITYPE , IERR2 )
-      IF ( IERR2 .GT. 0 ) GOTO 170
+      IF ( IERR2 .GT. 0 ) THEN
+         WRITE ( LUNUT , 2101 )
+         ITYPE = 1
+         DO
+            CALL RDTOK1 ( LUNUT , ILUN  , LCH   , LSTACK, CCHAR ,
+     *                    IPOSR , NPOS  , CDUMMY, IAROPT, RHULP ,
+     *                    ITYPE , IERR2 )
+            READ( CDUMMY, *, IOSTAT = IERR2 ) IAROPT
+            IF ( IERR2 == 0 ) THEN
+               EXIT
+            ENDIF
+         ENDDO
+      ENDIF
+
       WRITE ( LUNUT , 2100 ) IAROPT
       GOTO ( 60 , 70 , 110 ) IAROPT+1
       WRITE ( LUNUT , 2110 )
@@ -492,6 +508,7 @@
      *           ' of additional storage.' )
  2090 FORMAT ( //,' No active systems; no boundary conditions' )
  2100 FORMAT (  /,' Time lag option:',I3 )
+ 2101 FORMAT (  /,' Note: Skipping superfluous boundary names' )
  2110 FORMAT (    ' ERROR: Option not implemented')
  2120 FORMAT (    ' No time lags' )
  2130 FORMAT (    ' Constant time lags without defaults' )
