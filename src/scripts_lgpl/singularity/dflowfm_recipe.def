@@ -20,6 +20,7 @@ include: yum
     LICENSEFILE /opt/delft3dfm_latest/license/License.pdf
     ITERATION <singularityVersionNumberDelft3DFM>
     MPI_LIBRARY mpich 3.3
+    SINGULARITY <singularityVersionNumberSingularity>
 
 %post
     echo "Installing required packages..."
