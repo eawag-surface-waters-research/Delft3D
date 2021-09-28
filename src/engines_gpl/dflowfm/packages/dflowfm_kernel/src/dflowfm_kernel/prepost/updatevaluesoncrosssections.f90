@@ -55,8 +55,7 @@ implicit none
        return
     end if
 
-    if(.not. allocated(nval)) then
-        allocate(nval)
+    if(nval == 0) then
         nval  = 5 + NUMCONST_MDU 
         if( jased == 4 .and. stmpar%lsedtot > 0 ) then
            nval = nval + stmpar%lsedtot + 1      

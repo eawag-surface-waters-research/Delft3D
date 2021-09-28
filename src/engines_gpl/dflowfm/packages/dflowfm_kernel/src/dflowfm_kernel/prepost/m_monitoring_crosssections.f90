@@ -71,7 +71,7 @@ double precision, allocatable        :: sumvalcum_local(:,:)   !< Local cumulati
 double precision, allocatable        :: sumvalcur_global(:,:)  !< Global current values of monitored crs quantities, only needed by MPI_RANK_0 process 
 double precision, allocatable        :: sumvalcur_local(:,:)   !< Local  current values of monitored crs quantities 
 double precision, allocatable        :: sumvalcum_timescale(:) !< Store the time-scale multiplication (e.g. morfac in the case of sediment).
-integer, allocatable                 :: nval               !< number of quantities moonitored including sediment
+integer                              :: nval = 0               !< number of quantities moonitored including sediment
 contains
 
 !> Returns the index/position of a named crosssection in the global set arrays of this module.
