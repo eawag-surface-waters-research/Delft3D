@@ -1115,17 +1115,18 @@ rem ==========================
         set dest_scripts="!install_dir!\x64\Release\dwaves\scripts"
         set dest_plugins="!install_dir!\x64\Release\plugins\bin"
         set dest_share="!install_dir!\x64\Release\share\bin"
+        set dest_bin_esmf="!install_dir!\x64\Release\esmf\bin"
+        set dest_scripts_esmf="!install_dir!\x64\Release\esmf\scripts"
         
         call :makeAllDirs   
-        call :copyDwavesDependentRuntimeLibraries                                                                            !dest_bin!
-        
-        rem Temporarily rename dest_bin to share_bin to copy libraries there as well
-        set dest_bin=!dest_share!
-        call :copyDwaqDependentRuntimeLibraries                                                                              !dest_bin!
-        set dest_bin="!install_dir!\x64\Release\dwaves\bin"
+        call :makeDir !dest_bin_esmf!
+        call :makeDir !dest_scripts_esmf!
+        call :copyDwavesDependentRuntimeLibraries                                                                       !dest_bin!
         
         rem copy binaries and dll 
-        call :copyFile "!build_dir!\wave\!configuration!\wave.*"                                                           !dest_bin! 
+        call :copyFile "!build_dir!\wave\!configuration!\wave.*"                                                        !dest_bin! 
+        call :copyFile "!checkout_src_root!\third_party_open\esmf\win64\bin\*"                                          !dest_bin_esmf!
+        call :copyFile "!checkout_src_root!\third_party_open\esmf\win64\scripts\*"                                      !dest_scripts_esmf!
     )
     
 goto :endproc
@@ -1168,13 +1169,8 @@ rem ==========================
         call :makeAllDirs   
         call :copyDwavesDependentRuntimeLibraries                                                                           !dest_bin!
         
-        rem Temporarily rename dest_bin to share_bin to copy libraries there as well
-        set dest_bin=!dest_share!
-        call :copyDwaveDependentRuntimeLibraries                                                                            !dest_bin!
-        set dest_bin="!install_dir!\x64\Release\dwaves\bin"
-        
         rem copy binaries and dll 
-        call :copyFile "!build_dir!\wave\!configuration!\wave_exe.*"                                                      !dest_bin! 
+        call :copyFile "!build_dir!\wave\!configuration!\wave_exe.exe"                                                      "!install_dir!\x64\Release\dwaves\bin\wave.exe"
 
         call :copyFile "!checkout_src_root!\engines_gpl\wave\scripts\run_dwaves.bat"                                        !dest_scripts!
     )
@@ -1219,11 +1215,6 @@ rem ==========================
         call :makeAllDirs   
         call :copySwanOmpDependentRuntimeLibraries                                                                           !dest_bin!
         
-        rem Temporarily rename dest_bin to share_bin to copy libraries there as well
-        set dest_bin=!dest_share!
-        call :copySwanOmpDependentRuntimeLibraries                                                                           !dest_bin!
-        set dest_bin="!install_dir!\x64\Release\swan\bin"
-
         rem copy binaries and dll
         call :copyFile "!build_dir!\swan_omp\!configuration!\swan_omp.*"                                                     !dest_bin!
 
@@ -1272,11 +1263,6 @@ rem ==========================
 
         call :makeAllDirs
         call :copySwanMpiDependentRuntimeLibraries                                                                           !dest_bin!
-
-        rem Temporarily rename dest_bin to share_bin to copy libraries there as well
-        set dest_bin=!dest_share!
-        call :copySwanMpiDependentRuntimeLibraries                                                                           !dest_bin!
-        set dest_bin="!install_dir!\x64\Release\swan\bin"
 
         rem copy binaries and dll
         call :copyFile "!build_dir!\swan_mpi\!configuration!\swan_mpi.*"                                                     !dest_bin!

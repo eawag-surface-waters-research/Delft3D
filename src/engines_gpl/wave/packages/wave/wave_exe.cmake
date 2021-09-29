@@ -84,14 +84,12 @@ if (WIN32)
                             PRIVATE
                             "${checkout_src_root}/third_party_open/netcdf/netCDF 4.6.1/lib"
                             "${checkout_src_root}/third_party_open/pthreads/bin/x64"
-                            "${checkout_src_root}/third_party_open/mpich2/x64/lib"
-                            "${checkout_src_root}/third_party_open/swan/x64")
+                            "${checkout_src_root}/third_party_open/mpich2/x64/lib")
 
     target_link_libraries(${executable_name}                                                   
                             "pthreadVC2.lib"
                             "netcdf.lib"
-                            "fmpich2.lib"
-                            "swan_mpi_lib.lib")
+                            "fmpich2.lib")
 
     # Set linker options
     message(STATUS "Setting target_link_options on windows")
