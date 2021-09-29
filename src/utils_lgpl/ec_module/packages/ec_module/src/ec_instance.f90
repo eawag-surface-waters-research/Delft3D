@@ -567,7 +567,7 @@ module m_ec_instance
                               fileReaderPtr => instancePtr%ecFileReadersPtr(i)%ptr
                               if (associated(fileReaderPtr%bc)) then 
                                  BCBlockPtr => fileReaderPtr%bc
-                                 write(line,'(a,i5.5,a)') '         File Reader ',fileReaderPtr%id, '(filename='//trim(fileReaderPtr%bc%bcfileptr%bcFilename)//')'
+                                 write(line,'(a,i5.5,a)') '         File Reader ',fileReaderPtr%id, '(filename='//trim(fileReaderPtr%bc%fname)//')'
                                  call messenger(lvl, line)
                                  write(line,'(a,i5.5)') '            BCBlock ',BCBlockPtr%id 
                                  call messenger(lvl, line)
