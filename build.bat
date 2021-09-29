@@ -61,11 +61,13 @@ if !ERRORLEVEL! NEQ 0 exit /B %~1
 
 echo.
 echo Visual Studio sln-files:
+echo all       : %root%\build_all\all.snl
 echo D-Flow FM : %root%\build_dflowfm\dflowfm.sln
 echo DIMR      : %root%\build_dimr\dimr.sln
 echo DWAQ      : %root%\build_dwaq\dwaq.sln
+echo D-Waves   : %root%\build_dwaves\dwaves.sln
 echo Tests     : %root%\build_tests\tests.sln
-echo Other     : %root%\src\delft3d_open.sln
+echo Other     : %root%\src\delft3d4-flow.sln
 echo             %root%\src\ec_module.sln
 echo             %root%\src\io_netcdf.sln
 echo             %root%\src\nefis.sln
@@ -439,8 +441,8 @@ rem =========================
         del /f/q del.log
 
         cd /d "%root%\src\"
-        echo "    Compiling delft3d_open.sln ..."
-        call :VSbuild delft3d_open
+        echo "    Compiling delft3d4-flow.sln ..."
+        call :VSbuild delft3d4-flow
         echo "    Compiling utils_lgpl_no_tests.sln ..."
         call :VSbuild utils_lgpl_no_tests
         rem # Disabled: causes errors: call :VSbuild nefis
