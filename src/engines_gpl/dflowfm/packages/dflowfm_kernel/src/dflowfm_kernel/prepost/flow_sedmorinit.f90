@@ -77,7 +77,7 @@ subroutine flow_sedmorinit()
     integer, dimension(:), allocatable        :: node_processed !< flag (connection) nodes processed while checking cross sections
     type(t_branch), pointer                   :: pbr
     double precision                          :: dim_real
-
+    integer                                   :: outmorphopol !opposite of inmorphopol
 
 !! executable statements -------------------------------------------------------
 !
@@ -414,7 +414,13 @@ subroutine flow_sedmorinit()
     endif
 
     ! morphological polygon additions
-    call realloc(kcsmor,ndx,stat=ierr,fill=0,keepExisting=.false.)
+    if (inmorphopol==1) then
+        outmorphopol=0
+    else
+        outmorphopol=1
+    endif
+    
+    call realloc(kcsmor,ndx,stat=ierr,fill=outmorphopol,keepExisting=.false.)
     !
     inquire (file = trim(md_morphopol), exist = ex)
     if (.not. ex) then
@@ -427,7 +433,7 @@ subroutine flow_sedmorinit()
        ! find cells inside polygon
        call selectelset_internal_nodes(xz, yz, kcs, ndx, kp, pointscount, LOC_FILE=md_morphopol, LOC_SPEC_TYPE=LOCTP_POLYGON_FILE)
        do k=1,pointscount
-          kcsmor(kp(k)) = 1
+          kcsmor(kp(k)) = inmorphopol
        end do
     end if
 

@@ -1336,6 +1336,7 @@ subroutine readMDUFile(filename, istat)
     call prop_get_integer(md_ptr, 'sediment', 'BndTreatment',         jabndtreatment, success)           ! separate treatment boundary links in upwinding transports
     call prop_get_integer(md_ptr, 'sediment', 'SourSink',             jasourcesink, success)             ! switch off source or sink terms for sed advection
     call prop_get_string (md_ptr, 'sediment', 'MorphoPol',            md_morphopol, success)             ! Only apply mormerge operation/bottom change in polygon
+    call prop_get_integer(md_ptr, 'sediment', 'InMorphoPol',          inmorphopol, success)              ! value of the update inside morphopol (only 0 or 1 make sense)
     call prop_get_integer(md_ptr, 'sediment', 'MorCFL',               jamorcfl, success )                ! use morphological time step restriction (1, default) or not (0)
     call prop_get_double (md_ptr, 'sediment', 'DzbDtMax',             dzbdtmax, success)                 ! Max bottom level change per timestep
     call prop_get_double (md_ptr, 'sediment', 'MasBalMinDep',         botcrit, success)                  ! Minimum depth *after* bottom update for SSC adaptation mass balance
@@ -3134,6 +3135,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
           call prop_set(prop_ptr, 'sediment', 'MorphoPol', md_morphopol, 'Only apply bed updating wihtin specified polygon (*.pol)')
           call prop_set(prop_ptr, 'sediment', 'MorCFL'    , jamorcfl, 'Use CFL-like condition for morphologic updating (0=no, 1=yes) (default yes)')
           call prop_set(prop_ptr, 'sediment', 'DzbDtMax', dzbdtmax, 'Maximum bed level change (m) per time step for the case MorCFL=1 (default=0.1 m)')
+          call prop_set(prop_ptr, 'sediment', 'InMorphoPol', inmorphopol, 'Value of the update inside MorphoPol (0=inside polygon no update, 1=inside polygon yes update)')
        end if
        if (jased .ne. 4) then
           call prop_set(prop_ptr, 'sediment', 'Nr_of_sedfractions' ,  mxgr , 'Nr of sediment fractions, (specify the next parameters for each fraction) ')

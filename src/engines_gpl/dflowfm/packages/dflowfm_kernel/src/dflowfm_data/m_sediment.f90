@@ -101,6 +101,7 @@ module m_sediment
  double precision                  :: dzbdtmax
  double precision                  :: botcrit       !< mass balance: minimum depth after bottom update to adapt concentrations
  integer                           :: jamormergedtuser
+ integer                           :: inmorphopol   !< value of the update inside morphopol (only 0 or 1 make sense)
  !
  !-------------------------------------------------- old sediment transport and morphology
  integer                           :: mxgrKrone     !< mx grainsize index nr that followsKrone. Rest follows v.Rijn
@@ -167,6 +168,8 @@ contains
  dzbdtmax            = 0.1d0
  botcrit             = 1d-4
  jamormergedtuser    = 0
+ inmorphopol         = 1
+ 
  end subroutine default_sediment
 
  subroutine allocgrains() ! for all fractions:
