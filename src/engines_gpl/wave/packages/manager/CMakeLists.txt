@@ -24,7 +24,7 @@ get_fortran_source_files(${src_path} source_files)
 
 # Define library
 set(library_name wave_manager)
-add_library(${library_name} ${source_files})
+add_library(${library_name} ${source_files} ${fortran_version_file})
 
 # Define prebuild events
 prebuild_version_number(${library_name} ${rc_version_file} 
