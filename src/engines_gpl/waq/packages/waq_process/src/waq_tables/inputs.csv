@@ -3681,6 +3681,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "Res_Pickup","MinDepth  ",  17,"Y","x",1
 "Res_Pickup","MaxResPup ",  18,"Y","x",1
 "Res_Pickup","FactResPup",  19,"Y","x",1
+"Res_Pickup","SWfrIMS2  ",  20,"Y","x",1
 "Sed_IM1   ","IM1       ",   1,"N","x",1
 "Sed_IM1   ","ZSedIM1   ",   2,"Y","x",1
 "Sed_IM1   ","VSedIM1   ",   3,"Y","x",1

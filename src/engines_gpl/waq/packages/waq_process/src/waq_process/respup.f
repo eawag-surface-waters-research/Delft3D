@@ -92,6 +92,7 @@
       real(4) mindep
       real(4) maxrespup
       real(4) factrespup
+      integer swfrims2
       real(4) press2
       real(4) frim1s2pup
       real(4) frim2s2pup
@@ -141,6 +142,7 @@
       mindep     = pmsa( ipnt(17) )
       maxrespup  = pmsa( ipnt(18) )
       factrespup = pmsa( ipnt(19) )
+      swfrims2   = nint(pmsa( ipnt(20) ))
 
 !***********************************************************************
 !**** Processes connected to the RESUSENSION van Rijn Pick-up
@@ -157,13 +159,21 @@
       endif
 
 !     Fraction TIM1 in S2
-
-      frim1s2pup = im1s2/rhosand/(thicks2*(1.-pors2))
-      frim2s2pup = im2s2/rhosand/(thicks2*(1.-pors2))
-      frim3s2pup = im3s2/rhosand/(thicks2*(1.-pors2))
       tims2      = im1s2+im2s2+im3s2
-      frtims2pup = tims2/rhosand/(thicks2*(1.-pors2))
-
+      if (swfrims2 .eq. 1) then
+!         mass fraction determined as mass IMx / (mass sand + mass TIM) 
+          frim1s2pup = im1s2/(rhosand*thicks2*(1.-pors2) + tims2)
+          frim2s2pup = im2s2/(rhosand*thicks2*(1.-pors2) + tims2)
+          frim3s2pup = im3s2/(rhosand*thicks2*(1.-pors2) + tims2)
+          frtims2pup = tims2/(rhosand*thicks2*(1.-pors2) + tims2)
+      else
+!         original delwaq method: fraction = mass IMx / mass sand 
+          frim1s2pup = im1s2/(rhosand*thicks2*(1.-pors2))
+          frim2s2pup = im2s2/(rhosand*thicks2*(1.-pors2))
+          frim3s2pup = im3s2/(rhosand*thicks2*(1.-pors2))
+          frtims2pup = tims2/(rhosand*thicks2*(1.-pors2))
+      endif 
+      
 !     No resuspension when depth below min depth
       if ( depth .lt. mindep) then
          flrim1s2 = 0.0
@@ -215,12 +225,12 @@
       fl( 1 + iflux ) = flrim1s2 / depth
       fl( 2 + iflux ) = flrim2s2 / depth
       fl( 3 + iflux ) = flrim3s2 / depth
-      pmsa (ipnt (20) ) = flrim1s2
-      pmsa (ipnt (21) ) = flrim2s2
-      pmsa (ipnt (22) ) = flrim3s2
-      pmsa (ipnt (23) ) = flres2
-      pmsa (ipnt (24) ) = press2
-      pmsa (ipnt (25) ) = frtims2pup
+      pmsa (ipnt (21) ) = flrim1s2
+      pmsa (ipnt (22) ) = flrim2s2
+      pmsa (ipnt (23) ) = flrim3s2
+      pmsa (ipnt (24) ) = flres2
+      pmsa (ipnt (25) ) = press2
+      pmsa (ipnt (26) ) = frtims2pup
 
       endif
       endif
