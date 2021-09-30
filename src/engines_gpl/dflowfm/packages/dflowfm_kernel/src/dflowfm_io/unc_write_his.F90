@@ -786,9 +786,9 @@ subroutine unc_write_his(tim)            ! wrihis
                ierr = nf90_put_att(ihisfile, id_frac_name,'long_name', 'sediment fraction identifier')
                !
                if (kmx>0) then
-                  ierr = nf90_def_var(ihisfile, 'Sediment concentration', nf90_double, (/  id_laydim, id_statdim, id_sedsusdim, id_timedim /), id_sf)
-                  ierr = nf90_def_var(ihisfile, 'Sediment settling velocity', nf90_double, (/  id_laydimw, id_statdim, id_sedsusdim, id_timedim /), id_ws)
-                  ierr = nf90_def_var(ihisfile, 'Sediment vertical diffusivity', nf90_double, (/  id_laydimw, id_statdim, id_sedsusdim, id_timedim /), id_seddif)
+                  ierr = nf90_def_var(ihisfile, 'sed', nf90_double, (/  id_laydim, id_statdim, id_sedsusdim, id_timedim /), id_sf)
+                  ierr = nf90_def_var(ihisfile, 'ws', nf90_double, (/  id_laydimw, id_statdim, id_sedsusdim, id_timedim /), id_ws)
+                  ierr = nf90_def_var(ihisfile, 'seddif', nf90_double, (/  id_laydimw, id_statdim, id_sedsusdim, id_timedim /), id_seddif)
                   ierr = nf90_put_att(ihisfile, id_seddif, 'long_name', 'Sediment vertical diffusion')
                   ierr = nf90_put_att(ihisfile, id_seddif, 'units', 'm2 s-1')
                   ierr = nf90_put_att(ihisfile, id_seddif, '_FillValue', dmiss)
@@ -798,8 +798,8 @@ subroutine unc_write_his(tim)            ! wrihis
                   jawrizc = 1
                   jawrizw = 1
                else
-                  ierr = nf90_def_var(ihisfile, 'Sediment concentration', nf90_double, (/  id_statdim, id_sedsusdim, id_timedim /), id_sf)
-                  ierr = nf90_def_var(ihisfile, 'Sediment settling velocity', nf90_double, (/ id_statdim, id_sedsusdim, id_timedim /), id_ws)
+                  ierr = nf90_def_var(ihisfile, 'sed', nf90_double, (/  id_statdim, id_sedsusdim, id_timedim /), id_sf)
+                  ierr = nf90_def_var(ihisfile, 'ws', nf90_double, (/ id_statdim, id_sedsusdim, id_timedim /), id_ws)
                endif
                !
                ierr = nf90_put_att(ihisfile, id_sf, 'long_name', 'Sediment concentration')
@@ -837,48 +837,48 @@ subroutine unc_write_his(tim)            ! wrihis
                end select
                !
                if (stmpar%morpar%moroutput%sbcuv) then
-                  ierr = nf90_def_var(ihisfile, 'Current related bedload transport, x-component', nf90_double, (/  id_statdim, id_sedtotdim, id_timedim /), id_sbcx)
+                  ierr = nf90_def_var(ihisfile, 'sbcx', nf90_double, (/  id_statdim, id_sedtotdim, id_timedim /), id_sbcx)
                   ierr = nf90_put_att(ihisfile, id_sbcx, 'long_name', 'Current related bedload transport, x-component')
                   ierr = nf90_put_att(ihisfile, id_sbcx, 'units', transpunit)
                   ierr = nf90_put_att(ihisfile, id_sbcx, 'coordinates', statcoordstring)
                   ierr = nf90_put_att(ihisfile, id_sbcx, 'geometry', station_geom_container_name)
-                  ierr = nf90_def_var(ihisfile, 'Current related bedload transport, y-component', nf90_double, (/ id_statdim, id_sedtotdim, id_timedim /), id_sbcy)
+                  ierr = nf90_def_var(ihisfile, 'sbcy', nf90_double, (/ id_statdim, id_sedtotdim, id_timedim /), id_sbcy)
                   ierr = nf90_put_att(ihisfile, id_sbcy, 'long_name', 'Current related bedload transport, y-component')
                   ierr = nf90_put_att(ihisfile, id_sbcy, 'units', transpunit)
                   ierr = nf90_put_att(ihisfile, id_sbcy, 'coordinates', statcoordstring)
                   ierr = nf90_put_att(ihisfile, id_sbcy, 'geometry', station_geom_container_name)
                endif
                if (stmpar%morpar%moroutput%sbwuv .and. jawave>0) then
-                  ierr = nf90_def_var(ihisfile, 'Wave related bedload transport, x-component', nf90_double, (/ id_statdim, id_sedtotdim, id_timedim /), id_sbwx)
+                  ierr = nf90_def_var(ihisfile, 'sbwx', nf90_double, (/ id_statdim, id_sedtotdim, id_timedim /), id_sbwx)
                   ierr = nf90_put_att(ihisfile, id_sbwx, 'long_name', 'Wave related bedload transport, x-component')
                   ierr = nf90_put_att(ihisfile, id_sbwx, 'units', transpunit)
                   ierr = nf90_put_att(ihisfile, id_sbwx, 'coordinates', statcoordstring)
                   ierr = nf90_put_att(ihisfile, id_sbwx, 'geometry', station_geom_container_name)
-                  ierr = nf90_def_var(ihisfile, 'Wave related bedload transport, y-component', nf90_double, (/ id_statdim, id_sedtotdim, id_timedim /), id_sbwy)
+                  ierr = nf90_def_var(ihisfile, 'sbwy', nf90_double, (/ id_statdim, id_sedtotdim, id_timedim /), id_sbwy)
                   ierr = nf90_put_att(ihisfile, id_sbwy, 'long_name', 'Wave related bedload transport, y-component')
                   ierr = nf90_put_att(ihisfile, id_sbwy, 'units', transpunit)
                   ierr = nf90_put_att(ihisfile, id_sbwy, 'coordinates', statcoordstring)
                   ierr = nf90_put_att(ihisfile, id_sbwy, 'geometry', station_geom_container_name)
                endif
                if (stmpar%morpar%moroutput%sswuv .and. jawave>0) then
-                  ierr = nf90_def_var(ihisfile, 'Wave related suspended transport, x-component', nf90_double, (/ id_statdim, id_sedtotdim, id_timedim /), id_sswx)
+                  ierr = nf90_def_var(ihisfile, 'sswx', nf90_double, (/ id_statdim, id_sedtotdim, id_timedim /), id_sswx)
                   ierr = nf90_put_att(ihisfile, id_sswx, 'long_name', 'Wave related suspended transport, x-component')
                   ierr = nf90_put_att(ihisfile, id_sswx, 'units', transpunit)
                   ierr = nf90_put_att(ihisfile, id_sswx, 'coordinates', statcoordstring)
                   ierr = nf90_put_att(ihisfile, id_sswx, 'geometry', station_geom_container_name)
-                  ierr = nf90_def_var(ihisfile, 'Wave related suspended transport, y-component', nf90_double, (/ id_statdim, id_sedtotdim, id_timedim /), id_sswy)
+                  ierr = nf90_def_var(ihisfile, 'sswy', nf90_double, (/ id_statdim, id_sedtotdim, id_timedim /), id_sswy)
                   ierr = nf90_put_att(ihisfile, id_sswy, 'long_name', 'Wave related suspended transport, y-component')
                   ierr = nf90_put_att(ihisfile, id_sswy, 'units', transpunit)
                   ierr = nf90_put_att(ihisfile, id_sswy, 'coordinates', statcoordstring)
                   ierr = nf90_put_att(ihisfile, id_sswy, 'geometry', station_geom_container_name)
                end if
                if (stmpar%morpar%moroutput%sscuv) then
-                  ierr = nf90_def_var(ihisfile, 'Current related suspended transport, x-component', nf90_double, (/ id_statdim, id_sedtotdim, id_timedim /), id_sscx)
+                  ierr = nf90_def_var(ihisfile, 'sscx', nf90_double, (/ id_statdim, id_sedtotdim, id_timedim /), id_sscx)
                   ierr = nf90_put_att(ihisfile, id_sscx, 'long_name', 'Current related suspended transport, x-component')
                   ierr = nf90_put_att(ihisfile, id_sscx, 'units', transpunit)
                   ierr = nf90_put_att(ihisfile, id_sscx, 'coordinates', statcoordstring)
                   ierr = nf90_put_att(ihisfile, id_sscx, 'geometry', station_geom_container_name)
-                  ierr = nf90_def_var(ihisfile, 'Current related suspended transport, y-component', nf90_double, (/ id_statdim, id_sedtotdim, id_timedim /), id_sscy)
+                  ierr = nf90_def_var(ihisfile, 'sscy', nf90_double, (/ id_statdim, id_sedtotdim, id_timedim /), id_sscy)
                   ierr = nf90_put_att(ihisfile, id_sscy, 'long_name', 'Current related suspended transport, y-component')
                   ierr = nf90_put_att(ihisfile, id_sscy, 'units', transpunit)
                   ierr = nf90_put_att(ihisfile, id_sscy, 'coordinates', statcoordstring)
@@ -888,13 +888,13 @@ subroutine unc_write_his(tim)            ! wrihis
                ! Source and sink terms
                !
                if (stmpar%morpar%moroutput%sourcesink) then
-                  ierr = nf90_def_var(ihisfile, 'Source term suspended sediment transport', nf90_double, (/ id_statdim, id_sedsusdim, id_timedim /), id_sour)
+                  ierr = nf90_def_var(ihisfile, 'sourse', nf90_double, (/ id_statdim, id_sedsusdim, id_timedim /), id_sour)
                   ierr = nf90_put_att(ihisfile, id_sour, 'long_name', 'Source term suspended sediment transport')
                   ierr = nf90_put_att(ihisfile, id_sour, 'units', 'kg m-3 s-1')
                   ierr = nf90_put_att(ihisfile, id_sour, 'coordinates', statcoordstring)
                   ierr = nf90_put_att(ihisfile, id_sour, 'geometry', station_geom_container_name)
 
-                  ierr = nf90_def_var(ihisfile, 'Sink term suspended sediment transport', nf90_double, (/ id_statdim, id_sedsusdim, id_timedim /), id_sink)
+                  ierr = nf90_def_var(ihisfile, 'sinkse', nf90_double, (/ id_statdim, id_sedsusdim, id_timedim /), id_sink)
                   ierr = nf90_put_att(ihisfile, id_sink, 'long_name', 'Sink term suspended sediment transport')
                   ierr = nf90_put_att(ihisfile, id_sink, 'units', 's-1')
                   ierr = nf90_put_att(ihisfile, id_sink, 'coordinates', statcoordstring)
@@ -905,14 +905,14 @@ subroutine unc_write_his(tim)            ! wrihis
                !
                select case (stmpar%morlyr%settings%iunderlyr)
                   case (1)
-                     ierr = nf90_def_var(ihisfile, 'Available sediment mass in the bed', nf90_double, (/ id_statdim, id_sedtotdim, id_timedim /), id_bodsed)
+                     ierr = nf90_def_var(ihisfile, 'bodsed', nf90_double, (/ id_statdim, id_sedtotdim, id_timedim /), id_bodsed)
                      ierr = nf90_put_att(ihisfile, id_bodsed, 'long_name', 'Available sediment mass in the bed')
                      ierr = nf90_put_att(ihisfile, id_bodsed, 'units', 'kg m-2')
                      ierr = nf90_put_att(ihisfile, id_bodsed, '_FillValue', dmiss)
                      ierr = nf90_put_att(ihisfile, id_bodsed, 'coordinates', statcoordstring)
                      ierr = nf90_put_att(ihisfile, id_bodsed, 'geometry', station_geom_container_name)
                      !
-                     ierr = nf90_def_var(ihisfile, 'Sediment thickness in the bed', nf90_double, (/ id_statdim, id_timedim /), id_dpsed)
+                     ierr = nf90_def_var(ihisfile, 'dpsed', nf90_double, (/ id_statdim, id_timedim /), id_dpsed)
                      ierr = nf90_put_att(ihisfile, id_dpsed, 'long_name', 'Sediment thickness in the bed')
                      ierr = nf90_put_att(ihisfile, id_dpsed, 'units', 'm')
                      ierr = nf90_put_att(ihisfile, id_dpsed, '_FillValue', dmiss)
@@ -921,14 +921,14 @@ subroutine unc_write_his(tim)            ! wrihis
                   case (2)
                      ierr = nf90_def_dim(ihisfile, 'nBedLayers', stmpar%morlyr%settings%nlyr, id_nlyrdim)
                      !
-                     ierr = nf90_def_var(ihisfile, 'Available sediment mass in a layer of the bed', nf90_double, (/ id_nlyrdim, id_statdim, id_sedtotdim, id_timedim /), id_msed)
+                     ierr = nf90_def_var(ihisfile, 'msed', nf90_double, (/ id_nlyrdim, id_statdim, id_sedtotdim, id_timedim /), id_msed)
                      ierr = nf90_put_att(ihisfile, id_msed, 'long_name', 'Available sediment mass in a layer of the bed')
                      ierr = nf90_put_att(ihisfile, id_msed, 'units', 'kg m-2')
                      ierr = nf90_put_att(ihisfile, id_msed, '_FillValue', dmiss)
                      ierr = nf90_put_att(ihisfile, id_msed, 'coordinates', statcoordstring)
                      ierr = nf90_put_att(ihisfile, id_msed, 'geometry', station_geom_container_name)
                      !
-                     ierr = nf90_def_var(ihisfile, 'Thickness of a layer of the bed', nf90_double, (/ id_nlyrdim, id_statdim, id_timedim /), id_thlyr)
+                     ierr = nf90_def_var(ihisfile, 'thlyr', nf90_double, (/ id_nlyrdim, id_statdim, id_timedim /), id_thlyr)
                      ierr = nf90_put_att(ihisfile, id_thlyr, 'long_name', 'Thickness of a layer of the bed')
                      ierr = nf90_put_att(ihisfile, id_thlyr, 'units', 'm')
                      ierr = nf90_put_att(ihisfile, id_thlyr, '_FillValue', dmiss)
@@ -936,7 +936,7 @@ subroutine unc_write_his(tim)            ! wrihis
                      ierr = nf90_put_att(ihisfile, id_thlyr, 'geometry', station_geom_container_name)
                      !
                      if (stmpar%morlyr%settings%iporosity>0) then
-                        ierr = nf90_def_var(ihisfile, 'Porosity of a layer of the bed', nf90_double, (/ id_nlyrdim, id_statdim, id_timedim /), id_poros)
+                        ierr = nf90_def_var(ihisfile, 'poros', nf90_double, (/ id_nlyrdim, id_statdim, id_timedim /), id_poros)
                         ierr = nf90_put_att(ihisfile, id_poros, 'long_name', 'Porosity of a layer of the bed')
                         ierr = nf90_put_att(ihisfile, id_poros, 'units', '-')
                         ierr = nf90_put_att(ihisfile, id_poros, '_FillValue', dmiss)
@@ -944,7 +944,7 @@ subroutine unc_write_his(tim)            ! wrihis
                         ierr = nf90_put_att(ihisfile, id_poros, 'geometry', station_geom_container_name)
                      endif
                      !
-                     ierr = nf90_def_var(ihisfile, 'Volume fraction in a layer of the bed', nf90_double, (/ id_nlyrdim, id_statdim,  id_sedtotdim, id_timedim /), id_lyrfrac)
+                     ierr = nf90_def_var(ihisfile, 'lyrfrac', nf90_double, (/ id_nlyrdim, id_statdim,  id_sedtotdim, id_timedim /), id_lyrfrac)
                      ierr = nf90_put_att(ihisfile, id_lyrfrac, 'long_name', 'Volume fraction in a layer of the bed')
                      ierr = nf90_put_att(ihisfile, id_lyrfrac, 'units', 'm')
                      ierr = nf90_put_att(ihisfile, id_lyrfrac, '_FillValue', dmiss)
@@ -953,7 +953,7 @@ subroutine unc_write_his(tim)            ! wrihis
                end select
                !
                if (stmpar%morpar%moroutput%frac) then
-                  ierr = nf90_def_var(ihisfile, 'Availability fraction in top layer', nf90_double, (/ id_statdim, id_sedtotdim, id_timedim /), id_frac)
+                  ierr = nf90_def_var(ihisfile, 'frac', nf90_double, (/ id_statdim, id_sedtotdim, id_timedim /), id_frac)
                   ierr = nf90_put_att(ihisfile, id_frac, 'long_name', 'Availability fraction in top layer')
                   ierr = nf90_put_att(ihisfile, id_frac, 'units', '-')
                   ierr = nf90_put_att(ihisfile, id_frac, '_FillValue', dmiss)
@@ -962,7 +962,7 @@ subroutine unc_write_his(tim)            ! wrihis
                endif
                !
                if (stmpar%morpar%moroutput%mudfrac) then
-                  ierr = nf90_def_var(ihisfile, 'Mud fraction in top layer', nf90_double, (/ id_statdim, id_timedim /), id_mudfrac)
+                  ierr = nf90_def_var(ihisfile, 'mudfrac', nf90_double, (/ id_statdim, id_timedim /), id_mudfrac)
                   ierr = nf90_put_att(ihisfile, id_mudfrac, 'long_name', 'Mud fraction in top layer')
                   ierr = nf90_put_att(ihisfile, id_mudfrac, 'units', '-')
                   ierr = nf90_put_att(ihisfile, id_mudfrac, '_FillValue', dmiss)
@@ -971,7 +971,7 @@ subroutine unc_write_his(tim)            ! wrihis
                endif
                !
                if (stmpar%morpar%moroutput%sandfrac) then
-                  ierr = nf90_def_var(ihisfile, 'Sand fraction in top layer', nf90_double, (/ id_statdim, id_timedim /), id_sandfrac)
+                  ierr = nf90_def_var(ihisfile, 'sandfrac', nf90_double, (/ id_statdim, id_timedim /), id_sandfrac)
                   ierr = nf90_put_att(ihisfile, id_sandfrac, 'long_name', 'Sand fraction in top layer')
                   ierr = nf90_put_att(ihisfile, id_sandfrac, 'units', '-')
                   ierr = nf90_put_att(ihisfile, id_sandfrac, '_FillValue', dmiss)
@@ -980,7 +980,7 @@ subroutine unc_write_his(tim)            ! wrihis
                endif
                !
                if (stmpar%morpar%moroutput%fixfac) then
-                  ierr = nf90_def_var(ihisfile, 'Reduction factor due to limited sediment thickness', nf90_double, (/ id_statdim, id_sedtotdim, id_timedim /), id_fixfac)
+                  ierr = nf90_def_var(ihisfile, 'fixfac', nf90_double, (/ id_statdim, id_sedtotdim, id_timedim /), id_fixfac)
                   ierr = nf90_put_att(ihisfile, id_fixfac, 'long_name', 'Reduction factor due to limited sediment thickness')
                   ierr = nf90_put_att(ihisfile, id_fixfac, 'units', '-')
                   ierr = nf90_put_att(ihisfile, id_fixfac, '_FillValue', dmiss)
@@ -989,7 +989,7 @@ subroutine unc_write_his(tim)            ! wrihis
                endif
                !
                if (stmpar%morpar%moroutput%hidexp) then
-                  ierr = nf90_def_var(ihisfile, 'Hiding and exposure factor', nf90_double, (/ id_statdim, id_sedtotdim, id_timedim /), id_hidexp)
+                  ierr = nf90_def_var(ihisfile, 'hidexp', nf90_double, (/ id_statdim, id_sedtotdim, id_timedim /), id_hidexp)
                   ierr = nf90_put_att(ihisfile, id_hidexp, 'long_name', 'Hiding and exposure factor')
                   ierr = nf90_put_att(ihisfile, id_hidexp, 'units', '-')
                   ierr = nf90_put_att(ihisfile, id_hidexp, '_FillValue', dmiss)
@@ -998,7 +998,7 @@ subroutine unc_write_his(tim)            ! wrihis
                endif
                !
                if (stmpar%morpar%flufflyr%iflufflyr>0 .and. stmpar%lsedsus>0) then
-                  ierr = nf90_def_var(ihisfile, 'Sediment mass in fluff layer', nf90_double, (/ id_statdim, id_sedsusdim, id_timedim /), id_mfluff)
+                  ierr = nf90_def_var(ihisfile, 'mfluff', nf90_double, (/ id_statdim, id_sedsusdim, id_timedim /), id_mfluff)
                   ierr = nf90_put_att(ihisfile, id_mfluff, 'long_name', 'Sediment mass in fluff layer')
                   ierr = nf90_put_att(ihisfile, id_mfluff, 'units', '-')
                   ierr = nf90_put_att(ihisfile, id_mfluff, '_FillValue', dmiss)
