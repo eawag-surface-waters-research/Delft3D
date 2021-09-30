@@ -1504,7 +1504,7 @@ end subroutine setfoustandardname
               AnalyseTypeLong  = AnalyseTypeShort
            case ('c')
               AnalyseTypeShort = 'Maximum '
-              AnalyseTypeLong  = 'Maximum based on ' // trim(gdfourier%founamc(ifou)) // ';'
+              AnalyseTypeLong  = 'Maximum based on ' // trim(gdfourier%founamc(ifou)) // '; '
            case ('r', 'R')
               AnalyseTypeShort = 'Maximum '
               AnalyseTypeLong  = 'Maximum (Running Mean) '
@@ -1513,7 +1513,7 @@ end subroutine setfoustandardname
               AnalyseTypeLong  = AnalyseTypeShort
            case ('C')
               AnalyseTypeShort = 'Minimum '
-              AnalyseTypeLong  = 'Minimum based on ' // trim(gdfourier%founamc(ifou)) // ';'
+              AnalyseTypeLong  = 'Minimum based on ' // trim(gdfourier%founamc(ifou)) // '; '
            case ('u', 'U')
               AnalyseTypeShort = 'Minimum '
               AnalyseTypeLong  = 'Minimum (Running Mean) '
