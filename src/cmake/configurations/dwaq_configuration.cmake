@@ -144,5 +144,5 @@ endif()
 # Linux installation
 #=============
 if(UNIX)
-    add_subdirectory(${checkout_src_root}/cmake/install_waq install_waq)
+    add_subdirectory(${checkout_src_root}/${install_waq_module} install_waq)
 endif()
