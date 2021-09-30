@@ -109,7 +109,7 @@ real(hp)   :: th      ! Shields number
 !
 integer            :: iocond
 integer            :: lun
-real(hp)   :: acal
+real(hp)   :: acal = -1.0_hp
 real(hp)   :: suspfac ! user-specified suspended sediment factor
 real(hp)   :: power !power of the velocity
 !
@@ -202,41 +202,43 @@ error_message = ' '
 !write(*,*) 'I am here 1'
 !endif 
 
-open (newunit=lun, file = filenm, form = 'formatted', iostat = iocond, status = 'old')
-if (iocond/=0) then
-   error_message = 'Unable to open parameter file: ' // filenm
-   return
-endif
-!
-read(lun,*, iostat = iocond) acal
-if (iocond/=0) then
-   error_message = 'Problem reading acal from file: ' // filenm
-   return
-else 
-    if (write_count < 100) then
-        write(*,*) "acal", acal
+if (acal < 0.0_hp) then
+    open (newunit=lun, file = filenm, form = 'formatted', iostat = iocond, status = 'old')
+    if (iocond/=0) then
+       error_message = 'Unable to open parameter file: ' // filenm
+       return
     endif
-endif
-!
-read(lun,*, iostat = iocond) suspfac
-if (iocond/=0) then
-   error_message = 'Problem reading suspfac from file: ' // filenm
-   return
-else 
-    if (write_count < 100) then
-        write(*,*) "suspfac", suspfac
+    !
+    read(lun,*, iostat = iocond) acal
+    if (iocond/=0) then
+       error_message = 'Problem reading acal from file: ' // filenm
+       return
+    else 
+        !if (write_count < 100) then
+            write(*,*) "acal", acal
+        !endif
     endif
-endif
-read(lun,*, iostat = iocond) power
-if (iocond/=0) then
-   error_message = 'Problem reading power from file: ' // filenm
-   return
-else 
-    if (write_count < 100) then
-        write(*,*) "power", power
+    !
+    read(lun,*, iostat = iocond) suspfac
+    if (iocond/=0) then
+       error_message = 'Problem reading suspfac from file: ' // filenm
+       return
+    else 
+        !if (write_count < 100) then
+            write(*,*) "suspfac", suspfac
+        !endif
     endif
+    read(lun,*, iostat = iocond) power
+    if (iocond/=0) then
+       error_message = 'Problem reading power from file: ' // filenm
+       return
+    else 
+        !if (write_count < 100) then
+            write(*,*) "power", power
+        !endif
+    endif
+    close(lun)
 endif
-close(lun)
 
 !if (write_count < 100) then
 !write(*,*) 'I am here 2'
@@ -286,7 +288,7 @@ sswv    = 0.0_hp          ! suspended load transport, n direction due to waves i
 !
 t_relax = 0.0_hp          ! relaxation time is zero
 !
-if (write_count < 100) then
+if (write_count < 10) then
     write(*,*) "utot", utot
     write(*,*) "d50", d50
     write(*,*) "chezy", chezy
