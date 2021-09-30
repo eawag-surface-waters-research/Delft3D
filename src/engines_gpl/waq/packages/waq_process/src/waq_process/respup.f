@@ -59,8 +59,8 @@
 
       real(4) pmsa(*)     !i/o process manager system array, window of routine to process library
       real(4) fl(*)       ! o  array of fluxes made by this process in mass/volume/time
-      integer ipoint( 25) ! i  array of pointers in pmsa to get and store the data
-      integer increm( 25) ! i  increments in ipoint for segment loop, 0=constant, 1=spatially varying
+      integer ipoint( 26) ! i  array of pointers in pmsa to get and store the data
+      integer increm( 26) ! i  increments in ipoint for segment loop, 0=constant, 1=spatially varying
       integer noseg       ! i  number of computational elements in the whole model schematisation
       integer noflux      ! i  number of fluxes, increment in the fl array
       integer iexpnt(4,*) ! i  from, to, from-1 and to+1 segment numbers of the exchange surfaces
@@ -69,7 +69,7 @@
       integer noq2        ! i  nr of exchanges in 2nd direction, noq1+noq2 gives hor. dir. reg. grid
       integer noq3        ! i  nr of exchanges in 3rd direction, vertical direction, pos. downward
       integer noq4        ! i  nr of exchanges in the bottom (bottom layers, specialist use only)
-      integer ipnt( 25)   !    local work array for the pointering
+      integer ipnt( 26)   !    local work array for the pointering
       integer iseg        !    local loop counter for computational element loop
 
       real     im1s2, im2s2, im3s2
@@ -81,7 +81,7 @@
       real(4) grain50
       real(4) grav
       real(4) kinviscos
-      real(4) powns2pup 
+      real(4) powns2pup
       real(4) rhosand
       real(4) rhowater
       real(4) pors2
@@ -161,19 +161,19 @@
 !     Fraction TIM1 in S2
       tims2      = im1s2+im2s2+im3s2
       if (swfrims2 .eq. 1) then
-!         mass fraction determined as mass IMx / (mass sand + mass TIM) 
+!         mass fraction determined as mass IMx / (mass sand + mass TIM)
           frim1s2pup = im1s2/(rhosand*thicks2*(1.-pors2) + tims2)
           frim2s2pup = im2s2/(rhosand*thicks2*(1.-pors2) + tims2)
           frim3s2pup = im3s2/(rhosand*thicks2*(1.-pors2) + tims2)
           frtims2pup = tims2/(rhosand*thicks2*(1.-pors2) + tims2)
       else
-!         original delwaq method: fraction = mass IMx / mass sand 
+!         original delwaq method: fraction = mass IMx / mass sand
           frim1s2pup = im1s2/(rhosand*thicks2*(1.-pors2))
           frim2s2pup = im2s2/(rhosand*thicks2*(1.-pors2))
           frim3s2pup = im3s2/(rhosand*thicks2*(1.-pors2))
           frtims2pup = tims2/(rhosand*thicks2*(1.-pors2))
-      endif 
-      
+      endif
+
 !     No resuspension when depth below min depth
       if ( depth .lt. mindep) then
          flrim1s2 = 0.0
@@ -208,7 +208,7 @@
             rfim3s2 = 0.0
          endif
 
-		! Limit resuspension to available material
+         ! Limit resuspension to available material
 
          mrim1s2 = max (0.0, im1s2 / delt )
          mrim2s2 = max (0.0, im2s2 / delt )
@@ -236,7 +236,7 @@
       endif
 
       iflux = iflux + noflux
-      ipnt  = ipnt + increm 
+      ipnt  = ipnt + increm
 
  9000 continue
 
