@@ -26,7 +26,6 @@ SUBDIRS = \
     FLAP \
     polypack \
     kdtree2 \
-    swan \
     md5 \
     $(MAYBE_FORTRANGIS)
 
