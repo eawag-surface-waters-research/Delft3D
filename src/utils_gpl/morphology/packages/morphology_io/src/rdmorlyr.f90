@@ -767,7 +767,8 @@ subroutine rdmorlyr(lundia    ,error     ,filmor    , &
        txtput2 = 'from sediment file'
        write(lundia,'(2a,a20)') txtput1, ':', trim(txtput2)
     else
-       write(lundia,'(2a,a20)') txtput1, ':', trim(flcomp)
+       txtput2 = 'from IniComp file -'
+       write(lundia,'(3a)') txtput1, ':', trim(flcomp)
     endif
     !
     write (lundia, '(a)') '*** End    of underlayer input'
@@ -1941,7 +1942,7 @@ subroutine rdinimorlyr(lsedtot   ,lsed      ,lundia    ,error     , &
              deallocate(thtemp, stat = istat)
              !
           else
-             write (message,'(2a)') 'Invalid file version of ', trim(flcomp)
+             write (message,'(3a)') 'Invalid file version of ', trim(flcomp), '. Expecting [BedCompositionFileInformation] FileVersion = 01.00 or 02.00'
              call mess(LEVEL_ERROR, message)  
              error = .true.
              return          
