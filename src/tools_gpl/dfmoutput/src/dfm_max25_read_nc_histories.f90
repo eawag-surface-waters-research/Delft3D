@@ -42,7 +42,7 @@ module read_nc_histories
 
    private
 
-   public :: read_meta_data, read_data, close_nc_his_file, read_station_names
+   public :: read_meta_data, read_data, close_nc_his_file, read_station_names, find_stations_var
 
    interface read_data
       module procedure read_data_r4
@@ -147,21 +147,45 @@ module read_nc_histories
       endif
    end function read_data_r8
 
+   !> find stations variable for a time serie
+   !! result will be in most cases 'station_name' or 'cross_section_name'
+   !! assumes ncid is already opened
+   subroutine find_stations_var(field_name, stations_var)
+      character(len=*), intent(in   ) :: field_name
+      character(len=*), intent(  out) :: stations_var
+
+      integer :: i, status, nVar, varid, dimids(10), ndims, varid_name, dim_stations
+      character(len=64) :: name
+
+      status = nf90_inquire(ncid, nVariables = nVar)
+      varid_name = get_varid(field_name)
+      status = nf90_inquire_variable(ncid, varId_name, ndims=ndims, dimids=dimids)
+      dim_stations = dimids(1)
+
+      do i = 1, nVar
+         status = nf90_inquire_variable(ncid, i, name=name, ndims=ndims, dimids=dimids)
+         if (index(name, '_name') > 0 .and. ndims == 2) then
+            if (dimids(2) == dim_stations) then
+               stations_var = name
+               return
+            end if
+         end if
+      end do
+
+      ! previous default:
+      stations_var = 'station_name'
+   end subroutine find_stations_var
+
    !> read station names from an already opened NetCDF file
    function read_station_names(stations, stations_varname) result(status)
       character(len=*), allocatable, intent(out) :: stations(:)       !< output array
       character(len=*)             , intent(in ) :: stations_varname  !< variable name on NetCDF file
       integer                                    :: status            !< function result: 0=OK
 
-      integer :: nVar, varid, i
-      character(len=80) :: namei
+      integer :: varid, i
 
       allocate(stations(nStations))
-      status = nf90_inquire(ncid, nVariables = nVar)
-      do varid = 1, nVar
-         status = nf90_inquire_variable(ncid, varId, namei)
-         if (namei == stations_varname) exit
-      enddo
+      varid = get_varid(stations_varname)
 
       status = nf90_get_var(ncid, varId, stations)
 
@@ -169,6 +193,20 @@ module read_nc_histories
          call convertCstring(stations(i))
       enddo
    end function read_station_names
+
+   function get_varid(varname) result(varid)
+      character(len=*), intent(in) :: varname
+      integer                      :: varid  !< function result
+      integer                      :: nVar, status
+      character(len=80)            :: namei
+
+      status = nf90_inquire(ncid, nVariables = nVar)
+      do varid = 1, nVar
+         status = nf90_inquire_variable(ncid, varId, namei)
+         if (namei == varname) return
+      enddo
+      varid = 0
+   end function get_varid
 
    !> close file
    function close_nc_his_file() result(status)

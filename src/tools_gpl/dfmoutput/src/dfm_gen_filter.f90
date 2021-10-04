@@ -54,9 +54,11 @@ subroutine gen_filter(filename, filename_out, field_name, intval, coefimpl, coef
    integer :: ierr, i, nStations, ntimes, iunout
    real(kind=hp), allocatable :: hisdata(:,:), ySmooth(:)
    character(len=64), allocatable :: stations(:)
+   character(len=32) :: stations_var
 
                            ierr = read_meta_data(filename, nStations)
-   if (ierr == nf90_noerr) ierr = read_station_names(stations, 'station_name')
+   if (ierr == nf90_noerr) call find_stations_var(field_name, stations_var)
+   if (ierr == nf90_noerr) ierr = read_station_names(stations, stations_var)
    if (ierr == nf90_noerr) ierr = read_data(hisdata, field_name)
    if (ierr == nf90_noerr) ierr = close_nc_his_file()
 
