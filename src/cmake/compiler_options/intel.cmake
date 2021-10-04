@@ -32,10 +32,10 @@ if (UNIX)
     # at least one C file as well (netCDF). Use a neutral flag to avoid problems
     set(CMAKE_CXX_FLAGS_RELEASE      "-O2 -fPIC")
     set(CMAKE_C_FLAGS_RELEASE        "-O2 -fPIC")
-    set(CMAKE_CXX_FLAGS_DEBUG        "-O0 -fPIC")
-    set(CMAKE_C_FLAGS_DEBUG          "-O0 -fPIC")
+    set(CMAKE_CXX_FLAGS_DEBUG        "-g -O0 -fPIC")
+    set(CMAKE_C_FLAGS_DEBUG          "-g -O0 -fPIC")
     set (CMAKE_Fortran_FLAGS_RELEASE "-O2 -fPIC")
-    set (CMAKE_Fortran_FLAGS_DEBUG   "-O0 -fPIC")
+    set (CMAKE_Fortran_FLAGS_DEBUG   "-g -O0 -fPIC")
 
     set(cpp_compiler_flags "-std=c++11")
     set(file_preprocessor_flag -v)
@@ -46,4 +46,3 @@ if (UNIX)
     set(check_bounds_flag -check bounds)
     set(openmp_flag -qopenmp)
 endif(UNIX)
-

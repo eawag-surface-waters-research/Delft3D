@@ -30,6 +30,9 @@ function print_usage_info {
     echo "-p, --prepareonly"
     echo "       Only CMake, no make, no src/build_h6c7.sh"
     echo
+    echo "--debug"
+    echo "      Compile in debug mode"
+    echo
     echo "More info  : https://oss.deltares.nl/web/delft3d/source-code"
     echo "About CMake: https://svn.oss.deltares.nl/repos/delft3d/trunk/src/cmake/doc/README"
     echo
@@ -47,7 +50,7 @@ function CreateCMakedir () {
     cd     $root
     rm -rf $root/build_$1
     mkdir  $root/build_$1
-    
+
     return
 }
 
@@ -60,8 +63,8 @@ function DoCMake () {
     echo
     echo "Executing CMake for $1 ..."
     cd    $root/build_$1
-    echo "cmake ../src/cmake -G "$generator" -B "." -D CONFIGURATION_TYPE="$1" -D CMAKE_BUILD_TYPE=Release &>build_$1/cmake_$1.log"
-          cmake ../src/cmake -G "$generator" -B "." -D CONFIGURATION_TYPE="$1" -D CMAKE_BUILD_TYPE=Release &>cmake_$1.log
+    echo "cmake ../src/cmake -G "$generator" -B "." -D CONFIGURATION_TYPE="$1" -D CMAKE_BUILD_TYPE=${buildtype} &>build_$1/cmake_$1.log"
+          cmake ../src/cmake -G "$generator" -B "." -D CONFIGURATION_TYPE="$1" -D CMAKE_BUILD_TYPE=${buildtype} &>cmake_$1.log
 
     return
 }
@@ -116,7 +119,7 @@ function InstallAll () {
         # CMaked stuff
         cp -rf $root/build_all/install/* $root/build_all/lnx64/ &>/dev/null
     fi
-    
+
     return
 }
 
@@ -133,7 +136,7 @@ mode=quiet
 config=
 generator="Unix Makefiles"
 compiler=intel18
-
+buildtype=Release
 
 #
 ## Start processing command line options:
@@ -183,6 +186,10 @@ case $key in
     config="swan"
     shift
     ;;
+    --debug)
+    buildtype=Debug
+    shift
+    ;;
     *)
     echo ERROR: Unknown command line argument $key
     exit 1
@@ -191,7 +198,7 @@ esac
 done
 
 #
-# Check config parameter    
+# Check config parameter
 if [ -z $config ]; then
     print_usage_info
 fi
@@ -224,7 +231,7 @@ fi
 
 
 
- 
+
 #
 # Dot setenv.sh to load the modules needed
 echo ". $root/src/setenv.sh $compiler"
@@ -244,4 +251,3 @@ BuildCMake $config
 InstallAll
 
 echo Finished
-
