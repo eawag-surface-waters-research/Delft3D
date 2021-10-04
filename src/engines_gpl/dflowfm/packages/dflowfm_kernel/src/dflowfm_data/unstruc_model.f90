@@ -1023,6 +1023,7 @@ subroutine readMDUFile(filename, istat)
     call prop_get_logical( md_ptr, 'geometry', 'ChangeVelocityAtStructures', changeVelocityAtStructures)
 
     call prop_get_integer( md_ptr, 'geometry', 'NoOptimizedPolygon', janooptimizedpolygon)
+    call prop_get_logical( md_ptr, 'geometry', 'ChangeStructureDimensions', changeStructureDimensions)
 
     ! 1D Volume tables
     useVolumeTables = .false.
