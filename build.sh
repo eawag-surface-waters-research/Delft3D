@@ -65,6 +65,10 @@ function DoCMake () {
     cd    $root/build_$1
     echo "cmake ../src/cmake -G "$generator" -B "." -D CONFIGURATION_TYPE="$1" -D CMAKE_BUILD_TYPE=${buildtype} &>build_$1/cmake_$1.log"
           cmake ../src/cmake -G "$generator" -B "." -D CONFIGURATION_TYPE="$1" -D CMAKE_BUILD_TYPE=${buildtype} &>cmake_$1.log
+    if [ $? -ne 0 ]; then
+        echo "CMake configure resulted in an error. Check log files."
+        exit 1
+    fi
 
     return
 }
@@ -80,6 +84,10 @@ function BuildCMake () {
     cd    $root/build_$1
     echo "make VERBOSE=1 install &>build_$1/make_$1.log"
           make VERBOSE=1 install &>make_$1.log
+    if [ $? -ne 0 ]; then
+        echo "CMake build resulted in an error. Check log files."
+        exit 1
+    fi
 
     return
 }
@@ -226,6 +234,11 @@ if [ "$prepareonly" = "0" ] && [ "$config" = "all"  ]; then
     rm -rf $root/src/share/ &>/dev/null
     echo "    ./build_h6c7.sh -$compiler"
               ./build_h6c7.sh -$compiler
+    if [ $? -ne 0 ]; then
+        echo "Traditional build resulted in an error. Check log files."
+        exit 1
+    fi
+
     cd $root
 fi
 
@@ -236,6 +249,10 @@ fi
 # Dot setenv.sh to load the modules needed
 echo ". $root/src/setenv.sh $compiler"
       . $root/src/setenv.sh $compiler
+if [ $? -ne 0 ]; then
+    echo "Setenv.sh resulted in an error. Check log files."
+    exit 1
+fi
 
 CreateCMakedir $config
 
