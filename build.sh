@@ -128,10 +128,10 @@ function InstallAll () {
         cp -rf $root/build_all/install/* $root/build_all/lnx64/ &>/dev/null
 
         # Additional step to copy ESMF stuff needed by D-WAVES
-        cp -rf $root/src/third_party_open/esmf/lnx64/bin/ESMF_RegridWeightGen                          $root/build_all/lnx64/bin                      &>/dev/null
-        cp -rf $root/src/third_party_open/esmf/lnx64/scripts/ESMF_RegridWeightGen_in_Delft3D-WAVE.sh   $root/build_all/lnx64/bin                      &>/dev/null
-        cp -rf $root/src/third_party_open/esmf/lnx64/bin/lib*                                          $root/build_all/lnx64/share/delft3d/esmf/lnx64 &>/dev/null
-        cp -rf $root/src/third_party_open/esmf/lnx64/bin_COS7/lib*                                     $root/build_all/lnx64/share/delft3d/esmf/lnx64 &>/dev/null
+        cp -rf $root/src/third_party_open/esmf/lnx64/bin/ESMF_RegridWeightGen                          $root/build_all/lnx64/bin                               &>/dev/null
+        cp -rf $root/src/third_party_open/esmf/lnx64/scripts/ESMF_RegridWeightGen_in_Delft3D-WAVE.sh   $root/build_all/lnx64/bin                               &>/dev/null
+        cp -rf $root/src/third_party_open/esmf/lnx64/bin/lib*                                          $root/build_all/lnx64/share/delft3d/esmf/lnx64/bin      &>/dev/null
+        cp -rf $root/src/third_party_open/esmf/lnx64/bin_COS7/lib*                                     $root/build_all/lnx64/share/delft3d/esmf/lnx64/bin_COS7 &>/dev/null
     fi
 
     return
