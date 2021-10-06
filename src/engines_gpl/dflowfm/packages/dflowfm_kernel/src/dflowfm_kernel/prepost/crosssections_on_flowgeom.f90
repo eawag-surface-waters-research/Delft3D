@@ -409,22 +409,26 @@ subroutine crosssections_on_flowgeom()
           ii = crs(ic)%loc2OC
           pCrs => network%observcrs%observcross(ii)
           branchIdx = pCrs%branchIdx
-          if (branchIdx > 0) then
-             ierror = findlink(branchIdx, pCrs%chainage, linknr) ! find flow link given branchIdx and chainage
-             if (linknr == -1 .and. jampi > 0) then
-                continue  ! on another domain
-             else if (ierror == DFM_NOERR) then
-                numlist(ic) = 1
-                linklist(1,ic) = linknr
-                call crspath_on_flowgeom(crs(ic)%path,0,1,numlist(ic),linklist(1,ic), 1,1)
-             else
+          ierror = findlink(branchIdx, pCrs%chainage, linknr) ! find flow link given branchIdx and chainage
+          if (linknr == -1) then
+             if (ierror /= DFM_NOERR) then
                 call SetMessage(LEVEL_ERROR, 'Error occurs when snapping Observation cross section '''//trim(crs(ic)%name)//''' to a 1D flow link.')
+                call SetMessage(LEVEL_ERROR, 'Possibly wrong branchId? Given branchId is: '''//trim(pCrs%branchid)//'''.')
+             else if (jampi > 0) then
+                continue  ! Most probably on another domain
+             else
+                ! Sequential model with correct branchId, but still no link: possibly chainage outside length range of branch? Warning only.
+                call SetMessage(LEVEL_WARN, 'Error occurs when snapping Observation cross section '''//trim(crs(ic)%name)//''' to a 1D flow link.')
+                write(msgbuf, '(a,g10.3,a,g10.3,a)') 'Possibly wrong chainage? Given chainage is: ', pCrs%chainage, &
+                                                    ' on branchId '''//trim(pCrs%branchId)//''' (length = ', network%brs%branch(branchIdx)%length, ').'
+                call SetMessage(LEVEL_WARN, trim(msgbuf))
              end if
-          else
-             write(msgbuf, '(a)') "Observation cross section "//trim(crs(ic)%name)//" does not have a valide branch index."
-             call mess(LEVEL_ERROR, msgbuf)
+          else ! valid flowlink found
+             numlist(ic) = 1
+             linklist(1,ic) = linknr
+             call crspath_on_flowgeom(crs(ic)%path,0,1,numlist(ic),linklist(1,ic), 1,1)
           end if
-        end if
+       end if
     end do
 
     CALL READYY('Enabling cross sections on grid', -1d0)
