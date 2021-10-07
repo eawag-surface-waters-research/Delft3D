@@ -1257,6 +1257,17 @@ subroutine traparams(iform     ,name      ,nparreq   ,nparopt   ,parkeyw   , &
        parkeyw(3) = 'PowerC'
        parkeyw(4) = 'RipFac'
        parkeyw(5) = 'ThetaC'
+       nparopt    = 5
+       parkeyw(6) = 'SusACal'
+       pardef(6)  = 0.0_fp
+       parkeyw(7) = 'SusPowerB'
+       pardef(7)  = 3.0_fp
+       parkeyw(8) = 'SusPowerC'
+       pardef(8)  = 0.0_fp
+       parkeyw(9) = 'SusRipFac'
+       pardef(9)  = 1.0_fp
+       parkeyw(10)= 'SusThetaC'
+       pardef(10) = 0.0_fp
     elseif (iform == 5) then
        name       = 'Bijker (1971)'
        nparreq    = 9
