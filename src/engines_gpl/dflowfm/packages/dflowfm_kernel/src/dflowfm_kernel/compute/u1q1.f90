@@ -63,7 +63,7 @@
              q1(L) = au(L)*( teta(L)*u1(L) + (1d0-teta(L))*u0(L) )
              qa(L) = au(L)*u1(L)
           else
-             call reset_fu_ru_for_structure_link(L, network%adm%lin2str, network%sts%struct)
+!            call reset_fu_ru_for_structure_link(L, network%adm%lin2str, network%sts%struct) ! see furusobekstructures
              u1(L) = 0d0
              q1(L) = 0d0
              qa(L) = 0d0

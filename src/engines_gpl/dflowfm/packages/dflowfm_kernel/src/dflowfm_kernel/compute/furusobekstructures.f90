@@ -43,7 +43,7 @@ logical :: firstiter=.true. , jarea= .false.
 firstiter = .true.
 jarea     = .false.
 
-do ng = 1, ncgensg      ! loop over generalstruc signals, sethu
+do ng = 1, ncgensg      ! loop over generalstruc signals
    do n  = L1cgensg(ng), L2cgensg(ng)
       L  = kcgen(3,n)
       if (kcgen(1,n) == ln(2,L)) then
@@ -54,8 +54,13 @@ do ng = 1, ncgensg      ! loop over generalstruc signals, sethu
 
       if (hu(L) > 0d0) then ! hu is above lowest sill
          call flgsfm( n, ng, Ls, firstiter , jarea )
+      else    ! after discussion with Jan, this should be done to prevent any non zero in sub velocities u1(1:3) after re-wetting    
+         fusav(:,n) = 0d0
+         rusav(:,n) = 0d0
+         ausav(:,n) = 0d0
       endif
    enddo
+
 enddo
 
 end subroutine furusobekstructures
