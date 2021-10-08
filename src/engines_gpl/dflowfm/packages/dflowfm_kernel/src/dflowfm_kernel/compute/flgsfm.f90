@@ -294,7 +294,10 @@ use m_flowgeom
     endif
 
     if (au(Lf) == 0d0) then
-        hu(Lf) =  0d0 ; au(Lb:Lt) = 0d0
+        hu(Lf) =  0d0 
+        if (kmx > 0) then 
+           au(Lb:Lt) = 0d0
+        endif
     endif
 
     ! TEMP = laatste statement
