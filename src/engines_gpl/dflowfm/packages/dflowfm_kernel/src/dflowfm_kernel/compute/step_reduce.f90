@@ -166,7 +166,16 @@
  else
     s1 = s0
  end if
- 
+
+ if (nonlin >=2) then
+    ! In case the water levels drop, s1m must be adjusted to the water level. Nested Newton assumes s1(k) >= s1m(k).
+    do k = 1,ndx
+       if (s1(k) < s1m(k)) then
+          s1m(k) = s1(k)
+       endif
+    enddo
+ endif
+
  call volsur()
 
  if (nonlin > 0) then
