@@ -35,6 +35,7 @@ if(UNIX)
    set(oss_dependencies deltares_common_c)
    oss_include_libraries(${library_name} oss_dependencies)
    target_link_libraries(${library_name} ${oss_dependencies})
+   add_definitions(-DHAVE_CONFIG_H=1)
 endif(UNIX)
 
 # Set additional compilation properties, specific for Debug mode
