@@ -59,6 +59,8 @@ if(UNIX)
          PkgConfig::NETCDF_FTN)
 
     include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../include")
+
+    add_definitions(-DHAVE_CONFIG_H=1)
 endif(UNIX)
 
 # Define additional compilation flags
