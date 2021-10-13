@@ -77,7 +77,7 @@ use m_flowgeom
     double precision               :: zb2, zs
     double precision               :: gateloweredgelevel, gatedoorheight
     double precision               :: DsL, hh, zb, zt, au0, au1, au2, au3
-    double precision               :: gatefraction
+    double precision               :: gatefraction, aulf
     double precision               :: hhi(3), zbi(3), zti(3)
 
 !
@@ -146,7 +146,8 @@ use m_flowgeom
     zs                 = min  ( bob(1,Lf), bob(2,Lf) )         ! == zcgen(3*ng - 2) crest/silllevel
     zbi(1)             = zs
     gateloweredgelevel = generalstruc(ng)%gateheightonlink(L0) ! == zcgen(3*ng - 1) under gate door and infinity in open part.
-    gatefraction = generalstruc(ng)%gateclosedfractiononlink(L0)
+    gatefraction       = generalstruc(ng)%gateclosedfractiononlink(L0)
+    DsL                = s1(k2) - s1(k1)
 
     ! TODO: RTC: AvD/Herman: hier ook wu'tjes en zb1-tjes etc gaan zetten, voordat we de flupd/flgtar-subroutines gaan callen?
     ! Velheight is always true for river structures
@@ -172,16 +173,14 @@ use m_flowgeom
        ff3(:,:) = 0d0
     endif
 
-    if (husb > zs) then
-       zbi(1) = zs
+    if (husb > zs) then ! in all three tests of this type we do not have risc of immediate drying after opening, (sills usually above bed)
+       zbi(1) = zs      ! so we do not have the regular husb-zs>epshu, that would make a structure first overflowing too epshu dependent
        call flgtarfm(ng, L0, wu(Lf), bl(kL), bl(kR), tekenstr, zs, wstr, w2, wsd, zb2, dg, ds1, ds2, cgf, cgd,   &
                      cwf, cwd, mugf, lambda, strdamf, gatedoorheight)
-
-       DsL    = s1(k2) - s1(k1)
        u1(Lf) = rusav(1,n) - fusav(1,n)*DsL ; u0(Lf) = u1(Lf) ; q1(Lf) = ausav(1,n)*u1(Lf)
-       call flqhgsfm(Lf, teken, husb, hdsb, uu, zs, gatefraction*wstr, w2, wsd, zb2, ds1, ds2, dg,  &
+       call flqhgsfm(Lf, teken, husb, hdsb, uu, zs, wstr, w2, wsd, zb2, ds1, ds2, dg,  &
                      cgf, cgd, cwf, cwd, mugf, lambda, strdamf, jarea, ds)
-       fusav(1,n) = fu(Lf) ; rusav(1,n) = ru(Lf) ; ausav(1,n) = au(Lf)
+       fusav(1,n) = fu(Lf) ; rusav(1,n) = ru(Lf) ; ausav(1,n) = au(Lf)*gatefraction
     else
        fusav(1,n) = 0d0
        rusav(1,n) = 0d0
@@ -198,7 +197,7 @@ use m_flowgeom
                         cwf, cwd, mugf, lambda, strdamf, gatedoorheight)
           call flqhgsfm(Lf, teken, husb, hdsb, uu, zs, wstr, w2, wsd, zb2, ds1, ds2, dg,  &
                         cgf, cgd, cwf, cwd, mugf, lambda, strdamf, jarea, ds)
-          fusav(2,n) = fu(Lf) ; rusav(2,n) = ru(Lf) ; ausav(2,n) = au(Lf)
+          fusav(2,n) = fu(Lf) ; rusav(2,n) = ru(Lf) ; ausav(2,n) = au(Lf)*gatefraction
 
        else
           fusav(2,n) = 0d0
@@ -211,17 +210,16 @@ use m_flowgeom
        ausav(2,n) = 0d0
     endif
 
-    zs = min  ( bob(1,Lf), bob(2,Lf) )         ! == zcgen(3*ng - 2) crest/silllevel
-
-    if ( husb > zs .and. (1d0-gatefraction) > 0d0) then
-       zbi(3) = zs
+    zs = min  ( bob(1,Lf), bob(2,Lf) )                    ! == zcgen(3*ng - 2) crest/silllevel
+    if ( husb > zs .and. (1d0-gatefraction) > 1d-9) then  ! and add flow around the tip of the floating gate (e.g. for SVKW)
+       zbi(3) = zs                                        ! 1d-9 prevents unneccesary evaluation  
        dg     = huge(1d0)
        u1(Lf) = rusav(3,n) - fusav(3,n)*dsL ; u0(Lf) = u1(Lf) ; q1(Lf) = ausav(3,n)*u1(Lf)
        call flgtarfm(ng, L0, wu(Lf), bl(kL), bl(kR), tekenstr, zs, wstr, w2, wsd, zb2, dg, ds1, ds2, cgf, cgd,   &
                      cwf, cwd, mugf, lambda, strdamf, gatedoorheight)
-       call flqhgsfm(Lf, teken, husb, hdsb, uu, zs, wstr, wstr, wstr, zb2, ds1, ds2, dg,  &      ! zs, wstr, w2, wsd, zb2,  ! no contraction here
-                      cgf, cgd, cwf, cwd, mugf, lambda, strdamf, jarea, ds)
-       fusav(3,n) = fu(Lf) ; rusav(3,n) = ru(Lf) ; ausav(3,n) = au(Lf)*(1d0-gatefraction)
+       call flqhgsfm(Lf, teken, husb, hdsb, uu, zs, wstr, wstr, wstr, zb2, ds1, ds2, dg, & ! no width variation here, 3 times wstr, 
+                      cgf, cgd, cwf, cwd, mugf, lambda, strdamf, jarea, ds)                ! easy to see in the call
+       fusav(3,n) = fu(Lf) ; rusav(3,n) = ru(Lf) ; ausav(3,n) = au(Lf)*(1d0-gatefraction)      
     else
        fusav(3,n) = 0d0
        rusav(3,n) = 0d0
