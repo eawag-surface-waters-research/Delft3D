@@ -138,24 +138,31 @@ goto :endproc
 
 
 
-rem =============================================================
-rem === copyDir takes two arguments: the name of the dir to   ===
-rem === copy to and the destiny directory                     ===
-rem ===                                                       ===
-rem === NOTE: errors will be reported and the script will     ===
-rem === with an error code after executing the rest of its    ===
-rem === statements                                            ===
-rem =============================================================
+rem ===================================================================
+rem === copyDir: Copy the full contents of a directory (source)     ===
+rem ===          to another location (target)                       ===
+rem ===                                                             ===
+rem === Arguments:                                                  ===
+rem ===     source: path\name of (existing) directory to be copied  ===
+rem ===     target: path\name of (existing) directory to copy to    ===
+rem ===                                                             ===
+rem === If source and target exist, the full contents of source     ===
+rem === will be copied into target.                                 ===
+rem ===                                                             ===
+rem === NOTE: errors will be reported and the script will           ===
+rem === with an error code after executing the rest of its          ===
+rem === statements                                                  ===
+rem ===================================================================
 :copyDir
-    set target=%~1
-    set dest=%~2
+    set source=%~1
+    set target=%~2
     rem
-    rem "echo f |" is (only) needed when dest does not exist
+    rem "echo f |" is (only) needed when target does not exist
     rem and does not harm in other cases
     rem
-    echo f | xcopy "%target%" %dest% /I /E /F /Y
+    echo f | xcopy "%source%" %target% /I /E /F /Y
     if NOT !ErrorLevel! EQU 0 (
-        echo ERROR: while copying "!target!" to "!dest!"
+        echo ERROR: while copying "!source!" to "!target!"
     )
 goto :endproc
 
