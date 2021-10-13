@@ -70,6 +70,9 @@ else
 fi
 shopt -u nullglob
 
+# Avoid referring to mpi libraries outside the container by feeding it a restricted PATH (and the --cleanenv flag)
+restricted_path=/usr/lib64/mpich/bin:/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/sbin 
+
 # Set container properties
 # Note that the working directory is set to a custom mounting directory
 # for the container runtime environment. This mounting is to prevent 
@@ -103,4 +106,6 @@ echo "Mounting target directory         :   $mountdir"
 echo "Container working directory       :   $container_working_dir"
 echo "Executable                        :   $executable"
 echo "Extra executable flags            :   $executable_extraopts"
-singularity exec --bind $working_dir:$mountdir --pwd $container_working_dir $container_file_path $container_libdir/$executable -m $dimr_config_file $executable_extraopts
+echo "Restricted PATH                   :   $restricted_path"
+
+singularity exec --cleanenv --bind $working_dir:$mountdir --pwd $container_working_dir --env PATH=$restricted_path $container_file_path $container_libdir/$executable -m $dimr_config_file $executable_extraopts
