@@ -18,11 +18,11 @@ set(rc_version_file ${datsel_version_number_include_path}/version_number.rc)
 
 # Generate version files
 generate_version_files(${rc_version_file} 
-                       ${datsel_root_path}
+                       ${checkout_src_root}
                        ${ini_version_file})
 
 generate_version_files(${header_version_file} 
-                       ${datsel_root_path}
+                       ${checkout_src_root}
                        ${ini_version_file})
 
 # Gather source files

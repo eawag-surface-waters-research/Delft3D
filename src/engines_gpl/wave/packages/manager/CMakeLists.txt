@@ -9,11 +9,11 @@ set(rc_version_file ${wave_version_files_path}/wave_version.rc)
 
 # Generate version files
 generate_version_files(${rc_version_file} 
-                       ${wave_version_path}
+                       ${checkout_src_root}
                        ${ini_version_file})
 
 generate_version_files(${fortran_version_file} 
-                       ${wave_version_path}
+                       ${checkout_src_root}
                        ${ini_version_file})
 
 # Set directory which contains all source files

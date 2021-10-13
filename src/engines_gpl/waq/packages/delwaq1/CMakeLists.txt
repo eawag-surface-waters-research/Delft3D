@@ -29,7 +29,7 @@ generate_version_files(${fortran_version_file}
                        ON)
 
 generate_version_files(${fortran_version_file_delwaq} 
-                       ${waq_root_path}
+                       ${checkout_src_root}
                        ${ini_version_file} 
                        ON)
 
