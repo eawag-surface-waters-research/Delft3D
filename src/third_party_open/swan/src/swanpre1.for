@@ -3111,7 +3111,7 @@
 ! ============================================================
 !
       IF (KEYWIS ('TRI')) THEN
-        CALL ININTG ('ITRIAD', ITRIAD, 'STA', 11)
+        CALL ININTG ('ITRIAD', ITRIAD, 'STA', 1)
         IF (ITRIAD.EQ.1) THEN
            CALL INREAL ('TRFAC', PTRIAD(1), 'STA', 0.8)                   41.44
            CALL INREAL ('CUTFR', PTRIAD(2), 'STA', 2.5)                   40.61 40.56 30.82
