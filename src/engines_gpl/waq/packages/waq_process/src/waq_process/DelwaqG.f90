@@ -1369,9 +1369,9 @@
                   fl(iflux+(iseg-1)*noflux) = fl(iflux+(iseg-1)*noflux) + decflx(ifl)*dl(ilay) /depth
                 enddo
 
-                if ( iseg == 1900 ) then
-                    !write(91,'(a,i5,10g15.6)') 'decflx', ilay, decflx(2), decflx(6), decflx(10), pon, poc, n_fact
-                endif
+                !if ( iseg == 1900 ) then
+                !    write(91,'(a,i5,10g15.6)') 'decflx', ilay, decflx(2), decflx(6), decflx(10), pon, poc, n_fact
+                !endif
 
                 !if ( iseg == 1900 ) then
                 !    write(91,'(a,i5,10g15.6)') 'fl pon1', ilay, fl(15+(iseg-1)*noflux), fl(19+(iseg-1)*noflux), fl(23+(iseg-1)*noflux), pmsa(ipoint(171)+increm(171)*1899)
@@ -2025,12 +2025,12 @@
           ! end of loop over layers in present cell
           enddo
 
-          if ( iseg == 1900 ) then
-              !write(91,'(a,10g15.6)') 'fl pon1', fl(16+(iseg-1)*noflux), fl(20+(iseg-1)*noflux), fl(24+(iseg-1)*noflux), &
-                  pmsa(ipoint(175)+increm(175)*(iseg-1)), pmsa(ipoint(171)+increm(171)*(iseg-1)), depth
-              !write(91,'(a,10g15.6)') 'conc   ', sum(sedconc(:,is_pon1,iseg2d)*dl(:)), sum(sedconc(:,is_poc1,iseg2d)*dl(:)), &
-                  pmsa(ipoint(175)+increm(175)*(iseg-1)), pmsa(ipoint(171)+increm(171)*(iseg-1))
-          endif
+         !if ( iseg == 1900 ) then
+         !     write(91,'(a,10g15.6)') 'fl pon1', fl(16+(iseg-1)*noflux), fl(20+(iseg-1)*noflux), fl(24+(iseg-1)*noflux), &
+         !        pmsa(ipoint(175)+increm(175)*(iseg-1)), pmsa(ipoint(171)+increm(171)*(iseg-1)), depth
+         !     write(91,'(a,10g15.6)') 'conc   ', sum(sedconc(:,is_pon1,iseg2d)*dl(:)), sum(sedconc(:,is_poc1,iseg2d)*dl(:)), &
+         !        pmsa(ipoint(175)+increm(175)*(iseg-1)), pmsa(ipoint(171)+increm(171)*(iseg-1))
+         !endif
 
 ! ENDPROC
           do isys = 1,nototsed
@@ -2291,9 +2291,9 @@
           !write(91,*) 'DELWQG: 1860 1640', fl(OFFSET_FL+is_so4+(1860-1)*noflux), fl(OFFSET_FL+is_so4+(1640-1)*noflux)
           !write(91,*) 'TOTMAS           ', sedconc(1,is_so4,1860), sedconc(1,is_so4,1640)
           !write(91,*) 'S1_SO4           ', pmsa(ipoint(OFFSET_S1+is_so4)+(1860-1)*increm(OFFSET_S1+s1_so4)), &
-                                           pmsa(ipoint(OFFSET_S1+is_so4)+(1640-1)*increm(OFFSET_S1+s1_so4))
+          !                                 pmsa(ipoint(OFFSET_S1+is_so4)+(1640-1)*increm(OFFSET_S1+s1_so4))
           !write(91,*) 'DEPTH            ', pmsa(ipoint(ip_depth)+(1860-1)*increm(ip_depth)), &
-                                           pmsa(ipoint(ip_depth)+(1640-1)*increm(ip_depth))
+          !                                 pmsa(ipoint(ip_depth)+(1640-1)*increm(ip_depth))
 
       endif
 
