@@ -314,7 +314,8 @@ module m_ec_typedefs
       real(hp)                                :: timesteps          !< Numer of seconds since tEcTimeFrame%k_refdate.
       integer                                 :: timesndx = -1      !< index into file: used in general for random access files (nc) to keep track of position
       real(hp)                                :: missingValue       !< value to use for missing data in the data arrays
-      real(hp), dimension(:),     pointer     :: arr1dPtr => null() !< points to a 1-dim array field, stored in arr1d OR in a kernel
+      real(hp),                   pointer     :: scalarPtr=> null() !< points to a single scalar stored in arr1d OR in a kernel
+      real(hp), dimension(:),     pointer     :: arr1dPtr => null() !< points to an array field, stored in arr1d OR in a kernel
       real(hp), dimension(:),     allocatable :: arr1d              !< 1-dim array field
       real(hp)                                :: x_spw_eye          !< x-coordinate of spiderweb eye
       real(hp)                                :: y_spw_eye          !< y-coordinate of spiderweb eye

@@ -2283,7 +2283,7 @@ module m_ec_provider
       end function ecProviderCreateSpiderwebItems
       
       ! =======================================================================
-      function ecProviderCreateTimeInterpolatedItem(instancePtr, sourceItemId, tgtNdx) result(itemId)
+      function ecProviderCreateTimeInterpolatedItem(instancePtr, sourceItemId, tgtNdx, arrayPtr, scalarPtr) result(itemId)
           use m_ec_item
           use m_ec_converter,  only: ecConverterSetType, ecConverterSetInterpolation, ecConverterSetOperand, ecConverterSetElement
           use m_ec_instance,   only: ecInstanceCreateConverter, ecInstanceCreateConnection, ecInstanceCreateItem, ecInstanceCreateField, ecInstanceCreateQuantity
@@ -2296,6 +2296,8 @@ module m_ec_provider
           type(tEcInstance), pointer    :: instancePtr    !< EC-instance
           integer, intent(in)           :: sourceItemId   !< Source item id, before temporal interpolation
           integer, intent(in), optional :: tgtNdx         !< Optional target index, 1 is assumed as default
+          real(hp), pointer, optional   :: arrayPtr(:)    !< Optional pointer to a target array somewhere else
+          real(hp), pointer, optional   :: scalarPtr      !< Optional pointer to a target scalar somewhere else
           integer                       :: targetItemId   !< Target item id, after temporal interpolation
           integer                       :: itemId         !< returned  target item ID, if successful, otherwise -1 
           type(tECItem), pointer        :: sourceItemPtr => null() 
@@ -2324,7 +2326,33 @@ module m_ec_provider
           fieldId = ecInstanceCreateField(instancePtr)
 
           arraySize = size(sourceItemPtr%sourceT0FieldPtr%arr1d)
-          if (.not. (ecFieldCreate1dArray(instancePtr, fieldId, arraySize))) return
+          if (present(arrayPtr)) then
+              if (.not.associated(arrayPtr)) then
+                  call setECMessage("ecProviderCreateTimeInterpolatedItem: pointer to target array unassociated.")
+                  return
+              end if
+              if (size(arrayPtr)/=arraySize) then               ! check size
+                  call setECMessage("ecProviderCreateTimeInterpolatedItem: reserved target size and source size do not match.")
+                  return
+              end if
+              if (.not.ecFieldSet1dArrayPointer(instancePtr, fieldId, arrayPtr)) then
+                  call setECMessage("ecProviderCreateTimeInterpolatedItem: setting pointer to target array failed.")
+                  return 
+              end if
+          else
+              if (.not. (ecFieldCreate1dArray(instancePtr, fieldId, arraySize))) return
+          end if
+
+          if (present(scalarPtr)) then
+              if (.not.associated(scalarPtr)) then
+                  call setECMessage("ecProviderCreateTimeInterpolatedItem: pointer to target scalar unassociated.")
+                  return
+              end if
+              if (.not.ecFieldSetScalarPointer(instancePtr, fieldId, scalarPtr)) then
+                  call setECMessage("ecProviderCreateTimeInterpolatedItem: setting pointer to target scalar failed.")
+                  return 
+              end if
+          end if
 
           if (.not. ecItemSetRole(instancePtr, targetItemId, itemType_target)) return
           if (.not. ecItemSetTargetField(instancePtr, targetItemId, fieldId)) return

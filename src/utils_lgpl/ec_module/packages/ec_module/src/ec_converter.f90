@@ -1048,6 +1048,9 @@ module m_ec_converter
             case default
                call setECMessage("ERROR: ec_converter::ecConverterPerformConversions: Unknown Converter type requested.")
          end select
+         if (success) then
+             success = ecConverterUpdateScalar(connection)
+         endif
       end function ecConverterPerformConversions
 
       ! =======================================================================
@@ -1349,6 +1352,9 @@ module m_ec_converter
          end select
          success = .true.
       end function ecConverterUniform
+
+      
+      
 
 
 
@@ -3101,6 +3107,29 @@ module m_ec_converter
          end select
          success = .true.
       end function ecConverterNetcdf
+
+      ! =======================================================================
+
+      !> For every connected target item, 
+      !> if the target field has an associated scalar pointer, fill it with the first element of the arr1DPtr array.
+      !> This scalar pointer is connected with a scalar in a kernel, such as a single field in a derived type
+      function ecConverterUpdateScalar(connection) result (success)
+         logical                            :: success    !< function status
+         type(tEcConnection), intent(inout) :: connection !< access to Converter and Items
+         type(tEcField), pointer :: fieldPtr
+         integer :: itgt
+         !
+         success = .false.
+         do itgt = 1, connection%nTargetItems
+            fieldPtr => connection%targetItemsPtr(itgt)%ptr%targetFieldPtr
+            if (associated(fieldPtr)) then
+               if (associated(fieldPtr%scalarPtr)) then
+                  fieldPtr%scalarPtr = fieldPtr%arr1DPtr(1)
+               endif
+            endif
+         enddo
+         success = .true.
+      end function ecConverterUpdateScalar
 
       ! =======================================================================
 

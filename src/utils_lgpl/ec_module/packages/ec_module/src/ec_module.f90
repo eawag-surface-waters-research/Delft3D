@@ -133,6 +133,10 @@ module m_ec_module
       module procedure ecItemGetQHtable
    end interface ecGetQHtable
 
+   interface ecFindItem
+      module procedure ecFileReaderFindItem
+   end interface ecFindItem
+   
    interface ecFindItemInFileReader
       module procedure ecFileReaderFindItem
    end interface ecFindItemInFileReader
@@ -251,11 +255,20 @@ module m_ec_module
       module procedure ecFieldSetMissingValue
    end interface ecSetFieldMissingValue
    
-   interface ecSetField1dArray
-      module procedure ecFieldSet1dArray
-      module procedure ecFieldCreate1dArray
-   end interface ecSetField1dArray
+   interface ecSetFieldScalarPointer
+      module procedure ecFieldSetScalarPointer 
+   end interface ecSetFieldScalarPointer
+
+   interface ecSetFieldArrayPointer
+      module procedure ecFieldSet1dArrayPointer 
+   end interface ecSetFieldArrayPointer
+
    
+   interface ecSetFieldDataPtr
+      module procedure ecFieldSetScalarPointer
+      module procedure ecFieldSet1dArrayPointer
+   end interface ecSetFieldDataPtr
+
    ! Item
 
    interface ecSetItemProperty
@@ -361,9 +374,14 @@ module m_ec_module
    end interface ecCreateInitializeBCFileReader
 
    ! Support
+   interface ecFindItem
+      module procedure ecSupportFindItem
+   end interface ecFindItem
+
    interface ecFindItemByQuantityLocation
       module procedure ecSupportFindItemByQuantityLocation
    end interface ecFindItemByQuantityLocation
+
    interface ecFindFileReader
       module procedure ecSupportFindFileReader
       module procedure ecSupportFindFileReaderByFileName
