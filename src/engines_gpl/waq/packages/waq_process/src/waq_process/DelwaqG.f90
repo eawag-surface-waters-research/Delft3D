@@ -558,6 +558,8 @@
 
       integer :: ierror
 
+      logical :: default_profile
+
       character(len=160) :: moname
       character(len=20)  :: syname(nototsed) = &
                   ['CH4-pore    ', 'DOC-pore    ', 'DON-pore    ', 'DOP-pore    ', 'DOS-pore    ', 'NH4-pore    ', &
@@ -568,6 +570,7 @@
                    'POS3-bulk   ', 'POS4-bulk   ', 'SUP-bulk    ', 'VIVP-bulk   ']
 
       integer, save      :: lumap, lurestart
+      integer            :: luinp ! Extra DELWAQG input parameters
       character(len=200) :: mapfile
       character(len=200) :: initfile
       character(len=200) :: restartfile
@@ -858,10 +861,12 @@
           DifCoef = PMSA(IPOINT(ip_DifCoef)+(iseg-1)*INCREM(ip_DifCoef))
           Diflen  = PMSA(IPOINT(ip_Diflen )+(iseg-1)*INCREM(ip_Diflen ))
           Depth   = PMSA(IPOINT(ip_Depth  )+(iseg-1)*INCREM(ip_Depth  ))
-          do ilay = 1,nolay
-              tt(ilay) = turcoef*exp(-exp_tur*bd(ilay))
-              td(ilay) = difcoef*exp(-exp_dif*sd(ilay))
-          enddo
+          if ( default_profile ) then
+              do ilay = 1,nolay
+                  tt(ilay) = turcoef*exp(-exp_tur*bd(ilay))
+                  td(ilay) = difcoef*exp(-exp_dif*sd(ilay))
+              enddo
+          endif
 
           if (SW_VB) then
               ip = OFFSET_S1+is_nh4
@@ -1365,7 +1370,7 @@
                 enddo
 
                 if ( iseg == 1900 ) then
-                    write(91,'(a,i5,10g15.6)') 'decflx', ilay, decflx(2), decflx(6), decflx(10), pon, poc, n_fact
+                    !write(91,'(a,i5,10g15.6)') 'decflx', ilay, decflx(2), decflx(6), decflx(10), pon, poc, n_fact
                 endif
 
                 !if ( iseg == 1900 ) then
@@ -2021,9 +2026,9 @@
           enddo
 
           if ( iseg == 1900 ) then
-              write(91,'(a,10g15.6)') 'fl pon1', fl(16+(iseg-1)*noflux), fl(20+(iseg-1)*noflux), fl(24+(iseg-1)*noflux), &
+              !write(91,'(a,10g15.6)') 'fl pon1', fl(16+(iseg-1)*noflux), fl(20+(iseg-1)*noflux), fl(24+(iseg-1)*noflux), &
                   pmsa(ipoint(175)+increm(175)*(iseg-1)), pmsa(ipoint(171)+increm(171)*(iseg-1)), depth
-              write(91,'(a,10g15.6)') 'conc   ', sum(sedconc(:,is_pon1,iseg2d)*dl(:)), sum(sedconc(:,is_poc1,iseg2d)*dl(:)), &
+              !write(91,'(a,10g15.6)') 'conc   ', sum(sedconc(:,is_pon1,iseg2d)*dl(:)), sum(sedconc(:,is_poc1,iseg2d)*dl(:)), &
                   pmsa(ipoint(175)+increm(175)*(iseg-1)), pmsa(ipoint(171)+increm(171)*(iseg-1))
           endif
 
@@ -2130,12 +2135,13 @@
       !
       subroutine initialise_layers
 
-      integer, parameter :: nolay_default = 7
-      real, parameter    :: dl_default(nolay_default) = [ 0.001, 0.002, 0.004, 0.008, 0.016, 0.032, 0.037 ]   ! layer thickness
+      integer, parameter           :: nolay_default = 7
+      real, parameter              :: dl_default(nolay_default) = [ 0.001, 0.002, 0.004, 0.008, 0.016, 0.032, 0.037 ]   ! layer thickness
 
       character(len=40), parameter :: param_file = 'delwaqg.parameters'
-      logical :: exists
-      integer :: i, lumon, luinp
+      character(len=100)           :: line
+      logical                      :: exists, skip_tt_td
+      integer                      :: i, lumon, ierr
 
       call getmlu( lumon )
 
@@ -2149,6 +2155,7 @@
           read( luinp, * ) restartfile
           read( luinp, * ) initfile
           read( luinp, * ) nolay
+          default_profile = .false.
       else
           write( lumon, '(/,3a)' ) 'DELWAQG: file "', trim(param_file), '" not found - using default layer parameters instead'
           mapfile     = 'delwaqg.map'
@@ -2156,6 +2163,7 @@
           initfile    = 'none'
 
           nolay = nolay_default
+          default_profile = .true.
       endif
 
       allocate( tt(nolay), td(nolay), dl(nolay), sd(nolay), bd(nolay), av(nolay,nolay), bv(nolay), rwork(nolay), &
@@ -2171,11 +2179,22 @@
 
       write( lumon, '(a,i0)' ) 'Number of layers: ', nolay
       if ( exists ) then
-          do i = 1,nolay
-              read( luinp, * ) dl(i)
-          enddo
+          read( luinp, '(a)' ) line
+          read( line, *, iostat = ierr ) dl(1), td(1), tt(1)
+          if ( ierr /= 0 ) then
+              default_profile = .true.
+              skip_tt_td      = .true.
 
-          close( luinp )
+              read( line, * ) dl(1)
+              do i = 2,nolay
+                  read( luinp, * ) dl(i)
+              enddo
+          else
+              skip_tt_td      = .false.
+              do i = 2,nolay
+                  read( luinp, * ) dl(i), td(i), tt(i)
+              enddo
+          endif
       else
           dl = dl_default
       endif
@@ -2187,10 +2206,17 @@
       bd(nolay) = sd(nolay) + dl(nolay)
 
       write( lumon, '(a)' ) 'Per layer (in m):'
-      write( lumon, '(a)' ) '        Thickness         Top      Bottom'
-      do i = 1,nolay
-          write( lumon, '(i5,3g12.4)' ) i, dl(i), sd(i), bd(i)
-      enddo
+      if ( skip_tt_td ) then
+          write( lumon, '(a)' ) '           Thickness            Top         Bottom'
+          do i = 1,nolay
+              write( lumon, '(i5,5g15.4)' ) i, dl(i), sd(i), bd(i)
+          enddo
+      else
+          write( lumon, '(a)' ) '           Thickness            Top         Bottom      Diffusion   Bioturbation'
+          do i = 1,nolay
+              write( lumon, '(i5,5g15.4)' ) i, dl(i), sd(i), bd(i), td(i), tt(i)
+          enddo
+      endif
       write( lumon, '(a)' ) ' '
 
       end subroutine initialise_layers
@@ -2206,6 +2232,9 @@
       real    :: mass3d, totmas
       character(len=20), allocatable :: synameinit(:)
       character(len=40)              :: title(4)
+      logical :: sync_initial
+
+      sync_initial = .false.
 
       if ( initfile == 'none' ) then
           sedconc = 0.0
@@ -2247,7 +2276,11 @@
           sedconc(:,1:nototseddis,:) = sedconc(:,1:nototseddis,:) * poros
 
           close( luinit )
+      endif
 
+      call handle_zone_information( sync_initial )
+
+      if ( sync_initial ) then
           !
           ! Set up the fluxes required to bring the S1 substances in line with the detailed sediment
           ! With this, a flux is calculated that compensates the difference in total mass between
@@ -2255,11 +2288,11 @@
           !
           call sync_S1_sedconc
 
-          write(91,*) 'DELWQG: 1860 1640', fl(OFFSET_FL+is_so4+(1860-1)*noflux), fl(OFFSET_FL+is_so4+(1640-1)*noflux)
-          write(91,*) 'TOTMAS           ', sedconc(1,is_so4,1860), sedconc(1,is_so4,1640)
-          write(91,*) 'S1_SO4           ', pmsa(ipoint(OFFSET_S1+is_so4)+(1860-1)*increm(OFFSET_S1+s1_so4)), &
+          !write(91,*) 'DELWQG: 1860 1640', fl(OFFSET_FL+is_so4+(1860-1)*noflux), fl(OFFSET_FL+is_so4+(1640-1)*noflux)
+          !write(91,*) 'TOTMAS           ', sedconc(1,is_so4,1860), sedconc(1,is_so4,1640)
+          !write(91,*) 'S1_SO4           ', pmsa(ipoint(OFFSET_S1+is_so4)+(1860-1)*increm(OFFSET_S1+s1_so4)), &
                                            pmsa(ipoint(OFFSET_S1+is_so4)+(1640-1)*increm(OFFSET_S1+s1_so4))
-          write(91,*) 'DEPTH            ', pmsa(ipoint(ip_depth)+(1860-1)*increm(ip_depth)), &
+          !write(91,*) 'DEPTH            ', pmsa(ipoint(ip_depth)+(1860-1)*increm(ip_depth)), &
                                            pmsa(ipoint(ip_depth)+(1640-1)*increm(ip_depth))
 
       endif
@@ -2327,5 +2360,129 @@
                                 (sedconc(ilay,isys,iseg2d),isys=nototseddis+1,nototsed),iseg2d=1,noseg2d),ilay=1,nolay)
 
       end subroutine write_sedconc
+
+      subroutine handle_zone_information( sync_initial )
+      logical, intent(inout) :: sync_initial
+
+      integer                            :: ierr, luzone, lumon, idx, ic, ip, ip2, ilay
+      character(len=200)                 :: zonefile
+      integer, dimension(:), allocatable :: zone
+      integer                            :: nzones
+      real, dimension(:), allocatable    :: initvalue
+      character(len=20)                  :: name
+      character(len=200)                 :: inputline
+
+      integer, parameter                 :: first_s1 = 142
+
+      call getmlu( lumon )
+
+      read( luinp, *, iostat = ierr ) zonefile
+
+      if ( ierr /= 0 ) then
+          close( luinp )
+          return
+      endif
+
+      !
+      ! Read in the zone information - text file with zone numbers
+      !
+      sync_initial = .true.
+
+      allocate( zone(noseg2d) )
+      open( newunit = luzone, file = zonefile, status = 'old', iostat = ierr )
+      if ( ierr /= 0 ) then
+          write( lumon, '(2a)' ) 'Error opening zone file - ', trim(zonefile)
+          write( lumon, '(a)' )  'Calculation stopped'
+          stop
+      endif
+
+      read( luzone, *, iostat = ierr ) zone
+      if ( ierr /= 0 ) then
+          write( lumon, '(2a)' )      'Error reading zone file - ', trim(zonefile)
+          write( lumon, '(a,i0,a)' )  'Expecting ', noseg2d, ' zone numbers'
+          write( lumon, '(a)' )       'Calculation stopped'
+          stop
+      endif
+
+      zone   = merge( zone, 1, zone > 0 )
+      nzones = maxval( zone )
+
+      write( lumon, '(2a)' )   'Initialisation of the sediment via zones - file: ', trim(zonefile)
+      write( lumon, '(a,i0)' ) 'Number of zones: ', nzones
+
+      allocate( initvalue(nzones) )
+
+      !
+      ! Now read the lines with initial values per zone
+      !
+      do
+          read( luinp, '(a)', iostat = ierr ) inputline
+          if ( ierr /= 0 ) then
+              exit
+          endif
+
+          read( inputline, *, iostat = ierr ) name, initvalue
+          if ( ierr /= 0 ) then
+              write( lumon, '(a)' ) 'Error reading the values per zone from line: ', trim(inputline)
+              write( lumon, '(a)' ) 'Too few data? Calculation stopped'
+              stop
+          endif
+
+          idx = getindex(name )
+          if ( idx < 1 ) then
+              write( lumon, '(a)' ) 'Unknown quantity in values per zone from line: ', trim(inputline)
+              write( lumon, '(a)' ) 'Calculation stopped'
+              stop
+          endif
+
+          if ( idx < first_s1 .and. increm(idx) <= 0 ) then
+              write( lumon, '(4a)' ) 'Quantity ', trim(name), ' not defined as a parameter varying per segment'
+              write( lumon, '(a)' )  'Input inconsistent. Calculation stopped'
+              stop
+          endif
+
+          ip  = ipoint(idx)
+          ic  = increm(idx)
+          ip2 = ip + (noseg2d-1) * ic
+
+          if ( idx < first_s1 ) then
+              pmsa(ip:ip2:ic) = initvalue(zone)
+          else
+              idx = idx - first_s1 + 1
+              do ilay = 1,nolay
+                  sedconc(ilay,idx,:) = initvalue(zone)
+              enddo
+          endif
+      enddo
+      end subroutine handle_zone_information
+
+      integer function getindex( name )
+      character(len=*), intent(in) :: name
+      type known
+          character(len=20) :: name
+          integer           :: index
+      end type
+
+      type(known), dimension(40) :: known_name = [ &
+          known('PorSed      ', 131), known('Exp_Dif     ', 135), known('Exp_Tur     ', 136), known('pHSed       ', 137), &
+          known('TurCoef     ', 140), known('DifCoef     ', 141), known('S1_CH4      ', 142), known('S1_DOC      ', 143), &
+          known('S1_DON      ', 144), known('S1_DOP      ', 145), known('S1_DOS      ', 146), known('S1_NH4      ', 147), &
+          known('S1_NO3      ', 148), known('S1_OXY      ', 149), known('S1_PO4      ', 150), known('S1_Si       ', 151), &
+          known('S1_SO4      ', 152), known('S1_SUD      ', 153), known('S1_AAP      ', 154), known('S1_APATP    ', 155), &
+          known('S1_FeIIIpa  ', 156), known('S1_Opal     ', 157), known('S1_PC1      ', 158), known('S1_PC2      ', 159), &
+          known('S1_PC3      ', 160), known('S1_PC4      ', 161), known('S1_PN1      ', 162), known('S1_PN2      ', 163), &
+          known('S1_PN3      ', 164), known('S1_PN4      ', 165), known('S1_PP1      ', 166), known('S1_PP2      ', 167), &
+          known('S1_PP3      ', 168), known('S1_PP4      ', 169), known('S1_PS1      ', 170), known('S1_PS2      ', 171), &
+          known('S1_PS3      ', 172), known('S1_PS4      ', 173), known('S1_SUP      ', 174), known('S1_VIVP     ', 175)]
+
+      getindex = -1
+      do i = 1,size(known_name)
+          if ( name == known_name(i)%name ) then
+              getindex = known_name(i)%index
+              exit
+          endif
+      enddo
+
+      end function getindex
 
       end subroutine dlwqg2
