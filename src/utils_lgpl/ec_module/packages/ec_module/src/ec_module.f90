@@ -262,12 +262,16 @@ module m_ec_module
    interface ecSetFieldArrayPointer
       module procedure ecFieldSet1dArrayPointer 
    end interface ecSetFieldArrayPointer
-
    
    interface ecSetFieldDataPtr
       module procedure ecFieldSetScalarPointer
       module procedure ecFieldSet1dArrayPointer
    end interface ecSetFieldDataPtr
+
+   interface ecSetField1dArray
+      module procedure ecFieldSet1dArray
+      module procedure ecFieldCreate1dArray
+   end interface ecSetField1dArray   
 
    ! Item
 
