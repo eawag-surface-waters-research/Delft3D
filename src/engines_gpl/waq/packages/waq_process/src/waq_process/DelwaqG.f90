@@ -2421,6 +2421,10 @@
               exit
           endif
 
+          if ( inputline == ' ' ) then
+              cycle
+          endif
+
           read( inputline, *, iostat = ierr ) name, initvalue
           if ( ierr /= 0 ) then
               write( lumon, '(a)' ) 'Error reading the values per zone from line: ', trim(inputline)
