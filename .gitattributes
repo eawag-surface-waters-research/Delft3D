@@ -449,6 +449,7 @@ src/clean.cmd -text
 src/clean.sh -text
 src/cmake/CMakeLists.txt -text
 src/cmake/compiler_options/intel.cmake -text
+src/cmake/compiler_options/intel_allchecks.cmake -text
 src/cmake/configurations/all_configuration.cmake -text
 src/cmake/configurations/delft3dfm_configuration.cmake -text
 src/cmake/configurations/dflow2d3d_configuration.cmake -text
