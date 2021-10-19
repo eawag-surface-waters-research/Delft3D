@@ -759,6 +759,7 @@ subroutine readMDUFile(filename, istat)
     character(len=200), dimension(:), allocatable       :: fnames
     double precision, external     :: densfm
     double precision :: tim
+    double precision :: sumlaycof
     integer :: major, minor
     external :: unstruc_errorhandler
     hkad = -999
@@ -966,8 +967,8 @@ subroutine readMDUFile(filename, istat)
         if( allocated(laycof) ) deallocate( laycof )
         allocate( laycof(kmx) )
         call prop_get_doubles( md_ptr, 'geometry', 'StretchCoef' , laycof, kmx )
-              
-        if (sum(laycof) /= 100) then
+        sumlaycof = sum(laycof)
+        if (comparereal(sumlaycof, 100d0) /= 0) then
           if (.not. allocated(tmpdouble)) allocate( tmpdouble(300) )
           tmpdouble = 0d0
           call prop_get_doubles( md_ptr, 'geometry', 'StretchCoef'   , tmpdouble, 300 )
@@ -981,7 +982,9 @@ subroutine readMDUFile(filename, istat)
           if ( kmx /= n ) then
             call mess(LEVEL_ERROR, 'ERROR: The number of values specified in "StretchCoef" is inconsistent with "Kmx"!')
           else
-            call mess(LEVEL_ERROR, 'ERROR: The values specified in "StretchCoef" do not add up to 100!')   
+              tmpstr = ' '
+              write (tmpstr, "(a,f15.8)") 'ERROR: The values specified in "StretchCoef" do not add up to 100! We got: ', sumlaycof
+            call mess(LEVEL_ERROR, tmpstr)
           endif
         endif
     else if( iStrchType == STRCH_EXPONENT ) then
