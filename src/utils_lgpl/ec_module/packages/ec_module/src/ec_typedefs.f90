@@ -376,7 +376,7 @@ module m_ec_typedefs
       type(tEcField),                       pointer :: sourceT0FieldPtr   => null() !< Field containing source data of second to last read data block.
       type(tEcField),                       pointer :: sourceT1FieldPtr   => null() !< Field containing source data of last read data block.
       type(tEcField),                       pointer :: targetFieldPtr     => null() !< Field containing target data at current time.
-      type(tEcTimeseries),      allocatable :: timeseries                   !< Information supporting rewinding of a read timeseries 
+      type(tEcTimeseries),              allocatable :: timeseries                   !< Information supporting rewinding of a read timeseries 
       type(tEcConnectionPtr), dimension(:), pointer :: connectionsPtr     => null() !< Connections in which this Item is a target Item
       type(tEcTimeFrame),                   pointer :: tframe => null()             !< TimeFrame at which data is available
       integer                                       :: nConnections                 !< Number of Connections <= size(connectionsPtr)

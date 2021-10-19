@@ -466,8 +466,11 @@ module m_ec_item
             if (istat /= 0) then
                call setECMessage("Warning: deallocate skipWeights failed. Will continue.")
                success = .false.
-            endif
-         endif
+            end if
+         end if
+         if (item%quantityPtr%constant) then
+             item%nconnections = 0
+         end if
       end function ecItemUpdateTargetItem
       
       ! =======================================================================
