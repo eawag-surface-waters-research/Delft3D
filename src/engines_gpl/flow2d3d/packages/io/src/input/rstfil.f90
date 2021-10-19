@@ -320,7 +320,7 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
               & .not. nan_check(r1    , 'r1 (restart-file)'    , lundia) .or. &
               & .not. nan_check(rtur1 , 'rtur1 (restart-file)' , lundia) .or. &
               & .not. nan_check(umnldf, 'umnldf (restart-file)', lundia) .or. &
-              & .not. nan_check(umnldf, 'vmnldf (restart-file)', lundia)      ) then
+              & .not. nan_check(vmnldf, 'vmnldf (restart-file)', lundia)      ) then
                ierror = 1
            endif
        endif
