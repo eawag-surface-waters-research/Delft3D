@@ -119,14 +119,15 @@ c         Read the existing tables
           call readdb ( io_inp , io_mes )
 c         Store R1 in relational way
           ncnpr = 0
-          do 10 iproc = 1,nproc
-          do 10 iconf = 1,nconf
-              if ( conpro(iconf,iproc) ) then
-                  ncnpr = ncnpr+1
-                  r1_pid(ncnpr) = procid(iproc)
-                  r1_cid(ncnpr) = confid(iconf)
-              endif
-   10     continue
+          do iproc = 1,nproc
+            do iconf = 1,nconf
+                if ( conpro(iconf,iproc) ) then
+                    ncnpr = ncnpr+1
+                    r1_pid(ncnpr) = procid(iproc)
+                    r1_cid(ncnpr) = confid(iconf)
+                endif
+            enddo
+          enddo
 c         Remove primary   table  P4
 c         Remove secondary tables R4 till R8
           nproc = 0
@@ -151,7 +152,7 @@ c----------------------------------------------------------------------c
 c     We decompose the Proces.asc
 c----------------------------------------------------------------------c
 
-      do 100 iproc = 1,nprocl
+      do iproc = 1,nprocl
 
 c         proces name and description
           read ( io_asc , '(a10,20x,a50)' ) c10,c50
@@ -176,7 +177,7 @@ c         input items on segment level
 
           read ( io_asc , '(i10)' ) naanta
           ihulp = naanta
-          do 15 iaanta = 1,naanta
+          do iaanta = 1,naanta
               if ( newfrm ) then
                   read ( io_asc , FMT31) c10,value,c1,c50,c20
               else
@@ -211,12 +212,12 @@ c         input items on segment level
 c             Switch to decide segment/exchange!
               inpusx(ninpu) = 1
 
-   15     continue
+          enddo
 
 c         input items on exchange level
 
           read ( io_asc , '(i10)' ) naanta
-          do 20 iaanta = 1,naanta
+          do iaanta = 1,naanta
               if ( newfrm ) then
                   read ( io_asc , FMT31) c10,value,c1,c50,c20
               else
@@ -249,13 +250,13 @@ c         input items on exchange level
               endif
 c             Switch to decide segment/exchange!
               inpusx(ninpu) = 0
-   20     continue
+          enddo
 
 c         output items on segment level
 
           read ( io_asc , '(i10)' ) naanta
           ihulp = naanta
-          do 30 iaanta = 1,naanta
+          do iaanta = 1,naanta
               if ( newfrm ) then
                   read ( io_asc , FMT32) c10,c1,c50,c20             
               else
@@ -273,12 +274,12 @@ c         output items on segment level
               outpdo(noutp) = c1
 c             Switch to decide segment/exchange!
               outpsx(noutp) = 1
-   30     continue
+          enddo
 
 c         output items on exchange level
 
           read ( io_asc , '(i10)' ) naanta
-          do 40 iaanta = 1,naanta
+          do iaanta = 1,naanta
               if ( newfrm ) then
                   read ( io_asc , FMT32) c10,c1,c50,c20
               else
@@ -296,13 +297,13 @@ c         output items on exchange level
               outpdo(noutp) = c1
 c             Switch to decide segment/exchange!
               outpsx(noutp) = 0
-   40     continue
+          enddo
 
 c         fluxes
 
           noffsf = noutf
           read ( io_asc , '(i10)' ) naanta
-          do 50 iaanta = 1,naanta
+          do iaanta = 1,naanta
               if ( newfrm ) then
                   read ( io_asc , FMT32) c10,c1,c50,c20
               else
@@ -318,13 +319,13 @@ c         fluxes
               outffl(noutf) = c10
               outfnm(noutf) = iaanta
               outfdo(noutf) = c1
-   50     continue
+          enddo
 
 c         stochi lines
 
           noffse = nstoc
           read ( io_asc , '(i10)' ) naanta
-          do 60 iaanta = 1,naanta
+          do iaanta = 1,naanta
               read ( io_asc , '(a10,2x,a10,2x,f10.0)' ) c10,c10b,value
 
 c             check presence of current flux in fluxes under current process
@@ -345,13 +346,13 @@ c             check presence of current flux in fluxes under current process
 	        c20 = ' '
               call upd_p2 ( c10, c50, value, 0, newtab, grp, io_mes ,
      j                      iitem, c20, newfrm, .false. )
-   60     continue
+          enddo
 
 c         stochi lines D
 
           noffse = ndisp
           read ( io_asc , '(i10)' ) naanta
-          do 80 iaanta = 1,naanta
+          do iaanta = 1,naanta
               read ( io_asc , '(a10,2x,a10,2x,f10.0)' ) c10,c10b,value
 
               ndisp = ndisp + 1
@@ -365,13 +366,13 @@ c         stochi lines D
               c20 = ' '
               call upd_p2 ( c10, c50, value, 0, newtab, grp, io_mes ,
      j                      iitem, c20, newfrm, .false. )
-   80     continue
+          enddo
 
 c         stochi lines V
 
           noffse = nvelo
           read ( io_asc , '(i10)' ) naanta
-          do 70 iaanta = 1,naanta
+          do iaanta = 1,naanta
               read ( io_asc , '(a10,2x,a10,2x,f10.0)' ) c10,c10b,value
 
               nvelo = nvelo + 1
@@ -385,10 +386,10 @@ c         stochi lines V
               c20 = ' '
               call upd_p2 ( c10, c50, value, 0, newtab, grp, io_mes ,
      j                      iitem, c20, newfrm, .false. )
-   70     continue
+          enddo
           read ( io_asc , '(a10)' ) c10
           if ( c10(1:3) .ne. 'END' ) STOP 'error'
-  100 continue
+      enddo
 
 c         DUPROL format has two additional blocks, specifying active and inactive substances
 
@@ -433,7 +434,7 @@ c----------------------------------------------------------------------c
 
       if ( newtab ) then
 
-      do 120 i = 1,nitem
+      do i = 1,nitem
           call zoek (itemid(i)(1:8),1,'bloomalg',8,ihulp)
           if ( ihulp .gt. 0 ) then
               if ( itemid(i)(9:10) .eq. '01' ) then
@@ -484,7 +485,7 @@ c         Remove defaults for DUFLOW hydro parameters, so that conversion proces
               call zoek (itemid(i)(1:5),1,'ITIME',5,ihulp)
               if ( ihulp .eq. 1 ) itemde(i) = -999.
           endif
-  120 continue
+      enddo
 
       endif
 
@@ -521,7 +522,7 @@ c----------------------------------------------------------------------c
       endif
 
  1000 format ('configuration ''DUPROL'' serial 2011010101') 
- 1010 format ('2011010101') 
+
 
       close (io_mes)
 
@@ -539,24 +540,33 @@ c----------------------------------------------------------------------c
 
 c     Initialise indexes arrays
 
-      do 10 iitem=1,nitemm
-   10 item_i(iitem) = iitem
-      do 20 ifort=1,nfortm
-   20 fort_i(ifort) = ifort
-      do 30 iproc=1,nprocm
-   30 proc_i(iproc) = iproc
-      do 40 iinpu=1,ninpum
-   40 inpu_i(iinpu) = iinpu
-      do 50 ioutp=1,noutpm
-   50 outp_i(ioutp) = ioutp
-      do 60 ioutf=1,noutfm
-   60 outf_i(ioutf) = ioutf
-      do 70 istoc=1,nstocm
-   70 stoc_i(istoc) = istoc
-      do 80 ivelo=1,nvelom
-   80 velo_i(ivelo) = ivelo
-      do 90 idisp=1,ndispm
-   90 disp_i(idisp) = idisp
+      do iitem=1,nitemm
+        item_i(iitem) = iitem
+      enddo
+      do ifort=1,nfortm
+        fort_i(ifort) = ifort
+      enddo
+      do iproc=1,nprocm
+        proc_i(iproc) = iproc
+      enddo
+      do iinpu=1,ninpum
+        inpu_i(iinpu) = iinpu
+      enddo
+      do ioutp=1,noutpm
+        outp_i(ioutp) = ioutp
+      enddo
+      do ioutf=1,noutfm
+        outf_i(ioutf) = ioutf
+      enddo
+      do istoc=1,nstocm
+        stoc_i(istoc) = istoc
+      enddo
+      do ivelo=1,nvelom
+        velo_i(ivelo) = ivelo
+      enddo
+      do idisp=1,ndispm
+        disp_i(idisp) = idisp
+      enddo
       return
       end
 
@@ -584,22 +594,22 @@ c         Dummy versions of tables P1 and P5
 c         Table R1
 c         include all processes in Dummy configuration
 
-          do 5 iproc = 1,nproc
+          do iproc = 1,nproc
               conpro(1,iproc) = .true.
-    5     continue
+          enddo
 
 c         Table R2
 c         add all substances to Dummy configuration
 
           ncnsb = 0
-          do 10 iitem = 1,nitem
+          do iitem = 1,nitem
               if ( itemgr(iitem) .eq. grp ) then
 c                 This must be a substance
                   ncnsb = ncnsb + 1
                   r2_cid(ncnsb) = confid(1)
                   r2_sid(ncnsb) = itemid(iitem)
               endif
-   10     continue
+          enddo
 
       else
 
@@ -610,18 +620,18 @@ c         Recreate Table R1
           do 15 iproc = 1,nproc
           do 15 iconf = 1,nconf
    15     conpro(iconf,iproc) = .false.
-          do 20 icnpr = 1,ncnpr
+          do icnpr = 1,ncnpr
               call zoek (r1_pid(icnpr),nproc,procid,10,iproc)
               call zoek (r1_cid(icnpr),nconf,confid,10,iconf)
               if (iconf.le.0) stop 'BUG CRATAB'
               if (iproc.gt.0) conpro(iconf,iproc) = .true.
-   20     continue
+          enddo
 
 c         Table R2
 c         add all new substances to Dummy configuration
 c         NO EFFORT DONE TO CLEAR OLD ENTRIES
 
-          do 40 iitem = 1,nitem
+          do iitem = 1,nitem
               if ( itemgr(iitem) .eq. grp ) then
 c                 This must be a NEW substance
                   if ( ncnsb + 1 .gt. ncnsbm ) stop 'DIMENSION NCNSBM'
@@ -629,7 +639,7 @@ c                 This must be a NEW substance
                   r2_cid(ncnsb) = 'DummyConfg'
                   r2_sid(ncnsb) = itemid(iitem)
               endif
-   40     continue
+          enddo
 
       endif
       return
