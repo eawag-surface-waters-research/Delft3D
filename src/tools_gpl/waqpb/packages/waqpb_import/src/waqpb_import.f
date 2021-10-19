@@ -56,10 +56,17 @@ c
       data         grp /'DummyGroup                          '/
       data         initialConfgId /'DummyConfg'/
       
+      
+      ! Format specifiers
+      character(len=*), parameter  :: FMT21 = "(a10,f18.0,a1,1x,a50)"
+      character(len=*), parameter  :: FMT22 = "(a10,18x,  a1,1x,a50))"
+      character(len=*), parameter  :: FMT31 = "(a10,f18.0,a1,1x,a50,3x,a20)"
+      character(len=*), parameter  :: FMT32 = "(a10,18x,  a1,1x,a50,3x,a20)"
+      
 c     Command line arguments
 
       newtab = .false.
-      newfrm = .false.
+      newfrm = .true.
       duprol = .false.
       pdffil = 'proces.asc'
       do i=1,9999
@@ -70,7 +77,7 @@ c     Command line arguments
             endif
             if (index(ArgumentString,'-duprol').gt.0) duprol = .true.
             if (index(ArgumentString,'-newtab').gt.0) newtab = .true.
-            if (index(ArgumentString,'-newfrm').gt.0) newfrm = .true.
+            if (index(ArgumentString,'-oldfrm').gt.0) newfrm = .false.
       enddo
 
       open ( newunit=io_mes , file = 'waqpb_import.log' )
@@ -154,10 +161,8 @@ c         proces name and description
 
 c         fortran code
           read ( io_asc , '(a10)' ) c10a
-
 c         transport code
           read ( io_asc , * ) jndex
-
           if ( nproc+1 .gt. nprocm ) stop 'DIMENSION NPROCM'
           nproc = nproc + 1
           procid(nproc) = c10
@@ -173,14 +178,13 @@ c         input items on segment level
           ihulp = naanta
           do 15 iaanta = 1,naanta
               if ( newfrm ) then
-                  read ( io_asc , 3001) c10,value,c1,c50,c20
+                  read ( io_asc , FMT31) c10,value,c1,c50,c20
               else
-                  read ( io_asc , 2001) c10,value,c1,c50
-	            c20 = ' '
+                  read ( io_asc , FMT21) c10,value,c1,c50
+	            c20 = ' ' 
               endif
               call upd_p2 ( c10, c50, value, 1, newtab, grp, io_mes ,
      j                      iitem, c20, newfrm, .false. )
-
               ninpu = ninpu + 1
               if ( ninpu .gt. ninpum ) then
                   write (*,*) ninpu
@@ -214,14 +218,13 @@ c         input items on exchange level
           read ( io_asc , '(i10)' ) naanta
           do 20 iaanta = 1,naanta
               if ( newfrm ) then
-                  read ( io_asc , 3001) c10,value,c1,c50,c20
+                  read ( io_asc , FMT31) c10,value,c1,c50,c20
               else
-                  read ( io_asc , 2001) c10,value,c1,c50
+                  read ( io_asc , FMT21) c10,value,c1,c50
 	            c20 = ' '
               endif
               call upd_p2 ( c10, c50, value, 2, newtab, grp, io_mes ,
      j                      iitem, c20, newfrm, .false. )
-
               ninpu = ninpu + 1
               if ( ninpu .gt. ninpum ) then
                   write (*,*) ninpu
@@ -254,15 +257,14 @@ c         output items on segment level
           ihulp = naanta
           do 30 iaanta = 1,naanta
               if ( newfrm ) then
-                  read ( io_asc , 3002) c10,c1,c50,c20
+                  read ( io_asc , FMT32) c10,c1,c50,c20             
               else
-                  read ( io_asc , 2002) c10,c1,c50
+                  read ( io_asc , FMT22) c10,c1,c50
 	            c20 = ' '
               endif
               value = -999.
               call upd_p2 ( c10, c50, value, 1, newtab, grp, io_mes ,
      j                      iitem, c20, newfrm, .false. )
-
               noutp = noutp + 1
               if ( noutp .gt. noutpm ) stop 'DIMENSION NOUTPM'
               outppr(noutp) = procid(nproc)
@@ -278,15 +280,14 @@ c         output items on exchange level
           read ( io_asc , '(i10)' ) naanta
           do 40 iaanta = 1,naanta
               if ( newfrm ) then
-                  read ( io_asc , 3002) c10,c1,c50,c20
+                  read ( io_asc , FMT32) c10,c1,c50,c20
               else
-                  read ( io_asc , 2002) c10,c1,c50
+                  read ( io_asc , FMT22) c10,c1,c50
 	            c20 = ' '
               endif
               value = -999.
               call upd_p2 ( c10, c50, value, 2, newtab, grp, io_mes ,
      j                      iitem, c20, newfrm, .false. )
-
               noutp = noutp + 1
               if ( noutp .gt. noutpm ) stop 'DIMENSION NOUTPM'
               outppr(noutp) = procid(nproc)
@@ -303,15 +304,14 @@ c         fluxes
           read ( io_asc , '(i10)' ) naanta
           do 50 iaanta = 1,naanta
               if ( newfrm ) then
-                  read ( io_asc , 3002) c10,c1,c50,c20
+                  read ( io_asc , FMT32) c10,c1,c50,c20
               else
-                  read ( io_asc , 2002) c10,c1,c50
+                  read ( io_asc , FMT22) c10,c1,c50
 	            c20 = ' '
               endif
               value = -999.
               call upd_p2 ( c10, c50, value, 1, newtab, grp, io_mes ,
      j                      iitem, c20, newfrm, .false. )
-
               noutf = noutf + 1
               if ( noutf .gt. noutfm ) stop 'DIMENSION NOUTFM'
               outfpr(noutf) = procid(nproc)
@@ -395,14 +395,14 @@ c         DUPROL format has two additional blocks, specifying active and inactiv
       if ( duprol ) then
           read ( io_asc , '(i10)' ) naanta
           do iaanta = 1,naanta
-              read ( io_asc , 3002) c10,c1,c50,c20
+              read ( io_asc , FMT32) c10,c1,c50,c20
               value = -999.
               call upd_p2 ( c10, c50, value, 0, newtab, grp, io_mes ,
      j                      iitem, c20, newfrm, .false. )
           enddo
           read ( io_asc , '(i10)' ) naanta
           do iaanta = 1,naanta
-              read ( io_asc , 3002) c10,c1,c50,c20
+              read ( io_asc , FMT32) c10,c1,c50,c20
               value = -999.
               call upd_p2 ( c10, c50, value, 0, newtab, grp, io_mes ,
      j                      iitem, c20, newfrm, .true. )
@@ -527,10 +527,8 @@ c----------------------------------------------------------------------c
 
       stop 'Normal end'
   999 stop 'PROCES.ASC does not exist!!!!!!!!!'
- 2001 format (a10,f18.0,a1,1x,a50)
- 2002 format (a10,18x,  a1,1x,a50)
- 3001 format (a10,f18.0,a1,1x,a50,5x,a20)
- 3002 format (a10,18x,  a1,1x,a50,5x,a20)
+
+
       end
 
       subroutine iniind()
