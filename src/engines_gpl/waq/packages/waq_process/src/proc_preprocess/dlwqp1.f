@@ -148,6 +148,8 @@
       character*40 ,allocatable :: subunit(:)      ! substance unit
       character*60 ,allocatable :: subdescr(:)     ! substance description
       character*20              :: outname         ! output name
+      logical                   :: blmfil_exists   ! bloom.spe exists
+
 
       ! proces definition structure
 
@@ -450,27 +452,37 @@
             nopralg = 0
          endif
       endif
-         ! read the bloom-species database.
+      
+      ! inquire if bloom-species database exists.
+      blmfil_exists = .false.
+      inquire(file=blmfil, exist=blmfil_exists)
 
-      if ( l_eco ) then
-         open ( newunit=lunblm, file=blmfil )
-         read ( lunblm    , '(a)' ) line
-         verspe = 1.0
-         ioff =  index(line, 'BLOOMSPE_VERSION_')
-         if(ioff.eq.0) then
-            rewind( lunblm )
-         else
-            read (line(ioff+17:), *, err = 100) verspe
-100         continue
-         endif
+      ! read the bloom-species database.
+      if (blmfil_exists) then
+        if ( l_eco ) then
+           open ( newunit=lunblm, file=blmfil )
+           read ( lunblm    , '(a)' ) line
+           verspe = 1.0
+           ioff =  index(line, 'BLOOMSPE_VERSION_')
+           if(ioff.eq.0) then
+              rewind( lunblm )
+           else
+              read (line(ioff+17:), *, err = 100) verspe
+  100         continue
+           endif
+        endif
 
          call reaalg ( lurep  , lunblm , verspe , maxtyp , maxcof , 
      +                 notyp  , nocof  , noutgrp, nouttyp, alggrp ,
      +                 abrgrp , algtyp , abrtyp , algdsc , cofnam ,
      +                 algcof , outgrp , outtyp , noprot , namprot,
      +                 nampact, nopralg, nampralg)
+      else
+        ierr = ierr + 1
+        write(line,'(a)') ' eco input file not found! Exiting'
+        call monsys(line,1)
+        return
       endif
-
       ! chem coupling
 
       call getcom ( '-chem'  , 3    , lfound, idummy, rdummy,
