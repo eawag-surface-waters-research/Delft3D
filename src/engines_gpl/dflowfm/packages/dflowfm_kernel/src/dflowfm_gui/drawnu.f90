@@ -100,7 +100,7 @@
 
       call TEKgrid(key)
 
-      call teksam(xs,ys,zs,ns,ndraw(32))
+      if (ns > 0) call teksam(xs,ys,zs,ns,ndraw(32))
     
       if (ndraw(2) == 6) then
          CALL TEKNET(NCOLDN,key) ! network on top

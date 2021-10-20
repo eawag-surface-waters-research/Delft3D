@@ -41,7 +41,8 @@
 !!   -tracers with boundary conditions (not necessarily all tracers) have their own numbering
 !!   -the tracer (with bc's) to consituent mapping is called "itrac2const"
 !!   -boundary condition related information of the tracers are stored in "bndtr" of type "bndtype"
-module m_transport
+
+module m_transportdata
    integer, parameter                            :: NAMLEN = 128
    integer                                       :: NUMCONST       ! Total number of constituents
    integer                                       :: NUMCONST_MDU   ! number of constituents as specified in mdu/ext file
@@ -63,7 +64,13 @@ module m_transport
    character(len=NAMLEN), dimension(:), allocatable :: const_units    ! constituent units
    character(len=NAMLEN), parameter                 :: DEFTRACER = 'default_tracer'
 
-   integer,          dimension(:,:), allocatable :: id_const   ! consituent id's in map-file
+   integer,          dimension(:,:), allocatable    :: id_const   ! consituent id's in map-file
+   integer                                          :: iconst_cur ! active constituent (for visualization)
+end module m_transportdata
+
+module m_transport
+ 
+   use m_transportdata                                       !separation to get rid of all those use only: checks
 
    double precision, dimension(:,:), allocatable :: fluxhor  ! horizontal fluxes
    double precision, dimension(:,:), allocatable :: fluxver  ! vertical   fluxes
@@ -86,9 +93,6 @@ module m_transport
    double precision, dimension(:,:), allocatable :: rhs      ! right-hand side, dim(NUMCONST,Ndkx)
    double precision, dimension(:,:), allocatable :: a,b,c,d  ! aj(i,j)*sed(j,k-1) + bj(i,j)*sed(j,k) + c(i,j)*sed(j,k+1) = d(i), i=k-kb+1
    double precision, dimension(:),   allocatable :: sol, e   ! solution and dummy array in tridag, respectively
-
-!  for visualisation
-   integer                                       :: iconst_cur ! active constituent (for visualization)
 
 !  for local timestepping
    double precision, dimension(:,:), allocatable :: sumhorflux    !< sum of horizontal fluxes, dim(NUMCONST,Ndkx)

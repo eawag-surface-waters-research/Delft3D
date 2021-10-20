@@ -202,18 +202,18 @@ subroutine anticreep( L )
       endif
 
       if ( jasal > 0 ) then
-         cl = sa1(kl2)
-         if ( kl1 >= kbl .and. kl1 <= ktl ) cl = ( ( pocol(kl2-kbl+1) - pocor(krr      ) ) * sa1(kl1)   &
-                                                 + ( pocor(krr      ) - pocol(kl1-kbl+1) ) * sa1(kl2) ) &
+         cl = constituents(isalt, kl2) 
+         if ( kl1 >= kbl .and. kl1 <= ktl ) cl = ( ( pocol(kl2-kbl+1) - pocor(krr      ) ) * constituents(isalt, kl1)   &
+                                                 + ( pocor(krr      ) - pocol(kl1-kbl+1) ) * constituents(isalt, kl2) ) &
                                                  / ( pocol(kl2-kbl+1) - pocol(kl1-kbl+1) )
-         cr = sa1(kr2)
-         if ( kr1 >= kbr .and. kr1 <= ktr ) cr = ( ( pocor(kr2-kbr+1) - pocol(kll      ) ) * sa1(kr1)   &
-                                                 + ( pocol(kll      ) - pocor(kr1-kbr+1) ) * sa1(kr2) ) &
+         cr = constituents(isalt, kr2) 
+         if ( kr1 >= kbr .and. kr1 <= ktr ) cr = ( ( pocor(kr2-kbr+1) - pocol(kll      ) ) * constituents(isalt, kr1)   &
+                                                 + ( pocol(kll      ) - pocor(kr1-kbr+1) ) * constituents(isalt, kr2) ) &
                                                  / ( pocor(kr2-kbr+1) - pocor(kr1-kbr+1) )
-         grad1 = ( sa1(kr) - cl ) ! / dx(L)
-         grad2 = ( cr - sa1(kl) ) ! / dx(L)
+         grad1 = ( constituents(isalt, kr) - cl ) ! / dx(L)
+         grad2 = ( cr - constituents(isalt, kL) ) ! / dx(L)
          grad = 0d0 ; if ( grad1 * grad2 > 0d0 ) grad = 2.0d0 * grad1 * grad2 / (grad1 + grad2)
-         sal = acl(L) * sa1(kl) + ( 1d0 - acl(L) ) * sa1(kr)
+         sal = acl(L) * constituents(isalt, kl) + ( 1d0 - acl(L) ) * constituents(isalt, kr) 
          temp = backgroundwatertemperature
          if ( jatem > 0 ) temp = acl(L) * constituents(itemp, kl) + ( 1d0 - acl(L) ) * constituents(itemp, kr)
          call dens_eck( temp, sal, dummy, rhods, dummy )
@@ -226,7 +226,7 @@ subroutine anticreep( L )
          if ( kl1 >= kbl .and. kl1 <= ktl ) cl = ( ( pocol(kl2-kbl+1) - pocor(krr      ) ) * constituents(itemp,kl1)   &
                                                  + ( pocor(krr      ) - pocol(kl1-kbl+1) ) * constituents(itemp,kl2) ) &
                                                  / ( pocol(kl2-kbl+1) - pocol(kl1-kbl+1) )
-         cr = tem1(kr2)
+         cr = constituents(itemp, kr2)
          if ( kr1 >= kbr .and. kr1 <= ktr ) cr = ( ( pocor(kr2-kbr+1) - pocol(kll      ) ) * constituents(itemp,kr1)   &
                                                  + ( pocol(kll      ) - pocor(kr1-kbr+1) ) * constituents(itemp,kr2) ) &
                                                  / ( pocor(kr2-kbr+1) - pocor(kr1-kbr+1) )
@@ -235,7 +235,7 @@ subroutine anticreep( L )
          grad = 0d0 ; if ( grad1 * grad2 > 0d0 ) grad = 2.0d0 * grad1 * grad2 / (grad1 + grad2)
          temp = acl(L) * constituents(itemp,kl) + ( 1d0 - acl(L) ) * constituents(itemp,kr)
          sal = backgroundsalinity
-         if ( jasal > 0 ) sal  = acl(L) * sa1(kl) + ( 1d0 - acl(L) ) * sa1(kr)
+         if ( jasal > 0 ) sal  = acl(L) * constituents(isalt, kl) + ( 1d0 - acl(L) ) * constituents(isalt, kr)
          call dens_eck( temp, sal, dummy, dummy, rhodt )
          drho(kf) = drho(kf) + rhodt * grad
          dtem(kf) = grad
@@ -252,7 +252,7 @@ subroutine anticreep( L )
       if (ztop - zbot < 1d-4) cycle
       zmid = ( zbot + ztop ) * 0.5d0
       LL = Lb + k - 1
-      do kf = kfmax,1,-1
+      do kf = kfmax,1,-1                               ! HK: double inside loop, same as D3D => too much work
          kll = kicol(kf)
          krr = kicor(kf)
          if ( point(kf) <= zbed ) exit

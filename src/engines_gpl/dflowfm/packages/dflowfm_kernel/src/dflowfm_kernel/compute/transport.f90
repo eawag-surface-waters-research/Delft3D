@@ -129,10 +129,10 @@ subroutine transport()                           ! transport for now, advect sal
           kb = ln(1,L) ; ki = ln(2,L)
           if (q1(L) >= 0 .or. keepstbndonoutflow == 1) then
               kk      = kmxd*(k-1)+L-Lb+1
-              sa1(kb) = zbnds(kk)                 ! inflow
-              salmax  = max( salmax, sa1(kb) )
+              constituents(isalt, kb) = zbnds(kk)                 ! inflow
+              salmax  = max( salmax, constituents(isalt, kb) )
           else
-              sa1(kb) = sa1(ki)                   ! outflow
+              constituents(isalt, kb) = constituents(isalt, ki)   ! outflow
           endif
           !if (jasteric > 0) then
           !   steric(1,kb) = zbnds(kk)
@@ -140,10 +140,10 @@ subroutine transport()                           ! transport for now, advect sal
        enddo
 
        if ( kb.gt.0 ) then
-          valtop = sa1(kb)
+          valtop = constituents(isalt, kb)
           do L=Lt+1,Lb+kmxL(LL)-1
              kb      = ln(1,L)
-             sa1(kb) = valtop
+             constituents(isalt, kb) = valtop
           end do
        end if
     enddo
@@ -166,21 +166,12 @@ subroutine transport()                           ! transport for now, advect sal
           if (q1(L) >= 0  .or. keepstbndonoutflow == 1) then
               kk        = kmxd*(k-1)+L-Lb+1
               constituents(itemp, kb)  = zbndTM(kk)                  ! inflow
-
-!             BEGIN DEBUG
-!              if ( zbndTM(kk).eq.DMISS ) then
-!                 call mess(LEVEL_INFO, 'zbndTM=DMISS, (LL,kk)=', LL, kk)
-!              end if
-!             END DEBUG
-
           else
               constituents(itemp, kb)  = constituents(itemp, ki)     ! outflow
           endif
-
           !if (jasteric > 0) then
           !   steric(2,kb) = zbndTM(kk)
           !endif
-
        enddo
 
        if ( kb.gt.0 ) then
@@ -236,7 +227,7 @@ subroutine transport()                           ! transport for now, advect sal
        do L  = Lb, Lt
           k1 = ln(1,L)
           k2 = ln(2,L)
-          dsadn = dxi(LL)*( sa1(k2) - sa1(k1) )
+          dsadn = dxi(LL)*( constituents(isalt,k2) - constituents(isalt,k1) )
           dsadx(k1) = dsadx(k1) + wcx1(LL)*dsadn
           dsady(k1) = dsady(k1) + wcy1(LL)*dsadn
           dsadx(k2) = dsadx(k2) + wcx2(LL)*dsadn
@@ -296,8 +287,8 @@ subroutine transport()                           ! transport for now, advect sal
        ql  = is*q1(L)
 
        if (jasal > 0) then
-           supq(kd) = supq(kd) + ql*sa1(k)
-           supq(k ) = supq(k ) - ql*sa1(k)
+           supq(kd) = supq(kd) + ql*constituents(isalt,k)
+           supq(k ) = supq(k ) - ql*constituents(isalt,k)
        endif
 
        if (jatem > 0) then
@@ -327,11 +318,11 @@ subroutine transport()                           ! transport for now, advect sal
           if (kku < 0) then
 
              if (limtypsa > 0) then
-                saku = sa1(ku)
+                 saku = constituents(isalt,ku)
              endif
 
              if (limtyptm > 0) then
-                 teku = constituents(itemp, ku)
+                 teku = constituents(itemp,ku)
              endif
 
              if (limtypsed > 0) then
@@ -352,11 +343,11 @@ subroutine transport()                           ! transport for now, advect sal
              sl1  = slnup(1+ip,LL) ; sl2  = slnup(2+ip,LL)
 
              if (limtypsa > 0) then
-                saku  = sa1(ku)*sl1 + sa1(ku2)*sl2
+                saku  = constituents(isalt,ku)*sl1 + constituents(isalt,ku2)*sl2
              endif
 
              if (limtyptm > 0) then
-                 teku  = constituents(itemp,ku)*sl1 + constituents(itemp, ku2)*sl2
+                 teku  = constituents(itemp,ku)*sl1 + constituents(itemp,ku2)*sl2
              endif
 
              if (limtypsed  > 0) then
@@ -375,12 +366,8 @@ subroutine transport()                           ! transport for now, advect sal
              ! if (min(sa1(kd), sa1(k), saku) > 1d-3 .and. max(sa1(kd), sa1(k), saku) < salmax -1d-3) then ! lower order near top
              if ( .true. ) then ! lower order near top
 
-                ds2  =  sa1(kd) - sa1(k)        ! ds1 = voorlopende slope, ds2 = eigen slope
-                ds1  = (sa1(k)  - saku )*sl3
-
-                IF (LL == 28580) THEN
-                   DS1 = 1D0*ds1
-                ENDIF
+                ds2  =  constituents(isalt, kd) - constituents(isalt, k)        ! ds1 = voorlopende slope, ds2 = eigen slope
+                ds1  = (constituents(isalt, k)  - saku )*sl3
 
                 if (abs(ds2)  > eps10 .and. abs(ds1) > eps10) then
                    if (Limtypsa == 7) then
@@ -524,13 +511,13 @@ subroutine transport()                           ! transport for now, advect sal
           if (q1(L) > 0d0) then
              pp(k2) = pp(k2) + max( 0d0,  alf(L)* qsho(L) )           ! set   upwind pp, see 4.83
              pm(k2) = pm(k2) + min( 0d0,  alf(L)* qsho(L) )           !
-             qp(k1) = qp(k1) + max( 0d0,   q1(L)*(sa1(k2)-sa1(k1)) )  ! set downwind qq
-             qm(k1) = qm(k1) + min( 0d0,   q1(L)*(sa1(k2)-sa1(k1)) )  !
+             qp(k1) = qp(k1) + max( 0d0,   q1(L)*(constituents(isalt,k2)-constituents(isalt,k1)) )  ! set downwind qq
+             qm(k1) = qm(k1) + min( 0d0,   q1(L)*(constituents(isalt,k2)-constituents(isalt,k1)) )  !
           else
              pp(k1) = pp(k1) + max( 0d0, -alf(L)* qsho(L) )           ! set   upwind pp
              pm(k1) = pm(k1) + min( 0d0, -alf(L)* qsho(L) )           !
-             qp(k2) = qp(k2) + max( 0d0,  -q1(L)*(sa1(k1)-sa1(k2)) )  ! set downwind qq
-             qm(k2) = qm(k2) + min( 0d0,  -q1(L)*(sa1(k1)-sa1(k2)) )  !
+             qp(k2) = qp(k2) + max( 0d0,  -q1(L)*(constituents(isalt,k1)-constituents(isalt,k2)) )  ! set downwind qq
+             qm(k2) = qm(k2) + min( 0d0,  -q1(L)*(constituents(isalt,k1)-constituents(isalt,k2)) )  !
           endif
        enddo
 
@@ -569,10 +556,10 @@ subroutine transport()                           ! transport for now, advect sal
           pp(kd) = pp(kd) + qsho(L)
           pm(k ) = pm(k ) + qsho(L)
 
-          qp(kd) = max(qp(kd),  sa1(k )) ! min and max of neighbours
-          qm(kd) = min(qm(kd),  sa1(k ))
-          qp(k ) = max(qp(k ),  sa1(kd))
-          qm(k ) = min(qm(k ),  sa1(kd))
+          qp(kd) = max(qp(kd),  constituents(isalt,k )) ! min and max of neighbours
+          qm(kd) = min(qm(kd),  constituents(isalt,k ))
+          qp(k ) = max(qp(k ),  constituents(isalt,kd))
+          qm(k ) = min(qm(k ),  constituents(isalt,kd))
 
        enddo
 
@@ -589,7 +576,7 @@ subroutine transport()                           ! transport for now, advect sal
           if (pp(k) > 0) then
 
              if (pm(k) > 0) then
-                 if (sa1(k) > qp(k) ) then  ! local max
+                 if (constituents(isalt,k) > qp(k) ) then  ! local max
                    aa = pp(k) / pm(k)
                  endif
              endif
@@ -597,7 +584,7 @@ subroutine transport()                           ! transport for now, advect sal
           else if (pp(k) < 0) then
 
              if (pm(k) < 0) then
-                 if ( sa1(k) < qm(k) ) then ! local min
+                 if ( constituents(isalt,k) < qm(k) ) then ! local min
                      aa = pp(k) / pm(k)
                  endif
              endif
@@ -638,7 +625,7 @@ subroutine transport()                           ! transport for now, advect sal
           call getkbotktop(kk,kb,kt)
           do k = kb,kt
              if (vol1(k) > 0d0) then
-                aa = sa1(k) + dts*pp(k)/vol1(k)
+                aa = constituents(isalt,k) + dts*pp(k)/vol1(k)
                 if ( aa < 0d0 .or. aa > salmax ) then
                     do n = 1,nd(kk)%lnx
                        L = iabs( nd(kk)%ln(n) )
@@ -686,7 +673,7 @@ subroutine transport()                           ! transport for now, advect sal
 
  endif
 
- if (jasal > 0 .or. jatem > 0) then
+! if (jasal > 0 .or. jatem > 0) then
 
     if (dicouv >= 0d0 ) then  ! horizontal diffusion
        do LL = 1,lnx
@@ -715,7 +702,7 @@ subroutine transport()                           ! transport for now, advect sal
                    if (jacreep == 1) then
                       ds2 = dsalL(L)
                    else
-                      ds2 = sa1(k2) - sa1(k1)
+                      ds2 = constituents(isalt,k2) - constituents(isalt,k1)
                    endif
                    qsa = qds*ds2
                    supq(k2) =  supq(k2) - qsa
@@ -756,10 +743,10 @@ subroutine transport()                           ! transport for now, advect sal
           if ( vol1(k) > eps4 ) then
               if (jasal > 0) then
                   src = 0d0 ; if (numsrc > 0) src = salsrc(k)
-                  sa1(k)  = sa1(k)   + dts*(supq(k) - sa1(k)*sq(k)  + src ) / vol1(k)
+                  constituents(isalt,k) = constituents(isalt,k)  + dts*(supq(k) - constituents(isalt,k)*sq(k)  + src ) / vol1(k)
               endif
               if (jatem > 0) then
-                 constituents(itemp,k)  = constituents(itemp, k)  + dts*(tupq(k) - constituents(itemp, k)*sq(k) + heatsrc(k) ) / vol1(k)
+                  constituents(itemp,k) = constituents(itemp,k)  + dts*(tupq(k) - constituents(itemp,k)*sq(k) + heatsrc(k) ) / vol1(k)
               endif
               if (jased > 0) then
                  do j = 1,mxgr
@@ -778,12 +765,6 @@ subroutine transport()                           ! transport for now, advect sal
              call update_ghosts(ITYPE_Sall, 1, Ndx, sa1, ierror)
              if ( jatimer.eq.1 ) call stoptimer(IUPDSALL)
           endif
-          if (jatem > 0) then
-             if ( jatimer.eq.1 ) call starttimer(IUPDSALL)
-             call update_ghosts(ITYPE_Sall, 1, Ndx, tem1, ierror)
-             if ( jatimer.eq.1 ) call stoptimer(IUPDSALL)
-          endif
-
        end if
 
     else                                                                      ! 3D
@@ -816,15 +797,15 @@ subroutine transport()                           ! transport for now, advect sal
                  ku = k+1 ; kd = k   ; qst = -qw(k)                ! from k+1 to k
               endif
 
-              qstd = qst*(sa1(ku) ) ! -sa1(kd))                         ! incoming - self
+              qstd = qst*(constituents(isalt,ku) ) ! -sa1(kd))     ! incoming - self
               qstu = qstd           ! 0d0
               if (javasal > 1) then
-                 ho   = qst*(sa1(kd)-sa1(ku))*0.5d0
+                 ho   = qst*(constituents(isalt,kd)-constituents(isalt,ku))*0.5d0
                  qstd = qstd + ho                                  ! ho
                  qstu = qstu + ho                                  ! ho
               endif
               if (difsalw > 0d0) then
-                 dif  = (sigsali*vicwws(k) + difsalw)*(sa1(ku) - sa1(kd) )*ba(kk) / ( 0.5d0*(zws(k+1) - zws(k-1)) )
+                 dif  = (sigsali*vicwws(k) + difsalw)*(constituents(isalt,ku) - constituents(isalt,kd) )*ba(kk) / ( 0.5d0*(zws(k+1) - zws(k-1)) )
                  qstd = qstd + dif ; qstu = qstu + dif
               endif
               supq(kd) = supq(kd) + qstd
@@ -835,7 +816,7 @@ subroutine transport()                           ! transport for now, advect sal
            do k = kb,kt
               if (vol1(k) > 0d0 ) then
                  src = 0d0 ; if (numsrc > 0) src = salsrc(k)
-                 sa1(k)  = sa1(k)  + dts*(supq(k) - sa1(k)*sq(k) + src ) / vol1(k)
+                 constituents(isalt,k)  = constituents(isalt,k)  + dts*(supq(k) - constituents(isalt,k)*sq(k) + src ) / vol1(k)
               endif
            enddo
 
@@ -848,7 +829,7 @@ subroutine transport()                           ! transport for now, advect sal
                  java = 3
               else
                  do k = kb+1, kt
-                    if (sa1(k) > sa1(k-1) ) then
+                    if (constituents(isalt,k) > constituents(isalt,k-1) ) then
                        java = 3
                        exit
                     endif
@@ -859,12 +840,12 @@ subroutine transport()                           ! transport for now, advect sal
            if (jasal > 0) then
                a(1:km) = 0d0 ; b(1:km) = 1d0 ; c(1:km) = 0d0
                src = 0d0 ; if (numsrc > 0) src = salsrc(kb)
-               d(1)  = sa1(kb)  + dts*(supq(kb) - sa1(kb) *sq(kb) + src )  / vol1(kb)    ! put sa0 in d
+               d(1)  = constituents(isalt,kb)  + dts*(supq(kb) - constituents(isalt,kb) *sq(kb) + src )  / vol1(kb)    ! put sa0 in d
            endif
            if (jatem > 0) then
                ta(1:km) = 0d0 ; tb(1:km) = 1d0 ; tc(1:km) = 0d0
                src   = heatsrc(kb)
-               td(1) = constituents(itemp, kb) + dts*(tupq(kb) - constituents(itemp, kb)*sq(kb) + src ) / vol1(kb)     ! put sa0 in d
+               td(1) = constituents(itemp, kb) + dts*(tupq(kb) - constituents(itemp,kb)*sq(kb) + src ) / vol1(kb)     ! put sa0 in d
 !              BEGIN DEBUG
 !               td(1) = tem1(kb) + dts*src / vol1(kb)     ! put sa0 in d
 !              END DEBUG
@@ -930,17 +911,17 @@ subroutine transport()                           ! transport for now, advect sal
                  endif
 
                  if (jasal > 0) then
-                    src = 0d0 ; if (numsrc > 0) src = salsrc(k+1)
-                    d(n+1) = sa1(k+1) + dts*( supq(k+1) - sa1(k+1)*sq(k+1) + src) / vol1(k+1)              ! horizontal explicit, org allinout
+                    src    = 0d0 ; if (numsrc > 0) src = salsrc(k+1)
+                    d(n+1) = constituents(isalt, k+1) + dts*( supq(k+1) - constituents(isalt, k+1)*sq(k+1) + src) / vol1(k+1)              ! horizontal explicit, org allinout
                     if (tetav .ne. 1d0) then
-                       d(n+1) = d(n+1) - tetav1*( sa1(k+1)*adv  - sa1(k)  *adv1 ) / vol1(k+1)
-                       d(n  ) = d(n  ) - tetav1*( sa1(k  )*adv1 - sa1(k+1)*adv  ) / vol1(k  )
+                       d(n+1) = d(n+1) - tetav1*( constituents(isalt, k+1)*adv  - constituents(isalt, k)*adv1 )   / vol1(k+1)
+                       d(n  ) = d(n  ) - tetav1*( constituents(isalt, k  )*adv1 - constituents(isalt, k+1)*adv  ) / vol1(k  )
                     endif
                  endif
 
                  if (jatem > 0) then
                     src     = heatsrc(k+1)
-                    td(n+1) = constituents(itemp, k+1) + dts*( tupq(k+1) - constituents(itemp, k+1)*sq(k+1) + src  )  / vol1(k+1)
+                    td(n+1) = constituents(itemp, k+1) + dts*( tupq(k+1) - constituents(itemp, k+1)*sq(k+1) + src)  / vol1(k+1)
 
                     if (tetav .ne. 1d0) then
                        td(n+1) = td(n+1) - tetav1*(  constituents(itemp,k+1)*adv  - constituents(itemp, k)  *adv1 ) / vol1(k+1)
@@ -1023,9 +1004,9 @@ subroutine transport()                           ! transport for now, advect sal
 
                  if (jasal > 0) then
                     src = 0d0 ; if (numsrc > 0) src = salsrc(k+1)
-                    d(n+1)  = sa1(k+1) + dts*( supq(k+1) - sa1(k+1)*sq(k+1) + src ) / vol1(k+1)
+                    d(n+1)  = constituents(isalt,k+1) + dts*( supq(k+1) - constituents(isalt,k+1)*sq(k+1) + src ) / vol1(k+1)
                     if (tetav .ne. 1d0) then
-                       adv    = 0.5d0*dts*qw(k)*tetav1*(sa1(k) + sa1(k+1))
+                       adv    = 0.5d0*dts*qw(k)*tetav1*( constituents(isalt, k) + constituents(isalt,k+1) )
                        d(n+1) = d(n+1) + adv/vol1(k+1)
                        d(n  ) = d(n  ) - adv/vol1(k)
                     endif
@@ -1057,26 +1038,11 @@ subroutine transport()                           ! transport for now, advect sal
 
            endif
 
-           !do k    = kb, kt   check
-           !   n    = k - kb + 1
-           !   sa1(k) = d(n)
-           !   if (n > 1) then
-           !     sa1(k) = sa1(k) - a(n)*sa0(k-1)
-           !   endif
-           !   if (n < km) then
-           !     sa1(k) = sa1(k) - c(n)*sa0(k+1)
-           !   endif
-           !
-           !   sa1(k) = sa1(k) / ( b(n) -1 )
-           !enddo
-
-
            if (jasal > 0) then
-              call tridag(a,b,c,d,e,sa1(kb:kt),km)
+              call tridag(a,b,c,d,e,constituents(isalt,kb:kt),km)
            endif
            if (jatem > 0) then
-              call tridag(ta,tb,tc,td,e,tem1(kb:kt),km)
-              constituents(itemp, kb:kt) = tem1(kb:kt)
+              call tridag(ta,tb,tc,td,e,constituents(itemp,kb:kt),km)
            endif
            if (jased > 0) then
               do j = 1,mxgr
@@ -1089,7 +1055,8 @@ subroutine transport()                           ! transport for now, advect sal
 
         if (maxitverticalforestersal > 0) then
 
-            call foresterpoint(sa1(kb:), vol1(kb:), a, d, km, kmxn(kk), maxitverticalforestersal, 1)
+            ! call foresterpoint(sa1(kb:), vol1(kb:), a, d, km, kmxn(kk), maxitverticalforestersal, 1)
+            call foresterpoint2(constituents, numconst, ndkx, isalt, vol1(kb:), a, d, km, kmxn(kk), kb, maxitverticalforestersal, 1)
 
         endif
 
@@ -1123,7 +1090,7 @@ subroutine transport()                           ! transport for now, advect sal
     end if
 ! end DEBUG
 
-   if ( jasal.gt.0 ) then    !  compute salt error
+  if ( jasal.gt.0 ) then    !  compute salt error
 
       if (jatransportmodule == 0) sam0 = sam1
       sam0tot = sam1tot
@@ -1139,16 +1106,16 @@ subroutine transport()                           ! transport for now, advect sal
         km = kt - kb + 1
 
         do k = kb,kt
-            sam1tot = sam1tot + sa1(k)*vol1(k)
+            sam1tot = sam1tot + constituents(isalt,k)*vol1(k)
             if (jatransportmodule == 0) then
-               sam1(k) =        sa1(k)*vol1(k)            ! mass balance
+               sam1(k) =        constituents(isalt,k)*vol1(k)               ! mass balance
                same(k) = sam1(k) - sam0(k) - dts*( supq(k) + salsrc(k) )    ! mass balance
             endif
         enddo
      enddo
      !$OMP END PARALLEL DO
 
-       saminbnd = 0d0 ; samoutbnd = 0d0
+      saminbnd = 0d0 ; samoutbnd = 0d0
 
       do LL = lnxi + 1, 0 !  lnx                                ! copy on outflow
           call getLbotLtop(LL,Lb,Lt)
@@ -1158,17 +1125,17 @@ subroutine transport()                           ! transport for now, advect sal
           do L = Lb, Lt
              kb = ln(1,L) ; ki = ln(2,L)
              if (q1(L) > 0) then
-                saminbnd  = saminbnd  + q1(L)*sa1(kb)*dts   ! mass in
+                saminbnd  = saminbnd  + q1(L)*constituents(isalt,kb)*dts   ! mass in
              else
-                samoutbnd = samoutbnd - ( q1(L)*sa1(ki)+qsho(L) ) *dts   ! mass out
+                samoutbnd = samoutbnd - ( q1(L)*constituents(isalt,ki)+qsho(L) ) *dts   ! mass out
              endif
           enddo
        enddo
-      samerr = sam1tot - sam0tot !  - saminbnd + samoutbnd
+       samerr = sam1tot - sam0tot !  - saminbnd + samoutbnd
    endif
 
-  !$OMP PARALLEL DO             &
-  !$OMP PRIVATE(kk,kb,kt,k)
+   !$OMP PARALLEL DO             &
+   !$OMP PRIVATE(kk,kb,kt,k)
    do kk = 1,ndx ! i
       call getkbotktop(kk,kb,kt)
       if ( kt < kb ) cycle
@@ -1177,14 +1144,23 @@ subroutine transport()                           ! transport for now, advect sal
       enddo
       do k = kt+1 , kb + kmxn(kk) - 1
          rho(k) = rho(kt)
-         rhowat(k) = rhowat(kt)    ! UNST-5170
       enddo
    enddo
    !$OMP END PARALLEL DO
 
-
+   if (stm_included) then 
+      !$OMP PARALLEL DO             &
+      !$OMP PRIVATE(kk,kb,kt,k)
+       do kk = 1,ndx ! i5
+         call getkbotktop(kk,kb,kt)
+         do k = kt+1 , kb + kmxn(kk) - 1
+            rhowat(k) = rhowat(kt)    ! UNST-5170
+         enddo
+      enddo
+      !$OMP END PARALLEL DO
+   endif
+ 
    ! propagate rho
-
    if (jabaroctimeint == 5) then  ! rho advection
        dts  = 0.5d0*dts
        if (jarhoxu > 0) then
@@ -1194,7 +1170,7 @@ subroutine transport()                           ! transport for now, advect sal
        dts = 2.0d0*dts
    endif
 
- endif
+! endif ! came from if (jasal > 0 .or. jatem > 0) then line 676, a jump to inside a check, I remove this check for clarity
  
  if (jarhoxu > 0 .and. jacreep == 1) then
      do LL = 1,lnx
@@ -1204,11 +1180,7 @@ subroutine transport()                           ! transport for now, advect sal
         enddo
      enddo
  endif
-
- if (jatem > 0d0) then
-    ! tem1 = tem1 - 50d0 ! tkelvn
- endif
-
+ 
  if (jased > 0 .and. jased < 4) then
 
     dmorfax = max(1d0,dmorfac)
@@ -1367,7 +1339,7 @@ subroutine transport()                           ! transport for now, advect sal
        if (q1(L) < 0) then
           kb = ln(1,L) ; ki = ln(2,L)
           if (jasal > 0 .and. keepstbndonoutflow == 0) then
-              sa1(kb)  = sa1(ki)
+              constituents(isalt,kb)  = constituents(isalt,ki)
           endif
           if (jatem > 0  .and. keepstbndonoutflow == 0) then
               constituents(itemp, kb) = constituents(itemp,ki)
@@ -1387,6 +1359,18 @@ subroutine transport()                           ! transport for now, advect sal
     endif
  endif
 
-call timstop(handle_extra(52)) ! transport
+ do k = 1, 0!  ndxi ! for test selectiveZ.mdu
+    if (xz(k) > 270) then
+       do kk = kbot(k), ktop(k)
+          if (zws(kk) < -5d0) then
+             constituents(isalt,kk) = 30d0
+          else
+             constituents(isalt,kk) = 0d0
+          endif
+       enddo
+    endif
+ enddo
 
-   end subroutine transport
+ call timstop(handle_extra(52)) ! transport
+
+ end subroutine transport

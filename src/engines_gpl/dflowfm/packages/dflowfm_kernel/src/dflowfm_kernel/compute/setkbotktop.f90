@@ -364,13 +364,13 @@ integer          :: k1, k3, kb3, Lt1, Lt2, Lt3, Ld1, Ld2, Ld3, kk1, kk2, kk3
     if (kt0 > kt) then
         volkt   = vol0(kt)
 
-        if (jasal > 0) savolkt = volkt*sa1(kt)
+        if (jasal > 0) savolkt = volkt*constituents(isalt, kt) 
         if (jatem > 0) tevolkt = volkt*constituents(itemp, kt)
 
         do kkk  = kt0 , kt+1, -1                 ! old volumes above present ktop are lumped in ktop
            volkt     = volkt + vol0(kkk)
            vol0(kt)  = volkt
-           if (jasal > 0) savolkt   = savolkt  + vol0(kkk)*sa1(kkk)
+           if (jasal > 0) savolkt   = savolkt  + vol0(kkk)*constituents(isalt, kkk) 
            if (jatem > 0) tevolkt   = tevolkt  + vol0(kkk)*constituents(itemp, kkk)
            if (ti_waq > 0) then
               do kwaq = kkk, kt + 1, -1
@@ -381,9 +381,9 @@ integer          :: k1, k3, kb3, Lt1, Lt2, Lt3, Ld1, Ld2, Ld3, kk1, kk2, kk3
         enddo
         if (volkt > 0) then
            if (jasal > 0) then
-              sa1(kt) = savolkt/volkt
+              constituents(isalt, kt) = savolkt/volkt
               if (ktx > kt) then
-                 sa1(kt+1:ktx) = sa1(kt)
+                 constituents(isalt, kt+1:ktx) = constituents(isalt, kt)
               endif
            endif
            if (jatem > 0) then
