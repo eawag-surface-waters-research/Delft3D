@@ -17,9 +17,9 @@ endif(UNIX)
 
 # Note that the CMAKE_CURRENT_SOURCE_DIR has a path to THIS CMakeLists location
 set(waq_run_processes_root_path ${CMAKE_CURRENT_SOURCE_DIR}/../../) # Trace back to the waq_run_processes root path
-set(ini_version_file ${CMAKE_CURRENT_SOURCE_DIR}/${include_path}/version_number.ini)
-set(h_version_file ${CMAKE_CURRENT_SOURCE_DIR}/${include_path}/version_number.h)
-set(rc_version_file ${CMAKE_CURRENT_SOURCE_DIR}/${include_path}/version_number.rc)
+set(ini_version_file "${CMAKE_CURRENT_SOURCE_DIR}/include/version_number.ini")
+set(h_version_file "${CMAKE_CURRENT_SOURCE_DIR}/include/version_number.h")
+set(rc_version_file "${CMAKE_CURRENT_SOURCE_DIR}/include/version_number.rc")
 
 # Generate version files
 generate_version_files(${rc_version_file} 
