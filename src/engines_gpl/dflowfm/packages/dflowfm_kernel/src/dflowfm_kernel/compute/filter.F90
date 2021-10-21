@@ -572,56 +572,58 @@ subroutine comp_filter_predictor()
             L = Lb + klay-1
             
 !           fill right-hand side
-            solver_filter%rhs(LL) = u0(L)
+         if (L >= Lb .and. L <= Lt)  solver_filter%rhs(LL) = u0(L)   
          end do
       else
          do LL=1,Lnx
             call getLbotLtop(LL, Lb, Lt)
 !           get 3D link index (sigma only)
             L = Lb + klay-1
-            
-!           fill right-hand side
-            if ( itype.eq.3 ) then
-               solver_filter%rhs(LL) = u0(L) - adve(L)*Dt
-            else
-               solver_filter%rhs(LL) = u0(L)
-            end if
-            
-            if ( order.eq.1 ) then
-               fac = -eps(klay,LL) * Dt * dsign
-            else if ( order.eq.2 ) then
-               fac = eps(klay,LL) * Dt * dsign
-            else
-               fac = eps(klay,LL) * Dt * dsign
-            end if
-            plotlin(L) = eps(klay,LL)
-               
-!           BEGIN DEBUG
-            if ( itype.eq.1 ) then
-               plotlin(L) = dts/(dtmaxeps(LL)/max(eps(klay,LL),1e-10))
-            else
-               plotlin(L) = 1d0
-            end if
-!           END DEBUG
-               
-            
-!           loop over columns
-            do i=solver_filter%ia(LL),solver_filter%ia(LL+1)-1
-!              get column number
-               j = solver_filter%ja(i)
-               
-!              add scaled biharmonic operator
-               if ( order.eq.1 ) then
-                  solver_filter%A(i) = fac*ALvec(i)
-               else if ( order.eq.2 .or. order.eq.3 ) then
-                  solver_filter%A(i) = fac*ALvec2(i)
-               end if
-               
-!              add diagonal entry
-               if ( j.eq.LL ) then
-                  solver_filter%A(i) = solver_filter%A(i) + 1d0
-               end if
-            end do
+            if (L >= Lb .and. L <= Lt) then
+!               fill right-hand side           
+                    if ( itype.eq.3 ) then
+                       solver_filter%rhs(LL) = u0(L) - adve(L)*Dt
+                    else
+                       solver_filter%rhs(LL) = u0(L)
+                    end if
+                    
+                
+                if ( order.eq.1 ) then
+                   fac = -eps(klay,LL) * Dt * dsign
+                else if ( order.eq.2 ) then
+                   fac = eps(klay,LL) * Dt * dsign
+                else
+                   fac = eps(klay,LL) * Dt * dsign
+                end if
+                plotlin(L) = eps(klay,LL)
+                   
+!               BEGIN DEBUG
+                if ( itype.eq.1 ) then
+                   plotlin(L) = dts/(dtmaxeps(LL)/max(eps(klay,LL),1e-10))
+                else
+                   plotlin(L) = 1d0
+                end if
+!               END DEBUG
+                   
+                
+!               loop over columns
+                do i=solver_filter%ia(LL),solver_filter%ia(LL+1)-1
+!                  get column number
+                   j = solver_filter%ja(i)
+                   
+!                  add scaled biharmonic operator
+                   if ( order.eq.1 ) then
+                      solver_filter%A(i) = fac*ALvec(i)
+                   else if ( order.eq.2 .or. order.eq.3 ) then
+                      solver_filter%A(i) = fac*ALvec2(i)
+                   end if
+                   
+!                  add diagonal entry
+                   if ( j.eq.LL ) then
+                      solver_filter%A(i) = solver_filter%A(i) + 1d0
+                   end if
+                end do
+            endif
             
          end do
       end if
@@ -677,9 +679,10 @@ subroutine comp_filter_predictor()
          call getLbotLtop(LL, Lb, Lt)
 !        get 3D link index (sigma only)
          L = Lb + klay-1
+          
          
 !        fill layer data
-         ustar(L) = sol(LL)
+          if (L >= Lb .and. L <= Lt) ustar(L) = sol(LL)
       end do
       
       call stoptimer(IFILT_COPYBACK)
