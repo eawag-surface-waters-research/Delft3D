@@ -66,7 +66,7 @@ set_source_files_properties(${src_path}/mod_couplib/m_couplib.F90
                             ${src_path}/mod_couplib/m_sndrcv.F90
                             PROPERTIES COMPILE_OPTIONS "${file_preprocessor_flag}")
 
-target_include_directories(${library_name}  PRIVATE ${mpich2_path}/
+target_include_directories(${library_name}  PRIVATE ${mpi_include_path}/
                                                     "${CMAKE_CURRENT_SOURCE_DIR}/../../include")
 
 # Define how the files should be structured in Visual studio

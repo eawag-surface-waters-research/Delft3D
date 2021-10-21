@@ -24,16 +24,16 @@ if (WIN32)
     target_link_libraries(${executable_name} ${exe_dependencies})
 
     include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../include"
-                        ${mpich2_path})
+                        ${mpi_include_path})
     # Set linker properties
     message(STATUS "Setting linker properties in windows")
     target_link_directories(${executable_name}
                             PRIVATE
-                            "${checkout_src_root}/third_party_open/mpich2/x64/lib"
+                            "${mpi_library_path}"
                             "${checkout_src_root}/third_party_open/netcdf/netCDF 4.6.1/lib")
 
     target_link_libraries(${executable_name}
-                          "fmpich2.lib"
+                          "${mpi_fortran_library}"
                           "netcdf.lib")
 
     # disable OpenMP

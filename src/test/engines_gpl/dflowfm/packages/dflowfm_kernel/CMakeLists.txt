@@ -117,7 +117,7 @@ if(WIN32)
 
 target_link_directories(${executable_name} PRIVATE
                         ${gisinternals_path}
-                        "${checkout_src_root}/third_party_open/mpich2/x64/lib"
+                        "${mpi_library_path}"
                         "${checkout_src_root}/third_party_open/netcdf/netCDF 4.6.1/lib"
                         "${checkout_src_root}/third_party_open/petsc/petsc-3.10.2/lib/x64/Release"
                         "${checkout_src_root}/third_party_open/pthreads/bin/x64"
@@ -135,7 +135,7 @@ target_link_libraries(${executable_name} ${oss_dependencies}
                           "Winspool.lib"
                           "netcdf.lib"
                           "pthreadVC2.lib"
-                          "fmpich2.lib"
+                          "${mpi_fortran_library}"
                           "libpetsc.lib"
                           "gdal_i.lib"
                           "tecio.lib")
@@ -144,7 +144,7 @@ target_link_libraries(${executable_name} ${oss_dependencies}
 endif(WIN32)
 
 include_directories(${gisinternals_path}
-                    ${mpich2_path}
+                    ${mpi_include_path}
                     ${petsc_path}
                     ${tecplot_path})
 

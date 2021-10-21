@@ -34,7 +34,7 @@ include_directories(${include_path}
                     ${dd_iterators_path}
                     ${dd_mapper_path}
                     ${pthreads_path}
-                    ${mpich2_path}
+                    ${mpi_include_path}
                     ${expat_path})
 
 # Set version file variables
@@ -116,14 +116,13 @@ if (WIN32)
     target_link_directories(${library_name}
                             PRIVATE
                             "${checkout_src_root}/third_party_open/netcdf/netCDF 4.6.1/lib"
-                            "${checkout_src_root}/third_party_open/mpich2/x64/lib"
+                            "${mpi_library_path}"
                             "${checkout_src_root}/third_party_open/expat/x64/x64"
                             "${checkout_src_root}/third_party_open/pthreads/bin/x64")
 
     target_link_libraries(${library_name}
-                            "mpi.lib"
                             "libexpat.lib"
-                            "fmpich2.lib"
+                            "${mpi_fortran_library}"
                             "pthreadVC2.lib"
                             "wsock32.lib"
                             "netapi32.lib"

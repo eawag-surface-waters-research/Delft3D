@@ -35,7 +35,7 @@ if (WIN32)
     oss_include_libraries(${executable_name} exe_dependencies)
     target_link_libraries(${executable_name} ${exe_dependencies})
     
-    include_directories(${mpich2_path})
+    include_directories(${mpi_include_path})
 
 endif(WIN32)
 
@@ -72,7 +72,7 @@ if(UNIX)
          PkgConfig::NETCDF
          PkgConfig::NETCDF_FTN)
 
-    include_directories(${mpich2_path})
+    include_directories(${mpi_include_path})
     
 endif(UNIX)
 
@@ -84,12 +84,12 @@ if (WIN32)
                             PRIVATE
                             "${checkout_src_root}/third_party_open/netcdf/netCDF 4.6.1/lib"
                             "${checkout_src_root}/third_party_open/pthreads/bin/x64"
-                            "${checkout_src_root}/third_party_open/mpich2/x64/lib")
+                            "${mpi_library_path}")
 
     target_link_libraries(${executable_name}                                                   
                             "pthreadVC2.lib"
                             "netcdf.lib"
-                            "fmpich2.lib")
+                            "${mpi_fortran_library}")
 
     # Set linker options
     message(STATUS "Setting target_link_options on windows")

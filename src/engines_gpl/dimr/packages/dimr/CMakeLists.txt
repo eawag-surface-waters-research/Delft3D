@@ -85,7 +85,7 @@ if (WIN32)
                                 ${header_path}
                                 "${dimr_lib_path}/include"
                                 "${checkout_src_root}/third_party_open/expat/x64/include"
-                                "${checkout_src_root}/third_party_open/mpich2/include"
+                                "${mpi_include_path}"
                                 "${checkout_src_root}/third_party_open/netcdf/netCDF 4.6.1/include"
                                 "${checkout_src_root}/third_party_open/pthreads/include/x64")
 
@@ -94,13 +94,12 @@ if (WIN32)
                             PRIVATE
                             "${checkout_src_root}/third_party_open/netcdf/netCDF 4.6.1/lib"
                             "${checkout_src_root}/third_party_open/expat/x64/x64/"
-                            "${checkout_src_root}/third_party_open/mpich2/x64/lib"
+                            "${mpi_library_path}"
                             "${checkout_src_root}/third_party_open/pthreads/bin/x64")
 
     target_link_libraries(${executable_name}    ${oss_dependencies}
-                                                "fmpich2.lib"
+                                                "${mpi_c_library}"
                                                 "libexpat.lib"
-                                                "mpi.lib"
                                                 "pthreadVC2.lib")
 endif(WIN32)
 

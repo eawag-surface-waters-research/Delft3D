@@ -1,4 +1,4 @@
-include_directories(${mpich2_path}/)
+include_directories(${mpi_include_path})
 
 set(library_name deltares_common_mpi)
 get_fortran_source_files(src source_files)

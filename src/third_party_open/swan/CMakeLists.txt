@@ -43,7 +43,7 @@ if (WIN32)
     oss_include_libraries(${library_name} ${oss_dependencies})
     target_link_libraries(${library_name} ${oss_dependencies})
     include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include"
-                        ${mpich2_path})
+                        ${mpi_include_path})
 endif(WIN32)
 
 

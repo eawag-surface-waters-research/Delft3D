@@ -105,20 +105,20 @@ endif(WIN32)
 
 
 if (WIN32)
-    target_include_directories(${library_name} PRIVATE ${mpich2_path})
+    target_include_directories(${library_name} PRIVATE ${mpi_include_path})
 
     # Set linker properties
     message(STATUS "Setting linker properties in windows")
     target_link_directories(${library_name}
                             PRIVATE
-                            "${checkout_src_root}/third_party_open/mpich2/x64/lib"
+                            "${mpi_library_path}"
                             "${checkout_src_root}/third_party_open/netcdf/netCDF 4.6.1/lib"
                             "${checkout_src_root}/third_party_open/pthreads/bin/x64")
 
 
     target_link_libraries(${library_name}
                             "libiomp5md.lib"
-                            "fmpich2.lib"
+                            "${mpi_fortran_library}"
                             "WbeMuuid.lib"
                             "ole32.lib"
                             "oleaut32.lib"
@@ -130,7 +130,6 @@ if (WIN32)
                             "Gdi32.lib"
                             "Winspool.lib"
                             "netcdf.lib"
-                            "fmpich2.lib"
                             "pthreadVC2.lib")
 
     # Set linker options

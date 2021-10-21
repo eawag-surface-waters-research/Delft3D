@@ -2,8 +2,8 @@
 set(library_path "${CMAKE_CURRENT_SOURCE_DIR}/../petsc-3.10.2")
 
 # Include directories that are necessary references
-include_directories(${library_path}/include/)
-include_directories(${mpich2_path}/)
+include_directories(${library_path}/include)
+include_directories(${mpi_include_path})
 
 set(source_path "${library_path}/src")
 set(sources ${source_path}/dm/f90-mod/petscdmmod.F

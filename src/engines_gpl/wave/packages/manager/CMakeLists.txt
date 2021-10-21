@@ -49,7 +49,7 @@ set(oss_dependencies    wave_data
 oss_include_libraries(${library_name} oss_dependencies)
 target_link_libraries(${library_name} ${oss_dependencies})
 
-include_directories(${mpich2_path})
+include_directories(${mpi_include_path})
 
 # Set additional compilation properties, specific for Debug mode
 target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${check_bounds_flag}>")

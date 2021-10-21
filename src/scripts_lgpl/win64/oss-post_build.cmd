@@ -6,6 +6,8 @@ rem ######
 
 setlocal enabledelayedexpansion
 set globalErrorLevel=0
+set oss_mpi=IntelMPI
+rem set oss_mpi=MPICH
 
 echo oss-post_build...
 
@@ -95,6 +97,7 @@ echo configuration       : !configuration!
 echo project             : !project!
 echo compiler_redist_dir : !compiler_redist_dir!
 echo mkl_redist_dir      : !mkl_redist_dir!
+echo oss_mpi             : !oss_mpi!
 
 
 
@@ -169,6 +172,28 @@ goto :endproc
 
 
 rem ===============
+rem === copyMPI
+rem ===============
+:copyMPI
+    set destination=%~1
+    echo "Copy MPI libraries . . ."
+    if !oss_mpi!=="IntelMPI" (
+        call :copyFile "%I_MPI_ONEAPI_ROOT%\env\*.bat"                !destination!
+        call :copyFile "%I_MPI_ONEAPI_ROOT%\bin\*.dll"                !destination!
+        call :copyFile "%I_MPI_ONEAPI_ROOT%\bin\*.exe"                !destination!
+        call :copyFile "%I_MPI_ONEAPI_ROOT%\bin\release\*.dll"        !destination!
+        call :copyFile "%I_MPI_ONEAPI_ROOT%\libfabric\bin\*.dll"      !destination!
+        call :copyFile "%I_MPI_ONEAPI_ROOT%\libfabric\bin\*.dll"      !destination!
+    )
+    if !oss_mpi!=="MPICH" (
+        call :copyFile "!checkout_src_root!\third_party_open\mpich2\x64\bin\*.exe" !destination!
+        call :copyFile "!checkout_src_root!\third_party_open\mpich2\x64\lib\*.dll" !destination!
+    )
+goto :endproc
+
+
+
+rem ===============
 rem === POSTBUILD_ALL
 rem ===============
 :install_all
@@ -236,14 +261,12 @@ rem =============================================================
 
     echo "copyDflowfmDependentRuntimeLibraries . . ."
     
+    call :copyMPI                                                                                                            !dest_share!
     call :copyFile "!checkout_src_root!\third_party_open\netcdf\netCDF 4.6.1\bin\*"                                          !dest_bin!  
     call :copyFile "!checkout_src_root!\third_party_open\pthreads\bin\x64\*.dll"                                             !dest_bin!
-    call :copyFile "!checkout_src_root!\third_party_open\mpich2\x64\bin\*.exe"                                               !dest_bin!
-    call :copyFile "!checkout_src_root!\third_party_open\mpich2\x64\lib\*.dll"                                               !dest_bin!
     call :copyFile "!checkout_src_root!\third_party_open\expat\x64\x64\%configuration%\libexpat.dll"                         !dest_bin!
     call :copyFile "!checkout_src_root!\third_party_open\intelredist\lib\x64\\*.*"                                           !dest_bin!
     call :copyFile "!checkout_src_root!\third_party_open\pthreads\bin\x64\\*.dll"                                            !dest_bin!
-    call :copyFile "!checkout_src_root!\third_party_open\mpich2\x64\lib\\*.dll"                                              !dest_bin!
     call :copyFile "!checkout_src_root!\third_party_open\Tecplot\lib\x64\\*.dll"                                             !dest_bin!
     call :copyFile "!checkout_src_root!\third_party_open\GISInternals\release-1911-x64\bin\xerces-c_3_2.dll"                 !dest_bin!
     call :copyFile "!checkout_src_root!\third_party_open\GISInternals\release-1911-x64\bin\gdal300.dll"                      !dest_bin!
@@ -306,10 +329,11 @@ rem =============================================================
     if !mpi_redist_dir!=="" (
         rem mpi_redist_dir not set
     ) else (
-        set localstring="!mpi_redist_dir!bin\release\impi.dll"
-        call :copyFile !!localstring! !dest_bin!
-        set localstring="!mpi_redist_dir!libfabric\bin\libfabric.dll"
-        call :copyFile !!localstring! !dest_bin!
+        call :copyFile "!mpi_redist_dir!env\*.bat"                !dest_bin!
+        call :copyFile "!mpi_redist_dir!bin\*.dll"                !dest_bin!
+        call :copyFile "!mpi_redist_dir!bin\*.exe"                !dest_bin!
+        call :copyFile "!mpi_redist_dir!bin\release\*.dll"        !dest_bin!
+        call :copyFile "!mpi_redist_dir!libfabric\bin\*.dll"      !dest_bin!
     )
 
 goto :endproc
@@ -322,9 +346,8 @@ rem =============================================================
 :copyDimrDependentRuntimeLibraries
 
     set destination=%~1
+    call :copyMPI                                                                                                       !destination!
     call :copyFile "!checkout_src_root!\third_party_open\pthreads\bin\x64\*.dll"                                        !destination!
-    call :copyFile "!checkout_src_root!\third_party_open\mpich2\x64\bin\*.exe"                                          !destination!
-    call :copyFile "!checkout_src_root!\third_party_open\mpich2\x64\lib\*.dll"                                          !destination!
     call :copyFile "!checkout_src_root!\third_party_open\expat\x64\x64\%configuration%\libexpat.dll"                    !destination!
 
 goto :endproc
@@ -337,10 +360,9 @@ rem =============================================================
 :copyDwaqDependentRuntimeLibraries
 
     set destination=%~1
+    call :copyMPI                                                                                                       !destination!
     call :copyFile "!checkout_src_root!\third_party_open\netcdf\netCDF 4.6.1\bin\*"                                     !destination!  
     call :copyFile "!checkout_src_root!\third_party_open\pthreads\bin\x64\*.dll"                                        !destination!
-    call :copyFile "!checkout_src_root!\third_party_open\mpich2\x64\bin\*.exe"                                          !destination!
-    call :copyFile "!checkout_src_root!\third_party_open\mpich2\x64\lib\*.dll"                                          !destination!
 
 goto :endproc
 
@@ -375,9 +397,8 @@ rem =============================================================
 :copySwanMpiDependentRuntimeLibraries
 
     set destination=%~1
+    call :copyMPI                                                                                                       !destination!
     call :copyFile "!checkout_src_root!\third_party_open\netcdf\netCDF 4.6.1\bin\*"                                     !destination!  
-    call :copyFile "!checkout_src_root!\third_party_open\mpich2\x64\bin\*.exe"                                          !destination!
-    call :copyFile "!checkout_src_root!\third_party_open\mpich2\x64\lib\*.dll"                                          !destination!
 
 goto :endproc
 
@@ -389,10 +410,9 @@ rem =============================================================
 :copyFlow2D3DDependentRuntimeLibraries
 
     set destination=%~1
+    call :copyMPI                                                                                                       !destination!
     call :copyFile "!checkout_src_root!\third_party_open\netcdf\netCDF 4.6.1\bin\*"                                     !destination!  
     call :copyFile "!checkout_src_root!\third_party_open\pthreads\bin\x64\*.dll"                                        !destination!
-    call :copyFile "!checkout_src_root!\third_party_open\mpich2\x64\bin\*.exe"                                          !destination!
-    call :copyFile "!checkout_src_root!\third_party_open\mpich2\x64\lib\*.dll"                                          !destination!
     call :copyFile "!checkout_src_root!\third_party_open\expat\x64\x64\%configuration%\libexpat.dll"                    !destination!
 
 goto :endproc

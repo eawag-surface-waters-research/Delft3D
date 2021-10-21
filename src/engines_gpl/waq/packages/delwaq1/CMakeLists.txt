@@ -120,13 +120,13 @@ if(UNIX)
 endif(UNIX)
 
 if (WIN32)
-    target_include_directories(${executable_name} PRIVATE ${waq_include_path} ${mpich2_path})
+    target_include_directories(${executable_name} PRIVATE ${waq_include_path} ${mpi_include_path})
 
     # Set linker properties
     message(STATUS "Setting linker properties in windows")
     target_link_directories(${executable_name}
                             PRIVATE
-                            "${checkout_src_root}/third_party_open/mpich2/x64/lib"
+                            "${mpi_library_path}"
                             "${checkout_src_root}/third_party_open/netcdf/netCDF 4.6.1/lib"
                             "${checkout_src_root}/third_party_open/pthreads/bin/x64")
 
@@ -141,7 +141,7 @@ if (WIN32)
                             "Gdi32.lib"
                             "Winspool.lib"
                             "netcdf.lib"
-                            "fmpich2.lib"
+                            "${mpi_fortran_library}"
                             "pthreadVC2.lib")
 
     # Set linker options

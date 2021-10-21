@@ -18,7 +18,7 @@ message(STATUS "Configuring '${library_name}' with the following esmfsm include 
 # Note that the CMAKE_CURRENT_SOURCE_DIR has a path to THIS CMakeLists location
 set(include_path ${CMAKE_CURRENT_SOURCE_DIR}/include)
 include_directories(${include_path}
-                    ${mpich2_path}
+                    ${mpi_include_path}
                     ${deltares_common_include_path}
                     ${delftio_include_path}
                     ${esmfsm_module_include_path})

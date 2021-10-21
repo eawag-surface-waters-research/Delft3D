@@ -53,8 +53,15 @@ set sharedir=%D3D_HOME%\%ARCH%\share\bin
 
     rem Run
 set PATH=%dflow2d3ddir%;%sharedir%
+if exist %sharedir%\var.bat (
+    echo executing: "%sharedir%\var.bat"
+                    "%sharedir%\var.bat"
+) else (
+    echo "WARNING: File not found: %sharedir%\var.bat"
+    echo "         Problems may occur when using IntelMPI"
+)
 echo executing: "%sharedir%\mpiexec.exe" -n %numpar% -localonly "%dflow2d3ddir%\d_hydro.exe" %argfile%
-"%sharedir%\mpiexec.exe" -n %numpar% -localonly "%dflow2d3ddir%\d_hydro.exe" %argfile%
+                "%sharedir%\mpiexec.exe" -n %numpar% -localonly "%dflow2d3ddir%\d_hydro.exe" %argfile%
 
 goto end
 

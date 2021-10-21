@@ -20,7 +20,7 @@ if (WIN32)
                             netcdff) 
     oss_include_libraries(${library_name} oss_dependencies)
 
-    include_directories(${mpich2_path})
+    include_directories(${mpi_include_path})
 
     # Define preprocessor definitions     
     target_compile_definitions(${library_name} PRIVATE "WIN32;HAVE_MPI")
@@ -48,7 +48,7 @@ if (UNIX)
          PkgConfig::NETCDF_FTN)
 
     include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include"
-                        ${mpich2_path})
+                        ${mpi_include_path})
 
     # Define preprocessor definitions 
     target_compile_definitions(${library_name} PRIVATE "HAVE_MPI")

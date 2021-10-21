@@ -55,12 +55,27 @@ set (CMAKE_CONFIGURATION_TYPES "Debug;Release" CACHE STRING "" FORCE)
 # Set checkout root
 set(checkout_src_root ${CMAKE_CURRENT_SOURCE_DIR}/..) # This points to the location of OSS/src
 
+# MPI
+set(OSS_MPI "IntelMPI" CACHE STRING "MPI library is IntelMPI")
+#set(OSS_MPI "MPICH" CACHE STRING "MPI library is MPICH")
+
+
 if (WIN32)
     # Set pthreads library
     set(pthreads_path ${checkout_src_root}/third_party_open/pthreads/include/x64) 
     
-    # Set mpich2 library
-    set(mpich2_path ${checkout_src_root}/third_party_open/mpich2/x64/include)
+    # Set mpi_include_path
+    if ("${OSS_MPI}" STREQUAL "IntelMPI")
+        set(mpi_include_path $ENV{I_MPI_ONEAPI_ROOT}/include)
+        set(mpi_library_path $ENV{I_MPI_ONEAPI_ROOT}/lib/$<CONFIG>;$ENV{I_MPI_ONEAPI_ROOT}/lib)
+        set(mpi_fortran_library "impi.lib")
+        set(mpi_c_library "impi.lib;impicxx.lib")
+    else()
+        set(mpi_include_path ${checkout_src_root}/third_party_open/mpich2/x64/include)
+        set(mpi_library_path ${checkout_src_root}/third_party_open/mpich2/x64/lib)
+        set(mpi_fortran_library "fmpich2.lib mpi.lib")
+        set(mpi_c_library "mpi.lib")
+    endif()
     
     # Set the Tecplot path 
     set(tecplot_path ${checkout_src_root}/third_party_open/Tecplot/include)
