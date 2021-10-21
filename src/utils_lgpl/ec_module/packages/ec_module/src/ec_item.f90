@@ -468,8 +468,10 @@ module m_ec_item
                success = .false.
             end if
          end if
-         if (item%quantityPtr%constant) then
-             item%nconnections = 0
+         if (associated(item%quantityPtr)) then
+             if (item%quantityPtr%constant) then
+                 item%nconnections = 0
+             end if
          end if
       end function ecItemUpdateTargetItem
       
