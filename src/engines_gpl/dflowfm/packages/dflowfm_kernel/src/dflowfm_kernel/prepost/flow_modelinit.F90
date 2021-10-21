@@ -297,9 +297,7 @@
  call timstop(handle_extra(18)) ! end waq processes init
 
  call timstrt('Transport init      ', handle_extra(19)) ! transport module
- if ( jatransportmodule.ne.0 ) then
-    call ini_transport()
- end if
+ call ini_transport()
  call timstop(handle_extra(19)) ! end transport module
 
 ! initialize part
@@ -400,8 +398,7 @@
  call timstop(handle_extra(31)) ! end set fcru mor
 
  call flow_initimestep(1, iresult)                   ! 1 also sets zws0
-
-
+ 
  jaFlowNetChanged = 0
 
 
@@ -412,8 +409,7 @@
  endif
  call timstop(handle_extra(33)) ! end Fourier init
 
-
-
+ 
  call timstrt('MDU file pointer    ', handle_extra(34)) ! writeMDUFilepointer
  call mess(LEVEL_INFO, '** Model initialization was successful **')
  call mess(LEVEL_INFO, '* Active Model definition:')! Print model settings in diagnostics file.
@@ -440,6 +436,8 @@
  call writesomeinitialoutput()
 
  iresult = DFM_NOERR
+
+ 
  return
 1234 continue
 !  BEGIN DEBUG
