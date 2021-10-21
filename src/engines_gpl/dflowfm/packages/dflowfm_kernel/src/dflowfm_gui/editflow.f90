@@ -43,8 +43,6 @@
       use gridoperations
       use unstruc_display, only: idisLink, dis_info_1d_link, nhlFlowLink
       use m_inquire_flowgeom
-      use m_transport, only: NUMCONST, ISALT, ITEMP, ISED1, ISEDN, ITRA1, ITRAN, ITRAN0, constituents, itrac2const, const_names, const_units
-
       implicit none
       integer :: MODE, KEY, kb , kt ,k, NL
       integer :: newmode
@@ -215,7 +213,7 @@
          if (jasal > 0) then
             call getkbotktop(nplot,kb , kt )
             k = kb + kplot - 1
-            constituents(isalt,k) = constituents(isalt,k) + 1d0
+            sa1(k) = sa1(k) + 1d0
          endif
       ELSE IF (KEY .EQ. 43 .or. KEY .EQ. 140) THEN     ! -
          CALL KPLOTPLUSMIN(-1)

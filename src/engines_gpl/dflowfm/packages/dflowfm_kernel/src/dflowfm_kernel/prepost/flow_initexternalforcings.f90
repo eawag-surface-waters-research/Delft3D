@@ -295,38 +295,45 @@
  if (allocated(kbndu)) deallocate(  xbndu,ybndu,xy2bndu,zbndu,kbndu,zbndu0)
  if (allocated(zkbndu)) deallocate( zkbndu)
  if (allocated(zbndq)) deallocate(  zbndq)
+ !if (allocated(zbndu_store)) deallocate(zbndu_store)
  if (allocated(sigmabndu)) deallocate(sigmabndu)
  if (allocated(zminmaxu)) deallocate(zminmaxu)
  if (nbndu > 0) then                                 ! similar for u bnd's
     allocate ( xbndu(nbndu), ybndu(nbndu), xy2bndu(2,nbndu), kbndu(n4,nbndu), kdu(nbndu) , stat=ierr)
     call aerr('xbndu(nbndu), ybndu(nbndu), xy2bndu(2,nbndu), kbndu(n4,nbndu), kdu(nbndu)', ierr, nbndu*(n4+5) )
-    if (jased ==1 .or. jased == 2 .and. jaceneqtr == 2) then
+    if (jased > 1 .and. jaceneqtr == 2 .and. .not. stm_included) then
        if (allocated (zkbndu) ) deallocate(zkbndu, kbanu)
-       allocate ( zkbndu(2,nbndu) , stat= ierr    )
-       call aerr('zkbndu(2,nbndu)', ierr, 2*nbndu )
-       allocate ( kbanu (2,nbndu) , stat= ierr    )
-       call aerr('kbanu (2,nbndu)', ierr, 2*nbndu )
+       allocate ( zkbndu(2,nbndu) ,stat= ierr    )
+       call aerr('zkbndu(2,nbndu)',ierr, 2*nbndu )
+       allocate ( kbanu(2,nbndu) ,stat= ierr    )
+       call aerr('kbanu(2,nbndu)',ierr, 2*nbndu )
        kbanu = 0
     endif
-
-    allocate ( zbndu    (nbndu*kmxd) , stat = ierr       )
-    call aerr('zbndu    (nbndu*kmxd)', ierr , nbndu*kmxd )
-    allocate ( zbndu0   (nbndu*kmxd) , stat = ierr       ) ! TODO: Spee/Reyns: the zbndu array was made 3D by Spee, but Reyns's zbndu0 changes have not been updated for this yet.
-    call aerr('zbndu0   (nbndu*kmxd)', ierr , nbndu*kmxd )
-    
-    !allocate ( zbndq    (nbndu*kmxd) , stat = ierr       )
-    !call aerr('zbndq    (nbndu*kmxd)', ierr , nbndu*kmxd )
-
-    allocate ( zbndq    (nbndu) , stat = ierr       )
-    call aerr('zbndq    (nbndu)', ierr , nbndu      )
-    
-    allocate ( zminmaxu (nbndu*2  )  , stat = ierr       )
-    call aerr('zminmaxu (nbndu*2  )' , ierr , nbndu*2    )
-    if (kmx > 0) then                   ! only used in 3D:
-       allocate ( sigmabndu(nbndu*kmxd) , stat = ierr       )
-       call aerr('sigmabndu(nbndu*kmxd)', ierr , nbndu*kmxd )
+    if (kmx >= 1) then
+       allocate ( sigmabndu(kmx*nbndu) , stat=ierr )
+       call aerr('sigmabndu(kmx*nbndu)', ierr, kmx*nbndu )
+       allocate(zbndu(nbndu*kmxd), stat=ierr)
+       call aerr('zbndu(nbndu*kmxd)', ierr, nbndu*kmxd )
+       allocate(zbndu0(nbndu*kmxd), stat=ierr) ! TODO: Spee/Reyns: the zbndu array was made 3D by Spee, but Reyns's zbndu0 changes have not been updated for this yet.
+       call aerr('zbndu0(nbndu*kmxd)', ierr, nbndu*kmxd )
+       allocate(zbndq(nbndu*kmxd), stat=ierr)
+       call aerr('zbndq(nbndu*kmxd)', ierr, nbndu*kmxd )
+    else
+       allocate ( sigmabndu(nbndu) , stat=ierr )
+       call aerr('sigmabndu(nbndu)', ierr, kmx*nbndu )
+       allocate(zbndu(nbndu), stat=ierr)
+       call aerr('zbndu(nbndu)', ierr, nbndu )
+       allocate(zbndu0(nbndu), stat=ierr)
+       call aerr('zbndu0(nbndu)', ierr, nbndu )
+       allocate(zbndq(nbndu), stat=ierr)
+       call aerr('zbndq(nbndu)', ierr, nbndu )
     endif
-  
+    allocate ( zminmaxu(2*nbndu) , stat=ierr )
+    call aerr('zminmaxu(2*nbndu)', ierr, 2*nbndu )
+
+    !allocate ( zbndu_store(nbndu) , stat=ierr   )
+    !call aerr('zbndu_store(nbndu)', ierr, nbndu )
+
     kbndu = 0 ; kdu = 1
     do k = 1, nbndu
        L          = keu(k)
@@ -373,8 +380,8 @@
        ! also allocate 3D-sigma bnd distribution for EC
        allocate ( sigmabnds(kmxd*nbnds) )
        call aerr('sigmabnds(kmxd*nbnds)', ierr, kmxd*nbnds )
-       allocate ( zminmaxs (2*nbnds) )
-       call aerr('zminmaxs (2*nbnds)', ierr, 2*nbnds )
+       allocate ( zminmaxs(2*nbnds) )
+       call aerr('zminmaxs(2*nbnds)', ierr, 2*nbnds )
 
        zbnds   = DMISS ; kbnds = 0 ; kds = 1
        do k = 1, nbnds

@@ -46,7 +46,9 @@ subroutine extract_rho()
 
    do k=1,Ndkx
       rho(k) = constituents(1,k)
-      constituents(1,k) = sa1(k)
+      if ( ISALT.ne.0 ) then
+         constituents(ISALT,k) = sa1(k)
+      endif
    enddo
 
    if (timon) call timstop( ithndl )

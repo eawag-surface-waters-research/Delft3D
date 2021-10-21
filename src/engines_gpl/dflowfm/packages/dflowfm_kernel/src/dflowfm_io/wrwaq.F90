@@ -2577,7 +2577,6 @@ end subroutine waq_wri_vel
 subroutine waq_wri_sal(itim, filenamesal, lunsal)
     use m_flowgeom
     use m_flow
-    use m_transport
     use wrwaq
     implicit none
 !
@@ -2597,7 +2596,7 @@ subroutine waq_wri_sal(itim, filenamesal, lunsal)
     if (waqpar%aggre == 0 .and. waqpar%kmxnxa == 1) then
         do i=1,ndxi
             if ( vol1(i) > 1d-25 ) then
-                waqpar%sal(i) = constituents(isalt, i) 
+                waqpar%sal(i) = sa1(i)
             end if
         end do
     else if (waqpar%aggre == 0 .and. waqpar%aggrel == 0) then
@@ -2605,7 +2604,7 @@ subroutine waq_wri_sal(itim, filenamesal, lunsal)
             call getkbotktopmax(k,kb,kt,ktx)
             do kk = kb, ktx
                 if ( vol1(kk) > 1d-25 ) then
-                    waqpar%sal(waqpar%isaggr(kk)) = constituents(isalt, kk)
+                    waqpar%sal(waqpar%isaggr(kk)) = sa1(kk)
                 end if
             end do
         end do
@@ -2615,7 +2614,7 @@ subroutine waq_wri_sal(itim, filenamesal, lunsal)
             call getkbotktopmax(k,kb,kt,ktx)
             do kk = kb, ktx
                 if ( vol1(kk) > 1d-25 ) then
-                    waqpar%sal(waqpar%isaggr(kk)) = waqpar%sal(waqpar%isaggr(kk)) + constituents(isalt, kk) * vol1(kk)
+                    waqpar%sal(waqpar%isaggr(kk)) = waqpar%sal(waqpar%isaggr(kk)) + sa1(kk) * vol1(kk)
                 end if
             end do
         end do

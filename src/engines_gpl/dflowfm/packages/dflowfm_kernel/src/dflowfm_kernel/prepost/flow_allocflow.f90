@@ -655,11 +655,9 @@ endif
  allocate ( rho (ndkx) , stat= ierr )
  call aerr('rho (ndkx)', ierr, ndkx ) ; rho  = rhomean
  
- if (stm_included) then 
-    if (allocated(rhowat) ) deallocate(rhowat)
-    allocate ( rhowat (ndkx) , stat= ierr )
-    call aerr('rhowat (ndkx)', ierr, ndkx ) ; rhowat  = rhomean
- endif
+ if (allocated(rhowat) ) deallocate(rhowat)
+ allocate ( rhowat (ndkx) , stat= ierr )
+ call aerr('rhowat (ndkx)', ierr, ndkx ) ; rhowat  = rhomean
 
  if (jasal > 0 .or. jatem > 0 .or. jased> 0 .or. stm_included ) then
     if (abs(jabaroctimeint) >= 2) then
@@ -1091,7 +1089,7 @@ endif
  if (jatem > 0) then
     if ( allocated (tem1) ) deallocate (tem1)
     allocate ( tem1(ndkx)  , stat = ierr)
-    call aerr('tem1(ndkx) ', ierr, ndkx)
+    call aerr('tem1(ndkx) ', ierr, 2*ndkx)
     tem1 = temini
     if ( allocated (heatsrc) )  deallocate (heatsrc, heatsrc0)
     allocate ( heatsrc(ndkx), heatsrc0(ndkx) , stat = ierr)

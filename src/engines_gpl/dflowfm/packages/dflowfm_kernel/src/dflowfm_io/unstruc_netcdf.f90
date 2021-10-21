@@ -3959,14 +3959,11 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
              call getkbotktop(kk,kb,kt)
              call getlayerindices(kk, nlayb, nrlay)
              do k = kb,kt
-                work1(k-kb+nlayb,kk) = constituents(isalt,k) 
+                work1(k-kb+nlayb,kk) = sa1(k)
              enddo
           end do
           ierr = nf90_put_var(irstfile, id_sa1, work1(1:kmx,1:ndxi), (/ 1, 1, itim /), (/ kmx, ndxi, 1 /))
        else
-          do k = 1,ndxi
-             sa1(k) = constituents(isalt, k)
-          enddo
           ierr = nf90_put_var(irstfile, id_sa1, sa1, (/ 1, itim /), (/ ndxi, 1 /))
        end if
     endif
@@ -4591,7 +4588,7 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
    use m_mass_balance_areas
    use m_fm_wq_processes
    use m_xbeach_data
-   use m_transportdata
+   use m_transport, only: NUMCONST, itemp, ITRA1, ITRAN, ISED1, ISEDN, constituents, const_names, const_units, id_const
    use m_particles, only: japart, jatracer, part_iconst
    use m_alloc
    use m_waves
@@ -5878,9 +5875,6 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
 
    ! Salinity
    if (jasal > 0 .and. jamapsal > 0) then
-      do k = 1,ndkx
-         sa1(k) = constituents(isalt, k )
-      enddo
       ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_sa1, iLocS, sa1, jabndnd=jabndnd_)
    end if
 
@@ -6897,7 +6891,7 @@ if (jamapsed > 0 .and. jased > 0 .and. stm_included) then
      workx = DMISS
      do k=1,ndkx
         if ( nudge_tem(k).ne.DMISS ) then
-           workx(k) = nudge_sal(k)-constituents(isalt,k)
+           workx(k) = nudge_sal(k)-sa1(k)
         end if
      end do
      ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_nudge_Dsal, UNC_LOC_S3D, workx, jabndnd=jabndnd_)
@@ -6961,7 +6955,7 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
     use m_mass_balance_areas
     use m_fm_wq_processes
     use m_xbeach_data
-    use m_transportdata
+    use m_transport, only: NUMCONST, itemp, ITRA1, ITRAN, ISED1, ISEDN, constituents, const_names, const_units, id_const
     use bedcomposition_module, only: bedcomp_getpointer_integer
     use m_alloc
     use m_missing
@@ -9050,14 +9044,11 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
                 call getkbotktop(kk,kb,kt)
                 call getlayerindices(kk, nlayb, nrlay)
                 do k = kb,kt
-                   work1(k-kb+nlayb, kk) = constituents(isalt, k)
+                   work1(k-kb+nlayb, kk) = sa1(k)
                 enddo
              end do
              ierr = nf90_put_var(imapfile, id_sa1(iid), work1(1:kmx,1:ndxndxi), (/ 1, 1, itim /), (/ kmx, ndxndxi, 1 /))
           else
-             do k = 1, ndxndxi
-                sa1(k) = constituents(isalt, k)
-            enddo
              ierr = nf90_put_var(imapfile, id_sa1(iid), sa1, (/ 1, itim /), (/ ndxndxi, 1 /))
           end if
        endif
@@ -12470,11 +12461,6 @@ subroutine unc_read_map(filename, ierr)
     if (jasal > 0) then
         ierr = get_var_and_shift(imapfile, 'sa1', sa1, tmpvar1, UNC_LOC_S3D, kmx, kstart, um%ndxi_own, it_read, um%jamergedmap, &
                                  um%inode_own, um%inode_merge)
-        do kk = 1,um%ndxi_own
-           do k = kbot(kk), ktop(kk)
-              constituents(isalt,k) = sa1(k)
-           enddo
-        enddo
         call check_error(ierr, 'salinity')
     endif
     call readyy('Reading map data',0.90d0)
@@ -12485,12 +12471,6 @@ subroutine unc_read_map(filename, ierr)
                                  um%inode_own, um%inode_merge)
         call check_error(ierr, 'temperature')
         ! TODO: [TRUNKMERGE]: HK: fill this tem1 into constituents (because below the updateghost will not work now for tem)
-        do kk = 1,um%ndxi_own
-           do k = kbot(kk), ktop(kk)
-              constituents(itemp,k) = tem1(k)
-           enddo
-        enddo
-   
     endif
 
 
@@ -13026,30 +13006,53 @@ subroutine unc_read_map(filename, ierr)
       call update_ghosts(ITYPE_SALL, 1, Ndx, s1, ierr)
       call update_ghosts(ITYPE_SALL, 1, Ndx, s0, ierr)
 
-      if (numconst > 0) then
-   
-          if (kmx == 0) then ! 2D
-             call update_ghosts(ITYPE_Sall , NUMCONST, Ndx , constituents, ierr)
-          else               ! 3D
-            call update_ghosts(ITYPE_Sall3D, NUMCONST, Ndkx, constituents, ierr)
+      if (kmx == 0) then
+      ! 2D
+         if (jasal > 0) then
+            call update_ghosts(ITYPE_Sall, 1, Ndx, sa1, ierr)
+         endif
+         if (jatem > 0) then
+            call update_ghosts(ITYPE_Sall, 1, Ndx, tem1, ierr)
+         end if
+         if (ITRA1 > 0) then
+            ! NOTE: This update sends too much (sa1/tem), but ok.
+            call update_ghosts(ITYPE_Sall, NUMCONST, Ndx, constituents, ierr)
          end if
 
+      else
+      ! 3D
+         if (jasal > 0) then
+            call update_ghosts(ITYPE_Sall3D, 1, Ndkx, sa1, ierr)
+         endif
+         !if (jatem > 0) then
+         !   call update_ghosts(ITYPE_Sall3D, 1, Ndkx, tem1, ierr)
+         !endif
+         !if (ITRA1 > 0 .or. jatem > 0) then
+         if (ITRA1 > 0 .or. jatem > 0 .or. ISED1 > 0) then
+            ! NOTE: This update sends too much (sa1/tem), but ok.
+            ! Sed concentrations automagically included
+            call update_ghosts(ITYPE_Sall3D, NUMCONST, Ndkx, constituents, ierr)
+         end if
       end if
+      !
+      ! Sediment
+      !call update_ghosts()
 
       if ( jatimer.eq.1 ) call stoptimer(IUPDSALL)
 
       !-- U/U3D --
       if ( jatimer.eq.1 ) call starttimer(IUPDU)
-
-      if (kmx == 0) then ! 2D
+      if (kmx == 0) then
+      ! 2D
          call update_ghosts(ITYPE_U, 1, Lnx, u1, ierr)
          call update_ghosts(ITYPE_U, 1, Lnx, u0, ierr)
          call update_ghosts(ITYPE_U, 1, Lnx, q1, ierr)
-      else               ! 3D
+      else
+      ! 3D
          call update_ghosts(ITYPE_U3D, 1, Lnkx, u1, ierr)
          call update_ghosts(ITYPE_U3D, 1, Lnkx, u0, ierr)
          call update_ghosts(ITYPE_U3D, 1, Lnkx, q1, ierr)
-         call update_ghosts(ITYPE_U3D, 1, Lnkx, qa, ierr) 
+         call update_ghosts(ITYPE_U3D, 1, Lnkx, qa, ierr)
       end if
 
       if ( jatimer.eq.1 ) call stoptimer(IUPDU)
@@ -14568,10 +14571,8 @@ subroutine unc_write_flowgeom_filepointer(igeomfile, jabndnd)
        lne1write(L)=lne(1,L)
        lne2write(L)=lne(2,L)
     end do
-
     ierr = nf90_put_var(igeomfile, id_elemlink,     lne1write, count=(/ 1, numl /), start=(/1,1/))
     ierr = nf90_put_var(igeomfile, id_elemlink,     lne2write, count=(/ 1, numl /), start=(/2,1/))
-
     deallocate(lne1write)
     deallocate(lne2write)
 
@@ -14584,7 +14585,7 @@ subroutine unc_write_flowgeom_filepointer(igeomfile, jabndnd)
        ierr = nf90_put_var(igeomfile, id_flowlinktype, (/ 2 /), start = (/ i /))
     end do
     !call readyy('Writing flow geometry data',.90d0)
-  
+
     if (lnx > 0) then
        ! Flow links velocity points
        ierr = nf90_put_var(igeomfile, id_flowlinkxu, xu(1:lnx))

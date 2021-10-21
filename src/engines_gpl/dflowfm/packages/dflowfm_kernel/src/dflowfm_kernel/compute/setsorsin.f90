@@ -97,8 +97,8 @@
              enddo
           endif
           do k = ksrc(2,n), ksrc(3,n)
-              !if (jasal > 0) constituents(isalt,k) = srsn(1+isalt,n)
-              !if (jatem > 0) constituents(itemp,k) = srsn(1+itemp,n)
+              if (jasal > 0) sa1(k)  = srsn(1+isalt,n)
+              if (jatem > 0) constituents(itemp,k) = srsn(1+itemp,n)
               do L = 1,numconst
                  constituents(L,k) = srsn(L+1,n)
               enddo
@@ -151,8 +151,8 @@
              enddo
           endif
           do k = ksrc(5,n), ksrc(6,n)
-             !if (jasal > 0) constituents(isalt,k) = srsn(1+numconst+1+isalt,n)
-             !if (jatem > 0) constituents(itemp,k) = srsn(1+numconst+1+itemp,n)
+             if (jasal > 0) sa1(k)  = srsn(1+numconst+1+isalt,n)
+             if (jatem > 0) constituents(itemp,k) = srsn(1+numconst+1+itemp,n)
              do L = 1,numconst
                 constituents(L,k) = srsn(1+numconst+1+L,n)
              enddo
@@ -219,7 +219,7 @@
           endif
           if (jatransportmodule == 0) then
               if (qsrck > 0) then              ! FROM k to k2
-                 if (jasal > 0) salsrc(k)  = salsrc (k) - qsrck*constituents(isalt, k) 
+                 if (jasal > 0) salsrc(k)  = salsrc (k) - qsrck*sa1 (k)
                  if (jatem > 0) heatsrc(k) = heatsrc(k) - qsrck*constituents(itemp,k)
               else if  (qsrck  < 0) then       ! FROM k2 to k
                  if (jasal > 0) salsrc(k)  = salsrc (k) - qsrck*sasrc(n)
@@ -247,7 +247,7 @@
                 if (jasal > 0) salsrc (k) = salsrc (k) + qsrck*sasrc(n)
                 if (jatem > 0) heatsrc(k) = heatsrc(k) + qsrck*tmsrc(n)
              else if  (qsrck  < 0) then
-                if (jasal > 0) salsrc (k) = salsrc (k) + qsrck*constituents(isalt,k)
+                if (jasal > 0) salsrc (k) = salsrc (k) + qsrck*sa1 (k)
                 if (jatem > 0) heatsrc(k) = heatsrc(k) + qsrck*constituents(itemp,k)
              endif
           endif

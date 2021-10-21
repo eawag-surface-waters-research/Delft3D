@@ -222,6 +222,7 @@ end if
        if (rr < 3000d0 ) then
            call getkbotktop(k,kb,kt)
            do kk = kb+kmx/2,kt
+              !sa1(kk) = sa1(kk) + deltasalinity
               sa1(kk) = 1.1d0*(rr/3000d0)**8 + 33.75d0
            enddo
        endif
@@ -395,12 +396,13 @@ end if
                 if (jatem > 0) then
                    tem1(kk) = 5d0
                 endif
-              else
+                ! if (zws(kk) > -5d0) sa1(kk) = 5d0
+             else
                 sa1(kk) = locsaltmin
                 if (jatem > 0) then
                    tem1(kk) = 10d0
                 endif
-              endif
+          endif
           endif
           sa1(k)  = sa1(k) + vol1(kk)*sa1(kk)
 
@@ -488,8 +490,6 @@ end if
      call coriolistilt(0d0 )
  else if (md_IDENT(1:14) == 'corioliskelvin') then
      call corioliskelvin(0d0)
- else if (md_IDENT(1:9) == 'oceaneddy') then
-     !call oceaneddy(0d0)
 
  else if (index(md_ident,'checkerboard') > 0 ) then     ! v40.net, v100.net
 
@@ -533,6 +533,16 @@ end if
        if (jasal > 0) then
            if (yy > 0.20 .and. yy < 0.30) sa1(k) = 30.
        endif
+           !if (xx < 0.5d0 .and. yy < 0.5d0) then
+       !    xx = 2*xx
+       !    yy = 2*yy
+       !    xx = xx - 0.5d0
+       !    yy = yy - 0.5d0
+       !    rr = sqrt( xx*xx + yy*yy)
+       !    sa1(k) = amp*( 1 + cos(2*pin*rr) )
+       ! else
+       !    sa1(k) = 0
+       ! endif
     enddo
 
     !WIM s0 = s1
@@ -644,11 +654,15 @@ end if
        x0 = -180 ; y0 = 0 ; rmx = 350
        do k = 1,ndx
           s1(k) = dep
+          ! if (xz(k) > -251 .and. xz(k) < -50 .and. yz(k) > -100 .and. yz(k) < 100) then
+          !if (xz(k) > -351 .and. xz(k) < -50 .and. yz(k) > -150 .and. yz(k) < 150) then
+          !   sa1(k) = 10d0
+          !endif
           dxx = xz(k) - x0 ; dyy = yz(k) - y0
           rr  = sqrt(dxx*dxx + dyy*dyy)
           if (rr < 0.5d0*rmx) then
-             !sa1(k) = 5d0 + 5d0*cos(twopi*rr/rmx)
-            sa1(k) = 10d0
+             sa1(k) = 5d0 + 5d0*cos(twopi*rr/rmx)
+             sa1(k) = 10d0
           endif
        enddo
 
@@ -1420,59 +1434,49 @@ end if
     endif
  endif
 
- if (jasal > 0) then   
-    if (kmx > 0 .and. inisal2D >= 1 .and. jarestart.eq.0 ) then
-       do kk = 1,ndx
-          call getkbotktop(kk,kb,kt)
-          if (inisal2D == 2) then
-             do k = kb, kt
-                if (kt == kb) then
-                   rr  = 1d0
-                else
-                   rr  = dble(k-kb)/dble(kt-kb)
-                endif
-                sa1(k) = (1d0 - rr)*sa1(kk) + rr*satop(kk)
-             enddo
-          else if (inisal2D == 3) then          ! uniform below is specified
-             do k = kb, kt
-                zz = 0.5d0*( zws(k) + zws(k-1) )
-                if (zz < uniformsalinitybelowz .and. sabot(kk) .ne. dmiss) then
-                   sa1(k) = sabot(kk)
-                else
-                   sa1(k) = sa1(kk)
-                endif
-             enddo
-          endif
-          do k = kt+1, kb+kmxn(kk)-1
-             sa1(k) = sa1(max(kt,kb))
-          enddo
-       enddo
-
-       if ( allocated(satop) ) then
-          deallocate (satop)
-       endif
-       if ( allocated(sabot) ) then
-          deallocate (sabot)
-       endif
-    endif
-    
-    do k = 1,ndkx
-       sa1(k) = max( 0d0,  sa1(k) )
-    enddo
-
-    if (Sal0abovezlev .ne. dmiss) then
-        do kk = 1,ndx
-          call getkbotktop(kk,kb,kt)
+ if (jasal > 0 .and. kmx > 0 .and. inisal2D >= 1 .and. jarestart.eq.0 ) then
+    do kk = 1,ndx
+       call getkbotktop(kk,kb,kt)
+       if (inisal2D == 2) then
           do k = kb, kt
-             if (zws(k) > Sal0abovezlev) then
-                 sa1(k) = 0d0
+             if (kt == kb) then
+                rr  = 1d0
+             else
+                rr  = dble(k-kb)/dble(kt-kb)
+             endif
+             sa1(k) = (1d0 - rr)*sa1(kk) + rr*satop(kk)
+          enddo
+       else if (inisal2D == 3) then          ! uniform below is specified
+          do k = kb, kt
+             zz = 0.5d0*( zws(k) + zws(k-1) )
+             if (zz < uniformsalinitybelowz .and. sabot(kk) .ne. dmiss) then
+                sa1(k) = sabot(kk)
+             else
+                sa1(k) = sa1(kk)
              endif
           enddo
-        enddo
+       endif
+       do k = kt+1, kb+kmxn(kk)-1
+          sa1(k) = sa1(max(kt,kb))
+       enddo
+    enddo
+    sa1 = max(0d0, sa1)
+    if ( allocated(satop) ) then
+       deallocate (satop)
+    endif
+    if ( allocated(sabot) ) then
+       deallocate (sabot)
     endif
 
-    salmax = maxval(sa1)
-  
+ endif
+
+ if (kmx > 0 .and. initem2D > 0 ) then
+    do kk = 1,ndx
+       call getkbotktop(kk,kb,kt)
+       do k = kb, kt
+           tem1(k) = tem1(kk)
+       enddo
+    enddo
  endif
 
  if (kmx > 0 .and. inised2D > 0 ) then
@@ -1488,7 +1492,22 @@ end if
     inised2D = 0
  endif
 
- ! When restart, initialize salinity, temperature, sed on waterlevel boundaries
+ if (Sal0abovezlev .ne. dmiss) then
+     do kk = 1,ndx
+       call getkbotktop(kk,kb,kt)
+       do k = kb, kt
+          if (zws(k) > Sal0abovezlev) then
+              sa1(k) = 0d0
+          endif
+       enddo
+     enddo
+ endif
+
+ if (jasal > 0) then
+    salmax = maxval(sa1)
+ endif
+
+  ! When restart, initialize salinity, temperature, sed on waterlevel boundaries
  ! NOTE: keep this identical to how it's done at the end of transport()
  ! hk: and, make sure this is done prior to fill constituents
  if (jarestart > 0) then
@@ -1498,7 +1517,7 @@ end if
             cycle
         endif
         do L = Lb, Lt
-           if (q1(L) <= 0d0) then
+           if (q1(L) < 0) then
               kb = ln(1,L) ; ki = ln(2,L)
               if (jasal > 0) then
                   sa1(kb)  = sa1(ki)
@@ -1516,27 +1535,19 @@ end if
     enddo
  endif
 
- if ( janudge.eq.1 ) then  ! and here last actions on sal/tem nudging, before we set rho
-    call set_nudgerate()
-    if ( jainiwithnudge > 0 ) then
-       call set_saltem_nudge()
-       if (jainiwithnudge == 2) then
-           janudge = 0
-           deallocate (nudge_tem, nudge_sal, nudge_rate , nudge_time)
-       endif
-    end if
- end if
+ ! initialize constituents
+ if ( NUMCONST.gt.0 ) then
+     call fill_constituents(0)   ! called from initialise
+     if (jatem > 0) then
+         do k = 1,ndkx
+            constituents(itemp,k) = tem1(k)
+         enddo
+        ! deallocate(tem1)
+     endif
+ endif
 
- if (jasal > 0) then ! used to be in fill_constituents each step
-    do k = 1,ndkx
-       constituents(isalt,k) = max( 0d0,  sa1(k) )
-    enddo
- endif 
-
- if (itemp > 0) then ! used to be in fill_constituents each step
-    do k = 1,ndkx
-       constituents(itemp,k) =  tem1(k)
-    enddo
+ if (jarestart == 1 .and. (jasal > 0 .or. jatem > 0  .or. jased > 0)) then
+    jainirho = 1
  endif
 
  if (jainirho == 1) then
@@ -1547,7 +1558,7 @@ end if
        enddo
        do k = kt+1 , kb + kmxn(kk) - 1
           rho(k) = rho(kt)
-          if (stm_included) rhowat(k) = rhowat(kt)   ! UNST-5170
+          rhowat(k) = rhowat(kt)   ! UNST-5170
        enddo
     enddo
  endif
@@ -1556,13 +1567,24 @@ end if
     rho0 = rho
  endif
 
+
  if (jaFlowNetChanged == 1 .or. nodtot /= ndx .or. lintot /= lnx) then
-    call reducept(Ndx,Ndxi,Lnx)                              ! also alloc arrays for reduce
-    if (icgsolver == 10) then
-       call alloc_jacobi(ndx,lnx)
-    endif
+       call reducept(Ndx,Ndxi,Lnx)                              ! also alloc arrays for reduce
+       if (icgsolver == 10) then
+          call alloc_jacobi(ndx,lnx)
+       endif
  end if
 
+ if ( janudge.eq.1 ) then
+    call set_nudgerate()
+    if ( jainiwithnudge > 0 ) then
+       call set_saltem_nudge()
+       if (jainiwithnudge == 2) then
+           janudge = 0
+           deallocate (nudge_tem, nudge_sal, nudge_rate , nudge_time)
+       endif
+    end if
+ end if
 
 ! BEGIN DEBUG
 ! if ( jampi.eq.1 ) then

@@ -116,11 +116,6 @@
    integer, external         :: read_commandline
    integer, external         :: flow_modelinit
 
-   integer                   :: mklok
-   double precision          :: tstartall , tstopall ! just checking... 
-
-   call klok(tstartall)
-
 #if HAVE_DISPLAY==0
 ! For dflowfm-cli executable, switch off all GUI calls here at *runtime*,
 ! by setting jaGUI = 0.
@@ -137,9 +132,6 @@
    call mpi_init(ierr)
    call mpi_comm_rank(DFM_COMM_DFMWORLD,my_rank,ierr)
    call mpi_comm_size(DFM_COMM_DFMWORLD,numranks,ierr)
-
-   write(*,*) ' my_rank, numranks ', my_rank, numranks
-
    ja_mpi_init_by_fm = 1
 
    if ( numranks.le.1 ) then
@@ -264,6 +256,7 @@
        call dobatch()
     endif 
     
+
     if ( md_japartition.eq.1 ) then
        if (network%loaded .and. md_partugrid /= 1) then
           md_partugrid = 1
@@ -359,11 +352,6 @@
            inquire (file = trim(md_ident)//'.cfg', exist = jawel)
            if (jawel) then 
               call load_displaysettings(trim(md_ident)//'.cfg')
-           else 
-               inquire (file = 'unstruc.cfg', exist = jawel)
-               if (jawel) then 
-                   call load_displaysettings('unstruc.cfg')
-               endif
            endif
    
            CALL DRAWNU(KEY) ! Draw model for the first time
@@ -425,10 +413,5 @@
 !  finalize before exit
    call partition_finalize()
 
-   call klok(tstopall)
-
-   !call newfil(mklok, 'wallclock')
-   !write(mklok,*) tstopall - tstartall, ' s'
-   
 
    end program unstruc

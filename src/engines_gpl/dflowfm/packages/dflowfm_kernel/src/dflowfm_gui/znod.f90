@@ -39,7 +39,7 @@
  use m_missing
  use m_partitioninfo
  use m_xbeach_data !, only: ee1, rr, ee1sum, H, Fx_cc, Fy_cc
- use m_transportdata
+ use m_transport, only: constituents, itemp, NUMCONST, ICONST_CUR
  use m_missing
  use m_observations
  use bedcomposition_module
@@ -100,7 +100,7 @@
  else if (nodval == 10) then
    znod = ucy(k)
  else if (nodval == 11) then
-    if (jasal > 0) znod = constituents(isalt, k)
+    if (jasal > 0) znod = sa1(k)
  else if (nodval == 12) then
     if (jatem > 0) then
        if (jafahrenheit == 0) then

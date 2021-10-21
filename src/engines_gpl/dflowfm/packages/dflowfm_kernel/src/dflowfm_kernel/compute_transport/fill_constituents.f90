@@ -64,9 +64,9 @@ subroutine fill_constituents(jas) ! if jas == 1 do sources
    const_sink = 0d0
 
    do k=1,Ndkx
-      !if ( ISALT.ne.0 ) then
-      !    constituents(ISALT,k) = sa1(k)
-      !end if
+      if ( ISALT.ne.0 ) then
+         constituents(ISALT,k) = sa1(k)
+      end if
 
       !if ( ITEMP.ne.0 ) then
       !    constituents(ITEMP,k) = tem1(k)

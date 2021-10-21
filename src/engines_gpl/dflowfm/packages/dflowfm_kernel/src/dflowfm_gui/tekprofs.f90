@@ -44,8 +44,7 @@
   USE UNSTRUC_DISPLAY
   use m_waves, only : ustokes
   use m_sediment, only : jased, sed
-  use m_transport !, only: NUMCONST, ISALT, ITEMP, ISED1, ISEDN, ITRA1, ITRAN, ITRAN0, constituents, itrac2const, const_names, const_units
-
+  use m_transport, only : constituents, numconst, itemp, iconst_cur, const_names, NUMCONST, ISED1, ISEDN
   implicit none
 
 
@@ -312,9 +311,8 @@
 
   if (jasal > 0) then
 
-     vmin =  1d6 ; vmin = min(vmin, minval(constituents(iconst_cur,kb:kt)) )
-     vmax = -1d6 ; vmax = max(vmax, maxval(constituents(iconst_cur,kb:kt)) , vmin+1d-5 )
-     call TEKFN(6,11, 1, constituents(isalt, kb:kt) , hcref  , km, vmin, vmax, zmin, zmax, KLPROF, 'sal' , 1, 2 , 0d0,kplot)
+      call getvminmax(6,vmin,vmax,sa1(kb:), kt-kb+1)
+      call TEKFN(6,11, 1, sa1(kb:kt)  , hcref  , km, vmin, vmax, zmin, zmax, KLPROF, 'sal' , 1, 2 , 0d0,kplot)
 
     ! do k = kb,kt-1
     !    kk     = k-kb+1
@@ -432,7 +430,7 @@
             if (kk.lt. 1) cycle
             call getkbotktop(kk,kb,kt)
             if (kt > kb) then
-               call TEKFN(n,2*n-1, 1, constituents(isalt,kb:kt) , hcref  , km, vmin, vmax, zmin, zmax, KLPROF, 'sal' , 0, 2 , 0d0,kplot)
+               call TEKFN(n,2*n-1, 1, sa1(kb:kt)  , hcref  , km, vmin, vmax, zmin, zmax, KLPROF, 'sal' , 0, 2 , 0d0,kplot)
             endif
          enddo
       else if (ndraw(35) == 3) then
@@ -441,7 +439,7 @@
             if (kk == 0) cycle
             call getkbotktop(kk,kb,kt)
             if (kt > kb) then
-               call TEKFN(n,2*n-1, 1, constituents(isalt,kb:kt) , hcref  , km, vmin, vmax, zmin, zmax, KLPROF, 'sal' , 0, 2 , 0d0,kplot)
+               call TEKFN(n,2*n-1, 1, sa1(kb:kt)  , hcref  , km, vmin, vmax, zmin, zmax, KLPROF, 'sal' , 0, 2 , 0d0,kplot)
             endif
          enddo
       endif

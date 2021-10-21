@@ -116,7 +116,7 @@ subroutine ini_transport()
       jalimitdtdiff = 0
    end select
 
-   if (numconst > 0) call alloc_transport(.false.)
+   call alloc_transport(.false.)
 
    if ( ISALT.gt.0 ) then
       if ( javasal == 6) then

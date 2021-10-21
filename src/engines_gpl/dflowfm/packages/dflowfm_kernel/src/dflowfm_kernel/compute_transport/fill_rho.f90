@@ -49,7 +49,6 @@ subroutine fill_rho()
    if (timon) call timstrt ( "fill_rho", ithndl )
 
    do k=1,Ndkx
-      sa1(k) = constituents(1,k)
       constituents(1,k) = rho(k)
    enddo
 

@@ -51,9 +51,9 @@ subroutine extract_constituents()
    if (timon) call timstrt ( "extract_constituents", ithndl )
 
    do k=1,Ndkx
-      !if ( ISALT.ne.0 ) then
-      !   sa1(k) = constituents(ISALT,k)
-      !end if
+      if ( ISALT.ne.0 ) then
+         sa1(k) = constituents(ISALT,k)
+      end if
 
       !if ( ITEMP.ne.0 ) then
          ! tem1(k) = constituents(ITEMP,k)
@@ -105,17 +105,20 @@ subroutine extract_constituents()
       do kk = 1, Ndxi
          if (salimax .ne. dmiss) then
             do k = kbot(kk),ktop(kk)
-               if (constituents(isalt,k) > salimax) then
-                   constituents(isalt,k) = salimax
-                   limmax  = limmax + 1
+               if (sa1(k) > salimax) then
+                  sa1(k)  = salimax
+                  limmax  = limmax + 1
                endif
             enddo
          endif
 
          do k = kbot(kk),ktop(kk)
-            if (constituents(isalt,k) < salimin) then
-               dmin    = min(dmin,constituents(isalt,k))
-               constituents(isalt,k) = salimin
+            if (sa1(k) < salimin) then
+               !if (sa1(k) < -1d-4) then
+               !   call adddot( xz(kk) , yz(kk), sa1(k) )
+               !endif
+               dmin    = min(dmin,sa1(k))
+               sa1(k)  = salimin
                limmin  = limmin + 1
             endif
          enddo

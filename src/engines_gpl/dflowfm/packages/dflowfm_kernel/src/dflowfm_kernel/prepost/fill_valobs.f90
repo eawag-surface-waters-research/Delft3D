@@ -316,7 +316,7 @@ subroutine fill_valobs()
                valobs(IPNT_UCZ+klay-1,i)  = ucz(kk)
             end if
             if ( jasal.gt.0 ) then
-               valobs(IPNT_SA1+klay-1,i)  = constituents(isalt, kk)
+               valobs(IPNT_SA1+klay-1,i) = sa1(kk)
             end if
             if ( jatem.gt.0 ) then
                valobs(IPNT_TEM1+klay-1,i) = constituents(itemp, kk)

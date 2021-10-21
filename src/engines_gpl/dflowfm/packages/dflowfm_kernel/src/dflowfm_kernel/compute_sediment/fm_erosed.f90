@@ -67,7 +67,7 @@
    use unstruc_channel_flow, only: network, t_branch, t_node, nt_LinkNode
    use message_module, only: write_error
    use MessageHandling, only: LEVEL_INFO, LEVEL_FATAL, mess, setmessage
-   use m_transport, only: ised1, numconst, constituents, isalt, itemp
+   use m_transport, only: ised1, numconst, constituents
    use dfparall
    use m_alloc
    use m_missing
@@ -744,12 +744,12 @@
       ! sa0 and tem0 have no real meaning, sa1 and tem1 before transport are at the old time-level,
       ! while after transport they are at the new time-level
       if (jasal > 0) then
-         salinity = constituents(isalt, kbed)                            ! r0(nm, kbed, lsal)
+         salinity =  sa1(kbed)                            ! r0(nm, kbed, lsal)
       else
          salinity = backgroundsalinity
       endif
       if (jatem > 0) then
-         temperature =  constituents(itemp,kbed)                         ! r0(nm, kbed, ltem)
+         temperature =  tem1(kbed)                        ! r0(nm, kbed, ltem)
       else
          temperature = backgroundwatertemperature
       endif

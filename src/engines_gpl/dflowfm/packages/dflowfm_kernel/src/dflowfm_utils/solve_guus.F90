@@ -519,9 +519,7 @@ endif
 
  call timstrt('Conjugate Gradient solver', handle_sol)
  
- if ( jatimer.eq.1 ) then 
-     call starttimer(IGAUSSEL)
- endif
+ if ( jatimer.eq.1 ) call starttimer(IGAUSSEL)
 
  if (jajipjan >= 2) then 
     call gauss_eliminationjipjan( )
@@ -529,9 +527,7 @@ endif
     call gauss_elimination ( )
  endif
     
- if ( jatimer.eq.1 ) then 
-     call stoptimer(IGAUSSEL)
- endif
+ if ( jatimer.eq.1 ) call stoptimer(IGAUSSEL)
  
  if ( jatimer.eq.1 ) call starttimer(ICG)
  
