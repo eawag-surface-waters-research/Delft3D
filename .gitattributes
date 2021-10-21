@@ -448,6 +448,7 @@ src/buildvs17fm.cmd -text
 src/clean.cmd -text
 src/clean.sh -text
 src/cmake/CMakeLists.txt -text
+src/cmake/README -text svneol=unset#application/octet-stream
 src/cmake/compiler_options/intel.cmake -text
 src/cmake/compiler_options/intel_allchecks.cmake -text
 src/cmake/configurations/all_configuration.cmake -text
@@ -465,7 +466,6 @@ src/cmake/configurations/swan_configuration.cmake -text
 src/cmake/configurations/tests_configuration.cmake -text
 src/cmake/doc/CMake[!!-~]Inventory.xlsx -text
 src/cmake/doc/CMake_for_OSS_tree_[!!-~]project_report.docx -text
-src/cmake/doc/README -text svneol=unset#application/octet-stream
 src/cmake/doc/Readme-CMake-GUI.docx -text
 src/cmake/functions.cmake -text
 src/cmake/install_dimr/CMakeLists.txt -text
