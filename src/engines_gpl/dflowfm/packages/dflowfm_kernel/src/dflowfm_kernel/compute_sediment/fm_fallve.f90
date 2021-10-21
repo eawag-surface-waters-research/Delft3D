@@ -45,7 +45,7 @@
    use m_flowgeom, only: ndx, ln, kfs,bl, wcl, lnx
    use m_flow    , only: ifrctypuni, z0, hs, iturbulencemodel,kbot,ktop,kmx,zws,ucxq,ucyq,sa1,tem1,ucx,ucy,ucz,ndkx,s1,z0urou,ifrcutp,hu,frcu,ucx_mor,ucy_mor
    use m_flowparameters, only: jasal, jatem, jawave, epshs
-   use m_transport, only: constituents, ised1
+   use m_transport, only: constituents, ised1, isalt, itemp
    use m_turbulence, only:turkinepsws, rhowat
    use morphology_data_module
    use message_module, only: write_error
@@ -196,7 +196,7 @@
       end do
    end if
 
-   do ll = 1, lsed
+   do ll = 1, lsed   
       !
       do i = 1, npar
          localpar(i) = par_settle(i,ll)
@@ -216,17 +216,20 @@
                !
                ! Input parameters are passed via dll_reals/integers/strings-arrays
                !
+
+               ! HK: is this better than first establish fallvelocity in a cell, next interpolate to interfaces?
+
                tka = zws(kk+1) - zws(kk) ! thickness above
                tkb = zws(kk) - zws(kk-1)   ! thickness below
                tkt = tka+tkb
                if (jasal > 0) then
-                  salint = max(0.0_fp, (tka*sa1(kk+1) + tkb*sa1(kk)  ) / tkt )
+                  salint = max(0.0_fp, (tka*constituents(isalt,kk+1) + tkb*constituents(isalt,kk)  ) / tkt )
                else
                   salint = backgroundsalinity
                endif
                !                !
                if (jatem > 0) then
-                  temint = (  tka*tem1(kk+1) + tkb*tem1(kk)  ) / tkt
+                  temint =             (tka*constituents(itemp,kk+1) + tkb*constituents(itemp,kk)  ) / tkt
                else
                   temint = backgroundwatertemperature
                endif
@@ -316,13 +319,13 @@
             endif
          else                           ! 2D
             if (jasal > 0) then
-               salint = max(0d0, sa1(k))
+               salint = max(0d0, constituents(isalt,k))
             else
                salint = backgroundsalinity
             endif
             !             !
             if (jatem > 0) then
-               temint = tem1(k)
+               temint = constituents(itemp,k)
             else
                temint = backgroundwatertemperature
             endif

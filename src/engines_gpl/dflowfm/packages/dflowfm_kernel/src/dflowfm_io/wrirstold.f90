@@ -37,6 +37,7 @@
    use unstruc_model
    use m_sediment, only: jaceneqtr
    use unstruc_netcdf, only: unc_write_net
+   use m_transport
    implicit none
    INTEGER :: MOUT, k, kk, kb, kt, l
 
@@ -66,7 +67,7 @@
       call newfil(mout, trim(getoutputdir())//trim(md_ident)//'_'//'_salbot.xyz')
       do kk = 1,ndxi
          call getkbotktop(kk,kb,kt)
-         write(mout,*) xz(kk), yz(kk), sa1(kb)
+         write(mout,*) xz(kk), yz(kk), constituents(isalt, kb)
       enddo
       call doclose (mout)
 
@@ -74,7 +75,7 @@
          call newfil(mout, trim(getoutputdir())//trim(md_ident)//'_'//'_saltop.xyz')
          do kk = 1,ndxi
             call getkbotktop(kk,kb,kt)
-            write(mout,*) xz(kk), yz(kk), sa1(kt)
+            write(mout,*) xz(kk), yz(kk), constituents(isalt, kt)
          enddo
          call doclose (mout)
       endif

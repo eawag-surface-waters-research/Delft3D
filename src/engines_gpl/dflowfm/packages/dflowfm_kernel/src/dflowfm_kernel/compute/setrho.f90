@@ -35,7 +35,7 @@ use m_physcoef
 use m_flow
 use m_sediment
 use sediment_basics_module, only: SEDTYP_NONCOHESIVE_TOTALLOAD
-use m_transport, only: constituents, itemp, ISED1, ISEDN
+use m_transport
 use m_turbulence, only: rhowat
 
 implicit none
@@ -44,25 +44,24 @@ double precision, external :: densfm
 double precision           :: rhom, sal, temp
 
 if (jasal > 0) then
-   saL = max(0d0, sa1(k))
+   saL = max(0d0, constituents(isalt, k))
 else
    saL = backgroundsalinity
 endif
 
 if (jatem > 0) then
-   temp  = max(0d0, constituents(itemp,k))
+   temp = max(0d0, constituents(itemp,k))
 else
    temp = backgroundwatertemperature
 endif
 
 setrho = densfm(sal,temp)
 
-rhom = setrho                      ! UNST-5170 for mor, only use salt+temp, not sediment effect
-rhom = min(rhom, 1250d0)           ! check overshoots at thin water layers
-rhom = max(rhom,  990d0)           !
-rhowat(k) = rhom
-
 if (jased > 0 .and. stm_included) then
+   rhom = setrho                      ! UNST-5170 for mor, only use salt+temp, not sediment effect
+   rhom = min(rhom, 1250d0)           ! check overshoots at thin water layers
+   rhom = max(rhom,  990d0)           !
+   rhowat(k) = rhom
    if (stmpar%morpar%densin) then     ! sediment effects
       l = ISED1
       rhom = setrho
@@ -73,14 +72,14 @@ if (jased > 0 .and. stm_included) then
          end if
       end do
    end if
-else if (jaseddenscoupling > 0) then ! jased < 4
+else if (jaseddenscoupling > 0) then  ! jased < 4
    rhom = setrho
    do j = 1,mxgr
       setrho = setrho + sed(j,k)*(rhosed(j) - rhom)/rhosed(j)
    enddo
 end if
 
-setrho = min(setrho, 1250d0)           ! check overshoots at thin water layers
-setrho = max(setrho,  990d0)           !
+setrho = min(setrho, 1250d0)          ! check overshoots at thin water layers
+setrho = max(setrho,  990d0)          !
 
 end function setrho

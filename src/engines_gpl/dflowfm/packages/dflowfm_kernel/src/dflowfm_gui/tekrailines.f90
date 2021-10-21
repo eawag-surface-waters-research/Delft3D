@@ -37,6 +37,7 @@
  use m_sferic
  use m_missing
  use unstruc_display
+ use m_transport
  implicit none
  integer          :: nx, ncol, jaall, ITYP
  integer          :: r, L, k1,k2
@@ -68,8 +69,8 @@
        zz1 = bl(k1)
        zz2 = bl(k2)
     else if (ityp == 3) then
-       zz1 = sa1(k1)
-       zz2 = sa1(k2)
+       zz1 = constituents(isalt,k1)
+       zz2 = constituents(isalt,k2)
     else if (ityp == 4) then
        zz1 = pgrw(k1)
        zz2 = pgrw(k2)

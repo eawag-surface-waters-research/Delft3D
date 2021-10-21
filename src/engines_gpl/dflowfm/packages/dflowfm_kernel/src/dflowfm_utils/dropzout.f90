@@ -34,6 +34,7 @@
  use m_polygon
  use m_flowgeom
  use m_flow
+ use m_transportdata
  use m_missing, only: dmiss, jins
  use geometry_module, only: dbpinpol
  implicit none
@@ -57,10 +58,10 @@
              kb = kb + kplot - 1
           endif
           do k = kb,kt
-             sam1tot = sam1tot - sa1(k)*vol0(k)
-             sa1(k)  = max(0d0, sa1(k) + dropstep)
-             sam1tot = sam1tot + sa1(k)*vol1(k)
-             call isocol(sa1(n),ncol)
+             sam1tot = sam1tot - constituents(isalt,k)*vol0(k)
+             constituents(isalt,k)  = max(0d0, constituents(isalt,k) + dropstep)
+             sam1tot = sam1tot + constituents(isalt,k)*vol1(k)
+             call isocol(constituents(isalt,n),ncol)
              nn = size( nd(n)%x )
              call pfiller(nd(n)%x, nd(n)%y, nn, ncol, 30)
           enddo
@@ -72,10 +73,10 @@
     n = nplot
     call getkbotktop(n,kb,kt)
     k = kb + kplot - 1
-    sam1tot = sam1tot - sa1(k)*vol0(k)
-    sa1(k)  = max(0d0, sa1(k) + dropstep)
-    sam1tot = sam1tot + sa1(k)*vol1(k)
-    call isocol(sa1(n),ncol)
+    sam1tot = sam1tot - constituents(isalt,k)*vol0(k)
+    constituents(isalt,k)  = max(0d0, constituents(isalt,k) + dropstep)
+    sam1tot = sam1tot + constituents(isalt,k)*vol1(k)
+    call isocol(constituents(isalt,n),ncol)
     nn = size( nd(n)%x )
     call pfiller(nd(n)%x, nd(n)%y, nn, ncol, 30)
  endif

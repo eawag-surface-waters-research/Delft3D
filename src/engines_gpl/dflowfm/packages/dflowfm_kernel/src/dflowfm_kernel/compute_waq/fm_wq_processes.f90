@@ -1327,10 +1327,10 @@
 !
    subroutine copy_data_from_fm_to_wq_processes(time)
       use m_flowgeom,       only: Ndxi, ba
-      use m_flow,           only: vol1, sa1, tem1, ucx, ucy
+      use m_flow,           only: vol1, ucx, ucy
       use m_flowtimes,      only: irefdate, tunit
       use m_fm_wq_processes
-      use m_transport,      only: constituents, itemp
+      use m_transport,      only: constituents, itemp, isalt
       use m_sferic,         only: twopi, rd2dg
       use m_wind
       use m_meteo
@@ -1421,14 +1421,14 @@
       if ( isfsal.gt.0 ) then
          ipoisal = arrpoi(iisfun) + (isfsal-1)*noseg
          do k=0,ktx-kbx
-            pmsa(ipoisal + k) = sa1(k+kbx) ! should be changed to constituents(isalt, k+kbx) in the future
+            pmsa(ipoisal + k) = constituents(isalt,k+kbx) 
          end do
       end if
 
       if ( isftem.gt.0 ) then
          ipoitem = arrpoi(iisfun) + (isftem-1)*noseg
          do k=0,ktx-kbx
-            pmsa(ipoitem + k) = constituents(itemp, k+kbx) ! tem1 is not always up to date!
+            pmsa(ipoitem + k) = constituents(itemp, k+kbx) 
          end do
       end if
 

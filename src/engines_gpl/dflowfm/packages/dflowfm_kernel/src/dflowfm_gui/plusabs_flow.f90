@@ -34,6 +34,8 @@
  Subroutine plusabs_flow(numchoice)
  use m_flow
  use m_flowgeom
+ use m_transport, only: NUMCONST, ISALT, ITEMP, ISED1, ISEDN, ITRA1, ITRAN, ITRAN0, constituents, itrac2const, const_names, const_units
+
  implicit none
 
  integer :: numchoice, k, kk, kb, kt
@@ -48,20 +50,21 @@
 
  if (numchoice == 1) then
     call plusabsd(xz,yz,yz,ndx,key,s1); s1=max(s1,bl)
- else if (numchoice == 2) then
+ else if (numchoice == 2 .and. jasal >0)  then
     if (.not. allocated (sa1) ) then
-       CALL qnerror('first reinitialise with jasal=1',' ',' ')
-       return
+       allocate(sa1(ndx))
     endif
+    do kk = 1,ndx
+       sa1(kk) = constituents(isalt,kk)
+    enddo
     call plusabsd(xz,yz,yz,ndx,key,sa1)
-    if (kmx > 0) then
-       do kk = 1,ndx
-          call getkbotktop(kk,kb,kt)
-          do k = kb,kt
-             sa1(k) = sa1(kk)
-          enddo
+    do kk = 1,ndx
+       call getkbotktop(kk,kb,kt)
+       do k = kb,kt
+          constituents(isalt,k) = sa1(kk)
        enddo
-    endif
+       constituents(isalt,kk) = sa1(kk)
+    enddo
 
     salmax = maxval(sa1)
 

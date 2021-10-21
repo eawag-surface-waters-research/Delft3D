@@ -139,6 +139,11 @@
  write(msgbuf,'(a,F25.10)') 'time setumod           (s)  :' , tim_get_wallclock(handle_umod)   ; call msg_flush()
  write(msgbuf,'(a,F25.10)') 'time furu              (s)  :' , tim_get_wallclock(handle_furu)   ; call msg_flush()
  write(msgbuf,'(a,F25.10)') 'time solve             (s)  :' , tim_get_wallclock(handle_sol)    ; call msg_flush()
+
+ write(msgbuf,'(a,F25.10)') 'time gausselimination  (s)  :' , t(3,igaussel)                    ; call msg_flush()
+ write(msgbuf,'(a,F25.10)') 'time gausssubstitution (s)  :' , t(3,igausssu)                    ; call msg_flush()
+ write(msgbuf,'(a,F25.10)') 'time totalsolve        (s)  :' , t(3,itotalsol)                   ; call msg_flush()
+
  write(msgbuf,'(a,F25.10)') 'time setexternalforc.  (s)  :' , tim_get_wallclock(handle_ext)    ; call msg_flush()
  write(msgbuf,'(a,F25.10)') 'time setexternalfbnd.  (s)  :' , tim_get_wallclock(handle_extbnd) ; call msg_flush()
  write(msgbuf,'(a,F25.10)') 'time steps             (s)  :' , tim_get_wallclock(handle_steps)  ; call msg_flush()

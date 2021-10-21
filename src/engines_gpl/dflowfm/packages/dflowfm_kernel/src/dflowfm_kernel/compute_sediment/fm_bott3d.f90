@@ -55,7 +55,7 @@
    use m_flowparameters, only: epshs, epshu, jawave, eps10, jasal, jatem
    use m_sediment,  only: stmpar, sedtra, mtd, sedtot2sedsus, m_sediment_sed=>sed, avalflux, botcrit, kcsmor, jamormergedtuser, mergebodsed
    use m_flowtimes, only: dts, tstart_user, time1, dnt, julrefdat, tfac, ti_sed, ti_seds, time_user, dt_user
-   use m_transport, only: fluxhortot, ised1, isedn, constituents, sinksetot, sinkftot, itra1, itran, numconst
+   use m_transport, only: fluxhortot, ised1, isedn, constituents, sinksetot, sinkftot, itra1, itran, numconst, isalt, itemp
    use unstruc_files, only: mdia, close_all_files
    use m_fm_erosed
    use Messagehandling
@@ -1056,7 +1056,7 @@
             enddo
             !
             if (jasal>0) then
-               sa1(k) =  sa1(k) * ddp
+               constituents(isalt,k) =  constituents(isalt,k) * ddp
             endif
             !
             !if (jatem>0) then
@@ -1087,7 +1087,7 @@
                if (hs(k)<epshs) cycle
                call getkbotktop(k,kb,kt)
                do kk=kb,kt
-                  sa1(kk) = sa1(kk) * hs(k) / max(hs(k) - blchg(k), botcrit)
+                  constituents(isalt,kk) = constituents(isalt,kk) * hs(k) / max(hs(k) - blchg(k), botcrit)
                enddo
             enddo
          endif
