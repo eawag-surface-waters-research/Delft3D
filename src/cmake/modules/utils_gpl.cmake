@@ -22,3 +22,4 @@ set(morphology_io_module "${morphology_module_path}/morphology_io")
 # Hydrology
 set(hydrology_module_path "${utils_gpl_path}/dhydrology/packages")
 set(hydrology_kernel_module "${hydrology_module_path}/dhydrology_kernel")
+set(hydrology_kernel_io_module "${hydrology_module_path}/dhydrology_io")
