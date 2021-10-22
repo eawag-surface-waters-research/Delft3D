@@ -25,7 +25,9 @@ if (WIN32)
                          gridgeom
                          kdtree2
                          kdtree_wrapper
-                         io_netcdf)
+                         io_netcdf
+                         netcdf4
+                         netcdff)
 endif(WIN32)
 oss_include_libraries(${library_name} oss_dependencies)
 
