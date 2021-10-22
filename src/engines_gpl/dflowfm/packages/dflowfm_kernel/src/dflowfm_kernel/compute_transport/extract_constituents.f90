@@ -51,14 +51,7 @@ subroutine extract_constituents()
    if (timon) call timstrt ( "extract_constituents", ithndl )
 
    do k=1,Ndkx
-      !if ( ISALT.ne.0 ) then
-      !   sa1(k) = constituents(ISALT,k)
-      !end if
-
-      !if ( ITEMP.ne.0 ) then
-         ! tem1(k) = constituents(ITEMP,k)
-      !end if
-
+ 
       if( jasecflow > 0 .and. jaequili == 0 .and. kmx == 0 ) then
          spirint(k) = constituents(ISPIR,k)
       endif
