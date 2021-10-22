@@ -1,5 +1,16 @@
 @ echo off
 
+    rem When using intelMPI for the first time on a machine:
+    rem Execute "hydra_service.exe -install" as administrator:
+    rem     Preparation: Check that your Delft3D installation contains "...\x64\share\bin\hydra_service.exe". Optionally copy it to a local directory (it will run as a service).
+    rem     "Windows Start button" -> type "cmd", right-click "Command Prompt" App, "Run as Administrator"
+    rem     In this command box:
+    rem         cd ...\x64\share\bin (or your local copy)
+    rem         hydra_service.exe -install
+    rem         mpiexec.exe -register -username <user> -password <password> -noprompt
+    rem     When there is an hydra_service/smpd already running on the machine, it must be ended first, using the Microsoft Task Manager, 
+    rem     or in the command  box: hydra_service.exe -uninstall (smpd -uninstall)
+
     rem When using mpich2 for the first time on a machine:
     rem Execute "smpd -install" as administrator:
     rem     Preparation: Check that your Delft3D installation contains "...\x64\share\bin\smpd.exe". Optionally copy it to a local directory (it will run as a service).
@@ -20,8 +31,8 @@ rem build.bat all
 rem See README.md there for more information
 
 set build_configuration=build_all
-set script_path=..\..\..\..\%build_configuration%\x64\dimr\scripts
-call %script_path%\run_dimr_parallel.bat 3 dimr_config.xml
+set script_path=..\..\..\..\%build_configuration%\x64\Release\dimr\scripts
+call c:\checkouts\oss_bins\dimrset_91\x64\dimr\scripts\run_dimr_parallel.bat 3 dimr_config.xml
 
 
     rem To prevent the DOS box from disappearing immediately: remove the rem on the following line
