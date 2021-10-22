@@ -2411,6 +2411,7 @@ src/engines_gpl/dimr/packages/dimr_lib/src/exception.cpp -text
 src/engines_gpl/dimr/packages/dimr_lib/src/log.cpp -text
 src/engines_gpl/dimr/packages/dimr_lib/src/stringutils.cpp -text
 src/engines_gpl/dimr/packages/dimr_lib/src/xmltree.cpp -text
+src/engines_gpl/dimr/packages/dimr_lib_tests/CMakeLists.txt -text
 src/engines_gpl/dimr/packages/dimr_lib_tests/dimr_lib_tests.vcxproj -text
 src/engines_gpl/dimr/packages/dimr_lib_tests/tests/DimrTests.cpp -text
 src/engines_gpl/dimr/packages/dimr_lib_tests/tests/DimrTests.h -text
