@@ -160,8 +160,8 @@ Elder       = 0d0       ! add Elder viscosity
 Smagorinsky = 0.2d0     ! add Smagorinsky Cs coefficient, vic = vic + (Cs*dx)**2 * S
 viuchk      = 0.24      ! if < 0.5 then eddy viscosity cell check viu<viuchk*dx*dx/dt
 
-vicoww      = 5d-5      ! 1D-6   !                 ! constant vertical   eddy viscosity (m2/s)
-dicoww      = 5d-5      ! 1D-6   !                 ! constant vertical   eddy viscosity (m2/s)
+vicoww      = 1d-6      ! 5d-5   !                 ! background vertical eddy viscosity (m2/s)
+dicoww      = 1d-6      ! 5d-5   !                 ! background vertical eddy diffusivity (m2/s)
 
 rhomean     = 1000d0    ! mean ambient rho ! (kg/m3)
 rhog        = ag*rhomean
