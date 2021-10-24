@@ -115,7 +115,8 @@ subroutine transport()                           ! transport for now, advect sal
     limtypmom = 0
  endif
 
- limtyp = max(Limtypsa, limtyptm, limtypsed)                   ! check if limiter need be applied
+ ! It is not allowed to change the selection of limiters for sal/tem/sed as defined in the input file. Therefore, the next line is now a comment (and will be removed in future)
+ ! limtyp = max(Limtypsa, limtyptm, limtypsed)                   ! check if limiter need be applied
 
  if (jasal == 0 .and. jatem == 0 .and. jased == 0 .and. jatransportmodule == 0 ) return    ! no salinity, or sediment, no higher orders
 
