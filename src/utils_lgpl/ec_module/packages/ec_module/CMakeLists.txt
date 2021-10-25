@@ -53,7 +53,7 @@ if ( ${configuration_type} STREQUAL "DFLOWFM" OR ${configuration_type} STREQUAL 
 
     set(library_name ec_module_dll)
     # Add dynamic ec_module library
-    add_library(${library_name} SHARED ${src_path}/ec_module_api.F90)
+    add_library(${library_name} SHARED ${src_path}/ec_module_api.f90)
 
     set(oss_dependencies deltares_common kdtree2 kdtree_wrapper gridgeom io_netcdf ec_module)
     oss_include_libraries(${library_name} oss_dependencies)
@@ -64,7 +64,7 @@ if ( ${configuration_type} STREQUAL "DFLOWFM" OR ${configuration_type} STREQUAL 
     target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${check_bounds_flag}>")
 
     # Create the folder structure in vfproj
-    source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${src_path}/ec_module_api.F90)
+    source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${src_path}/ec_module_api.f90)
     set_target_properties (${library_name} PROPERTIES FOLDER utils_lgpl/ec_module)
     install(TARGETS ${library_name} DESTINATION lib)
 endif()
