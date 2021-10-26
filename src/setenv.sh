@@ -9,10 +9,10 @@ if [ "$1" == "intel21" ]; then
   
      module load    intel/21.2.0
      module display intel/21.2.0
-    
-     module load    mpich/3.3.2_intel21.2.0
-     module display mpich/3.3.2_intel21.2.0
-  
+ 
+     module load    intelmpi/21.2.0
+     module display intelmpi/21.2.0
+ 
      module load    netcdf/v4.7.4_v4.5.3_intel21.2.0
      module display netcdf/v4.7.4_v4.5.3_intel21.2.0
   
