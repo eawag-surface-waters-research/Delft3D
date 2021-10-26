@@ -37,3 +37,4 @@ post_build_target( ${executable_name}
                    ${checkout_src_root} 
                    ${executable_name}  )
 
+install(TARGETS ${executable_name} RUNTIME DESTINATION bin)

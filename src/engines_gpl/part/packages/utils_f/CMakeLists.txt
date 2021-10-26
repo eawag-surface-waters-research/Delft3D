@@ -27,6 +27,9 @@ if(UNIX)
     target_link_libraries(${library_name} ${oss_dependencies})
 endif(UNIX)
 
+target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${check_bounds_flag}>")
+target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${check_pointer}>")
+
 # Define additional compilation flags
 set_source_files_properties(${fortran_version_file}
                             PROPERTIES COMPILE_OPTIONS "${file_preprocessor_flag}")

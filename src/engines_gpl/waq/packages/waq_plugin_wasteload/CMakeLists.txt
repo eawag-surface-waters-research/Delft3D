@@ -49,12 +49,16 @@ target_compile_options(${library_name} PRIVATE "${extend_source132_flag}")
 # Set dependencies
 set(oss_dependencies    deltares_common
                         waq_utils_f) 
+
 oss_include_libraries(${library_name} oss_dependencies)
 target_link_libraries(${library_name} ${oss_dependencies})
 
 if(UNIX)
     target_link_libraries(${library_name} ${oss_dependencies})
 endif(UNIX)
+
+target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${check_bounds_flag}>")
+target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${check_pointer}>")
 
 # Define how the files should be structured within Visual Studio
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${source_files})

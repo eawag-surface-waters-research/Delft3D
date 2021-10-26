@@ -17,7 +17,7 @@ list(REMOVE_ITEM waq_utils_source ${CMAKE_CURRENT_SOURCE_DIR}/${src_path}/waq_ut
 
 if(UNIX)
    list(REMOVE_ITEM waq_utils_source ${CMAKE_CURRENT_SOURCE_DIR}/${src_path}/waq_utils/avundf.f)
-else(UNIX)
+else()
    list(REMOVE_ITEM waq_utils_source ${CMAKE_CURRENT_SOURCE_DIR}/${src_path}/waq_utils/avundf_linux.f)
 endif(UNIX)
 
