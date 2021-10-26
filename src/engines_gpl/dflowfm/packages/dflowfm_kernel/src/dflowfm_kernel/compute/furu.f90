@@ -260,7 +260,7 @@ subroutine furu()                                   ! set fu, ru and kfs
 
  endif
 
- 
+
 do n  = 1, nbndu                                    ! boundaries at u points
 
     k2    = kbndu(2,n)
@@ -273,8 +273,8 @@ do n  = 1, nbndu                                    ! boundaries at u points
        zbndun = zbndq(n)
     else if (itpbn == 5) then  ! absgenbc
        zbndun = u1(LL)         ! set in xbeach_absgen_bc
-    else                       ! other types that use alfsmo 
-       zbndun = zbndu( (n-1)*kmxd + 1 ) 
+    else                       ! other types that use alfsmo
+       zbndun = zbndu( (n-1)*kmxd + 1 )
     end if
 
     if (alfsmo < 1d0) then
@@ -329,7 +329,7 @@ do n  = 1, nbndu                                    ! boundaries at u points
              endif
              qk1   = hu(L)*ustbLL*sqcfi               ! integral flux till level k
              ru(L) = (qk1 - qk0) / ( hu(L) - hu(L-1) )
-             if (zbndu(n) < 0d0) ru(L) = -1d0*ru(L)
+             if (zbndq(n) < 0d0) ru(L) = -1d0*ru(L)
              qk0   =  qk1
           endif
        endif
