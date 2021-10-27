@@ -333,24 +333,23 @@ module m_ec_item
             call setECMessage(trim(message))
             return
          endif
-         if (itemPtr%role == itemType_target) then
+         select case (selector)
+         case(0)
+            fieldptr => itemPtr%sourceT0FieldPtr
+         case(1)
+            fieldptr => itemPtr%sourceT1FieldPtr
+         case(2)
+            fieldptr => itemPtr%targetFieldPtr
+         case default
             fieldptr => null()
-            select case (selector)
-            case(0)
-               fieldptr => itemPtr%sourceT0FieldPtr
-            case(1)
-               fieldptr => itemPtr%sourceT1FieldPtr
-            case(2)
-               fieldptr => itemPtr%targetFieldPtr
-            end select
-            if (associated(fieldptr)) then
-               if (allocated(fieldptr%arr1d)) then
-                  Arr1DPtr => fieldptr%arr1d
-               else
-                  Arr1DPtr => fieldptr%arr1dPtr
-               endif
-            end if 
-         endif
+         end select
+         if (associated(fieldptr)) then
+            if (allocated(fieldptr%arr1d)) then
+               Arr1DPtr => fieldptr%arr1d
+            else
+               Arr1DPtr => fieldptr%arr1dPtr
+            endif
+         end if 
       end function ecItemGetArr1DPtr
 ! =======================================================================
       
