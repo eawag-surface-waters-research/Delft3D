@@ -210,37 +210,30 @@ module m_ec_item
          character(len=1000)                                     :: message
          real(hp), dimension(:), target, optional, intent(inout) :: target_array !< kernel's data array for the requested values
          !
-         integer                :: i       !< loop counter
          type(tEcItem), pointer :: itemPtr !< Item under consideration
          !
-         success = .false.
-         !
-         ! Find the Item.
-         do i=1, instancePtr%nItems ! TODO: This lookup loop of items may be expensive for large models, use a lookup table with ids.
-            itemPtr => instancePtr%ecItemsPtr(i)%ptr
 ! TODO: Edwin: UNST-683: somehow this itemPtr is *not* thread-safe. When called via ec_gettimespacevalue (see unstruc.f90, ec_gettimespacevalue(ecInstancePtr, item_damlevel, tim, zcdam), with OMP SECTIONS)
 !       Access violations and irregular end of files occur. Setting OMP_NUM_THREADS=1 'solves' the errors.
-            if ((itemPtr%id == itemId) .and. (itemPtr%role == itemType_target)) then
-               ! Optionally set the Item's target array.
-               if (present(target_array)) then
-                  itemPtr%targetFieldPtr%arr1dPtr => target_array
-               end if
-              ! Update the Item's data if needed.
-              ! if (comparereal(itemPtr%targetFieldPtr%timesteps, timesteps) == 0) then
-              !    success = .true.
-              ! else
-                  success = ecItemUpdateTargetItem(instancePtr, itemPtr, timesteps)
-                  if (.not.success) then
-                     write(message,'(a,i8,a)') "Updating target failed, quantity='" &
-                                     //trim(itemPtr%quantityPtr%name)   &
-                                     //"', item=",itemPtr%id
-                     call setECMessage(trim(message))
-                     success = .false.
-                  endif 
-              ! end if
-               exit
+         success = .false.
+         itemPtr => ecSupportFindItem(instancePtr, itemId)
+         if (.not.associated(itemPtr)) then
+            write(message,'(a,i8)') "Updating target failed, item not found, itemId=",itemId
+            call setECMessage(trim(message))
+            return
+         endif
+         if (itemPtr%role == itemType_target) then
+            if (present(target_array)) then
+               itemPtr%targetFieldPtr%arr1dPtr => target_array
             end if
-         end do
+            if (.not.ecItemUpdateTargetItem(instancePtr, itemPtr, timesteps)) then
+               write(message,'(a,i8,a)') "Updating target failed, quantity='" &
+                               //trim(itemPtr%quantityPtr%name)   &
+                               //"', itemId=",itemPtr%id
+               call setECMessage(trim(message))
+               return
+            endif 
+         endif 
+         success = .true.
       end function ecItemGetValues
 
 ! =======================================================================
@@ -251,41 +244,43 @@ module m_ec_item
          type(tEcInstance), pointer :: instancePtr  !< intent(in)
          integer, intent(in)        :: itemId
          type(tEcItem), pointer     :: itemPtr !< Item under consideration
-         integer :: i
+         character(len=1000)        :: message
 
          ressize = -1
-         ! Find the Item.
-         do i=1, instancePtr%nItems ! TODO: This lookup loop of items may be expensive for large models, use a lookup table with ids.
-            itemPtr => instancePtr%ecItemsPtr(i)%ptr
-            if ((itemPtr%id == itemId) .and. (itemPtr%role == itemType_target)) then
-               ressize = itemPtr%quantityPtr%vectormax &
-                       * max(itemPtr%elementsetPtr%nCoordinates,1) &
-                       * max(1,itemPtr%elementsetPtr%n_layers)
-               exit
-            end if
-         end do
+         itemPtr => ecSupportFindItem(instancePtr, itemId)
+         if (.not.associated(itemPtr)) then
+            write(message,'(a,i8)') "Updating target failed, item not found, itemId=",itemId
+            call setECMessage(trim(message))
+            return
+         endif
+         if (itemPtr%role == itemType_target) then
+            ressize = itemPtr%quantityPtr%vectormax &
+                    * max(itemPtr%elementsetPtr%nCoordinates,1) &
+                    * max(1,itemPtr%elementsetPtr%n_layers)
+         endif
       end function ecItemEstimateResultSize
       
 ! =======================================================================
       !> Retrieve the id of the provider (filereader) that supplies this item
       function ecItemGetProvider(instancePtr, itemId) result(providerID)
-      implicit none
-      integer                               :: providerID
-      type(tEcInstance),      pointer       :: instancePtr  !< intent(in)
-      integer,                intent(in)    :: itemID       !< unique Item id
+         implicit none
+         integer                               :: providerID
+         type(tEcInstance),      pointer       :: instancePtr  !< intent(in)
+         integer,                intent(in)    :: itemID       !< unique Item id
 
-      integer  :: i
-      type(tEcItem), pointer :: itemPtr            !< Item under consideration
+         character(len=1000)    :: message
+         type(tEcItem), pointer :: itemPtr            !< Item under consideration
 
-      providerID = ec_undef_int
-
-      do i=1, instancePtr%nItems ! TODO: This lookup loop of items may be expensive for large models, use a lookup table with ids.
-         itemPtr => instancePtr%ecItemsPtr(i)%ptr
-         if ((itemPtr%id == itemId) .and. (itemPtr%role == itemType_source)) then
-            providerID = itemPtr%providerID
-         end if
-      enddo
+         providerID = ec_undef_int
+         itemPtr => ecSupportFindItem(instancePtr, itemId)
+         if (.not.associated(itemPtr)) then
+            write(message,'(a,i8)') "Updating target failed, item not found, itemId=",itemId
+            call setECMessage(trim(message))
+            return
+         endif
+         providerID = itemPtr%providerID
       end function ecItemGetProvider
+
 ! =======================================================================
       !> Retrieve pointers to the Q and H arrays of a QH-table associated with this item
       !> Returns true if this source item is associated with a QH-table
@@ -321,21 +316,24 @@ module m_ec_item
 ! =======================================================================
       !> Retrieve a pointer to the item's field's arr1d
       function ecItemGetArr1DPtr(instancePtr, itemId, selector) result(Arr1DPtr)
-      implicit none
-      type(tEcInstance),      pointer       :: instancePtr  !< intent(in)
-      integer,                intent(in)    :: itemID       !< unique Item id
-      integer,                intent(in)    :: selector     !< selects field, 0:source0, 1:source1, 2:target
-      real(hp), dimension(:), pointer       :: Arr1DPtr     !< points to a 1-dim array field, stored in arr1d OR in a kernel
+         implicit none
+         type(tEcInstance),      pointer       :: instancePtr  !< intent(in)
+         integer,                intent(in)    :: itemID       !< unique Item id
+         integer,                intent(in)    :: selector     !< selects field, 0:source0, 1:source1, 2:target
+         real(hp), dimension(:), pointer       :: Arr1DPtr     !< points to a 1-dim array field, stored in arr1d OR in a kernel
 
-      integer  :: i
-      type(tEcItem) , pointer :: itemPtr
-      type(tEcField), pointer :: fieldptr
+         character(len=1000)     :: message
+         type(tEcItem) , pointer :: itemPtr
+         type(tEcField), pointer :: fieldptr
 
-      arr1dPtr => null()
-
-      do i=1, instancePtr%nItems ! TODO: This lookup loop of items may be expensive for large models, use a lookup table with ids.
-         itemPtr => instancePtr%ecItemsPtr(i)%ptr
-         if ((itemPtr%id == itemId) .and. (itemPtr%role == itemType_source)) then
+         arr1dPtr => null()
+         itemPtr => ecSupportFindItem(instancePtr, itemId)
+         if (.not.associated(itemPtr)) then
+            write(message,'(a,i8)') "Updating target failed, item not found, itemId=",itemId
+            call setECMessage(trim(message))
+            return
+         endif
+         if (itemPtr%role == itemType_target) then
             fieldptr => null()
             select case (selector)
             case(0)
@@ -352,8 +350,7 @@ module m_ec_item
                   Arr1DPtr => fieldptr%arr1dPtr
                endif
             end if 
-         end if
-      enddo
+         endif
       end function ecItemGetArr1DPtr
 ! =======================================================================
       
