@@ -644,11 +644,9 @@ end subroutine ecInstanceListSourceItems
          itemPtr => null()
          !
          if (associated(instancePtr)) then
-            do i=1, instancePtr%nItems
-               if (instancePtr%ecItemsPtr(i)%ptr%id == itemId) then
-                  itemPtr => instancePtr%ecItemsPtr(i)%ptr
-               end if
-            end do
+            if (itemId>0 .and. itemId<=instancePtr%nItems) then 
+               itemPtr => instancePtr%ecItemsPtr(itemId)%ptr
+            end if
          else
             call setECMessage("ec_support::ecSupportFindItem: Dummy argument instancePtr is not associated.")
          end if
@@ -667,11 +665,9 @@ end subroutine ecInstanceListSourceItems
          connectionPtr => null()
          !
          if (associated(instancePtr)) then
-            do i=1, instancePtr%nConnections
-               if (instancePtr%ecConnectionsPtr(i)%ptr%id == connectionId) then
-                  connectionPtr => instancePtr%ecConnectionsPtr(i)%ptr
-               end if
-            end do
+            if (connectionId>0 .and. connectionId<=instancePtr%nConnections) then 
+               connectionPtr => instancePtr%ecConnectionsPtr(connectionId)%ptr
+            end if
          else
             call setECMessage("ec_support::ecSupportFindConnection: Dummy argument instancePtr is not associated.")
          end if
@@ -690,11 +686,9 @@ end subroutine ecInstanceListSourceItems
          converterPtr => null()
          !
          if (associated(instancePtr)) then
-            do i=1, instancePtr%nConverters
-               if (instancePtr%ecConvertersPtr(i)%ptr%id == converterId) then
-                  converterPtr => instancePtr%ecConvertersPtr(i)%ptr
-               end if
-            end do
+            if (converterId>0 .and. converterId<=instancePtr%nConverters) then 
+                converterPtr => instancePtr%ecConvertersPtr(converterId)%ptr
+            end if
          else
             call setECMessage("ec_support::ecSupportFindConverter: Dummy argument instancePtr is not associated.")
          end if
@@ -713,11 +707,9 @@ end subroutine ecInstanceListSourceItems
          fileReaderPtr => null()
          !
          if (associated(instancePtr)) then
-            do i=1, instancePtr%nFileReaders
-               if (instancePtr%ecFileReadersPtr(i)%ptr%id == fileReaderId) then
-                  fileReaderPtr => instancePtr%ecFileReadersPtr(i)%ptr
-               end if
-            end do
+            if (fileReaderId>0 .and. fileReaderId<=instancePtr%nFileReaders) then 
+                fileReaderPtr => instancePtr%ecFileReadersPtr(fileReaderId)%ptr
+            end if
          else
             call setECMessage("ec_support::ecSupportFindFileReader: Dummy argument instancePtr is not associated.")
          end if
@@ -764,11 +756,9 @@ end subroutine ecInstanceListSourceItems
          bcBlockPtr => null()
          !
          if (associated(instancePtr)) then
-            do i=1, instancePtr%nBCBlocks
-               if (instancePtr%ecBCBlocksPtr(i)%ptr%id == bcBlockId) then
-                  bcBlockPtr => instancePtr%ecBCBlocksPtr(i)%ptr
-               end if
-            end do
+            if (bcBlockId>0 .and. bcBlockId<=instancePtr%nBCBlocks) then 
+               bcBlockPtr => instancePtr%ecbcBlocksPtr(bcBlockId)%ptr
+            end if
          else
             call setECMessage("ec_support::ecSupportFindBCBlock: Dummy argument instancePtr is not associated.")
          end if
@@ -787,11 +777,9 @@ end subroutine ecInstanceListSourceItems
          netCDFPtr => null()
          !
          if (associated(instancePtr)) then
-            do i=1, instancePtr%nNetCDFs
-               if (instancePtr%ecNetCDFsPtr(i)%ptr%id == netCDFId) then
-                  netCDFPtr => instancePtr%ecNetCDFsPtr(i)%ptr
-               end if
-            end do
+            if (netCDFId>0 .and. netCDFId<=instancePtr%nNetCDFs) then 
+               netCDFPtr => instancePtr%ecNetCDFsPtr(netCDFId)%ptr
+            end if
          else
             call setECMessage("ec_support::ecSupportFindNetCDF: Dummy argument instancePtr is not associated.")
          end if

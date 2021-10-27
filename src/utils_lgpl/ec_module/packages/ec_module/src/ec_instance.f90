@@ -220,7 +220,7 @@ module m_ec_instance
          !
          itemPtr => null()
          itemId = ec_undef_int
-         itemPtr => ecItemCreate(instancePtr%idCounter + 1)
+         itemPtr => ecItemCreate(instancePtr%nItems + 1)
          if (associated(itemPtr)) then
             ! ensure capacity
             if (instancePtr%nItems == size(instancePtr%ecItemsPtr)) then
@@ -231,8 +231,7 @@ module m_ec_instance
             ! register the Item
             instancePtr%nItems = instancePtr%nItems + 1
             instancePtr%ecItemsPtr(instancePtr%nItems)%ptr => itemPtr
-            instancePtr%idCounter = instancePtr%idCounter + 1
-            itemId = instancePtr%idCounter
+            itemId = itemPtr%id
          end if
       end function ecInstanceCreateItem
       
@@ -248,7 +247,7 @@ module m_ec_instance
          !
          quantityPtr => null()
          quantityId = ec_undef_int
-         quantityPtr => ecQuantityCreate(instancePtr%idCounter + 1)
+         quantityPtr => ecQuantityCreate(instancePtr%nQuantities + 1)
          if (associated(quantityPtr)) then
             ! ensure capacity
             if (instancePtr%nQuantities == size(instancePtr%ecQuantitiesPtr)) then
@@ -259,8 +258,7 @@ module m_ec_instance
             ! register the Quantity
             instancePtr%nQuantities = instancePtr%nQuantities + 1
             instancePtr%ecQuantitiesPtr(instancePtr%nQuantities)%ptr => quantityPtr
-            instancePtr%idCounter = instancePtr%idCounter + 1
-            quantityId = instancePtr%idCounter
+            quantityId = quantityPtr%id
          end if
       end function ecInstanceCreateQuantity
       
@@ -276,7 +274,7 @@ module m_ec_instance
          !
          elementSetPtr => null()
          elementSetId = ec_undef_int
-         elementSetPtr => ecElementSetCreate(instancePtr%idCounter + 1)
+         elementSetPtr => ecElementSetCreate(instancePtr%nElementSets + 1)
          if (associated(elementSetPtr)) then
             ! ensure capacity
             if (instancePtr%nElementSets == size(instancePtr%ecElementSetsPtr)) then
@@ -287,8 +285,7 @@ module m_ec_instance
             ! register the ElementSet
             instancePtr%nElementSets = instancePtr%nElementSets + 1
             instancePtr%ecElementSetsPtr(instancePtr%nElementSets)%ptr => elementSetPtr
-            instancePtr%idCounter = instancePtr%idCounter + 1
-            elementSetId = instancePtr%idCounter
+            elementSetId = elementSetPtr%id
          end if
       end function ecInstanceCreateElementSet
       
@@ -304,7 +301,7 @@ module m_ec_instance
          !
          fieldPtr => null()
          fieldId = ec_undef_int
-         fieldPtr => ecFieldCreate(instancePtr%idCounter + 1)
+         fieldPtr => ecFieldCreate(instancePtr%nFields + 1)
          if (associated(fieldPtr)) then
             ! ensure capacity
             if (instancePtr%nFields == size(instancePtr%ecFieldsPtr)) then
@@ -315,8 +312,7 @@ module m_ec_instance
             ! register the Field
             instancePtr%nFields = instancePtr%nFields + 1
             instancePtr%ecFieldsPtr(instancePtr%nFields)%ptr => fieldPtr
-            instancePtr%idCounter = instancePtr%idCounter + 1
-            fieldId = instancePtr%idCounter
+            fieldId = fieldPtr%id
          end if
       end function ecInstanceCreateField
       
@@ -332,7 +328,7 @@ module m_ec_instance
          !
          connectionPtr => null()
          connectionId = ec_undef_int
-         connectionPtr => ecConnectionCreate(instancePtr%idCounter + 1)
+         connectionPtr => ecConnectionCreate(instancePtr%nConnections + 1)
          if (associated(connectionPtr)) then
             ! ensure capacity
             if (instancePtr%nConnections == size(instancePtr%ecConnectionsPtr)) then
@@ -343,8 +339,7 @@ module m_ec_instance
             ! register the Connection
             instancePtr%nConnections = instancePtr%nConnections + 1
             instancePtr%ecConnectionsPtr(instancePtr%nConnections)%ptr => connectionPtr
-            instancePtr%idCounter = instancePtr%idCounter + 1
-            connectionId = instancePtr%idCounter
+            connectionId = connectionPtr%id
          end if
       end function ecInstanceCreateConnection
       
@@ -360,7 +355,7 @@ module m_ec_instance
          !
          converterPtr => null()
          converterId = ec_undef_int
-         converterPtr => ecConverterCreate(instancePtr%idCounter + 1)
+         converterPtr => ecConverterCreate(instancePtr%nConverters + 1)
          if (associated(converterPtr)) then
             ! ensure capacity
             if (instancePtr%nConverters == size(instancePtr%ecConvertersPtr)) then
@@ -371,8 +366,7 @@ module m_ec_instance
             ! register the Converter
             instancePtr%nConverters = instancePtr%nConverters + 1
             instancePtr%ecConvertersPtr(instancePtr%nConverters)%ptr => converterPtr
-            instancePtr%idCounter = instancePtr%idCounter + 1
-            converterId = instancePtr%idCounter
+            converterId = converterPtr%id
          end if
       end function ecInstanceCreateConverter
       
@@ -387,7 +381,7 @@ module m_ec_instance
          type(tEcFileReader), pointer :: fileReaderPtr !< the new FileReader
          !
          fileReaderId = ec_undef_int
-         fileReaderPtr => ecFileReaderCreate(instancePtr%idCounter + 1)
+         fileReaderPtr => ecFileReaderCreate(instancePtr%nFileReaders + 1)
          if (associated(fileReaderPtr)) then
             ! ensure capacity
             if (instancePtr%nFileReaders == size(instancePtr%ecFileReadersPtr)) then
@@ -398,8 +392,7 @@ module m_ec_instance
             ! register the FileReader
             instancePtr%nFileReaders = instancePtr%nFileReaders + 1
             instancePtr%ecFileReadersPtr(instancePtr%nFileReaders)%ptr => fileReaderPtr
-            instancePtr%idCounter = instancePtr%idCounter + 1
-            fileReaderId = instancePtr%idCounter
+            fileReaderId = fileReaderPtr%id
          end if
       end function ecInstanceCreateFileReader
 
@@ -410,7 +403,7 @@ module m_ec_instance
          !
          type(tEcBCBlock), pointer             :: bcblockPtr   !< intent(out), the new BCBlock
          bcblockId = ec_undef_int
-         bcblockPtr => ecBCBlockCreate(instancePtr%idCounter + 1)
+         bcblockPtr => ecBCBlockCreate(instancePtr%nBCblocks + 1)
          if (associated(bcblockPtr)) then
             ! ensure capacity
             if (instancePtr%nBCBlocks == size(instancePtr%ecBCBlocksPtr)) then
@@ -421,8 +414,7 @@ module m_ec_instance
             ! register the BCBlock
             instancePtr%nBCBlocks = instancePtr%nBCBlocks + 1
             instancePtr%ecBCBlocksPtr(instancePtr%nBCBlocks)%ptr => bcblockPtr
-            instancePtr%idCounter = instancePtr%idCounter + 1
-            bcblockId = instancePtr%idCounter
+            bcblockId = bcblockPtr%id
          end if
       end function ecInstanceCreateBCBlock
       
@@ -436,7 +428,7 @@ module m_ec_instance
          !
          type(tEcNetCDF), pointer              :: netCDFPtr   !< intent(out), the new BCBlock
          netCDFId = ec_undef_int
-         netCDFPtr => ecNetCDFCreate(instancePtr%idCounter + 1)
+         netCDFPtr => ecNetCDFCreate(instancePtr%nNetCDFs + 1)
          if (associated(netCDFPtr)) then
             ! ensure capacity
             if (instancePtr%nNetCDFs == size(instancePtr%ecNetCDFsPtr)) then
@@ -447,8 +439,7 @@ module m_ec_instance
             ! register the new instance
             instancePtr%nNetCDFs = instancePtr%nNetCDFs + 1
             instancePtr%ecNetCDFsPtr(instancePtr%nNetCDFs)%ptr => netCDFPtr
-            instancePtr%idCounter = instancePtr%idCounter + 1
-            netCDFId = instancePtr%idCounter
+            netCDFId = netCDFPtr%id
          end if
       end function ecInstanceCreateNetCDF
 
