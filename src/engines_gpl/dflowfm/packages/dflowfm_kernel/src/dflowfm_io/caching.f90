@@ -576,6 +576,7 @@ subroutine copyCachedCrossSections( linklist, ipol, success )
                 success        = .false.
                 exit
             endif
+            if ( np == 0 ) cycle
             if ( any( cache_cross_sections(i)%path%xp(1:np) /= crs(i)%path%xp(1:np) ) .or. &
                  any( cache_cross_sections(i)%path%yp(1:np) /= crs(i)%path%yp(1:np) ) ) then
                 success        = .false.
