@@ -81,16 +81,6 @@ if(NOT TARGET waqpb_lib)
     add_subdirectory(${checkout_src_root}/${waqpb_lib_module} waqpb_lib)
 endif()
 
-## Waq_run_processes
-#if(NOT TARGET waq_run_processes)
-#    add_subdirectory(${checkout_src_root}/${waq_run_processes_module} waq_run_processes)
-#endif()
-#if(NOT TARGET waq_run_processes_version_number)
-#    add_subdirectory(${checkout_src_root}/${waq_run_processes_version_number_module} waq_run_processes_version_number)
-#endif()
-
-
-
 #
 # Utils
 #=============

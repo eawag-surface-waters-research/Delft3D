@@ -464,6 +464,7 @@ src/cmake/configurations/include/tools_configuration.cmake -text
 src/cmake/configurations/include/tools_delft3dfm_configuration.cmake -text
 src/cmake/configurations/swan_configuration.cmake -text
 src/cmake/configurations/tests_configuration.cmake -text
+src/cmake/configurations/tools_configuration.cmake -text
 src/cmake/doc/CMake[!!-~]Inventory.xlsx -text
 src/cmake/doc/CMake_for_OSS_tree_[!!-~]project_report.docx -text
 src/cmake/doc/Readme-CMake-GUI.docx -text

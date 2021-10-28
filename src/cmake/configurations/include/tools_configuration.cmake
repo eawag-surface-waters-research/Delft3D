@@ -15,28 +15,25 @@ if(NOT TARGET deltares_common_mpi)
     add_subdirectory(${checkout_src_root}/${deltares_common_mpi_module} deltares_common_mpi)
 endif()
 
-# Waq
-if(NOT TARGET waq_utils_c)
-    add_subdirectory(${checkout_src_root}/${waq_utils_c_module} waq_utils_c)
+# triangle
+if(NOT TARGET triangle_c)
+    add_subdirectory(${checkout_src_root}/${triangle_c_module} triangle_c)
 endif()
 
-if(NOT TARGET waq_utils_f)
-    add_subdirectory(${checkout_src_root}/${waq_utils_f_module} waq_utils_f)
+# gridgeom
+if(NOT TARGET gridgeom)
+    add_subdirectory(${checkout_src_root}/${gridgeom_module} gridgeom)
 endif()
 
-if(NOT TARGET waq_kernel)
-    add_subdirectory(${checkout_src_root}/${waq_kernel_module} waq_kernel)
+# Third party libraries
+# kdtree2
+if(NOT TARGET kdtree2)
+    add_subdirectory(${checkout_src_root}/${kdtree_module} kdtree2)
 endif()
 
-if(NOT TARGET wq_processes)
-    add_subdirectory(${checkout_src_root}/${wq_processes_module} wq_processes)
+if(NOT TARGET kdtree_wrapper)
+    add_subdirectory(${checkout_src_root}/${kdtree_wrapper_module} kdtree_wrapper)
 endif()
-
-if(NOT TARGET waq_plugin_wasteload)
-    add_subdirectory(${checkout_src_root}/${waq_plugin_wasteload_module} waq_plugin_wasteload)
-endif()
-
-
 
 # Tools_gpl
 # Mormerge
@@ -47,46 +44,6 @@ endif()
 # dfmoutput
 if(NOT TARGET dfmoutput)
     add_subdirectory(${checkout_src_root}/${dfmoutput_module} dfmoutput)
-endif()
-
-# Waqpb
-if(NOT TARGET waqpb_lib)
-    add_subdirectory(${checkout_src_root}/${waqpb_lib_module} waqpb_lib)
-endif()
-
-if(NOT TARGET waqpb_import)
-    add_subdirectory(${checkout_src_root}/${waqpb_import_module} waqpb_import)
-endif()
-
-if(NOT TARGET waqpb_export)
-    add_subdirectory(${checkout_src_root}/${waqpb_export_module} waqpb_export)
-endif()
-
-# Waq_run_processes
-if(NOT TARGET waq_run_processes_version_number)
-    add_subdirectory(${checkout_src_root}/${waq_run_processes_version_number_module} waq_run_processes_version_number)
-endif()
-
-if(NOT TARGET waq_run_processes)
-    add_subdirectory(${checkout_src_root}/${waq_run_processes_module} waq_run_processes)
-endif()
-
-# duprol2delwaq
-if(NOT TARGET duprol2delwaq)
-    add_subdirectory(${checkout_src_root}/${duprol2delwaq_module} duprol2delwaq)
-endif()
-
-# Datsel
-if(NOT TARGET datsel_version_number)
-    add_subdirectory(${checkout_src_root}/${datsel_version_number_module} datsel_version_number)
-endif()
-
-if(NOT TARGET datsel_f)
-    add_subdirectory(${checkout_src_root}/${datsel_f_module} datsel_f)
-endif()
-
-if(NOT TARGET datsel)
-    add_subdirectory(${checkout_src_root}/${datsel_module} datsel)
 endif()
 
 # Third party
@@ -146,4 +103,9 @@ endif()
 
 if(NOT TARGET esmfsm)
     add_subdirectory(${checkout_src_root}/${esmfsm_module} esmfsm)
+endif()
+
+# ec_module
+if(NOT TARGET ec_module)
+    add_subdirectory(${checkout_src_root}/${ec_module} ec_module)
 endif()
