@@ -68,7 +68,9 @@ set_source_files_properties(${fortran_version_file}
 # IO_NETCDF_DLL
 ###############
 string(TOUPPER ${CONFIGURATION_TYPE} configuration_type)
-if ( ${configuration_type} STREQUAL "DFLOWFM" OR ${configuration_type} STREQUAL "ALL" )
+if ( ${configuration_type} STREQUAL "DFLOWFM" OR 
+     ${configuration_type} STREQUAL "ALL" OR 
+     ${configuration_type} STREQUAL "TOOLS" )
     set(library_name io_netcdf_dll)
     # Add dynamic io_netcdf library
     add_library(${library_name} SHARED ${src_path}/io_netcdf_api.F90)

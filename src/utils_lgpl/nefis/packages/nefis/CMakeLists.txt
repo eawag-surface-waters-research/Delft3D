@@ -66,3 +66,34 @@ source_group("Version Files" FILES ${ini_version_file})
 # Create the folder structure in vfproj
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${headers} ${source})
 set_target_properties (${library_name} PROPERTIES FOLDER utils_lgpl/nefis)
+
+###############
+# nefis_dll
+###############
+string(TOUPPER ${CONFIGURATION_TYPE} configuration_type)
+if ( ${configuration_type} STREQUAL "TOOLS" )    
+    set(library_name nefis_dll)
+
+    add_library(${library_name} ${headers} ${source} ${ini_version_file})
+
+    # Set additional dependencies
+    target_include_directories(${library_name}  PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/include")
+
+   # Set preprocessor definitions
+   if (UNIX)
+       target_compile_definitions(${library_name} PRIVATE "NEFIS_DLL;PTR8;linux;LINUX64;_IA64_;_LIB;_CRT_SECURE_NO_WARNINGS")    
+   endif(UNIX)
+   if (WIN32)
+       target_compile_definitions(${library_name} PRIVATE "NEFIS_DLL;W64;PTR8;WIN64;_WIN64;_IA64_;_WINDOWS;_DEBUG;_LIB;_CRT_SECURE_NO_WARNINGS")
+   endif(WIN32)
+
+   source_group(${visual_studio_source_group_name} FILES ${source})
+   source_group("${visual_studio_source_group_name}\\Header Files" FILES ${headers})
+   source_group("Version Files" FILES ${ini_version_file})
+
+   source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${headers} ${source})
+   set_target_properties (${library_name} PROPERTIES FOLDER utils_lgpl/nefis_dll)
+
+    install(TARGETS ${library_name} DESTINATION lib)
+endif()
+
