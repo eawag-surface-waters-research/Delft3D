@@ -63,14 +63,23 @@
       integer      , intent(in   ) :: nropen    !< Delwaq number of the file to be opened
       integer      , intent(in   ) :: opmode    !< Indicator how file must be opened
       integer      , intent(inout) :: ierr      !< Error flag
-
 !     Local variables     :
 
       integer       ierr2
       logical       lexist   , lopened
-
+      character(256) wd
+      integer       loc
+      
       IERR   =   0
 
+!     check if files exist in the current working directory
+      loc = 0
+      loc = scan(trim(finam),'/\',back = .true.)
+      if (loc > 0) then
+          wd = finam(1:loc)
+      endif
+
+      
 !     get the correct open statement
 
       select case ( nropen )
@@ -582,9 +591,11 @@
 !     error while opening STOP with message
 
   910 continue
-      write ( * , 2000 ) nropen, lun, trim(finam)
+      write ( * , 2000 ) nropen, lun, trim(finam), trim(wd)
       call srstop ( 1 )
 
  2000 format (   ' ERROR opening file number:',I3,' on unit:',I3  ,
-     *         /,' Filename is: ',A )
+     *         /,' Filename is: ',A ,
+     *         /,' Searching in working directory: ',
+     *         /,'  ' A )
       end
