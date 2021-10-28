@@ -68,6 +68,7 @@ src/test/engines_gpl/dflowfm/packages/dflowfm_kernel/obj
 src/test/engines_gpl/dflowfm/packages/dflowfm_kernel/project.lock.json
 src/third_party_open/openda/tests/bin
 src/third_party_open/openda/tests/test_dll_noise/Release
+src/tools_gpl/agrhyd/packages/agrhyd/include/agrhyd_version.rc
 src/tools_lgpl/matlab/quickplot/progsrc/tekal_map.m
 src/utils_gpl/dhydrology/packages/dhydrology_io/*.aps
 src/utils_gpl/dhydrology/packages/dhydrology_io/*.eto
