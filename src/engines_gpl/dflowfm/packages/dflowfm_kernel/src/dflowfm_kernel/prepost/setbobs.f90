@@ -338,7 +338,11 @@
  call duikerstoprofs()
 
  if ( cacheRetrieved() ) then
-    call copyCachedLongCulverts( longculverts, success )
+    if (allocated(longculverts)) then
+       call copyCachedLongCulverts( longculverts, success )
+    else
+       success = .true.
+    end if
  else
     success = .false.
  endif
