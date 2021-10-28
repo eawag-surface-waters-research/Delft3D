@@ -143,7 +143,7 @@
        call getLbotLtop(LL,Lb,Lt)
        cs = csu(LL)  ; sn = snu(LL)
 
-       if (icorio > 0 .and. jsferic > 0) then
+       if ( jsferic > 0 .or. jacorioconstant > 0 ) then
            if (icorio >= 4 .and. icorio <= 6) then
                fcor1 = fcori(LL) ; fcor2 = fcor1      ! defined at u-point
            else

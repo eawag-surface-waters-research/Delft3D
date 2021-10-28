@@ -1050,6 +1050,7 @@ subroutine readMDUFile(filename, istat)
     call prop_get_logical(md_ptr, 'numerics', 'setHorizontalBobsFor1d2d', setHorizontalBobsFor1d2d)
     call prop_get_integer(md_ptr, 'numerics', 'Icoriolistype'   , icorio)
     call prop_get_integer(md_ptr, 'numerics', 'Newcorio'        , newcorio)
+    call prop_get_integer(md_ptr, 'numerics', 'Corioconstant'   , jacorioconstant)
     call prop_get_double (md_ptr, 'numerics', 'Corioadamsbashfordfac', Corioadamsbashfordfac)
     call prop_get_double (md_ptr, 'numerics', 'Coriohhtrsh'          , hhtrshcor)
     call prop_get_integer(md_ptr, 'numerics', 'Limtyphu'        , limtyphu)
@@ -1227,6 +1228,13 @@ subroutine readMDUFile(filename, istat)
        call mess(LEVEL_WARN, 'Invalid settings specified for SubsUplUpdateS1; using 0.')
        sdu_update_s1 = 0
     endif
+
+    call prop_get(md_ptr, 'numerics', 'Oceaneddysizefrac'   , Oceaneddysizefrac)
+    call prop_get(md_ptr, 'numerics', 'Oceaneddysize'       , Oceaneddysize)
+    call prop_get(md_ptr, 'numerics', 'Oceaneddyamp'        , Oceaneddyamp)
+    call prop_get(md_ptr, 'numerics', 'Oceaneddyvel'        , Oceaneddyvel)
+    call prop_get(md_ptr, 'numerics', 'Oceaneddyyoff'       , Oceaneddyyoff)
+    call prop_get(md_ptr, 'numerics', 'Oceaneddyxoff'       , Oceaneddyxoff)
 
     ! Physics
     call prop_get_double (md_ptr, 'physics', 'UnifFrictCoef'  , frcuni)
@@ -2759,6 +2767,9 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     end if
     call prop_set(prop_ptr, 'numerics', 'Icoriolistype', icorio,    '0=No, 5=default, 3,4 no weights, 5-10 Kleptsova hu/hs, 25-30 Ham hs/hu, odd: 2D hs/hu, even: hsk/huk ')
     call prop_set(prop_ptr, 'numerics', 'Newcorio',      newcorio,  '0=prior to 27-11-2019, 1=no normal forcing on open bnds, plus 12 variants )')
+    if (jacorioconstant .ne. 0) then  
+        call prop_set(prop_ptr, 'numerics', 'Corioconstant', '0=default, 1=Coriolis constant in sferic models anyway,2=beta plane, both in cart. and spher. coord.')
+    endif
     if (Corioadamsbashfordfac .ne. 0) then
        call prop_set(prop_ptr, 'numerics', 'Corioadamsbashfordfac', Corioadamsbashfordfac,    '0=No, 0.5d0=AdamsBashford, only for Newcorio=1)')
     endif
@@ -3012,6 +3023,15 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     endif
     if (writeall .or. sdu_update_s1 > 0) then
        call prop_set (prop_ptr, 'numerics', 'SubsUplUpdateS1', sdu_update_s1, 'Update water levels (S1) due to subsidence / uplift')
+    endif
+
+    if (Oceaneddyamp > 0d0) then 
+       call prop_set(prop_ptr, 'numerics', 'Oceaneddysizefrac'   , Oceaneddysizefrac)
+       call prop_set(prop_ptr, 'numerics', 'Oceaneddysize'       , Oceaneddysize)
+       call prop_set(prop_ptr, 'numerics', 'Oceaneddyamp'        , Oceaneddyamp)
+       call prop_set(prop_ptr, 'numerics', 'Oceaneddyvel'        , Oceaneddyvel)
+       call prop_set(prop_ptr, 'numerics', 'Oceaneddyyoff'       , Oceaneddyyoff)
+       call prop_set(prop_ptr, 'numerics', 'Oceaneddyxoff'       , Oceaneddyxoff)
     endif
 
 ! Physics

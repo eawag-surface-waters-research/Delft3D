@@ -1,30 +1,30 @@
 !----- AGPL --------------------------------------------------------------------
-!                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2021.                                
-!                                                                               
-!  This file is part of Delft3D (D-Flow Flexible Mesh component).               
-!                                                                               
-!  Delft3D is free software: you can redistribute it and/or modify              
-!  it under the terms of the GNU Affero General Public License as               
-!  published by the Free Software Foundation version 3.                         
-!                                                                               
-!  Delft3D  is distributed in the hope that it will be useful,                  
-!  but WITHOUT ANY WARRANTY; without even the implied warranty of               
-!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the                
-!  GNU Affero General Public License for more details.                          
-!                                                                               
-!  You should have received a copy of the GNU Affero General Public License     
-!  along with Delft3D.  If not, see <http://www.gnu.org/licenses/>.             
-!                                                                               
-!  contact: delft3d.support@deltares.nl                                         
-!  Stichting Deltares                                                           
-!  P.O. Box 177                                                                 
-!  2600 MH Delft, The Netherlands                                               
-!                                                                               
-!  All indications and logos of, and references to, "Delft3D",                  
-!  "D-Flow Flexible Mesh" and "Deltares" are registered trademarks of Stichting 
+!
+!  Copyright (C)  Stichting Deltares, 2017-2021.
+!
+!  This file is part of Delft3D (D-Flow Flexible Mesh component).
+!
+!  Delft3D is free software: you can redistribute it and/or modify
+!  it under the terms of the GNU Affero General Public License as
+!  published by the Free Software Foundation version 3.
+!
+!  Delft3D  is distributed in the hope that it will be useful,
+!  but WITHOUT ANY WARRANTY; without even the implied warranty of
+!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+!  GNU Affero General Public License for more details.
+!
+!  You should have received a copy of the GNU Affero General Public License
+!  along with Delft3D.  If not, see <http://www.gnu.org/licenses/>.
+!
+!  contact: delft3d.support@deltares.nl
+!  Stichting Deltares
+!  P.O. Box 177
+!  2600 MH Delft, The Netherlands
+!
+!  All indications and logos of, and references to, "Delft3D",
+!  "D-Flow Flexible Mesh" and "Deltares" are registered trademarks of Stichting
 !  Deltares, and remain the property of Stichting Deltares. All rights reserved.
-!                                                                               
+!
 !-------------------------------------------------------------------------------
 
 ! $Id$
@@ -489,8 +489,7 @@ end if
  else if (md_IDENT(1:14) == 'corioliskelvin') then
      call corioliskelvin(0d0)
  else if (md_IDENT(1:9) == 'oceaneddy') then
-     !call oceaneddy(0d0)
-
+     call oceaneddy(0d0)
  else if (index(md_ident,'checkerboard') > 0 ) then     ! v40.net, v100.net
 
     bl    = 0d0
@@ -977,9 +976,9 @@ end if
     call oldfil(msam, md_s1inifile)
     if (msam /= 0) then
         call reasam(msam, 0)
-        if (jampi > 0) then 
+        if (jampi > 0) then
             call mess(LEVEL_WARN, 'Filling water level using [geometry] WaterLevIniFile in .mdu does not exchange information between partitions')
-        endif 
+        endif
         call flow_initfloodfill()
     end if
     call restoresam()
@@ -1420,7 +1419,7 @@ end if
     endif
  endif
 
- if (jasal > 0) then   
+ if (jasal > 0) then
     if (kmx > 0 .and. inisal2D >= 1 .and. jarestart.eq.0 ) then
        do kk = 1,ndx
           call getkbotktop(kk,kb,kt)
@@ -1455,7 +1454,7 @@ end if
           deallocate (sabot)
        endif
     endif
-    
+
     do k = 1,ndkx
        sa1(k) = max( 0d0,  sa1(k) )
     enddo
@@ -1472,7 +1471,7 @@ end if
     endif
 
     salmax = maxval(sa1)
-  
+
  endif
 
  if (kmx > 0 .and. inised2D > 0 ) then
@@ -1531,7 +1530,7 @@ end if
     do k = 1,ndkx
        constituents(isalt,k) = max( 0d0,  sa1(k) )
     enddo
- endif 
+ endif
 
  if (itemp > 0) then ! used to be in fill_constituents each step
     do k = 1,ndkx
