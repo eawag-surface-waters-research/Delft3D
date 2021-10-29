@@ -360,6 +360,9 @@ module swan_input
     integer, parameter :: q_wl   = 2 ! used as index in array qextnd
     integer, parameter :: q_cur  = 3 ! used as index in array qextnd
     integer, parameter :: q_wind = 4 ! used as index in array qextnd
+
+    private
+    public :: read_swan, swan_type, swan_run
 contains
 !
 !
@@ -600,7 +603,6 @@ subroutine scan_mdw(sr)
     integer                     :: convar
     integer                     :: cp
     integer                     :: cs
-    integer                     :: error
     integer                     :: gridtype
     integer                     :: i, j
     integer                     :: ios
@@ -1180,7 +1182,6 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
     integer                     :: sectnr
     integer                     :: timenr
     integer                     :: timetable
-    integer                     :: iter
     integer                     :: n_outpars
     integer                     :: par
     integer                     :: slash_er
@@ -3972,7 +3973,6 @@ subroutine write_swan_inp (wavedata, calccount, &
     integer                     :: kst
     integer                     :: l
     integer                     :: lc
-    integer                     :: lunhot
     integer                     :: luninp
     integer                     :: m
     integer                     :: mdc1
@@ -4000,16 +4000,12 @@ subroutine write_swan_inp (wavedata, calccount, &
     real                        :: dyb
     real                        :: fhigh
     real                        :: flow
-    real                        :: timsec
     real                        :: xlenfr
     real                        :: xpfr
     real                        :: xpb
     real                        :: ypb
     real                        :: ylenfr
     real                        :: ypfr
-    real                        :: tal
-    real                        :: tap
-    character(6)                :: oldhot
     character(7), dimension(20) :: varnam1
     character(7), dimension(9)  :: varnam2
     character(8)                :: casl_short
@@ -5178,14 +5174,8 @@ subroutine write_swan_inp (wavedata, calccount, &
     !
     if (sr%output_points) then
        do loc = 1, sr%nloc
-          pointname = ' '
-          !
-          ! Remove the path from pntfilnam
-          !
-          indstart  = max(0 , index(sr%pntfilnam(loc),'/',back=.true.) , index(sr%pntfilnam(loc),'\',back=.true.))
-          pointname = sr%pntfilnam(loc)(indstart+1:)
-          indend    = min(9 , index(pointname,' ',back=.false.) , index(pointname,'.',back=.false.))
-          pointname(indend:) = ' '
+          pointname = get_pointname(sr%pntfilnam(loc))
+
           line(1:7)       = 'POINTS '
           i               = 8
           line(i:i)       = ''''''
@@ -5618,5 +5608,28 @@ subroutine adjustinput(sr)
     enddo
     !
 end subroutine adjustinput
+
+!> pointname is pntfilnam without path, spaces and extension
+function get_pointname(pntfilnam) result (pointname)
+   character(len=*), intent(in) :: pntfilnam  !< input filename
+   character(len=79)            :: pointname  !< function result
+
+   integer :: indstart, indend
+   !
+   ! Remove the path, spaces and extension from pntfilnam
+   !
+   indstart  = max(0 , index(pntfilnam,'/',back=.true.) , index(pntfilnam,'\',back=.true.))
+   pointname = pntfilnam(indstart+1:)
+
+   indend    = index(pointname, ' ')
+   if (indend > 0) then
+      pointname(indend:) = ' '
+   end if
+
+   indend    = index(pointname, '.')
+   if (indend > 0) then
+      pointname(indend:) = ' '
+   end if
+end function get_pointname
 
 end module swan_input
