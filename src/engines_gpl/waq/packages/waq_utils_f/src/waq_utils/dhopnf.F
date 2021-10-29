@@ -74,6 +74,7 @@
 
 !     check if files exist in the current working directory
       loc = 0
+      wd = "."
       loc = scan(trim(finam),'/\',back = .true.)
       if (loc > 0) then
           wd = finam(1:loc)
