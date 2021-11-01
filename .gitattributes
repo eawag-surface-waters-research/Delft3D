@@ -17946,6 +17946,7 @@ src/tools_lgpl/matlab/quickplot/make_d3dmatlab.m -text
 src/tools_lgpl/matlab/quickplot/make_delwaq2raster.m -text
 src/tools_lgpl/matlab/quickplot/make_ecoplot.m -text
 src/tools_lgpl/matlab/quickplot/make_quickplot.m -text
+src/tools_lgpl/matlab/quickplot/make_sim2ugrid.m -text
 src/tools_lgpl/matlab/quickplot/matlabversionnumber.m -text
 src/tools_lgpl/matlab/quickplot/new_data_struct.m -text
 src/tools_lgpl/matlab/quickplot/new_getdata_interface.m -text
@@ -18490,6 +18491,7 @@ src/tools_lgpl/matlab/quickplot/progsrc/reducepoints.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/samples.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/setzcoord.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/shape.m -text
+src/tools_lgpl/matlab/quickplot/progsrc/sim2ugrid.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/splitcellstr.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/stagprint.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/surfer.m -text
