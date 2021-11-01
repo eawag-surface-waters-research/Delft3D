@@ -361,8 +361,8 @@ module swan_input
     integer, parameter :: q_cur  = 3 ! used as index in array qextnd
     integer, parameter :: q_wind = 4 ! used as index in array qextnd
 
-    private
-    public :: read_swan, swan_type, swan_run
+    private :: get_pointname, alloc_swan
+
 contains
 !
 !
