@@ -884,7 +884,7 @@ end subroutine setfoustandardname
        real(kind=fp)                , intent(in)            :: dtw     !<  weight for time step
        real(kind=prec), dimension(:), intent(in)            :: bl      !<  bottum level
        integer                      , intent(inout)         :: nfou    !<  counter for update fou quantities
-       real(kind=fp)  , dimension(:), intent(in)            :: rarray2 !<  Array for combined min/max
+       real(kind=fp)  , dimension(:), intent(in), optional  :: rarray2 !<  Array for combined min/max
        !
        ! The following list of pointer parameters is used to point inside the gdfourier structure
        !
@@ -964,6 +964,10 @@ end subroutine setfoustandardname
              !
              ! combined max value
              !
+             if (.not. present(rarray2)) then
+                msgbuf = 'rarray2 not given for combined max value'
+                call err_flush()
+             end if
              do n = 1, nmaxus
                 if (rarray2(n) > fousmas(n)) then
                    fousmas(n) = rarray2(n)
@@ -974,6 +978,10 @@ end subroutine setfoustandardname
              !
              ! combined min value
              !
+             if (.not. present(rarray2)) then
+                msgbuf = 'rarray2 not given for combined min value'
+                call err_flush()
+             end if
              do n = 1, nmaxus
                 if (rarray2(n) < fousmas(n)) then
                    fousmas(n) = rarray2(n)
@@ -1286,8 +1294,10 @@ end subroutine setfoustandardname
           call find_field_pointer(fieldptr1, founam(ifou))
           if (gdfourier%fouelp(ifou) == 'c' .or. gdfourier%fouelp(ifou) == 'C') then
              call find_field_pointer(fieldptr2, gdfourier%founamc(ifou))
+             call fouana(ifou, time0, fieldptr1, bl, dtw, nfou, fieldptr2)
+          else
+             call fouana(ifou, time0, fieldptr1, bl, dtw, nfou)
           end if
-          call fouana(ifou, time0, fieldptr1, bl, dtw, nfou, fieldptr2)
        enddo
 
        if (allocated(wmag)) deallocate(wmag)
