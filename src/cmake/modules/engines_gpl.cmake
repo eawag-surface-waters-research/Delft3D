@@ -18,6 +18,7 @@ set(waq_io_module "${waq_module_path}/waq_io")
 set(delwaq_module "${waq_module_path}/delwaq")
 set(delwaq1_module "${waq_module_path}/delwaq1")
 set(delwaq2_module "${waq_module_path}/delwaq2")
+set(delwaq_lib_examples_module "${waq_module_path}/delwaq_lib_examples")
 
 # Waves
 set(wave_module_path "${engines_gpl_path}/wave/packages")

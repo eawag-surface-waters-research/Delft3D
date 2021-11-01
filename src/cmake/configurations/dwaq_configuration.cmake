@@ -1,6 +1,5 @@
 project(dwaq)
 
-
 #
 # WAQ
 #=============
@@ -36,8 +35,22 @@ if(NOT TARGET delwaq1)
     add_subdirectory(${checkout_src_root}/${delwaq1_module} delwaq1)
 endif()
 
-if(NOT TARGET delwaq2)
-    add_subdirectory(${checkout_src_root}/${delwaq2_module} delwaq2)
+if(NOT TARGET delwaq_lib_examples)
+    add_subdirectory(${checkout_src_root}/${delwaq_lib_examples_module} delwaq_lib_examples)
+endif()
+
+#
+# WAQ Tools
+#=============
+# Waqpb
+if(NOT TARGET waqpb_export)
+    add_subdirectory(${checkout_src_root}/${waqpb_export_module} waqpb_export)
+endif()
+if(NOT TARGET waqpb_import)
+    add_subdirectory(${checkout_src_root}/${waqpb_import_module} waqpb_import)
+endif()
+if(NOT TARGET waqpb_lib)
+    add_subdirectory(${checkout_src_root}/${waqpb_lib_module} waqpb_lib)
 endif()
 
 
@@ -63,22 +76,6 @@ endif()
 
 if(NOT TARGET delpar)
     add_subdirectory(${checkout_src_root}/${delpar_module} delpar)
-endif()
-
-
-
-#
-# WAQ Tools
-#=============
-# Waqpb
-if(NOT TARGET waqpb_export)
-    add_subdirectory(${checkout_src_root}/${waqpb_export_module} waqpb_export)
-endif()
-if(NOT TARGET waqpb_import)
-    add_subdirectory(${checkout_src_root}/${waqpb_import_module} waqpb_import)
-endif()
-if(NOT TARGET waqpb_lib)
-    add_subdirectory(${checkout_src_root}/${waqpb_lib_module} waqpb_lib)
 endif()
 
 #

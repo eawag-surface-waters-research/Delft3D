@@ -3613,12 +3613,15 @@ src/engines_gpl/waq/packages/delwaq2_openda_lib/delwaq2_openda_lib.vfproj -text
 src/engines_gpl/waq/packages/delwaq2_openda_lib/src/m_delwaq_2_openda.F90 -text
 src/engines_gpl/waq/packages/delwaq2_openda_lib/src/openda_exchange_items.f90 -text
 src/engines_gpl/waq/packages/delwaq2_openda_lib/src/waq_multi_instance.f90 -text
+src/engines_gpl/waq/packages/delwaq_lib_examples/CMakeLists.txt -text
+src/engines_gpl/waq/packages/delwaq_lib_examples/delwaq2_stepwise/CMakeLists.txt -text
 src/engines_gpl/waq/packages/delwaq_lib_examples/delwaq2_stepwise/delwaq2_stepwise.vfproj -text
 src/engines_gpl/waq/packages/delwaq_lib_examples/delwaq2_stepwise/src/Makefile.am -text
 src/engines_gpl/waq/packages/delwaq_lib_examples/delwaq2_stepwise/src/block.f -text
 src/engines_gpl/waq/packages/delwaq_lib_examples/delwaq2_stepwise/src/dlwqmain_stepwise.f90 -text
 src/engines_gpl/waq/packages/delwaq_lib_examples/delwaq2_two_instances/delwaq2_two_instances.vfproj -text
 src/engines_gpl/waq/packages/delwaq_lib_examples/delwaq2_two_instances/src/dlwqmain_two_instances.f90 -text
+src/engines_gpl/waq/packages/delwaq_lib_examples/delwaq_dimr_test/CMakeLists.txt -text
 src/engines_gpl/waq/packages/delwaq_lib_examples/delwaq_dimr_test/delwaq_dimr_test.vfproj -text
 src/engines_gpl/waq/packages/delwaq_lib_examples/delwaq_dimr_test/src/Makefile.am -text
 src/engines_gpl/waq/packages/delwaq_lib_examples/delwaq_dimr_test/src/delwaq_dimr_test.f90 -text
