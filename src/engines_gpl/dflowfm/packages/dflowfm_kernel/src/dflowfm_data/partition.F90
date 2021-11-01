@@ -5560,24 +5560,20 @@ end subroutine gatherv_double_data_mpi_dif
       if ( allocated(idomain) ) deallocate(idomain)
 
 !     allocate
-      allocate(idomain(Ne))
+      allocate(idomain(Ne), stat=ierror)
+      call aerr('idomain(Ne)', ierror, Ne)
 
 #ifdef HAVE_METIS
 !     allocate
-      allocate(tpwgts(Nparts))
+      allocate(tpwgts(Nparts), stat=ierror)
+      call aerr('tpwgts(Nparts)', ierror, Nparts)
       if (method == 3) then
          Nn = numk
-         allocate(eptr(nump1d2d+1))
-         allocate(eind(4*max(Ne,Nn)))
-         allocate(vwgt(max(Ne,Nn)))
-         allocate(vsize(max(Ne,Nn)))
-         allocate(npart(max(Ne,Nn)))
+         allocate(eptr(nump1d2d+1), eind(4*max(Ne,Nn)), vwgt(max(Ne,Nn)), vsize(max(Ne,Nn)), npart(max(Ne,Nn)), stat=ierror)
+         call aerr('eptr(...)', ierror, nump1d2d+1 + 7*max(Ne,Nn))
       else
-         allocate(vwgt(Ne))
-         allocate(vsize(Ne))
-         allocate(npart(Ne))
-         allocate(ncon(1))
-         allocate(ubvec(1))
+         allocate(vwgt(Ne), vsize(Ne), npart(Ne), ncon(1), ubvec(1), stat=ierror)
+         call aerr('vwgt(...)', ierror, 2+3*Ne)
       endif
 
 !     set default options
@@ -5639,9 +5635,11 @@ end subroutine gatherv_double_data_mpi_dif
          ubvec = 1.001                      ! allowed load imbalance tolerance
 
 !        generate adjacency structure in CSR format 
-         allocate(iadj(nump1d2d+1))
+         allocate(iadj(nump1d2d+1), stat=ierror)
+         call aerr('iadj(nump1d2d+1)', ierror, nump1d2d+1)
          iadj = 0
-         allocate(iadj_tmp(nump1d2d+1))
+         allocate(iadj_tmp(nump1d2d+1), stat=ierror)
+         call aerr('iadj_tmp(nump1d2d+1)', ierror, nump1d2d+1)
 
 !        count number of connection per vertex
          iadj_tmp = 0
@@ -5661,7 +5659,8 @@ end subroutine gatherv_double_data_mpi_dif
          end do
 
 !        set connections
-         allocate(jadj(iadj(nump1d2d+1)-1))
+         allocate(jadj(iadj(nump1d2d+1)-1), stat=ierror)
+         call aerr('jadj(iadj(nump1d2d+1)-1)', ierror, iadj(nump1d2d+1)-1)
          jadj = 0
 
          iadj_tmp = iadj
@@ -5676,7 +5675,8 @@ end subroutine gatherv_double_data_mpi_dif
             end if
          end do
 
-         allocate(adjw(iadj(nump1d2d+1)-1))
+         allocate(adjw(iadj(nump1d2d+1)-1), stat=ierror)
+         call aerr('jadjw(iadj(nump1d2d+1)-1)', ierror, iadj(nump1d2d+1)-1)
          adjw = 0
 !        set edge weights and vsize
          call set_weights_for_METIS(nump1d2d, Nparts, iadj(nump1d2d+1)-1, iadj, jadj,vsize, adjw)
