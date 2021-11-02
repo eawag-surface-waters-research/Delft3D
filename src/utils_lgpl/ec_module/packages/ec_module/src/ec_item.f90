@@ -502,22 +502,14 @@ module m_ec_item
          end if
          !
          if (item%accessType==accessType_fileReader) then 
-            ! Find the FileReader which can update this source Item.
-            frs: do i=1, instancePtr%nFileReaders
-               do j=1, instancePtr%ecFileReadersPtr(i)%ptr%nItems
-                  if (instancePtr%ecFileReadersPtr(i)%ptr%items(j)%ptr%id == item%id) then
-                     fileReaderPtr => instancePtr%ecFileReadersPtr(i)%ptr
-                     exit frs ! exits outer named do loop
-                  end if
-               end do
-            end do frs
+            fileReaderPtr => ecSupportFindFileReader(instancePtr, item%providerId)
          endif
          !
 
          ! timesteps < t0 : not supported
          if (item%quantityPtr%constant) then
-               success = .true.
-               return
+            success = .true.
+            return
          else if (comparereal(item%sourceT1FieldPtr%timesteps, timesteps%mjd(), 1.0D-10) == 0) then
             ! requested time equals to T1.
             ! no read action needed, UNLESS 'block-from'

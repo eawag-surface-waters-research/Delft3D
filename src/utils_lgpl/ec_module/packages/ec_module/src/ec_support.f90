@@ -47,8 +47,6 @@ module m_ec_support
    public :: ecGetTimesteps
    public :: ecSupportOpenExistingFile
    public :: ecSupportOpenExistingFileGnu
-   public :: ecSupportAddUniqueInt
-   public :: ecSupportAddUniqueChar
    public :: ecSupportFindItemByQuantityLocation
    public :: ecSupportFindItem
    public :: ecSupportFindQuantity
@@ -253,102 +251,8 @@ module m_ec_support
          endif
       end function ecSupportOpenExistingFile
 
-      ! ==========================================================================
 
-      !> Add an integer to a set of integers.
-      function ecSupportAddUniqueInt(intArr, anInt) result(success)
-         logical                        :: success!< function status
-         integer, dimension(:), pointer :: intArr !< array containing unique integers (a set)
-         integer, intent(in)            :: anInt  !< integer to be added to the set of integers
-
-         integer                        :: i         !< loop counter
-         integer                        :: istat     !< deallocate() status
-         integer                        :: lenArr    !< lenght of intArr
-         integer, dimension(:), pointer :: newIntArr !< larger version of intArr
-
-         success = .false.
-         newIntArr => null()
-         i = 0
-         istat = 1
-         lenArr = 0
-
-         if (.not. associated(intArr)) then
-            call setECMessage("ec_support::ecSupportAddUniqueInt: Dummy argument pointer intArr is not associated.")
-         else
-            lenArr = size(intArr)
-            do i=1, lenArr
-               if (intArr(i) == anInt) then
-                  ! This integer is already in intArr
-                  success = .true.
-                  return
-               endif
-            enddo
-            ! This integer is not yet in intArr, so add it.
-            allocate(newIntArr(lenArr+1), STAT = istat)
-            if (istat /= 0 ) then
-               call setECMessage("ec_support::ecSupportAddUniqueInt: Unable to allocate additional memory.")
-            else
-               do i=1, lenArr
-                  newIntArr(i) = intArr(i) ! Copy existing integers.
-               enddo
-               newIntArr(lenArr+1) = anInt ! Add the new integer.
-               deallocate(intArr, STAT = istat)
-               if (istat /= 0 ) then
-                  call setECMessage("WARNING: ec_support::ecSupportAddUniqueInt: Unable to deallocate old memory.")
-               end if
-               intArr => newIntArr
-               success = .true.
-            end if
-         endif
-      end function ecSupportAddUniqueInt
-
-      ! ==========================================================================
-
-      !> Add a char to a set of chars.
-      function ecSupportAddUniqueChar(charArr, aChar) result(success)
-         logical                                             :: success !< function status
-         character(len=maxNameLen), dimension(:), pointer    :: charArr !< array containing unique chars (a set)
-         character(len=*),                        intent(in) :: aChar   !< char to be added to the set of chars
-         !
-         integer                                          :: i          !< loop counter
-         integer                                          :: istat      !< deallocate() status
-         integer                                          :: lenArr     !< lenght of charArr
-         character(len=maxNameLen), dimension(:), pointer :: newCharArr !< larger version of charArr
-         !
-         success = .false.
-         newCharArr => null()
-         i = 0
-         istat = 1
-         lenArr = 0
-         !
-         !if (.not. associated(charArr)) then
-         !   reallocP(charArr, 1, STAT = istat)
-         !   if (istat == 0) then
-         !      charArr(1) = aChar
-         !   else
-         !      call setECMessage("ec_support::ecSupportAddUniqueChar: Unable to allocate additional memory.")
-         !   end if
-         !   return
-         !end if
-         !!
-         !lenArr = size(charArr)
-         !do i=1, lenArr
-         !   if (charArr(i) == aChar) then
-         !      ! This char is already in charArr
-         !      success = .true.
-         !      return
-         !   endif
-         !enddo
-         !! This char is not yet in charArr, so add it.
-         !reallocP(charArr, lenArr+1, STAT = istat)
-         !if (istat == 0) then
-         !   charArr(lenArr+1) = aChar
-         !   success = .true.
-         !else
-         !   call setECMessage("ec_support::ecSupportAddUniqueChar: Unable to allocate additional memory.")
-         !end if
-      end function ecSupportAddUniqueChar
-
+      !
       ! =======================================================================
       ! Find methods
       ! =======================================================================
@@ -359,16 +263,10 @@ module m_ec_support
          type(tEcInstance), pointer            :: instancePtr !< intent(in)
          integer,                   intent(in) :: quantityId  !< unique Quantity id
          !
-         integer :: i !< loop counter
-         !
          quantityPtr => null()
          !
          if (associated(instancePtr)) then
-            do i=1, instancePtr%nQuantities
-               if (instancePtr%ecQuantitiesPtr(i)%ptr%id == quantityId) then
-                  quantityPtr => instancePtr%ecQuantitiesPtr(i)%ptr
-               end if
-            end do
+            quantityPtr => instancePtr%ecQuantitiesPtr(quantityId)%ptr
          else
             call setECMessage("ec_support::ecSupportFindQuantity: Dummy argument instancePtr is not associated.")
          end if
@@ -421,16 +319,10 @@ module m_ec_support
          type(tEcInstance),   pointer            :: instancePtr   !< intent(in)
          integer,                     intent(in) :: elementSetId  !< unique ElementSet id
          !
-         integer :: i !< loop counter
-         !
          elementSetPtr => null()
          !
          if (associated(instancePtr)) then
-            do i=1, instancePtr%nElementSets
-               if (instancePtr%ecElementSetsPtr(i)%ptr%id == elementSetId) then
-                  elementSetPtr => instancePtr%ecElementSetsPtr(i)%ptr
-               end if
-            end do
+            elementSetPtr => instancePtr%ecElementSetsPtr(elementSetId)%ptr
          else
             call setECMessage("ec_support::ecSupportFindElementSet: Dummy argument instancePtr is not associated.")
          end if
@@ -444,16 +336,10 @@ module m_ec_support
          type(tEcInstance), pointer            :: instancePtr !< intent(in)
          integer,                   intent(in) :: fieldId     !< unique Field id
          !
-         integer :: i !< loop counter
-         !
          fieldPtr => null()
          !
          if (associated(instancePtr)) then
-            do i=1, instancePtr%nFields
-               if (instancePtr%ecFieldsPtr(i)%ptr%id == fieldId) then
-                  fieldPtr => instancePtr%ecFieldsPtr(i)%ptr
-               end if
-            end do
+            fieldPtr => instancePtr%ecFieldsPtr(fieldId)%ptr
          else
             call setECMessage("ec_support::ecSupportFindField: Dummy argument instancePtr is not associated.")
          end if
@@ -476,31 +362,6 @@ subroutine ecInstanceListSourceItems(instancePtr,dev)
             endif
          enddo
 end subroutine ecInstanceListSourceItems
-
-      !! =======================================================================
-      !!> Retrieve the item ID given a quantitystring and locationstring
-      !!> Loop over all items in the EC instance qualified as 'source'
-      !function ecSupportFindItemByQuantityLocation(instancePtr, quantityname, locationname ) result(itemID)
-      !   type(tEcInstance), pointer            :: instancePtr    !< EC-instance
-      !   character(len=*), intent(in)         :: quantityname   !< Desired quantity
-      !   character(len=*), intent(in)         :: locationname   !< Desired location
-      !   integer                               :: itemID         !< returned item ID
-      !   integer :: i                                            !< loop counter over items
-      !   type (tEcItem), pointer               :: itemPtr
-      !
-      !   itemID = -1
-      !   if (associated(instancePtr)) then
-      !      do i=1, instancePtr%nItems
-      !         itemPtr => instancePtr%ecItemsPtr(i)%ptr
-      !         if (itemPtr%role==itemType_source) then
-      !            if (itemPtr%quantityPtr%name==quantityname .and. itemPtr%elementSetPtr%name==locationname) then
-      !               itemID = itemPtr%id
-      !               exit
-      !            end if
-      !         end if
-      !      end do
-      !   end if
-      !end function ecSupportFindItemByQuantityLocation
 
       ! =======================================================================
       !> Retrieve the item ID given a quantitystring and locationstring
@@ -639,8 +500,6 @@ end subroutine ecInstanceListSourceItems
          type(tEcInstance), pointer            :: instancePtr !< intent(in)
          integer,                   intent(in) :: itemId      !< unique Item id
          !
-         integer :: i !< loop counter
-         !
          itemPtr => null()
          !
          if (associated(instancePtr)) then
@@ -659,8 +518,6 @@ end subroutine ecInstanceListSourceItems
          type(tEcConnection),     pointer            :: connectionPtr !< Item corresponding to connectionId
          type(tEcInstance),       pointer            :: instancePtr   !< intent(in)
          integer,                         intent(in) :: connectionId  !< unique Connection id
-         !
-         integer :: i !< loop counter
          !
          connectionPtr => null()
          !
@@ -681,8 +538,6 @@ end subroutine ecInstanceListSourceItems
          type(tEcInstance),  pointer            :: instancePtr  !< intent(in)
          integer,                    intent(in) :: converterId  !< unique Converter id
          !
-         integer :: i !< loop counter
-         !
          converterPtr => null()
          !
          if (associated(instancePtr)) then
@@ -701,8 +556,6 @@ end subroutine ecInstanceListSourceItems
          type(tEcFileReader), pointer            :: fileReaderPtr !< FileReader corresponding to fileReaderId
          type(tEcInstance),   pointer            :: instancePtr   !< intent(in)
          integer,                     intent(in) :: fileReaderId  !< unique FileReader id
-         !
-         integer :: i !< loop counter
          !
          fileReaderPtr => null()
          !
@@ -751,8 +604,6 @@ end subroutine ecInstanceListSourceItems
          type(tEcInstance), pointer              :: instancePtr   !< intent(in)
          integer, intent(in)                     :: bcBlockId     !< unique BCBlock id
          !
-         integer :: i !< loop counter
-         !
          bcBlockPtr => null()
          !
          if (associated(instancePtr)) then
@@ -771,8 +622,6 @@ end subroutine ecInstanceListSourceItems
          type(tEcNetCDF), pointer                :: netCDFPtr     !< NetCDF instance for the given Id
          type(tEcInstance), pointer              :: instancePtr   !< intent(in)
          integer, intent(in)                     :: netCDFId      !< unique NetCDF id
-         !
-         integer :: i !< loop counter
          !
          netCDFPtr => null()
          !
