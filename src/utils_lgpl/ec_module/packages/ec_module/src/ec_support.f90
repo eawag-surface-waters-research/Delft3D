@@ -636,23 +636,22 @@ end subroutine ecInstanceListSourceItems
 
       ! =======================================================================
       !> Find the file reader for the bc block that contains the component definition for the comp.correction block
-      function ecSupportFindRelatedBCBlock(instancePtr, corrFileReaderPtr, qname, bcname, func) result(cmpFileReaderPtr)
+      function ecSupportFindRelatedBCBlock(instancePtr, corFileReaderPtr, func) result(cmpFileReaderPtr)
          type(tEcFileReader), pointer :: cmpFileReaderPtr  !< resulting file reader
          type(tEcInstance),   pointer :: instancePtr       !< intent(in)
-         type(tEcFileReader), pointer :: corrFileReaderPtr !< intent(inout)
-         character(len=*)             :: qname             !< quantity name
-         character(len=*)             :: bcname            !< point on poly name
+         type(tEcFileReader), pointer :: corFileReaderPtr  !< intent(inout)
          integer, intent(in)          :: func              !< function type
 
          integer                      :: iFileReader
-         type (tEcBCBlock), pointer   :: BCBlockptr
+         type (tEcBCBlock), pointer   :: BCBlockptr_cmp, BCBlockptr_cor
          !
          cmpFileReaderPtr => null()
+         BCBlockptr_cor => corFileReaderPtr%bc
          do iFileReader = 1, instancePtr%nFileReaders
-            BCBlockptr => instancePtr%EcFileReadersPtr(iFileReader)%ptr%bc
-            if (associated(BCBlockptr)) then
-               if (trim(BCBlockptr%bcname)==trim(bcname) .and. (trim(BCBlockptr%qname)==trim(qname))  &
-                                                         .and. BCBlockptr%func == func) then
+            BCBlockptr_cmp => instancePtr%EcFileReadersPtr(iFileReader)%ptr%bc
+            if (associated(BCBlockptr_cmp)) then
+               if (trim(BCBlockptr_cmp%bcname)==trim(BCBlockptr_cor%bcname)  .and. &
+                  (trim(BCBlockptr_cmp%qname) ==trim(BCBlockptr_cor%qname))  .and. BCBlockptr_cmp%func == func) then
                   cmpFileReaderPtr => instancePtr%EcFileReadersPtr(iFileReader)%ptr
                   exit
                endif

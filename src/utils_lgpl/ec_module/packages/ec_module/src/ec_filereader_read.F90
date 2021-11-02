@@ -1920,9 +1920,9 @@ module m_ec_filereader_read
          success = .true.
 
          if (corFileReaderPtr%bc%func==BC_FUNC_HARMOCORR) then
-            cmpFileReaderPtr => ecSupportFindRelatedBCBlock(instancePtr, corFileReaderPtr, corFileReaderPtr % bc % qname, corFileReaderPtr % bc % bcname, BC_FUNC_HARMONIC)
+            cmpFileReaderPtr => ecSupportFindRelatedBCBlock(instancePtr, corFileReaderPtr, BC_FUNC_HARMONIC)
          elseif (corFileReaderPtr%bc%func==BC_FUNC_ASTROCORR) then
-            cmpFileReaderPtr => ecSupportFindRelatedBCBlock(instancePtr, corFileReaderPtr, corFileReaderPtr % bc % qname, corFileReaderPtr % bc % bcname, BC_FUNC_ASTRO)
+            cmpFileReaderPtr => ecSupportFindRelatedBCBlock(instancePtr, corFileReaderPtr, BC_FUNC_ASTRO)
          endif
 
          if (.not. associated(cmpFileReaderPtr)) then
