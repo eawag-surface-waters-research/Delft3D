@@ -177,6 +177,7 @@ module read_nc_histories
 
       ! previous default:
       stations_var = 'station_name'
+      nStat = nStations
    end subroutine find_stations_var
 
    !> read station names from an already opened NetCDF file
