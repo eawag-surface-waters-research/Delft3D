@@ -27,9 +27,8 @@ module write_extremes_his
 ! *******************************************************************************
 implicit none
 
-private :: is_above_threshold, write_val2string, write_mean_nloc_2string, &
-           write_mean_range_2string
-public  :: write_extremes_statloop, write_extremes_stat, write_extremes_header
+private :: is_above_threshold, write_mean_nloc_2string, write_mean_range_2string
+public  :: write_extremes_statloop, write_extremes_stat, write_extremes_header, write_val2string
 
 contains
 

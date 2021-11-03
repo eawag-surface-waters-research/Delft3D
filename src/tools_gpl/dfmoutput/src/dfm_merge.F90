@@ -100,7 +100,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
    integer, allocatable :: nfaceedges(:)   ! total number of edges that surround a face
    double precision, allocatable :: node_x(:), node_y(:), edge_x(:), edge_y(:) !< coordinates
    double precision              :: xx, yy
-   integer :: im,imm, nm, ikk, ic, iii, k1c, g1, g2, nfaces, iedge, iface, tmpvarDim, jafound
+   integer :: imm, ikk, ic, iii, k1c, g1, g2, nfaces, iedge, iface, tmpvarDim, jafound
    integer :: ifacefile, ifacein, ifaceout, ifacec
    integer :: inodefile, netedgecount2
    integer :: id_nodex, id_nodey, id_edgex, id_edgey
@@ -127,7 +127,6 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
    integer :: varid
    type(t_ug_network) :: netids_input, netids_output
    type(t_ug_contacts) :: cids_input, cids_output
-   integer, allocatable :: varids_allowmerge(:) ! IDs of variables, =1 allows to merge, =0 does not merge
    integer :: idom, n1, n2, n3, k1, k2
    integer :: tmpdimids(NF90_MAX_VAR_DIMS)
    ! TODO: Consider to change the type of the following i-variables from double precision to integer.
@@ -217,7 +216,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
    integer, allocatable, target  :: link1d2d_domain(:,:)
    integer, allocatable :: link1d2d_c2g(:,:), links1d2dnodes_g(:,:,:), nlink1d2dglob(:)
    integer :: numl1d2dt
-   integer :: contactid, nMaxvars_contact
+   integer :: nMaxvars_contact
    integer, allocatable :: icfile(:), nvars_contact(:,:), varids_contact(:,:,:), id_contactvars(:,:), nMaxvars_contact_icontact(:)
    integer, allocatable :: nvarsel(:)
    integer :: jareadglob

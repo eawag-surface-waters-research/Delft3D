@@ -150,11 +150,12 @@ module read_nc_histories
    !> find stations variable for a time serie
    !! result will be in most cases 'station_name' or 'cross_section_name'
    !! assumes ncid is already opened
-   subroutine find_stations_var(field_name, stations_var)
+   subroutine find_stations_var(field_name, stations_var, nStat)
       character(len=*), intent(in   ) :: field_name
       character(len=*), intent(  out) :: stations_var
+      integer         , intent(  out) :: nStat
 
-      integer :: i, status, nVar, varid, dimids(10), ndims, varid_name, dim_stations
+      integer :: i, status, nVar, dimids(10), ndims, varid_name, dim_stations
       character(len=64) :: name
 
       status = nf90_inquire(ncid, nVariables = nVar)
@@ -167,6 +168,8 @@ module read_nc_histories
          if (index(name, '_name') > 0 .and. ndims == 2) then
             if (dimids(2) == dim_stations) then
                stations_var = name
+               status = nf90_inquire_dimension(ncid, dim_stations, len = nStat)
+               nStations = nStat
                return
             end if
          end if

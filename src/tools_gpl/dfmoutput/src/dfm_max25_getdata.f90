@@ -57,11 +57,12 @@ subroutine fmgetdata_running_mean(filename, filename_out, field_name, minmaxlst)
    real, allocatable :: hisdata(:,:), maxvalues(:), minvalues(:)
    real(kind=8), allocatable :: onetime(:)
    character(len=64), allocatable :: stations(:)
-   integer, allocatable :: stats_index(:), list(:)
+   integer, allocatable :: list(:)
    character(len=32) :: stations_var
+   character(len=12) :: cnum1, cnum2
 
                            ierr = read_meta_data(filename, nStations)
-   if (ierr == nf90_noerr) call find_stations_var(field_name, stations_var)
+   if (ierr == nf90_noerr) call find_stations_var(field_name, stations_var, nStations)
    if (ierr == nf90_noerr) ierr = read_station_names(stations, stations_var)
    if (ierr == nf90_noerr) ierr = read_data(hisdata, field_name)
    if (ierr == nf90_noerr) ierr = close_nc_his_file()
@@ -72,11 +73,16 @@ subroutine fmgetdata_running_mean(filename, filename_out, field_name, minmaxlst)
       open(newunit=iunit, file=filename_out)
       call parse_min_max_list(minmaxlst, list)
       allocate(maxvalues(nStations), minvalues(nStations), onetime(nStations))
+      write(iunit,*) 'quantity = ', field_name
       do k = 1, size(list)
 
          nd = list(k)
          ntimes = size(hisdata,1)
          call runsum%init(nStations, nd)
+         if (nd > ntimes) then
+            write(iunit,*) 'Not enough times for filter width = ', nd
+            cycle
+         end if
          do i = 1, ntimes
             onetime = hisdata(i,:)
             call runsum%update(onetime)
@@ -98,7 +104,9 @@ subroutine fmgetdata_running_mean(filename, filename_out, field_name, minmaxlst)
          ! print values
          write(iunit,*) 'width = ', nd
          do j = 1, nStations
-            write(iunit,'(a32,2(x,f10.4))') stations(j), maxvalues(j), minvalues(j)
+            call write_val2string(maxvalues(j), cnum1, 1)
+            call write_val2string(minvalues(j), cnum2, 1)
+            write(iunit,'(a32,2(a12,x))') stations(j), cnum1, cnum2
          end do
       end do
       close(iunit)
@@ -121,7 +129,7 @@ subroutine fmgetdata(filename, filename_out, field_name, minmaxlst)
    character(len=32) :: stations_var
 
                            ierr = read_meta_data(filename, nStations)
-   if (ierr == nf90_noerr) call find_stations_var(field_name, stations_var)
+   if (ierr == nf90_noerr) call find_stations_var(field_name, stations_var, nStations)
    if (ierr == nf90_noerr) ierr = read_station_names(stations, stations_var)
    if (ierr == nf90_noerr) ierr = read_data(hisdata, field_name)
    if (ierr == nf90_noerr) ierr = close_nc_his_file()
