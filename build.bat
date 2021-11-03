@@ -61,7 +61,7 @@ if !ERRORLEVEL! NEQ 0 exit /B %~1
 
 echo.
 echo Visual Studio sln-files:
-echo all       : %root%\build_all\all.snl
+echo all       : %root%\build_all\all.sln
 echo D-Flow FM : %root%\build_dflowfm\dflowfm.sln
 echo DIMR      : %root%\build_dimr\dimr.sln
 echo DWAQ      : %root%\build_dwaq\dwaq.sln
