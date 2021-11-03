@@ -35,6 +35,10 @@ if(NOT TARGET delwaq1)
     add_subdirectory(${checkout_src_root}/${delwaq1_module} delwaq1)
 endif()
 
+if(NOT TARGET delwaq2)
+    add_subdirectory(${checkout_src_root}/${delwaq2_module} delwaq2)
+endif()
+
 if(NOT TARGET delwaq_lib_examples)
     add_subdirectory(${checkout_src_root}/${delwaq_lib_examples_module} delwaq_lib_examples)
 endif()
