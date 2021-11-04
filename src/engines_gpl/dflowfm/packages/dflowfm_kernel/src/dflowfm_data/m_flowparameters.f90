@@ -830,7 +830,7 @@ subroutine default_flowparameters()
     jahazlayer = 0       !<
     Pure1D     = 0d0     !< puur1D no yes
     JaZlayercenterbedvel      = 1
-    jastructurelayersactive   = 0
+    jastructurelayersactive   = 1
     JaZerozbndinflowadvection = 0
 
     jabaroctimeint = -4  !< time integration baroclini pressure, 1 = expl., 2=AB rho , 3 = AB barocterm, 4=3dryfloodproof 5 = advect rho (n+1/2)
