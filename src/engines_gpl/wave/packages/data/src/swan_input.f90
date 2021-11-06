@@ -5614,7 +5614,9 @@ function get_pointname(pntfilnam) result (pointname)
    character(len=*), intent(in) :: pntfilnam  !< input filename
    character(len=79)            :: pointname  !< function result
 
-   integer :: indstart, indend
+   integer            :: indstart, indend
+   integer, parameter :: maxPointNameLength = 8  ! max length for sname in swanpre2
+
    !
    ! Remove the path, spaces and extension from pntfilnam
    !
@@ -5629,6 +5631,11 @@ function get_pointname(pntfilnam) result (pointname)
    indend    = index(pointname, '.')
    if (indend > 0) then
       pointname(indend:) = ' '
+   end if
+
+   if (len_trim(pointname) > maxPointNameLength) then
+      write(*,'(5a)') "*** MESSAGE: point name '", trim(pointname), "' is truncated to '", pointname(:maxPointNameLength), "'."
+      pointname(maxPointNameLength+1:) = ' '
    end if
 end function get_pointname
 
