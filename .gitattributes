@@ -2295,7 +2295,6 @@ src/engines_gpl/dimr/doc/DIMR-TestPlan/DIMR-TestPlan.tex -text
 src/engines_gpl/dimr/doc/DIMR-TestPlan/buildDoc.bat -text
 src/engines_gpl/dimr/doc/DIMR-TestReport/DIMR-TestReport.tex -text
 src/engines_gpl/dimr/doc/DIMR-TestReport/buildDoc.bat -text
-src/engines_gpl/dimr/doc/DIMR_references/DIMR_references.bib -text
 src/engines_gpl/dimr/doc/DimrAndBMIDesign_v03.docx -text
 src/engines_gpl/dimr/doc/buildDocs.bat -text
 src/engines_gpl/dimr/doc/classDiagramDimr.pdf -text
