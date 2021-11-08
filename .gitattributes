@@ -2284,8 +2284,6 @@ src/engines_gpl/dflowfm/tests/DFlowFMTests/Properties/AssemblyInfo.cs -text
 src/engines_gpl/dflowfm/tests/test_data/2d_ugrid_net.nc -text
 src/engines_gpl/dflowfm/tests/test_data/rectangular_mesh.mdu -text
 src/engines_gpl/dflowfm/tests/test_data/testPolygon.pol -text
-src/engines_gpl/dimr/doc/DIMR-FunctionalDesign/DIMR-FunctionalDesign.tex -text
-src/engines_gpl/dimr/doc/DIMR-FunctionalDesign/buildDoc.bat -text
 src/engines_gpl/dimr/doc/DIMR-TechnicalDocumentation/DIMR.Doxyfile -text
 src/engines_gpl/dimr/doc/DIMR-TechnicalDocumentation/Deltares[!!-~]logo.ico -text
 src/engines_gpl/dimr/doc/DIMR-TechnicalDocumentation/RunDoxygen.bat -text
