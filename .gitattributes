@@ -2287,11 +2287,6 @@ src/engines_gpl/dflowfm/tests/test_data/testPolygon.pol -text
 src/engines_gpl/dimr/doc/DIMR-TechnicalDocumentation/DIMR.Doxyfile -text
 src/engines_gpl/dimr/doc/DIMR-TechnicalDocumentation/Deltares[!!-~]logo.ico -text
 src/engines_gpl/dimr/doc/DIMR-TechnicalDocumentation/RunDoxygen.bat -text
-src/engines_gpl/dimr/doc/DimrAndBMIDesign_v03.docx -text
-src/engines_gpl/dimr/doc/buildDocs.bat -text
-src/engines_gpl/dimr/doc/classDiagramDimr.pdf -text
-src/engines_gpl/dimr/doc/parseLogs.py -text
-src/engines_gpl/dimr/doc/use_dimr_dll_example.c -text
 src/engines_gpl/dimr/packages/dimr/CMakeLists.txt -text
 src/engines_gpl/dimr/packages/dimr/dimr_class_diagram.cd -text
 src/engines_gpl/dimr/packages/dimr/include/dimr_exe.h -text
