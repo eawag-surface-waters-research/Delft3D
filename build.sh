@@ -28,7 +28,7 @@ function print_usage_info {
     echo
     echo "Options:"
     echo "-p, --prepareonly"
-    echo "       Only CMake, no make, no src/build_h6c7.sh"
+    echo "       Only CMake, no make"
     echo
     echo "--debug"
     echo "      Compile in debug mode"
@@ -227,29 +227,6 @@ echo
 scriptdirname=`readlink \-f \$0`
 scriptdir=`dirname $scriptdirname`
 root=$scriptdir
-
-
-
-
-if [ "$prepareonly" = "0" ] && [ "$config" = "all"  ]; then
-    cd $root/src
-    echo "Building the traditional way ..."
-    echo "    Clean directories bin, lib, share in $root/src ..."
-    rm -rf $root/src/bin/ &>/dev/null
-    rm -rf $root/src/lib/ &>/dev/null
-    rm -rf $root/src/share/ &>/dev/null
-    echo "    ./build_h6c7.sh -$compiler"
-              ./build_h6c7.sh -$compiler
-    if [ $? -ne 0 ]; then
-        echo "Traditional build resulted in an error. Check log files."
-        exit 1
-    fi
-
-    cd $root
-fi
-
-
-
 
 #
 # Dot setenv.sh to load the modules needed

@@ -16,8 +16,8 @@ if [ "$1" == "intel21" ]; then
      module load    netcdf/v4.7.4_v4.5.3_intel21.2.0
      module display netcdf/v4.7.4_v4.5.3_intel21.2.0
   
-     module load    petsc/3.13.3_intel21.2.0_mpich3.3.2
-     module display petsc/3.13.3_intel21.2.0_mpich3.3.2
+     module load    petsc/3.13.3_intel21.2.0_intelmpi21.2.0
+     module display petsc/3.13.3_intel21.2.0_intelmpi21.2.0
   
      module load    metis/5.1.0_intel21.2.0
      module display metis/5.1.0_intel21.2.0
