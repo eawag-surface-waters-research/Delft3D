@@ -70,9 +70,9 @@ echo "Export environment variables"
 export FC=mpiifort
 echo "FC=$FC"
 
-export CXX=mpicxx
+export CXX=mpiicpc
 echo "CXX=$CXX"
 
-export CC=mpicc
+export CC=mpiicc
 echo "CC=$CC"
 
