@@ -67,7 +67,7 @@ module load    svn/1.9.12serf_gcc7.3.0
 module display svn/1.9.12serf_gcc7.3.0
 
 echo "Export environment variables"
-export FC=mpif90
+export FC=mpiifort
 echo "FC=$FC"
 
 export CXX=mpicxx
