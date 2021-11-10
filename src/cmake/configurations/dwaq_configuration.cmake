@@ -56,6 +56,15 @@ endif()
 if(NOT TARGET waqpb_lib)
     add_subdirectory(${checkout_src_root}/${waqpb_lib_module} waqpb_lib)
 endif()
+if(NOT TARGET waqmerge_version_number)
+    add_subdirectory(${checkout_src_root}/${waqmerge_version_number_module} waqmerge_version_number)
+endif()
+if(NOT TARGET waqmerge)
+    add_subdirectory(${checkout_src_root}/${waqmerge_module} waqmerge)
+endif()
+if(NOT TARGET agrhyd)
+    add_subdirectory(${checkout_src_root}/${agrhyd_module} agrhyd)
+endif()
 
 
 
@@ -129,6 +138,10 @@ if(NOT TARGET esmfsm)
     add_subdirectory(${checkout_src_root}/${esmfsm_module} esmfsm)
 endif()
 
+# io_netcdf
+if(NOT TARGET io_hyd)
+    add_subdirectory(${checkout_src_root}/${io_hyd_module} io_hyd)
+endif()
 
 
 #

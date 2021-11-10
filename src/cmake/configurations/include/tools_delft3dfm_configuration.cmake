@@ -24,3 +24,17 @@ endif()
 if(NOT TARGET waqpb_export)
     add_subdirectory(${checkout_src_root}/${waqpb_export_module} waqpb_export)
 endif()
+
+# Waqmerge
+if(NOT TARGET waqmerge_version_number)
+    add_subdirectory(${checkout_src_root}/${waqmerge_module} waqmerge_version_number)
+endif()
+
+if(NOT TARGET waqmerge)
+    add_subdirectory(${checkout_src_root}/${waqmerge_module} waqmerge)
+endif()
+
+# Agrhyd
+if(NOT TARGET agrhyd)
+    add_subdirectory(${checkout_src_root}/${agrhyd_module} agrhyd)
+endif()

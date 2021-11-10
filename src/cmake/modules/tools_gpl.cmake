@@ -12,6 +12,9 @@ set(waqpb_module_path "${tools_gpl_path}/waqpb/packages/")
 set(waqpb_lib_module ${waqpb_module_path}/waqpb_lib)
 set(waqpb_import_module ${waqpb_module_path}/waqpb_import)
 set(waqpb_export_module ${waqpb_module_path}/waqpb_export)
+set(waqmerge_module_path "${tools_gpl_path}/waqmerge/packages/")
+set(waqmerge_version_number_module ${tools_gpl_path}/waqmerge/packages/waqmerge_version_number)
+set(waqmerge_module ${tools_gpl_path}/waqmerge/packages/waqmerge)
 
 # Waq_Run_processes
 set(waq_run_processes_module_path "${tools_gpl_path}/waq_run_processes/packages/")
@@ -26,3 +29,6 @@ set(datsel_module_path "${tools_gpl_path}/datsel/packages/")
 set(datsel_version_number_module ${datsel_module_path}/datsel_version_number)
 set(datsel_f_module ${datsel_module_path}/datsel_f)
 set(datsel_module ${datsel_module_path}/datsel)
+
+# Agrhyd
+set(agrhyd_module ${tools_gpl_path}/agrhyd/packages/agrhyd)
