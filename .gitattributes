@@ -17430,6 +17430,7 @@ src/tools_gpl/Makefile.am -text
 src/tools_gpl/agrhyd/Makefile.am -text
 src/tools_gpl/agrhyd/default/agrhyd.ini -text
 src/tools_gpl/agrhyd/packages/Makefile.am -text
+src/tools_gpl/agrhyd/packages/agrhyd/CMakeLists.txt -text
 src/tools_gpl/agrhyd/packages/agrhyd/Makefile.am -text
 src/tools_gpl/agrhyd/packages/agrhyd/agrhyd.vfproj -text
 src/tools_gpl/agrhyd/packages/agrhyd/include/agrhyd_version.rc.svn -text
@@ -17444,7 +17445,7 @@ src/tools_gpl/agrhyd/packages/agrhyd/src/agr_len.f -text
 src/tools_gpl/agrhyd/packages/agrhyd/src/agr_poi.f -text
 src/tools_gpl/agrhyd/packages/agrhyd/src/agr_poi_exp.f -text
 src/tools_gpl/agrhyd/packages/agrhyd/src/agr_poi_reg.f -text
-src/tools_gpl/agrhyd/packages/agrhyd/src/agr_poi_v2.f -text
+src/tools_gpl/agrhyd/packages/agrhyd/src/agr_poi_v2.txt -text
 src/tools_gpl/agrhyd/packages/agrhyd/src/agr_reg.f -text
 src/tools_gpl/agrhyd/packages/agrhyd/src/agrhyd.f90 -text
 src/tools_gpl/agrhyd/packages/agrhyd/src/agrhyd_version.F90.svn -text
@@ -17733,14 +17734,16 @@ src/tools_gpl/waq_run_processes/packages/waq_run_processes_version_number/src/ve
 src/tools_gpl/waq_run_processes/packages/waq_run_processes_version_number/waq_run_processes_version_number.vcxproj -text
 src/tools_gpl/waqmerge/Makefile.am -text
 src/tools_gpl/waqmerge/packages/Makefile.am -text
+src/tools_gpl/waqmerge/packages/waqmerge/CMakeLists.txt -text
 src/tools_gpl/waqmerge/packages/waqmerge/Makefile.am -text
 src/tools_gpl/waqmerge/packages/waqmerge/src/Makefile.am -text
 src/tools_gpl/waqmerge/packages/waqmerge/src/merge_step_unstruc.f90 -text
 src/tools_gpl/waqmerge/packages/waqmerge/src/overall_hyd.F90 -text
 src/tools_gpl/waqmerge/packages/waqmerge/src/read_waqoutput_dir.f90 -text
 src/tools_gpl/waqmerge/packages/waqmerge/src/renum_bnd.f90 -text
-src/tools_gpl/waqmerge/packages/waqmerge/src/waqmerge -text
-src/tools_gpl/waqmerge/packages/waqmerge/waqmerge -text
+src/tools_gpl/waqmerge/packages/waqmerge/src/waqmerge.f90 -text
+src/tools_gpl/waqmerge/packages/waqmerge/waqmerge.vfproj -text
+src/tools_gpl/waqmerge/packages/waqmerge_version_number/CMakeLists.txt -text
 src/tools_gpl/waqmerge/packages/waqmerge_version_number/Makefile.am -text
 src/tools_gpl/waqmerge/packages/waqmerge_version_number/include/resource.h -text
 src/tools_gpl/waqmerge/packages/waqmerge_version_number/include/version_number.h.svn -text

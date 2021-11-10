@@ -48,21 +48,21 @@
       istat = 0
       call prop_file('ini',trim(hyd%file_hyd%name)//'.mdu', mdu_ptr, istat)
       if (istat /= 0) then
-        select case (istat)
-          case(1)
-            write(*     ,'(a,a)'), '*** ERROR File: '//trim(hyd%file_hyd%name)//' not found'
-          case(3)
-            write(*     ,'(a,a)'), '*** ERROR Premature EOF in file: '//trim(hyd%file_hyd%name)
-          case default
-            write(*     ,'(a,a)'), '*** ERROR Read error from file: '//trim(hyd%file_hyd%name)
-        endselect
+         select case (istat)
+            case(1)
+               write(*     ,'(a,a)'), '*** ERROR File: '//trim(hyd%file_hyd%name)//' not found'
+            case(3)
+               write(*     ,'(a,a)'), '*** ERROR Premature EOF in file: '//trim(hyd%file_hyd%name)
+            case default
+               write(*     ,'(a,a)'), '*** ERROR Read error from file: '//trim(hyd%file_hyd%name)
+         endselect
       endif
       call prop_get_string(mdu_ptr, 'output', 'WAQOutputDir', waq_output_dir,waq_output_dir_found)
       
 
       
       if (.not. waq_output_dir_found) then
-        waq_output_dir = 'DFM_DELWAQ' 
+         waq_output_dir = 'DFM_DELWAQ' 
       end if
    
       return
