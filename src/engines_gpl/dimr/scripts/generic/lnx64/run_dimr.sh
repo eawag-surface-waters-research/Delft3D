@@ -156,7 +156,7 @@ if [ $NSLOTS -ne 1 ]; then
     testmpiexec=$(type mpiexec 2>/dev/null)
     if [[ $testmpiexec != "mpiexec is"* ]]; then
         # Try to module load mpi.
-        module load mpich/3.3.2_intel18.0.3
+        module load intelmpi/21.2.0
     fi
     echo "    `type mpiexec`"
 fi
