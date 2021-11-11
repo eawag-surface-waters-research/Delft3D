@@ -1749,6 +1749,7 @@ subroutine readMDUFile(filename, istat)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_waterlevel_s1', jamaps1, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_evaporation', jamapevap, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_volume1', jamapvol1, success)
+    call prop_get_integer(md_ptr, 'output', 'Wrimap_waterdepth', jamaphs, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_waterdepth_hu', jamaphu, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_ancillary_variables', jamapanc, success)
     if (jamapanc > 0) then
@@ -1756,6 +1757,12 @@ subroutine readMDUFile(filename, istat)
           jamaps1 = 1
           write (msgbuf, '(a, i0, a)') 'MDU setting "Wrimap_ancillary_variables = ', jamapanc, '" requires ' &
              //'"Wrimap_waterlevel_s1 = 1". Has been enabled now.'
+          call warn_flush()
+       end if
+       if (jamaphs <= 0) then
+          jamaphs = 1
+          write (msgbuf, '(a, i0, a)') 'MDU setting "Wrimap_ancillary_variables = ', jamapanc, '" requires ' &
+             //'"Wrimap_waterdepth = 1". Has been enabled now.'
           call warn_flush()
        end if
        if (jamaphu <= 0) then
@@ -3638,6 +3645,9 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     endif
     if (writeall .or. jamapvol1 > 0) then
         call prop_set(prop_ptr, 'output', 'Wrimap_volume1', jamapvol1, 'Write volumes to map file (1: yes, 0: no)')
+    endif
+    if (writeall .or. jamaphs /= 1) then
+        call prop_set(prop_ptr, 'output', 'Wrimap_waterdepth', jamaphs, 'Write water depths to map file (1: yes, 0: no)')
     endif
     if (writeall .or. jamaphu > 0) then
         call prop_set(prop_ptr, 'output', 'Wrimap_waterdepth_hu', jamaphu, 'Write water depths on u-points to map file (1: yes, 0: no)')

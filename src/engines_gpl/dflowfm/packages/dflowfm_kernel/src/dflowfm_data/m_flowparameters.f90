@@ -447,6 +447,7 @@
  integer                           :: jamaps1                   !< water levels to map file, 0: no, 1: yes
  integer                           :: jamapevap                 !< evaporation to map file, 0: no, 1: yes
  integer                           :: jamapvol1                 !< Volumes to map file, 0: no, 1: yes
+ integer                           :: jamaphs                   !< Water depths to map file, 0: no, 1: yes
  integer                           :: jamaphu                   !< Water depths on u point to map file, 0: no, 1: yes
  integer                           :: jamapanc                  !< Ancillary variables attribute added to map file, 0: no, 1: yes (http://cfconventions.org/cf-conventions/v1.6.0/cf-conventions.html#ancillary-data)
  integer                           :: jamapau                   !< Normal flow areas au to map file, 0: no, 1: yes
@@ -906,6 +907,7 @@ subroutine default_flowparameters()
     jamaps1 = 1
     jamapevap = 0
     jamapvol1 = 0
+    jamaphs = 1
     jamaphu = 0
     jamapanc = 0
     jamapau = 0

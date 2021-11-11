@@ -570,7 +570,7 @@ function unc_def_var_map(ncid,id_tsp, id_var, itype, iloc, var_name, standard_na
 use m_save_ugrid_state, only: network1dname, mesh2dname, mesh1dname, contactname 
 use netcdf_utils, only: ncu_append_atts
 use m_flowgeom
-use m_flowparameters, only: jamapvol1, jamapau, jamaps1, jamaphu, jamapanc, jamapFlowAnalysis
+use m_flowparameters, only: jamapvol1, jamapau, jamaps1, jamaphs, jamaphu, jamapanc, jamapFlowAnalysis
 use network_data, only: numk, numl, numl1d
 use dfm_error
 use m_missing
@@ -742,7 +742,7 @@ integer :: varid
          ierr = ug_def_var(ncid, id_var(2), idims(idx_fastdim:maxrank), itype, UG_LOC_FACE, &
                            trim(mesh2dname), var_name, standard_name, long_name, unit, cell_method_, cell_measures, crs, ifill=-999, dfill=dmiss, writeopts=unc_writeopts)
       end if
-      if (jamapanc > 0 .and. jamaps1 > 0 .and. .not. strcmpi(var_name, 'waterdepth')) then
+      if (jamapanc > 0 .and. jamaphs > 0 .and. .not. strcmpi(var_name, 'waterdepth')) then
          ierr = unc_put_att_map_char(ncid, id_tsp, id_var, 'ancillary_variables', 'waterdepth')
       end if
 
@@ -803,7 +803,7 @@ integer :: varid
 
       end if
 
-      if (jamapanc > 0 .and. jamaps1 > 0 .and. .not. strcmpi(var_name, 'waterdepth')) then
+      if (jamapanc > 0 .and. jamaphs > 0 .and. .not. strcmpi(var_name, 'waterdepth')) then
          ierr = unc_put_att_map_char(ncid, id_tsp, id_var, 'ancillary_variables', 'waterdepth')
       end if
 
@@ -4731,7 +4731,6 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
 
       ! Water levels
       if (jamaps1 > 0) then
-         ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_hs, nf90_double, UNC_LOC_S, 'waterdepth', 'sea_floor_depth_below_sea_surface', 'Water depth at pressure points', 'm', jabndnd=jabndnd_)
          ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_s1, nf90_double, UNC_LOC_S, 's1',         'sea_surface_height',                'Water level', 'm', jabndnd=jabndnd_)
       end if
       if (jamaps0 > 0) then
@@ -4776,11 +4775,16 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
          ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_dtcell, nf90_double, iLocS, 'dtcell', '', 'Time step per cell based on CFL', 's', jabndnd=jabndnd_)
       endif
       
-      ! Velocities
+      ! Water depths
+      if (jamaphs > 0) then
+         ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_hs, nf90_double, UNC_LOC_S, 'waterdepth', 'sea_floor_depth_below_sea_surface', 'Water depth at pressure points', 'm', jabndnd=jabndnd_)
+      end if
+     
       if (jamaphu > 0) then
          ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_hu, nf90_double, UNC_LOC_U, 'hu', 'sea_floor_depth_below_sea_surface', 'water depth at velocity points', 'm', jabndnd=jabndnd_)
       end if
 
+      ! Velocities
       if (jamapau > 0) then
          ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_au, nf90_double, iLocU, 'au',         '',                'normal flow area between two neighbouring grid cells', 'm2', jabndnd=jabndnd_)
       end if
@@ -5694,19 +5698,23 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
    ! Water level
    if (jamaps1 == 1) then
       !ierr = nf90_inq_varid(mapids%ncid, 'mesh2d'//'_s1', mapids%id_s1(2))
-      ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_s1, UNC_LOC_S, s1, jabndnd=jabndnd_) 
-      !ierr = nf90_inq_varid(mapids%ncid, 'mesh2d'//'_waterdepth', mapids%id_hs(2))
-      ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_hs, UNC_LOC_S, hs, jabndnd=jabndnd_)
+      ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_s1, UNC_LOC_S, s1, jabndnd=jabndnd_)
    end if
-   
+
    if (jamaps0 == 1) then
       ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_s0, UNC_LOC_S, s0, jabndnd=jabndnd_)
    end if
-   
+
    if (jamapqin > 0 .and. jaqin > 0) then
       ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_qin, UNC_LOC_S, qin, jabndnd=jabndnd_)
    end if
 
+   ! Water depth
+   if (jamaphs == 1) then
+      !ierr = nf90_inq_varid(mapids%ncid, 'mesh2d'//'_waterdepth', mapids%id_hs(2))
+      ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_hs, UNC_LOC_S, hs, jabndnd=jabndnd_)
+   end if
+   
    ! Evaporation
    if (jamapevap == 1) then
       if (jadhyd == 1) then
@@ -7225,7 +7233,7 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
             idims(1) = id_flowelemdim(iid)
             idims(2) = id_timedim(iid)
             
-            if(jamaps1 > 0) then
+            if(jamaphs > 0) then
                 call definencvar(imapfile,id_hs(iid)   ,nf90_double,idims,2, 'waterdepth'  , 'water depth', 'm', 'FlowElem_xcc FlowElem_ycc')   
             endif
 
@@ -8903,7 +8911,7 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
            ierr = nf90_put_var(imapfile, id_s0(iid),  s0,   (/ 1, itim /), (/ ndxndxi, 1 /))
         endif
         
-        if (jamaps1>0) then
+        if (jamaphs>0) then
            ierr = nf90_put_var(imapfile, id_hs(iid),  hs,   (/ 1, itim /), (/ ndxndxi, 1 /))
         endif
        ! Tau current and chezy roughness
