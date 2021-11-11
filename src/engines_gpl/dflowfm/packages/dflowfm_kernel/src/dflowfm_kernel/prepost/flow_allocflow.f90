@@ -728,10 +728,13 @@ endif
 
 !    Secondary Flow
  if (jasecflow > 0) then
+    if (allocated (spirint)) deallocate (spirint)
     allocate ( spirint( ndx ) , stat = ierr )
     call aerr('spirint( ndx )', ierr, ndx  ) ; spirint = 0
+    if (allocated (czusf)) deallocate (czusf)
     allocate ( czusf  ( lnx ) , stat = ierr )
     call aerr('czusf  ( lnx )', ierr, lnx  ) ; czusf   = 0
+    if (allocated (czssf)) deallocate (czssf)
     allocate ( czssf  ( ndx ) , stat = ierr )
     call aerr('czssf  ( ndx )', ierr, ndx  ) ; czssf   = 0
     if (kmx == 0) then
