@@ -46,10 +46,10 @@ function print_usage_info {
 # =========================
 function CreateCMakedir () {
     echo
-    echo "Create CMake dir for $1 ..."
+    echo "Create CMake dir for $1$2 ..."
     cd     $root
-    rm -rf $root/build_$1
-    mkdir  $root/build_$1
+    rm -rf $root/build_$1$2
+    mkdir  $root/build_$1$2
 
     return
 }
@@ -62,8 +62,8 @@ function CreateCMakedir () {
 function DoCMake () {
     echo
     echo "Executing CMake for $1 ..."
-    cd    $root/build_$1
-    echo "cmake ../src/cmake -G "$generator" -B "." -D CONFIGURATION_TYPE="$1" -D CMAKE_BUILD_TYPE=${buildtype} &>build_$1/cmake_$1.log"
+    cd    $root/build_$1$2
+    echo "cmake ../src/cmake -G "$generator" -B "." -D CONFIGURATION_TYPE="$1" -D CMAKE_BUILD_TYPE=${buildtype} &>build_$1$2/cmake_$1.log"
           cmake ../src/cmake -G "$generator" -B "." -D CONFIGURATION_TYPE="$1" -D CMAKE_BUILD_TYPE=${buildtype} &>cmake_$1.log
     if [ $? -ne 0 ]; then
         echo "CMake configure resulted in an error. Check log files."
@@ -81,8 +81,8 @@ function DoCMake () {
 function BuildCMake () {
     echo
     echo "Building (make) based on CMake preparations for $1 ..."
-    cd    $root/build_$1
-    echo "make VERBOSE=1 install &>build_$1/make_$1.log"
+    cd    $root/build_$1$2
+    echo "make VERBOSE=1 install &>build_$1$2/make_$1.log"
           make VERBOSE=1 install &>make_$1.log
     if [ $? -ne 0 ]; then
         echo "CMake build resulted in an error. Check log files."
@@ -98,40 +98,40 @@ function BuildCMake () {
 # === InstallAll        ===
 # =========================
 function InstallAll () {
-    if [ "$config" = "all"  ]; then
+    if [ ${1} = "all"  ]; then
         echo
         echo "Installing in build_all ..."
         cd     $root
-        rm -rf $root/build_all/lnx64
-        mkdir -p $root/build_all/lnx64
+        rm -rf $root/build_$1$2/lnx64
+        mkdir -p $root/build_$1$2/lnx64
         # Start with artifacts from traditional build
-        cp -rf $root/src/bin/ $root/build_all/lnx64/ &>/dev/null
-        cp -rf $root/src/lib/ $root/build_all/lnx64/ &>/dev/null
-        cp -rf $root/src/share/ $root/build_all/lnx64/ &>/dev/null
+        cp -rf $root/src/bin/ $root/build_$1$2/lnx64/ &>/dev/null
+        cp -rf $root/src/lib/ $root/build_$1$2/lnx64/ &>/dev/null
+        cp -rf $root/src/share/ $root/build_$1$2/lnx64/ &>/dev/null
         # Delete DIMR/D-Flow FM/D-WAQ/D-WAVES related files: they will be added from the CMake build tasks
-        rm -f $root/build_all/lnx64/bin/dflowfm        &>/dev/null
-        rm -f $root/build_all/lnx64/bin/dimr           &>/dev/null
-        rm -f $root/build_all/lnx64/lib/libdflowfm.so* &>/dev/null
-        rm -f $root/build_all/lnx64/lib/libdimr.so*    &>/dev/null
+        rm -f $root/build_$1$2/lnx64/bin/dflowfm        &>/dev/null
+        rm -f $root/build_$1$2/lnx64/bin/dimr           &>/dev/null
+        rm -f $root/build_$1$2/lnx64/lib/libdflowfm.so* &>/dev/null
+        rm -f $root/build_$1$2/lnx64/lib/libdimr.so*    &>/dev/null
 
-        rm -f $root/build_all/lnx64/bin/delwaq*                      &>/dev/null
-        rm -f $root/build_all/lnx64/lib/libdelwaq.so*                &>/dev/null
-        rm -f $root/build_all/lnx64/lib/libwaq_plugin_wasteload.so*  &>/dev/null
-        rm -f $root/build_all/lnx64/share/delft3d/bloom*             &>/dev/null
-        rm -f $root/build_all/lnx64/share/delft3d/proc_def*          &>/dev/null
+        rm -f $root/build_$1$2/lnx64/bin/delwaq*                      &>/dev/null
+        rm -f $root/build_$1$2/lnx64/lib/libdelwaq.so*                &>/dev/null
+        rm -f $root/build_$1$2/lnx64/lib/libwaq_plugin_wasteload.so*  &>/dev/null
+        rm -f $root/build_$1$2/lnx64/share/delft3d/bloom*             &>/dev/null
+        rm -f $root/build_$1$2/lnx64/share/delft3d/proc_def*          &>/dev/null
 
-        rm -f $root/build_all/lnx64/bin/wave*                        &>/dev/null
-        rm -f $root/build_all/lnx64/bin/swan*                        &>/dev/null
-        rm -f $root/build_all/lnx64/lib/libwave*                     &>/dev/null
+        rm -f $root/build_$1$2/lnx64/bin/wave*                        &>/dev/null
+        rm -f $root/build_$1$2/lnx64/bin/swan*                        &>/dev/null
+        rm -f $root/build_$1$2/lnx64/lib/libwave*                     &>/dev/null
 
         # CMaked stuff
-        cp -rf $root/build_all/install/* $root/build_all/lnx64/ &>/dev/null
+        cp -rf $root/build_$1$2/install/* $root/build_$1$2/lnx64/ &>/dev/null
 
         # Additional step to copy ESMF stuff needed by D-WAVES
-        cp -rf $root/src/third_party_open/esmf/lnx64/bin/ESMF_RegridWeightGen                          $root/build_all/lnx64/bin                               &>/dev/null
-        cp -rf $root/src/third_party_open/esmf/lnx64/scripts/ESMF_RegridWeightGen_in_Delft3D-WAVE.sh   $root/build_all/lnx64/bin                               &>/dev/null
-        cp -rf $root/src/third_party_open/esmf/lnx64/bin/lib*                                          $root/build_all/lnx64/share/delft3d/esmf/lnx64/bin      &>/dev/null
-        cp -rf $root/src/third_party_open/esmf/lnx64/bin_COS7/lib*                                     $root/build_all/lnx64/share/delft3d/esmf/lnx64/bin_COS7 &>/dev/null
+        cp -rf $root/src/third_party_open/esmf/lnx64/bin/ESMF_RegridWeightGen                          $root/build_$1$2/lnx64/bin                               &>/dev/null
+        cp -rf $root/src/third_party_open/esmf/lnx64/scripts/ESMF_RegridWeightGen_in_Delft3D-WAVE.sh   $root/build_$1$2/lnx64/bin                               &>/dev/null
+        cp -rf $root/src/third_party_open/esmf/lnx64/bin/lib*                                          $root/build_$1$2/lnx64/share/delft3d/esmf/lnx64/bin      &>/dev/null
+        cp -rf $root/src/third_party_open/esmf/lnx64/bin_COS7/lib*                                     $root/build_$1$2/lnx64/share/delft3d/esmf/lnx64/bin_COS7 &>/dev/null
     fi
 
     return
@@ -151,6 +151,7 @@ config=
 generator="Unix Makefiles"
 compiler=intel18
 buildtype=Release
+buildDirExtension=""
 
 #
 ## Start processing command line options:
@@ -202,6 +203,7 @@ case $key in
     ;;
     --debug)
     buildtype=Debug
+    buildDirExtension="_debug"
     shift
     ;;
     *)
@@ -218,7 +220,7 @@ if [ -z $config ]; then
 fi
 
 echo
-echo "    config      : $config"
+echo "    config      : $config" "${buildtype}"
 echo "    compiler    : $compiler"
 echo "    prepareonly : $prepareonly"
 echo
@@ -237,17 +239,17 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-CreateCMakedir $config
+CreateCMakedir ${config} ${buildDirExtension}
 
-DoCMake $config
+DoCMake ${config} ${buildDirExtension}
 
 if [ "$prepareonly" = "1" ]; then
     echo Finished with preparations only
     exit 0
 fi
 
-BuildCMake $config
+BuildCMake ${config} ${buildDirExtension}
 
-InstallAll
+InstallAll ${config} ${buildDirExtension}
 
 echo Finished
