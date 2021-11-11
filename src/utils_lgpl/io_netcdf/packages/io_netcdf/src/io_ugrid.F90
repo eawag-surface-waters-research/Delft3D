@@ -1458,30 +1458,30 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
          if (meshids%varids(mid_edgelon).ne.-1) then
             ierr = nf90_put_var(ncid, meshids%varids(mid_edgelon), lone(1:numEdge))
          endif
-        if (meshids%varids(mid_edgelat).ne.-1) then
-           ierr = nf90_put_var(ncid, meshids%varids(mid_edgelat), late(1:numEdge))
+         if (meshids%varids(mid_edgelat).ne.-1) then
+            ierr = nf90_put_var(ncid, meshids%varids(mid_edgelat), late(1:numEdge))
          endif
          deallocate(lone)
          deallocate(late)
 
-        ! end point coordinates:
-       if (size(edge_nodes,2).gt.0) then
-          allocate(edgelonbnd(2, numEdge), edgelatbnd(2, numEdge))
-          edgelonbnd = dmiss
-          edgelatbnd = dmiss
-          do n=1,numEdge
-             edgelonbnd(1:2, n) = lonn(edge_nodes(1:2, n)+offset)
-             edgelatbnd(1:2, n) = latn(edge_nodes(1:2, n)+offset)
-          end do
-          if (meshids%varids(mid_edgelonbnd).ne.-1) then
-             ierr = nf90_put_var(ncid, meshids%varids(mid_edgelonbnd), edgelonbnd)
-          endif
-          if (meshids%varids(mid_edgelatbnd).ne.-1) then
-             ierr = nf90_put_var(ncid, meshids%varids(mid_edgelatbnd), edgelatbnd)
-          endif
-          deallocate(edgelonbnd, edgelatbnd)
-       endif
-     end if
+         ! end point coordinates:
+         if (size(edge_nodes,2).gt.0) then
+            allocate(edgelonbnd(2, numEdge), edgelatbnd(2, numEdge))
+            edgelonbnd = dmiss
+            edgelatbnd = dmiss
+            do n=1,numEdge
+               edgelonbnd(1:2, n) = lonn(edge_nodes(1:2, n)+offset)
+               edgelatbnd(1:2, n) = latn(edge_nodes(1:2, n)+offset)
+            end do
+            if (meshids%varids(mid_edgelonbnd).ne.-1) then
+               ierr = nf90_put_var(ncid, meshids%varids(mid_edgelonbnd), edgelonbnd)
+            endif
+            if (meshids%varids(mid_edgelatbnd).ne.-1) then
+               ierr = nf90_put_var(ncid, meshids%varids(mid_edgelatbnd), edgelatbnd)
+            endif
+            deallocate(edgelonbnd, edgelatbnd)
+         endif
+      end if
 #endif
    end if
 
