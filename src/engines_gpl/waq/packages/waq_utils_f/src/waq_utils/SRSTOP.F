@@ -55,7 +55,7 @@
       write ( 13 , * ) iexit
       close ( 13 )
 
-      if (useexeption_waq) call throwexception()
+      !if (useexeption_waq) call throwexception()
 
       select case ( iexit )
          case ( :0 )
