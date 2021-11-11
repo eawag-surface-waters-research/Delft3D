@@ -139,10 +139,10 @@
              ustc2  = cdrag*u2dh**2
              abscos = abs( csw*uux     + snw*uuy ) / max(1d-4, sqrt(uux*uux + uuy*uuy) )         ! abs(prodin(uw,uc))
              call getsoulsbywci(modind, z00, ustc2, ustw2, fw, cdrag, umod, abscos, taubpuLL, taubxuLL)
+             ustbLL = sqrt(umod*taubpuLL)
           else if (modind == 9) then                          ! wave-current interaction van Rijn (2004)
              ! call getvanrijnwci    (LL, z00, ustc2, ustw2, ustcw2, z0urou(LL))
           endif
-          ustbLL = sqrt(umod*taubpuLL)
           sqcf   = max(sqcf,ustbLL / umod )                      ! waveps not needed, see umod = max(umod, 1d-4) line above
           if (stm_included .or. jawaveSwartDelwaq > 1)  then     ! For usage in coupled models
              taubxu(LL) = taubxuLL
