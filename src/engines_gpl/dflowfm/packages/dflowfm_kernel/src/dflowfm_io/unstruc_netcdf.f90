@@ -11935,7 +11935,7 @@ subroutine unc_read_map(filename, ierr)
                id_jmax, id_ncrs, id_flowelemcrsz, id_flowelemcrsn
 
     integer :: id_tmp
-    integer :: layerfrac
+    integer :: layerfrac, layerthk
     integer, allocatable :: id_tr1(:), id_ttrabnd(:), id_ztrabnd(:)
     integer, allocatable :: id_sf1(:), id_tsedfracbnd(:), id_zsedfracbnd(:)
     integer, allocatable :: id_rwqb(:)
@@ -12602,7 +12602,8 @@ subroutine unc_read_map(filename, ierr)
        msed  => stmpar%morlyr%state%msed
        thlyr => stmpar%morlyr%state%thlyr
        svfrac => stmpar%morlyr%state%svfrac
-       layerfrac = 0
+       layerfrac = imiss
+       layerthk = imiss
        !
        ! Check dimensions for consistency
        !
@@ -12741,6 +12742,7 @@ subroutine unc_read_map(filename, ierr)
           call check_error(ierr, 'bodsed')
           stmpar%morlyr%state%bodsed(:,1:ndxi) = rst_bodsed(:,1:ndxi)
           call bedcomp_use_bodsed(stmpar%morlyr)
+          layerfrac = 2
        case (2)
           ! msed (/ id_sedtotdim(iid) , id_nlyrdim(iid) , id_flowelemdim(iid) , id_timedim(iid) /)
           if (allocated(tmpvar2)) deallocate(tmpvar2)
@@ -12749,151 +12751,162 @@ subroutine unc_read_map(filename, ierr)
           call realloc(rst_msed,(/sedtot_read, nlyr_read, ndxi/),keepExisting = .false.)
           !
           ierr = nf90_inq_varid(imapfile, 'msed', id_msed)
-          do l = 1, sedtot_read
-             ierr = nf90_get_var(imapfile, id_msed, tmpvar2(l, 1:nlyr_read,1:um%ndxi_own), start = (/ l, 1, kstart, it_read/), count = (/1, nlyr_read, ndxi, 1/))
-          end do
-          !
-          do kk = 1, ndxi
-             if (um%jamergedmap == 1) then
-                kloc = um%inode_own(kk)
-             else
-                kloc = kk
-             end if
-             rst_msed(:, :, kloc) = tmpvar2(:, :, kk)
-          end do
-          !call check_error(ierr, 'msed')
-          if (ierr .ne. 0) then
-             !
-             ! lyrfrac (/ id_sedtotdim(iid) , id_nlyrdim(iid) , id_flowelemdim(iid) , id_timedim(iid) /)
-             if (allocated(tmpvar2)) deallocate(tmpvar2)
-             call realloc(tmpvar2,(/sedtot_read, nlyr_read, ndxi/) ,keepExisting = .false.)
-             !
-             ierr = nf90_inq_varid(imapfile, 'lyrfrac', id_lyrfrac)
+          if (ierr == nf90_noerr) then
+             layerfrac = 0
              do l = 1, sedtot_read
-                ierr = nf90_get_var(imapfile, id_lyrfrac, tmpvar2(l, 1:nlyr_read,1:um%ndxi_own), start = (/ l, 1, kstart, it_read/), count = (/1, nlyr_read, ndxi, 1/))
+                ierr = nf90_get_var(imapfile, id_msed, tmpvar2(l, 1:nlyr_read,1:um%ndxi_own), start = (/ l, 1, kstart, it_read/), count = (/1, nlyr_read, ndxi, 1/))
              end do
+             !
              do kk = 1, ndxi
                 if (um%jamergedmap == 1) then
                    kloc = um%inode_own(kk)
                 else
                    kloc = kk
                 end if
-                rst_msed(:, :, kloc) = tmpvar2(:, :, kk)     ! no typo, see restart_lyrs.f90
+                rst_msed(:, :, kloc) = tmpvar2(:, :, kk)
              end do
+             call check_error(ierr, 'msed')
+          else   
+             !
+             ierr = nf90_inq_varid(imapfile, 'lyrfrac', id_lyrfrac)
+             if (ierr == nf90_noerr) then
+                !
+                ! lyrfrac (/ id_sedtotdim(iid) , id_nlyrdim(iid) , id_flowelemdim(iid) , id_timedim(iid) /)
+                if (allocated(tmpvar2)) deallocate(tmpvar2)
+                call realloc(tmpvar2,(/sedtot_read, nlyr_read, ndxi/) ,keepExisting = .false.)
+                !
+                do l = 1, sedtot_read
+                   ierr = nf90_get_var(imapfile, id_lyrfrac, tmpvar2(l, 1:nlyr_read,1:um%ndxi_own), start = (/ l, 1, kstart, it_read/), count = (/1, nlyr_read, ndxi, 1/))
+                end do
+                do kk = 1, ndxi
+                   if (um%jamergedmap == 1) then
+                      kloc = um%inode_own(kk)
+                   else
+                      kloc = kk
+                   end if
+                   rst_msed(:, :, kloc) = tmpvar2(:, :, kk)     ! no typo, see restart_lyrs.f90
+                end do
+                layerfrac = 1
+             end if
              call check_error(ierr, 'lyrfrac')
-             layerfrac = 1
           end if
           !
-          ! thlyr (/ id_nlyrdim(iid) , id_flowelemdim(iid) , id_timedim(iid) /)
-          if (allocated(tmpvar)) deallocate(tmpvar)
-          if (allocated(rst_thlyr)) deallocate(rst_thlyr)
-          call realloc(tmpvar,(/nlyr_read, ndxi/) ,keepExisting = .false.)
-          call realloc(rst_thlyr,(/nlyr_read, ndxi/),keepExisting = .false.)
-          !
           ierr = nf90_inq_varid(imapfile, 'thlyr', id_thlyr)
-          ierr = nf90_get_var(imapfile, id_thlyr, tmpvar(1:nlyr_read,1:um%ndxi_own), start = (/ 1, kstart, it_read/), count = (/nlyr_read, ndxi, 1/))
-          do kk = 1, ndxi
-             if (um%jamergedmap == 1) then
-                kloc = um%inode_own(kk)
-             else
-                kloc = kk
-             end if
-             rst_thlyr(:, kloc) = tmpvar(:, kk)
-          end do
+          if (ierr == nf90_noerr) then
+             layerthk = 1
+             !
+             ! thlyr (/ id_nlyrdim(iid) , id_flowelemdim(iid) , id_timedim(iid) /)
+             if (allocated(tmpvar)) deallocate(tmpvar)
+             if (allocated(rst_thlyr)) deallocate(rst_thlyr)
+             call realloc(tmpvar,(/nlyr_read, ndxi/) ,keepExisting = .false.)
+             call realloc(rst_thlyr,(/nlyr_read, ndxi/),keepExisting = .false.)
+             !
+             ierr = nf90_get_var(imapfile, id_thlyr, tmpvar(1:nlyr_read,1:um%ndxi_own), start = (/ 1, kstart, it_read/), count = (/nlyr_read, ndxi, 1/))
+             do kk = 1, ndxi
+                if (um%jamergedmap == 1) then
+                   kloc = um%inode_own(kk)
+                else
+                   kloc = kk
+                end if
+                rst_thlyr(:, kloc) = tmpvar(:, kk)
+             end do
+          end if 
           call check_error(ierr, 'thlyr')
           !
           ! Organize layer administration
-          if (stmpar%morlyr%settings%nlyr >= nlyr_read) then
-             ! copy first layer
-             thlyr(1, 1:ndxi)                   = rst_thlyr(1, 1:ndxi)
-             msed(1:stmpar%lsedtot,1,1:ndxi)    = rst_msed(1:stmpar%lsedtot,1,1:ndxi)
-             !
-             do k = 2,1+stmpar%morlyr%settings%nlyr-nlyr_read
-                thlyr(k,1:ndxi)                     = 0.0_fp
-                msed(1:stmpar%lsedtot,k,1:ndxi)     = 0.0_fp
-             enddo
-             !
-             ! copy remaining layers
-             !
-             thlyr(stmpar%morlyr%settings%nlyr-nlyr_read+2:stmpar%morlyr%settings%nlyr,1:ndxi)             = rst_thlyr(2:nlyr_read,1:ndxi)
-             msed(1:stmpar%lsedtot,stmpar%morlyr%settings%nlyr-nlyr_read+2:stmpar%morlyr%settings%nlyr,1:ndxi) = rst_msed(1:stmpar%lsedtot,2:nlyr_read, 1:ndxi)
-          else
-             !
-             ! more layers in restart file than in simulation
-             !
-             ! copy the first nlyr layers
-             !
-             thlyr(1:stmpar%morlyr%settings%nlyr, 1:ndxi)                    = rst_thlyr(1:stmpar%morlyr%settings%nlyr,1:ndxi)
-             msed(1:stmpar%lsedtot, 1:stmpar%morlyr%settings%nlyr, 1:ndxi)   = rst_msed(1:stmpar%lsedtot,1:stmpar%morlyr%settings%nlyr,1:ndxi)
-             !
-             !
-             ! add contents of other layers to last layer
-             !
-             do k = stmpar%morlyr%settings%nlyr+1, nlyr_read
-                thlyr(stmpar%morlyr%settings%nlyr,1:ndxi)        = thlyr(stmpar%morlyr%settings%nlyr,1:ndxi) &
-                                                                 & + rst_thlyr(k, 1:ndxi)
-                do l = 1, stmpar%lsedtot
-                   msed(l, stmpar%morlyr%settings%nlyr, 1:ndxi) = msed(l, stmpar%morlyr%settings%nlyr,1:ndxi) &
-                                                                & + rst_msed(l,k,1:ndxi)
+          if ((layerfrac >= 0) .and. (layerthk >= 0)) then
+             if (stmpar%morlyr%settings%nlyr >= nlyr_read) then
+                ! copy first layer
+                thlyr(1, 1:ndxi)                   = rst_thlyr(1, 1:ndxi)
+                msed(1:stmpar%lsedtot,1,1:ndxi)    = rst_msed(1:stmpar%lsedtot,1,1:ndxi)
+                !
+                do k = 2,1+stmpar%morlyr%settings%nlyr-nlyr_read
+                   thlyr(k,1:ndxi)                     = 0.0_fp
+                   msed(1:stmpar%lsedtot,k,1:ndxi)     = 0.0_fp
                 enddo
-             enddo
-          end if
-          !
-          if (layerfrac==1) then
+                !
+                ! copy remaining layers
+                !
+                thlyr(stmpar%morlyr%settings%nlyr-nlyr_read+2:stmpar%morlyr%settings%nlyr,1:ndxi)             = rst_thlyr(2:nlyr_read,1:ndxi)
+                msed(1:stmpar%lsedtot,stmpar%morlyr%settings%nlyr-nlyr_read+2:stmpar%morlyr%settings%nlyr,1:ndxi) = rst_msed(1:stmpar%lsedtot,2:nlyr_read, 1:ndxi)
+             else
+                !
+                ! more layers in restart file than in simulation
+                !
+                ! copy the first nlyr layers
+                !
+                thlyr(1:stmpar%morlyr%settings%nlyr, 1:ndxi)                    = rst_thlyr(1:stmpar%morlyr%settings%nlyr,1:ndxi)
+                msed(1:stmpar%lsedtot, 1:stmpar%morlyr%settings%nlyr, 1:ndxi)   = rst_msed(1:stmpar%lsedtot,1:stmpar%morlyr%settings%nlyr,1:ndxi)
+                !
+                !
+                ! add contents of other layers to last layer
+                !
+                do k = stmpar%morlyr%settings%nlyr+1, nlyr_read
+                   thlyr(stmpar%morlyr%settings%nlyr,1:ndxi)        = thlyr(stmpar%morlyr%settings%nlyr,1:ndxi) &
+                                                                    & + rst_thlyr(k, 1:ndxi)
+                   do l = 1, stmpar%lsedtot
+                      msed(l, stmpar%morlyr%settings%nlyr, 1:ndxi) = msed(l, stmpar%morlyr%settings%nlyr,1:ndxi) &
+                                                                   & + rst_msed(l,k,1:ndxi)
+                   enddo
+                enddo
+             end if
              !
-             ! msed contains volume fractions
-             if (stmpar%morlyr%settings%iporosity==0) then
-                do l = 1,stmpar%lsedtot
+             if (layerfrac==1) then
+                !
+                ! msed contains volume fractions
+                if (stmpar%morlyr%settings%iporosity==0) then
+                   do l = 1,stmpar%lsedtot
+                      do k = 1, stmpar%morlyr%settings%nlyr
+                         do nm = 1, ndxi
+                            msed(l,k,nm) = msed(l,k,nm)*thlyr(k,nm)*stmpar%sedpar%cdryb(l)
+                         enddo
+                      enddo
+                   enddo
+                else
                    do k = 1, stmpar%morlyr%settings%nlyr
                       do nm = 1, ndxi
-                         msed(l,k,nm) = msed(l,k,nm)*thlyr(k,nm)*stmpar%sedpar%cdryb(l)
-                      enddo
-                   enddo
-                enddo
-             else
-                do k = 1, stmpar%morlyr%settings%nlyr
-                   do nm = 1, ndxi
-                      !
-                      ! determine mass fractions
-                      mfracsum = 0.0_fp
-                      do l = 1, stmpar%lsedtot
-                         mfrac(l) = msed(l,k,nm)*stmpar%sedpar%rhosol(l)
-                         mfracsum = mfracsum + mfrac(l)
-                      enddo
-                      if (mfracsum>0.0_fp) then
+                         !
+                         ! determine mass fractions
+                         mfracsum = 0.0_fp
                          do l = 1, stmpar%lsedtot
-                            mfrac(l) = mfrac(l)/mfracsum
+                            mfrac(l) = msed(l,k,nm)*stmpar%sedpar%rhosol(l)
+                            mfracsum = mfracsum + mfrac(l)
                          enddo
+                         if (mfracsum>0.0_fp) then
+                            do l = 1, stmpar%lsedtot
+                               mfrac(l) = mfrac(l)/mfracsum
+                            enddo
+                            !
+                            ! obtain porosity and sediment thickness without pores
+                            !
+                            call getporosity(stmpar%morlyr, mfrac, poros)
+                            sedthick = thlyr(k,nm)*(1.0_fp-poros)
+                         else
+                            sedthick = 0.0_fp
+                            poros = 0.0_fp
+                         endif
                          !
-                         ! obtain porosity and sediment thickness without pores
+                         ! convert volume fractions to sediment mass
                          !
-                         call getporosity(stmpar%morlyr, mfrac, poros)
-                         sedthick = thlyr(k,nm)*(1.0_fp-poros)
-                      else
-                         sedthick = 0.0_fp
-                         poros = 0.0_fp
-                      endif
-                      !
-                      ! convert volume fractions to sediment mass
-                      !
-                      do l = 1, stmpar%lsedtot
-                         msed(l,k,nm) = msed(l,k,nm)*sedthick*stmpar%sedpar%rhosol(l)
+                         do l = 1, stmpar%lsedtot
+                            msed(l,k,nm) = msed(l,k,nm)*sedthick*stmpar%sedpar%rhosol(l)
+                         enddo
+                         svfrac(k,nm) = 1.0_fp-poros
                       enddo
-                      svfrac(k,nm) = 1.0_fp-poros
                    enddo
-                enddo
-             endif
-          else
-             if (stmpar%morlyr%settings%iporosity>0) then
-                do nm = 1, ndxi
-                   sedthick = 0.0_fp
-                   do l = 1, stmpar%lsedtot
-                      sedthick = sedthick + msed(l,k,nm)/stmpar%sedpar%rhosol(l)
+                endif
+             else
+                if (stmpar%morlyr%settings%iporosity>0) then
+                   do nm = 1, ndxi
+                      sedthick = 0.0_fp
+                      do l = 1, stmpar%lsedtot
+                         sedthick = sedthick + msed(l,k,nm)/stmpar%sedpar%rhosol(l)
+                      enddo
+                      svfrac(k,nm) = sedthick/thlyr(k,nm)
                    enddo
-                   svfrac(k,nm) = sedthick/thlyr(k,nm)
-                enddo
+                endif
              endif
-          endif
+          end if 
        end select
        endif
 
