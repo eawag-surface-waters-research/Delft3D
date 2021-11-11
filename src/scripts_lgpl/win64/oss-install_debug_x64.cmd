@@ -89,6 +89,8 @@ rem ===============
 	call :delwaq_dll
 rem 	call :delwaq2_openda_lib
 	call :waq_plugin_wasteload
+    call :waqmerge
+    call :agrhyd
     call :wave
     call :plugin_culvert
     call :plugin_delftflow_traform
@@ -344,6 +346,23 @@ rem ====================
     echo "... nothing to be done"
 goto :endproc
 
+
+rem ====================
+rem === INSTALL_WAQMERGE
+rem ====================
+:waqmerge
+    echo "installing waqmerge . . ."
+    echo "... nothing to be done"
+goto :endproc
+
+
+rem ====================
+rem === INSTALL_AGRHYD
+rem ====================
+:agrhyd
+    echo "installing agrhyd. . ."
+    echo "... nothing to be done"
+goto :endproc
 
 
 rem ==============

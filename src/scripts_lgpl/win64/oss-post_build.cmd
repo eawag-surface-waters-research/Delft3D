@@ -210,6 +210,8 @@ rem ===============
     call :delwaq2
     call :waqpb_export
     call :waqpb_import
+    call :waqmerge
+    call :agrhyd
     call :waq_run_processes
     call :duprol2delwaq
     call :delpar
@@ -1105,6 +1107,98 @@ rem ==========================
     )
     
 goto :endproc
+
+
+
+rem ==========================
+rem === POST_BUILD_waqmerge
+rem ==========================
+:waqmerge
+
+    echo "postbuild waqmerge . . ."
+    
+    if "%configuration%" == "Debug" (
+    
+        echo "Debug postbuild"
+        set dest_bin="%install_dir%\x64\Debug"
+        
+        set dest_bin="!install_dir!\x64\Debug"
+        set dest_default="!install_dir!\x64\Debug"
+        set dest_scripts="!install_dir!\x64\Debug"
+        set dest_plugins="!install_dir!\x64\Debug"
+        set dest_share="!install_dir!\x64\Debug"
+        
+        call :makeDir !dest_bin!   
+        
+        rem copy binaries and dll 
+        call :copyFile "!build_dir!\waqmerge\!configuration!\waqmerge.*"                                !dest_bin!
+    )
+    
+    if "%configuration%" == "Release" ( 
+    
+        echo "Release postbuild"
+
+        set dest_bin="!install_dir!\x64\Release\dpart\bin"
+        set dest_default="!install_dir!\x64\Release\dpart\default"
+        set dest_scripts="!install_dir!\x64\Release\dpart\scripts"
+        set dest_plugins="!install_dir!\x64\Release\plugins\bin"
+        set dest_share="!install_dir!\x64\Release\share\bin"
+        
+        call :makeAllDirs   
+        
+        rem copy binaries and dll 
+        call :copyFile "!build_dir!\waqmerge\!configuration!\waqmerge.exe"                            !dest_bin!
+        call :copyFile "!checkout_src_root!\engines_gpl\part\scripts\run_dpart.bat"               !dest_scripts!
+    )
+    
+goto :endproc
+
+
+
+
+rem ==========================
+rem === POST_BUILD_agrhyd
+rem ==========================
+:agrhyd
+
+    echo "postbuild agrhyd . . ."
+    
+    if "%configuration%" == "Debug" (
+    
+        echo "Debug postbuild"
+        set dest_bin="%install_dir%\x64\Debug"
+        
+        set dest_bin="!install_dir!\x64\Debug"
+        set dest_default="!install_dir!\x64\Debug"
+        set dest_scripts="!install_dir!\x64\Debug"
+        set dest_plugins="!install_dir!\x64\Debug"
+        set dest_share="!install_dir!\x64\Debug"
+        
+        call :makeDir !dest_bin!   
+        
+        rem copy binaries and dll 
+        call :copyFile "!build_dir!\agrhyd\!configuration!\agrhyd.*"                                !dest_bin!
+    )
+    
+    if "%configuration%" == "Release" ( 
+    
+        echo "Release postbuild"
+
+        set dest_bin="!install_dir!\x64\Release\dpart\bin"
+        set dest_default="!install_dir!\x64\Release\dpart\default"
+        set dest_scripts="!install_dir!\x64\Release\dpart\scripts"
+        set dest_plugins="!install_dir!\x64\Release\plugins\bin"
+        set dest_share="!install_dir!\x64\Release\share\bin"
+        
+        call :makeAllDirs   
+        
+        rem copy binaries and dll 
+        call :copyFile "!build_dir!\agrhyd\!configuration!\agrhyd.exe"                            !dest_bin!
+        call :copyFile "!checkout_src_root!\engines_gpl\part\scripts\run_dpart.bat"               !dest_scripts!
+    )
+    
+goto :endproc
+
 
 
 
