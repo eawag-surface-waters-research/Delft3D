@@ -17,7 +17,7 @@ Compiling on Windows/Linux
 
 0.5 (LINUX ONLY:)
     Execute:
-    . ../src/setenv.sh
+    . ../src/setenv.sh intel21
     This performs all "module load" statements (and compiler definitions) needed
 
 1. Create a target directory where the generated files should go to. 
@@ -46,7 +46,7 @@ Compiling on Windows/Linux
                                    "tools",                         # configure TOOLS     only
                                    "tests"                          # configure TESTS     only
    Examples:
-       WINDOWS: cmake ..\src\cmake -G "Visual Studio 15 2017" -A x64 -B "." -D CONFIGURATION_TYPE="dflowfm"
+       WINDOWS: cmake ..\src\cmake -G "Visual Studio 16 2019" -A x64 -B "." -D CONFIGURATION_TYPE="dflowfm"
        LINUX  : cmake ../src/cmake -G "Unix Makefiles"               -B "." -D CONFIGURATION_TYPE="dflowfm" -D CMAKE_BUILD_TYPE=Release
 
 3. WINDOWS
