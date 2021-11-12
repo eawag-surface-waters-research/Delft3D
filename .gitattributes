@@ -9136,6 +9136,7 @@ src/third_party_open/fortrangis/sourceforge/style.css -text
 src/third_party_open/fortrangis/sourceforge/update.sh -text
 src/third_party_open/intelredist/flicense.rtf -text
 src/third_party_open/intelredist/intel_fortran_license_info.txt -text
+src/third_party_open/intelredist/lib/mpi_lnx/libfabric.so.1 -text
 src/third_party_open/intelredist/lib/x64/1033/ifcore_msg.dll -text
 src/third_party_open/intelredist/lib/x64/1033/irc_msg.dll -text
 src/third_party_open/intelredist/lib/x64/1033/libmUI.dll -text
