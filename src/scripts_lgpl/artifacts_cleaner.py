@@ -212,10 +212,11 @@ def dimrsetRemove():
 
 # replace libfabric with newer ones:
 def intelMpiFix():
-    os.remove('lnx64/lib/libfabric.so.1')
-    os.remove('lnx64/lib/libfabric.so.1.10.2')
-    shutil.copyfile('src/third_party_open/intelredist/lib/mpi_lnx/libfabric.so.1', 'libfabric.so.1')
-    shutil.copyfile('src/third_party_open/intelredist/lib/mpi_lnx/libfabric.so.1', 'libfabric.so.1.10.2')
+    if (os.path.exists('lnx64')):
+        os.remove('lnx64/lib/libfabric.so.1')
+        os.remove('lnx64/lib/libfabric.so.1.10.2')
+        shutil.copyfile('src/third_party_open/intelredist/lib/mpi_lnx/libfabric.so.1', 'libfabric.so.1')
+        shutil.copyfile('src/third_party_open/intelredist/lib/mpi_lnx/libfabric.so.1', 'libfabric.so.1.10.2')
 
 # Remove files specifically for an OSS build (Windows/Linux)
 def delft3d4Remove():
