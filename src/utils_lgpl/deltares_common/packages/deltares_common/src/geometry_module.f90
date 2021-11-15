@@ -113,8 +113,9 @@ module geometry_module
    double precision, intent(inout)           :: x_breach, y_breach
    
    !locals
-   integer                                   :: k, ja, Lf, k1, k2
-   double precision                          :: dis, distemp, xn, yn, xntempa, yntempa, xc, yc
+   integer                                   :: k, ja, i, jacros
+   double precision                          :: dis, distemp, xn, yn, xntempa, yntempa, xc, yc, crpm, sm, sl
+   
 
    ! Project the start of the breach on the polyline, find xn and yn
    !if(.not.allocated(xp)) return
@@ -134,8 +135,14 @@ module geometry_module
    ! Assign the flow links and the starting link of the breach
    dis = huge(dmiss)      
    do k = 1, size(xl, 1)
-      ! compute the mid point of the segment
-      call half(xl(k,1), yl(k,1), xl(k,2), yl(k,2), xc, yc, jsferic, jasfer3D)
+      ! calculate the coordinates of the intersection of the 1d2d link with the dambreak polygon
+      do i = 1, np-1
+         call cross (xp(i), yp(i), xp(i+1), yp(i+1), xl(k, 1), yl(k,1), xl(k,2), yl(k,2), jacros, sl, sm, xc, yc, crpm, jsferic, dmiss)
+         if (jacros == 1) then
+            exit
+         end if
+      enddo
+    
       ! calculate the distance with projected start of the breach
       distemp = dbdistance(xn, yn, xc, yc, jsferic, jasfer3D, dmiss)
       ! identify the closest link to the projected point
