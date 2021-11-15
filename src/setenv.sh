@@ -12,6 +12,8 @@ if [ "$1" == "intel21" ]; then
  
      module load    intelmpi/21.2.0
      module display intelmpi/21.2.0
+
+      . $SETVARS_VARS_PATH -ofi_internal=1
  
      module load    netcdf/v4.7.4_v4.5.3_intel21.2.0
      module display netcdf/v4.7.4_v4.5.3_intel21.2.0
@@ -67,12 +69,15 @@ module load    svn/1.9.12serf_gcc7.3.0
 module display svn/1.9.12serf_gcc7.3.0
 
 echo "Export environment variables"
-export FC=mpiifort
+if [ "$1" == "intel21" ]; then
+     export FC=mpiifort
+     export CXX=mpiicpc
+     export CC=mpiicc
+else
+     export FC=mpif90
+     export CXX=mpicxx
+     export CC=mpicc
+fi
 echo "FC=$FC"
-
-export CXX=mpiicpc
 echo "CXX=$CXX"
-
-export CC=mpiicc
 echo "CC=$CC"
-
