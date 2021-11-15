@@ -310,9 +310,9 @@
 
          else 
       
-            a  = ao
-            ja = jao
-            ia = iao
+            a(1:na)  = ao(1:na)
+            ja(1:na) = jao(1:na)
+            ia(1:nrow+1) = iao(1:nrow+1)
       
          endif    
 
