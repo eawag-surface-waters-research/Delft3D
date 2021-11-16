@@ -446,6 +446,11 @@ module m_fourier_analysis
           call warn_flush()
           goto 6666
        endif
+       if (rstart > rstop) then
+          msgbuf = 'Fourier sample interval start > Fourier sample interval stop.'
+          call warn_flush()
+          goto 6666
+       endif
        ftmsto(ifou) = rstop
        !
        ! Fouwrt catches the end of all fourier analyses
