@@ -41,9 +41,6 @@ if !ERRORLEVEL! NEQ 0 exit /B %~1
 call :vcvarsall
 if !ERRORLEVEL! NEQ 0 exit /B %~1
 
-call :traditionalBuild
-if !ERRORLEVEL! NEQ 0 exit /B %~1
-
 call :DoCMake !config!
 if !ERRORLEVEL! NEQ 0 exit /B %~1
 
@@ -67,12 +64,6 @@ echo DIMR      : %root%\build_dimr\dimr.sln
 echo DWAQ      : %root%\build_dwaq\dwaq.sln
 echo D-Waves   : %root%\build_dwaves\dwaves.sln
 echo Tests     : %root%\build_tests\tests.sln
-echo Other     : %root%\src\delft3d4-flow.sln
-echo             %root%\src\ec_module.sln
-echo             %root%\src\io_netcdf.sln
-echo             %root%\src\nefis.sln
-echo             %root%\src\utils_lgpl.sln
-echo             %root%\src\utils_lgpl_no_tests.sln
 echo.
 echo Finished
 goto :end
@@ -425,32 +416,6 @@ rem =======================
     cd /d "%root%\"
     goto :endproc
 
-
-
-rem =========================
-rem === traditionalBuild ====
-rem =========================
-:traditionalBuild
-    if %prepareonly% EQU 1 goto :endproc
-    if !ERRORLEVEL! NEQ 0 goto :endproc
-    
-    if "!config!" == "all" (
-        echo.
-        echo "Building in the traditional way (only when config is all) ..."
-
-        echo "    Clean directory %root%\src\bin\x64 ..."
-        rmdir /s /q "%root%\src\bin\x64"  > del.log 2>&1
-        del /f/q del.log
-
-        cd /d "%root%\src\"
-        echo "    Compiling delft3d4-flow.sln ..."
-        call :VSbuild delft3d4-flow
-        echo "    Compiling utils_lgpl_no_tests.sln ..."
-        call :VSbuild utils_lgpl_no_tests
-        rem # Disabled: causes errors: call :VSbuild nefis
-        cd /d "%root%\"
-    )
-    goto :endproc
 
 
 rem =======================
