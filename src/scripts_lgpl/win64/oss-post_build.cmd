@@ -512,6 +512,9 @@ rem ==========================
         
         call :copyFile "!checkout_src_root!\engines_gpl\dflowfm\scripts\team-city\run_dflowfm_processes.bat"               !dest_scripts!
         call :copyFile "!checkout_src_root!\engines_gpl\dflowfm\scripts\team-city\run_dflowfm.bat"                         !dest_scripts!
+        
+        rem Temporary fix to obtain "dmor" (should be replaced by compiling/delivering mormerge):
+        call :mormerge
     )
     
 goto :endproc
