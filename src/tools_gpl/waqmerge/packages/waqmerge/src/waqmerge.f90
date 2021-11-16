@@ -61,7 +61,7 @@ program waqmerge
       character(len=255)        :: new_hyd         ! name for new UGRID 1.0 hyd file
       integer                   :: len_geo         ! length of old waqgeom filename
       character(len=255)        :: new_geom        ! name for new UGRID 1.0 _waqgeom file
-
+      logical                   :: mdu_exist       ! mdu file is present
 
 
       ! Version string
@@ -76,6 +76,14 @@ program waqmerge
 
       if (command_argument_count() .gt. 0) then
          call get_command_argument(1,hyd%file_hyd%name)
+         
+         mdu_exist = .false.
+         inquire(file = trim(hyd%file_hyd%name)//'.mdu',exist = mdu_exist)
+         if (.not. mdu_exist) then
+            write(*     ,'(a,a)'), '*** ERROR File: '//trim(hyd%file_hyd%name)//'.mdu'//' does not exist'
+            call srstop(1)
+         endif
+         
          ! report
          call dhfext(hyd%file_hyd%name,filext, extpos, extlen)
          hyd%file_hyd%name = hyd%file_hyd%name(1:extpos-1)
@@ -122,7 +130,7 @@ program waqmerge
       exists = .true.
       do while (exists)
          write(sdnm, '(i4.4)') n_domain
-         domain_hydname = trim(waq_output_dir)//'_'//trim(hyd%file_hyd%name)//'_'//sdnm//'/'//trim(hyd%file_hyd%name)//'_'//sdnm//'.hyd'
+         domain_hydname = trim(waq_output_dir)//'_'//sdnm//'/'//trim(hyd%file_hyd%name)//'_'//sdnm//'.hyd'
          inquire(file=domain_hydname,exist=exists)
          if ( exists ) n_domain = n_domain + 1
       end do
@@ -131,8 +139,8 @@ program waqmerge
 
 !     stop when nothing was found!
       if (n_domain .eq.0) then
-         write(lunrep,'(a,a,a)') ' ERROR: no hydrodynamic descriptions found for ',trim(waq_output_dir)//'_',trim(hyd%file_hyd%name)
-         write(*     ,'(a,a,a)') ' ERROR: no hydrodynamic descriptions found for ',trim(waq_output_dir)//'_',trim(hyd%file_hyd%name)
+         write(lunrep,'(a,a,a)') ' ERROR: no hydrodynamic descriptions found for ',trim(waq_output_dir)
+         write(*     ,'(a,a,a)') ' ERROR: no hydrodynamic descriptions found for ',trim(waq_output_dir)
          write(lunrep,'(a,a)') ' Execution will stop '
          write(*     ,'(a,a)') ' Execution will stop '
          stop (1)

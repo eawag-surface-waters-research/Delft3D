@@ -40,11 +40,12 @@
       logical                               :: waq_output_dir_found ! WAQ directory specified
       integer                               :: istat                ! reading parameter
 
-
+      
       waq_output_dir = ''
 
       nullify(mdu_ptr)
       call tree_create('waqmerge-input', mdu_ptr)
+      
       istat = 0
       call prop_file('ini',trim(hyd%file_hyd%name)//'.mdu', mdu_ptr, istat)
       if (istat /= 0) then
@@ -62,8 +63,8 @@
 
       
       if (.not. waq_output_dir_found) then
-         waq_output_dir = 'DFM_DELWAQ' 
+         waq_output_dir = 'DFM_DELWAQ_'//trim(hyd%file_hyd%name)
       end if
-   
+
       return
     end subroutine
