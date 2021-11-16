@@ -210,14 +210,6 @@ def dimrsetRemove():
                 print("      Removing directory: " + str(path))
                 shutil.rmtree(path, ignore_errors=True)
 
-# replace libfabric with newer ones:
-def intelMpiFix():
-    if (os.path.exists('lnx64')):
-        os.remove('lnx64/lib/libfabric.so.1')
-        os.remove('lnx64/lib/libfabric.so.1.10.2')
-        shutil.copyfile('src/third_party_open/intelredist/lib/mpi_lnx/libfabric.so.1', 'libfabric.so.1')
-        shutil.copyfile('src/third_party_open/intelredist/lib/mpi_lnx/libfabric.so.1', 'libfabric.so.1.10.2')
-
 # Remove files specifically for an OSS build (Windows/Linux)
 def delft3d4Remove():
     removeFiles = [
@@ -307,7 +299,6 @@ if product=="oss":
     ossRemove()
 elif product=="dimrset":
     dimrsetRemove()
-    intelMpiFix();
 elif product=="delft3d4":
     delft3d4Remove()
 
