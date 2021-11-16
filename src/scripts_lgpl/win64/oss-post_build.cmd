@@ -204,6 +204,7 @@ rem ===============
     call :dflowfm
     call :dflowfm_dll
     call :dfmoutput
+    call :mormerge
     call :waq_plugin_wasteload
     call :delwaq_dll
     call :delwaq1
@@ -593,6 +594,40 @@ rem ==========================
         call :copyFile "!build_dir!\dfmoutput\!configuration!\dfmoutput.exe"                                                   !dest_bin!
 
         call :copyFile "!checkout_src_root!\engines_gpl\dflowfm\scripts\team-city\run_dfmoutput.bat"                       !dest_scripts!
+    )
+    
+goto :endproc
+
+
+
+rem ==========================
+rem === POST_BUILD_MORMERGE
+rem ==========================
+:mormerge
+    echo "postbuild mormerge . . ."
+    
+    if "%configuration%" == "Debug" (
+    
+        echo "Debug postbuild"
+        set dest_bin="%install_dir%\x64\Debug"
+
+        call :makeDir !dest_bin!
+        rem call :copyFile "!build_dir!\mormerge\!configuration!\mormerge.*"                               !dest_bin!
+        call :copyFile "!checkout_src_root!\tools_gpl\mormerge\scripts\mormerge.tcl"                       !dest_bin!
+    )
+    
+    if "%configuration%" == "Release" ( 
+    
+        echo "Release postbuild"
+
+        set dest_bin="!install_dir!\x64\Release\dmor\bin"
+        set dest_scripts="!install_dir!\x64\Release\dmor\scripts"
+
+        call :makeAllDirs 
+        
+        rem call :copyFile "!build_dir!\mormerge\!configuration!\mormerge.*"                               !dest_bin!
+        call :copyFile "!checkout_src_root!\tools_gpl\mormerge\scripts\mormerge.tcl"                       !dest_scripts!
+        call :copyFile "!checkout_src_root!\tools_gpl\mormerge\scripts\run_mormerge.bat"                   !dest_scripts!
     )
     
 goto :endproc
