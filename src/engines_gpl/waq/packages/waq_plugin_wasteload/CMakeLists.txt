@@ -48,6 +48,7 @@ target_compile_options(${library_name} PRIVATE "${extend_source132_flag}")
 
 # Set dependencies
 set(oss_dependencies    deltares_common
+                        deltares_common_c
                         waq_utils_f) 
 
 oss_include_libraries(${library_name} oss_dependencies)

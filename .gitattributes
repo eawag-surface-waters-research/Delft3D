@@ -19232,6 +19232,7 @@ src/utils_lgpl/deltares_common/packages/deltares_common/src/array_module.f90 -te
 src/utils_lgpl/deltares_common/packages/deltares_common/src/bilin5.f90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/buffer.f90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/combinepaths.f90 -text
+src/utils_lgpl/deltares_common/packages/deltares_common/src/cwd.f90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/deltares_common_version.F90.svn -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/dictionary_class.f90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/distance.f90 -text
@@ -19292,6 +19293,7 @@ src/utils_lgpl/deltares_common/packages/deltares_common_c/src/Makefile.am -text
 src/utils_lgpl/deltares_common/packages/deltares_common_c/src/bmi_shared_lib_fortran_api.c -text
 src/utils_lgpl/deltares_common/packages/deltares_common_c/src/cpuinfo.cpp -text
 src/utils_lgpl/deltares_common/packages/deltares_common_c/src/cutil.c -text
+src/utils_lgpl/deltares_common/packages/deltares_common_c/src/getcwd.c -text
 src/utils_lgpl/deltares_common/packages/deltares_common_c/src/getopt.cpp -text
 src/utils_lgpl/deltares_common/packages/deltares_common_c/src/getputarray.cpp -text
 src/utils_lgpl/deltares_common/packages/deltares_common_c/src/meminfo.cpp -text

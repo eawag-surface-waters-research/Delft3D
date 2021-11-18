@@ -51,7 +51,7 @@
 !     SUBROUTINE CALLED  : SRSTOP, stopexecution
 
 !     LOGICAL UNITS      : LUN = unit to be opened
-
+      use cwd, only: getCWD
       implicit none
 
 !     Parameters          :
@@ -65,20 +65,12 @@
       integer      , intent(inout) :: ierr      !< Error flag
 !     Local variables     :
 
-      integer       ierr2
-      logical       lexist   , lopened
-      character(256) wd
-      integer       loc
+      integer                         ierr2     !< Error flag
+      logical                         ierr_cwd  !< Error flag for obtaining current working directory
+      character(256)                  wd_path   !< Current working directory path
       
-      IERR   =   0
+      ierr   =   0
 
-!     check if files exist in the current working directory
-      loc = 0
-      wd = "."
-      loc = scan(trim(finam),'/\',back = .true.)
-      if (loc > 0) then
-          wd = finam(1:loc)
-      endif
 
       
 !     get the correct open statement
@@ -592,7 +584,14 @@
 !     error while opening STOP with message
 
   910 continue
-      write ( * , 2000 ) nropen, lun, trim(finam), trim(wd)
+!     get current working directory
+      wd_path = ''
+      ierr_cwd = getCWD(wd_path)
+      if (ierr_cwd /= 0) then
+         wd_path = 'Current working directory not found!'
+      endif
+      
+      write ( * , 2000 ) nropen, lun, trim(finam), trim(wd_path)
       call srstop ( 1 )
 
  2000 format (   ' ERROR opening file number:',I3,' on unit:',I3  ,
