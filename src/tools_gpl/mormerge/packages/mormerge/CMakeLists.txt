@@ -71,6 +71,7 @@ endif(WIN32)
 
 if(UNIX)
     target_link_libraries(${executable_name} ${oss_dependencies})
+    set_property(TARGET ${executable_name} PROPERTY LINKER_LANGUAGE Fortran)
 endif()
 
 # Define how the files should be structured within Visual Studio
