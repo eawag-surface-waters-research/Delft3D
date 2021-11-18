@@ -507,6 +507,13 @@
                   end if
                  call fill_valstruct_perlink(valgenstru(:,n), La, dir, ST_UNSET, 0, 0)
                enddo
+               ! Fill in values for each structure if it exists on the current subdomain
+               if (L1cgensg(i) <= L2cgensg(i)) then  ! At least one flow link in this domain is affected by this structure.
+                  valgenstru(NUMVALS_GENSTRU,n) = 1  ! rank contains the general structure.
+                  valgenstru(13,n) = zcgen(3*i  )    ! id_genstru_openw.
+                  valgenstru(14,n) = zcgen(3*i-1)    ! id_genstru_edgel.
+                  valgenstru(9,n)  = zcgen(3*i-2)    ! id_genstru_cresth.
+               end if
             enddo
          end if
       end if
@@ -709,12 +716,12 @@
          else! Old general structure
             do n = 1, ngenstru
                call average_valstruct(valgenstru(:,n), ST_UNSET, 0, 0, 0)
-               i = genstru2cgen(n)
-               if (L1cgensg(i) <= L2cgensg(i)) then  ! At least one flow link in this domain is affected by this structure.
-                  valgenstru(NUMVALS_GENSTRU,n) = 1  ! rank contains the general structure.
-                  valgenstru(13,n) = zcgen(3*i  )    ! id_genstru_openw.
-                  valgenstru(14,n) = zcgen(3*i-1)    ! id_genstru_edgel.
-                  valgenstru(9,n)  = zcgen(3*i-2)    ! id_genstru_cresth.
+               if (jampi > 0) then
+                  if (valgenstru(NUMVALS_GENSTRU,n) > 1) then ! The structure lies on more than one partition
+                     valgenstru(13,n) = valgenstru(13,n)/valgenstru(NUMVALS_GENSTRU,n)    ! id_genstru_openw.
+                     valgenstru(14,n) = valgenstru(14,n)/valgenstru(NUMVALS_GENSTRU,n)    ! id_genstru_edgel.
+                     valgenstru(9,n)  = valgenstru(9,n)/valgenstru(NUMVALS_GENSTRU,n)     ! id_genstru_cresth.
+                  end if
                end if
             end do
          end if
