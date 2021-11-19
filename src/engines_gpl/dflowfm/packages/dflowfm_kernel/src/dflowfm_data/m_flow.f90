@@ -172,13 +172,15 @@
  double precision, allocatable         :: s1mini(:)   !< initial of s1m
  double precision, allocatable         :: a1m(:)      !< surface area pressurized nonlin minus part
 
- integer, allocatable                  :: negativeDepths(:)                 !< Number of negative depths during output interval at nodes.
- integer, allocatable                  :: negativeDepths_cum(:)             !< Cumulative number of negative depths at nodes.
- integer, allocatable                  :: noIterations(:)                   !< Number of no iteration locations during output interval at nodes.
- integer, allocatable                  :: noIterations_cum(:)               !< Cumulative number of no iteration locations at nodes.
- integer, allocatable                  :: limitingTimestepEstimation(:)     !< Number of times during the output interval the conditions in a node is limiting the time step
- integer, allocatable                  :: limitingTimestepEstimation_cum(:) !< Cumulative number of times the conditions in a node is limiting the time step.
+ double precision, allocatable         :: negativeDepths(:)                 !< Number of negative depths during output interval at nodes.
+ double precision, allocatable         :: negativeDepths_cum(:)             !< Cumulative number of negative depths at nodes.
+ double precision, allocatable         :: noIterations(:)                   !< Number of no iteration locations during output interval at nodes.
+ double precision, allocatable         :: noIterations_cum(:)               !< Cumulative number of no iteration locations at nodes.
+ double precision, allocatable         :: limitingTimestepEstimation(:)     !< Number of times during the output interval the conditions in a node is limiting the time step
+ double precision, allocatable         :: limitingTimestepEstimation_cum(:) !< Cumulative number of times the conditions in a node is limiting the time step.
                                                                             !< Note: this doubles with variable numlimdt(:), which contains the same cumulative count, under a different MDU option.
+                                                                            !< Note: these variables are double precision (in stead of integers) because post processing is 
+                                                                            !<       based on double precision variables.     
  double precision, allocatable         :: flowCourantNumber(:)              !< Courant number
  
 ! node related, dim = ndkx
