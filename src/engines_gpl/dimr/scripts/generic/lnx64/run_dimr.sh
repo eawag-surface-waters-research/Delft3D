@@ -115,14 +115,16 @@ fi
 
 # set the number of OpenMP threads equal to max(2,NumberOfPhysicalCores-2)
 if [ -z ${OMP_NUM_THREADS+x} ]; then 
-    export NumberOfPhysicalCores=`cat /proc/cpuinfo | grep "cpu cores" | uniq | awk -F: '{print $2}'` 
-    export OMP_NUM_THREADS=`expr $NumberOfPhysicalCores - 2`
-    if [ $OMP_NUM_THREADS -lt 2 ]; then
-        export OMP_NUM_THREADS=2
-    fi
+    # If OMP_NUM_THREADS is not already defined:
+    # Since OMP_NUM_THREADS is advised to be 1, don't do any smart setting, just set it to 1
+    # export NumberOfPhysicalCores=`cat /proc/cpuinfo | grep "cpu cores" | uniq | awk -F: '{print $2}'` 
+    # export OMP_NUM_THREADS=`expr $NumberOfPhysicalCores - 2`
+    # if [ $OMP_NUM_THREADS -lt 2 ]; then
+    #     export OMP_NUM_THREADS=2
+    # fi
+    export OMP_NUM_THREADS=1
 else echo "OMP_NUM_THREADS is already defined"
 fi
-echo "OMP_NUM_THREADS" is $OMP_NUM_THREADS
 
 export NSLOTS=`expr $NNODES \* $corespernode` 
 
@@ -145,22 +147,24 @@ fi
 export D3D_HOME
 PROC_DEF_DIR=$D3D_HOME/share/delft3d
 export PROC_DEF_DIR
+
+# Always try the following module load
+module load intelmpi/21.2.0 &>/dev/null
+
+export FI_PROVIDER=tcp
  
 echo "    Configfile       : $configfile"
 echo "    D3D_HOME         : $D3D_HOME"
 echo "    PROC_DEF_DIR     : $PROC_DEF_DIR"
 echo "    Working directory: $workdir"
+echo "    Number of nodes  : $NNODES"
 echo "    Number of slots  : $NSLOTS"
+echo "    OMP_NUM_THREADS  : $OMP_NUM_THREADS"
 echo "    Docker parallel  : $dockerprl"
-if [ $NSLOTS -ne 1 ]; then
-    testmpiexec=$(type mpiexec 2>/dev/null)
-    if [[ $testmpiexec != "mpiexec is"* ]]; then
-        # Try to module load mpi.
-        module load intelmpi/21.2.0
-    fi
-    echo "    `type mpiexec`"
-fi
-echo 
+echo "    `type mpiexec`"
+echo "    FI_PROVIDER      : $FI_PROVIDER"
+echo "    I_MPI_FABRICS    : $I_MPI_FABRICS"
+echo
 
     #
     # Set the directories containing the binaries
@@ -176,7 +180,6 @@ libdir=$D3D_HOME/lib
     # Run
 export LD_LIBRARY_PATH=$libdir:$LD_LIBRARY_PATH
 export PATH=$bindir:$PATH
-# export LD_PRELOAD=$libdir/libmkl_core.so
 
 # For debugging only
 if [ $debuglevel -eq 0 ]; then
@@ -211,10 +214,6 @@ else
         #
         # Parallel in Docker
         # Assumption: 1 node
-        export PATH=/usr/lib64/mpich/bin:$PATH
-        echo "Starting mpd..."
-        mpd &
-        mpdboot -n $NSLOTS --rsh=/usr/bin/rsh
 
         node_number=$NSLOTS
         while [ $node_number -ge 1 ]; do
@@ -226,13 +225,6 @@ else
         echo "mpirun -np $NSLOTS $bindir/dimr $configfile $debugarg"
               mpirun -np $NSLOTS $bindir/dimr $configfile $debugarg
     else
-        if [ -z "$MPI_ROOT" ]
-        then
-           # Default: Parallel on Deltares cluster
-           export PATH=/usr/lib64/mpich/bin:/opt/mpich2/1.4.1_intel14.0.3/bin:$PATH
-        else
-           export PATH=$MPI_ROOT/bin:$PATH
-        fi 
         #
         # Create machinefile using $PE_HOSTFILE
         if [ $NNODES -eq 1 ]; then
@@ -253,28 +245,11 @@ else
         cat $(pwd)/machinefile
         echo ----------------------------------------------------------------------
 
-        if [ $NNODES -ne 1 ]; then
-            # echo "Starting mpd; not needed on h6 (but will not harm): suppress messages"
-            mpd &>/dev/null &
-            mpdboot -n $NSLOTS &>/dev/null
-        fi
-
-        node_number=$NSLOTS
-        while [ $node_number -ge 1 ]; do
-           node_number=`expr $node_number - 1`
-           ln -s /dev/null log$node_number.irlog
-        done
 
         echo "executing:"
         echo "mpiexec -np $NSLOTS $bindir/dimr $configfile $debugarg"
               mpiexec -np $NSLOTS $bindir/dimr $configfile $debugarg
     fi
-    rm -f log*.irlog
-fi
-
-if [[ $NNODES -ne 1 ]] || [[ $NSLOTS -ne 1 && $dockerprl -eq 1 ]]; then
-    # Not needed on h6 (but will not harm): suppress messages"
-    mpdallexit &>/dev/null
 fi
 
 

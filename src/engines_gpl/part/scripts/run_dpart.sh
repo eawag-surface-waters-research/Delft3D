@@ -110,6 +110,9 @@ libdir=$D3D_HOME/lib
     # Run
 export LD_LIBRARY_PATH=$libdir:$LD_LIBRARY_PATH
 
+module load intelmpi/21.2.0 &>/dev/null
+export FI_PROVIDER=tcp
+
 
     echo "executing:"
     echo "$bindir/delpar $configfile"

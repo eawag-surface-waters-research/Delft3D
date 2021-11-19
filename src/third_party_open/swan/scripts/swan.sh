@@ -61,6 +61,10 @@ fi
 scriptdirname=`readlink \-f \$0`
 scriptdir=`dirname $scriptdirname`
 D3D_HOME=$scriptdir/..
+
+module load intelmpi/21.2.0 &>/dev/null
+export FI_PROVIDER=tcp
+
 #
 #
 #

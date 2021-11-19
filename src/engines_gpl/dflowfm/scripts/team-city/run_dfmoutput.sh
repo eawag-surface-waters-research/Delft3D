@@ -40,6 +40,9 @@ scriptdir=`dirname $scriptdirname`
 export D3D_HOME=$scriptdir/.. 
 export LD_LIBRARY_PATH=$D3D_HOME/lib:$LD_LIBRARY_PATH
 
+module load intelmpi/21.2.0 &>/dev/null
+export FI_PROVIDER=tcp
+
 ##$SCRIPT_DIR/../dflowfm "$@"
 echo $D3D_HOME/bin/dfmoutput --verbose $dfmoutputoptions "$@"
 #echo $dfmoutputoptions
