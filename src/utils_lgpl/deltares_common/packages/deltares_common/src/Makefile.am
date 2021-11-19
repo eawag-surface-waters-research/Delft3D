@@ -28,6 +28,7 @@ libDeltaresCommon_la_SOURCES = \
 	precision_sp.F90 \
 	mathconsts.f90 \
 	physicalconsts.f90 \
+	cwd.f90 \
 	MessageHandling.f90 \
 	malloc.f90 \
 	geometry_module.f90 \

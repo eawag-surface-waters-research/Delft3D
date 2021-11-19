@@ -24,6 +24,7 @@ libDeltaresCommonC_la_SOURCES = \
 	 cutil.c \
 	 getopt.cpp \
 	 getputarray.cpp \
+     getcwd.c \
 	 meminfo.cpp \
 	 sems.cpp \
 	 stream.cpp \
