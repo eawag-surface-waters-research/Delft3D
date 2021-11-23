@@ -59,9 +59,7 @@ if (UNIX)
     set(oss_dependencies deltares_common 
                          io_netcdf
                          io_hyd
-                         waq_io
-                         waq_utils_f
-                         waq_utils_c)
+                         waq_io)
 
     oss_include_libraries(${executable_name} oss_dependencies)
 
@@ -78,9 +76,7 @@ if (WIN32)
                          io_hyd
                          netcdf4
                          netcdff
-                         waq_io
-                         waq_utils_f
-                         waq_utils_c)
+                         waq_io)
 
     oss_include_libraries(${executable_name} oss_dependencies)
     target_link_libraries(${executable_name} ${oss_dependencies})
