@@ -1455,12 +1455,12 @@ if (ndambreaksg > 0) then
          indexLink = indexLink + 1
          ! compute the mid point
          Lf = iabs(kdambreak(3,k))
-         k3 = lncn(1,Lf)
-         k4 = lncn(2,Lf)
-         xl(indexLink, 1) = xk(k3)
-         xl(indexLink, 2) = xk(k4)
-         yl(indexLink, 1) = yk(k3)
-         yl(indexLink, 2) = yk(k4)
+         k1 = ln(1,Lf)
+         k2 = ln(2,Lf)
+         xl(indexLink, 1) = xz(k1)
+         xl(indexLink, 2) = xz(k2)
+         yl(indexLink, 1) = yz(k1)
+         yl(indexLink, 2) = yz(k2)
       enddo
 
       ! comp_breach_point takes plain arrays to compute the breach point (also used in unstruct_bmi)
