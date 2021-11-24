@@ -79,11 +79,11 @@
  call which2Dnetlinkwascrossed(n2d, k1, k2, L)
  if (L==0) then
     ! 1d2d link is inside the 2d grid cell, use the square root of the surface area instead.
-    wu2 = sqrt(ba(n2))
+    wu2 = sqrt(ba(n2d))
  else
-   k3 = kn(1,L)
-   k4 = kn(2,L)
-   wu2 = dbdistance ( xk(k3), yk(k3), xk(k4), yk(k4), jsferic, jasfer3D, dmiss)
+    k3 = kn(1,L)
+    k4 = kn(2,L)
+    wu2 = dbdistance ( xk(k3), yk(k3), xk(k4), yk(k4), jsferic, jasfer3D, dmiss)
  endif
 
  wuL = min (wu1, wu2)     ! both 1D sides flood at the same moment, no division by 2
