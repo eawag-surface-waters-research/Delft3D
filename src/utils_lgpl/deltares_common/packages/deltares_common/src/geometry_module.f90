@@ -100,17 +100,21 @@ module geometry_module
 
    contains
 
-   !> projects a point to a polyline and finds the closest link
+   !> projects a point to a polyline and finds the closest link.
+   !! "Closest" is based on the intersection location of each flow link with the input polyline.
    subroutine comp_breach_point(startLocationX, startLocationY, xp, yp, np, xl, yl, Lstart, x_breach, y_breach, jsferic, jasfer3D, dmiss)
 
    implicit none
 
    !input
-   integer, intent(in)                       :: np, jsferic, jasfer3D
-   integer, intent(inout)                    :: Lstart
-   double precision, intent(in)              :: startLocationX, startLocationY, dmiss
-   double precision, allocatable, intent(in) :: xp(:), yp(:), xl(:,:), yl(:,:)
-   double precision, intent(inout)           :: x_breach, y_breach
+   double precision, intent(in   ) :: startLocationX, startLocationY !< Input coordinates of the start location of the breach.
+   double precision, intent(in   ) :: xp(:), yp(:)       !< Dambreak polyline points.
+   integer,          intent(in   ) :: np                 !< Number of input polyline points.
+   double precision, intent(in   ) :: xl(:,:), yl(:,:)   !< (2,nlinks) Start-end points of the intersected flow links, used for selecting the nearest link to the start location.
+   integer,          intent(  out) :: Lstart             !< Resulting index of the flow link closest to the startlocationX,Y.
+   double precision, intent(  out) :: x_breach, y_breach !< Snapped x,y coordinates of the selected flow link's intersection with the polyline.
+   double precision, intent(in   ) :: dmiss              !< Missing value used in the input polyline arrays.
+   integer,          intent(in   ) :: jsferic, jasfer3D  !< Input coordinate type (sferic=1, cartesian=0)
    
    !locals
    integer                                   :: k, ja, i, jacros
