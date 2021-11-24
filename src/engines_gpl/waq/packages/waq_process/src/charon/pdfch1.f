@@ -117,7 +117,7 @@
 !
       CALL GETMMO(MLEVEL)
       WRITE(LUREP,*)
-      WRITE(LUREP,*) ' Determinig the relation between the substances',
+      WRITE(LUREP,*) ' Determining the relation between the substances',
      +               ' and the CHEM species'
 
 !     Read input of CHARON (also opening of files)
