@@ -3,7 +3,7 @@ set version=5.10
 set serial=2021101901
 set toolFound=false
 set toolDebug=false
-set cmakeConfiguration=build_DWAQ
+set cmakeConfiguration=build_all
 
 if exist ..\..\..\..\..\..\..\%cmakeConfiguration%\waqpb_export\Release\waqpb_export.exe     set toolFound=true
 if exist ..\..\..\..\..\..\..\%cmakeConfiguration%\waqpb_export\Debug\waqpb_export.exe (
