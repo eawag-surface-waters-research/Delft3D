@@ -512,9 +512,6 @@ rem ==========================
         
         call :copyFile "!checkout_src_root!\engines_gpl\dflowfm\scripts\team-city\run_dflowfm_processes.bat"               !dest_scripts!
         call :copyFile "!checkout_src_root!\engines_gpl\dflowfm\scripts\team-city\run_dflowfm.bat"                         !dest_scripts!
-        
-        rem Temporary fix to obtain "dmor" (should be replaced by compiling/delivering mormerge):
-        call :mormerge
     )
     
 goto :endproc
@@ -626,9 +623,9 @@ rem ==========================
         set dest_bin="!install_dir!\x64\Release\dmor\bin"
         set dest_scripts="!install_dir!\x64\Release\dmor\scripts"
 
-        call :makeAllDirs 
-        
-        rem call :copyFile "!build_dir!\mormerge\!configuration!\mormerge.*"                               !dest_bin!
+        call :makeDir !dest_bin! 
+        call :makeDir !dest_scripts! 
+        call :copyFile "!build_dir!\mormerge\!configuration!\mormerge.*"                                   !dest_bin!
         call :copyFile "!checkout_src_root!\tools_gpl\mormerge\scripts\mormerge.tcl"                       !dest_scripts!
         call :copyFile "!checkout_src_root!\tools_gpl\mormerge\scripts\run_mormerge.bat"                   !dest_scripts!
     )
@@ -1624,6 +1621,38 @@ goto :endproc
 
 
 
+rem =============================
+rem === POST_BUILD_EC_MODULE_DLL
+rem =============================
+:ec_module_dll
+    echo "postbuild ec_module_dll . . ."
+    
+    if "%configuration%" == "Debug" (
+    
+    echo "Debug postbuild"
+    set dest_bin="!install_dir!\x64\Debug"
+
+    call :makeDir !dest_bin!
+
+    call :copyFile "!build_dir!\ec_module\!configuration!\ec_module_dll.*"                              !dest_bin!
+
+    )
+    
+    if "%configuration%" == "Release" (
+    
+    echo "Release postbuild"
+    
+    set dest_share=!install_dir!\x64\Release\share\bin
+    call :makeDir "!dest_share!"
+ 
+    call :copyFile "!build_dir!\ec_module\!configuration!\ec_module_dll.dll"                                "!dest_share!\ec_module.dll"
+    
+    )
+
+goto :endproc
+
+
+
 rem ===================================
 rem === POST_BUILD_TEST_DELTARES_COMMON
 rem ===================================
@@ -1653,6 +1682,38 @@ rem ===================================
     
     call :makeAllDirs 
     call :copyFile "!build_dir!\test_deltares_common\!configuration!\test_deltares_common.*"                                !dest_bin!
+    
+    )
+
+goto :endproc
+
+
+
+rem =============================
+rem === POST_BUILD_IO_NETCDF_DLL
+rem =============================
+:io_netcdf_dll
+    echo "postbuild io_netcdf_dll . . ."
+    
+    if "%configuration%" == "Debug" (
+    
+    echo "Debug postbuild"
+    set dest_bin="!install_dir!\x64\Debug"
+
+    call :makeDir !dest_bin!
+
+    call :copyFile "!build_dir!\io_netcdf\!configuration!\io_netcdf_dll.*"                              !dest_bin!
+
+    )
+    
+    if "%configuration%" == "Release" (
+    
+    echo "Release postbuild"
+    
+    set dest_share=!install_dir!\x64\Release\share\bin
+    call :makeDir "!dest_share!"
+ 
+    call :copyFile "!build_dir!\io_netcdf\!configuration!\io_netcdf_dll.dll"                                "!dest_share!\io_netcdf.dll"
     
     )
 

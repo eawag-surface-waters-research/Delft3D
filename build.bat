@@ -270,12 +270,7 @@ rem =======================
 :PrepareSln
     if "!mode!" == "quiet" (
         if "%config%" == "all" (
-            echo.
-            echo first ask python version
-            python --version
-            echo "Calling prepare_sln.py in quiet mode ..."
-            cd /d "%root%\src\"
-            python prepare_sln.py -vs !vs! -ifort !ifort! -cmakeConfig none -cmakePreparationOnly no
+            echo "Calling prepare_sln.py is not needed ..."
         )
     ) else (
         echo.
