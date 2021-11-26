@@ -2051,7 +2051,7 @@ if (mext /= 0) then
           xy2gate(2,n) = yz(kbi)
 
           if (kmx <= 1) then
-             iadv(L) = 0
+             iadv(Lf) = 0
              call setfixedweirscheme3onlink(Lf)
           endif
 
