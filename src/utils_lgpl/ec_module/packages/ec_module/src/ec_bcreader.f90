@@ -573,7 +573,7 @@ contains
              return
           end select
        case ('VERTICALPOSITIONTYPE','VERTPOSITIONTYPE')
-          IF (index(hdrvals(ifld)%s,'PERCEN')+index(hdrvals(ifld)%s,'BED')>0) then
+          IF (index(hdrvals(ifld)%s,'PERCEN')>0 .and. index(hdrvals(ifld)%s,'BED')>0) then
              hdrvals(ifld)%s = 'PERCBED'
           endif
           select case (adjustl(hdrvals(ifld)%s))
