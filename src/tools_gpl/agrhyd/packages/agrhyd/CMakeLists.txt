@@ -15,9 +15,9 @@ set(agrhyd_files ${agrhyd_root_path}/packages/agrhyd/src/agrhyd.f90
 set(icon_file ${agrhyd_version_path}/agrhyd_icon.rc)
 
 # Generate version files
-generate_version_files(${fortran_version_file_agrhyd} 
+generate_version_files(${fortran_version_file_agrhyd}
                        ${checkout_src_root}
-                       ${ini_version_file} 
+                       ${ini_version_file}
                        ON)
 
 
@@ -34,7 +34,7 @@ add_executable(${executable_name} ${source_files}
                                   ${fortran_version_file_agrhyd})
 
 # Define prebuild events
-prebuild_version_number(${executable_name} ${fortran_version_file_agrhyd} 
+prebuild_version_number(${executable_name} ${fortran_version_file_agrhyd}
                                         ${agrhyd_root_path}
                                         ${ini_version_file}
                                         ON)
@@ -56,10 +56,11 @@ if (UNIX)
     pkg_check_modules(NETCDF_FTN REQUIRED IMPORTED_TARGET netcdf-fortran)
     pkg_check_modules(PROJ REQUIRED IMPORTED_TARGET proj)
 
-    set(oss_dependencies deltares_common 
+    set(oss_dependencies deltares_common
+                         deltares_common_c
                          io_netcdf
                          io_hyd
-                         waq_io)
+                         waq_utils_f)
 
     oss_include_libraries(${executable_name} oss_dependencies)
 
@@ -72,11 +73,12 @@ endif(UNIX)
 
 if (WIN32)
     set(oss_dependencies deltares_common
+                         deltares_common_c
                          io_netcdf
                          io_hyd
                          netcdf4
                          netcdff
-                         waq_io)
+                         waq_utils_f)
 
     oss_include_libraries(${executable_name} oss_dependencies)
     target_link_libraries(${executable_name} ${oss_dependencies})
@@ -89,8 +91,8 @@ if(UNIX)
     message(STATUS "netcdf lib dir is ${NETCDF_LIBRARY_DIRS}")
     target_link_directories(${executable_name} PRIVATE ${NETCDF_LIBRARY_DIRS})
 
-    message(STATUS "Setting target_compile_definitions in Unix")    
-   set_property(TARGET ${executable_name} PROPERTY LINKER_LANGUAGE Fortran)
+    message(STATUS "Setting target_compile_definitions in Unix")
+    set_property(TARGET ${executable_name} PROPERTY LINKER_LANGUAGE Fortran)
 endif(UNIX)
 
 if (WIN32)
@@ -118,9 +120,9 @@ set(install_dir ${CMAKE_BINARY_DIR})
 set(build_dir ${CMAKE_BINARY_DIR})
 
 post_build_target (${executable_name}
-                   ${install_dir} 
-                   ${build_dir} 
-                   ${checkout_src_root} 
+                   ${install_dir}
+                   ${build_dir}
+                   ${checkout_src_root}
                    ${executable_name})
 
 install(TARGETS ${executable_name} RUNTIME  DESTINATION bin)
