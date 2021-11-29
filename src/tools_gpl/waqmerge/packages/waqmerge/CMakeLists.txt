@@ -18,12 +18,11 @@ if (UNIX)
     pkg_check_modules(NETCDF_FTN REQUIRED IMPORTED_TARGET netcdf-fortran)
     pkg_check_modules(PROJ REQUIRED IMPORTED_TARGET proj)
 
-    set(oss_dependencies deltares_common 
+    set(oss_dependencies deltares_common
+                         deltares_common_c
                          io_netcdf
                          io_hyd
-                         waq_io
                          waq_utils_f
-                         waq_utils_c
                          waqmerge_version_number)
 
     oss_include_libraries(${executable_name} oss_dependencies)
@@ -37,13 +36,12 @@ endif(UNIX)
 
 if (WIN32)
     set(oss_dependencies deltares_common
+                         deltares_common_c
                          io_netcdf
                          io_hyd
                          netcdf4
                          netcdff
-                         waq_io
                          waq_utils_f
-                         waq_utils_c
                          waqmerge_version_number)
 
     oss_include_libraries(${executable_name} oss_dependencies)
@@ -54,7 +52,7 @@ if(UNIX)
     message(STATUS "netcdf lib dir is ${NETCDF_LIBRARY_DIRS}")
     target_link_directories(${executable_name} PRIVATE ${NETCDF_LIBRARY_DIRS})
 
-    message(STATUS "Setting target_compile_definitions in Unix")    
+    message(STATUS "Setting target_compile_definitions in Unix")
     set_property(TARGET ${executable_name} PROPERTY LINKER_LANGUAGE Fortran)
 endif(UNIX)
 
@@ -85,9 +83,9 @@ set(install_dir ${CMAKE_BINARY_DIR})
 set(build_dir ${CMAKE_BINARY_DIR})
 
 post_build_target (${executable_name}
-                   ${install_dir} 
-                   ${build_dir} 
-                   ${checkout_src_root} 
+                   ${install_dir}
+                   ${build_dir}
+                   ${checkout_src_root}
                    ${executable_name})
 
 install(TARGETS ${executable_name} RUNTIME  DESTINATION bin)
