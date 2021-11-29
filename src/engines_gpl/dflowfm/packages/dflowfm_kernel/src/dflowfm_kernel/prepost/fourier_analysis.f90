@@ -65,6 +65,9 @@ module m_fourier_analysis
        integer       :: nofouvar = 0 ! Number of parameters to write to NetCDF file
        integer       :: ibluc
        integer       :: iblws
+       integer       :: iblfb        !< Freeboard in fourier file(1) or not(0)
+       integer       :: iblwdog      !< Waterdepth on ground in fourier file(1) or not(0)
+       integer       :: iblvog       !< Volume on ground in fourier file(1) or not(0)
        !
        ! pointers
        !
@@ -114,7 +117,7 @@ module m_fourier_analysis
     public :: reafou
     public :: postpr_fourier
 
-    public :: fourierIsActive, fourierWithUc
+    public :: fourierIsActive, fourierWithUc, fourierWithFb, fourierWithWdog, fourierWithVog
     public :: nofou
     public :: FouOutputFile
 
@@ -130,6 +133,21 @@ module m_fourier_analysis
        fourierWithUc = (gdfourier%ibluc>0)
     end function fourierWithUc
 
+!> do fourier with freeboard or not
+    logical function fourierWithFb()
+       fourierWithFb = (gdfourier%iblfb>0)
+    end function fourierWithFb
+
+!> do fourier with waterdepth on groud or not
+    logical function fourierWithWdog()
+       fourierWithWdog = (gdfourier%iblwdog>0)
+    end function fourierWithWdog
+
+!> do fourier with volume on groud or not
+    logical function fourierWithVog()
+       fourierWithVog = (gdfourier%iblvog>0)
+    end function fourierWithVog
+
 !> count the number of fourier/min/max quantities
     subroutine count_fourier_variables
        implicit none
@@ -138,6 +156,9 @@ module m_fourier_analysis
 
        gdfourier%iblws = 0
        gdfourier%ibluc = 0
+       gdfourier%iblfb = 0
+       gdfourier%iblwdog = 0
+       gdfourier%iblvog = 0
        do ivar=1, nofou
           !
           names(1) = gdfourier%founam(ivar)
@@ -148,6 +169,12 @@ module m_fourier_analysis
                 gdfourier%iblws = gdfourier%iblws + 1
              case ('uc')
                 gdfourier%ibluc = gdfourier%ibluc + 1
+             case ('fb')
+                gdfourier%iblfb = gdfourier%iblfb + 1
+             case ('wdog')
+                gdfourier%iblwdog = gdfourier%iblwdog + 1
+             case ('vog')
+                gdfourier%iblvog = gdfourier%iblvog + 1
              end select
           enddo
        enddo
@@ -287,6 +314,7 @@ module m_fourier_analysis
        integer                               :: ierr                ! error code allocate
        logical                               :: isRunningMean       ! min/max is based on running mean
        type (TRunningMeanMeta)               :: RMmeta              ! meta data in case of running mean calculation
+       integer                               :: ncyc
    !
    !! executable statements -------------------------------------------------------
    !
@@ -343,12 +371,25 @@ module m_fourier_analysis
        !
        linenumber = linenumber + 1
        if (record(1:1)=='*' .or. record == ' ') goto 20
-       fouid      = fouid      + 1
        !
        call str_lower(record, 132)
        if (allocated(columns)) deallocate(columns)
        call strsplit(record, 1, columns, 1)
        nveld = size(columns)
+       ! check: for fb, wdog and vog, only support max and numcyc=0
+       if (index(columns(1),'fb') > 0 .or. index(columns(1),'wdog') > 0 .or. index(columns(1),'vog') > 0) then
+          if (index(columns(7),'max') == 0) then
+             goto 20
+          else
+             ncyc = 0
+             read (columns(4), *, err=6666) ncyc
+             if (ncyc /= 0) then
+                goto 20
+             end if
+          end if
+       end if
+
+       fouid = fouid + 1
        !
        ! determine array names and type (scalar or vectorial) for fourier analysis
        !
@@ -404,6 +445,15 @@ module m_fourier_analysis
              call warn_flush()
              goto 6666
           endif
+       case ('fb')
+          founam(ifou)   = 'fb'
+          fouref(ifou,1) = fouid
+       case ('wdog')
+          founam(ifou)   = 'wdog'
+          fouref(ifou,1) = fouid
+       case ('vog')
+          founam(ifou)   = 'vog'
+          fouref(ifou,1) = fouid
        case default                    ! constituent, anything else
           read (founam(ifou)(2:2), '(i1)', iostat=iostat) fconno(ifou)
           if (iostat /= 0) then
@@ -477,7 +527,10 @@ module m_fourier_analysis
             founam(ifou)(1:2)/='ta' .and. &
             founam(ifou)(1:3)/='uxa' .and. &
             founam(ifou)(1:3)/='uya' .and. &
-            founam(ifou)(1:2)/='ws') then
+            founam(ifou)(1:2)/='ws'  .and. &
+            founam(ifou)(1:9)/='fb'  .and. &
+            founam(ifou)(1:9)/='wdog'.and. &
+            founam(ifou)(1:9)/='vog') then
           !
           read (columns(7), *, iostat=iostat) flayno
           if (iostat /= 0) then
@@ -812,6 +865,8 @@ function name_dependent_size(fourier_name) result(nmaxus)
         nmaxus = ndx
    case('r1')
         nmaxus = ndkx
+   case('fb', 'wdog', 'vog')
+      nmaxus = ndx
    case default
         nmaxus = max(ndkx,lnkx)
    end select
@@ -867,6 +922,12 @@ subroutine setfoustandardname(founam, foustdname)
     case ('uya','uy')
        foustdname = merge('sea_water_y_velocity        ',   &   
                           'northward_sea_water_velocity', jsferic==0)
+    case ('fb')
+       foustdname = 'freeboard'
+    case ('wdog')
+       foustdname = 'waterdepth_on_ground'
+    case ('vog')
+       foustdname = 'volume_on_ground'
     case default
        foustdname = ' '
     end select
@@ -887,7 +948,7 @@ end subroutine setfoustandardname
        real(kind=fp)                , intent(in)            :: time0   !<  Current time
        real(kind=fp)  , dimension(:), intent(in)            :: rarray  !<  Array for fourier analysis
        real(kind=fp)                , intent(in)            :: dtw     !<  weight for time step
-       real(kind=prec), dimension(:), intent(in)            :: bl      !<  bottum level
+       real(kind=prec), dimension(:), intent(in)            :: bl      !<  bottom level
        integer                      , intent(inout)         :: nfou    !<  counter for update fou quantities
        real(kind=fp)  , dimension(:), intent(in), optional  :: rarray2 !<  Array for combined min/max
        !
@@ -1222,6 +1283,39 @@ end subroutine setfoustandardname
           else
              nofouvar = nofouvar + 2
           endif
+       !
+       ! requested fourier analysis freeboard
+       !
+       elseif (columns(1)(1:2)=='fb') then
+          if (index(columns(7),'max') > 0 .and. numcyc==0) then
+             nofou = nofou + 1
+             nofouvar = nofouvar + 1
+          else
+             msgbuf = 'Fourier analysis: for variable keyword fb, only support max and numcyc=0, others are ignored'
+             call warn_flush()
+          end if
+       !
+       ! requested fourier analysis waterdepth_on_ground
+       !
+       elseif (columns(1)(1:4)=='wdog') then
+          if (index(columns(7),'max') > 0 .and. numcyc==0) then
+             nofou = nofou + 1
+             nofouvar = nofouvar + 1
+          else
+             msgbuf = 'Fourier analysis: for variable keyword wdog, only support max and numcyc=0, others are ignored'
+             call warn_flush()
+          end if
+       !
+       ! requested fourier analysis volume_on_ground
+       !
+       elseif (columns(1)(1:3)=='vog') then
+          if (index(columns(7),'max') > 0 .and. numcyc==0) then
+             nofou = nofou + 1
+             nofouvar = nofouvar + 1
+          else
+             msgbuf = 'Fourier analysis: for variable keyword vog, only support max and numcyc=0, others are ignored'
+             call warn_flush()
+          end if
        else
           !
           ! requested fourier analysis undefined
@@ -1360,6 +1454,12 @@ end subroutine setfoustandardname
        case ('ta')
           call gettaus(1)
           fieldptr => taus
+       case ('fb')
+          fieldptr => freeboard      ! freeboard
+       case ('wdog')
+          fieldptr => hsOnGround     ! waterdepth above ground
+       case ('vog')
+          fieldptr => volOnGround    ! volume above ground
        case default
           fieldptr => null()         ! Unknown FourierVariable exception
        end select
@@ -1504,6 +1604,15 @@ end subroutine setfoustandardname
            case ('ta')
               unc_loc = UNC_LOC_S
               namfun = 'bed stress'
+           case ('fb')
+              unc_loc = UNC_LOC_S
+              namfun = 'freeboard'
+           case ('wdog')
+              unc_loc = UNC_LOC_S
+              namfun = 'waterdepth_on_ground'
+           case ('vog')
+              unc_loc = UNC_LOC_S
+              namfun = 'volume_on_ground'
            end select
 
            is_min_max_avg = .true.
@@ -1543,8 +1652,14 @@ end subroutine setfoustandardname
            namfunlong = cnumber // ": " // namfun
            !
            idvar(:,ivar) = imissval
-           ierr = unc_def_var_map(fileids%ncid,fileids%id_tsp, idvar(:,ivar), NF90_DOUBLE, unc_loc, trim(fouvarnam(ivar)), trim(fouvarnamstd(ivar)), &
+           if (index(founam(ifou),'fb') > 0 .or. index(founam(ifou),'wdog') > 0 .or. index(founam(ifou),'vog') > 0) then 
+           ! Freeboard, waterdepth on ground and volume on groud are only for 1D
+              ierr = unc_def_var_map(fileids%ncid,fileids%id_tsp, idvar(:,ivar), NF90_DOUBLE, unc_loc, trim(fouvarnam(ivar)), trim(fouvarnamstd(ivar)), &
+                          AnalyseTypeShort // namfunlong // ', ' // trim(fouvarnamlong(ivar)), fouvarunit(ivar), is_timedep = 0, which_meshdim = 1)
+           else
+              ierr = unc_def_var_map(fileids%ncid,fileids%id_tsp, idvar(:,ivar), NF90_DOUBLE, unc_loc, trim(fouvarnam(ivar)), trim(fouvarnamstd(ivar)), &
                           AnalyseTypeShort // namfunlong // ', ' // trim(fouvarnamlong(ivar)), fouvarunit(ivar), is_timedep = 0)
+           end if
            if (ierr == NF90_NOERR) ierr = unc_put_att(fileids%ncid,idvar(:,ivar), 'long_name', AnalyseTypeLong // namfunlong // ', ' // trim(fouvarnamlong(ivar)))
            if (ierr == NF90_NOERR) ierr = unc_put_att(fileids%ncid,idvar(:,ivar), 'units',fouvarunit(ivar))
            if (ierr == NF90_NOERR) ierr = unc_put_att(fileids%ncid,idvar(:,ivar), 'reference_date_in_yyyymmdd', irefdate)
@@ -1554,13 +1669,6 @@ end subroutine setfoustandardname
            if (ierr == NF90_NOERR) ierr = unc_put_att(fileids%ncid,idvar(:,ivar), 'stoptime_'  // analyseType // '_analysis_in_minutes_since_reference_date', tfasto)
 
            if (ierr == NF90_NOERR) ierr = unc_add_gridmapping_att(fileids%ncid, idvar(:,ivar), jsferic)
-           select case (founam(ifou))
-           case('s1','r1','u1','ux','uy','uxa','uya','uc','ta')
-              if (ierr == NF90_NOERR) ierr = unc_put_att(fileids%ncid, idvar(:,ivar),  'coordinates'  , 'mesh2d_face_x mesh2d_face_y')
-           case('qxk','ws')
-              if (ierr == NF90_NOERR) ierr = unc_put_att(fileids%ncid, idvar(:,ivar),  'coordinates'  , 'mesh2d_edge_x mesh2d_edge_y')
-           end select
-
            if ( .not. is_min_max_avg) then
               if (ierr == NF90_NOERR) ierr = unc_put_att(fileids%ncid,idvar(:,ivar), 'number_of_cycles', fnumcy(ifou))
               if (ierr == NF90_NOERR) ierr = unc_put_att(fileids%ncid,idvar(:,ivar), 'frequency_degrees_per_hour', freqnt)

@@ -47,7 +47,9 @@ use m_mass_balance_areas, only: jamba
 use m_partitioninfo, only: jampi, sdmn, my_rank
 use m_integralstats
 use m_fourier_analysis
-use m_oned_functions, only: updateTimeWetOnGround, updateTotalInflow1d2d, updateTotalInflowLat
+use m_oned_functions, only: updateTimeWetOnGround, updateTotalInflow1d2d, updateTotalInflowLat, &
+                            updateFreeboard, set_ground_level_for_1d_nodes, updateDepthOnGround, &
+                            updateVolOnGround
 use unstruc_channel_flow, only : network
 implicit none
 integer, intent(out) :: iresult
@@ -138,9 +140,25 @@ character(len=255)   :: filename_fou_out
 
 888 continue
 
-   if (fourierIsActive() .and. md_fou_step == 1) then
-      if (fourierWithUc()) then
-         call getucxucyeulmag(ndkx, workx, worky, ucmag, jaeulervel, 1)
+   if (fourierIsActive()) then
+      if (md_fou_step == 1) then
+         if (fourierWithUc()) then
+            call getucxucyeulmag(ndkx, workx, worky, ucmag, jaeulervel, 1)
+         endif
+      end if
+      if (network%loaded .and. (fourierWithFb() .or. fourierWithWdog() .or. fourierWithVog())) then
+         if (dnt == 1) then
+            call set_ground_level_for_1d_nodes(network) ! set ground level for 1d nodes
+         end if
+         if (fourierWithFb()) then
+            call updateFreeboard(network)
+         end if
+         if (fourierWithWdog()) then
+            call updateDepthOnGround(network)
+         end if
+         if (fourierWithVog()) then
+            call updateVolOnGround(network)
+         end if
       endif
       call postpr_fourier(time0, dts)
    endif
