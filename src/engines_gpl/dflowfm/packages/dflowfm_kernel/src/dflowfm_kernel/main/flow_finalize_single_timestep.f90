@@ -160,7 +160,9 @@ character(len=255)   :: filename_fou_out
             call updateVolOnGround(network)
          end if
       endif
-      call postpr_fourier(time0, dts)
+      if (md_fou_step == 1) then
+         call postpr_fourier(time0, dts)
+      end if
    endif
 
 end subroutine flow_finalize_single_timestep
