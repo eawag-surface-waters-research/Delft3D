@@ -39,8 +39,8 @@
  integer :: n12                                      ! find normal velocity components of the other links
 
  ! locals
- integer :: LL, LLL, LLLL                            ! for links LL,
- integer :: k12      , kup                                ! relevant node, 1 or 2, L/R
+ integer :: LL, L2, L2a                              ! for links LL,
+ integer :: k12      , kup                           ! relevant node, 1 or 2, L/R
  double precision ::  ucin, ucinx, uciny, ucupin, cs, sn
 
  integer :: nn12
@@ -53,24 +53,25 @@
 
  k12  = ln(n12,L)
  do LL   = 1, nd(k12)%lnx                            ! loop over all attached links
-    LLL  = nd(k12)%ln(LL)
-    LLLL = iabs(LLL)
+    L2   = nd(k12)%ln(LL)
+    L2a  = iabs(L2)
 
-    if ( qa(LLLL) == 0d0) then                       ! include own link
+    if ( qa(L2a) == 0d0) then                       ! include own link
 
     else
 
-       if (nd(k12)%lnx == 2 .and. u1Du(LLLL) .ne. 0d0) then
-          ucin = ucxu(LLLL)*cs + ucyu(LLLL)*sn
-          ucin = sign(abs(u1Du(LLLL)), ucin) - u1(L)
+       if (nd(k12)%lnx == 2 .and. u1Du(L2a) .ne. 0d0) then
+          ! ucin = ucxu(L2a)*cs + ucyu(L2a)*sn
+          ucin = isnblin(n12,L) 
+          ucin = sign(abs(u1Du(L2a)), ucin) - u1(L)
        else
-          ucin = ucxu(LLLL)*cs + ucyu(LLLL)*sn  - u1(L)
+          ucin = ucxu(L2a)*cs + ucyu(L2a)*sn  - u1(L)
        endif
 
-       if (LLL > 0) then                             ! incoming link
-          QucPerpure1D = QucPerpure1D - qa(LLLL)*ucin
+       if (L2 > 0) then                             ! incoming link
+          QucPerpure1D = QucPerpure1D - qa(L2a)*ucin
        else
-          QucPerpure1D = QucPerpure1D + qa(LLLL)*ucin
+          QucPerpure1D = QucPerpure1D + qa(L2a)*ucin
        endif
 
     endif
