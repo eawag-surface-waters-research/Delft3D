@@ -57,7 +57,7 @@ c     Defaults for command line arguments
 
       versio = 5.00
       serial = 20130101
-      newfrm = .false.
+      newfrm = .true.
 
       do i=1,9999
             call getarg (i,ArgumentString)
@@ -71,6 +71,7 @@ c     Defaults for command line arguments
                 read (c20,'(i20)',iostat=status) serial
             endif
             if (index(ArgumentString,'-newfrm').gt.0) newfrm = .true.
+            if (index(ArgumentString,'-oldfrm').gt.0) newfrm = .false.
       enddo
 
 
