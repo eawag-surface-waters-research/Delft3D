@@ -43,5 +43,5 @@
 /* Return 0 on success, 1 on error. */
 int getCWDHelper(char *str, int len)
 {
-    return GETCWD(str, len) != str;
+    return GETCWD(str, len) == NULL;
 }
