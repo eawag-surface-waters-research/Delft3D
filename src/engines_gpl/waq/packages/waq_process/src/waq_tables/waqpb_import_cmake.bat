@@ -1,13 +1,10 @@
 @echo off
 set toolFound=false
-set toolDebug=false
+set toolx64=false
 set cmakeConfiguration=build_all
 
 if exist ..\..\..\..\..\..\..\%cmakeConfiguration%\waqpb_import\Release\waqpb_import.exe     set toolFound=true
-if exist ..\..\..\..\..\..\..\%cmakeConfiguration%\waqpb_import\Debug\waqpb_import.exe (
-    set toolFound=true
-    set toolDebug=true
-)
+if exist ..\..\..\..\..\..\..\%cmakeConfiguration%\x64\Release\dwaq\bin\waqpb_import.exe     set toolx64=true
 
 echo Searching in cmake build: %cmakeConfiguration%
 
@@ -22,11 +19,14 @@ if %toolFound%==true  (
     echo Run waqpb_help.bat for more information
     echo.
     pause
-    if %toolDebug%==true ..\..\..\..\..\..\..\%cmakeConfiguration%\waqpb_import\Debug\waqpb_import.exe -pdfprocesm.asc -newfrm
-    if not %toolDebug%==true ..\..\..\..\..\..\..\%cmakeConfiguration%\waqpb_import\Release\waqpb_import.exe -pdfprocesm.asc -newfrm
+    if %toolx64%==true ..\..\..\..\..\..\..\%cmakeConfiguration%\x64\Release\dwaq\bin\waqpb_import.exe
+    if %toolx64%==false ..\..\..\..\..\..\..\%cmakeConfiguration%\waqpb_import\Release\waqpb_import.exe
     copy proc_def.* ..\..\..\..\default
     if exist ..\..\..\..\..\..\..\%cmakeConfiguration%\x64\dwaq\default\ (
         copy proc_def.* ..\..\..\..\..\..\..\%cmakeConfiguration%\x64\dwaq\default\
+    )
+    if exist ..\..\..\..\..\..\..\%cmakeConfiguration%\x64\Release\dwaq\default\ (
+        copy proc_def.* ..\..\..\..\..\..\..\%cmakeConfiguration%\x64\Release\dwaq\default\
     )
     echo.
     pause

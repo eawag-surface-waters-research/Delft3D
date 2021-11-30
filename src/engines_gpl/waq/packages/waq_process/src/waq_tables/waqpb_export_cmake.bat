@@ -2,14 +2,12 @@
 set version=5.10
 set serial=2021101901
 set toolFound=false
-set toolDebug=false
+set toolx64=false
 set cmakeConfiguration=build_all
 
 if exist ..\..\..\..\..\..\..\%cmakeConfiguration%\waqpb_export\Release\waqpb_export.exe     set toolFound=true
-if exist ..\..\..\..\..\..\..\%cmakeConfiguration%\waqpb_export\Debug\waqpb_export.exe (
-    set toolFound=true
-    set toolDebug=true
-)
+if exist ..\..\..\..\..\..\..\%cmakeConfiguration%\x64\Release\dwaq\bin\waqpb_export.exe     set toolx64=true
+
 
 echo Searching in cmake build: %cmakeConfiguration%
 
@@ -23,11 +21,14 @@ if %toolFound%==true (
     echo Run waqpb_help.bat for more information
     echo.
     pause
-    if %toolDebug%==true ..\..\..\..\..\..\..\%cmakeConfiguration%\waqpb_export\Debug\waqpb_export.exe -version%version% -serial%serial% -newfrm
-    if not %toolDebug%==true ..\..\..\..\..\..\..\%cmakeConfiguration%\waqpb_export\Release\waqpb_export.exe -version%version% -serial%serial% -newfrm
+    if %toolx64%==true ..\..\..\..\..\..\..\%cmakeConfiguration%\x64\Release\dwaq\bin\waqpb_export.exe -version%version% -serial%serial%
+    if %toolx64%==false ..\..\..\..\..\..\..\%cmakeConfiguration%\waqpb_export\Release\waqpb_export.exe -version%version% -serial%serial%
     copy proc_def.* ..\..\..\..\default
     if exist ..\..\..\..\..\..\..\%cmakeConfiguration%\x64\dwaq\default\ (
         copy proc_def.* ..\..\..\..\..\..\..\%cmakeConfiguration%\x64\dwaq\default\
+    )
+    if exist ..\..\..\..\..\..\..\%cmakeConfiguration%\x64\Release\dwaq\default\ (
+        copy proc_def.* ..\..\..\..\..\..\..\%cmakeConfiguration%\x64\Release\dwaq\default\
     )
     echo.
     pause
