@@ -1184,6 +1184,7 @@ SUBROUTINE MINMXNS()
       USE M_BITMAP
       use network_data
       USE M_SAMPLES
+      use m_arcinfo
       USE M_grid
       USE M_SPLINES
       implicit none
@@ -1215,11 +1216,16 @@ SUBROUTINE MINMXNS()
       if ( NS.gt.0 ) then
          CALL  DMINMAX(  XS  ,  NS   ,  XSMIN,   XSMAX, NS    )
          CALL  DMINMAX(  YS  ,  NS   ,  YSMIN,   YSMAX, NS    )
-      else
-         xsmin =  huge(0d0)
-         xsmax =  huge(0d0)
-         ysmin =  huge(0d0)
-         ysmax =  huge(0d0)
+      else if (mca > 0) then
+         xsmin = x0 
+         xsmax = x0 + dxa*(mca-1)
+         ysmin = y0
+         ysmax = y0 + dya*(nca-1)
+      else 
+         xsmin =  0d0
+         xsmax =  0d0
+         ysmin =  0d0
+         ysmax =  0d0
       end if
 
       IF (NDRAW(26) .EQ. 1) THEN

@@ -6389,11 +6389,13 @@ contains
    dm = (x - x0)/dxa ; m = int(dm) ; am = dm - m ; m = m + 1
    dn = (y - y0)/dya ; n = int(dn) ; an = dn - n ; n = n + 1
    z  = dmiss
-   if (m < mca .and. n < nca .and. m >= 1 .and. n >= 1) then 
-      z  =        am  *        an    * d(m+1 , n+1) + &
-           (1d0 - am) *        an    * d(m   , n+1) + &
-           (1d0 - am) * (1d0 - an)   * d(m   , n  ) + &
-                  am  * (1d0 - an)   * d(m+1 , n  ) 
+   if (d(m,n) .ne. dmiss .and. d(m+1,n) .ne. dmiss .and. d(m,n+1) .ne. dmiss .and. d(m+1,n+1) .ne. dmiss) then  
+      if (m < mca .and. n < nca .and. m >= 1 .and. n >= 1) then 
+         z  =        am  *        an    * d(m+1 , n+1) + &
+              (1d0 - am) *        an    * d(m   , n+1) + &
+              (1d0 - am) * (1d0 - an)   * d(m   , n  ) + &
+                     am  * (1d0 - an)   * d(m+1 , n  )
+      endif 
    endif
 
    end subroutine bilinarcinfo

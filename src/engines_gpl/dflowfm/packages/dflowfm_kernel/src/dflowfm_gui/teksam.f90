@@ -118,6 +118,8 @@
       SUBROUTINE TEKarc (MET, hrc, rc)
       use m_arcinfo 
       use unstruc_display
+      use m_missing, only: DMISS
+      
       implicit none
       double precision :: hrc, rc, x, y, z
       integer          :: met, m, n, key
@@ -130,10 +132,12 @@
          IF (KEY .EQ. 1) RETURN
          do m = 1,mca
          
+            z = d(m,n)
+            if ( z == dmiss) cycle 
             x = x0 + dxa*(m-1)
             y = y0 + dya*(n-1)
-            z = d(m,n)
             call tek1sample (x,y,z,met,rc,hrc,m,n)
+
          enddo
      enddo
      end SUBROUTINE TEKarc
@@ -141,7 +145,7 @@
   
      subroutine tek1sample(x,y,z,met,rc,hrc,m,n)
      use unstruc_colors
-     use m_missing, only: DMISS
+     
      use unstruc_opengl, only: jaopengl
      use unstruc_display
      use m_arcinfo
