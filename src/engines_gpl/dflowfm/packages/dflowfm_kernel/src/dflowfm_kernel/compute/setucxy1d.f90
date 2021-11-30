@@ -32,7 +32,7 @@
 
 ! =================================================================================================
 ! =================================================================================================
-subroutine setucxy1D() ! give ucx,ucy magnitude of uc1D, Pure1D
+subroutine setucxy1D() ! give ucx,ucy magnitude of uc1D, jaPure1D
 
 use m_flowgeom
 use m_flow

@@ -307,6 +307,8 @@
  double precision, allocatable     :: ucxu  (:)   !< upwind link ucx (m/s)
  double precision, allocatable     :: ucyu  (:)   !< upwind link ucy (m/s)
  double precision, allocatable     :: u1Du  (:)   !< upwind 1D link velocity (m/s) (only relevant for Pure1D)
+ integer         , allocatable     :: isnbnod (:,:) !< sign of left/right node follows your dir in jaPure1D assumptions, -1 or 1 for Ja1D nodes
+ integer         , allocatable     :: isnblin (:,:) !< sign of left/right link follows your dir in jaPure1D assumptions, -1 or 1 for Ja1D nodes
  double precision, allocatable     :: advi  (:)   !< advection implicit part (1/s)
  double precision, allocatable     :: adve  (:)   !< advection explicit part (m/s2)
  double precision, allocatable     :: adve0 (:)   !< advection explicit part (m/s2) prevstep

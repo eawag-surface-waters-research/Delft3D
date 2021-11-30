@@ -375,7 +375,8 @@
 
  integer                           :: jaustarint              !< 1=integral bed layer velocity,  0=velocity at half bed layer
 
- double precision                  :: Pure1D                  !< 0d0 = org 1D advec, 1d0 = puur1D
+ integer                           :: jaPure1D                !< 0 = default 1D advec, 1 = pure1D using vol1_f, 2 = pure1D using vol1
+                                                              ! hk renames to jaPure1D to prevent confusion with the later introduced logical Pure1D in mor.
 
  double precision                  :: Eddyviscositybedfacmax  !< eddyviscosityatbed = min(eddyviscosityatbed, eddyviscosityatbedfacmax*eddyviscosityatbed+1 )
 
@@ -751,8 +752,8 @@ subroutine default_flowparameters()
     bedslope    = 0d0    ! bottom inclination testcases
     Slopedrop2D = 0d0    ! Apply droplosses only if local bottom slope > Slopedrop2D, negative = no droplosses
     Drop1D      = .false.
-    Drop2D      = 0d0    ! Apply droblosses in 2D yes or no 1 or 0
-    drop3D      = 1d0    ! Apply droplosses in 3D yes or no 1 or 0
+    Drop2D      = 0d0    ! Apply droplosses in 2D yes or no 1 or 0
+    Drop3D      = 1d0    ! Apply droplosses in 3D yes or no 1 or 0
     jacstbnd    = 0
     jajre       = 0
     jasourcesink= 1
@@ -844,7 +845,7 @@ subroutine default_flowparameters()
     javatem    = 6       !< vert. adv. tem1 : 0=No, 1=UpwexpL, 2=Centralexpl, 3=UpwimpL, 4=CentraLimpL, 5=switched to 3 for neg stratif.
     javased    = 6       !< vert. adv. suspended sediment concentrations : 0=No, 1=UpwexpL, 2=Centralexpl, 3=UpwimpL, 4=CentraLimpL, 5=switched to 3 for neg stratif., 6=higher-order upwind/explicit
     jahazlayer = 0       !<
-    Pure1D     = 0d0     !< puur1D no yes
+    jaPure1D   = 0       !< 0 = org 1D advec, 1 = pure1D using vol1_f, 2 = pure1D using vol1
     JaZlayercenterbedvel      = 1
     jastructurelayersactive   = 1
     JaZerozbndinflowadvection = 0

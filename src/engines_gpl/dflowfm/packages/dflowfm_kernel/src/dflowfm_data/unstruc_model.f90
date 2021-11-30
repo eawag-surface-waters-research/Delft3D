@@ -1087,7 +1087,7 @@ subroutine readMDUFile(filename, istat)
 
     call prop_get_integer(md_ptr, 'numerics', 'Horadvtypzlayer' , jahazlayer)
 
-    call prop_get_double (md_ptr, 'numerics', 'Pure1D'          , Pure1D)
+    call prop_get_integer(md_ptr, 'numerics', 'Pure1D'          , jaPure1D)
 
     call prop_get_integer(md_ptr, 'numerics', 'Zlayercenterbedvel', jaZlayercenterbedvel)
 
@@ -2829,8 +2829,8 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
       call prop_set(prop_ptr, 'numerics', 'Horadvtypzlayer', Jahazlayer, 'Horizontal advection treatment of z-layers (1: default, 2: sigma-like)')
     endif
 
-    if (writeall .or. Pure1D > 0) then
-       call prop_set(prop_ptr, 'numerics', 'Pure1D'          , Pure1D, '0d0=org,1d0=pure1D')
+    if (writeall .or. jaPure1D > 0) then
+       call prop_set(prop_ptr, 'numerics', 'Pure1D'        , jaPure1D, '0 = org 1D advec, 1 = pure1D using vol1_f, 2 = pure1D using vol1')
     endif
 
     if (jaZerozbndinflowadvection > 0) then

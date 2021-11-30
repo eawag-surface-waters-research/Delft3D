@@ -953,7 +953,7 @@ end if
     endif
  enddo
 
- if (pure1D > 0d0) then
+ if (japure1D > 0) then
     call setiadvpure1D()
  endif
 

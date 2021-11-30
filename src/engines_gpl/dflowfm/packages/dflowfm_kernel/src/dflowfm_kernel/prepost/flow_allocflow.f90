@@ -585,8 +585,10 @@
  if (lnxi > 0 .and. kmx == 0) then
     call realloc(uc1D, ndx, keepExisting = .false., fill = 0d0, stat = ierr)
     call aerr('uc1D(ndx)', ierr, ndx)
-    call realloc(u1Du, lnx, keepExisting = .false., fill = 0d0, stat = ierr)
-    call aerr('u1Du(lnx)', ierr, lnx)
+    if (japure1D > 0) then 
+       call realloc(u1Du, lnx, keepExisting = .false., fill = 0d0, stat = ierr)
+       call aerr('u1Du(lnx)', ierr, lnx)
+    endif
  endif
 
  if ( allocated(dtcell) ) then

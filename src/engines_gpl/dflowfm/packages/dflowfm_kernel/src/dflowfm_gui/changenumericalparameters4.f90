@@ -70,7 +70,7 @@
    OPTION(15) = 'Uchileaf                         ( )   ' ; it(2*15) = 6
    OPTION(16) = 'Cdleaf                           ( )   ' ; it(2*16) = 6
    OPTION(17) = 'Arealeaf                         ( )   ' ; it(2*17) = 6
-   OPTION(18) = 'Pure1D                           ( )   ' ; it(2*18) = 6
+   OPTION(18) = 'jaPure1D                         ( )   ' ; it(2*18) = 2
 
 
 !   123456789012345678901234567890123456789012345678901234567890
@@ -93,7 +93,7 @@
    HELPM (15) = '                                                        ( ) '
    HELPM (16) = '                                                        ( ) '
    HELPM (17) = '                                                        ( ) '
-   HELPM (18) = '                                                        ( ) '
+   HELPM (18) = '!< 0 = org 1D advec, 1 = pure1D using vol1_f, 2 = vol1  ( ) '
 
 
    CALL SAVEKEYS()
@@ -184,7 +184,7 @@
    CALL IFORMputdouble  (2*15 , Uchileaf,   '(F7.3)' )
    CALL IFORMputdouble  (2*16 , Cdleaf,     '(F7.3)' )
    CALL IFORMputdouble  (2*17 , Arealeaf,   '(F7.3)' )
-   CALL IFORMputdouble  (2*18 , Pure1D,     '(F7.3)' )
+   CALL IFORMputinteger (2*18 , jaPure1D )
 
 
    !  Display the form with numeric fields left justified
@@ -242,7 +242,7 @@
           CALL IFORMgetdouble  (2*15 , Uchileaf   )
           CALL IFORMgetdouble  (2*16 , Cdleaf     )
           CALL IFORMgetdouble  (2*17 , Arealeaf   )
-          CALL IFORMgetdouble  (2*18 , Pure1D     )
+          CALL IFORMgetinteger (2*18 , jaPure1D     )
 
           do L = 1,Lnx1D
              if (prof1D(1,L) >= 0) then  ! only direct profiles

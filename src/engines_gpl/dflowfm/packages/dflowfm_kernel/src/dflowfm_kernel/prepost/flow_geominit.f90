@@ -1034,6 +1034,10 @@
 
  call set_1d_indices_in_network()
 
+ if (japure1D > 0) then 
+    call setisnbnodisnblin() ! set signarray isnbnod for left and rightneighbouring uc1d.
+ endif
+
  if (network%loaded .and. ndxi-ndx2d > 0 .and. (jamapTimeWetOnGround > 0 .or. jamapFreeboard > 0 .or. jamapDepthOnGround > 0 .or. jamapVolOnGround > 0)) then
     call set_ground_level_for_1d_nodes(network) ! set ground level for 1d nodes
  end if

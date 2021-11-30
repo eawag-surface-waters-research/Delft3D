@@ -948,17 +948,6 @@ else if (icorio == 10) then                             ! vol2D type weigthings
 
  if (kmx == 0 .and. lnx1D > 0 ) then ! setuc
     call setuc1D ()
-    u1Du  = 0d0
-    if (pure1D > 0) then
-       do L = 1,lnx
-          if (qa(L) > 0 .and. abs(uc1D(ln(1,L))) > 0 ) then                               ! set upwind ucxu, ucyu  on links
-             u1Du(L) = uc1D(ln(1,L))
-          else if (qa(L) < 0 .and. abs(uc1D(ln(2,L))) > 0 ) then
-             u1Du(L) = uc1D(ln(2,L))
-          endif
-       enddo
-    endif
-
  endif
 
 end subroutine setucxucyucxuucyunew
