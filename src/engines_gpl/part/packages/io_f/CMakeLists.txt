@@ -22,3 +22,5 @@ endif(UNIX)
 # Define how the files should be structured within Visual Studio
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${source_files})
 set_target_properties (${library_name} PROPERTIES FOLDER engines_gpl/part)
+
+target_compile_options(${library_name} PRIVATE "${file_preprocessor_flag}")

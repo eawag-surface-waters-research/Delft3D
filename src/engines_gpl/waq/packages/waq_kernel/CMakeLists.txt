@@ -81,6 +81,7 @@ set_property(SOURCE ${proces_file}         PROPERTY COMPILE_OPTIONS "${openmp_fl
 
 
 # Set additional compilation properties
+target_compile_options(${library_name} PRIVATE "${file_preprocessor_flag}")
 target_compile_options(${library_name} PRIVATE "${extend_source132_flag}")
 target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${check_bounds_flag}>")
 target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${check_pointer}>")
