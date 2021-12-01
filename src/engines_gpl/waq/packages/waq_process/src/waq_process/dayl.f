@@ -38,7 +38,7 @@
 ! Name    T   L I/O   Description                                    Units
 ! ----    --- -  -    -------------------                            -----
 ! TIME    R*4 1 I  DELWAQ time in scu                              [scu]
-! TREF    R*4 1 I  Refernce tim in days                              [d]
+! TREF    R*4 1 I  Reference tim in days                             [d]
 ! RLAT    R*4 1 I  Latitude, north pos., south neg. [ radians ]   [grad]
 !     Logical Units : -
 
