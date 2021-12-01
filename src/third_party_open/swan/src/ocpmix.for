@@ -1967,8 +1967,9 @@
 !CVIS     &         SHARED,                                                    40.41
      &      ACCESS='SEQUENTIAL',FORM=FORM(IFO))
          END IF
+         IFUN = IUNIT                                                          BJXX
       END IF
-      HIOPEN = IFUN
+      HIOPEN = MAX(HIOPEN,IFUN)                                                BJXX
   80  IF (ITEST.GE.30) WRITE (PRINTF, 82) IUNIT, DDNAME, SF
   82  FORMAT (' File opened: ', I6, 2X, A36, 2X, A2)
       RETURN

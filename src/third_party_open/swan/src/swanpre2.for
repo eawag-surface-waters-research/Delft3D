@@ -4093,6 +4093,7 @@
   28    FORMAT (I6, ' quantities')
       ELSE
         CALL MSGERR (3, 'unsupported boundary data file')
+        NBOUNC = 0                                                        BJXX
       ENDIF
 !
       ALLOCATE(BSPFIL%BSPLOC(NBOUNC))                                     40.31

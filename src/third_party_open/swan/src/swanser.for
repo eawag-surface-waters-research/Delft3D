@@ -2009,6 +2009,10 @@
 !
       DO 14 K = 1 ,MXITNR
         ITER = K                                                          40.41
+        IF (XC .LT. 1. ) XC = 1.                                          BJXX
+        IF (YC .LT. 1. ) YC = 1.                                          BJXX
+        IF (XC .GT. MXC) XC = FLOAT(MXC)                                  BJXX
+        IF (YC .GT. MYC) YC = FLOAT(MYC)                                  BJXX
         I1   = INT(XC)                                                    40.00
         J1   = INT(YC)
         IF (I1 .EQ. MXC) I1 = I1 - 1
