@@ -455,31 +455,34 @@ rem =======================
     if "!config!" == "all" (
         echo.
         echo "Installing in build_all ..."
-        xcopy %root%\src\bin\x64                                %root%\build_all\x64\                 /E /C /Y /Q > del.log 2>&1
-        xcopy %root%\build_all\x64\Release\dimr                 %root%\build_all\x64\dimr\            /E /C /Y /Q > del.log 2>&1
-        xcopy %root%\build_all\x64\Release\dflowfm\bin\dflowfm* %root%\build_all\x64\dflowfm\bin\     /E /C /Y /Q > del.log 2>&1
-        xcopy %root%\build_all\x64\Release\dflowfm\bin\dfm*     %root%\build_all\x64\dflowfm\bin\     /E /C /Y /Q > del.log 2>&1
-        xcopy %root%\build_all\x64\Release\dflowfm\default      %root%\build_all\x64\dflowfm\default\ /E /C /Y /Q > del.log 2>&1
-        xcopy %root%\build_all\x64\Release\dflowfm\scripts      %root%\build_all\x64\dflowfm\scripts\ /E /C /Y /Q > del.log 2>&1
+        xcopy %root%\build_all\x64\Release\dimr                     %root%\build_all\x64\dimr\            /E /C /Y /Q > del.log 2>&1
 
-        xcopy %root%\build_all\x64\Release\dwaq\bin\delwaq.dll      %root%\build_all\x64\dwaq\bin\     /E /C /Y /Q > del.log 2>&1
-        xcopy %root%\build_all\x64\Release\dwaq\bin\delwaq*.exe     %root%\build_all\x64\dwaq\bin\     /E /C /Y /Q > del.log 2>&1
-        xcopy %root%\build_all\x64\Release\dwaq\bin\waq_plugin*.dll %root%\build_all\x64\dwaq\bin\     /E /C /Y /Q > del.log 2>&1
-        xcopy %root%\build_all\x64\Release\dwaq\default             %root%\build_all\x64\dwaq\default\ /E /C /Y /Q > del.log 2>&1
-        xcopy %root%\build_all\x64\Release\dwaq\scripts             %root%\build_all\x64\dwaq\scripts\ /E /C /Y /Q > del.log 2>&1
+        xcopy %root%\build_all\x64\Release\dflowfm\bin\dflowfm*     %root%\build_all\x64\dflowfm\bin\     /E /C /Y /Q > del.log 2>&1
+        xcopy %root%\build_all\x64\Release\dflowfm\bin\dfm*         %root%\build_all\x64\dflowfm\bin\     /E /C /Y /Q > del.log 2>&1
+        xcopy %root%\build_all\x64\Release\dflowfm\default          %root%\build_all\x64\dflowfm\default\ /E /C /Y /Q > del.log 2>&1
+        xcopy %root%\build_all\x64\Release\dflowfm\scripts          %root%\build_all\x64\dflowfm\scripts\ /E /C /Y /Q > del.log 2>&1
 
-        xcopy %root%\build_all\x64\Release\dwaves\bin\wave.dll      %root%\build_all\x64\dwaves\bin\     /E /C /Y /Q > del.log 2>&1
-        xcopy %root%\build_all\x64\Release\dwaves\bin\wave.exe      %root%\build_all\x64\dwaves\bin\     /E /C /Y /Q > del.log 2>&1
-        xcopy %root%\build_all\x64\Release\dwaves\default           %root%\build_all\x64\dwaves\default\ /E /C /Y /Q > del.log 2>&1
-        xcopy %root%\build_all\x64\Release\dwaves\scripts           %root%\build_all\x64\dwaves\scripts\ /E /C /Y /Q > del.log 2>&1
-        xcopy %root%\build_all\x64\Release\swan\bin\swan_mpi.exe    %root%\build_all\x64\swan\bin\       /E /C /Y /Q > del.log 2>&1
-        xcopy %root%\build_all\x64\Release\swan\bin\swan_omp.exe    %root%\build_all\x64\swan\bin\       /E /C /Y /Q > del.log 2>&1
-        xcopy %root%\build_all\x64\Release\swan\scripts             %root%\build_all\x64\swan\scripts\   /E /C /Y /Q > del.log 2>&1
-        xcopy %root%\build_all\x64\Release\esmf\bin                 %root%\build_all\x64\esmf\bin\       /E /C /Y /Q > del.log 2>&1
-        xcopy %root%\build_all\x64\Release\esmf\scripts             %root%\build_all\x64\esmf\scripts\   /E /C /Y /Q > del.log 2>&1
+        xcopy %root%\build_all\x64\Release\dwaq\bin\delwaq.dll      %root%\build_all\x64\dwaq\bin\        /E /C /Y /Q > del.log 2>&1
+        xcopy %root%\build_all\x64\Release\dwaq\bin\delwaq*.exe     %root%\build_all\x64\dwaq\bin\        /E /C /Y /Q > del.log 2>&1
+        xcopy %root%\build_all\x64\Release\dwaq\bin\waq_plugin*.dll %root%\build_all\x64\dwaq\bin\        /E /C /Y /Q > del.log 2>&1
+        xcopy %root%\build_all\x64\Release\dwaq\default             %root%\build_all\x64\dwaq\default\    /E /C /Y /Q > del.log 2>&1
+        xcopy %root%\build_all\x64\Release\dwaq\scripts             %root%\build_all\x64\dwaq\scripts\    /E /C /Y /Q > del.log 2>&1
 
+        xcopy %root%\build_all\x64\Release\dwaves\bin\wave.dll      %root%\build_all\x64\dwaves\bin\      /E /C /Y /Q > del.log 2>&1
+        xcopy %root%\build_all\x64\Release\dwaves\bin\wave.exe      %root%\build_all\x64\dwaves\bin\      /E /C /Y /Q > del.log 2>&1
+        xcopy %root%\build_all\x64\Release\dwaves\default           %root%\build_all\x64\dwaves\default\  /E /C /Y /Q > del.log 2>&1
+        xcopy %root%\build_all\x64\Release\dwaves\scripts           %root%\build_all\x64\dwaves\scripts\  /E /C /Y /Q > del.log 2>&1
 
-        xcopy %root%\build_all\x64\Release\share\bin            %root%\build_all\x64\share\bin\       /E /C /Y /Q > del.log 2>&1
+        xcopy %root%\build_all\x64\Release\swan\bin\swan_mpi.exe    %root%\build_all\x64\swan\bin\        /E /C /Y /Q > del.log 2>&1
+        xcopy %root%\build_all\x64\Release\swan\bin\swan_omp.exe    %root%\build_all\x64\swan\bin\        /E /C /Y /Q > del.log 2>&1
+        xcopy %root%\build_all\x64\Release\swan\scripts             %root%\build_all\x64\swan\scripts\    /E /C /Y /Q > del.log 2>&1
+
+        xcopy %root%\build_all\x64\Release\esmf\bin                 %root%\build_all\x64\esmf\bin\        /E /C /Y /Q > del.log 2>&1
+        xcopy %root%\build_all\x64\Release\esmf\scripts             %root%\build_all\x64\esmf\scripts\    /E /C /Y /Q > del.log 2>&1
+
+        xcopy %root%\build_all\x64\Release\dmor                     %root%\build_all\x64\dmor\            /E /C /Y /Q > del.log 2>&1
+
+        xcopy %root%\build_all\x64\Release\share\bin                %root%\build_all\x64\share\bin\       /E /C /Y /Q > del.log 2>&1
         rmdir /s /q %root%\build_all\x64\Release > del.log 2>&1
         del /f/q del.log
     )
