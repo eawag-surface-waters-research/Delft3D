@@ -53,7 +53,7 @@
       ! set the names
       name              = hyd%file_hyd%name
       name_path         = trim(waq_output_dir)//'/'//trim(name)
-      istat =  makedir(trim(waq_output_dir)//'_'//trim(name))
+      istat =  makedir(trim(waq_output_dir))
       
       hyd%file_com%name = name
       hyd%file_hyd%name = name_path//'.hyd'
