@@ -41,6 +41,8 @@ use unstruc_model, only: md_foufile, md_tunit, getoutputdir, md_fou_step
 use unstruc_files, only : defaultFilename
 use m_flow, only: kmxd
 use m_flowtimes, only: tstart_user, tstop_user, ti_his, dt_user
+use unstruc_channel_flow, only: network
+use m_oned_functions, only: set_ground_level_for_1d_nodes, set_max_volume_for_1d_nodes
 
 implicit none
 integer  :: minp, ierr
@@ -65,6 +67,19 @@ select case (md_fou_step)
 end select
 
 call reafou(minp, md_foufile, kmxd, NUMCONST, ISALT, ITEMP, tstart_user, tstop_user, ti_fou, success)
+
+if (network%loaded) then
+   if (fourierWithFb() .or. fourierWithWdog() .or. fourierWithVog()) then
+   ! If freeboard, waterdepth on ground or volume on groud is read from the *.fou file,
+   ! then need to compute groundlevel for 1d node firstly. 
+   ! The groundlevel will be used to update freeboard, waterdepth on ground and volume on groud later.
+      call set_ground_level_for_1d_nodes(network)
+   end if
+   if (fourierWithVog()) then
+   ! If volume on ground is read from the *.fou file, then also need to compute maximal volume firstly.
+      call set_max_volume_for_1d_nodes() ! set maximal volume, it will be used to update the volume on ground level for the output
+   end if
+end if
 
 call doclose(minp)
 

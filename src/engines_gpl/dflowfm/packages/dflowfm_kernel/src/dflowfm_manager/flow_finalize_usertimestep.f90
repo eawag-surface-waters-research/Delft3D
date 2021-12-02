@@ -45,6 +45,8 @@ subroutine flow_finalize_usertimestep(iresult)
    use precision_basics, only : comparereal
    use unstruc_model, only: md_fou_step
    use m_partitioninfo, only: jampi
+   use unstruc_channel_flow, only : network
+   use m_oned_functions, only: updateFreeboard, updateDepthOnGround, updateVolOnGround
    implicit none
 
    integer, intent(out) :: iresult !< Error status, DFM_NOERR==0 if successful.
@@ -138,6 +140,17 @@ subroutine flow_finalize_usertimestep(iresult)
       if (fourierWithUc()) then
          call getucxucyeulmag(ndkx, workx, worky, ucmag, jaeulervel, 1)
       endif
+      if (network%loaded) then
+         if (fourierWithFb()) then
+            call updateFreeboard(network)
+         end if
+         if (fourierWithWdog()) then
+            call updateDepthOnGround(network)
+         end if
+         if (fourierWithVog()) then
+            call updateVolOnGround(network)
+         end if
+      end if
       ti_fou = merge(dt_user, ti_his, md_fou_step == 0)
       call postpr_fourier(time0, ti_fou)
    endif
