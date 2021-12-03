@@ -43,7 +43,6 @@ subroutine setbedlevelfromextfile()    ! setbedlevels()  ! check presence of old
  use string_module, only: strcmpi
  use unstruc_inifields, only: readIniFieldProvider, checkIniFieldFileVersion
  use dfm_error
- use m_arcinfo, only : MAXSAMARC
 
  use unstruc_netcdf
  implicit none
@@ -72,10 +71,7 @@ subroutine setbedlevelfromextfile()    ! setbedlevels()  ! check presence of old
  character(len=ini_key_len)      :: groupname
  character(len=255)              :: fnam
  character(len=255)              :: basedir
- integer :: major, minor
  integer :: i, iLocType
- integer :: maxsamples
-
 
  kc_size_store = 0
  inifield_ptr => null()
@@ -160,10 +156,6 @@ subroutine setbedlevelfromextfile()    ! setbedlevels()  ! check presence of old
        if (num_items_in_file > 0) then
           i  = 1
           ja2 = 1
-       end if
-       call prop_get_integer (inifield_ptr, 'general', 'maxsamples', maxsamples, success)
-       if (success) then
-          MAXSAMARC = maxsamples
        end if
     end if
 
