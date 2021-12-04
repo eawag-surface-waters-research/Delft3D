@@ -1044,6 +1044,7 @@ subroutine readMDUFile(filename, istat)
     if (Layertype > 1) then
        iadvec = 33 ; iadvec1D = 33
     endif
+    call prop_get_integer(md_ptr, 'numerics', 'AdvecCorrection1D2D', iadveccorr1D2D)
     call prop_get_integer(md_ptr, 'numerics', 'TimeStepType'    , itstep)
 
     call prop_get_integer(md_ptr, 'numerics', 'maxNonlinearIterations'    , maxNonlinearIterations)
@@ -2779,6 +2780,8 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
        call prop_set(prop_ptr, 'numerics', 'Lincontin',    Lincontin,  'Default 0; Set to 1 for linearizing d(Hu)/dx; link to AdvecType')
     endif
     call prop_set(prop_ptr, 'numerics', 'AdvecType',    iadvec,     'Advection type (0: none, 1: Wenneker, 2: Wenneker q(uio-u), 3: Perot q(uio-u), 4: Perot q(ui-u), 5: Perot q(ui-u) without itself), 33: as 3 using links (faster)')
+    call prop_set(prop_ptr, 'numerics', 'AdvecCorrection1D2D', iadveccorr1D2D,     'Advection correction of 1D2D link volume (0: none, 1: link volume au*dx')
+
     call prop_set(prop_ptr, 'numerics', 'TimeStepType', itstep,     'Time step handling (0: only transport, 1: transport + velocity update, 2: full implicit step-reduce, 3: step-Jacobi, 4: explicit)')
     if (writeall .or. maxNonlinearIterations /= 100) then
         call prop_set(prop_ptr, 'numerics', 'maxNonlinearIterations'    , maxNonlinearIterations, 'Maximal iterations in non-linear iteration loop before a time step reduction is applied')

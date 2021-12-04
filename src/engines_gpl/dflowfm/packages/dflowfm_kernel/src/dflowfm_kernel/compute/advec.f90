@@ -609,6 +609,8 @@
 
        if (kcu(L) ==1) then
           volu = acl(L)*vol1_f(k1) + (1d0-acl(L))*vol1_f(k2)
+       else if (kcu(L) == 3 .and. iadveccorr1D2D == 1) then
+          volu = au(L)*dx(L) ! Use volume weighting based on approximated "lateral volume", to avoid large 1D river volumes.
        else
           volu = acl(L)*vol1(k1) + (1d0-acl(L))*vol1(k2)
        endif

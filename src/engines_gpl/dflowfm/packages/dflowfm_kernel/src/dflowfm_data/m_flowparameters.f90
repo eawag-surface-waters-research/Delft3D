@@ -47,6 +47,7 @@
  logical                           :: setHorizontalBobsFor1d2d !< bobs are set to 2d bedlevel, to prevent incorrect storage in sewer system.
  logical                           :: dxDoubleAt1DEndNodes !< indicaties whether a 1D grid cell at the end of a network has to be extended with 0.5*dx
  integer                           :: iadvec1D          !< same, now for 1D links
+ integer                           :: iadveccorr1D2D    !< Advection correction of 1D2D link volume (0: none, 1: link volume au*dx')
 
  logical                           :: changeVelocityAtStructures !< Set the flow velocity at structures in setucxucyucxuucyu to the 
                                                                  !< flow velocity upstream of the structure
@@ -583,6 +584,7 @@ subroutine default_flowparameters()
     itstep   = 2      ! time step 0=only transport, 1=transport + velocity update, 2=full implicit step_reduce
     iadvec   = 33     ! adv type, 0=no, 1= Wenneker vol, qu-udzt array, 2=1, function, 3=Perot in uit, 4=Perot in, 5=3,piaczek
     iadvec1D = 33     ! same, now for 1D links
+    iadveccorr1D2D = 0 ! Advection correction of 1D2D link volume (0: none, 1: link volume au*dx')
 
     maxNonlinearIterations   = 100     !< maximal iterations in non linear iteration loop before a time step reduction is applied
     setHorizontalBobsFor1d2d = .false. !< bobs are set to 2d bedlevel, to prevent incorrect storage in sewer system.

@@ -266,7 +266,7 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
 
 
        if (kcu(L) .ne. 2 .and. kcu(L) .ne. 1) then
-          cycle  ! weirs only on regular links and 1d2d links
+          cycle  ! weirs only on regular links
        endif
 
        jaweir   = 1 ! 0

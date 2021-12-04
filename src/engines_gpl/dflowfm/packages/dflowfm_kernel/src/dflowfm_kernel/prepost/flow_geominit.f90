@@ -105,6 +105,7 @@
  double precision        :: atpf_org, circumormasscenter_org, phase, zkk
  double precision        :: xref, yref
  integer                 :: itatp_org, jaend ! , jarerun=0
+ double precision        :: weirheight, weirlength
 
  double precision, allocatable :: banh(:) , rr(:)       ! temp
  integer         , allocatable :: nbanh(:,:) , nr(:)    ! temp
@@ -730,6 +731,11 @@
        else
           dx(L) = max(dx(L), 0.5d0*sqrt(ba(k)) )
        endif
+       if (kcu(L) == 3 .and. fixedweirtopwidth > 0d0) then
+          weirheight = fixedweirtopwidth ! we don't have bl nor bobs yet !max(0d0, 0.5d0*(bob(1,L) + bob(2,L)) - 0.5d0*(bl(k1) + bl(k2)) )
+          weirlength = fixedweirtopwidth
+          dx(L) = min(dx(L), max(weirlength + 2d0*weirheight*fixedweirtalud, 0.5d0*sqrt(ba(k))))
+       end if
     endif
 
 !   for partition_init: compute temporary csu, snu (will be overwritten in phase 2), based on xzw, yzw (instead of xz, yz)
