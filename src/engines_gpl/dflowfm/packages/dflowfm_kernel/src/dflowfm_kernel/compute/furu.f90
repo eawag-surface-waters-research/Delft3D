@@ -175,7 +175,7 @@ subroutine furu()                                   ! set fu, ru and kfs
               du = du0 + frL*ustokes(L)
 
           else if ( ifxedweirfrictscheme > 0) then
-              if (iadv(L) == 21) then
+              if (iadv(L) == 21 .or. kcu(L) == 3) then
                  call fixedweirfriction2D(L,k1,k2,frL)
               else
                  frL = cfuhi(L)*sqrt(u1L*u1L + v2)   ! g / (H.C.C) = (g.K.K) / (A.A) travels in cfu
