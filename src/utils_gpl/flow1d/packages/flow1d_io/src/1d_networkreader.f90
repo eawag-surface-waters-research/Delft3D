@@ -825,6 +825,7 @@ module m_1d_networkreader
       integer                                  :: igpFrom
       integer                                  :: igpTo
       character(len=IdLen)                     :: Chainage
+      character(len=4)                         :: cnum
       
       brs%Count = brs%Count + 1
       ibr = brs%Count
@@ -871,7 +872,8 @@ module m_1d_networkreader
             write (msgbuf, '(3a, g11.4, a, g11.4)' ) 'Two grid points on branch ''', trim(branchid), ''' are too close at chainage ',               &
                                     gpchainages(igr), ' and ', gpchainages(igr + 1)
             if (my_rank >= 0) then
-               write(msgbuf,'(a,i4,2a)') 'Rank = ', my_rank, ': ', trim(msgbuf)
+               write(cnum, '(i4)') my_rank
+               msgbuf = 'Rank = ' // cnum // ': ' // msgbuf
             end if
             call SetMessage(LEVEL_WARN, msgbuf)
          endif 
