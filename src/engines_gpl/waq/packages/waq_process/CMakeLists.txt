@@ -6,9 +6,12 @@ get_fortran_source_files(${src_path}/bloom bloom_source)
 
 # Gather source files
 get_fortran_source_files(${src_path}/charon charon_source)
-                                    
+
 # Gather source files
 get_fortran_source_files(${src_path}/proc_preprocess proc_preprocess_source)
+
+# Gather source files
+get_fortran_source_files(${src_path}/trwp trwp_source)
 
 # Gather source files
 get_fortran_source_files(${src_path}/waq_process waq_process_source)
@@ -25,6 +28,7 @@ set(library_name waq_process)
 add_library(${library_name} ${bloom_source} 
                             ${charon_source} 
                             ${proc_preprocess_source}
+                            ${trwp_source}
                             ${waq_solvesaphe_source}
                             ${waq_process_source}
                             ${waq_tables_source})
@@ -73,6 +77,7 @@ target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${check_pointe
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${bloom_source} 
                                                     ${charon_source} 
                                                     ${proc_preprocess_source}
+                                                    ${trwp_source}
                                                     ${waq_solvesaphe_source}
                                                     ${waq_process_source}
                                                     ${waq_tables_source})

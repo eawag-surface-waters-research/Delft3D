@@ -17127,3 +17127,199 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VBSum     ","fS1VB09rel", 198,"Y","x",1
 "VBSum     ","fS2VB09rel", 199,"Y","x",1
 "VBSum     ","fS3VB09rel", 200,"Y","x",1
+"PropSing  ","nSingle   ",   1,"Y","x",1
+"PropSing  ","BioFilmDen",   2,"Y","x",1
+"PropSing  ","Diam_Tyre1",   3,"N","x",1
+"PropSing  ","Diam_Tyre2",   4,"N","x",1
+"PropSing  ","Diam_Tyre3",   5,"N","x",1
+"PropSing  ","Diam_Tyre4",   6,"N","x",1
+"PropSing  ","Diam_Susp1",   7,"N","x",1
+"PropSing  ","Diam_Susp2",   8,"N","x",1
+"PropSing  ","Diam_Susp3",   9,"N","x",1
+"PropSing  ","Dens_Tyre1",  10,"N","x",1
+"PropSing  ","Dens_Tyre2",  11,"N","x",1
+"PropSing  ","Dens_Tyre3",  12,"N","x",1
+"PropSing  ","Dens_Tyre4",  13,"N","x",1
+"PropSing  ","Dens_Susp1",  14,"N","x",1
+"PropSing  ","Dens_Susp2",  15,"N","x",1
+"PropSing  ","Dens_Susp3",  16,"N","x",1
+"PropSing  ","ShapeFac1 ",  17,"Y","x",1
+"PropSing  ","ShapeFac2 ",  18,"Y","x",1
+"PropSing  ","ShapeFac3 ",  19,"Y","x",1
+"PropSing  ","ShapeFac4 ",  20,"Y","x",1
+"PropSing  ","ShapeFacSu",  21,"Y","x",1
+"PropSing  ","ShapeFacSu",  22,"Y","x",1
+"PropSing  ","ShapeFacSu",  23,"Y","x",1
+"PropSing  ","BioFilmThk",  24,"Y","x",1
+"PropSing  ","BioFilmThk",  25,"Y","x",1
+"PropSing  ","BioFilmThk",  26,"Y","x",1
+"PropSing  ","BioFilmThk",  27,"Y","x",1
+"PropSing  ","BioFilmXXX",  28,"Y","x",1
+"PropSing  ","BioFilmXXX",  29,"Y","x",1
+"PropSing  ","BioFilmXXX",  30,"Y","x",1
+"PropTagg  ","nTRWP     ",   1,"Y","x",1
+"PropTagg  ","nIM       ",   2,"Y","x",1
+"PropTagg  ","BioFilmThk",   3,"Y","x",1
+"PropTagg  ","BioFilmDen",   4,"Y","x",1
+"PropTagg  ","Diam_Tyre1",   5,"N","x",1
+"PropTagg  ","Diam_Tyre2",   6,"N","x",1
+"PropTagg  ","Diam_Tyre3",   7,"N","x",1
+"PropTagg  ","Diam_Tyre4",   8,"N","x",1
+"PropTagg  ","Dens_Tyre1",   9,"N","x",1
+"PropTagg  ","Dens_Tyre2",  10,"N","x",1
+"PropTagg  ","Dens_Tyre3",  11,"N","x",1
+"PropTagg  ","Dens_Tyre4",  12,"N","x",1
+"PropTagg  ","Diam_Susp1",  13,"N","x",1
+"PropTagg  ","Diam_Susp2",  14,"N","x",1
+"PropTagg  ","Diam_Susp3",  15,"N","x",1
+"PropTagg  ","Dens_Susp1",  16,"N","x",1
+"PropTagg  ","Dens_Susp2",  17,"N","x",1
+"PropTagg  ","Dens_Susp3",  18,"N","x",1
+"htragg    ","nTRWP     ",   1,"Y","x",1
+"htragg    ","nIM       ",   2,"Y","x",1
+"htragg    ","Efficiency",   3,"Y","x",1
+"htragg    ","Temp      ",   4,"Y","x",1
+"htragg    ","Velocity  ",   5,"Y","x",1
+"htragg    ","CHEZY     ",   6,"Y","x",1
+"htragg    ","DELT      ",   7,"N","x",1
+"htragg    ","Depth     ",   8,"N","x",1
+"htragg    ","Tyre1     ",   9,"N","x",1
+"htragg    ","Tyre2     ",  10,"N","x",1
+"htragg    ","Tyre3     ",  11,"N","x",1
+"htragg    ","Tyre4     ",  12,"N","x",1
+"htragg    ","Diam_Tyre1",  13,"N","x",1
+"htragg    ","Diam_Tyre2",  14,"N","x",1
+"htragg    ","Diam_Tyre3",  15,"N","x",1
+"htragg    ","Diam_Tyre4",  16,"N","x",1
+"htragg    ","Dens_Tyre1",  17,"N","x",1
+"htragg    ","Dens_Tyre2",  18,"N","x",1
+"htragg    ","Dens_Tyre3",  19,"N","x",1
+"htragg    ","Dens_Tyre4",  20,"N","x",1
+"htragg    ","VSedTRWP1 ",  21,"N","x",1
+"htragg    ","VSedTRWP2 ",  22,"N","x",1
+"htragg    ","VSedTRWP3 ",  23,"N","x",1
+"htragg    ","VSedTRWP4 ",  24,"N","x",1
+"htragg    ","IM1       ",  25,"N","x",1
+"htragg    ","IM2       ",  26,"N","x",1
+"htragg    ","IM3       ",  27,"N","x",1
+"htragg    ","Diam_Susp1",  28,"N","x",1
+"htragg    ","Diam_Susp2",  29,"N","x",1
+"htragg    ","Diam_Susp3",  30,"N","x",1
+"htragg    ","Dens_Susp1",  31,"N","x",1
+"htragg    ","Dens_Susp2",  32,"N","x",1
+"htragg    ","Dens_Susp3",  33,"N","x",1
+"htragg    ","VSedIM1   ",  34,"N","x",1
+"htragg    ","VSedIM2   ",  35,"N","x",1
+"htragg    ","VSedIM3   ",  36,"N","x",1
+"SedTyre   ","nTRWP     ",   1,"Y","x",1
+"SedTyre   ","nIM       ",   2,"Y","x",1
+"SedTyre   ","Tau       ",   3,"N","x",1
+"SedTyre   ","Depth     ",   4,"N","x",1
+"SedTyre   ","DELT      ",   5,"N","x",1
+"SedTyre   ","SafeFactor",   6,"Y","x",1
+"SedTyre   ","Tyre1     ",   7,"N","x",1
+"SedTyre   ","Tyre2     ",   8,"N","x",1
+"SedTyre   ","Tyre3     ",   9,"N","x",1
+"SedTyre   ","Tyre4     ",  10,"N","x",1
+"SedTyre   ","VSedTRWP1 ",  11,"N","x",1
+"SedTyre   ","VSedTRWP2 ",  12,"N","x",1
+"SedTyre   ","VSedTRWP3 ",  13,"N","x",1
+"SedTyre   ","VSedTRWP4 ",  14,"N","x",1
+"SedTyre   ","TcrsTyre1 ",  15,"N","x",1
+"SedTyre   ","TcrsTyre2 ",  16,"N","x",1
+"SedTyre   ","TcrsTyre3 ",  17,"N","x",1
+"SedTyre   ","TcrsTyre4 ",  18,"N","x",1
+"SedTyre   ","IM1S1     ",  19,"Y","x",1
+"SedTyre   ","IM2S1     ",  20,"Y","x",1
+"SedTyre   ","IM3S1     ",  21,"Y","x",1
+"SedTyre   ","VSedTRWP1 ",  22,"N","x",0
+"SedTyre   ","VSedTRWP2 ",  23,"N","x",0
+"SedTyre   ","VSedTRWP3 ",  24,"N","x",0
+"SedTyre   ","VSedTRWP4 ",  25,"N","x",0
+"SedTAgg   ","nTRWP     ",   1,"Y","x",1
+"SedTAgg   ","nIM       ",   2,"Y","x",1
+"SedTAgg   ","Tau       ",   3,"N","x",1
+"SedTAgg   ","Depth     ",   4,"N","x",1
+"SedTAgg   ","DELT      ",   5,"N","x",1
+"SedTAgg   ","SafeFactor",   6,"Y","x",1
+"SedTAgg   ","TyreAgg11 ",   7,"Y","x",1
+"SedTAgg   ","TyreAgg12 ",   8,"Y","x",1
+"SedTAgg   ","TyreAgg13 ",   9,"Y","x",1
+"SedTAgg   ","TyreAgg21 ",  10,"Y","x",1
+"SedTAgg   ","TyreAgg22 ",  11,"Y","x",1
+"SedTAgg   ","TyreAgg23 ",  12,"Y","x",1
+"SedTAgg   ","TyreAgg31 ",  13,"Y","x",1
+"SedTAgg   ","TyreAgg32 ",  14,"Y","x",1
+"SedTAgg   ","TyreAgg33 ",  15,"Y","x",1
+"SedTAgg   ","TyreAgg41 ",  16,"Y","x",1
+"SedTAgg   ","TyreAgg42 ",  17,"Y","x",1
+"SedTAgg   ","TyreAgg43 ",  18,"Y","x",1
+"SedTAgg   ","VSedTagg11",  19,"N","x",1
+"SedTAgg   ","VSedTagg12",  20,"N","x",1
+"SedTAgg   ","VSedTagg13",  21,"N","x",1
+"SedTAgg   ","VSedTagg21",  22,"N","x",1
+"SedTAgg   ","VSedTagg22",  23,"N","x",1
+"SedTAgg   ","VSedTagg23",  24,"N","x",1
+"SedTAgg   ","VSedTagg31",  25,"N","x",1
+"SedTAgg   ","VSedTagg32",  26,"N","x",1
+"SedTAgg   ","VSedTagg33",  27,"N","x",1
+"SedTAgg   ","VSedTagg41",  28,"N","x",1
+"SedTAgg   ","VSedTagg42",  29,"N","x",1
+"SedTAgg   ","VSedTagg43",  30,"N","x",1
+"SedTAgg   ","TcrsTagg11",  31,"N","x",1
+"SedTAgg   ","TcrsTagg12",  32,"N","x",1
+"SedTAgg   ","TcrsTagg13",  33,"N","x",1
+"SedTAgg   ","TcrsTagg21",  34,"N","x",1
+"SedTAgg   ","TcrsTagg22",  35,"N","x",1
+"SedTAgg   ","TcrsTagg23",  36,"N","x",1
+"SedTAgg   ","TcrsTagg31",  37,"N","x",1
+"SedTAgg   ","TcrsTagg32",  38,"N","x",1
+"SedTAgg   ","TcrsTagg33",  39,"N","x",1
+"SedTAgg   ","TcrsTagg41",  40,"N","x",1
+"SedTAgg   ","TcrsTagg42",  41,"N","x",1
+"SedTAgg   ","TcrsTagg43",  42,"N","x",1
+"SedTAgg   ","VSedTagg11",  43,"N","x",0
+"SedTAgg   ","VSedTagg12",  44,"N","x",0
+"SedTAgg   ","VSedTagg13",  45,"N","x",0
+"SedTAgg   ","VSedTagg21",  46,"N","x",0
+"SedTAgg   ","VSedTagg22",  47,"N","x",0
+"SedTAgg   ","VSedTagg23",  48,"N","x",0
+"SedTAgg   ","VSedTagg31",  49,"N","x",0
+"SedTAgg   ","VSedTagg32",  50,"N","x",0
+"SedTAgg   ","VSedTagg33",  51,"N","x",0
+"SedTAgg   ","VSedTagg41",  52,"N","x",0
+"SedTAgg   ","VSedTagg42",  53,"N","x",0
+"SedTAgg   ","VSedTagg43",  54,"N","x",0
+"SumTRWP   ","nTRWP     ",   1,"Y","x",1
+"SumTRWP   ","nIM       ",   2,"Y","x",1
+"SumTRWP   ","Tyre1     ",   3,"N","x",1
+"SumTRWP   ","Tyre2     ",   4,"N","x",1
+"SumTRWP   ","Tyre3     ",   5,"N","x",1
+"SumTRWP   ","Tyre4     ",   6,"N","x",1
+"SumTRWP   ","TyreAgg11 ",   7,"Y","x",1
+"SumTRWP   ","TyreAgg12 ",   8,"Y","x",1
+"SumTRWP   ","TyreAgg13 ",   9,"Y","x",1
+"SumTRWP   ","TyreAgg21 ",  10,"Y","x",1
+"SumTRWP   ","TyreAgg22 ",  11,"Y","x",1
+"SumTRWP   ","TyreAgg23 ",  12,"Y","x",1
+"SumTRWP   ","TyreAgg31 ",  13,"Y","x",1
+"SumTRWP   ","TyreAgg32 ",  14,"Y","x",1
+"SumTRWP   ","TyreAgg33 ",  15,"Y","x",1
+"SumTRWP   ","TyreAgg41 ",  16,"Y","x",1
+"SumTRWP   ","TyreAgg42 ",  17,"Y","x",1
+"SumTRWP   ","TyreAgg43 ",  18,"Y","x",1
+"SumTRWP   ","TAggSed11 ",  19,"Y","x",1
+"SumTRWP   ","TAggSed12 ",  20,"Y","x",1
+"SumTRWP   ","TAggSed13 ",  21,"Y","x",1
+"SumTRWP   ","TAggSed21 ",  22,"Y","x",1
+"SumTRWP   ","TAggSed22 ",  23,"Y","x",1
+"SumTRWP   ","TAggSed23 ",  24,"Y","x",1
+"SumTRWP   ","TAggSed31 ",  25,"Y","x",1
+"SumTRWP   ","TAggSed32 ",  26,"Y","x",1
+"SumTRWP   ","TAggSed33 ",  27,"Y","x",1
+"SumTRWP   ","TAggSed41 ",  28,"Y","x",1
+"SumTRWP   ","TAggSed42 ",  29,"Y","x",1
+"SumTRWP   ","TAggSed43 ",  30,"Y","x",1
+"SumTRWP   ","IM1       ",  31,"N","x",1
+"SumTRWP   ","IM2       ",  32,"N","x",1
+"SumTRWP   ","IM3       ",  33,"N","x",1

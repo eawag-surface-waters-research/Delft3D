@@ -53,7 +53,7 @@
 !
 !     Local declarations
 !
-      PARAMETER   ( NOMODU = 162)
+      PARAMETER   ( NOMODU = 168)
       CHARACTER*6   MODNAM(NOMODU)
       SAVE          MODNAM
       DATA MODNAM /
@@ -218,15 +218,21 @@
      +   'MPBLLM',
      +   'MPBNLM',
      +   'VBXS12',
-     +   'VBXSUM'
+     +   'VBXSUM',
+     +   'PROPSG',
+     +   'PRPAGG',
+     +   'HETAGG',
+     +   'SEDTYR',
+     +   'SEDAGG',
+     +   'SUMTYR'
      +   /
 !
 !     Set module number
 !
       IMODUL = 0
-      DO 10 J = 1,NOMODU
+      DO J = 1,NOMODU
          IF (PRONAM(1:6).EQ.MODNAM(J)) IMODUL = J
-   10 CONTINUE
+      END DO
 !
       RETURN
       END
