@@ -4050,6 +4050,14 @@ src/engines_gpl/waq/packages/waq_process/src/proc_preprocess/wripro.f -text
 src/engines_gpl/waq/packages/waq_process/src/proc_preprocess/wrstoc.f -text
 src/engines_gpl/waq/packages/waq_process/src/proc_preprocess/wrtoys.f -text
 src/engines_gpl/waq/packages/waq_process/src/proc_preprocess/wrwrko.f -text
+src/engines_gpl/waq/packages/waq_process/src/trwp/README -text
+src/engines_gpl/waq/packages/waq_process/src/trwp/heteroagg.f -text
+src/engines_gpl/waq/packages/waq_process/src/trwp/properties.f90 -text
+src/engines_gpl/waq/packages/waq_process/src/trwp/propsg.f90 -text
+src/engines_gpl/waq/packages/waq_process/src/trwp/prpagg.f90 -text
+src/engines_gpl/waq/packages/waq_process/src/trwp/sediment.f -text
+src/engines_gpl/waq/packages/waq_process/src/trwp/sedimtyr.f -text
+src/engines_gpl/waq/packages/waq_process/src/trwp/sumtyr.f90 -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/DelwaqG.f90 -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/ESpace.f90 -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/Makefile.am -text
