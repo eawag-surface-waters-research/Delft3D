@@ -100,7 +100,7 @@ function BuildCMake () {
 function InstallAll () {
     if [ ${1} = "all"  ]; then
         echo
-        echo "Installing in build_all ..."
+        echo "Installing in build_$1$2 ..."
         cd     $root
         rm -rf $root/build_$1$2/lnx64
         mkdir -p $root/build_$1$2/lnx64/bin
