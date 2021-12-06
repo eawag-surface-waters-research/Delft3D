@@ -976,9 +976,9 @@ module m_oned_functions
       ii = i- ndx2d
       if (groundLevel(ii) .ne. dmiss) then ! if ground level is applicable
          if (groundStorage(ii) == 1) then ! also storage above ground: allow negative freeboard.
-            freeboard(i) = groundLevel(ii) - s1(i)
+            freeboard(ii) = groundLevel(ii) - s1(i)
          else
-            freeboard(i) = max(0d0, groundLevel(ii) - s1(i))
+            freeboard(ii) = max(0d0, groundLevel(ii) - s1(i))
          end if
       end if
    end do
@@ -1024,7 +1024,7 @@ module m_oned_functions
    do i = ndx2d+1, ndxi
       ii = i-ndx2d
       if (groundLevel(ii) .ne. dmiss .and. groundStorage(ii) == 1 .and. s1(i) - groundLevel(ii) >= epswetout) then ! if groundLevel is applicable
-         hsOnGround(i) = max(0d0, s1(i) - groundLevel(ii))
+         hsOnGround(ii) = max(0d0, s1(i) - groundLevel(ii))
       end if
    end do
 
@@ -1047,7 +1047,7 @@ module m_oned_functions
    do i = ndx2d+1, ndxi
       ii = i-ndx2d
       if (groundLevel(ii) .ne. dmiss .and. groundStorage(ii) == 1 .and. s1(i) - groundLevel(ii) >= epswetout) then ! if groundLevel is applicable
-         volOnGround(i) = max(0d0, vol1(i) - volMaxUnderground(ii))
+         volOnGround(ii) = max(0d0, vol1(i) - volMaxUnderground(ii))
       end if
    end do
 

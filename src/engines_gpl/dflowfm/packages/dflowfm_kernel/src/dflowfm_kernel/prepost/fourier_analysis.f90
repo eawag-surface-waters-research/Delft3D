@@ -138,12 +138,12 @@ module m_fourier_analysis
        fourierWithFb = (gdfourier%iblfb>0)
     end function fourierWithFb
 
-!> do fourier with waterdepth on groud or not
+!> do fourier with waterdepth on ground or not
     logical function fourierWithWdog()
        fourierWithWdog = (gdfourier%iblwdog>0)
     end function fourierWithWdog
 
-!> do fourier with volume on groud or not
+!> do fourier with volume on ground or not
     logical function fourierWithVog()
        fourierWithVog = (gdfourier%iblvog>0)
     end function fourierWithVog
@@ -376,18 +376,6 @@ module m_fourier_analysis
        if (allocated(columns)) deallocate(columns)
        call strsplit(record, 1, columns, 1)
        nveld = size(columns)
-       ! check: for fb, wdog and vog, only support max and numcyc=0
-       if (index(columns(1),'fb') > 0 .or. index(columns(1),'wdog') > 0 .or. index(columns(1),'vog') > 0) then
-          if (index(columns(7),'max') == 0) then
-             goto 20
-          else
-             ncyc = 0
-             read (columns(4), *, err=6666) ncyc
-             if (ncyc /= 0) then
-                goto 20
-             end if
-          end if
-       end if
 
        fouid = fouid + 1
        !
@@ -523,14 +511,14 @@ module m_fourier_analysis
        !
        irelp = 7
        !
-       if ( founam(ifou)(1:2)/='s1'  .and. &
-            founam(ifou)(1:2)/='ta' .and. &
-            founam(ifou)(1:3)/='uxa' .and. &
-            founam(ifou)(1:3)/='uya' .and. &
-            founam(ifou)(1:2)/='ws'  .and. &
-            founam(ifou)(1:9)/='fb'  .and. &
-            founam(ifou)(1:9)/='wdog'.and. &
-            founam(ifou)(1:9)/='vog') then
+       if ( founam(ifou)/='s1'  .and. &
+            founam(ifou)/='ta' .and. &
+            founam(ifou)/='uxa' .and. &
+            founam(ifou)/='uya' .and. &
+            founam(ifou)/='ws'  .and. &
+            founam(ifou)/='fb'  .and. &
+            founam(ifou)/='wdog'.and. &
+            founam(ifou)/='vog') then
           !
           read (columns(7), *, iostat=iostat) flayno
           if (iostat /= 0) then
@@ -842,7 +830,7 @@ end function valid_combi
 
 !> helper routine to get the size of suma arrays
 function name_dependent_size(fourier_name) result(nmaxus)
-   use m_flowgeom, only : ndx, lnx ! actually from m_cell_geometry
+   use m_flowgeom, only : ndx, lnx, ndx2d, ndxi ! actually from m_cell_geometry
    use m_flow, only: ndkx, lnkx
    character(len=*), intent(in) :: fourier_name  !< name of the fourier quantity
    integer                      :: nmaxus        !< function result: size of suma array
@@ -865,8 +853,8 @@ function name_dependent_size(fourier_name) result(nmaxus)
         nmaxus = ndx
    case('r1')
         nmaxus = ndkx
-   case('fb', 'wdog', 'vog')
-      nmaxus = ndx
+   case('fb','wdog', 'vog')
+        nmaxus = ndxi-ndx2d
    case default
         nmaxus = max(ndkx,lnkx)
    end select
@@ -1287,35 +1275,32 @@ end subroutine setfoustandardname
        ! requested fourier analysis freeboard
        !
        elseif (columns(1)(1:2)=='fb') then
-          if (index(columns(7),'max') > 0 .and. numcyc==0) then
-             nofou = nofou + 1
+          nofou = nofou + 1
+          if (numcyc == 0) then
              nofouvar = nofouvar + 1
           else
-             msgbuf = 'Fourier analysis: for variable keyword fb, only support max and numcyc=0, others are ignored'
-             call warn_flush()
-          end if
+             nofouvar = nofouvar + 2
+          endif
        !
        ! requested fourier analysis waterdepth_on_ground
        !
        elseif (columns(1)(1:4)=='wdog') then
-          if (index(columns(7),'max') > 0 .and. numcyc==0) then
-             nofou = nofou + 1
+          nofou = nofou + 1
+          if (numcyc == 0) then
              nofouvar = nofouvar + 1
           else
-             msgbuf = 'Fourier analysis: for variable keyword wdog, only support max and numcyc=0, others are ignored'
-             call warn_flush()
-          end if
+             nofouvar = nofouvar + 2
+          endif
        !
        ! requested fourier analysis volume_on_ground
        !
        elseif (columns(1)(1:3)=='vog') then
-          if (index(columns(7),'max') > 0 .and. numcyc==0) then
-             nofou = nofou + 1
+          nofou = nofou + 1
+          if (numcyc == 0) then
              nofouvar = nofouvar + 1
           else
-             msgbuf = 'Fourier analysis: for variable keyword vog, only support max and numcyc=0, others are ignored'
-             call warn_flush()
-          end if
+             nofouvar = nofouvar + 2
+          endif
        else
           !
           ! requested fourier analysis undefined
@@ -1653,7 +1638,7 @@ end subroutine setfoustandardname
            !
            idvar(:,ivar) = imissval
            if (index(founam(ifou),'fb') > 0 .or. index(founam(ifou),'wdog') > 0 .or. index(founam(ifou),'vog') > 0) then 
-           ! Freeboard, waterdepth on ground and volume on groud are only for 1D
+           ! Freeboard, waterdepth on ground and volume on ground are only for 1D
               ierr = unc_def_var_map(fileids%ncid,fileids%id_tsp, idvar(:,ivar), NF90_DOUBLE, unc_loc, trim(fouvarnam(ivar)), trim(fouvarnamstd(ivar)), &
                           AnalyseTypeShort // namfunlong // ', ' // trim(fouvarnamlong(ivar)), fouvarunit(ivar), is_timedep = 0, which_meshdim = 1)
            else
@@ -1755,13 +1740,25 @@ end subroutine setfoustandardname
        select case (gdfourier%fouelp(ifou))
        case ('x','i')
        ! First for Maximum or Minimum
-          ierror = unc_put_var_map(fileids%ncid, fileids%id_tsp, idvar(:,fouvar), iloc, fousmas)
-          if (gdfourier%founam(ifou)=='s1') then
-             ! min/max water depth
-             ierror = unc_put_var_map(fileids%ncid, fileids%id_tsp, idvar(:,fouvar+1), iloc, fousmbs)
-          endif
+          if (gdfourier%founam(ifou)=='fb' .or. gdfourier%founam(ifou)=='wdog' .or. gdfourier%founam(ifou)=='vog') then
+             if (idvar(1,fouvar) > 0 .and. nmaxus > 0) then
+                ierror = nf90_put_var(fileids%ncid, idvar(1,fouvar), fousmas, start = (/ 1,fileids%id_tsp%idx_curtime /))
+             end if
+          else
+             ierror = unc_put_var_map(fileids%ncid, fileids%id_tsp, idvar(:,fouvar), iloc, fousmas)
+             if (gdfourier%founam(ifou)=='s1') then
+                ! min/max water depth
+                ierror = unc_put_var_map(fileids%ncid, fileids%id_tsp, idvar(:,fouvar+1), iloc, fousmbs)
+             endif
+          end if
        case ('e')
-          ierror = unc_put_var_map(fileids%ncid, fileids%id_tsp, idvar(:,fouvar), iloc, fousma)
+          if (gdfourier%founam(ifou)=='fb' .or. gdfourier%founam(ifou)=='wdog' .or. gdfourier%founam(ifou)=='vog') then
+             if (idvar(1,fouvar) > 0 .and. nmaxus > 0) then
+                ierror = nf90_put_var(fileids%ncid, idvar(1,fouvar), fousmas, start = (/ 1,fileids%id_tsp%idx_curtime /))
+             end if
+          else
+             ierror = unc_put_var_map(fileids%ncid, fileids%id_tsp, idvar(:,fouvar), iloc, fousma)
+          end if
        case ('a', 'l')
        ! For average
           if( fousmb(1) > 0d0 ) then
@@ -1771,26 +1768,62 @@ end subroutine setfoustandardname
           else
              fousma = defaultd
           endif
-          ierror = unc_put_var_map(fileids%ncid, fileids%id_tsp, idvar(:,fouvar), iloc, fousma)
+          if (gdfourier%founam(ifou)=='fb' .or. gdfourier%founam(ifou)=='wdog' .or. gdfourier%founam(ifou)=='vog') then
+             if (idvar(1,fouvar) > 0 .and. nmaxus > 0) then
+                ierror = nf90_put_var(fileids%ncid, idvar(1,fouvar), fousmas, start = (/ 1,fileids%id_tsp%idx_curtime /))
+             end if
+          else
+             ierror = unc_put_var_map(fileids%ncid, fileids%id_tsp, idvar(:,fouvar), iloc, fousma)
+          end if
        case ('r','u')
           ! Maximum or Minimum based on running mean
           call replace_dummy(fousmas)
-          ierror = unc_put_var_map(fileids%ncid, fileids%id_tsp, idvar(:,fouvar), iloc, fousmas)
+          if (gdfourier%founam(ifou)=='fb' .or. gdfourier%founam(ifou)=='wdog' .or. gdfourier%founam(ifou)=='vog') then
+             if (idvar(1,fouvar) > 0 .and. nmaxus > 0) then
+                ierror = nf90_put_var(fileids%ncid, idvar(1,fouvar), fousmas, start = (/ 1,fileids%id_tsp%idx_curtime /))
+             end if
+          else
+             ierror = unc_put_var_map(fileids%ncid, fileids%id_tsp, idvar(:,fouvar), iloc, fousmas)
+          end if
        case ('R','U')
           ! Maximum or Minimum based on running mean including time of maximum
           call replace_dummy(fousmas)
-          ierror = unc_put_var_map(fileids%ncid, fileids%id_tsp, idvar(:,fouvar),   iloc, fousmas)
-          ierror = unc_put_var_map(fileids%ncid, fileids%id_tsp, idvar(:,fouvar+1), iloc, fousmbs)
+          if (gdfourier%founam(ifou)=='fb' .or. gdfourier%founam(ifou)=='wdog' .or. gdfourier%founam(ifou)=='vog') then
+             if (idvar(1,fouvar) > 0 .and. nmaxus > 0) then
+                ierror = nf90_put_var(fileids%ncid, idvar(1,fouvar), fousmas, start = (/ 1,fileids%id_tsp%idx_curtime /))
+             end if
+             if (idvar(1,fouvar+1) > 0 .and. nmaxus > 0) then
+                ierror = nf90_put_var(fileids%ncid, idvar(1,fouvar+1), fousmas, start = (/ 1,fileids%id_tsp%idx_curtime /))
+             end if
+          else
+             ierror = unc_put_var_map(fileids%ncid, fileids%id_tsp, idvar(:,fouvar),   iloc, fousmas)
+             ierror = unc_put_var_map(fileids%ncid, fileids%id_tsp, idvar(:,fouvar+1), iloc, fousmbs)
+          end if
        case ('c','C')
           ! combined maximum or minimum
           call replace_dummy(fousmbs)
-          ierror = unc_put_var_map(fileids%ncid, fileids%id_tsp, idvar(:,fouvar), iloc, fousmbs)
+          if (gdfourier%founam(ifou)=='fb' .or. gdfourier%founam(ifou)=='wdog' .or. gdfourier%founam(ifou)=='vog') then
+             if (idvar(1,fouvar) > 0 .and. nmaxus > 0) then
+                ierror = nf90_put_var(fileids%ncid, idvar(1,fouvar), fousmas, start = (/ 1,fileids%id_tsp%idx_curtime /))
+             end if
+          else
+             ierror = unc_put_var_map(fileids%ncid, fileids%id_tsp, idvar(:,fouvar), iloc, fousmbs)
+          end if
        case default
           ! Fourier
           !
           call fourier_final(ifou, nmaxus)
-          ierror = unc_put_var_map(fileids%ncid, fileids%id_tsp, idvar(:,fouvar),   iloc, fousma)
-          ierror = unc_put_var_map(fileids%ncid, fileids%id_tsp, idvar(:,fouvar+1), iloc, fousmb)
+          if (gdfourier%founam(ifou)=='fb' .or. gdfourier%founam(ifou)=='wdog' .or. gdfourier%founam(ifou)=='vog') then
+             if (idvar(1,fouvar) > 0 .and. nmaxus > 0) then
+                ierror = nf90_put_var(fileids%ncid, idvar(1,fouvar), fousmas, start = (/ 1,fileids%id_tsp%idx_curtime /))
+             end if
+             if (idvar(1,fouvar+1) > 0 .and. nmaxus > 0) then
+                ierror = nf90_put_var(fileids%ncid, idvar(1,fouvar+1), fousmas, start = (/ 1,fileids%id_tsp%idx_curtime /))
+             end if
+          else
+             ierror = unc_put_var_map(fileids%ncid, fileids%id_tsp, idvar(:,fouvar),   iloc, fousma)
+             ierror = unc_put_var_map(fileids%ncid, fileids%id_tsp, idvar(:,fouvar+1), iloc, fousmb)
+          end if
        end select
    end subroutine wrfous
 

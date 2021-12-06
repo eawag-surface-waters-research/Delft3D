@@ -56,6 +56,7 @@
  integer :: nlayb, nrlay, nlayb1, nrlay1, nlayb2, nrlay2, Lb, Lt, mx, ltn, mpol, Lt1, Lt2, Lt3, Ld1, Ld2, Ld3, Ldn
  integer :: laybed, laytop, nrlayL, Lf, kuni, kb
  integer :: nlayb1L,nrlay1L,nlayb2L,nrlay2L
+ integer :: ndx1d
 
  double precision :: zmn, zmx, dzm, zw, zkk  ! for 3D
  double precision :: xL, xR, dLR, alf, xfixed, xsigma, gf, d1, di, w1, w2, w3, zbt, zbb, dzb, gfi, gfk, sumcof
@@ -599,18 +600,19 @@
 
  ! for 1D only
  if (network%loaded) then
-    if (ndxi-ndx2d > 0) then
+    ndx1d = ndxi-ndx2d
+    if (ndx1d > 0) then
        call realloc(time_wetground, ndx, keepExisting = .false., fill = 0d0, stat = ierr)
        call aerr('time_wetground(ndx)', ierr, ndx)
 
-       call realloc(freeboard, ndx, keepExisting = .false., fill = dmiss, stat = ierr)
-       call aerr('freeboard(ndx)', ierr, ndx)
+       call realloc(freeboard, ndx1d, keepExisting = .false., fill = dmiss, stat = ierr)
+       call aerr('freeboard(ndxi-ndx2d)', ierr, ndx1d)
 
-       call realloc(hsOnGround, ndx, keepExisting = .false., fill = 0d0, stat = ierr)
-       call aerr('hsOnGround(ndx)', ierr, ndx)
+       call realloc(hsOnGround, ndx1d, keepExisting = .false., fill = 0d0, stat = ierr)
+       call aerr('hsOnGround(ndxi-ndx2d)', ierr, ndx1d)
 
-       call realloc(volOnGround, ndx, keepExisting = .false., fill = 0d0, stat = ierr)
-       call aerr('volOnGround(ndx)', ierr, ndx)
+       call realloc(volOnGround, ndx1d, keepExisting = .false., fill = 0d0, stat = ierr)
+       call aerr('volOnGround(ndxi-ndx2d)', ierr, ndx1d)
 
        call realloc(qCur1d2d, ndx, keepExisting = .false., fill = 0d0, stat = ierr)
        call aerr('qCur1d2d(ndx)', ierr, ndx)

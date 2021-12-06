@@ -70,9 +70,9 @@ call reafou(minp, md_foufile, kmxd, NUMCONST, ISALT, ITEMP, tstart_user, tstop_u
 
 if (network%loaded) then
    if (fourierWithFb() .or. fourierWithWdog() .or. fourierWithVog()) then
-   ! If freeboard, waterdepth on ground or volume on groud is read from the *.fou file,
+   ! If freeboard, waterdepth on ground or volume on ground is read from the *.fou file,
    ! then need to compute groundlevel for 1d node firstly. 
-   ! The groundlevel will be used to update freeboard, waterdepth on ground and volume on groud later.
+   ! The groundlevel will be used to update freeboard, waterdepth on ground and volume on ground later.
       call set_ground_level_for_1d_nodes(network)
    end if
    if (fourierWithVog()) then

@@ -7017,13 +7017,13 @@ if (jamapsed > 0 .and. jased > 0 .and. stm_included) then
          ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_timewetground, UNC_LOC_S, time_wetground, jabndnd=jabndnd_) 
       end if
       if (jamapFreeboard > 0) then ! freeboard
-         ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_freeboard, UNC_LOC_S, freeboard, jabndnd=jabndnd_) 
+         ierr = nf90_put_var(mapids%ncid, mapids%id_freeboard(1), freeboard, start = (/ 1,mapids%id_tsp%idx_curtime /))
       end if
       if (jamapDepthOnGround > 0) then ! waterdepth that is above ground level
-         ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_hs_on_ground, UNC_LOC_S, hsOnGround, jabndnd=jabndnd_)
+         ierr = nf90_put_var(mapids%ncid, mapids%id_hs_on_ground(1), hsOnGround, start = (/ 1,mapids%id_tsp%idx_curtime /))
       end if
       if (jamapVolOnGround > 0) then ! volume that is above ground level
-         ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_vol_on_ground, UNC_LOC_S, volOnGround, jabndnd=jabndnd_)
+         ierr = nf90_put_var(mapids%ncid, mapids%id_vol_on_ground(1), volOnGround, start = (/ 1,mapids%id_tsp%idx_curtime /))
       end if
       if (jamapTotalInflow1d2d > 0) then ! total 1d2d inflow
          ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_qCur1d2d, UNC_LOC_S, qCur1d2d, jabndnd=jabndnd_)
