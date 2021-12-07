@@ -382,11 +382,11 @@
          if ( ierr2  .gt. 0 ) goto 100
          noqt = noq  + noq4
          allocate ( ipnt(4,noqt) , stat = ierr2 )
-         ipnt = 0
          if ( ierr2 .ne. 0 ) then
             write ( lunut , 2160 ) ierr2, 4*noqt
             goto 100
          endif
+         ipnt = 0
          call pointi ( lun    , lchar  , noseg  , noq       , noq1   ,
      &                 noq2   , noq3   , noqt   , nobnd     , ipnt   ,
      &                 intsrt , iopt1  , jtrack , filtype(44), ioutpt ,
@@ -507,6 +507,13 @@
 !***************  second type of input ******************
 
    10 continue
+      allocate ( ipnt(4,noqt) , stat = ierr2 )
+      if ( ierr2 .ne. 0 ) then
+         write ( lunut , 2160 ) ierr2, 4*noqt
+         goto 100
+      endif
+      ipnt = 0
+
       ilflag = 1
       if ( nodisp .lt. 1 ) then
            write ( lunut , 2290 ) nodisp
