@@ -25,7 +25,7 @@
 subroutine PRPAGG   (  pmsa  , fl    , ipoint, increm, noseg , &
                        noflux, iexpnt, iknmrk, noq1  , noq2  , &
                        noq3  , noq4  )
-!DEC$ ATTRIBUTES DLLEXPORT, ALIAS: 'PRPAGG' :: PRPAGG
+
 !>\file
 !>       Properties of aggregated particles (one TRW particle and one suspended solids particle)
 
