@@ -15,10 +15,12 @@ At the toplevel, https://svn.oss.deltares.nl/repos/delft3d/trunk :
 Windows:
 - build.bat
   Execute "build.bat --help" to show the usage
+  Currently used as default build process: "build.bat all -vs 2019 -ifort 21"
 
 Linux:
 - build.sh
   Execute "./build.sh --help" to show the usage
+  Currently used as default build process: "./build.sh all --compiler intel21"
 
 More information:
 https://oss.deltares.nl/web/delft3d/source-code
