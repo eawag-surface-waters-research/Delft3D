@@ -14,7 +14,7 @@ set(ini_version_file ${res_path}/version_number.ini)
 set(rc_version_file ${res_path}/version_number_dll.rc)
 
 # Generate the version files
-generate_version_files(${rc_version_file} ${ini_version_file})
+generate_version_files(${rc_version_file} ${checkout_src_root} ${ini_version_file})
 set(svn_version_file ${rc_version_file}.svn)
 
 if(UNIX)

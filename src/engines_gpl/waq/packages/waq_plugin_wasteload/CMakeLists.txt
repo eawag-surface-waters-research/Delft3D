@@ -9,10 +9,12 @@ set(rc_version_file ${waq_version_path}/version_number_waq_plugin_wasteload_vers
 
 # Generate version files
 generate_version_files(${rc_version_file} 
+                       ${checkout_src_root}
                        ${ini_version_file} 
                        ON)
 
 generate_version_files(${fortran_version_file} 
+                       ${checkout_src_root}
                        ${ini_version_file} 
                        ON)
 

@@ -13,7 +13,7 @@ if(UNIX)
 endif(UNIX)
 
 # Generate the F90 version file
-generate_version_files(${fortran_version_file} ${ini_version_file})
+generate_version_files(${fortran_version_file} ${checkout_src_root} ${ini_version_file})
             
 set(src_path src)
 get_fortran_source_files(${src_path} sources)

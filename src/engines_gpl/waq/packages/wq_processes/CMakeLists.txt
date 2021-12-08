@@ -9,10 +9,12 @@ set(rc_version_file "${CMAKE_CURRENT_SOURCE_DIR}/../../version/version_number.rc
 
 # Generate the F90 version files
 generate_version_files(${rc_version_file} 
+                       ${checkout_src_root}
                        ${ini_version_file} 
                        ON)
 
 generate_version_files(${fortran_version_file} 
+                       ${checkout_src_root}
                        ${ini_version_file} 
                        ON)
 

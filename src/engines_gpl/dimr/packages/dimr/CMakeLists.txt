@@ -17,8 +17,8 @@ if (UNIX)
 endif(UNIX)
 
 # Generate the version files
-generate_version_files(${rc_version_file} ${ini_version_file})
-generate_version_files(${header_version_file} ${ini_version_file})
+generate_version_files(${rc_version_file} ${checkout_src_root} ${ini_version_file})
+generate_version_files(${header_version_file} ${checkout_src_root} ${ini_version_file})
 
 # Gather source files
 file(GLOB source ${src_path}/*.cpp)

@@ -18,24 +18,25 @@ endfunction()
 # Generates files that are related to the version numbering as a preconfiguration process of cmake.
 #
 # Argument
+# svn_version_path : Path to check for the svn version.
 # fortran_version_file : The name of the Fortran version file it needs to generate.
 # version_file : The .ini file which contains the version information format.
 # --onlyifmissing : Optional boolean flag to determine if the version file should be generated. (default: OFF)
-function(generate_version_files fortran_version_file version_file) 
+function(generate_version_files fortran_version_file svn_version_path version_file) 
     IF(NOT DEFINED update_version_script_path)
         message(FATAL_ERROR "Variable 'update_version_script_path' is undefined.")
     ENDIF()
 
     if (UNIX)
-        message(STATUS "generate_version_files IN UNIX  ${update_version_script_path} ${fortran_version_file}${checkout_src_root} ${version_file} ${checkout_src_root}")
-        execute_process(COMMAND /bin/bash ${update_version_script_path} ${fortran_version_file} ${checkout_src_root} ${version_file} ${svn_version_path})
+        message(STATUS "generate_version_files IN UNIX  ${update_version_script_path} ${fortran_version_file} ${svn_version_path} ${version_file} ${checkout_src_root}")
+        execute_process(COMMAND /bin/bash ${update_version_script_path} ${fortran_version_file} ${svn_version_path} ${version_file} ${svn_version_path})
     endif(UNIX)
     if (WIN32)
         message(STATUS "generate_version_files IN WINDOWS")
         IF(DEFINED ARGV3 AND ARGV3)
-            execute_process(COMMAND ${update_version_script_path} ${fortran_version_file} ${checkout_src_root} ${version_file} --onlyifmissing)
+            execute_process(COMMAND ${update_version_script_path} ${fortran_version_file} ${svn_version_path} ${version_file} --onlyifmissing)
         ELSE()
-            execute_process(COMMAND ${update_version_script_path} ${fortran_version_file} ${checkout_src_root} ${version_file})
+            execute_process(COMMAND ${update_version_script_path} ${fortran_version_file} ${svn_version_path} ${version_file})
         ENDIF()
     endif(WIN32)
 
@@ -58,19 +59,19 @@ function(prebuild_version_number library_name fortran_version_file svn_version_p
     message(STATUS "Adding prebuild event step for ${library_name}")
 
     if (UNIX)
-#       if(EXISTS ${fortran_version_file})
-#           file(READ ${fortran_version_file} version_file_content)
-#           file(READ ${version_file} version_content)
-#           string(FIND "${version_file_content}" "${version_content}" versions_found)
+#       	if(EXISTS ${fortran_version_file})
+#		file(READ ${fortran_version_file} version_file_content)
+#		file(READ ${version_file} version_content)
+#		string(FIND "${version_file_content}" "${version_content}" versions_found)
 #
-#           message(STATUS ${versions_found})
+#		message(STATUS ${versions_found})
 #
-#       if(${versions_found} GREATER_EQUAL 0)
-#           message(STATUS "file and version match found, returning because no update is needed")
-#           return()
-#       endif ()
-#   endif()
-    execute_process(COMMAND /bin/bash ${update_version_script_path} ${fortran_version_file} ${svn_version_path} ${version_file} ${checkout_src_root})
+#		if(${versions_found} GREATER_EQUAL 0)
+#		    message(STATUS "file and version match found, returning because no update is needed")
+#		    return()
+#		endif ()
+#	endif()
+	execute_process(COMMAND /bin/bash ${update_version_script_path} ${fortran_version_file} ${svn_version_path} ${version_file} ${checkout_src_root})
     endif(UNIX)
     if (WIN32)
        IF(DEFINED ARGV4 AND ARGV4)
@@ -233,12 +234,12 @@ endfunction()
 # Configures a package for installing.
 #
 # Argument
-# name                  : The name of the package.
+# name			        : The name of the package.
 # description_file      : The file containing the description of the package.
-# mayor                 : The mayor version nr.
-# minor                 : The minor version nr.
-# build                 : The build version nr.
-# generator             : The generators to be used to build the package, seperated by ';'.
+# mayor				    : The mayor version nr.
+# minor				    : The minor version nr.
+# build				    : The build version nr.
+# generator  		    : The generators to be used to build the package, seperated by ';'.
 function(configure_package_installer name description_file  mayor minor build generator)
   set(CPACK_VERBATIM_VARIABLES YES)
   set(CPACK_INCLUDE_TOPLEVEL_DIRECTORY OFF)
