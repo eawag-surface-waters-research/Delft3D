@@ -12,7 +12,6 @@ set(fortran_version_file ${part_root_path}/packages/utils_f/src/part_version.F90
 set(icon_file ${part_version_path}/part_icon.rc)
 
 generate_version_files(${fortran_version_file} 
-                       ${checkout_src_root}
                        ${ini_version_file} 
                        ON)
 

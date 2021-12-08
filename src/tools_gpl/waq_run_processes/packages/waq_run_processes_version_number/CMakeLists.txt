@@ -23,12 +23,10 @@ set(rc_version_file "${CMAKE_CURRENT_SOURCE_DIR}/include/version_number.rc")
 
 # Generate version files
 generate_version_files(${rc_version_file} 
-                       ${checkout_src_root}
                        ${ini_version_file} 
                        ON)
 
 generate_version_files(${h_version_file} 
-                       ${checkout_src_root}
                        ${ini_version_file} 
                        ON)
 

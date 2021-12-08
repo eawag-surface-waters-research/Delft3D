@@ -16,7 +16,6 @@ set(icon_file ${agrhyd_version_path}/agrhyd_icon.rc)
 
 # Generate version files
 generate_version_files(${fortran_version_file_agrhyd}
-                       ${checkout_src_root}
                        ${ini_version_file}
                        ON)
 

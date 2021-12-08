@@ -13,7 +13,7 @@ set(public_include_path ${deltares_common_include_path})
 set(src_path src) 
 
 # Generate the F90 version file
-generate_version_files(${fortran_version_file} ${checkout_src_root} ${ini_version_file} TRUE)
+generate_version_files(${fortran_version_file} ${ini_version_file} TRUE)
 set(svn_version_file ${fortran_version_file}.svn)
 
 # Set the source files

@@ -6,7 +6,7 @@ set(ini_version_file "${CMAKE_CURRENT_SOURCE_DIR}/include/version_number.ini")
 set(fortran_version_file "${CMAKE_CURRENT_SOURCE_DIR}/${src_path}/gridgeom_version.F90")
 
 # Generate the F90 version file
-generate_version_files(${fortran_version_file} ${checkout_src_root} ${ini_version_file})
+generate_version_files(${fortran_version_file} ${ini_version_file})
 
 # Gather source files
 get_fortran_source_files(${src_path} source_files)
