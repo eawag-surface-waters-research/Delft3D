@@ -52,6 +52,7 @@ string(TOUPPER ${CONFIGURATION_TYPE} configuration_type)
 if ( ${configuration_type} STREQUAL "DFLOWFM" OR ${configuration_type} STREQUAL "ALL" )
 
     set(library_name ec_module_dll)
+    set(library_renamed libec_module.so)
     # Add dynamic ec_module library
     add_library(${library_name} SHARED ${src_path}/ec_module_api.f90)
 
@@ -76,5 +77,5 @@ if ( ${configuration_type} STREQUAL "DFLOWFM" OR ${configuration_type} STREQUAL 
                        ${build_dir} 
                        ${checkout_src_root} 
                        ${library_name})
-    install(TARGETS ${library_name} DESTINATION lib)
+    install(PROGRAMS $<TARGET_FILE:${library_name}> RENAME ${library_renamed} DESTINATION lib)
 endif()

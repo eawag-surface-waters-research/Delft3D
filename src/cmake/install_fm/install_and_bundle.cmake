@@ -1,6 +1,5 @@
 set(BUILD_LIBRARIES
    ${CMAKE_INSTALL_PREFIX}/lib/libdflowfm.so
-   ${CMAKE_INSTALL_PREFIX}/lib/libio_netcdf_dll.so
 )
 set(THIRDPARTY_x64_LIB_FOLDERS
   ${CMAKE_INSTALL_PREFIX}

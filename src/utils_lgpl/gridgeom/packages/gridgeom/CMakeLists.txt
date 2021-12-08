@@ -126,4 +126,4 @@ if(WIN32)
 endif(WIN32)
 
 # Install the shared library in the lib folder with rename
-install(FILES $<TARGET_FILE:${library_name}> RENAME ${library_renamed} DESTINATION lib)
+install(PROGRAMS $<TARGET_FILE:${library_name}> RENAME ${library_renamed} DESTINATION lib)

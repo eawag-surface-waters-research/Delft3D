@@ -72,6 +72,7 @@ if ( ${configuration_type} STREQUAL "DFLOWFM" OR
      ${configuration_type} STREQUAL "ALL" OR 
      ${configuration_type} STREQUAL "TOOLS" )
     set(library_name io_netcdf_dll)
+    set(library_renamed libio_netcdf.so)
     # Add dynamic io_netcdf library
     add_library(${library_name} SHARED ${src_path}/io_netcdf_api.F90)
 
@@ -116,6 +117,6 @@ if ( ${configuration_type} STREQUAL "DFLOWFM" OR
                        ${build_dir} 
                        ${checkout_src_root} 
                        ${library_name})
-    install(TARGETS ${library_name} DESTINATION lib)
+    install(PROGRAMS $<TARGET_FILE:${library_name}> RENAME ${library_renamed} DESTINATION lib)
 endif()
 
