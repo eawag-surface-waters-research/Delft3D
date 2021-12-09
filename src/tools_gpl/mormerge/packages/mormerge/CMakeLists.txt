@@ -92,5 +92,6 @@ post_build_target (${executable_name}
 
 install(TARGETS ${executable_name} RUNTIME  DESTINATION bin)
 if (UNIX)
+    install(PROGRAMS ${CMAKE_SOURCE_DIR}/../tools_gpl/mormerge/scripts/mormerge.tcl     DESTINATION bin)
     install(PROGRAMS ${CMAKE_SOURCE_DIR}/../tools_gpl/mormerge/scripts/run_mormerge.sh  DESTINATION bin)
 endif(UNIX)
