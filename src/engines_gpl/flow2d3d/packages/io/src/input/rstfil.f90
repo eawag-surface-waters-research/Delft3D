@@ -114,6 +114,7 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
     character(256)                                       :: filpath ! Path specification of restid
     integer                                              :: nm_pos ! indicating the array to be exchanged has nm index at the 2nd place, e.g., dbodsd(lsedtot,nm)
     real(fp), dimension(:,:,:), pointer                  :: rst_rtur1
+    real(fp)                                             :: rdum
 !
 !! executable statements -------------------------------------------------------
 !
@@ -134,6 +135,23 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
     !
     error = .false.
     nm_pos = 1
+    !
+    ! Not all array entries are filled by the data from the restart file.
+    ! This may cause non-relevant entries to have a random value.
+    ! These values might be NaN ... which cause the nan_check of the whole
+    ! array to unnecessarily raise the alarm. Initialize all array entries
+    ! using an extreme number such that it's still clear if these array
+    ! entries used.
+    !
+    rdum = -9999999.0_fp
+    s1 = rdum
+    u1 = rdum
+    v1 = rdum
+    if (lstsci > 0) r1 = rdum
+    if (ltur > 0) rtur1 = rdum
+    umnldf = rdum
+    vmnldf = rdum
+    ! dps, roller, fluff layer, ... not initialized.
     !
     ! test file existence, first 'tri-rst.<restid>.idate.itime'
     !
