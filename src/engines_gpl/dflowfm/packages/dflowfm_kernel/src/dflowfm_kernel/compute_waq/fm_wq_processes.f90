@@ -1329,6 +1329,7 @@
       use m_flowgeom,       only: Ndxi, ba
       use m_flow,           only: vol1, ucx, ucy
       use m_flowtimes,      only: irefdate, tunit
+      use m_flowparameters, only: flowWithoutWaves, jawaveswartdelwaq
       use m_fm_wq_processes
       use m_transport,      only: constituents, itemp, isalt
       use m_sferic,         only: twopi, rd2dg
@@ -1403,7 +1404,7 @@
          ipoitau  = arrpoi(iisfun) + (isftau-1)*noseg
          do kk=1,Ndxi
             call getkbotktop(kk,kb,kt)
-            call gettau(kk,taucurc,czc)
+            call gettau(kk,taucurc,czc,jawaveswartdelwaq)
             pmsa(ipoitau+kb-kbx) = taucurc
          end do
       end if

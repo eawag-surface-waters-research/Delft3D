@@ -123,7 +123,7 @@
 
     ustbLL = sqcf*umod                                           ! ustar based upon bottom layer velocity
 
-    if (jawave > 0) then
+    if (jawave > 0 .and. .not. flowWithoutWaves) then
        call getustwav(LL, z00, fw, ustw2, csw, snw, Dfu, Dfuc, deltau, costu) ! get ustar wave squared, fw and wavedirection cosines  based upon Swart, ustokes
        if (ustw2 > 1d-8) then
           !ustc2 = ustbLL*ustbLL
@@ -202,12 +202,12 @@
     cfuhi3D   = cfuhiLL*umod                                  ! cfuhi3D = frc. contr. to diagonal
     !advi(Lb) = advi(Lb) +  cfuhiLL*umod
 
-    if (jawave==0) then
+    if (jawave==0 .or. flowWithoutWaves) then
        z0ucur(LL) = z00
        z0urou(LL) = z00
     endif
 
-    if (jawave>0 .and. jawaveStokes >= 1) then                               ! Ustokes correction at bed
+    if (jawave>0 .and. jawaveStokes >= 1 .and. .not. flowWithoutWaves) then                               ! Ustokes correction at bed
        adve(Lb)  = adve(Lb) - cfuhi3D*ustokes(Lb)
     endif
 

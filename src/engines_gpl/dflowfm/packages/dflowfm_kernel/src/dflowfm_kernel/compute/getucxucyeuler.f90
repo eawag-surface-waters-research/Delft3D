@@ -48,7 +48,7 @@ subroutine getucxucyeuler(N, ucxeu, ucyeu)
    double precision :: u1l, wcxu, wcyu, ueul
 
    ucxeu(1:ndkx) = ucx(1:ndkx) ; ucyeu(1:ndkx) = ucy(1:ndkx)
-   if (jawave > 0) then
+   if (jawave > 0 .and. .not. flowWithoutWaves) then
       do LL = 1,lnx
          Lb = Lbot(LL) ; Lt = Lb - 1 + kmxL(LL)
          do L = Lb, Lt

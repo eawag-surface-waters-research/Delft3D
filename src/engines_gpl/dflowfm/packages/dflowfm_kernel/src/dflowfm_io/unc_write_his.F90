@@ -89,7 +89,7 @@ subroutine unc_write_his(tim)            ! wrihis
                      id_qsun, id_qeva, id_qcon, id_qlong, id_qfreva, id_qfrcon, id_qtot, &
                      id_turkin, id_tureps , id_vicwwu, id_rich, id_zcs, id_zws, id_zwu, &
                      id_wind, id_patm, id_tair, id_rhum, id_clou, &
-                     id_R, id_WH, id_WD, id_WL, id_WT, id_WU, id_WTAU, id_hs, &
+                     id_R, id_WH, id_WD, id_WL, id_WT, id_WU, id_WTAU, id_hs, id_taucur, &
                      id_pumpdim,    id_pump_id,     id_pump_dis,     id_pump_cap,      id_pump_s1up,      id_pump_s1dn,     id_pump_head,      &
                      id_pump_xmid,  id_pump_ymid,   id_pump_struhead,id_pump_stage,    id_pump_redufact,  id_pump_s1del,    id_pump_s1suc,     id_pump_disdir, &
                      id_gatedim,    id_gatename,    id_gate_dis,    id_gate_edgel,     id_gate_s1up,      id_gate_s1dn,    &                              ! id_gate_head,
@@ -328,6 +328,10 @@ subroutine unc_write_his(tim)            ! wrihis
             idims(2) = id_timedim
             if (jahiswatdep > 0) then
                call definencvar(ihisfile,id_hs, nf90_double, idims, 2, 'waterdepth'  , 'water depth', 'm', statcoordstring, station_geom_container_name)
+            endif
+            if (jahistaucurrent > 0) then
+               call definencvar(ihisfile,id_taucur, nf90_double, idims, 2, 'taus'  , 'taus', 'N m-2', 'Total bed shear stress')
+               ierr = nf90_put_att(ihisfile, id_taucur, 'geometry', station_geom_container_name)
             endif
 
             if( jahisvelvec > 0 ) then
@@ -848,7 +852,7 @@ subroutine unc_write_his(tim)            ! wrihis
                   ierr = nf90_put_att(ihisfile, id_sbcy, 'coordinates', statcoordstring)
                   ierr = nf90_put_att(ihisfile, id_sbcy, 'geometry', station_geom_container_name)
                endif
-               if (stmpar%morpar%moroutput%sbwuv .and. jawave>0) then
+               if (stmpar%morpar%moroutput%sbwuv .and. jawave>0 .and. .not. flowWithoutWaves) then
                   ierr = nf90_def_var(ihisfile, 'sbwx', nf90_double, (/ id_statdim, id_sedtotdim, id_timedim /), id_sbwx)
                   ierr = nf90_put_att(ihisfile, id_sbwx, 'long_name', 'Wave related bedload transport, x-component')
                   ierr = nf90_put_att(ihisfile, id_sbwx, 'units', transpunit)
@@ -860,7 +864,7 @@ subroutine unc_write_his(tim)            ! wrihis
                   ierr = nf90_put_att(ihisfile, id_sbwy, 'coordinates', statcoordstring)
                   ierr = nf90_put_att(ihisfile, id_sbwy, 'geometry', station_geom_container_name)
                endif
-               if (stmpar%morpar%moroutput%sswuv .and. jawave>0) then
+               if (stmpar%morpar%moroutput%sswuv .and. jawave>0 .and. .not. flowWithoutWaves) then
                   ierr = nf90_def_var(ihisfile, 'sswx', nf90_double, (/ id_statdim, id_sedtotdim, id_timedim /), id_sswx)
                   ierr = nf90_put_att(ihisfile, id_sswx, 'long_name', 'Wave related suspended transport, x-component')
                   ierr = nf90_put_att(ihisfile, id_sswx, 'units', transpunit)
@@ -2793,6 +2797,10 @@ subroutine unc_write_his(tim)            ! wrihis
     if (timon) call timstop(handle_extra(56))
 
     if (timon) call timstrt('unc_write_his obs/crs data 2', handle_extra(57))
+    if (jahistaucurrent > 0) then
+       ierr = nf90_put_var(ihisfile, id_taucur,  valobsT(:,IPNT_tau),    start = (/ 1, it_his /), count = (/ ntot, 1 /))
+    endif
+
     if (numobs+nummovobs > 0) then
        if ( kmx>0 ) then
 !         3D
@@ -3772,7 +3780,7 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = nf90_put_var(ihisfile, id_sscy, toutputy  , start = (/ 1, 1, it_his /), count = (/ ntot, stmpar%lsedtot, 1 /))
          endif
          !
-         if (stmpar%morpar%moroutput%sbwuv .and. jawave>0) then
+         if (stmpar%morpar%moroutput%sbwuv .and. jawave>0 .and. .not. flowWithoutWaves) then
             call realloc(toutputx, (/ntot, stmpar%lsedtot /), keepExisting=.false., fill = dmiss)
             call realloc(toutputy, (/ntot, stmpar%lsedtot /), keepExisting=.false., fill = dmiss)
             do l = 1, stmpar%lsedtot
@@ -3791,7 +3799,7 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = nf90_put_var(ihisfile, id_sbwy, toutputy  , start = (/ 1, 1, it_his /), count = (/ ntot, stmpar%lsedtot, 1 /))
          endif
          !
-         if (stmpar%morpar%moroutput%sswuv .and. jawave>0) then
+         if (stmpar%morpar%moroutput%sswuv .and. jawave>0 .and. .not. flowWithoutWaves) then
             call realloc(toutputx, (/ntot, stmpar%lsedtot /), keepExisting=.false., fill = dmiss)
             call realloc(toutputy, (/ntot, stmpar%lsedtot /), keepExisting=.false., fill = dmiss)
             do l = 1, stmpar%lsedtot

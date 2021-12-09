@@ -127,7 +127,7 @@ subroutine flow_trachyinit()
     threshold_abort_current = threshold_abort
     threshold_abort = LEVEL_FATAL
     !
-    if (jawave==0) then
+    if (jawave==0 .or. flowWithoutWaves) then
        do k = 1, ndx
           hh = max(hs(k), epshs)
           call getczz0(hh, frcuni, ifrctypuni, cz_dum, z0rou(k))

@@ -154,7 +154,7 @@ subroutine furu()                                   ! set fu, ru and kfs
 
 10        continue
 
-          if (jawave == 3 .or. (jawave.eq.4 .and. swave.eq.1)) then                ! Delft3D-Wave Stokes-drift correction
+          if (jawave==3 .or. (jawave==4 .and. swave==1) .or. jawave==6 .and. .not. flowWithoutWaves) then                ! Delft3D-Wave Stokes-drift correction
               ! D3D: Compare with taubsu computation (taubot.f90) and usage (cucnp.f90/uzd.f90)
               ! A3M:ok for c01-validation_3.1.6: frL = ypar(L)*(cfuhi(L)+cfwavhi(L))*wavmu(L)/hu(L)
               if (modind < 9) then
@@ -250,7 +250,7 @@ subroutine furu()                                   ! set fu, ru and kfs
     if ( jafilter.ne.0 ) then
       call comp_filter_predictor()
     end if
-    if (jawave > 0 ) then ! now every timestep, not only at getfetch updates
+    if (jawave > 0 .and. .not. flowWithoutWaves ) then ! now every timestep, not only at getfetch updates
        do k = 1,ndx
           call tauwavehk(Hwav(k), Twav(k), hs(k), Uorb(k), rlabda(k), ustk(k))
        enddo
@@ -340,7 +340,7 @@ do n  = 1, nbndu                                    ! boundaries at u points
 
  call furusobekstructures()
 
- if ( jawave.eq.3 ) then
+ if (jawave==3 .or. jawave==6 .and. .not. flowWithoutWaves) then
     if (kmx==0) then
        !   add wave-induced mass fluxes on boundaries to convert euler input to GLM
        do L=Lnxi+1,Lnx

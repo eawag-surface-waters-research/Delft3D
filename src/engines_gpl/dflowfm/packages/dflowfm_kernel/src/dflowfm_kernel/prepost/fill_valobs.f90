@@ -59,7 +59,7 @@ subroutine fill_valobs()
 
    if (timon) call timstrt ( "fill_valobs", handle_extra(55))
 
-   if (jaeulervel==1 .and. jawave > 0) then
+   if (jaeulervel==1 .and. jawave > 0 .and. .not. flowWithoutWaves) then
       call getucxucyeulmag(ndkx, workx, worky, ucmag, jaeulervel, jahisvelocity)
    endif
 
@@ -72,9 +72,13 @@ subroutine fill_valobs()
       if (allocated(wa)) deallocate(wa)
       allocate(wa(1:2,1:max(kmx,1)))
    endif
+   if (flowWithoutWaves .and. jahistaucurrent>0) then
+      ! Ugly fix to have array taus filled
+      call gettaus(1,1)
+   endif
 
    if (jawave<3 .and. .not. stm_included) then
-      call gettaus(1)
+      call gettaus(1,1)
    endif
    !
    if (stm_included .and. jased>0) then
@@ -149,10 +153,13 @@ subroutine fill_valobs()
          if (jawave>0 .and. allocated(hwav)) then
             valobs(IPNT_WAVEH,i) = hwav(k)*wavfac
             valobs(IPNT_WAVET,i) = twav(k)
-            valobs(IPNT_WAVED,i) = 270d0-phiwav(k)  ! Direction from
-            valobs(IPNT_WAVEL,i) = rlabda(k)
-            valobs(IPNT_WAVEU,i) = uorb(k)
+            if (.not. flowWithoutWaves) then
+               valobs(IPNT_WAVED,i) = 270d0-phiwav(k)  ! Direction from
+               valobs(IPNT_WAVEL,i) = rlabda(k)
+               valobs(IPNT_WAVEU,i) = uorb(k)
+            endif
          endif
+
 
          if (jahistaucurrent>0) then
          valobs(IPNT_WAVETAU,i) = taus(k)
@@ -175,7 +182,7 @@ subroutine fill_valobs()
                ii = j-IVAL_SSCY1+1
                valobs(IPNT_SSCY1+ii-1,i)=sedtra%sscy(k,ii)
             enddo
-            if (jawave>0) then
+            if (jawave>0 .and. .not. flowWithoutWaves) then
                do j = IVAL_SBWX1, IVAL_SBWXN
                   ii = j-IVAL_SBWX1+1
                   valobs(IPNT_SBWX1+ii-1,i)=sedtra%sbwx(k,ii)
@@ -297,7 +304,7 @@ subroutine fill_valobs()
 
             valobs(IPNT_UCX+klay-1,i) = ucx(kk)
             valobs(IPNT_UCY+klay-1,i) = ucy(kk)
-            if (jaeulervel==1 .and. hs(k) > epshu .and. jawave>0) then
+            if (jaeulervel==1 .and. hs(k) > epshu .and. jawave>0 .and. .not. flowWithoutWaves) then
                valobs(IPNT_UCX+klay-1,i) = workx(kk)
                valobs(IPNT_UCY+klay-1,i) = worky(kk)
             endif
@@ -487,6 +494,11 @@ subroutine fill_valobs()
             else
                valobs(IPNT_INFILTACT,i) = 0d0
          end if
+         end if
+
+!        Tau
+         if (jahistaucurrent > 0) then
+            valobs(IPNT_TAU,i) = taus(k)
          end if
 
 !        Heatflux

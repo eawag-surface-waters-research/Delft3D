@@ -378,7 +378,8 @@ module m_ec_provider
                            "humidity_airtemperature_cloudiness_solarradiation",           &
                            "dewpoint_airtemperature_cloudiness",                          &
                            "dewpoint_airtemperature_cloudiness_solarradiation",           &
-                           "solarradiation", "longwaveradiation")
+                           "solarradiation", "longwaveradiation", "wavesignificantheight", &
+                           "waveperiod" )
                         success = ecProviderCreateNetcdfItems(instancePtr, fileReaderPtr, quantityname, varname)
                      case ("hrms","tp", "tps", "rtp","dir","fx","fy","wsbu","wsbv","mx","my","dissurf","diswcap","ubot") 
                         success = ecProviderCreateWaveNetcdfItems(instancePtr, fileReaderPtr, quantityname)
@@ -2567,6 +2568,12 @@ module m_ec_provider
             ncstdnames(1) = 'sea_water_potential_temperature'
             ncvarnames(2) = 'so'                             ! salinity
             ncstdnames(2) = 'sea_water_salinity'
+         case ('wavesignificantheight')
+            ncvarnames(1) = 'hs'                             ! significant wave height
+            ncstdnames(1) = 'sea_surface_wave_significant_height'
+         case ('waveperiod')
+            ncvarnames(1) = varname                          ! significant wave height
+            ncstdnames(1) = varname
          case default                                        ! experiment: gather miscellaneous variables from an NC-file,
             if (index(quantityName,'waqsegmentfunction')==1) then
                ncvarnames(1) = quantityName

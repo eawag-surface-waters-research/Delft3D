@@ -120,7 +120,9 @@
 
  integer                           :: jarhoxu           !< rho effects in momentum, 0=no, 1=in horizontal adv, 2=+ in vertical adv, 3 = + in pressure term
 
- integer                           :: jawave            !< Include wave model nr, 0=no, 1=fetchlimited hurdle stive + swart, 4: XBeach wave driver, 3:SWan, 5=Const
+ integer                           :: jawave                      !< Include wave model nr, 0=no, 1=fetchlimited hurdle stive + swart, 3=SWAN, 4=XBeach wave driver, 5=Const, 6=SWAN-NetCDF
+
+ logical                           :: flowWithoutWaves = .false.  !< True: Do not use Wave data in the flow computations, it will only be passed through to D-WAQ
 
  integer                           :: jawavestreaming   !< Switch on in D3D model: >=1 : streaming mom , >= 2 : streaming mom + turb
 
@@ -479,6 +481,19 @@
  integer                           :: jamapIntTidesDiss         !< internal tides dissipation to map file, 0: no, 1: yes
  integer                           :: jamapNudge                !< output nudging to map file, 0: no, 1: yes
  integer                           :: jamapwav                  !< output waves to map file, 0: no, 1: yes
+ integer                           :: jamapwav_hwav             !< output waves to map file for variable hwav, 0: no, 1: yes
+ integer                           :: jamapwav_twav             !< output waves to map file for variable twav, 0: no, 1: yes
+ integer                           :: jamapwav_phiwav           !< output waves to map file for variable phiwav, 0: no, 1: yes
+ integer                           :: jamapwav_sxwav            !< output waves to map file for variable sxwav, 0: no, 1: yes
+ integer                           :: jamapwav_sywav            !< output waves to map file for variable sywav, 0: no, 1: yes
+ integer                           :: jamapwav_sxbwav           !< output waves to map file for variable sxbwav, 0: no, 1: yes
+ integer                           :: jamapwav_sybwav           !< output waves to map file for variable sybwav, 0: no, 1: yes
+ integer                           :: jamapwav_mxwav            !< output waves to map file for variable mxwav, 0: no, 1: yes
+ integer                           :: jamapwav_mywav            !< output waves to map file for variable mywav, 0: no, 1: yes
+ integer                           :: jamapwav_dsurf            !< output waves to map file for variable dsurf, 0: no, 1: yes
+ integer                           :: jamapwav_dwcap            !< output waves to map file for variable dwcap, 0: no, 1: yes
+ integer                           :: jamapwav_uorb             !< output waves to map file for variable uorb, 0: no, 1: yes
+
  integer                           :: jamapdtcell               !< output time steps per cell based on CFL
  integer                           :: jamapTimeWetOnGround      !< output to map file the cumulative time when water is above ground level, 0: no, 1: yes
  integer                           :: jamapFreeboard            !< output freeboard to map file, 0: no, 1: yes

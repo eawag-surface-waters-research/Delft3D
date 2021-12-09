@@ -35,7 +35,7 @@
 subroutine getucxucyeulmag(N, ucxeulg, ucyeulg, ucmago, jaeulervel, jaucmag)
    use m_flowgeom
    use m_flow, only: ndkx, ucx, ucy
-   use m_flowparameters, only: jawave
+   use m_flowparameters, only: jawave, flowWithoutWaves
    use m_waves, only: ustokes            ! available for all wave models
 
    implicit none
@@ -52,7 +52,7 @@ subroutine getucxucyeulmag(N, ucxeulg, ucyeulg, ucmago, jaeulervel, jaucmag)
    ucxeulg(1:ndkx) = ucx(1:ndkx) ; ucyeulg(1:ndkx) = ucy(1:ndkx)
 
    ! Transform uxy/ucy into Eulerian velocities
-   if (jaeulervel==1 .and. jawave>0) then
+   if (jaeulervel==1 .and. jawave>0 .and. .not. flowWithoutWaves) then
       call getucxucyeuler(N, ucxeulg, ucyeulg)
    endif
 

@@ -84,7 +84,7 @@ subroutine update_integralstats()
       return
    end if
 
-   call gettaus(1)
+   call gettaus(1,1)
 
    do k=1,ndxi
       is_sumvalsnd(IDX_TAUS, k) =     is_sumvalsnd(IDX_TAUS, k) + dts * taus(k)

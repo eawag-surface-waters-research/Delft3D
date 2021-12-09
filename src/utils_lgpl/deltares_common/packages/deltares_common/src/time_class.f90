@@ -44,10 +44,13 @@ module time_class
       procedure :: mjd => c_time_mjd
       procedure :: set => c_time_set
       procedure :: set2 => c_time_set2
+      procedure :: set4 => c_time_set4
       procedure :: seconds => c_time_seconds
    end type c_time
 
 contains
+
+   !> init with time in modified julian date
    subroutine c_time_set(this, mjd)
       class(c_time), intent(inout) :: this
       real(kind=hp), intent(in) :: mjd
@@ -56,13 +59,28 @@ contains
       this%as_seconds = 0.0_hp
    end subroutine c_time_set
 
-   subroutine c_time_set2(this, mjd, seconds)
+   !> init with refdate already in modified julian date and fraction to be added
+   subroutine c_time_set2(this, mjd, fraction)
       class(c_time), intent(inout) :: this
-      real(kind=hp), intent(in) :: mjd, seconds
+      real(kind=hp), intent(in) :: mjd, fraction
 
-      this%as_mjd = mjd + seconds
-      this%as_seconds = seconds * 86400.0_hp
+      this%as_mjd = mjd + fraction
+      this%as_seconds = fraction * 86400.0_hp
    end subroutine c_time_set2
+
+   !> init with time in seconds and use refdate and tzone to get the correct offset
+   subroutine c_time_set4(this, tim, irefdate, tzone, tUnitFactor)
+      use time_module, only : JULIAN
+      class(c_time), intent(inout) :: this
+      real(kind=hp), intent(in)    :: tim, tzone, tUnitFactor
+      integer      , intent(in)    :: irefdate
+
+      real(kind=hp)                :: refmjd
+
+      refmjd = JULIAN(irefdate, 0)
+      call this%set2(refmjd, tim * tUnitFactor / 86400.0_hp - tzone / 24.0_hp)
+
+   end subroutine c_time_set4
 
    function c_time_mjd(this) result(t)
       class(c_time), intent(in) :: this

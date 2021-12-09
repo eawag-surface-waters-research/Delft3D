@@ -6889,7 +6889,7 @@ module m_meteo
       integer, external :: findname
       
       success = .true.
-      
+
       itemPtr1 => null()
       itemPtr2 => null()
       itemPtr3 => null()
@@ -7076,42 +7076,54 @@ module m_meteo
          case ('discharge_salinity_temperature_sorsin')
             itemPtr1 => item_discharge_salinity_temperature_sorsin
             dataPtr1 => qstss
-         case ('hrms')
+         case ('hrms', 'wavesignificantheight')
             itemPtr1 => item_hrms
             dataPtr1 => hwavcom
-         case ('tp', 'tps', 'rtp')
+            jamapwav_hwav = 1
+         case ('tp', 'tps', 'rtp', 'waveperiod')
             itemPtr1 => item_tp
             dataPtr1 => twav
-         case ('dir')
+            jamapwav_twav = 1
+         case ('dir', 'wavedirection')
             itemPtr1 => item_dir
             dataPtr1 => phiwav
+            jamapwav_phiwav = 1
          case ('fx')
             itemPtr1 => item_fx
             dataPtr1 => sxwav
+            jamapwav_sxwav = 1
          case ('fy')
             itemPtr1 => item_fy
             dataPtr1 => sywav
+            jamapwav_sywav = 1
          case ('wsbu')
             itemPtr1 => item_wsbu
             dataPtr1 => sbxwav
+            jamapwav_sxbwav = 1
          case ('wsbv')
             itemPtr1 => item_wsbv
             dataPtr1 => sbywav
+            jamapwav_sybwav = 1
          case ('mx')
             itemPtr1 => item_mx
             dataPtr1 => mxwav
+            jamapwav_mxwav = 1
          case ('my')
             itemPtr1 => item_my
             dataPtr1 => mywav
+            jamapwav_mywav = 1
          case ('dissurf')
             itemPtr1 => item_dissurf
             dataPtr1 => dsurf
+            jamapwav_dsurf = 1
          case ('diswcap')
             itemPtr1 => item_diswcap
             dataPtr1 => dwcap
+            jamapwav_dwcap = 1
          case ('ubot')
             itemPtr1 => item_ubot
             dataPtr1 => uorbwav            
+            jamapwav_uorb = 1
          case ('tracerbnd')
             ! get tracer (boundary) number
             itrac = findname(numtracers, trnames, trname)
@@ -7877,6 +7889,9 @@ module m_meteo
          case ('hrms', 'tp', 'tps', 'rtp', 'dir', 'fx', 'fy', 'wsbu', 'wsbv', 'mx', 'my', 'dissurf','diswcap','ubot')
             ! the name of the source item created by the file reader will be the same as the ext.force. quant name
             sourceItemName = target_name
+         case ('wavesignificantheight', 'waveperiod', 'wavedirection')
+            ! the name of the source item created by the file reader will be the same as the ext.force. quant name
+            sourceItemName = varname
          case ('airpressure', 'atmosphericpressure')
             if (ec_filetype == provFile_arcinfo) then
                sourceItemName = 'wind_p'

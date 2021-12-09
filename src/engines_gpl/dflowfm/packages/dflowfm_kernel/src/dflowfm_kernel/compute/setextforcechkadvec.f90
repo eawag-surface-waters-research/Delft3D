@@ -110,8 +110,10 @@ if (jawind > 0) then
 
  endif
 
- if (jawave == 3) then      ! if a SWAN computation is performed, add wave forces to adve
-    !
+ if ((jawave==3.or.jawave==6) .and. .not. flowWithoutWaves) then
+     ! if a SWAN computation is performed, add wave forces to adve
+     ! This part is mainly based on the wave forces formulation (wsu) of Delft3D (cucnp.f90)
+
     if ( kmx.eq.0 ) then  ! 2D
        do L  = 1,lnx
           adve(L) = adve(L) - wavfu(L)

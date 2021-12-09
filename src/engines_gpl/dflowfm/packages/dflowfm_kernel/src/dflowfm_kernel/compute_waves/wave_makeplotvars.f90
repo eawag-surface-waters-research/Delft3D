@@ -63,7 +63,7 @@
       end do
    end do
 
-   if (jawave==3) then
+   if (jawave==3 .or. jawave==6) then
       do L=1,lnx
          k1=ln(1,L);k2=ln(2,L)
          fwav_mag(k1) = fwav_mag(k1)+wcl(1,L)*wavfu(L)*rhomean*hu(L)

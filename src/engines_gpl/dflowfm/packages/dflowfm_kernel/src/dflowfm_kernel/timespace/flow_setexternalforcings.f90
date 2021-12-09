@@ -76,7 +76,8 @@ subroutine flow_setexternalforcings(tim, l_initPhase, iresult)
    integer                               :: n, ierr, istru, structInd
    double precision, allocatable         :: results(:,:)
    double precision, allocatable         :: waterLevelsLeft(:), waterLevelsRight(:),normalVelocity(:)
-   logical                               :: foundtempforcing
+   logical                               :: foundtempforcing, success_copy
+   double precision                      :: tUnitFactor
 
    iresult = DFM_EXTFORCERROR
    call timstrt('External forcings', handle_ext)
@@ -236,13 +237,16 @@ subroutine flow_setexternalforcings(tim, l_initPhase, iresult)
 !   !$OMP SECTION
 
    ! Get wave parameters within this parallel section:
-   call ecTime%set(tim)
-   if (jawave == 3) then
+   tUnitFactor = ecSupportTimeUnitConversionFactor(tunit)
+   call ecTime%set4(tim, irefdate, tzone, tUnitFactor)
+   if (jawave==3 .or. jawave==6) then
       !
       ! This part must be skipped during initialization
       if (.not.l_initPhase) then
-         ! Finally the delayed external forcings can be initialized
-         success = flow_initwaveforcings_runtime()
+         if (jawave == 3) then
+            ! Finally the delayed external forcings can be initialized
+            success = flow_initwaveforcings_runtime()
+         endif
          if (allocated (hwavcom) ) then
             ! Don't make them zero: ecGetValues might do nothing
             !hwav = 0.0
@@ -256,46 +260,66 @@ subroutine flow_setexternalforcings(tim, l_initPhase, iresult)
          if (allocated (phiwav) ) then
             ! Don't make them zero: ecGetValues might do nothing
             !phiwav = 0.0
+            success_copy = success
             success = success .and. ecGetValues(ecInstancePtr, item_dir, ecTime)
+            if (jawave == 6) success = success_copy
          endif
          if (allocated (sxwav) ) then
             ! Don't make them zero: ecGetValues might do nothing
             !sxwav = 0.0
+            success_copy = success
             success = success .and. ecGetValues(ecInstancePtr, item_fx, ecTime)
+            if (jawave == 6) success = success_copy
          endif
          if (allocated (sywav) ) then
             ! Don't make them zero: ecGetValues might do nothing
             !sywav = 0.0
+            success_copy = success
             success = success .and. ecGetValues(ecInstancePtr, item_fy, ecTime)
+            if (jawave == 6) success = success_copy
          endif
          if (allocated (sbxwav) ) then
             ! Don't make them zero: ecGetValues might do nothing
             !sxwav = 0.0
+            success_copy = success
             success = success .and. ecGetValues(ecInstancePtr, item_wsbu, ecTime)
+            if (jawave == 6) success = success_copy
          endif
          if (allocated (sbywav) ) then
             ! Don't make them zero: ecGetValues might do nothing
             !sywav = 0.0
+            success_copy = success
             success = success .and. ecGetValues(ecInstancePtr, item_wsbv, ecTime)
+            if (jawave == 6) success = success_copy
          endif
          if (allocated (mxwav) ) then
             ! Don't make them zero: ecGetValues might do nothing
             !mxwav = 0.0
+            success_copy = success
             success = success .and. ecGetValues(ecInstancePtr, item_mx, ecTime)
+            if (jawave == 6) success = success_copy
          endif
          if (allocated (mywav) ) then
             ! Don't make them zero: ecGetValues might do nothing
             !mywav = 0.0
+            success_copy = success
             success = success .and. ecGetValues(ecInstancePtr, item_my, ecTime)
+            if (jawave == 6) success = success_copy
          endif
          if (allocated (dsurf) ) then
+            success_copy = success
             success = success .and. ecGetValues(ecInstancePtr, item_dissurf, ecTime)
+            if (jawave == 6) success = success_copy
          endif
          if (allocated (dwcap) ) then
+            success_copy = success
             success = success .and. ecGetValues(ecInstancePtr, item_diswcap, ecTime)
+            if (jawave == 6) success = success_copy
          endif
          if (allocated (uorbwav) ) then
+            success_copy = success
             success = success .and. ecGetValues(ecInstancePtr, item_ubot, ecTime)
+            if (jawave == 6) success = success_copy
          endif
       endif
       if (.not. success) then

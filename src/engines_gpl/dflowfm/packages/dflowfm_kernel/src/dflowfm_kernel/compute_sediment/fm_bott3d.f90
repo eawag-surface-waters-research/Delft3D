@@ -52,7 +52,7 @@
    use m_flow     , only: vol0, vol1, s0, s1, hs, u1, kmx, hu, au, zws, sa1, tem1
    use m_flowgeom , only: bai, ndxi, nd, wu, bl, ba, ln, dx, ndx, lnx, lnxi, acl, wcx1, wcy1, wcx2, wcy2, xz, yz, wu_mor, ba_mor, bai_mor, bl_ave, ndx2d
    use m_flowexternalforcings, only: nbndz, nbndu, nopenbndsect
-   use m_flowparameters, only: epshs, epshu, jawave, eps10, jasal, jatem
+   use m_flowparameters, only: epshs, epshu, jawave, eps10, jasal, jatem, flowWithoutWaves, jawaveswartdelwaq
    use m_sediment,  only: stmpar, sedtra, mtd, sedtot2sedsus, m_sediment_sed=>sed, avalflux, botcrit, kcsmor, jamormergedtuser, mergebodsed
    use m_flowtimes, only: dts, tstart_user, time1, dnt, julrefdat, tfac, ti_sed, ti_seds, time_user, dt_user
    use m_transport, only: fluxhortot, ised1, isedn, constituents, sinksetot, sinkftot, itra1, itran, numconst, isalt, itemp
@@ -109,6 +109,7 @@
    integer                                     :: nxmx
    integer                                     :: nmk
    integer                                     :: lm
+   integer                                     :: jawaveswartdelwaq_local
    double precision                            :: aksu
    double precision                            :: apower
    double precision                            :: cavg
@@ -133,6 +134,12 @@
    bcmfile             => stmpar%morpar%bcmfile
    morbnd              => stmpar%morpar%morbnd
    cmpupd              => stmpar%morpar%cmpupd
+
+   if (flowWithoutWaves) then
+      jawaveswartdelwaq_local = 0
+   else
+      jawaveswartdelwaq_local = jawaveswartdelwaq
+   endif
 
    if (.not. allocated(bl_ave0)) then
       allocate(bl_ave0(1:ndx),stat=ierror)
@@ -394,7 +401,7 @@
                   if (.not. (idomain(k2) == my_rank)) cycle    ! internal cells at boundary are in the same domain as the link
                endif
                if( u1(lm) < 0.0d0 ) cycle
-               call gettau(k2,taucurc,czc)
+               call gettau(k2,taucurc,czc,jawaveswartdelwaq_local)
                tausum2(1) = tausum2(1) + taucurc**2            ! sum of the shear stress squared
             enddo                                              ! the distribution of bedload is scaled with square stress
             ! for avoiding instability on BC resulting from uniform bedload
@@ -459,7 +466,7 @@
                   !
                   if (morbnd(jb)%ibcmt(3) == lsedbed) then
                      !rate = bc_mor_array(li)
-                     call gettau( ln(2,lm), taucurc, czc )
+                     call gettau( ln(2,lm), taucurc, czc, jawaveswartdelwaq_local )
                      !if ( tausum2(1) > 0d0 ) then
                      if ( tausum2(1) > 0d0 .and. wu_mor(lm)>0d0) then    ! fix cutcell
                         rate = bc_sed_distribution(li) * taucurc**2 / wu_mor(lm) / tausum2(1)

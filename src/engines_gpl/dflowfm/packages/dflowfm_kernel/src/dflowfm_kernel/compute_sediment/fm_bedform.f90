@@ -52,7 +52,7 @@ subroutine fm_bedform()
     use m_sediment, only: sedtra, stmpar, stm_included
     use m_physcoef, only: ag, rhomean, backgroundwatertemperature
     use m_flowgeom, only: ndxi, ndx, lnx, lnxi, kfs, ln, wcl, bl
-    use m_flowparameters, only: epshs, jawave, epshu
+    use m_flowparameters, only: epshs, jawave, epshu, flowWithoutWaves
     use m_flow, only: ucx, ucy, frcu, ifrcutp, hu, hs, u1, u0, s1, ucx_mor, ucy_mor
     use m_flowtimes
     use m_waves
@@ -137,7 +137,7 @@ subroutine fm_bedform()
     end if
     czn = 0d0; czu = 0d0; u1eul = 0d0
     !
-    if (jawave > 0) then
+    if (jawave > 0 .and. .not. flowWithoutWaves) then
        u1eul = u1 - ustokes   
        call setucxucy_mor (u1eul)
     end if
@@ -630,7 +630,7 @@ subroutine fm_calksc()
     use m_flowtimes,            only: dts, dt_max
     use m_flow,                 only: kmx, s1, u1, u0, hs, z0urou, ucx, ucy, frcu, ifrcutp, hu, ucx_mor, ucy_mor, zws
     use m_flowgeom,             only: ndx, kfs, bl, ndxi, lnx, wcl, ln
-    use m_flowparameters,       only: v2dwbl, jatrt, epshs, jawave
+    use m_flowparameters,       only: v2dwbl, jatrt, epshs, jawave, flowWithoutWaves
     use m_sediment
     use m_bedform
     use m_rdtrt
@@ -712,7 +712,7 @@ subroutine fm_calksc()
     z0rou = 0d0; u1eul = 0d0; deltas = 0d0
     !
     ! Calculate Eulerian velocities at old time level
-    if (jawave>0) then
+    if (jawave>0 .and. .not. flowWithoutWaves) then
        u1eul = u0 - ustokes
        call setucxucy_mor (u1eul)
     endif
@@ -777,7 +777,7 @@ subroutine fm_calksc()
              call getkbotktop(k, kb, kt)
              kmaxx = kb
              !
-             if (v2dwbl>0 .and. (jawave>0) .and. kmx>0) then
+             if (v2dwbl>0 .and. (jawave>0)  .and. .not. flowWithoutWaves .and. kmx>0) then
                 !
                 ! Determine representative 2Dh velocity based on velocities in first layer above wave boundary layer 
                 ! kmaxx is the first layer with its centre above the wave boundary layer
@@ -805,7 +805,7 @@ subroutine fm_calksc()
                      & / log(1d0 + zz/z0rou(k))
              endif
              !
-             if (jawave>0) then
+             if (jawave>0 .and. .not. flowWithoutWaves) then
                 hh  = hwav(k) * sqrt(2.0_fp)
                 arg = 2.0_fp * pi * depth / max(rlabda(k),0.1)
                 if (arg > 50.0_fp) then

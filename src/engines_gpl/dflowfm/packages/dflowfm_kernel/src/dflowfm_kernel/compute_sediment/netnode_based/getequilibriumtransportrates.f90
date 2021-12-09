@@ -146,7 +146,7 @@
 
  ueff        = ucur ; beta = 1d0 ; twave = 0d0                     !
  ustar2swart = sqcf*sqcf*Ueff*Ueff
- if (jawave > 0 .and. ueff > 0d0) then
+ if (jawave > 0 .and. ueff > 0d0 .and. .not. flowWithoutWaves) then
     if (twav(k) > 1d-2) then
        twave = twav(k)
        uwave = uorb(k)                                             ! (m/s) for jased == 2, tauwav contains uorb

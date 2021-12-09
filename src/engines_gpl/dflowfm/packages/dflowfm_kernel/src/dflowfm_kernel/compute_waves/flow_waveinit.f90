@@ -86,7 +86,7 @@
    call realloc(wblt, lnx, stat=ierr, keepExisting = .false., fill = 0d0  )
    call aerr('wblt(lnx)', ierr, lnx)
 
-   if (jawave == 3) then
+   if (jawave==3 .or. jawave==6) then
       call realloc(wavfu, lnkx, stat=ierr, keepExisting = .false., fill = 0d0)
       call aerr('wavfu  (lnkx)', ierr, lnx)
       call realloc(wavfv, lnx, stat=ierr, keepExisting = .false., fill = 0d0)
@@ -125,6 +125,17 @@
       call aerr   ('hwavcom   (ndx)', ierr, ndx)
    endif
    !
+   if  (jawave == 6) then
+      call realloc( hwav,   ndx, stat=ierr, keepExisting = .false., fill = hwavuni)
+      call aerr   ('hwav   (ndx)', ierr, ndx)
+      call realloc( twav,   ndx, stat=ierr, keepExisting = .false., fill = twavuni)
+      call aerr   ('twav   (ndx)', ierr, ndx)
+      call realloc( rlabda,  ndx,  stat=ierr, keepExisting = .false., fill = 0d0)
+      call aerr   ('rlabda  (ndx)',     ierr, ndx)
+      call realloc( uorb,    ndx,  stat=ierr, keepExisting = .false., fill = 0d0)
+      call aerr   ('uorb    (ndx)',     ierr, ndx)
+   endif
+
    if (jawave .eq. 4) then
       if (trim(instat)=='stat' .or. &
           trim(instat)=='stat_table') then

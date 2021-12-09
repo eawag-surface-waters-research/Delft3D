@@ -48,7 +48,7 @@
  use unstruc_files, only: mdia
  use unstruc_netcdf
  use MessageHandling
- use m_flowparameters, only: jawave, jatrt, jacali, jacreep, jatransportmodule, jamd1dfile
+ use m_flowparameters, only: jawave, jatrt, jacali, jacreep, jatransportmodule, jamd1dfile, flowWithoutWaves
  use dfm_error
  use m_fm_wq_processes, only: jawaqproc
  use m_vegetation
@@ -201,7 +201,7 @@
  call flow_allocflow()                               ! allocate   flow arrays
  call timstop(handle_extra(37)) ! end alloc flow
  !
- if (jawave > 0) then
+ if (jawave > 0 .and. .not. flowWithoutWaves) then
     call alloc9basicwavearrays()
  endif
  if (jawave > 2 .or. (jased > 0 .and. stm_included)) then

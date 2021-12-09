@@ -73,7 +73,7 @@
    use m_missing
    use m_physcoef, only: frcuni, ifrctypuni
    use m_turbulence, only: vicwws, turkinepsws, rhowat
-   use m_flowparameters, only: jasal, jatem, jawave, epshs, jasecflow, eps10, jasourcesink, v2dwbl
+   use m_flowparameters, only: jasal, jatem, jawave, epshs, jasecflow, eps10, jasourcesink, v2dwbl, flowWithoutWaves
    use m_fm_erosed
    use m_bedform
    use m_xbeach_data
@@ -267,7 +267,7 @@
       call mess(LEVEL_FATAL, errmsg)
    endif
    !
-   wave = jawave>0
+   wave = (jawave>0) .and. .not. flowWithoutWaves
    !
    ! Mass conservation; s1 is updated before entering fm_erosed
    !hs = s1 - bl !improvement? - to check WO
@@ -298,8 +298,7 @@
    call init_1dinfo()
    call setucxqucyq_mor(u1_tmp, ucxq_tmp, ucyq_tmp)
    !
-
-   if (.not. (jawave==4 .or. jawave==3)) then
+   if ((.not. (jawave==4 .or. jawave==3 .or. jawave==6)) .or. flowWithoutWaves) then
       ktb=0d0     ! no roller turbulence
    else
       do k=1, ndx
@@ -420,7 +419,7 @@
       enddo
    enddo
    !
-   !if (jawave>0) then
+   !if (jawave>0 .and. .not. flowWithoutWaves) then
       z0rouk = 0d0; taub = 0d0
       do L=1,lnx
          k1=ln(1,L); k2=ln(2,L)
@@ -693,7 +692,7 @@
          zvelb = h1/ee
       endif
       !
-      if (jawave > 0) then
+      if (jawave > 0 .and. .not. flowWithoutWaves) then
          ubot = uorb(nm)        ! array uitgespaard
       else
          ubot = 0d0
@@ -701,7 +700,7 @@
       !
       ! Calculate total (possibly wave enhanced) roughness
       !
-      if (jawave > 0) then
+      if (jawave > 0 .and. .not. flowWithoutWaves) then
          z0rou = z0rouk(nm)
       else ! currents only
          z0rou = z0curk(nm)       ! currents+potentially trachy
@@ -765,7 +764,7 @@
       endif
       taks0 = max(aksfac*rc, 0.01d0*h1)
       !
-      if (jawave>0) then
+      if (jawave>0 .and. .not. flowWithoutWaves) then
          if (twav(nm)>0d0) then
             delr  = 0.025d0
             taks0 = max(0.5d0*delr, taks0)
@@ -1251,14 +1250,14 @@
       call fm_upwbed(lsedtot, sbcx, sbcy, sxtot, sytot, e_sbcn, e_sbct)
    endif
    !
-   if (bedw>0.0_fp .and. jawave > 0) then
+   if (bedw>0.0_fp .and. jawave > 0 .and. .not. flowWithoutWaves) then
       !
       ! Upwind wave-related bed load load transports
       !
       call fm_upwbed(lsedtot, sbwx, sbwy, sxtot, sytot, e_sbwn, e_sbwt)
    endif
    !
-   if (susw>0.0_fp .and. jawave > 0) then
+   if (susw>0.0_fp .and. jawave > 0 .and. .not. flowWithoutWaves) then
       !
       ! Upwind wave-related suspended load transports
       !
@@ -1436,14 +1435,14 @@
    ! Bed-slope and sediment availability effects for
    ! wave-related bed load transport
    !
-   if (bedw>0.0_fp .and. jawave > 0) then
+   if (bedw>0.0_fp .and. jawave > 0 .and. .not. flowWithoutWaves) then
       call fm_adjust_bedload(e_sbwn, e_sbwt,.false.)
    endif
    !
    ! Sediment availability effects for
    ! wave-related suspended load transport
    !
-   if (susw>0.0_fp .and. jawave > 0) then
+   if (susw>0.0_fp .and. jawave > 0 .and. .not. flowWithoutWaves) then
       call fm_adjust_bedload(e_sswn, e_sswt, .false.)
    endif
    !

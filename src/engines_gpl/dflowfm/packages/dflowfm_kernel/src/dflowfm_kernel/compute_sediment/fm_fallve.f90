@@ -44,7 +44,7 @@
    use m_flowtimes, only: time1
    use m_flowgeom, only: ndx, ln, kfs,bl, wcl, lnx
    use m_flow    , only: ifrctypuni, z0, hs, iturbulencemodel,kbot,ktop,kmx,zws,ucxq,ucyq,sa1,tem1,ucx,ucy,ucz,ndkx,s1,z0urou,ifrcutp,hu,frcu,ucx_mor,ucy_mor
-   use m_flowparameters, only: jasal, jatem, jawave, epshs
+   use m_flowparameters, only: jasal, jatem, jawave, epshs, flowWithoutWaves
    use m_transport, only: constituents, ised1, isalt, itemp
    use m_turbulence, only:turkinepsws, rhowat
    use morphology_data_module
@@ -176,7 +176,7 @@
    end if
 
    ! Calculate roughness height
-   if (jawave<3) then  ! current related, potentially including trachy
+   if (jawave<3 .or. flowWithoutWaves) then  ! current related, potentially including trachy
       do L=1, lnx
          k1 = ln(1,L); k2 = ln(2,L)
          if (frcu(L)>0d0) then

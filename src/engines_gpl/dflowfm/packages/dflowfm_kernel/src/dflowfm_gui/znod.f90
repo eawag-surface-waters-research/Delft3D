@@ -59,7 +59,7 @@
  integer          :: kk, k, nodval,N,L, k2
  double precision :: uu, seq(mxgr), wse(mxgr),hsk, dum, czc, taucurc,ustw2,U10,FetchL,FetchD
  real(fp)       , dimension(:,:)   , pointer :: bedtmp
- integer :: istat
+ integer :: istat, jawaveswartdelwaq_local
 
  nodval = ndraw(28)
 
@@ -67,6 +67,12 @@
     znod = DMISS
     return
  end if
+
+ if (flowWithoutWaves) then
+    jawaveswartdelwaq_local = 0
+ else
+    jawaveswartdelwaq_local = jawaveswartdelwaq
+ endif
 
  k = kk
  if (kmx > 0) then
@@ -212,7 +218,7 @@ else if (nodval == 27) then
 
  else if (nodval == 39) then
 
-    call gettau(kk, znod, czc)
+    call gettau(kk, znod, czc, jawaveswartdelwaq_local)
 
  else if (nodval == 40) then
 
@@ -286,7 +292,7 @@ else if (nodval == 27) then
        znod = v1ship(kk)
     endif
 
- else if (nodval == numoptwav .and. jawave > 0) then
+ else if (nodval == numoptwav .and. jawave > 0 .and. .not. flowWithoutWaves) then
     if (jawave == 1 .or. jawave == 2) then
       select case (waveparopt)
         case(1)
@@ -298,13 +304,13 @@ else if (nodval == 27) then
         case(4)
                 znod = Uorb(kk)
         case(5)
-                call gettau2(kk,taucurc,czc,ustw2)
+                call gettau2(kk,taucurc,czc,ustw2,jawaveswartdelwaq)
                 znod = sqrt(ustw2)            !ustw
         case(6)
-                call gettau2(kk,taucurc,czc,ustw2)
+                call gettau2(kk,taucurc,czc,ustw2,jawaveswartdelwaq)
                 znod = sqrt(taucurc/rhomean)  !ustw+c
         case(7)
-                call gettau2(kk,taucurc,czc,ustw2)
+                call gettau2(kk,taucurc,czc,ustw2,jawaveswartdelwaq)
                 znod = taucurc                ! taus to Delwaq
         case(8)
                 znod = ustk(kk)               ! Ustokes

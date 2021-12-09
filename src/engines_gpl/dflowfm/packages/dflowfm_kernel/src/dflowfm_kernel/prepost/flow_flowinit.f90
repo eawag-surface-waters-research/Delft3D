@@ -1386,7 +1386,9 @@ end if
     end do
  end if
 
-  if (jawave==3) then
+  if ((jawave==3 .or. jawave==6) .and. .not. flowWithoutWaves) then
+    ! Normal situation: use wave info in FLOW
+    ! 3D not implementend
     if( kmx == 0 ) then
        hs = s1-bl                                   ! safety
        hs = max(hs, 0d0)
@@ -1398,7 +1400,14 @@ end if
     call setwavmubnd()
  end if
 
- if (jawave==5) then
+ if ((jawave==3 .or. jawave==6) .and. flowWithoutWaves) then
+    ! Exceptional situation: use wave info not in FLOW, only in WAQ
+    ! Only compute uorb
+    ! Works both for 2D and 3D
+    call wave_uorbrlabda()                       ! hwav gets depth-limited here
+end if
+
+ if (jawave==5 .and. .not. flowWithoutWaves) then
     if (kmx==0) then
        do k=1,ndx
           hwav(k) = min(hwavuni, gammax*(s1(k)-bl(k)))

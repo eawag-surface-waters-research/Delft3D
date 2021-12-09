@@ -368,7 +368,9 @@ module m_ec_filereader
                   timesndx = itemPtr%sourceT1FieldPtr%timesndx + 1
                endif
                select case (qname)
-               case ('hrms', 'tp', 'tps', 'rtp', 'dir', 'fx', 'fy', 'wsbu', 'wsbv', 'mx', 'my', 'dissurf','diswcap','ubot')   ! TODO RL: kijken of dit eruit kan 
+               ! Ugly hack: when qname = tp/tps, the default case must be executed when jawave==6
+               ! case ('hrms', 'tp', 'tps', 'rtp', 'dir', 'fx', 'fy', 'wsbu', 'wsbv', 'mx', 'my', 'dissurf','diswcap','ubot')   ! TODO RL: kijken of dit eruit kan 
+               case ('hrms', 'dir', 'fx', 'fy', 'wsbu', 'wsbv', 'mx', 'my', 'dissurf','diswcap','ubot')   ! TODO RL: kijken of dit eruit kan 
                   t0t1 = -1
                   do i=1, fileReaderPtr%nItems
                      success = ecNetcdfReadBlock(fileReaderPtr, fileReaderPtr%items(i)%ptr, t0t1, fileReaderPtr%items(i)%ptr%elementSetPtr%nCoordinates)                  

@@ -1720,7 +1720,7 @@ subroutine waq_wri_couple_files(time)
 
     ! Taus file (contains taus at the bottom of computational cells)
     if (jawave /= 3) then   ! If jawave == 3, then taus is obtained from subroutine tauwave (taus = taucur + tauwave).
-        call gettaus(1)
+        call gettaus(1,2)
     endif
     call waq_wri_tau(itim, defaultFilename('tau'), waqpar%luntau)
 
@@ -3048,3 +3048,5 @@ end subroutine waq_read_dwq
 !------------------------------------------------------------------------------
 
 end module waq
+
+

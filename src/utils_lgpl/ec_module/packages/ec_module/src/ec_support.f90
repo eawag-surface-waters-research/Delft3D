@@ -1148,13 +1148,16 @@ end subroutine ecInstanceListSourceItems
                    else
                       call setECmessage("attribute 'standard_name' not found for variable " // trim(varname))
                    endif
-               case ('m','meters','km','kilometers')
+               case ('m','meter','meters','km','kilometers')
                    stdname = ''
                    ierr = nf90_get_att(ncid, ivar, 'standard_name', stdname)
+                   if (stdname == '') then
+                      ierr = nf90_get_att(ncid, ivar, 'long_name', stdname)
+                   endif
                    select case (stdname)
-                      case ('projection_x_coordinate')
+                      case ('projection_x_coordinate', 'x')
                          x_varid = ivar
-                      case ('projection_y_coordinate')
+                      case ('projection_y_coordinate', 'y')
                          y_varid = ivar
                    end select
                end select

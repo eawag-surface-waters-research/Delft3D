@@ -278,7 +278,10 @@
  hs = s1-bl
  hs = max(hs,0d0)
 
- if (jawave==3) then
+
+  if ((jawave==3 .or. jawave==6) .and. .not. flowWithoutWaves) then
+    ! Normal situation: use wave info in FLOW
+    ! 3D not implementend
     if( kmx == 0 ) then
        call wave_comp_stokes_velocities()
        call wave_uorbrlabda()                                          ! hwav gets depth-limited here
@@ -288,7 +291,14 @@
     call setwavmubnd()
  end if
 
- if (jawave.eq.4 .and. jajre.eq.1) then
+  if ((jawave==3 .or. jawave==6) .and. flowWithoutWaves) then
+    ! Exceptional situation: use wave info not in FLOW, only in WAQ
+    ! Only compute uorb
+    ! Works both for 2D and 3D
+    call wave_uorbrlabda()                       ! hwav gets depth-limited here
+  end if
+
+  if (jawave.eq.4 .and. jajre.eq.1 .and. .not. flowWithoutWaves) then
     if (swave.eq.1 ) then
        call xbeach_waves(ierror)
     endif
@@ -303,9 +313,9 @@
     if (jamombal==1) then
        call xbeach_mombalance()
     endif
- end if
+  end if
 
-  if (jawave==5) then
+  if (jawave==5 .and. .not. flowWithoutWaves) then
     if (kmx==0) then
        do k=1,ndx
           hwav(k) = min(hwavuni, gammax*(s1(k)-bl(k)))

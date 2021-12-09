@@ -5118,7 +5118,7 @@ subroutine rollerturbulence(k)
    double precision          :: disrol, rol, Tw, Tb, cw, ktrb, hloc
    double precision          :: dcf, dcfin, ML, twothird
    
-   if (jawave .eq. 3) then
+   if (jawave==3 .or. jawave==6) then
       disrol = dsurf(k)
       cw     = rlabda(k)/max(1d-1,twav(k))
       rol    = disrol*cw/2d0/ag/0.10d0          ! assume something for roller slope
