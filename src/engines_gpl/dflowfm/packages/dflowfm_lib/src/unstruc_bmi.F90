@@ -177,6 +177,7 @@ integer(c_int) function initialize(c_config_file) result(c_iresult) bind(C, name
 
    character(kind=c_char),intent(in)    :: c_config_file(MAXSTRLEN)
    character(len=strlen(c_config_file)) :: config_file
+   character(128)                       :: env_value
 
    ! Extra local variables
    integer :: inerr  ! number of the initialisation error
@@ -187,17 +188,60 @@ integer(c_int) function initialize(c_config_file) result(c_iresult) bind(C, name
    integer :: i,j,k
     
    c_iresult = 0 ! TODO: is this return value BMI-compliant?
+   jampi     = 0
 #ifdef HAVE_MPI
+
+   ! Check if MPI is already initialized
    call mpi_initialized(mpi_initd, inerr)
-   if (.not. mpi_initd) then
-      ja_mpi_init_by_fm = 1
-      call mpi_init(inerr)
-   else
+   if (mpi_initd) then
       ja_mpi_init_by_fm = 0
+      if (inerr == 0) then
+          jampi = 1
+      end if
+   else
+      ! Preparations for calling mpi_init:
+      ! When using IntelMPI, mpi_init will cause a crash if IntelMPI is not
+      ! installed. Do not call mpi_init in a sequential computation.
+      ! Check this via the possible environment parameters.
+      env_value = ""
+
+      ! MPICH2 (or derived)
+      call util_getenv("PMI_RANK",env_value)
+      if (env_value /= "") jampi=1
+
+      ! OpenMPI 1.3 (or derived)
+      call util_getenv("OMPI_COMM_WORLD_RANK",env_value)
+      if (env_value /= "") jampi=1
+
+      ! OpenMPI 1.2 (or derived)
+      call util_getenv("OMPI_MCA_ns_nds_vpid",env_value)
+      if (env_value /= "") jampi=1
+
+      ! MVAPICH 1.1 (or derived)
+      call util_getenv("MPIRUN_RANK",env_value)
+      if (env_value /= "") jampi=1
+
+      ! MVAPICH 1.9 (or derived)
+      call util_getenv("MV2_COMM_WORLD_RANK",env_value)
+      if (env_value /= "") jampi=1
+
+      ! POE, IBM (or derived)
+      call util_getenv("MP_CHILD",env_value)
+      if (env_value /= "") jampi=1
+
+      if (jampi == 1) then
+          ja_mpi_init_by_fm = 1
+          call mpi_init(inerr)
+          if (inerr /= 0) then
+              jampi = 0
+          end if
+      end if
    end if
 
-   call mpi_comm_rank(DFM_COMM_DFMWORLD,my_rank,inerr)
-   call mpi_comm_size(DFM_COMM_DFMWORLD,numranks,inerr)
+   if (jampi == 1) then
+       call mpi_comm_rank(DFM_COMM_DFMWORLD,my_rank,inerr)
+       call mpi_comm_size(DFM_COMM_DFMWORLD,numranks,inerr)
+   end if
 
    if ( numranks.le.1 ) then
       jampi = 0

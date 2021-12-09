@@ -111,6 +111,7 @@
    character(len=maxnamelen) :: md_mapfile_base !< storing the user-defined map file
    character(len=maxnamelen) :: md_flowgeomfile_base !< storing the user-defined flowgeom file
    character(len=maxnamelen) :: md_classmapfile_base !< storing the user-defined class map file
+   character(len=128)        :: env_value
     
    integer, external         :: iget_jaopengl
    integer, external         :: read_commandline
@@ -130,13 +131,55 @@
     jaGUI = 0          !< GUI (1) or not (0)
 #endif
 
+   jampi  = 0
 #ifdef HAVE_MPI
-   ! From calling C/C++ side, construct an MPI communicator, and call
-   ! MPI_Fint MPI_Comm_c2f(MPI_Comm comm) to convert the C comm handle
-   ! to a FORTRAN comm handle.
-   call mpi_init(ierr)
-   call mpi_comm_rank(DFM_COMM_DFMWORLD,my_rank,ierr)
-   call mpi_comm_size(DFM_COMM_DFMWORLD,numranks,ierr)
+
+   ! Preparations for calling mpi_init:
+   ! When using IntelMPI, mpi_init will cause a crash if IntelMPI is not
+   ! installed. Do not call mpi_init in a sequential computation.
+   ! Check this via the possible environment parameters.
+   env_value = ""
+
+   ! MPICH2 (or derived)
+   call util_getenv("PMI_RANK",env_value)
+   if (env_value /= "") jampi=1
+
+   ! OpenMPI 1.3 (or derived)
+   call util_getenv("OMPI_COMM_WORLD_RANK",env_value)
+   if (env_value /= "") jampi=1
+
+   ! OpenMPI 1.2 (or derived)
+   call util_getenv("OMPI_MCA_ns_nds_vpid",env_value)
+   if (env_value /= "") jampi=1
+
+   ! MVAPICH 1.1 (or derived)
+   call util_getenv("MPIRUN_RANK",env_value)
+   if (env_value /= "") jampi=1
+
+   ! MVAPICH 1.9 (or derived)
+   call util_getenv("MV2_COMM_WORLD_RANK",env_value)
+   if (env_value /= "") jampi=1
+
+   ! POE, IBM (or derived)
+   call util_getenv("MP_CHILD",env_value)
+   if (env_value /= "") jampi=1
+
+   if (jampi == 1) then
+       ja_mpi_init_by_fm = 1
+       call mpi_init(ierr)
+       if (ierr /= 0) then
+           jampi = 0
+       end if
+   end if
+
+   if (jampi == 1) then
+      ! From calling C/C++ side, construct an MPI communicator, and call
+      ! MPI_Fint MPI_Comm_c2f(MPI_Comm comm) to convert the C comm handle
+      ! to a FORTRAN comm handle.
+      call mpi_init(ierr)
+      call mpi_comm_rank(DFM_COMM_DFMWORLD,my_rank,ierr)
+      call mpi_comm_size(DFM_COMM_DFMWORLD,numranks,ierr)
+   end if
 
    write(*,*) ' my_rank, numranks ', my_rank, numranks
 
