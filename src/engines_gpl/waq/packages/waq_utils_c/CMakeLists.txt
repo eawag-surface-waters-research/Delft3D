@@ -10,3 +10,5 @@ add_library(waq_utils_c ${source})
 # Define how the files should be structured in Visual studio
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${source} )
 set_target_properties (waq_utils_c PROPERTIES FOLDER engines_gpl/waq)
+
+set_source_files_properties(${source} PROPERTIES COMPILE_OPTIONS "${file_preprocessor_flag}")
