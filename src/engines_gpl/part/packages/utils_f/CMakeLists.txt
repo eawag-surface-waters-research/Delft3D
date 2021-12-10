@@ -7,7 +7,6 @@ set(ini_version_file ${CMAKE_CURRENT_SOURCE_DIR}/../../res/version_number.ini)
 set(fortran_version_file ${CMAKE_CURRENT_SOURCE_DIR}/${src_path}/part_version.F90)
 
 generate_version_files(${fortran_version_file} 
-                       ${checkout_src_root}
                        ${ini_version_file} 
                        ON)
 

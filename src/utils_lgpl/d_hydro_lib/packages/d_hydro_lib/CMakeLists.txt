@@ -16,7 +16,6 @@ set(h_version_file ${d_hydro_lib_version_path}/d_hydro_lib_version.h)
 
 # Generate version files
 generate_version_files(${h_version_file} 
-                       ${checkout_src_root}
                        ${ini_version_file})
 
 # Set include directories

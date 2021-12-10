@@ -18,25 +18,24 @@ endfunction()
 # Generates files that are related to the version numbering as a preconfiguration process of cmake.
 #
 # Argument
-# svn_version_path : Path to check for the svn version.
 # fortran_version_file : The name of the Fortran version file it needs to generate.
 # version_file : The .ini file which contains the version information format.
 # --onlyifmissing : Optional boolean flag to determine if the version file should be generated. (default: OFF)
-function(generate_version_files fortran_version_file svn_version_path version_file) 
+function(generate_version_files fortran_version_file version_file) 
     IF(NOT DEFINED update_version_script_path)
         message(FATAL_ERROR "Variable 'update_version_script_path' is undefined.")
     ENDIF()
 
     if (UNIX)
-        message(STATUS "generate_version_files IN UNIX  ${update_version_script_path} ${fortran_version_file} ${svn_version_path} ${version_file} ${checkout_src_root}")
-        execute_process(COMMAND /bin/bash ${update_version_script_path} ${fortran_version_file} ${svn_version_path} ${version_file} ${svn_version_path})
+        message(STATUS "generate_version_files IN UNIX  ${update_version_script_path} ${fortran_version_file} ${checkout_src_root} ${version_file} ${checkout_src_root}")
+        execute_process(COMMAND /bin/bash ${update_version_script_path} ${fortran_version_file} ${checkout_src_root} ${version_file} ${svn_version_path})
     endif(UNIX)
     if (WIN32)
         message(STATUS "generate_version_files IN WINDOWS")
         IF(DEFINED ARGV3 AND ARGV3)
-            execute_process(COMMAND ${update_version_script_path} ${fortran_version_file} ${svn_version_path} ${version_file} --onlyifmissing)
+            execute_process(COMMAND ${update_version_script_path} ${fortran_version_file} ${checkout_src_root} ${version_file} --onlyifmissing)
         ELSE()
-            execute_process(COMMAND ${update_version_script_path} ${fortran_version_file} ${svn_version_path} ${version_file})
+            execute_process(COMMAND ${update_version_script_path} ${fortran_version_file} ${checkout_src_root} ${version_file})
         ENDIF()
     endif(WIN32)
 

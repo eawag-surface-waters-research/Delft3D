@@ -46,7 +46,6 @@ set(h_version_file ${flow2d3d_version_path}/flow2d3d_version.h)
 
 # Generate version files
 generate_version_files(${h_version_file} 
-                       ${checkout_src_root}
                        ${ini_version_file})
 
 # Gather source files 

@@ -12,11 +12,9 @@ set(rc_version_file ${res_path}/version_number.rc)
 
 # Generate version files
 generate_version_files(${rc_version_file} 
-                       ${checkout_src_root}
                        ${ini_version_file})
 
 generate_version_files(${fortran_version_file} 
-                       ${checkout_src_root}
                        ${ini_version_file})
 
 # Gather source files

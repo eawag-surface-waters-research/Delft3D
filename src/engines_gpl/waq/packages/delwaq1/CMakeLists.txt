@@ -19,17 +19,14 @@ set(icon_file ${waq_version_path}/waq_icon.rc)
 
 # Generate version files
 generate_version_files(${rc_version_file} 
-                       ${checkout_src_root}
                        ${ini_version_file} 
                        ON)
 
 generate_version_files(${fortran_version_file} 
-                       ${checkout_src_root}
                        ${ini_version_file} 
                        ON)
 
 generate_version_files(${fortran_version_file_delwaq} 
-                       ${checkout_src_root}
                        ${ini_version_file} 
                        ON)
 
