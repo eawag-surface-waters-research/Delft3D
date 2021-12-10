@@ -129,7 +129,8 @@ if (UNIX)
     target_link_libraries(${library_name}
          ${oss_dependencies}
          PkgConfig::NETCDF
-         PkgConfig::NETCDF_FTN)
+         PkgConfig::NETCDF_FTN
+         uuid)
 endif(UNIX)
 
 # Define how the files should be structured within Visual Studio
