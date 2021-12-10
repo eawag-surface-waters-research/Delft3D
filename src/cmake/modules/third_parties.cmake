@@ -39,6 +39,8 @@ endif(WIN32)
 if(WIN32)
     set(netcdf_module ${third_party_open_path}/netcdf/${cmake_directory})
 endif(WIN32)
+set(netcdf_version "netCDF 4.6.1")
+
 
 # polypack
 set(polypack_module ${third_party_open_path}/polypack/${cmake_directory})

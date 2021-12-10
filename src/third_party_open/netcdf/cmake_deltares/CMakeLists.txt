@@ -7,8 +7,8 @@ include_directories(${library_path}/netcdf-fortran-4.4.4/libsrc)
 set(source_path "${library_path}/netcdf-fortran-4.4.4/fortran")
 
 # Include directories that are necessary references for netcdf4
-message(STATUS "netcdf 4.6.1 include dir is ${library_path}/netCDF\ 4.6.1/include")
-include_directories("${library_path}/netCDF\ 4.6.1/include")
+message(STATUS ${netcdf_version} " include dir is ${library_path}/${netcdf_version}/include")
+include_directories("${library_path}/${netcdf_version}/include")
 set(c_sources ${source_path}/nf_lib.c)
 
 # Add library

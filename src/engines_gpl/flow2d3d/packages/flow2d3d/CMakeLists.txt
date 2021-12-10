@@ -114,7 +114,7 @@ if (WIN32)
     message(STATUS "Setting linker properties in windows")
     target_link_directories(${library_name}
                             PRIVATE
-                            "${checkout_src_root}/third_party_open/netcdf/netCDF 4.6.1/lib"
+                            "${checkout_src_root}/third_party_open/netcdf/${netcdf_version}/lib"
                             "${mpi_library_path}"
                             "${checkout_src_root}/third_party_open/expat/x64/x64"
                             "${checkout_src_root}/third_party_open/pthreads/bin/x64")

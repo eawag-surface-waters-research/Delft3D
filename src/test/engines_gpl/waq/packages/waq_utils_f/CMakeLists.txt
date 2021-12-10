@@ -50,7 +50,7 @@ if(WIN32)
                          waq_utils_f)
 
     target_link_directories(${executable_name} PRIVATE
-                                "${checkout_src_root}/third_party_open/netcdf/netCDF 4.6.1/lib")
+                                "${checkout_src_root}/third_party_open/netcdf/${netcdf_version}/lib")
 
     oss_include_libraries(${executable_name}   oss_dependencies)
     target_link_libraries(${executable_name} ${oss_dependencies}

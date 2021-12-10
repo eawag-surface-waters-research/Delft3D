@@ -47,14 +47,14 @@ if (WIN32)
                                PRIVATE
 							   "${checkout_src_root}/third_party_open/expat/x64/include"
 							   "${checkout_src_root}/third_party_open/mpich2/include"
-							   "${checkout_src_root}/third_party_open/netcdf/netCDF 4.6.1/include"
+							   "${checkout_src_root}/third_party_open/netcdf/${netcdf_version}/include"
 							   "${checkout_src_root}/third_party_open/pthreads/include/x64")
 
     # Set the linker properties
     target_link_directories(${executable_name}
                             PRIVATE
                             "${checkout_src_root}/third_party_open/expat/x64/x64/"
-							"${checkout_src_root}/third_party_open/netcdf/netCDF 4.6.1/lib"
+							"${checkout_src_root}/third_party_open/netcdf/${netcdf_version}/lib"
 							"${checkout_src_root}/third_party_open/mpich2/x64/lib"
 							"${checkout_src_root}/third_party_open/pthreads/bin/x64")
 
