@@ -28,7 +28,7 @@ function(generate_version_files fortran_version_file version_file)
 
     if (UNIX)
         message(STATUS "generate_version_files IN UNIX  ${update_version_script_path} ${fortran_version_file} ${checkout_src_root} ${version_file} ${checkout_src_root}")
-        execute_process(COMMAND /bin/bash ${update_version_script_path} ${fortran_version_file} ${checkout_src_root} ${version_file} ${svn_version_path})
+        execute_process(COMMAND /bin/bash ${update_version_script_path} ${fortran_version_file} ${checkout_src_root} ${version_file} ${checkout_src_root})
     endif(UNIX)
     if (WIN32)
         message(STATUS "generate_version_files IN WINDOWS")
