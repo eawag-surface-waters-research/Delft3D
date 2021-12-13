@@ -17180,7 +17180,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "htragg    ","Efficiency",   3,"Y","x",1
 "htragg    ","Temp      ",   4,"Y","x",1
 "htragg    ","Velocity  ",   5,"Y","x",1
-"htragg    ","CHEZY     ",   6,"Y","x",1
+"htragg    ","CHEZY     ",   6,"N","x",1
 "htragg    ","DELT      ",   7,"N","x",1
 "htragg    ","Depth     ",   8,"N","x",1
 "htragg    ","Tyre1     ",   9,"N","x",1
