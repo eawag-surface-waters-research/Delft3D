@@ -238,7 +238,7 @@
       IF ( NOUTP .GT. 0 ) THEN
          CALL DHOPNF ( LUN(25) , LCHAR(25), 25      , 2      , IERRD   )
          CALL DLWQIO ( LUN(25) , LCHAR(25), LUN(19) , NOUTP   , NRVART  ,
-     +                 NBUFMX  , J(IIOUT) , J(IIOPO), C(IONAM), C(IOSNM), 
+     +                 NBUFMX  , J(IIOUT) , J(IIOPO), C(IONAM), C(IOSNM),
      +                 C(IOUNI), C(IODSC) , NOTOT   , C(ISSNM), C(ISUNI),
      +                 C(ISDSC), LUN      , LCHAR   , MYPART  , IERR    )
          CLOSE ( LUN(25) )
@@ -567,7 +567,7 @@
       integer  (4), intent(in   ) :: nopa               !< number of parameters or segment functions
       integer  (4), intent(in   ) :: iparm              !< selected parameter
       real     (4), intent(in   ) :: parm (nopa *noseg) !< parameter or segment function array
-      character(7), intent(  out) :: string             !< model docu substring
+      character(1), intent(  out) :: string(7)          !< model docu substring
       logical     , intent(in   ) :: propor             !< if .true. then /m2 in the input
       logical     , intent(in   ) :: direct             !< if .false. segments is first index
 
@@ -576,7 +576,7 @@
       real(4) surf   ! help variable
       integer indx   ! index
 
-      string = 'mass/m2'                                ! always in the output
+      string(1:7) = ['m','a','s', 's', '/', 'm', '2']   ! always in the output and keep debugger happy
       if ( direct ) then
          indx =  iparm                    ! parameter
       else

@@ -329,6 +329,8 @@
       arrdm2(iiharm) = 1
       arrdm3(iiharm) = 1
 
+      nlines = nlines + 1       ! Try to avoid a problem with the debugger
+
       arrnam(iifarr) = 'FARR  '
       arrknd(iifarr) = 1
       arrdm1(iifarr) = nlines

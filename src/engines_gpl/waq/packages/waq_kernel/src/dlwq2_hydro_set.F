@@ -53,7 +53,7 @@
 !          Lock the files by LU-number, so that multiple instances
 !          may use the library
 !
-      logical, dimension(100), save :: file_locked
+      logical, dimension(1000), save :: file_locked = .false.
 
 
 !

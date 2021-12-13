@@ -279,6 +279,8 @@
       ARRDM2(IINRFT) = 1
       ARRDM3(IINRFT) = 1
 !
+      NPOINS = NPOINS + 1           ! Try to avoid problem with the debugger
+
       ARRNAM(IIBULK) = 'IPOINT'
       ARRKND(IIBULK) = 1
       ARRDM1(IIBULK) = NPOINS
