@@ -331,7 +331,9 @@ subroutine fill_valobs()
             if( jasal > 0 .or. jatem > 0 .or. jased > 0 ) then
                valobs(IPNT_RHO+klay-1,i) = rho(kk)
             end if
-            valobs(IPNT_UMAG+klay-1,i) = ucmag(kk)
+            if (jahisvelocity > 0) then
+               valobs(IPNT_UMAG+klay-1,i) = ucmag(kk)
+            end if
             valobs(IPNT_QMAG+klay-1,i) = 0.5d0*(squ(kk)+sqi(kk))
             
             if (kmx==0) then
