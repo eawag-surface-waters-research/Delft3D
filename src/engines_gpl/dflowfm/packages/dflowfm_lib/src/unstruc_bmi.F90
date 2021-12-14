@@ -187,8 +187,11 @@ integer(c_int) function initialize(c_config_file) result(c_iresult) bind(C, name
    type(c_ptr) :: xptr
    integer :: i,j,k
     
-   c_iresult = 0 ! TODO: is this return value BMI-compliant?
-   jampi     = 0
+   c_iresult         = 0 ! TODO: is this return value BMI-compliant?
+   jampi             = 0
+   numranks          = 1
+   my_rank           = 0
+   ja_mpi_init_by_fm = 0
 #ifdef HAVE_MPI
 
    ! Check if MPI is already initialized
@@ -250,8 +253,6 @@ integer(c_int) function initialize(c_config_file) result(c_iresult) bind(C, name
    !   make domain number string as soon as possible
    write(sdmn, '(I4.4)') my_rank
 
-#else
-   numranks=1
 #endif
 
    ! do this until default has changed

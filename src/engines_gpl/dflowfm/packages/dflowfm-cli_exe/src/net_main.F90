@@ -131,7 +131,10 @@
     jaGUI = 0          !< GUI (1) or not (0)
 #endif
 
-   jampi  = 0
+   jampi             = 0
+   numranks          = 1
+   my_rank           = 0
+   ja_mpi_init_by_fm = 0
 #ifdef HAVE_MPI
 
    ! Preparations for calling mpi_init:
@@ -176,14 +179,12 @@
       ! From calling C/C++ side, construct an MPI communicator, and call
       ! MPI_Fint MPI_Comm_c2f(MPI_Comm comm) to convert the C comm handle
       ! to a FORTRAN comm handle.
-      call mpi_init(ierr)
       call mpi_comm_rank(DFM_COMM_DFMWORLD,my_rank,ierr)
       call mpi_comm_size(DFM_COMM_DFMWORLD,numranks,ierr)
    end if
 
    write(*,*) ' my_rank, numranks ', my_rank, numranks
 
-   ja_mpi_init_by_fm = 1
 
    if ( numranks.le.1 ) then
       jampi = 0
