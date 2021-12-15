@@ -76,8 +76,8 @@ module m_oned_functions
       ! Therefore initialise these arrays with a negative value.
       if (network%loaded) then
          where (kcu(1:lnx1d) == 1)
-            frcu(1:lnx1d) = -10d0
-            ifrcutp(1:lnx1d) = 0
+            frcu(1:lnx1d)     = dmiss
+            ifrcutp(1:lnx1d)  = 0
             frcu_mor(1:lnx1d) = -10d0
          end where
       endif
