@@ -56,7 +56,7 @@ subroutine fmgetdata_running_mean(filename, filename_out, field_name, minmaxlst)
    integer :: ierr, i, j, k, nStations, nd, ntimes, iunit
    real, allocatable :: hisdata(:,:), maxvalues(:), minvalues(:)
    real(kind=8), allocatable :: onetime(:)
-   character(len=64), allocatable :: stations(:)
+   character(len=:), allocatable :: stations(:)
    integer, allocatable :: list(:)
    character(len=32) :: stations_var
    character(len=12) :: cnum1, cnum2
@@ -73,14 +73,14 @@ subroutine fmgetdata_running_mean(filename, filename_out, field_name, minmaxlst)
       open(newunit=iunit, file=filename_out)
       call parse_min_max_list(minmaxlst, list)
       allocate(maxvalues(nStations), minvalues(nStations), onetime(nStations))
-      write(iunit,*) 'quantity = ', field_name
+      write(iunit,'(2a)') 'quantity = ', field_name
       do k = 1, size(list)
 
          nd = list(k)
          ntimes = size(hisdata,1)
          call runsum%init(nStations, nd)
          if (nd > ntimes) then
-            write(iunit,*) 'Not enough times for filter width = ', nd
+            write(iunit,'(a,i4)') 'Not enough times for filter width =', nd
             cycle
          end if
          do i = 1, ntimes
@@ -102,11 +102,13 @@ subroutine fmgetdata_running_mean(filename, filename_out, field_name, minmaxlst)
          minvalues = minvalues / real(nd)
 
          ! print values
-         write(iunit,*) 'width = ', nd
+         write(iunit,*)
+         write(iunit,'(a,i4)') 'width =', nd
+         write(iunit,'(a)') '   max value    min value   station name'
          do j = 1, nStations
             call write_val2string(maxvalues(j), cnum1, 1)
             call write_val2string(minvalues(j), cnum2, 1)
-            write(iunit,'(a32,2(a12,x))') stations(j), cnum1, cnum2
+            write(iunit,'(2(a12,x),2x,a)') cnum1, cnum2, trim(stations(j))
          end do
       end do
       close(iunit)
@@ -124,7 +126,7 @@ subroutine fmgetdata(filename, filename_out, field_name, minmaxlst)
 
    integer :: ierr, i, nStations
    real, allocatable :: hisdata(:,:)
-   character(len=64), allocatable :: stations(:)
+   character(len=:), allocatable :: stations(:)
    integer, allocatable :: stats_index(:), list(:)
    character(len=32) :: stations_var
 

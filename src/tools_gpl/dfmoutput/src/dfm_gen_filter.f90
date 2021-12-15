@@ -53,7 +53,7 @@ subroutine gen_filter(filename, filename_out, field_name, intval, coefimpl, coef
 
    integer :: ierr, i, nStations, ntimes, iunout
    real(kind=hp), allocatable :: hisdata(:,:), ySmooth(:)
-   character(len=64), allocatable :: stations(:)
+   character(len=:), allocatable :: stations(:)
    character(len=32) :: stations_var
 
                            ierr = read_meta_data(filename, nStations)

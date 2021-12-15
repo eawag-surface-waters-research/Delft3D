@@ -57,7 +57,7 @@ module read_nc_histories
       integer         , intent(out) :: nStat     !< number of stations found on input file
       integer                       :: status    !< function result; 0=OK
 
-      integer :: timeID, name_lenID, stationsID
+      integer :: timeID, name_lenID, stationsID, cross_name_lenID, nCrossNameLength
 
                                 status = nf90_open(filename, nf90_nowrite, ncid)
       if (status == nf90_noerr) status = nf90_inq_dimid(ncid, "time", timeID)
@@ -67,6 +67,14 @@ module read_nc_histories
       if (status == nf90_noerr) status = nf90_inquire_dimension(ncid, timeID, len = nTimes)
       if (status == nf90_noerr) status = nf90_inquire_dimension(ncid, name_lenID, len = nNameLength)
       if (status == nf90_noerr) status = nf90_inquire_dimension(ncid, stationsID, len = nStations)
+
+      status = nf90_inq_dimid(ncid, "cross_section_name_len", cross_name_lenID)
+      if (status == nf90_noerr) then
+         status = nf90_inquire_dimension(ncid, cross_name_lenID, len = nCrossNameLength)
+         nNameLength = max(nNameLength, nCrossNameLength)
+      else
+         status = nf90_noerr
+      end if
 
       nStat = nStations
 
@@ -182,13 +190,13 @@ module read_nc_histories
 
    !> read station names from an already opened NetCDF file
    function read_station_names(stations, stations_varname) result(status)
-      character(len=*), allocatable, intent(out) :: stations(:)       !< output array
+      character(len=:), allocatable, intent(out) :: stations(:)       !< output array
       character(len=*)             , intent(in ) :: stations_varname  !< variable name on NetCDF file
       integer                                    :: status            !< function result: 0=OK
 
       integer :: varid, i
 
-      allocate(stations(nStations))
+      allocate(character(nNameLength) :: stations(nStations))
       varid = get_varid(stations_varname)
 
       status = nf90_get_var(ncid, varId, stations)
