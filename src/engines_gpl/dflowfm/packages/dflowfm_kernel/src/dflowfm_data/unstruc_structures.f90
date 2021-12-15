@@ -270,11 +270,11 @@ integer :: jaoldstr !< tmp backwards comp: we cannot mix structures from EXT and
       use m_longculverts, only: nlongculvertsg
       implicit none
 
-      if( jahispump > 0 .and. npumpsg > 0) then
+      if((ti_rst > 0 .or. jahispump > 0) .and. npumpsg > 0) then
          if( allocated( valpump ) ) deallocate( valpump )
          allocate( valpump(NUMVALS_PUMP,npumpsg) ) ; valpump = 0d0
       endif
-      if( jahiscgen > 0 ) then
+      if(ti_rst > 0 .or. jahiscgen > 0 ) then
          if( ncgensg > 0 ) then
             if( allocated( valcgen ) ) deallocate( valcgen )
             allocate( valcgen(NUMVALS_CGEN,ncgensg) ) ; valcgen = 0d0
@@ -306,7 +306,7 @@ integer :: jaoldstr !< tmp backwards comp: we cannot mix structures from EXT and
          nweirgen = network%sts%numWeirs
       end if
       
-      if( jahisweir > 0 .and. nweirgen > 0) then
+      if((ti_rst > 0 .or. jahisweir > 0) .and. nweirgen > 0) then
          if( allocated( valweirgen) ) deallocate( valweirgen )
          allocate( valweirgen(NUMVALS_WEIRGEN,nweirgen) ) ; valweirgen = 0d0
       endif
@@ -314,7 +314,7 @@ integer :: jaoldstr !< tmp backwards comp: we cannot mix structures from EXT and
          if( allocated( valdambreak ) ) deallocate( valdambreak )
          allocate( valdambreak(NUMVALS_DAMBREAK,ndambreaksg) ) ; valdambreak = 0d0
       endif
-      if( jahisorif > 0 .and. network%sts%numOrifices > 0) then
+      if((ti_rst > 0 .or. jahisorif > 0) .and. network%sts%numOrifices > 0) then
          if( allocated( valorifgen) ) deallocate( valorifgen )
          allocate( valorifgen(NUMVALS_ORIFGEN,network%sts%numOrifices) ) ; valorifgen = 0d0
       endif
