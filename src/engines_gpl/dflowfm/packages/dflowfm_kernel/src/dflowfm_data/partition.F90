@@ -1053,7 +1053,7 @@ use meshdata, only : ug_idsLen, ug_idsLongNamesLen
          ! * calculation points (flow nodes) are order such that branch indices are always increasing,
          ! * and calculation points (flow nodes) within a branch are always ordered by increasing offset/chainage.
 
-         allocate(indx(nump1d2d), indxinv(nump1d2d), cellnrs(nump1d2d), tmpCoord(nump1d2d), tmpNetcellNod(nump1d2d))
+         allocate(indx(nump1d2d), indxinv(nump1d2d), cellnrs(nump1d2d), tmpCoord(nump1d2d), tmpNetcellNod(nump+1:nump1d2d))
          cellnrs = iorg
          call indexxi(size(iorg), cellnrs, indx)
 
