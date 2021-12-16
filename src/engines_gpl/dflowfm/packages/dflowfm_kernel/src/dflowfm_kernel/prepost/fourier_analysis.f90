@@ -986,44 +986,37 @@ end subroutine setfoustandardname
              !
              ! Calculate MAX value
              !
+             do n = 1, nmaxus
+                fousmas(n) = max(fousmas(n), rarray(n))
+             enddo
              if (gdfourier%withTime(ifou)) then
-               do n = 1, nmaxus
-                  if (rarray(n) > fousmas(n)) then
-                     fousmas(n) = rarray(n)
-                     fousmbs(n) = time0
-                  end if
-               end do
-             else if (founam == 's1') then
-
                 do n = 1, nmaxus
-                   !
-                   ! Waterlevel (fousma) and waterdepth (fousmb),
-                   !
-                   fousmas(n) = max(fousmas(n), rarray(n))
+                   ! time of maximum
+                   if (rarray(n) > fousmas(n)) fousmbs(n) = time0
+                end do
+             else if (founam == 's1') then
+                do n = 1, nmaxus
+                   ! waterdepth (fousmb)
                    fousmbs(n) = max(fousmbs(n), rarray(n) - real(bl(n),sp))               ! NOTE: bl is a HEIGHT (as bl in fm) and NOT a DEPTH (delft3d)
                 enddo
              else
-                do n = 1, nmaxus
-                   fousmas(n) = max(fousmas(n), rarray(n))
-                enddo
              endif
           case ('i')
              !
              ! Calculate MIN value
              !
+             do n = 1, nmaxus
+                fousmas(n) = min(fousmas(n), rarray(n))
+             enddo
              if (gdfourier%withTime(ifou)) then
-               do n = 1, nmaxus
-                  if (rarray(n) < fousmas(n)) then
-                     fousmas(n) = rarray(n)
-                     fousmbs(n) = time0
-                  end if
-               end do
+                do n = 1, nmaxus
+                   ! time of minimum
+                   if (rarray(n) < fousmas(n)) fousmbs(n) = time0
+                end do
              else
-               do n = 1, nmaxus
-                  fousmas(n) = min(fousmas(n), rarray(n))
-               enddo
                if (founam == 's1') then
                   do n = 1, nmaxus
+                     ! waterdepth (fousmb)
                      fousmbs(n) = min(fousmbs(n), rarray(n) - real(bl(n),sp))
                   enddo
                endif
@@ -1211,8 +1204,6 @@ end subroutine setfoustandardname
        !
        ! test for continuation record
        !
-       ! requested fourier analysis water-level
-       !
        read(columns(4),*,err=999) numcyc
 
        withMinMax = ( index(record,'max')>0 .or. index(record,'min')>0 )
@@ -1225,6 +1216,7 @@ end subroutine setfoustandardname
        end if
 
        if (columns(1)(1:2)=='wl') then
+          ! requested fourier analysis water-level
           nofou = nofou + 1
           if (withMinMax) then
              !
