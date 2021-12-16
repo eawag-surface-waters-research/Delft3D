@@ -1,0 +1,114 @@
+!!  Copyright (C)  Stichting Deltares, 2012-2021.
+!!
+!!  This program is free software: you can redistribute it and/or modify
+!!  it under the terms of the GNU General Public License version 3,
+!!  as published by the Free Software Foundation.
+!!
+!!  This program is distributed in the hope that it will be useful,
+!!  but WITHOUT ANY WARRANTY; without even the implied warranty of
+!!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+!!  GNU General Public License for more details.
+!!
+!!  You should have received a copy of the GNU General Public License
+!!  along with this program. If not, see <http://www.gnu.org/licenses/>.
+!!
+!!  contact: delft3d.support@deltares.nl
+!!  Stichting Deltares
+!!  P.O. Box 177
+!!  2600 MH Delft, The Netherlands
+!!
+!!  All indications and logos of, and references to registered trademarks
+!!  of Stichting Deltares remain the property of Stichting Deltares. All
+!!  rights reserved.
+
+
+    ! 6 char name for process mathc with second line of PDF  
+subroutine PROATT     ( pmsa   , fl     , ipoint , increm, noseg , &                            
+                            noflux , iexpnt , iknmrk , noq1  , noq2  , &                            
+                            noq3   , noq4   )     
+! dont touch next line, replace name though
+!DEC$ ATTRIBUTES DLLEXPORT, ALIAS: 'PROATT' :: PROATT                                     
+!                                                                                                     
+!*******************************************************************************                      
+!                                                                                                     
+    IMPLICIT NONE                                                                                   
+!                                                                                                     
+!     Type    Name         I/O Description                                                            
+!          
+    integer, parameter :: plen = 7 ! total length of the PMSA input and output array
+    real(4) pmsa(*)      ! I/O Process Manager System Array, window of routine to process library     
+    real(4) fl(*)        ! O  Array of fluxes made by this process in mass/volume/time               
+    integer ipoint(plen) ! I  Array of pointers in pmsa to get and store the data                    
+    integer increm(plen) ! I  Increments in ipoint for segment loop, 0=constant, 1=spatially varying 
+    integer noseg        ! I  Number of computational elements in the whole model schematisation     
+    integer noflux       ! I  Number of fluxes, increment in the fl array                            
+    integer iexpnt(4,*)  ! I  From, To, From-1 and To+1 segment numbers of the exchange surfaces     
+    integer iknmrk(*)    ! I  Active-Inactive, Surface-water-bottom, see manual for use              
+    integer noq1         ! I  Nr of exchanges in 1st direction (the horizontal dir if irregular mesh)
+    integer noq2         ! I  Nr of exchanges in 2nd direction, noq1+noq2 gives hor. dir. reg. grid  
+    integer noq3         ! I  Nr of exchanges in 3rd direction, vertical direction, pos. downward    
+    integer noq4         ! I  Nr of exchanges in the bottom (bottom layers, specialist use only)     
+!                                                                                                     
+!*******************************************************************************                      
+!                                                                                                     
+!     Type    Name         I/O Description                                        Unit                
+!                                                                                                     
+!     support variables
+    integer ipnt(plen)     ! Local work array for the pointering                                    
+    integer iseg          ! Local loop counter for computational element loop                      
+    integer ioq
+    integer ikmrk1        ! first segment attribute    
+ 
+     ! input state variables
+    real   Rad     ! irradiation at the segment upper-boundary              (W/m2)        
+    real   ExtVl   ! total extinction coefficient visible light             (1/m)         
+    real   Depth   ! depth of segment                                       (m) 
+    
+     !auxiliaries
+    real   PARRAD  ! from RAd to PARRAD
+    real   PFD     ! from rad to photon flux density                        (umol photon m-2) 
+    real   atten   ! attenuation of light by water + plankton Chl           (dl)              
+    real   exat    ! -ve exponent of attenuation                            (dl)              
+    
+!                                                                                                     
+!******************************************************************************* 
+!                                                                                                     
+    ipnt        = ipoint
+           
+    !iflux = 0
+        
+    ! segment loop
+    do iseg = 1 , noseg
+        call dhkmrk(1,iknmrk(iseg),ikmrk1)
+        if (ikmrk1.eq.1) then
+            
+        Rad          = PMSA(ipnt(  1 ))  !    irradiation at the segment upper-boundary              (W/m2)                          
+        ExtVl        = PMSA(ipnt(  2 ))  !    total extinction coefficient visible light             (1/m)               
+        Depth        = PMSA(ipnt(  3 ))  !    depth of segment                                       (m)
+           
+        ! calculate light availability in segment
+        ! from RAD [W/m2] to PARRAD [W/m2]
+        PARRAD = RAD * 0.45 
+        ! 1 W/m2 = 4.57 umol photons m-2 s-1
+        PFD = PARRAD * 4.57 ! from PARRAD to PFD
+           
+        !attenuation    MLD*(attco_W+abcoChl*algChl)    dl   attenuation of light by water and by phytoplankton Chl 
+        atten = depth * ExtVL                           
+        !exat   dl    -ve exponent of attenuation     
+        exat = exp(-atten)
+           
+        ! segemnt dependent, but species independent output
+        PMSA(ipnt( 4 ))  =  PFD   
+        PMSA(ipnt( 5 ))  =  atten 
+        PMSA(ipnt( 6 ))  =  exat  
+        PMSA(ipnt( 7 ))  =  PARRAD
+            
+        endif ! end if check for dry cell 
+
+        !allocate pointers
+        !iflux = iflux + noflux
+        ipnt = ipnt + increm
+
+    enddo ! end loop over segments
+    return
+end ! end subroutine 
