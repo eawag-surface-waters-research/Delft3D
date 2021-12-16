@@ -27,8 +27,6 @@
 subroutine PRODIA     ( pmsa   , fl     , ipoint , increm, noseg , &                            
                             noflux , iexpnt , iknmrk , noq1  , noq2  , &                            
                             noq3   , noq4   )     
-! dont touch next line, replace name though
-!DEC$ ATTRIBUTES DLLEXPORT, ALIAS: 'PRODIA' :: PRODIA                                     
 !                                                                                                     
 !*******************************************************************************                      
 !  
