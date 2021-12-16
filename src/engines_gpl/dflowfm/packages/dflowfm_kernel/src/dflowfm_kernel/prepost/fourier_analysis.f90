@@ -91,6 +91,7 @@ module m_fourier_analysis
                                                                                !! E  : Max Energy head requested instead of fourier analysis
        character(len=16), dimension(:)    , pointer :: founam        => null() !< Names of variables for fourier analysis
        character(len=16), dimension(:)    , pointer :: founamc       => null() !< Names of variables for combined min/max
+       logical          , dimension(:)    , pointer :: withTime      => null() !< With extra output of time of min/max
        character(len=50), dimension(:)    , pointer :: fouvarnam     => null() !< Names of variables for fourier analysis as written to NetCDF file
        character(len=50), dimension(:)    , pointer :: fouvarnamstd  => null() !< Standard name of variables for fourier analysis as written to NetCDF file
        character(len=50), dimension(:)    , pointer :: fouvarnamlong => null() !< Part of the long names of variables for fourier analysis as written to NetCDF file
@@ -214,6 +215,7 @@ module m_fourier_analysis
        if (istat == 0) call reallocp (gdfourier%fouelp, nofou, stat = istat, keepExisting = .false.)
        if (istat == 0) call reallocp (gdfourier%founam, nofou, stat = istat, keepExisting = .false.)
        if (istat == 0) call reallocp (gdfourier%founamc, nofou, stat = istat, keepExisting = .false.)
+       if (istat == 0) call reallocp (gdfourier%withTime, nofou, stat = istat, fill = .false.)
        if (istat == 0) call reallocp (gdfourier%fouvarnam     , gdfourier%nofouvar, stat = istat, keepExisting = .false.)
        if (istat == 0) call reallocp (gdfourier%fouvarnamstd  , gdfourier%nofouvar, stat = istat, keepExisting = .false.)
        if (istat == 0) call reallocp (gdfourier%fouvarnamlong , gdfourier%nofouvar, stat = istat, keepExisting = .false.)
@@ -314,7 +316,6 @@ module m_fourier_analysis
        integer                               :: ierr                ! error code allocate
        logical                               :: isRunningMean       ! min/max is based on running mean
        type (TRunningMeanMeta)               :: RMmeta              ! meta data in case of running mean calculation
-       integer                               :: ncyc
    !
    !! executable statements -------------------------------------------------------
    !
@@ -583,6 +584,9 @@ module m_fourier_analysis
                       if (irelp /= nveld .and. valid_combi(founam(ifou), columns(nveld))) then
                          fouelp(ifou) = 'c'
                          gdfourier%founamc = columns(nveld)
+                      else if (columns(nveld) == 'time') then
+                         fouelp(ifou) = 'x'
+                         gdfourier%withTime(ifou) = .true.
                       else
                          fouelp(ifou) = 'x'
                       end if
@@ -590,6 +594,9 @@ module m_fourier_analysis
                       if (irelp /= nveld .and. valid_combi(founam(ifou), columns(nveld))) then
                          fouelp(ifou) = 'C'
                          gdfourier%founamc = columns(nveld)
+                      else if (columns(nveld) == 'time') then
+                         fouelp(ifou) = 'i'
+                         gdfourier%withTime(ifou) = .true.
                       else
                          fouelp(ifou) = 'i'
                       end if
@@ -645,13 +652,13 @@ module m_fourier_analysis
                 call setfouunit(founam(ifou), lsal, ltem, fconno(ifou), fouvarunit(ivar))
              endif
              call setfoustandardname(founam(ifou), fouvarnamstd(ivar))
-             if (founam(ifou) == 's1' .and. fouelp(ifou) == 'x') then
+             if (founam(ifou) == 's1' .and. fouelp(ifou) == 'x' .and. .not. gdfourier%withTime(ifou)) then
                 ivar = ivar + 1
                 fouvarnam(ivar) = "fourier" // cref // "_max_depth"
                 fouvarnamlong(ivar) = "maximum depth value"
                 call setfouunit(founam(ifou), lsal, ltem, fconno(ifou), fouvarunit(ivar))
                 fouvarnamstd(ivar) = "sea_floor_depth_below_sea_surface"
-             else if (fouelp(ifou) == 'R') then
+             else if (fouelp(ifou) == 'R' .or. (fouelp(ifou) == 'x' .and. gdfourier%withTime(ifou))) then
                 ivar = ivar + 1
                 fouvarnam(ivar) = "maximum" // cref // "_time"
                 fouvarnamlong(ivar) = "time of maximum value"
@@ -683,13 +690,13 @@ module m_fourier_analysis
              if (index('ux|uy|uxa|uya',trim(founam(ifou)))==0) then
                 call setfoustandardname(founam(ifou), fouvarnamstd(ivar))
              endif
-             if (founam(ifou) == 's1' .and. fouelp(ifou) == 'i') then
+             if (founam(ifou) == 's1' .and. fouelp(ifou) == 'i'.and. .not. gdfourier%withTime(ifou)) then
                 ivar = ivar + 1
                 fouvarnam(ivar) = "fourier" // cref // "_min_depth"
                 fouvarnamlong(ivar) = "minimum depth value"
                 call setfouunit(founam(ifou), lsal, ltem, fconno(ifou), fouvarunit(ivar))
                 fouvarnamstd(ivar) = "sea_floor_depth_below_sea_surface"
-             else if (fouelp(ifou) == 'U') then
+             else if (fouelp(ifou) == 'U' .or. (fouelp(ifou) == 'i'.and. gdfourier%withTime(ifou))) then
                 ivar = ivar + 1
                 fouvarnam(ivar) = "minimum" // cref // "_time"
                 fouvarnamlong(ivar) = "time of minimum value"
@@ -808,8 +815,8 @@ subroutine getsizes(ifou, sizea, sizeb)
          ! and combined min/max, sumb is used for 2nd field
          sizeb = sizea
       case('x', 'i')
-         ! min and min: sumb is only used for waterdepth
-         sizeb = merge(sizea, 1, gdfourier%founam(ifou) == 's1')
+         ! min and min: sumb is only used for waterdepth or time
+         sizeb = merge(sizea, 1, gdfourier%founam(ifou) == 's1' .or. gdfourier%withTime(ifou))
       case default
          ! real fourier analyse: sumb has the same size as suma
          sizeb = sizea
@@ -980,7 +987,14 @@ end subroutine setfoustandardname
              !
              ! Calculate MAX value
              !
-             if (founam == 's1') then
+             if (gdfourier%withTime(ifou)) then
+               do n = 1, nmaxus
+                  if (rarray(n) > fousmas(n)) then
+                     fousmas(n) = rarray(n)
+                     fousmbs(n) = time0
+                  end if
+               end do
+             else if (founam == 's1') then
 
                 do n = 1, nmaxus
                    !
@@ -998,13 +1012,22 @@ end subroutine setfoustandardname
              !
              ! Calculate MIN value
              !
-             do n = 1, nmaxus
-                fousmas(n) = min(fousmas(n), rarray(n))
-             enddo
-             if (founam == 's1') then
-                do n = 1, nmaxus
-                   fousmbs(n) = min(fousmbs(n), rarray(n) - real(bl(n),sp))
-                enddo
+             if (gdfourier%withTime(ifou)) then
+               do n = 1, nmaxus
+                  if (rarray(n) < fousmas(n)) then
+                     fousmas(n) = rarray(n)
+                     fousmbs(n) = time0
+                  end if
+               end do
+             else
+               do n = 1, nmaxus
+                  fousmas(n) = min(fousmas(n), rarray(n))
+               enddo
+               if (founam == 's1') then
+                  do n = 1, nmaxus
+                     fousmbs(n) = min(fousmbs(n), rarray(n) - real(bl(n),sp))
+                  enddo
+               endif
              endif
           case ('a', 'l')
              !
@@ -1136,6 +1159,8 @@ end subroutine setfoustandardname
        character(len=300)                 :: record ! Used for format free reading 300 = 256 + a bit (field, =, ##, etc.)
        character(len=30), allocatable     :: columns(:)! each record is split into separate fields (columns)
        integer                            :: numcyc
+       integer                            :: nofouvarstep
+       logical                            :: withMinMax
        integer, pointer                   :: nofouvar
    !
    !! executable statements -------------------------------------------------------
@@ -1189,124 +1214,47 @@ end subroutine setfoustandardname
        ! requested fourier analysis water-level
        !
        read(columns(4),*,err=999) numcyc
+
+       withMinMax = ( index(record,'max')>0 .or. index(record,'min')>0 )
+       if (withMinMax .and. columns(nveld) == 'time') then
+          nofouvarstep = 2
+       else if (numcyc == 0) then
+          nofouvarstep = 1
+       else
+          nofouvarstep = 2
+       end if
+
        if (columns(1)(1:2)=='wl') then
           nofou = nofou + 1
-          if (index(record,'max')>0 .or. index(record,'min')>0 ) then
+          if (withMinMax) then
              !
              ! max and min: also write max depth
              !
              nofouvar = nofouvar + 2
-          else if (numcyc == 0) then
-             nofouvar = nofouvar + 1
           else
-             nofouvar = nofouvar + 2
-          endif
-       !
-       ! requested fourier analysis wind-speed
-       !
-       elseif (columns(1)(1:2)=='ws') then
-          nofou = nofou + 1
-          if (numcyc == 0) then
-             nofouvar = nofouvar + 1
-          else
-             nofouvar = nofouvar + 2
-          endif
-       !
-       ! requested fourier analysis temperature
-       !
-       elseif (columns(1)(1:2)=='ct') then
-          nofou = nofou + 1
-          if (numcyc == 0) then
-             nofouvar = nofouvar + 1
-          else
-             nofouvar = nofouvar + 2
-          endif
-       !
-       ! requested fourier analysis cell-centred eastward and northward velocity
-       !
-       elseif (columns(1)(1:2)=='ux' .or. columns(1)(1:2)=='uy') then
-          nofou = nofou + 1
-          if (numcyc == 0) then
-             nofouvar = nofouvar + 1
-          else
-             nofouvar = nofouvar + 2
-          endif
-       !
-       ! requested fourier analysis cell centred velocity magnitude   ucmag
-       !
-       elseif (columns(1)(1:2)=='uc') then
-          nofou = nofou + 1
-          if (numcyc == 0) then
-             nofouvar = nofouvar + 1
-          else
-             nofouvar = nofouvar + 2
-          endif
-       !
-       ! requested fourier analysis salinity
-       !
-       elseif (columns(1)(1:2)=='cs') then
-          nofou = nofou + 1
-          if (numcyc == 0) then
-             nofouvar = nofouvar + 1
-          else
-             nofouvar = nofouvar + 2
-          endif
-       !
-       ! requested fourier analysis bed shear stress
-       !
-       elseif (columns(1)(1:2)=='bs') then
-          nofou = nofou + 1
-          if (numcyc == 0) then
-             nofouvar = nofouvar + 1
-          else
-             nofouvar = nofouvar + 2
+             nofouvar = nofouvar + nofouvarstep
           endif
        !
        ! requested fourier analysis constituent
        !
        elseif ((columns(1)(1:1)=='c') .and. (index('12345',columns(1)(2:2))>0)) then
-          nofou = nofou + 1
-          if (numcyc == 0) then
-             nofouvar = nofouvar + 1
-          else
-             nofouvar = nofouvar + 2
-          endif
+          nofou    = nofou + 1
+          nofouvar = nofouvar + nofouvarstep
        !
-       ! requested fourier analysis freeboard
+       ! remaining quantities
        !
-       elseif (columns(1)(1:2)=='fb') then
-          nofou = nofou + 1
-          if (numcyc == 0) then
-             nofouvar = nofouvar + 1
-          else
-             nofouvar = nofouvar + 2
-          endif
-       !
-       ! requested fourier analysis waterdepth_on_ground
-       !
-       elseif (columns(1)(1:4)=='wdog') then
-          nofou = nofou + 1
-          if (numcyc == 0) then
-             nofouvar = nofouvar + 1
-          else
-             nofouvar = nofouvar + 2
-          endif
-       !
-       ! requested fourier analysis volume_on_ground
-       !
-       elseif (columns(1)(1:3)=='vog') then
-          nofou = nofou + 1
-          if (numcyc == 0) then
-             nofouvar = nofouvar + 1
-          else
-             nofouvar = nofouvar + 2
-          endif
        else
-          !
-          ! requested fourier analysis undefined
-          !
-          msgbuf = 'Fourier analysis: variable keyword ''' // trim(columns(1)) // ''' not recognized, ignored'
-          call msg_flush()
+          select case (columns(1))
+          case ('ws', 'ct', 'ux', 'uy', 'uc', 'cs', 'bs', 'fb', 'wdog', 'vog')
+             nofou    = nofou + 1
+             nofouvar = nofouvar + nofouvarstep
+          case default
+            !
+            ! requested fourier analysis undefined
+            !
+            msgbuf = 'Fourier analysis: variable keyword ''' // trim(columns(1)) // ''' not recognized, ignored'
+            call msg_flush()
+          end select
        endif
        !
        goto 10
@@ -1746,7 +1694,7 @@ end subroutine setfoustandardname
              end if
           else
              ierror = unc_put_var_map(fileids%ncid, fileids%id_tsp, idvar(:,fouvar), iloc, fousmas)
-             if (gdfourier%founam(ifou)=='s1') then
+             if (gdfourier%founam(ifou)=='s1' .or. gdfourier%withTime(ifou)) then
                 ! min/max water depth
                 ierror = unc_put_var_map(fileids%ncid, fileids%id_tsp, idvar(:,fouvar+1), iloc, fousmbs)
              endif

@@ -35,7 +35,6 @@ subroutine flow_finalize_single_timestep(iresult)
 use m_flow
 use m_flowgeom
 use m_flowtimes
-use unstruc_model, only : jawritebalancefile
 use unstruc_model, only : md_fou_step
 use unstruc_netcdf
 use timers
@@ -44,7 +43,7 @@ use unstruc_display, only : jaGUI
 use dfm_error
 use dfm_signals
 use m_mass_balance_areas, only: jamba
-use m_partitioninfo, only: jampi, sdmn, my_rank
+use m_partitioninfo, only: jampi, my_rank
 use m_integralstats
 use m_fourier_analysis
 use m_oned_functions, only: updateTimeWetOnGround, updateTotalInflow1d2d, updateTotalInflowLat, &
@@ -52,7 +51,6 @@ use m_oned_functions, only: updateTimeWetOnGround, updateTotalInflow1d2d, update
 use unstruc_channel_flow, only : network
 implicit none
 integer, intent(out) :: iresult
-character(len=255)   :: filename_fou_out
 
    ! Timestep has been performed, now finalize it.
 
