@@ -1,7 +1,7 @@
       SUBROUTINE MALG       ( PMSA   , FL     , IPOINT , INCREM, NOSEG , &
                               NOFLUX , IEXPNT , IKNMRK , NOQ1  , NOQ2  , &
                               NOQ3   , NOQ4   )
-      !DEC$ ATTRIBUTES DLLEXPORT, ALIAS: 'MALG' :: MALG 
+
 
 !
 !*******************************************************************************
