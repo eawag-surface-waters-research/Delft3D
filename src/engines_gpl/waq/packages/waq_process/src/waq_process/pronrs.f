@@ -33,7 +33,7 @@
 !     FUNCTION            : Returns module number
 !                           NOTE the numbers in this subroutine must have
 !                           an 1 to 1 relation with the labels in the
-!                           subroutine PROCEZ.
+!                           subroutine PROCAL.
 !
 !     SUBROUTINES CALLED  : -
 !
@@ -53,7 +53,7 @@
 !
 !     Local declarations
 !
-      PARAMETER   ( NOMODU = 168)
+      PARAMETER   ( NOMODU = 175)
       CHARACTER*6   MODNAM(NOMODU)
       SAVE          MODNAM
       DATA MODNAM /
@@ -224,7 +224,14 @@
      +   'HETAGG',
      +   'SEDTYR',
      +   'SEDAGG',
-     +   'SUMTYR'
+     +   'SUMTYR',
+     +   'PROATT',
+     +   'PRODIA',
+     +   'PROGRE',
+     +   'PRONCM',
+     +   'PROSED',
+     +   'PROTCM',
+     +   'PROZOO'
      +   /
 !
 !     Set module number

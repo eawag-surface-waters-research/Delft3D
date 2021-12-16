@@ -581,6 +581,27 @@
          case (168 ) ;  call SUMTYR ( pmsa   , flux   , ipoint , increm , noseg  ,               ! &
      &                                 noflux , iexpnt , iknmrk , noq1   , noq2   ,               ! &
      &                                 noq3   , noq4   )
+         case (169 ) ;  call PROATT ( pmsa   , flux   , ipoint , increm , noseg  ,               ! &
+     &                                 noflux , iexpnt , iknmrk , noq1   , noq2   ,               ! &
+     &                                 noq3   , noq4   )
+         case (170 ) ;  call PRODIA ( pmsa   , flux   , ipoint , increm , noseg  ,               ! &
+     &                                 noflux , iexpnt , iknmrk , noq1   , noq2   ,               ! &
+     &                                 noq3   , noq4   )
+         case (171 ) ;  call PROGRE ( pmsa   , flux   , ipoint , increm , noseg  ,               ! &
+     &                                 noflux , iexpnt , iknmrk , noq1   , noq2   ,               ! &
+     &                                 noq3   , noq4   )
+         case (172 ) ;  call PRONCM ( pmsa   , flux   , ipoint , increm , noseg  ,               ! &
+     &                                 noflux , iexpnt , iknmrk , noq1   , noq2   ,               ! &
+     &                                 noq3   , noq4   )
+         case (173 ) ;  call PROSED ( pmsa   , flux   , ipoint , increm , noseg  ,               ! &
+     &                                 noflux , iexpnt , iknmrk , noq1   , noq2   ,               ! &
+     &                                 noq3   , noq4   )
+         case (174 ) ;  call PROTCM ( pmsa   , flux   , ipoint , increm , noseg  ,               ! &
+     &                                 noflux , iexpnt , iknmrk , noq1   , noq2   ,               ! &
+     &                                 noq3   , noq4   )
+         case (175 ) ;  call PROZOO ( pmsa   , flux   , ipoint , increm , noseg  ,               ! &
+     &                                 noflux , iexpnt , iknmrk , noq1   , noq2   ,               ! &
+     &                                 noq3   , noq4   )
          case default
       
       
