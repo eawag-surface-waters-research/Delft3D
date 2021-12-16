@@ -444,8 +444,7 @@ module m_fourier_analysis
           founam(ifou)   = 'vog'
           fouref(ifou,1) = fouid
        case default                    ! constituent, anything else
-          read (founam(ifou)(2:2), '(i1)', iostat=iostat) fconno(ifou)
-          if (iostat /= 0) then
+          if ( .not. ReadConstituentNumber(founam(ifou), fconno(ifou))) then
              msgbuf = 'Unable to initialize fourier analysis for ''' // trim(founam(ifou)) // '''.'
              call warn_flush()
              goto 6666
@@ -1160,6 +1159,7 @@ end subroutine setfoustandardname
        character(len=30), allocatable     :: columns(:)! each record is split into separate fields (columns)
        integer                            :: numcyc
        integer                            :: nofouvarstep
+       integer                            :: number
        logical                            :: withMinMax
        integer, pointer                   :: nofouvar
    !
@@ -1237,7 +1237,7 @@ end subroutine setfoustandardname
        !
        ! requested fourier analysis constituent
        !
-       elseif ((columns(1)(1:1)=='c') .and. (index('12345',columns(1)(2:2))>0)) then
+       elseif (ReadConstituentNumber(columns(1), number)) then
           nofou    = nofou + 1
           nofouvar = nofouvar + nofouvarstep
        !
@@ -1267,6 +1267,23 @@ end subroutine setfoustandardname
        success = .True.
      rewind(lunfou)
    end subroutine fouini
+
+   !> read constituent number from quantity name after 'c' (e.g. 'c2')
+   !! return true if found 'c' at the start and a number > 0
+   function ReadConstituentNumber(quantity, number) result(success)
+      character(len=*), intent(in) :: quantity
+      integer         , intent(  out) :: number
+      logical                         :: success
+
+      integer :: ierr
+
+      number  = -999
+      success = .false.
+      if (quantity(1:1) =='c') then
+         read (quantity(2:), *, iostat=ierr) number
+         success = (ierr == 0 .and. number > 0)
+      end if
+   end function ReadConstituentNumber
 
 !> do the actual fourier and min/max update
 !! write to file after last update
