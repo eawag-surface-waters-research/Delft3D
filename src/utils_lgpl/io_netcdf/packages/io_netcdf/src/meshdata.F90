@@ -53,6 +53,7 @@ type t_ug_meshgeom
    integer                   :: numface         = -1    !< Number of mesh faces.
    integer                   :: maxnumfacenodes = -1    !< Maximum of number of face nodes.
    integer                   :: numlayer        = -1    !< Number of mesh layers (num interfaces == numlayer + 1), numlayer = 0 means "no layers".
+   integer                   :: numtopsig       = -1    !< Number of top sigma layers in the case of z-sigma coordinates.
    integer                   :: layertype       = -1    !< Type of vertical layer definition (only if numlayer >= 1), one of LAYERTYPE_* parameters.
    integer                   :: nnodes          = -1    !< Number of branches
    integer                   :: nbranches       = -1    !< Number of branches
@@ -105,6 +106,8 @@ type t_ug_meshgeom
    
    double precision, pointer :: layer_zs(:) => null()    !< Vertical coordinates of the mesh layers' center (either z or sigma).
    double precision, pointer :: interface_zs(:)=> null() !< Vertical coordinates of the mesh layers' interface (either z or sigma).
+   double precision, pointer :: bedlevel(:) => null() !< Vertical coordinates of the bed level
+   
 
 end type t_ug_meshgeom
 
