@@ -824,6 +824,7 @@
                           else
                               rVB = merge( 1.0, 0.0, VB > 0.0 )
                           endif
+
                           if (rVB .lt. 1.0 .and. NINT(SWVBGro) .eq. 1 .and. NINT (SWVBMrt) .eq. 0) then
 !                             Checking for nutrient availability
 !                             if ( (F4VB + F5VB) - 1.E-10 .lt. 0.0 ) then
@@ -887,6 +888,9 @@
                   pmsa( ipnt(ip_NutLimVB)   ) = NutLimVB
 
 ! ---             end check iniCovVB - only significant vegetation
+
+              else
+                  fvb = 0.0 ! Possible inconsistency ...
               endif
 
 !*** VBUPT *************************
@@ -1132,6 +1136,7 @@
 
 !**** LOOP TO ORGANISE DISTRIBUTION OF UPTAKE FLUXES OVER THE WATER COLUMN AND SEDIMENT
 !*** VEG3DU ************************
+
 
       ipnt  = ipoint(1:nin+nout)
       do iseg = 1 , noseg

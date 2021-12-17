@@ -1369,14 +1369,6 @@
                   fl(iflux+(iseg-1)*noflux) = fl(iflux+(iseg-1)*noflux) + decflx(ifl)*dl(ilay) /depth
                 enddo
 
-                !if ( iseg == 1900 ) then
-                !    write(91,'(a,i5,10g15.6)') 'decflx', ilay, decflx(2), decflx(6), decflx(10), pon, poc, n_fact
-                !endif
-
-                !if ( iseg == 1900 ) then
-                !    write(91,'(a,i5,10g15.6)') 'fl pon1', ilay, fl(15+(iseg-1)*noflux), fl(19+(iseg-1)*noflux), fl(23+(iseg-1)*noflux), pmsa(ipoint(171)+increm(171)*1899)
-                !endif
-
             elseif (icfrac.eq.2) then
                 !    ! POC2
                 kp(ilay,is_poc2) = kp(ilay,is_poc2) - decflx(1)
@@ -2025,13 +2017,6 @@
           ! end of loop over layers in present cell
           enddo
 
-         !if ( iseg == 1900 ) then
-         !     write(91,'(a,10g15.6)') 'fl pon1', fl(16+(iseg-1)*noflux), fl(20+(iseg-1)*noflux), fl(24+(iseg-1)*noflux), &
-         !        pmsa(ipoint(175)+increm(175)*(iseg-1)), pmsa(ipoint(171)+increm(171)*(iseg-1)), depth
-         !     write(91,'(a,10g15.6)') 'conc   ', sum(sedconc(:,is_pon1,iseg2d)*dl(:)), sum(sedconc(:,is_poc1,iseg2d)*dl(:)), &
-         !        pmsa(ipoint(175)+increm(175)*(iseg-1)), pmsa(ipoint(171)+increm(171)*(iseg-1))
-         !endif
-
 ! ENDPROC
           do isys = 1,nototsed
               dissub = (isys.le.nototseddis)
@@ -2230,11 +2215,12 @@
       integer :: ierr, luinit, lumon
       integer :: timeini, nosysini, nosegini
       real    :: mass3d, totmas
+      real    :: thickness, poros
       character(len=20), allocatable :: synameinit(:)
       character(len=40)              :: title(4)
-      logical :: sync_initial
 
-      sync_initial = .false.
+      thickness = PMSA(IPOINT(ip_Th_DelwaqG))
+      poros     = PMSA(IPOINT(ip_poros))
 
       if ( initfile == 'none' ) then
           sedconc = 0.0
@@ -2278,27 +2264,14 @@
           close( luinit )
       endif
 
-      call handle_zone_information( sync_initial )
-
-      if ( sync_initial ) then
-          !
-          ! Set up the fluxes required to bring the S1 substances in line with the detailed sediment
-          ! With this, a flux is calculated that compensates the difference in total mass between
-          ! detailed sediment concentrations and the S1 substances in one time step
-          !
-          call sync_S1_sedconc
-
-          !write(91,*) 'DELWQG: 1860 1640', fl(OFFSET_FL+is_so4+(1860-1)*noflux), fl(OFFSET_FL+is_so4+(1640-1)*noflux)
-          !write(91,*) 'TOTMAS           ', sedconc(1,is_so4,1860), sedconc(1,is_so4,1640)
-          !write(91,*) 'S1_SO4           ', pmsa(ipoint(OFFSET_S1+is_so4)+(1860-1)*increm(OFFSET_S1+s1_so4)), &
-          !                                 pmsa(ipoint(OFFSET_S1+is_so4)+(1640-1)*increm(OFFSET_S1+s1_so4))
-          !write(91,*) 'DEPTH            ', pmsa(ipoint(ip_depth)+(1860-1)*increm(ip_depth)), &
-          !                                 pmsa(ipoint(ip_depth)+(1640-1)*increm(ip_depth))
-
-      endif
+      call handle_zone_information( thickness, poros )
 
       end subroutine initialise_sedconc
 
+      ! Set up the fluxes required to bring the S1 substances in line with the detailed sediment
+      ! With this, a flux is calculated that compensates the difference in total mass between
+      ! detailed sediment concentrations and the S1 substances in one time step
+      !
       subroutine sync_S1_sedconc
           integer :: iseg2d, iseg, isys, ilay, iflux, ip
           real    :: totmas
@@ -2361,8 +2334,8 @@
 
       end subroutine write_sedconc
 
-      subroutine handle_zone_information( sync_initial )
-      logical, intent(inout) :: sync_initial
+      subroutine handle_zone_information( thickness, poros )
+      real, intent(in)       :: thickness, poros
 
       integer                            :: ierr, luzone, lumon, idx, ic, ip, ip2, ilay
       character(len=200)                 :: zonefile
@@ -2386,8 +2359,6 @@
       !
       ! Read in the zone information - text file with zone numbers
       !
-      sync_initial = .true.
-
       allocate( zone(noseg2d) )
       open( newunit = luzone, file = zonefile, status = 'old', iostat = ierr )
       if ( ierr /= 0 ) then
@@ -2413,7 +2384,8 @@
       allocate( initvalue(nzones) )
 
       !
-      ! Now read the lines with initial values per zone
+      ! Now read the lines with initial values per zone:
+      ! For the substances these represent the mass per m2 (so the concentration seen by D-Water Quality itself).
       !
       do
           read( luinp, '(a)', iostat = ierr ) inputline
@@ -2454,7 +2426,9 @@
           else
               idx = idx - first_s1 + 1
               do ilay = 1,nolay
-                  sedconc(ilay,idx,:) = initvalue(zone)
+                  sedconc(ilay,idx,:) = initvalue(zone) / thickness ! sedconc is the concentration in the active
+                                                                    ! sediment layer, initvalue is the concentration
+                                                                    ! per m2
               enddo
           endif
       enddo
