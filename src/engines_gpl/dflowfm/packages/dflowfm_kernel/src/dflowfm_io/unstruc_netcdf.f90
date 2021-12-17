@@ -15425,7 +15425,7 @@ subroutine readcells(filename, ierr, jaidomain, jaiglobal_s, jareinitialize)
     endif
     
     call readyy('Reading net data',1d0) 
-    ierr = unc_close(inetfile)
+    ierr = ionc_close(ioncid)
     if (nerr_ > 0) goto 888
 
     call readyy('Reading net data',-1d0)   
