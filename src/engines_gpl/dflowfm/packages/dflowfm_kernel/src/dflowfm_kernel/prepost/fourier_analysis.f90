@@ -1237,7 +1237,7 @@ end subroutine setfoustandardname
        !
        else
           select case (columns(1))
-          case ('ws', 'ct', 'ux', 'uy', 'uc', 'cs', 'bs', 'fb', 'wdog', 'vog')
+          case ('ws', 'ct', 'ux', 'uy', 'uxa', 'uya', 'uc', 'cs', 'bs', 'fb', 'wdog', 'vog')
              nofou    = nofou + 1
              nofouvar = nofouvar + nofouvarstep
           case default
