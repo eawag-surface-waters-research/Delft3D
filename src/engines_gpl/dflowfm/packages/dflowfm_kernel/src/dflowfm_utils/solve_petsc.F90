@@ -88,14 +88,11 @@ end module m_petsc
    subroutine startpetsc()
 #ifdef HAVE_PETSC   
       use m_petsc
-      use mpi, only: mpi_comm_dup
       use m_flowparameters, only: Icgsolver
-      use m_partitioninfo, only: DFM_COMM_DFMWORLD
       implicit none
       PetscErrorCode :: ierr = PETSC_OK
      
       if ( icgsolver.eq.6 ) then
-         call mpi_comm_dup(DFM_COMM_DFMWORLD, PETSC_COMM_WORLD, ierr)
          call PetscInitialize(PETSC_NULL_CHARACTER,ierr)
          call PetscPopSignalHandler(ierr) ! Switch off signal catching in PETSC.
          call PetscLogDefaultBegin(ierr)
