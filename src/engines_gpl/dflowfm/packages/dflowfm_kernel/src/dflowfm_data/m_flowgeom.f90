@@ -134,6 +134,7 @@
  integer,          allocatable     :: jaduiktmp(:)  !< temparr
  double precision, allocatable, target     :: bob   (:,:)    !< [m] left and right inside lowerside tube (binnenkant onderkant buis) HEIGHT values (m) (positive upward), adjusted for structures {"location": "edge", "shape": [2, "lnx"]}
  double precision, allocatable, target     :: bob0  (:,:)    !< [m] left and right inside lowerside tube (binnenkant onderkant buis) HEIGHT values (m) (positive upward), NOT adjusted for structures {"location": "edge", "shape": [2, "lnx"]}
+ double precision, allocatable     :: blup  (:)      !< [m] "upwind" bed level at u point, as determined by sethu() {"location": "edge", "shape": ["lnx"]}
  integer,          allocatable     :: ibot  (:)      !< local ibedlevtype for setting min or max network depths (temporary, result goes to bobs)
 
  double precision, allocatable     :: acl   (  :)    !< left dx fraction, alfacl

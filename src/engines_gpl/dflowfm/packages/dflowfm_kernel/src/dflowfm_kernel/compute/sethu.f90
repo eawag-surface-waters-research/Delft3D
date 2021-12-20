@@ -159,25 +159,11 @@ subroutine sethu(jazws0)                            ! Set upwind waterdepth hu
         endif
     endif
 
-    ! TODO: while documenting 1D2D code, we discovered the following undesirable bup:
-    ! it should by default be the max(bob1/2), if conveyance2D < 1. Not yet changed.
-    bup = bob(iup,L)
-
-    if (L <= lnx1D) then      ! 1D
-       if (kcu(L) == 4 .and. jaconveyance2D >= 1) then
-           bup = min( bob(1,L), bob(2,L) )
-       else if (kcu(L) == 5 .or. kcu(L) == 7) then
-           bup = max( bob(1,L), bob(2,L) )
-       else
-           bup = max( bob(1,L), bob(2,L) )
-       endif
-       if (jagrounlay > 0) then
-          bup = bup + grounlay(L)
-       endif
-
-    else if (kmx == 0 .and. jaconveyance2D >= 1) then
-       bup = min( bob(1,L), bob(2,L) )
-    endif
+    !DIR$ INLINE
+    call getblu_from_bob(L, iup, bup)
+    if (jafullgridoutput == 1) then
+       blup(L) = bup
+    end if
 
     huL = sup-bup
 

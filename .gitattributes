@@ -1630,6 +1630,7 @@ src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_kernel/prepost/get_m
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_kernel/prepost/get_netlinks_of_dryarea.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_kernel/prepost/get_polstartend.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_kernel/prepost/get_splineprops.f90 -text
+src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_kernel/prepost/getblu_from_bob.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_kernel/prepost/getdxofconnectedkcu1.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_kernel/prepost/getlateralindex.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_kernel/prepost/getmiddleknot.f90 -text

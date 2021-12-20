@@ -488,6 +488,10 @@
  allocate ( xu(lnx), yu(lnx) , blu(lnx) ,  stat = ierr)
  call aerr('xu(lnx), yu(lnx) , blu(lnx)',  ierr, 3*lnx)
  blu = dmiss
+ if (jafullgridoutput == 1) then
+    call realloc(blup, lnx, keepExisting = .false., fill = dmiss, stat = ierr)
+    call aerr('blup(lnx)', ierr, lnx)
+ end if
 
  if (allocated (ln2lne) ) deallocate ( ln2lne, lne2ln )
  nex = max(lnx,numl)

@@ -412,8 +412,11 @@ type t_unc_mapids
    integer :: id_blave(MAX_ID_VAR)      = -1 !< Variable ID for main channel averaged bed level
    integer :: id_bamor(MAX_ID_VAR)      = -1 !< Variable ID for main channel cell area
    integer :: id_wumor(MAX_ID_VAR)      = -1 !< Variable ID for main channel width at flow link
-   integer :: id_flowelemzcc(MAX_ID_VAR)= -1 !< Variable ID for time dependent layer centre height
-   integer :: id_flowelemzw(MAX_ID_VAR) = -1 !< Variable ID for time dependent layer interface height
+   integer :: id_flowelemzcc(MAX_ID_VAR)     = -1 !< Variable ID for time dependent layer centre z-coord
+   integer :: id_flowelemzcc_bnd(MAX_ID_VAR) = -1 !< Variable ID for time dependent layer centre z-coord bounds
+   integer :: id_flowelemzw(MAX_ID_VAR)      = -1 !< Variable ID for time dependent layer interface z-coord
+   integer :: id_flowlinkzu(MAX_ID_VAR)      = -1 !< Variable ID for time dependent layered flow link z-coord
+   integer :: id_flowlinkzu_bnd(MAX_ID_VAR)  = -1 !< Variable ID for time dependent layered flow link z-coord bounds
    integer :: id_negdpt(MAX_ID_VAR)       = -1 !< Variable ID for number of times negative depth is calculated in a node
    integer :: id_negdpt_cum(MAX_ID_VAR)   = -1 !< Variable ID for cumulative number of times negative depth is calculated in a node
    integer :: id_noiter(MAX_ID_VAR)       = -1 !< Variable ID for number of times no iteration is generated in a node
@@ -4605,7 +4608,7 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
    use unstruc_channel_flow, only: network
    use m_oned_functions, only: gridpoint2cross
    use string_module, only: replace_multiple_spaces_by_single_spaces
-   use m_save_ugrid_state, only: mesh1dname
+   use m_save_ugrid_state, only: mesh1dname, mesh2dname
    use m_hydrology_data, only : jadhyd, ActEvap, PotEvap, interceptionmodel, DFM_HYD_NOINTERCEPT, InterceptHs
    use m_subsidence, only: jasubsupl, subsout, subsupl, subsupl_t0
    use Timers
@@ -4645,11 +4648,14 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
 !        id_rsi, id_rsiexact, id_dudx, id_dudy, id_dvdx, id_dvdy, id_dsdx, id_dsdy
 
    integer :: iid, i, j, jj, numContPts, numNodes, itim, n, LL, L, Lb, Lt, LLL, k, k1, k2, k3
+   integer :: id_twodim
    integer :: kk, kb, kt, kkk, found, iloc
    integer :: nlayb, nrlay
+   integer :: Ltx, nlaybL, nrlayLx
    integer :: iLocS ! Either UNC_LOC_S or UNC_LOC_S3D, depending on whether layers are present.
    integer :: iLocU ! Either UNC_LOC_U or UNC_LOC_U3D, depending on whether layers are present.
    double precision, dimension(:), allocatable :: windx, windy, toutput, rks, tetatemp, wa
+   double precision :: zwu0
    character( len = 4 ) :: str
    
    type(t_CSType), pointer                       :: pCS
@@ -4657,7 +4663,7 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
    integer                                       :: ndx1d 
    integer, save                                 :: jmax, nCrs
    double precision, dimension(:,:), allocatable :: work1d_z, work1d_n
-   double precision, dimension(:,:,:), allocatable :: work3d
+   double precision, dimension(:,:,:), allocatable :: work3d, work3d2
 
    if (ndxi <= 0) then
       call mess(LEVEL_WARN, 'No flow elements in model, will not write flow geometry.')
@@ -4725,8 +4731,30 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
 
       ! Time dependent grid layers
       if (kmx > 0 .and. jafullgridoutput == 1) then
+         ! Face-centred z-coordinates:
          ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_flowelemzcc, nf90_double, UNC_LOC_S3D, 'flowelem_zcc', 'altitude', 'Vertical coordinate of layer centres at pressure points'   , 'm' , jabndnd=jabndnd_)
          ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_flowelemzw , nf90_double, UNC_LOC_W  , 'flowelem_zw' , 'altitude', 'Vertical coordinate of layer interfaces at pressure points', 'm' , jabndnd=jabndnd_)
+
+         if (ndx2d > 0) then ! Borrow the "2-dimension" from the already defined mesh (either 2d or 1d, does not matter)
+            id_twodim = mapids%id_tsp%meshids2d%dimids(mdim_two)
+         else
+            id_twodim = mapids%id_tsp%meshids1d%dimids(mdim_two)
+         end if
+         
+         ! Bounds variable for face-centred z-coordinates:
+         ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_flowelemzcc_bnd, nf90_double, UNC_LOC_S3D, 'flowelem_zcc_bnd', 'altitude', 'Bounds of vertical coordinate of layers at pressure points'   , 'm' , &
+            dimids = (/ id_twodim, -3, -2, -1 /), jabndnd=jabndnd_)
+         ierr = nf90_put_att(mapids%ncid, mapids%id_flowelemzcc(2), 'bounds', trim(mesh2dname)//'_flowelem_zcc_bnd')
+         ierr = nf90_put_att(mapids%ncid, mapids%id_flowelemzcc(1), 'bounds', trim(mesh1dname)//'_flowelem_zcc_bnd')
+
+         ! Edge-centred z-coordinates:
+         ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_flowlinkzu, nf90_double, UNC_LOC_U3D, 'flowlink_zu', 'altitude', 'Vertical coordinate of layer centres at velocity points'   , 'm' , jabndnd=jabndnd_)
+
+         ! Bounds variable for edge-centred z-coordinates:
+         ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_flowlinkzu_bnd, nf90_double, UNC_LOC_U3D, 'flowlink_zu_bnd', 'altitude', 'Bounds of vertical coordinate of layers at velocity points'   , 'm' , &
+            dimids = (/ id_twodim, -3, -2, -1 /), jabndnd=jabndnd_)
+         ierr = nf90_put_att(mapids%ncid, mapids%id_flowlinkzu(2), 'bounds', trim(mesh2dname)//'_flowlink_zu_bnd')
+         ierr = nf90_put_att(mapids%ncid, mapids%id_flowlinkzu(1), 'bounds', trim(mesh1dname)//'_flowlink_zu_bnd')
       endif
 
       ! Water levels
@@ -5685,14 +5713,37 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
    ! Time dependent grid layers
    if (kmx > 0 .and. jafullgridoutput == 1) then
       call realloc(work1d, ndkx, keepExisting = .false.)
-      do kk = 1,ndx
+      call realloc(work3d2, (/ 2, kmx, max(lnx, ndxndxi) /), keepExisting=.false., fill = dmiss)
+      do kk = 1,ndxndxi
          call getkbotktop(kk,kb,kt)
+         call getlayerindices(kk, nlayb,nrlay)
          do k = kb,kt
-            work1d(k) = (zws(k) + zws(k-1)) * 0.5d0
+            work1d(k) = (zws(k) + zws(k-1)) * 0.5d0 ! middle z-coord of this cell in this layer
+            work3d2(1:2,k-kb+nlayb,kk) = zws(k-1:k) ! vertical z-bounds of this cell in this layer
          enddo
       end do
       ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_flowelemzcc, UNC_LOC_S3D, work1d, jabndnd=jabndnd_)
       ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_flowelemzw , UNC_LOC_W  , zws   , jabndnd=jabndnd_)
+      ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_flowelemzcc_bnd, UNC_LOC_S, work3d2, locdim = 3, jabndnd=jabndnd_)
+      !ierr = nf90_put_var(mapids%ncid, mapids%id_flowelemzcc_bnd(2), work3d2(1:2, 1:kmx, 1:ndxndxi), start=(/ 1, 1, 1, itim /), count=(/ 2, kmx, ndxndxi, 1 /))
+      ! TODO: support this in 1D or 1D2D as well, via unc_put_var_map interfaces.
+
+      call realloc(work1d, lnkx, keepExisting = .false., fill = dmiss)
+      ! work3d2 already sufficiently allocated above.
+      do LL = 1,lnx
+         !DIR$ INLINE
+         zwu0 = blup(LL) ! cached from latest sethu()
+         call getLbotLtopmax(LL,Lb,Ltx)
+         call getlayerindicesLmax(LL, nlaybL, nrlayLx)
+
+         do L = Lb,Ltx
+            work1d(L) = zwu0 + .5d0*hu(LL)
+            work3d2(1:2,L-Lb+nlaybL,LL) = (/ zwu0, zwu0 + hu(LL) /) ! vertical z-bounds of this cell in this layer
+            zwu0 = zwu0 + hu(LL)
+         enddo
+      end do
+      ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_flowlinkzu, UNC_LOC_U3D, work1d, jabndnd=jabndnd_)
+      ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_flowlinkzu_bnd, UNC_LOC_U, work3d2, locdim = 3, jabndnd=jabndnd_)
    endif
 
    ! Water level
