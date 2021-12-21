@@ -9155,7 +9155,6 @@ src/third_party_open/fortrangis/sourceforge/style.css -text
 src/third_party_open/fortrangis/sourceforge/update.sh -text
 src/third_party_open/intelredist/flicense.rtf -text
 src/third_party_open/intelredist/intel_fortran_license_info.txt -text
-src/third_party_open/intelredist/intelmpi_installation_scripts/l_mpi_oneapi_p_2021.4.0.441_offline.sh -text
 src/third_party_open/intelredist/lib/mpi_lnx/libfabric.so.1 -text
 src/third_party_open/intelredist/lib/x64/1033/ifcore_msg.dll -text
 src/third_party_open/intelredist/lib/x64/1033/irc_msg.dll -text
