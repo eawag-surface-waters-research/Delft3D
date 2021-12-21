@@ -946,7 +946,11 @@ end if
     if (iadv(L) /= 0) then
        ! only when advection calculation is on, change the advection type
        if (kcu(L) == 3) then         ! lateral overflow
-          iadv(L) = 8
+          if (iadveccorr1D2D == 2) then ! Switch off advection on 1D2D lateral/embedded links
+             iadv(L) = 0
+          else
+             iadv(L) = 8                ! Original lateral overflow
+          endif
        else if (kcu(L) == 5 .or. kcu(L) == 7) then   ! pipe connection
           iadv(L) = 8
        endif
