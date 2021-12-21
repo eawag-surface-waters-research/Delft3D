@@ -64,7 +64,8 @@ subroutine calculate_sedim( diameter, density, shape_factor , settling, crit_str
     real, intent(in)  :: diameter, density, shape_factor
     real, intent(out) :: settling, crit_stress
 
-
+    real :: dstar, crit_coeff
+    
     real, parameter :: perday              = 86400.0 ! Convert from s to day
     real, parameter :: denswater           = 1000.0
     real, parameter :: gravacc             =   9.81 ! m/s^2
