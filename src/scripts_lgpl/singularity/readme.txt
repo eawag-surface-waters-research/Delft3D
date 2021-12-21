@@ -1,7 +1,11 @@
 delft3dfm_202x.0x_lnx64_sif0x.tar.gz:
-0. Download and install Singularity: https://sylabs.io/guides/3.0/user-guide/installation.html
-1. Unpack the delft3dfm-Singularity-sif-file with the runscript "execute_singularity.sh". Keep them together in a separate directory.
-2. Edit "execute_singularity.sh": it must refer to an existing IntelMPI installation on your system.
-3. Copy to your working folder: "run_singularity.sh" and/or "submit_singularity.sh"
-   They are example scripts for executing Singularity computations.
+1. Download and install Singularity: https://sylabs.io/guides/3.8/user-guide/introduction.html
+2. Unpack the delft3dfm-Singularity-sif-file with the runscript "execute_singularity.sh". Keep them together in the same directory.
+   Do not place multiple sif-files in the same directory.
+3. Edit "execute_singularity.sh": it must refer to an existing IntelMPI installation on your system.
+4. Copy into your working folder: "run_singularity.sh" and/or "submit_singularity.sh"
+   They are example scripts for executing Singularity computations. You'll need to modify them for your own needs.
+   "Working folder" is the location of your dimr configuration file.
+   
+More information: see User manual and Installation manual, see https://download.deltares.nl/en/download/delft3d-fm/
 

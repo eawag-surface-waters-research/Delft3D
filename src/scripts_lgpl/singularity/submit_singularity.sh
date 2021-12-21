@@ -3,26 +3,53 @@
 #$ -j yes
 #$ -cwd
 
-# To submit Singularity on an SGE cluster, execute this script
+# Usage:
+# To submit and execute a job on an SGE cluster, for
+# D-Flow FM computations using a Singularity container,
+# The script "run_singularity.sh" is much simpler, but can only be used for
+# either sequential, or parallel computations using one node.
+# For parallel using multiple nodes: use submit_singularity.sh.
+#
+# To start:
+# 1. Be sure that a Singularity container is available, 
+#    together with an execute_singularity.sh script in the same folder
+# 2. Copy this script into your working folder, i.e. the folder containing the dimr config file
+# 3. Modify this script, see remarks below
+# 4. Execute this script from the command line
+#    You can feed this script to a queueing system
+#
+# "execute_singularity.sh -p 2": Parent level to mount:
+# If your working folder does not contain all the input files, then you have to set this -p flag.
+# Let's define the "top level" as the folder containing all the input files.
+# The value of -p must be the number of folder levels between the dimr config file and the top level.
+# A higher value will not harm, as long as it exists.
+# 
 
-# stop after an error occured:
-set -e
- 
-# Set numbers of hosts and cores per host
+
+#
+#
+# --- You will need to change the lines below -----------------------------
+
+# Set number of nodes and partitions
 nNodes=1
 nProc=3
 
-# set path to the directory containing the sif-file to be used
-singularityDir=/p/d-hydro/delft3dfm_containers/delft3dfm_2022.02_test
+# Set the path to the folder containing the singularity image
+singularitydir=/p/d-hydro/delft3dfm_containers/delft3dfm_2022.02_test
 
 # select queue; one of : normal-e3-c7 , normal-e5-c7
-# queue=normal-e3-c7
 queue=test-c7
 
 # DIMR input-file; must already exist!
 dimrFile=dimr_config.xml
 
 
+#
+#
+# --- You shouldn't need to change the lines below ------------------------
+
+# stop after an error occured:
+set -e
 
 nPart=$((nNodes * nProc))
 
