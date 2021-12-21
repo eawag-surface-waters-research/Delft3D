@@ -106,7 +106,7 @@
 
       ntrwp = pmsa(ipoint(ip_ntrwp))
       nspm = pmsa(ipoint(ip_nim  ))
-      nitem = 8+4*ntrwp+4*nspm !
+      nitem = ip_lastsingle + 4 * ntrwp + 4 * nspm
 !
 !  Note: we only need to do this once, no looping over the segments
 !  as all particles of the same size class have the same properties

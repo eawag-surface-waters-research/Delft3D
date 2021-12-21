@@ -64,22 +64,17 @@ subroutine calculate_sedim( diameter, density, shape_factor , settling, crit_str
     real, intent(in)  :: diameter, density, shape_factor
     real, intent(out) :: settling, crit_stress
 
-    real :: dstar, coeffM, coeffN, expn, crit_coeff
 
     real, parameter :: perday              = 86400.0 ! Convert from s to day
     real, parameter :: denswater           = 1000.0
-    real, parameter :: gravacc             =    9.8
-    real, parameter :: kinematic_viscosity = 1.0e-3 ! what is the unit here? It looks like 
+    real, parameter :: gravacc             =   9.81 ! m/s^2
+    real, parameter :: kinematic_viscosity = 1.0e-3 ! m^2/s
 
-    coeffM = 53.5  * exp( -0.65 * shape_factor )
-    coeffN =  5.65 * exp( -2.5 * shape_factor )
-    expn   =  0.7 + 0.9 * shape_factor
 
     if ( density > denswater ) then
         dstar = (diameter * 1.0e-6) * (( density / denswater - 1 ) * gravacc / kinematic_viscosity ** 2 ) ** 0.333333
 
-!        settling = coeffM * kinematic_viscosity / (coeffN * diameter * 1.0e-6) * &
-!                   ( sqrt( 0.25d0 + (dble( 4.0 * coeffN / (3.0 * coeffM**2) * dstar ** 3 ))**(1.0/expn) ) - 0.5 ) ** expn
+
         settling = 2.5 * dstar / 1000.
         
         settling = perday * settling

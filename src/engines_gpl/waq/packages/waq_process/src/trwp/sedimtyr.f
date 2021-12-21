@@ -91,7 +91,7 @@
       ntrwp = pmsa(ipoint(ip_ntrwp))
       nspm = pmsa(ipoint(ip_nim  ))
       if (nspm.gt.nspmm) call errsys ('Dimension issue in SEDTYR',1)
-      nitem = 6+3*ntrwp+nspm+2*ntrwp
+      nitem = ip_lastsingle + 3*ntrwp+nspm+2*ntrwp
       delt           = pmsa(ipoint(ip_Delt))
       safe_factor    = pmsa(ipoint(ip_SafeFactor))
 

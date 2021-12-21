@@ -78,7 +78,7 @@
 
       ntrwp = pmsa(ipoint(ip_ntrwp))
       nspm = pmsa(ipoint(ip_nim  ))
-      nitem = 6+5*ntrwp*nspm
+      nitem = ip_lastsingle + 5*ntrwp*nspm
       delt        = pmsa(ipoint(ip_Delt))
       safe_factor = pmsa(ipoint(ip_SafeFactor))
       

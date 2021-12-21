@@ -4065,7 +4065,6 @@ src/engines_gpl/waq/packages/waq_process/src/protist/protistGreen.f90 -text
 src/engines_gpl/waq/packages/waq_process/src/protist/protistNCM.f90 -text
 src/engines_gpl/waq/packages/waq_process/src/protist/protistTypes.f90 -text
 src/engines_gpl/waq/packages/waq_process/src/protist/protistZoo.f90 -text
-src/engines_gpl/waq/packages/waq_process/src/trwp/README -text
 src/engines_gpl/waq/packages/waq_process/src/trwp/heteroagg.f -text
 src/engines_gpl/waq/packages/waq_process/src/trwp/properties.f90 -text
 src/engines_gpl/waq/packages/waq_process/src/trwp/propsg.f90 -text
