@@ -18,6 +18,23 @@
 # 4. Execute this script from the command line
 #    You can feed this script to a queueing system
 #
+#
+# Submit a job in the queue:
+#     Execute this script from the command line without arguments.
+#     The "STEP 1" part below will be entered, finishing with putting this script,
+#     "submit_singularity.sh", with a set of arguments, in the queue
+#
+# Execute a job from the queue:
+#     When the queueing system has allocated resources, this script,
+#     "submit_singularity.sh", with a set of arguments, will be executed.
+#     The "STEP 2" part below will be entered, finishing with:
+#     - executing script "execute_singularity.sh"
+#       In case of a single node run. The mpirun/mpiexec inside will refer to
+#       the external IntelMPI installation.
+#     - executing "mpirun ... execute_singularity.sh"
+#       In case of a multi node run. It's essential that "mpirun" is outside Singularity.
+
+
 # "execute_singularity.sh -p 2": Parent level to mount:
 # If your working folder does not contain all the input files, then you have to set this -p flag.
 # Let's define the "top level" as the folder containing all the input files.
@@ -31,7 +48,7 @@
 # --- You will need to change the lines below -----------------------------
 
 # Set number of nodes and partitions
-nNodes=1
+nNodes=2
 nProc=3
 
 # Set the path to the folder containing the singularity image
@@ -66,33 +83,33 @@ if (( $# < 4 )); then
     # Read MDU file from DIMR-file
     mduFile="$(sed -n 's/\r//; s/<inputFile>\(.*\).mdu<\/inputFile>/\1/p' $dimrFile)".mdu
 
-    # jobName: $FOLDERNAME_nodesxprocs
+    # jobName: dimrsif_$FOLDERNAME_nodesxprocs
     export jobName="dimrsif_${PWD##*/}_${nNodes}x${nProc}"
 
 
     if [ "$nPart" == "1" ]; then
         echo Adding a job to the queue for one node, one partition, based on this script "submit_singularity.sh" ...
-        qsub -q $queue -N $jobName submit_singularity.sh $nNodes $nProc $singularityDir/execute_singularity.sh run_dimr.sh -m $dimrFile
+        qsub -q $queue -N $jobName submit_singularity.sh $nNodes $nProc $singularitydir/execute_singularity.sh run_dimr.sh -m $dimrFile
     else
         cd dflowfm
         echo partitioning...
-        $singularityDir/execute_singularity.sh run_dflowfm.sh --partition:ndomains=$nPart:icgsolver=6 $mduFile
+        $singularitydir/execute_singularity.sh run_dflowfm.sh --partition:ndomains=$nPart:icgsolver=6 $mduFile
         cd ..
         if [ "$nNodes" == "1" ]; then
             echo Adding a job to the queue for one node, multi partitions, based on this script "submit_singularity.sh" ...
-            qsub -q $queue -N $jobName submit_singularity.sh $nNodes $nProc $singularityDir/execute_singularity.sh run_dimr.sh -m $dimrFile
+            qsub -q $queue -N $jobName submit_singularity.sh $nNodes $nProc $singularitydir/execute_singularity.sh run_dimr.sh -m $dimrFile
         else
             echo Adding a job to the queue for multi nodes, based on this script "submit_singularity.sh" ...
-            qsub -q $queue -pe distrib $nNodes -N $jobName submit_singularity.sh $nNodes $nProc $singularityDir/execute_singularity.sh run_dimr.sh -m $dimrFile
+            qsub -q $queue -pe distrib $nNodes -N $jobName submit_singularity.sh $nNodes $nProc $singularitydir/execute_singularity.sh run_dimr.sh -m $dimrFile
         fi
-        # $singularityDir/execute_singularity.sh run_dfmoutput.sh --help
     fi
 
 else
     #
     # This script is called with 4 arguments or more:
     # STEP 2:
-    # The queueing system allocated nodes, execute "mpirun"
+    # The queueing system allocated nodes, execute "execute_singularity.sh",
+    # possibly with "mpirun" outside (multi node)
 
     module load intelmpi/21.2.0
     
@@ -101,24 +118,20 @@ else
     nProc=${2}
     exec_sif=${3}
     run_dimr=${4}
-    min_m=${5}
-    dimrfile=${6}
-    arg7=${7}
-    arg8=${8}
     
     scriptdirname=`readlink \-f \$0`
     echo ---------------------------------------------------------------------- 
     echo $scriptdirname
-    echo submit_singularity.sh executing "mpirun"
+    echo submit_singularity.sh executing "execute_singularity.sh"
     echo pwd          : $pwd
     echo nNodes       : $nNodes
     echo nProc        : $nProc
     echo exec_sif     : $exec_sif
     echo run_dimr     : $run_dimr
-    echo min_m        : $min_m
-    echo dimrfile     : $dimrfile
-    echo arg7         : $arg7
-    echo arg8         : $arg8
+    echo arg5         : ${5}
+    echo arg5         : ${6}
+    echo arg7         : ${7}
+    echo arg8         : ${8}
     echo
     #
     # Create machinefile using $PE_HOSTFILE
@@ -141,10 +154,10 @@ else
     echo ---------------------------------------------------------------------- 
 
     if [ "$nNodes" == "1" ]; then
-        echo One node execution: singularity exec run_dimr.sh -c nProc
-        $exec_sif $run_dimr $min_m $dimrfile -c $nProc ${7} ${8} ${9} ${10} ${11} ${12} 
+        echo One node execution: execute_singularity.sh run_dimr.sh -c nProc
+        $exec_sif $run_dimr -c $nProc ${5} ${6} ${7} ${8} ${9} ${10} ${11} ${12} 
     else
-        echo Multi node execution: mpirun -n nPart singularity exec run_dimr.sh -c 1
-        mpirun -n $nPart -ppn $nProc -f machinefile ${3} ${4} ${5} ${6} ${7} ${8} ${9} ${10} ${11} ${12} 
+        echo Multi node execution: mpirun -n nPart execute_singularity.sh run_dimr.sh -c 1
+        mpirun -n $nPart -ppn $nProc -f machinefile $exec_sif $run_dimr ${5} ${6} ${7} ${8} ${9} ${10} ${11} ${12} 
     fi
 fi
