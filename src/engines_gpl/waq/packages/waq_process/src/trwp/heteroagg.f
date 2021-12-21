@@ -114,7 +114,7 @@
       ipnt(1:nitem) = ipoint(1:nitem)
 !
       iflux = 1
-      do 9000 iseg = 1 , noseg
+      do iseg = 1 , noseg
           call dhkmrk(1,iknmrk(iseg),ikmrk1)
           if (ikmrk1.eq.1) then
           call dhkmrk(2,iknmrk(iseg),ikmrk2)
@@ -222,7 +222,7 @@
           iflux = iflux + noflux
           ipnt(1:nitem) = ipnt(1:nitem) + increm(1:nitem)
 !
- 9000 continue
+      end do
 !
       return
 !

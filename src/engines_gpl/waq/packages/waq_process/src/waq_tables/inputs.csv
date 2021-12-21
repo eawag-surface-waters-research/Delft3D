@@ -17144,7 +17144,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VBSum     ","fS1VB09rel", 198,"Y","x",1
 "VBSum     ","fS2VB09rel", 199,"Y","x",1
 "VBSum     ","fS3VB09rel", 200,"Y","x",1
-"PropSing  ","nSingle   ",   1,"Y","x",1
+"PropSing  ","nTRWPFrac ",   1,"N","x",1
 "PropSing  ","BioFilmDen",   2,"Y","x",1
 "PropSing  ","Diam_Tyre1",   3,"N","x",1
 "PropSing  ","Diam_Tyre2",   4,"N","x",1

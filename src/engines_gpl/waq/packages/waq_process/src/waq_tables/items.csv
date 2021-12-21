@@ -12566,7 +12566,6 @@ itemid,itemse,itemex,itemde,itemun,itemnm,itemag,itemda,itemwk,itemgr
 "INIS1_SUP ","x"," ",   -999.000    ,"(g/m3/d)            ","Initialisation flux S1_SUP                        ","volume    ","volume    "," ","                              "
 "INIS1_VIVP","x"," ",   -999.000    ,"(g/m3/d)            ","Initialisation flux S1_VIVP                       ","volume    ","volume    "," ","                              "
 "SWfrIMS2  ","x"," ",    0.00000    ,"(-)                 ","sw. to correct mass fraction of IMx in S2 (1=yes) ","volume    ","volume    "," ","                              "
-"nSingle   ","x"," ",    7.00000    ,"  (-)               ","Actual count of TRWP fractions                    ","volume    ","volume    "," ","                              "
 "BioFilmDen","x"," ",    1000.00    ,"  (kg/m3)           ","Density of the biofilm                            ","volume    ","volume    "," ","                              "
 "Diam_Tyre1","x"," ",   -999.000    ,"  (um)              ","Diameter of the TRW particles (1)                 ","volume    ","volume    "," ","                              "
 "Diam_Tyre2","x"," ",   -999.000    ,"  (um)              ","Diameter of the TRW particles (2)                 ","volume    ","volume    "," ","                              "
@@ -13611,3 +13610,4 @@ itemid,itemse,itemex,itemde,itemun,itemnm,itemag,itemda,itemwk,itemgr
 "dN1P_Z1   ","x"," ",   -999.000    ,"          (gNut m-3 "," mortality of ncm 1 through species 1             ","volume    ","volume    "," ","                              "
 "dN1Si_Z1  ","x"," ",   -999.000    ,"          (gNut m-3 "," mortality of ncm 1 through species 1             ","volume    ","volume    "," ","                              "
 "ncmSi_1   ","x"," ",   -999.000    ,"{no unit}           ","undefined                                         ","volume    ","volume    ","x","DummyGroup                    "
+"nTRWPFrac ","x"," ",   -999.000    ,"    (-)             ","Actual count of TRWP fractions                    ","volume    ","volume    "," ","                              "
