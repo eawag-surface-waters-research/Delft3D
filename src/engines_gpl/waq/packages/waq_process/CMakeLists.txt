@@ -18,7 +18,6 @@ get_fortran_source_files(${src_path}/trwp trwp_source)
 
 # Gather source files
 get_fortran_source_files(${src_path}/waq_process waq_process_source)
-list(REMOVE_ITEM waq_process_source ${CMAKE_CURRENT_SOURCE_DIR}/${src_path}/waq_process/dradio.f)
 
 file(GLOB waq_solvesaphe_source ${src_path}/waq_process/solvesaphe/mod_precision.f90
                                 ${src_path}/waq_process/solvesaphe/mod_chemconst.f90
@@ -80,7 +79,7 @@ target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${check_pointe
 # Define how the files should be structured in Visual studio
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${bloom_source}
                                                     ${charon_source}
-                                                    ${protist_source} 
+                                                    ${protist_source}
                                                     ${proc_preprocess_source}
                                                     ${trwp_source}
                                                     ${waq_solvesaphe_source}

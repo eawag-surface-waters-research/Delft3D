@@ -85,12 +85,12 @@
       HALFLIFE       = PMSA(IP2)
       ATOMMASS       = PMSA(IP3)
       DRADDECAY      = LOG(2.0) / HALFLIFE / 365.0 ! /day
-      RADIATION_CONV = DRADDECAY    ! /day
-                       / 86400.0    ! s/day -> /s
-                       * AVOGADRO   ! number per mol
-                       / ATOMMASS   ! g/mol -> number per g
-                       / 1.0E3      ! g/mg  -> /mg
-                                    ! number / mg / s = Bq/mg
+      RADIATION_CONV = DRADDECAY     ! /day
+     &                  / 86400.0    ! s/day -> /s
+     &                  * AVOGADRO   ! number per mol
+     &                  / ATOMMASS   ! g/mol -> number per g
+     &                  / 1.0E3      ! g/mg  -> /mg
+                                     ! number / mg / s = Bq/mg
 
       DO 9000 ISEG = 1 , NOSEG
 !!    CALL DHKMRK(1,IKNMRK(ISEG),IKMRK1)
