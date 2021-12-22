@@ -1281,7 +1281,7 @@ end subroutine setfoustandardname
 !! write to file after last update
     subroutine postpr_fourier(time0, dts)
     use m_transport, only : constituents
-    use m_flowgeom, only : bl, lnx
+    use m_flowgeom, only : bl, lnx, blfourier, ndx
     use m_flow
     implicit none
 
@@ -1309,6 +1309,18 @@ end subroutine setfoustandardname
     founam     => gdfourier%founam
     dtw        =  dts / dt_user
 
+    !Update fourier specific bl and s1 array, only if required
+    if (kmx >0 .and. (laytyp(1) == 1 .or. numtopsig > 0)) then
+       if (.not. allocated(blFourier)) then
+          allocate(blFourier(ndx),s1Fourier(ndx))
+          blFourier = bl
+          s1Fourier = s1
+       else
+          blFourier = max(bl,blFourier)
+          s1Fourier = max(s1,s1Fourier)
+       endif
+    endif
+    
     if (gdfourier%iblws > 0) then
        allocate(wmag(lnx), stat=ierr)
        if (ierr /= 0) then
@@ -1492,7 +1504,7 @@ end subroutine setfoustandardname
         ierr = unc_create(trim(FouOutputFile), 0, fileids%ncid)
         if (ierr == NF90_NOERR) ierr = ug_addglobalatts(fileids%ncid, ug_meta_fm)
         if (ierr /= NF90_NOERR) goto 99
-        call unc_write_flowgeom_filepointer_ugrid(fileids%ncid, fileids%id_tsp)
+        call unc_write_flowgeom_filepointer_ugrid(fileids%ncid, fileids%id_tsp,jafou = .true.)
 
         call realloc(all_unc_loc, nofou)
         !
