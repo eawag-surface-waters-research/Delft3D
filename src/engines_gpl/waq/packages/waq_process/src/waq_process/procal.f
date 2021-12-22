@@ -602,9 +602,12 @@
          case (175 ) ;  call PROZOO ( pmsa   , flux   , ipoint , increm , noseg  ,               ! &
      &                                 noflux , iexpnt , iknmrk , noq1   , noq2   ,               ! &
      &                                 noq3   , noq4   )
+         case (176 ) ;  call DRADIO ( pmsa   , flux   , ipoint , increm , noseg  ,               ! &
+     &                                 noflux , iexpnt , iknmrk , noq1   , noq2   ,               ! &
+     &                                 noq3   , noq4   )
          case default
-      
-      
+
+
 !     assumed from dll
 
             call getmlu(lunrep)

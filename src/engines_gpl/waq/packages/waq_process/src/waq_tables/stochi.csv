@@ -3669,3 +3669,8 @@ stocfl,stocsu,stocsc
 "dN1P_Z1   ","ncmP_1    ",  -1.00000
 "dN1Si_Z1  ","ncmSi_1   ",  -1.00000
 "dN1Si_Z1  ","Opal      ",   1.00000
+"dRadioU   ","Uranium   ",  -1.00000
+"dRadioCs  ","Caesium137",  -1.00000
+"dRadioR1  ","Radio1    ",  -1.00000
+"dRadioR2  ","Radio2    ",  -1.00000
+"dRadioR3  ","Radio3    ",  -1.00000

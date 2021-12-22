@@ -32,7 +32,7 @@ if %toolFound%==true  (
     pause
 ) else (
     echo.
-    echo waqpb_import.exe not found! 
+    echo waqpb_import.exe not found!
     echo Please check cmake_configuration, or build the waq proces library tools.
     echo You can build it using build_all\all.sln
     echo.

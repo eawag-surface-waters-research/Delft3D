@@ -1,9 +1,10 @@
 @echo off
 set version=5.10
-set serial=20211216
+set serial=20211222
 set toolFound=false
 set toolx64=false
 set cmakeConfiguration=build_all
+set cmakeConfiguration=build
 
 if exist ..\..\..\..\..\..\..\%cmakeConfiguration%\waqpb_export\Release\waqpb_export.exe     set toolFound=true
 if exist ..\..\..\..\..\..\..\%cmakeConfiguration%\x64\Release\dwaq\bin\waqpb_export.exe     set toolx64=true
@@ -34,7 +35,7 @@ if %toolFound%==true (
     pause
 ) else (
     echo.
-    echo waqpb_export.exe not found! 
+    echo waqpb_export.exe not found!
     echo Please check cmake_configuration, or build the waq proces library tools.
     echo You can build it using build_all\all.sln
     echo.
