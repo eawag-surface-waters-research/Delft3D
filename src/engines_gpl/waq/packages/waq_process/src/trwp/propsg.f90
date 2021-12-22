@@ -87,26 +87,24 @@ subroutine PROPSG   (  pmsa  , fl    , ipoint, increm, noseg , &
         call dhkmrk(1,iknmrk(iseg),ikmrk1)
         if (ikmrk1.eq.1) then
             call dhkmrk(2,iknmrk(iseg),ikmrk2)
-            if (ikmrk2.le.4) then   ! surface water
                 
-                ! input independentt of fractions
-                biofilm_density = pmsa(ipnt(ip_BioFilmDen))
+            ! input independentt of fractions
+            biofilm_density = pmsa(ipnt(ip_BioFilmDen))
             
-                ! loop over active fractions
-                do ifrac = 1,nfrac
-                    diameter        = pmsa(ipnt(ip_lastsingle        +ifrac))
-                    density         = pmsa(ipnt(ip_lastsingle+nfrac  +ifrac))
-                    shape_factor    = pmsa(ipnt(ip_lastsingle+nfrac*2+ifrac))
-                    biofilm_thk     = pmsa(ipnt(ip_lastsingle+nfrac*3+ifrac))
+            ! loop over active fractions
+            do ifrac = 1,nfrac
+                diameter        = pmsa(ipnt(ip_lastsingle        +ifrac))
+                density         = pmsa(ipnt(ip_lastsingle+nfrac  +ifrac))
+                shape_factor    = pmsa(ipnt(ip_lastsingle+nfrac*2+ifrac))
+                biofilm_thk     = pmsa(ipnt(ip_lastsingle+nfrac*3+ifrac))
 
-                    call add_biofilm( diameter, density, biofilm_thk, biofilm_density )
-                    call calculate_sedim( diameter, density, shape_factor, settle_vel, tcr_sedim )
+                call add_biofilm( diameter, density, biofilm_thk, biofilm_density )
+                call calculate_sedim( diameter, density, shape_factor, settle_vel, tcr_sedim )
 
-                    pmsa(ipnt(ip_lastsingle+nfrac*4+ifrac)) = settle_vel
-                    pmsa(ipnt(ip_lastsingle+nfrac*5+ifrac)) = tcr_sedim
-                enddo
-
-            endif
+                pmsa(ipnt(ip_lastsingle+nfrac*4+ifrac)) = settle_vel
+                pmsa(ipnt(ip_lastsingle+nfrac*5+ifrac)) = tcr_sedim
+            enddo
+                
         endif
             
         ipnt(1:nitem) = ipnt(1:nitem) + increm(1:nitem)
