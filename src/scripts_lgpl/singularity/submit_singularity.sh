@@ -129,7 +129,7 @@ else
     echo exec_sif     : $exec_sif
     echo run_dimr     : $run_dimr
     echo arg5         : ${5}
-    echo arg5         : ${6}
+    echo arg6         : ${6}
     echo arg7         : ${7}
     echo arg8         : ${8}
     echo
