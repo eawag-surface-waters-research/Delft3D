@@ -17,8 +17,6 @@ container_PATH=$MPI_DIR/bin:/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/s
 container_LD_LIBRARY_PATH=$MPI_DIR/lib:$MPI_DIR/lib/release
 # "I_MPI_FABRICS=shm" will be overwritten automatically by IntelMPI when doing a multi node run
 container_I_MPI_FABRICS=shm
-container_OMP_NUM_THREADS_SWAN=4
-container_OMP_NUM_THREADS=1
 
 
 function print_usage_info {
@@ -126,8 +124,6 @@ echo "Executable options                        : $executable_opts"
 echo "env PATH                 inside container : $container_PATH"
 echo "env LD_LIBRARY_PATH      inside container : $container_LD_LIBRARY_PATH"
 echo "env I_MPI_FABRICS        inside container : $container_I_MPI_FABRICS"
-echo "env OMP_NUM_THREADS      inside container : $container_OMP_NUM_THREADS"
-echo "env OMP_NUM_THREADS_SWAN inside container : $container_OMP_NUM_THREADS_SWAN"
 echo
 echo "Executing singularity exec $container_bindir/$executable $executable_opts"
 singularity exec \
@@ -136,6 +132,4 @@ singularity exec \
                  --env PATH=$container_PATH \
                  --env LD_LIBRARY_PATH=$container_LD_LIBRARY_PATH \
                  --env I_MPI_FABRICS=$container_I_MPI_FABRICS \
-                 --env OMP_NUM_THREADS_SWAN=$container_OMP_NUM_THREADS_SWAN \
-		 --env OMP_NUM_THREADS=$container_OMP_NUM_THREADS \
                  $container_file_path $container_bindir/$executable $executable_opts

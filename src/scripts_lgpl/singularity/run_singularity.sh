@@ -62,6 +62,7 @@ if [ "$nPart" == "1" ]; then
 else
     # Parallel computation on one node
     #
+
     # First: partioning 
     # (You can re-use a partioning if the input files didn't change and if the number of partitions didn't change)
     # Partitioning is executed by dflowfm, in the folder containing the mdu-file
@@ -69,16 +70,19 @@ else
     echo partitioning...
     # "-p": See above. Arguments behind "run_dflowfm.sh" are explained in run_dflowfm.sh
     $singularitydir/execute_singularity.sh -p 2 run_dflowfm.sh --partition:ndomains=$nPart:icgsolver=6 $mduFile
-
     # Jump back to the dimr config file folder to execute dimr
     cd ..
+    
+    # Second: computation
     echo computation...
-
     # mpiexec is executed inside run_dimr.sh    
     # "-p": See above. Arguments behind "run_dimr.sh" are explained in run_dimr.sh
     $singularitydir/execute_singularity.sh -p 2 run_dimr.sh -m $dimrFile -c $nPart
-    
+
+    # Last: combine output files    
     # Optionally merge the map output files together into one file
+    cd dflowfm/dflowfmoutput
     # "-p": See above. Arguments behind "run_dfmoutput.sh" are explained in run_dimr.sh
-    #$singularitydir/execute_singularity.sh -p 2 run_dfmoutput.sh
+    $singularitydir/execute_singularity.sh -p 2 run_dfmoutput.sh -- -d mapmerge --infile f34_0000_map.nc f34_0001_map.nc f34_0002_map.nc --outfile f34_map.nc
+    cd ../..
 fi

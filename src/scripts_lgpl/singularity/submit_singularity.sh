@@ -16,7 +16,7 @@
 # 2. Copy this script into your working folder, i.e. the folder containing the dimr config file
 # 3. Modify this script, see remarks below
 # 4. Execute this script from the command line
-#    You can feed this script to a queueing system
+#    This script assumes a SGE queueing system is present and will execute qsub
 #
 #
 # Submit a job in the queue:
