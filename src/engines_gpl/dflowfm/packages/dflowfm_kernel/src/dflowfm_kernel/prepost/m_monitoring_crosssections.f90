@@ -72,6 +72,10 @@ double precision, allocatable        :: sumvalcur_global(:,:)  !< Global current
 double precision, allocatable        :: sumvalcur_local(:,:)   !< Local  current values of monitored crs quantities 
 double precision, allocatable        :: sumvalcum_timescale(:) !< Store the time-scale multiplication (e.g. morfac in the case of sediment).
 integer                              :: nval = 0               !< number of quantities moonitored including sediment
+integer                              :: nNodesCrs              !< [-] Total number of nodes for all cross sections
+integer,          allocatable, target:: nodeCountCrs(:)        !< [-] Count of nodes per cross section.
+double precision, allocatable, target:: geomXCrs(:)            !< [m] x coordinates of cross sections.
+double precision, allocatable, target:: geomYCrs(:)            !< [m] y coordinates of cross sections.
 contains
 
 !> Returns the index/position of a named crosssection in the global set arrays of this module.
@@ -437,5 +441,158 @@ subroutine pol_to_crosssections(xpl, ypl, npl, names)
     end do
 end subroutine pol_to_crosssections
 
+!> Fills in the geometry arrays of cross sections for history output
+subroutine fill_geometry_arrays_crs()
+   use m_alloc
+   use m_partitioninfo
+   use m_GlobalParameters
+   implicit none
+
+   double precision, allocatable :: xGat(:), yGat(:)    ! Coordinates that are gatherd data from all subdomains
+   integer,          allocatable :: nodeCountCrsMPI(:)  ! Count of nodes per cross section after mpi communication.
+   double precision, allocatable :: geomXCrsMPI(:)      ! [m] x coordinates of cross sections after mpi communication.
+   double precision, allocatable :: geomYCrsMPI(:)      ! [m] y coordinates of cross sections after mpi communication.
+   integer,          allocatable :: nodeCountCrsGat(:), nNodesCrsGat(:), displs(:)
+   double precision, allocatable :: geomX(:), geomY(:)
+   integer                       :: nlinks, i, j, k, k1, ierror, is, ie, n, ii, nNodes, nNodesCrsMPI, L, L0, ks, nPar
+   double precision              :: xLast, yLast
+
+   ! Allocate and construct geometry variable arrays (on one subdomain)
+   call realloc(nodeCountCrs,   ncrs, keepExisting = .false., fill = 0  )
+   do i = 1, ncrs
+      nlinks = crs(i)%path%lnx
+      if (nlinks > 0 ) then
+         nodeCountCrs(i) = nlinks + 1
+      end if
+   end do
+   nNodesCrs = sum(nodeCountCrs)
+   call realloc(geomXCrs,       nNodesCrs,   keepExisting = .false., fill = 0d0)
+   call realloc(geomYCrs,       nNodesCrs,   keepExisting = .false., fill = 0d0)
+   is = 0
+   ie = 0
+   do i = 1, ncrs
+      nNodes = nodeCountCrs(i)
+      nlinks = crs(i)%path%lnx
+      if (nNodes > 0) then
+         call realloc(geomX, nNodes)
+         call realloc(geomY, nNodes)
+         L = crs(i)%path%iperm(1)
+         geomX(1) = crs(i)%path%xk(1,L)
+         geomX(2) = crs(i)%path%xk(2,L)
+         geomY(1) = crs(i)%path%yk(1,L)
+         geomY(2) = crs(i)%path%yk(2,L)
+
+         if (nlinks > 0) then
+            k = 3
+            do L0 = 2, nlinks
+               L = crs(i)%path%iperm(L0)
+               geomX(k) = crs(i)%path%xk(2,L)
+               geomY(k) = crs(i)%path%yk(2,L)
+
+               k = k+1
+            end do
+            is = ie + 1
+            ie = is + nNodes - 1
+            geomXCrs(is:ie) = geomX(1:nNodes)
+            geomYCrs(is:ie) = geomY(1:nNodes)
+         end if
+      end if
+   end do
+
+   !! The codes below are similar to subroutine "fill_geometry_arrays_lateral".
+   !! They work for cross sections, including the situataion that a cross section lies on multiple subdomains.
+   ! For parallel simulation: since only process 0000 writes the history output, the related arrays
+   ! are only made on 0000.
+   if (jampi > 0) then
+      call reduce_int_sum(nNodesCrs, nNodesCrsMPI) ! Get total number of nodes among all subdomains
+
+      if (my_rank == 0) then
+         ! Allocate arrays
+         call realloc(nodeCountCrsMPI, ncrs,  keepExisting = .false., fill = 0  )
+         call realloc(geomXCrsMPI,     nNodesCrsMPI, keepExisting = .false., fill = 0d0)
+         call realloc(geomYCrsMPI,     nNodesCrsMPI, keepExisting = .false., fill = 0d0)
+
+         ! Allocate arrays that gather information from all subdomains
+         ! Data on all subdomains will be gathered in a contiguous way
+         call realloc(nodeCountCrsGat, ncrs*ndomains, keepExisting = .false., fill = 0  )
+         call realloc(xGat,            nNodesCrsMPI,  keepExisting = .false., fill = 0d0)
+         call realloc(yGat,            nNodesCrsMPI,  keepExisting = .false., fill = 0d0)
+         call realloc(displs,          ndomains,      keepExisting = .false., fill = 0  )
+         call realloc(nNodesCrsGat,    ndomains,      keepExisting = .false., fill = 0  )
+      end if
+
+      ! Gather integer data, where the same number of data, i.e. ncrs, are gathered from each subdomain to process 0000
+      call gather_int_data_mpi_same(ncrs, nodeCountCrs, ncrs*ndomains, nodeCountCrsGat, ncrs, 0, ierror)
+
+      if (my_rank == 0) then
+         ! To use mpi gather call, construct displs, and nNodesCrsGat (used as receive count for mpi gather call)
+         displs(1) = 0
+         do i = 1, ndomains
+            is = (i-1)*ncrs+1 ! Starting index in nodeCountCrsGat
+            ie = is+ncrs-1    ! Endding index in nodeCountCrsGat
+            nNodesCrsGat(i) = sum(nodeCountCrsGat(is:ie)) ! Total number of nodes on subdomain i
+            if (i > 1) then
+               displs(i) = displs(i-1) + nNodesCrsGat(i-1)
+            end if
+         end do
+      end if
+
+      ! Gather double precision data, here, different number of data can be gatherd from different subdomains to process 0000
+      call gatherv_double_data_mpi_dif(nNodesCrs, geomXCrs, nNodesCrsMPI, xGat, ndomains, nNodesCrsGat, displs, 0, ierror)
+      call gatherv_double_data_mpi_dif(nNodesCrs, geomYCrs, nNodesCrsMPI, yGat, ndomains, nNodesCrsGat, displs, 0, ierror)
+
+      if (my_rank == 0) then
+         ! Construct nodeCountCrsMPI for history output
+         do i = 1, ncrs
+            do n = 1, ndomains
+               k = (n-1)*ncrs+i
+               nodeCountCrsMPI(i) = nodeCountCrsMPI(i) + nodeCountCrsGat(k) ! Total number of nodes for cross section i among all subdomains
+            end do
+         end do
+
+         ! Construct geomXCrsMPI and geomYCrsMPI for history output
+         j = 1
+         xLast = xGat(1)
+         yLast = yGat(1)
+         do i = 1, ncrs                     ! for each cross section
+            nPar = 0                        ! Number of subdomains that contain this cross section
+            do n = 1, ndomains              ! on each sudomain
+               k = (n-1)*ncrs+i             ! index in nodeCountCrsGat
+               nNodes = nodeCountCrsGat(k)  ! cross section i on sumdomain n has nNodes nodes
+               if (nNodes > 0) then
+                  nPar = nPar + 1
+                  ii = (n-1)*ncrs
+                  is = sum(nNodesCrsGat(1:n-1)) + sum(nodeCountCrsGat(ii+1:ii+i-1))! starting index in xGat
+                  ks = 1
+                  if (nPar > 1) then ! This cross section lies on multiple subdomains.
+                     if (abs(xLast-xGat(is+1))<1d-8 .and. abs(yLast-yGat(is+1)<1d-8)) then
+                        ! The starting node of the this cross section on the current subdomain is
+                        ! the ending node of this cross section on the previous subdomain.
+                        ks = 2 ! Will copy the coordinates from the 2nd nodes
+                        nodeCountCrsMPI(i) = nodeCountCrsMPI(i) - 1 ! adjust the node counter
+                        nNodesCrsMPI = nNodesCrsMPI - 1
+                     end if
+                  end if
+
+                  do k1 = ks, nNodes
+                     geomXCrsMPI(j) = xGat(is+k1)
+                     geomYCrsMPI(j) = yGat(is+k1)
+                     j = j + 1
+                  end do
+                  xLast = geomXCrsMPI(j-1)
+                  yLast = geomYCrsMPI(j-1)
+               end if
+            end do
+         end do
+         ! Copy the MPI-arrays to nodeCountCrs, geomXCrs and geomYCrs for the his-output
+         nNodesCrs = nNodesCrsMPI
+         nodeCountCrs(1:ncrs) = nodeCountCrsMPI(1:ncrs)
+         call realloc(geomXCrs, nNodesCrs, keepExisting = .false., fill = 0d0)
+         call realloc(geomYCrs, nNodesCrs, keepExisting = .false., fill = 0d0)
+         geomXCrs(1:nNodesCrs) = geomXCrsMPI(1:nNodesCrs)
+         geomYCrs(1:nNodesCrs) = geomYCrsMPI(1:nNodesCrs)
+      end if
+   end if
+end subroutine fill_geometry_arrays_crs
 
 end module m_monitoring_crosssections

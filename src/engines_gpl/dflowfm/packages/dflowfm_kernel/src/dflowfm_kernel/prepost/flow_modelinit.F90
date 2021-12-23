@@ -62,6 +62,7 @@
  use m_fm_update_crosssections, only: fm_update_mor_width_area, fm_update_mor_width_mean_bedlevel
  use unstruc_netcdf_map_class
  use unstruc_caching
+ use m_monitoring_crosssections, only: ncrs, fill_geometry_arrays_crs
 
  !use m_mormerge
  !
@@ -307,6 +308,9 @@
 
  call timstrt('Observations init   ', handle_extra(21)) ! observations init
  call flow_obsinit()                                 ! initialise stations and cross sections on flow grid + structure his (1st call required for call to flow_trachy_update)
+ if (ncrs > 0) then
+    call fill_geometry_arrays_crs()
+ end if
  call timstop(handle_extra(21)) ! end observations init
 
  call timstrt('Flow init           ', handle_extra(23)) ! flow init

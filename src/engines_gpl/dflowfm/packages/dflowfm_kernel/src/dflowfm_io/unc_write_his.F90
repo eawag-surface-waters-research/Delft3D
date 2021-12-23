@@ -1118,16 +1118,8 @@ subroutine unc_write_his(tim)            ! wrihis
 
             ! Define geometry related variables
             crs_geom_container_name = 'cross_section_geom'
-            nNodeTot = 0
-            do i = 1, ncrs
-               nlinks = crs(i)%path%lnx
-               if (nlinks > 0 ) then
-                  nNodes = nlinks + 1
-               else if (nlinks == 0) then
-                  nNodes = 0
-               end if
-               nNodeTot = nNodeTot +  nNodes
-            end do
+            nNodeTot = nNodesCrs
+
             ierr = sgeom_def_geometry_variables(ihisfile, crs_geom_container_name, 'cross section', 'line', nNodeTot, id_crsdim, &
                id_crsgeom_node_count, id_crsgeom_node_coordx, id_crsgeom_node_coordy)
 
@@ -2497,44 +2489,14 @@ subroutine unc_write_his(tim)            ! wrihis
                 !ierr = nf90_put_var(ihisfile, id_crsy,     crs(i)%path%yp(1:crs(i)%path%np), (/ 1, i /))
                 ierr = nf90_put_var(ihisfile, id_crsname,  trimexact(crs(i)%name, strlen_netcdf),      (/ 1, i /))
             end do
-            ! write geometry variables at the first time of history output
-            j = 1
-            call realloc(node_count, ncrs, fill = 0)
-            do i = 1, ncrs
-               nlinks = crs(i)%path%lnx
-               if (nlinks > 0) then
-                  nNodes = nlinks + 1
-               else if (nlinks == 0) then
-                  nNodes = 0
-               end if
-               node_count(i) = nNodes
-
-               if (nNodes > 0) then
-                  call realloc(geom_x, nNodes)
-                  call realloc(geom_y, nNodes)
-                  L = crs(i)%path%iperm(1)
-                  geom_x(1) = crs(i)%path%xk(1,L)
-                  geom_x(2) = crs(i)%path%xk(2,L)
-                  geom_y(1) = crs(i)%path%yk(1,L)
-                  geom_y(2) = crs(i)%path%yk(2,L)
-
-                  if (nlinks > 1) then
-                     k = 3
-                     do L0 = 2, nlinks
-                        L = crs(i)%path%iperm(L0)
-                        geom_x(k) = crs(i)%path%xk(2,L)
-                        geom_y(k) = crs(i)%path%yk(2,L)
-
-                        k = k+1
-                     end do
-                  end if
-
-                  ierr = nf90_put_var(ihisfile, id_crsgeom_node_coordx, geom_x(1:nNodes), start = (/ j /), count = (/ nNodes /))
-                  ierr = nf90_put_var(ihisfile, id_crsgeom_node_coordy, geom_y(1:nNodes), start = (/ j /), count = (/ nNodes /))
-                  j = j + nNodes
-               end if
-            end do
-            ierr = nf90_put_var(ihisfile, id_crsgeom_node_count, node_count, start = (/ 1 /), count = (/ ncrs /))
+            if (it_his == 0) then
+               ierr = nf90_put_var(ihisfile, id_crsgeom_node_coordx, geomXCrs,     start = (/ 1 /), count = (/ nNodesCrs /))
+               ierr = nf90_put_var(ihisfile, id_crsgeom_node_coordy, geomYCrs,     start = (/ 1 /), count = (/ nNodesCrs /))
+               ierr = nf90_put_var(ihisfile, id_crsgeom_node_count,  nodeCountCrs)
+               if (allocated(geomXCrs))     deallocate(geomXCrs)
+               if (allocated(geomYCrs))     deallocate(geomYCrs)
+               if (allocated(nodeCountCrs)) deallocate(nodeCountCrs)
+            end if
         end if
 
         if (nrug>0) then
