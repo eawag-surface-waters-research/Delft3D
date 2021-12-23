@@ -14358,7 +14358,7 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd,jafou)
                                     edge_nodes, face_nodes, edge_faces, null(), null(),x2dn, y2dn, xue, yue, xz(1:ndx2d), yz(1:ndx2d), &
                                     crs, -999, dmiss, start_index, layer_count, layer_type, &
                                     layer_zs=layer_zs,waterlevelname=trim(waterlevelname), interface_zs=interface_zs, writeopts=unc_writeopts,&
-                                    nsigma =numtopsig)
+                                    nsigma_opt =numtopsig)
 
       ! Add edge type variable (edge-flowlink relation)
       call write_edge_type_variable(ncid, id_tsp%meshids2d, mesh2dname, edge_type)
