@@ -1068,7 +1068,7 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
    integer                             :: start_index     !< The base index of the provided arrays (0 if this function writes array from C/C++/C#, 1 for Fortran)
    integer, optional,        intent(in) :: numLayer  !< Number of vertical layers in the mesh. Optional.
    integer, optional,        intent(in) :: layerType !< Type of vertical layering in the mesh. One of LAYERTYPE_* parameters. Optional, only used if numLayer >= 1.
-   integer, optional,        intent(in) :: nsigma   !< Number of sigma layers
+   integer, optional,     intent(inout) :: nsigma   !< Number of sigma layers
    
    real(kind=dp), optional, pointer, intent(in) :: layer_zs(:)     !< Vertical coordinates of the mesh layers' center (either z or sigma). Optional, only used if numLayer >= 1.
    real(kind=dp), optional, pointer, intent(in) :: interface_zs(:) !< Vertical coordinates of the mesh layers' interface (either z or sigma). Optional, only used if numLayer >= 1.
@@ -1123,6 +1123,8 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
 
    prefix=trim(meshName)
 
+   if (.not. present(nsigma)) nsigma = 0
+    
    add_edge_face_connectivity = associated(edge_faces)
    add_face_edge_connectivity = associated(face_edges)
    add_face_face_connectivity = associated(face_links)
