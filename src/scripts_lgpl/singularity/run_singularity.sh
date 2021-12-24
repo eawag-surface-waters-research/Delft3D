@@ -58,7 +58,7 @@ mduFile="$(sed -n 's/\r//; s/<inputFile>\(.*\).mdu<\/inputFile>/\1/p' $dimrFile)
 if [ "$nPart" == "1" ]; then
     # Sequential computation
     # "-p": See above. Arguments after "run_dimr.sh" are explained in run_dimr.sh
-    $singularitydir/execute_singularity.sh -p 2 run_dimr.sh $dimrFile
+    $singularitydir/execute_singularity.sh -p 2 run_dimr.sh -m $dimrFile
 else
     # Parallel computation on one node
     #
