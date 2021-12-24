@@ -12,17 +12,17 @@
 #
 # To start:
 # 1. Be sure that a Singularity container is available, 
-#    together with an execute_singularity.sh script in the same folder
-# 2. Copy this script into your working folder, i.e. the folder containing the dimr config file
-# 3. Modify this script, see remarks below
-# 4. Execute this script from the command line
-#    This script assumes a SGE queueing system is present and will execute qsub
+#    together with an execute_singularity.sh script in the same folder.
+# 2. Copy the submit_singularity.sh script into your working folder, i.e. the folder containing the dimr config file.
+# 3. Modify the submit_singularity.sh script, see remarks below.
+# 4. Execute the script from the command line.
+#    This script assumes a SGE queueing system is present and will execute qsub.
 #
 #
 # Submit a job in the queue:
 #     Execute this script from the command line without arguments.
-#     The "STEP 1" part below will be entered, finishing with putting this script,
-#     "submit_singularity.sh", with a set of arguments, in the queue
+#     The "STEP 1" part below will be entered, finishing with placing this script,
+#     "submit_singularity.sh", with a set of arguments, in the queue.
 #
 # Execute a job from the queue:
 #     When the queueing system has allocated resources, this script,
@@ -36,10 +36,10 @@
 
 
 # "execute_singularity.sh -p 2": Parent level to mount:
-# If your working folder does not contain all the input files, then you have to set this -p flag.
-# Let's define the "top level" as the folder containing all the input files.
+# If your working folder does not contain all of the input files, then you must set the -p flag.
+# Let's define the "top level" as the folder containing all of the input files.
 # The value of -p must be the number of folder levels between the dimr config file and the top level.
-# A higher value will not harm, as long as it exists.
+# A higher value will not cause any harm, provided that folders exist at the higher levels.
 # 
 
 
@@ -65,7 +65,7 @@ dimrFile=dimr_config.xml
 #
 # --- You shouldn't need to change the lines below ------------------------
 
-# stop after an error occured:
+# stop after an error occurred:
 set -e
 
 nPart=$((nNodes * nProc))
@@ -80,7 +80,7 @@ if (( $# < 4 )); then
     PROCESSSTR="$(seq -s " " 0 $((nPart-1)))"
     sed -i "s/\(<process.*>\)[^<>]*\(<\/process.*\)/\1$PROCESSSTR\2/" $dimrFile
 
-    # Read MDU file from DIMR-file
+    # Read MDU file from DIMR file
     mduFile="$(sed -n 's/\r//; s/<inputFile>\(.*\).mdu<\/inputFile>/\1/p' $dimrFile)".mdu
 
     # jobName: dimrsif_$FOLDERNAME_nodesxprocs

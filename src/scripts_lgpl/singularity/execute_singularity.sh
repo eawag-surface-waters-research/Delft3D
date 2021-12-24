@@ -1,23 +1,35 @@
 #!/bin/bash
 
-# For Deltares/h6c7 (using qsub):
+# Usage:
+# Executing a command inside a Singularity container.
+# This script is an interface between the scripts "run_singularity.sh" and 
+# "submit_singularity" in the working folder and the Singularity container itself.
+
+# This script "execute_singularity.sh" script must be located in the same folder
+# as the Singularity sif-file.
+
+
+# This script assumes that the command "singularity" can be found.
+# Needed by users at Deltares:
 module load singularity
 
-# Overwrite environment parameters in the container. 
-# --cleanenv will block the users environment to be passed through to the container.
-# Be careful with it: the IntelMPI setup uses multiple environment settings:
-# Do not use --cleanenv for multiple node computations!
-#
-# The following parameters are passed through to the container via --env
-#
-# PLEASE CHANGE:
-# MPI_DIR: please insert the path to your own installation of IntelMPI
+
+
+# The following parameters are passed to the container via --env.
+# Modify them according to your requirements:
+
+# MPI_DIR: the path to your own installation of IntelMPI
 MPI_DIR=/opt/apps/intelmpi/2021.2.0/mpi/2021.2.0
 container_PATH=$MPI_DIR/bin:/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/sbin 
 container_LD_LIBRARY_PATH=$MPI_DIR/lib:$MPI_DIR/lib/release
+
 # "I_MPI_FABRICS=shm" will be overwritten automatically by IntelMPI when doing a multi node run
 container_I_MPI_FABRICS=shm
 
+
+#
+#
+# --- You shouldn't need to change the lines below ------------------------
 
 function print_usage_info {
     echo "Usage: ${0##*/} executable [OPTIONS]"
@@ -29,7 +41,7 @@ function print_usage_info {
     echo "-h, --help"
     echo "       Print this help message and exit"
     echo "-p, --parentlevel"
-    echo "       A numeric value which specifies the amount of levels to navigate to the parent directory to mount"
+    echo "       A numeric value that specifies the amount of levels to navigate to the parent directory to mount"
     echo "       (Default value: 1)"
     exit 1
 }
@@ -107,7 +119,7 @@ elif [[ $parent_level -eq 0 ]]; then
     working_dir=$current_working_dir
     container_working_dir=$mountdir
 else 
-    echo "Invalid parent level setting: value must be greater or equal to 0"
+    echo "Invalid parent level setting: value must be greater than or equal to 0"
     exit 1
 fi
 
@@ -126,6 +138,17 @@ echo "env LD_LIBRARY_PATH      inside container : $container_LD_LIBRARY_PATH"
 echo "env I_MPI_FABRICS        inside container : $container_I_MPI_FABRICS"
 echo
 echo "Executing singularity exec $container_bindir/$executable $executable_opts"
+
+#
+#
+# --- Execution part: modify if needed ------------------------------------ 
+
+# Optionally use --cleanenv to prevent the user's environment from being passed to the container.
+# Be careful with it: the IntelMPI setup uses multiple environment settings.
+# --cleanenv will probably not work for multiple node computations.
+# See also https://sylabs.io/guides/3.8/user-guide/environment_and_metadata.html
+#
+
 singularity exec \
                  --bind $working_dir:$mountdir,$MPI_DIR:$MPI_DIR,/usr/:/host \
                  --pwd $container_working_dir \
