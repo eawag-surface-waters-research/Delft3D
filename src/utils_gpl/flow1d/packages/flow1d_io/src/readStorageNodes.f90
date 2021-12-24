@@ -223,7 +223,7 @@ module m_readStorageNodes
                call interpolateStringToInteger(sInterpolate, interpol)
                ! read bedLevel
                call prop_get_double(node_ptr, '', 'bedLevel', storageLevels(1), success1)
-               success = success .and. check_input(success1, storgNodeId, 'bedLevel')
+               success = success .and. check_input(success1, storgNodeId, 'bedLevel', storageLevels(1))
                
                ! read area
                call prop_get_double(node_ptr, '', 'area', storageAreas(1), success1)
@@ -387,18 +387,31 @@ module m_readStorageNodes
    !> Helper routine to check the result status of a read/prop_get action.
    !! Checks if success is true or false, when false generate an error message.
    !! Result value is the original success value.
-   function check_input(success, st_id, key) result (res)
-      logical         , intent(in   )    :: success   !< Result value of the prop_get subroutine.
-      character(len=*), intent(in   )    :: st_id     !< Id of the current storage node.
-      character(len=*), intent(in   )    :: key       !< Key of the input value.
-      logical                            :: res       !< Result status, is equal to the original success value.
-                                                      !< Recommended use: successall = successall .and. check_input_result(success, ..)
+   !! Moreover, as an optional choice, it checks if the input value (double precision) equals to dmiss(-999). If yes,
+   !! then a warning message will be written.
+   function check_input(success, st_id, key, val) result (res)
+      use m_missing, only: dmiss
+      implicit none
+      logical         ,           intent(in   ) :: success !< Result value of the prop_get subroutine.
+      character(len=*),           intent(in   ) :: st_id   !< Id of the current storage node.
+      character(len=*),           intent(in   ) :: key     !< Key of the input value.
+      logical                                   :: res     !< Result status, is equal to the original success value.
+                                                           !< Recommended use: successall = successall .and. check_input_result(success, ..)
+      double precision, optional, intent(in   ) :: val     !< The input value to be checked
 
       if (.not. success) then
          write (msgbuf, '(a,a,a,a,a)') 'Error Reading storage Node ''', trim(st_id), ''', ''', trim(key), ''' is missing.'
          call err_flush()
       endif
       res = success
+
+      if (present(val)) then
+         if (abs(val-dmiss)<1d-8) then
+            write(msgbuf, '(a,a,a,a,a)') 'Reading storage Node ''', trim(st_id), ''', the input value for ', trim(key), ' is -999, which can cause problems in computation.'
+            call warn_flush()
+         endif
+      end if
+
       return 
    end function check_input
 end module m_readStorageNodes
