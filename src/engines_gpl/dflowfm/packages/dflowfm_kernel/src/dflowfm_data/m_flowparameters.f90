@@ -69,7 +69,7 @@
 
  integer                           :: icorio            !< Coriolis weigthing
 
- integer                           :: newcorio = 0      !< 0=up to 27-11-2019 , 1 = after
+ integer                           :: newcorio = 1      !< 0=prior to 27-11-2019, 1=no normal forcing on open bnds, plus 12 variants
 
  integer                           :: jacorioconstant=0 !< 0=default, 1=Coriolis constant in sferic models anyway,2=beta plane, both in cart. and spher. coor.
 
