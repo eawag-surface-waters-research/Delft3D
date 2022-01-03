@@ -2816,7 +2816,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
       call prop_set(prop_ptr, 'numerics', 'Cffacver', Cffacver,   'Factor for including (1-CFL) in HO term vertical   (0d0: no, 1d0: yes)')
     endif
     if (writeall .or. jarhoxu .ne. 0 ) then
-      call prop_set(prop_ptr, 'numerics', 'Jarhoxu', Jarhoxu,   'Inlcude density gradient in advection term (0: no, 1: yes, 2: Also in barotrop and baroclin pressure term)')
+      call prop_set(prop_ptr, 'numerics', 'Jarhoxu', Jarhoxu,   'Include density gradient in advection term (0: no(strongly advised), 1: yes, 2: Also in barotropic and baroclinic pressure term)')
     endif
     if (writeall .or. (jahazlayer .ne. 0 .and. layertype .ne. 1)) then
       call prop_set(prop_ptr, 'numerics', 'Horadvtypzlayer', Jahazlayer, 'Horizontal advection treatment of z-layers (1: default, 2: sigma-like)')
