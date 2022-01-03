@@ -26,6 +26,7 @@
      +                    ioutps       , outputs      ,
      +                    nomult       , imultp       ,
      +                    constants    , noinfo       ,
+     +                    refday       ,
      +                    nowarn       , ierr         )
 
 !       Deltares Software Centre
@@ -64,6 +65,7 @@
       integer  ( 4)       , intent(in   ) :: imultp(2,nomult)!< multiple substance administration
       type(t_dlwq_item)   , intent(inout) :: constants       !< delwaq constants list
       integer             , intent(inout) :: noinfo          !< count of informative message
+      integer  ( 4)       , intent(in)    :: refday          !< reference day, varying from 1 till 365
       integer             , intent(inout) :: nowarn          !< count of warnings
       integer             , intent(inout) :: ierr            !< error count
 
@@ -141,7 +143,7 @@
       character*20,allocatable  :: diname(:)       ! dispersion names
       character*20,allocatable  :: vename(:)       ! velocity names
       character*20,allocatable  :: dename(:)       ! default array names
-      character*20,allocatable  :: locnam(:)       ! loacal array names
+      character*20,allocatable  :: locnam(:)       ! local array names
       character*20 ,allocatable :: ainame(:)       ! all item names names in the proc_def
       character*20              :: subname         ! substance name
       character*100,allocatable :: substdname(:)   ! substance standard name
@@ -630,7 +632,7 @@
      +                   nampralg)
          endif
 
-         ! add the processes in the strucure
+         ! add the processes in the structure
 
          call prprop ( lurep    , laswi   , l3dmod   , config, no_act,
      +                 actlst   , allitems, procesdef, noinfo, nowarn,
@@ -774,7 +776,7 @@
      +              nopa     , paname, nofun , funame, nosfun,
      +              sfname   , nodisp, diname, novelo, vename,
      +              nmis     , defaul, noloc , nodef , dename, outputs,
-     +              ndspx    , nvelx , nlocx , locnam   )
+     +              ndspx    , nvelx , nlocx , locnam, refday)
 
       ! report on the use of the delwaq input
 
@@ -821,7 +823,6 @@
       deallocate(grdref,sysgrd,sysndt)
 
       ! write proces work file
-
       call wr_proceswrk( lurep , procesdef, nodef , defaul, idpnw ,
      +                   ivpnw , dsto     , vsto  , locnam, nopred,
      +                   nocons, nopa     , nofun , nosfun, notot ,
@@ -925,7 +926,7 @@
      &              notot,  substdname, subunit, subdescr )
       close ( lun(25) )
 
-      ! write altoys input files, only for old balnce file
+      ! write altoys input files, only for old balance file
       ! ( altoys.inp batoys.inp altoys.ini altoys.fil)
 
       if ( btest(intopt,3) .and. .not. btest(intopt,4) ) then

@@ -22,8 +22,8 @@
 !!  rights reserved.
 
       subroutine dlwq01 ( lun    , syname , nosys  , notot  , nomult ,
-     &                    multp  , iwidth , otime  , isfact , vrsion ,
-     &                    ioutpt , ierr   , iwar   )
+     &                    multp  , iwidth , otime  , isfact , refday ,
+     &                    vrsion , ioutpt , ierr   , iwar   )
 
 !       Deltares Software Centre
 
@@ -77,6 +77,7 @@
       integer  ( 4), intent(  out) :: iwidth            !< width of the output file
       real     ( 8), intent(  out) :: otime             !< Offset of the system time (Julian)
       integer  ( 4), intent(  out) :: isfact            !< Units (in sec) of the system clock
+      integer  ( 4), intent(  out) :: refday            !< reference day, varying from 1 till 365
       real     ( 4), intent(  out) :: vrsion            !< version number of this input
       integer  ( 4), intent(  out) :: ioutpt            !< flag for more or less output
       integer  ( 4), intent(inout) :: ierr              !< cumulative error   count
@@ -84,27 +85,27 @@
 
 !     Local
 
-      integer  ( 4)   itype                             !  input type  0 = any, 1 = char, 2 = int, 3 = float
-      integer  ( 4)   ierr2                             !  local error   accumulator
-      integer  ( 4)   iwar2                             !  local warning accumulator
-      character(40)   modid1, modid2,  runid1, runid2   !  model identification strings
-      integer  ( 4)   idummy                            !  integer   read help variable
-      real     ( 4)   adummy                            !  real      read help variable
-      character(255)  cdummy                            !  character read help variable
-      integer  ( 4)   isys, isys2                       !  loop counters for substances
-      logical         intread                           !  flag for read of substance numbers
-      integer  ( 4)   ilen                              !  length help variable
-      integer  ( 4)   idate                             !  date of the time offset
-      integer  ( 4)   itime                             !  time of the time offset
-      integer  ( 4)   iyear                             !  year of the time offset
-      integer  ( 4)   imonth                            !  month of the time offset
-      integer  ( 4)   iday                              !  day of the time offset
-      integer  ( 4)   ihour                             !  hour of the time offset
-      integer  ( 4)   iminut                            !  minute of the time offset
-      integer  ( 4)   isecnd                            !  second of the time offset
-      integer  ( 4)   ifound                            !  help variable for name search
-      integer  ( 4)   nosyss                            !  help variable for transported substance
-      integer  ( 4)   notots                            !  help variable for total substance
+      integer  ( 4)   :: itype                             !  input type  0 = any, 1 = char, 2 = int, 3 = float
+      integer  ( 4)   :: ierr2                             !  local error   accumulator
+      integer  ( 4)   :: iwar2                             !  local warning accumulator
+      character(40)   :: modid1, modid2,  runid1, runid2   !  model identification strings
+      integer  ( 4)   :: idummy                            !  integer   read help variable
+      real     ( 4)   :: adummy                            !  real      read help variable
+      character(255)  :: cdummy                            !  character read help variable
+      integer  ( 4)   :: isys, isys2                       !  loop counters for substances
+      logical         :: intread                           !  flag for read of substance numbers
+      integer  ( 4)   :: ilen                              !  length help variable
+      integer  ( 4)   :: idate                             !  date of the time offset
+      integer  ( 4)   :: itime                             !  time of the time offset
+      integer  ( 4)   :: iyear                             !  year of the time offset
+      integer  ( 4)   :: imonth                            !  month of the time offset
+      integer  ( 4)   :: iday                              !  day of the time offset
+      integer  ( 4)   :: ihour                             !  hour of the time offset
+      integer  ( 4)   :: iminut                            !  minute of the time offset
+      integer  ( 4)   :: isecnd                            !  second of the time offset
+      integer  ( 4)   :: ifound                            !  help variable for name search
+      integer  ( 4)   :: nosyss                            !  help variable for transported substance
+      integer  ( 4)   :: notots                            !  help variable for total substance
       integer  ( 4), allocatable :: imult(:)            !  help array for number of substances
       character(20), allocatable :: sname(:)            !  help array for substance names
       integer(4) :: ithndl = 0
@@ -176,6 +177,9 @@
             write ( lunut  , 2060 ) -isfact
          endif
       endif
+
+!     Compute refday
+      call compute_refday(iyear, imonth, iday, refday)
 
 !     Copy timers data to dlwqt0_data
       dlwq0t_otime  = otime 
@@ -354,3 +358,43 @@
  2170 format ( /' ERROR encountered invalid repeat count - should start with an asterisk (*): ',A )
 
       end
+
+      
+      
+!     Compute reference day, varying from 1 till 365 (or 366 for leap years), needed for dayl process
+      subroutine compute_refday(iyear, imonth, iday, refday)
+        IMPLICIT  NONE
+        integer  ( 4), intent(in)  ::   iyear              !  year of the time offset
+        integer  ( 4), intent(in)  ::   imonth             !  month of the time offset
+        integer  ( 4), intent(in)  ::   iday               !  day of the time offset
+        integer  ( 4), intent(out) ::   refday             !  refday
+        
+        integer, dimension(12)     ::   daysPerMonth       !  # days in each month
+        logical                    ::   leapYear           !  is iyear a leap year, yes or no
+        
+        refday = 0
+        call checkLeapYear(iyear, leapYear)
+        
+        if (leapYear) then
+           daysPerMonth = (/31,29,31,30,31,30,31,31,30,31,30,31/)
+        else
+           daysPerMonth = (/31,28,31,30,31,30,31,31,30,31,30,31/)
+        endif
+        
+        refday = sum(daysPerMonth(1:imonth-1)) + iday
+        
+      end subroutine
+      
+      
+!     Check if year is a leap year
+      subroutine checkLeapYear(iyear, leapYear)
+        IMPLICIT  NONE
+        integer  ( 4), intent(in)  ::   iyear              !  year of the time offset
+        logical , intent(out)      ::   leapYear           !  is iyear a leap year, yes or no
+        
+        if (mod(iyear,4) == 0)   leapYear = .TRUE.
+        if (mod(iyear,100) == 0) leapYear = .FALSE.
+        if (mod(iyear,400) == 0) leapYear = .TRUE.
+
+      end subroutine
+

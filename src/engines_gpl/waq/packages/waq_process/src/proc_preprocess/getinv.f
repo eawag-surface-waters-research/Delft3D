@@ -25,7 +25,7 @@
      +                    nopa     , paname, nofun , funame, nosfun,
      +                    sfname   , nodisp, diname, novelo, vename,
      +                    nmis     , defaul, noloc , nodef , dename, outputs,
-     +                    ndspx    , nvelx , nlocx , locnam)
+     +                    ndspx    , nvelx , nlocx , locnam, refday)
 
       ! sets the i/o pointers for every proces
       ! if nessacary turns on secondary processes
@@ -64,6 +64,7 @@
       integer                   :: nvelx           ! number of velocities
       integer                   :: nlocx           ! number of local values on exchanges
       character(len=*)          :: locnam(*)       ! local values names
+      integer  ( 4)       , intent(in)    :: refday          ! reference day, varying from 1 till 365
 
       ! local decalarations
 
@@ -240,12 +241,17 @@
                         nodef   = nodef + 1
                         dename(nodef) = valnam
                         ivalip = -3
-                        if ( abs(proc1%input_item(i_input)%actdef-rmis0) .lt. 1.e-20 )then
-                           line = ' '
-                           defaul(nodef) = 0.0
+                        if (valnam == 'RefDay') then
+                           defaul(nodef) = real(refday)
+                           write(line1,'(a,g13.6)') '       based on T0-string:',real(refday)
                         else
-                           defaul(nodef) = proc1%input_item(i_input)%actdef
-                           write(line1,'(a,g13.6)') '       using default value:',proc1%input_item(i_input)%actdef
+                           if ( abs(proc1%input_item(i_input)%actdef-rmis0) .lt. 1.e-20 )then
+                              line = ' '
+                              defaul(nodef) = 0.0
+                           else
+                              defaul(nodef) = proc1%input_item(i_input)%actdef
+                              write(line1,'(a,g13.6)') '       using default value:',proc1%input_item(i_input)%actdef
+                           endif
                         endif
                      endif
                   endif

@@ -28,7 +28,7 @@
 !     Deltares Software Centre
 
 !>\File
-!>               Reads block 7 of input, process paramters new style
+!>               Reads block 7 of input, process parameters new style
 
 !     Global declarations
 
@@ -36,7 +36,7 @@
       use dlwq_data      ! for definition and storage of data
       use rd_token       ! tokenized reading
       use partmem        ! for the interface with Delpar (Tau and VertDisp)
-      use timers       !   performance timers
+      use timers         ! performance timers
       implicit none
 
 !     implicit none
@@ -77,12 +77,12 @@
       integer                              :: ierr2                ! error indicator
       integer                              :: ierr3                ! error indicator
       integer                              :: ioerr                ! IO - error indicator
-      integer                                 inovec               ! location of NOVEC
-      integer                                 inothr               ! location of NOTHREADS
-      integer                                 i                    ! loop counter
-      integer                                 idata                ! help variable
-      logical                                 taupart              ! is tau present?
-      logical                                 vdfpart              ! is vertical diffusion present
+      integer                              :: inovec               ! location of NOVEC
+      integer                              :: inothr               ! location of NOTHREADS
+      integer                              :: i                    ! loop counter
+      integer                              :: idata                ! help variable
+      logical                              :: taupart              ! is tau present?
+      logical                              :: vdfpart              ! is vertical diffusion present
       integer                              :: special              ! index of special parameters
       integer(4) :: ithndl = 0
       if (timon) call timstrt( "dlwq7a", ithndl )
@@ -129,8 +129,9 @@
      &                        iwidth    , substances, constants , parameters, functions,
      &                        segfuncs  , segments  , gridps    , dlwqdata  , ierr2    ,
      &                        iwar      )
+            
             if ( ierr2 .gt. 0 ) goto 30
-
+            
             ! check for special constants, get directly from structure (ignore order, scaling etc this is not clean)
 
             if ( dlwqdata%subject .eq. SUBJECT_CONSTANT ) then
@@ -203,6 +204,7 @@
       nopa   = parameters%no_item
       nofun  = functions%no_item
       nosfun = segfuncs%no_item
+
       write ( lunut , 2050 ) constants%no_item
       write ( lunut , 2060 ) parameters%no_item
       write ( lunut , 2070 ) functions%no_item
@@ -211,7 +213,8 @@
       if ( parameters%no_item .gt. 0 ) write ( lun(2) ) (parameters%name(i), i=1, parameters%no_item)
       if ( functions%no_item  .gt. 0 ) write ( lun(2) ) (functions%name(i) , i=1, functions%no_item)
       if ( segfuncs%no_item   .gt. 0 ) write ( lun(2) ) (segfuncs%name(i)  , i=1, segfuncs%no_item)
-
+      
+      
       call dhopnf  ( lun(16) , lchar(16) , 16    , 1     , ioerr )
       write(lun(16)) ' 5.000PROCES'
       write(lun(16)) proc_pars%cursize
@@ -255,7 +258,7 @@
          endif
       endif
 
-!     proc_pars opruimen
+!     proc_pars cleanup
 
       ierr3 = dlwq_cleanup(substances)
       ierr3 = dlwq_cleanup(parameters)

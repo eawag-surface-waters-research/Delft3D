@@ -163,12 +163,13 @@
       character(len=20)              :: rundat                   ! execution date-time string
       character                      :: cdummy
       real                           :: rdummy
-      integer( 4)                    :: nomult            !< number of multiple substances
-      integer( 4)                    :: iwidth            !< width of the output file
-      real( 4)                       :: vrsion            !< version number of this input
-      integer( 4)                    :: ioutpt            !< flag for more or less output
-      integer                           ierr                     ! cumulative number of errors
-      integer                           iwar                     ! cumulative number of warnings
+      integer( 4)                    :: nomult                   !< number of multiple substances
+      integer( 4)                    :: iwidth                   !< width of the output file
+      integer( 4)                    :: refday                   !< reference day, varying from 1 till 365
+      real( 4)                       :: vrsion                   !< version number of this input
+      integer( 4)                    :: ioutpt                   !< flag for more or less output
+      integer                        :: ierr                     ! cumulative number of errors
+      integer                        :: iwar                     ! cumulative number of warnings
       logical                        :: chkpar(2)                ! flags to check for parameters SURF and LENGTH (used for special waste loads)
       type(GridPointerColl) GridPs
       type(OutputColl     ) Outputs
@@ -187,6 +188,7 @@
       logical                        :: unitop
       character(len=200)             :: nameoffile
       integer                        :: ioerr
+
 !
 !       initialisations
 !
@@ -371,8 +373,9 @@
       lch (1) = lchar(26)
       lunut   = lun(29)
       call dlwq01 ( lun     , psynam  , nosys   , notot   , nomult  ,
-     &              multp   , iwidth  , otime   , isfact  , vrsion  ,
-     &              ioutpt  , ierr    , iwar    )
+     &              multp   , iwidth  , otime   , isfact  , refday  ,
+     &              vrsion  , ioutpt  , ierr    , iwar    )
+
       if ( ierr .ne. 0 ) then
          write ( lunrep , 2000 )
          ierr = ierr + 1
@@ -508,6 +511,7 @@
      +              ioutps       , outputs      ,
      +              nomult       , imultp       ,
      +              constants    , noinfo       ,
+     +              refday       ,
      +              iwar         , ierr         )
 
       deallocate(syname)

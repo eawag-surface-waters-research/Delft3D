@@ -49,7 +49,7 @@
 !     R3_IID       CHA*10 NO_INPU I       item identification
 !     R3_NUMB      INT    NO_INPU I       serial number
 !     R3_DEFY      CHA*1  NO_INPU I       default y/n
-!     R3_DOC       CHA*1  NO_INPU I       documneted y/n
+!     R3_DOC       CHA*1  NO_INPU I       documented y/n
 !     R3_SEX       INT    NO_INPU I       segment or exchange
 !     LUNREP       INT    1       I       Unit number report file
 !     IERROR       INT    1       O       Error
@@ -105,12 +105,12 @@
       DATA
      + (ELMNMS(I),ELMTPS(I),NBYTSG(I),ELMDMS(1,I),ELMDMS(2,I),ELMDES(I),
      +  I = 1 , NELEMS)
-     +/'NO_INPU'  ,'INTEGER'  , 4,1,1,'number of rows  in table R3'    ,
+     +/'NO_INPU'  ,'INTEGER'  , 4,1,1,'number of rows in table R3'     ,
      + 'R3_PID'   ,'CHARACTER',10,1,0,'reference to prcocess'          ,
      + 'R3_IID'   ,'CHARACTER',10,1,0,'reference to item (input)'      ,
      + 'R3_NUMB'  ,'INTEGER'  , 4,1,0,'serial number in process'       ,
      + 'R3_DEFY'  ,'CHARACTER', 1,1,0,'use default yes/no'             ,
-     + 'R3_DOC'   ,'CHARACTER', 1,1,0,'documneted yes/no'              ,
+     + 'R3_DOC'   ,'CHARACTER', 1,1,0,'documented yes/no'              ,
      + 'R3_SEX'   ,'INTEGER'  , 4,1,0,'segment/exchange indication'    /
 !
 !     Read group

@@ -80,26 +80,26 @@
          integer                                :: no_param          ! number of paramters in this block of data
          integer                                :: no_loc            ! number of locations
          integer                                :: no_brk            ! number of breakpoints or harmonics
-         integer                                :: functype          ! constant, block, linear, harmonics, foutier
+         integer                                :: functype          ! constant, block, linear, harmonics, fourier
          integer                                :: igrid             ! grid number of input
          logical                                :: extern            ! is data in file or online coupling
-         integer                                :: filetype          ! type of ecternal data source
+         integer                                :: filetype          ! type of external data source
          character(len=FILE_NAME_SIZE)          :: filename          ! name of file or dataset in coupling
          integer                                :: lun               ! unit number external file
          integer                                :: iorder            ! ordering of the data matrix, param-loc or loc-param
-         logical                                :: param_named       ! are the paramters named
+         logical                                :: param_named       ! are the parameters named
          character(len=ITEM_NAME_SIZE), pointer :: param_name(:)     ! parameter names
          logical                                :: loc_named         ! are the locations named
          character(len=ITEM_NAME_SIZE), pointer :: loc_name(:)       ! location names
-         logical                                :: param_pointered   ! are the paramters pointered
+         logical                                :: param_pointered   ! are the parameters pointered
          integer, pointer                       :: param_pointers(:) ! index of the parameters in the waq substance/constants/etc arrays
          logical                                :: loc_defaults      ! data is default for all locations
          logical                                :: loc_pointered     ! are the locations pointered
          integer, pointer                       :: loc_pointers(:)   ! segment number of the locations in the specific grid
          logical                                :: scaled            ! overall scaling applied?
          real                                   :: scale_factor      ! overall scaling factor
-         logical                                :: param_scaled      ! need the parametrs scaling
-         real, pointer                          :: factor_param(:)   ! scale factors for parametrers if any
+         logical                                :: param_scaled      ! need the parameters scaling
+         real, pointer                          :: factor_param(:)   ! scale factors for parameters if any
          logical                                :: loc_scaled        ! need the locations scaling
          real, pointer                          :: factor_loc(:)     ! scale factors for locations if any
          integer, pointer                       :: times(:)          ! time at breakpoints
