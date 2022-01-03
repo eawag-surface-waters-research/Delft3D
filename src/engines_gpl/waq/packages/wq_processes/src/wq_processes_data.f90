@@ -86,8 +86,8 @@
       end module
 
       module processes_pointers
-
-      integer(8), save           :: dll_opb         !< open proces library dll handle
+      use iso_c_binding
+      integer(C_INTPTR_T), save           :: dll_opb         !< open proces library dll handle
 
       integer                    :: nipmsa          !< Length IPMSA
       integer                    :: nproc           !< Number of called processes

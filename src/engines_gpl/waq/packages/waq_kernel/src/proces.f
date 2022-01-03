@@ -69,6 +69,7 @@
 
       use timers
       use m_couplib
+      use iso_c_binding
 
       implicit none
 
@@ -193,7 +194,7 @@
       integer                    :: open_shared_library
       integer                    :: perf_function
       integer, save              :: ifirst = 1
-      integer(8), save           :: dll_opb     ! open proces library dll handle
+      integer(c_intptr_t), save  :: dll_opb     ! open proces library dll handle
       character(len=256)         :: shared_dll
       logical                    :: lfound
       integer                    :: idummy
@@ -829,6 +830,7 @@
       use timers
 !     use m_timers_waq
       use m_couplib
+      use iso_c_binding
 !
       INTEGER             IPROC , K     , IDT   , ITFACT, NOGRID,
      +                    NOSEG , NOFLUX, NOQ1  , NOQ2  , NOQ3  ,
@@ -852,7 +854,7 @@
      +                    DERIV(*)       , STOCHI(*)      ,
      +                    VOLUME(*)      , FLXDMP(*)
       CHARACTER*10        PRONAM(*)
-      integer(8)   , intent(in   ) :: dll_opb     ! open proces library dll handle
+      integer(c_intptr_t)   , intent(in   ) :: dll_opb     ! open proces library dll handle
 !
 !     Local
 !

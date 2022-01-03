@@ -38,30 +38,31 @@
 
 !     use m_timers_waq
       use timers
+      use iso_c_binding
       implicit none
 
 !     parameters          :
 
-!     kind           function         name          description
+!     kind           function                 name          description
 
-      real   (4)   , intent(inout) :: pmsa  ( * ) ! Process module status array
-      integer      , intent(in   ) :: imodul      ! Process module number
-      real   (4)   , intent(  out) :: flux  ( * ) ! Process fluxes
-      integer      , intent(in   ) :: ipoint( * ) ! Pointer to process data
-      integer      , intent(in   ) :: increm( * ) ! Increment in pointer process data
-      integer      , intent(in   ) :: noseg       ! Number of computational volumes
-      integer      , intent(in   ) :: noflux      ! Number of process fluxes
-      integer      , intent(in   ) :: iexpnt(4,*) ! Exchange pointers
-      integer      , intent(in   ) :: iknmrk( * ) ! Tag array
-      integer      , intent(in   ) :: noq1        ! Number of exchanges in first direction
-      integer      , intent(in   ) :: noq2        ! Number of exchanges in second direction
-      integer      , intent(in   ) :: noq3        ! Number of exchanges in third direction
-      integer      , intent(in   ) :: noq4        ! Number of exchanges in the water bed
-      character(10), intent(in   ) :: pronam      ! Name of this process
-      integer      , intent(in   ) :: pronvr      ! Not used
-      integer      , intent(in   ) :: prvtyp( * ) ! Not used
-      integer      , intent(in   ) :: iproc       ! Process number
-      integer(8)   , intent(in   ) :: dll_opb     ! open proces library dll handle
+      real   (4)   , intent(inout)          :: pmsa  ( * ) ! Process module status array
+      integer      , intent(in   )          :: imodul      ! Process module number
+      real   (4)   , intent(  out)          :: flux  ( * ) ! Process fluxes
+      integer      , intent(in   )          :: ipoint( * ) ! Pointer to process data
+      integer      , intent(in   )          :: increm( * ) ! Increment in pointer process data
+      integer      , intent(in   )          :: noseg       ! Number of computational volumes
+      integer      , intent(in   )          :: noflux      ! Number of process fluxes
+      integer      , intent(in   )          :: iexpnt(4,*) ! Exchange pointers
+      integer      , intent(in   )          :: iknmrk( * ) ! Tag array
+      integer      , intent(in   )          :: noq1        ! Number of exchanges in first direction
+      integer      , intent(in   )          :: noq2        ! Number of exchanges in second direction
+      integer      , intent(in   )          :: noq3        ! Number of exchanges in third direction
+      integer      , intent(in   )          :: noq4        ! Number of exchanges in the water bed
+      character(10), intent(in   )          :: pronam      ! Name of this process
+      integer      , intent(in   )          :: pronvr      ! Not used
+      integer      , intent(in   )          :: prvtyp( * ) ! Not used
+      integer      , intent(in   )          :: iproc       ! Process number
+      integer(c_intptr_t)   , intent(in   ) :: dll_opb     ! open proces library dll handle
 
 !     local
 

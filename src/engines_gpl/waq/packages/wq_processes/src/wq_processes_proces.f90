@@ -326,6 +326,7 @@
                               noq4  , pronam, dll_opb)
 
       use timers
+      use iso_c_binding
 
       integer             iproc , k, noseg , noflux, noq1  , noq2  , noq3  , noq4
       integer             prvnio(*)      , prvtyp(*)      , &
@@ -338,7 +339,7 @@
                           iexpnt(*)      , iknmrk(*)
       real                a(*)           , flux(*)
       character*10        pronam(*)
-      integer(8)   , intent(in   ) :: dll_opb     ! open proces library dll handle
+      integer(c_intptr_t)   , intent(in   ) :: dll_opb     ! open proces library dll handle
 !
 !     Local
 !
