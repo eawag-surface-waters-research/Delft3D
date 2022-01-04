@@ -72,10 +72,10 @@ double precision, allocatable        :: sumvalcur_global(:,:)  !< Global current
 double precision, allocatable        :: sumvalcur_local(:,:)   !< Local  current values of monitored crs quantities 
 double precision, allocatable        :: sumvalcum_timescale(:) !< Store the time-scale multiplication (e.g. morfac in the case of sediment).
 integer                              :: nval = 0               !< number of quantities moonitored including sediment
-integer                              :: nNodesCrs              !< [-] Total number of nodes for all cross sections
-integer,          allocatable, target:: nodeCountCrs(:)        !< [-] Count of nodes per cross section.
-double precision, allocatable, target:: geomXCrs(:)            !< [m] x coordinates of cross sections.
-double precision, allocatable, target:: geomYCrs(:)            !< [m] y coordinates of cross sections.
+integer                              :: nNodesCrs              !< [-] Total number of nodes for all cross section geometries
+integer,          allocatable, target:: nodeCountCrs(:)        !< [-] Count of nodes per cross section geometry.
+double precision, allocatable, target:: geomXCrs(:)            !< [m] x coordinates of cross section geometries.
+double precision, allocatable, target:: geomYCrs(:)            !< [m] y coordinates of cross section geometries.
 contains
 
 !> Returns the index/position of a named crosssection in the global set arrays of this module.
@@ -448,7 +448,7 @@ subroutine fill_geometry_arrays_crs()
    use m_GlobalParameters
    implicit none
 
-   double precision, allocatable :: xGat(:), yGat(:)    ! Coordinates that are gatherd data from all subdomains
+   double precision, allocatable :: xGat(:), yGat(:)    ! Coordinates that are gathered data from all subdomains
    integer,          allocatable :: nodeCountCrsMPI(:)  ! Count of nodes per cross section after mpi communication.
    double precision, allocatable :: geomXCrsMPI(:)      ! [m] x coordinates of cross sections after mpi communication.
    double precision, allocatable :: geomYCrsMPI(:)      ! [m] y coordinates of cross sections after mpi communication.
@@ -474,8 +474,8 @@ subroutine fill_geometry_arrays_crs()
       nNodes = nodeCountCrs(i)
       nlinks = crs(i)%path%lnx
       if (nNodes > 0) then
-         call realloc(geomX, nNodes)
-         call realloc(geomY, nNodes)
+         call realloc(geomX, max(allocSize(geomX), nNodes), keepExisting=.false.)
+         call realloc(geomY, max(allocSize(geomY), nNodes), keepExisting=.false.)
          L = crs(i)%path%iperm(1)
          geomX(1) = crs(i)%path%xk(1,L)
          geomX(2) = crs(i)%path%xk(2,L)
@@ -486,8 +486,8 @@ subroutine fill_geometry_arrays_crs()
             k = 3
             do L0 = 2, nlinks
                L = crs(i)%path%iperm(L0)
-               geomX(k) = crs(i)%path%xk(2,L)
-               geomY(k) = crs(i)%path%yk(2,L)
+               geomX(k) = crs(i)%path%xk(2,L) ! TODO: JZ: There may be one issue here: is xk(2,L) always the "next" point in the path/iperm order?
+               geomY(k) = crs(i)%path%yk(2,L) !           I don't think that's guaranteed. See crspath_on_flowgeom(), 2D part.
 
                k = k+1
             end do

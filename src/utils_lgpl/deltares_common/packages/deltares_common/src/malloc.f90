@@ -31,7 +31,7 @@ module m_alloc
 implicit none
 private 
 
-public realloc, reallocP, aerr
+public realloc, reallocP, aerr, allocSize
 
 ! TODO: Handle nondefault kinds properly? [AvD]
 
@@ -145,6 +145,11 @@ interface reallocP
    module procedure reallocPLogical3
    module procedure reallocPLogical4
 end interface
+
+interface allocSize
+   module procedure allocSizeDouble
+end interface
+
 contains
 !
 !
@@ -3395,5 +3400,20 @@ subroutine reallocByte2(arr, uindex, lindex, stat, fill, shift, keepExisting)
    if (present(stat)) stat = localErr
 end subroutine reallocByte2
 !
+
+!===============================================================================
+
+!> Determines size of an allocatable array, returning 0 when it is not allocated.
+function allocSizeDouble(arr) result(isize)
+   implicit none
+   double precision, allocatable, intent(inout) :: arr(:) !< Array for which the extent must be determined. Is allowed to be not allocated.
+   integer                                      :: isize  !< Array length, 0 when it was not allocated.
+
+   if (allocated(arr)) then
+      isize = size(arr)
+   else
+      isize = 0
+   end if
+end function allocSizeDouble
 
 end module m_alloc
