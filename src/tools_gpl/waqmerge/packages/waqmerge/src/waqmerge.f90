@@ -78,9 +78,9 @@ program waqmerge
          call get_command_argument(1,hyd%file_hyd%name)
          
          mdu_exist = .false.
-         inquire(file = trim(hyd%file_hyd%name)//'.mdu',exist = mdu_exist)
+         inquire(file = trim(hyd%file_hyd%name),exist = mdu_exist)
          if (.not. mdu_exist) then
-            write(*     ,'(a,a)'), '*** ERROR File: '//trim(hyd%file_hyd%name)//'.mdu'//' does not exist'
+            write(*     ,'(a,a)'), '*** ERROR File: '//trim(hyd%file_hyd%name)//' does not exist'
             call srstop(1)
          endif
          

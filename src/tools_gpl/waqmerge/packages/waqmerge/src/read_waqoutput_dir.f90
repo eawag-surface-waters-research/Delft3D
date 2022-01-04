@@ -47,7 +47,7 @@
       call tree_create('waqmerge-input', mdu_ptr)
       
       istat = 0
-      call prop_file('ini',trim(hyd%file_hyd%name)//'.mdu', mdu_ptr, istat)
+      call prop_file('ini',trim(hyd%file_hyd%name), mdu_ptr, istat)
       if (istat /= 0) then
          select case (istat)
             case(1)
