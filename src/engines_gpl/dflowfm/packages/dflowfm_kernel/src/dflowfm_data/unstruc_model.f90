@@ -2732,7 +2732,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
        endif
 
        if (writeall .or. keepzlayeringatbed /= 2) then
-          call prop_set(prop_ptr, 'geometry', 'Keepzlayeringatbed'  , keepzlayeringatbed, '0:bedlayerthickness == zlayerthickness, 1:possibly very thin layer at bed, 2=equal thickness first two layers')
+          call prop_set(prop_ptr, 'geometry', 'Keepzlayeringatbed'  , keepzlayeringatbed, '0:possibly very thin layer at bed, 1:bedlayerthickness == zlayerthickness, 2=equal thickness first two layers')
        endif
 
        if (ihuz .ne. 1) then
