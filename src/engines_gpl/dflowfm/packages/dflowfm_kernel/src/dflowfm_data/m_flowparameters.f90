@@ -85,9 +85,9 @@
 
  double precision                  :: Oceaneddyyoff = 0.0d0  !< relative domain size yoffset from centre
 
- double precision                  :: Corioadamsbashfordfac = 0d0  !< Coriolis Adams Bashford , 0d0 = explicit, 0.5 = AB
+ double precision                  :: Corioadamsbashfordfac = 0.5d0  !< Coriolis Adams Bashforth , 0d0 = explicit, 0.5 = AB
 
- double precision                  :: Barocadamsbashfordfac = .5d0 !< Baroclinic Adams Bashford , 0d0 = explicit, 0.5 = AB
+ double precision                  :: Barocadamsbashfordfac = .5d0 !< Baroclinic Adams Bashforth , 0d0 = explicit, 0.5 = AB
 
  double precision                  :: hhtrshcor         !< if > 0 safety for hu/hs in corio for now, ==0
 
