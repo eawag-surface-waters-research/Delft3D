@@ -139,7 +139,7 @@ echo     -p proc_def        : use an alternative process library file instead of
 echo     -np                : do not use any Delwaq processes (all substances will be seen as tracers)
 echo     -eco [bloom.spe]   : use BLOOM, optionally using an alternative algea database for the default
 echo                          $D3D_HOME/share/delft3d/bloom.spe
-echo     ...                : any other options are passed trough to the Delwaq to process
+echo     ...                : any other options are passed through to Delwaq to process
 :end
     rem To prevent the DOS box from disappearing immediately: remove the rem on the following line
 rem pause
