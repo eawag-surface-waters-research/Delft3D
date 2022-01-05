@@ -48,7 +48,6 @@ subroutine flow_setexternalforcingsonboundaries(tim, iresult)
    use m_sobekdfm
    use unstruc_channel_flow
    use m_oned_functions
-   use m_ec_typedefs, only: tEcItem
 
 
    implicit none
@@ -59,7 +58,6 @@ subroutine flow_setexternalforcingsonboundaries(tim, iresult)
    integer :: i, n, k, k2, kb, kt, ki, L, itrac, isf
    double precision :: timmin
    character(maxMessageLen) :: message123
-   type(tEcItem), pointer   :: itemPtr
 
    iresult = DFM_EXTFORCERROR
    call timstrt('External forcings boundaries', handle_extbnd)
@@ -72,15 +70,6 @@ subroutine flow_setexternalforcingsonboundaries(tim, iresult)
       if (.not. success) then
          goto 888
       end if
-
-      ! check the value of input waterlevelbnd
-      itemPtr => ecInstancePtr%ecItemsPtr(item_waterlevelbnd)%ptr
-      do i=1,itemPtr%nConnections
-         if (abs(zbndz(i)+999) < 1d-8) then
-            write(msgbuf,'(a)')  'Value -999 is specified as waterlevelbnd for boundary node'''// trim(itemPtr%connectionsPtr(i)%PTR%SOURCEITEMSPTR(1)%PTR%ELEMENTSETPTR%NAME)//''', this can cause problem in the computation.'
-            call mess(LEVEL_WARN, trim(msgbuf))
-         end if
-      end do
    end if
 
    if (nqhbnd > 0) then
