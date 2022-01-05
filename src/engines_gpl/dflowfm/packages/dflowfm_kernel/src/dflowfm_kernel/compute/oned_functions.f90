@@ -78,7 +78,7 @@ module m_oned_functions
          where (kcu(1:lnx1d) == 1)
             frcu(1:lnx1d)     = dmiss
             ifrcutp(1:lnx1d)  = 0
-            frcu_mor(1:lnx1d) = -10d0
+            frcu_mor(1:lnx1d) = dmiss
          end where
       endif
 

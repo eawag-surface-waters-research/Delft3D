@@ -406,7 +406,7 @@
       do LL = 1,nd(k)%lnx
          Lf = nd(k)%ln(LL)
          L = abs( Lf )
-         if (frcu(L)>0) then
+         if (frcu_mor(L)>0) then
             call getczz0(h1, frcu_mor(L), ifrcutp(L), czu, z0u)
          else
             call getczz0(h1, frcuni, ifrctypuni, czu, z0u)
