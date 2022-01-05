@@ -17,6 +17,14 @@ set(oss_dependencies deltares_common
 oss_include_libraries(${executable_name} oss_dependencies)
 target_link_libraries(${executable_name} ${oss_dependencies})
 
+if(UNIX)
+    message(STATUS "Setting target_compile_definitions in Unix")
+    set_property(TARGET ${executable_name} PROPERTY LINKER_LANGUAGE Fortran)
+endif(UNIX)
+
+if (WIN32)
+   target_compile_definitions(${executable_name} PRIVATE WIN64)
+endif(WIN32)
 
 
 # Define how the files should be structured within Visual Studio
