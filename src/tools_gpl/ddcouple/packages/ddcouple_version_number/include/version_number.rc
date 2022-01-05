@@ -53,7 +53,7 @@ BEGIN
             VALUE "OriginalFilename", "ddcouple.exe\0"
             VALUE "PrivateBuild", "-\0"
             VALUE "ProductName", "ddcouple\0"
-            VALUE "ProductVersion", "1.02.00.140575M\0"
+            VALUE "ProductVersion", "1.02.00.140581M\0"
             VALUE "SpecialBuild", "-\0"
         END
     END
