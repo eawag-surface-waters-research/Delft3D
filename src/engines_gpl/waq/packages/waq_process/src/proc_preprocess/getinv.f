@@ -94,6 +94,8 @@
       real, parameter           :: rmis0  = -888.  ! missing but no matter (set to 0.0)
       integer                   :: i_star          ! index of * in name
       integer(4)                :: ithndl = 0      ! handle for performance timer
+      integer                   :: refDayFound = -1 ! check for RefDay default
+
       if (timon) call timstrt( "getinv", ithndl )
 
       ! some init
@@ -241,7 +243,8 @@
                         nodef   = nodef + 1
                         dename(nodef) = valnam
                         ivalip = -3
-                        if (valnam == 'RefDay') then
+                        call ZOEKNS ( 'RefDay', 1, valnam, 6 , refDayFound)
+                        if (refDayFound /= -1) then
                            defaul(nodef) = real(refday)
                            write(line1,'(a,g13.6)') '       based on T0-string:',real(refday)
                         else
