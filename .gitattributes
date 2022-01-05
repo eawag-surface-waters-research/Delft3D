@@ -17597,6 +17597,8 @@ src/tools_gpl/ddcouple/packages/ddcouple_version_number/src/Makefile.am -text
 src/tools_gpl/ddcouple/packages/ddcouple_version_number/src/c2c.c -text
 src/tools_gpl/ddcouple/packages/ddcouple_version_number/src/f2c.c -text
 src/tools_gpl/ddcouple/packages/ddcouple_version_number/src/version.c -text
+src/tools_gpl/ddcouple/scripts/run_ddcouple.bat -text
+src/tools_gpl/ddcouple/scripts/run_ddcouple.sh -text
 src/tools_gpl/dfmoutput/CMakeLists.txt -text
 src/tools_gpl/dfmoutput/Makefile.am -text
 src/tools_gpl/dfmoutput/dfmoutput.vfproj -text
