@@ -212,6 +212,7 @@ rem ===============
     call :waqpb_export
     call :waqpb_import
     call :waqmerge
+    call :ddcouple
     call :agrhyd
     call :waq_run_processes
     call :duprol2delwaq
@@ -1138,7 +1139,6 @@ rem ==========================
         
         rem copy binaries and dll 
         call :copyFile "!build_dir!\delpar\!configuration!\delpar.exe"                            !dest_bin!
-        call :copyFile "!checkout_src_root!\engines_gpl\part\scripts\run_dpart.bat"               !dest_scripts!
     )
     
 goto :endproc
@@ -1173,9 +1173,9 @@ rem ==========================
     
         echo "Release postbuild"
 
-        set dest_bin="!install_dir!\x64\Release\dpart\bin"
-        set dest_default="!install_dir!\x64\Release\dpart\default"
-        set dest_scripts="!install_dir!\x64\Release\dpart\scripts"
+        set dest_bin="!install_dir!\x64\Release\dwaq\bin"
+        set dest_default="!install_dir!\x64\Release\dwaq\default"
+        set dest_scripts="!install_dir!\x64\Release\dwaq\scripts"
         set dest_plugins="!install_dir!\x64\Release\plugins\bin"
         set dest_share="!install_dir!\x64\Release\share\bin"
         
@@ -1183,11 +1183,56 @@ rem ==========================
         
         rem copy binaries and dll 
         call :copyFile "!build_dir!\waqmerge\!configuration!\waqmerge.exe"                            !dest_bin!
-        call :copyFile "!checkout_src_root!\engines_gpl\part\scripts\run_dpart.bat"               !dest_scripts!
     )
     
 goto :endproc
 
+
+
+
+rem ==========================
+rem === POST_BUILD_ddcouple
+rem ==========================
+:ddcouple
+
+    echo "postbuild ddcouple . . ."
+    
+    if "%configuration%" == "Debug" (
+    
+        echo "Debug postbuild"
+        set dest_bin="%install_dir%\x64\Debug"
+        
+        set dest_bin="!install_dir!\x64\Debug"
+        set dest_default="!install_dir!\x64\Debug"
+        set dest_scripts="!install_dir!\x64\Debug"
+        set dest_plugins="!install_dir!\x64\Debug"
+        set dest_share="!install_dir!\x64\Debug"
+        
+        call :makeDir !dest_bin!   
+        
+        rem copy binaries and dll 
+        call :copyFile "!build_dir!\ddcouple\!configuration!\ddcouple.*"                                !dest_bin!
+    )
+    
+    if "%configuration%" == "Release" ( 
+    
+        echo "Release postbuild"
+
+        set dest_bin="!install_dir!\x64\Release\dwaq\bin"
+        set dest_default="!install_dir!\x64\Release\dwaq\default"
+        set dest_scripts="!install_dir!\x64\Release\dwaq\scripts"
+        set dest_plugins="!install_dir!\x64\Release\plugins\bin"
+        set dest_share="!install_dir!\x64\Release\share\bin"
+        
+        call :makeAllDirs   
+        
+        rem copy binaries and dll 
+        call :copyFile "!build_dir!\ddcouple\!configuration!\ddcouple.exe"                            !dest_bin!
+        
+        call :copyFile "!checkout_src_root!\tools_gpl\ddcouple\scripts\run_ddcouple.bat"                 !dest_scripts!
+    )
+    
+goto :endproc
 
 
 
@@ -1219,9 +1264,9 @@ rem ==========================
     
         echo "Release postbuild"
 
-        set dest_bin="!install_dir!\x64\Release\dpart\bin"
-        set dest_default="!install_dir!\x64\Release\dpart\default"
-        set dest_scripts="!install_dir!\x64\Release\dpart\scripts"
+        set dest_bin="!install_dir!\x64\Release\dwaq\bin"
+        set dest_default="!install_dir!\x64\Release\dwaq\default"
+        set dest_scripts="!install_dir!\x64\Release\dwaq\scripts"
         set dest_plugins="!install_dir!\x64\Release\plugins\bin"
         set dest_share="!install_dir!\x64\Release\share\bin"
         
@@ -1229,7 +1274,6 @@ rem ==========================
         
         rem copy binaries and dll 
         call :copyFile "!build_dir!\agrhyd\!configuration!\agrhyd.exe"                            !dest_bin!
-        call :copyFile "!checkout_src_root!\engines_gpl\part\scripts\run_dpart.bat"               !dest_scripts!
     )
     
 goto :endproc

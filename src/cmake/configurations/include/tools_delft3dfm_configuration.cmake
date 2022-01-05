@@ -34,6 +34,15 @@ if(NOT TARGET waqmerge)
     add_subdirectory(${checkout_src_root}/${waqmerge_module} waqmerge)
 endif()
 
+# Ddcouple
+if(NOT TARGET ddcouple_version_number)
+    add_subdirectory(${checkout_src_root}/${ddcouple_module} ddcouple_version_number)
+endif()
+
+if(NOT TARGET ddcouple)
+    add_subdirectory(${checkout_src_root}/${ddcouple_module} ddcouple)
+endif()
+
 # Agrhyd
 if(NOT TARGET agrhyd)
     add_subdirectory(${checkout_src_root}/${agrhyd_module} agrhyd)
