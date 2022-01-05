@@ -75,7 +75,7 @@
  integer              :: jw, istat, L, ierr
  integer, external    :: flow_flowinit
  integer, external    :: init_openmp
- integer, external    :: set_model_boundingbox
+! integer, external    :: set_model_boundingbox
  !
  ! To raise floating-point invalid, divide-by-zero, and overflow exceptions:
  ! Activate the following 3 lines, See also statements below
@@ -181,7 +181,7 @@
     end if
  end if
  
- iresult = set_model_boundingbox()
+! iresult = set_model_boundingbox()
  
  call timstop(handle_extra(4)) ! End flow geometry
 
