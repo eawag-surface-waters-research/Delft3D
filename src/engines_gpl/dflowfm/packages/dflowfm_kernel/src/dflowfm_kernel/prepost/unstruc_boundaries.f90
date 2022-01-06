@@ -560,6 +560,14 @@ subroutine processexternalboundarypoints(qid, filename, filetype, return_time, n
          call realloc(atqh_all,nqhbnd); atqh_all(nqhbnd) = 0d0
          call realloc(atqh_sum,nqhbnd); atqh_sum(nqhbnd) = 0d0
          call realloc(qhbndz,nqhbnd)  ; qhbndz(nqhbnd)   = 0d0
+         call realloc(qh_gamma, nqhbnd)
+         qh_gamma = 0d0
+         call realloc(qhbndz_min, nqhbnd)
+         qhbndz_min = 0d0
+         call realloc(qhbndz_plus, nqhbnd)
+         qhbndz_plus = 0d0
+         call realloc(q_org, nqhbnd)
+         q_org = 0d0
      end if
      itpez(nbndz+1:nbndz+numz) =  itpbn
 

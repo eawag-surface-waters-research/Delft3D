@@ -47,7 +47,7 @@ subroutine furu()                                   ! set fu, ru and kfs
 
  implicit none
 
- integer          :: L, Lf, n, k1, k2, kb, LL, k, itu1, Lb, Lt, itpbn, ns
+ integer          :: L, Lf, n, k1, k2, kb, LL, k, itu1, Lb, Lt, itpbn, ns, i
 
  double precision :: bui, cu, du, du0, gdxi, ds, riep, as, gdxids
  double precision :: slopec, hup, u1L, v2, frL, u1L0, rhof, zbndun, zbndu0n, bdmwrp, bdmwrs
@@ -356,6 +356,19 @@ do n  = 1, nbndu                                    ! boundaries at u points
        enddo
     endif
  end if
+
+ do i = 1, nqhbnd
+    do n   = L1qhbnd(i), L2qhbnd(i)
+       kb  = kbndz(1,n)
+       k2  = kbndz(2,n)
+       L   = kbndz(3,n)
+       if (au(L)> 0d0 .and. qh_gamma(i) /= 0d0 .and. atqh_all(i) /= 0d0) then
+          fu(L) = abs(q1(L)/atqh_all(i)) * qh_gamma(i)/au(L)
+          ru(L) = q1(L) / au(L)
+          continue
+       endif
+     enddo
+  enddo
 
 ! BEGIN DEBUG
  if ( jampi.eq.1 ) then

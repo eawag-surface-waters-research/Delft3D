@@ -57,6 +57,7 @@ subroutine flow_setexternalforcingsonboundaries(tim, iresult)
 
    integer :: i, n, k, k2, kb, kt, ki, L, itrac, isf
    double precision :: timmin
+   double precision :: dQ
    character(maxMessageLen) :: message123
 
    iresult = DFM_EXTFORCERROR
@@ -99,6 +100,38 @@ subroutine flow_setexternalforcingsonboundaries(tim, iresult)
          if ( jatimer.eq.1 ) call stoptimer(IMPIREDUCE)
       end if
 
+      ! First step calculate the water level, using the QH-relation for a outflowing discharge + dQ 
+      do i = 1, nqhbnd
+         q_org(i) = atqh_all(i)
+         atqh_all(i) = q_org(i) + max(min(0.001d0*abs(q_org(i)),1d0),0.001d0)
+      enddo
+      success = ec_gettimespacevalue(ecInstancePtr, item_qhbnd, irefdate, tzone, tunit, tim)
+      if (.not. success) then
+         goto 888
+      end if
+      qhbndz_plus = qhbndz
+
+      ! Second step calculate the water level, using the QH-relation for a outflowing discharge - dQ 
+      do i = 1, nqhbnd
+         atqh_all(i) = q_org(i) - max(min(0.001d0*abs(q_org(i)),1d0),0.001d0)
+      enddo
+      success = ec_gettimespacevalue(ecInstancePtr, item_qhbnd, irefdate, tzone, tunit, tim)
+      if (.not. success) then
+         goto 888
+      end if
+      qhbndz_min = qhbndz
+
+      ! Step 3 now estimate the slope of the QH-relation at the given discharge
+      do i = 1, nqhbnd
+         dQ = max(min(0.001d0*abs(q_org(i)),1d0),0.001d0)
+         if (comparereal(qhbndz_plus(i), qhbndz_min(i)) == 0) then
+            qh_gamma(i) = 0d0
+         else
+            qh_gamma(i) = 2* dQ / (qhbndz_plus(i) - qhbndz_min(i))
+         endif
+         atqh_all(i) = q_org(i)
+      enddo
+
       success = ec_gettimespacevalue(ecInstancePtr, item_qhbnd, irefdate, tzone, tunit, tim)
       if (.not. success) then
          goto 888
@@ -107,7 +140,7 @@ subroutine flow_setexternalforcingsonboundaries(tim, iresult)
       ! vind bijbehorende zbndz punten
       do i = 1,nqhbnd
          do n   = L1qhbnd(i), L2qhbnd(i)
-            zbndz(n) = qhrelax*qhbndz(i) + (1d0-qhrelax)*max(s1( kbndz(1,n) ), bl( kbndz(1,n) ))
+            zbndz(n) = qhbndz(i) 
          end do
       end do
    endif
