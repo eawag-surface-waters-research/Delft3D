@@ -150,7 +150,7 @@
 
                        wetdown = max(wetdown, 0.0001d0)
                       call computeculvert(pstru%culvert, fu(L), ru(L), au(L), width, kfu, cmustr, s1(k1), s1(k2), &
-                          q1(L), q1(L), pstru%u1(L0), pstru%u0(L0), dx(L), dts, wetdown, .true.)
+                          q1(L), q1(L), pstru%u1(L0), pstru%u0(L0), dx(L), dts, wetdown)
                       
                    case (ST_UNI_WEIR)
                       fu(L) = pstru%fu(L0)
