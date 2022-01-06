@@ -28,7 +28,7 @@ if not exist %argfile% (
 )
 
 set workdir=%CD%
-rem set argfile=%workdir%\%argfile%
+set argfile=%workdir%\%argfile%
 echo Working directory: %workdir%
     rem
     rem Set the directories containing the binaries
@@ -52,8 +52,15 @@ set PATH=%waqdir%;%sharedir%
     rem Run
 set PATH=%waqdir%;%sharedir%;%~dp0
 
+    rem go to directory, run ddcouple, and return
+For %%A in ("%argfile%") do (
+    set argName=%%~nxA
+    set argPath=%%~dpA
+)
+cd /d "%argPath%"
 echo executing in this window: "%waqdir%\ddcouple.exe" "%argfile%"
-"%waqdir%\ddcouple.exe" "%argfile%"
+"%waqdir%\ddcouple.exe" "%argName%"
+cd /d "%workdir%"
 
 
 
