@@ -39,16 +39,15 @@ case $argfile in
     ;;
 esac
 
+workdir=`pwd`
 
 if [ ! -f $argfile ]; then
     if [ ! -f $argfile.inp ]; then
-        echo "ERROR: input hyd/ddb $argfile does not exist"
+        echo "ERROR: input hyd/ddb $argfile does not exist in working directory $workdir"
         print_usage_info
     fi
 fi
 
-
-workdir=`pwd`
 
 if [ -z "${D3D_HOME}" ]; then
     scriptdirname=`readlink \-f \$0`
