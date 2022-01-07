@@ -2690,7 +2690,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
        call prop_set(prop_ptr, 'geometry', 'Layertype' ,        Layertype,         'Vertical layer type (1: all sigma, 2: all z, 3: use VertplizFile)')
        call prop_set(prop_ptr, 'geometry', 'Numtopsig' ,        Numtopsig,         'Number of sigma layers in top of z-layer model')
        if (janumtopsiguniform .ne. 1) then
-           call prop_set(prop_ptr, 'geometry', 'Numtopsiguniform' , jaNumtopsiguniform,         'Number of sigma layers in top of z-layer model')
+           call prop_set(prop_ptr, 'geometry', 'Numtopsiguniform' , jaNumtopsiguniform,         'Number of sigma layers above z-layers in a z-sigma model')
        endif
 
        call prop_set(prop_ptr, 'geometry', 'SigmaGrowthFactor', sigmagrowthfactor, 'Layer thickness growth factor from bed up')
