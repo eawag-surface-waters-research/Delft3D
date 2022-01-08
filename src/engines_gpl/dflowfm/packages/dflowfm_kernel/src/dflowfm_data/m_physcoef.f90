@@ -226,7 +226,7 @@ limiterhordif               = 2             !< 0=No, 1=Horizontal gradient densi
 Stanton                     = 0.0013        !< coeff for convective  heat flux, if negative , take wind Cd
 Dalton                      = 0.0013        !< coeff for evaporative heat flux, if negative , take wind Cd
 
-Jadelvappos                 = 1             !< only positive forced evaporation fluxes
+Jadelvappos                 = 0             !< only positive forced evaporation fluxes
 
 tetav                       = 0.55d0        !< vertical teta transport
 tetavkeps                   = 0.55d0        !< vertical teta k-eps
