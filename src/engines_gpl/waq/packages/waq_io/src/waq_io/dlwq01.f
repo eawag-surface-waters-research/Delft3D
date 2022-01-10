@@ -375,10 +375,9 @@
         refday = 0
         call checkLeapYear(iyear, leapYear)
         
+        daysPerMonth = (/31,28,31,30,31,30,31,31,30,31,30,31/)
         if (leapYear) then
-           daysPerMonth = (/31,29,31,30,31,30,31,31,30,31,30,31/)
-        else
-           daysPerMonth = (/31,28,31,30,31,30,31,31,30,31,30,31/)
+           daysPerMonth(2) = 29
         endif
         
         refday = sum(daysPerMonth(1:imonth-1)) + iday
