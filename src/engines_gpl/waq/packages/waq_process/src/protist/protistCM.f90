@@ -36,6 +36,8 @@ use protist_uptake_functions
 use protist_photosynthesis_functions
 use protist_phagotrophy_functions
 use protist_food_functions
+use protist_constants
+use ieee_arithmetic
 
 
     IMPLICIT NONE                                                                                   
@@ -125,8 +127,6 @@ use protist_food_functions
      
      ! other parameters
      real, parameter :: wTurb = 0.0 ! this needs to be an input!!!!
-     real(8),  parameter :: PI_8  = 4 * atan (1.0_8) 
-     real, parameter :: threshNut = 1.0E-10 ! protection against small nut conc.
      
      ! loop counter 
      integer iPrey      ! counter for loops
@@ -173,7 +173,7 @@ use protist_food_functions
 
 
     ! segment loop
-    do iseg = 1 , noseg
+    segmentLoop: do iseg = 1 , noseg
         call dhkmrk(1,iknmrk(iseg),ikmrk1)
         if (ikmrk1.eq.1) then
             
@@ -187,7 +187,7 @@ use protist_food_functions
         exat         = PMSA(ipnt( 13 ))  !    -ve exponent of attenuation                            (dl)    
                       
         ! species loop
-        do iSpec = 0, (nrSp-1)
+        speciesLoop: do iSpec = 0, (nrSp-1)
 
             spInc = nrSpCon * iSpec
 
@@ -235,8 +235,8 @@ use protist_food_functions
             SDA          = PMSA(ipnt( nrSpInd + 40 + spInc ))   !     specific dynamic action                                (dl)
             UmRT         = PMSA(ipnt( nrSpInd + 41 + spInc ))   !     maximum growth rate at reference T                     (d-1) 
             
-            if (protC <= 1.0E-9) then 
-                cycle
+            if (protC <= threshCmass) then 
+                cycle speciesLoop
             end if
                         
             ! Calculate the nutrient quota of the cell-------------------------------------------------------------------------------                            
@@ -501,16 +501,16 @@ use protist_food_functions
                 fl ( (25 + 5 + iPrey * 5) + (25 + maxNrPr * 5) * iSpec + iflux ) = prot_array%dPreySi(iPrey + 1) 
             end do  
             
-            if ( isnan(protC) ) write (*,*) '(''ERROR: NaN in protC in segment:'', i10)' ,    iseg
-            if ( isnan(Cfix) )  write (*,*) '(''ERROR: NaN in Cfix in segment:'', i10)' ,    iseg
-            if ( isnan(totR) )  write (*,*) '(''ERROR: NaN in totR in segment:'', i10)' ,    iseg
-            if ( isnan(mrt) )   write (*,*) '(''ERROR: NaN in mrt in segment:'', i10)' ,    iseg
-            if ( isnan(NC) )    write (*,*) '(''ERROR: NaN in NC in segment:'', i10)' ,    iseg
-            if ( isnan(PC) )    write (*,*) '(''ERROR: NaN in PC in segment:'', i10)' ,    iseg
-            if ( isnan(ChlC) )  write (*,*) '(''ERROR: NaN in ChlC in segment:'', i10)' ,    iseg
-            if ( isnan(ingC) )  write (*,*) '(''ERROR: NaN in ingC in segment:'', i10)' ,    iseg
+            if ( ieee_is_nan(protC) ) write (*,*) '(''ERROR: NaN in protC in segment:'', i10)' ,    iseg
+            if ( ieee_is_nan(Cfix) )  write (*,*) '(''ERROR: NaN in Cfix in segment:'', i10)' ,    iseg
+            if ( ieee_is_nan(totR) )  write (*,*) '(''ERROR: NaN in totR in segment:'', i10)' ,    iseg
+            if ( ieee_is_nan(mrt) )   write (*,*) '(''ERROR: NaN in mrt in segment:'', i10)' ,    iseg
+            if ( ieee_is_nan(NC) )    write (*,*) '(''ERROR: NaN in NC in segment:'', i10)' ,    iseg
+            if ( ieee_is_nan(PC) )    write (*,*) '(''ERROR: NaN in PC in segment:'', i10)' ,    iseg
+            if ( ieee_is_nan(ChlC) )  write (*,*) '(''ERROR: NaN in ChlC in segment:'', i10)' ,    iseg
+            if ( ieee_is_nan(ingC) )  write (*,*) '(''ERROR: NaN in ingC in segment:'', i10)' ,    iseg
                
-        enddo ! end loop over species 
+        enddo speciesLoop ! end loop over species 
 
         endif ! end if check for dry cell 
 
@@ -518,7 +518,7 @@ use protist_food_functions
         iflux = iflux + noflux
         ipnt = ipnt + increm
 
-    enddo ! end loop over segments
+    enddo segmentLoop ! end loop over segments
     
     
     ! deallocation of prey input array

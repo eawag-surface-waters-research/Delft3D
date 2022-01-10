@@ -30,6 +30,7 @@ subroutine PROSED     ( pmsa   , fl     , ipoint , increm, noseg , &
 !*******************************************************************************                      
 !  
 
+    use protist_constants
     IMPLICIT NONE                                                                                   
 !                                                                                                     
 !     Type    Name         I/O Description                                                            
@@ -215,7 +216,6 @@ subroutine PROSED     ( pmsa   , fl     , ipoint , increm, noseg , &
     enddo        
     
     iSpec = 0
-    ipnt = ipoint
     ! Exchange loop over vertical direction -------------------------------------------------------------------
     do ioq = noq1+noq2+1 , noq1+noq2+noq3+noq4
         i_origin  = iexpnt(1,ioq)
@@ -236,7 +236,7 @@ subroutine PROSED     ( pmsa   , fl     , ipoint , increm, noseg , &
                 do iSpec = 0, (nrSp-1)
                     
                     if ( Depth .gt. MinDepth .and. Depth2 .gt. MinDepth2 ) then
-                        PMSA(ipnt( inpItems + maxNrSp + 6 * maxNrSp + 1 + iSpec )) = PMSA(ipnt(inpItems + 1 + iSpec))/86400.
+                        PMSA(ipnt( inpItems + maxNrSp + 6 * maxNrSp+1+iSpec)) = PMSA(ipnt(inpItems+1+iSpec))/numSecPerDay
                     else
                         PMSA(ipnt( inpItems + maxNrSp + 6 * maxNrSp + 1 + iSpec )) = 0.0
                     endif ! end check if min depth large enough

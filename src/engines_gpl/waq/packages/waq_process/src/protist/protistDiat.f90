@@ -34,6 +34,9 @@ use protist_math_functions
 use protist_cell_functions
 use protist_uptake_functions
 use protist_photosynthesis_functions
+use protist_constants
+use ieee_arithmetic
+
 
     IMPLICIT NONE                                                                                   
 !                                                                                                     
@@ -96,9 +99,6 @@ use protist_photosynthesis_functions
      real    maxPSreq, PS                                ! req for C to come from PS (==1 for diatoms)
      real    totR, Cu                                    ! respiration and C-growth
      real    mrt, mrtFrAut, mrtFrDet                     ! mortality to detritus and autolysis
-     
-     ! additional protection parameters
-     real, parameter :: threshVal = 1.0E-10              ! protection against too small nutrient values
 
      ! Fluxes
      real    dNH4up, dNO3up, dPup, dSiup                 ! uptake fluxes
@@ -127,7 +127,7 @@ use protist_photosynthesis_functions
     inpItems = maxNrSp * nrSpCon + nrInd
    
     ! segment loop
-    do iseg = 1 , noseg
+    segmentLoop: do iseg = 1 , noseg
         call dhkmrk(1,iknmrk(iseg),ikmrk1)
         if (ikmrk1.eq.1) then
             
@@ -142,7 +142,7 @@ use protist_photosynthesis_functions
         exat         = PMSA(ipnt(  12 ))  !    -ve exponent of attenuation                            (dl)              
                       
         ! species loop
-        do iSpec = 0, (nrSp-1)
+        speciesLoop: do iSpec = 0, (nrSp-1)
 
             spInc = nrSpCon * iSpec
                
@@ -186,8 +186,8 @@ use protist_photosynthesis_functions
             SiCopt       = PMSA(ipnt( nrInd + 36 + spInc ))   !      minimum Si:C (diatom)                                  (gSi gC-1)
             UmRT         = PMSA(ipnt( nrInd + 37 + spInc ))   !      maximum growth rate at reference T                     (d-1) 
                         
-            if (protC <= 1.0E-9) then 
-                cycle
+            if (protC <= threshCmass) then 
+                cycle speciesLoop
             end if
             
             ! Calculate the nutrient quota of the cell-------------------------------------------------------------------------------                            
@@ -348,17 +348,17 @@ use protist_photosynthesis_functions
             fl ( 21 +  iSpec * 22  + iflux )  = dAutChl  
             fl ( 22 +  iSpec * 22  + iflux )  = dDetChl  
             
-            if ( isnan(protC) ) write (*,*) '(''ERROR: NaN in protC in segment:'', i10)' ,    iseg
-            if ( isnan(Cfix) )  write (*,*) '(''ERROR: NaN in Cfix in segment:'', i10)' ,    iseg
-            if ( isnan(totR) )  write (*,*)  '(''ERROR: NaN in totR in segment:'', i10)' ,    iseg
-            if ( isnan(mrt) )   write (*,*) '(''ERROR: NaN in mrt in segment:'', i10)' ,    iseg
-            if ( isnan(NC) )    write (*,*) '(''ERROR: NaN in NC in segment:'', i10)' ,    iseg
-            if ( isnan(PC) )    write (*,*) '(''ERROR: NaN in PC in segment:'', i10)' ,    iseg
-            if ( isnan(ChlC) )  write (*,*) '(''ERROR: NaN in ChlC in segment:'', i10)' ,    iseg
-            if ( isnan(SC) )    write (*,*) '(''ERROR: NaN in SC in segment:'', i10)' ,    iseg
+            if ( ieee_is_nan(protC) ) write (*,*) '(''ERROR: NaN in protC in segment:'', i10)' ,    iseg
+            if ( ieee_is_nan(Cfix) )  write (*,*) '(''ERROR: NaN in Cfix in segment:'', i10)' ,    iseg
+            if ( ieee_is_nan(totR) )  write (*,*)  '(''ERROR: NaN in totR in segment:'', i10)' ,    iseg
+            if ( ieee_is_nan(mrt) )   write (*,*) '(''ERROR: NaN in mrt in segment:'', i10)' ,    iseg
+            if ( ieee_is_nan(NC) )    write (*,*) '(''ERROR: NaN in NC in segment:'', i10)' ,    iseg
+            if ( ieee_is_nan(PC) )    write (*,*) '(''ERROR: NaN in PC in segment:'', i10)' ,    iseg
+            if ( ieee_is_nan(ChlC) )  write (*,*) '(''ERROR: NaN in ChlC in segment:'', i10)' ,    iseg
+            if ( ieee_is_nan(SC) )    write (*,*) '(''ERROR: NaN in SC in segment:'', i10)' ,    iseg
 
             
-        enddo ! end loop over species 
+        enddo speciesLoop ! end loop over species 
 
         endif ! end if check for dry cell 
 
@@ -366,6 +366,6 @@ use protist_photosynthesis_functions
         iflux = iflux + noflux
         ipnt = ipnt + increm
 
-    enddo ! end loop over segments
+    enddo segmentLoop ! end loop over segments
     return
 end ! end subroutine 

@@ -34,6 +34,8 @@ use protist_cell_functions
 use protist_phagotrophy_functions
 use protist_types
 use protist_food_functions
+use protist_constants
+use ieee_arithmetic
 
     IMPLICIT NONE                                                                                   
 !                                                                                                     
@@ -108,7 +110,6 @@ use protist_food_functions
             
      ! other parameters
      real, parameter :: wTurb = 0.0 ! this needs to be an input from model eventually!!!!
-     real(8),  parameter :: PI_8  = 4 * atan (1.0_8) 
 
      ! loop counter 
      integer iPrey      ! counter for loops
@@ -153,14 +154,14 @@ use protist_food_functions
     inpItems = nrSpInd   + maxNrSp * nrSpCon + maxNrPr * nrSp_par
          
     ! segment loop
-    do iseg = 1 , noseg
+    segmentLoop: do iseg = 1 , noseg
         call dhkmrk(1,iknmrk(iseg),ikmrk1)
         if (ikmrk1.eq.1) then    
             
             Temp      = PMSA(ipnt(   6 ))   !   temperature                                            (C)
       
         ! species loop
-        do iSpec = 0, (nrSp-1)
+        speciesLoop: do iSpec = 0, (nrSp-1)
 
             spInc = nrSpCon * iSpec
                
@@ -190,8 +191,8 @@ use protist_food_functions
             SDA          = PMSA(ipnt( nrSpInd   + 22 + spInc ))   !      specific dynamic action                                (dl)
             UmRT         = PMSA(ipnt( nrSpInd   + 23 + spInc ))   !      maximum growth rate using NH4-N at reference T         (d-1) 
                         
-            if (protC <= 1.0E-9) then 
-                cycle
+            if (protC <= threshCmass) then 
+                cycle speciesLoop
             end if
 
             ! Calculate the nutrient quota of the cell-------------------------------------------------------------------------------                            
@@ -323,12 +324,12 @@ use protist_food_functions
             dPout   = voiding(protP, protC, PCopt)
                                     
             ! gNut m-3 d-1 mortality
-            dAutC = protC * protC * mrtFrAut
-            dDetC = protC * protC * mrtFrDet    
-            dAutN = protN * protN * mrtFrAut
-            dDetN = protN * protN * mrtFrDet            
-            dAutP = protP * protP * mrtFrAut
-            dDetP = protP * protP * mrtFrDet            
+            dAutC = protC **2 * mrtFrAut
+            dDetC = protC **2 * mrtFrDet    
+            dAutN = protN **2 * mrtFrAut
+            dDetN = protN **2 * mrtFrDet            
+            dAutP = protP **2 * mrtFrAut
+            dDetP = protP **2 * mrtFrDet            
             
               
             ! (1 + SpeciesLoop * (nr of fluxes per individual species + total prey fluxes) + total number of fluxes
@@ -348,11 +349,11 @@ use protist_food_functions
             fl (  14 + iSpec * (15 + maxNrPr * 5) + iflux) = dAutP
             fl (  15 + iSpec * (15 + maxNrPr * 5) + iflux) = dDetP
             
-            if ( isnan(protC) ) write (*,*) '(''ERROR: NaN in protC in segment:'', i10)' ,    iseg
-            if ( isnan(ingC) )  write (*,*) '(''ERROR: NaN in ingC in segment:'', i10)' ,    iseg
-            if ( isnan(assC) )  write (*,*) '(''ERROR: NaN in assC in segment:'', i10)' ,    iseg
-            if ( isnan(totR) )  write (*,*) '(''ERROR: NaN in totR in segment:'', i10)' ,    iseg
-            if ( isnan(mrt) )   write (*,*) '(''ERROR: NaN in mrt in segment:'', i10)' ,    iseg
+            if ( ieee_is_nan(protC) ) write (*,*) '(''ERROR: NaN in protC in segment:'', i10)' ,    iseg
+            if ( ieee_is_nan(ingC) )  write (*,*) '(''ERROR: NaN in ingC in segment:'', i10)' ,    iseg
+            if ( ieee_is_nan(assC) )  write (*,*) '(''ERROR: NaN in assC in segment:'', i10)' ,    iseg
+            if ( ieee_is_nan(totR) )  write (*,*) '(''ERROR: NaN in totR in segment:'', i10)' ,    iseg
+            if ( ieee_is_nan(mrt) )   write (*,*) '(''ERROR: NaN in mrt in segment:'', i10)' ,    iseg
             
             ! Prey losses through pred ing. ----------------------------------------------------  
                             
@@ -373,7 +374,7 @@ use protist_food_functions
                 fl ( (15 + 5 + iPrey * 5) + (15 + maxNrPr * 5) * iSpec + iflux ) = prot_array%dPreySi(iPrey + 1) 
             end do 
             
-        enddo ! end loop over species 
+        enddo speciesLoop ! end loop over species 
 
         endif ! end if check for dry cell 
 
@@ -381,7 +382,7 @@ use protist_food_functions
         iflux = iflux + noflux
         ipnt = ipnt + increm
 
-    enddo ! end loop over segments
+    enddo segmentLoop ! end loop over segments
     
     
     ! deallocation of prey input array
