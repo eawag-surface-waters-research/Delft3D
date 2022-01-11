@@ -12732,7 +12732,6 @@ itemid,itemse,itemex,itemde,itemun,itemnm,itemag,itemda,itemwk,itemgr
 "maxNrSp_D ","x"," ",    2.00000    ,"      (dl)          ","total nr species implemented in process           ","volume    ","volume    "," ","                              "
 "nrSp_D    ","x"," ",    1.00000    ,"      (dl)          ","nr of species user wants to model                 ","volume    ","volume    "," ","                              "
 "nrSpCon_D ","x"," ",    37.0000    ,"      (dl)          ","nr of species dependent items                     ","volume    ","volume    "," ","                              "
-"nrInd_D   ","x"," ",    12.0000    ,"      (dl)          ","nr of species independent items                   ","volume    ","volume    "," ","                              "
 "diatC_1   ","x"," ",   0.100000E-11,"      (gC m-3)      ","diatom C-biomass                                  ","volume    ","volume    ","x","DummyGroup                    "
 "diatN_1   ","x"," ",    0.00000    ,"      (gN m-3)      ","diatom N-biomass                                  ","volume    ","volume    ","x","DummyGroup                    "
 "diatP_1   ","x"," ",    0.00000    ,"      (gP m-3)      ","diatom P-biomass                                  ","volume    ","volume    ","x","DummyGroup                    "
@@ -13638,3 +13637,4 @@ itemid,itemse,itemex,itemde,itemun,itemnm,itemag,itemda,itemwk,itemgr
 "dRadioR3  ","x"," ",   -999.000    ,"           (mg/m3/d)","Radio-active decay Radio3                         ","volume    ","volume    "," ","                              "
 "nrFlSp    ","x"," ",    22.0000    ,"        (dl)        ","nr of fluxes per individual species (DON'T CHANGE)","volume    ","volume    "," ","                              "
 "nrOutSp   ","x"," ",    24.0000    ,"        (dl)        ","nr of output items per species (DON'T CHANGE)     ","volume    ","volume    "," ","                              "
+"nrInd_D   ","x"," ",    14.0000    ,"        (dl)        ","nr of species independent items                   ","volume    ","volume    "," ","                              "
