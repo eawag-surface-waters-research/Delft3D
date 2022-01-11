@@ -160,7 +160,7 @@ use ieee_arithmetic
     nrSpCon   = PMSA(ipnt(   3 ))   !   nr of species dependent items                          (dl)                
     nrSpInd   = PMSA(ipnt(   4 ))   !   nr of species independent items                        (dl)  
     maxNrPr   = PMSA(ipnt(   5 ))   !   nr of prey species implemented                         (dl)
-    nrSp_par = PMSA(ipnt(   6 ))   !   nr of parameters per species       
+    nrSp_par  = PMSA(ipnt(   6 ))   !   nr of parameters per species       
     
     
     ! allocation of prey input array
@@ -217,7 +217,7 @@ use ieee_arithmetic
             NCopt        = PMSA(ipnt( nrSpInd + 22 + spInc ))   !     N:C for growth under optimal conditions                (gN gC-1)
             NO3Cm        = PMSA(ipnt( nrSpInd + 23 + spInc ))   !     N:C that totally represses NO3 transport               (gN gC-1)
             NO3Copt      = PMSA(ipnt( nrSpInd + 24 + spInc ))   !     N:C for growth on NO3 under optimal conditions         (gN gC-1)
-            optCR        = PMSA(ipnt( nrSpInd + 25 + spInc ))   !     proportion of prey captured by starved Prot               (dl)
+            optCR        = PMSA(ipnt( nrSpInd + 25 + spInc ))   !     proportion of prey captured by starved Prot            (dl)
             PCm          = PMSA(ipnt( nrSpInd + 26 + spInc ))   !     PC maximum quota                                       (gP gC-1)
             PCo          = PMSA(ipnt( nrSpInd + 27 + spInc ))   !     PC minimum quota                                       (gP gC-1)
             PCoNCm       = PMSA(ipnt( nrSpInd + 28 + spInc ))   !     maximum NC when PC is minimum (PCu = 0)                (gN gC-1)
@@ -359,47 +359,47 @@ use ieee_arithmetic
             ! Output -------------------------------------------------------------------
                
             ! (input items + position of specific output item in vector + species loop * total number of output) 
-            PMSA(ipnt( inpItems +  1 + iSpec * 41 )) = NC 
-            PMSA(ipnt( inpItems +  2 + iSpec * 41 )) = PC 
-            PMSA(ipnt( inpItems +  3 + iSpec * 41 )) = ChlC 
-            PMSA(ipnt( inpItems +  4 + iSpec * 41 )) = UmT 
-            PMSA(ipnt( inpItems +  5 + iSpec * 41 )) = BR
-            PMSA(ipnt( inpItems +  6 + iSpec * 41 )) = NCu 
-            PMSA(ipnt( inpItems +  7 + iSpec * 41 )) = PCu 
-            PMSA(ipnt( inpItems +  8 + iSpec * 41 )) = NPCu
-            PMSA(ipnt( inpItems +  9 + iSpec * 41 )) = mot
-            PMSA(ipnt( inpItems + 10 + iSpec * 41 )) = upP 
-            PMSA(ipnt( inpItems + 11 + iSpec * 41 )) = upNH4 
-            PMSA(ipnt( inpItems + 12 + iSpec * 41 )) = upNO3 
-            PMSA(ipnt( inpItems + 13 + iSpec * 41 )) = PSqm 
-            PMSA(ipnt( inpItems + 14 + iSpec * 41 )) = PS
-            PMSA(ipnt( inpItems + 15 + iSpec * 41 )) = Cfix 
-            PMSA(ipnt( inpItems + 16 + iSpec * 41 )) = CfixPS
-            PMSA(ipnt( inpItems + 17 + iSpec * 41 )) = synChl
-            PMSA(ipnt( inpItems + 18 + iSpec * 41 )) = degChl
-            PMSA(ipnt( inpItems + 19 + iSpec * 41 )) = sumCP
-            PMSA(ipnt( inpItems + 20 + iSpec * 41 )) = ingNC
-            PMSA(ipnt( inpItems + 21 + iSpec * 41 )) = ingPC
-            PMSA(ipnt( inpItems + 22 + iSpec * 41 )) = ppNC
-            PMSA(ipnt( inpItems + 23 + iSpec * 41 )) = ppPC
-            PMSA(ipnt( inpItems + 24 + iSpec * 41 )) = stoichP
-            PMSA(ipnt( inpItems + 25 + iSpec * 41 )) = opAE
-            PMSA(ipnt( inpItems + 26 + iSpec * 41 )) = reqPred
-            PMSA(ipnt( inpItems + 27 + iSpec * 41 )) = maxIng
-            PMSA(ipnt( inpItems + 28 + iSpec * 41 )) = ingSat
-            PMSA(ipnt( inpItems + 29 + iSpec * 41 )) = ingC  
-            PMSA(ipnt( inpItems + 30 + iSpec * 41 )) = assC  
-            PMSA(ipnt( inpItems + 31 + iSpec * 41 )) = ingN
-            PMSA(ipnt( inpItems + 32 + iSpec * 41 )) = ingP
-            PMSA(ipnt( inpItems + 33 + iSpec * 41 )) = assN
-            PMSA(ipnt( inpItems + 34 + iSpec * 41 )) = assP
-            PMSA(ipnt( inpItems + 35 + iSpec * 41 )) = totR 
-            PMSA(ipnt( inpItems + 36 + iSpec * 41 )) = Cu
-            PMSA(ipnt( inpItems + 37 + iSpec * 41 )) = mrt 
-            PMSA(ipnt( inpItems + 38 + iSpec * 41 )) = mrtFrAut 
-            PMSA(ipnt( inpItems + 39 + iSpec * 41 )) = mrtFrDet
-            PMSA(ipnt( inpItems + 40 + iSpec * 41 )) = preyFlag
-            PMSA(ipnt( inpItems + 41 + iSpec * 41 )) = lightInh
+            PMSA(ipnt( inpItems +  1 + iSpec * nrSpCon )) = NC 
+            PMSA(ipnt( inpItems +  2 + iSpec * nrSpCon )) = PC 
+            PMSA(ipnt( inpItems +  3 + iSpec * nrSpCon )) = ChlC 
+            PMSA(ipnt( inpItems +  4 + iSpec * nrSpCon )) = UmT 
+            PMSA(ipnt( inpItems +  5 + iSpec * nrSpCon )) = BR
+            PMSA(ipnt( inpItems +  6 + iSpec * nrSpCon )) = NCu 
+            PMSA(ipnt( inpItems +  7 + iSpec * nrSpCon )) = PCu 
+            PMSA(ipnt( inpItems +  8 + iSpec * nrSpCon )) = NPCu
+            PMSA(ipnt( inpItems +  9 + iSpec * nrSpCon )) = mot
+            PMSA(ipnt( inpItems + 10 + iSpec * nrSpCon )) = upP 
+            PMSA(ipnt( inpItems + 11 + iSpec * nrSpCon )) = upNH4 
+            PMSA(ipnt( inpItems + 12 + iSpec * nrSpCon )) = upNO3 
+            PMSA(ipnt( inpItems + 13 + iSpec * nrSpCon )) = PSqm 
+            PMSA(ipnt( inpItems + 14 + iSpec * nrSpCon )) = PS
+            PMSA(ipnt( inpItems + 15 + iSpec * nrSpCon )) = Cfix 
+            PMSA(ipnt( inpItems + 16 + iSpec * nrSpCon )) = CfixPS
+            PMSA(ipnt( inpItems + 17 + iSpec * nrSpCon )) = synChl
+            PMSA(ipnt( inpItems + 18 + iSpec * nrSpCon )) = degChl
+            PMSA(ipnt( inpItems + 19 + iSpec * nrSpCon )) = sumCP
+            PMSA(ipnt( inpItems + 20 + iSpec * nrSpCon )) = ingNC
+            PMSA(ipnt( inpItems + 21 + iSpec * nrSpCon )) = ingPC
+            PMSA(ipnt( inpItems + 22 + iSpec * nrSpCon )) = ppNC
+            PMSA(ipnt( inpItems + 23 + iSpec * nrSpCon )) = ppPC
+            PMSA(ipnt( inpItems + 24 + iSpec * nrSpCon )) = stoichP
+            PMSA(ipnt( inpItems + 25 + iSpec * nrSpCon )) = opAE
+            PMSA(ipnt( inpItems + 26 + iSpec * nrSpCon )) = reqPred
+            PMSA(ipnt( inpItems + 27 + iSpec * nrSpCon )) = maxIng
+            PMSA(ipnt( inpItems + 28 + iSpec * nrSpCon )) = ingSat
+            PMSA(ipnt( inpItems + 29 + iSpec * nrSpCon )) = ingC  
+            PMSA(ipnt( inpItems + 30 + iSpec * nrSpCon )) = assC  
+            PMSA(ipnt( inpItems + 31 + iSpec * nrSpCon )) = ingN
+            PMSA(ipnt( inpItems + 32 + iSpec * nrSpCon )) = ingP
+            PMSA(ipnt( inpItems + 33 + iSpec * nrSpCon )) = assN
+            PMSA(ipnt( inpItems + 34 + iSpec * nrSpCon )) = assP
+            PMSA(ipnt( inpItems + 35 + iSpec * nrSpCon )) = totR 
+            PMSA(ipnt( inpItems + 36 + iSpec * nrSpCon )) = Cu
+            PMSA(ipnt( inpItems + 37 + iSpec * nrSpCon )) = mrt 
+            PMSA(ipnt( inpItems + 38 + iSpec * nrSpCon )) = mrtFrAut 
+            PMSA(ipnt( inpItems + 39 + iSpec * nrSpCon )) = mrtFrDet
+            PMSA(ipnt( inpItems + 40 + iSpec * nrSpCon )) = preyFlag
+            PMSA(ipnt( inpItems + 41 + iSpec * nrSpCon )) = lightInh
 
             ! FLUXES -------------------------------------------------------------------   
             ! Protist gains------------------------------------------------------------   

@@ -740,8 +740,3 @@ procid,procco,procfo,procnm
 "Prot_CM   ",123,"PROTCM    ","Growth/mortality of constitutive mixoplankton     "
 "Prot_NCM  ",123,"PRONCM    "," Growth/mortality of non-constitutive mixoplankton"
 "Prot_Zoo  ",123,"PROZOO    ","Growth/mortality of protozooplankton              "
-"RadioU    ",123,"DRADIO    ","Radio-active decay of uranium-238                 "
-"RadioCs   ",123,"DRADIO    ","Radio-active decay of caesium-137                 "
-"RadioSub1 ",123,"DRADIO    ","Radio-active decay of substance Radio1            "
-"RadioSub2 ",123,"DRADIO    ","Radio-active decay of substance Radio2            "
-"RadioSub3 ",123,"DRADIO    ","Radio-active decay of substance Radio3            "

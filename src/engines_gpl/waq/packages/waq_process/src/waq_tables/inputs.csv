@@ -17347,88 +17347,90 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "Prot_Dia  ","nrSp_D    ",   2,"Y"," ",1
 "Prot_Dia  ","nrSpCon_D ",   3,"Y"," ",1
 "Prot_Dia  ","nrInd_D   ",   4,"Y"," ",1
-"Prot_Dia  ","PO4       ",   5,"N"," ",1
-"Prot_Dia  ","NH4       ",   6,"N"," ",1
-"Prot_Dia  ","NO3       ",   7,"N"," ",1
-"Prot_Dia  ","Si        ",   8,"N"," ",1
-"Prot_Dia  ","Temp      ",   9,"N"," ",1
-"Prot_Dia  ","PFD       ",  10,"N"," ",1
-"Prot_Dia  ","atten     ",  11,"N"," ",1
-"Prot_Dia  ","exat      ",  12,"N"," ",1
-"Prot_Dia  ","diatC_1   ",  13,"N"," ",1
-"Prot_Dia  ","diatChl_1 ",  14,"N"," ",1
-"Prot_Dia  ","diatN_1   ",  15,"N"," ",1
-"Prot_Dia  ","diatP_1   ",  16,"N"," ",1
-"Prot_Dia  ","diatSi_1  ",  17,"N"," ",1
-"Prot_Dia  ","alpha_D1  ",  18,"Y"," ",1
-"Prot_Dia  ","ChlCm_D1  ",  19,"Y"," ",1
-"Prot_Dia  ","ChlCo_D1  ",  20,"Y"," ",1
-"Prot_Dia  ","CR_D1     ",  21,"Y"," ",1
-"Prot_Dia  ","FrAut_D1  ",  22,"Y"," ",1
-"Prot_Dia  ","FrDet_D1  ",  23,"Y"," ",1
-"Prot_Dia  ","KtNH4_D1  ",  24,"Y"," ",1
-"Prot_Dia  ","KtNO3_D1  ",  25,"Y"," ",1
-"Prot_Dia  ","KtP_D1    ",  26,"Y"," ",1
-"Prot_Dia  ","KtSi_D1   ",  27,"Y"," ",1
-"Prot_Dia  ","MrtRT_D1  ",  28,"Y"," ",1
-"Prot_Dia  ","NCm_D1    ",  29,"Y"," ",1
-"Prot_Dia  ","NCo_D1    ",  30,"Y"," ",1
-"Prot_Dia  ","NCopt_D1  ",  31,"Y"," ",1
-"Prot_Dia  ","NO3Cm_D1  ",  32,"Y"," ",1
-"Prot_Dia  ","NO3Copt_D1",  33,"Y"," ",1
-"Prot_Dia  ","PCm_D1    ",  34,"Y"," ",1
-"Prot_Dia  ","PCo_D1    ",  35,"Y"," ",1
-"Prot_Dia  ","PCoNCm_D1 ",  36,"Y"," ",1
-"Prot_Dia  ","PCoNCop_D1",  37,"Y"," ",1
-"Prot_Dia  ","PCopt_D1  ",  38,"Y"," ",1
-"Prot_Dia  ","PSDOC_D1  ",  39,"Y"," ",1
-"Prot_Dia  ","Q10_D1    ",  40,"Y"," ",1
-"Prot_Dia  ","redco_D1  ",  41,"Y"," ",1
-"Prot_Dia  ","relPS_D1  ",  42,"Y"," ",1
-"Prot_Dia  ","ReUmNH4_D1",  43,"Y"," ",1
-"Prot_Dia  ","ReUmNO3_D1",  44,"Y"," ",1
-"Prot_Dia  ","RT_D1     ",  45,"Y"," ",1
-"Prot_Dia  ","SiCm_D1   ",  46,"Y"," ",1
-"Prot_Dia  ","SiCo_D1   ",  47,"Y"," ",1
-"Prot_Dia  ","SiCopt_D1 ",  48,"Y"," ",1
-"Prot_Dia  ","UmRT_D1   ",  49,"Y"," ",1
-"Prot_Dia  ","diatC_2   ",  50,"Y"," ",1
-"Prot_Dia  ","diatChl_2 ",  51,"Y"," ",1
-"Prot_Dia  ","diatN_2   ",  52,"Y"," ",1
-"Prot_Dia  ","diatP_2   ",  53,"Y"," ",1
-"Prot_Dia  ","diatSi_2  ",  54,"Y"," ",1
-"Prot_Dia  ","alpha_D2  ",  55,"Y"," ",1
-"Prot_Dia  ","ChlCm_D2  ",  56,"Y"," ",1
-"Prot_Dia  ","ChlCo_D2  ",  57,"Y"," ",1
-"Prot_Dia  ","CR_D2     ",  58,"Y"," ",1
-"Prot_Dia  ","FrAut_D2  ",  59,"Y"," ",1
-"Prot_Dia  ","FrDet_D2  ",  60,"Y"," ",1
-"Prot_Dia  ","KtNH4_D2  ",  61,"Y"," ",1
-"Prot_Dia  ","KtNO3_D2  ",  62,"Y"," ",1
-"Prot_Dia  ","KtP_D2    ",  63,"Y"," ",1
-"Prot_Dia  ","KtSi_D2   ",  64,"Y"," ",1
-"Prot_Dia  ","MrtRT_D2  ",  65,"Y"," ",1
-"Prot_Dia  ","NCm_D2    ",  66,"Y"," ",1
-"Prot_Dia  ","NCo_D2    ",  67,"Y"," ",1
-"Prot_Dia  ","NCopt_D2  ",  68,"Y"," ",1
-"Prot_Dia  ","NO3Cm_D2  ",  69,"Y"," ",1
-"Prot_Dia  ","NO3Copt_D2",  70,"Y"," ",1
-"Prot_Dia  ","PCm_D2    ",  71,"Y"," ",1
-"Prot_Dia  ","PCo_D2    ",  72,"Y"," ",1
-"Prot_Dia  ","PCoNCm_D2 ",  73,"Y"," ",1
-"Prot_Dia  ","PCoNCop_D2",  74,"Y"," ",1
-"Prot_Dia  ","PCopt_D2  ",  75,"Y"," ",1
-"Prot_Dia  ","PSDOC_D2  ",  76,"Y"," ",1
-"Prot_Dia  ","Q10_D2    ",  77,"Y"," ",1
-"Prot_Dia  ","redco_D2  ",  78,"Y"," ",1
-"Prot_Dia  ","relPS_D2  ",  79,"Y"," ",1
-"Prot_Dia  ","ReUmNH4_D2",  80,"Y"," ",1
-"Prot_Dia  ","ReUmNO3_D2",  81,"Y"," ",1
-"Prot_Dia  ","RT_D2     ",  82,"Y"," ",1
-"Prot_Dia  ","SiCm_D2   ",  83,"Y"," ",1
-"Prot_Dia  ","SiCo_D2   ",  84,"Y"," ",1
-"Prot_Dia  ","SiCopt_D2 ",  85,"Y"," ",1
-"Prot_Dia  ","UmRT_D2   ",  86,"Y"," ",1
+"Prot_Dia  ","nrFlSp    ",   5,"Y"," ",1
+"Prot_Dia  ","nrOutSp   ",   6,"Y"," ",1
+"Prot_Dia  ","PO4       ",   7,"N"," ",1
+"Prot_Dia  ","NH4       ",   8,"N"," ",1
+"Prot_Dia  ","NO3       ",   9,"N"," ",1
+"Prot_Dia  ","Si        ",  10,"N"," ",1
+"Prot_Dia  ","Temp      ",  11,"N"," ",1
+"Prot_Dia  ","PFD       ",  12,"N"," ",1
+"Prot_Dia  ","atten     ",  13,"N"," ",1
+"Prot_Dia  ","exat      ",  14,"N"," ",1
+"Prot_Dia  ","diatC_1   ",  15,"N"," ",1
+"Prot_Dia  ","diatChl_1 ",  16,"N"," ",1
+"Prot_Dia  ","diatN_1   ",  17,"N"," ",1
+"Prot_Dia  ","diatP_1   ",  18,"N"," ",1
+"Prot_Dia  ","diatSi_1  ",  19,"N"," ",1
+"Prot_Dia  ","alpha_D1  ",  20,"Y"," ",1
+"Prot_Dia  ","ChlCm_D1  ",  21,"Y"," ",1
+"Prot_Dia  ","ChlCo_D1  ",  22,"Y"," ",1
+"Prot_Dia  ","CR_D1     ",  23,"Y"," ",1
+"Prot_Dia  ","FrAut_D1  ",  24,"Y"," ",1
+"Prot_Dia  ","FrDet_D1  ",  25,"Y"," ",1
+"Prot_Dia  ","KtNH4_D1  ",  26,"Y"," ",1
+"Prot_Dia  ","KtNO3_D1  ",  27,"Y"," ",1
+"Prot_Dia  ","KtP_D1    ",  28,"Y"," ",1
+"Prot_Dia  ","KtSi_D1   ",  29,"Y"," ",1
+"Prot_Dia  ","MrtRT_D1  ",  30,"Y"," ",1
+"Prot_Dia  ","NCm_D1    ",  31,"Y"," ",1
+"Prot_Dia  ","NCo_D1    ",  32,"Y"," ",1
+"Prot_Dia  ","NCopt_D1  ",  33,"Y"," ",1
+"Prot_Dia  ","NO3Cm_D1  ",  34,"Y"," ",1
+"Prot_Dia  ","NO3Copt_D1",  35,"Y"," ",1
+"Prot_Dia  ","PCm_D1    ",  36,"Y"," ",1
+"Prot_Dia  ","PCo_D1    ",  37,"Y"," ",1
+"Prot_Dia  ","PCoNCm_D1 ",  38,"Y"," ",1
+"Prot_Dia  ","PCoNCop_D1",  39,"Y"," ",1
+"Prot_Dia  ","PCopt_D1  ",  40,"Y"," ",1
+"Prot_Dia  ","PSDOC_D1  ",  41,"Y"," ",1
+"Prot_Dia  ","Q10_D1    ",  42,"Y"," ",1
+"Prot_Dia  ","redco_D1  ",  43,"Y"," ",1
+"Prot_Dia  ","relPS_D1  ",  44,"Y"," ",1
+"Prot_Dia  ","ReUmNH4_D1",  45,"Y"," ",1
+"Prot_Dia  ","ReUmNO3_D1",  46,"Y"," ",1
+"Prot_Dia  ","RT_D1     ",  47,"Y"," ",1
+"Prot_Dia  ","SiCm_D1   ",  48,"Y"," ",1
+"Prot_Dia  ","SiCo_D1   ",  49,"Y"," ",1
+"Prot_Dia  ","SiCopt_D1 ",  50,"Y"," ",1
+"Prot_Dia  ","UmRT_D1   ",  51,"Y"," ",1
+"Prot_Dia  ","diatC_2   ",  52,"Y"," ",1
+"Prot_Dia  ","diatChl_2 ",  53,"Y"," ",1
+"Prot_Dia  ","diatN_2   ",  54,"Y"," ",1
+"Prot_Dia  ","diatP_2   ",  55,"Y"," ",1
+"Prot_Dia  ","diatSi_2  ",  56,"Y"," ",1
+"Prot_Dia  ","alpha_D2  ",  57,"Y"," ",1
+"Prot_Dia  ","ChlCm_D2  ",  58,"Y"," ",1
+"Prot_Dia  ","ChlCo_D2  ",  59,"Y"," ",1
+"Prot_Dia  ","CR_D2     ",  60,"Y"," ",1
+"Prot_Dia  ","FrAut_D2  ",  61,"Y"," ",1
+"Prot_Dia  ","FrDet_D2  ",  62,"Y"," ",1
+"Prot_Dia  ","KtNH4_D2  ",  63,"Y"," ",1
+"Prot_Dia  ","KtNO3_D2  ",  64,"Y"," ",1
+"Prot_Dia  ","KtP_D2    ",  65,"Y"," ",1
+"Prot_Dia  ","KtSi_D2   ",  66,"Y"," ",1
+"Prot_Dia  ","MrtRT_D2  ",  67,"Y"," ",1
+"Prot_Dia  ","NCm_D2    ",  68,"Y"," ",1
+"Prot_Dia  ","NCo_D2    ",  69,"Y"," ",1
+"Prot_Dia  ","NCopt_D2  ",  70,"Y"," ",1
+"Prot_Dia  ","NO3Cm_D2  ",  71,"Y"," ",1
+"Prot_Dia  ","NO3Copt_D2",  72,"Y"," ",1
+"Prot_Dia  ","PCm_D2    ",  73,"Y"," ",1
+"Prot_Dia  ","PCo_D2    ",  74,"Y"," ",1
+"Prot_Dia  ","PCoNCm_D2 ",  75,"Y"," ",1
+"Prot_Dia  ","PCoNCop_D2",  76,"Y"," ",1
+"Prot_Dia  ","PCopt_D2  ",  77,"Y"," ",1
+"Prot_Dia  ","PSDOC_D2  ",  78,"Y"," ",1
+"Prot_Dia  ","Q10_D2    ",  79,"Y"," ",1
+"Prot_Dia  ","redco_D2  ",  80,"Y"," ",1
+"Prot_Dia  ","relPS_D2  ",  81,"Y"," ",1
+"Prot_Dia  ","ReUmNH4_D2",  82,"Y"," ",1
+"Prot_Dia  ","ReUmNO3_D2",  83,"Y"," ",1
+"Prot_Dia  ","RT_D2     ",  84,"Y"," ",1
+"Prot_Dia  ","SiCm_D2   ",  85,"Y"," ",1
+"Prot_Dia  ","SiCo_D2   ",  86,"Y"," ",1
+"Prot_Dia  ","SiCopt_D2 ",  87,"Y"," ",1
+"Prot_Dia  ","UmRT_D2   ",  88,"Y"," ",1
 "ProSedD   ","maxNrSp_D ",   1,"Y"," ",1
 "ProSedD   ","nrSp_D    ",   2,"Y"," ",1
 "ProSedD   ","nrSpCon_S ",   3,"Y"," ",1
@@ -17857,18 +17859,3 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "Prot_Zoo  ","rNCM_N1   ",  92,"Y"," ",1
 "Prot_Zoo  ","mot_N1    ",  93,"N"," ",1
 "Prot_Zoo  ","PRN1_Z1   ",  94,"Y"," ",1
-"RadioU    ","Uranium   ",   1,"N","x",1
-"RadioU    ","HalflifeU ",   2,"Y"," ",1
-"RadioU    ","AtommassU ",   3,"Y"," ",1
-"RadioCs   ","Caesium137",   1,"N","x",1
-"RadioCs   ","HalflifeCs",   2,"Y"," ",1
-"RadioCs   ","AtommassCs",   3,"Y"," ",1
-"RadioSub1 ","Radio1    ",   1,"N","x",1
-"RadioSub1 ","HalflifeR1",   2,"N","x",1
-"RadioSub1 ","AtommassR1",   3,"N","x",1
-"RadioSub2 ","Radio2    ",   1,"N","x",1
-"RadioSub2 ","HalflifeR2",   2,"N","x",1
-"RadioSub2 ","AtommassR2",   3,"N","x",1
-"RadioSub3 ","Radio3    ",   1,"N","x",1
-"RadioSub3 ","HalflifeR3",   2,"N","x",1
-"RadioSub3 ","AtommassR3",   3,"N","x",1

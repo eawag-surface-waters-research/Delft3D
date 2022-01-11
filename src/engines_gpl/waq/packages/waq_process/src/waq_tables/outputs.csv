@@ -5144,8 +5144,3 @@ outppr,outpit,outpnm,outpdo,outpsx
 "Prot_Zoo  ","mrtAut_Z1 ",  27," ",1
 "Prot_Zoo  ","mrtDet_Z1 ",  28," ",1
 "Prot_Zoo  ","preyFl_Z1 ",  29," ",1
-"RadioU    ","RadiationU",   1,"x",1
-"RadioCs   ","RadiatCs  ",   1,"x",1
-"RadioSub1 ","RadiatR1  ",   1,"x",1
-"RadioSub2 ","RadiatR2  ",   1,"x",1
-"RadioSub3 ","RadiatR3  ",   1,"x",1

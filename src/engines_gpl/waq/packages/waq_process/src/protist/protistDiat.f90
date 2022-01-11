@@ -73,6 +73,7 @@ use ieee_arithmetic
     
      !input parameters
      real    maxNrSp, nrSp, nrSpCon, nrInd               ! constant and species numbers      
+     real    nrFlSp, nrOutSp                             ! constant and species numbers  
      real    UmRT, Q10, RT, CR                           ! growth and respiration rate calculation 
      real    NCm, NO3Cm, PCm, SiCm, ChlCm                ! maximum NC, PC, ChlC quotas
      real    NCo, PCo, SiCo, ChlCo                       ! minimum NC and PC quotas
@@ -118,10 +119,12 @@ use ieee_arithmetic
     iflux = 0
     
     ! segment and species independent items
-    maxNrSp   = PMSA(ipnt(   1 ))   !   total nr species implemented in process                (dl)
-    nrSp      = PMSA(ipnt(   2 ))   !   nr of species to be modelled                           (dl)                
-    nrSpCon   = PMSA(ipnt(   3 ))   !   nr of species dependent items                          (dl)                
-    nrInd     = PMSA(ipnt(   4 ))   !   nr of species independent items                        (dl)  
+    maxNrSp   = PMSA(ipnt(   1 ))   !   total nr species implemented in process
+    nrSp      = PMSA(ipnt(   2 ))   !   nr of species to be modelled
+    nrSpCon   = PMSA(ipnt(   3 ))   !   nr of species dependent items
+    nrInd     = PMSA(ipnt(   4 ))   !   nr of species independent items
+    nrFlSp    = PMSA(ipnt(   5 ))   !   nr of fluxes per individual species
+    nrOutSp   = PMSA(ipnt(   6 ))   !   nr of output items per individual species
       
     ! length of the PMSA input array. 
     inpItems = maxNrSp * nrSpCon + nrInd
@@ -132,14 +135,14 @@ use ieee_arithmetic
         if (ikmrk1.eq.1) then
             
         ! species independent items
-        PO4          = PMSA(ipnt(   5 ))  !    initial external DIP                                   (gP m-3)
-        NH4          = PMSA(ipnt(   6 ))  !    initial external NH4                                   (gN m-3)
-        NO3          = PMSA(ipnt(   7 ))  !    initial external NO3                                   (gN m-3)
-        Si           = PMSA(ipnt(   8 ))  !    initial external Si                                    (gSi m-3)
-        Temp         = PMSA(ipnt(   9 ))  !    ambient water temperature                              (oC)               
-        PFD          = PMSA(ipnt(  10 ))  !    from rad to photon flux density                        (umol photon m-2)           
-        atten        = PMSA(ipnt(  11 ))  !    attenuation of light by water + plankton Chl           (dl)                            
-        exat         = PMSA(ipnt(  12 ))  !    -ve exponent of attenuation                            (dl)              
+        PO4          = PMSA(ipnt(   7 ))  !    initial external DIP                                   (gP m-3)
+        NH4          = PMSA(ipnt(   8 ))  !    initial external NH4                                   (gN m-3)
+        NO3          = PMSA(ipnt(   9 ))  !    initial external NO3                                   (gN m-3)
+        Si           = PMSA(ipnt(  10 ))  !    initial external Si                                    (gSi m-3)
+        Temp         = PMSA(ipnt(  11 ))  !    ambient water temperature                              (oC)               
+        PFD          = PMSA(ipnt(  12 ))  !    from rad to photon flux density                        (umol photon m-2)           
+        atten        = PMSA(ipnt(  13 ))  !    attenuation of light by water + plankton Chl           (dl)                            
+        exat         = PMSA(ipnt(  14 ))  !    -ve exponent of attenuation                            (dl)              
                       
         ! species loop
         speciesLoop: do iSpec = 0, (nrSp-1)
@@ -254,30 +257,30 @@ use ieee_arithmetic
             ! Output -------------------------------------------------------------------
                
             ! (input items + position of specific output item in vector + species loop * total number of output) 
-            PMSA(ipnt( inpItems +  1 + iSpec * 24 )) = NC 
-            PMSA(ipnt( inpItems +  2 + iSpec * 24 )) = PC 
-            PMSA(ipnt( inpItems +  3 + iSpec * 24 )) = SC 
-            PMSA(ipnt( inpItems +  4 + iSpec * 24 )) = ChlC
-            PMSA(ipnt( inpItems +  5 + iSpec * 24 )) = UmT 
-            PMSA(ipnt( inpItems +  6 + iSpec * 24 )) = BR
-            PMSA(ipnt( inpItems +  7 + iSpec * 24 )) = NCu 
-            PMSA(ipnt( inpItems +  8 + iSpec * 24 )) = PCu 
-            PMSA(ipnt( inpItems +  9 + iSpec * 24 )) = SCu 
-            PMSA(ipnt( inpItems + 10 + iSpec * 24 )) = NPSiCu
-            PMSA(ipnt( inpItems + 11 + iSpec * 24 )) = upP 
-            PMSA(ipnt( inpItems + 12 + iSpec * 24 )) = upNH4 
-            PMSA(ipnt( inpItems + 13 + iSpec * 24 )) = upNO3 
-            PMSA(ipnt( inpItems + 14 + iSpec * 24 )) = upSi
-            PMSA(ipnt( inpItems + 15 + iSpec * 24 )) = PSqm 
-            PMSA(ipnt( inpItems + 16 + iSpec * 24 )) = PS
-            PMSA(ipnt( inpItems + 17 + iSpec * 24 )) = Cfix 
-            PMSA(ipnt( inpItems + 18 + iSpec * 24 )) = synChl
-            PMSA(ipnt( inpItems + 19 + iSpec * 24 )) = degChl
-            PMSA(ipnt( inpItems + 20 + iSpec * 24 )) = totR 
-            PMSA(ipnt( inpItems + 21 + iSpec * 24 )) = Cu
-            PMSA(ipnt( inpItems + 22 + iSpec * 24 )) = mrt 
-            PMSA(ipnt( inpItems + 23 + iSpec * 24 )) = mrtFrAut 
-            PMSA(ipnt( inpItems + 24 + iSpec * 24 )) = mrtFrDet
+            PMSA(ipnt( inpItems +  1 + iSpec * nrOutSp )) = NC 
+            PMSA(ipnt( inpItems +  2 + iSpec * nrOutSp )) = PC 
+            PMSA(ipnt( inpItems +  3 + iSpec * nrOutSp )) = SC 
+            PMSA(ipnt( inpItems +  4 + iSpec * nrOutSp )) = ChlC
+            PMSA(ipnt( inpItems +  5 + iSpec * nrOutSp )) = UmT 
+            PMSA(ipnt( inpItems +  6 + iSpec * nrOutSp )) = BR
+            PMSA(ipnt( inpItems +  7 + iSpec * nrOutSp )) = NCu 
+            PMSA(ipnt( inpItems +  8 + iSpec * nrOutSp )) = PCu 
+            PMSA(ipnt( inpItems +  9 + iSpec * nrOutSp )) = SCu 
+            PMSA(ipnt( inpItems + 10 + iSpec * nrOutSp )) = NPSiCu
+            PMSA(ipnt( inpItems + 11 + iSpec * nrOutSp )) = upP 
+            PMSA(ipnt( inpItems + 12 + iSpec * nrOutSp )) = upNH4 
+            PMSA(ipnt( inpItems + 13 + iSpec * nrOutSp )) = upNO3 
+            PMSA(ipnt( inpItems + 14 + iSpec * nrOutSp )) = upSi
+            PMSA(ipnt( inpItems + 15 + iSpec * nrOutSp )) = PSqm 
+            PMSA(ipnt( inpItems + 16 + iSpec * nrOutSp )) = PS
+            PMSA(ipnt( inpItems + 17 + iSpec * nrOutSp )) = Cfix 
+            PMSA(ipnt( inpItems + 18 + iSpec * nrOutSp )) = synChl
+            PMSA(ipnt( inpItems + 19 + iSpec * nrOutSp )) = degChl
+            PMSA(ipnt( inpItems + 20 + iSpec * nrOutSp )) = totR 
+            PMSA(ipnt( inpItems + 21 + iSpec * nrOutSp )) = Cu
+            PMSA(ipnt( inpItems + 22 + iSpec * nrOutSp )) = mrt 
+            PMSA(ipnt( inpItems + 23 + iSpec * nrOutSp )) = mrtFrAut 
+            PMSA(ipnt( inpItems + 24 + iSpec * nrOutSp )) = mrtFrDet
 
             ! FLUXES -------------------------------------------------------------------   
             ! Protist gains------------------------------------------------------------                                 
@@ -325,28 +328,28 @@ use ieee_arithmetic
             dDetChl     = protChl * mrtFrDet
               
             ! (1 + SpeciesLoop * (nr of fluxes per individual species) + total number of fluxes) 
-            fl (  1 +  iSpec * 22  + iflux )  = dNH4up
-            fl (  2 +  iSpec * 22  + iflux )  = dNO3up
-            fl (  3 +  iSpec * 22  + iflux )  = dPup  
-            fl (  4 +  iSpec * 22  + iflux )  = dSiup 
-            fl (  5 +  iSpec * 22  + iflux )  = dCfix
-            fl (  6 +  iSpec * 22  + iflux )  = dChlsyn
-            fl (  7 +  iSpec * 22  + iflux )  = dChldeg
-            fl (  8 +  iSpec * 22  + iflux )  = dCresp
-            fl (  9 +  iSpec * 22  + iflux )  = dDOCleak
-            fl ( 10 +  iSpec * 22  + iflux )  = dDOCvoid
-            fl ( 11 +  iSpec * 22  + iflux )  = dNH4out
-            fl ( 12 +  iSpec * 22  + iflux )  = dPout      
-            fl ( 13 +  iSpec * 22  + iflux )  = dAutC    
-            fl ( 14 +  iSpec * 22  + iflux )  = dDetC    
-            fl ( 15 +  iSpec * 22  + iflux )  = dAutN    
-            fl ( 16 +  iSpec * 22  + iflux )  = dDetN    
-            fl ( 17 +  iSpec * 22  + iflux )  = dAutP    
-            fl ( 18 +  iSpec * 22  + iflux )  = dDetP    
-            fl ( 19 +  iSpec * 22  + iflux )  = dAutSi   
-            fl ( 20 +  iSpec * 22  + iflux )  = dDetSi   
-            fl ( 21 +  iSpec * 22  + iflux )  = dAutChl  
-            fl ( 22 +  iSpec * 22  + iflux )  = dDetChl  
+            fl (  1 +  iSpec * nrFlSp  + iflux )  = dNH4up
+            fl (  2 +  iSpec * nrFlSp  + iflux )  = dNO3up
+            fl (  3 +  iSpec * nrFlSp  + iflux )  = dPup  
+            fl (  4 +  iSpec * nrFlSp  + iflux )  = dSiup 
+            fl (  5 +  iSpec * nrFlSp  + iflux )  = dCfix
+            fl (  6 +  iSpec * nrFlSp  + iflux )  = dChlsyn
+            fl (  7 +  iSpec * nrFlSp  + iflux )  = dChldeg
+            fl (  8 +  iSpec * nrFlSp  + iflux )  = dCresp
+            fl (  9 +  iSpec * nrFlSp  + iflux )  = dDOCleak
+            fl ( 10 +  iSpec * nrFlSp  + iflux )  = dDOCvoid
+            fl ( 11 +  iSpec * nrFlSp  + iflux )  = dNH4out
+            fl ( 12 +  iSpec * nrFlSp  + iflux )  = dPout      
+            fl ( 13 +  iSpec * nrFlSp  + iflux )  = dAutC    
+            fl ( 14 +  iSpec * nrFlSp  + iflux )  = dDetC    
+            fl ( 15 +  iSpec * nrFlSp  + iflux )  = dAutN    
+            fl ( 16 +  iSpec * nrFlSp  + iflux )  = dDetN    
+            fl ( 17 +  iSpec * nrFlSp  + iflux )  = dAutP    
+            fl ( 18 +  iSpec * nrFlSp  + iflux )  = dDetP    
+            fl ( 19 +  iSpec * nrFlSp  + iflux )  = dAutSi   
+            fl ( 20 +  iSpec * nrFlSp  + iflux )  = dDetSi   
+            fl ( 21 +  iSpec * nrFlSp  + iflux )  = dAutChl  
+            fl ( 22 +  iSpec * nrFlSp  + iflux )  = dDetChl  
             
             if ( ieee_is_nan(protC) ) write (*,*) '(''ERROR: NaN in protC in segment:'', i10)' ,    iseg
             if ( ieee_is_nan(Cfix) )  write (*,*) '(''ERROR: NaN in Cfix in segment:'', i10)' ,    iseg
