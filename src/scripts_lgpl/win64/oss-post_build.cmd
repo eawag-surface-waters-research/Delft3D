@@ -306,7 +306,7 @@ rem =============================================================
     if !mkl_redist_dir!=="" (
         rem mkl_redist_dir not set
     ) else (
-        rem note that for onaApi MKL, the DLL names end in '.1.dll'
+        rem note that for oneAPI MKL, the DLL names end in '.1.dll'
         set localstring="!mkl_redist_dir!mkl_core*.dll"
         call :copyFile !!localstring! !dest_bin!
         set localstring="!mkl_redist_dir!mkl_def*.dll"
@@ -1212,6 +1212,9 @@ rem ==========================
         
         rem copy binaries and dll 
         call :copyFile "!build_dir!\ddcouple\!configuration!\ddcouple.*"                                !dest_bin!
+        set localstring="!compiler_redist_dir!*.dll"
+        rem Note the awkward usage of !-characters
+        call :copyFile !!localstring!                                                                   !dest_share!!
     )
     
     if "%configuration%" == "Release" ( 
@@ -1228,8 +1231,11 @@ rem ==========================
         
         rem copy binaries and dll 
         call :copyFile "!build_dir!\ddcouple\!configuration!\ddcouple.exe"                            !dest_bin!
+        set localstring="!compiler_redist_dir!*.dll"
+        rem Note the awkward usage of !-characters
+        call :copyFile !!localstring!                                                                 !dest_share!!
         
-        call :copyFile "!checkout_src_root!\tools_gpl\ddcouple\scripts\run_ddcouple.bat"                 !dest_scripts!
+        call :copyFile "!checkout_src_root!\tools_gpl\ddcouple\scripts\run_ddcouple.bat"              !dest_scripts!
     )
     
 goto :endproc
