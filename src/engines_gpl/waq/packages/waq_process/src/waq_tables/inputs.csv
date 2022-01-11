@@ -17859,3 +17859,18 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "Prot_Zoo  ","rNCM_N1   ",  92,"Y"," ",1
 "Prot_Zoo  ","mot_N1    ",  93,"N"," ",1
 "Prot_Zoo  ","PRN1_Z1   ",  94,"Y"," ",1
+"RadioU    ","Uranium   ",   1,"N","x",1
+"RadioU    ","HalflifeU ",   2,"Y"," ",1
+"RadioU    ","AtommassU ",   3,"Y"," ",1
+"RadioCs   ","Caesium137",   1,"N","x",1
+"RadioCs   ","HalflifeCs",   2,"Y"," ",1
+"RadioCs   ","AtommassCs",   3,"Y"," ",1
+"RadioSub1 ","Radio1    ",   1,"N","x",1
+"RadioSub1 ","HalflifeR1",   2,"N","x",1
+"RadioSub1 ","AtommassR1",   3,"N","x",1
+"RadioSub2 ","Radio2    ",   1,"N","x",1
+"RadioSub2 ","HalflifeR2",   2,"N","x",1
+"RadioSub2 ","AtommassR2",   3,"N","x",1
+"RadioSub3 ","Radio3    ",   1,"N","x",1
+"RadioSub3 ","HalflifeR3",   2,"N","x",1
+"RadioSub3 ","AtommassR3",   3,"N","x",1
