@@ -54,6 +54,7 @@ if(UNIX)
 
     add_definitions(-DHAVE_CONFIG_H=1)
 endif(UNIX)
+set_target_properties(${executable_name} PROPERTIES COMPILE_FLAGS ${openmp_flag})
 
 # Define additional compilation flags
 set_source_files_properties(${checkout_src_root}/third_party_open/swan/src/ocpids.F
