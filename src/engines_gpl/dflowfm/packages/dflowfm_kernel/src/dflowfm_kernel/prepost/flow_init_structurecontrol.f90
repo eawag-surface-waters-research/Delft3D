@@ -851,7 +851,14 @@ end do
                      call mess(LEVEL_ERROR, 'Programming error: general structure via structures.ini file does not support REALTIME control for '//trim(generalkeywrd(k)))
                   end select
                else
-                  success = .false.
+                  if (len_trim(plifile) > 0) then
+                     ! 2D /pli file based structure
+                     success = .false.
+                  else
+                     ! network%sts based structure, processed already before via forcinglist.
+                     success = .true.
+                  end if
+                     
                   select case (key)
                   case ('CrestLevel', 'levelcenter')
                      ifld = 1
