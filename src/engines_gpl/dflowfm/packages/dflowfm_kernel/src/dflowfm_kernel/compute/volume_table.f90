@@ -236,9 +236,11 @@ module m_VolumeTables
       if (nstor > 0) then
          stors => network%stors%stor
          do i = 1, nstor
-            nod = stors(i)%gridPoint ! TODO: 1D2D: UNST-5013/NST-5061 : is this safe against storage nodes outside of current domain?
+            nod = stors(i)%gridPoint 
             n = nod-ndx2d
-            vltb(n)%topLevel = max(vltb(n)%topLevel, getTopLevel(stors(i))) - bl(nod)
+            if (n > 0) then
+               vltb(n)%topLevel = max(vltb(n)%topLevel, getTopLevel(stors(i))) - bl(nod)
+            endif
          enddo
       endif
       
