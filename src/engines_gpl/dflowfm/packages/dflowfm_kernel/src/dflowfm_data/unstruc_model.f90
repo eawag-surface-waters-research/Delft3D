@@ -3980,7 +3980,7 @@ function getoutputdir(dircat)
    select case(trim(dircat_))
    case ('waq')
       if (len_trim(md_waqoutputdir) == 0) then
-         getoutputdir = 'DFM_DELWAQ_'//trim(md_ident)//trim(rundat2)
+         getoutputdir = 'DFM_DELWAQ_'//trim(md_ident_sequential)//trim(rundat2)
       else
          getoutputdir = trim(md_waqoutputdir)//get_dirsep()
       end if
