@@ -790,6 +790,7 @@ module m_1d_networkreader
                           gpchainages, gpUchainages, gpID, my_rank)
    
       use m_branch
+      use messagehandling
       use precision_basics, only: comparereal
       
       implicit none
@@ -910,6 +911,10 @@ module m_1d_networkreader
             pbr%toNode%x          = gpX(gridPointsCount)
             pbr%toNode%y          = gpY(gridPointsCount)
             igpTo                 = ip2
+         elseif (comparereal(gpchainages(gridPointsCount), branchlength) > 0) then
+            ! Only check for points beyond the branch length, in parallel mode a missing end node is possible.
+            msgbuf = 'The chainage of the last gridpoint on branch '''// trim(pbr%Id)// ''' is larger than the edge length of this branch'
+            call err_flush()
          end if
       end if
 

@@ -11143,6 +11143,7 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
    use m_sferic
    use m_missing
    use unstruc_messages
+   use MessageHandling
    use dfm_error
    use m_alloc
    use gridoperations
@@ -11354,9 +11355,21 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
          YK(numk_last+1:numk_last + meshgeom%numnode) = meshgeom%nodeY
          network%numk = meshgeom%numnode
          ! construct network and administrate
+         
+         ! continue on errors during this subroutine
+         threshold_abort = LEVEL_FATAL
+
          ierr = construct_network_from_meshgeom(network, meshgeom, nbranchids, nbranchlongnames, nnodeids, &
             nnodelongnames, nodeids, nodelongnames, network1dname, mesh1dname, nodesOnBranchVertices, jampi, my_rank)
+
+         ! check if any errors have occurred, if so raise a fatal error
+         if (getMaxErrorLevel() ==LEVEL_ERROR) then
+            call SetMessage(LEVEL_FATAL, 'Errors have occurred during the initialisation. Check the previous messages')
+         endif
+         threshold_abort = LEVEL_ERROR
+
          ! get the edge nodes, usually not available (needs to be generated)
+
          if (meshgeom%numedge.eq.-1) then
             ierr = ggeo_count_or_create_edge_nodes(meshgeom%nodebranchidx, meshgeom%nodeoffsets, meshgeom%nedge_nodes(1,:), meshgeom%nedge_nodes(2,:), meshgeom%nbranchlengths, start_index, meshgeom%numedge)
             call reallocP(meshgeom%edge_nodes,(/ 2, meshgeom%numedge /), keepExisting = .false.)
