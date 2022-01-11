@@ -36,6 +36,7 @@ if (WIN32)
     # Set linker options
     message(STATUS "Setting target_link_options in windows")
     target_link_options(${executable_name} PRIVATE ${nologo_flag})
+    set_target_properties(${executable_name} PROPERTIES COMPILE_FLAGS ${openmp_flag})
 endif(WIN32)
 
 if(UNIX)
@@ -53,8 +54,9 @@ if(UNIX)
     include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../include")
 
     add_definitions(-DHAVE_CONFIG_H=1)
+    set_target_properties(${executable_name} PROPERTIES COMPILE_FLAGS ${openmp_flag})
+    target_link_options(${executable_name} PRIVATE ${openmp_flag})
 endif(UNIX)
-set_target_properties(${executable_name} PROPERTIES COMPILE_FLAGS ${openmp_flag})
 
 # Define additional compilation flags
 set_source_files_properties(${checkout_src_root}/third_party_open/swan/src/ocpids.F
