@@ -219,6 +219,9 @@ rem ===============
 rem     call :delwaq2_openda_lib
     call :waq_plugin_wasteload
     call :part
+    call :agrhyd
+    call :ddcouple
+    call :waqmerge
     call :wave
     call :waveexe
     call :plugin_culvert
@@ -657,7 +660,49 @@ rem ================
         set localstring="!compiler_redist_dir!libiomp5md.dll"
         call :copyFile !localstring! !dest!
     )
-	
+
+goto :endproc
+
+
+rem ===================
+rem === INSTALL_AGRHYD
+rem ===================
+:agrhyd
+    echo "installing agrhyd . . ."
+
+    set dest_bin="!dest_main!\x64\dwaq\bin"
+
+    call :makeDir !dest_bin!
+
+    call :copyFile engines_gpl\waq\bin\x64\Release\agrhyd.exe                     !dest_bin!
+goto :endproc
+
+
+rem ===================
+rem === INSTALL_DDCOUPLE
+rem ===================
+:ddcouple
+    echo "installing ddcouple . . ."
+
+    set dest_bin="!dest_main!\x64\dwaq\bin"
+
+    call :makeDir !dest_bin!
+
+    call :copyFile engines_gpl\waq\bin\x64\Release\ddcouple.exe                     !dest_bin!
+goto :endproc
+
+
+rem ===================
+rem === INSTALL_WAQMERGE
+rem ===================
+:waqmerge
+    echo "installing waqmerge . . ."
+
+    set dest_bin="!dest_main!\x64\dwaq\bin"
+
+    call :makeDir !dest_bin!
+
+    call :copyFile engines_gpl\waq\bin\x64\Release\waqmerge.exe                     !dest_bin!
 goto :endproc
 
 
