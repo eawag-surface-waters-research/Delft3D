@@ -9,4 +9,4 @@
 #endif
 #define PROG_VERSION  "1.02.00"    /* Version must include at least two dots, starting with a real number followed by a dot */
 #define FILE_VERSION  "undefined"                        /* Needed for the file header */
-#define BUILD_NUMBER  "140581M"
+#define BUILD_NUMBER  "140616M"

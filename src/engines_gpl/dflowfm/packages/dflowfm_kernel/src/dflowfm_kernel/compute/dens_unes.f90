@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2021.                                
+!  Copyright (C)  Stichting Deltares, 2017-2022.                                
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -33,7 +33,7 @@
  subroutine dens_unes(temp, salt, rhouns, rhods, rhodt)
 !----- GPL ---------------------------------------------------------------------
 !
-!  Copyright (C)  Stichting Deltares, 2011-2021.
+!  Copyright (C)  Stichting Deltares, 2011-2022.
 !
 !  This program is free software: you can redistribute it and/or modify
 !  it under the terms of the GNU General Public License as published by

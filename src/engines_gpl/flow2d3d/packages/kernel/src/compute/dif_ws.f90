@@ -4,7 +4,7 @@ subroutine dif_ws(j         ,nmmaxj    ,nmmax     ,kmax      ,lsal      , &
                 & gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2011-2021.                                
+!  Copyright (C)  Stichting Deltares, 2011-2022.                                
 !                                                                               
 !  This program is free software: you can redistribute it and/or modify         
 !  it under the terms of the GNU General Public License as published by         
