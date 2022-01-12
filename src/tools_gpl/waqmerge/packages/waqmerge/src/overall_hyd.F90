@@ -67,7 +67,7 @@
       do i_domain = 0, n_domain-1
 
          write(sdnm, '(i4.4)') i_domain
-         domain%name = trim(waq_output_dir)//'_'//sdnm//'/'//trim(name)//'_'//sdnm//'.hyd'
+         domain%name = trim(waq_output_dir)//'/'//trim(name)//'_'//sdnm//'.hyd'
          domain%mmax = -999
          domain%nmax = -999
          domain%aggr = ' '

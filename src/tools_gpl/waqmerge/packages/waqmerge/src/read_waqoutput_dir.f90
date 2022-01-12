@@ -45,17 +45,17 @@
 
       nullify(mdu_ptr)
       call tree_create('waqmerge-input', mdu_ptr)
-      
+
       istat = 0
-      call prop_file('ini',trim(hyd%file_hyd%name), mdu_ptr, istat)
+      call prop_file('ini',trim(hyd%file_hyd%name)//'.mdu', mdu_ptr, istat)
       if (istat /= 0) then
          select case (istat)
             case(1)
-               write(*     ,'(a,a)'), '*** ERROR File: '//trim(hyd%file_hyd%name)//' not found'
+               write(*     ,'(a,a)'), '*** ERROR File: '//trim(hyd%file_hyd%name)//'.mdu'//' not found'
             case(3)
-               write(*     ,'(a,a)'), '*** ERROR Premature EOF in file: '//trim(hyd%file_hyd%name)
+               write(*     ,'(a,a)'), '*** ERROR Premature EOF in file: '//trim(hyd%file_hyd%name)//'.mdu'
             case default
-               write(*     ,'(a,a)'), '*** ERROR Read error from file: '//trim(hyd%file_hyd%name)
+               write(*     ,'(a,a)'), '*** ERROR Read error from file: '//trim(hyd%file_hyd%name)//'.mdu'
          endselect
       endif
       call prop_get_string(mdu_ptr, 'output', 'WAQOutputDir', waq_output_dir,waq_output_dir_found)

@@ -130,7 +130,7 @@ program waqmerge
       exists = .true.
       do while (exists)
          write(sdnm, '(i4.4)') n_domain
-         domain_hydname = trim(waq_output_dir)//'_'//sdnm//'/'//trim(hyd%file_hyd%name)//'_'//sdnm//'.hyd'
+         domain_hydname = trim(waq_output_dir)//'/'//trim(hyd%file_hyd%name)//'_'//sdnm//'.hyd'
          inquire(file=domain_hydname,exist=exists)
          if ( exists ) n_domain = n_domain + 1
       end do
