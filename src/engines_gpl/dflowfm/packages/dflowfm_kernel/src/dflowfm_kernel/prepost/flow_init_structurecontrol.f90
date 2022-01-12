@@ -258,6 +258,7 @@ do i=1,nstr
 
    ! check if this structure concerns Flow1D type structure
    call prop_get_string(str_ptr, '', 'branchid', branchid, success)
+   if (.not. success) call prop_get_string(str_ptr, '', 'numCoordinates', branchid, success)
    if (success) then
       if (trim(strtype) /= 'pump') then
          cycle

@@ -4205,6 +4205,8 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
 
        ! write info. of general structure
        nlen = network%sts%numGeneralStructures
+       maxNumLinks = get_max_numLinks(ST_GENERAL_ST, nlen)
+
        if(nlen > 0) then
           ierr = nf90_put_var(irstfile, id_genstru_crestl, valgenstru(9, 1:nlen),  (/1, itim/), (/nlen, 1/))
           ierr = nf90_put_var(irstfile, id_genstru_crestw, valgenstru(10, 1:nlen), (/1, itim/), (/nlen, 1/))
@@ -4285,6 +4287,7 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
 
        ! write info. of weir
        nlen = network%sts%numWeirs
+       maxNumLinks = get_max_numLinks(ST_WEIR, nlen)
        if(nlen > 0) then
           ierr = nf90_put_var(irstfile, id_weirgen_crestl, valweirgen(9, 1:nlen), (/1, itim/), (/nlen, 1/))
           ierr = nf90_put_var(irstfile, id_weirgen_crestw, valweirgen(10, 1:nlen), (/1, itim/), (/nlen, 1/))
@@ -4362,6 +4365,7 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
 
        ! write info. of orifice
        nlen = network%sts%numOrifices
+       maxNumLinks = get_max_numLinks(ST_ORIFICE, nlen)
        if(nlen > 0) then
           ierr = nf90_put_var(irstfile, id_orifgen_crestl, valorifgen(9, 1:nlen),  (/1, itim/), (/nlen, 1/))
           ierr = nf90_put_var(irstfile, id_orifgen_crestw, valorifgen(10, 1:nlen), (/1, itim/), (/nlen, 1/))
