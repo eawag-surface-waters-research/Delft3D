@@ -92,14 +92,14 @@
       real     ( sp), pointer     :: ypoltmp(:)      ! temp y-coordinates polygon
       integer  ( ip)                 nrowstmp        ! temp length polygon
       integer  ( ip)                 npmargin        ! allocation margin in number of particles
-      
+
       character( 20)                 cplastic        ! plastic name
-      real     ( sp)                 rdpldensity     ! read plastic density    
+      real     ( sp)                 rdpldensity     ! read plastic density
       real     ( sp)                 rdplshapefactor ! read plastic shapefactor
-      real     ( sp)                 rdplmeansize    ! read plastic meansize   
-      real     ( sp)                 rdplvarsize     ! read plastic stdevsize  
-      real     ( sp)                 rdplmusize      ! read plastic meansize   
-      real     ( sp)                 rdplsigmasize   ! read plastic stdevsize  
+      real     ( sp)                 rdplmeansize    ! read plastic meansize
+      real     ( sp)                 rdplvarsize     ! read plastic stdevsize
+      real     ( sp)                 rdplmusize      ! read plastic meansize
+      real     ( sp)                 rdplsigmasize   ! read plastic stdevsize
       real     ( sp)                 rdplfragrate    ! read plastic fragmentation rate
       integer  ( ip)                 plmissing
 
@@ -777,7 +777,7 @@
                   write ( lun2, '(/a)' ) '  Found keyword "screens".'
                   write ( *   , '(/a)' ) ' Found keyword "screens".'
                   screens = .true.
-                  if ( gettoken( permealeft  , ierr2 ) .ne. 0 ) goto 9201   ! leftside permeability of screeens 
+                  if ( gettoken( permealeft  , ierr2 ) .ne. 0 ) goto 9201   ! leftside permeability of screeens
                   if ( gettoken( permearight , ierr2 ) .ne. 0 ) goto 9202   ! rightside permeability of screeens
                   if ( gettoken( fiscreens   , ierr2 ) .ne. 0 ) goto 9203   ! screens polygon
 
@@ -806,7 +806,7 @@
             end do
          end if
       end if
-      
+
 !     read the simulation timers
 !     simulation start time (the value of id is read above in the special features section)
 
@@ -996,7 +996,7 @@
             close ( lunfil )
          endif
 !        ini_opt = 2 : ascii text file from rasterdata
-         if (ini_opt .eq. 2 ) then                              
+         if (ini_opt .eq. 2 ) then
             if ( gettoken( ini_file, ierr2 ) .ne. 0 ) goto 6012
             open ( newunit=lunfil, file=ini_file, status='old', iostat=ierr2 )
             if ( ierr2 .ne. 0 ) go to 1710
@@ -1236,6 +1236,11 @@
       endif
 
 !     x-window of the plot
+!     Note:
+!     If the number encountered is NOT an integer (interpreted as the number of plotgrids),
+!     then the definition of the first and only plotgrid will follow. Otherwise a set of
+!     that many definitions is expected. Rather tricky, but that is one way of making it
+!     backward compatible
 
       npgrid = 1
       if ( gettoken( i, xw1f, itype, ierr2 ) .ne. 0 ) goto 4038
@@ -1243,7 +1248,19 @@
          npgrid = i
          write ( lun2, '(A,I4)' ) 'Number of plot grids: ',npgrid
       endif
-      if ( npgrid .ne. 0 ) allocate ( pg(npgrid) )
+      if ( npgrid .ne. 0 ) then
+         allocate ( pg(npgrid) )
+      else
+         allocate ( pg(1) )
+         pg(1)%xlow  = 0.0
+         pg(1)%xhigh = 1.0
+         pg(1)%ylow  = 0.0
+         pg(1)%yhigh = 1.0
+         pg(1)%ztype = 0
+         pg(1)%mmap  = 0
+         pg(1)%nmap  = 0
+      endif
+
       do i = 1, npgrid
          if ( npgrid .gt. 1 ) write ( lun2, '(/A,i4)' ) 'Information for plotgrid: ', i
          if ( itype .eq. 2 ) then
@@ -1380,7 +1397,7 @@
                fidye(i) = ' '
             elseif (itype.eq.3) then
                fidye(i) = ' '
-            else               
+            else
                radius(i) = -999.0
                open ( newunit=lunfil, file=fidye(i), status='old', iostat=ierr2 )
                if ( ierr2 .ne. 0 ) go to 1702
@@ -1487,14 +1504,14 @@
             fiwaste(i+nodye) = ' '
          elseif (itype.eq.3) then
             fiwaste(i+nodye) = ' '
-         else               
+         else
             radius(i+nodye) = -999.0
             open ( newunit=lunfil, file=fiwaste(i+nodye), status='old', iostat=ierr2 )
             if ( ierr2 .ne. 0 ) go to 1703
             call getdim_dis ( lunfil, fiwaste(i+nodye), nrowsmax, lun2 )
             close (lunfil)
          endif
-         
+
          if ( gettoken( wparm (i+nodye), ierr2 ) .ne. 0 ) goto 4043
          ndprt(i+nodye) = int(wparm(i+nodye)*nopart/100.0 + 0.5)
 
@@ -2434,7 +2451,7 @@
       call stop_exit(1)
 
       end
-   
+
       subroutine getdim_dis ( lun      , dis_file , nrowsmax, lunlog   )
 !
 !     programmer : michelle jeuken
