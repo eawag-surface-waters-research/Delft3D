@@ -324,7 +324,7 @@ rem =======================
         echo ERROR: generator is empty.
         echo        Possible causes:
         echo            In prepare_sln.py:
-        echo                Choosen Visual Studio version is not installed
+        echo                Chosen Visual Studio version is not installed
         set ERRORLEVEL=1
         goto :end
     )
@@ -464,6 +464,11 @@ rem =======================
 
         xcopy %root%\build_all\x64\Release\dwaq\bin\delwaq.dll      %root%\build_all\x64\dwaq\bin\        /E /C /Y /Q > del.log 2>&1
         xcopy %root%\build_all\x64\Release\dwaq\bin\delwaq*.exe     %root%\build_all\x64\dwaq\bin\        /E /C /Y /Q > del.log 2>&1
+        xcopy %root%\build_all\x64\Release\dwaq\bin\agrhyd.exe      %root%\build_all\x64\dwaq\bin\        /E /C /Y /Q > del.log 2>&1
+        xcopy %root%\build_all\x64\Release\dwaq\bin\ddcouple.exe    %root%\build_all\x64\dwaq\bin\        /E /C /Y /Q > del.log 2>&1
+        xcopy %root%\build_all\x64\Release\dwaq\bin\waqmerge.exe    %root%\build_all\x64\dwaq\bin\        /E /C /Y /Q > del.log 2>&1
+        xcopy %root%\build_all\x64\Release\dwaq\bin\waqpb_export.exe    %root%\build_all\x64\dwaq\bin\        /E /C /Y /Q > del.log 2>&1
+        xcopy %root%\build_all\x64\Release\dwaq\bin\waqpb_import.exe    %root%\build_all\x64\dwaq\bin\        /E /C /Y /Q > del.log 2>&1
         xcopy %root%\build_all\x64\Release\dwaq\bin\waq_plugin*.dll %root%\build_all\x64\dwaq\bin\        /E /C /Y /Q > del.log 2>&1
         xcopy %root%\build_all\x64\Release\dwaq\default             %root%\build_all\x64\dwaq\default\    /E /C /Y /Q > del.log 2>&1
         xcopy %root%\build_all\x64\Release\dwaq\scripts             %root%\build_all\x64\dwaq\scripts\    /E /C /Y /Q > del.log 2>&1
