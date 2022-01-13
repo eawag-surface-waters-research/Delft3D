@@ -17589,10 +17589,8 @@ src/tools_gpl/ddcouple/packages/ddcouple_version_number/ddcouple_version_number.
 src/tools_gpl/ddcouple/packages/ddcouple_version_number/ddcouple_version_number.vcxproj -text
 src/tools_gpl/ddcouple/packages/ddcouple_version_number/ddcouple_version_number.vcxproj.user -text
 src/tools_gpl/ddcouple/packages/ddcouple_version_number/include/resource.h -text
-src/tools_gpl/ddcouple/packages/ddcouple_version_number/include/version_number.h -text
 src/tools_gpl/ddcouple/packages/ddcouple_version_number/include/version_number.h.svn -text
 src/tools_gpl/ddcouple/packages/ddcouple_version_number/include/version_number.ini -text
-src/tools_gpl/ddcouple/packages/ddcouple_version_number/include/version_number.rc -text
 src/tools_gpl/ddcouple/packages/ddcouple_version_number/include/version_number.rc.svn -text
 src/tools_gpl/ddcouple/packages/ddcouple_version_number/src/Makefile.am -text
 src/tools_gpl/ddcouple/packages/ddcouple_version_number/src/c2c.c -text
