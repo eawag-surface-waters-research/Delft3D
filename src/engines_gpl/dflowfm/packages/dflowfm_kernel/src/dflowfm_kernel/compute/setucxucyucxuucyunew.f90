@@ -52,6 +52,8 @@
  double precision, external :: lin2nodx, lin2nody
 
  ucxq = 0d0 ; ucyq = 0d0           ! zero arrays
+ 
+ if (iperot /= -1) then
  ucx  = 0d0 ; ucy  = 0d0
 
  if (kmx < 1) then                                   ! original 2D coding
@@ -107,6 +109,7 @@
     enddo
 
  endif
+ endif 
 
 
  if (icorio == 5) then                                  ! original 2D coding hu weightings

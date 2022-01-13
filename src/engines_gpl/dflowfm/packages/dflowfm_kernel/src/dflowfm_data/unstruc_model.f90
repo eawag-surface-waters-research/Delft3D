@@ -1228,6 +1228,8 @@ subroutine readMDUFile(filename, istat)
        call mess(LEVEL_WARN, 'Invalid settings specified for SubsUplUpdateS1; using 0.')
        sdu_update_s1 = 0
     endif
+    
+    call prop_get_integer(md_ptr, 'numerics', 'PerotType', iperot)
 
     call prop_get(md_ptr, 'numerics', 'Oceaneddysizefrac'   , Oceaneddysizefrac)
     call prop_get(md_ptr, 'numerics', 'Oceaneddysize'       , Oceaneddysize)

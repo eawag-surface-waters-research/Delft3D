@@ -65,6 +65,7 @@
  use unstruc_channel_flow, only: useVolumeTables
  use m_VolumeTables
  use timers
+ use m_setucxcuy_leastsquare, only: reconst2nd
 
  implicit none
 
@@ -1100,6 +1101,9 @@ end if
        u1_tmp = u1
        u1     = u0
        hs     = s0 - bl
+      if (iperot == -1) then
+         call reconst2nd ()
+      endif
        call setucxucyucxuucyunew() !reconstruct cell-center velocities
        u1     = u1_tmp
        deallocate(u1_tmp)

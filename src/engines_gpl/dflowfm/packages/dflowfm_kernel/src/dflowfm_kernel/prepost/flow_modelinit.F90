@@ -36,7 +36,7 @@
  use timers
  use m_flowgeom,    only: jaFlowNetChanged, ndx, lnx, kfs, ndxi
  use waq,           only: reset_waq
- use m_flow,        only: zws, zws0, kmx, jasecflow, lnkx
+ use m_flow,        only: zws, zws0, kmx, jasecflow, lnkx, iperot
  use m_flowtimes
  use m_wind, only: numlatsg
  use network_data,  only: netstat, NETSTAT_CELLS_DIRTY
@@ -63,6 +63,7 @@
  use unstruc_netcdf_map_class
  use unstruc_caching
  use m_monitoring_crosssections, only: ncrs, fill_geometry_arrays_crs
+  use m_setucxcuy_leastsquare, only: reconst2ndini
 
  !use m_mormerge
  !
@@ -286,6 +287,10 @@
      call netlink_tree(1)
  endif
  call timstop(handle_extra(16)) ! netlink tree 1
+ 
+  if (iperot == -1) then
+     call reconst2ndini ()
+  endif
 
  !! flow1d -> dflowfm update
  call timstrt('Save 1d             ', handle_extra(17)) ! save 1d

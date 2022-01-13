@@ -45,6 +45,7 @@
  use m_missing
  use m_xbeach_data, only : DR, roller, swave
  use unstruc_model, only : md_restartfile
+ use m_setucxcuy_leastsquare, only: reconst2nd
  implicit none
 
  integer,intent(in):: jazws0
@@ -92,12 +93,18 @@
     u1_tmp = u1
     u1     = u0
     hs     = s0 - bl
+    if (iperot == -1) then
+       call reconst2nd ()
+    endif
     call setucxucyucxuucyunew() !reconstruct cell-center velocities
     u1     = u1_tmp
     deallocate(u1_tmp)
 
     dti = 1d0/dts
  else
+      if (iperot == -1) then
+         call reconst2nd ()
+      endif
     call setucxucyucxuucyunew()
  endif
 

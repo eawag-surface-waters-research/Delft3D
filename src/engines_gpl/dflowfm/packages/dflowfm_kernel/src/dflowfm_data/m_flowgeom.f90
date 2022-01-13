@@ -49,6 +49,8 @@
    integer, allocatable            :: nod(:)         !< Mapping to net nodes
    double precision, allocatable   :: x  (:)         !< for now, this is only for quick/aligned plotting, the corners of a cell
    double precision, allocatable   :: y  (:)         !< for now, this is only for quick/aligned plotting, the corners of a cell
+   integer                         :: nwx            !< nr of walls attached
+   integer, allocatable            :: nw (:)         !< wallnrs attached to this node
  end type tnode
 
  double precision                  :: bamin          !< minimum 2D cell area

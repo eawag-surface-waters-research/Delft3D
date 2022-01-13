@@ -49,6 +49,7 @@
  double precision, external :: nod2linx, nod2liny
  double precision, external :: lin2nodx, lin2nody
 
+ if (iperot /= -1) then
  ucxq = 0d0 ; ucyq = 0d0           ! zero arrays
  ucx = 0d0 ; ucy = 0d0
 
@@ -179,6 +180,7 @@
        endif
     enddo
 
+ endif
  endif
 
  do n  = 1, nbndz                                     ! waterlevel boundaries

@@ -34,6 +34,7 @@
  use m_flowtimes
  use m_flow
  use m_flowgeom
+ use m_setucxcuy_leastsquare, only: reconst2nd
  implicit none
 
  double precision :: dta, das, ds
@@ -60,6 +61,9 @@
          ds = ag*dxi(L)*(s0(k2) - s0(k1))
          u1(L) = ( u1(L)*(1d0 - das) + u0(L)*das - dta*(adve(L) + ds) ) / (1d0 + dta*advi(L))
       enddo
+      if (iperot == -1) then
+         call reconst2nd()
+      endif
       call setucxucyucxuucyunew()
 
    enddo

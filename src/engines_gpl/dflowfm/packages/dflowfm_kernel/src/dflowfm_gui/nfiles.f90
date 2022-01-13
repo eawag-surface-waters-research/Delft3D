@@ -55,6 +55,7 @@
    use dfm_error
    use gridoperations
    use string_module, only: strcmpi
+   use m_setucxcuy_leastsquare, only: reconst2nd
 
    implicit none
    integer :: MODE, NUM,  NWHAT,  KEY
@@ -443,6 +444,9 @@
             else
                JA = 1
             end if
+            if (iperot == -1) then
+               call reconst2nd ()
+            endif
             call setucxucyucxuucyunew() ! reconstruct cell center velocities
          else
             call rearst(MLAN,JA)

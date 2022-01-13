@@ -1275,6 +1275,7 @@ src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_kernel/compute/setsi
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_kernel/compute/setsorsin.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_kernel/compute/settaubxu_nowave.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_kernel/compute/setuc1d.f90 -text
+src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_kernel/compute/setucxcuy_leastsquare.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_kernel/compute/setucxucyucxuucyu.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_kernel/compute/setucxucyucxuucyunew.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_kernel/compute/setucxy1d.f90 -text

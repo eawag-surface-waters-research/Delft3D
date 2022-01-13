@@ -46,6 +46,7 @@ subroutine setumod(jazws0)                          ! set cell center Perot velo
  use m_missing
  use m_xbeach_data, only : DR, roller, swave
  use unstruc_model, only : md_restartfile
+ use m_setucxcuy_leastsquare, only: reconst2nd
  implicit none
 
  integer,intent(in):: jazws0
@@ -93,10 +94,16 @@ subroutine setumod(jazws0)                          ! set cell center Perot velo
     u1_tmp = u1
     u1     = u0
     hs     = s0 - bl
+    if (iperot == -1) then
+       call reconst2nd ()
+    endif
     call setucxucyucxuucyu() !reconstruct cell-center velocities
     u1     = u1_tmp
     deallocate(u1_tmp)
  else
+    if (iperot == -1) then
+       call reconst2nd ()
+    endif
     call setucxucyucxuucyu()
  endif
  dti = 1d0/dts
@@ -117,8 +124,10 @@ subroutine setumod(jazws0)                          ! set cell center Perot velo
           v(L) =      acL(LL) *(-sn*nod2linx(LL,1,ucx(k1),ucy(k1)) + cs*nod2liny(LL,1,ucx(k1),ucy(k1))) +  &
                  (1d0-acL(LL))*(-sn*nod2linx(LL,2,ucx(k2),ucy(k2)) + cs*nod2liny(LL,2,ucx(k2),ucy(k2)))
        else
-          v(L) =      acl(LL) *(-sn*ucx(k1) + cs*ucy(k1) ) + &
-                 (1d0-acl(LL))*(-sn*ucx(k2) + cs*ucy(k2) )
+          if (iperot >= 0) then
+             v(L) =      acl(LL) *(-sn*ucx(k1) + cs*ucy(k1) ) + &
+                    (1d0-acl(LL))*(-sn*ucx(k2) + cs*ucy(k2) )
+          endif
        endif
        if (kmx > 0) then
           v(LL) = v(LL) + v(L)*Au(L) ! hk: activate when needed

@@ -109,6 +109,9 @@
 
  double precision, allocatable :: banh(:) , rr(:)       ! temp
  integer         , allocatable :: nbanh(:,:) , nr(:)    ! temp
+ 
+ integer, dimension(:), allocatable :: nw_temp
+ integer                            :: nwx
 
 ! character(len=200), dimension(:), allocatable :: fnames
 ! integer                                       :: ifil
@@ -1089,6 +1092,21 @@
        walls(1,nw) = k1                             ! waterlevel point on the inside
        walls(2,nw) = k3                             ! first wall corner
        walls(3,nw) = k4                             ! second wall corner
+       
+       nwx = nd(k1)%nwx
+       if (nd(k1)%nwx == 0) then
+          allocate (nd(k1)%nw(1))
+          nd(k1)%nw(1) = nw
+          nd(k1)%nwx = 1
+       else
+          allocate (nw_temp(nwx))
+          nw_temp = nd(k1)%nw
+          deallocate (nd(k1)%nw)
+          allocate (nd(k1)%nw(nwx+1))
+          nd(k1)%nw(1:nwx) = nw_temp(1:nwx)
+          nd(k1)%nw(nwx+1) = nw
+          deallocate (nw_temp)
+       endif
 
        call duitpl(xzw(k1), yzw(k1), xk(k3), yk(k3), xzw(k1), yzw(k1), xk(k4), yk(k4), sig, jsferic)
        call dlinedis(xzw(k1), yzw(k1), xk(k3), yk(k3), xk(k4), yk(k4),JA,DIS,XN,YN, jsferic, jasfer3D, dmiss)
