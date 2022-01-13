@@ -118,10 +118,10 @@ module protist_types
             prot_array%CcellPrey(iPrey + 1)     = PMSA(ipnt( nrSpInd + maxNrSp * nrSpCon + 6 + iPrey * nrSp_par))   !      C content of protist cell                              (pgC cell-1) 
             prot_array%rPrey(iPrey + 1)         = PMSA(ipnt( nrSpInd + maxNrSp * nrSpCon + 7 + iPrey * nrSp_par))   !      radius of nutrient repleted protist cell               (um)
             prot_array%motPrey(iPrey + 1)       = PMSA(ipnt( nrSpInd + maxNrSp * nrSpCon + 8 + iPrey * nrSp_par))   !      swimming velocity                                      (m s-1)
-            prot_array%PR(iPrey + 1)            = PMSA(ipnt( nrSpInd + maxNrSp * nrSpCon + 9 + iSpec + iPrey * nrSp_par))   !      handling index of prey 1 by pred 1             (dl)  
+            prot_array%PR(iPrey + 1)            = PMSA(ipnt( nrSpInd + maxNrSp * nrSpCon + 9 + iSpec + iPrey * nrSp_par))   !      handling index of prey 1 by pred 1             (-)  
             
             
-            ! if loop to protect against small preys [dl]
+            ! if loop to protect against small preys (-)
             if (prot_array%preyC(iPrey + 1) >= 1.0E-5) then 
                 prot_array%preyFlag(iPrey + 1) = 1.0
             else 

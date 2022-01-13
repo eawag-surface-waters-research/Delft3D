@@ -58,7 +58,7 @@ module protist_cell_functions
    ! Units: gC gC-1 d-1     
    real function basal_respiration(maxUmT, CR) result(BR)
       real, intent(in) ::  maxUmT
-      real, intent(in) ::  CR      ! catabolic respiration quotient    (dl)
+      real, intent(in) ::  CR      ! catabolic respiration quotient    (-)
       BR = maxUmT * CR
    end function basal_respiration
    

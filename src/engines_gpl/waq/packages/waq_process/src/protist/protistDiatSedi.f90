@@ -93,10 +93,10 @@ subroutine PROSED     ( pmsa   , fl     , ipoint , increm, noseg , &
     iflux = 0
     
     ! segment and species independent items
-    maxNrSp    = PMSA(ipnt(   1 ))   !   total nr species implemented in process                (dl)
-    nrSp       = PMSA(ipnt(   2 ))   !   nr of species to be modelled                           (dl)                
-    nrSpCon    = PMSA(ipnt(   3 ))   !   nr of species dependent items                          (dl)                
-    nrInd      = PMSA(ipnt(   4 ))   !   nr of species independent items                        (dl)  
+    maxNrSp    = PMSA(ipnt(   1 ))   !   total nr species implemented in process                (-)
+    nrSp       = PMSA(ipnt(   2 ))   !   nr of species to be modelled                           (-)                
+    nrSpCon    = PMSA(ipnt(   3 ))   !   nr of species dependent items                          (-)                
+    nrInd      = PMSA(ipnt(   4 ))   !   nr of species independent items                        (-)  
     DELT       = PMSA(ipnt(   5 ))   !   timestep for processes                                 (d)    
     MinDepth   = PMSA(ipnt(   6 ))   !   minimum waterdepth for sedimentation/resuspension      (m)    
     TaucSDiat  = PMSA(ipnt(   7 ))   !   critical shear stress for sedimentation Diatoms        (N/m2) 
@@ -133,7 +133,7 @@ subroutine PROSED     ( pmsa   , fl     , ipoint , increm, noseg , &
                     VSedDiat     = max( 0.0 , PMSA(ipnt( nrInd +  7 + spInc )) )  !      sedimentation velocity Diatoms                         (m/d)  
                     
                     ! Calculate sedimentation probabality-------------------------------------------------------------------------------
-                    ! Units: dl   
+                    ! Units: (-)   
                     if (Tau .eq. -1.0) then
                         PSed = 1.0
                     elseif (TaucSDiat .lt. 1e-20 )  then
@@ -142,7 +142,7 @@ subroutine PROSED     ( pmsa   , fl     , ipoint , increm, noseg , &
                         ! comapre with critical shear stress
                         PSed = max ( 0.0, (1.0 - Tau/TaucSDiat) )
                     endif
-                    ! changed PSedMin to 0.0 .... is this ok?? 
+                    ! changed PSedMin to 0.0
                     PSed = max( 0.0, PSed )
                     
                     ! Calculate potential sediment fluxes-------------------------------------------------------------------------------

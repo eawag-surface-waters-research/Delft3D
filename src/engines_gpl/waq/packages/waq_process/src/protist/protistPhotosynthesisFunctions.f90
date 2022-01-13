@@ -47,7 +47,7 @@ module protist_photosynthesis_functions
       real, intent(in) :: PSDOC                             ! proportion of photosynthesis leaked as C
       real, intent(in) :: BR                                ! basal respiration
       real, intent(in) :: redco                             ! C respired to support nitrate reduction for NH4        (gC gN-1)
-      real, intent(in) :: relPS                             ! relative PSmax:Umax on phototrophy                     (dl)
+      real, intent(in) :: relPS                             ! relative PSmax:Umax on phototrophy                     (-)
       real, parameter  :: anaResp = 1.5       ! anabolic respiration cost in terms of C                (gC gN-1 d-1)
       
       plateau = ((1.0 + PSDOC) * maxUmT * maxPSreq * relPS * (1.0 + NCopt * (redco + anaResp)) * NPSiCu) + BR + 1e-6          
@@ -65,7 +65,7 @@ module protist_photosynthesis_functions
       real, intent(in) :: alpha                             ! alpha for photosynthesis in protist in PE curve        ()
       real             :: intermediateVal
         
-      ! dl   intermediate in depth-integrated photosynthesis calculation according to the Smith equation
+      ! (-)   intermediate in depth-integrated photosynthesis calculation according to the Smith equation
       intermediateVal   = (alpha * ChlC * PFD * numSecPerDay) / plateau           
       ! gC gC-1 d-1   gross photosynthesis rate
       grossPhotoRate = plateau * (log(intermediateVal + sqrt(1.0 + intermediateVal**2)) - log(intermediateVal * exat + sqrt(1.0 + (intermediateVal * exat)**2))) / atten 
@@ -90,7 +90,7 @@ module protist_photosynthesis_functions
       real, intent(in) :: NPSiCu                          ! limiting internal nutrient value
       real, intent(in) :: netPhotoRate                    ! see function netPS above (Cfixation)
       real, intent(in) :: plateau                         ! see function plateau above (max photosynthetic rate possible)
-      real, parameter  :: Mphoto = 0.5      ! 2.0 scalar for controlling photoacclimation rate           (dl)        
+      real, parameter  :: Mphoto = 0.5      ! 2.0 scalar for controlling photoacclimation rate           (-)        
       real, parameter  :: L = 0.95          ! upper asymptote
       real, parameter  :: k = -24           ! growth rate to form curve     
       real, parameter  :: b = 0.7! 0.85          ! displacement along the x-axis
@@ -114,7 +114,7 @@ module protist_photosynthesis_functions
    end function degradeChl
    
    ! uptake of protist chlorophyll by NCM
-   ! Units: dl
+   ! Units: (-)
    real function upChl(ChlC, ChlCmax) result(APchl)
       real, intent(in) :: ChlC, ChlCmax  
       real             :: nChlC

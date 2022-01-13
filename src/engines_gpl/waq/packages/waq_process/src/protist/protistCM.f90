@@ -155,11 +155,11 @@ use ieee_arithmetic
     iflux = 0
     
     ! segment and species independent items
-    maxNrSp   = PMSA(ipnt(   1 ))   !   total nr species implemented in process                (dl)
-    nrSp      = PMSA(ipnt(   2 ))   !   nr of species to be modelled                           (dl)                
-    nrSpCon   = PMSA(ipnt(   3 ))   !   nr of species dependent items                          (dl)                
-    nrSpInd   = PMSA(ipnt(   4 ))   !   nr of species independent items                        (dl)  
-    maxNrPr   = PMSA(ipnt(   5 ))   !   nr of prey species implemented                         (dl)
+    maxNrSp   = PMSA(ipnt(   1 ))   !   total nr species implemented in process                (-)
+    nrSp      = PMSA(ipnt(   2 ))   !   nr of species to be modelled                           (-)                
+    nrSpCon   = PMSA(ipnt(   3 ))   !   nr of species dependent items                          (-)                
+    nrSpInd   = PMSA(ipnt(   4 ))   !   nr of species independent items                        (-)  
+    maxNrPr   = PMSA(ipnt(   5 ))   !   nr of prey species implemented                         (-)
     nrSp_par  = PMSA(ipnt(   6 ))   !   nr of parameters per species       
     
     
@@ -183,8 +183,8 @@ use ieee_arithmetic
         NO3          = PMSA(ipnt(  9 ))  !    initial external NO3                                   (gN m-3)
         Temp         = PMSA(ipnt( 10 ))  !    ambient water temperature                              (oC)               
         PFD          = PMSA(ipnt( 11 ))  !    from rad to photon flux density                        (umol photon m-2)           
-        atten        = PMSA(ipnt( 12 ))  !    attenuation of light by water + plankton Chl           (dl)                            
-        exat         = PMSA(ipnt( 13 ))  !    -ve exponent of attenuation                            (dl)    
+        atten        = PMSA(ipnt( 12 ))  !    attenuation of light by water + plankton Chl           (-)                            
+        exat         = PMSA(ipnt( 13 ))  !    -ve exponent of attenuation                            (-)    
                       
         ! species loop
         speciesLoop: do iSpec = 0, (nrSp-1)
@@ -197,42 +197,42 @@ use ieee_arithmetic
             protChl      = PMSA(ipnt( nrSpInd +  2 + spInc ))   !     Chl-biomass                                            (gChl m-3)   
             protN        = PMSA(ipnt( nrSpInd +  3 + spInc ))   !     N-biomass                                              (gN m-3)   
             protP        = PMSA(ipnt( nrSpInd +  4 + spInc ))   !     P-biomass                                              (gP m-3)
-            AEm          = PMSA(ipnt( nrSpInd +  5 + spInc ))   !     maximum assimilation efficiency (AE)                   (dl)
-            AEo          = PMSA(ipnt( nrSpInd +  6 + spInc ))   !     minimum AE                                             (dl)
+            AEm          = PMSA(ipnt( nrSpInd +  5 + spInc ))   !     maximum assimilation efficiency (AE)                   (-)
+            AEo          = PMSA(ipnt( nrSpInd +  6 + spInc ))   !     minimum AE                                             (-)
             alpha        = PMSA(ipnt( nrSpInd +  7 + spInc ))   !     alpha for photosynthesis in protist                    (Figure this out!)  
             CcellProt    = PMSA(ipnt( nrSpInd +  8 + spInc ))   !     C content of protist cell                              (pgC cell-1) 
             ChlCm        = PMSA(ipnt( nrSpInd +  9 + spInc ))   !     maximum cellular Chl:C ratio                           (gChl gC-1)
             ChlCo        = PMSA(ipnt( nrSpInd + 10 + spInc ))   !     minimum cellular Chl:C ratio                           (gChl gC-1)
-            CR           = PMSA(ipnt( nrSpInd + 11 + spInc ))   !     catabolic respiration quotient                         (dl)
-            FrAut        = PMSA(ipnt( nrSpInd + 12 + spInc ))   !     fraction of mortality to autolysis                     (dl)
-            FrDet        = PMSA(ipnt( nrSpInd + 13 + spInc ))   !     fraction of mortality to detritus                      (dl)
-            kAE          = PMSA(ipnt( nrSpInd + 14 + spInc ))   !     Control of AE in response to prey quality              (dl)
+            CR           = PMSA(ipnt( nrSpInd + 11 + spInc ))   !     catabolic respiration quotient                         (-)
+            FrAut        = PMSA(ipnt( nrSpInd + 12 + spInc ))   !     fraction of mortality to autolysis                     (-)
+            FrDet        = PMSA(ipnt( nrSpInd + 13 + spInc ))   !     fraction of mortality to detritus                      (-)
+            kAE          = PMSA(ipnt( nrSpInd + 14 + spInc ))   !     Control of AE in response to prey quality              (-)
             KtNH4        = PMSA(ipnt( nrSpInd + 15 + spInc ))   !     Kt for NH4 transport                                   (gN m-3)
             KtNO3        = PMSA(ipnt( nrSpInd + 16 + spInc ))   !     Kt for NO3 transport                                   (gN m-3)
             KtP          = PMSA(ipnt( nrSpInd + 17 + spInc ))   !     Kt for DIP transport                                   (gP m-3)
-            MrtRT        = PMSA(ipnt( nrSpInd + 18 + spInc ))   !     mortality at reference temperature                     (dl)
-            maxPSreq     = PMSA(ipnt( nrSpInd + 19 + spInc ))   !     maximum C to come from PS                              (dl)
+            MrtRT        = PMSA(ipnt( nrSpInd + 18 + spInc ))   !     mortality at reference temperature                     (-)
+            maxPSreq     = PMSA(ipnt( nrSpInd + 19 + spInc ))   !     maximum C to come from PS                              (-)
             NCm          = PMSA(ipnt( nrSpInd + 20 + spInc ))   !     N:C that totally represses NH4 transport               (gN gC-1)
             NCo          = PMSA(ipnt( nrSpInd + 21 + spInc ))   !     minimum N-quota                                        (gN gC-1)
             NCopt        = PMSA(ipnt( nrSpInd + 22 + spInc ))   !     N:C for growth under optimal conditions                (gN gC-1)
             NO3Cm        = PMSA(ipnt( nrSpInd + 23 + spInc ))   !     N:C that totally represses NO3 transport               (gN gC-1)
             NO3Copt      = PMSA(ipnt( nrSpInd + 24 + spInc ))   !     N:C for growth on NO3 under optimal conditions         (gN gC-1)
-            optCR        = PMSA(ipnt( nrSpInd + 25 + spInc ))   !     proportion of prey captured by starved Prot            (dl)
+            optCR        = PMSA(ipnt( nrSpInd + 25 + spInc ))   !     proportion of prey captured by starved Prot            (-)
             PCm          = PMSA(ipnt( nrSpInd + 26 + spInc ))   !     PC maximum quota                                       (gP gC-1)
             PCo          = PMSA(ipnt( nrSpInd + 27 + spInc ))   !     PC minimum quota                                       (gP gC-1)
             PCoNCm       = PMSA(ipnt( nrSpInd + 28 + spInc ))   !     maximum NC when PC is minimum (PCu = 0)                (gN gC-1)
             PCoNCopt     = PMSA(ipnt( nrSpInd + 29 + spInc ))   !     optimum NC when PC is minimum (PCu = 0)                (gN gC-1)
             PCopt        = PMSA(ipnt( nrSpInd + 30 + spInc ))   !     PC optimum quota                                       (gP gC-1)
-            PSDOC        = PMSA(ipnt( nrSpInd + 31 + spInc ))   !     proportion of current PS being leaked as DOC           (dl)
-            Q10          = PMSA(ipnt( nrSpInd + 32 + spInc ))   !     Q10 for UmRT                                           (dl)
+            PSDOC        = PMSA(ipnt( nrSpInd + 31 + spInc ))   !     proportion of current PS being leaked as DOC           (-)
+            Q10          = PMSA(ipnt( nrSpInd + 32 + spInc ))   !     Q10 for UmRT                                           (-)
             rProt        = PMSA(ipnt( nrSpInd + 33 + spInc ))   !     radius of nutrient repleted protist cell               (um)
             redco        = PMSA(ipnt( nrSpInd + 34 + spInc ))   !     C respired to support nitrate reduction for NH4        (gC gN-1)
-            relPhag      = PMSA(ipnt( nrSpInd + 35 + spInc ))   !     rel. phagotrophy in dark : in light                    (dl)
-            relPS        = PMSA(ipnt( nrSpInd + 36 + spInc ))   !     relative PSmax:Umax on phototrophy                     (dl)
-            ReUmNH4      = PMSA(ipnt( nrSpInd + 37 + spInc ))   !     max. growth rate supported by NH4-N:Umax               (dl)
-            ReUmNO3      = PMSA(ipnt( nrSpInd + 38 + spInc ))   !     max. growth rate supported by NO3-N:Umax               (dl)
+            relPhag      = PMSA(ipnt( nrSpInd + 35 + spInc ))   !     rel. phagotrophy in dark : in light                    (-)
+            relPS        = PMSA(ipnt( nrSpInd + 36 + spInc ))   !     relative PSmax:Umax on phototrophy                     (-)
+            ReUmNH4      = PMSA(ipnt( nrSpInd + 37 + spInc ))   !     max. growth rate supported by NH4-N:Umax               (-)
+            ReUmNO3      = PMSA(ipnt( nrSpInd + 38 + spInc ))   !     max. growth rate supported by NO3-N:Umax               (-)
             RT           = PMSA(ipnt( nrSpInd + 39 + spInc ))   !     reference temperature for UmRT                         (deg C)
-            SDA          = PMSA(ipnt( nrSpInd + 40 + spInc ))   !     specific dynamic action                                (dl)
+            SDA          = PMSA(ipnt( nrSpInd + 40 + spInc ))   !     specific dynamic action                                (-)
             UmRT         = PMSA(ipnt( nrSpInd + 41 + spInc ))   !     maximum growth rate at reference T                     (d-1) 
             
             if (protC <= threshCmass) then 
@@ -256,7 +256,7 @@ use ieee_arithmetic
             
             ! Calculate nutrient status within cell compared to ideal status (nutrient status = 1) --------------------------------------- 
             ! Determine minimum of N-P-Si limitation; Liebig-style limitation of growth (NPCu)
-            ! Units: dl
+            ! Units: (-)
             NCu = statusNC(NC, NCo, NCopt)                        
             PCu = statusPC(PC, PCo, PCopt)
             NPCu = min(NCu, PCu)      
@@ -292,13 +292,13 @@ use ieee_arithmetic
             call initialize_prot_array(prot_array,maxNrPr, PMSA, plen, ipnt, nrSpInd, maxNrSp, nrSpCon, iSpec, nrSp_par)
 
             
-            ! for output [dl]
+            ! for output (-)
             preyFlag = sum(prot_array%preyFlag)
             
             
             !! FOOD QUANTITY -------------------------------------------------------------------------------    
             ! reduction of phagotrophy during night 
-            ! Units: dl
+            ! Units: (-)
             relPhag = 1.0 - relPhag
             lightInh = lightInhibition(PFD, relPhag)
 

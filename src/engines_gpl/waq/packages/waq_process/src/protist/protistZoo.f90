@@ -109,7 +109,8 @@ use ieee_arithmetic
      real    mrt, mrtFrAut, mrtFrDet                ! mortality to detritus and autolysis
             
      ! other parameters
-     real, parameter :: wTurb = 0.0 ! this needs to be an input from model eventually!!!!
+    real, parameter :: wTurb = 0.0                  ! necessary for empirical relations
+                                                    ! can, if desired, be modified to be an input from the hydromechanics 
 
      ! loop counter 
      integer iPrey      ! counter for loops
@@ -134,13 +135,13 @@ use ieee_arithmetic
     iflux = 0
     
     ! segment and species independent items
-    maxNrSp   = PMSA(ipnt(   1 ))   !   total nr species implemented in process                (dl)
-    nrSp      = PMSA(ipnt(   2 ))   !   nr of species to be modelled                           (dl)
-    nrSpCon   = PMSA(ipnt(   3 ))   !   nr of species dependent items                          (dl)
-    nrSpInd   = PMSA(ipnt(   4 ))   !   nr of species independent items                        (dl)
-    maxNrPr   = PMSA(ipnt(   5 ))   !   nr of prey species implemented                         (dl)
-    nrSp_par  = PMSA(ipnt(   7 ))   !   nr of parameters per species                           (dl)
-    iSp       = PMSA(ipnt(   8 ))   !   selector of species parameter (needed to share code with for protistCM)   (dl)
+    maxNrSp   = PMSA(ipnt(   1 ))   !   total nr species implemented in process                (-)
+    nrSp      = PMSA(ipnt(   2 ))   !   nr of species to be modelled                           (-)
+    nrSpCon   = PMSA(ipnt(   3 ))   !   nr of species dependent items                          (-)
+    nrSpInd   = PMSA(ipnt(   4 ))   !   nr of species independent items                        (-)
+    maxNrPr   = PMSA(ipnt(   5 ))   !   nr of prey species implemented                         (-)
+    nrSp_par  = PMSA(ipnt(   7 ))   !   nr of parameters per species                           (-)
+    iSp       = PMSA(ipnt(   8 ))   !   selector of species parameter (needed to share code with for protistCM)   (-)
     
     ! allocation of prey input array
     call allocate_prot_array(prot_array,maxNrPr)
@@ -170,25 +171,25 @@ use ieee_arithmetic
             protC        = PMSA(ipnt( nrSpInd   +  1 + spInc ))   !      C-biomass                                              (gC m-3)  
             protN        = PMSA(ipnt( nrSpInd   +  2 + spInc ))   !      N-biomass                                              (gN m-3)   
             protP        = PMSA(ipnt( nrSpInd   +  3 + spInc ))   !      P-biomass                                              (gP m-3)   
-            AEm          = PMSA(ipnt( nrSpInd   +  4 + spInc ))   !      maximum assimilation efficiency (AE)                   (dl)
-            AEo          = PMSA(ipnt( nrSpInd   +  5 + spInc ))   !      minimum AE                                             (dl)
+            AEm          = PMSA(ipnt( nrSpInd   +  4 + spInc ))   !      maximum assimilation efficiency (AE)                   (-)
+            AEo          = PMSA(ipnt( nrSpInd   +  5 + spInc ))   !      minimum AE                                             (-)
             CcellZoo     = PMSA(ipnt( nrSpInd   +  6 + spInc ))   !      C content of protist cell                              (pgC cell-1)
-            CR           = PMSA(ipnt( nrSpInd   +  7 + spInc ))   !      catabolic respiration quotient                         (dl)
-            FrAut        = PMSA(ipnt( nrSpInd   +  8 + spInc ))   !      fraction of mortality to autolysis                     (dl)   
-            FrDet        = PMSA(ipnt( nrSpInd   +  9 + spInc ))   !      fraction of mortality to detritus                      (dl)   
-            kAE          = PMSA(ipnt( nrSpInd   + 10 + spInc ))   !      Control of AE in response to prey quality              (dl)
-            MrtRT        = PMSA(ipnt( nrSpInd   + 11 + spInc ))   !      mortality at reference temperature                     (dl)      
+            CR           = PMSA(ipnt( nrSpInd   +  7 + spInc ))   !      catabolic respiration quotient                         (-)
+            FrAut        = PMSA(ipnt( nrSpInd   +  8 + spInc ))   !      fraction of mortality to autolysis                     (-)   
+            FrDet        = PMSA(ipnt( nrSpInd   +  9 + spInc ))   !      fraction of mortality to detritus                      (-)   
+            kAE          = PMSA(ipnt( nrSpInd   + 10 + spInc ))   !      Control of AE in response to prey quality              (-)
+            MrtRT        = PMSA(ipnt( nrSpInd   + 11 + spInc ))   !      mortality at reference temperature                     (-)      
             NCm          = PMSA(ipnt( nrSpInd   + 12 + spInc ))   !      N:C that totally represses NH4 transport               (gN gC-1) 
             NCo          = PMSA(ipnt( nrSpInd   + 13 + spInc ))   !      minimum N-quota                                        (gN gC-1)
             NCopt        = PMSA(ipnt( nrSpInd   + 14 + spInc ))   !      N:C for growth under optimal conditions                (gN gC-1)
-            optCR        = PMSA(ipnt( nrSpInd   + 15 + spInc ))   !      proportion of prey captured by starved Zoo             (dl)       
+            optCR        = PMSA(ipnt( nrSpInd   + 15 + spInc ))   !      proportion of prey captured by starved Zoo             (-)       
             PCm          = PMSA(ipnt( nrSpInd   + 16 + spInc ))   !      PC maximum quota                                       (gP gC-1) 
             PCo          = PMSA(ipnt( nrSpInd   + 17 + spInc ))   !      PC minimum quota                                       (gP gC-1)
             PCopt        = PMSA(ipnt( nrSpInd   + 18 + spInc ))   !      PC optimum quota                                       (gP gC-1)
-            Q10          = PMSA(ipnt( nrSpInd   + 19 + spInc ))   !      Q10 for UmRT                                           (dl)
+            Q10          = PMSA(ipnt( nrSpInd   + 19 + spInc ))   !      Q10 for UmRT                                           (-)
             RT           = PMSA(ipnt( nrSpInd   + 20 + spInc ))   !      reference temperature for UmRT                         (deg C)
             rZoo         = PMSA(ipnt( nrSpInd   + 21 + spInc ))   !      radius of nutrient repleted protist cell               (um)
-            SDA          = PMSA(ipnt( nrSpInd   + 22 + spInc ))   !      specific dynamic action                                (dl)
+            SDA          = PMSA(ipnt( nrSpInd   + 22 + spInc ))   !      specific dynamic action                                (-)
             UmRT         = PMSA(ipnt( nrSpInd   + 23 + spInc ))   !      maximum growth rate using NH4-N at reference T         (d-1) 
                         
             if (protC <= threshCmass) then 
@@ -207,7 +208,7 @@ use ieee_arithmetic
             
             ! Calculate nutrient status within cell compared to ideal status (nutrient status = 1) --------------------------------------- 
             ! Determine minimum of N-P-Si limitation; Liebig-style limitation of growth (NPCu)
-            ! Units: dl
+            ! Units: (-)
             NCu = statusNC(NC, NCo, NCopt)                        
             PCu = statusPC(PC, PCo, PCopt)
             NPCu = min(NCu, PCu)            
@@ -220,7 +221,7 @@ use ieee_arithmetic
             call initialize_prot_array(prot_array,maxNrPr, PMSA, plen, ipnt, nrSpInd, maxNrSp, nrSpCon, iSp, nrSp_par)
 
             
-            ! for output [dl]
+            ! for output (-)
             preyFlag = sum(prot_array%preyFlag)
 
 

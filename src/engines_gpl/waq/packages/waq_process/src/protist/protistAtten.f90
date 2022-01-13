@@ -65,8 +65,8 @@ subroutine PROATT     ( pmsa   , fl     , ipoint , increm, noseg , &
      !auxiliaries
     real   PARRAD  ! from RAd to PARRAD
     real   PFD     ! from rad to photon flux density                        (umol photon m-2) 
-    real   atten   ! attenuation of light by water + plankton Chl           (dl)              
-    real   exat    ! -ve exponent of attenuation                            (dl)              
+    real   atten   ! attenuation of light by water + plankton Chl           (-)              
+    real   exat    ! -ve exponent of attenuation                            (-)              
     
 !                                                                                                     
 !******************************************************************************* 

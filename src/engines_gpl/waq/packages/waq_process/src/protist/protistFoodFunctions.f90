@@ -60,7 +60,7 @@ module protist_food_functions
         sumCP = sum(prot_array%capturedPrey) + 1.0E-20            
          
         ! proportion iPrey of total prey 
-        ! Units: dl
+        ! Units: (-)
         prot_array%propPrey = prot_array%capturedPrey / sumCP    
         
         ! total captured prey Nut:C
@@ -81,15 +81,15 @@ module protist_food_functions
         real, intent(out)                    :: ppNC, ppPC, stoichP, opAE
 
         ! quota of captured prey in relation to predator    
-        ! Units: dl       
+        ! Units: (-)       
         ppNC = ingNC / NCopt
         ppPC = ingPC / PCopt
         ! determine limiting nutrient in prey or set to 1 if preNut > predNut
-        ! Units: dl
+        ! Units: (-)
         stoichP = min(ppNC, ppPC, 1.0)
                         
         !! assimilation efficiency for prey 
-        !! Units: dl  
+        !! Units: (-)  
         opAE = (AEo + (AEm - AEo) * stoichP / (stoichP + kAE) * (1.0 + kAE)) * stoichP + 1.0E-20
              
     end subroutine protistFoodQuality
