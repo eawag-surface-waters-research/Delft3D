@@ -1183,6 +1183,8 @@ rem ==========================
         
         rem copy binaries and dll 
         call :copyFile "!build_dir!\waqmerge\!configuration!\waqmerge.exe"                            !dest_bin!
+                
+        call :copyFile "!checkout_src_root!\tools_gpl\waqmerge\scripts\run_waqmerge.bat"              !dest_scripts!
     )
     
 goto :endproc

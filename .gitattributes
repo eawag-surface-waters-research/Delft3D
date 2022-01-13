@@ -17861,6 +17861,8 @@ src/tools_gpl/waqmerge/packages/waqmerge_version_number/src/f2c.c -text
 src/tools_gpl/waqmerge/packages/waqmerge_version_number/src/version.c -text
 src/tools_gpl/waqmerge/packages/waqmerge_version_number/waqmerge_version_number.vcproj -text
 src/tools_gpl/waqmerge/packages/waqmerge_version_number/waqmerge_version_number.vcxproj -text
+src/tools_gpl/waqmerge/scripts/run_waqmerge.bat -text
+src/tools_gpl/waqmerge/scripts/run_waqmerge.sh -text
 src/tools_gpl/waqpb/Makefile.am -text
 src/tools_gpl/waqpb/packages/Makefile.am -text
 src/tools_gpl/waqpb/packages/include/data.inc -text
