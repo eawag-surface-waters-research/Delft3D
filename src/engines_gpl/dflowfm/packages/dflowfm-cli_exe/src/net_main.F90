@@ -79,8 +79,9 @@
    use gridoperations
    use m_commandline_option
    use unstruc_channel_flow, only: network
-   
+
    use m_partitioninfo
+   use check_mpi_env
 #ifdef HAVE_MPI
    use mpi
 #endif
@@ -111,8 +112,7 @@
    character(len=maxnamelen) :: md_mapfile_base !< storing the user-defined map file
    character(len=maxnamelen) :: md_flowgeomfile_base !< storing the user-defined flowgeom file
    character(len=maxnamelen) :: md_classmapfile_base !< storing the user-defined class map file
-   character(len=128)        :: env_value
-    
+
    integer, external         :: iget_jaopengl
    integer, external         :: read_commandline
    integer, external         :: flow_modelinit
@@ -141,31 +141,7 @@
    ! When using IntelMPI, mpi_init will cause a crash if IntelMPI is not
    ! installed. Do not call mpi_init in a sequential computation.
    ! Check this via the possible environment parameters.
-   env_value = ""
-
-   ! MPICH2 (or derived)
-   call util_getenv("PMI_RANK",env_value)
-   if (env_value /= "") jampi=1
-
-   ! OpenMPI 1.3 (or derived)
-   call util_getenv("OMPI_COMM_WORLD_RANK",env_value)
-   if (env_value /= "") jampi=1
-
-   ! OpenMPI 1.2 (or derived)
-   call util_getenv("OMPI_MCA_ns_nds_vpid",env_value)
-   if (env_value /= "") jampi=1
-
-   ! MVAPICH 1.1 (or derived)
-   call util_getenv("MPIRUN_RANK",env_value)
-   if (env_value /= "") jampi=1
-
-   ! MVAPICH 1.9 (or derived)
-   call util_getenv("MV2_COMM_WORLD_RANK",env_value)
-   if (env_value /= "") jampi=1
-
-   ! POE, IBM (or derived)
-   call util_getenv("MP_CHILD",env_value)
-   if (env_value /= "") jampi=1
+   jampi = merge(1, 0, running_in_mpi_environment())
 
    if (jampi == 1) then
        ja_mpi_init_by_fm = 1
