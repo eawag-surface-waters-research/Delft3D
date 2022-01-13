@@ -247,8 +247,7 @@ implicit none
     integer            :: md_cutcells        = 0
     integer            :: npolf              = 0      !< nr of polygonplotfiles saved with n key in editpol
 
-    integer            :: md_usecaching      = 0      !< Use the caching file if it exists (1) or not (0)
-                                                      !< NOTE: turned off by default for the moment!
+    integer            :: md_usecaching      = 1      !< Use the caching file if it exists (1) or not (0)
 
 !   map file output format
     integer,            parameter             :: NUMFORMATS      = 4
@@ -383,7 +382,7 @@ use unstruc_channel_flow
 
     md_cfgfile = ' '
 
-    md_usecaching = 0      !< Use the caching file if it exists (1) or not (0)
+    md_usecaching = 1      !< Use the caching file if it exists (1) or not (0)
 
     ! The following settings are intentionally *not* reset for each model.
     !md_snapshot_seqnr  = 0 ! not handy in practice, it destroys previous plots without warning
