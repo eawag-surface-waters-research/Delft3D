@@ -11197,7 +11197,7 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
    character(len=:), allocatable             :: tmpstring
    integer :: n1, n2, ibr_n1, ibr_n2, ibr
    double precision :: off1, off2
-   integer :: numerr
+   integer :: numerr, threshold_abort_current
 
    numk_read = 0
    numl_read = 0
@@ -11361,16 +11361,17 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
          ! construct network and administrate
          
          ! continue on errors during this subroutine
+         threshold_abort_current = threshold_abort
          threshold_abort = LEVEL_FATAL
 
          ierr = construct_network_from_meshgeom(network, meshgeom, nbranchids, nbranchlongnames, nnodeids, &
             nnodelongnames, nodeids, nodelongnames, network1dname, mesh1dname, nodesOnBranchVertices, jampi, my_rank)
 
          ! check if any errors have occurred, if so raise a fatal error
-         if (getMaxErrorLevel() ==LEVEL_ERROR) then
+         if (getMaxErrorLevel() == LEVEL_ERROR) then
             call SetMessage(LEVEL_FATAL, 'Errors have occurred during the initialisation. Check the previous messages')
          endif
-         threshold_abort = LEVEL_ERROR
+         threshold_abort = threshold_abort_current
 
          ! get the edge nodes, usually not available (needs to be generated)
 
