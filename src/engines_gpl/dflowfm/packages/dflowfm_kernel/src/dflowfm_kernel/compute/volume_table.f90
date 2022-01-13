@@ -288,15 +288,18 @@ module m_VolumeTables
 
       ! Compute the contribution of all the storage nodes to the volume table of the corresponding node
       do i = 1, nstor
-         nod = stors(i)%gridPoint ! TODO: 1D2D: UNST-5013/UNST-5061 : is this safe against storage nodes outside of current domain?
+         nod = stors(i)%gridPoint 
          n = nod-ndx2d
+         if (n > 0) then
 
-         do j = 1, vltb(n)%count
-            level = bl(nod) + (j-1)*tableIncrement
-            vltb(n)%vol(j) = vltb(n)%vol(j) + getVolume(stors(i), level)
-            ! NOTE: %sur follows at the end as an average for each level
-         enddo
-         vltb(n)%sur(vltb(n)%count) = vltb(n)%sur(vltb(n)%count) + GetSurface(stors(i), level)
+            do j = 1, vltb(n)%count
+               level = bl(nod) + (j-1)*tableIncrement
+               vltb(n)%vol(j) = vltb(n)%vol(j) + getVolume(stors(i), level)
+               ! NOTE: %sur follows at the end as an average for each level
+            enddo
+            vltb(n)%sur(vltb(n)%count) = vltb(n)%sur(vltb(n)%count) + GetSurface(stors(i), level)
+         endif
+         
       enddo
      
       ! Compute the contributions of all incoming and outgoing links to the volume table of the corresponding node
