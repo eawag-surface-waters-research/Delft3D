@@ -1199,6 +1199,8 @@ rem ==========================
 
     echo "postbuild ddcouple . . ."
     
+    set localstring="!compiler_redist_dir!*.dll"
+    
     if "%configuration%" == "Debug" (
     
         echo "Debug postbuild"
@@ -1214,8 +1216,6 @@ rem ==========================
         
         rem copy binaries and dll 
         call :copyFile "!build_dir!\ddcouple\!configuration!\ddcouple.*"                                !dest_bin!
-        set localstring="!compiler_redist_dir!*.dll"
-        rem Note the awkward usage of !-characters
         call :copyFile !!localstring!                                                                   !dest_share!!
     )
     
@@ -1233,8 +1233,6 @@ rem ==========================
         
         rem copy binaries and dll 
         call :copyFile "!build_dir!\ddcouple\!configuration!\ddcouple.exe"                            !dest_bin!
-        set localstring="!compiler_redist_dir!*.dll"
-        rem Note the awkward usage of !-characters
         call :copyFile !!localstring!                                                                 !dest_share!!
         
         call :copyFile "!checkout_src_root!\tools_gpl\ddcouple\scripts\run_ddcouple.bat"              !dest_scripts!
