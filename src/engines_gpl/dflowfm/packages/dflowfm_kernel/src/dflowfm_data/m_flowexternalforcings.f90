@@ -431,7 +431,6 @@
  double precision, allocatable, target :: q_org(:)      !< temporary array for saving the discharge through the QH boundary per domain
  double precision, allocatable, target :: qh_gamma(:)   !< temporary array for saving the slope of the QH-relation
  double precision, allocatable     :: atqh_sum(:)       !< temporary array for computing total discharge through qh boundary
- double precision                  :: qhrelax = 1d-2    !< relaxation factor for h signal
 
  integer                                       :: nwbnd    !< number of wave-energy boundaries
  character(len=255), dimension(:), allocatable :: fnamwbnd !< polyline filenames associated with wave-energy boundary

@@ -694,7 +694,7 @@ end subroutine loadModel
 !! @see writeMDUFile
 subroutine readMDUFile(filename, istat)
     use m_flow, notinuse_s=>success
-               !,                  only : kmx, layertype, mxlayz, sigmagrowthfactor, qhrelax, iturbulencemodel, &
+               !,                  only : kmx, layertype, mxlayz, sigmagrowthfactor, iturbulencemodel, &
                !                         LAYTP_SIGMA, numtopsig, spirbeta,                              &
                !                         dztopuniabovez, dztop, uniformhu, jahazlayer, Floorlevtoplay,         &
                !                         javakeps,                                                             &
@@ -1145,7 +1145,6 @@ subroutine readMDUFile(filename, istat)
     call prop_get_double (md_ptr, 'numerics', 'Epshstem'     , epshstem)
 
     call prop_get_double (md_ptr, 'numerics', 'Teta0'        , teta0)
-    call prop_get_double (md_ptr, 'numerics', 'Qhrelax'      , qhrelax)
     call prop_get_integer(md_ptr, 'numerics', 'Jbasqbnddownwindhs'    , jbasqbnddownwindhs)
 
     call prop_get_integer(md_ptr, 'numerics', 'Maxitverticalforestersal' , Maxitverticalforestersal)
@@ -2430,7 +2429,7 @@ end subroutine writeMDUFile
 
 !> Write a model definition to a file pointer
 subroutine writeMDUFilepointer(mout, writeall, istat)
-    use m_flow ! ,                !  only : kmx, layertype, mxlayz, sigmagrowthfactor, qhrelax, numtopsig, &
+    use m_flow ! ,                !  only : kmx, layertype, mxlayz, sigmagrowthfactor, numtopsig, &
                                   !         Iturbulencemodel, spirbeta, dztopuniabovez, dztop, jahazlayer, Floorlevtoplay ,  &
                                   !         fixedweirtopwidth, fixedweirtopfrictcoef, fixedweirtalud, ifxedweirfrictscheme,         &
                                   !         Tsigma, jarhoxu, iStrchType, STRCH_USER, STRCH_EXPONENT, STRCH_FIXLEVEL, laycof
@@ -2906,10 +2905,6 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
 
     if (writeall .or. Teta0 .ne. 0.55d0) then
        call prop_set(prop_ptr, 'numerics', 'Teta0'    , Teta0,   'Theta of time integration (0.5 < theta < 1)')
-    endif
-
-    if (writeall .or. qhrelax .ne. 1d-2) then
-       call prop_set(prop_ptr, 'numerics', 'Qhrelax'  , Qhrelax, 'Relaxation on Q-h open boundaries')
     endif
 
     if (writeall .or. jbasqbnddownwindhs > 0) then
