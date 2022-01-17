@@ -56,9 +56,6 @@ fi
 module load    gcc/7.3.0
 module display gcc/7.3.0
   
-module load    libtool/2.4.6_gcc7.3.0
-module display libtool/2.4.6_gcc7.3.0
-
 module load    proj/7.1.0_gcc7.3.0
 module display proj/7.1.0_gcc7.3.0
 
