@@ -388,9 +388,7 @@ integer function GetCrossType(string)
 
    character(len=*), intent(in) :: string   !< name of the cross section type    
 
-   call str_lower(string)
-
-   select case(trim(string))
+   select case(str_tolower(trim(string)))
       case ('tabulated')
          GetCrossType = CS_TABULATED ! v1
       case ('trapezium')

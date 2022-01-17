@@ -363,7 +363,7 @@ module m_readCrossSections
          select case (crossType)
          case(CS_TABULATED)
             
-            if (trim(typestr) == 'zwRiver') then
+            if (strcmpi(typestr, 'zwRiver')) then
                plural = .true.
             endif
             success = readTabulatedCS(pCS, md_ptr%child_nodes(i)%node_ptr) 
