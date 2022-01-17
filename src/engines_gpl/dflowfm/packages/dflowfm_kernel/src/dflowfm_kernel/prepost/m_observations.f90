@@ -1014,10 +1014,10 @@ subroutine addObservation_from_ini(network, filename)
    ! 1b. get the corresponding x- and y-coordinates
    allocate(xx_tmp(nByBrch))
    allocate(yy_tmp(nByBrch))
-   if (nByBrch > 0) then
-      ierr = odu_get_xy_coordinates(branchIdx_tmp(1:nByBrch), Chainage_tmp(1:nByBrch), meshgeom1d%ngeopointx, meshgeom1d%ngeopointy, &
-                                     meshgeom1d%nbranchgeometrynodes, meshgeom1d%nbranchlengths, jsferic, xx_tmp, yy_tmp)
-   endif
+   do i = 1, nByBrch
+      ierr = odu_get_xy_coordinates(branchIdx_tmp(i:i), Chainage_tmp(i:i), meshgeom1d%ngeopointx, meshgeom1d%ngeopointy, &
+                                     meshgeom1d%nbranchgeometrynodes, meshgeom1d%nbranchlengths, jsferic, xx_tmp(i:i), yy_tmp(i:i))
+   enddo
    if (ierr /= DFM_NOERR) then
       call mess(LEVEL_ERROR, "Error occurs when getting the x- and y-coordinates for obs from file '"//trim(filename)//".")
    end if
