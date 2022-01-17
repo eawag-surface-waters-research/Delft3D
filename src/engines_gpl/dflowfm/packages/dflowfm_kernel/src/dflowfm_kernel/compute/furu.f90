@@ -329,7 +329,7 @@ do n  = 1, nbndu                                    ! boundaries at u points
              endif
              qk1   = hu(L)*ustbLL*sqcfi               ! integral flux till level k
              ru(L) = (qk1 - qk0) / ( hu(L) - hu(L-1) )
-             if (zbndq(n) < 0d0) ru(L) = -1d0*ru(L)
+             if (zbndun < 0d0) ru(L) = -1d0*ru(L)
              qk0   =  qk1
           endif
        endif
