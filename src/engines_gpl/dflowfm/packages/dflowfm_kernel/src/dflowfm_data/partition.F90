@@ -5308,6 +5308,32 @@ subroutine gatherv_double_data_mpi_dif(ndata_send, data_send, ndata_gat, data_ga
 
 end subroutine gatherv_double_data_mpi_dif
 
+!> Gathers integer data into specified locations from all processes in a group and delivers to a specified root process.
+!! Note: Different numbers of data on different subdomains can be sent.
+subroutine gatherv_int_data_mpi_dif(ndata_send, data_send, ndata_gat, data_gat, ngroups, recvCount, displs, root, ierror)
+#ifdef HAVE_MPI
+      use mpi
+#endif
+
+      implicit none
+      integer,                        intent(in   ) :: ndata_send !< Number of data in array data_send
+      integer, dimension(ndata_send), intent(in   ) :: data_send  !< Array of data on one subdomain to send
+      integer,                        intent(in   ) :: ndata_gat  !< Number of data in array data_gat
+      integer, dimension(ndata_gat),  intent(inout) :: data_gat   !< Array of data gathered from all subdomains to receive
+      integer,                        intent(in   ) :: ngroups    !< Number of groups (subdomains)
+      integer, dimension(ngroups),    intent(in   ) :: recvCount  !< Array containing the number of elements that are received from each subdomain
+      integer, dimension(ngroups),    intent(in   ) :: displs     !< Entry i in this array specifies the displacement (relative to data_gat) at which
+                                                                  !< to place the incoming data from process i (significant only at root)
+      integer,                        intent(in   ) :: root       !< Rank of receiving process
+      integer,                        intent(inout) :: ierror     !< Error index
+
+      ierror = -1
+#ifdef HAVE_MPI
+      call mpi_gatherv(data_send, ndata_send, mpi_integer, data_gat, recvCount, displs, mpi_integer, root, DFM_COMM_DFMWORLD, ierror)
+#endif
+
+end subroutine gatherv_int_data_mpi_dif
+
 !> Abort all processes
    subroutine abort_all()
       use dfm_error, only: DFM_GENERICERROR
