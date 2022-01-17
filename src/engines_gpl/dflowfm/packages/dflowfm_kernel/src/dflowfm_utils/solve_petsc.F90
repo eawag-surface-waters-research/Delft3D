@@ -88,11 +88,14 @@ end module m_petsc
    subroutine startpetsc()
 #ifdef HAVE_PETSC   
       use m_petsc
+      use mpi, only: mpi_comm_dup
       use m_flowparameters, only: Icgsolver
+      use m_partitioninfo, only: DFM_COMM_DFMWORLD
       implicit none
       PetscErrorCode :: ierr = PETSC_OK
      
       if ( icgsolver.eq.6 ) then
+         call mpi_comm_dup(DFM_COMM_DFMWORLD, PETSC_COMM_WORLD, ierr)
          call PetscInitialize(PETSC_NULL_CHARACTER,ierr)
          call PetscPopSignalHandler(ierr) ! Switch off signal catching in PETSC.
          call PetscLogDefaultBegin(ierr)
@@ -108,6 +111,7 @@ end module m_petsc
 !> initialze PETSc
    subroutine stoppetsc()
 #ifdef HAVE_PETSC   
+      use mpi, only: mpi_comm_free
       use m_petsc
       use m_flowparameters, only: Icgsolver
       implicit none
@@ -116,6 +120,7 @@ end module m_petsc
       if (Icgsolver.eq.6) then
          call killSolverPETSC()
          call PetscFinalize(ierr)
+         call mpi_comm_free(PETSC_COMM_WORLD, ierr)
       end if
 #endif
       return
@@ -159,8 +164,12 @@ end module m_petsc
       ierror = 1
 
       
-!     make global numbering
-      call get_global_numbers(nocg,noel(nogauss+1:nogauss+nocg), iglobal, numcells, 0)
+!     make global numbering; the first call fails in debug mode when nocg = 0 and hence nogauss = len(noel)
+      if (nocg > 0) then
+          call get_global_numbers(nocg, noel(nogauss+1:nogauss+nocg), iglobal, numcells, 0)
+      else
+          call get_global_numbers(nocg, noel, iglobal, numcells, 0)
+      endif
       
       if ( jampi.eq.1 ) then
 !        the number of cells in this domain
@@ -409,11 +418,11 @@ end module m_petsc
       rhs_val = 0d0
       sol_val = 0d0
       res_val = 0d0
-      if (ierr == PETSC_OK) call VecCreateMPIWithArray( DFM_COMM_DFMWORLD, singletonBlocks, &
+      if (ierr == PETSC_OK) call VecCreateMPIWithArray( PETSC_COMM_WORLD, singletonBlocks, &
                                   numrows, PETSC_DECIDE, rhs_val, rhs, ierr)
-      if (ierr == PETSC_OK) call VecCreateMPIWithArray( DFM_COMM_DFMWORLD, singletonBlocks, &
+      if (ierr == PETSC_OK) call VecCreateMPIWithArray( PETSC_COMM_WORLD, singletonBlocks, &
                                   numrows, PETSC_DECIDE, sol_val, sol, ierr)
-      if (ierr == PETSC_OK) call VecCreateMPIWithArray( DFM_COMM_DFMWORLD, singletonBlocks, &
+      if (ierr == PETSC_OK) call VecCreateMPIWithArray( PETSC_COMM_WORLD, singletonBlocks, &
                                   numrows, PETSC_DECIDE, res_val, res, ierr)
       if (ierr == PETSC_OK) call VecAssemblyBegin(rhs,ierr)
       if (ierr == PETSC_OK) call VecAssemblyBegin(sol,ierr)
@@ -622,7 +631,7 @@ end module m_petsc
          if (ierr == PETSC_OK) call PCDestroy(Preconditioner, ierr)
       end if
 
-      if (ierr == PETSC_OK) call PCCreate(DFM_COMM_DFMWORLD,Preconditioner, ierr)
+      if (ierr == PETSC_OK) call PCCreate(PETSC_COMM_WORLD,Preconditioner, ierr)
       if (ierr == PETSC_OK) call PCSetOperators(Preconditioner, Amat, Amat, ierr)
       if (ierr == PETSC_OK) call KSPSetPC(Solver, Preconditioner, ierr)
 
@@ -690,7 +699,7 @@ end module m_petsc
 
 !     the following will destroy joff
       if (ndomains == 1) then
-         if (ierr == PETSC_OK) call MatCreateSeqAIJWithArrays(DFM_COMM_DFMWORLD, numrows, numrows,   &
+         if (ierr == PETSC_OK) call MatCreateSeqAIJWithArrays(PETSC_COMM_WORLD, numrows, numrows,   &
             idia, jdia, adia, Amat, ierr)
       else
 !         do i=0,ndomains-1
@@ -705,7 +714,7 @@ end module m_petsc
 !         end do
 !         stop
 
-         if (ierr == PETSC_OK) call MatCreateMPIAIJWithSplitArrays(DFM_COMM_DFMWORLD, numrows, numrows,   &
+         if (ierr == PETSC_OK) call MatCreateMPIAIJWithSplitArrays(PETSC_COMM_WORLD, numrows, numrows,   &
             PETSC_DETERMINE, PETSC_DETERMINE, idia, jdia, adia, ioff, joff, aoff, Amat, ierr)
       end if
 
@@ -717,7 +726,7 @@ end module m_petsc
 !      call writemesg('RHS and SOL vector are filled')
 
       if (ierr == PETSC_OK) then 
-        call KSPCreate(DFM_COMM_DFMWORLD, Solver, ierr)
+        call KSPCreate(PETSC_COMM_WORLD, Solver, ierr)
         isKSPCreated = .true.
       endif
       if (ierr == PETSC_OK) call KSPSetOperators(Solver, Amat, Amat, ierr)

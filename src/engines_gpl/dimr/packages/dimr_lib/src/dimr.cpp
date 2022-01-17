@@ -334,7 +334,7 @@ void Dimr::runParallelInit(dimr_control_block* cb) {
     dimr_component* masterComponent = cb->subBlocks[cb->masterSubBlockId].unit.component;
 
     // Create an MPI subgroup and subcommunicator and pass it on to the masterComponent.
-    if (use_mpi && masterComponent->mpiCommVar != NULL && masterComponent->numProcesses > 1) { // TODO: consider removing the numproc>1 check.
+    if (use_mpi && masterComponent->mpiCommVar != NULL) {
         ierr = MPI_Group_incl(mpiGroupWorld, masterComponent->numProcesses, masterComponent->processes, &mpiGroupComp);
         if (ierr != MPI_SUCCESS) {
             throw Exception(true, Exception::ERR_MPI, "runParallelInit: cannot create a subgroup of %d processes for component \"%s\". Code: %d.", masterComponent->numProcesses, masterComponent->name, ierr);
@@ -376,7 +376,28 @@ void Dimr::runParallelInit(dimr_control_block* cb) {
         (masterComponent->dllGetCurrentTime) (&cb->subBlocks[cb->masterSubBlockId].tCur);
     }
 
+    if (masterComponent->numProcesses < numranks) {
+        double dbl4_buf[4];
+        
+        if (masterComponent->processes[0] == my_rank) {
+            dbl4_buf[0] = cb->subBlocks[cb->masterSubBlockId].tStart;
+            dbl4_buf[1] = cb->subBlocks[cb->masterSubBlockId].tEnd;
+            dbl4_buf[2] = cb->subBlocks[cb->masterSubBlockId].tStep;
+            dbl4_buf[3] = cb->subBlocks[cb->masterSubBlockId].tCur;
+        }
+        else {
+            for (int i = 0; i < 4; i++)
+            {
+                dbl4_buf[i] = 0.0;
+            }
+        }
+        ierr = MPI_Bcast(dbl4_buf, 4, MPI_DOUBLE, masterComponent->processes[0], MPI_COMM_WORLD);
 
+        cb->subBlocks[cb->masterSubBlockId].tStart = dbl4_buf[0];
+        cb->subBlocks[cb->masterSubBlockId].tEnd = dbl4_buf[1];
+        cb->subBlocks[cb->masterSubBlockId].tStep = dbl4_buf[2];
+        cb->subBlocks[cb->masterSubBlockId].tCur = dbl4_buf[3];
+    }
 
     //
     // Then initialize the other components and couplers
@@ -713,17 +734,37 @@ void Dimr::runParallelInit(dimr_control_block* cb) {
 //------------------------------------------------------------------------------
 void Dimr::runParallelUpdate(dimr_control_block* cb, double tStep) {
     dimr_control_block* masterComponent = &cb->subBlocks[cb->masterSubBlockId];
-    if (!masterComponent->unit.component->onThisRank)
-    {
-        throw Exception(true, Exception::ERR_MPI, "runParallelUpdate: not supported yet: master component \"%s\" should run on all processes.", masterComponent->unit.component->name);
-        // TODO: AvD/AM: is this allowed: master component not on *all* dimr processes? NOT YET, but yes we want it, e.g. 3xFM, 7xWAVE. Rethink.
-    }
     // Initialize time parameters
     double* currentTime = &masterComponent->tCur;
+
+    // already requested in "runParallelInit" ... is this really nessary?
     // masterComponent->tStart : simulation start time as obtained from the masterComponent
     // masterComponent->tEnd   : simulation end   time as obtained from the masterComponent
-    (masterComponent->unit.component->dllGetStartTime) (&masterComponent->tStart);
-    (masterComponent->unit.component->dllGetEndTime) (&masterComponent->tEnd);
+    if (masterComponent->unit.component->onThisRank)
+    {
+        (masterComponent->unit.component->dllGetStartTime) (&masterComponent->tStart);
+        (masterComponent->unit.component->dllGetEndTime) (&masterComponent->tEnd);
+    }
+
+    // make sure that all threads know about it ...
+    if (masterComponent->unit.component->numProcesses < numranks) {
+        double dbl2_buf[2];
+        int ierr;
+
+        if (masterComponent->unit.component->processes[0] == my_rank) {
+            dbl2_buf[0] = masterComponent->tStart;
+            dbl2_buf[1] = masterComponent->tEnd;
+        }
+        else {
+            dbl2_buf[0] = 0.0;
+            dbl2_buf[1] = 0.0;
+        }
+        ierr = MPI_Bcast(dbl2_buf, 2, MPI_DOUBLE, masterComponent->unit.component->processes[0], MPI_COMM_WORLD);
+
+        masterComponent->tStart = dbl2_buf[0];
+        masterComponent->tEnd = dbl2_buf[1];
+    }
+
     masterComponent->tNext = min(*currentTime + tStep, masterComponent->tEnd);
     if (*currentTime == masterComponent->tStart) {
         // Set the currentTime and nextTime in all other components, relative to currentTime
@@ -802,8 +843,22 @@ void Dimr::runParallelUpdate(dimr_control_block* cb, double tStep) {
                 chdir(masterComponent->unit.component->workingDir);
                 log->Write(INFO, my_rank, "%10.1f:    %s.Update(%10.1f)", *currentTime, masterComponent->unit.component->name, tStep);
                 timerStart(masterComponent->unit.component);
-                int state = (masterComponent->unit.component->dllUpdate) (tStep);
-                if (state != 0)
+                int state = 0; // state returned by local call to component (0 if not called)
+                int state0 = 0; // state returned by call to component by the first thread calling that component
+                int ierr;
+                if (masterComponent->unit.component->onThisRank)
+                {
+                    state = (masterComponent->unit.component->dllUpdate) (tStep);
+                    if (masterComponent->unit.component->processes[0] == my_rank)
+                    {
+                        state0 = state;
+                    }
+                }
+                if (masterComponent->unit.component->numProcesses < numranks)
+                {
+                    ierr = MPI_Bcast(&state0, 4, MPI_INT, masterComponent->unit.component->processes[0], MPI_COMM_WORLD);
+                }
+                if (state0 != 0 || state != 0)
                 {
                     stringstream ss, curTime;
                     ss << state;
@@ -1790,30 +1845,45 @@ void Dimr::connectLibs(void) {
 
         delete[] lib;
     }
-    if (my_rank == 0) {
-        printComponentVersionStrings(INFO);            // List component version to log
-    }
+    printComponentVersionStrings(INFO);            // List component version to log
 }
 
 //void Dimr::printComponentVersionStrings (Level my_level) {
 void Dimr::printComponentVersionStrings(Level my_level) {
     const char* version = "version";
     char* versionstr = new char[MAXSTRINGLEN];
-    log->Write(my_level, my_rank, "");
-    log->Write(my_level, my_rank, "Version Information of Components");
-    log->Write(my_level, my_rank, "=================================");
+    int ierr;
+
     for (int i = 0; i < componentsList.numComponents; i++) {
         strcpy(versionstr, "");
-        if (componentsList.components[i].dllGetAttribute != NULL) {
-            componentsList.components[i].dllGetAttribute(version, versionstr);
+
+        if (componentsList.components[i].processes[0] == my_rank) {
+            if (componentsList.components[i].dllGetAttribute != NULL) {
+                componentsList.components[i].dllGetAttribute(version, versionstr);
+            }
         }
+        if (componentsList.components[i].numProcesses < numranks) {
+            ierr = MPI_Bcast(versionstr, MAXSTRINGLEN, MPI_CHAR, componentsList.components[i].processes[0], MPI_COMM_WORLD);
+        }
+
         if (strlen(versionstr) == 0) {
             strcpy(versionstr, "Unknown");
         }
-        log->Write(my_level, my_rank, "%-35s: %s", componentsList.components[i].library, versionstr);
+        if (my_rank == 0) {
+            if (i == 0) {
+                log->Write(my_level, my_rank, "");
+                log->Write(my_level, my_rank, "Version Information of Components");
+                log->Write(my_level, my_rank, "=================================");
+            }
+            log->Write(my_level, my_rank, "%-35s: %s", componentsList.components[i].library, versionstr);
+        }
     }
-    log->Write(my_level, my_rank, "---------------------------------");
-    log->Write(my_level, my_rank, "");
+
+    if (my_rank == 0) {
+        log->Write(my_level, my_rank, "---------------------------------");
+        log->Write(my_level, my_rank, "");
+    }
+
     delete[] versionstr;
 }
 
