@@ -330,8 +330,7 @@ subroutine unc_write_his(tim)            ! wrihis
                call definencvar(ihisfile,id_hs, nf90_double, idims, 2, 'waterdepth'  , 'water depth', 'm', statcoordstring, station_geom_container_name)
             endif
             if (jahistaucurrent > 0) then
-               call definencvar(ihisfile,id_taucur, nf90_double, idims, 2, 'taus'  , 'taus', 'N m-2', 'Total bed shear stress')
-               ierr = nf90_put_att(ihisfile, id_taucur, 'geometry', station_geom_container_name)
+               call definencvar(ihisfile,id_taucur, nf90_double, idims, 2, 'taus'  , 'Total bed shear stress', 'N m-2', statcoordstring, station_geom_container_name)
             endif
 
             if( jahisvelvec > 0 ) then
