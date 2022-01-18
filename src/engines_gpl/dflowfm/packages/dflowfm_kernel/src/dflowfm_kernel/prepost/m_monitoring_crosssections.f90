@@ -459,9 +459,9 @@ subroutine fill_geometry_arrays_crs()
    double precision, allocatable :: geomYCrsMPI(:)      ! [m] y coordinates of cross sections after mpi communication.
    integer,          allocatable :: nodeCountCrsGat(:), nNodesCrsGat(:), displs(:)
    double precision, allocatable :: geomX(:), geomY(:)
-   integer                       :: nlinks, i, j, j1, k, k1, ierror, is, ie, n, ii, nNodes, nNodesCrsMPI, L, L0, ks, ke, nPar, nNodesAdd, nn, jaexist, nb, kk
+   integer                       :: nlinks, i, j, j1, k, k1, ierror, is, ie, n, ii, nNodes, nNodesCrsMPI, L, L0, ks, ke, nPar, nNodesAdd, nn, jaexist, nb, nbLast, kk
    double precision              :: xNew, yNew, xOld, yOld
-   integer,          allocatable :: maskBnd(:), maskBndAll(:), maskBndGat(:), indBndMPI(:) ! Arrays for boundary nodes, only used in parallel run
+   integer,          allocatable :: maskBnd(:), maskBndAll(:), maskBndGat(:), indBndMPI(:), jaCoincide(:)  ! Arrays for boundary nodes, only used in parallel run
 
    ! Allocate and construct geometry variable arrays (on one subdomain)
    call realloc(nodeCountCrs,   ncrs, keepExisting = .false., fill = 0  )
@@ -487,7 +487,6 @@ subroutine fill_geometry_arrays_crs()
    do i = 1, ncrs
       nNodes = nodeCountCrs(i)
       nlinks = crs(i)%path%lnx
-      nb = 0
       if (nNodes > 0) then
          call realloc(geomX, max(allocSize(geomX), nNodes), keepExisting=.false.)
          call realloc(geomY, max(allocSize(geomY), nNodes), keepExisting=.false.)
@@ -502,22 +501,11 @@ subroutine fill_geometry_arrays_crs()
             call realloc(maskBnd, nNodes, keepExisting = .false., fill = 0)
             if (nlinks == 1) then
                ! If there is only one link, then the two nodes are the boundary nodes.
-               nb = 2
                maskBnd(1) = 1
                maskBnd(2) = 1
             else
-               ! If there are more than one link, then firstly decide the starting node as one boundary node.
-               L = crs(i)%path%iperm(2)
-               if ((.not.(comparereal(crs(i)%path%xk(1,L), geomX(1), eps6)==0 .and. comparereal(crs(i)%path%yk(1,L), geomY(1), eps6)==0)) &
-                  .and. (.not.(comparereal(crs(i)%path%xk(2,L), geomX(1), eps6)==0 .and. comparereal(crs(i)%path%yk(2,L), geomY(1), eps6)==0)))then
-                 ! If (geomX(1),geomY(1)) is not a node of the second link, then it is a boundary node.
-                  nb = nb + 1
-                  maskBnd(1) = 1
-               else
-                  ! Otherwise (geomX(2),geomY(2)) is a boundary node.
-                  nb = nb + 1
-                  maskBnd(2) = 1
-               end if
+               ! If there are more than one link, then (geomX(1),geomY(1)) is a boundary node.
+               maskBnd(1) = 1
             end if
          end if
 
@@ -542,9 +530,7 @@ subroutine fill_geometry_arrays_crs()
 
                   if (jampi > 0) then ! Mark this node and the previous node as boundary nodes.
                      call realloc(maskBnd, nNodes, keepExisting=.true.)
-                     nb = nb + 1
                      maskBnd(k-1) = 1
-                     nb = nb + 1
                      maskBnd(k) = 1
                   end if
 
@@ -558,7 +544,6 @@ subroutine fill_geometry_arrays_crs()
                geomY(k) = crs(i)%path%yk(2,L)
 
                if (jampi > 0 .and. L0 == nlinks) then ! The 2nd node of the last link is a boundary node.
-                  nb = nb + 1
                   maskBnd(k) = 1
                end if
 
@@ -640,7 +625,9 @@ subroutine fill_geometry_arrays_crs()
          do i = 1, ncrs                     ! for each cross section
             nPar = 0                        ! Number of subdomains that contain this cross section
             nb = 0                          ! Number of boundary nodes for this cross section
+            nbLast = 0                      ! Number of boundary nodes for this cross section in the previous subdomains
             call realloc(indBndMPI, nodeCountCrsMPI(i), keepExisting = .false., fill = 0)
+            call Realloc(jaCoincide,nodeCountCrsMPI(i), keepExisting = .false., fill = 0)
             do n = 1, ndomains              ! on each sudomain
                k = (n-1)*ncrs+i             ! index in nodeCountCrsGat
                nNodes = nodeCountCrsGat(k)  ! cross section i on sumdomain n has nNodes nodes
@@ -658,12 +645,18 @@ subroutine fill_geometry_arrays_crs()
                            xNew = xGat(kk)
                            yNew = yGat(kk)
                            jaexist = 0
-                           do j1 = 1, nb ! Loop over all the boundary nodes that have been added in the coordinate arrays
-                              xOld = geomXCrsMPI(indBndMPI(j1))
-                              yOld = geomYCrsMPI(indBndMPI(j1))
-                              if (comparereal(xNew, xOld, eps6)==0 .and. comparereal(xNew, xOld, eps6)==0) then
-                                 jaexist = 1
-                                 exit
+                           do j1 = 1, nbLast ! Loop over all the boundary nodes of the previous subdomains that have been added in the coordinate arrays
+                              if (jaCoincide(j1) == 0) then
+                                 ! If the j1 boundary node is not coincide with any boundary node, then check if node (xNew,yNew) is coincide with it or not.
+                                 ! If jaCoincide(j1) == 1, then no need to check this node because one boundary node can be
+                                 ! coincide with another boundary node maximal ONCE.
+                                 xOld = geomXCrsMPI(indBndMPI(j1))
+                                 yOld = geomYCrsMPI(indBndMPI(j1))
+                                 if (comparereal(xNew, xOld, eps6)==0 .and. comparereal(xNew, xOld, eps6)==0) then
+                                    jaexist = 1
+                                    jaCoincide(j1) = 1
+                                    exit
+                                 end if
                               end if
                            end do
                            if (jaexist == 0) then ! If the new candidate node does not exist in the coordinate arrays, then add it
@@ -694,6 +687,7 @@ subroutine fill_geometry_arrays_crs()
                         end if
                      end do
                   end if
+                  nbLast = nb ! update nbLast when the current subdomain is finished.
                end if
             end do
          end do
