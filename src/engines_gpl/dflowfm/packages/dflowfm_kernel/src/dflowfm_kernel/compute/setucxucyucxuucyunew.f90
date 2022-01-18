@@ -391,7 +391,7 @@ else if (icorio == 10) then                             ! vol2D type weigthings
  if (icorio == 5) then                       ! original hu/hs weighting
     if (kmx < 1) then
        !$OMP PARALLEL DO           &
-       !$OMP PRIVATE(k)
+       !$OMP PRIVATE(k,hsk)
        do k = 1,ndxi
           hsk = hs(k)
           if (hsk > 0d0)  then
@@ -421,7 +421,7 @@ else if (icorio == 10) then                             ! vol2D type weigthings
  else if (icorio == 6) then                       ! original hu/hs weighting 2D
     if (kmx < 1) then
        !$OMP PARALLEL DO           &
-       !$OMP PRIVATE(k)
+       !$OMP PRIVATE(k,hsk)
        do k = 1,ndxi
           hsk = hs(k)
           if (hsk > 0d0)  then
@@ -450,7 +450,7 @@ else if (icorio == 10) then                             ! vol2D type weigthings
 
     if (kmx < 1) then ! original 2D coding
        !$OMP PARALLEL DO           &
-       !$OMP PRIVATE(k)
+       !$OMP PRIVATE(k,hsk)
        do k = 1,ndxi
           if (hus(k) > 0d0)  then
              hsk = hus(k)
@@ -481,7 +481,7 @@ else if (icorio == 10) then                             ! vol2D type weigthings
 
     if (kmx < 1) then ! original 2D coding
        !$OMP PARALLEL DO           &
-       !$OMP PRIVATE(k)
+       !$OMP PRIVATE(k,hsk)
        do k = 1,ndxi
           if (hus(k) > 0d0)  then
              hsk = hus(k)
@@ -512,7 +512,7 @@ else if (icorio == 10) then                             ! vol2D type weigthings
 
     if (kmx < 1) then ! original 2D coding
        !$OMP PARALLEL DO           &
-       !$OMP PRIVATE(k)
+       !$OMP PRIVATE(k,hsk)
        do k = 1,ndxi
           if (vol1(k) > 0d0)  then
              hsk = vol1(k)
@@ -542,7 +542,7 @@ else if (icorio == 10) then                             ! vol2D type weigthings
 
     if (kmx < 1) then ! original 2D coding
        !$OMP PARALLEL DO           &
-       !$OMP PRIVATE(k)
+       !$OMP PRIVATE(k,hsk)
        do k = 1,ndxi
           if (vol1(k) > 0d0)  then
              hsk = vol1(k)
