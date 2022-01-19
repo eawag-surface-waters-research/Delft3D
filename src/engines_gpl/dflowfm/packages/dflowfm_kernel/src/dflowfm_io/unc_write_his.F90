@@ -588,7 +588,11 @@ subroutine unc_write_his(tim)            ! wrihis
             endif
 
             if (jahistaucurrent>0) then
-               ierr = nf90_def_var(ihisfile, 'taus',  nf90_double, ((/ id_statdim, id_timedim /)) , id_WTAU)
+               ! TODO: The wtau variable below is confusing: it contains the *total* bottom shear stress.
+               !       The taus variable earlier in this subroutine writes the same total bottom shear stress
+               !       as well. Duplication is to be removed, and possibly separate tauwav and taucur output
+               !       is more useful.
+               ierr = nf90_def_var(ihisfile, 'wtau',  nf90_double, ((/ id_statdim, id_timedim /)) , id_WTAU)
                ierr = nf90_put_att(ihisfile, id_WTAU, 'coordinates'  , statcoordstring)
                ierr = nf90_put_att(ihisfile, id_WTAU, 'standard_name', 'mean_bottom_shear_stress')
                ierr = nf90_put_att(ihisfile, id_WTAU, 'long_name'    , 'Mean bottom shear stress')
