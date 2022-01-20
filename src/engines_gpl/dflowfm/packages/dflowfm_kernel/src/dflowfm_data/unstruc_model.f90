@@ -562,13 +562,6 @@ subroutine loadModel(filename)
    endif
    call timstop(timerHandle)
 
-    if (getMaxErrorLevel() >= LEVEL_ERROR) then
-       msgbuf = 'loadModel for '''//trim(filename)//''': Errors were found, please check the diagnostics file.'
-       call fatal_flush()
-    endif
-
-    threshold_abort = LEVEL_ERROR
-
     ! Load land boundary from file.
     if (len_trim(md_ldbfile) > 0) then
         call strsplit(md_ldbfile,1,fnames,1)
@@ -593,7 +586,13 @@ subroutine loadModel(filename)
          call loadObservations(fnames(ifil), 1)
       enddo
       deallocate(fnames)
-   end if
+    end if
+
+    threshold_abort = LEVEL_ERROR
+    if (getMaxErrorLevel() >= LEVEL_ERROR) then
+       msgbuf = 'loadModel for '''//trim(filename)//''': Errors were found, please check the diagnostics file.'
+       call fatal_flush()
+    end if
 
    ! Cross sections in two steps
    call delCrossSections()
