@@ -106,7 +106,6 @@ type t_ug_meshgeom
    
    double precision, pointer :: layer_zs(:) => null()    !< Vertical coordinates of the mesh layers' center (either z or sigma).
    double precision, pointer :: interface_zs(:)=> null() !< Vertical coordinates of the mesh layers' interface (either z or sigma).
-   double precision, pointer :: bedlevel(:) => null() !< Vertical coordinates of the bed level
    
 
 end type t_ug_meshgeom
@@ -120,6 +119,7 @@ type, bind(C) :: c_t_ug_meshgeomdim
    integer(kind=c_int)      :: numface               !< Number of mesh faces.
    integer(kind=c_int)      :: maxnumfacenodes       !< Maximum of number of face nodes.
    integer(kind=c_int)      :: numlayer              !< Number of mesh layers (num interfaces == numlayer + 1), numlayer = 0 means "no layers".
+   ! integer(kind=c_int)      :: numtopsig             !< NOTE: UNST-5477: intentionally disabled, to avoid API-change.
    integer(kind=c_int)      :: layertype             !< Type of vertical layer definition (only if numlayer >= 1), one of LAYERTYPE_* parameters.
    integer(kind=c_int)      :: nnodes
    integer(kind=c_int)      :: nbranches             !< Number of branches
