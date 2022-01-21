@@ -124,9 +124,6 @@ type t_unc_timespace_id
    ! geometry fieldss
    integer :: id_flowelemba(MAX_ID_VAR)     = -1 !< Variable ID for flow node bottom area (on 1D, 2D, 3D, 1D2D grid parts resp.).
    integer :: id_flowelembl(MAX_ID_VAR)     = -1 !< Variable ID for flow node bed level (on 1D, 2D, 3D, 1D2D grid parts resp.).
-   integer :: id_bldepth(MAX_ID_VAR)        = -1 !< Variable ID for sea floor depth below geoid (for sigma layering in map/any flowgeom output file)
-   integer :: id_s1max(MAX_ID_VAR)          = -1 !< Variable ID for maximum water level (for sigma layering in Fourier output file)
-
    integer :: id_flowelemcrsz(MAX_ID_VAR)   = -1 !< Variable ID for cross-section point levels passing through flow node (on 1D).
    integer :: id_flowelemcrsn(MAX_ID_VAR)   = -1 !< Variable ID for cross-section point widths passing through flow node (on 1D).
    integer :: id_jmax                       = -1
@@ -619,7 +616,6 @@ integer :: which_meshdim_
 integer                         :: jabndnd_      !< Flag specifying whether boundary nodes are to be written.
 integer                         :: ndxndxi       !< Last node to be saved. Equals ndx when boundary nodes are written, or ndxi otherwise.
 integer :: varid
-character(len=50) :: checkvars(5) ! small array to check on presence of some variables.
 
    ierr = DFM_NOERR
 
@@ -892,23 +888,19 @@ character(len=50) :: checkvars(5) ! small array to check on presence of some var
 
    select case (iloc)
    case(UNC_LOC_S3D)
-      ! Check which vertical coordinate variable is present in the file, and add it to the :coordinate attribute.
-      checkvars(1:4) = (/ 'layer_sigma_z', 'layer_z', 'layer_sigma', 'flowelem_zcc' /)
-      do i=1,4
-         if (nf90_inq_varid( ncid, trim(mesh2dname)//'_'//trim(checkvars(i)), varid)==NF90_NOERR) then 
-            ierr = ncu_append_atts( ncid, id_var(2), 'coordinates', ' '//trim(mesh2dname)//'_'//trim(checkvars(i)))
-            exit
-         end if
-      end do
+      if (nf90_inq_varid( ncid, trim(mesh2dname)//'_flowelem_zcc', varid)==NF90_NOERR) then 
+         ierr = ncu_append_atts( ncid, id_var(2), 'coordinates', ' '//trim(mesh2dname)//'_flowelem_zcc')
+      end if
+      if (nf90_inq_varid( ncid, trim(mesh2dname)//'_layer_z', varid)==NF90_NOERR) then 
+         ierr = ncu_append_atts( ncid, id_var(2), 'coordinates', ' '//trim(mesh2dname)//'_layer_z')
+      end if
    case(UNC_LOC_W)
-      ! Check which vertical coordinate variable is present in the file, and add it to the :coordinate attribute.
-      checkvars(1:4) = (/ 'interface_sigma_z', 'interface_z', 'interface_sigma', 'flowelem_zw' /)
-      do i=1,4
-         if (nf90_inq_varid( ncid, trim(mesh2dname)//'_'//trim(checkvars(i)), varid)==NF90_NOERR) then 
-            ierr = ncu_append_atts( ncid, id_var(2), 'coordinates', ' '//trim(mesh2dname)//'_'//trim(checkvars(i)))
-            exit
-         end if
-      end do
+      if (nf90_inq_varid( ncid, trim(mesh2dname)//'_flowelem_zw', varid)==NF90_NOERR) then 
+         ierr = ncu_append_atts( ncid, id_var(2), 'coordinates', ' '//trim(mesh2dname)//'_flowelem_zw')
+      end if
+      if (nf90_inq_varid( ncid, trim(mesh2dname)//'_interface_z', varid)==NF90_NOERR) then 
+         ierr = ncu_append_atts( ncid, id_var(2), 'coordinates', ' '//trim(mesh2dname)//'_interface_z')
+      end if
    end select
 
 ! RL: separate cases needed for iloc==UNC_LOC_U3D and UNC_LOC_WU, see Issue UNST-4880
@@ -13902,7 +13894,6 @@ subroutine get_2d_edge_data(edge_nodes, edge_faces, edge_type, xue, yue, edge_ma
 end subroutine get_2d_edge_data
 
 !> Sets layer info in the given variables. Only call this if layers present.
-!! The returned layer_type and arrays can be passed to io_ugrid writing routines.
 subroutine get_layer_data_ugrid(layer_count, layer_type, layer_zs, interface_zs)
    use m_alloc
    use m_missing
@@ -13912,17 +13903,14 @@ subroutine get_layer_data_ugrid(layer_count, layer_type, layer_zs, interface_zs)
    implicit none
 
    integer,                     intent(in)  :: layer_count  !< Number of layers.
-   integer,                     intent(out) :: layer_type   !< UGRID layer type (sigma or z or sigma-z) to be determined, one of io_ugrid's constants.
+   integer,                     intent(out) :: layer_type   !< UGRID layer type (sigma or z) to be determined.
    real(kind=dp), dimension(:), intent(out) :: layer_zs     !< Vertical layer center coordinates array to be filled.
    real(kind=dp), dimension(:), intent(out) :: interface_zs !< Vertical layer interface coordinates array to be filled.
    character(len=255) :: message !< Temporary variable for writing log messages.
-   real(kind=dp) :: dsig
-   integer :: i
 
    ! Create rank 1 array with vertical layer coordinates (not per flow node).
-   ! NOTE: dfm sigma values (positive upwards, bedlevel=0, eta=1) will be converted
-   !       to CF-compliant ocean sigma (positive upwards, bedlevel=-1, eta=0) coordinates.
    if (laytyp(1) == LAYTP_SIGMA) then
+      ! Transform from dfm sigma (positive upwards, bedlevel=0, eta=1) to ocean sigma (positive upwards, bedlevel=-1, eta=0) coordinates.
       interface_zs(1:layer_count + 1) = zslay(0:layer_count, 1) - 1d0
       layer_type = LAYERTYPE_OCEANSIGMA
    elseif(laytyp(1) == LAYTP_Z) then 
@@ -13932,10 +13920,7 @@ subroutine get_layer_data_ugrid(layer_count, layer_type, layer_zs, interface_zs)
         layer_type = LAYERTYPE_Z
       else
         ! sigma over z coordinates
-        ! NOTE: the sigma levels below are only correct for janumtopsiguniform == 1
-        dsig = 1d0/numtopsig
-        interface_zs(1:layer_count + 1 - numtopsig) = zslay(0:layer_count - numtopsig, 1)
-        interface_zs(layer_count + 2 - numtopsig:layer_count + 1) = dsig * [(i, i = 1,numtopsig)] - 1d0
+        interface_zs(1:layer_count + 1) = zslay(0:layer_count, 1) - 1d0
         layer_type = LAYERTYPE_OCEAN_SIGMA_Z  
       endif
   else
@@ -13947,12 +13932,6 @@ subroutine get_layer_data_ugrid(layer_count, layer_type, layer_zs, interface_zs)
 
    ! Layer center coordinates.
    layer_zs(1:layer_count) = .5d0*(interface_zs(1:layer_count) + interface_zs(2:layer_count + 1))
-
-   if(laytyp(1) == LAYTP_Z .and. numtopsig > 0) then
-      ! Repair the first sigma layer center in a z-sigma combined layering, which was wrongly calculated in above expression.
-      layer_zs(layer_count + 1 - numtopsig) = .5d0*dsig - 1d0
-   end if
-   
 end subroutine get_layer_data_ugrid
 
 !> Writes the unstructured flow geometry in UGRID format to an already opened netCDF dataset.
@@ -13964,7 +13943,7 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd,jafou)
    use m_missing
    use netcdf
    use m_partitioninfo
-   use m_flow, only: kmx, mxlaydefs, laymx, numtopsig, s1max
+   use m_flow, only: kmx, mxlaydefs, laymx, numtopsig, s1Fourier
    use m_alloc
    use dfm_error
    use m_save_ugrid_state !stores the contactname and other saved ugrid names
@@ -13979,7 +13958,6 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd,jafou)
    integer, intent(in)                     :: ncid
    type(t_unc_timespace_id), intent(inout) :: id_tsp   !< Set of time and space related variable id's
    integer, optional, intent(in) :: jabndnd !< Whether to include boundary nodes (1) or not (0). Default: no.
-   logical, optional, intent(in) :: jaFou   !< Whether this flowgeom writing is part of a Fourier file or not (affects 3D layer writing)
 
    integer                         :: jabndnd_      !< Flag specifying whether boundary nodes are to be written.
    integer                         :: ndxndxi       !< Last 2/3D node to be saved. Equals ndx when boundary nodes are written, or ndxi otherwise.
@@ -13996,8 +13974,7 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd,jafou)
    integer, parameter :: LAYERTYPE_Z             = 2 !< Vertical coordinate for fixed z-layers.
    integer, parameter :: LAYERTYPE_OCEAN_SIGMA_Z = 3 !< Combined Z-Sigma layers
    real(kind=dp), dimension(:), pointer :: layer_zs => null(), interface_zs => null()
-   character(len=10) :: waterlevelname , bldepthname
-   logical :: jafou_
+   character(len=10) :: waterlevelname 
 !   type(t_crs) :: pj
 
    integer :: ierr
@@ -14005,6 +13982,7 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd,jafou)
    integer                         :: Li            !< Index of 1D link (can be internal or boundary)
    integer :: id_flowelemcontourptsdim, id_flowelemcontourx, id_flowelemcontoury
    integer :: jaInDefine
+   logical, optional :: jaFou
    double precision :: xx, yy
    double precision, dimension(:), allocatable :: zz
    double precision, allocatable :: work2(:,:)
@@ -14053,12 +14031,6 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd,jafou)
    else
       ndxndxi   = ndxi
       last_1d   = ndxi
-   end if
-
-   if (present(jaFou)) then
-      jafou_ = jaFou
-   else
-      jafou_ = .false.
    end if
 
    ! Put dataset in define mode (possibly again) to add dimensions and variables.
@@ -14216,12 +14188,10 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd,jafou)
                                        meshgeom1d%nbranchorder, &
                                        nodeids_remap, nodelongnames_remap, nodebranchidx_remap, nodeoffsets_remap, edgebranchidx_remap, edgeoffsets_remap,&
                                        writeopts=unc_writeopts)
-            ! NOTE: UNST-5477: this call is not valid yet for 3D models with ocean_sigma_z combined layering
          else
          ierr = ug_write_mesh_arrays(ncid, id_tsp%meshids1d, mesh1dname, 1, UG_LOC_NODE + UG_LOC_EDGE, n1d_write, n1dedges, 0, 0, &
                                      edge_nodes, face_nodes, null(), null(), null(), x1dn, y1dn, x1du, y1du, xz(1:1), yz(1:1), &
                                      crs, -999, dmiss, start_index, layer_count, layer_type, layer_zs, interface_zs, writeopts=unc_writeopts)
-            ! NOTE: UNST-5477: this call is not valid yet for 3D models with ocean_sigma_z combined layering
          endif         
       endif
 
@@ -14377,53 +14347,39 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd,jafou)
       ! TODO: AvD: lnx1d+1:lnx includes open bnd links, which may *also* be 1D boundaries (don't want that in mesh2d)
       ! note edge_faces does not need re-indexing, cell number are flow variables and 2d comes first
 
-      if (jafullgridoutput == 0) then
-          unc_writeopts = ior(unc_writeopts,UG_WRITE_LYRVAR)
-      else
-          unc_writeopts = iand(unc_writeopts,not(UG_WRITE_LYRVAR))
-      end if
-
-      waterlevelname = 's1'
-      bldepthname    = 'bldepth'
-      if (layer_type == LAYERTYPE_OCEAN_SIGMA_Z .or. layer_type == LAYERTYPE_OCEAN_SIGMA) then
-         if (jafou_) then
-            waterlevelname = 's1max'
-         end if
-      end if
+      if(layer_type == LAYERTYPE_OCEAN_SIGMA_Z .or. layer_type == LAYERTYPE_OCEAN_SIGMA) then
+          if (id_tsp%meshids2d%dimids(mdim_face) <= 0) then
+            ierr = nf90_def_dim(ncid, trim(mesh2dname)//'_nFaces',         ndx2d,   id_tsp%meshids2d%dimids(mdim_face))
+          endif
+          ierr = nf90_def_var(ncid, trim(mesh2dname)//'_bldepth' , nf90_double, id_tsp%meshids2d%dimids(mdim_face), id_tsp%meshids2d%varids(mid_bldepth))
+          ierr = nf90_put_att(ncid, id_tsp%meshids2d%varids(mid_bldepth), 'standard_name' , "sea_floor_depth_below_geoid" )
+          ierr = nf90_put_att(ncid, id_tsp%meshids2d%varids(mid_bldepth), 'units', "m" )
+          ierr = nf90_put_att(ncid, id_tsp%meshids2d%varids(mid_bldepth), 'positive',  "down" )
+          if ( present(jafou)) then
+              ierr = nf90_def_var(ncid, trim(mesh2dname)//'_s1max' , nf90_double, id_tsp%meshids2d%dimids(mdim_face), id_tsp%meshids2d%varids(mid_s1max))
+              ierr = nf90_put_att(ncid, id_tsp%meshids2d%varids(mid_s1max), 'standard_name' , "water level on cell centres" )
+              ierr = nf90_put_att(ncid, id_tsp%meshids2d%varids(mid_s1max), 'units', "m" )
+              ierr = nf90_put_att(ncid, id_tsp%meshids2d%varids(mid_s1max), 'positive',  "down" )
+              
+              ierr = nf90_enddef(ncid)
+              ierr = nf90_put_var(ncid, id_tsp%meshids2d%varids(mid_s1max), s1Fourier(1:ndx2d))
+              ierr = nf90_put_var(ncid, id_tsp%meshids2d%varids(mid_bldepth), -1*blFourier(1:ndx2d))
+              waterlevelname = '_s1max'
+          else
+              ierr = nf90_enddef(ncid)
+              ierr = nf90_put_var(ncid, id_tsp%meshids2d%varids(mid_bldepth), -1*bl(1:ndx2d))
+              waterlevelname = '_s1'
+          endif
+      endif
    
       ierr = ug_write_mesh_arrays(ncid, id_tsp%meshids2d, mesh2dname, 2, UG_LOC_EDGE + UG_LOC_FACE, numk2d, numl2d, ndx2d, numNodes, &
                                     edge_nodes, face_nodes, edge_faces, null(), null(),x2dn, y2dn, xue, yue, xz(1:ndx2d), yz(1:ndx2d), &
                                     crs, -999, dmiss, start_index, layer_count, layer_type, &
-                                    layer_zs=layer_zs, interface_zs=interface_zs, &
-                                    nsigma_opt=numtopsig, waterlevelname=trim(waterlevelname), bldepthname=trim(bldepthname), &
-                                    writeopts=unc_writeopts)
+                                    layer_zs=layer_zs,waterlevelname=trim(waterlevelname), interface_zs=interface_zs, writeopts=unc_writeopts,&
+                                    nsigma_opt =numtopsig)
 
       ! Add edge type variable (edge-flowlink relation)
       call write_edge_type_variable(ncid, id_tsp%meshids2d, mesh2dname, edge_type)
-
-      ! Write optionally required bldepth and when needed s1max arrays for sigma- and sigma-z layer models
-      if (layer_type == LAYERTYPE_OCEAN_SIGMA_Z .or. layer_type == LAYERTYPE_OCEAN_SIGMA) then
-         ierr = nf90_def_var(ncid, trim(mesh2dname)//'_'//trim(bldepthname) , nf90_double, id_tsp%meshids2d%dimids(mdim_face), id_tsp%id_bldepth(2))
-         ierr = nf90_put_att(ncid, id_tsp%id_bldepth(2), 'standard_name' , "sea_floor_depth_below_geoid" )
-         ierr = nf90_put_att(ncid, id_tsp%id_bldepth(2), 'units', "m" )
-         ierr = nf90_put_att(ncid, id_tsp%id_bldepth(2), 'positive',  "down" )
-
-         if (jafou_) then
-            ierr = nf90_def_var(ncid, trim(mesh2dname)//'_'//trim(waterlevelname) , nf90_double, id_tsp%meshids2d%dimids(mdim_face), id_tsp%id_s1max(2))
-            ierr = nf90_put_att(ncid, id_tsp%id_s1max(2), 'standard_name' , "water level on cell centres" )
-            ierr = nf90_put_att(ncid, id_tsp%id_s1max(2), 'units', "m" )
-            ierr = nf90_put_att(ncid, id_tsp%id_s1max(2), 'positive',  "down" )
-
-            ierr = nf90_enddef(ncid)
-            ierr = nf90_put_var(ncid, id_tsp%id_s1max(2), s1max(1:ndx2d))
-            ierr = nf90_put_var(ncid, id_tsp%id_bldepth(2), -1*bl_min(1:ndx2d))
-            ierr = nf90_redef(ncid)
-         else
-            ierr = nf90_enddef(ncid)
-            ierr = nf90_put_var(ncid, id_tsp%id_bldepth(2), -1*bl(1:ndx2d))
-            ierr = nf90_redef(ncid)
-         endif
-      endif
 
       deallocate(edge_nodes)
       deallocate(face_nodes)

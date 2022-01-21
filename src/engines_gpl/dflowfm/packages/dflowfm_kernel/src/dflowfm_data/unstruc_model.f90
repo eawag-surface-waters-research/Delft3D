@@ -2024,18 +2024,7 @@ subroutine readMDUFile(filename, istat)
        call mess(LEVEL_WARN, 'D-WAVES coupling enabled and kmx>0, so layer interface coordinates are needed on com-file. FullGridOutput set to 1.')
        call warn_flush()
     endif
-    ! Check for ocean_sigma_z in combination with numtopsig=0, then fullgridoutput=1 is the only option (UNST-5477).
-    if (success) then
-       if (jafullgridoutput == 0 .and. Layertype > 1 .and. Numtopsig > 0 .and. kmx > 0 .and. janumtopsiguniform /= 1) then
-          jafullgridoutput = 1
-          call mess(LEVEL_WARN, 'A combination of Z- and Sigma-layers is used, but Numtopsiguniform is not 1. FullGridOutput must be set to 1.')
-          call warn_flush()
-       endif
-    else
-       if (Layertype > 1 .and. Numtopsig > 0 .and. kmx > 0 .and. janumtopsiguniform /= 1) then
-          jafullgridoutput = 1
-       endif
-    endif
+   
 
     call prop_get_integer( md_ptr, 'output', 'EulerVelocities', jaeulervel)
     if ((jawave<3 .or. flowWithoutWaves) .and. jaeulervel == 1 ) then    ! also for surfbeat

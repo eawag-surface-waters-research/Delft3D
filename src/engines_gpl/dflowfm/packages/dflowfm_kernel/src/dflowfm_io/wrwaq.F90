@@ -771,7 +771,7 @@ subroutine waq_write_waqgeom_filepointer_ugrid(igeomfile)
     
     
     ! Write mesh geometry.    
-    ierr = ug_write_mesh_struct(igeomfile, meshids, networkids, crs, meshgeom) ! NOTE: UNST-5477: this call is not valid yet for 3D models with ocean_sigma_z combined layering
+    ierr = ug_write_mesh_struct(igeomfile, meshids, networkids, crs, meshgeom)
     call check_error(ierr)
 
     ! Write edge type variable (this is an extra variable that is not part of the UGRID standard).

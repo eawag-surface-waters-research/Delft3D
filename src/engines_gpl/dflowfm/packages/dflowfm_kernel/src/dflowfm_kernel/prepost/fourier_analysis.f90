@@ -183,9 +183,7 @@ module m_fourier_analysis
 
 !> allocate the arrays for fourier and min/max
    subroutine alloc_fourier_analysis_arrays()
-       use m_flowgeom, only : bl, bl_min, ndx
-       use m_flow, only: s1, s1max, kmx, laytyp, numtopsig
-       !!--declarations----------------------------------------------------------------
+   !!--declarations----------------------------------------------------------------
        use precision
 
        !
@@ -246,14 +244,6 @@ module m_fourier_analysis
           gdfourier%fouvarunit    = ' '
           !
        endif
-
-      ! Create fourier specific bl and s1 array, only if required
-      if (kmx >0 .and. (laytyp(1) == 1 .or. numtopsig > 0)) then
-         call realloc(bl_min, ndx, keepExisting = .false., stat = istat)
-         call realloc(s1max, ndx, keepExisting = .false., stat = istat)
-         bl_min = bl
-         s1max = s1
-      endif
    end subroutine alloc_fourier_analysis_arrays
 
 !> - Read fourier input file and stores the
@@ -1291,7 +1281,7 @@ end subroutine setfoustandardname
 !! write to file after last update
     subroutine postpr_fourier(time0, dts)
     use m_transport, only : constituents
-    use m_flowgeom, only : bl, lnx, bl_min, ndx
+    use m_flowgeom, only : bl, lnx, blfourier, ndx
     use m_flow
     implicit none
 
@@ -1321,8 +1311,14 @@ end subroutine setfoustandardname
 
     !Update fourier specific bl and s1 array, only if required
     if (kmx >0 .and. (laytyp(1) == 1 .or. numtopsig > 0)) then
-       bl_min = min(bl, bl_min) ! lowest bed level
-       s1max = max(s1, s1max) ! highest water level
+       if (.not. allocated(blFourier)) then
+          allocate(blFourier(ndx),s1Fourier(ndx))
+          blFourier = bl
+          s1Fourier = s1
+       else
+          blFourier = max(bl,blFourier)
+          s1Fourier = max(s1,s1Fourier)
+       endif
     endif
     
     if (gdfourier%iblws > 0) then

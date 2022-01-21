@@ -154,7 +154,7 @@
  ! node related, dim = ndx
  double precision, allocatable, target :: s0(:)       !< [m] waterlevel    (m ) at start of timestep {"location": "face", "shape": ["ndx"]}
  double precision, allocatable, target :: s1(:)       !< [m] waterlevel    (m ) at end   of timestep {"location": "face", "shape": ["ndx"]}
- double precision, allocatable, target :: s1max(:)    !< [m] maximum waterlevel (m ) at end   of timestep for Fourier output {"location": "face", "shape": ["ndx"]}
+ double precision, allocatable, target :: s1Fourier(:)!< [m] maximum waterlevel (m ) at end   of timestep for Fourier output {"location": "face", "shape": ["ndx"]}
  double precision, allocatable         :: s00(:)      !< waterlevel    (m ) for checking iteration in nonlin
  double precision, allocatable, target :: a0(:)       !< [m2] storage area at start of timestep {"location": "face", "shape": ["ndx"]}
  double precision, allocatable, target :: a1(:)       !< [m2] storage area at end of timestep {"location": "face", "shape": ["ndx"]}
