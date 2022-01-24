@@ -124,7 +124,7 @@ module swan_input
        integer                                 :: myc
        integer                                 :: vegetation
        integer                                 :: ice = 0
-       integer       , dimension(4)            :: qextnd           ! 0: not used, 1: used and not extended, 2: used and extended
+       integer       , dimension(5)            :: qextnd           ! 0: not used, 1: used and not extended, 2: used and extended
        integer                                 :: flowVelocityType = FVT_DEPTH_AVERAGED
                                                                    ! Possible values:
                                                                    !    FVT_SURFACE_LAYER           : use FLOW velocity at surface
@@ -249,6 +249,7 @@ module swan_input
        logical                                 :: swmor
        logical                                 :: swuvi
        logical                                 :: swuvt
+       logical                                 :: swveg
        logical                                 :: swwindt
        logical                                 :: swwav
        logical                                 :: swwlt
@@ -299,7 +300,7 @@ module swan_input
        real                                    :: int2keephotfile
        real                                    :: veg_height
        real                                    :: veg_diamtr
-       integer                                 :: veg_nstems
+       integer                                 :: veg_nstems       ! the number of plant stands per square meter
        integer                                 :: maxerr       = 2 ! Corresponds to maxerr in SWAN: maximum level of errors with which the calculation will continue
        real                                    :: veg_drag
        !
@@ -360,6 +361,7 @@ module swan_input
     integer, parameter :: q_wl   = 2 ! used as index in array qextnd
     integer, parameter :: q_cur  = 3 ! used as index in array qextnd
     integer, parameter :: q_wind = 4 ! used as index in array qextnd
+    integer, parameter :: q_veg  = 5 ! used as index in array qextnd
 
     private :: get_pointname, alloc_swan
 
@@ -497,6 +499,7 @@ subroutine read_swan (filnam, sr, wavedata)
    sr%useflowdata   = .false.
    sr%exemode       = SWAN_MODE_EXE
    sr%swmor         = .false.
+   sr%swveg         = .false.
    sr%swwlt         = .false.
    sr%swuvt         = .false.
    sr%swwindt       = .false.
@@ -562,7 +565,7 @@ subroutine read_swan (filnam, sr, wavedata)
          endif
       endif
       call read_swan_mdw(sr%casl     ,wavedata   , &
-                       & sr%swmor    ,sr%swwlt   ,sr%swuvt   , &
+                       & sr%swmor    ,sr%swwlt   ,sr%swuvt   , sr%swveg , &
                        & sr%swwav    ,sr%swuvi   ,sr%corht   , &
                        & sr%swflux   ,sr%rgfout  ,sr%prname  , &
                        & sr%prnumb   ,sr%title1  ,sr%title2  ,sr%title3 , &
@@ -620,6 +623,7 @@ subroutine scan_mdw(sr)
     integer                     :: parread
     integer                     :: pnts
     integer                     :: swmr
+    integer                     :: swvg
     integer                     :: swwt
     integer                     :: swut
     integer                     :: swwnd
@@ -734,11 +738,12 @@ subroutine scan_mdw(sr)
             ! using the correct record indices
             if (irec == nwind_rec) then
                 swmr  = 0
+                swvg  = 0
                 swwt  = 0
                 swut  = 0
                 swwnd = 0
                 if (lge(vers, '4.90.06')) then
-                   read (line, *, iostat = ios) swmr, swwt, swut, swwnd
+                   read (line, *, iostat = ios) swmr, swvg, swwt, swut, swwnd
                    if (swwnd == 1) sr%swwindt = .true.
                 else
                    sr%swwindt = .false.
@@ -1555,6 +1560,7 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
     def_nfreq    = -999
     def_freqmin  = -999.0
     def_freqmax  = -999.0
+    sr%veg_drag  = -999.0
     call prop_get_integer(mdw_ptr, 'General', 'NDir'    , def_ndir)
     call prop_get_real   (mdw_ptr, 'General', 'StartDir', def_startdir)
     call prop_get_real   (mdw_ptr, 'General', 'EndDir'  , def_enddir)
@@ -1807,7 +1813,7 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
     sr%drel    = 0.02
     sr%dh_abs  = 0.02
     sr%dt_abs  = 0.02
-    sr%percwet = 98.0
+    sr%percwet = 90.0 !98.0
     sr%itermx  = 15
     sr%gamma0  = 3.3
     sr%alfa    = 0.0
@@ -2028,6 +2034,7 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
     !
     if (wavedata%mode /= stand_alone) then
        call prop_get_integer(mdw_ptr, 'General', 'FlowBedLevel'  , sr%dom(1)%qextnd(q_bath))
+       call prop_get_integer(mdw_ptr, 'General', 'FlowVegetation', sr%dom(1)%qextnd(q_veg) )
        call prop_get_integer(mdw_ptr, 'General', 'FlowWaterLevel', sr%dom(1)%qextnd(q_wl)  )
        call prop_get_integer(mdw_ptr, 'General', 'FlowVelocity'  , sr%dom(1)%qextnd(q_cur) )
        call prop_get_integer(mdw_ptr, 'General', 'FlowWind'      , sr%dom(1)%qextnd(q_wind))
@@ -2077,6 +2084,7 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
        dom%veg_nstems       = 1
        dom%veg_drag         = 1
        dom%qextnd(q_bath)   = sr%dom(1)%qextnd(q_bath)
+       dom%qextnd(q_veg)    = sr%dom(1)%qextnd(q_veg)
        dom%qextnd(q_wl)     = sr%dom(1)%qextnd(q_wl)
        dom%qextnd(q_cur)    = sr%dom(1)%qextnd(q_cur)
        dom%qextnd(q_wind)   = sr%dom(1)%qextnd(q_wind)
@@ -2132,12 +2140,24 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
        flag           = .false.
        dom%vegetation  = 0 
        call prop_get_logical(tmp_ptr, '*', 'Vegetation', flag)
-       if (flag) dom%vegetation = 1
-       if (dom%vegetation == 1) then
+       if (flag) then
+          dom%vegetation = 1
+          write(*,*) 'SWAN_INPUT: vegetation first assumed non-spatially varying'
+       endif
+       flag = .false.
+       call prop_get_logical(tmp_ptr, '*', 'VegSVNPlants', flag)
+       write(*,*) 'Spatially varying vegetation is ', flag
+       if (flag) then
+          dom%vegetation = 2
+          write(*,*) 'SWAN_INPUT: vegetation is set to spatially varying'
+       endif
+       if (dom%vegetation >= 1) then	   
           call prop_get_real   (tmp_ptr, '*', 'VegHeight' , dom%veg_height)
           call prop_get_real   (tmp_ptr, '*', 'VegDiamtr' , dom%veg_diamtr)
-          call prop_get_integer(tmp_ptr, '*', 'VegNstems' , dom%veg_nstems)
           call prop_get_real   (tmp_ptr, '*', 'VegDrag' ,   dom%veg_drag)
+       endif
+       if (dom%vegetation == 1) then	   
+          call prop_get_integer(tmp_ptr, '*', 'VegNstems' , dom%veg_nstems)
           !
           ! Read vegetation map
           !
@@ -2200,11 +2220,13 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
        ! for the current grid.
        !
        call prop_get_integer(tmp_ptr, '*', 'FlowBedLevel'  , dom%qextnd(q_bath))
+       call prop_get_integer(tmp_ptr, '*', 'FlowVegetation', dom%qextnd(q_veg) )
        call prop_get_integer(tmp_ptr, '*', 'FlowWaterLevel', dom%qextnd(q_wl)  )
        call prop_get_integer(tmp_ptr, '*', 'FlowVelocity'  , dom%qextnd(q_cur) )
        call prop_get_integer(tmp_ptr, '*', 'FlowWind'      , dom%qextnd(q_wind))
        !
        if (dom%qextnd(q_bath)>0) sr%swmor   = .true.
+       if (dom%qextnd(q_veg )>0) sr%swveg   = .true.
        if (dom%qextnd(q_wl  )>0) sr%swwlt   = .true.
        if (dom%qextnd(q_cur )>0) sr%swuvt   = .true.
        if (dom%qextnd(q_wind)>0) sr%swwindt = .true.
@@ -2364,7 +2386,7 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
     !
     ! determine whether flow data is used
     !
-    sr%useflowdata = sr%swmor .or. sr%swwlt .or. sr%swuvt .or. (sr%swwindt .and. dom%n_meteofiles == 0) 
+    sr%useflowdata = sr%swmor .or. sr%swwlt .or. sr%swveg .or. sr%swuvt .or. (sr%swwindt .and. dom%n_meteofiles == 0)
     !
     ! determine the number of boundaries
     !
@@ -2881,7 +2903,7 @@ end subroutine read_keyw_mdw
 !
 !==============================================================================
 subroutine read_swan_mdw(casl      ,wavedata  , &
-                       & swmor     ,swwlt     ,swuvt     , &
+                       & swmor     ,swwlt     ,swuvt     , swveg 	,   &
                        & swwav     ,swuvi     ,corht     , &
                        & swflux    ,rgfout    ,prname    , &
                        & prnumb    ,title1    ,title2    ,title3    , &
@@ -2925,6 +2947,7 @@ subroutine read_swan_mdw(casl      ,wavedata  , &
     logical                         ,intent(out) :: corht
     logical                         ,intent(out) :: swflux
     logical                         ,intent(out) :: swmor
+    logical                         ,intent(out) :: swveg
     logical                         ,intent(out) :: swuvi
     logical                         ,intent(out) :: swuvt
     logical                         ,intent(out) :: swwav
@@ -3006,6 +3029,7 @@ subroutine read_swan_mdw(casl      ,wavedata  , &
     integer           :: spec2d
     integer           :: swdiss
     integer           :: swmr
+    integer           :: swvg
     integer           :: swou
     integer           :: swut
     integer           :: swwt
@@ -3038,6 +3062,7 @@ subroutine read_swan_mdw(casl      ,wavedata  , &
     !  Switches
     !
     !     SWMOR   bottom from MORFO
+    !     SWVEG	  vegetation from dflowfm
     !     SWWLT   water level from TRISU
     !     SWUVT   velocity from TRISU
     !     SWUVI   velocity from input (constant over field)
@@ -3112,15 +3137,17 @@ subroutine read_swan_mdw(casl      ,wavedata  , &
     rccnt = rccnt + 1
 !---Parameters from FLOW: bathymetry, waterlevel, current, wind---
     swmr  = 0
+    swvg  = 0
     swwt  = 0
     swut  = 0
     swwnd = 0
     if (lge(vers, '4.90.06')) then
-       read (iuni, *, err = 1002, end = 1009) swmr, swwt, swut, swwnd
+       read (iuni, *, err = 1002, end = 1009) swmr, swvg, swwt, swut, swwnd
     else
-       read (iuni, *, err = 1002, end = 1009) swmr, swwt, swut
+       read (iuni, *, err = 1002, end = 1009) swmr, swwt, swut, swvg
     endif
     swmor      = .false.
+    swveg      = .false.
     swwlt      = .false.
     swuvt      = .false.
     sr%swwindt = .false.
@@ -3128,6 +3155,7 @@ subroutine read_swan_mdw(casl      ,wavedata  , &
     swflux     = .true.
     corht      = .false.
     if (swmr  == 1) swmor      = .true.
+    if (swvg  == 1) swveg      = .true.
     if (swwt  == 1) swwlt      = .true.
     if (swut  == 1) swuvt      = .true.
     if (swwnd == 1) then
@@ -3140,7 +3168,7 @@ subroutine read_swan_mdw(casl      ,wavedata  , &
        sr%curviwind = .true.
        sr%excval    = -999.0
     endif
-    if (swmor .or. swwlt .or. swuvt .or. sr%swwindt) then
+    if (swmor .or. swveg .or. swwlt .or. swuvt .or. sr%swwindt) then
        !
        ! FLOW data is used
        !
@@ -3313,12 +3341,14 @@ subroutine read_swan_mdw(casl      ,wavedata  , &
        if (nextnd > 0) then
           read (line, *, err = 1002, end = 1009) sr%wlevelcorr, nextnd, &
               & sr%dom(nnest)%qextnd(q_bath), &
+              & sr%dom(nnest)%qextnd(q_veg) , &
               & sr%dom(nnest)%qextnd(q_wl)  , &
               & sr%dom(nnest)%qextnd(q_cur) , &
               & sr%dom(nnest)%qextnd(q_wind)
           do in = nnest-nextnd+1, nnest
              dom => sr%dom(in)
              dom%qextnd(q_bath) = sr%dom(nnest)%qextnd(q_bath)
+             dom%qextnd(q_veg) = sr%dom(nnest)%qextnd(q_veg)
              dom%qextnd(q_wl)   = sr%dom(nnest)%qextnd(q_wl)
              dom%qextnd(q_cur)  = sr%dom(nnest)%qextnd(q_cur)
              dom%qextnd(q_wind) = sr%dom(nnest)%qextnd(q_wind)
@@ -3344,7 +3374,7 @@ subroutine read_swan_mdw(casl      ,wavedata  , &
     !                  1 if used and not extended
     !                  2 if used and extended
     ! for the considered grid and quantity.
-    ! transfer swmor/swwlt/swuvt/swwindt to qextnd.
+    ! transfer swmor/swwlt/swuvt/swwindt/swveg to qextnd.
     !
     do in = 1, nnest
        dom => sr%dom(in)
@@ -3352,6 +3382,11 @@ subroutine read_swan_mdw(casl      ,wavedata  , &
           dom%qextnd(q_bath) = dom%qextnd(q_bath) + 1
        else
           dom%qextnd(q_bath) = 0
+       endif
+       if (swveg) then
+          dom%qextnd(q_veg) = dom%qextnd(q_veg) + 1
+       else
+          dom%qextnd(q_veg) = 0
        endif
        if (swwlt) then
           dom%qextnd(q_wl) = dom%qextnd(q_wl) + 1
@@ -3377,12 +3412,14 @@ subroutine read_swan_mdw(casl      ,wavedata  , &
     ! update global flags that determine usage
     !
     swmor = .false.
+    swveg = .false.
     swwlt = .false.
     swuvt = .false.
     sr%swwindt = .false.
     do in = 1, nnest
        dom => sr%dom(in)
        swmor = swmor .or. (dom%qextnd(q_bath)>0)
+       swveg = swveg .or. (dom%qextnd(q_veg)>0)
        swwlt = swwlt .or. (dom%qextnd(q_wl)>0)
        swuvt = swuvt .or. (dom%qextnd(q_cur)>0)
        sr%swwindt = sr%swwindt .or. (dom%qextnd(q_wind)>0)
@@ -4007,7 +4044,7 @@ subroutine write_swan_inp (wavedata, calccount, &
     real                        :: ylenfr
     real                        :: ypfr
     character(7), dimension(20) :: varnam1
-    character(7), dimension(9)  :: varnam2
+    character(7), dimension(11) :: varnam2
     character(8)                :: casl_short
     character(15)               :: tbegc
     character(15)               :: tendc
@@ -4032,7 +4069,8 @@ subroutine write_swan_inp (wavedata, calccount, &
          &       'XP     ', 'YP     ', 'DIST   ', 'UBOT  ', 'STEEPW',     &
          &       'WLENGTH', 'FORCES ', 'RTP    ', 'PDIR  ', 'WIND  '      /
     data varnam2/'TPS    ', 'TM02   ', 'TMM10  ', 'DHSIGN', 'DRTM01',     &
-         &       'SETUP  ', 'DISSURF', 'DISWCAP', 'DISBOT'                /
+         &       'SETUP  ', 'DISSURF', 'DISWCAP', 'DISBOT', 'DISVEG',     &
+         &       'NPLANTS'/
 !
 !! executable statements -------------------------------------------------------
 !
@@ -4370,7 +4408,7 @@ subroutine write_swan_inp (wavedata, calccount, &
     !
     !     Vegetation map
     !
-    if (dom%vegetation == 1) then
+    if (dom%vegetation == 2) then
        write (luninp, '(1X,A)') '$'
        lijn = 'INPGRID _'
        line(1:19) = 'NPLANTS CURV 0. 0. '
@@ -4383,6 +4421,10 @@ subroutine write_swan_inp (wavedata, calccount, &
        !
        line  = 'READINP NPLANTS 1.0 ''' // trim(vegfil) // ''' 4 0 FREE'
        write (luninp, '(1X,A)') trim(line)
+       line       = ' '
+       line(1:10) = 'VEGETATION'
+       write (line(15:), '(F6.2,1X,F7.4,1X,A,1X,F6.2)') sr%veg_height, sr%veg_diamtr, "1", dom%veg_drag
+       write (luninp, '(1X,A)') line
        line       = ' '
     endif
 !-----------------------------------------------------------------------
@@ -5601,6 +5643,7 @@ subroutine adjustinput(sr)
        dom => sr%dom(in)
        !
        call prop_get_integer(domain_ptr, '*', 'FlowBedLevel'  , dom%qextnd(q_bath))
+       call prop_get_integer(domain_ptr, '*', 'FlowVegetation', dom%qextnd(q_veg) )
        call prop_get_integer(domain_ptr, '*', 'FlowWaterLevel', dom%qextnd(q_wl)  )
        call prop_get_integer(domain_ptr, '*', 'FlowVelocity'  , dom%qextnd(q_cur) )
        call prop_get_integer(domain_ptr, '*', 'FlowWind'      , dom%qextnd(q_wind))

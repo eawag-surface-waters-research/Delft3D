@@ -1,4 +1,4 @@
-subroutine write_wave_map_netcdf (sg, sof, sif, n_swan_grids, wavedata, casl, prevtime, singleprecision, output_ice)
+subroutine write_wave_map_netcdf (sg, sof, sif, n_swan_grids, wavedata, casl, prevtime, singleprecision, sif_mmax, sif_nmax, sif_veg, output_ice)
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2022.                                
@@ -49,6 +49,9 @@ subroutine write_wave_map_netcdf (sg, sof, sif, n_swan_grids, wavedata, casl, pr
     logical                       , intent(in)  :: prevtime     ! true: the time to be written is the "previous time"
     logical                       , intent(in)  :: singleprecision
     integer                       , intent(in)  :: output_ice   ! switch for writing ice quantities
+    integer                       , intent(in)  :: sif_mmax
+    integer                       , intent(in)  :: sif_nmax
+    real   , dimension(sif_mmax,sif_nmax)       :: sif_veg
 !
 ! Local variables
 !
@@ -93,6 +96,7 @@ subroutine write_wave_map_netcdf (sg, sof, sif, n_swan_grids, wavedata, casl, pr
     integer                                     :: idvar_icefrac
     integer                                     :: idvar_floedia
     integer       , dimension(:)  , allocatable :: idvar_outpars
+    integer                                     :: idvar_nstems
     integer                                     :: ierror
     integer                                     :: ind
     integer                                     :: precision
@@ -116,6 +120,13 @@ subroutine write_wave_map_netcdf (sg, sof, sif, n_swan_grids, wavedata, casl, pr
 !
 !! executable statements -------------------------------------------------------
 !
+    if (sif_mmax /= sof%mmax) then
+       write(*,'(a,i0,a,i0,a)') "ERROR: sif_mmax(", sif_mmax, ") is assumed to be identical to sof%mmax(", sof%mmax, ") but isn't. Vegetation arrays will contain rubbish."
+    endif
+    if (sif_nmax /= sof%nmax) then
+       write(*,'(a,i0,a,i0,a)') "ERROR: sif_nmax(", sif_nmax, ") is assumed to be identical to sof%nmax(", sof%nmax, ") but isn't. Vegetation arrays will contain rubbish."
+    endif
+    
     dearthrad = 6378137.0_hp
     call getfullversionstring_WAVE(version_full)
     call getprogramname_WAVE(programname)
@@ -239,6 +250,7 @@ subroutine write_wave_map_netcdf (sg, sof, sif, n_swan_grids, wavedata, casl, pr
        idvar_fy      = nc_def_var(idfile, 'fy'      , precision, 3, (/iddim_mmax, iddim_nmax, iddim_time/), ''    , 'Wave induced force (y-component)'    , 'n/m2', .true., filename)
        idvar_windu   = nc_def_var(idfile, 'windu'   , precision, 3, (/iddim_mmax, iddim_nmax, iddim_time/), ''    , 'Wind velocity (x-component)'    , 'm/s', .true., filename)
        idvar_windv   = nc_def_var(idfile, 'windv'   , precision, 3, (/iddim_mmax, iddim_nmax, iddim_time/), ''    , 'Wind velocity (y-component)'    , 'm/s', .true., filename)
+       idvar_nstems  = nc_def_var(idfile, 'nstems'  , precision, 3, (/iddim_mmax, iddim_nmax, iddim_time/), ''    , 'Stem density'    , '1/m2', .true., filename)
        if (output_ice > 0) then
           idvar_icefrac = nc_def_var(idfile, 'icefrac' , precision, 3, (/iddim_mmax, iddim_nmax, iddim_time/), ''    , 'Area fraction covered by ice'   , '1', .true., filename)
           if (output_ice == 1) then
@@ -290,6 +302,7 @@ subroutine write_wave_map_netcdf (sg, sof, sif, n_swan_grids, wavedata, casl, pr
        ierror = nf90_inq_varid(idfile, 'fy'      , idvar_fy     ); call nc_check_err(ierror, "inq_varid fy     ", filename)
        ierror = nf90_inq_varid(idfile, 'windu'   , idvar_windu  ); call nc_check_err(ierror, "inq_varid windu  ", filename)
        ierror = nf90_inq_varid(idfile, 'windv'   , idvar_windv  ); call nc_check_err(ierror, "inq_varid windv  ", filename)
+       ierror = nf90_inq_varid(idfile, 'nstems'  , idvar_nstems ); call nc_check_err(ierror, "inq_varid nstems ", filename)
        if (output_ice > 0) then
           ierror = nf90_inq_varid(idfile, 'icefrac' , idvar_icefrac); call nc_check_err(ierror, "inq_varid icefrac", filename)
           if (output_ice == 1) then
@@ -337,6 +350,7 @@ subroutine write_wave_map_netcdf (sg, sof, sif, n_swan_grids, wavedata, casl, pr
     ierror = nf90_put_var(idfile, idvar_fy     , sof%fy        , start=(/ 1, 1, wavedata%output%count /), count = (/ sof%mmax, sof%nmax, 1 /)); call nc_check_err(ierror, "put_var fy     ", filename)
     ierror = nf90_put_var(idfile, idvar_windu  , sof%windu     , start=(/ 1, 1, wavedata%output%count /), count = (/ sof%mmax, sof%nmax, 1 /)); call nc_check_err(ierror, "put_var windu  ", filename)
     ierror = nf90_put_var(idfile, idvar_windv  , sof%windv     , start=(/ 1, 1, wavedata%output%count /), count = (/ sof%mmax, sof%nmax, 1 /)); call nc_check_err(ierror, "put_var windv  ", filename)
+    ierror = nf90_put_var(idfile, idvar_nstems , sif_veg     , start=(/ 1, 1, wavedata%output%count /), count = (/ sof%mmax, sof%nmax, 1 /)); call nc_check_err(ierror, "put_var nstems ", filename)
     if (output_ice > 0) then
        ierror = nf90_put_var(idfile, idvar_icefrac, sif%ice_frac  , start=(/ 1, 1, wavedata%output%count /), count = (/ sof%mmax, sof%nmax, 1 /)); call nc_check_err(ierror, "put_var icefrac", filename)
        if (output_ice == 1) then

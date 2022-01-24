@@ -72,6 +72,9 @@ subroutine get_var_netcdf(i_flow, wavetime, varname, vararr, mmax, nmax, basenam
    integer                             :: idvar_windx
    integer                             :: idvar_windy
    integer                             :: idvar_time
+   integer                             :: idvar_rnveg
+   integer                             :: idvar_diaveg
+   integer                             :: idvar_veg_stemheight
    integer                             :: mmax_from_file
    integer                             :: nm
    integer                             :: ntimes
@@ -126,8 +129,12 @@ subroutine get_var_netcdf(i_flow, wavetime, varname, vararr, mmax, nmax, basenam
    ierror = nf90_inquire_dimension(idfile, iddim_mmax, string, mmax_from_file); call nc_check_err(ierror, "inq_dim mmax", filename)
    ierror = nf90_inquire_dimension(idfile, iddim_time, string, ntimes); call nc_check_err(ierror, "inq_dim time", filename)
    select case(varname)
+      case('diaveg')
+         ierror = nf90_inq_varid(idfile, 'diaveg', idvar_diaveg); call nc_check_err(ierror, "inq_varid diaveg", filename)
       case('dps')
          ierror = nf90_inq_varid(idfile, 'FlowElem_bl', idvar_dps); call nc_check_err(ierror, "inq_varid FlowElem_bl", filename)  ! _zcc has laydim included, so useless in 3D
+      case('rnveg')
+         ierror = nf90_inq_varid(idfile, 'rnveg', idvar_rnveg); call nc_check_err(ierror, "inq_varid rnveg", filename)
       case('s1')
          ierror = nf90_inq_varid(idfile, 's1', idvar_s1); call nc_check_err(ierror, "inq_varid s1", filename)   
       case('u1')
@@ -139,7 +146,9 @@ subroutine get_var_netcdf(i_flow, wavetime, varname, vararr, mmax, nmax, basenam
          ierror = nf90_inq_varid(idfile, 'ucy', idvar_v1); call nc_check_err(ierror, "inq_varid ucy", filename)
          if (kmax_>1) then
             ierror = nf90_inq_varid(idfile, 'FlowElem_zw', idvar_zw); call nc_check_err(ierror, "inq_varid FlowElem_zw", filename)
-         endif         
+         endif
+      case('veg_stemheight')
+         ierror = nf90_inq_varid(idfile, 'veg_stemheight', idvar_veg_stemheight); call nc_check_err(ierror, "inq_varid veg_stemheight", filename)
       case('windx')
          ierror = nf90_inq_varid(idfile, 'windx', idvar_windx); call nc_check_err(ierror, "inq_varid windx", filename)
       case('windy')
@@ -212,8 +221,12 @@ subroutine get_var_netcdf(i_flow, wavetime, varname, vararr, mmax, nmax, basenam
    ! Get var
    !
    select case(varname)
+      case('diaveg')
+         ierror = nf90_get_var(idfile, idvar_diaveg, vararr, start=(/1,itime/), count=(/mmax/)); call nc_check_err(ierror, "get_var diaveg", filename)
       case('dps')
          ierror = nf90_get_var(idfile, idvar_dps  , vararr, start=(/1,itime/), count=(/mmax/)); call nc_check_err(ierror, "get_var dps", filename)  ! to check
+      case('rnveg')
+         ierror = nf90_get_var(idfile, idvar_rnveg, vararr, start=(/1,itime/), count=(/mmax/)); call nc_check_err(ierror, "get_var rnveg", filename)
       case('s1')
          ierror = nf90_get_var(idfile, idvar_s1   , vararr, start=(/1,itime/), count=(/mmax/)); call nc_check_err(ierror, "get_var s1", filename)
       case('u1')
@@ -230,6 +243,8 @@ subroutine get_var_netcdf(i_flow, wavetime, varname, vararr, mmax, nmax, basenam
             ierror = nf90_get_var(idfile, idvar_v1   , vararr3d, start=(/1,1,itime/), count=(/kmax_,mmax,1/)); call nc_check_err(ierror, "get_var ucy", filename)
             ierror = nf90_get_var(idfile, idvar_zw   , flzw,     start=(/1,1,itime/), count=(/kmax_+1,mmax,1/)); call nc_check_err(ierror, "get_var FlowElem_zw", filename)
          endif
+      case('veg_stemheight')
+         ierror = nf90_get_var(idfile, idvar_veg_stemheight   , vararr, start=(/1,itime/), count=(/mmax/)); call nc_check_err(ierror, "get_var veg_stemheight", filename)
       case('windx')
          ierror = nf90_get_var(idfile, idvar_windx, vararr, start=(/1,itime/), count=(/mmax/)); call nc_check_err(ierror, "get_var windx", filename)
       case('windy')

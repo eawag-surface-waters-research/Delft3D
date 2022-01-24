@@ -337,6 +337,10 @@ type t_unc_mapids
    integer :: id_nudge_tem(MAX_ID_VAR)   = -1  ! nudging temperature
    integer :: id_nudge_Dsal(MAX_ID_VAR)  = -1 ! difference of nudging salinity with salinity
    integer :: id_nudge_Dtem(MAX_ID_VAR)  = -1 ! difference of nudging temperature with temperature
+!vegetation
+	integer :: id_rnveg(MAX_ID_VAR) = 1          !< Variable ID for vegetation stem density
+	integer :: id_diaveg(MAX_ID_VAR) = 1         !< Variable ID for vegetation stem diameter
+	integer :: id_veg_stemheight(MAX_ID_VAR) = 1 !< Variable ID for vegetation stem height
 ! particles
    integer :: id_depth_averaged_particle_concentration(MAX_ID_VAR) = -1  ! depth-averaged particle concentration
 ! for parallel
@@ -5563,7 +5567,13 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
             ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_cftrt, nf90_double, UNC_LOC_L, 'cftrt',   '', 'Roughness from trachytopes', '', jabndnd=jabndnd_)
             ierr = unc_put_att(mapids%ncid, mapids%id_cftrt, 'non_si_units', ' ')
          end if
-      end if 
+      end if
+      
+      if (javeg > 0) then
+         ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_rnveg        	, nf90_double, UNC_LOC_S, 'rnveg'        , 'stem density of vegetation'      , 'stem density per square meter', 'm-2')
+         ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_diaveg        , nf90_double, UNC_LOC_S, 'diaveg'       , 'stem diameter of vegetation'     , 'stem diameter of vegetation', 'm')
+         ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_veg_stemheight, nf90_double, UNC_LOC_S, 'stemheight'   , 'stem height of vegetation'       , 'stem height of vegetation', 'm-2')
+      endif
 
       if (jamapcali > 0 .and. jacali == 1) then
          ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_cfcl, nf90_double, UNC_LOC_L, 'cfcl',   '', 'Calibration factor for roughness', '', jabndnd=jabndnd_)
@@ -7067,6 +7077,12 @@ if (jamapsed > 0 .and. jased > 0 .and. stm_included) then
      ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_nudge_Dsal, UNC_LOC_S3D, workx, jabndnd=jabndnd_)
    end if
    
+   if (javeg > 0) then
+      ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_rnveg , UNC_LOC_S, rnveg, jabndnd=jabndnd_)
+      ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_diaveg , UNC_LOC_S, diaveg, jabndnd=jabndnd_)
+      ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_veg_stemheight , UNC_LOC_S, stemheight, jabndnd=jabndnd_)
+   endif
+   
    if ( japart.eq.1 .and. jatracer.eq.1 .and. kmx.gt.0 ) then
 !     depth-averaged particle concentration     
       do k=1,Ndx
@@ -7175,7 +7191,8 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
     id_taurat, id_dm, id_dg, id_dgsd, id_frac, id_mudfrac, id_sandfrac, id_fixfac, id_hidexp, id_mfluff, id_scrn, id_urmscc, id_Fxcc, id_Fycc, &
     id_ducxdx, id_ducydy, id_ducxdy, id_ducydx, id_dsdx, id_dsdy, & 
     id_sscx, id_sscy, id_sscx_reconstructed, id_sscy_reconstructed, &
-    id_turkin1, id_tureps1, id_vicwwu, id_swanbl
+    id_turkin1, id_tureps1, id_vicwwu, id_swanbl, &
+    id_rnveg, id_diaveg, id_veg_stemheight
 
     integer,          dimension(:,:),   allocatable, save :: id_dxx                     ! fractions
     double precision, dimension(:),     allocatable       :: dum, ust_rot,vst_rot
@@ -8513,7 +8530,23 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
         !
         ierr = unc_add_gridmapping_att(imapfile, (/ id_windx(iid), id_windy(iid), id_windxu(iid), id_windyu(iid),  nf90_global /), jsferic)
 
-
+        if (javeg > 0) then
+           ierr = nf90_def_var(imapfile, 'rnveg', nf90_double, (/ id_flowelemdim(iid), id_timedim (iid)/) , id_rnveg(iid))
+           ierr = nf90_put_att(imapfile, id_rnveg(iid),'long_name'    , 'Stem density of vegetation')
+           ierr = nf90_put_att(imapfile, id_rnveg(iid),'coordinates'  , 'FlowElem_xcc FlowElem_ycc')
+           ierr = nf90_put_att(imapfile, id_rnveg(iid),'units'        , 'm-2')
+		   
+           ierr = nf90_def_var(imapfile, 'diaveg', nf90_double, (/ id_flowelemdim(iid), id_timedim (iid)/) , id_diaveg(iid))
+           ierr = nf90_put_att(imapfile, id_diaveg(iid),'long_name'    , 'Stem diameter of vegetation')
+           ierr = nf90_put_att(imapfile, id_diaveg(iid),'coordinates'  , 'FlowElem_xcc FlowElem_ycc')
+           ierr = nf90_put_att(imapfile, id_diaveg(iid),'units'        , 'm')
+		   
+           ierr = nf90_def_var(imapfile, 'veg_stemheight', nf90_double, (/ id_flowelemdim(iid), id_timedim (iid)/) , id_veg_stemheight(iid))
+           ierr = nf90_put_att(imapfile, id_veg_stemheight(iid),'long_name'    , 'Stem height of vegetation')
+           ierr = nf90_put_att(imapfile, id_veg_stemheight(iid),'coordinates'  , 'FlowElem_xcc FlowElem_ycc')
+           ierr = nf90_put_att(imapfile, id_veg_stemheight(iid),'units'        , 'm')
+        endif
+      
         ! For all 3D variables, expand the coordinate attribute with a vertical coordinate
         ierr = nf90_inq_varid( imapfile, 'LayCoord_cc', varid)
         if (ierr==NF90_NOERR) then 
@@ -8894,7 +8927,13 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
         if (jawind/=0) then
             ierr = nf90_inq_varid(imapfile, 'windx', id_windx(iid))
             ierr = nf90_inq_varid(imapfile, 'windy', id_windy(iid))
-        endif    
+        endif
+        
+        if (jaseparate_==2 .and. javeg > 0) then
+           ierr = nf90_inq_varid(imapfile, 'rnveg', id_rnveg(iid))
+           ierr = nf90_inq_varid(imapfile, 'diaveg', id_diaveg(iid))
+           ierr = nf90_inq_varid(imapfile, 'veg_stemheight', id_veg_stemheight(iid))
+        endif   
     endif    
     
     ! -- Start data writing (flow data) ------------------------
@@ -9893,6 +9932,12 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
     if ( NUMCONST.gt.0 ) then
        if ( allocated(idum)     ) deallocate(idum)
     end if
+    
+    if (jaseparate_==2 .and. javeg > 0) then
+       ierr = nf90_put_var(imapfile, id_rnveg(iid), rnveg, (/ 1, itim /), (/ ndxndxi, 1 /))
+       ierr = nf90_put_var(imapfile, id_diaveg(iid), diaveg, (/ 1, itim /), (/ ndxndxi, 1 /))
+       ierr = nf90_put_var(imapfile, id_veg_stemheight(iid), stemheight, (/ 1, itim /), (/ ndxndxi, 1 /))
+    endif
   
 end subroutine unc_write_map_filepointer
 

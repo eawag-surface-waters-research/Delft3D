@@ -54,9 +54,12 @@ subroutine get_flow_fields (i_flow, i_swan, sif, fg, sg, f2s, wavedata, sr, flow
 !
 ! Local variables
 !
+   integer            :: i
+   integer            :: j
    integer            :: iprint       = 0
    real               :: alpb         = 0.0
    real               :: dummy        = -999.0
+   real               :: maxval
    logical            :: clbot        = .true.
    character(256)     :: mudfilnam    = ' '
    type(input_fields) :: fif                    ! input fields defined on flow grid
@@ -261,6 +264,56 @@ subroutine get_flow_fields (i_flow, i_swan, sif, fg, sg, f2s, wavedata, sr, flow
       endif
    endif
    !
+if (sr%swveg .and. sr%dom(1)%qextnd(q_veg) >= 1) then
+      if (sr%flowgridfile == ' ') then
+         !
+         ! There is no vegetation on the Delf3D4-FLOW com file
+         !
+         write(*,'(a)') "ERROR: trying to read vegetation from Delft3D4-FLOW com-file. Not implemented yet."
+         call wavestop(1, "ERROR: trying to read vegetation from Delft3D4-FLOW com-file. Not implemented yet.")
+      else
+         !
+         ! Read vegetation parameters from netcdf-file
+         !
+         call get_var_netcdf (i_flow, wavedata%time , 'rnveg', &
+                            & fif%veg, fif%mmax, fif%nmax, &
+                            & sr%flowgridfile, wavedata%output%lastvalidflowfield)
+         call get_var_netcdf (i_flow, wavedata%time , 'diaveg', &
+                            & fif%diaveg, fif%mmax, fif%nmax, &
+                            & sr%flowgridfile, wavedata%output%lastvalidflowfield)
+         call get_var_netcdf (i_flow, wavedata%time , 'veg_stemheight', &
+                            & fif%veg_stemheight, fif%mmax, fif%nmax, &
+                            & sr%flowgridfile, wavedata%output%lastvalidflowfield)
+         !
+         ! Map vegetation components to SWAN grid, using ESMF_Regrid weights
+         !
+         call grmap_esmf (i_flow       ,fif%veg    , fif%npts, &
+                        & sif%veg    , sif%mmax, sif%nmax, &
+                        & f2s        , sg)
+         call grmap_esmf (i_flow       ,fif%diaveg    , fif%npts, &
+                        & sif%diaveg    , sif%mmax, sif%nmax, &
+                        & f2s           , sg)
+         call grmap_esmf (i_flow       ,fif%veg_stemheight, fif%npts, &
+                        & sif%veg_stemheight, sif%mmax, sif%nmax, &
+                        & f2s               , sg)
+         ! It seems that SWAN only accepts constant values for diaveg and veg_stemheight
+         !
+         maxval = -1.0e10
+         do i=1, fif%mmax
+            do j=1, fif%nmax
+               maxval = max(maxval, fif%diaveg(i,j))
+            enddo
+         enddo
+         sr%veg_diamtr = maxval
+         maxval = -1.0e10
+         do i=1, fif%npts
+            do j=1, fif%nmax
+               maxval = max(maxval, fif%veg_stemheight(i,j))
+            enddo
+         enddo
+         sr%veg_height = maxval
+      endif
+   endif
    if (wavedata%mode == flow_mud_online) then
       write(*,'(4x,a)') 'Mud:'
       write(mudfilnam,'(a,a)')'com-',trim(mudids(1))
