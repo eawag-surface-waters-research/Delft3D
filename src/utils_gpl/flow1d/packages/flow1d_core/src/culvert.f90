@@ -112,8 +112,8 @@ contains
       double precision, intent(  out)              :: cmustr
       double precision, intent(inout)              :: u0m
       double precision, intent(inout)              :: u1m
-      double precision, intent(in   )              :: s1m2         !< left waterlevel s(m)          sleft
-      double precision, intent(in   )              :: s1m1         !< right waterlevel s(m+1)       sright
+      double precision, intent(in   )              :: s1m1         !< left waterlevel s(m)          sleft
+      double precision, intent(in   )              :: s1m2         !< right waterlevel s(m+1)       sright
       double precision, intent(in   )              :: dxm
       double precision, intent(in   )              :: dt
       double precision, intent(in   )              :: wetdown
