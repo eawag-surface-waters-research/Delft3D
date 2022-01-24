@@ -22,7 +22,7 @@
 !!  rights reserved.
       
       subroutine wq_processes_initialise ( lunlsp, pdffil, shared_dll_so, blmfil, blmoutfil, sttfil, statprocesdef, outputs, &
-                                           nomult, imultp, constants, noinfo, nowarn, ierr)
+                                           nomult, imultp, constants, refday, noinfo, nowarn, ierr)
 
 !       Deltares Software Centre
 
@@ -128,6 +128,7 @@
       character*40 ,allocatable :: subunit(:)      ! substance unit
       character*60 ,allocatable :: subdescr(:)     ! substance description
       character*20              :: outname         ! output name
+      integer  ( 4), intent(in) :: refday          ! reference day, varying from 1 till 365
 
       ! proces definition structure
 
@@ -682,7 +683,7 @@
                     nopa     , paname, nofun , funame, nosfun,    &
                     sfunname , nodisp, diname, novelo, vename,    &
                     nmis     , defaul, noloc , nodef , dename, outputs,   &
-                    ndspx    , nvelx , nlocx , locnam   )
+                    ndspx    , nvelx , nlocx , locnam, refday   )
 
       ! report on the use of the delwaq input
 
