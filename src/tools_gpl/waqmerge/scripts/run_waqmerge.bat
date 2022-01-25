@@ -7,7 +7,7 @@ title run_waqmerge
 setlocal enabledelayedexpansion
 
     rem
-    rem Set the hyd/ddb file
+    rem Set the mdu file
     rem
 set argfile= 
 if [%1] EQU [] (
@@ -22,7 +22,7 @@ if [%1] EQU [] (
 echo Configfile:%argfile%
 if not exist %argfile% (
     if not exist %argfile%.inp (
-        echo ERROR: input hyd/ddb "%argfile%" does not exist
+        echo ERROR: input mdu file "%argfile%" does not exist
         goto usage
     )
 )
@@ -68,9 +68,9 @@ goto end
 
 :usage
 echo Usage:
-echo run_waqmerge.bat [--help] input.ddb
+echo run_waqmerge.bat [--help] input.mdu
 echo     --help             : (Optional) show this usage
-echo     input.ddb          : (Mandatory) Waqmerge input file.
+echo     input.mdu          : (Mandatory) Waqmerge input file.
 :end
     rem To prevent the DOS box from disappearing immediately: remove the rem on the following line
 rem pause

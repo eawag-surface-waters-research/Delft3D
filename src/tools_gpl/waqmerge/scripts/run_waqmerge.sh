@@ -8,10 +8,10 @@
     #
 
 function print_usage_info {
-    echo "Usage: ${0##*/} <input.ddb> [OPTION]..."
+    echo "Usage: ${0##*/} <input.mdu> [OPTION]..."
     echo "Run Waqmerge on Linux."
     echo
-    echo "<input.ddb>"
+    echo "<input.mdu>"
     echo "       (Mandatory) Waqmerge input file"
     echo
     echo "Options:"
@@ -43,7 +43,7 @@ workdir=`pwd`
 
 if [ ! -f $argfile ]; then
     if [ ! -f $argfile.inp ]; then
-        echo "ERROR: input hyd/ddb $argfile does not exist in working directory $workdir"
+        echo "ERROR: input mdu file $argfile does not exist in working directory $workdir"
         print_usage_info
     fi
 fi
