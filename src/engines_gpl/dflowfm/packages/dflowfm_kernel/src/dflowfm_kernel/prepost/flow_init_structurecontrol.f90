@@ -260,7 +260,7 @@ do i=1,nstr
    call prop_get_string(str_ptr, '', 'branchid', branchid, success)
    if (.not. success) call prop_get_string(str_ptr, '', 'numCoordinates', branchid, success)
    if (success) then
-      if (trim(strtype) /= 'pump') then
+      if (trim(strtype) /= 'pump' .and. trim(strtype) /= 'dambreak') then
          cycle
       endif
    endif
