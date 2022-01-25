@@ -22,9 +22,6 @@ if(UNIX)
     set_property(TARGET ${executable_name} PROPERTY LINKER_LANGUAGE Fortran)
 endif(UNIX)
 
-if (WIN32)
-   target_compile_definitions(${executable_name} PRIVATE WIN64)
-endif(WIN32)
 
 
 # Define how the files should be structured within Visual Studio
