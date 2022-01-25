@@ -88,11 +88,11 @@ set waveexedir=%D3D_HOME%\%ARCH%\dwaves\bin
 
     rem Run
 set PATH=%dimrexedir%;%delwaqexedir%;%dflowfmexedir%;%flow1dexedir%;%flow1d2dexedir%;%rtctoolsexedir%;%rrexedir%;%waveexedir%;%swanbatdir%;%swanexedir%;%esmfbatdir%;%esmfexedir%;%shareddir%
-if exist %shareddir%\var.bat (
-    echo executing: "%shareddir%\var.bat"
-                    "%shareddir%\var.bat"
+if exist %shareddir%\vars.bat (
+    echo executing: "%shareddir%\vars.bat"
+                    "%shareddir%\vars.bat"
 ) else (
-    echo "WARNING: File not found: %shareddir%\var.bat"
+    echo "WARNING: File not found: %shareddir%\vars.bat"
     echo "         Problems may occur when using IntelMPI"
 )
 echo executing: "%shareddir%\mpiexec.exe" -n %numpar% -localonly "%dimrexedir%\dimr.exe" -d %debuglevel% %argfile%
