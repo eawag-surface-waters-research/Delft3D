@@ -1231,36 +1231,46 @@ module m_readstructures
 
       allocate(dambr)
 
-      call prop_get_double(md_ptr, 'Structure', 'StartLocationX',  dambr%startLocationX, success)
+      call prop_get_double(md_ptr, 'Structure', 'StartLocationX',  dambr%startLocationX, localsuccess)
+      success = success .and. check_input_result(localsuccess, st_id, 'StartLocationX')
       if (.not. success) return
 
-      call prop_get_double(md_ptr, 'Structure', 'StartLocationY',  dambr%startLocationY, success)
+      call prop_get_double(md_ptr, 'Structure', 'StartLocationY',  dambr%startLocationY, localsuccess)
+      success = success .and. check_input_result(localsuccess, st_id, 'StartLocationY')
       if (.not. success) return
 
-      call prop_get_integer(md_ptr, 'Structure', 'Algorithm', dambr%algorithm, success)
+      call prop_get_integer(md_ptr, 'Structure', 'Algorithm', dambr%algorithm, localsuccess)
+      success = success .and. check_input_result(localsuccess, st_id, 'Algorithm')
       if (.not. success) return
 
-      call prop_get_double(md_ptr, 'Structure', 'CrestLevelIni', dambr%crestLevelIni, success)
+      call prop_get_double(md_ptr, 'Structure', 'CrestLevelIni', dambr%crestLevelIni, localsuccess)
+      success = success .and. check_input_result(localsuccess, st_id, 'CrestLevelIni')
       if (.not. success) return
          
       if (dambr%algorithm == 2) then
          
-         call prop_get_double(md_ptr, 'Structure', 'BreachWidthIni', dambr%breachWidthIni, success)
+         call prop_get_double(md_ptr, 'Structure', 'BreachWidthIni', dambr%breachWidthIni, localsuccess)
+         success = success .and. check_input_result(localsuccess, st_id, 'BreachWidthIni')
          if (.not. success) return
 
-         call prop_get_double(md_ptr, 'Structure', 'CrestLevelMin', dambr%crestLevelMin, success)
+         call prop_get_double(md_ptr, 'Structure', 'CrestLevelMin', dambr%crestLevelMin, localsuccess)
+         success = success .and. check_input_result(localsuccess, st_id, 'CrestLevelMin')
          if (.not. success) return
 
-         call prop_get_double(md_ptr, 'Structure', 'TimeToBreachToMaximumDepth', dambr%timeToBreachToMaximumDepth, success)
+         call prop_get_double(md_ptr, 'Structure', 'TimeToBreachToMaximumDepth', dambr%timeToBreachToMaximumDepth, localsuccess)
+         success = success .and. check_input_result(localsuccess, st_id, 'TimeToBreachToMaximumDepth')
          if (.not. success) return
 
-         call prop_get_double(md_ptr, 'Structure', 'F1', dambr%f1, success)
+         call prop_get_double(md_ptr, 'Structure', 'F1', dambr%f1, localsuccess)
+         success = success .and. check_input_result(localsuccess, st_id, 'F1')
          if (.not. success) return
 
-         call prop_get_double(md_ptr, 'Structure', 'F2', dambr%f2, success)
+         call prop_get_double(md_ptr, 'Structure', 'F2', dambr%f2, localsuccess)
+         success = success .and. check_input_result(localsuccess, st_id, 'F2')
          if (.not. success) return
 
-         call prop_get_double(md_ptr, 'Structure', 'Ucrit', dambr%ucrit, success)
+         call prop_get_double(md_ptr, 'Structure', 'Ucrit', dambr%ucrit, localsuccess)
+         success = success .and. check_input_result(localsuccess, st_id, 'Ucrit')
          if (.not. success) return
          
          ! optional extra fields
@@ -1281,11 +1291,13 @@ module m_readstructures
       if (dambr%algorithm == 3) then
          ! UNST-3308: NOTE that only the .tim filename is read below. It is NOT added to the network%forcinglist.
          !            All time-space handling of the dambreak is still done in kernel.
-         call prop_get_string(md_ptr, 'Structure', 'DambreakLevelsAndWidths', dambr%levelsAndWidths, success)
+         call prop_get_string(md_ptr, 'Structure', 'DambreakLevelsAndWidths', dambr%levelsAndWidths, localsuccess)
+         success = success .and. check_input_result(localsuccess, st_id, 'DambreakLevelsAndWidths')
          if (.not. success) return         
       endif
 
-      call prop_get_double(md_ptr, 'Structure', 'T0', dambr%t0, success)
+      call prop_get_double(md_ptr, 'Structure', 'T0', dambr%t0, localsuccess)
+      success = success .and. check_input_result(localsuccess, st_id, 'T0')
       if (.not. success) return
       
       call setCoefficents(dambr)
