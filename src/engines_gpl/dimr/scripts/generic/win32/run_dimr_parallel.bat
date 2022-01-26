@@ -90,7 +90,7 @@ set waveexedir=%D3D_HOME%\%ARCH%\dwaves\bin
 set PATH=%dimrexedir%;%delwaqexedir%;%dflowfmexedir%;%flow1dexedir%;%flow1d2dexedir%;%rtctoolsexedir%;%rrexedir%;%waveexedir%;%swanbatdir%;%swanexedir%;%esmfbatdir%;%esmfexedir%;%shareddir%
 if exist %shareddir%\vars.bat (
     echo executing: "%shareddir%\vars.bat"
-                    "%shareddir%\vars.bat"
+        call "%shareddir%\vars.bat"
 ) else (
     echo "WARNING: File not found: %shareddir%\vars.bat"
     echo "         Problems may occur when using IntelMPI"
