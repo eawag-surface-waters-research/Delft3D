@@ -4637,6 +4637,7 @@ src/scripts_lgpl/win64/testcoverage/readcov.py -text
 src/scripts_lgpl/win64/utils_lgpl_no_tests_template.sln -text
 src/scripts_lgpl/win64/utils_lgpl_template.sln -text
 src/setenv.sh -text
+src/setenv_no_modules.sh -text
 src/test/engines_gpl/dflowfm/packages/dflowfm_kernel/CMakeLists.txt -text
 src/test/engines_gpl/dflowfm/packages/dflowfm_kernel/src/test_1d_grid.f90 -text
 src/test/engines_gpl/dflowfm/packages/dflowfm_kernel/src/test_MDU_File_Version.f90 -text

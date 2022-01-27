@@ -237,8 +237,14 @@ root=$scriptdir
 
 #
 # Dot setenv.sh to load the modules needed
-echo ". $root/src/setenv.sh $compiler"
-      . $root/src/setenv.sh $compiler
+module list > /dev/null
+if [ $? -ne 0 ]; then
+    echo ". $root/src/setenv_no_modules.sh $compiler"
+          . $root/src/setenv_no_modules.sh $compiler
+else
+    echo ". $root/src/setenv.sh $compiler"
+          . $root/src/setenv.sh $compiler
+fi
 if [ $? -ne 0 ]; then
     echo "Setenv.sh resulted in an error. Check log files."
     exit 1
