@@ -125,7 +125,6 @@ subroutine write_wave_grid_netcdf (i_grid, sg, gridname, filename)
        !
        ! Create shifted grid, having the SWAN grid points as cell centres
        !
-       write(*,'(a)') '      Create shifted grid, having the SWAN grid points as cell centres'
        xshift = 0.0_hp
        yshift = 0.0_hp
        if (ierror/=0) write(*,*) "ERROR allocatoin in write_wave_grid_netcdf"
@@ -287,23 +286,16 @@ subroutine write_wave_grid_netcdf (i_grid, sg, gridname, filename)
        !
        ! Cartesian
        ! Nothing to do
-       write(*,'(a)') '      Cartesian: nothing to do'
     endif
     !
-    write(*,'(a)') '      get full version string Wave'
     call getfullversionstring_WAVE(version_full)
-    write(*,'(a)') '      get program name Wave'
     call getprogramname_WAVE(programname)
-    write(*,'(a)') '      get company Wave'
     call getcompany_WAVE(company)
-    write(*,'(a)') '      get company URL Wave'
     call getcompanyurl_WAVE(companyurl)
-    write(*,'(a)') '      date and time'
     call date_and_time(cdate, ctime, czone)
     !
     ! define name of output file
     !
-    write(*,'(a)') '      define name of output file'
     write(filename,'(2a)') "TMP_ESMF_RegridWeightGen_", trim(gridname)
     !
     ! gridname may contain an extension

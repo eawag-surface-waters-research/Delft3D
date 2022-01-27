@@ -93,7 +93,6 @@ subroutine grids_and_gridmaps (n_swan_grids, n_flow_grids, sr, mode)
    endif
 
 ! Find out number of SWAN grids
-   write(*,'(a)') '  Find out number of SWAN grids'
    i_swan=1
    inquire(file='swangrids', exist=exists)
    if (exists) then
@@ -115,25 +114,19 @@ subroutine grids_and_gridmaps (n_swan_grids, n_flow_grids, sr, mode)
    endif
 
    ! Allocate pointer arrays grid structures
-   write(*,'(a)') '  Allocate pointer arrays grid structures'
    call Init_Grids (n_swan_grids, n_flow_grids)
    
-   write(*,'(a)') '  loop over SWAN grids'  
    do i=1,n_swan_grids
       grid_name = swangrid(i)
       grid_file_type ='FLOW'
       xy_loc         ='CORNER'
-      write(*,'(a)') '    Allocate and get grid'
       call Alloc_and_get_grid(i, swan_grids(i),grid_name,grid_file_type,xy_loc, sr%flowLinkConnectivity)
-      write(*,'(a)') '    Write bnd loc'
       call write_bnd_loc(i,swan_grids(i))
       if (netcdf_files) then
-         write(*,'(a)') '    Write wave grid netcdf'
          call write_wave_grid_netcdf(i, swan_grids(i), grid_name, flow2swan_maps(i,1)%r_tmp_filename)
       endif
    enddo
 
-   write(*,'(a)') '  loop over Flow grids'
    do i=1,n_flow_grids
       if (.not. flow_data_initialized) then
          write(*,'(a)') '*** ERROR: FLOW data (runid(s)) is not initialized.'
@@ -157,7 +150,6 @@ subroutine grids_and_gridmaps (n_swan_grids, n_flow_grids, sr, mode)
       endif
    enddo
 
-   write(*,'(a)') '  loop over SWAN grids'   
    do i=1,n_swan_grids
       do j=2,n_flow_grids
          flow2swan_maps(i,j)%r_tmp_filename = flow2swan_maps(i,1)%r_tmp_filename
@@ -185,6 +177,5 @@ subroutine grids_and_gridmaps (n_swan_grids, n_flow_grids, sr, mode)
          call make_grid_map(i, j, s, f, s2f, .false.)
       enddo
    enddo
-   write(*,'(a)') '  Finalising grids and grid mappings'
    
 end subroutine grids_and_gridmaps

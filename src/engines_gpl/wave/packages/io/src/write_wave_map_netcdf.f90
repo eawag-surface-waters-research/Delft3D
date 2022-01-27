@@ -121,10 +121,10 @@ subroutine write_wave_map_netcdf (sg, sof, sif, n_swan_grids, wavedata, casl, pr
 !! executable statements -------------------------------------------------------
 !
     if (sif_mmax /= sof%mmax) then
-       write(*,'(a,i0,a,i0,a)') "ERROR: sif_mmax(", sif_mmax, ") is assumed to be identical to sof%mmax(", sof%mmax, ") but isn't. Vegetation arrays will contain rubbish."
+       write(*,'(a,i0,a,i0,a)') "ERROR: sif_mmax(", sif_mmax, ") is assumed to be identical to sof%mmax(", sof%mmax, ") but isn't. Vegetation arrays may contain wrong information."
     endif
     if (sif_nmax /= sof%nmax) then
-       write(*,'(a,i0,a,i0,a)') "ERROR: sif_nmax(", sif_nmax, ") is assumed to be identical to sof%nmax(", sof%nmax, ") but isn't. Vegetation arrays will contain rubbish."
+       write(*,'(a,i0,a,i0,a)') "ERROR: sif_nmax(", sif_nmax, ") is assumed to be identical to sof%nmax(", sof%nmax, ") but isn't. Vegetation arrays may contain wrong information."
     endif
     
     dearthrad = 6378137.0_hp

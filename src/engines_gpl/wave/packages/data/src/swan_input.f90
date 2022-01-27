@@ -2142,14 +2142,11 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
        call prop_get_logical(tmp_ptr, '*', 'Vegetation', flag)
        if (flag) then
           dom%vegetation = 1
-          write(*,*) 'SWAN_INPUT: vegetation first assumed non-spatially varying'
        endif
        flag = .false.
        call prop_get_logical(tmp_ptr, '*', 'VegSVNPlants', flag)
-       write(*,*) 'Spatially varying vegetation is ', flag
        if (flag) then
           dom%vegetation = 2
-          write(*,*) 'SWAN_INPUT: vegetation is set to spatially varying'
        endif
        if (dom%vegetation >= 1) then	   
           call prop_get_real   (tmp_ptr, '*', 'VegHeight' , dom%veg_height)

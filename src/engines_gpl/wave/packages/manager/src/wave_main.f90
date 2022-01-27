@@ -370,7 +370,6 @@ function wave_master_init(mode_in, mdw_file) result(retval)
    ! CHECK
    ! ====================================================================================
    !
-   write(*,'(a)') 'Checking SWAN input...'
    call check_input(swan_run, wavedata)
 end function wave_master_init
 

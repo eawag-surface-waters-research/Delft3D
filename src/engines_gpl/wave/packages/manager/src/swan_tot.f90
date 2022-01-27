@@ -434,7 +434,6 @@ subroutine swan_tot (n_swan_grids, n_flow_grids, wavedata, selectedtime)
                                & wavedata)
          endif
          
-         write(*,'(a)') '  Deallocate input/output fields'
          call dealloc_input_fields (swan_input_fields, wavedata%mode)
          call dealloc_output_fields (swan_output_fields)
          !
