@@ -1697,10 +1697,10 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
 
       ! "The parameter sigma(k) is defined only for the nsigma layers nearest the ocean surface"
       if (associated(layer_zs).and.(meshids%varids(mid_layersigma).ne.-1).and.(numLayer.gt.0)) then
-         ierr = nf90_put_var(ncid, meshids%varids(mid_layersigma), layer_zs(numLayer-nsigma+1:numlayer),start=(/numlayer-nsigma+1/))
+         ierr = nf90_put_var(ncid, meshids%varids(mid_layersigma), layer_zs(1:numlayer))
       endif
       if (associated(interface_zs).and.(meshids%varids(mid_interfacesigma).ne.-1).and.(numLayer.gt.0)) then
-         ierr = nf90_put_var(ncid, meshids%varids(mid_interfacesigma), interface_zs(numLayer + 2-nsigma:numlayer+1),start=(/numLayer + 2-nsigma/))
+         ierr = nf90_put_var(ncid, meshids%varids(mid_interfacesigma), interface_zs(2:numlayer+1), start=(/2/))
       endif
       
    end if
