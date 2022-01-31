@@ -123,7 +123,7 @@
               ! Probability of settling
               !
               prob_settling =
-     &            max( 0.0, 1.0 - shear_stress / critical_stress )
+     &            max( 0.0, 1.0 - shear_stress / max(critical_stress,1e-6) )
 
               !
               ! Flux to the bottom (limit to avoid instabilities)
@@ -132,7 +132,7 @@
      &                             safe_factor / delt ) * cwater
               
               do ispm = 1,nspm
-                  fl(iflux+itel+ispm) = settling_flux * cbotsp(ispm)  / cbotsum
+                  fl(iflux+itel+ispm) = settling_flux * cbotsp(ispm)  / max(cbotsum,1e-6)
               enddo
               itel = itel + nspm
               

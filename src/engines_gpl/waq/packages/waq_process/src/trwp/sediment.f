@@ -109,7 +109,7 @@
               ! Probability of settling (limit to avoid instabilities)
               !
               prob_settling =
-     &            max( 0.0, 1.0 - shear_stress / critical_stress )
+     &            max( 0.0, 1.0 - shear_stress / max(critical_stress,1e-6) )
               settling_flux = min( prob_settling * settling / depth,
      &                             safe_factor / delt ) * cwater
 !              pmsa(ipnt(ip_lastsingle+3*ntrwpm*nspmm+itel) ) = settling_flux * depth  ! g/m2/d
