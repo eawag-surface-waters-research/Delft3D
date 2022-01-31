@@ -1678,31 +1678,40 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
 
       ! Write mesh layer distribution (mesh-global, not per face)
       ! "[zs] variable should contain sigma(k)*depth_c for the layers where sigma is defined and zlev(k) for the other layers"
-      if (associated(layer_zs).and.(meshids%varids(mid_layerzs).ne.-1).and.(numLayer.gt.0)) then
-         ierr = nf90_put_var(ncid, meshids%varids(mid_layerzs), layer_zs(1:numLayer-nsigma), start = (/ 1 /))
-         ierr = nf90_put_var(ncid, meshids%varids(mid_layerzs), layer_zs(numLayer-nsigma+1:numlayer)*depth_c, start=(/numlayer-nsigma+1/))
-      endif
-      if (associated(interface_zs).and.(meshids%varids(mid_interfacezs).ne.-1).and.(numLayer.gt.0)) then
-         ierr = nf90_put_var(ncid, meshids%varids(mid_interfacezs), interface_zs(1:numLayer + 1-nsigma), start = (/ 1 /))
-         ierr = nf90_put_var(ncid, meshids%varids(mid_interfacezs), interface_zs(numLayer + 2-nsigma:numlayer+1)*depth_c, start=(/numLayer + 2-nsigma/))
-      endif
-
       ! "zlev(k) is defined for the nlayer - nsigma deeper layers"
-      if (associated(layer_zs).and.(meshids%varids(mid_layerz).ne.-1).and.(numLayer.gt.0)) then
-         ierr = nf90_put_var(ncid, meshids%varids(mid_layerz),  layer_zs(1:numLayer-nsigma))
-      endif
-      if (associated(interface_zs).and.(meshids%varids(mid_interfacez).ne.-1).and.(numLayer.gt.0)) then
-         ierr = nf90_put_var(ncid, meshids%varids(mid_interfacez), interface_zs(1:numLayer + 1-nsigma))
-      endif
-
       ! "The parameter sigma(k) is defined only for the nsigma layers nearest the ocean surface"
-      if (associated(layer_zs).and.(meshids%varids(mid_layersigma).ne.-1).and.(numLayer.gt.0)) then
-         ierr = nf90_put_var(ncid, meshids%varids(mid_layersigma), layer_zs(1:numlayer))
-      endif
-      if (associated(interface_zs).and.(meshids%varids(mid_interfacesigma).ne.-1).and.(numLayer.gt.0)) then
-         ierr = nf90_put_var(ncid, meshids%varids(mid_interfacesigma), interface_zs(2:numlayer+1), start=(/2/))
-      endif
       
+      if (numLayer > 0) then
+         if (associated(layer_zs)) then
+            if (meshids%varids(mid_layerzs) > 0.) then
+               ierr = nf90_put_var(ncid, meshids%varids(mid_layerzs), layer_zs(1:numLayer-nsigma), start = (/ 1 /))
+               ierr = nf90_put_var(ncid, meshids%varids(mid_layerzs), layer_zs(numLayer-nsigma+1:numlayer)*depth_c, start=(/numlayer-nsigma+1/))
+            endif
+            if (meshids%varids(mid_layerzs) > 0) then
+               ierr = nf90_put_var(ncid, meshids%varids(mid_layerzs), layer_zs(1:numLayer-nsigma), start = (/ 1 /))
+               ierr = nf90_put_var(ncid, meshids%varids(mid_layerzs), layer_zs(numLayer-nsigma+1:numlayer)*depth_c, start=(/numlayer-nsigma+1/))
+            endif
+            if (meshids%varids(mid_layersigma) > 0) then
+               ierr = nf90_put_var(ncid, meshids%varids(mid_layersigma), layer_zs(1:numlayer), start = (/ 1 /))
+            endif
+         endif ! layer_zs
+
+         if (associated(interface_zs)) then
+            if (meshids%varids(mid_interfacezs) > 0) then
+               ierr = nf90_put_var(ncid, meshids%varids(mid_interfacezs), interface_zs(1:numLayer + 1-nsigma), start = (/ 1 /))
+               ierr = nf90_put_var(ncid, meshids%varids(mid_interfacezs), interface_zs(numLayer + 2-nsigma:numlayer+1)*depth_c, start=(/numLayer + 2-nsigma/))
+            endif
+            if (meshids%varids(mid_interfacez) > 0) then
+               ierr = nf90_put_var(ncid, meshids%varids(mid_interfacez), interface_zs(1:numLayer + 1-nsigma))
+            endif
+            if (meshids%varids(mid_interfacesigma) > 0) then
+               ierr = nf90_put_var(ncid, meshids%varids(mid_interfacesigma), interface_zs(2:numlayer+1), start=(/ 2 /))
+            endif
+         endif ! interface_zs
+      endif ! numLayer
+          
+      
+.      
    end if
 
    ! Check for any remaining native NetCDF errors
