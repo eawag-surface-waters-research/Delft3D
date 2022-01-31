@@ -1709,9 +1709,7 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
             endif
          endif ! interface_zs
       endif ! numLayer
-          
-      
-.      
+
    end if
 
    ! Check for any remaining native NetCDF errors
