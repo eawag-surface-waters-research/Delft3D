@@ -1840,10 +1840,8 @@
         
         refday = 0
         
-        read(refdat(1:4),*) iyear
-        read(refdat(5:6),*) imonth
-        read(refdat(7:8),*) iday
-        
+        read(refdat, '(i4,i2,i2)' ) iyear, imonth, iday
+
         call checkLeapYear(iyear, leapYear)
         
         daysPerMonth = (/31,28,31,30,31,30,31,31,30,31,30,31/)

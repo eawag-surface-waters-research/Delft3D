@@ -69,47 +69,48 @@ use ieee_arithmetic
     integer spInc         ! local species PMSA number counter
     integer inpItems      ! nr of input items need for output PMSA
     
-     !input parameters
-     real    maxNrSp, nrSp, nrSpCon, nrInd               ! constant and species numbers       
-     real    UmRT, Q10, RT, CR                           ! growth and respiration rate calculation 
-     real    NCm, NO3Cm, PCm, ChlCm                      ! maximum NC, PC, ChlC quotas
-     real    NCo, PCo, ChlCo                             ! minimum NC and PC quotas
-     real    NCopt, NO3Copt, PCopt                       ! optimal NC and PC quotas
-     real    KtP, KtNH4, KtNO3                           ! half saturation constants
-     real    PCoNCopt, PCoNCm                            ! P status influence on optimum NC
-     real    ReUmNH4, ReUmNO3, redco, PSDOC, relPS       ! relative growth rates with specific nutrients  
-     real    MrtRT, FrAut, FrDet                         ! reference mortality and fractions
-     real    rProt                                       ! radius of cell
-     real    alpha                                       ! inital slope
+    !input parameters
+    integer    maxNrSp, nrSp, nrSpCon, nrInd            ! constant and species numbers       
+    integer    nrFlSp, nrOutSp                          ! constant and species numbers  
+    real    UmRT, Q10, RT, CR                           ! growth and respiration rate calculation 
+    real    NCm, NO3Cm, PCm, ChlCm                      ! maximum NC, PC, ChlC quotas
+    real    NCo, PCo, ChlCo                             ! minimum NC and PC quotas
+    real    NCopt, NO3Copt, PCopt                       ! optimal NC and PC quotas
+    real    KtP, KtNH4, KtNO3                           ! half saturation constants
+    real    PCoNCopt, PCoNCm                            ! P status influence on optimum NC
+    real    ReUmNH4, ReUmNO3, redco, PSDOC, relPS       ! relative growth rates with specific nutrients  
+    real    MrtRT, FrAut, FrDet                         ! reference mortality and fractions
+    real    rProt                                       ! radius of cell
+    real    alpha                                       ! inital slope
  
-     ! input state variables
-     real    protC, protChl, protN, protP                ! protist state variables
-     real    PO4, NH4, NO3                               ! nutrient state variables
-     real    Temp                                        ! physical abiotic variables      
-     real    PFD, atten, exat                            ! available light and extinction
+    ! input state variables
+    real    protC, protChl, protN, protP                ! protist state variables
+    real    PO4, NH4, NO3                               ! nutrient state variables
+    real    Temp                                        ! physical abiotic variables      
+    real    PFD, atten, exat                            ! available light and extinction
 
          
-     ! auxiliaries
-     real    NC, PC, ChlC                                ! cell nutrient quotas
-     real    UmT, BR                                     ! growth and repsiration rates
-     real    NCu, PCu, NPCu                              ! nutrient status within the cell
-     real    mot                                         ! motility 
-     real    upP, upNH4, upNO3                           ! nutrient uptake
-     real    PSqm, Cfix, synChl, degChl                  ! plateau and Cifx through photosynthesis
-     real    maxPSreq, PS                                ! req for C to come from PS (==1 for diatoms)
-     real    totR, Cu                                    ! respiration and C-growth
-     real    mrt, mrtFrAut, mrtFrDet                     ! mortality to detritus and autolysis
+    ! auxiliaries
+    real    NC, PC, ChlC                                ! cell nutrient quotas
+    real    UmT, BR                                     ! growth and repsiration rates
+    real    NCu, PCu, NPCu                              ! nutrient status within the cell
+    real    mot                                         ! motility 
+    real    upP, upNH4, upNO3                           ! nutrient uptake
+    real    PSqm, Cfix, synChl, degChl                  ! plateau and Cifx through photosynthesis
+    real    maxPSreq, PS                                ! req for C to come from PS (==1 for diatoms)
+    real    totR, Cu                                    ! respiration and C-growth
+    real    mrt, mrtFrAut, mrtFrDet                     ! mortality to detritus and autolysis
      
 
-     ! Fluxes
-     real    dNH4up, dNO3up, dPup                        ! uptake fluxes
-     real    dCfix                                       ! photosynthesis flux
-     real    dChlsyn, dChldeg                            ! Chl synthesis  and degradation flux
-     real    dCresp                                      ! respiration flux
-     real    dDOCleak                                    ! C leak through photosynthesis 
-     real    dDOCvoid, dNH4out, dPout                    ! voiding fluxes
-     real    dAutC, dAutN, dAutP, dAutChl                ! autolysis fluxes                          
-     real    dDetC, dDetN, dDetP, dDetChl                ! voiding fluxes
+    ! Fluxes
+    real    dNH4up, dNO3up, dPup                        ! uptake fluxes
+    real    dCfix                                       ! photosynthesis flux
+    real    dChlsyn, dChldeg                            ! Chl synthesis  and degradation flux
+    real    dCresp                                      ! respiration flux
+    real    dDOCleak                                    ! C leak through photosynthesis 
+    real    dDOCvoid, dNH4out, dPout                    ! voiding fluxes
+    real    dAutC, dAutN, dAutP, dAutChl                ! autolysis fluxes                          
+    real    dDetC, dDetN, dDetP, dDetChl                ! voiding fluxes
 
 !                                                                                                     
 !******************************************************************************* 
@@ -123,6 +124,8 @@ use ieee_arithmetic
     nrSp      = PMSA(ipnt(   2 ))   !   nr of species to be modelled                           (-)                
     nrSpCon   = PMSA(ipnt(   3 ))   !   nr of species dependent items                          (-)                
     nrInd     = PMSA(ipnt(   4 ))   !   nr of species independent items                        (-)  
+    nrFlSp    = PMSA(ipnt(   5 ))   !   nr of fluxes per individual species                    (-)  
+    nrOutSp   = PMSA(ipnt(   6 ))   !   nr of output items per individual species              (-)  
       
     ! length of the PMSA input array. 
     inpItems = maxNrSp * nrSpCon + nrInd
@@ -133,13 +136,13 @@ use ieee_arithmetic
         if (ikmrk1.eq.1) then
             
         ! species independent items
-        PO4          = PMSA(ipnt(   5 ))  !    initial external DIP                                   (gP m-3)
-        NH4          = PMSA(ipnt(   6 ))  !    initial external NH4                                   (gN m-3)
-        NO3          = PMSA(ipnt(   7 ))  !    initial external NO3                                   (gN m-3)
-        Temp         = PMSA(ipnt(   8 ))  !    ambient water temperature                              (oC)               
-        PFD          = PMSA(ipnt(   9 ))  !    from rad to photon flux density                        (umol photon m-2)           
-        atten        = PMSA(ipnt(  10 ))  !    attenuation of light by water + plankton Chl           (-)                            
-        exat         = PMSA(ipnt(  11 ))  !    -ve exponent of attenuation                            (-)              
+        PO4          = PMSA(ipnt(   7 ))  !    initial external DIP                                   (gP m-3)
+        NH4          = PMSA(ipnt(   8 ))  !    initial external NH4                                   (gN m-3)
+        NO3          = PMSA(ipnt(   9 ))  !    initial external NO3                                   (gN m-3)
+        Temp         = PMSA(ipnt(  10 ))  !    ambient water temperature                              (oC)               
+        PFD          = PMSA(ipnt(  11 ))  !    from rad to photon flux density                        (umol photon m-2)           
+        atten        = PMSA(ipnt(  12 ))  !    attenuation of light by water + plankton Chl           (-)                            
+        exat         = PMSA(ipnt(  13 ))  !    -ve exponent of attenuation                            (-)              
       
         ! species loop
         speciesLoop: do iSpec = 0, (nrSp-1)
@@ -252,28 +255,28 @@ use ieee_arithmetic
             ! Output -------------------------------------------------------------------
                
             ! (input items + position of specific output item in vector + species loop * total number of output) 
-            PMSA(ipnt( inpItems +  1 + iSpec * 22 )) = NC 
-            PMSA(ipnt( inpItems +  2 + iSpec * 22 )) = PC 
-            PMSA(ipnt( inpItems +  3 + iSpec * 22 )) = ChlC 
-            PMSA(ipnt( inpItems +  4 + iSpec * 22 )) = UmT 
-            PMSA(ipnt( inpItems +  5 + iSpec * 22 )) = BR
-            PMSA(ipnt( inpItems +  6 + iSpec * 22 )) = NCu 
-            PMSA(ipnt( inpItems +  7 + iSpec * 22 )) = PCu 
-            PMSA(ipnt( inpItems +  8 + iSpec * 22 )) = NPCu
-            PMSA(ipnt( inpItems +  9 + iSpec * 22 )) = mot
-            PMSA(ipnt( inpItems + 10 + iSpec * 22 )) = upP 
-            PMSA(ipnt( inpItems + 11 + iSpec * 22 )) = upNH4 
-            PMSA(ipnt( inpItems + 12 + iSpec * 22 )) = upNO3 
-            PMSA(ipnt( inpItems + 13 + iSpec * 22 )) = PSqm 
-            PMSA(ipnt( inpItems + 14 + iSpec * 22 )) = PS
-            PMSA(ipnt( inpItems + 15 + iSpec * 22 )) = Cfix 
-            PMSA(ipnt( inpItems + 16 + iSpec * 22 )) = synChl
-            PMSA(ipnt( inpItems + 17 + iSpec * 22 )) = degChl
-            PMSA(ipnt( inpItems + 18 + iSpec * 22 )) = totR 
-            PMSA(ipnt( inpItems + 19 + iSpec * 22 )) = Cu
-            PMSA(ipnt( inpItems + 20 + iSpec * 22 )) = mrt 
-            PMSA(ipnt( inpItems + 21 + iSpec * 22 )) = mrtFrAut 
-            PMSA(ipnt( inpItems + 22 + iSpec * 22 )) = mrtFrDet
+            PMSA(ipnt( inpItems +  1 + iSpec * nrOutSp )) = NC 
+            PMSA(ipnt( inpItems +  2 + iSpec * nrOutSp )) = PC 
+            PMSA(ipnt( inpItems +  3 + iSpec * nrOutSp )) = ChlC 
+            PMSA(ipnt( inpItems +  4 + iSpec * nrOutSp )) = UmT 
+            PMSA(ipnt( inpItems +  5 + iSpec * nrOutSp )) = BR
+            PMSA(ipnt( inpItems +  6 + iSpec * nrOutSp )) = NCu 
+            PMSA(ipnt( inpItems +  7 + iSpec * nrOutSp )) = PCu 
+            PMSA(ipnt( inpItems +  8 + iSpec * nrOutSp )) = NPCu
+            PMSA(ipnt( inpItems +  9 + iSpec * nrOutSp )) = mot
+            PMSA(ipnt( inpItems + 10 + iSpec * nrOutSp )) = upP 
+            PMSA(ipnt( inpItems + 11 + iSpec * nrOutSp )) = upNH4 
+            PMSA(ipnt( inpItems + 12 + iSpec * nrOutSp )) = upNO3 
+            PMSA(ipnt( inpItems + 13 + iSpec * nrOutSp )) = PSqm 
+            PMSA(ipnt( inpItems + 14 + iSpec * nrOutSp )) = PS
+            PMSA(ipnt( inpItems + 15 + iSpec * nrOutSp )) = Cfix 
+            PMSA(ipnt( inpItems + 16 + iSpec * nrOutSp )) = synChl
+            PMSA(ipnt( inpItems + 17 + iSpec * nrOutSp )) = degChl
+            PMSA(ipnt( inpItems + 18 + iSpec * nrOutSp )) = totR 
+            PMSA(ipnt( inpItems + 19 + iSpec * nrOutSp )) = Cu
+            PMSA(ipnt( inpItems + 20 + iSpec * nrOutSp )) = mrt 
+            PMSA(ipnt( inpItems + 21 + iSpec * nrOutSp )) = mrtFrAut 
+            PMSA(ipnt( inpItems + 22 + iSpec * nrOutSp )) = mrtFrDet
 
 
             ! FLUXES -------------------------------------------------------------------   
@@ -319,25 +322,26 @@ use ieee_arithmetic
             dDetChl     = protChl * mrtFrDet
               
             ! (1 + SpeciesLoop * (nr of fluxes per individual species) + total number of fluxes) 
-            fl (  1 +  iSpec * 19  + iflux )  = dNH4up
-            fl (  2 +  iSpec * 19  + iflux )  = dNO3up
-            fl (  3 +  iSpec * 19  + iflux )  = dPup  
-            fl (  4 +  iSpec * 19  + iflux )  = dCfix
-            fl (  5 +  iSpec * 19  + iflux )  = dChlsyn
-            fl (  6 +  iSpec * 19  + iflux )  = dChldeg
-            fl (  7 +  iSpec * 19  + iflux )  = dCresp
-            fl (  8 +  iSpec * 19  + iflux )  = dDOCleak
-            fl (  9 +  iSpec * 19  + iflux )  = dDOCvoid
-            fl ( 10 +  iSpec * 19  + iflux )  = dNH4out
-            fl ( 11 +  iSpec * 19  + iflux )  = dPout     
-            fl ( 12 +  iSpec * 19  + iflux )  = dAutC     
-            fl ( 13 +  iSpec * 19  + iflux )  = dDetC    
-            fl ( 14 +  iSpec * 19  + iflux )  = dAutN    
-            fl ( 15 +  iSpec * 19  + iflux )  = dDetN    
-            fl ( 16 +  iSpec * 19  + iflux )  = dAutP    
-            fl ( 17 +  iSpec * 19  + iflux )  = dDetP    
-            fl ( 18 +  iSpec * 19  + iflux )  = dAutChl  
-            fl ( 19 +  iSpec * 19  + iflux )  = dDetChl  
+            fl (  1 +  iSpec * nrFlSp  + iflux )  = dNH4up
+            fl (  2 +  iSpec * nrFlSp  + iflux )  = dNO3up
+            fl (  3 +  iSpec * nrFlSp  + iflux )  = dPup  
+            fl (  4 +  iSpec * nrFlSp  + iflux )  = dCfix
+            fl (  5 +  iSpec * nrFlSp  + iflux )  = dChlsyn
+            fl (  6 +  iSpec * nrFlSp  + iflux )  = dChldeg
+            fl (  7 +  iSpec * nrFlSp  + iflux )  = dCresp
+            fl (  8 +  iSpec * nrFlSp  + iflux )  = dDOCleak
+            fl (  9 +  iSpec * nrFlSp  + iflux )  = dDOCvoid
+            fl ( 10 +  iSpec * nrFlSp  + iflux )  = dNH4out
+            fl ( 11 +  iSpec * nrFlSp  + iflux )  = dPout     
+            fl ( 12 +  iSpec * nrFlSp  + iflux )  = dAutC     
+            fl ( 13 +  iSpec * nrFlSp  + iflux )  = dDetC    
+            fl ( 14 +  iSpec * nrFlSp  + iflux )  = dAutN    
+            fl ( 15 +  iSpec * nrFlSp  + iflux )  = dDetN    
+            fl ( 16 +  iSpec * nrFlSp  + iflux )  = dAutP    
+            fl ( 17 +  iSpec * nrFlSp  + iflux )  = dDetP    
+            fl ( 18 +  iSpec * nrFlSp  + iflux )  = dAutChl  
+            fl ( 19 +  iSpec * nrFlSp  + iflux )  = dDetChl  
+
             
             if ( ieee_is_nan(protC) ) write (*,*) '(''ERROR: NaN in protC in segment:'', i10)' ,    iseg
             if ( ieee_is_nan(Cfix) )  write (*,*) '(''ERROR: NaN in Cfix in segment:'', i10)' ,    iseg

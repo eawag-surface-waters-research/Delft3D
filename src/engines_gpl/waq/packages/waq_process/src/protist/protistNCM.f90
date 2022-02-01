@@ -74,70 +74,71 @@ use ieee_arithmetic
     integer nrSp_par
     integer iSp
     
-     ! INPUT PARAMETERS  
-     integer    maxNrSp, nrSp, nrSpCon, nrSpInd     ! constant and species numbers   
-     integer    maxNrPr                             ! maxNrPrey
-     real       relPhag                             ! feeding night:day
-     real       UmRT, Q10, RT, CR                   ! growth and respiration rate calculation
-     real       NCm, PCm                            ! maximum NC and PC quotas
-     real       NCo, PCo                            ! minimum NC and PC quotas
-     real       NCopt, PCopt                        ! optimal NC and PC quotas
-     real       ChlCm, degChl
-     real       CcellProt, rProt                      ! parameters for protozooplankton cell
-     real       optCR                               ! parameters for encounter
-     real       kAE, AEm, AEo                       ! parameters for assimilation efficiency
-     real       SDA                                 ! specific dynamic action
-     real       MrtRT, FrAut, FrDet                 ! reference mortality and fractions
-     real       redco, PSDOC, maxPSreq, relPS       ! photosynthesis related input
-     real       alpha                               ! inital slope
+    ! INPUT PARAMETERS  
+    integer    maxNrSp, nrSp, nrSpCon, nrSpInd     ! constant and species numbers   
+    integer    nrFlSp, nrOutSp                     ! constant and species numbers  
+    integer    maxNrPr                             ! maxNrPrey
+    real       relPhag                             ! feeding night:day
+    real       UmRT, Q10, RT, CR                   ! growth and respiration rate calculation
+    real       NCm, PCm                            ! maximum NC and PC quotas
+    real       NCo, PCo                            ! minimum NC and PC quotas
+    real       NCopt, PCopt                        ! optimal NC and PC quotas
+    real       ChlCm, degChl
+    real       CcellProt, rProt                    ! parameters for protozooplankton cell
+    real       optCR                               ! parameters for encounter
+    real       kAE, AEm, AEo                       ! parameters for assimilation efficiency
+    real       SDA                                 ! specific dynamic action
+    real       MrtRT, FrAut, FrDet                 ! reference mortality and fractions
+    real       redco, PSDOC, maxPSreq, relPS       ! photosynthesis related input
+    real       alpha                               ! inital slope
 
-     ! INPUT STATE VARIABLES
-     real    protC, protN, protP, protChl           ! protist state variables
-     real    Temp                                   ! physical abiotic variables
+    ! INPUT STATE VARIABLES
+    real    protC, protN, protP, protChl           ! protist state variables
+    real    Temp                                   ! physical abiotic variables
 
-     real    PFD, atten, exat                      ! available light and extinction
+    real    PFD, atten, exat                       ! available light and extinction
          
-     ! AUXILIARIES
-     real    lightInh        ! inhibtion of feeding in dark 
-     real    NC, PC, ChlC    ! nutrient quotas
-     real    UmT, BR         ! growth and repsiration rates
-     real    NCu, PCu, NPCu  ! nutrient limitations
-     real    mot             ! motility
-     ! food quantity
-     real    sumCP        ! total captured prey
-     real    ingNC, ingPC ! total ingested N and P 
-     real    preyFlag     ! sum of preyFlag (can be 0 = both low, 1 = 1 ok, 2 = both ok)
-     ! food quality
-     real    stoichP, ppNC, ppPC                    ! stoichiometry comparison                 
-     real    opAE                                   ! assimilation efficiency
-     real    maxIng, ingSat, ingC, ingN, ingP, KI   ! ingestion
-     real    assC, assN, assP                       ! assimilation 
-     ! ingestion and assimilation
-     real    totR, Cu                               ! respiration and C-growth
-     real    mrt, mrtFrAut, mrtFrDet                ! mortality to detritus and autolysis
-     ! photosynthesis
-     real    PSqm, PS, Cfix
+    ! AUXILIARIES
+    real    lightInh        ! inhibtion of feeding in dark 
+    real    NC, PC, ChlC    ! nutrient quotas
+    real    UmT, BR         ! growth and repsiration rates
+    real    NCu, PCu, NPCu  ! nutrient limitations
+    real    mot             ! motility
+    ! food quantity
+    real    sumCP        ! total captured prey
+    real    ingNC, ingPC ! total ingested N and P 
+    real    preyFlag     ! sum of preyFlag (can be 0 = both low, 1 = 1 ok, 2 = both ok)
+    ! food quality
+    real    stoichP, ppNC, ppPC                    ! stoichiometry comparison                 
+    real    opAE                                   ! assimilation efficiency
+    real    maxIng, ingSat, ingC, ingN, ingP, KI   ! ingestion
+    real    assC, assN, assP                       ! assimilation 
+    ! ingestion and assimilation
+    real    totR, Cu                               ! respiration and C-growth
+    real    mrt, mrtFrAut, mrtFrDet                ! mortality to detritus and autolysis
+    ! photosynthesis
+    real    PSqm, PS, Cfix
             
-     ! other parameters
-     real, parameter :: wTurb = 0.0 ! this needs to be an input from model eventually!!!!
+    ! other parameters
+    real, parameter :: wTurb = 0.0 ! this needs to be an input from model eventually!!!!
 
-     ! loop counter 
-     integer iPrey      ! counter for loops
+    ! loop counter 
+    integer iPrey      ! counter for loops
 
-     ! Fluxes
-     real   dCeat, dNeat, dPeat                         ! assimilation fluxes
-     real   dCresp                                      ! respiration flux
-     real   dCfix, dChldeg, dChlout                     ! photosynthesis and Chl degradation fluxes
-     real   dDOCleak, dDOCvoid                          ! DOC leakage
-     real   dPOCout, dPONout, dPOPout                   ! voiding organic fluxes
-     real   dNH4out, dPout                              ! voding inorganic fluxes
-     real   dAutC, dAutN, dAutP, dAutChl                ! autolysis fluxes
-     real   dDetC, dDetN, dDetP, dDetChl                ! detritus fluxes
-     real   dChlup                                      ! uptake of prey chlorophyll
+    ! Fluxes
+    real   dCeat, dNeat, dPeat                         ! assimilation fluxes
+    real   dCresp                                      ! respiration flux
+    real   dCfix, dChldeg, dChlout                     ! photosynthesis and Chl degradation fluxes
+    real   dDOCleak, dDOCvoid                          ! DOC leakage
+    real   dPOCout, dPONout, dPOPout                   ! voiding organic fluxes
+    real   dNH4out, dPout                              ! voding inorganic fluxes
+    real   dAutC, dAutN, dAutP, dAutChl                ! autolysis fluxes
+    real   dDetC, dDetN, dDetP, dDetChl                ! detritus fluxes
+    real   dChlup                                      ! uptake of prey chlorophyll
 
      
-     ! Protist arrays
-     type(protist_array)   :: prot_array                 ! type containing all protist specific arrays
+    ! Protist arrays
+    type(protist_array)   :: prot_array                 ! type containing all protist specific arrays
 
 !                                                                                                     
 !******************************************************************************* 
@@ -150,12 +151,13 @@ use ieee_arithmetic
     maxNrSp   = PMSA(ipnt(   1 ))   !   total nr species implemented in process                (-)
     nrSp      = PMSA(ipnt(   2 ))   !   nr of species to be modelled                           (-)                
     nrSpCon   = PMSA(ipnt(   3 ))   !   nr of species dependent items                          (-)                
-    nrSpInd   = PMSA(ipnt(   4 ))   !   nr of species independent items                        (-)  
+    nrSpInd   = PMSA(ipnt(   4 ))   !   nr of species independent items                        (-)
     maxNrPr   = PMSA(ipnt(   5 ))   !   nr of prey species implemented                         (-)
-    nrSp_par  = PMSA(ipnt(   10 ))   !   nr of parameters per species                           (-)
-    iSp       = PMSA(ipnt(   11 ))   !   selector of species parameter (needed to share code with for protistCM)   (-)
-    
-    
+    nrFlSp    = PMSA(ipnt(   6 ))   !   nr of fluxes per individual species                    (-)  
+    nrOutSp   = PMSA(ipnt(   7 ))   !   nr of output items per individual species              (-)  
+    nrSp_par  = PMSA(ipnt(  12 ))   !   nr of parameters per species                           (-)
+    iSp       = PMSA(ipnt(  13 ))   !   selector of species parameter (needed to share code with for protistCM)   (-)
+
     ! allocation of prey input array
     call allocate_prot_array(prot_array,maxNrPr)
 
@@ -170,10 +172,10 @@ use ieee_arithmetic
         call dhkmrk(1,iknmrk(iseg),ikmrk1)
         if (ikmrk1.eq.1) then    
             
-            Temp      = PMSA(ipnt(   6 ))  !    temperature                                            (C)      
-            PFD       = PMSA(ipnt(   7 ))  !    from rad to photon flux density                        (umol photon m-2)           
-            atten     = PMSA(ipnt(   8 ))  !    attenuation of light by water + plankton Chl           (-)                            
-            exat      = PMSA(ipnt(   9 ))  !    -ve exponent of attenuation                            (-) 
+            Temp      = PMSA(ipnt(   8 ))  !    temperature                                            (C)      
+            PFD       = PMSA(ipnt(   9 ))  !    from rad to photon flux density                        (umol photon m-2)           
+            atten     = PMSA(ipnt(  10 ))  !    attenuation of light by water + plankton Chl           (-)                            
+            exat      = PMSA(ipnt(  11 ))  !    -ve exponent of attenuation                            (-) 
       
         ! species loop
         speciesLoop: do iSpec = 0, (nrSp-1)
@@ -315,40 +317,40 @@ use ieee_arithmetic
             ! Output -------------------------------------------------------------------
                
             ! (input items + position of specific output item in vector + species loop * total number of output) 
-            PMSA(ipnt( inpItems +   1 + iSpec * 34 )) = NC
-            PMSA(ipnt( inpItems +   2 + iSpec * 34 )) = PC
-            PMSA(ipnt( inpItems +   3 + iSpec * 34 )) = ChlC
-            PMSA(ipnt( inpItems +   4 + iSpec * 34 )) = UmT
-            PMSA(ipnt( inpItems +   5 + iSpec * 34 )) = BR 
-            PMSA(ipnt( inpItems +   6 + iSpec * 34 )) = NCu
-            PMSA(ipnt( inpItems +   7 + iSpec * 34 )) = PCu
-            PMSA(ipnt( inpItems +   8 + iSpec * 34 )) = NPCu
-            PMSA(ipnt( inpItems +   9 + iSpec * 34 )) = mot
-            PMSA(ipnt( inpItems +  10 + iSpec * 34 )) = sumCP
-            PMSA(ipnt( inpItems +  11 + iSpec * 34 )) = ingNC
-            PMSA(ipnt( inpItems +  12 + iSpec * 34 )) = ingPC
-            PMSA(ipnt( inpItems +  13 + iSpec * 34 )) = ppNC
-            PMSA(ipnt( inpItems +  14 + iSpec * 34 )) = ppPC
-            PMSA(ipnt( inpItems +  15 + iSpec * 34 )) = stoichP
-            PMSA(ipnt( inpItems +  16 + iSpec * 34 )) = opAE
-            PMSA(ipnt( inpItems +  17 + iSpec * 34 )) = maxIng
-            PMSA(ipnt( inpItems +  18 + iSpec * 34 )) = ingSat
-            PMSA(ipnt( inpItems +  19 + iSpec * 34 )) = ingC  
-            PMSA(ipnt( inpItems +  20 + iSpec * 34 )) = assC  
-            PMSA(ipnt( inpItems +  21 + iSpec * 34 )) = ingN
-            PMSA(ipnt( inpItems +  22 + iSpec * 34 )) = ingP
-            PMSA(ipnt( inpItems +  23 + iSpec * 34 )) = assN
-            PMSA(ipnt( inpItems +  24 + iSpec * 34 )) = assP
-            PMSA(ipnt( inpItems +  25 + iSpec * 34 )) = PSqm 
-            PMSA(ipnt( inpItems +  26 + iSpec * 34 )) = PS   
-            PMSA(ipnt( inpItems +  27 + iSpec * 34 )) = Cfix 
-            PMSA(ipnt( inpItems +  28 + iSpec * 34 )) = totR
-            PMSA(ipnt( inpItems +  29 + iSpec * 34 )) = Cu
-            PMSA(ipnt( inpItems +  30 + iSpec * 34 )) = mrt
-            PMSA(ipnt( inpItems +  31 + iSpec * 34 )) = mrtFrAut
-            PMSA(ipnt( inpItems +  32 + iSpec * 34 )) = mrtFrDet
-            PMSA(ipnt( inpItems +  33 + iSpec * 34 )) = preyFlag
-            PMSA(ipnt( inpItems +  34 + iSpec * 34 )) = lightInh
+            PMSA(ipnt( inpItems +   1 + iSpec * nrOutSp )) = NC
+            PMSA(ipnt( inpItems +   2 + iSpec * nrOutSp )) = PC
+            PMSA(ipnt( inpItems +   3 + iSpec * nrOutSp )) = ChlC
+            PMSA(ipnt( inpItems +   4 + iSpec * nrOutSp )) = UmT
+            PMSA(ipnt( inpItems +   5 + iSpec * nrOutSp )) = BR 
+            PMSA(ipnt( inpItems +   6 + iSpec * nrOutSp )) = NCu
+            PMSA(ipnt( inpItems +   7 + iSpec * nrOutSp )) = PCu
+            PMSA(ipnt( inpItems +   8 + iSpec * nrOutSp )) = NPCu
+            PMSA(ipnt( inpItems +   9 + iSpec * nrOutSp )) = mot
+            PMSA(ipnt( inpItems +  10 + iSpec * nrOutSp )) = sumCP
+            PMSA(ipnt( inpItems +  11 + iSpec * nrOutSp )) = ingNC
+            PMSA(ipnt( inpItems +  12 + iSpec * nrOutSp )) = ingPC
+            PMSA(ipnt( inpItems +  13 + iSpec * nrOutSp )) = ppNC
+            PMSA(ipnt( inpItems +  14 + iSpec * nrOutSp )) = ppPC
+            PMSA(ipnt( inpItems +  15 + iSpec * nrOutSp )) = stoichP
+            PMSA(ipnt( inpItems +  16 + iSpec * nrOutSp )) = opAE
+            PMSA(ipnt( inpItems +  17 + iSpec * nrOutSp )) = maxIng
+            PMSA(ipnt( inpItems +  18 + iSpec * nrOutSp )) = ingSat
+            PMSA(ipnt( inpItems +  19 + iSpec * nrOutSp )) = ingC  
+            PMSA(ipnt( inpItems +  20 + iSpec * nrOutSp )) = assC  
+            PMSA(ipnt( inpItems +  21 + iSpec * nrOutSp )) = ingN
+            PMSA(ipnt( inpItems +  22 + iSpec * nrOutSp )) = ingP
+            PMSA(ipnt( inpItems +  23 + iSpec * nrOutSp )) = assN
+            PMSA(ipnt( inpItems +  24 + iSpec * nrOutSp )) = assP
+            PMSA(ipnt( inpItems +  25 + iSpec * nrOutSp )) = PSqm 
+            PMSA(ipnt( inpItems +  26 + iSpec * nrOutSp )) = PS   
+            PMSA(ipnt( inpItems +  27 + iSpec * nrOutSp )) = Cfix 
+            PMSA(ipnt( inpItems +  28 + iSpec * nrOutSp )) = totR
+            PMSA(ipnt( inpItems +  29 + iSpec * nrOutSp )) = Cu
+            PMSA(ipnt( inpItems +  30 + iSpec * nrOutSp )) = mrt
+            PMSA(ipnt( inpItems +  31 + iSpec * nrOutSp )) = mrtFrAut
+            PMSA(ipnt( inpItems +  32 + iSpec * nrOutSp )) = mrtFrDet
+            PMSA(ipnt( inpItems +  33 + iSpec * nrOutSp )) = preyFlag
+            PMSA(ipnt( inpItems +  34 + iSpec * nrOutSp )) = lightInh
             
             ! FLUXES -------------------------------------------------------------------   
             ! Protist gains------------------------------------------------------------                                 
@@ -415,38 +417,38 @@ use ieee_arithmetic
             dChlup = sum(prot_array%dPreyChl) * upChl(ChlC, ChlCm)
                           
             ! (1 + SpeciesLoop * (nr of fluxes per individual species + total prey fluxes) + total number of fluxes
-            fl (   1 + iSpec * (23 + maxNrPr * 5) + iflux) = dCeat
-            fl (   2 + iSpec * (23 + maxNrPr * 5) + iflux) = dNeat
-            fl (   3 + iSpec * (23 + maxNrPr * 5) + iflux) = dPeat
-            fl (   4 + iSpec * (23 + maxNrPr * 5) + iflux) = dCfix
-            fl (   5 + iSpec * (23 + maxNrPr * 5) + iflux) = dChldeg
-            fl (   6 + iSpec * (23 + maxNrPr * 5) + iflux) = dChlout
-            fl (   7 + iSpec * (23 + maxNrPr * 5) + iflux) = dCresp
-            fl (   8 + iSpec * (23 + maxNrPr * 5) + iflux) = dDOCleak
-            fl (   9 + iSpec * (23 + maxNrPr * 5) + iflux) = dDOCvoid
-            fl (  10 + iSpec * (23 + maxNrPr * 5) + iflux) = dPOCout
-            fl (  11 + iSpec * (23 + maxNrPr * 5) + iflux) = dPONout
-            fl (  12 + iSpec * (23 + maxNrPr * 5) + iflux) = dPOPout
-            fl (  13 + iSpec * (23 + maxNrPr * 5) + iflux) = dNH4out
-            fl (  14 + iSpec * (23 + maxNrPr * 5) + iflux) = dPout  
-            fl (  15 + iSpec * (23 + maxNrPr * 5) + iflux) = dAutC
-            fl (  16 + iSpec * (23 + maxNrPr * 5) + iflux) = dDetC
-            fl (  17 + iSpec * (23 + maxNrPr * 5) + iflux) = dAutN
-            fl (  18 + iSpec * (23 + maxNrPr * 5) + iflux) = dDetN
-            fl (  19 + iSpec * (23 + maxNrPr * 5) + iflux) = dAutP
-            fl (  20 + iSpec * (23 + maxNrPr * 5) + iflux) = dDetP
-            fl (  21 + iSpec * (23 + maxNrPr * 5) + iflux) = dAutChl
-            fl (  22 + iSpec * (23 + maxNrPr * 5) + iflux) = dDetChl            
-            fl (  23 + iSpec * (23 + maxNrPr * 5) + iflux) = dChlup
+            fl (   1 + iSpec * ( nrFlSp + maxNrPr * 5) + iflux) = dCeat
+            fl (   2 + iSpec * ( nrFlSp + maxNrPr * 5) + iflux) = dNeat
+            fl (   3 + iSpec * ( nrFlSp + maxNrPr * 5) + iflux) = dPeat
+            fl (   4 + iSpec * ( nrFlSp + maxNrPr * 5) + iflux) = dCfix
+            fl (   5 + iSpec * ( nrFlSp + maxNrPr * 5) + iflux) = dChldeg
+            fl (   6 + iSpec * ( nrFlSp + maxNrPr * 5) + iflux) = dChlout
+            fl (   7 + iSpec * ( nrFlSp + maxNrPr * 5) + iflux) = dCresp
+            fl (   8 + iSpec * ( nrFlSp + maxNrPr * 5) + iflux) = dDOCleak
+            fl (   9 + iSpec * ( nrFlSp + maxNrPr * 5) + iflux) = dDOCvoid
+            fl (  10 + iSpec * ( nrFlSp + maxNrPr * 5) + iflux) = dPOCout
+            fl (  11 + iSpec * ( nrFlSp + maxNrPr * 5) + iflux) = dPONout
+            fl (  12 + iSpec * ( nrFlSp + maxNrPr * 5) + iflux) = dPOPout
+            fl (  13 + iSpec * ( nrFlSp + maxNrPr * 5) + iflux) = dNH4out
+            fl (  14 + iSpec * ( nrFlSp + maxNrPr * 5) + iflux) = dPout  
+            fl (  15 + iSpec * ( nrFlSp + maxNrPr * 5) + iflux) = dAutC
+            fl (  16 + iSpec * ( nrFlSp + maxNrPr * 5) + iflux) = dDetC
+            fl (  17 + iSpec * ( nrFlSp + maxNrPr * 5) + iflux) = dAutN
+            fl (  18 + iSpec * ( nrFlSp + maxNrPr * 5) + iflux) = dDetN
+            fl (  19 + iSpec * ( nrFlSp + maxNrPr * 5) + iflux) = dAutP
+            fl (  20 + iSpec * ( nrFlSp + maxNrPr * 5) + iflux) = dDetP
+            fl (  21 + iSpec * ( nrFlSp + maxNrPr * 5) + iflux) = dAutChl
+            fl (  22 + iSpec * ( nrFlSp + maxNrPr * 5) + iflux) = dDetChl            
+            fl (  23 + iSpec * ( nrFlSp + maxNrPr * 5) + iflux) = dChlup
                                     
             ! loop over prey ingestion fluxes
             do iPrey = 0, (maxNrPr - 1)                                
                 ! (nr prey independent fluxes + prey Flux # + loop) + (move on to next predator) + total number of fluxes
-                fl ( (23 + 1 + iPrey * 5) + iSpec * (23 + maxNrPr * 5) + iflux ) = prot_array%dPreyC(iPrey + 1)  
-                fl ( (23 + 2 + iPrey * 5) + iSpec * (23 + maxNrPr * 5) + iflux ) = prot_array%dPreyChl(iPrey + 1)
-                fl ( (23 + 3 + iPrey * 5) + iSpec * (23 + maxNrPr * 5) + iflux ) = prot_array%dPreyN(iPrey + 1)  
-                fl ( (23 + 4 + iPrey * 5) + iSpec * (23 + maxNrPr * 5) + iflux ) = prot_array%dPreyP(iPrey + 1)  
-                fl ( (23 + 5 + iPrey * 5) + iSpec * (23 + maxNrPr * 5) + iflux ) = prot_array%dPreySi(iPrey + 1) 
+                fl ( ( nrFlSp + 1 + iPrey * 5) + iSpec * ( nrFlSp + maxNrPr * 5) + iflux ) = prot_array%dPreyC(iPrey + 1)  
+                fl ( ( nrFlSp + 2 + iPrey * 5) + iSpec * ( nrFlSp + maxNrPr * 5) + iflux ) = prot_array%dPreyChl(iPrey + 1)
+                fl ( ( nrFlSp + 3 + iPrey * 5) + iSpec * ( nrFlSp + maxNrPr * 5) + iflux ) = prot_array%dPreyN(iPrey + 1)  
+                fl ( ( nrFlSp + 4 + iPrey * 5) + iSpec * ( nrFlSp + maxNrPr * 5) + iflux ) = prot_array%dPreyP(iPrey + 1)  
+                fl ( ( nrFlSp + 5 + iPrey * 5) + iSpec * ( nrFlSp + maxNrPr * 5) + iflux ) = prot_array%dPreySi(iPrey + 1) 
             end do 
             
             if ( ieee_is_nan(protC) ) write (*,*) '(''ERROR: NaN in protC in segment:'', i10)' ,    iseg
