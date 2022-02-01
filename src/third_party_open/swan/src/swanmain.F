@@ -1201,7 +1201,7 @@
 ! 13. Source text
 !
       VERNUM = 41.31
-      VERTXT ='41.31A'
+      VERTXT ='41.31A.1'
 !
       CALL OCPINI ('swaninit', .TRUE.,INERR)                              34.01
       IF (INERR.GT.0) RETURN                                              34.01

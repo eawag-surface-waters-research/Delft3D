@@ -191,8 +191,7 @@
            CLOSE(NREF)                                                    40.30
            OPEN(UNIT=NREF, FILE=FILENM, FORM='UNFORMATTED',               40.30
      &          STATUS='REPLACE',
-!MatL4     &          ACCESS='DIRECT', RECL=1)                                  40.30
-     &          ACCESS='DIRECT', RECL=4)                                  41.08 40.30
+     &          ACCESS='DIRECT', RECL=1)                                  40.30
            IREC(IRQ) = 1                                                  40.51
         END IF
         IF (RAWPRT.AND.IPD.EQ.1) THEN                                     41.62
