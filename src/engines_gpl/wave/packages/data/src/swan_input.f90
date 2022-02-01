@@ -5102,12 +5102,12 @@ subroutine write_swan_inp (wavedata, calccount, &
        do j = 1, CEILING(real(size(varnam2))/6.0)
           m = min(6, size(varnam2)-(j-1)*6)
           lijn = ' '
-          write(lijn, '(A,I1.1,A)') "(", m, "(2X,A),'_')"
+          write(lijn, '(A,I1.1,A)') "(", m, "(2X,A),' _')"
           write (luninp, lijn) (varnam2(n),n=(j-1)*6+1,min(j*6,size(varnam2)))
        enddo
        write (luninp, '(2A)') "  ", trim(outfirst)
     else
-       write (luninp, '(6(2X,A),''_'')') varnam2
+       write (luninp, '(6(2X,A),'' _'')') varnam2
     endif
     line        = ' '
     line(1:2)   = '$ '
