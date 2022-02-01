@@ -1008,6 +1008,7 @@ function ug_write_mesh_struct(ncid, meshids, networkids, crs, meshgeom, nnodeids
    type(t_ug_meshgeom), intent(in   ) :: meshgeom !< The complete mesh geometry in a single struct.
    type(t_crs),           intent(in)  :: crs      !< Optional crs containing metadata of unsupported coordinate reference systems
    integer                            :: ierr     !< Result status (UG_NOERR==NF90_NOERR) if successful.
+!   integer, optional, intent(in)      :: nsigma_opt !< Number of 
    character(len=ug_idsLen), optional, allocatable           :: nnodeids(:), nbranchids(:), nodeids(:)
    character(len=ug_idsLongNamesLen), optional, allocatable  :: nnodelongnames(:), nbranchlongnames(:), nodelongnames(:)
    character(len=*), optional                                :: network1dname
@@ -1020,7 +1021,8 @@ function ug_write_mesh_struct(ncid, meshids, networkids, crs, meshgeom, nnodeids
                                meshgeom%nedge_nodes(1,:), meshgeom%nedge_nodes(2,:), nbranchids, nbranchlongnames, meshgeom%nbranchlengths, meshgeom%nbranchgeometrynodes, meshgeom%nbranches, &
                                meshgeom%ngeopointx, meshgeom%ngeopointy, meshgeom%ngeometry, &
                                meshgeom%nbranchorder, &
-                               nodeids, nodelongnames, meshgeom%nodebranchidx, meshgeom%nodeoffsets, meshgeom%edgebranchidx, meshgeom%edgeoffsets, zn = meshgeom%nodez)
+                               nodeids, nodelongnames, meshgeom%nodebranchidx, meshgeom%nodeoffsets, meshgeom%edgebranchidx, meshgeom%edgeoffsets, &
+                               zn = meshgeom%nodez, nsigma_opt = merge(meshgeom%numlayer, meshgeom%numtopsig, meshgeom%layertype.eq.1))
 
 end function ug_write_mesh_struct
 
@@ -1683,16 +1685,15 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
       
       if (numLayer > 0) then
          if (associated(layer_zs)) then
-            if (meshids%varids(mid_layerzs) > 0.) then
-               ierr = nf90_put_var(ncid, meshids%varids(mid_layerzs), layer_zs(1:numLayer-nsigma), start = (/ 1 /))
-               ierr = nf90_put_var(ncid, meshids%varids(mid_layerzs), layer_zs(numLayer-nsigma+1:numlayer)*depth_c, start=(/numlayer-nsigma+1/))
-            endif
             if (meshids%varids(mid_layerzs) > 0) then
                ierr = nf90_put_var(ncid, meshids%varids(mid_layerzs), layer_zs(1:numLayer-nsigma), start = (/ 1 /))
                ierr = nf90_put_var(ncid, meshids%varids(mid_layerzs), layer_zs(numLayer-nsigma+1:numlayer)*depth_c, start=(/numlayer-nsigma+1/))
             endif
+            if (meshids%varids(mid_layerz) > 0) then
+               ierr = nf90_put_var(ncid, meshids%varids(mid_layerz),  layer_zs(1:numLayer-nsigma))
+            endif
             if (meshids%varids(mid_layersigma) > 0) then
-               ierr = nf90_put_var(ncid, meshids%varids(mid_layersigma), layer_zs(1:numlayer), start = (/ 1 /))
+               ierr = nf90_put_var(ncid, meshids%varids(mid_layersigma), layer_zs(numLayer-nsigma+1:numlayer),start=(/numlayer-nsigma+1/))
             endif
          endif ! layer_zs
 
@@ -1705,7 +1706,7 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
                ierr = nf90_put_var(ncid, meshids%varids(mid_interfacez), interface_zs(1:numLayer + 1-nsigma))
             endif
             if (meshids%varids(mid_interfacesigma) > 0) then
-               ierr = nf90_put_var(ncid, meshids%varids(mid_interfacesigma), interface_zs(2:numlayer+1), start=(/ 2 /))
+               ierr = nf90_put_var(ncid, meshids%varids(mid_interfacesigma), interface_zs(numLayer + 2-nsigma:numlayer+1),start=(/numLayer + 2-nsigma/))               
             endif
          endif ! interface_zs
       endif ! numLayer
