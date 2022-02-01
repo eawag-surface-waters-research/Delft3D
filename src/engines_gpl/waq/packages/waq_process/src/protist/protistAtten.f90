@@ -52,7 +52,7 @@ subroutine PROATT     ( pmsa   , fl     , ipoint , increm, noseg , &
 !     Type    Name         I/O Description                                        Unit                
 !                                                                                                     
 !     support variables
-    integer ipnt(plen)    ! Local work array for the pointering                                    
+    integer ipnt(plen)     ! Local work array for the pointering                                    
     integer iseg          ! Local loop counter for computational element loop                      
     integer ioq
     integer ikmrk1        ! first segment attribute    
@@ -90,9 +90,9 @@ subroutine PROATT     ( pmsa   , fl     , ipoint , increm, noseg , &
         ! 1 W/m2 = 4.57 umol photons m-2 s-1
         PFD = PARRAD * 4.57 ! from PARRAD to PFD
            
-        !attenuation    MLD*(attco_W+abcoChl*algChl)    (-)   attenuation of light by water and by phytoplankton Chl 
+        !attenuation    MLD*(attco_W+abcoChl*algChl)    dl   attenuation of light by water and by phytoplankton Chl 
         atten = depth * ExtVL                           
-        !exat   (-)    -ve exponent of attenuation     
+        !exat   dl    -ve exponent of attenuation     
         exat = exp(-atten)
            
         ! segemnt dependent, but species independent output

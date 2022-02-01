@@ -44,7 +44,7 @@ use ieee_arithmetic
 !                                                                                                     
 !     Type    Name         I/O Description                                                            
 !          
-    integer, parameter :: plen = 451 ! total length of the PMSA input and output array
+    integer, parameter :: plen = 205 ! total length of the PMSA input and output array
     real(4) pmsa(*)      ! I/O Process Manager System Array, window of routine to process library     
     real(4) fl(*)        ! O  Array of fluxes made by this process in mass/volume/time               
     integer ipoint(plen) ! I  Array of pointers in pmsa to get and store the data                    
@@ -73,8 +73,6 @@ use ieee_arithmetic
     integer spInc         ! local species PMSA number counter
     integer inpItems      ! nr of input items need for output PMSA
     integer nrSp_par
-    integer nrFluxSp
-    integer nrPreySt
     
      !input parameters
      integer    maxNrSp, nrSp, nrSpCon, nrSpInd     ! constant and species numbers   
@@ -162,11 +160,9 @@ use ieee_arithmetic
     nrSpCon   = PMSA(ipnt(   3 ))   !   nr of species dependent items                          (-)                
     nrSpInd   = PMSA(ipnt(   4 ))   !   nr of species independent items                        (-)  
     maxNrPr   = PMSA(ipnt(   5 ))   !   nr of prey species implemented                         (-)
-    nrSp_par  = PMSA(ipnt(   6 ))   !   nr of parameters per species                           (-)
-    nrFluxSp  = PMSA(ipnt(   7 ))   !   nr of fluxes per species independent of prey           (-)
-    nrPreySt  = PMSA(ipnt(   8 ))   !   nr of prey state variables which can be eaten          (-)
-
-
+    nrSp_par  = PMSA(ipnt(   6 ))   !   nr of parameters per species       
+    
+    
     ! allocation of prey input array
     call allocate_prot_array(prot_array,maxNrPr)
 
@@ -182,13 +178,13 @@ use ieee_arithmetic
         if (ikmrk1.eq.1) then
             
         ! species independent items
-        PO4          = PMSA(ipnt(  9 ))  !    initial external DIP                                   (gP m-3)
-        NH4          = PMSA(ipnt( 10 ))  !    initial external NH4                                   (gN m-3)
-        NO3          = PMSA(ipnt( 11 ))  !    initial external NO3                                   (gN m-3)
-        Temp         = PMSA(ipnt( 12 ))  !    ambient water temperature                              (oC)               
-        PFD          = PMSA(ipnt( 13 ))  !    from rad to photon flux density                        (umol photon m-2)           
-        atten        = PMSA(ipnt( 14 ))  !    attenuation of light by water + plankton Chl           (-)                            
-        exat         = PMSA(ipnt( 15 ))  !    -ve exponent of attenuation                            (-)    
+        PO4          = PMSA(ipnt(  7 ))  !    initial external DIP                                   (gP m-3)
+        NH4          = PMSA(ipnt(  8 ))  !    initial external NH4                                   (gN m-3)
+        NO3          = PMSA(ipnt(  9 ))  !    initial external NO3                                   (gN m-3)
+        Temp         = PMSA(ipnt( 10 ))  !    ambient water temperature                              (oC)               
+        PFD          = PMSA(ipnt( 11 ))  !    from rad to photon flux density                        (umol photon m-2)           
+        atten        = PMSA(ipnt( 12 ))  !    attenuation of light by water + plankton Chl           (-)                            
+        exat         = PMSA(ipnt( 13 ))  !    -ve exponent of attenuation                            (-)    
                       
         ! species loop
         speciesLoop: do iSpec = 0, (nrSp-1)
@@ -458,34 +454,33 @@ use ieee_arithmetic
             dAutChl     = protChl * mrtFrAut
             dDetChl     = protChl * mrtFrDet
 
-
-
             ! (1 + SpeciesLoop * (nr of fluxes per individual species) + total number of fluxes) 
-            fl (  1 + (nrFluxSp + maxNrPr * nrPreySt) * iSpec + iflux )  = dNH4up    
-            fl (  2 + (nrFluxSp + maxNrPr * nrPreySt) * iSpec + iflux )  = dNO3up    
-            fl (  3 + (nrFluxSp + maxNrPr * nrPreySt) * iSpec + iflux )  = dPup      
-            fl (  4 + (nrFluxSp + maxNrPr * nrPreySt) * iSpec + iflux )  = dCfix     
-            fl (  5 + (nrFluxSp + maxNrPr * nrPreySt) * iSpec + iflux )  = dChlsyn   
-            fl (  6 + (nrFluxSp + maxNrPr * nrPreySt) * iSpec + iflux )  = dChldeg   
-            fl (  7 + (nrFluxSp + maxNrPr * nrPreySt) * iSpec + iflux )  = dCresp    
-            fl (  8 + (nrFluxSp + maxNrPr * nrPreySt) * iSpec + iflux )  = dDOCleak    
-            fl (  9 + (nrFluxSp + maxNrPr * nrPreySt) * iSpec + iflux )  = dDOCvoid    
-            fl ( 10 + (nrFluxSp + maxNrPr * nrPreySt) * iSpec + iflux )  = dNH4out   
-            fl ( 11 + (nrFluxSp + maxNrPr * nrPreySt) * iSpec + iflux )  = dPout     
-            fl ( 12 + (nrFluxSp + maxNrPr * nrPreySt) * iSpec + iflux )  = dCeat     
-            fl ( 13 + (nrFluxSp + maxNrPr * nrPreySt) * iSpec + iflux )  = dNeat     
-            fl ( 14 + (nrFluxSp + maxNrPr * nrPreySt) * iSpec + iflux )  = dPeat     
-            fl ( 15 + (nrFluxSp + maxNrPr * nrPreySt) * iSpec + iflux )  = dPOCout   
-            fl ( 16 + (nrFluxSp + maxNrPr * nrPreySt) * iSpec + iflux )  = dPONout   
-            fl ( 17 + (nrFluxSp + maxNrPr * nrPreySt) * iSpec + iflux )  = dPOPout   
-            fl ( 18 + (nrFluxSp + maxNrPr * nrPreySt) * iSpec + iflux )  = dAutC     
-            fl ( 19 + (nrFluxSp + maxNrPr * nrPreySt) * iSpec + iflux )  = dDetC     
-            fl ( 20 + (nrFluxSp + maxNrPr * nrPreySt) * iSpec + iflux )  = dAutN     
-            fl ( 21 + (nrFluxSp + maxNrPr * nrPreySt) * iSpec + iflux )  = dDetN     
-            fl ( 22 + (nrFluxSp + maxNrPr * nrPreySt) * iSpec + iflux )  = dAutP     
-            fl ( 23 + (nrFluxSp + maxNrPr * nrPreySt) * iSpec + iflux )  = dDetP     
-            fl ( 24 + (nrFluxSp + maxNrPr * nrPreySt) * iSpec + iflux )  = dAutChl   
-            fl ( 25 + (nrFluxSp + maxNrPr * nrPreySt) * iSpec + iflux )  = dDetChl   
+            fl (  1 + (25 + maxNrPr * 5) * iSpec + iflux )  = dNH4up    
+            fl (  2 + (25 + maxNrPr * 5) * iSpec + iflux )  = dNO3up    
+            fl (  3 + (25 + maxNrPr * 5) * iSpec + iflux )  = dPup      
+            fl (  4 + (25 + maxNrPr * 5) * iSpec + iflux )  = dCfix     
+            fl (  5 + (25 + maxNrPr * 5) * iSpec + iflux )  = dChlsyn   
+            fl (  6 + (25 + maxNrPr * 5) * iSpec + iflux )  = dChldeg   
+            fl (  7 + (25 + maxNrPr * 5) * iSpec + iflux )  = dCresp    
+            fl (  8 + (25 + maxNrPr * 5) * iSpec + iflux )  = dDOCleak    
+            fl (  9 + (25 + maxNrPr * 5) * iSpec + iflux )  = dDOCvoid    
+            fl ( 10 + (25 + maxNrPr * 5) * iSpec + iflux )  = dNH4out   
+            fl ( 11 + (25 + maxNrPr * 5) * iSpec + iflux )  = dPout     
+            fl ( 12 + (25 + maxNrPr * 5) * iSpec + iflux )  = dCeat     
+            fl ( 13 + (25 + maxNrPr * 5) * iSpec + iflux )  = dNeat     
+            fl ( 14 + (25 + maxNrPr * 5) * iSpec + iflux )  = dPeat     
+            fl ( 15 + (25 + maxNrPr * 5) * iSpec + iflux )  = dPOCout   
+            fl ( 16 + (25 + maxNrPr * 5) * iSpec + iflux )  = dPONout   
+            fl ( 17 + (25 + maxNrPr * 5) * iSpec + iflux )  = dPOPout   
+            fl ( 18 + (25 + maxNrPr * 5) * iSpec + iflux )  = dAutC     
+            fl ( 19 + (25 + maxNrPr * 5) * iSpec + iflux )  = dDetC     
+            fl ( 20 + (25 + maxNrPr * 5) * iSpec + iflux )  = dAutN     
+            fl ( 21 + (25 + maxNrPr * 5) * iSpec + iflux )  = dDetN     
+            fl ( 22 + (25 + maxNrPr * 5) * iSpec + iflux )  = dAutP     
+            fl ( 23 + (25 + maxNrPr * 5) * iSpec + iflux )  = dDetP     
+            fl ( 24 + (25 + maxNrPr * 5) * iSpec + iflux )  = dAutChl   
+            fl ( 25 + (25 + maxNrPr * 5) * iSpec + iflux )  = dDetChl   
+            !iSPec * 25
             
             ! Prey losses through pred ing. ----------------------------------------------------  
                             
@@ -499,11 +494,11 @@ use ieee_arithmetic
             ! loop over prey ingestion fluxes
             do iPrey = 0, (maxNrPr - 1)                                
                 ! (nr prey independent fluxes + prey Flux # + loop) + (move on to next predator) + total number of fluxes
-                fl ( (nrFluxSp + 1 + iPrey * nrPreySt) + (nrFluxSp + maxNrPr * nrPreySt) * iSpec + iflux ) = prot_array%dPreyC(iPrey + 1)  
-                fl ( (nrFluxSp + 2 + iPrey * nrPreySt) + (nrFluxSp + maxNrPr * nrPreySt) * iSpec + iflux ) = prot_array%dPreyChl(iPrey + 1)
-                fl ( (nrFluxSp + 3 + iPrey * nrPreySt) + (nrFluxSp + maxNrPr * nrPreySt) * iSpec + iflux ) = prot_array%dPreyN(iPrey + 1)  
-                fl ( (nrFluxSp + 4 + iPrey * nrPreySt) + (nrFluxSp + maxNrPr * nrPreySt) * iSpec + iflux ) = prot_array%dPreyP(iPrey + 1)  
-                fl ( (nrFluxSp + 5 + iPrey * nrPreySt) + (nrFluxSp + maxNrPr * nrPreySt) * iSpec + iflux ) = prot_array%dPreySi(iPrey + 1) 
+                fl ( (25 + 1 + iPrey * 5) + (25 + maxNrPr * 5) * iSpec + iflux ) = prot_array%dPreyC(iPrey + 1)  
+                fl ( (25 + 2 + iPrey * 5) + (25 + maxNrPr * 5) * iSpec + iflux ) = prot_array%dPreyChl(iPrey + 1)
+                fl ( (25 + 3 + iPrey * 5) + (25 + maxNrPr * 5) * iSpec + iflux ) = prot_array%dPreyN(iPrey + 1)  
+                fl ( (25 + 4 + iPrey * 5) + (25 + maxNrPr * 5) * iSpec + iflux ) = prot_array%dPreyP(iPrey + 1)  
+                fl ( (25 + 5 + iPrey * 5) + (25 + maxNrPr * 5) * iSpec + iflux ) = prot_array%dPreySi(iPrey + 1) 
             end do  
             
             if ( ieee_is_nan(protC) ) write (*,*) '(''ERROR: NaN in protC in segment:'', i10)' ,    iseg

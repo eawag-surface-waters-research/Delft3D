@@ -71,45 +71,45 @@ use ieee_arithmetic
     integer spInc         ! local species PMSA number counter
     integer inpItems      ! nr of input items need for output PMSA
     
-     ! input parameters
-    integer maxNrSp, nrSp, nrSpCon, nrInd               ! constant and species numbers      
-    integer nrFlSp, nrOutSp                             ! constant and species numbers  
-    real    UmRT, Q10, RT, CR                           ! growth and respiration rate calculation 
-    real    NCm, NO3Cm, PCm, SiCm, ChlCm                ! maximum NC, PC, ChlC quotas
-    real    NCo, PCo, SiCo, ChlCo                       ! minimum NC and PC quotas
-    real    NCopt, NO3Copt, PCopt, SiCopt               ! optimal NC and PC quotas
-    real    KtSi, KtP, KtNH4, KtNO3                     ! half saturation constants
-    real    PCoNCopt, PCoNCm                            ! P status influence on optimum NC
-    real    ReUmNH4, ReUmNO3, redco, PSDOC, relPS       ! relative growth rates with specific nutrients  
-    real    MrtRT, FrAut, FrDet                         ! reference mortality and fractions
-    real    alpha                                       ! inital slope
+     !input parameters
+     real    maxNrSp, nrSp, nrSpCon, nrInd               ! constant and species numbers      
+     real    nrFlSp, nrOutSp                             ! constant and species numbers  
+     real    UmRT, Q10, RT, CR                           ! growth and respiration rate calculation 
+     real    NCm, NO3Cm, PCm, SiCm, ChlCm                ! maximum NC, PC, ChlC quotas
+     real    NCo, PCo, SiCo, ChlCo                       ! minimum NC and PC quotas
+     real    NCopt, NO3Copt, PCopt, SiCopt               ! optimal NC and PC quotas
+     real    KtSi, KtP, KtNH4, KtNO3                     ! half saturation constants
+     real    PCoNCopt, PCoNCm                            ! P status influence on optimum NC
+     real    ReUmNH4, ReUmNO3, redco, PSDOC, relPS       ! relative growth rates with specific nutrients  
+     real    MrtRT, FrAut, FrDet                         ! reference mortality and fractions
+     real    alpha                                       ! inital slope
  
-    ! input state variables
-    real    protC, protChl, protN, protP, protSi        ! protist state variables
-    real    PO4, NH4, NO3, Si                           ! nutrient state variables
-    real    Temp                                        ! physical abiotic variables 
-    real    PFD, atten, exat                            ! available light and extinction
+     ! input state variables
+     real    protC, protChl, protN, protP, protSi        ! protist state variables
+     real    PO4, NH4, NO3, Si                           ! nutrient state variables
+     real    Temp                                        ! physical abiotic variables 
+     real    PFD, atten, exat                            ! available light and extinction
 
          
-    ! auxiliaries
-    real    NC, PC, SC, ChlC                            ! cell nutrient quotas
-    real    UmT, BR                                     ! growth and repsiration rates
-    real    NCu, PCu, SCu, NPSiCu                       ! nutrient status within the cell
-    real    upP, upNH4, upNO3, upSi                     ! nutrient uptake
-    real    PSqm, Cfix, synChl, degChl                  ! plateau and Cifx through photosynthesis
-    real    maxPSreq, PS                                ! req for C to come from PS (==1 for diatoms)
-    real    totR, Cu                                    ! respiration and C-growth
-    real    mrt, mrtFrAut, mrtFrDet                     ! mortality to detritus and autolysis
+     ! auxiliaries
+     real    NC, PC, SC, ChlC                            ! cell nutrient quotas
+     real    UmT, BR                                     ! growth and repsiration rates
+     real    NCu, PCu, SCu, NPSiCu                       ! nutrient status within the cell
+     real    upP, upNH4, upNO3, upSi                     ! nutrient uptake
+     real    PSqm, Cfix, synChl, degChl                  ! plateau and Cifx through photosynthesis
+     real    maxPSreq, PS                                ! req for C to come from PS (==1 for diatoms)
+     real    totR, Cu                                    ! respiration and C-growth
+     real    mrt, mrtFrAut, mrtFrDet                     ! mortality to detritus and autolysis
 
-    ! Fluxes
-    real    dNH4up, dNO3up, dPup, dSiup                 ! uptake fluxes
-    real    dCfix                                       ! photosynthesis flux
-    real    dChlsyn, dChldeg                            ! Chl synthesis  and degradation flux
-    real    dCresp                                      ! respiration flux
-    real    dDOCleak                                    ! C leak through photosynthesis 
-    real    dDOCvoid, dNH4out, dPout                    ! voiding fluxes
-    real    dAutC, dAutN, dAutP, dAutSi, dAutChl        ! autolysis fluxes                          
-    real    dDetC, dDetN, dDetP, dDetSi, dDetChl        ! voiding fluxes
+     ! Fluxes
+     real    dNH4up, dNO3up, dPup, dSiup                 ! uptake fluxes
+     real    dCfix                                       ! photosynthesis flux
+     real    dChlsyn, dChldeg                            ! Chl synthesis  and degradation flux
+     real    dCresp                                      ! respiration flux
+     real    dDOCleak                                    ! C leak through photosynthesis 
+     real    dDOCvoid, dNH4out, dPout                    ! voiding fluxes
+     real    dAutC, dAutN, dAutP, dAutSi, dAutChl        ! autolysis fluxes                          
+     real    dDetC, dDetN, dDetP, dDetSi, dDetChl        ! voiding fluxes
 
 !                                                                                                     
 !******************************************************************************* 
@@ -119,12 +119,12 @@ use ieee_arithmetic
     iflux = 0
     
     ! segment and species independent items
-    maxNrSp   = PMSA(ipnt(   1 ))   !   total nr species implemented in process                      (-)  
-    nrSp      = PMSA(ipnt(   2 ))   !   nr of species to be modelled                                 (-)  
-    nrSpCon   = PMSA(ipnt(   3 ))   !   nr of species dependent items                                (-)  
-    nrInd     = PMSA(ipnt(   4 ))   !   nr of species independent items                              (-)  
-    nrFlSp    = PMSA(ipnt(   5 ))   !   nr of fluxes per individual species                          (-)  
-    nrOutSp   = PMSA(ipnt(   6 ))   !   nr of output items per individual species                    (-)  
+    maxNrSp   = PMSA(ipnt(   1 ))   !   total nr species implemented in process
+    nrSp      = PMSA(ipnt(   2 ))   !   nr of species to be modelled
+    nrSpCon   = PMSA(ipnt(   3 ))   !   nr of species dependent items
+    nrInd     = PMSA(ipnt(   4 ))   !   nr of species independent items
+    nrFlSp    = PMSA(ipnt(   5 ))   !   nr of fluxes per individual species
+    nrOutSp   = PMSA(ipnt(   6 ))   !   nr of output items per individual species
       
     ! length of the PMSA input array. 
     inpItems = maxNrSp * nrSpCon + nrInd
@@ -353,7 +353,7 @@ use ieee_arithmetic
             
             if ( ieee_is_nan(protC) ) write (*,*) '(''ERROR: NaN in protC in segment:'', i10)' ,    iseg
             if ( ieee_is_nan(Cfix) )  write (*,*) '(''ERROR: NaN in Cfix in segment:'', i10)' ,    iseg
-            if ( ieee_is_nan(totR) )  write (*,*) '(''ERROR: NaN in totR in segment:'', i10)' ,    iseg
+            if ( ieee_is_nan(totR) )  write (*,*)  '(''ERROR: NaN in totR in segment:'', i10)' ,    iseg
             if ( ieee_is_nan(mrt) )   write (*,*) '(''ERROR: NaN in mrt in segment:'', i10)' ,    iseg
             if ( ieee_is_nan(NC) )    write (*,*) '(''ERROR: NaN in NC in segment:'', i10)' ,    iseg
             if ( ieee_is_nan(PC) )    write (*,*) '(''ERROR: NaN in PC in segment:'', i10)' ,    iseg

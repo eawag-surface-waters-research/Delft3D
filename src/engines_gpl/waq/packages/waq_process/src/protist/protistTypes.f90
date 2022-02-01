@@ -103,7 +103,7 @@ module protist_types
         integer, intent(in)                 :: ipnt(:)
         integer, intent(in)                 :: plen
         integer, intent(in)                 :: maxNrSp, nrSpCon, nrSpInd, iSpec, nrSp_par
-        real(4)                             :: pmsa(*)
+        real(4)                             :: pmsa(plen)
         integer     iPrey
 
 
