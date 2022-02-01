@@ -42,7 +42,6 @@
       use unstruc_files, only: mdia
       use m_flowtimes
       use timers
-      use computeRefday
 
       use m_wind, only: jawind, jarain
 
@@ -386,6 +385,7 @@
       use m_flowtimes
       use timers
       use m_wind, only: jawind, jarain
+      use computeRefday
 
       implicit none
 
@@ -730,7 +730,7 @@
       otime = dble(julrefdat)-0.5d0 !refdate_mjd
       
       !     Compute refday needed for daylight process
-      call compute_refday_string(refdat, refdayNr)
+      call compute_refday_from_string(refdat, refdayNr)
 
 
 !     Finally, evaluate the processes using the proces library

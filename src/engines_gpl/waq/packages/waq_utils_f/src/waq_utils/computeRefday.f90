@@ -36,18 +36,18 @@ module computeRefday
 
 
       !     Compute reference day, varying from 1 till 365 (or 366 for leap years)
-      subroutine compute_refday_string(refdat, refday)
+      subroutine compute_refday_from_string(refdat, refday)
         IMPLICIT  NONE
-        integer  ( 4), intent(in)  ::   refdat             !  refdate
-        integer  ( 4)              ::   iyear              !  year of the time offset
-        integer  ( 4)              ::   imonth             !  month of the time offset
-        integer  ( 4)              ::   iday               !  day of the time offset
-        integer  ( 4), intent(out) ::   refday             !  refday
+        character (len=8), intent(in)    ::   refdat             !  refdate
+        integer  ( 4)                    ::   iyear              !  year of the time offset
+        integer  ( 4)                    ::   imonth             !  month of the time offset
+        integer  ( 4)                    ::   iday               !  day of the time offset
+        integer  ( 4), intent(out)       ::   refday             !  refday
         
         read(refdat, '(i4,i2,i2)' ) iyear, imonth, iday
         call compute_refday(iyear, imonth, iday, refday)
         
-      end subroutine compute_refday_string
+      end subroutine compute_refday_from_string
       
       
       !     Compute reference day, varying from 1 till 365 (or 366 for leap years)
