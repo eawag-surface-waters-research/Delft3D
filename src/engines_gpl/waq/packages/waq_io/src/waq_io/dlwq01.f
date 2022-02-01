@@ -58,6 +58,8 @@
       use rd_token     !   tokenized reading
       use dlwq0t_data
       use timers       !   performance timers
+      use computeRefday
+
       implicit none
 
 !       Functions called  :
@@ -358,42 +360,3 @@
  2170 format ( /' ERROR encountered invalid repeat count - should start with an asterisk (*): ',A )
 
       end
-
-      
-      
-!     Compute reference day, varying from 1 till 365 (or 366 for leap years), needed for dayl process
-      subroutine compute_refday(iyear, imonth, iday, refday)
-        IMPLICIT  NONE
-        integer  ( 4), intent(in)  ::   iyear              !  year of the time offset
-        integer  ( 4), intent(in)  ::   imonth             !  month of the time offset
-        integer  ( 4), intent(in)  ::   iday               !  day of the time offset
-        integer  ( 4), intent(out) ::   refday             !  refday
-        
-        integer, dimension(12)     ::   daysPerMonth       !  # days in each month
-        logical                    ::   leapYear           !  is iyear a leap year, yes or no
-        
-        refday = 0
-        call checkLeapYear(iyear, leapYear)
-        
-        daysPerMonth = (/31,28,31,30,31,30,31,31,30,31,30,31/)
-        if (leapYear) then
-           daysPerMonth(2) = 29
-        endif
-        
-        refday = sum(daysPerMonth(1:imonth-1)) + iday
-        
-      end subroutine
-      
-      
-!     Check if year is a leap year
-      subroutine checkLeapYear(iyear, leapYear)
-        IMPLICIT  NONE
-        integer  ( 4), intent(in)  ::   iyear              !  year of the time offset
-        logical , intent(out)      ::   leapYear           !  is iyear a leap year, yes or no
-        
-        if (mod(iyear,4) == 0)   leapYear = .TRUE.
-        if (mod(iyear,100) == 0) leapYear = .FALSE.
-        if (mod(iyear,400) == 0) leapYear = .TRUE.
-
-      end subroutine
-

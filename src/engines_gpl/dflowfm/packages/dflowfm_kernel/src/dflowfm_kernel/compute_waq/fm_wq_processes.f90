@@ -42,6 +42,8 @@
       use unstruc_files, only: mdia
       use m_flowtimes
       use timers
+      use computeRefday
+
       use m_wind, only: jawind, jarain
 
       implicit none
@@ -728,7 +730,7 @@
       otime = dble(julrefdat)-0.5d0 !refdate_mjd
       
       !     Compute refday needed for daylight process
-      call compute_refday(refdat, refdayNr)
+      call compute_refday_string(refdat, refdayNr)
 
 
 !     Finally, evaluate the processes using the proces library
@@ -1825,44 +1827,6 @@
       return
    end subroutine default_fm_wq_processes
 
-  
-   !     Compute reference day, varying from 1 till 365 (or 366 for leap years), needed for dayl process
-      subroutine compute_refday(refdat, refday)
-        IMPLICIT  NONE
-        character (len=8), intent(in)   :: refdat
-        integer  ( 4), intent(out) ::   refday             !  refday
-        
-        integer, dimension(12)     ::   daysPerMonth       !  # days in each month
-        integer  ( 4)              ::   iyear              !  year of the time offset
-        integer  ( 4)              ::   imonth             !  month of the time offset
-        integer  ( 4)              ::   iday               !  day of the time offset
-        logical                    ::   leapYear           !  is iyear a leap year, yes or no
-        
-        refday = 0
-        
-        read(refdat, '(i4,i2,i2)' ) iyear, imonth, iday
 
-        call checkLeapYear(iyear, leapYear)
-        
-        daysPerMonth = (/31,28,31,30,31,30,31,31,30,31,30,31/)
-        if (leapYear) then
-           daysPerMonth(2) = 29
-        endif
-        refday = sum(daysPerMonth(1:imonth-1)) + iday
-        
-      end subroutine
-      
-      
-!     Check if year is a leap year
-      subroutine checkLeapYear(iyear, leapYear)
-        IMPLICIT  NONE
-        integer  ( 4), intent(in)  ::   iyear              !  year of the time offset
-        logical , intent(out)      ::   leapYear           !  is iyear a leap year, yes or no
-        
-        if (mod(iyear,4) == 0)   leapYear = .TRUE.
-        if (mod(iyear,100) == 0) leapYear = .FALSE.
-        if (mod(iyear,400) == 0) leapYear = .TRUE.
-
-      end subroutine
 
 

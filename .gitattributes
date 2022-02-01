@@ -4324,6 +4324,7 @@ src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/avundf.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/avundf_linux.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/cnvper.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/cnvtim.f -text
+src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/computeRefday.f90 -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/d00sub.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/dattim.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/delwaq_loads.f -text
