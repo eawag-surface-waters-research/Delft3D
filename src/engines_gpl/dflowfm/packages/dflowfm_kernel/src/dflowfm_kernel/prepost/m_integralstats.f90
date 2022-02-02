@@ -85,7 +85,7 @@ subroutine update_integralstats()
    end if
    
    if (jawave<3) then      ! do not overwrite current+wave induced bed shear stresses from tauwave
-      call gettaus(1)
+      call gettaus(1, 1)
    endif
 
    do k=1,ndxi

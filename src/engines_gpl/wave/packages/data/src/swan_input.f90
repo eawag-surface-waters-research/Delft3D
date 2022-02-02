@@ -1813,7 +1813,7 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
     sr%drel    = 0.02
     sr%dh_abs  = 0.02
     sr%dt_abs  = 0.02
-    sr%percwet = 90.0 !98.0
+    sr%percwet = 98.0
     sr%itermx  = 15
     sr%gamma0  = 3.3
     sr%alfa    = 0.0
@@ -2035,6 +2035,10 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
     if (wavedata%mode /= stand_alone) then
        call prop_get_integer(mdw_ptr, 'General', 'FlowBedLevel'  , sr%dom(1)%qextnd(q_bath))
        call prop_get_integer(mdw_ptr, 'General', 'FlowVegetation', sr%dom(1)%qextnd(q_veg) )
+       if (sr%dom(1)%qextnd(q_veg) == 2) then
+          write(*,*) 'SWAN_INPUT: FlowVegetation=2 is found while extrapolation to the outside of domain is not supported yet.'
+          goto 999
+       endif
        call prop_get_integer(mdw_ptr, 'General', 'FlowWaterLevel', sr%dom(1)%qextnd(q_wl)  )
        call prop_get_integer(mdw_ptr, 'General', 'FlowVelocity'  , sr%dom(1)%qextnd(q_cur) )
        call prop_get_integer(mdw_ptr, 'General', 'FlowWind'      , sr%dom(1)%qextnd(q_wind))

@@ -338,9 +338,9 @@ type t_unc_mapids
    integer :: id_nudge_Dsal(MAX_ID_VAR)  = -1 ! difference of nudging salinity with salinity
    integer :: id_nudge_Dtem(MAX_ID_VAR)  = -1 ! difference of nudging temperature with temperature
 !vegetation
-	integer :: id_rnveg(MAX_ID_VAR) = 1          !< Variable ID for vegetation stem density
-	integer :: id_diaveg(MAX_ID_VAR) = 1         !< Variable ID for vegetation stem diameter
-	integer :: id_veg_stemheight(MAX_ID_VAR) = 1 !< Variable ID for vegetation stem height
+	integer :: id_rnveg(MAX_ID_VAR)       = -1 !< Variable ID for vegetation stem density
+	integer :: id_diaveg(MAX_ID_VAR)      = -1 !< Variable ID for vegetation stem diameter
+	integer :: id_veg_stemheight(MAX_ID_VAR) = -1 !< Variable ID for vegetation stem height
 ! particles
    integer :: id_depth_averaged_particle_concentration(MAX_ID_VAR) = -1  ! depth-averaged particle concentration
 ! for parallel

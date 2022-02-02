@@ -306,7 +306,7 @@ if (sr%swveg .and. sr%dom(1)%qextnd(q_veg) >= 1) then
          enddo
          sr%veg_diamtr = maxval
          maxval = -1.0e10
-         do i=1, fif%npts
+         do i=1, fif%mmax
             do j=1, fif%nmax
                maxval = max(maxval, fif%veg_stemheight(i,j))
             enddo
