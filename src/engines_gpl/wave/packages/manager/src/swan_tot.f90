@@ -304,8 +304,8 @@ subroutine swan_tot (n_swan_grids, n_flow_grids, wavedata, selectedtime)
             !
             write(*,'(a)') '  Write Vegetation map file'
             sumvars      = .true.
-            extr_var1 = .false. !dom%qextnd(q_bath) == 2
-            extr_var2 = .false. !dom%qextnd(q_wl)   == 2
+            extr_var1 = .false.
+            extr_var2 = .false.
             call write_swan_file (swan_input_fields%veg         , &
                                 & swan_input_fields%s1veg       , &
                                 & swan_input_fields%mmax        , &
