@@ -123,7 +123,7 @@
       do m = 1,size(pillar)
         call pol_to_flowlinks(pillar(m)%xcor, pillar(m)%ycor, pillar(m)%xcor*0d0, pillar(m)%np, nPath, Path)
         do n = 1,nPath
-          call crspath_on_flowgeom(Path(n),0,0,1,idum,0,1)
+          call crspath_on_flowgeom(Path(n),1,0,1,idum,0,1)
           do L = 1,Path(n)%lnx
             Lf = Path(n)%ln(L)
             La = iabs(Lf)
