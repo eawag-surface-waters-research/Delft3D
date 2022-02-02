@@ -1410,7 +1410,7 @@ end subroutine setfoustandardname
        case ('r1')
           fieldptr => constituents(gdfourier%fconno(ifou),:)
        case ('ta')
-          call gettaus(1)
+          call gettaus(1, 1)
           fieldptr => taus
        case ('fb')
           fieldptr => freeboard      ! freeboard
