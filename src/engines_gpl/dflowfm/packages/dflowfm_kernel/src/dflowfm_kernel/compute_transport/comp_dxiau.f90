@@ -32,8 +32,8 @@
 
 ! compute Au/Dx for diffusive flux
 subroutine comp_dxiAu()                          ! or: setdxiau
-   use m_flowgeom, only: ln, Lnx, dxi, wu
-   use m_flow, only: hs, zws, kmx, Au, hu
+   use m_flowgeom , only : ln, Lnx, dxi, wu, Lnxi
+   use m_flow     , only : hs, zws, kmx, Au, hu, jadiffusiononbnd
    use m_transport, only : dxiAu, jalimitdtdiff
    use timers
 
@@ -86,6 +86,15 @@ subroutine comp_dxiAu()                          ! or: setdxiau
          end do
       end if
    end if
+
+   if (jadiffusiononbnd == 0) then  
+      do LL=lnxi+1, lnx
+         call getLbotLtop(LL,Lb,Lt)
+         do L=Lb,Lt
+            dxiAu(L) = 0d0 
+         enddo
+      enddo
+   endif
 
    if (timon) call timstop( ithndl )
    return

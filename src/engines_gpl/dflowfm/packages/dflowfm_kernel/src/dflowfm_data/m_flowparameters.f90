@@ -413,6 +413,8 @@
 
  integer                           :: jaupwindsrc               !< 1st-order upwind advection (1) or higher-order (0)
 
+ integer                           :: jadiffusiononbnd   = 1    !< 0 switches off diffusion on open boundaries 
+
  integer                           :: jajre                     !< 0: default, 1: sb
 
  integer                           :: jasourcesink              !< 1: source+sink 2:source 3:sink for sediment
