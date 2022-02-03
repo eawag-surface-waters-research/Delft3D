@@ -19,12 +19,16 @@ module load singularity
 # Modify them according to your requirements:
 
 # MPI_DIR: the path to your own installation of IntelMPI
-MPI_DIR=/opt/apps/intelmpi/2021.2.0/mpi/2021.2.0
+MPI_DIR=/opt/intel/oneapi/mpi/2021.4.0
 container_PATH=$MPI_DIR/bin:/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/sbin 
 container_LD_LIBRARY_PATH=$MPI_DIR/lib:$MPI_DIR/lib/release
 
-# "I_MPI_FABRICS=shm" will be overwritten automatically by IntelMPI when doing a multi node run
-container_I_MPI_FABRICS=shm
+# These parameters should be modified according to your requirements.
+# set the MPI OFI provider library
+export I_MPI_FABRICS=shm
+
+# set the MPI communication fabric
+export FI_PROVIDER=tcp
 
 
 #
@@ -135,7 +139,6 @@ echo "Executable                                : $executable"
 echo "Executable options                        : $executable_opts"
 echo "env PATH                 inside container : $container_PATH"
 echo "env LD_LIBRARY_PATH      inside container : $container_LD_LIBRARY_PATH"
-echo "env I_MPI_FABRICS        inside container : $container_I_MPI_FABRICS"
 echo
 echo "Executing singularity exec $container_bindir/$executable $executable_opts"
 
@@ -154,5 +157,4 @@ singularity exec \
                  --pwd $container_working_dir \
                  --env PATH=$container_PATH \
                  --env LD_LIBRARY_PATH=$container_LD_LIBRARY_PATH \
-                 --env I_MPI_FABRICS=$container_I_MPI_FABRICS \
                  $container_file_path $container_bindir/$executable $executable_opts
