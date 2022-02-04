@@ -29,7 +29,7 @@
 nPart=3
 
 # Set the path to the folder containing the singularity image
-singularitydir=/p/d-hydro/delft3dfm_containers/delft3dfm_2022.02_test
+singularitydir=/p/d-hydro/delft3dfm_containers/pleaseChooseTheContainerYourRequire
 
 
 # DIMR input file; must already exist!
@@ -66,7 +66,7 @@ else
     # First: partitioning 
     # (You can re-use a partition if the input files and the number of partitions haven't changed)
     # Partitioning is executed by dflowfm, in the folder containing the mdu file
-    cd dflowfm
+    cd path/to/directory/containing/the/mdu/file
     echo partitioning...
     # "-p": See above. Arguments after "run_dflowfm.sh" are explained in run_dflowfm.sh
     $singularitydir/execute_singularity.sh -p 2 run_dflowfm.sh --partition:ndomains=$nPart:icgsolver=6 $mduFile
@@ -81,7 +81,7 @@ else
 
     # Finally: combine output files    
     # Optionally merge the map output files together into one file
-    cd dflowfm/dflowfmoutput
+    cd path/to/directory/containing/the/dflowfm/output/files
     # "-p": See above. Arguments after "run_dfmoutput.sh" are explained in run_dfmoutput.sh
     $singularitydir/execute_singularity.sh -p 2 run_dfmoutput.sh -- -d mapmerge --infile f34_0000_map.nc f34_0001_map.nc f34_0002_map.nc --outfile f34_map.nc
     cd ../..
