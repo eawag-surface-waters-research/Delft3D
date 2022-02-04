@@ -1291,6 +1291,8 @@ subroutine echomor(lundia    ,error     ,lsec      ,lsedtot   ,nto       , &
     logical                                , pointer :: multi
     logical                                , pointer :: eulerisoglm
     logical                                , pointer :: glmisoeuler
+    logical                                , pointer :: upwindbedload
+    logical                                , pointer :: pure1d_mor
     character(256)                         , pointer :: bcmfilnam
     character(20)          , dimension(:)  , pointer :: namsed
     type(handletype)                       , pointer :: bcmfile
@@ -1406,6 +1408,8 @@ subroutine echomor(lundia    ,error     ,lsec      ,lsedtot   ,nto       , &
     subiw               => morpar%subiw
     eulerisoglm         => morpar%eulerisoglm
     glmisoeuler         => morpar%glmisoeuler
+    upwindbedload       => mornum%upwindbedload
+    pure1d_mor          => mornum%pure1d
     !
     ! output values to file
     !
@@ -1669,6 +1673,25 @@ subroutine echomor(lundia    ,error     ,lsec      ,lsedtot   ,nto       , &
        txtput1 = '   Depth switch wetslope to dryslope'
        write (lundia, '(2a,e20.4)') txtput1, ':', hswitch
     end if
+    !
+    ! Numerics
+    !
+    txtput1 = 'Numerical parameters:'
+    write (lundia, '(a)') txtput1
+    txtput1 = '   Upwind scheme for bedload'
+    if (upwindbedload) then
+       txtput2 = '                 YES'
+    else
+       txtput2 = '                  NO'
+    endif
+    write (lundia, '(3a)') txtput1, ':', txtput2
+    txtput1 = '   Pure1D for morphodynamics'
+    if (pure1d_mor) then
+       txtput2 = '                 YES'
+    else
+       txtput2 = '                  NO'
+    endif
+    write (lundia, '(3a)') txtput1, ':', txtput2 
     !
     ! User requested sediment percentiles
     !
