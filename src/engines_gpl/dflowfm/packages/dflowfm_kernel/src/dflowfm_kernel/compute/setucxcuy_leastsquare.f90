@@ -1,6 +1,6 @@
 module m_setucxcuy_leastsquare
    
-   double precision, dimension(:,:,:), allocatable :: AtWAiAtW ! Matrix on each flow node
+   double precision, dimension(:,:,:), allocatable :: AtWAiAtW ! Matrix for each flow node
    integer         , dimension(:)    , allocatable :: ireconstu
    integer         , dimension(:)    , allocatable :: ireconstz
  
@@ -264,78 +264,12 @@ module m_setucxcuy_leastsquare
          AtW(nmax,:) = 0d0
          Atw(:,m)    = 0d0
          Atw(nmax,m) = 1d0
-            
-            
-            !AtWAi = AtWA
-            !svec  = 0d0
-            !smat  = 0d0
-            !call svdcmp( AtWAi, nmax, nmax, nmax, nmax, svec, smat )  ! here, AtWAi is not the inverse, AtWAi is used replacing of U
-            !condnr = maxval(svec) / minval(svec)
-            !!if (condnr > 1000d0) then
-            !if( L==2152 ) then
-            !   print * , 'Condition number is large', L, condnr
-            !   pause
-            !endif
-            
-            
-            !Rmat = AtWA
-            !cvec = 0.0d0
-            !dvec = 0.0d0
-            !call qrdcmp( Rmat, nmax, nmax, cvec, dvec, sing )
-            !do i = 1,nmax
-            !   do j = 1,nmax
-            !      Qmatt(i,j) = 0.0d0
-            !   enddo
-            !   Qmatt(i,i) = 1.0d0
-            !enddo
-            !do k = 1,nmax-1
-            !   if( cvec(k) .ne. 0.0d0 ) then
-            !      do j = 1,nmax
-            !         sum = 0.0d0
-            !         do i = k,nmax
-            !            sum = sum + Rmat(i,k) * Qmatt(i,j)
-            !         enddo
-            !         sum = sum / cvec(k)
-            !         do i = k,nmax
-            !            Qmatt(i,j) = Qmatt(i,j) - sum * Rmat(i,k)
-            !         enddo
-            !      enddo
-            !   endif
-            !enddo
-            !do i = 1,nmax
-            !   Rmat(i,i) = dvec(i)
-            !   do j = 1,i-1
-            !      Rmat(i,j) = 0.0d0
-            !   enddo
-            !enddo
-            !Rmati = Rmat
-            !svec = 0d0  ! dummy vector
-            !call gaussj( Rmati, nmax, nmax, svec, 1, 1 )
-            !do j = 1,nmax
-            !   do i = 1,nmax
-            !      RiQt(i,j) = 0.0d0
-            !      do kk = 1,nmax
-            !         RiQt(i,j) = RiQt(i,j) + Rmati(i,kk) * Qmatt(kk,j)
-            !      enddo
-            !   enddo
-            !enddo
-            !do j = 1,m
-            !   do i = 1,nmax
-            !      AtWAiAtW(i,j,k) = 0.0d0
-            !      do kk = 1,nmax
-            !         AtWAiAtW(i,j,k) = AtWAiAtW(i,j,k) + RiQt(i,kk) * AtW(kk,j)
-            !      enddo
-            !   enddo
-            !enddo
-            !
            
          AtWAi = AtWA
          svec = 0d0  ! dummy vector
          call gaussj1( AtWAi, nmax, nmax, svec, 1, 1, ierr )
-         if( ierr /= 0 ) then
+         if (ierr /= 0) then
             ireconstu(L) = 1
-            !print*,L,'singulare'
-            !pause
             cycle
          endif
             
@@ -474,10 +408,6 @@ module m_setucxcuy_leastsquare
             enddo
             uxu(L) = xvec(1)
             uyu(L) = xvec(2)
-            !dudxL = xvec(3)
-            !dvdxL = xvec(4)
-            !dudyL = xvec(5)
-            !dvdyL = xvec(6)
             v(L) = - snu(L) * uxu(L) + csu(L) * uyu(L)
          enddo
          do L = lnxi+1,lnx
@@ -582,10 +512,6 @@ module m_setucxcuy_leastsquare
                enddo
                uxu(LL) = xvec(1)
                uyu(LL) = xvec(2)
-               !dudxL = xvec(3)
-               !dvdxL = xvec(4)
-               !dudyL = xvec(5)
-               !dvdyL = xvec(6)
                v(LL) = - snu(L) * uxu(LL) + csu(L) * uyu(LL)
             enddo
          enddo
@@ -620,142 +546,6 @@ module m_setucxcuy_leastsquare
          endif
       enddo
 
-      !if (kmx == 0) then
-      !   do L = 1,lnx
-      !      if( ireconstu(L) == 1 ) cycle
-      !      k1 = ln(1,L) ; k2 = ln(2,L)
-      !      if( ireconstz(k1) == 0 ) then
-      !         ucx(k1) = ucx(k1) + uxu(L)*wcL(1,L)
-      !         ucy(k1) = ucy(k1) + uyu(L)*wcL(1,L)
-      !      endif
-      !      if( ireconstz(k2) == 0 ) then
-      !         ucx(k2) = ucx(k2) + uxu(L)*wcL(2,L)
-      !         ucy(k2) = ucy(k2) + uyu(L)*wcL(2,L)
-      !      endif
-      !   enddo
-      !else  !3D
-      !   ucx = 0d0 ; ucy = 0d0
-      !   do LL = 1,lnx
-      !      if( ireconstu(LL) == 1 ) cycle
-      !      call getLbotLtop(LL,Lb,Lt)
-      !      n1 = ln(1,LL) ; n2 = ln(2,LL)
-      !      do L = Lb,Lt
-      !         k1 = ln(1,L) ; k2 = ln(2,L)
-      !         if( ireconstz(n1) == 0 ) then
-      !            ucx(k1) = ucx(k1) + uxu(L)*wcL(1,LL)
-      !            ucy(k1) = ucy(k1) + uyu(L)*wcL(1,LL)
-      !         endif
-      !         if( ireconstz(n2) == 0 ) then
-      !            ucx(k2) = ucx(k2) + uxu(L)*wcL(2,LL)
-      !            ucy(k2) = ucy(k2) + uyu(L)*wcL(2,LL)
-      !         endif
-      !      enddo
-      !   enddo
-      !endif
-      
-   
-      
-      !!!do L = 1,lnx
-      !!!   if( ireconstu(L) == 1 ) cycle
-      !!!   k1 = ln(1,L) ; k2 = ln(2,L)
-      !!!   if( ireconstz(k1)  == 0 ) then
-      !!!      cof0 =  acl(L) * dx(L)
-      !!!      ucx(k1) = ucx(k1) + ( 1d0 - wu(L) * cof0  / ba(k1) ) * uxu(L)
-      !!!      ucy(k1) = ucy(k1) + ( 1d0 - wu(L) * cof0  / ba(k1) ) * uyu(L)
-      !!!   endif
-      !!!   if( ireconstz(k2) == 0 ) then 
-      !!!      cof0 = (1d0 - acl(L)) * dx(L)
-      !!!      ucx(k2) = ucx(k2) + ( 1d0 - wu(L) * cof0  / ba(k2) ) * uxu(L)
-      !!!      ucy(k2) = ucy(k2) + ( 1d0 - wu(L) * cof0  / ba(k2) ) * uyu(L)
-      !!!   endif
-      !!!enddo
-      !!!do L = 1,mxwalls
-      !!!   k1 = walls(1,L)
-      !!!   if( ireconstz(k1) == 1 ) then
-      !!!      continue
-      !!!      cycle
-      !!!   endif
-      !!!   cs = - walls(8,L)
-      !!!   sn =   walls(7,L)
-      !!!   cof0 = 2d0 * walls(12,L)
-      !!!   cof1 = 1d0 - walls(9,L) * cof0  / ba(k1)
-      !!!   cof2 = ( 1d0 - cof1 * sn**2 ) * ( 1d0 - cof1 * cs**2 ) - cof1**2 * sn**2 * cs**2
-      !!!   uu = ucx(k1)
-      !!!   vv = ucy(k1)
-      !!!   ucx(k1) = uu * ( 1d0 - cof1 * cs**2 ) - vv * cof1 * sn * cs
-      !!!   ucy(k1) = vv * ( 1d0 - cof1 * sn**2 ) - uu * cof1 * sn * cs 
-      !!!enddo
-      
-      
-      
-      
-        do k = 1,ndxi
-        !    if( size( nd(k)%nod ) == 4 ) then
-        !       if ( nd(k)%lnx == size( nd(k)%nod ) ) then
-        !       L1 = abs( nd(k)%ln(1) )
-        !       L2 = abs( nd(k)%ln(2) )
-        !       L3 = abs( nd(k)%ln(3) )
-        !       L4 = abs( nd(k)%ln(4) )
-        !       ucx(k) = ( uxu(L1) + uxu(L2) + uxu(L3) + uxu(L4) ) * 0.25d0 
-        !       ucy(k) = ( uyu(L1) + uyu(L2) + uyu(L3) + uyu(L4) ) * 0.25d0 
-        !        !print *,'A nontriangular cell', k
-        !        !pause
-        !        !cycle
-        !       endif
-        !    endif
-            
-            !!!    L1 = abs( nd(k)%ln(1) )
-            !!!    L2 = abs( nd(k)%ln(2) )
-            !!!    L3 = abs( nd(k)%ln(3) )
-               !!!if ( size( nd(k)%nod ) == 3 ) then
-               !!!if( ireconstz(k) == 1 ) cycle
-               !!!ucx(k) = 0d0
-               !!!ucy(k) = 0d0
-               !!!do LL = 1,nd(k)%lnx
-               !!!   L = nd(k)%ln(LL)
-               !!!   La = abs(L)
-               !!!   if( L > 0 ) then
-               !!!      cof0 =  acl(La) * dx(La)
-               !!!   else
-               !!!      cof0 = (1d0 - acl(La)) * dx(La)
-               !!!   endif
-               !!!   ucx(k) = ucx(k) + ( 1d0 - wu(La) * cof0  / ba(k) ) * uxu(La)
-               !!!   ucy(k) = ucy(k) + ( 1d0 - wu(La) * cof0  / ba(k) ) * uyu(La)
-               !!!enddo
-               !!!endif
-            !!!    x1 = xu(L1) - xz(k) ; y1 = yu(L1) - yz(k)
-            !!!    x2 = xu(L2) - xz(k) ; y2 = yu(L2) - yz(k)
-            !!!    x3 = xu(L3) - xz(k) ; y3 = yu(L3) - yz(k)
-            !!!    cof0 = x1 * ( y2 - y3 ) + x2 * ( y3 - y1 ) + x3 * ( y1 - y2 )
-            !!!    ucx(k) = uxu(L1) * ( x2 * y3 - x3 * y2 ) + uxu(L2) * ( x3 * y1 - x1 * y3 ) + uxu(L3) * ( x1 * y2 - x2 * y1 )
-            !!!    ucy(k) = uyu(L1) * ( x2 * y3 - x3 * y2 ) + uyu(L2) * ( x3 * y1 - x1 * y3 ) + uyu(L3) * ( x1 * y2 - x2 * y1 )
-            !!!    ucx(k) = ucx(k) / cof0
-            !!!    ucy(k) = ucy(k) / cof0
-        !    else
-        !        !L1 = abs( nd(k)%ln(1) )
-        !        !L2 = abs( nd(k)%ln(2) )
-        !        !x1 = xu(L1) - xz(k) ; y1 = yu(L1) - yz(k)
-        !        !x2 = xu(L2) - xz(k) ; y2 = yu(L2) - yz(k)
-        !        !do nn = 1,size(nd(k)%nod)
-        !        !    n = nd(k)%nod(nn)
-        !        !    do LL1 = 1,cn(n)%nwx
-        !        !        L3 = abs(cn(n)%nw(LL1))
-        !        !        n2 = walls(2,L3) + walls(3,L3) - n
-        !        !        x3 = ( xk(n) + xk(n2) ) * 0.5d0 - xz(k)
-        !        !        y3 = ( yk(n) + yk(n2) ) * 0.5d0 - yz(k)
-        !        !    enddo
-        !        !enddo
-        !        !cof0 = x1 * ( y2 - y3 ) + x2 * ( y3 - y1 ) + x3 * ( y1 - y2 )
-        !        !ucx(k) = uxu(L1) * ( x2 * y3 - x3 * y2 ) + uxu(L2) * ( x3 * y1 - x1 * y3 )
-        !        !ucy(k) = uyu(L1) * ( x2 * y3 - x3 * y2 ) + uyu(L2) * ( x3 * y1 - x1 * y3 )
-        !        !ucx(k) = ucx(k) / cof0
-        !        !ucy(k) = ucy(k) / cof0
-
-        !    
-        enddo
-        ucxq = ucx
-        ucyq = ucy
- 
    end subroutine reconst2nd
    
 ! =================================================================================================
@@ -839,7 +629,7 @@ module m_setucxcuy_leastsquare
                         icol = k
                      endif
                   elseif( ipiv(k) > 1 ) then
-                     print*, 'singular matrix in gaussj'
+                     !print*, 'singular matrix in gaussj'
                      ierr = 1
                      return
                   endif
@@ -861,8 +651,8 @@ module m_setucxcuy_leastsquare
          endif
          indxr(i) = irow
          indxc(i) = icol
-         if ( abs( a(icol,icol) ) < 1d-10 ) then
-            print*, 'singular matrix in gaussj'
+         if (abs( a(icol,icol) ) < 1d-10) then
+            !print*, 'singular matrix in gaussj'
             ierr = 1
             return
          endif

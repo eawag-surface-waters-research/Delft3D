@@ -1105,6 +1105,7 @@
           allocate (nd(k1)%nw(nwx+1))
           nd(k1)%nw(1:nwx) = nw_temp(1:nwx)
           nd(k1)%nw(nwx+1) = nw
+          nd(k1)%nwx = nd(k1)%nwx + 1
           deallocate (nw_temp)
        endif
 
