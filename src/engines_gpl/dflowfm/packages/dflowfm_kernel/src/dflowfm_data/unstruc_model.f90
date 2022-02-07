@@ -1121,6 +1121,7 @@ subroutine readMDUFile(filename, istat)
     call prop_get_double( md_ptr, 'numerics', 'Fixedweirtopwidth'     , fixedweirtopwidth)
     call prop_get_double( md_ptr, 'numerics', 'Fixedweirtopfrictcoef' , fixedweirtopfrictcoef)
     call prop_get_double( md_ptr, 'numerics', 'Fixedweirtalud'        , fixedweirtalud)
+    call prop_get_double (md_ptr, 'numerics', 'FixedweirRelaxationcoefficient' , waquaweirthetaw)
 
     call prop_get_integer(md_ptr, 'numerics', 'Izbndpos'          , Izbndpos)
     call prop_get_double (md_ptr, 'numerics', 'Tlfsmo'            , Tlfsmo)
@@ -2865,6 +2866,8 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
        call prop_set(prop_ptr, 'numerics', 'Fixedweirtopwidth' , fixedweirtopwidth,        'Uniform width of the groyne part of fixed weirs')
        call prop_set(prop_ptr, 'numerics', 'Fixedweirtopfrictcoef' , fixedweirtopfrictcoef,'Uniform friction coefficient of the groyne part of fixed weirs')
        call prop_set(prop_ptr, 'numerics', 'Fixedweirtalud' , fixedweirtalud,              'Uniform talud slope of fixed weirs')
+       call prop_set(prop_ptr, 'numerics', 'FixedweirRelaxationcoefficient' , waquaweirthetaw,  'Fixed weir relaxation coefficient for computation of energy loss')
+
     endif
     if (writeall .or. (izbndpos > 0)) then
        call prop_set(prop_ptr, 'numerics', 'Izbndpos',  Izbndpos,   'Position of z boundary (0: D3Dflow, 1: on net boundary, 2: on specified polyline)')
