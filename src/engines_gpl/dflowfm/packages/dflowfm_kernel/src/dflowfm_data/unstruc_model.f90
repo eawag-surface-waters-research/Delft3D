@@ -2867,7 +2867,13 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
        call prop_set(prop_ptr, 'numerics', 'Fixedweirtopfrictcoef' , fixedweirtopfrictcoef,'Uniform friction coefficient of the groyne part of fixed weirs')
        call prop_set(prop_ptr, 'numerics', 'Fixedweirtalud' , fixedweirtalud,              'Uniform talud slope of fixed weirs')
        call prop_set(prop_ptr, 'numerics', 'FixedweirRelaxationcoefficient' , waquaweirthetaw,  'Fixed weir relaxation coefficient for computation of energy loss')
-
+       if (waquaweirthetaw .gt. 1.0d0) then
+           waquaweirthetaw = 1.0d0
+           call mess(LEVEL_INFO, 'WARNING: Fixed weir relaxation coefficient is reset to the maximum value of 1.0', '.')
+       elseif (waquaweirthetaw .lt. 0.0d0) then 
+           waquaweirthetaw = 0.0d0
+           call mess(LEVEL_INFO, 'WARNING: Fixed weir relaxation coefficient is reset to the minimum value of 0.0', '.')
+       endif    
     endif
     if (writeall .or. (izbndpos > 0)) then
        call prop_set(prop_ptr, 'numerics', 'Izbndpos',  Izbndpos,   'Position of z boundary (0: D3Dflow, 1: on net boundary, 2: on specified polyline)')
