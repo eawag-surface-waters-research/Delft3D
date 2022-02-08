@@ -1032,6 +1032,21 @@ function add_layers_to_meshgeom(meshgeom) result(ierr)
    call reallocP(meshgeom%interface_zs, layer_count + 1, fill=dmiss)
    meshgeom%layer_zs = layer_zs
    meshgeom%interface_zs = interface_zs
+   
+   select case (meshgeom%layertype)
+   case (LAYERTYPE_OCEANSIGMA)
+       meshgeom%numtopsig = meshgeom%numLayer
+   case (LAYERTYPE_Z)
+       meshgeom%numtopsig = 0
+   case (LAYERTYPE_OCEAN_SIGMA_Z)
+       call mess(LEVEL_WARN, 'Combined Z-Sigma not implemented yet in Waq.')
+       ierr = DFM_NOTIMPLEMENTED
+       return
+   case default
+       call mess(LEVEL_WARN, 'Unknown layer type.')
+       ierr = DFM_NOTIMPLEMENTED
+       return
+   end select
 
    deallocate(layer_zs)
    deallocate(interface_zs)
