@@ -17340,9 +17340,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "SumTRWP   ","IM1       ",  31,"N","x",1
 "SumTRWP   ","IM2       ",  32,"N","x",1
 "SumTRWP   ","IM3       ",  33,"N","x",1
-"Prot_Atte ","Rad       ",   1,"N"," ",1
-"Prot_Atte ","ExtVl     ",   2,"N"," ",1
-"Prot_Atte ","Depth     ",   3,"N"," ",1
+"Prot_PFD  ","Rad       ",   1,"N"," ",1
 "Prot_Dia  ","maxNrSp_D ",   1,"Y"," ",1
 "Prot_Dia  ","nrSp_D    ",   2,"Y"," ",1
 "Prot_Dia  ","nrSpCon_D ",   3,"Y"," ",1
@@ -17865,7 +17863,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "Prot_Zoo  ","nDumSi_1  ",  92,"Y"," ",1
 "Prot_Zoo  ","Ccell_N1  ",  93,"Y"," ",1
 "Prot_Zoo  ","rNCM_N1   ",  94,"Y"," ",1
-"Prot_Zoo  ","mot_N1    ",  95,"Y"," ",1
+"Prot_Zoo  ","mot_N1    ",  95,"N"," ",1
 "Prot_Zoo  ","PRN1_Z1   ",  96,"Y"," ",1
 "RadioU    ","Uranium   ",   1,"N","x",1
 "RadioU    ","HalflifeU ",   2,"Y"," ",1
