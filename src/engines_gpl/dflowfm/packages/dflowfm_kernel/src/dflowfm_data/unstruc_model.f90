@@ -1121,7 +1121,7 @@ subroutine readMDUFile(filename, istat)
     call prop_get_double( md_ptr, 'numerics', 'Fixedweirtopwidth'     , fixedweirtopwidth)
     call prop_get_double( md_ptr, 'numerics', 'Fixedweirtopfrictcoef' , fixedweirtopfrictcoef)
     call prop_get_double( md_ptr, 'numerics', 'Fixedweirtalud'        , fixedweirtalud)
-    call prop_get_double (md_ptr, 'numerics', 'FixedweirRelaxationcoefficient' , waquaweirthetaw)
+    call prop_get_double (md_ptr, 'numerics', 'FixedweirRelaxationcoef' , waquaweirthetaw)
 
     call prop_get_integer(md_ptr, 'numerics', 'Izbndpos'          , Izbndpos)
     call prop_get_double (md_ptr, 'numerics', 'Tlfsmo'            , Tlfsmo)
@@ -2866,7 +2866,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
        call prop_set(prop_ptr, 'numerics', 'Fixedweirtopwidth' , fixedweirtopwidth,        'Uniform width of the groyne part of fixed weirs')
        call prop_set(prop_ptr, 'numerics', 'Fixedweirtopfrictcoef' , fixedweirtopfrictcoef,'Uniform friction coefficient of the groyne part of fixed weirs')
        call prop_set(prop_ptr, 'numerics', 'Fixedweirtalud' , fixedweirtalud,              'Uniform talud slope of fixed weirs')
-       call prop_set(prop_ptr, 'numerics', 'FixedweirRelaxationcoefficient' , waquaweirthetaw,  'Fixed weir relaxation coefficient for computation of energy loss')
+       call prop_set(prop_ptr, 'numerics', 'FixedweirRelaxationcoef' , waquaweirthetaw,    'Fixed weir relaxation coefficient for computation of energy loss')
        if (waquaweirthetaw .gt. 1.0d0) then
            waquaweirthetaw = 1.0d0
            call mess(LEVEL_INFO, 'WARNING: Fixed weir relaxation coefficient is reset to the maximum value of 1.0', '.')
