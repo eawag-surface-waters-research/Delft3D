@@ -7280,6 +7280,7 @@ module m_meteo
       use m_ec_module, only: ecFindFileReader, ec_filetype_to_conv_type ! TODO: Refactor this private data access (UNST-703).
       use m_ec_filereader_read, only: ecParseARCinfoMask
       use m_flow, only: kmx, kbot, ktop
+      use m_flowparameters, only: jawave
       use m_sferic, only: jsferic
       use m_missing, only: dmiss
       use m_flowtimes, only: refdate_mjd
@@ -7891,6 +7892,11 @@ module m_meteo
          case ('hrms', 'tp', 'tps', 'rtp', 'dir', 'fx', 'fy', 'wsbu', 'wsbv', 'mx', 'my', 'dissurf','diswcap','ubot')
             ! the name of the source item created by the file reader will be the same as the ext.force. quant name
             sourceItemName = target_name
+            ! this file contains wave data
+            if(jawave==3) then
+                ! wave data is read from a com.nc file produced by D-Waves which contains one time field only
+                fileReaderPtr%one_time_field = .true.
+            endif
          case ('wavesignificantheight', 'waveperiod', 'wavedirection')
             ! the name of the source item created by the file reader will be the same as the ext.force. quant name
             sourceItemName = varname

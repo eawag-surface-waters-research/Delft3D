@@ -367,10 +367,7 @@ module m_ec_filereader
                   t0t1 = 0 
                   timesndx = itemPtr%sourceT1FieldPtr%timesndx + 1
                endif
-               select case (qname)
-               ! Ugly hack: when qname = tp/tps, the default case must be executed when jawave==6
-               ! case ('hrms', 'tp', 'tps', 'rtp', 'dir', 'fx', 'fy', 'wsbu', 'wsbv', 'mx', 'my', 'dissurf','diswcap','ubot')   ! TODO RL: kijken of dit eruit kan 
-               case ('hrms', 'dir', 'fx', 'fy', 'wsbu', 'wsbv', 'mx', 'my', 'dissurf','diswcap','ubot')   ! TODO RL: kijken of dit eruit kan 
+               if(fileReaderPtr%one_time_field) then
                   t0t1 = -1
                   do i=1, fileReaderPtr%nItems
                      success = ecNetcdfReadBlock(fileReaderPtr, fileReaderPtr%items(i)%ptr, t0t1, fileReaderPtr%items(i)%ptr%elementSetPtr%nCoordinates)                  
@@ -381,7 +378,7 @@ module m_ec_filereader
                         fileReaderPtr%items(i)%ptr%sourceT0FieldPtr => fieldPtrA
                      endif
                   end do
-               case default
+               else
                   do i=1, fileReaderPtr%nItems
                      success = ecNetcdfReadNextBlock(fileReaderPtr, fileReaderPtr%items(i)%ptr, t0t1, timesndx)
                      if (.not.success) then
@@ -404,7 +401,7 @@ module m_ec_filereader
                         fileReaderPtr%items(i)%ptr%sourceT0FieldPtr => fieldPtrA
                      end do
                   end if
-               end select
+               endif
             case (provFile_svwp, provFile_svwp_weight, provFile_curvi_weight, provFile_samples, &
                   provFile_triangulationmagdir, provFile_poly_tim, provFile_grib)
                ! NOTE for provFile_samples: don't support readNextRecord, because sample data is read once by ecSampleReadAll upon init.
