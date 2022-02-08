@@ -45,46 +45,17 @@ subroutine comp_dxiAu()                          ! or: setdxiau
 
    if (timon) call timstrt ( "comp_dxiAu", ithndl )
 
-   if ( jalimitdtdiff.eq.0 ) then
-      if ( kmx.eq.0 ) then
-         do L=1,Lnx
-            dxiAu(L) = dxi(L)*Au(L)
-         end do
-      else
-         do LL=1,Lnx
-            call getLbotLtop(LL,Lb,Lt)
-            do L=Lb,Lt
-               dxiAu(L) = dxi(LL)*Au(L)
-            end do
-         end do
-      end if
+   if ( kmx.eq.0 ) then
+      do L=1,Lnx
+         dxiAu(L) = dxi(L)*Au(L)
+      end do
    else
-      if ( kmx.eq.0 ) then
-         do L=1,Lnx
-            if (au(L) > 0d0) then 
-               k1 = ln(1,L)
-               k2 = ln(2,L)
-               !dxiAu(L) = dxi(L)*wu(L) * min(hs(k1), hs(k2))
-               dxiAu(L) = dxi(L)*wu(L)*min( hs(k1), hs(k2),hu(L) )
-            else 
-               dxiAu(L) = 0d0
-            endif
+      do LL=1,Lnx
+         call getLbotLtop(LL,Lb,Lt)
+         do L=Lb,Lt
+            dxiAu(L) = dxi(LL)*Au(L)
          end do
-      else
-         do LL=1,Lnx
-            call getLbotLtop(LL,Lb,Lt)
-            do L=Lb,Lt
-               if (au(L) > 0d0) then 
-                  k1 = ln(1,L)
-                  k2 = ln(2,L)
-                  !dxiAu(L) = dxi(LL)*wu(LL) * min(zws(k1)-zws(k1-1),zws(k2)-zws(k2-1))
-                  dxiAu(L) = dxi(LL)*wu(LL) * min(zws(k1)-zws(k1-1),zws(k2)-zws(k2-1), hu(L))
-               else
-                  dxiAu(L) = 0d0
-               endif
-            end do
-         end do
-      end if
+      end do
    end if
 
    if (jadiffusiononbnd == 0) then  
