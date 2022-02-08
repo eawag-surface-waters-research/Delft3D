@@ -1093,20 +1093,22 @@
        walls(2,nw) = k3                             ! first wall corner
        walls(3,nw) = k4                             ! second wall corner
        
-       nwx = nd(k1)%nwx
-       if (nd(k1)%nwx == 0) then
-          allocate (nd(k1)%nw(1))
-          nd(k1)%nw(1) = nw
-          nd(k1)%nwx = 1
-       else
-          allocate (nw_temp(nwx))
-          nw_temp = nd(k1)%nw
-          deallocate (nd(k1)%nw)
-          allocate (nd(k1)%nw(nwx+1))
-          nd(k1)%nw(1:nwx) = nw_temp(1:nwx)
-          nd(k1)%nw(nwx+1) = nw
-          nd(k1)%nwx = nd(k1)%nwx + 1
-          deallocate (nw_temp)
+       if (iPerot == -1) then
+          nwx = nd(k1)%nwx
+          if (nd(k1)%nwx == 0) then
+             allocate (nd(k1)%nw(1))
+             nd(k1)%nw(1) = nw
+             nd(k1)%nwx = 1
+          else
+             allocate (nw_temp(nwx))
+             nw_temp = nd(k1)%nw
+             deallocate (nd(k1)%nw)
+             allocate (nd(k1)%nw(nwx+1))
+             nd(k1)%nw(1:nwx) = nw_temp(1:nwx)
+             nd(k1)%nw(nwx+1) = nw
+             nd(k1)%nwx = nd(k1)%nwx + 1
+             deallocate (nw_temp)
+          endif
        endif
 
        call duitpl(xzw(k1), yzw(k1), xk(k3), yk(k3), xzw(k1), yzw(k1), xk(k4), yk(k4), sig, jsferic)
