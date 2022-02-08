@@ -121,15 +121,16 @@
                       ! For 1d the flow area is computed, using the upstream water depth
                       ! For 2D the flow area is computed, using the flow width WU and the waterdepth at the upstream grid cell
                       if (kcu(L) == 1) then
-                      dpt = max(epshu, s1(k1) - bob0(1,L))
-                      call GetCSParsFlow(network%adm%line2cross(L, 2), network%crs%cross, dpt, as1, perimeter, width, maxFlowWidth = maxwidth1)
-                      dpt = max(epshu, s1(k2) - bob0(2,L))
-                      call GetCSParsFlow(network%adm%line2cross(L, 2), network%crs%cross, dpt, as2, perimeter, width, maxFlowWidth = maxwidth2)
-                      width = max(maxwidth1, maxwidth2)
-                      wu(L) = width
+                         dpt = max(epshu, s1(k1) - bob0(1,L))
+                         call GetCSParsFlow(network%adm%line2cross(L, 2), network%crs%cross, dpt, as1, perimeter, width, maxFlowWidth = maxwidth1)
+                         dpt = max(epshu, s1(k2) - bob0(2,L))
+                         call GetCSParsFlow(network%adm%line2cross(L, 2), network%crs%cross, dpt, as2, perimeter, width, maxFlowWidth = maxwidth2)
+                         width = max(maxwidth1, maxwidth2)
+                         wu(L) = width
                       else
                         as1 = (s1(k1)-bl(k1))*wu(L)
                         as2 = (s1(k2)-bl(k2))*wu(L)
+                        width = wu(L)
                       endif
                       call getcz(hu(L), frcu(L), ifrcutp(L), Cz, L)
                       au(L) = pstru%au(L0)
