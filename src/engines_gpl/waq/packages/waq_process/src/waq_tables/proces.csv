@@ -733,7 +733,7 @@ procid,procco,procfo,procnm
 "SedTyre   ",123,"SEDTYR    ","Sedimentation of tyre/road wear particles         "
 "SedTAgg   ",123,"SEDAGG    ","Sedimentation of aggregated TRW particles         "
 "SumTRWP   ",123,"SUMTYR    "," Cumulative conc of TRW particles                 "
-"Prot_PFD  ",123,"PROPFD    ","computation of photon flux density                "
+"Prot_Atte ",123,"PROATT    ","attenuation of light by protist                   "
 "Prot_Dia  ",123,"PRODIA    ","Growth/mortality of diatoms                       "
 "ProSedD   ",123,"PROSED    ","Sedimentation diatoms                             "
 "Prot_Gre  ",123,"PROGRE    ","Growth/mortality of greens                        "

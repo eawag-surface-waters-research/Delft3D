@@ -582,7 +582,7 @@
          case (168 ) ;  call SUMTYR ( pmsa   , flux   , ipoint , increm , noseg  ,               ! &
      &                                 noflux , iexpnt , iknmrk , noq1   , noq2   ,               ! &
      &                                 noq3   , noq4   )
-         case (169 ) ;  call PROPFD ( pmsa   , flux   , ipoint , increm , noseg  ,               ! &
+         case (169 ) ;  call PROATT ( pmsa   , flux   , ipoint , increm , noseg  ,               ! &
      &                                 noflux , iexpnt , iknmrk , noq1   , noq2   ,               ! &
      &                                 noq3   , noq4   )
          case (170 ) ;  call PRODIA ( pmsa   , flux   , ipoint , increm , noseg  ,               ! &

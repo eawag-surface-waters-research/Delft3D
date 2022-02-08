@@ -4052,6 +4052,7 @@ src/engines_gpl/waq/packages/waq_process/src/proc_preprocess/wripro.f -text
 src/engines_gpl/waq/packages/waq_process/src/proc_preprocess/wrstoc.f -text
 src/engines_gpl/waq/packages/waq_process/src/proc_preprocess/wrtoys.f -text
 src/engines_gpl/waq/packages/waq_process/src/proc_preprocess/wrwrko.f -text
+src/engines_gpl/waq/packages/waq_process/src/protist/protistAtten.f90 -text
 src/engines_gpl/waq/packages/waq_process/src/protist/protistCM.f90 -text
 src/engines_gpl/waq/packages/waq_process/src/protist/protistCellFunctions.f90 -text
 src/engines_gpl/waq/packages/waq_process/src/protist/protistConstants.f90 -text
@@ -4061,7 +4062,6 @@ src/engines_gpl/waq/packages/waq_process/src/protist/protistFoodFunctions.f90 -t
 src/engines_gpl/waq/packages/waq_process/src/protist/protistGreen.f90 -text
 src/engines_gpl/waq/packages/waq_process/src/protist/protistMathFunctions.f90 -text
 src/engines_gpl/waq/packages/waq_process/src/protist/protistNCM.f90 -text
-src/engines_gpl/waq/packages/waq_process/src/protist/protistPFD.f90 -text
 src/engines_gpl/waq/packages/waq_process/src/protist/protistPhagotrophyFunctions.f90 -text
 src/engines_gpl/waq/packages/waq_process/src/protist/protistPhotosynthesisFunctions.f90 -text
 src/engines_gpl/waq/packages/waq_process/src/protist/protistTypes.f90 -text
