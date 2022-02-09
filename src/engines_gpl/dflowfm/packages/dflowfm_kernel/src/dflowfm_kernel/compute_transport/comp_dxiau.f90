@@ -1,30 +1,30 @@
 !----- AGPL --------------------------------------------------------------------
-!                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2022.                                
-!                                                                               
-!  This file is part of Delft3D (D-Flow Flexible Mesh component).               
-!                                                                               
-!  Delft3D is free software: you can redistribute it and/or modify              
-!  it under the terms of the GNU Affero General Public License as               
-!  published by the Free Software Foundation version 3.                         
-!                                                                               
-!  Delft3D  is distributed in the hope that it will be useful,                  
-!  but WITHOUT ANY WARRANTY; without even the implied warranty of               
-!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the                
-!  GNU Affero General Public License for more details.                          
-!                                                                               
-!  You should have received a copy of the GNU Affero General Public License     
-!  along with Delft3D.  If not, see <http://www.gnu.org/licenses/>.             
-!                                                                               
-!  contact: delft3d.support@deltares.nl                                         
-!  Stichting Deltares                                                           
-!  P.O. Box 177                                                                 
-!  2600 MH Delft, The Netherlands                                               
-!                                                                               
-!  All indications and logos of, and references to, "Delft3D",                  
-!  "D-Flow Flexible Mesh" and "Deltares" are registered trademarks of Stichting 
+!
+!  Copyright (C)  Stichting Deltares, 2017-2022.
+!
+!  This file is part of Delft3D (D-Flow Flexible Mesh component).
+!
+!  Delft3D is free software: you can redistribute it and/or modify
+!  it under the terms of the GNU Affero General Public License as
+!  published by the Free Software Foundation version 3.
+!
+!  Delft3D  is distributed in the hope that it will be useful,
+!  but WITHOUT ANY WARRANTY; without even the implied warranty of
+!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+!  GNU Affero General Public License for more details.
+!
+!  You should have received a copy of the GNU Affero General Public License
+!  along with Delft3D.  If not, see <http://www.gnu.org/licenses/>.
+!
+!  contact: delft3d.support@deltares.nl
+!  Stichting Deltares
+!  P.O. Box 177
+!  2600 MH Delft, The Netherlands
+!
+!  All indications and logos of, and references to, "Delft3D",
+!  "D-Flow Flexible Mesh" and "Deltares" are registered trademarks of Stichting
 !  Deltares, and remain the property of Stichting Deltares. All rights reserved.
-!                                                                               
+!
 !-------------------------------------------------------------------------------
 
 ! $Id$
@@ -45,24 +45,53 @@ subroutine comp_dxiAu()                          ! or: setdxiau
 
    if (timon) call timstrt ( "comp_dxiAu", ithndl )
 
-   if ( kmx.eq.0 ) then
-      do L=1,Lnx
-         dxiAu(L) = dxi(L)*Au(L)
-      end do
-   else
-      do LL=1,Lnx
-         call getLbotLtop(LL,Lb,Lt)
-         do L=Lb,Lt
-            dxiAu(L) = dxi(LL)*Au(L)
+   if ( jalimitdtdiff.eq.0 ) then
+      if ( kmx.eq.0 ) then
+         do L=1,Lnx
+            dxiAu(L) = dxi(L)*Au(L)
          end do
-      end do
+      else
+         do LL=1,Lnx
+            call getLbotLtop(LL,Lb,Lt)
+            do L=Lb,Lt
+               dxiAu(L) = dxi(LL)*Au(L)
+            end do
+         end do
+      end if
+   else
+      if ( kmx.eq.0 ) then
+         do L=1,Lnx
+            if (au(L) > 0d0) then
+               k1 = ln(1,L)
+               k2 = ln(2,L)
+               !dxiAu(L) = dxi(L)*wu(L) * min(hs(k1), hs(k2))
+               dxiAu(L) = dxi(L)*wu(L)*min( hs(k1), hs(k2),hu(L) )
+            else
+               dxiAu(L) = 0d0
+            endif
+         end do
+      else
+         do LL=1,Lnx
+            call getLbotLtop(LL,Lb,Lt)
+            do L=Lb,Lt
+               if (au(L) > 0d0) then
+                  k1 = ln(1,L)
+                  k2 = ln(2,L)
+                  !dxiAu(L) = dxi(LL)*wu(LL) * min(zws(k1)-zws(k1-1),zws(k2)-zws(k2-1))
+                  dxiAu(L) = dxi(LL)*wu(LL) * min(zws(k1)-zws(k1-1),zws(k2)-zws(k2-1), hu(L)-hu(L-1))
+               else
+                  dxiAu(L) = 0d0
+               endif
+            end do
+         end do
+      end if
    end if
 
-   if (jadiffusiononbnd == 0) then  
+   if (jadiffusiononbnd == 0) then
       do LL=lnxi+1, lnx
          call getLbotLtop(LL,Lb,Lt)
          do L=Lb,Lt
-            dxiAu(L) = 0d0 
+            dxiAu(L) = 0d0
          enddo
       enddo
    endif
