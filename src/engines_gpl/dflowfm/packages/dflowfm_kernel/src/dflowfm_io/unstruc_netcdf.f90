@@ -14440,7 +14440,7 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd,jafou)
                                     edge_nodes, face_nodes, edge_faces, null(), null(),x2dn, y2dn, xue, yue, xz(1:ndx2d), yz(1:ndx2d), &
                                     crs, -999, dmiss, start_index, layer_count, layer_type, &
                                     layer_zs=layer_zs, interface_zs=interface_zs, &
-                                    nsigma_opt=merge(layer_count,numtopsig,layer_type.eq.1), &
+                                    nsigma_opt=numtopsig, &
                                     waterlevelname=trim(waterlevelname), bldepthname=trim(bldepthname), &
                                     writeopts=unc_writeopts)
 

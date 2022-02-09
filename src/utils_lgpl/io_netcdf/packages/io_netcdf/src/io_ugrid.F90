@@ -1127,12 +1127,16 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
 
    prefix=trim(meshName)
 
-   nsigma = 0
-   if (present(nsigma_opt)) then
-      nsigma = nsigma_opt
+   if (present(layerType)) then
+      nsigma = 0
+      if (layerType == LAYERTYPE_OCEAN_SIGMA_Z .and. present(nsigma_opt)) then
+         nsigma = nsigma_opt
+      else if (layerType == LAYERTYPE_OCEANSIGMA) then
+         ! Code below depends on correctly set nsigma. For plain sigma layering: nsigma==numlayer.
+         nsigma = numLayer
+      end if
    end if
 
-    
    add_edge_face_connectivity = associated(edge_faces)
    add_face_edge_connectivity = associated(face_edges)
    add_face_face_connectivity = associated(face_links)
@@ -1670,7 +1674,7 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
    ! Layers
    if (add_layer_var) then
       
-      if (associated(interface_zs)) then
+      if (associated(interface_zs) .and. layertype == LAYERTYPE_OCEAN_SIGMA_Z) then
          depth_c = -interface_zs(numLayer + 1 - nsigma) ! z pos -> depth pos down
       end if
 
@@ -1699,13 +1703,16 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
 
          if (associated(interface_zs)) then
             if (meshids%varids(mid_interfacezs) > 0) then
+               ! Combined z-sigma variable
                ierr = nf90_put_var(ncid, meshids%varids(mid_interfacezs), interface_zs(1:numLayer + 1-nsigma), start = (/ 1 /))
                ierr = nf90_put_var(ncid, meshids%varids(mid_interfacezs), interface_zs(numLayer + 2-nsigma:numlayer+1)*depth_c, start=(/numLayer + 2-nsigma/))
             endif
             if (meshids%varids(mid_interfacez) > 0) then
+               ! Z-layers (also partly, when in combined ocean_sigma_z)
                ierr = nf90_put_var(ncid, meshids%varids(mid_interfacez), interface_zs(1:numLayer + 1-nsigma))
             endif
             if (meshids%varids(mid_interfacesigma) > 0) then
+               ! sigma-layers (also partly, when in combined ocean_sigma_z)
                ierr = nf90_put_var(ncid, meshids%varids(mid_interfacesigma), interface_zs(numLayer + 1-nsigma:numlayer+1),start=(/numLayer + 1-nsigma/))               
             endif
          endif ! interface_zs

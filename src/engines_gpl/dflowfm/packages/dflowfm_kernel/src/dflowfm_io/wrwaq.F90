@@ -991,7 +991,7 @@ end function create_ugrid_geometry
 !! since array pointers will become disassociated, possibly causing memory leaks.
 function add_layers_to_meshgeom(meshgeom) result(ierr)
    use io_ugrid
-   use m_flow, only: kmx, mxlaydefs, laymx
+   use m_flow, only: kmx, mxlaydefs, laymx, numtopsig
    use m_alloc
    use m_missing
    use unstruc_netcdf, only: get_layer_data_ugrid
@@ -1035,10 +1035,13 @@ function add_layers_to_meshgeom(meshgeom) result(ierr)
    
    select case (meshgeom%layertype)
    case (LAYERTYPE_OCEANSIGMA)
+       ! Set trivial value for numtopsig: same as total layer count
        meshgeom%numtopsig = meshgeom%numLayer
    case (LAYERTYPE_Z)
+       ! Set trivial value for numtopsig: 0, all layers are fixed z.
        meshgeom%numtopsig = 0
    case (LAYERTYPE_OCEAN_SIGMA_Z)
+       meshgeom%numtopsig = numtopsig
        call mess(LEVEL_WARN, 'Combined Z-Sigma not implemented yet in Waq.')
        ierr = DFM_NOTIMPLEMENTED
        return
