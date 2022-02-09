@@ -162,10 +162,16 @@ outppr,outpit,outpnm,outpdo,outpsx
 "Extinc_UVG","ExtUVFresh",   5,"x",1
 "CalcRad   ","Rad       ",   1,"x",1
 "CalcRad   ","RadBot    ",   2,"x",1
+"CalcRad   ","atten     ",   3," ",1
+"CalcRad   ","exat      ",   4," ",1
 "CalcRadDay","RadDay    ",   1,"x",1
 "CalcRadDay","RadBotDay ",   2,"x",1
+"CalcRadDay","atten     ",   3," ",1
+"CalcRadDay","exat      ",   4," ",1
 "CalcRadUV ","Rad_uv    ",   1,"x",1
 "CalcRadUV ","RadBot_uv ",   2,"x",1
+"CalcRadUV ","atten     ",   3," ",1
+"CalcRadUV ","exat      ",   4," ",1
 "Daylength ","DayL      ",   1,"x",1
 "Reflection","fRefl     ",   1,"x",1
 "DepAve    ","BloomDepth",   1,"x",1
@@ -4889,10 +4895,8 @@ outppr,outpit,outpnm,outpdo,outpsx
 "SumTRWP   ","TyreNN    ",   1,"x",1
 "SumTRWP   ","TAggSedNN ",   2,"x",1
 "SumTRWP   ","SuspNN    ",   3,"x",1
-"Prot_Atte ","PFD       ",   1," ",1
-"Prot_Atte ","atten     ",   2," ",1
-"Prot_Atte ","exat      ",   3," ",1
-"Prot_Atte ","PARRAD    ",   4," ",1
+"Prot_PFD  ","PFD       ",   1," ",1
+"Prot_PFD  ","PARRAD    ",   2," ",1
 "Prot_Dia  ","NC_D1     ",   1," ",1
 "Prot_Dia  ","PC_D1     ",   2," ",1
 "Prot_Dia  ","SC_D1     ",   3," ",1
