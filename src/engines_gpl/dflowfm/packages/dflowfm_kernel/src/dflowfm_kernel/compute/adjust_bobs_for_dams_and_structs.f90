@@ -102,7 +102,7 @@
                  bl(k1) = min(bl(k1), bob0(1,L))
               endif
               if (pstru%culvert%rightlevel < bob0(2,L)) then
-                 write(msgbuf,'(a,f8.2,a,f8.2,a)') 'The bedlevel of the channel at the left side for '''//trim(pstru%id)//''' is changed from ', &
+                 write(msgbuf,'(a,f8.2,a,f8.2,a)') 'The bedlevel of the channel at the right side for '''//trim(pstru%id)//''' is changed from ', &
                            bob0(2,L), ' into ', pstru%culvert%rightlevel, '.'
                  call warn_flush()
                  bob0(2,L) = pstru%culvert%rightlevel
