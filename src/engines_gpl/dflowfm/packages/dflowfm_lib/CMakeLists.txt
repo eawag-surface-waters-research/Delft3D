@@ -47,7 +47,6 @@ if (UNIX)
     pkg_check_modules(NETCDF REQUIRED IMPORTED_TARGET netcdf)
     pkg_check_modules(NETCDF_FTN REQUIRED IMPORTED_TARGET netcdf-fortran)
     pkg_check_modules(PETSC REQUIRED IMPORTED_TARGET PETSc)
-    pkg_check_modules(PROJ REQUIRED IMPORTED_TARGET proj)
 
     set(oss_dependencies    deltares_common
                             deltares_common_c
@@ -62,7 +61,6 @@ if (UNIX)
                             interacter_stub
                             kdtree_wrapper
                             kdtree2
-                            fortranc
                             fortrangis
                             libsigwatch
                             md5digest
@@ -74,7 +72,6 @@ if (UNIX)
                             morphology_plugins_c
                             nefis
                             polypack
-                            shp
                             trachytopes_io
                             trachytopes_kernel
                             triangle_c
@@ -90,8 +87,7 @@ if (UNIX)
          ${oss_dependencies}
          PkgConfig::NETCDF
          PkgConfig::NETCDF_FTN
-         PkgConfig::PETSC
-         PkgConfig::PROJ)
+         PkgConfig::PETSC)
 endif(UNIX)
 
 
@@ -110,7 +106,6 @@ if (WIN32)
                             interacter_stub
                             kdtree_wrapper
                             kdtree2
-                            fortranc
                             fortrangis
                             libsigwatch
                             md5digest
@@ -124,10 +119,8 @@ if (WIN32)
                             nefis
                             netcdf4
                             netcdff
-                            proj
                             petsc
                             polypack
-                            shp
                             trachytopes_io
                             trachytopes_kernel
                             triangle_c
@@ -149,12 +142,12 @@ endif(WIN32)
 
 if(UNIX)
     message(STATUS "Setting target_compile_definitions in Unix")    
-    target_compile_definitions(${library_name} PRIVATE "HAVE_DISPLAY=0;HAVE_METIS;HAVE_POLYPACK;HAVE_MPI;HAVE_PROJ;HAVE_SHAPELIB;HAVE_GDAL;HAVE_PETSC")
+    target_compile_definitions(${library_name} PRIVATE "HAVE_DISPLAY=0;HAVE_METIS;HAVE_POLYPACK;HAVE_MPI;HAVE_PETSC")
 endif(UNIX)
 
 if(WIN32)
     message(STATUS "Setting target_compile_definitions in windows")
-    target_compile_definitions(${library_name} PRIVATE "WIN32;HAVE_DISPLAY=0;HAVE_METIS;HAVE_POLYPACK;HAVE_MPI;HAVE_PROJ;HAVE_SHAPELIB;HAVE_GDAL;HAVE_PETSC;HAVE_OPENGL")  
+    target_compile_definitions(${library_name} PRIVATE "WIN32;HAVE_DISPLAY=0;HAVE_METIS;HAVE_POLYPACK;HAVE_MPI;HAVE_PETSC;HAVE_OPENGL")  
 endif(WIN32)
 
 # Set additional compilation properties, specific for Debug mode
@@ -169,7 +162,6 @@ set_source_files_properties(${source}
 if (WIN32)
 
     target_include_directories(${library_name} PRIVATE  ${include_path}
-                                                        ${gisinternals_path}
                                                         ${mpi_include_path}
                                                         ${petsc_path}
                                                         ${tecplot_path})
@@ -178,7 +170,6 @@ if (WIN32)
     message(STATUS "Setting linker properties in windows")
     target_link_directories(${library_name}
                             PRIVATE
-                            ${gisinternals_path}
                             "${mpi_library_path}"
                             "${checkout_src_root}/third_party_open/netcdf/${netcdf_version}/lib"
                             "${checkout_src_root}/third_party_open/petsc/petsc-3.10.2/lib/x64/Release"
@@ -199,7 +190,6 @@ if (WIN32)
                             "pthreadVC2.lib"
                             "${mpi_fortran_library}"
                             "libpetsc.lib"
-                            "gdal_i.lib"
                             "tecio.lib")
 
 

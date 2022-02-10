@@ -16,7 +16,6 @@ if (UNIX)
     # these calls create special `PkgConfig::<MODULE>` variables
     pkg_check_modules(NETCDF REQUIRED IMPORTED_TARGET netcdf)
     pkg_check_modules(NETCDF_FTN REQUIRED IMPORTED_TARGET netcdf-fortran)
-    pkg_check_modules(PROJ REQUIRED IMPORTED_TARGET proj)
 
     set(oss_dependencies deltares_common
                          deltares_common_c
@@ -30,8 +29,7 @@ if (UNIX)
     target_link_libraries(${executable_name}
          ${oss_dependencies}
          PkgConfig::NETCDF
-         PkgConfig::NETCDF_FTN
-         PkgConfig::PROJ)
+         PkgConfig::NETCDF_FTN)
 endif(UNIX)
 
 if (WIN32)

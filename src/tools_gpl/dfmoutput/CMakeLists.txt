@@ -30,34 +30,25 @@ if (UNIX)
     # these calls create special `PkgConfig::<MODULE>` variables
     pkg_check_modules(NETCDF REQUIRED IMPORTED_TARGET netcdf)
     pkg_check_modules(NETCDF_FTN REQUIRED IMPORTED_TARGET netcdf-fortran)
-    pkg_check_modules(PROJ REQUIRED IMPORTED_TARGET proj)
 
     set(oss_dependencies deltares_common 
                          io_netcdf 
-                         FLAP 
-                         fortranc 
-                         fortrangis
-                         shp)
+                         FLAP)
 
     oss_include_libraries(${executable_name} oss_dependencies)
 
     target_link_libraries(${executable_name}
          ${oss_dependencies}
          PkgConfig::NETCDF
-         PkgConfig::NETCDF_FTN
-         PkgConfig::PROJ)
+         PkgConfig::NETCDF_FTN)
 endif(UNIX)
 
 if (WIN32)
     set(oss_dependencies deltares_common
                          io_netcdf
                          FLAP
-                         fortranc
-                         fortrangis
                          netcdf4
-                         netcdff
-                         proj
-                         shp)
+                         netcdff)
 
     oss_include_libraries(${executable_name} oss_dependencies)
     target_link_libraries(${executable_name} ${oss_dependencies})
@@ -84,8 +75,7 @@ set_source_files_properties(${fortran_version_file}
 target_link_libraries(${executable_name} netcdf)
 
 if (WIN32)
-    include_directories(${gisinternals_path}
-                        ${mpi_include_path}
+    include_directories(${mpi_include_path}
                         ${tecplot_path})
                         
 
@@ -93,7 +83,6 @@ if (WIN32)
     message(STATUS "Setting linker properties in windows")
     target_link_directories(${executable_name}
                             PRIVATE
-                            ${gisinternals_path}
                             "${mpi_library_path}"
                             "${checkout_src_root}/third_party_open/netcdf/${netcdf_version}/lib"
                             "${checkout_src_root}/third_party_open/pthreads/bin/x64"
@@ -111,11 +100,10 @@ if (WIN32)
                           "netcdf.lib"
                           "pthreadVC2.lib"
                           "${mpi_fortran_library}"
-                          "gdal_i.lib"
                           "tecio.lib")
 
     message(STATUS "Setting target_compile_definitions in windows")
-    target_compile_definitions(${executable_name} PRIVATE "WIN32;HAVE_DISPLAY=0;HAVE_METIS;HAVE_POLYPACK;HAVE_MPI;HAVE_PROJ;HAVE_SHAPELIB;HAVE_GDAL;HAVE_PETSC")
+    target_compile_definitions(${executable_name} PRIVATE "WIN32;HAVE_DISPLAY=0;HAVE_METIS;HAVE_POLYPACK;HAVE_MPI;HAVE_PETSC")
 
     # Set linker options
     message(STATUS "Setting target_link_options in windows")

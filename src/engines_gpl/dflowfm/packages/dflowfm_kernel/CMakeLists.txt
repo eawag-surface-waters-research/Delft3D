@@ -123,9 +123,7 @@ if (UNIX)
     # these calls create special `PkgConfig::<MODULE>` variables
     pkg_check_modules(NETCDF REQUIRED IMPORTED_TARGET netcdf)
     pkg_check_modules(NETCDF_FTN REQUIRED IMPORTED_TARGET netcdf-fortran)
-    pkg_check_modules(GDAL REQUIRED IMPORTED_TARGET gdal)
     pkg_check_modules(PETSC REQUIRED IMPORTED_TARGET PETSc)
-    pkg_check_modules(PROJ REQUIRED IMPORTED_TARGET proj)
 
 
 
@@ -141,7 +139,6 @@ if (UNIX)
                             io_netcdf
                             kdtree_wrapper
                             kdtree2
-                            fortranc
                             fortrangis
                             libsigwatch
                             md5digest
@@ -152,7 +149,6 @@ if (UNIX)
                             morphology_kernel
                             morphology_plugins_c
                             polypack
-                            shp
                             trachytopes_io
                             trachytopes_kernel
                             triangle_c
@@ -164,11 +160,9 @@ if (UNIX)
 
     oss_include_libraries(${library_name} oss_dependencies)
     target_link_libraries(${library_name} ${oss_dependencies}
-         PkgConfig::GDAL
          PkgConfig::NETCDF
          PkgConfig::NETCDF_FTN
-         PkgConfig::PETSC
-         PkgConfig::PROJ)
+         PkgConfig::PETSC)
 
 
     include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include"
@@ -203,7 +197,6 @@ set(oss_dependencies    deltares_common
                         netcdff
                         petsc
                         polypack
-                        shp
                         trachytopes_io
                         trachytopes_kernel
                         triangle_c
@@ -274,15 +267,15 @@ if (WIN32)
     set_target_properties(${library_name} PROPERTIES COMPILE_FLAGS ${openmp_flag})
     if(WITH_INTERACTER)
         # Add HAVE_DISPLAY=1
-        target_compile_definitions(${library_name} PRIVATE "WIN32;HAVE_TECPLOT;HAVE_METIS;HAVE_POLYPACK;HAVE_MPI;HAVE_PROJ;HAVE_SHAPELIB;HAVE_GDAL;HAVE_PETSC;HAVE_OPENGL;HAVE_DISPLAY=1")
+        target_compile_definitions(${library_name} PRIVATE "WIN32;HAVE_TECPLOT;HAVE_METIS;HAVE_POLYPACK;HAVE_MPI;HAVE_PETSC;HAVE_OPENGL;HAVE_DISPLAY=1")
     else()
-        target_compile_definitions(${library_name} PRIVATE "WIN32;HAVE_TECPLOT;HAVE_METIS;HAVE_POLYPACK;HAVE_MPI;HAVE_PROJ;HAVE_SHAPELIB;HAVE_GDAL;HAVE_PETSC;HAVE_OPENGL;HAVE_DISPLAY=0")
+        target_compile_definitions(${library_name} PRIVATE "WIN32;HAVE_TECPLOT;HAVE_METIS;HAVE_POLYPACK;HAVE_MPI;HAVE_PETSC;HAVE_OPENGL;HAVE_DISPLAY=0")
     endif()
 endif(WIN32)
 
 if (UNIX)
     target_link_libraries(${library_name} ${oss_dependencies})
-    target_compile_definitions(${library_name} PRIVATE "HAVE_METIS;HAVE_POLYPACK;HAVE_MPI;HAVE_PROJ;HAVE_SHAPELIB;HAVE_GDAL;HAVE_PETSC")
+    target_compile_definitions(${library_name} PRIVATE "HAVE_METIS;HAVE_POLYPACK;HAVE_MPI;HAVE_PETSC")
 endif(UNIX)
 
 # Create the folder structure in vfproj

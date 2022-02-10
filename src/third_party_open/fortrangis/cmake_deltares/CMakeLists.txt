@@ -16,20 +16,6 @@ endif(UNIX)
 set(fortranc_library_name fortranc)
 add_library(${fortranc_library_name} ${fortranc_sources})
 
-# Add dependencies
-if (UNIX)
-    # the `pkg_check_modules` function is created with this call
-    find_package(PkgConfig REQUIRED)
-
-    # these calls create special `PkgConfig::<MODULE>` variables
-    pkg_check_modules(PROJ REQUIRED IMPORTED_TARGET proj)
-
-    target_link_libraries(${fortranc_library_name} PkgConfig::PROJ) # Note that this is an optional dependency. It was introduced to remain consistent with the tests.sln
-endif(UNIX)
-if (WIN32)
-    add_dependencies(${fortranc_library_name} proj) # Note that this is an optional dependency. It was introduced to remain consistent with the tests.sln
-endif(WIN32)
-
 # Set additional compilation properties, specific for Debug mode
 target_compile_options(${fortranc_library_name} PRIVATE "$<$<CONFIG:Debug>:${check_bounds_flag}>")
 
@@ -54,8 +40,39 @@ add_library(${fortrangis_library_name} ${fortrangis_sources})
 target_include_directories(${fortrangis_library_name} PRIVATE ${src_path}/include)
 
 # Add dependencies
-add_dependencies(${fortrangis_library_name} shp) # Note that this is an optional dependency. It was introduced to remain consistent with the tests.sln
-add_dependencies(${fortrangis_library_name} ${fortranc_library_name})
+target_link_libraries(${fortrangis_library_name} PRIVATE ${fortranc_library_name})
+
+# Add dependencies of underlying 3rd party libraries
+# Use target_link_libraries with INTERFACE to propagate all these dependencies
+# to other package that use fortrangis.
+
+# shp intentionally comes first here: otherwise on Windows, the precompiled gdal_i.lib
+# will introduce a duplicate definition of Shp* API functions.
+target_link_libraries(${fortrangis_library_name} INTERFACE shp)
+
+if (UNIX)
+    # the `pkg_check_modules` function is created with this call
+    find_package(PkgConfig REQUIRED)
+
+    # these calls create special `PkgConfig::<MODULE>` variables
+    pkg_check_modules(PROJ REQUIRED IMPORTED_TARGET proj)
+    pkg_check_modules(GDAL REQUIRED IMPORTED_TARGET gdal)
+
+    target_link_libraries(${fortrangis_library_name} INTERFACE PkgConfig::PROJ PkgConfig::GDAL)
+endif(UNIX)
+if (WIN32)
+    target_link_libraries(${fortrangis_library_name} INTERFACE proj)
+
+    # GDAL comes pre-compiled on Windows
+    target_link_libraries(${fortrangis_library_name} INTERFACE "gdal_i.lib")
+    target_link_directories(${fortrangis_library_name} INTERFACE ${gisinternals_path})
+    target_include_directories(${fortrangis_library_name} INTERFACE ${gisinternals_path})
+endif(WIN32)
+
+# Propagate preprocessor variable definitions to any other package that uses fortrangis.
+target_compile_definitions(${fortrangis_library_name} INTERFACE HAVE_PROJ)
+target_compile_definitions(${fortrangis_library_name} INTERFACE HAVE_SHAPELIB)
+target_compile_definitions(${fortrangis_library_name} INTERFACE HAVE_GDAL)
 
 # Set additional compilation properties, specific for Debug mode
 target_compile_options(${fortrangis_library_name} PRIVATE "$<$<CONFIG:Debug>:${check_bounds_flag}>")

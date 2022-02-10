@@ -10,6 +10,7 @@ if(UNIX)
     # these calls create special `PkgConfig::<MODULE>` variables
     pkg_check_modules(NETCDF REQUIRED IMPORTED_TARGET netcdf)
     pkg_check_modules(NETCDF_FTN REQUIRED IMPORTED_TARGET netcdf-fortran)
+
 endif(UNIX)
 
 # Generate the F90 version file
@@ -31,21 +32,32 @@ set_target_properties (${library_name} PROPERTIES FOLDER utils_lgpl/io_netcdf)
 
 if(UNIX)
     # Add dependency
-    set(oss_dependencies deltares_common)
+    set(oss_dependencies deltares_common
+                         fortrangis)
     target_compile_definitions(${library_name} PRIVATE LINUX64)    
     oss_include_libraries(${library_name} oss_dependencies)
 
-    target_link_libraries(${library_name} ${oss_dependencies} PkgConfig::NETCDF PkgConfig::NETCDF_FTN)
+    target_link_libraries(${library_name} ${oss_dependencies}
+         PkgConfig::NETCDF
+         PkgConfig::NETCDF_FTN)
 endif(UNIX)
 
 if (WIN32)
+    target_link_directories(${library_name}
+            INTERFACE
+			"${checkout_src_root}/third_party_open/netcdf/${netcdf_version}/lib")
+
     # Add dependency
     set(oss_dependencies deltares_common
+                        fortrangis
                         netcdf4
                         netcdff)
     target_compile_definitions(${library_name} PRIVATE WIN64)
     oss_include_libraries(${library_name} oss_dependencies)
-    
+
+    target_link_libraries(${library_name} ${oss_dependencies}
+                                          netcdf)
+
     target_compile_options(${library_name} PRIVATE "${heap_arrays_one_flag}")
 endif(WIN32)
 
@@ -77,28 +89,14 @@ if ( ${configuration_type} STREQUAL "DFLOWFM" OR
     add_library(${library_name} SHARED ${src_path}/io_netcdf_api.F90)
 
     if(UNIX)
-        target_link_directories(${library_name} PRIVATE ${NETCDF_LIBRARY_DIRS}) 
-        set(oss_dependencies deltares_common  io_netcdf)
+        set(oss_dependencies io_netcdf)
         oss_include_libraries(${library_name} oss_dependencies)
-        target_link_libraries(${library_name} deltares_common
-                                              io_netcdf
-                                              PkgConfig::NETCDF
-                                              PkgConfig::NETCDF_FTN)
+        target_link_libraries(${library_name} ${oss_dependencies})
     endif(UNIX)
     if (WIN32)
-        target_link_directories(${library_name}
-                                PRIVATE
-                                "${checkout_src_root}/third_party_open/netcdf/${netcdf_version}/lib")
-        set(oss_dependencies deltares_common
-                             io_netcdf
-                             netcdf4
-                             netcdff)
+        set(oss_dependencies io_netcdf)
         oss_include_libraries(${library_name} oss_dependencies)
-        target_link_libraries(${library_name} deltares_common
-                                              io_netcdf
-                                              netcdf
-                                              netcdf4
-                                              netcdff)
+        target_link_libraries(${library_name} ${oss_dependencies})
     endif(WIN32)
 
     # Set additional compilation properties, specific for Debug mode

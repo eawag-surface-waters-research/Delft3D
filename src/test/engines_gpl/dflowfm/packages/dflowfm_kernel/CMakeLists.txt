@@ -15,7 +15,6 @@ if(UNIX)
     pkg_check_modules(NETCDF     REQUIRED IMPORTED_TARGET netcdf)
     pkg_check_modules(NETCDF_FTN REQUIRED IMPORTED_TARGET netcdf-fortran)
     pkg_check_modules(PETSC      REQUIRED IMPORTED_TARGET PETSc)
-    pkg_check_modules(PROJ       REQUIRED IMPORTED_TARGET proj)
 
     set(oss_dependencies    deltares_common
                             deltares_common_c
@@ -31,7 +30,6 @@ if(UNIX)
                             interacter_stub
                             kdtree_wrapper
                             kdtree2
-                            fortranc
                             fortrangis
                             libsigwatch
                             md5digest
@@ -43,7 +41,6 @@ if(UNIX)
                             morphology_plugins_c
                             nefis
                             polypack
-                            shp
                             trachytopes_io
                             trachytopes_kernel
                             triangle_c
@@ -65,7 +62,6 @@ if(UNIX)
          PkgConfig::NETCDF
          PkgConfig::NETCDF_FTN
          PkgConfig::PETSC
-         PkgConfig::PROJ
          "metis")
 
     set_property(TARGET ${executable_name} PROPERTY LINKER_LANGUAGE Fortran)
@@ -87,7 +83,6 @@ if(WIN32)
                          io_netcdf
                          kdtree_wrapper
                          kdtree2
-                         fortranc
                          fortrangis
                          libsigwatch
                          md5digest
@@ -103,7 +98,6 @@ if(WIN32)
                          netcdff
                          petsc
                          polypack
-                         shp
                          trachytopes_io
                          trachytopes_kernel
                          triangle_c
@@ -116,7 +110,6 @@ if(WIN32)
 
 
 target_link_directories(${executable_name} PRIVATE
-                        ${gisinternals_path}
                         "${mpi_library_path}"
                         "${checkout_src_root}/third_party_open/netcdf/${netcdf_version}/lib"
                         "${checkout_src_root}/third_party_open/petsc/petsc-3.10.2/lib/x64/Release"
@@ -137,14 +130,12 @@ target_link_libraries(${executable_name} ${oss_dependencies}
                           "pthreadVC2.lib"
                           "${mpi_fortran_library}"
                           "libpetsc.lib"
-                          "gdal_i.lib"
                           "tecio.lib")
 
 
 endif(WIN32)
 
-include_directories(${gisinternals_path}
-                    ${mpi_include_path}
+include_directories(${mpi_include_path}
                     ${petsc_path}
                     ${tecplot_path})
 
