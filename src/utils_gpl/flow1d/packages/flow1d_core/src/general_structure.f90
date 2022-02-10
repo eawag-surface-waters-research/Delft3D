@@ -300,6 +300,11 @@ contains
          call flqhgs(fu(2), ru(2), u1L, dxL, dt, structwidth, kfuL, au(2), qL, flowDir, &
                      hu, hd, uu, zgate, gatefraction*wstr, w2, wsd, zb2, ds1, ds2, dg,                &
                      rhoast, cgf, cgd, cwf, cwd, mugf, 0d0, 0d0, dx_struc, ds, genstr%state(2,L0), velheight)
+      else
+         fu(1) = 0d0
+         ru(1) = 0d0
+         fu(2) = 0d0
+         ru(2) = 0d0
       endif
       
       if (gatefraction< 1d0 - gatefrac_eps) then
@@ -313,6 +318,9 @@ contains
                      rhoast, cgf, cgd, cwf, cwd, mugf, lambda, Cz, dx_struc, ds, genstr%state(3,L0), velheight)
          genstr%sOnCrest(L0) = ds + crest     ! waterlevel on crest
 
+      else
+         fu(3) = 0d0
+         ru(3) = 0d0
       endif
       
       auL =  (au(1) + au(2)) + au(3)
