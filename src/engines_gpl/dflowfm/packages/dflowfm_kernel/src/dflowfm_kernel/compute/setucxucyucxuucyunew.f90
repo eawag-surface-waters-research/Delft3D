@@ -44,6 +44,7 @@
  integer          :: itpbn, newucxq=0
  double precision :: uu, vv, uucx, uucy, wcxu, wcyu, cs, sn, adx, ac1, ac2, wuw, hdx, hul, hsk, uin, duxdn, duydn, uhu, htrs
  double precision :: dischcorrection
+ double precision :: u1L
  double precision :: uinx, uiny, ahu, uxy
 
  double precision,  allocatable :: husx, husy
@@ -60,11 +61,17 @@
 
     do L = 1,lnx1D
        if (u1(L) .ne. 0d0 .and. kcu(L) .ne. 3) then  ! link flows ; in 2D, the loop is split to save kcu check in 2D
+          if ((kcu(L)==4 .or. (iadv(L) >= 21 .and. iadv(L) <=29)) .and. ChangeVelocityAtStructures) then
+             ! Apply only on some barrier-like hydraulic structures, and typically on 1D2D links for dambreaks
+             u1L = q1(L)/au_nostrucs(L)
+          else
+             u1L = u1(L)
+          endif
           k1 = ln(1,L) ; k2 = ln(2,L)
-          ucx(k1) = ucx(k1) + wcx1(L)*u1(L)
-          ucy(k1) = ucy(k1) + wcy1(L)*u1(L)
-          ucx(k2) = ucx(k2) + wcx2(L)*u1(L)
-          ucy(k2) = ucy(k2) + wcy2(L)*u1(L)
+          ucx(k1) = ucx(k1) + wcx1(L)*u1L
+          ucy(k1) = ucy(k1) + wcy1(L)*u1L
+          ucx(k2) = ucx(k2) + wcx2(L)*u1L
+          ucy(k2) = ucy(k2) + wcy2(L)*u1L
        endif
     enddo
 
@@ -73,11 +80,17 @@
           if ( struclink(L) == 1 ) cycle
        endif
        if (u1(L) .ne. 0d0) then                      ! link flows
+          if (( kcu(L)==3 .or. kcu(L)==4 .or. (iadv(L) >= 21 .and. iadv(L) <=29)) .and. ChangeVelocityAtStructures) then
+             ! Apply only on some barrier-like hydraulic structures, and typically on 1D2D links for dambreaks
+             u1L = q1(L)/au_nostrucs(L)
+          else
+             u1L = u1(L)
+          endif
           k1 = ln(1,L) ; k2 = ln(2,L)
-          ucx(k1) = ucx(k1) + wcx1(L)*u1(L)
-          ucy(k1) = ucy(k1) + wcy1(L)*u1(L)
-          ucx(k2) = ucx(k2) + wcx2(L)*u1(L)
-          ucy(k2) = ucy(k2) + wcy2(L)*u1(L)
+          ucx(k1) = ucx(k1) + wcx1(L)*u1L
+          ucy(k1) = ucy(k1) + wcy1(L)*u1L
+          ucx(k2) = ucx(k2) + wcx2(L)*u1L
+          ucy(k2) = ucy(k2) + wcy2(L)*u1L
        endif
     enddo
 
