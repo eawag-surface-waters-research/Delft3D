@@ -8368,10 +8368,11 @@ module m_meteo
       vectorMaxTgt = itemPtrTgt%quantityPtr%vectorMax
       if (vectorMaxSrc /= vectorMaxTgt) then
          success = .false.
-         select case (itemPtrTgt%quantityPtr%name)   
+         select case (itemPtrTgt%quantityPtr%name)
          case ('discharge_salinity_temperature_sorsin')
             write(msg,'(a,i0,a,i0,a)') 'Wrong number of data columns in a discharge_salinity_temperature_sorsin time series: ', vectorMaxTgt, ' requested, ',vectorMaxSrc,' provided.'
-            call mess(LEVEL_ERROR,  trim(msg)) 
+            msg = trim(msg) // " With source file '" // trim(itemPtrSrc%elementsetPtr%name) // "'"
+            call mess(LEVEL_ERROR,  trim(msg))
          case default
             call mess(LEVEL_WARN, "There was a problem with a source of type " // trim(itemPtrSrc%quantityPtr%name) &
                     // " with source file '" // trim(itemPtrSrc%elementsetPtr%name) // "'")
