@@ -45,7 +45,7 @@ endif(UNIX)
 if (WIN32)
     target_link_directories(${library_name}
             INTERFACE
-			"${checkout_src_root}/third_party_open/netcdf/${netcdf_version}/lib")
+            "${checkout_src_root}/third_party_open/netcdf/${netcdf_version}/lib")
 
     # Add dependency
     set(oss_dependencies deltares_common
@@ -88,16 +88,9 @@ if ( ${configuration_type} STREQUAL "DFLOWFM" OR
     # Add dynamic io_netcdf library
     add_library(${library_name} SHARED ${src_path}/io_netcdf_api.F90)
 
-    if(UNIX)
-        set(oss_dependencies io_netcdf)
-        oss_include_libraries(${library_name} oss_dependencies)
-        target_link_libraries(${library_name} ${oss_dependencies})
-    endif(UNIX)
-    if (WIN32)
-        set(oss_dependencies io_netcdf)
-        oss_include_libraries(${library_name} oss_dependencies)
-        target_link_libraries(${library_name} ${oss_dependencies})
-    endif(WIN32)
+    set(oss_dependencies io_netcdf)
+    oss_include_libraries(${library_name} oss_dependencies)
+    target_link_libraries(${library_name} ${oss_dependencies})
 
     # Set additional compilation properties, specific for Debug mode
     target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${check_bounds_flag}>")
