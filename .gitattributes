@@ -18324,6 +18324,7 @@ src/tools_lgpl/matlab/quickplot/progsrc/private/hls2rgb.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/idx2rgb.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/incanalysis.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/incremental.m -text
+src/tools_lgpl/matlab/quickplot/progsrc/private/init_netcdf_settings.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/inlist.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/insstruct.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/int32_byteflip.m -text
