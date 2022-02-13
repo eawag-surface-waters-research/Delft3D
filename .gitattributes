@@ -18521,6 +18521,7 @@ src/tools_lgpl/matlab/quickplot/progsrc/qpcross.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/qpcrosst.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/qpfile.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/qpfopen.m -text
+src/tools_lgpl/matlab/quickplot/progsrc/qpplot.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/qpread.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/qpsa.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/qpsf.m -text
