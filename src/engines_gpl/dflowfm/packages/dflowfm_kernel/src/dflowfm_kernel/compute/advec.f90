@@ -89,6 +89,8 @@
  double precision                  :: qxm, qxmu, uam, uamu, uamd, qxmd, du
  double precision                  :: vv1, vv2, dv1, dv2, quk, que
  double precision                  :: ucxku, ucyku, ai, ae, abh, vu1Di, volu, volui, hh, huvL, baik1, baik2
+ double precision                  :: vol_k1        !< representative volume for node k1
+ double precision                  :: vol_k2        !< representative volume for node k2
  double precision                  :: ucin, fdx, ql, qucx, qucy, ac1, ac2, uqn, qn, rhoinsrc, dzss, qnn
  integer                           :: LL,LLL,LLLL, Lb, Lt, Lay, i
 
@@ -342,9 +344,10 @@
  nfw = 0
 
  if (kmx == 0) then
+     
 
  !$OMP PARALLEL DO                                                                   &
- !$OMP PRIVATE(L, advel,k1,k2,iadvL,qu1,qu2,volu,ai,ae,iad,volui,abh,hh,v12t,ku,kd,isg,n12, ucxku, ucyku, ucin, fdx)
+ !$OMP PRIVATE(L, advel,k1,k2,iadvL,qu1,qu2,volu,ai,ae,iad,volui,abh,hh,v12t,ku,kd,isg,n12, ucxku, ucyku, ucin, fdx, vol_k1, vol_k2)
 
  do L  = 1,lnx
 
@@ -441,36 +444,25 @@
                                                      ! based upon cell center excess advection velocity
        qu1 = 0                                       ! and Perot control volume
        qu2 = 0
-       if (jaPure1D == 1) then 
-   
-          if (vol1_f(k1) > 0) then
-             qu1 = QucPerPure1D(1,L)                    ! excess momentum in/out u(L) dir. from k1
-             qu1 = qu1*acl(L)                           ! Perot weigthing
-          endif
-          if (vol1_f(k2) > 0) then
-             qu2 = QucPerPure1D(2,L)                    ! excess momentum in/out u(L) dir. from k2
-             qu2 = qu2*(1d0-acl(L))                     ! Perot weigthing
-          endif
-          volu = acl(L)*vol1_f(k1) + (1d0-acl(L))*vol1_f(k2)
-          if (volu > 0) then
-             advel = (qu1 + qu2)/volu                   ! dimension: ((m4/s2) / m3) =   (m/s2)
-          endif
-
-       else 
-  
-          if (vol1(k1) > 0) then
-             qu1 = QucPerPure1D(1,L)                    ! excess momentum in/out u(L) dir. from k1
-             qu1 = qu1*acl(L)                           ! Perot weigthing
-          endif
-          if (vol1(k2) > 0) then
-             qu2 = QucPerPure1D(2,L)                    ! excess momentum in/out u(L) dir. from k2
-             qu2 = qu2*(1d0-acl(L))                     ! Perot weigthing
-          endif
-          volu = acl(L)*vol1(k1) + (1d0-acl(L))*vol1(k2)
-          if (volu > 0) then
-             advel = (qu1 + qu2)/volu                   ! dimension: ((m4/s2) / m3) =   (m/s2)
-          endif
-
+       if (jaPure1D == 1) then
+          vol_k1 = vol1_f(k1)
+          vol_k2 = vol1_f(k2)
+       else
+          vol_k1 = vol1(k1)
+          vol_k2 = vol1(k2)
+       endif
+       
+       if (vol_k1 > 0) then
+          qu1 = QucPerPure1D(1,L)                    ! excess momentum in/out u(L) dir. from k1
+          qu1 = qu1*acl(L)                           ! Perot weigthing
+       endif
+       if (vol_k2 > 0) then
+          qu2 = QucPerPure1D(2,L)                    ! excess momentum in/out u(L) dir. from k2
+          qu2 = qu2*(1d0-acl(L))                     ! Perot weigthing
+       endif
+       volu = acl(L)*vol_k1 + (1d0-acl(L))*vol_k2
+       if (volu > 0) then
+          advel = (qu1 + qu2)/volu                   ! dimension: ((m4/s2) / m3) =   (m/s2)
        endif
 
     else if (iadvL == 333) then                      ! explicit first order mom conservative

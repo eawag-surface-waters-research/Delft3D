@@ -1087,6 +1087,7 @@ subroutine readMDUFile(filename, istat)
     call prop_get_integer(md_ptr, 'numerics', 'Horadvtypzlayer' , jahazlayer)
 
     call prop_get_integer(md_ptr, 'numerics', 'Pure1D'          , jaPure1D)
+    call prop_get_integer(md_ptr, 'numerics', 'Junction1D'      , jaJunction1D)
 
     call prop_get_integer(md_ptr, 'numerics', 'Zlayercenterbedvel', jaZlayercenterbedvel)
 
@@ -2835,7 +2836,8 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     endif
 
     if (writeall .or. jaPure1D > 0) then
-       call prop_set(prop_ptr, 'numerics', 'Pure1D'        , jaPure1D, '0 = org 1D advec, 1 = pure1D using vol1_f, 2 = pure1D using vol1')
+       call prop_set(prop_ptr, 'numerics', 'Pure1D'        , jaPure1D, 'along 1D channels: 0 = org 1D advec, 1 = pure1D using vol1_f, 2 = pure1D using vol1')
+       call prop_set(prop_ptr, 'numerics', 'Junction1D'    , jaJunction1D, 'at 1D junctions: 0 = org 1D advec, 1 = same as along 1D channels')
     endif
 
     if (jaZerozbndinflowadvection > 0) then

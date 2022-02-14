@@ -376,8 +376,9 @@
 
  integer                           :: jaustarint              !< 1=integral bed layer velocity,  0=velocity at half bed layer
 
- integer                           :: jaPure1D                !< 0 = default 1D advec, 1 = pure1D using vol1_f, 2 = pure1D using vol1
-                                                              ! hk renames to jaPure1D to prevent confusion with the later introduced logical Pure1D in mor.
+ integer                           :: jaPure1D                !< along 1D channels: 0 = vectorial approach, 1 = scalar approach using vol1_f, 2 = scalar approach using vol1
+
+ integer                           :: jaJunction1D            !< at 1D junctions: 0 = vectorial approach, 1 = same approach as along the 1D channels
 
  double precision                  :: Eddyviscositybedfacmax  !< eddyviscosityatbed = min(eddyviscosityatbed, eddyviscosityatbedfacmax*eddyviscosityatbed+1 )
 
@@ -850,6 +851,7 @@ subroutine default_flowparameters()
     javased    = 6       !< vert. adv. suspended sediment concentrations : 0=No, 1=UpwexpL, 2=Centralexpl, 3=UpwimpL, 4=CentraLimpL, 5=switched to 3 for neg stratif., 6=higher-order upwind/explicit
     jahazlayer = 0       !<
     jaPure1D   = 0       !< 0 = org 1D advec, 1 = pure1D using vol1_f, 2 = pure1D using vol1
+    jaJunction1D = 1     !< 0 = org 1D advec at junctions, 1 = junctions follow jaPure1D approach
     JaZlayercenterbedvel      = 1
     jastructurelayersactive   = 1
     JaZerozbndinflowadvection = 0
