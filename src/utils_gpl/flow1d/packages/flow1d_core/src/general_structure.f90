@@ -199,6 +199,7 @@ contains
          crest   = max(bob0(1), bob0(2), genstr%zs)
       else
          crest = genstr%zs
+         maxwidth = genstr%ws
       endif
       
       gle = max(crest, genstr%gateLowerEdgeLevel)
