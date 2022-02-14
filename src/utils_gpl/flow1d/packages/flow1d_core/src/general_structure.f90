@@ -200,7 +200,6 @@ contains
       else
          crest = genstr%zs
       endif
-      maxwidth = genstr%ws
       
       gle = max(crest, genstr%gateLowerEdgeLevel)
       genstr%gateLowerEdgeLevel_actual = gle
