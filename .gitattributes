@@ -4219,7 +4219,7 @@ src/engines_gpl/waq/packages/waq_process/src/waq_process/solvesaphe/mod_acbw_phs
 src/engines_gpl/waq/packages/waq_process/src/waq_process/solvesaphe/mod_chemconst.f90 -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/solvesaphe/mod_chemspeciation.f90 -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/solvesaphe/mod_phsolvers.F90 -text
-src/engines_gpl/waq/packages/waq_process/src/waq_process/solvesaphe/mod_phsolvers_logging.F90 -text
+src/engines_gpl/waq/packages/waq_process/src/waq_process/solvesaphe/mod_phsolvers_logging.F90.notused -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/solvesaphe/mod_precision.f90 -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/solvesaphe/mod_random.f90 -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/somsed.f -text
