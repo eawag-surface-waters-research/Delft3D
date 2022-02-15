@@ -272,6 +272,7 @@ subroutine initGUI(INTINIT)
     COMMON /VFAC/ VFAC, VFACFORCE, NVEC
     COMMON /DRAWTHIS/ ndraw(50)
 
+    type(tree_data), pointer :: ini_ptr !< Unstruc.ini settings in tree_data
 
     ! Read ini file
     FILNAM = trim(unstruc_basename)//'.ini'
@@ -282,12 +283,13 @@ subroutine initGUI(INTINIT)
         call sysfilepath(filnam, inifilename)
     end if
 
-    call readIniFile(inifilename, istat)
+    call readIniFile(inifilename, ini_ptr, errmsg=msgbuf, istat=istat)
+    if (istat /= 0) then
+       call err_flush()
+    end if
 
 
-    !CALL ZOEKAL (MINI,REC, 'INITSCREEN',JA)
-    !READ (MINI,'(A)',END = 888) REC
-    !READ ( REC,*,ERR = 999) JVGA,NXPIX,NYPIX,NTXCOLS,NTXROWS
+
     call get_req_integer(ini_ptr, 'screen', 'JVGA',    JVGA)
     call get_req_integer(ini_ptr, 'screen', 'NXPIX',   NXPIX)
     call get_req_integer(ini_ptr, 'screen', 'NYPIX',   NYPIX)
@@ -295,7 +297,6 @@ subroutine initGUI(INTINIT)
     call get_req_integer(ini_ptr, 'screen', 'NTXROWS', NTXROWS)
 
 
-    !      CALL ZOEKAL (MINI,REC, '@GRAFCOL',JA)
     call prop_get_integer(ini_ptr, 'grafcol', 'NCOLDG',    NCOLDG)
     call prop_get_integer(ini_ptr, 'grafcol', 'NCOLRG',    NCOLRG)
     call prop_get_integer(ini_ptr, 'grafcol', 'NCOLDN',    NCOLDN)
@@ -465,22 +466,6 @@ subroutine initGUI(INTINIT)
 
     call prop_get_integer(ini_ptr, 'display', 'JAFULLBOTTOMLINE' , jafullbottomline )
 
-! TODO: Supporten we nog HLS? [AvD]
-!      CALL ZOEKAL(MINI,REC,'HLSVALUES',JA)
-!      IF (JA .EQ. 1) THEN
-!  564    CONTINUE
-!         READ(MINI,*,ERR=992,END=992) ICL,IRED,IGREEN,IBLUE
-!         ICL   = MAX(1,MIN(ICL,255))
-!         IRED  = MAX(0,MIN(IRED   ,255))
-!         IGREEN= MAX(0,MIN(IGREEN ,255))
-!         IBLUE = MAX(0,MIN(IBLUE  ,255))
-!         CALL IGRPALETTEHLS(ICL,IRED,IGREEN,IBLUE)
-!         GOTO 564
-!      ENDIF
-!
-!  992 CONTINUE
-
-!      CALL ZOEKAL(MINI,REC,'RGBVALUES',JA)
     rgbvalues(:,:) = 0
     rgbvalues(1:4,1)  = (/ 210,    3,    3,    3 /)
     rgbvalues(1:4,2)  = (/ 211,    1,  128,  255 /)  ! NCOLRN = SHOW ALL LINKS/prev net

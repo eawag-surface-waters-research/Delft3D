@@ -40,26 +40,22 @@ use properties
 implicit none
 private ! Prevent used modules from being exported
 
-   type(tree_data), pointer, public :: ini_ptr !< Unstruc ini settings in tree_data
-
-public :: readIniFile, &
-          get_req_string, get_req_integer, get_req_integers, get_req_double
-
+public :: get_req_string, get_req_integer, get_req_integers, get_req_double
 contains
 
-!> Loads initial program settings file through inifiles. 
-subroutine readIniFile(filename, istat)
-    character(*),      intent(in)  :: filename
-    integer, optional, intent(out) :: istat
+!> Local error checker for get_req_*() subroutines.
+subroutine unstruc_ini_error_handler(chapter, prop_key, success)
+   implicit none
+   character(len=*), intent(in   ) :: chapter  !< The chapter which was attempted to be accessed.
+   character(len=*), intent(in   ) :: prop_key !< The property key which was attempted to be accessed.
+   logical,          intent(in   ) :: success  !< Succes status of a prop_get/set() call.
 
-    istat = 0 ! Success
+   if (.not. success) then
+      call err('ERROR READING INI-FILE, RESTORE CORRECT FILE OR CALL Deltares.',&
+               'NO VALUE FOUND FOR: ','['//trim(chapter)//'] '//trim(prop_key))
+   end if
 
-    call tree_create(trim(filename), ini_ptr)
-    call prop_file('ini',trim(filename),ini_ptr,istat)
-    if (istat /= 0) then
-        call mess(LEVEL_ERROR, 'ini file '''//trim(filename)//''' not found. Code: ', istat)
-    endif
-end subroutine readIniFile
+end subroutine unstruc_ini_error_handler
 
 !> Reads the value for a string variable from a propery tree.
 !! When not found, and error is logged and program stops. 
@@ -72,10 +68,8 @@ subroutine get_req_string(prop_ptr, chapter, key, value)
     logical :: success
 
     call prop_get_string(prop_ptr, chapter, key, value, success)
-    if (.not. success) then
-      call err('ERROR READING INI-FILE, RESTORE CORRECT FILE OR CALL Deltares.',&
-               'NO VALUE FOUND FOR: ',key)
-    endif
+    call unstruc_ini_error_handler(chapter, key, success)
+
 end subroutine get_req_string
 
 !> Reads the value for an integer variable from a propery tree.
@@ -89,10 +83,8 @@ subroutine get_req_integer(prop_ptr, chapter, key, value)
     logical :: success
 
     call prop_get_integer(prop_ptr, chapter, key, value, success)
-    if (.not. success) then
-      call err('ERROR READING INI-FILE, RESTORE CORRECT FILE OR CALL Deltares.',&
-               'NO VALUE FOUND FOR: ',key)
-    endif
+    call unstruc_ini_error_handler(chapter, key, success)
+
 end subroutine get_req_integer
 
 
@@ -108,10 +100,8 @@ subroutine get_req_integers(prop_ptr, chapter, key, value, valuelength)
     logical :: success
 
     call prop_get_integers(prop_ptr, chapter, key, value, valuelength, success)
-    if (.not. success) then
-      call err('ERROR READING INI-FILE, RESTORE CORRECT FILE OR CALL Deltares.\n'//&
-               'NO VALUE FOUND FOR: '//key)
-    endif
+    call unstruc_ini_error_handler(chapter, key, success)
+
 end subroutine get_req_integers
 
 !> Reads the value for a double precision variable from a propery tree.
@@ -125,10 +115,8 @@ subroutine get_req_double(prop_ptr, chapter, key, value)
     logical :: success
 
     call prop_get_double(prop_ptr, chapter, key, value, success)
-    if (.not. success) then
-      call err('ERROR READING INI-FILE, RESTORE CORRECT FILE OR CALL Deltares.',&
-               'NO VALUE FOUND FOR: ',key)
-    endif
+    call unstruc_ini_error_handler(chapter, key, success)
+
 end subroutine get_req_double
 
 

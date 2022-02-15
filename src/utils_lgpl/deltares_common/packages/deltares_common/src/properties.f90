@@ -75,7 +75,43 @@ module properties
        module procedure prop_get_version_number
     end interface
     
-contains
+   contains
+
+!> Loads an .ini file into a tree structure.
+!! Some optional arguments may be used to obtain error status + message.
+subroutine readIniFile(filename, ini_ptr, filetypename, errmsg, istat)
+    character(len=*),           intent(in   ) :: filename     !< File to be read
+    type(tree_data),            pointer       :: ini_ptr      !< tree_data structure into which file is read, subsequently ready for prop_get calls.
+    character(len=*), optional, intent(in   ) :: filetypename !< Optional name of this file type, used in a possible error message. Default: 'ini file'.
+    character(len=*), optional, intent(  out) :: errmsg       !< Optional character string that will be filled with a printable error message (to be done on call site).
+    integer,          optional, intent(  out) :: istat        !< Optional result status (0 if successful).
+
+    integer :: istat_
+    character(len=64) :: filetypename_
+
+    istat_ = 0 ! Success
+
+    ! Prepare error message:
+    if (present(filetypename)) then
+       filetypename_ = filetypename
+    else
+       filetypename_ = 'ini file'
+    end if
+
+    ! Construct + fill tree
+    call tree_create(trim(filename), ini_ptr)
+    call prop_file('ini',trim(filename), ini_ptr, istat_)
+    
+    ! Handle possible error
+    if (istat_ /= 0) then
+       write(errmsg, '(a," ''",a,"'' not found. Code: ",i0)') trim(filetypename), trim(filename), istat_
+    endif
+    if (present(istat)) then
+       istat = istat_
+    end if
+
+end subroutine readIniFile
+
 
 subroutine prop_file(filetype, filename , tree, error)
     use tree_structures
