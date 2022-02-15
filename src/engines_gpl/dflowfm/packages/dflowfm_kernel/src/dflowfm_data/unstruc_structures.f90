@@ -688,9 +688,9 @@ double precision function get_discharge_through_gate_opening(genstr, L0, s1m1, s
    double precision  :: u1L, dsL, gatefraction
    
    dsL = s1m2 - s1m1 
-   gatefraction = 1d0-genstr%gateclosedfractiononlink(L0)
+   gatefraction = genstr%gateclosedfractiononlink(L0)
    
-   if (gatefraction > gatefrac_eps) then
+   if (gatefraction < 1d0-gatefrac_eps) then
       u1L = genstr%ru(3,L0) - genstr%fu(3,L0)*dsL
       get_discharge_through_gate_opening = genstr%au(3,L0) * u1L
    else
