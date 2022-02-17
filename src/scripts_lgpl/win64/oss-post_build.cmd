@@ -767,7 +767,7 @@ rem ==========================
 :delwaq_dll
 
     echo "postbuild delwaq_dll . . ."
-    
+
     if "%configuration%" == "Debug" (
     
         echo "Debug postbuild"
@@ -781,6 +781,9 @@ rem ==========================
         
         call :makeDir !dest_bin!   
         call :copyDwaqDependentRuntimeLibraries                                                                          !dest_bin!
+        
+        rem copy intel dlls
+        call :copyFile "!compiler_redist_dir!*.dll"                                                    !dest_share!
         
         rem copy binaries and dll 
         call :copyFile "!build_dir!\waq_plugin_wasteload\!configuration!\waq_plugin_wasteload.*"                         !dest_bin!
@@ -802,6 +805,9 @@ rem ==========================
         
         rem copy binaries and dll 
         call :copyFile "!build_dir!\delwaq\!configuration!\delwaq.dll"                                 !dest_bin! 
+        
+        rem copy intel dlls
+        call :copyFile "!compiler_redist_dir!*.dll"                                                    !dest_share!
 
         rem default
         call :copyFile !checkout_src_root!\engines_gpl\waq\default\bloom.spe                           !dest_default!
@@ -1199,8 +1205,6 @@ rem ==========================
 
     echo "postbuild ddcouple . . ."
     
-    set localstring="!compiler_redist_dir!*.dll"
-    
     if "%configuration%" == "Debug" (
     
         echo "Debug postbuild"
@@ -1216,7 +1220,7 @@ rem ==========================
         
         rem copy binaries and dll 
         call :copyFile "!build_dir!\ddcouple\!configuration!\ddcouple.*"                                !dest_bin!
-        call :copyFile !!localstring!                                                                   !dest_share!!
+        call :copyFile "!compiler_redist_dir!*.dll"                                                     !dest_share!
     )
     
     if "%configuration%" == "Release" ( 
@@ -1233,7 +1237,7 @@ rem ==========================
         
         rem copy binaries and dll 
         call :copyFile "!build_dir!\ddcouple\!configuration!\ddcouple.exe"                            !dest_bin!
-        call :copyFile !!localstring!                                                                 !dest_share!!
+        call :copyFile "!compiler_redist_dir!*.dll"                                                   !dest_share!
         
         call :copyFile "!checkout_src_root!\tools_gpl\ddcouple\scripts\run_ddcouple.bat"              !dest_scripts!
     )
