@@ -18,6 +18,12 @@ endif(UNIX)
 include_directories(${checkout_src_root}
                    "${CMAKE_CURRENT_SOURCE_DIR}/../../include")
 
+set_source_files_properties(
+                   src/depfil_stm.F90
+                   PROPERTIES COMPILE_OPTIONS "${file_preprocessor_flag}")
+
+target_compile_definitions(${library_name} PRIVATE "MOR_USE_ECMODULE")
+
 # Set additional compilation properties, specific for Debug mode
 target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${check_bounds_flag}>")
 
