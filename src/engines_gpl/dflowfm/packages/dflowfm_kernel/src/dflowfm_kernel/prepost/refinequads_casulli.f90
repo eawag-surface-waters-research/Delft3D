@@ -44,21 +44,21 @@ subroutine refinequads_casulli
 
    type (tadm)                            :: adm        ! structure with administration
 
-   double precision                       :: xc, yc, x3, y3, x4, y4, xp, yp
+   double precision                       :: xc, yc, xp, yp
 
    integer                                :: Lstart
 
    integer                                :: ierror
 
-   integer                                :: k, k0, k1, k2, k3, k4, kstart, kend
-   integer                                :: kk, kkm1, kkp1, kkp2, kkk, L, L1, L2, Lm1
+   integer                                :: k, k0, k1, k2, k3, k4
+   integer                                :: kk, kkm1, kkp1, kkp2, kkk, L, Lm1
    integer                                :: link1, link2
    integer                                :: kcell, knode, knew, Lnew
-   integer                                :: N, Ncell, NL, NR, node1, node2
+   integer                                :: N, Ncell, node1, node2
 
    integer                                :: numL_old, numk_old
 
-   integer                                :: jatolan, NPL_bak
+   integer                                :: jatolan
 
    integer                                :: idirectional
 
@@ -761,12 +761,8 @@ subroutine refinequads_casulli
       integer, dimension(:,:), intent(inout) :: newnodes ! new-node administration
 
       integer                                :: L1, L2
-      integer                                :: k1, k2, kk, kk1, kk2, L, N
       integer                                :: iLR1, iLR2, iSE1, iSE2, ipoint1, ipoint2
-      integer                                :: i, j, icell
-
-      double precision                       :: xc, yc
-      double precision                       :: vecprod, dx1, dx2
+      integer                                :: icell
 
       integer, external                      :: icommon
 

@@ -37,33 +37,31 @@ subroutine furu()                                   ! set fu, ru and kfs
  use m_flowtimes
  use m_alloc
  use m_partitioninfo
- use m_xbeach_data, only: ust, vst, urms, swave, Lwave
+ use m_xbeach_data, only: swave
  use m_waves, only: ypar, cfwavhi, hminlw, cfhi_vanrijn, uorb
  use m_sediment
  use unstruc_channel_flow
  use m_sferic
  use m_trachy, only: trachy_resistance
- use unstruc_model, only: md_restartfile
 
  implicit none
 
- integer          :: L, Lf, n, k1, k2, kb, LL, k, itu1, Lb, Lt, itpbn, ns, i
+ integer          :: L, n, k1, k2, kb, LL, k, itu1, Lb, Lt, itpbn, i
 
- double precision :: bui, cu, du, du0, gdxi, ds, riep, as, gdxids
- double precision :: slopec, hup, u1L, v2, frL, u1L0, rhof, zbndun, zbndu0n, bdmwrp, bdmwrs
+ double precision :: bui, cu, du, du0, gdxi, ds
+ double precision :: slopec, hup, u1L, v2, frL, u1L0, zbndun, zbndu0n
  double precision :: qk0, qk1, dzb, hdzb, z00  !
- double precision :: as1, as2, qtotal, width, st2, cmustr, wetdown, dpt
+ double precision :: st2
  double precision :: twot = 2d0/3d0, hb, h23, ustbLL, agp, vLL
  double precision :: hminlwi,fsqrtt,uorbL
 
  integer          :: np, L1     ! pumpstuff
  double precision :: ap, qp, vp ! pumpstuff
 
- double precision :: cfuhi3D, Cz    ! for bed friction
+ double precision :: cfuhi3D    ! for bed friction
 
- integer          :: ierr, jaustarintsave
+ integer          :: jaustarintsave
  double precision :: sqcfi
- logical          :: SkipDimensionChecks
  integer :: ispumpon
 
  hminlwi=1d0/hminlw

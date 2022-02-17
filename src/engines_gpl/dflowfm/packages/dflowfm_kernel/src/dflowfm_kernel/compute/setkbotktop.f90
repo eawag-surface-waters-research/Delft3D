@@ -35,20 +35,20 @@
  use m_flowgeom
  use m_flow
  use m_flowtimes
- use m_transport, only: NUMCONST, Constituents, ISALT, ITEMP, ISED1, ISEDN, ITRA1, itraN, itrac2const
+ use m_transport, only: Constituents, ISALT, ITEMP
 
  implicit none
 
  integer          :: jazws0
 
- integer          :: k2, kb, k, n, kk, nL, nR, nlayb, nlayt, nrlay, ktx, kL, ndz, i
- integer          :: ktmn, ktmx, kt0, kt1, kt2, kt3, LL, L, Lb, Lt, n1,n2, kb1,kb2,ki,kt, kkk, kwaq, Ltn, Ldn
- double precision :: zkk, h0, zks, zkz, sigm, hdz, toplaymint, volkt, savolkt, tevolkt, dtopsi
- double precision :: w1, w2, w3, h1, h2, h3, dz1, dz2, dz3, zw1, zw2, zw3, bL1, bL2, bL3, ht1, ht2, ht3
-integer          :: k1, k3, kb3, Lt1, Lt2, Lt3, Ld1, Ld2, Ld3, kk1, kk2, kk3
+ integer          :: k2, kb, k, n, kk, nL, nR, nlayb, nrlay, ktx
+ integer          :: kt0, kt1, kt2, kt3, LL, L, Lb, Lt, n1,n2, kb1, kb2, kt, kkk, kwaq, Ldn
+ double precision :: zkk, h0, toplaymint, volkt, savolkt, tevolkt, dtopsi
+ double precision :: w1, w2, w3, h1, h2, h3, zw1, zw2, zw3, bL1, bL2, bL3, ht1, ht2, ht3
+integer          :: k1, k3, kb3, kk1, kk2, kk3
 
  integer          :: numbd, numtp, j
- double precision :: drhok, dzk, a, aa, h00, zsl, aaa, sig, dsig, dsig0
+ double precision :: drhok, a, aa, h00, zsl, aaa, sig, dsig, dsig0
 
  if (kmx == 0) return
 

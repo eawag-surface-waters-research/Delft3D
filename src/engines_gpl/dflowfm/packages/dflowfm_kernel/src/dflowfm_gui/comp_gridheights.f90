@@ -63,14 +63,9 @@ subroutine comp_gridheights(mc, eheight, ierror)
    integer                                                             :: ncs, ndx
    integer,          allocatable, dimension(:)                         :: ics, idx
    double precision, allocatable, dimension(:)                         :: t
-   double precision, dimension(2)                                      :: xs1, ys1
-   double precision                                                    :: hmax, xe, ye, nx, ny, htot
-   logical                                                             :: Lorient
 
-   integer                                                             :: is, igL, igR, mfacmax, isL, isR, iter, MAXITER
-   integer                                                             :: i, iL, iR, j, Ndum, num, NsubL, NsubR, numnew
-
-   logical                                                             :: Lset
+   integer                                                             :: is, igL, igR, mfacmax, isL, isR
+   integer                                                             :: i, iL, iR, j, num, NsubL, NsubR, numnew
 
    double precision, external                                          :: splinelength_int
 

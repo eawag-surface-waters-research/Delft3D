@@ -421,15 +421,12 @@ subroutine loadModel(filename)
     use m_monitoring_crosssections
     use m_monitoring_runupgauges
     use m_thindams
-    use m_flow, only: isimplefixedweirs, kmx
+    use m_flow, only: isimplefixedweirs
     use m_manholes
     use m_polygon
     use m_fixedweirs
     use m_partitioninfo
     use string_module
-    use m_transport, only: NUMCONST, ISALT, ITEMP
-    use m_flowtimes, only: tstart_user, tstop_user, dt_max
-    use m_flowparameters , only: jatransportmodule
     use m_sediment
     use m_alloc
     use m_cross_helper
@@ -457,10 +454,9 @@ subroutine loadModel(filename)
     logical                   :: found_1d_network
 
     integer :: istat, minp, ifil, jadoorladen
-    integer :: timerReadStructs   = 0
 
-    integer :: i, ipli
-    integer :: L, k1, k2, tok
+    integer :: i
+    integer :: L, k1, k2
     integer :: ntot_lb
     integer :: handle_loadModel
     integer :: timerHandle
@@ -2481,7 +2477,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     character(len=128)             :: helptxt
     character(len=256)             :: tmpstr
     integer                        :: i, ibuf, help
-    real(kind=hp)                  :: ti_wav_array(3), ti_map_array(3), ti_rst_array(3), ti_his_array(3), ti_waq_array(3), ti_classmap_array(3)
+    real(kind=hp)                  :: ti_map_array(3), ti_rst_array(3), ti_his_array(3), ti_waq_array(3), ti_classmap_array(3)
 
     logical, external              :: get_japart
     istat = 0 ! Success
@@ -3943,7 +3939,7 @@ end subroutine setmd_ident
 !! OutputDir has been read already.
 subroutine switch_dia_file()
 implicit none
-integer                      :: L1, L2, mdia2, mdia, ierr
+integer                      :: mdia2, mdia, ierr
 character(len=256)           :: rec
 logical                      :: line_copied
 external :: getmdia, setmdia

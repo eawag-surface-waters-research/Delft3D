@@ -32,8 +32,8 @@
       use m_fm_wq_processes
       use m_alloc
       use unstruc_messages
-      use m_flow, only: kmx, Lnkx
-      use m_flowgeom, only: Ndxi, ba, Lnx, Lnxi, ln, lne2ln
+      use m_flow, only: kmx
+      use m_flowgeom, only: Ndxi
       use m_flowexternalforcings
       use m_transport
       use m_partitioninfo
@@ -374,8 +374,8 @@
       use bloom_data_vtrans
       use m_alloc
       use unstruc_messages
-      use m_flow, only: kmx, Lnkx
-      use m_flowgeom, only: Ndxi, ba, Lnx, Lnxi, ln, lne2ln
+      use m_flow, only: kmx
+      use m_flowgeom, only: Ndxi, ba
       use m_flowparameters, only: jasal, jatem, jawave, jawaveSwartDelwaq
       use m_flowexternalforcings
       use m_transport
@@ -398,7 +398,7 @@
       integer                  :: nowarn          !< count of warnings
       integer                  :: ierr, ierr2     !< error count
 
-      integer( 4)              :: i, j, ip, isys, icon, ipar, ifun, isfun, ivar
+      integer( 4)              :: i, j, ip, icon, ipar, ifun, isfun, ivar
       integer                  :: ipoifmlayer, ipoifmktop, ipoifmkbot
       integer( 4)              :: refdayNr      ! reference day number, varying from 1 till 365
 
@@ -882,11 +882,10 @@
    integer, intent (out)         :: iresult
 
    character(len=256)            :: filename, sourcemask
-   integer                       :: kb, k, ja, method, kk, kt, ktopx, lenqidnam, ipa, ifun, isfun, imba, imna
+   integer                       :: kb, k, ja, method, kk, kt, lenqidnam, ipa, ifun, isfun, imna
    integer                       :: klocal, waqseg2D, waqseglay
    character (len=NAMTRACLEN)    :: qidnam
    character (len=20)            :: waqinput
-   integer                       :: minp0, npli, inside, filetype0, iad, needextramba, needextrambar
    double precision, allocatable :: viuh(:)            ! temporary variable
    integer, external             :: findname
 
@@ -1264,7 +1263,6 @@
    subroutine fm_wq_processes_step(dt,time)
       use m_fm_wq_processes
       use m_mass_balance_areas
-      use m_missing, only: dmiss
       use unstruc_model, only: md_flux_int
       use m_flow, only: vol1
       use timers
@@ -1275,16 +1273,9 @@
       double precision, intent(in) :: time !< time     for waq in seconds
 
       integer                      :: ipoiconc
-      integer                      :: i, j
 
       integer                      :: ipoivol, ipoisurf, ipoiarea
       integer                      :: ipoivelx, ipoidefa, ipoiflux
-
-      integer                      :: ierr
-
-      double precision             :: dti
-
-      integer                      :: ipvol, isys, k
 
       integer(4), save :: ithand0 = 0
       integer(4), save :: ithand1 = 0
@@ -1356,11 +1347,10 @@
       integer          :: ipoisurf, ipoitau, ipoivel
       integer          :: ipoivol, ipoiconc, ipoisal, ipoitem
       integer          :: ipoivwind, ipoiwinddir, ipoifetchl, ipoifetchd, ipoiradsurf, ipoirain, ipoivertdisper, ipoileng
-      integer          :: i, ip, ifun, isfun
+      integer          :: ip, ifun, isfun
       integer          :: kk, k, kb, kt, ktmax, ktwq
-      integer          :: L, nw1, nw2
+      integer          :: L
 
-      integer          :: iknmrk_dry, iknmrk_wet
       logical, save    :: first = .true.
 
       if (nofun>0) then
@@ -1646,7 +1636,6 @@
       double precision, intent(in) :: tim
 
       integer          :: isys, iconst, iwqbot
-      integer          :: ipoiconc
       integer          :: ivar, iarr, iv_idx
       integer          :: iarknd, ip_arr, idim1, idim2
       integer          :: incr
