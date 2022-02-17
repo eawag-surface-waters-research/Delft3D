@@ -103,6 +103,9 @@ subroutine loadNetwork(filename, istat, jadoorladen)
         return
     end if
 
+    ! This if is needed as long routine load_network_from_flow1d is present for alternative
+    ! 1D-Network reading from INI-file (for Willem Ottevanger)
+
     IF (JADOORLADEN == 0) THEN
         K0 = 0
         L0 = 0

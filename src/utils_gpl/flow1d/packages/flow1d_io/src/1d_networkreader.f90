@@ -38,11 +38,95 @@ module m_1d_networkreader
 
    private
    
+   public NetworkReader
+   public NetworkUgridReader
    public read_1d_ugrid
    public construct_network_from_meshgeom
 
    contains
- 
+    
+   subroutine NetworkReader(network, networkFile)
+   
+      use m_hash_search
+      
+      implicit none
+   
+      type(t_network), target, intent(inout) :: network
+      character(len=*), intent(in) :: networkFile
+      
+      type(tree_data), pointer  :: md_ptr
+      integer :: istat
+      integer :: numstr
+      integer :: i
+
+      call tree_create(trim(networkFile), md_ptr, maxlenpar)
+      call prop_file('ini',trim(networkFile), md_ptr, istat)
+
+      numstr = 0
+      if (associated(md_ptr%child_nodes)) then
+         numstr = size(md_ptr%child_nodes)
+      end if
+
+      ! Get the Nodes First
+      do i = 1, numstr
+         
+         if (tree_get_name(md_ptr%child_nodes(i)%node_ptr) .eq. 'node') then
+           call readNode(network%nds, md_ptr%child_nodes(i)%node_ptr)
+         endif
+
+      enddo
+      call fill_hashtable(network%nds)
+      
+      ! Get the Branches
+      do i = 1, numstr
+         
+         if (tree_get_name(md_ptr%child_nodes(i)%node_ptr) .eq. 'branch') then
+           call readBranch(network%brs, network%nds, md_ptr%child_nodes(i)%node_ptr)
+         endif
+
+      enddo
+      
+      call adminBranchOrders(network%brs)
+      call fill_hashtable(network%brs)
+      
+      call tree_destroy(md_ptr)
+      
+   end subroutine NetworkReader
+   
+   subroutine NetworkUgridReader(network, networkUgridFile)
+   
+      use io_netcdf
+      use io_ugrid
+      use m_hash_search
+      use gridgeom
+      use meshdata
+      
+      implicit none
+   
+      type(t_network), target, intent(inout) :: network
+      character(len=*), intent(in)           :: networkUgridFile
+      
+      integer                   :: ierr
+      integer                   :: ioncid
+      
+      ! Open UGRID-File
+      ierr = ionc_open(networkUgridFile, NF90_NOWRITE, ioncid)
+      if (ierr .ne. 0) then
+         call SetMessage(LEVEL_FATAL, 'Error Opening UGRID-File: '''//trim(networkUgridFile)//'''')
+      endif
+
+      ! Do the actual read
+      call read_1d_ugrid(network, ioncid)
+      
+      ! Close UGRID-File
+      ierr = ionc_close(ioncid)
+      if (ierr .ne. 0) then
+         call SetMessage(LEVEL_FATAL, 'Error Closing UGRID-File: '''//trim(networkUgridFile)//'''')
+      endif
+       
+   end subroutine NetworkUgridReader  
+
+
    !> Constructs a flow1d t_network datastructure, based on meshgeom read from a 1D UGRID file.
    !! meshgeom is only used for reading a UGRID NetCDF file, whereas network is used during
    !! a model computation.

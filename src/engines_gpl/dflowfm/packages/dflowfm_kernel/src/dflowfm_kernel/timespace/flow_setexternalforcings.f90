@@ -509,7 +509,9 @@ subroutine flow_setexternalforcings(tim, l_initPhase, iresult)
 
    if (stm_included) then
        if ((jased>0) .and. l_set_frcu_mor) then
-           call set_frcu_mor(1)     !otherwise frcu_mor is set in getprof_1d()
+           if (jamd1dfile == 0) then
+               call set_frcu_mor(1)     !otherwise frcu_mor is set in getprof_1d()
+           endif
            call set_frcu_mor(2)
        endif
    endif

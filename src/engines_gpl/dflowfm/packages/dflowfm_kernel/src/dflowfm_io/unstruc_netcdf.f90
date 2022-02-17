@@ -2697,6 +2697,7 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
     use m_alloc
     use m_CrossSections 
     use unstruc_channel_flow, only: network
+    use m_flowparameters, only: jamd1dfile
     use m_save_ugrid_state, only: mesh1dname
     use m_structures
     use m_1d_structures
@@ -4603,7 +4604,7 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
    use m_sediment
    use m_bedform
    use m_wind
-   use m_flowparameters, only: jatrt, ibedlevtyp
+   use m_flowparameters, only: jatrt, jamd1dfile, ibedlevtyp
    use m_mass_balance_areas
    use m_fm_wq_processes
    use m_xbeach_data
