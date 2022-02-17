@@ -141,9 +141,6 @@ module m_oned_functions
             call timstop(handle)
          endif
          handle = 0
-         call timstrt('Set structure indices', handle)
-         call set_structure_indices()
-         call timstop(handle)
          
          network%initialized = .true.         
       endif
@@ -486,10 +483,6 @@ module m_oned_functions
       endif
 
    end subroutine save_1d_nrd_vars_in_stm
-
-   !> 
-   subroutine set_structure_indices()
-   end subroutine set_structure_indices
 
    subroutine setbobs_1d()
    
