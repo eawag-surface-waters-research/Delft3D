@@ -2136,19 +2136,6 @@ subroutine readMDUFile(filename, istat)
       enddo
       deallocate(fnames)
 
-      ! Next, filter and collect any [structure] blocks from the top level MDU file.
-      n = tree_num_nodes(md_ptr)
-      do i = 1,n
-         select case (trim(tree_get_name( md_ptr%child_nodes(i)%node_ptr )))
-         case ('structure')
-            ! TODO: UNST-2452: support multiple structures in MDU with their own basedir (or not?)
-            call tree_add_node(strs_ptr, md_ptr%child_nodes(i)%node_ptr, ierror)
-            if (ierror /= 0) then
-               write(msgbuf, '(a,i0,a)') 'Failed to add element #', i, ' to list of structures.'
-               call err_flush()
-            end if
-         end select
-      end do
       ! [debug]
       if (loglevel_StdOut <= LEVEL_DEBUG) then
          write (*,*) '** DEBUG  : This is the list of structures that will be processed:' ! no MessageHandling, because tree_traverse does not (yet) support it.
