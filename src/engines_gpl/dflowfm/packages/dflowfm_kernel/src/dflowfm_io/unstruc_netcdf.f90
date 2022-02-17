@@ -13215,11 +13215,9 @@ subroutine unc_read_map(filename, ierr)
    !      ln_read(:,L) = itmp2D(:,LL)
    !   end do
    !   call check_error(ierr, 'FlowLink')
-   !   
-   !   ! check orientation
-   !   call check_flowlink_orientation(lnx_own, ln_read, ilink_own, lnx_merge, ndxi_merge, ndxi, inode_owninv, inode_merge2own)
+   !
    !end if
-   
+
    !-- Synchronisation to other domains, only for merged-map input
    if (jampi == 1 .and. um%jamergedmap == 1) then
       !-- S/S3D --
@@ -15541,102 +15539,6 @@ subroutine readcells(filename, ierr, jaidomain, jaiglobal_s, jareinitialize)
     ierr  = 1
     nerr_ = 0
 end subroutine readcells
-
-!!> Check the orientations of flowlinks in the current model, comparing with flowlinks that are read from the rst file.
-!!> If the orientations are different, then reverse the orientation of the velociy that is read from rst file.
-subroutine check_flowlink_orientation(lnx_own, ln_read, ilink_own, lnx_merge, ndxi_merge, ndxi, inode_owninv, inode_merge2own)
-   use m_flowgeom,      only: ln
-   use m_flow,          only: u1, u0
-   use m_partitioninfo, only: my_rank, jampi
-   use unstruc_messages
-   implicit none
-
-   
-   integer,                        intent(in) :: lnx_own      ! Number of flowlinks (excluding ghosts) on the current model
-   integer, dimension(2,lnx_own),  intent(in) :: ln_read      ! FlowLink read from rst file
-   integer, dimension(lnx_own),    intent(in) :: ilink_own(:) ! index mapping from its own partition (excluding ghosts) to this partition(with ghosts) 
-   integer, optional,              intent(in) :: lnx_merge    ! Number of Flowlinks in the merged file
-   integer,                        intent(in) :: ndxi_merge   ! Number of Flownodes in the merged file
-   integer,                        intent(in) :: ndxi         ! Number of Flownodes (including ghosts) on the current model
-   integer, dimension(ndxi),       intent(in) :: inode_owninv ! Mapping from actual index (including ghosts) to the own index (excluding ghosts)
-   integer, dimension(ndxi_merge), intent(in) :: inode_merge2own ! Mapping from merged file to the own index
-   integer                                    :: L, LL, k1, k2, k1_read, k2_read, kk1, kk2, kk1_read, kk2_read, num=0
-   character(len=128)                         :: message
-    
-   
-   call mess(LEVEL_INFO, 'Check flowlink orientation when restart:')
-    
-   ! check orientation for flowlinks of its own
-   do L = 1, lnx_own
-      LL = ilink_own(L) ! L link is LL link when including ghost links
-      
-      ! on the curret model
-      k1 = ln(1,LL)     ! in the current model, ln array contains ghosts
-      k2 = ln(2,LL)
-      if (k1>ndxi) then
-         kk1 = 0
-      else
-         kk1 = max(inode_owninv(k1), 0) ! node index of its own
-      end if
-      if (k2>ndxi) then
-         kk1 = 0
-      else
-         kk2 = max(inode_owninv(k2), 0)
-      end if
-      
-      ! from rst file
-      k1_read = ln_read(1,L) ! node index in the merged file
-      k2_read = ln_read(2,L)
-      if (k1_read > 0) then
-         kk1_read = max(inode_merge2own(k1_read), 0 ) ! node index of its own 
-      else
-         ! the fill_value in ln_read from the merged file denotes a bnd flownodes. In this situation, the orientation of 
-         ! the flowlink is always pointing to the interior of the comp. domain. So we do not need to compare the coordinates of the 
-         ! bnd flownodes
-         kk1_read = 0
-      end if
-      
-      if (k2_read > 0) then
-         kk2_read = max(inode_merge2own(k2_read), 0)
-      else
-         kk2_read = 0
-      end if
-
-      if (kk1 .ne. kk1_read) then
-         if (kk1 .eq. kk2_read .and. kk2 .eq. kk1_read) then ! For the same link L, the orientation is differet
-            if (jampi==0) then
-               write(message, "('orientation mismatches for link=', I0, ', has been fixed.')") L
-               call mess(LEVEL_INFO, trim(message))
-            else
-               write(message, "('my_rank=', I0,': orientation mismatches for link=', I0, ', has been fixed.')") my_rank, L
-               call mess(LEVEL_INFO, trim(message))
-            end if         
-            
-            u1(LL) = -u1(LL)
-            u0(LL) = -u0(LL)
-            num   = num + 1
-         else ! It is not the same link
-            if (jampi==0) then
-               write(message, "('flowlink mismatches: link=', I0, '.')") L
-               call mess(LEVEL_ERROR, trim(message))
-            else
-               write(message, "('my_rank=', I0, ': flowlink mismatches: link=', I0,'.')") my_rank, L
-               call mess(LEVEL_ERROR, trim(message))
-            end if
-         end if
-      end if
-   end do
-         
-   if (num == 0) then
-      if (jampi == 0) then
-         call mess(LEVEL_INFO, 'No mismatched flowlink is found. Finish checking.')
-      else
-         write(message, "('my_rank=', I0,': no mismatched flowlink is found. Finish checking')") my_rank
-         call mess(LEVEL_INFO, trim(message))
-      end if
-   end if
-
-end subroutine check_flowlink_orientation
 
 subroutine find_flownodesorlinks_merge(n, x, y, n_loc, n_own, iloc_own, iloc_merge, janode, jaerror2sam, inode_merge2loc)
    use kdtree2Factory
