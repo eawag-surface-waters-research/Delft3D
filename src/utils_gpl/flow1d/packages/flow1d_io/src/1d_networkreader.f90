@@ -726,7 +726,6 @@ module m_1d_networkreader
       pbr%fromNode%y        = gpY(1)
       pbr%toNode%x          = gpX(gridPointsCount)
       pbr%toNode%y          = gpY(gridPointsCount)
-      pbr%iTrench           = 0
 
       do j = 1, 2
          if (j==1) then
@@ -914,8 +913,6 @@ module m_1d_networkreader
             call err_flush()
          end if
       end if
-
-      pbr%iTrench           = 0
 
       do j = 1, 2
          if (j==1) then
