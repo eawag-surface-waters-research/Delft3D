@@ -30,46 +30,50 @@
 ! $Id$
 ! $HeadURL$
 
-  SUBROUTINE MERGENODES(K1,K2,JA)  ! KNOOP 1 WORDT OPGENOMEN IN KNOOP 2
+  SUBROUTINE MERGENODES(K1,K2,JA,unconnected)  ! KNOOP 1 WORDT OPGENOMEN IN KNOOP 2
 
-  use m_netw
-  use m_missing
-  use gridoperations
+  use m_netw,         only: NMK, KN, NOD, KC, XK
+  use m_missing,      only: dxymis
+  use gridoperations, only: OTHERNODE
 
   implicit none
-  integer :: K1,K2,JA, L2, NN, K22, NM22, L2A, K22A, N1
-
+  integer, intent(in)              :: K1,K2        ! netnode indices of the 2 nodes to be merged  
+  integer, intent(out)             :: JA           ! Status integer, always 1
+  logical, intent(inout), optional :: unconnected  ! if true skip expensive connected check
+  
+  !locals
+  integer :: L2, L12, NN, K22, NM22, L2A, K22A, N1
   integer :: l
-  integer :: l12
-  integer :: n
-  integer :: nm
-  integer :: nm1
-  integer :: nm2
+  integer :: n, nm, nm1, nm2
   INTEGER :: NODLIN(200)
-
-  JA  = 0
+  
+  if (.not. present(unconnected)) unconnected = .false.
+  
   NM1 = NMK(K1)
   NM2 = NMK(K2)
-  CALL GIVELINKNUM(K1,K2,L12)
-  if (L12 .ne. 0) then
-     kn(1,L12) = 0 ; kn(2,L12) = 0; kn(3,L12) = 0
+  
+  if ( .not. unconnected) then ! Deze check is duur dus doe hem niet als je weet dat de nodes unconnected zijn. 
+     CALL GIVELINKNUM(K1,K2,L12)
+     if (L12 .ne. 0) then
+        kn(1,L12) = 0 ; kn(2,L12) = 0; kn(3,L12) = 0
+     endif
+     
+     DO NM = 1,NM1 ! CHECK OF JE NIET VIA EEN ANDER PAD OOK BIJ K2 UIT KAN KOEMN. ZO JA, VERWIJDER LINK
+        L2 = NOD(K1)%LIN(NM)
+        CALL OTHERNODE(K1,L2,K22)
+        IF (K22 .NE. 0 .AND. K22 .NE. K2) THEN
+           NM22 = NMK(K22)
+           DO NN  = 1,NM22
+              L2A  = NOD(K22)%LIN(NN)
+              CALL OTHERNODE(K22,L2A,K22A)
+              IF (K22A == K2) THEN
+                 kn(1,L2A) = 0 ; kn(2,L2A) = 0; kn(3,L2A) = 0
+              ENDIF
+           ENDDO
+        ENDIF
+     ENDDO
   endif
-
-  DO NM = 1,NM1               ! CHECK OF JE NIET VIA EEN ANDER PAD OOK BIJ K2 UIT KAN KOEMN. ZO JA, VERWIJDER LINK
-     L2 = NOD(K1)%LIN(NM)
-     CALL OTHERNODE(K1,L2,K22)
-     IF (K22 .NE. 0 .AND. K22 .NE. K2) THEN
-        NM22 = NMK(K22)
-        DO NN  = 1,NM22
-           L2A  = NOD(K22)%LIN(NN)
-           CALL OTHERNODE(K22,L2A,K22A)
-           IF (K22A == K2) THEN
-              kn(1,L2A) = 0 ; kn(2,L2A) = 0; kn(3,L2A) = 0
-           ENDIF
-        ENDDO
-     ENDIF
-  ENDDO
-
+   
   N = 0
   DO NM = 1,NM2
      L  = NOD(K2)%LIN(NM)
@@ -88,19 +92,17 @@
   ENDDO
   NMK(K2) = N
 
- ! call setnodadm(0); return
 
-
-  if ( allocated(nod(k2)%lin) ) DEALLOCATE(NOD(K2)%LIN) ! hk did same as sp few lines below
+  if ( allocated(nod(k2)%lin) ) DEALLOCATE(NOD(K2)%LIN) 
+  if ( allocated(nod(k1)%lin) ) deallocate(NOD(K1)%lin) 
+  
   ALLOCATE ( NOD(K2)%LIN(NMK(K2)) )
-
   NOD(K2)%LIN(1:NMK(K2)) = NODLIN(1:NMK(K2))
-
-  if ( allocated(nod(k1)%lin) ) deallocate (NOD(K1)%lin) ! %LIN = 0  ! SPvdP: added check
+ 
   KC (K1)     = 0
   NMK(K1)     = 0
   XK (K1)     = dxymis
-  ja = 1 ! nepcheck
+  ja = 1
 
   RETURN
   END SUBROUTINE MERGENODES

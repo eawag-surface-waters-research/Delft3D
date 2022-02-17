@@ -1714,7 +1714,6 @@ src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_kernel/prepost/merge
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_kernel/prepost/mergenodes.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_kernel/prepost/mergenodesinpolygon.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_kernel/prepost/mergepoly.f90 -text
-src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_kernel/prepost/mergeunconnectednodes.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_kernel/prepost/minmaxpol.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_kernel/prepost/mirr.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_kernel/prepost/mirror.f90 -text
