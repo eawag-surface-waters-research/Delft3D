@@ -1,34 +1,36 @@
 module m_rdtrt
 
 !----- GPL ---------------------------------------------------------------------
-!                                                                               
-!  Copyright (C)  Stichting Deltares, 2011-2022.                                
-!                                                                               
-!  This program is free software: you can redistribute it and/or modify         
-!  it under the terms of the GNU General Public License as published by         
-!  the Free Software Foundation version 3.                                      
-!                                                                               
-!  This program is distributed in the hope that it will be useful,              
-!  but WITHOUT ANY WARRANTY; without even the implied warranty of               
-!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the                
-!  GNU General Public License for more details.                                 
-!                                                                               
-!  You should have received a copy of the GNU General Public License            
-!  along with this program.  If not, see <http://www.gnu.org/licenses/>.        
-!                                                                               
-!  contact: delft3d.support@deltares.nl                                         
-!  Stichting Deltares                                                           
-!  P.O. Box 177                                                                 
-!  2600 MH Delft, The Netherlands                                               
-!                                                                               
-!  All indications and logos of, and references to, "Delft3D" and "Deltares"    
-!  are registered trademarks of Stichting Deltares, and remain the property of  
-!  Stichting Deltares. All rights reserved.                                     
-!                                                                               
+!
+!  Copyright (C)  Stichting Deltares, 2011-2022.
+!
+!  This program is free software: you can redistribute it and/or modify
+!  it under the terms of the GNU General Public License as published by
+!  the Free Software Foundation version 3.
+!
+!  This program is distributed in the hope that it will be useful,
+!  but WITHOUT ANY WARRANTY; without even the implied warranty of
+!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+!  GNU General Public License for more details.
+!
+!  You should have received a copy of the GNU General Public License
+!  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+!
+!  contact: delft3d.support@deltares.nl
+!  Stichting Deltares
+!  P.O. Box 177
+!  2600 MH Delft, The Netherlands
+!
+!  All indications and logos of, and references to, "Delft3D" and "Deltares"
+!  are registered trademarks of Stichting Deltares, and remain the property of
+!  Stichting Deltares. All rights reserved.
+!
 !-------------------------------------------------------------------------------
 !  $Id$
 !  $HeadURL$
 !!--description-----------------------------------------------------------------
+
+use precision
 
 !
 ! functions and subroutines
@@ -54,7 +56,6 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        , &
 !!--pseudo code and references--------------------------------------------------
 ! NONE
 !!--declarations----------------------------------------------------------------
-    use precision
     use properties
     use trachytopes_data_module
     use grid_dimens_module, only: griddimtype
@@ -112,16 +113,16 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        , &
     real(fp), dimension(:)     , pointer :: rttacLin
     real(fp), dimension(:)     , pointer :: vegh2d
     real(fp), dimension(:)     , pointer :: vden2d
-    character(256)             , pointer :: md_ttdfile ! Name of trachytopes definition file. 
-    character(256)             , pointer :: md_arlfile ! Name of trachytopes area definition file 
+    character(256)             , pointer :: md_ttdfile ! Name of trachytopes definition file.
+    character(256)             , pointer :: md_arlfile ! Name of trachytopes area definition file
 
     type(trachy_type) , target               :: gdtrachy
     type (griddimtype), target , intent(in)  :: griddim
     real(fp)                   , intent(in)  :: dryflc
     type (tree_data)  , pointer, intent(in)  :: mdfile_ptr
     logical                    , intent(in)  :: waqol
-    real(fp)                   , intent(in)  :: d3d_tunit ! d3d_tunit available for compatitibility with Delft3D 
-    
+    real(fp)                   , intent(in)  :: d3d_tunit ! d3d_tunit available for compatitibility with Delft3D
+
 !
 ! Local parameters
 !
@@ -131,8 +132,8 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        , &
 ! Global variables
 !
     integer  :: itimtt
-    integer  :: itrtcrs    
-    integer  :: itrtobs    
+    integer  :: itrtcrs
+    integer  :: itrtobs
     integer  :: lundia
     integer  :: kmax
     integer  :: nmaxus
@@ -156,7 +157,7 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        , &
     integer                          :: it
     integer                          :: itttmp
     integer                          :: j
-    integer                          :: jdir                     
+    integer                          :: jdir
     integer                          :: lcurec
     integer                          :: lfile
     integer                          :: luntmp
@@ -205,36 +206,36 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        , &
     ntrtnrm        => gdtrachy%gen%ntrtnrm
     ntrtcrs        => gdtrachy%gen%ntrtcrs
     ntrtobs        => gdtrachy%gen%ntrtobs
-    max_cl         => gdtrachy%gen%max_cl    
+    max_cl         => gdtrachy%gen%max_cl
     n_q            => gdtrachy%gen%n_q
     n_zs           => gdtrachy%gen%n_zs
     nodir          => gdtrachy%gen%nodir
     md_ttdfile     => gdtrachy%gen%md_ttdfile
     dttrt          => gdtrachy%gen%dttrt
     itrt_list      => gdtrachy%gen%itrt_list
-    fraccu_list    => gdtrachy%gen%fraccu_list    
+    fraccu_list    => gdtrachy%gen%fraccu_list
     !
-    nlb            => griddim%nlb    !WO - was gdp%d%nlb  previously 
-    nub            => griddim%nub    ! 
+    nlb            => griddim%nlb    !WO - was gdp%d%nlb  previously
+    nub            => griddim%nub    !
     mlb            => griddim%mlb    !
     mub            => griddim%mub    !
     nmlb           => griddim%nmlb   !
     nmub           => griddim%nmub   !
-    mfg            => griddim%mfg    ! 
-    nfg            => griddim%nfg    !    
+    mfg            => griddim%mfg    !
+    nfg            => griddim%nfg    !
     nmax           => griddim%nmax
     mmax           => griddim%mmax
-    
-    if (mod(nmax,2) == 1) then 
+
+    if (mod(nmax,2) == 1) then
         nmaxus = nmax - 1
-    else     
+    else
         nmaxus = nmax
-    end if 
-    
+    end if
+
     nmaxddb = nmax + 2*ddbval
-    
+
     nmmax = nmaxddb*(mmax + 2*ddbval)
-    !nm      = n + nmaxddb * (m - 1 + ddbval ) + ddbval    
+    !nm      = n + nmaxddb * (m - 1 + ddbval ) + ddbval
     !(see call n_and_m_to_nm.f90 WO)
     !
     ! n_m_to_nm      => griddim%n_m_to_nm
@@ -256,11 +257,11 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        , &
        !
        do jdir = 1,nodir
           if (istat==0) allocate(gdtrachy%dir(jdir)%rttfu(nmlb:nmub,kmax), stat = istat)
-          ! 
+          !
           if (istat/=0) then
              call SetMessage(LEVEL_ERROR, 'RDTRT: memory alloc error')
              error = .true.
-             return        
+             return
           endif
           !
           ! update local pointers
@@ -272,7 +273,7 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        , &
           !
           rttfu(nmlb:nmub,1:kmax) = 0.0_fp
           !
-       end do   
+       end do
     endif
     !
     ! Initialize scalars
@@ -312,7 +313,7 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        , &
           if (istat==0) allocate(gdtrachy%dir(jdir)%kcu_trt(nmlb:nmub)                    , stat = istat)
           if (istat==0) allocate(gdtrachy%dir(jdir)%zsu_prev(nmlb:nmub)                   , stat = istat)
        end do
-       ! general 
+       ! general
        if (istat==0) allocate(gdtrachy%gen%ittdef(ntrt,2)                                 , stat = istat)
        if (istat==0) allocate(gdtrachy%gen%rttdef(ntrt,nroupa)                            , stat = istat)
        if (istat==0) allocate(gdtrachy%gen%crs(ntrtcrs)                                   , stat = istat)
@@ -331,7 +332,7 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        , &
        if (istat/=0) then
           call SetMessage(LEVEL_ERROR, 'RDTRT: memory alloc error')
           error = .true.
-          return        
+          return
        endif
        !
        ! update local pointers
@@ -346,17 +347,17 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        , &
           ittlin          => gdtrachy%dir(jdir)%lin
           rttacLin        => gdtrachy%dir(jdir)%acLin
 !          md_arlfile      => gdtrachy%dir(jdir)%md_arlfile
-          if (jdir == 1) then 
+          if (jdir == 1) then
              icx = nmaxddb   ! nmax
           else
              icx = 1
-          end if 
-          do m = 1,mmax      
-             do n = 1,nmax   
+          end if
+          do m = 1,mmax
+             do n = 1,nmax
                 nm          = n + nmaxddb * (m - 1 + ddbval ) + ddbval
                 ittlin(1,nm) = nm
                 ittlin(2,nm) = nm+icx
-                rttacLin(nm)  = 0.5_fp   
+                rttacLin(nm)  = 0.5_fp
              enddo
           enddo
        enddo
@@ -372,7 +373,7 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        , &
     !
     ! Check on multiple
     itimtt = nint(rtimtt/dt)
-    if (abs(real(itimtt,fp)*dt-rtimtt) > (0.1_fp*dt)) then       ! previously : if (dtn(itimtt, rtimtt, dt)) which is approximate - updates are preformed within 0.1 of dtmax, cf. Delft3D, WO) 
+    if (abs(real(itimtt,fp)*dt-rtimtt) > (0.1_fp*dt)) then       ! previously : if (dtn(itimtt, rtimtt, dt)) which is approximate - updates are preformed within 0.1 of dtmax, cf. Delft3D, WO)
        call SetMessage(LEVEL_ERROR, 'RDTRT: Trachytope update time is not a multiple of the user time step' )
        error = .true.
        goto 9999
@@ -566,18 +567,18 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        , &
     ibeg = 1
     iend = 132
     !
-    ! Comment at end of line 
+    ! Comment at end of line
     !
     ! loop over rec132 and find #
     !
     comment_at_end_of_line_loop: &
         do istr = ibeg, iend
-            if (rec132(istr:istr) == '#') then 
+            if (rec132(istr:istr) == '#') then
                 iend = istr
                 exit comment_at_end_of_line_loop
-            end if 
+            end if
         end do &
-    comment_at_end_of_line_loop    
+    comment_at_end_of_line_loop
     !
     call scannr(rec132    ,ibeg      ,iend      ,nrflds    ,itype     , &
               & ifield    ,rfield    ,cfield    ,lenchr    ,MAXFLD    , &
@@ -593,7 +594,7 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        , &
        !
        rec132 = ' '
        write (rec132, '(i12)') mcurec
-       call SetMessage(LEVEL_ERROR, 'Read error from file: '// & 
+       call SetMessage(LEVEL_ERROR, 'Read error from file: '// &
            & trim(filtmp) // ', Record: ' // trim(rec132))
        error = .true.
        goto 199
@@ -619,7 +620,7 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        , &
           if (nrflds/=nropar(i) + 2) then
              rec132 = ' '
              write (rec132, '(i12)') mcurec
-             call SetMessage(LEVEL_ERROR, 'Trachytopes: Wrong number of parameters defined, File: ' & 
+             call SetMessage(LEVEL_ERROR, 'Trachytopes: Wrong number of parameters defined, File: ' &
                  & // trim(filtmp) // ', Record: ' // trim(rec132))
              error  = .true.
              goto 199
@@ -639,7 +640,7 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        , &
           if (.not.lokay) then
              rec132 = ' '
              write (rec132, '(i12)') mcurec
-             call SetMessage(LEVEL_FATAL, 'Read error from file: '// & 
+             call SetMessage(LEVEL_FATAL, 'Read error from file: '// &
                  & trim(filtmp) // ', Record: ' // trim(rec132))
              error = .true.
              goto 199
@@ -656,12 +657,12 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        , &
           !
           if (mtrt>ntrt) then
              call SetMessage(LEVEL_ERROR, 'Trachytopes: Number of trachytope definitions in file > array size.')
-             error = .true.             
+             error = .true.
              goto 199
           endif
           if (mtrtnrm>ntrtnrm) then
              call SetMessage(LEVEL_ERROR, 'Trachytopes: Number of standard trachytope definitions in file > array size.')
-             error = .true.             
+             error = .true.
              goto 199
           endif
           !
@@ -685,17 +686,17 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        , &
           !
           rec132 = ' '
           write (rec132, '(i12)') mcurec
-          call SetMessage(LEVEL_ERROR, 'Trachytopes: Unknown roughness code in  file ' & 
+          call SetMessage(LEVEL_ERROR, 'Trachytopes: Unknown roughness code in  file ' &
               & // trim(filtmp) // ', Record: ' // trim(rec132))
           error  = .true.
           goto 199
        endif
-    elseif (itype(1)==1 .and. itype(2)==3) then   
-        ! Reading is done in trachytopes module 
-        ! Checking of valid cross-section/observation-station name is done later in FM or Delft3D 
+    elseif (itype(1)==1 .and. itype(2)==3) then
+        ! Reading is done in trachytopes module
+        ! Checking of valid cross-section/observation-station name is done later in FM or Delft3D
         !
-        if (cfield(2)(1:9) == 'DISCHARGE') then        ! TO DO: use strcmpi? 
-            ! DISCHARGE    -> cross-section name 
+        if (cfield(2)(1:9) == 'DISCHARGE') then        ! TO DO: use strcmpi?
+            ! DISCHARGE    -> cross-section name
             mtrtcrs = mtrtcrs + 1
             mtrt    = mtrt + 1
             prev_trt_no   = ifield(1)
@@ -706,24 +707,24 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        , &
             gdtrachy%gen%crs(mtrtcrs)%rec132 = rec132
             gdtrachy%gen%crs(mtrtcrs)%itrt   = mtrt
             gdtrachy%gen%crs(mtrtcrs)%idx_start = m_q + 1
-            gdtrachy%gen%crs(mtrtcrs)%idx_end   = m_q         ! gets updated when first dependent row is read 
+            gdtrachy%gen%crs(mtrtcrs)%idx_end   = m_q         ! gets updated when first dependent row is read
             !
             if (mtrtcrs>ntrtcrs) then
-                call SetMessage(LEVEL_ERROR, & 
+                call SetMessage(LEVEL_ERROR, &
                     & 'Trachytopes: Number of discharge-dependent trachytope definitions in file > array size.')
-                error = .true.             
+                error = .true.
                 goto 199
             endif
             if (mtrt>ntrt) then
-                call SetMessage(LEVEL_ERROR, & 
+                call SetMessage(LEVEL_ERROR, &
                     & 'Trachytopes: Number of trachytope definitions in file > array size (check in discharge).')
-                error = .true.             
+                error = .true.
                 goto 199
             endif
-            ! 
+            !
             goto 110
-        elseif (cfield(2)(1:10) == 'WATERLEVEL') then  ! TO DO: use strcmpi? 
-            ! WATERLEVEL   -> observation-station name 
+        elseif (cfield(2)(1:10) == 'WATERLEVEL') then  ! TO DO: use strcmpi?
+            ! WATERLEVEL   -> observation-station name
             mtrtobs = mtrtobs + 1
             mtrt    = mtrt + 1
             prev_trt_no   = ifield(1)
@@ -734,27 +735,27 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        , &
             gdtrachy%gen%obs(mtrtobs)%rec132 = rec132
             gdtrachy%gen%obs(mtrtobs)%itrt   = mtrt
             gdtrachy%gen%obs(mtrtobs)%idx_start = m_zs + 1
-            gdtrachy%gen%obs(mtrtobs)%idx_end   = m_zs       ! gets updated when first dependent row is read 
+            gdtrachy%gen%obs(mtrtobs)%idx_end   = m_zs       ! gets updated when first dependent row is read
             !
             if (mtrtobs>ntrtobs) then
                 call SetMessage(LEVEL_ERROR, 'Trachytopes: Number of waterlevel-dependent trachytope definitions in file > array size.')
-                error = .true.             
+                error = .true.
                 goto 199
             endif
             if (mtrt>ntrt) then
                 call SetMessage(LEVEL_ERROR, 'Trachytopes: Number of trachytope definitions in file > array size (check in waterlevel).')
-                error = .true.             
+                error = .true.
                 goto 199
             endif
             !
             goto 110
-        else 
+        else
             call SetMessage(LEVEL_ERROR, 'Trachytopes: Unknown roughness code in  file ' // trim(filtmp) // ', Record: ' // trim(rec132))
             error  = .true.
             goto 199
-        end if 
+        end if
     elseif (itype(1)==1 .and. itype(2)/=3 .and. itype(3)==1) then
-        if (ifield(1) == prev_trt_no) then 
+        if (ifield(1) == prev_trt_no) then
             ! add to table for discharge/water level depdendent data
             if (prev_trt_type == TRACHY_WATERLEVEL_TYPE) then
                 ! add values to table for waterlevel dependent trachytopes
@@ -764,7 +765,7 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        , &
                 gdtrachy%gen%obs(mtrtobs)%nropars   = nropar(ifield(3))
                 gdtrachy%gen%ittdef_zs(m_zs) = ifield(3)
                 !
-                ! Store parameters data in array temporarily (will be overwritten later) 
+                ! Store parameters data in array temporarily (will be overwritten later)
                 !
                 lrcode = .false.
                 if (ifield(3)<=IROUGH) then
@@ -774,18 +775,18 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        , &
                     end if
                 end if
                 if (lrcode) then
-                    gdtrachy%gen%table_zs(m_zs)         = rfield(2) 
+                    gdtrachy%gen%table_zs(m_zs)         = rfield(2)
                     gdtrachy%gen%obs(mtrtobs)%idx_end   = m_zs       ! check later: idx_end >= idx_start + 1
                     do j = 1, nropar(i)
                         rttdef(mtrt, j)    = rfield(j + 3)
                         gdtrachy%gen%rttdef_zs(m_zs, j)          = rfield(j + 3)
-                    end do 
+                    end do
                 else
                     call SetMessage(LEVEL_ERROR, 'Trachytopes: Unknown roughness code for waterlevel dependence in file ' &
                         & // trim(filtmp) // ', Record: ' // trim(rec132))
                     error  = .true.
                     goto 199
-                end if     
+                end if
                 !
             elseif (prev_trt_type == TRACHY_DISCHARGE_TYPE) then
                 ! add values to table for discharge dependent trachytopes
@@ -795,7 +796,7 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        , &
                 gdtrachy%gen%crs(mtrtcrs)%nropars   = nropar(ifield(3))
                 gdtrachy%gen%ittdef_q(m_q) = ifield(3)
                 !
-                ! Store parameters data in array temporarily (will be overwritten later) 
+                ! Store parameters data in array temporarily (will be overwritten later)
                 !
                 lrcode = .false.
                 if (ifield(3)<=IROUGH) then
@@ -805,33 +806,33 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        , &
                     end if
                 end if
                 if (lrcode) then
-                    gdtrachy%gen%table_q(m_q)           = rfield(2) 
+                    gdtrachy%gen%table_q(m_q)           = rfield(2)
                     gdtrachy%gen%crs(mtrtcrs)%idx_end   = m_q        ! check later: idx_end >= idx_start + 1
                     do j = 1, nropar(i)
                         rttdef(mtrt, j)    = rfield(j + 3)
                         gdtrachy%gen%rttdef_q(m_q, j)   = rfield(j + 3)
-                    end do 
+                    end do
                 else
-                    call SetMessage(LEVEL_ERROR, 'Trachytopes: Unknown roughness code for discharge dependence in file ' & 
+                    call SetMessage(LEVEL_ERROR, 'Trachytopes: Unknown roughness code for discharge dependence in file ' &
                         & // trim(filtmp) // ', Record: ' // trim(rec132))
                     error  = .true.
                     goto 199
-                end if                
-            else 
+                end if
+            else
                 call SetMessage(LEVEL_ERROR, 'Unknown read error #3 in rdtrt.f90')
                 error = .true.
             end if
         else
             call SetMessage(LEVEL_ERROR, 'Unknown read error #4 in rdtrt.f90')
-            error = .true.                
-        end if                
+            error = .true.
+        end if
     else
        !
        ! Cannot interpret line
        !
        rec132 = ' '
        write (rec132, '(i12)') mcurec
-       call SetMessage(LEVEL_ERROR, 'Read error from file: '// trim(filtmp) // & 
+       call SetMessage(LEVEL_ERROR, 'Read error from file: '// trim(filtmp) // &
            & ', Record: ' // trim(rec132))
        error = .true.
        goto 199
@@ -851,20 +852,20 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        , &
     !
     do itrtcrs = 1, ntrtcrs
         if (gdtrachy%gen%crs(itrtcrs)%idx_start + 1 > gdtrachy%gen%crs(itrtcrs)%idx_end) then
-            call SetMessage(LEVEL_ERROR, 'Error reading trachytopes: Expected 2 '// & 
-                & 'or more TRTDEF DISCHARGE TRT_EQ PARAMS after ->  "'//trim(gdtrachy%gen%md_ttdfile)// & 
+            call SetMessage(LEVEL_ERROR, 'Error reading trachytopes: Expected 2 '// &
+                & 'or more TRTDEF DISCHARGE TRT_EQ PARAMS after ->  "'//trim(gdtrachy%gen%md_ttdfile)// &
                 & '": '//trim(gdtrachy%gen%crs(itrtcrs)%rec132))
             error = .true.
-        end if 
+        end if
         itttmp = gdtrachy%gen%ittdef_q(gdtrachy%gen%crs(itrtcrs)%idx_start)
         do m_q = gdtrachy%gen%crs(itrtcrs)%idx_start, gdtrachy%gen%crs(itrtcrs)%idx_end
-            if (gdtrachy%gen%ittdef_q(m_q) /= itttmp) then 
+            if (gdtrachy%gen%ittdef_q(m_q) /= itttmp) then
                call SetMessage(LEVEL_ERROR, 'Error reading trachytopes: Trt function '//&
                    & 'type should be the same for all discharges in  "'//&
                    & trim(gdtrachy%gen%md_ttdfile)//'": '//trim(gdtrachy%gen%crs(itrtcrs)%rec132))
                error = .true.
-            end if 
-        end do 
+            end if
+        end do
         do m_q = gdtrachy%gen%crs(itrtcrs)%idx_start+1, gdtrachy%gen%crs(itrtcrs)%idx_end
             ! check if discharges are monotonically increasing
             if (gdtrachy%gen%table_q(m_q)>gdtrachy%gen%table_q(m_q-1)) then
@@ -872,44 +873,44 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        , &
                     ! compute slope
                     gdtrachy%gen%rttdef_q_slope(m_q-1,j) = (gdtrachy%gen%rttdef_q(m_q, j) - &
                         & gdtrachy%gen%rttdef_q(m_q-1, j))/(gdtrachy%gen%table_q(m_q)-gdtrachy%gen%table_q(m_q-1))
-                    ! compute crossing 
-                    gdtrachy%gen%rttdef_q_cross(m_q-1,j) = gdtrachy%gen%rttdef_q(m_q-1, j) - & 
+                    ! compute crossing
+                    gdtrachy%gen%rttdef_q_cross(m_q-1,j) = gdtrachy%gen%rttdef_q(m_q-1, j) - &
                         & gdtrachy%gen%rttdef_q_slope(m_q-1,j) * gdtrachy%gen%table_q(m_q-1)
-                end do    
-            else                                 
-                call SetMessage(LEVEL_ERROR, 'Trachytopes: Discharges should be monotonically' & 
+                end do
+            else
+                call SetMessage(LEVEL_ERROR, 'Trachytopes: Discharges should be monotonically' &
                     & //'increasing for discharge dependence in file ' // trim(gdtrachy%gen%md_ttdfile) &
                     & // ', Record: ' // trim(gdtrachy%gen%crs(itrtcrs)%rec132))
                 error  = .true.
-            end if    
-        end do    
-    end do 
+            end if
+        end do
+    end do
     !
     do itrtobs = 1, ntrtobs
         if (gdtrachy%gen%obs(itrtobs)%idx_start + 1 > gdtrachy%gen%obs(itrtobs)%idx_end) then
             call SetMessage(LEVEL_ERROR, 'Error reading trachytopes: Expected 2 '&
-                & //'or more TRTDEF WATERLEVEL TRT_EQ PARAMS after -> "'//trim(gdtrachy%gen%md_ttdfile) & 
+                & //'or more TRTDEF WATERLEVEL TRT_EQ PARAMS after -> "'//trim(gdtrachy%gen%md_ttdfile) &
                 & //'": '//trim(gdtrachy%gen%obs(itrtobs)%rec132))
             error = .true.
-        end if 
+        end if
         itttmp = gdtrachy%gen%ittdef_zs(gdtrachy%gen%obs(itrtobs)%idx_start)
         do m_zs = gdtrachy%gen%obs(itrtobs)%idx_start, gdtrachy%gen%obs(itrtobs)%idx_end
-            if (gdtrachy%gen%ittdef_zs(m_zs) /= itttmp) then 
+            if (gdtrachy%gen%ittdef_zs(m_zs) /= itttmp) then
                call SetMessage(LEVEL_ERROR, 'Error reading trachytopes: Trt '&
                    &//'function type should be the same for all waterlevels in  "'&
                    &//trim(gdtrachy%gen%md_ttdfile)//'": '//trim(gdtrachy%gen%obs(itrtobs)%rec132))
                error = .true.
-            end if 
-        end do   
+            end if
+        end do
         do m_zs = gdtrachy%gen%obs(itrtobs)%idx_start+1, gdtrachy%gen%obs(itrtobs)%idx_end
             ! check if waterlevels are monotonically increasing
             if (gdtrachy%gen%table_zs(m_zs)>gdtrachy%gen%table_zs(m_zs-1)) then
                 do j = 1,gdtrachy%gen%obs(itrtobs)%nropars
                      ! compute slope
                      gdtrachy%gen%rttdef_zs_slope(m_zs-1,j) = (gdtrachy%gen%rttdef_zs(m_zs, j)-gdtrachy%gen%rttdef_zs(m_zs-1, j))/(gdtrachy%gen%table_zs(m_zs)-gdtrachy%gen%table_zs(m_zs-1))
-                     ! compute crossing 
+                     ! compute crossing
                      gdtrachy%gen%rttdef_zs_cross(m_zs-1,j) = gdtrachy%gen%rttdef_zs(m_zs-1, j) - gdtrachy%gen%rttdef_zs_slope(m_zs-1,j) * gdtrachy%gen%table_zs(m_zs-1)
-                end do     
+                end do
             else
                 call SetMessage(LEVEL_ERROR, 'Trachytopes: Water levels should '&
                     &//'be monotonically increasing for waterlevel dependence in file '&
@@ -932,17 +933,17 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        , &
         md_arlfile => gdtrachy%dir(jdir)%md_arlfile
         !
         filtmp = ' '
-        if (nodir .eq. 1) then 
+        if (nodir .eq. 1) then
             keyw   = 'Trtl'
         else
             keyw   = 'Trt'//char(116+jdir)    ! 'Trtu' or 'Trtv'
-        end if 
+        end if
         call prop_get_string(mdfile_ptr, '*',keyw,filtmp)
         !
         txtput1 = keyw
         write (msgtmp, '(a,a,a)') txtput1,': ',trim(filtmp)
         call SetMessage(LEVEL_INFO, msgtmp)
-        
+
         md_arlfile = trim(filtmp)
         !
         ! keyword not found ?
@@ -957,8 +958,8 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        , &
         !
         if (filtmp == ' ') then
            i = 0
-           do m = 1,mmax      
-              do n = 1,nmax   
+           do m = 1,mmax
+              do n = 1,nmax
                  i = i+1
                  ittaru(i,1) = n
                  ittaru(i,2) = m
@@ -972,7 +973,7 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        , &
                      & rttaru    ,rttxyz    ,nmax      ,ddbval)
            if (error) goto 9999
         endif
-    end do        
+    end do
     !
     do jdir = 1, nodir
         !
@@ -982,7 +983,7 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        , &
         rgcalu => gdtrachy%dir(jdir)%rgcalu
         !
         filtmp = ' '
-        if (nodir .eq. 1) then 
+        if (nodir .eq. 1) then
             keyw   = 'TrtCll'
         else
             keyw   = 'TrtCl'//char(116+jdir)    ! 'TrtClu' or 'TrtClv'
@@ -1026,7 +1027,7 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        , &
                rgcalu(nm) = 1.0_fp
            enddo
         endif
-    end do    
+    end do
     !
     !  Minimum water depth in roughness computations
     !
@@ -1066,10 +1067,10 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        , &
        !
     endif
     !
-    max_cl = 8 
+    max_cl = 8
     keyw    = 'TrtMxR'
     call prop_get(mdfile_ptr, '*', keyw, max_cl)
-    if (istat==0) then 
+    if (istat==0) then
        if (istat==0) allocate(gdtrachy%gen%fraccu_list(max_cl)  , stat = istat)
        if (istat==0) allocate(gdtrachy%gen%itrt_list(max_cl)    , stat = istat)
        itrt_list       => gdtrachy%gen%itrt_list
@@ -1080,16 +1081,16 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        , &
           error = .true.
           goto 9999
        endif
-    endif    
-    
+    endif
+
     !
     call SetMessage(LEVEL_INFO, 'End    of trachytopes input')
     !
     ! transfer to local subdomain
     !
-    mll = mmax   
-    nll = nmaxus 
-    do jdir = 1, nodir 
+    mll = mmax
+    nll = nmaxus
+    do jdir = 1, nodir
         nttaru => gdtrachy%dir(jdir)%nttaru
         ittaru => gdtrachy%dir(jdir)%ittaru
         rttaru => gdtrachy%dir(jdir)%rttaru
@@ -1110,11 +1111,11 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        , &
                  ittaru(it,2) = -1
                  ittaru(it,3) = -1
                  rttaru(it) = -1.0
-                 ittaru(it, 4) = TRACHY_NOT_IN_SUBDOMAIN 
+                 ittaru(it, 4) = TRACHY_NOT_IN_SUBDOMAIN
               endif
            enddo
         endif
-    end do    
+    end do
     !
  9999 continue
 end subroutine rdtrt
@@ -1132,7 +1133,6 @@ subroutine rdttar(filnam    ,lundia    ,error     ,nttaru    ,ittaru    , &
 !!--pseudo code and references--------------------------------------------------
 ! NONE
 !!--declarations----------------------------------------------------------------
-    use precision
     use trachytopes_data_module
     use system_utils, only: exifil
     use MessageHandling
@@ -1154,7 +1154,7 @@ subroutine rdttar(filnam    ,lundia    ,error     ,nttaru    ,ittaru    , &
     real(fp)      , dimension(nttaru)    :: rttaru
     real(fp)      , dimension(nttaru, 3) :: rttxyz
     character(256)                       :: filnam
-    
+
 !
 ! Local variables
 !
@@ -1181,6 +1181,7 @@ subroutine rdttar(filnam    ,lundia    ,error     ,nttaru    ,ittaru    , &
     logical                                     :: leql
     logical                                     :: lfirst
     logical                                     :: lokay
+    logical                                     :: lcomment
     logical                                     :: lprblk
     real(fp)      , dimension(MAXFLD)           :: rfield
     character(30) , dimension(MAXFLD)           :: cfield
@@ -1194,8 +1195,8 @@ subroutine rdttar(filnam    ,lundia    ,error     ,nttaru    ,ittaru    , &
     do i = 1, 4
        nmpblk(i) = 0
     enddo
-    ! 
-    ! update nmaxddb 
+    !
+    ! update nmaxddb
     !
     nmaxddb = nmax + 2*ddbval
     !
@@ -1272,62 +1273,12 @@ subroutine rdttar(filnam    ,lundia    ,error     ,nttaru    ,ittaru    , &
     !
     ! Interpret line ...
     !
-    !
-    ! Comment line
-    !
-    if ((rec132(1:1)=='*') .or. (rec132(1:1)=='#')) goto 210
-    !
-    ! Check for five integers: a block
-    !
-    ibeg = 1
-    iend = 132
-    call scannr(rec132    ,ibeg      ,iend      ,nrflds    ,itype     , &
-              & ifield    ,rfield    ,cfield    ,lenchr    ,MAXFLD    , &
-              & .true.    ,.true.    ,.true.    )
-    !
-    ! When no sub-fields are found, record appears to be empty
-    !
-    if (nrflds==0) goto 210
-    !
-    ! Check the contents
-    !
-    lokay = .false.
-    !
-    ! Check if it is a valid link record
-    ! e.g.:  L   trtdefno   trtperc
-    !
-    if (nrflds==3 .and. itype(1)==1 .and. itype(2)==1 .and.   &
-      & (itype(3)==2 .or. itype(3)==1)) then
-       lokay = .true.
+    call interpret_record( rec132, nrflds, itype, ifield, rfield, cfield, lenchr, lcomment, lokay )
+
+    if ( lcomment ) then
+        goto 210
     endif
-    !
-    ! Check if it is a valid single point record
-    ! e.g.:  n    m    trtdefno   trtperc
-    !
-    if (nrflds==4 .and. itype(1)==1 .and. itype(2)==1 .and. itype(3)==1 .and.   &
-      & (itype(4)==2 .or. itype(4)==1)) then
-       lokay = .true.
-    endif
-    !
-    ! Check if it is a valid net link record for unstructured input
-    ! e.g.:  x_u    y_u    z_u    trtdefno   trtperc
-    ! (At present z is not-used, but 5 input parameters have been chosen to avoid confusion with the other options [nrflds=3,4 or 6])
-    !
-    if (nrflds==5 .and. & 
-      & (itype(1)==2 .or. itype(1)==1) .and. & 
-      & (itype(2)==2 .or. itype(2)==1) .and. &         
-      & (itype(3)==2 .or. itype(3)==1) .and. &         
-      & itype(4)==1 .and. (itype(5)==2 .or. itype(5)==1)) then
-       lokay = .true.
-    endif
-    !
-    ! Check if it is a valid block record
-    ! e.g.:  n1    m1    n2    m2    trtdefno   trtperc
-    !
-    if (nrflds==6 .and. itype(1)==1 .and. itype(2)==1 .and. itype(3)==1 .and.   &
-      & itype(4)==1 .and. itype(5)==1 .and. (itype(6)==2 .or. itype(6)==1)) then
-       lokay = .true.
-    endif
+
     !
     if (.not.lokay) then
        !
@@ -1341,7 +1292,7 @@ subroutine rdttar(filnam    ,lundia    ,error     ,nttaru    ,ittaru    , &
        goto 9999
     endif
     !
-    ! Assign arl, aru/arv input to data structures 
+    ! Assign arl, aru/arv input to data structures
     !
     if (nrflds==3) then
        ! Unstructured input based on net link number
@@ -1403,12 +1354,12 @@ subroutine rdttar(filnam    ,lundia    ,error     ,nttaru    ,ittaru    , &
        ittaru(mttaru, 2) = -22222 !1         !ifield(2)
        ittaru(mttaru, 3) = ifield(2)
        !
-       ! (ifield(1)is nm input for single domain simulation) 
+       ! (ifield(1)is nm input for single domain simulation)
        ! must be transformed to nm in dd sense.
        !
        nmt = ifield(1)                                                   ! local nm coordinate not considering dd.
-       mt = floor(real(nmt-1)/real(nmax)) + 1                            ! local m coordinate 
-       nt = nmt - nmax * (mt - 1 )                                       ! local n coordinate   
+       mt = floor(real(nmt-1)/real(nmax)) + 1                            ! local m coordinate
+       nt = nmt - nmax * (mt - 1 )                                       ! local n coordinate
        ittaru(mttaru, 4) = nt + nmaxddb * (mt - 1 + ddbval ) + ddbval    ! local nm coordinate considering dd.
        if (itype(3)==2) then
           rttaru(mttaru) = rfield(3)
@@ -1537,9 +1488,9 @@ subroutine rdttar(filnam    ,lundia    ,error     ,nttaru    ,ittaru    , &
        !
        ittaru(mttaru, 1) = -22222 !ifield(2) !ifield(1)
        ittaru(mttaru, 2) = -22222 !1         !ifield(2)
-       ittaru(mttaru, 3) = ifield(4)       
+       ittaru(mttaru, 3) = ifield(4)
        !
-       ! (ifield(1)is nm input for single domain simulation) 
+       ! (ifield(1)is nm input for single domain simulation)
        ! must be transformed to nm in dd sense.
        !
        ! Store x,y,z locations in rttxyz
@@ -1549,10 +1500,10 @@ subroutine rdttar(filnam    ,lundia    ,error     ,nttaru    ,ittaru    , &
           else
              rttxyz(mttaru,dimctr) = real(ifield(dimctr),fp)
           endif
-       enddo   
-       !       
-       ittaru(mttaru, 4) = TRACHY_MISSING_VALUE                          ! set to missing value, and replace from unstruc for now. 
-                                                                         ! In future: connect to kd-tree from within trachytopes module? 
+       enddo
+       !
+       ittaru(mttaru, 4) = TRACHY_MISSING_VALUE                          ! set to missing value, and replace from unstruc for now.
+                                                                         ! In future: connect to kd-tree from within trachytopes module?
        if (itype(5)==2) then
           rttaru(mttaru) = rfield(5)
        else
@@ -1640,7 +1591,7 @@ subroutine rdttar(filnam    ,lundia    ,error     ,nttaru    ,ittaru    , &
               & *(abs(ifield(2) - ifield(4)) + 1)
        if (mttaru>nttaru) then
           call SetMessage(LEVEL_ERROR, 'rachytopes: Number of area entries ' //                &
-               & ' in file ' // trim(filnam) // ' > array size.') 
+               & ' in file ' // trim(filnam) // ' > array size.')
           error = .true.
           close (luntmp2)
           goto 9999
@@ -1687,7 +1638,6 @@ subroutine expblk(lundia    ,ittaru    ,rttaru    ,nttaru    ,iblbeg    , &
 !!--pseudo code and references--------------------------------------------------
 ! NONE
 !!--declarations----------------------------------------------------------------
-    use precision
     use MessageHandling
     !use globaldata
     !
@@ -1710,7 +1660,7 @@ subroutine expblk(lundia    ,ittaru    ,rttaru    ,nttaru    ,iblbeg    , &
     integer , dimension(nttaru, 4)              :: ittaru
     logical                       , intent(out) :: error
     real(fp), dimension(nttaru)                 :: rttaru
-    
+
 !
 ! Local variables
 !
@@ -1733,9 +1683,9 @@ subroutine expblk(lundia    ,ittaru    ,rttaru    ,nttaru    ,iblbeg    , &
     n2 = max(nmpblk(1), nmpblk(3))
     m2 = max(nmpblk(2), nmpblk(4))
     !
-    ! Set nmaxdbb (account for spoke cells) 
+    ! Set nmaxdbb (account for spoke cells)
     !
-    nmaxddb = nmax + 2*ddbval   
+    nmaxddb = nmax + 2*ddbval
     !
     ! Set the current index
     !
@@ -1808,7 +1758,6 @@ subroutine dimtrt(lundia    ,error     ,gdtrachy   ,mdfile_ptr , &
 !!--pseudo code and references--------------------------------------------------
 ! NONE
 !!--declarations----------------------------------------------------------------
-    use precision
     use trachytopes_data_module
     use grid_dimens_module, only: griddimtype
     use dfparall
@@ -1822,7 +1771,7 @@ subroutine dimtrt(lundia    ,error     ,gdtrachy   ,mdfile_ptr , &
 !    type(globdat)    , target               :: gdp
     type(trachy_type), target                :: gdtrachy
     type(tree_data)  , pointer , intent(in)  :: mdfile_ptr
-    type(griddimtype), target  , intent(in)  :: griddim    
+    type(griddimtype), target  , intent(in)  :: griddim
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
@@ -1900,12 +1849,12 @@ subroutine dimtrt(lundia    ,error     ,gdtrachy   ,mdfile_ptr , &
     n_q     = 0
     n_zs    = 0
     nroupa = 12
-    do jdir = 1,nodir 
+    do jdir = 1,nodir
        nttaru        => gdtrachy%dir(jdir)%nttaru
        nttaru = 0
-    end do    
+    end do
     prev_trt_no   = TRACHY_UNDEFINED
-    prev_trt_type = TRACHY_UNDEFINED    
+    prev_trt_type = TRACHY_UNDEFINED
     !
     ! Read value of Trtrou, default NO
     !
@@ -1992,7 +1941,7 @@ subroutine dimtrt(lundia    ,error     ,gdtrachy   ,mdfile_ptr , &
            !              (must exist, no default)
            !
            filtmp = ' '
-           if (nodir .eq. 1) then 
+           if (nodir .eq. 1) then
                keyw   = 'Trtl'
            else
                keyw = 'Trt'//char(116+jdir)    ! 'Trtu' or 'Trtv'
@@ -2011,12 +1960,12 @@ subroutine dimtrt(lundia    ,error     ,gdtrachy   ,mdfile_ptr , &
            !
            if (filtmp == ' ') then
               ! uniform
-              nttaru = nmmax  
+              nttaru = nmmax
            else
               call dittar(filtmp    ,lundia    ,error     ,nttaru    )
               if (error) goto 9999
            endif
-       end do    
+       end do
        goto 9999
     endif
     !
@@ -2028,18 +1977,18 @@ subroutine dimtrt(lundia    ,error     ,gdtrachy   ,mdfile_ptr , &
     if ((rec132(1:1)=='*') .or. (rec132(1:1)=='#')) goto 110
     ibeg = 1
     iend = 132
-    ! Comment at end of line 
+    ! Comment at end of line
     !
     ! loop over rec132 and find #
     !
     comment_at_end_of_line_loop: &
         do istr = ibeg, iend
-            if (rec132(istr:istr) == '#') then 
+            if (rec132(istr:istr) == '#') then
                 iend = istr
                 exit comment_at_end_of_line_loop
-            end if 
+            end if
         end do &
-    comment_at_end_of_line_loop        
+    comment_at_end_of_line_loop
         call scannr(rec132    ,ibeg      ,iend      ,nrflds    ,itype     , &
               & ifield    ,rfield    ,cfield    ,lenchr    ,MAXFLD    , &
               & .true.    ,.true.    ,.true.    )
@@ -2052,22 +2001,22 @@ subroutine dimtrt(lundia    ,error     ,gdtrachy   ,mdfile_ptr , &
             ntrtnrm = ntrtnrm + 1
             prev_trt_no   = TRACHY_UNDEFINED
             prev_trt_type = TRACHY_UNDEFINED
-        elseif (itype(1)==1 .and. itype(2)==3) then   
-            if (cfield(2)(1:9) == 'DISCHARGE') then        ! TO DO: use strcmpi? 
+        elseif (itype(1)==1 .and. itype(2)==3) then
+            if (cfield(2)(1:9) == 'DISCHARGE') then        ! TO DO: use strcmpi?
                 ntrtcrs = ntrtcrs + 1
                 ntrt    = ntrt + 1
                 prev_trt_no   = ifield(1)
                 prev_trt_type = TRACHY_DISCHARGE_TYPE
-            elseif (cfield(2)(1:10) == 'WATERLEVEL') then  ! TO DO: use strcmpi? 
+            elseif (cfield(2)(1:10) == 'WATERLEVEL') then  ! TO DO: use strcmpi?
                 ntrtobs = ntrtobs + 1
                 ntrt    = ntrt + 1
                 prev_trt_no = ifield(1)
                 prev_trt_type = TRACHY_WATERLEVEL_TYPE
             else
-                ! do nothing 
+                ! do nothing
             endif
         elseif (itype(1)==1 .and. itype(2)/=3 .and. itype(3)==1) then
-            if (ifield(1) == prev_trt_no) then 
+            if (ifield(1) == prev_trt_no) then
                 ! add to table for discharge/water level depdendent data
                 if (prev_trt_type == TRACHY_WATERLEVEL_TYPE) then
                     ! count values to table for waterlevel dependent trachytopes
@@ -2075,20 +2024,20 @@ subroutine dimtrt(lundia    ,error     ,gdtrachy   ,mdfile_ptr , &
                 elseif (prev_trt_type == TRACHY_DISCHARGE_TYPE) then
                     ! count values to table for discharge dependent trachytopes
                     n_q = n_q + 1
-                else 
+                else
                    call SetMessage(LEVEL_ERROR, 'Unknown read error #1 in rdtrt.f90')
                    error = .true.
                 end if
             else
                 call SetMessage(LEVEL_ERROR, 'Unknown read error #2 in rdtrt.f90')
-                error = .true.                
-            end if                
+                error = .true.
+            end if
         endif
     endif
     goto 110
  9999 continue
 end subroutine dimtrt
-                
+
 subroutine dittar(filnam    ,lundia    ,error     ,nttaru    )
 !!--description-----------------------------------------------------------------
 !
@@ -2100,7 +2049,6 @@ subroutine dittar(filnam    ,lundia    ,error     ,nttaru    )
 !!--pseudo code and references--------------------------------------------------
 ! NONE
 !!--declarations----------------------------------------------------------------
-    use precision
 !    use globaldata
     use system_utils, only: exifil
     use MessageHandling
@@ -2137,6 +2085,7 @@ subroutine dittar(filnam    ,lundia    ,error     ,nttaru    )
     logical                          :: leql
     logical                          :: lfirst
     logical                          :: lokay
+    logical                          :: lcomment
     logical                          :: lprblk
     real(fp), dimension(MAXFLD)      :: rfield
     character(30), dimension(MAXFLD) :: cfield
@@ -2213,58 +2162,12 @@ subroutine dittar(filnam    ,lundia    ,error     ,nttaru    )
     !
     ! Interpret line ...
     !
-    !
-    ! Comment line
-    !
-    if ((rec132(1:1)=='*') .or. (rec132(1:1)=='#')) goto 210
-    !
-    ! Scan the record
-    !
-    ibeg = 1
-    iend = 132
-    call scannr(rec132    ,ibeg      ,iend      ,nrflds    ,itype     , &
-              & ifield    ,rfield    ,cfield    ,lenchr    ,MAXFLD    , &
-              & .true.    ,.true.    ,.true.    )
-    !
-    ! When no sub-fields are found, record appears to be empty
-    !
-    if (nrflds==0) goto 210
-    !
-    ! Check the contents
-    !
-    lokay = .false.
-    !
-    ! Check if it is a valid link record
-    !
-    if (nrflds==3 .and. itype(1)==1 .and. itype(2)==1 .and.   &
-      & (itype(3)==2 .or. itype(3)==1)) then
-       lokay = .true.
+    call interpret_record( rec132, nrflds, itype, ifield, rfield, cfield, lenchr, lcomment, lokay )
+
+    if ( lcomment ) then
+        goto 210
     endif
-    !
-    ! Check if it is a valid single point record
-    !
-    if (nrflds==4 .and. itype(1)==1 .and. itype(2)==1 .and. itype(3)==1 .and.   &
-      & (itype(4)==2 .or. itype(4)==1)) then
-       lokay = .true.
-    endif
-    !
-    ! Check if it is a valid net link record for unstructured input
-    !
-    if (nrflds==5 .and. & 
-      & (itype(1)==2 .or. itype(1)==1) .and. & 
-      & (itype(2)==2 .or. itype(2)==1) .and. &         
-      & (itype(3)==2 .or. itype(3)==1) .and. &         
-      & itype(4)==1 .and. (itype(5)==2 .or. itype(5)==1)) then
-       lokay = .true.
-    endif
-    !
-    ! Check if it is a valid block record
-    !
-    if (nrflds==6 .and. itype(1)==1 .and. itype(2)==1 .and. itype(3)==1 .and.   &
-      & itype(4)==1 .and. itype(5)==1 .and. (itype(6)==2 .or. itype(6)==1)) then
-       lokay = .true.
-    endif
-    !
+
     if (.not.lokay) then
        !
        ! Cannot interpret line
@@ -2352,9 +2255,93 @@ subroutine dittar(filnam    ,lundia    ,error     ,nttaru    )
     goto 210
  9999 continue
 end subroutine dittar
-                
-                
-                
+
+subroutine interpret_record( rec132, nrflds, itype, ifield, rfield, cfield, lenchr, lcomment, lokay )
+    character(len=*), intent(in)    :: rec132
+    integer, intent(out)            :: nrflds
+    integer, intent(out)            :: itype(:)
+    logical, intent(out)            :: lcomment
+    logical, intent(out)            :: lokay
+
+    ! Note: inout, then we do not have to bother about setting them
+    integer, intent(inout)          :: ifield(:)
+    real(fp), intent(inout)         :: rfield(:)
+    character(len=*), intent(inout) :: cfield(:)
+    integer, intent(inout)          :: lenchr(:)
+
+    integer                      :: ibeg, iend
+
+    nrflds   = 0
+    itype    = -999
+    lokay    = .true.
+    lcomment = .false.
+
+    !
+    ! Comment line
+    !
+    if ((rec132(1:1)=='*') .or. (rec132(1:1)=='#')) then
+        lcomment = .true.
+        return
+    endif
+
+    !
+    ! Check for five integers: a block
+    !
+    ibeg = 1
+    iend = 132
+    call scannr(rec132    ,ibeg      ,iend      ,nrflds    ,itype       , &
+              & ifield    ,rfield    ,cfield    ,lenchr    ,size(ifield), &
+              & .true.    ,.true.    ,.true.    )
+    !
+    ! When no sub-fields are found, record appears to be empty
+    !
+    if (nrflds==0) then
+        lcomment = .true.
+        return
+    endif
+
+    !
+    ! Check the contents
+    !
+    lokay = .false.
+    !
+    ! Check if it is a valid link record
+    ! e.g.:  L   trtdefno   trtperc
+    !
+    if (nrflds==3 .and. itype(1)==1 .and. itype(2)==1 .and.   &
+      & (itype(3)==2 .or. itype(3)==1)) then
+       lokay = .true.
+    endif
+    !
+    ! Check if it is a valid single point record
+    ! e.g.:  n    m    trtdefno   trtperc
+    !
+    if (nrflds==4 .and. itype(1)==1 .and. itype(2)==1 .and. itype(3)==1 .and.   &
+      & (itype(4)==2 .or. itype(4)==1)) then
+       lokay = .true.
+    endif
+    !
+    ! Check if it is a valid net link record for unstructured input
+    ! e.g.:  x_u    y_u    z_u    trtdefno   trtperc
+    ! (At present z is not-used, but 5 input parameters have been chosen to avoid confusion with the other options [nrflds=3,4 or 6])
+    !
+    if (nrflds==5 .and. &
+      & (itype(1)==2 .or. itype(1)==1) .and. &
+      & (itype(2)==2 .or. itype(2)==1) .and. &
+      & (itype(3)==2 .or. itype(3)==1) .and. &
+      & itype(4)==1 .and. (itype(5)==2 .or. itype(5)==1)) then
+       lokay = .true.
+    endif
+    !
+    ! Check if it is a valid block record
+    ! e.g.:  n1    m1    n2    m2    trtdefno   trtperc
+    !
+    if (nrflds==6 .and. itype(1)==1 .and. itype(2)==1 .and. itype(3)==1 .and.   &
+      & itype(4)==1 .and. itype(5)==1 .and. (itype(6)==2 .or. itype(6)==1)) then
+       lokay = .true.
+    endif
+end subroutine interpret_record
+
 end module m_rdtrt
-               
-               
+
+
