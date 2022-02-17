@@ -389,19 +389,9 @@
    endif
 
    if (writebalance) then
-      call mba_write_bal_time_step(lunmbabal, timembastart, timembaend, datembastart, datembaend, numconst, notot, nombs, imbs2sys, &
-                                   nomba, nombabnd, nflux, totfluxsys, mbsname, mbaname, mbabndname, mbalnused, numsrc, srcname, &
-                                   mbasorsinout, mbaarea, mbavolumebegin, mbavolumeend, mbaflowhor, mbaflowsorsin, mbaflowraineva, &
-                                   mbafloweva, mbamassbegin, mbamassend, mbafluxhor, mbafluxsorsin, mbafluxheat, &
-                                   flxdmp, stochi, fluxname, nfluxsys, ipfluxsys, fluxsys, jarain, jaevap, jatem, isalt, itemp, &
-                                   jambalumpmba, jambalumpbnd, jambalumpsrc, jambalumpproc)
+      call mba_write_bal_time_step(lunmbabal, timembastart, timembaend, datembastart, datembaend )
       if (jambawritecsv.eq.1) then
-         call mba_write_csv_time_step(lunmbacsvm, lunmbacsvmb, timembastart, timembaend, datembastart, datembaend, numconst, notot, nombs, &
-                                      imbs2sys, nomba, nopenbndsect, nombabnd, nflux, totfluxsys, mbsname, mbaname, openbndname, mbalnused, &
-                                      numsrc, srcname, mbasorsinout, mbaarea, mbavolumebegin, mbavolumeend, mbaflowhor, mbaflowsorsin, &
-                                      mbaflowraineva, mbafloweva, mbamassbegin, mbamassend, mbafluxhor, mbafluxsorsin, mbafluxheat, &
-                                      flxdmp, stochi, fluxname, nfluxsys, ipfluxsys, fluxsys, jarain, jaevap, jatem, isalt, itemp, &
-                                      jambalumpmba, jambalumpbnd, jambalumpsrc, jambalumpproc)
+         call mba_write_csv_time_step(lunmbacsvm, lunmbacsvmb, timembastart, timembaend, datembastart, datembaend )
       endif
    endif
 
@@ -503,18 +493,8 @@
 
    if (writebalance) then
       write(lunmbabal,1000)
-      call mba_write_bal_time_step(lunmbabal, timembastarttot, timembaend, datembastart, datembaend, numconst, notot, nombs, &
-                                   imbs2sys, nomba, nombabnd, nflux, totfluxsys, mbsname, mbaname, mbabndname, mbalnused, numsrc, &
-                                   srcname, mbasorsinout, mbaarea, mbavolumebegintot, mbavolumeend, mbaflowhortot, mbaflowsorsintot, &
-                                   mbaflowrainevatot, mbaflowevatot, mbamassbegintot, mbamassend, mbafluxhortot, mbafluxsorsintot, &
-                                   mbafluxheattot, flxdmptot, stochi, fluxname, nfluxsys, ipfluxsys, fluxsys, jarain, jaevap, jatem, &
-                                   isalt, itemp, jambalumpmba, jambalumpbnd, jambalumpsrc, jambalumpproc)
-!      call mba_write_csv_time_step(lunmbacsvm, lunmbacsvmb, timembastarttot, timembaend, datembastart, datembaend, numconst, notot, nombs, &
-!                                   imbs2sys, nomba, nopenbndsect, nombabnd, nflux, totfluxsys, mbsname, mbaname, openbndname, mbalnused, numsrc, &
-!                                   srcname, mbasorsinout, mbaarea, mbavolumebegintot, mbavolumeend, mbaflowhortot, mbaflowsorsintot, &
-!                                   mbaflowrainevatot, mbaflowevatot, mbamassbegintot, mbamassend, mbafluxhortot, mbafluxsorsintot, &
-!                                   mbafluxheattot, flxdmptot, stochi, fluxname, nfluxsys, ipfluxsys, fluxsys, jarain, jaevap, jatem, &
-!                                   isalt, itemp, jambalumpmba, jambalumpbnd, jambalumpsrc, jambalumpproc)
+      call mba_write_bal_time_step(lunmbabal, timembastarttot, timembaend, datembastart, datembaend )
+!      call mba_write_csv_time_step(lunmbacsvm, lunmbacsvmb, timembastarttot, timembaend, datembastart, datembaend )
    endif
 
    1000 format (///'============================================================='&
@@ -790,12 +770,14 @@
    return
    end subroutine mba_write_bal_header
 
-   subroutine mba_write_bal_time_step(lunbal, timestart, timeend, datestart, dateend, numconst, notot, nombs, imbs2sys, nomba, &
-                                      nombabnd, nflux, totfluxsys, mbsname, mbaname, mbabndname, mbalnused, numsrc, srcname, &
-                                      mbasorsinout, mbaarea, mbavolumebegin, mbavolumeend, mbaflowhor, mbaflowsorsin, mbaflowraineva, &
-                                      mbafloweva, mbamassbegin, mbamassend, mbafluxhor, mbafluxsorsin, mbafluxheat, flxdmp, &
-                                      stochi, fluxname, nfluxsys, ipfluxsys, fluxsys, jarain, jaevap, jatem, isalt, itemp, &
-                                      jambalumpmba, jambalumpbnd, jambalumpsrc, jambalumpproc)
+   subroutine mba_write_bal_time_step(lunbal, timestart, timeend, datestart, dateend )
+
+   use m_mass_balance_areas
+   use m_fm_wq_processes, ifluxdummy => iflux
+   use m_flowparameters, only: jatem, jambawritecsv, jambalumpmba, jambalumpbnd, jambalumpsrc, jambalumpproc
+   use m_flowexternalforcings, only: numsrc, srcname
+   use m_wind, only: jarain, jaevap
+   use m_transport, only: numconst, isalt, itemp
 
    implicit none
 
@@ -805,60 +787,7 @@
    double precision            :: timeend                   ! end time of balance period (s)
    character(len=19)           :: datestart                 ! start date of balance period
    character(len=19)           :: dateend                   ! end date of balance period
-   integer                     :: numconst                  ! Number of constituents
-   integer                     :: nombs                     ! Number of mass balances
-   integer                     :: nomba                     ! Number of balance areas
-   integer                     :: notot                     ! Number of WAQ sustances
-   integer                     :: imbs2sys(nombs)           ! mass balance number to WAQ substance (0=not a WAQ substance)
-   integer                     :: nombabnd                  ! Number of balance areas and boundaries
-   integer                     :: nflux                     ! number of fluxes
-   integer                     :: totfluxsys                ! total number of fluxes for all sustances
 
-   character(*)                :: mbsname(nombs)            ! mass balance names
-   character(*)                :: mbaname(nomba)            ! mass balance area names
-   character(*)                :: mbabndname(nombabnd)      ! mass balance area exchange names
-
-   integer                     :: mbalnused(nomba,nombabnd) ! number of links between mda and mbabnd that are actually active
-
-   integer                     :: numsrc                    ! nr of point sources/sinks
-   character(len=255)          :: srcname(numsrc)           ! sources/sinks name (numsrc)
-   integer                     :: mbasorsinout(2,numsrc)    ! (reduced) mba for each side of a source sink
-
-   double precision            :: mbaarea(nomba)            ! surface area of mass balance area
-
-   double precision            :: mbavolumebegin(nomba)     ! begin volume in mass balance area
-   double precision            :: mbavolumeend(nomba)       ! end volume in mass balance area
-   double precision            :: mbaflowhor(2,nombabnd,nombabnd) ! periodical flows between balance areas and between boundaries and balance areas
-   double precision            :: mbaflowsorsin(2,numsrc)   ! periodical flow from source sinks
-   double precision            :: mbaflowraineva(2,nomba)   ! periodical flow from rain and forced evaportion
-   double precision            :: mbafloweva(nomba)       ! periodical flow from calculated evaportion
-
-   double precision            :: mbamassbegin(nombs,nomba) ! begin volume in mass balance area
-   double precision            :: mbamassend(nombs,nomba)   ! end volume in mass balance area
-   double precision            :: mbafluxhor(2,numconst,nombabnd,nombabnd) ! periodical fluxes between balance areas and between boundaries and balance areas
-   double precision            :: mbafluxsorsin(2,2,numconst,numsrc) ! periodical fluxes from source sinks
-   double precision            :: mbafluxheat(2,nomba)      ! temperature rheat flux
-
-   double precision            :: flxdmp(2,nflux, nomba)
-   real                        :: stochi(notot,nflux)
-   character(10)               :: fluxname(nflux)
-
-   integer                     :: nfluxsys(notot)
-   integer                     :: ipfluxsys(notot)
-   integer                     :: fluxsys(totfluxsys)
-
-   integer                     :: jarain                    ! use rain yes or no
-   integer                     :: jaevap                    ! use evaporation yes or no
-   integer                     :: jatem                     ! Temperature model (0=no, 5=heatfluxmodel)
-   integer                     :: isalt                     ! constituent that is salt
-   integer                     :: itemp                     ! constituent that is temperature
-
-   integer                     :: jambalumpmba              ! Lump MBA from/to other areas mass balance terms
-   integer                     :: jambalumpbnd              ! Lump MBA boundary mass balance terms
-   integer                     :: jambalumpsrc              ! Lump MBA source/sink mass balance terms
-   integer                     :: jambalumpproc             ! Lump MBA processes mass balance terms
-
-   integer, parameter :: long = SELECTED_INT_KIND(16)
    character(len=20), external :: seconds_to_dhms
    integer :: imbs, imba, jmba, isrc, isys, iflux, jflux, ifluxsys
    double precision            :: totals(2)                 ! totals for both columns
@@ -1382,12 +1311,14 @@
 
    end subroutine mba_write_bal_time_step
 
-   subroutine mba_write_csv_time_step(luncsvm, luncsvmb, timestart, timeend, datestart, dateend, numconst, notot, nombs, imbs2sys, nomba, &
-                                      nopenbndsect,  nombabnd, nflux, totfluxsys, mbsname, mbaname, openbndname, mbalnused, numsrc, &
-                                      srcname, mbasorsinout, mbaarea, mbavolumebegin, mbavolumeend, mbaflowhor, mbaflowsorsin, &
-                                      mbaflowraineva, mbafloweva, mbamassbegin, mbamassend, mbafluxhor, mbafluxsorsin, mbafluxheat, &
-                                      flxdmp, stochi, fluxname, nfluxsys, ipfluxsys, fluxsys, jarain, jaevap, jatem, isalt, itemp, &
-                                      jambalumpmba, jambalumpbnd, jambalumpsrc, jambalumpproc)
+   subroutine mba_write_csv_time_step(luncsvm, luncsvmb, timestart, timeend, datestart, dateend )
+
+   use m_mass_balance_areas
+   use m_fm_wq_processes, ifluxdummy => iflux
+   use m_flowparameters, only: jatem, jambawritecsv, jambalumpmba, jambalumpbnd, jambalumpsrc, jambalumpproc
+   use m_flowexternalforcings, only: numsrc, srcname, nopenbndsect, openbndname
+   use m_wind, only: jarain, jaevap
+   use m_transport, only: numconst, isalt, itemp
 
    implicit none
 
@@ -1398,59 +1329,6 @@
    double precision            :: timeend                   ! end time of balance period (s)
    character(len=19)           :: datestart                 ! start date of balance period
    character(len=19)           :: dateend                   ! end date of balance period
-   integer                     :: numconst                  ! Number of constituents
-   integer                     :: nombs                     ! Number of mass balances
-   integer                     :: nomba                     ! Number of balance areas
-   integer                     :: notot                     ! Number of WAQ sustances
-   integer                     :: imbs2sys(nombs)           ! mass balance number to WAQ substance (0=not a WAQ substance)
-   integer                     :: nopenbndsect              ! Number of boundaries
-   integer                     :: nombabnd                  ! Number of balance areas and boundaries
-   integer                     :: nflux                     ! number of fluxes
-   integer                     :: totfluxsys                ! total number of fluxes for all sustances
-
-   character(*)                :: mbsname(nombs)            ! mass balance names
-   character(*)                :: mbaname(nomba)            ! mass balance area names
-   character(*)                :: openbndname(nombabnd)      ! mass balance area exchange names
-
-   integer                     :: mbalnused(nomba,nombabnd) ! number of links between mda and mbabnd that are actually active
-
-   integer                     :: numsrc                    ! nr of point sources/sinks
-   character(len=255)          :: srcname(numsrc)           ! sources/sinks name (numsrc)
-   integer                     :: mbasorsinout(2,numsrc)    ! (reduced) mba for each side of a source sink
-
-   double precision            :: mbaarea(nomba)            ! surface area of mass balance area
-
-   double precision            :: mbavolumebegin(nomba)     ! begin volume in mass balance area
-   double precision            :: mbavolumeend(nomba)       ! end volume in mass balance area
-   double precision            :: mbaflowhor(2,nombabnd,nombabnd) ! periodical flows between balance areas and between boundaries and balance areas
-   double precision            :: mbaflowsorsin(2,numsrc)   ! periodical flow from source sinks
-   double precision            :: mbaflowraineva(2,nomba)   ! periodical flow from rain and forced evaportion
-   double precision            :: mbafloweva(nomba)       ! periodical flow from calculated evaportion
-
-   double precision            :: mbamassbegin(nombs,nomba) ! begin volume in mass balance area
-   double precision            :: mbamassend(nombs,nomba)   ! end volume in mass balance area
-   double precision            :: mbafluxhor(2,numconst,nombabnd,nombabnd) ! periodical fluxes between balance areas and between boundaries and balance areas
-   double precision            :: mbafluxsorsin(2,2,numconst,numsrc) ! periodical fluxes from source sinks
-   double precision            :: mbafluxheat(2,nomba)      ! temperature rheat flux
-
-   double precision            :: flxdmp(2,nflux, nomba)
-   real                        :: stochi(notot,nflux)
-   character(10)               :: fluxname(nflux)
-
-   integer                     :: nfluxsys(notot)
-   integer                     :: ipfluxsys(notot)
-   integer                     :: fluxsys(totfluxsys)
-
-   integer                     :: jarain                    ! use rain yes or no
-   integer                     :: jaevap                    ! use evaporation yes or no
-   integer                     :: jatem                     ! Temperature model (0=no, 5=heatfluxmodel)
-   integer                     :: isalt                     ! constituent that is salt
-   integer                     :: itemp                     ! constituent that is temperature
-
-   integer                     :: jambalumpmba              ! Lump MBA from/to other areas mass balance terms
-   integer                     :: jambalumpbnd              ! Lump MBA boundary mass balance terms
-   integer                     :: jambalumpsrc              ! Lump MBA source/sink mass balance terms
-   integer                     :: jambalumpproc             ! Lump MBA processes mass balance terms
 
    character(len=20), external :: seconds_to_dhms
    integer :: imbs, imba, jmba, isrc, isys, iflux, jflux, ifluxsys
