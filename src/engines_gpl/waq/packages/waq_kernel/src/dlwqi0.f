@@ -306,7 +306,7 @@
       if ( init_ixset ) then
           init_ixset = .false.
           CALL IXSETS ( LUN(19) , MYPART  , NOTOT   , NOSYS   ,
-     +                  NOSEG   , NOQ     , J(IXPNT), J(IOWNS),
+     +                  NOSSS   , NOQ     , J(IXPNT), J(IOWNS),
      +                  J(IOWNQ), NDMPAR  , NDMPS   , NTDMPQ  ,
      +                  NDMPQ   , IBFLAG  , J(ISDMP), J(IPDMP),
      +                  J(IQDMP) )

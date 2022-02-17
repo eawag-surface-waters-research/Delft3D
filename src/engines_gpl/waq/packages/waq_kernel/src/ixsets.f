@@ -47,7 +47,7 @@
                                             ! current computing proces
       integer, intent(in)  :: notot         ! total number of systems
       integer, intent(in)  :: nosys         ! number of active systems
-      integer, intent(in)  :: noseg         ! total number of segments
+      integer, intent(in)  :: noseg         ! total number of segments (water and sediment!)
       integer, intent(in)  :: noq           ! total number of exchanges
       integer, intent(in)  :: ipoint(4,noq) ! exchange pointers
       integer, intent(in)  :: owners(noseg) ! partitioning of segments, for

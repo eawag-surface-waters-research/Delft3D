@@ -128,7 +128,7 @@
 
       INTEGER      IPDMP(*)  , IQDMP(*)   , ISDMP (*) , IORAAI(*) ,
      +             NQRAAI(*) , IQRAAI(*)  , GRDNOS(*) , GRDREF(*)
-      INTEGER      GRDSEG(NOSEG,NOGRID)
+      INTEGER      GRDSEG(NOSEG+NSEG2,NOGRID)
       CHARACTER*40 MODID (4) , BNDNAM(*)  , WSTNAM(*)
       CHARACTER*20 SYSID (*) , DUMPID(*)  , BNDID (*) , BNDTYP(*) ,
      *             WASTID(*) , WSTTYP(*)  , CONAME(*) , PANAME(*) ,
