@@ -296,7 +296,6 @@ use unstruc_channel_flow
     md_paths_relto_parent = 0
 
     md_netfile = ' '
-    md_1dfiles%onednetwork = ' '
     md_1dfiles%cross_section_definitions = ' '
     md_1dfiles%cross_section_locations = ' '
     md_1dfiles%roughness = ' '
@@ -430,13 +429,13 @@ subroutine loadModel(filename)
     use m_sediment
     use m_alloc
     use m_cross_helper
-    use m_netw_flow1d
     use m_flow1d_reader
     use m_flowexternalforcings, only: pillar
     use m_sferic
     ! use string_module, only: get_dirsep
     use unstruc_caching
     use m_longculverts
+    use unstruc_channel_flow
 
     interface
        subroutine realan(mlan, antot)
@@ -484,10 +483,6 @@ subroutine loadModel(filename)
     ! read and proces dflow1d model
     ! This routine is still used for Morphology model with network in INI-File (Willem Ottevanger)
 
-    timerHandle = 0
-    call timstrt('Load network from flow1d', timerHandle)
-    call load_network_from_flow1d(md_1dfiles, found_1d_network)
-    call timstop(timerHandle)
 
     if (found_1d_network) then
        jadoorladen = 1
@@ -830,7 +825,6 @@ subroutine readMDUFile(filename, istat)
     call prop_get_integer(md_ptr, bnam, 'PathsRelativeToParent',  md_paths_relto_parent)
 
 ! Geometry
-    call prop_get_string ( md_ptr, 'geometry', 'OneDNetworkFile',  md_1dfiles%onednetwork,               success)
     call prop_get_string ( md_ptr, 'geometry', 'CrossDefFile',     md_1dfiles%cross_section_definitions, success)
     call prop_get_string ( md_ptr, 'geometry', 'CrossLocFile',     md_1dfiles%cross_section_locations,   success)
     call prop_get_string ( md_ptr, 'geometry', 'StorageNodeFile',  md_1dfiles%storage_nodes,             success)
@@ -861,9 +855,6 @@ subroutine readMDUFile(filename, istat)
     call prop_get_string ( md_ptr, 'geometry', 'PillarFile',       md_pillarfile,   success)
     if ( len_trim(md_pillarfile) > 0 ) then
        japillar = 3
-    endif
-    if( len_trim(md_1dfiles%onednetwork) > 0 ) then
-       jamd1dfile = 1
     endif
     call prop_get_string ( md_ptr, 'geometry', 'GulliesFile',      md_gulliesfile,   success)
     call prop_get_string ( md_ptr, 'geometry', 'RoofsFile',        md_roofsfile,     success)

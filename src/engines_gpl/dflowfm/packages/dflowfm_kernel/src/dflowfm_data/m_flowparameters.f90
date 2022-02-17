@@ -573,9 +573,6 @@
  ! parameter for bed roughness and transport
  integer                                              :: v2dwbl
 
- ! determines whether md1d file exist
- integer                                              :: jamd1dfile = 0
-
  ! parameter for secondary flow
  integer                                              :: ispirparopt ! for visualization
 

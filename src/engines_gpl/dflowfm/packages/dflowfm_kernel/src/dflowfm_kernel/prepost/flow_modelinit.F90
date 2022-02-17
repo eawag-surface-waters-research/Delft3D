@@ -48,7 +48,7 @@
  use unstruc_files, only: mdia
  use unstruc_netcdf
  use MessageHandling
- use m_flowparameters, only: jawave, jatrt, jacali, jacreep, jatransportmodule, jamd1dfile, flowWithoutWaves
+ use m_flowparameters, only: jawave, jatrt, jacali, jacreep, jatransportmodule, flowWithoutWaves
  use dfm_error
  use m_fm_wq_processes, only: jawaqproc
  use m_vegetation
@@ -403,9 +403,7 @@
 
  call timstrt('Set friction values for MOR        ', handle_extra(31)) ! set fcru mor
  if ((jased>0) .and. stm_included) then
-    if (jamd1dfile == 0) then
-       call set_frcu_mor(1)        !otherwise frcu_mor is set in getprof_1d()
-    endif
+    call set_frcu_mor(1)        !otherwise frcu_mor is set in getprof_1d()
     call set_frcu_mor(2)
  endif
  call timstop(handle_extra(31)) ! end set fcru mor
