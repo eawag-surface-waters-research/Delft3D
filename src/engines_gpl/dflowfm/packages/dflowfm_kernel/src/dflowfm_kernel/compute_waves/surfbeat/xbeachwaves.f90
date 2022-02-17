@@ -573,7 +573,7 @@ subroutine xbeach_wave_init()
       ! get nodes per netcell
       call fill_connected_nodes(ierror)
       ! Find calculation kernel around points
-      call fm_surrounding_points(xk,yk,numk,connected_nodes,no_connected_nodes,nump,kp, ierror)
+      call fm_surrounding_points(numk,connected_nodes,no_connected_nodes,nump,kp, ierror)
       ! Find upwind neighbours for each grid point and wave direction
       call find_upwind_neighbours(xk,yk,numk,thetabin,ntheta,kp,np,w,prev,ds,ierror)
       ! set e01
@@ -1068,14 +1068,14 @@ subroutine xbeach_instationary()
          tt1(itheta,:) = min(tt1(itheta,:) , Tdeplim )
       enddo
       sigt=twopi/tt1
-      sigmwav=sum(sigt,dim=1)/ntheta  
-      
-      ! wave period breaker dissipation 
-      call xbeach_wave_period_breaker_dissipation( D, E, sigmwav, cgwav, kwav, ddT)        
-      
+      sigmwav=sum(sigt,dim=1)/ntheta
+
+      ! wave period breaker dissipation
+      call xbeach_wave_period_breaker_dissipation( D, E, sigmwav, cgwav, kwav, ddT)
+
       !  Wind source term
       if (jawsource.eq.1) then
-         call xbeach_windsource(ee1, E, tt1, sigmwav , cgwavt, cgwav, hh, dtmaxwav, wsorE, wsorT,egradcg,SwE,SwT)    
+         call xbeach_windsource(ee1, tt1, cgwavt, wsorE, wsorT,egradcg,SwE,SwT)
       else
           wsorE=0.d0
           wsorT=0.d0
@@ -4288,13 +4288,13 @@ end subroutine xbeach_solvesystem
 
 
 !> update energy field and roller energy for stationary case
-subroutine update_ee1rr(dtmaxwav, sigt, cgwav, ctheta, horadvec, thetaadvec, E, H, thet, thetamean,   &
+subroutine update_ee1rr(dtmaxwav, sigt, cgwav, ctheta, E, H, thet, thetamean,   &
                         sigmwav, gammax, hh, &
-                        fw, break, deltaH, waveps, kwav, km, gamma, gamma2, nroelvink, QB, alpha, trep, R, cwav, D,   &
+                        fw, break, deltaH, waveps, kwav, km, gamma, gamma2, nroelvink, QB, alpha, trep, cwav, D,   &
                         roller, br, &
-                        urms_cc, fwcutoff, Df, DDlok, wete, rrhoradvec, rrthetaadvec,  jawsource, mwind, &
-                        snx, csx, limtypw, &
-                        ee1, rr, drr, wci, rhs, solver, nbndw, kbndw, zbndw, d_relaxfac)
+                        urms_cc, fwcutoff, Df, wete, &
+                        snx, csx, &
+                        ee1, rr, drr, wci, solver, nbndw, kbndw, zbndw)
    use m_flowgeom, only: ntheta, Ndxi, Ndx, ba, dtheta, xz, yz
    use m_flowparameters, only: epshs
    use m_flow, only: vol1 
@@ -4308,8 +4308,6 @@ subroutine update_ee1rr(dtmaxwav, sigt, cgwav, ctheta, horadvec, thetaadvec, E, 
    double precision, dimension(ntheta,Ndx),   intent(in)     :: sigt         !< relative frequency
    double precision, dimension(Ndx),          intent(inout)  :: cgwav        !< group velocity
    double precision, dimension(ntheta,Ndx),   intent(inout)  :: ctheta       !< refraction velocity
-   double precision, dimension(ntheta,Ndx),   intent(inout)  :: horadvec     !< horizontal advection (work array)
-   double precision, dimension(ntheta,Ndx),   intent(inout)  :: thetaadvec   !< directional advection (work array)
    double precision, dimension(Ndx),          intent(inout)  :: E            !< bulk energy (work array)
    double precision, dimension(Ndx),          intent(inout)  :: H            !< significant wave height (work array)
    double precision, dimension(ntheta,Ndx),   intent(inout)  :: thet         !< significant wave height (work array)
@@ -4318,7 +4316,7 @@ subroutine update_ee1rr(dtmaxwav, sigt, cgwav, ctheta, horadvec, thetaadvec, E, 
    double precision,                          intent(in)     :: gammax
    double precision, dimension(Ndx),          intent(inout)  :: hh
    double precision, dimension(Ndx),          intent(in)     :: fw
-                                              
+
    character(len=slen),                       intent(inout)  :: break
    double precision,                          intent(inout)  :: DeltaH
    double precision,                          intent(inout)  :: waveps
@@ -4330,41 +4328,30 @@ subroutine update_ee1rr(dtmaxwav, sigt, cgwav, ctheta, horadvec, thetaadvec, E, 
    double precision, dimension(Ndx),          intent(inout)  :: QB
    double precision,                          intent(in)     :: alpha
    double precision,                          intent(in)     :: Trep
-   double precision,                          intent(in)     :: mwind
-   double precision, dimension(Ndx),          intent(inout)  :: R
    double precision, dimension(Ndx),          intent(in)     :: cwav
    double precision, dimension(Ndx),          intent(inout)  :: D
-                                              
+
    integer,                                   intent(in)     :: roller
    integer,                                   intent(in)     :: wci
-   integer,                                   intent(in)     :: jawsource
    double precision, dimension(Ndx),          intent(in)     :: br
    double precision, dimension(Ndx),          intent(inout)  :: urms_cc
    double precision,                          intent(inout)  :: fwcutoff
    double precision, dimension(Ndx),          intent(inout)  :: Df
-   double precision, dimension(ntheta,Ndx),   intent(inout)  :: DDlok
    double precision, dimension(ntheta,Ndx),   intent(inout)  :: wete
-   double precision, dimension(ntheta,Ndx),   intent(inout)  :: rrhoradvec
-   double precision, dimension(ntheta,Ndx),   intent(inout)  :: rrthetaadvec
-                                              
    double precision, dimension(ntheta),       intent(in)     :: snx, csx
-   
-   integer,                                   intent(in)     :: limtypw
-                                              
+
    double precision, dimension(ntheta,Ndx),   intent(inout)  :: ee1          !< energy field
    double precision, dimension(ntheta,Ndx),   intent(inout)  :: rr           !< roller energy
    double precision, dimension(ntheta,Ndx),   intent(inout)  :: drr          !< roller energy dissipation     
 
-   double precision, dimension(ntheta,Ndx),   intent(inout)  :: rhs          !< right-hand side, work array
    type(tsolver),                             intent(inout)  :: solver       !< solver
    integer,                                   intent(in)     :: nbndw        !< number of Dirichlet boundary nodes
    integer,          dimension(nbndw),        intent(in)     :: kbndw        !< boundary nodes
    double precision, dimension(ntheta,nbndw), intent(inout)  :: zbndw        !< boundary values
-   double precision,                          intent(in)     :: d_relaxfac
-   
+
    double precision, dimension(:,:),          allocatable    :: src_coeff    ! coefficient of sources
    double precision, dimension(:,:),          allocatable    :: src_expl     ! explicit sources
-   
+
    double precision                                          :: dfac
    double precision                                          :: dis
    integer                                                   :: k, itheta
@@ -4610,7 +4597,6 @@ subroutine xbeach_stationary()
    use m_physcoef, only: ag
    use m_flowgeom
    use m_flow, only: s1, rhomean, epshs, nplot
-   use m_flowparameters, only:limtypw
    use m_flowtimes
    use m_flowexternalforcings, only: nbndw, zbndw, kbndw
    use m_xbeach_data
@@ -4662,25 +4648,24 @@ subroutine xbeach_stationary()
           
        if (windmodel.eq.1) then
           !ML TODO: incorporate wind source term, now only does windmodel, not jawsource
-          call update_ee1rr_windmodel(dtmaximp, sigt, tt1, cgwavt, ctheta, horadvec, thetaadvec, E, H, thet, thetamean,   &
+          call update_ee1rr_windmodel(dtmaximp, sigt, tt1, cgwavt, ctheta, E, H, thet, thetamean,   &
                       sigmwav, gammaxxb, hh, &
-                      fw, break, deltaH, waveps, cgwav, kwav, km, gamma, gamma2, nroelvink, Qb, alpha, Trep, R, cwav, D,   &
+                      fw, break, deltaH, waveps, kwav, km, gamma, gamma2, nroelvink, Qb, alpha, Trep, cwav, D,   &
                       roller, br, &
-                      urms_cc, fwcutoff, Dbottom, DDlok, wete, rrhoradvec, rrthetaadvec, jawsource, wsorE, wsorT, egradcg, mwind, &
-                      snx, csx, limtypw, &
-                      ee1, rr, drr, wci, rhs, solver, nbndw, kbndw(1,:), zbndw)
+                      urms_cc, fwcutoff, Dbottom, wete, jawsource, wsorE, wsorT, &
+                      snx, csx, &
+                      ee1, rr, drr, wci, solver, nbndw, kbndw(1,:), zbndw)
           call xbeach_wave_compute_celerities()
        else
-          call update_ee1rr(dtmaximp, sigt, cgwav, ctheta, horadvec, thetaadvec, E, H, thet, thetamean,   &
+          call update_ee1rr(dtmaximp, sigt, cgwav, ctheta, E, H, thet, thetamean,   &
                          sigmwav, gammaxxb, hh, &
-                         fw, break, deltaH, waveps, kwav, km, gamma, gamma2, nroelvink, Qb, alpha, Trep, R, cwav, D,   &
+                         fw, break, deltaH, waveps, kwav, km, gamma, gamma2, nroelvink, Qb, alpha, Trep, cwav, D,   &
                          roller, br, &
-                         urms_cc, fwcutoff, Dbottom, DDlok, wete, rrhoradvec, rrthetaadvec, jawsource, mwind, &
-                         snx, csx, limtypw, &
-                         ee1, rr, drr, wci, rhs, solver, nbndw, kbndw(1,:), zbndw, d_relaxfac)
-              
+                         urms_cc, fwcutoff, Dbottom, wete, &
+                         snx, csx, &
+                         ee1, rr, drr, wci, solver, nbndw, kbndw(1,:), zbndw)
        endif
-       
+
        !if (jaGUI==1) then
        !   key=3
        !   call drawnu(key)
@@ -5615,32 +5600,27 @@ subroutine borecharacter()
    do k = 1, ndx
       wmagcc(k)=sqrt(wxcc(k) * wxcc(k) + wycc(k) * wycc(k)) 
    end do
-   
+
    ierr = 0
-   
+
 1234 continue
-   deallocate(dist2,dist0, stat=ierr)  
-   deallocate(wxcc,wycc,wdir, stat=ierr)       
+   deallocate(dist2,dist0, stat=ierr)
+   deallocate(wxcc,wycc,wdir, stat=ierr)
    return
-   
-  end subroutine xbeach_map_wind_field    
-    
-  subroutine xbeach_windsource(ee1, E, tt1, sigmwav , cgwavt, cgwav, hh, dtmaxwav, wsorE, wsorT,egradcg,SwE ,SwT )
-   use m_flowgeom, only: ndx, ndxi, lnx, wcl, ln, thetabin,ntheta, dtheta, bai
-   use m_xbeach_data, only: mwind, Eini, snx, csx, wmagcc, windspreadfac, Eful, Tful,CE1, CT1, CE2, CT2, jagradcg
-   use m_physcoef, only: rhomean, ag, rhog
+
+  end subroutine xbeach_map_wind_field
+
+  subroutine xbeach_windsource(ee1, tt1, cgwavt, wsorE, wsorT,egradcg,SwE ,SwT )
+   use m_flowgeom, only: ndx, ndxi, ntheta, dtheta, bai
+   use m_xbeach_data, only: snx, csx, wmagcc, windspreadfac, Eful, Tful,CE1, CT1, CE2, CT2, jagradcg
+   use m_physcoef, only: rhomean, ag
    use m_sferic, only: pi
 
    implicit none
-                                                                             
+
    double precision, dimension(ntheta, ndx), intent(in) :: ee1              !<   wave energy/rad 
-   double precision, dimension(ndx)        , intent(in) :: E                !<   nodal wave energy
    double precision, dimension(ntheta, ndx), intent(in) :: tt1              !<   wave period in directional bin
-   double precision, dimension(ndx)        , intent(in) :: sigmwav             !<   nodal wave period
    double precision, dimension(ntheta, ndx), intent(in) :: cgwavt           !<   group celerity per bin
-   double precision, dimension(ndx)        , intent(in) :: cgwav            !<   nodal group celerity
-   double precision, dimension(ndx)        , intent(in) :: hh               !<   water depth
-   double precision,                         intent(in) :: dtmaxwav         !<   time step
 
    double precision, dimension(ntheta, ndx), intent(out):: wsorT            !<   wind input period per second
    double precision, dimension(ntheta, ndx), intent(out):: wsorE            !<   wind input energy per second
@@ -5664,7 +5644,7 @@ subroutine borecharacter()
    gradcg=0d0; tgradcg=0d0; gradcg=0d0
 
    ! velocity gradient operator
-   call advec_horz_cg(dtmaxwav, snx, csx, cgwavt, gradcg)
+   call advec_horz_cg(snx, csx, cgwavt, gradcg)
        
    do k = 1, ndxi
         
@@ -5722,7 +5702,7 @@ subroutine borecharacter()
    return
 end subroutine xbeach_windsource
    
-subroutine advec_horz_cg(dtmaxwav, snx, csx, veloc, gradcg)
+subroutine advec_horz_cg(snx, csx, veloc, gradcg)
    use m_sferic
    use m_physcoef
    use m_flowgeom
@@ -5732,7 +5712,6 @@ subroutine advec_horz_cg(dtmaxwav, snx, csx, veloc, gradcg)
    integer                                                  :: L, k1, k2, itheta
    double precision                                         :: velocL
    double precision                                         :: cwuL
-   double precision, intent(in)                             :: dtmaxwav
    double precision, intent(in), dimension(ntheta)          :: snx, csx
    double precision, intent(in), dimension(ntheta, ndx)     :: veloc
    double precision, intent(out), dimension(ntheta, ndx)    :: gradcg
@@ -5956,13 +5935,13 @@ subroutine xbeach_wave_compute_period_depth_limitation(E, Tmaxdep )
 
 end subroutine advec_horz_windmodel
 
-subroutine update_ee1rr_windmodel(dtmaxwav, sigt, tt1, cgwavt, ctheta, horadvec, thetaadvec, E, H, thet, thetamean,   &
+subroutine update_ee1rr_windmodel(dtmaxwav, sigt, tt1, cgwavt, ctheta, E, H, thet, thetamean,   &
                         sigmwav, gammax, hh, &
-                        fw, break, deltaH, waveps,cgwav, kwav, km, gamma, gamma2, nroelvink, QB, alpha, trep, R, cwav, D,   &
+                        fw, break, deltaH, waveps,kwav, km, gamma, gamma2, nroelvink, QB, alpha, trep, cwav, D,   &
                         roller, br, &
-                        urms_cc, fwcutoff, Df, DDlok, wete, rrhoradvec, rrthetaadvec,  jawsource, wsorE, wsorT, gradcg, mwind, &
-                        snx, csx, limtypw, &
-                         ee1, rr, drr, wci, rhs, solver, nbndw, kbndw, zbndw)
+                        urms_cc, fwcutoff, Df, wete, jawsource, wsorE, wsorT, &
+                        snx, csx, &
+                         ee1, rr, drr, wci, solver, nbndw, kbndw, zbndw)
 
    use m_flowgeom, only: ntheta, Ndx, ba, dtheta
    use m_flowparameters, only: epshs
@@ -5980,8 +5959,6 @@ subroutine update_ee1rr_windmodel(dtmaxwav, sigt, tt1, cgwavt, ctheta, horadvec,
    double precision, dimension(ntheta,Ndx),   intent(inout)  :: tt1          !< wave period
    double precision, dimension(ntheta,Ndx),   intent(inout)  :: cgwavt        !< group velocity
    double precision, dimension(ntheta,Ndx),   intent(inout)  :: ctheta       !< refraction velocity
-   double precision, dimension(ntheta,Ndx),   intent(inout)  :: horadvec     !< horizontal advection (work array)
-   double precision, dimension(ntheta,Ndx),   intent(inout)  :: thetaadvec   !< directional advection (work array)
    double precision, dimension(Ndx),          intent(inout)  :: E            !< bulk energy (work array)
    double precision, dimension(Ndx),          intent(inout)  :: H            !< significant wave height (work array)
    double precision, dimension(ntheta,Ndx),   intent(inout)  :: thet         !< significant wave height (work array)
@@ -5990,11 +5967,10 @@ subroutine update_ee1rr_windmodel(dtmaxwav, sigt, tt1, cgwavt, ctheta, horadvec,
    double precision,                          intent(in)     :: gammax
    double precision, dimension(Ndx),          intent(inout)  :: hh
    double precision, dimension(Ndx),          intent(in)     :: fw
-                                              
+
    character(len=slen),                       intent(inout)  :: break
    double precision,                          intent(inout)  :: DeltaH
    double precision,                          intent(inout)  :: waveps
-   double precision, dimension(Ndx),          intent(in)     :: cgwav   
    double precision, dimension(Ndx),          intent(in)     :: kwav
    double precision, dimension(Ndx),          intent(in)     :: km
    double precision,                          intent(in)     :: gamma
@@ -6003,8 +5979,6 @@ subroutine update_ee1rr_windmodel(dtmaxwav, sigt, tt1, cgwavt, ctheta, horadvec,
    double precision, dimension(Ndx),          intent(inout)  :: QB
    double precision,                          intent(in)     :: alpha
    double precision,                          intent(in)     :: Trep
-   double precision,                          intent(in)     :: mwind
-   double precision, dimension(Ndx),          intent(inout)  :: R
    double precision, dimension(Ndx),          intent(in)     :: cwav
    double precision, dimension(Ndx),          intent(inout)  :: D
                                               
@@ -6015,23 +5989,16 @@ subroutine update_ee1rr_windmodel(dtmaxwav, sigt, tt1, cgwavt, ctheta, horadvec,
    double precision, dimension(Ndx),          intent(inout)  :: urms_cc
    double precision,                          intent(inout)  :: fwcutoff
    double precision, dimension(Ndx),          intent(inout)  :: Df
-   double precision, dimension(ntheta,Ndx),   intent(inout)  :: DDlok
    double precision, dimension(ntheta,Ndx),   intent(inout)  :: wete
-   double precision, dimension(ntheta,Ndx),   intent(inout)  :: rrhoradvec
-   double precision, dimension(ntheta,Ndx),   intent(inout)  :: rrthetaadvec
    double precision, dimension(ntheta,Ndx),   intent(inout)  :: wsorE
    double precision, dimension(ntheta,Ndx),   intent(inout)  :: wsorT
-   double precision, dimension(ntheta,Ndx),   intent(inout)  :: gradcg
-   
+
    double precision, dimension(ntheta),       intent(in)     :: snx, csx
-   
-   integer,                                   intent(in)     :: limtypw
-                                              
+
    double precision, dimension(ntheta,Ndx),   intent(inout)  :: ee1          !< energy field
    double precision, dimension(ntheta,Ndx),   intent(inout)  :: rr           !< roller energy
    double precision, dimension(ntheta,Ndx),   intent(inout)  :: drr          !< roller energy dissipation     
 
-   double precision, dimension(ntheta,Ndx),   intent(inout)  :: rhs          !< right-hand side, work array
    type(tsolver),                             intent(inout)  :: solver       !< solver
    integer,                                   intent(in)     :: nbndw        !< number of Dirichlet boundary nodes
    integer,          dimension(nbndw),        intent(in)     :: kbndw        !< boundary nodes
@@ -7061,12 +7028,11 @@ subroutine disper_approx(h,T,k,n,C,Cg,mn)
 
 end subroutine disper_approx
 !
-subroutine fm_surrounding_points(xn,yn,no_nodes,connected_nodes,no_connected_nodes, no_cells, kp, ierr)
+subroutine fm_surrounding_points(no_nodes,connected_nodes,no_connected_nodes, no_cells, kp, ierr)
    use m_flowgeom
 
    implicit none
 
-   double precision,  dimension(no_nodes),          intent(in)  :: xn,yn              ! coordinates of network nodes
    integer,                                         intent(in)  :: no_nodes           ! number of network nodes
    integer,                                         intent(in)  :: no_connected_nodes ! max node numbers connected to each cell
    integer, dimension(no_cells,no_connected_nodes), intent(in)  :: connected_nodes    ! node numbers connected to each cell
