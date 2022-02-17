@@ -203,7 +203,7 @@ module m_CrossSections
        !*** ground layer data
        type(t_groundlayer),pointer              :: groundlayer => null()      !< pointer to groundlayer data
        
-       ! Friction Data not needed in Cache, already processed into Cross-Sections, which are cached
+       ! Friction Data 
        integer                                  :: frictionSectionsCount = 0  !< Number of actual friction sections
        character(IdLen), allocatable            :: frictionSectionID(:)       !< Friction Section Identification
        integer         , allocatable            :: frictionSectionIndex(:)    !< Friction Section index
@@ -1142,7 +1142,7 @@ recursive subroutine findNeighbourAndAddCrossSection(brs, crs, branchid, cross, 
    type(t_branchSet)      , intent(in   )          :: brs            !< Set of reaches
    integer                , intent(in   )          :: branchid       !< branch for which a neighbour is requested
    type(t_CrossSection)   , intent(in   )          :: cross          !< cross section
-   double precision       , intent(  out)          :: offset         !< chainage of cross section on branch
+   double precision       , intent(inout)          :: offset         !< chainage of cross section on branch
    logical                , intent(in   )          :: beginNode      !< indicates whether the begin or end node is to be used of the branch
    integer, dimension(:,:), intent(in   )          :: orderNumber    !< first index contains orderNumber, second contains start position for this ordernumber
 

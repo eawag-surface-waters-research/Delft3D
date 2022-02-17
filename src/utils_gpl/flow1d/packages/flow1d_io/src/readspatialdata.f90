@@ -36,21 +36,15 @@ module m_readSpatialData
    use m_branch
    use properties
    use m_hash_search
-   use m_read_table
-
    
    implicit none
 
    private
 
    public spatial_data_reader
-   public read_spatial_data_cache
-   public write_spatial_data_cache
-
-
+ 
 contains
-
-   !> Read spatial data from input file
+!> Read spatial data from input file
    subroutine spatial_data_reader(isp, spData, brs, inputfile, default, itype, interpolateOverBranches)
 
       type(t_spatial_dataSet) , intent(inout)  :: spData                   !< Spatial data set
@@ -244,157 +238,5 @@ contains
       endif
    
    end subroutine spatial_data_reader
-
-   !> Read the spatial data file from cache
-   subroutine read_spatial_data_cache(ibin, network)
-
-      type(t_network), intent(inout)      :: network     !< network structure
-      integer, intent(in)                 :: ibin        !< unit number of binary cache file
-
-      type(t_spatial_data), pointer       :: pQuant
-      integer                             :: nValues
-      integer                             :: tblCount
-      integer                             :: i
-      integer                             :: j
-   
-      read(ibin) network%spData%Count
-      network%spData%growsby = network%spData%count + 2
-      call realloc(network%spData)
-      
-      read(ibin) network%spData%level
-      read(ibin) network%spData%depth
-      read(ibin) network%spData%discharge
-      read(ibin) network%spData%salinity
-      read(ibin) network%spData%dispersion
-      read(ibin) network%spData%windShield
-      read(ibin) network%spData%TH_F1
-      read(ibin) network%spData%TH_F3
-      read(ibin) network%spData%TH_F4
-      read(ibin) network%spData%ConvLength
-      
-      do i = 1, network%spData%Count
-      
-         pQuant => network%spdata%quant(i)
-
-         read(ibin) pQuant%default
-         
-         read(ibin) pQuant%quantity
-         
-         read(ibin) nValues
-         if (nValues > 0) then
-         
-            allocate(pQuant%tblIndex(nValues))
-            allocate(pQuant%values(nValues))
-         
-            read(ibin) (pQuant%tblIndex(j), j = 1, nValues)
-            read(ibin) (pQuant%values(j), j = 1, nValues)
-            
-         endif
-
-         read(ibin) tblCount
-
-         do j = 1, tblCount
-            pQuant%tables%Count = pQuant%tables%Count + 1
-            if (pQuant%tables%Count > pQuant%tables%Size) Then
-               call realloc(pQuant%tables)
-            endif
-            allocate(pQuant%tables%tb(j)%table)
-            call read_table_cache(ibin, pQuant%tables%tb(j)%table)
-         enddo
-
-      enddo
-   
-      ! Transport Parameters
-      read(ibin) transportPars%do_salt
-      read(ibin) transportPars%do_temp
-      read(ibin) transportPars%salt_index
-      read(ibin) transportPars%temp_index
-      read(ibin) transportPars%constituents_count
-      read(ibin) transportPars%density
-      read(ibin) transportPars%teta
-      read(ibin) transportPars%tidal_period
-      read(ibin) transportPars%n
-      read(ibin) transportPars%advection_scheme
-      
-      read(ibin) (transportPars%c(i), i = 1, 11)
-
-      do i = 1, 2
-         read(ibin) transportPars%co_h(i)%boundary_index
-         read(ibin) transportPars%co_h(i)%initial_values_index
-         read(ibin) transportPars%co_h(i)%name
-         read(ibin) transportPars%co_h(i)%default
-      enddo
-
-   end subroutine read_spatial_data_cache
-
-   !> Read the spatial data file from cache
-   subroutine write_spatial_data_cache(ibin, spData)
-
-      type(t_spatial_dataSet), intent(in) :: spData   !< network structure
-      integer, intent(in)                 :: ibin     !< unit number of binary cache file
-
-      type(t_spatial_data), pointer       :: pQuant
-      integer                             :: nValues
-      integer                             :: i
-      integer                             :: j
-   
-      write(ibin) spData%Count
-      
-      write(ibin) spData%level
-      write(ibin) spData%depth
-      write(ibin) spData%discharge
-      write(ibin) spData%salinity
-      write(ibin) spData%dispersion
-      write(ibin) spData%windShield
-      write(ibin) spData%TH_F1
-      write(ibin) spData%TH_F3
-      write(ibin) spData%TH_F4
-      write(ibin) spData%ConvLength
-      
-      do i = 1, spData%Count
-      
-         pQuant => spdata%quant(i)
-         
-         write(ibin) pQuant%default
-
-         write(ibin) pQuant%quantity
-         
-         nValues = size(pQuant%tblIndex)
-         write(ibin) nValues
-         
-         if (nValues > 0) then
-            write(ibin) (pQuant%tblIndex(j), j = 1, nValues)
-            write(ibin) (pQuant%values(j), j = 1, nValues)
-         endif
-
-         write(ibin) pQuant%tables%Count
-         do j = 1, pQuant%tables%Count
-            call write_table_cache(ibin, pQuant%tables%tb(j)%table)
-         enddo
-
-      enddo
-
-      ! Transport Parameters
-      write(ibin) transportPars%do_salt
-      write(ibin) transportPars%do_temp
-      write(ibin) transportPars%salt_index
-      write(ibin) transportPars%temp_index
-      write(ibin) transportPars%constituents_count
-      write(ibin) transportPars%density
-      write(ibin) transportPars%teta
-      write(ibin) transportPars%tidal_period
-      write(ibin) transportPars%n
-      write(ibin) transportPars%advection_scheme
-      
-      write(ibin) (transportPars%c(i), i = 1, 11)
-
-      do i = 1, 2
-         write(ibin) transportPars%co_h(i)%boundary_index
-         write(ibin) transportPars%co_h(i)%initial_values_index
-         write(ibin) transportPars%co_h(i)%name
-         write(ibin) transportPars%co_h(i)%default
-      enddo
-      
-   end subroutine write_spatial_data_cache
 
 end module m_readSpatialData   

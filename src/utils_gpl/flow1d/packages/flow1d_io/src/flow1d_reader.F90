@@ -435,36 +435,16 @@ module m_flow1d_reader
       else
          call prop_get_string(md_ptr, 'files', 'networkFile', inputfile, success)
       endif
-      inputfile = md_flow1d_file(1:posslash)//inputfile
-      if (success .and. len_trim(inputfile) > 0) then
-      
-         posdot = index(inputFile, '.', back = .true.)
-         binfile = inputFile(1:posdot)//'cache'
-         inquire(file=binfile, exist=file_exist)
-         if (doReadCache .and. file_exist) then
-            open(newunit=ibin, file=binfile, status='old', form='unformatted', access='stream', action='read', iostat=istat)
-            if (istat /= 0) then
-               call setmessage(LEVEL_FATAL, 'Error opening Network Cache file')
-               ibin = 0
-            endif
-            call read_network_cache(ibin, network)
-            close(ibin)
-            ibin = 0
-            
-         else
          
-            if (readNetworkFromUgrid) then
-               ! Read from UGRID-File
-               call NetworkUgridReader(network, inputfile)
-            else
-               ! Read from INI-File
-               call NetworkReader(network, inputfile)
-
-            endif
-            
-         endif
+      if (readNetworkFromUgrid) then
+         ! Read from UGRID-File
+         call NetworkUgridReader(network, inputfile)
+      else
+         ! Read from INI-File
+         call NetworkReader(network, inputfile)
 
       endif
+            
       
       if (network%nds%Count < 2 .or. network%brs%Count < 1) then
          call SetMessage(LEVEL_FATAL, 'No Proper Network Found')
@@ -569,90 +549,78 @@ module m_flow1d_reader
       call timstrt('ReadInitData', timerReadInitial)
       call SetMessage(LEVEL_INFO, 'Reading Initial Data ...')
       
-      binfile = md_flow1d_file(1:posslash)//'SpatialData.cache'
-      inquire(file=binfile, exist=file_exist)
-      if (doReadCache .and. file_exist) then
-         open(newunit=ibin, file=binfile, status='old', form='unformatted', access='stream', action='read', iostat=istat)
-         if (istat /= 0) then
-            call setmessage(LEVEL_FATAL, 'Error Opening Spatial Data Cache File: '//trim(binfile))
-            ibin = 0
-         endif
-         call read_spatial_data_cache(ibin, network)
-         close(ibin)
+      
+      ! Read initial data files
+      UseInitialWaterDepth = .false.
+      call prop_get_logical(md_ptr, 'GlobalValues', 'UseInitialWaterDepth', UseInitialWaterDepth, success)
+      inputfile=''
+      default = 0d0
+      if (UseInitialWaterDepth) then
+         call prop_get_string(md_ptr, 'files', 'initialWaterDepthFile', inputfile, success)
+         call prop_get_double(md_ptr, 'GlobalValues', 'initialWaterDepth', default, success)
+         quantity = CFiWaterDepth
       else
-      
-         ! Read initial data files
-         UseInitialWaterDepth = .false.
-         call prop_get_logical(md_ptr, 'GlobalValues', 'UseInitialWaterDepth', UseInitialWaterDepth, success)
-         inputfile=''
+         call prop_get_string(md_ptr, 'files', 'initialWaterLevelFile', inputfile, success)
+         call prop_get_double(md_ptr, 'GlobalValues', 'initialWaterLevel', default, success)
+         quantity = CFiWaterlevel
+      endif
+      if (success .and. len_trim(inputfile) > 0) then
+         inputfile = md_flow1d_file(1:posslash)//inputfile
+         call spatial_data_reader(isp, network%spdata, network%brs, inputfile, default, quantity, .true.)
+         call SetMessage(LEVEL_INFO, 'Initial Water Level/Depth Loaded')
+      endif
+   
+      inputfile=''
+      call prop_get_string(md_ptr, 'files', 'initialDischargeFile', inputfile, success)
+      if (success .and. len_trim(inputfile) > 0) then
+         inputfile = md_flow1d_file(1:posslash)//inputfile
          default = 0d0
-         if (UseInitialWaterDepth) then
-            call prop_get_string(md_ptr, 'files', 'initialWaterDepthFile', inputfile, success)
-            call prop_get_double(md_ptr, 'GlobalValues', 'initialWaterDepth', default, success)
-            quantity = CFiWaterDepth
-         else
-            call prop_get_string(md_ptr, 'files', 'initialWaterLevelFile', inputfile, success)
-            call prop_get_double(md_ptr, 'GlobalValues', 'initialWaterLevel', default, success)
-            quantity = CFiWaterlevel
-         endif
-         if (success .and. len_trim(inputfile) > 0) then
-            inputfile = md_flow1d_file(1:posslash)//inputfile
-            call spatial_data_reader(isp, network%spdata, network%brs, inputfile, default, quantity, .true.)
-            call SetMessage(LEVEL_INFO, 'Initial Water Level/Depth Loaded')
-         endif
+         call prop_get_double(md_ptr, 'GlobalValues', 'InitialDischarge', default, success)
+         call spatial_data_reader(isp, network%spdata, network%brs, inputfile, default, CFiDischarge, .true.)
+         call SetMessage(LEVEL_INFO, 'Initial Discharge Data Loaded')
+      endif
+   
+      inputfile=''
+      call prop_get_string(md_ptr, 'files', 'initialSalinityFile', inputfile, success)
+      inputfile = md_flow1d_file(1:posslash)//inputfile
+      default = 5d0
+      call prop_get_double(md_ptr, 'GlobalValues', 'InitialSalinity', default, success)
+      call spatial_data_reader(isp, network%spdata, network%brs, inputfile, default, CFiSalinity, .true.)
+      if (transportPars%salt_index > 0) then
+         transportPars%co_h(transportPars%salt_index)%initial_values_index = isp
+         transportPars%co_h(transportPars%salt_index)%name                 = 'water_salinity'
+      endif
       
-         inputfile=''
-         call prop_get_string(md_ptr, 'files', 'initialDischargeFile', inputfile, success)
-         if (success .and. len_trim(inputfile) > 0) then
-            inputfile = md_flow1d_file(1:posslash)//inputfile
-            default = 0d0
-            call prop_get_double(md_ptr, 'GlobalValues', 'InitialDischarge', default, success)
-            call spatial_data_reader(isp, network%spdata, network%brs, inputfile, default, CFiDischarge, .true.)
-            call SetMessage(LEVEL_INFO, 'Initial Discharge Data Loaded')
-         endif
+      call SetMessage(LEVEL_INFO, 'Initial Salinity Data Loaded')
+      !endif
+   
+      inputfile=''
+      call prop_get_string(md_ptr, 'files', 'initialTemperatureFile', inputfile, success)
+      inputfile = md_flow1d_file(1:posslash)//inputfile
+      default = 14d0
+      call prop_get_double(md_ptr, 'GlobalValues', 'InitialTemperature', default, success)
+      call spatial_data_reader(isp, network%spdata, network%brs, inputfile, default, CFiTemperature, .true.)
+      transportPars%co_h(transportPars%temp_index)%initial_values_index = isp
+      transportPars%co_h(transportPars%temp_index)%name                 = 'water_temperature'
       
-         inputfile=''
-         call prop_get_string(md_ptr, 'files', 'initialSalinityFile', inputfile, success)
+      call SetMessage(LEVEL_INFO, 'Initial Temperature Data Loaded')
+   
+      inputfile=''
+      call prop_get_string(md_ptr, 'files', 'dispersionFile', inputfile, success)    
+      if (success .and. len_trim(inputfile) > 0) then
          inputfile = md_flow1d_file(1:posslash)//inputfile
-         default = 5d0
-         call prop_get_double(md_ptr, 'GlobalValues', 'InitialSalinity', default, success)
-         call spatial_data_reader(isp, network%spdata, network%brs, inputfile, default, CFiSalinity, .true.)
-         if (transportPars%salt_index > 0) then
-            transportPars%co_h(transportPars%salt_index)%initial_values_index = isp
-            transportPars%co_h(transportPars%salt_index)%name                 = 'water_salinity'
-         endif
-         
-         call SetMessage(LEVEL_INFO, 'Initial Salinity Data Loaded')
-         !endif
-      
+         default = 0d0
+         call prop_get_double(md_ptr, 'GlobalValues', 'Dispersion', default, success)
+         call spatial_data_reader(isp, network%spdata, network%brs, inputfile, default, CFiTH_F1, .true.)
+      else
          inputfile=''
-         call prop_get_string(md_ptr, 'files', 'initialTemperatureFile', inputfile, success)
-         inputfile = md_flow1d_file(1:posslash)//inputfile
-         default = 14d0
-         call prop_get_double(md_ptr, 'GlobalValues', 'InitialTemperature', default, success)
-         call spatial_data_reader(isp, network%spdata, network%brs, inputfile, default, CFiTemperature, .true.)
-         transportPars%co_h(transportPars%temp_index)%initial_values_index = isp
-         transportPars%co_h(transportPars%temp_index)%name                 = 'water_temperature'
-         
-         call SetMessage(LEVEL_INFO, 'Initial Temperature Data Loaded')
-      
-         inputfile=''
-         call prop_get_string(md_ptr, 'files', 'dispersionFile', inputfile, success)    
-         if (success .and. len_trim(inputfile) > 0) then
+         call prop_get_string(md_ptr, 'files', 'f1File', inputfile, success)    
+         default = 0d0
+         call prop_get_double(md_ptr, 'GlobalValues', 'f1', default, success)
+         if (success .or. len_trim(inputfile) > 0) then
             inputfile = md_flow1d_file(1:posslash)//inputfile
-            default = 0d0
-            call prop_get_double(md_ptr, 'GlobalValues', 'Dispersion', default, success)
             call spatial_data_reader(isp, network%spdata, network%brs, inputfile, default, CFiTH_F1, .true.)
-         else
-            inputfile=''
-            call prop_get_string(md_ptr, 'files', 'f1File', inputfile, success)    
-            default = 0d0
-            call prop_get_double(md_ptr, 'GlobalValues', 'f1', default, success)
-            if (success .or. len_trim(inputfile) > 0) then
-               inputfile = md_flow1d_file(1:posslash)//inputfile
-               call spatial_data_reader(isp, network%spdata, network%brs, inputfile, default, CFiTH_F1, .true.)
-               call SetMessage(LEVEL_INFO, 'Thatcher-Harleman F1 Data Loaded')
-            endif
+            call SetMessage(LEVEL_INFO, 'Thatcher-Harleman F1 Data Loaded')
          endif
 
          inputfile=''

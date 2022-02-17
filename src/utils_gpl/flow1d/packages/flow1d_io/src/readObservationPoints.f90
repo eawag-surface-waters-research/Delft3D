@@ -36,7 +36,6 @@ module m_readObservationPoints
 
    use properties
    use m_hash_search
-   use m_hash_list
    use string_module
 
    implicit none
@@ -44,8 +43,6 @@ module m_readObservationPoints
    private
 
    public readObservationPoints
-   public read_obs_point_cache
-   public write_obs_point_cache
 
    !> The file version number of the observation points file format: d.dd, [config_major].[config_minor], e.g., 1.03
    !!
@@ -111,21 +108,6 @@ module m_readObservationPoints
       obsPointID   = ''
       obsPointName = ''
       
-      pos = index(observationPointsFile, '.', back = .true.)
-      binfile = observationPointsFile(1:pos)//'cache'
-      inquire(file=binfile, exist=file_exist)
-      if (doReadCache .and. file_exist) then
-         open(newunit=ibin, file=binfile, status='old', form='unformatted', access='stream', action='read', iostat=istat)
-         if (istat /= 0) then
-            call setmessage(LEVEL_FATAL, 'Error opening Observation Point Cache file')
-            ibin = 0
-         endif
-         call read_obs_point_cache(ibin, network)
-         close(ibin)
-         ibin = 0
-         return
-      endif
-
       call tree_create(trim(observationPointsFile), md_ptr, maxlenpar)
       call prop_file('ini',trim(observationPointsFile),md_ptr, istat)
       
@@ -227,71 +209,6 @@ module m_readObservationPoints
 
    end subroutine readObservationPoints
 
-   subroutine read_obs_point_cache(ibin, network)
-   
-      type(t_network), intent(inout)         :: network
-      integer, intent(in)                    :: ibin
-      
-      integer                           :: i
-      type(t_ObservationPoint), pointer :: pobs
-
-      read(ibin) network%obs%count
-      network%obs%growsby = network%obs%count + 2
-      call realloc(network%obs)
-
-      do i = 1, network%obs%count
-      
-         pobs => network%obs%OPnt(i)
-         
-         read(ibin) pobs%id 
-         read(ibin) pobs%name 
-         read(ibin) pobs%p1
-         read(ibin) pobs%p2
-         read(ibin) pobs%pointWeight
-         read(ibin) pobs%l1
-         read(ibin) pobs%l2
-         read(ibin) pobs%linkWeight
-         read(ibin) pobs%branchIdx
-         pobs%branch => network%brs%branch(pobs%branchIdx)
-         read(ibin) pobs%chainage
-
-      enddo
-      
-      call read_hash_list_cache(ibin, network%obs%hashlist)
-         
-   end subroutine read_obs_point_cache
-   
-   subroutine write_obs_point_cache(ibin, obs)
-   
-      type(t_ObservationPointSet), intent(in)  :: obs
-      integer, intent(in)                      :: ibin
-      
-      integer                           :: i
-      type(t_ObservationPoint), pointer :: pobs
-      
-      write(ibin) obs%Count
-
-      do i = 1, obs%Count
-      
-         pobs => obs%OPnt(i)
-
-         write(ibin) pobs%id 
-         write(ibin) pobs%name 
-         write(ibin) pobs%p1
-         write(ibin) pobs%p2
-         write(ibin) pobs%pointWeight          
-         write(ibin) pobs%l1
-         write(ibin) pobs%l2
-         write(ibin) pobs%linkWeight
-         write(ibin) pobs%branchIdx
-         write(ibin) pobs%chainage
-        
-      enddo
-      
-      call write_hash_list_cache(ibin, obs%hashlist)
-      
-   end subroutine write_obs_point_cache
-   
    !> Converts a location type as text string into the integer parameter constant.
    !! E.g. INDTP_1D, etc. If input string is invalid, -1 is returned.
    subroutine locationTypeStringToInteger(slocType, ilocType)

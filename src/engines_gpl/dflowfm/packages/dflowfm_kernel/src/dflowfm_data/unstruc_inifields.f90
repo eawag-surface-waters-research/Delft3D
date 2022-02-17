@@ -838,7 +838,6 @@ subroutine spaceInit1dField(sBranchId, sChainages, sValues, ipos, res)
    use m_flowparameters, only: eps10
    use precision_basics
    use m_hash_search
-   use m_hash_list
    use dfm_error
    
    implicit none

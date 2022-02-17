@@ -31,9 +31,7 @@ module m_read_roughness
    
    use m_Branch
    use m_GlobalParameters
-   use m_read_table
    use m_hash_search
-   use m_hash_list
    use m_network
    use m_readSpatialData
    use m_Roughness
@@ -47,8 +45,6 @@ module m_read_roughness
    private
 
    public roughness_reader
-   public read_roughness_cache
-   public write_roughness_cache
    public frictionTypeStringToInteger
 
    !> The file version number of the roughness file format: d.dd, [config_major].[config_minor], e.g., 1.03
@@ -119,20 +115,6 @@ contains
          endif
       endif
       
-      binfile = 'Roughness.cache'
-      inquire(file=binfile, exist=file_exist)
-      if (doReadCache .and. file_exist) then
-         open(newunit=ibin, file=binfile, status='old', form='unformatted', access='stream', action='read', iostat=istat)
-         if (istat /= 0) then
-            call setmessage(LEVEL_ERROR, 'Error opening Roughness Cache file')
-            ibin = 0
-            return
-         endif
-         call read_roughness_cache(ibin, network)
-         close(ibin)
-         return
-      endif
-   
       rgs    => network%rgs
       brs    => network%brs
       spdata => network%spdata
@@ -692,138 +674,5 @@ contains
       enddo
    
    end subroutine init_at_branches
- 
-   !> Read the binary cache file for roughness values
-   subroutine read_roughness_cache(ibin, network)
-   
-      type(t_network), intent(inout)  :: network   !< Network structure
-      integer, intent(in)             :: ibin      !< Unit number for binary file
-      
-      integer                         :: i
-      integer                         :: j
-      integer                         :: tblCount
-
-      type(t_Roughness), pointer      :: pRough
-      integer                         :: nbrs
-      logical                         :: hasPos
-      logical                         :: hasNeg
-      
-      nbrs = network%brs%Count
-
-      read(ibin) network%rgs%count
-      network%rgs%growsby = network%rgs%count + 2
-      call realloc(network%rgs)
-
-      do i = 1, network%rgs%Count
-      
-         pRough => network%rgs%rough(i)
-       
-         read(ibin) pRough%id
-         
-         read(ibin) pRough%iSection
-         
-         read(ibin) hasPos
-         if (hasPos) then
-         
-            allocate(pRough%rgh_type_pos(nbrs))
-            allocate(pRough%fun_type_pos(nbrs))
-         
-            read(ibin) (pRough%rgh_type_pos(j), j = 1, nbrs)
-            read(ibin) (pRough%fun_type_pos(j), j = 1, nbrs)
-
-         endif
-         
-         read(ibin) hasNeg
-         if (hasNeg) then
-         
-            allocate(pRough%rgh_type_neg(nbrs))
-            allocate(pRough%fun_type_neg(nbrs))
-         
-            read(ibin) (pRough%rgh_type_neg(j), j = 1, nbrs)
-            read(ibin) (pRough%fun_type_neg(j), j = 1, nbrs)
-
-         endif
-
-         read(ibin) pRough%spd_pos_idx
-         read(ibin) pRough%spd_neg_idx
-         
-      enddo
-      
-      read(ibin) tblCount
-
-      do i = 1, tblCount
-         network%rgs%tables%Count = network%rgs%tables%Count + 1
-         if (network%rgs%tables%Count > network%rgs%tables%Size) Then
-            call realloc(network%rgs%tables)
-         endif
-         allocate(network%rgs%tables%tb(i)%table)
-         call read_table_cache(ibin, network%rgs%tables%tb(i)%table)
-      enddo
-
-      call read_hash_list_cache(ibin, network%rgs%hashlist)
-      
-   end subroutine read_roughness_cache
-   
-   !> Write the binary cace file for roughness values
-   subroutine write_roughness_cache(ibin, network)
-
-      type(t_network), intent(in)     :: network  !< Network structure
-      integer, intent(in)             :: ibin     !< unit number of binary cache file
-      
-      type(t_RoughnessSet)            :: rgs
-      type(t_Roughness), pointer      :: pRough
-      integer                         :: i
-      integer                         :: j
-      integer                         :: nbrs
-      logical                         :: hasPos
-      logical                         :: hasNeg
-      
-      rgs  = network%rgs
-      nbrs = network%brs%Count
-      
-      write(ibin) rgs%Count
-
-      do i = 1, rgs%Count
-      
-         pRough => rgs%rough(i)
-       
-         write(ibin) pRough%id
-         
-         write(ibin) pRough%iSection
-         
-         if (associated(pRough%rgh_type_pos)) then
-            hasPos = .true.
-            write(ibin) hasPos
-            write(ibin) (pRough%rgh_type_pos(j), j = 1, nbrs)
-            write(ibin) (pRough%fun_type_pos(j), j = 1, nbrs)
-         else
-            hasPos = .false.
-            write(ibin) hasPos
-         endif
-         
-         
-         if (associated(pRough%rgh_type_neg)) then
-            hasNeg = .true.
-            write(ibin) hasNeg
-            write(ibin) (pRough%rgh_type_neg(j), j = 1, nbrs)
-            write(ibin) (pRough%fun_type_neg(j), j = 1, nbrs)
-         else
-            hasNeg = .false.
-            write(ibin) hasNeg
-         endif
-         
-         write(ibin) pRough%spd_pos_idx
-         write(ibin) pRough%spd_neg_idx
-
-      enddo
-
-      write(ibin) rgs%tables%Count
-      do i = 1, rgs%tables%Count
-         call write_table_cache(ibin, rgs%tables%tb(i)%table)
-      enddo
-      
-      call write_hash_list_cache(ibin, rgs%hashlist)
-
-   end subroutine write_roughness_cache
 
     end module m_read_roughness
