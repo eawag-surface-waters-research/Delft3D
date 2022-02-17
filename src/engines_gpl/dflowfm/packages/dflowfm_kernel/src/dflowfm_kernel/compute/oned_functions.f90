@@ -152,8 +152,6 @@ module m_oned_functions
    !! (This replaces the netlink/netnode numbers that were originally
    !! filled in during the network reading stage.)
    subroutine set_linknumbers_in_branches()
-   
-      use m_globalParameters
       use unstruc_channel_flow
       use m_flowgeom
       use m_sediment

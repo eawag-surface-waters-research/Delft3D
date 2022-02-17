@@ -416,15 +416,13 @@
    use unstruc_model
    use unstruc_display
    use unstruc_messages
-   use M_splines, only: increasespl, maxspl, maxsplen, readsplines
+   use M_splines, only: increasespl, maxspl, maxsplen, readsplines, writesplines
    USE M_SAMPLES
    use m_commandline_option
    use dfm_signals
    use gridoperations
    use m_monitoring_crosssections, only: increaseCrossSections, maxcrs
-   use M_splines      ! need for wrispl
-   use unstruc_netcdf ! need for wrinet
-
+   use unstruc_netcdf, only : unc_write_net
 
    implicit none
    CHARACTER inarg*(*), EXT*4
