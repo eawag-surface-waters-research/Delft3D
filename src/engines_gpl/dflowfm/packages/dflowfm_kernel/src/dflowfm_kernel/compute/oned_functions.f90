@@ -162,23 +162,15 @@ module m_oned_functions
       implicit none
 
       integer :: L
-      integer                                 :: ibr, jbr
+      integer                                 :: ibr
       integer :: inod
-      integer :: nbr, upointscount, pointscount
-      integer :: storageCount
-      integer :: i, j, jpos, linkcount
-      integer :: k1, k2, igrid
+      integer :: nbr
+      integer :: i
+      integer :: k1, k2
       integer :: is, ip1, ip2
-      integer :: c1, c2
-      integer :: storage_count
-      type(t_branch), pointer                 :: pbr, qbr
-      type(t_storage), pointer                :: pstor
+      type(t_branch), pointer                 :: pbr
       integer, dimension(:), pointer          :: lin
       integer, dimension(:), pointer          :: grd
-      double precision, dimension(:), pointer :: chainage
-      type(t_chainage2cross), pointer           :: gpnt2cross(:)                   !< list containing cross section indices per u-location
-      type (t_CrossSection), pointer          :: cross1, cross2
-      logical                                 :: foundFrom, foundTo
 
       ! First reset the gridnumber of all network nodes.
       ! These nodes are exactly the set into which the branches's fromNode/toNode are pointing.
@@ -233,15 +225,7 @@ module m_oned_functions
 
       implicit none
 
-      integer :: L
-      integer :: ibr
-      integer :: nbr, upointscount, pointscount
-      integer :: storageCount
-      integer :: i, j, jpos, linkcount
-      integer :: k1, k2, igrid
-      integer :: c1, c2
-      integer :: storage_count
-      type(t_branch), pointer                 :: pbr
+      integer :: i
       type(t_storage), pointer                :: pstor
       integer, allocatable                    :: ixy2stor(:), k_tmp(:)
       double precision, allocatable           :: x_tmp(:), y_tmp(:)
@@ -301,12 +285,9 @@ module m_oned_functions
       use m_inquire_flowgeom
 
       implicit none
-    
-      integer :: istru, local_index, nstru, ierr
-      type(t_structure), pointer :: pstru
-      type(t_branch), pointer :: pbranch
 
-      
+      integer :: nstru
+
       nstru = network%sts%count
       if (nstru>0) then
          call realloc(L1strucsg, nstru)
@@ -332,21 +313,16 @@ module m_oned_functions
 
       integer :: L
       integer :: ibr
-      integer :: nbr, upointscount, pointscount
-      integer :: storageCount
+      integer :: nbr, pointscount
       integer :: i, j, jpos, linkcount
-      integer :: k1, k2, igrid
+      integer :: k1, igrid
       integer :: c1, c2
-      integer :: storage_count
       double precision :: d1, d2, dh
       type(t_branch), pointer                 :: pbr
-      type(t_storage), pointer                :: pstor
       integer, dimension(:), pointer          :: lin
       integer, dimension(:), pointer          :: grd
       double precision, dimension(:), pointer :: chainage
       type(t_chainage2cross), pointer           :: gpnt2cross(:)                   !< list containing cross section indices per u-location
-      type (t_CrossSection), pointer          :: cross1, cross2
-
 
       ! cross sections (in case of sediment transport every gridpoint requires a unique
       ! cross section)
@@ -428,16 +404,15 @@ module m_oned_functions
    subroutine save_1d_nrd_vars_in_stm
       use m_branch
       use m_node
-      use m_sediment, only: sedtra, stmpar
+      use m_sediment, only: stmpar
       use unstruc_channel_flow
       use morphology_data_module, only : t_nodefraction, t_noderelation
       use string_module
 
       implicit none
 
-      integer :: inod, ibr, iFrac, iNodeRel, directionLink = 0
+      integer :: ibr, iFrac, iNodeRel
       type(t_branch), pointer :: pbr
-      type(t_node)  , pointer :: pnod
       type(t_nodefraction), pointer          :: pFrac
       type(t_noderelation),pointer           :: pNodRel
 
@@ -501,7 +476,6 @@ module m_oned_functions
    integer :: n1
    integer :: n2
    integer :: nstor
-   integer :: nnode
    integer :: nstruc
    double precision :: crest_level
    type(t_structure), pointer :: pstruc
@@ -635,8 +609,7 @@ module m_oned_functions
       integer              :: k1   
       integer              :: k2
       integer              :: dir
-      integer              :: n
-      
+
       ! First compute average waterlevels on suction side and delivery side of the pump
       s1k1 = 0d0
       s1k2 = 0d0

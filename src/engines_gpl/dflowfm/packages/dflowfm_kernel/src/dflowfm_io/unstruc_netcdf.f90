@@ -577,11 +577,11 @@ end function unc_def_var_nonspatial
 !! Typical call: unc_def_var(mapids, mapids%id_s1(:), nf90_double, UNC_LOC_S, 's1', 'sea_surface_height', 'water level', 'm')
 !! Space-dependent variables will be multiply defined: on mesh1d and mesh2d-based variables (unless specified otherwise via which_meshdim argument).
 function unc_def_var_map(ncid,id_tsp, id_var, itype, iloc, var_name, standard_name, long_name, unit, is_timedep, dimids, cell_method, which_meshdim, jabndnd, ivalid_max) result(ierr)
-use m_save_ugrid_state, only: network1dname, mesh2dname, mesh1dname, contactname 
+use m_save_ugrid_state, only: mesh2dname, mesh1dname, contactname 
 use netcdf_utils, only: ncu_append_atts
 use m_flowgeom
-use m_flowparameters, only: jamapvol1, jamapau, jamaps1, jamaphs, jamaphu, jamapanc, jamapFlowAnalysis
-use network_data, only: numk, numl, numl1d
+use m_flowparameters, only: jamapvol1, jamapau, jamaphs, jamaphu, jamapanc
+use network_data, only: numl, numl1d
 use dfm_error
 use m_missing
 use string_module, only: strcmpi
@@ -1018,7 +1018,7 @@ character(len=*),           intent(in)  :: att_value     !< (Character) attribut
 integer                                 :: ierr          !< Result status, DFM_NOERR if successful.
 
 character(len=255) :: att_value_ug
-integer :: i, numvar, valvarid
+integer :: valvarid
 
    ierr = DFM_NOERR
 
@@ -1154,7 +1154,6 @@ integer :: lnx2d, lnx2db, numl2d, Lf, L, i, n, k, kb, kt, nlayb, nrlay, LL, Lb, 
 double precision, allocatable, save :: workL(:)
 double precision, allocatable, save :: workS3D(:,:), workU3D(:,:), workW(:,:), workWU(:,:)
 ! temporary UGRID fix
-double precision, allocatable :: mappedValues(:)
 integer                         :: jabndnd_      !< Flag specifying whether boundary nodes are to be written.
 integer                         :: ndxndxi       !< Last 2/3D node to be saved. Equals ndx when boundary nodes are written, or ndxi otherwise.
 integer                         :: last_1d       !< Last 1D node to be saved. Equals ndx1db when boundary nodes are written, or ndxi otherwise.
@@ -1712,8 +1711,6 @@ end function unc_put_var_map_byte
 !! TODO: only implemented for UNC_LOC_S
 function unc_put_var_map_byte_timebuffer(ncid,id_tsp, id_var, iloc, values, t1, tl, jabndnd) result(ierr)
 use m_flowgeom
-use network_data, only: numk, numl, numl1d
-use m_flow, only: kmx
 use dfm_error
 use m_alloc
 use m_missing
@@ -1777,8 +1774,7 @@ end function unc_put_var_map_byte_timebuffer
 
 function unc_put_var_map_dble2(ncid,id_tsp, id_var, iloc, values, default_value, locdim, jabndnd) result(ierr)
 use m_flowgeom
-use network_data, only: numk, numl, numl1d
-use m_flow, only: kmx
+use network_data, only: numl, numl1d
 use dfm_error
 use m_alloc
 use m_missing
@@ -1795,7 +1791,7 @@ integer, optional,          intent(in)  :: jabndnd
 integer                         :: ierr          !< Result status, DFM_NOERR if successful.
 
 integer                         :: n1d_write     !< Number of 1D nodes to write.
-integer :: lnx2d, lnx2db, numl2d, Lf, L, i, n, k, kb, kt, nlayb, nrlay, LL, Lb, Ltx, nlaybL, nrlayLx
+integer               :: lnx2d, lnx2db, numl2d
 integer               :: ilocdim
 integer               :: lndim
 integer, dimension(3) :: dimids_var
@@ -1938,8 +1934,7 @@ end function unc_put_var_map_dble2
 
 function unc_put_var_map_dble3(ncid,id_tsp, id_var, iloc, values, default_value, locdim, jabndnd) result(ierr)
 use m_flowgeom
-use network_data, only: numk, numl, numl1d
-use m_flow, only: kmx
+use network_data, only: numl, numl1d
 use dfm_error
 use m_alloc
 use m_missing
@@ -1956,7 +1951,7 @@ integer, optional,          intent(in)  :: jabndnd
 integer                         :: ierr          !< Result status, DFM_NOERR if successful.
 
 integer                         :: n1d_write     !< Number of 1D nodes to write.
-integer :: lnx2d, lnx2db, numl2d, Lf, L, i, n, k, kb, kt, nlayb, nrlay, LL, Lb, Ltx, nlaybL, nrlayLx
+integer               :: lnx2d, lnx2db, numl2d
 integer               :: ilocdim
 integer               :: lndim1, lndim2
 integer, dimension(4) :: dimids_var
@@ -2703,7 +2698,6 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
     use m_CrossSections 
     use unstruc_channel_flow, only: network
     use m_flowparameters, only: jamd1dfile
-    use m_oned_functions, only: gridpoint2cross
     use m_save_ugrid_state, only: mesh1dname
     use m_structures
     use m_1d_structures
@@ -2739,8 +2733,7 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
         id_pump_stagedim,     &
         id_time, id_timestep, &
         id_s1, id_taus, id_ucx, id_ucy, id_ucz, id_unorm, id_q1, id_ww1, id_sa1, id_tem1, id_sed, id_ero, id_s0, id_u0, &
-        id_q1main, &
-        id_cfcl, id_cftrt, id_czs, id_E, id_thetamean, &
+        id_czs, id_E, id_thetamean, &
         id_sigmwav,  &
         id_tsalbnd, id_zsalbnd, id_ttembnd, id_ztembnd, id_tsedbnd, id_zsedbnd, &
         id_morbl, id_bodsed, id_msed, id_thlyr, id_lyrfrac, id_sedtotdim, id_sedsusdim, id_nlyrdim, &
@@ -2748,7 +2741,7 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
         id_flowelemdomain, id_flowelemglobalnr, id_flowlink, id_netelemnode, id_netlink,&
         id_flowelemxzw, id_flowelemyzw, id_flowlinkxu, id_flowlinkyu,&
         id_flowelemxbnd, id_flowelemybnd, id_bl, id_s0bnd, id_s1bnd, id_blbnd, &
-        id_unorma, id_vicwwu, id_tureps1, id_turkin1, id_qw, id_qa, id_hu, id_squ, id_sqi, &
+        id_unorma, id_vicwwu, id_tureps1, id_turkin1, id_qw, id_qa, id_squ, id_sqi, &
         id_jmax, id_flowelemcrsz, id_ncrs, id_morft, id_morCrsName, id_strlendim, &
         id_culvert_openh, &
         id_genstru_crestl, id_genstru_edgel, id_genstru_openw, id_genstru_fu, id_genstru_ru, id_genstru_au, id_genstru_crestw, &
@@ -2761,8 +2754,8 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
     integer, allocatable, save :: id_tr1(:), id_rwqb(:), id_bndtradim(:), id_ttrabnd(:), id_ztrabnd(:)
     integer, allocatable, save :: id_sf1(:), id_bndsedfracdim(:), id_tsedfracbnd(:), id_zsedfracbnd(:)
 
-    integer :: i, numContPts, numNodes, itim, k, kb, kt, kk, LL, Lb, Lt, iconst, L, j, nv, nv1, nm, ndxbnd, nlayb, nrlay, LTX, nlaybL, nrlaylx, maxNumLinks, numLinks, L0, nlen, istru, maxNumStages, numStages, nfuru
-    double precision              :: vicc, dicc, dens
+    integer :: i, itim, k, kb, kt, kk, LL, Lb, iconst, L, j, nv, nv1, nm, ndxbnd, nlayb, nrlay, LTX, nlaybL, nrlaylx, maxNumLinks, numLinks, L0, nlen, istru, maxNumStages, numStages, nfuru
+    double precision              :: dens
     double precision, allocatable :: max_threttim(:)
     double precision, dimension(:), allocatable       :: dum
     double precision, dimension(:,:,:), allocatable   :: frac
@@ -2776,7 +2769,7 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
     
     type(t_CSType), pointer                       :: pCS
     type(t_CSType), pointer, dimension(:)         :: pCSs
-    integer                                       :: n, jmax, ndx1d, nCrs
+    integer                                       :: jmax, ndx1d, nCrs
     double precision, dimension(:,:), allocatable :: work1d_z
     double precision, dimension(:,:), allocatable :: work2d
     integer,          dimension(:,:), allocatable :: work2di
@@ -4622,7 +4615,6 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
    use m_missing
    use m_CrossSections 
    use unstruc_channel_flow, only: network
-   use m_oned_functions, only: gridpoint2cross
    use string_module, only: replace_multiple_spaces_by_single_spaces
    use m_save_ugrid_state, only: mesh1dname, mesh2dname
    use m_hydrology_data, only : jadhyd, ActEvap, PotEvap, interceptionmodel, DFM_HYD_NOINTERCEPT, InterceptHs
@@ -4636,10 +4628,7 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
 
    integer                         :: jabndnd_      !< Flag specifying whether boundary nodes are to be written.
    integer                         :: ndxndxi       !< Last node to be saved. Equals ndx when boundary nodes are written, or ndxi otherwise.
-
-   integer                       :: idims(2)
-
-   integer, save                 :: ierr, ndim
+   integer, save                   :: ierr, ndim
 
    double precision, allocatable                       :: ust_x(:), ust_y(:), wavout(:), wavout2(:), scaled_rain(:)
    character(len=255)                                  :: tmpstr
@@ -4649,28 +4638,27 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
    character(64)                                       :: dxdescr
    character(15)                                       :: transpunit
    double precision                                    :: rhol, dens, mortime, wavfac
-   double precision                                    :: moravg, morstarthyd, dmorft, dmorfs, rhodt
+   double precision                                    :: moravg, dmorft, dmorfs, rhodt
    double precision, dimension(:,:), allocatable       :: poros, toutputx, toutputy, sxtotori, sytotori
    double precision, dimension(:,:,:), allocatable     :: frac
    integer, dimension(:), allocatable                  :: flag_val
    character(len=10000)                                :: flag_mean
    
    double precision, dimension(:), allocatable         :: numlimdtdbl
-   integer, dimension(:),   allocatable                :: idum
    double precision, dimension(:), allocatable         :: work1d
    double precision                                    :: vicc, dicc, ddum
 
 !    Secondary Flow 
 !        id_rsi, id_rsiexact, id_dudx, id_dudy, id_dvdx, id_dvdy, id_dsdx, id_dsdy
 
-   integer :: iid, i, j, jj, numContPts, numNodes, itim, n, LL, L, Lb, Lt, LLL, k, k1, k2, k3
+   integer :: i, j, jj, itim, n, LL, L, Lb, Lt, LLL, k, k1, k2, k3
    integer :: id_twodim
    integer :: kk, kb, kt, kkk, found, iloc
    integer :: nlayb, nrlay
    integer :: Ltx, nlaybL, nrlayLx
    integer :: iLocS ! Either UNC_LOC_S or UNC_LOC_S3D, depending on whether layers are present.
    integer :: iLocU ! Either UNC_LOC_U or UNC_LOC_U3D, depending on whether layers are present.
-   double precision, dimension(:), allocatable :: windx, windy, toutput, rks, tetatemp, wa
+   double precision, dimension(:), allocatable :: windx, windy, toutput, rks, wa
    double precision :: zwu0
    character( len = 4 ) :: str
    
@@ -7145,7 +7133,6 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
     use bedcomposition_module, only: bedcomp_getpointer_integer
     use m_alloc
     use m_missing
-    use m_partitioninfo, only: jampi
     use string_module, only: replace_multiple_spaces_by_single_spaces
     use netcdf_utils, only: ncu_append_atts
 
@@ -7175,18 +7162,17 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
     id_sbwx, id_sbwy, id_sbwx_reconstructed, id_sbwy_reconstructed, &
     id_sswx, id_sswy, id_sswx_reconstructed, id_sswy_reconstructed, &
     id_sourse, id_sinkse, id_ws, &
-    id_sxtot, id_sytot, id_rsedeq, id_umod, id_zumod, id_ustar, id_dzdn, id_dzdt, id_morbl, id_diag, id_aks, id_rca, &
+    id_sxtot, id_sytot, id_rsedeq, id_umod, id_zumod, id_ustar, id_dzdn, id_dzdt, id_morbl, id_aks, id_rca, &
     id_bodsed, id_dpsed, id_msed, id_lyrfrac, id_thlyr, id_poros, id_nlyrdim, &
     id_sedtotdim, id_sedsusdim, id_rho, id_viu, id_diu, id_q1, id_spircrv, id_spirint, &
     id_q1main, &
     id_s1, id_taus, id_ucx, id_ucy, id_ucz, id_ucxa, id_ucya, id_unorm, id_ww1, id_sa1, id_tem1, id_sed, id_ero, id_s0, id_u0, id_cfcl, id_cftrt, id_czs, id_czu, &
     id_qsun, id_qeva, id_qcon, id_qlong, id_qfreva, id_qfrcon, id_qtot, &
-    id_wind, id_patm, id_tair, id_rhum, id_clou, id_E, id_R, id_H, id_D, id_DR, id_urms, id_thetamean, &
+    id_patm, id_tair, id_rhum, id_clou, id_E, id_R, id_H, id_D, id_DR, id_urms, id_thetamean, &
     id_cwav, id_cgwav, id_sigmwav, id_SwE, id_SwT, &
-    id_ust, id_Fx, id_Fy, id_vst, id_windx, id_windy, id_windxu, id_windyu, id_numlimdt, id_hs, id_bl, id_zk, &
+    id_ust, id_vst, id_windx, id_windy, id_windxu, id_windyu, id_numlimdt, id_hs, id_bl, id_zk, &
     id_1d2d_edges, id_1d2d_zeta1d, id_1d2d_crest_level, id_1d2d_b_2di, id_1d2d_b_2dv, id_1d2d_d_2dv, id_1d2d_q_zeta, id_1d2d_q_lat, &
     id_1d2d_cfl, id_1d2d_flow_cond, id_1d2d_sb, id_1d2d_s1_2d, id_1d2d_s0_2d, id_tidep, id_salp, id_inttidesdiss, &
-    id_rsi, id_dudx, id_dudy, id_dvdx, id_dvdy, & 
     id_duneheight, id_dunelength, id_ksd, id_ksr, id_ksmr, id_ks, &
     id_taurat, id_dm, id_dg, id_dgsd, id_frac, id_mudfrac, id_sandfrac, id_fixfac, id_hidexp, id_mfluff, id_scrn, id_urmscc, id_Fxcc, id_Fycc, &
     id_ducxdx, id_ducydy, id_ducxdy, id_ducydx, id_dsdx, id_dsdy, & 
@@ -7204,9 +7190,9 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
     
     integer,          dimension(:), allocatable :: idum
 
-    integer :: iid, i, j, jj, numContPts, numNodes, itim, k, kb, kt, kk, n, LL, Ltx, Lb, L, nm, nlayb,nrlay, nlaybL, nrlayLx, varid, ndims
+    integer :: iid, i, j, jj, itim, k, kb, kt, kk, n, LL, Ltx, Lb, L, nm, nlayb,nrlay, nlaybL, nrlayLx, varid, ndims
     integer :: ndxndxi ! Either ndx or ndxi, depending on whether boundary nodes also need to be written.
-    double precision, dimension(:), allocatable :: windx, windy, windang
+    double precision, dimension(:), allocatable :: windx, windy
     double precision, dimension(:), allocatable :: numlimdtdbl ! TODO: WO/AvD: remove this once integer version of unc_def_map_var is available
     double precision :: vicc, dicc, dens
     integer :: jaeulerloc
@@ -10005,7 +9991,6 @@ end subroutine unc_write_net
 !> Writes the unstructured net in UGRID format to an already opened netCDF dataset.
 subroutine unc_write_net_filepointer(inetfile, janetcell, janetbnd, jaidomain, jaiglobal_s)
     use network_data
-    use m_flowgeom, only: xz, yz
     use m_alloc
     use m_polygon
     use m_sferic
@@ -10013,8 +9998,7 @@ subroutine unc_write_net_filepointer(inetfile, janetcell, janetbnd, jaidomain, j
     use m_partitioninfo
     use geometry_module, only: get_startend, normaloutchk
     use gridoperations
-    use m_flowparameters, only: jawave
-    
+
     integer, intent(in) :: inetfile
 
     integer, optional, intent(in) :: janetcell  !< write additional network cell information (1) or not (0). Default: 1.
@@ -10031,11 +10015,9 @@ subroutine unc_write_net_filepointer(inetfile, janetcell, janetbnd, jaidomain, j
     integer :: id_netnodedim, id_netlinkptsdim, &   !< Dimensions
                id_bndlinkdim, &
                id_encinstdim, id_encptsdim, id_encpartdim, &
-               id_netelemlinkptsdim, &
                id_netnodex, id_netnodey, id_netnodez, &            !< Node variables
-               id_netnodelon, id_netnodelat, &                     !< Mandatory lon/lat coords for net nodes
                id_netlink, id_netlinktype, &                       !< Link variables
-               id_bndlink, id_bndlinktype, &                       !< Boundary variables
+               id_bndlink, &                       !< Boundary variables
                id_enc_container, id_encx, id_ency, &               !< Grid enclosure variables
                id_enc_nodecount, id_enc_partnodecount, &
                id_enc_interiorring, &
@@ -10043,7 +10025,7 @@ subroutine unc_write_net_filepointer(inetfile, janetcell, janetbnd, jaidomain, j
     type(t_unc_netelem_ids) :: ids_netelem
     integer :: id_mesh2d
     integer :: jaInDefine
-    integer :: k, L, nv, numbnd, maxbnd, numencparts, numencpts, ja
+    integer :: k, L, nv, numbnd, maxbnd, numencparts, numencpts
     double precision, allocatable :: polc(:)
     integer, dimension(:), allocatable :: kn1write
     integer, dimension(:), allocatable :: kn2write
@@ -10420,7 +10402,7 @@ end function unc_def_net_elem
 !> helper function to write the net elements to an already open NetCDF file
 function unc_write_net_elem(inetfile, ids) result(ierr)
    use network_data
-   use m_missing, only : dmiss, intmiss
+   use m_missing, only : intmiss
 
    integer,                 intent(in) :: inetfile  !< id of the NetCDF file
    type(t_unc_netelem_ids), intent(in) :: ids       !< struct holding variable ids
@@ -10474,7 +10456,7 @@ end function unc_write_net_elem
 !> helper function to fill coordinate arrays (see below)
 subroutine fill_netlink_geometry(xtt, ytt, xut, yut)
    use network_data
-   use m_missing,       only : dmiss, intmiss, dxymis
+   use m_missing,       only : dmiss, dxymis
    use m_sferic,        only : jsferic, jasfer3D, rd2dg, ra
    use m_flowgeom,      only : xz, yz
    use geometry_module, only : normaloutchk
@@ -10627,20 +10609,18 @@ subroutine unc_write_net_ugrid2(ncid, id_tsp, janetcell, jaidomain, jaiglobal_s)
    integer,        optional, intent(in   ) :: jaiglobal_s !< write global netcell numbers (1) or not (0, default)
 
    integer                          :: janetcell_, jaidomain_, jaiglobal_s_
-   integer                          :: id_mesh2d, id_netnodedim
+   integer                          :: id_netnodedim
    type(t_unc_netelem_ids)          :: ids_netelem
 
    integer :: nn
    integer, allocatable :: edge_nodes(:,:), face_nodes(:,:), edge_type(:), contacts(:,:)
-   real(kind=hp), dimension(:), pointer :: layer_zs=>null(), interface_zs =>null()
 
    integer :: ierr
-   integer :: i, ii, k, k1, k2, numl2d, numk1d, numk2d, nump1d, L, Lnew, nv, n1, n2, n
+   integer :: i, k, k1, k2, numl2d, numk1d, numk2d, nump1d, L, Lnew, nv, n1, n2, n
    integer :: jaInDefine
    integer :: id_zf
 
    real(kind=hp), allocatable :: xn(:), yn(:), zn(:), xe(:), ye(:), zf(:)
-   real(kind=hp), allocatable :: work2(:,:)
 
    integer                    :: n1dedges, n1d2dcontacts, start_index
    integer, allocatable       :: contacttype(:), idomain1d(:), iglobal_s1d(:)
@@ -11205,7 +11185,6 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
    use m_alloc
    use gridoperations
    use m_partitioninfo, only : jampi, my_rank
-   use m_flowparameters, only : jarstignorebl
 
    use unstruc_channel_flow
    use m_cross_helper
@@ -11221,31 +11200,20 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
    integer,          intent(out)   :: ierr               !< Return status (NetCDF operations)
 
    integer :: ioncid, iconvtype, start_index, networkIndex
-   integer :: im, nmesh, idim, i, iv, L, numk_last, numl_last
-   integer :: ncid, id_netnodez, id_netlinktype
+   integer :: im, nmesh, i, L, numk_last, numl_last
+   integer :: ncid, id_netnodez
    integer, allocatable :: kn12(:,:), kn3(:) ! Placeholder arrays for the edge_nodes and edge_types
    double precision :: convversion, zk_fillvalue, altsign
    type(t_ug_meshgeom) :: meshgeom
-   
-   logical           :: dflowfm_1d
-   
-   type(t_branch), pointer      :: pbr
-   type(t_node), pointer        :: pnod
-   integer                      :: istat, minp, ifil, inod, ngrd, k, k1, k2
-   type (t_structure), pointer  :: pstru
-   integer                      :: nstru
-   
+
    ! 1d2d links
    integer                                   :: ncontacts, ncontactmeshes, koffset1dmesh
-   integer                                   :: begin_face, end_face 
    integer, allocatable                      :: mesh1indexes(:),mesh2indexes(:), contacttype(:)
-   character(len=40), allocatable            :: contactsids(:)
    character(len=80), allocatable            :: contactslongnames(:)
    character(len=40)                         :: currentNodeId
    logical                                   :: includeArrays
    logical                                   :: do_edgelengths, need_edgelengths
    double precision, allocatable             :: xface(:), yface(:)
-   integer, allocatable                      :: branchStartNode(:), branchEndNode(:)
    integer                                   :: nodesOnBranchVertices
    character(len=:), allocatable             :: tmpstring
    integer :: n1, n2, ibr_n1, ibr_n2, ibr
@@ -11746,7 +11714,7 @@ subroutine unc_read_net(filename, numk_keep, numl_keep, numk_read, numl_read, ie
                id_netlink, id_netlinktype, &                !< Link variables
                id_crsvar
 
-    integer :: ja, L
+    integer :: L
     double precision :: zk_fillvalue
 
     call readyy('Reading net data',0d0)
@@ -11963,7 +11931,6 @@ end subroutine md5_net_file
 !! The calling routine should later call update_ghosts, such that ghost locations are filled as well.
 function get_var_and_shift(ncid, varname, targetarr, tmparr, loctype, kmx, locstart, loccount, it_read, jamergedmap, iloc_own, iloc_merge) result(ierr)
 use dfm_error
-use m_flow, only: layertype
    integer, intent(in)             :: ncid !< Open NetCDF data set
    character(len=*), intent(in)    :: varname !< Variable name in file.
    double precision, intent(inout) :: targetarr(:)  !< Data will be stored in this array.
@@ -11978,8 +11945,7 @@ use m_flow, only: layertype
    integer,          intent(in)    :: iloc_merge(:) !< Mapping array from the unique own (i.e. non-ghost) nodes/links to the global/merged ndxi/lnx numbering. Should be filled from index 1:loccount (e.g. 1:ndxi_own).
    integer                         :: ierr         !< Result, DFM_NOERR if successful
    integer                         :: id_var
-   integer                         :: i, ib, it, is, imap, numDims, d1, d2,nlayb, nrlay, jawarn = 0
-   double precision                :: tmpval
+   integer                         :: i, ib, it, is, imap, numDims, d1, d2,nlayb, nrlay
    double precision, allocatable   :: tmparray1D(:), tmparray2D(:,:)
    integer, dimension(nf90_max_var_dims):: rhdims, tmpdims
    integer :: jamerged_dif
@@ -14014,9 +13980,7 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd,jafou)
    use dfm_error
    use m_save_ugrid_state !stores the contactname and other saved ugrid names
    use m_CrossSections 
-   use unstruc_channel_flow, only: network
-   use m_flowparameters, only: jamd1dfile, jafullgridoutput
-   use m_oned_functions, only: gridpoint2cross
+   use m_flowparameters, only: jafullgridoutput
    use m_flowtimes, only: handle_extra
    use Timers
    implicit none
@@ -14050,17 +14014,9 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd,jafou)
    integer                         :: Li            !< Index of 1D link (can be internal or boundary)
    integer :: id_flowelemcontourptsdim, id_flowelemcontourx, id_flowelemcontoury
    integer :: jaInDefine
-   double precision :: xx, yy
-   double precision, dimension(:), allocatable :: zz
    double precision, allocatable :: work2(:,:)
-
    integer                       :: n1dedges, n1d2dcontacts, numk2d, start_index
-   integer,allocatable           :: contacttype(:) 
-   
-   type(t_CSType), pointer                       :: pCS
-   type(t_CSType), pointer, dimension(:)         :: pCSs
-   integer                                       :: j, jmax, nCrs
-   double precision, dimension(:,:), allocatable :: work1d_z, work1d_n
+   integer, allocatable          :: contacttype(:)
 
    ! re-mapping of 1d mesh coordinates for UGrid
    double precision, allocatable                 :: x1dn(:), y1dn(:), xue(:), yue(:), x1du(:), y1du(:)
@@ -14600,26 +14556,20 @@ subroutine unc_write_flowgeom_filepointer(igeomfile, jabndnd)
     use m_missing
     use netcdf
     use m_partitioninfo
-    use m_flow, only: kmx
     use m_flowparameters, only: jafullgridoutput
     integer, intent(in) :: igeomfile
     integer, optional, intent(in) :: jabndnd !< Whether to include boundary nodes (1) or not (0). Default: no.
 
     integer                         :: jabndnd_      !< Flag specifying whether boundary nodes are to be written.
     integer                         :: ndxndxi       !< Last node to be saved. Equals ndx when boundary nodes are written, or ndxi otherwise.
-
-    integer, allocatable :: kn3(:), ibndlink(:)
-
     integer :: ierr
     integer :: &
-        id_laydim, id_netlinkdim, id_netlinkptsdim, &
+        id_netlinkdim, id_netlinkptsdim, &
         id_flowelemdim, id_flowelemmaxnodedim, id_flowelemcontourptsdim, &
-        id_flowlinkdim, id_flowlinkptsdim, id_erolaydim, &
+        id_flowlinkdim, id_flowlinkptsdim, &
         id_flowelemxcc, id_flowelemycc, id_flowelemzcc, &
         id_flowelemxzw, id_flowelemyzw, &
-        id_flowelemloncc, id_flowelemlatcc, &
         id_flowelemcontourx, id_flowelemcontoury, id_flowelemba, &
-        id_flowelemcontourlon, id_flowelemcontourlat, &
         id_flowelembl, id_elemlink, &
         id_flowlink, id_flowlinktype, &
         id_flowlinkxu, id_flowlinkyu, &
@@ -14633,7 +14583,6 @@ subroutine unc_write_flowgeom_filepointer(igeomfile, jabndnd)
     integer, dimension(:), allocatable :: lne1write
     integer, dimension(:), allocatable :: lne2write
 
-    double precision :: xx, yy
     double precision, dimension(:), allocatable :: zz
     double precision, dimension(:,:), allocatable :: work2
 
@@ -15203,8 +15152,7 @@ subroutine readcells(filename, ierr, jaidomain, jaiglobal_s, jareinitialize)
     
     integer                       :: inetfile, & 
                                      id_netnodedim, id_netlinkdim, id_netelemdim, & !< Dimensions
-                                     id_netelemmaxnodedim, id_nodmaxlinkdim,  id_netlinkptsdim, &  
-                                     id_netnodex, id_netnodey,  &    !< Node variables
+                                     id_netelemmaxnodedim, &
                                      id_netlink, id_netlinktype, &   !< Link variables
                                      id_netelemnode, id_netelemlink, &    !< Netcell variables
                                      id_idomain, id_iglobal_s
@@ -15612,7 +15560,7 @@ subroutine check_flowlink_orientation(lnx_own, ln_read, ilink_own, lnx_merge, nd
    integer,                        intent(in) :: ndxi         ! Number of Flownodes (including ghosts) on the current model
    integer, dimension(ndxi),       intent(in) :: inode_owninv ! Mapping from actual index (including ghosts) to the own index (excluding ghosts)
    integer, dimension(ndxi_merge), intent(in) :: inode_merge2own ! Mapping from merged file to the own index
-   integer                                    :: L, LL, k1, k2, k1_read, k2_read, kk1, kk2, kk1_read, kk2_read, num=0, ierr=0
+   integer                                    :: L, LL, k1, k2, k1_read, k2_read, kk1, kk2, kk1_read, kk2_read, num=0
    character(len=128)                         :: message
     
    
@@ -16036,7 +15984,7 @@ subroutine read_structures_from_rst(ncid, filename, it_read)
    character(len=IdLen)              :: struName
    double precision,     allocatable :: tmpvar(:), tmpvar3d(:,:,:), tmpvar2d(:,:)
    integer,              allocatable :: tmpvar3di(:,:,:), tmpvar2di(:,:)
-   integer :: strucDimErr, id_var, i, nLinks, nStru, ierr, iStru, nfuru, numlinks, strucVarErr, L, L0, nstages, maxNumStages
+   integer :: strucDimErr, i, nLinks, nStru, ierr, iStru, nfuru, numlinks, strucVarErr, L, L0, nstages, maxNumStages
    integer :: id_culvert_openh, &
                id_genstru_crestl, id_genstru_edgel, id_genstru_openw, id_genstru_fu, id_genstru_ru, id_genstru_au, id_genstru_crestw, id_genstru_area, id_genstru_linkw, id_genstru_state, id_genstru_sOnCrest,&
                id_weirgen_crestl, id_weirgen_crestw, id_weirgen_area, id_weirgen_linkw, id_weirgen_fu, id_weirgen_ru, id_weirgen_au, id_weirgen_state, id_weirgen_sOnCrest, &
@@ -16689,7 +16637,6 @@ end subroutine read_structures_from_rst
 !> Read and check all the dimensions of a structure. Return ierr = DFM_NOERR if all the dimensions are correctly read. Otherwise ierr > 0.
 subroutine read_structure_dimensions_from_rst(ncid, filename, istrtypein, struname, nDim, struDimNames, ids_struDim, nstruModel, ierr)
    use dfm_error, only: DFM_GENERICERROR, DFM_NOERR
-   use unstruc_channel_flow, only: network
    use m_alloc
    use m_GlobalParameters
    implicit none
@@ -16703,7 +16650,7 @@ subroutine read_structure_dimensions_from_rst(ncid, filename, istrtypein, struna
    integer,                           intent(in   ) :: nstruModel  !< Number of this structure type in the model
    integer,                           intent(  out) :: ierr        !< If all dimensions are correclty read, it equals to DFM_NOERR
    integer,          dimension(nDim), intent(inout) :: ids_struDim !< Ids of all dimensions
-   integer :: id_strudim1, nlen
+   integer :: nlen
 
    ierr = DFM_NOERR
    if (nstruModel > 0) then

@@ -1067,7 +1067,6 @@ contains
    end subroutine findleftright
    
    subroutine selfattraction(avhs, self, i1,i2,j1,j2, jaselfal )
-   use m_partitioninfo, only: my_rank
    implicit none
    
    ! Input\Output parameter
@@ -1078,7 +1077,7 @@ contains
    ! Local parameters
    double precision, parameter :: Me=5.9726d24, R=6371d3, g=9.81d0, pi=4d0*atan(1.0), rhow=1.0240164d3 ,rhoe=3d0*Me/(4d0*pi*R*R*R)
    integer :: nlat, nlon, n15, lsave, lwork, ldwork, lwk, liwk, lshaec, lshsec
-   integer :: i, j, ierror, isym, nt, l, mdab, ndab, k1, k2
+   integer :: i, j, ierror, isym, nt, l, mdab, ndab, k1
 !   double precision, dimension(0:1024) :: llnh, llnk
    double precision, dimension(:),   allocatable :: llnh, llnk
    double precision, dimension(:),   allocatable :: work, wk, iwk, wshaec, wshsec
@@ -5780,12 +5779,8 @@ contains
      integer,          optional, intent(inout) :: lftopol(:)  !< (Optional) Mapping array from flow links to the polyline index that intersected that flow link (only relevant when loc_spec_type==LOCTP_POLYLINE_FILE or LOCTP_POLYLINE_XY).
      integer,          optional, intent(in   ) :: sortLinks   !< (Optional) Whether or not to sort the found flow links along the polyline path. (only relevant when loc_spec_type==LOCTP_POLYGON_FILE or LOCTP_POLYGON_XY).
 
-     !locals 
-     integer :: minp, L, Lstart, Lend, k1, k2, ja, opts, ierr, inp
-     double precision :: xa, ya, xb, yb,xm, ym, CRPM, dist 
-     double precision, allocatable, dimension(:) :: distsStartPoly, sortedDistsStartPoly
-     integer, allocatable, dimension(:):: sortedIndexses, tempLinkArray !< the sorted indexes
-     double precision, allocatable :: xpltest(:)
+     !locals
+     integer :: minp, L, Lstart, Lend, opts, ierr, inp
 
      integer :: linktype_
 
@@ -6062,7 +6057,7 @@ contains
    use kdtree2Factory
    use m_samples
    use m_netw
-   use m_flowgeom, only : xz, yz, ln2lne, Ln, Lnx, Wu1Duni
+   use m_flowgeom, only : ln2lne, Ln, Lnx, Wu1Duni
    use m_partitioninfo
    use unstruc_netcdf
    use m_flowexternalforcings, only: qid
@@ -6114,7 +6109,7 @@ contains
 
    double precision                :: zz
 
-   integer                         :: n6 , L, Lk, n, nn, n1, n2, i
+   integer                         :: n6 , L, Lk, n, n1, n2, i
    integer                         :: ierror, jakc
    integer                         :: jakdtree=1
 
@@ -6455,15 +6450,12 @@ contains
       integer     ,     intent(in)    :: method     ! time/space interpolation method
       character(1),     intent(in)    :: operand    ! file name for meteo data file
       double precision, intent(in)    :: transformcoef(:) !< Transformation coefficients
-   
-      double precision, allocatable   :: xpli(:), ypli(:)
-      integer                         :: maxpli = 10000
-      integer                         :: minp0, inside, npli,k
-    
-      success = .false. 
-                  
+      integer                         :: minp0, inside, k
+
+      success = .false.
+
       call oldfil(minp0, filename)
-      if (filetype == inside_polygon) then       ! polyfil 
+      if (filetype == inside_polygon) then       ! polyfil
 
          call savepol()
          call reapol(minp0, 0)
@@ -7279,7 +7271,6 @@ module m_meteo
                                             multuni1,  multuni2,  multuni3,  multuni4)
       use m_ec_module, only: ecFindFileReader, ec_filetype_to_conv_type ! TODO: Refactor this private data access (UNST-703).
       use m_ec_filereader_read, only: ecParseARCinfoMask
-      use m_flow, only: kmx, kbot, ktop
       use m_flowparameters, only: jawave
       use m_sferic, only: jsferic
       use m_missing, only: dmiss
@@ -8412,11 +8403,11 @@ module m_meteo
          end if
          it = it + 1
       end do
+      success = .true.
    end function ec_gettimeseries_by_itemID
-   
-   
+
    ! ==========================================================================
-   
+
    !> Convenience wrapper around ec_gettimespacevalue_by_itemID.
    function ec_gettimespacevalue_by_name(instancePtr, group_name, timesteps) result(success)
       use m_flowtimes

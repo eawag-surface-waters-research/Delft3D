@@ -46,9 +46,9 @@ subroutine unc_write_his(tim)            ! wrihis
     !use coordinate_reference_system, only: transform_and_put_latlon_coordinates
     use unstruc_files, only: defaultFilename
     use unstruc_netcdf, only: unc_create, unc_close, unc_addcoordatts, unc_def_var_nonspatial, unc_write_flowgeom_filepointer, definencvar
-    use unstruc_netcdf, only: ihisfile, mapids
+    use unstruc_netcdf, only: ihisfile
     use unstruc_netcdf, only: UNC_LOC_S3D, UNC_LOC_WU, UNC_LOC_W
-    use unstruc_netcdf, only: unc_writeopts, unc_noforcedflush, UG_WRITE_LATLON, nccrs => crs
+    use unstruc_netcdf, only: unc_writeopts, unc_noforcedflush, UG_WRITE_LATLON
     use unstruc_messages
     use m_sferic, only: jsferic
     use m_partitioninfo
@@ -76,19 +76,17 @@ subroutine unc_write_his(tim)            ! wrihis
 
     ! locals
     integer, save :: id_laydim , id_laydimw, &
-                     id_statdim, id_mstatdim, id_strlendim, id_crsdim, id_crslendim, id_crsptsdim, id_timedim, &
+                     id_statdim, id_strlendim, id_crsdim, id_crslendim, id_crsptsdim, id_timedim, &
                      id_statx, id_staty, id_statid, id_statname, id_time, id_timestep, &
-                     id_statlon, id_statlat, &
-                     id_mstatx, id_mstaty, id_mstatname, &
-                     id_crsx, id_crsy, id_crsname, &
+                     id_statlon, id_statlat, id_crsname, &
                      id_vars, id_varucx, id_varucy, id_varucz, id_varsal, id_vartem, id_varsed, id_varrho, &
-                     id_varQ, id_varQint, id_varb, id_varumag, id_varqmag,& ! id_varQavg,
-                     id_varAu,  & ! id_varAuavg,
-                     id_varu,  id_varwx, id_varwy, id_varrain, id_varpatm, &!id_varuavg,
+                     id_varQ, id_varQint, id_varb, id_varumag, id_varqmag,&
+                     id_varAu,  &
+                     id_varu,  id_varwx, id_varwy, id_varrain, id_varpatm, &
                      id_infiltcap, id_infiltact, &
                      id_qsun, id_qeva, id_qcon, id_qlong, id_qfreva, id_qfrcon, id_qtot, &
                      id_turkin, id_tureps , id_vicwwu, id_rich, id_zcs, id_zws, id_zwu, &
-                     id_wind, id_patm, id_tair, id_rhum, id_clou, &
+                     id_wind, id_tair, id_rhum, id_clou, &
                      id_R, id_WH, id_WD, id_WL, id_WT, id_WU, id_WTAU, id_hs, id_taucur, &
                      id_pumpdim,    id_pump_id,     id_pump_dis,     id_pump_cap,      id_pump_s1up,      id_pump_s1dn,     id_pump_head,      &
                      id_pump_xmid,  id_pump_ymid,   id_pump_struhead,id_pump_stage,    id_pump_redufact,  id_pump_s1del,    id_pump_s1suc,     id_pump_disdir, &
@@ -155,13 +153,12 @@ subroutine unc_write_his(tim)            ! wrihis
     integer                      :: IP, num, ntmp, n, nlyrs
 
     double precision, save       :: curtime_split = 0d0 ! Current time-partition that the file writer has open.
-    integer                      :: ntot, mobs, k, i, j, jj, i1, ierr, mnp, kk, kb, kt, klay, idims(3), LL,Lb,Lt,L, Lf, k3, k4, nNodeTot, nNodes, L0, k1, k2, nlinks
+    integer                      :: ntot, k, i, j, jj, ierr, mnp, kk, idims(3),L, Lf, k3, k4, nNodeTot, nNodes, L0, k1, k2, nlinks
     character(len=255)           :: station_geom_container_name, crs_geom_container_name, weir_geom_container_name, orif_geom_container_name, &
                                     genstru_geom_container_name, uniweir_geom_container_name, culvert_geom_container_name, longculvert_geom_container_name, &
                                     gategen_geom_container_name, pump_geom_container_name, bridge_geom_container_name, src_geom_container_name, &
-                                    lat_geom_container_name, rug_geom_container_name
-    logical                      :: jawel
-    double precision             :: xp, yp, qsum, vals, valx, valy, valwx, valwy, valpatm, wind, cof0, tmpx, tmpy
+                                    lat_geom_container_name
+    double precision             :: cof0
 
     integer                      :: strlen_netcdf  ! string length definition for (station) names on history file
     character(len=255)           :: filename
@@ -169,14 +166,13 @@ subroutine unc_write_his(tim)            ! wrihis
     character(len=1024)          :: statcoordstring
     integer                      :: igen, istru
     integer                      :: ndims
-    character(len=255)           :: tmpstr, tmpstr2, tmpstr3, unit1, unit2, unit3
+    character(len=255)           :: tmpstr
     integer                      :: jawrizc = 0
     integer                      :: jawrizw = 0
     double precision             :: w1, pumplensum, pumplenmid, pumpxmid, pumpymid
     double precision             :: rhol
     double precision, allocatable:: toutput1(:), toutputx(:,:), toutputy(:,:), toutput3(:,:,:)
     double precision, allocatable:: toutput_cum, toutput_cur
-    type(t_structure), pointer   :: pstru
     integer                      :: lsed
     logical                      :: add_latlon
 

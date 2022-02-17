@@ -105,7 +105,6 @@ subroutine findexternalboundarypoints()             ! find external boundary poi
  integer               :: nx
  integer               :: ierror
  integer               :: num_bc_ini_blocks
- integer               :: ifrac
  character(len=64)     :: varname
 
  jatimespace = 1
@@ -497,7 +496,6 @@ subroutine processexternalboundarypoints(qid, filename, filetype, return_time, n
  use m_ship
  use properties
  use m_transport
- use m_sediment, only: stm_included, stmpar, sedtot2sedsus
  use sediment_basics_module, only: SEDTYP_NONCOHESIVE_SUSPENDED, SEDTYP_COHESIVE
  use m_meteo, qid_meteo => qid, filetype_meteo => filetype
  use m_sobekdfm
@@ -792,7 +790,6 @@ function addtimespacerelation_boundaries(qid, filename, filetype, method, operan
    use m_flowexternalforcings, no1=>qid, no2=>filetype, no3=>operand, no4 => success
    use m_meteo, no5=>qid, no6=>filetype, no7=>operand, no8 => success
    use m_flowparameters, only: jawave
-   use m_flow, only: kmx
    use m_flowtimes, only: dt_nodal
 
    implicit none
@@ -807,7 +804,7 @@ function addtimespacerelation_boundaries(qid, filename, filetype, method, operan
 
    logical                       :: success
    character(len=256)            :: tracnam, sfnam, qidnam
-   integer                       :: itrac, isf, iconst
+   integer                       :: itrac, isf
    integer, external             :: findname
    double precision, dimension(:), pointer     :: pzmin, pzmax
 
@@ -930,13 +927,12 @@ logical function initboundaryblocksforcings(filename)
  use m_meteo, only: ec_addtimespacerelation
  use timespace
  use string_module, only: str_tolower, strcmpi
- use m_meteo, only: countbndpoints
  use system_utils
  use unstruc_files, only: resolvePath
  use unstruc_model, only: ExtfileNewMajorVersion, ExtfileNewMinorVersion
  use m_missing
  use m_ec_parameters, only: provFile_uniform
- use m_partitioninfo, only: my_rank, idomain, jampi, reduce_sum, is_ghost_node
+ use m_partitioninfo, only: jampi, reduce_sum, is_ghost_node
 
  implicit none
 
@@ -952,7 +948,6 @@ logical function initboundaryblocksforcings(filename)
  character(len=ini_value_len) :: property_value
  character(len=ini_value_len) :: quantity
  character(len=ini_value_len) :: locationfile        !
- character(len=ini_value_len) :: locationtype        !
  character(len=ini_value_len) :: forcingfile         !
  character(len=ini_value_len) :: forcingfiletype     !
  character(len=ini_value_len) :: targetmaskfile      !
@@ -971,12 +966,10 @@ logical function initboundaryblocksforcings(filename)
  character(len=ini_value_len) :: itemtype
  character(len=256)           :: fnam
  character(len=256)           :: basedir
- character(len=256)           :: sourcemask
  double precision             :: chainage
- double precision             :: tmpval
- integer                      :: iostat, ierr
+ integer                      :: ierr
  integer                      :: ilattype, nlat
- integer                      :: k, n, k1, k2, nini, nLatTmp
+ integer                      :: k, n, k1, nini
  integer                      :: fmmethod
  integer, dimension(1)        :: targetindex
  integer                      :: ib, ibqh, ibt
@@ -985,7 +978,7 @@ logical function initboundaryblocksforcings(filename)
  integer                      :: loc_spec_type
  integer                      :: numcoordinates
  double precision, allocatable :: xcoordinates(:), ycoordinates(:)
- double precision, allocatable :: xdum(:), ydum(:)!, xy2dum(:,:)
+ double precision, allocatable :: xdum(:), ydum(:)
  integer, allocatable          :: kdum(:)
  integer, allocatable          :: itpenzr(:), itpenur(:)
 
@@ -1591,8 +1584,7 @@ function adduniformtimerelation_objects(qid, locationfile, objtype, objid, param
    double precision, pointer  :: targetarrayptr(:)
    double precision, pointer  :: dbleptr(:)
    integer            :: tgtitem
-   integer, pointer   :: intptr, multuniptr, tgtitemptr
-
+   integer, pointer   :: intptr, multuniptr
 
    success = .true.   ! initialization
    xdum = 1d0 ; ydum = 1d0; kdum = 1
@@ -1889,8 +1881,7 @@ subroutine checkCombinationOldNewKeywordsGeneralStructure(janewformat, str_ptr)
    integer, intent(out)          :: janewformat
    type(TREE_DATA), pointer      :: str_ptr
 
-   logical                       :: success
-   integer                       :: k, l, cnt_new, cnt_old
+   integer                       :: cnt_new, cnt_old
 
    cnt_new = countUniqueKeys(str_ptr, generalkeywrd, generalkeywrd_old)
    cnt_old = countUniqueKeys(str_ptr, generalkeywrd_old, generalkeywrd)
