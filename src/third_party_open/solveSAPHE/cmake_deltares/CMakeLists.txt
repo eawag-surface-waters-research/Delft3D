@@ -15,8 +15,9 @@ add_library(${solvesaphe_library_name} ${fortran_sources})
 # Set dependencies
 set(oss_dependencies    deltares_common)
 
+oss_include_libraries(${solvesaphe_library_name} oss_dependencies)
 target_link_libraries(${solvesaphe_library_name} ${oss_dependencies})
-oss_include_libraries(${solvesaphe_library_name} ${oss_dependencies})
+
 
 # Create the folder structure in vfproj
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/.." FILES ${fortran_sources} )
