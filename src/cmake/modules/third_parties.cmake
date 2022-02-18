@@ -57,4 +57,4 @@ set(swan_mpi_module ${third_party_open_path}/swan/swan_mpi)
 set(swan_omp_module ${third_party_open_path}/swan/swan_omp)
 
 # solvesaphe
-set(solvesaphe_module ${third_party_open_path}/solvesaphe/${cmake_directory})
+set(solvesaphe_module ${third_party_open_path}/solveSAPHE/${cmake_directory})
