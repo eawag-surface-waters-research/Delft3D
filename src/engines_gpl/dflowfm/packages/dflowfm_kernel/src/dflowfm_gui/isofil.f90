@@ -34,30 +34,38 @@
       implicit none
       integer          :: n4, ncolr
       double precision :: X(n4), Y(n4), Z(n4)
+      double precision :: vmax, vmin, dv, val
+      integer          :: ncols, nv, nis, nie, jaauto
+      COMMON /DEPMAX/ VMAX,VMIN,DV,VAL(256),NCOLS(256),NV,NIS,NIE,JAAUTO
+      
+      call isofil_cor (X, Y, Z, n4, NCOLR, VAL, NCOLS, NV)
 
-      double precision :: dv, dzn, frac
-      integer :: i, ih, j, j1, j2, jaauto
+   END subroutine isofil
+   
+   ! ==============================================================================================
+   ! ==============================================================================================
+   SUBROUTINE isofil_cor (X, Y, Z, n4, NCOLR, VAL, NCOLS, NV)
+      implicit none
+      integer          :: n4, ncolr
+      double precision :: X(n4), Y(n4), Z(n4)
+
+      double precision :: dzn, frac
+      integer :: i, ih, j, j1, j2
       integer :: ncol
-      integer :: ncols
       integer :: ndraw
-      integer :: nie
-      integer :: nis
       integer :: npics
       integer :: num
-      integer :: nv
       integer :: nx1
       integer :: nx3
       integer :: ny1
       integer :: ny3
-      double precision :: val
-      double precision :: vmax
-      double precision :: vmin
       double precision :: zmax
       double precision :: zmin
       double precision :: znex
       double precision :: znow
       double precision :: DX(12),DY(12), DZ(12), XH(12),YH(12)
-      COMMON /DEPMAX/ VMAX,VMIN,DV,VAL(256),NCOLS(256),NV,NIS,NIE,JAAUTO
+      double precision :: VAL(256)
+      integer          :: NCOLS(256),NV
       COMMON /DRAWTHIS/ ndraw(50)
 
       DO 10 I = 1,n4
@@ -194,4 +202,4 @@
          ENDIF
       ENDIF
       RETURN
-      END subroutine isofil
+      END subroutine isofil_cor
