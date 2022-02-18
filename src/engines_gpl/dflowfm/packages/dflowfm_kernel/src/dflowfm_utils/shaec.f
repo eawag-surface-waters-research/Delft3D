@@ -298,12 +298,13 @@ c
 c
 c *******************************************************************
       subroutine shaec(nlat,nlon,isym,nt,g,idg,jdg,a,b,mdab,ndab,
-     1                    wshaec,lshaec,work,lwork,ierror)
-      double precision g,a,b,wshaec,work
-      dimension g(idg,jdg,*),a(mdab,ndab,*),b(mdab,ndab,*),wshaec(*),
-     1          work(*) 
-      !double precision g(idg,jdg,*),a(mdab,ndab,*),b(mdab,ndab,*),wshaec(*),
-     1!          work(*)
+     +                    wshaec,lshaec,work,lwork,ierror)
+      integer, intent(in) :: nlat, nlon, idg, jdg, mdab, ndab, lwork,
+     + isym, nt, lshaec
+      integer, intent(out) :: ierror
+      double precision, intent(inout) :: g(idg,jdg,*),a(mdab,ndab,*),
+     + b(mdab,ndab,*), wshaec(*), work(*)
+      integer :: labc, mmax, imid, lzz1, ls, nln, iw1, ist
       ierror = 1
       if(nlat.lt.3) return
       ierror = 2
@@ -341,20 +342,24 @@ c *******************************************************************
       return
       end
       subroutine shaec1(nlat,isym,nt,g,idgs,jdgs,a,b,mdab,ndab,imid,
-     1                idg,jdg,ge,go,work,zb,wzfin,whrfft)
+     +                idg,jdg,ge,go,work,zb,wzfin,whrfft)
 c
 c     whrfft must have at least nlon+15 locations
 c     wzfin must have 2*l*(nlat+1)/2 + ((l-3)*l+2)/2 locations
 c     zb must have 3*l*(nlat+1)/2 locations
 c     work must have ls*nlon locations
 c
-      double precision g,a,b,ge,go,zb,wzfin,whrfft,work
-      dimension g(idgs,jdgs,1),a(mdab,ndab,1),b(mdab,ndab,1),
-     1          ge(idg,jdg,1),go(idg,jdg,1),zb(imid,nlat,3),wzfin(1),
-     3          whrfft(1),work(1)
-      !double precision g(idgs,jdgs,1),a(mdab,ndab,1),b(mdab,ndab,1),
-     1!          ge(idg,jdg,1),go(idg,jdg,1),zb(imid,nlat,3),wzfin(1),
-     3!          whrfft(1),work(1)
+      integer, intent(in) :: idg, jdgs, nlat, isym, mdab, ndab, imid,
+     + idgs, jdg, nt
+      double precision, intent(inout) :: g(idgs,jdgs,1),a(mdab,ndab,1),
+     +          b(mdab,ndab,1),
+     +          ge(idg,jdg,1),go(idg,jdg,1),zb(imid,nlat,3),wzfin(1),
+     +          whrfft(1),work(1)
+
+      integer :: ls, nlon, mmax, mdo, nlp1, modl, imm1, i, k, j, mp1,
+     + np1, ndo, m, mp2, i3
+      real :: tsn, fsn ! TODO must be double precision
+
       ls = idg
       nlon = jdg
       mmax = min0(nlat,nlon/2+1)
@@ -451,12 +456,16 @@ c
       a(mmax,np1,k) = a(mmax,np1,k)+zb(i,np1,i3)*go(i,2*mmax-2,k)
   170 continue
       return
-      end
+      end subroutine shaec1
 
       subroutine shaeci(nlat,nlon,wshaec,lshaec,dwork,ldwork,ierror)
-      !dimension wshaec(lshaec)
-      double precision wshaec(*)
-      double precision dwork(ldwork)
+      integer, intent(in) :: nlat, nlon, lshaec, ldwork
+      double precision, intent(inout) :: wshaec(lshaec)
+      double precision, intent(inout) :: dwork(ldwork)
+      integer, intent(out) :: ierror
+
+      integer :: imid, mmax, lzz1, labc, iw1
+
       ierror = 1
       if(nlat.lt.3) return
       ierror = 2
@@ -474,4 +483,4 @@ c
       iw1 = lzz1+labc+1
       call hrffti(nlon,wshaec(iw1))
       return
-      end
+      end subroutine shaeci

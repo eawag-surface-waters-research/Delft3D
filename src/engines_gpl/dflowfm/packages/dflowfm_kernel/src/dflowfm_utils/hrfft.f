@@ -204,8 +204,9 @@ c
 c
 c
       subroutine hrffti (n,wsave)
+      integer, intent(in) :: n
       double precision wsave(n+15)
-      !dimension       wsave(n+15)                                              
+      real :: tfft ! TODO double
       common /hrf/ tfft
       tfft = 0.
       if (n .eq. 1) return                                                     
@@ -216,9 +217,12 @@ c
 c                                                                              
 c     a multiple fft package for spherepack
 c                                                                              
+      integer, intent(in) :: n
       double precision wa(n)      ,fac(15)    ,ntryh(4)
-      !dimension       wa(n)      ,fac(15)    ,ntryh(4)                         
       double precision tpi,argh,argld,arg
+      integer :: nl, nf, i, j, ntry, l1, k1, ld, l2, ido, ii, ipm, ip
+      integer :: nfm1, is, ib, nr, nq
+      real :: fi ! TODO double
       data ntryh(1),ntryh(2),ntryh(3),ntryh(4)/4,2,3,5/                        
       nl = n                                                                   
       nf = 0           
@@ -278,8 +282,9 @@ c
 c                      
 c     a multiple fft package for spherepack
 c                      
+      integer, intent(in) :: m, n, mdimr
       double precision r(mdimr,n)  ,work(1)    ,whrfft(n+15)
-      !dimension       r(mdimr,n)  ,work(1)    ,whrfft(n+15)
+      real :: tfft ! TODO double
       common /hrf/ tfft
       if (n .eq. 1) return                
 c     tstart = second(dum)
@@ -291,8 +296,10 @@ c     tfft = tfft+second(dum)-tstart
 c                      
 c     a multiple fft package for spherepack
 c                      
+      integer, intent(in) :: m, n, mdimc
       double precision ch(m,n) ,c(mdimc,n)  ,wa(n)   ,fac(15)
-      !dimension       ch(m,n) ,c(mdimc,n)  ,wa(n)   ,fac(15)
+      integer :: i, j, nf, na, l2, iw, ix2, ix3, ix4, idl1, ido, l1, ip
+      integer :: kh, k1
       nf = fac(2)      
       na = 1           
       l2 = n           
@@ -355,10 +362,11 @@ c
 c                      
 c     a multiple fft package for spherepack
 c                      
+      integer, intent(in) :: mp, ido, l1, mdimcc, mdimch
       double precision cc(mdimcc,ido,l1,4)   ,ch(mdimch,ido,4,l1)     ,
      1             wa1(ido)     ,wa2(ido)     ,wa3(ido)
-      !dimension    cc(mdimcc,ido,l1,4)   ,ch(mdimch,ido,4,l1)     ,
-     1!             wa1(ido)     ,wa2(ido)     ,wa3(ido)
+      real :: hsqt2 ! TODO double
+      integer :: i, k, m, ic, idp2
       hsqt2=sqrt(2.)/2.                   
       do 101 k=1,l1    
          do 1001 m=1,mp                   
@@ -431,10 +439,10 @@ c
 c                      
 c     a multiple fft package for spherepack
 c                      
+      integer, intent(in) :: mp, ido, l1, mdimcc, mdimch
       double precision ch(mdimch,ido,2,l1)  ,cc(mdimcc,ido,l1,2)     ,
      1                wa1(ido)
-      !dimension   ch(mdimch,ido,2,l1)  ,cc(mdimcc,ido,l1,2)     ,
-     1!                wa1(ido)            
+      integer :: i, k, m, ic, idp2
       do 101 k=1,l1    
          do 1001 m=1,mp                   
          ch(m,1,1,k) = cc(m,1,k,1)+cc(m,1,k,2)               
@@ -471,10 +479,12 @@ c
 c                      
 c     a multiple fft package for spherepack
 c                      
+      integer, intent(in) :: mp, ido, mdimcc, mdimch, l1
       double precision ch(mdimch,ido,3,l1)  ,cc(mdimcc,ido,l1,3)     ,
      1                wa1(ido)     ,wa2(ido)
-      !dimension   ch(mdimch,ido,3,l1)  ,cc(mdimcc,ido,l1,3)     ,
-     !!                wa1(ido)     ,wa2(ido)                 
+      real, external :: pimach ! TODO double
+      real :: arg, taur, taui
+      integer :: i, k, m, ic, idp2
       arg=2.*pimach()/3.                  
       taur=cos(arg)    
       taui=sin(arg)    
@@ -528,10 +538,12 @@ c
 c                      
 c     a multiple fft package for spherepack
 c                      
+      integer, intent(in) :: mp, ido, l1,mdimcc, mdimch
       double precision cc(mdimcc,ido,l1,5)    ,ch(mdimch,ido,5,l1)     ,
      1           wa1(ido)     ,wa2(ido)     ,wa3(ido)     ,wa4(ido)
-      !dimension  cc(mdimcc,ido,l1,5)    ,ch(mdimch,ido,5,l1)     ,
-     1!           wa1(ido)     ,wa2(ido)     ,wa3(ido)     ,wa4(ido)             
+      real, external :: pimach ! TODO double
+      real :: arg, tr11, ti11, tr12, ti12
+      integer :: i, k, m, ic, idp2
       arg=2.*pimach()/5.                  
       tr11=cos(arg)    
       ti11=sin(arg)    
@@ -648,12 +660,15 @@ c
 c                      
 c     a multiple fft package for spherepack
 c                      
+      integer, intent(in) :: mp, ido, ip, l1, mdimcc, mdimch, idl1
       double precision ch(mdimch,ido,l1,ip)   ,cc(mdimcc,ido,ip,l1)  ,
      1            c1(mdimcc,ido,l1,ip)    ,c2(mdimcc,idl1,ip),
      2                ch2(mdimch,idl1,ip)           ,wa(ido)
-      !dimension     ch(mdimch,ido,l1,ip)   ,cc(mdimcc,ido,ip,l1)  ,
-     1!            c1(mdimcc,ido,l1,ip)    ,c2(mdimcc,idl1,ip),
-     2!                ch2(mdimch,idl1,ip)           ,wa(ido)
+      real, external :: pimach ! TODO double
+      real :: tpi, arg, dcp, dsp, ar1, ai1, ar1h, ar2h, ai2, dc2, ds2
+      real :: ar2
+      integer :: ipph, ipp2, idp2, nbd, i, j, k, l, m, ik, j2, lc, ic
+      integer :: jc, idij,is
       tpi=2.*pimach()                     
       arg = tpi/float(ip)                 
       dcp = cos(arg)   
@@ -852,17 +867,17 @@ c
   144 continue         
       return           
       end              
-      function pimach()                   
-      pimach=3.14159265358979             
-      return           
-      end              
+      real function pimach() ! TODO double
+      pimach=3.14159265358979
+      return
+      end
       subroutine hrfftb(m,n,r,mdimr,whrfft,work)
 c                      
 c     a multiple fft package for spherepack
 c                      
-      !double precision r,work,whrfft
-      !dimension     r(mdimr,n)  ,work(1)    ,whrfft(n+15)
+      integer, intent(in) :: m,n,mdimr
       double precision r(mdimr,n)  ,work(1)    ,whrfft(n+15)
+      real :: tfft
       common /hrf/ tfft
       if (n .eq. 1) return                
 c     tstart = second(dum)
@@ -874,8 +889,9 @@ c     tfft = tfft+second(dum)-tstart
 c                      
 c     a multiple fft package for spherepack
 c                      
+      integer, intent(in) :: m,n, mdimc
       double precision ch(m,n), c(mdimc,n), wa(n) ,fac(15)
-      !dimension       ch(m,n), c(mdimc,n), wa(n) ,fac(15)
+      integer :: i,j,ix2,ix3,ix4,idl1,ido,l2,k1,nf,na,l1,iw,ip
       nf = fac(2)      
       na = 0           
       l1 = 1           
@@ -936,15 +952,16 @@ c
       end              
       subroutine hradbg (mp,ido,ip,l1,idl1,cc,c1,c2,mdimcc,
      1          ch,ch2,mdimch,wa)
+      integer, intent(in) :: mp, ido, ip, l1,mdimcc, mdimch, idl1
 c                      
 c     a multiple fft package for spherepack
 c                      
       double precision ch(mdimch,ido,l1,ip)    ,cc(mdimcc,ido,ip,l1) ,
      1           c1(mdimcc,ido,l1,ip)     ,c2(mdimcc,idl1,ip),
      2                ch2(mdimch,idl1,ip)       ,wa(ido)
-      !dimension    ch(mdimch,ido,l1,ip)    ,cc(mdimcc,ido,ip,l1) ,
-     1!           c1(mdimcc,ido,l1,ip)     ,c2(mdimcc,idl1,ip),
-     2!                ch2(mdimch,idl1,ip)       ,wa(ido)
+      real, external :: pimach ! TODO double
+      real :: tpi, arg, dcp, dsp, ar1h, ai2,ar2h,dc2,ds2,ar1,ai1,ar2
+      integer :: i,j,k,l,m,idp2,nbd,ipp2,ipph,jc,j2,ic,idij,ik,lc,is
       tpi=2.*pimach()                     
       arg = tpi/float(ip)                 
       dcp = cos(arg)   
@@ -1139,10 +1156,11 @@ c
 c                      
 c     a multiple fft package for spherepack
 c                      
+      integer, intent(in) :: mp, ido, l1, mdimcc, mdimch
       double precision cc(mdimcc,ido,4,l1)  ,ch(mdimch,ido,l1,4)    ,
      1                wa1(ido)  ,wa2(ido)  ,wa3(ido)
-      !dimension  cc(mdimcc,ido,4,l1)  ,ch(mdimch,ido,l1,4)    ,
-     1!                wa1(ido)  ,wa2(ido)  ,wa3(ido)         
+      real :: sqrt2 ! TODO double
+      integer :: i,k,m,ic,idp2
       sqrt2=sqrt(2.)   
       do 101 k=1,l1    
           do 1001 m=1,mp                  
@@ -1208,10 +1226,10 @@ c
 c                      
 c     a multiple fft package for spherepack
 c                      
+      integer, intent(in) :: mp, ido, mdimcc, mdimch, l1
       double precision cc(mdimcc,ido,2,l1)    ,ch(mdimch,ido,l1,2),
-     1                wa1(ido)  
-      !dimension  cc(mdimcc,ido,2,l1)    ,ch(mdimch,ido,l1,2),
-     1!                wa1(ido)            
+     1                wa1(ido)
+      integer :: i,k,m,ic,idp2
       do 101 k=1,l1    
           do 1001 m=1,mp                  
          ch(m,1,k,1) = cc(m,1,1,k)+cc(m,ido,2,k)             
@@ -1246,10 +1264,12 @@ c
 c                      
 c     a multiple fft package for spherepack
 c                      
+      integer, intent(in) :: mp, ido, mdimcc, mdimch, l1
       double precision cc(mdimcc,ido,3,l1)    ,ch(mdimch,ido,l1,3),
      1                wa1(ido)   ,wa2(ido)
-      !dimension  cc(mdimcc,ido,3,l1)    ,ch(mdimch,ido,l1,3),
-     1!                wa1(ido)   ,wa2(ido)                   
+      real, external :: pimach
+      real :: arg, taur, taui ! TODO double
+      integer :: i, k, m, ic, idp2
       arg=2.*pimach()/3.                  
       taur=cos(arg)    
       taui=sin(arg)    
@@ -1304,11 +1324,13 @@ c
 c                      
 c     a multiple fft package for spherepack
 c                      
+      integer, intent(in) :: mdimch, ido, mp, l1, mdimcc
       double precision cc(mdimcc,ido,5,l1)    ,ch(mdimch,ido,l1,5),
      1             wa1(ido)     ,wa2(ido)     ,wa3(ido)     ,wa4(ido)
-      !dimension  cc(mdimcc,ido,5,l1)    ,ch(mdimch,ido,l1,5),
-     1!             wa1(ido)     ,wa2(ido)     ,wa3(ido)     ,wa4(ido)           
-      arg=2.*pimach()/5.                  
+      integer :: i, k, m, ic, idp2
+      real :: arg, tr11, ti11,ti12,tr12 ! TODO doubles
+      real, external :: pimach
+      arg=2.*pimach()/5.
       tr11=cos(arg)    
       ti11=sin(arg)    
       tr12=cos(2.*arg)                    

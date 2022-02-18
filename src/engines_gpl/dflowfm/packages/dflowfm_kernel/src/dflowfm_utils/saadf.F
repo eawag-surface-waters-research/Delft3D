@@ -55,8 +55,12 @@
 !----------------------------------------------------------------------c
       subroutine amub (nrow,ncol,job,a,ja,ia,b,jb,ib,
      *                  c,jc,ic,nzmax,iw,ierr)
-      real*8 a(*), b(*), c(*)
-      integer ja(*),jb(*),jc(*),ia(nrow+1),ib(*),ic(*),iw(ncol)
+      integer, intent(in) :: nrow, ncol, nzmax
+      real*8, intent(inout) :: a(*), b(*), c(*)
+      integer, intent(inout) :: ja(*),jb(*),jc(*),ia(nrow+1),ib(*),ic(*)
+     * ,iw(ncol)
+      integer :: len, ierr, j, ii, ka, jj, kb, jcol, jpos, job
+      integer :: k
 !-----------------------------------------------------------------------
 ! performs the matrix by matrix product C = A B
 !-----------------------------------------------------------------------
@@ -147,9 +151,12 @@
 !-----------------------------------------------------------------------
       subroutine aplb (nrow,ncol,job,a,ja,ia,b,jb,ib,
      *     c,jc,ic,nzmax,iw,ierr)
-      real*8 a(*), b(*), c(*)
-      integer ja(*),jb(*),jc(*),ia(nrow+1),ib(nrow+1),ic(nrow+1),
-     *     iw(ncol)
+      integer, intent(in) :: nrow, ncol, nzmax, job
+      real*8, intent(inout) :: a(*), b(*), c(*)
+      integer, intent(inout) :: ja(*),jb(*),jc(*),ia(nrow+1),ib(nrow+1)
+     * ,ic(nrow+1), iw(ncol)
+      integer, intent(out) :: ierr
+      integer :: ii, ka, jcol, len, j, kb, jpos, k
 !-----------------------------------------------------------------------
 ! performs the matrix sum  C = A+B.
 !-----------------------------------------------------------------------
@@ -237,8 +244,12 @@ c
       end
 !-----------------------------------------------------------------------
       subroutine aplb1(nrow,ncol,job,a,ja,ia,b,jb,ib,c,jc,ic,nzmax,ierr)
-      real*8 a(*), b(*), c(*)
-      integer ja(*),jb(*),jc(*),ia(nrow+1),ib(nrow+1),ic(nrow+1)
+      integer, intent(in) :: nrow, ncol, nzmax, job
+      integer, intent(out) :: ierr
+      real*8, intent(inout) :: a(*), b(*), c(*)
+      integer, intent(inout):: ja(*),jb(*),jc(*),ia(nrow+1),ib(nrow+1)
+     * ,ic(nrow+1)
+      integer :: i, ka, kb, kamax, kbmax, j2,kc, j1
 !-----------------------------------------------------------------------
 ! performs the matrix sum  C = A+B for matrices in sorted CSR format.
 ! the difference with aplb  is that the resulting matrix is such that
@@ -338,8 +349,12 @@ c
 !-----------------------------------------------------------------------
       subroutine aplsb (nrow,ncol,a,ja,ia,s,b,jb,ib,c,jc,ic,
      *     nzmax,ierr)
-      real*8 a(*), b(*), c(*), s
-      integer ja(*),jb(*),jc(*),ia(nrow+1),ib(nrow+1),ic(nrow+1)
+      integer, intent(in) :: nrow, ncol, nzmax
+      integer, intent(out) :: ierr
+      real*8, intent(inout) :: a(*), b(*), c(*), s
+      integer, intent(inout) :: ja(*),jb(*),jc(*),ia(nrow+1),ib(nrow+1)
+     * ,ic(nrow+1)
+      integer :: i, ka, kb, kamax, kbmax, j1, j2, kc
 !-----------------------------------------------------------------------
 ! performs the operation C = A+s B for matrices in sorted CSR format.
 ! the difference with aplsb is that the resulting matrix is such that
@@ -449,8 +464,12 @@ c
 !-----------------------------------------------------------------------
       subroutine aplsb1 (nrow,ncol,a,ja,ia,s,b,jb,ib,c,jc,ic,
      *     nzmax,ierr)
-      real*8 a(*), b(*), c(*), s
-      integer ja(*),jb(*),jc(*),ia(nrow+1),ib(nrow+1),ic(nrow+1)
+      integer, intent(in) :: nrow, ncol, nzmax
+      integer, intent(out) :: ierr
+      real*8, intent(inout) :: a(*), b(*), c(*), s
+      integer, intent(inout) :: ja(*),jb(*),jc(*),ia(nrow+1),ib(nrow+1)
+     * ,ic(nrow+1)
+      integer :: i, ka, kb, kamax, kbmax, j1, j2, kc
 !-----------------------------------------------------------------------
 ! performs the operation C = A+s B for matrices in sorted CSR format.
 ! the difference with aplsb is that the resulting matrix is such that
@@ -560,8 +579,13 @@ c
 !-----------------------------------------------------------------------
       subroutine apmbt (nrow,ncol,job,a,ja,ia,b,jb,ib,
      *     c,jc,ic,nzmax,iw,ierr)
-      real*8 a(*), b(*), c(*)
-      integer ja(*),jb(*),jc(*),ia(nrow+1),ib(ncol+1),ic(*),iw(*)
+      integer, intent(in) :: nrow, ncol, nzmax, job
+      integer, intent(out) :: ierr
+      real*8, intent(inout) :: a(*), b(*), c(*)
+      integer, intent(inout) :: ja(*),jb(*),jc(*),ia(nrow+1),ib(ncol+1)
+     * ,ic(*),iw(*)
+      integer :: j, nnza, nnzb, ljob, ipos, k, ii, jcol, jpos, i, len
+      integer :: ka
 !-----------------------------------------------------------------------
 ! performs the matrix sum  C = A + transp(B) or C = A - transp(B)
 !-----------------------------------------------------------------------
@@ -696,8 +720,13 @@ c
 !-----------------------------------------------------------------------
       subroutine aplsbt(nrow,ncol,a,ja,ia,s,b,jb,ib,
      *     c,jc,ic,nzmax,iw,ierr)
-      real*8 a(*), b(*), c(*), s
-      integer ja(*),jb(*),jc(*),ia(nrow+1),ib(ncol+1),ic(*),iw(*)
+      integer, intent(in) :: nrow, ncol, nzmax
+      integer, intent(out) :: ierr
+      real*8, intent(inout) :: a(*), b(*), c(*), s
+      integer, intent(inout) :: ja(*),jb(*),jc(*),ia(nrow+1),ib(ncol+1)
+     * ,ic(*),iw(*)
+      integer :: j, nnza, nnzb, len, k, ii, ka, jcol, ljob, ipos, jpos
+      integer :: i
 !-----------------------------------------------------------------------
 ! performs the matrix sum  C = A + transp(B).
 !-----------------------------------------------------------------------
@@ -818,8 +847,11 @@ c
       end
 !-----------------------------------------------------------------------
       subroutine diamua (nrow,job, a, ja, ia, diag, b, jb, ib)
-      real*8 a(*), b(*), diag(nrow), scal
-      integer ja(*),jb(*), ia(nrow+1),ib(nrow+1)
+      integer, intent(in) :: nrow, job
+      real*8, intent(inout) :: a(*), b(*), diag(nrow)
+      integer, intent(inout) :: ja(*),jb(*), ia(nrow+1),ib(nrow+1)
+      real*8 :: scal
+      integer :: ii, k1, k2, k
 !-----------------------------------------------------------------------
 ! performs the matrix by matrix product B = Diag * A  (in place)
 !-----------------------------------------------------------------------
@@ -875,8 +907,10 @@ c
       end
 !-----------------------------------------------------------------------
       subroutine amudia (nrow,job, a, ja, ia, diag, b, jb, ib)
-      real*8 a(*), b(*), diag(nrow)
-      integer ja(*),jb(*), ia(nrow+1),ib(nrow+1)
+      integer, intent(in) :: nrow, job
+      real*8, intent(inout) :: a(*), b(*), diag(nrow)
+      integer, intent(inout) :: ja(*),jb(*), ia(nrow+1),ib(nrow+1)
+      integer :: ii, k1, k2, k
 !-----------------------------------------------------------------------
 ! performs the matrix by matrix product B = A * Diag  (in place)
 !-----------------------------------------------------------------------
@@ -930,8 +964,10 @@ c
       end
 !-----------------------------------------------------------------------
       subroutine aplsca (nrow, a, ja, ia, scal,iw)
-      real*8 a(*), scal
-      integer ja(*), ia(nrow+1),iw(*)
+      integer, intent(in) :: nrow
+      real*8, intent(inout) :: a(*), scal
+      integer, intent(inout) :: ja(*), ia(nrow+1),iw(*)
+      integer :: icount, j, ko, ii, k1, k2, k
 !-----------------------------------------------------------------------
 ! Adds a scalar to the diagonal entries of a sparse matrix A :=A + s I
 !-----------------------------------------------------------------------
@@ -1027,8 +1063,10 @@ c
       end
 !-----------------------------------------------------------------------
       subroutine apldia (nrow, job, a, ja, ia, diag, b, jb, ib, iw)
-      real*8 a(*), b(*), diag(nrow)
-      integer ja(*),jb(*), ia(nrow+1),ib(nrow+1), iw(*)
+      integer, intent(in) :: nrow, job
+      real*8, intent(inout) :: a(*), b(*), diag(nrow)
+      integer, intent(inout) :: ja(*),jb(*), ia(nrow+1),ib(nrow+1),iw(*)
+      integer :: nnz, k, icount, j, ko, ii, k1, k2
 !-----------------------------------------------------------------------
 ! Adds a diagonal matrix to a general sparse matrix:  B = A + Diag
 !-----------------------------------------------------------------------
@@ -1279,8 +1317,9 @@ c
       end
 !-----------------------------------------------------------------------
       subroutine amuxe (n,x,y,na,ncol,a,ja)
-      real*8 x(n), y(n), a(na,*)
-      integer  n, na, ncol, ja(na,*)
+      integer, intent(in) :: n, na, ncol
+      real*8, intent(inout) :: x(n), y(n), a(na,*)
+      integer, intent(inout) :: ja(na,*)
 !-----------------------------------------------------------------------
 !        A times a vector in Ellpack Itpack format (ELL)
 !-----------------------------------------------------------------------
@@ -1432,8 +1471,10 @@ c
 !-----------------------------------------------------------------------
       subroutine vbrmv(nr, nc, ia, ja, ka, a, kvstr, kvstc, x, b)
 !-----------------------------------------------------------------------
-      integer nr, nc, ia(nr+1), ja(*), ka(*), kvstr(nr+1), kvstc(*)
-      real*8  a(*), x(*), b(*)
+      integer, intent(in) :: nr, nc
+      integer, intent(inout) :: ia(nr+1), ja(*), ka(*), kvstr(nr+1)
+     * , kvstc(*)
+      real*8, intent(inout) ::  a(*), x(*), b(*)
 !-----------------------------------------------------------------------
 !     Sparse matrix-full vector product, in VBR format.
 !-----------------------------------------------------------------------
@@ -1662,8 +1703,9 @@ c  x = The solution of  L x = y .
       end
 !-----------------------------------------------------------------------
       subroutine ldsoll (n,x,y,al,jal,nlev,lev,ilev)
-      integer n, nlev, jal(*), ilev(nlev+1), lev(n)
-      real*8 x(n), y(n), al(*)
+      integer, intent(in) :: n, nlev
+      integer, intent(inout) :: jal(*), ilev(nlev+1), lev(n)
+      real*8, intent(inout) :: x(n), y(n), al(*)
 !-----------------------------------------------------------------------
 !    Solves L x = y    L = triangular. Uses LEVEL SCHEDULING/MSR format
 !-----------------------------------------------------------------------
@@ -1688,8 +1730,8 @@ c  x = The solution of  L x = y .
 !-----------
 c  x = The solution of  L x = y .
 !--------------------------------------------------------------------
-      integer ii, jrow, i
-      real*8 t
+      integer :: ii, jrow, i, k
+      real*8 :: t
 !
 !     outer loop goes through the levels. (SEQUENTIAL loop)
 !
@@ -1892,8 +1934,13 @@ c  x = The solution of  U x = y .
 
 !-----------------------------------------------------------------------
         subroutine errpr (n, y, y1,iout,msg)
-        real*8 y(*), y1(*), t, sqrt
-        character*6 msg
+        integer, intent(in) :: n, iout
+        real*8, intent(in) :: y(*), y1(*)
+        character*6, intent(in) :: msg
+
+        real*8 :: t
+        integer :: k
+
         t = 0.0d0
         do 1 k=1,n
            t = t+(y(k)-y1(k))**2
@@ -2092,8 +2139,10 @@ c  x = The solution of  U x = y .
       return
       end
       double precision function dnrm2XXX ( n, dx, incx)
-      integer          next
-      double precision   dx(1), cutlo, cuthi, hitest, sum, xmax,zero,one
+      integer, intent(in) :: n, incx
+      double precision, intent(in) :: dx(*)
+      double precision  :: cutlo, cuthi, hitest, sum, xmax,zero,one
+      integer           :: next, nn, i, j
       data   zero, one /0.0d0, 1.0d0/
 !
 !     euclidean norm of the n-vector stored in dx() with storage
@@ -2629,8 +2678,11 @@ c cooell  : converts coordinate to Ellpack/Itpack format               c
 c dcsort  : sorting routine used by crsjad                             c
 c----------------------------------------------------------------------c
       subroutine csrdns(nrow,ncol,a,ja,ia,dns,ndns,ierr)
-      real*8 dns(ndns,*),a(*)
-      integer ja(*),ia(*)
+      integer, intent(in) :: nrow, ncol, ndns
+      integer, intent(out) :: ierr
+      real*8, intent(inout) :: dns(ndns,*), a(*)
+      integer, intent(inout) :: ja(*),ia(*)
+      integer :: i, j, k
 c-----------------------------------------------------------------------
 c Compressed Sparse Row    to    Dense
 c-----------------------------------------------------------------------
@@ -2682,8 +2734,11 @@ c-----------------------------------------------------------------------
       end
 c-----------------------------------------------------------------------
       subroutine dnscsr(nrow,ncol,nzmax,dns,ndns,a,ja,ia,ierr)
-      real*8 dns(ndns,*),a(*)
-      integer ia(*),ja(*)
+      integer, intent(in) :: nrow, ncol, ndns, nzmax
+      integer, intent(out) :: ierr
+      real*8, intent(inout) :: dns(ndns,*),a(*)
+      integer, intent(inout) :: ia(*),ja(*)
+      integer ::next, i, j
 c-----------------------------------------------------------------------
 c Dense     to    Compressed Row Sparse
 c-----------------------------------------------------------------------
@@ -2738,8 +2793,11 @@ c-----------------------------------------------------------------------
 c-----------------------------------------------------------------------
       subroutine coocsr(nrow,nnz,a,ir,jc,ao,jao,iao)
 c-----------------------------------------------------------------------
-      real*8 a(*),ao(*),x
-      integer ir(*),jc(*),jao(*),iao(*)
+      integer, intent(in) :: nrow, nnz
+      real*8, intent(inout) :: a(*),ao(*)
+      integer, intent(inout) :: ir(*),jc(*),jao(*),iao(*)
+      integer :: k, j, k0, iad, i
+      real*8 :: x
 c-----------------------------------------------------------------------
 c  Coordinate     to   Compressed Sparse Row
 c-----------------------------------------------------------------------
@@ -2805,8 +2863,9 @@ c-----------------------------------------------------------------------
       end
 c-----------------------------------------------------------------------
       subroutine coicsr (n,nnz,job,a,ja,ia,iwk)
-      integer ia(nnz),ja(nnz),iwk(n+1)
-      real*8 a(*)
+      integer, intent(in) :: n, nnz, job
+      integer, intent(inout) :: ia(nnz),ja(nnz),iwk(n+1)
+      real*8, intent(inout) :: a(*)
 c------------------------------------------------------------------------
 c IN-PLACE coo-csr conversion routine.
 c------------------------------------------------------------------------
@@ -2842,8 +2901,9 @@ c         if you want them sorted.
 c----------------------------------------------------------------------c
 c  Coded by Y. Saad, Sep. 26 1989                                      c
 c----------------------------------------------------------------------c
-      real*8 t,tnext
-      logical values
+      real*8 :: t,tnext
+      logical :: values
+      integer :: i, j, k, init, ipos, inext, jnext
 c-----------------------------------------------------------------------
       values = (job .eq. 1)
 c find pointer array for resulting matrix.
@@ -2905,8 +2965,11 @@ c------------------------------------------------------------------------
 c-----------------------------------------------------------------------
       subroutine csrcoo (nrow,job,nzmax,a,ja,ia,nnz,ao,ir,jc,ierr)
 c-----------------------------------------------------------------------
-      real*8 a(*),ao(*)
-      integer ir(*),jc(*),ja(*),ia(nrow+1)
+      integer, intent(in) :: nrow, job, nzmax
+      integer, intent(out) :: ierr
+      real*8, intent(inout) :: a(*),ao(*)
+      integer, intent(inout) :: ir(*),jc(*),ja(*),ia(nrow+1)
+      integer :: nnz, k, i, k1, k2
 c-----------------------------------------------------------------------
 c  Compressed Sparse Row      to      Coordinate
 c-----------------------------------------------------------------------
@@ -2981,8 +3044,12 @@ c-----------------------------------------------------------------------
       end
 c-----------------------------------------------------------------------
       subroutine csrssr (nrow,a,ja,ia,nzmax,ao,jao,iao,ierr)
-      real*8 a(*), ao(*), t
-      integer ia(*), ja(*), iao(*), jao(*)
+      integer, intent(in) :: nrow, nzmax
+      integer, intent(out) :: ierr
+      real*8, intent(inout) :: a(*), ao(*)
+      integer, intent(inout) :: ia(*), ja(*), iao(*), jao(*)
+      real*8 :: t
+      integer :: ko, i, kold, kdiag, k
 c-----------------------------------------------------------------------
 c Compressed Sparse Row     to     Symmetric Sparse Row
 c-----------------------------------------------------------------------
@@ -3323,8 +3390,12 @@ c-----------------------------------------------------------------------
       end
 c-----------------------------------------------------------------------
       subroutine xssrcsr (nrow,a,ja,ia,nzmax,ao,jao,iao,indu,ierr)
-      integer ia(nrow+1),iao(nrow+1),ja(*),jao(nzmax),indu(nrow+1)
-      real*8 a(*),ao(nzmax)
+      integer, intent(in) :: nrow, nzmax
+      integer, intent(out) :: ierr
+      integer, intent(inout) :: ia(nrow+1),iao(nrow+1),ja(*),jao(nzmax)
+     * ,indu(nrow+1)
+      real*8 , intent(inout) :: a(*),ao(nzmax)
+      integer :: i, j, k, lenrow, nnz, ipos, kosav, klast, kfirst, ko
 c-----------------------------------------------------------------------
 c Symmetric Sparse Row   to    (regular) Compressed Sparse Row
 c-----------------------------------------------------------------------
@@ -3436,8 +3507,11 @@ c-----------------------------------------------------------------------
 c-----------------------------------------------------------------------
       subroutine csrell (nrow,a,ja,ia,maxcol,coef,jcoef,ncoef,
      *                   ndiag,ierr)
-      integer ia(nrow+1), ja(*), jcoef(ncoef,1)
-      real*8 a(*), coef(ncoef,1)
+      integer, intent(in) :: nrow, maxcol, ncoef
+      integer, intent(out) :: ierr, ndiag
+      integer, intent(inout) :: ia(nrow+1), ja(*), jcoef(ncoef,1)
+      real*8 , intent(inout) :: a(*), coef(ncoef,1)
+      integer :: i,j,k,k1,k2
 c-----------------------------------------------------------------------
 c Compressed Sparse Row     to    Ellpack - Itpack format
 c-----------------------------------------------------------------------
@@ -3508,8 +3582,11 @@ c-----------------------------------------------------------------------
       end
 c-----------------------------------------------------------------------
       subroutine ellcsr(nrow,coef,jcoef,ncoef,ndiag,a,ja,ia,nzmax,ierr)
-      integer ia(nrow+1), ja(*), jcoef(ncoef,1)
-      real*8 a(*), coef(ncoef,1)
+      integer, intent(in) :: nrow, nzmax, ncoef, ndiag
+      integer, intent(out) :: ierr
+      integer, intent(inout) :: ia(nrow+1), ja(*), jcoef(ncoef,1)
+      real*8 , intent(inout) :: a(*), coef(ncoef,1)
+      integer :: kpos, i, k
 c-----------------------------------------------------------------------
 c  Ellpack - Itpack format  to  Compressed Sparse Row
 c-----------------------------------------------------------------------
@@ -3570,8 +3647,10 @@ c-----------------------------------------------------------------------
       end
 c-----------------------------------------------------------------------
       subroutine csrmsr (n,a,ja,ia,ao,jao,wk,iwk)
-      real*8 a(*),ao(*),wk(n)
-      integer ia(n+1),ja(*),jao(*),iwk(n+1)
+      integer, intent(in) :: n
+      real*8 , intent(inout) :: a(*),ao(*),wk(n)
+      integer, intent(inout) :: ia(n+1),ja(*),jao(*),iwk(n+1)
+      integer :: icount, i, k, iptr, ii, j
 c-----------------------------------------------------------------------
 c Compressed Sparse Row   to      Modified - Sparse Row
 c                                 Sparse row with separate main diagonal
@@ -3677,8 +3756,10 @@ c-----------------------------------------------------------------------
       end
 c-----------------------------------------------------------------------
       subroutine msrcsr (n,a,ja,ao,jao,iao,wk,iwk)
-      real*8 a(*),ao(*),wk(n)
-      integer ja(*),jao(*),iao(n+1),iwk(n+1)
+      integer, intent(in) :: n
+      real*8 , intent(inout) :: a(*),ao(*),wk(n)
+      integer, intent(inout) :: ja(*),jao(*),iao(n+1),iwk(n+1)
+      integer :: i,j,k,ii,idiag,iptr
 c-----------------------------------------------------------------------
 c       Modified - Sparse Row  to   Compressed Sparse Row
 c
@@ -3756,6 +3837,7 @@ c-----------------------------------------------------------------------
       end
 c-----------------------------------------------------------------------
       subroutine csrcsc (n,job,ipos,a,ja,ia,ao,jao,iao)
+      integer, intent(in) :: n, job, ipos
       integer ia(n+1),iao(n+1),ja(*),jao(*)
       real*8  a(*),ao(*)
 c-----------------------------------------------------------------------
@@ -3798,8 +3880,10 @@ c-----------------------------------------------------------------------
       end
 c-----------------------------------------------------------------------
       subroutine csrcsc2 (n,n2,job,ipos,a,ja,ia,ao,jao,iao)
-      integer ia(n+1),iao(n2+1),ja(*),jao(*)
-      real*8  a(*),ao(*)
+      integer, intent(in) :: n, job, n2, ipos
+      integer, intent(inout) :: ia(n+1),iao(n2+1),ja(*),jao(*)
+      real*8 , intent(inout) :: a(*),ao(*)
+      integer :: i,j,k,next
 c-----------------------------------------------------------------------
 c Compressed Sparse Row     to      Compressed Sparse Column
 c
@@ -3875,8 +3959,9 @@ c-----------------------------------------------------------------------
       end
 c-----------------------------------------------------------------------
       subroutine csrlnk (n,a,ja,ia,link)
-      real*8 a(*)
-      integer n, ja(*), ia(n+1), link(*)
+      real*8 , intent(inout) :: a(*)
+      integer, intent(in) :: n
+      integer, intent(inout) :: ja(*), ia(n+1), link(*)
 c-----------------------------------------------------------------------
 c      Compressed Sparse Row         to    Linked storage format.
 c-----------------------------------------------------------------------
@@ -3927,7 +4012,7 @@ c notes:
 c ------ ia may be altered on return.
 c-----------------------------------------------------------------------
 c local variables
-      integer i, k
+      integer i, k, istart, iend
 c
 c loop through all rows
 c
@@ -4021,8 +4106,12 @@ c-----------------------------------------------------------------------
 c-----------------------------------------------------------------------
       subroutine csrdia (n,idiag,job,a,ja,ia,ndiag,
      *                   diag,ioff,ao,jao,iao,ind)
-      real*8 diag(ndiag,idiag), a(*), ao(*)
-      integer ia(*), ind(*), ja(*), jao(*), iao(*), ioff(*)
+      integer, intent(in) :: n, ndiag
+      integer, intent(inout) :: idiag
+      real*8 , intent(inout) :: diag(ndiag,idiag), a(*), ao(*)
+      integer, intent(inout) :: ia(*), ind(*), ja(*), jao(*), iao(*)
+     * , ioff(*)
+      integer :: i,j,k,l,jmax,ii,job,job1,job2,ko,n2,idum
 c-----------------------------------------------------------------------
 c Compressed sparse row     to    diagonal format
 c-----------------------------------------------------------------------
@@ -4161,8 +4250,11 @@ c-----------------------------------------------------------------------
       end
 c-----------------------------------------------------------------------
       subroutine diacsr (n,job,idiag,diag,ndiag,ioff,a,ja,ia)
-      real*8 diag(ndiag,idiag), a(*), t
+      integer, intent(in) :: n, job, ndiag,idiag
+      real*8 , intent(inout) :: diag(ndiag,idiag), a(*)
       integer ia(*), ja(*), ioff(*)
+      real*8 :: t
+      integer :: i,j,jj,ko
 c-----------------------------------------------------------------------
 c    diagonal format     to     compressed sparse row
 c-----------------------------------------------------------------------
@@ -4521,8 +4613,11 @@ c-----------------------------------------------------------------------
       end
 c-----------------------------------------------------------------------
       subroutine csrbnd (n,a,ja,ia,job,abd,nabd,lowd,ml,mu,ierr)
-      real*8 a(*),abd(nabd,n)
-      integer ia(n+1),ja(*)
+      integer, intent(in) :: n, nabd, job
+      integer, intent(out) :: ierr
+      real*8 , intent(inout) :: a(*),abd(nabd,n)
+      integer, intent(inout) :: ia(n+1),ja(*),lowd
+      integer :: i,j,k,m,ii,mdiag,ml,mu
 c-----------------------------------------------------------------------
 c   Compressed Sparse Row  to  Banded (Linpack ) format.
 c-----------------------------------------------------------------------
@@ -4663,8 +4758,12 @@ c-----------------------------------------------------------------------
       end
 c-----------------------------------------------------------------------
       subroutine bndcsr (n,abd,nabd,lowd,ml,mu,a,ja,ia,len,ierr)
-      real*8 a(*),abd(nabd,*), t
-      integer ia(n+1),ja(*)
+      integer, intent(in) :: n, nabd
+      integer, intent(out) :: ierr
+      real*8,  intent(inout) :: a(*),abd(nabd,*)
+      integer, intent(inout) :: ia(n+1),ja(*), len,lowd
+      real*8 :: t
+      integer :: i,j,irow,ml,mu,ko
 c-----------------------------------------------------------------------
 c Banded (Linpack ) format   to    Compressed Sparse Row  format.
 c-----------------------------------------------------------------------
@@ -4754,8 +4853,11 @@ c-----------------------------------------------------------------------
       end
 c-----------------------------------------------------------------------
       subroutine csrssk (n,imod,a,ja,ia,asky,isky,nzmax,ierr)
-      real*8 a(*),asky(nzmax)
-      integer n, imod, nzmax, ierr, ia(n+1), isky(n+1), ja(*)
+      integer, intent(in) :: n, nzmax
+      integer, intent(out) :: ierr
+      real*8 , intent(inout) :: a(*), asky(nzmax)
+      integer, intent(inout) :: imod, ia(n+1), isky(n+1), ja(*)
+      integer :: i,j,k,ml,nnz,kend
 c-----------------------------------------------------------------------
 c      Compressed Sparse Row         to     Symmetric Skyline Format
 c  or  Symmetric Sparse Row
@@ -4867,8 +4969,10 @@ c-----------------------------------------------------------------------
       end
 c-----------------------------------------------------------------------
       subroutine sskssr (n,imod,asky,isky,ao,jao,iao,nzmax,ierr)
-      real*8 asky(*),ao(nzmax)
-      integer n, imod,nzmax,ierr, isky(n+1),iao(n+1),jao(nzmax)
+      integer, intent(in) :: n, nzmax
+      integer, intent(out) :: ierr
+      real*8 , intent(inout) :: asky(*),ao(nzmax)
+      integer, intent(inout) :: imod, isky(n+1),iao(n+1),jao(nzmax)
 c-----------------------------------------------------------------------
 c     Symmetric Skyline Format  to  Symmetric Sparse Row format.
 c-----------------------------------------------------------------------
@@ -4923,7 +5027,7 @@ c-------
 c This module is in place: ao and iao can be the same as asky, and isky.
 c-----------------------------------------------------------------------
 c local variables
-      integer next, kend, kstart, i, j
+      integer next, kend, kstart, i, j, k
       ierr = 0
 c
 c check for validity of imod
@@ -4980,8 +5084,12 @@ c-----------------------------------------------------------------------
       end
 c-----------------------------------------------------------------------
       subroutine csrjad (nrow, a, ja, ia, idiag, iperm, ao, jao, iao)
-      integer ja(*), jao(*), ia(nrow+1), iperm(nrow), iao(nrow)
-      real*8 a(*), ao(*)
+      integer, intent(in) :: nrow
+      integer, intent(out) :: idiag
+      integer, intent(inout) :: ja(*), jao(*), ia(nrow+1), iperm(nrow)
+     * , iao(nrow)
+      real*8 , intent(inout) :: a(*), ao(*)
+      integer :: i,j,k,k0,k1,jj,ilo,len
 c-----------------------------------------------------------------------
 c    Compressed Sparse Row  to   JAgged Diagonal storage.
 c-----------------------------------------------------------------------
@@ -5078,8 +5186,11 @@ c-----------------------------------------------------------------------
       end
 c-----------------------------------------------------------------------
       subroutine jadcsr (nrow, idiag, a, ja, ia, iperm, ao, jao, iao)
-      integer ja(*), jao(*), ia(idiag+1), iperm(nrow), iao(nrow+1)
-      real*8 a(*), ao(*)
+      integer, intent(in) :: nrow, idiag
+      integer, intent(inout) :: ja(*), jao(*), ia(idiag+1), iperm(nrow)
+     * , iao(nrow+1)
+      real*8 , intent(inout) :: a(*), ao(*)
+      integer :: k1, jj, kpos, i, j, k, len
 c-----------------------------------------------------------------------
 c     Jagged Diagonal Storage   to     Compressed Sparse Row
 c-----------------------------------------------------------------------
@@ -5336,6 +5447,11 @@ c
 c-----end-of-cooell-----------------------------------------------------
 c-----------------------------------------------------------------------
       subroutine xcooell(n,nnz,a,ja,ia,ac,jac,nac,ner,ncmax,ierr)
+      integer, intent(in) :: n, nnz, nac, ner
+      integer, intent(out) :: ierr
+      real*8 , intent(inout) :: a(nnz), ac(nac,ner)
+      integer, intent(inout) :: ja(nnz), ia(nnz), jac(nac,ner)
+      integer ::ncmax, icount, k, ii, in, inn, is, innz
 C-----------------------------------------------------------------------
 C   coordinate format to ellpack format.
 C-----------------------------------------------------------------------
@@ -5446,8 +5562,6 @@ C             IERR =  1   -  The array AC has a zero column. (Warning)
 C             IERR =  2   -  The array AC has a zero row.    (Warning)
 C
 C---------------------------------------------------------------------
-      real*8 a(nnz), ac(nac,ner)
-      integer ja(nnz), ia(nnz), jac(nac,ner), ierr, ncmax, icount
 c
 c- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 c   Initial error parameter to zero:
@@ -5620,8 +5734,11 @@ c-----------------------------------------------------------------------
       end
 c-----------------------------------------------------------------------
       subroutine usscsr (nrow,a,ja,ia,diag,al,jal,ial,au,jau,iau)
-      real*8 a(*),al(*),diag(*),au(*)
-      integer ja(*),ia(nrow+1),jal(*),ial(nrow+1),jau(*),iau(nrow+1)
+      integer, intent(in) :: nrow
+      real*8 , intent(inout) :: a(*),al(*),diag(*),au(*)
+      integer, intent(inout) :: ja(*),ia(nrow+1),jal(*),ial(nrow+1)
+     * ,jau(*),iau(nrow+1)
+      integer :: i,j,k,ka,jak
 c-----------------------------------------------------------------------
 c Unsymmetric Sparse Skyline   format   to Compressed Sparse Row
 c-----------------------------------------------------------------------
@@ -5797,8 +5914,10 @@ c-----------------------------------------------------------------------
 !      end
 !c
       subroutine ssscsr (nrow,a,ja,ia,diag,al,jal,ial,au)
-      real*8 a(*),al(*),diag(*),au(*)
-      integer ja(*),ia(nrow+1),jal(*),ial(nrow+1)
+      integer, intent(in) :: nrow
+      real*8 , intent(inout) :: a(*),al(*),diag(*),au(*)
+      integer, intent(inout) :: ja(*),ia(nrow+1),jal(*),ial(nrow+1)
+      integer :: i,j,k,ka,jak
 c-----------------------------------------------------------------------
 c Unsymmetric Sparse Skyline   format   to Compressed Sparse Row
 c-----------------------------------------------------------------------
@@ -6343,8 +6462,11 @@ c csrkvstc:  Finds block column partitioning of matrix in CSR format   c
 c kvstmerge: Merges block partitionings, for conformal row/col pattern c
 c----------------------------------------------------------------------c
       subroutine submat (n,job,i1,i2,j1,j2,a,ja,ia,nr,nc,ao,jao,iao)
-      integer n,job,i1,i2,j1,j2,nr,nc,ia(*),ja(*),jao(*),iao(*)
-      real*8 a(*),ao(*)
+      integer, intent(in) :: n,job
+      integer, intent(inout) :: i1,i2,j1,j2,nr,nc,ia(*),ja(*),jao(*)
+     * ,iao(*)
+      real*8 , intent(inout) :: a(*),ao(*)
+      integer :: i, j, k, ii, k1,k2,klen
 c-----------------------------------------------------------------------
 c extracts the submatrix A(i1:i2,j1:j2) and puts the result in
 c matrix ao,iao,jao
@@ -6622,7 +6744,7 @@ c-----------------------------------------------------------------------
 c Y. Saad - Feb. 1, 1991.
 c-----------------------------------------------------------------------
 c local variables
-      integer i, k, j, ifirst, nnz, next
+      integer i, k, j, ifirst, nnz, next, irow, ko
 c
 c count the number of elements in each column
 c
@@ -7165,8 +7287,10 @@ c-----------------------------------------------------------------------
       end
 c-----------------------------------------------------------------------
       subroutine transp (nrow,ncol,a,ja,ia,iwk,ierr)
-      integer nrow, ncol, ia(*), ja(*), iwk(*), ierr
-      real*8 a(*)
+      integer, intent(in) :: nrow
+      integer, intent(out) :: ierr
+      integer, intent(inout) :: ia(*), ja(*), iwk(*), ncol
+      real*8 , intent(inout) :: a(*)
 c------------------------------------------------------------------------
 c In-place transposition routine.
 c------------------------------------------------------------------------
@@ -7219,7 +7343,9 @@ c           Y. Saad, Sep. 21 1989                                      c
 c  modified Oct. 11, 1989.                                             c
 c----------------------------------------------------------------------c
 c local variables
-      real*8 t, t1
+      real*8  :: t, t1
+      integer :: i,j,k,l,init,inext,jcol,nnz
+
       ierr = 0
       nnz = ia(nrow+1)-1
 c
@@ -7417,7 +7543,10 @@ c-----------------------------------------------------------------------
       end
 c-----------------------------------------------------------------------
       subroutine levels (n, jal, ial, nlev, lev, ilev, levnum)
-      integer jal(*),ial(*), levnum(*), ilev(*), lev(*)
+      integer, intent(in) :: n
+      integer, intent(out) :: nlev
+      integer, intent(inout) ::jal(*),ial(*), levnum(*), ilev(*), lev(*)
+      integer :: i, j, levi
 c-----------------------------------------------------------------------
 c levels gets the level structure of a lower triangular matrix
 c for level scheduling in the parallel solution of triangular systems
@@ -7494,9 +7623,13 @@ c-----------------------------------------------------------------------
       subroutine amask (nrow,ncol,a,ja,ia,jmask,imask,
      *                  c,jc,ic,iw,nzmax,ierr)
 c---------------------------------------------------------------------
-      real*8 a(*),c(*)
-      integer ia(nrow+1),ja(*),jc(*),ic(nrow+1),jmask(*),imask(nrow+1)
-      logical iw(ncol)
+      integer, intent(in) :: nrow, ncol, nzmax
+      integer, intent(out) :: ierr
+      real*8 , intent(inout) :: a(*),c(*)
+      integer, intent(inout) :: ia(nrow+1),ja(*),jc(*),ic(nrow+1)
+     * ,jmask(*),imask(nrow+1)
+      logical, intent(inout) :: iw(ncol)
+      integer :: k, k1,k2,len,ii,j
 c-----------------------------------------------------------------------
 c This subroutine builds a sparse matrix from an input matrix by
 c extracting only elements in positions defined by the mask jmask, imask
@@ -7581,8 +7714,10 @@ c-----------------------------------------------------------------------
       end
 c-----------------------------------------------------------------------
       subroutine rperm (nrow,a,ja,ia,ao,jao,iao,perm,job)
-      integer nrow,ja(*),ia(nrow+1),jao(*),iao(nrow+1),perm(nrow),job
-      real*8 a(*),ao(*)
+      integer, intent(in) :: nrow, job
+      integer, intent(inout) :: ja(*),ia(nrow+1),jao(*),iao(nrow+1)
+     * ,perm(nrow)
+      real*8 , intent(inout) :: a(*),ao(*)
 c-----------------------------------------------------------------------
 c this subroutine permutes the rows of a matrix in CSR format.
 c rperm  computes B = P A  where P is a permutation matrix.
@@ -7617,7 +7752,8 @@ c        if (job.ne.1)  then the arrays a and ao are not used.
 c----------------------------------------------------------------------c
 c           Y. Saad, May  2, 1990                                      c
 c----------------------------------------------------------------------c
-      logical values
+      logical :: values
+      integer :: i, j, k, ii, ko
       values = (job .eq. 1)
 c
 c     determine pointers for output matix.
@@ -7798,8 +7934,9 @@ c-----------------------------------------------------------------------
       end
 c-----------------------------------------------------------------------
       subroutine dperm1 (i1,i2,a,ja,ia,b,jb,ib,perm,ipos,job)
-      integer i1,i2,job,ja(*),ia(*),jb(*),ib(*),perm(*)
-      real*8 a(*),b(*)
+      integer, intent(in) :: ipos, job
+      integer, intent(inout) :: i1,i2,ja(*),ia(*),jb(*),ib(*),perm(*)
+      real*8 , intent(inout) :: a(*),b(*)
 c-----------------------------------------------------------------------
 c     general submatrix extraction routine.
 c-----------------------------------------------------------------------
@@ -7836,7 +7973,7 @@ c  algorithm is NOT in place
 c-----------------------------------------------------------------------
 c local variables
 c
-      integer ko,irow,k
+      integer ko,irow,k,i
       logical values
 c-----------------------------------------------------------------------
       values = (job .eq. 1)
@@ -7858,8 +7995,10 @@ c-----------------------------------------------------------------------
 c-----------------------------------------------------------------------
       subroutine dperm2 (i1,i2,a,ja,ia,b,jb,ib,cperm,rperm,istart,
      *        ipos,job)
-      integer i1,i2,job,istart,ja(*),ia(*),jb(*),ib(*),cperm(*),rperm(*)
-      real*8 a(*),b(*)
+      integer, intent(in) :: ipos, job, istart
+      integer, intent(inout) :: i1,i2,ja(*),ia(*),jb(*),ib(*),cperm(*)
+     * ,rperm(*)
+      real*8 , intent(inout) :: a(*),b(*)
 c-----------------------------------------------------------------------
 c     general submatrix permutation/ extraction routine.
 c-----------------------------------------------------------------------
@@ -7926,7 +8065,7 @@ c     may be on entry.
 c-----------------------------------------------------------------------
 c local variables
 c
-      integer ko,irow,k
+      integer ko,irow,k, i
       logical values
 c-----------------------------------------------------------------------
       values = (job .eq. 1)
@@ -7947,8 +8086,9 @@ c-----------------------------------------------------------------------
       end
 c-----------------------------------------------------------------------
       subroutine dmperm (nrow,a,ja,ao,jao,perm,job)
-      integer nrow,ja(*),jao(*),perm(nrow),job
-      real*8 a(*),ao(*)
+      integer, intent(in) :: nrow
+      integer, intent(inout) :: ja(*),jao(*),perm(nrow),job
+      real*8 , intent(inout) :: a(*),ao(*)
 c-----------------------------------------------------------------------
 c This routine performs a symmetric permutation of the rows and
 c columns of a matrix stored in MSR format. i.e., it computes
@@ -7988,7 +8128,7 @@ c     on entry.
 c----------------------------------------------------------------------c
 c     local variables
 c
-      integer n1, n2
+      integer n1, n2, j
       n1 = nrow+1
       n2 = n1+1
 c
@@ -8009,8 +8149,9 @@ c--------end-of-dmperm--------------------------------------------------
 c-----------------------------------------------------------------------
     
       subroutine permsimple(n, x, XH, perm, permselect)
-      integer n, perm(n), permselect
-      real*8 x(n), XH(N)
+      integer, intent(in) :: n, perm(n), permselect
+      real*8 , intent(inout) :: x(n), XH(N)
+      integer :: k
       
       if (permselect > 1) then 
          XH   = X
@@ -8021,8 +8162,9 @@ c-----------------------------------------------------------------------
       END
     
       subroutine permsimpleINVERSE (n, x, XH, perm, permselect)
-      integer n, perm(n), permselect
-      real*8 x(n), XH(N)
+      integer, intent(in) :: n, perm(n), permselect
+      real*8 , intent(inout) :: x(n), XH(N)
+      integer :: k
       
       if (permselect > 1) then 
          XH   = X
@@ -8034,8 +8176,9 @@ c-----------------------------------------------------------------------
       
 
       subroutine dvperm (n, x, perm)
-      integer n, perm(n)
-      real*8 x(n)
+      integer, intent(in) :: n
+      integer, intent(inout) :: perm(n)
+      real*8 , intent(inout) :: x(n)
 c-----------------------------------------------------------------------
 c this subroutine performs an in-place permutation of a real vector x
 c according to the permutation array perm(*), i.e., on return,
@@ -8058,7 +8201,8 @@ c----------------------------------------------------------------------c
 c           Y. Saad, Sep. 21 1989                                      c
 c----------------------------------------------------------------------c
 c local variables
-      real*8 tmp, tmp1
+      real*8  :: tmp, tmp1
+      integer :: init, next, j, k, ii
 c
       init      = 1
       tmp   = x(init)
@@ -8109,7 +8253,8 @@ c-----------------------------------------------------------------------
       end
 c-----------------------------------------------------------------------
       subroutine ivperm (n, ix, perm)
-      integer n, perm(n), ix(n)
+      integer, intent(in) :: n
+      integer, intent(inout) :: ix(n), perm(n)
 c-----------------------------------------------------------------------
 c this subroutine performs an in-place permutation of an integer vector
 c ix according to the permutation array perm(*), i.e., on return,
@@ -8132,7 +8277,7 @@ c----------------------------------------------------------------------c
 c           Y. Saad, Sep. 21 1989                                      c
 c----------------------------------------------------------------------c
 c local variables
-      integer tmp, tmp1
+      integer :: tmp, tmp1, j, init, ii, k, next
 c
       init      = 1
       tmp   = ix(init)
@@ -8231,7 +8376,9 @@ c-----------------------------------------------------------------------
       end
 c-----------------------------------------------------------------------
       subroutine diapos  (n,ja,ia,idiag)
-      integer ia(n+1), ja(*), idiag(n)
+      integer, intent(in) :: n
+      integer, intent(inout) :: ia(n+1), ja(*), idiag(n)
+      integer :: i, k
 c-----------------------------------------------------------------------
 c this subroutine returns the positions of the diagonal elements of a
 c sparse matrix a, ja, ia, in the array idiag.
@@ -8269,8 +8416,11 @@ c-----------------------------------------------------------------------
       end
 c-----------------------------------------------------------------------
       subroutine dscaldg (n,a,ja,ia,diag,job)
-      real*8 a(*), diag(*),t
-      integer ia(*),ja(*)
+      integer, intent(in) :: n, job
+      real*8 , intent(inout) :: a(*), diag(*)
+      integer, intent(inout) :: ia(*),ja(*)
+      integer :: i,j, k1, k2,k
+      real*8 :: t
 c-----------------------------------------------------------------------
 c scales rows by diag where diag is either given (job=0)
 c or to be computed:
@@ -8313,9 +8463,10 @@ c-----------------------------------------------------------------------
       end
 c-----------------------------------------------------------------------
       subroutine extbdg (n,a,ja,ia,bdiag,nblk,ao,jao,iao)
-      implicit real*8 (a-h,o-z)
-      real*8 bdiag(*),a(*),ao(*)
-      integer ia(*),ja(*),jao(*),iao(*)
+      integer, intent(in) :: n, nblk
+      real*8 , intent(inout) :: bdiag(*),a(*),ao(*)
+      integer, intent(inout) :: ia(*),ja(*),jao(*),iao(*)
+      integer :: j, k, jj, j1, j2, ko, kb, i, ltr, l, m
 c-----------------------------------------------------------------------
 c this subroutine extracts the main diagonal blocks of a
 c matrix stored in compressed sparse row format and puts the result
@@ -8380,6 +8531,10 @@ c-----------------------------------------------------------------------
       end
 c-----------------------------------------------------------------------
       subroutine getbwd(n,a,ja,ia,ml,mu)
+      integer, intent(in) :: n
+      real*8 , intent(inout) :: a(*)
+      integer, intent(inout) :: ja(*),ia(n+1),ml,mu
+      integer ::ldist,i,k
 c-----------------------------------------------------------------------
 c gets the bandwidth of lower part and upper part of A.
 c does not assume that A is sorted.
@@ -8406,8 +8561,6 @@ c       mu = max ( (j-i)  s.t. a(i,j) .ne. 0  )
 c----------------------------------------------------------------------c
 c Y. Saad, Sep. 21 1989                                                c
 c----------------------------------------------------------------------c
-      real*8 a(*)
-      integer ja(*),ia(n+1),ml,mu,ldist,i,k
       ml = - n
       mu = - n
       do 3 i=1,n
@@ -8423,6 +8576,11 @@ c-----------------------------------------------------------------------
       end
 c-----------------------------------------------------------------------
       subroutine blkfnd (nrow,ja,ia,nblk)
+      integer, intent(in) :: nrow
+      integer, intent(out) :: nblk
+      integer, intent(inout) :: ia(nrow+1),ja(*)
+      integer :: imsg, jf, jl, i1, i2, jfirst, jlast, jrow, len0, iblk
+     * , len, i, irow, minlen
 c-----------------------------------------------------------------------
 c This routine attemptps to determine whether or not  the input
 c matrix has a block structure and finds the blocks size
@@ -8450,7 +8608,6 @@ c
 c----------------------------------------------------------------------c
 c           Y. Saad, Sep. 21 1989                                      c
 c----------------------------------------------------------------------c
-      integer ia(nrow+1),ja(*)
 c-----------------------------------------------------------------------
 c first part of code will find candidate block sizes.
 c criterion used here is a simple one: scan rows and  determine groups
@@ -8504,6 +8661,10 @@ c-----------------------------------------------------------------------
       end
 c-----------------------------------------------------------------------
       subroutine blkchk (nrow,ja,ia,nblk,imsg)
+      integer, intent(in) :: nrow, nblk
+      integer, intent(out) :: imsg
+      integer, intent(inout) :: ia(nrow+1),ja(*)
+      integer :: len, i, k, lena, jstart, j, ii, i1,j2, irow, nr
 c-----------------------------------------------------------------------
 c This routine checks whether the input matrix is a block
 c matrix with block size of nblk. A block matrix is one which is
@@ -8538,7 +8699,6 @@ c             two rows in same group have different lengths
 c----------------------------------------------------------------------c
 c           Y. Saad, Sep. 21 1989                                      c
 c----------------------------------------------------------------------c
-      integer ia(nrow+1),ja(*)
 c----------------------------------------------------------------------
 c first part of code will find candidate block sizes.
 c this is not guaranteed to work . so a check is done at the end
@@ -8599,7 +8759,10 @@ c-----------------------------------------------------------------------
       end
 c-----------------------------------------------------------------------
       subroutine infdia (n,ja,ia,ind,idiag)
-      integer ia(*), ind(*), ja(*)
+      integer, intent(in) :: n
+      integer, intent(out) :: idiag
+      integer, intent(inout) :: ia(*), ind(*), ja(*)
+      integer :: i,j,k,n2
 c-----------------------------------------------------------------------
 c     obtains information on the diagonals of A.
 c-----------------------------------------------------------------------
@@ -8649,7 +8812,11 @@ c-----------------------------------------------------------------------
       end
 c-----------------------------------------------------------------------
       subroutine amubdg (nrow,ncol,ncolb,ja,ia,jb,ib,ndegr,nnz,iw)
-      integer ja(*),jb(*),ia(nrow+1),ib(ncol+1),ndegr(nrow),iw(ncolb)
+      integer, intent(in) :: nrow, ncol, ncolb
+      integer, intent(out) :: nnz
+      integer, intent(inout) :: ja(*),jb(*),ia(nrow+1),ib(ncol+1)
+     * ,ndegr(nrow),iw(ncolb)
+      integer :: jc, jr, j, last, k, ldg, ii
 c-----------------------------------------------------------------------
 c gets the number of nonzero elements in each row of A*B and the total
 c number of nonzero elements in A*B.
@@ -8743,7 +8910,11 @@ c-----------------------------------------------------------------------
       end
 c-----------------------------------------------------------------------
       subroutine aplbdg (nrow,ncol,ja,ia,jb,ib,ndegr,nnz,iw)
-      integer ja(*),jb(*),ia(nrow+1),ib(nrow+1),iw(ncol),ndegr(nrow)
+      integer, intent(in) :: nrow, ncol
+      integer, intent(out) :: nnz
+      integer, intent(inout) :: ja(*),jb(*),ia(nrow+1),ib(nrow+1)
+     * ,iw(ncol),ndegr(nrow)
+      integer :: last, j, jr, jc, ldg, k, ii
 c-----------------------------------------------------------------------
 c gets the number of nonzero elements in each row of A+B and the total
 c number of nonzero elements in A+B.
@@ -8836,8 +9007,11 @@ c-----------------------------------------------------------------------
       end
 c-----------------------------------------------------------------------
       subroutine rnrms   (nrow, nrm, a, ja, ia, diag)
-      real*8 a(*), diag(nrow), scal
-      integer ja(*), ia(nrow+1)
+      integer, intent(in) :: nrow, nrm
+      real*8 , intent(inout) :: a(*), diag(nrow)
+      integer, intent(inout) :: ja(*), ia(nrow+1)
+      real*8 :: scal
+      integer :: k, k1, k2, ii
 c-----------------------------------------------------------------------
 c gets the norms of each row of A. (choice of three norms)
 c-----------------------------------------------------------------------
@@ -8887,8 +9061,10 @@ c-------------end-of-rnrms----------------------------------------------
       end
 c-----------------------------------------------------------------------
       subroutine cnrms   (nrow, nrm, a, ja, ia, diag)
-      real*8 a(*), diag(nrow)
-      integer ja(*), ia(nrow+1)
+      integer, intent(in) :: nrow, nrm
+      real*8,  intent(inout) :: a(*), diag(nrow)
+      integer, intent(inout) :: ja(*), ia(nrow+1)
+      integer :: k, ii, k1, k2, j
 c-----------------------------------------------------------------------
 c gets the norms of each column of A. (choice of three norms)
 c-----------------------------------------------------------------------
@@ -8937,8 +9113,11 @@ c------------end-of-cnrms-----------------------------------------------
       end
 c-----------------------------------------------------------------------
       subroutine roscal(nrow,job,nrm,a,ja,ia,diag,b,jb,ib,ierr)
-      real*8 a(*), b(*), diag(nrow)
-      integer nrow,job,nrm,ja(*),jb(*),ia(nrow+1),ib(nrow+1),ierr
+      integer, intent(in) :: nrow, job, nrm
+      integer, intent(out) :: ierr
+      real*8 , intent(out) :: a(*), b(*), diag(nrow)
+      integer, intent(inout) :: ja(*),jb(*),ia(nrow+1),ib(nrow+1)
+      integer :: j
 c-----------------------------------------------------------------------
 c scales the rows of A such that their norms are one on return
 c 3 choices of norms: 1-norm, 2-norm, max-norm.
@@ -8993,8 +9172,11 @@ c-----------------------------------------------------------------------
 c-----------------------------------------------------------------------
       subroutine coscal(nrow,job,nrm,a,ja,ia,diag,b,jb,ib,ierr)
 c-----------------------------------------------------------------------
-      real*8 a(*),b(*),diag(nrow)
-      integer nrow,job,ja(*),jb(*),ia(nrow+1),ib(nrow+1),ierr
+      integer, intent(in) :: nrow, job
+      integer, intent(out) :: ierr
+      real*8 , intent(inout) :: a(*),b(*),diag(nrow)
+      integer, intent(inout) :: ja(*),jb(*),ia(nrow+1),ib(nrow+1)
+      integer :: j, nrm
 c-----------------------------------------------------------------------
 c scales the columns of A such that their norms are one on return
 c result matrix written on b, or overwritten on A.
@@ -9251,7 +9433,8 @@ c        if (job.ne.1)  then the arrays a and ao are not used.
 c----------------------------------------------------------------------c
 c           Y. Saad, revised May  2, 1990                              c
 c----------------------------------------------------------------------c
-      logical values
+      logical :: values
+      integer :: ii, j, k, ko
       values = (job .eq. 1)
 c
 c copying
@@ -9460,8 +9643,11 @@ c HeapSort, FixHeap, HeapInsert, interchange, MoveBack, FiHeapM,       c
 c           FixHeapM, HeapInsertM,indsetr,rndperm, are utility         c
 c           routines for sorting, generating random permutations, etc. c
 c----------------------------------------------------------------------c
-      subroutine multic (n,ja,ia,ncol,kolrs,il,iord,maxcol,ierr) 
-      integer n, ja(*),ia(n+1),kolrs(n),iord(n),il(maxcol+1),ierr 
+      subroutine multic (n,ja,ia,ncol,kolrs,il,iord,maxcol,ierr)
+      integer, intent(in) :: n, maxcol
+      integer, intent(out) :: ierr
+      integer, intent(inout) :: ja(*),ia(n+1),kolrs(n),iord(n)
+     * ,il(maxcol+1)
 c-----------------------------------------------------------------------
 c     multicoloring ordering -- greedy algorithm -- 
 c     determines the coloring permutation and sets up
@@ -9493,9 +9679,9 @@ c ierr  = integer. Error message. normal return ierr = 0. If ierr .eq.1
 c         then the array il was overfilled. 
 c 
 c-----------------------------------------------------------------------
-c     
-      integer kol, i, j, k, maxcol, mycol 
-c     
+c
+      integer kol, i, j, k, mycol, icol, mcol, ii, ncol
+c
       ierr = 0
       do 1 j=1, n
          kolrs(j) = 0
@@ -9584,9 +9770,10 @@ c-----------------------------------------------------------------------
       end
 c-----------------------------------------------------------------------
 
-      subroutine indset0 (n,ja,ia,nset,iord,riord,sym,iptr) 
-      integer n, nset, ja(*),ia(*),riord(*),iord(*) 
-      logical sym
+      subroutine indset0 (n,ja,ia,nset,iord,riord,sym,iptr)
+      integer, intent(in) :: n, iptr
+      integer, intent(inout) :: nset, ja(*),ia(*),riord(*),iord(*)
+      logical, intent(in) :: sym
 c---------------------------------------------------------------------- 
 c greedy algorithm for independent set ordering
 c----------------------------------------------------------------------
@@ -9606,7 +9793,7 @@ c matrix has a symmetric structure.
 c---------------------------------------------------------------------- 
 c local variables
 c 
-      integer j, k1, k2, nod, k, mat
+      integer j, k1, k2, nod, k, mat, ipos, nummat
       do 1 j=1, n
          iord(j) = 0
  1    continue
@@ -9652,9 +9839,10 @@ c
 c---------------------------------------------------------------------- 
       end
 c----------------------------------------------------------------------
-      subroutine indset1 (n,ja,ia,nset,iord,riord,iw,sym,iptr) 
-      integer n, nset, iptr, ja(*),ia(*),riord(*),iord(*),iw(*)
-      logical sym
+      subroutine indset1 (n,ja,ia,nset,iord,riord,iw,sym,iptr)
+      integer, intent(in) :: n, iptr
+      integer, intent(inout) :: nset, ja(*),ia(*),riord(*),iord(*),iw(*)
+      logical, intent(in) :: sym
 c---------------------------------------------------------------------- 
 c greedy algorithm for independent set ordering -- with intial 
 c order of traversal given by that of min degree. 
@@ -9674,7 +9862,7 @@ c notes: works for CSR, MSR, and CSC formats but assumes that the
 c matrix has a symmetric structure. 
 c---------------------------------------------------------------------- 
 c local variables
-      integer j,k1,k2,nummat,nod,k,ipos 
+      integer j,k1,k2,nummat,nod,k,ipos, mat, ii, imat, iptrm1
 c
 c     nummat is the number of matrices to loop through (A in symmetric
 c     pattern case (nummat=1) or A,and transp(A) otherwise (mummat=2) 
@@ -9755,9 +9943,11 @@ c
 c----------------------------------------------------------------------
       end
 c----------------------------------------------------------------------
-      subroutine indset2(n,ja,ia,nset,iord,riord,iw,sym,iptr) 
-      integer n,nset,iptr,ja(*),ia(*),riord(n),iord(n),iw(n) 
-      logical sym 
+      subroutine indset2(n,ja,ia,nset,iord,riord,iw,sym,iptr)
+      integer, intent(in) :: n
+      integer, intent(inout) ::nset, iptr,ja(*),ia(*),riord(n),iord(n)
+     * ,iw(n)
+      logical, intent(in) :: sym
 c---------------------------------------------------------------------- 
 c greedy algorithm for independent set ordering -- local minimization
 c using heap strategy -- 
@@ -9796,7 +9986,7 @@ c----------------------------------------------------------------------
 c local variables --
 c 
       integer j,k1,k2,nummat,nod,k,ipos,i,last,lastlast,jold,jnew,
-     *     jo,jn 
+     *     jo,jn, ichild, imat, iptrm1
 c
 c     nummat is the number of matrices to loop through (A in symmetric
 c     pattern case (nummat=1) or A,and transp(A) otherwise (mummat=2) 
@@ -9913,9 +10103,11 @@ c
 c----------------------------------------------------------------------
       end
 c----------------------------------------------------------------------
-      subroutine indset3(n,ja,ia,nset,iord,riord,iw,sym,iptr) 
-      integer n,nset,iptr,ja(*),ia(*),riord(n),iord(n),iw(n) 
-      logical sym 
+      subroutine indset3(n,ja,ia,nset,iord,riord,iw,sym,iptr)
+      integer, intent(in) :: n
+      integer, intent(inout) :: nset,iptr,ja(*),ia(*),riord(n),iord(n)
+     * ,iw(n) 
+      logical, intent(in) :: sym 
 c---------------------------------------------------------------------- 
 c greedy algorithm for independent set ordering -- local minimization
 c using heap strategy -- VERTEX COVER ALGORITHM --  
@@ -9954,7 +10146,8 @@ c riord = reverse permutation array.
 c----------------------------------------------------------------------
 c local variables --
 c 
-      integer j,nummat,nod,k,ipos,i,lastnset,jold,jnew
+      integer :: j,nummat,nod,k,ipos,i,lastnset,jold,jnew, nnz, ideg
+      integer :: iptrm1, imat
 c
 c     nummat is the number of matrices to loop through (A in symmetric
 c     pattern case (nummat=1) or A,and transp(A) otherwise (mummat=2) 
@@ -9988,7 +10181,7 @@ c
 c
 c     number of edges
 c     
-         if (sym) then nnz = 2*nnz
+         if (sym) nnz = 2*nnz
 c     
 c start by constructing a Max heap
 c 
@@ -10031,7 +10224,8 @@ c-----------------------------------------------------------------------
       end
 c-----------------------------------------------------------------------
       subroutine HeapSort (a,ind,rind,n,ncut)
-      integer a(*),ind(n),rind(n),n, ncut 
+      integer, intent(in) :: n, ncut
+      integer, intent(inout) :: a(*),ind(n),rind(n)
 c----------------------------------------------------------------------  
 c integer version -- min heap sorts decreasinly. 
 c---------------------------------------------------------------------- 
@@ -10080,7 +10274,7 @@ c     last         = number of elements in the heap.
 c----------------------------------------------------------------------
 c local variables 
 c
-      integer child,lchild,rchild,xkey
+      integer child,lchild,rchild,xkey, ikey
       xkey = a(jkey) 
       ikey = ind(jkey) 
       lchild = 2*vacant
@@ -10157,7 +10351,7 @@ c one back in from the top --
 c 
 c local variables 
 c
-      integer vacant,xmin 
+      integer vacant,xmin, imin
 c
          vacant = 1 
          xmin = a(vacant)
@@ -10186,7 +10380,7 @@ c     last         = number of elements in the heap.
 c----     
 c local variables 
 c
-      integer child,lchild,rchild,xkey
+      integer child,lchild,rchild,xkey, ikey
       xkey = a(jkey) 
       ikey = ind(jkey) 
       lchild = 2*vacant
@@ -10239,7 +10433,7 @@ c      node = node + 1
       end 
 c----------------------------------------------------------------------
       subroutine movebackM (a,ind,rind,last) 
-      integer a(*),ind(*),rind(*),last 
+      integer a(*),ind(*),rind(*),last
 c----------------------------------------------------------------------
 c moves the front key to the back and inserts the last
 c one back in from the top --  MAX HEAP VERSION 
@@ -10247,7 +10441,7 @@ c----------------------------------------------------------------------
 c 
 c local variables 
 c
-      integer vacant,xmin 
+      integer vacant,xmin, imin
 c
       vacant = 1 
       xmin = a(vacant)
@@ -10260,9 +10454,11 @@ c----------------------------------------------------------------------
       return
       end 
 c----------------------------------------------------------------------
-      subroutine indsetr (n,ja,ia,nset,iord,riord,sym,iptr) 
-      integer n, nset, ja(*),ia(*),riord(*),iord(*) 
-      logical sym
+      subroutine indsetr (n,ja,ia,nset,iord,riord,sym,iptr)
+      integer, intent(in) :: n
+      integer, intent(inout) :: nset, ja(*),ia(*),riord(*),iord(*)
+      logical, intent(in) :: sym
+      integer :: ipos, iptr, ii, nummat
 c---------------------------------------------------------------------- 
 c greedy algorithm for independent set ordering -- RANDOM TRAVERSAL -- 
 c----------------------------------------------------------------------
@@ -10282,7 +10478,7 @@ c matrix has a symmetric structure.
 c---------------------------------------------------------------------- 
 c local variables
 c 
-      integer j, k1, k2, nod, k, mat
+      integer j, k1, k2, nod, k, mat, iseed
       do 1 j=1, n
          iord(j) = 0
  1    continue
@@ -10345,7 +10541,8 @@ c iseed is the initial seed. any integer.
 c----------------------------------------------------------------------
 c local
 c
-      integer i, j, itmp 
+      integer i, j, itmp
+      integer, external :: irand
 c----------------------------------------------------------------------
       do j=1, n
          iord(j) = j
@@ -10360,13 +10557,14 @@ c
 c----------------------------------------------------------------------
       return
 c----------------------------------------------------------------------
-      end  
-      
-      
-      
+      end
+
       subroutine amub_countonly(nrow,ncol,a,ja,ia,b,jb,ib,iw,len)
-      real*8 a(*), b(*)
-      integer ja(*),jb(*),ia(nrow+1),ib(*),iw(ncol)
+      integer, intent(in) :: nrow, ncol
+      integer, intent(out) :: len
+      real*8 , intent(inout) :: a(*), b(*)
+      integer, intent(inout) :: ja(*),jb(*),ia(nrow+1),ib(*),iw(ncol)
+      integer :: jj, k, kb, jcol, jpos, j, ii, ka
 !-----------------------------------------------------------------------
 ! computes number of nonzeros in matrix product C = A B
 !-----------------------------------------------------------------------
