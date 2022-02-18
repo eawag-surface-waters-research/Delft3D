@@ -2199,7 +2199,6 @@ src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_utils/solve_guus.F90
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_utils/solve_jacobi.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_utils/solve_parms.F90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_utils/solve_petsc.F90 -text
-src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_utils/solve_petsc_v34.F90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_utils/sphcom.f -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_utils/statisticsfinalise.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_utils/statisticsini.f90 -text

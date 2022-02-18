@@ -34,11 +34,6 @@
 #endif
 
 
-#ifdef USE_DEPRECATED_PETSC34
-! for backwards compatibility with PETSc 3.4 (UNST-573)
-#include "solve_petsc_v34.F90"
-#else
-
 module m_petsc
 #include <petsc/finclude/petscksp.h>
 
@@ -980,4 +975,4 @@ end module m_petsc
       return
    end subroutine
 
-#endif ! matches #ifdef for compatibility with older petsc version (3.4)
+
