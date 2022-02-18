@@ -1,0 +1,23 @@
+# Set the source path where the library components are located
+set(library_path "${CMAKE_CURRENT_SOURCE_DIR}/../")
+
+set(source_path "${library_path}/src")
+
+set(fortran_sources ${source_path}/mod_precision.f90
+                    ${source_path}/mod_chemconst.f90
+                    ${source_path}/mod_acbw_phsolvers.F90)
+
+# Add library
+set (solvesaphe_library_name solvesaphe)
+add_library(${solvesaphe_library_name} ${fortran_sources})
+
+
+# Set dependencies
+set(oss_dependencies    deltares_common)
+
+target_link_libraries(${solvesaphe_library_name} ${oss_dependencies})
+oss_include_libraries(${solvesaphe_library_name} ${oss_dependencies})
+
+# Create the folder structure in vfproj
+source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/.." FILES ${fortran_sources} )
+set_target_properties (${solvesaphe_library_name} PROPERTIES FOLDER third_party_open)

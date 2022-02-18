@@ -19,10 +19,6 @@ get_fortran_source_files(${src_path}/trwp trwp_source)
 # Gather source files
 get_fortran_source_files(${src_path}/waq_process waq_process_source)
 
-file(GLOB waq_solvesaphe_source ${src_path}/waq_process/solvesaphe/mod_precision.f90
-                                ${src_path}/waq_process/solvesaphe/mod_chemconst.f90
-                                ${src_path}/waq_process/solvesaphe/mod_acbw_phsolvers.F90)
-
 get_fortran_source_files(${src_path}/waq_tables waq_tables_source)
 
 # Define library
@@ -32,7 +28,6 @@ add_library(${library_name} ${bloom_source}
                             ${protist_source}
                             ${proc_preprocess_source}
                             ${trwp_source}
-                            ${waq_solvesaphe_source}
                             ${waq_process_source}
                             ${waq_tables_source})
 
@@ -47,6 +42,7 @@ if (UNIX)
 
     set(oss_dependencies    deltares_common
                             nefis
+                            solvesaphe
                             waq_utils_c
                             waq_utils_f)
 
@@ -60,6 +56,7 @@ if (WIN32)
                             nefis
                             netcdf4
                             netcdff
+                            solvesaphe
                             waq_utils_c
                             waq_utils_f)
 
@@ -82,7 +79,6 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${bloom_source}
                                                     ${protist_source}
                                                     ${proc_preprocess_source}
                                                     ${trwp_source}
-                                                    ${waq_solvesaphe_source}
                                                     ${waq_process_source}
                                                     ${waq_tables_source})
 

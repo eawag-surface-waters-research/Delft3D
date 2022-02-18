@@ -17238,6 +17238,7 @@ src/third_party_open/shapelib/src/shp.vcxproj.user -text
 src/third_party_open/shapelib/src/shpopen.c -text
 src/third_party_open/shapelib/src/shptree.c -text
 src/third_party_open/shapelib/test/shapelib_test.vfproj -text
+src/third_party_open/solveSAPHE/cmake_deltares/CMakeLists.txt -text
 src/third_party_open/subversion/bin/win32-17/MSVCP100.DLL -text
 src/third_party_open/subversion/bin/win32-17/MSVCR100.DLL -text
 src/third_party_open/subversion/bin/win32-17/apr_ldap-1.dll -text

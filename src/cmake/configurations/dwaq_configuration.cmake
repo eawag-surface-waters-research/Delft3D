@@ -125,6 +125,11 @@ if(NOT TARGET nefis)
     add_subdirectory(${checkout_src_root}/${nefis_module} nefis)
 endif()
 
+# Solvesaphe
+if(NOT TARGET solvesaphe)
+    add_subdirectory(${checkout_src_root}/${solvesaphe_module} solvesaphe)
+endif()
+
 # delftio
 if(NOT TARGET delftio_shm)
     add_subdirectory(${checkout_src_root}/${delftio_shm_module} delftio_shm)
