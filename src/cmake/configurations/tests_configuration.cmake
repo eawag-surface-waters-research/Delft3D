@@ -183,6 +183,11 @@ if(NOT TARGET nefis)
     add_subdirectory(${checkout_src_root}/${nefis_module} nefis)
 endif()
 
+# Solvesaphe
+if(NOT TARGET solvesaphe)
+    add_subdirectory(${checkout_src_root}/${solvesaphe_module} solvesaphe)
+endif()
+
 # Test binaries
 add_subdirectory(${checkout_src_root}/${test_deltares_common_module} test_deltares_common)
 add_subdirectory(${checkout_src_root}/${test_ec_module}              test_ec_module)

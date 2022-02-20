@@ -188,6 +188,11 @@ if(NOT TARGET nefis)
     add_subdirectory(${checkout_src_root}/${nefis_module} nefis)
 endif()
 
+# Solvesaphe
+if(NOT TARGET solvesaphe)
+    add_subdirectory(${checkout_src_root}/${solvesaphe_module} solvesaphe)
+endif()
+
 # Unit tests for dflowfm
 # Only for the version without interacter
 if(NOT WITH_INTERACTER)
