@@ -739,7 +739,6 @@ subroutine readMDUFile(filename, istat)
     integer :: ibuf, ifil, mptfile, warn
     integer :: i, n, j, je, iostat, readerr, ierror
     integer :: jadum
-    real(kind=hp) :: hkad
     real(kind=hp) :: ti_rst_array(3), ti_map_array(3), ti_his_array(3), acc, ti_wav_array(3), ti_waq_array(3), ti_classmap_array(3)
     character(len=200), dimension(:), allocatable       :: fnames
     double precision, external     :: densfm
@@ -747,7 +746,6 @@ subroutine readMDUFile(filename, istat)
     double precision :: sumlaycof
     integer :: major, minor
     external :: unstruc_errorhandler
-    hkad = -999
     istat = 0 ! Success
 
 ! Put .mdu file into a property tree
@@ -1104,11 +1102,6 @@ subroutine readMDUFile(filename, istat)
     call prop_get_double (md_ptr, 'numerics', 'Tspinupturblogprof', Tspinupturblogprof )
     call prop_get_integer(md_ptr, 'numerics', 'Logprofatubndin'   , jaLogprofatubndin  )
     call prop_get_integer(md_ptr, 'numerics', 'Logprofkepsbndin'  , jaLogprofkepsbndin )
-
-    call prop_get_double( md_ptr, 'numerics', 'Hkad'              , hkad)
-    if (hkad .ne. -999) then
-        call mess(LEVEL_INFO, 'MDU contains deprecated ''Hkad'' attribute, please resave', '.')
-    end if
 
     call prop_get_double( md_ptr, 'numerics', 'Slopedrop2D'  , Slopedrop2D)
     call prop_get_logical(md_ptr, 'numerics', 'Drop1D'      , Drop1D)
