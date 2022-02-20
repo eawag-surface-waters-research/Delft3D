@@ -855,9 +855,6 @@ subroutine readMDUFile(filename, istat)
     endif
 
     call prop_get_string ( md_ptr, 'geometry', 'FixedWeirFile',    md_fixedweirfile, success)
-    if (.not. success) then ! Backwards compatibility: read old ThindykeFile keyword.
-       call prop_get_string ( md_ptr, 'geometry', 'ThindykeFile',     md_fixedweirfile, success)
-    end if
     call prop_get_string ( md_ptr, 'geometry', 'PillarFile',       md_pillarfile,   success)
     if ( len_trim(md_pillarfile) > 0 ) then
        japillar = 3
