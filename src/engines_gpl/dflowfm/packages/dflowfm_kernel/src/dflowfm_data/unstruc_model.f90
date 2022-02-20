@@ -1089,15 +1089,7 @@ subroutine readMDUFile(filename, istat)
     endif
     call prop_get_integer(md_ptr, 'numerics', 'jposhchk'       , jposhchk)
     call prop_get_integer(md_ptr, 'numerics', 'FixedWeirScheme'  , ifixedweirscheme, success)
-    !if (.not. success) then ! Backwards compatibility: read old Fixedweirscheme keyword.
-    !   call prop_get_integer(md_ptr, 'numerics', 'Ithindykescheme'  , ifixedweirscheme)
-    !end if
-!    call prop_get_integer(md_ptr, 'numerics', 'numoverlap'      , numoverlap, success)
-
     call prop_get_double( md_ptr, 'numerics', 'FixedWeirContraction' , Fixedweircontraction, success)
-    if (.not. success) then ! Backwards compatibility: read old Thindykecontraction keyword.
-       call prop_get_double( md_ptr, 'numerics', 'Thindykecontraction' , Fixedweircontraction)
-    end if
 
     call prop_get_integer(md_ptr, 'numerics', 'Fixedweirfrictscheme'  , ifxedweirfrictscheme)
     call prop_get_double( md_ptr, 'numerics', 'Fixedweirtopwidth'     , fixedweirtopwidth)
