@@ -35,7 +35,6 @@
  use m_flow
  use m_flowgeom
  use m_flowtimes
- use unstruc_model, only : jawritebalancefile
  use unstruc_netcdf
  use m_xbeach_netcdf
  use m_timer

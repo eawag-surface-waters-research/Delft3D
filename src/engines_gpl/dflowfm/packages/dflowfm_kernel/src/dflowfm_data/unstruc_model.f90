@@ -212,7 +212,6 @@ implicit none
     character(len=200) :: md_snapshotdir   = ' ' !< Directory where hardcopy snapshots should be saved.
                                                  !! Created if non-existent.
 
-    integer            :: jaWritebalancefile = 0
     integer            :: md_jaAutoStart     = MD_NOAUTOSTART !< Autostart simulation after loading or not.
     integer            :: md_snapshot_seqnr  = 0 !< Sequence number of last snapshot file written.
 !   partitioning command line options
@@ -359,8 +358,6 @@ use unstruc_channel_flow
     md_classmap_file = ' '
 
     md_snapshotdir   = ' '
-
-    jaWritebalancefile = 0
 
     md_mapformat    = IFORMAT_UGRID   !< map file output format (one of IFORMAT_*)
     md_unc_conv     = UNC_CONV_UGRID  ! TODO: AvD: does this double now with IFORMAT_UGRID?
@@ -1906,8 +1903,6 @@ subroutine readMDUFile(filename, istat)
     end if
 
     call prop_get_double(md_ptr, 'output', 'StatsInterval', ti_stat, success)
-
-    call prop_get_integer( md_ptr, 'output', 'WriteBalancefile' , jaWritebalancefile)
 
   !  call prop_get_string(md_ptr, 'output', 'SnapshotDir', md_snapshotdir, success) !not needed anymore
 
@@ -3455,10 +3450,6 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     end if
 
     call prop_set(prop_ptr, 'output', 'StatsInterval', ti_stat,        'Screen step output interval in seconds simulation time, if negative in seconds wall clock time')
-
-    if (writeall .or. jawritebalancefile > 0) then
-       call prop_set(prop_ptr, 'output', 'WriteBalancefile', JaWritebalancefile,  'Write balance file (1: yes, 0: no)')
-    endif
 
   ! call prop_set(prop_ptr, 'output', 'SnapshotDir', trim(md_snapshotdir), 'Directory where snapshots/screendumps are saved.')
 

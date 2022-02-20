@@ -36,7 +36,6 @@ use m_flow
 use timers
 use m_flowgeom
 use m_flowtimes
-use unstruc_model, only : jawritebalancefile
 use unstruc_netcdf
 use m_timer
 use unstruc_display, only : jaGUI
