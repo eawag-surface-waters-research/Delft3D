@@ -30,7 +30,6 @@ Uniformwidth1D              = 2.                  # Uniform width for channel pr
 Uniformheight1D             = 3.                  # Uniform height for channel profiles not specified by profloc
 Uniformtyp1Dstreetinlets    = -2                  # Uniform type street inlets
 Uniformtyp1Droofgutterpipes = -2                  # Uniform type roof gutter pipes
-ManholeFile                 =                     # File *.ini containing manholes
 PipeFile                    =                     # File *.pliz containing pipe-based 'culverts'
 ShipdefFile                 =                     # File *.shd containing ship definitions
 WaterLevIni                 = 0.                  # Initial water level at missing s0 values

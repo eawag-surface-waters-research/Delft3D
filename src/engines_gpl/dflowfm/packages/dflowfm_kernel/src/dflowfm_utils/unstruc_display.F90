@@ -162,7 +162,6 @@ implicit none
     integer :: ndrawCrossSections = 5   !< how draw cross sections
     integer :: ndrawThinDams      = 2   !< show thin dams  0=no, 1=polylines, 2=net links
     integer :: ndrawFixedWeirs     = 1   !< show fixed weirs 0=no, 1=polylines, 2=flow links
-    integer :: ndrawManholes      = 2   !< how draw manholes
     integer :: ndrawPart          = 2   !< Particles, 1=No, 2=Yes
     integer :: ndrawDots          = 2   !< dots, 1=No, 2=Yes
     integer :: ndrawStructures    = 1   !< structures, 1=No, 2=Yes (only symbols), 3=Yes (symbols and IDs)
@@ -736,59 +735,6 @@ subroutine plotObservations() ! TEKOBS
 
 end subroutine plotObservations
 
-
-
-!> Plots all manholes in the current viewport
-subroutine plotManholes()
-    use m_manholes
-    use m_flowgeom
-    use m_flow
-    use gridoperations
-    
-    integer      :: n
-    logical inview
-    if (ndrawmanholes == 1 ) return
-
-    call setcol(klobs)
-    call IGrCharJustify('L')
-
-
-    !call add_manhole(.5d0*(x1+x2), .5d0*(x1+x2), "bla", MANHOLE_OPEN_MOMENTUM) ! AvD: TMP
-
-    do n  = 1, nummh
-       if (.not. inview(manholes(n)%x, manholes(n)%y)) cycle
-
-       if (ndrawmanholes .ne. 4 .and. ndrawmanholes .ne. 5 ) then
-            call movabs(manholes(n)%x, manholes(n)%y)
-            call hlcir2(1.2*rcir, ncolmh, ncolblack)
-       endif
-!       if (ndrawobs == 3) then
-!           call settextsizefac(1.5d0)
-!           call igrcharfont(7)
-!           call gtext(' '//trim(namobs(n)), xobs(n), yobs(n), klobs)
-!           call igrcharfont(1)
-!       endif
-
-!       K  = KOBS(N)
-!       IF (K > 0) THEN
-!          if (ndrawobs == 4 .or. ndrawobs == 5 ) then
-!             nn = size( nd(K)%x )
-!             call PFILLER(nd(k)%x, nd(k)%y, nn,klobs,klobs)
-!             if (ndrawobs == 5) then
-!                call gtext(' '//trim(namobs(n)), xobs(n), yobs(n), 221)
-!             endif
-!          else if (ndrawobs == 6) then
-!             write (tex,'(f10.4)') s1(k)
-!             call gtext(tex(1:14), xobs(n), yobs(n), klobs)
-!          else if (ndrawobs == 7) then
-!                       write (tex,'(f10.4)') sqrt(ucx(k)*ucx(k) + ucy(k)*ucy(k) )
-!             call gtext(tex(1:14), xobs(n), yobs(n), klobs)
-!          endif
-!       ENDIF
-    end do
-
-    !call init_manholes() ! AvD: TMP
-end subroutine plotManholes
 
 subroutine plotSplines(m1, m2, ncol)
     USE M_SPLINES

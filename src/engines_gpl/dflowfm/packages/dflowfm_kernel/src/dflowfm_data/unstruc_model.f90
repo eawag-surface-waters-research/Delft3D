@@ -126,7 +126,6 @@ implicit none
     character(len=255) :: md_proflocfile   = ' ' !< X,Y,and a profile reference nr    (e.g., *_profloc.xyz)
     character(len=255) :: md_profdeffile   = ' ' !< Profile definition of these nrs   (e.g., *_profdef.txt)
     character(len=255) :: md_profdefxyzfile= ' ' !< XYZ profile definition in pliz of these nrs ic yz-def (e.g., *_xyzprof.pliz)
-    character(len=255) :: md_manholefile   = ' ' !< File containing manholes          (e.g., *.ini)
     character(len=255) :: md_1d2dlinkfile  = ' ' !< File containing custom parameters for 1D2D links (e.g., *.ini)
     character(len=255) :: md_pipefile      = ' ' !< File containing pipe-based 'culverts' (e.g., *.pliz)
     character(len=255) :: md_shipdeffile   = ' ' !< File containing shipdefinition    (e.g., *.shd)
@@ -319,7 +318,6 @@ use unstruc_channel_flow
     md_proflocfile = ' '
     md_profdeffile = ' '
     md_profdefxyzfile = ' '
-    md_manholefile = ' '
     md_1d2dlinkfile = ' '
     md_shipdeffile = ' '
     md_restartfile = ' '
@@ -422,7 +420,6 @@ subroutine loadModel(filename)
     use m_monitoring_runupgauges
     use m_thindams
     use m_flow, only: isimplefixedweirs
-    use m_manholes
     use m_polygon
     use m_fixedweirs
     use m_partitioninfo
@@ -665,12 +662,6 @@ subroutine loadModel(filename)
    endif
    call timstop(timerHandle)
 
-    ! Load manholes from file.
-    call delete_manholes()
-    if (len_trim(md_manholefile) > 0) then
-        call load_manholes(md_manholefile, 0)
-    end if
-
     ! Load partition polygons from file
     if (len_trim(md_partitionfile) > 0 .and. md_japartition == 0) then
        call oldfil(minp, md_partitionfile)
@@ -890,7 +881,6 @@ subroutine readMDUFile(filename, istat)
     call prop_get_integer( md_ptr, 'geometry', '1D2Dinternallinktype' , ja1D2Dinternallinktype)
 
 
-    call prop_get_string ( md_ptr, 'geometry', 'ManholeFile' ,     md_manholefile , success)
     call prop_get_string ( md_ptr, 'geometry', 'PipeFile'    ,     md_pipefile    , success)
     call prop_get_string ( md_ptr, 'geometry', 'ShipdefFile' ,     md_shipdeffile , success)
 
@@ -2570,7 +2560,6 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     call prop_set(prop_ptr, 'geometry', '1D2Dinternallinktype', ja1D2Dinternallinktype, 'Uniform width for channel profiles not specified by profloc')
     endif
 
-    call prop_set(prop_ptr, 'geometry', 'ManholeFile',      trim(md_manholefile),   'File *.ini containing manholes'  )
     if ( len(md_pipefile) > 1) then
        call prop_set(prop_ptr, 'geometry', 'PipeFile',      trim(md_pipefile),      'File *.pliz containing pipe-based ''culverts'''  )
     endif

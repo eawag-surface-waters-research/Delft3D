@@ -128,8 +128,6 @@
       call plotThinDams()
       call plotFixedWeirs()
 
-      call plotManholes()
-
       call tekwindvector()
 
       if (ndrawpol > 1 .and. ndrawpol .ne. 3) then

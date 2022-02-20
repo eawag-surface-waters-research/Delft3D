@@ -21,7 +21,6 @@ ProfdefFile                       =                     # Channel profile defini
 ProfdefxyzFile                    =                     # Channel profile definition file _profdefinition.def with definition for all profile numbers
 Uniformwidth1D                    = 2.                  # Uniform width for channel profiles not specified by profloc
 StructureFile                     =                     # File *.ini containing list of structures (pumps, weirs, gates and general structures)
-ManholeFile                       =                     # File *.ini containing manholes
 ShipdefFile                       =                     # File *.shd containing ship definitions
 WaterLevIni                       = 0.                  # Initial water level at missing s0 values
 BedlevUni                         = -5.                 # Uniform bed level used at missing z values if BedlevType > 2
