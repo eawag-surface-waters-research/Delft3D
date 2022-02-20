@@ -891,7 +891,6 @@ subroutine readMDUFile(filename, istat)
     call prop_get_double ( md_ptr, 'geometry', 'WaterdepthIni1D' , WaterdepthIni1D)
     call prop_get_double ( md_ptr, 'geometry', 'Uniformhu'   , uniformhu)
 
-    call prop_get_double ( md_ptr, 'geometry', 'BotLevUni'   ,   zkuni)
     call prop_get_double ( md_ptr, 'geometry', 'BedlevUni'   ,   zkuni)
     call prop_get_double (md_ptr,  'geometry', 'Bedslope'    , bedslope)
     call prop_get_double (md_ptr,  'geometry', 'Bedwaveamplitude' , bedwaveamplitude)
@@ -899,7 +898,6 @@ subroutine readMDUFile(filename, istat)
 
     call prop_get_integer( md_ptr, 'geometry', 'BedlevMode'  , ibedlevmode)
 
-    call prop_get_integer( md_ptr, 'geometry', 'BotlevType'  , ibedlevtyp)
     call prop_get_integer( md_ptr, 'geometry', 'BedlevType'  , ibedlevtyp)
     call prop_get_double ( md_ptr, 'geometry', 'Blmeanbelow' , blmeanbelow)
     call prop_get_double ( md_ptr, 'geometry', 'Blminabove'  , blminabove)
