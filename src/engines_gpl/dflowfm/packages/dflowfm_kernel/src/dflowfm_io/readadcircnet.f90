@@ -37,6 +37,7 @@
       use m_landboundary
       use m_missing
       use gridoperations
+      use m_mergenodes
 
       implicit none
 

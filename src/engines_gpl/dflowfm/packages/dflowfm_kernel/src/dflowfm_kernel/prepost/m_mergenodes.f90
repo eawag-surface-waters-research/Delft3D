@@ -29,7 +29,12 @@
 
 ! $Id$
 ! $HeadURL$
+  module m_mergenodes
+  
+  implicit none
 
+  contains
+  
   SUBROUTINE MERGENODES(K1,K2,JA,unconnected)  ! KNOOP 1 WORDT OPGENOMEN IN KNOOP 2
 
   use m_netw,         only: NMK, KN, NOD, KC, XK
@@ -37,9 +42,9 @@
   use gridoperations, only: OTHERNODE
 
   implicit none
-  integer, intent(in)              :: K1,K2        ! netnode indices of the 2 nodes to be merged  
-  integer, intent(out)             :: JA           ! Status integer, always 1
-  logical, intent(inout), optional :: unconnected  ! if true skip expensive connected check
+  integer, intent(in)						:: K1,K2        ! netnode indices of the 2 nodes to be merged  
+  integer, intent(out)					:: JA           ! Status integer, always 1
+  logical, intent(in), optional :: unconnected  ! if present skip expensive connected check
   
   !locals
   integer :: L2, L12, NN, K22, NM22, L2A, K22A, N1
@@ -47,12 +52,10 @@
   integer :: n, nm, nm1, nm2
   INTEGER :: NODLIN(200)
   
-  if (.not. present(unconnected)) unconnected = .false.
-  
   NM1 = NMK(K1)
   NM2 = NMK(K2)
   
-  if ( .not. unconnected) then ! Deze check is duur dus doe hem niet als je weet dat de nodes unconnected zijn. 
+  if ( .not. present(unconnected)) then ! Deze check is duur dus doe hem niet als je weet dat de nodes unconnected zijn. 
      CALL GIVELINKNUM(K1,K2,L12)
      if (L12 .ne. 0) then
         kn(1,L12) = 0 ; kn(2,L12) = 0; kn(3,L12) = 0
@@ -106,3 +109,5 @@
 
   RETURN
   END SUBROUTINE MERGENODES
+  
+  end module m_mergenodes

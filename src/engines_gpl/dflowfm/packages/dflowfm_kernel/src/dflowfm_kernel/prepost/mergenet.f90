@@ -37,7 +37,8 @@
    use m_missing, only: dmiss
    use m_sferic, only: jsferic, jasfer3D
    use gridoperations
-
+   use m_mergenodes
+   
    implicit none
    double precision :: eps
    integer :: ierr

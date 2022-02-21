@@ -40,7 +40,7 @@
    use geometry_module, only: pinpok, dbpinpol, get_startend
    use gridoperations
    use m_polygon ! , only: savepol, restorepol
-
+   use m_mergenodes
    implicit none
    integer :: jadoorladen ! ,npl
    !double precision :: xpl(npl),ypl(npl)

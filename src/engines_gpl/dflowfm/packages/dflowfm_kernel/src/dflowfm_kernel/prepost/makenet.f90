@@ -41,7 +41,8 @@
    use geometry_module, only: pinpok
    use gridoperations
    use m_flowparameters, only : bedslope
-
+   use m_mergenodes
+   
    implicit none
 
    integer, intent(in) :: japaramscreen !< Load parameter screen or not (1/0)

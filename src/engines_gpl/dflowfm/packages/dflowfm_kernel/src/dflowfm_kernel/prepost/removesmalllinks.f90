@@ -39,7 +39,7 @@
    use m_missing, only: dmiss, dxymis
    use m_sferic, only: jsferic, jasfer3D, dtol_pole
    use gridoperations
-
+   use m_mergenodes
    implicit none
 
    integer            :: minp

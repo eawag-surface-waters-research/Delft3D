@@ -36,6 +36,7 @@
   use geometry_module, only: dbdistance, cross
   use m_missing, only: dmiss
   use m_sferic,  only: jsferic, jasfer3D
+  use m_mergenodes
   use gridoperations
 
   implicit none

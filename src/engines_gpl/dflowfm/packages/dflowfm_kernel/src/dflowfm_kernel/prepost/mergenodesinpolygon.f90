@@ -40,6 +40,7 @@
   use m_polygon, only: NPL, xpl, ypl, zpl
   use geometry_module, only: dbpinpol, dbdistance
   use gridoperations
+	use m_mergenodes
 
   implicit none
 

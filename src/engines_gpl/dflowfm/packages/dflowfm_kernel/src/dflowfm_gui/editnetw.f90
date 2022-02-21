@@ -38,6 +38,7 @@
       use dfm_error
       use unstruc_messages
       use gridoperations
+      use m_mergenodes
       implicit none
       integer :: MODE, KEY
 

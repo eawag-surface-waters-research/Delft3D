@@ -35,7 +35,7 @@
       use m_grid
       use m_missing
       use gridoperations
-
+      use m_mergenodes
       implicit none
       double precision :: af
 

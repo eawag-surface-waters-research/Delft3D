@@ -33,6 +33,7 @@
    SUBROUTINE CLOSEWORLD()
    USE M_NETW
    USE M_SFERIC
+   use m_mergenodes
    implicit none
    INTEGER :: K1, K2, ja
    double precision :: xmn, xmx

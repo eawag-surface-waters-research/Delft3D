@@ -37,6 +37,7 @@
    use m_sferic
    use geometry_module, only: getdxdy
    use gridoperations
+   use m_mergenodes
    implicit none
 
    DOUBLE PRECISION :: DX2,DY2,DX3,DY3,DEN
