@@ -358,7 +358,7 @@ c
 
       integer :: ls, nlon, mmax, mdo, nlp1, modl, imm1, i, k, j, mp1,
      + np1, ndo, m, mp2, i3
-      real :: tsn, fsn ! TODO must be double precision
+      double precision :: tsn, fsn
 
       ls = idg
       nlon = jdg

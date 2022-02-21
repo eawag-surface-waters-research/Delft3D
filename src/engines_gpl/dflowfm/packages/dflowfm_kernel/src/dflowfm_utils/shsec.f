@@ -276,12 +276,13 @@ c
 c ****************************************************************
       subroutine shsec(nlat,nlon,isym,nt,g,idg,jdg,a,b,mdab,ndab,
      1                    wshsec,lshsec,work,lwork,ierror)
-      double precision g,a,b,wshsec,work
-      dimension g(idg,jdg,1),a(mdab,ndab,1),b(mdab,ndab,1),wshsec(1),
-     1          work(1)
-      !double precision g(idg,jdg,1),a(mdab,ndab,1),b(mdab,ndab,1),wshsec(lshsec)!,
-     1!         work(lwork,1)
-      !double precision, dimension work(1)
+      integer, intent(in) :: nlat, nlon, isym, nt, mdab, ndab, lshsec
+     * , lwork, idg, jdg
+      integer, intent(out) :: ierror
+      double precision, intent(inout) :: g(idg,jdg,1), a(mdab,ndab,1)
+     * ,b(mdab,ndab,1) ,wshsec(lshsec), work(lwork)
+      integer :: mmax, imid, lzz1, labc, ls, nln, ist, iw1
+
       ierror = 1
       if(nlat.lt.3) return
       ierror = 2
@@ -325,13 +326,14 @@ c     whrfft must have at least nlon+15 locations
 c     walin must have 3*l*imid + 3*((l-3)*l+2)/2 locations
 c     zb must have 3*l*imid locations
 c
-      double precision g,a,b,ge,go,pb,walin,whrfft,work
-      dimension g(idgs,jdgs,1),a(mdab,ndab,1),b(mdab,ndab,1),
+      integer, intent(in) :: nlat, mdab, ndab, idg, jdg, imid, isym
+     * , idgs, jdgs
+      double precision g(idgs,jdgs,1),a(mdab,ndab,1),b(mdab,ndab,1),
      1          ge(idg,jdg,1),go(idg,jdg,1),pb(imid,nlat,3),walin(1),
      3          whrfft(1),work(1)
-      !double precision g(idgs,jdgs,1),a(mdab,ndab,1),b(mdab,ndab,1),
-     1!          ge(idg,jdg,1),go(idg,jdg,1),pb(imid,nlat,3),walin(1),
-     3!          whrfft(1),work(1)
+      integer :: ls, nlon, mmax, mdo, i, j, k, m
+      integer :: modl, imm1, nt, i3, np1, ndo, mp1, mp2
+      integer :: nlp1
       ls = idg
       nlon = jdg
       mmax = min0(nlat,nlon/2+1)
@@ -485,8 +487,11 @@ c
 c ****************************************************************
       subroutine shseci(nlat,nlon,wshsec,lshsec,dwork,ldwork,ierror)
       !dimension wshsec(*)
-      double precision wshsec(*)
-      double precision dwork(ldwork)
+      integer, intent(in) :: nlat, nlon, ldwork, lshsec
+      integer, intent(out) :: ierror
+      double precision, intent(inout) :: wshsec(*)
+      double precision, intent(inout) :: dwork(ldwork)
+      integer :: iw1, lzz1, imid, labc, mmax
       ierror = 1
       if(nlat.lt.3) return
       ierror = 2

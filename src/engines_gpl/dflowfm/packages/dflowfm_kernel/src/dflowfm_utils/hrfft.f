@@ -206,7 +206,7 @@ c
       subroutine hrffti (n,wsave)
       integer, intent(in) :: n
       double precision wsave(n+15)
-      real :: tfft ! TODO double
+      double precision :: tfft
       common /hrf/ tfft
       tfft = 0.
       if (n .eq. 1) return                                                     
@@ -222,7 +222,7 @@ c
       double precision tpi,argh,argld,arg
       integer :: nl, nf, i, j, ntry, l1, k1, ld, l2, ido, ii, ipm, ip
       integer :: nfm1, is, ib, nr, nq
-      real :: fi ! TODO double
+      double precision :: fi
       data ntryh(1),ntryh(2),ntryh(3),ntryh(4)/4,2,3,5/                        
       nl = n                                                                   
       nf = 0           
@@ -284,7 +284,7 @@ c     a multiple fft package for spherepack
 c                      
       integer, intent(in) :: m, n, mdimr
       double precision r(mdimr,n)  ,work(1)    ,whrfft(n+15)
-      real :: tfft ! TODO double
+      double precision :: tfft
       common /hrf/ tfft
       if (n .eq. 1) return                
 c     tstart = second(dum)
@@ -365,9 +365,9 @@ c
       integer, intent(in) :: mp, ido, l1, mdimcc, mdimch
       double precision cc(mdimcc,ido,l1,4)   ,ch(mdimch,ido,4,l1)     ,
      1             wa1(ido)     ,wa2(ido)     ,wa3(ido)
-      real :: hsqt2 ! TODO double
+      double precision :: hsqt2
       integer :: i, k, m, ic, idp2
-      hsqt2=sqrt(2.)/2.                   
+      hsqt2=sqrt(2.0d0)/2.0d0
       do 101 k=1,l1    
          do 1001 m=1,mp                   
          ch(m,1,1,k) = (cc(m,1,k,2)+cc(m,1,k,4))             
@@ -482,8 +482,8 @@ c
       integer, intent(in) :: mp, ido, mdimcc, mdimch, l1
       double precision ch(mdimch,ido,3,l1)  ,cc(mdimcc,ido,l1,3)     ,
      1                wa1(ido)     ,wa2(ido)
-      real, external :: pimach ! TODO double
-      real :: arg, taur, taui
+      double precision, external :: pimach
+      double precision :: arg, taur, taui
       integer :: i, k, m, ic, idp2
       arg=2.*pimach()/3.                  
       taur=cos(arg)    
@@ -541,10 +541,10 @@ c
       integer, intent(in) :: mp, ido, l1,mdimcc, mdimch
       double precision cc(mdimcc,ido,l1,5)    ,ch(mdimch,ido,5,l1)     ,
      1           wa1(ido)     ,wa2(ido)     ,wa3(ido)     ,wa4(ido)
-      real, external :: pimach ! TODO double
-      real :: arg, tr11, ti11, tr12, ti12
+      double precision, external :: pimach
+      double precision :: arg, tr11, ti11, tr12, ti12
       integer :: i, k, m, ic, idp2
-      arg=2.*pimach()/5.                  
+      arg=2.0d0*pimach()/5.0d0
       tr11=cos(arg)    
       ti11=sin(arg)    
       tr12=cos(2.*arg)                    
@@ -664,12 +664,12 @@ c
       double precision ch(mdimch,ido,l1,ip)   ,cc(mdimcc,ido,ip,l1)  ,
      1            c1(mdimcc,ido,l1,ip)    ,c2(mdimcc,idl1,ip),
      2                ch2(mdimch,idl1,ip)           ,wa(ido)
-      real, external :: pimach ! TODO double
-      real :: tpi, arg, dcp, dsp, ar1, ai1, ar1h, ar2h, ai2, dc2, ds2
-      real :: ar2
+      double precision, external :: pimach
+      double precision :: tpi, arg, dcp, dsp, ar1, ai1, ar1h, ar2h, ai2
+      double precision :: dc2, ds2, ar2
       integer :: ipph, ipp2, idp2, nbd, i, j, k, l, m, ik, j2, lc, ic
       integer :: jc, idij,is
-      tpi=2.*pimach()                     
+      tpi=2.0d0*pimach()
       arg = tpi/float(ip)                 
       dcp = cos(arg)   
       dsp = sin(arg)   
@@ -867,8 +867,8 @@ c
   144 continue         
       return           
       end              
-      real function pimach() ! TODO double
-      pimach=3.14159265358979
+      double precision function pimach()
+      pimach=3.14159265358979d0
       return
       end
       subroutine hrfftb(m,n,r,mdimr,whrfft,work)
@@ -877,7 +877,7 @@ c     a multiple fft package for spherepack
 c                      
       integer, intent(in) :: m,n,mdimr
       double precision r(mdimr,n)  ,work(1)    ,whrfft(n+15)
-      real :: tfft
+      double precision :: tfft
       common /hrf/ tfft
       if (n .eq. 1) return                
 c     tstart = second(dum)
@@ -959,8 +959,9 @@ c
       double precision ch(mdimch,ido,l1,ip)    ,cc(mdimcc,ido,ip,l1) ,
      1           c1(mdimcc,ido,l1,ip)     ,c2(mdimcc,idl1,ip),
      2                ch2(mdimch,idl1,ip)       ,wa(ido)
-      real, external :: pimach ! TODO double
-      real :: tpi, arg, dcp, dsp, ar1h, ai2,ar2h,dc2,ds2,ar1,ai1,ar2
+      double precision, external :: pimach
+      double precision :: tpi, arg, dcp, dsp, ar1h, ai2,ar2h,dc2,ds2
+      double precision :: ar1,ai1,ar2
       integer :: i,j,k,l,m,idp2,nbd,ipp2,ipph,jc,j2,ic,idij,ik,lc,is
       tpi=2.*pimach()                     
       arg = tpi/float(ip)                 
@@ -1159,9 +1160,9 @@ c
       integer, intent(in) :: mp, ido, l1, mdimcc, mdimch
       double precision cc(mdimcc,ido,4,l1)  ,ch(mdimch,ido,l1,4)    ,
      1                wa1(ido)  ,wa2(ido)  ,wa3(ido)
-      real :: sqrt2 ! TODO double
+      double precision :: sqrt2
       integer :: i,k,m,ic,idp2
-      sqrt2=sqrt(2.)   
+      sqrt2=sqrt(2.0d0)
       do 101 k=1,l1    
           do 1001 m=1,mp                  
          ch(m,1,k,3) = (cc(m,1,1,k)+cc(m,ido,4,k))           
@@ -1267,10 +1268,10 @@ c
       integer, intent(in) :: mp, ido, mdimcc, mdimch, l1
       double precision cc(mdimcc,ido,3,l1)    ,ch(mdimch,ido,l1,3),
      1                wa1(ido)   ,wa2(ido)
-      real, external :: pimach
-      real :: arg, taur, taui ! TODO double
+      double precision, external :: pimach
+      double precision :: arg, taur, taui
       integer :: i, k, m, ic, idp2
-      arg=2.*pimach()/3.                  
+      arg=2.0d0*pimach()/3.0d0
       taur=cos(arg)    
       taui=sin(arg)    
       do 101 k=1,l1    
@@ -1328,16 +1329,16 @@ c
       double precision cc(mdimcc,ido,5,l1)    ,ch(mdimch,ido,l1,5),
      1             wa1(ido)     ,wa2(ido)     ,wa3(ido)     ,wa4(ido)
       integer :: i, k, m, ic, idp2
-      real :: arg, tr11, ti11,ti12,tr12 ! TODO doubles
-      real, external :: pimach
-      arg=2.*pimach()/5.
+      double precision :: arg, tr11, ti11,ti12,tr12
+      double precision, external :: pimach
+      arg=2.0d0*pimach()/5.0d0
       tr11=cos(arg)    
       ti11=sin(arg)    
       tr12=cos(2.*arg)                    
       ti12=sin(2.*arg)                    
       do 101 k=1,l1    
       do 1001 m=1,mp   
-         ch(m,1,k,1) = cc(m,1,1,k)+2.*cc(m,ido,2,k)+2.*cc(m,ido,4,k)            
+         ch(m,1,k,1) = cc(m,1,1,k)+2.*cc(m,ido,2,k)+2.*cc(m,ido,4,k)
          ch(m,1,k,2) = (cc(m,1,1,k)+tr11*2.*cc(m,ido,2,k)    
      1   +tr12*2.*cc(m,ido,4,k))-(ti11*2.*cc(m,1,3,k)        
      1   +ti12*2.*cc(m,1,5,k))            
