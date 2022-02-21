@@ -67,7 +67,7 @@
       goto 888
    end if
 
-   ! JRE avoid annoying dt_user interference
+   ! JRE avoid annoying dt_user interference   
     call xbeach_write_stats(time1)
     call sedmor_write_stats(time1)
    iresult = DFM_NOERR

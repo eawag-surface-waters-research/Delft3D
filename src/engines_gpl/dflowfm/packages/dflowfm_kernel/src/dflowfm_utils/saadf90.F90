@@ -85,7 +85,7 @@
  subroutine inisaad(epscg_loc,maxmatvecs_loc,alpha_loc)
  use m_reduce
  use m_saad
- use m_flowparameters, only: jajipjan
+ use m_flowparameters, only: Noderivedtypes
  
  implicit none
  
@@ -100,7 +100,7 @@
  allocate(ngs(nodtot) ); ngs = 0
  
  na = 0                ! matrix counter
- if (jajipjan < 5) then 
+ if (Noderivedtypes < 5) then 
     
     do n=nogauss0+1,nogauss0+nocg0
        na   = na + 1

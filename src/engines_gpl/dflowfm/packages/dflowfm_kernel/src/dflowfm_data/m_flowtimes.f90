@@ -196,6 +196,7 @@ contains
 !! For a reinit prior to flow computation, call reset_flowtimes() instead.
 subroutine default_flowtimes()
     refdat      = '20010101'        !< Reference date (e.g., '20090101'). All times (tstart_user, tend_user, etc.) are w.r.t. to this date.
+    irefdate    =  20010101
     Tzone       = 0d0
     dt_user     = 120d0             !< User specified time step (s) for external forcing update.
     dt_nodal    = 21600d0           !< User specified time step (s) for nodal factors update.

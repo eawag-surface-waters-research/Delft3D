@@ -1077,9 +1077,9 @@ subroutine readMDUFile(filename, istat)
 
     call prop_get_integer(md_ptr, 'numerics', 'Icgsolver'       , Icgsolver)
     call prop_get_integer(md_ptr, 'numerics', 'Maxdegree'       , Maxdge)
-    call prop_get_integer(md_ptr, 'numerics', 'Noderivedtypes'  , Jajipjan)
+    ! call prop_get_integer(md_ptr, 'numerics', 'Noderivedtypes'  , Noderivedtypes)
     if (icgsolver == 7 .or. icgsolver == 6) then
-       Jajipjan = min(Jajipjan, 4) ! no deallocation of
+       Noderivedtypes = min(Noderivedtypes, 4) ! no deallocation of derived types
     endif
     call prop_get_integer(md_ptr, 'numerics', 'jposhchk'       , jposhchk)
     call prop_get_integer(md_ptr, 'numerics', 'FixedWeirScheme'  , ifixedweirscheme, success)
@@ -2796,8 +2796,8 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     if (writeall .or. Maxdge .ne. 6) then
        call prop_set(prop_ptr, 'numerics', 'Maxdegree',  Maxdge,      'Maximum degree in Gauss elimination')
     end if
-    if (writeall .or. Jajipjan > 0 ) then
-       call prop_set(prop_ptr, 'numerics', 'Noderivedtypes', Jajipjan,  '0=use der. types. , 1 = less, 2 = lesser, 5 = also dealloc der. types')
+    if (writeall .or. Noderivedtypes > 0 ) then
+       !call prop_set(prop_ptr, 'numerics', 'Noderivedtypes', Noderivedtypes,  '0=use der. types. , 1,2,3,4,5 etc = do use them')
     end if
     if (writeall .or. jposhchk /= 2) then
        call prop_set(prop_ptr, 'numerics', 'jposhchk',       jposhchk, 'Check for positive waterdepth (0: no, 1: 0.7*dts, just redo, 2: 1.0*dts, close all links, 3: 0.7*dts, close all links, 4: 1.0*dts, reduce au, 5: 0.7*dts, reduce au)')

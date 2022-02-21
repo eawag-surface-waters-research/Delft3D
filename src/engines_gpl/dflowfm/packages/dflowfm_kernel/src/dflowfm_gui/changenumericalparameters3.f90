@@ -76,7 +76,7 @@
    OPTION(16) = 'jawaveRoller                         ( )' ; it(2*16) = 2
    OPTION(17) = 'Maxitforestersal                     ( )' ; it(2*17) = 2
    OPTION(18) = 'Maxitforestertem                     ( )' ; it(2*18) = 2
-   OPTION(19) = 'Jajipjan (Noderivedtypes in mdu)     ( )' ; it(2*19) = 2
+   OPTION(19) = 'Noderivedtypes (Noderivedtypes in mdu)     ( )' ; it(2*19) = 2
    OPTION(20) = 'Maxdegree                            ( )' ; it(2*20) = 2
    OPTION(21) = 'Jaevap                               ( )' ; it(2*21) = 2
    OPTION(22) = 'Jaseddenscoupling                    ( )' ; it(2*22) = 2
@@ -193,7 +193,7 @@
    CALL IFORMputinteger (2*16 ,jawaveRoller                )
    CALL IFORMputinteger (2*17 ,Maxitverticalforestersal    )
    CALL IFORMputinteger (2*18 ,Maxitverticalforestertem    )
-   CALL IFORMputinteger (2*19 ,Jajipjan                    )
+   CALL IFORMputinteger (2*19 ,Noderivedtypes                    )
    CALL IFORMputinteger (2*20 ,maxdge                      )
    CALL IFORMputinteger (2*21 ,Jaevap                      )
    CALL IFORMputinteger (2*22 ,Jaseddenscoupling           )
@@ -254,7 +254,7 @@
           CALL IFORMGETinteger (2*16 ,jawaveRoller            )
           CALL IFORMGETinteger (2*17 ,Maxitverticalforestersal)
           CALL IFORMGETinteger (2*18 ,Maxitverticalforestertem)
-          CALL IFORMGETinteger (2*19 ,Jajipjan                )
+          CALL IFORMGETinteger (2*19 ,Noderivedtypes                )
           CALL IFORMGETinteger (2*20 ,Maxdge                  )
           CALL IFORMGETinteger (2*21 ,Jaevap                  )
           CALL IFORMgetinteger (2*22 ,Jaseddenscoupling            )
