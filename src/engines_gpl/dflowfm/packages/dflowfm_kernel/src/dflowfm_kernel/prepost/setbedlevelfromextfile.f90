@@ -76,22 +76,9 @@ subroutine setbedlevelfromextfile()    ! setbedlevels()  ! check presence of old
  kc_size_store = 0
  inifield_ptr => null()
 
- if (len_trim(md_xybfile) > 0) then 
-    inquire(file = md_xybfile, exist=jawel)
-    if (jawel) then                                   ! set tegeldiepte optie als bl file aanwezig
-        ! BathymetryFile available and used for initialisation of the bed levels
-        call oldfil(mxyb,md_xybfile)
-        call reabl(mxyb)
-        call mess(LEVEL_INFO, 'setbedlevelfromextfile: Setting bedlevel from file '''//trim(md_xybfile)//'''.')
-    else
-        ! BathymetryFile specified but not available     
-        call mess(LEVEL_FATAL, 'setbedlevelfromextfile: Bedlevel from file '''//trim(md_xybfile)//''' not found.')
-    endif     
- else
-     ! When no BathymetryFile, attempt to read cell centred bed levels directly from net file:
-     call setbedlevelfromnetfile()
-     call mess(LEVEL_INFO, 'setbedlevelfromextfile: Using bedlevel as specified in net-file.')
- endif
+ ! Attempt to read cell centred bed levels directly from net file:
+ call setbedlevelfromnetfile()
+ call mess(LEVEL_INFO, 'setbedlevelfromextfile: Using bedlevel as specified in net-file.')
 
  ! ibedlevtyp determines from which source data location the bed levels are used to derive bobs and bl.
  ! These types need to be mapped to one of three possible primitive locations (center/edge/corner).

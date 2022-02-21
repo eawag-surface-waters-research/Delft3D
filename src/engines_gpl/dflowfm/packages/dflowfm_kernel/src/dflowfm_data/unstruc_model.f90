@@ -110,7 +110,6 @@ implicit none
     type(t_filenames)  :: md_1dfiles
     character(len=255) :: md_netfile       = ' ' !< Net definition                    (e.g., *_net.nc)
     character(len=255) :: md_flowgeomfile  = ' ' !< Storing flow geometry (output)    (e.g., *_flowgeom.nc)
-    character(len=255) :: md_xybfile       = ' ' !< Bathymetry file                   (e.g., *.xyb)
     character(len=255) :: md_dryptsfile    = ' ' !< Dry points file (list)            (e.g., *.xyz, *.pol)
     character(len=255) :: md_encfile       = ' ' !< Enclosure file (list)             (e.g., *.xyz, *.pol)
     character(len=255) :: md_s1inifile     = ' ' !< Initial water levels sample file using floodfill  (e.g., *.xyz)
@@ -303,7 +302,6 @@ use unstruc_channel_flow
     md_1dfiles%structures = ' '
 
     md_flowgeomfile = ' '
-    md_xybfile = ' '
     md_dryptsfile = ' '
     md_encfile = ' '
     md_s1inifile = ' '
@@ -825,8 +823,6 @@ subroutine readMDUFile(filename, istat)
     md_1dfiles%roughnessdir = ' '
     call prop_get_string ( md_ptr, 'geometry', 'NetFile',          md_netfile,      success)
     call prop_get_string ( md_ptr, 'geometry', 'GridEnclosureFile',md_encfile,      success)
-    call prop_get_string ( md_ptr, 'geometry', 'BathymetryFile',   md_xybfile,      success)
-    call prop_get_string ( md_ptr, 'geometry', 'BedlevelFile'  ,   md_xybfile,      success)
     call prop_get_string ( md_ptr, 'geometry', 'DryPointsFile',    md_dryptsfile,   success)
     call prop_get_string ( md_ptr, 'geometry', 'WaterLevIniFile',  md_s1inifile,    success)
     call prop_get_string ( md_ptr, 'geometry', 'LandBoundaryFile', md_ldbfile,      success)
@@ -2448,7 +2444,6 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
 
 ! Geometry
     call prop_set(prop_ptr, 'geometry', 'NetFile',          trim(md_netfile),       'Unstructured grid file *_net.nc')
-    call prop_set(prop_ptr, 'geometry', 'BedlevelFile',     trim(md_xybfile),       'Bedlevels points file e.g. *.xyz, only needed for bedlevtype not equal 3')
     call prop_set(prop_ptr, 'geometry', 'GridEnclosureFile',trim(md_encfile),       'Enclosure file to clip outer parts from the grid *.pol')
     call prop_set(prop_ptr, 'geometry', 'DryPointsFile',    trim(md_dryptsfile),    'Dry points file *.xyz (third column dummy z values), or dry areas polygon file *.pol (third column 1/-1: inside/outside)')
 
