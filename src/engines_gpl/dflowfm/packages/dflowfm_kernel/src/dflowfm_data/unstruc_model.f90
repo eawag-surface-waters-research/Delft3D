@@ -2042,14 +2042,6 @@ subroutine readMDUFile(filename, istat)
 
     end if
 
-!    Secondary Flow
-    !jasftesting = 0
-    !call prop_get_integer( md_ptr, 'output', 'SecFlowTesting', jasftesting)
-    !jasfinttype = 1
-    !call prop_get_integer( md_ptr, 'output', 'SecFlowIntType', jasfinttype)
-    !jasftesttype = -1
-    !call prop_get_integer( md_ptr, 'output', 'SecFlowTestType', jasftesttype)
-
     ! Map classes output (formerly: incremental file)
     ti_classmap_array = 0d0
     call prop_get_doubles(md_ptr, 'output', 'ClassMapInterval', ti_classmap_array, 3, success)
@@ -3820,11 +3812,6 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
    call prop_set_integer(prop_ptr, 'processes', 'Wriwaqbot3Doutput', md_wqbot3D_output, 'Write 3D water quality bottom variables (1: yes, 0: no)')
    call prop_set_double (prop_ptr, 'processes', 'VolumeDryThreshold', waq_vol_dry_thr)
    call prop_set_double (prop_ptr, 'processes', 'DepthDryThreshold', waq_dep_dry_thr)
-
-!   Secondary Flow
-    !call prop_set(prop_ptr, 'output', 'SecFlowTesting', jasftesting, '0:none, 1: exact ucx,ucy point vel, 2: exact staggered vels.')
-    !call prop_set(prop_ptr, 'output', 'SecFlowIntType', jasfinttype, '1:perot type, 2: gauss.')
-    !call prop_set(prop_ptr, 'output', 'SecFlowTestType',jasftesttype, ' ')
 
     call datum(rundat)
     write(mout, '(a,a)') '# Generated on ', trim(rundat)

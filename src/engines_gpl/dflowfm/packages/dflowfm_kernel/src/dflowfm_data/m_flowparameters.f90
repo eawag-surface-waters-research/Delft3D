@@ -222,11 +222,6 @@
  integer                           :: filterorder       !< order of filter
  integer                           :: jacheckmonitor    !< compute and output "checkerboard" mode monitor
 
-!    Secondary Flow
-! integer                           :: jasftesting       !< (secondary flow testing: 0: no just compute fm velocitie, 1: prescribe exact ucx,ucy point values 2: prescribe exact edge velocities (FM reconstructs ucx,ucy) 3: prescribe exact ucx,ucy cell-averaged values
-! integer                           :: jasfinttype       !< 1: perot reconstruction 2: standard gauss
-! integer                           :: jasftesttype      !< -1: u_theta = 0.1*200/r; u_r = 0 | k: k=0..3, u_x = x^k, u_y = 0
-
  double precision                  :: Uniformhu         !< Uniformhu for arjen's membranes
  double precision                  :: bedslope          !< bed inclination testcases
  double precision                  :: bedwaveamplitude=0d0  !< bed testcases

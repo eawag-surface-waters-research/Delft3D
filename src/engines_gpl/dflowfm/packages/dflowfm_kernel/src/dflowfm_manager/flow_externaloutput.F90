@@ -134,9 +134,6 @@
               flowCourantNumber = 0d0
            endif
         endif
-!         if ( jatidep > 0 ) then
-!            call writidep(tim)
-!         end if
          if (comparereal(time_map, ti_mape, eps10) == 0) then
             time_map = tstop_user + 1
          else

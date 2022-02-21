@@ -197,11 +197,6 @@
       ELSE IF (NWHAT .EQ. 28) THEN
          CALL SAVENET()
          CALL MAKECOARSE2FINETRIANGLECONNECTIONCELLS()
-      ELSE IF (NWHAT .EQ. 29) THEN
-         CALL SAVENET()
-           CALL renumberNodes()
-!           call removewallfromsamples()  ! obsolete
-         ! CALL REFINELINES()
       ELSE IF (NWHAT .EQ. 30) THEN
          CALL SAVENET()
          call fliplinks()
