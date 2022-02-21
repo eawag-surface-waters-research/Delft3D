@@ -45,7 +45,7 @@ subroutine unc_write_his(tim)            ! wrihis
     use netcdf_utils
     !use coordinate_reference_system, only: transform_and_put_latlon_coordinates
     use unstruc_files, only: defaultFilename
-    use unstruc_netcdf, only: unc_create, unc_close, unc_addcoordatts, unc_def_var_nonspatial, unc_write_flowgeom_filepointer, definencvar
+    use unstruc_netcdf, only: unc_create, unc_close, unc_addcoordatts, unc_addcoordmapping, unc_def_var_nonspatial, unc_write_flowgeom_filepointer, definencvar
     use unstruc_netcdf, only: ihisfile
     use unstruc_netcdf, only: UNC_LOC_S3D, UNC_LOC_WU, UNC_LOC_W
     use unstruc_netcdf, only: unc_writeopts, unc_noforcedflush, UG_WRITE_LATLON
@@ -259,7 +259,8 @@ subroutine unc_write_his(tim)            ! wrihis
         end if
 
         if (numobs+nummovobs > 0) then
-            call unc_write_flowgeom_filepointer(ihisfile, 1)
+            ierr = unc_addcoordmapping(ihisfile, jsferic)
+            
             ierr = nf90_def_dim(ihisfile, 'stations', numobs+nummovobs, id_statdim)
 
             if (nummovobs > 0) then
