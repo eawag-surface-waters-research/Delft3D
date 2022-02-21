@@ -999,7 +999,6 @@ subroutine readMDUFile(filename, istat)
     call prop_get_logical( md_ptr, 'geometry', 'dxDoubleAt1DEndNodes', dxDoubleAt1DEndNodes)
     call prop_get_logical( md_ptr, 'geometry', 'ChangeVelocityAtStructures', changeVelocityAtStructures)
 
-    call prop_get_integer( md_ptr, 'geometry', 'NoOptimizedPolygon', janooptimizedpolygon)
     call prop_get_logical( md_ptr, 'geometry', 'ChangeStructureDimensions', changeStructureDimensions)
 
     ! 1D Volume tables
@@ -2705,10 +2704,6 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
 
        if (writeall .or. jaZlayeratubybob .ne. 0 .and. layertype .ne. 1) then
          call prop_set(prop_ptr, 'geometry', 'Zlayeratubybob', JaZlayeratubybob, 'Lowest connected cells governed by bob instead of by bL L/R' )
-       endif
-
-       if (janooptimizedpolygon > 0) then
-          call prop_set(prop_ptr, 'geometry', 'NoOptimizedPolygon', janooptimizedpolygon, '0:polygon optimization ON, 1: OFF')
        endif
     endif
 
