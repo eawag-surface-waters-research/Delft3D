@@ -81,13 +81,6 @@
    use m_monitoring_crosssections, only: increaseCrossSections
    implicit none
 
-   interface
-      subroutine realan(mlan, antot)
-         integer, intent(inout)                ::  mlan
-         integer, intent(inout), optional      ::  antot
-      end subroutine realan
-   end interface
-
    double precision :: ag, cdflow, cfl, cfric, deltx, delty, deltz, dscr, dx, e0, eps, epsgs, fbouy, fdyn, gx, gy, gz
    integer :: itgs
    integer :: janet, jav
@@ -345,6 +338,13 @@
    CHARACTER inarg*(*), EXT*4
    LOGICAL JAWEL
    integer :: minp, n1, n2, istat, ja
+
+   interface
+      subroutine realan(mlan, antot)
+         integer, intent(inout)                ::  mlan
+         integer, intent(inout), optional      ::  antot
+      end subroutine realan
+   end interface
 
    INQUIRE(FILE = trim(inarg),EXIST = JAWEL)
    if (JAWEL) then
