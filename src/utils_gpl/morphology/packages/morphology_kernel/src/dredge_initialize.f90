@@ -236,11 +236,11 @@ subroutine dredge_initialize(dadpar, idomain, ndomains, lundia, error, comm)
              numpoints(                dredge_domainnr) = real(pdump%npnt,fp)
              numpoints(dredge_ndomains+dredge_domainnr) = real(size(pdump%nm,1),fp)
              !
-             call comm(numpoints, dredge_ndomains, error, msgstr)
+             call comm(numpoints, 2*dredge_ndomains, error, msgstr)
              if (error) goto 999
              !
-             in_ndomains = 0
-             npnt_global = 0
+             in_ndomains = 0 !how many partitions does the area cover
+             npnt_global = 0 !total number of internal points that the area cover
              localoffset = 0
              do id = 1,  dredge_ndomains
                 np = nint(numpoints(id))
@@ -253,7 +253,11 @@ subroutine dredge_initialize(dadpar, idomain, ndomains, lundia, error, comm)
              if (in_ndomains <= 1) then
                 pdump%in1domain = .true.
              else
-                pdump%npnt = npnt_global
+                npnt         = pdump%npnt
+                pdump%npnt   = npnt_global
+                !pdump%npnt = npnt_global
+                !npnt       = pdump%npnt
+                !npnt=real(size(pdump%inm,1),fp)
                 !
                 ! Reallocate and shift
                 !
@@ -302,7 +306,7 @@ subroutine dredge_initialize(dadpar, idomain, ndomains, lundia, error, comm)
                 call reallocP(pdump%sortvar ,npnt_global      ,shift=localoffset,stat=istat)
                 call reallocP(pdump%inm     ,npnt_global      ,shift=localoffset,stat=istat)
                 ! nm(i)=0 for points outside this domain is used in this subroutine
-                call reallocP(pdump%nm      ,npnt_global      ,fill=0,shift=localoffset,stat=istat)
+                !call reallocP(pdump%nm      ,npnt_global      ,fill=0,shift=localoffset,stat=istat)
                 !
                 if (istat/=0) then
                    error  = .true.

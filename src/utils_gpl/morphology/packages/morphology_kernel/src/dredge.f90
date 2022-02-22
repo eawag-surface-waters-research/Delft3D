@@ -275,16 +275,18 @@ module m_dredge
        pdump => dump_prop(ib)
        area => pdump%area
        reflevel => pdump%reflevel
+       reflevel = 0.0_fp
        !
        ! Set the reference level and compute dump capacity and area.
        !
        voltim = 0.0_fp
        do i = 1,pdump%npnt
           nm = pdump%nm(i)
-          if (nm==0) then
-             reflevel(i) = 0.0_fp
-             cycle
-          endif
+          if (nm <= 0) cycle ! get data only for internal points
+          !if (nm==0) then
+          !   reflevel(i) = 0.0_fp
+          !   cycle
+          !endif
           !
           select case (pdump%depthdef)
           case (DEPTHDEF_REFPLANE)
