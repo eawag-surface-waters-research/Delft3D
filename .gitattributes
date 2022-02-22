@@ -3857,7 +3857,6 @@ src/engines_gpl/waq/packages/waq_kernel/src/proces.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/prodr2.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/profld.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/proint.f -text
-src/engines_gpl/waq/packages/waq_kernel/src/propoi.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/provel.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/psolve.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/putper.f -text

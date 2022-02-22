@@ -42,7 +42,6 @@
 !                           Reads proces work file.
 !
 !     SUBROUTINES CALLED  : PRONRS, gives module number
-!                           PROPOI, computes absolute pointers, increments
 !
 !     FILES               : LUNWRP, Proces work file
 !                           LUREP , Monitoring file
