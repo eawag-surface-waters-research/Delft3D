@@ -838,7 +838,7 @@
        p_mbafluxhor     => mbafluxhortot
        p_mbafluxsorsin  => mbafluxsorsintot
        p_mbafluxheat    => mbafluxheattot
-       p_flxdmp         => flxdmp
+       p_flxdmp         => flxdmptot
    else
        p_mbavolumebegin => mbavolumebegin
        p_mbaflowhor     => mbaflowhor
