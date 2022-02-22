@@ -442,8 +442,6 @@ subroutine loadModel(filename)
     character(len=1024) :: fnamesstring
     double precision, dimension(2) :: tempbob
 
-    logical                   :: found_1d_network
-
     integer :: istat, minp, ifil, jadoorladen
 
     integer :: i
@@ -476,11 +474,7 @@ subroutine loadModel(filename)
     ! This routine is still used for Morphology model with network in INI-File (Willem Ottevanger)
 
 
-    if (found_1d_network) then
-       jadoorladen = 1
-    else
-       jadoorladen = 0
-    endif
+    jadoorladen = 0
 
     timerHandle = 0
     call timstrt('Load network', timerHandle)

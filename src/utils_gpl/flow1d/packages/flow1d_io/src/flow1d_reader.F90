@@ -67,7 +67,6 @@ module m_flow1d_reader
       type(t_network), intent(inout)  :: network
       
       type(tree_data), pointer        :: md_ptr
-      character(len=charln)           :: folder
       integer                         :: numstr
       integer                         :: backslash
       integer                         :: slash
@@ -92,7 +91,7 @@ module m_flow1d_reader
       call timstrt('ReadRoughness', timerReadRoughness)
       call SetMessage(LEVEL_INFO, 'Reading Roughness ...')
 
-      call roughness_reader(network, filenames%roughness, folder)
+      call roughness_reader(network, filenames%roughness)
      
       call SetMessage(LEVEL_INFO, 'Reading Roughness Done')
       call timstop(timerReadRoughness)

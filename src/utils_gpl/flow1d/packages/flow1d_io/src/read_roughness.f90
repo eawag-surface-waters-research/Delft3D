@@ -73,9 +73,8 @@ module m_read_roughness
 contains
 
    !> Read all roughness ini-files
-   subroutine roughness_reader(network, roughnessfiles, mapdir, md_ptr)
+   subroutine roughness_reader(network, roughnessfiles, md_ptr)
       type(t_network), intent(inout), target :: network                !< Network structure
-      character(len=*), intent(in)           :: mapdir                 !< Location of roughness files
       character(len=*), intent(in)           :: roughnessfiles         !< separated list of roughness files
       type(tree_data), pointer, intent(in), optional   :: md_ptr       !< treedata pointer to model definition file
 
@@ -171,9 +170,6 @@ contains
          
          file = inputfiles(1:isemi-1)
          inputfiles = inputfiles(isemi+1:)
-         if (len_trim(mapdir) > 0) then
-            file = trim(mapdir)//file
-         endif
             
          call remove_leading_spaces(trim(file))
          call read_roughnessfile(rgs, brs, spdata, file, default, def_type)

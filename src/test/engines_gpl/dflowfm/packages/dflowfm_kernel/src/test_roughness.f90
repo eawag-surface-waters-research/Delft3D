@@ -43,7 +43,6 @@ subroutine test_roughness_branches
    type(t_network)         :: network
    type(t_CSType), pointer :: cross
    character(len=256)      :: roughnessfiles
-   character(len=256)      :: mapdir
    integer                 :: ibranch
    integer                 :: section
    integer                 :: igrid
@@ -69,8 +68,7 @@ subroutine test_roughness_branches
    cross => null()
    
    roughnessfiles = 'roughness_main.ini;roughness-globals.ini'
-   mapdir         = 'roughness/'
-   call roughness_reader(network, roughnessfiles, mapdir)
+   call roughness_reader(network, roughnessfiles)
    
    ibranch  = 4
    section  = hashsearch(network%rgs%hashlist, 'chezy45')
