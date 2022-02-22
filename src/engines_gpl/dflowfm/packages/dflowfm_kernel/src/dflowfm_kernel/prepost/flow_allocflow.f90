@@ -1006,7 +1006,6 @@ endif
      call aerr('frculin (lnx)'   , ierr,   ndx) ; frculin = dmiss
  endif
 
- ! TODO alloceer u_to_main alleen bij md1d netwerk
  if (network%loaded .or. stm_included) then
     if ( allocated(u_to_umain) ) deallocate(u_to_umain)
     allocate ( u_to_umain   (lnkx) , stat = ierr)

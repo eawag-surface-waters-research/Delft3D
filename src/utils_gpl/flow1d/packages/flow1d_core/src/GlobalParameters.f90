@@ -88,7 +88,6 @@ module m_GlobalParameters
    end type
  
    type t_filenames
-      character(len=255) :: onednetwork                  = ' ' !< 1d Network definition             (e.g., flow1d.md1d)
       character(len=255) :: cross_section_definitions    = ' ' !< 1d cross section definitions
       character(len=255) :: cross_section_locations      = ' ' !< 1d cross section locations
       character(len=1024):: roughness                    = ' ' !< 1d roughness files
