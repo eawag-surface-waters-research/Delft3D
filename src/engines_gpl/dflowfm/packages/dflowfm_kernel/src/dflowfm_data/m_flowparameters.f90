@@ -32,6 +32,8 @@
 
  module m_flowparameters
  use m_sediment, only: jased
+ use m_missing
+
  implicit none
 
  integer                           :: jatransportmodule = 1    !< use transport module (1) or subroutine (0), or no transport (2)
@@ -73,7 +75,7 @@
 
  integer                           :: jacorioconstant=0 !< 0=default, 1=Coriolis constant in sferic models anyway,2=beta plane, both in cart. and spher. coor.
 
- double precision                  :: Oceaneddyamp = 0.05d0  !< Amplitude of testcase Oceaneddy, negative = anticyclone
+ double precision                  :: Oceaneddyamp = 0.0d0   !< Amplitude of testcase Oceaneddy, negative = anticyclone
 
  double precision                  :: Oceaneddyvel = 0.0d0   !< Velocity of testcase Oceaneddy, negative = anticyclone
 
@@ -197,9 +199,10 @@
  double precision                  :: blmin             !<  : lowest bedlevel point in model
 
  double precision                  :: upot0=-999d0      !<  : initial potential energy
+ double precision                  :: ukin0=-999d0      !<  : initial potential energy
 
  integer                           :: jaupdbndbl        !< Update bl at boundary (1 = update, 0 = no update)
- integer                           :: jaupdbobbl1d     !< Update bl and bobs for 1d network (call to setbobs_1d only at initialization)
+ integer                           :: jaupdbobbl1d      !< Update bl and bobs for 1d network (call to setbobs_1d only at initialization)
 
  integer                           :: nonlin            !< 1 : non-linear continuity , == max(nonlin, nonlin2D) , 2 == pressurized nonlin
  integer                           :: nonlin1D          !< 1 : non-linear continuity eq for 1D points, only for non-rectangles
@@ -390,6 +393,16 @@
  integer                           :: inivel                 !< initial velocity (1) or not (0)
 
  double precision                  :: cffacver = 0d0         !< switch to low order at high cf in constituent transport vertical, 1d0=yes, 0d0 = no
+
+ double precision                  :: cffachormom = 1d0      !< switch to low order at high cf in horizontal mom. transport, 1d0=yes, 0d0 = no
+
+ double precision                  :: cfexphormom = 1d0      !< exponent of same
+
+ double precision                  :: cfconhormom = 0d0      !< constant of same
+
+ double precision                  :: cffachu     = 1d0      !< switch to low order at high cf in sethu, 1d0=yes, 0d0 = no
+
+ double precision                  :: cfexphu     = 1d0      !< exponent of same
 
  double precision                  :: toplayminthick         !< minimum top layer thickness (m)
 

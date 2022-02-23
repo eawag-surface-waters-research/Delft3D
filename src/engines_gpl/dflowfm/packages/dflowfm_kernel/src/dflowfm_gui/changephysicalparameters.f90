@@ -163,7 +163,7 @@
    CALL IFORMPUTinteger (2* 2 , ifrctypuni      )
    CALL IFormPutDouble  (2* 3 , windsp ,'(F8.3)')
    CALL IFormPutDouble  (2* 4 , winddir,'(F8.3)')
-   CALL IFormPutDouble  (2* 5 , vicouv ,'(e8.3)')
+   CALL IFormPutDouble  (2* 5 , vicouv ,'(e9.2)')
    CALL IFormPutDouble  (2* 6 , vicoww ,'(e8.3)')
    CALL IFORMPUTdouble  (2* 7 , dicouv, '(e8.3)')
    CALL IFORMPUTdouble  (2* 8 , dicoww, '(e8.3)')

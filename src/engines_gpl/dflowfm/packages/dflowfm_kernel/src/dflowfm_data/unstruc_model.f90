@@ -1039,6 +1039,12 @@ subroutine readMDUFile(filename, istat)
     call prop_get_integer(md_ptr, 'numerics', 'Vertadvtypmom3onbnd', javau3onbnd)
 
     call prop_get_double (md_ptr, 'numerics', 'Cffacver'        , Cffacver)
+    call prop_get_double (md_ptr, 'numerics', 'Cffachormom'     , Cffachormom)
+    call prop_get_double (md_ptr, 'numerics', 'Cfexphormom'     , Cfexphormom)
+    call prop_get_double (md_ptr, 'numerics', 'Cfconhormom'     , Cfconhormom)
+    call prop_get_double (md_ptr, 'numerics', 'Cffachu'         , Cffachu)
+    call prop_get_double (md_ptr, 'numerics', 'Cfexphu'         , Cfexphu)
+
 
     call prop_get_integer(md_ptr, 'numerics', 'Horadvtypzlayer' , jahazlayer)
 
@@ -2690,8 +2696,6 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
 
 ! Numerics
     call prop_set(prop_ptr, 'numerics', 'CFLMax',       cflmx,      'Maximum Courant number')
-    call prop_set(prop_ptr, 'numerics', 'EpsMaxlev',    epsmaxlev,  'Stop criterium for non linear iteration')
-    call prop_set(prop_ptr, 'numerics', 'EpsMaxlevm',   epsmaxlevm, 'Stop criterium for Nested Newton loop in non linear iteration')
     !call prop_set(prop_ptr, 'numerics', 'CFLWaveFrac',  cflw,       'Wave velocity fraction, total courant vel = u + cflw*wavevelocity')
     if (writeall .or.  Lincontin .ne. 0) then
        call prop_set(prop_ptr, 'numerics', 'Lincontin',    Lincontin,  'Default 0; Set to 1 for linearizing d(Hu)/dx; link to AdvecType')
@@ -2742,6 +2746,24 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     if (writeall .or. cffacver .ne. 0d0 ) then
       call prop_set(prop_ptr, 'numerics', 'Cffacver', Cffacver,   'Factor for including (1-CFL) in HO term vertical   (0d0: no, 1d0: yes)')
     endif
+    if (writeall .or. cffachormom .ne. 1d0 ) then
+      call prop_set(prop_ptr, 'numerics', 'Cffachormom', Cffachormom,   'Factor for including (1-CFL) in HO term horizontal mom (0d0: no, 1d0: yes)')
+    endif
+    if (writeall .or. cfexphormom .ne. 1d0 ) then
+      call prop_set(prop_ptr, 'numerics', 'Cfexphormom', Cfexphormom,   'exponent for including (1-CFL) in HO term horizontal mom )')
+    endif
+    if (writeall .or. cfconhormom .ne. 0d0 ) then
+      call prop_set(prop_ptr, 'numerics', 'Cfconhormom', Cfconhormom,   'constant for including (1-CFL) in HO term horizontal mom )')
+    endif
+
+    if (writeall .or. cffachu .ne. 1d0 ) then
+      call prop_set(prop_ptr, 'numerics', 'Cffachu', Cffachu,   'Factor for including (1-CFL) in sethu (0d0: no, 1d0: yes)')
+    endif
+    if (writeall .or. cfexphu .ne. 1d0 ) then
+      call prop_set(prop_ptr, 'numerics', 'Cfexphu', Cfexphu,   'exp for including (1-CFL) in sethu')
+    endif
+ 
+ 
     if (writeall .or. jarhoxu .ne. 0 ) then
       call prop_set(prop_ptr, 'numerics', 'Jarhoxu', Jarhoxu,   'Include density gradient in advection term (0: no(strongly advised), 1: yes, 2: Also in barotropic and baroclinic pressure term)')
     endif
@@ -2973,6 +2995,13 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     endif
     if (writeall .or. sdu_update_s1 > 0) then
        call prop_set (prop_ptr, 'numerics', 'SubsUplUpdateS1', sdu_update_s1, 'Update water levels (S1) due to subsidence / uplift')
+    endif
+
+    if (writeall .or. epsmaxlev .ne. 1d-8) then
+    call prop_set(prop_ptr, 'numerics', 'EpsMaxlev',    epsmaxlev,  'Stop criterium for non linear iteration')
+    endif
+    if (writeall .or. epsmaxlevm .ne. 1d-8) then
+    call prop_set(prop_ptr, 'numerics', 'EpsMaxlevm',   epsmaxlevm, 'Stop criterium for Nested Newton loop in non linear iteration')
     endif
 
     if (Oceaneddyamp > 0d0) then 

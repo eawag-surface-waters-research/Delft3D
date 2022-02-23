@@ -289,8 +289,6 @@
               endif
            endif
 
-           if (kmx == 0 .and. ja_timestep_auto .ne. 0) ja_timestep_auto = 1
-
            if (ibedlevtyp .ne. 3) then
               jaconveyance2D = -1
               nonlin2D       = 0

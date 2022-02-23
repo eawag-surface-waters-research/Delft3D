@@ -1422,10 +1422,11 @@ integer :: k1, k2! node number
 integer :: L     ! net link number
 integer :: line_max ! maximal line number
 integer :: branchindex, ilocallin, nstruc, istrtype, i
-type(t_weir), pointer :: pweir
-type(t_pump), pointer :: ppump
-type(t_orifice), pointer :: porifice
-type(t_culvert), pointer :: pculvert
+double precision, external :: zlin , znod
+type(t_weir), pointer      :: pweir
+type(t_pump), pointer      :: ppump
+type(t_orifice), pointer   :: porifice
+type(t_culvert), pointer   :: pculvert
 
 
 linec = 7
@@ -1452,6 +1453,11 @@ if (k1 > 0) then
    call Write2Scr(linec, 'Water depth  (hs)', hs(k1), 'm')
    call Write2Scr(linec, 'Bottom level (bl)', bl(k1), 'm')
    call Write2Scr(linec, 'Volume     (vol1)', vol1(k1), 'm3')
+   call Write2Scr(linec, 'Volume   (vol1_f)', vol1_f(k1), 'm3')
+   if (znod(k1) .ne. dmiss) then 
+   call Write2Scr(linec, 'znod(k1)         ', znod(k1), 'znod')
+   endif
+
 end if
 
 ! write an empty line
@@ -1467,6 +1473,12 @@ if (k2 > 0) then
    call Write2Scr(linec, 'Water depth  (hs)', hs(k2), 'm')
    call Write2Scr(linec, 'Bottom level (bl)', bl(k2), 'm')
    call Write2Scr(linec, 'Volume     (vol1)', vol1(k2), 'm3')
+   call Write2Scr(linec, 'Volume   (vol1_f)', vol1_f(k2), 'm3')
+   if (znod(k2) .ne. dmiss) then 
+   call Write2Scr(linec, 'znod(k2)         ', znod(k2), 'znod')
+   endif
+
+
 end if
 
 ! write an empty line
@@ -1508,7 +1520,10 @@ call Write2Scr(linec, 'Flow width    (wu)', wu(LL), 'm')
 call Write2Scr(linec, 'Water depth   (hu)', hu(LL), 'm')
 call Write2Scr(linec, 'Velocity      (u1)', u1(LL), 'm/s')
 call Write2Scr(linec, 'Discharge     (q1)', q1(LL), 'm3/s')
-call Write2Scr(linec, 'Conveyance (cfuhi)', cfuhi(LL), 'm3/s')
+call Write2Scr(linec, 'g/CCH      (cfuhi)', cfuhi(LL), '1/m')
+if (zlin(LL) .ne. -999) then 
+call Write2Scr(linec, 'zlin              ', zlin(LL), 'zlin')
+endif
 
 ! If this flowlink has a stucture on it, then also display related info.
 if (network%loaded .and. kcu(LL) == 1) then
@@ -1605,7 +1620,7 @@ end subroutine dis_info_1d_link
       call IOUTSTRINGXY(1,ipos,tex)
    end subroutine Write2ScrInt
 
-   !> Writes a line with double precision data to the screen.
+   !> Writes a line with double precision data to the interacter screen.
    subroutine Write2ScrDouble(ipos, desc, val, unit)
       implicit none
       integer, intent(inout)        :: ipos
@@ -1929,31 +1944,70 @@ subroutine tekwindvector()
     
  else if (ndraw(40) == 2) then 
     
-    if (jasal > 0 .and. kmx > 0) then 
-       call upotukinueaa(upot,ukin,ueaa)     
+    call upotukinueaa(upot,ukin,ueaa)     
 
-       yp  = yp - dyp
-       tex = 'Upot :               (kg/(m.s2))'
-       write(tex(8:20), '(F11.2)') upot    
-       ncol = ncoltx
-       call GTEXT(tex, xp, yp, ncol)
-   
-       yp  = yp - dyp
-       tex = 'Ukin :               (kg/(m.s2))'
-       write(tex(8:20), '(F11.2)') ukin    
-       call GTEXT(tex, xp, yp, ncol)
-   
-       yp  = yp - dyp
-       tex = 'Utot :               (kg/(m.s2))'
-       write(tex(8:20), '(F11.2)') upot+ukin    
-       call GTEXT(tex, xp, yp, ncol)
+    yp  = yp - dyp
+    tex = 'Upot0+Ukin0:         (kg/(m.s2))'
+    if (upot0+ukin0 > 1000) then 
+       write(tex(8:20), '(F11.2)') ukin0
+    else
+       write(tex(8:20), '(F11.7)') ukin0
+    endif 
+    ncol = ncoltx
+    call GTEXT(tex, xp, yp, ncol)
 
-       yp  = yp - dyp
-       tex = 'Ueaa :               (kg/(m.s2))'
-       write(tex(8:20), '(F11.2)') ueaa    
-       call GTEXT(tex, xp, yp, ncol)
+    yp  = yp - dyp
+    tex = 'Upot :               (kg/(m.s2))'
+    if (upot + ukin > 1000) then 
+       write(tex(8:20), '(F11.2)') upot   
+    else
+       write(tex(8:20), '(F11.7)') upot 
+    endif 
+    ncol = ncoltx
+    call GTEXT(tex, xp, yp, ncol)
+  
+    yp  = yp - dyp
+    tex = 'Ukin :               (kg/(m.s2))'
+    if (upot + ukin > 1000) then 
+       write(tex(8:20), '(F11.2)') ukin   
+    else
+       write(tex(8:20), '(F11.7)') ukin 
+    endif 
+    call GTEXT(tex, xp, yp, ncol)
+  
+    yp  = yp - dyp
+    tex = 'Utot :               (kg/(m.s2))'
+    if (upot + ukin > 1000) then 
+       write(tex(8:20), '(F11.2)') upot+ukin   
+    else
+       write(tex(8:20), '(F11.7)') upot+ukin
+    endif 
+    call GTEXT(tex, xp, yp, ncol)
 
-   endif
+    yp  = yp - dyp
+    tex = 'Ukin/Ukin0:                 ( )'
+    if (upot + ukin > 1000) then 
+       write(tex(8:20), '(F11.2)') ukin/ukin0   
+    else
+       write(tex(8:20), '(F11.7)') ukin/ukin0
+    endif 
+    call GTEXT(tex, xp, yp, ncol)
+
+    yp  = yp - dyp
+    tex = 'Utot/Utot0:                 ( )'
+    if (upot + ukin > 1000) then 
+       write(tex(8:20), '(F11.2)') (ukin+upot)/(ukin0)   
+    else
+       write(tex(8:20), '(F11.7)') (ukin+upot)/(ukin0)
+    endif 
+    call GTEXT(tex, xp, yp, ncol)
+
+    if (jasal > 0 .or. jatem > 0) then
+    yp  = yp - dyp
+    tex = 'Ueaa :               (kg/(m.s2))'
+    write(tex(8:20), '(F11.2)') ueaa    
+    call GTEXT(tex, xp, yp, ncol)
+    endif
            
  endif   
  
@@ -1976,42 +2030,52 @@ use m_flowgeom
 use m_missing
 implicit none
 double precision :: upot, ukin, ueaa
-double precision :: vtot, roav, hh, zz, dzz
+double precision :: vtot, roav, hh, zz, dzz, rhok
 integer k, kk
        
 upot = 0d0 ; ukin = 0d0 ; ueaa = 0d0 ; vtot = 0d0 ; roav = 0d0
 
-if (jasal > 0 .and. kmx > 0) then 
+do kk = 1,ndx
+   if ( hs(kk) == 0 ) cycle
+   do k = kbot(kk), ktop(kk) 
+      vtot = vtot + vol1(k)                                                 ! m3
+      if (jasal > 0) then 
+         roav = roav + vol1(k)*rho(k)                                       ! kg
+       else
+         roav = roav + vol1(k)*rhomean                                      ! kg
+      endif
+   enddo  
+enddo 
+roav = roav / vtot                                                          ! kg/m3
 
-   do kk = 1,ndx
-      if ( hs(kk) == 0 ) cycle
-      do k = kbot(kk), ktop(kk) 
-         zz   = (zws(k) + zws(k-1))*0.5d0                                      ! m
-         vtot = vtot + vol1(k)                                                 ! m3
-         roav = roav + vol1(k)*   rho(k)                                       ! kg
-      enddo  
-   enddo 
-   roav = roav / vtot                                                          ! kg/m3
-   
-   do kk = 1,ndx
-      if ( hs(kk) == 0 ) cycle
-      do k = kbot(kk), ktop(kk) 
-         zz   = (zws(k) + zws(k-1))*0.5d0                                      ! m
-         ueaa = ueaa + vol1(k)*zz*(rho(k) - roav)                              ! kg.m
-         upot = upot + vol1(k)*zz* rho(k)                                      ! kg.m
-         ukin = ukin + vol1(k)*    rho(k)*(ucx(k)*ucx(k) + ucy(k)*ucy(k))*0.5d0! kg.m2/s2
-      enddo  
-   enddo   
-   
-   ueaa  = ueaa*ag/vtot                                                        ! kg/(m.s2)
-   upot  = upot*ag/vtot  
-   ukin  = ukin*0.5/vtot        
+do kk = 1,ndx
+   if ( hs(kk) == 0 ) cycle
+   do k = kbot(kk), ktop(kk) 
+      if (kmx > 0) then 
+         zz   = (zws(k) + zws(k-1))*0.5d0                                   ! m
+      else 
+         zz   = s1(k) - bl(k)
+      endif
+      if (jasal > 0) then 
+         rhok = rho(k)
+      else 
+         rhok = rhomean 
+      endif
+      ueaa = ueaa + vol1(k)*zz*(rho(k) - roav)                              ! kg.m
+      upot = upot + vol1(k)*zz* rho(k)                                      ! kg.m
+      ukin = ukin + vol1(k)*    rho(k)*(ucx(k)*ucx(k) + ucy(k)*ucy(k))*0.5d0! kg.m2/s2
+   enddo  
+enddo   
 
-   if (upot0 == dmiss) upot0 = upot
-   upot = upot - upot0
+ueaa  = ueaa*ag/vtot                                                        ! kg/(m.s2)
+upot  = upot*ag/vtot  
+ukin  = ukin*0.5/vtot        
 
-endif
-                                                                     ! 
+if (upot0 == dmiss) upot0 = upot
+if (ukin0 == dmiss) ukin0 = ukin
+
+upot = upot - upot0 
+                                                                  ! 
 end subroutine upotukinueaa
 
    SUBROUTINE GETINTRGB(KRGB) ! GET interacter RGB FOR NCOL

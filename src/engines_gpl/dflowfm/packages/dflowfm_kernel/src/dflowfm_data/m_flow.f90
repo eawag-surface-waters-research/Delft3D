@@ -709,6 +709,7 @@ use m_missing
     jacftrtfac  = 0   !< Whether or not (1/0) a multiplication factor field was specified for trachytopes's returned roughness values.
 
     upot0 = dmiss
+    ukin0 = dmiss
 
 end subroutine reset_flow
 

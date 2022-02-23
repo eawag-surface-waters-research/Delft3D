@@ -44,7 +44,7 @@
    implicit none
 
    integer :: numpar, numfld, numparactual, numfldactual
-   PARAMETER  (NUMPAR = 22, NUMFLD = 2*NUMPAR)
+   PARAMETER  (NUMPAR = 25, NUMFLD = 2*NUMPAR)
    INTEGER  IX(NUMFLD),IY(NUMFLD),IS(NUMFLD),IT(NUMFLD)
    CHARACTER WRDKEY*40, OPTION(NUMPAR)*40, HELPM(NUMPAR)*60
    integer :: nlevel
@@ -55,57 +55,63 @@
    integer :: ir, il, iw, ixp, iyp, ih, i, iuvfieldorg, ifexit, ifinit, key, ja, niadvec
    integer :: nbut, imp, inp
 
-   NLEVEL     = 4
-   OPTION( 1) = 'ITURBULENCEMODEL                     ( )' ; it(2* 1) = 2
-   OPTION( 2) = 'JAUSTARINT                           ( )' ; it(2* 2) = 2
-   OPTION( 3) = 'jabaroctimeint                          ' ; it(2* 3) = 2
-   OPTION( 4) = 'JAVAKEPS                                ' ; it(2* 4) = 2
-   OPTION( 5) = 'IDENSFORM                               ' ; it(2* 5) = 2
-   OPTION( 6) = 'JARHOXU                                 ' ; it(2* 6) = 2
-   OPTION( 7) = 'JAVASAL                                 ' ; it(2* 7) = 2
-   OPTION( 8) = 'IFIXEDWEIRSCHEME                        ' ; it(2* 8) = 2
-   OPTION( 9) = 'Tsigma                                  ' ; it(2* 9) = 6
-   OPTION(10) = 'Local timestepping in transport(1)      ' ; it(2*10) = 2
-   OPTION(11) = 'Cffacver                                ' ; it(2*11) = 6
-   OPTION(12) = 'Javatem                                 ' ; it(2*12) = 2
-   OPTION(13) = 'Javiuplus3D                             ' ; it(2*13) = 2
-   OPTION(14) = 'Jaqaisq1                                ' ; it(2*14) = 2
-   OPTION(15) = 'Addksources                             ' ; it(2*15) = 6
-   OPTION(16) = 'Initialise rho, if not, first barocl = 0' ; it(2*16) = 2
-   OPTION(17) = 'jaLogprofatubndin                       ' ; it(2*17) = 2
-   OPTION(18) = 'javau                                   ' ; it(2*18) = 2
-   OPTION(19) = 'jacomp                                  ' ; it(2*19) = 2
-   OPTION(20) = 'Drop2D                                  ' ; it(2*20) = 6
-   OPTION(21) = 'Drop3D                                  ' ; it(2*21) = 6
-   OPTION(22) = 'jaStructurelayersactive                 ' ; it(2*22) = 2
+   NLEVEL     = 4 ; i = 1
+   OPTION( i) = 'ITURBULENCEMODEL                     ( )' ; it(2* i) = 2 ; i = i+ 1 
+   OPTION( i) = 'JAUSTARINT                           ( )' ; it(2* i) = 2 ; i = i+ 1
+   OPTION( i) = 'jabaroctimeint                          ' ; it(2* i) = 2 ; i = i+ 1
+   OPTION( i) = 'JAVAKEPS                                ' ; it(2* i) = 2 ; i = i+ 1
+   OPTION( i) = 'IDENSFORM                               ' ; it(2* i) = 2 ; i = i+ 1
+   OPTION( i) = 'JARHOXU                                 ' ; it(2* i) = 2 ; i = i+ 1
+   OPTION( i) = 'JAVASAL                                 ' ; it(2* i) = 2 ; i = i+ 1
+   OPTION( i) = 'IFIXEDWEIRSCHEME                        ' ; it(2* i) = 2 ; i = i+ 1
+   OPTION( i) = 'Tsigma                                  ' ; it(2* i) = 6 ; i = i+ 1
+   OPTION( i) = 'Local timestepping in transport(1)      ' ; it(2* i) = 2 ; i = i+ 1
+   OPTION( i) = 'Cffacver                                ' ; it(2* i) = 6 ; i = i+ 1
+   OPTION( i) = 'Cffachormom                             ' ; it(2* i) = 6 ; i = i+ 1
+   OPTION( i) = 'Cfexphormom                             ' ; it(2* i) = 6 ; i = i+ 1
+   OPTION( i) = 'Cfconhormom                             ' ; it(2* i) = 6 ; i = i+ 1
+   OPTION( i) = 'Javatem                                 ' ; it(2* i) = 2 ; i = i+ 1
+   OPTION( i) = 'Javiuplus3D                             ' ; it(2* i) = 2 ; i = i+ 1
+   OPTION( i) = 'Jaqaisq1                                ' ; it(2* i) = 2 ; i = i+ 1
+   OPTION( i) = 'Addksources                             ' ; it(2* i) = 6 ; i = i+ 1
+   OPTION( i) = 'Initialise rho, if not, first barocl = 0' ; it(2* i) = 2 ; i = i+ 1
+   OPTION( i) = 'jaLogprofatubndin                       ' ; it(2* i) = 2 ; i = i+ 1
+   OPTION( i) = 'javau                                   ' ; it(2* i) = 2 ; i = i+ 1
+   OPTION( i) = 'jacomp                                  ' ; it(2* i) = 2 ; i = i+ 1
+   OPTION( i) = 'Drop2D                                  ' ; it(2* i) = 6 ; i = i+ 1
+   OPTION( i) = 'Drop3D                                  ' ; it(2* i) = 6 ; i = i+ 1
+   OPTION( i) = 'jaStructurelayersactive                 ' ; it(2* i) = 2 ; i = i+ 1
 
 
 
 !   123456789012345678901234567890123456789012345678901234567890
 !            1         2         3         4         5         6
 
-   HELPM ( 1) = '0=no, 1 = constant, 2 = algebraic, 3 = k-eps, 4 = k-tau     '
-   HELPM ( 2) = '0123                                                        '
-   HELPM ( 3) = '1 = expl, -2; abashford, -3 = ab3, -5 = adv rho             '
-   HELPM ( 4) = '0 = NO, 3 = VERT IMPL, HOR EXPL                             '
-   HELPM ( 5) = '0 = no, 1 = eckart                                          '
-   HELPM ( 6) = '0 = no, 1 = YES                                             '
-   HELPM ( 7) = '0=No, 1=Upwe, 2=Cente, 3=Upwi, 4=Centi, 5=4,3, 6=MCexpl     '
-   HELPM ( 8) = '0=No, 6=subgrid, 7=rajaratnam, 8=Tabelb, 9=Willemontenotyet '
-   HELPM ( 9) = 'Sigma adaptation timescale, only for layertype == 4         '
-   HELPM (10) = '1 = yes, 0 = no                                             '
-   HELPM (11) = '0=never switch off ho term vertical                         '
-   HELPM (12) = '0=No, 1=Upwe, 2=Cente, 3=Upwi, 4=Centi, 5=4,3, 6=MCexpl     '
-   HELPM (13) = '0=no, 1 = yes                                               '
-   HELPM (14) = '0=no, 1 = yes                                               '
-   HELPM (15) = '0=no, 1 = yes                                               '
-   HELPM (16) = '0=no, 1 = yes                                               '
-   HELPM (17) = 'at ubnd in: 0 = uniform U1, 1 = log U1, 2 = also k-eps      '
-   HELPM (18) = '0=no, 3 = impli upw, 5 = Quickest                           '
-   HELPM (19) = '0=standard, 1 = use csu snu in weights, 2 = scalarx,y banf  '
-   HELPM (20) = '0=no, 1 = yes                                               '
-   HELPM (21) = '0=no, 1 = yes                                               '
-   HELPM (22) = '0=no, 1 = yes                                               '
+   i = 1
+   HELPM ( i) = '0=no, 1 = constant, 2 = algebraic, 3 = k-eps, 4 = k-tau     ' ; i=i+1
+   HELPM ( i) = '0123                                                        ' ; i=i+1
+   HELPM ( i) = '1 = expl, -2; abashford, -3 = ab3, -5 = adv rho             ' ; i=i+1
+   HELPM ( i) = '0 = NO, 3 = VERT IMPL, HOR EXPL                             ' ; i=i+1
+   HELPM ( i) = '0 = no, 1 = eckart                                          ' ; i=i+1
+   HELPM ( i) = '0 = no, 1 = YES                                             ' ; i=i+1
+   HELPM ( i) = '0=No, 1=Upwe, 2=Cente, 3=Upwi, 4=Centi, 5=4,3, 6=MCexpl     ' ; i=i+1
+   HELPM ( i) = '0=No, 6=subgrid, 7=rajaratnam, 8=Tabelb, 9=Willemontenotyet ' ; i=i+1
+   HELPM ( i) = 'Sigma adaptation timescale, only for layertype == 4         ' ; i=i+1
+   HELPM ( i) = '1 = yes, 0 = no                                             ' ; i=i+1
+   HELPM ( i) = '0=never switch off ho term vertical                         ' ; i=i+1
+   HELPM ( i) = '0=never switch off ho term hor mom                          ' ; i=i+1
+   HELPM ( i) = '0=exp of                                                    ' ; i=i+1
+   HELPM ( i) = '0=constant to be added to                                   ' ; i=i+1
+   HELPM ( i) = '0=No, 1=Upwe, 2=Cente, 3=Upwi, 4=Centi, 5=4,3, 6=MCexpl     ' ; i=i+1
+   HELPM ( i) = '0=no, 1 = yes                                               ' ; i=i+1
+   HELPM ( i) = '0=no, 1 = yes                                               ' ; i=i+1
+   HELPM ( i) = '0=no, 1 = yes                                               ' ; i=i+1
+   HELPM ( i) = 'at ubnd in: 0 = uniform U1, 1 = log U1, 2 = also k-eps      ' ; i=i+1
+   HELPM ( i) = '0=no, 3 = impli upw, 5 = Quickest                           ' ; i=i+1
+   HELPM ( i) = '0=standard, 1 = use csu snu in weights, 2 = scalarx,y banf  ' ; i=i+1
+   HELPM ( i) = '0=no, 1 = yes                                               ' ; i=i+1
+   HELPM ( i) = '0=no, 1 = yes                                               ' ; i=i+1
+   HELPM ( i) = '0=no, 1 = yes                                               ' ; i=i+1
  
 
    CALL SAVEKEYS()
@@ -174,28 +180,32 @@
       CALL IFORMATTRIBUTEN(IR,0,0,7)
    ENDDO
 
-   CALL IFormPutINTEGER (2* 1 ,ITURBULENCEMODEL )
-   CALL IFORMPUTINTEGER (2* 2 ,JAUSTARINT       )
-   CALL IFORMPUTINTEGER (2* 3 ,jabaroctimeint   )
-   CALL IFORMPUTINTEGER (2* 4 ,JAVAKEPS         )
-   CALL IFORMPUTINTEGER (2* 5 ,IDENSFORM        )
-   CALL IFORMPUTINTEGER (2* 6 ,JARHOXU          )
-   CALL IFORMPUTINTEGER (2* 7 ,JAVASAL          )
-   CALL IFORMPUTINTEGER (2* 8 ,ifixedweirscheme )
-   CALL IFORMPUTdouble  (2* 9 ,Tsigma           , '(F7.3)' )
-   CALL IFORMPUTINTEGER (2*10 ,JALTS            )
-   CALL IFORMPUTdouble  (2*11 ,Cffacver         , '(F7.3)' )
-   CALL IFORMPUTINTEGER (2*12 ,JAVATEM          )
-   CALL IFORMputINTEGER (2*13 ,javiuplus3D      )
-   CALL IFORMputINTEGER (2*14 ,jaqaisq1         )
-   CALL IFORMputdouble  (2*15 ,addksources      , '(F7.3)' )
-   CALL IFORMputINTEGER (2*16 ,jainirho         )
-   CALL IFORMputINTEGER (2*17 ,jaLogprofatubndin)
-   CALL IFORMputINTEGER (2*18 ,javau)
-   CALL IFORMputINTEGER (2*19 ,jacomp)
-   CALL IFORMPUTdouble  (2*20 ,drop2D           , '(F7.3)' )
-   CALL IFORMPUTdouble  (2*21 ,drop3D           , '(F7.3)' )
-   CALL IFORMputINTEGER (2*22 ,jastructurelayersactive)
+   i = 1
+   CALL IFormPutINTEGER (2*i,ITURBULENCEMODEL )               ; i=i+1
+   CALL IFORMPUTINTEGER (2*i,JAUSTARINT       )               ; i=i+1
+   CALL IFORMPUTINTEGER (2*i,jabaroctimeint   )               ; i=i+1
+   CALL IFORMPUTINTEGER (2*i,JAVAKEPS         )               ; i=i+1
+   CALL IFORMPUTINTEGER (2*i,IDENSFORM        )               ; i=i+1
+   CALL IFORMPUTINTEGER (2*i,JARHOXU          )               ; i=i+1
+   CALL IFORMPUTINTEGER (2*i,JAVASAL          )               ; i=i+1
+   CALL IFORMPUTINTEGER (2*i,ifixedweirscheme )               ; i=i+1
+   CALL IFORMPUTdouble  (2*i,Tsigma           , '(F7.3)' )    ; i=i+1
+   CALL IFORMPUTINTEGER (2*i,JALTS            )               ; i=i+1
+   CALL IFORMPUTdouble  (2*i,Cffacver         , '(F7.3)' )    ; i=i+1
+   CALL IFORMPUTdouble  (2*i,Cffachormom      , '(F7.3)' )    ; i=i+1
+   CALL IFORMPUTdouble  (2*i,Cfexphormom      , '(F7.3)' )    ; i=i+1
+   CALL IFORMPUTdouble  (2*i,Cfconhormom      , '(F7.3)' )    ; i=i+1
+   CALL IFORMPUTINTEGER (2*i,JAVATEM          )               ; i=i+1
+   CALL IFORMputINTEGER (2*i,javiuplus3D      )               ; i=i+1
+   CALL IFORMputINTEGER (2*i,jaqaisq1         )               ; i=i+1
+   CALL IFORMputdouble  (2*i,addksources      , '(F7.3)' )    ; i=i+1
+   CALL IFORMputINTEGER (2*i,jainirho         )               ; i=i+1
+   CALL IFORMputINTEGER (2*i,jaLogprofatubndin)               ; i=i+1
+   CALL IFORMputINTEGER (2*i,javau)                           ; i=i+1
+   CALL IFORMputINTEGER (2*i,jacomp)                          ; i=i+1
+   CALL IFORMPUTdouble  (2*i,drop2D           , '(F7.3)' )    ; i=i+1
+   CALL IFORMPUTdouble  (2*i,drop3D           , '(F7.3)' )    ; i=i+1
+   CALL IFORMputINTEGER (2*i,jastructurelayersactive)         ; i=i+1
 
 
    !  Display the form with numeric fields left justified
@@ -235,28 +245,32 @@
    ELSE IF (KEY .EQ. 22 .OR. KEY .EQ. 23) THEN
        IF (KEY .EQ. 22) THEN
 
-          CALL IFORMGETINTEGER (2* 1 ,ITURBULENCEMODEL )
-          CALL IFORMGETINTEGER (2* 2 ,JAUSTARINT       )
-          CALL IFORMGETINTEGER (2* 3 ,jabaroctimeint   )
-          CALL IFORMGETINTEGER (2* 4 ,JAVAKEPS         )
-          CALL IFORMGETINTEGER (2* 5 ,IDENSFORM        )
-          CALL IFORMGETINTEGER (2* 6 ,JARHOXU          )
-          CALL IFORMGETINTEGER (2* 7 ,JAVASAL          )
-          CALL IFORMGETINTEGER (2* 8 ,IFIXEDWEIRSCHEME )
-          CALL IFORMGETdouble  (2* 9 ,Tsigma           )
-          CALL IFORMGETINTEGER (2*10 ,JALTS            )
-          CALL IFORMGETdouble  (2*11 ,Cffacver         )
-          CALL IFORMGETINTEGER (2*12 ,JAVATEM          )
-          CALL IFORMGETINTEGER (2*13 ,javiuplus3D      )
-          CALL IFORMGETINTEGER (2*14 ,jaqaisq1         )
-          CALL IFORMGETdouble  (2*15 ,addksources      )
-          CALL IFORMGETINTEGER (2*16 ,jainirho         )
-          CALL IFORMGETINTEGER (2*17 ,jaLogprofatubndin)
-          CALL IFORMGETINTEGER (2*18 ,javau            )
-          CALL IFORMGETINTEGER (2*19 ,jacomp           )
-          CALL IFORMGETdouble  (2*20 ,Drop2D           )
-          CALL IFORMGETdouble  (2*21 ,Drop3D           )
-          CALL IFORMGETINTEGER (2*22 ,jastructurelayersactive)
+          i = 1
+          CALL IFORMGETINTEGER (2*i ,ITURBULENCEMODEL )           ; i=i+1
+          CALL IFORMGETINTEGER (2*i ,JAUSTARINT       )           ; i=i+1
+          CALL IFORMGETINTEGER (2*i ,jabaroctimeint   )           ; i=i+1
+          CALL IFORMGETINTEGER (2*i ,JAVAKEPS         )           ; i=i+1
+          CALL IFORMGETINTEGER (2*i ,IDENSFORM        )           ; i=i+1
+          CALL IFORMGETINTEGER (2*i ,JARHOXU          )           ; i=i+1
+          CALL IFORMGETINTEGER (2*i ,JAVASAL          )           ; i=i+1
+          CALL IFORMGETINTEGER (2*i ,IFIXEDWEIRSCHEME )           ; i=i+1
+          CALL IFORMGETdouble  (2*i ,Tsigma           )           ; i=i+1
+          CALL IFORMGETINTEGER (2*i ,JALTS            )           ; i=i+1
+          CALL IFORMGETdouble  (2*i ,Cffacver         )           ; i=i+1
+          CALL IFORMGETdouble  (2*i ,Cffachormom      )           ; i=i+1
+          CALL IFORMGETdouble  (2*i ,Cfexphormom      )           ; i=i+1
+          CALL IFORMGETdouble  (2*i ,Cfconhormom      )           ; i=i+1
+          CALL IFORMGETINTEGER (2*i ,JAVATEM          )           ; i=i+1
+          CALL IFORMGETINTEGER (2*i ,javiuplus3D      )           ; i=i+1
+          CALL IFORMGETINTEGER (2*i ,jaqaisq1         )           ; i=i+1
+          CALL IFORMGETdouble  (2*i ,addksources      )           ; i=i+1
+          CALL IFORMGETINTEGER (2*i ,jainirho         )           ; i=i+1
+          CALL IFORMGETINTEGER (2*i ,jaLogprofatubndin)           ; i=i+1
+          CALL IFORMGETINTEGER (2*i ,javau            )           ; i=i+1
+          CALL IFORMGETINTEGER (2*i ,jacomp           )           ; i=i+1
+          CALL IFORMGETdouble  (2*i ,Drop2D           )           ; i=i+1
+          CALL IFORMGETdouble  (2*i ,Drop3D           )           ; i=i+1
+          CALL IFORMGETINTEGER (2*i ,jastructurelayersactive)     ; i=i+1
 
        ENDIF
        CALL IWinClose(1)
