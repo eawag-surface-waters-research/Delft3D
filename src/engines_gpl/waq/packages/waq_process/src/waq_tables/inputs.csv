@@ -17144,7 +17144,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VBSum     ","fS1VB09rel", 198,"Y","x",1
 "VBSum     ","fS2VB09rel", 199,"Y","x",1
 "VBSum     ","fS3VB09rel", 200,"Y","x",1
-"PropSing  ","nTRWPFrac ",   1,"N","x",1
+"PropSing  ","nTRWPprop ",   1,"Y"," ",1
 "PropSing  ","BioFilmDen",   2,"Y","x",1
 "PropSing  ","Diam_Tyre1",   3,"N","x",1
 "PropSing  ","Diam_Tyre2",   4,"N","x",1
@@ -17174,7 +17174,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "PropSing  ","BioFilmXXX",  28,"Y","x",1
 "PropSing  ","BioFilmXXX",  29,"Y","x",1
 "PropSing  ","BioFilmXXX",  30,"Y","x",1
-"PropTagg  ","nTRWP     ",   1,"Y","x",1
+"PropTagg  ","nTRWP     ",   1,"Y"," ",1
 "PropTagg  ","nIM       ",   2,"Y","x",1
 "PropTagg  ","BioFilmThk",   3,"Y","x",1
 "PropTagg  ","BioFilmDen",   4,"Y","x",1
@@ -17192,7 +17192,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "PropTagg  ","Dens_Susp1",  16,"N","x",1
 "PropTagg  ","Dens_Susp2",  17,"N","x",1
 "PropTagg  ","Dens_Susp3",  18,"N","x",1
-"htragg    ","nTRWP     ",   1,"Y","x",1
+"htragg    ","nTRWP     ",   1,"Y"," ",1
 "htragg    ","nIM       ",   2,"Y","x",1
 "htragg    ","Efficiency",   3,"Y","x",1
 "htragg    ","Temp      ",   4,"Y","x",1
@@ -17228,7 +17228,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "htragg    ","VSedIM1   ",  34,"N","x",1
 "htragg    ","VSedIM2   ",  35,"N","x",1
 "htragg    ","VSedIM3   ",  36,"N","x",1
-"SedTyre   ","nTRWP     ",   1,"Y","x",1
+"SedTyre   ","nTRWP     ",   1,"Y"," ",1
 "SedTyre   ","nIM       ",   2,"Y","x",1
 "SedTyre   ","Tau       ",   3,"N","x",1
 "SedTyre   ","Depth     ",   4,"N","x",1
@@ -17253,7 +17253,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "SedTyre   ","VSedTRWP2 ",  23,"N","x",0
 "SedTyre   ","VSedTRWP3 ",  24,"N","x",0
 "SedTyre   ","VSedTRWP4 ",  25,"N","x",0
-"SedTAgg   ","nTRWP     ",   1,"Y","x",1
+"SedTAgg   ","nTRWP     ",   1,"Y"," ",1
 "SedTAgg   ","nIM       ",   2,"Y","x",1
 "SedTAgg   ","Tau       ",   3,"N","x",1
 "SedTAgg   ","Depth     ",   4,"N","x",1
@@ -17307,7 +17307,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "SedTAgg   ","VSedTagg41",  52,"N","x",0
 "SedTAgg   ","VSedTagg42",  53,"N","x",0
 "SedTAgg   ","VSedTagg43",  54,"N","x",0
-"SumTRWP   ","nTRWP     ",   1,"Y","x",1
+"SumTRWP   ","nTRWP     ",   1,"Y"," ",1
 "SumTRWP   ","nIM       ",   2,"Y","x",1
 "SumTRWP   ","Tyre1     ",   3,"N","x",1
 "SumTRWP   ","Tyre2     ",   4,"N","x",1
@@ -17865,7 +17865,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "Prot_Zoo  ","nDumSi_1  ",  92,"Y"," ",1
 "Prot_Zoo  ","Ccell_N1  ",  93,"Y"," ",1
 "Prot_Zoo  ","rNCM_N1   ",  94,"Y"," ",1
-"Prot_Zoo  ","mot_N1    ",  95,"Y"," ",1
+"Prot_Zoo  ","mot_N1    ",  95,"N"," ",1
 "Prot_Zoo  ","PRN1_Z1   ",  96,"Y"," ",1
 "RadioU    ","Uranium   ",   1,"N","x",1
 "RadioU    ","HalflifeU ",   2,"Y"," ",1
