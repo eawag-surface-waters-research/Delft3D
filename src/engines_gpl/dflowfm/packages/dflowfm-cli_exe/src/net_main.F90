@@ -230,7 +230,9 @@
     
 
 #ifdef HAVE_PETSC
-      call startpetsc()
+    if (md_japartition == 0 .and. len_trim(md_ident) > 0) then
+        call startpetsc()
+    end if
 #endif
   
     MODE = 1
@@ -442,8 +444,10 @@
    
 1234 continue
 
-!  finalize before exit
-   call partition_finalize()
+!  finalize before exit in case we did "normal" computation
+   if (md_japartition == 0 .and. len_trim(md_ident) > 0) then
+      call partition_finalize()
+   end if
 
    call klok(tstopall)
 
