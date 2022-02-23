@@ -218,12 +218,13 @@ TInt4 iftype ( char *fname) ;
 /*
     FM_close_nefis_files ();
 */
-/*
+
     *ierror = Clsdat(datfds);
     *ierror = Clsdef(deffds);
-*/
+/*
     *ierror = clnfdt(datfds); /* HACK: use the names directly! */
     *ierror = clnfdf(deffds);
+*/
     return;
 }
 

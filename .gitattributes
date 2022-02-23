@@ -20086,11 +20086,14 @@ src/utils_lgpl/ods/packages/ods/src/m3hbuf.h -text
 src/utils_lgpl/ods/packages/ods/src/mappix.c -text
 src/utils_lgpl/ods/packages/ods/src/mappix.h -text
 src/utils_lgpl/ods/packages/ods/src/mkods -text
+src/utils_lgpl/ods/packages/ods/src/mkods.bat -text
 src/utils_lgpl/ods/packages/ods/src/morbagr.c -text
 src/utils_lgpl/ods/packages/ods/src/morbagr.h -text
 src/utils_lgpl/ods/packages/ods/src/morcom.c -text
 src/utils_lgpl/ods/packages/ods/src/morcom.h -text
+src/utils_lgpl/ods/packages/ods/src/nefis.rsp -text
 src/utils_lgpl/ods/packages/ods/src/o4opt.h -text
+src/utils_lgpl/ods/packages/ods/src/ods.rsp -text
 src/utils_lgpl/ods/packages/ods/src/ods2nef.c -text
 src/utils_lgpl/ods/packages/ods/src/ods2nef.h -text
 src/utils_lgpl/ods/packages/ods/src/ods_bna.c -text
