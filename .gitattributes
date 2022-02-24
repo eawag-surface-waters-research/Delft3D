@@ -1279,7 +1279,6 @@ src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_kernel/compute/setuc
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_kernel/compute/setucxucyucxuucyunew.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_kernel/compute/setucxy1d.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_kernel/compute/setumod.f90 -text
-src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_kernel/compute/setumodnew.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_kernel/compute/setveg.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_kernel/compute/setwindstress.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_kernel/compute/setzcs.f90 -text
