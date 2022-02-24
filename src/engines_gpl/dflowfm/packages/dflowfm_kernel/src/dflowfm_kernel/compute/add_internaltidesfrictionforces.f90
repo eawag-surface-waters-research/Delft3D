@@ -52,7 +52,7 @@
 
 !     compute water depth gradient, based on cell-centered date
       hs = s1-bl
-      call comp_gradC(hs, workx, worky)
+      call comp_gradC(hs, workx, worky)  
 
       !call realloc(plotlin, Ndx, keepExisting=.false.)
       !plotlin = worky
@@ -63,37 +63,37 @@
       do k=1,Ndx
          dum = sqrt(workx(k)**2 + worky(k)**2)
          GradHinUc = workx(k)*ucx(k) + worky(k)*ucy(k)
-         workx(k) =  -FrcInternalTides2D(k) * GradHinUc * workx(k)
+         workx(k) =  -FrcInternalTides2D(k) * GradHinUc * workx(k)           ! (m/s)*(m/s)*( )
          worky(k) =  -FrcInternalTides2D(k) * GradHinUc * worky(k)
 
          if ( hs(k).gt.epshs ) then
 
             if( ITcap.gt.0d0 ) then
 !              limit with ITcap
-               diss = -rho(k)*( workx(k) * ucx(k) + worky(k) * ucy(k) )
+               diss = -rho(k)*( workx(k) * ucx(k) + worky(k) * ucy(k) )      ! (kg/m3)*(m3/s3) = kg/s3
 
-               if ( diss.gt.ITcap ) then
-                  dfac = ITcap/diss
+               if ( diss.gt.ITcap ) then                                     ! (W/m2) = (kg/s3)
+                  dfac = ITcap/diss                                          ! ( )
 
-                  workx(k) = dfac * workx(k)
+                  workx(k) = dfac * workx(k)                                 ! still (m2/s2)
                   worky(k) = dfac * worky(k)
                end if
             end if
 
 !           check time step
 !           estimate eigenvalue
-            Lambda = FrcInternalTides2D(k) * dum**2 / hs(k)
+            Lambda = FrcInternalTides2D(k) * dum**2 / hs(k)                  ! (m/s)*( )/ (m) = (1/s)
             if ( Lambda*dts.gt.1d0 ) then
                dfac = 1d0 / (Lambda*dts)
  !              write(str, "('k = ', I8, ': gamma ||grad H||^2 / H = ', E15.5, ' > 1/Delta t =', E15.5, ', H=', E15.5, ', ||grad H||=', E15.5, ', gamma=', E15.5, ', reduce factor=', E15.5)") k, Lambda, 1d0/dts, hs(k), dum, FrcInternalTides2D(k), dfac
  !              call mess(LEVEL_WARN, trim(str))
 !               ierror = 1
 
-               workx(k) = dfac * workx(k)
-               worky(k) = dfac * worky(k)
+               workx(k) = dfac * workx(k)                                    ! still (m2/s2)
+               worky(k) = dfac * worky(k)                                  
             end if
 
-            DissInternalTidesPerArea(k) = -rho(k)*( workx(k) * ucx(k) + worky(k) * ucy(k) )
+            DissInternalTidesPerArea(k) = -rho(k)*( workx(k) * ucx(k) + worky(k) * ucy(k) )    ! kg/s3
 
 !           add to total internal tides dissipation rate
             if ( jampi.eq.1 ) then
@@ -101,7 +101,7 @@
             end if
 
             if ( k.le.Ndxi ) then   ! do not add fictitious boundary nodes
-               DissInternalTides = DissInternalTides + DissInternalTidesPerArea(k) * ba(k)
+               DissInternalTides = DissInternalTides + DissInternalTidesPerArea(k) * ba(k)     ! W
             end if
          end if
       end do
@@ -125,9 +125,9 @@
             dumx2 = nod2linx(L,2,workx(k2),worky(k2))
             dumy2 = nod2liny(L,2,workx(k2),worky(k2))
 
-            adve(L) = adve(L) - huvli(L) * (  &
-              (acL(L)*dumx1 + (1d0-acL(L))*dumx2) * csu(L) +   &
-              (acL(L)*dumy1 + (1d0-acL(L))*dumy2) * snu(L) )
+            adve(L) = adve(L) - huvli(L) *                                         &
+                                ( (acL(L)*dumx1 + (1d0-acL(L))*dumx2) * csu(L) +   &
+                                  (acL(L)*dumy1 + (1d0-acL(L))*dumy2) * snu(L) )
 
          end if
       end do

@@ -1091,6 +1091,7 @@ subroutine readMDUFile(filename, istat)
     call prop_get_double( md_ptr, 'numerics', 'Drop3D'       , Drop3D)
     call prop_get_integer(md_ptr, 'numerics', 'Lincontin'    , lincontin)
     call prop_get_double (md_ptr, 'numerics', 'Chkadvd'      , chkadvd)
+    call prop_get_double (md_ptr, 'numerics', 'Chkdifd'      , chkdifd)
     call prop_get_double (md_ptr, 'numerics', 'Zwsbtol'      , zwsbtol)
     call prop_get_double (md_ptr, 'numerics', 'Trsh_u1Lb'    , Trsh_u1Lb)
     call prop_get_double (md_ptr, 'numerics', 'Epshstem'     , epshstem)
@@ -2851,6 +2852,10 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
 
     if (writeall .or. Chkadvd .ne. 0.1d0) then
        call prop_set(prop_ptr, 'numerics', 'Chkadvd'  , Chkadvd, 'Check advection terms if depth < chkadvdp, => less setbacks')
+    endif
+
+    if ( writeall .or. Chkdifd .ne. 0.01d0 .and. jatransportautotimestepdiff == 1) then
+       call prop_set(prop_ptr, 'numerics', 'Chkdifd'  , Chkdifd, 'Check diffusion terms if depth < chkdifd, only if jatransportautotimestepdiff==1')
     endif
 
     if (writeall .or. trsh_u1Lb .ne. 0.0d0) then

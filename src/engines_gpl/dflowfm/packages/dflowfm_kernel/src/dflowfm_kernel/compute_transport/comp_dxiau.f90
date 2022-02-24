@@ -33,14 +33,15 @@
 ! compute Au/Dx for diffusive flux
 subroutine comp_dxiAu()                          ! or: setdxiau
    use m_flowgeom , only : ln, Lnx, dxi, wu, Lnxi
-   use m_flow     , only : hs, zws, kmx, Au, hu, jadiffusiononbnd
+   use m_flow     , only : hs, zws, kmx, Au, hu, jadiffusiononbnd, chkdifd
    use m_transport, only : dxiAu, jalimitdtdiff
    use timers
 
    implicit none
 
-   integer :: k1, k2
-   integer :: LL, L, Lb, Lt
+   integer          :: k1, k2
+   integer          :: LL, L, Lb, Lt
+   double precision :: hh
    integer(4) ithndl /0/
 
    if (timon) call timstrt ( "comp_dxiAu", ithndl )
@@ -64,8 +65,11 @@ subroutine comp_dxiAu()                          ! or: setdxiau
             if (au(L) > 0d0) then
                k1 = ln(1,L)
                k2 = ln(2,L)
-               !dxiAu(L) = dxi(L)*wu(L) * min(hs(k1), hs(k2))
-               dxiAu(L) = dxi(L)*wu(L)*min( hs(k1), hs(k2),hu(L) )
+               hh = min( hs(k1), hs(k2),hu(L) )
+               if (chkdifd > 0 .and. hh < chkdifd) then
+                   hh = hh*hh/chkdifd
+               endif
+               dxiAu(L) = dxi(L)*wu(L)*hh
             else
                dxiAu(L) = 0d0
             endif
@@ -77,8 +81,11 @@ subroutine comp_dxiAu()                          ! or: setdxiau
                if (au(L) > 0d0) then
                   k1 = ln(1,L)
                   k2 = ln(2,L)
-                  !dxiAu(L) = dxi(LL)*wu(LL) * min(zws(k1)-zws(k1-1),zws(k2)-zws(k2-1))
-                  dxiAu(L) = dxi(LL)*wu(LL) * min(zws(k1)-zws(k1-1),zws(k2)-zws(k2-1), hu(L)-hu(L-1))
+                  hh =  min( zws(k1)-zws(k1-1), zws(k2)-zws(k2-1), hu(L)-hu(L-1) )
+                  if (chkdifd > 0 .and. hh < chkdifd) then
+                      hh = hh*hh/chkdifd
+                  endif
+                  dxiAu(L) = dxi(LL)*wu(LL)*hh
                else
                   dxiAu(L) = 0d0
                endif

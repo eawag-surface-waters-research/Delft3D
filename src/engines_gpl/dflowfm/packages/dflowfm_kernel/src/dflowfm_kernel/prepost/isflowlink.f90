@@ -43,7 +43,7 @@ SUBROUTINE ISflowlink(XP, YP, LL) ! IS THIS A flow NODE OR A flow LINK ?
  LL = 0
 
  DO L = 1,lnx
-    if (L > lnx1D) then
+    if (L > lnx1D .and. L <= lnxi) then
        k1 = lncn(1,l) ; k2 = lncn(2,L)  ! eigenlijk 3 en 4
        xa = 0.5*(xk(k1) + xk(k2)) ; ya = 0.5*(yk(k1) + yk(k2))
     else

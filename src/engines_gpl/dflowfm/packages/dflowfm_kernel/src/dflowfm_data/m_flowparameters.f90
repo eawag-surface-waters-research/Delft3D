@@ -312,6 +312,7 @@
  double precision                  :: epswav            !< minimum waterdepth for wave calculations
  double precision                  :: chkhuexpl         !< only for step_explicit:  check computed flux beneath this waterdepth
  double precision                  :: chkadvd           !< check advection  for 'drying' below this (upwind) waterdepth
+ double precision                  :: chkdifd           !< check diffusion, only for jatransportautotimestepdiff== 1
  double precision                  :: chkwndd           !< check windstress for 'drying' below this waterdepth
  double precision                  :: chktempdep        !< check heatfluxes for 'drying' below this waterdepth
  double precision                  :: trsh_u1Lb = 0.0d0
@@ -833,6 +834,7 @@ subroutine default_flowparameters()
     epswav     = 1d-2    ! minimum waterdepth for wave calculations
     chkhuexpl  = 0.1d0   ! only for step_explicit:  check computed flux beneath this waterdepth
     chkadvd    = 0.1d0   ! check advection  for 'drying' below this (upwind) waterdepth
+    chkdifd    = 0.01d0  ! check diffusion only for jatransportautotimestepdiff == 1
     chkwndd    = 0.1d0   ! check windstress              below this waterdepth
     chktempdep = 0.1d0   ! check heatfluxes              below this waterdepth
 
