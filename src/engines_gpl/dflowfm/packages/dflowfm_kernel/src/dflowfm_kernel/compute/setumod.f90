@@ -129,11 +129,11 @@ subroutine setumod(jazws0)                          ! set cell center Perot velo
     do L = Lb,Lt
        k1 = ln(1,L) ; k2 = ln(2,L)
 
-       if ( jasfer3D == 1 ) then
-          v(L) =      acL(LL) *(-sn*nod2linx(LL,1,ucx(k1),ucy(k1)) + cs*nod2liny(LL,1,ucx(k1),ucy(k1))) +  &
-                 (1d0-acL(LL))*(-sn*nod2linx(LL,2,ucx(k2),ucy(k2)) + cs*nod2liny(LL,2,ucx(k2),ucy(k2)))
-       else
-          if (iperot /= -1) then
+       if (iperot /= -1) then
+          if ( jasfer3D == 1 ) then
+             v(L) =      acL(LL) *(-sn*nod2linx(LL,1,ucx(k1),ucy(k1)) + cs*nod2liny(LL,1,ucx(k1),ucy(k1))) +  &
+                    (1d0-acL(LL))*(-sn*nod2linx(LL,2,ucx(k2),ucy(k2)) + cs*nod2liny(LL,2,ucx(k2),ucy(k2)))
+          else  
              v(L) =      acl(LL) *(-sn*ucx(k1) + cs*ucy(k1) ) + &
                     (1d0-acl(LL))*(-sn*ucx(k2) + cs*ucy(k2) )
           endif
