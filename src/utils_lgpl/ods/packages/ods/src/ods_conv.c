@@ -222,7 +222,8 @@ ODS_AccumulateData(
       TReal4              misval,        /* I  missing value */
       TInt4             * ndim,          /* I  array with dimensions */
       TReal4            * data,          /* IO accumulative array */
-      TReal4            * data_to_add )  /* I  data to be added */
+      TReal4            * data_to_add,   /* I  data to be added */
+      TReal4              factor      )  /* I  factor to multiply the added data by */
 {
    TInt4 i       ;
    TInt4 k       ;
@@ -246,7 +247,7 @@ ODS_AccumulateData(
          {
             if ( data[i3] != misval && data_to_add[i3] != misval )
             {
-               data[i3] = data[i3] + data_to_add[i3] ;
+               data[i3] = data[i3] + data_to_add[i3] * factor ;
             }
             else
             {

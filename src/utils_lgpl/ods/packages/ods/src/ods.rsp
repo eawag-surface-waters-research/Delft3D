@@ -1,5 +1,5 @@
 -I. -I../include -I../../../../nefis/packages/nefis/include
--DUSE_WINNT -DUSE_VS2005 -DWIN32
+-DUSE_WINNT -DUSE_VS2005 -DWIN32 -DUSE_DLL
 dlwbin.c
 dlwbingr.c
 dlwgrid.c

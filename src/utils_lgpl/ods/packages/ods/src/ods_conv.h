@@ -59,7 +59,8 @@ ODS_AccumulateData(
       TReal4              misval,
       TInt4             * ndim,
       TReal4            * data,
-      TReal4            * data_to_add ) ;
+      TReal4            * data_to_add,
+      TReal4              factor      );
 
 TVoid
 ODS_AccumulateOverTime(
