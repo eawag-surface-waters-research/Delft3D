@@ -30,14 +30,13 @@
 ! $Id$
 ! $HeadURL$
 
-subroutine setumod(jazws0)                          ! set cell center Perot velocities at nodes
+ subroutine setumodnew(jazws0)                          ! set cell center Perot velocities at nodes
                                                      ! set Perot based friction velocities umod at u point
                                                      ! set tangential velocities at u point
                                                      ! set velocity gradient at u point
                                                      ! set corner based Perot velocities
-
- use m_flow
  use timers
+ use m_flow
  use m_flowgeom
  use m_flowtimes
  use m_sferic
@@ -61,13 +60,13 @@ subroutine setumod(jazws0)                          ! set cell center Perot velo
 
  double precision  :: sxw, syw, sf, ac1, ac2, csl, snl, wuw, ustar, suxw, suyw, uin, suxL, suyL
  double precision  :: cs, sn, dxi2, dyi2, sucheck
- double precision  :: chezy2, hhu, rt, hmin
- double precision  :: uu,vv,uucx,uucy, ff, ds, hup, fcor, vcor
+ double precision  :: chezy2, hhu, rt, hmin, hs1, hs2
+ double precision  :: uu,vv,uucx,uucy, ff, ds, hup, fcor, vcor, fcor1, fcor2, fvcor, fvcorab
  double precision  :: dundn, dutdn, dundt, dutdt, shearvar, delty, vksag6, Cz
  double precision  :: umodLL, volu, hul, dzz, adx, hdx, huv, qL, wcxu, wcyu
- double precision, allocatable:: u1_tmp(:)
+ double precision, allocatable:: u1_tmp(:), vluban(:)
 
- integer           :: nw, L1, L2, kbk, k2k, Ld, Lu, kt, Lb, Lt, Lb1, Lt1, Lb2, Lt2, kb1, kb2, ntmp
+ integer           :: nw, L1, L2, kbk, k2k, Ld, Lu, kt, Lb, Lt, Lb1, Lt1, Lb2, Lt2, kb1, kb2, ntmp, m
 
  double precision  :: depumin  ! external
  double precision  :: horvic   ! external
@@ -75,7 +74,7 @@ subroutine setumod(jazws0)                          ! set cell center Perot velo
 
  double precision  :: DRL, nuhroller
 
- double precision  :: dxiAu, vicc
+ double precision  :: dxiAu, vicc, vlban, fcLL
 
  integer :: ini = 0
 
@@ -85,7 +84,7 @@ subroutine setumod(jazws0)                          ! set cell center Perot velo
  double precision, external :: nod2linx, nod2liny, lin2nodx, lin2nody, cor2linx, cor2liny
  double precision, external :: nod2wallx, nod2wally, wall2linx, wall2liny
 
- call timstrt('Umod', handle_umod)
+ call timstrt('Umod new', handle_umod)
  if(jazws0==1 .and. len_trim(md_restartfile)>0) then
    ! This is the moment after the restart file is read and before the first output of the inital info.
    ! At this moment, u0 is used to compute the cell-center velocities. And hs has been computed in flow_initimestep, using s0.
@@ -97,26 +96,26 @@ subroutine setumod(jazws0)                          ! set cell center Perot velo
     if (iperot == -1) then
        call reconst2nd ()
     endif
-    call setucxucyucxuucyu() !reconstruct cell-center velocities
+    call setucxucyucxuucyunew() !reconstruct cell-center velocities
     u1     = u1_tmp
     deallocate(u1_tmp)
+
+    dti = 1d0/dts
  else
-    if (iperot == -1) then
-       call reconst2nd ()
-    endif
-    call setucxucyucxuucyu()
+      if (iperot == -1) then
+         call reconst2nd ()
+      endif
+    call setucxucyucxuucyunew()
  endif
- dti = 1d0/dts
 
- ! set friction velocities umod, tangential velocities v and velocity gradients and windstresses
-
- !$OMP PARALLEL DO                           &
- !$OMP PRIVATE(L,LL,Lb,Lt,k1,k2,cs,sn,hmin,fcor,vcor)
- do LL   = lnx1D+1,lnx
-    hmin = min( hs(ln(1,LL)),hs(ln(2,LL)) )
+ !$OMP PARALLEL DO                                  &
+ !$OMP PRIVATE(LL,Lb,Lt,cs,sn,L,k1,k2)
+ do LL   = lnx1D+1,lnx             ! set tangential velocities v
+    if (hu(LL) == 0) cycle
 
     call getLbotLtop(LL,Lb,Lt)
     cs = csu(LL)  ; sn = snu(LL) ; v(LL) = 0d0
+
     do L = Lb,Lt
        k1 = ln(1,L) ; k2 = ln(2,L)
 
@@ -124,56 +123,161 @@ subroutine setumod(jazws0)                          ! set cell center Perot velo
           v(L) =      acL(LL) *(-sn*nod2linx(LL,1,ucx(k1),ucy(k1)) + cs*nod2liny(LL,1,ucx(k1),ucy(k1))) +  &
                  (1d0-acL(LL))*(-sn*nod2linx(LL,2,ucx(k2),ucy(k2)) + cs*nod2liny(LL,2,ucx(k2),ucy(k2)))
        else
-          if (iperot >= 0) then
-             v(L) =      acl(LL) *(-sn*ucx(k1) + cs*ucy(k1) ) + &
-                    (1d0-acl(LL))*(-sn*ucx(k2) + cs*ucy(k2) )
-          endif
+          v(L) =      acl(LL) *(-sn*ucx(k1) + cs*ucy(k1) ) + &
+                 (1d0-acl(LL))*(-sn*ucx(k2) + cs*ucy(k2) )
        endif
        if (kmx > 0) then
           v(LL) = v(LL) + v(L)*Au(L) ! hk: activate when needed
        endif
-
-       if (icorio > 0) then
-          ! set u tangential
-          if (icorio == 4) then
-                 vcor = v(L)
-          else
-             if ( jasfer3D == 1 ) then
-                 vcor =      acL(LL) *(-sn*nod2linx(LL,1,ucxq(k1),ucyq(k1)) + cs*nod2liny(LL,1,ucxq(k1),ucyq(k1))) +  &
-                        (1d0-acL(LL))*(-sn*nod2linx(LL,2,ucxq(k2),ucyq(k2)) + cs*nod2liny(LL,2,ucxq(k2),ucyq(k2)))
-             else
-                 vcor =      acl(LL) *(-sn*ucxq(k1) + cs*ucyq(k1) ) + &     ! continuity weighted best sofar plus depth limiting
-                        (1d0-acl(LL))*(-sn*ucxq(k2) + cs*ucyq(k2) )
-             endif
-          endif
-
-          if (jsferic == 1) then
-             fcor = fcori(LL)
-          else
-             fcor = fcorio
-          endif
-          if (fcor .ne. 0d0) then
-             if (trshcorio > 0) then
-                if ( hmin < trshcorio) then
-                   fcor = fcor*hmin/trshcorio
-                endif
-             endif
-             adve(L) = adve(L) - fcor*vcor
-          endif
-       endif
-
     enddo
     if (kmx > 0) then
        if ( Au(LL) .gt. 0d0 ) then ! hk: activate if needed
            v(LL) = v(LL) / Au(LL)
        endif
     endif
-
  enddo
-
  !$OMP END PARALLEL DO
 
- !updvertp
+ if (icorio > 0 .and. icorio < 40) then
+    fcor1 = fcorio ; fcor2 = fcorio
+    !x$OMP PARALLEL DO                           &
+    !x$OMP PRIVATE(L,LL,Lb,Lt,k1,k2,cs,sn,hs1,hs2,fcor,fcor1,fcor2,fvcor,vcor,volu,hmin)
+    do LL   = lnx1D+1,lnx
+       if (hu(LL) == 0) cycle
+       n1 = ln(1,LL) ; n2 = ln(2,LL)
+       hmin = min( hs(n1), hs(n2) )
+
+       call getLbotLtop(LL,Lb,Lt)
+       cs = csu(LL)  ; sn = snu(LL)
+
+       if ( jsferic > 0 .or. jacorioconstant > 0 ) then
+           if (icorio >= 4 .and. icorio <= 6) then
+               fcor1 = fcori(LL) ; fcor2 = fcor1      ! defined at u-point
+           else
+               fcor1 = fcori(n1) ; fcor2 = fcori(n2)  ! defined at zeta-points
+           endif
+       endif
+
+       do L = Lb,Lt
+          k1 = ln(1,L) ; k2 = ln(2,L)
+
+          if (icorio > 0) then
+             fvcor = 0d0
+             ! set u tangential
+             if (icorio <= 20) then ! Olga types
+                if ( jasfer3D == 1 ) then
+                    fvcor =      acL(LL) *(-sn*nod2linx(LL,1,ucxq(k1),ucyq(k1)) + cs*nod2liny(LL,1,ucxq(k1),ucyq(k1)))*fcor1 +  &
+                            (1d0-acL(LL))*(-sn*nod2linx(LL,2,ucxq(k2),ucyq(k2)) + cs*nod2liny(LL,2,ucxq(k2),ucyq(k2)))*fcor2
+                else
+                    fvcor =      acl(LL) *(-sn*ucxq(k1) + cs*ucyq(k1) )*fcor1 + &
+                            (1d0-acl(LL))*(-sn*ucxq(k2) + cs*ucyq(k2) )*fcor2
+                endif
+             else                                      ! David types
+                if (icorio <= 26) then                 ! hs/hu
+                   hs1 = hs(n1) ; hs2 = hs(n2)
+                   if (kmx > 0) then
+                      if ( mod(icorio,2) .ne. 0)  then ! odd nrs get local k-weighting
+                         hs1 = zws(k1) - zws(k1-1) ; hs2 = zws(k2) - zws(k2-1)
+                      endif
+                   endif
+                   huv = hu(L)
+                else if (icorio <= 28) then               ! ahus/ahu
+                   hs1 = hus(n1)       ; hs2 = hus(n2)
+                   if (kmx > 0) then
+                      if ( mod(icorio,2) .ne. 0)  then ! odd nrs get local k-weighting
+                         hs1 = hus(k1) ; hs2 = hus(k2)
+                      endif
+                   endif
+                   huv = acl(LL)*hs1 + (1d0-acl(LL))*hs2
+                else if (icorio <= 30) then               ! like advec33
+                   if ( mod(icorio,2) .ne. 0)  then    ! odd nrs get local k-weighting
+                        hs1 = vol1(k1) ; hs2 = vol1(k2)
+                   else
+                        hs1 = vol1(n1) ; hs2 = vol1(n2)
+                   endif
+                   huv = acl(LL)*hs1 + (1d0-acl(LL))*hs2
+                endif
+
+                if (huv > 0) then
+                   if ( jasfer3D == 1 ) then
+                       fvcor =     acL(LL) *(-sn*nod2linx(LL,1,ucxq(k1),ucyq(k1)) + cs*nod2liny(LL,1,ucxq(k1),ucyq(k1)))*fcor1*hs1 +  &
+                              (1d0-acL(LL))*(-sn*nod2linx(LL,2,ucxq(k2),ucyq(k2)) + cs*nod2liny(LL,2,ucxq(k2),ucyq(k2)))*fcor2*hs2
+                   else
+                       fvcor =     acl(LL) *(-sn*ucxq(k1) + cs*ucyq(k1) )*fcor1*hs1 + &
+                              (1d0-acl(LL))*(-sn*ucxq(k2) + cs*ucyq(k2) )*fcor2*hs2
+                   endif
+                   fvcor = fvcor/ huv
+                endif
+
+             endif
+
+             if (trshcorio > 0) then
+                if ( hmin < trshcorio) then
+                    fvcor = fvcor*hmin/trshcorio
+                endif
+             endif
+             adve(L) = adve(L) - fvcor
+
+             if (Corioadamsbashfordfac > 0d0) then
+                if (fvcoro(L) .ne. 0d0) then
+                   adve(L) = adve(L) - Corioadamsbashfordfac* (  fvcor - fvcoro(L)  )
+                endif
+                fvcoro(L) = fvcor
+             endif
+          endif
+
+       enddo
+
+       if (icorio > 0 .and. Corioadamsbashfordfac > 0d0) then
+          fvcoro( Lt+1:Lb+kmxL(LL)-1 ) = 0d0
+       endif
+
+    enddo
+
+ else if (icorio == 45) then
+
+    !do n = 1, size(LLkkk,2)
+    !   L1  = LLkkk(1,n)
+    !   L2  = LLkkk(2,n)
+    !   k1  = LLkkk(3,n)
+    !   k2  = LLkkk(4,n)
+    !   k3  = LLkkk(5,n)
+    !   fcLL =  fcorio*(-csu(L1)*snu(L2) + snu(L1)*csu(L2))
+    !   adve(L1) = adve(L1) + 0.25*fcLL
+    !   adve(L2) = adve(L2) - 0.25*fcLL
+    !enddo
+
+ else if (icorio >= 65) then
+
+    if (.not. allocated(vluban) ) then
+       allocate(vluban(Lnkx))
+    endif
+
+    vluban = 0
+    do m   = 1, mxban                                     ! bz based on netnodes area
+       k   = nban(1,m)
+       n   = nban(2,m)
+       L1  = nban(3,m)
+       L2  = nban(4,m)
+       if (L1 > 0 .and. L2 > 0) then
+          vlban       = banf(m)*hs(k)
+          if (icorio == 66) then
+             hs1      = acl(L1)*hs(ln(1,L1)) + (1d0-acl(L1))*hs(ln(2,L1))
+             hs2      = acl(L2)*hs(ln(1,L2)) + (1d0-acl(L2))*hs(ln(2,L2))
+             vlban    = 0.5d0*(hs1+hs2)
+          endif
+          fcLL        = vlban*fcorio*(-csu(L1)*snu(L2) + snu(L1)*csu(L2))  ! tangential L1 L2
+          adve(L1)    = adve(L1) + u1(L2)*fcLL
+          adve(L2)    = adve(L2) - u1(L1)*fcLL
+          vluban(L1)  = vluban(L1)  + vlban
+          vluban(L2)  = vluban(L2)  + vlban
+       endif
+    enddo
+    do L = 1,Lnx
+       adve(L) = adve(L) / vluban(L)
+    enddo
+ endif
+
 
 ihorvic = 0
 if (vicouv > 0 .or. javiusp == 1 .or. Smagorinsky > 0 .or. Elder > 0 .or. kmx > 0) then
@@ -611,5 +715,4 @@ if (ihorvic > 0 .or. NDRAW(29) == 37) then
 
  call timstop(handle_umod)
 
-
- end subroutine setumod
+ end subroutine setumodnew

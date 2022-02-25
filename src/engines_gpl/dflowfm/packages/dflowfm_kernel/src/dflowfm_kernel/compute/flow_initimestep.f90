@@ -129,11 +129,11 @@
  call timstop(handle_extra(39)) ! End huau
 
  call timstrt('Setumod     ', handle_extra(43)) ! Start setumod
- !if (newcorio == 1) then
- !   call setumodnew(jazws0)
- !else
+ if (newcorio == 1) then
+    call setumodnew(jazws0)
+ else
     call setumod(jazws0)                             ! set cell center velocities, should be here as prior to 2012 orso
- !endif
+ endif
  call timstop(handle_extra(43)) ! End setumod
 
  call timstrt('Set conveyance       ', handle_extra(44)) ! Start cfuhi
