@@ -1145,6 +1145,8 @@ rem ==========================
         
         rem copy binaries and dll 
         call :copyFile "!build_dir!\delpar\!configuration!\delpar.exe"                            !dest_bin!
+
+        call :copyFile "!checkout_src_root!\engines_gpl\part\scripts\run_dpart.bat"                 !dest_scripts!
     )
     
 goto :endproc

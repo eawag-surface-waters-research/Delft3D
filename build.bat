@@ -473,6 +473,9 @@ rem =======================
         xcopy %root%\build_all\x64\Release\dwaq\default             %root%\build_all\x64\dwaq\default\    /E /C /Y /Q > del.log 2>&1
         xcopy %root%\build_all\x64\Release\dwaq\scripts             %root%\build_all\x64\dwaq\scripts\    /E /C /Y /Q > del.log 2>&1
 
+        xcopy %root%\build_all\x64\Release\dpart\bin\delpar.exe     %root%\build_all\x64\dpart\bin\        /E /C /Y /Q > del.log 2>&1
+        xcopy %root%\build_all\x64\Release\dpart\scripts            %root%\build_all\x64\dpart\scripts\    /E /C /Y /Q > del.log 2>&1
+
         xcopy %root%\build_all\x64\Release\dwaves\bin\wave.dll      %root%\build_all\x64\dwaves\bin\      /E /C /Y /Q > del.log 2>&1
         xcopy %root%\build_all\x64\Release\dwaves\bin\wave.exe      %root%\build_all\x64\dwaves\bin\      /E /C /Y /Q > del.log 2>&1
         xcopy %root%\build_all\x64\Release\dwaves\default           %root%\build_all\x64\dwaves\default\  /E /C /Y /Q > del.log 2>&1
