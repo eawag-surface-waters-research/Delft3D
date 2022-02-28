@@ -153,8 +153,8 @@
               mass_tyre = volume_tyre * density_tyre
               mass_susp = volume_susp * density_susp
 
-              ntyre     = ctyre / mass_tyre
-              nsusp     = csusp / mass_susp
+              ntyre = ctyre / max( mass_tyre, tiny(mass_tyre) )
+              nsusp = csusp / max( mass_susp, tiny(mass_susp) )
 
               !
               ! Contributions to the aggregation rate:

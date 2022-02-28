@@ -17146,20 +17146,20 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VBSum     ","fS3VB09rel", 200,"Y","x",1
 "PropSing  ","nTRWPprop ",   1,"Y"," ",1
 "PropSing  ","BioFilmDen",   2,"Y","x",1
-"PropSing  ","Diam_Tyre1",   3,"N","x",1
-"PropSing  ","Diam_Tyre2",   4,"N","x",1
-"PropSing  ","Diam_Tyre3",   5,"N","x",1
-"PropSing  ","Diam_Tyre4",   6,"N","x",1
-"PropSing  ","Diam_Susp1",   7,"N","x",1
-"PropSing  ","Diam_Susp2",   8,"N","x",1
-"PropSing  ","Diam_Susp3",   9,"N","x",1
-"PropSing  ","Dens_Tyre1",  10,"N","x",1
-"PropSing  ","Dens_Tyre2",  11,"N","x",1
-"PropSing  ","Dens_Tyre3",  12,"N","x",1
-"PropSing  ","Dens_Tyre4",  13,"N","x",1
-"PropSing  ","Dens_Susp1",  14,"N","x",1
-"PropSing  ","Dens_Susp2",  15,"N","x",1
-"PropSing  ","Dens_Susp3",  16,"N","x",1
+"PropSing  ","Diam_Tyre1",   3,"Y","x",1
+"PropSing  ","Diam_Tyre2",   4,"Y","x",1
+"PropSing  ","Diam_Tyre3",   5,"Y","x",1
+"PropSing  ","Diam_Tyre4",   6,"Y","x",1
+"PropSing  ","Diam_Susp1",   7,"Y","x",1
+"PropSing  ","Diam_Susp2",   8,"Y","x",1
+"PropSing  ","Diam_Susp3",   9,"Y","x",1
+"PropSing  ","Dens_Tyre1",  10,"Y","x",1
+"PropSing  ","Dens_Tyre2",  11,"Y","x",1
+"PropSing  ","Dens_Tyre3",  12,"Y","x",1
+"PropSing  ","Dens_Tyre4",  13,"Y","x",1
+"PropSing  ","Dens_Susp1",  14,"Y","x",1
+"PropSing  ","Dens_Susp2",  15,"Y","x",1
+"PropSing  ","Dens_Susp3",  16,"Y","x",1
 "PropSing  ","ShapeFac1 ",  17,"Y","x",1
 "PropSing  ","ShapeFac2 ",  18,"Y","x",1
 "PropSing  ","ShapeFac3 ",  19,"Y","x",1
@@ -17178,20 +17178,20 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "PropTagg  ","nIM       ",   2,"Y","x",1
 "PropTagg  ","BioFilmThk",   3,"Y","x",1
 "PropTagg  ","BioFilmDen",   4,"Y","x",1
-"PropTagg  ","Diam_Tyre1",   5,"N","x",1
-"PropTagg  ","Diam_Tyre2",   6,"N","x",1
-"PropTagg  ","Diam_Tyre3",   7,"N","x",1
-"PropTagg  ","Diam_Tyre4",   8,"N","x",1
-"PropTagg  ","Dens_Tyre1",   9,"N","x",1
-"PropTagg  ","Dens_Tyre2",  10,"N","x",1
-"PropTagg  ","Dens_Tyre3",  11,"N","x",1
-"PropTagg  ","Dens_Tyre4",  12,"N","x",1
-"PropTagg  ","Diam_Susp1",  13,"N","x",1
-"PropTagg  ","Diam_Susp2",  14,"N","x",1
-"PropTagg  ","Diam_Susp3",  15,"N","x",1
-"PropTagg  ","Dens_Susp1",  16,"N","x",1
-"PropTagg  ","Dens_Susp2",  17,"N","x",1
-"PropTagg  ","Dens_Susp3",  18,"N","x",1
+"PropTagg  ","Diam_Tyre1",   5,"Y","x",1
+"PropTagg  ","Diam_Tyre2",   6,"Y","x",1
+"PropTagg  ","Diam_Tyre3",   7,"Y","x",1
+"PropTagg  ","Diam_Tyre4",   8,"Y","x",1
+"PropTagg  ","Dens_Tyre1",   9,"Y","x",1
+"PropTagg  ","Dens_Tyre2",  10,"Y","x",1
+"PropTagg  ","Dens_Tyre3",  11,"Y","x",1
+"PropTagg  ","Dens_Tyre4",  12,"Y","x",1
+"PropTagg  ","Diam_Susp1",  13,"Y","x",1
+"PropTagg  ","Diam_Susp2",  14,"Y","x",1
+"PropTagg  ","Diam_Susp3",  15,"Y","x",1
+"PropTagg  ","Dens_Susp1",  16,"Y","x",1
+"PropTagg  ","Dens_Susp2",  17,"Y","x",1
+"PropTagg  ","Dens_Susp3",  18,"Y","x",1
 "htragg    ","nTRWP     ",   1,"Y"," ",1
 "htragg    ","nIM       ",   2,"Y","x",1
 "htragg    ","Efficiency",   3,"Y","x",1
@@ -17204,14 +17204,14 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "htragg    ","Tyre2     ",  10,"N","x",1
 "htragg    ","Tyre3     ",  11,"N","x",1
 "htragg    ","Tyre4     ",  12,"N","x",1
-"htragg    ","Diam_Tyre1",  13,"N","x",1
-"htragg    ","Diam_Tyre2",  14,"N","x",1
-"htragg    ","Diam_Tyre3",  15,"N","x",1
-"htragg    ","Diam_Tyre4",  16,"N","x",1
-"htragg    ","Dens_Tyre1",  17,"N","x",1
-"htragg    ","Dens_Tyre2",  18,"N","x",1
-"htragg    ","Dens_Tyre3",  19,"N","x",1
-"htragg    ","Dens_Tyre4",  20,"N","x",1
+"htragg    ","Diam_Tyre1",  13,"Y","x",1
+"htragg    ","Diam_Tyre2",  14,"Y","x",1
+"htragg    ","Diam_Tyre3",  15,"Y","x",1
+"htragg    ","Diam_Tyre4",  16,"Y","x",1
+"htragg    ","Dens_Tyre1",  17,"Y","x",1
+"htragg    ","Dens_Tyre2",  18,"Y","x",1
+"htragg    ","Dens_Tyre3",  19,"Y","x",1
+"htragg    ","Dens_Tyre4",  20,"Y","x",1
 "htragg    ","VSedTRWP1 ",  21,"N","x",1
 "htragg    ","VSedTRWP2 ",  22,"N","x",1
 "htragg    ","VSedTRWP3 ",  23,"N","x",1
@@ -17219,12 +17219,12 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "htragg    ","IM1       ",  25,"N","x",1
 "htragg    ","IM2       ",  26,"N","x",1
 "htragg    ","IM3       ",  27,"N","x",1
-"htragg    ","Diam_Susp1",  28,"N","x",1
-"htragg    ","Diam_Susp2",  29,"N","x",1
-"htragg    ","Diam_Susp3",  30,"N","x",1
-"htragg    ","Dens_Susp1",  31,"N","x",1
-"htragg    ","Dens_Susp2",  32,"N","x",1
-"htragg    ","Dens_Susp3",  33,"N","x",1
+"htragg    ","Diam_Susp1",  28,"Y","x",1
+"htragg    ","Diam_Susp2",  29,"Y","x",1
+"htragg    ","Diam_Susp3",  30,"Y","x",1
+"htragg    ","Dens_Susp1",  31,"Y","x",1
+"htragg    ","Dens_Susp2",  32,"Y","x",1
+"htragg    ","Dens_Susp3",  33,"Y","x",1
 "htragg    ","VSedIM1   ",  34,"N","x",1
 "htragg    ","VSedIM2   ",  35,"N","x",1
 "htragg    ","VSedIM3   ",  36,"N","x",1
