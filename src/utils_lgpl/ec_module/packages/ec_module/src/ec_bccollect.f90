@@ -317,9 +317,9 @@ module m_ec_bccollect
 
     integer                          ::     ifld 
     integer                          ::     iostat
-    character(len=60),  allocatable  ::     hdrkeys(:)     !< All keys from header
-    character(len=60),  allocatable  ::     hdrvals(:)     !< All values from header
-    character(len=60)                ::     dumstr
+    character(len=256),  allocatable  ::     hdrkeys(:)     !< All keys from header
+    character(len=256),  allocatable  ::     hdrvals(:)     !< All values from header
+    character(len=256)                ::     dumstr
 
     integer                          ::     iq, iq_sel
 
