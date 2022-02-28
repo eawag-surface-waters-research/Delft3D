@@ -76,9 +76,9 @@ implicit none
 !
 ! PLT String sizes
 !
-integer, parameter :: DioMaxParLen    = 80   ! max len of parName string
-integer, parameter :: DioMaxLocLen    = 132  ! max len of locName string
-integer, parameter :: DioMaxDescrLen  = 132  ! max len of descr. string
+integer, parameter :: DioMaxParLen    = 256   ! max len of parName string
+integer, parameter :: DioMaxLocLen    = 256  ! max len of locName string
+integer, parameter :: DioMaxDescrLen  = 256  ! max len of descr. string
 
 !
 ! PLT String sizes for HIS Files
