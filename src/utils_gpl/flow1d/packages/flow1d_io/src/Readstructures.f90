@@ -158,7 +158,7 @@ module m_readstructures
 
       integer                                                :: pos
       integer                                                :: ibin = 0
-      character(len=Charln)                                  :: binfile
+      character(len=Idlen)                                   :: binfile
       logical                                                :: file_exist
       integer                                                :: major, minor, ierr
       
