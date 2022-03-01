@@ -103,7 +103,7 @@ subroutine readIniFile(filename, ini_ptr, filetypename, errmsg, istat)
     call prop_file('ini',trim(filename), ini_ptr, istat_)
     
     ! Handle possible error
-    if (istat_ /= 0) then
+    if (istat_ /= 0 .and. present(errmsg)) then
        write(errmsg, '(a," ''",a,"'' not found. Code: ",i0)') trim(filetypename), trim(filename), istat_
     endif
     if (present(istat)) then
