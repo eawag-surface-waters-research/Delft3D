@@ -62,7 +62,7 @@ subroutine flow_sedmorinit()
     implicit none
 
     logical :: error, have_mudbnd, have_sandbnd, ex, success
-    character(256) , dimension(:), allocatable :: nambnd        ! nambnd: needed for morphological bc
+    character(20) , dimension(:), allocatable :: nambnd        ! nambnd: needed for morphological bc
     character     , dimension(200)            :: mes
     character(12)                             :: chstr !< temporary string representation for chainage
     character(40)                             :: errstr

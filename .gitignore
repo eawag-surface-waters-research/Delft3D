@@ -66,6 +66,7 @@ src/test/engines_gpl/dflowfm/packages/dflowfm_kernel/[Rr]elease
 src/test/engines_gpl/dflowfm/packages/dflowfm_kernel/_Pvt_Extensions
 src/test/engines_gpl/dflowfm/packages/dflowfm_kernel/obj
 src/test/engines_gpl/dflowfm/packages/dflowfm_kernel/project.lock.json
+src/third_party/interacter
 src/third_party_open/openda/tests/bin
 src/third_party_open/openda/tests/test_dll_noise/Release
 src/tools_gpl/agrhyd/packages/agrhyd/include/agrhyd_version.rc
