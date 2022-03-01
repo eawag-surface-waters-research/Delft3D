@@ -230,7 +230,7 @@
     
 
 #ifdef HAVE_PETSC
-    if (md_japartition == 0 .and. len_trim(md_ident) > 0) then
+    if (jampi > 0) then
         call startpetsc()
     end if
 #endif
@@ -445,7 +445,7 @@
 1234 continue
 
 !  finalize before exit in case we did "normal" computation
-   if (md_japartition == 0 .and. len_trim(md_ident) > 0) then
+   if (jampi > 0) then
       call partition_finalize()
    end if
 
