@@ -1120,7 +1120,7 @@ module m_readstructures
       logical,          optional,   intent(inout) :: success     
       
       integer           :: istat   
-      character(CharLn) :: tmpstr, structuretype
+      character(IdLen) :: tmpstr, structuretype
       logical           :: success1
       
       call prop_get_string(md_ptr, '', key, tmpstr, success1)
