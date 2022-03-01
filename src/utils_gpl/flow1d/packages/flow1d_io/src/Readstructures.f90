@@ -93,9 +93,8 @@ module m_readstructures
       type(t_network),  intent(inout)    :: network        !< The network data structure into whose Structure Set the file(s) will be read.
       character(len=*), intent(in   )    :: structurefiles !< File name(s) to be read. Separate multiple files by semicolon: "file with spaces 1.ini;file2.ini;file 3.ini".
    
-      integer  :: isemi, ispace
-      character(len=CharLn) :: file
-      character(len=CharLn) :: inputFiles
+      character(len=IdLen) :: file
+      character(len=IdLen) :: inputFiles
       
       inputFiles = structurefiles
       do while (len_trim(inputfiles) > 0) 
