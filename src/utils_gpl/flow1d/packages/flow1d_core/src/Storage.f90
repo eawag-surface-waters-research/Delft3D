@@ -138,7 +138,7 @@ contains
       
       ! Local variables
       integer istor
-      character(len=CharLn) :: line
+      character(len=IdLen) :: line
 
       ! Program code
       

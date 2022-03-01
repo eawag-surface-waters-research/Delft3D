@@ -66,8 +66,8 @@ module m_GlobalParameters
    !TODO temporary unit to be removed, when finished
    integer, public :: luntrans = 0
 
-   character(len=charln)            :: wlevStateFileIn
-   character(len=charln)            :: wlevStateFileOut
+   character(len=IdLen)            :: wlevStateFileIn
+   character(len=IdLen)            :: wlevStateFileOut
    
    character(len=20)                :: obsIntPolType
 

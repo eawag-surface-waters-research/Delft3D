@@ -89,7 +89,7 @@ module m_readCrossSections
       logical                        :: success
       type(t_CrossSection), pointer  :: pCrs
       type(t_CSType), pointer        :: pCrsDef
-      character(len=Charln)          :: binfile
+      character(len=IdLen)          :: binfile
       logical                        :: file_exist
       integer                        :: pos, ibin
       integer                        :: numcrs
@@ -214,7 +214,7 @@ module m_readCrossSections
       logical :: success
       integer                       :: pos
       integer                       :: ibin = 0
-      character(len=Charln)         :: binfile
+      character(len=IdLen)         :: binfile
       logical                       :: file_exist
       character(len=Idlen)          :: fileVersion
       integer                       :: major 

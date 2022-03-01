@@ -61,7 +61,7 @@ module m_forcinglist
      double precision, pointer        :: targetptr => null() !< Pointer to scalar variable in which the provided
                                                         !< parameter value(s) can later be stored.
                                                         !< For example => pump%capacity.
-    character(Charln)                :: filename        !< Name of file that contains the forcing data (e.g., a time series file).
+    character(IdLen)                :: filename        !< Name of file that contains the forcing data (e.g., a time series file).
   end type
 
   !> An ordered list of structure forcing items.

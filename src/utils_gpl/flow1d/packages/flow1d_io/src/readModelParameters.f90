@@ -50,7 +50,7 @@ module m_readModelParameters
       
       
       type(tree_data), pointer, intent(in)      :: md_ptr
-      character(len=Charln)                     :: sobekSimIniFile
+      character(len=IdLen)                     :: sobekSimIniFile
 
       integer                                   :: iValue
       double precision                          :: Value

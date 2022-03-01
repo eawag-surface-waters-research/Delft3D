@@ -50,7 +50,7 @@ module ModelTypes
         logical          :: writerestart
         logical          :: userestart
         
-        character(len=Charln) :: restartFile
+        character(len=IdLen) :: restartFile
         ! model state variables with dimension of number of points / cells
     end type
 end module

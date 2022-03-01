@@ -89,11 +89,11 @@ contains
       integer                                :: count
       integer                                :: def_type
       logical                                :: success
-      character(len=charLn)                  :: file
+      character(len=IdLen)                  :: file
       double precision                       :: default
 
       integer                                :: ibin = 0
-      character(len=Charln)                  :: binfile
+      character(len=IdLen)                  :: binfile
       logical                                :: file_exist
       integer                                :: istat
       
@@ -244,7 +244,7 @@ contains
       type(t_roughnessSet), intent(inout)    :: rgs        !< Roughness set
       type(t_branchSet), intent(in)          :: brs        !< Branches
       type(t_spatial_dataSet), intent(inout) :: spdata     !< Spatial data set
-      character(len=charLn), intent(in)      :: inputfile  !< Name of the input file
+      character(len=IdLen), intent(in)      :: inputfile  !< Name of the input file
       double precision, intent(inout)        :: default    !< Default friction parameter
       integer, intent(inout)                 :: def_type   !< Default friction type
    
@@ -298,7 +298,7 @@ contains
       type(t_roughnessSet), intent(inout)    :: rgs        !< Roughness set
       type(t_branchSet), intent(in)          :: brs        !< Branches
       type(t_spatial_dataSet), intent(inout) :: spdata     !< Spatial data set
-      character(len=charLn), intent(in)      :: inputfile  !< Name of the input file
+      character(len=IdLen), intent(in)      :: inputfile  !< Name of the input file
       double precision, intent(inout)        :: default    !< Default friction parameter
       integer, intent(inout)                 :: def_type   !< Default friction type
       
@@ -331,7 +331,7 @@ contains
       
       character(len=Idlen)                   :: fricType
       character(len=Idlen)                   :: funcType
-      character(len=Charln)                  :: frictionValuesFileName
+      character(len=IdLen)                  :: frictionValuesFileName
      
       count = 0
       if (associated(tree_ptr%child_nodes)) then
@@ -531,7 +531,7 @@ contains
       type(t_roughnessSet), intent(inout)    :: rgs        !< Roughness set
       type(t_branchSet), intent(in)          :: brs        !< Branches
       type(t_spatial_dataSet), intent(inout) :: spdata     !< Spatial data set
-      character(len=charLn), intent(in)      :: inputfile  !< Name of the input file
+      character(len=IdLen), intent(in)      :: inputfile  !< Name of the input file
       double precision, intent(inout)        :: default    !< Default friction parameter
       integer, intent(inout)                 :: def_type   !< Default friction type
       

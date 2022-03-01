@@ -388,7 +388,7 @@ contains
 
       ! local variables
       type(t_quantityStatistics), pointer         :: quant
-      character(len=CharLn)                       :: line
+      character(len=IdLen)                       :: line
       integer i
 
       !program code

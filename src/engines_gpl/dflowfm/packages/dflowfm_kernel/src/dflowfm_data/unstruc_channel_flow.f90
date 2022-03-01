@@ -39,7 +39,7 @@ integer                       :: CSCalculationOption  !< Calculation option for 
 logical,                public :: useVolumeTables                    !< Indicates whether 1d volume tables are useds
 double precision,       public :: tableIncrement                     !< Increment for volume tables
 logical,                public :: useVolumeTableFile                 !< Write the volume tables to file (or not)
-character(len=charln),  public :: volumeTableFile                    !< Name of the table input file
+character(len=IdLen),  public :: volumeTableFile                    !< Name of the table input file
 
 contains
 

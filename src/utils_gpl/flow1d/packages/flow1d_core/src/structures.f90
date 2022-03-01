@@ -485,7 +485,7 @@ end subroutine deallocstructure
 !
 ! Local variables
 !
-      character(CharLn)                   :: line
+      character(IdLen)                   :: line
 !
 !
 !! executable statements -------------------------------------------------------
@@ -576,7 +576,7 @@ end subroutine deallocstructure
 !
 ! Local variables
 !
-      character(CharLn)                   :: line
+      character(IdLen)                   :: line
 !
 !
 !! executable statements -------------------------------------------------------
