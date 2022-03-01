@@ -89,7 +89,7 @@ subroutine rdstm(stm, griddim, filsed, filmor, filtrn, &
     integer                     , intent(in)  :: lsec
     logical                     , intent(in)  :: lfbedfrm
     integer                     , intent(in)  :: julrefday
-    character(20) , dimension(:), intent(in)  :: nambnd
+    character(256) , dimension(:), intent(in)  :: nambnd
     character(*)                , intent(in)  :: dtunit
     logical                     , intent(out) :: error
 !
