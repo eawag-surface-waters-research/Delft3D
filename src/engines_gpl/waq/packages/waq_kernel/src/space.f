@@ -137,7 +137,7 @@
      +             J(IALEN:),J(IAKND:),J(IADM1:), J(IADM2:), J(IADM3:),
      +             CNAME, ITOTI, PART )
 !
-!     Set the integer array workspace
+!     Set the character array workspace
 !
       CALL DHMMCA( LUNREP   ,L_DECL   ,J(IAPOI:), J(IATYP:), J(IABYT:),
      +             J(IALEN:),J(IAKND:),J(IADM1:), J(IADM2:), J(IADM3:),
@@ -173,7 +173,7 @@
       IMAXC = ITOTC
 
 !
-!     Allocate the arrays, first C then J then A for least memory requiremnt
+!     Allocate the arrays, first C then J then A for least memory requirement
 !
 
       IF ( L_DECL ) THEN
