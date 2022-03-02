@@ -47,9 +47,10 @@ subroutine furu()                                   ! set fu, ru and kfs
  implicit none
 
  integer          :: L, n, k1, k2, kb, LL, k, itu1, Lb, Lt, itpbn, i
+ integer          :: kup, kdo, iup
 
  double precision :: bui, cu, du, du0, gdxi, ds
- double precision :: slopec, hup, u1L, v2, frL, u1L0, zbndun, zbndu0n
+ double precision :: slopec, hup, hdo, u1L, v2, frL, u1L0, zbndun, zbndu0n
  double precision :: qk0, qk1, dzb, hdzb, z00  !
  double precision :: st2
  double precision :: twot = 2d0/3d0, hb, h23, ustbLL, agp, vLL
@@ -206,13 +207,26 @@ subroutine furu()                                   ! set fu, ru and kfs
        vp    = 0d0
        do n  = L1pumpsg(np), L2pumpsg(np)
           k1 = kpump(1,n)
+          k2 = kpump(2,n)
           L1 = kpump(3,n)
           L  = iabs(L1)
           hu(L) = 0d0; au(L) = 0d0
           fu(L) = 0d0; ru(L) = 0d0
-          if (hs(k1) > 1d-2 .and. ispumpon(np,s1(k1)) == 1) then
-             hu(L) = 1d0
-             au(L) = 1d0
+          if (qp*L1 > 0) then
+             kup = k1
+             kdo = k2
+             iup = 1
+          else
+             kup = k2
+             kdo = k1
+             iup = 2
+          end if
+
+          if (hs(kup) > 1d-2 .and. ispumpon(np,s1(kup)) == 1) then
+             hup   = s1(kup) - bob0(iup,L)
+             hdo   = s1(kdo) - bob0(3-iup,L) 
+             hu(L) = max(hup,hdo)    ! 1d0
+             au(L) = wu(L)*hu(L)     ! 1d0
              ap    = ap + au(L)
              vp    = vp + vol1(k1)
           endif
@@ -223,11 +237,9 @@ subroutine furu()                                   ! set fu, ru and kfs
 
        if (ap > 0d0) then
           do n  = L1pumpsg(np), L2pumpsg(np)
-             k1 = kpump(1,n)
-             if (hs(k1) > 1d-2) then
-                L1 = kpump(3,n)
-                L  = iabs(L1)
-                fu(L) = 0d0
+             L1 = kpump(3,n)
+             L  = iabs(L1)
+             if (au(L) > 0d0) then
                 if (L1 > 0) then
                     ru(L) =  qp/ap
                 else
