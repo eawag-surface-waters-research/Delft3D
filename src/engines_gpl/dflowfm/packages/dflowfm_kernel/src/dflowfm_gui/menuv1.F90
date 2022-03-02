@@ -127,7 +127,7 @@
       OPTION(26)= '                                        '
       OPTION(27)= 'Do 1 FLOW step                          '
       OPTION(28)= 'MAKECOARSE2FINETRIANGLECONNECTIONCELLS  '
-      OPTION(29)= 'Renumber nodes                          '
+      OPTION(29)= '                                        '
       OPTION(30)= 'Flip links                              '
       OPTION(31)= 'Coarsen mesh                            '
       OPTION(32)= 'Grow curvilinear grid from splines      '
