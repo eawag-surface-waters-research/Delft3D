@@ -33,7 +33,7 @@
 !> check if structures on flowlinks are unique
 subroutine check_structures_and_fixed_weirs()
    use m_flowgeom, only: Lnx
-   use m_flowexternalforcings, only: ncgensg, kcgen, L1cgensg, L2cgensg
+   use m_flowexternalforcings, only: ncgensg, kcgen, L1cgensg, L2cgensg, cgen_ids
    use m_fixedweirs, only: nfxw, lnfxw
    use unstruc_messages
    implicit none
@@ -76,7 +76,7 @@ subroutine check_structures_and_fixed_weirs()
          else
 !           flowlink is not free
             nummulti = nummulti+1
-            write(msg, "('Flowlink ', I0, ' found in structure ', I0, ' already claimed by structure ', I0, '.')") Lf, n, L2struct(Lf)
+            write(msg, "('Flowlink ', I0, ' found in structure ', A, ' already claimed by structure ', A, '.')") Lf, trim(cgen_ids(n)), trim(cgen_ids(L2struct(Lf)))
             call mess(LEVEL_WARN, trim(msg))
          end if
 
@@ -84,7 +84,7 @@ subroutine check_structures_and_fixed_weirs()
          if ( L2weir(Lf).ne.0 ) then
 !           flowlink is associated with fixed weir
             numweir = numweir+1
-            write(msg, "('Flowlink ', I0, ' found in structure ', I0, ' already claimed by fixed weir.')") Lf, n
+            write(msg, "('Flowlink ', I0, ' found in structure ', A, ' already claimed by fixed weir.')") Lf, trim(cgen_ids(n))
             call mess(LEVEL_WARN, trim(msg))
          end if
       end do
