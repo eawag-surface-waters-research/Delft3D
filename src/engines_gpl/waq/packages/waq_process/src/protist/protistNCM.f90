@@ -155,8 +155,8 @@ use ieee_arithmetic
     maxNrPr   = PMSA(ipnt(   5 ))   !   nr of prey species implemented                         (-)
     nrFlSp    = PMSA(ipnt(   6 ))   !   nr of fluxes per individual species                    (-)  
     nrOutSp   = PMSA(ipnt(   7 ))   !   nr of output items per individual species              (-)  
-    nrSp_par  = PMSA(ipnt(  11 ))   !   nr of parameters per species                           (-)
-    iSp       = PMSA(ipnt(  12 ))   !   selector of species parameter (needed to share code with for protistCM)   (-)
+    nrSp_par  = PMSA(ipnt(  12 ))   !   nr of parameters per species                           (-)
+    iSp       = PMSA(ipnt(  13 ))   !   selector of species parameter (needed to share code with for protistCM)   (-)
 
     ! allocation of prey input array
     call allocate_prot_array(prot_array,maxNrPr)
@@ -175,7 +175,7 @@ use ieee_arithmetic
             Temp      = PMSA(ipnt(   8 ))  !    temperature                                            (C)      
             PFD       = PMSA(ipnt(   9 ))  !    from rad to photon flux density                        (umol photon m-2)           
             atten     = PMSA(ipnt(  10 ))  !    attenuation of light by water + plankton Chl           (-)                            
-            exat      = EXP(-atten)       !    -ve exponent of attenuation                            (-)    
+            exat      = PMSA(ipnt(  11 ))  !    -ve exponent of attenuation                            (-) 
       
         ! species loop
         speciesLoop: do iSpec = 0, (nrSp-1)

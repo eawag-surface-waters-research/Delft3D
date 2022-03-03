@@ -188,7 +188,7 @@ use ieee_arithmetic
         Temp         = PMSA(ipnt( 12 ))  !    ambient water temperature                              (oC)               
         PFD          = PMSA(ipnt( 13 ))  !    from rad to photon flux density                        (umol photon m-2)           
         atten        = PMSA(ipnt( 14 ))  !    attenuation of light by water + plankton Chl           (-)                            
-        exat         = EXP(-atten)       !    -ve exponent of attenuation                            (-)    
+        exat         = PMSA(ipnt( 15 ))  !    -ve exponent of attenuation                            (-)    
                       
         ! species loop
         speciesLoop: do iSpec = 0, (nrSp-1)

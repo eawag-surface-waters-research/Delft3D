@@ -23,7 +23,7 @@
 
 
     ! 6 char name for process mathc with second line of PDF  
-subroutine PROPFD     ( pmsa   , fl     , ipoint , increm, noseg , &                            
+subroutine PROATT     ( pmsa   , fl     , ipoint , increm, noseg , &                            
                             noflux , iexpnt , iknmrk , noq1  , noq2  , &                            
                             noq3   , noq4   )     
 !                                                                                                     
@@ -33,7 +33,7 @@ subroutine PROPFD     ( pmsa   , fl     , ipoint , increm, noseg , &
 !                                                                                                     
 !     Type    Name         I/O Description                                                            
 !          
-    integer, parameter :: plen = 3 ! total length of the PMSA input and output array
+    integer, parameter :: plen = 7 ! total length of the PMSA input and output array
     real(4) pmsa(*)      ! I/O Process Manager System Array, window of routine to process library     
     real(4) fl(*)        ! O  Array of fluxes made by this process in mass/volume/time               
     integer ipoint(plen) ! I  Array of pointers in pmsa to get and store the data                    
@@ -59,10 +59,14 @@ subroutine PROPFD     ( pmsa   , fl     , ipoint , increm, noseg , &
  
      ! input state variables
     real   Rad     ! irradiation at the segment upper-boundary              (W/m2)        
+    real   ExtVl   ! total extinction coefficient visible light             (1/m)         
+    real   Depth   ! depth of segment                                       (m) 
     
      !auxiliaries
     real   PARRAD  ! from RAd to PARRAD
-    real   PFD     ! from rad to photon flux density                        (umol photon m-2)            
+    real   PFD     ! from rad to photon flux density                        (umol photon m-2) 
+    real   atten   ! attenuation of light by water + plankton Chl           (-)              
+    real   exat    ! -ve exponent of attenuation                            (-)              
     
 !                                                                                                     
 !******************************************************************************* 
@@ -77,16 +81,25 @@ subroutine PROPFD     ( pmsa   , fl     , ipoint , increm, noseg , &
         if (ikmrk1.eq.1) then
             
         Rad          = PMSA(ipnt(  1 ))  !    irradiation at the segment upper-boundary              (W/m2)                          
-
+        ExtVl        = PMSA(ipnt(  2 ))  !    total extinction coefficient visible light             (1/m)               
+        Depth        = PMSA(ipnt(  3 ))  !    depth of segment                                       (m)
+           
         ! calculate light availability in segment
         ! from RAD [W/m2] to PARRAD [W/m2]
         PARRAD = RAD * 0.45 
         ! 1 W/m2 = 4.57 umol photons m-2 s-1
         PFD = PARRAD * 4.57 ! from PARRAD to PFD
            
-        ! segment dependent, but species independent output
-        PMSA(ipnt( 2 ))  =  PFD   
-        PMSA(ipnt( 3 ))  =  PARRAD
+        !attenuation    MLD*(attco_W+abcoChl*algChl)    (-)   attenuation of light by water and by phytoplankton Chl 
+        atten = depth * ExtVL                           
+        !exat   (-)    -ve exponent of attenuation     
+        exat = exp(-atten)
+           
+        ! segemnt dependent, but species independent output
+        PMSA(ipnt( 4 ))  =  PFD   
+        PMSA(ipnt( 5 ))  =  atten 
+        PMSA(ipnt( 6 ))  =  exat  
+        PMSA(ipnt( 7 ))  =  PARRAD
             
         endif ! end if check for dry cell 
 
