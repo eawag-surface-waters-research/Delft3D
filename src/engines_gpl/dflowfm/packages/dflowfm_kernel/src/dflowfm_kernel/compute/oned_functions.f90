@@ -601,15 +601,13 @@ module m_oned_functions
                 
       double precision     :: s1k1
       double precision     :: s1k2
-      double precision     :: hup, hdo
       double precision     :: qp
       double precision     :: ap
       double precision     :: vp1, vp2, vp
       integer              :: L   
-      integer              :: L0, L1
+      integer              :: L0   
       integer              :: k1   
       integer              :: k2
-      integer              :: kup, kdo, iup
       integer              :: dir
 
       ! First compute average waterlevels on suction side and delivery side of the pump
@@ -635,13 +633,14 @@ module m_oned_functions
             k2 = ln(1,L)
          endif
          
-         if (hs(k1) > 1d-2) then ! Checking k1 is not really correct here: depending on dir+qpump, it's either k1, or k2, but qpump is not yet known.
-            ! NOTE: water level weighting across links is uniform for all links.
-            ap    = ap + 1d0
+         if (hs(k1) > 1d-2) then
+            ! NOTE: pump area-weighting across links is uniform for all links (au=1).
+            au(L) = 1d0
+            ap    = ap + au(L)
             vp1    = vp1 + vol1(k1)
             vp2    = vp2 + vol1(k2)
-            s1k1 = s1k1 + s1(k1)
-            s1k2 = s1k2 + s1(k2)
+            s1k1 = s1k1 + au(L)*s1(k1)
+            s1k2 = s1k2 + au(L)*s1(k2)
          endif
       enddo
       
@@ -672,58 +671,38 @@ module m_oned_functions
       else
 
          ! Limit the pump discharge in case the volume in the cells at the suction side is limited.
-         if (abs(qp) > 0.9d0*vp/dts) then
+          if (abs(qp) > 0.9d0*vp/dts) then
             qp = sign(0.9d0*vp/dts, qp)
          endif
          
-         ! Compute total pump flow area
-         ap = 0d0
          do L0  = 1, struct%numlinks
             L = struct%linknumbers(L0)
             dir = int(sign(1d0, L*qp)) ! Includes both pumping direction and flow link w.r.t. structure spatial orientation.
             L = iabs(L)
-            hu(L) = 0d0; au(L) = 0d0
-            fu(L) = 0d0; ru(L) = 0d0
             if ( dir > 0) then         
-               kup = ln(1,L)
-               kdo = ln(2,L)
-               iup = 1
+               k1 = ln(1,L)
             else
-               kup = ln(2,L)
-               kdo = ln(1,L)
-               iup = 2
+               k1 = ln(2,L)
             endif
          
-            if (hs(kup) > 1d-2) then
-               hup   = s1(kup) - bob(iup,L)
-               hdo   = s1(kdo) - bob(3-iup,L) 
-               hu(L) = max(hup,hdo)    ! 1d0
-               au(L) = wu(L)*hu(L)     ! 1d0
-               ap    = ap + au(L)
-            end if
+            if (hs(k1) > 1d-2) then
+               struct%fu(L0) =  0d0
+               struct%ru(L0) =  qp/ap
+               struct%au(L0) =  ap
+            else 
+               struct%fu(L0) = 0d0
+               struct%ru(L0) = 0d0
+               struct%au(L0) = 0d0
+            endif
          enddo
-
-         if (ap > 0d0) then
-            do L0  = 1, struct%numlinks
-               L1 = struct%linknumbers(L0)
-               L = iabs(L1)
-               if (au(L) > 0d0) then
-                  if (L1 > 0) then
-                      ru(L) =  qp/ap
-                  else
-                      ru(L) = -qp/ap
-                  endif
-               endif
-               struct%fu(L0) = fu(L)
-               struct%ru(L0) = ru(L)
-               struct%au(L0) = au(L)
-            enddo
-         else
-            struct%fu(:) = 0d0
-            struct%ru(:) = 0d0
-            struct%au(:) = 0d0
-         endif
       endif
+      
+      do L0  = 1, struct%numlinks
+         L = iabs(struct%linknumbers(L0))
+         fu(L) = struct%fu(L0)
+         ru(L) = struct%ru(L0)
+         au(L) = struct%au(L0)
+      enddo
 
    end subroutine computePump_all_links
 
