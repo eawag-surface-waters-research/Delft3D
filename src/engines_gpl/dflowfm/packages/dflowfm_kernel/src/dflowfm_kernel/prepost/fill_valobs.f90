@@ -108,7 +108,7 @@ subroutine fill_valobs()
             nlayb = 1
          end if
 
-         if (jawave>0) then
+         if (jawave > 0 .and. .not. flowWithoutWaves) then
             wa = 0d0
             call linkstocentercartcomp(k,ustokes,wa)      ! wa now 2*1 value or 2*1 vertical slice
          endif
@@ -309,14 +309,16 @@ subroutine fill_valobs()
                valobs(IPNT_UCY+klay-1,i) = worky(kk)
             endif
 
-            if (jawave>0 .and. hs(k)>epshu) then
-               if (kmx==0) then
-                  kk_const = 1
-               else
-                  kk_const = klay
+            if (jawave > 0 .and. .not. flowWithoutWaves) then
+               if (hs(k)>epshu) then
+                  if (kmx==0) then
+                     kk_const = 1
+                  else
+                     kk_const = klay
+                  endif
+                  valobs(IPNT_UCXST+klay-1,i) = wa(1,kk_const)
+                  valobs(IPNT_UCYST+klay-1,i) = wa(2,kk_const)
                endif
-               valobs(IPNT_UCXST+klay-1,i) = wa(1,kk_const)
-               valobs(IPNT_UCYST+klay-1,i) = wa(2,kk_const)
             endif
 
             if ( kmx>0 ) then
