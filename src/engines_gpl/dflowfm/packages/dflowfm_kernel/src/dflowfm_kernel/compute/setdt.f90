@@ -78,7 +78,8 @@ subroutine setdt()
      call setdtmaxavalan(dts)
    end if
 
-   dti = 1d0/dts
+!  The next statement is wrong and should be at the end of this subroutine (UNST-5838)
+!  dti = 1d0/dts
    dtsc = dts
 
 !  account for user time step
@@ -128,6 +129,9 @@ subroutine setdt()
 
    call timestepanalysis(dtsc_loc)
 
+!  This is the correct location for computing DTI (UNST-5838)
+   dti = 1d0/dts
+   
    if ( jaGUI.eq.1 ) then
       call tekcflmx()
    endif
