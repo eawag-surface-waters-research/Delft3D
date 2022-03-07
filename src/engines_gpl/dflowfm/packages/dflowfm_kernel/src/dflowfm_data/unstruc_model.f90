@@ -73,6 +73,7 @@ implicit none
     integer, parameter :: ExtfileNewMinorVersion = 1
     ! History ExtfileNewVersion:
     ! 2.00 (2019-08-06): enabled specifying "nodeId" in a 1D network node.
+    ! 2.01 (2019-12-04): optional fields targetMaskFile and targetMaskInvert for [Meteo] blocks.
 
 
     !> The version number of the 1D2DFile format: d.dd, [config_major].[config_minor], e.g., 1.03
