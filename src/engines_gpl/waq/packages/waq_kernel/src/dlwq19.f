@@ -912,7 +912,7 @@
             do k = 1, nowst
                if ( iseg2 .eq. iwaste(k) ) then
                   do isys = 1, nosys
-                     wstdmp(isys,k,2) = wstdmp(isys,k,2) - q*conc(isys,iseg)
+                     wstdmp(isys,k,2) = wstdmp(isys,k,2) + q*conc(isys,iseg)
                   enddo
                   exit
                endif
@@ -1320,7 +1320,7 @@
                do k = 1, nowst
                   if ( iseg .eq. iwaste(k) ) then
                      do isys = 1, nosys
-                        wstdmp(isys,k,2) = wstdmp(isys,k,2) - q*dconc2(isys,iseg)
+                        wstdmp(isys,k,2) = wstdmp(isys,k,2) + q*dconc2(isys,iseg)
                      enddo
                      exit
                   endif
