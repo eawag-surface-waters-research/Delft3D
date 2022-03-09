@@ -203,6 +203,15 @@ subroutine setbobsonroofs( )      ! override bobs along pliz's
        endif
     enddo
 
+    do L  = 1,lnxi 
+       if (kcu(L) == 2) then
+           n1 = ln(1,L) ; n2  = ln(2,L)
+           bob(1,L) = max(bob(1,L),bl(n1),bl(n2)) 
+           bob(2,L) = max(bob(2,L),bl(n1),bl(n2)) 
+           bob0(:,L) = bob(:,L)
+       endif
+    enddo 
+
  endif
 
  nt2 = 0
