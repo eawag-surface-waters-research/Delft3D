@@ -901,6 +901,7 @@ module m_ec_filereader_read
          integer                             :: idvar_q       !< id as obtained from NetCDF
          integer                             :: ntimes        !< number of times on the NetCDF file
          integer                             :: read_index    !< index of field to read
+         real(hp)                            :: tim           !< instantanious time
          real(hp), dimension(:), allocatable :: times         !< time array read from NetCDF
          character(NF90_MAX_NAME)            :: string        !< to catch NetCDF messages
          !
@@ -942,6 +943,11 @@ module m_ec_filereader_read
             call setECMessage("Allocation error in ec_filereader_read::ecNetcdfReadBlock.")
             return
          endif
+         ! Parse refdate and tunit to reconstruct mjd from netcdf timestep vector
+         string = '' ! NetCDF does not completely overwrite a string, so re-initialize.
+         if (.not. ecSupportNetcdfCheckError(nf90_get_att(fileReaderPtr%fileHandle, idvar_time, "units", string), "obtain units", fileReaderPtr%fileName)) return
+         if (.not. ecSupportTimestringToUnitAndRefdate(string, fileReaderPtr%tframe%ec_timestep_unit, fileReaderPtr%tframe%ec_refdate, &
+                                                              tzone = fileReaderPtr%tframe%ec_timezone)) return
          ierror = nf90_get_var(fileReaderPtr%fileHandle, idvar_time, times, start=(/1/), count=(/ntimes/)); success = ecSupportNetcdfCheckError(ierror, "get_var time", fileReaderPtr%fileName)
          !
          ! Search in times the first time bigger than lastReadTime
@@ -973,13 +979,15 @@ module m_ec_filereader_read
             endif
             !
             ! T0
-            if (t0t1==0) then
-               item1%sourceT0FieldPtr%timesteps = times(read_index)
+            if (t0t1==0) then   ! JRE: needed to be changed to mjd because of use in ecItemUpdateSourceItem
+               tim=fileReaderPtr%tframe%ec_refdate + times(read_index) * ecSupportTimeUnitConversionFactor(fileReaderPtr%tframe%ec_timestep_unit) / 86400.0_hp - fileReaderPtr%tframe%ec_timezone / 24.0_hp
+               item1%sourceT0FieldPtr%timesteps = tim
                ierror = nf90_get_var(fileReaderPtr%fileHandle, idvar_q, item1%sourceT0FieldPtr%arr1dPtr, start=(/ 1, read_index /), count = (/ n, 1 /))
                success = ecSupportNetcdfCheckError(ierror, "get_var "//item1%quantityPtr%name, fileReaderPtr%fileName)
             ! ===== T1 =====
             else if(t0t1==1) then
-               item1%sourceT1FieldPtr%timesteps = times(read_index)
+               tim=fileReaderPtr%tframe%ec_refdate + times(read_index) * ecSupportTimeUnitConversionFactor(fileReaderPtr%tframe%ec_timestep_unit) / 86400.0_hp - fileReaderPtr%tframe%ec_timezone / 24.0_hp
+               item1%sourceT1FieldPtr%timesteps = tim
                ierror = nf90_get_var(fileReaderPtr%fileHandle, idvar_q, item1%sourceT1FieldPtr%arr1dPtr, start=(/ 1, read_index /), count = (/ n, 1 /))
                success = ecSupportNetcdfCheckError(ierror, "get_var "//item1%quantityPtr%name, fileReaderPtr%fileName)
             else
