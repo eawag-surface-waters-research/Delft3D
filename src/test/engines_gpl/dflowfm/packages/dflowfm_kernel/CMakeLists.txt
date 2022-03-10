@@ -34,12 +34,10 @@ if(UNIX)
                             libsigwatch
                             md5digest
                             md5
-                            metisoptions
                             morphology_data
                             morphology_io
                             morphology_kernel
                             morphology_plugins_c
-                            nefis
                             polypack
                             trachytopes_io
                             trachytopes_kernel
@@ -61,8 +59,7 @@ if(UNIX)
          Threads::Threads
          PkgConfig::NETCDF
          PkgConfig::NETCDF_FTN
-         PkgConfig::PETSC
-         "metis")
+         PkgConfig::PETSC)
 
     set_property(TARGET ${executable_name} PROPERTY LINKER_LANGUAGE Fortran)
 endif(UNIX)
@@ -87,13 +84,10 @@ if(WIN32)
                          libsigwatch
                          md5digest
                          md5
-                         metis
-                         metisoptions
                          morphology_data
                          morphology_io
                          morphology_kernel
                          morphology_plugins_c
-                         nefis
                          netcdf4
                          netcdff
                          petsc
