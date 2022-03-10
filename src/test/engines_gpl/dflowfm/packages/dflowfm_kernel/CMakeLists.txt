@@ -59,7 +59,8 @@ if(UNIX)
          Threads::Threads
          PkgConfig::NETCDF
          PkgConfig::NETCDF_FTN
-         PkgConfig::PETSC)
+         PkgConfig::PETSC
+         "metis")
 
     set_property(TARGET ${executable_name} PROPERTY LINKER_LANGUAGE Fortran)
 endif(UNIX)
