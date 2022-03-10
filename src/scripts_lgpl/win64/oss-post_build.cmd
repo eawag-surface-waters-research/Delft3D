@@ -287,9 +287,7 @@ rem =============================================================
     call :copyFile "!checkout_src_root!\third_party_open\GISInternals\release-1911-x64\bin\iconv.dll"                        !dest_bin!
     call :copyFile "!checkout_src_root!\third_party_open\GISInternals\release-1911-x64\bin\geos.dll"                         !dest_bin!
     call :copyFile "!checkout_src_root!\third_party_open\GISInternals\release-1911-x64\bin\freexl.dll"                       !dest_bin!
-    rem pthreads depends on MSVCR100.DLL
-    call :copyFile "!checkout_src_root!\third_party_open\vcredist\x64\Microsoft.VC100.CRT\msvcr100.dll"                      !dest_bin!
-    
+
 
     if !compiler_redist_dir!=="" (
         rem Compiler_dir not set
