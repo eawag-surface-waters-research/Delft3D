@@ -159,9 +159,6 @@
       call mpi_comm_size(DFM_COMM_DFMWORLD,numranks,ierr)
    end if
 
-   write(*,*) ' my_rank, numranks ', my_rank, numranks
-
-
    if ( numranks.le.1 ) then
       jampi = 0
    end if
@@ -216,6 +213,10 @@
     case default    ! Nonzero error code. Return.
        goto 1234
     end select
+
+#ifdef HAVE_MPI
+    write(*,*) ' my_rank, numranks ', my_rank, numranks
+#endif
 
     if ( md_pressakey == 1 ) then
        call pressakey()
