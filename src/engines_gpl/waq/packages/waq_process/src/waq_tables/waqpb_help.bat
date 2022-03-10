@@ -16,14 +16,14 @@ echo   - modify version information in waqpb_export.bat.
 echo   - run waq_pb_export.bat again to create a new proc_def, new 
 echo     tables, and a new procesm.asc to see if proces.asc was
 echo     imported correctly.
-echo
+echo.
 echo   - note: by default waqpb_export.bat and waqpb_import.bat 
 echo     export/import the database in the new proces.asc
 echo     format. This allows longer descriptions because the unit has a
 echo     seperate field. Using the old format is still possible
 echo     by adding the argument -oldfrm. 
-echo
-echo.  - note2: It is also possible to make (usually small) changes in
+echo.
+echo   - note2: It is also possible to make (usually small) changes in
 echo     the csv-files directly. E.g. existing items will not always because
 echo     updated when you make changes in the proces.asc. Then you just have
 echo     to use waq_pb_export.bat to generate a new proc_def.
