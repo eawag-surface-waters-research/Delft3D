@@ -35,7 +35,7 @@
 !
       INTEGER  NALG  , ISWFIX, NIPALG, IFLUX , ISEG  ,
      +         IALG  , IP    , IFIX
-      REAL     EXTALG, EXTCF , BIOMAS
+      REAL(8)  EXTALG, EXTCF , BIOMAS
 !
       NALG  = NINT(PMSA(IPOINT(1)))
       ISWFIX= NINT(PMSA(IPOINT(2)))
