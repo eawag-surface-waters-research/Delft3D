@@ -58,7 +58,7 @@
  double precision                  :: dts         !< internal computational timestep (s)
  double precision                  :: dtsc        !< max timstep of limiting point kkcflmx, zero if larger than dt_max
  double precision                  :: dtfacmax    !< max dts increase factor
- double precision                  :: dti         !< clinverse  computational timestep (1/s)
+ double precision                  :: dti         !< inverse  computational timestep (1/s)
  double precision                  :: dtprev      !< previous computational timestep (s)  (1s is a bit like sobek)
  double precision                  :: dtmin       !< dt < dtmin : surely crashed
  double precision                  :: dtminbreak  !< smallest allowed timestep (in s), checked on a sliding average of several timesteps in validation routine.
@@ -263,6 +263,7 @@ subroutine reset_flowtimes()
    use Timers
     dtprev       = dt_init           !< previous computational timestep (s)  (1s is a bit like sobek)
     dts          = dt_init           !< internal computational timestep (s)
+    dti          = 1d0/dts           !< inverse  computational timestep (1/s)
     !tfac         = 1d0               !< Time unit in seconds JRE: disabled, and handled in readMDU
     time0        = 0d0               !< current   julian (s) of s0
     time1        = 0d0               !< current   julian (s) of s1  ! and of course, time1 = time0 + dt

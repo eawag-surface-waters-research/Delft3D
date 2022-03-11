@@ -12440,7 +12440,8 @@ subroutine unc_read_map(filename, ierr)
     ierr = nf90_get_var(imapfile, id_timestep,  dt_init, start = (/   it_read/))
     call check_error(ierr, 'timestep')
     dts = dt_init
-    
+    dti = 1d0/dts
+
     ! Read following variables no matter if it is the same or different partitions
     ! Read waterlevels (flow elem)
     ierr = get_var_and_shift(imapfile, 's1', s1, tmpvar1, UNC_LOC_S, kmx, kstart, um%ndxi_own, it_read, um%jamergedmap, um%inode_own, &

@@ -38,6 +38,7 @@
  time0     = tstart_user
  time1     = tstart_user
  dts       = dt_init
+ dti       = 1d0/dts
  dtprev    = dts
  dnt       = 0
  dnt_user  = 1

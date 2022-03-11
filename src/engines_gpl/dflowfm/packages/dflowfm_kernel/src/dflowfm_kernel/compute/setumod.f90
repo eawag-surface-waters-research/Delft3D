@@ -103,7 +103,6 @@ subroutine setumod(jazws0)                          ! set cell center Perot velo
     endif
     u1     = u1_tmp
     deallocate(u1_tmp)
-    dti = 1d0/dts
  else
     if (iperot == -1) then
        call reconst2nd ()
@@ -114,7 +113,6 @@ subroutine setumod(jazws0)                          ! set cell center Perot velo
        call setucxucyucxuucyu()
     endif
  endif
- if (newcorio == 0) dti = 1d0/dts
 
  !$OMP PARALLEL DO                           &
  !$OMP PRIVATE(L,LL,Lb,Lt,k1,k2,cs,sn,hmin,fcor,vcor)
