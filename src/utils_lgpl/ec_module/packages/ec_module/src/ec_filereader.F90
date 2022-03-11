@@ -261,8 +261,9 @@ module m_ec_filereader
                   end do
                   success = .true.
                case (BC_FUNC_ASTRO)
-                  success = ecTimeFrameRealHpTimestepsToDateTime(timesteps, yyyymmdd, hhmmss)
+                  if (.not.ecTimeFrameRealHpTimestepsToDateTime(timesteps, yyyymmdd, hhmmss)) return
                   n_invalid_components = (ecFileReaderLookupAstroComponents(fileReaderPtr)) 
+                  if (n_invalid_components>0) return
                   do i = 1, size(fileReaderPtr%items(1)%ptr%sourceT1FieldPtr%arr1d)
                      fileReaderPtr%items(1)%ptr%sourceT0FieldPtr%arr1d(i) = fileReaderPtr%items(1)%ptr%sourceT1FieldPtr%arr1d(i)
                      fileReaderPtr%items(2)%ptr%sourceT0FieldPtr%arr1d(i) = fileReaderPtr%items(2)%ptr%sourceT1FieldPtr%arr1d(i)
@@ -273,13 +274,14 @@ module m_ec_filereader
                                fileReaderPtr%items(3)%ptr%sourceT0FieldPtr%arr1d(i), &
                                fileReaderPtr%items(1)%ptr%sourceT0FieldPtr%astro_kbnumber(i),   &
                                yyyymmdd, hhmmss, istat)
-                     if (istat /= 0) success = .false.
+                     if (istat /= 0) return
                   end do
                   ! Shift time interval with dtnodal
                   do i=1, fileReaderPtr%nItems
                      fileReaderPtr%items(i)%ptr%sourceT0FieldPtr%timesteps = timesteps
                      fileReaderPtr%items(i)%ptr%sourceT1FieldPtr%timesteps = timesteps + fileReaderPtr%tframe%dtnodal
                   end do
+                  success = .true.
                case (BC_FUNC_QHTABLE)
                   do i=1, fileReaderPtr%nItems
                      fileReaderPtr%items(i)%ptr%sourceT1FieldPtr%timesteps = fileReaderPtr%items(i)%ptr%sourceT1FieldPtr%timesteps + 10000.0_hp
