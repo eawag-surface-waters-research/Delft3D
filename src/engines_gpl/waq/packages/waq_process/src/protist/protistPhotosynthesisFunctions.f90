@@ -68,7 +68,7 @@ module protist_photosynthesis_functions
       ! (-)   intermediate in depth-integrated photosynthesis calculation according to the Smith equation
       intermediateVal   = (alpha * ChlC * PFD * numSecPerDay) / plateau           
       ! gC gC-1 d-1   gross photosynthesis rate
-      grossPhotoRate = plateau * (log(intermediateVal + sqrt(1.0 + intermediateVal**2)) - log(intermediateVal * exat + sqrt(1.0 + (intermediateVal * exat)**2))) / atten 
+      grossPhotoRate = plateau * (log(intermediateVal + sqrt(1.0 + intermediateVal**2)) - log(intermediateVal * exat + sqrt(1.0 + (intermediateVal * exat)**2))) / tiny(atten) 
    end function grossPS
       
    ! net PS 
