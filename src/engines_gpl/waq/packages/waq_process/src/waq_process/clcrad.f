@@ -61,8 +61,10 @@
 
 !     local decalrations
 
-      INTEGER            :: IP1,IP2,IP3,IP4,IP5,IP6,IP7,IP8,IP9,IP10 ! index pointers in PMSA array
-      INTEGER            :: IN1,IN2,IN3,IN4,IN5,IN6,IN7,IN8,IN9,IN10 ! increments in PMSA array
+      INTEGER            :: IP1,IP2,IP3,IP4,IP5,IP6,IP7,IP8,IP9,IP10
+      INTEGER            :: IP11 ! index pointers in PMSA array
+      INTEGER            :: IN1,IN2,IN3,IN4,IN5,IN6,IN7,IN8,IN9,IN10
+      INTEGER            :: IN11 ! increments in PMSA array
       INTEGER            :: LUNREP         ! report file
       INTEGER            :: ISEG           ! loop counter segment loop
       INTEGER            :: IKMRK1         ! first feature inactive(0)-active(1)-bottom(2) segment
@@ -95,7 +97,8 @@
       IP8  = IPOINT(8)
       IP9  = IPOINT(9)
       IP10  = IPOINT(10)
-
+      IP11  = IPOINT(11)
+      
       IF (IP7.NE.IP9) THEN
          CALL GETMLU(LUNREP)
          WRITE(LUNREP,*) 'Error in CLCRAD: Rad/RadDay/Rad_uv should be an input too!'
@@ -115,6 +118,8 @@
       IN8  = INCREM(8)
       IN9  = INCREM(9)
       IN10  = INCREM(10)
+      IN11  = INCREM(11)
+
 
 !.....2DH mode
 
@@ -132,6 +137,9 @@
 
 !          RadBot    = RadSurf corrected for reflection
            PMSA(IP10) = PMSA(IP3)*(1.-PMSA(IP8))
+           
+!          atten
+           PMSA(IP11) = 0.0
 
 !........Segment is actief watersegment
          ELSE IF (IKMRK1 .EQ. 1) THEN
@@ -141,6 +149,9 @@
 
 !          RadBot    = RadSurf   * (1 - reflection) * EXP( -ExtVl    *Depth     )
            PMSA(IP10) = PMSA(IP3) *(1.-PMSA(IP8)) * EXP( -PMSA(IP1)*PMSA(IP2) )
+           
+!          atten    = ExtVl    *Depth
+           PMSA(IP11) = PMSA(IP1)*PMSA(IP2)
 
 !........Segment is actief bodemsegment
          ELSE IF (IKMRK1 .EQ. 3) THEN
@@ -150,6 +161,9 @@
 
 !          RadBot    = 0.0
            PMSA(IP10) = 0.0
+           
+!          attenuation    = 0.0
+           PMSA(IP11) = 0.0
 
          ENDIF
 
@@ -162,6 +176,7 @@
          IP8  = IP8  + IN8
          IP9  = IP9  + IN9
          IP10  = IP10  + IN10
+         IP11  = IP11  + IN11
 
  1000 CONTINUE
 
@@ -189,6 +204,9 @@
                PMSA(IP9 + (IVAN-1)  * IN9) = RADTOP
 !              RadBot = RadTOP
                PMSA(IP10 + (IVAN-1)  * IN10) = RADTOP
+               
+!              atten
+               PMSA(IP11 + (IVAN-1)  * IN11) = 0.0
 
 !...........Van segment = actief water segment
             ELSE IF (IK1VN .EQ. 1) THEN
@@ -205,7 +223,7 @@
                   RADBOT = RADTOP * EXP( -EXTVL * DEPTH )
 
                   PMSA(IP9  + (IVAN -1) * IN9 ) = RADTOP
-                  PMSA(IP9  + (INAAR-1) * IN9 ) = RADBOT
+                  PMSA(IP9 + (INAAR-1) * IN9 ) = RADBOT
                   PMSA(IP10 + (IVAN -1) * IN10) = RADBOT
 
                ENDIF

@@ -225,7 +225,7 @@
      +   'SEDTYR',
      +   'SEDAGG',
      +   'SUMTYR',
-     +   'PROATT',
+     +   'PROPFD',
      +   'PRODIA',
      +   'PROGRE',
      +   'PRONCM',
