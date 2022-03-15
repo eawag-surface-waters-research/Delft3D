@@ -149,7 +149,7 @@ if(NOT TARGET esmfsm)
     add_subdirectory(${checkout_src_root}/${esmfsm_module} esmfsm)
 endif()
 
-# io_netcdf
+# io_hyd
 if(NOT TARGET io_hyd)
     add_subdirectory(${checkout_src_root}/${io_hyd_module} io_hyd)
 endif()
