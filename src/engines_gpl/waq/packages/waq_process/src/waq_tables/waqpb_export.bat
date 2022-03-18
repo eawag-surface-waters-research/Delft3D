@@ -1,6 +1,6 @@
 @echo off
 set version=5.10
-set serial=20220315
+set serial=20220318
 set toolFound=false
 set toolx64=false
 set cmakeConfiguration=build_all
