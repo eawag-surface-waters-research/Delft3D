@@ -320,6 +320,7 @@ subroutine sethu(jazws0)                            ! Set upwind waterdepth hu
 
     else
        hu(L) = 0d0
+       au(L) = 0d0
     endif
 
     if (kmx > 0) then
