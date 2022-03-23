@@ -30,7 +30,13 @@
 module computeRefday
 
     implicit none
+      interface compute_refday
+         module procedure compute_refday_from_string
+         module procedure compute_refday_from_integers
+      end interface
     contains
+
+
 
 
 
@@ -38,20 +44,20 @@ module computeRefday
       !     Compute reference day, varying from 1 till 365 (or 366 for leap years)
       subroutine compute_refday_from_string(refdat, refday)
         IMPLICIT  NONE
-        character (len=8), intent(in)    ::   refdat             !  refdate
+        character (len=*), intent(in)    ::   refdat             !  refdate
         integer  ( 4)                    ::   iyear              !  year of the time offset
         integer  ( 4)                    ::   imonth             !  month of the time offset
         integer  ( 4)                    ::   iday               !  day of the time offset
         integer  ( 4), intent(out)       ::   refday             !  refday
         
         read(refdat, '(i4,i2,i2)' ) iyear, imonth, iday
-        call compute_refday(iyear, imonth, iday, refday)
+        call compute_refday_from_integers(iyear, imonth, iday, refday)
         
       end subroutine compute_refday_from_string
       
       
       !     Compute reference day, varying from 1 till 365 (or 366 for leap years)
-      subroutine compute_refday(iyear, imonth, iday, refday)
+      subroutine compute_refday_from_integers(iyear, imonth, iday, refday)
         IMPLICIT  NONE
         integer  ( 4), intent(in)  ::   iyear              !  year of the time offset
         integer  ( 4), intent(in)  ::   imonth             !  month of the time offset
@@ -71,7 +77,7 @@ module computeRefday
         
         refday = sum(daysPerMonth(1:imonth-1)) + iday
         
-      end subroutine compute_refday
+      end subroutine compute_refday_from_integers
       
       
 !     Check if year is a leap year

@@ -730,7 +730,7 @@
       otime = dble(julrefdat)-0.5d0 !refdate_mjd
       
       !     Compute refday needed for daylight process
-      call compute_refday_from_string(refdat, refdayNr)
+      call compute_refday(refdat, refdayNr)
 
 
 !     Finally, evaluate the processes using the proces library
