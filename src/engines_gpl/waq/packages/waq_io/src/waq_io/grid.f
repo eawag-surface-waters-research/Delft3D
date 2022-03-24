@@ -278,6 +278,8 @@
 !        Expand with layers in the base grid
 
       do igrid = 1, nogrid
+         
+         if (igrid .eq. GridPs%bottom_grid) cycle
 
          noseg2 = GridPs%Pointers(igrid)%noseg_lay
 
