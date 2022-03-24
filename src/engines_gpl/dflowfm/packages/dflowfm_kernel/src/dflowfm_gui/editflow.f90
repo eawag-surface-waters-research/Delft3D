@@ -117,7 +117,7 @@
                call tekprofs()
                call textflow()
             endif
-            CALL DISND(KK)
+            CALL DISND(KK, 1)
          ELSE IF (NPUT .EQ. 52 .or. NPUT .EQ. 57 ) THEN   ! LINK mode
             call isflowlink(xp, yp, LL)
 
@@ -266,7 +266,7 @@
             call tekprofs()
             call textflow()
          endif
-         CALL DISND(KK)
+         CALL DISND(KK, 1)
       ENDIF
 !
       GOTO 10

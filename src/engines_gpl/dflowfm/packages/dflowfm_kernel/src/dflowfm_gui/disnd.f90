@@ -30,31 +30,76 @@
 ! $Id$
 ! $HeadURL$
 
- SUBROUTINE DISND(NN)   ! print node values
+ SUBROUTINE DISND(NN, netorflow)   ! print net or flow node values
  use m_devices
  use m_flowgeom
+ use network_data, only: rnod, netcell, xk, yk, nump
+ use m_save_ugrid_state, only: nodeids
+ 
  implicit none
- integer :: nn
+ integer, intent(in   ) :: nn !< Node number (either net or flow node)
+ integer, intent(in   ) :: netorflow !< Whether to display net node info (0) or flow node info (1)
 
  CHARACTER TEX*23
- DOUBLE PRECISION :: ZNOD
+ character(len=8)  :: nodetype
+ character(len=23) :: idtext
+ DOUBLE PRECISION, external :: ZNOD
+ 
+ double precision :: x, y, val
+
+ if (netorflow == 0) then
+    nodetype = 'NET NODE'
+ else
+    nodetype = 'FLOWNODE'
+ end if
+ idtext = ''
 
  IF (NN .LE. 0) THEN
-    TEX = 'NO FLOW NODE FOUND    '
+    TEX = 'NO '//nodetype//' FOUND    '
     CALL KTEXT(TEX,IWS-22,4,15)
+    CALL KTEXT('                      *',IWS-22,5,15)
+    CALL KTEXT('                      *',IWS-22,6,15)
+    CALL KTEXT('                      *',IWS-22,7,15)
+    CALL KTEXT('                      *',IWS-22,8,15)
  ELSE
-    TEX = 'FLOW NODE NR:         '
+    if (netorflow == 0) then
+       x = xk(NN)
+       y = yk(NN)
+       val = dble(rnod(NN))
+       idtext = '                (no id)'
+       if (allocated(nodeids)) then
+          if (NN <= size(nodeids)) then
+             idtext = 'ID ='
+             write(idtext(6:), '(A18)') trim(nodeids(NN))
+          end if
+       end if
+    else
+       x = xz(NN)
+       y = yz(NN)
+       val = znod(NN)
+       if (NN <= nump) then
+          idtext = '2D node         (no id)'
+       else if (allocated(nodeids)) then
+          idtext = 'ID ='
+          write(idtext(6:), '(A18)') trim(nodeids(netcell(NN)%nod(1)))
+       else
+          idtext = '1D node         (no id)'
+       end if
+    end if
+    TEX = nodetype//' NR:         '
     WRITE(TEX (14:),'(I10)') NN
     CALL KTEXT(TEX,IWS-22,4,15)
     TEX = 'VAL=                  '
-    WRITE(TEX(6:), '(E18.11)') ZNOD(NN)
+    WRITE(TEX(6:), '(E18.11)') val
     CALL KTEXT(TEX,IWS-22,5,15)
-    TEX = 'XZ =                  '
-    WRITE(TEX(6:), '(E18.11)') XZ(NN)
+    TEX = 'X  =                  '
+    WRITE(TEX(6:), '(E18.11)') x
     CALL KTEXT(TEX,IWS-22,6,15)
-    TEX = 'yZ =                  '
-    WRITE(TEX(6:), '(E18.11)') YZ(NN)
+    TEX = 'Y  =                  '
+    WRITE(TEX(6:), '(E18.11)') y
     CALL KTEXT(TEX,IWS-22,7,15)
+    WRITE(TEX(1:), '(A23)') trim(idtext)
+    CALL KTEXT(TEX,IWS-22,8,15)
  ENDIF
 
  RETURN
