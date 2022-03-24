@@ -124,7 +124,6 @@
       integer                 iknmrk            !  help variables merged attributes
       integer                 ivalk             !  return value dhknmrk
 
-      logical                 has_atr           !  whether attributes were read as part of the mutigrid definition or not
       logical                 exist             !  whether a file exists or not
       character*255           ugridfile         !  name of the ugrid-file
       character*255           hydfile           !  name of the hyd-file
@@ -294,8 +293,8 @@
 !       Read optional multiple grids
 
       call grid ( lun    , noseg  , notot  , nototp , nolay  ,
-     &            gridps , nseg2  , nogrid , syname ,
-     &            has_atr, ierr2  , iwar2  )
+     &            gridps , nseg2  , nogrid , syname , ierr2  ,
+     &            iwar2  )
       if ( ierr2 .gt. 0 ) goto 240
 
 !       Read grid-layout for visually printed output
@@ -368,218 +367,216 @@
 
 !     Attribute array
 
-      if ( .not. has_atr ) then
-         ikerr   = 0
-         allocate ( iamerge(noseg+nseg2) )                        !   composite attribute array
-         allocate ( ikmerge(    10     ) )                        !   flags of filles attributes
-         allocate ( iread  (noseg+nseg2) )                        !   work array to read the attributes
-         iamerge = 0
-         ikmerge = 0
+      ikerr   = 0
+      allocate ( iamerge(noseg+nseg2) )                        !   composite attribute array
+      allocate ( ikmerge(    10     ) )                        !   flags of filles attributes
+      allocate ( iread  (noseg+nseg2) )                        !   work array to read the attributes
+      iamerge = 0
+      ikmerge = 0
 
-         if ( has_hydfile ) then
-            ierr2 = force_include_file( lchar(40) )
-            if ( ierr2 /= 0 ) goto 240
-         endif
+      if ( has_hydfile ) then
+         ierr2 = force_include_file( lchar(40) )
+         if ( ierr2 /= 0 ) goto 240
+      endif
 
-         if ( vrsion .lt. 4.20 ) then                             !   attributes not supported
-            nkopt = 0
-         else
-            if ( gettoken( nkopt, ierr2 ) .gt. 0 ) goto 240
-            write ( lunut , 2110 ) nkopt                          !   so many blocks of input are provided
-         endif
+      if ( vrsion .lt. 4.20 ) then                             !   attributes not supported
+         nkopt = 0
+      else
+         if ( gettoken( nkopt, ierr2 ) .gt. 0 ) goto 240
+         write ( lunut , 2110 ) nkopt                          !   so many blocks of input are provided
+      endif
 
-         do 20 i = 1 , nkopt                                      !   read those blocks
+      do 20 i = 1 , nkopt                                      !   read those blocks
 
-            if ( gettoken( nopt, ierr2 ) .gt. 0 ) goto 240
-            write ( lunut , 2120 ) nopt                           !   number of attributes in this block
-            allocate ( ikenm(nopt) )
-            do j = 1, nopt                                        !   get the attribute numbers
-               if ( gettoken( ikenm(j), ierr2 ) .gt. 0 ) goto 240
-            enddo
-
-            if ( gettoken( ikopt1, ierr2 ) .gt. 0 ) goto 240      !   the file option for this info
-            write ( lunut , 2130 ) ikopt1
-            call opt1 ( ikopt1  , lun     , 40      , lchar   , filtype ,
-     &                  dtflg1  , dtflg3  , 0       , ierr2   , iwar2   ,
-     &                  .false. )
-            if ( ierr2  .gt. 0 ) goto 240
-            if ( ikopt1 .eq. 0 ) then                             !   binary file
-               call dhopnf  ( lun(40) , lchar(40) , 40 , 2 , ierr2 )
-               read  ( lun(40) , end=250 , err=260 ) ( iread(j), j=1, noseg )
-               close ( lun(40) )
-            else
-               if ( gettoken( ikopt2, ierr2 ) .gt. 0 ) goto 240   !   second option
-               write ( lunut , 2140 ) ikopt2
-
-               select case ( ikopt2 )
-
-                  case ( 1 )                                      !   no defaults
-                     write ( lunut , 2150 )
-                     if ( ioutpt .ge. 5 ) then
-                        write ( lunut , 2160 )
-                     else
-                        write ( lunut , 2170 )
-                     endif
-                     do j = 1, noseg
-                        if ( gettoken( iread(j), ierr2 ) .gt. 0 ) goto 240
-                        if ( ioutpt .ge. 5 ) write ( lunut , 2180 ) j , iread(j)
-                     enddo
-
-                  case ( 2 )                                      !   default with overridings
-                     write ( lunut , 2190 )
-                     if ( gettoken( ikdef, ierr2 ) .gt. 0 ) goto 240
-                     if ( gettoken( nover, ierr2 ) .gt. 0 ) goto 240
-                     write ( lunut , 2200 )ikdef, nover
-                     if ( ikerr .eq. 0 ) then                     !   only assign if no previous error
-                        do iseg = 1 , noseg
-                           iread(iseg) = ikdef
-                        enddo
-                     endif
-                     if ( nover .gt. 0 ) then
-                        if ( ioutpt .ge. 3 ) then
-                           write ( lunut , 2210 )
-                        else
-                           write ( lunut , 2220 )
-                        endif
-                        do j = 1, nover
-                           if ( gettoken( iover , ierr2 ) .gt. 0 ) goto 240
-                           if ( gettoken( idummy, ierr2 ) .gt. 0 ) goto 240
-                           if ( iover .lt. 1 .or. iover .gt. noseg ) then
-                              write ( lunut , 2230 ) j, iover
-                              ierr = ierr + 1
-                           else
-                              if ( ioutpt .ge. 3 ) write ( lunut , 2240 ) j, iover, idummy
-                              iread(iover) = idummy
-                           endif
-                        enddo
-                     endif
-
-                  case default
-                     write ( lunut , 2250 )
-                     ierr = ierr + 1
-
-               end select
-
-            endif
-
-!           Merge file buffer with attributes array in memory
-
-            do 10 iknm2 = 1 , nopt
-               iknm1 = ikenm(iknm2)
-
-!                    see if merged already
-
-               if ( ikmerge(iknm1) .ne. 0  ) then
-                  write ( lunut , 2260 ) iknm2, iknm1
-                  ierr  = ierr + 1
-                  ikerr = 1
-                  exit
-               endif
-
-!                    see if valid
-
-               if ( iknm1 .le. 0 .or. iknm1 .gt. 10 ) then
-                  if ( iknm1 .eq. 0 ) then
-                     write ( lunut , 2270 ) iknm2
-                     iwar2 = iwar2 + 1
-                  else
-                     write ( lunut , 2280 ) iknm1,iknm2
-                     iwar2 = iwar2 + 1
-                  endif
-                  cycle                    !  skip
-               endif
-
-!                 Merge for this attribute
-
-               write ( lunut , 2290 ) iknm2, iknm1
-               ikmerge(iknm1) = 1
-               iknmrk = 10**(iknm1-1)
-               do iseg = 1 , noseg
-                  call DHKMRK( iknm2, iread(iseg), ivalk )
-                  iamerge(iseg) = iamerge(iseg) + iknmrk*ivalk
-               enddo
-   10       continue
-            deallocate ( ikenm )
-   20    continue
-
-!        Time dependent attributes
-
-         if ( vrsion .lt. 4.20 ) then                             !   attributes not supported
-            ikopt2 = 0
-         else
-            if ( gettoken( ikopt2, ierr2 ) .gt. 0 ) goto 240
-            write ( lunut , 2300 ) ikopt2
-         endif
-         if ( ikopt2 .eq. 1 ) then                                !   this file
-            write ( lunut, 2310 )
-            if ( gettoken( nopt, ierr2 ) .gt. 0 ) goto 240
-            write ( lunut, 2120 ) nopt
-            do j = 1, nopt
-               if ( gettoken( iknm1, ierr2 ) .gt. 0 ) goto 240
-               if ( iknm1 .le. 0 .or. iknm1 .gt. 10 ) then
-                  if ( iknm1 .eq. 0 ) then
-                     write ( lunut , 2270 ) j,iknm1
-                     iwar2 = iwar2 + 1
-                  else
-                     write ( lunut , 2280 ) iknm2,iknm1
-                     iwar2 = iwar2 + 1
-                  endif
-                  cycle
-               endif
-
-!                 Merge for this attribute is performed in DELWAQ2
-
-               if ( ikmerge(iknm1) .eq. 0  ) then
-                  write ( lunut , 2290 ) iknm2,iknm1
-                  ikmerge(iknm1) = 1
-               else
-                  write ( lunut , 2260 ) iknm2,iknm1
-                  ierr  = ierr + 1
-                  ikerr = 1
-               endif
-            enddo
-
-            ifiopk = 0
-            if ( gettoken( ikopt1, ierr2 ) .gt. 0 ) goto 240
-            write ( lunut , 2130 ) ikopt1
-            call opt1 ( ikopt1  , lun     , 40      , lchar   , filtype ,
-     &                  dtflg1  , dtflg3  , 0       , ierr2   , iwar2   ,
-     &                  .false. )
-            if ( ierr2 .gt. 0 ) goto 240
-            if ( ikopt1 .eq. 0 ) then
-               write ( lunut , 2320 )
-               ifiopk = 1
-            elseif(ikopt1 .eq. -2 ) then
-               write ( lunut , 2330 )
-               ifiopk = 2
-            else
-               write ( lunut , 2340 )
-               ierr = ierr + 1
-            endif
-
-         else
-
-            write ( lunut , 2350 )
-
-         endif
-
-!        Set default behaviour if not specified
-
-         if ( ikmerge(1) .eq. 0  .and. ikerr .eq. 0 ) then
-            write ( lunut , 2360 )
-            iamerge = iamerge + 1
-         endif
-         if ( ikmerge(2) .eq. 0 ) write ( lunut, 2370 )
-         if ( nseg2      .gt. 0 ) write ( lunut, 2380 ) nseg2
-         do i = noseg+1, noseg+nseg2      ! bottom segments are 3 - always active!
-            iamerge(i) = (iamerge(i)/10)*10 + 3
+         if ( gettoken( nopt, ierr2 ) .gt. 0 ) goto 240
+         write ( lunut , 2120 ) nopt                           !   number of attributes in this block
+         allocate ( ikenm(nopt) )
+         do j = 1, nopt                                        !   get the attribute numbers
+            if ( gettoken( ikenm(j), ierr2 ) .gt. 0 ) goto 240
          enddo
 
-!        Write to file
+         if ( gettoken( ikopt1, ierr2 ) .gt. 0 ) goto 240      !   the file option for this info
+         write ( lunut , 2130 ) ikopt1
+         call opt1 ( ikopt1  , lun     , 40      , lchar   , filtype ,
+     &               dtflg1  , dtflg3  , 0       , ierr2   , iwar2   ,
+     &               .false. )
+         if ( ierr2  .gt. 0 ) goto 240
+         if ( ikopt1 .eq. 0 ) then                             !   binary file
+            call dhopnf  ( lun(40) , lchar(40) , 40 , 2 , ierr2 )
+            read  ( lun(40) , end=250 , err=260 ) ( iread(j), j=1, noseg )
+            close ( lun(40) )
+         else
+            if ( gettoken( ikopt2, ierr2 ) .gt. 0 ) goto 240   !   second option
+            write ( lunut , 2140 ) ikopt2
 
-         if ( ikerr .eq. 0 ) write( lun(2) ) iamerge
-         deallocate ( ikmerge, iamerge )
+            select case ( ikopt2 )
+
+               case ( 1 )                                      !   no defaults
+                  write ( lunut , 2150 )
+                  if ( ioutpt .ge. 5 ) then
+                     write ( lunut , 2160 )
+                  else
+                     write ( lunut , 2170 )
+                  endif
+                  do j = 1, noseg
+                     if ( gettoken( iread(j), ierr2 ) .gt. 0 ) goto 240
+                     if ( ioutpt .ge. 5 ) write ( lunut , 2180 ) j , iread(j)
+                  enddo
+
+               case ( 2 )                                      !   default with overridings
+                  write ( lunut , 2190 )
+                  if ( gettoken( ikdef, ierr2 ) .gt. 0 ) goto 240
+                  if ( gettoken( nover, ierr2 ) .gt. 0 ) goto 240
+                  write ( lunut , 2200 )ikdef, nover
+                  if ( ikerr .eq. 0 ) then                     !   only assign if no previous error
+                     do iseg = 1 , noseg
+                        iread(iseg) = ikdef
+                     enddo
+                  endif
+                  if ( nover .gt. 0 ) then
+                     if ( ioutpt .ge. 3 ) then
+                        write ( lunut , 2210 )
+                     else
+                        write ( lunut , 2220 )
+                     endif
+                     do j = 1, nover
+                        if ( gettoken( iover , ierr2 ) .gt. 0 ) goto 240
+                        if ( gettoken( idummy, ierr2 ) .gt. 0 ) goto 240
+                        if ( iover .lt. 1 .or. iover .gt. noseg ) then
+                           write ( lunut , 2230 ) j, iover
+                           ierr = ierr + 1
+                        else
+                           if ( ioutpt .ge. 3 ) write ( lunut , 2240 ) j, iover, idummy
+                           iread(iover) = idummy
+                        endif
+                     enddo
+                  endif
+
+               case default
+                  write ( lunut , 2250 )
+                  ierr = ierr + 1
+
+            end select
+
+         endif
+
+!        Merge file buffer with attributes array in memory
+
+         do 10 iknm2 = 1 , nopt
+            iknm1 = ikenm(iknm2)
+
+!                 see if merged already
+
+            if ( ikmerge(iknm1) .ne. 0  ) then
+               write ( lunut , 2260 ) iknm2, iknm1
+               ierr  = ierr + 1
+               ikerr = 1
+               exit
+            endif
+
+!                 see if valid
+
+            if ( iknm1 .le. 0 .or. iknm1 .gt. 10 ) then
+               if ( iknm1 .eq. 0 ) then
+                  write ( lunut , 2270 ) iknm2
+                  iwar2 = iwar2 + 1
+               else
+                  write ( lunut , 2280 ) iknm1,iknm2
+                  iwar2 = iwar2 + 1
+               endif
+               cycle                    !  skip
+            endif
+
+!              Merge for this attribute
+
+            write ( lunut , 2290 ) iknm2, iknm1
+            ikmerge(iknm1) = 1
+            iknmrk = 10**(iknm1-1)
+            do iseg = 1 , noseg
+               call DHKMRK( iknm2, iread(iseg), ivalk )
+               iamerge(iseg) = iamerge(iseg) + iknmrk*ivalk
+            enddo
+   10    continue
+         deallocate ( ikenm )
+   20 continue
+
+!     Time dependent attributes
+
+      if ( vrsion .lt. 4.20 ) then                             !   attributes not supported
+         ikopt2 = 0
+      else
+         if ( gettoken( ikopt2, ierr2 ) .gt. 0 ) goto 240
+         write ( lunut , 2300 ) ikopt2
       endif
+      if ( ikopt2 .eq. 1 ) then                                !   this file
+         write ( lunut, 2310 )
+         if ( gettoken( nopt, ierr2 ) .gt. 0 ) goto 240
+         write ( lunut, 2120 ) nopt
+         do j = 1, nopt
+            if ( gettoken( iknm1, ierr2 ) .gt. 0 ) goto 240
+            if ( iknm1 .le. 0 .or. iknm1 .gt. 10 ) then
+               if ( iknm1 .eq. 0 ) then
+                  write ( lunut , 2270 ) j,iknm1
+                  iwar2 = iwar2 + 1
+               else
+                  write ( lunut , 2280 ) iknm2,iknm1
+                  iwar2 = iwar2 + 1
+               endif
+               cycle
+            endif
+
+!              Merge for this attribute is performed in DELWAQ2
+
+            if ( ikmerge(iknm1) .eq. 0  ) then
+               write ( lunut , 2290 ) iknm2,iknm1
+               ikmerge(iknm1) = 1
+            else
+               write ( lunut , 2260 ) iknm2,iknm1
+               ierr  = ierr + 1
+               ikerr = 1
+            endif
+         enddo
+
+         ifiopk = 0
+         if ( gettoken( ikopt1, ierr2 ) .gt. 0 ) goto 240
+         write ( lunut , 2130 ) ikopt1
+         call opt1 ( ikopt1  , lun     , 40      , lchar   , filtype ,
+     &               dtflg1  , dtflg3  , 0       , ierr2   , iwar2   ,
+     &               .false. )
+         if ( ierr2 .gt. 0 ) goto 240
+         if ( ikopt1 .eq. 0 ) then
+            write ( lunut , 2320 )
+            ifiopk = 1
+         elseif(ikopt1 .eq. -2 ) then
+            write ( lunut , 2330 )
+            ifiopk = 2
+         else
+            write ( lunut , 2340 )
+            ierr = ierr + 1
+         endif
+
+      else
+
+         write ( lunut , 2350 )
+
+      endif
+
+!     Set default behaviour if not specified
+
+      if ( ikmerge(1) .eq. 0  .and. ikerr .eq. 0 ) then
+         write ( lunut , 2360 )
+         iamerge = iamerge + 1
+      endif
+      if ( ikmerge(2) .eq. 0 ) write ( lunut, 2370 )
+      if ( nseg2      .gt. 0 ) write ( lunut, 2380 ) nseg2
+      do i = noseg+1, noseg+nseg2      ! bottom segments are 3 - always active!
+         iamerge(i) = (iamerge(i)/10)*10 + 3
+      enddo
+
+!     Write to file
+
+      if ( ikerr .eq. 0 ) write( lun(2) ) iamerge
+      deallocate ( ikmerge, iamerge )
 
 !       read segment volumes
 

@@ -21,8 +21,7 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-      subroutine read_grid ( lun    , aGrid  , GridPs , oldproc,
-     &                       nosegl_bottom, lunwrk, has_atr, ierr   )
+      subroutine read_grid ( lun    , aGrid  , GridPs , oldproc, nosegl_bottom, ierr   )
 
 !       Deltares Software Centre
 
@@ -67,8 +66,6 @@
       type(GridPointerColl) , intent(in   ) :: GridPs        !< collection off all grid definitions
       logical               , intent(in   ) :: oldproc       !< true if old processing
       integer               , intent(in   ) :: nosegl_bottom !< number of segments expected for bottom
-      integer               , intent(in   ) :: lunwrk        !< LU-number for writing the attributes to
-      logical               , intent(out  ) :: has_atr       !< whether attributes have been read or not
       integer               , intent(inout) :: ierr          !< cummulative error count
 
 !     local declarations
@@ -102,8 +99,6 @@
 
 !     set default, type is already set in calling routine
 !                                          ( bottomgrid, processgrid, subgrid )
-
-      has_atr = .false.
 
       aGrid%name            =  ' '
       aGrid%noseg           =  0
@@ -155,9 +150,8 @@
                   exit                                         ! input for the grid is ready
 
                case ( 'BOTTOMGRID_FROM_ATTRIBUTES' )       ! it is the filename keyword
-                  has_atr = .true.
                   allocate ( aGrid%iarray(noseg) )
-                  call read_attributes_for_bottomgrid( aGrid%iarray, nosegl_bottom, lunwrk, ierr )
+                  call read_attributes_for_bottomgrid( aGrid%iarray, nosegl_bottom, ierr )
                   exit
 
                case ( 'REFERENCEGRID' )
@@ -238,8 +232,8 @@
 
       contains
 
-      subroutine read_attributes_for_bottomgrid( iarray, nosegl, lun, ierr )
-      integer :: nosegl, ierr, lun
+      subroutine read_attributes_for_bottomgrid( iarray, nosegl, ierr )
+      integer :: nosegl, ierr
       integer, dimension(:) :: iarray
 
       integer :: i, j, nkopt, ikopt1, ikopt2, ierr2, lunbin, iover, ikdef, idummy
@@ -252,10 +246,6 @@
       do i = 1 , nkopt                                      !   read those blocks
 
          if ( gettoken( nopt, ierr2 ) .gt. 0 ) goto 900
-
-         if ( allocated(ikenm) ) then
-             deallocate( ikenm )
-         endif
          allocate ( ikenm(nopt) )
          do j = 1, nopt                                        !   get the attribute numbers
             if ( gettoken( ikenm(j), ierr2 ) .gt. 0 ) goto 900
@@ -311,22 +301,15 @@
          endif
       enddo
 
-      ! save the attributes to file
-      write( lun ) iarray
-
       ! Extract the information we need
       do i = 1,noseg
           call dhkmrk( 1, iarray(i), active )
           call dhkmrk( 2, iarray(i), attrib )
-!          if ( active == 1 .and. (attrib == 0 .or. attrib == 3) ) then
-!             iarray(i) = 1 + mod(i-1,nosegl)
-!          else
-!             iarray(i) = 0
-!          endif
-!
-!AM: I do not think we need to have the above condition
-!
-           iarray(i) = 1 + mod(i-1,nosegl)
+          if ( active == 1 .and. (attrib == 0 .or. attrib == 3) ) then
+             iarray(i) = 1 + mod(i-1,nosegl)
+          else
+             iarray(i) = 0
+          endif
       enddo
 
       ! We read the number of time-dependent attributes - there should be none
