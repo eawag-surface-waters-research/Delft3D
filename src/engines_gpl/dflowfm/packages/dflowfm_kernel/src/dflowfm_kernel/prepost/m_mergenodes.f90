@@ -35,28 +35,35 @@ implicit none
 
 contains
 
-SUBROUTINE MERGENODES(K1,K2,JA,check_connected)  ! KNOOP 1 WORDT OPGENOMEN IN KNOOP 2
+SUBROUTINE MERGENODES(K1,K2,JA,check_connected_input)  ! KNOOP 1 WORDT OPGENOMEN IN KNOOP 2
 
 use m_netw,         only: NMK, KN, NOD, KC, XK
 use m_missing,      only: dxymis
 use gridoperations, only: OTHERNODE
 
 implicit none
-integer,           intent(in  )	:: K1,K2           ! netnode indices of the 2 nodes to be merged
-integer,           intent( out)	:: JA              ! Status integer, always 1
-logical, optional, intent(in  ) :: check_connected ! Do expensive connected check, default = .true.
+integer,           intent(in  )	:: K1,K2                 ! netnode indices of the 2 nodes to be merged
+integer,           intent( out)	:: JA                    ! Status integer, always 1
+logical, optional, intent(in  ) :: check_connected_input ! Do expensive connected check, default = .true.
 
 !locals
 integer :: L2, L12, NN, K22, NM22, L2A, K22A, N1
 integer :: l
 integer :: n, nm, nm1, nm2
 INTEGER :: NODLIN(200)
+logical :: check_connected
+
+if(present(check_connected_input)) then 
+  check_connected = check_connected_input
+else
+  check_connected = .true.
+endif
 
 NM1 = NMK(K1)
 NM2 = NMK(K2)
 
 ! Deze check is duur dus doe hem niet als je weet dat de nodes unconnected zijn.
-if (.not. present(check_connected) .or. (present(check_connected) .and. check_connected == .false.)) then 
+if (check_connected) then 
 
     CALL GIVELINKNUM(K1,K2,L12)
     if (L12 .ne. 0) then

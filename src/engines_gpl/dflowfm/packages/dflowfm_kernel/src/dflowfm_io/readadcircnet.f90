@@ -172,7 +172,7 @@
 
 
                   ! NOTE: This assumes that the opposite node is ONLY marked for deletion, NOT YET deleted, such that node numbering won't change yet, and file reading can continue with original numbers!
-                  call MERGENODES(K1,K2,JA,.true.)
+                  call MERGENODES(K1,K2,JA,.FALSE.)
 
                end if
 
