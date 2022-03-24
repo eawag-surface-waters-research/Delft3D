@@ -307,6 +307,7 @@
  ! See also m_flowtimes::dtminbreak
 
  ! parameters controlling flooding/drying/solving
+ integer                           :: testdryflood      !< Flag for testing alternative drying flooding algoritm; 0 = standard, 1 =Delft3D-FLOW
  double precision                  :: epshu             !< minimum waterdepth for setting hu>0
  double precision                  :: epshs             !< minimum waterdepth for setting cfu
  double precision                  :: epswav            !< minimum waterdepth for wave calculations

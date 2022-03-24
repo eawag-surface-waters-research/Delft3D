@@ -45,6 +45,7 @@
  integer :: n, L, LL, LLL
 
  integer, dimension(2) :: idum
+ double precision      :: dtrsh=0d-0
 
  Nodneg = 0 ; key = 0
 
@@ -52,15 +53,21 @@
       call setcol(221) ! white
  end if
 
-
+ if ( testdryflood == 1 ) then
+    !
+    ! In this test implementation the algoritm of Delft3D-FLOW is applied to prevent very thin layers 
+    ! 
+    dtrsh = max(1d-9, min(epshu, 1d-3))
+ endif
+ 
  if (jposhchk == 0) return
 
  do n = 1,ndxi                                                  ! check result
 
 
     if (abs(kfs(n)) /= 0) then ! Also check ghost nodes for posh/setbacks
-       if ( s1(n) < bl(n) ) then
-           if ( s1(n) < bl(n) - 1d-10 ) then                     ! if ( s1(n) < bl(n) ) then
+       if ( s1(n) < bl(n) + dtrsh ) then
+           if ( s1(n) < bl(n) + dtrsh - 1d-10 ) then                     ! if ( s1(n) < bl(n) ) then
 
               nodneg = n ; numnodneg = numnodneg + 1
               if ( jaGUI.eq.1 ) then
