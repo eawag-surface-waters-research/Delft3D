@@ -146,6 +146,7 @@
 
 !     Check if boundary is active
 
+      iwar2_old = 0
       do iq = 1, nobnd
          iwar2_old = iwar2
          if ( ibnd( iq, 1 ) .eq. 0 ) then
