@@ -42,9 +42,9 @@ use m_missing,      only: dxymis
 use gridoperations, only: OTHERNODE
 
 implicit none
-integer,           intent(in  )	:: K1,K2                 ! netnode indices of the 2 nodes to be merged
-integer,           intent( out)	:: JA                    ! Status integer, always 1
-logical, optional, intent(in  ) :: check_connected_input ! Do expensive connected check, default = .true.
+integer,           intent(in   )	:: K1,K2                 ! netnode indices of the 2 nodes to be merged
+integer,           intent(  out)	:: JA                    ! Status integer, always 1
+logical, optional, intent(in   ) :: check_connected_input ! Do expensive connected check, default = .true.
 
 !locals
 integer :: L2, L12, NN, K22, NM22, L2A, K22A, N1
