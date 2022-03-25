@@ -10,7 +10,7 @@ if (UNIX)
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config.h.cmake.in ${CMAKE_CURRENT_SOURCE_DIR}/include/config.h)  
     set(configFile "${CMAKE_CURRENT_SOURCE_DIR}/include/config.h") 
     
-    include_directories(${NETCDF_INCLUDE_DIRS}) 
+    include_directories(${NETCDF_INCLUDEDIR}) 
     add_definitions(-DHAVE_CONFIG_H)
     add_definitions(-DD3D_PLUGIN_EXT=".so")
     add_definitions(-DHAVE_STRUCT_TIMESPEC)

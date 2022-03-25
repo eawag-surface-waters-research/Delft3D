@@ -12,7 +12,7 @@ set(rc_version_file "${absolute_header_path}/dimr_exe_version.rc")
 set(header_version_file "${absolute_header_path}/dimr_exe_version.h")
 
 if (UNIX)    
-    include_directories(${NETCDF_INCLUDE_DIRS}) 
+    include_directories(${NETCDF_INCLUDEDIR}) 
     add_definitions(-DD3D_PLUGIN_EXT=".so")
 endif(UNIX)
 
