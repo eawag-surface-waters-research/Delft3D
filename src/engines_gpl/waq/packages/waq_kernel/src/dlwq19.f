@@ -601,9 +601,10 @@
          if2 = itf  (ibox)
          do i = if1, if2
             iq = iordf(i)
-            q  = flow(iq)*dt(ibox)
             ifrom = ipoint(1,iq)               !  The diagonal now is the sum of the
             ito   = ipoint(2,iq)               !  new volume that increments with each step
+            if ( ifrom .eq. 0 .or.  ito .eq. 0 ) cycle
+            q  = flow(iq)*dt(ibox)
             work(3,ifrom) = q                 ! flow through lower surface (central or upwind now arranged in one spot, further down)
             work(1,ito  ) = q                 ! flow through upper surface
          enddo
@@ -806,11 +807,13 @@
                   endif
                endif
    10       continue
-            if ( report .and. ( changed .ne. 0 .or. remained .ne. 0 ) ) then
+            if ( changed .ne. 0 .or. remained .ne. 0 ) then
                acc_remained = acc_remained + remained
                acc_changed  = acc_changed  + changed
                if ( remained .gt. 0 .and. changed .eq. 0 ) then
-                  write ( lunut, * ) 'Warning: No further progress in the wetting procedure!'
+                  if ( report ) then
+                     write ( lunut, * ) 'Warning: No further progress in the wetting procedure!'
+                  endif
                   exit
                endif
             endif
