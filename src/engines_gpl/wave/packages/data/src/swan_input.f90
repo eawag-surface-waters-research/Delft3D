@@ -65,7 +65,7 @@ module swan_input
 !         0.0000000e+000 0
 !
 !
-!         * Y/N Use bathmetry, use waterlevel, use 
+!         * Y/N Use bathmetry, use waterlevel, use current
 !         0 0 0
 !         ......
 !         * Water level correction, Extend flow data on the last # grid(s),
@@ -4495,6 +4495,7 @@ subroutine write_swan_inp (wavedata, calccount, &
        line(ind + 11:ind + 14) = 'FREE'
        line(ind + 15:79)       = ' '
        write (luninp, '(1X,A)') trim(line)
+       ! The WU drag formulation is used to be backwards compatible
        write (luninp, '(1X,A)') 'WIND DRAG WU'
        line(1:79)              = ' '
     endif
