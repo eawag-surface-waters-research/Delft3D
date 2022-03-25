@@ -32,7 +32,7 @@
 
 !subroutine update_constituents_RK3
 !   use m_flowgeom,   only: Ndx, Ndxi, Lnxi, Lnx, ln, nd  ! static mesh information
-!   use m_flow,       only: Ndkx, Lnkx, u1, q1, au, qw, zws, sq, sqi, vol1, kbot, ktop, Lbot, Ltop,  kmxn, kmxL, kmx, viu, vicwws, plotlin, jalts
+!   use m_flow,       only: Ndkx, Lnkx, u1, q1, au, qw, zws, sq, sqi, vol1, kbot, ktop, Lbot, Ltop,  kmxn, kmxL, kmx, viu, vicwws, plotlin
 !   use m_flowtimes,  only: dts, ja_timestep_auto
 !   use m_turbulence, only: sigdifi
 !   use m_physcoef,   only: dicoww, vicouv, difmolsal

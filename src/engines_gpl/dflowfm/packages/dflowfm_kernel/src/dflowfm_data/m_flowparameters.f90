@@ -364,8 +364,6 @@
 
  integer                           :: jaorgbarockeywords !< default=0=new, 1=org
 
- integer                           :: jalts = 1         ! local time-stepping (1) or not (0)
-
  integer                           :: jatransportautotimestepdiff = 0 ! Auto Timestep in Transport module, 0 = limitation of diffusion, but no limitation of time-step due to diffusion, 1 = no limitation of diffusion, but limitation of time step due to diffusion, 2: no limitation of diffusion and no limitation of time step due to diffusion
 
  integer                           :: implicitdiffusion2D = 0 ! Auto Timestep in Transport module, 0 = limitation of diffusion, but no limitation of time-step due to diffusion, 1 = no limitation of diffusion, but limitation of time step due to diffusion, 2: no limitation of diffusion and no limitation of time step due to diffusion

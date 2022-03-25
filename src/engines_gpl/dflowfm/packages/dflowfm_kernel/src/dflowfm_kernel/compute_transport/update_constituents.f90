@@ -70,7 +70,7 @@
 !>     aaj(k) sedj(k-1) + bbj(k) sedj(k) + ccj(k) sedj(k+1) = ddj(k)
 subroutine update_constituents(jarhoonly)
    use m_flowgeom,   only: Ndx, Ndxi, Lnxi, Lnx, ln, nd  ! static mesh information
-   use m_flow,       only: Ndkx, Lnkx, u1, q1, au, qw, zws, sq, sqi, vol1, kbot, ktop, Lbot, Ltop,  kmxn, kmxL, kmx, viu, vicwws, plotlin, jalts, wsf, jadecaytracers
+   use m_flow,       only: Ndkx, Lnkx, u1, q1, au, qw, zws, sq, sqi, vol1, kbot, ktop, Lbot, Ltop,  kmxn, kmxL, kmx, viu, vicwws, plotlin, wsf, jadecaytracers
    use m_flowtimes,  only: dts, ja_timestep_auto
    use m_turbulence, only: sigdifi
    use m_physcoef,   only: dicoww, vicouv, difmolsal
@@ -122,13 +122,13 @@ subroutine update_constituents(jarhoonly)
 !  get maximum transport time step
    call get_dtmax()
 
-   if ( jalts.eq.1 ) then  ! local time-stepping
+   !if ( jalts.eq.1 ) then  ! local time-stepping
       call get_ndeltasteps()
-   else
-      nsubsteps = 1
-      ndeltasteps = 1
-      numnonglobal = 0
-   end if
+   !else
+   !   nsubsteps = 1  ! maybe remove later  
+   !   ndeltasteps = 1
+   !   numnonglobal = 0
+   !end if
 
 !  store dts
    dts_store = dts

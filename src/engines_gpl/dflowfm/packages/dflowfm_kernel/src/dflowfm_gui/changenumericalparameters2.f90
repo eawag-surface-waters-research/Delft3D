@@ -190,7 +190,7 @@
    CALL IFORMPUTINTEGER (2*i,JAVASAL          )               ; i=i+1
    CALL IFORMPUTINTEGER (2*i,ifixedweirscheme )               ; i=i+1
    CALL IFORMPUTdouble  (2*i,Tsigma           , '(F7.3)' )    ; i=i+1
-   CALL IFORMPUTINTEGER (2*i,JALTS            )               ; i=i+1
+!   CALL IFORMPUTINTEGER (2*i,JALTS            )               ; i=i+1
    CALL IFORMPUTdouble  (2*i,Cffacver         , '(F7.3)' )    ; i=i+1
    CALL IFORMPUTdouble  (2*i,Cffachormom      , '(F7.3)' )    ; i=i+1
    CALL IFORMPUTdouble  (2*i,Cfexphormom      , '(F7.3)' )    ; i=i+1
@@ -255,7 +255,7 @@
           CALL IFORMGETINTEGER (2*i ,JAVASAL          )           ; i=i+1
           CALL IFORMGETINTEGER (2*i ,IFIXEDWEIRSCHEME )           ; i=i+1
           CALL IFORMGETdouble  (2*i ,Tsigma           )           ; i=i+1
-          CALL IFORMGETINTEGER (2*i ,JALTS            )           ; i=i+1
+!          CALL IFORMGETINTEGER (2*i ,JALTS            )           ; i=i+1
           CALL IFORMGETdouble  (2*i ,Cffacver         )           ; i=i+1
           CALL IFORMGETdouble  (2*i ,Cffachormom      )           ; i=i+1
           CALL IFORMGETdouble  (2*i ,Cfexphormom      )           ; i=i+1

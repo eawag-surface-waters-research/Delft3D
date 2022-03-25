@@ -1004,12 +1004,15 @@ subroutine readMDUFile(filename, istat)
 
     call prop_get_integer(md_ptr, 'numerics', 'maxNonlinearIterations'    , maxNonlinearIterations)
     call prop_get_logical(md_ptr, 'numerics', 'setHorizontalBobsFor1d2d', setHorizontalBobsFor1d2d)
-    call prop_get_integer(md_ptr, 'numerics', 'Icoriolistype'   , icorio)
+    
     call prop_get_integer(md_ptr, 'numerics', 'Testdryingflooding', testdryflood)
+
+    call prop_get_integer(md_ptr, 'numerics', 'Icoriolistype'   , icorio)
     call prop_get_integer(md_ptr, 'numerics', 'Newcorio'        , newcorio)
     call prop_get_integer(md_ptr, 'numerics', 'Corioconstant'   , jacorioconstant)
     call prop_get_double (md_ptr, 'numerics', 'Corioadamsbashfordfac', Corioadamsbashfordfac)
     call prop_get_double (md_ptr, 'numerics', 'Coriohhtrsh'          , hhtrshcor)
+
     call prop_get_integer(md_ptr, 'numerics', 'Limtyphu'        , limtyphu)
     call prop_get_integer(md_ptr, 'numerics', 'Limtypmom'       , limtypmom)
     call prop_get_integer(md_ptr, 'numerics', 'Limtypsa'        , limtypsa)
@@ -1018,7 +1021,6 @@ subroutine readMDUFile(filename, istat)
     if (jatransportmodule == 1 .and. kmx > 1) then ! package deal
        ja_timestep_auto = 5
     endif
-    call prop_get_integer(md_ptr, 'numerics', 'TransportTimestepping' , jaLts)
 
     call prop_get_integer(md_ptr, 'numerics', 'TransportAutoTimestepdiff' , jatransportautotimestepdiff)
     if (jatransportautotimestepdiff == 3 .and. kmx > 0) then
@@ -2715,6 +2717,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     end if
     call prop_set(prop_ptr, 'numerics', 'Icoriolistype', icorio,    '0=No, 5=default, 3,4 no weights, 5-10 Kleptsova hu/hs, 25-30 Ham hs/hu, odd: 2D hs/hu, even: hsk/huk ')
     call prop_set(prop_ptr, 'numerics', 'Newcorio',      newcorio,  '0=prior to 27-11-2019, 1=no normal forcing on open bnds, plus 12 variants )')
+
     if (jacorioconstant .ne. 0) then  
         call prop_set(prop_ptr, 'numerics', 'Corioconstant', '0=default, 1=Coriolis constant in sferic models anyway,2=beta plane, both in cart. and spher. coord.')
     endif
@@ -2735,7 +2738,6 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
 
     call prop_set(prop_ptr, 'numerics', 'TransportMethod', jatransportmodule,   'Transport method (0: Herman''s method, 1: transport module)')
     if (writeall .or. jatransportmodule == 1) then
-       call prop_set(prop_ptr, 'numerics', 'TransportTimestepping', jaLts,   'Timestepping method in Transport module, 0 = global, 1 = local (default) ')
        call prop_set(prop_ptr, 'numerics', 'TransportAutoTimestepdiff', jatransportautotimestepdiff,   'Auto Timestepdiff in Transport, 0 : lim diff, no lim Dt_tr, 1 : no lim diff, lim Dt_tr, 2: no lim diff, no lim Dt_tr, 3=implicit (only 2D)')
        call prop_set(prop_ptr, 'numerics', 'Implicitdiffusion2D', Implicitdiffusion2D,   '1 = Yes, 0 = No')
     endif

@@ -1592,8 +1592,6 @@ end if
     else
        ja_timestep_auto = 0
     end if
- else if (ja_timestep_auto .ne. 5) then
-    jalts = 1
  endif
 
  if ( jaimplicit.eq.1 ) then
