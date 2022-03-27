@@ -3021,6 +3021,8 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
        call prop_set(prop_ptr, 'numerics', 'Oceaneddyyoff'       , Oceaneddyyoff)
        call prop_set(prop_ptr, 'numerics', 'Oceaneddyxoff'       , Oceaneddyxoff)
     endif
+    
+    call prop_set(prop_ptr, 'numerics', 'Testdryingflooding', testdryflood,   'Test for drying flooding algoritm (0: D-Flow FM, 1: Delft3D-FLOW)')
 
 ! Physics
     call prop_set(prop_ptr, 'physics', 'UnifFrictCoef',     frcuni,      'Uniform friction coefficient (0: no friction)')
