@@ -1338,6 +1338,7 @@
                if ( ipb .eq. 0 ) cycle
                ifrom = ipoint(1,iq)
                ito   = ipoint(2,iq)
+               if ( ifrom .eq. 0 .or.  ito .eq. 0 ) cycle
                if (vertical_upwind) then
                   q     = flow(iq) * dt(ibox)                      ! This is the upwind differences version
                   if ( q .gt. 0. 0 ) then
