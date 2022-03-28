@@ -32,16 +32,17 @@
 
 ! compute Au/Dx for diffusive flux
 subroutine comp_dxiAu()                          ! or: setdxiau
-   use m_flowgeom , only : ln, Lnx, dxi, wu, Lnxi
-   use m_flow     , only : hs, zws, kmx, Au, hu, jadiffusiononbnd, chkdifd
+   use m_flowgeom ! , only : ln, Lnx, dxi, wu, Lnxi
+   use m_flow     ! , only : hs, zws, kmx, Au, hu, jadiffusiononbnd, chkdifd, ifixedweirsc
+   use m_fixedweirs
    use m_transport, only : dxiAu, jalimitdtdiff
    use timers
 
    implicit none
 
-   integer          :: k1, k2
+   integer          :: k1, k2, i
    integer          :: LL, L, Lb, Lt
-   double precision :: hh
+   double precision :: hh, ff
    integer(4) ithndl /0/
 
    if (timon) call timstrt ( "comp_dxiAu", ithndl )
@@ -93,6 +94,23 @@ subroutine comp_dxiAu()                          ! or: setdxiau
          end do
       end if
    end if
+
+   if (ifixedweirscheme >= 7 .or. ifixedweirscheme <= 9) then  ! reduce diff. area's in tabelb and villemonte that diffused through dikes originally  
+      do i = 1,nfxw
+         L = lnfxw(i)
+         if (L > 0) then 
+            k1 = ln(1,L) ; k2 = ln(2,L) 
+            hh = max( s1(k1), s1(k2) ) - max( bob(1,L), bob(2,L) )
+            if (hh > 0) then
+               ff = wu(L) * hh / au(L) 
+               call getLbotLtop(LL,Lb,Lt)
+               do L=Lb,Lt
+                  dxiAu(L) = dxiAu(L)*ff
+               end do
+            endif
+         endif  
+      enddo
+   endif 
 
    if (jadiffusiononbnd == 0) then
       do LL=lnxi+1, lnx
