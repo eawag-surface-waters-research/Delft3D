@@ -1818,7 +1818,6 @@ end subroutine setfoustandardname
        use mathconsts, only : raddeg
        integer      , intent(in) :: ifou     !< Fourier counter
        integer      , intent(in) :: nmaxus   !< dimension of current quantity
-       real(kind=fp)             :: hdt      ! Half Integration time step [seconds]
        real(kind=fp)             :: freqnt   ! Frequency in degrees per hour
        real(kind=fp)             :: shift    ! Phase shift
        integer                   :: n        ! loop counter
@@ -1838,7 +1837,6 @@ end subroutine setfoustandardname
    !
    !! executable statements -------------------------------------------------------
    !
-       hdt    =  0.5_fp * dt_user
        fnumcy =  gdfourier%fnumcy(ifou)
        ftmsto =  gdfourier%ftmsto(ifou) / dt_user
        ftmstr =  gdfourier%ftmstr(ifou) / dt_user
@@ -1856,7 +1854,7 @@ end subroutine setfoustandardname
        ! FOUFAS =  2 * PI * FNUMCY / [(FTMSTO - FMTSTR) ]
        ! so FREQNT = FOUFAS * RADDEG * 3600 is OK
        !
-       shift = ftmstr * foufas
+       shift = ftmstr * foufas * dt_user
        freqnt = foufas * raddeg * 3600.0_fp
        wdt = 2.0_fp/(ftmsto - ftmstr)
        fas_term = fv0pu - tzone * freqnt
