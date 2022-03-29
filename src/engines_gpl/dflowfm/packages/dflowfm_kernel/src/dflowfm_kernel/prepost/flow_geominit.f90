@@ -1047,7 +1047,7 @@
 
  call set_1d_indices_in_network()
 
- if (japure1D > 0) then 
+ if (japure1D == 1 .or. japure1D == 2) then 
     call setisnbnodisnblin() ! set signarray isnbnod for left and rightneighbouring uc1d.
  endif
 

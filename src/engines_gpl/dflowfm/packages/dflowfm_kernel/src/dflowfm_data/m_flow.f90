@@ -195,7 +195,9 @@
  double precision, allocatable         :: uqcx  (:)   !< cell center incoming momentum, global x-dir (m4/s2), only for iadvec = 1
  double precision, allocatable         :: uqcy  (:)   !< cell center incoming momentum, global y-dir (m4/s2), only for iadvec = 1
  double precision, allocatable, target :: ucmag (:)   !< [m/s] cell center velocity magnitude {"location": "face", "shape": ["ndkx"]}
- double precision, allocatable         :: uc1D  (:)   !< m/s 1D cell center velocities
+ double precision, allocatable         :: uc1D  (:)   !< [m/s] 1D cell center velocities
+ double precision, allocatable         :: alpha_mom_1D (:)   !< [-] ratio of incoming momentum versus initial estimate of outgoing momentum
+ double precision, allocatable         :: alpha_ene_1D (:)   !< [-] ratio of incoming energy versus initial estimate of outgoing energy
  double precision, allocatable         :: cfli  (:)   !< sum of incoming courants (    ) = sum( Dt*Qj/Vi)
  double precision, allocatable         :: dvxc  (:)   !< cell center stress term, global x-dir (m3/s2)
  double precision, allocatable         :: dvyc  (:)   !< cell center stress term, global y-dir (m3/s2)
@@ -307,7 +309,13 @@
  double precision, allocatable, target     :: au_nostrucs    (:)   !< [m2] flow area     (m2)   at u point {"location": "edge", "shape": ["lnkx"]}
  double precision, allocatable     :: ucxu  (:)   !< upwind link ucx (m/s)
  double precision, allocatable     :: ucyu  (:)   !< upwind link ucy (m/s)
- double precision, allocatable     :: u1Du  (:)   !< upwind 1D link velocity (m/s) (only relevant for Pure1D)
+ double precision, allocatable     :: au1D  (:,:) !< [m2] cross-sectional area at begin and end of 1D link (only relevant for Pure1D)
+ double precision, allocatable     :: wu1D  (:,:) !< [m] surface width at begin and end of 1D link (only relevant for Pure1D)
+ double precision, allocatable     :: sar1D (:,:) !< [m2] surface area of first and second half of 1D link (only relevant for Pure1D)
+ double precision, allocatable     :: volu1D  (:) !< [m3] volume of 1D link (only relevant for Pure1D)
+ double precision, allocatable     :: u1Du  (:)   !< [m/s] upwind 1D link velocity (only relevant for Pure1D)
+ double precision, allocatable     :: q1D   (:,:) !< [m3/s] discharge at begin and end of 1D link (only relevant for Pure1D)
+ double precision, allocatable     :: ds1u  (:,:) !< [m] difference between node water level and link water level (only relevant for Pure1D)
  integer         , allocatable     :: isnbnod (:,:) !< sign of left/right node follows your dir in jaPure1D assumptions, -1 or 1 for Ja1D nodes
  integer         , allocatable     :: isnblin (:,:) !< sign of left/right link follows your dir in jaPure1D assumptions, -1 or 1 for Ja1D nodes
  double precision, allocatable     :: advi  (:)   !< advection implicit part (1/s)

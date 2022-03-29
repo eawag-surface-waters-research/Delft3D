@@ -110,6 +110,13 @@
  double precision,        external :: lin2nodx, lin2nody
  double precision,        external :: nod2linx, nod2liny
  double precision,        external :: dlimiter, dslim
+ 
+ double precision :: qu_up
+ double precision :: u_up
+ double precision :: qu_do
+ double precision :: u_do
+ double precision :: am
+ double precision :: cl
 
  japiaczek33 = 0
 
@@ -342,12 +349,11 @@
  enddo
 
  nfw = 0
-
  if (kmx == 0) then
      
 
  !$OMP PARALLEL DO                                                                   &
- !$OMP PRIVATE(L, advel,k1,k2,iadvL,qu1,qu2,volu,ai,ae,iad,volui,abh,hh,v12t,ku,kd,isg,n12, ucxku, ucyku, ucin, fdx, vol_k1, vol_k2)
+ !$OMP PRIVATE(L, advel,k1,k2,iadvL,qu1,qu2,volu,ai,ae,iad,volui,abh,hh,v12t,ku,kd,isg,n12, ucxku, ucyku, ucin, fdx, vol_k1, vol_k2, qu_up, u_up, u_do, qu_do, am, cl)
 
  do L  = 1,lnx
 
@@ -440,29 +446,59 @@
           advel = (qu1 + qu2)/volu                   ! dimension: ((m4/s2) / m3) =   (m/s2)
        endif
 
-   else if (iadvL == 103) then                       ! explicit first order mom conservative
-                                                     ! based upon cell center excess advection velocity
-       qu1 = 0                                       ! and Perot control volume
-       qu2 = 0
-       if (jaPure1D == 1) then
-          vol_k1 = vol1_f(k1)
-          vol_k2 = vol1_f(k2)
-       else
-          vol_k1 = vol1(k1)
-          vol_k2 = vol1(k2)
-       endif
-       
-       if (vol_k1 > 0) then
-          qu1 = QucPerPure1D(1,L)                    ! excess momentum in/out u(L) dir. from k1
-          qu1 = qu1*acl(L)                           ! Perot weigthing
-       endif
-       if (vol_k2 > 0) then
-          qu2 = QucPerPure1D(2,L)                    ! excess momentum in/out u(L) dir. from k2
-          qu2 = qu2*(1d0-acl(L))                     ! Perot weigthing
-       endif
-       volu = acl(L)*vol_k1 + (1d0-acl(L))*vol_k2
-       if (volu > 0) then
-          advel = (qu1 + qu2)/volu                   ! dimension: ((m4/s2) / m3) =   (m/s2)
+   else if (iadvL == 103) then
+       if (jaPure1D == 4) then ! Energy style
+
+           u_up = q1D(1,L) / au1D(1,L)
+           qu_up = q1D(1,L) * (u_up - u1(L))
+           u_do = q1D(2,L) / au1D(2,L)
+           qu_do = q1D(2,L) * (u_do - u1(L))
+           advel = (qu_up + qu_do) / volu1D(L)
+
+       elseif (jaPure1D == 3) then ! Sobek style
+
+           if (q1D(1,L) > 0) then ! flow entering link at node 1
+               u_up = alpha_mom_1D(k1) * q1D(1,L) / au1D(1,L)
+               am = 1d0 ! weight of momentum versus energy conservation (only momentum implemented, so 1)
+               cl = min(1d0, 2d0 * dts * abs(q1D(1,L)) / max(1e-5,volu1D(L))) ! Courant factor (2 * dts /max(u_eps, volu1D(L)) * q1D(1,L), assuming 1 so large velocity)
+               qu_up = am * cl * q1D(1,L) * (u_up - u1(L))
+           else
+               qu_up = 0d0
+           endif
+           if (q1D(2,L) < 0) then ! flow entering link at node 2
+               u_do = alpha_mom_1D(k2) * q1D(2,L) / au1D(2,L)
+               am = 1d0 ! weight of momentum versus energy conservation (only momentum implemented, so 1)
+               cl = min(1d0, 2d0 * dts * abs(q1D(2,L)) / max(1e-5,volu1D(L))) ! Courant factor (2 * dts /max(u_eps, volu1D(L)) * q1D(1,L), assuming 1 so large velocity)
+               qu_do = am * cl * q1D(2,L) * (u_do - u1(L))
+           else
+               qu_do = 0d0
+           endif
+           advel = (qu_up + qu_do) / volu1D(L)
+
+       else                                              ! explicit first order mom conservative
+                                                         ! based upon cell center excess advection velocity
+           qu1 = 0                                       ! and Perot control volume
+           qu2 = 0
+           if (jaPure1D == 1) then
+              vol_k1 = vol1_f(k1)
+              vol_k2 = vol1_f(k2)
+           else ! jaPure1D == 0 .or. jaPure1D == 2
+              vol_k1 = vol1(k1)
+              vol_k2 = vol1(k2)
+           endif
+           
+           if (vol_k1 > 0) then
+              qu1 = QucPerPure1D(1,L)                    ! excess momentum in/out u(L) dir. from k1
+              qu1 = qu1*acl(L)                           ! Perot weigthing
+           endif
+           if (vol_k2 > 0) then
+              qu2 = QucPerPure1D(2,L)                    ! excess momentum in/out u(L) dir. from k2
+              qu2 = qu2*(1d0-acl(L))                     ! Perot weigthing
+           endif
+           volu = acl(L)*vol_k1 + (1d0-acl(L))*vol_k2
+           if (volu > 0) then
+              advel = (qu1 + qu2)/volu                   ! dimension: ((m4/s2) / m3) =   (m/s2)
+           endif
        endif
 
     else if (iadvL == 333) then                      ! explicit first order mom conservative
