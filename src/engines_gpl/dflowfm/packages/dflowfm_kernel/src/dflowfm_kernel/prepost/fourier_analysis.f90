@@ -984,7 +984,7 @@ end subroutine setfoustandardname
        fousmbs   => gdfourier%fousmb(ifou)%sdata
        founam    => gdfourier%founam(ifou)
 
-       ! Perform fourier analysis, every timestep as long as NST value
+       ! Perform fourier analysis, every timestep as long as time0 value
        ! lies in requested time interval FTMSTR and FTMSTO
        !
        ! The name of the variable for Fourier analysis fully specified the number of elements for the fourier loop
@@ -1838,8 +1838,8 @@ end subroutine setfoustandardname
    !! executable statements -------------------------------------------------------
    !
        fnumcy =  gdfourier%fnumcy(ifou)
-       ftmsto =  gdfourier%ftmsto(ifou) / dt_user
-       ftmstr =  gdfourier%ftmstr(ifou) / dt_user
+       ftmsto =  gdfourier%ftmsto(ifou)
+       ftmstr =  gdfourier%ftmstr(ifou)
        fknfac =  gdfourier%fknfac(ifou)
        foufas =  gdfourier%foufas(ifou)
        fousma => gdfourier%fousma(ifou)%rdata
@@ -1848,15 +1848,16 @@ end subroutine setfoustandardname
        !
        ! Initialize local variables
        !
+       
        ! Frequention := 360 degree / period
        ! where period = [ (FTMSTO - FMTSTR) ] / [ FNUMCY * 3600 ]
        ! FOUFAS is defined in RDFOUR as
        ! FOUFAS =  2 * PI * FNUMCY / [(FTMSTO - FMTSTR) ]
        ! so FREQNT = FOUFAS * RADDEG * 3600 is OK
        !
-       shift = ftmstr * foufas * dt_user
+       shift = ftmstr * foufas
        freqnt = foufas * raddeg * 3600.0_fp
-       wdt = 2.0_fp/(ftmsto - ftmstr)
+       wdt = 2.0_fp * dt_user /(ftmsto - ftmstr)
        fas_term = fv0pu - tzone * freqnt
        do n = 1, nmaxus
           ltest = (fousma(n) == 0.0_fp .and. fousmb(n) == 0.0_fp)
