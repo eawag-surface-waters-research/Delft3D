@@ -32,11 +32,11 @@
 
 ! compute Au/Dx for diffusive flux
 subroutine comp_dxiAu()                          ! or: setdxiau
-   use m_flowgeom ! , only : ln, Lnx, dxi, wu, Lnxi
-   use m_flow     ! , only : hs, zws, kmx, Au, hu, jadiffusiononbnd, chkdifd, ifixedweirsc
-   use m_fixedweirs
-   use m_transport, only : dxiAu, jalimitdtdiff
-   use timers
+   use m_flowgeom  , only : ln, Lnx, dxi, wu, Lnxi, bob
+   use m_flow      , only : hs, zws, kmx, Au, hu, jadiffusiononbnd, chkdifd, ifixedweirscheme, s1
+   use m_fixedweirs, only : nfxw, lnfxw
+   use m_transport , only : dxiAu, jalimitdtdiff
+   use timers      , only : timon, timstrt, timstop
 
    implicit none
 
