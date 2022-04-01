@@ -65,6 +65,9 @@ module display gdal/3.1.2_gcc7.3.0
 module load    svn/1.9.12serf_gcc7.3.0
 module display svn/1.9.12serf_gcc7.3.0
 
+module load    patchelf/0.12
+module display patchelf/0.12
+
 echo "Export environment variables"
 if [ "$1" == "intel21" ]; then
      export FC=mpiifort

@@ -28,8 +28,8 @@ fixup_bundle("${CMAKE_INSTALL_PREFIX}/bin/delwaq2" "${BUILD_LIBRARIES}" "${THIRD
 fixup_bundle("${CMAKE_INSTALL_PREFIX}/bin/waqmerge" "${BUILD_LIBRARIES}" "${THIRDPARTY_x64_LIB_FOLDERS}")
 fixup_bundle("${CMAKE_INSTALL_PREFIX}/bin/ddcouple" "${BUILD_LIBRARIES}" "${THIRDPARTY_x64_LIB_FOLDERS}")
 fixup_bundle("${CMAKE_INSTALL_PREFIX}/bin/agrhyd" "${BUILD_LIBRARIES}" "${THIRDPARTY_x64_LIB_FOLDERS}")
-execute_process(COMMAND find "${CMAKE_INSTALL_PREFIX}/bin" -type f -exec bash -c "/opt/apps/patchelf/0.12/bin/patchelf --set-rpath '$ORIGIN/../lib' $1" _ {} \; -exec echo "patched rpath of: " {} \;)
-execute_process(COMMAND find "${CMAKE_INSTALL_PREFIX}/lib" -type f -exec echo "patched rpath of: "  {} \; -exec bash -c "/opt/apps/patchelf/0.12/bin/patchelf --set-rpath '$ORIGIN' $1" _ {} \;)
-execute_process(COMMAND find "${CMAKE_INSTALL_PREFIX}/share" -type f -exec echo "patched rpath of: "  {} \; -exec bash -c "/opt/apps/patchelf/0.12/bin/patchelf --set-rpath '$ORIGIN/../lib:$ORIGIN' $1" _ {} \;)
+execute_process(COMMAND find "${CMAKE_INSTALL_PREFIX}/bin" -type f -exec bash -c "patchelf --set-rpath '$ORIGIN/../lib' $1" _ {} \; -exec echo "patched rpath of: " {} \;)
+execute_process(COMMAND find "${CMAKE_INSTALL_PREFIX}/lib" -type f -exec echo "patched rpath of: "  {} \; -exec bash -c "patchelf --set-rpath '$ORIGIN' $1" _ {} \;)
+execute_process(COMMAND find "${CMAKE_INSTALL_PREFIX}/share" -type f -exec echo "patched rpath of: "  {} \; -exec bash -c "patchelf --set-rpath '$ORIGIN/../lib:$ORIGIN' $1" _ {} \;)
 execute_process(COMMAND find "${CMAKE_INSTALL_PREFIX}/lib" -type l -exec echo "remove destination of symlink:" {} \; -exec bash -c "cp --remove-destination $(readlink {}) {};"  {} \; WORKING_DIRECTORY "${CMAKE_INSTALL_PREFIX}/lib" )
 
