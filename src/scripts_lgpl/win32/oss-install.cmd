@@ -401,7 +401,6 @@ rem ======================
     call :copyNetcdf
 
     call :copyFile engines_gpl\waq\default\bloom.spe                           !dest_default!
-    call :copyFile engines_gpl\waq\default\bloominp.d09                        !dest_default!
     call :copyFile engines_gpl\waq\default\proc_def.dat                        !dest_default!
     call :copyFile engines_gpl\waq\default\proc_def.def                        !dest_default!
 

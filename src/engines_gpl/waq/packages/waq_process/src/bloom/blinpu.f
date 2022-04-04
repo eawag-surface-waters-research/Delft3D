@@ -67,14 +67,9 @@
       real           autofr
       character(8)   cpmax
 
-!  From now on BLOOM won't read the D09-file any more. Some settings will be made available through the inp-file later on
       call getidentification(idstr)
       write(outdbg,'(1x,a/)') trim(idstr)
       write(outdbg, '(a/)') ' BLOOM debug file'
-
-      write(outdbg, '(a)')  ' From now on, BLOOM will not read the bloominp.D09 file any more. Some'
-      write(outdbg, '(a)')  ' of the options that were available trough this file are now accessible'
-      write(outdbg, '(a/)') ' through parameters settings. Consult the manual for details.'
 
 !  Determine nuspec and nuecog
       is = 0

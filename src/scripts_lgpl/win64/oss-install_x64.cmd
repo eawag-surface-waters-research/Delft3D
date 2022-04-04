@@ -330,7 +330,6 @@ rem ====================
     call :makeDir !dest_share!
 
     call :copyFile engines_gpl\waq\default\bloom.spe                           !dest_default!
-    call :copyFile engines_gpl\waq\default\bloominp.d09                        !dest_default!
     call :copyFile engines_gpl\waq\default\proc_def.dat                        !dest_default!
     call :copyFile engines_gpl\waq\default\proc_def.def                        !dest_default!
 
@@ -557,10 +556,9 @@ rem ======================
     call :copyFile engines_gpl\waq\bin\x64\Release\delwaq.dll                  !dest_bin!
 
     call :copyFile engines_gpl\waq\default\bloom.spe                           !dest_default!
-    call :copyFile engines_gpl\waq\default\bloominp.d09                        !dest_default!
     call :copyFile engines_gpl\waq\default\proc_def.dat                        !dest_default!
     call :copyFile engines_gpl\waq\default\proc_def.def                        !dest_default!
-	
+
     if !compiler_redist_dir!=="" (
            rem Compiler_dir not set
        ) else (

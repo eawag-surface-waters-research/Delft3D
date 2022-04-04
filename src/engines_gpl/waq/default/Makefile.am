@@ -9,7 +9,6 @@ include $(top_srcdir)/common.am
 #Includes
 dist_pkgdata_DATA = \
 	bloom.spe \
-	bloominp.d09 \
 	proc_def.dat \
 	proc_def.def
 
