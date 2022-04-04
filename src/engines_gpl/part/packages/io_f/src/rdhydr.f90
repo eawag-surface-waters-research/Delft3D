@@ -36,6 +36,7 @@ module rdhydr_mod
       use openfl_mod     ! explicit interface
       use rd_token       ! tokenized reading like in DELWAQ
       use partmem
+      use m_part_regular
       use alloc_mod
 !
       implicit none      ! force explicit typing
@@ -44,10 +45,10 @@ module rdhydr_mod
       subroutine rdhydr ( nmax   , mmax   , mnmaxk , nflow  , noseg  ,  &
                           noq    , itime  , itstrt , idelt  , volume ,  &
                           vdiff  , area   , flow   , vol1   , vol2   ,  &
-                          flow1  , vdiff1 , update , cellpnt, flowpnt,  &
+                          flow1  , flow2m , vdiff1 , update , cellpnt, flowpnt,  &
                           tau    , tau1   , caltau , salin  , salin1 ,  &
                           temper , temper1, nfiles , lunit  , fname  ,  &
-                          ftype  , rhowatc)
+                          ftype  , flow2  , rhowatc)
 !
 !     READING HYDRODYNAMICS FILE (*.hyd)
 !              (initially)
@@ -91,6 +92,7 @@ module rdhydr_mod
       real     (sp), intent(  out) :: vol1   (noseg )  !< first volume record
       real     (sp), intent(  out) :: vol2   (noseg )  !< second volume record
       real     (sp), intent(  out) :: flow1  ( noq  )  !< flow record in file
+      real     (sp), intent(  out) :: flow2m (nflow )  !< a grid with flows
       real     (sp), intent(  out) :: vdiff1 (noseg )  !< vertical diffusion record in file
       logical      , intent(  out) :: update           !< values have been updated
       integer  (ip), intent(in   ) :: cellpnt(noseg )  !< backpointering from volumes to grid
@@ -107,13 +109,14 @@ module rdhydr_mod
       integer  (ip), intent(inout) :: lunit(nfiles)    !< unit nrs of all files
       character(* ), intent(inout) :: fname(nfiles)    !< file names of all files
       character(20), intent(inout) :: ftype(2)         !< 'binary'
+      real     (sp), intent(  out) :: flow2  ( noq  )  !< flow record in file second record
 
 !     locals
 
       logical           :: updatv, updatf, updatd, lblock
 !
       logical :: first  = .true.
-      integer(ip) :: i     , i2    , idelt1 , ifflag , iocond , isflag, kmax
+      integer(ip) :: i, i0, i03d, i1, i2, idelt1, ifflag , iocond , isflag, kmax
       integer(ip) :: it1   , it2   , max    , mod    , lunut
       integer(ip) :: mnmax                        ! number of cells per layer in the cube
       integer(ip) :: idtimv , itimv1 , itimv2     ! timings of the volumes file
@@ -124,22 +127,28 @@ module rdhydr_mod
       integer(4) ithndl              ! handle to time this subroutine
       data       ithndl / 0 /
       real(sp) :: densty  ! AddedDana
+      real(ip) :: ideltold !AddedMarc
       if ( timon ) call timstrt( "rdhydr", ithndl )
 !
       lunut = lunit(2)
-      depmin = 0.05*nmax*mmax/mnmaxk
-      depmin = max(depmin,0.001)
+      if (zmodel) then
+         depmin = 0.05
+      else
+         depmin = 0.05*nmax*mmax/mnmaxk
+         depmin = max(depmin,0.001)
+      end if
       kmax   = mnmaxk/nmax/mmax
       if ( idelt == -999 ) then
 !
-
+!        Save current value of idelt for later
+         ideltold = idelt
          write ( lunut, * ) ' Opening the volume file:', fname(6)(1:len_trim(fname(6)))
          call openfl ( lunit(6), fname(6), ftype(2), 0 )
 !        if (iocond  /=  0) goto 100
          write ( lunut, * ) ' Opening the flow   file:', fname(7)(1:len_trim(fname(7)))
          call openfl ( lunit(7), fname(7), ftype(2), 0 )
 
-         if ( lunit(20) .gt. 0 .and. fname(20) .ne. 'none' ) then
+         if ( lunit(20) .ne. 0 .and. fname(20) .ne. 'none' ) then
             write ( lunut, * ) ' Opening the vdf    file:', fname(20)(1:len_trim(fname(20)))
             call openfl ( lunit(20), fname(20), ftype(2), 3 )
             if ( lunit(20) .eq. 0 ) write ( lunut, * ) ' Warning the vdf file does not exist !'
@@ -148,7 +157,7 @@ module rdhydr_mod
          endif
          if ( lunit(20) .eq. 0 ) vdiff = 0.0
 
-         if ( lunit(21) .gt. 0 .and. fname(21)(1:4) .ne. 'none' ) then
+         if ( lunit(21) .ne. 0 .and. fname(21)(1:4) .ne. 'none' ) then
             write ( lunut, * ) ' Opening the tau    file:', fname(21)(1:len_trim(fname(21)))
             call openfl ( lunit(21), fname(21), ftype(2), 3 )
             if ( lunit(21) .eq. 0 ) write ( lunut, * ) ' Warning the tau file does not exist !'
@@ -158,7 +167,7 @@ module rdhydr_mod
          caltau = .false.
          if ( lunit(21) .eq. 0 ) caltau = .true.
 
-         if ( lunit(22) .gt. 0 .and. fname(22)(1:4) .ne. 'none' ) then
+         if ( lunit(22) .ne. 0 .and. fname(22)(1:4) .ne. 'none' ) then
             write ( lunut, * ) ' Opening the salinity file:', fname(22)(1:len_trim(fname(22)))
             call openfl ( lunit(22), fname(22), ftype(2), 3 )
             if ( lunit(22) .eq. 0 ) write ( lunut, * ) ' Warning the salinity file does not exist !'
@@ -166,7 +175,7 @@ module rdhydr_mod
             lunit(22) = 0
          endif
 
-         if ( lunit(23) .gt. 0 .and. fname(23)(1:4) .ne. 'none' ) then
+         if ( lunit(23) .ne. 0 .and. fname(23)(1:4) .ne. 'none' ) then
             write ( lunut, * ) ' Opening the temperature file:', fname(23)(1:len_trim(fname(23)))
             call openfl ( lunit(23), fname(23), ftype(2), 3 )
             if ( lunit(23) .eq. 0 ) write ( lunut, * ) ' Warning the temperature file does not exist !'
@@ -182,18 +191,26 @@ module rdhydr_mod
 !
          read (lunit(7), iostat = iocond) it1, flow1
          if (iocond  /=  0    ) goto 140
-!        read (lunit(7), iostat = iocond) it2, flow1
-!        if (iocond  /=  0    ) goto 150
+         read (lunit(7), iostat = iocond) it2, flow2
+         if (iocond  /=  0    ) goto 150
 !        idelt = it2 - it1
 !        if (idelt   /=  idelt1) goto 160
          itstrt = it1
          rewind (lunit(6))
          rewind (lunit(7))
-         volume(cellpnt(:)) = vol1 (:)
+         !
+         ! This caused a stack overflow - 300000 grid cells
+         !volume(cellpnt(:)) = vol1 (:)
+         do i = 1,size(vol1)
+             volume(cellpnt(i)) = vol1(i)
+         enddo
+
          flow = 0.0
          do i = 1, noq
             if ( flowpnt(i,1) .gt. 0 ) flow(flowpnt(i,1)) = flow(flowpnt(i,1)) + flow1(i)
             if ( flowpnt(i,2) .gt. 0 ) flow(flowpnt(i,2)) = flow(flowpnt(i,2)) + flow1(i)
+            if ( flowpnt(i,1) .gt. 0 ) flow2m(flowpnt(i,1)) = flow2m(flowpnt(i,1)) + flow2(i)
+            if ( flowpnt(i,2) .gt. 0 ) flow2m(flowpnt(i,2)) = flow2m(flowpnt(i,2)) + flow2(i)
          enddo
       else
 !
@@ -216,8 +233,8 @@ module rdhydr_mod
 !.. note that flows must be block since no space is reserved for flow-interpolation
          call dlwqfl ( lunit(7), lunut   , itime   , idtimf  , itimf1  ,   &
                        itimf2  , idelt   , noq     , nflow   , flow1   ,   &
-                       flow    , flowpnt , fname(7), isflag  , ifflag  ,   &
-                       updatf  )
+                       flow2   , flow    , flowpnt , fname(7), isflag  , ifflag  ,   &
+                       updatf  , flow2m  )
 
 !.. vertical diffusions
 
@@ -272,26 +289,39 @@ module rdhydr_mod
 !
       endif
 !
-      do 60 i = 1, mnmaxk
+      if (zmodel) then
+         ! only make sure the deepest
+         do i2 = 2, mmax
+            do i1 = 2, nmax
+               i0 = lgrid(i1, i2)
+               if (i0  >  0) then
+                  i03d = i0 + (laybot(i1, i2)-1)*nmax*mmax
+                  volume(i03d) = max(volume(i03d), area(i0) * depmin)
+               end if
+            end do
+         end do
+      else
+         do i = 1, mnmaxk
 
-!       limit volume to 5cm
+!          limit volume to 5cm
 
-        i2 = mod(i,nmax*mmax)
-        if(i2==0) i2 = nmax*mmax
-        volume(i) = max(volume(i), area(i2) * depmin)
+           i2 = mod(i,nmax*mmax)
+           if(i2==0) i2 = nmax*mmax
+           volume(i) = max(volume(i), area(i2) * depmin)
 
-!       apply scaling to vertical diffusion
-!       the .vdf file at the moment contains the D3D-FLOW dicww array in m2/s.
-!       typically: doffset = vicmol/sigmol(substance)
-!                  dscale  = 1.0   /sigdif(substance)
-!                  dminim  = gdp%gdphysco%dicoww       if I interpreted D3D-FLOW correctly (lp)
-!       off course only do this if the vertical diffusion was updated with the file-values
+!          apply scaling to vertical diffusion
+!          the .vdf file at the moment contains the D3D-FLOW dicww array in m2/s.
+!          typically: doffset = vicmol/sigmol(substance)
+!                     dscale  = 1.0   /sigdif(substance)
+!                     dminim  = gdp%gdphysco%dicoww       if I interpreted D3D-FLOW correctly (lp)
+!          off course only do this if the vertical diffusion was updated with the file-values
 
-   60 continue
+         end do
+      end if
 !
 !     end of routine
 !
-      if ( lunit(22) .ne. 0 .and. lunit(23) .ne. 0 ) then
+      if ( lunit(22) .gt. 0 .and. lunit(23) .gt. 0 .and. ideltold .ne. -999 ) then
          do i = 1, noseg
             rhowatc(i) = densty(max(0.0e0,salin1(i)), temper1(i))
          enddo

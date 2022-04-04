@@ -43,7 +43,7 @@
 
       use dlwq_data      ! for definition and storage of data
       use rd_token       ! tokenized reading
-      use partmem        ! for the interface with Delpar (Tau and VertDisp)
+      use partmem, only: alone, lsettl, layt        ! for the interface with Delpar (Tau and VertDisp)
       use timers         ! performance timers
       implicit none
 
@@ -101,8 +101,8 @@
       integer                               :: ioerr                      ! local error io
       integer                               :: ierr2                      ! local error
       integer                               :: ierr_alloc                 ! local error allocating
-      logical                               :: taupart                    ! is tau present?
-      logical                               :: vdfpart                    ! is vertical diffusion present
+      logical                                 taupart              ! is tau present?
+      logical                                 vdfpart              ! is vertical diffusion present
       integer(4) :: ithndl = 0
       if (timon) call timstrt( "dlwq07", ithndl )
 

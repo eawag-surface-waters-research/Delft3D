@@ -32,6 +32,8 @@ if(UNIX)
     set(oss_dependencies    deltares_common
                             part_data_f
                             part_io_f
+                            io_hyd
+                            io_netcdf
                             waq_kernel
                             waq_plugin_wasteload
                             waq_utils_c

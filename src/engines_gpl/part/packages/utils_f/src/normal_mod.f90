@@ -22,6 +22,7 @@
 !!  rights reserved.
 
 module normal_mod
+      use random_generator
 
       implicit none
 
@@ -64,7 +65,7 @@ module normal_mod
 
       real function normal ( rseed )
 
-      real(4)  rnd  , s, a, x, y
+      real(4)  s, a, x, y
       real(8)  rseed
       integer  i
 

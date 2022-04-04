@@ -8,16 +8,50 @@ get_fortran_source_files(${src_path} source_files)
 set(library_name part_kernel_f)
 add_library(${library_name} ${source_files})
 
-# Set dependencies
-set(oss_dependencies    deltares_common
-                        part_data_f
-                        part_io_f
-                        part_utils_f) 
-oss_include_libraries(${library_name} oss_dependencies)
+# Add dependencies
+if (UNIX)
+    # the `pkg_check_modules` function is created with this call
+    find_package(PkgConfig REQUIRED)
 
-if(UNIX)
-    target_link_libraries(${library_name} ${oss_dependencies})
+    # these calls create special `PkgConfig::<MODULE>` variables
+    pkg_check_modules(NETCDF REQUIRED IMPORTED_TARGET netcdf)
+    pkg_check_modules(NETCDF_FTN REQUIRED IMPORTED_TARGET netcdf-fortran)
+
+    set(oss_dependencies deltares_common
+                         part_data_f
+                         part_utils_f
+                         part_io_f
+                         gridgeom
+                         kdtree_wrapper
+                         kdtree2
+                         io_netcdf
+                         io_hyd)
+
+
+    target_link_libraries(${library_name}
+         ${oss_dependencies}
+         PkgConfig::NETCDF
+         PkgConfig::NETCDF_FTN)
+    oss_include_libraries(${library_name} oss_dependencies)
 endif(UNIX)
+
+if (WIN32)
+    set(oss_dependencies deltares_common
+                         part_data_f
+                         part_utils_f
+                         part_io_f
+                         gridgeom
+                         kdtree_wrapper
+                         kdtree2
+                         io_netcdf
+                         io_hyd
+                         netcdf4
+                         netcdff)
+
+    target_link_libraries(${library_name} ${oss_dependencies})
+    oss_include_libraries(${library_name} oss_dependencies)
+endif(WIN32)
+
 
 # Define how the files should be structured within Visual Studio
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${source_files})

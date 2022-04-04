@@ -15,9 +15,20 @@ AM_FFLAGS += -fopenmp $(OPENMP_FFLAGS)
 
 #-------------------------------------------------------------------------------
 #Includes
+FINCLUDES += \
+    -I$(top_builddir)/utils_lgpl/io_netcdf/packages/io_netcdf/src \
+    -I$(top_builddir)/utils_lgpl/io_hyd/packages/io_hyd/src \
+    -I$(NETCDFROOT)/include
+
 FMODULES += \
         -I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src/rd_token \
-        -I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src
+        -I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src \
+        -I$(top_builddir)/utils_lgpl/io_netcdf/packages/io_netcdf/src \
+        -I$(top_builddir)/utils_lgpl/io_hyd/packages/io_hyd/src \
+        -I$(NETCDF_FORTRAN_LIBS)
+
+AM_FCFLAGS += $(FINCLUDES) $(FMODULES) $(NETCDF_CFLAGS) $(NETCDF_FORTRAN_CFLAGS)
+AM_FFLAGS  += $(FINCLUDES) $(FMODULES) ${NETCDF_CFLAGS} ${NETCDF_FORTRAN_CFLAGS}
 
 #-------------------------------------------------------------------------------
 #Sources
@@ -27,6 +38,7 @@ libdata_f_la_SOURCES = \
          file_info.f90 \
          modeldim.f90 \
          partmem.f90 \
+         partfmmem.f90 \
          alloc.f90
 
 #-------------------------------------------------------------------------------

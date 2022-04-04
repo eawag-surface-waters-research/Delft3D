@@ -43,7 +43,7 @@
 
       ! local declarations
 
-      integer, parameter  :: nokey   = 77           ! number of keywords in hyd file
+      integer, parameter  :: nokey   = 84           ! number of keywords in hyd file
       character(len=40)   :: key(nokey)             ! keywords in the hyd file
       integer             :: ikey                   ! index keyword (first level)
       integer             :: ikey2                  ! index keyword (second level)
@@ -144,6 +144,13 @@
       key(75) = 'waqgeom-file'
       key(76) = 'automatic'
       key(77) = 'walking'
+      key(78) = 'file-created-by'
+      key(79) = 'file-creation-date'
+      key(80) = 'sink-sources'
+      key(81) = 'end-sink-sources'
+      key(82) = 'z-layers'
+      key(83) = 'z-layers-ztop'
+      key(84) = 'z-layers-zbot'
 
       call getmlu(lunrep)
 
@@ -246,6 +253,13 @@
       endif
       if (hyd%geometry .eq. HYD_GEOM_CURVI) then
          call remove_path(hyd%file_dps%name,filename) ; write(lunhyd,'(a,'' '''''',a,'''''''')') key(64), trim(filename)
+      endif
+
+      ! zbot, ztop (for z-layer only)
+
+      if(hyd%layer_type == HYD_LAYERS_Z .and. hyd%ztop /= -999.0) then
+         write(lunhyd,'(a,'' '',f15.6)') key(83), hyd%ztop
+         write(lunhyd,'(a,'' '',f15.6)') key(84), hyd%zbot
       endif
 
       ! hydrodynamic-layers

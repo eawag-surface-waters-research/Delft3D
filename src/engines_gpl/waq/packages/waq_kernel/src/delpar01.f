@@ -20,7 +20,6 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
-
       subroutine delpar01 ( itime   , noseg   , nolay   , noq     , nosys   ,
      &                      notot   , dwqvol  , surface , dwqflo  , syname  ,
      &                      nosfun  , sfname  , segfun  , amass   , conc    ,
@@ -33,6 +32,7 @@
 !      use rdhydr_mod                 ! explicit interface
       use partwq_mod                 ! explicit interface
       use oildsp_mod                 ! explicit interface
+      use part03_mod                 ! explicit interface
       use part09_mod                 ! explicit interface
       use part10_mod                 ! explicit interface
       use part12_mod                 ! explicit interface
@@ -41,6 +41,11 @@
       use part18_mod                 ! explicit interface
       use part21_mod                 ! explicit interface
       use partur_mod                 ! explicit interface
+      use spec_feat_par
+      use partini_mod
+      use m_part_regular
+      use larvae_mod
+      use ibm_mod
 
       implicit none
 
@@ -70,21 +75,29 @@
       real      (4), intent(inout) :: dmps   (notot ,ndmps,*) !< dumped segment fluxes if INTOPT > 7
       real      (4), intent(inout) :: amass2 (notot , 5 )     !< mass balance array
 
+
 !     Locals
 
       integer(ip) lunut             !  output unit number
+      integer     lunpr
       integer( 4) indx              !  index in segment names
       integer( 4) ioff              !  offset in substances array
       integer( 4) isys              !  loop counter substances
       logical     :: first  = .true.
       integer(ip), save :: idtimd , itimd1 , itimd2     ! timings of the vertical diffusion file
       integer(ip), save :: idtimt , itimt1 , itimt2     ! timings of the tau file
+      integer(ip), save :: idtims , itims1 , itims2     ! timings of the salinity file
+      integer(ip), save :: idtimtm , itimtm1 , itimtm2     ! timings of the temperature file
       integer(ip), save :: ifflag , isflag
       logical    , save :: updatd
       integer(ip) nosubud
       integer(ip) iseg, i, i2, ipart
+      integer(ip) ilp, isp, ids, ide, iext, nores, noras
       real   (rp) depmin
+      real(sp) :: densty  ! AddedDana
       logical     update
+      integer     iniday
+      integer           :: lures
       integer(4)  ithandl /0/
 
       if ( alone ) return
@@ -92,8 +105,22 @@
       lunut = lunitp(2)
 
 !           this replaces the call to rdhydr
+      if ( modtyp .eq.7 ) then
+        if(idp_file .ne. ' ' .and. itime .eq. nint(const(8))*86400 ) then ! release at day iniday - specific for IBM module (modtyp=7) FMK 13-2-2017
+            call partini( nopart, nosubs, idp_file, wpart  , xpart ,
+     &                    ypart , zpart , npart   , mpart  , kpart ,
+     &                    iptime, lunpr )
+!            call partini( lgrid, lgrid2, nmaxp, mmaxp, xb    , yb  ,
+!     &                    nopart, nosubs, idp_file, wpart  , xpart ,
+!     &                    ypart , zpart , npart   , mpart  , kpart ,
+!     &                    iptime, lunut )
+        endif
+      endif
 
-      volumep(cellpntp(:)) = dwqvol(:)
+      do i=1, noseg
+        volumep(cellpntp(i)) = dwqvol(i)
+      enddo
+
       flow = 0.0
       do i = 1, noqp
          if ( flowpntp(i,1) .gt. 0 ) flow(flowpntp(i,1)) = flow(flowpntp(i,1)) + dwqflo(i)
@@ -113,7 +140,9 @@
       if ( lsettl .or. layt .gt. 1 ) then
          call zoek20 ( 'TAU       ', nosfun, sfname, 10, indx )
          if ( indx .gt. 0 ) then
-            tau(cellpntp(:)) = segfun(:,indx)
+            do i=1, noseg
+               tau(cellpntp(i)) = segfun(i,indx)
+            enddo
          else if ( lunitp(21) .gt. 0 ) then
             call dlwqbl ( lunitp(21), lunut   , itime     , idtimt  , itimt1  ,
      &                    itimt2    , ihdel   , noseg     , mnmaxk  , tau1    ,
@@ -123,7 +152,9 @@
          if ( layt .gt. 1 ) then
             call zoek20 ( 'VERTDISP  ', nosfun, sfname, 10, indx )
             if ( indx .gt. 0 ) then
-               vdiff(cellpntp(:)) = segfun(:,indx)
+               do i=1, noseg
+                  vdiff(cellpntp(i)) = segfun(i,indx)
+               enddo
             else if ( lunitp(20) .gt. 0 ) then
                call dlwqbl ( lunitp(20), lunut   , itime     , idtimd  , itimd1  ,
      &                       itimd2    , ihdel   , noseg     , mnmaxk  , vdiff1  ,
@@ -137,19 +168,58 @@
                vdiff = 0.0
             endif
          endif
+
+         ! for salinity and temperature
+         !.. salinity
+
+            call zoek20 ( 'SALINITY  ', nosfun, sfname, 10, indx )
+            if ( indx .gt. 0 ) then
+               do i=1, noseg
+                  salin(cellpntp(i)) = segfun(i,indx)
+               enddo
+            else if ( lunitp(22) .gt. 0 ) then
+            call dlwqbl ( lunitp(22), lunut   , itime    , idtims , itims1 ,
+     &                     itims2   , ihdel   , noseg    , mnmaxk , salin1 ,
+     &                     salin    , cellpntp , fnamep(22), isflag , ifflag ,
+     &                     updatd   )
+            endif
+
+
+!.. temperature
+
+            call zoek20 ( 'TEMP      ', nosfun, sfname, 10, indx )
+            if ( indx .gt. 0 ) then
+               do i=1, noseg
+                  temper(cellpntp(i)) = segfun(i,indx)
+               enddo
+            else if ( lunitp(23) .gt. 0 ) then
+            call dlwqbl ( lunitp(23), lunut   , itime    , idtimtm , itimtm1 ,
+     &                     itimtm2   , ihdel   , noseg    , mnmaxk , temper1,
+     &                     temper   , cellpntp , fnamep(23), isflag , ifflag ,
+     &                     updatd   )
+            endif
       endif
       first = .false.
+      if ( lunitp(22) .gt. 0 .and. lunitp(23) .gt. 0 ) then
+         do i = 1, noseg
+            rhowatc(i) = densty(max(0.0e0,salin1(i)), temper1(i))
+         enddo
+      else
+         do i = 1, noseg
+            rhowatc(i) = rhow
+         enddo
+      endif
 
 !     Taking over of aged particles by Delwaq
 ! first for oil model
-      if (modtyp.eq.4) then 
+      if (modtyp.eq.4) then
         call oil2waq( nopart , nosys    , notot    , nosubs   , noseg    ,
      &              nolay    , dwqvol   , surface  , nmaxp    , mmaxp    ,
      &              lgrid3   , syname   , itime    , iddtim   , npwndw   ,
      &              iptime   , npart    , mpart    , kpart    , wpart    ,
      &              amass    , conc     , iaflag   , intopt   , ndmps    ,
      &              isdmp    , dmps     , amass2   )
-      else 
+      else
         call par2waq( nopart , nosys    , notot    , nosubs   , noseg    ,
      &              nolay    , dwqvol   , surface  , nmaxp    , mmaxp    ,
      &              lgrid3   , syname   , itime    , iddtim   , npwndw   ,
@@ -157,7 +227,7 @@
      &              amass    , conc     , iaflag   , intopt   , ndmps    ,
      &              isdmp    , dmps     , amass2   )
       endif
-      
+
 !     Echo actual time to screen
 
       write ( *, 1020) itime  /86400, mod(itime  , 86400)/3600, mod(itime  , 3600)/60, mod(itime  , 60),
@@ -197,6 +267,7 @@
 
 !     Part13 makes 3d detail plot grids corrected for recovery rate
 
+      do ilp = 1, npgrid
       call part13 ( lunitp(9), fnamep(9), lunut    , title    , subst2   ,
      &              lgrid2   , nmaxp    , volumep  , area     , npart    ,
      &              mpart    , xpart    , ypart    , wpart    , nopart   ,
@@ -209,6 +280,7 @@
      &              nfract   , lsettl   , mstick   , elt_names, elt_types,
      &              elt_dims , elt_bytes, locdep   , zpart    , za       ,
      &              dpsp     , tcktot   , nosub_max, bufsize  )
+      enddo
 
 !     Parths makes 2D averaged time histories every ihstep
 
@@ -226,14 +298,98 @@
      &              zpart    , za       , locdep   , dpsp     , tcktot   ,
      &              lgrid3   )
 
-      if ( itime .ge. itstopp ) goto 9999 ! <=== here the simulation loop ends
+      if ( itime .ge. itstopp ) then
+
+! write the restart files when needed
+
+      if (write_restart_file) then
+         ! first to calculate the number of particles in the restart files
+         nores = 0
+         noras = 0
+         do ilp = 1, nopart
+            if (npart(ilp)>1.and.mpart(ilp)>1) then          !only for the active particles
+               if (lgrid( npart(ilp), mpart(ilp)).ge.1) then
+                  nores = nores + 1          ! only for the active particles
+                  if (max_restart_age .gt. 0 .and. iptime(ilp) .lt. max_restart_age) then
+                     noras = noras + 1       ! if max_restart_age is a positve and the particles' age is less then max_restart_age
+                  end if
+               end if
+            end if
+         enddo
+
+         res_file = fnamep(1)
+         iext = len_trim(res_file) - 3
+         if (max_restart_age .lt. 0) then
+!           Write the restart file with all active paritcles
+            if (modtyp.eq.6)then
+               res_file(iext+1:iext+4) = 'ses'    !limited number of particles (for 'plastics' modeltype 6 restart, as 'ras' but including settling values)
+               write ( lunut, * ) ' Including particle dependent settling velocity'
+            else
+               res_file(iext+1:iext+4) = 'res'     !all results, except those that are inactive (outside model)
+            end if
+            write ( lunut, * ) ' Opening restart particles file:', idp_file(1:len_trim(res_file))
+            call openfl ( lures, res_file, ftype(2), 1 )
+            write ( lures ) 0, nores, nosubs
+
+            do ilp = 1, nopart
+               if (npart(ilp)>1.and.mpart(ilp)>1) then
+                  if (lgrid( npart(ilp), mpart(ilp)).ge.1) then  !only for the active particles
+                     if (modtyp.ne.6) then
+                        write ( lures ) npart(ilp), mpart(ilp), kpart(ilp), xpart(ilp), ypart(ilp), zpart(ilp),
+     &                                  wpart(1:nosubs,ilp), iptime(ilp)
+                     else
+                        write ( lures ) npart(ilp), mpart(ilp), kpart(ilp), xpart(ilp), ypart(ilp), zpart(ilp),
+     &                                  wpart(1:nosubs,ilp), spart(1:nosubs,ilp), iptime(ilp)
+                     end if
+                  end if
+               end if
+            enddo
+            write (lunut,*) ' Number of active particles in the restart file: ',nores
+            close ( lures )
+         else
+!        Write the restart file with all active paritcles below a certain age
+            if (modtyp.eq.6)then
+               res_file(iext+1:iext+4) = 'sas'    !limited number of particles (for 'plastics' modeltype 6 restart, as 'ras' but including settling values)
+               write ( lunut, * ) ' Including particle dependent settling velocity'
+            else
+               res_file(iext+1:iext+4) = 'ras'    !limited number of particles (remove particles older than a certain age or inactive)
+            end if
+            write ( lunut, * ) ' Opening restart particles file:', idp_file(1:len_trim(res_file))
+            write ( lunut, * ) ' Particles older than ',max_restart_age,' seconds are removed'
+            call openfl ( lures, res_file, ftype(2), 1 )
+            write ( lures ) 0, noras, nosubs
+
+            do ilp = 1, nopart
+               if (npart(ilp)>1.and.mpart(ilp)>1) then
+                  if (lgrid( npart(ilp), mpart(ilp)).ge.1 .and. (iptime(ilp).lt.max_restart_age)) then   !only when the particles' age less than max_restart_age, time in seconds
+                     if (modtyp.ne.6) then
+                        write ( lures ) npart(ilp), mpart(ilp), kpart(ilp), xpart(ilp), ypart(ilp), zpart(ilp),
+     &                                  wpart(1:nosubs,ilp),iptime(ilp)
+                     else
+                        write ( lures ) npart(ilp), mpart(ilp), kpart(ilp), xpart(ilp), ypart(ilp), zpart(ilp),
+     &                                  wpart(1:nosubs,ilp), spart(1:nosubs,ilp), iptime(ilp)
+                     end if
+                  end if
+               end if
+            enddo
+            write (lunut,*) ' Number of active particles in the restart file below maximum age: ',noras
+            close ( lures )
+         end if
+      end if
+
+
+        goto 9999 ! <=== here the simulation loop ends
+      endif
+
 
 !     Part03 computes velocities and depth
 
-      call part03 ( lgrid    , volumep  , flow     , dx       , dy       ,
-     &              nmaxp    , mmaxp    , mnmaxk   , lgrid2   , velo     ,
-     &              layt     , area     , depth    , dpsp     , locdep   ,
-     &              zlevel   , tcktot   , ltrack)
+      call part03 ( lgrid     , volumep   , flow      , dx       , dy       ,
+     &              nmaxp     , mmaxp     , mnmaxk    , lgrid2   , velo     ,
+     &              layt      , area      , depth     , dpsp     , locdep   ,
+     &              zlevel    , zmodel    , laytop    , laytopp  , laybot   ,
+     &              pagrid    , aagrid    , tcktot    , ltrack   , flow2m   ,
+     &              lgrid3    , vol1      , vol2      , vel1     , vel2     )
 
 !     This section does water quality processes
 
@@ -253,20 +409,39 @@
          case ( 3 )     ! = obsolete
 
          case ( 4 )     ! = oil model
-            call oildsp ( lgrid    , nmaxp    , concp    , volumep  , area     ,    
-     &                    npart    , mpart    , wpart    , radius   , nodye    ,    
-     &                    npwndw   , nopart   , itime    , idelt    , wvelo    ,    
-     &                    const    , lunut    , nosubs   , noslay   , lgrid2   ,    
+            call oildsp ( lgrid    , nmaxp    , concp    , volumep  , area     ,
+     &                    npart    , mpart    , wpart    , radius   , nodye    ,
+     &                    npwndw   , nopart   , itime    , idelt    , wvelo    ,
+     &                    const    , lunut    , nosubs   , noslay   , lgrid2   ,
      &                    lgrid3   ,
-     &                    mmaxp    , xb       , yb       , kpart    , mapsub   ,    
-     &                    isfile   , nfract   , mstick   , nstick   , fstick   ,    
-     &                    xa       , ya       , pg(1)    , lsettl   , xpart    ,    
-     &                    ypart    , zpart    , za       , locdep   , dpsp     ,    
-     &                    tcktot   , substi   ,            npmax    , rhow     ,    
-     &                    amassd   , ioptrad  , ndisapp  , idisset  , tydisp   ,    
+     &                    mmaxp    , xb       , yb       , kpart    , mapsub   ,
+     &                    isfile   , nfract   , mstick   , nstick   , fstick   ,
+     &                    xa       , ya       , pg(1)    , lsettl   , xpart    ,
+     &                    ypart    , zpart    , za       , locdep   , dpsp     ,
+     &                    tcktot   , substi   ,            npmax    , rhow     ,
+     &                    amassd   , ioptrad  , ndisapp  , idisset  , tydisp   ,
      &                    efdisp   , xpoldis  , ypoldis  , nrowsdis , wpartini ,
      &                    iptime)
-      end select
+
+         case ( 7 )     ! = ibm model
+              if ( mod(itime,86400) .eq. 0 ) then !jvb for output within ibm module this is a temporary hack
+                 call part11 ( lgrid , xb       , yb       , nmaxp    , npart,
+     &                         mpart  , xpart    , ypart    , xa       , ya   ,
+     &                         nopart , npwndw   , lgrid2   , kpart    , zpart,
+     &                         za     , locdep   , dpsp     , layt     , mmaxp,
+     &                         tcktot   )
+              endif
+               call ibm( lunut   , itime    , idelt    , nmaxp    , mmaxp    ,
+     &                   layt     , noseglp  , nolayp   , mnmaxk   , lgrid    ,
+     &                   lgrid2   , lgrid3   , nopart   , npwndw   , nosubs   ,
+     &                   npart    , mpart    , kpart    , xpart    , ypart    ,
+     &                   zpart    , wpart    , iptime   , wsettl   , locdep   ,
+     &                   noconsp  , const    , concp    , xa       , ya       ,
+     &                   angle    , vol1     , vol2     , flow     , depth    ,
+     &                   vdiff1   , salin1   , temper1  , v_swim   , d_swim   ,
+     &                   itstrtp  , vel1     , vel2     , ibmmt    , ibmsd    ,
+     &                   chronrev , selstage , zmodel   , laybot   , laytop   )
+         end select
 
 !     two-layer system with stratification
 
@@ -284,28 +459,31 @@
      &   call part09 ( lunut    , itime    , nodye    , nwaste   , mwaste   ,
      &                 xwaste   , ywaste   , iwtime   , amassd   , aconc    ,
      &                 npart    , mpart    , xpart    , ypart    , zpart    ,
-     &                 wpart    , iptime   , nopart   , radius   , nrowswaste, 
+     &                 wpart    , iptime   , nopart   , radius   , nrowswaste,
      &                 xpolwaste           , ypolwaste           , lgrid    ,
-     &                 lgrid2   , nmaxp    , mmaxp    , xb       , yb       ,  
+     &                 lgrid2   , nmaxp    , mmaxp    , xb       , yb       ,
      &                 dx       , dy       , ndprt    , nosubs   , kpart    ,
-     &                 layt     , tcktot   , nplay    , kwaste   , nolayp   ,
+     &                 layt     , tcktot   , zmodel   , laytop   , laybot   ,
+     &                 nplay    , kwaste   , nolayp   ,
      &                 modtyp   , zwaste   , track    , nmdyer   , substi   ,
      &                 rhopart)
 
+
 !      add continuous release
 
-      if ( nocont .gt. 0 )
-     &   call part14 ( itime    , idelt    , nodye    , nocont   , ictime   ,
+       if ( nocont .gt. 0 )
+     &    call part14 ( itime    , idelt    , nodye    , nocont   , ictime   ,
      &                 ictmax   , nwaste   , mwaste   , xwaste   , ywaste   ,
      &                 zwaste   , aconc    , rem      , npart    , ndprt    ,
      &                 mpart    , xpart    , ypart    , zpart    , wpart    ,
-     &                 iptime   , nopart   , pblay    , radius   , nrowswaste, 
+     &                 iptime   , nopart   , pblay    , radius   , nrowswaste,
      &                 xpolwaste           , ypolwaste           , lgrid    ,
-     &                 lgrid2   , nmaxp    , mmaxp    , xb       , yb       ,  
+     &                 lgrid2   , nmaxp    , mmaxp    , xb       , yb       ,
      &                 dx       , dy       , ftime    , tmassu   , nosubs   ,
      &                 ncheck   , t0buoy   , modtyp   , abuoy    , t0cf     ,
      &                 acf      , lunut    , kpart    , layt     , tcktot   ,
-     &                 nplay    , kwaste   , nolayp   , linear   , track    ,
+     &                 zmodel   , laytop   , laybot   , nplay    , kwaste   ,
+     &                 nolayp   , linear   , track    ,
      &                 nmconr   , spart    , rhopart  , noconsp  , const   )
 
 !     write particle tracks
@@ -317,10 +495,12 @@
      &                 nopart   , npwndw   , lgrid2   , kpart    , zpart    ,
      &                 za       , locdep   , dpsp     , nolayp   , mmaxp    ,
      &                 tcktot   )
-         ! write actual particle tracks (file #16)
-         call wrttrk ( lunut   , fout     , fnamep(16), itrakc   , nopart  ,
-     &                 npmax    , xa       , ya       , za       , xyztrk   )
-         itrakc = itrakc + itraki
+!           write actual particle tracks (file #16)
+         if (itime.eq.(itstrtp+idelt*itrakc-idelt)) then
+            call wrttrk ( lunut   , fout     , fnamep(16), itrakc   , nopart  ,
+     &                    npmax    , xa       , ya       , za       , xyztrk  )
+            itrakc = itrakc + itraki
+         endif
       endif
 
       if ( noudef .gt. 0 )  then
@@ -328,7 +508,7 @@
 !       add release in a way defined by the user
 !       array isub contains references to substances
 
-         call partur (  itime    , noudef   , iutime   , mpart    , npart    , 
+         call partur (  itime    , noudef   , iutime   , mpart    , npart    ,
      &                  kpart    , xpart    , ypart    , zpart    , wpart    ,
      &                  iptime   , nopart   , lgrid    , nmaxp    , mmaxp    ,
      &                  tmasud   , ipntp    , substi   , nosubs   , nolayp   ,
@@ -351,9 +531,11 @@
      &                 wsettl   , irfac    , anfac    , lsettl   , locdep   ,
      &                 tcktot   , dpsp     )
       else
-         wsettl = 1.0  ! whole array assignment
-      endif
-      call partvs ( lunut    , itime    , nosubs   , nopart   , ivtset   ,
+! jvb removed this line (commented, so execute if not modtyp=7?
+           if (modtyp.ne.7) wsettl = 1.0  ! whole array assignment
+         endif
+! jvb removed call to partvs (commented, so execute if not modtyp=7?
+         if (modtyp.ne.7) call partvs ( lunut   , itime    , nosubs   , nopart   , ivtset   ,
      &              ivtime   , vsfour   , vsfact   , wpart    , wsettl   ,
      &              modtyp   , nmaxp    , mmaxp    , lgrid3   , noslay   ,
      &              npart    , mpart    , kpart    , nosegp   , noseglp  ,
@@ -367,26 +549,29 @@
 
 !      calculate actual displacement  3d version
 !      this routine must be called with the number of hydrodynamic layers
-      call part10 ( lgrid    , volumep  , flow     , dx       , dy       ,
-     &              area     , angle    , nmaxp    , mnmaxk   , idelt    ,
-     &              nopart   , npart    , mpart    , xpart    , ypart    ,
-     &              zpart    , iptime   , rough    , drand    , lgrid2   ,
-     &              wvelo    , wdir     , decays   , wpart    , pblay    ,
-     &              npwndw   , vdiff    , nosubs   , dfact    , modtyp   ,
-     &              t0buoy   , abuoy    , kpart    , mmaxp    , layt     ,
-     &              wsettl   , depth    , ldiffz   , ldiffh   , lcorr    ,
-     &              acomp    , ipc      , accrjv   , xb       , yb       ,
-     &              tcktot   , lunut    , alpha    , mapsub   , nfract   ,
-     &              taucs    , tauce    , chezy    , rhow     , lsettl   ,
-     &              mstick   , nstick   , ioptdv   , cdisp    , dminim   ,
-     &              fstick   , defang   , floil    , xpart0   , ypart0   ,
-     &              xa0      , ya0      , xa       , ya       , npart0   ,
-     &              mpart0   , za       , locdep   , dpsp     , nolayp   ,
-     &              vrtdsp   , stickdf  , subst    , nbmax    , nconn    ,
-     &              conn     , tau      , caltau   , nboomint , iboomset ,
-     &              tyboom   , efboom   , xpolboom , ypolboom , nrowsboom ,
-     &              itime)
-     
+!      call part10 ( lgrid    , volumep  , flow     , dx       , dy       ,
+!     &              area     , angle    , nmaxp    , mnmaxk   , idelt    ,
+!     &              nopart   , npart    , mpart    , xpart    , ypart    ,
+!     &              zpart    , iptime   , rough    , drand    , lgrid2   ,
+!     &              lgrid3   , zmodel   , laytop   , laybot   ,
+!     &              wvelo    , wdir     , decays   , wpart    , pblay    ,
+!     &              npwndw   , vdiff    , nosubs   , dfact    , modtyp   ,
+!     &              t0buoy   , abuoy    , kpart    , mmaxp    , layt     ,
+!     &              wsettl   , depth    , ldiffz   , ldiffh   , lcorr    ,
+!     &              acomp    , ipc      , accrjv   , xb       , yb       ,
+!     &              tcktot   , lunut    , alpha    , mapsub   , nfract   ,
+!     &              taucs    , tauce    , chezy    , rhow     , lsettl   ,
+!     &              mstick   , nstick   , ioptdv   , cdisp    , dminim   ,
+!     &              fstick   , defang   , floil    , xpart0   , ypart0   ,
+!     &              xa0      , ya0      , xa       , ya       , npart0   ,
+!     &              mpart0   , za       , locdep   , dpsp     , nolayp   ,
+!     &              vrtdsp   , stickdf  , subst    , nbmax    , nconn    ,
+!     &              conn     , tau      , caltau   , nboomint , nboomtint,
+!     &              iboomset , iboomtset, boomdepth                      ,
+!     &              tyboom   , efboom   , tyboomt  , efboomt  , xpolboom ,
+!     &              ypolboom , xipolboom, yipolboom, nrowsboom , itime   ,
+!     &              v_swim   , d_swim   )
+
 
  9999 if ( timon ) call timstop ( ithandl )
       return

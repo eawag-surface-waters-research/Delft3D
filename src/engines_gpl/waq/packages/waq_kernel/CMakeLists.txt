@@ -47,7 +47,9 @@ if(UNIX)
                             waq_plugin_wasteload
                             waq_process
                             waq_utils_c
-                            waq_utils_f) 
+                            waq_utils_f
+                            io_netcdf
+                            io_hyd)
     oss_include_libraries(${library_name} oss_dependencies)
 
     target_link_libraries(${library_name}
@@ -68,7 +70,11 @@ if(WIN32)
                             waq_plugin_wasteload
                             waq_process
                             waq_utils_c
-                            waq_utils_f) 
+                            waq_utils_f
+                            io_netcdf
+                            io_hyd
+                            netcdf4
+                            netcdff)
     oss_include_libraries(${library_name} oss_dependencies)
 
     target_link_libraries(${library_name} ${oss_dependencies})

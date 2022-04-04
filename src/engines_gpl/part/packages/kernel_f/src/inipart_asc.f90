@@ -32,6 +32,7 @@
       use get_key_mod
       use grid_search_mod
       use pinpok_mod
+      use random_generator
 
       implicit none ! force explicit typing
 
@@ -76,7 +77,7 @@
       integer(ip)                       :: nnpart, mmpart
 
       real   (sp)                       :: xx,yy
-      real   (sp)                       :: totmass, avgmass   
+      real   (sp)                       :: totmass, avgmass
       real   (sp)                       :: xxcel, yycel
       logical                           :: okay
       logical                           :: end_of_file,read_error
@@ -91,14 +92,7 @@
 !     local scalars
 !
       integer(ip) :: len_file, len_fract
-      real   (sp) :: rnd
-!
-!     required, otherwise under linux the built-in
-!     random generator will be used, rather than the
-!     part generator.
-!
-      external             rnd
-      integer(sp)          :: get_index
+      integer(ip) :: get_index
       integer(4) ithndl              ! handle to time this subroutine
       data       ithndl / 0 /
       if ( timon ) call timstrt( "inipart_asc", ithndl )
@@ -245,8 +239,8 @@
       write(lunpr,'(//a)')     ' Couldn''t find cells for the initial oil particles.'
       write(lunpr,'(//a)')     ' Is (part of) the polygon within the grid range?'
       call stop_exit(1)
-      
+
       end subroutine inipart_asc
 
 
- 
+

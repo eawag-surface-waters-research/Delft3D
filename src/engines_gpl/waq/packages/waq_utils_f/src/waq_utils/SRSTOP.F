@@ -21,9 +21,9 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
       
-      module exeption_waq
-      logical :: useexeption_waq = .false.
-      end module exeption_waq
+      module exception_waq
+      logical :: useexception_waq = .false.
+      end module exception_waq
       
       subroutine srstop ( iexit )
 
@@ -42,7 +42,7 @@
 
 !     kind           function         name                 description
 
-      use exeption_waq
+      use exception_waq
 
       integer  ( 4), intent(in   ) :: iexit             !< return value
       if ( iexit .ne. 0 ) then
@@ -55,7 +55,7 @@
       write ( 13 , * ) iexit
       close ( 13 )
 
-      !if (useexeption_waq) call throwexception()
+      !if (useexception_waq) call throwexception()
 
       select case ( iexit )
          case ( :0 )

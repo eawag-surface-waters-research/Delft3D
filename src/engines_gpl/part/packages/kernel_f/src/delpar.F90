@@ -369,6 +369,7 @@
       use openfl_mod
       use delete_file_mod            ! explicit interface
       use oildsp_mod                 ! explicit interface
+      use part03_mod                 ! explicit interface
       use part09_mod                 ! explicit interface
       use part10_mod                 ! explicit interface
       use grid_search_mod            ! explicit interface
@@ -384,9 +385,14 @@
       use rdhydr_mod                 ! explicit interface
       use writrk_mod                 ! explicit interface
       use partmem
+      use m_part_regular
       use alloc_mod
-      !use normal_mod
+      use ibm_mod
+      use larvae_mod
+      !use partwr_mod
       
+      !use normal_mod
+
 #ifdef HAVE_CONFIG_H
 #else
       use ifcore
@@ -401,17 +407,20 @@
       integer(ip)         :: itime   , lunpr, lunfil, lunini
       integer(ip)         :: nosubud , noth
       integer(ip)         :: ilp, isp, iext, nores, noras
-      real(sp)            :: dtstep
+      real(sp)            :: dtstep, pctprogress
       logical             :: update
       character(len=*)    :: ifnam
 
-      real     ( dp)              :: rseed = 0.5d0
+      integer             :: iniday  ! day number for initial condition
+
+      real     ( hp)              :: rseed = 0.5d0
       real     ( sp)              :: rnorm
-      
+
       integer(4) ithndl              ! handle to time this subroutine
       data ithndl / 0 /
       call timini ( )
-      timon = .true.
+      !timon = .true.
+      timon = .false.
       if ( timon ) call timstrt( "delpar", ithndl )
 
 !     initialize normal distribution generator
@@ -429,12 +438,31 @@
                     1       , alone   )
       lunpr = lun(2)
 
+#ifdef HAVE_CONFIG_H
+#else
+      hyd%file_hyd%name = fname(18)
+      call read_hyd(hyd)
+      call read_hyd_init(hyd)
+#endif
+
       call report_date_time ( lunpr   )
 
       noth = OMP_GET_MAX_THREADS()
 
       write ( lunpr  , 2020 ) noth
       write (    *   , 2020 ) noth
+
+#ifdef HAVE_CONFIG_H
+      zmodel = .false.
+	  fmmodel = .false.
+#else
+      zmodel = hyd%layer_type == HYD_LAYERS_Z
+      fmmodel = hyd%geometry == HYD_GEOM_UNSTRUC
+      if (fmmodel) then
+         call partfm(lunpr)
+         goto 999
+      endif
+#endif
 
 !     rdlgri also calculates tcktot ! Data is put in the partmem module
 
@@ -444,12 +472,12 @@
 
       call rdccol ( nmaxp   , mmaxp   , lun(5)  , fname(5) , ftype  ,    &
                     lgrid2  , xb      , yb      , lun(2)   )
-      
+
       if((maxval(xb).le.180.0).and.(minval(xb).ge.-180.0).and. &
          (maxval(yb).le.90.0 ).and.(minval(yb).ge.-90.0)) then
          write ( lunpr  , 2030 )
          write (    *   , 2030 )
-      endif      
+      endif
 
 !     calculate distances and angles, and depth in the grid
 
@@ -467,10 +495,10 @@
       call rdhydr ( nmaxp    , mmaxp    , mnmaxk   , nflow    , nosegp   ,    &
                     noqp     , itime    , itstrtp  , ihdel    , volumep  ,    &
                     vdiff    , area     , flow     , vol1     , vol2     ,    &
-                    flow1    , vdiff1   , update   , cellpntp , flowpntp ,    &
+                    flow1    , flow2m   , vdiff1   , update   , cellpntp , flowpntp ,    &
                     tau      , tau1     , caltau   , salin    , salin1   ,    &
                     temper   , temper1  , nfiles   , lun      , fname    ,    &
-                    ftype    , rhowatc)
+                    ftype    , flow2    , rhowatc)
 
 !     Read the whole input file ! Data is put in the partmem module !
 
@@ -566,13 +594,15 @@
       call part03 ( lgrid   , volumep , flow    , dx      , dy      ,    &
                     nmaxp   , mmaxp   , mnmaxk  , lgrid2  , velo    ,    &
                     layt    , area    , depth   , dpsp    , locdep  ,    &
-                    zlevel  , tcktot  , ltrack)
+                    zlevel  , zmodel  , laytop  , laytopp , laybot  ,    &
+                    pagrid  , aagrid  , tcktot  , ltrack  , flow2m  ,    &
+                    lgrid3  , vol1    , vol2    , vel1    , vel2    )
 
-!      write particle tracks (initial state)
+!     initiate particle track file(s)
 
       if (ltrack) then
-!
-!     write initial information to track file
+
+!     write initial information to track file(s)
          dtstep = float(idelt)
          nstept = 1 + ((itstopp - itstrtp)/idelt)/itraki
 
@@ -580,22 +610,12 @@
                        dtstep   , nstept   , ibuff    , rbuff    , cbuff    ,    &
                        track    , npmax    )
 
-         call part11 ( lgrid   , xb      , yb      , nmaxp   , npart   ,    &
-                       mpart   , xpart   , ypart   , xa      , ya      ,    &
-                       nopart  , npwndw  , lgrid2  , kpart   , zpart   ,    &
-                       za      , locdep  , dpsp    , layt    , mmaxp   ,    &
-                       tcktot  )
-!          write actual particle tracks (file #16)
-
-         call wrttrk ( lun(2)  , fout    ,fname(16), itrakc  , nopart  ,    &
-                       npmax   , xa      , ya      , za      , xyztrk  )
-         itrakc = itrakc + itraki
-!
       endif
       write(*,'(a//)') '  Ready'
 
 !     set initial conditions of particles (only oil module)
 
+      iniday = 0
       if ( ini_opt .eq. 1 .and. oil ) then
          call inipart( lgrid   , lgrid2  , nmaxp   , mmaxp   , xb      ,    &
                        yb      , nopart  , nosubs  , substi  , ini_file,    &
@@ -609,13 +629,14 @@
                        ypart   , zpart   , npart   , mpart   , kpart   ,    &
                        iptime  , npmax   , nrowsmax, lunpr   )
       endif
-      if ( idp_file .ne. ' ' ) then
+      if ( idp_file .ne. ' ' .and. modtyp .ne. 7 ) then
          if (modtyp .ne. 6) then
             write ( lunpr, * ) ' Opening initial particles file:', idp_file(1:len_trim(idp_file))
             call openfl ( lunini, idp_file, ftype(2), 0 )
             read ( lunini ) ilp, nopart, nosubs
             do ilp = 1, nopart
-               read( lunini ) npart(ilp), mpart(ilp), kpart(ilp), xpart(ilp), ypart(ilp), zpart(ilp), wpart(1:nosubs,ilp), iptime(ilp)
+               read( lunini ) npart(ilp), mpart(ilp), kpart(ilp), xpart(ilp), ypart(ilp), zpart(ilp), wpart(1:nosubs,ilp), iptime(ilp),track(1,ilp),track(2,ilp),track(3,ilp), &
+                                     track(4,ilp), track(5,ilp), track(6,ilp), track(7,ilp)
             enddo
             close ( lunini )
          else
@@ -624,13 +645,14 @@
             read ( lunini ) ilp, nopart, nosubs
             do ilp = 1, nopart
                read( lunini ) npart(ilp), mpart(ilp), kpart(ilp), xpart(ilp), ypart(ilp), zpart(ilp), wpart(1:nosubs,ilp), &
-                          spart(1:nosubs,ilp), iptime(ilp)
+                          spart(1:nosubs,ilp), iptime(ilp),track(1,ilp),track(2,ilp),track(3,ilp), &
+                                     track(4,ilp), track(5,ilp), track(6,ilp), track(7,ilp)
             enddo
             do ilp = 1, nopart
                do isp = 1, nosubs
                   if (modtyp .eq. 6) then
                      rhopart(isp, ilp) = pldensity(isp)
-                  endif                 
+                  endif
                enddo
             enddo
             close ( lunini )
@@ -670,15 +692,16 @@
       do itime = itstrtp, itstopp, idelt
 
 !        Echo actual time to screen
+         pctprogress = 100.0 * (real(itime,4) - real(itstrtp,4)) / (real(itstopp,4) - real(itstrtp,4)) ! percentage progress
 
          write ( *, 1020) itime  /86400, mod(itime  , 86400)/3600, mod(itime  , 3600)/60, mod(itime  , 60),  &
                           itstopp/86400, mod(itstopp, 86400)/3600, mod(itstopp, 3600)/60, mod(itstopp, 60),  &
-                          nopart - npwndw + 1, npmax
+                          pctprogress, nopart - npwndw + 1, npmax
          write (lun(2), '(/a)')                                   &
           '----------------------------------------------------------------------------------'
          write (lun(2), 1020 ) itime  /86400, mod(itime  , 86400)/3600, mod(itime  , 3600)/60, mod(itime  , 60),  &
                                itstopp/86400, mod(itstopp, 86400)/3600, mod(itstopp, 3600)/60, mod(itstopp, 60),  &
-                               nopart - npwndw + 1, npmax
+                               pctprogress, nopart - npwndw + 1, npmax
 
 !        Part15 adapts wind and direction for actual time
          call part15 ( lun(2)   , itime    , spawnd   , mnmax2   , nowind   ,    &
@@ -689,10 +712,23 @@
          call rdhydr ( nmaxp    , mmaxp    , mnmaxk   , nflow    , nosegp   ,    &
                        noqp     , itime    , itstrtp  , ihdel    , volumep  ,    &
                        vdiff    , area     , flow     , vol1     , vol2     ,    &
-                       flow1    , vdiff1   , update   , cellpntp , flowpntp ,    &
+                       flow1    , flow2m   , vdiff1   , update   , cellpntp , flowpntp ,    &
                        tau      , tau1     , caltau   , salin    , salin1   ,    &
                        temper   , temper1  , nfiles   , lun      , fname    ,    &
-                       ftype    , rhowatc)
+                       ftype    , flow2    , rhowatc)
+
+!        Part03 computes velocities and depth (immediately after reading the new hydro)
+         call part03 ( lgrid    , volumep  , flow     , dx       , dy       ,    &
+                       nmaxp    , mmaxp    , mnmaxk   , lgrid2   , velo     ,    &
+                       layt     , area     , depth    , dpsp     , locdep   ,    &
+                       zlevel   , zmodel   , laytop   , laytopp  , laybot   ,    &
+                       pagrid   , aagrid   , tcktot   , ltrack   , flow2m   , lgrid3   ,    &
+                       vol1     , vol2     , vel1     , vel2     )
+
+         if (zmodel) then
+            call partzp(lunpr, nopart, nmaxp, mmaxp, mnmax2, nolayp, mpart, npart,  &
+                kpart, zpart, lgrid, laytopp, laytop, locdepp, locdep, itime, itstrtp)
+         endif
 
 !        Part12 makes .map files, binary and Nefis versions
 
@@ -739,14 +775,23 @@
                        zpart    , za       , locdep   , dpsp     , tcktot   ,    &
                        lgrid3   )
 
+!        write particle tracks
+
+         if (ltrack.and.itime.eq.(itstrtp+idelt*itrakc)) then
+            ! get the absolute x,y,z's of the particles
+            call part11 ( lgrid    , xb       , yb       , nmaxp    , npart    ,    &
+                          mpart    , xpart    , ypart    , xa       , ya       ,    &
+                          nopart   , npwndw   , lgrid2   , kpart    , zpart    ,    &
+                          za       , locdep   , dpsp     , nolayp   , mmaxp    ,    &
+                          tcktot   )
+!           write actual particle tracks (file #16)
+            call wrttrk ( lun(2)   , fout     , fname(16), itrakc   , nopart  ,    &
+                          npmax    , xa       , ya       , za       , xyztrk  ,    &
+                          nosubs   , wpart    , track    )
+            itrakc = itrakc + itraki
+         endif
+
          if ( itime .ge. itstopp ) exit    ! <=== here the simulation loop ends
-
-!        Part03 computes velocities and depth
-
-         call part03 ( lgrid    , volumep  , flow     , dx       , dy       ,    &
-                       nmaxp    , mmaxp    , mnmaxk   , lgrid2   , velo     ,    &
-                       layt     , area     , depth    , dpsp     ,               &
-                       locdep   , zlevel   , tcktot   , ltrack)
 
 !        This section does water quality processes
 
@@ -779,6 +824,24 @@
                              amassd   , ioptrad  , ndisapp  , idisset  , tydisp   ,    &
                              efdisp   , xpoldis  , ypoldis  , nrowsdis , wpartini ,    &
                              iptime)
+            case ( 7 )     ! = ibm model
+               if ( mod(itime,86400) .eq. 0 ) then !jvb for output within ibm module this is a temporary hack
+                  call part11 ( lgrid    , xb       , yb       , nmaxp    , npart    ,    &
+                                mpart    , xpart    , ypart    , xa       , ya       ,    &
+                                nopart   , npwndw   , lgrid2   , kpart    , zpart    ,    &
+                                za       , locdep   , dpsp     , layt     , mmaxp    ,    &
+                                tcktot   )
+               endif
+               call ibm    ( lun(2)   , itime    , idelt    , nmaxp    , mmaxp    ,    &
+                             layt     , noseglp  , nolayp   , mnmaxk   , lgrid    ,    &
+                             lgrid2   , lgrid3   , nopart   , npwndw   , nosubs   ,    &
+                             npart    , mpart    , kpart    , xpart    , ypart    ,    &
+                             zpart    , wpart    , iptime   , wsettl   , locdep   ,    &
+                             noconsp  , const    , concp    , xa       , ya       ,    &
+                             angle    , vol1     , vol2     , flow     , depth    ,    &
+                             vdiff1   , salin1   , temper1  , v_swim   , d_swim   ,    &
+                             itstrtp  , vel1     , vel2     , ibmmt    , ibmsd    ,    &
+                             chronrev , selstage , zmodel   , laybot   , laytop   )
 
          end select
 
@@ -802,7 +865,7 @@
                        xpolwaste           , ypolwaste           , lgrid    ,    &
                        lgrid2   , nmaxp    , mmaxp    , xb       , yb       ,    &
                        dx       , dy       , ndprt    , nosubs   , kpart    ,    &
-                       layt     , tcktot   , nplay    , kwaste   , nolayp   ,    &
+                       layt     , tcktot   , zmodel   , laytop   , laybot   ,    nplay    , kwaste   , nolayp   ,    &
                        modtyp   , zwaste   , track    , nmdyer   , substi   ,    &
                        rhopart)
 
@@ -819,23 +882,8 @@
                        dx       , dy       , ftime    , tmassu   , nosubs   ,    &
                        ncheck   , t0buoy   , modtyp   , abuoy    , t0cf     ,    &
                        acf      , lun(2)   , kpart    , layt     , tcktot   ,    &
-                       nplay    , kwaste   , nolayp   , linear   , track    ,    &
+                       zmodel   , laytop   , laybot   , nplay    , kwaste   , nolayp   , linear   , track    ,    &
                        nmconr   , spart    , rhopart  , noconsp  , const)
-
-!        write particle tracks
-
-         if (ltrack.and.itime.eq.(itstrtp+idelt*itrakc-idelt)) then
-            ! get the absolute x,y,z's of the particles
-            call part11 ( lgrid    , xb       , yb       , nmaxp    , npart    ,    &
-                          mpart    , xpart    , ypart    , xa       , ya       ,    &
-                          nopart   , npwndw   , lgrid2   , kpart    , zpart    ,    &
-                          za       , locdep   , dpsp     , nolayp   , mmaxp    ,    &
-                          tcktot   )
-!           write actual particle tracks (file #16)
-            call wrttrk ( lun(2)   , fout     , fname(16), itrakc   , nopart  ,    &
-                          npmax    , xa       , ya       , za       , xyztrk  )
-            itrakc = itrakc + itraki
-         endif
 
          if ( noudef .gt. 0 )  then
 
@@ -887,6 +935,7 @@
                        area     , angle    , nmaxp    , mnmaxk   , idelt    ,    &
                        nopart   , npart    , mpart    , xpart    , ypart    ,    &
                        zpart    , iptime   , rough    , drand    , lgrid2   ,    &
+                       zmodel   , laytop   , laybot   , &
                        wvelo    , wdir     , decays   , wpart    , pblay    ,    &
                        npwndw   , vdiff    , nosubs   , dfact    , modtyp   ,    &
                        t0buoy   , abuoy    , kpart    , mmaxp    , layt     ,    &
@@ -901,7 +950,7 @@
                        vrtdsp   , stickdf  , subst    , nbmax    , nconn    ,    &
                        conn     , tau      , caltau   , nboomint , iboomset ,    &
                        tyboom   , efboom   , xpolboom , ypolboom , nrowsboom ,    &
-                       itime)
+                       itime    , v_swim   , d_swim )
 
 !         print test data for checking purposes (< 100 particles)
 !          if (nopart  >=  1 .and. nopart .le. 100) then   &
@@ -950,10 +999,12 @@
                   if (lgrid( npart(ilp), mpart(ilp)).ge.1) then  !only for the active particles
                      if (modtyp.ne.6) then
                         write ( lunfil ) npart(ilp), mpart(ilp), kpart(ilp), xpart(ilp), ypart(ilp), zpart(ilp), &
-                                     wpart(1:nosubs,ilp), iptime(ilp)
+                                     wpart(1:nosubs,ilp), iptime(ilp),track(1,ilp),track(2,ilp),track(3,ilp), &
+                                     track(4,ilp), track(5,ilp), track(6,ilp), track(7,ilp)
                      else
                         write ( lunfil ) npart(ilp), mpart(ilp), kpart(ilp), xpart(ilp), ypart(ilp), zpart(ilp), &
-                                     wpart(1:nosubs,ilp), spart(1:nosubs,ilp), iptime(ilp)
+                                     wpart(1:nosubs,ilp), spart(1:nosubs,ilp), iptime(ilp),track(1,ilp),track(2,ilp),track(3,ilp), &
+                                     track(4,ilp), track(5,ilp), track(6,ilp), track(7,ilp)
                      end if
                   end if
                end if
@@ -978,10 +1029,12 @@
                   if (lgrid( npart(ilp), mpart(ilp)).ge.1 .and. (iptime(ilp).lt.max_restart_age)) then   !only when the particles' age less than max_restart_age, time in seconds
                      if (modtyp.ne.6) then
                         write ( lunfil ) npart(ilp), mpart(ilp), kpart(ilp), xpart(ilp), ypart(ilp), zpart(ilp), &
-                                     wpart(1:nosubs,ilp),iptime(ilp)
+                                     wpart(1:nosubs,ilp),iptime(ilp),track(1,ilp),track(2,ilp),track(3,ilp), &
+                                     track(4,ilp), track(5,ilp), track(6,ilp), track(7,ilp)
                      else
                         write ( lunfil ) npart(ilp), mpart(ilp), kpart(ilp), xpart(ilp), ypart(ilp), zpart(ilp), &
-                                     wpart(1:nosubs,ilp), spart(1:nosubs,ilp), iptime(ilp)
+                                     wpart(1:nosubs,ilp), spart(1:nosubs,ilp), iptime(ilp),track(1,ilp),track(2,ilp),track(3,ilp), &
+                                     track(4,ilp), track(5,ilp), track(6,ilp), track(7,ilp)
                      end if
                   end if
                end if
@@ -991,7 +1044,7 @@
          end if
       end if
 
-      call report_date_time(lunpr)
+ 999  call report_date_time(lunpr)
       write ( *    , '(//a)') ' Normal end of PART simulation'
       write ( lunpr, '(//a)') ' Normal end of PART simulation'
 
@@ -1006,7 +1059,8 @@
  1010 format( '  Start  time :', i6.4 ,'D-', i2.2 ,'H-', i2.2 , 'M-', i2.2 ,'S.'/          &
               '  Stop   time :', i6.4 ,'D-', i2.2 ,'H-', i2.2 , 'M-', i2.2 ,'S.'// )
  1020 format( '  Time ', i6.4 ,'D-', i2.2 ,'H-', i2.2 ,'M-', i2.2 ,'S.',' Stop time ',     &
-                i6.4 ,'D-', i2.2 ,'H-', i2.2 ,'M-', i2.2 ,'S.', i11,' part. (of',i11,')')
+                i6.4 ,'D-', i2.2 ,'H-', i2.2 ,'M-', i2.2 ,'S. (', f5.1, '% completed) ',   &
+                i11,' part. (of',i11,')')
 
  2020 format (/'  Parallel processing with ',i3,' processor(s)'/)
  2030 format (/'  WARNING: Your x-coordinates are in the range [-180,180] and your' &

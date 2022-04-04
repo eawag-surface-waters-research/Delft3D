@@ -40,9 +40,11 @@
 !                           lun2 = delpar report file
 
       use rd_token        ! tokenized reading like in DELWAQ
-      use precision_part       ! flexible size definition
+      use precision_part  ! flexible size definition
       use timers          ! performance timers
       use partmem         ! <== this is the data-block that is filled by this routine
+      use m_part_regular
+      use m_partmesh
       use typos           ! derived types
       use alloc_mod       ! to allocate arrays
       use fileinfo        ! file information for all input/output files
@@ -92,14 +94,14 @@
       real     ( sp), pointer     :: ypoltmp(:)      ! temp y-coordinates polygon
       integer  ( ip)                 nrowstmp        ! temp length polygon
       integer  ( ip)                 npmargin        ! allocation margin in number of particles
-
+      
       character( 20)                 cplastic        ! plastic name
-      real     ( sp)                 rdpldensity     ! read plastic density
+      real     ( sp)                 rdpldensity     ! read plastic density    
       real     ( sp)                 rdplshapefactor ! read plastic shapefactor
-      real     ( sp)                 rdplmeansize    ! read plastic meansize
-      real     ( sp)                 rdplvarsize     ! read plastic stdevsize
-      real     ( sp)                 rdplmusize      ! read plastic meansize
-      real     ( sp)                 rdplsigmasize   ! read plastic stdevsize
+      real     ( sp)                 rdplmeansize    ! read plastic meansize   
+      real     ( sp)                 rdplvarsize     ! read plastic stdevsize  
+      real     ( sp)                 rdplmusize      ! read plastic meansize   
+      real     ( sp)                 rdplsigmasize   ! read plastic stdevsize  
       real     ( sp)                 rdplfragrate    ! read plastic fragmentation rate
       integer  ( ip)                 plmissing
 
@@ -169,7 +171,7 @@
       write ( lun2, 2000 ) title(1)
       write ( *   , 2000 ) title(1)
 
-!     read the name of the hyd file for ui delft3d
+!     read the name of the hyd file for ui delft3d (ignored here for now)
 
       if ( gettoken( cbuffer, ierr2 ) .ne. 0 ) goto 4003
       write ( lun2, 1997 ) cbuffer
@@ -183,10 +185,11 @@
 !                    4 - oil model
 !                    5 - (obsolete option)
 !                    6 - Probabilistic density driven settling model
+!                    7 - IBM model
 
       if ( gettoken( modtyp , ierr2 ) .ne. 0 ) goto 11
       if ( gettoken( notrak , ierr2 ) .ne. 0 ) goto 11
-      if ( gettoken( idummy , ierr2 ) .ne. 0 ) goto 11
+      if ( gettoken( idummy, ierr2 ) .ne. 0 ) goto 11
       if ( gettoken( ioption, ierr2 ) .ne. 0 ) goto 11
       if ( ioption .eq. 0 ) then
          lsettl = .false.
@@ -202,9 +205,15 @@
 
       write ( *, * ) ' Number of layers            : ', nolayp
       if ( notrak .eq. 0 ) then
-         write ( lun2, '(a)' ) '  Particle tracks not written to tracking file'
+         write ( lun2, '(/a)' ) '  Particle tracks not written to tracking file'
+      elseif ( notrak .eq. 1 ) then
+        write ( lun2, '(a)' ) '    Particle tracks written to tracking file'
+!         write ( lun2, '(/a)' ) '  Particle tracks written to tracking file every calculation time step'
+      elseif ( notrak .gt. 1 ) then
+         write ( lun2, '(/a,i0,a)' ) '  Particle tracks written to tracking file at ', notrak, ' times the calculation time step'
       else
-         write ( lun2, '(a)' ) '  Particle tracks written to tracking file'
+         write ( lun2, '(/a)' ) '  Error 1002. Particle tracks interval multiplier is negative!'
+         ierr = ierr + 1
       endif
       oil = modtyp .eq. 4
 
@@ -382,6 +391,9 @@
             mapsub(1) = 1            !.. substance number 1 must be temperature
          case ( 6 )
             write ( *, * ) ' You are using the probabilistic density driven settling model '
+         case ( 7 )
+            write ( *, * ) ' You are using the general Individual Based Model (IBM)'
+            pblay  = 0.0
          case default
             write(lun2 , 2015) modtyp
             nolayp = 1
@@ -489,7 +501,10 @@
             write ( lun2, 2011 ) pblay
          case ( 4 )
             write ( lun2, 2002 ) 'Oil model - dispersion and evaporation included'
+         case ( 7 )
+            write ( lun2, 2001) 'General Individual Based Model (IBM)'
       end select
+
       subst2( nosubs+2 ) = 'nr of particles'
       subst2( nosubs+1 ) = 'localdepth'         !     added for 3d datasets
 
@@ -562,10 +577,15 @@
             iwndtm(i) = id*86400 + ih*3600 + im*60 + is
          enddo
       endif
-      call alloc ( "wvelo", wvelo, mnmax2 )
-      call alloc ( "wdir" , wdir , mnmax2 )
-      write ( lun2, '(//)' )
-
+      if (fmmodel) then
+          call alloc ( "wvelo", wvelo, numcells )
+          call alloc ( "wdir" , wdir , numcells )
+          write ( lun2, '(//)' )
+      else
+          call alloc ( "wvelo", wvelo, mnmax2 )
+          call alloc ( "wdir" , wdir , mnmax2 )
+          write ( lun2, '(//)' )
+      endif
 !       read number of constants that will follow
 
       if ( gettoken( noconsp, ierr2 ) .ne. 0 ) goto 4019
@@ -660,11 +680,20 @@
 ! read special features
 ! add defaults when special features are not used first
       vertical_bounce = .true.
+      apply_wind_drag = .false.
+      max_wind_drag_depth = 0.0
       write_restart_file = .false.
       max_restart_age = -1
       pldebug = .false.
       screens = .false.
       nrowsscreens = 0
+      partinifile = ' '
+      partrelfile = ' '
+      ibmmodel = .false.
+      ibmmodelname = ""
+      ibmstagedev = ""
+      chronrev = .false.
+      selstage = 0.0
 
 
       if ( gettoken( cbuffer, id, itype, ierr2 ) .ne. 0 ) then
@@ -683,6 +712,14 @@
                   write ( lun2, '(/a)' ) '  Found keyword "no_vertical_bounce": vertical bouncing is switched off.'
                   write ( *   , '(/a)' ) ' Found keyword "no_vertical_bounce": vertical bouncing is switched off.'
                   vertical_bounce = .false.
+               case ('max_wind_drag_depth')
+                  write ( lun2, '(/a)' ) ' Found keyword "max_wind_drag_depth".'
+                  write ( *   , '(/a)' ) ' Found keyword "max_wind_drag_depth".'
+                  apply_wind_drag = .true.
+                  if (gettoken (max_wind_drag_depth, ierr2) .ne. 0 ) goto 9005
+                  if (max_wind_drag_depth.lt.0.0) goto 9005
+                  write ( lun2, '(/a,f13.4)' ) ' Maximum depth for particles in top layer to be subject to wind drag: ', max_wind_drag_depth
+                  write ( *   , '(/a,f13.4)' ) ' Maximum depth for particles in top layer to be subject to wind drag: ', max_wind_drag_depth
                case ('write_restart_file')
                   write ( lun2, '(/a)' ) '  Found keyword "write_restart_file".'
                   write ( *   , '(/a)' ) ' Found keyword "write_restart_file".'
@@ -777,7 +814,7 @@
                   write ( lun2, '(/a)' ) '  Found keyword "screens".'
                   write ( *   , '(/a)' ) ' Found keyword "screens".'
                   screens = .true.
-                  if ( gettoken( permealeft  , ierr2 ) .ne. 0 ) goto 9201   ! leftside permeability of screeens
+                  if ( gettoken( permealeft  , ierr2 ) .ne. 0 ) goto 9201   ! leftside permeability of screeens 
                   if ( gettoken( permearight , ierr2 ) .ne. 0 ) goto 9202   ! rightside permeability of screeens
                   if ( gettoken( fiscreens   , ierr2 ) .ne. 0 ) goto 9203   ! screens polygon
 
@@ -787,8 +824,8 @@
                   close (lunfil)
                   if ( nrowsscreens .gt. 0) then
 !     allocate memory for the dispersant polygons, and read them into memory
-                     call alloc ( "xpolscreens", xpolscreens, nrowsscreens )
-                     call alloc ( "ypolscreens", ypolscreens, nrowsscreens )
+                     call alloc ( "xpoltmp", xpolscreens, nrowsscreens )
+                     call alloc ( "ypoltmp", ypolscreens, nrowsscreens )
                      xpolscreens = 999.999
                      ypolscreens = 999.999
                      call polpart(fiscreens, nrowsscreens, xpolscreens, ypolscreens, nrowstmp, lun2)
@@ -797,6 +834,66 @@
                      write ( *   , '(/a)' ) ' Screens polygon doesn''t contain any coordinates'
                      screens = .false.
                   endif
+               case ('partinifile')
+                  write ( lun2, '(/a)' ) '  Found keyword "partinifile".'
+                  write ( *   , '(/a)' ) ' Found keyword "partinifile".'
+                  if ( gettoken( partinifile  , ierr2 ) .ne. 0 ) goto 9301   ! part FM ini file
+               case ('partrelfile')
+                  write ( lun2, '(/a)' ) '  Found keyword "partrelfile".'
+                  write ( *   , '(/a)' ) ' Found keyword "partrelfile".'
+                  if ( gettoken( partrelfile  , ierr2 ) .ne. 0 ) goto 9302   ! part FM ini file
+               case ('ibmmodel')
+                  if (modtyp /= 7) goto 9401
+                  write ( lun2, '(/a)' ) '  Found keyword "ibmmodel".'
+                  write ( *   , '(/a)' ) ' Found keyword "ibmmodel".'
+                  ibmmodel = .true.
+                  if ( gettoken( ibmmodelname     , ierr2 ) .ne. 0 ) goto 9402   ! IBM model name
+                  write ( lun2, '(/a)' ) '  Found IBM model name : ', ibmmodelname
+                  write ( *   , '(/a)' ) ' Found IBM model name : ', ibmmodelname
+                  select case (trim(ibmmodelname)) ! Set IBM model
+                    case ("test")
+                        ibmmt = 0        ! model type none
+                    case ("european_eel")
+                        ibmmt = 1        ! model type European eel
+                    case ("atlantic_salmon")
+                        ibmmt = 2        ! model type Atlantic salmon
+                    case ("mauve_stinger")
+                        ibmmt = 3        ! model type Mauve stinger
+                    case ("horseshoecrab")
+                        ibmmt = 4        ! model type Horseshoe crab
+                    case ("mangrove_seeds")
+                        ibmmt = 5        ! model type Mangrove propagules          
+                    case ("asian_carp_eggs")
+                        ibmmt = 6        ! model type Asian Carp Eggs            
+                    case default         !IBM model not filled
+                        write(lun2, '(/a)') ' Unrecognised IBM model name : ', trim(ibmmodelname)
+                        goto 9403
+                  end select
+                  if ( gettoken( ibmstagedev , ierr2 ) .ne. 0 ) goto 9404   ! IBM stage development
+                    write ( lun2, '(/a)' ) ' Found IBM stage development name : ', ibmstagedev
+                    write ( *   , '(/a)' ) ' Found IBM stage development name : ', ibmstagedev 
+                  ! Set stage development
+                  select case (trim(ibmstagedev))
+                    case ("dev_fixed")
+                        ibmsd = 0 !dev_fixed
+                    case ("dev_linear")
+                        ibmsd = 1 !dev_linear
+                    case ("dev_interpolate")
+                        ibmsd = 2 !dev_intpltd
+                    case ("dev_asian_carp_eggs")
+                        ibmsd = 3 !dev_asian_carp_eggs
+                    case default        !IBM model not filled
+                        write(lun2, '(/a)') ' Unrecognised IBM model stage development : ', trim(ibmstagedev)
+                        goto 9405      
+                   end select 
+               case ('revchron')
+                  if (modtyp /= 7) goto 9406
+                  write ( lun2, '(/a)' ) '  Found keyword "revchron".'
+                  write ( *   , '(/a)' ) ' Found keyword "revchron".'
+                  chronrev = .true.
+                  if ( gettoken( selstage     , ierr2 ) .ne. 0 ) goto 9407   ! Give stage for release
+                  write ( lun2, '(/a,f10.3)' ) '  Found stage for reversed release : ', selstage
+                  write ( *   , '(/a,f10.3)' ) ' Found stage for reversed release : ', selstage
                case default
                   write ( lun2, '(/a,a)' ) '  Unrecognised keyword: ', trim(cbuffer)
                   write ( *   , '(/a,a)' ) ' Unrecognised keyword: ', trim(cbuffer)
@@ -806,7 +903,7 @@
             end do
          end if
       end if
-
+      
 !     read the simulation timers
 !     simulation start time (the value of id is read above in the special features section)
 
@@ -958,7 +1055,8 @@
 
 !     write t0-string to title string
 
-      write ( title(4), '(a3,1x,i4.4,5(1x,i2.2) )' ) 'T0:',iyear,imonth,id,ih,im,is
+      write( title(4), '(a4,i4.4,a,i2.2,a,i2.2,a,i2.2,a,i2.2,a,i2.2,a)' ) &
+            'T0: ', iyear, '.', imonth,  '.', id,    ' ', ih, ':', im, ':', is, '  (scu=       1s)'
 
       if (oil) then
 
@@ -996,7 +1094,7 @@
             close ( lunfil )
          endif
 !        ini_opt = 2 : ascii text file from rasterdata
-         if (ini_opt .eq. 2 ) then
+         if (ini_opt .eq. 2 ) then                              
             if ( gettoken( ini_file, ierr2 ) .ne. 0 ) goto 6012
             open ( newunit=lunfil, file=ini_file, status='old', iostat=ierr2 )
             if ( ierr2 .ne. 0 ) go to 1710
@@ -1126,13 +1224,10 @@
             endif
          endif
 
-!     allocate memory for the polygons, and read them into memory
-         if (nrowsmax .gt. 0) then
+         if ( ndisapp .gt. 0 .and. nrowsmax .gt. 0) then
+!     allocate memory for the dispersant polygons, and read them into memory
             call alloc ( "xpoltmp", xpoltmp, nrowsmax )
             call alloc ( "ypoltmp", ypoltmp, nrowsmax )
-         endif
-         if ( ndisapp .gt. 0) then
-!     allocate memory for the dispersant polygons, and read them into memory
             call alloc ( "xpoldis", xpoldis, nrowsmax, ndisapp )
             call alloc ( "ypoldis", ypoldis, nrowsmax, ndisapp )
             call alloc ( "nrowsdis", nrowsdis, ndisapp )
@@ -1236,11 +1331,6 @@
       endif
 
 !     x-window of the plot
-!     Note:
-!     If the number encountered is NOT an integer (interpreted as the number of plotgrids),
-!     then the definition of the first and only plotgrid will follow. Otherwise a set of
-!     that many definitions is expected. Rather tricky, but that is one way of making it
-!     backward compatible
 
       npgrid = 1
       if ( gettoken( i, xw1f, itype, ierr2 ) .ne. 0 ) goto 4038
@@ -1248,19 +1338,7 @@
          npgrid = i
          write ( lun2, '(A,I4)' ) 'Number of plot grids: ',npgrid
       endif
-      if ( npgrid .ne. 0 ) then
-         allocate ( pg(npgrid) )
-      else
-         allocate ( pg(1) )
-         pg(1)%xlow  = 0.0
-         pg(1)%xhigh = 1.0
-         pg(1)%ylow  = 0.0
-         pg(1)%yhigh = 1.0
-         pg(1)%ztype = 0
-         pg(1)%mmap  = 0
-         pg(1)%nmap  = 0
-      endif
-
+      if ( npgrid .ne. 0 ) allocate ( pg(npgrid) )
       do i = 1, npgrid
          if ( npgrid .gt. 1 ) write ( lun2, '(/A,i4)' ) 'Information for plotgrid: ', i
          if ( itype .eq. 2 ) then
@@ -1397,7 +1475,7 @@
                fidye(i) = ' '
             elseif (itype.eq.3) then
                fidye(i) = ' '
-            else
+            else               
                radius(i) = -999.0
                open ( newunit=lunfil, file=fidye(i), status='old', iostat=ierr2 )
                if ( ierr2 .ne. 0 ) go to 1702
@@ -1504,14 +1582,14 @@
             fiwaste(i+nodye) = ' '
          elseif (itype.eq.3) then
             fiwaste(i+nodye) = ' '
-         else
+         else               
             radius(i+nodye) = -999.0
             open ( newunit=lunfil, file=fiwaste(i+nodye), status='old', iostat=ierr2 )
             if ( ierr2 .ne. 0 ) go to 1703
             call getdim_dis ( lunfil, fiwaste(i+nodye), nrowsmax, lun2 )
             close (lunfil)
          endif
-
+         
          if ( gettoken( wparm (i+nodye), ierr2 ) .ne. 0 ) goto 4043
          ndprt(i+nodye) = int(wparm(i+nodye)*nopart/100.0 + 0.5)
 
@@ -1851,13 +1929,16 @@
       enddo
       if ( npmax .ne. nopart ) then
          npmax = max(npmax,nopart)           ! the whole computation is a bit strange
-         write ( lun2, 3100 ) npmax          ! nopart variable is only used for
       endif                                  ! dimensioning and is set to 0 in delpar
       npmargin = npmax / 100
       npmax = npmax + npmargin + 1           ! we add a 1% + 1 uncertainty margin here...
+      write ( lun2, 3100 ) npmax             ! nopart variable is only used for
 
 !     further allocations
 
+      if (zmodel) then
+         call alloc ( "locdepp", locdepp, mnmax2   , noslay )
+      endif
       call alloc ( "locdep", locdep, mnmax2   , noslay )
       call alloc ( "adepth", adepth, nosubs   , noslay )
       call alloc ( "apeak ", apeak , nosubs   , noslay )
@@ -1889,7 +1970,7 @@
             call alloc ( cwork, pg(i)%imask ,                    pg(i)%nmap, pg(i)%mmap )
          enddo
       endif
-      if ( idummy .gt. 0 ) call alloc ( "subsud", subsud, idummy*2 )
+!      if ( idummy .gt. 0 ) call alloc ( "subsud", subsud, idummy*2 )
       call alloc ( "dfact ", dfact , nosubs       )
       call alloc ( "fstick", fstick, nosubs       )
       call alloc ( "isfile", isfile, nosub_max    )
@@ -1950,6 +2031,9 @@
       call alloc ( "elt_dims ", elt_dims , 6, 8+nosub_max*noslay )
       bufsize = max(noslay*pg(1)%nmap*pg(1)%mmap,noslay*mnmax2,nosta)
       call alloc ( "rbuffr   ", rbuffr   , bufsize )
+      call alloc ( "v_swim", v_swim, npmax        )
+      call alloc ( "d_swim", d_swim, npmax        )
+      call alloc ( "ebb_flow", d_swim, npmax        )
 
       npmax = npmax - npmargin ! Deduct margin again
 
@@ -1970,6 +2054,8 @@
       t0buoy = 0.0
       apeak  = 0.0
       wsettl = 0.0
+      v_swim = 0.0
+      d_swim = 0.0
 
 !     stop when errors occured during reading
 
@@ -2413,6 +2499,12 @@
 9000  write(lun2,*) ' Error: reading special features '
       write(*   ,*) ' Error: reading special features '
       call stop_exit(1)
+9005  write(lun2,*) ' Error: reading value of max_wind_drag_depth constant'
+      write(*   ,*) ' Error: reading value of max_wind_drag_depth constant'
+      call stop_exit(1)
+9006  write(lun2,*) ' Error: value of max_wind_drag_depth is less than zero'
+      write(*   ,*) ' Error: value of max_wind_drag_depth is less than zero'
+      call stop_exit(1)
 9010  write(lun2,*) ' Error: value of max_restart_age constant'
       write(*   ,*) ' Error: value of max_restart_age constant'
       call stop_exit(1)
@@ -2449,9 +2541,36 @@
 9204  write(lun2,*) ' Error: could not open screens polygon-file: '//trim(fiscreens)
       write(*,*) ' Error: could not open screens polygon-file: '//trim(fiscreens)
       call stop_exit(1)
+9301  write(lun2,*) ' Error: reading part FM ini file name!'
+      write(*   ,*) ' Error: reading part FM ini file name!'
+      call stop_exit(1)
+9302  write(lun2,*) ' Error: reading part FM elease file name!'
+      write(*   ,*) ' Error: reading part FM elease file name!'
+      call stop_exit(1)
+9401  write(lun2,*) ' Error: found "IBMmodel" keyword, but this is not a IBM model (modtype /= 7) '
+      write(*   ,*) ' Error: found "IBMmodel" keyword, but this is not a IBM model (modtype /= 7) '
+      call stop_exit(1)
+9402  write(lun2,*) ' Error: expected ibm model name!'
+      write(*   ,*) ' Error: expected ibm model name!'
+      call stop_exit(1)
+9403  write(lun2,*) ' Error: no suitable ibm model name supplied!'
+      write(*   ,*) ' Error: no suitable ibm model name supplied!'
+      call stop_exit(1)
+9404  write(lun2,*) ' Error: expected ibm stage development method name!'
+      write(*   ,*) ' Error: expected ibm stage development method name!'
+      call stop_exit(1)
+9405  write(lun2,*) ' Error: no suitable stage delelopment method name supplied!'
+      write(*   ,*) ' Error: no suitable stage delelopment method name supplied!'
+      call stop_exit(1)
+9406  write(lun2,*) ' Error: found "RevChron" keyword, but this is not a IBM model (modtype /= 7) '
+      write(*   ,*) ' Error: found "RevChron" keyword, but this is not a IBM model (modtype /= 7) '
+      call stop_exit(1)
+9407  write(lun2,*) ' Error: expected stage of reversed release!'
+      write(*   ,*) ' Error: expected stage of reversed release!'
+      call stop_exit(1)
 
       end
-
+   
       subroutine getdim_dis ( lun      , dis_file , nrowsmax, lunlog   )
 !
 !     programmer : michelle jeuken

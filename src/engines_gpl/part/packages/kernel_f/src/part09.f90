@@ -31,7 +31,7 @@ contains
                           xpolwaste       , ypolwaste       , lgrid  ,  &
                           lgrid2 , nmax   , mmax   , xp     , yp     ,  &
                           dx     , dy     , ndprt  , nosubs , kpart  ,  &
-                          layt   , tcktot , nplay  , kwaste , nolay  ,  &
+                          layt   , tcktot , zmodel , laytop , laybot , nplay  , kwaste , nolay  ,  &
                           modtyp , zwaste , track  , nmdyer , substi ,  &
                           rhopart )
 
@@ -65,8 +65,6 @@ contains
 !     Logical unit numbers  : lun2 - output file to print statistics
 
 !     Subroutines called    : findcircle - distributes particles over a circle
-
-!     functions   called    : rnd  - random number generator
 
       use precision_part          ! single/double precision
       use timers
@@ -115,6 +113,9 @@ contains
       integer  ( ip), intent(in   ) :: lun2                  !< output report unit number
       integer  ( ip), intent(  out) :: kpart  (*)            !< k-values particles
       real     ( rp), intent(in   ) :: tcktot (layt)         !< thickness hydrod.layer
+      logical       , intent(in   ) :: zmodel
+      integer  ( ip), intent(in   ) :: laytop(nmax,mmax)      !< highest active layer in z-layer model
+      integer  ( ip), intent(in   ) :: laybot(nmax,mmax)      !< highest active layer in z-layer model
       integer  ( ip)                :: nplay  (layt)         !< work array that could as well remain inside
       integer  ( ip), intent(inout) :: kwaste (nodye)        !< k-values of dye points
       integer  ( ip), intent(in   ) :: nolay                 !< number of comp. layer
@@ -222,7 +223,7 @@ contains
                                 xpolwaste(1:nrowswaste(id), id), ypolwaste(1:nrowswaste(id), id), &
                                 xpart(i), ypart(i), npart(i), mpart(i))
             end if
-            
+
 !     distribute the particles for this waste over the vertical
 
    10       ipart = ipart + 1
@@ -241,7 +242,11 @@ contains
                call stop_exit(1)
             endif
    20       continue
-            kpart(i) = nulay
+            if (zmodel) then
+               kpart(i) = min(laybot(npart(i), mpart(i)), max(nulay,laytop(npart(i), mpart(i))))
+            else
+               kpart(i) = nulay
+            endif
 
 !    for one layer models (2dh), the release will be in the user-defined location
 
@@ -262,7 +267,7 @@ contains
                wpart( isub, i ) = aconc( id, isub )
                if (modtyp .eq. 6) then
                   rhopart(isub, i) = pldensity(isub)
-               endif                 
+               endif
             enddo
             iptime(i) = 0
 

@@ -134,6 +134,7 @@
       hyd%kmax  = d_hyd%kmax
       hyd%nolay = d_hyd%nolay
       hyd%geometry    = d_hyd%geometry
+      hyd%layer_type  = d_hyd%layer_type
       hyd%sal_present = d_hyd%sal_present
       hyd%tem_present = d_hyd%tem_present
       hyd%tau_present = d_hyd%tau_present
@@ -800,6 +801,7 @@
       hyd%kmax  = domain_hyd_coll%hyd_pnts(1)%kmax
       hyd%nolay = domain_hyd_coll%hyd_pnts(1)%nolay
       hyd%geometry    = domain_hyd_coll%hyd_pnts(1)%geometry
+      hyd%layer_type  = domain_hyd_coll%hyd_pnts(1)%layer_type
       hyd%sal_present = domain_hyd_coll%hyd_pnts(1)%sal_present
       hyd%tem_present = domain_hyd_coll%hyd_pnts(1)%tem_present
       hyd%tau_present = domain_hyd_coll%hyd_pnts(1)%tau_present

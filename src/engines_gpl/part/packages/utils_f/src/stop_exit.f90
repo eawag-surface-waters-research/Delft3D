@@ -21,9 +21,9 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-      module exeption_part
-      logical :: useexeption_part = .false.
-      end module exeption_part
+      module exception_part
+      logical :: useexception_part = .false.
+      end module exception_part
 
       subroutine stop_exit( iexit )
 !
@@ -38,7 +38,7 @@
 !     iexit   integer    1         input   return value
 !     ---------------------------------------------------------
 !
-      use exeption_part
+      use exception_part
 
       implicit none
 
@@ -55,7 +55,7 @@
       write ( lunfil , * ) iexit
       close ( lunfil )
 
-      if (useexeption_part) call throwexception()
+      if (useexception_part) call throwexception()
 
       select case ( iexit )
          case ( :0 )

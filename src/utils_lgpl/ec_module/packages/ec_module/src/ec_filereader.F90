@@ -261,9 +261,8 @@ module m_ec_filereader
                   end do
                   success = .true.
                case (BC_FUNC_ASTRO)
-                  if (.not.ecTimeFrameRealHpTimestepsToDateTime(timesteps, yyyymmdd, hhmmss)) return
+                  success = ecTimeFrameRealHpTimestepsToDateTime(timesteps, yyyymmdd, hhmmss)
                   n_invalid_components = (ecFileReaderLookupAstroComponents(fileReaderPtr)) 
-                  if (n_invalid_components>0) return
                   do i = 1, size(fileReaderPtr%items(1)%ptr%sourceT1FieldPtr%arr1d)
                      fileReaderPtr%items(1)%ptr%sourceT0FieldPtr%arr1d(i) = fileReaderPtr%items(1)%ptr%sourceT1FieldPtr%arr1d(i)
                      fileReaderPtr%items(2)%ptr%sourceT0FieldPtr%arr1d(i) = fileReaderPtr%items(2)%ptr%sourceT1FieldPtr%arr1d(i)
@@ -274,14 +273,13 @@ module m_ec_filereader
                                fileReaderPtr%items(3)%ptr%sourceT0FieldPtr%arr1d(i), &
                                fileReaderPtr%items(1)%ptr%sourceT0FieldPtr%astro_kbnumber(i),   &
                                yyyymmdd, hhmmss, istat)
-                     if (istat /= 0) return
+                     if (istat /= 0) success = .false.
                   end do
                   ! Shift time interval with dtnodal
                   do i=1, fileReaderPtr%nItems
                      fileReaderPtr%items(i)%ptr%sourceT0FieldPtr%timesteps = timesteps
                      fileReaderPtr%items(i)%ptr%sourceT1FieldPtr%timesteps = timesteps + fileReaderPtr%tframe%dtnodal
                   end do
-                  success = .true.
                case (BC_FUNC_QHTABLE)
                   do i=1, fileReaderPtr%nItems
                      fileReaderPtr%items(i)%ptr%sourceT1FieldPtr%timesteps = fileReaderPtr%items(i)%ptr%sourceT1FieldPtr%timesteps + 10000.0_hp
@@ -329,10 +327,10 @@ module m_ec_filereader
                end do
                success = .true.
             case (provFile_fourier)
+               success = .true.
                if(allocated(fileReaderPtr%items(1)%ptr%sourceT0FieldPtr%astro_components)) then ! Astronomical case
-                  if (.not.ecTimeFrameRealHpTimestepsToDateTime(timesteps, yyyymmdd, hhmmss)) return
+                  success = ecTimeFrameRealHpTimestepsToDateTime(timesteps, yyyymmdd, hhmmss)
                   n_invalid_components = (ecFileReaderLookupAstroComponents(fileReaderPtr)) 
-                  if (n_invalid_components>0) return
                   do i = 1, size(fileReaderPtr%items(1)%ptr%sourceT1FieldPtr%arr1d)
                      fileReaderPtr%items(1)%ptr%sourceT0FieldPtr%arr1d(i) = fileReaderPtr%items(1)%ptr%sourceT1FieldPtr%arr1d(i)
                      fileReaderPtr%items(2)%ptr%sourceT0FieldPtr%arr1d(i) = fileReaderPtr%items(2)%ptr%sourceT1FieldPtr%arr1d(i)
@@ -343,7 +341,7 @@ module m_ec_filereader
                                fileReaderPtr%items(3)%ptr%sourceT0FieldPtr%arr1d(i),            &
                                fileReaderPtr%items(1)%ptr%sourceT0FieldPtr%astro_kbnumber(i),   &
                                yyyymmdd, hhmmss, istat)
-                     if (istat /= 0) return
+                     if (istat /= 0) success = .false.
                   end do
                   ! Shift time interval with dtnodal
                   do i=1, fileReaderPtr%nItems
@@ -355,7 +353,6 @@ module m_ec_filereader
                      fileReaderPtr%items(i)%ptr%sourceT1FieldPtr%timesteps = fileReaderPtr%items(i)%ptr%sourceT1FieldPtr%timesteps + 10000.0_hp
                   end do
                endif
-               success = .true.
             case (provFile_netcdf)
                qname = fileReaderPtr%items(1)%ptr%quantityPtr%name
                call str_lower(qname)
@@ -585,9 +582,10 @@ module m_ec_filereader
             if (nmissing>0) then 
                do icmp=1, kcmp
                   if (fileReaderPtr%items(1)%ptr%sourceT0FieldPtr%astro_kbnumber(icmp)<0) then
-                     call setECMessage('unknown astronomical component "'     &
-                                 // trim(fileReaderPtr%items(1)%ptr%sourceT0FieldPtr%astro_components(icmp)) &
-                                 // '" in file ' // trim(fileReaderPtr%filename) // '.') 
+                     call setECMessage('unknown component '     &
+                                 // trim(fileReaderPtr%items(1)%ptr%sourceT0FieldPtr%astro_components(icmp)),                      &
+                                      ' amplitude set to 0 ')
+                     ! TODO: return the appropriate state
                   end if
                end do
             end if

@@ -137,7 +137,7 @@
 
 101   continue
 
-!     total number of files
+!     18. hyd file
 
       open  (newunit = lun(iout), file = fnam(iout))
       call write_version ( lun(2) )
@@ -176,8 +176,14 @@
       if ( gettoken( finame  , ierr ) .ne. 0 ) goto 1000
       if ( gettoken( finame  , ierr ) .ne. 0 ) goto 1000
       if ( gettoken( finame  , ierr ) .ne. 0 ) goto 1000
-      if ( gettoken( fnam(18), ierr ) .ne. 0 ) goto 1000   ! name of the hyd file
+      if ( gettoken( fnam(18), ierr ) .ne. 0 ) goto 1000   ! name of the hyd file (actually used)
       lun(18) = lun(17)+1
+
+!     25. base file name for tracking binary his file (trk-... *.his)
+!        (base file name derived from input file - 1rst file)
+
+      fnam(25) = fnam(16)(:indx)//'.his'
+      call delete_file ( fnam(25), ierr )
 
       if      (ipri==0) then
          open (newunit = lun(iout), file = fnam(iout), form='formatted')

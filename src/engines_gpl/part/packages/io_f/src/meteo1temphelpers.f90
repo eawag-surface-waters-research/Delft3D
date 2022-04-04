@@ -25,12 +25,12 @@
 !! Long term: EC-module should replace meteo1.f90 (and be free of all these cross-dependencies)
 
 
-module m_missing
+module m_missing_meteo
  implicit none
  double precision                  :: dmiss    = -999d0   !
  double precision                  :: xymis    = -999d0   !
  double precision                  :: dxymis   = -999d0
-end module m_missing
+end module m_missing_meteo
 
 
 !> Opens an existing file for reading.
@@ -348,7 +348,7 @@ end subroutine ilocatestring
       !! @param[out] sm lambda in [0,1] on line segment 3-4 (outside [0,1] if no intersection). Unchanged if no intersect!!
       !! @param[out] xcr,ycr x-coord. of intersection point.
       SUBROUTINE CROSS(x1, y1, x2, y2, x3, y3, x4, y4, JACROS,SL,SM,XCR,YCR,CRP)
-      use m_missing
+      use m_missing_meteo
       implicit none
       double precision :: crp
       double precision :: det
@@ -440,7 +440,7 @@ end subroutine ilocatestring
  end function getdy
 
  double precision function dbdistance(x1,y1,x2,y2)                  ! distance point 1 -> 2
- use m_missing
+ use m_missing_meteo
  implicit none
  double precision :: x1, y1, x2, y2
  ! locals
@@ -458,7 +458,7 @@ end subroutine ilocatestring
  end function dbdistance
 
       SUBROUTINE PINPOK(XL, YL, N, X, Y, INSIDE)
-      USE M_MISSING
+      USE m_missing_meteo
       implicit none
       integer :: N, INSIDE
       double precision :: X(N), Y(N), XL, YL

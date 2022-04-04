@@ -35,8 +35,8 @@
       use grids          ! for the storage of contraction grids
       use dlwq_data      ! for definition and storage of data
       use rd_token       ! tokenized reading
-      use partmem        ! for the interface with Delpar (Tau and VertDisp)
-      use timers         ! performance timers
+      use partmem, only: alone, lsettl, layt        ! for the interface with Delpar (Tau and VertDisp)
+      use timers       !   performance timers
       implicit none
 
 !     implicit none
@@ -77,12 +77,12 @@
       integer                              :: ierr2                ! error indicator
       integer                              :: ierr3                ! error indicator
       integer                              :: ioerr                ! IO - error indicator
-      integer                              :: inovec               ! location of NOVEC
-      integer                              :: inothr               ! location of NOTHREADS
-      integer                              :: i                    ! loop counter
-      integer                              :: idata                ! help variable
-      logical                              :: taupart              ! is tau present?
-      logical                              :: vdfpart              ! is vertical diffusion present
+      integer                                 inovec               ! location of NOVEC
+      integer                                 inothr               ! location of NOTHREADS
+      integer                                 i                    ! loop counter
+      integer                                 idata                ! help variable
+      logical                                 taupart              ! is tau present?
+      logical                                 vdfpart              ! is vertical diffusion present
       integer                              :: special              ! index of special parameters
       integer(4) :: ithndl = 0
       if (timon) call timstrt( "dlwq7a", ithndl )

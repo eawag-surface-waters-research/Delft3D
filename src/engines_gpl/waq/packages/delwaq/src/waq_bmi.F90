@@ -111,8 +111,8 @@ contains
     use iso_c_utils
     use delwaq2_global_data
     use dhcommand
-    use exeption_waq
-    use exeption_part
+    use exception_waq
+    use exception_part
 
     implicit none
     character(kind=c_char),intent(in)    :: c_config_file(MAXSTRLEN)
@@ -122,9 +122,9 @@ contains
     integer                          :: errorcode
     include 'actions.inc'
 
-    ! do not use stop, but exeption when used trough bmi
-    useexeption_waq = .true.
-    useexeption_part = .true.
+    ! do not use stop, but exception when used trough bmi
+    useexception_waq = .true.
+    useexception_part = .true.
 
     ! Store the name
     runid_given = char_array_to_string(c_config_file)

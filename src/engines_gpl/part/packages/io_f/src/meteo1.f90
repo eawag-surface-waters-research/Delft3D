@@ -5136,7 +5136,6 @@ implicit none
   double precision       ,intent(out) :: z(:)     ! resultvector for this quantity
 
   !Local variables
-  integer , external                  :: comparereal
   integer                             :: i
   integer                             :: k
 

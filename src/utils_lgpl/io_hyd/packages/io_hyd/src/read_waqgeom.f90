@@ -127,15 +127,15 @@ module m_read_waqgeom
 
         call reallocP(edge_type, waqgeom%numedge, keepExisting = .false.)
         ierr = ionc_get_ncid(ioncid, ncid)
-        ierr = nf90_inq_varid(ncid, "mesh2d_edge_type", id_edgetypes)  ! instead of variable name, we should look at the mesh attributes (but these are not set yet)
+        ierr = nf90_inq_varid(ncid, trim(waqgeom%meshname)//"_edge_type", id_edgetypes)  ! instead of variable name, we should look at the mesh attributes (but these are not set yet)
         ierr = nf90_get_var(ncid, id_edgetypes, edge_type, count=(/ waqgeom%numedge /))
 
-        ierr = nf90_inq_varid(ncid, "mesh2d_face_domain_number", id_idomain)  ! instead of variable name, we should look at the mesh attributes (but these are not set yet)
+        ierr = nf90_inq_varid(ncid, trim(waqgeom%meshname)//"_face_domain_number", id_idomain)  ! instead of variable name, we should look at the mesh attributes (but these are not set yet)
         if (ierr .eq. 0) then
            call reallocP(idomain, waqgeom%numface, keepExisting = .false.)
            ierr = nf90_get_var(ncid, id_idomain, idomain, count=(/ waqgeom%numface /))
         endif 
-        ierr = nf90_inq_varid(ncid, "mesh2d_face_global_number", id_iglobal)  ! instead of variable name, we should look at the mesh attributes (but these are not set yet)
+        ierr = nf90_inq_varid(ncid, trim(waqgeom%meshname)//"_face_global_number", id_iglobal)  ! instead of variable name, we should look at the mesh attributes (but these are not set yet)
         if (ierr .eq. 0) then
            call reallocP(iglobal, waqgeom%numface, keepExisting = .false.)
            ierr = nf90_get_var(ncid, id_iglobal, iglobal, count=(/ waqgeom%numface /))
