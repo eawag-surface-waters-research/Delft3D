@@ -890,6 +890,7 @@ rem ==========================
         
         rem copy binaries and dll 
         call :copyFile "!build_dir!\waq_plugin_wasteload\!configuration!\waq_plugin_wasteload.*"       !dest_bin!
+        call :copyFile "!build_dir!\waq_plugin_wasteload\!configuration!\waq_plugin_wasteload.*"       !build_dir!\delwaq2\!configuration!  ! also copy this dll to debug directory of delwaq2
         call :copyFile "!build_dir!\delwaq\!configuration!\delwaq.*"                                   !dest_bin!
         call :copyFile "!build_dir!\delwaq2\!configuration!\delwaq2.*"                                 !dest_bin!
     )
