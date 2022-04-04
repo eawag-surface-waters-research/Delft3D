@@ -28,7 +28,8 @@
       ! global declarations
 
       use hydmod
-      use rd_token       ! tokenized reading
+      use rd_token                    ! tokenized reading
+      use :: m_hyd_keys, only: key, nokey     ! keywords in hydfile
       implicit none
 
       ! declaration of the arguments
@@ -37,8 +38,6 @@
 
       ! local declarations
 
-      integer, parameter  :: nokey   = 84           ! number of keywords in hyd file
-      character(len=40)   :: key(nokey)             ! keywords in the hyd file
       integer             :: ikey                   ! index keyword (first level)
       integer             :: ikey2                  ! index keyword (second level)
       integer             :: lunhyd                 ! unit number hyd file
@@ -77,90 +76,6 @@
       real*8              :: julian                 ! julian function
       logical, parameter  :: untileol = .true.      ! read until the end of the line
       
-      key(1)  = 'task'
-      key(2)  = 'geometry'
-      key(3)  = 'horizontal-aggregation'
-      key(4)  = 'minimum-vert-diffusion-used'
-      key(5)  = 'vertical-diffusion'
-      key(6)  = 'description'
-      key(7)  = 'end-description'
-      key(8)  = 'reference-time'
-      key(9)  = 'hydrodynamic-start-time'
-      key(10) = 'hydrodynamic-stop-time'
-      key(11) = 'hydrodynamic-timestep'
-      key(12) = 'conversion-ref-time'
-      key(13) = 'conversion-start-time'
-      key(14) = 'conversion-stop-time'
-      key(15) = 'conversion-timestep'
-      key(16) = 'grid-cells-first-direction'
-      key(17) = 'grid-cells-second-direction'
-      key(18) = 'number-hydrodynamic-layers'
-      key(19) = 'number-water-quality-layers'
-      key(20) = 'hydrodynamic-file'
-      key(21) = 'aggregation-file'
-      key(22) = 'grid-indices-file'
-      key(23) = 'grid-coordinates-file'
-      key(24) = 'volumes-file'
-      key(25) = 'areas-file'
-      key(26) = 'flows-file'
-      key(27) = 'pointers-file'
-      key(28) = 'lengths-file'
-      key(29) = 'salinity-file'
-      key(30) = 'temperature-file'
-      key(31) = 'vert-diffusion-file'
-      key(32) = 'surfaces-file'
-      key(33) = 'total-grid-file'
-      key(34) = 'discharges-file'
-      key(35) = 'chezy-coefficients-file'
-      key(36) = 'shear-stresses-file'
-      key(37) = 'walking-discharges-file'
-      key(38) = 'minimum-vert-diffusion'
-      key(39) = 'upper-layer'
-      key(40) = 'lower-layer'
-      key(41) = 'interface-depth'
-      key(42) = 'end-minimum-vert-diffusion'
-      key(43) = 'constant-dispersion'
-      key(44) = 'first-direction'
-      key(45) = 'second-direction'
-      key(46) = 'third-direction'
-      key(47) = 'end-constant-dispersion'
-      key(48) = 'hydrodynamic-layers'
-      key(49) = 'end-hydrodynamic-layers'
-      key(50) = 'water-quality-layers'
-      key(51) = 'end-water-quality-layers'
-      key(52) = 'discharges'
-      key(53) = 'end-discharges'
-      key(54) = 'domains'
-      key(55) = 'end-domains'
-      key(56) = 'dd-boundaries'
-      key(57) = 'end-dd-boundaries'
-      key(58) = 'normal'
-      key(59) = 'inlet'
-      key(60) = 'outlet'
-      key(61) = 'full-coupling'
-      key(62) = 'coupling-per-domain'
-      key(63) = 'attributes-file'
-      key(64) = 'depths-file'
-      key(65) = 'curvilinear-grid'
-      key(66) = 'yes'
-      key(67) = 'no'
-      key(68) = 'calculated'
-      key(69) = 'unstructured'
-      key(70) = 'number-horizontal-exchanges'
-      key(71) = 'number-vertical-exchanges'
-      key(72) = 'number-water-quality-segments-per-layer'
-      key(73) = 'horizontal-surfaces-file'
-      key(74) = 'boundaries-file'
-      key(75) = 'waqgeom-file'
-      key(76) = 'automatic'
-      key(77) = 'walking'
-      key(78) = 'file-created-by'
-      key(79) = 'file-creation-date'
-      key(80) = 'sink-sources'
-      key(81) = 'end-sink-sources'
-      key(82) = 'z-layers'
-      key(83) = 'z-layers-ztop'
-      key(84) = 'z-layers-zbot'
 
       ft_dat = ft_bin
       call getmlu(lunrep)
