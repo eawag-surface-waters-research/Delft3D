@@ -48,7 +48,7 @@ BEGIN
             VALUE "FileDescription", "Coupler between D-Flow FM and SWAN\0"
             VALUE "FileVersion", "VN_MAJOR.VN_MINOR.VN_REVISION.VN_BUILD_NUMBER\0"
             VALUE "InternalName", "wave\0"
-            VALUE "LegalCopyright", "Copyright © 1999-2008\0"
+            VALUE "LegalCopyright", "Copyright © 1999-2022\0"
             VALUE "LegalTrademarks", "Copyright Deltares\0"
             VALUE "OriginalFilename", "wave.dll\0"
             VALUE "PrivateBuild", "-\0"
