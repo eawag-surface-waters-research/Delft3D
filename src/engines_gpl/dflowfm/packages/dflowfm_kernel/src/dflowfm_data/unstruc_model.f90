@@ -812,6 +812,15 @@ subroutine readMDUFile(filename, istat)
     md_1dfiles%roughnessdir = ' '
     call prop_get_string ( md_ptr, 'geometry', 'NetFile',          md_netfile,      success)
     call prop_get_string ( md_ptr, 'geometry', 'GridEnclosureFile',md_encfile,      success)
+    tmpstr = ''
+    call prop_get_string ( md_ptr, 'geometry', 'BathymetryFile',   tmpstr,      success)
+    if (success .and. len_trim(tmpstr) > 0) then
+        istat = -1
+        call mess(LEVEL_ERROR, 'Error while reading '''//trim(filename)//''': keyword [geometry] BathmetryFile is not longer supported. Place bedlevel in IniFieldFile or ExtFile instead.')
+        return
+    end if
+
+       
     call prop_get_string ( md_ptr, 'geometry', 'DryPointsFile',    md_dryptsfile,   success)
     call prop_get_string ( md_ptr, 'geometry', 'WaterLevIniFile',  md_s1inifile,    success)
     call prop_get_string ( md_ptr, 'geometry', 'LandBoundaryFile', md_ldbfile,      success)
