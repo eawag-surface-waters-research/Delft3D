@@ -2199,10 +2199,6 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
        ! Read modelled frequency range
        !
        call prop_get_integer(tmp_ptr, '*', 'NFreq', dom%nfreq)
-       if (dom%nfreq < 1) then
-          write(*,*) 'SWAN_INPUT: invalid number of frequencies: ', dom%nfreq
-          goto 999
-       endif
        call prop_get_real(tmp_ptr, '*', 'FreqMin', dom%freqmin)
        call prop_get_real(tmp_ptr, '*', 'FreqMax', dom%freqmax)
        !
