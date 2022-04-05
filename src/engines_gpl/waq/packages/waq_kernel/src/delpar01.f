@@ -172,42 +172,42 @@
          ! for salinity and temperature
          !.. salinity
 
-            call zoek20 ( 'SALINITY  ', nosfun, sfname, 10, indx )
-            if ( indx .gt. 0 ) then
-               do i=1, noseg
-                  salin(cellpntp(i)) = segfun(i,indx)
-               enddo
-            else if ( lunitp(22) .gt. 0 ) then
-            call dlwqbl ( lunitp(22), lunut   , itime    , idtims , itims1 ,
-     &                     itims2   , ihdel   , noseg    , mnmaxk , salin1 ,
-     &                     salin    , cellpntp , fnamep(22), isflag , ifflag ,
-     &                     updatd   )
-            endif
+         call zoek20 ( 'SALINITY  ', nosfun, sfname, 10, indx )
+         if ( indx .gt. 0 ) then
+            do i=1, noseg
+              salin(cellpntp(i)) = segfun(i,indx)
+            enddo
+         else if ( lunitp(22) .gt. 0 ) then
+         call dlwqbl ( lunitp(22), lunut   , itime    , idtims , itims1 ,
+     &                 itims2   , ihdel   , noseg    , mnmaxk , salin1 ,
+     &                 salin    , cellpntp , fnamep(22), isflag , ifflag ,
+     &                 updatd   )
+         endif
 
 
 !.. temperature
 
-            call zoek20 ( 'TEMP      ', nosfun, sfname, 10, indx )
-            if ( indx .gt. 0 ) then
-               do i=1, noseg
-                  temper(cellpntp(i)) = segfun(i,indx)
-               enddo
-            else if ( lunitp(23) .gt. 0 ) then
-            call dlwqbl ( lunitp(23), lunut   , itime    , idtimtm , itimtm1 ,
-     &                     itimtm2   , ihdel   , noseg    , mnmaxk , temper1,
-     &                     temper   , cellpntp , fnamep(23), isflag , ifflag ,
-     &                     updatd   )
-            endif
+         call zoek20 ( 'TEMP      ', nosfun, sfname, 10, indx )
+         if ( indx .gt. 0 ) then
+            do i=1, noseg
+              temper(cellpntp(i)) = segfun(i,indx)
+            enddo
+         else if ( lunitp(23) .gt. 0 ) then
+         call dlwqbl ( lunitp(23), lunut   , itime    , idtimtm , itimtm1 ,
+     &                 itimtm2   , ihdel   , noseg    , mnmaxk , temper1,
+     &                 temper   , cellpntp , fnamep(23), isflag , ifflag ,
+     &                 updatd   )
+        endif
       endif
       first = .false.
       if ( lunitp(22) .gt. 0 .and. lunitp(23) .gt. 0 ) then
-         do i = 1, noseg
+          do i = 1, noseg
             rhowatc(i) = densty(max(0.0e0,salin1(i)), temper1(i))
-         enddo
+          enddo
       else
-         do i = 1, noseg
+          do i = 1, noseg
             rhowatc(i) = rhow
-         enddo
+          enddo
       endif
 
 !     Taking over of aged particles by Delwaq
@@ -267,7 +267,6 @@
 
 !     Part13 makes 3d detail plot grids corrected for recovery rate
 
-      do ilp = 1, npgrid
       call part13 ( lunitp(9), fnamep(9), lunut    , title    , subst2   ,
      &              lgrid2   , nmaxp    , volumep  , area     , npart    ,
      &              mpart    , xpart    , ypart    , wpart    , nopart   ,
@@ -280,7 +279,6 @@
      &              nfract   , lsettl   , mstick   , elt_names, elt_types,
      &              elt_dims , elt_bytes, locdep   , zpart    , za       ,
      &              dpsp     , tcktot   , nosub_max, bufsize  )
-      enddo
 
 !     Parths makes 2D averaged time histories every ihstep
 
@@ -302,80 +300,80 @@
 
 ! write the restart files when needed
 
-      if (write_restart_file) then
-         ! first to calculate the number of particles in the restart files
-         nores = 0
-         noras = 0
-         do ilp = 1, nopart
-            if (npart(ilp)>1.and.mpart(ilp)>1) then          !only for the active particles
-               if (lgrid( npart(ilp), mpart(ilp)).ge.1) then
-                  nores = nores + 1          ! only for the active particles
-                  if (max_restart_age .gt. 0 .and. iptime(ilp) .lt. max_restart_age) then
-                     noras = noras + 1       ! if max_restart_age is a positve and the particles' age is less then max_restart_age
-                  end if
-               end if
-            end if
-         enddo
+        if (write_restart_file) then
+           ! first to calculate the number of particles in the restart files
+           nores = 0
+           noras = 0
+           do ilp = 1, nopart
+              if (npart(ilp)>1.and.mpart(ilp)>1) then          !only for the active particles
+                 if (lgrid( npart(ilp), mpart(ilp)).ge.1) then
+                    nores = nores + 1          ! only for the active particles
+                    if (max_restart_age .gt. 0 .and. iptime(ilp) .lt. max_restart_age) then
+                       noras = noras + 1       ! if max_restart_age is a positve and the particles' age is less then max_restart_age
+                    end if
+                 end if
+              end if
+           enddo
 
-         res_file = fnamep(1)
-         iext = len_trim(res_file) - 3
-         if (max_restart_age .lt. 0) then
-!           Write the restart file with all active paritcles
-            if (modtyp.eq.6)then
-               res_file(iext+1:iext+4) = 'ses'    !limited number of particles (for 'plastics' modeltype 6 restart, as 'ras' but including settling values)
-               write ( lunut, * ) ' Including particle dependent settling velocity'
-            else
-               res_file(iext+1:iext+4) = 'res'     !all results, except those that are inactive (outside model)
-            end if
-            write ( lunut, * ) ' Opening restart particles file:', idp_file(1:len_trim(res_file))
-            call openfl ( lures, res_file, ftype(2), 1 )
-            write ( lures ) 0, nores, nosubs
+           res_file = fnamep(1)
+           iext = len_trim(res_file) - 3
+           if (max_restart_age .lt. 0) then
+!             Write the restart file with all active paritcles
+              if (modtyp.eq.6)then
+                 res_file(iext+1:iext+4) = 'ses'    !limited number of particles (for 'plastics' modeltype 6 restart, as 'ras' but including settling values)
+                 write ( lunut, * ) ' Including particle dependent settling velocity'
+              else
+                 res_file(iext+1:iext+4) = 'res'     !all results, except those that are inactive (outside model)
+              end if
+              write ( lunut, * ) ' Opening restart particles file:', idp_file(1:len_trim(res_file))
+              call openfl ( lures, res_file, ftype(2), 1 )
+              write ( lures ) 0, nores, nosubs
 
-            do ilp = 1, nopart
-               if (npart(ilp)>1.and.mpart(ilp)>1) then
-                  if (lgrid( npart(ilp), mpart(ilp)).ge.1) then  !only for the active particles
-                     if (modtyp.ne.6) then
-                        write ( lures ) npart(ilp), mpart(ilp), kpart(ilp), xpart(ilp), ypart(ilp), zpart(ilp),
-     &                                  wpart(1:nosubs,ilp), iptime(ilp)
-                     else
-                        write ( lures ) npart(ilp), mpart(ilp), kpart(ilp), xpart(ilp), ypart(ilp), zpart(ilp),
-     &                                  wpart(1:nosubs,ilp), spart(1:nosubs,ilp), iptime(ilp)
-                     end if
-                  end if
-               end if
-            enddo
-            write (lunut,*) ' Number of active particles in the restart file: ',nores
-            close ( lures )
-         else
-!        Write the restart file with all active paritcles below a certain age
-            if (modtyp.eq.6)then
-               res_file(iext+1:iext+4) = 'sas'    !limited number of particles (for 'plastics' modeltype 6 restart, as 'ras' but including settling values)
-               write ( lunut, * ) ' Including particle dependent settling velocity'
-            else
-               res_file(iext+1:iext+4) = 'ras'    !limited number of particles (remove particles older than a certain age or inactive)
-            end if
-            write ( lunut, * ) ' Opening restart particles file:', idp_file(1:len_trim(res_file))
-            write ( lunut, * ) ' Particles older than ',max_restart_age,' seconds are removed'
-            call openfl ( lures, res_file, ftype(2), 1 )
-            write ( lures ) 0, noras, nosubs
+              do ilp = 1, nopart
+                 if (npart(ilp)>1.and.mpart(ilp)>1) then
+                    if (lgrid( npart(ilp), mpart(ilp)).ge.1) then  !only for the active particles
+                       if (modtyp.ne.6) then
+                          write ( lures ) npart(ilp), mpart(ilp), kpart(ilp), xpart(ilp), ypart(ilp), zpart(ilp),
+     &                                    wpart(1:nosubs,ilp), iptime(ilp)
+                       else
+                          write ( lures ) npart(ilp), mpart(ilp), kpart(ilp), xpart(ilp), ypart(ilp), zpart(ilp),
+     &                                    wpart(1:nosubs,ilp), spart(1:nosubs,ilp), iptime(ilp)
+                       end if
+                    end if
+                 end if
+              enddo
+              write (lunut,*) ' Number of active particles in the restart file: ',nores
+              close ( lures )
+           else
+!          Write the restart file with all active paritcles below a certain age
+              if (modtyp.eq.6)then
+                 res_file(iext+1:iext+4) = 'sas'    !limited number of particles (for 'plastics' modeltype 6 restart, as 'ras' but including settling values)
+                 write ( lunut, * ) ' Including particle dependent settling velocity'
+              else
+                 res_file(iext+1:iext+4) = 'ras'    !limited number of particles (remove particles older than a certain age or inactive)
+              end if
+              write ( lunut, * ) ' Opening restart particles file:', idp_file(1:len_trim(res_file))
+              write ( lunut, * ) ' Particles older than ',max_restart_age,' seconds are removed'
+              call openfl ( lures, res_file, ftype(2), 1 )
+              write ( lures ) 0, noras, nosubs
 
-            do ilp = 1, nopart
-               if (npart(ilp)>1.and.mpart(ilp)>1) then
-                  if (lgrid( npart(ilp), mpart(ilp)).ge.1 .and. (iptime(ilp).lt.max_restart_age)) then   !only when the particles' age less than max_restart_age, time in seconds
-                     if (modtyp.ne.6) then
-                        write ( lures ) npart(ilp), mpart(ilp), kpart(ilp), xpart(ilp), ypart(ilp), zpart(ilp),
-     &                                  wpart(1:nosubs,ilp),iptime(ilp)
-                     else
-                        write ( lures ) npart(ilp), mpart(ilp), kpart(ilp), xpart(ilp), ypart(ilp), zpart(ilp),
-     &                                  wpart(1:nosubs,ilp), spart(1:nosubs,ilp), iptime(ilp)
-                     end if
-                  end if
-               end if
-            enddo
-            write (lunut,*) ' Number of active particles in the restart file below maximum age: ',noras
-            close ( lures )
-         end if
-      end if
+              do ilp = 1, nopart
+                 if (npart(ilp)>1.and.mpart(ilp)>1) then
+                    if (lgrid( npart(ilp), mpart(ilp)).ge.1 .and. (iptime(ilp).lt.max_restart_age)) then   !only when the particles' age less than max_restart_age, time in seconds
+                       if (modtyp.ne.6) then
+                          write ( lures ) npart(ilp), mpart(ilp), kpart(ilp), xpart(ilp), ypart(ilp), zpart(ilp),
+     &                                    wpart(1:nosubs,ilp),iptime(ilp)
+                       else
+                          write ( lures ) npart(ilp), mpart(ilp), kpart(ilp), xpart(ilp), ypart(ilp), zpart(ilp),
+     &                                    wpart(1:nosubs,ilp), spart(1:nosubs,ilp), iptime(ilp)
+                       end if
+                    end if
+                 end if
+              enddo
+              write (lunut,*) ' Number of active particles in the restart file below maximum age: ',noras
+              close ( lures )
+           end if
+        end if
 
 
         goto 9999 ! <=== here the simulation loop ends
