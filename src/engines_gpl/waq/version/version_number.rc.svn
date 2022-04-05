@@ -53,7 +53,7 @@ BEGIN
             VALUE "FileVersion", "VN_MAJOR.VN_MINOR.VN_REVISION.VN_BUILD_NUMBER\0"
             VALUE "InternalName", "DELWAQ\0"
             VALUE "LegalCopyright", "Copyright © 1981-2022\0"
-            VALUE "LegalTrademarks", "Copyright Deltares\0"
+            VALUE "LegalTrademarks", "Copyright © Deltares\0"
             VALUE "OriginalFilename", "delwaq.dll\0"
             VALUE "PrivateBuild", "-\0"
             VALUE "ProductName", "D-Water Quality\0"

@@ -49,7 +49,7 @@ BEGIN
             VALUE "FileVersion", "VN_MAJOR.VN_MINOR.VN_REVISION\0"
             VALUE "InternalName", "waqmerge\0"
             VALUE "LegalCopyright", "Copyright © 1999-2022\0"
-            VALUE "LegalTrademarks", "Copyright Deltares\0"
+            VALUE "LegalTrademarks", "Copyright © Deltares\0"
             VALUE "OriginalFilename", "waqmerge.exe\0"
             VALUE "PrivateBuild", "-\0"
             VALUE "ProductName", "waqmerge\0"

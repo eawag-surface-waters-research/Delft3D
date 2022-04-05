@@ -49,7 +49,7 @@ BEGIN
             VALUE "FileVersion", "VN_MAJOR.VN_MINOR.VN_REVISION.VN_BUILD_NUMBER\0"
             VALUE "InternalName", "mormerge\0"
             VALUE "LegalCopyright", "Copyright © 2011-2022\0"
-            VALUE "LegalTrademarks", "Copyright (C) Stichting Deltares\0"
+            VALUE "LegalTrademarks", "Copyright © Stichting Deltares\0"
             VALUE "OriginalFilename", "mormerge.exe\0"
             VALUE "PrivateBuild", "-\0"
             VALUE "ProductName", "mormerge\0"
