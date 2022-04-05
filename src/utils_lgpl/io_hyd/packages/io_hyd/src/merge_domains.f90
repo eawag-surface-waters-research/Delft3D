@@ -162,7 +162,7 @@
       ! iglobal is only partially filled first look for highest number
 
       nosegl = 0
-		hyd%waqgeom%numnode = 0
+      hyd%waqgeom%numnode = 0
       hyd%waqgeom%numedge = 0
       hyd%waqgeom%maxnumfacenodes = 0
       hyd%waqgeom%numface = 0
