@@ -77,12 +77,12 @@
       integer                              :: ierr2                ! error indicator
       integer                              :: ierr3                ! error indicator
       integer                              :: ioerr                ! IO - error indicator
-      integer                                 inovec               ! location of NOVEC
-      integer                                 inothr               ! location of NOTHREADS
-      integer                                 i                    ! loop counter
-      integer                                 idata                ! help variable
-      logical                                 taupart              ! is tau present?
-      logical                                 vdfpart              ! is vertical diffusion present
+      integer                              :: inovec               ! location of NOVEC
+      integer                              :: inothr               ! location of NOTHREADS
+      integer                              :: i                    ! loop counter
+      integer                              :: idata                ! help variable
+      logical                              :: taupart              ! is tau present?
+      logical                              :: vdfpart              ! is vertical diffusion present
       integer                              :: special              ! index of special parameters
       integer(4) :: ithndl = 0
       if (timon) call timstrt( "dlwq7a", ithndl )
