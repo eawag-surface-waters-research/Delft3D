@@ -58,6 +58,7 @@
 
       integer(ip) i, i2, itime, indx, ierr
       integer     lunut         ! report file
+!      integer     lunpr
       integer(ip)         :: ilp, isp, ids, ide, iext, nores, noras, nosubs_idp
       real   (rp) depmin
       real   (sp) dtstep
@@ -160,59 +161,59 @@
          endif
       endif
 
-      do i =1 , nosegp
-        volumep(cellpntp(i)) = dwqvol(i)
-      enddo
+         do i =1 , nosegp
+           volumep(cellpntp(i)) = dwqvol(i)
+         enddo
 
-      flow = 0.0
-      do i = 1, noqp
-        if ( flowpntp(i,1) .gt. 0 ) flow(flowpntp(i,1)) = flow(flowpntp(i,1)) + dwqflo(i)
-        if ( flowpntp(i,2) .gt. 0 ) flow(flowpntp(i,2)) = flow(flowpntp(i,2)) + dwqflo(i)
-      enddo
-      depmin = (0.05*nmaxp*mmaxp)/mnmaxk
-      depmin = max(depmin,0.001)
-      do i = 1, mnmaxk        !       limit volume to depmin
-        i2 = mod(i-1,nmaxp*mmaxp) + 1
-        volumep(i) = max(volumep(i), area(i2) * depmin)
-      enddo
+         flow = 0.0
+         do i = 1, noqp
+            if ( flowpntp(i,1) .gt. 0 ) flow(flowpntp(i,1)) = flow(flowpntp(i,1)) + dwqflo(i)
+            if ( flowpntp(i,2) .gt. 0 ) flow(flowpntp(i,2)) = flow(flowpntp(i,2)) + dwqflo(i)
+         enddo
+         depmin = (0.05*nmaxp*mmaxp)/mnmaxk
+         depmin = max(depmin,0.001)
+         do i = 1, mnmaxk        !       limit volume to depmin
+            i2 = mod(i-1,nmaxp*mmaxp) + 1
+            volumep(i) = max(volumep(i), area(i2) * depmin)
+         enddo
 
-      call rdpart ( lunitp(1) , lunut     , fnamep(1) )
-      call plotgrp( npgrid    , pg        , nmaxp     , mmaxp    , lgrid    ,
-     &              lgrid2    , xb        , yb        )
-      call part08 ( lunut     , nodye     , nocont    , ictmax   , amassd   ,
-     &              ictime    , amassc    , aconc     , tmass    , tmassc   ,
-     &              nosubs    , ndprt     , tmassu    , ftime    , linear   ,
-     &              substi    , nmdyer    , nmconr    )
-      call part06 ( lunut     , lgrid     , lgrid2    , nmaxp    , mmaxp    ,
-     &              xb        , yb        , nodye     , nocont   , xwaste   ,
-     &              ywaste    , nwaste    , mwaste    )
-      nopart   = 0
-      npwndw   = 1
-      npwndn   = 0
-      acomp  = .false.
-      accrjv = 1.0e-9 !_sp
-      oil2dh = oil .and. layt == 1
-      oil3d  = oil .and. layt  > 1
-      ltrack = notrak  /=  0
-      call getdps ( lunut     , lunitp(17), fnamep(17), nmaxp    , mmaxp    ,
-     &              noseglp   , dpsp      , cellpntp  , ltrack   )
-      call part03 ( lgrid     , volumep   , flow      , dx       , dy       ,
-     &              nmaxp     , mmaxp     , mnmaxk    , lgrid2   , velo     ,
-     &              layt      , area      , depth     , dpsp     , locdep   ,
-     &              zlevel    , zmodel    , laytop    , laytopp  , laybot   ,
-     &              pagrid , aagrid , tcktot , ltrack , flow2m   ,
-     &              lgrid3 , vol1   , vol2   , vel1   , vel2     )
+         call rdpart ( lunitp(1) , lunut     , fnamep(1) )
+         call plotgrp( npgrid    , pg        , nmaxp     , mmaxp    , lgrid    ,
+     &                 lgrid2    , xb        , yb        )
+         call part08 ( lunut     , nodye     , nocont    , ictmax   , amassd   ,
+     &                 ictime    , amassc    , aconc     , tmass    , tmassc   ,
+     &                 nosubs    , ndprt     , tmassu    , ftime    , linear   ,
+     &                 substi    , nmdyer    , nmconr    )
+         call part06 ( lunut     , lgrid     , lgrid2    , nmaxp    , mmaxp    ,
+     &                 xb        , yb        , nodye     , nocont   , xwaste   ,
+     &                 ywaste    , nwaste    , mwaste    )
+         nopart   = 0
+         npwndw   = 1
+         npwndn   = 0
+         acomp  = .false.
+         accrjv = 1.0e-9 !_sp
+         oil2dh = oil .and. layt == 1
+         oil3d  = oil .and. layt  > 1
+         ltrack = notrak  /=  0
+         call getdps ( lunut     , lunitp(17), fnamep(17), nmaxp    , mmaxp    ,
+     &                 noseglp   , dpsp      , cellpntp  , ltrack   )
+         call part03 ( lgrid     , volumep   , flow      , dx       , dy       ,
+     &                 nmaxp     , mmaxp     , mnmaxk    , lgrid2   , velo     ,
+     &                 layt      , area      , depth     , dpsp     , locdep   ,
+     &                 zlevel    , zmodel    , laytop    , laytopp  , laybot   ,
+     &                 pagrid , aagrid , tcktot , ltrack , flow2m   ,
+     &                 lgrid3 , vol1   , vol2   , vel1   , vel2     )
 
-      if (ltrack) then
-        call part11 ( lgrid    , xb       , yb        , nmaxp   , npart    ,
-     &                mpart    , xpart    , ypart     , xa      , ya       ,
-     &                nopart   , npwndw   , lgrid2    , kpart   , zpart    ,
-     &                za       , locdep   , dpsp      , layt    , mmaxp    ,
-     &                tcktot   )
-        call wrttrk ( lunut    , fout     , fnamep(16), itrakc  , nopart   ,
-     &                npmax    , xa       , ya        , za      , xyztrk      )
-      endif
-      oil    = modtyp == 4
+         if (ltrack) then
+            call part11 ( lgrid    , xb       , yb        , nmaxp   , npart    ,
+     &                    mpart    , xpart    , ypart     , xa      , ya       ,
+     &                    nopart   , npwndw   , lgrid2    , kpart   , zpart    ,
+     &                    za       , locdep   , dpsp      , layt    , mmaxp    ,
+     &                    tcktot   )
+            call wrttrk ( lunut    , fout     , fnamep(16), itrakc  , nopart   ,
+     &                    npmax    , xa       , ya        , za      , xyztrk      )
+         endif
+         oil    = modtyp == 4
       if ( ini_opt .eq. 1 .and. oil ) then
          call inipart( lgrid   , lgrid2  , nmaxp   , mmaxp   , xb      ,
      &   yb      , nopart  , nosubs  , substi(1)  , ini_file,
@@ -271,6 +272,13 @@
             write ( lunut, * ) ' Opening initial particles file:', idp_file(1:len_trim(idp_file))
             open( newunit = luini, file = idp_file,form = 'FORMATTED', status ='old')
             read ( luini , *) nopart_res, nosubs_idp
+!            if (nosubs_idp.ne.nosubs) then
+!               write ( lunut, * ) ' Error: number of substances in the ini-file   : ',nosubs_idp
+!               write ( lunut, * ) '        number of substances in the model setup: ',nosubs
+!               write ( *    , * ) ' Error: number of substances in the ini-file   : ',nosubs_idp
+!               write ( *    , * ) '        number of substances in the model setup: ',nosubs
+!               call srstop(1)
+!            endif
             close ( luini )
             npmax = nopart_res
       endif

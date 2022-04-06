@@ -3410,7 +3410,6 @@ src/engines_gpl/part/packages/io_f/src/rdpart.f90 -text
 src/engines_gpl/part/packages/io_f/src/rdwnd.f90 -text
 src/engines_gpl/part/packages/io_f/src/report.f90 -text
 src/engines_gpl/part/packages/io_f/src/report_date_time.f90 -text
-src/engines_gpl/part/packages/io_f/src/write_restart_file.f90 -text
 src/engines_gpl/part/packages/io_f/src/writrk.f90 -text
 src/engines_gpl/part/packages/io_f/src/wrttrk.f90 -text
 src/engines_gpl/part/packages/kernel_f/CMakeLists.txt -text
