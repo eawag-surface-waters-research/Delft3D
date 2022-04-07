@@ -70,6 +70,9 @@ target_include_directories(${library_name}  PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}
 # Set additional compilation properties
 target_compile_options(${library_name} PRIVATE "${file_preprocessor_flag}")
 target_compile_options(${library_name} PRIVATE "${extend_source132_flag}")
+target_compile_options(${library_name} PRIVATE "${openmp_flag}")
+target_compile_options(${library_name} PRIVATE "${automatic_local_variable_storage_flag}")
+target_compile_options(${library_name} PRIVATE "${generate_reentrancy_threaded_flag}")
 target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${check_bounds_flag}>")
 target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${check_pointer}>")
 
