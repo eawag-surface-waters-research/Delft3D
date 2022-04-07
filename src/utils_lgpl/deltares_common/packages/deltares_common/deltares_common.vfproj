@@ -87,6 +87,7 @@
 		<File RelativePath="src\handles.f90"/>
 		<File RelativePath="src\hash_search.f90"/>
 		<File RelativePath="src\iso_c_utils.F90"/>
+		<File RelativePath=".\src\m_hyd_keys.f90"/>
 		<File RelativePath="src\m_tablematrices.f90"/>
 		<File RelativePath="src\m_tables.f90"/>
 		<File RelativePath="src\malloc.f90"/>
