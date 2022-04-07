@@ -267,6 +267,7 @@
        goto 1234
     end if
 
+   
     if ( md_jamake1d2dlinks .eq. 1 ) then
        ! Make 1D2D links for already loaded net file.
        imake1d2dtype = I1D2DTP_1TO1
@@ -371,7 +372,11 @@
     if ( jagui.eq.1 .and. len_trim(md_cfgfile).gt.0 ) then
        call load_displaysettings(md_cfgfile)
     end if
-
+    if(  md_convertlongculverts == 1) then
+       call findcells(0)
+       call makelongculverts_commandline()
+       goto 1234  !      stop
+    endif
    
     if (len_trim(md_ident) > 0) then
         ! An MDU file was read.

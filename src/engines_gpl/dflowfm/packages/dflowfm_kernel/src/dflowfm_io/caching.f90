@@ -457,11 +457,11 @@ subroutine storeCachingFile( basename, usecaching )
     !
     ! Store the data for the long culverts
     !
-    if ( .not. allocated(longculverts) ) then
-        allocate( longculverts(0) )
-    endif
-    write( lun ) section(key_long_culverts), size(longculverts)
-    call storeLongCulverts( lun, longculverts )
+    !if ( .not. allocated(longculverts) ) then
+    !    allocate( longculverts(0) )
+    !endif
+    !write( lun ) section(key_long_culverts), size(longculverts)
+    !call storeLongCulverts( lun, longculverts )
 
     !
     ! We are done, so close the file

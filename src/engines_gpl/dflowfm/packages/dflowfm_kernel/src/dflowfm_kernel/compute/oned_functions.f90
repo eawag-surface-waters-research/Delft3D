@@ -285,7 +285,7 @@ module m_oned_functions
       use m_inquire_flowgeom
 
       implicit none
-
+    
       integer :: nstru
 
       nstru = network%sts%count
@@ -609,7 +609,7 @@ module m_oned_functions
       integer              :: k1   
       integer              :: k2
       integer              :: dir
-
+      
       ! First compute average waterlevels on suction side and delivery side of the pump
       s1k1 = 0d0
       s1k2 = 0d0

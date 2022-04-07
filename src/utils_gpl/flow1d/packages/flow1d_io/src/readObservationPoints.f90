@@ -91,7 +91,7 @@ module m_readObservationPoints
       type(t_ObservationPoint), pointer     :: pOPnt
       integer                               :: pos
       integer                               :: ibin = 0
-      character(len=IdLen)                 :: binfile
+     ! character(len=IdLen)                 :: binfile
       logical                               :: file_exist
       integer                               :: formatbr       ! =1: use branchid and chainage, =0: use xy coordinate and LocationType
       integer                               :: major, minor, ierr

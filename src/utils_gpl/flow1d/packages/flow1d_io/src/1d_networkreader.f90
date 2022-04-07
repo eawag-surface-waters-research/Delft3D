@@ -267,11 +267,12 @@ module m_1d_networkreader
          nodeids(meshgeom%nedge_nodes(2,ibran)), meshgeom%nbranchlengths(ibran), meshgeom%nbranchorder(ibran), gridPointsCount, localGpsX(1:gridPointsCount), &
          localGpsY(1:gridPointsCount),localOffsets(1:gridPointsCount), localUoffsets(1:linkCount), &
          localGpsID(1:gridPointsCount), my_rank_)
+    
    enddo
 
    call adminBranchOrders(network%brs)
    call fill_hashtable(network%brs)
-
+   
    network%loaded = .true.
 
    end function construct_network_from_meshgeom

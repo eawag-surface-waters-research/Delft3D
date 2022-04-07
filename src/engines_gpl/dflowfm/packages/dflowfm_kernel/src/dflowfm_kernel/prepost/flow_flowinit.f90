@@ -1280,6 +1280,7 @@ end if
  s00 = s1
 
  nonlin = max(nonlin1D, nonlin2D)
+ 
  if (nonlin >= 2) then
     if (allocated(s1m) ) deallocate (s1m, a1m)
     allocate ( s1m(ndx), a1m(ndx) , STAT=ierr) ; s1m = s1

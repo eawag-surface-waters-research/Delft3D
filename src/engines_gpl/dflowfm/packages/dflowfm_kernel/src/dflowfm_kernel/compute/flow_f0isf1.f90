@@ -87,7 +87,7 @@
  volerr      = vol1tot - vol0tot - vinbnd + voutbnd - vincel + voutcel !+ dvolbot
  volerrcum   = volerrcum    + volerr
 
-if (jahisbal > 0) then
+ if (jahisbal > 0) then
     ! extra
     vinrain     = qinrain *dts
     vinrainground = qinrainground*dts

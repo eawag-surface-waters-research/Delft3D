@@ -49,7 +49,8 @@ module m_network
    public getFrictionValue
    public update_flow1d_admin
    public getRoughnessForProfile
-
+   
+   
    interface realloc
       module procedure realloc_1dadmin
    end interface realloc
@@ -638,7 +639,7 @@ contains
       enddo
    
    end subroutine set_network_pointers
-
+   
    !> In this subroutine arrays crossorder and lastAtBran are filled \n
    !! crossorder contains the cross section indices, where the cross sections are ordered 
    !! in ascending branchid and subsequently in chainage.\n
@@ -894,10 +895,10 @@ use m_tablematrices
     !
     if (associated(cross)) then
        ! section refers to the roughness section *within* the cross section. Actual friction section index then comes from lookup.
-       if (cross%frictionSectionsCount > 0) then
+       if (cross%frictionSectionsCount > 0) then ! FB: this is also true if there is no friction section index as count is always >= 1
          isec = cross%frictionsectionIndex(min(cross%frictionSectionsCount, section))
        else
-          isec = section
+         isec = section
        endif
     else
        ! No cross section definition: section directly refers to a friction section index.
@@ -933,7 +934,7 @@ use m_tablematrices
     !
     else ! Version 2 roughness
        do i = 1, 2
-          if (isec < 0) then
+          if (cross%frictionSectionID(cross%frictionSectionsCount) == '') then
              ! Current cross section does *not* refer to a friction section index, but has defined direct roughness type+coefficient.
              cz = GetChezy(cross%frictionType(section), cross%frictionValue(section), rad, dep, u)
           else

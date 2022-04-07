@@ -2327,12 +2327,12 @@ subroutine unc_write_his(tim)            ! wrihis
             ! Define geometry related variables
             longculvert_geom_container_name = 'longculvert_geom'
             nNodeTot = 0
-            nNodeTot = get_total_number_of_geom_nodes(ST_LONGCULVERT, nlongculvertsg)
+            nNodeTot = nNodesLongCulv
 
             ierr = sgeom_def_geometry_variables(ihisfile, longculvert_geom_container_name, 'longculvert', 'line', nNodeTot, id_longculvertdim, &
                id_longculvertgeom_node_count, id_longculvertgeom_node_coordx, id_longculvertgeom_node_coordy)
-            ierr = ncu_clone_vardef(ihisfile, ihisfile, id_longculvertgeom_node_coordx, 'longculvert_geom_lon', id_laydim, & !id_statlon, &
-                          'longitude', 'blabla1', 'degrees_east')
+            !ierr = ncu_clone_vardef(ihisfile, ihisfile, id_longculvertgeom_node_coordx, 'longculvert_geom_lon', id_laydim, & !id_statlon, &
+            !              'longitude', 'blabla1', 'degrees_east')
 
             ierr = nf90_def_var(ihisfile, 'longculvert_discharge', nf90_double, (/ id_longculvertdim, id_timedim /), id_longculvert_dis)
             ierr = nf90_put_att(ihisfile, id_longculvert_dis, 'long_name', 'Discharge through long culvert')
@@ -3536,20 +3536,12 @@ subroutine unc_write_his(tim)            ! wrihis
          enddo
          ! write geometry variables at the first time of history output
          if (it_his == 1) then
-            j = 1
-            call realloc(node_count, nlongculvertsg, fill = 0)
-            do i = 1, nlongculvertsg
-               nNodes = get_number_of_geom_nodes(ST_LONGCULVERT, i)
-               node_count(i) = nNodes
-
-               if (nNodes > 0) then
-                  call get_geom_coordinates_of_structure(ST_LONGCULVERT, i, nNodes, geom_x, geom_y)
-                  ierr = nf90_put_var(ihisfile, id_longculvertgeom_node_coordx, geom_x(1:nNodes), start = (/ j /), count = (/ nNodes /))
-                  ierr = nf90_put_var(ihisfile, id_longculvertgeom_node_coordy, geom_y(1:nNodes), start = (/ j /), count = (/ nNodes /))
-                  j = j + nNodes
-               end if
-            end do
-            ierr = nf90_put_var(ihisfile, id_longculvertgeom_node_count, node_count, start = (/ 1 /), count = (/ nlongculvertsg /))
+            ierr = nf90_put_var(ihisfile, id_longculvertgeom_node_coordx, geomXLongCulv,     start = (/ 1 /), count = (/ nNodesLongCulv /))
+            ierr = nf90_put_var(ihisfile, id_longculvertgeom_node_coordy, geomYLongCulv,     start = (/ 1 /), count = (/ nNodesLongCulv /))
+            ierr = nf90_put_var(ihisfile, id_longculvertgeom_node_count,  nodeCountLongCulv, start = (/ 1 /), count = (/ nlongculvertsg /))
+            if (allocated(geomXLongCulv))     deallocate(geomXLongCulv)
+            if (allocated(geomYLongCulv))     deallocate(geomYLongCulv)
+            if (allocated(nodeCountLongCulv)) deallocate(nodeCountLongCulv)
          end if
       end if
 

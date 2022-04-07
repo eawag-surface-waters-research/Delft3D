@@ -46,6 +46,11 @@ module m_readCrossSections
    
    public readCrossSectionDefinitions
    public readCrossSectionLocationFile
+   public finalizeCrs
+   !public write_cross_section_definition_cache
+   !public write_cross_section_cache
+   !public write_convtab
+   !public read_convtab
 
    !> The file version number of the cross section definition file format: d.dd, [config_major].[config_minor], e.g., 1.03
    !!
@@ -160,6 +165,25 @@ module m_readCrossSections
          call prop_get_double(md_ptr%child_nodes(i)%node_ptr, '', 'shift', pCrs%shift, success)
          if (.not. success) pCrs%shift = 0.0d0
          
+        call finalizeCrs(network,pCrs,iref,inext)
+         
+      end do
+
+      call tree_destroy(md_ptr)
+      
+   end subroutine readCrossSectionLocationFile
+   
+    
+   subroutine finalizeCrs(network,pCrs,iref,inext)
+   
+      use m_CrossSections
+      use m_network
+      use m_hash_search
+      type(t_network), intent(inout) :: network                 !< Network structure
+      type(t_CrossSection), pointer, intent(inout)  :: pCrs
+      integer, intent(in)            :: iref
+      integer, intent(in)            :: inext
+      
          pCrs%itabDef             = iref
          pCrs%tabDef              => network%CSDefinitions%CS(iref)
          
@@ -167,15 +191,15 @@ module m_readCrossSections
          call SetParsCross(network%CSDefinitions%CS(iref), network%crs%cross(inext))
          pCrs => network%crs%cross(inext)
          
+         allocate(pCrs%frictionTypePos(pCrs%tabDef%frictionSectionsCount))        !< Friction type for positive flow direction
+         allocate(pCrs%frictionTypeNeg(pCrs%tabDef%frictionSectionsCount))        !< Friction type for negative flow direction
+         call realloc(pCrs%frictionValuePos, pCrs%tabDef%frictionSectionsCount, fill=-999d0) !< Friction value for positive flow direction
+         call realloc(pCrs%frictionValueNeg, pCrs%tabDef%frictionSectionsCount, fill=-999d0) !< Friction value for negative flow direction
          ! Allocate and Copy Section Data form Definition
-         if (pCrs%tabDef%frictionSectionsCount > 0) then
+         if (.not. pCrs%tabDef%frictionSectionID(pCrs%tabDef%frictionSectionsCount) == '') then
             allocate(pCrs%frictionSectionID(pCrs%tabDef%frictionSectionsCount))      !< Friction Section Identification
             allocate(pCrs%frictionSectionFrom(pCrs%tabDef%frictionSectionsCount))    !<
             allocate(pCrs%frictionSectionTo(pCrs%tabDef%frictionSectionsCount))      !<
-            allocate(pCrs%frictionTypePos(pCrs%tabDef%frictionSectionsCount))        !< Friction type for positive flow direction
-            allocate(pCrs%frictionTypeNeg(pCrs%tabDef%frictionSectionsCount))        !< Friction type for negative flow direction
-            call realloc(pCrs%frictionValuePos, pCrs%tabDef%frictionSectionsCount, fill=-999d0) !< Friction value for positive flow direction
-            call realloc(pCrs%frictionValueNeg, pCrs%tabDef%frictionSectionsCount, fill=-999d0) !< Friction value for negative flow direction
             call realloc(pCrs%tabdef%frictionSectionFrom, pCrs%tabDef%frictionSectionsCount)
             call realloc(pCrs%tabdef%frictionSectionto, pCrs%tabDef%frictionSectionsCount)
 
@@ -183,13 +207,20 @@ module m_readCrossSections
             pCrs%frictionSectionID     = pCrs%tabDef%frictionSectionID
             pCrs%frictionSectionFrom   = pCrs%tabDef%frictionSectionFrom
             pCrs%frictionSectionTo     = pCrs%tabDef%frictionSectionTo
-
+            
+                     ! Retrieve Roughness for Profile from Spatial Data
+         call GetRoughnessForProfile(network, network%crs%cross(inext))
+         else 
+           pCrs%frictiontypepos(1) = network%csdefinitions%cs(iref)%frictiontype(1)
+           pCrs%frictiontypeneg(1) = network%csdefinitions%cs(iref)%frictiontype(1)
+           pCrs%frictionvaluepos(1) = network%csdefinitions%cs(iref)%frictionvalue(1)
+           pCrs%frictionvalueneg(1) = network%csdefinitions%cs(iref)%frictionvalue(1) 
          endif
          
          network%crs%count = inext
          
-         ! Retrieve Roughness for Profile from Spatial Data
-         call GetRoughnessForProfile(network, network%crs%cross(inext))
+         !check of fricion section count > 0, zo ja getrougness, zo nee vul frictionype frictionvalue uit def
+
          if (network%CSDefinitions%CS(iref)%crossType == cs_YZ_Prof) then
             ! Prematurely to facilitate Conveyance Data to Delta Shell
 
@@ -198,12 +229,8 @@ module m_readCrossSections
             call CalcConveyance(network%crs%cross(inext))
          endif
          
-      end do
-
-      call tree_destroy(md_ptr)
-      
-   end subroutine readCrossSectionLocationFile
-
+   end subroutine finalizeCrs
+   
    !> Read the cross section definitions file, taking the file version into account.
    subroutine readCrossSectionDefinitions(network, CrossSectionDefinitionFile)
 
@@ -257,7 +284,7 @@ module m_readCrossSections
    
       !integer :: istat
       integer :: numstr
-      integer :: i, j
+      integer :: i, j, k
       integer :: crosstype
       logical :: success
       character(len=IdLen) :: id
@@ -381,6 +408,7 @@ module m_readCrossSections
             inext = AddCrossSectionDefinition(network%CSDefinitions, id, numLevels, level, width,               &
                                               width, plains, crestLevel, baseLevel, flowArea, totalArea,        &
                                               closed, groundlayerUsed, groundlayer)
+           
             deallocate(level, width)            
          
          case(CS_CIRCLE, CS_EGG)

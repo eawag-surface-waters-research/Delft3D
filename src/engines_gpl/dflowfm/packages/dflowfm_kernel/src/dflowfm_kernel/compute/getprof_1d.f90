@@ -206,7 +206,7 @@ endif
 if (abs(itp) == 1) then   ! pipe
     call pipe(hpr, profw, area, width, japerim, perim)
 else if (abs(itp) == 2) then   ! rectan, peri=wu + 2*hpr
-    call rectan  (hpr, profw, profh, area, width, japerim, perim)
+    call rectan  (hpr, profw, profh, area, width, japerim, perim, itp < 0)
 else if (abs(itp) == 3) then  ! rectan, peri=wu
     call rectan2D(hpr, profw, profh, area, width, japerim, perim)
 else if (abs(itp) == 100 .or. abs(itp) == 101) then  !                          itp >= 100, yzprof
@@ -221,7 +221,7 @@ if (ka .ne. 0 .and. kb .ne. ka) then     ! interpolate in profiles
     if (abs(itp) == 1) then                   ! pipe
        call pipe(hpr, profw, area2, width2, japerim, perim2)
     else if (abs(itp) == 2) then              ! rectan, peri=wu + 2*hpr
-       call rectan  (hpr, profw, profh, area2, width2, japerim, perim2)
+       call rectan  (hpr, profw, profh, area2, width2, japerim, perim2, itp < 0)
     else if (abs(itp) == 3) then              ! rectan, peri=wu
        call rectan2D(hpr, profw, profh, area2, width2, japerim, perim2)
     else if (abs(itp) == 100 .or. abs(itp) == 101) then ! >= 10, conveyance approach

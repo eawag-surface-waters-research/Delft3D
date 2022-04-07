@@ -47,7 +47,7 @@
 
  implicit none
 
- integer L, k1, k2, n1, n2, LK, n, k, k3, LL, kk, Ls, mis
+ integer L, k1, k2, n1, n2, LK, n, k, k3, LL, kk, Ls, mis, i, j, numcoords
  double precision           :: bl1, bl2, blv, bln, zn1, zn2, zn3, wn, alf, banow, xnow, ynow, skewn, xt, yt, xn, yn
  ! double precision, external :: skewav
 
@@ -337,17 +337,30 @@
 
  call duikerstoprofs()
 
- if ( cacheRetrieved() ) then
-    if (allocated(longculverts)) then
-       call copyCachedLongCulverts( longculverts, success )
-    else
-       success = .true.
-    end if
+ 
+ if ( newculverts) then
+  ! find the 1d2d flowlinks required for longculvertsToProfs
+  do i  = 1, nlongculvertsg
+    numcoords = size(longculverts(i)%xcoords)
+    !if (numcoords > 2) then
+    call find1d2dculvertlinks(network,longculverts(i), numcoords)
+    !longculverts(i)%flowlinks(1)           = find1d2dculvertlink(network, longculverts(i)%xcoords(1        ),longculverts(i)%ycoords(1        ),longculverts(i)%xcoords(2          ),longculverts(i)%ycoords(2          ) )
+    !longculverts(i)%flowlinks(numcoords-1) = find1d2dculvertlink(network, longculverts(i)%xcoords(numcoords),longculverts(i)%ycoords(numcoords),longculverts(i)%xcoords(numcoords-1),longculverts(i)%ycoords(numcoords-1) )
+    !endif 
+  enddo
+  call longculvertsToProfs( .true. )
  else
-    success = .false.
+  !if ( cacheRetrieved() ) then
+  !  if (allocated(longculverts)) then
+  !     call copyCachedLongCulverts( longculverts, success )
+  !  else
+  !     success = .true.
+  !  end if
+  !else
+  !  success = .false.
+  !endif
+  call longculvertsToProfs( .false. )
  endif
- call longculvertsToProfs( skiplinks = success )
-
  if (blmeanbelow .ne. -999d0) then
     do n = 1,ndx2D
        wn = 0d0; bln = 0d0

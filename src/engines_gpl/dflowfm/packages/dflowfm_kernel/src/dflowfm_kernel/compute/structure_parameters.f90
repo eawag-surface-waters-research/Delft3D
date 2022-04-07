@@ -44,7 +44,7 @@
       use m_1d_structures
       use m_compound
       use m_GlobalParameters
-      use m_longculverts, only: nlongculvertsg, longculverts
+      use m_longculverts, only: nlongculvertsg, longculverts, newculverts
       implicit none
       integer                       :: i, n, L, Lf, La, ierr, ntmp, k, ku, kd, istru, nlinks
       double precision              :: dir
@@ -59,7 +59,8 @@
             nreducebuf = npumpsg*NUMVALS_PUMP + ngatesg*NUMVALS_GATE + ncdamsg*NUMVALS_CDAM + ncgensg*NUMVALS_CGEN &
                        + ngategen*NUMVALS_GATEGEN + nweirgen*NUMVALS_WEIRGEN + ngenstru*NUMVALS_GENSTRU + ngenstru*NUMVALS_GENSTRU &
                        + ndambreaksg * NUMVALS_DAMBREAK + network%sts%numUniWeirs*NUMVALS_UNIWEIR + network%sts%numOrifices*NUMVALS_ORIFGEN &
-                       + network%sts%numCulverts*NUMVALS_CULVERT + network%sts%numBridges*NUMVALS_BRIDGE + network%cmps%count*NUMVALS_CMPSTRU
+                       + network%sts%numCulverts*NUMVALS_CULVERT + network%sts%numBridges*NUMVALS_BRIDGE + network%cmps%count*NUMVALS_CMPSTRU &
+                       + nlongculvertsg*NUMVALS_LONGCULVERT
             allocate ( reducebuf  ( nreducebuf ) , stat = ierr      )
             call aerr('reducebuf  ( nreducebuf )', ierr, nreducebuf ) ; reducebuf  = 0d0
          endif
@@ -490,7 +491,7 @@
                end if
             enddo
          else
-            ! old general structure, do not compute the new extra fileds
+            ! old general structure, do not compute the new extra fields
             do n = 1,ngenstru
                i = genstru2cgen(n)
                valgenstru(1:NUMVALS_GENSTRU,n) = 0d0
@@ -546,16 +547,38 @@
       if (allocated(vallongculvert)) then
          do n = 1, nlongculvertsg
             vallongculvert(1:NUMVALS_LONGCULVERT,n) = 0d0
-            if (longculverts(n)%numlinks > 0) then
-               Lf = longculverts(n)%flowlinks(1) ! We use the 1st link as a representative flow link
-               La = abs( Lf )
-               if( jampi > 0 ) then ! TODO: UNST-4644
-                  call link_ghostdata(my_rank,idomain(ln(1,La)), idomain(ln(2,La)), jaghost, idmn_ghost)
-                  if ( jaghost.eq.1 ) cycle
+            if (longculverts(n)%numlinks > 0) then ! This long culvert is valid on the current domain/subdomain
+               ! Firstly we fill in the waterlevel at up- and down-stream points.
+               ku = longculverts(n)%flownode_up
+               if (ku > 0) then ! this upstream point is on the current subdomain/domain
+                  if (jampi == 0 .or. (jampi > 0 .and. (.not. is_ghost_node(ku)))) then
+                     vallongculvert(3,n) = s1(ku)
+                  end if
+               end if
+
+               kd = longculverts(n)%flownode_dn
+               if (kd > 0) then ! this downstream point is on the current subdomain/domain
+                  if (jampi == 0 .or. (jampi > 0 .and. (.not. is_ghost_node(kd)))) then
+                     vallongculvert(4,n) = s1(kd)
+                  end if
+               end if
+
+               ! Then fill in for the representative flow ilnk
+               if (newculverts) then
+                  Lf = longculverts(n)%flowlinks(2) ! We use the 2st link as a representative flow link
+               else
+                  Lf = longculverts(n)%flowlinks(1)
                endif
-               dir = sign(1d0,dble(Lf))
-               call fill_valstruct_perlink(vallongculvert(:,n), La, dir, ST_LONGCULVERT, n, 0)
-               call average_valstruct(vallongculvert(:,n), ST_LONGCULVERT, n, 0, 0)
+
+               La = abs( Lf )
+               if (La > 0) then
+                  if( jampi > 0 ) then
+                     call link_ghostdata(my_rank,idomain(ln(1,La)), idomain(ln(2,La)), jaghost, idmn_ghost)
+                     if ( jaghost.eq.1 ) cycle
+                  endif
+                  dir = sign(1d0,dble(Lf))
+                  call fill_valstruct_perlink(vallongculvert(:,n), La, dir, ST_LONGCULVERT, n, 0)
+               end if
             end if
          enddo
       end if
@@ -619,13 +642,24 @@
             call fill_reduce_buffer( valcmpstru, network%cmps%count*NUMVALS_CMPSTRU )
             n = 1
          endif
-         ! TODO: UNST-4644, add for long culvert
+         if(allocated(vallongculvert) .and. nlongculvertsg > 0) then
+            call fill_reduce_buffer( vallongculvert, nlongculvertsg*NUMVALS_LONGCULVERT )
+            n = 1
+         endif
          if( n == 1 ) then
             call reduce_crs(reducebuf,nreducebuf,1) 
          endif
       end if
 
-         ! TODO: UNST-4644, add for long culvert
+      ! === Long culvert
+      if (nlongculvertsg > 0 .and. allocated(vallongculvert)) then
+         if (jampi > 0) then
+            call subsitute_reduce_buffer( vallongculvert, nlongculvertsg*NUMVALS_LONGCULVERT )
+         end if
+         do n=1,nlongculvertsg
+            call average_valstruct(vallongculvert(:,n), ST_LONGCULVERT, n, nlinks, nlongculvertsg)
+         end do
+      end if
       ! === Compound structure
       if (network%cmps%count > 0 .and. allocated(valcmpstru)) then
          if (jampi > 0) then

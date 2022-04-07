@@ -239,6 +239,11 @@ integer :: jaoldstr !< tmp backwards comp: we cannot mix structures from EXT and
  integer,          allocatable, target :: nodeCountBridge(:)   !< [-] Count of nodes per bridge.
  double precision, allocatable, target :: geomXBridge(:)       !< [m] x coordinates of bridges.
  double precision, allocatable, target :: geomYBridge(:)       !< [m] y coordinates of bridges.
+ ! long culvert
+ integer                               :: nNodesLongCulv       !< [-] Total number of nodes for all long culverts
+ integer,          allocatable, target :: nodeCountLongCulv(:) !< [-] Count of nodes per long culverts.
+ double precision, allocatable, target :: geomXLongCulv(:)     !< [m] x coordinates of long culverts.
+ double precision, allocatable, target :: geomYLongCulv(:)     !< [m] y coordinates of long culverts.
  
  integer, parameter :: IOPENDIR_FROMLEFT  = -1 !< Gate door opens/closes from left side.
  integer, parameter :: IOPENDIR_FROMRIGHT =  1 !< Gate door opens/closes from right side.
@@ -424,11 +429,9 @@ subroutine fill_valstruct_perlink(valstruct, L, dir, istrtypein, istru, L0)
    integer :: ku, kd, k1, k2
    type(t_GeneralStructure), pointer :: genstr
    double precision :: qcmp
+   logical :: in_compound
 
-   if (istrtypein == ST_LONGCULVERT) then
-      ku = longculverts(istru)%flownode_up
-      kd = longculverts(istru)%flownode_dn
-   else
+   if (istrtypein /= ST_LONGCULVERT) then
       if (dir > 0) then
          ku = ln(1,L)
          kd = ln(2,L)
@@ -442,29 +445,34 @@ subroutine fill_valstruct_perlink(valstruct, L, dir, istrtypein, istru, L0)
    valstruct(1) = valstruct(1) + wu(L)
    
    if (istru > 0) then ! When it is not old weir and not old general structure and not a compound structure
-      if (network%sts%struct(istru)%compound > 0) then ! for a structure that belongs to a compound structure
+      if (istrtypein == ST_LONGCULVERT) then
+         in_compound = .false.
+      else
+         in_compound = (network%sts%struct(istru)%compound > 0)
+      end if
+
+      if (in_compound) then ! for a structure that belongs to a compound structure
          k1 = ln(1,L)
          k2 = ln(2,L)
          if (hu(L) > 0) then
             qcmp = get_discharge_under_compound_struc(network%sts%struct(istru), L0, s1(k1), s1(k2), teta(L))
          else
             qcmp = 0d0
-         end if
-         valstruct(2) = valstruct(2) + qcmp*dir
+         end if      
+         valstruct(2) = valstruct(2) + qcmp*dir      
       else
          valstruct(2) = valstruct(2) + q1(L)*dir
       end if
-   else
-      valstruct(2) = valstruct(2) + q1(L)*dir
    end if
-   
-   valstruct(3) = valstruct(3) + s1(ku)*wu(L)
-   valstruct(4) = valstruct(4) + s1(kd)*wu(L)
-   valstruct(5) = valstruct(5) + (s1(ku) - s1(kd))*wu(L)
+   if (istrtypein /= ST_LONGCULVERT) then
+      valstruct(3) = valstruct(3) + s1(ku)*wu(L)
+      valstruct(4) = valstruct(4) + s1(kd)*wu(L)
+      valstruct(5) = valstruct(5) + (s1(ku) - s1(kd))*wu(L)
+   end if
 
    if (istrtypein /= ST_PUMP) then ! Compute flow area for structures except for pump
       if (istru > 0) then ! When it is not old weir and not old general structure and not a compound structure
-         if (network%sts%struct(istru)%compound > 0) then ! for a structure that belongs to a compound structure
+         if (in_compound) then ! for a structure that belongs to a compound structure
             valstruct(6) = valstruct(6) + network%sts%struct(istru)%au(L0)
          else
             valstruct(6) = valstruct(6) + au(L)
@@ -582,11 +590,15 @@ subroutine average_valstruct(valstruct, istrtypein, istru, nlinks, icount)
          valstruct(12)= dmiss ! force difference per unit width
       end if
    else
-      ! valstruct(2): keep discharge at the summed value
-      ! Average the remaining values:
-      valstruct(3) = valstruct(3) / valstruct(1)        ! s1up
-      valstruct(4) = valstruct(4) / valstruct(1)        ! s1down
-      valstruct(5) = valstruct(5) / valstruct(1)        ! head
+      if (istrtypein == ST_LONGCULVERT) then
+         valstruct(5) = valstruct(3) - valstruct(4)
+      else
+         ! valstruct(2): keep discharge at the summed value
+         ! Average the remaining values:
+         valstruct(3) = valstruct(3) / valstruct(1)        ! s1up
+         valstruct(4) = valstruct(4) / valstruct(1)        ! s1down
+         valstruct(5) = valstruct(5) / valstruct(1)        ! head
+      end if
 
       if (istrtypein /= ST_PUMP) then
          if (valstruct(6) > 0d0) then ! non-zero flow area
@@ -865,36 +877,47 @@ integer function get_number_of_geom_nodes(istrtypein, i)
                                          !< an orifice should be called with istrtypein = ST_ORIFICE, whereas its struct(istru)%type = ST_GENERAL_ST.
    integer, intent(in   ) :: i           !< Structure index for this structure type.
 
-   integer :: istru, nLinks, nLinksTmp, jaghost, idmn_ghost, L, Lf, La
+   integer :: istru, nLinks, nLinksTmp, jaghost, idmn_ghost, L, Lf, La, Ls
    type(t_structure), pointer    :: pstru
 
    if (istrtypein == ST_LONGCULVERT) then
-      get_number_of_geom_nodes = longculverts(i)%numlinks+1
+      nLinks = longculverts(i)%numlinks - 2 ! exclude the two 1D2D links
+      Ls = 1
    else
       istru = get_istru(istrtypein, i)
 
       pstru => network%sts%struct(istru)
       nLinks = pstru%numlinks
-      if (jampi > 0) then ! For parallel computing, check if there is any ghost links
-         nLinksTmp = nLinks
-         do L = 1, nLinksTmp
+   end if
+
+   ! In a parallel simulation, count the links that are valid (>0) and non-ghost.
+   if (jampi > 0) then
+      nLinksTmp = nLinks
+      do L = 1, nLinksTmp
+         if (istrtypein == ST_LONGCULVERT) then
+            Lf = longculverts(i)%flowlinks(Ls+L)
+         else
             Lf = pstru%linknumbers(L)
-            La = abs(Lf)
+         end if
+         La = abs(Lf)
+         if (La > 0) then
             call link_ghostdata(my_rank,idomain(ln(1,La)), idomain(ln(2,La)), jaghost, idmn_ghost)
             if ( jaghost.eq.1 ) then
                nLinks = nLinks - 1
             end if
-         enddo
-      end if
-      if (nLinks > 0) then
-         ! "2D" representation: nLinks+1 polyline points.
-         ! TODO: for multiple 1D links in a single structure, we could consider
-         !       a multi-part polyline. That would mean: get_number_of_geom_nodes = 2*nLinks
-         get_number_of_geom_nodes = nLinks + 1
-      else if (nLinks == 0) then
-         ! When no links: empty geometry.
-         get_number_of_geom_nodes = 0
-      end if
+         else
+            nLinks = nLinks - 1
+         end if
+      enddo
+   end if
+   if (nLinks > 0) then
+      ! "2D" representation: nLinks+1 polyline points.
+      ! TODO: for multiple 1D links in a single structure, we could consider
+      !       a multi-part polyline. That would mean: get_number_of_geom_nodes = 2*nLinks
+      get_number_of_geom_nodes = nLinks + 1
+   else if (nLinks == 0) then
+      ! When no links: empty geometry.
+      get_number_of_geom_nodes = 0
    end if
 
 end function get_number_of_geom_nodes
@@ -923,7 +946,9 @@ end function get_total_number_of_geom_nodes
 !> Gets geometry coordinates of a structure.
 !! Geometry coordinates can be used in a (multi-) polyline representation of the placement
 !! of structures on flow links.
-subroutine get_geom_coordinates_of_structure(istrtypein, i, nNodes, x, y)
+!! Currently one structure lying on multiple subdomains is only supported for long culverts.
+!! TODO: Support other structures lying on multiple subdomains.
+subroutine get_geom_coordinates_of_structure(istrtypein, i, nNodes, x, y, maskBnd)
    use m_1d_structures
    use m_alloc
    use m_flowgeom, only: lncn
@@ -939,32 +964,42 @@ subroutine get_geom_coordinates_of_structure(istrtypein, i, nNodes, x, y)
    integer,                       intent(in   ) :: nNodes      !< Number of geometry nodes in this structure (as computed by get_number_of_geom_nodes()).
    double precision, allocatable, intent(  out) :: x(:)        !< x-coordinates of the structure (will be reallocated when needed)
    double precision, allocatable, intent(  out) :: y(:)        !< y-coordinates of the structure (will be reallocated when needed)
+   integer,          allocatable, intent(  out) :: maskBnd(:)  !< Mask array of boundary nodes (now only used for long culverts)
 
-   integer :: istru, nLinks, L, L0, k1, k2, k3, k4, k, nLinksTmp, jaghost, idmn_ghost, Lf, La
+   integer :: istru, nLinks, L, L0, Ls, k1, k2, k3, k4, k, nLinksTmp, jaghost, idmn_ghost, Lf, La
    double precision :: dtmp
    type(t_structure), pointer    :: pstru
    integer, allocatable :: links(:)
 
    if (istrtypein == ST_LONGCULVERT) then
-      nLinks = longculverts(i)%numlinks
+      nLinks = longculverts(i)%numlinks - 2 ! exclude the two 1D2D links
+      Ls = 1
    else
       istru = get_istru(istrtypein, i)
       pstru => network%sts%struct(istru)
       nLinks = pstru%numlinks
-      if (jampi > 0) then ! In parallel, if finds a ghost link, then remove it from the list
-         call realloc(links, nLinks, KeepExisting=.false., fill = 0)
-         nLinksTmp = nLinks
-         nLinks    = 0
-         do L = 1, nLinksTmp
+   end if
+
+   ! In a parallel simulation, array links stores the link number of all valid (>0) and non-ghost links.
+   if (jampi > 0) then
+      call realloc(links, nLinks, KeepExisting=.false., fill = 0)
+      nLinksTmp = nLinks
+      nLinks    = 0
+      do L = 1, nLinksTmp
+         if (istrtypein == ST_LONGCULVERT) then
+            Lf = longculverts(i)%flowlinks(Ls+L)
+         else
             Lf = pstru%linknumbers(L)
-            La = abs(Lf)
+         end if
+         La = abs(Lf)
+         if (La > 0) then ! All links in array links are valid
             call link_ghostdata(my_rank,idomain(ln(1,La)), idomain(ln(2,La)), jaghost, idmn_ghost)
             if ( jaghost == 0 ) then
                nLinks = nLinks + 1
                links(nLinks) = Lf
             end if
-         enddo
-      end if
+         end if
+      enddo
    end if
 
 
@@ -972,11 +1007,11 @@ subroutine get_geom_coordinates_of_structure(istrtypein, i, nNodes, x, y)
       call realloc(x, nNodes, keepExisting = .false.)
       call realloc(y, nNodes, keepExisting = .false.)
 
-      if (istrtypein == ST_LONGCULVERT) then
-         L = longculverts(i)%flowlinks(1)
+      if (jampi > 0) then
+         L = abs(links(1))
       else
-         if (jampi > 0) then
-            L = abs(links(1))
+         if (istrtypein == ST_LONGCULVERT) then
+            L = abs(longculverts(i)%flowlinks(Ls+1))
          else
             L = abs(pstru%linknumbers(1))
          end if
@@ -989,13 +1024,36 @@ subroutine get_geom_coordinates_of_structure(istrtypein, i, nNodes, x, y)
       x(2) = xk(k2)
       y(1) = yk(k1)
       y(2) = yk(k2)
+
+      if (jampi > 0) then
+         if (istrtypein == ST_LONGCULVERT) then
+            ! maskBnd will be used for the situation that the structure lying on multiple subdomains.
+            ! Determine the 1st boundary node (Boundary nodes are only useful for parallel simulations).
+            call realloc(maskBnd, nNodes, keepExisting = .false., fill = 0)
+            if (nLinks == 1) then
+               ! If there is only one link, then the two nodes are the boundary nodes.
+               maskBnd(1) = 1
+               maskBnd(2) = 1
+            else
+               ! If there are more than one link, then (x(1),y(1)) is a boundary node.
+               ! NOTE: here assumes that the 1st node of a 1D link of the long culvert is always the
+               ! starting node, and the 2nd node is always the ending node.
+               maskBnd(1) = 1
+            end if
+         else
+            ! For other structures, lying on multiple subdomains is not supported yet.
+            ! When we support it, then we can also use the codes as above.
+            call realloc(maskBnd, 1, keepExisting = .false., fill = 0)
+         end if
+      end if
+
       k = 3
       do L0 = 2, nLinks
-         if (istrtypein == ST_LONGCULVERT) then
-            L = longculverts(i)%flowlinks(L0)
+         if (jampi > 0) then
+            L = abs(links(L0))
          else
-            if (jampi > 0) then
-               L = abs(links(L0))
+            if (istrtypein == ST_LONGCULVERT) then
+               L = abs(longculverts(i)%flowlinks(L0+Ls))
             else
                L = abs(pstru%linknumbers(L0))
             end if
@@ -1027,6 +1085,10 @@ subroutine get_geom_coordinates_of_structure(istrtypein, i, nNodes, x, y)
          endif
          k1 = k3
          k2 = k4
+
+         if (jampi > 0 .and. L0 == nlinks .and. istrtypein == ST_LONGCULVERT) then ! The last node is a boundary node.
+            maskBnd(k) = 1
+         end if
          k = k+1
       end do
    end if
@@ -1102,6 +1164,8 @@ subroutine fill_geometry_arrays_structure(istrtypein, nstru, nNodesStru, nodeCou
    use m_alloc
    use m_partitioninfo
    use m_GlobalParameters
+   use m_flowparameters, only: eps6
+   use precision_basics
    implicit none
    integer,                       intent(in   ) :: istrtypein       !< The type of the structure. May differ from the struct%type
    integer,                       intent(in   ) :: nstru            !< Number of this structure type
@@ -1116,7 +1180,10 @@ subroutine fill_geometry_arrays_structure(istrtypein, nstru, nNodesStru, nodeCou
    double precision, allocatable :: geomYStruMPI(:)      ! [m] y coordinates of structures after mpi communication.
    integer,          allocatable :: nodeCountStruGat(:), nNodesStruGat(:), displs(:)
    double precision, allocatable :: geomX(:), geomY(:)
-   integer                       :: i, j, k, k1, ierror, is, ie, n, ii, nNodes, nNodesStruMPI
+   integer                       :: i, j, j1, k, k1, ierror, is, ie, n, ii, nNodes, nNodesStruMPI, jaexist, ke, ks, kk, nb, nbLast, npar
+   double precision              :: xNew, yNew, xOld, yOld
+   integer,          allocatable :: maskBnd(:), maskBndAll(:), maskBndGat(:), indBndMPI(:) ! Arrays for boundary nodes, only used in parallel run
+   integer,          allocatable :: jacoincide(:)
 
    ! Allocate and construct geometry variable arrays (on one subdomain)
    call realloc(nodeCountStru,   nstru, keepExisting = .false., fill = 0  )
@@ -1127,16 +1194,25 @@ subroutine fill_geometry_arrays_structure(istrtypein, nstru, nNodesStru, nodeCou
    nNodesStru = sum(nodeCountStru)
    call realloc(geomXStru,       nNodesStru,   keepExisting = .false., fill = 0d0)
    call realloc(geomYStru,       nNodesStru,   keepExisting = .false., fill = 0d0)
+   if (jampi > 0 .and. istrtypein == ST_LONGCULVERT) then
+      ! In parallel runs, one structure might lie on multiple subdomains. To handle this situation,
+      ! we will need to know which nodes are on boundaries of a structure on each subdomain, and the boundary nodes will be handled separately.
+      ! This will aviod having duplicated (boundary) nodes in the arrays of coordinates of a structure among all subdomains.
+       call realloc(maskBndAll, nNodesStru, keepExisting = .false., fill = 0) ! If the node is a boundary node then the value will be 1
+   end if
    is = 0
    ie = 0
    do i = 1, nstru
       nNodes = nodeCountStru(i)
       if (nNodes > 0) then
-         call get_geom_coordinates_of_structure(istrtypein, i, nNodes, geomX, geomY)
+         call get_geom_coordinates_of_structure(istrtypein, i, nNodes, geomX, geomY, maskBnd)
          is = ie + 1
          ie = is + nNodes - 1
          geomXStru(is:ie) = geomX(1:nNodes)
          geomYStru(is:ie) = geomY(1:nNodes)
+         if (jampi > 0 .and. istrtypein == ST_LONGCULVERT) then
+            maskBndAll(is:ie) = maskBnd(1:nNodes)
+         end if
       end if
    end do
 
@@ -1160,6 +1236,9 @@ subroutine fill_geometry_arrays_structure(istrtypein, nstru, nNodesStru, nodeCou
          call realloc(yGat,             nNodesStruMPI,  keepExisting = .false., fill = 0d0)
          call realloc(displs,           ndomains,       keepExisting = .false., fill = 0  )
          call realloc(nNodesStruGat,    ndomains,       keepExisting = .false., fill = 0  )
+         if (istrtypein == ST_LONGCULVERT) then
+            call realloc(maskBndGat,       nNodesStruMPI,  keepExisting = .false., fill = 0  )
+         end if
       end if
 
       ! Gather integer data, where the same number of data, i.e. nstru, are gathered from each subdomain to process 0000
@@ -1181,6 +1260,9 @@ subroutine fill_geometry_arrays_structure(istrtypein, nstru, nNodesStru, nodeCou
       ! Gather double precision data, here, different number of data can be gatherd from different subdomains to process 0000
       call gatherv_double_data_mpi_dif(nNodesStru, geomXStru, nNodesStruMPI, xGat, ndomains, nNodesStruGat, displs, 0, ierror)
       call gatherv_double_data_mpi_dif(nNodesStru, geomYStru, nNodesStruMPI, yGat, ndomains, nNodesStruGat, displs, 0, ierror)
+      if (istrtypein == ST_LONGCULVERT) then
+         call gatherv_int_data_mpi_dif(nNodesStru,maskBndAll, nNodesStruMPI, maskBndGat, ndomains, nNodesStruGat, displs, 0, ierror)
+      end if
 
       if (my_rank == 0) then
          ! Construct nodeCountStruMPI for history output
@@ -1192,22 +1274,100 @@ subroutine fill_geometry_arrays_structure(istrtypein, nstru, nNodesStru, nodeCou
          end do
 
          ! Construct geomXStruMPI and geomYStruMPI for history output
-         j = 1
-         do i = 1, nstru    ! for each structure
-            do n = 1, ndomains ! on each sudomain
-               k = (n-1)*nstru+i        ! index in nodeCountStruGat
-               nNodes = nodeCountStruGat(k)  ! structure i on sumdomain n has nNodes nodes
-               if (nNodes > 0) then
-                  ii = (n-1)*nstru
-                  is = sum(nNodesStruGat(1:n-1)) + sum(nodeCountStruGat(ii+1:ii+i-1))! starting index in xGat
-                  do k1 = 1, nNodes
-                     geomXStruMPI(j) = xGat(is+k1)
-                     geomYStruMPI(j) = yGat(is+k1)
-                     j = j + 1
-                  end do
-               end if
+         ! Below seperate long culverts with other structures, because the we support a long culvert lying
+         ! on multiple subdomains, but do not support other structures lying on multiple subdomains yet.
+         ! TODO: enable this for other structures as well.
+         if (istrtypein == ST_LONGCULVERT) then
+            j = 0
+            do i = 1, nstru                    ! for each structure
+               nPar = 0                        ! Number of subdomains that contain this structure
+               nb = 0                          ! Number of boundary nodes for this structure
+               nbLast = 0                      ! Number of boundary nodes for this structure in the previous subdomains
+               call realloc(indBndMPI, nodeCountStruMPI(i), keepExisting = .false., fill = 0)
+               call Realloc(jaCoincide,nodeCountStruMPI(i), keepExisting = .false., fill = 0)
+               do n = 1, ndomains              ! on each sudomain
+                  k = (n-1)*nstru+i             ! index in nodeCountStruGat
+                  nNodes = nodeCountStruGat(k)  ! structure i on sumdomain n has nNodes nodes
+                  if (nNodes > 0) then
+                     nPar = nPar + 1
+                     ii = (n-1)*nstru
+                     is = sum(nNodesStruGat(1:n-1)) + sum(nodeCountStruGat(ii+1:ii+i-1))! starting index in xGat
+                     ks = 1
+                     ke = nNodes
+                     if (nPar > 1) then ! This structure lies on multiple subdomains.
+                        ! Select and add the nodes of this structure on the current subdomain
+                        do k1 = ks, ke
+                           kk = is+k1
+                           if (maskBndGat(kk) == 1) then ! If it is a boundary node, need to check if it already exists in
+                                                         ! the coordinate arrays, i.e. GeomXstruMPI and GeomYStruMPI
+                              xNew = xGat(kk)
+                              yNew = yGat(kk)
+                              jaexist = 0
+                              do j1 = 1, nbLast ! Loop over all the boundary nodes of the previous subdomains that have been added in the coordinate arrays
+                                 if (jaCoincide(j1) == 0) then
+                                    ! If the j1 boundary node is not coincide with any boundary node, then check if node (xNew,yNew) is coincide with it or not.
+                                    ! If jaCoincide(j1) == 1, then no need to check this node because one boundary node can be
+                                    ! coincide with another boundary node maximal ONCE.
+                                    xOld = geomXStruMPI(indBndMPI(j1))
+                                    yOld = geomYStruMPI(indBndMPI(j1))
+                                    if (comparereal(xNew, xOld, eps6)==0 .and. comparereal(xNew, xOld, eps6)==0) then
+                                       jaexist = 1
+                                       jaCoincide(j1) = 1
+                                       exit
+                                    end if
+                                 end if
+                              end do
+                              if (jaexist == 0) then ! If the new candidate node does not exist in the coordinate arrays, then add it
+                                 j = j + 1
+                                 geomXStruMPI(j) = xNew
+                                 geomYStruMPI(j) = yNew
+                                 nb = nb + 1         ! add one boundary node
+                                 indBndMPI(nb) = j   ! store its index in geomXStruMPI (and geomYStruMPI)
+                              else
+                                 nodeCountStruMPI(i) = nodeCountStruMPI(i) - 1 ! adjust the node counter
+                                 nNodesStruMPI = nNodesStruMPI - 1
+                              end if
+                           else ! If it is not a boundary node, then add it directly
+                              j = j + 1
+                              geomXStruMPI(j) = xGat(kk)
+                              geomYStruMPI(j) = yGat(kk)
+                           end if
+                        end do
+                     else
+                        do k1 = ks, ke
+                           j = j + 1
+                           kk = is + k1
+                           geomXStruMPI(j) = xGat(kk)
+                           geomYStruMPI(j) = yGat(kk)
+                           if (maskBndGat(kk) == 1) then
+                              nb = nb + 1
+                              indBndMPI(nb) = j ! store the index in geomXStruMPI for the boundary nodes
+                           end if
+                        end do
+                     end if
+                     nbLast = nb ! update nbLast when the current subdomain is finished.
+                  end if
+               end do
             end do
-         end do
+         else
+            j = 1
+            do i = 1, nstru    ! for each structure
+               do n = 1, ndomains ! on each sudomain
+                  k = (n-1)*nstru+i        ! index in nodeCountStruGat
+                  nNodes = nodeCountStruGat(k)  ! structure i on sumdomain n has nNodes nodes
+                  if (nNodes > 0) then
+                     ii = (n-1)*nstru
+                     is = sum(nNodesStruGat(1:n-1)) + sum(nodeCountStruGat(ii+1:ii+i-1))! starting index in xGat
+                     do k1 = 1, nNodes
+                        geomXStruMPI(j) = xGat(is+k1)
+                        geomYStruMPI(j) = yGat(is+k1)
+                        j = j + 1
+                     end do
+                  end if
+               end do
+            end do
+         end if
+
          ! Copy the MPI-arrays to nodeCoutLat, geomXStru and geomYStru for the his-output
          nNodesStru = nNodesStruMPI
          nodeCountStru(1:nstru) = nodeCountStruMPI(1:nstru)

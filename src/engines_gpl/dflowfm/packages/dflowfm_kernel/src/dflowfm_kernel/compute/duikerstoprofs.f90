@@ -80,7 +80,7 @@
                endif
                prof1D(1,Lf)  = w1 ; wu(Lf) = w1
                prof1D(2,Lf)  = h1
-               prof1D(3,Lf)  =  2                                      ! for now, simple rectan
+               prof1D(3,Lf)  =  -2                                      ! for now, simple rectan, closed
                jaduiktmp(Lf) =  1
             endif
          endif

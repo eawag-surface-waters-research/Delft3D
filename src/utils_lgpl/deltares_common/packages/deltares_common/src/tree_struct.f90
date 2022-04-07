@@ -89,7 +89,7 @@ module TREE_STRUCTURES
               tree_get_data_ptr, tree_put_data, tree_get_name, tree_get_data,                      &
               tree_get_datatype, tree_get_data_string,                                             &
               tree_traverse, tree_traverse_level, print_tree,                                      &
-              tree_fold, tree_destroy, tree_get_data_alloc_string
+              tree_fold, tree_destroy, tree_get_data_alloc_string, tree_remove_child_by_name
    ! nested function has to be public for gfortran
    public ::  dealloc_tree_data
 
@@ -181,6 +181,55 @@ subroutine tree_create_node( tree, name, node )
    endif
 end subroutine tree_create_node
 
+subroutine tree_remove_child_by_name(tree,name,ierror)
+  character(len=*), intent(in)            :: name   !< name of child node to be removed
+  type(TREE_DATA), intent(inout), pointer :: tree   !< tree from which the node has to be removed
+  
+  type(TREE_DATA_PTR), dimension(:), pointer :: children
+  integer :: removeindex
+  integer :: i
+  integer,            intent(out) :: ierror !< Error status, 0 if succesful.
+  integer                         :: newsize
+  
+  ierror = 0
+  
+  if ( .not. associated(tree) ) then
+    ierror = 1
+    return
+  end if
+  
+  newsize = 0
+  if ( associated( tree%child_nodes ) ) then
+    newsize =  size( tree%child_nodes ) -1
+  endif
+  
+  removeindex = -1
+  do i = 1, newsize+1
+    if ( str_tolower(tree_get_name(tree%child_nodes(i)%node_ptr)) == str_tolower(name) ) then
+      removeindex = i
+    endif
+  enddo
+  
+  if (removeindex == -1) then
+    ierror = 1
+    return
+  end if
+  
+  allocate( children(1:newsize), stat = ierror )
+  if ( ierror .ne. 0 ) then
+    return
+  else
+    if ( newsize > 1 ) then
+      children(1:removeindex-1)     = tree%child_nodes(1:removeindex-1)
+      children(removeindex:newsize) = tree%child_nodes(removeindex+1:newsize+1)
+      deallocate( tree%child_nodes )
+    endif
+  
+    tree%child_nodes => children
+  
+  endif
+  
+end subroutine tree_remove_child_by_name
 !> Adds an existing tree node to the children array of a tree.
 !! Both the tree and the new node are pointers, use this to efficiently
 !! create or extend a tree with already existing subtrees.

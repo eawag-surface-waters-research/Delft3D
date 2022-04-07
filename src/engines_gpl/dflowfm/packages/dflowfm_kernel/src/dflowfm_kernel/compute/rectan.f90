@@ -30,7 +30,7 @@
 ! $Id$
 ! $HeadURL$
 
-subroutine rectan(hpr, br, hr, area, width, japerim, perim)
+subroutine rectan(hpr, br, hr, area, width, japerim, perim, closed)
 use m_flow, only : slotw1D
 implicit none
 integer          :: japerim
@@ -40,6 +40,8 @@ double precision :: hr                   ! hoogte  van profiel
 double precision :: area                 ! wet cross sectional area
 double precision :: width                ! width at water surface
 double precision :: perim, hp            ! wet perimeter
+logical, intent(in   ) :: closed         !< Whether the rectangle shape is closed (ceiling can be included in wet perimeter)
+
 if (japerim == 1) then
    hp = min(hpr, hr)
 else
@@ -48,6 +50,10 @@ endif
 area  = hp*br
 width = br
 perim = 2d0*hp + br
+if (hpr >= hr .and. closed) then
+   perim = perim+br
+end if
+
 if (slotw1D > 0 .and. japerim == 0) then
    width = width + slotw1D
    area  = area  + slotw1D*hpr

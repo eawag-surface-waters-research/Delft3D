@@ -30,66 +30,43 @@
 ! $Id$
 ! $HeadURL$
 
- subroutine inflowcell(xp,yp,k,jaoutside, iLocTp)                      ! is this point in a flowcell
- !FB TODO: this should be a function not a subroutine, return value (k) is not the last argument in list. booleans should be logical not integer.
- use m_flowgeom
- use m_GlobalParameters, only: INDTP_1D, INDTP_2D, INDTP_ALL
- use m_flow
- use m_flowexternalforcings
- use geometry_module, only: pinpok
- use m_missing, only: jins, dmiss
+!>  perform partitioning from command line
+subroutine makelongculverts_commandline()
+   use unstruc_model
+   use m_readstructures
+   use string_module, only: strsplit
+   use m_longculverts
+   use unstruc_netcdf, only :  unc_write_net, UNC_CONV_UGRID
+   use unstruc_channel_flow, only: network
+   
+   character(len=1024) :: fnamesstring
+   character(len=:), allocatable :: converted_fnamesstring
+   character(len=:), allocatable :: converted_crsdefsstring
+   character(len=:), allocatable :: tempstring_crsdef
+   character(len=:), allocatable :: tempstring_fnames
+   character(len=200), dimension(:), allocatable       :: fnames
+  
+   
+    if (len_trim(md_1dfiles%structures) > 0) then
+    
+      fnamesstring = md_1dfiles%structures
+      call strsplit(fnamesstring,1,fnames,1)
+      call convertLongCulvertsAsNetwork(fnames(1), 0,md_culvertprefix,converted_fnamesstring,converted_crsdefsstring, istat)
+      do ifil=2,size(fnames)
+         call convertLongCulvertsAsNetwork(fnames(ifil), 1,md_culvertprefix, tempstring_fnames,tempstring_crsdef, istat)
+         converted_crsdefsstring = trim(trim(converted_crsdefsstring)//', ')//tempstring_crsdef
+         converted_fnamesstring  = trim(trim(converted_fnamesstring) //', ')//tempstring_fnames
+      end do
+      deallocate(fnames)
+      call finalizeLongCulvertsInNetwork()
+     
+      call unc_write_net(trim(md_culvertprefix)//md_netfile, janetcell = 1, janetbnd = 0, jaidomain = 0, iconventions = UNC_CONV_UGRID)
 
- implicit none
-
- double precision, intent(in) :: xp, yp
- integer, intent(inout)       :: k !return value, if flowcell is found k = cell index
- integer, intent(in)          :: jaoutside
- integer, intent(in)          :: iLocTp      !< Node type, one of INDTP_1D/2D/ALL.
-
- ! locals
- integer           :: n, nn, in, kb, L, nstart, nend
- double precision  :: dxx, dyy, r
-
- ! define the searching range, this is especially for the purpose of snapping obs to 1D, 2D or 1D+2D flownodes.
- ! For other purpose it should stay as before
- select case(iLocTp)
-   case (INDTP_ALL)
-      nstart = 1
-      nend   = ndxi
-   case(INDTP_1D) ! 1d flownodes coordinates
-      nstart = ndx2D+1
-      nend   = ndxi
-   case(INDTP_2D) ! 2d flownodes coordinates
-      nstart = 1
-      nend   = ndx2D
- end select
-
- k = 0
- do n = nstart,nend
-     nn = size( nd(n)%x )
-     IF (NN > 2) THEN
-        call PINPOK (Xp, Yp, Nn, nd(n)%x, nd(n)%y, IN, jins, dmiss)
-        if (in == 1) then
-           k = n
-           return
-        endif
-     ENDIF
- enddo
-
- if (jaoutside == -1) then ! do not look at open boundaries
-    return
- endif
-
- do n   = 1, nbndz
-    kb  = kbndz(1,n)
-    L   = kbndz(3,n)
-    dxx = xp - xz(kb)
-    dyy = yp - yz(kb)
-    r   = sqrt(dxx*dxx + dyy*dyy)
-    if (r < 0.3d0*dx(L) ) then
-       k = kb
-       return
+      md_netfile = trim(md_culvertprefix)//md_netfile
+      md_1dfiles%structures = converted_fnamesstring
+      md_1dfiles%cross_section_definitions = converted_crsdefsstring   
+      converted_fnamesstring = trim( trim(md_culvertprefix)//md_ident )//'.mdu'
+      call writeMDUFile(converted_fnamesstring ,istat)
     endif
- enddo
-
-   end subroutine inflowcell
+    
+end subroutine makelongculverts_commandline

@@ -96,6 +96,7 @@
  logical                 :: jawel                    ! filecheck
  logical                 :: isbadlink                ! Bad link (e.g. too short)
  character(len=5)        :: txt
+ integer, allocatable    :: inonlin(:)               ! Array of nonLin1D, nonLin2D and nonLin, used for MPI communication
 
  integer                 :: nw, L1, L2, LLA , nw11   ! wall stuff
  integer                 :: icn                      ! corner stuff
@@ -1046,6 +1047,18 @@
  endif
 
  call set_1d_indices_in_network()
+
+ if (jampi > 0) then
+    ! MPI communication of nonLin, nonLin1D and nonLin2D
+    call realloc(inonLin, 3, keepExisting = .false., fill = 0)
+    inonLin(1) = nonLin1D
+    inonLin(2) = nonLin2D
+    inonLin(3) = nonLin
+    call reduce_int_max(3, inonLin)
+    nonLin1D = inonLin(1)
+    nonLin2D = inonLin(2)
+    nonLin   = inonLin(3)
+ end if
 
  if (japure1D == 1 .or. japure1D == 2) then 
     call setisnbnodisnblin() ! set signarray isnbnod for left and rightneighbouring uc1d.
