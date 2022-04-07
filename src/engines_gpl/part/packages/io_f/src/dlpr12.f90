@@ -47,7 +47,7 @@ contains
                           ihflag , elt_names , elt_types , elt_dims , elt_bytes ,   &
                           rbuffr )
 !
-!     Deltares (former: Deltares)
+!     Deltares
 !
 !     created             : january 1993 by r.j. vos
 !

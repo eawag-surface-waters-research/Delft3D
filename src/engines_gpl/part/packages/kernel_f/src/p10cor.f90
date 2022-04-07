@@ -45,7 +45,7 @@ contains
                           ipcgo, accrjv)
 !
 !
-!                   Deltares (former: Deltares)
+!                   Deltares
 !
 !                        d e l p a r    v3.22
 !

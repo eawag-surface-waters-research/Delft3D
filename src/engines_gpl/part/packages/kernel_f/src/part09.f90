@@ -114,8 +114,8 @@ contains
       integer  ( ip), intent(  out) :: kpart  (*)            !< k-values particles
       real     ( rp), intent(in   ) :: tcktot (layt)         !< thickness hydrod.layer
       logical       , intent(in   ) :: zmodel
-      integer  ( ip), intent(in   ) :: laytop(nmax,mmax)      !< highest active layer in z-layer model
-      integer  ( ip), intent(in   ) :: laybot(nmax,mmax)      !< highest active layer in z-layer model
+      integer  ( ip), intent(in   ) :: laytop(:,:)           !< highest active layer in z-layer model
+      integer  ( ip), intent(in   ) :: laybot(:,:)           !< highest active layer in z-layer model
       integer  ( ip)                :: nplay  (layt)         !< work array that could as well remain inside
       integer  ( ip), intent(inout) :: kwaste (nodye)        !< k-values of dye points
       integer  ( ip), intent(in   ) :: nolay                 !< number of comp. layer

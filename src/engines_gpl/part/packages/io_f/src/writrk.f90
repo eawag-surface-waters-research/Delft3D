@@ -43,7 +43,7 @@ contains
                         tstring   ,dt        ,nstep     ,ibuff     ,  &
                         rbuff     ,cbuff     ,track     ,nopmax   )
 !-----------------------------------------------------------------------
-!         Deltares (former: Deltares)
+!         Deltares
 !
 !             module: subroutine writrk
 !           function: writes the initial group 1 ('trk-const') to

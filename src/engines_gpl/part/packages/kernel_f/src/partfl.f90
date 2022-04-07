@@ -41,7 +41,7 @@ contains
                           nosubc , icvdf2 , lgrida )
 !
 !
-!                   Deltares (former: Deltares)
+!                   Deltares
 !
 !                        d e l p a r    v3.30
 !

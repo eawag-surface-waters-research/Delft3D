@@ -31,7 +31,7 @@ contains
                           lgrid3 , vol1   , vol2   , vel1   , vel2   )
 !
 !
-!                   Deltares (former: Deltares)
+!                   Deltares
 !
 !                        d e l p a r    v3.10
 !
@@ -74,25 +74,25 @@ contains
       integer(ip), intent(in   ) :: mmax                   !< second dimension lgrid
       integer(ip), intent(in   ) :: mnmaxk                 !< total size of 3D matrix
       integer(ip), intent(in   ) :: layt                   !< number of layers
-      integer(ip), intent(in   ) :: lgrid (nmax,mmax)      !< active grid indices matrix
-      integer(ip), intent(in   ) :: lgrid2(nmax,mmax)      !< total grid indices matrix
-      real   (rp), intent(in   ) :: dx    (nmax*mmax)      !< x distance of grid cell
-      real   (rp), intent(in   ) :: dy    (nmax*mmax)      !< y distance of grid cell
-      real   (rp), intent(in   ) :: volume(mnmaxk)         !< volumes
+      integer(ip), intent(in   ) :: lgrid (:,:)            !< active grid indices matrix
+      integer(ip), intent(in   ) :: lgrid2(:,:)            !< total grid indices matrix
+      real   (rp), intent(in   ) :: dx    (:)              !< x distance of grid cell
+      real   (rp), intent(in   ) :: dy    (:)              !< y distance of grid cell
+      real   (rp), intent(in   ) :: volume(:)              !< volumes
       real   (rp), intent(in   ) :: flow  (*)              !< flows
-      real   (rp), intent(in   ) :: area  (nmax*mmax)      !< horizontal surface area
-      real   (rp), intent(  out) :: depth (nmax*mmax)      !< water depth
-      real   (rp), intent(  out) :: velo  (mnmaxk)         !< velocities in 3D
-      real   (rp), intent(in   ) :: dps   (nmax*mmax)      !< bed depth
-      real   (rp), intent(  out) :: locdep(nmax*mmax,layt) !< depth per layer
-      real   (rp), intent(  out) :: zlevel(nmax*mmax)
+      real   (rp), intent(in   ) :: area  (:)              !< horizontal surface area
+      real   (rp), intent(  out) :: depth (:)              !< water depth
+      real   (rp), intent(  out) :: velo  (:)              !< velocities in 3D
+      real   (rp), intent(in   ) :: dps   (:)              !< bed depth
+      real   (rp), intent(  out) :: locdep(:,:)            !< depth per layer
+      real   (rp), intent(  out) :: zlevel(:)
       logical    , intent(in   ) :: zmodel
-      integer(ip), intent(inout) :: laytop(nmax,mmax)      !< highest active layer in z-layer model
-      integer(ip), intent(inout) :: laytopp(nmax,mmax)     !< highest active layer in z-layer model of previous time step
-      integer(ip), intent(inout) :: laybot(nmax,mmax)      !< deepest active layer in z-layer model
-      integer(ip), intent(in   ) :: pagrid(nmax,mmax,layt) !< potentially active z-layer segments grid matrix
-      integer(ip), intent(inout) :: aagrid(nmax,mmax,layt) !< actually active z-layer segments grid matrix
-      real   (rp), intent(in   ) :: tcktot(layt)
+      integer(ip), intent(inout) :: laytop(:,:)            !< highest active layer in z-layer model
+      integer(ip), intent(inout) :: laytopp(:,:)           !< highest active layer in z-layer model of previous time step
+      integer(ip), intent(inout) :: laybot(:,:)            !< deepest active layer in z-layer model
+      integer(ip), intent(in   ) :: pagrid(:,:,:)          !< potentially active z-layer segments grid matrix
+      integer(ip), intent(inout) :: aagrid(:,:,:)          !< actually active z-layer segments grid matrix
+      real   (rp), intent(in   ) :: tcktot(:)
       logical    , intent(in   ) :: ltrack
       real   (rp), intent(in   ) :: flow2m  (*)            !< flows next time level on matrix
       integer(ip), pointer       :: lgrid3( : , : )        !< original grid (conc array)

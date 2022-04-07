@@ -46,7 +46,7 @@ contains
                          amasud,nopart,sname , isout,iptime, lurep,       &
                          ipnt  ,volume,nosudx, syname)
 !
-!                   Deltares (former: Deltares)
+!                   Deltares
 !
 !
 !   version:     version 3.60

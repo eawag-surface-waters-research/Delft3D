@@ -24,7 +24,7 @@
       real function densty( salin  , temp   )
 !
 !
-!     Deltares (former: Deltares)
+!     Deltares
 !
 !
 !     created             : january 1991, by a. markus

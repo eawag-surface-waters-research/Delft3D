@@ -39,7 +39,7 @@ contains
       subroutine strip ( lunin  , lfile  , lunut  , iout   , npos   ,  &
                          char   ,                            car    )
 !
-!                   Deltares (former: Deltares)
+!                   Deltares
 !
 !                        d e l p a r    v2.00
 !

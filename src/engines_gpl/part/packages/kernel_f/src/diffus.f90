@@ -25,7 +25,7 @@
                             diff0  , ufric  , gamma  )
 !
 !
-!     Deltares (former: Deltares)
+!     Deltares
 !
 !
 !     created             : january 1991, by a. markus

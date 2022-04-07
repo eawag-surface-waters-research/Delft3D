@@ -41,7 +41,7 @@ contains
       subroutine openfl ( lun, finam, ftype, iopt)
 !
 !
-!     Deltares (former: Deltares)
+!     Deltares
 !
 !     version: 2.40      : windows 95 version
 !

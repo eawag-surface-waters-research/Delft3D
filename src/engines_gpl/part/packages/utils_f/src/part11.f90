@@ -52,6 +52,7 @@
       use precision_part               ! single/double precision
       use partmem, only: zmodel, laytop , laybot , zlbot 
       use timers
+      use, intrinsic :: ieee_arithmetic, only : ieee_value, ieee_quiet_nan 
 
       implicit none               ! force explicit typing
 
@@ -168,9 +169,9 @@
 
 !              particles outside model area
 
-               xa(ipart) = -999.999
-               ya(ipart) = -999.999
-               za(ipart) = -999.999
+               xa(ipart) = IEEE_VALUE( 1.0d0, IEEE_QUIET_NAN )
+               ya(ipart) = IEEE_VALUE( 1.0d0, IEEE_QUIET_NAN )
+               za(ipart) = IEEE_VALUE( 1.0d0, IEEE_QUIET_NAN )
             endif
          endif
   100 continue

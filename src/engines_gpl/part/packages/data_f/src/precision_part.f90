@@ -32,4 +32,4 @@ module precision_part
       integer, parameter :: dp = kind(1.0d0)  ! double precision
       integer, parameter :: fp = sp
       integer, parameter :: hp = dp
-end module
+end module precision_part

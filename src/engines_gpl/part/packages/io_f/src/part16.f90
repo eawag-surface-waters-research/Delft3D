@@ -45,7 +45,7 @@ contains
                         nosubs, nolay , mnmax2, isfile, nosubc,    &
                         modtyp                        )
 !
-!                   Deltares (former: Deltares)
+!                   Deltares
 !
 !                        d e l p a r    v3.12
 !

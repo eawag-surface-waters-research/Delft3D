@@ -142,15 +142,15 @@ module part14_mod
       integer  ( ip), intent(  out) :: kpart  (*)            !< k-values particles
       real     ( rp), intent(in   ) :: tcktot (layt)         !< thickness hydrod.layer
       logical       , intent(in   ) :: zmodel
-      integer  ( ip), intent(in   ) :: laytop(nmax,mmax)      !< highest active layer in z-layer model
-      integer  ( ip), intent(in   ) :: laybot(nmax,mmax)      !< highest active layer in z-layer model
+      integer  ( ip), intent(in   ) :: laytop(:,:)           !< highest active layer in z-layer model
+      integer  ( ip), intent(in   ) :: laybot(:,:)           !< highest active layer in z-layer model
       integer  ( ip)                :: nplay  (layt)         !< work array that could as well remain inside
       integer  ( ip), intent(in   ) :: kwaste (nodye+nocont) !< k-values of wasteload points
       integer  ( ip), intent(in   ) :: nolay                 !< number of comp. layer
       integer  ( ip), intent(in   ) :: linear (nocont)       !< 1 = linear interpolated loads
       real     ( rp), intent(inout) :: track  (8,*)          !< track array for all particles
       character( 20), intent(in   ) :: nmconr (nocont)       !< names of the continuous loads
-      real     ( rp), intent(  in)  :: spart  (nosubs,*)     !< size of the particles
+      real     ( rp), intent(in   )  :: spart  (nosubs,*)     !< size of the particles
       real     ( rp), intent(inout) :: rhopart  (nosubs,*)   !< density of the particles
       integer  ( ip), intent(in   ) :: noconsp               !< number of constants
       real     ( rp), intent(in   ) :: const(*)              !< constant values

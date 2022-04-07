@@ -52,7 +52,7 @@ contains
       subroutine findcircle   ( x    , y  , radius , np     , mp , &
                           lgrid, dx , dy     , lcircl )
 !
-!                        Deltares (former: Deltares)
+!                        Deltares
 !
 !                        d e l p a r    v3.10
 !
@@ -603,7 +603,7 @@ outer2:  do m = 2, mmax
       subroutine intl2v (x , y , x0 , y0 , xl , yl,  memory )
 !
 !
-!                   Deltares (former: Deltares)
+!                   Deltares
 !
 !                        d e l p a r    v2.01
 !

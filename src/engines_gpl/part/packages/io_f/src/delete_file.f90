@@ -36,7 +36,7 @@ implicit none    ! force explicit typing
 contains
      subroutine delete_file ( filnam, ierror )
 !
-!     Deltares (former: Deltares)
+!     Deltares
 !
 !     created: aug   1993 by jan van beek
 !

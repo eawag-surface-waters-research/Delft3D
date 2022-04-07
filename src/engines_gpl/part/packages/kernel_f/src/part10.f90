@@ -148,14 +148,14 @@ contains
                                                         ! if 1 depth averaged algebraic model
       integer(ip), intent(in)    :: ipc                 ! if > 1 predictor corrector method used &
                                                         ! if   5 something special happens
-      integer(ip), pointer    :: lgrid ( : , : )        ! grid with active grid numbers, negatives for open boundaries
-      integer(ip), pointer    :: lgrid2( :, : )         ! total grid with grid numbers
+      integer(ip), pointer    :: lgrid (:, : )          ! grid with active grid numbers, negatives for open boundaries
+      integer(ip), pointer    :: lgrid2(:, : )          ! total grid with grid numbers
       logical    , intent(in) :: zmodel                 ! layer type
-      integer(ip), intent(in) :: laytop(nmax,mmax)      ! highest active layer in z-layer model
-      integer(ip), intent(in) :: laybot(nmax,mmax)      ! deepest active layer in z-layer model
-      integer(ip), intent(in)    :: lun2                ! unit number debug in formation file
-      integer(ip), pointer    :: mapsub( : )         ! index for substances, used for oil
-      integer(ip), intent(in)    :: modtyp              ! 1 = tracer model              &
+      integer(ip), intent(in) :: laytop(:, :)           ! highest active layer in z-layer model
+      integer(ip), intent(in) :: laybot(:, :)           ! deepest active layer in z-layer model
+      integer(ip), intent(in) :: lun2                   ! unit number debug in formation file
+      integer(ip), pointer    :: mapsub(: )             ! index for substances, used for oil
+      integer(ip), intent(in) :: modtyp                 ! 1 = tracer model              &
                                                         ! 2 = 2-layer temperature model &
                                                         ! 3 = obsolete                  &
                                                         ! 4 = oil model                 &

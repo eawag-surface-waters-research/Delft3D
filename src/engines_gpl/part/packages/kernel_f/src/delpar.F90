@@ -23,7 +23,7 @@
 
 !
 !
-!                          Deltares (former: Deltares)
+!                          Deltares
 !
 !                        d e l p a r    v3.60
 !
@@ -454,7 +454,7 @@
 
 #ifdef HAVE_CONFIG_H
       zmodel = .false.
-	  fmmodel = .false.
+      fmmodel = .false.
 #else
       zmodel = hyd%layer_type == HYD_LAYERS_Z
       fmmodel = hyd%geometry == HYD_GEOM_UNSTRUC
@@ -952,12 +952,6 @@
                        tyboom   , efboom   , xpolboom , ypolboom , nrowsboom ,    &
                        itime    , v_swim   , d_swim )
 
-!         print test data for checking purposes (< 100 particles)
-!          if (nopart  >=  1 .and. nopart .le. 100) then   &
-!             call report (lunpr  ,nopart, modtyp, floil  ,stoil ,  &
-!     *                    mpart  ,npart , kpart , xpart  ,ypart ,  &
-!     *                    zpart  ,vrtdsp ,wsettl )
-!          endif
 
       enddo
 
@@ -999,12 +993,10 @@
                   if (lgrid( npart(ilp), mpart(ilp)).ge.1) then  !only for the active particles
                      if (modtyp.ne.6) then
                         write ( lunfil ) npart(ilp), mpart(ilp), kpart(ilp), xpart(ilp), ypart(ilp), zpart(ilp), &
-                                     wpart(1:nosubs,ilp), iptime(ilp),track(1,ilp),track(2,ilp),track(3,ilp), &
-                                     track(4,ilp), track(5,ilp), track(6,ilp), track(7,ilp)
+                                     wpart(1:nosubs,ilp), iptime(ilp),track(1:7,ilp)
                      else
                         write ( lunfil ) npart(ilp), mpart(ilp), kpart(ilp), xpart(ilp), ypart(ilp), zpart(ilp), &
-                                     wpart(1:nosubs,ilp), spart(1:nosubs,ilp), iptime(ilp),track(1,ilp),track(2,ilp),track(3,ilp), &
-                                     track(4,ilp), track(5,ilp), track(6,ilp), track(7,ilp)
+                                     wpart(1:nosubs,ilp), spart(1:nosubs,ilp), iptime(ilp),track(1:7,ilp)
                      end if
                   end if
                end if
@@ -1029,12 +1021,10 @@
                   if (lgrid( npart(ilp), mpart(ilp)).ge.1 .and. (iptime(ilp).lt.max_restart_age)) then   !only when the particles' age less than max_restart_age, time in seconds
                      if (modtyp.ne.6) then
                         write ( lunfil ) npart(ilp), mpart(ilp), kpart(ilp), xpart(ilp), ypart(ilp), zpart(ilp), &
-                                     wpart(1:nosubs,ilp),iptime(ilp),track(1,ilp),track(2,ilp),track(3,ilp), &
-                                     track(4,ilp), track(5,ilp), track(6,ilp), track(7,ilp)
+                                     wpart(1:nosubs,ilp),iptime(ilp),track(1:7,ilp)
                      else
                         write ( lunfil ) npart(ilp), mpart(ilp), kpart(ilp), xpart(ilp), ypart(ilp), zpart(ilp), &
-                                     wpart(1:nosubs,ilp), spart(1:nosubs,ilp), iptime(ilp),track(1,ilp),track(2,ilp),track(3,ilp), &
-                                     track(4,ilp), track(5,ilp), track(6,ilp), track(7,ilp)
+                                     wpart(1:nosubs,ilp), spart(1:nosubs,ilp), iptime(ilp),track(1:7,ilp)
                      end if
                   end if
                end if

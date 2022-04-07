@@ -25,7 +25,7 @@
                           dy     , area   , angle  , nmax   , mmax   )
 !
 !
-!                   Deltares (former: Deltares)
+!                   Deltares
 !
 !                        d e l p a r    v1.30
 !

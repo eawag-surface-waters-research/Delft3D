@@ -37,6 +37,21 @@ set_source_files_properties(${fortran_version_file} ${fortran_version_file}
                             PROPERTIES COMPILE_OPTIONS "${file_preprocessor_flag}")
 
 
+set(oss_dependencies_general deltares_common
+                             deltares_common_c
+                             nefis
+                             part_data_f
+                             part_utils_f
+                             part_kernel_f
+                             part_io_f
+                             gridgeom
+                             kdtree_wrapper
+                             kdtree2
+                             waq_utils_f
+                             io_netcdf
+                             io_hyd)
+
+
 # Add dependencies
 if (UNIX)
     # the `pkg_check_modules` function is created with this call
@@ -46,49 +61,23 @@ if (UNIX)
     pkg_check_modules(NETCDF REQUIRED IMPORTED_TARGET netcdf)
     pkg_check_modules(NETCDF_FTN REQUIRED IMPORTED_TARGET netcdf-fortran)
 
-    set(oss_dependencies deltares_common
-                         deltares_common_c
-                         nefis
-                         part_data_f
-                         part_utils_f
-                         part_kernel_f
-                         part_io_f
-                         gridgeom
-                         kdtree_wrapper
-                         kdtree2
-                         waq_utils_f
-                         io_netcdf
-                         io_hyd)
-
+    set(oss_dependencies ${oss_dependencies_general})
 
     target_link_libraries(${executable_name}
          ${oss_dependencies}
          PkgConfig::NETCDF
          PkgConfig::NETCDF_FTN)
-    oss_include_libraries(${executable_name} oss_dependencies)
+    
 endif(UNIX)
 
 if (WIN32)
-    set(oss_dependencies deltares_common
-                         deltares_common_c
-                         nefis
-                         part_data_f
-                         part_utils_f
-                         part_kernel_f
-                         part_io_f
-                         gridgeom
-                         kdtree_wrapper
-                         kdtree2
-                         waq_utils_f
-                         io_netcdf
-                         io_hyd
+    set(oss_dependencies ${oss_dependencies_general}
                          netcdf4
                          netcdff)
 
     target_link_libraries(${executable_name} ${oss_dependencies})
-    oss_include_libraries(${executable_name} oss_dependencies)
 endif(WIN32)
-
+oss_include_libraries(${executable_name} oss_dependencies)
 
 
 # Set additional compilation properties

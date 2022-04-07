@@ -29,7 +29,7 @@
       implicit none    ! force explicit typing
 !
 !
-!                     Deltares (former: Deltares)
+!                     Deltares
 !
 !                        d e l p a r    v3.60
 !

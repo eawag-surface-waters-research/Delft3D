@@ -34,7 +34,7 @@
       use delete_file_mod
       implicit none             ! force explicit typing
 !
-!                   Deltares (former: Deltares)
+!                   Deltares
 !
 !                        d e l p a r    v2.00
 !
