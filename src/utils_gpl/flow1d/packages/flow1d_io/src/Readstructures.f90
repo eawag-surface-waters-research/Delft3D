@@ -797,37 +797,21 @@ module m_readstructures
       ! Make distinction between a pillar bridge and a standard bridge
       
       bridge%pillarwidth = 0d0
+      bridge%outletlosscoeff = 0d0
       call prop_get_double(md_ptr, '', 'pillarWidth', bridge%pillarwidth, success1)
       if (success1) then
          ! pillar bridge
-         call setMessage(LEVEL_ERROR, 'Error Reading Bridge '''//trim(st_id)//''': pillar bridge is currently unsupported. Only standard bridge is supported.')
-         success = .false.
-         ! UNST-2907: pillar bridge support removed. Keep code below for future re-enabling.
-         !call prop_get_double(md_ptr, '', 'formFactor', bridge%formfactor, success1)
-         !success = success .and. check_input_result(success1, st_id, 'formFactor')
-         !
-         !bridge%bedLevel           = 0.0d0
-         !bridge%useOwnCrossSection = .false.
-         !bridge%pcross             => null()
-         !bridge%crosssectionnr     = 0
-         !bridge%bedFrictionType    = 0
-         !bridge%groundFrictionType = 0
-         !bridge%bedFriction        = 0.0d0
-         !bridge%groundFriction     = 0.0d0
-         !bridge%length             = 0.0d0
-         !bridge%inletlosscoeff     = 0.0d0
-         !bridge%outletlosscoeff    = 0.0d0
-         
-      else
-         ! Standard bridge
-         call prop_get_string(md_ptr, '', 'csDefId', CrsDefID, success1)
-         success = success .and. check_input_result(success1, st_id, 'csDefId')
-         if (success) then
-            CrsDefIndx = hashsearch(network%CSDefinitions%hashlist, CrsDefID)
-            if (CrsDefIndx <= 0) then
-               call setMessage(LEVEL_ERROR, 'Error Reading Bridge '''//trim(st_id)//''': Cross-Section Definition '''//trim(CrsDefID)// ''' not found.')
-               success = .false.
-            endif
+         call prop_get_double(md_ptr, '', 'formFactor', bridge%formfactor, success1)
+         success = success .and. check_input_result(success1, st_id, 'formFactor')
+      endif
+      
+      ! Standard bridge
+      call prop_get_string(md_ptr, '', 'csDefId', CrsDefID, success1)
+      if (success1) then
+         CrsDefIndx = hashsearch(network%CSDefinitions%hashlist, CrsDefID)
+         if (CrsDefIndx <= 0) then
+            call setMessage(LEVEL_ERROR, 'Error Reading Bridge '''//trim(st_id)//''': Cross-Section Definition '''//trim(CrsDefID)// ''' not found.')
+            success = .false.
          endif
          
          call prop_get_string(md_ptr, '', 'frictionType', txt, success1)
@@ -870,10 +854,6 @@ module m_readstructures
          
          call prop_get_double(md_ptr, '', 'outletLossCoeff', bridge%outletlosscoeff, success1)
          success = success .and. check_input_result(success1, st_id, 'outletLossCoeff')
-         
-         
-         bridge%pillarwidth = 0.0d0
-         bridge%formfactor  = 0.0d0
 
       endif
       
