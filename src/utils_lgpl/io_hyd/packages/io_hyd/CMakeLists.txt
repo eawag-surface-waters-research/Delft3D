@@ -39,6 +39,3 @@ oss_include_libraries(${library_name} oss_dependencies)
 # Define how the files should be structured within Visual Studio
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${source_files})
 set_target_properties (${library_name} PROPERTIES FOLDER utils_lgpl/io_hyd)
-
-target_compile_options(${library_name} PRIVATE "${traceback_flag}")
-target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${floating_point_exeption_flag}>")

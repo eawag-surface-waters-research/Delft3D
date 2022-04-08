@@ -111,7 +111,7 @@
 !     loop over the number of particles
 
 !$OMP PARALLEL DO PRIVATE  ( n, m, n0, n1, n2, n3, xt, yt, totdep,     &
-!$OMP                        ilay, dlay, dist ),                       &
+!$OMP                        deplay, ilay, dlay, dist ),                       &
 !$OMP             SCHEDULE ( DYNAMIC, max((nopart-npwndw)/100,1)  )
       do 100 ipart = npwndw, nopart
          n  = npart(ipart)

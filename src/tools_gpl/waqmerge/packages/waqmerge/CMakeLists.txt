@@ -76,9 +76,6 @@ endif(WIN32)
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${source_files})
 set_target_properties (${executable_name} PROPERTIES FOLDER tools_gpl/waqmerge)
 
-target_compile_options(${executable_name} PRIVATE "${traceback_flag}")
-target_compile_options(${executable_name} PRIVATE "$<$<CONFIG:Debug>:${floating_point_exeption_flag}>")
-
 # Set post-build step
 set(install_dir ${CMAKE_BINARY_DIR})
 set(build_dir ${CMAKE_BINARY_DIR})

@@ -30,8 +30,6 @@
 !
       IMPLICIT NONE
 !
-      include "omp_lib.h"
-!
 !     Type    Name         I/O Description
 !
       real(4) pmsa(*)     !I/O Process Manager System Array, window of routine to process library
