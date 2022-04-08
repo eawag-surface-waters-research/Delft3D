@@ -10,24 +10,9 @@ set(src_path src)
 get_fortran_source_files(${src_path} source_files)
 list(REMOVE_ITEM source_files   ${CMAKE_CURRENT_SOURCE_DIR}/${src_path}/dlwqtr_template.f)
 
-# Gather preprocessing files
-file(GLOB preproccessor_files   ${CMAKE_CURRENT_SOURCE_DIR}/${src_path}/delpar00.F
-                                ${CMAKE_CURRENT_SOURCE_DIR}/${src_path}/dlwq2_hydro_set.F)
-
-# Gather OpenMQ files
-set(openmq_files    ${CMAKE_CURRENT_SOURCE_DIR}/${src_path}/dlwqnf.f
-                    ${CMAKE_CURRENT_SOURCE_DIR}/${src_path}/dlwqng.f
-                    ${CMAKE_CURRENT_SOURCE_DIR}/${src_path}/dlwqnm.f)
-
-# Gather OpenMQ and reentrancy files
-set(proces_file ${CMAKE_CURRENT_SOURCE_DIR}/${src_path}/proces.f)
-
 # Define library
 set(library_name waq_kernel)
-add_library(${library_name} ${source_files}
-                            ${preproccessor_files}
-                            ${openmq_files}
-                            ${proces_file})
+add_library(${library_name} ${source_files})
 
 # Set dependencies
 if(UNIX)
@@ -80,15 +65,15 @@ if(WIN32)
     target_link_libraries(${library_name} ${oss_dependencies})
 endif(WIN32)
 
-# Define additional compilation flags
-set_property(SOURCE ${preproccessor_files} PROPERTY COMPILE_OPTIONS "${file_preprocessor_flag}")
-set_property(SOURCE ${openmq_files}        PROPERTY COMPILE_OPTIONS "${openmp_flag}")
-set_property(SOURCE ${proces_file}         PROPERTY COMPILE_OPTIONS "${openmp_flag}" "${generate_reentrancy_threaded_flag}" "${extend_source132_flag}")
-
 
 # Set additional compilation properties
 target_compile_options(${library_name} PRIVATE "${file_preprocessor_flag}")
+target_compile_options(${library_name} PRIVATE "${openmp_flag}")
 target_compile_options(${library_name} PRIVATE "${extend_source132_flag}")
+target_compile_options(${library_name} PRIVATE "${automatic_local_variable_storage_flag}")
+target_compile_options(${library_name} PRIVATE "${generate_reentrancy_threaded_flag}")
+target_compile_options(${library_name} PRIVATE "${traceback_flag}")
+target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${floating_point_exeption_flag}>")
 target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${check_bounds_flag}>")
 target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${check_pointer}>")
 

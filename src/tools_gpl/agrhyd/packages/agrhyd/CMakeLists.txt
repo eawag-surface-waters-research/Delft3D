@@ -83,6 +83,8 @@ endif(WIN32)
 
 # Set additional compilation properties
 target_compile_options(${executable_name} PRIVATE "${extend_source132_flag}")
+target_compile_options(${executable_name} PRIVATE "${traceback_flag}")
+target_compile_options(${executable_name} PRIVATE "$<$<CONFIG:Debug>:${floating_point_exeption_flag}>")
 
 if(UNIX)
     message(STATUS "netcdf lib dir is ${NETCDF_LIBRARY_DIRS}")

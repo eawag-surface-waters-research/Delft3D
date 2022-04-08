@@ -137,7 +137,10 @@ endif(UNIX)
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${source_files})
 source_group(Resources FILES    ${rc_version_file})
 
-set_target_properties(${library_name} PROPERTIES COMPILE_FLAGS ${openmp_flag})
+target_compile_options(${library_name} PRIVATE "${openmp_flag}")
+target_compile_options(${library_name} PRIVATE "${traceback_flag}")
+target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${floating_point_exeption_flag}>")
+
 set_target_properties(${library_name} PROPERTIES FOLDER engines_gpl/waq)
 
 if(UNIX)
