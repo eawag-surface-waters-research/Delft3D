@@ -469,6 +469,7 @@ src/buildvs17.cmd -text
 src/buildvs17_dimr.cmd -text
 src/buildvs17_test.cmd -text
 src/buildvs17fm.cmd -text
+src/buildvs19_ionetcdf.cmd -text
 src/clean.cmd -text
 src/clean.sh -text
 src/cmake/CMakeLists.txt -text
