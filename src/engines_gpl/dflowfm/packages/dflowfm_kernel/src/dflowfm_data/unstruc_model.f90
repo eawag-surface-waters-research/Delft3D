@@ -487,15 +487,21 @@ subroutine loadModel(filename)
     network%sferic = jsferic==1
 
     threshold_abort = LEVEL_FATAL
-    
+    if (istat == 0 .and. jadoorladen == 0 .and. network%numk > 0 .and. network%numl > 0) then
     timerHandle = 0
     call timstrt('Read 1d attributes', timerHandle)
     call read_1d_attributes(md_1dfiles, network)
     call timstop(timerHandle)
-      
+    
+    ! set administration arrays and fill cross section list. So getbobs for 1d can be called.
+    timerHandle = 0
+    call timstrt('Initialise 1d administration', timerHandle)
+    call initialize_1dadmin(network, network%numl)
+    call timstop(timerHandle)
+    
     timerHandle = 0
     call timstrt('Read structures', timerHandle)
-   ! if (istat == 0 .and. jadoorladen == 0 .and. network%numk > 0 .and. network%numl > 0) then
+    
     if (len_trim(md_1dfiles%structures) > 0) then
       call SetMessage(LEVEL_INFO, 'Reading Structures ...')
       call readStructures(network, md_1dfiles%structures)
@@ -513,19 +519,13 @@ subroutine loadModel(filename)
       endif
     endif
     call timstop(timerHandle)
-
-    ! set administration arrays and fill cross section list. So getbobs for 1d can be called.
-    timerHandle = 0
-    call timstrt('Initialise 1d administration', timerHandle)
-    call initialize_1dadmin(network, network%numl)
-    call timstop(timerHandle)
     
-    if (getMaxErrorLevel() >= LEVEL_ERROR) then
-       msgbuf = 'loadModel for '''//trim(filename)//''': Errors were found, please check the diagnostics file.'
-       call fatal_flush()
-    endif
+    !if (getMaxErrorLevel() >= LEVEL_ERROR) then
+    !   msgbuf = 'loadModel for '''//trim(filename)//''': Errors were found, please check the diagnostics file.'
+    !   call fatal_flush()
+    !endif
     
-    if (istat == 0 .and. jadoorladen == 0 .and. network%numk > 0 .and. network%numl > 0) then
+    
        ! fill bed levels from values based on links
        do L = 1,  network%numl
           tempbob = getbobs(network, L)
