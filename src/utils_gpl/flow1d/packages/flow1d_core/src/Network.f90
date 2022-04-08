@@ -244,7 +244,8 @@ contains
       
       adm%lin2str = -huge(1)
       do i = 1, network%sts%count
-         adm%lin2str(abs(network%sts%struct(i)%linknumbers(1:pstru%numlinks))) = i
+         pstru => network%sts%struct(i)
+         adm%lin2str(abs(pstru%linknumbers(1:pstru%numlinks))) = i
       enddo
       
       adm%lin2ibr   = -huge(1)
