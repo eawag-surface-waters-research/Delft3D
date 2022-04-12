@@ -51,6 +51,7 @@ libIOHyd_la_SOURCES = \
          copy_hyd_step.f90 \
          merge_domains.f90 \
          set_hyd.f90 \
+         m_hyd_keys \
          write_atr.f90 \
          write_bnd.f90 \
          write_cco.f90 \

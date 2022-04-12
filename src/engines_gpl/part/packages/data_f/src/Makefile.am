@@ -34,6 +34,7 @@ AM_FFLAGS  += $(FINCLUDES) $(FMODULES) ${NETCDF_CFLAGS} ${NETCDF_FORTRAN_CFLAGS}
 #Sources
 libdata_f_la_SOURCES = \
          precision.f90 \
+         m_part_modeltypes.f90 \
          typos_mod.f90 \
          file_info.f90 \
          modeldim.f90 \

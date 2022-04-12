@@ -75,6 +75,7 @@ contains
 !     functions   called    : findcell
 
       use precision_part          ! single and double precision
+      use m_part_modeltypes       ! part model definitions
       use timers
       use putget_mod         ! explicit interface
       use genfil_mod         ! explicit interface
@@ -609,7 +610,7 @@ contains
                    call stop_exit(1)
                 endif
 !
-                if (modtyp==2) then
+                if (modtyp == model_two_layer_temp) then
                    depthl = volume(i2) / area(i2)
                    fvolum = surf * thickn(ilay) * depthl
                 elseif(lsettl.and.ilay==nolay) then
@@ -643,7 +644,7 @@ contains
 !.. then an extra layer is created hereto..
 !.. also for sticking materials (mstick(isub) > 0)
 !
-                    if(modtyp==4.and.isub <(3*nfract)) then
+                    if(modtyp == model_oil .and. isub <(3*nfract)) then
 !.. oil module
                        jsub = mod(isub,3)
                        if(jsub==0) jsub = 3
@@ -697,7 +698,7 @@ contains
                        nbin  (ilay, iy, ix) + 1
                     endif
                     if (amap(isub, ilay, iy, ix)  >  apeak(isub,ilay)) then
-                       if(modtyp /= 3.or.isub /= iredtq) then
+                       if(modtyp /= model_red_tide .or. isub /= iredtq) then
                           if(isub /= ntrack.or.isub /= itrack) then
                              apeak(isub,ilay)  = amap(isub, ilay, iy, ix)
                              adepth(isub,ilay) = depthl

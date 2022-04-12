@@ -21,15 +21,16 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-module precision_part
+module m_part_modeltypes
 !
 !  module declarations
 !
-      implicit none
-      integer, parameter :: ip = kind(1)      ! precision of normal integers
-      integer, parameter :: rp = kind(1.0)    ! precision of normal reals
-      integer, parameter :: sp = kind(1.0e0)  ! single precision
-      integer, parameter :: dp = kind(1.0d0)  ! double precision
-      integer, parameter :: fp = sp
-      integer, parameter :: hp = dp
-end module precision_part
+      implicit none    
+      integer, parameter :: model_tracers             = 1
+      integer, parameter :: model_two_layer_temp      = 2
+      integer, parameter :: model_red_tide            = 3
+      integer, parameter :: model_oil                 = 4
+      integer, parameter :: model_2d3d_temp           = 5
+      integer, parameter :: model_prob_dens_settling  = 6
+      integer, parameter :: model_ibm                 = 7
+end module m_part_modeltypes

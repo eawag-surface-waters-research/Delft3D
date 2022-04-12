@@ -29,6 +29,7 @@ module parths_mod
 !  data definition module(s)
 !
 use precision_part            ! single and double precision
+use m_part_modeltypes         ! part model definitions
 use timers
 use filtyp_mod
 use openfl_mod
@@ -340,7 +341,7 @@ contains
         do 45 ilay = 1, nolay
            iseg = i2 + (ilay - 1)*noseglp
            do 40 isub = 1, nosubs
-             if (modtyp /= 2) then
+             if (modtyp /= model_two_layer_temp) then
                 chismp(isub , ilay , istat) = conc(isub  , iseg)
              else
                 ipos = (isub-1)*nolay  + ilay
@@ -383,7 +384,7 @@ contains
 !
                   ilay = kpart(i1)
 !
-                  if(modtyp==2) then
+                  if(modtyp == model_two_layer_temp) then
                      depthl = volume(i2)/area(i2)
                      fvolum = surf * thickn(ilay) * depthl
                   else
@@ -405,7 +406,7 @@ contains
 !.. for floating oil or for deposited substances surf is required (per m2)
 !.. also for sticking substances
 !
-                      if(modtyp==4.and.isub <(3*nfract)) then
+                      if(modtyp == model_oil .and. isub <(3*nfract)) then
 !.. oil module
                         jsub = mod(isub,3)
                         if((2*(jsub)/2) /= jsub) then

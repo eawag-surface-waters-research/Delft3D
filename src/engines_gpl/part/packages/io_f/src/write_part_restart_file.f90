@@ -28,6 +28,7 @@ subroutine write_part_restart_file()
     use spec_feat_par
     use fileinfo
     use openfl_mod
+    use m_part_modeltypes       ! part model definitions
     
     
     implicit none
@@ -57,7 +58,7 @@ subroutine write_part_restart_file()
     iext = len_trim(res_file) - 3
     if (max_restart_age .lt. 0) then
     !             Write the restart file with all active paritcles
-      if (modtyp.eq.6)then
+      if (modtyp .eq. model_prob_dens_settling) then
          res_file(iext+1:iext+4) = 'ses'    !limited number of particles (for 'plastics' modeltype 6 restart, as 'ras' but including settling values)
          write ( lunut, * ) ' Including particle dependent settling velocity'
       else
@@ -70,7 +71,7 @@ subroutine write_part_restart_file()
       do ilp = 1, nopart
          if (npart(ilp)>1.and.mpart(ilp)>1) then
             if (lgrid( npart(ilp), mpart(ilp)).ge.1) then  !only for the active particles
-               if (modtyp.ne.6) then
+               if (modtyp .ne. model_prob_dens_settling) then
                   write ( lures ) npart(ilp), mpart(ilp), kpart(ilp), xpart(ilp), ypart(ilp), zpart(ilp), &
                           wpart(1:nosubs,ilp), iptime(ilp)
                else
@@ -84,7 +85,7 @@ subroutine write_part_restart_file()
       close ( lures )
     else
     !          Write the restart file with all active paritcles below a certain age
-      if (modtyp.eq.6)then
+      if (modtyp .eq. model_prob_dens_settling) then
          res_file(iext+1:iext+4) = 'sas'    !limited number of particles (for 'plastics' modeltype 6 restart, as 'ras' but including settling values)
          write ( lunut, * ) ' Including particle dependent settling velocity'
       else
@@ -98,7 +99,7 @@ subroutine write_part_restart_file()
       do ilp = 1, nopart
          if (npart(ilp)>1.and.mpart(ilp)>1) then
             if (lgrid( npart(ilp), mpart(ilp)).ge.1 .and. (iptime(ilp).lt.max_restart_age)) then   !only when the particles' age less than max_restart_age, time in seconds
-               if (modtyp.ne.6) then
+               if (modtyp .ne. model_prob_dens_settling) then
                   write ( lures ) npart(ilp), mpart(ilp), kpart(ilp), xpart(ilp), ypart(ilp), zpart(ilp), &
                           wpart(1:nosubs,ilp),iptime(ilp)
                else

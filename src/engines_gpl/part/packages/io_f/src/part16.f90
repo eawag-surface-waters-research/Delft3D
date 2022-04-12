@@ -29,6 +29,7 @@ module part16_mod
 !  data definition module(s)
 !
 use precision_part              ! single and double precision
+use m_part_modeltypes           ! part model definitions
 use timers
 use openfl_mod
 use fileinfo               ! file information for all input/output files
@@ -250,7 +251,7 @@ contains
                       iseg             = (ilay-1)*mnmax2 + ic
                       rhelp            = wpart (isub, i)
                       atotal(ipos)     = atotal(ipos)      + rhelp
-                      if(modtyp /= 2) then
+                      if(modtyp /=  model_two_layer_temp) then
                          conc  (isub,iseg)= conc  (isub,iseg) + rhelp
                       else
                          conc  (ipos,ic  )= conc  (ipos,ic  ) + rhelp

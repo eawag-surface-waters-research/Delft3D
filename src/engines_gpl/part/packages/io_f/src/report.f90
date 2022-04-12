@@ -29,7 +29,8 @@ module report_mod
 !  data definition module(s)
 !
 use precision_part       ! single and double precision
-      use timers
+use m_part_modeltypes    ! part model definitions
+use timers
 !
 implicit none       ! force explicit typing
 !
@@ -82,7 +83,7 @@ contains
       'm   n   k    x-rel.[0-1]    y-rel.[0-1]    z-rel.[0-1]'// &
       '   settling(m/s) '
 !
-      if (modtyp /= 4) then
+      if (modtyp /= model_oil) then
          do i=1,nopart
             write(lunpr,'(3x,i4,3i4,4e15.4,5x,a)')          &
             i,mpart(i),npart(i),kpart(i),xpart(i),ypart(i), &
