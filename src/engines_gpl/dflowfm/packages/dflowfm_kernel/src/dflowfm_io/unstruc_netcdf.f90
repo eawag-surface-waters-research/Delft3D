@@ -12065,8 +12065,7 @@ end function get_var_and_shift
 !> Reads the flow data from a map or a rst file.
 !! Processing is done elsewhere.
 !subroutine unc_read_map(filename, numk_keep, numl_keep, numk_read, numl_read, ierr)
-!TODO:JZ modify the name of this subroutine, since it also reads rst files. 
-subroutine unc_read_map(filename, ierr)
+subroutine unc_read_map_or_rst(filename, ierr)
     use m_flow
     use m_flowtimes
     use m_transport, only: NUMCONST, ISALT, ITEMP, ISED1, ISEDN, ITRA1, ITRAN, constituents, itrac2const, const_names
@@ -13278,9 +13277,9 @@ subroutine unc_read_map(filename, ierr)
     if(allocated(tmpvar1)) deallocate(tmpvar1)
     if(allocated(tmpvar2)) deallocate(tmpvar2)
     
-end subroutine unc_read_map
+end subroutine unc_read_map_or_rst
 
-!> helper routine for unc_read_map
+!> helper routine for unc_read_map_or_rst
 function unc_read_merged_map(um, imapfile, filename, ierr) result (success)
    use m_alloc               , only : realloc
    use m_samples             , only : Ns
