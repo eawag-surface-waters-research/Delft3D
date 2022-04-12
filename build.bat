@@ -134,7 +134,7 @@ rem =================================
         set mode=quiet
     )
     
-     set "options=-vs:0 -ifort:0 -coverage:0"
+     set "options=-vs:0 -ifort:0 -coverage:0 -prepareonly:0"
 
   rem see: https://stackoverflow.com/questions/3973824/windows-bat-file-optional-argument-parsing answer 2.
   for %%O in (%options%) do for /f "tokens=1,* delims=:" %%A in ("%%O") do set "%%A=%%~B"
@@ -235,6 +235,11 @@ rem =================================
     if NOT !-ifort! == 0 (
     set ifort=!-ifort!
     echo overriding ifort with !-ifort!
+    )
+
+    if NOT !-prepareonly! == 0 (
+    set prepareonly=!-prepareonly!
+    echo overriding prepareonly with !-prepareonly!
     )
     goto :endproc
    
@@ -530,6 +535,7 @@ rem =======================
     echo.
     echo "[OPTIONS]: usage [OPTION] followed by value, space separated, in any order"
     echo "-coverage: Instrument object files for code-coverage tool (codecov) Example: -coverage 1"
+    echo "-prepareonly: Only prepare solution, do not build the code. Example: -prepareonly 1"
     echo "-vs: desired visual studio version. Example: -vs 2019
     echo "-ifort: desired intel fortran compiler version. Example: -ifort 21
     echo.
