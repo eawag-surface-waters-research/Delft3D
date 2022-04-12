@@ -10,7 +10,15 @@ set(ini_version_file ${waq_version_path}/version_number.ini)
 set(fortran_version_file ${CMAKE_CURRENT_SOURCE_DIR}/src/delwaq1_version.F90)
 set(fortran_version_file_delwaq ${waq_root_path}/packages/delwaq/src/delwaq_version.F90)
 set(rc_version_file ${waq_version_path}/version_number_delwaq1.rc)
-set(delwaq_files ${waq_root_path}/packages/delwaq/src/delwaq1.f
+set(delwaq_files ${waq_root_path}/packages/delwaq/src/delwaq1.F90
+                 ${waq_root_path}/packages/delwaq/src/delwaq1.F90
+                 ${waq_root_path}/packages/delwaq/src/m_delwaq1_data.F90
+                 ${waq_root_path}/packages/delwaq/src/delwaq1_init.F90
+                 ${waq_root_path}/packages/delwaq/src/delwaq1_unlock_username.F90
+                 ${waq_root_path}/packages/delwaq/src/delwaq1_allocate_workspace.F90
+                 ${waq_root_path}/packages/delwaq/src/delwaq1_read_user_data.F90
+                 ${waq_root_path}/packages/delwaq/src/delwaq1_write_messages.F90
+                 ${waq_root_path}/packages/delwaq/src/delwaq1_close_lunfiles.F90
                  ${waq_root_path}/packages/delwaq/src/getidentification.f
                  ${waq_root_path}/packages/delwaq/src/delwaq_version.F90)
 
@@ -93,7 +101,7 @@ endif(UNIX)
 
 if(WIN32)
     set(oss_dependencies    delwaq_dll
-                             netcdf4
+                            netcdf4
                             netcdff) 
     target_link_libraries(${executable_name} ${oss_dependencies})
 endif(WIN32)
