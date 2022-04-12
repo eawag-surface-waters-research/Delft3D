@@ -14,7 +14,8 @@ bin_PROGRAMS = ddcouple
 #-------------------------------------------------------------------------------
 #Includes
 FMODULES += \
-    -I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src/rd_token
+    -I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src/rd_token \
+    -I$(top_builddir)/utils_lgpl/io_hyd/packages/io_hyd/src/m_hyd_keys
 
 #-------------------------------------------------------------------------------
 #Sources
