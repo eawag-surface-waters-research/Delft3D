@@ -11,6 +11,7 @@ add_executable(${executable_name} ${source_files})
 # Add dependencies
 set(oss_dependencies deltares_common
                      deltares_common_c
+                     io_hyd
                      waq_utils_f
                      ddcouple_version_number)
 
