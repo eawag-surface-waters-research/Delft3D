@@ -54,6 +54,7 @@
 		<File RelativePath=".\src\hyd_waqgeom_old.f90"/>
 		<File RelativePath=".\src\hydmod.f90"/>
 		<File RelativePath=".\src\merge_domains.f90"/>
+		<File RelativePath=".\src\m_hyd_keys.f90"/>
 		<File RelativePath=".\src\read_atr.f90"/>
 		<File RelativePath=".\src\read_bnd.f90"/>
 		<File RelativePath=".\src\read_cco.f90"/>
