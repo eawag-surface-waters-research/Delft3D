@@ -487,18 +487,18 @@ subroutine loadModel(filename)
     network%sferic = jsferic==1
 
     threshold_abort = LEVEL_FATAL
-    if (istat == 0 .and. jadoorladen == 0 .and. network%numk > 0 .and. network%numl > 0) then
-    timerHandle = 0
-    call timstrt('Read 1d attributes', timerHandle)
-    call read_1d_attributes(md_1dfiles, network)
-    call timstop(timerHandle)
-    
-    ! set administration arrays and fill cross section list. So getbobs for 1d can be called.
-    timerHandle = 0
-    call timstrt('Initialise 1d administration', timerHandle)
-    call initialize_1dadmin(network, network%numl)
-    call timstop(timerHandle)
-    
+    if (istat == 0 .and. jadoorladen == 0 .and. network%numk > 0 .and. network%numl > 0) then 
+       timerHandle = 0
+       call timstrt('Read 1d attributes', timerHandle)
+       call read_1d_attributes(md_1dfiles, network)
+       call timstop(timerHandle)
+       
+       ! set administration arrays and fill cross section list. So getbobs for 1d can be called.
+       timerHandle = 0
+       call timstrt('Initialise 1d administration', timerHandle)
+       call initialize_1dadmin(network, network%numl)
+       call timstop(timerHandle)
+    endif
     timerHandle = 0
     call timstrt('Read structures', timerHandle)
     
@@ -525,7 +525,7 @@ subroutine loadModel(filename)
     !   call fatal_flush()
     !endif
     
-    
+  
        ! fill bed levels from values based on links
        do L = 1,  network%numl
           tempbob = getbobs(network, L)
@@ -542,10 +542,7 @@ subroutine loadModel(filename)
           endif
           zk(k1) = min(zk(k1),tempbob(1))
           zk(k2) = min(zk(k2),tempbob(2))
-       enddo
-
-    endif
-    
+       enddo    
 
     ! Load land boundary from file.
     if (len_trim(md_ldbfile) > 0) then

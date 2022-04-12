@@ -4343,7 +4343,7 @@ function ug_put_mesh_contact(ncid, contactids, mesh1indexes, mesh2indexes, conta
        ierr = convert_start_index(contacts(2,:), imiss, startIndex, 0)
    endif
 
-   ierr = nf90_put_var(ncid, contactids%varids(cid_contacttopo), contacts)
+   ierr = nf90_put_var(ncid, contactids%varids(cid_contacttopo), abs(contacts))
 
    if (present(contactsids)) then
       ierr = nf90_put_var(ncid, contactids%varids(cid_contactids), contactsids)

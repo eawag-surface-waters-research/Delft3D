@@ -915,7 +915,7 @@ integer function get_number_of_geom_nodes(istrtypein, i)
       ! TODO: for multiple 1D links in a single structure, we could consider
       !       a multi-part polyline. That would mean: get_number_of_geom_nodes = 2*nLinks
       get_number_of_geom_nodes = nLinks + 1
-   else if (nLinks == 0) then
+   else 
       ! When no links: empty geometry.
       get_number_of_geom_nodes = 0
    end if
