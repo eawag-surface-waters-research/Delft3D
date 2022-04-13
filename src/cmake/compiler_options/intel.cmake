@@ -23,12 +23,8 @@ if (WIN32)
     set(check_pointer /check:pointer)
     set(openmp_flag /Qopenmp)
     set(generate_reentrancy_threaded_flag /reentrancy:threaded)
-    set(floating_point_exception_flag /fpe:0)
+    set(floating_point_exeption_flag /fpe:0)
     set(traceback_flag /traceback)
-
-    set(qauto_threaded_flags /Qauto /reentrancy:threaded)
-	set(waq_default_flags /fpp /extend-source:132 /traceback)
-	set(waq_debug_flags /check:uninit /check:stack /traceback /fpe:0 /check:bounds /check:pointer)
 endif(WIN32)
 
 if (UNIX)

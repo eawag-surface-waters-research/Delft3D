@@ -68,9 +68,14 @@ oss_include_libraries(${library_name} oss_dependencies)
 target_include_directories(${library_name}  PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../../include")
 
 # Set additional compilation properties
-target_compile_options(${library_name} PRIVATE "${qauto_threaded_flags}")
-target_compile_options(${library_name} PRIVATE "${waq_default_flags}")
-target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${waq_debug_flags}>")
+target_compile_options(${library_name} PRIVATE "${file_preprocessor_flag}")
+target_compile_options(${library_name} PRIVATE "${extend_source132_flag}")
+target_compile_options(${library_name} PRIVATE "${automatic_local_variable_storage_flag}")
+target_compile_options(${library_name} PRIVATE "${generate_reentrancy_threaded_flag}")
+target_compile_options(${library_name} PRIVATE "${traceback_flag}")
+target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${floating_point_exeption_flag}>")
+target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${check_bounds_flag}>")
+target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${check_pointer}>")
 
 # Define how the files should be structured in Visual studio
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${bloom_source}

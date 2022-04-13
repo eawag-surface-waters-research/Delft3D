@@ -11,14 +11,21 @@ get_fortran_source_files(${src_path} source_files)
 set(executable_name waqpb_import)
 add_executable(${executable_name} ${source_files})
 
+# Set additional compilation properties
+target_compile_options(${executable_name} PRIVATE "${extend_source132_flag}")
+
 # Set dependencies
 set(oss_dependencies    waqpb_lib) 
 oss_include_libraries(${executable_name} oss_dependencies)
 target_link_libraries(${executable_name} ${oss_dependencies})
 
+
 # Set additional compilation properties
-target_compile_options(${executable_name} PRIVATE "${waq_default_flags}")
-target_compile_options(${executable_name} PRIVATE "$<$<CONFIG:Debug>:${waq_debug_flags}>")
+target_compile_options(${executable_name} PRIVATE "${extend_source132_flag}")
+target_compile_options(${executable_name} PRIVATE "${traceback_flag}")
+target_compile_options(${executable_name} PRIVATE "$<$<CONFIG:Debug>:${floating_point_exeption_flag}>")
+target_compile_options(${executable_name} PRIVATE "$<$<CONFIG:Debug>:${check_bounds_flag}>")
+target_compile_options(${executable_name} PRIVATE "$<$<CONFIG:Debug>:${check_pointer}>")
 
 if(UNIX)
     set_property(TARGET ${executable_name} PROPERTY LINKER_LANGUAGE Fortran)

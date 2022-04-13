@@ -42,6 +42,11 @@ prebuild_version_number(${library_name} ${fortran_version_file}
                                         ${ini_version_file}
                                         ON)
 
+# Set additional compilation properties
+target_compile_options(${library_name} PRIVATE "${extend_source132_flag}")
+target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${check_bounds_flag}>")
+
+
 set_source_files_properties(${fortran_version_file}
                             ${preprocessor_files}
                             PROPERTIES COMPILE_OPTIONS "${file_preprocessor_flag}")
@@ -133,8 +138,8 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${source_files})
 source_group(Resources FILES    ${rc_version_file})
 
 target_compile_options(${library_name} PRIVATE "${openmp_flag}")
-target_compile_options(${library_name} PRIVATE "${waq_default_flags}")
-target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${waq_debug_flags}>")
+target_compile_options(${library_name} PRIVATE "${traceback_flag}")
+target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${floating_point_exeption_flag}>")
 
 set_target_properties(${library_name} PROPERTIES FOLDER engines_gpl/waq)
 
