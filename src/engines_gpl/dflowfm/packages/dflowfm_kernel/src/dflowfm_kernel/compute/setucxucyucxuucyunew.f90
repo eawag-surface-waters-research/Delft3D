@@ -32,6 +32,7 @@
 
  subroutine setucxucyucxuucyunew()   ! and reclaim ucxq, ucyq for Coriolis without interfering with Morfology
  use m_flowgeom
+ use precision_basics
  use m_flow
  use m_sobekdfm
  use m_sediment, only: jased, stm_included
@@ -61,7 +62,9 @@
 
     do L = 1,lnx1D
        if (u1(L) .ne. 0d0 .and. kcu(L) .ne. 3) then  ! link flows ; in 2D, the loop is split to save kcu check in 2D
-          if ((kcu(L)==4 .or. (iadv(L) >= 21 .and. iadv(L) <=29)) .and. ChangeVelocityAtStructures) then
+          ! In some cases the flow area of the hydraulic structure is larger than the flow area of the branch.
+          ! In those cases the flow velocity at the structure 
+          if ((kcu(L)==4 .or. (iadv(L) >= 21 .and. iadv(L) <=29)) .and. ChangeVelocityAtStructures .and. comparereal(au_nostrucs(L), au(L)) ==1) then
              ! Apply only on some barrier-like hydraulic structures, and typically on 1D2D links for dambreaks
              u1L = q1(L)/au_nostrucs(L)
           else
@@ -80,7 +83,9 @@
           if ( struclink(L) == 1 ) cycle
        endif
        if (u1(L) .ne. 0d0) then                      ! link flows
-          if (( kcu(L)==3 .or. kcu(L)==4 .or. (iadv(L) >= 21 .and. iadv(L) <=29)) .and. ChangeVelocityAtStructures) then
+          ! In some cases the flow area of the hydraulic structure is larger than the flow area of the branch.
+          ! In those cases the flow velocity at the structure 
+          if (( kcu(L)==3 .or. kcu(L)==4 .or. (iadv(L) >= 21 .and. iadv(L) <=29)) .and. ChangeVelocityAtStructures .and. comparereal(au_nostrucs(L), au(L)) ==1) then
              ! Apply only on some barrier-like hydraulic structures, and typically on 1D2D links for dambreaks
              u1L = q1(L)/au_nostrucs(L)
           else
