@@ -46,15 +46,6 @@
 !>               - information on the time series of additional velocities
 !>               - information on the time series of from- and to lengthes
 
-!       Created            : April '88  BY M.E.Sileon and L. Postma
-
-!       Modified           : ????????             Names for additional
-!                                                 dispersions and velos
-!                            April '96 L. Postma: Version support
-!                          : April '97 by R. Bruinsma
-!                            Tokenized input data file reading added
-!                            July  '02 by Leo Postma
-!                            Call to Opt1 changed.
 
 !       Subroutines called : BOUND
 !                            OPT0
@@ -352,6 +343,7 @@
       else
           if ( gettoken( iopt, ierr2 ) .gt. 0 ) goto 100
           write ( lunut , 2170 ) iopt
+          noqt = noq
           if ( iopt .eq. 2 ) goto 10
 
 !***************  first type of input ******************
