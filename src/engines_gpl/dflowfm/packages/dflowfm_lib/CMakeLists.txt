@@ -87,7 +87,8 @@ if (UNIX)
          ${oss_dependencies}
          PkgConfig::NETCDF
          PkgConfig::NETCDF_FTN
-         PkgConfig::PETSC)
+         PkgConfig::PETSC
+         "metis")
 endif(UNIX)
 
 
