@@ -1237,7 +1237,7 @@
                     ierr = nf90_inquire_dimension(ncid, i, nameDim(1))
                     if (ierr /= 0) cycle
                     ierr =  nf90_inquire_variable_list(ncid, varI, nameDim)
-                    if (ierr /= 0 .or. varId <= 0) cycle
+                    if (ierr /= 0 .or. varI <= 0) cycle
                     varstdname = ' '
                     ierr = nf90_get_att(ncid, varI, 'standard_name', varstdname)
                     if (ierr /= 0) cycle
