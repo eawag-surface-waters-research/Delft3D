@@ -816,15 +816,6 @@ subroutine readMDUFile(filename, istat)
     md_1dfiles%roughnessdir = ' '
     call prop_get_string ( md_ptr, 'geometry', 'NetFile',          md_netfile,      success)
     call prop_get_string ( md_ptr, 'geometry', 'GridEnclosureFile',md_encfile,      success)
-    tmpstr = ''
-    call prop_get_string ( md_ptr, 'geometry', 'BathymetryFile',   tmpstr,      success)
-    if (success .and. len_trim(tmpstr) > 0) then
-        istat = -1
-        call mess(LEVEL_ERROR, 'Error while reading '''//trim(filename)//''': keyword [geometry] BathmetryFile is not longer supported. Place bedlevel in IniFieldFile or ExtFile instead.')
-        return
-    end if
-
-       
     call prop_get_string ( md_ptr, 'geometry', 'DryPointsFile',    md_dryptsfile,   success)
     call prop_get_string ( md_ptr, 'geometry', 'WaterLevIniFile',  md_s1inifile,    success)
     call prop_get_string ( md_ptr, 'geometry', 'LandBoundaryFile', md_ldbfile,      success)
@@ -2223,13 +2214,7 @@ subroutine readMDUFile(filename, istat)
    !   jarstbnd=1
    !endif
 
-   call list_ignored_md (md_ptr,LEVEL_WARN, ierror, prefix='readMDUFile')
-
-   ! If unused entries were in MDU, return with that error code.
-   ! NOTE: too strong now, disabled.
-   !if (ierror /= DFM_NOERR) then
-   !   istat = ierror
-   !end if
+   call final_check_of_mdu_keywords (md_ptr, prefix='While reading '''//trim(filename)//'''')
 
 end subroutine readMDUFile
 
@@ -2295,40 +2280,93 @@ subroutine createDirectionClasses(map_classes_ucdir, map_classes_ucdirstep)
    enddo
 end subroutine createDirectionClasses
 
-!> Present a list of all MDU entries (tree struct) that were not read from unstruc or read more than once.
-!> Present a list of all MDU entries (tree struct) ignored by unstruc or read more than once.
-subroutine list_ignored_md(md_tree, error_level, istat, prefix)
+!> Check if a keyword is deprecated (but still supported).
+logical function isdeprecated(chap, key)
+   character(len=*)                           :: chap  !< chapter name
+   character(len=*)                           :: key   !< keyword name
+   
+   isdeprecated = .false.
+   select case (chap)
+   case (' ') ! just template code for the time being
+      select case (key)
+      case (' ')
+         isdeprecated = .true.
+      end select
+   end select
+end function isdeprecated
+
+!> Check if a keyword is removed (and hence no longer supported).
+logical function isremoved(chap, key)
+   character(len=*)                           :: chap  !< chapter name
+   character(len=*)                           :: key   !< keyword name
+   
+   isremoved = .false.
+   select case (chap)
+   case ('geometry')
+      select case (key)
+      case ('bathymetryfile','bedlevelfile','botlevuni','botlevtype','ithindykescheme','manholefile','nooptimizedpolygon')
+         isremoved = .true.
+      end select
+   case ('numerics')
+      select case (key)
+      case ('hkad','ithindykescheme','thindykecontraction')
+         isremoved = .true.
+      end select
+   case ('output')
+      select case (key)
+      case ('writebalancefile')
+         isremoved = .true.
+      end select
+   end select
+end function isremoved
+    
+!> Present a list of all MDU entries (tree struct) that were not read D-Flow FM or read more than once.
+!> Show errors if obsolete (removed) keywords are used and stop.
+!> Show warnings if deprecated (but not yet removed) keywords are used.
+subroutine final_check_of_mdu_keywords(md_tree, prefix)
    use MessageHandling
    use dfm_error
    implicit none
    type (TREE_DATA), pointer  :: md_tree           !< MDU-tree
-   integer, intent(in)        :: error_level       !< Level for the Message handling
-   integer, intent(out)       :: istat             !< Results status (DFM_NOERR if no ignored entries)
    character(len=*), optional :: prefix            !< Optional message string prefix, default empty
 
-
    type (TREE_DATA), pointer  :: achapter, anode
-   integer  :: inode, nnode, ichapter, nchapter, i
-   character(len=30) :: nodename, chaptername
-   character(len=5)  :: node_visit_str
-   character(len=100):: nodestring
-   logical           :: success
-   integer :: numerr
-   integer, parameter :: numignore = 1
-   character(len=16), dimension(numignore) :: ignorechaps !< which chapters to skip while checking
+   integer                                        :: inode                   !< index of the keyword being processed
+   integer                                        :: nnode                   !< number of keywords in the chapter
+   integer                                        :: ichapter                !< index of the chapter being processed
+   integer                                        :: nchapter                !< number of chapters in the file
+   integer                                        :: i                       !< loop variable
+   integer, parameter                             :: strlen = 30             !< maximum length of chapter and keyword/node names
+   character(len=strlen)                          :: nodename                !< name of the keyword
+   character(len=strlen)                          :: chaptername             !< name of the chapter
+   character(len=5)                               :: node_visit_str          !< temporary string containing the number of times a keyword was accessed
+   character(len=100)                             :: nodestring              !< string containing the keyword value
+   logical                                        :: ismatch                 !< flag indicating whether the chapter/keyword matches a certain condition
+   integer                                        :: threshold_abort_current !< backup variable for default abort threshold level (temporarily overruled)
+   logical                                        :: success                 !< flag indicating successful completion of a call
+   integer                                        :: num_removed             !< count the number of removed keywords
+   integer                                        :: num_deprecated          !< count the number of deprecated keywords
+   integer                                        :: num_doubleaccess        !< count the number of keywords accessed multiple times
+   integer                                        :: num_unused              !< count the number of unused (but not old removed) keywords
+   integer, parameter                             :: numignore = 1           !< number of ignored chapters
+   character(len=strlen), dimension(numignore)    :: ignorechaps             !< which chapters to skip while checking
 
    ignorechaps(:) = ' '
    ignorechaps(1) = 'model'
 
-   istat = DFM_NOERR
-   numerr = 0
+   num_deprecated = 0
+   num_doubleaccess = 0
+   num_removed = 0
+   num_unused = 0
+
+   threshold_abort_current = threshold_abort
+   threshold_abort = LEVEL_FATAL
 
    nchapter = size(md_tree%child_nodes)
 ch:do ichapter = 1, nchapter
       achapter => md_tree%child_nodes(ichapter)%node_ptr
       chaptername = tree_get_name(achapter)
-
-      do i=1,numignore
+      do i = 1,numignore
          if (trim(ignorechaps(i)) == trim(chaptername)) then
             cycle ch
          end if
@@ -2347,24 +2385,48 @@ ch:do ichapter = 1, nchapter
          if (success) then
             if (size(anode%node_data) > 0) then
                if (anode%node_visit < 1) then
-                  numerr = numerr + 1
-                  call mess(error_level, prefix//': ['//trim(chaptername)//'] '//trim(nodename)//'='//trim(nodestring)//' was in file, but not used. Check possible typo.')
+                  ! report any unused keyword
+                  if (isremoved(trim(chaptername), trim(nodename))) then
+                      ! keyword is known, but no longer supported
+                      num_removed = num_removed + 1
+                      call mess(LEVEL_ERROR, prefix//': keyword ['//trim(chaptername)//'] '//trim(nodename)//' is no longer supported.')
+                  else
+                      ! keyword unknown, or known keyword that was not accessed because of the reading was switched off by the value of another keyword
+                      num_unused = num_unused + 1
+                      call mess(LEVEL_WARN, prefix//': keyword ['//trim(chaptername)//'] '//trim(nodename)//'='//trim(nodestring)//' was in file, but not used. Check possible typo.')
+                  endif
+               else
+                   ! keyword is known and used
+                  
+                  if (isdeprecated(trim(chaptername), trim(nodename))) then
+                      ! keyword is used, but deprecated
+                      num_deprecated = num_deprecated + 1
+                      call mess(LEVEL_WARN, prefix//': keyword ['//trim(chaptername)//'] '//trim(nodename)//' is deprecated and may be removed in a future release.')
+                  endif
                endif
                if (anode%node_visit > 1) then
-                  numerr = numerr + 1
                   write(node_visit_str,'(i0)') anode%node_visit
-!                 call mess(error_level, prefix//': ['//trim(chaptername)//'] '//trim(nodename)//'='//trim(nodestring)//' was accessed more than once ('//trim(node_visit_str)//' times). Please contact support.')
+                  num_doubleaccess = num_doubleaccess + 1
+!                 call mess(LEVEL_WARN, prefix//': ['//trim(chaptername)//'] '//trim(nodename)//'='//trim(nodestring)//' was accessed more than once ('//trim(node_visit_str)//' times). Please contact support.')
                endif
             endif
          endif
       enddo
    enddo ch
 
-   if (numerr > 0) then
-      istat = DFM_WRONGINPUT
+   if (num_deprecated > 0) then
+      ! to bring this message to the attention of the user, we write an error but continue ..
+      call mess(LEVEL_ERROR, prefix//': Deprecated keywords used: Check Section "Overview of deprecated and removed keywords" in the User Manual for information on how to update the input file.')
    end if
 
-end subroutine list_ignored_md
+   threshold_abort = threshold_abort_current
+
+   if (num_removed > 0) then
+      ! this is a fatal error that we want to stop at.
+      call mess(LEVEL_ERROR, prefix//': Old unsupported keywords used: Check Section "Overview of deprecated and removed keywords" in the User Manual for information on how to update the input file.')
+   end if
+
+end subroutine final_check_of_mdu_keywords
 
 
 !> Write a model definition to a file.
