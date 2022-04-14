@@ -25,14 +25,10 @@
 !>\file
 !>                    delwaq1_write_messages
 
-subroutine delwaq1_write_messages(argc, argv, errorcode)
+subroutine delwaq1_write_messages()
     use m_delwaq1_data
       
     implicit none
-      
-    integer, intent(in)                           :: argc
-    character(len=*), dimension(argc), intent(in) :: argv
-    integer, intent(inout)                        :: errorcode
 
 
     write ( lunrep,'(//'' Messages presented including .lsp file:'')')

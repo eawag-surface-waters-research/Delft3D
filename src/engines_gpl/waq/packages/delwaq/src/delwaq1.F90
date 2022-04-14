@@ -30,42 +30,19 @@ subroutine delwaq1(argc, argv, errorcode)
 !>
 !>                    Reads the DELWAQ inputfiles and generates
 !>                    a consistent set of binairy intermediate files.
-
-!     INFORMATION   : Deltares
-!                     L. Postma,
-!                     Rotterdamse weg 185,
-!                     P.O. Box 177,
-!                     2600 MH Delft,
-!                     Netherlands.
-!                     telephone (31) 15-569353
-!                     telefax   (31) 15-619674
 !
 !     LOGICAL UNITS : LUN(29), output, formatted report file
 !                     LUN( 1), output, binary common-block file
 !                     LUN( 2), output, binary system file
 !
-!     SUBROUTINES CALLED :*UNLOCK, unlocks user dependent data
-!                         *UNISET, reads input filename
-!                          DLWQ01, reads block 1 of user data
-!                          DLWQ02, reads block 2 of user data
-!                          DLWQ03, reads block 3 of user data
-!                          DLWQ04, reads block 4 of user data
-!                          DLWQ05, reads block 5 of user data
-!                          DLWQ06, reads block 6 of user data
-!                          DLWQ07, reads block 7 of user data
-!                          DLWQ7A, reads block 7 of user data new style
-!                          DLWQ08, reads block 8 of user data
-!                          DLWQ09, reads block 9 of user data
-!                          DLWQS1, reads block 10 , statistical definition
-!                          DLWQP1, proces pre-processor
-!                          SPACE , computes space needed
-!                          DLWQDI, writes dimensions of arrays for DELWAQ2
-!                         *DHOPNF, opens files ( if neccesary )
-!                         *SRSTOP, stops execution
-!
-!                         *, these routines can contain sytem dependencies
-!
-!
+!     SUBROUTINES CALLED :
+!                         delwaq1_init, initializes timer and values
+!                         delwaq1_unlock_username
+!                         delwaq1_allocate_workspace
+!                         delwaq1_read_user_data
+!                         delwaq1_write_messages
+!                         delwaq1_close_lunfiles
+
     use Grids        !   for the storage of contraction grids
     use dlwq_data    !   for definition and storage of data
     use Output       !   for the output names and pointers
@@ -87,12 +64,12 @@ subroutine delwaq1(argc, argv, errorcode)
     integer, intent(out)                          :: errorcode
 
 
-    call delwaq1_init(argc, argv, errorcode)
-    call delwaq1_unlock_username(argc, argv, errorcode)
+    call delwaq1_init(argc, argv)
+    call delwaq1_unlock_username()
     call delwaq1_allocate_workspace(argc, argv, errorcode)
-    call delwaq1_read_user_data(argc, argv, errorcode)
-    call delwaq1_write_messages(argc, argv, errorcode)
-    call delwaq1_close_lunfiles(argc, argv, errorcode)
+    call delwaq1_read_user_data()
+    call delwaq1_write_messages()
+    call delwaq1_close_lunfiles()
 
     ! Delwaq1_lib should never use a stop, but must be modified to return an error code instead (0 = normal end)
     ! Currently a return from the delwaq1_lib assumes a normal end.

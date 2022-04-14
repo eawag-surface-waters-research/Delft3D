@@ -24,15 +24,13 @@
 
 !>\file
 !>                    delwaq1_unlock_username
+!     SUBROUTINES CALLED :
+!                         *UNLOCK, unlocks user dependent data
 
-subroutine delwaq1_unlock_username(argc, argv, errorcode)
+subroutine delwaq1_unlock_username()
     use m_delwaq1_data
       
     implicit none
-      
-    integer, intent(in)                           :: argc
-    character(len=*), dimension(argc), intent(in) :: argv
-    integer, intent(inout)                        :: errorcode
     
     !
     !     unscramble name user

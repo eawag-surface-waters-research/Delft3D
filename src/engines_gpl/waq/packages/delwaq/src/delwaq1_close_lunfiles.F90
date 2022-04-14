@@ -25,14 +25,10 @@
 !>\file
 !>                    delwaq1_close_lunfiles
 
-subroutine delwaq1_close_lunfiles(argc, argv, errorcode)
+subroutine delwaq1_close_lunfiles()
     use m_delwaq1_data
       
     implicit none
-      
-    integer, intent(in)                           :: argc
-    character(len=*), dimension(argc), intent(in) :: argv
-    integer, intent(inout)                        :: errorcode
     
     !
     ! Close all open LUN files

@@ -24,17 +24,26 @@
 
 !>\file
 !>                    delwaq1_read_user_data
+!     SUBROUTINES CALLED :
+!                          DLWQ01, reads block 1 of user data
+!                          DLWQ02, reads block 2 of user data
+!                          DLWQ03, reads block 3 of user data
+!                          DLWQ04, reads block 4 of user data
+!                          DLWQ05, reads block 5 of user data
+!                          DLWQ06, reads block 6 of user data
+!                          DLWQ07, reads block 7 of user data
+!                          DLWQ7A, reads block 7 of user data new style
+!                          DLWQ08, reads block 8 of user data
+!                          DLWQ09, reads block 9 of user data
+!                          DLWQS1, reads block 10 , statistical definition
+!                          DLWQP1, proces pre-processor
+!                          SPACE , computes space needed
 
-subroutine delwaq1_read_user_data(argc, argv, errorcode)
+subroutine delwaq1_read_user_data()
     use m_delwaq1_data
       
     implicit none
       
-    integer, intent(in)                           :: argc
-    character(len=*), dimension(argc), intent(in) :: argv
-    integer, intent(inout)                        :: errorcode
-    
-    
 
     cchar   = ' '
     ilun    = 0

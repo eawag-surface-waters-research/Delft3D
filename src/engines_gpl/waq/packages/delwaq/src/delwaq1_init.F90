@@ -23,16 +23,17 @@
 
 
 !>\file
-!>                    delwaq1_init
+!>                    delwaq1_init: initializes timer and values
+!     SUBROUTINES CALLED :
+!                         *UNISET, reads input filename
 
-subroutine delwaq1_init(argc, argv, errorcode)
+subroutine delwaq1_init(argc, argv)
     use m_delwaq1_data
       
     implicit none
       
     integer, intent(in)                           :: argc
     character(len=*), dimension(argc), intent(in) :: argv
-    integer, intent(inout)                        :: errorcode
 
     !     Special system init
       
