@@ -303,25 +303,23 @@ subroutine prop_inifile_pointer(lu, tree)
                 if (mod(num_bs, 2) == 1) then ! Odd nr of backslashes, indeed line continuation
                     multiple_lines = .true.
                     lcend = lcend-1 ! Strip off single line cont character
-                    goto 700
+                    line = line(1:lend)//' '//linecont(1:lcend)
+                    lend = lend + lcend + 1
+                    ! Line continuation, proceed to next line
                 else
                     if (.not. multiple_lines) then
                         ! No continuation, so leave possible comment as well
                         lcend = len_trim(linecont)
                     end if
-                    goto 800
+                    line = line(1:lend)//' '//linecont(1:lcend)
+                    lend = lend + lcend + 1
+                    exit  ! No further lines for this value
                 end if
             else
                 ! Empty line, leave continuation loop
                 exit
             end if
 
-        700 line = line(1:lend)//' '//linecont(1:lcend)
-            lend = lend + lcend + 1
-            cycle ! Line continuation, proceed to next line
-        800 line = line(1:lend)//' '//linecont(1:lcend)
-            lend = lend + lcend + 1
-            exit  ! No further lines for this value
         end do
 
        if (eof/=0) exit
@@ -2029,16 +2027,14 @@ end subroutine count_occurrences
     integer                 , intent(  out), optional       :: minor          !< Minor number of the fileVersion
     character(len=*)        , intent(  out), optional       :: versionstring  !< Version string
     logical                 , intent(  out), optional       :: success        !< Returns whether fileVersion is found
-    
+
     character(len=IdLen)      :: chapterin_
     character(len=IdLen)      :: keyin_
     character(len=IdLen)      :: string
-    logical                   :: success_
     logical                   :: isnum
     integer                   :: idot
     integer                   :: iend
-    
-    
+
     if (present(chapterin)) then
        chapterin_ = chapterin
     else
