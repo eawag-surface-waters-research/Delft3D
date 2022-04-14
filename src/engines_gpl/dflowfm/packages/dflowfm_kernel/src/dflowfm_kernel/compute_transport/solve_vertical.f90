@@ -40,6 +40,7 @@ subroutine solve_vertical(NUMCONST, ISED1, ISEDN, limtyp, thetavert, Ndkx, Lnkx,
    use m_flowgeom,  only: Ndxi, Ndx, Lnx, Ln, ba, kfs, bl  ! static mesh information
    use m_flowtimes, only: dts
    use m_flow,      only: epshsdif, s1, kmxn, xlozmidov, rhomean, rho, ag, a1, wsf  ! do not use m_flow, please put this in the argument list
+   use m_flowparameters, only: epshu, testdryflood
    use m_sediment,  only: mtd, jased, ws, sedtra, stmpar
    use sediment_basics_module
    use timers
@@ -144,7 +145,9 @@ subroutine solve_vertical(NUMCONST, ISED1, ISEDN, limtyp, thetavert, Ndkx, Lnkx,
       do k=kb,kt-1   ! assume zero-fluxes at boundary and top
          n = k-kb+1  ! layer number
          dvol1i  = 1d0/max(vol1(k),dtol)                            ! dtol: safety
+         if (testdryflood == 2 ) dvol1i = 1d0/max(vol1(k),epshu*ba(kk)/max(kt-kb+1,1))
          dvol2i  = 1d0/max(vol1(k+1),dtol)                          ! dtol: safety
+         if (testdryflood == 2 ) dvol2i = 1d0/max(vol1(k+1),epshu*ba(kk)/max(kt-kb+1,1))
          dtba    = dt_loc*ba(kk)
          dtbazi  = dtba / max(1d-4, 0.5d0*(zws(k+1)-zws(k-1)) )     ! another safety check
 

@@ -149,6 +149,7 @@ subroutine fill_constituents(jas) ! if jas == 1 do sources
       call getkbotktop(kk,kb,kt)
       do k=kb,kt
          dvoli = 1d0/max(vol1(k),dtol)
+         if (testdryflood == 2 ) dvoli = 1d0/max(vol1(k),epshu*ba(kk)/max(kt-kb+1,1))
 
 !        temperature
          if (jatem > 1) then
