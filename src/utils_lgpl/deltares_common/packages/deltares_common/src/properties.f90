@@ -1746,21 +1746,21 @@ subroutine prop_set_integers(tree, chapter, key, value, anno, success)
 
     strvalue = ' '
     n = size(value)
-    if (n==0) goto 10
+    if (n > 0) then
+        ! Pretty print all integers into strvalue, separated by single spaces
+        write(strvalue, *) value(1)
+        strvalue = adjustl(strvalue)
+        iv = len_trim(strvalue)
+        do i=2,n
+            write(strscalar,*) value(i)
+            strscalar = adjustl(strscalar)
+            is = len_trim(strscalar)
+            strvalue(iv+2:iv+is+1) = strscalar(1:is)
+            iv  = iv+is+1
+        end do
+    end if
 
-    ! Pretty print all integers into strvalue, separated by single spaces
-    write(strvalue, *) value(1)
-    strvalue = adjustl(strvalue)
-    iv = len_trim(strvalue)
-    do i=2,n
-        write(strscalar,*) value(i)
-        strscalar = adjustl(strscalar)
-        is = len_trim(strscalar)
-        strvalue(iv+2:iv+is+1) = strscalar(1:is)
-        iv  = iv+is+1
-    end do
-
- 10 continue ! Put the string representation into the tree
+    ! Put the string representation into the tree
     if (present(anno)) then
         call prop_set_data(tree, chapter, key, transfer(trim(strvalue), node_value), 'STRING', anno = anno, success = success_)
     else
