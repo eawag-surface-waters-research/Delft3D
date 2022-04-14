@@ -12136,7 +12136,7 @@ subroutine unc_read_map_or_rst(filename, ierr)
     logical :: file_exists
     double precision, allocatable        :: max_threttim(:)
     double precision, allocatable        :: tmpvar(:,:)
-    double precision, allocatable        :: tmpvar1(:)
+    double precision, allocatable        :: tmpvar1(:), tmpvar1D(:)
     double precision, allocatable        :: tmpvar2(:,:,:)
     double precision, allocatable        :: tmp_s1(:), tmp_bl(:), tmp_s0(:)
     double precision, allocatable        :: rst_bodsed(:,:), rst_mfluff(:,:), rst_thlyr(:,:)
@@ -12684,99 +12684,79 @@ subroutine unc_read_map_or_rst(filename, ierr)
     
     ! Read the tracers
     if(ITRA1 > 0) then
-       if(.not.allocated(id_tr1)) then
-          allocate(id_tr1(ITRAN-ITRA1+1))
-       endif
-       if (allocated(tmpvar)) deallocate(tmpvar)
-       allocate(tmpvar(max(1,kmx), ndxi))
+       call realloc(tmpvar1D, ndx*(kmx+2), keepExisting = .false.,fill=-0.0d0)
        do iconst = ITRA1,ITRAN
           i = iconst - ITRA1 + 1
           tmpstr = const_names(iconst)
           ! Forbidden chars in NetCDF names: space, /, and more.
-          call replace_char(tmpstr,32,95) 
-          call replace_char(tmpstr,47,95) 
-          ierr = nf90_inq_varid(imapfile, trim(tmpstr), id_tr1(i))
-          if ( ierr.eq.NF90_NOERR ) then
-!            tracer exists in restart file             
-             if(kmx > 0) then
-                ierr = nf90_get_var(imapfile, id_tr1(i), tmpvar(1:kmx,1:um%ndxi_own), start=(/ 1, kstart, it_read /), &
-                                    count=(/ kmx, um%ndxi_own, 1 /))
-                do kk = 1, um%ndxi_own
-                   if (um%jamergedmap == 1) then
-                      kloc = um%inode_own(kk)
-                   else
-                      kloc = kk
-                   end if
+          call replace_char(tmpstr,32,95)
+          call replace_char(tmpstr,47,95)
+!         tracer exists in restart file             
+          ierr = get_var_and_shift(imapfile, trim(tmpstr), tmpvar1D, tmpvar1, UNC_LOC_S3D, kmx, kstart, um%ndxi_own, it_read, um%jamergedmap, &
+                              um%inode_own, um%inode_merge)
+          if(kmx > 0) then
+             do kk = 1, um%ndxi_own
+                if (um%jamergedmap == 1) then
+                   kloc = um%inode_own(kk)
+                else
+                   kloc = kk
+                end if
 
-                   call getkbotktop(kloc, kb, kt)
-                   call getlayerindices(kloc, nlayb, nrlay)
-                   do k = kb, kt
-                      constituents(iconst,k) = tmpvar(k-kb+nlayb,kk)
-                   end do
-                enddo
-             else
-                ierr = nf90_get_var(imapfile, id_tr1(i), tmpvar(1,1:um%ndxi_own), start = (/ kstart, it_read/), count = (/ndxi,1/))
-                do kk = 1, ndxi
-                   if (um%jamergedmap == 1) then
-                      kloc = um%inode_own(kk)
-                   else
-                      kloc = kk
-                   end if
-                   constituents(iconst, kloc) = tmpvar(1,kk)
+                call getkbotktop(kloc, kb, kt)
+                call getlayerindices(kloc, nlayb, nrlay)
+                do k = kb, kt
+                   constituents(iconst,k) = tmpvar1D(k)
                 end do
-             end if
-          endif
+             enddo
+          else
+             do kk = 1, um%ndxi_own
+                if (um%jamergedmap == 1) then
+                   kloc = um%inode_own(kk)
+                else
+                   kloc = kk
+                end if
+                constituents(iconst, kloc) = tmpvar1D(kk)
+             end do
+          end if
           call check_error(ierr, const_names(iconst))
        enddo
     endif
 
 !   Read the water quality bottom variables
     if(numwqbots > 0) then
-       call realloc(id_rwqb, numwqbots, keepExisting = .false., fill = 0)
-       if (wqbot3D_output == 1) then
-          call realloc(tmpvar, [max(1,kmx), ndxi], keepExisting = .false., fill = 0.0d0)
-       else
-          call realloc(tmpvar, [1, ndxi], keepExisting = .false., fill = 0.0d0)
-       endif
+       call realloc(tmpvar1D, ndx*(kmx+2), keepExisting = .false.,fill=-0.0d0)
        do iwqbot = 1, numwqbots
           tmpstr = wqbotnames(iwqbot)
           ! Forbidden chars in NetCDF names: space, /, and more.
           call replace_char(tmpstr,32,95) 
           call replace_char(tmpstr,47,95) 
           if (wqbot3D_output == 1) then
-             ierr = nf90_inq_varid(imapfile, trim(tmpstr)//'_3D', id_rwqb(iwqbot))
-             if ( ierr.eq.NF90_NOERR ) then
-!            3D water quality bottom variable exists in restart file
-                ierr = nf90_get_var(imapfile, id_rwqb(iwqbot), tmpvar(1:kmx,1:um%ndxi_own), start=(/ 1, kstart, it_read /), &
-                                    count=(/ kmx, um%ndxi_own, 1 /))
-                do kk = 1, um%ndxi_own
-                   if (um%jamergedmap == 1) then
-                      kloc = um%inode_own(kk)
-                   else
-                      kloc = kk
-                   end if
-                   call getkbotktop(kloc, kb, kt)
-                   call getlayerindices(kloc, nlayb, nrlay)
-                   do k = kb, kt
-                      wqbot(iwqbot, k) = tmpvar(k-kb+nlayb,kk)
-                   end do
-                enddo
-             endif
-          else
-             ierr = nf90_inq_varid(imapfile, trim(tmpstr), id_rwqb(iwqbot))
-             if ( ierr.eq.NF90_NOERR ) then
-   !            2D water quality bottom variable exists in restart file, put it in the bottom layer
-                ierr = nf90_get_var(imapfile, id_rwqb(iwqbot), tmpvar(1,1:um%ndxi_own), start = (/ kstart, it_read/), count = (/ndxi,1/))
-                do kk = 1, ndxi
-                   if (um%jamergedmap == 1) then
-                      kloc = um%inode_own(kk)
-                   else
-                      kloc = kk
-                   end if
-                   call getkbotktop(kloc,kb,kt)
-                   wqbot(iwqbot, kb) = tmpvar(1,kk)
+             ierr = get_var_and_shift(imapfile, trim(tmpstr)//'_3D', tmpvar1D, tmpvar1, UNC_LOC_S3D, kmx, kstart, um%ndxi_own, it_read, um%jamergedmap, &
+                              um%inode_own, um%inode_merge)
+             do kk = 1, um%ndxi_own
+                if (um%jamergedmap == 1) then
+                   kloc = um%inode_own(kk)
+                else
+                   kloc = kk
+                end if
+                call getkbotktop(kloc, kb, kt)
+                call getlayerindices(kloc, nlayb, nrlay)
+                do k = kb, kt
+                   wqbot(iwqbot, k) = tmpvar1D(k)
                 end do
-             endif
+             enddo
+          else
+             ierr = get_var_and_shift(imapfile, trim(tmpstr), tmpvar1D, tmpvar1, UNC_LOC_S, kmx, kstart, um%ndxi_own, it_read, um%jamergedmap, &
+                              um%inode_own, um%inode_merge)
+             do kk = 1, um%ndxi_own
+                if (um%jamergedmap == 1) then
+                   kloc = um%inode_own(kk)
+                else
+                   kloc = kk
+                end if
+                call getkbotktop(kloc,kb,kt)
+                wqbot(iwqbot, kb) = tmpvar1D(kk)
+             end do
           endif
           call check_error(ierr, wqbotnames(iwqbot))
        enddo
