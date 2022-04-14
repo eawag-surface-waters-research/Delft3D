@@ -32,7 +32,6 @@
 !                          DLWQ05, reads block 5 of user data
 !                          DLWQ06, reads block 6 of user data
 !                          DLWQ07, reads block 7 of user data
-!                          DLWQ7A, reads block 7 of user data new style
 !                          DLWQ08, reads block 8 of user data
 !                          DLWQ09, reads block 9 of user data
 !                          DLWQS1, reads block 10 , statistical definition
@@ -142,19 +141,13 @@ subroutine delwaq1_read_user_data()
     inpfil%dtflg3 = dtflg3
     inpfil%itfact = itfact
     inpfil%vrsion = vrsion
-    if ( vrsion .le. 4.90 ) then
-        nrharm(10) = 0
-        call dlwq07 ( lun    , lchar    , filtype, noseg  , nocons , &
-                     nopa   , nofun    , nosfun , itfact , dtflg2 , &
-                     dtflg3 , iwidth   , novec  , vrsion , ioutpt , &
-                     nothrd , constants, ierr   , iwar   )
-    else
-        nrharm(10) = 0
-        deltim     = otime
-        call dlwq7a ( lun    , lchar  , filtype, inpfil   , syname , &
-                     iwidth , ioutpt , gridps , constants, chkpar , &
-                     ierr   , iwar   )
-    endif
+
+    nrharm(10) = 0
+    deltim     = otime
+    call dlwq07 ( lun    , lchar  , filtype, inpfil   , syname , &
+                  iwidth , ioutpt , gridps , constants, chkpar , &
+                  ierr   , iwar   )
+
     !
     !     Finish and close system file ( DLWQ09 can re-read it )
     !
