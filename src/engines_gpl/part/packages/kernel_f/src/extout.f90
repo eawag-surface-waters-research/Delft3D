@@ -29,6 +29,7 @@ module extout_mod
 !
 use precision_part    ! single/double precision
       use timers
+      use m_part_modeltypes
 !
 implicit none    ! force explicit typing
 !
@@ -44,17 +45,6 @@ contains
                           rhow   , flow   , dx     ,         &
                           dy     )
 !
-!
-!    Deltares
-!
-!
-!    d e l p a r    v3.43
-!
-!
-!     system administration : r.j. vos
-!
-!
-!     created               : july 1998 by r.j. vos
 !
 !
 !     function              : generates extra output variables
@@ -269,7 +259,7 @@ contains
                  iseg = (ilay-1)*mnmax2 + ic
                  do 400 isub = nosubs + 1, nosubc
                     if(isfile(isub) /= 1) then
-                       if(modtyp /= 2) then
+                       if(modtyp /= model_two_layer_temp) then
                           conc(isub, iseg) = -999.0
                        else
                           ipos = ilay + (isub-1)*nolay

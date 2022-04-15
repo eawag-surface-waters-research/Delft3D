@@ -41,28 +41,6 @@ contains
 
 !     CREATING MAP FILE FOR CURVILINEAR GRID
 !          (Nefis and binary files / per time step)
-!
-!     system administration : r.j. vos
-
-!     created               : february 1990, by l. postma
-
-!     modified              : cleared may 1996
-!                             july 1996: isfile = 1: conc. not updated
-!                             july 1996: vs 3.12, writes mapfile like delwaq
-!                                                 thus layers are not substances
-!                                                 also for the 2 layer model !!!
-!                             okt  1996: vs 3.21: error with -999 for modty p= 2 (model_two_layer_temp) solved
-!                             nov  1996: vs 3.22: error with init. loop 175
-!                                                 (correct in 2.30, but wrongly copied to 3-level)
-!                             nov  1997: vs 3.40: version with oil for modtyp = 4 (model_oil)
-!                             jul  1998: vs 3.43: version with extra bottom layer for lsettl=.true.
-!                             sep  1998: vs 3.50: version with sticking material (mstick(isub)>0)
-!                             mar  1990: test-vs 3.60: version with model-type = 5 also (3d temp.model)
-!                             apr  1999: vs 3.60: version for release of 1 june
-!                             jun  1999: vs 3.60: corrected version for release june
-!                                                 correction in jsub and for dispersed oil that settles
-!                             may  2000: vs 3.60: corrected for error in model type 4(oil):
-!                                                 for this model type always output needed
 
 !     function              : generates a standard delwaq - map-file,
 !                             and concentration-array for partwq

@@ -68,13 +68,6 @@ module part14_mod
 !>           in their layer
 !>         - The particle tracking array gets the thus computed initial states of the particles
 
-!     System administration : Antoon Koster
-
-!     Created               : February 1990 by Leo Postma
-
-!     Modified              : May      1996 by Robert Vos    : 3d version
-!                             July     2001 by Antoon koster : mass conservation &
-!                                                              suppression round off errors
 
 !     Note                  : none
 
@@ -87,6 +80,7 @@ module part14_mod
       use grid_search_mod
       use spec_feat_par
       use random_generator
+      use m_part_modeltypes
       implicit none
 
 !     Arguments
@@ -330,7 +324,7 @@ module part14_mod
             mpart (i) = mwasth
             xpart (i) = xwasth
             ypart (i) = ywasth
-            if ( modtyp .eq. 2 ) then
+            if ( modtyp .eq. model_two_layer_temp ) then
                t0buoy(i) = t0cf (ic)                    ! could be taken out of the particle loop
                abuoy (i) = 2.0*sqrt(acf(ic)*idelt)      ! even complete out of this routine
             else
@@ -371,13 +365,13 @@ module part14_mod
 
 !         give the particles a z-value within the layer
 
-            if ( modtyp .eq. 2 ) then     ! .. two layer model use a pointe discharge (as in v3.00)
+            if ( modtyp .eq. model_two_layer_temp ) then     ! .. two layer model use a pointe discharge (as in v3.00)
                if ( zwaste(ie) .gt. pblay ) then
                   zpart(i) = ( zwaste(ie) - pblay ) / ( 1.0 - pblay )
                else
                   zpart(i) =  zwaste(ie)/pblay
                endif
-            elseif ( modtyp .eq. 4 .and. kpart(i) .eq. 1 ) then   !   for one layer models (2dh),
+            elseif ( modtyp .eq. model_oil .and. kpart(i) .eq. 1 ) then   !   for one layer models (2dh),
                zpart(i) = zwaste(ie)           !      the release will be in the user-defined location
             elseif ( nolay .eq. 1 ) then
                zpart(i) = zwaste(ie)/100.0
@@ -389,7 +383,7 @@ module part14_mod
 
             do isub = 1, nosubs
                wpart (isub, i) = aconc(ie, isub)
-               if (modtyp .eq. 6) then
+               if (modtyp .eq. model_prob_dens_settling) then
                   rhopart(isub, i) = pldensity(isub)
                endif
             enddo

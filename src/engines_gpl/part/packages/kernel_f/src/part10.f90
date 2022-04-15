@@ -49,62 +49,7 @@ contains
 !
 !    CALCULATES PARTICLE MOTION FROM ADVECTION, DISPERSION AND SETTLING
 !                 (per time step)
-!
 
-!     system administration : frank kleissen
-
-
-!     created               : january 1990, by l. postma
-
-
-!     modified              : August 1990 by r.j.diependaal
-!                             uses a vertical dispersion coefficient
-!                             that is averaged over the vertical
-!                             August 1990 by l.postma
-!                             particle displacement is calculated in a
-!                             more sophisticated manner (cross-overs to other
-!                             segments induce a new calculation!)
-!                           : February 1991 by a. hendriks and a. markus
-!                             account for oil particles ( z coordinate
-!                             larger than 1, and a two-layer system,
-!                             where the two layers are recognised by
-!                             positive and negative z coordinates and
-!                             a separate parameter in drand)
-!                           : March 1991 by a. markus (no oil anymore)
-!                           : July 1992 by r.j. vos, for 8 substances
-!                             with identical transport but different
-!                             decay
-!               delparv2.20:  April  1994 by r.j. vos, for buoyancy
-!                             with more than 1 discharge and only in
-!                             upper layer !!!
-!               delparv3.00:  May    1994 by l.postma, smooth loading
-!                             for continuous releases
-!                             June   1994 by r.j. vos, uniform sampling
-!                             in x and y direction for horizontal
-!                             random walk
-!               delparv3.10:  May    1996 by r.j. vos  3d version
-!                             for the time being no pred-corr and uniform diff.
-!                             including predictor-corrector of dunsbergen
-!               delparv3.21:  Okt    1996 by r.j. vos  3d version
-!               delparv3.22:  Nov    1996 by r.j. vos: correction pred-corr scheme 3d version
-!               delparv3.40:  Nov    1997 by r.j. vos: 3d version with oil
-!                             oil is transported as floating when any of the fractions
-!                             of oil within the particle has a mass larger zero.
-!               delparv3.43:  July   1998 by r.j. vos: settling/erosion at the bed
-!                             a particle at the bed gets kp = 0
-!               delparv3.50:  Sept   1998 by r.j. vos: mass may stick to land
-!                                                      by horizontal diffusion or settling
-!               delparv3.60:  April  1999 by r.j. vos: constant vertical diffusivity added
-!                                                      sticking oil: definitions changed
-!                                                      sticking parameter introduced
-!               delparv3.60:  July     2000 by r.j. vos: when floating oil
-!                                                         sticks, then prevent dispersed to
-!                                                         overwrite the stick array
-!                             July     2007 by Leo Postma: redesign of this routine, thin dams
-!                                                          for advection and diffusion
-!                             ????     ???? by Jan van Beek: unofficial DD support
-!                             June     2011 by Leo Postma: support OMP parallelism
-!                             October  2011 by Leo Postma: official support Domain Decomposition
 
 !     logical unit numbers  : standard output: error messages
 !                             lun2           : error and debug messages
@@ -129,6 +74,7 @@ contains
       use grid_search_mod
       use spec_feat_par    ! special feature parameters
       use random_generator
+      use m_part_modeltypes
 !
       implicit none             ! force explicit typing
 
@@ -294,9 +240,9 @@ contains
       logical       :: dstick                  ! logical that determines sticking
       logical       :: ldispo                  ! vertical diffusion is on (true) or off (false) for oil particle
       logical       :: lstick                  ! keeps the possibility to stick
-      logical       :: oilmod                  ! = modtyp .eq. 4
+      logical       :: oilmod                  ! = modtyp .eq. model_oil
       logical       :: threed                  ! = layt .gt. 1
-      logical       :: twolay                  ! = modtyp .eq. 2
+      logical       :: twolay                  ! = modtyp .eq. model_two_layer_temp
       real(dp)      :: a                       ! tsja
       real(sp)      :: codef                   ! cosine of deflection angle
       real(sp)      :: dxx                     ! delta x with deflected oil
@@ -458,8 +404,8 @@ contains
          twopi  = 8.0 * atan(1.0)
          defang = defang * twopi / 360.0    !  deflection angle oil modelling
          coriol = abs(defang) .ge. 1.0e-6   !  deflection from the equator aparently
-         twolay = modtyp .eq. 2
-         oilmod = modtyp .eq. 4
+         twolay = modtyp .eq. model_two_layer_temp
+         oilmod = modtyp .eq. model_oil
          threed = layt .gt. 1
          cdrag  = drand(3) / 100.0          !  wind drag as a fraction
          ptlay  = 1.0 - pblay
@@ -622,8 +568,8 @@ contains
             elseif ( kp .eq. 2 ) then
                dred = pblay
             else
-               write (*,*) ' The layer-number is too large for modtyp=2'
-               write( lun2,*) ' The layer-number is too large for modtyp=2'
+               write (*,*) ' The layer-number is too large for modtyp=2 (model_two_layer_temp)'
+               write( lun2,*) ' The layer-number is too large for modtyp=2 (model_two_layer_temp)'
                call stop_exit(1)
             endif
          endif
@@ -841,7 +787,7 @@ contains
             dvz         = 2.0 * sq6 * sqrt( disp*itdelt ) *   &
                              ( rnd(rseed)-0.5 ) / depthl / dred
          endif
-        if (modtyp.ne.7) then
+        if (modtyp.ne.model_ibm) then
           dvzs = wsettl(ipart)*itdelt/depthl          !  settling      ?? what is the effect of this?? jvb: no bouncing for settling particles
           dvzt = dvzs + dvz                           !  vertical diffusion
         else
@@ -1045,7 +991,7 @@ contains
                vz1    = flow ( n0 + idep   + 2*mnmaxk) / vol
             endif
          endif
-         if (modtyp.eq.7) then
+         if (modtyp.eq.model_ibm) then
             depthl = volume(n0+idep)/area(n0)
             vzs  = wsettl(ipart)/depthl             !  settling
             if ( kpp .ne. ktopp ) vz0  = vz0 + vzs
@@ -1357,7 +1303,7 @@ contains
 
 !**      xnew,ynew is inclusive of diffusion (dax,day); c1 = 0.0 for 3d
 
-         if (modtyp.eq.7) then 
+         if (modtyp.eq.model_ibm) then 
             sdir         = d_swim(ipart) * twopi / 360.0
             displacement = v_swim(ipart)*idelt
             dx_swim      = displacement*sin(sdir+sangl)

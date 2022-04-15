@@ -52,6 +52,7 @@ contains
       use mathconsts, only: raddeg_hp, pi
       use physicalconsts, only: earth_radius
       use random_generator
+      use m_part_modeltypes
 
       implicit none
 
@@ -258,7 +259,7 @@ contains
             !laypart(nopart + i) = nulay
 !    for one layer models (2dh), the release will be in the user-defined location
             if (jsferic .ne. 1) then ! in a sferic model, the zwaste is needed for conversion of sferic to cartesian, so setting the zpart cannot .
-               if ( modtyp .eq. 4 .and. laywaste(id) .eq. 1 ) then
+               if ( modtyp .eq. model_oil .and. laywaste(id) .eq. 1 ) then
                   zpart(nopart+i) = zwasth
                elseif ( nolay .eq. 1 ) then
                   zpart(nopart+i) = zwasth/100.0
@@ -274,7 +275,7 @@ contains
             
             do isub = 1, nosubs
                wpart( isub, nopart+i ) = aconc( id, isub )
-               if (modtyp .eq. 6) then
+               if (modtyp .eq. model_prob_dens_settling) then
                   rhopart(isub, nopart+i) = pldensity(isub)
                endif
             enddo

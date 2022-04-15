@@ -34,6 +34,7 @@ use precision             ! single and double precision
 !  module procedure(s)
 !
 use exception_part         ! explicit interface for subroutine calls
+use m_part_modeltypes
 !
 implicit none             ! force explicit typing
 !
@@ -64,9 +65,9 @@ contains
 !
       read (lun1 , *,err=1090) (substi(i), i = 1, nosubs)
 !
-!     skip file names for red tide model (modtyp=3)
+!     skip file names for red tide model (modtyp=model_red_tide)
 !
-      if(modtyp==3) then
+      if(modtyp==model_red_tide) then
         do 71 i = 1, nosubs
              if(substi(i)(1:8)=='nh4_file') then
                 read(lun1,*,err=1110)  finnh4

@@ -49,6 +49,7 @@ contains
       use fileinfo  , lun=> lunit    ! logical unit numbers for files
       use random_generator
       use timers
+      use m_part_modeltypes
 
       !locals
       logical          :: partdomain, skip_pt, openbound, mirror
@@ -59,7 +60,7 @@ contains
       integer(ip)   :: isub                    ! loop counter nosubs
       integer(ip)   :: itdelt                  ! delta-t of the particle for smooth loading
       integer(ip)   :: kp                      ! k of the particle
-      logical       :: twolay                  ! = modtyp .eq. 2
+      logical       :: twolay                  ! = modtyp .eq. model_two_layer_temp
       double precision      :: abuac           ! actual value of abuoy(ipart) ( * sqrt(ddfac)
       double precision      :: cdrag           ! local drag coefficient (converted from persentage)
       double precision      :: dax             ! delta of diffusive spreading x
@@ -83,7 +84,7 @@ contains
       if ( timon ) call timstrt( "part10fm", ithndl )
 
       maxiter = 100
-      twolay = modtyp .eq. 2
+      twolay = modtyp .eq. model_two_layer_temp
       sq6    = sqrt( 6.0 )
       ddfac  = 2.0
       dran1  = drand(1)
@@ -279,6 +280,7 @@ contains
       use mathconsts, only: raddeg_hp
       use random_generator
       use timers
+      use m_part_modeltypes
 
       !locals
       logical               :: partdomain, openbound
@@ -290,7 +292,7 @@ contains
       integer(ip)           :: itdelt                  ! delta-t of the particle for smooth loading
       integer(ip)           :: kp                      ! k of the particle
       logical               :: dstick                  ! logical that determines sticking
-      logical               :: twolay                  ! = modtyp .eq. 2
+      logical               :: twolay                  ! = modtyp .eq. model_two_layer_temp
       double precision      :: abuac                   ! actual value of abuoy(ipart) ( * sqrt(ddfac)
       double precision      :: cdrag                   ! local drag coefficient (converted from persentage)
       double precision      :: dax                     ! delta of diffusive spreading x
@@ -314,7 +316,7 @@ contains
       data       ithndl / 0 /
       if ( timon ) call timstrt( "part10fm_pdrag", ithndl )
 
-      twolay = modtyp .eq. 2
+      twolay = modtyp .eq. model_two_layer_temp
       sq6    = sqrt( 6.0 )
       ddfac  = 2.0
       twopi  = 8.0 * atan(1.0)

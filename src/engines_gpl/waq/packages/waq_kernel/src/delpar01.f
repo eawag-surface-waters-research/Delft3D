@@ -104,8 +104,8 @@
       lunut = lunitp(2)
 
 !           this replaces the call to rdhydr
-      if ( modtyp .eq.7 ) then
-        if(idp_file .ne. ' ' .and. itime .eq. nint(const(8))*86400 ) then ! release at day iniday - specific for IBM module (modtyp=7) FMK 13-2-2017
+      if ( modtyp .eq.model_ibm ) then
+        if(idp_file .ne. ' ' .and. itime .eq. nint(const(8))*86400 ) then ! release at day iniday - specific for IBM module (modtyp=model_ibm) FMK 13-2-2017
             call partini( nopart, nosubs, idp_file, wpart  , xpart ,
      &                    ypart , zpart , npart   , mpart  , kpart ,
      &                    iptime, lunpr )
@@ -207,7 +207,7 @@
 
 !     Taking over of aged particles by Delwaq
 ! first for oil model
-      if (modtyp.eq.4) then
+      if (modtyp.eq.model_oil) then
         call oil2waq( nopart , nosys    , notot    , nosubs   , noseg    ,
      &              nolay    , dwqvol   , surface  , nmaxp    , mmaxp    ,
      &              lgrid3   , syname   , itime    , iddtim   , npwndw   ,
@@ -365,7 +365,7 @@
 
 !     two-layer system with stratification
 
-      if ( modtyp .eq. 2 )
+      if ( modtyp .eq. model_two_layer_temp )
      &   call part18 ( lgrid    , velo     , concp    , flres    , volumep  ,
      &                 area     , mnmaxk   , npart    , mpart    , wpart    ,
      &                 zpart    , nopart   , idelt    , nolayp   , npwndw   ,
@@ -451,11 +451,11 @@
      &                 wsettl   , irfac    , anfac    , lsettl   , locdep   ,
      &                 tcktot   , dpsp     )
       else
-! jvb removed this line (commented, so execute if not modtyp=7?
-           if (modtyp.ne.7) wsettl = 1.0  ! whole array assignment
+! jvb removed this line (commented, so execute if not modtyp=model_ibm?
+           if (modtyp.ne.model_ibm) wsettl = 1.0  ! whole array assignment
          endif
-! jvb removed call to partvs (commented, so execute if not modtyp=7?
-         if (modtyp.ne.7) call partvs ( lunut   , itime    , nosubs   , nopart   , ivtset   ,
+! jvb removed call to partvs (commented, so execute if not modtyp=model_ibm?
+         if (modtyp.ne.model_ibm) call partvs ( lunut   , itime    , nosubs   , nopart   , ivtset   ,
      &              ivtime   , vsfour   , vsfact   , wpart    , wsettl   ,
      &              modtyp   , nmaxp    , mmaxp    , lgrid3   , noslay   ,
      &              npart    , mpart    , kpart    , nosegp   , noseglp  ,

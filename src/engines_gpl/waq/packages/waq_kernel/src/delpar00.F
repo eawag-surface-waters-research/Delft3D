@@ -212,7 +212,7 @@
         call wrttrk ( lunut    , fout     , fnamep(16), itrakc  , nopart   ,
      &                npmax    , xa       , ya        , za      , xyztrk      )
       endif
-      oil    = modtyp == 4
+      oil    = modtyp == model_oil
       if ( ini_opt .eq. 1 .and. oil ) then
          call inipart( lgrid   , lgrid2  , nmaxp   , mmaxp   , xb      ,
      &   yb      , nopart  , nosubs  , substi(1)  , ini_file,
@@ -226,8 +226,8 @@
      &                  ypart   , zpart   , npart   , mpart   , kpart   ,
      &                  iptime  , npmax   , nrowsmax, lunut   )
       endif
-      if ( modtyp .ne. 7 .and. idp_file .ne. ' ' ) then
-         if (modtyp .ne. 6) then
+      if ( modtyp .ne. model_ibm .and. idp_file .ne. ' ' ) then
+         if (modtyp .ne. model_prob_dens_settling) then
             write ( lunut, * ) ' Opening initial particles file:', idp_file(1:len_trim(idp_file))
             call openfl ( luini, idp_file, ftype(2), 0 )
             read ( 50 ) ilp, nopart, nosubs_idp
@@ -260,7 +260,7 @@
             enddo
             do ilp = 1, nopart
                do isp = 1, nosubs
-                  if (modtyp .eq. 6) then
+                  if (modtyp .eq. model_prob_dens_settling) then
                      rhopart(isp, ilp) = pldensity(isp)
                   endif
                enddo
@@ -275,7 +275,7 @@
             npmax = nopart_res
       endif
       !     Draw random log normal distributed particle sizes for non-restart particles
-      if (modtyp .eq. 6) then
+      if (modtyp .eq. model_prob_dens_settling) then
          do ilp = 1, npmax
             rnorm = normal(rseed)
             if (ilp .gt. nopart_res) then
@@ -302,9 +302,9 @@
             hmin     = const(noconsp-1)
             defang   = const(noconsp)
          endif
-         if (modtyp == 1.or.modtyp >= 3) then
+         if ((modtyp == model_tracers).or.(modtyp >= model_red_tide)) then
             pblay = 0.0
-         elseif(modtyp==2) then
+         elseif(modtyp==model_two_layer_temp) then
             pblay = 0.7
          else
             write(*,*) 'This model type has not been implemented yet '

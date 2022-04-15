@@ -46,26 +46,6 @@ contains
                           wvelo  , alpha  , nosubc , icvdf2    )
 !
 !
-!                   Deltares
-!
-!                        d e l p a r    v3.30
-!
-!
-!     system administration : r.j. vos
-!
-!
-!     created               : january 1991, by a. markus
-!
-!
-!     modified              : cleared may 1996, 3d version
-!                             26/7/1996:
-!                             v3.12: delwaq map is standard for conc-array
-!                             v3.20: recalculates dispersion without depth-aver.
-!                             11/10/1996: corrected for error in 3d version
-!                                         (icvdf2 = icvdf + nosubs)
-!                                         (lead. dim of conc array is nosubc)
-!                             v3.30: icvdf2 as argument
-!
 !     function              : calculates the exchange between the
 !                             two layers and exchanges the particles
 !                             as part of the 3d version
@@ -75,7 +55,7 @@ contains
 !                             and is mnmaxk = mnmax2 (layt must be 1)
 !                             and goes conc with mnmaxk*nolay, with nolay=2
 !
-!                             only for the two-layer model (modtyp = 2)
+!                             only for the two-layer model (modtyp = model_two_layer_temp)
 !                             for the two layer model, one layer is used for storage
 !                             the total number of substances is nosubs*nolay
 !

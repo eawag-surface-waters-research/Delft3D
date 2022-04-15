@@ -23,62 +23,10 @@
 
 !
 !
-!                          Deltares
-!
-!                        d e l p a r    v3.60
-!
-!                          particle program
-!
-!
-!     system administration : r.j. vos (since 1 january 1994, before m. zeeuw)
-!
-!
-!     programmer            : april '90, l. postma ('static version')
-!                             dec.  '00, a. koster ('dynamic version')
-!
 !
 !     function              : main steering module for the 3d discrete particle
 !                             model.
 !
-!                             note:
-!                             in delpar versions earlier then v3.60.05 this was the
-!                             main program. for the implementation of dynamic memory
-!                             allocation (based on fmm) this main program was converted
-!                             to a subroutine.
-!     modifications         : including pc dunsbergen and 3d facilities
-!                             v3.40: oil module included (modtyp=4), process routine oildsp called;
-!                                    oil has two fractions: one at the surface and one dispersed
-!                                    psfzoom is only used for plotting 2d and for floating oil
-!                                    add openfl for opening standard formats
-!                                    changed putget, added putget_chars
-!                             v3.43: sedimentation and erosion at the bed is allowed
-!                                    option to create extra output
-!                                    corrected an error in psfzoom on 8-9
-!                             v3.50: extra possibility for particle to stop travelling
-!                                    particle goes into a persistent phase, i.e. stays
-!                                    at land. this is not a particle at the bed (bottom)!
-!                                    sticking oil can not evaporate or disperse (when floating)
-!                                    sticking oil s expressed in mass per m2 (part12, part13)
-!                                    adapt calls to part10 and oildsp, and part12,part13 and parths
-!                             v3.60: partwq can also be used for 3d temmperature modelling
-!                                    modtyp = 2: 2d-1-layer or 2-layer temperature model (2d hydrodynamics)
-!                                    modtyp = 5: 3d-temperature model (3d hydrodynamics)
-!                                                some updates of rdparm are made
-!                                    also updated the psf-function to 3d with simple 3d approach
-!                                    (by generalisation of the 2d formulae)
-!                                    allows also for constant vertical dispersion
-!                             v3.60: license file implemented (see module licens)
-!                             v3.60: errors from acceptance test
-!                                    delpar: nolay => noslay in
-!                                        calls to partwr,oildsp
-!                                    rdparm: adapted formats in report
-!                                    partwr: delete 3 useless lines
-!                                    part12, part13, pfzoom: not correct for jsub=2,or settling dispersed oil
-!                                    pfzoom: xmach mus be 0.0 for land-mask
-!
-!                                    4/8/2000: oildsp has been modified for higher numerical accuracy of oil
-!                                              dispersion (rj vos)
-!                           v3.60.05:transformed to subroutine for dynamic version of delpar
 !
 !     note                  : two layer model must be temp. model !!!
 !
@@ -89,7 +37,7 @@
 !
 !     subroutines called    : write_version - echo header to screen
 !                             dlwqtd - does time inteprolation (like delwaq)
-!                             oildsp - oil dispersion (modtyp=4)
+!                             oildsp - oil dispersion (modtyp=model_oil)
 !                             part01 - calculate distances and angles in grid
 !                             part06 - calculate dump-sites in the grids
 !                             part08 - calculate total released mass and
@@ -108,7 +56,7 @@
 !                             parths - make history plots
 !                             partur - adds user-defined releases from file to system
 !                             partvs - make settling velocities
-!                             partwq - two-layer or 3d temperature model (modtyp=2 or 5)
+!                             partwq - two-layer or 3d temperature model (modtyp=model_two_layer_temp or model_2d3d_temp)
 !                             pfzoom - make plots for zoom window using psf's
 !                             rdccol - read curved grid
 !                             rdfnam - read in/out files
@@ -535,7 +483,7 @@
       acomp  = .false.
       accrjv = 1.0e-9_sp
       ltrack = notrak  /=  0
-      oil    = modtyp == 4
+      oil    = modtyp == model_oil
       oil2dh = oil .and. layt == 1
       oil3d  = oil .and. layt  > 1
 
@@ -546,16 +494,15 @@
          defang   = const(noconsp)
       endif
 !3d
-!3d.. modtyp = 2 is still a 2 layer option, it assumes 2 layers
+!3d.. modtyp = model_two_layer_temp is still a 2 layer option, it assumes 2 layers
 !3d.. nolay etc. specifies the total number of layers
 !3d.. layt specifies the number of layers for the hydrodynamics
 !3d
 !3d.. pblay specifies the thickness where the particles will be flipped
 !3d
-!oil  if (modtyp == 1.or.modtyp==3) then
-      if (modtyp == 1.or.modtyp >= 3) then
+      if ((modtyp == model_tracers).or.(modtyp >= model_red_tide)) then
         pblay = 0.0
-      elseif(modtyp==2) then
+      elseif(modtyp==model_two_layer_temp) then
 !..
 !.. set pblay equal to some value that differs from zero
 !.. the true value will be set by the user later
@@ -629,8 +576,8 @@
                        ypart   , zpart   , npart   , mpart   , kpart   ,    &
                        iptime  , npmax   , nrowsmax, lunpr   )
       endif
-      if ( idp_file .ne. ' ' .and. modtyp .ne. 7 ) then
-         if (modtyp .ne. 6) then
+      if ( idp_file .ne. ' ' .and. modtyp .ne. model_ibm ) then
+         if (modtyp .ne. model_prob_dens_settling) then
             write ( lunpr, * ) ' Opening initial particles file:', idp_file(1:len_trim(idp_file))
             call openfl ( lunini, idp_file, ftype(2), 0 )
             read ( lunini ) ilp, nopart, nosubs
@@ -650,7 +597,7 @@
             enddo
             do ilp = 1, nopart
                do isp = 1, nosubs
-                  if (modtyp .eq. 6) then
+                  if (modtyp .eq. model_prob_dens_settling) then
                      rhopart(isp, ilp) = pldensity(isp)
                   endif
                enddo
@@ -660,7 +607,7 @@
       endif
 
 !     Draw random log normal distributed particle sizes for non-restart particles
-      if (modtyp .eq. 6) then
+      if (modtyp .eq. model_prob_dens_settling) then
          do ilp = 1, npmax
             rnorm = normal(rseed)
             if (ilp .gt. nopart_res) then
@@ -847,7 +794,7 @@
 
 !     two-layer system with stratification
 
-         if ( modtyp .eq. 2 )          &
+         if ( modtyp .eq. model_two_layer_temp )          &
          call part18 ( lgrid    , velo     , concp    , flres    , volumep  ,    &
                        area     , mnmaxk   , npart    , mpart    , wpart    ,    &
                        zpart    , nopart   , idelt    , nolayp   , npwndw   ,    &
@@ -978,7 +925,7 @@
          iext = len_trim(res_file) - 3
          if (max_restart_age .lt. 0) then
 !           Write the restart file with all active paritcles
-            if (modtyp.eq.6)then
+            if (modtyp.eq.model_prob_dens_settling)then
                res_file(iext+1:iext+4) = 'ses'    !limited number of particles (for 'plastics' modeltype 6 restart, as 'ras' but including settling values)
                write ( lunpr, * ) ' Including particle dependent settling velocity'
             else
@@ -991,7 +938,7 @@
             do ilp = 1, nopart
                if (npart(ilp)>1.and.mpart(ilp)>1) then
                   if (lgrid( npart(ilp), mpart(ilp)).ge.1) then  !only for the active particles
-                     if (modtyp.ne.6) then
+                     if (modtyp.ne.model_prob_dens_settling) then
                         write ( lunfil ) npart(ilp), mpart(ilp), kpart(ilp), xpart(ilp), ypart(ilp), zpart(ilp), &
                                      wpart(1:nosubs,ilp), iptime(ilp),track(1:7,ilp)
                      else
@@ -1005,7 +952,7 @@
             close ( lunfil )
          else
 !        Write the restart file with all active paritcles below a certain age
-            if (modtyp.eq.6)then
+            if (modtyp.eq.model_prob_dens_settling)then
                res_file(iext+1:iext+4) = 'sas'    !limited number of particles (for 'plastics' modeltype 6 restart, as 'ras' but including settling values)
                write ( lunpr, * ) ' Including particle dependent settling velocity'
             else
@@ -1019,7 +966,7 @@
             do ilp = 1, nopart
                if (npart(ilp)>1.and.mpart(ilp)>1) then
                   if (lgrid( npart(ilp), mpart(ilp)).ge.1 .and. (iptime(ilp).lt.max_restart_age)) then   !only when the particles' age less than max_restart_age, time in seconds
-                     if (modtyp.ne.6) then
+                     if (modtyp.ne.model_prob_dens_settling) then
                         write ( lunfil ) npart(ilp), mpart(ilp), kpart(ilp), xpart(ilp), ypart(ilp), zpart(ilp), &
                                      wpart(1:nosubs,ilp),iptime(ilp),track(1:7,ilp)
                      else

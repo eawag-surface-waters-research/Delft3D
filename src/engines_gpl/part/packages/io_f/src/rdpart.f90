@@ -143,7 +143,6 @@
       open  ( newunit=ilun(i), file=lch(i), iostat=ios) ! File might already be open
       if (ios.ne.0 .and. ios.ne.5004) then
          write ( lun2, * ) ' Error opening PART input file'
-         write ( *   , * ) ' Error opening PART input file'
          call stop_exit(1)
       endif
       rewind (ilun(i))                          ! Be sure to rewind!
@@ -154,9 +153,6 @@
       if ( gettoken( filvers, ierr2 ) .ne. 0 ) goto 4001
       if ( filvers(1:19) .eq. 'delpar_version_3.60' ) filvers(1:19) = 'v3.60.00'
       if ( filvers(2:19) .lt. '3.66.00') then
-         write(*   ,'(2x,a  )') ' Obsolete input file '
-         write(*   ,'(2x,a,a)') ' Version found             : ',filvers(1:19)
-         write(*   ,'(2x,a,a)') ' Lowest version requested  : ','V3.66.00'
          write(lun2,'(2x,a  )') ' Obsolete input file '
          write(lun2,'(2x,a  )') ' Version found             : ',filvers(1:19)
          write(lun2,'(2x,a  )') ' Lowest version requested  : ','V3.66.00'
@@ -302,7 +298,6 @@
             endif
          case default
             write ( lun2, * ) ' Error: this vert.diff. option is not valid'
-            write ( *   , * ) ' Error: this vert.diff. option is not valid'
             call stop_exit(1)
       end select
       write ( lun2, * ) '   '
@@ -351,8 +346,6 @@
          case ( 3 )
             write(lun2,*) ' You are trying to use the red tide model, but the '
             write(lun2,*) ' red tide model is obsolete. Please contact Deltares. '
-            write(*,*) ' You are trying to use the red tide model, but the '
-            write(*,*) ' red tide model is obsolete. Please contact Deltares. '
             call stop_exit(1)
          case ( 4 )
             write(*,'(//)')
@@ -362,13 +355,10 @@
             if ( nosubs .lt. 3 ) then
                write ( lun2, * ) ' For oil module at least 3 substances '
                write ( lun2, * ) '(floating, dispersed and sticking oil)'
-               write ( *   , * ) ' For oil module at least 3 substances '
-               write ( *   , * ) '(floating, dispersed and sticking oil)'
                ierr = ierr + 1
             endif
             if ( nfract*3 .gt. nosubs ) then
                write ( lun2, * ) ' For oil module at least 3 subst per fraction'
-               write ( *   , * ) ' For oil module at least 3 subst per fraction'
                ierr = ierr + 1
             endif
             do i = 1, nfract*3
@@ -420,7 +410,6 @@
                   exit
                endif
                if ( jsub .eq. nosubs ) then
-                  write ( *   , * ) ' Error: sticking substance has no source ', substi(is)
                   write ( lun2, * ) ' Error: sticking substance has no source ', substi(is)
                   call stop_exit(1)
                endif
@@ -2031,7 +2020,6 @@
 !     stop when errors occured during reading
 
       if ( ierr .ne. 0 ) then
-         write (  *  , '(A,i3)' ) ' Number of errors in processing input file:', ierr
          write ( lun2, '(A,i3)' ) ' Number of errors in processing input file:', ierr
          call stop_exit(1)
       else
@@ -2466,76 +2454,52 @@
       call stop_exit(1)
 
 9000  write(lun2,*) ' Error: reading special features '
-      write(*   ,*) ' Error: reading special features '
       call stop_exit(1)
 9005  write(lun2,*) ' Error: reading value of max_wind_drag_depth constant'
-      write(*   ,*) ' Error: reading value of max_wind_drag_depth constant'
       call stop_exit(1)
 9006  write(lun2,*) ' Error: value of max_wind_drag_depth is less than zero'
-      write(*   ,*) ' Error: value of max_wind_drag_depth is less than zero'
       call stop_exit(1)
 9010  write(lun2,*) ' Error: value of max_restart_age constant'
-      write(*   ,*) ' Error: value of max_restart_age constant'
       call stop_exit(1)
 9011  write(lun2,*) ' Error: max_restart_age is zero. Did you specify a value?'
-      write(*   ,*) ' Error: max_restart_age is zero. Did you specify a value?'
       call stop_exit(1)
 
 9101  write(lun2,*) ' Error: found plastics_parameters, but this is not a plastics model (modtye /= 6 (model_prob_dens_settling) '
-      write(*   ,*) ' Error: found plastics_parameters, but this is not a plastics model (modtyp /= 6 (model_prob_dens_settling) '
       call stop_exit(1)
 9103  write(lun2,*) ' Error: expected substance name of a plastic to be specified '
-      write(*   ,*) ' Error: expected substance name of a plastic to be specified '
       call stop_exit(1)
 9104  write(lun2,*) ' Error: could not read plastic parameter correctly for ', trim(cplastic)
-      write(*   ,*) ' Error: could not read plastic parameter correctly for ', trim(cplastic)
       call stop_exit(1)
 9105  write(lun2,*) ' Error: zero or negative mean size specified for ', trim(cplastic)
-      write(*   ,*) ' Error: zero or negative mean size specified for ', trim(cplastic)
       call stop_exit(1)
 9106  write(lun2,*) ' Error: plastic "', trim(cplastic), '" was already defined! '
-      write(*   ,*) ' Error: plastic "', trim(cplastic), '" was already defined! '
       call stop_exit(1)
 9107  write(lun2,'(/A,I3,A)') '  Error: ', plmissing, ' plastic(s) is/are not parametrised! '
-      write(*   ,'(/A,I3,A)')  ' Error: ', plmissing, ' plastic(s) is/are not parametrised! '
       call stop_exit(1)
-9201  write(lun2,*) ' Error: expected leftside permeability of screeens!'
-      write(*   ,*) ' Error: expected leftside permeability of screeens!'
+9201  write(lun2,*) ' Error: expected leftside permeability of screens!'
       call stop_exit(1)
-9202  write(lun2,*) ' Error: expected rightside permeability of screeens!'
-      write(*   ,*) ' Error: expected rightside permeability of screeens!'
+9202  write(lun2,*) ' Error: expected rightside permeability of screens!'
       call stop_exit(1)
-9203  write(lun2,*) ' Error: expected screeens polygon file name!'
-      write(*   ,*) ' Error: expected screeens polygon file name!'
+9203  write(lun2,*) ' Error: expected screens polygon file name!'
 9204  write(lun2,*) ' Error: could not open screens polygon-file: '//trim(fiscreens)
-      write(*,*) ' Error: could not open screens polygon-file: '//trim(fiscreens)
       call stop_exit(1)
 9301  write(lun2,*) ' Error: reading part FM ini file name!'
-      write(*   ,*) ' Error: reading part FM ini file name!'
       call stop_exit(1)
 9302  write(lun2,*) ' Error: reading part FM elease file name!'
-      write(*   ,*) ' Error: reading part FM elease file name!'
       call stop_exit(1)
 9401  write(lun2,*) ' Error: found "IBMmodel" keyword, but this is not a IBM model (modtyp /= 7 (model_ibm)) '
-      write(*   ,*) ' Error: found "IBMmodel" keyword, but this is not a IBM model (modtyp /= 7 (model_ibm)) '
       call stop_exit(1)
 9402  write(lun2,*) ' Error: expected ibm model name!'
-      write(*   ,*) ' Error: expected ibm model name!'
       call stop_exit(1)
 9403  write(lun2,*) ' Error: no suitable ibm model name supplied!'
-      write(*   ,*) ' Error: no suitable ibm model name supplied!'
       call stop_exit(1)
 9404  write(lun2,*) ' Error: expected ibm stage development method name!'
-      write(*   ,*) ' Error: expected ibm stage development method name!'
       call stop_exit(1)
 9405  write(lun2,*) ' Error: no suitable stage delelopment method name supplied!'
-      write(*   ,*) ' Error: no suitable stage delelopment method name supplied!'
       call stop_exit(1)
 9406  write(lun2,*) ' Error: found "RevChron" keyword, but this is not a IBM model (modtyp /= 7 (model_ibm)) '
-      write(*   ,*) ' Error: found "RevChron" keyword, but this is not a IBM model (modtyp /= 7 (model_ibm)) '
       call stop_exit(1)
 9407  write(lun2,*) ' Error: expected stage of reversed release!'
-      write(*   ,*) ' Error: expected stage of reversed release!'
       call stop_exit(1)
 
       end
@@ -2584,9 +2548,6 @@
       read(lun,'(a)') line ! get last read line
       len_line = len_trim(line)
       len_file = len_trim(dis_file)
-      write(*     ,'(a,a)')  &
-        '           last line read : ',line(:len_line)
-      write(*     ,'(/a)') ' Please check file !!'
       write(lunlog,'(//a,a)')  &
         ' Error: problem while reading dis-file ',dis_file(:len_file)
       write(lunlog,'(a,a)')    &
@@ -2658,12 +2619,7 @@
 
 !     error handling
 
- 1000 write(*,'(//a,a)')  &
-        ' Error: problem while reading ini-file ',ini_file(:len_file)
-      write(*     ,'(//a,a,a,a)')  &
-        ' Error: could not find key ',key
-      write(*     ,'(/a)') ' Please check file !!'
-      write(lunlog,'(//a,a)')  &
+ 1000 write(lunlog,'(//a,a)')  &
         ' Error: problem while reading ini-file ',ini_file(:len_file)
       write(lunlog,'(//a,a,a,a)')  &
         ' Error: could not find key ',key
@@ -2675,21 +2631,13 @@
       read(lun,'(a)') line ! get last read line
       len_line = len_trim(line)
       len_file = len_trim(ini_file)
-      write(*     ,'(a,a)')  &
-        '           last line read : ',line(:len_line)
-      write(*     ,'(/a)') ' Please check file !!'
       write(lunlog,'(//a,a)')  &
         ' Error: problem while reading ini-file ',ini_file(:len_file)
       write(lunlog,'(a,a)')    &
         '          last line read : ',line(:len_line)
       write(lunlog,'(/a)') ' Please check file !!'
       call stop_exit(1)
- 1020 write(*,'(//a,a)')  &
-        ' Error: problem while reading ini-file ',ini_file(:len_file)
-      backspace lun
-      write(*     ,'(//a)') ' Error: premature end-of-file found'
-      write(*     ,'(/a )') ' Please check file !!'
-      write(lunlog,'(//a,a)')  &
+ 1020write(lunlog,'(//a,a)')  &
         ' Error: problem while reading ini-file ',ini_file(:len_file)
       write(lunlog,'(//a)') ' Error: premature end-of-file found'
       write(lunlog,'(/a )') ' Please check file !!'
@@ -2740,12 +2688,7 @@ subroutine getdim_asc ( lun , asc_file , npart_ini, nrowsmax , &
 
 !     error handling
 
- 1000 write(*,'(//a,a)')  &
-        ' Error: problem while reading ini-file ',asc_file(:len_file)
-      write(*     ,'(//a,a,a,a)')  &
-        ' Error: could not find key ',key
-      write(*     ,'(/a)') ' Please check file !!'
-      write(lunlog,'(//a,a)')  &
+ 1000 write(lunlog,'(//a,a)')  &
         ' Error: problem while reading ini-file ',asc_file(:len_file)
       write(lunlog,'(//a,a,a,a)')  &
         ' Error: could not find key ',key

@@ -54,6 +54,7 @@ module part14fm_mod
       use mathconsts, only: raddeg_hp, pi
       use physicalconsts, only: earth_radius
       use random_generator
+      use m_part_modeltypes
       implicit none
 
 !     Arguments
@@ -293,7 +294,7 @@ module part14fm_mod
             mpart (i) = mwasth
             xpart (i) = xwasth
             ypart (i) = ywasth
-            if ( modtyp .eq. 2 ) then
+            if ( modtyp .eq. model_two_layer_temp ) then
                t0buoy(i) = t0cf (ic)                    ! could be taken out of the particle loop
                abuoy (i) = 2.0*sqrt(acf(ic)*idelt)      ! even complete out of this routine
             else
@@ -385,13 +386,13 @@ module part14fm_mod
 
 !         give the particles a z-value within the layer
             if (jsferic .ne. 1) then ! in a sferic model, the zwaste is needed for conversion of sferic to cartesian (and vice cersa) , so setting the zpart cannot be used to set the layer or discharge depth.
-               if ( modtyp .eq. 2 ) then     ! .. two layer model use a pointe discharge (as in v3.00)
+               if ( modtyp .eq. model_two_layer_temp ) then     ! .. two layer model use a pointe discharge (as in v3.00)
                   if ( zwaste(ie) .gt. pblay ) then
                      zpart(i) = ( zwaste(ie) - pblay ) / ( 1.0 - pblay )
                   else
                      zpart(i) =  zwaste(ie)/pblay
                   endif
-               elseif ( modtyp .eq. 4 .and. laywaste(ie) .eq. 1 ) then   !   for one layer models (2dh),
+               elseif ( modtyp .eq. model_oil .and. laywaste(ie) .eq. 1 ) then   !   for one layer models (2dh),
                   zpart(i) = zwaste(ie)           !      the release will be in the user-defined location
                elseif ( nolay .eq. 1 ) then
                   zpart(i) = zwaste(ie)/100.0
@@ -403,7 +404,7 @@ module part14fm_mod
 
             do isub = 1, nosubs
                wpart (isub, i) = aconc(ie, isub)
-               if (modtyp .eq. 6) then
+               if (modtyp .eq. model_prob_dens_settling) then
                   rhopart(isub, i) = pldensity(isub)
                endif
             enddo

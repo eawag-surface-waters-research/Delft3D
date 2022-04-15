@@ -54,13 +54,6 @@ contains
 !>         NOTE:  The vertical distribution contains a bug by integer division. This
 !>         bug is not removed yet because it would disturb the test bench that is now needed.
 
-!     System administration : Antoon Koster
-
-!     Created               : February 1990 by Leo Postma
-
-!     Modified              : May      1996 by Robert Vos    : 3d version
-
-!     Note                  : none
 
 !     Logical unit numbers  : lun2 - output file to print statistics
 
@@ -70,6 +63,7 @@ contains
       use timers
       use grid_search_mod
       use spec_feat_par
+      use m_part_modeltypes
       implicit none
 
 !     Arguments
@@ -250,7 +244,7 @@ contains
 
 !    for one layer models (2dh), the release will be in the user-defined location
 
-            if ( modtyp .eq. 4 .and. kpart(i) .eq. 1 ) then
+            if ( modtyp .eq. model_oil .and. kpart(i) .eq. 1 ) then
                zpart(i) = zwasth
             elseif ( nolay .eq. 1 ) then
                zpart(i) = zwasth/100.0
@@ -265,7 +259,7 @@ contains
 
             do isub = 1, nosubs
                wpart( isub, i ) = aconc( id, isub )
-               if (modtyp .eq. 6) then
+               if (modtyp .eq. model_prob_dens_settling) then
                   rhopart(isub, i) = pldensity(isub)
                endif
             enddo
