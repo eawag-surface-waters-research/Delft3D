@@ -1060,7 +1060,7 @@
     nonLin   = inonLin(3)
  end if
 
- if (japure1D == 1 .or. japure1D == 2) then 
+ if (japure1D > 0) then
     call setisnbnodisnblin() ! set signarray isnbnod for left and rightneighbouring uc1d.
  endif
 

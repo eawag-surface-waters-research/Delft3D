@@ -130,11 +130,7 @@ subroutine furu()                                   ! set fu, ru and kfs
           gdxi  = agp*dxi(L)
           cu    = gdxi*teta(L)
           du    = dti*u0(L) - adve(L) + gdxi*slopec
-          if (jaPure1D == 4) then
-              ds    = s0(k2) + ds1u(2,L) - s0(k1) - ds1u(1,L)
-          else
-              ds    = s0(k2) - s0(k1)
-          endif
+          ds    = s0(k2) - s0(k1)
           if (teta(L) /= 1d0) then
              du = du - (1d0-teta(L))*gdxi*ds
           endif
