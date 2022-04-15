@@ -38,6 +38,6 @@
       integer          :: ncols, nv, nis, nie, jaauto
       COMMON /DEPMAX2/ VMAX,VMIN,DV,VAL(256),NCOLS(256),NV,NIS,NIE,JAAUTO
 
-      call isofil_cor (X, Y, Z, n4, NCOLR, VAL, NCOLS, NV)
+      call isofil_color (X, Y, Z, n4, NCOLR, VAL, NCOLS, NV)
 
    END subroutine isofilb
