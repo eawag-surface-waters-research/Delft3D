@@ -132,10 +132,6 @@ subroutine delete_drypoints_from_netgeom(dryptsfilelist, jaconfirm, jinside)
                   call fix_global_polygons(1,0)
                endif
 
-               if ( NPL.gt.100 ) then
-!                 split polygon
-               end if
-
                call pol_to_cellmask() ! third column in pol-file may be used to specify inside (1), or outside (0) mode, only 0 or 1 allowed.
                call delpol()
                call restorepol()
