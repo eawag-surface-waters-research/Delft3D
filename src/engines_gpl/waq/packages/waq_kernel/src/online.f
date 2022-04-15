@@ -50,10 +50,6 @@
 !     COMMON  /  SYSC   /   Pointers in character array workspace
 !
       INCLUDE 'sysc.inc'
-!
-!     Dynamical memory allocation
-!
-      INCLUDE 'fsm-fix.i'
 
       integer    itime
 
@@ -477,10 +473,6 @@
 !     COMMON  /  SYSC   /   Pointers in character array workspace
 !
       INCLUDE 'sysc.inc'
-!
-!     Dynamical memory allocation
-!
-      INCLUDE 'fsm-fix.i'
 
       integer    itime
 !

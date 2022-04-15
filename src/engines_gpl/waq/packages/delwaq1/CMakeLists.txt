@@ -19,7 +19,7 @@ set(delwaq_files ${waq_root_path}/packages/delwaq/src/delwaq1.F90
                  ${waq_root_path}/packages/delwaq/src/delwaq1_read_user_data.F90
                  ${waq_root_path}/packages/delwaq/src/delwaq1_write_messages.F90
                  ${waq_root_path}/packages/delwaq/src/delwaq1_close_lunfiles.F90
-                 ${waq_root_path}/packages/delwaq/src/getidentification.f
+                 ${waq_root_path}/packages/delwaq/src/getidentification.F90
                  ${waq_root_path}/packages/delwaq/src/delwaq_version.F90)
 
 # Set icon file

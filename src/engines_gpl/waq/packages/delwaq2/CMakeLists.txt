@@ -10,9 +10,12 @@ set(ini_version_file ${waq_version_path}/version_number.ini)
 set(fortran_version_file ${CMAKE_CURRENT_SOURCE_DIR}/src/delwaq2_version.F90)
 set(fortran_version_file_delwaq ${waq_root_path}/packages/delwaq/src/delwaq_version.F90)
 set(rc_version_file ${waq_version_path}/version_number_delwaq2.rc)
-set(delwaq_files ${waq_root_path}/packages/delwaq/src/delwaq2.f
+set(delwaq_files ${waq_root_path}/packages/delwaq/src/delwaq2.F90
+                 ${waq_root_path}/packages/delwaq/src/delwaq2_main_init.F90"/>
+                 ${waq_root_path}/packages/delwaq/src/delwaq2_main_finalise.F90"/>
+                 ${waq_root_path}/packages/delwaq/src/delwaq2_main.F90"/>
                  ${waq_root_path}/packages/delwaq/src/delwaq2_global_data.f90
-                 ${waq_root_path}/packages/delwaq/src/getidentification.f
+                 ${waq_root_path}/packages/delwaq/src/getidentification.F90
                  ${waq_root_path}/packages/delwaq/src/waq_mpi_processes_stubs.f90)
 
 # Set icon file

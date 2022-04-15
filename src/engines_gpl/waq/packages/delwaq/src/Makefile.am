@@ -36,9 +36,18 @@ libdelwaq_la_SOURCES = \
        delwaq2_global_data.f90 \
        waq_mpi_processes_stubs.f90 \
        delwaq_version.F90 \
-       getidentification.f \
-       delwaq1.f \
-       delwaq2.f \
+       getidentification.F90 \
+       delwaq1.F90 \
+       delwaq1_init.F90 \
+       delwaq1_unlock_username.F90 \
+       delwaq1_allocate_workspace.F90 \
+       delwaq1_read_user_data.F90 \
+       delwaq1_write_messages.F90 \
+       delwaq1_close_lunfiles.F90 \
+       delwaq2.F90 \
+       delwaq2_main.F90 \
+       delwaq2_main_init.F90 \
+       delwaq2_main_finalise.F90 \
        waq_bmi.F90 
 
 #-------------------------------------------------------------------------------

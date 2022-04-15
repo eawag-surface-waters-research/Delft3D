@@ -51,8 +51,18 @@
 		<File RelativePath="..\..\version\version_number.rc"/>
 		<File RelativePath="..\..\version\waq_icon.rc"/></Filter>
 		<Filter Name="Source Files" Filter="f90;for;f;fpp;ftn;def;odl;idl">
-		<File RelativePath=".\src\delwaq1.f"/>
-		<File RelativePath=".\src\delwaq2.f"/>
+		<File RelativePath=".\src\delwaq1.F90"/>
+		<File RelativePath=".\src\delwaq1_allocate_workspace.F90"/>
+		<File RelativePath=".\src\delwaq1_close_lunfiles.F90"/>
+		<File RelativePath=".\src\delwaq1_compute_space.F90"/>
+		<File RelativePath=".\src\delwaq1_init.F90"/>
+		<File RelativePath=".\src\delwaq1_read_user_data.F90"/>
+		<File RelativePath=".\src\delwaq1_unlock_username.F90"/>
+		<File RelativePath=".\src\delwaq1_write_messages.F90"/>
+		<File RelativePath=".\src\delwaq2.F90"/>
+		<File RelativePath=".\src\delwaq2_main_init.F90"/>
+		<File RelativePath=".\src\delwaq2_main_finalise.F90"/>
+		<File RelativePath=".\src\delwaq2_main.F90"/>
 		<File RelativePath=".\src\delwaq2_global_data.f90"/>
 		<File RelativePath=".\src\delwaq_version.F90">
 			<FileConfiguration Name="Debug|Win32">
@@ -63,7 +73,7 @@
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
 			<FileConfiguration Name="Release|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
-		<File RelativePath=".\src\getidentification.f"/>
+		<File RelativePath=".\src\getidentification.F90"/>
 		<File RelativePath=".\src\waq_mpi_processes_stubs.f90"/>
 		<File RelativePath=".\src\waq_bmi.F90">
 			<FileConfiguration Name="Debug|Win32">
