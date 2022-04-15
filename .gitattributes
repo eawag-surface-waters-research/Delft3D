@@ -860,6 +860,7 @@ src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_gui/isoceltri.f90 -t
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_gui/isocol.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_gui/isocol2.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_gui/isofil.f90 -text
+src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_gui/isofil_color.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_gui/isofilb.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_gui/isofiltri.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_gui/isoline.f90 -text
