@@ -35,6 +35,7 @@
       use part03_mod                 ! explicit interface
       use partini_mod
       use m_part_regular
+      use m_part_modeltypes
       implicit none
 
 !         Particle tracking
