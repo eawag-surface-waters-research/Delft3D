@@ -424,13 +424,13 @@
  character(len=255), allocatable   :: qhpliname(:)      !< name of the location extracted from the pli-file
  integer         , allocatable     :: L1qhbnd(:)        !< first  nbndz point in discharge bnd nqbnd
  integer         , allocatable     :: L2qhbnd(:)        !< second nbndz point in discharge bnd nqbnd
- double precision, allocatable, target :: qhbndz(:)     !< temporary array for storing boundary values per qh boundary segment
- double precision, allocatable, target :: qhbndz_plus(:)!< temporary array for calculating the slope of the QH relation
- double precision, allocatable, target :: qhbndz_min(:) !< temporary array for calculating the slope of the QH relation
- double precision, allocatable, target :: atqh_all(:)   !< temporary array for computing discharge through the QH boundary per domain
- double precision, allocatable, target :: q_org(:)      !< temporary array for saving the discharge through the QH boundary per domain
- double precision, allocatable, target :: qh_gamma(:)   !< temporary array for saving the slope of the QH-relation
- double precision, allocatable     :: atqh_sum(:)       !< temporary array for computing total discharge through qh boundary
+ double precision, allocatable, target  :: qhbndz(:)     !< temporary array for storing boundary values per qh boundary segment
+ double precision, allocatable          :: qhbndz_plus(:)!< temporary array for calculating the slope of the QH relation
+ double precision, allocatable          :: qhbndz_min(:) !< temporary array for calculating the slope of the QH relation
+ double precision, allocatable, target  :: atqh_all(:)   !< temporary array for computing discharge through the QH boundary per domain
+ double precision, allocatable          :: q_org(:)      !< temporary array for saving the discharge through the QH boundary per domain
+ double precision, allocatable          :: qh_gamma(:)   !< temporary array for saving the slope of the QH-relation
+ double precision, allocatable          :: atqh_sum(:)   !< temporary array for computing total discharge through qh boundary
 
  integer                                       :: nwbnd    !< number of wave-energy boundaries
  character(len=255), dimension(:), allocatable :: fnamwbnd !< polyline filenames associated with wave-energy boundary
