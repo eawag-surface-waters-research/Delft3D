@@ -929,7 +929,7 @@
             j    = nvert(2,iseg)
             if ( j .gt. 0 ) then                                      ! this is head of column
                ih1 = nvert(1,j)
-               if ( j .lt. nosegl ) then
+               if ( j .lt. noseg ) then
                   ih2 = nvert(1,j+1)
                else
                   ih2 = noseg+1
