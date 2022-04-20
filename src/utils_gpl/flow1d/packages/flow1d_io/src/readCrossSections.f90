@@ -310,7 +310,7 @@ module m_readCrossSections
       type(t_CSType), pointer       :: pCS
       character(len=IdLen), allocatable :: fricTypes(:)
       integer                       :: maxnumsections ! Max number of friction sections, to realloc some arrays
-      
+      integer                       :: jaFricId
       numstr = 0
       if (associated(md_ptr%child_nodes)) then
          numstr = size(md_ptr%child_nodes)
@@ -488,7 +488,19 @@ module m_readCrossSections
                   pCS%frictionSectionID(j) = ''
                enddo
             endif
-               
+         else
+            jaFricId = 0
+            do j = 1, pCs%frictionSectionsCount
+               if (len_trim(pCS%frictionSectionID(j)) > 1) then
+                  jaFricId = 1
+                  exit
+               end if
+            end do
+            if (jaFricId == 0) then
+               write(msgbuf, '(a,i0,a)') 'Incorrect CrossSection input for CrossSection Definition with type '//trim(typestr)//' and id: '//trim(id)// &
+                                               '. frictionId (or frictionIds)is not specified in section #', j, '.'
+               call err_flush()
+            end if
          endif
          success = .true.
          
