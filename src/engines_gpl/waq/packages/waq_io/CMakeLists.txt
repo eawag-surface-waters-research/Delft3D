@@ -17,9 +17,6 @@ add_library(${library_name} ${mpidum_files}
                             ${ods_files}
                             ${waq_io_files})
 
-# Set additional compilation properties
-target_compile_options(${library_name} PRIVATE "${extend_source132_flag}")
-
 # Set dependencies
 if(UNIX)
     # the `pkg_check_modules` function is created with this call
@@ -61,11 +58,8 @@ endif(WIN32)
 oss_include_libraries(${library_name} oss_dependencies)
 
 # Set additional compilation properties
-target_compile_options(${library_name} PRIVATE "${extend_source132_flag}")
-target_compile_options(${library_name} PRIVATE "${traceback_flag}")
-target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${floating_point_exeption_flag}>")
-target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${check_bounds_flag}>")
-target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${check_pointer}>")
+target_compile_options(${library_name} PRIVATE "${waq_default_flags}")
+target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${waq_debug_flags}>")
 
 # Define how the files should be structured within Visual Studio
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${mpidum_files}

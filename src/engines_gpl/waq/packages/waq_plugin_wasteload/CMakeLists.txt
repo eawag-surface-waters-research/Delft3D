@@ -41,9 +41,6 @@ prebuild_version_number(${library_name} ${fortran_version_file}
 set_source_files_properties(${fortran_version_file}
                             PROPERTIES COMPILE_OPTIONS "${file_preprocessor_flag}")
 
-# Set additional compilation properties
-target_compile_options(${library_name} PRIVATE "${extend_source132_flag}")
-
 # Set dependencies
 set(oss_dependencies    deltares_common
                         deltares_common_c
@@ -56,10 +53,9 @@ if(UNIX)
     target_link_libraries(${library_name} ${oss_dependencies})
 endif(UNIX)
 
-target_compile_options(${library_name} PRIVATE "${traceback_flag}")
-target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${floating_point_exeption_flag}>")
-target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${check_bounds_flag}>")
-target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${check_pointer}>")
+# Set additional compilation properties
+target_compile_options(${library_name} PRIVATE "${waq_default_flags}")
+target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${waq_debug_flags}>")
 
 # Define how the files should be structured within Visual Studio
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${source_files})
