@@ -58,19 +58,19 @@ function(prebuild_version_number library_name fortran_version_file svn_version_p
     message(STATUS "Adding prebuild event step for ${library_name}")
 
     if (UNIX)
-#       	if(EXISTS ${fortran_version_file})
-#		file(READ ${fortran_version_file} version_file_content)
-#		file(READ ${version_file} version_content)
-#		string(FIND "${version_file_content}" "${version_content}" versions_found)
-#
-#		message(STATUS ${versions_found})
-#
-#		if(${versions_found} GREATER_EQUAL 0)
-#		    message(STATUS "file and version match found, returning because no update is needed")
-#		    return()
-#		endif ()
-#	endif()
-	execute_process(COMMAND /bin/bash ${update_version_script_path} ${fortran_version_file} ${svn_version_path} ${version_file} ${checkout_src_root})
+        #       if(EXISTS ${fortran_version_file})
+        #           file(READ ${fortran_version_file} version_file_content)
+        #           file(READ ${version_file} version_content)
+        #           string(FIND "${version_file_content}" "${version_content}" versions_found)
+        #
+        #           message(STATUS ${versions_found})
+        #
+        #           if(${versions_found} GREATER_EQUAL 0)
+        #               message(STATUS "file and version match found, returning because no update is needed")
+        #               return()
+        #           endif()
+        #       endif()
+        execute_process(COMMAND /bin/bash ${update_version_script_path} ${fortran_version_file} ${svn_version_path} ${version_file} ${checkout_src_root})
     endif(UNIX)
     if (WIN32)
        IF(DEFINED ARGV4 AND ARGV4)
@@ -229,16 +229,18 @@ function(get_module_include_path module_path library_name return_include_path)
     set(${return_include_path} ${public_include_path} PARENT_SCOPE)
 endfunction()
 
+
+
 # configure_package_installer
 # Configures a package for installing.
 #
 # Argument
-# name			        : The name of the package.
-# description_file      : The file containing the description of the package.
-# mayor				    : The mayor version nr.
-# minor				    : The minor version nr.
-# build				    : The build version nr.
-# generator  		    : The generators to be used to build the package, seperated by ';'.
+# name              : The name of the package.
+# description_file  : The file containing the description of the package.
+# mayor             : The mayor version nr.
+# minor             : The minor version nr.
+# build             : The build version nr.
+# generator         : The generators to be used to build the package, seperated by ';'.
 function(configure_package_installer name description_file  mayor minor build generator)
   set(CPACK_VERBATIM_VARIABLES YES)
   set(CPACK_INCLUDE_TOPLEVEL_DIRECTORY OFF)
@@ -252,3 +254,17 @@ function(configure_package_installer name description_file  mayor minor build ge
   set(CPACK_GENERATOR "${generator}")
   include(CPack)
 endfunction(configure_package_installer)
+
+
+
+# set_rpath
+# Find all binaries in "targetDir" and set rpath to "rpathValue" in these binaries
+# This function is called from the "install_and_bundle.cmake" files
+#
+# Arguments
+# targetDir         : Name of the directory to search for binaries whose rpath needs to be set
+# rpathValue        : Value to which rpath needs to be set
+function(set_rpath targetDir rpathValue)
+  execute_process(COMMAND find "${targetDir}" -type f -exec bash -c "patchelf --set-rpath '${rpathValue}' $1" _ {} \; -exec echo "patched rpath of: " {} \;)
+endfunction(set_rpath)
+
