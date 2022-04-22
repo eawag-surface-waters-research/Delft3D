@@ -790,11 +790,19 @@ module m_readstructures
       success = .true.
       allocate(bridge)
       
-      bridge%pillarwidth = 0d0
-      bridge%outletlosscoeff = 0d0
+      bridge%bedLevel           = 0.0d0
+      bridge%pillarwidth        = 0d0
+      bridge%formfactor         = 0d0
+      bridge%allowedflowdir     = 0
       bridge%useOwnCrossSection = .false.
-      bridge%inletlosscoeff = 0d0
-      
+      bridge%pcross             => null()
+      bridge%crosssectionnr     = 0
+      bridge%bedFrictionType    = 0
+      bridge%bedFriction        = 0.0d0
+      bridge%length             = 0.0d0
+      bridge%inletlosscoeff     = 0d0
+      bridge%outletlosscoeff    = 0d0
+
       call prop_get_string(md_ptr, 'structure', 'allowedFlowDir', txt, success1)
       success = success .and. check_input_result(success1, st_id, 'allowedFlowDir')
       if (success) bridge%allowedflowdir = allowedFlowDirToInt(txt)
