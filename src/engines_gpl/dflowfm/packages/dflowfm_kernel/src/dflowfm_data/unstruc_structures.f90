@@ -446,7 +446,7 @@ subroutine fill_valstruct_perlink(valstruct, L, dir, istrtypein, istru, L0)
    ! 1. Generic values that apply to all structure types
    valstruct(1) = valstruct(1) + wu(L)
    
-   if (istru > 0 .and. .not. (istrtypein == ST_LONGCULVERT) ) then ! When it is not old weir and not old general structure and not a compound structure
+   if (istru > 0 .and. (istrtypein /= ST_LONGCULVERT) ) then ! When it is not old weir and not old general structure and not a compound structure
      in_compound = (network%sts%struct(istru)%compound > 0)
    end if
 
