@@ -1063,9 +1063,17 @@ end subroutine ecInstanceListSourceItems
          if (ndim==1) then
             select case (trim(units))
                case ('degrees_east','degree_east','degree_E','degrees_E','degreeE','degreesE')
+                  if (lon_varid > 0) then
+                     call setECmessage("redefinition of lon_varid; not supported")
+                     return
+                  end if
                   lon_varid = ivar
                   lon_dimid = dimids(1)
                case ('degrees_north','degree_north','degree_N','degrees_N','degreeN','degreesN')
+                  if (lat_varid > 0) then
+                     call setECmessage("redefinition of lat_varid; not supported")
+                     return
+                  end if
                   lat_varid = ivar
                   lat_dimid = dimids(1)
                case ('degrees')
