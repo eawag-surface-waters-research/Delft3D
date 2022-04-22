@@ -52,7 +52,7 @@
         write(0,'(a)') 'syntax: ec_module_test -c <config_file> [ -t <testname> | -l <listfilename>] [-v] [-s] [--no-compare] [--new-reference]'
         write(0,'(a)') '                                        [--data-format <fortran format string> ] [--time-format <fortran format string>]' 
         write(0,'(a)') 'Aruments:   -h                                    show (this) description'
-        write(0,'(a)') '            -v                                    verbose' 
+        write(0,'(a)') '            -v                                    verbose'
         write(0,'(a)') '            -s                                    stop current test on difference beyond tolerance'
         write(0,'(a)') '            -c <configfile>                       config file with defined tests (XML)'
         write(0,'(a)') '                                                  may be "internal" for internal unit tests.'
@@ -60,7 +60,7 @@
         write(0,'(a)') '            -l <listfilename>                     name of a list file with names of tests to be run'
         write(0,'(a)') '            --data-format <fortran format string> specifier for data (get-values) written to out'
         write(0,'(a)') '            --time-format <fortran format string> specifier for time written to out'
-        write(0,'(a)') '            --new-reference                       write the new reults to the reference location to accept the run as reference'
+        write(0,'(a)') '            --new-reference                       write the new results to the reference location to accept the run as reference'
         write(0,'(a)') '            --no-compare                          skip the comparison step, just run'
         write(0,'(a)')
         write(0,'(a)') 'N.B. The --new-reference flag implies --no-compare'

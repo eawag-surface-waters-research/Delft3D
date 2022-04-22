@@ -943,6 +943,7 @@ module time_module
       end function split_date_time
 
       !> parse a time string of the form "23:59:59.123" or "23:59:59" and return it as fraction of a day
+      !! ms and seconds are optional
       function parse_time(time, ok) result (fraction)
          character(len=*), intent(in)  :: time      !< input time string
          logical         , intent(out) :: ok        !< success flag
@@ -984,27 +985,31 @@ module time_module
             ipos1 = index(time, ':')
             ipos2 = index(time, ':', back=.true.)
             if (ipos2 == ipos1 .and. ipos2 > 0) then
-               continue ! found one ':' splitter
+               ! found one ':' splitter => 0 seconds
+               times(1) = time(1:ipos1-1)
+               times(2) = time(ipos1+1:)
+               times(3) = '00.000'
             else
                if (ipos2 == ipos1 .and. ipos2 < 1) then
                   ! found no splitters
                   times(1) = time(1:2)
                   times(2) = time(3:4)
                   times(3) = time(5:)
+                  if (times(3) == ' ') times(3) = '00.000'
                else
                   times(1) = adjustl(time(:ipos1-1))
                   times(2) = time(ipos1+1:ipos2-1)
                   times(3) = time(ipos2+1:)
                end if
-               do i = 1, nParts
-                  read(times(i), *, iostat=ierr) temp
-                  if (ierr /= 0 .or. temp >= invalidValues(i)) then
-                     exit
-                  end if
-                  fraction = fraction + temp * scaleValues(i)
-                  ok = (i == nParts)
-               end do
             end if
+            do i = 1, nParts
+               read(times(i), *, iostat=ierr) temp
+               if (ierr /= 0 .or. temp >= invalidValues(i)) then
+                  exit
+               end if
+               fraction = fraction + temp * scaleValues(i)
+               ok = (i == nParts)
+            end do
          end if
       end function parse_time
 
