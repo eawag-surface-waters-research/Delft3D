@@ -431,6 +431,8 @@ subroutine fill_valstruct_perlink(valstruct, L, dir, istrtypein, istru, L0)
    double precision :: qcmp
    logical :: in_compound
 
+   in_compound = .false.
+   
    if (istrtypein /= ST_LONGCULVERT) then
       if (dir > 0) then
          ku = ln(1,L)
@@ -444,26 +446,23 @@ subroutine fill_valstruct_perlink(valstruct, L, dir, istrtypein, istru, L0)
    ! 1. Generic values that apply to all structure types
    valstruct(1) = valstruct(1) + wu(L)
    
-   if (istru > 0) then ! When it is not old weir and not old general structure and not a compound structure
-      if (istrtypein == ST_LONGCULVERT) then
-         in_compound = .false.
-      else
-         in_compound = (network%sts%struct(istru)%compound > 0)
-      end if
-
-      if (in_compound) then ! for a structure that belongs to a compound structure
-         k1 = ln(1,L)
-         k2 = ln(2,L)
-         if (hu(L) > 0) then
-            qcmp = get_discharge_under_compound_struc(network%sts%struct(istru), L0, s1(k1), s1(k2), teta(L))
-         else
-            qcmp = 0d0
-         end if      
-         valstruct(2) = valstruct(2) + qcmp*dir      
-      else
-         valstruct(2) = valstruct(2) + q1(L)*dir
-      end if
+   if (istru > 0 .and. .not. (istrtypein == ST_LONGCULVERT) ) then ! When it is not old weir and not old general structure and not a compound structure
+     in_compound = (network%sts%struct(istru)%compound > 0)
    end if
+
+   if (in_compound) then ! for a structure that belongs to a compound structure
+     k1 = ln(1,L)
+     k2 = ln(2,L)
+     if (hu(L) > 0) then
+       qcmp = get_discharge_under_compound_struc(network%sts%struct(istru), L0, s1(k1), s1(k2), teta(L))
+     else
+       qcmp = 0d0
+     end if
+     valstruct(2) = valstruct(2) + qcmp*dir
+   else
+     valstruct(2) = valstruct(2) + q1(L)*dir
+   end if
+
    if (istrtypein /= ST_LONGCULVERT) then
       valstruct(3) = valstruct(3) + s1(ku)*wu(L)
       valstruct(4) = valstruct(4) + s1(kd)*wu(L)
