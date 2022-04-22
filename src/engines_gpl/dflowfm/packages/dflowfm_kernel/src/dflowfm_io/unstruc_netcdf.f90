@@ -11918,7 +11918,7 @@ subroutine md5_net_file(numlstart, numlcount)
 end subroutine md5_net_file
 
 !> Assigns the information, that has been read from a restart file and stored in array1, to a 2D array2.
-subroutine assign_info_to_2D_array(array1, array2, iloc, kmx, loccount, jamergedmap, iloc_own, jaWaqbot, wqbot3D_output)
+subroutine assign_restart_data_to_local_array(array1, array2, iloc, kmx, loccount, jamergedmap, iloc_own, jaWaqbot, wqbot3D_output)
    double precision, allocatable, intent(in   ) :: array1(:)      !< Array that contains information read from a restart file
    double precision, allocatable, intent(inout) :: array2(:,:)    !< Target 2D array
    integer,                       intent(in   ) :: iloc           !< Index of one dimension of the 2D array
@@ -11929,7 +11929,7 @@ subroutine assign_info_to_2D_array(array1, array2, iloc, kmx, loccount, jamerged
    integer,                       intent(in   ) :: jaWaqbot       !< It is a waq bottom variable (1) or not(0)
    integer,                       intent(in   ) :: wqbot3D_output !< Read 3D waq bottom variable (1) or not(0)
 
-   integer :: kk, kloc, k, kb, kt, nlayb, nrlay
+   integer :: kk, kloc, k, kb, kt
 
    do kk = 1, loccount
       if (jamergedmap == 1) then
@@ -11938,30 +11938,21 @@ subroutine assign_info_to_2D_array(array1, array2, iloc, kmx, loccount, jamerged
          kloc = kk
       end if
 
-      if (jaWaqbot == 0) then ! It is not a waq bottom variable
+      if (jaWaqbot == 0 .or. wqbot3D_output > 0) then ! It is not a 2D waq bottom variable
          if (kmx > 0) then
             call getkbotktop(kloc, kb, kt)
-            call getlayerindices(kloc, nlayb, nrlay)
             do k = kb, kt
                array2(iloc,k) = array1(k)
             end do
          else
             array2(iloc,kloc) = array1(kk)
          end if
-      else ! It is a waq bottom variable
-         if (wqbot3D_output > 0) then
-            call getkbotktop(kloc, kb, kt)
-            call getlayerindices(kloc, nlayb, nrlay)
-            do k = kb, kt
-               array2(iloc,k) = array1(k)
-            end do
-         else
-            call getkbotktop(kloc,kb,kt)
-            array2(iloc,kb) = array1(kk)
-         end if
+      else ! It is a 2D waq bottom variable
+         call getkbotktop(kloc,kb,kt)
+         array2(iloc,kb) = array1(kk)
       end if
    enddo
-end subroutine assign_info_to_2D_array
+end subroutine assign_restart_data_to_local_array
 
 !> Reads a single array variable from a map file, and optionally,
 !! if it was a merged map file from parallel run, reshift the read
@@ -12713,7 +12704,7 @@ subroutine unc_read_map_or_rst(filename, ierr)
        if (ierr /= nf90_noerr) then
           call mess(LEVEL_WARN, 'unc_read_map_or_rst: cannot read variable sa1 from the specified restart file. Skip reading this variable.')
        else
-          call assign_info_to_2D_array(sa1, constituents, isalt, kmx, um%ndxi_own, um%jamergedmap, um%inode_own, 0, 0)
+          call assign_restart_data_to_local_array(sa1, constituents, isalt, kmx, um%ndxi_own, um%jamergedmap, um%inode_own, 0, 0)
        end if
     endif
 
@@ -12731,7 +12722,7 @@ subroutine unc_read_map_or_rst(filename, ierr)
        if (ierr /= nf90_noerr) then
           call mess(LEVEL_WARN, 'unc_read_map_or_rst: cannot read variable tem1 from the specified restart file. Skip reading this variable.')
        else
-          call assign_info_to_2D_array(tem1, constituents, itemp, kmx, um%ndxi_own, um%jamergedmap, um%inode_own, 0, 0)
+          call assign_restart_data_to_local_array(tem1, constituents, itemp, kmx, um%ndxi_own, um%jamergedmap, um%inode_own, 0, 0)
        end if
     endif
 
@@ -12756,7 +12747,7 @@ subroutine unc_read_map_or_rst(filename, ierr)
           if (ierr /= nf90_noerr) then
              call mess(LEVEL_WARN, 'unc_read_map_or_rst: cannot read variable '''//trim(tmpstr)//''' from the specified restart file. Skip reading this variable.')
           else
-             call assign_info_to_2D_array(tmpvar1D, constituents, iconst, kmx, um%ndxi_own, um%jamergedmap, um%inode_own, 0, 0)
+             call assign_restart_data_to_local_array(tmpvar1D, constituents, iconst, kmx, um%ndxi_own, um%jamergedmap, um%inode_own, 0, 0)
           end if
        enddo
     endif
@@ -12781,7 +12772,7 @@ subroutine unc_read_map_or_rst(filename, ierr)
           if (ierr /= nf90_noerr) then
              call mess(LEVEL_WARN, 'unc_read_map_or_rst: cannot read variable '''//trim(tmpstr1)//''' from the specified restart file. Skip reading this variable.')
           else
-             call assign_info_to_2D_array(tmpvar1D, wqbot, iwqbot, kmx, um%ndxi_own, um%jamergedmap, um%inode_own, 1, wqbot3D_output)
+             call assign_restart_data_to_local_array(tmpvar1D, wqbot, iwqbot, kmx, um%ndxi_own, um%jamergedmap, um%inode_own, 1, wqbot3D_output)
           end if
        enddo
     endif
