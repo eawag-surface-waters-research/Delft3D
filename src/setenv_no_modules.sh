@@ -44,6 +44,10 @@ export PKG_CONFIG_PATH=/opt/apps/gdal/3.1.2_gcc7.3.0/lib/pkgconfig:$PKG_CONFIG_P
 export PATH=/opt/apps/svn/1.9.12serf_gcc7.3.0/bin:$PATH
 export LD_LIBRARY_PATH=/opt/apps/serf/1.3.9_gcc7.3.0/lib:$LD_LIBRARY_PATH
 
+# patchelf:
+export PATH=/opt/apps/patchelf/0.12/bin:$PATH
+
+
 echo "Export environment variables"
 if [ "$1" == "intel21" ]; then
      export FC=mpiifort
