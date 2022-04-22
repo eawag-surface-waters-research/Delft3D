@@ -279,6 +279,9 @@ module m_readStorageNodes
                call interpolateStringToInteger(sInterpolate, interpol)
             end if
             
+            if (storageLevels(1) == -999d0) then
+               call SetMessage(LEVEL_ERROR, 'Bed Level for storage node ' // trim(storgNodeId) // ' was set to missing value -999.0, which is not supported for storage nodes. Please enter an actual value.')
+            endif
             if (storageAreas(1) <= 0d0) then
                call setMessage(LEVEL_ERROR, 'Area at Bed Level for storage node ' // trim(storgNodeId) // ' <= 0.0. Please enter a positive value')
             endif
