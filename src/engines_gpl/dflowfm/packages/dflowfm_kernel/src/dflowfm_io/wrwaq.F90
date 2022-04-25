@@ -2040,18 +2040,14 @@ subroutine waq_make_aggr_lnk()
     implicit none
     
     integer :: dseg, dbnd, isrc
-    integer :: L, LL, Lb, Lbb, Ltx, ip, ipa, ip1, ip2, ip3, ip4, iq
+    integer :: L, LL, Lb, Lbb, Ltx, ip, ipa, ip1, ip2, iq
     integer :: k, kk, kb, kt, ktx
     
 ! first 2D
     waqpar%noq12  = 0
     do L=1,lnx
-        ip1   = waqpar%iapnt(ln(1,L))
-        ip2   = waqpar%iapnt(ln(2,L))
-        ip3 = 0
-        if(klnup(1,L) /= 0) ip3 = waqpar%iapnt(abs(klnup(1,L))) ! abs to correct single value weighting flag.
-        ip4 = 0
-        if(klnup(4,L) /= 0) ip4 = waqpar%iapnt(abs(klnup(4,L))) ! abs to correct single value weighting flag.
+        ip1 = waqpar%iapnt(ln(1,L))
+        ip2 = waqpar%iapnt(ln(2,L))
 
         if ( (ip1 > 0 .or. ip2 > 0) .and. ip1 /= ip2 ) then
             ip = 0
@@ -2059,14 +2055,10 @@ subroutine waq_make_aggr_lnk()
                 do iq = 1 , waqpar%noq12
                     if (waqpar%ifrmto(1,iq) == ip1 .and. waqpar%ifrmto(2,iq) == ip2) then
                         ip =  iq
-                        waqpar%ifrmto(3,iq) = 0
-                        waqpar%ifrmto(4,iq) = 0
                         exit
                     endif
                     if (waqpar%ifrmto(1,iq) == ip2 .and. waqpar%ifrmto(2,iq) == ip1) then
                         ip = -iq
-                        waqpar%ifrmto(3,iq) = 0
-                        waqpar%ifrmto(4,iq) = 0
                         exit
                     endif
                 enddo
@@ -2075,8 +2067,6 @@ subroutine waq_make_aggr_lnk()
                 waqpar%noq12 = waqpar%noq12 + 1
                 waqpar%ifrmto(1,waqpar%noq12) = ip1
                 waqpar%ifrmto(2,waqpar%noq12) = ip2
-                waqpar%ifrmto(3,waqpar%noq12) = ip3
-                waqpar%ifrmto(4,waqpar%noq12) = ip4
                 waqpar%iqaggr(L) = waqpar%noq12
             else
                 waqpar%iqaggr(L) = ip
@@ -2091,8 +2081,6 @@ subroutine waq_make_aggr_lnk()
         do isrc = 1, waqpar%numsrcwaq
           waqpar%ifrmto(1,waqpar%noq12 + isrc) = waqpar%ifrmtosrc(1, isrc)
           waqpar%ifrmto(2,waqpar%noq12 + isrc) = waqpar%ifrmtosrc(2, isrc)
-          waqpar%ifrmto(3,waqpar%noq12 + isrc) = 0
-          waqpar%ifrmto(4,waqpar%noq12 + isrc) = 0
         enddo
       endif
       waqpar%noq12s = waqpar%noq12 + waqpar%numsrcwaq
@@ -2114,8 +2102,6 @@ subroutine waq_make_aggr_lnk()
                     if (waqpar%ifrmto(1,ipa) < 0) waqpar%ifrmto(1,iq) = waqpar%ifrmto(1,ipa) - dbnd
                     if (waqpar%ifrmto(2,ipa) > 0) waqpar%ifrmto(2,iq) = waqpar%ifrmto(2,ipa) + dseg
                     if (waqpar%ifrmto(2,ipa) < 0) waqpar%ifrmto(2,iq) = waqpar%ifrmto(2,ipa) - dbnd
-                    if (waqpar%ifrmto(3,ipa) > 0) waqpar%ifrmto(3,iq) = waqpar%ifrmto(3,ipa) + dseg
-                    if (waqpar%ifrmto(4,ipa) > 0) waqpar%ifrmto(4,iq) = waqpar%ifrmto(4,ipa) + dseg
                 end if
             end do
             Lbb = Ltx - waqpar%kmxnxa + 1
@@ -2141,8 +2127,6 @@ subroutine waq_make_aggr_lnk()
           do isrc = 1, waqpar%numsrcwaq
             waqpar%ifrmto(1,waqpar%noq12 + isrc) = waqpar%ifrmtosrc(1, isrc)
             waqpar%ifrmto(2,waqpar%noq12 + isrc) = waqpar%ifrmtosrc(2, isrc)
-            waqpar%ifrmto(3,waqpar%noq12 + isrc) = 0
-            waqpar%ifrmto(4,waqpar%noq12 + isrc) = 0
           enddo
         endif
         waqpar%noq12s = waqpar%noq12 + waqpar%numsrcwaq
