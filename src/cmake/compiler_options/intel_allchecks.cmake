@@ -46,7 +46,7 @@ if (UNIX)
 
     set(file_preprocessor_flag -fpp)
     set(check_bounds_flag -check bounds)
-    set(check_pointer /check:pointers)
+    set(check_pointer -check pointers)
     set(openmp_flag -qopenmp)
     set(generate_reentrancy_threaded_flag -reentrancy threaded)
     set(floating_point_exception_flag -fpe0)
