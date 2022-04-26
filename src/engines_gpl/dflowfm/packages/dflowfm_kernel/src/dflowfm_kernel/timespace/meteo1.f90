@@ -6893,10 +6893,10 @@ module m_meteo
       dataPtr3 => null()
       dataPtr4 => null()
       select case (trim(qidname))
-         case ('windx')
+         case ('windx', 'stressx')
             itemPtr1 => item_windx
             dataPtr1 => wx
-         case ('windy')
+         case ('windy', 'stressy')
             itemPtr1 => item_windy
             dataPtr1 => wy
          case ('windxy', 'stressxy')
@@ -7933,6 +7933,20 @@ module m_meteo
                sourceItemName = 'northward_wind'
             else
                call mess(LEVEL_FATAL, 'm_meteo::ec_addtimespacerelation: Unsupported filetype for quantity windy.')
+               return
+            end if
+         case ('stressx')
+            if (ec_filetype == provFile_netcdf) then
+               sourceItemName = 'surface_downward_eastward_stress'
+            else
+               call mess(LEVEL_FATAL, 'm_meteo::ec_addtimespacerelation: stressx only implemented for NetCDF.')
+               return
+            end if
+         case ('stressy')
+            if (ec_filetype == provFile_netcdf) then
+               sourceItemName = 'surface_downward_northward_stress'
+            else
+               call mess(LEVEL_FATAL, 'm_meteo::ec_addtimespacerelation: stressy only implemented for NetCDF.')
                return
             end if
          case ('stressxy')

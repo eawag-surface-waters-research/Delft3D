@@ -1461,12 +1461,13 @@ if (mext /= 0) then
             endif
             jagrainlayerthicknessspecified = 1
 
-        else if (qid == 'windx' .or. qid == 'windy' .or. qid == 'windxy' .or. qid == 'stressxy') then
+        else if (qid == 'windx' .or. qid == 'windy' .or. qid == 'windxy' .or. &
+                 qid == 'stressxy' .or. qid == 'stressx' .or. qid == 'stressy') then
 
-           jawindstressgiven = merge(1, 0, qid == 'stressxy')
+           jawindstressgiven = merge(1, 0, qid(1:6) == 'stress')
            success = (.not. (jawindstressgiven == 1 .and. kmx > 0))
            if (.not. success) then
-              msgbuf = "Quantity 'stressxy' not implemented for 3D (yet)"
+              msgbuf = "Quantity 'stress(x/y)' not implemented for 3D (yet)"
               call err_flush()
            endif
 
