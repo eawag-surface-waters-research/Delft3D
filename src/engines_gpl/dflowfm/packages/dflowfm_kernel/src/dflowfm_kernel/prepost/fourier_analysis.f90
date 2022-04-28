@@ -453,6 +453,9 @@ module m_fourier_analysis
        case ('vog')
           founam(ifou)   = 'vog'
           fouref(ifou,1) = fouid
+       case ('q1')
+          founam(ifou)   = 'q1'
+          fouref(ifou,1) = fouid
        case default                    ! constituent, anything else
           if ( .not. ReadConstituentNumber(founam(ifou), fconno(ifou))) then
              msgbuf = 'Unable to initialize fourier analysis for ''' // trim(founam(ifou)) // '''.'
@@ -857,7 +860,7 @@ function name_dependent_size(fourier_name) result(nmaxus)
         nmaxus = ndx
    case('ws')
         nmaxus = lnx
-   case('u1')
+   case('u1', 'q1')
         nmaxus = lnkx
    case('qxk')
         nmaxus = lnx
@@ -901,6 +904,8 @@ subroutine setfouunit(founam, lsal, ltem, fconno, fouvarunit)
        else
           fouvarunit = 'kg m-3'
        endif
+    case ('q1')
+       fouvarunit = 'm3 s-1'
     case default
        fouvarunit = ' '
     end select
@@ -1247,7 +1252,7 @@ end subroutine setfoustandardname
        !
        else
           select case (columns(1))
-          case ('ws', 'ct', 'ux', 'uy', 'uxa', 'uya', 'uc', 'cs', 'bs', 'fb', 'wdog', 'vog')
+          case ('ws', 'ct', 'ux', 'uy', 'uxa', 'uya', 'uc', 'cs', 'bs', 'fb', 'wdog', 'vog', 'q1')
              nofou    = nofou + 1
              nofouvar = nofouvar + nofouvarstep
           case default
@@ -1418,6 +1423,8 @@ end subroutine setfoustandardname
           fieldptr => hsOnGround     ! waterdepth above ground
        case ('vog')
           fieldptr => volOnGround    ! volume above ground
+       case ('q1')
+          fieldptr => q1
        case default
           fieldptr => null()         ! Unknown FourierVariable exception
        end select
@@ -1571,6 +1578,9 @@ end subroutine setfoustandardname
            case ('vog')
               unc_loc = UNC_LOC_S
               namfun = 'volume_on_ground'
+           case ('q1')
+              unc_loc = UNC_LOC_U
+              namfun = 'discharge through flow link'
            end select
 
            is_min_max_avg = .true.
