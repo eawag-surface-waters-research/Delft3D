@@ -2858,7 +2858,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     if (writeall .or. jaPure1D > 0) then
        call prop_set(prop_ptr, 'numerics', 'Pure1D'        , jaPure1D, 'along 1D channels: 0 = 2D Perot, 1 = 1D Perot using vol1_f, 2 = 1D Perot using vol1, 3 and 4 = 1D links')
        if (jaPure1D > 2) then
-           call mess(LEVEL_WARNING, 'Pure1D options > 2 temporarily not supported.')
+           call mess(LEVEL_WARN, 'Pure1D options > 2 temporarily not supported.')
        endif
        call prop_set(prop_ptr, 'numerics', 'Junction1D'    , jaJunction1D, 'at 1D junctions: 0 = org 1D advec, 1 = same as along 1D channels')
     endif
