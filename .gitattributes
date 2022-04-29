@@ -3565,7 +3565,6 @@ src/engines_gpl/waq/packages/delwaq/src/Makefile.am -text
 src/engines_gpl/waq/packages/delwaq/src/delwaq1.F90 -text
 src/engines_gpl/waq/packages/delwaq/src/delwaq1_allocate_workspace.F90 -text
 src/engines_gpl/waq/packages/delwaq/src/delwaq1_close_lunfiles.F90 -text
-src/engines_gpl/waq/packages/delwaq/src/delwaq1_compute_space.F90 -text
 src/engines_gpl/waq/packages/delwaq/src/delwaq1_init.F90 -text
 src/engines_gpl/waq/packages/delwaq/src/delwaq1_read_user_data.F90 -text
 src/engines_gpl/waq/packages/delwaq/src/delwaq1_unlock_username.F90 -text
