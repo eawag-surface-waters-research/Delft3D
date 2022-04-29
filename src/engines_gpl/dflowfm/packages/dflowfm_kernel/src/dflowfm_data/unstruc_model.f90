@@ -515,7 +515,9 @@ subroutine loadModel(filename)
           call loadLongCulvertsAsNetwork(fnames(ifil), 1, istat)
         end do
         deallocate(fnames)
-        if (.not. newculverts) call finalizeLongCulvertsInNetwork()
+        if (.not. newculverts .and. nlongculvertsg > 0) then
+           call finalizeLongCulvertsInNetwork()
+        end if
       endif
     endif
     call timstop(timerHandle)
