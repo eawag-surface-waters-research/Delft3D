@@ -666,13 +666,10 @@ contains
          enddo
       endif
 
-      
-      ! Update the profile data
-      
-
+if (newculverts) then
       do ilongc = 1, nlongculvertsg
          do i = 2, longculverts(ilongc)%numlinks-1
-            Lf = abs(longculverts(ilongc)%flowlinks(i))
+            Lf = abs(longculverts(ilongc)%flowlinks(i))         
             k1 = ln(1,Lf)
             k2 = ln(2,Lf)
             bob(1, Lf) = longculverts(ilongc)%bl(i-1)
@@ -687,6 +684,7 @@ contains
             else
                bl(k2) = min(bl(k2), bob(2,Lf))
             end if
+         
          enddo
          Lf = abs(longculverts(ilongc)%flowlinks(1))
          wu(Lf) = longculverts(ilongc)%width
@@ -694,12 +692,43 @@ contains
          prof1D(2,Lf)  = longculverts(ilongc)%height
          prof1D(3,Lf)  =  -2 
          
-         Lf = abs(longculverts(ilongc)%flowlinks(longculverts(ilongc)%numlinks))           
+         Lf = abs(longculverts(ilongc)%flowlinks(longculverts(ilongc)%numlinks))
          wu(Lf) = longculverts(ilongc)%width
          prof1D(1,Lf)  = wu(Lf)
          prof1D(2,Lf)  = longculverts(ilongc)%height
-         prof1D(3,Lf)  =  -2
+         prof1D(3,Lf)  =  -2 
       enddo
+else !voor nu houden we de oude implementatie intact
+  do ilongc = 1, nlongculvertsg
+         do i = 1, longculverts(ilongc)%numlinks
+            Lf = abs(longculverts(ilongc)%flowlinks(i))
+            !if (kcu(lf) == 1) then ! TODO: UNST-5433: change when 1d2d links are *extra* in addition to culvert polyline
+            k1 = ln(1,Lf)
+            k2 = ln(2,Lf)
+            
+            bob(1, Lf) = longculverts(ilongc)%bl(i)
+            bob(2, Lf) = longculverts(ilongc)%bl(i+1)
+            if (k1 > ndx2d) then
+               bl(k1) = bob(1,Lf)
+            else
+            bl(k1) = min(bl(k1), bob(1,Lf))
+            end if
+            if (k2 > ndx2d) then
+               bl(k2) = bob(2,Lf)
+            else
+            bl(k2) = min(bl(k2), bob(2,Lf))
+            end if
+         
+      
+            wu(Lf) = longculverts(ilongc)%width
+            prof1D(1,Lf)  = wu(Lf)
+            prof1D(2,Lf)  = longculverts(ilongc)%height
+            prof1D(3,Lf)  =  2                                      ! for now, simple rectan
+
+            !endif
+         enddo
+      enddo
+endif
 
    end subroutine longculvertsToProfs
 
