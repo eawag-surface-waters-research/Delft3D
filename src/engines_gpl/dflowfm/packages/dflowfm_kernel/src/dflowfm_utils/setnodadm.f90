@@ -38,23 +38,38 @@
 subroutine setnodadm(jacrosscheck_)
    use gridoperations
    use m_network
-   use m_save_ugrid_state, only: contactnlinks, contactnetlinks
+   use m_save_ugrid_state, only: contactnlinks, contactnetlinks, hashlist_contactids
    use network_data
    use unstruc_channel_flow
 
    integer, intent(in   ) :: jacrosscheck_ !< Whether or not to remove any crossing netlinks.
 
-   integer :: L, LL, Lnew
+   integer :: L, LL, Lnew, Ltoberemoved, Linc
 
 
    call setnodadm_grd_op(10+jacrosscheck_)
 
    ! Update netlink numbers for all 1d2d contacts, after netlinks may have been permuted:
    if (contactnlinks > 0) then
+      Ltoberemoved = 1 ! used later, for checking if the lenght is 0
       do LL=1,contactnlinks
          L = contactnetlinks(LL)
          Lnew = Lperminv(L)
          contactnetlinks(LL) = Lnew
+
+         ! Check if this link's length is 0.
+         ! If L is in array LC (filled in subroutine setnodadm_grd_op), then this link has 0 length and we write a warning message.
+         do Linc = Ltoberemoved, numremoved
+            if (LC(Linc) > L) then ! Link numbers in LC are ascending
+               exit
+            else if (LC(Linc) == L) then ! 1D2D link #LL was removed by setnodadm_grd_op()
+               write (msgbuf, '(a,a,a,i0,a)') '1D2D contact link''', trim(hashlist_contactids%id_list(LL)), '''has length of 0, this link will be ignored (removed).'
+               call warn_flush()
+
+               Ltoberemoved = Linc + 1 ! remember for next LL loop.
+               exit
+            end if
+         end do
       end do
    end if
 
