@@ -49,10 +49,10 @@
       data     first /.true./
       data     opkom  / &
       '+-----------------------------------------------------------------------+', &
-      '|                      D e l f t 3 D - D E L W A Q                      |', &
+      '|                      Delft3D / D-HYDRO - DELWAQ                       |', &
       '|                                                                       |', &
-      '| D-Water Quality         Water quality simulation in 1D/2D/3D models   |', &
-      '| D-Ecology               Algae simulation in 1D/2D/3D models           |', &
+      '| D-Water Quality         Water quality simulation and                  |', &
+      '|                         algae simulation in 1D/2D/3D models           |', &
       '|                                                                       |', &
       '| Version xx.xxxx  xx-xx-xxxx                                           |', &
       '+-----------------------------------------------------------------------+'/
