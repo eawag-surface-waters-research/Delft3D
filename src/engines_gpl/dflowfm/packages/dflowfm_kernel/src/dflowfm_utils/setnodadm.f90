@@ -63,7 +63,7 @@ subroutine setnodadm(jacrosscheck_)
             if (LC(Linc) > L) then ! Link numbers in LC are ascending
                exit
             else if (LC(Linc) == L) then ! 1D2D link #LL was removed by setnodadm_grd_op()
-               write (msgbuf, '(a,a,a,i0,a)') '1D2D contact link''', trim(hashlist_contactids%id_list(LL)), '''has length of 0, this link will be ignored (removed).'
+               write (msgbuf, '(a,a,a)') '1D2D contact link ''', trim(hashlist_contactids%id_list(LL)), ''' has length of 0, this link will be ignored (removed).'
                call warn_flush()
 
                Ltoberemoved = Linc + 1 ! remember for next LL loop.
