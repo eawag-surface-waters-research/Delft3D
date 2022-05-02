@@ -82,7 +82,7 @@ contains
 !                             lun2 - output log file
 !
 !
-!     subroutines called    : part11 - converts model cooordinates to
+!     subroutines called    : part11 - converts model coordinates to
 !                                      national grid and plot coordinates,
 !                             dlwq12 - writes history file (lun1+nefis)
 !                             openfl - opens a binary/unformatted file

@@ -67,7 +67,7 @@ contains
 !     logical unit numbers  : lun1 - plot grid file
 !                             lun2 - output log file
 
-!     subroutines called    : part11 - converts model cooordinates to
+!     subroutines called    : part11 - converts model coordinates to
 !                                      national grid and plot coordinates,
 !                             putget
 !                             putget_chars

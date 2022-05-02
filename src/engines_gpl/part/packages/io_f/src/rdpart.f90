@@ -2093,14 +2093,14 @@
  2259 format(8x,'Station name :',a20  )
  2260 format(12x,'Release time            =',   &
                          i4,'D-',i2.2,'H-',i2.2,'M-',i2.2,'S.')
- 2280 format(12x,'Coordinates             = (',f11.2,',',f11.2,')'/  &
-             12x,'Depth(%) under surface  =  ',f11.0)
- 2281 format(12x,'Coordinates             = (',f11.2,',',f11.2,')'/  &
+ 2280 format(12x,'Coordinates             = (',f11.4,',',f11.4,')'/  &
+             12x,'Depth(%) under surface  =  ',f11.1)
+ 2281 format(12x,'Coordinates             = (',f11.4,',',f11.4,')'/  &
              12x,'Layer                   =  ',i11  )
- 2282 format(12x,'Initial radius          =   ',f11.0, ' m.',/,      &
-             12x,'Percentage of particles =   ',f11.0, ' %')
+ 2282 format(12x,'Initial radius          =   ',f11.2, ' m.',/,      &
+             12x,'Percentage of particles =   ',f11.1, ' %')
  2283 format(12x,'Release in polygon      =   ',A,' (The coordinates above are ignored)'/, &
-             12x,'Percentage of particles =   ',f11.0, ' %')
+             12x,'Percentage of particles =   ',f11.1, ' %')
  2289 format(12x,'Released masses : ')
  2290 format(20x,'  Substance : ',a20,e13.4,'  kg/m3')
  2300 format(/'  Number of continuous release stations:', i2  /       )
