@@ -636,6 +636,7 @@ module m_oned_functions
          if (hs(k1) > 1d-2) then
             ! NOTE: pump area-weighting across links is uniform for all links (au=1).
             au(L) = 1d0
+            hu(L) = 1d0 ! UNST-5835: restored original hu(L) = 1d0, originally set in furu(). Currently furu() resets it to 0d0 already while treating "old" structures.
             ap    = ap + au(L)
             vp1    = vp1 + vol1(k1)
             vp2    = vp2 + vol1(k2)
