@@ -158,7 +158,6 @@ module m_oned_functions
       use messageHandling
       use precision_basics, only: comparereal
       use m_GlobalParameters, only: flow1d_eps10
-      use network_data, only: nump1d2d, nump, netcell
 
       implicit none
 
@@ -169,19 +168,10 @@ module m_oned_functions
       integer :: i
       integer :: k1, k2
       integer :: is, ip1, ip2
-      integer :: numk1d
       type(t_branch), pointer                 :: pbr
       integer, dimension(:), pointer          :: lin
       integer, dimension(:), pointer          :: grd
-      integer, allocatable :: netnode_to_flownode(:)
 
-      numk1d = nump1d2d - nump
-      allocate(netnode_to_flownode(numk1d))
-      do i=nump+1,nump1d2d
-         k1 = netcell(i)%nod(1)
-         netnode_to_flownode(k1) = i
-      end do
-      
       ! First reset the gridnumber of all network nodes.
       ! These nodes are exactly the set into which the branches's fromNode/toNode are pointing.
       do inod = 1,network%nds%count
@@ -193,8 +183,8 @@ module m_oned_functions
          pbr => network%brs%branch(ibr)
 
          ! Set flow node numbers via all flow link numbers on current branch.
-         ! NONONO: When uPointsCount == 0, any "orphan" flow node numbers will be set via another branch on which they *do* lie.
-         if (pbr%gridPointsCount > 0) then
+         ! When uPointsCount == 0, any "orphan" flow node numbers will be set via another branch on which they *do* lie.
+         if (pbr%uPointsCount > 0) then
             call realloc(pbr%lin, pbr%uPointsCount)
             call realloc(pbr%grd, pbr%gridPointsCount)
             lin => pbr%lin
@@ -646,7 +636,6 @@ module m_oned_functions
          if (hs(k1) > 1d-2) then
             ! NOTE: pump area-weighting across links is uniform for all links (au=1).
             au(L) = 1d0
-            hu(L) = 1d0 ! UNST-5835: restored original hu(L) = 1d0, originally set in furu(). Currently furu() resets it to 0d0 already while treating "old" structures.
             ap    = ap + au(L)
             vp1    = vp1 + vol1(k1)
             vp2    = vp2 + vol1(k2)
