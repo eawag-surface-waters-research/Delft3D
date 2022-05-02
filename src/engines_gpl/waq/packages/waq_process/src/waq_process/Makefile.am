@@ -194,6 +194,7 @@ libwaq_process_la_SOURCES = \
        macnut.f90 \
        covmac.f \
        respup.f \
+       resbuf.f90 \
        dredge.f \
        floceq.f90
 

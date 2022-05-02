@@ -1065,6 +1065,17 @@ outppr,outpit,outpnm,outpdo,outpsx
 "Res_Pickup","fRTIMS2Pup",   4,"x",1
 "Res_Pickup","Pshields  ",   5,"x",1
 "Res_Pickup","FrTIMS2   ",   6,"x",1
+"Res_Buffer","fRIM1S2Pup",   1,"x",1
+"Res_Buffer","fRIM2S2Pup",   2,"x",1
+"Res_Buffer","fRIM3S2Pup",   3,"x",1
+"Res_Buffer","fRTIMS2Pup",   4,"x",1
+"Res_Buffer","Pshields  ",   5,"x",1
+"Res_Buffer","FrTIMS2   ",   6,"x",1
+"Res_Buffer","fResS1IM1 ",   7,"x",1
+"Res_Buffer","fResS1IM2 ",   8,"x",1
+"Res_Buffer","fResS1IM3 ",   9,"x",1
+"Res_Buffer","fResS1DM  ",  10,"x",1
+"Res_Buffer","fResS2DM  ",  11,"x",1
 "Sed_IM1   ","PSedIM1   ",   1,"x",1
 "Sed_IM1   ","fSedIM1   ",   2,"x",1
 "Sed_IM1   ","fSedIM1S2 ",   3," ",1
@@ -5149,4 +5160,3 @@ outppr,outpit,outpnm,outpdo,outpsx
 "RadioCs   ","RadiatCs  ",   1,"x",1
 "RadioSub1 ","RadiatR1  ",   1,"x",1
 "RadioSub2 ","RadiatR2  ",   1,"x",1
-"RadioSub3 ","RadiatR3  ",   1,"x",1

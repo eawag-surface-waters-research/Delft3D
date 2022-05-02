@@ -3699,6 +3699,39 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "Res_Pickup","MaxResPup ",  18,"Y","x",1
 "Res_Pickup","FactResPup",  19,"Y","x",1
 "Res_Pickup","SWfrIMS2  ",  20,"Y","x",1
+"Res_Buffer","IM1S2     ",   1,"Y","x",1
+"Res_Buffer","IM2S2     ",   2,"Y","x",1
+"Res_Buffer","IM3S2     ",   3,"Y","x",1
+"Res_Buffer","Tau       ",   4,"N","x",1
+"Res_Buffer","TauShields",   5,"Y","x",1
+"Res_Buffer","GRAIN50   ",   6,"Y","x",1
+"Res_Buffer","GRAV      ",   7,"Y","x",1
+"Res_Buffer","KinViscos ",   8,"Y","x",1
+"Res_Buffer","RHOSAND   ",   9,"Y","x",1
+"Res_Buffer","RhoWater  ",  10,"N","x",1
+"Res_Buffer","PORS2     ",  11,"Y","x",1
+"Res_Buffer","ThickS2   ",  12,"Y","x",1
+"Res_Buffer","Surf      ",  13,"N","x",1
+"Res_Buffer","Depth     ",  14,"N","x",1
+"Res_Buffer","DELT      ",  15,"N","x",1
+"Res_Buffer","MinDepth  ",  16,"Y","x",1
+"Res_Buffer","MaxResPup ",  17,"Y","x",1
+"Res_Buffer","FactResPup",  18,"Y","x",1
+"Res_Buffer","SWResusp  ",  19,"Y","x",1
+"Res_Buffer","IM1S1     ",  20,"Y","x",1
+"Res_Buffer","ZResIM1   ",  21,"Y","x",1
+"Res_Buffer","VResIM1   ",  22,"Y","x",1
+"Res_Buffer","TaucRS1IM1",  23,"Y","x",1
+"Res_Buffer","IM2S1     ",  24,"Y","x",1
+"Res_Buffer","ZResIM2   ",  25,"Y","x",1
+"Res_Buffer","VResIM2   ",  26,"Y","x",1
+"Res_Buffer","TaucRS1IM2",  27,"Y","x",1
+"Res_Buffer","IM3S1     ",  28,"Y","x",1
+"Res_Buffer","ZResIM3   ",  29,"Y","x",1
+"Res_Buffer","VResIM3   ",  30,"Y","x",1
+"Res_Buffer","TaucRS1IM3",  31,"Y","x",1
+"Res_Buffer","DMS1      ",  32,"Y","x",1
+"Res_Buffer","DMS2      ",  33,"Y","x",1
 "Sed_IM1   ","IM1       ",   1,"N","x",1
 "Sed_IM1   ","ZSedIM1   ",   2,"Y","x",1
 "Sed_IM1   ","VSedIM1   ",   3,"Y","x",1
@@ -17873,6 +17906,3 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "RadioSub2 ","Radio2    ",   1,"N","x",1
 "RadioSub2 ","HalflifeR2",   2,"N","x",1
 "RadioSub2 ","AtommassR2",   3,"N","x",1
-"RadioSub3 ","Radio3    ",   1,"N","x",1
-"RadioSub3 ","HalflifeR3",   2,"N","x",1
-"RadioSub3 ","AtommassR3",   3,"N","x",1

@@ -53,7 +53,7 @@
 !
 !     Local declarations
 !
-      PARAMETER   ( NOMODU = 176)
+      PARAMETER   ( NOMODU = 177)
       CHARACTER*6   MODNAM(NOMODU)
       SAVE          MODNAM
       DATA MODNAM /
@@ -197,6 +197,7 @@
      +   'FLOCEQ',
      +   'DREDGE',
      +   'RESPUP',
+     +   'RESBUF',
      +   'SEDIM ',
      +   'S12TIM',
      +   'REFL  ',

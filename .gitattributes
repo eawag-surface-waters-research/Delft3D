@@ -4212,6 +4212,7 @@ src/engines_gpl/waq/packages/waq_process/src/waq_process/rdbalg.f -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/rear.f -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/refl.f -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/resant.f -text
+src/engines_gpl/waq/packages/waq_process/src/waq_process/resbuf.f90 -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/resdm.f -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/respup.f -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/restim.f -text

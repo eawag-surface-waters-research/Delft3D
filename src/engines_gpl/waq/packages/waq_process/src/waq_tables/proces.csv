@@ -188,6 +188,7 @@ procid,procco,procfo,procnm
 "CalVSALG29",123,"CALSED    ","Sedimentation velocity ALG29 = f (Temp SS Sal)    "
 "CalVSALG30",123,"CALSED    ","Sedimentation velocity ALG30 = f (Temp SS Sal)    "
 "Res_Pickup",123,"RESPUP    ","Resuspension S2 van Rijn pick-up                  "
+"Res_Buffer",123,"RESBUF    ","Resuspension for buffer model                     "
 "Sed_IM1   ",123,"SEDIM     ","Sedimentation IM1                                 "
 "Sed_IM2   ",123,"SEDIM     ","Sedimentation IM2                                 "
 "Sed_IM3   ",123,"SEDIM     ","Sedimentation IM3                                 "
@@ -744,4 +745,3 @@ procid,procco,procfo,procnm
 "RadioCs   ",123,"DRADIO    ","Radio-active decay of caesium-137                 "
 "RadioSub1 ",123,"DRADIO    ","Radio-active decay of substance Radio1            "
 "RadioSub2 ",123,"DRADIO    ","Radio-active decay of substance Radio2            "
-"RadioSub3 ",123,"DRADIO    ","Radio-active decay of substance Radio3            "
