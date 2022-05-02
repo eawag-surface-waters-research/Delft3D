@@ -7,7 +7,7 @@ if (WIN32)
     # Set global Fortran compiler flags that apply for each Fortran project
     set(nologo_flag /nologo)
     set(compiler_flags "/W1 ${nologo_flag} /libs:dll /threads")
-    set(debug_flags "/check:uninit /check:stack /traceback")
+    set(debug_flags "/check:uninit /check:stack /check:pointers /check:bounds /traceback /fpe:0")
 
     # Set optional flags:
     message(STATUS "Setting optional Intel Fortran compiler flags in Windows")
@@ -16,7 +16,7 @@ if (WIN32)
     set(extend_source132_flag /extend-source:132)
     set(heap_arrays_one_flag /heap-arrays:1)
     set(heap_arrays_100_flag /heap-arrays:100)
-    set(real_size_64_flag /real_size:64)
+    set(real_size_64_flag /real-size:64)
 
     set(check_bounds_flag /check:bounds)
     set(linker_debug_flag /debug)
@@ -55,4 +55,4 @@ endif(UNIX)
 
 set(qauto_threaded_flags ${automatic_local_variable_storage_flag} ${generate_reentrancy_threaded_flag})
 set(waq_default_flags ${file_preprocessor_flag} ${extend_source132_flag} ${traceback_flag})
-set(waq_debug_flags   ${floating_point_exception_flag} ${check_bounds_flag} ${check_pointer})
+set(waq_debug_flags) # WAQ specific debug flags are currently empty (moved to general debug flags)
