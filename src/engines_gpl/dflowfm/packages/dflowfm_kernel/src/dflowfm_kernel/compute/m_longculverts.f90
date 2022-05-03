@@ -745,12 +745,7 @@ endif
                if (longculverts(ilongc)%ifrctyp > 0) then
                   ifrcutp(Lf) = longculverts(ilongc)%ifrctyp
                if (longculverts(ilongc)%friction_value > 0) then             
-                  if(newculverts .and. (LL == 1 .or. LL == longculverts(ilongc)%numlinks)) then
-                    frcu(Lf) = 0.0
-                    ifrcutp(Lf) = 0
-                  else
                     frcu(Lf) = longculverts(ilongc)%friction_value
-                  endif
                endif
             end if
          enddo
