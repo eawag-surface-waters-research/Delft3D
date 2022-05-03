@@ -691,12 +691,16 @@ if (newculverts) then
          prof1D(1,Lf)  = wu(Lf)
          prof1D(2,Lf)  = longculverts(ilongc)%height
          prof1D(3,Lf)  =  -2 
+         bob(1, Lf) = longculverts(ilongc)%bl(1)
+         bob(2, Lf) = bl(ln(2,Lf))
          
          Lf = abs(longculverts(ilongc)%flowlinks(longculverts(ilongc)%numlinks))
          wu(Lf) = longculverts(ilongc)%width
          prof1D(1,Lf)  = wu(Lf)
          prof1D(2,Lf)  = longculverts(ilongc)%height
          prof1D(3,Lf)  =  -2 
+         bob(1, Lf) = longculverts(ilongc)%bl(longculverts(ilongc)%numlinks-1)
+         bob(2, Lf) = bl(ln(2,Lf))
       enddo
 else !voor nu houden we de oude implementatie intact
   do ilongc = 1, nlongculvertsg
@@ -710,22 +714,20 @@ else !voor nu houden we de oude implementatie intact
             bob(2, Lf) = longculverts(ilongc)%bl(i+1)
             if (k1 > ndx2d) then
                bl(k1) = bob(1,Lf)
-            else
+            else ! k1 = 2d point
             bl(k1) = min(bl(k1), bob(1,Lf))
             end if
+            
             if (k2 > ndx2d) then
                bl(k2) = bob(2,Lf)
             else
             bl(k2) = min(bl(k2), bob(2,Lf))
             end if
-         
-      
+             
             wu(Lf) = longculverts(ilongc)%width
             prof1D(1,Lf)  = wu(Lf)
             prof1D(2,Lf)  = longculverts(ilongc)%height
-            prof1D(3,Lf)  =  2                                      ! for now, simple rectan
-
-            !endif
+            prof1D(3,Lf)  =  -2                                      ! for now, simple rectan            
          enddo
       enddo
 endif
