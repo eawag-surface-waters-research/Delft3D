@@ -81,7 +81,6 @@
 		<File RelativePath=".\src\waq_io\dlwq5e.f"/>
 		<File RelativePath=".\src\waq_io\dlwq5g.f"/>
 		<File RelativePath=".\src\waq_io\dlwq5h.f"/>
-		<File RelativePath=".\src\waq_io\dlwq7a.f"/>
 		<File RelativePath=".\src\waq_io\dlwqj2.f"/>
 		<File RelativePath=".\src\waq_io\dlwqj3.f"/>
 		<File RelativePath=".\src\waq_io\dmpare.f"/>

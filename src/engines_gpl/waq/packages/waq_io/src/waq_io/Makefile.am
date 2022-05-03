@@ -48,7 +48,6 @@ libwaq_io_la_SOURCES = bound.f \
        dlwq5e.f \
        dlwq5g.f \
        dlwq5h.f \
-       dlwq7a.f \
        dlwqj2.f \
        dlwqj3.f \
        dmpare.f \
