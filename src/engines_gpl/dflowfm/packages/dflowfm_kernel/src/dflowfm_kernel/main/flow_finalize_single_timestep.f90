@@ -49,6 +49,7 @@ use m_fourier_analysis
 use m_oned_functions, only: updateTimeWetOnGround, updateTotalInflow1d2d, updateTotalInflowLat, &
                             updateFreeboard, updateDepthOnGround, updateVolOnGround
 use unstruc_channel_flow, only : network
+use m_update_wl_at_links, only : update_wl_at_links
 implicit none
 integer, intent(out) :: iresult
 
@@ -141,6 +142,9 @@ integer, intent(out) :: iresult
       if (fourierWithUc()) then
          call getucxucyeulmag(ndkx, workx, worky, ucmag, jaeulervel, 1)
       endif
+      if (fourierWithSul()) then
+         call update_wl_at_links()
+      end if
       if (network%loaded) then
          if (fourierWithFb()) then
             call updateFreeboard(network)

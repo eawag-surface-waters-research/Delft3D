@@ -47,6 +47,7 @@ subroutine flow_finalize_usertimestep(iresult)
    use m_partitioninfo, only: jampi
    use unstruc_channel_flow, only : network
    use m_oned_functions, only: updateFreeboard, updateDepthOnGround, updateVolOnGround
+   use m_update_wl_at_links, only : update_wl_at_links
    implicit none
 
    integer, intent(out) :: iresult !< Error status, DFM_NOERR==0 if successful.
@@ -140,6 +141,9 @@ subroutine flow_finalize_usertimestep(iresult)
       if (fourierWithUc()) then
          call getucxucyeulmag(ndkx, workx, worky, ucmag, jaeulervel, 1)
       endif
+      if (fourierWithSul()) then
+         call update_wl_at_links()
+      end if
       if (network%loaded) then
          if (fourierWithFb()) then
             call updateFreeboard(network)

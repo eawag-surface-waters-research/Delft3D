@@ -65,6 +65,7 @@ module m_fourier_analysis
        integer       :: nofouvar = 0 ! Number of parameters to write to NetCDF file
        integer       :: ibluc
        integer       :: iblws
+       integer       :: iblsul       !< number of quantities for water level on links
        integer       :: iblfb        !< Freeboard in fourier file(1) or not(0)
        integer       :: iblwdog      !< Waterdepth on ground in fourier file(1) or not(0)
        integer       :: iblvog       !< Volume on ground in fourier file(1) or not(0)
@@ -118,7 +119,7 @@ module m_fourier_analysis
     public :: reafou
     public :: postpr_fourier
 
-    public :: fourierIsActive, fourierWithUc, fourierWithFb, fourierWithWdog, fourierWithVog
+    public :: fourierIsActive, fourierWithUc, fourierWithFb, fourierWithWdog, fourierWithVog, fourierWithSul
     public :: nofou
     public :: FouOutputFile
 
@@ -149,6 +150,11 @@ module m_fourier_analysis
        fourierWithVog = (gdfourier%iblvog>0)
     end function fourierWithVog
 
+!> do fourier with water levels on links or not
+    logical function fourierWithSul()
+       fourierWithSul = (gdfourier%iblsul>0)
+    end function fourierWithSul
+
 !> count the number of fourier/min/max quantities
     subroutine count_fourier_variables
        implicit none
@@ -160,6 +166,7 @@ module m_fourier_analysis
        gdfourier%iblfb = 0
        gdfourier%iblwdog = 0
        gdfourier%iblvog = 0
+       gdfourier%iblsul = 0
        do ivar=1, nofou
           !
           names(1) = gdfourier%founam(ivar)
@@ -168,6 +175,8 @@ module m_fourier_analysis
              select case (names(i))
              case ('ws')
                 gdfourier%iblws = gdfourier%iblws + 1
+             case ('sul')
+                gdfourier%iblsul = gdfourier%iblsul + 1
              case ('uc')
                 gdfourier%ibluc = gdfourier%ibluc + 1
              case ('fb')
@@ -456,6 +465,9 @@ module m_fourier_analysis
        case ('q1')
           founam(ifou)   = 'q1'
           fouref(ifou,1) = fouid
+       case ('sul')
+          founam(ifou)   = 'sul'
+          fouref(ifou,1) = fouid
        case default                    ! constituent, anything else
           if ( .not. ReadConstituentNumber(founam(ifou), fconno(ifou))) then
              msgbuf = 'Unable to initialize fourier analysis for ''' // trim(founam(ifou)) // '''.'
@@ -525,6 +537,7 @@ module m_fourier_analysis
        irelp = 7
        !
        if ( founam(ifou)/='s1'  .and. &
+            founam(ifou)/='sul' .and. &
             founam(ifou)/='ta' .and. &
             founam(ifou)/='uxa' .and. &
             founam(ifou)/='uya' .and. &
@@ -858,7 +871,7 @@ function name_dependent_size(fourier_name) result(nmaxus)
    select case (fourier_name)
    case('s1', 'wl')
         nmaxus = ndx
-   case('ws')
+   case('ws', 'sul')
         nmaxus = lnx
    case('u1', 'q1')
         nmaxus = lnkx
@@ -890,7 +903,7 @@ subroutine setfouunit(founam, lsal, ltem, fconno, fouvarunit)
     !
     ! body
     select case (founam)
-    case ('s1')
+    case ('s1', 'sul')
        fouvarunit = 'm'
     case ('ws', 'u1', 'ux', 'uy', 'uc', 'uxa', 'uya')
        fouvarunit = 'm s-1'
@@ -1252,7 +1265,7 @@ end subroutine setfoustandardname
        !
        else
           select case (columns(1))
-          case ('ws', 'ct', 'ux', 'uy', 'uxa', 'uya', 'uc', 'cs', 'bs', 'fb', 'wdog', 'vog', 'q1')
+          case ('ws', 'ct', 'ux', 'uy', 'uxa', 'uya', 'uc', 'cs', 'bs', 'fb', 'wdog', 'vog', 'q1', 'sul')
              nofou    = nofou + 1
              nofouvar = nofouvar + nofouvarstep
           case default
@@ -1425,6 +1438,8 @@ end subroutine setfoustandardname
           fieldptr => volOnGround    ! volume above ground
        case ('q1')
           fieldptr => q1
+       case ('sul')
+          fieldptr => sul
        case default
           fieldptr => null()         ! Unknown FourierVariable exception
        end select
@@ -1581,6 +1596,9 @@ end subroutine setfoustandardname
            case ('q1')
               unc_loc = UNC_LOC_U
               namfun = 'discharge through flow link'
+           case ('sul')
+              unc_loc = UNC_LOC_U
+              namfun = 'water level at flow link'
            end select
 
            is_min_max_avg = .true.
