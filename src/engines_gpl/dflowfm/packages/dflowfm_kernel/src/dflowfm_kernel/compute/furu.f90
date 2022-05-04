@@ -212,7 +212,7 @@ subroutine furu()                                   ! set fu, ru and kfs
           L  = iabs(L1)
           hu(L) = 0d0; au(L) = 0d0
           fu(L) = 0d0; ru(L) = 0d0
-          if (qp*L1 > 0) then
+          if (qp*L1 >= 0) then
              kup = k1
              kdo = k2
              iup = 1
