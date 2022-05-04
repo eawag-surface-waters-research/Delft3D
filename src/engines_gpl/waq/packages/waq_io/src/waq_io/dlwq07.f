@@ -51,7 +51,7 @@
       integer               , intent(in   ) :: lun(*)       !< unit numbers used
       character(len=*)      , intent(in   ) :: lchar(*)     !< filenames
       integer  ( 4)         , intent(inout) :: filtype(*)   !< type of binary file
-      type(inputfilestack)  , intent(inout) :: inpfil       !< input file strucure with include stack and flags
+      type(inputfilestack)  , intent(inout) :: inpfil       !< input file structure with include stack and flags
       character(len=*)      , intent(in   ) :: syname(*)    !< substance names
       integer               , intent(in   ) :: iwidth       !< width of output
       integer               , intent(in   ) :: ioutpt       !< level of reporting to ascii output file
