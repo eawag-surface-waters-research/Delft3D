@@ -51,7 +51,7 @@ subroutine setnodadm(jacrosscheck_)
 
    ! Update netlink numbers for all 1d2d contacts, after netlinks may have been permuted:
    if (contactnlinks > 0) then
-      Ltoberemoved = 1 ! used later, for checking if the lenght is 0
+      Ltoberemoved = 1 ! used later, for checking if the length is 0
       do LL=1,contactnlinks
          L = contactnetlinks(LL)
          Lnew = Lperminv(L)
@@ -59,8 +59,8 @@ subroutine setnodadm(jacrosscheck_)
 
          ! Check if this link's length is 0.
          ! If L is in array LC (filled in subroutine setnodadm_grd_op), then this link has 0 length and we write a warning message.
-         do Linc = Ltoberemoved, numremoved
-            if (LC(Linc) > L) then ! Link numbers in LC are ascending
+         do Linc = Ltoberemoved, nlinkremoved
+            if (LC(Linc) > L) then ! Link numbers in LC are ascending, so link L will not be present in the remaining LC values.
                exit
             else if (LC(Linc) == L) then ! 1D2D link #LL was removed by setnodadm_grd_op()
                write (msgbuf, '(a,a,a)') '1D2D contact link ''', trim(hashlist_contactids%id_list(LL)), ''' has length of 0, this link will be ignored (removed).'
@@ -69,11 +69,11 @@ subroutine setnodadm(jacrosscheck_)
                Ltoberemoved = Linc + 1 ! remember for next LL loop.
                exit
             end if
-         end do
-      end do
+         end do ! Linc
+      end do ! LL
    end if
 
-   if (lc(1) /=0) then
+   if (nlinkremoved > 0) then
       call update_flow1d_admin(network, lc)
    endif
 

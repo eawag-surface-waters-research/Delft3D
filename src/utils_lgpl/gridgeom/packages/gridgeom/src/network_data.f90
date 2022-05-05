@@ -147,7 +147,7 @@ module network_data
   integer                          :: nlinkbadortho = 0 !< Nr. of net links with bad orthogonality detected.
   integer                          :: nlinktoosmall = 0 !< Nr. of net links with too small flow links across them.
 
-  integer                          :: numremoved        !< Number of removed net links
+  integer                          :: nlinkremoved      !< Number of removed net links
   integer                          :: netflow = 2   ! 1=net, 2=flow
 
   integer                          :: JOCHECKNET = 0
@@ -334,6 +334,7 @@ module network_data
    nlinkcross = 0
    nlinkbadortho = 0 
    nlinktoosmall = 0
+   nlinkremoved  = 0
    netflow = 2  
    JOCHECKNET = 0
    zkUNI    = -5d0                   

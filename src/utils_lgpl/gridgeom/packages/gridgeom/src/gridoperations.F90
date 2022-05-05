@@ -851,8 +851,8 @@
       ENDIF
       if (ja == 0) then
          ! save removed links, so the flow1d admin can be updated later on
-         numremoved = numremoved+1
-         LC(numremoved) = L
+         nlinkremoved = nlinkremoved+1
+         LC(nlinkremoved) = L
       endif               
    ENDDO
 
