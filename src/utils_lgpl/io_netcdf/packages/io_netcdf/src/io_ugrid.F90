@@ -921,6 +921,12 @@ function ug_def_var(ncid, id_var, id_dims, itype, iloctype, mesh_name, var_name,
       else
          ierr = nf90_put_att(ncid, id_var, 'coordinates', prefix//'_node_x '//prefix//'_node_y')
       end if
+      if (len_trim(cell_method) > 0) then
+         ierr = nf90_put_att(ncid, id_var, 'cell_methods', prefix//'_nNodes: '//trim(cell_method))
+      end if
+      if (len_trim(cell_measures) > 0) then
+         ierr = nf90_put_att(ncid, id_var, 'cell_measures', trim(cell_measures))
+      end if
    case (UG_LOC_EDGE)
       ierr = nf90_put_att(ncid, id_var, 'location',    'edge')
       if (add_latlon) then
