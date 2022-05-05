@@ -812,7 +812,7 @@
    L2 = 0 ; L1 = 0
    jathindams = 0
    lc = 0
-   numremoved = 0
+   nlinkremoved = 0
    DO L=1,NUML                                                   ! LINKS AANSCHUIVEN, 1d EERST
       K1 = KN(1,L)  ; K2 = KN(2,L) ; K3 = KN(3,L)
       if (k3 == 0) then
