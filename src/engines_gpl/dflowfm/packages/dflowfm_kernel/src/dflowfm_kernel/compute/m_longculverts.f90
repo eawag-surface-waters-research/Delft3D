@@ -1109,7 +1109,7 @@ endif
 
    end subroutine addlongculvertcrosssections
 
-   !> Fills in flowlink numbers for a giving longculvert.
+   !> Fills in flowlink numbers for a given longculvert.
    !! Note 1: This long culvert is considered invalid if its starting node, or ending node, is outside the global network.
    !! Note 2: In a parallel simulation, the flowlink number gets 0 if the flowlink is not on the current subdomain.
    !! Note 3: In a parallel simulation, it can happen that the starting (ending) node of the polylin of the long culvert is
@@ -1149,7 +1149,7 @@ endif
      call inflowcell(xpl(is), ypl(is), inode(1), 0, INDTP_ALL)
      call inflowcell(xpl(ie), ypl(ie), inode(2), 0, INDTP_ALL)
 
-     inodeGlob = inode
+     inodeGlob(1:2) = inode(1:2)
      if (jampi > 0) then
         ! Communicate inode in parallel run to get inodeGlob
         call reduce_int_max(2, inodeGlob)
@@ -1166,7 +1166,7 @@ endif
            nodenum = inode(1) ! For the later search
            jafounds = 1
         else
-           ! Find the first known flow node in the current partition (if 2D flow ndoe was not found outside of the loop already)
+           ! Find the first known flow node in the current partition (if 2D flow node was not found outside of the loop already)
            call realloc(jnode, 1, keepExisting=.false.,fill=0)
            do j = is+1, ie-1
               call find_flowcells_kdtree(treeglob,1,xpl(j), ypl(j),jnode,1,INDTP_1D, ierror)

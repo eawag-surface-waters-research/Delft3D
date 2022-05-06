@@ -527,7 +527,7 @@ end subroutine fill_valstruct_perlink
 !! a loop prior to calling this averaging routine.
 !! Note 2: if it is a general structure (jagenst == 1), then (6)-(12) are computed as well.
 !! Note 3: if in parallel computing, MPI reduction must be done before calling this subroutine.
-subroutine average_valstruct(valstruct, istrtypein, istru, nlinks, icount)
+subroutine average_valstruct(valstruct, istrtypein, istru, nlinks)
    use m_missing, only: dmiss
    use m_partitioninfo, only: jampi
    use m_1d_structures
@@ -560,13 +560,10 @@ subroutine average_valstruct(valstruct, istrtypein, istru, nlinks, icount)
                                                                 !< (23) velocity through gate opening
                                                                 !< (24) velocity over gate
                                                                 !< (25) velocity under gate
-                                                                !< (icount) counters of partitions for parallel
    integer,                        intent(in   ) :: istrtypein  !< The type of the structure. May differ from the struct%type, for example:
                                                                 !< an orifice should be called with istrtypein = ST_ORIFICE, whereas its struct(istru)%type = ST_GENERAL_ST.
    integer,                        intent(in   ) :: istru       !< Structure index in network%sts set or in longculverts
    integer,                        intent(in   ) :: nlinks      !< Number of flow links for this structure (on the current partition)
-   integer,                        intent(in   ) :: icount      !< Index of the counter element in valstruct array,
-                                                                !! it is the last element of the array.
 
    type(t_structure), pointer :: pstru
    
