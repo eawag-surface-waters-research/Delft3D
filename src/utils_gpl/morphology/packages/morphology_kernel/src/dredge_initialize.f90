@@ -112,7 +112,9 @@ subroutine dredge_initialize(dadpar, idomain, ndomains, lundia, error, comm)
     !
     if (.not.firstdredge) return
     !
-    globalareadump = localareadump
+    if (nadump > 0) then
+       globalareadump = localareadump
+    endif
     if (ndomains > 1) then
        !
        ! Start communication with other domains
