@@ -3650,7 +3650,7 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
        if (network%numl > 0) then
           ierr = nf90_def_dim(irstfile, 'n1DFlowLink', network%numl, id_1dflowlink_dim)
           ierr = nf90_def_var(irstfile, 'hysteresis_for_summerdike', nf90_short, (/ id_1dflowlink_dim /), id_hysteresis)
-          ierr = nf90_put_att(irstfile, id_hysteresis, 'long_name', 'Hysteresis information for summer dike. 0 is true-true, 1 is true-false, 2 is false-true, 3 is false-false.')
+          ierr = nf90_put_att(irstfile, id_hysteresis, 'long_name', 'Hysteresis information for summer dike. 3 is true-true, 2 is false-true, 1 is true-false, 0 is false-false.')
           ierr = nf90_put_att(irstfile, id_hysteresis, 'units', '')
        end if
     end if
@@ -4564,7 +4564,7 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
     if (network%loaded) then
        if (network%numl > 0) then
           call realloc(work1di, network%numl, keepExisting=.false.)
-          call convert_hysteresis_summerdike(network%numl, .true., work1di)
+          call convert_hysteresis_summerdike(.true., work1di)
 
           ierr = nf90_put_var(irstfile, id_hysteresis, work1di)
        end if
@@ -13233,7 +13233,7 @@ subroutine unc_read_map_or_rst(filename, ierr)
                 ! Convert to logic value and fill in hysteresis_for_summerdike
                 call realloc(itmpvar,  numl1d, keepExisting=.false., fill = 0)
                 itmpvar = int(tmpvar1D)
-                call convert_hysteresis_summerdike(numl1d, .false., itmpvar)
+                call convert_hysteresis_summerdike(.false., itmpvar)
              else
                 write (msgbuf, '(a,i0,a,i0,a)') 'Number of 1D links: in the restart file ', numl1d, ',  in model: ', lnx1d, '.'
                 call warn_flush()
@@ -16682,54 +16682,31 @@ end subroutine definencvar
 !! The approach of this conversion is, a 1d link L has two logical values hysteresis(1,L) and hysteresis(2,L).
 !! Four integers 0, 1, 2, and 3 represent the following situations:
 !! |  value  |  hysteresis(1,L)  |  hysteresis(2,L) |
-!! !  0      |  .true.           !  .true.          !
-!! |  1      |  .true.           |  .false.         |
+!! !  3      |  .true.           |  .true.          |
 !! |  2      |  .false.          |  .true.          |
-!! |  3      |  .false.          |  .false.         |
+!! |  1      |  .true.           |  .false.         |
+!! |  0      |  .false.          |  .false.         |
 !! Using this approach, the original 2d array, of size (/2, numl1d/), can be stored in a 1d array work1di.
-subroutine convert_hysteresis_summerdike(numl1d,logic2int, work1di)
+subroutine convert_hysteresis_summerdike(logic2int, work1di)
    use unstruc_channel_flow, only: network
    implicit none
-   integer,               intent(in   ) :: numl1d    !< number of 1d links
    logical,               intent(in   ) :: logic2int !< true: convert from logic values to integers
                                                      !< false: convert from integers to logic values
    integer, dimension(:), intent(inout) :: work1di   !< array storing integers
 
-   integer :: L, val
+   integer :: L, irem
 
    if (logic2int) then
-      do L = 1, numl1d
-         if (network%adm%hysteresis_for_summerdike(1,L)) then
-            if (network%adm%hysteresis_for_summerdike(2,L)) then
-               work1di(L) = 0
-            else
-               work1di(L) = 1
-            end if
-         else
-            if (network%adm%hysteresis_for_summerdike(2,L)) then
-               work1di(L) = 2
-            else
-               work1di(L) = 3
-            end if
-         end if
+      do L = 1, network%numl
+         work1di(L) = 1*merge(1, 0, network%adm%hysteresis_for_summerdike(1,L)) &
+                    + 2*merge(1, 0, network%adm%hysteresis_for_summerdike(2,L))
       end do
    else
-      do L = 1, numl1d
-         val = int(work1di(L))
-         select case (val)
-         case (0)
-            network%adm%hysteresis_for_summerdike(1,L) = .true.
-            network%adm%hysteresis_for_summerdike(2,L) = .true.
-         case (1)
-            network%adm%hysteresis_for_summerdike(1,L) = .true.
-            network%adm%hysteresis_for_summerdike(2,L) = .false.
-         case (2)
-            network%adm%hysteresis_for_summerdike(1,L) = .false.
-            network%adm%hysteresis_for_summerdike(2,L) = .true.
-         case (3)
-            network%adm%hysteresis_for_summerdike(1,L) = .false.
-            network%adm%hysteresis_for_summerdike(2,L) = .false.
-         end select
+      do L = 1, network%numl
+         irem = modulo(work1di(L),2)
+
+         network%adm%hysteresis_for_summerdike(1,L) = (irem == 1)
+         network%adm%hysteresis_for_summerdike(2,L) = (work1di(L) - irem == 2)
       end do
    end if
 end subroutine convert_hysteresis_summerdike

@@ -62,14 +62,15 @@ double precision :: perimgr, perimgr2, alfg, czg, hpr
 double precision :: frcn, cz, cf, conv, af_sub(3), perim_sub(3), cz_sub(3)
 double precision :: q_sub(3)             ! discharge per segment
 integer          :: LL, ka, kb, itp, ifrctyp, ibndsect
-integer          :: k1, k2, jahysteresis_
+integer          :: k1, k2
 integer          :: jacustombnd1d
 double precision :: u1L, q1L, s1L, dpt, factor, maxflowwidth
 type(t_CrossSection), pointer :: cross1, cross2
+logical          :: doUpdateHysteresis
 
-jahysteresis_ = 1
+doUpdateHysteresis = .true.
 if (len_trim(md_restartfile) > 0 .and. comparereal(time1, tstart_user, eps10) == 0) then
-   jahysteresis_ = 0
+   doUpdateHysteresis = .false.
 end if
 
 LL = L
@@ -132,7 +133,7 @@ else if (abs(kcu(ll))==1 .and. network%loaded) then !flow1d used only for 1d cha
    cz = 0d0
 
    if (japerim == 0) then ! calculate total area and volume
-      call GetCSParsTotal(network%adm%line2cross(LL, 2), network%crs%cross, hpr, area, width, CSCalculationOption, network%adm%hysteresis_for_summerdike(:,LL), jahysteresis = jahysteresis_)
+      call GetCSParsTotal(network%adm%line2cross(LL, 2), network%crs%cross, hpr, area, width, CSCalculationOption, network%adm%hysteresis_for_summerdike(:,LL), doUpdateHysteresis=doUpdateHysteresis)
    else ! japerim = 1: calculate flow area, conveyance and perimeter.
       cz = 0d0
       call GetCSParsFlow(network%adm%line2cross(LL, 2), network%crs%cross, hpr, area, perim, width, maxflowwidth = maxflowwidth, af_sub = af_sub, perim_sub = perim_sub)
