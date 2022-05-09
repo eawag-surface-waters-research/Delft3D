@@ -1423,7 +1423,7 @@ subroutine GetCSParsFlowCross(cross, dpt, flowArea, wetPerimeter, flowWidth, max
 end subroutine GetCSParsFlowCross
 
 !> Get total area and total width for given location and water depth
-subroutine GetCSParsTotalInterpolate(line2cross, cross, dpt, totalArea, totalWidth, calculationOption, hysteresis, doSummerDike)
+subroutine GetCSParsTotalInterpolate(line2cross, cross, dpt, totalArea, totalWidth, calculationOption, hysteresis, doSummerDike, jahysteresis)
    use m_GlobalParameters
    
    implicit none
@@ -1440,7 +1440,7 @@ subroutine GetCSParsTotalInterpolate(line2cross, cross, dpt, totalArea, totalWid
    integer, intent(in)                       :: calculationOption 
    logical, intent(in), optional             :: doSummerDike   !< Switch to calculate Summer Dikes or not
    logical, intent(inout), optional          :: hysteresis(2)  !< hysteresis information for summer dikes
-   
+   integer, intent(in), optional             :: jahysteresis   !< Compute hysteresis (1) or not(0)
    double precision                      :: f              !< cross = (1-f)*cross1 + f*cross2
    double precision                      :: totalArea1
    double precision                      :: totalArea2
@@ -1450,8 +1450,14 @@ subroutine GetCSParsTotalInterpolate(line2cross, cross, dpt, totalArea, totalWid
    type (t_CrossSection), pointer        :: cross1         !< cross section
    type (t_CrossSection), pointer        :: cross2         !< cross section
    integer, save                         :: ihandle   = 0
+   integer                               :: jahysteresis_
 
-   
+   if (present(jahysteresis)) then
+      jahysteresis_ = jahysteresis
+   else
+      jahysteresis_ = 1
+   end if
+
    if (line2cross%c1 <= 0) then
       ! no cross section defined on branch, use default definition
       totalArea = default_width* dpt
@@ -1465,7 +1471,7 @@ subroutine GetCSParsTotalInterpolate(line2cross, cross, dpt, totalArea, totalWid
 
    if(cross1%crossIndx == cross2%crossIndx) then
       ! Same Cross-Section, no interpolation needed 
-      call GetCSParsTotalCross(cross1, dpt, totalArea, totalWidth, calculationOption, hysteresis(1))
+      call GetCSParsTotalCross(cross1, dpt, totalArea, totalWidth, calculationOption, hysteresis(1), jahysteresis = jahysteresis_)
    else
       select case (cross1%crosstype)
       case (CS_CIRCLE, CS_EGG)
@@ -1505,7 +1511,7 @@ subroutine GetCSParsTotalInterpolate(line2cross, cross, dpt, totalArea, totalWid
 end subroutine GetCSParsTotalInterpolate
 
 !> Get total area and total width for given cross section location and water depth
-subroutine GetCSParsTotalCross(cross, dpt, totalArea, totalWidth, calculationOption, hysteresis, doSummerDike)
+subroutine GetCSParsTotalCross(cross, dpt, totalArea, totalWidth, calculationOption, hysteresis, doSummerDike, jahysteresis)
 
    use m_GlobalParameters
    
@@ -1521,7 +1527,7 @@ subroutine GetCSParsTotalCross(cross, dpt, totalArea, totalWidth, calculationOpt
    integer, intent(in)               :: calculationOption 
    logical, intent(in), optional     :: doSummerDike    !< Switch to calculate Summer Dikes or not
    logical, intent(inout)            :: hysteresis!< Switch to calculate Summer Dikes or not
-
+   integer, intent(in), optional     :: jahysteresis    !< Compute hysteresis (1) or not(0)
 
    ! Local Variables
    type(t_CSType), pointer           :: crossDef
@@ -1531,6 +1537,14 @@ subroutine GetCSParsTotalCross(cross, dpt, totalArea, totalWidth, calculationOpt
    logical                           :: getSummerDikes
    double precision                  :: af_sub(3), perim_sub(3)
    integer, save                     :: ihandle = 0
+   integer                           :: jahysteresis_
+   
+   if (present(jahysteresis)) then
+      jahysteresis_ = jahysteresis
+   else
+      jahysteresis_ = 1
+   end if
+
    if (dpt < 0.0d0) then
       totalArea = 0.0d0
       totalWidth = sl
@@ -1548,7 +1562,7 @@ subroutine GetCSParsTotalCross(cross, dpt, totalArea, totalWidth, calculationOpt
          else
             getSummerDikes = .true.
          endif
-         call TabulatedProfile(dpt, cross, .false., getSummerDikes, totalArea, totalWidth, maxwidth, wetPerimeter, af_sub, perim_sub, calculationOption, hysteresis)
+         call TabulatedProfile(dpt, cross, .false., getSummerDikes, totalArea, totalWidth, maxwidth, wetPerimeter, af_sub, perim_sub, calculationOption, hysteresis, jahysteresis = jahysteresis_)
       case (CS_CIRCLE)
          call CircleProfile(dpt, crossDef%diameter, totalArea, totalWidth, maxwidth, wetPerimeter, calculationOption)
       case (CS_EGG)
@@ -1581,7 +1595,7 @@ subroutine GetCSParsTotalCross(cross, dpt, totalArea, totalWidth, calculationOpt
 end subroutine GetCSParsTotalCross
 
 !> Get area, width and perimeter for a tabulated profile
-subroutine TabulatedProfile(dpt, cross, doFlow, getSummerDikes, area, width, maxWidth, perimeter, af_sub, perim_sub, calculationOption, hysteresis)
+subroutine TabulatedProfile(dpt, cross, doFlow, getSummerDikes, area, width, maxWidth, perimeter, af_sub, perim_sub, calculationOption, hysteresis, jahysteresis)
 
    use m_GlobalParameters
 
@@ -1599,6 +1613,7 @@ subroutine TabulatedProfile(dpt, cross, doFlow, getSummerDikes, area, width, max
    double precision, intent(out)     :: perim_sub(3)        !< Wet perimeter, split up to main, floodlain1 and floodplain2
    integer, intent(in)               :: calculationOption   !< Defines the calculation option for closed profiles: Preisman, Plus or min the latter two are used for Nested Newton
    logical, intent(inout)            :: hysteresis          !< Flag for hysteresis of summerdike
+   integer, optional, intent(in)     :: jahysteresis         !< Compute hysteresis (1) or not (0)
 
    ! local parameters
    type(t_CSType), pointer           :: crossDef
@@ -1608,6 +1623,13 @@ subroutine TabulatedProfile(dpt, cross, doFlow, getSummerDikes, area, width, max
    double precision  :: sdArea
    double precision  :: sdWidth
    integer           :: section
+   integer           :: jahystersis_
+
+   if (present(jahysteresis)) then
+      jahystersis_ = jahysteresis
+   else
+      jahystersis_ = 1
+   end if
 
    crossDef => cross%tabDef
 
@@ -1631,8 +1653,8 @@ subroutine TabulatedProfile(dpt, cross, doFlow, getSummerDikes, area, width, max
       
       else
       
-         ! Get Summer Dike Total Data
-         call GetSummerDikeTotal(summerdike, wlev, sdArea, sdWidth, hysteresis)
+         ! Get Summer Dike Total Data   
+         call GetSummerDikeTotal(summerdike, wlev, sdArea, sdWidth, hysteresis, jahystersis_)
       
       endif
       
@@ -2276,7 +2298,7 @@ subroutine GetSummerDikeFlow(summerdike, wlev, sdArea, sdWidth)
 end subroutine GetSummerDikeFlow
 
 !> Get total parameers for summerdike
-subroutine GetSummerDikeTotal(summerdike, wlev, sdArea, sdWidth, hysteresis)
+subroutine GetSummerDikeTotal(summerdike, wlev, sdArea, sdWidth, hysteresis, jahystersis)
 
    implicit none
 
@@ -2285,7 +2307,7 @@ subroutine GetSummerDikeTotal(summerdike, wlev, sdArea, sdWidth, hysteresis)
    double precision, intent(out)                :: sdArea          !< area for summerdike
    double precision, intent(out)                :: sdWidth         !< width for summerdike
    logical, intent(inout)                       :: hysteresis      !< hysteresis parameter for rising or falling water
-
+   integer, intent(in)                          :: jahystersis     !< compute hysteresis (1) or not (0)
    ! Local Parameters
    double precision                             :: sdtr
    double precision                             :: atot
@@ -2308,12 +2330,14 @@ subroutine GetSummerDikeTotal(summerdike, wlev, sdArea, sdWidth, hysteresis)
       htop = summerdike%crestLevel
       hbas = summerdike%baseLevel
       
-      if (wlev >= (htop + sdtr)) then
-         hysteresis = .false.
-      elseif (wlev <= hbas) then
-         hysteresis = .true.
-      else
-      endif
+      if (jahystersis == 1) then
+         if (wlev >= (htop + sdtr)) then
+            hysteresis = .false.
+         elseif (wlev <= hbas) then
+            hysteresis = .true.
+         else
+         endif
+      end if
       
       if (hysteresis) then
       

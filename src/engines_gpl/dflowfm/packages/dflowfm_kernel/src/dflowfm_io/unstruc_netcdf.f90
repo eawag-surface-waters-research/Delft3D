@@ -2730,6 +2730,7 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
         id_orifgen_linkdim,   &
         id_pumpdim,           &
         id_pump_stagedim,     &
+        id_1dflowlink_dim,    &
         id_time, id_timestep, &
         id_s1, id_taus, id_ucx, id_ucy, id_ucz, id_unorm, id_q1, id_ww1, id_sa1, id_tem1, id_sed, id_ero, id_s0, id_u0, &
         id_czs, id_E, id_thetamean, &
@@ -2748,7 +2749,8 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
         id_weirgen_crestl, id_weirgen_crestw, id_weirgen_area, id_weirgen_linkw, id_weirgen_fu, id_weirgen_ru, id_weirgen_au, id_weirgen_state, id_weirgen_sOnCrest, &
         id_orifgen_crestl, id_orifgen_edgel, id_orifgen_openw, id_orifgen_fu, id_orifgen_ru, id_orifgen_au, id_orifgen_crestw, &
         id_orifgen_area, id_orifgen_linkw, id_orifgen_state, id_orifgen_sOnCrest, &
-        id_pump_cap, id_pump_ssTrigger, id_pump_dsTrigger
+        id_pump_cap, id_pump_ssTrigger, id_pump_dsTrigger, &
+        id_hysteresis
     
     integer, allocatable, save :: id_tr1(:), id_rwqb(:), id_bndtradim(:), id_ttrabnd(:), id_ztrabnd(:)
     integer, allocatable, save :: id_sf1(:), id_bndsedfracdim(:), id_tsedfracbnd(:), id_zsedfracbnd(:)
@@ -2772,6 +2774,7 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
     double precision, dimension(:,:), allocatable :: work1d_z
     double precision, dimension(:,:), allocatable :: work2d
     integer,          dimension(:,:), allocatable :: work2di
+    integer,          dimension(:),   allocatable :: work1di
     double precision, dimension(:,:,:), allocatable :: work3d
     integer,          dimension(:,:,:), allocatable :: work3di
     type(t_structure), pointer                    :: pstru
@@ -3639,6 +3642,16 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
 
           ierr = nf90_def_var(irstfile, 'pump_delivery_side_trigger', nf90_int, dimids = (/id_pump_stagedim, id_pumpdim, id_timedim/), varid = id_pump_dsTrigger)
           ierr = nf90_put_att(irstfile, id_pump_dsTrigger, 'long_name', 'Delivery trigger of pump. 1 means true and 0 means false.')
+       end if
+    end if
+
+    ! Write network%adm%hysteresis_for_summerdike for all 1d links
+    if (network%loaded) then
+       if (network%numl > 0) then
+          ierr = nf90_def_dim(irstfile, 'n1DFlowLink', network%numl, id_1dflowlink_dim)
+          ierr = nf90_def_var(irstfile, 'hysteresis_for_summerdike', nf90_short, (/ id_1dflowlink_dim /), id_hysteresis)
+          ierr = nf90_put_att(irstfile, id_hysteresis, 'long_name', 'Hysteresis information for summer dike. 0 is true-true, 1 is true-false, 2 is false-true, 3 is false-false.')
+          ierr = nf90_put_att(irstfile, id_hysteresis, 'units', '')
        end if
     end if
 
@@ -4547,6 +4560,15 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
        ierr = nf90_put_var(irstfile, id_s1bnd, tmp_s1, (/ 1, itim /), (/ ndxbnd, 1 /))
        ierr = nf90_put_var(irstfile, id_blbnd, tmp_bl, (/ 1, itim /), (/ ndxbnd, 1 /))
     endif
+
+    if (network%loaded) then
+       if (network%numl > 0) then
+          call realloc(work1di, network%numl, keepExisting=.false.)
+          call convert_hysteresis_summerdike(network%numl, .true., work1di)
+
+          ierr = nf90_put_var(irstfile, id_hysteresis, work1di)
+       end if
+    end if
 end subroutine unc_write_rst_filepointer
 
 
@@ -12149,6 +12171,7 @@ subroutine unc_read_map_or_rst(filename, ierr)
                id_sedtotdim,                    &
                id_sedsusdim,                    &
                id_nlyrdim,                      &
+               id_1dflowlinkdim,                &
                id_msed,                         &
                id_mfluff,                       &
                id_thlyr,                        &
@@ -12178,12 +12201,14 @@ subroutine unc_read_map_or_rst(filename, ierr)
     double precision, allocatable        :: tmp_s1(:), tmp_bl(:), tmp_s0(:)
     double precision, allocatable        :: rst_bodsed(:,:), rst_mfluff(:,:), rst_thlyr(:,:)
     double precision, allocatable        :: rst_msed(:,:,:)
+    integer,          allocatable        :: itmpvar(:)
     real(fp)                             :: mfracsum, poros, sedthick
     real(fp), dimension(stmpar%lsedtot)  :: mfrac
     integer :: numpart,  lmerge = 0, lugrid = 0
     integer :: kstart, lstart, kstart_bnd
     integer :: jamergedmap_same_bu
     integer :: tmp_loc
+    integer :: numl1d
 
     character(len=8)::numformat
     character(len=2)::numtrastr, numsedfracstr
@@ -13195,6 +13220,32 @@ subroutine unc_read_map_or_rst(filename, ierr)
 
     call readyy('Reading map data',0.95d0)    
    
+    ! Read hysteresis_for_summerdike
+    if (lnx1d > 0) then
+       ierr = nf90_inq_dimid(imapfile, 'n1DFlowLink', id_1dflowlinkdim)
+       if (ierr == nf90_noerr) then
+          ierr = nf90_inquire_dimension(imapfile, id_1dflowlinkdim, len=numl1d)
+          if (ierr == nf90_noerr) then
+             if (numl1d == lnx1d) then
+                call realloc(tmpvar1D, numl1d, keepExisting=.false., fill = 0d0) ! We use this array becasue get_var_and_shift requires a double precision array
+                ierr = get_var_and_shift(imapfile, 'hysteresis_for_summerdike', tmpvar1D, tmpvar1, UNC_LOC_U, kmx, Lstart, numl1d, it_read, um%jamergedmap, &
+                                   um%ilink_own, um%ilink_merge)
+                ! Convert to logic value and fill in hysteresis_for_summerdike
+                call realloc(itmpvar,  numl1d, keepExisting=.false., fill = 0)
+                itmpvar = int(tmpvar1D)
+                call convert_hysteresis_summerdike(numl1d, .false., itmpvar)
+             else
+                write (msgbuf, '(a,i0,a,i0,a)') 'Number of 1D links: in the restart file ', numl1d, ',  in model: ', lnx1d, '.'
+                call warn_flush()
+                call qnerror('Number of 1D links read from the restart file unequal to number of 1d links in model.')
+             end if
+          else
+             write (msgbuf, '(a)') 'unc_read_map_or_rst: cannot read the number of 1D links.'
+             call warn_flush()
+         end if
+       end if
+    end if
+
    ! Check if the orientation of each flowlink in the current model is the same with the link in the rst file
    ! If not, reverse the velocity that is read from rst file
    ! Check only when parallel restart with different partitions. ToDo: check for all the restart scenarios
@@ -16625,5 +16676,61 @@ subroutine definencvar(ncid, idq, itype, idims, n, name, desc, unit, namecoord, 
    end if
 
 
-   end subroutine definencvar
+end subroutine definencvar
+
+!> Converts between logical values and integers for hysteresis of summer dikes, depending on logic2int.
+!! The approach of this conversion is, a 1d link L has two logical values hysteresis(1,L) and hysteresis(2,L).
+!! Four integers 0, 1, 2, and 3 represent the following situations:
+!! |  value  |  hysteresis(1,L)  |  hysteresis(2,L) |
+!! !  0      |  .true.           !  .true.          !
+!! |  1      |  .true.           |  .false.         |
+!! |  2      |  .false.          |  .true.          |
+!! |  3      |  .false.          |  .false.         |
+!! Using this approach, the original 2d array, of size (/2, numl1d/), can be stored in a 1d array work1di.
+subroutine convert_hysteresis_summerdike(numl1d,logic2int, work1di)
+   use unstruc_channel_flow, only: network
+   implicit none
+   integer,               intent(in   ) :: numl1d    !< number of 1d links
+   logical,               intent(in   ) :: logic2int !< true: convert from logic values to integers
+                                                     !< false: convert from integers to logic values
+   integer, dimension(:), intent(inout) :: work1di   !< array storing integers
+
+   integer :: L, val
+
+   if (logic2int) then
+      do L = 1, numl1d
+         if (network%adm%hysteresis_for_summerdike(1,L)) then
+            if (network%adm%hysteresis_for_summerdike(2,L)) then
+               work1di(L) = 0
+            else
+               work1di(L) = 1
+            end if
+         else
+            if (network%adm%hysteresis_for_summerdike(2,L)) then
+               work1di(L) = 2
+            else
+               work1di(L) = 3
+            end if
+         end if
+      end do
+   else
+      do L = 1, numl1d
+         val = int(work1di(L))
+         select case (val)
+         case (0)
+            network%adm%hysteresis_for_summerdike(1,L) = .true.
+            network%adm%hysteresis_for_summerdike(2,L) = .true.
+         case (1)
+            network%adm%hysteresis_for_summerdike(1,L) = .true.
+            network%adm%hysteresis_for_summerdike(2,L) = .false.
+         case (2)
+            network%adm%hysteresis_for_summerdike(1,L) = .false.
+            network%adm%hysteresis_for_summerdike(2,L) = .true.
+         case (3)
+            network%adm%hysteresis_for_summerdike(1,L) = .false.
+            network%adm%hysteresis_for_summerdike(2,L) = .false.
+         end select
+      end do
+   end if
+end subroutine convert_hysteresis_summerdike
 end module unstruc_netcdf

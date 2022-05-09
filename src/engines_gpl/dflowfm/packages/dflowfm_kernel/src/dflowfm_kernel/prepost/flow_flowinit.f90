@@ -1075,7 +1075,7 @@ end if
             JAWEL = (jw == 1)
          endif
      else ! Restart from *_yyyymmdd_hhmmss_rst.nc or from *_map.nc
-       call read_restart_from_map(md_restartfile, iresult) !TODO:JZ modify the name of this subroutine, since it also restarts from rst files.
+       call read_restart_from_map(md_restartfile, iresult)
        if (jased > 0 .and. stm_included) then
           call setbobs()
        endif

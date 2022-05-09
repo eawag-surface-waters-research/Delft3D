@@ -41,6 +41,8 @@ use m_missing
 use unstruc_channel_flow
 use m_crosssections
 use m_cross_helper
+use unstruc_model, only: md_restartfile
+use precision_basics
 
 implicit none
 integer          :: L, japerim, calcConv
@@ -60,10 +62,15 @@ double precision :: perimgr, perimgr2, alfg, czg, hpr
 double precision :: frcn, cz, cf, conv, af_sub(3), perim_sub(3), cz_sub(3)
 double precision :: q_sub(3)             ! discharge per segment
 integer          :: LL, ka, kb, itp, ifrctyp, ibndsect
-integer          :: k1, k2
+integer          :: k1, k2, jahysteresis_
 integer          :: jacustombnd1d
 double precision :: u1L, q1L, s1L, dpt, factor, maxflowwidth
 type(t_CrossSection), pointer :: cross1, cross2
+
+jahysteresis_ = 1
+if (len_trim(md_restartfile) > 0 .and. comparereal(time1, tstart_user, eps10) == 0) then
+   jahysteresis_ = 0
+end if
 
 LL = L
 if (L > lnxi) then                      ! for 1D boundary links, refer to attached link
@@ -125,7 +132,7 @@ else if (abs(kcu(ll))==1 .and. network%loaded) then !flow1d used only for 1d cha
    cz = 0d0
 
    if (japerim == 0) then ! calculate total area and volume
-      call GetCSParsTotal(network%adm%line2cross(LL, 2), network%crs%cross, hpr, area, width, CSCalculationOption, network%adm%hysteresis_for_summerdike(:,LL))
+      call GetCSParsTotal(network%adm%line2cross(LL, 2), network%crs%cross, hpr, area, width, CSCalculationOption, network%adm%hysteresis_for_summerdike(:,LL), jahysteresis = jahysteresis_)
    else ! japerim = 1: calculate flow area, conveyance and perimeter.
       cz = 0d0
       call GetCSParsFlow(network%adm%line2cross(LL, 2), network%crs%cross, hpr, area, perim, width, maxflowwidth = maxflowwidth, af_sub = af_sub, perim_sub = perim_sub)
