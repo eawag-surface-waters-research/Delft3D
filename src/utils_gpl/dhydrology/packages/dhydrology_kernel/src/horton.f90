@@ -44,10 +44,11 @@ module horton
    !! (using integral of capacity function, depending on state recovery or decrease).
    
    function infiltration_horton_formula(n, MinInfCap, MaxInfCap, DecreaseRate, RecoveryRate, PreviousInfCap, NewInfCap, &
-                                       TimestepSize, Dt, InitialStorage, Rainfall, InfCapState, InfiltrationMM) result(ierr)
+                                       TimestepSize, Dt, InitialStorage, Rainfall, jarain, InfCapState, InfiltrationMM) result(ierr)
       use dhydrology_error
       
       integer,                    intent(in   ) :: n                  !< Array length (grid cell count)
+      integer,                    intent(in   ) :: jarain             !< indicates if array Rainfall is available, otherwise no rainfall is assumed
       double precision,           intent(in   ) :: MinInfCap(n)       !< Minimum infiltration capacity (mm/hr)
       double precision,           intent(in   ) :: MaxInfCap(n)       !< Maximum infiltration capacity (mm/hr)
       double precision,           intent(in   ) :: DecreaseRate(n)    !< Decrease rate (1/hr)
@@ -68,6 +69,7 @@ module horton
       double precision                :: RFrac
       double precision, allocatable   :: ratio(:)
       integer                         :: i
+      logical                         :: rainIsFalling 
       
       ierr = DHYD_NOERR
 
@@ -106,7 +108,12 @@ module horton
       Ratio = -1d0
 
       do i = 1, n
-         if(InfCapState(i) == HORTON_CAPSTAT_DECREASE .and. InitialStorage(i) <= 0d0 .and. Rainfall(i) <= 0d0) then
+         if (jarain) then
+            rainIsFalling = Rainfall(i) > 0d0
+         else 
+            rainIsFalling = .false.
+         endif
+         if(InfCapState(i) == HORTON_CAPSTAT_DECREASE .and. InitialStorage(i) <= 0d0 .and. .not. rainIsFalling) then
             ! state is decrease, but no storage and no rain anymore: switch to recovery
             InfCapState(i) = HORTON_CAPSTAT_RECOVERY
             Ratio(i) = (PreviousInfCap(i)-MaxInfcap(i)) / (MinInfCap(i)- MaxInfCap(i))
@@ -116,7 +123,7 @@ module horton
                DT1(i) = 9999d0
             end if
             DT(i)  = max(0d0, DT1(i) - RFRAC)
-            else if(InfCapState(i) == HORTON_CAPSTAT_RECOVERY .and. (InitialStorage(i) > 0d0 .or. Rainfall(i) > 0d0) ) then
+         else if(InfCapState(i) == HORTON_CAPSTAT_RECOVERY .and. (InitialStorage(i) > 0d0 .or. rainIsFalling) ) then
             ! state is recovery, but storage or rain: switch to decrease
             InfCapState(i) = HORTON_CAPSTAT_DECREASE
             ratio(i) = (PreviousInfCap(i)-MinInfCap(i)) / (MaxInfCap(i) - MinInfCap(i))
