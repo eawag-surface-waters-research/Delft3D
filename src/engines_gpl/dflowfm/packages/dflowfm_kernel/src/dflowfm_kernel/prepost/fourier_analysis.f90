@@ -1594,7 +1594,7 @@ end subroutine setfoustandardname
               unc_loc = UNC_LOC_S
               namfun = 'volume_on_ground'
            case ('q1')
-              unc_loc = UNC_LOC_U
+              unc_loc = merge(UNC_LOC_U3D, UNC_LOC_U, kmx > 0)
               namfun = 'discharge through flow link'
            case ('sul')
               unc_loc = UNC_LOC_U
