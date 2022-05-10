@@ -28,8 +28,8 @@
 # Set number of partitions (this script only works for one node)
 nPart=3
 
-# Set the path to the folder containing the singularity image
-singularitydir=/p/d-hydro/delft3dfm_containers/pleaseChooseTheContainerYourRequire
+# Set the path to the folder containing the singularity image and the execute_singularity.sh script. For example: 
+singularitydir=/p/d-hydro/delft3dfm_containers/delft3dfm_2022.03
 
 
 # DIMR input file; must already exist!
@@ -72,7 +72,7 @@ else
     $singularitydir/execute_singularity.sh -p 2 run_dflowfm.sh --partition:ndomains=$nPart:icgsolver=6 $mduFile
     
 	# Jump back to the dimr config file folder to execute dimr
-    cd ..
+    cd path/to/directory/containing/the/dimr_config/file
     # Second: computation
     echo computation...
     # mpiexec is executed inside run_dimr.sh    
