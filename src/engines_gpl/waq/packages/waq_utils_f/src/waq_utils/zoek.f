@@ -46,7 +46,7 @@
 !     FUNCTION            : searches a string in an array
 !
 !     SUBROUTINES CALLED  : ZOEKNS, searches not case sensitive
-!                           ZOEKCS, searches case sensetive
+!                           ZOEKCS, searches case sensitive
 !                           ERRSYS,
 !
 !     COMMON's            : CZOEK , search settings

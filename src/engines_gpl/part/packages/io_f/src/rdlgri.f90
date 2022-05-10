@@ -318,7 +318,7 @@
       call alloc ( "dx     ", dx     , mnmax2 )
       call alloc ( "dy     ", dy     , mnmax2 )
       call alloc ( "flow   ", flow   , nflow  )
-      call alloc ( "flow2  ", flow2m , nflow  )
+      call alloc ( "flow2m ", flow2m , nflow  )
       call alloc ( "flow1  ", flow1  , noqp   )
       call alloc ( "flow2  ", flow2  , noqp   )
       call alloc ( "ipnt   ", ipntp  , mnmaxk )
