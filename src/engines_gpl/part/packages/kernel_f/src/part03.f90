@@ -261,12 +261,6 @@ contains
       else
          zlevel = default  ! whole array assignment
       endif
-         do i2 = 1, mmax
-         do i1 = 1, nmax
-            i0 = lgrid(i1, i2)
-            write(*,*) 'QQQa',i0,depth(i0)
-         enddo
-         enddo
 !
 !     end of subroutine
 !
