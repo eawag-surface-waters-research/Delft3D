@@ -66,12 +66,6 @@ integer          :: k1, k2
 integer          :: jacustombnd1d
 double precision :: u1L, q1L, s1L, dpt, factor, maxflowwidth
 type(t_CrossSection), pointer :: cross1, cross2
-logical          :: doUpdateHysteresis
-
-doUpdateHysteresis = .true.
-if (len_trim(md_restartfile) > 0 .and. comparereal(time1, tstart_user, eps10) == 0) then
-   doUpdateHysteresis = .false.
-end if
 
 LL = L
 if (L > lnxi) then                      ! for 1D boundary links, refer to attached link
@@ -133,7 +127,7 @@ else if (abs(kcu(ll))==1 .and. network%loaded) then !flow1d used only for 1d cha
    cz = 0d0
 
    if (japerim == 0) then ! calculate total area and volume
-      call GetCSParsTotal(network%adm%line2cross(LL, 2), network%crs%cross, hpr, area, width, CSCalculationOption, network%adm%hysteresis_for_summerdike(:,LL), doUpdateHysteresis=doUpdateHysteresis)
+      call GetCSParsTotal(network%adm%line2cross(LL, 2), network%crs%cross, hpr, area, width, CSCalculationOption, network%adm%hysteresis_for_summerdike(:,LL))
    else ! japerim = 1: calculate flow area, conveyance and perimeter.
       cz = 0d0
       call GetCSParsFlow(network%adm%line2cross(LL, 2), network%crs%cross, hpr, area, perim, width, maxflowwidth = maxflowwidth, af_sub = af_sub, perim_sub = perim_sub)

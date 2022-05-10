@@ -867,16 +867,19 @@ module m_oned_functions
    use m_flowgeom, only: groundLevel, volMaxUnderground, ndx, ndxi, ndx2d
    use m_flow,     only: s1, vol1, a1, vol1_f, a1m, s1m, nonlin
    use m_alloc
+   use unstruc_channel_flow, only: network
+   use unstruc_netcdf, only: convert_hysteresis_summerdike
    implicit none
    double precision, allocatable :: s1_tmp(:), vol1_tmp(:), a1_tmp(:), vol1_ftmp(:), a1m_tmp(:), s1m_tmp(:)
    integer                       :: ndx1d
+   integer,          allocatable :: hesteresis_tmp(:)
 
    ndx1d = ndxi-ndx2d
    if (ndx1d == 0) then
       return
    end if
 
-   ! 1. copy current s1, vol1, vol1_f, a1 and a1m to a temporary array
+   ! 1. copy current s1, vol1, vol1_f, a1, a1m and hysteresis to a temporary array
    allocate(s1_tmp(ndx))
    s1_tmp = s1
    
@@ -897,6 +900,12 @@ module m_oned_functions
    allocate(a1_tmp(ndx))
    a1_tmp = a1
    
+   if (network%loaded) then
+      if (network%numl > 0) then
+         allocate(hesteresis_tmp(network%numl))
+         call convert_hysteresis_summerdike(.true., hesteresis_tmp)
+      end if
+   end if
 
    ! 2. set s1 to be the ground level
    s1(ndx2d+1:ndxi)  = groundLevel(1:ndx1d)
@@ -913,7 +922,7 @@ module m_oned_functions
    call vol12d(0)
    volMaxUnderground(1:ndx1d) = vol1(ndx2d+1:ndxi)
 
-   ! 4. set s1, vol1, vol1_f, a1, a1m back
+   ! 4. set s1, vol1, vol1_f, a1, a1m and hysteresis back
    s1     = s1_tmp
    vol1   = vol1_tmp
    vol1_f = vol1_ftmp
@@ -923,6 +932,11 @@ module m_oned_functions
       a1m    = a1m_tmp
    end if
 
+   if (network%loaded) then
+      if (network%numl > 0) then
+         call convert_hysteresis_summerdike(.false., hesteresis_tmp)
+      end if
+   end if
    end subroutine set_max_volume_for_1d_nodes
 
 

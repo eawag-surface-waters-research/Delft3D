@@ -1423,7 +1423,7 @@ subroutine GetCSParsFlowCross(cross, dpt, flowArea, wetPerimeter, flowWidth, max
 end subroutine GetCSParsFlowCross
 
 !> Get total area and total width for given location and water depth
-subroutine GetCSParsTotalInterpolate(line2cross, cross, dpt, totalArea, totalWidth, calculationOption, hysteresis, doSummerDike, doUpdateHysteresis)
+subroutine GetCSParsTotalInterpolate(line2cross, cross, dpt, totalArea, totalWidth, calculationOption, hysteresis, doSummerDike)
    use m_GlobalParameters
    
    implicit none
@@ -1440,7 +1440,6 @@ subroutine GetCSParsTotalInterpolate(line2cross, cross, dpt, totalArea, totalWid
    integer, intent(in)                       :: calculationOption 
    logical, intent(in), optional             :: doSummerDike   !< Switch to calculate Summer Dikes or not
    logical, intent(inout), optional          :: hysteresis(2)  !< hysteresis information for summer dikes
-   logical, intent(in), optional             :: doUpdateHysteresis !< Update hysteresis (.true.) or not(.false.). When .false., the hysteresis value has been read from rst file.
    double precision                      :: f              !< cross = (1-f)*cross1 + f*cross2
    double precision                      :: totalArea1
    double precision                      :: totalArea2
@@ -1464,7 +1463,7 @@ subroutine GetCSParsTotalInterpolate(line2cross, cross, dpt, totalArea, totalWid
 
    if(cross1%crossIndx == cross2%crossIndx) then
       ! Same Cross-Section, no interpolation needed 
-      call GetCSParsTotalCross(cross1, dpt, totalArea, totalWidth, calculationOption, hysteresis(1), doUpdateHysteresis=doUpdateHysteresis)
+      call GetCSParsTotalCross(cross1, dpt, totalArea, totalWidth, calculationOption, hysteresis(1))
    else
       select case (cross1%crosstype)
       case (CS_CIRCLE, CS_EGG)
@@ -1504,7 +1503,7 @@ subroutine GetCSParsTotalInterpolate(line2cross, cross, dpt, totalArea, totalWid
 end subroutine GetCSParsTotalInterpolate
 
 !> Get total area and total width for given cross section location and water depth
-subroutine GetCSParsTotalCross(cross, dpt, totalArea, totalWidth, calculationOption, hysteresis, doSummerDike, doUpdateHysteresis)
+subroutine GetCSParsTotalCross(cross, dpt, totalArea, totalWidth, calculationOption, hysteresis, doSummerDike)
 
    use m_GlobalParameters
    
@@ -1520,7 +1519,6 @@ subroutine GetCSParsTotalCross(cross, dpt, totalArea, totalWidth, calculationOpt
    integer, intent(in)               :: calculationOption 
    logical, intent(in), optional     :: doSummerDike    !< Switch to calculate Summer Dikes or not
    logical, intent(inout)            :: hysteresis!< Switch to calculate Summer Dikes or not
-   logical, intent(in), optional     :: doUpdateHysteresis !< Update hysteresis (.true.) or not(.false.). When .false., the hysteresis value has been read from rst file.
    ! Local Variables
    type(t_CSType), pointer           :: crossDef
    double precision                  :: wetperimeter
@@ -1547,7 +1545,7 @@ subroutine GetCSParsTotalCross(cross, dpt, totalArea, totalWidth, calculationOpt
          else
             getSummerDikes = .true.
          endif
-         call TabulatedProfile(dpt, cross, .false., getSummerDikes, totalArea, totalWidth, maxwidth, wetPerimeter, af_sub, perim_sub, calculationOption, hysteresis, doUpdateHysteresis=doUpdateHysteresis)
+         call TabulatedProfile(dpt, cross, .false., getSummerDikes, totalArea, totalWidth, maxwidth, wetPerimeter, af_sub, perim_sub, calculationOption, hysteresis)
       case (CS_CIRCLE)
          call CircleProfile(dpt, crossDef%diameter, totalArea, totalWidth, maxwidth, wetPerimeter, calculationOption)
       case (CS_EGG)
@@ -1580,7 +1578,7 @@ subroutine GetCSParsTotalCross(cross, dpt, totalArea, totalWidth, calculationOpt
 end subroutine GetCSParsTotalCross
 
 !> Get area, width and perimeter for a tabulated profile
-subroutine TabulatedProfile(dpt, cross, doFlow, getSummerDikes, area, width, maxWidth, perimeter, af_sub, perim_sub, calculationOption, hysteresis, doUpdateHysteresis)
+subroutine TabulatedProfile(dpt, cross, doFlow, getSummerDikes, area, width, maxWidth, perimeter, af_sub, perim_sub, calculationOption, hysteresis)
 
    use m_GlobalParameters
 
@@ -1598,7 +1596,6 @@ subroutine TabulatedProfile(dpt, cross, doFlow, getSummerDikes, area, width, max
    double precision, intent(out)     :: perim_sub(3)        !< Wet perimeter, split up to main, floodlain1 and floodplain2
    integer, intent(in)               :: calculationOption   !< Defines the calculation option for closed profiles: Preisman, Plus or min the latter two are used for Nested Newton
    logical, intent(inout)            :: hysteresis          !< Flag for hysteresis of summerdike
-   logical, optional, intent(in)     :: doUpdateHysteresis  !< Update hysteresis (.true.) or not(.false.). When .false., the hysteresis value has been read from rst file.
 
    ! local parameters
    type(t_CSType), pointer           :: crossDef
@@ -1632,7 +1629,7 @@ subroutine TabulatedProfile(dpt, cross, doFlow, getSummerDikes, area, width, max
       else
       
          ! Get Summer Dike Total Data   
-         call GetSummerDikeTotal(summerdike, wlev, sdArea, sdWidth, hysteresis, doUpdateHysteresis=doUpdateHysteresis)
+         call GetSummerDikeTotal(summerdike, wlev, sdArea, sdWidth, hysteresis)
       
       endif
       
@@ -2276,7 +2273,7 @@ subroutine GetSummerDikeFlow(summerdike, wlev, sdArea, sdWidth)
 end subroutine GetSummerDikeFlow
 
 !> Get total parameers for summerdike
-subroutine GetSummerDikeTotal(summerdike, wlev, sdArea, sdWidth, hysteresis, doUpdateHysteresis)
+subroutine GetSummerDikeTotal(summerdike, wlev, sdArea, sdWidth, hysteresis)
 
    implicit none
 
@@ -2285,7 +2282,6 @@ subroutine GetSummerDikeTotal(summerdike, wlev, sdArea, sdWidth, hysteresis, doU
    double precision, intent(out)                :: sdArea          !< area for summerdike
    double precision, intent(out)                :: sdWidth         !< width for summerdike
    logical, intent(inout)                       :: hysteresis      !< hysteresis parameter for rising or falling water
-   logical, intent(in)                          :: doUpdateHysteresis!< Update hysteresis (.true.) or not(.false.). When .false., the hysteresis value has been read from rst file.
 
    ! Local Parameters
    double precision                             :: sdtr
@@ -2309,14 +2305,13 @@ subroutine GetSummerDikeTotal(summerdike, wlev, sdArea, sdWidth, hysteresis, doU
       htop = summerdike%crestLevel
       hbas = summerdike%baseLevel
       
-      if (doUpdateHysteresis) then
-         if (wlev >= (htop + sdtr)) then
-            hysteresis = .false.
-         elseif (wlev <= hbas) then
-            hysteresis = .true.
-         else
-         endif
-      end if
+      if (wlev >= (htop + sdtr)) then
+         hysteresis = .false.
+      elseif (wlev <= hbas) then
+         hysteresis = .true.
+      else
+      endif
+
       
       if (hysteresis) then
       
