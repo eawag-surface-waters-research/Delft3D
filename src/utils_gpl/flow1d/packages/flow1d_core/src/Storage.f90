@@ -84,10 +84,13 @@ module m_Storage
   
    type, public :: t_storage
       character(len=idlen)    :: id                      !< unique id of storage area
-      character(len=idlen)    :: nodeId                  !< Node Id
+      character(len=idlen)    :: nodeId                  !< (optional) Node Id
+      character(len=idlen)    :: branchId                !< (optional) branchId
       character(len=idlen)    :: name                    !< Long name in the user interface
       integer                 :: gridPoint               !< gridpoint index
       integer                 :: node_index              !< connection node index
+      integer                 :: branch_index            !< branch index
+      double precision        :: chainage                !< location of the storage node w.r.t the start of the branch
       integer                 :: storageType             !< type of storage on street\n
                                                          !! 0: no storage\n
                                                          !! 2: reservoir storage\n

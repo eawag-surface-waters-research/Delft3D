@@ -222,6 +222,7 @@ module m_oned_functions
       use messageHandling
       use m_GlobalParameters, only: INDTP_ALL
       use m_partitioninfo, only: jampi
+      use m_inquire_flowgeom
 
       implicit none
 
@@ -230,7 +231,7 @@ module m_oned_functions
       integer, allocatable                    :: ixy2stor(:), k_tmp(:)
       double precision, allocatable           :: x_tmp(:), y_tmp(:)
       character(len=IdLen), allocatable       :: name_tmp(:)
-      integer                                 :: nxy, countxy, jakdtree
+      integer                                 :: nxy, countxy, jakdtree, ierr
 
       
       countxy = network%storS%Count_xy
@@ -245,14 +246,16 @@ module m_oned_functions
       nxy = 0
       do i = 1, network%storS%count
          pstor => network%storS%stor(i)
-         if (pstor%node_index < 0) then
+         if (pstor%node_index > 0) then
+            pStor%gridPoint = network%nds%node(pstor%node_index)%gridNumber
+         else if (pstor%branch_index > 0) then
+            ierr = findnode(pStor%branch_index, pstor%chainage, pstor%gridPoint)
+         else
             nxy = nxy + 1
             ixy2stor(nxy) = i
             x_tmp(nxy)    = pstor%x
             y_tmp(nxy)    = pstor%y
             name_tmp(nxy) = pstor%id
-         else
-            pStor%gridPoint = network%nds%node(pstor%node_index)%gridNumber
          end if
       end do
       
