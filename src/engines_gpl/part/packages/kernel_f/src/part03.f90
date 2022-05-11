@@ -68,7 +68,7 @@ contains
 
 !     parameters
 
-!     kind         function         name                     Descriptipon
+!     kind         function         name                     Description
 
       integer(ip), intent(in   ) :: nmax                   !< first dimension lgrid
       integer(ip), intent(in   ) :: mmax                   !< second dimension lgrid
@@ -190,7 +190,6 @@ contains
                     sum = sum + vx**2
                   endif
                   velo(i03d) = sqrt(sum / 2.0)
-                  depth(i0)  = depth(i0) + volume(i03d) 
                   dplay = volume(i03d)/area(i0)
                   if (ilay .eq. 1) then
                     vel1(iseg) = velo(i03d)
@@ -230,12 +229,11 @@ contains
                       sum = sum + vx**2
                     endif
                     vel2(iseg) = sqrt(sum/2.0)
-                     locdep(i0,ilay) = dplay
+                    locdep(i0,ilay) = dplay
                   else
-                     locdep(i0,ilay) = locdep(i0,ilay-1) + dplay
+                    locdep(i0,ilay) = locdep(i0,ilay-1) + dplay
                   end if
-                  depth(i0) = depth(i0)/area(i0)
-                  depth(i0)  = depth(i0) + dplay
+                  depth(i0)  = locdep(i0,layt)
                end do
             end if
          end do
