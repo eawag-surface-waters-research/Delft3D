@@ -1253,10 +1253,18 @@ integer function dlwqnc_create_wqvariable( ncidout, mesh_name, wqname, longname,
         endif
     endif
 
-    ierror = nf90_put_att( ncidout, wqid, "delwaq_name", wqname )
-    if ( ierror /= 0 ) then
-        dlwqnc_create_wqvariable = ierror
-        return
+    if ( nolayid /= dlwqnc_type2d ) then
+        ierror = nf90_put_att( ncidout, wqid, "delwaq_name", wqname )
+        if ( ierror /= 0 ) then
+            dlwqnc_create_wqvariable = ierror
+            return
+        endif
+    else
+        ierror = nf90_put_att( ncidout, wqid, "delwaq_name", trim(wqname)//"_avg")
+        if ( ierror /= 0 ) then
+            dlwqnc_create_wqvariable = ierror
+            return
+        endif
     endif
 
     ierror = nf90_put_att( ncidout, wqid, "mesh", mesh_name(1:k) )
