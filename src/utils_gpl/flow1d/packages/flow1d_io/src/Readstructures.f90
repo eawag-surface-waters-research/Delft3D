@@ -627,9 +627,10 @@ module m_readstructures
       type(t_forcinglist),                intent(inout) :: forcinglist     !< List of all (structure) forcing parameters, to which pump forcing will be added if needed.
       logical,                            intent(  out) :: success         !< Result status, whether reading of the structure was successful.
  
-      character(len=IdLen)                        :: CrsDefID, txt
+      character(len=IdLen)                        :: CrsDefID, txt, BranchID
       integer                                     :: CrsDefIndx
       integer                                     :: icross
+      double precision                            :: chainage
       
       integer                                     :: bedFrictionType
       double precision                            :: bedFriction
@@ -678,8 +679,15 @@ module m_readstructures
          
       icross = AddCrossSection(network%crs, network%CSDefinitions, 0, 0.0d0, CrsDefIndx, 0.0d0, &
                                bedFrictionType, bedFriction, groundFrictionType, groundFriction)
-      network%crs%cross(icross)%branchid = -1
-         
+      
+      call prop_get_string(md_ptr, '', 'branchId', branchID, success1)
+      network%crs%cross(icross)%branchid = hashsearch(network%brs%hashlist, branchID)
+      
+      call prop_get_double(md_ptr, '', 'chainage', chainage, success1)
+      if (success1) then
+      network%crs%cross(icross)%chainage = chainage
+      endif
+      
       culvert%pcross         => network%crs%cross(icross)
       culvert%crosssectionnr = icross
       

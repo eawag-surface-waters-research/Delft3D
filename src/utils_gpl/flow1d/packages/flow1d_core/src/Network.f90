@@ -245,7 +245,9 @@ contains
       adm%lin2str = -huge(1)
       do i = 1, network%sts%count
          pstru => network%sts%struct(i)
-         adm%lin2str(abs(pstru%linknumbers(1:pstru%numlinks))) = i
+         if (associated(pstru%linknumbers)) then 
+          adm%lin2str(abs(pstru%linknumbers(1:pstru%numlinks))) = i
+         endif
       enddo
       
       adm%lin2ibr   = -huge(1)
