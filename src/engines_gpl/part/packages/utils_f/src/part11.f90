@@ -169,9 +169,9 @@
 
 !              particles outside model area
 
-               xa(ipart) = IEEE_VALUE( 1.0d0, IEEE_QUIET_NAN )
-               ya(ipart) = IEEE_VALUE( 1.0d0, IEEE_QUIET_NAN )
-               za(ipart) = IEEE_VALUE( 1.0d0, IEEE_QUIET_NAN )
+               xa(ipart) = -999
+               ya(ipart) = -999
+               za(ipart) = -999
             endif
          endif
   100 continue

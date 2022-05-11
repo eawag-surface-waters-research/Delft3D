@@ -125,7 +125,6 @@ contains
 !     determine actually active segments in z-layer models
 !
       if (zmodel) then
-         aagrid = 0
          do i2 = 2, mmax
             do i1 = 2, nmax
                i0 = lgrid(i1, i2)

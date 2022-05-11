@@ -180,16 +180,19 @@
             enddo
          enddo
       endif
+
+      ! Allocations necessary for both sigma and zlayers, despite only being used for zlayers
+      call alloc ( "laytop", laytop, nmaxp, mmaxp)
+      call alloc ( "laytopp", laytopp, nmaxp, mmaxp)
+      call alloc ( "laybot", laybot, nmaxp, mmaxp)
+      call alloc ( "pagrid", pagrid, nmaxp, mmaxp, layt )
+      call alloc ( "aagrid", aagrid, nmaxp, mmaxp, layt )
+      laytop = 0
+      laytopp = 0
+      laybot = 0
+      pagrid = 0
+      aagrid = 0
       if (zmodel) then
-         call alloc ( "laytop", laytop, nmaxp, mmaxp)
-         call alloc ( "laytopp", laytopp, nmaxp, mmaxp)
-         call alloc ( "laybot", laybot, nmaxp, mmaxp)
-         call alloc ( "pagrid", pagrid, nmaxp, mmaxp, layt )
-         call alloc ( "aagrid", aagrid, nmaxp, mmaxp, layt )
-         laytop = 0
-         laytopp = 0
-         laybot = 0
-         pagrid = 0
          do i = 1, nmaxp
             do j = 1, mmaxp
                if ( lgrid(i,j) .gt. 0 ) then
