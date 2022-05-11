@@ -2379,9 +2379,6 @@ src/engines_gpl/dimr/scripts/fm/run_dimr.bat -text
 src/engines_gpl/dimr/scripts/generic/lnx64/dimr_config_example.xml -text
 src/engines_gpl/dimr/scripts/generic/lnx64/run_dimr.sh -text
 src/engines_gpl/dimr/scripts/generic/lnx64/submit_dimr.sh -text
-src/engines_gpl/dimr/scripts/generic/win32/dimr_config_example.xml -text
-src/engines_gpl/dimr/scripts/generic/win32/run_dimr.bat -text
-src/engines_gpl/dimr/scripts/generic/win32/run_dimr_parallel.bat -text
 src/engines_gpl/dimr/scripts/generic/win64/dimr_config_example.xml -text
 src/engines_gpl/dimr/scripts/generic/win64/run_dimr.bat -text
 src/engines_gpl/dimr/scripts/generic/win64/run_dimr_parallel.bat -text
