@@ -944,7 +944,7 @@ end function get_total_number_of_geom_nodes
 !! of structures on flow links.
 !! Currently one structure lying on multiple subdomains is only supported for long culverts.
 !! TODO: Support other structures lying on multiple subdomains.
-subroutine get_geom_coordinates_of_structure(istrtypein, i, nNodes, x, y, maskBnd)
+subroutine get_geom_coordinates_of_structure(istrtypein, i, nNodes, x, y, maskLocalStartEnd)
    use m_1d_structures
    use m_alloc
    use m_flowgeom, only: lncn
@@ -954,13 +954,13 @@ subroutine get_geom_coordinates_of_structure(istrtypein, i, nNodes, x, y, maskBn
    use m_partitioninfo, only: jampi, idomain, my_rank, link_ghostdata
    use m_flowgeom, only: ln
    implicit none
-   integer,                       intent(in   ) :: istrtypein  !< The type of the structure. May differ from the struct%type, for example:
-                                                               !< an orifice should be called with istrtypein = ST_ORIFICE, whereas its struct(istru)%type = ST_GENERAL_ST.
-   integer,                       intent(in   ) :: i           !< Structure index for this structure type.
-   integer,                       intent(in   ) :: nNodes      !< Number of geometry nodes in this structure (as computed by get_number_of_geom_nodes()).
-   double precision, allocatable, intent(  out) :: x(:)        !< x-coordinates of the structure (will be reallocated when needed)
-   double precision, allocatable, intent(  out) :: y(:)        !< y-coordinates of the structure (will be reallocated when needed)
-   integer,          allocatable, intent(  out) :: maskBnd(:)  !< Mask array of boundary nodes (now only used for long culverts)
+   integer,                       intent(in   ) :: istrtypein            !< The type of the structure. May differ from the struct%type, for example:
+                                                                         !< an orifice should be called with istrtypein = ST_ORIFICE, whereas its struct(istru)%type = ST_GENERAL_ST.
+   integer,                       intent(in   ) :: i                     !< Structure index for this structure type.
+   integer,                       intent(in   ) :: nNodes                !< Number of geometry nodes in this structure (as computed by get_number_of_geom_nodes()).
+   double precision, allocatable, intent(  out) :: x(:)                  !< x-coordinates of the structure (will be reallocated when needed)
+   double precision, allocatable, intent(  out) :: y(:)                  !< y-coordinates of the structure (will be reallocated when needed)
+   integer,          allocatable, intent(  out) :: maskLocalStartEnd(:)  !< Mask array of local start and end nodes on current subdomain (now only used for long culverts)
 
    integer :: istru, nLinks, L, L0, Ls, k1, k2, k3, k4, k, nLinksTmp, jaghost, idmn_ghost, Lf, La
    double precision :: dtmp
@@ -1023,23 +1023,23 @@ subroutine get_geom_coordinates_of_structure(istrtypein, i, nNodes, x, y, maskBn
 
       if (jampi > 0) then
          if (istrtypein == ST_LONGCULVERT) then
-            ! maskBnd will be used for the situation that the structure lying on multiple subdomains.
-            ! Determine the 1st boundary node (Boundary nodes are only useful for parallel simulations).
-            call realloc(maskBnd, nNodes, keepExisting = .false., fill = 0)
+            ! maskLocalStartEnd will be used for the situation that the structure lying on multiple subdomains.
+            ! Determine the 1st local start/end node (it is only useful for parallel simulations).
+            call realloc(maskLocalStartEnd, nNodes, keepExisting = .false., fill = 0)
             if (nLinks == 1) then
-               ! If there is only one link, then the two nodes are the boundary nodes.
-               maskBnd(1) = 1
-               maskBnd(2) = 1
+               ! If there is only one link, then the two nodes are the start/end nodes.
+               maskLocalStartEnd(1) = 1
+               maskLocalStartEnd(2) = 1
             else
-               ! If there are more than one link, then (x(1),y(1)) is a boundary node.
+               ! If there are more than one link, then (x(1),y(1)) is a start/end node.
                ! NOTE: here assumes that the 1st node of a 1D link of the long culvert is always the
                ! starting node, and the 2nd node is always the ending node.
-               maskBnd(1) = 1
+               maskLocalStartEnd(1) = 1
             end if
          else
             ! For other structures, lying on multiple subdomains is not supported yet.
             ! When we support it, then we can also use the codes as above.
-            call realloc(maskBnd, 1, keepExisting = .false., fill = 0)
+            call realloc(maskLocalStartEnd, 1, keepExisting = .false., fill = 0)
          end if
       end if
 
@@ -1083,7 +1083,7 @@ subroutine get_geom_coordinates_of_structure(istrtypein, i, nNodes, x, y, maskBn
          k2 = k4
 
          if (jampi > 0 .and. L0 == nlinks .and. istrtypein == ST_LONGCULVERT) then ! The last node is a boundary node.
-            maskBnd(k) = 1
+            maskLocalStartEnd(k) = 1
          end if
          k = k+1
       end do
@@ -1176,9 +1176,9 @@ subroutine fill_geometry_arrays_structure(istrtypein, nstru, nNodesStru, nodeCou
    double precision, allocatable :: geomYStruMPI(:)      ! [m] y coordinates of structures after mpi communication.
    integer,          allocatable :: nodeCountStruGat(:), nNodesStruGat(:), displs(:)
    double precision, allocatable :: geomX(:), geomY(:)
-   integer                       :: i, j, j1, k, k1, ierror, is, ie, n, ii, nNodes, nNodesStruMPI, jaexist, ke, ks, kk, nb, nbLast, npar
+   integer                       :: i, j, j1, k, k1, ierror, is, ie, n, ii, nNodes, nNodesStruMPI, jaexist, ke, ks, kk, nLocalStartEnd, nLocalStartEndLast, npar
    double precision              :: xNew, yNew, xOld, yOld
-   integer,          allocatable :: maskBnd(:), maskBndAll(:), maskBndGat(:), indBndMPI(:) ! Arrays for boundary nodes, only used in parallel run
+   integer,          allocatable :: maskLocalStartEnd(:), maskLocalStartEndAll(:), maskLocalStartEndGat(:), indLocalStartEndMPI(:) ! Arrays for local start/end nodes, only used in parallel run
    integer,          allocatable :: jacoincide(:)
 
    ! Allocate and construct geometry variable arrays (on one subdomain)
@@ -1192,22 +1192,22 @@ subroutine fill_geometry_arrays_structure(istrtypein, nstru, nNodesStru, nodeCou
    call realloc(geomYStru,       nNodesStru,   keepExisting = .false., fill = 0d0)
    if (jampi > 0 .and. istrtypein == ST_LONGCULVERT) then
       ! In parallel runs, one structure might lie on multiple subdomains. To handle this situation,
-      ! we will need to know which nodes are on boundaries of a structure on each subdomain, and the boundary nodes will be handled separately.
-      ! This will aviod having duplicated (boundary) nodes in the arrays of coordinates of a structure among all subdomains.
-       call realloc(maskBndAll, nNodesStru, keepExisting = .false., fill = 0) ! If the node is a boundary node then the value will be 1
+      ! we will need to know which nodes are local start/end nodes of a structure on each subdomain, and the local start/end nodes will be handled separately.
+      ! This will avoid having duplicated (local start/end) nodes in the arrays of coordinates of a structure among all subdomains.
+       call realloc(maskLocalStartEndAll, nNodesStru, keepExisting = .false., fill = 0) ! If the node is a local start/end node then the value will be 1
    end if
    is = 0
    ie = 0
    do i = 1, nstru
       nNodes = nodeCountStru(i)
       if (nNodes > 0) then
-         call get_geom_coordinates_of_structure(istrtypein, i, nNodes, geomX, geomY, maskBnd)
+         call get_geom_coordinates_of_structure(istrtypein, i, nNodes, geomX, geomY, maskLocalStartEnd)
          is = ie + 1
          ie = is + nNodes - 1
          geomXStru(is:ie) = geomX(1:nNodes)
          geomYStru(is:ie) = geomY(1:nNodes)
          if (jampi > 0 .and. istrtypein == ST_LONGCULVERT) then
-            maskBndAll(is:ie) = maskBnd(1:nNodes)
+            maskLocalStartEndAll(is:ie) = maskLocalStartEnd(1:nNodes)
          end if
       end if
    end do
@@ -1233,7 +1233,7 @@ subroutine fill_geometry_arrays_structure(istrtypein, nstru, nNodesStru, nodeCou
          call realloc(displs,           ndomains,       keepExisting = .false., fill = 0  )
          call realloc(nNodesStruGat,    ndomains,       keepExisting = .false., fill = 0  )
          if (istrtypein == ST_LONGCULVERT) then
-            call realloc(maskBndGat,       nNodesStruMPI,  keepExisting = .false., fill = 0  )
+            call realloc(maskLocalStartEndGat, nNodesStruMPI,  keepExisting = .false., fill = 0  )
          end if
       end if
 
@@ -1257,7 +1257,7 @@ subroutine fill_geometry_arrays_structure(istrtypein, nstru, nNodesStru, nodeCou
       call gatherv_double_data_mpi_dif(nNodesStru, geomXStru, nNodesStruMPI, xGat, ndomains, nNodesStruGat, displs, 0, ierror)
       call gatherv_double_data_mpi_dif(nNodesStru, geomYStru, nNodesStruMPI, yGat, ndomains, nNodesStruGat, displs, 0, ierror)
       if (istrtypein == ST_LONGCULVERT) then
-         call gatherv_int_data_mpi_dif(nNodesStru,maskBndAll, nNodesStruMPI, maskBndGat, ndomains, nNodesStruGat, displs, 0, ierror)
+         call gatherv_int_data_mpi_dif(nNodesStru, maskLocalStartEndAll, nNodesStruMPI, maskLocalStartEndGat, ndomains, nNodesStruGat, displs, 0, ierror)
       end if
 
       if (my_rank == 0) then
@@ -1277,13 +1277,13 @@ subroutine fill_geometry_arrays_structure(istrtypein, nstru, nNodesStru, nodeCou
             j = 0
             do i = 1, nstru                    ! for each structure
                nPar = 0                        ! Number of subdomains that contain this structure
-               nb = 0                          ! Number of boundary nodes for this structure
-               nbLast = 0                      ! Number of boundary nodes for this structure in the previous subdomains
-               call realloc(indBndMPI, nodeCountStruMPI(i), keepExisting = .false., fill = 0)
-               call Realloc(jaCoincide,nodeCountStruMPI(i), keepExisting = .false., fill = 0)
+               nLocalStartEnd = 0              ! Number of local start/end nodes for this structure
+               nLocalStartEndLast = 0          ! Number of local start/end nodes for this structure in the previous subdomains
+               call realloc(indLocalStartEndMPI, nodeCountStruMPI(i), keepExisting = .false., fill = 0)
+               call realloc(jaCoincide,nodeCountStruMPI(i), keepExisting = .false., fill = 0)
                do n = 1, ndomains              ! on each sudomain
-                  k = (n-1)*nstru+i             ! index in nodeCountStruGat
-                  nNodes = nodeCountStruGat(k)  ! structure i on sumdomain n has nNodes nodes
+                  k = (n-1)*nstru+i            ! index in nodeCountStruGat
+                  nNodes = nodeCountStruGat(k) ! structure i on sumdomain n has nNodes nodes
                   if (nNodes > 0) then
                      nPar = nPar + 1
                      ii = (n-1)*nstru
@@ -1294,18 +1294,18 @@ subroutine fill_geometry_arrays_structure(istrtypein, nstru, nNodesStru, nodeCou
                         ! Select and add the nodes of this structure on the current subdomain
                         do k1 = ks, ke
                            kk = is+k1
-                           if (maskBndGat(kk) == 1) then ! If it is a boundary node, need to check if it already exists in
-                                                         ! the coordinate arrays, i.e. GeomXstruMPI and GeomYStruMPI
+                           if (maskLocalStartEndGat(kk) == 1) then ! If it is a local start/end node, need to check if it already exists in
+                                                                   ! the coordinate arrays, i.e. GeomXstruMPI and GeomYStruMPI
                               xNew = xGat(kk)
                               yNew = yGat(kk)
                               jaexist = 0
-                              do j1 = 1, nbLast ! Loop over all the boundary nodes of the previous subdomains that have been added in the coordinate arrays
+                              do j1 = 1, nLocalStartEndLast ! Loop over all local start/end nodes of the previous subdomains that have been added in the coordinate arrays
                                  if (jaCoincide(j1) == 0) then
-                                    ! If the j1 boundary node is not coincide with any boundary node, then check if node (xNew,yNew) is coincide with it or not.
-                                    ! If jaCoincide(j1) == 1, then no need to check this node because one boundary node can be
-                                    ! coincide with another boundary node maximal ONCE.
-                                    xOld = geomXStruMPI(indBndMPI(j1))
-                                    yOld = geomYStruMPI(indBndMPI(j1))
+                                    ! If the j1 start/end node is not coincide with any start/end node, then check if node (xNew,yNew) is coincide with it or not.
+                                    ! If jaCoincide(j1) == 1, then no need to check this node because one start/end node can be
+                                    ! coincide with another start/end node maximal ONCE.
+                                    xOld = geomXStruMPI(indLocalStartEndMPI(j1))
+                                    yOld = geomYStruMPI(indLocalStartEndMPI(j1))
                                     if (comparereal(xNew, xOld, eps6)==0 .and. comparereal(xNew, xOld, eps6)==0) then
                                        jaexist = 1
                                        jaCoincide(j1) = 1
@@ -1317,13 +1317,13 @@ subroutine fill_geometry_arrays_structure(istrtypein, nstru, nNodesStru, nodeCou
                                  j = j + 1
                                  geomXStruMPI(j) = xNew
                                  geomYStruMPI(j) = yNew
-                                 nb = nb + 1         ! add one boundary node
-                                 indBndMPI(nb) = j   ! store its index in geomXStruMPI (and geomYStruMPI)
+                                 nLocalStartEnd = nLocalStartEnd + 1         ! add one local start/end node
+                                 indLocalStartEndMPI(nLocalStartEnd) = j     ! store its index in geomXStruMPI (and geomYStruMPI)
                               else
                                  nodeCountStruMPI(i) = nodeCountStruMPI(i) - 1 ! adjust the node counter
                                  nNodesStruMPI = nNodesStruMPI - 1
                               end if
-                           else ! If it is not a boundary node, then add it directly
+                           else ! If it is not a start/end node, then add it directly
                               j = j + 1
                               geomXStruMPI(j) = xGat(kk)
                               geomYStruMPI(j) = yGat(kk)
@@ -1335,13 +1335,13 @@ subroutine fill_geometry_arrays_structure(istrtypein, nstru, nNodesStru, nodeCou
                            kk = is + k1
                            geomXStruMPI(j) = xGat(kk)
                            geomYStruMPI(j) = yGat(kk)
-                           if (maskBndGat(kk) == 1) then
-                              nb = nb + 1
-                              indBndMPI(nb) = j ! store the index in geomXStruMPI for the boundary nodes
+                           if (maskLocalStartEndGat(kk) == 1) then
+                              nLocalStartEnd = nLocalStartEnd + 1
+                              indLocalStartEndMPI(nLocalStartEnd) = j ! store the index in geomXStruMPI for the local start/end nodes
                            end if
                         end do
                      end if
-                     nbLast = nb ! update nbLast when the current subdomain is finished.
+                     nLocalStartEndLast = nLocalStartEnd ! update nLocalStartEndLast when the current subdomain is finished.
                   end if
                end do
             end do

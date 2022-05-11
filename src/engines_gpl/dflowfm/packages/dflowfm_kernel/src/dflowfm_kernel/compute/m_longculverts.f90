@@ -1115,7 +1115,7 @@ endif
    !! Note 3: In a parallel simulation, it can happen that the starting (ending) node of the polylin of the long culvert is
    !! not on the current subdomain. In this case, the starting (ending) node ON the current subdomain is
    !! found firstly, and then search flowlinks for the interior polyline points.
-   !! TODO: currently it does not support the situation when, in a parallel simulation, the polyline enters
+   !! TODO (UNST-6073): currently it does not support the situation when, in a parallel simulation, the polyline enters
    !! one subdomain, then leaves, and then enters again.
    subroutine find1d2dculvertlinks(network,longculvert, numcoords)
 
@@ -1158,6 +1158,7 @@ endif
      if (inodeGlob(1) <= 0 .or. inodeGlob(2) <= 0) then 
         ! The long culvert is not valid if its starting or ending node is outside the global network
         longculvert%numlinks = 0
+        call mess(LEVEL_WARN, 'find1d2dculvertlinks: a long culvert is not valid if its starting or ending node is outside the global network.')
         return
      else ! This long culvert is valid on the current domain
         ! check the starting node
