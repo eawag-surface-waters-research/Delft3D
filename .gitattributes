@@ -2377,8 +2377,6 @@ src/engines_gpl/dimr/scripts/fm/dimr_wq_without_BLOOM_parallel.xml -text
 src/engines_gpl/dimr/scripts/fm/fm_parameters_for_waves.txt -text
 src/engines_gpl/dimr/scripts/fm/run_dimr.bat -text
 src/engines_gpl/dimr/scripts/generic/lnx64/dimr_config_example.xml -text
-src/engines_gpl/dimr/scripts/generic/lnx64/libtool -text
-src/engines_gpl/dimr/scripts/generic/lnx64/libtool_install.sh -text
 src/engines_gpl/dimr/scripts/generic/lnx64/run_dimr.sh -text
 src/engines_gpl/dimr/scripts/generic/lnx64/submit_dimr.sh -text
 src/engines_gpl/dimr/scripts/generic/win32/dimr_config_example.xml -text
