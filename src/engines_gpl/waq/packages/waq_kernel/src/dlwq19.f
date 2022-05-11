@@ -203,7 +203,7 @@
       logical   , save :: report           ! write iteation reports in monitoring file
       integer          :: ierr2         !
       real(4)     acc_remained, acc_changed ! For reporting: accumulated/averaged reporting parameters
-      logical          :: vertical_upwind  ! Set .true. for upwind sceme in the vertical
+      logical          :: vertical_upwind  ! Set .true. for upwind scheme in the vertical
       integer  ( 4)          ithandl /0/
       integer  ( 4)          ithand1 /0/
       integer  ( 4)          ithand2 /0/
