@@ -24,8 +24,6 @@ function print_usage_info {
     echo "       print this help message and exit"
     echo "-m, --masterfile <filename>"
     echo "       dimr configuration filename, default dimr_config.xml"
-    echo "--dockerparallel"
-    echo "       A parallel run inside docker"
     echo "The following arguments are used when called by submit_dimr.sh:"
     echo "    --D3D_HOME <path>"
     echo "       path to binaries and scripts"
@@ -45,7 +43,6 @@ corespernodedefault=1
 corespernode=$corespernodedefault
 debuglevel=-1
 configfile=dimr_config.xml
-dockerprl=0
 D3D_HOME=
 runscript_extraopts=
 NNODES=1
@@ -75,9 +72,6 @@ case $key in
     -m|--masterfile)
     configfile="$1"
     shift
-    ;;
-    --dockerparallel)
-    dockerprl=1
     ;;
     --D3D_HOME)
     D3D_HOME="$1"
@@ -170,7 +164,6 @@ echo "    Working directory: $workdir"
 echo "    Number of nodes  : $NNODES"
 echo "    Number of slots  : $NSLOTS"
 echo "    OMP_NUM_THREADS  : $OMP_NUM_THREADS"
-echo "    Docker parallel  : $dockerprl"
 echo "    `type mpiexec`"
 echo "    FI_PROVIDER      : $FI_PROVIDER"
 echo "    I_MPI_FABRICS    : $I_MPI_FABRICS"
@@ -220,46 +213,30 @@ if [ $NSLOTS -eq 1 ]; then
     echo "$bindir/dimr $configfile $debugarg"
           $bindir/dimr $configfile $debugarg
 else
-    if [ $dockerprl -eq 1 ]; then
-        #
-        # Parallel in Docker
-        # Assumption: 1 node
-
-        node_number=$NSLOTS
-        while [ $node_number -ge 1 ]; do
-           node_number=`expr $node_number - 1`
-           ln -s /dev/null log$node_number.irlog
-        done
-
-        echo "executing:"
-        echo "mpirun -np $NSLOTS $bindir/dimr $configfile $debugarg"
-              mpirun -np $NSLOTS $bindir/dimr $configfile $debugarg
+    #
+    # Create machinefile using $PE_HOSTFILE
+    if [ $NNODES -eq 1 ]; then
+        echo " ">$(pwd)/machinefile
     else
-        #
-        # Create machinefile using $PE_HOSTFILE
-        if [ $NNODES -eq 1 ]; then
-            echo " ">$(pwd)/machinefile
-        else
-            if [ -n $corespernode ]; then
-                if [ -e $(pwd)/machinefile ]; then
-                    rm -f machinefile
-                fi
-                for (( i = 1 ; i <= $corespernode; i++ )); do
-                    awk '{print $1":"1}' $PE_HOSTFILE >> $(pwd)/machinefile
-                done
-            else
-               awk '{print $1":"2}' $PE_HOSTFILE > $(pwd)/machinefile
+        if [ -n $corespernode ]; then
+            if [ -e $(pwd)/machinefile ]; then
+                rm -f machinefile
             fi
+            for (( i = 1 ; i <= $corespernode; i++ )); do
+                awk '{print $1":"1}' $PE_HOSTFILE >> $(pwd)/machinefile
+            done
+        else
+           awk '{print $1":"2}' $PE_HOSTFILE > $(pwd)/machinefile
         fi
-        echo Contents of machinefile:
-        cat $(pwd)/machinefile
-        echo ----------------------------------------------------------------------
-
-
-        echo "executing:"
-        echo "mpiexec -np $NSLOTS $bindir/dimr $configfile $debugarg"
-              mpiexec -np $NSLOTS $bindir/dimr $configfile $debugarg
     fi
+    echo Contents of machinefile:
+    cat $(pwd)/machinefile
+    echo ----------------------------------------------------------------------
+
+
+    echo "executing:"
+    echo "mpiexec -np $NSLOTS $bindir/dimr $configfile $debugarg"
+          mpiexec -np $NSLOTS $bindir/dimr $configfile $debugarg
 fi
 
 
