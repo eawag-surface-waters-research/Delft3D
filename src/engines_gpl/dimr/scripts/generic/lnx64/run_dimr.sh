@@ -113,17 +113,18 @@ else
     debugarg="-d $debuglevel"
 fi
 
-# set the number of OpenMP threads equal to max(2,NumberOfPhysicalCores-2)
 if [ -z ${OMP_NUM_THREADS+x} ]; then 
     # If OMP_NUM_THREADS is not already defined:
     # Since OMP_NUM_THREADS is advised to be 1, don't do any smart setting, just set it to 1
-    # export NumberOfPhysicalCores=`cat /proc/cpuinfo | grep "cpu cores" | uniq | awk -F: '{print $2}'` 
-    # export OMP_NUM_THREADS=`expr $NumberOfPhysicalCores - 2`
-    # if [ $OMP_NUM_THREADS -lt 2 ]; then
-    #     export OMP_NUM_THREADS=2
-    # fi
+      # Optionally: set the number of OpenMP threads equal to max(2,NumberOfPhysicalCores-2)
+      # export NumberOfPhysicalCores=`cat /proc/cpuinfo | grep "cpu cores" | uniq | awk -F: '{print $2}'` 
+      # export OMP_NUM_THREADS=`expr $NumberOfPhysicalCores - 2`
+      # if [ $OMP_NUM_THREADS -lt 2 ]; then
+      #     export OMP_NUM_THREADS=2
+      # fi
     export OMP_NUM_THREADS=1
-else echo "OMP_NUM_THREADS is already defined"
+else
+    echo "OMP_NUM_THREADS is already defined"
 fi
 
 export NSLOTS=`expr $NNODES \* $corespernode` 
@@ -148,11 +149,20 @@ export D3D_HOME
 PROC_DEF_DIR=$D3D_HOME/share/delft3d
 export PROC_DEF_DIR
 
-# Always try the following module load
-module load intelmpi/21.2.0 &>/dev/null
 
-export FI_PROVIDER=tcp
- 
+
+# On Deltares systems only:
+if [ -f "/opt/apps/deltares/.nl" ]; then
+    # Try the following module load
+    module load intelmpi/21.2.0 &>/dev/null
+
+    # If not defined yet: Define I_MPI_FABRICS and FI_PROVIDER with proper values for Deltares systems
+    [ ! -z "$I_MPI_FABRICS" ] && echo "I_MPI_FABRICS is already defined" || export I_MPI_FABRICS=shm
+    [ ! -z "$FI_PROVIDER" ] && echo "FI_PROVIDER is already defined" || export FI_PROVIDER=tcp
+fi
+
+
+
 echo "    Configfile       : $configfile"
 echo "    D3D_HOME         : $D3D_HOME"
 echo "    PROC_DEF_DIR     : $PROC_DEF_DIR"
