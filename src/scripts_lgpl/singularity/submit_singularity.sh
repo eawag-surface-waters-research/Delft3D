@@ -5,10 +5,10 @@
 
 # Usage:
 # To submit and execute a job on an SGE cluster, for
-# D-Flow FM computations using a Singularity container,
+# D-Flow FM computations using a Singularity container.
 # The script "run_singularity.sh" is much simpler, but can only be used for
 # either sequential, or parallel computations using one node.
-# For parallel using multiple nodes: use submit_singularity.sh.
+# For parallel using multiple nodes: use submit_singularity.sh or write your own variant.
 #
 # To start:
 # 1. Be sure that a Singularity container is available, 
@@ -17,6 +17,8 @@
 # 3. Modify the submit_singularity.sh script, see remarks below.
 # 4. Execute the script from the command line.
 #    This script assumes a SGE queueing system is present and will execute qsub.
+#    Example:
+#    > ./submit_singularity.sh
 #
 #
 # Submit a job in the queue:
@@ -51,10 +53,10 @@
 nNodes=2
 nProc=3
 
-# Set the path to the folder containing the singularity image
-singularitydir=/p/d-hydro/delft3dfm_containers/delft3dfm_2022.02_test
+# Set the path to the folder containing the singularity image and the execute_singularity.sh script. For example: 
+singularitydir=/p/d-hydro/delft3dfm_containers/delft3dfm_2022.03
 
-# select queue; one of : normal-e3-c7 , normal-e5-c7
+# select queue; one of : normal-e3-c7, normal-e3-c7-v2, normal-e5-c7, test-c7
 queue=test-c7
 
 # DIMR input-file; must already exist!
@@ -88,19 +90,37 @@ if (( $# < 4 )); then
 
 
     if [ "$nPart" == "1" ]; then
+        # Sequential computation
+        # "-p": See above. Arguments after "run_dimr.sh" are explained in run_dimr.sh
         echo Adding a job to the queue for one node, one partition, based on this script "submit_singularity.sh" ...
-        qsub -q $queue -N $jobName submit_singularity.sh $nNodes $nProc $singularitydir/execute_singularity.sh run_dimr.sh -m $dimrFile
+        qsub -q $queue -N $jobName submit_singularity.sh $nNodes $nProc $singularitydir/execute_singularity.sh -p 2 run_dimr.sh -m $dimrFile
     else
-        cd dflowfm
+        # Parallel computation on 1 or more nodes
+        #
+
+        # First: partitioning 
+        # (You can re-use a partition if the input files and the number of partitions haven't changed)
+        # Partitioning is executed by dflowfm, in the folder containing the mdu file
+        # Partitioning is executed immediately on the current system, not in the queue
+        cd path/to/directory/containing/the/mdu/file
         echo partitioning...
-        $singularitydir/execute_singularity.sh run_dflowfm.sh --partition:ndomains=$nPart:icgsolver=6 $mduFile
-        cd ..
+        # "-p": See above. Arguments after "run_dflowfm.sh" are explained in run_dflowfm.sh
+        $singularitydir/execute_singularity.sh -p 2 run_dflowfm.sh --partition:ndomains=$nPart:icgsolver=6 $mduFile
+
+        # Jump back to the dimr config file folder to execute dimr
+        cd path/to/directory/containing/the/dimr_config/file
+        # Second: computation
+        echo computation...
         if [ "$nNodes" == "1" ]; then
+            # One Node
+            # "-p": See above. Arguments after "run_dimr.sh" are explained in run_dimr.sh
             echo Adding a job to the queue for one node, multi partitions, based on this script "submit_singularity.sh" ...
-            qsub -q $queue -N $jobName submit_singularity.sh $nNodes $nProc $singularitydir/execute_singularity.sh run_dimr.sh -m $dimrFile
+            qsub -q $queue -N $jobName submit_singularity.sh $nNodes $nProc $singularitydir/execute_singularity.sh -p 2 run_dimr.sh -m $dimrFile
         else
+            # Multi Node
+            # "-p": See above. Arguments after "run_dimr.sh" are explained in run_dimr.sh
             echo Adding a job to the queue for multi nodes, based on this script "submit_singularity.sh" ...
-            qsub -q $queue -pe distrib $nNodes -N $jobName submit_singularity.sh $nNodes $nProc $singularitydir/execute_singularity.sh run_dimr.sh -m $dimrFile
+            qsub -q $queue -pe distrib $nNodes -N $jobName submit_singularity.sh $nNodes $nProc $singularitydir/execute_singularity.sh -p 2 run_dimr.sh -m $dimrFile
         fi
     fi
 
@@ -111,13 +131,17 @@ else
     # The queueing system allocated nodes, execute "execute_singularity.sh",
     # possibly with "mpirun" outside (multi node)
 
+    # This script assumes that the command "singularity" can be found.
+    # For example, at Deltares:
     module load intelmpi/21.2.0
     
     pwd=`pwd`
     nNodes=${1}
     nProc=${2}
     exec_sif=${3}
-    run_dimr=${4}
+    minp=${4}
+    pcount=${5}
+    run_dimr=${6}
     
     scriptdirname=`readlink \-f \$0`
     echo ---------------------------------------------------------------------- 
@@ -127,11 +151,15 @@ else
     echo nNodes       : $nNodes
     echo nProc        : $nProc
     echo exec_sif     : $exec_sif
+    echo -p           : $minp
+    echo pcount       : $pcount
     echo run_dimr     : $run_dimr
-    echo arg5         : ${5}
-    echo arg6         : ${6}
-    echo arg7         : ${7}
-    echo arg8         : ${8}
+    echo run_dimr arg 1 : ${7}
+    echo run_dimr arg 2 : ${8}
+    echo run_dimr arg 3 : ${9}
+    echo run_dimr arg 4 : ${10}
+    echo run_dimr arg 5 : ${11}
+    echo run_dimr arg 6 : ${12}
     echo
     #
     # Create machinefile using $PE_HOSTFILE
@@ -154,10 +182,13 @@ else
     echo ---------------------------------------------------------------------- 
 
     if [ "$nNodes" == "1" ]; then
-        echo One node execution: execute_singularity.sh run_dimr.sh -c nProc
-        $exec_sif $run_dimr -c $nProc ${5} ${6} ${7} ${8} ${9} ${10} ${11} ${12} 
+        # One Node: mpirun is executed inside run_dimr.sh, triggered by "-c nProc"
+        echo One node execution: execute_singularity.sh -p 2 run_dimr.sh -c nProc
+        $exec_sif $minp $pcount $run_dimr -c $nProc ${7} ${8} ${9} ${10} ${11} ${12} 
     else
-        echo Multi node execution: mpirun -n nPart execute_singularity.sh run_dimr.sh -c 1
-        mpirun -n $nPart -ppn $nProc -f machinefile $exec_sif $run_dimr ${5} ${6} ${7} ${8} ${9} ${10} ${11} ${12} 
+        # Multi Node: mpirun must be outside execute_singularity.sh.
+        # A Singularity container will be started for each partition. Note that run_dimr.sh does not contain a "-c nProc" specification, defaulting to "-c 1"
+        echo Multi node execution: mpirun -n nPart -ppn nProc -f machinefile execute_singularity.sh -p 2 run_dimr.sh -c 1
+        mpirun -n $nPart -ppn $nProc -f machinefile $exec_sif $minp $pcount $run_dimr ${7} ${8} ${9} ${10} ${11} ${12} 
     fi
 fi
