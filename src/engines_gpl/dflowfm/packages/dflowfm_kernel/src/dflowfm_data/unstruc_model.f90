@@ -490,10 +490,15 @@ subroutine loadModel(filename)
     if (istat == 0 .and. jadoorladen == 0 .and. network%numk > 0 .and. network%numl > 0) then 
        timerHandle = 0
        call timstrt('Read 1d attributes', timerHandle)
-       call read_1d_attributes(md_1dfiles, network)
+       call read_1d_attributes(md_1dfiles, network)            
+       ! set administration arrays and fill cross section list. So getbobs for 1d can be called.
+       call timstrt('Initialise 1d administration', timerHandle)
+       call initialize_1dadmin(network, network%numl)
        call timstop(timerHandle)
+
+
     endif
- 
+    
     timerHandle = 0
     call timstrt('Read structures', timerHandle)
     
@@ -516,19 +521,12 @@ subroutine loadModel(filename)
       endif
     endif
     
-    call timstop(timerHandle) !initialize_1dadmin is called separately so that newly added long culvet crossections are in administration.
+
     
-       if (istat == 0 .and. jadoorladen == 0 .and. network%numk > 0 .and. network%numl > 0) then 
-       ! set administration arrays and fill cross section list. So getbobs for 1d can be called.
-       timerHandle = 0
-       call timstrt('Initialise 1d administration', timerHandle)
-       call initialize_1dadmin(network, network%numl)
-       call timstop(timerHandle)
+    if (getMaxErrorLevel() >= LEVEL_ERROR) then
+       msgbuf = 'loadModel for '''//trim(filename)//''': Errors were found, please check the diagnostics file.'
+       call fatal_flush()
     endif
-    !if (getMaxErrorLevel() >= LEVEL_ERROR) then
-    !   msgbuf = 'loadModel for '''//trim(filename)//''': Errors were found, please check the diagnostics file.'
-    !   call fatal_flush()
-    !endif
     
   
        ! fill bed levels from values based on links
