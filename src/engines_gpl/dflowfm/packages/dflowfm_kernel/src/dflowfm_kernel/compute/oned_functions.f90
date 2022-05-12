@@ -868,11 +868,10 @@ module m_oned_functions
    use m_flow,     only: s1, vol1, a1, vol1_f, a1m, s1m, nonlin
    use m_alloc
    use unstruc_channel_flow, only: network
-   use unstruc_netcdf, only: convert_hysteresis_summerdike
    implicit none
    double precision, allocatable :: s1_tmp(:), vol1_tmp(:), a1_tmp(:), vol1_ftmp(:), a1m_tmp(:), s1m_tmp(:)
    integer                       :: ndx1d
-   integer,          allocatable :: hesteresis_tmp(:)
+   logical, allocatable :: hysteresis_tmp(:,:)
 
    ndx1d = ndxi-ndx2d
    if (ndx1d == 0) then
@@ -902,8 +901,8 @@ module m_oned_functions
    
    if (network%loaded) then
       if (network%numl > 0) then
-         allocate(hesteresis_tmp(network%numl))
-         call convert_hysteresis_summerdike(.true., hesteresis_tmp)
+         allocate(hysteresis_tmp(2, network%numl))
+         hysteresis_tmp(:,:) = network%adm%hysteresis_for_summerdike
       end if
    end if
 
@@ -934,7 +933,7 @@ module m_oned_functions
 
    if (network%loaded) then
       if (network%numl > 0) then
-         call convert_hysteresis_summerdike(.false., hesteresis_tmp)
+         network%adm%hysteresis_for_summerdike = hysteresis_tmp
       end if
    end if
    end subroutine set_max_volume_for_1d_nodes
