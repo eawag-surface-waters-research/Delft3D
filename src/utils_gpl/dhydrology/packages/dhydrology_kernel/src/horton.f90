@@ -44,11 +44,10 @@ module horton
    !! (using integral of capacity function, depending on state recovery or decrease).
    
    function infiltration_horton_formula(n, MinInfCap, MaxInfCap, DecreaseRate, RecoveryRate, PreviousInfCap, NewInfCap, &
-                                       TimestepSize, Dt, InitialStorage, Rainfall, jarain, InfCapState, InfiltrationMM) result(ierr)
+                                       TimestepSize, Dt, InitialStorage, Rainfall, includerain, InfCapState, InfiltrationMM) result(ierr)
       use dhydrology_error
       
       integer,                    intent(in   ) :: n                  !< Array length (grid cell count)
-      integer,                    intent(in   ) :: jarain             !< indicates if array Rainfall is available, otherwise no rainfall is assumed
       double precision,           intent(in   ) :: MinInfCap(n)       !< Minimum infiltration capacity (mm/hr)
       double precision,           intent(in   ) :: MaxInfCap(n)       !< Maximum infiltration capacity (mm/hr)
       double precision,           intent(in   ) :: DecreaseRate(n)    !< Decrease rate (1/hr)
@@ -58,7 +57,8 @@ module horton
       double precision,           intent(in   ) :: TimestepSize       !< Timestep size (s)
       double precision,           intent(inout) :: Dt(n)              !< Time in hours since start of decreasing/recovery mode (hr)
       double precision,           intent(in   ) :: InitialStorage(n)  !< Initial storage (=storage at start of timestep) (m)
-      double precision,           intent(in   ) :: Rainfall(n)        !< Rainfall in current timestep (or more precise: additional ground rainfall, so minus interception)
+      double precision,           intent(in   ) :: Rainfall(:)        !< Rainfall in current timestep (or more precise: additional ground rainfall, so minus interception)
+      integer,                    intent(in   ) :: includerain        !< indicates whether or not (1/0) array Rainfall is available, otherwise no rainfall is assumed
       integer,                    intent(  out) :: InfCapState(n)     !< Infiltration capacity state; (one of HORTON_CAPSTAT_(NOCHANGE|RECOVERY|INCREASE))
       double precision, optional, intent(  out) :: InfiltrationMM(n)  !< Infiltration amount (mm)
       integer                                   :: ierr               !< Result status, DHYD_NOERR if successful.
@@ -108,7 +108,7 @@ module horton
       Ratio = -1d0
 
       do i = 1, n
-         if (jarain) then
+         if (includerain == 1) then
             rainIsFalling = Rainfall(i) > 0d0
          else 
             rainIsFalling = .false.
