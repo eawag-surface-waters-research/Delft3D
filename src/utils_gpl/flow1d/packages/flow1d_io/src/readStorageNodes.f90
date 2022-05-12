@@ -45,12 +45,13 @@ module m_readStorageNodes
 
    public readStorageNodes
    
-   ! Storage nodes file current version: 2.00
+   ! Storage nodes file current version: 2.01
    integer, parameter :: storgNodesFileMajorVersion = 2
-   integer, parameter :: storgNodesFileMinorVersion = 0
+   integer, parameter :: storgNodesFileMinorVersion = 1
    
    ! History storage nodes file versions:
 
+   ! 2.01 (2022-05-11): added branchId+chainage as possible location.
    ! 2.00 (2019-08-27): renamed to storage nodes, added x/y as possible location, added storage table option.
    ! 1.00 (2018-08-13): initial "urban" version of storage nodes ('retentions').
 
