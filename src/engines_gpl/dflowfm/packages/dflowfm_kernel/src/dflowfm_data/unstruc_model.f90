@@ -490,62 +490,61 @@ subroutine loadModel(filename)
     if (istat == 0 .and. jadoorladen == 0 .and. network%numk > 0 .and. network%numl > 0) then 
        timerHandle = 0
        call timstrt('Read 1d attributes', timerHandle)
-       call read_1d_attributes(md_1dfiles, network)            
+       call read_1d_attributes(md_1dfiles, network)
+       call timstop(timerHandle)
+
+       timerHandle = 0
+       call timstrt('Read structures', timerHandle)
+       if (len_trim(md_1dfiles%structures) > 0) then
+          call SetMessage(LEVEL_INFO, 'Reading Structures ...')
+          call readStructures(network, md_1dfiles%structures)
+          call SetMessage(LEVEL_INFO, 'Reading Structures Done')
+
+          if ( md_convertlongculverts == 0) then
+             fnamesstring = md_1dfiles%structures
+             call strsplit(fnamesstring,1,fnames,1)
+             call loadLongCulvertsAsNetwork(fnames(1), 0, istat)
+             do ifil=2,size(fnames)
+                call loadLongCulvertsAsNetwork(fnames(ifil), 1, istat)
+             end do
+             deallocate(fnames)
+             if (.not. newculverts .and. nlongculvertsg > 0) then
+                call finalizeLongCulvertsInNetwork()
+             end if
+          end if
+       end if
+
+       call timstop(timerHandle)
+
        ! set administration arrays and fill cross section list. So getbobs for 1d can be called.
        call timstrt('Initialise 1d administration', timerHandle)
        call initialize_1dadmin(network, network%numl)
        call timstop(timerHandle)
+    end if
 
-
-    endif
-    
-    timerHandle = 0
-    call timstrt('Read structures', timerHandle)
-    
-    if (len_trim(md_1dfiles%structures) > 0) then
-      call SetMessage(LEVEL_INFO, 'Reading Structures ...')
-      call readStructures(network, md_1dfiles%structures)
-      call SetMessage(LEVEL_INFO, 'Reading Structures Done')
-
-      if ( md_convertlongculverts == 0) then
-        fnamesstring = md_1dfiles%structures
-        call strsplit(fnamesstring,1,fnames,1)
-        call loadLongCulvertsAsNetwork(fnames(1), 0, istat)
-        do ifil=2,size(fnames)
-          call loadLongCulvertsAsNetwork(fnames(ifil), 1, istat)
-        end do
-        deallocate(fnames)
-        if (.not. newculverts .and. nlongculvertsg > 0) then
-           call finalizeLongCulvertsInNetwork()
-        end if
-      endif
-    endif
-    
-
-    
     if (getMaxErrorLevel() >= LEVEL_ERROR) then
        msgbuf = 'loadModel for '''//trim(filename)//''': Errors were found, please check the diagnostics file.'
        call fatal_flush()
     endif
     
   
-       ! fill bed levels from values based on links
-       do L = 1,  network%numl
-          tempbob = getbobs(network, L)
-          if (tempbob(1) > 0.5d0* huge(1d0)) tempbob(1) = dmiss
-          if (tempbob(2) > 0.5d0* huge(1d0)) tempbob(2) = dmiss
+    ! fill bed levels from values based on links
+    do L = 1,  network%numl
+       tempbob = getbobs(network, L)
+       if (tempbob(1) > 0.5d0* huge(1d0)) tempbob(1) = dmiss
+       if (tempbob(2) > 0.5d0* huge(1d0)) tempbob(2) = dmiss
 
-          k1 = kn(1,L)
-          k2 = kn(2,L)
-          if (zk(k1) == dmiss) then
-             zk(k1) = tempbob(1)
-          endif
-          if (zk(k2) == dmiss) then
-             zk(k2) = tempbob(2)
-          endif
-          zk(k1) = min(zk(k1),tempbob(1))
-          zk(k2) = min(zk(k2),tempbob(2))
-       enddo    
+       k1 = kn(1,L)
+       k2 = kn(2,L)
+       if (zk(k1) == dmiss) then
+          zk(k1) = tempbob(1)
+       endif
+       if (zk(k2) == dmiss) then
+          zk(k2) = tempbob(2)
+       endif
+       zk(k1) = min(zk(k1),tempbob(1))
+       zk(k2) = min(zk(k2),tempbob(2))
+    enddo    
 
     ! Load land boundary from file.
     if (len_trim(md_ldbfile) > 0) then

@@ -277,6 +277,8 @@ contains
          call timstrt('Apply branch orders', timerHandle)
          
          call useBranchOrders(network%crs, network%brs)
+         call reIndexCrossSections(network%sts, network%crs) ! Update re-sorted cross sections for culverts and bridges
+
          call timstop(timerhandle)
          
          timerHandle = 0
