@@ -98,6 +98,28 @@ if(NOT TARGET delpar)
 endif()
 
 #
+# Third party libraries
+#=============
+# kdtree2
+if(NOT TARGET kdtree2)
+    add_subdirectory(${checkout_src_root}/${kdtree_module} kdtree2)
+endif()
+
+if(NOT TARGET kdtree_wrapper)
+    add_subdirectory(${checkout_src_root}/${kdtree_wrapper_module} kdtree_wrapper)
+endif()
+
+# triangle
+if(NOT TARGET triangle_c)
+    add_subdirectory(${checkout_src_root}/${triangle_c_module} triangle_c)
+endif()
+
+# fortrangis
+if(NOT TARGET fortrangis)
+    add_subdirectory(${checkout_src_root}/${fortrangis_module} fortrangis)
+endif()
+
+#
 # Utils
 #=============
 # Deltares_common
@@ -118,6 +140,16 @@ endif()
 # io_netcdf
 if(NOT TARGET io_netcdf)
     add_subdirectory(${checkout_src_root}/${io_netcdf_module} io_netcdf)
+endif()
+
+# ec_module
+if(NOT TARGET ec_module)
+    add_subdirectory(${checkout_src_root}/${ec_module} ec_module)
+endif()
+
+# gridgeom
+if(NOT TARGET gridgeom)
+    add_subdirectory(${checkout_src_root}/${gridgeom_module} gridgeom)
 endif()
 
 # Nefis
@@ -149,11 +181,10 @@ if(NOT TARGET esmfsm)
     add_subdirectory(${checkout_src_root}/${esmfsm_module} esmfsm)
 endif()
 
-# io_netcdf
+# io_hyd
 if(NOT TARGET io_hyd)
     add_subdirectory(${checkout_src_root}/${io_hyd_module} io_hyd)
 endif()
-
 
 #
 # Linux installation
