@@ -1,5 +1,7 @@
 @ echo off
 
+set PATH=c:\ProgramData\Miniconda3;%PATH%
+
 setlocal enabledelayedexpansion
 set prepareonly=0
 set mode=
