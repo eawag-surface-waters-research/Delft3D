@@ -242,12 +242,8 @@ contains
       call timstrt('line administration', timerHandle)
       adm => network%adm
       
-      adm%lin2str = -huge(1)
-      do i = 1, network%sts%count
-         pstru => network%sts%struct(i)
-         adm%lin2str(abs(pstru%linknumbers(1:pstru%numlinks))) = i
-      enddo
-      
+      call update_lin2str_admin(network)
+
       adm%lin2ibr   = -huge(1)
       adm%lin2local = -huge(1)
       adm%lin2grid  = -huge(1)
@@ -619,6 +615,24 @@ contains
       enddo
    
    end subroutine reassign_pointers
+
+   !> Updates the network%adm%lin2str administration after the full set
+   !! of structures has been filled.
+   subroutine update_lin2str_admin(network)
+      type(t_network), intent(inout) :: network !< The overal network containing structures and administration.
+
+      integer :: i
+      type (t_structure), pointer :: pstru
+
+      network%adm%lin2str = -huge(1)
+      do i = 1, network%sts%count
+         pstru => network%sts%struct(i)
+         if (associated(pstru%linknumbers)) then
+            network%adm%lin2str(abs(pstru%linknumbers(1:pstru%numlinks))) = i
+         end if
+      enddo
+   end subroutine update_lin2str_admin
+
 
    subroutine set_network_pointers(network)
       ! Modules
