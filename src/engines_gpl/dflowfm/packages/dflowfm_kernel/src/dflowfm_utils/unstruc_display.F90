@@ -2046,6 +2046,10 @@ do kk = 1,ndx
       endif
    enddo  
 enddo 
+if (vtot == 0d0) then
+   return
+end if
+
 roav = roav / vtot                                                          ! kg/m3
 
 do kk = 1,ndx
