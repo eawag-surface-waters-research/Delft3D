@@ -1015,6 +1015,7 @@ subroutine readMDUFile(filename, istat)
 
     call prop_get_integer(md_ptr, 'numerics', 'Icoriolistype'   , icorio)
     call prop_get_integer(md_ptr, 'numerics', 'Newcorio'        , newcorio)
+
     call prop_get_integer(md_ptr, 'numerics', 'Corioconstant'   , jacorioconstant)
     call prop_get_double (md_ptr, 'numerics', 'Corioadamsbashfordfac', Corioadamsbashfordfac)
     call prop_get_double (md_ptr, 'numerics', 'Coriohhtrsh'          , hhtrshcor)
@@ -1250,6 +1251,7 @@ subroutine readMDUFile(filename, istat)
     call prop_get_integer(md_ptr, 'physics', 'Equili'         , jaequili ) ! TODO: Ottevanger/Nabi: consider changing the name of these settings: add "spiral/secondary flow" into it.
 
     call prop_get_integer(md_ptr, 'physics', 'Idensform'      , idensform)
+    call prop_get_integer(md_ptr, 'physics', 'Maxitpresdens'  , maxitpresdens)
     call prop_get_integer(md_ptr, 'physics', 'Temperature'       , jatem)
     call prop_get_double (md_ptr, 'physics', 'InitialTemperature', temini)
     call prop_get_double (md_ptr, 'physics', 'Secchidepth'       , Secchidepth)
@@ -1396,10 +1398,6 @@ subroutine readMDUFile(filename, istat)
     call prop_get_double (md_ptr, 'wind' , 'Rhoair'                   , rhoair )
     call prop_get_double (md_ptr, 'wind' , 'PavIni'                   , PavIni )
     call prop_get_double (md_ptr, 'wind' , 'PavBnd'                   , PavBnd )
-    call prop_get_integer(md_ptr, 'wind' , 'Stericcorrection'         , jasteric)
-    if (Jasteric > 0) then
-       rhosteric = densfm(backgroundsalinity, backgroundwatertemperature)
-    endif
 
     call prop_get_integer(md_ptr, 'waves', 'Wavemodelnr'    , jawave)
     call prop_get_double (md_ptr, 'waves', 'Tifetchcomp'    , Tifetch)
@@ -2766,7 +2764,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
        if (writeall .or. jaZlayeratubybob .ne. 0 .and. layertype .ne. 1) then
          call prop_set(prop_ptr, 'geometry', 'Zlayeratubybob', JaZlayeratubybob, 'Lowest connected cells governed by bob instead of by bL L/R' )
        endif
-       endif
+    endif
 
     ! 1D Volume tables
     if (writeall .or. useVolumeTables) then
@@ -3135,9 +3133,13 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     call prop_set(prop_ptr, 'physics', 'irov',             irov,         '0=free slip, 1 = partial slip using wall_ks')
     call prop_set(prop_ptr, 'physics', 'wall_ks',          wall_ks,      'Wall roughness type (0: free slip, 1: partial slip using wall_ks)')
     call prop_set(prop_ptr, 'physics', 'Rhomean',          rhomean,      'Average water density (kg/m3)')
-    if (writeall .or. (idensform .ne. 1)) then
-       call prop_set(prop_ptr, 'physics', 'Idensform',     idensform,    'Density calulation (0: uniform, 1: Eckart, 2: Unesco, 3: baroclinic case)')
+    if (writeall .or. idensform .ne. 1) then
+       call prop_set(prop_ptr, 'physics', 'Idensform',     idensform,    'Density calulation (0: uniform, 1: Eckart, 2: Unesco, 3=Unesco83, 13=3+pressure)')
     endif
+    if (writeall .or. Maxitpresdens .ne. 1) then
+       call prop_set(prop_ptr, 'physics', 'Maxitpresdens', Maxitpresdens,'Max nr of iterations in pressure-density coupling, only used if idensform > 10 )')
+    endif
+ 
     call prop_set(prop_ptr, 'physics', 'Ag'     ,          ag ,          'Gravitational acceleration')
     call prop_set(prop_ptr, 'physics', 'TidalForcing',     jatidep,      'Tidal forcing, if jsferic=1 (0: no, 1: yes)')
     call prop_set(prop_ptr, 'physics', 'SelfAttractionLoading',  jaselfal,     'Self attraction and loading (0=no, 1=yes, 2=only self attraction)')
@@ -3306,8 +3308,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     call prop_set(prop_ptr, 'wind', 'Rhoair',                  Rhoair,   'Air density (kg/m3)')
     call prop_set(prop_ptr, 'wind', 'PavBnd',                  PavBnd,   'Average air pressure on open boundaries (N/m2) (only applied if > 0)')
     call prop_set(prop_ptr, 'wind', 'Pavini',                  PavIni,   'Average air pressure for initial water level correction (N/m2) (only applied if > 0)')
-    call prop_set(prop_ptr, 'wind', 'Stericcorrection',      Jasteric, 'Steric correction on waterlevel bnds, for which sal + temp should be prescribed')
-
+    
     if (writeall .or. jagrw > 0 .or. infiltrationmodel /= DFM_HYD_NOINFILT) then
        call prop_set(prop_ptr, 'grw', 'groundwater'        , jagrw,             '0=No (horizontal) groundwater flow, 1=With groundwater flow')
        write (tmpstr, '(a,5(i0,": ",a),a)') 'Infiltration method (', DFM_HYD_NOINFILT, 'No infiltration', 1, 'Interception layer', &

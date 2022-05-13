@@ -122,6 +122,8 @@
 
    call klok(tstartall)
 
+   call checkunesco83()
+
 #if HAVE_DISPLAY==0
 ! For dflowfm-cli executable, switch off all GUI calls here at *runtime*,
 ! by setting jaGUI = 0.

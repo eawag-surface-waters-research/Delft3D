@@ -33,6 +33,7 @@
    SUBROUTINE DRAWNU(KEY)
    use m_netw
    USE M_SAMPLES
+   use m_arcinfo
    use unstruc_display
    use unstruc_opengl
    implicit none
@@ -100,7 +101,11 @@
 
       call TEKgrid(key)
 
-      call teksam(xs,ys,zs,ns,ndraw(32))
+      if (mca*nca > maxsamarc) then 
+         call TEKarc(ndraw(32))
+      else if (ns > 0) then 
+         call teksam(ndraw(32))
+      endif
     
       if (ndraw(2) == 6) then
          CALL TEKNET(NCOLDN,key) ! network on top

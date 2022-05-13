@@ -44,8 +44,7 @@
 
  integer          :: n, kb, k2, itpbn, L, ibnd
  double precision :: zb, hh, dtgh, alf, zcor
- double precision, external :: barocpsteric
-
+ 
  do n  = 1, nbndz                                    ! overrides for waterlevel boundaries
     kb      = kbndz(1,n)
     k2      = kbndz(2,n)
@@ -81,12 +80,7 @@
     if (japatm > 0 .and. PavBnd > 0) then
        zb = zb - ( patm(kb) - PavBnd )/(ag*rhomean)
     endif
-
-    !if (jasteric > 0) then
-    !   zcor = barocpsteric(kb)/(ag*rhomean)
-    !   zb   = zb - zcor
-    !endif
-
+ 
 !    zb = max( zb, bl(kb) + 1d-3 )
 
     ! When requested, set bl of bnd nodes to a certain depth below (initial) water level.

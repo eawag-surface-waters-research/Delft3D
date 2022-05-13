@@ -70,7 +70,9 @@ subroutine update_verticalprofiles()
 
  double precision :: cfuhi3D, vicwmax, tkewin, zint, z1, vicwww, alfaT, tke, eps, tttctot, c3t, c3e
 
- double precision :: rhoLL, pkwmag, hrmsLL, dsurfLL, dwcapLL, wdep, hbot, dzwav
+ double precision :: rhoLL, pkwmag, hrmsLL, dsurfLL, dwcapLL, wdep, hbot, dzwav, prsappr
+
+ double precision, external :: setrho
 
  integer          :: k, ku, kd, kb, kt, n, kbn, kbn1, kn, knu, kk, kbk, ktk, kku, LL, L, Lb, Lt, kxL, Lu, Lb0, kb0
  integer          :: k1, k2, k1u, k2u, n1, n2, ifrctyp, ierr, jadrhodz = 1, kup, ierror, Ltv, ktv, whit
@@ -379,14 +381,24 @@ subroutine update_verticalprofiles()
 
             drhodz = 0d0 ; drhodz1 = 0d0 ; drhodz2 = 0d0
 
-            dzc1       = 0.5d0*(zws(k1u) - zws(k1-1) )  ! vertical distance between cell centers on left side
+            dzc1 = 0.5d0*(zws(k1u) - zws(k1-1) )  ! vertical distance between cell centers on left side
             if (dzc1 >  0) then
-               drhodz1 = ( rho(k1u) - rho(k1) ) / dzc1
+               if (idensform < 10) then                     
+                  drhodz1 = ( rho(k1u) - rho(k1) ) / dzc1
+               else
+                  prsappr = ag*rhomean*( zws(ktop(ln(1,LL))) - zws(k1) )   
+                  drhodz1 = ( setrho(k1u,prsappr) - setrho(k1,prsappr) ) / dzc1
+               endif
             endif
 
-            dzc2       = 0.5d0*(zws(k2u) - zws(k2-1) )  ! vertical distance between cell centers on right side
+            dzc2 = 0.5d0*(zws(k2u) - zws(k2-1) )  ! vertical distance between cell centers on right side
             if (dzc2 > 0) then
-               drhodz2 = ( rho(k2u) - rho(k2) ) / dzc2
+               if (idensform < 10) then      
+                  drhodz2 = ( rho(k2u) - rho(k2) ) / dzc2
+               else
+                  prsappr = ag*rhomean*( zws(ktop(ln(2,LL))) - zws(k2) )  
+                  drhodz2 = ( setrho(k2u,prsappr) - setrho(k2,prsappr) ) / dzc2
+               endif
             endif
 
             if (jadrhodz == 1) then
@@ -444,7 +456,7 @@ subroutine update_verticalprofiles()
         if (jawave>0 .and. jawaveStokes>=1) then  ! shear based on eulerian velocity field, see turclo,note JvK, Ardhuin 2006
            dijdij(k) = ( ( u1(Lu) - u1(L) - ( ustokes(Lu) - ustokes(L) )) ** 2 + ( v(Lu) - v(L) - ( vstokes(Lu) - vstokes(L) )) ** 2 ) / dzw(k)**2
         else
-        dijdij(k) = ( ( u1(Lu) - u1(L) ) ** 2 + ( v(Lu) - v(L) ) ** 2 ) / dzw(k)**2
+           dijdij(k) = ( ( u1(Lu) - u1(L) ) ** 2 + ( v(Lu) - v(L) ) ** 2 ) / dzw(k)**2
         endif
 
         if (jarichardsononoutput > 0) then                ! save richardson nr to output

@@ -1071,17 +1071,7 @@ endif
 
     if (allocated (sam0) ) deallocate (sam0, sam1, same)
     allocate (sam0(ndkx), sam1(ndkx), same(ndkx) )  ; sam0 = 0 ; sam1 = 0 ; same = 0
-
-    if (jasteric > 0) then
-       if (allocated (steric) ) deallocate (steric)
-       allocate ( steric(2,ndkx) , stat = ierr)
-       call aerr('steric(2,ndkx)', ierr, 2*ndkx)
-       do n=1,ndkx
-          steric(1,n) = backgroundsalinity
-          steric(2,n) = backgroundwatertemperature
-       enddo
-    endif
-
+ 
     if ( jatransportmodule == 0) then
        if ( allocated (supq) )  deallocate (supq, qsho)
        allocate ( supq(ndkx), qsho(lnkx)  , stat = ierr)

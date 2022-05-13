@@ -135,9 +135,6 @@ subroutine transport()                           ! transport for now, advect sal
           else
               constituents(isalt, kb) = constituents(isalt, ki)   ! outflow
           endif
-          !if (jasteric > 0) then
-          !   steric(1,kb) = zbnds(kk)
-          !endif
        enddo
 
        if ( kb.gt.0 ) then
@@ -170,9 +167,6 @@ subroutine transport()                           ! transport for now, advect sal
           else
               constituents(itemp, kb)  = constituents(itemp, ki)     ! outflow
           endif
-          !if (jasteric > 0) then
-          !   steric(2,kb) = zbndTM(kk)
-          !endif
        enddo
 
        if ( kb.gt.0 ) then
@@ -1135,19 +1129,13 @@ subroutine transport()                           ! transport for now, advect sal
        samerr = sam1tot - sam0tot !  - saminbnd + samoutbnd
    endif
 
-   !$OMP PARALLEL DO             &
-   !$OMP PRIVATE(kk,kb,kt,k)
+
+  ! !$OMP PARALLEL DO             &
+  ! !$OMP PRIVATE(kk)
    do kk = 1,ndx ! i
-      call getkbotktop(kk,kb,kt)
-      if ( kt < kb ) cycle
-      do k = kb,kt
-         rho(k)  = setrho(k)
-      enddo
-      do k = kt+1 , kb + kmxn(kk) - 1
-         rho(k) = rho(kt)
-      enddo
+      call setrhokk(kk)  
    enddo
-   !$OMP END PARALLEL DO
+  ! !$OMP END PARALLEL DO
 
    if (stm_included) then 
       !$OMP PARALLEL DO             &

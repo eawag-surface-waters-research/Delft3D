@@ -146,6 +146,7 @@
  double precision                  :: clam0                      !< eckart density parameters
  double precision                  :: alph0                      !< eckart density parameters
  integer                           :: idensform                  !< 0 = no, 1 = eckart
+ integer                           :: Maxitpresdens = 1          !< max nr of density-pressure iterations 
  integer                           :: limiterhordif              !< 0=No, 1=Horizontal gradient densitylimiter, 2=Finite volume
 
  double precision                  :: Stanton                    !< coeff for convective  heat flux, if negative , take wind Cd

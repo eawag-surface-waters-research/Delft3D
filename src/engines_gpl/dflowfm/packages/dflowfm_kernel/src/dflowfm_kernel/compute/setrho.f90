@@ -30,7 +30,35 @@
 ! $Id$
 ! $HeadURL$
 
-double precision function setrho(k)
+subroutine setrhokk(kk)
+use m_flow, only : rho, idensform, kmxn
+implicit none
+integer :: kk 
+integer :: kb,kt,k
+ 
+double precision, external :: setrho 
+double precision           :: p0
+
+call getkbotktop(kk,kb,kt)
+if (kt<kb) return
+
+if (idensform < 10) then  ! no pressure dependency 
+   do k = kb,kt
+      rho(k)  = setrho(k,p0)
+   enddo
+else                      ! with pressure dependency
+   p0 = 0d0               ! surface value is 0 bar in unesco, not 1 bar
+   do k = kt,kb,-1
+      rho(k)  = setrho(k,p0)
+   enddo
+endif
+
+do k = kt+1 , kb + kmxn(kk) - 1
+   rho(k) = rho(kt)
+enddo
+end subroutine setrhokk
+
+double precision function setrho(k,p0)
 use m_physcoef
 use m_flow
 use m_sediment
@@ -39,9 +67,12 @@ use m_transport
 use m_turbulence, only: rhowat
 
 implicit none
-integer :: k, j, l, lsed
-double precision, external :: densfm
-double precision           :: rhom, sal, temp
+integer          :: k
+double precision :: p0           ! in as cell ceiling pressure, out as cell floorpressure (pascal) 
+
+integer                         :: j, l, lsed, i    
+double precision, external      :: densfm
+double precision                :: rhom, sal, temp, p1, dzz
 
 if (jasal > 0) then
    saL = max(0d0, constituents(isalt, k))
@@ -50,12 +81,22 @@ else
 endif
 
 if (jatem > 0) then
-   temp = max(0d0, constituents(itemp,k))
+   temp = max(0d0, constituents(itemp,k))  ! should be changed to -2d0 at some point in future
 else
    temp = backgroundwatertemperature
 endif
 
-setrho = densfm(sal,temp)
+if (idensform < 10) then 
+   setrho = densfm(sal,temp,p0)
+else 
+   dzz = zws(k) - zws(k-1)
+   do i  = 1,Maxitpresdens 
+      p1 = p0 + ag*dzz*rho(k)
+      rho(k) =  densfm(sal,temp,0.5d0*(p1+p0) )
+   enddo
+   setrho = rho(k)
+   p0     = p1
+endif
 
 if (jased > 0 .and. stm_included) then
    rhom = setrho                      ! UNST-5170 for mor, only use salt+temp, not sediment effect
@@ -75,7 +116,7 @@ if (jased > 0 .and. stm_included) then
 else if (jaseddenscoupling > 0) then  ! jased < 4
    rhom = setrho
    do j = 1,mxgr
-      setrho = setrho + sed(j,k)*(rhosed(j) - rhom)/rhosed(j)
+      setrho = setrho + sed(j,k)*(rhosed(j) - rhom)/rhosed(j) ! good to see this is also adopted officially above %
    enddo
 end if
 

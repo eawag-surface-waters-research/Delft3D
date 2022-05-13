@@ -68,6 +68,9 @@
 !              Algorithms for computation of fundamental
 !              properties of seawater, UNESCO technical papers
 !              in marine science, 1983)
+!              JvK and HK checked this on 12-05-2022, and we found that the correct reference is:
+!              Background papers and supporting data, on the international equation of state of seawater 1980, Unesco 1981
+!              (both years 1980 and 1981 are on cover), formula taken from page 20
 !
 !!--pseudo code and references--------------------------------------------------
 ! NONE
