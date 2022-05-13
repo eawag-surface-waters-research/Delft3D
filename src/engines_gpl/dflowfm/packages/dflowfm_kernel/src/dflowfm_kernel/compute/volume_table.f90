@@ -225,6 +225,9 @@ module m_VolumeTables
       stors => network%storS%stor
 
       ndx1d = ndx - ndx2d     ! include also the 2d boundary nodes.
+      if (allocated(vltb)) then
+         deallocate(vltb)
+      end if
       allocate(vltb(ndx1d))
       do n = 1, ndx1d
          vltb(n)%count = 0
