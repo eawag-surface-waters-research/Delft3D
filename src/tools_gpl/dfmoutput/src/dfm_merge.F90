@@ -2223,6 +2223,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
                         if (jaread_sep == 1) then
                            call realloc(tmpvar2D_tmpmax, (/  count_read(is), count_read(ie) /), keepExisting=.false., fill=dmiss)
                            ierr = nf90_get_var(ncids(ii), varids(ii,iv,itopo), tmpvar2D_tmpmax, count=count_read(is:ie), start=start_idx(is:ie))
+                           tmpvar2D(:,nitemglob0+1:nitemglob0+count_read(ie)) = dmiss
                            tmpvar2D(1:netfacemaxnodes(itopo,ii),nitemglob0+1:nitemglob0+count_read(ie)) = tmpvar2D_tmpmax(1:count_read(is),1:count_read(ie))
                            jaread_sep = 0
                         else
