@@ -955,7 +955,7 @@ function ug_def_var(ncid, id_var, id_dims, itype, iloctype, mesh_name, var_name,
       end if
    case (UG_LOC_CONTACT)
       ierr = nf90_put_att(ncid, id_var, 'location',    'contact')
-      ierr = nf90_put_att(ncid, id_var, 'coordinates', prefix)
+      ierr = nf90_put_att(ncid, id_var, 'coordinates', prefix//'_contact_id')
       ! TODO: AvD: UNST-1100: cell_measures for contacts not yet supported/well defined...
    case (UG_LOC_VOL)
       ierr = UG_NOTIMPLEMENTED
