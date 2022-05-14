@@ -1559,6 +1559,7 @@ end if
  if (jainirho == 1) then
     do kk = 1,ndx  ! initialise rho's
        call setrhokk(kk)
+       call getkbotktop(kk,kb,kt)
        do k = kt+1 , kb + kmxn(kk) - 1
           if (stm_included) rhowat(k) = rhowat(kt)   ! UNST-5170
        enddo
