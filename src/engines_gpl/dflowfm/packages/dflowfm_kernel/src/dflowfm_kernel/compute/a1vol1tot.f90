@@ -36,6 +36,7 @@
  use m_partitioninfo
  use m_flowtimes
  use precision_basics
+ use unstruc_model, only: md_restartfile
  implicit none
 
  double precision, dimension(1) :: dum
@@ -80,7 +81,9 @@
  if (comparereal(time1, tstart_user, eps10)== 0) then
     volcur(IDX_VOLTOT) = vol1tot
     volcur(IDX_STOR)   = vol1tot
-    vol1ini = vol1tot
+    if (len_trim(md_restartfile) == 0) then ! vol1ini has been read from a restart file in a restart simulation
+       vol1ini = vol1tot
+    end if
 !   vol1ini needs to be global
     if ( jampi.eq.1 ) then
        call reduce_double_sum(1, (/ vol1ini /), dum)
