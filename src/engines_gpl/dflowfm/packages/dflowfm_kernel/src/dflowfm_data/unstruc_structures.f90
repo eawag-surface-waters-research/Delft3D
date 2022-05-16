@@ -1235,6 +1235,9 @@ subroutine fill_geometry_arrays_structure(istrtypein, nstru, nNodesStru, nodeCou
          if (istrtypein == ST_LONGCULVERT) then
             call realloc(maskLocalStartEndGat, nNodesStruMPI,  keepExisting = .false., fill = 0  )
          end if
+      else
+         ! NOTE: dummy allocate to prevent crash in Debug-model on Intel MPI, even though receive buffers are officially not needed on non-root.
+         allocate(nodeCountStruGat(0), xGat(0), yGat(0), displs(0), nNodesStruGat(0), maskLocalStartEndGat(0))
       end if
 
       ! Gather integer data, where the same number of data, i.e. nstru, are gathered from each subdomain to process 0000

@@ -589,6 +589,9 @@ subroutine fill_geometry_arrays_crs()
          call realloc(displs,          ndomains,      keepExisting = .false., fill = 0  )
          call realloc(nNodesCrsGat,    ndomains,      keepExisting = .false., fill = 0  )
          call realloc(maskBndGat,      nNodesCrsMPI,  keepExisting = .false., fill = 0  )
+      else
+         ! NOTE: dummy allocate to prevent crash in Debug-model on Intel MPI, even though receive buffers are officially not needed on non-root.
+         allocate(nodeCountCrsGat(0), xGat(0), yGat(0), displs(0), nNodesCrsGat(0), maskBndGat(0))
       end if
 
       ! Gather integer data, where the same number of data, i.e. ncrs, are gathered from each subdomain to process 0000
