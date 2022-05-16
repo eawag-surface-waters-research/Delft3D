@@ -492,7 +492,8 @@ subroutine loadModel(filename)
        call timstrt('Read 1d attributes', timerHandle)
        call read_1d_attributes(md_1dfiles, network)
        call timstop(timerHandle)
-
+    endif
+    
        timerHandle = 0
        call timstrt('Read structures', timerHandle)
        if (len_trim(md_1dfiles%structures) > 0) then
@@ -520,7 +521,6 @@ subroutine loadModel(filename)
        call timstrt('Initialise 1d administration', timerHandle)
        call initialize_1dadmin(network, network%numl)
        call timstop(timerHandle)
-    end if
 
     if (getMaxErrorLevel() >= LEVEL_ERROR) then
        msgbuf = 'loadModel for '''//trim(filename)//''': Errors were found, please check the diagnostics file.'
