@@ -2732,7 +2732,6 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
         id_pump_stagedim,     &
         id_1dflowlink_dim,    &
         id_max_idx_dim,       &
-        id_1_dim,             &
         id_time, id_timestep, &
         id_s1, id_taus, id_ucx, id_ucy, id_ucz, id_unorm, id_q1, id_ww1, id_sa1, id_tem1, id_sed, id_ero, id_s0, id_u0, &
         id_czs, id_E, id_thetamean, &
@@ -3657,15 +3656,14 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
           ierr = nf90_put_att(irstfile, id_hysteresis, 'units', '')
        end if
     end if
-    
+
     if (MAX_IDX > 0) then
-       ierr = nf90_def_dim(irstfile, '1', 1, id_1_dim)
-       ierr = nf90_def_var(irstfile, 'initial_total_volume', nf90_double, (/ id_1_dim /), id_vol1ini)
+       ierr = nf90_def_var(irstfile, 'initial_total_volume', nf90_double, id_vol1ini)
        ierr = nf90_put_att(irstfile, id_vol1ini, 'long_name', 'Initial total volume of the original simulation.')
        ierr = nf90_put_att(irstfile, id_vol1ini, 'units', 'm3')
-       
+
        ierr = nf90_def_dim(irstfile, 'nMaxIdx', MAX_IDX, id_max_idx_dim)
-       ierr = nf90_def_var(irstfile, 'total_volume', nf90_double, (/ id_max_idx_dim /), id_voltot)
+       ierr = nf90_def_var(irstfile, 'total_volumes', nf90_double, (/ id_max_idx_dim /), id_voltot)
        ierr = nf90_put_att(irstfile, id_voltot, 'long_name', 'Total volume array.')
        ierr = nf90_put_att(irstfile, id_voltot, 'units', 'm3')
     end if
@@ -4584,12 +4582,12 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
           ierr = nf90_put_var(irstfile, id_hysteresis, work1di)
        end if
     end if
-    
+
     if (MAX_IDX > 0) then
        ierr = nf90_put_var(irstfile, id_vol1ini, vol1ini)
        ierr = nf90_put_var(irstfile, id_voltot, voltot)
     end if
-    
+
 end subroutine unc_write_rst_filepointer
 
 
@@ -13267,17 +13265,17 @@ subroutine unc_read_map_or_rst(filename, ierr)
          end if
        end if
     end if
-    
+
     ! Read initial total volume and volume array voltot
      ierr = nf90_inq_varid(imapfile, 'initial_total_volume', id_vol1ini)
      ierr = nf90_get_var(imapfile, id_vol1ini, vol1ini)
      if (ierr /= nf90_noerr) then
-        call mess(LEVEL_INFO, 'unc_read_map_or_rst: cannot read initial_total_valume.')
+        call mess(LEVEL_INFO, 'unc_read_map_or_rst: cannot read initial_total_volume. Mass balance output will reflect current model run only.')
      end if
-     ierr = nf90_inq_varid(imapfile, 'total_volume', id_voltot)
+     ierr = nf90_inq_varid(imapfile, 'total_volumes', id_voltot)
      ierr = nf90_get_var(imapfile, id_voltot, voltot)
      if (ierr /= nf90_noerr) then
-        call mess(LEVEL_INFO, 'unc_read_map_or_rst, cannot read total_volume.')
+        call mess(LEVEL_INFO, 'unc_read_map_or_rst, cannot read total_volumes. Mass balance output will reflect current model run only')
      end if
 
    ! Check if the orientation of each flowlink in the current model is the same with the link in the rst file
