@@ -82,7 +82,6 @@ echo OMP_NUM_THREADS is already defined
    set /A OMP_NUM_THREADS=!NumberOfPhysicalCores! - 2
    if /I OMP_NUM_THREADS LEQ 2 ( set OMP_NUM_THREADS=2 )
 )
-echo OMP_NUM_THREADS is %OMP_NUM_THREADS%
 
 echo number of partitions: %numpar%
 
