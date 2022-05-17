@@ -345,9 +345,9 @@ end subroutine api_loadmodel
     call timstrt('Update various', inner_timerhandle)
     
     call updateValuesOnCrossSections(time1)             ! Initial statistics, copied from flow_usertimestep
-    call updateValuesOnRunupGauges()             
-    if (jahisbal > 0 .and. len_trim(md_restartfile) == 0) then ! In a restart simulation, the balance has been read from the restart file directly                             ! Update WaterBalances etc.
-      call updateBalance() 
+    call updateValuesOnRunupGauges()
+    if (jahisbal > 0) then                              ! Update WaterBalances etc.
+      call updateBalance()
    endif
    call updateValuesonSourceSinks(time1)
    
