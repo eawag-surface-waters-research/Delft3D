@@ -107,6 +107,9 @@ module m_readStorageNodes
 
       call tree_create(trim(storgNodesFile), md_ptr, maxlenpar)
       call prop_file('ini',trim(storgNodesFile),md_ptr, istat)
+
+      msgbuf = 'Reading '//trim(storgNodesFile)//'.'
+      call msg_flush()
       
       ! check FileVersion
       major = 0
@@ -155,7 +158,7 @@ module m_readStorageNodes
             jageneral = 1
             cycle
          else if (strcmpi(blockname,'StorageNode')) then   ! Read [StorageNode] block
-            ! Set nodeIdx and branchIdx to -1
+
             nodeIdx = -1
             branchIdx = -1
             success = .true.
@@ -333,7 +336,7 @@ module m_readStorageNodes
                pSto%node_index= nodeIdx
             else if (branchIdx > 0) then
                psto%branch_index = branchIdx
-               pSto%chainage = Chainage
+               pSto%chainage = chainage
             else
                network%storS%Count_xy = network%storS%Count_xy + 1
                pSto%x         = x
@@ -368,7 +371,7 @@ module m_readStorageNodes
          call SetMessage(LEVEL_ERROR, 'Reading storage nodes file: Error Deallocating Arrays')
       endif
       
-      write(msgbuf,'(a,a,i10,a)') 'Done reading storage nodes file,', trim(storgNodesFile), network%storS%Count, ' storage nodes have been read.'
+      write(msgbuf,'(a,a,i10,a)') 'Done reading storage nodes file, ', trim(storgNodesFile), network%storS%Count, ' storage nodes have been read.'
       call msg_flush()
 
       call fill_hashtable(network%storS)

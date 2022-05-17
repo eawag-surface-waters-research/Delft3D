@@ -167,6 +167,9 @@ module m_readstructures
       call tree_create(trim(structurefile), md_ptr, maxlenpar)
       call prop_file('ini',trim(structurefile),md_ptr,istat)
       
+      msgbuf = 'Reading '//trim(structurefile)//'.'
+      call msg_flush()
+      
       ! check FileVersion
       ierr = 0
       major = 1

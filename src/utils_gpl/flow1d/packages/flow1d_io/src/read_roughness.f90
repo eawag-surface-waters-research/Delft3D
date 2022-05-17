@@ -257,7 +257,10 @@ contains
       ! create and fill tree
       call tree_create(trim(inputfile), tree_ptr, maxlenpar)
       call prop_file('ini',trim(inputfile),tree_ptr,istat)
-   
+
+      msgbuf = 'Reading '//trim(inputfile)//'.'
+      call msg_flush()
+
       if (istat /= 0) then
          call setmessage(LEVEL_ERROR, 'Roughness file '''//trim(inputfile)//''' could not be opened.')
          return

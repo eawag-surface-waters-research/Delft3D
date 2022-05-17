@@ -105,6 +105,10 @@ module m_readCrossSections
       
       call tree_create(trim(CrossSectionfile), md_ptr, maxlenpar)
       call prop_file('ini',trim(CrossSectionfile),md_ptr,istat)
+
+      msgbuf = 'Reading '//trim(CrossSectionfile)//'.'
+      call msg_flush()
+
       numstr = 0
       if (associated(md_ptr%child_nodes)) then
          numstr = size(md_ptr%child_nodes)
@@ -257,6 +261,8 @@ module m_readCrossSections
       
       call tree_create(trim(CrossSectionDefinitionFile), md_ptr, maxlenpar)
       call prop_file('ini',trim(CrossSectionDefinitionFile),md_ptr,istat)
+      msgbuf = 'Reading '//trim(CrossSectionDefinitionFile)//'.'
+      call msg_flush()
 
       call prop_get_version_number(md_ptr, major = major, minor = minor, success = success)
       if (.not. success) then
