@@ -213,7 +213,7 @@ contains
          frictLoss = 2.0d0 * gravity * bridge%length / (chezyBridge * chezyBridge * hydrRadius)
 
          ! Exit Loss
-         exitLoss = bridge% outletlosscoeff * ((max((1.0d0 - aum / wetdown), 0.0d0))**2)
+         exitLoss = bridge%outletlosscoeff * ((max((1.0d0 - aum / wetdown), 0.0d0))**2)
          exitLoss = max(exitLoss, 0.0d0)
       endif
 
