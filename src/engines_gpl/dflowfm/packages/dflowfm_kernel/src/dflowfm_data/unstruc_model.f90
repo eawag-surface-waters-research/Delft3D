@@ -2592,8 +2592,8 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     call prop_set(prop_ptr, 'geometry', 'Cosphiutrsh',   cosphiutrsh,  '0-1, 1= no bad orthos')
     endif
 
-    if (ja1D2Dinternallinktype .ne. 1) then
-    call prop_set(prop_ptr, 'geometry', '1D2Dinternallinktype', ja1D2Dinternallinktype, 'Uniform width for channel profiles not specified by profloc')
+    if (writeall .or. ja1D2Dinternallinktype .ne. 1) then
+       call prop_set(prop_ptr, 'geometry', '1D2Dinternallinktype', ja1D2Dinternallinktype, 'Link treatment method for type-3 internal links.')
     endif
 
     if ( len(md_pipefile) > 1) then
