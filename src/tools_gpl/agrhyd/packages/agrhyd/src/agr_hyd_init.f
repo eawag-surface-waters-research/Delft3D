@@ -79,6 +79,7 @@
       integer, parameter  :: IAGTYP_AVG   = 2 ! aggregation using averaging
       integer, parameter  :: IAGTYP_WAVG  = 3 ! aggregation using averaging with a weight variable
       integer, parameter  :: IAGTYP_MIN   = 4 ! aggregation using minimum value
+      integer, parameter  :: IAGTYP_ACCUS = 5 ! aggregation using a signed accumulation (for combining flows in opposite directions)
 
       ! copy geometry type
       output_hyd%geometry = input_hyd%geometry 

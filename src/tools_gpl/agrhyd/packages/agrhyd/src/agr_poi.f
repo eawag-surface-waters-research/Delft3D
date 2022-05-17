@@ -92,6 +92,9 @@
          if ( ip1 /= 0 ) then
             iq1selectno(ip1)  = iq1selectno(ip1) + 1
          endif
+         if ( ip2 /= 0 ) then
+            iq1selectno(ip2)  = iq1selectno(ip2) + 1
+         endif
       enddo
 
       maxexchanges = maxval( iq1selectno )
@@ -119,6 +122,11 @@
             iq1selectno(ip1)   = iq1selectno(ip1) + 1
             ips                = iq1selectno(ip1)
             iq1select(ips,ip1) = iq
+         endif
+         if ( ip2 /= 0 ) then
+            iq1selectno(ip2)   = iq1selectno(ip2) + 1
+            ips                = iq1selectno(ip2)
+            iq1select(ips,ip2) = iq
          endif
       enddo
 
@@ -177,10 +185,10 @@
                      ipnt_q(iq) =  iq_n
                      found = .true.
                      exit
-                     !elseif ( ip2 .eq. ip_n(1,iq_n) .and. ip1 .eq. ip_n(2,iq_n) ) then
-                     !   ipnt_q(iq) = -iq_n
-                     !   found = .true.
-                     !   exit
+                  elseif ( ip2 .eq. ip_n(1,iq_n) .and. ip1 .eq. ip_n(2,iq_n) ) then
+                     ipnt_q(iq) = -iq_n
+                     found = .true.
+                     exit
                   endif
                endif
             enddo

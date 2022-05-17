@@ -99,7 +99,7 @@ C
 C
 C     Zero accumulation arrays
 C
-      IF ( IAGTYP .EQ. 1 ) THEN
+      IF ( IAGTYP .EQ. 1 .OR. IAGTYP .EQ. 5 ) THEN
          DO ISEG2 = 1 , NOSEG2
             ARROUT(ISYSO,ISEG2) = 0.0
          ENDDO
@@ -114,11 +114,23 @@ C
 C
 C     Accumulate
 C
-      IF ( IAGTYP .EQ. 1 ) THEN
+      IF ( IAGTYP .EQ. 1) THEN
          DO ISEG1 = 1 , NOSEG1
-            ISEG2 = IPGRID(ISEG1)
+            ISEG2 = ABS(IPGRID(ISEG1))
             IF ( ISEG2 .GT. 0 ) THEN
                ARROUT(ISYSO,ISEG2) = ARROUT(ISYSO,ISEG2) +
+     +                               ARRINP(ISYSI,ISEG1)
+            ENDIF
+         ENDDO
+      ELSEIF ( IAGTYP .EQ. 5) THEN
+         ! modified version of IAGTYP == 1: deduct values when pointer is negative
+         DO ISEG1 = 1 , NOSEG1
+            ISEG2 = ABS(IPGRID(ISEG1))
+            IF ( IPGRID(ISEG1) .GT. 0 ) THEN
+               ARROUT(ISYSO,ISEG2) = ARROUT(ISYSO,ISEG2) +
+     +                               ARRINP(ISYSI,ISEG1)
+            ELSEIF ( IPGRID(ISEG1) .LT. 0 ) THEN
+               ARROUT(ISYSO,ISEG2) = ARROUT(ISYSO,ISEG2) -
      +                               ARRINP(ISYSI,ISEG1)
             ENDIF
          ENDDO
