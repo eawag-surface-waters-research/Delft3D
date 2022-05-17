@@ -13640,3 +13640,7 @@ itemid,itemse,itemex,itemde,itemun,itemnm,itemag,itemda,itemwk,itemgr
 "nrFlSp_Z  ","x"," ",    15.0000    ,"(-)                 ","nr of fluxes per individual species (DON'T CHANGE)","volume    ","volume    "," ","                              "
 "nrOutSp_Z ","x"," ",    29.0000    ,"(-)                 ","nr of output items per species (DON'T CHANGE)     ","volume    ","volume    "," ","                              "
 "nTRWPprop ","x"," ",    7.00000    ,"(-)                 ","Actual count of TRWP fractions                    ","volume    ","volume    "," ","                              "
+"HalflifeR3","x"," ",   -999.000    ,"  (y)               ","Half-life of Radio3                               ","volume    ","volume    "," ","                              "
+"AtommassR3","x"," ",   -999.000    ,"  (g/mol)           ","Atomic mass of Radio3                             ","volume    ","volume    "," ","                              "
+"RadiatR3  ","x"," ",   -999.000    ,"  (Bq/m3)           ","Radiation from Radio3                             ","volume    ","volume    "," ","                              "
+"dRadioR3  ","x"," ",   -999.000    ,"  (mg/m3/d)         ","Radio-active decay Radio3                         ","volume    ","volume    "," ","                              "

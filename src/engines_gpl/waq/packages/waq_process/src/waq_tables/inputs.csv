@@ -17906,3 +17906,6 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "RadioSub2 ","Radio2    ",   1,"N","x",1
 "RadioSub2 ","HalflifeR2",   2,"N","x",1
 "RadioSub2 ","AtommassR2",   3,"N","x",1
+"RadioSub3 ","Radio3    ",   1,"N","x",1
+"RadioSub3 ","HalflifeR3",   2,"N","x",1
+"RadioSub3 ","AtommassR3",   3,"N","x",1
