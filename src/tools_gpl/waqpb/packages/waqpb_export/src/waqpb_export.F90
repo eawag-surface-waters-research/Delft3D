@@ -27,23 +27,23 @@
 !  $Id$
 !  $HeadURL$
 
-c
-c     Program to compose a PROCES.ASC file from tables
-c
-c     This program consists of the following parts:
-c     - Reading of tables holding PROCLIB data structure
-c     - Loop over the processes:
-c       - Empty PDF structure
-c       - Construct and write PDF structure
-c       - Dump structure to PROCES.ASC
+!
+!     Program to compose a PROCES.ASC file from tables
+!
+!     This program consists of the following parts:
+!     - Reading of tables holding PROCLIB data structure
+!     - Loop over the processes:
+!       - Empty PDF structure
+!       - Construct and write PDF structure
+!       - Dump structure to PROCES.ASC
 
-c     Include data structures for tables and PDF-file
-      include 'data.inc'
-      include 'pdf.inc'
-      integer      jndex , iproc , iinpu , iitem , ioutp , idisp ,
-     j             ioutf , isubs , naanta, ioffse, ioffs2, ivelo ,
-     j             istoc , iconf , naant2, serial,
-     j             ierror, icnsb , imodv , i
+!     Include data structures for tables and PDF-file
+      include 'data_ff.inc'
+      include 'pdf_ff.inc'
+      integer      jndex , iproc , iinpu , iitem , ioutp , idisp , &
+                   ioutf , isubs , naanta, ioffse, ioffs2, ivelo , &
+                   istoc , iconf , naant2, serial, &
+                   ierror, icnsb , imodv , i
       logical      itmswi(nitemm)
       logical      newfrm
       character*10 c10   
@@ -53,7 +53,7 @@ c     Include data structures for tables and PDF-file
       real         actdef, versio
       integer      lu_inp, lu_mes, status, lunfil
       
-c     Defaults for command line arguments
+!     Defaults for command line arguments
 
       versio = 5.00
       serial = 20130101
@@ -85,39 +85,39 @@ c     Defaults for command line arguments
 
       write (*,'('' Reading data......'')')
 
-c----------------------------------------------------------------------c
-c     READ DATABASE
-c----------------------------------------------------------------------c
+!----------------------------------------------------------------------c
+!     READ DATABASE
+!----------------------------------------------------------------------c
 
       call readdb ( lu_inp, lu_mes )
 
-c     Check validity of table R9
+!     Check validity of table R9
 
-      do 10 imodv = 1,nmodv
+      do imodv = 1,nmodv
           call zoek (modvci(imodv),nconf,confid,10,iconf)
-          if ( iconf .le. 0 )
-     j        write ( lu_mes , '(''Unknown config in TABLE5: '',a10,1x,
-     j                            a10)') modvci(imodv),modvit(imodv)
+          if ( iconf .le. 0 ) then
+              write ( lu_mes , '(''Unknown config in TABLE5: '',a10,1x, a10)') modvci(imodv),modvit(imodv)
+          end if
           call zoek (modvit(imodv),nitem,itemid,10,iitem)
-          if ( iitem .le. 0 )
-     j        write ( lu_mes , '(''Unknown item in TABLE5: '',a10,1x,
-     j                            a10)') modvci(imodv),modvit(imodv)
-   10 continue
+          if ( iitem .le. 0 ) then
+              write ( lu_mes , '(''Unknown item in TABLE5: '',a10,1x, a10)') modvci(imodv),modvit(imodv)
+          end if
+      end do
 
-c     Create auxiliary table of substances
+!     Create auxiliary table of substances
 
       nsubs = 0
       do icnsb = 1,ncnsb
           c10 = r2_sid(icnsb)
 
-c         Lookup substance in item array
+!         Lookup substance in item array
           call zoek (c10,nitem,itemid,10,iitem)
           if ( iitem .le. 0 ) then
               write (*,*) ' ITEM: ',c10
               STOP 'Unknown substance in R2 table'
           endif
 
-c         Add to substances array
+!         Add to substances array
           call zoek (c10,nsubs,subsid,10,isubs)
           if ( isubs .le. 0 ) then
               if ( nsubs+1 .gt. nsubsm ) STOP 'Dimension NSUBSM'
@@ -126,16 +126,16 @@ c         Add to substances array
           endif
       enddo
 
-c     Dump TRM tables
+!     Dump TRM tables
 
-c      write (*,'('' Writing TRM tables......'')')
-c      call writrm
+!      write (*,'('' Writing TRM tables......'')')
+!      call writrm
       write (*,'('' Writing TRM tables for LaTeX......'')')
       call writex
       
-c----------------------------------------------------------------------c
-c     SET VERSION, SERIAL AND WRITE NEFIS FILE
-c----------------------------------------------------------------------c
+!----------------------------------------------------------------------c
+!     SET VERSION, SERIAL AND WRITE NEFIS FILE
+!----------------------------------------------------------------------c
 
       write (lu_mes,'(''Writing NEFIS process definition file'')')
       call makind()
@@ -145,9 +145,9 @@ c----------------------------------------------------------------------c
          write (*,'(''ERROR writing NEFIS file, see report file'')')
       endif
 
-c----------------------------------------------------------------------c
-c     LOOP OVER PROCESSES
-c----------------------------------------------------------------------c
+!----------------------------------------------------------------------c
+!     LOOP OVER PROCESSES
+!----------------------------------------------------------------------c
 
       write (*,'('' Making PROCES.ASC......'')')
       write (*,*)
@@ -158,11 +158,11 @@ c----------------------------------------------------------------------c
 
           write (*,'(''+Process: '',a10)') procid(iproc)
 
-c----------------------------------------------------------------------c
-c         CONSTRUCT PROCESS
-c----------------------------------------------------------------------c
+!----------------------------------------------------------------------c
+!         CONSTRUCT PROCESS
+!----------------------------------------------------------------------c
 
-c         Clear PDF structure
+!         Clear PDF structure
 
           ins = 0
           ine = 0
@@ -173,31 +173,31 @@ c         Clear PDF structure
           dis = 0
           vel = 0
 
-c         Fill PDF structure
+!         Fill PDF structure
 
-C         INPUT ITEMS ON SEGMENT LEVEL/EXCHANGE LEVEL
+!         INPUT ITEMS ON SEGMENT LEVEL/EXCHANGE LEVEL
 
-c         scan input items table for FIRST occurence of proces
+!         scan input items table for FIRST occurence of proces
           call zoek ( procid(iproc), ninpu, inpupr, 10, ioffse )
           naanta = 0
           if ( ioffse .gt. 0 ) then
 
-c             loop over all INPU rows related to this process
+!             loop over all INPU rows related to this process
 
   410         continue
               naanta = naanta + 1
 
-c             Process current row
+!             Process current row
 
-c             Lookup item in items table
+!             Lookup item in items table
               iinpu = ioffse + naanta-1
               call zoek ( inpuit(iinpu), nitem, itemid, 10, iitem)
               if ( iitem .le. 0 ) stop 'unknown ITEM'
 
-c             Documented items are marked for COEFEDIT.DAT
+!             Documented items are marked for COEFEDIT.DAT
               if ( inpudo(iinpu) .eq. 'x' ) itmswi(iitem) = .true.
 
-c             Find item properties and store in PDF structure
+!             Find item properties and store in PDF structure
               if ( inpude(iinpu) .eq. 'Y' ) then
                   actdef = itemde(iitem)
               elseif ( inpude(iinpu) .eq. 'G' ) then
@@ -237,36 +237,35 @@ c             Find item properties and store in PDF structure
                   ine_do(ine) = inpudo(iinpu)
               endif
 
-c             Back for next row in table INPU,
-c             if it still matches current proces
+!             Back for next row in table INPU,
+!             if it still matches current proces
 
               if ( (iinpu+1) .le. ninpu ) then
-                  call zoek ( procid(iproc), 1, inpupr(iinpu+1),
-     j                  10, jndex )
+                  call zoek ( procid(iproc), 1, inpupr(iinpu+1), 10, jndex )
                   if ( jndex .gt. 0 ) goto 410
               endif
           endif
 
-C         OUTPUT ITEMS ON SEGMENT LEVEL/EXCHANGE LEVEL
+!         OUTPUT ITEMS ON SEGMENT LEVEL/EXCHANGE LEVEL
 
-c         scan output items table for FIRST occurence of proces
+!         scan output items table for FIRST occurence of proces
           call zoek ( procid(iproc), noutp, outppr, 10, ioffse )
           naanta = 0
           if ( ioffse .gt. 0 ) then
 
-c             loop over all OUTP rows related to this process
+!             loop over all OUTP rows related to this process
 
   440         continue
               naanta = naanta + 1
 
-c             Process current row
+!             Process current row
 
-c             Lookup item in items table
+!             Lookup item in items table
               ioutp = ioffse + naanta-1
               call zoek ( outpit(ioutp), nitem, itemid, 10, iitem)
               if ( iitem .le. 0 ) stop 'unknown ITEM'
 
-c             Find item properties and store in PDF structure
+!             Find item properties and store in PDF structure
               if ( outpsx(ioutp) .eq. 1 ) then
                   ous = ous + 1
                   if ( ous .gt. ousmax ) stop 'DIMENSION ousmax'
@@ -290,102 +289,99 @@ c             Find item properties and store in PDF structure
                   endif
                   oue_do(oue) = outpdo(ioutp)
 
-c                 SCAN VELO and DISP TABLES FOR LINES ASSOCIATED WITH
-c                 CURRENT OUTPUT ITEM ON EXCHANGE LEVEL
+!                 SCAN VELO and DISP TABLES FOR LINES ASSOCIATED WITH
+!                 CURRENT OUTPUT ITEM ON EXCHANGE LEVEL
 
-c                 scan dispersion lines table for FIRST occurence of item
+!                 scan dispersion lines table for FIRST occurence of item
                   call zoek ( itemid(iitem), ndisp, dispit, 10, ioffs2)
                   naant2 = 0
                   if ( ioffs2 .gt. 0 ) then
 
-c                     loop over all DISP rows related to this item
+!                     loop over all DISP rows related to this item
 
   450                 continue
                       naant2 = naant2+1
                       dis = dis + 1
                       if ( dis .gt. dismax ) stop 'dimension DISMAX'
 
-c                     Process current row
+!                     Process current row
 
                       idisp = ioffs2 + naant2-1
                       dis_su(dis) = dispsu(idisp)
                       dis_it(dis) = dispit(idisp)
                       dis_sc(dis) = dispsc(idisp)
 
-c                     Back for next row in table DISP,
-c                     if it still matches current item
+!                     Back for next row in table DISP,
+!                     if it still matches current item
 
                       if ( (idisp+1) .le. ndisp ) then
-                          call zoek ( itemid(iitem), 1, dispit(idisp+1),
-     j                          10, jndex )
+                          call zoek ( itemid(iitem), 1, dispit(idisp+1), 10, jndex )
                           if ( jndex .gt. 0 ) goto 450
                       endif
                   endif
 
-c                 scan velocity lines table for FIRST occurence of item
+!                 scan velocity lines table for FIRST occurence of item
                   call zoek ( itemid(iitem), nvelo, veloit, 10, ioffs2)
                   naant2 = 0
                   if ( ioffs2 .gt. 0 ) then
 
-c                     loop over all VELO rows related to this item
+!                     loop over all VELO rows related to this item
 
   460                 continue
                       naant2 = naant2+1
                       vel = vel + 1
                       if ( vel .gt. velmax ) stop 'dimension VELMAX'
 
-c                     Process current row
+!                     Process current row
 
                       ivelo = ioffs2 + naant2-1
                       vel_su(vel) = velosu(ivelo)
                       vel_it(vel) = veloit(ivelo)
                       vel_sc(vel) = velosc(ivelo)
 
-c                     Back for next row in table VELO,
-c                     if it still matches current item
+!                     Back for next row in table VELO,
+!                     if it still matches current item
 
                       if ( (ivelo+1) .le. nvelo ) then
-                          call zoek ( itemid(iitem), 1, veloit(ivelo+1),
-     j                          10, jndex )
+                          call zoek ( itemid(iitem), 1, veloit(ivelo+1), 10, jndex )
                           if ( jndex .gt. 0 ) goto 460
                       endif
                   endif
 
-c                 END of processing output item on exchange level!
+!                 END of processing output item on exchange level!
 
               endif
 
-c             Back for next row in table OUTP,
-c             if it still matches current proces
+!             Back for next row in table OUTP,
+!             if it still matches current proces
 
               if ( (ioutp+1) .le. noutp ) then
-                  call zoek ( procid(iproc), 1, outppr(ioutp+1),
-     j                  10, jndex )
+                  call zoek ( procid(iproc), 1, outppr(ioutp+1), 10, jndex )
                   if ( jndex .gt. 0 ) goto 440
               endif
           endif
 
-C         FLUXES
+!         FLUXES
 
-c         scan output fluxes table for FIRST occurence of proces
+!         scan output fluxes table for FIRST occurence of proces
           call zoek ( procid(iproc), noutf, outfpr, 10, ioffse )
           if ( ioffse .gt. 0 ) then
 
-c             loop over all FLUX rows related to this process
+!             loop over all FLUX rows related to this process
 
   470         continue
               flu = flu + 1
               if ( flu .gt. flumax ) stop 'dimension FLUMAX'
 
-c             Process current row
+!             Process current row
 
-c             Lookup flux in items table
+!             Lookup flux in items table
               ioutf = ioffse + flu-1
-c             write (lu_mes,*) ' flu ',flu,' ioutf ', ioutf
+!             write (lu_mes,*) ' flu ',flu,' ioutf ', ioutf
               call zoek ( outffl(ioutf), nitem, itemid, 10, iitem)
               if ( iitem .le. 0 ) stop 'unknown FLUX'
 
-c             Find and store flux properties
+!             Find and store flux properties
               flu_id(flu) = itemid(iitem)
               if (newfrm) then
               flu_nm(flu) = itemnm(iitem)
@@ -395,64 +391,61 @@ c             Find and store flux properties
               endif
               flu_do(flu) = outfdo(ioutf)
 
-c             SCAN STOCHI TABLE FOR LINES ASSOCIATED WITH PRESENT FLUX
+!             SCAN STOCHI TABLE FOR LINES ASSOCIATED WITH PRESENT FLUX
 
-c             scan stochi lines table for FIRST occurence of flux
+!             scan stochi lines table for FIRST occurence of flux
               call zoek ( itemid(iitem), nstoc, stocfl, 10, ioffs2)
               naant2 = 0
               if ( ioffs2 .gt. 0 ) then
 
-c                 loop over all STOC rows related to this flux
+!                 loop over all STOC rows related to this flux
 
   480             continue
                   naant2 = naant2+1
                   sto = sto + 1
                   if ( sto .gt. stomax ) stop 'dimension STOMAX'
 
-c                 Process current row
+!                 Process current row
 
                   istoc = ioffs2 + naant2-1
                   sto_su(sto) = stocsu(istoc)
                   sto_fl(sto) = stocfl(istoc)
                   sto_sc(sto) = stocsc(istoc)
 
-c                 Back for next row in table STOC,
-c                 if it still matches current flux
+!                 Back for next row in table STOC,
+!                 if it still matches current flux
 
                   if ( (istoc+1) .le. nstoc ) then
-                      call zoek ( itemid(iitem), 1, stocfl(istoc+1),
-     j                      10, jndex )
+                      call zoek ( itemid(iitem), 1, stocfl(istoc+1), &
+                            10, jndex )
                       if ( jndex .gt. 0 ) goto 480
                   endif
               endif
 
-c             Back for next row in table OUTF,
-c             if it still matches current proces
+!             Back for next row in table OUTF,
+!             if it still matches current proces
 
               if ( (ioutf+1) .le. noutf ) then
-                  call zoek ( procid(iproc), 1, outfpr(ioutf+1),
-     j                  10, jndex )
+                  call zoek ( procid(iproc), 1, outfpr(ioutf+1), 10, jndex )
                   if ( jndex .gt. 0 ) goto 470
               endif
           endif
 
-c----------------------------------------------------------------------c
-c         WRITE PROCESS
-c----------------------------------------------------------------------c
+!----------------------------------------------------------------------c
+!         WRITE PROCESS
+!----------------------------------------------------------------------c
 
-c         Write PDF file (formats as in HARMONIZE to allow comparison)
+!         Write PDF file (formats as in HARMONIZE to allow comparison)
 
           if (newfrm) then
-          call wripdn ( procid(iproc), procnm(iproc), procco(iproc),
-     j                  procfo(iproc), lunfil )
+          call wripdn ( procid(iproc), procnm(iproc), procco(iproc), procfo(iproc), lunfil )
           else
-          call wripdf ( procid(iproc), procnm(iproc), procco(iproc),
-     j                  procfo(iproc), lunfil )
+          call wripdf ( procid(iproc), procnm(iproc), procco(iproc), procfo(iproc), lunfil )
           endif
   800 continue
       close (lunfil)
 
-c     Write all active coefficients to COEFEDIT.DAT in the Sobek-format
+!     Write all active coefficients to COEFEDIT.DAT in the Sobek-format
       call coefed(serial,itmswi)
 
   900 continue
@@ -466,7 +459,7 @@ c     Write all active coefficients to COEFEDIT.DAT in the Sobek-format
 
       integer      lennam, lenuni, i
 
-c     find length of name and unit
+!     find length of name and unit
 
       lennam = -1
       do 10 i = 50,1,-1
@@ -482,8 +475,7 @@ c     find length of name and unit
       endif
 
       lenuni = 0
-      if ( unit(2:3) .eq. 'no' .and.
-     j     unit(5:8) .eq. 'unit' ) then
+      if ( unit(2:3) .eq. 'no' .and. unit(5:8) .eq. 'unit' ) then
           lenuni = 0
       else
           do 20 i = 20,1,-1
@@ -506,8 +498,9 @@ c     find length of name and unit
       write ( adduni(1          :lennam) , '(a)' ) name(1:lennam)
       do 30 i = 1,50-lennam-lenuni
    30 adduni(lennam+i:lennam+i) = ' '
-      if (lenuni.gt.0)
-     j write ( adduni(50-lenuni+1:50    ) , '(a)' ) unit(1:lenuni)
+      if (lenuni.gt.0) then
+         write ( adduni(50-lenuni+1:50    ) , '(a)' ) unit(1:lenuni)
+      end if
 
       return
       end

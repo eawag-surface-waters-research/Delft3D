@@ -27,14 +27,10 @@
 !  $Id$
 !  $HeadURL$
 
-c
-c     Program to decompose a PROCES.ASC file into tables
-c     28-2-2000: Start upgrade om PDF's in te checken
-c     04-8-2000: Finish
-c     13-01-2011: Jos van Gils, update to import asci files produced by the DUPROL parser
-c     27-12-2012: Modify for Open Source, table P5 and R1/R2/R9 are no longer relevant
-c
-      include 'data.inc'
+
+!     Program to decompose a PROCES.ASC file into tables
+
+      include 'data_ff.inc'
       character*1  c1
       character*10 c10, c10b, c10a
       character*20 c20
@@ -45,12 +41,12 @@ c
       character*80 pdffil, procesnaam
       character*255 ArgumentString
       real         value
-      integer      jndex , naanta, iaanta, iproc , i     , ihulp ,
-     j             noffse, ihulp2, ihulp3, ihulp4, nprocl,
-     j             noffsf, iitem
+      integer      jndex , naanta, iaanta, iproc , i     , ihulp , &
+                   noffse, ihulp2, ihulp3, ihulp4, nprocl, &
+                   noffsf, iitem
       integer      delete, replac, insert, abort , none
-      parameter   (delete = 1, replac = 2, insert = 3, abort  = 0,
-     j             none   = 4)
+      parameter   (delete = 1, replac = 2, insert = 3, abort  = 0, &
+                   none   = 4)
       logical      newtab, duprol, newfrm
       integer      io_mes, io_asc, io_inp, lunfil
       data         grp /'DummyGroup                          '/
@@ -63,7 +59,7 @@ c
       character(len=*), parameter  :: FMT31 = "(a10,f18.0,a1,1x,a50,3x,a20)"
       character(len=*), parameter  :: FMT32 = "(a10,18x,  a1,1x,a50,3x,a20)"
       
-c     Command line arguments
+!     Command line arguments
 
       newtab = .false.
       newfrm = .true.
@@ -80,7 +76,7 @@ c     Command line arguments
             if (index(ArgumentString,'-oldfrm').gt.0) newfrm = .false.
       enddo
 
-      open ( newunit=io_mes , file = 'waqpb_import.log' )
+      open ( newunit=io_mes, file = 'waqpb_import.log' )
 	if (duprol) then
           write (io_mes,'(''DUPROL import'')')
           newtab = .true.
@@ -115,9 +111,9 @@ c     Command line arguments
           write (*,'('' Loading database......'')')
           write (*,*)
           write (io_mes,'(''Loading database......'')')
-c         Read the existing tables
+!         Read the existing tables
           call readdb ( io_inp , io_mes )
-c         Store R1 in relational way
+!         Store R1 in relational way
           ncnpr = 0
           do iproc = 1,nproc
             do iconf = 1,nconf
@@ -128,8 +124,8 @@ c         Store R1 in relational way
                 endif
             enddo
           enddo
-c         Remove primary   table  P4
-c         Remove secondary tables R4 till R8
+!         Remove primary   table  P4
+!         Remove secondary tables R4 till R8
           nproc = 0
           ninpu = 0
           noutp = 0
@@ -148,21 +144,21 @@ c         Remove secondary tables R4 till R8
 
     1 continue
 
-c----------------------------------------------------------------------c
-c     We decompose the Proces.asc
-c----------------------------------------------------------------------c
+!----------------------------------------------------------------------c
+!     We decompose the Proces.asc
+!----------------------------------------------------------------------c
 
       do iproc = 1,nprocl
 
-c         proces name and description
+!         proces name and description
           read ( io_asc , '(a10,20x,a50)' ) c10,c50
-          write ( io_mes , '(''Process '',a10)' ) c10
+          write ( io_mes, '(''Process '',a10)' ) c10
           write (*,'(''Process: '',a10)') c10
 	    if (duprol) grp = c10
 
-c         fortran code
+!         fortran code
           read ( io_asc , '(a10)' ) c10a
-c         transport code
+!         transport code
           read ( io_asc , * ) jndex
           if ( nproc+1 .gt. nprocm ) stop 'DIMENSION NPROCM'
           nproc = nproc + 1
@@ -173,7 +169,7 @@ c         transport code
 
           call upd_p3 ( c10a , newtab , io_mes )
 
-c         input items on segment level
+!         input items on segment level
 
           read ( io_asc , '(i10)' ) naanta
           ihulp = naanta
@@ -182,10 +178,9 @@ c         input items on segment level
                   read ( io_asc , FMT31) c10,value,c1,c50,c20
               else
                   read ( io_asc , FMT21) c10,value,c1,c50
-	            c20 = ' ' 
+                c20 = ' ' 
               endif
-              call upd_p2 ( c10, c50, value, 1, newtab, grp, io_mes ,
-     j                      iitem, c20, newfrm, .false. )
+              call upd_p2 ( c10, c50, value, 1, newtab, grp, io_mes, iitem, c20, newfrm, .false. )
               ninpu = ninpu + 1
               if ( ninpu .gt. ninpum ) then
                   write (*,*) ninpu
@@ -209,12 +204,12 @@ c         input items on segment level
               else
                   inpude(ninpu) = 'Y'
               endif
-c             Switch to decide segment/exchange!
+!             Switch to decide segment/exchange!
               inpusx(ninpu) = 1
 
           enddo
 
-c         input items on exchange level
+!         input items on exchange level
 
           read ( io_asc , '(i10)' ) naanta
           do iaanta = 1,naanta
@@ -222,10 +217,9 @@ c         input items on exchange level
                   read ( io_asc , FMT31) c10,value,c1,c50,c20
               else
                   read ( io_asc , FMT21) c10,value,c1,c50
-	            c20 = ' '
+                c20 = ' '
               endif
-              call upd_p2 ( c10, c50, value, 2, newtab, grp, io_mes ,
-     j                      iitem, c20, newfrm, .false. )
+              call upd_p2 ( c10, c50, value, 2, newtab, grp, io_mes, iitem, c20, newfrm, .false. )
               ninpu = ninpu + 1
               if ( ninpu .gt. ninpum ) then
                   write (*,*) ninpu
@@ -248,11 +242,11 @@ c         input items on exchange level
               else
                   inpude(ninpu) = 'Y'
               endif
-c             Switch to decide segment/exchange!
+!             Switch to decide segment/exchange!
               inpusx(ninpu) = 0
           enddo
 
-c         output items on segment level
+!         output items on segment level
 
           read ( io_asc , '(i10)' ) naanta
           ihulp = naanta
@@ -261,22 +255,21 @@ c         output items on segment level
                   read ( io_asc , FMT32) c10,c1,c50,c20             
               else
                   read ( io_asc , FMT22) c10,c1,c50
-	            c20 = ' '
+                c20 = ' '
               endif
               value = -999.
-              call upd_p2 ( c10, c50, value, 1, newtab, grp, io_mes ,
-     j                      iitem, c20, newfrm, .false. )
+              call upd_p2 ( c10, c50, value, 1, newtab, grp, io_mes, iitem, c20, newfrm, .false. )
               noutp = noutp + 1
               if ( noutp .gt. noutpm ) stop 'DIMENSION NOUTPM'
               outppr(noutp) = procid(nproc)
               outpit(noutp) = itemid(iitem)
               outpnm(noutp) = iaanta
               outpdo(noutp) = c1
-c             Switch to decide segment/exchange!
+!             Switch to decide segment/exchange!
               outpsx(noutp) = 1
           enddo
 
-c         output items on exchange level
+!         output items on exchange level
 
           read ( io_asc , '(i10)' ) naanta
           do iaanta = 1,naanta
@@ -284,22 +277,21 @@ c         output items on exchange level
                   read ( io_asc , FMT32) c10,c1,c50,c20
               else
                   read ( io_asc , FMT22) c10,c1,c50
-	            c20 = ' '
+                c20 = ' '
               endif
               value = -999.
-              call upd_p2 ( c10, c50, value, 2, newtab, grp, io_mes ,
-     j                      iitem, c20, newfrm, .false. )
+              call upd_p2 ( c10, c50, value, 2, newtab, grp, io_mes, iitem, c20, newfrm, .false. )
               noutp = noutp + 1
               if ( noutp .gt. noutpm ) stop 'DIMENSION NOUTPM'
               outppr(noutp) = procid(nproc)
               outpit(noutp) = itemid(iitem)
               outpnm(noutp) = iaanta + ihulp
               outpdo(noutp) = c1
-c             Switch to decide segment/exchange!
+!             Switch to decide segment/exchange!
               outpsx(noutp) = 0
           enddo
 
-c         fluxes
+!         fluxes
 
           noffsf = noutf
           read ( io_asc , '(i10)' ) naanta
@@ -308,11 +300,10 @@ c         fluxes
                   read ( io_asc , FMT32) c10,c1,c50,c20
               else
                   read ( io_asc , FMT22) c10,c1,c50
-	            c20 = ' '
+                c20 = ' '
               endif
               value = -999.
-              call upd_p2 ( c10, c50, value, 1, newtab, grp, io_mes ,
-     j                      iitem, c20, newfrm, .false. )
+              call upd_p2 ( c10, c50, value, 1, newtab, grp, io_mes, iitem, c20, newfrm, .false. )
               noutf = noutf + 1
               if ( noutf .gt. noutfm ) stop 'DIMENSION NOUTFM'
               outfpr(noutf) = procid(nproc)
@@ -321,14 +312,14 @@ c         fluxes
               outfdo(noutf) = c1
           enddo
 
-c         stochi lines
+!         stochi lines
 
           noffse = nstoc
           read ( io_asc , '(i10)' ) naanta
           do iaanta = 1,naanta
               read ( io_asc , '(a10,2x,a10,2x,f10.0)' ) c10,c10b,value
 
-c             check presence of current flux in fluxes under current process
+!             check presence of current flux in fluxes under current process
               call zoek (c10b,(noutf-noffsf),outffl(noffsf+1),10,ihulp)
               if ( ihulp .le. 0 ) then
                   write (*,*) ' Illegal flux in stochi line!!'
@@ -343,12 +334,11 @@ c             check presence of current flux in fluxes under current process
 
               value = -999.
               c50 = ' '
-	        c20 = ' '
-              call upd_p2 ( c10, c50, value, 0, newtab, grp, io_mes ,
-     j                      iitem, c20, newfrm, .false. )
+              c20 = ' '
+              call upd_p2 ( c10, c50, value, 0, newtab, grp, io_mes, iitem, c20, newfrm, .false. )
           enddo
 
-c         stochi lines D
+!         stochi lines D
 
           noffse = ndisp
           read ( io_asc , '(i10)' ) naanta
@@ -364,11 +354,10 @@ c         stochi lines D
               value = -999.
               c50 = ' '
               c20 = ' '
-              call upd_p2 ( c10, c50, value, 0, newtab, grp, io_mes ,
-     j                      iitem, c20, newfrm, .false. )
+              call upd_p2 ( c10, c50, value, 0, newtab, grp, io_mes, iitem, c20, newfrm, .false. )
           enddo
 
-c         stochi lines V
+!         stochi lines V
 
           noffse = nvelo
           read ( io_asc , '(i10)' ) naanta
@@ -384,34 +373,31 @@ c         stochi lines V
               value = -999.
               c50 = ' '
               c20 = ' '
-              call upd_p2 ( c10, c50, value, 0, newtab, grp, io_mes ,
-     j                      iitem, c20, newfrm, .false. )
+              call upd_p2 ( c10, c50, value, 0, newtab, grp, io_mes, iitem, c20, newfrm, .false. )
           enddo
           read ( io_asc , '(a10)' ) c10
           if ( c10(1:3) .ne. 'END' ) STOP 'error'
       enddo
 
-c         DUPROL format has two additional blocks, specifying active and inactive substances
+!         DUPROL format has two additional blocks, specifying active and inactive substances
 
       if ( duprol ) then
           read ( io_asc , '(i10)' ) naanta
           do iaanta = 1,naanta
               read ( io_asc , FMT32) c10,c1,c50,c20
               value = -999.
-              call upd_p2 ( c10, c50, value, 0, newtab, grp, io_mes ,
-     j                      iitem, c20, newfrm, .false. )
+              call upd_p2 ( c10, c50, value, 0, newtab, grp, io_mes, iitem, c20, newfrm, .false. )
           enddo
           read ( io_asc , '(i10)' ) naanta
           do iaanta = 1,naanta
               read ( io_asc , FMT32) c10,c1,c50,c20
               value = -999.
-              call upd_p2 ( c10, c50, value, 0, newtab, grp, io_mes ,
-     j                      iitem, c20, newfrm, .true. )
+              call upd_p2 ( c10, c50, value, 0, newtab, grp, io_mes, iitem, c20, newfrm, .true. )
           enddo
       endif
       close (io_asc)
 
-c     Sort and check R6-R7-R8
+!     Sort and check R6-R7-R8
 
       call sortst ( stocfl, stocsu, stocsc, nstoc )
       call chksto ( stocfl, stocsu, stocsc, nstoc , itemid, nitem, io_mes )
@@ -420,17 +406,17 @@ c     Sort and check R6-R7-R8
       call sortst ( veloit, velosu, velosc, nvelo )
       call chksto ( veloit, velosu, velosc, nvelo , itemid, nitem, io_mes )
 
-c     Create/update tables R1, R2
+!     Create/update tables R1, R2
       call cratab (grp,newtab,initialConfgId,initialConfgName)
 
-c     Clear tables
+!     Clear tables
       call cldept
 
-c----------------------------------------------------------------------c
-c     Adhoc correction on default values
-c     BLOOMAlgii must be -101
-c     Only -dis and -par quantities may have default value -11
-c----------------------------------------------------------------------c
+!----------------------------------------------------------------------c
+!     Adhoc correction on default values
+!     BLOOMAlgii must be -101
+!     Only -dis and -par quantities may have default value -11
+!----------------------------------------------------------------------c
 
       if ( newtab ) then
 
@@ -448,8 +434,7 @@ c----------------------------------------------------------------------c
               ihulp2 = index (itemid(i),'-par')
               ihulp3 = index (itemid(i),'-Dis')
               ihulp4 = index (itemid(i),'-Par')
-              if ( ihulp  .le. 0 .and. ihulp2 .le. 0 .and.
-     j             ihulp3 .le. 0 .and. ihulp4 .le. 0 ) then
+              if ( ihulp  .le. 0 .and. ihulp2 .le. 0 .and. ihulp3 .le. 0 .and. ihulp4 .le. 0 ) then
                   itemde(i) = -999.
               endif
           endif
@@ -462,7 +447,7 @@ c----------------------------------------------------------------------c
 
           if (duprol) then
 
-c         Remove defaults for DUFLOW hydro parameters, so that conversion process will be activated
+!         Remove defaults for DUFLOW hydro parameters, so that conversion process will be activated
               call zoek (itemid(i)(1:5),1,'Z    ',5,ihulp)
               if ( ihulp .eq. 1 ) itemde(i) = -999.
               call zoek (itemid(i)(1:5),1,'Q    ',5,ihulp)
@@ -489,15 +474,15 @@ c         Remove defaults for DUFLOW hydro parameters, so that conversion proces
 
       endif
 
-c----------------------------------------------------------------------c
-c     Dump tables
-c----------------------------------------------------------------------c
+!----------------------------------------------------------------------c
+!     Dump tables
+!----------------------------------------------------------------------c
 
       call writdb ( io_inp )
 
-c----------------------------------------------------------------------c
-c     Write prefined set for SOBEK (DUPROL mode ONLY)
-c----------------------------------------------------------------------c
+!----------------------------------------------------------------------c
+!     Write prefined set for SOBEK (DUPROL mode ONLY)
+!----------------------------------------------------------------------c
 
       if (duprol) then
           i = index (pdffil,'.')
@@ -533,12 +518,11 @@ c----------------------------------------------------------------------c
       end
 
       subroutine iniind()
-      include 'data.inc'
+      include 'data_ff.inc'
 
-      integer    iitem, ifort , iproc , iinpu , ioutp , ioutf , istoc ,
-     j           ivelo, idisp
+      integer    iitem, ifort , iproc , iinpu , ioutp , ioutf , istoc , ivelo, idisp
 
-c     Initialise indexes arrays
+!     Initialise indexes arrays
 
       do iitem=1,nitemm
         item_i(iitem) = iitem
@@ -575,15 +559,15 @@ c     Initialise indexes arrays
       character*30 grp
       character*10 initialConfgId
       character*50 initialConfgName
-      include 'data.inc'
+      include 'data_ff.inc'
       integer iitem , iproc, icnpr, iconf
       logical newtab
 
       if ( newtab ) then
 
-c         NEW TABLES
+!         NEW TABLES
 
-c         Dummy versions of tables P1 and P5
+!         Dummy versions of tables P1 and P5
           nsgrp = 1
           sgrpid(1) = grp
           sgrpnm(1) = grp
@@ -591,20 +575,20 @@ c         Dummy versions of tables P1 and P5
           confid(1) = initialConfgId
           confnm(1) = initialConfgName
 
-c         Table R1
-c         include all processes in Dummy configuration
+!         Table R1
+!         include all processes in Dummy configuration
 
           do iproc = 1,nproc
               conpro(1,iproc) = .true.
           enddo
 
-c         Table R2
-c         add all substances to Dummy configuration
+!         Table R2
+!         add all substances to Dummy configuration
 
           ncnsb = 0
           do iitem = 1,nitem
               if ( itemgr(iitem) .eq. grp ) then
-c                 This must be a substance
+!                 This must be a substance
                   ncnsb = ncnsb + 1
                   r2_cid(ncnsb) = confid(1)
                   r2_sid(ncnsb) = itemid(iitem)
@@ -613,9 +597,9 @@ c                 This must be a substance
 
       else
 
-c         UPDATE TABLES
+!         UPDATE TABLES
 
-c         Recreate Table R1
+!         Recreate Table R1
 
           do 15 iproc = 1,nproc
           do 15 iconf = 1,nconf
@@ -627,13 +611,13 @@ c         Recreate Table R1
               if (iproc.gt.0) conpro(iconf,iproc) = .true.
           enddo
 
-c         Table R2
-c         add all new substances to Dummy configuration
-c         NO EFFORT DONE TO CLEAR OLD ENTRIES
+!         Table R2
+!         add all new substances to Dummy configuration
+!         NO EFFORT DONE TO CLEAR OLD ENTRIES
 
           do iitem = 1,nitem
               if ( itemgr(iitem) .eq. grp ) then
-c                 This must be a NEW substance
+!                 This must be a NEW substance
                   if ( ncnsb + 1 .gt. ncnsbm ) stop 'DIMENSION NCNSBM'
                   ncnsb = ncnsb + 1
                   r2_cid(ncnsb) = 'DummyConfg'
