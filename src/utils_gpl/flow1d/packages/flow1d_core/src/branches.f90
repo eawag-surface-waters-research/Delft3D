@@ -304,6 +304,7 @@ module m_branch
 
       integer                 :: ibr, i, ngrid, iUCandidate
       type(t_branch), pointer :: pbr
+      logical                 :: newsequence
 
       do ibr= 1, brs%count
          pbr => brs%branch(ibr)
@@ -343,8 +344,19 @@ module m_branch
             pbr%grd(i) = ngrid
 
             ! Administer grid points sequences:
-            if (pbr%uPointsChainages(iUCandidate) > pbr%gridPointsChainages(i+1)) then
-               ! Next u-point does not lie between current gridpoint #i and next #i+1, so that must be a new gridpoints sequence
+            if (iUCandidate <= pbr%uPointsCount) then
+               ! When next u-point does not lie between current gridpoint #i and next #i+1, then that must be a new gridpoints sequence
+               newsequence = (pbr%uPointsChainages(iUCandidate) > pbr%gridPointsChainages(i+1))
+            else
+               ! No more u-points, but still gridpoint(s) left, so all of these
+               ! remaining gridpoints must be singleton 1D points, each forming
+               ! a 1-points sequence on its own.
+               ! This is possible when 1D2D links near partition boundaries
+               ! have their 1D endpoints as loose ghost nodes in this partition.
+               newsequence = .true.
+            end if
+
+            if (newsequence) then
                if (pbr%gridPointsSeqCount > 0) then
                   ! Administer end point of current sequence.
                   pbr%k2gridPointsSeq(pbr%gridPointsSeqCount)   = i

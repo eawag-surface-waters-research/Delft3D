@@ -202,9 +202,12 @@ module m_oned_functions
                   k1 = abs(ln(1,L))
                   grd(i) = k1
                enddo
-               L = ip2-1-(is-1)
-               k2 = ln(2,iabs(lin(L)))
-               grd(ip2) = k2
+               if (ip2 > ip1) then
+                  ! For gridpointsequence with 2 or more gridpoints, make sure to add the last one.
+                  L = ip2-1-(is-1)
+                  k2 = ln(2,iabs(lin(L)))
+                  grd(ip2) = k2
+               end if
             end do
             if (pbr%toNode%gridnumber == -1 .and. comparereal(pbr%gridPointsChainages(pbr%gridPointsCount), pbr%length, flow1d_eps10) == 0)  then
                pbr%toNode%gridnumber = k2 ! Only when exactly at the branch end (need not be so in parallel models).
@@ -613,6 +616,11 @@ module m_oned_functions
       integer              :: k2
       integer              :: dir
       
+      if (struct%numlinks == 0) then
+         ! Possibly outside of this partition
+         return
+      end if
+
       ! First compute average waterlevels on suction side and delivery side of the pump
       s1k1 = 0d0
       s1k2 = 0d0

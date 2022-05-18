@@ -249,7 +249,7 @@ module m_1d_networkreader
          localUOffsets(1:linkCount)      = meshgeom%edgeoffsets(firstLink:lastLink)
       end if
 
-      if (nodesOnBranchVertices==0 .and. linkCount /= 0) then
+      if (.false. .and. nodesOnBranchVertices==0 .and. linkCount /= 0) then
          if (gridPointsCount > 0) then
             startEndPointMissing(1) = (localUOffsets(1)         < localOffsets(1))
             startEndPointMissing(2) = (localUOffsets(linkCount) > localOffsets(gridPointsCount))
