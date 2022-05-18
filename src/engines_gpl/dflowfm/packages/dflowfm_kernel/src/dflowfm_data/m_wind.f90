@@ -129,7 +129,7 @@ double precision                  :: patmfac         !< 100 if Mbar, 1 if Pascal
 double precision                  :: cdb(3)          !< breakpoints cd function cd coefficient
 double precision                  :: wdb(3)          !< breakpoints cd function windspeed
 integer                           :: ICdtyp          !< 1=Const; 2=Smith&Banke (2 pts); 3=S&B (3 pts); 4=Charnock 1955, 5=Hwang 2005, 6=Wuest 2005
-integer                           :: jarelativewind  !< 1 = relative, 0 not relative
+double precision                  :: relativewind    !< factor for top layer speed in relative wind, 0=no, 1 =full top layer speed 
 integer                           :: jawindhuorzwsbased   !< 1 = finite volume , 0 = hu
 integer                           :: jawindpartialdry     !< Reduce windstress on water if link partially dry, only for bedlevtyp=3, 0 = no, 1 = yes
 contains
@@ -155,7 +155,7 @@ use m_physcoef, only : rhomean
     cdb(3)  = 0.003d0     !< third  wind breakpoint
     wdb(3)  = 30
     icdtyp  = 2
-    jarelativewind = 0    !< wind relative
+    relativewind = 0d0    !< factor for top layer speed in wind relative wind, 0=no, 1 =full top layer speed   
     jawindhuorzwsbased   = 0    !< default: HU-based both in 2D and 3D (and not zws-based)
     jawindpartialdry     = 1    !< default: partially dry cells switched off
 

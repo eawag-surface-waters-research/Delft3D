@@ -32,7 +32,7 @@
 
  subroutine wetbed(time)
 
- use m_flowparameters
+ use m_flowparameters, only: hwetbed
  implicit none
 
  integer, parameter :: mmax = 601 !  3000
@@ -49,7 +49,6 @@
 !c
 !c initialise
 !c
-
         g=9.81
         t=time
         dt=1.0
@@ -65,10 +64,11 @@
         eps=1.0e-6
         mc = 301
         xc = (mc-1)*dxw
-        do i=0,mmax
+        mc = mmax
+        do i=0,mc ! mmax
           x(i)=(i-0.5)*dxw - xc
         enddo
-        do i=0,mmax
+        do i=0,mc ! mmax
           if (x(i).lt.0.0) then
             s(i)=h1
           else
@@ -132,7 +132,7 @@
           xd=-c1*t
           xm=(u2-c2)*t
           xu=z*t
-          do i=0,mmax
+          do i=0,mc ! mmax
             if (x(i).lt.xd) then
               u(i)=0.0
               s(i)=h1
@@ -151,7 +151,7 @@
 !       enddo
 
 !        open(unit=33,file='wetbed.prn')
-        do m=2,mmax
+        do m=2,mc ! mmax
             if (m == 2) then
                 call movabs(x(m)+xc, s(m))
             else
@@ -166,8 +166,6 @@
                 call lnabs(x(m)+xc, 0.1d0*U(m))
             endif
         enddo
-
-
 
 !        write (33,'(3e15.4)') x(m)+xc, s(m), u(m)
 

@@ -64,9 +64,9 @@
 
           wxL = wx(L)
           wyL = wy(L)
-          if (jarelativewind == 1) then
-             uL  = U1(Ltop(L))
-             vL  =  v(Ltop(L))
+          if (relativewind > 0d0) then
+             uL  = relativewind*U1(Ltop(L))
+             vL  = relativewind* v(Ltop(L))
              uxL = uL*csu(L) - vL*snu(L)
              uyL = uL*snu(L) + vL*csu(L)
              wxL = wxL - uxL

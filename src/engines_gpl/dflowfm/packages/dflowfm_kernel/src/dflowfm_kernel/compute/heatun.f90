@@ -69,9 +69,9 @@ ch      = Stanton                    ! Stanton number = 1.45e-3 (Friehe&Schmitt,
 qsu     = 0d0
 qsnom   = qsno
 call getlink1(n,L)
-if (jarelativewind == 1) then
-    wxL = wx(L) - ucx(ktop(n))
-    wyL = wy(L) - ucy(ktop(n))
+if (relativewind > 0d0) then
+    wxL = wx(L) - relativewind*ucx(ktop(n))
+    wyL = wy(L) - relativewind*ucy(ktop(n))
 else
     wxL = wx(L)
     wyL = wy(L)

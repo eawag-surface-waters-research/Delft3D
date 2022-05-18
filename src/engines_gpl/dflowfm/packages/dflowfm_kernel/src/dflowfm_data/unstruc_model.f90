@@ -1386,7 +1386,7 @@ subroutine readMDUFile(filename, istat)
     else if (Icdtyp == 7) then
        call prop_get_doubles(md_ptr, 'wind', 'Cdbreakpoints'          , Cdb, 2)
     endif
-    call prop_get_integer(md_ptr, 'wind',  'Relativewind'             , jarelativewind)
+    call prop_get_double    (md_ptr, 'wind',  'Relativewind'          , relativewind)
     if (kmx == 0) then
        jawindhuorzwsbased = 1
     else
@@ -3295,8 +3295,8 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
        call prop_set(prop_ptr, 'wind', 'Cdbreakpoints',        Cdb(1:3), 'Wind drag coefficient break points')
        call prop_set(prop_ptr, 'wind', 'Windspeedbreakpoints', Wdb(1:3), 'Wind speed break points (m/s)')
     endif
-    if (writeall .or. jarelativewind == 0) then
-       call prop_set(prop_ptr,    'wind', 'Relativewind',      jarelativewind,   'Wind speed relative to top-layer water speed, 1=yes, 0 = no) ' )
+    if (writeall .or. relativewind > 0d0) then
+       call prop_set(prop_ptr,    'wind', 'Relativewind',      relativewind,   'Wind speed relative to top-layer water speed*relativewind, 0d0=no relative wind, 1d0=using full top layer spreed)')
     endif
     if (kmx == 0 .and. jawindhuorzwsbased == 0 .or. kmx > 0 .and. jawindhuorzwsbased == 0) then
        call prop_set(prop_ptr, 'wind', 'Windhuorzwsbased', jawindhuorzwsbased,   'Wind hu or zws based , 0 = hu, 1 = zws ' )
