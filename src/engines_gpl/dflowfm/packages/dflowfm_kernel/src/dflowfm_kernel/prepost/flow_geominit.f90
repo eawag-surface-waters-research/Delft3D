@@ -119,7 +119,7 @@
 
  double precision        :: xh, yh
 
- integer                 :: jaidomain, jaiglobal_s, ierror
+ integer                 :: jaidomain, jaiglobal_s
 
  double precision, external    :: cosphiu
  integer :: ndraw
@@ -874,11 +874,6 @@
        wu(L)  = dbdistance ( xk(k3), yk(k3), xk(k4), yk(k4), jsferic, jasfer3D, dmiss)  ! set 2D link width
     endif
  enddo
-
- if (jampi>0) then
-    ! WU of orphan 1D2D links must come from neighbouring partition.
-    call update_ghosts(ITYPE_U, 1, lnx, wu, ierror)
- end if
 
  do L = lnxi+1,Lnx
     k1 = ln(1,L) ; k2 = ln(2,L)

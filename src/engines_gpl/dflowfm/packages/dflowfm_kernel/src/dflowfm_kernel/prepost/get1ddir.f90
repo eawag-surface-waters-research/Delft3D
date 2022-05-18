@@ -39,14 +39,14 @@
  use m_flowgeom
  use m_flow
  use m_sferic, only : jsferic, jasfer3D
- use m_missing, only: dmiss, dxymis
- use geometry_module, only: normalin, normalout
+ use m_missing, only :dxymis
+ use geometry_module, only: normalin
 
  implicit none
  integer          :: n1, n2, k, L, LL, ka, kb, k1, k2
  double precision :: xt, yt
 
- xt = 0d0 ; yt = 0d0; ka = 0; kb = 0; n2 = 0
+ xt = 0d0 ; yt = 0d0; ka = 0; kb = 0
  do k = 1, size(nd(n1)%ln)
     LL  = nd(n1)%ln(k)
     L   = iabs(LL)
@@ -63,13 +63,5 @@
  enddo
  if (kb == 0) kb = n1
 
- if (n2 > 0) then
-    ! 1D regular channel point found: directly compute tangential channel vector
-    call normalin(xz(n1), yz(n1), xz(n2), yz(n2), xt, yt, xu(L), yu(L), jsferic, jasfer3D, dxymis)
- else
-    ! No other 1D channel points found: estimate 1D channel direction as perpendicular to this kcu3 link
-    n2 = sum(abs(ln(1:2,L))) - n1
-    call normalout(xz(n1), yz(n1), xz(n2), yz(n2), xt, yt, jsferic, jasfer3D, dmiss, dxymis)
- end if
-
+ call normalin(xz(n1), yz(n1), xz(n2), yz(n2), xt, yt, xu(L), yu(L), jsferic, jasfer3D, dxymis)
  end subroutine get1Ddir

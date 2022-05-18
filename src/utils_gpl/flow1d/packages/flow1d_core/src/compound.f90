@@ -164,10 +164,8 @@ end subroutine
       do i = 1, cmps%count
          istru = cmps%compound(i)%structure_indices(1)
          numlinks = sts%struct(istru)%numlinks
-         if (numlinks > 0) then
-            allocate(cmps%compound(i)%linknumbers(numlinks))
-            cmps%compound(i)%linknumbers = sts%struct(istru)%linknumbers
-         end if
+         allocate(cmps%compound(i)%linknumbers(numlinks))
+         cmps%compound(i)%linknumbers = sts%struct(istru)%linknumbers
          cmps%compound(i)%numlinks = numlinks
          ! now check if other members contain the same links
          do j = 2, cmps%compound(i)%numstructs
