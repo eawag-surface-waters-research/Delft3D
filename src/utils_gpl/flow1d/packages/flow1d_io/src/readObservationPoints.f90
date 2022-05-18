@@ -181,8 +181,9 @@ module m_readObservationPoints
             pOPnt%name      = obsPointName
             if (formatbr == 1) then
                branchIdx = hashsearch(network%brs%hashlist, branchID)
-               if (branchIdx==-1) then
-                  msgbuf = 'The BranchId '''//trim(branchId)//''' does not exist, please check observation point '''//trim(obsPointName)//'''.'
+               if (branchIdx == -1) then
+                  msgbuf = 'Error Reading Observation Point '''//trim(obsPointName)//''' from file ''' // &
+                           trim(observationPointsFile)//''', the branchId '''//trim(branchId)//''' does not exist.'
                   call err_flush()
                else
                   pOPnt%branch    => network%brs%branch(branchIdx)
