@@ -371,7 +371,7 @@ module m_readStorageNodes
          call SetMessage(LEVEL_ERROR, 'Reading storage nodes file: Error Deallocating Arrays')
       endif
       
-      write(msgbuf,'(a,a,i10,a)') 'Done reading storage nodes file, ', trim(storgNodesFile), network%storS%Count, ' storage nodes have been read.'
+      write(msgbuf,'(a,a,a,i0,a)') 'Done reading storage nodes file ''', trim(storgNodesFile), ''', ', network%storS%Count, ' storage nodes have been read.'
       call msg_flush()
 
       call fill_hashtable(network%storS)

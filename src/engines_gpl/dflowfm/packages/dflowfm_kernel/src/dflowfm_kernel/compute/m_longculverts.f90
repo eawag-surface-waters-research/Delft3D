@@ -397,7 +397,7 @@ contains
        msgbuf = 'Reading long culverts from '//trim(structurefile)//'.'
        call msg_flush()
        
-        if (jaKeepExisting == 0) then
+       if (jaKeepExisting == 0) then
           nlongculvertsg = 0
           if (allocated(longculverts)) then
              deallocate(longculverts)
