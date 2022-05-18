@@ -5448,7 +5448,7 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
 
       if (jamapwav>0) then     
          if (flowWithoutWaves) then      ! Check the external forcing wave quantities and their associated arrays
-            if (jamapwav_hwav > 0      .and. allocated(hwavcom)) then   
+            if (jamapwav_hwav > 0      .and. allocated(hwav)) then   
                if (jamapsigwav==0) then
                   ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_hwav     , nf90_double, UNC_LOC_S, 'hwav'         , 'sea_surface_wave_rms_height'          , 'RMS wave height'          , 'm'    , jabndnd=jabndnd_) ! not CF
                else
@@ -6889,7 +6889,7 @@ if (jamapsed > 0 .and. jased > 0 .and. stm_included) then
 
    if (jamapwav>0) then
       if (flowWithoutWaves) then      ! Check the external forcing wave quantities and their associated arrays
-         if (jamapwav_hwav > 0      .and. allocated(hwavcom)) then
+         if (jamapwav_hwav > 0      .and. allocated(hwav)) then
             if (jamapsigwav==0) then
                wavfac = 1d0
             else
@@ -6897,7 +6897,7 @@ if (jamapsed > 0 .and. jased > 0 .and. stm_included) then
             endif
             if (allocated(wa)) deallocate(wa, stat = ierr)
             allocate(wa(1:ndx), stat=ierr)
-            wa = wavfac*hwavcom
+            wa = wavfac*hwav
             ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_hwav        , UNC_LOC_S, wa, jabndnd=jabndnd_)
          end if
          if (jamapwav_twav > 0   .and. allocated(twav)) then   

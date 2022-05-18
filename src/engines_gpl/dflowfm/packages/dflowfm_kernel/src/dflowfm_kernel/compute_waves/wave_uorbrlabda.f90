@@ -34,9 +34,11 @@
    use m_waves, only: uorb, wlenwav, uorbwav, twav, hwav, hwavcom, gammax, rlabda, jauorb, jauorbfromswan
    use m_flow, only: hs
    use m_flowgeom, only: ndx
+   use m_flowparameters, only: jawave
    use m_physcoef, only: ag
    use m_sferic, only: pi
    use m_flowtimes, only: time1
+   use mathconsts, only: sqrt2_hp
 
    implicit none
 
@@ -44,13 +46,19 @@
    integer                            :: uorbwav_from_SWAN=0
    integer                            :: wlenwav_from_SWAN=0
 
-   double precision                   :: hss, per, omeg, k0, k0h, rk, uorb1
+   double precision                   :: hss, per, omeg, k0, k0h, rk, uorb1, sqrt2inv
 
+   sqrt2inv = 1.0d0 / sqrt2_hp
    do k = 1,ndx
       hss = max(0.01, hs(k))
       per = max(0.01, twav(k))                   ! wave period
-
-      hwav(k) = min(hwavcom(k), gammax*hs(k))       ! Prevent unrealistic Hrms in shallow water. Use original comfile value again every time, as hs changes per dts
+      if (jawave == 6) then
+        ! HSIG is read from SWAN NetCDF file. Convert to HRMS
+        hwav(k) = hwavcom(k) * sqrt2inv
+      else
+        hwav(k) = hwavcom(k)
+      endif
+      hwav(k) = min(hwav(k), gammax*hs(k))       ! Prevent unrealistic Hrms in shallow water. Use original comfile value again every time, as hs changes per dts
       omeg       = 2.0*pi/per
       k0         = omeg*omeg/ag
       k0h        = k0*hss
