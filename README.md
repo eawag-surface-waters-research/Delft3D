@@ -16,11 +16,13 @@ Use this "README.md" for compiling all other kernels in this repository.
   Currently used as default build process: "./build.sh all --compiler intel21"   
   This will execute "src/setenv.sh" on Deltares systems. On other systems, the environment must be prepared upfront.   
 
+#### Alternative: without build-script (Windows and Linux)
+See ...\src\cmake\README   
+WARNING: When building without build-script, the collection of the resulting binaries will need attention
+
 #### More information:
 - Delft3D FM suite: https://oss.deltares.nl/web/delft3dfm/get-started
 - Delft3D 4  suite: https://oss.deltares.nl/web/delft3d/get-started
-- Compilation without build script (just CMake): ...\src\cmake\README   
-  WARNING: When building without using the default build scripts, the collection of the resulting binaries needs attention.
 
 
 
