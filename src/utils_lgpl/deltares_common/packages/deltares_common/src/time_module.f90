@@ -943,74 +943,47 @@ module time_module
       end function split_date_time
 
       !> parse a time string of the form "23:59:59.123" or "23:59:59" and return it as fraction of a day
+      !! also no splitter : is allowed ("235959.123" or "235959")
       !! ms and seconds are optional
       function parse_time(time, ok) result (fraction)
+         use string_module, only : strsplit
          character(len=*), intent(in)  :: time      !< input time string
          logical         , intent(out) :: ok        !< success flag
          real(kind=hp)                 :: fraction  !< function result
 
-         integer                       :: i, ierr
-         real(kind=hp)                 :: temp
-         integer                       :: ipos1, ipos2, ipos
-         integer, parameter            :: nParts = 3
+         integer, parameter            :: maxParts = 3
+         integer                       :: iPart, ierr
+         real(kind=hp)                 :: scalefactor, temp
+         integer                       :: nParts
 
-         character(len=16)             :: times(nParts)
-         real(kind=hp), parameter      :: invalidValues(nParts) = (/ 24.01_hp, 60.01_hp, 61.1_hp /) ! accept leap second
-         real(kind=hp), parameter      :: scaleValues(nParts) = (/ 1.0_hp / 24.0_hp , &
-                                                                   1.0_hp / 24.0_hp / 60.0_hp  , &
-                                                                   1.0_hp / 24.0_hp / 3600.0_hp /)
+         character(len=16), allocatable :: times(:)
+         real(kind=hp), parameter      :: invalidValues(maxParts) = (/ 24.01_hp, 60.01_hp, 61.1_hp /) ! accept leap second
 
          ok = .false.
+         scalefactor = 24.0_hp
+         fraction = 0.0_hp
 
-         ! just simple assume "HH:MM:SS" / "HH:MM:SS.XX"
-         ipos = index(time, '.')
-         if ((len_trim(time) == 8 .and. ipos < 1) .or. ipos == 9) then
-            fraction = 0.0_hp
-            do i = 1, nParts
-               ipos1 = 3*i-2
-               ipos2 = 3*i-1
-               if (i == nParts) ipos2 = len(time)
-               read(time(ipos1 : ipos2), *, iostat=ierr) temp
-               if (ierr /= 0 .or. temp >= invalidValues(i)) then
-                  exit ! goto more general reading
-               end if
-               fraction = fraction + temp * scaleValues(i)
-               ok = (i == nParts)
+         if (index(time, ':') > 0) then
+            call strsplit(time, 1, times, 1, ':')
+            nParts = min(maxParts, size(times))
+         else if (len_trim(time) == 4 .or. len_trim(time) >= 6) then
+            nParts = min(maxParts, len_trim(time) / 2)
+            allocate(times(nParts))
+            do iPart = 1, nParts-1
+               times(iPart) = time(2*iPart-1:2*iPart)
             end do
+            times(nParts) = time(2*nParts-1:)
+         else
+            nParts = 0 ! results in an error
          end if
 
-         if (.not. ok) then
-            ! more general: accept leading spaces and hour in 1 or 2 digits
-            fraction = 0.0_hp
-            ipos1 = index(time, ':')
-            ipos2 = index(time, ':', back=.true.)
-            if (ipos2 == ipos1 .and. ipos2 > 0) then
-               ! found one ':' splitter => 0 seconds
-               times(1) = time(1:ipos1-1)
-               times(2) = time(ipos1+1:)
-               times(3) = '00.000'
-            else
-               if (ipos2 == ipos1 .and. ipos2 < 1) then
-                  ! found no splitters
-                  times(1) = time(1:2)
-                  times(2) = time(3:4)
-                  times(3) = time(5:)
-                  if (times(3) == ' ') times(3) = '00.000'
-               else
-                  times(1) = adjustl(time(:ipos1-1))
-                  times(2) = time(ipos1+1:ipos2-1)
-                  times(3) = time(ipos2+1:)
-               end if
-            end if
-            do i = 1, nParts
-               read(times(i), *, iostat=ierr) temp
-               if (ierr /= 0 .or. temp >= invalidValues(i)) then
-                  exit
-               end if
-               fraction = fraction + temp * scaleValues(i)
-               ok = (i == nParts)
-            end do
-         end if
+         do iPart = 1, nParts
+              read(times(iPart), *, iostat=ierr) temp
+              if (ierr /= 0 .or. temp >= invalidValues(iPart) .or. temp<0) exit
+              fraction = fraction + temp/scalefactor
+              scalefactor = scalefactor * 60.0_hp
+              ok = (iPart == nParts)
+         enddo
       end function parse_time
 
       DOUBLE PRECISION FUNCTION JULIAN ( IDATE , ITIME )
