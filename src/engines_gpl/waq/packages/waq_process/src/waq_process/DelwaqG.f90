@@ -2181,7 +2181,8 @@
               enddo
           endif
       else
-          dl = dl_default
+          dl         = dl_default
+          skip_tt_td = .false.
       endif
       sd(1) = 0.0
       do i = 1,nolay-1
