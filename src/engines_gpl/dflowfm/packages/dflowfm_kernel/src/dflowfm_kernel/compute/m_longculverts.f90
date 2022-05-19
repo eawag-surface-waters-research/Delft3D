@@ -669,71 +669,76 @@ contains
          enddo
       endif
 
-if (newculverts) then
-      do ilongc = 1, nlongculvertsg
-         do i = 2, longculverts(ilongc)%numlinks-1
-            Lf = abs(longculverts(ilongc)%flowlinks(i))         
-            k1 = ln(1,Lf)
-            k2 = ln(2,Lf)
-            bob(1, Lf) = longculverts(ilongc)%bl(i-1)
-            bob(2, Lf) = longculverts(ilongc)%bl(i)
-            if (k1 > ndx2d) then !if 1d link
-               bl(k1) = bob(1,Lf)
-            else
-               bl(k1) = min(bl(k1), bob(1,Lf)) 
+      if (newculverts) then
+         do ilongc = 1, nlongculvertsg
+            do i = 2, longculverts(ilongc)%numlinks-1
+               Lf = abs(longculverts(ilongc)%flowlinks(i))
+               if (Lf > 0) then
+                  k1 = ln(1,Lf)
+                  k2 = ln(2,Lf)
+                  bob(1, Lf) = longculverts(ilongc)%bl(i-1)
+                  bob(2, Lf) = longculverts(ilongc)%bl(i)
+                  if (k1 > ndx2d) then !if 1d link
+                     bl(k1) = bob(1,Lf)
+                  else
+                     bl(k1) = min(bl(k1), bob(1,Lf)) 
+                  end if
+                  if (k2 > ndx2d) then
+                     bl(k2) = bob(2,Lf)
+                  else
+                     bl(k2) = min(bl(k2), bob(2,Lf))
+                  end if
+               end if
+            enddo
+            Lf = abs(longculverts(ilongc)%flowlinks(1))
+            if (Lf > 0) then
+               wu(Lf) = longculverts(ilongc)%width
+               prof1D(1,Lf)  = wu(Lf)
+               prof1D(2,Lf)  = longculverts(ilongc)%height
+               prof1D(3,Lf)  =  -2 
+               bob(1, Lf) = longculverts(ilongc)%bl(1)
+               bob(2, Lf) = bl(ln(2,Lf))
             end if
-            if (k2 > ndx2d) then
-               bl(k2) = bob(2,Lf)
-            else
+      
+            Lf = abs(longculverts(ilongc)%flowlinks(longculverts(ilongc)%numlinks))
+            if (Lf > 0) then
+               wu(Lf) = longculverts(ilongc)%width
+               prof1D(1,Lf)  = wu(Lf)
+               prof1D(2,Lf)  = longculverts(ilongc)%height
+               prof1D(3,Lf)  =  -2 
+               bob(1, Lf) = longculverts(ilongc)%bl(longculverts(ilongc)%numlinks-1)
+               bob(2, Lf) = bl(ln(2,Lf))
+            end if
+         enddo
+      else !voor nu houden we de oude implementatie intact
+         do ilongc = 1, nlongculvertsg
+            do i = 1, longculverts(ilongc)%numlinks
+               Lf = abs(longculverts(ilongc)%flowlinks(i))
+               !if (kcu(lf) == 1) then ! TODO: UNST-5433: change when 1d2d links are *extra* in addition to culvert polyline
+               k1 = ln(1,Lf)
+               k2 = ln(2,Lf)
+               
+               bob(1, Lf) = longculverts(ilongc)%bl(i)
+               bob(2, Lf) = longculverts(ilongc)%bl(i+1)
+               if (k1 > ndx2d) then
+                  bl(k1) = bob(1,Lf)
+               else ! k1 = 2d point
+               bl(k1) = min(bl(k1), bob(1,Lf))
+               end if
+               
+               if (k2 > ndx2d) then
+                  bl(k2) = bob(2,Lf)
+               else
                bl(k2) = min(bl(k2), bob(2,Lf))
-            end if
-         
+               end if
+                
+               wu(Lf) = longculverts(ilongc)%width
+               prof1D(1,Lf)  = wu(Lf)
+               prof1D(2,Lf)  = longculverts(ilongc)%height
+               prof1D(3,Lf)  =  -2                                      ! for now, simple rectan            
+            enddo
          enddo
-         Lf = abs(longculverts(ilongc)%flowlinks(1))
-         wu(Lf) = longculverts(ilongc)%width
-         prof1D(1,Lf)  = wu(Lf)
-         prof1D(2,Lf)  = longculverts(ilongc)%height
-         prof1D(3,Lf)  =  -2 
-         bob(1, Lf) = longculverts(ilongc)%bl(1)
-         bob(2, Lf) = bl(ln(2,Lf))
-         
-         Lf = abs(longculverts(ilongc)%flowlinks(longculverts(ilongc)%numlinks))
-         wu(Lf) = longculverts(ilongc)%width
-         prof1D(1,Lf)  = wu(Lf)
-         prof1D(2,Lf)  = longculverts(ilongc)%height
-         prof1D(3,Lf)  =  -2 
-         bob(1, Lf) = longculverts(ilongc)%bl(longculverts(ilongc)%numlinks-1)
-         bob(2, Lf) = bl(ln(2,Lf))
-      enddo
-else !voor nu houden we de oude implementatie intact
-  do ilongc = 1, nlongculvertsg
-         do i = 1, longculverts(ilongc)%numlinks
-            Lf = abs(longculverts(ilongc)%flowlinks(i))
-            !if (kcu(lf) == 1) then ! TODO: UNST-5433: change when 1d2d links are *extra* in addition to culvert polyline
-            k1 = ln(1,Lf)
-            k2 = ln(2,Lf)
-            
-            bob(1, Lf) = longculverts(ilongc)%bl(i)
-            bob(2, Lf) = longculverts(ilongc)%bl(i+1)
-            if (k1 > ndx2d) then
-               bl(k1) = bob(1,Lf)
-            else ! k1 = 2d point
-            bl(k1) = min(bl(k1), bob(1,Lf))
-            end if
-            
-            if (k2 > ndx2d) then
-               bl(k2) = bob(2,Lf)
-            else
-            bl(k2) = min(bl(k2), bob(2,Lf))
-            end if
-             
-            wu(Lf) = longculverts(ilongc)%width
-            prof1D(1,Lf)  = wu(Lf)
-            prof1D(2,Lf)  = longculverts(ilongc)%height
-            prof1D(3,Lf)  =  -2                                      ! for now, simple rectan            
-         enddo
-      enddo
-endif
+      endif
 
    end subroutine longculvertsToProfs
 
@@ -747,11 +752,13 @@ endif
       do ilongc = 1, nlongculvertsg
          do LL = 1, longculverts(ilongc)%numlinks
             Lf = abs(longculverts(ilongc)%flowlinks(LL))
+            if (Lf > 0) then
                if (longculverts(ilongc)%ifrctyp > 0) then
                   ifrcutp(Lf) = longculverts(ilongc)%ifrctyp
-               if (longculverts(ilongc)%friction_value > 0) then             
-                    frcu(Lf) = longculverts(ilongc)%friction_value
-               endif
+                  if (longculverts(ilongc)%friction_value > 0) then
+                     frcu(Lf) = longculverts(ilongc)%friction_value
+                  endif
+               end if
             end if
          enddo
       enddo
@@ -774,7 +781,9 @@ endif
            else
               L = abs(longculverts(i)%flowlinks(1))
            endif
+           if (L > 0) then
               au(L) = longculverts(i)%valve_relative_opening * au(L)
+           end if
          end if
       enddo
 
