@@ -237,12 +237,14 @@ root=$scriptdir
 
 # On Deltares systems only:
 if [ -f "/opt/apps/deltares/.nl" ]; then
-    #
-    # Dot setenv.sh to load the modules needed
+    # Check if modules exist
+    module list > /dev/null
     if [ $? -ne 0 ]; then
+        # No, modules do not exist: "Dot" setenv.sh version without modules
         echo ". $root/src/setenv_no_modules.sh $compiler"
               . $root/src/setenv_no_modules.sh $compiler
     else
+        # Yes, modules do exist: "Dot" setenv.sh to load the modules needed
         echo ". $root/src/setenv.sh $compiler"
               . $root/src/setenv.sh $compiler
     fi
