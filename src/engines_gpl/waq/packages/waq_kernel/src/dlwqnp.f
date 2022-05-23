@@ -35,45 +35,6 @@
 !>                         Method has the option to treat additional velocities, like
 !>                         settling of suspended matter, upwind to avoid wiggles.\n
 
-C     CREATED            : jan  1996 by R.J. Vos and Jan van Beek
-C
-C     LOGICAL UNITS      : LUN(19) , output, monitoring file
-C                          LUN(20) , output, formatted dump file
-C                          LUN(21) , output, unformatted hist. file
-C                          LUN(22) , output, unformatted dump file
-C                          LUN(23) , output, unformatted dump file
-C
-C     SUBROUTINES CALLED : DLWQTR, user transport routine
-C                          DLWQWQ, user waterquality routine
-C                          PROCES, DELWAQ proces system
-C                          DLWQO2, DELWAQ output system
-C                          DLWQPP, user postprocessing routine
-C                          DLWQ13, system postpro-dump routine
-C                          DLWQ14, scales waterquality
-C                          DLWQ15, wasteload routine
-C                          DLWQ17, boundary routine
-C                          DLWQ50, explicit derivative
-C                          DLWQ51, flux correction
-C                          DLWQ52, makes masses and concentrations
-C                          DLWQ41, update volumes
-C                          DLWQ42, set explicit step
-C                          DLWQD1, implicit step for the vertical
-C                          DLWQ44, update arrays
-C                          DLWQT0, update other time functions
-C                          PROINT, integration of fluxes
-C                          DHOPNF, opens files
-C                          ZERCUM, zero's the cummulative array's
-C
-C     PARAMETERS    :
-C
-C     NAME    KIND     LENGTH   FUNC.  DESCRIPTION
-C     ---------------------------------------------------------
-C     A       REAL       *      LOCAL  real      workspace array
-C     J       INTEGER    *      LOCAL  integer   workspace array
-C     C       CHARACTER  *      LOCAL  character workspace array
-C     LUN     INTEGER    *      INPUT  array with unit numbers
-C     LCHAR   CHAR*(*)   *      INPUT  filenames
-C
       use grids
       use timers
       use m_couplib
