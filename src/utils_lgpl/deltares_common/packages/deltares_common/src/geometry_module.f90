@@ -2211,7 +2211,7 @@ module geometry_module
 
       double precision, dimension(N)                :: DvolDx, DvolDy, DvolDz
 
-      double precision                              :: xx0, yy0, zz0, alpha
+      double precision                              :: xx0, yy0, zz0, alpha, xx00, yy00, zz00
       double precision                              :: xxcg, yycg, zzcg
       double precision                              :: dvol, vol, voli
       double precision                              :: Jx, Jy, Jz
@@ -2228,6 +2228,7 @@ module geometry_module
       double precision, parameter                   :: dtol=1d-8
       double precision, parameter                   :: deps=1d-8
       double precision, parameter                   :: onesixth = 0.166666666666666667d0
+      integer                             :: mout=0 ,k
 
       area = 0d0
       xcg = 0d0
@@ -2259,6 +2260,9 @@ module geometry_module
       xx0 = xx0/N
       yy0 = yy0/N
       zz0 = zz0/N
+      xx00  = xx0
+      yy00  = yy0
+      zz00  = zz0
       alpha = 0.75d0
 
       !  Newton iterations
@@ -2277,9 +2281,22 @@ module geometry_module
             vol = vol + dvol
          end do
 
-         if ( abs(vol).lt.dtol .and. iter.eq.1 ) then
-            !        no mass center can be defined, use first iterate
-            exit
+         if ( abs(vol).lt.dtol) then 
+            if (iter .eq.1 ) then  ! no mass center can be defined, use first iterate
+               
+               exit
+            else                   ! also use first iterate
+               !if (mout == 0) call newfil(mout,'dump.pli')
+               !write(mout,*) 'bl01'
+               !write(mout,*) n, ' 2 '
+               !do k = 1,n
+               !   write (mout,*) x(k), y(k) 
+               !enddo
+               xx0  = xx00
+               yy0  = yy00
+               zz0  = zz00
+               exit
+            endif
          end if
 
          voli = 1d0/vol

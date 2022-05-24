@@ -158,7 +158,7 @@
 
  endif
 
- if (jalightwind == 1 .and. icdtyp .ne. 7 .and. icdtyp .ne. 5) then
+ if (jalightwind == 1 .and. icdtyp .ne. 7 .and. icdtyp .ne. 6 .and. icdtyp .ne. 5) then
     if (uwi < 4d0) then     ! for wind < 4 m/s use wuest anyway
         awin = max(0.1d0,uwi)
         cd10 = max(cd10, 0.0044d0 / awin**1.15d0)

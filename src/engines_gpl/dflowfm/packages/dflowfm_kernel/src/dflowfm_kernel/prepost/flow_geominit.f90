@@ -821,8 +821,10 @@
  call aerr ('Lbnd1D(lnxi+1:lnx)', ierr, lnx-lnxi+1)
 
  IF (ALLOCATED (grounlay) ) deallocate( grounLay)
- allocate  ( grounLay(lnx1D) , stat= ierr) ; grounLay = dmiss
- call aerr ('grounLay(lnx1D)', ierr, Lnx1D)
+ if (lnx1D > 0) then 
+    allocate  ( grounLay(lnx1D) , stat= ierr) ; grounLay = dmiss
+    call aerr ('grounLay(lnx1D)', ierr, Lnx1D)
+ endif
 
  teta = abs(teta0)                   ! set spatially constant teta. Override only in setdt for ivariableteta = 2
  if (teta0 == 1d0) then

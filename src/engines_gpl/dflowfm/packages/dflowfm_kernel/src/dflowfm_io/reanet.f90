@@ -30,40 +30,21 @@
 ! $Id$
 ! $HeadURL$
 
-      SUBROUTINE REANET(MNET,JA,JADOORLADEN)
+      SUBROUTINE REANET(filename, k0, L0, NUMKN, NUMLN, istat)
       use m_netw
       use gridoperations
       implicit none
-      INTEGER :: MNET, JA, LMOD
-      integer :: JADOORLADEN
+
+      character(len=*), intent(in)     :: filename  !< inderdaad, filename
+      INTEGER                          :: k0, L0, NUMKN, NUMLN, istat
+ 
+      integer :: JADOORLADEN,  MNET, JA, LMOD, KMOD
+      integer :: i, mout,  k, nr, knread, L, N1 
+      integer :: numbersonline
       double precision :: af
-      integer :: i, KMOD, mout
-      integer :: k, nr, numbersonline
-      integer :: k0
-      integer :: knread
-      integer :: l
-      integer :: l0
-      integer :: n1
-      integer :: netfiltyp
-      integer :: numkn
-      integer :: numln
-
-      CHARACTER REC*3320
-
-      NETFILTYP = 2  !NEW
-
-
-      IF (NETFLOW == 2) THEN
-         CALL CLEARFLOWMODELINPUTS()
-      ENDIF
-
-      IF (JADOORLADEN==1) THEN
-         K0 = 0
-         L0 = 0
-      ELSE
-         K0 = NUMK
-         L0 = NUML
-      ENDIF
+      CHARACTER REC*332 
+ 
+      call oldfil(mnet, filename)
 
       JA = 1
       READ(MNET,'(A)',end = 777, err = 707) REC
@@ -76,7 +57,6 @@
       READ(MNET,'(A)') REC
 
       call readyy('reanet',0d0)
-
 
       CALL INCREASENETW(K0+NUMKN, L0 + NUMLN)
 
@@ -98,9 +78,7 @@
          endif
       ENDDO
 
-
-      if (netfiltyp == 1) READ(MNET,*)
-      READ(MNET,*)
+      READ(MNET,*) rec
 
       LMOD = MAX(1,NUMLn/1000)
       DO L = L0+1, L0+NUMLN
@@ -109,29 +87,23 @@
             call readyy('reanet',af)
          endif
          READ(MNET,'(A)',END = 777) REC
-         IF (NETFILTYP == 2) THEN
-             KNREAD = 0
-             nr = numbersonline(rec)
-             if (nr == 3) then
-                READ(REC,*,ERR = 888) KN(1,L), KN(2,L), KNREAD
-             else
-                READ(REC,*,ERR = 888) KN(1,L), KN(2,L)
-             endif
-         ENDIF
+        
+         nr = numbersonline(rec)
+         if (nr == 3) then
+            READ(REC,*,ERR = 888) KN(1,L), KN(2,L), KNREAD
+         else
+            READ(REC,*,ERR = 888) KN(1,L), KN(2,L)
+            KNREAD = 2
+         endif
          KN(1,L) = KN(1,L) + K0
          KN(2,L) = KN(2,L) + K0
-         IF (KNREAD .NE. 1) KNREAD = 2
+         ! IF (KNREAD .NE. 1) KNREAD = 2
          KN(3,L) = KNREAD
       ENDDO
 
-  666 NUMK = K0 + NUMKN
-      NUML = L0 + NUMLN
-      JA   = 0
+  666 continue 
+      istat = 0
       CALL DOCLOSE(MNET)
-
-
-      CALL SETNODADM (0)
-
 
       call readyy('reanet',-1d0)
 

@@ -3451,7 +3451,7 @@
       integer,          dimension(N)              :: iclist
       double precision                            :: xc, yc, area, w, sn, cs, xh, yh, aa, cs2, cs3, sn2, sn3, f
       double precision, dimension(1)              :: csloc, snloc, csloc2, snloc2, csloc3, snloc3
-      double precision                            :: xh2, yh2, xh3, yh3
+      double precision                            :: xh2, yh2, xh3, yh3, dist
 
       integer                                     :: i, ic, k1, k2, L, NN, Nc, ja2D, Lp, k3, ip, is, ncol
       integer                                     :: jacounterclockwise          ! counterclockwise (1) or not (0) (not used here)
@@ -3471,6 +3471,9 @@
       ja2D = 1
       do i=1,NN
           L = nod(k)%lin(i)
+          if (lnn(L) == 0) then 
+              ja2D = 0             ! otherwise incorrectly flagged as a 2D   
+          endif
           if (kn(3,L) /= 2 .and. kn(3,L).ne.0 ) ja2D = 0  
       enddo   
 
@@ -3533,7 +3536,16 @@
 
       else ! 1D
       
+         !w = 0d0 ! check in next time
+         !do i=1,NN
+         !   L = nod(k)%lin(i) ; call othernode(k,L,k2)
+         !   call dbdistancehk( xk(k), yk(k), xk(k2), yk(k2), dist ) ; w = w + dist     
+         !enddo
+         !w   = w/nn
+         !w   = 0.1d0*w* RCEL ! width = 0.2*dx
+
          w   = 0.5d0*Wu1Duni * RCEL ! RCEL a bit different in 1D
+
          num = 0
          
          if (nn == 1) then 

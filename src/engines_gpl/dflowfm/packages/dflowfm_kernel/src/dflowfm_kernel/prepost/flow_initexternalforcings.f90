@@ -2653,7 +2653,7 @@ end if
     enddo
     jagrounlay = 1
  else
-    deallocate(grounlay)
+    if (allocated(grounlay)) deallocate(grounlay)
  endif
 
  if ( jampi.eq.1 ) then

@@ -86,7 +86,7 @@ subroutine loadNetwork(filename, istat, jadoorladen)
     integer,      intent(in)  :: jadoorladen
     character(len=255) :: data_file_1d
 
-    integer      :: iDumk
+    integer      :: iDumk, mnet
     integer      :: iDuml
 
     ! double precision, allocatable, save :: zkold(:)
@@ -112,7 +112,11 @@ subroutine loadNetwork(filename, istat, jadoorladen)
     ENDIF
 
     ! New NetCDF net file
-    call unc_read_net(filename, K0, L0, NUMKN, NUMLN, istat)
+    if (index(filename,'.net') > 0 ) then 
+       call reanet      (filename, K0, L0, NUMKN, NUMLN, istat)
+    else
+       call unc_read_net(filename, K0, L0, NUMKN, NUMLN, istat)
+    endif 
     call md5_net_file(L0+1, NUMLN)
 
     iDumk = 0
