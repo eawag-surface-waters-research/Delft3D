@@ -215,6 +215,5 @@
       data_block%no_brk = nobrk
 
  9999 if (timon) call timstop( ithndl )
-      return
 
-      end
+      end subroutine read_data

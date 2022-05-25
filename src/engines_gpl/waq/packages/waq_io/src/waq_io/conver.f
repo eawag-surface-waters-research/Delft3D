@@ -34,10 +34,6 @@
 !>        Absolute offset time should be chosen such that all relative
 !>        times fit into 68 years from the absolute offset !
 
-!     CREATED       : March 1988 by Marjolein Sileon / Leo Postma
-
-!     Modified      : April 2011 by Leo Postma
-!                                   Fortran 90 look and feel
 
 !     Logical units : none
 
