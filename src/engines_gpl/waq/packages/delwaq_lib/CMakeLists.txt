@@ -27,7 +27,7 @@ get_fortran_source_files(${src_path} source_files)
 file(GLOB preprocessor_files ${CMAKE_CURRENT_SOURCE_DIR}/${src_path}/waq_bmi.F90)
 
 # Define library
-set(library_name delwaq_dll)
+set(library_name delwaq_lib)
 add_library(${library_name} SHARED ${source_files}
                                    ${rc_version_file})
 

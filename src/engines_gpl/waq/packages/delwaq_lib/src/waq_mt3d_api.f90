@@ -49,6 +49,7 @@
       !DEC$ ATTRIBUTES DECORATE, ALIAS : 'MT3D_PROCESSES_INIT' :: MT3D_processes_init
       
       use waq_omi_priv
+      use waq_omi_interface
       use MT3D
 
       implicit none
@@ -63,21 +64,6 @@
       character(len=*), dimension(number_processes), intent(in)  :: processes
       real, intent(in)                                           :: deltt_in               ! In days, real
    
-      logical, external       :: SetReferenceDate
-      logical, external       :: SetIntegrationOptions
-      logical, external       :: SetSimulationTimes
-      logical, external       :: DefineWQSchematisation
-      logical, external       :: DefineMonitoringLocations
-      logical, external       :: DefineWQDispersion      
-      logical, external       :: DefineWQProcessesX
-      logical, external       :: DefineWQExtraOutputParameters
-      logical, external       :: SetCurrentValueScalarInit
-      logical, external       :: SetCurrentValueFieldInit
-      logical, external       :: SetOutputTimers
-      logical, external       :: SetInitialVolume
-      integer, external       :: ModelInitialize
-      logical, external       :: SetFlowData
-      logical, external       :: SetBoundaryConditions
       
       integer, parameter      :: integration_method = 0
       
@@ -191,6 +177,7 @@
       !DEC$ ATTRIBUTES DECORATE, ALIAS : 'MT3D_PROCESSES_SETPAR' :: MT3D_processes_setpar
       
 !      use MT3D_PL
+      use waq_omi_interface
 
       implicit none
       
@@ -198,8 +185,7 @@
       integer, intent(in)                                        :: number_segments
       character(len=*), dimension(number_parameters), intent(in) :: process_parameters
       real, dimension(number_segments, number_parameters), intent(in) :: process_parameter_values
-      
-      logical, external       :: SetCurrentValueFieldInit
+
 
       logical :: success
       integer :: ipar, i
@@ -220,11 +206,9 @@
 
 !      use MT3D_PL
       use waq_omi_priv
+      use waq_omi_interface
 
       implicit none
-
-      logical, external          :: SetSimulationTimes
-      integer, external          :: ModelPerformTimeStep
 
       integer, intent(in)                                                 :: number_segments
       integer, intent(in)                                                 :: number_substances
@@ -265,10 +249,11 @@
    logical function MT3D_processes_fin ()
       !DEC$ ATTRIBUTES DLLEXPORT::MT3D_processes_fin
       !DEC$ ATTRIBUTES DECORATE, ALIAS : 'MT3D_PROCESSES_FIN' :: MT3D_processes_fin
-   
+
+      use waq_omi_interface
+
       implicit none
 
-      integer, external       :: ModelFinalize
       integer                 :: success_int
 
       success_int = ModelFinalize()

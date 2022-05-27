@@ -646,6 +646,9 @@ end subroutine GetTimeParameters
 
 end module waq_omi_priv
 
+
+module waq_omi_api
+contains
 integer function Count_Values(partype, parid, loctype, locid)
     !DEC$ ATTRIBUTES DLLEXPORT::Count_Values
     !DEC$ ATTRIBUTES DECORATE, ALIAS : 'COUNT_VALUES' :: Count_Values
@@ -837,7 +840,6 @@ integer function Get_Values(partype, parid, loctype, locid, number, values)
     logical                          :: success
     real(kind=kind(1.0d0))           :: currentTime
     integer                          :: dummy
-    integer, external                :: GetWQCurrentTime
 
     allocate( r_values(number) )
 
@@ -1241,3 +1243,4 @@ integer function GetWQNextTime( nextTime )
 
 end function GetWQNextTime
 
+end module waq_omi_api

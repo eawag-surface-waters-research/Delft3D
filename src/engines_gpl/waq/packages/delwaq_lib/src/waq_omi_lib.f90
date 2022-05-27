@@ -118,7 +118,9 @@ end module waq_omi_utils
 !
 ! interface routines
 !
+module waq_omi_interface
 
+contains
 !> Return the last known message
 logical function GetLastMessage( level, text )
 
@@ -683,7 +685,6 @@ logical function DefineWQSchematisation(number_segments, pointer_table, number_e
     integer, intent(in)                  :: number_segments
     integer, dimension(4)                :: number_exchanges
     integer, dimension(4,1:sum(number_exchanges)), intent(in)  :: pointer_table
-    logical, external                    :: DefineWQSchematisationX
 
     integer                              :: number_layers
     integer                              :: number_segments_per_layer
@@ -810,7 +811,6 @@ logical function SetProcessDefinition(mode, procdef_file)
 
     character(len=*)                 :: mode
     character(len=*)                 :: procdef_file
-    logical, external                :: SetProcessDefinitionCore
 
     SetProcessDefinition = SetProcessDefinitionCore(mode, procdef_file, ' ' )
 
@@ -826,7 +826,6 @@ logical function SetProcessDefinitionX(mode, procdef_file, sfrac_file )
     character(len=*)                 :: mode
     character(len=*)                 :: procdef_file
     character(len=*)                 :: sfrac_file
-    logical, external                :: SetProcessDefinitionCore
 
     SetProcessDefinitionX = SetProcessDefinitionCore(mode, procdef_file, sfrac_file )
 
@@ -891,7 +890,6 @@ logical function DefineWQProcesses(substance, number_substances, number_transpor
     character(len=*), dimension(number_processes)         :: process
 
     integer, dimension(number_substances)                 :: substance_mult
-    logical, external                                     :: DefineWQProcessesCore
 
     substance_mult = 1
 
@@ -926,7 +924,6 @@ logical function DefineWQProcessesX(substance, substance_mult, &
     integer, intent(in)              :: number_fields
     character(len=*), dimension(*)   :: process
     integer, intent(in)              :: number_processes
-    logical, external                :: DefineWQProcessesCore
 
     DefineWQProcessesX = DefineWQProcessesCore(substance, substance_mult, &
                                    number_substances, number_transported, &
@@ -1562,7 +1559,7 @@ integer function WriteRestartFileDefaultName ()
     implicit none
 
     character (len=255) lcharmap
-    integer    i, k, ierr, found, WriteRestartFile
+    integer    i, k, ierr, found
 
     lcharmap = lchar(23)
     found = 0
@@ -2363,3 +2360,4 @@ integer function ModelInitialize_By_Id( runid_given )
     ModelInitialize_By_Id = 0
 
 end function ModelInitialize_By_Id
+end module waq_omi_interface

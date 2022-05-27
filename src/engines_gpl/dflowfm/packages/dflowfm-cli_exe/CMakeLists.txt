@@ -167,9 +167,6 @@ if(WIN32)
     set_target_properties(${executable_name} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/x64/Debug)   
 endif(WIN32)
 
-# Set additional compilation properties, specific for Debug mode
-target_compile_options(${executable_name} PRIVATE "$<$<CONFIG:Debug>:${check_bounds_flag}>")
-target_compile_options(${executable_name} PRIVATE "$<$<CONFIG:Debug>:${check_pointer}>")
 
 # Define additional compilation flags
 set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/${src_path}/net_main.F90

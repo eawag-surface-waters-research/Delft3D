@@ -12,7 +12,7 @@
 				<Tool Name="VFCustomBuildTool"/>
 				<Tool Name="VFPreLinkEventTool"/>
 				<Tool Name="VFPreBuildEventTool" CommandLine="call ..\..\..\..\scripts_lgpl\win32\update_version.cmd ..\..\..\..\engines_gpl\waq\version\version_number.rc ..\..\..\..\engines_gpl\waq\ ..\..\..\..\engines_gpl\waq\version\version_number.ini --Onlyifmissing&#xA;call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\src\delwaq_version.F90 ..\..\..\..\engines_gpl\waq\ ..\..\..\..\engines_gpl\waq\version\version_number.ini --Onlyifmissing"/>
-				<Tool Name="VFPostBuildEventTool" CommandLine="..\..\..\..\scripts_lgpl\win32\oss-install_debug.cmd delwaq_dll"/>
+				<Tool Name="VFPostBuildEventTool" CommandLine="..\..\..\..\scripts_lgpl\win32\oss-install_debug.cmd delwaq_lib"/>
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
 		<Configuration Name="Release|Win32" OutputDirectory="../../bin/$(ConfigurationName)/" ConfigurationType="typeDynamicLibrary">
 				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" AdditionalIncludeDirectories="..\..\include;..\..\..\..\third_party_open\openda\core\native\include" FixedFormLineLength="fixedLength132" ModulePath="$(OutDir)\" RuntimeLibrary="rtMultiThreadedDLL"/>
@@ -22,7 +22,7 @@
 				<Tool Name="VFCustomBuildTool"/>
 				<Tool Name="VFPreLinkEventTool"/>
 				<Tool Name="VFPreBuildEventTool" CommandLine="call ..\..\..\..\scripts_lgpl\win32\update_version.cmd ..\..\..\..\engines_gpl\waq\version\version_number.rc ..\..\..\..\engines_gpl\waq\ ..\..\..\..\engines_gpl\waq\version\version_number.ini --Onlyifmissing&#xA;call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\src\delwaq_version.F90 ..\..\..\..\engines_gpl\waq\ ..\..\..\..\engines_gpl\waq\version\version_number.ini --Onlyifmissing"/>
-				<Tool Name="VFPostBuildEventTool" CommandLine="..\..\..\..\scripts_lgpl\win32\oss-install.cmd delwaq_dll bin &quot;$(IFORT_COMPILER18)redist\ia32\compiler\&quot;"/>
+				<Tool Name="VFPostBuildEventTool" CommandLine="..\..\..\..\scripts_lgpl\win32\oss-install.cmd delwaq_lib bin &quot;$(IFORT_COMPILER18)redist\ia32\compiler\&quot;"/>
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
 		<Configuration Name="Debug|x64" OutputDirectory="$(ProjectDir)..\..\bin\$(PlatformName)\$(ConfigurationName)\" ConfigurationType="typeDynamicLibrary">
 				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" AdditionalIncludeDirectories="..\..\include;..\..\..\..\third_party_open\openda\core\native\include" FixedFormLineLength="fixedLength132" WarnInterfaces="true" ModulePath="$(OutDir)\" Traceback="true" BoundsCheck="true" RuntimeLibrary="rtMultiThreadedDebugDLL" Interfaces="true"/>
@@ -32,7 +32,7 @@
 				<Tool Name="VFCustomBuildTool"/>
 				<Tool Name="VFPreLinkEventTool"/>
 				<Tool Name="VFPreBuildEventTool" CommandLine="call ..\..\..\..\scripts_lgpl\win32\update_version.cmd ..\..\..\..\engines_gpl\waq\version\version_number.rc ..\..\..\..\engines_gpl\waq\ ..\..\..\..\engines_gpl\waq\version\version_number.ini --Onlyifmissing&#xA;call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\src\delwaq_version.F90 ..\..\..\..\engines_gpl\waq\ ..\..\..\..\engines_gpl\waq\version\version_number.ini --Onlyifmissing"/>
-				<Tool Name="VFPostBuildEventTool" CommandLine="..\..\..\..\scripts_lgpl\win64\oss-install_debug_x64.cmd delwaq_dll"/>
+				<Tool Name="VFPostBuildEventTool" CommandLine="..\..\..\..\scripts_lgpl\win64\oss-install_debug_x64.cmd delwaq_lib"/>
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
 		<Configuration Name="Release|x64" OutputDirectory="$(ProjectDir)..\..\bin\$(PlatformName)\$(ConfigurationName)\" ConfigurationType="typeDynamicLibrary">
 				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" AdditionalIncludeDirectories="..\..\include;..\..\..\..\third_party_open\openda\core\native\include" FixedFormLineLength="fixedLength132" ModulePath="$(OutDir)\" RuntimeLibrary="rtMultiThreadedDLL"/>
@@ -42,7 +42,7 @@
 				<Tool Name="VFCustomBuildTool"/>
 				<Tool Name="VFPreLinkEventTool"/>
 				<Tool Name="VFPreBuildEventTool" CommandLine="call ..\..\..\..\scripts_lgpl\win32\update_version.cmd ..\..\..\..\engines_gpl\waq\version\version_number.rc ..\..\..\..\engines_gpl\waq\ ..\..\..\..\engines_gpl\waq\version\version_number.ini --Onlyifmissing&#xA;call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\src\delwaq_version.F90 ..\..\..\..\engines_gpl\waq\ ..\..\..\..\engines_gpl\waq\version\version_number.ini --Onlyifmissing"/>
-				<Tool Name="VFPostBuildEventTool" CommandLine="..\..\..\..\scripts_lgpl\win64\oss-install_x64.cmd delwaq_dll bin &quot;$(IFORT_COMPILER18)redist\intel64\compiler\&quot;"/>
+				<Tool Name="VFPostBuildEventTool" CommandLine="..\..\..\..\scripts_lgpl\win64\oss-install_x64.cmd delwaq_lib bin &quot;$(IFORT_COMPILER18)redist\intel64\compiler\&quot;"/>
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration></Configurations>
 	<Files>
 		<Filter Name="Header Files" Filter="fi;fd"/>

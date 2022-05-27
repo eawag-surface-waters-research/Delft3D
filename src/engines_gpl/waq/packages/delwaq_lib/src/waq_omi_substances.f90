@@ -573,10 +573,10 @@ end subroutine readSubstancesFile
 !> Register the substances, process parameters and processes with DELWAQ
 subroutine registerSubstances( success )
 
+    use waq_omi_interface
+
     logical, intent(inout) :: success !< Whether this step was successful or not
 
-    logical, external                            :: DefineWQProcesses
-    logical, external                            :: SetCurrentValueScalarRun
 
     !
     ! The information in the array "item" gets distributed

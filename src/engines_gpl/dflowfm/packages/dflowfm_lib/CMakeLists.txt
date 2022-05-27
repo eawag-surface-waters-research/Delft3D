@@ -151,9 +151,6 @@ if(WIN32)
     target_compile_definitions(${library_name} PRIVATE "WIN32;HAVE_DISPLAY=0;HAVE_METIS;HAVE_POLYPACK;HAVE_MPI;HAVE_PETSC;HAVE_OPENGL")  
 endif(WIN32)
 
-# Set additional compilation properties, specific for Debug mode
-target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${check_bounds_flag}>")
-target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${check_pointer}>")
     
 # Define additional compilation flags
 set_source_files_properties(${source}

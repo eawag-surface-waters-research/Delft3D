@@ -111,9 +111,6 @@ source_group(Resources FILES    ${rc_version_file}
                                 ${icon_file})
 set_target_properties (${executable_name} PROPERTIES FOLDER engines_gpl/wave)
 
-# Set additional compilation properties, specific for Debug mode
-target_compile_options(${executable_name} PRIVATE "$<$<CONFIG:Debug>:${check_bounds_flag}>")
-target_compile_options(${executable_name} PRIVATE "$<$<CONFIG:Debug>:${check_pointer}>")
 
 # Change the name of the target library to wave.exe
 set_target_properties (${executable_name} PROPERTIES OUTPUT_NAME wave_exe)

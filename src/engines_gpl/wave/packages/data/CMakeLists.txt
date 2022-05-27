@@ -59,10 +59,6 @@ endif(UNIX)
 set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/src/wave_mpi.F90
                             PROPERTIES COMPILE_OPTIONS "${file_preprocessor_flag}")
 
-# Set additional compilation properties, specific for Debug mode
-target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${check_bounds_flag}>")
-target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${check_pointer}>")
-
 # Define how the files should be structured within Visual Studio
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${source_files})
 set_target_properties (${library_name} PROPERTIES FOLDER engines_gpl/wave)

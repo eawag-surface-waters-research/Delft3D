@@ -27,8 +27,8 @@ if(NOT TARGET waq_io)
     add_subdirectory(${checkout_src_root}/${waq_io_module} waq_io)
 endif()
 
-if(NOT TARGET delwaq)
-    add_subdirectory(${checkout_src_root}/${delwaq_module} delwaq)
+if(NOT TARGET delwaq_lib)
+    add_subdirectory(${checkout_src_root}/${delwaq_lib_module} delwaq_lib)
 endif()
 
 if(NOT TARGET delwaq1)
