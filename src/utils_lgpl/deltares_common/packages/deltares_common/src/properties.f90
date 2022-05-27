@@ -70,11 +70,11 @@ module properties
        module procedure prop_set_double
        module procedure prop_set_doubles
     end interface
-    
+
     interface get_version_number
        module procedure prop_get_version_number
     end interface
-    
+
    contains
 
 !> Loads an .ini file into a tree structure.
@@ -101,7 +101,7 @@ subroutine readIniFile(filename, ini_ptr, filetypename, errmsg, istat)
     ! Construct + fill tree
     call tree_create(trim(filename), ini_ptr)
     call prop_file('ini',trim(filename), ini_ptr, istat_)
-    
+
     ! Handle possible error
     if (istat_ /= 0 .and. present(errmsg)) then
        write(errmsg, '(a," ''",a,"'' not found. Code: ",i0)') trim(filetypename), trim(filename), istat_
@@ -113,24 +113,34 @@ subroutine readIniFile(filename, ini_ptr, filetypename, errmsg, istat)
 end subroutine readIniFile
 
 
-subroutine prop_file(filetype, filename , tree, error)
+subroutine prop_file(filetype, filename , tree, error, errmsg)
     use tree_structures
     !
     implicit none
     !
     ! Parameters
     !
-    character(*), intent(in)  :: filetype
-    character(*), intent(in)  :: filename
-    type(tree_data), pointer  :: tree
-    integer     , intent(out) :: error
+    character(*), intent(in)                :: filetype
+    character(*), intent(in)                :: filename
+    type(tree_data), pointer                :: tree
+    integer     , intent(out)               :: error
+    character(len=*), intent(out), optional :: errmsg
     !
     ! Local variables
     !
-    character(10) :: ftype
+    integer        :: lu
+    character(10)  :: ftype
 
-    ftype = str_tolower(filetype)
-    error = 0
+    ftype         = str_tolower(filetype)
+    error         = 0
+
+    ! Get the error message first if requested - keeps the interface for the individual routines the same as before
+    if ( present(errmsg) ) then
+       errmsg = ' '
+       open(newunit=lu,file=filename,iostat=error,status='old', iomsg = errmsg)
+       close(lu)
+    endif
+
     select case (trim(ftype))
     case ('ini')
        call prop_inifile(filename, tree, error)
@@ -138,6 +148,9 @@ subroutine prop_file(filetype, filename , tree, error)
        call prop_tekalfile(filename, tree, error)
     case default
        write(*,*)'file type ',filetype,' not supported'
+       if ( present(errmsg) ) then
+          errmsg = 'file type ' // trim(filetype) // ' not supported'
+       endif
        error = 5
     endselect
 end subroutine prop_file
@@ -263,7 +276,7 @@ subroutine prop_inifile_pointer(lu, tree)
 
         do ! Check on line continuation
             call GetLine(lu, lineconttemp, eof)
-            if (index(lineconttemp, 'END PARAMETERS') == 1) then 
+            if (index(lineconttemp, 'END PARAMETERS') == 1) then
                eof = -1
                return ! stop reading from file
             endif
@@ -2011,18 +2024,18 @@ end subroutine count_occurrences
  end subroutine prop_get_strings
 
  !> Returns the version number found in the ini file default location is "[General], fileVersion".
- !! FileVersion should contain <<major>>.<<minor>><<additional info>>. 
+ !! FileVersion should contain <<major>>.<<minor>><<additional info>>.
  !! SUCCESS is set to false, when no '.' is found or when the key cannot be found.
  subroutine prop_get_version_number(tree, chapterin, keyin, major, minor, versionstring, success)
     use MessageHandling
-    
+
     implicit none
     !
     ! Parameters
     !
     type(tree_data), pointer, intent(in   )                 :: tree           !< pointer to treedata structure of input
-    character(*)            , intent(in   ), optional       :: chapterin      !< chapter for the fileVersion, if not present 'General' is used 
-    character(*)            , intent(in   ), optional       :: keyin          !< key for fileVersion, if not present 'fileVersion' is used 
+    character(*)            , intent(in   ), optional       :: chapterin      !< chapter for the fileVersion, if not present 'General' is used
+    character(*)            , intent(in   ), optional       :: keyin          !< key for fileVersion, if not present 'fileVersion' is used
     integer                 , intent(  out), optional       :: major          !< Major number of the fileVersion
     integer                 , intent(  out), optional       :: minor          !< Minor number of the fileVersion
     character(len=*)        , intent(  out), optional       :: versionstring  !< Version string
@@ -2045,29 +2058,29 @@ end subroutine count_occurrences
     else
        keyin_ = 'fileVersion'
     endif
-    
+
     call prop_get_string(tree, chapterin_, keyin_, string, success)
     if (.not. success) then
        return
     endif
-    
+
     if (present(versionstring)) then
        versionstring= string
     endif
-   
+
     idot = index(string, '.')
     if (idot==0) then
        success = .false.
        return
     endif
-       
+
     if (present(major)) then
        read(string(1:idot-1), *) major
     endif
     if (present(minor)) then
        iend = idot
        isnum = .true.
-       do while (isnum) 
+       do while (isnum)
           if (iend+1 > len(string)) then
              isnum = .false.
           elseif (scan(string(iend+1:iend+1),'0123456789') /= 0) then
@@ -2076,7 +2089,7 @@ end subroutine count_occurrences
              isnum = .false.
           endif
        enddo
-       
+
        read(string(idot+1:iend), *) minor
     endif
  end subroutine prop_get_version_number

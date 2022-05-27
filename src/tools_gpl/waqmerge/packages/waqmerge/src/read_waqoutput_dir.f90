@@ -28,26 +28,27 @@
       ! global declarations
 
       use hydmod                   ! module contains everything for the hydrodynamics
-      use properties                              
+      use properties
       implicit none
 
-      ! declaration of the arguments     
+      ! declaration of the arguments
       type(t_hyd), intent(in)               :: hyd                  ! description of the overall hydrodynamics
       type(tree_data) , pointer             :: mdu_ptr              ! tree for mdu file
-      
-      ! local declarations   
+
+      ! local declarations
       character(len=256), intent(out)       :: waq_output_dir       ! WAQ directory
       logical                               :: waq_output_dir_found ! WAQ directory specified
       integer                               :: istat                ! reading parameter
+      character(len=500)                    :: error_message
 
-      
+
       waq_output_dir = ''
 
       nullify(mdu_ptr)
       call tree_create('waqmerge-input', mdu_ptr)
 
       istat = 0
-      call prop_file('ini',trim(hyd%file_hyd%name)//'.mdu', mdu_ptr, istat)
+      call prop_file('ini',trim(hyd%file_hyd%name)//'.mdu', mdu_ptr, istat, error_message)
       if (istat /= 0) then
          select case (istat)
             case(1)
@@ -57,14 +58,18 @@
             case default
                write(*     ,'(a,a)'), '*** ERROR Read error from file: '//trim(hyd%file_hyd%name)//'.mdu'
          endselect
+         write(*,'(a,a)'), '*** Error message: ', trim(error_message)
+
       endif
       call prop_get_string(mdu_ptr, 'output', 'WAQOutputDir', waq_output_dir,waq_output_dir_found)
-      
 
-      
+
+
       if (.not. waq_output_dir_found) then
          waq_output_dir = 'DFM_DELWAQ_'//trim(hyd%file_hyd%name)
       end if
+
+      write(*,'(a,a)'), '*** Directory containing the flow files: ', trim(waq_output_dir)
 
       return
     end subroutine

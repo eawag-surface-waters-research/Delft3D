@@ -76,14 +76,14 @@ program waqmerge
 
       if (command_argument_count() .gt. 0) then
          call get_command_argument(1,hyd%file_hyd%name)
-         
+
          mdu_exist = .false.
          inquire(file = trim(hyd%file_hyd%name),exist = mdu_exist)
          if (.not. mdu_exist) then
             write(*     ,'(a,a)'), '*** ERROR File: '//trim(hyd%file_hyd%name)//' does not exist'
             call srstop(1)
          endif
-         
+
          ! report
          call dhfext(hyd%file_hyd%name,filext, extpos, extlen)
          hyd%file_hyd%name = hyd%file_hyd%name(1:extpos-1)
@@ -107,7 +107,7 @@ program waqmerge
          write(lunrep ,'(/a)') ' Execution will stop '
          write(*      ,'(/a)') ' Execution will stop '
          stop (1)
-      endif          
+      endif
       call setmlu(lunrep)
 
       ! execution start
@@ -121,7 +121,7 @@ program waqmerge
       write (*,*)
 
 
-      call read_waqoutput_dir(hyd, waq_output_dir)   
+      call read_waqoutput_dir(hyd, waq_output_dir)
 
 
 
@@ -132,7 +132,12 @@ program waqmerge
          write(sdnm, '(i4.4)') n_domain
          domain_hydname = trim(waq_output_dir)//'/'//trim(hyd%file_hyd%name)//'_'//sdnm//'.hyd'
          inquire(file=domain_hydname,exist=exists)
-         if ( exists ) n_domain = n_domain + 1
+         if ( exists ) then
+            write(*,'(2a)') 'Found: ', trim(domain_hydname)
+            n_domain = n_domain + 1
+         else
+            write(*,'(2a)') 'Last domain found'
+         endif
       end do
       write (msgbuf, '(a,a,a,i4)') 'Number of domains found for project ''',trim(hyd%file_hyd%name),''':', n_domain
       call msg_flush()
@@ -176,7 +181,7 @@ program waqmerge
                write(lunrep,'(a)') ' error: no waqgeom file found for domain'
                call srstop(1)
             endif
-         endif               
+         endif
          call read_hyd_init(domain_hyd)
          call reallocP(domain_hyd%iglobal_link, domain_hyd%noq1, fill=0, keepExisting=.false.)
       enddo
@@ -203,7 +208,7 @@ program waqmerge
       else
          call write_waqgeom(hyd, version)
 
-!        also write hyd file with UGRID 1.0 _waqgeom         
+!        also write hyd file with UGRID 1.0 _waqgeom
 !         len_hyd = len(trim(hyd%file_hyd%name))
 !         new_hyd = hyd%file_hyd%name(1:len_hyd-4)//'_new'//hyd%file_hyd%name(len_hyd-3:len_hyd)
 !         hyd%file_hyd%name = new_hyd
