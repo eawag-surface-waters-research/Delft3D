@@ -201,7 +201,7 @@
       INTEGER                  :: ILUN
       INTEGER                  :: IERRD
       INTEGER                  :: K
-      LOGICAL                  :: NOLIC
+
 !
       IF ( INIT ) THEN
          call timini ( )
@@ -332,9 +332,9 @@
             IF ( INIT2 ) THEN
                INIT2 = .FALSE.
                IF ( NOQ3 .GT. 0 ) THEN
-                  CALL startup_screen (LUN(19),.TRUE.,NOLIC)
+                  CALL startup_screen (LUN(19),.TRUE.)
                ELSE
-                  CALL startup_screen (LUN(19),.FALSE.,NOLIC)
+                  CALL startup_screen (LUN(19),.FALSE.)
                ENDIF
             ENDIF
 
@@ -344,12 +344,6 @@
                WRITE(*,*)
             ENDIF
 
-            if ( nolic .and. noseg > 150 ) then
-               write(*,'(//a)') 'Error: Authorisation problem'
-               write(*,'(a)')   '       No valid license, so the number
-     & of segments is limited to 150'
-               call srstop(1)
-            endif
          endif
 !
 !        end of reading master proces

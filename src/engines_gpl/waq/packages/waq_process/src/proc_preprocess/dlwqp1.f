@@ -177,7 +177,7 @@
       character*80   line
       character*256  pdffil
       character*10   config
-      logical        lfound, laswi , swi_nopro, l3dmod, nolic
+      logical        lfound, laswi , swi_nopro, l3dmod
       integer        blm_act                       ! index of ACTIVE_BLOOM_P
 
       ! charon coupling
@@ -269,9 +269,6 @@
       call dhopnf ( lun(35) , lchar(35), 35    , 1     , ierr2 )
       lurep = lun(35)
       call setmlu ( lurep )
-      if (nolic .and. noseg>150) then
-         ! error and stop
-      endif
       call monsys(line,11)
       line = ' '
       call monsys(line,1)

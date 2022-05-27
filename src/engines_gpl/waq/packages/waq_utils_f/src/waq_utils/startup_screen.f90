@@ -21,7 +21,7 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-      subroutine startup_screen(lunrep,l3dmod,nolic)
+      subroutine startup_screen(lunrep,l3dmod)
 
 !>\File
 !>        Write intro to screen and report file
@@ -33,7 +33,6 @@
 
       integer      , intent(in   ) :: lunrep   !< Unit number report file
       logical      , intent(in   ) :: l3dmod   !< Check 3D feature or not
-      logical      , intent(  out) :: nolic    !< No license found
 
       ! local declarations
 
@@ -60,7 +59,6 @@
       integer(4) ithndl /0/
       if ( timon ) call timstrt( "startup_screen", ithndl )
 
-      nolic =.false.
       if ( first ) then
          first = .false.
          ! set idstr

@@ -35,7 +35,7 @@ subroutine delwaq1_startup_screen()
     !
     !     unscramble name user
     !
-    call startup_screen(lunrep,.false.,nolic)
+    call startup_screen(lunrep,.false.)
     write(*,*)
     write(*,'(A9,A)') '  runid: ',trim(runid)
     write(*,*)

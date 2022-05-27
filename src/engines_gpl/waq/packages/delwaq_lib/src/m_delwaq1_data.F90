@@ -113,7 +113,6 @@ module m_delwaq1_data
     !
     !     help variables
     !
-    logical                        :: nolic                    ! No valid license?
     logical                        :: lfound                   ! help variable indicating if command line argument is found
     character(len=20)              :: rundat                   ! execution date-time string
     character                      :: cdummy

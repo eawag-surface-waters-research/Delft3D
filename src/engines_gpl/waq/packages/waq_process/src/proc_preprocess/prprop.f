@@ -90,7 +90,6 @@
 !
 !     license stuff
 !
-      logical       nolic
       integer       iconf
       integer(4)                :: ithndl = 0      ! handle for performance timer
       if (timon) call timstrt( "prprop", ithndl )
@@ -104,14 +103,11 @@
 !     get license infromation on configurations, removed always license
 !
       liconf = 1
-      nolic  = .false.
 !
 !     check licence for configuration if not in active only mode
-!     (if no license - nolic = true - use the "active only" mode
+!     MDK 27-05-2022: this is a remnant of an old licensing system. To be removed
 !
-      if ( nolic ) then
-         laswi = .true.
-      endif
+      laswi = .true.
 
       if ( .not. laswi ) then
          call zoek   ( config, nconf , confid, 10    , iconf  )

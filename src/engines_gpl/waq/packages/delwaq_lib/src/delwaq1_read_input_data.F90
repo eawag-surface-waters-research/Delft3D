@@ -97,11 +97,6 @@ subroutine delwaq1_read_input_data()
                   ioutpt  , gridps  , syname  , ierr    , iwar    , &
                   has_hydfile       , nexch   )
 
-    if ( nolic .and. noseg > 150 ) then
-        write(*,'(//a)') 'Error: Authorisation problem'
-        write(*,'(a)')   '       No valid license, so the number of segments is limited to 150'
-        call srstop(1)
-    endif
 
     if ( .not. associated(nsegdmp)  ) allocate(nsegdmp(1))
     if ( .not. associated(isegdmp)  ) allocate(isegdmp(1))

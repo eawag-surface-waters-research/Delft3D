@@ -152,7 +152,7 @@
       character*80   idstr
       character*20   rundat
       character*10   config
-      logical        lfound, laswi , swi_nopro, l3dmod, nolic
+      logical        lfound, laswi , swi_nopro, l3dmod
       integer        blm_act                       ! index of ACTIVE_BLOOM_P
 
       ! information
