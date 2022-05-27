@@ -56,8 +56,6 @@ subroutine delwaq2_main_init(dlwqd, itota, itoti, itotc, init, action, argc, arg
 
       call dhstore_command( argv )
 
-      call avundf
-
       itota=0
       itoti=0
       itotc=0

@@ -3577,8 +3577,8 @@ src/engines_gpl/waq/packages/delwaq_lib/src/delwaq1.F90 -text
 src/engines_gpl/waq/packages/delwaq_lib/src/delwaq1_allocate_workspace.F90 -text
 src/engines_gpl/waq/packages/delwaq_lib/src/delwaq1_close_lunfiles.F90 -text
 src/engines_gpl/waq/packages/delwaq_lib/src/delwaq1_init.F90 -text
-src/engines_gpl/waq/packages/delwaq_lib/src/delwaq1_read_user_data.F90 -text
-src/engines_gpl/waq/packages/delwaq_lib/src/delwaq1_unlock_username.F90 -text
+src/engines_gpl/waq/packages/delwaq_lib/src/delwaq1_read_input_data.F90 -text
+src/engines_gpl/waq/packages/delwaq_lib/src/delwaq1_startup_screen.F90 -text
 src/engines_gpl/waq/packages/delwaq_lib/src/delwaq1_write_messages.F90 -text
 src/engines_gpl/waq/packages/delwaq_lib/src/delwaq2.F90 -text
 src/engines_gpl/waq/packages/delwaq_lib/src/delwaq2_global_data.f90 -text
@@ -4331,8 +4331,6 @@ src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/DHSTOP.F -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/DHTIME.F -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/Makefile.am -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/SRSTOP.F -text
-src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/avundf.f -text
-src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/avundf_linux.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/cnvper.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/cnvtim.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/computeRefday.f90 -text
@@ -4408,9 +4406,9 @@ src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/rdvers.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/rdwrk3.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/rdwrk4.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/reptim.f -text
+src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/startup_screen.f90 -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/stasub.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/strip.f -text
-src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/unlock.f90 -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/usedcp.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/wapdef.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/waqmem.f90 -text

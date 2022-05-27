@@ -34,7 +34,6 @@ module m_delwaq1_data
     use timers       !   performance timers
     use dhcommand
 
-    use D00SUB
     use ProcesSet
     use Workspace
     use Rd_token

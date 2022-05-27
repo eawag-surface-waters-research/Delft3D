@@ -37,25 +37,11 @@ subroutine delwaq1(argc, argv, errorcode)
 !
 !     SUBROUTINES CALLED :
 !                         delwaq1_init, initializes timer and values
-!                         delwaq1_unlock_username
+!                         delwaq1_startup_screen
 !                         delwaq1_allocate_workspace
 !                         delwaq1_read_user_data
 !                         delwaq1_write_messages
 !                         delwaq1_close_lunfiles
-
-    use Grids        !   for the storage of contraction grids
-    use dlwq_data    !   for definition and storage of data
-    use Output       !   for the output names and pointers
-    use timers       !   performance timers
-    use dhcommand
-    use m_delwaq1_data
-
-    use D00SUB
-    use ProcesSet
-    use Workspace
-    use Rd_token
-
-
       
     implicit none
 
@@ -65,9 +51,9 @@ subroutine delwaq1(argc, argv, errorcode)
 
 
     call delwaq1_init(argc, argv)
-    call delwaq1_unlock_username()
+    call delwaq1_startup_screen()
     call delwaq1_allocate_workspace(argc, argv, errorcode)
-    call delwaq1_read_user_data()
+    call delwaq1_read_input_data()
     call delwaq1_write_messages()
     call delwaq1_close_lunfiles()
 

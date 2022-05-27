@@ -21,7 +21,7 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-      subroutine unlock(lunrep,l3dmod,nolic)
+      subroutine startup_screen(lunrep,l3dmod,nolic)
 
 !>\File
 !>        Write intro to screen and report file
@@ -58,7 +58,7 @@
       '+-----------------------------------------------------------------------+'/
      
       integer(4) ithndl /0/
-      if ( timon ) call timstrt( "unlock", ithndl )
+      if ( timon ) call timstrt( "startup_screen", ithndl )
 
       nolic =.false.
       if ( first ) then
@@ -77,5 +77,5 @@
       write (lunrep,'(2a)') ' Execution start: ',rundat
 
       if ( timon ) call timstop( ithndl )
-      return
-      end
+
+      end subroutine startup_screen

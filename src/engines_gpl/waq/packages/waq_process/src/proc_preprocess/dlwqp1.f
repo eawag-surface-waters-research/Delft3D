@@ -269,7 +269,6 @@
       call dhopnf ( lun(35) , lchar(35), 35    , 1     , ierr2 )
       lurep = lun(35)
       call setmlu ( lurep )
-      call unlock ( lurep ,l3dmod ,nolic)
       if (nolic .and. noseg>150) then
          ! error and stop
       endif

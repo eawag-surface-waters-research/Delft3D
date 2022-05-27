@@ -332,9 +332,9 @@
             IF ( INIT2 ) THEN
                INIT2 = .FALSE.
                IF ( NOQ3 .GT. 0 ) THEN
-                  CALL UNLOCK (LUN(19),.TRUE.,NOLIC)
+                  CALL startup_screen (LUN(19),.TRUE.,NOLIC)
                ELSE
-                  CALL UNLOCK (LUN(19),.FALSE.,NOLIC)
+                  CALL startup_screen (LUN(19),.FALSE.,NOLIC)
                ENDIF
             ENDIF
 

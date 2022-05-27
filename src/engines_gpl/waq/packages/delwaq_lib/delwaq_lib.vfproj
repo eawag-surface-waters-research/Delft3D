@@ -57,7 +57,7 @@
 		<File RelativePath=".\src\delwaq1_compute_space.F90"/>
 		<File RelativePath=".\src\delwaq1_init.F90"/>
 		<File RelativePath=".\src\delwaq1_read_user_data.F90"/>
-		<File RelativePath=".\src\delwaq1_unlock_username.F90"/>
+		<File RelativePath=".\src\delwaq1_startup_screen.F90"/>
 		<File RelativePath=".\src\delwaq1_write_messages.F90"/>
 		<File RelativePath=".\src\delwaq2.F90"/>
 		<File RelativePath=".\src\delwaq2_main_init.F90"/>

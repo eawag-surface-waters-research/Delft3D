@@ -21,27 +21,22 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-! --------------------------------------------------------------------------
-! -- Linux version: completely dummy! --
-! Routine ad hoc:
-! Avoid a nasty problem with underflows on Windows 95/98.
-!
-! Usage:
-! Call this routine once early in the program, for instance just after
-! start-up.
-!
-! Note:
-! It contains statements specific for Digital/Compaq Visual Fortran.
-! This means that under UNIX you will need to comment out most of the
-! code, an empty routine will suffice.
-!
-! Note:
-! It even contains some extensions defined by Digital Visual Fortran
-! --------------------------------------------------------------------------
-!
-      SUBROUTINE AVUNDF
-!
-! ---------- That was all. Return
-!
-      RETURN
-      END
+
+!>\file
+!>                    delwaq1_startup_screen
+!     SUBROUTINES CALLED :
+!                         *startup_screen, writes startup screen
+
+subroutine delwaq1_startup_screen()
+    use m_delwaq1_data
+      
+    implicit none
+    
+    !
+    !     unscramble name user
+    !
+    call startup_screen(lunrep,.false.,nolic)
+    write(*,*)
+    write(*,'(A9,A)') '  runid: ',trim(runid)
+    write(*,*)
+end subroutine delwaq1_startup_screen

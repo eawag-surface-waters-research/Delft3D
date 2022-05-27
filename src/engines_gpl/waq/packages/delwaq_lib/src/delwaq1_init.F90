@@ -51,7 +51,6 @@ subroutine delwaq1_init(argc, argv)
         endif
     enddo
     if (timon) call timstrt( "delwaq1", ithndl )
-    call avundf
 
     !        initialise values
 

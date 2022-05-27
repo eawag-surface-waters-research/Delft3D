@@ -38,7 +38,7 @@
 !                          DLWQP1, proces pre-processor
 !                          SPACE , computes space needed
 
-subroutine delwaq1_read_user_data()
+subroutine delwaq1_read_input_data()
     use m_delwaq1_data
       
     implicit none
@@ -188,4 +188,4 @@ subroutine delwaq1_read_user_data()
     deallocate(imultp)
     
     
-end subroutine delwaq1_read_user_data
+end subroutine delwaq1_read_input_data

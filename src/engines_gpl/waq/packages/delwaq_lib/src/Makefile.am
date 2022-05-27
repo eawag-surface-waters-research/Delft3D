@@ -39,9 +39,9 @@ libdelwaq_la_SOURCES = \
        getidentification.F90 \
        delwaq1.F90 \
        delwaq1_init.F90 \
-       delwaq1_unlock_username.F90 \
+       delwaq1_startup_screen.F90 \
        delwaq1_allocate_workspace.F90 \
-       delwaq1_read_user_data.F90 \
+       delwaq1_read_input_data.F90 \
        delwaq1_write_messages.F90 \
        delwaq1_close_lunfiles.F90 \
        delwaq2.F90 \

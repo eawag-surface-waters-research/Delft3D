@@ -31,8 +31,7 @@ libwaq_utils_la_SOURCES =  \
        dhcommand.f90 \
        DHGARG.F \
        SRSTOP.F \
-       unlock.f90 \
-       avundf_linux.f \
+       startup_screen.f90 \
        cnvper.f \
        cnvtim.f \
        d00sub.f \
