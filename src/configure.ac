@@ -623,8 +623,8 @@ engines_gpl/waq/packages/delwaq_lib_examples/delwaq2_stepwise/src/Makefile
 engines_gpl/waq/packages/delwaq_lib_examples/delwaq_dimr_test/src/Makefile
 engines_gpl/waq/packages/delwaq_lib_examples/unit_tests_waq/Makefile
 engines_gpl/waq/packages/delwaq_lib_examples/unit_tests_waq/src/Makefile
-engines_gpl/waq/packages/delwaq/Makefile
-engines_gpl/waq/packages/delwaq/src/Makefile
+engines_gpl/waq/packages/delwaq_lib/Makefile
+engines_gpl/waq/packages/delwaq_lib/src/Makefile
 engines_gpl/waq/packages/Makefile
 engines_gpl/waq/packages/waq_io/Makefile
 engines_gpl/waq/packages/waq_io/src/Makefile
