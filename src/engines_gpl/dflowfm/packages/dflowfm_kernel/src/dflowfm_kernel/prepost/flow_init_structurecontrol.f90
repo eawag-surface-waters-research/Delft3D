@@ -211,7 +211,7 @@ do i=1,network%sts%count
 
 end do
 
-call update_lin2str_admin(network, lnx)
+call update_lin2str_admin(network)
 
 ! UNST-3308: early counting of ndambreak was needed here, because of lftopol array, but must be redone later below as well.
 ndambreak = 0

@@ -979,8 +979,6 @@ endif
  call aerr('ucxu (lnkx)' , ierr , lnkx )  ; ucxu  = 0
  allocate ( ucyu (lnkx)  , stat = ierr)
  call aerr('ucyu (lnkx)' , ierr , lnkx )  ; ucxu  = 0
- allocate ( onlyWetLinks   (lnkx)  , stat = ierr)
- call aerr('onlyWetLinks   (lnkx)' , ierr , lnkx )  ; onlyWetLinks    = 0
  allocate ( hu   (lnkx)  , stat = ierr)
  call aerr('hu   (lnkx)' , ierr , lnkx )  ; hu    = 0
  allocate ( huvli(lnkx)  , stat =ierr )
