@@ -134,7 +134,7 @@ rem =================================
         set mode=quiet
     )
     
-     set "options=-vs:0 -ifort:0 -coverage:0 -prepareonly:0"
+  set "options=-vs:0 -ifort:0 -coverage: -prepareonly:"
 
   rem see: https://stackoverflow.com/questions/3973824/windows-bat-file-optional-argument-parsing answer 2.
   for %%O in (%options%) do for /f "tokens=1,* delims=:" %%A in ("%%O") do set "%%A=%%~B"
@@ -152,8 +152,11 @@ rem =================================
     shift /2
     goto :loop
   )
-  if NOT !-coverage! == 0 (
+  if !-coverage! == 1 (
   set coverage=1
+  )
+  if !-prepareonly! == 1 (
+  set prepareonly=1
   )
   goto :endproc
 
@@ -235,11 +238,6 @@ rem =================================
     if NOT !-ifort! == 0 (
     set ifort=!-ifort!
     echo overriding ifort with !-ifort!
-    )
-
-    if NOT !-prepareonly! == 0 (
-    set prepareonly=!-prepareonly!
-    echo overriding prepareonly with !-prepareonly!
     )
     goto :endproc
    
@@ -533,11 +531,11 @@ rem =======================
     echo "- dimr"
     echo "- tests"
     echo.
-    echo "[OPTIONS]: usage [OPTION] followed by value, space separated, in any order"
-    echo "-coverage: Instrument object files for code-coverage tool (codecov) Example: -coverage 1"
-    echo "-prepareonly: Only prepare solution, do not build the code. Example: -prepareonly 1"
-    echo "-vs: desired visual studio version. Example: -vs 2019
-    echo "-ifort: desired intel fortran compiler version. Example: -ifort 21
+    echo "[OPTIONS]: usage [OPTION], sometimes followed by a value, space separated, in any order"
+    echo "-coverage: Instrument object files for code-coverage tool (codecov) Example: -coverage"
+    echo "-prepareonly: Only prepare solution, do not build the code.         Example: -prepareonly"
+    echo "-vs: desired visual studio version.                                 Example: -vs 2019
+    echo "-ifort: desired intel fortran compiler version.                     Example: -ifort 21
     echo.
     echo "More info  : https://oss.deltares.nl/web/delft3d/source-code"
     echo "About CMake: https://svn.oss.deltares.nl/repos/delft3d/trunk/src/cmake/doc/README"
