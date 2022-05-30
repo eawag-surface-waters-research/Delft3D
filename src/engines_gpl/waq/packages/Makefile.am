@@ -7,6 +7,6 @@ SUBDIRS = \
 	wq_processes \
 	waq_plugin_wasteload \
 	waq_kernel \
-	delwaq \
+	delwaq_lib \
 	delwaq1 \
 	delwaq2 
