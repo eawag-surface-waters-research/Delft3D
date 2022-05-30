@@ -2637,8 +2637,8 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     end if
 
     call prop_set(prop_ptr, 'geometry', 'BedlevType',       ibedlevtyp, 'Bathymetry specification')
-    call prop_set(prop_ptr, 'geometry', ''          ,       ''        , '1: at cell centers (from BathymetryFile)')
-    call prop_set(prop_ptr, 'geometry', ''          ,       ''        , '2: at faces (from BathymetryFile)')
+    call prop_set(prop_ptr, 'geometry', ''          ,       ''        , '1: at cell centers (from Net/IniFieldFile)')
+    call prop_set(prop_ptr, 'geometry', ''          ,       ''        , '2: at faces (from IniFieldFile)')
     call prop_set(prop_ptr, 'geometry', ''          ,       ''        , '3: at nodes, face levels mean of node values')
     call prop_set(prop_ptr, 'geometry', ''          ,       ''        , '4: at nodes, face levels min. of node values')
     call prop_set(prop_ptr, 'geometry', ''          ,       ''        , '5: at nodes, face levels max. of node values')
