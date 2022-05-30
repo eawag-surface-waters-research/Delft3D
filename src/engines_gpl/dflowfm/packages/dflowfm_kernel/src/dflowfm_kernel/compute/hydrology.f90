@@ -80,7 +80,6 @@ module m_hydrology
          call realloc(HortonMaxInfCap, ndx, keepExisting = .false., fill = 0d0, stat = ierr)
          call realloc(HortonDecreaseRate, ndx, keepExisting = .false., fill = 0d0, stat = ierr)
          call realloc(HortonRecoveryRate, ndx, keepExisting = .false., fill = 0d0, stat = ierr)
-         call realloc(HortonStateTime, ndx, keepExisting = .false., fill = 0d0, stat = ierr)
          call realloc(HortonState,     ndx, keepExisting = .false., fill = HORTON_CAPSTAT_NOCHANGE, stat = ierr)
       end if
       
