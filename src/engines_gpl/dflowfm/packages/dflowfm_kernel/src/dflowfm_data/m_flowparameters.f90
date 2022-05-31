@@ -421,7 +421,7 @@
  double precision                  :: salmax                    !< filter if sal > maxsal
 
  integer                           :: jaupwindsrc               !< 1st-order upwind advection (1) or higher-order (0)
-
+ integer                           :: useIndirectionFlowLinks
  integer                           :: jadiffusiononbnd   = 1    !< 0 switches off diffusion on open boundaries 
 
  integer                           :: jajre                     !< 0: default, 1: sb
@@ -890,6 +890,7 @@ subroutine default_flowparameters()
     dparms = 0d0  ! parms-default
 
     jaupwindsrc = 1
+    useIndirectionFlowLinks = 0
     jalogsolverconvergence = 1
 
     jahisbal = 1

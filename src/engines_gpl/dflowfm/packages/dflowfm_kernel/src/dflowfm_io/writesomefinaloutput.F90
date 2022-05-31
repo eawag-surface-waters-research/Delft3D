@@ -239,6 +239,8 @@
  if (jawriteDetailedTimers > 0) then
     call timdump(trim(defaultFilename('timers')), .true.)
 
+    write(msgbuf, '(''Percentage of wet links = '', f6.2, '' %'')') 100d0*wetLinksFraction/wetLinksUpdate
+    call msg_flush()
     call system_clock(countstop, rate) ! Only to get the rate
 
     open(newunit=mout, file=trim(defaultFilename('timers')), access='append', action='write')

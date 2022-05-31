@@ -38,7 +38,7 @@
  use m_timer
  use unstruc_channel_flow
  use m_1d_structures
-
+ use timers
  implicit none
 
  integer          :: L0, L, k1, k2, k01, k02, LL, k, n, nn, km, n1, n2, Ld, kb, kt, ks, Lb, Lt, kmxLL, ng, istru
@@ -47,68 +47,42 @@
  double precision :: qwave
  type(t_structure), pointer :: pstru
  integer          :: ierror
+ integer, save :: handle = 0
 
  squ = 0d0 ; sqi = 0d0 ; qinbnd = 0d0 ; qoutbnd = 0d0
  ! u1  = 0d0 ; q1  = 0d0 ;  qa = 0d0
 
  if (kmx < 1) then ! original 2D coding              ! 1D2D
 
-    if ( jampi.eq.0 ) then
-       !$OMP PARALLEL DO           &
-       !$OMP PRIVATE(L,k1,k2)
-       do L = 1,lnx
-          if (hu(L) > 0) then
-             k1 = ln(1,L) ; k2 = ln(2,L)
-             u1(L) = ru(L) - fu(L)*( s1(k2) - s1(k1) )
-             q1(L) = au(L)*( teta(L)*u1(L) + (1d0-teta(L))*u0(L) )
-             qa(L) = au(L)*u1(L)
-          else
-!            call reset_fu_ru_for_structure_link(L, network%adm%lin2str, network%sts%struct) ! see furusobekstructures
-             u1(L) = 0d0
-             q1(L) = 0d0
-             qa(L) = 0d0
-          endif
-       enddo
-      !$OMP END PARALLEL DO
-     else
-!      parallel: compute u1, update u1, compute remaining variables
-
-!      compute u1
-       !$OMP PARALLEL DO           &
-       !$OMP PRIVATE(L,k1,k2)
-       do L=1,Lnx
-          if ( hu(L).gt.0 ) then
-             k1 = ln(1,L)
-             k2 = ln(2,L)
-             u1(L) = ru(L) - fu(L)*( s1(k2) - s1(k1) )
-          else
-             u1(L) = 0d0
-          end if
-       end do
-      !$OMP END PARALLEL DO
-
-!      update u1
-       if ( jatimer.eq.1 ) call starttimer(IUPDU)
-       call update_ghosts(ITYPE_U, 1, Lnx, u1, ierror)
-       if ( jatimer.eq.1 ) call stoptimer(IUPDU)
-
-!      compute q1 and qa
-       !$OMP PARALLEL DO           &
-       !$OMP PRIVATE(L,k1,k2)
-       do L=1,Lnx
-          if ( hu(L).gt.0 ) then
-             k1 = ln(1,L)
-             k2 = ln(2,L)
-             q1(L) = au(L)*( teta(L)*u1(L) + (1d0-teta(L))*u0(L) )
-             qa(L) = au(L)*u1(L)
-          else
-             q1(L) = 0d0
-             qa(L) = 0d0
-          end if
-       end do
-      !$OMP END PARALLEL DO
-    end if  ! jampi
-
+   if ( useIndirectionFlowLinks.eq.0 ) then
+      call timstrt('All flow links', handle)
+      do L = 1,lnx
+         if (hu(L) > 0) then
+            k1 = ln(1,L) ; k2 = ln(2,L)
+            u1(L) = ru(L) - fu(L)*( s1(k2) - s1(k1) )
+            q1(L) = au(L)*( teta(L)*u1(L) + (1d0-teta(L))*u0(L) )
+            qa(L) = au(L)*u1(L)
+         else
+            !            call reset_fu_ru_for_structure_link(L, network%adm%lin2str, network%sts%struct) ! see furusobekstructures
+            u1(L) = 0d0
+            q1(L) = 0d0
+            qa(L) = 0d0
+         endif
+      enddo
+   else
+      call timstrt('Only wet flow links', handle)
+      u1 = 0d0
+      q1 = 0d0
+      qa = 0d0
+      do LL = 1,wetLinkCount
+         L = onlyWetLinks(LL)
+         k1 = ln(1,L) ; k2 = ln(2,L)
+         u1(L) = ru(L) - fu(L)*( s1(k2) - s1(k1) )
+         q1(L) = au(L)*( teta(L)*u1(L) + (1d0-teta(L))*u0(L) )
+         qa(L) = au(L)*u1(L)
+      enddo
+    endif
+   call timstop(handle)  
     if (jaqaisq1 == 1) then ! tetaad
        qa = q1
     endif

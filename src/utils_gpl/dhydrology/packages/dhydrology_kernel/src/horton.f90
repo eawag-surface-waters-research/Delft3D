@@ -66,7 +66,7 @@ module horton
       ! local
       integer, parameter              :: NrSecondsPerHour = 3600
       double precision                :: RFrac
-      double precision                :: ratio, dt1
+      double precision                :: ratio
       integer                         :: i
       logical                         :: rainIsFalling 
       
@@ -91,33 +91,17 @@ module horton
             
          else if(comparereal(InitialStorage(i), 0d0) == 1 .or. rainIsFalling) then
             
-            !  Wet situation
-            if(comparereal(PreviousInfCap(i), MinInfCap(i)) <= 0) then
-               ! Previous infiltration capacity is at minimum value, so no change in infiltration capacity
-               InfCapState(i) = HORTON_CAPSTAT_NOCHANGE
-               NewInfCap(i) = MinInfCap(i)
-            else
-               !  Infiltration capacity is decreasing
-               InfCapState(i) = HORTON_CAPSTAT_DECREASE
-               ratio = (PreviousInfCap(i)-MinInfCap(i)) / (MaxInfCap(i) - MinInfCap(i))
-               dt1 = -1/DecreaseRate(i) * log(ratio)  + RFRAC
-               NewInfCap(i) = MinInfCap(i) + (MaxInfCap(i) - MinInfCap(i))  * exp(-1d0*DecreaseRate(i) * dt1)
-            endif
+            !  Wet situation, infiltration capacity is decreasing
+            InfCapState(i) = HORTON_CAPSTAT_DECREASE
+            ratio = (PreviousInfCap(i)-MinInfCap(i)) / (MaxInfCap(i) - MinInfCap(i))
+            NewInfCap(i) = MinInfCap(i) + (MaxInfCap(i) - MinInfCap(i)) * ratio * exp(-1d0*DecreaseRate(i) * rfrac)
             
-         else if ( comparereal(InitialStorage(i), 0d0)  <= 0 .and. .not. rainIsFalling) then
+         else 
             
-            !  Dry situation
-            if (comparereal(PreviousInfCap(i), MaxInfCap(i)) >= 0) then
-               ! Previous infiltration capacity is at maximum value, so no change in infiltration capacity
-               InfCapState(i) = HORTON_CAPSTAT_NOCHANGE
-               NewInfCap(i) = MaxInfCap(i)
-            else
-               ! Infiltration capacity is recovering
-               InfCapState(i) = HORTON_CAPSTAT_RECOVERY
-               ratio = (PreviousInfCap(i)-MaxInfcap(i)) / (MinInfCap(i)- MaxInfCap(i))
-               dt1 = -1/RecoveryRate (i)* log(ratio)  + RFRAC
-               NewInfCap(i) = MaxInfCap(i) - (MaxInfCap(i) - MinInfCap(i)) * exp(-1d0*RecoveryRate(i) * dt1)
-            endif
+            !  Dry situation, infiltration capacity is recovering
+            InfCapState(i) = HORTON_CAPSTAT_RECOVERY
+            ratio = (PreviousInfCap(i)-MaxInfcap(i)) / (MinInfCap(i)- MaxInfCap(i))
+            NewInfCap(i) = MaxInfCap(i) - (MaxInfCap(i) - MinInfCap(i)) * ratio * exp(-1d0*RecoveryRate(i) * rfrac)
             
          end if
       enddo

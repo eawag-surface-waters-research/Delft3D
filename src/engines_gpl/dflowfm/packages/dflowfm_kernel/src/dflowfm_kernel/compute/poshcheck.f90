@@ -154,4 +154,15 @@
     endif
  endif
 
+ if (key==2) then
+   wetLinkCount = 0
+   do L = 1, lnx
+      if (hu(L) > 0d0) then
+        wetLinkCount = wetLinkCount +1
+        onlyWetLinks(wetLinkCount) = L
+      endif
+   enddo
+  
+ endif
+
  end subroutine poshcheck
