@@ -104,7 +104,7 @@ module horton
                NewInfCap(i) = MinInfCap(i) + (MaxInfCap(i) - MinInfCap(i))  * exp(-1d0*DecreaseRate(i) * dt1)
             endif
             
-         else if ( InitialStorage(i) <= 0d0 .and. .not. rainIsFalling) then
+         else if ( comparereal(InitialStorage(i), 0d0)  <= 0 .and. .not. rainIsFalling) then
             
             !  Dry situation
             if (comparereal(PreviousInfCap(i), MaxInfCap(i)) >= 0) then
