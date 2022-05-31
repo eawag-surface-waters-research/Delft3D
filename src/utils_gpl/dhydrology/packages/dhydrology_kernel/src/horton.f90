@@ -77,19 +77,19 @@ module horton
 
       do i = 1, n
          if (includerain == 1) then
-            rainIsFalling = Rainfall(i) > 0d0
+            rainIsFalling = comparereal(Rainfall(i), 0d0) ==1
          else 
             rainIsFalling = .false.
          endif
 
          ! Compute the actual infiltration rate.
-         if (MaxInfCap(i) <= MinInfCap(i)) then
+         if (comparereal(MaxInfCap(i), MinInfCap(i)) <= 0) then
             
             ! Do nothing, because of lack of band width between minimum and maximum capacity.
             InfCapState(i) = HORTON_CAPSTAT_NOCHANGE
             NewInfCap(i) = PreviousInfCap(i)  
             
-         else if(InitialStorage(i) > 0d0 .or. rainIsFalling) then
+         else if(comparereal(InitialStorage(i), 0d0) == 1 .or. rainIsFalling) then
             
             !  Wet situation
             if(comparereal(PreviousInfCap(i), MinInfCap(i)) <= 0) then
