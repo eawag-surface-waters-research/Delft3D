@@ -34,7 +34,6 @@ subroutine sethu(jazws0)                            ! Set upwind waterdepth hu
  use m_flowgeom                                      ! Todo: higher order + limiter, see transport
  use m_flow
  use m_flowtimes
- use timers
  use m_sediment
  use m_fixedweirs
  use m_sobekdfm
@@ -69,7 +68,6 @@ subroutine sethu(jazws0)                            ! Set upwind waterdepth hu
  character (len=4) :: toest
 
  integer           :: k3, k4, itel, kuu, ku2, kku, ip , Lnu, kbd, ktd, kbd0, LLbc
- integer, save :: handle = 0
 
  double precision, external :: dslim,  nod2linx, nod2liny
 
@@ -496,15 +494,4 @@ subroutine sethu(jazws0)                            ! Set upwind waterdepth hu
     call setveg()
  endif
 
- !call timstrt('Count wet links', handle)
- !wetLinkCount = 0
- !do L = 1, lnx
- !   if (hu(L) > 0d0) then
- !     wetLinkCount = wetLinkCount +1
- !     onlyWetLinks(wetLinkCount) = L
- !   endif
- !enddo
- !call timstop(handle)
- wetLinksFraction = wetLinksFraction + dble(wetLinkCount)/dble(lnx)
- wetLinksUpdate = wetLinksUpdate + 1
 end subroutine sethu
