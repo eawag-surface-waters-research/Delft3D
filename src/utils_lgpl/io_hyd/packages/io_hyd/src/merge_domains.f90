@@ -504,36 +504,37 @@
       do i_domain = 1, n_domain
          idmn = i_domain - 1
          d_hyd => domain_hyd_coll%hyd_pnts(i_domain)
-         d_hyd%iglobal_link = 0
          do iq = 1, d_hyd%noq1
-            noq1 = noq1 + 1
-            d_hyd%iglobal_link(iq) = noq1
             ip1 = d_hyd%ipoint(1,iq)
             ip2 = d_hyd%ipoint(2,iq)
-            if ( ip1 .lt. 0 ) then
-               if (-ip1 .le. d_hyd%nobndl .and. d_hyd%idomain(ip2) .eq. idmn) then
-                  nobnd = nobnd + 1
-                  d_hyd%iglobal_bnd(-ip1) = -nobnd
-                  call renum_bnd(d_hyd%openbndsect_coll,ip1,-nobnd)
-               else if (d_hyd%idomain(ip2) .ne. idmn) then
-                  ! from cell is in ghost domain, revert addition of exchange 
-                  d_hyd%iglobal_link(iq) = 0
-                  noq1 = noq1 - 1
+            if ( ip1 .lt. 0 .and. ip2 .gt. 0) then
+               ! only add boundary links from current domain
+               if(d_hyd%idomain(ip2) .eq. idmn) then
+                  noq1 = noq1 + 1
+                  d_hyd%iglobal_link(iq) = noq1
+                  if (-ip1 .le. d_hyd%nobndl) then
+                     nobnd = nobnd + 1
+                     d_hyd%iglobal_bnd(-ip1) = -nobnd
+                     call renum_bnd(d_hyd%openbndsect_coll,ip1,-nobnd)
+                  end if
                end if
-            else if ( ip2 .lt. 0 ) then
-               if (-ip2 .le. d_hyd%nobndl .and. d_hyd%idomain(ip1) .eq. idmn) then
-                  nobnd = nobnd + 1
-                  d_hyd%iglobal_bnd(-ip2) = -nobnd
-                  call renum_bnd(d_hyd%openbndsect_coll,ip2,-nobnd)
-               else if (d_hyd%idomain(ip1) .ne. idmn) then
-                  ! from cell is in ghost domain, revert addition of exchange 
-                  d_hyd%iglobal_link(iq) = 0
-                  noq1 = noq1 - 1
+            else if (ip1 .gt. 0 .and. ip2 .lt. 0) then
+               ! only add boundary links from current domain
+               if (d_hyd%idomain(ip1) .eq. idmn) then
+                  noq1 = noq1 + 1
+                  d_hyd%iglobal_link(iq) = noq1
+                  if (-ip2 .le. d_hyd%nobndl) then
+                     nobnd = nobnd + 1
+                     d_hyd%iglobal_bnd(-ip2) = -nobnd
+                     call renum_bnd(d_hyd%openbndsect_coll,ip2,-nobnd)
+                  end if
                end if
-            else if (min(d_hyd%idomain(ip1),d_hyd%idomain(ip2)) .ne. idmn) then
-               ! one of the cells is in ghost domain with a lower domain number, revert addition of exchange 
-               d_hyd%iglobal_link(iq) = 0
-               noq1 = noq1 - 1
+            else if (ip1 .gt. 0 .and. ip2 .gt. 0) then
+               ! only add when lowest domain number of the cells is in the current domain (they are usually the same)
+               if (min(d_hyd%idomain(ip1),d_hyd%idomain(ip2)) .eq. idmn) then
+                  noq1 = noq1 + 1
+                  d_hyd%iglobal_link(iq) = noq1
+               end if
             end if
          enddo
       enddo
