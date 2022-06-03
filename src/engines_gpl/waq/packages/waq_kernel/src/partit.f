@@ -78,8 +78,8 @@
       integer :: itime   ! time for writing output-file
 
       ! Arjen
-      LOGICAL            OLCFWQ, SRWACT, RTCACT, DDWAQ
-      COMMON /COMMUN/    OLCFWQ, SRWACT, RTCACT, DDWAQ
+      LOGICAL            OLCFWQ, SRWACT, RTCACT
+      COMMON /COMMUN/    OLCFWQ, SRWACT, RTCACT
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "partit", ithandl )
 

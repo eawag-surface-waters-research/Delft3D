@@ -186,8 +186,8 @@
       real                     :: rdummy
       CHARACTER                :: cdummy
       CHARACTER*2              :: C2
-      LOGICAL                  :: OLCFWQ, SRWACT, RTCACT, DDWAQ
-      COMMON /COMMUN/             OLCFWQ, SRWACT, RTCACT, DDWAQ
+      LOGICAL                  :: OLCFWQ, SRWACT, RTCACT
+      COMMON /COMMUN/             OLCFWQ, SRWACT, RTCACT
 !
       integer(4), save         :: ithndl = 0
 !
@@ -271,7 +271,6 @@
             OLCFWQ = .FALSE.
             SRWACT = .FALSE.
             RTCACT = .FALSE.
-            DDWAQ  = .FALSE.
             LCHAR(44) = ' '
             LUN(44)   = LUN(43) + 1
 
@@ -306,18 +305,9 @@
             close (lunin)
  123        continue
 
-         ! check ddwaq from commandline
-
-            call getcom ( '-d'  , 0    , lfound, idummy, rdummy,
-     +           cdummy, ierr2)
-            if ( lfound ) then
-               DDWAQ = .TRUE.
-               write(lun(19),*) ' DDWAQ coupling activated'
-            endif
-
        ! initialise DIO
 
-            IF ( OLCFWQ .OR. SRWACT .OR. RTCACT .OR. DDWAQ ) THEN
+            IF ( OLCFWQ .OR. SRWACT .OR. RTCACT ) THEN
                if ( dioconfig .ne. ' ' ) then
                   write(lun(19),*) ' Using DelftIO ini file : ',trim(dioconfig)
                   CALL DIOINIT(dioconfig)
@@ -410,7 +400,7 @@
 !
 !        Use of DelftIO coupling not allowed in parallel runs
 !
-         IF ( OLCFWQ .OR. SRWACT .OR. RTCACT .OR. DDWAQ ) GOTO 996
+         IF ( OLCFWQ .OR. SRWACT .OR. RTCACT ) GOTO 996
       ENDIF
 
 !         branch to the appropriate integration option

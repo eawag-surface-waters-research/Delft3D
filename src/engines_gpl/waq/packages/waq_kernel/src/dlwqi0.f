@@ -121,10 +121,9 @@
 !     OLCFWQ             Flag indicating ONLINE running of CF and WQ
 !     SRWACT             Flag indicating active data exchange with SRW
 !     RTCACT             Flag indicating output for RTC
-!     DDWAQ              Flag indicating parallel computation
 
-      LOGICAL            OLCFWQ, SRWACT, RTCACT, DDWAQ, propor
-      COMMON /COMMUN/    OLCFWQ, SRWACT, RTCACT, DDWAQ
+      LOGICAL            OLCFWQ, SRWACT, RTCACT, propor
+      COMMON /COMMUN/    OLCFWQ, SRWACT, RTCACT
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "dlwqi0", ithandl )
 
