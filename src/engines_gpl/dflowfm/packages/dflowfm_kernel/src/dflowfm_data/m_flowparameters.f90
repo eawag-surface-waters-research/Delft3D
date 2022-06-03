@@ -836,6 +836,10 @@ subroutine default_flowparameters()
     chkdifd    = 0.01d0  ! check diffusion only for jatransportautotimestepdiff == 1
     chkwndd    = 0.1d0   ! check windstress              below this waterdepth
     chktempdep = 0.1d0   ! check heatfluxes              below this waterdepth
+    testdryflood = 0     ! test different options for drying flooding: 
+                         !                                0 = standard D-Flow FM
+                         !                                1 = Delft3D-FLOW check in water level points
+                         !                                2 = Minimum value for VOL1 of ba*epshu in transport equation
 
     jposhchk   = 2       ! check for positive waterdepth; 0 = no
                          !                                1 = 0.7*dts, just redo
