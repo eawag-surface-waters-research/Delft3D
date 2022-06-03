@@ -32,22 +32,18 @@
 !
 !     parameters            : none.
 !
-      character(len= 32) :: version
-      character(len= 22) :: firm
-      character(len= 80) :: cident
-      character(len= 30) :: verdat
+      character(len= 80) :: version_string
 !
 !     local scalars
 !
-      integer(kind=4) ::   icom,   iend,   il,  ir,   iver,   iwl,   lun
+      integer(kind=4) ::   lun
 
       character*120 idstr
-      character*3   os
-      integer (4)   i, j
+      integer (4)   i
 
-      character*75  opkom(7)
+      character*75  startup_screen_text(7)
       
-      data   opkom  / &
+      data   startup_screen_text  / &
         '+-----------------------------------------------------------------------+', &
         '|                        D e l f t 3 D - P A R T                        |', &
         '|                                                                       |', &
@@ -63,21 +59,21 @@
 !     Get version string from file version_number.h.svn
 !     (see also version_number project)
 !
-      call getfullversionstring_PART(cident)
+      call getfullversionstring_PART(version_string)
 !
       if (lun==0) then
 !        scherm uitvoer
-         do i = 1 , size(opkom)
-            if ( opkom(i)(3:15) .eq. 'Version xx.xx' ) then
-               write(opkom(i)(3:72),'(a)') cident(1:70)
+         do i = 1 , size(startup_screen_text)
+            if ( startup_screen_text(i)(3:15) .eq. 'Version xx.xx' ) then
+               write(startup_screen_text(i)(3:72),'(a)') version_string(1:70)
             end if
-            write( * , * ) opkom(i)
+            write( * , * ) startup_screen_text(i)
          enddo
       else
 !        print uitvoer
          write(lun,'(//13x,a)')   'PART - Particle tracking'
          write(lun,'(   6x,a)')   ' Water quality simulation in 2D/3D models      '
-         write(lun,'(    a//)')   trim(cident)
+         write(lun,'(    a//)')   trim(version_string)
       end if
 !
 !     end of routine

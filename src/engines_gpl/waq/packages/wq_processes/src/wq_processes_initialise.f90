@@ -152,7 +152,7 @@
       character*80   idstr
       character*20   rundat
       character*10   config
-      logical        lfound, laswi , swi_nopro, l3dmod
+      logical        lfound, laswi , swi_nopro
       integer        blm_act                       ! index of ACTIVE_BLOOM_P
 
       ! information
@@ -222,13 +222,6 @@
       procesdef%maxsize=0
       old_items%cursize = 0
       old_items%maxsize = 0
-
-      ! when we assume one column per call, is it really needed?
-!      if ( noseg .gt. 1 ) then
-         l3dmod = .true.
-!      else
-!         l3dmod = .false.
-!      endif
 
       ! open report file
 
@@ -521,9 +514,8 @@
 
          ! add the processes in the strucure
 
-         call prprop ( lunlsp    , laswi   , l3dmod   , config, no_act, &
-                       actlst    , allitems, procesdef, noinfo, nowarn, &
-                       old_items , ierr2 )
+         call prprop ( lunlsp, laswi, config, no_act, actlst, allitems, procesdef, &
+                       noinfo, nowarn, old_items , ierr2 )
          if ( ierr2 .ne. 0 ) ierr = ierr + 1
          nbpr   = procesdef%cursize
 

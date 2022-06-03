@@ -317,15 +317,11 @@
                endif
             ENDIF
 !
-!     The unlocking !
+!           Show startup screen
 !
             IF ( INIT2 ) THEN
                INIT2 = .FALSE.
-               IF ( NOQ3 .GT. 0 ) THEN
-                  CALL startup_screen (LUN(19),.TRUE.)
-               ELSE
-                  CALL startup_screen (LUN(19),.FALSE.)
-               ENDIF
+               CALL startup_screen (LUN(19))
             ENDIF
 
             IF (ACTION .EQ. ACTION_FULLCOMPUTATION) THEN

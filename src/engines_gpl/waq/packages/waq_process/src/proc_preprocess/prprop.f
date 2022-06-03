@@ -21,9 +21,8 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-      subroutine prprop ( lunrep   , laswi   , l3dmod   , config, no_act,
-     +                    actlst   , allitems, procesdef, noinfo, nowarn,
-     +                    old_items, ierror  )
+      subroutine prprop ( lunrep, laswi, config, no_act, actlst, allitems, procesdef,
+     +                    noinfo, nowarn, old_items, ierror  )
 
 !     Deltares Software Centre
 
@@ -42,7 +41,6 @@
 
       integer           , intent(in   ) :: lunrep                 !< report file
       logical           , intent(inout) :: laswi                  !< active processes only switch
-      logical           , intent(in   ) :: l3dmod                 !< 3d model
       character(len=*)  , intent(in   ) :: config                 !< requested configuration
       integer           , intent(in   ) :: no_act                 !< number of activated processes
       character(len=*)  , intent(in   ) :: actlst(*)              !< list of activated processes

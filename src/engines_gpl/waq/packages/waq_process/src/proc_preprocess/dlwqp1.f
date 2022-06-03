@@ -177,7 +177,7 @@
       character*80   line
       character*256  pdffil
       character*10   config
-      logical        lfound, laswi , swi_nopro, l3dmod
+      logical        lfound, laswi , swi_nopro
       integer        blm_act                       ! index of ACTIVE_BLOOM_P
 
       ! charon coupling
@@ -258,11 +258,6 @@
       procesdef%maxsize=0
       old_items%cursize = 0
       old_items%maxsize = 0
-      if ( noq3 .gt. 0 ) then
-         l3dmod = .true.
-      else
-         l3dmod = .false.
-      endif
 
       ! open report file
 
@@ -630,9 +625,8 @@
 
          ! add the processes in the structure
 
-         call prprop ( lurep    , laswi   , l3dmod   , config, no_act,
-     +                 actlst   , allitems, procesdef, noinfo, nowarn,
-     +                 old_items, ierr2 )
+         call prprop ( lurep, laswi, config, no_act, actlst, allitems, procesdef, 
+     +                 noinfo, nowarn, old_items, ierr2 )
          if ( ierr2 .ne. 0 ) ierr = ierr + 1
          nbpr   = procesdef%cursize
 

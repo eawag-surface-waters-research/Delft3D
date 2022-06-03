@@ -31,11 +31,11 @@ subroutine delwaq1_startup_screen()
     use m_delwaq1_data
       
     implicit none
-    
+
     !
-    !     unscramble name user
+    !     Show startup screen
     !
-    call startup_screen(lunrep,.false.)
+    call startup_screen(lunrep)
     write(*,*)
     write(*,'(A9,A)') '  runid: ',trim(runid)
     write(*,*)

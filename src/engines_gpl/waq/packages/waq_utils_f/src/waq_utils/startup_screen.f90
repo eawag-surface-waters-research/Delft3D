@@ -21,7 +21,7 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-      subroutine startup_screen(lunrep,l3dmod)
+      subroutine startup_screen(lunrep)
 
 !>\File
 !>        Write intro to screen and report file
@@ -32,21 +32,20 @@
       implicit none
 
       integer      , intent(in   ) :: lunrep   !< Unit number report file
-      logical      , intent(in   ) :: l3dmod   !< Check 3D feature or not
 
       ! local declarations
 
       save
 
-      character*20  rundat
-      character*120 idstr
+      character*20  run_date_time
+      character*120 version_string
       logical       first
       integer (4)   i, j
       save          first
-      character*75  opkom(8)
+      character*75  startup_screen_text(8)
 
       data     first /.true./
-      data     opkom  / &
+      data     startup_screen_text  / &
       '+-----------------------------------------------------------------------+', &
       '|                      Delft3D / D-HYDRO - DELWAQ                       |', &
       '|                                                                       |', &
@@ -61,18 +60,18 @@
 
       if ( first ) then
          first = .false.
-         ! set idstr
-         call getidentification(idstr)
-         do i = 1 , size(opkom)
-            if ( opkom(i)(3:15) .eq. 'Version xx.xx' ) then
-               write(opkom(i)(3:72),'(a)') idstr(1:70)
+         ! set version_string
+         call getidentification(version_string)
+         do i = 1 , size(startup_screen_text)
+            if ( startup_screen_text(i)(3:15) .eq. 'Version xx.xx' ) then
+               write(startup_screen_text(i)(3:72),'(a)') version_string(1:70)
             end if
-            write(*,*) opkom(i)
+            write(*,*) startup_screen_text(i)
          enddo
       endif
-      write (lunrep,'(1x,a)') trim(idstr)
-      call dattim(rundat)
-      write (lunrep,'(2a)') ' Execution start: ',rundat
+      write (lunrep,'(1x,a)') trim(version_string)
+      call dattim(run_date_time)
+      write (lunrep,'(2a)') ' Execution start: ',run_date_time
 
       if ( timon ) call timstop( ithndl )
 
