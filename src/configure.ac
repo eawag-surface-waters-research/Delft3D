@@ -602,7 +602,6 @@ engines_gpl/flow2d3d/scripts/Makefile
 engines_gpl/Makefile
 scripts_lgpl/linux/Makefile
 scripts_lgpl/Makefile
-third_party/Makefile
 third_party_open/Makefile
 third_party_open/version_number/Makefile
 third_party_open/version_number/packages/Makefile
