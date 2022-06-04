@@ -19,7 +19,6 @@ if USEFORTRANGIS
 endif
 
 SUBDIRS = \
-    triangle \
     version_number \
     $(MAYBE_FORTRANGIS)
 

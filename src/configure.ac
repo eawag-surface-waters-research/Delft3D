@@ -602,17 +602,7 @@ engines_gpl/flow2d3d/scripts/Makefile
 engines_gpl/Makefile
 scripts_lgpl/linux/Makefile
 scripts_lgpl/Makefile
-third_party_open/esmf/lnx64/bin/Makefile
-third_party_open/esmf/lnx64/Makefile
-third_party_open/esmf/lnx64/scripts/Makefile
-third_party_open/esmf/Makefile
 third_party_open/Makefile
-third_party_open/md5/Makefile
-third_party_open/md5/md5digest/Makefile
-third_party_open/md5/md5file/Makefile
-third_party_open/polypack/Makefile
-third_party_open/polypack/src/Makefile
-third_party_open/triangle/Makefile
 third_party_open/version_number/Makefile
 third_party_open/version_number/packages/Makefile
 third_party_open/version_number/packages/version_number/Makefile
