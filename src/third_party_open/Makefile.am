@@ -12,14 +12,8 @@
 
 include $(top_srcdir)/common.am
 
-# Descending into FortranGIS is optional, since its prerequisites
-# --with-shapelib and --with-proj are optional.
-if USEFORTRANGIS
-  MAYBE_FORTRANGIS = fortrangis
-endif
-
 SUBDIRS = \
-    version_number \
-    $(MAYBE_FORTRANGIS)
+    version_number 
+    
 
 
