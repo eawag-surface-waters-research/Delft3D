@@ -25,11 +25,10 @@
 
       ! function : aggregeate one hydrodynamic step
 
-      ! (c) DELFT HYDRAULICS
-
       ! global declarations
 
       use hydmod
+      use m_aggregation_types
       implicit none
 
       ! declaration of the arguments
@@ -53,13 +52,6 @@
       integer             :: ierr_alloc    !
       real, parameter     :: rmiss = -999.
 
-      ! in future from a module:
-
-      integer, parameter  :: IAGTYP_ACCUM = 1 ! aggregation using accumulation
-      integer, parameter  :: IAGTYP_AVG   = 2 ! aggregation using averaging
-      integer, parameter  :: IAGTYP_WAVG  = 3 ! aggregation using averaging with a weight variable
-      integer, parameter  :: IAGTYP_MIN   = 4 ! aggregation using minimum value
-      integer, parameter  :: IAGTYP_ACCUS = 5 ! aggregation using a signed accumulation (for combining flows in oposite directions)
 
       ! some init
 
@@ -107,7 +99,7 @@
      +             1               , 1                ,
      +             1               , 0                ,
      +             0               , 1                ,
-     +             ipnt_q          , IAGTYP_ACCUS     ,
+     +             ipnt_q          , IAGTYP_ACSGN     ,
      +             input_hyd%flow  , rwork            ,
      +             rwork           , output_hyd%flow  )
 

@@ -17466,6 +17466,7 @@ src/tools_gpl/agrhyd/packages/agrhyd/src/agrhyd.f90 -text
 src/tools_gpl/agrhyd/packages/agrhyd/src/agrhyd_version.F90.svn -text
 src/tools_gpl/agrhyd/packages/agrhyd/src/dhaggr.f -text
 src/tools_gpl/agrhyd/packages/agrhyd/src/gkwini.f -text
+src/tools_gpl/agrhyd/packages/agrhyd/src/m_aggreration_types.F90 -text
 src/tools_gpl/agrhyd/packages/agrhyd/src/merge_atr.f -text
 src/tools_gpl/agrhyd/packages/agrhyd/src/set_aggr_pnts.f -text
 src/tools_gpl/agrhyd/packages/agrhyd/src/set_aggr_reg.f -text

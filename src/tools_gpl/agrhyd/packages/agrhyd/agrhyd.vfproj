@@ -60,6 +60,7 @@
 		<File RelativePath=".\src\agr_reg.f"/>
 		<File RelativePath=".\src\agrhyd.f90"/>
 		<File RelativePath=".\src\agrhyd_version.F90">
+		<File RelativePath=".\src\m_aggregatioon_types.F90">
 			<FileConfiguration Name="Debug|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes" PreprocessorDefinitions="WIN32"/></FileConfiguration>
 			<FileConfiguration Name="Release|x64">

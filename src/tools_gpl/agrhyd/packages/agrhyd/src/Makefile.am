@@ -63,6 +63,7 @@ agrhyd_SOURCES = \
    agr_hyd_step.f \
    agr_reg.f \
    agr_hyd_init.f \
+   m_aggregation_types.F90 \
    set_aggr_reg.f \
    agr_poi_reg.f \
    agr_exp.f \
