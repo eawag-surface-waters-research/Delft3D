@@ -39,6 +39,7 @@ libwaq_utils_la_SOURCES =  \
        delwaq_loads.f \
        dhagg2.f \
        dhaggr.f \
+       m_aggregation_types.F90 \
        dhagkm.f \
        dhc20m.f \
        dhcarg.f \

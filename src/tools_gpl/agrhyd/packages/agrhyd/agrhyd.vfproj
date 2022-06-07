@@ -60,7 +60,6 @@
 		<File RelativePath=".\src\agr_reg.f"/>
 		<File RelativePath=".\src\agrhyd.f90"/>
 		<File RelativePath=".\src\agrhyd_version.F90">
-		<File RelativePath=".\src\m_aggregatioon_types.F90">
 			<FileConfiguration Name="Debug|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes" PreprocessorDefinitions="WIN32"/></FileConfiguration>
 			<FileConfiguration Name="Release|x64">
@@ -69,7 +68,6 @@
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes" PreprocessorDefinitions="WIN64"/></FileConfiguration>
 			<FileConfiguration Name="Release|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes" PreprocessorDefinitions="WIN32"/></FileConfiguration></File>
-		<File RelativePath=".\src\dhaggr.f"/>
 		<File RelativePath=".\src\gkwini.f"/>
 		<File RelativePath=".\src\merge_atr.f"/>
 		<File RelativePath=".\src\set_aggr_pnts.f"/>
