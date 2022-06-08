@@ -13223,12 +13223,12 @@ subroutine unc_read_map_or_rst(filename, ierr)
     call readyy('Reading map data',0.95d0)    
    
     ! Read hysteresis_for_summerdike
-    if (lnx1d > 0) then
+    if (lnx1d > 0 .and. network%loaded) then
        ierr = nf90_inq_dimid(imapfile, 'n1DFlowLink', id_1dflowlinkdim)
        if (ierr == nf90_noerr) then
           ierr = nf90_inquire_dimension(imapfile, id_1dflowlinkdim, len=numl1d)
           if (ierr == nf90_noerr) then
-             if (numl1d == lnx1d) then
+             if (numl1d == network%numl) then
                 call realloc(tmpvar1D, numl1d, keepExisting=.false., fill = 0d0) ! We use this array becasue get_var_and_shift requires a double precision array
                 ierr = get_var_and_shift(imapfile, 'hysteresis_for_summerdike', tmpvar1D, tmpvar1, UNC_LOC_U, kmx, Lstart, numl1d, it_read, um%jamergedmap, &
                                    um%ilink_own, um%ilink_merge)
