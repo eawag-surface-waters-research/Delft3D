@@ -79,7 +79,7 @@ subroutine unc_write_his(tim)            ! wrihis
                      id_statdim, id_strlendim, id_crsdim, id_crslendim, id_crsptsdim, id_timedim, &
                      id_statx, id_staty, id_statid, id_statname, id_time, id_timestep, &
                      id_statlon, id_statlat, id_crsname, &
-                     id_vars, id_varucx, id_varucy, id_varucz, id_varsal, id_vartem, id_varsed, id_varrho, &
+                     id_vars, id_varucx, id_varucy, id_varucz, id_varsal, id_vartem, id_varsed, id_varrhop, id_varrho, id_bruv,  &
                      id_varQ, id_varQint, id_varb, id_varumag, id_varqmag,&
                      id_varAu,  &
                      id_varu,  id_varwx, id_varwy, id_varrain, id_varpatm, &
@@ -635,17 +635,18 @@ subroutine unc_write_his(tim)            ! wrihis
 
             if ((jasal > 0 .or. jatem > 0 .or. jased > 0) .and. jahisrho > 0) then
                if ( kmx.gt.0 ) then
-                  ierr = nf90_def_var(ihisfile, 'density', nf90_double, (/ id_laydim, id_statdim, id_timedim /), id_varrho)
-                  ierr = nf90_put_att(ihisfile, id_varrho, 'coordinates', trim(statcoordstring) // ' zcoordinate_c')
-                  jawrizc = 1
+                  idims(1) = id_laydim
+                  jawrizc  = 1
+                  call definencvar(ihisfile,id_varrhop,nf90_double, idims,3,'potential_density'       , 'potential_density'         , 'kg m-3' ,  trim(statcoordstring) // ' zcoordinate_c', station_geom_container_name, fillVal = dmiss)
+                  if (idensform > 10) then 
+                  call definencvar(ihisfile,id_varrho ,nf90_double, idims,3,'density'                 , 'density'                   , 'kg m-3' ,  trim(statcoordstring) // ' zcoordinate_c', station_geom_container_name, fillVal = dmiss)
+                  endif
+                  idims(1) = id_laydimw
+                  call definencvar(ihisfile,id_bruv   ,nf90_double, idims,3,'Brunt_Vaisala_frequency' , 'Brunt_Vaisala_frequency'   , '1/s'    ,  trim(statcoordstring) // ' zcoordinate_w', station_geom_container_name, fillVal = dmiss)
                else
-                  ierr = nf90_def_var(ihisfile, 'density', nf90_double, (/ id_statdim, id_timedim /), id_varrho)
-                  ierr = nf90_put_att(ihisfile, id_varrho, 'coordinates', statcoordstring)
-               end if
-               ierr = nf90_put_att(ihisfile, id_varrho, 'units', 'kg m-3')
-               ierr = nf90_put_att(ihisfile, id_varrho, 'geometry', station_geom_container_name)
-               ierr = nf90_put_att(ihisfile, id_varrho, '_FillValue', dmiss)
-               ierr = nf90_put_att(ihisfile, id_varrho, 'standard_name', 'density')
+                  call definencvar(ihisfile,id_varrhop,nf90_double, idims,2,'potential_density'       , 'potential_density'         , 'kg m-3' ,  trim(statcoordstring)                    , station_geom_container_name, fillVal = dmiss)
+               end if  ! en misschien kan iemand de kmx > 0 repetitie ook in definencvar afvangen en // ' zcoordinate_c' automatisch maken voor kmx>0
+               
             endif
 
             if (ITRA1 > 0 .and. jahisconst > 0) then
@@ -2780,8 +2781,12 @@ subroutine unc_write_his(tim)            ! wrihis
              if (jatem > 0) then
                 ierr = nf90_put_var(ihisfile, id_vartem, valobsT(:,IPNT_TEM1+kk-1), start = (/ kk, 1, it_his /), count = (/ 1, ntot, 1 /))
              end if
-             if (jasal > 0 .or. jatem > 0 .or. jased > 0) then
-                ierr = nf90_put_var(ihisfile, id_varrho, valobsT(:,IPNT_RHO +kk-1), start = (/ kk, 1, it_his /), count = (/ 1, ntot, 1 /))
+             if( (jasal > 0 .or. jatem > 0 .or. jased > 0 ) .and. jahisrho > 0) then
+                ierr = nf90_put_var(ihisfile, id_varrhop , valobsT(:,IPNT_RHOP +kk-1), start = (/ kk, 1, it_his /), count = (/ 1, ntot, 1 /))
+                if (idensform > 10) then
+                ierr = nf90_put_var(ihisfile, id_varrho  , valobsT(:,IPNT_RHO +kk-1) , start = (/ kk, 1, it_his /), count = (/ 1, ntot, 1 /))
+                endif
+                ierr = nf90_put_var(ihisfile, id_bruv    , valobsT(:,IPNT_BRUV+kk-1) , start = (/ kk, 1, it_his /), count = (/ 1, ntot, 1 /))
              end if
              if (jased > 0 .and. .not. stm_included) then
                 ierr = nf90_put_var(ihisfile, id_varsed, valobsT(:,IPNT_SED +kk-1), start = (/ kk, 1, it_his /), count = (/ 1, ntot, 1 /))
@@ -2806,7 +2811,7 @@ subroutine unc_write_his(tim)            ! wrihis
                    else if (comparereal(tim, ti_hise, eps10) == 0) then
                       ierr = nf90_put_var(ihisfile, id_hwq(i), valobsT(:,IPNT_HWQ1 + (i-1)*kmx+kk-1), start = (/ kk, 1 /), count = (/ 1, ntot, 1/))
                    endif
-                enddo
+                enddo       
              end if
              if (IVAL_WQB3D1 > 0) then
                 do j = IVAL_WQB3D1,IVAL_WQB3DN   ! enumerators of 3d waqbot output in valobs array (not the pointer)
@@ -2845,8 +2850,8 @@ subroutine unc_write_his(tim)            ! wrihis
           if (jatem > 0) then
              ierr = nf90_put_var(ihisfile, id_vartem, valobsT(:,IPNT_TEM1), start = (/ 1, it_his /), count = (/ ntot, 1 /))
           end if
-          if(jasal > 0 .or. jatem > 0 .or. jased > 0 ) then
-             ierr = nf90_put_var(ihisfile, id_varrho, valobsT(:,IPNT_RHO),  start = (/ 1, it_his /), count = (/ ntot, 1 /))
+          if( (jasal > 0 .or. jatem > 0 .or. jased > 0 )  .and. jahisrho > 0) then
+             ierr = nf90_put_var(ihisfile, id_varrhop, valobsT(:,IPNT_RHOP) ,  start = (/ 1, it_his /), count = (/ ntot, 1 /))
           end if
   
           if (IVAL_TRA1 > 0) then

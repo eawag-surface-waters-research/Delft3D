@@ -30,7 +30,7 @@
 ! $Id$
 ! $HeadURL$
 
-subroutine setrhokk(kk)
+subroutine setrhokk(kk)    ! fill rho of one column  
 use m_flow, only : rho, idensform, kmxn
 implicit none
 integer :: kk 
@@ -69,37 +69,29 @@ use m_turbulence, only: rhowat
 implicit none
 integer          :: k
 double precision :: p0           ! in as cell ceiling pressure, out as cell floorpressure (pascal) 
+double precision :: rhok         ! in as previous density, reduces required nr of iterations 
 
 integer                         :: j, l, lsed, i    
 double precision, external      :: densfm
 double precision                :: rhom, sal, temp, p1, dzz
 
-if (jasal > 0) then
-   saL = max(0d0, constituents(isalt, k))
-else
-   saL = backgroundsalinity
-endif
-
-if (jatem > 0) then
-   temp = max(0d0, constituents(itemp,k))  ! should be changed to -2d0 at some point in future
-else
-   temp = backgroundwatertemperature
-endif
+call getsaltemk(k,sal, temp)
 
 if (idensform < 10) then 
    setrho = densfm(sal,temp,p0)
 else 
-   dzz = zws(k) - zws(k-1)
+   dzz  = zws(k) - zws(k-1)
+   rhok = rho(k)
    do i  = 1,Maxitpresdens 
-      p1 = p0 + ag*dzz*rho(k)
-      rho(k) =  densfm(sal,temp,0.5d0*(p1+p0) )
+      p1 = p0 + ag*dzz*rhok
+      rhok =  densfm(sal,temp,0.5d0*(p1+p0) )
    enddo
-   setrho = rho(k)
+   setrho = rhok
    p0     = p1
 endif
 
 if (jased > 0 .and. stm_included) then
-   rhom = setrho                      ! UNST-5170 for mor, only use salt+temp, not sediment effect
+   rhom = setrho                     ! UNST-5170 for mor, only use salt+temp, not sediment effect
    rhom = min(rhom, 1250d0)           ! check overshoots at thin water layers
    rhom = max(rhom,  990d0)           !
    rhowat(k) = rhom
@@ -124,3 +116,40 @@ setrho = min(setrho, 1250d0)          ! check overshoots at thin water layers
 setrho = max(setrho,  990d0)          !
 
 end function setrho
+
+double precision function setrhofixedp(k,p0)
+
+implicit none
+integer          :: k
+double precision :: p0           ! some given pressure 
+double precision, external      :: densfm
+
+double precision :: sal, temp
+
+call getsaltemk(k,sal, temp)
+
+setrhofixedp = densfm(sal,temp,p0)
+
+end function setrhofixedp
+
+
+subroutine getsaltemk(k,sal, temp)
+use m_flow
+use m_transport
+
+implicit none
+integer          :: k
+double precision :: sal, temp 
+
+if (jasal > 0) then
+   saL = max(0d0, constituents(isalt, k))
+else
+   saL = backgroundsalinity
+endif
+
+if (jatem > 0) then
+   temp = max(0d0, constituents(itemp,k))  ! should be changed to -2d0 at some point in future
+else
+   temp = backgroundwatertemperature
+endif
+end subroutine getsaltemk

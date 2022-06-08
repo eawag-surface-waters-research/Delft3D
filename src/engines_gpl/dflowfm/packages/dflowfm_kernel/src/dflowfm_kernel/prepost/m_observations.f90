@@ -168,7 +168,9 @@ implicit none
     integer                           :: IVAL_QFRE
     integer                           :: IVAL_QFRC
     integer                           :: IVAL_QTOT
+    integer                           :: IVAL_RHOP
     integer                           :: IVAL_RHO
+    integer                           :: IVAL_BRUV
     integer                           :: IVAL_SBCX1
     integer                           :: IVAL_SBCXN
     integer                           :: IVAL_SBCY1
@@ -275,7 +277,9 @@ implicit none
     integer                           :: IPNT_QFRC
     integer                           :: IPNT_QTOT
     integer                           :: IPNT_NUM
+    integer                           :: IPNT_RHOP
     integer                           :: IPNT_RHO
+    integer                           :: IPNT_BRUV
     integer                           :: IPNT_SBCX1           ! should be done per fraction
     integer                           :: IPNT_SBCXN
     integer                           :: IPNT_SBCY1
@@ -436,7 +440,9 @@ subroutine init_valobs_pointers()
    IVAL_INFILTCAP  = 0
    IVAL_INFILTACT  = 0
    IVAL_TAU        = 0
+   IVAL_RHOP       = 0
    IVAL_RHO        = 0
+   IVAL_BRUV       = 0
    IVAL_SBCX1      = 0          ! should be done per fraction
    IVAL_SBCXN      = 0
    IVAL_SBCY1      = 0
@@ -631,7 +637,11 @@ subroutine init_valobs_pointers()
       i=i+1;            IVAL_ZCS        = i
    end if
    if( jasal > 0 .or. jatem > 0 .or. jased > 0 ) then
+      i=i+1;            IVAL_RHOP       = i
+      if (idensform > 10) then 
       i=i+1;            IVAL_RHO        = i
+      endif
+      i=i+1;            IVAL_BRUV       = i
    endif
    MAXNUMVALOBS3D                       = i-i0
 
@@ -719,7 +729,9 @@ subroutine init_valobs_pointers()
    IPNT_TEPS  = ivalpoint(IVAL_TEPS,  kmx, nlyrs)
    IPNT_VICWW = ivalpoint(IVAL_VICWW, kmx, nlyrs)
    IPNT_RICH  = ivalpoint(IVAL_RICH,  kmx, nlyrs)
+   IPNT_RHOP  = ivalpoint(IVAL_RHOP,  kmx, nlyrs)
    IPNT_RHO   = ivalpoint(IVAL_RHO,   kmx, nlyrs)
+   IPNT_BRUV  = ivalpoint(IVAL_BRUV,  kmx, nlyrs)
    IPNT_WS1   = ivalpoint(IVAL_WS1,   kmx, nlyrs)
    IPNT_WSN   = ivalpoint(IVAL_WSN,   kmx, nlyrs)
    IPNT_SEDDIF1 = ivalpoint(IVAL_SEDDIF1,   kmx, nlyrs)

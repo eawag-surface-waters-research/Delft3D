@@ -49,10 +49,11 @@ subroutine fill_valobs()
    integer :: i, ii, j, kk, k, kb, kt, klay, L, LL, Lb, Lt, LLL, k1, k2, k3, LLa, n, nlayb, nrlay, nlaybL, nrlayLx
    integer :: ipoint, ival, klayt, kmx_const, kk_const, nlyrs
    double precision :: wavfac
-   double precision :: dens
+   double precision :: dens, prsappr, drhodz, rhomea 
    double precision, allocatable :: wa(:,:)
    double precision, allocatable :: frac(:,:)
    double precision, allocatable :: poros(:)
+   double precision, external    :: setrhofixedp
 
    kmx_const = kmx
    nlyrs     = 0
@@ -331,7 +332,22 @@ subroutine fill_valobs()
                valobs(IPNT_TEM1+klay-1,i) = constituents(itemp, kk)
             end if
             if( jasal > 0 .or. jatem > 0 .or. jased > 0 ) then
-               valobs(IPNT_RHO+klay-1,i) = rho(kk)
+               valobs(IPNT_RHOP+klay-1,i) = setrhofixedp(kk, 0d0)
+               if (idensform > 10 ) then  
+                valobs(IPNT_RHO+klay-1,i) = rho(kk)
+               endif
+               if (kk < kt) then
+                   if (idensform > 10 ) then           
+                      prsappr = ag*rhomean*( zws(kt) - zws(kk) )  
+                      drhodz  = ( setrhofixedp(kk+1,prsappr) - setrhofixedp(kk,prsappr) ) / 0.5d0*(zws(kk+1) - zws(kk-1)) 
+                   else 
+                      drhodz  = ( rho(kk+1) - rho(kk)                                   ) / 0.5d0*(zws(kk+1) - zws(kk-1)) 
+                   endif
+                   rhomea  = 0.5d0*( rho(kk+1) + rho(kk) )
+                   valobs(IPNT_BRUV+klay-1,i) = coefn2*drhodz/rhomea
+               else
+                   valobs(IPNT_BRUV+klay-1,i) = 0d0 
+               endif
             end if
             if (jahisvelocity > 0) then
                valobs(IPNT_UMAG+klay-1,i) = ucmag(kk)
