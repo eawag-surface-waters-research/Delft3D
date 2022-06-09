@@ -494,7 +494,7 @@ subroutine unc_write_his(tim)            ! wrihis
                
                ierr = nf90_put_att(ihisfile, id_varqmag, 'standard_name', 'water_volume_transport_in_river_channel') 
                ierr = nf90_put_att(ihisfile, id_varqmag, 'long_name', 'average discharge magnitude')
-               ierr = nf90_put_att(ihisfile, id_varqmag, 'units', 'm s-3')
+               ierr = nf90_put_att(ihisfile, id_varqmag, 'units', 'm3 s-1')
                ierr = nf90_put_att(ihisfile, id_varqmag, 'coordinates', statcoordstring)
                ierr = nf90_put_att(ihisfile, id_varqmag, 'geometry', station_geom_container_name)
                ierr = nf90_put_att(ihisfile, id_varqmag, '_FillValue', dmiss)
