@@ -670,7 +670,7 @@ contains
       i1  = floor(xmn); i2 = floor(xmx) + 1
       j1  = floor(ymn); j2 = floor(ymx) + 1
       
-      if ( jaselfal .eq.1 .or. jaselfal .eq.2 ) then
+      if ( jaselfal .eq.1 > 0 .and. jampi == 1) then
 !        globally reduce i1, i2, j1, j2
          i1 = -i1
          j1 = -j1
@@ -686,7 +686,7 @@ contains
       allocate ( td2(i1:i2,j1:j2), stat=ierr)
       td2 = 0d0
    
-      if ((jaselfal == 1) .OR. (jaselfal == 2)) then
+      if (jaselfal > 0) then
 !         if (allocated(self) ) deallocate ( self, avhs, area ) MVL ask Camille
          if (allocated(self) ) deallocate ( self, avhs )
          allocate ( self(i1:i2,j1:j2), stat=ierr)  
@@ -716,13 +716,13 @@ contains
    
    end if       
    
-   if ( jatidep.gt.0 ) then      
+   if ( jatidep > 0) then      
       call tforce( jul0, TIME , xz2 , yz2 , Td2, ndx2, dstart, dstop , eps) 
    else
       td2 = 0d0   ! safety
    end if
          
-   if ((jaselfal == 1) .OR. (jaselfal == 2)) then 
+   if (jaselfal > 0) then 
       call aggregatewaterlevels(avhs, i1,i2,j1,j2 )
       
       call selfattraction(avhs, self, i1,i2,j1,j2, jaselfal ) 
@@ -738,7 +738,7 @@ contains
       f22 = (    di)*(    dj)
       f12 = (1d0-di)*(    dj)
    
-      if ((jaselfal == 1) .OR. (jaselfal == 2)) then 
+      if (jaselfal > 0) then 
             
          tidep(1,n) = ( td2(m1,n1) + self(m1,n1) )*f11 +    &
                       ( td2(m2,n1) + self(m2,n1) )*f21 +    &
