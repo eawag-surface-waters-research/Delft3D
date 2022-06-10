@@ -119,6 +119,7 @@
       if ( mode .eq. 0 ) changed = .true.
       do i = 1, nsrc
          if (mnksrc(3,i) == -1) cycle ! awkward disabling of discharges outside partition when running parallel
+         if (mnksrc(7,i) == 4 .or. mnksrc(7,i) == 5 .or. mnksrc(7,i) == 8) cycle ! skip e,d and f culverts, output is not correct
          m = mnksrc(1,i)
          n = mnksrc(2,i)
          k = mnksrc(3,i)
@@ -155,6 +156,7 @@
       endif
       do i = 1, nsrc
          if (mnksrc(3,i) == -1) cycle ! awkward disabling of discharges outside partition when running parallel
+         if (mnksrc(7,i) == 4 .or. mnksrc(7,i) == 5 .or. mnksrc(7,i) == 8) cycle ! skip e,d and f culverts, output is not correct
          m = mnksrc(1,i)
          n = mnksrc(2,i)
          k = mnksrc(3,i)
@@ -190,7 +192,8 @@
          endif
       enddo
       do i = 1, nsrc
-         if ( mnksrc(7,i) .le. 1 ) cycle   !  no inlet-outlet and no culverts
+         if (mnksrc(7,i) .le. 1) cycle   !  no inlet-outlet and no culverts
+         if (mnksrc(7,i) == 4 .or. mnksrc(7,i) == 5 .or. mnksrc(7,i) == 8) cycle ! skip e,d and f culverts, output is not correct
          m = mnksrc(4,i)
          n = mnksrc(5,i)
          k = mnksrc(6,i)

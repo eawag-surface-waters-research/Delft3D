@@ -105,6 +105,7 @@
       nsr2  = 0
       do isrc = 1, nsrc
          if (mnksrc(3,isrc) == -1) cycle ! awkward disabling of discharges outside partition when running parallel
+         if (mnksrc(7,isrc) == 4 .or. mnksrc(7,isrc) == 5 .or. mnksrc(7,isrc) == 8) cycle ! skip e,d and f culverts, output is not correct
          k = mnksrc(3,isrc)
          iwpnt(isrc) = nosrc + 1
          if ( k .eq. 0 ) then
@@ -120,8 +121,9 @@
          endif
       enddo
       do isrc = 1, nsrc
-         if ( mnksrc(3,isrc) ==  -1 ) cycle   ! awkward disabling of discharges outside partition when running parallel
-         if ( mnksrc(7,isrc) .le. 1 ) cycle   ! no inlet outlet
+         if (mnksrc(3,isrc) ==  -1 ) cycle   ! awkward disabling of discharges outside partition when running parallel
+         if (mnksrc(7,isrc) == 4 .or. mnksrc(7,isrc) == 5 .or. mnksrc(7,isrc) == 8) cycle ! skip e,d and f culverts, output is not correct
+         if (mnksrc(7,isrc) .le. 1 ) cycle   ! no inlet outlet
          k = mnksrc(6,isrc)
          iwpnt(isrc+nsrc) = nosrc + 1
          if ( k .eq. 0 ) then
@@ -174,6 +176,7 @@
          nsr2 = 1
          do isrc = 1, nsrc
             if (mnksrc(3,isrc) == -1) cycle ! awkward disabling of discharges outside partition when running parallel
+            if (mnksrc(7,isrc) == 4 .or. mnksrc(7,isrc) == 5 .or. mnksrc(7,isrc) == 8) cycle ! skip e,d and f culverts, output is not correct
             k = mnksrc(3,isrc)
             iwp = iwpnt(isrc)
             write ( lunsrc , '(6X,E15.6,A,I4)' ) awaste(iwp),               &
@@ -188,8 +191,9 @@
             endif
          enddo
          do isrc = 1, nsrc
-            if ( mnksrc(3,isrc) ==  -1 ) cycle   ! awkward disabling of discharges outside partition when running parallel
-            if ( mnksrc(7,isrc) .le. 1 ) cycle   ! not an intake - outfall or other construct
+            if (mnksrc(3,isrc) ==  -1) cycle   ! awkward disabling of discharges outside partition when running parallel
+            if (mnksrc(7,isrc) == 4 .or. mnksrc(7,isrc) == 5 .or. mnksrc(7,isrc) == 8) cycle ! skip e,d and f culverts, output is not correct
+            if (mnksrc(7,isrc) .le. 1) cycle   ! not an intake - outfall or other construct
             k = mnksrc(6,isrc)
             iwp = iwpnt(isrc+nsrc)
             write ( lunsrc , '(6X,E15.6,A,I4)' ) awaste(iwp),               &
@@ -206,8 +210,9 @@
          if ( .not. zmodel ) then               ! zmodel alraedy dealt with
             do ilay = 1, nolay-1
                do isrc = 1, nsrc
-                  if ( mnksrc(3,isrc) ==  -1 ) cycle   ! awkward disabling of discharges outside partition when running parallel
-                  if ( mnksrc(3,isrc) .eq. 0 ) then    ! depth average loads
+                  if (mnksrc(3,isrc) ==  -1) cycle   ! awkward disabling of discharges outside partition when running parallel
+                  if (mnksrc(7,isrc) == 4 .or. mnksrc(7,isrc) == 5 .or. mnksrc(7,isrc) == 8) cycle ! skip e,d and f culverts, output is not correct
+                  if (mnksrc(3,isrc) .eq. 0) then    ! depth average loads
                      iwp = iwpnt(isrc)
                      write ( lunsrc , '(6X,E15.6,A,I4)' ) awaste(iwp+ilay), &
      &                                  '    1.0  ; SOURCE:',nsr2
@@ -215,9 +220,10 @@
                   endif
                enddo
                do isrc = 1, nsrc
-                  if ( mnksrc(3,isrc) ==  -1 ) cycle   ! awkward disabling of discharges outside partition when running parallel
-                  if ( mnksrc(7,isrc) .le. 1 ) cycle   ! not an intake - outfall or other construct
-                  if ( mnksrc(6,isrc) .eq. 0 ) then    ! depth average loads
+                  if (mnksrc(3,isrc) ==  -1) cycle   ! awkward disabling of discharges outside partition when running parallel
+                  if (mnksrc(7,isrc) == 4 .or. mnksrc(7,isrc) == 5 .or. mnksrc(7,isrc) == 8) cycle ! skip e,d and f culverts, output is not correct
+                  if (mnksrc(7,isrc) .le. 1) cycle   ! not an intake - outfall or other construct
+                  if (mnksrc(6,isrc) .eq. 0) then    ! depth average loads
                      iwp = iwpnt(isrc+nsrc)
                      write ( lunsrc , '(6X,E15.6,A,I4)' ) awaste(iwp+ilay), &
      &                                  '    1.0  ; SOURCE:',nsr2

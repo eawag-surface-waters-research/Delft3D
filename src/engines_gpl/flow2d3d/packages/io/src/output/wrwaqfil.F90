@@ -184,13 +184,14 @@
       integer  (4) mode2               !!  help variable
       integer  (4) noq1, noq2, noq3    !!  initially needed nr of exchanges in 3 dir.
       integer  (4) idim                !!  dimension work array
-      integer  (4) l                   !!  loop counter substances
+      integer  (4) l, i                !!  loop counter substances, sources
       character(5) sf                  !!  character variable for s(ediment concentration)f(iles)
       character(8) ssrff               !!  character variable for s(ediment) s(edimentation and) r(esuspension) f(lux) f(iles)
       integer  (4) istat               !!  allocate return status
       integer, allocatable :: isaggrl(:) !!  segment aggregation pointer (only top/bottom layer, depending on zmodel)
       integer  (4) ipiv                !!  help variable for array shift
       type(t_ug_meta)     :: meta
+      character(300) message
 !
 !! executable statements -------------------------------------------------------
 !
@@ -337,6 +338,14 @@
             if (istat==0) allocate ( gdp%gdwaqpar%discumwaq(  nsrc) , stat=istat)
             if (istat==0) allocate ( gdp%gdwaqpar%iwlk     (  nsrc) , stat=istat)
             if (istat==0) allocate ( gdp%gdwaqpar%ksrwaq   (2*nsrc) , stat=istat)
+            do i = 1, nsrc
+               if (mnksrc(7,i) == 4 .or. mnksrc(7,i) == 5 .or. mnksrc(7,i) == 8) then
+                  write ( message , '(3A)' ) '*** WARNING: no WAQ communication data for culvert ''', &
+                        trim(namsrc(i)), ''' will be written because it is a type d, e or f. Contact support!'
+                  write( *      , '(A)' ) trim(message)
+                  write( lundia , '(A)' ) trim(message)
+               end if
+            enddo
          endif
          if (istat/=0) then
             write(*,*) '*** ERROR: wrwaqfil: memory allocation error'

@@ -380,6 +380,7 @@
       il     = 1
       do i = 1,nsrc
          if (mnksrc(3,i) == -1) cycle ! awkward disabling of discharges outside partition when running parallel
+         if (mnksrc(7,i) == 4 .or. mnksrc(7,i) == 5 .or. mnksrc(7,i) == 8) cycle ! skip e,d and f culverts, output is not correct
          m = mnksrc(1,i)
          n = mnksrc(2,i)
          filstring = ''''//trim(namsrc(i))//''''//' normal'
@@ -429,8 +430,9 @@
       enddo
       il = 1
       do i = 1,nsrc
-         if ( mnksrc(3,i) ==  -1 ) cycle ! awkward disabling of discharges outside partition when running parallel
-         if ( mnksrc(7,i) .le. 1 ) cycle
+         if (mnksrc(3,i) ==  -1) cycle ! awkward disabling of discharges outside partition when running parallel
+         if (mnksrc(7,i) == 4 .or. mnksrc(7,i) == 5 .or. mnksrc(7,i) == 8) cycle ! skip e,d and f culverts, output is not correct
+         if (mnksrc(7,i) .le. 1) cycle
          m = mnksrc(4,i)
          n = mnksrc(5,i)
          if ( mnksrc(7,i) .eq. 2 ) then
