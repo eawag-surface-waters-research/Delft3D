@@ -225,6 +225,7 @@
                   PMSA(IP9  + (IVAN -1) * IN9 ) = RADTOP
                   PMSA(IP9 + (INAAR-1) * IN9 ) = RADBOT
                   PMSA(IP10 + (IVAN -1) * IN10) = RADBOT
+                  PMSA(IP11 + (IVAN -1) * IN11) = EXTVL * DEPTH
 
                ENDIF
 
@@ -239,6 +240,7 @@
 
                   PMSA(IP9 + (INAAR-1) * IN9) = RADBOT
                   PMSA(IP10 + (IVAN -1) * IN10) = RADBOT
+                  PMSA(IP11 + (IVAN -1) * IN11) = EXTVL * DEPTH
 
                ENDIF
 
@@ -252,6 +254,8 @@
 
 !              RadBot = Radsurf
                PMSA(IP10 + (INAAR-1) * IN10) = PMSA( IP3 + (INAAR-1)*IN3 )
+               
+               PMSA(IP11 + (INAAR-1) * IN11) = 0.0
 
 !...........Naar segment = actief water segment
             ELSE IF (IK1NR .EQ. 1) THEN
@@ -266,6 +270,7 @@
                   RADBOT = RADTOP * EXP( -EXTVL * DEPTH )
 
                   PMSA(IP10 + (INAAR-1) * IN10) = RADBOT
+                  PMSA(IP11 + (INAAR-1) * IN11) = EXTVL * DEPTH
 
                ENDIF
 
