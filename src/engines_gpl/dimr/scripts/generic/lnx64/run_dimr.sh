@@ -19,7 +19,7 @@ function print_usage_info {
     echo "-c, --corespernode <M>"
     echo "       number of cores per node, default $corespernodedefault"
     echo "-d, --debug <D>"
-    echo "       0:ALL, 6:SILENT"
+    echo "       0:ALL, 6:SILENT; ALL includes overall time output"
     echo "-h, --help"
     echo "       print this help message and exit"
     echo "-m, --masterfile <filename>"
@@ -207,11 +207,19 @@ if [ $debuglevel -eq 0 ]; then
     echo =========================================================
 fi
 
+timecmd=""
+if [ $debuglevel -eq 0 ]; then
+   if [ -z "${TIME}" ]; then
+       export TIME="\n\n %PCPU (%Xtext+%Ddata %Mmax)k \nreal %e \nuser %U \nsys %s"
+   fi
+   timecmd=/usr/bin/time
+fi
+
 
 if [ $NSLOTS -eq 1 ]; then
     echo "executing:"
-    echo "$bindir/dimr $configfile $debugarg"
-          $bindir/dimr $configfile $debugarg
+    echo "$timecmd $bindir/dimr $configfile $debugarg"
+          $timecmd $bindir/dimr $configfile $debugarg
 else
     #
     # Create machinefile using $PE_HOSTFILE
@@ -235,8 +243,8 @@ else
 
 
     echo "executing:"
-    echo "mpiexec -np $NSLOTS $bindir/dimr $configfile $debugarg"
-          mpiexec -np $NSLOTS $bindir/dimr $configfile $debugarg
+    echo "$timecmd mpiexec -np $NSLOTS $bindir/dimr $configfile $debugarg"
+          $timecmd mpiexec -np $NSLOTS $bindir/dimr $configfile $debugarg
 fi
 
 
