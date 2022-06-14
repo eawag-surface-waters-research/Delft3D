@@ -59,11 +59,14 @@ module coordinate_reference_system
       ! TODO: AvD: support BYTE/short as well?
    end type nc_attribute
 
-   !> Container for information about coordinate reference system in a NetCDF-file.
+   !> Container for information about coordinate reference system in a netCDF-file.
    type t_crs
-      character(len=64)               :: varname = ' ' !< Name of the NetCDF variable containing this CRS
+      character(len=64)               :: varname = ' ' !< Name of the netCDF variable containing this CRS
+      character(len=64)               :: name = ' '    !< Name of the coordinate reference system, like "Amersfoort / RD New"
+      character(len=64)               :: grid_mapping_name = ' '    !< Name of the grid mapping
       integer                         :: epsg_code     !< EPSG code (more info: http://spatialreference.org/)
       character(len=1024)             :: proj_string   !< PROJ-string (more info: http://proj4.org)
+      character(len=1024)             :: wkt   !< Well Known Text
       type(nc_attribute), allocatable :: attset(:)     !< General set with all/any attributes about this CRS.
    end type t_crs
 
