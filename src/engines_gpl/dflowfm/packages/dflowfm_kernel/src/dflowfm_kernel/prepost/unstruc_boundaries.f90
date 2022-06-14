@@ -1722,10 +1722,7 @@ subroutine init_threttimes()
  character(len=256)  :: qidfm, tracnam, sedfracnam, qidnam
  integer, external   :: findname
 
- if(jatransportmodule == 0) then
-    return
- endif
-
+ 
  ! deallocation of TH arrays
  if(allocated(threttim)) then
     deallocate(threttim)

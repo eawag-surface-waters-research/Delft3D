@@ -73,18 +73,16 @@ subroutine sumvalueOnCrossSections(resu, numvals)
 
            resu(IPNT_HUA,icrs) = resu(IPNT_HUA,icrs) + hu(L) * au(L)                                 ! upwind waterdepth
 
-           if( jatransportmodule.ne.0 ) then
-              IP = IPNT_HUA
-              do num = 1,NUMCONST_MDU
-                 IP = IP + 1
-                 do LL = Lbot(L), Ltop(L)
-                    k1 = ln(1,LL); k2 = ln(2,LL)
-                    resu(IP,icrs) = resu(IP,icrs) + dble(sign(1, Lf)) * ( max(q1(LL),0d0) * constituents(num,k1) &
-                                                                        + min(q1(LL),0d0) * constituents(num,k2) )
-                 enddo
+           IP = IPNT_HUA
+           do num = 1,NUMCONST_MDU
+              IP = IP + 1
+              do LL = Lbot(L), Ltop(L)
+                 k1 = ln(1,LL); k2 = ln(2,LL)
+                 resu(IP,icrs) = resu(IP,icrs) + dble(sign(1, Lf)) * ( max(q1(LL),0d0) * constituents(num,k1) &
+                                                                     + min(q1(LL),0d0) * constituents(num,k2) )
               enddo
-           endif
-
+           enddo
+ 
            if( jased == 4 .and. stmpar%lsedtot > 0 ) then ! todo, loop korter tot lsedsus.
               IP = IPNT_HUA + NUMCONST_MDU + 1 ! TODO: mourits/dam_ar: check whether all uses of NUMCONST versus NUMCONST_MDU are now correct.
               do lsed = 1,stmpar%lsedtot

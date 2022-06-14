@@ -44,10 +44,6 @@
  double precision :: qsrck, qsrckk, dzss
  double precision :: frac=0.5d0           ! cell volume fraction that can at most be extracted in one step
 
- if (jatransportmodule == 0) then         ! also just prior to setsorsin
-    salsrc = 0d0
- endif
-
  srsn = 0d0; vcsrc = 0d0
  do n  = 1,numsrc
     kk       = ksrc(1,n)                  ! 2D pressure cell nr, From side, 0 = out of all, -1 = in other domain, > 0, own domain
@@ -217,15 +213,6 @@
              endif
              qin(k)  = qin(k)  - qsrck
           endif
-          if (jatransportmodule == 0) then
-              if (qsrck > 0) then              ! FROM k to k2
-                 if (jasal > 0) salsrc(k)  = salsrc (k) - qsrck*constituents(isalt, k) 
-                 if (jatem > 0) heatsrc(k) = heatsrc(k) - qsrck*constituents(itemp,k)
-              else if  (qsrck  < 0) then       ! FROM k2 to k
-                 if (jasal > 0) salsrc(k)  = salsrc (k) - qsrck*sasrc(n)
-                 if (jatem > 0) heatsrc(k) = heatsrc(k) - qsrck*tmsrc(n)
-              endif
-          endif
        enddo
     endif
 
@@ -241,15 +228,6 @@
                 qsrck = qsrckk / (ksrc(6,n) - ksrc(5,n) + 1)
              endif
              qin(k) = qin(k) + qsrck
-          endif
-          if (jatransportmodule == 0) then
-             if (qsrck > 0) then
-                if (jasal > 0) salsrc (k) = salsrc (k) + qsrck*sasrc(n)
-                if (jatem > 0) heatsrc(k) = heatsrc(k) + qsrck*tmsrc(n)
-             else if  (qsrck  < 0) then
-                if (jasal > 0) salsrc (k) = salsrc (k) + qsrck*constituents(isalt,k)
-                if (jatem > 0) heatsrc(k) = heatsrc(k) + qsrck*constituents(itemp,k)
-             endif
           endif
        enddo
     endif

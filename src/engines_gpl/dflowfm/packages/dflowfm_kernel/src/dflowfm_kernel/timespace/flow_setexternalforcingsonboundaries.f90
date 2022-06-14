@@ -244,7 +244,7 @@ subroutine flow_setexternalforcingsonboundaries(tim, iresult)
       end if
    endif
 
-   if(jatransportmodule>0 .and. allocated(threttim)) then
+   if(allocated(threttim)) then
       call fm_thahbc()
    endif
 

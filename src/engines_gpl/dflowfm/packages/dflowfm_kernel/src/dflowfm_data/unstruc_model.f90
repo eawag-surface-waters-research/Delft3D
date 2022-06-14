@@ -1024,8 +1024,7 @@ subroutine readMDUFile(filename, istat)
     call prop_get_integer(md_ptr, 'numerics', 'Limtypmom'       , limtypmom)
     call prop_get_integer(md_ptr, 'numerics', 'Limtypsa'        , limtypsa)
     call prop_get_integer(md_ptr, 'numerics', 'Limtypw'         , limtypw)
-    call prop_get_integer(md_ptr, 'numerics', 'TransportMethod' , jatransportmodule)
-    if (jatransportmodule == 1 .and. kmx > 1) then ! package deal
+    if (kmx > 1) then ! package deal
        ja_timestep_auto = 5
     endif
 
@@ -2822,12 +2821,9 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
        call prop_set(prop_ptr, 'numerics', 'Limtypw'         , limtypw, 'Limiter type for wave action transport (0: none, 1: minmod, 2: van Leer, 3: Koren, 4: monotone central)')
     end if
 
-    call prop_set(prop_ptr, 'numerics', 'TransportMethod', jatransportmodule,   'Transport method (0: Herman''s method, 1: transport module)')
-    if (writeall .or. jatransportmodule == 1) then
-       call prop_set(prop_ptr, 'numerics', 'TransportAutoTimestepdiff', jatransportautotimestepdiff,   'Auto Timestepdiff in Transport, 0 : lim diff, no lim Dt_tr, 1 : no lim diff, lim Dt_tr, 2: no lim diff, no lim Dt_tr, 3=implicit (only 2D)')
-       call prop_set(prop_ptr, 'numerics', 'Implicitdiffusion2D', Implicitdiffusion2D,   '1 = Yes, 0 = No')
-    endif
-
+    call prop_set(prop_ptr, 'numerics', 'TransportAutoTimestepdiff', jatransportautotimestepdiff,   'Auto Timestepdiff in Transport, 0 : lim diff, no lim Dt_tr, 1 : no lim diff, lim Dt_tr, 2: no lim diff, no lim Dt_tr, 3=implicit (only 2D)')
+    call prop_set(prop_ptr, 'numerics', 'Implicitdiffusion2D', Implicitdiffusion2D,   '1 = Yes, 0 = No')
+  
     call prop_set(prop_ptr, 'numerics', 'Vertadvtypsal', Javasal,   'Vertical advection type for salinity (0: none, 1: upwind explicit, 2: central explicit, 3: upwind implicit, 4: central implicit, 5: central implicit but upwind for neg. stratif., 6: higher order explicit, no Forester)')
     call prop_set(prop_ptr, 'numerics', 'Vertadvtyptem', Javatem,   'Vertical advection type for temperature (0: none, 1: upwind explicit, 2: central explicit, 3: upwind implicit, 4: central implicit, 5: central implicit but upwind for neg. stratif., 6: higher order explicit, no Forester)')
     call prop_set(prop_ptr, 'numerics', 'Vertadvtypmom', javau, 'Vertical advection type for u1: 0: No, 3: Upwind implicit, 4: Central implicit, 5: QUICKEST implicit., 6: centerbased upwind expl, 7=6 HO' )

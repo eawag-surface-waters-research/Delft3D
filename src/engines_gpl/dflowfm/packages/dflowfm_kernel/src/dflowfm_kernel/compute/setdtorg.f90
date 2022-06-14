@@ -76,11 +76,6 @@
 
     if (ja_timestep_auto == 1 ) then   ! depth averaged timestep
        if ( itstep.ne.4 ) then   ! non-explicit time-step
-          !if ( jatransportmodule.eq.1 .and. time_dtmax.eq.time1 ) then
-          !   dts = dtmin_transp
-          !   kkcflmx  = kk_dtmin
-          !   jareduced = 1
-          !else
           if (ja_timestep_nostruct > 0) then  !< Exclude (structure) links without advection from the time step limitation
              squcor(1:ndx) = squ(1:ndx) ! Start with already computed squ.
              do L = 1,lnx1d

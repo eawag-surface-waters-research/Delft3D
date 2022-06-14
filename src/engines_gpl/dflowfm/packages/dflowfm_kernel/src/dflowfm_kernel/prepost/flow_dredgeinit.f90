@@ -47,10 +47,6 @@ subroutine flow_dredgeinit()
    dad_included = len_trim(md_dredgefile) /= 0
    if (.not. dad_included) return
 
-   if ( stm_included .and. jased.ne.0 .and. jatransportmodule.eq.0 ) then
-      call mess(LEVEL_FATAL, 'unstruc::flow_dredgeinit - Please use transport module with sediment model 4.')
-   end if
-
    call initdredge(dadpar)
    call fm_rddredge(dadpar, md_dredgefile, error)
    if (error) then

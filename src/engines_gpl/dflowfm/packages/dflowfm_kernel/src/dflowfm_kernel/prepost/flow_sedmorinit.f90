@@ -85,11 +85,7 @@ subroutine flow_sedmorinit()
 !
     if (.not.stm_included) return
 
-    if ( stm_included .and. jased.ne.0 .and. jatransportmodule.eq.0 ) then
-       call mess(LEVEL_FATAL, 'unstruc::flow_sedmorinit - Please use transport module when Sedimentmodelnr == 4, by setting TransportMethod = 1 under [numerics].')
-       return
-    end if
-    !
+      !
     inquire (file = trim(md_sedfile), exist = ex)
     if (.not. ex) then
        call mess(LEVEL_FATAL, 'unstruc::flow_sedmorinit - *.sed file in mdu file does not exist.')
