@@ -21,8 +21,15 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-      INTEGER  KNH4,  KNO3,  KPO4,   KSIO,  KDETN,  KDETP, KDETS,
-     &         KPHYT, KBODN,  KBODP, KBODSI
+module m_syst      !  Logic flag time functions
 
-      COMMON / CONCH /  KNH4,  KNO3,  KPO4,   KSIO,  KDETN,  KDETP,
-     &                  KDETS, KPHYT, KBODN,  KBODP, KBODSI
+    logical bndset   !  For boundaries
+    logical wstset   !  For wasteloads
+    logical funset   !  For constants parameters functions segfuns
+    logical othset   !  For others
+
+    integer ibndmx
+    integer iwstmx
+    integer ifunmx
+
+end module m_syst

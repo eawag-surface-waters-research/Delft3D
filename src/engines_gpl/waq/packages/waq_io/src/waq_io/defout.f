@@ -38,6 +38,7 @@
 
       use timers       !   performance timers
       use output
+      use m_sysi          ! Timer characteristics
 
       implicit none
 
@@ -55,9 +56,6 @@
 
 !     Common declarations
 
-!     COMMON  /  SYSI  /    Timer characteristics
-
-      INCLUDE 'sysi.inc'
 
 !     Local declarations
 

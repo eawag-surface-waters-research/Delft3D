@@ -790,7 +790,7 @@
 
       ! Function to get around the name clash - information in a COMMON block
       integer function get_original_noseg()
-          include 'sysn.inc'
+          use m_sysn          ! System characteristics
 
           get_original_noseg = noseg
       end function get_original_noseg

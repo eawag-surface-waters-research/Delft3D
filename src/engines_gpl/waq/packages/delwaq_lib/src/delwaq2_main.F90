@@ -50,6 +50,9 @@ subroutine dlwqmain(action, argc, argv, dlwqd)
       use delwaq2
       use delwaq2_data
       use dhcommand
+      use m_actions
+      use m_sysn
+      use m_sysi
 
       implicit none
 
@@ -67,9 +70,6 @@ subroutine dlwqmain(action, argc, argv, dlwqd)
       integer, save                                 :: itoti
       integer, save                                 :: itotc
 
-      include 'sysn_ff.inc'
-      include 'sysi_ff.inc'
-      include 'actions.inc'
 
 
       call delwaq2_main_init(dlwqd, itota, itoti, itotc, init, action, argc, argv)

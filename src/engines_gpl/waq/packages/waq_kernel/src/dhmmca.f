@@ -43,6 +43,11 @@
 !     Routines            : SRSTOP, stops execution (on error)
 
       use partition_arrays ! module for computing the pointers into the arrays
+      use m_sysn          ! System characteristics
+      use m_sysi          ! Timer characteristics
+      use m_sysa          ! Pointers in real array workspace
+      use m_sysj          ! Pointers in integer array workspace
+      use m_sysc          ! Pointers in character array workspace
 
       implicit none
 
@@ -52,7 +57,6 @@
 
       integer      , intent(in   ) :: lunrep    ! logical unitnumber output file
       logical      , intent(in   ) :: l_decl    ! Declare memory y/n
-!     integer      , intent(in   ) :: noarr     ! dimension of parameter arrays, contained in 'sysn.inc'
       integer      , intent(inout) :: arrpoi(:) ! Pointer in workarray/FMM reference pointer
       integer      , intent(inout) :: arrtyp(:) ! Array type ( INT=,REAL=,CHAR= ), see FMM/NEFIS
       integer      , intent(inout) :: arrbyt(:) ! Number of bytes per element, see FMM/NEFIS
@@ -65,32 +69,10 @@
       integer      , intent(inout) :: itotc     ! Required array space
       type(memory_partition), intent(inout) :: part ! Private variables for MAKPTR
 
-!     COMMON  /  SYSN   /   System characteristics
-
-      INCLUDE 'sysn.inc'
-
-!     COMMON  /  SYSI   /   Timer characteristics
-
-      INCLUDE 'sysi.inc'
-
-!     COMMON  /  SYSA   /   Pointers in real array workspace
-
-      INCLUDE 'sysa.inc'
-
-!     COMMON  /  SYSJ   /   Pointers in integer array workspace
-
-      INCLUDE 'sysj.inc'
-
-!     COMMON  /  SYSC   /   Pointers in character array workspace
-
-      INCLUDE 'sysc.inc'
 
 !     Local declarations
 
       character*20       :: namarr                      ! help variable for array name
-      integer, parameter :: nr_car = icsize             ! total number of arrays
-      integer            :: ip_car(nr_car)              ! help array to fill the common block / SYSA /
-      equivalence   ( ianam  , ip_car(1) )              ! first entry equivalences with first entry common block
 
       integer            :: iianam, iimnam, iisnam, iidnam, iibnid,
      &                      iibnam, iibtyp, iiwsid, iiwnam, iiwtyp,

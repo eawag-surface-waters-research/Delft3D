@@ -37,12 +37,12 @@
       use rd_token       ! tokenized reading
       use partmem, only: alone, lsettl, layt        ! for the interface with Delpar (Tau and VertDisp)
       use timers       !   performance timers
+      use m_sysn
       implicit none
 
 !     implicit none
 
       include 'omp_lib.h'
-      INCLUDE 'sysn.inc' !   COMMON  /  SYSN   /   System characteristics
 
 !     declaration of arguments
 

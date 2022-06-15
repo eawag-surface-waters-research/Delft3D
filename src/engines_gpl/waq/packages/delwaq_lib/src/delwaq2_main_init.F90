@@ -27,6 +27,9 @@ subroutine delwaq2_main_init(dlwqd, itota, itoti, itotc, init, action, argc, arg
   use delwaq2
   use delwaq2_data
   use dhcommand
+  use m_actions
+  use m_sysn
+  use m_sysi
 
 
   implicit none
@@ -45,9 +48,6 @@ subroutine delwaq2_main_init(dlwqd, itota, itoti, itotc, init, action, argc, arg
   integer, intent(inout)                        :: itoti
   integer, intent(inout)                        :: itotc
 
-  include 'sysn_ff.inc'
-  include 'sysi_ff.inc'
-  include 'actions.inc'
   
 
   init = .false.

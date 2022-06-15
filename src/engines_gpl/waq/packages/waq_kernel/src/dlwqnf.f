@@ -89,10 +89,15 @@
       use delwaq2_data
       use m_openda_exchange_items, only : get_openda_buffer
       use report_progress
+      use m_actions
+      use m_sysn          ! System characteristics
+      use m_sysi          ! Timer characteristics
+      use m_sysa          ! Pointers in real array workspace
+      use m_sysj          ! Pointers in integer array workspace
+      use m_sysc          ! Pointers in character array workspace
 
       implicit none
 
-      include 'actions.inc'
 
 !     Arguments:
 
@@ -109,20 +114,7 @@
 
 !$    include "omp_lib.h"
 
-!     common  /  sysn   /   system characteristics
-      include 'sysn.inc'
 
-!     common  /  sysi  /    timer characteristics
-      include 'sysi.inc'
-
-!     common  /  sysa   /   pointers in real array workspace
-      include 'sysa.inc'
-
-!     common  /  sysj   /   pointers in integer array workspace
-      include 'sysj.inc'
-
-!     common  /  sysc   /   pointers in character array workspace
-      include 'sysc.inc'
 
 !     Common to define external communications in SOBEK
 !     olcfwq             Flag indicating ONLINE running of CF and WQ
@@ -180,7 +172,6 @@
       integer                :: lleng
       integer                :: ioptzb
 
-      include 'state_data.inc'
 
 !     SPECIAL REMARKS    : MASS-ARRAY IS USED FOR RHS VECTOR!!
 !

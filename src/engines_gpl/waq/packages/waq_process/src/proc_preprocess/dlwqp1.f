@@ -47,11 +47,10 @@
       use output
       use partable
       use string_module
+      use m_sysn          ! System characteristics
+      use m_sysi          ! Timer characteristics
 
       implicit none
-
-      include 'sysn.inc'                           ! COMMON  /  SYSN   /   System characteristics
-      include 'sysi.inc'                           ! COMMON  /  SYSI  /    Timer characteristics
 
       ! declaration of arguments
 

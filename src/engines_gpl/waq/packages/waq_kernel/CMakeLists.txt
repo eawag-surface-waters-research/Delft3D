@@ -29,6 +29,7 @@ if(UNIX)
                             part_io_f
                             part_kernel_f
                             part_utils_f
+                            waq_include
                             waq_plugin_wasteload
                             waq_process
                             waq_utils_c
@@ -52,6 +53,7 @@ if(WIN32)
                             part_io_f
                             part_kernel_f
                             part_utils_f
+                            waq_include
                             waq_plugin_wasteload
                             waq_process
                             waq_utils_c

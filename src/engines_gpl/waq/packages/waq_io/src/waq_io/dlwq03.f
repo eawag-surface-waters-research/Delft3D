@@ -67,6 +67,8 @@
       use timers       !   performance timers
       use dlwq_netcdf  !   read/write grid in netcdf
       use output       !   output settings
+      use m_sysn          ! System characteristics
+
 
       implicit none
 
@@ -91,8 +93,6 @@
       logical      , intent(out)   :: has_hydfile       !< if true, much information comes from the hyd-file
       integer  ( 4), dimension(3), intent(out) :: nexch !< number of exchanges as read via hyd-file
       type(GridPointerColl)           GridPs            !< Collection of grid pointers
-
-      include 'sysn.inc'        !     common  /  sysn  /    System dimensions
 
 !     local decalations
 
@@ -697,13 +697,14 @@
       ! Check the contents of the volumes file: id the time step compatible?
       !
       subroutine check_volume_time( lunut, filvol, noseg, ierr2 )
+      
+      use m_sysi          ! Timer characteristics
+
 
       integer, intent(in)          :: lunut      !< LU-number of the report file
       character(len=*), intent(in) :: filvol     !< Name of the volumes file to be checked
       integer, intent(in)          :: noseg      !< Number of segments
       integer, intent(out)         :: ierr2      !< Whether an error was found or not
-
-      include 'sysi.inc'        !     common  /  sysi  /    Timer characteristics
 
       integer                      :: i, ierr
       integer                      :: luvol

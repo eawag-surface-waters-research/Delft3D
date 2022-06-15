@@ -38,6 +38,11 @@
 !     SUBROUTINES CALLED  : SRSTOP, stops execution
 
       use partition_arrays ! module for computing the pointers into the arrays
+      use m_sysn          ! System characteristics
+      use m_sysi          ! Timer characteristics
+      use m_sysa          ! Pointers in real array workspace
+      use m_sysj          ! Pointers in integer array workspace
+      use m_sysc          ! Pointers in character array workspace
 !
 !     PARAMETERS          :
 !
@@ -54,26 +59,6 @@
       CHARACTER*(*) C(:)
       type(memory_partition), intent(inout) :: part ! Private variables for MAKPTR
 
-!
-!     COMMON  /  SYSN   /   System characteristics
-!
-      INCLUDE 'sysn.inc'
-!
-!     COMMON  /  SYSI   /   Timer characteristics
-!
-      INCLUDE 'sysi.inc'
-!
-!     COMMON  /  SYSA   /   Pointers in real array workspace
-!
-      INCLUDE 'sysa.inc'
-!
-!     COMMON  /  SYSJ   /   Pointers in integer array workspace
-!
-      INCLUDE 'sysj.inc'
-!
-!     COMMON  /  SYSC   /   Pointers in character array workspace
-!
-      INCLUDE 'sysc.inc'
 !
 !     Local declarations
 !

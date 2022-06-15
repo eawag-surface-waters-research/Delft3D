@@ -43,10 +43,16 @@
       use m_openda_exchange_items, only : get_openda_buffer
       use report_progress
       use waqmem          ! module with the more recently added arrays
-
+      use m_actions
+      use m_sysn          ! System characteristics
+      use m_sysi          ! Timer characteristics
+      use m_sysa          ! Pointers in real array workspace
+      use m_sysj          ! Pointers in integer array workspace
+      use m_sysc          ! Pointers in character array workspace
+      
       implicit none
 
-      include 'actions.inc'
+
 C
 C     Declaration of arguments
 C
@@ -59,26 +65,7 @@ C
       TYPE(DELWAQ_DATA), TARGET   :: DLWQD
       type(GridPointerColl)       :: GridPs               ! collection of all grid definitions
 
-C
-C     COMMON  /  SYSN   /   System characteristics
-C
-      INCLUDE 'sysn.inc'
-C
-C     COMMON  /  SYSI  /    Timer characteristics
-C
-      INCLUDE 'sysi.inc'
-C
-C     COMMON  /  SYSA   /   Pointers in real array workspace
-C
-      INCLUDE 'sysa.inc'
-C
-C     COMMON  /  SYSJ   /   Pointers in integer array workspace
-C
-      INCLUDE 'sysj.inc'
-C
-C     COMMON  /  SYSC   /   Pointers in character array workspace
-C
-      INCLUDE 'sysc.inc'
+
 C
 C     Local declarations
 C
@@ -124,7 +111,6 @@ C
       logical          :: updatr
       real(kind=kind(1.0d0)) :: tol
 
-      include 'state_data.inc'
 
       if ( action == ACTION_FINALISATION ) then
           include 'dlwqdata_restore.inc'

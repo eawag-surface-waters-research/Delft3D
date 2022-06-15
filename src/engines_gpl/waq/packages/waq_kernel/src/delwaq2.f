@@ -107,10 +107,15 @@
       use m_timers_waq
       use m_couplib
       use delwaq2_data
+      use m_actions
+      use m_sysn          ! System characteristics
+      use m_sysi          ! Timer characteristics
+      use m_sysa          ! Pointers in real array workspace
+      use m_sysj          ! Pointers in integer array workspace
+      use m_sysc          ! Pointers in character array workspace
 
       implicit none
 
-      include 'actions.inc'
 !
 !     Declaration of arguments
 !
@@ -124,26 +129,7 @@
       TYPE(DELWAQ_DATA), TARGET               :: DLWQD
       type(GridPointerColl), pointer          :: GridPs               ! collection of all grid definitions
 
-!
-!     COMMON  /  SYSN   /   System characteristics
-!
-      INCLUDE 'sysn.inc'
-!
-!     COMMON  /  SYSI  /    Timer characteristics
-!
-      INCLUDE 'sysi.inc'
-!
-!     COMMON  /  SYSA   /   Pointers in real array workspace
-!
-      INCLUDE 'sysa.inc'
-!
-!     COMMON  /  SYSJ   /   Pointers in integer array workspace
-!
-      INCLUDE 'sysj.inc'
-!
-!     COMMON  /  SYSC   /   Pointers in character array workspace
-!
-      INCLUDE 'sysc.inc'
+
 !
 !     PARAMETERS    :
 !
@@ -164,9 +150,6 @@
 !
 !           input structure for boot-file
 !
-      INTEGER, DIMENSION(INSIZE)  :: IN
-      INTEGER, DIMENSION(IISIZE)  :: II
-      EQUIVALENCE ( IN( 1) , NOSEG ) , ( II( 1) , ITSTRT )
 !
       INTEGER, SAVE            :: LUN(NLUN)
       CHARACTER*(LCHMAX), SAVE :: LCHAR(NLUN)

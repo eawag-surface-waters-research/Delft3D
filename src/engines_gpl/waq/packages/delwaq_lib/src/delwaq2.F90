@@ -26,8 +26,8 @@ subroutine delwaq2( argc, argv, errorcode )
       !DEC$ ATTRIBUTES DLLEXPORT::delwaq2
 
       use delwaq2_data
+      use m_actions
       implicit none
-      include 'actions.inc'
     
       integer, intent(in)                           :: argc
       character(len=*), dimension(argc), intent(in) :: argv

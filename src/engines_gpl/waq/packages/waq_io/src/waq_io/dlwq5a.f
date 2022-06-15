@@ -79,6 +79,9 @@
       use rd_token
       use timers       !   performance timers
       use dlwq_data
+      use m_sysn          ! System characteristics
+      use m_sysi          ! Timer characteristics
+
 
       implicit none
       
@@ -107,25 +110,7 @@
       integer  ( 4), intent(inout) :: ierr          !< cumulative error   count
       integer  ( 4), intent(inout) :: iwar          !< cumulative warning count
 
-!     IN THE COMMON BLOCK:
 
-!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-!     ---------------------------------------------------------
-!     block sysi.inc
-!     ITSTRT  INTEGER    1         INPUT   Simulation start time ( scu )
-!     ITSTOP  INTEGER    1         INPUT   Simulation stop time ( scu )
-!     ISFACT  INTEGER    1         INPUT   system clock in seconds
-!     OTIME   REAL*8     1         INPUT   Julian offset of the real time
-!     block sysn.inc
-!     NEWRSP  INTEGER    1         IN/OUT  Real array space new bounds
-!     NEWISP  INTEGER    1         IN/OUT  Integer array space new bounds
-
-!*****NB for memory map see end of routine
-
-!     System common blocks
-
-      INCLUDE 'sysi.inc'       !     COMMON  /  SYSI   /   System timers
-      INCLUDE 'sysn.inc'       !     COMMON  /  SYSN   /   System characteristics
 
 !     Local declarations
 

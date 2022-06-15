@@ -221,12 +221,13 @@ end subroutine delwaq2_global_data_finalize
 
 subroutine delwaq2_global_data_copy( dlwqd )
 
+    use m_sysn
+    use m_sysc
+  
     type(delwaq_data) :: dlwqd
 
     character(len=20), dimension(1) :: dlwqname ! Template for entity names
 
-    include 'sysn_ff.inc'   ! for noutp
-    include 'sysc_ff.inc'
 
     integer :: iColl, max_waqfiles
     !

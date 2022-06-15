@@ -28,6 +28,12 @@
       USE DHMMCA_MOD
       USE DHMMJA_MOD
       USE DHMMRA_MOD
+      use m_sysn          ! System characteristics
+      use m_sysi          ! Timer characteristics
+      use m_sysa          ! Pointers in real array workspace
+      use m_sysj          ! Pointers in integer array workspace
+      use m_sysc          ! Pointers in character array workspace
+
 
       CONTAINS
 
@@ -77,26 +83,7 @@
       INTEGER*8              :: ITOT
 
       TYPE(MEMORY_PARTITION) :: PART
-!
-!     COMMON  /  SYSI   /   Timer characteristics
-!
-      INCLUDE 'sysi.inc'
-!
-!     COMMON  /  SYSN   /   System characteristics
-!
-      INCLUDE 'sysn.inc'
-!
-!     COMMON  /  SYSA   /   Pointers in real array workspace
-!
-      INCLUDE 'sysa.inc'
-!
-!     COMMON  /  SYSJ   /   Pointers in integer array workspace
-!
-      INCLUDE 'sysj.inc'
-!
-!     COMMON  /  SYSC   /   Pointers in character array workspace
-!
-      INCLUDE 'sysc.inc'
+
 !
 !     Allocate initial space
 !

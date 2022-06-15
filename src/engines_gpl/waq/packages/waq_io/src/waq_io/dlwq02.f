@@ -77,6 +77,8 @@
       use alloc_mod
       use dlwq0t_data
       use timers       !   performance timers
+      use m_sysi          ! Timer characteristics
+
 
       implicit none
 
@@ -114,7 +116,6 @@
       integer  ( 4), intent(inout) :: ierr              !< cumulative error   count
       integer  ( 4), intent(inout) :: iwar              !< cumulative warning count
 
-      include 'sysi.inc'         !    COMMON  /  SYSI  /    Timer characteristics
 !     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
 !     ---------------------------------------------------------
 !     ITSTRT  INTEGER    1         INPUT   Simulation start time ( scu )

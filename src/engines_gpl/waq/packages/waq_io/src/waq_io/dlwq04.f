@@ -74,6 +74,8 @@
       use pointr_mod
       use partmem
       use timers       !   performance timers
+      use m_sysn          ! System characteristics
+
 
       implicit none
 
@@ -103,8 +105,6 @@
       integer  ( 4), intent(inout) :: iwar              !< cumulative warning count
       logical      , intent(in)    :: has_hydfile       !< if true, much information comes from the hyd-file
       integer  ( 4), dimension(*), intent(in) :: nexch  !< nmber of exchanges from the hyd-file
-
-      include 'sysn.inc'      !    COMMON  /  SYSN  /    System dimensions
 
 !     COMMON BLOCK  :
 

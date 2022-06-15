@@ -56,11 +56,10 @@
       use m_couplib
       use delwaq2_data
       use grids
+      use m_sysn          ! System characteristics
+      use m_syst          ! Time function flags
 
       implicit none
-
-      include 'sysn.inc'     !  common with system dimensions
-      include 'syst.inc'     !  common with time function flags
 
 !     Parameters          :
 

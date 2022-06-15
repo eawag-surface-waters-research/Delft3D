@@ -41,11 +41,11 @@
 !
 !     declarations
 !
+      use m_sysn          ! System characteristics
       integer       pnolay
 !
 !     common  /  sysn   /   system characteristics
 !
-      include 'sysn.inc'
 
       pnolay = nolay
 

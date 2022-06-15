@@ -21,5 +21,7 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-      common/extra/ timmax, timsol
-      integer timmax, timsol
+module m_extra
+      integer :: timmax
+      integer :: timsol
+end module m_extra

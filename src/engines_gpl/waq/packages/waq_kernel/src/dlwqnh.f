@@ -85,10 +85,15 @@
       use delwaq2_data
       use m_openda_exchange_items, only : get_openda_buffer
       use report_progress
+      use m_actions
+      use m_sysn          ! System characteristics
+      use m_sysi          ! Timer characteristics
+      use m_sysa          ! Pointers in real array workspace
+      use m_sysj          ! Pointers in integer array workspace
+      use m_sysc          ! Pointers in character array workspace
 
       implicit none
 
-      include 'actions.inc'
 !
 !     Declaration of arguments
 !
@@ -103,26 +108,6 @@
 
 !$    include "omp_lib.h"
 
-!
-!     COMMON  /  SYSN   /   System characteristics
-!
-      INCLUDE 'sysn.inc'
-!
-!     COMMON  /  SYSI  /    Timer characteristics
-!
-      INCLUDE 'sysi.inc'
-!
-!     COMMON  /  SYSA   /   Pointers in real array workspace
-!
-      INCLUDE 'sysa.inc'
-!
-!     COMMON  /  SYSJ   /   Pointers in integer array workspace
-!
-      INCLUDE 'sysj.inc'
-!
-!     COMMON  /  SYSC   /   Pointers in character array workspace
-!
-      INCLUDE 'sysc.inc'
 !
 !     Local declarations
 !
@@ -156,7 +141,6 @@
       integer       :: ithandl
       integer, save :: ithand1 = 0 ! Leave local
 
-      include 'state_data.inc'
 
       if ( action == ACTION_INITIALISATION  .or.
      &     action == ACTION_FINALISATION           ) then

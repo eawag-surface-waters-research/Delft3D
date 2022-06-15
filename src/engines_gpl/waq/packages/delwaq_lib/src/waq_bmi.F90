@@ -113,6 +113,7 @@ contains
     use dhcommand
     use exception_waq
     use exception_part
+    use m_actions
 
     implicit none
     character(kind=c_char),intent(in)    :: c_config_file(MAXSTRLEN)
@@ -120,7 +121,6 @@ contains
     integer                          :: argc
     integer                          :: iarg
     integer                          :: errorcode
-    include 'actions.inc'
 
     ! do not use stop, but exception when used trough bmi
     useexception_waq = .true.
@@ -215,14 +215,14 @@ end subroutine get_attribute
     use delwaq2_global_data
     use messagehandling
     use iso_c_binding, only: c_double
+    use m_actions
+    use m_sysi
 
     implicit none
 
     real(c_double), value, intent(in) :: dt
     integer :: update_steps, step
     character(len=20), dimension(0) :: argv_dummy
-    include 'sysi_ff.inc'
-    include 'actions.inc'
 
     update_steps = nint(dt * dlwqd%tscale) / idt
     if(intsrt == 2) then
@@ -238,10 +238,12 @@ end subroutine get_attribute
   integer function finalize() bind(C, name="finalize")
     !DEC$ ATTRIBUTES DLLEXPORT :: finalize
     use delwaq2_global_data
+    use m_actions
+    
     implicit none
     character(len=20), dimension(0) :: argv_dummy
     integer :: ierr
-    include 'actions.inc'
+
 
     call dlwqmain( ACTION_SINGLESTEP, 0, argv_dummy, dlwqd )
     call dlwqmain( ACTION_FINALISATION, 0, argv_dummy, dlwqd )
@@ -255,9 +257,9 @@ end subroutine get_attribute
     !DEC$ ATTRIBUTES DLLEXPORT :: get_start_time
     use delwaq2_global_data
     use iso_c_binding, only: c_double
+    use m_sysi
     implicit none
     real(c_double), intent(out) :: t
-    include 'sysi_ff.inc'
 
     t = real(dlwqd%otime,8) + real(itstrt,8) / real(dlwqd%tscale,8)
   end subroutine get_start_time
@@ -267,9 +269,9 @@ end subroutine get_attribute
     !DEC$ ATTRIBUTES DLLEXPORT :: get_end_time
     use delwaq2_global_data
     use iso_c_binding, only: c_double
+    use m_sysi
     implicit none
     real(c_double), intent(out) :: t
-    include 'sysi_ff.inc'
 
     t = real(dlwqd%otime,8) + real(itstop,8) / real(dlwqd%tscale,8)
   end subroutine get_end_time
@@ -279,9 +281,9 @@ end subroutine get_attribute
     !DEC$ ATTRIBUTES DLLEXPORT :: get_time_step
     use delwaq2_global_data
     use iso_c_binding, only: c_double
+    use m_sysi
     implicit none
     real(c_double), intent(out) :: dt
-    include 'sysi_ff.inc'
 
     dt = real(idt,8) / real(dlwqd%tscale,8)
   end subroutine get_time_step
@@ -291,10 +293,10 @@ end subroutine get_attribute
     !DEC$ ATTRIBUTES DLLEXPORT :: get_current_time
     use delwaq2_global_data
     use iso_c_binding, only: c_double
+    use m_sysi
     implicit none
     real(c_double), intent(out) :: t
     integer current
-    include 'sysi_ff.inc'
 
     t = real(dlwqd%otime,8) + real(dlwqd%itime,8) / real(dlwqd%tscale,8)
   end subroutine get_current_time

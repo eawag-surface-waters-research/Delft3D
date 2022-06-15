@@ -77,6 +77,7 @@ if(UNIX)
                             nefis
                             delwaq_lib
                             waq_io
+                            waq_include
                             waq_kernel
                             waq_plugin_wasteload
                             waq_process

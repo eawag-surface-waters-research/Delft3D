@@ -66,13 +66,13 @@ end subroutine find_index
 !! Used here only
 subroutine set_intopt( option, keyword_true, keyword_false )
 
+    use m_sysi          ! Timer characteristics
+
     implicit none
 
     logical :: option                                  !< Selected value of the option
     character(len=*) :: keyword_true                   !< Keyword describing "true" value for the option
     character(len=*) :: keyword_false                  !< Keyword describing "false" value for the option
-
-    include 'sysi_ff.inc'
 
     integer :: lunut, ierr2
 
@@ -144,13 +144,12 @@ logical function GetWQDimensions(notot, noseg)
     !DEC$ ATTRIBUTES DECORATE, ALIAS : 'GETWQDIMENSIONS' :: GetWQDimensions
 
     use delwaq2_global_data
+    use m_sysi          ! Timer characteristics
 
     implicit none
 
     integer, intent(out)              :: notot         !< Number of substances
     integer, intent(out)              :: noseg         !< Number of segments
-
-    include 'sysi_ff.inc'
 
     notot = size_dlwq_state%notot
     noseg = size_dlwq_state%noseg
@@ -166,14 +165,14 @@ logical function SetSimulationTimes(startTime, endTime, timeStep)
     !DEC$ ATTRIBUTES DECORATE, ALIAS : 'SETSIMULATIONTIMES' :: SetSimulationTimes
 
     use delwaq2_global_data
+    use m_sysi          ! Timer characteristics
+
 
     implicit none
 
     integer, intent(in)              :: startTime       !< Start time in seconds since the reference date/time
     integer, intent(in)              :: endTime         !< Stop time in seconds since the reference date/time
     integer, intent(in)              :: timeStep        !< Time step in seconds
-
-    include 'sysi_ff.inc'
 
     itstrt = startTime
     itstop = endTime
@@ -192,14 +191,14 @@ logical function GetSimulationTimes(startTime, endTime, timeStep)
     !DEC$ ATTRIBUTES DECORATE, ALIAS : 'GETSIMULATIONTIMES' :: GetSimulationTimes
 
     use delwaq2_global_data
+    use m_sysi          ! Timer characteristics
+
 
     implicit none
 
     integer, intent(out)              :: startTime       !< Start time in seconds since the reference date/time
     integer, intent(out)              :: endTime         !< Stop time in seconds since the reference date/time
     integer, intent(out)              :: timeStep        !< Time step in seconds
-
-    include 'sysi_ff.inc'
 
     startTime = itstrt
     endTime   = itstop
@@ -212,14 +211,15 @@ end function GetSimulationTimes
 !> Set time format in monitoring file
 logical function SetTimeFormat(timeFormat)
 
+    use m_sysi          ! Timer characteristics
+
+
     !DEC$ ATTRIBUTES DLLEXPORT::SetTimeFormat
     !DEC$ ATTRIBUTES DECORATE, ALIAS : 'SETTIMEFORMAT' :: SetTimeFormat
 
     implicit none
 
     integer, intent(in)              :: timeFormat      !< Time format (0 = integer, 1 = dd:hh:mm:ss, 2 = yy:ddd:hh:mm:ss)
-
-    include 'sysi_ff.inc'
 
     isflag = timeFormat
 
@@ -263,16 +263,15 @@ logical function SetOutputTimers(type, startTime, endTime, timeStep)
     !DEC$ ATTRIBUTES DECORATE, ALIAS : 'SETOUTPUTTIMERS' :: SetOutputTimers
 
     use delwaq2_global_data
-
+    use m_sysn
+    use m_sysi
+  
     implicit none
 
     integer, intent(in)              :: type
     integer, intent(in)              :: startTime
     integer, intent(in)              :: endTime
     integer, intent(in)              :: timeStep
-
-    include 'sysi_ff.inc'
-    include 'sysn_ff.inc'
 
     select case ( type )
         case( 1 )
@@ -307,10 +306,9 @@ logical function SetAttributeInit(idx, ivalue)
 
     use waq_omi_utils
     use delwaq2_global_data
+    use m_sysn
 
     implicit none
-
-    include 'sysn_ff.inc'
 
     integer, intent(in)              :: idx
     integer, dimension(*), intent(in):: ivalue
@@ -407,14 +405,13 @@ logical function SetCurrentValueFieldInit(name, value)
 
     use waq_omi_utils
     use delwaq2_global_data
+    use m_sysn          ! System characteristics
+    use m_sysa          ! Pointers in real array workspace
 
     implicit none
 
     character(len=*), intent(in)     :: name
     real, dimension(*),intent(in)    :: value
-
-    include 'sysa_ff.inc'
-    include 'sysn_ff.inc'
 
     integer                          :: idx
 
@@ -454,14 +451,13 @@ logical function SetCurrentValueScalarRun(name, value)
 
     use waq_omi_utils
     use delwaq2_global_data
+    use m_sysn          ! System characteristics
+    use m_sysa          ! Pointers in real array workspace
 
     implicit none
 
     character(len=*), intent(in)     :: name
     real, intent(in)                 :: value
-
-    include 'sysa_ff.inc'
-    include 'sysn_ff.inc'
 
     integer                          :: idx
 
@@ -501,14 +497,15 @@ logical function SetCurrentValueFieldRun(name, value)
 
     use waq_omi_utils
     use delwaq2_global_data
+    use m_sysn          ! System characteristics
+    use m_sysa          ! Pointers in real array workspace
+
 
     implicit none
 
     character(len=*), intent(in)     :: name
     real, dimension(*),intent(in)    :: value
 
-    include 'sysa_ff.inc'
-    include 'sysn_ff.inc'
 
     integer                          :: idx
 
@@ -543,6 +540,9 @@ logical function GetCurrentValue(name, value)
 
     use waq_omi_utils
     use delwaq2_global_data
+    use m_sysn          ! System characteristics
+    use m_sysi          ! Timer characteristics
+    use m_sysa          ! Pointers in real array workspace
 
     implicit none
 
@@ -551,10 +551,6 @@ logical function GetCurrentValue(name, value)
 
     integer                          :: idx
     integer                          :: i
-
-    include 'sysa_ff.inc'
-    include 'sysi_ff.inc'
-    include 'sysn_ff.inc'
 
     GetCurrentValue = .false.
 
@@ -590,6 +586,7 @@ logical function SetIntegrationOptions(method, disp_flow_zero, disp_bound, first
 
     use waq_omi_utils
     use delwaq2_global_data
+    use m_sysi
 
     implicit none
 
@@ -599,8 +596,6 @@ logical function SetIntegrationOptions(method, disp_flow_zero, disp_bound, first
     logical, intent(in)              :: first_order
     logical, intent(in)              :: forester
     logical, intent(in)              :: anticreep
-
-    include 'sysi_ff.inc'
 
     intsrt = method
     intopt = 0
@@ -628,6 +623,7 @@ logical function SetBalanceOutputOptions(type, lump_processes, lump_loads, lump_
 
     use waq_omi_utils
     use delwaq2_global_data
+    use m_sysi
 
     implicit none
 
@@ -638,8 +634,6 @@ logical function SetBalanceOutputOptions(type, lump_processes, lump_loads, lump_
     logical, intent(in)              :: suppress_space
     logical, intent(in)              :: suppress_time
     integer, intent(in)              :: unit_type
-
-    include 'sysi_ff.inc'
 
     select case ( type )
         case (1,2)
@@ -677,10 +671,9 @@ logical function DefineWQSchematisation(number_segments, pointer_table, number_e
     !DEC$ ATTRIBUTES DECORATE, ALIAS : 'DEFINEWQSCHEMATISATION' :: DefineWQSchematisation
 
     use delwaq2_global_data
+    use m_sysn
 
     implicit none
-
-    include 'sysn_ff.inc'
 
     integer, intent(in)                  :: number_segments
     integer, dimension(4)                :: number_exchanges
@@ -779,10 +772,9 @@ logical function DefineWQDispersion(dispc, length)
     !DEC$ ATTRIBUTES DECORATE, ALIAS : 'DEFINEWQDISPERSION' :: DefineWQDispersion
 
     use delwaq2_global_data
+    use m_sysn
 
     implicit none
-
-    include 'sysn_ff.inc'
 
     real, dimension(3), intent(in)      :: dispc
     real, dimension(2,noq)              :: length
@@ -946,6 +938,7 @@ logical function DefineWQProcessesCore(substance, substance_mult, &
                                    process, number_processes)
 
     use delwaq2_global_data
+    use m_sysn
 
     implicit none
 
@@ -961,8 +954,6 @@ logical function DefineWQProcessesCore(substance, substance_mult, &
     character(len=*), dimension(number_fields)   :: field_parameter
 
     integer, dimension(number_substances)            :: substance_mult
-
-    include 'sysn_ff.inc'   ! for noutp
 
     integer                          :: numsubstot
     integer                          :: numsubsact
@@ -1097,14 +1088,13 @@ logical function DefineDischargeLocations(cell, number_loads)
 
     use waq_omi_utils
     use delwaq2_global_data
+    use m_sysn
 
     implicit none
 
 
     integer, intent(in)              :: number_loads
     integer, dimension(number_loads) :: cell
-
-    include 'sysn_ff.inc'
 
     integer                          :: i
     character(len=100)               :: message
@@ -1157,6 +1147,7 @@ logical function DefineMonitoringLocations(cell, name, number_monitoring)
 
     use waq_omi_utils
     use delwaq2_global_data
+    use m_sysn
 
     implicit none
 
@@ -1165,7 +1156,6 @@ logical function DefineMonitoringLocations(cell, name, number_monitoring)
     integer, intent(in)              :: number_monitoring
     character(len=*), dimension(number_monitoring)   :: name
     integer, dimension(number_monitoring)            :: cell
-    include 'sysn_ff.inc'
 
     integer                          :: i
     character(len=100)               :: message
@@ -1214,12 +1204,11 @@ logical function SetInitialVolume( volume )
 
     use waq_omi_utils
     use delwaq2_global_data
+    use m_sysn          ! System characteristics
+    use m_sysi          ! Timer characteristics
+    use m_sysa          ! Pointers in real array workspace
 
     implicit none
-
-    include 'sysn_ff.inc'
-    include 'sysi_ff.inc'
-    include 'sysa_ff.inc'
 
     real, dimension(noseg), intent(in) :: volume
 
@@ -1252,12 +1241,11 @@ logical function SetFlowData( volume, area, flow )
 
     use waq_omi_utils
     use delwaq2_global_data
+    use m_sysn          ! System characteristics
+    use m_sysi          ! Timer characteristics
+    use m_sysa          ! Pointers in real array workspace
 
     implicit none
-
-    include 'sysn_ff.inc'
-    include 'sysi_ff.inc'
-    include 'sysa_ff.inc'
 
     real, dimension(noseg), intent(in) :: volume
     real, dimension(noq), intent(in)   :: area
@@ -1290,12 +1278,11 @@ logical function SetFlowDataVolume( volume )
 
     use waq_omi_utils
     use delwaq2_global_data
+    use m_sysn          ! System characteristics
+    use m_sysi          ! Timer characteristics
+    use m_sysa          ! Pointers in real array workspace
 
     implicit none
-
-    include 'sysn_ff.inc'
-    include 'sysi_ff.inc'
-    include 'sysa_ff.inc'
 
     real, dimension(noseg), intent(in) :: volume
 
@@ -1314,12 +1301,11 @@ logical function SetFlowDataVelocity( velocity )
 
     use waq_omi_utils
     use delwaq2_global_data
+    use m_sysn          ! System characteristics
+    use m_sysi          ! Timer characteristics
+    use m_sysa          ! Pointers in real array workspace
 
     implicit none
-
-    include 'sysn_ff.inc'
-    include 'sysi_ff.inc'
-    include 'sysa_ff.inc'
 
     real, dimension(noq), intent(in)   :: velocity
 
@@ -1349,12 +1335,11 @@ integer function CorrectVolumeSurface( volume, surf, mass_per_m2 )
 
     use waq_omi_utils
     use delwaq2_global_data
+    use m_sysn          ! System characteristics
+    use m_sysi          ! Timer characteristics
+    use m_sysa          ! Pointers in real array workspace
 
     implicit none
-
-    include 'sysn_ff.inc'
-    include 'sysi_ff.inc'
-    include 'sysa_ff.inc'
 
     real, dimension(noseg), intent(in) :: volume
     real, dimension(noseg), intent(in) :: surf
@@ -1428,12 +1413,11 @@ logical function SetWasteLoadValues( idx, value )
 
     use waq_omi_utils
     use delwaq2_global_data
+    use m_sysn          ! System characteristics
+    use m_sysi          ! Timer characteristics
+    use m_sysa          ! Pointers in real array workspace
 
     implicit none
-
-    include 'sysn_ff.inc'
-    include 'sysi_ff.inc'
-    include 'sysa_ff.inc'
 
     integer                              :: idx
     real, dimension(notot+1), intent(in) :: value
@@ -1486,12 +1470,11 @@ logical function SetBoundaryConditions( idx, value )
 
     use waq_omi_utils
     use delwaq2_global_data
+    use m_sysn          ! System characteristics
+    use m_sysi          ! Timer characteristics
+    use m_sysa          ! Pointers in real array workspace
 
     implicit none
-
-    include 'sysn_ff.inc'
-    include 'sysi_ff.inc'
-    include 'sysa_ff.inc'
 
     integer                            :: idx
     real, dimension(nosys), intent(in) :: value
@@ -1532,14 +1515,12 @@ integer function ModelPerformTimeStep ()
     !DEC$ ATTRIBUTES DECORATE, ALIAS : 'MODELPERFORMTIMESTEP' :: ModelPerformTimeStep
 
     use delwaq2_global_data
-
+    use m_actions
+    
     implicit none
 
 
     character(len=20), dimension(0) :: argv_dummy
-
-    include 'actions.inc'
-
 
     call dlwqmain( ACTION_SINGLESTEP, 0, argv_dummy, dlwqd )
 
@@ -1586,12 +1567,11 @@ integer function WriteRestartFile ( lcharmap )
     !DEC$ ATTRIBUTES DECORATE, ALIAS : 'WRITERESTARTFILE' :: WriteRestartFile
 
     use delwaq2_global_data
+    use m_sysn          ! System characteristics
+    use m_sysc          ! Pointers in character array workspace
+    use m_sysa          ! Pointers in real array workspace
 
     implicit none
-
-    include 'sysc_ff.inc'
-    include 'sysn_ff.inc'
-    include 'sysa_ff.inc'
 
     character (len=*) lcharmap
     integer    i, k, ierr
@@ -1622,14 +1602,13 @@ integer function ModelInitialize ()
     use waq_omi_utils
     use dhcommand
     use m_openda_exchange_items, only : openda_buffer_initialize
+    use m_actions
+    use m_sysn          ! System characteristics
+    use m_sysi          ! Timer characteristics
+    use m_sysa          ! Pointers in real array workspace
+    use m_sysj          ! Pointers in integer array workspace
 
     implicit none
-
-    include 'actions.inc'
-    include 'sysn_ff.inc'
-    include 'sysi_ff.inc'
-    include 'sysj_ff.inc'
-    include 'sysa_ff.inc'
 
     type(t_dlwq_item)               :: constants    !< delwaq constants list
     integer                         :: lunrep, lunwrk
@@ -1741,14 +1720,13 @@ contains
 !
 subroutine write_delwaq03( name )
     use workspace
+    use m_sysn          ! System characteristics
+    use m_sysi          ! Timer characteristics
 
     implicit none
 
     character(len=*) :: name
 
-    include 'sysn_ff.inc'
-    include 'sysi_ff.inc'
-    include 'state_data.inc'
 
     integer                                 :: imaxa, imaxi, imaxc
     real,             dimension(:), pointer :: rbuf  => null()
@@ -1756,7 +1734,6 @@ subroutine write_delwaq03( name )
     character(len=1), dimension(:), pointer :: chbuf => null()
     integer                                 :: lunwrk
 
-    equivalence       ( in(1)  , noseg ) , ( ii(1), itstrt  ) ! equivalence output array with common block
 
     !noutp = 0 ! TODO: requires additional information in delwaq03
 
@@ -1787,14 +1764,13 @@ end subroutine write_delwaq03
 !
 subroutine write_delwaq04( name )
     use Grids
+    use m_sysn          ! System characteristics
+    use m_sysi          ! Timer characteristics
 
     implicit none
 
     character(len=*) :: name
 
-    include 'sysn_ff.inc'
-    include 'sysi_ff.inc'
-    include 'state_data.inc'
 
     integer :: i
     integer :: idummy
@@ -1953,10 +1929,9 @@ end subroutine write_delwaq04_monitoring
 subroutine handle_output_requests( name )
     use processet
     use output
+    use m_sysn          ! System characteristics
 
     implicit none
-
-    include 'sysn_ff.inc'
 
     character(len=*) :: name
 
@@ -1998,10 +1973,9 @@ subroutine handle_processes( name )
     use processet
     use output
     use rd_token
+    use m_sysn          ! System characteristics
 
     implicit none
-
-    include 'sysn_ff.inc'
 
     character(len=*) :: name
 
@@ -2277,13 +2251,12 @@ integer function ModelFinalize( )
 
     use delwaq2_global_data
 !    use m_delwaq_2_openda
+    use m_actions
 
     implicit none
 
     character(len=20), dimension(0) :: argv_dummy
     integer :: ierr
-
-    include 'actions.inc'
 
     call dlwqmain( ACTION_FINALISATION, 0, argv_dummy, dlwqd )
 
@@ -2315,16 +2288,16 @@ integer function ModelInitialize_By_Id( runid_given )
     use waq_omi_utils
     use dhcommand
     use m_openda_exchange_items, only : openda_buffer_initialize
+    use m_actions
+    use m_sysn          ! System characteristics
+    use m_sysi          ! Timer characteristics
+    use m_sysa          ! Pointers in real array workspace
+    use m_sysj          ! Pointers in integer array workspace
+
 
     implicit none
 
     character(len=*), intent(in)     :: runid_given
-
-    include 'actions.inc'
-    include 'sysn_ff.inc'
-    include 'sysi_ff.inc'
-    include 'sysj_ff.inc'
-    include 'sysa_ff.inc'
 
     !
     ! TODO: it is probably not all that simple

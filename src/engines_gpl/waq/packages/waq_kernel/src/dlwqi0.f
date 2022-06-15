@@ -43,8 +43,7 @@
 !>                             - calls DLWQTD to initialize the water bed layers
 !>                             - imports initial conditions
 
-!     CREATED: may -1988 by L. Postma
-!
+
 !     LOGICAL UNITNUMBERS : LUN( 2) - system intermediate file
 !                           LUN(19) - monitoring output file
 !
@@ -64,6 +63,11 @@
       use m_couplib
       use workspace
       use string_module  ! string manipulation tools
+      use m_sysn          ! System characteristics
+      use m_sysi          ! Timer characteristics
+      use m_sysa          ! Pointers in real array workspace
+      use m_sysj          ! Pointers in integer array workspace
+      use m_sysc          ! Pointers in character array workspace
 
 !     Parameters          :
 
@@ -84,26 +88,6 @@
       type(delwaq_data)    , intent(inout) :: dlwqd         !< derived type for persistent storage
       integer              , intent(inout) :: ierr          !< error count
 
-!
-!     COMMON  /  SYSN   /   System characteristics
-!
-      INCLUDE 'sysn.inc'
-!
-!     COMMON  /  SYSI  /    Timer characteristics
-!
-      INCLUDE 'sysi.inc'
-!
-!     COMMON  /  SYSA   /   Pointers in real array workspace
-!
-      INCLUDE 'sysa.inc'
-!
-!     COMMON  /  SYSJ   /   Pointers in integer array workspace
-!
-      INCLUDE 'sysj.inc'
-!
-!     COMMON  /  SYSC   /   Pointers in character array workspace
-!
-      INCLUDE 'sysc.inc'
 !
 !     Local declaration
 !

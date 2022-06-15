@@ -72,6 +72,11 @@
       use timers
       use delwaq2_data
       use waqmem          ! module with the more recently added arrays
+      use m_sysn          ! System characteristics
+      use m_sysi          ! Timer characteristics
+      use m_sysa          ! Pointers in real array workspace
+      use m_sysj          ! Pointers in integer array workspace
+      use m_sysc          ! Pointers in character array workspace
 
       DIMENSION       A(*)   , J(*)   , LUN(*)
       CHARACTER*(*)   C(*)
@@ -81,26 +86,7 @@
       TYPE(DELWAQ_DATA)           :: DLWQD
       type(GridPointerColl)       :: GridPs               ! collection off all grid definitions
 
-!
-!     COMMON  /  SYSN   /   System characteristics
-!
-      INCLUDE 'sysn.inc'
-!
-!     COMMON  /  SYSI  /    Timer characteristics
-!
-      INCLUDE 'sysi.inc'
-!
-!     COMMON  /  SYSA   /   Pointers in real array workspace
-!
-      INCLUDE 'sysa.inc'
-!
-!     COMMON  /  SYSJ   /   Pointers in integer array workspace
-!
-      INCLUDE 'sysj.inc'
-!
-!     COMMON  /  SYSC   /   Pointers in character array workspace
-!
-      INCLUDE 'sysc.inc'
+
 !
 !     Local declarations
 !
@@ -124,9 +110,6 @@
       INTEGER         sindex
 
       integer       :: ithandl
-
-      INCLUDE 'state_data.inc'
-
 
       !
       ! Distinguishing the actions is superfluous:

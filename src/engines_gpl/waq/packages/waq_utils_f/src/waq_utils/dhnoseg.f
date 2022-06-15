@@ -40,12 +40,9 @@
 !     pnoseg  integer       1     output  copy of the noseg from sysn
 !
 !     declarations
+      use m_sysn          ! System characteristics
 !
       integer       pnoseg
-!
-!     common  /  sysn   /   system characteristics
-!
-      include 'sysn.inc'
 
       pnoseg = noseg
 
@@ -73,12 +70,10 @@
 !     kmx      integer        1     input   number of layers
 !
 !     declarations
+      use m_sysn          ! System characteristics
 !
       integer       pnoseg
-!
-!     common  /  sysn   /   system characteristics
-!
-      include 'sysn.inc'
+
 
       noseg = nosegfm
       nolay = max( 1, kmx ) ! kmx may be zero, indicating a "true" 2D model

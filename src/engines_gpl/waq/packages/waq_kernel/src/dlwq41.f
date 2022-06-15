@@ -48,6 +48,7 @@
       use timers                     ! WAQ performance timers
       use m_couplib                  ! some first steps on paralellism
       use delwaq2_data
+      use m_syst
 
       implicit none
 
@@ -81,9 +82,6 @@
       integer(4), intent(in   ) :: mypart              !< number of current part/subdomain
       type(delwaq_data), intent(inout) :: dlwqd        !< derived type for persistent storage
 
-!     Common  /  syst   /   system time function flags
-
-      include 'syst.inc'
 
 !     Local
 

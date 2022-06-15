@@ -42,10 +42,11 @@
 !     IVAR    INTEGER       1     OUTPUT  Variable number, else -1
 !
 !     Declaration of arguments
+
+      use m_sysn          ! System characteristics
 !
       INTEGER             IAR_NR, INDX  , IVAR
-!
-      INCLUDE 'sysn.inc'
+
 !
 !     Just take the used array's in the right order
 !

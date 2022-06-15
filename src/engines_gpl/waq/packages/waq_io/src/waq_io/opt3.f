@@ -85,6 +85,8 @@
 
       use timers       !   performance timers
       use rd_token
+      use m_sysn          ! System characteristics
+
 
       implicit none
 
@@ -107,16 +109,7 @@
       integer  ( 4), intent(in   ) :: ioutpt            !< flag for more or less output
       integer  ( 4), intent(inout) :: ierr              !< error count / switch
 
-      include 'sysn.inc'     ! in cludes  COMMON  / SYSN / System characteristics
-!     in the common block :
-!     name    kind     length      funct.  description
-!     ---------------------------------------------------------
-!     nharms  integer  1           in/out  total space  of harmonics
-!     niharm  integer  1           in/out  total number of harmonics
-!     nlines  integer  1           in/out  total number var.values space
-!     npoins  integer  1           in/out  total number pointer space
-!     newrsp  integer  1           in/out  integer space new time funs
-!     newisp  integer  1           in/out  real    space new time funs
+
 
 !     local decalations
 

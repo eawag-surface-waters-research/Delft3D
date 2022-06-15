@@ -72,6 +72,8 @@
 
       use timers       !   performance timers
       use rd_token
+      use m_sysn          ! System characteristics
+
 
       implicit none
 
@@ -102,11 +104,6 @@
       integer  ( 4), intent(inout) :: iwar          !< cumulative warning count
       logical      , intent(in)    :: dont_read     !< do not actually read tokens, if true, the information is already provided
 
-!     COMMON  /  SYSN   /   System characteristics
-!        integer    nlines       !  total number of matrix lines
-!        integer    npoins       !  total number of matrix points
-
-      include 'sysn.inc'
 
       logical        bound       !  if .true. then boundary call
       logical        waste       !  if .true. then waste call

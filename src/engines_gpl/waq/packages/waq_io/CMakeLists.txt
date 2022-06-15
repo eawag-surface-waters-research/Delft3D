@@ -31,6 +31,7 @@ if(UNIX)
                             part_io_f
                             io_hyd
                             io_netcdf
+                            waq_include
                             waq_kernel
                             waq_plugin_wasteload
                             waq_utils_c
@@ -47,6 +48,7 @@ if(WIN32)
                             netcdff
                             part_data_f
                             part_io_f
+                            waq_include
                             waq_kernel
                             waq_plugin_wasteload
                             waq_utils_c

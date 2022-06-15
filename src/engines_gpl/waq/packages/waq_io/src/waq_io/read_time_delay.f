@@ -48,10 +48,10 @@
 
       use rd_token       ! for definition and storage of data
       use timers         ! performance timers
+      use m_sysi          ! Timer characteristics
 
       implicit none
 
-      include 'sysi.inc' ! common  /  sysi   /   system timers
       real(8) julian     ! returns 64 bits real Julian data
 
 !     Arguments

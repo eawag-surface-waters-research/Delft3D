@@ -21,10 +21,16 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-! state_data.inc --
-!
-!     Arrays holding many computational parameters
-!
-      integer, dimension(insize)        :: in
-      integer, dimension(iisize)        :: ii
-      equivalence ( in( 1) , noseg ) , ( ii( 1) , itstrt )
+module m_conc
+      integer :: KNH4
+      integer :: KNO3
+      integer :: KPO4
+      integer :: KSIO
+      integer :: KDETN
+      integer :: KDETP
+      integer :: KDETS
+      integer :: KPHYT
+      integer :: KBODN
+      integer :: KBODP
+      integer :: KBODSI
+end module m_conc

@@ -21,19 +21,8 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-! actions.inc --
-!     Parameters defining the actions for DELWAQ in DLL form
-!
-!     I have also thought about 'step' or 'phase' instead of 'action'
-!     but as long as a fullcomputation is also part of this list,
-!     these other names don't make sense. One option would be to
-!     have each phase correspond to a specific bit and to have all
-!     bits set in a fullcomputation, but a fullcomputation is more
-!     than initialisation followed by a single step and finalisation.
-!     'task' may be a better alternative for action
-!
-      integer, parameter :: ACTION_INITIALISATION  = 1
-      integer, parameter :: ACTION_FINALISATION    = 2
-      integer, parameter :: ACTION_SINGLESTEP      = 3
-      integer, parameter :: ACTION_FULLCOMPUTATION = 4
-
+module m_dlwqstr
+    integer, parameter :: itota = 2000000
+    integer, parameter :: itoti = 1000000
+    integer, parameter :: itotc =   20000
+end module m_dlwqstr

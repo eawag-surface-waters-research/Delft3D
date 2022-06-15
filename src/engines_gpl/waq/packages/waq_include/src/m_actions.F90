@@ -21,16 +21,21 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-C
-C     COMMON  /  SYST  /    Logic flag time functions
-C
-C     BNDSET  LOGICAL  1    For boundaries
-C     WSTSET  LOGICAL  1    For wasteloads
-C     FUNSET  LOGICAL  1    For constants parameters functions segfuns
-C     OTHSET  LOGICAL  1    For others
-C
-      LOGICAL   BNDSET , WSTSET , FUNSET , OTHSET
-      INTEGER   IBNDMX , IWSTMX , IFUNMX
-      COMMON  /  SYST  /  BNDSET , WSTSET , FUNSET , OTHSET ,
-     *                    IBNDMX , IWSTMX , IFUNMX
-C
+! actions.inc --
+!     Parameters defining the actions for DELWAQ in DLL form
+!
+!     I have also thought about 'step' or 'phase' instead of 'action'
+!     but as long as a fullcomputation is also part of this list,
+!     these other names don't make sense. One option would be to
+!     have each phase correspond to a specific bit and to have all
+!     bits set in a fullcomputation, but a fullcomputation is more
+!     than initialisation followed by a single step and finalisation.
+!     'task' may be a better alternative for action
+!
+module m_actions
+      integer, parameter :: ACTION_INITIALISATION  = 1
+      integer, parameter :: ACTION_FINALISATION    = 2
+      integer, parameter :: ACTION_SINGLESTEP      = 3
+      integer, parameter :: ACTION_FULLCOMPUTATION = 4
+end module m_actions
+

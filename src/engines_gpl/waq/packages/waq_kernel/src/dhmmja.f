@@ -51,6 +51,11 @@
 
       use waqmem           ! module with the more recently added arrays
       use partition_arrays ! module for computing the pointers into the arrays
+      use m_sysn          ! System characteristics
+      use m_sysi          ! Timer characteristics
+      use m_sysa          ! Pointers in real array workspace
+      use m_sysj          ! Pointers in integer array workspace
+      use m_sysc          ! Pointers in character array workspace
 
 !     implicit none
 
@@ -62,7 +67,6 @@
 
       integer      , intent(in   ) :: lunrep    ! logical unitnumber output file
       logical      , intent(in   ) :: l_decl    ! Declare memory y/n
-!     integer      , intent(in   ) :: noarr     ! dimension of parameter arrays, contained in 'sysn.inc'
       integer      , intent(inout) :: arrpoi(:) ! Pointer in workarray/FMM reference pointer
       integer      , intent(inout) :: arrtyp(:) ! Array type ( INT=,REAL=,CHAR= ), see FMM/NEFIS
       integer      , intent(inout) :: arrbyt(:) ! Number of bytes per element, see FMM/NEFIS
@@ -76,25 +80,6 @@
 
       integer      , intent(inout) :: itoti     ! Required array space
 
-!     COMMON  /  SYSN   /   System characteristics
-
-      INCLUDE 'sysn.inc'
-
-!     COMMON  /  SYSI   /   Timer characteristics
-
-      INCLUDE 'sysi.inc'
-
-!     COMMON  /  SYSA   /   Pointers in real array workspace
-
-      INCLUDE 'sysa.inc'
-
-!     COMMON  /  SYSJ   /   Pointers in integer array workspace
-
-      INCLUDE 'sysj.inc'
-
-!     COMMON  /  SYSC   /   Pointers in character array workspace
-
-      INCLUDE 'sysc.inc'
 
 !     Local declarations
 
@@ -106,9 +91,6 @@
       logical         triadi                            ! if .true. then ADI like Delft3d-Flow
       logical         balans                            ! if .true. then balances to be computed
       character*20    namarr                            ! help variable for array name
-      parameter     ( nr_jar = ijsize )                 ! total number of arrays
-      integer         ip_jar(nr_jar)                    ! help array to fill the common block / SYSA /
-      equivalence   ( iapoi  , ip_jar(1) )              ! first entry equivalences with first entry common block
       integer         noth                              ! number of available thread for parallel processing
       integer         ierr                              ! error indicator
       integer         jstart                            ! lower limit Flow arrays method 19 and 20

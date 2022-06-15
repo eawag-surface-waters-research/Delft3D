@@ -38,6 +38,12 @@ module m_delwaq1_data
     use ProcesSet
     use Workspace
     use Rd_token
+    
+    use m_sysn          ! System characteristics
+    use m_sysi          ! Timer characteristics
+    use m_sysa          ! Pointers in real array workspace
+    use m_sysj          ! Pointers in integer array workspace
+    use m_sysc          ! Pointers in character array workspace
 
     implicit none
     integer, parameter             :: nlun   = 50              ! number of input / output files
@@ -45,24 +51,8 @@ module m_delwaq1_data
     character(len=lchmax)             :: lchar(nlun)              ! file names input / output files
     integer, parameter             :: noint  = 200             ! number of integration options implemented
     integer                        :: iopt(noint)              ! integration option list
-    
-    !
-    !     common  /  SYSN   /   System characteristics
-    !
-    include 'sysn_ff.inc'
-    !
-    !     common  /  SYSI  /    Timer characteristics
-    !
-    include 'sysi_ff.inc'
-    include 'sysa_ff.inc'
-    include 'sysj_ff.inc'
-    include 'sysc_ff.inc'
-      
+          
 
-    !     output structure common blocks
-    !
-    integer             in(insize)       , ii(iisize)         ! arrays to write common block to file
-    equivalence       ( in(1)  , noseg ) , ( ii(1), itstrt  ) ! equivalence output array with common block
     !
     !     work arrays
     !

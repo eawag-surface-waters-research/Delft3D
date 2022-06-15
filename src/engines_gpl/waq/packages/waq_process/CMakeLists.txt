@@ -43,6 +43,7 @@ if (UNIX)
     set(oss_dependencies    deltares_common
                             nefis
                             solvesaphe
+                            waq_include
                             waq_utils_c
                             waq_utils_f)
 
@@ -57,6 +58,7 @@ if (WIN32)
                             netcdf4
                             netcdff
                             solvesaphe
+                            waq_include
                             waq_utils_c
                             waq_utils_f)
 

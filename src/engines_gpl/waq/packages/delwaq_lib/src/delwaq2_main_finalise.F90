@@ -25,12 +25,11 @@
 
 subroutine delwaq2_main_finalise(action, lunrep, rundat)
 
+    use m_actions
     implicit none
     integer, intent(in)                           :: action
     character(len=20), intent(in)                 :: rundat
     integer, intent(in)                           :: lunrep
-
-    include 'actions.inc'
 
     !     Finalise - only if the full computation was done
     if ((action == action_fullcomputation).or.(action == action_finalisation)) then

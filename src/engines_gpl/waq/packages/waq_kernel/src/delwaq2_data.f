@@ -365,10 +365,11 @@
       !     Routine to copy to and from the syst time data
       !
       subroutine copy_time_data( dlwqd, todlwqd )
+      
+      use m_syst
+      
       type(delwaq_data), intent(inout) :: dlwqd
       logical                          :: todlwqd
-
-      include 'syst.inc'
 
       if ( todlwqd ) then
           dlwqd%bndset = bndset

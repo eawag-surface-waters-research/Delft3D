@@ -93,6 +93,7 @@
 !     DECLARATIONS        :
 !
       use timers
+      use m_syst
       DIMENSION    LUN   (*) , HARMAT(*) , ARRAY (*) , IHARM (*) ,
      *             NRHARM(*) , NRFTOT(*) , VOLUME(*) , DISPER(*) ,
      *             AREA  (*) , FLOW  (*) , VELO  (*) , ALENG (*) ,
@@ -107,10 +108,8 @@
       LOGICAL      UPDATE, LSTREC, LREWIN
       REAL         RDUMMY(1)
       REAL         ADUMMY(1)
-!
-!     COMMON  /  SYST   /   System time function flags
-!
-      INCLUDE 'syst.inc'
+
+
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "dlwq45", ithandl )
 !

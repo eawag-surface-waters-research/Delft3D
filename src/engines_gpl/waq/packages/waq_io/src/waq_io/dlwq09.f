@@ -50,6 +50,9 @@
       use rd_token     !   for the reading of tokens
       use Output
       use timers       !   performance timers
+      use m_sysn          ! System characteristics
+      use m_sysi          ! Timer characteristics
+
 
       implicit none
 
@@ -71,38 +74,7 @@
       integer  ( 4), intent(inout) :: ierr              !< cumulative error   count
       integer  ( 4), intent(inout) :: iwar              !< cumulative warning count
 
-      INCLUDE 'sysi.inc'     !   COMMON  /  SYSI  /    Timer characteristics
-      INCLUDE 'sysn.inc'     !   COMMON  /  SYSN  /    System dimensions
 
-!     In SYSN.INC:
-
-!     NOSEG   INTEGER  1           INPUT   Number of segments
-!     NOSYS   INTEGER  1           INPUT   Number of active substances
-!     NOTOT   INTEGER  1           INPUT   Number of substances
-!     NODISP  INTEGER  1           INPUT   number of dispersion arrays
-!     NOVELO  INTEGER  1           INPUT   number of velocity arrays
-!     NOQ     INTEGER  1           INPUT   number of exchanges
-!     NODUMP  INTEGER  1           INPUT   Number of monitor point
-!     NOBND   INTEGER  1           INPUT   Number of boundaries
-!     NOWST   INTEGER  1           INPUT   Number of waste loads
-!     NOCONS  INTEGER  1           INPUT   Number of constants
-!     NOPA    INTEGER  1           INPUT   Number of parameters
-!     NOFUN   INTEGER  1           INPUT   Number of functions
-!     NOSFUN  INTEGER  1           INPUT   Number of segment functions
-!     NX      INTEGER  1           INPUT   Width of grid
-!     NY      INTEGER  1           INPUT   Depth of grid
-!     NOUTP   INTEGER  1           INPUT   Number of output files
-!     NRVART  INTEGER  1           OUTPUT  Total number of output variables
-!     NBUFMX  INTEGER  1           OUTPUT  Length of output buffer needed
-!     NCBUFM  INTEGER  1           IN/OUT  Length of character buffer
-!     NDMPAR  INTEGER  1           INPUT   number of dump areas
-!     NTDMPQ  INTEGER  1           INPUT   total number exchanges in dump area
-!     NTDMPS  INTEGER  1           INPUT   total number segments in dump area
-!     NORAAI  INTEGER  1     1     INPUT   number of raaien
-!     NTRAAQ  INTEGER  1     1     INPUT   total number of exch. in raaien
-!     NOBTYP  INTEGER  1           INPUT   nr of boundary types
-!     NOWTYP  INTEGER  1           INPUT   nr of wasteload types
-!     NOGRID  INTEGER  1           INPUT   nr of grids
 
 !     Local
 

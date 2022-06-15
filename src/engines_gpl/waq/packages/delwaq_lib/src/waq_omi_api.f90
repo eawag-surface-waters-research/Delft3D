@@ -43,6 +43,10 @@ contains
 
 !> Set a value
 logical function SetValuePriv(dlwqtype, parid, locid, values, operation)
+
+    use m_sysn          ! System characteristics
+    use m_sysa          ! Pointers in real array workspace
+      
     implicit none
 
     integer, intent(in)              :: dlwqtype         !< Type of parameter to be set
@@ -50,9 +54,6 @@ logical function SetValuePriv(dlwqtype, parid, locid, values, operation)
     integer, intent(in)              :: locid            !< Index of the parameter
     real, dimension(:), intent(in)   :: values           !< Value to be used in the operation
     integer, intent(in)              :: operation        !< Operation to apply
-
-    include 'sysn_ff.inc'
-    include 'sysa_ff.inc'
 
     integer, dimension(6)            :: idx
     logical                          :: success
@@ -99,6 +100,9 @@ end function SetValuePriv
 !! and potential number of elements that is affected
 function DetermineIndex( dlwqtype, parid, locid )
 
+    use m_sysn          ! System characteristics
+    use m_sysa          ! Pointers in real array workspace
+    
     integer, intent(in)   :: dlwqtype
     integer, intent(in)   :: parid
     integer, intent(in)   :: locid
@@ -110,9 +114,7 @@ function DetermineIndex( dlwqtype, parid, locid )
     integer               :: idxmass
     integer               :: idxvol
     integer               :: volcorr
-
-    include 'sysa_ff.inc'
-    include 'sysn_ff.inc'
+    
 
     idxmass = -1
     idxvol  = -1
@@ -331,11 +333,12 @@ end function GetValuePriv
 !> Check that the parameter ID is valid
 subroutine CheckParameterId( dlwqtype, parid, success )
 
+    use m_sysn          ! System characteristics
+
     integer, intent(in)    :: dlwqtype
     integer, intent(in)    :: parid
     logical, intent(inout) :: success
 
-    include 'sysn_ff.inc'
 
     select case ( dlwqtype )
         case ( DLWQ_CONSTANT )
@@ -372,11 +375,11 @@ end subroutine CheckParameterId
 !> Check that the location ID is valid
 subroutine CheckLocationId(  dlwqtype, locid, success )
 
+    use m_sysn
+
     integer, intent(in)    :: dlwqtype
     integer, intent(in)    :: locid
     logical, intent(inout) :: success
-
-    include 'sysn_ff.inc'
 
     select case ( dlwqtype )
         case ( DLWQ_CONSTANT )
@@ -423,9 +426,9 @@ end subroutine CheckOperation
 !> Retrieve number of locations (of given type)
 integer function GetLocationCountPriv( type )
 
-    integer, intent(in)    :: type
+    use m_sysn
 
-    include 'sysn_ff.inc'
+    integer, intent(in)    :: type
 
     select case ( type )
         case ( DLWQ_CONSTANT )
@@ -459,14 +462,14 @@ end function GetLocationCountPriv
 !> Retrieve indices of locations (of given type)
 integer function GetLocationIndicesPriv( type, idsSize, ids )
 
+    use m_sysn
+
     integer, intent(in)                :: type
     integer, intent(in)                :: idsSize
     integer, dimension(:), intent(out) :: ids
 
     integer                            :: count
     integer                            :: i
-
-    include 'sysn_ff.inc'
 
     count = GetLocationCountPriv( type )
 
@@ -482,10 +485,9 @@ end function GetLocationIndicesPriv
 
 !> Retrieve number of items (of given type)
 integer function GetItemCountPriv( type )
+    use m_sysn
 
     integer, intent(in)    :: type
-
-    include 'sysn_ff.inc'
 
     select case ( type )
         case ( DLWQ_CONSTANT )
@@ -628,14 +630,14 @@ end function GetLocationIndexPriv
 !> Get the time parameters for the computation
 subroutine GetTimeParameters( start, stop, step, current )
 
+    use m_sysi
+  
     implicit none
 
     real(kind=kind(1.0d0)), intent(out)                :: start
     real(kind=kind(1.0d0)), intent(out)                :: stop
     real(kind=kind(1.0d0)), intent(out)                :: step
     real(kind=kind(1.0d0)), intent(out)                :: current
-
-    include 'sysi_ff.inc'
 
     start   = dlwqd%otime + itstrt / dlwqd%tscale
     stop    = dlwqd%otime + itstop / dlwqd%tscale
@@ -655,11 +657,11 @@ integer function Count_Values(partype, parid, loctype, locid)
 
     use waq_omi_priv
     use waq_omi_constants
+    use m_sysn          ! System characteristics
+    use m_sysa          ! Pointers in real array workspace
+
 
     implicit none
-
-    include 'sysa_ff.inc'
-    include 'sysn_ff.inc'
 
     integer, intent(in)                   :: parid            !< Index of the parameter
     integer, intent(in)                   :: partype          !< Type of parameter to be set
@@ -932,10 +934,11 @@ subroutine SetCommonVars( icons_, iparm_, iconc_, ibset_, iwste_, nosys_, notot_
     !DEC$ ATTRIBUTES DLLEXPORT::SetCommonVars
     !DEC$ ATTRIBUTES DECORATE, ALIAS : 'SETCOMMONVARS' :: SetCommonVars
 
-    implicit none
+    use m_sysn          ! System characteristics
+    use m_sysa          ! Pointers in real array workspace
 
-    include 'sysa_ff.inc'
-    include 'sysn_ff.inc'
+      
+    implicit none
 
     integer :: icons_, iparm_, iconc_, ibset_, iwste_, nosys_, notot_, nocons_, nopa_, noseg_, nowst_, nobnd_
 

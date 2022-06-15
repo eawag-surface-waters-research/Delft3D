@@ -46,6 +46,9 @@
 
       use waqmem           ! module with the more recently added arrays
       use partition_arrays ! module for computing the pointers into the arrays
+      use m_sysn          ! System characteristics
+      use m_sysi          ! Timer characteristics
+      use m_sysa          ! Pointers in real array workspace
 
       implicit none
 
@@ -57,7 +60,6 @@
 
       integer      , intent(in   ) :: lunrep    ! logical unitnumber output file
       logical      , intent(in   ) :: l_decl    ! Declare memory y/n
-!     integer      , intent(in   ) :: noarr     ! dimension of parameter arrays, contained in 'sysn.inc'
       integer      , intent(inout) :: arrpoi(:) ! Pointer in workarray/FMM reference pointer
       integer      , intent(inout) :: arrtyp(:) ! Array type ( INT=,REAL=,CHAR= ), see FMM/NEFIS
       integer      , intent(inout) :: arrbyt(:) ! Number of bytes per element, see FMM/NEFIS
@@ -70,17 +72,7 @@
       integer      , intent(inout) :: itota     ! Required array space
       type(memory_partition), intent(inout) :: part ! Private variables for MAKPTR
 
-!     COMMON  /  SYSN   /   System characteristics
 
-      INCLUDE 'sysn.inc'
-
-!     COMMON  /  SYSI   /   Timer characteristics
-
-      INCLUDE 'sysi.inc'
-
-!     COMMON  /  SYSA   /   Pointers in real array workspace
-
-      INCLUDE 'sysa.inc'
 
 !     Local declarations
 
@@ -99,8 +91,7 @@
       integer         iartyp                            ! help variable for array type
       integer         iarlen                            ! help variable for array length
       integer         ip                                ! help variable for array pointer
-      integer         ip_rar(iasize)                    ! help array to fill the common block / SYSA /
-      equivalence   ( ivol   , ip_rar(1) )              ! first entry equivalences with first entry common block
+
       integer         noth                              ! number of available thread for parallel processing
       integer         ierr                              ! error indicator
       integer         jstart                            ! lower limit Flow arrays method 19 and 20

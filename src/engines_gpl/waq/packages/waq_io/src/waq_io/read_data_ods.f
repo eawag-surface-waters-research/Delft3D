@@ -32,6 +32,7 @@
 
       use dlwq_data      ! for definition and storage of data
       use timers       !   performance timers
+      use m_sysi          ! Timer characteristics
 
       implicit none
 
@@ -92,9 +93,6 @@
       integer                               :: maxdim
       integer                               :: ierr_alloc
 
-!     COMMON  /  SYSI   /   System timers
-
-      INCLUDE 'sysi.inc'
       integer(4) :: ithndl = 0
       if (timon) call timstrt( "read_data_ods", ithndl )
 

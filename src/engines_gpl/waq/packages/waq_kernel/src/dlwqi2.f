@@ -51,6 +51,9 @@
       use timers
       use grids
       use delwaq2_data
+      use m_sysn          ! System characteristics
+      use m_sysi          ! Timer characteristics
+
 
 !     PARAMETERS          :
 !
@@ -143,14 +146,7 @@
       type(delwaq_data),     intent(inout) :: dlwqd      !< derived type for persistent storage
       integer                              :: dmpbal(*)  !< indicates if dump area is included in the balance
       type(GridPointer)    :: aGrid      ! a single grid
-!
-!     COMMON  /  SYSN   /   System characteristics
-!
-      INCLUDE 'sysn.inc'
-!
-!     COMMON  /  SYSI   /   Timer characteristics
-!
-      INCLUDE 'sysi.inc'
+
 
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "dlwqi2", ithandl )

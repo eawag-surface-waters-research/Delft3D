@@ -52,11 +52,11 @@
 
       use timers       !   performance timers
       use grids          ! for the storage of contraction grids
+      use m_sysn          ! System characteristics
+
 
       implicit none
 
-!     COMMON  /  SYSN  /    System dimensions
-      INCLUDE 'sysn.inc'
 
 !     Parameters
 
