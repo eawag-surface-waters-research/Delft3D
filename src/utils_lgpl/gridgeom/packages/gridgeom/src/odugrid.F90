@@ -223,6 +223,9 @@ function odu_get_start_end_nodes_of_branches(branchidx, branchStartNode, branchE
          endif
          ibran = branchidx(i)
          branchStartNode(ibran) = i
+      elseif (branchidx(i) < ibran) then
+         ! Unsorted input, return error code
+         ierr = -1
       endif
    enddo
    branchEndNode(ibran) = numnode

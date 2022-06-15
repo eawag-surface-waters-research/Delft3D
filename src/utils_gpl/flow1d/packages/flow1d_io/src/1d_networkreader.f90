@@ -172,7 +172,7 @@ module m_1d_networkreader
    ierr = ggeo_get_xy_coordinates(meshgeom%nodebranchidx, meshgeom%nodeoffsets, meshgeom%ngeopointx, meshgeom%ngeopointy, &
       meshgeom%nbranchgeometrynodes, meshgeom%nbranchlengths, jsferic, gpsX, gpsY)
    if (ierr /= 0) then
-      call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Error Getting Mesh Coordinates From UGrid Data')
+      call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Error Getting Mesh Coordinates From UGrid Data. Are all grid points ordered by branchId, chainage?')
    endif
 
    ! Get the starting and ending mesh1d grid point indexes for each network branch.
@@ -184,11 +184,11 @@ module m_1d_networkreader
 
    ierr = ggeo_get_start_end_nodes_of_branches(meshgeom%nodebranchidx, gpFirst, gpLast)
    if (ierr /= 0) then
-      call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Error Getting first and last nodes of the network branches')
+      call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Error Getting first and last nodes of the network branches. Are all grid points ordered by branchId, chainage?')
    endif
    ierr = ggeo_get_start_end_nodes_of_branches(meshgeom%edgebranchidx, lnkFirst, lnkLast)
    if (ierr /= 0) then
-      call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Error Getting first and last links of the network branches')
+      call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Error Getting first and last links of the network branches. Are all edges ordered by branchId, chainage?')
    endif
 
    ! Fill the array storing the mesh1d node ids for each network node.
