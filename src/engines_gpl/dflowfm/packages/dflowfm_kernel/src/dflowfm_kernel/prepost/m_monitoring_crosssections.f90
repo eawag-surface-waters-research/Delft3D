@@ -357,22 +357,22 @@ subroutine addObservCrsFromIni(network, filename)
    end do
 
    ! 1b. get the corresponding x- and y-coordinates
-   if (nByBrch > 0) then
-      allocate(xx_tmp(nByBrch))
-      allocate(yy_tmp(nByBrch))
-      ierr = odu_get_xy_coordinates(branchIdx_tmp(1:nByBrch), Chainage_tmp(1: nByBrch), meshgeom1d%ngeopointx, meshgeom1d%ngeopointy, &
-                                    meshgeom1d%nbranchgeometrynodes, meshgeom1d%nbranchlengths, jsferic, xx_tmp, yy_tmp)
+   allocate(xx_tmp(nByBrch))
+   allocate(yy_tmp(nByBrch))
+   do i = 1, nByBrch
+      ierr = odu_get_xy_coordinates(branchIdx_tmp(i:i), Chainage_tmp(i:i), meshgeom1d%ngeopointx, meshgeom1d%ngeopointy, &
+                                       meshgeom1d%nbranchgeometrynodes, meshgeom1d%nbranchlengths, jsferic, xx_tmp(i:i), yy_tmp(i:i))
+   enddo
 
-      if (ierr /= DFM_NOERR) then
-         call mess(LEVEL_ERROR, "Error occurs when getting xy coordinates for observation cross sections from file '"//trim(filename)//".")
-      end if
+   if (ierr /= DFM_NOERR) then
+      call mess(LEVEL_ERROR, "Error occurs when getting xy coordinates for observation cross sections from file '"//trim(filename)//".")
+   end if
 
-      do i=1, nByBrch
-         pCrs => network%observcrs%observcross(ibrch2crs(i))
-         pCrs%x(1) = xx_tmp(i)
-         pCrs%y(1) = yy_tmp(i)
-      end do
-   endif
+   do i=1, nByBrch
+      pCrs => network%observcrs%observcross(ibrch2crs(i))
+      pCrs%x(1) = xx_tmp(i)
+      pCrs%y(1) = yy_tmp(i)
+   end do
 
    ! Step 2. add all observation crs from *.ini file
    do i =1, ncrsini
