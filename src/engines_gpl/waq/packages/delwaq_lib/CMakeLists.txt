@@ -56,6 +56,7 @@ if (WIN32)
                             nefis
                             netcdf4
                             netcdff
+                            waq_include
                             waq_io
                             waq_kernel
                             waq_plugin_wasteload
@@ -112,6 +113,7 @@ if (UNIX)
                             delftio_shm
                             io_netcdf
                             nefis
+                            waq_include
                             waq_io
                             waq_kernel
                             waq_plugin_wasteload
