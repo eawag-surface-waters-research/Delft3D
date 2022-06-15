@@ -119,7 +119,6 @@ S1incinterval                       =                                    # Inter
 WaqFileBase                         =                                    # Basename (without extension) for all Delwaq files to be written.
 WaqInterval                         =                                    # Interval (in s) between Delwaq file outputs
 StatsInterval                       =                                    # Interval (in s) between simulation statistics output.
-WriteBalancefile                    = 0                                  # Write Balancefile, 1=yes, 0=no
 SnapshotDir                         =                                    # Directory where snapshots/screendumps are saved.
 TimingsInterval                     =                                    # Timings output interval
 TimeSplitInterval                   = 0X                                 # Time splitting interval, after which a new output file is started. value+unit, e.g. '1 M', valid units: Y,M,D,h,m,s.
