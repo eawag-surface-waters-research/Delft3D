@@ -3526,7 +3526,6 @@ src/engines_gpl/waq/include/dlwqdata_restore.inc -text
 src/engines_gpl/waq/include/dlwqdata_save.inc -text
 src/engines_gpl/waq/include/dlwqstrt.inc -text
 src/engines_gpl/waq/include/mpif.h -text
-src/engines_gpl/waq/include/stochi_switch.inc -text
 src/engines_gpl/waq/packages/Makefile.am -text
 src/engines_gpl/waq/packages/delwaq1/CMakeLists.txt -text
 src/engines_gpl/waq/packages/delwaq1/Makefile.am -text
