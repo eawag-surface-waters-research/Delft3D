@@ -606,7 +606,6 @@ function wave_master_finish() result(retval)
       call deallocmeteo(swan_grids(i_swan)%grid_name)
    enddo
    !
-   call dealloc_swan(swan_run)
    call finalize_wave_mpi()
    write(*,'(a)') 'Delft3D-WAVE finished normally.'
 end function wave_master_finish
