@@ -552,7 +552,10 @@ subroutine processexternalboundarypoints(qid, filename, filetype, return_time, n
          itpbn = 7
          nqhbnd = nqhbnd + 1
          numqh  = numz
-         call realloc(qhpliname,nqhbnd)  ; qhpliname(nqhbnd) = pliname
+         if (filetype == poly_tim) then
+            call realloc(qhpliname,nqhbnd)  ; qhpliname(nqhbnd) = pliname
+         end if
+
          call realloc(L1qhbnd,nqhbnd) ; L1qhbnd(nqhbnd) = nbndz + 1
          call realloc(L2qhbnd,nqhbnd) ; L2qhbnd(nqhbnd) = nbndz + numz
          call realloc(atqh_all,nqhbnd); atqh_all(nqhbnd) = 0d0
