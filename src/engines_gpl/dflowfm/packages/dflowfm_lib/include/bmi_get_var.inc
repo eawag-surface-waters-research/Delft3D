@@ -64,7 +64,7 @@
      x = c_loc(sedtra%sswx)
   case("sswy") !<  [kg s-1 m-1] suspended load transport due to waves, y-component. {"location": "face", "shape": ["ndx","stmpar%lsedsus"], "internal": "sedtra%sswy"}
      x = c_loc(sedtra%sswy)
-  case("taucr") !<  [kg s-2 m] dimensional critical shear stress taucr. {"location": "face", "shape": ["stmpar%lsedtot"], "internal": "stmpar%sedpar%taucr"}
+  case("taucr") !<  [kg s-2 m-1] dimensional critical shear stress taucr. {"location": "face", "shape": ["stmpar%lsedtot"], "internal": "stmpar%sedpar%taucr"}
      x = c_loc(stmpar%sedpar%taucr)
   case("tetacr") !<  [-] dimensionless critical shear stress tetacr. {"location": "face", "shape": ["stmpar%lsedtot"], "internal": "stmpar%sedpar%tetacr"}
      x = c_loc(stmpar%sedpar%tetacr)
@@ -236,7 +236,7 @@
      x = c_loc(viusp)
   case("diusp") !<  [m2/s] user defined spatial eddy diffusivity coefficient at u point (m2/s) {"location": "edge", "shape": ["lnx"]}
      x = c_loc(diusp)
-  case("taus") !<  [kg s-2 m] cell centre tau N/m2 {"location": "face", "shape": ["ndx"]}
+  case("taus") !<  [kg s-2 m-1] cell centre tau N/m2 {"location": "face", "shape": ["ndx"]}
      x = c_loc(taus)
   case("ndxi") !<  [-] Number of internal flowcells  (internal = 2D + 1D ). {"rank": 0}
      x = c_loc(ndxi)

@@ -357,7 +357,7 @@ double precision, allocatable     :: fvcoro (:)  !< 3D adamsbashford u point (m/
 
  double precision, allocatable     :: zn2rn (:)   !< weight from zn to rn, flownode to netnode
 
- double precision, allocatable, target :: taus (:) !< [kg s-2 m] cell centre tau N/m2 {"location": "face", "shape": ["ndx"]}
+ double precision, allocatable, target :: taus (:) !< [kg s-2 m-1] cell centre tau N/m2 {"location": "face", "shape": ["ndx"]}
  double precision, allocatable, target :: tausmax  (:)   !< cell centre taumax N/m2
  double precision, allocatable     :: q1waq (:)   !< Cumulative q1 within current waq-timestep
  double precision, allocatable     :: qwwaq (:)   !< Cumulative qw within current waq-timestep
