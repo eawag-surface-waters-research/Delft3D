@@ -204,6 +204,7 @@
          integer, pointer                       :: idomain(:)             ! idomain
          integer, pointer                       :: iglobal(:)             ! global cell numbering
          integer, pointer                       :: iglobal_bnd(:)         ! global boundary numbering
+         logical, pointer                       :: ispoint_bnd(:)         ! is boundary a point source
          integer, pointer                       :: ilocal_link(:)         ! local number in owner domain
          integer, pointer                       :: iglobal_link(:)        ! iglobal_link
          integer                                :: numcontpts             ! numcontpts number of contour nodes

@@ -34,6 +34,7 @@
 
       use hydmod
       use m_alloc
+      use precision_basics, only : comparereal
       implicit none
 
       ! declaration of the arguments
@@ -48,30 +49,20 @@
       integer                                :: idmn                   ! flow like domain index (0:n_domain-1)
       type(t_hyd), pointer                   :: d_hyd                  ! description of one domain hydrodynamics
       type(t_hyd), pointer                   :: l_hyd                  ! description of a linked domain hydrodynamics
-      integer                                :: noseg                  ! total number of segments
       integer                                :: nosegl                 ! total number of segments per layer
       integer                                :: nobnd                  ! total number of boundaries
       integer                                :: nobndl                 ! total number of boundaries per layer
-      integer                                :: nolay                  ! number of layers
       integer                                :: noq1                   ! total number of exchanges in first directory
-      integer                                :: noq1l_domain           ! number of exchanhes per layer in domain
       integer                                :: iseg                   ! segment index
       integer                                :: isegl                  ! segment index in layer
-      integer                                :: iseg_glob              ! global segment index
+      integer                                :: iseg_global            ! global segment index
       integer                                :: ilay                   ! layer index
       integer                                :: iq                     ! exchange index
       integer                                :: iq_global              ! global exchange index layer
-      integer                                :: iq_glob                ! global exchange index overall
-      integer                                :: iq_domain              ! domain exchange index
       integer                                :: ip1                    ! segment pointer index
       integer                                :: ip2                    ! segment pointer index
       integer                                :: ip3                    ! segment pointer index
       integer                                :: ip4                    ! segment pointer index
-      integer                                :: ip1_lay                ! segment pointer index
-      integer                                :: ip2_lay                ! segment pointer index
-      integer                                :: ip3_lay                ! segment pointer index
-      integer                                :: ip4_lay                ! segment pointer index
-      integer                                :: numcontpts             ! numcontpts number of contour nodes
       integer                                :: no_sect                ! number of sections
       integer                                :: i_sect                 ! index of section
       integer                                :: isect                  ! index of section
@@ -82,45 +73,40 @@
       type(t_openbndsect)                    :: new_sect               ! single section new
       logical                                :: bnd_active             ! if a boundary is active
       integer                                :: iret                   ! return value
-      
       integer                                :: ik                     ! node counter
-      integer                                :: il                     ! link counter
-      integer                                :: nodeoffset             ! node offset
-      integer                                :: nodelinkoffset         ! node link offset
-      integer                                :: nv                     ! max node for element
-      integer                                :: inv                    ! index countour node for element
-
-      integer, allocatable                   :: iglobal_active(:)      ! does a global segment actually exist
-      integer, allocatable                   :: iglobal_new(:)         ! what is the new iglobal for all old iglobal
-      integer                                :: inew                   ! new number
-
       integer                                :: iface                  ! face index
-      integer                                :: iglobal                ! global face index
+      integer                                :: min_seg                ! minimum segment index
+      integer                                :: max_seg                ! maximum segment index
       integer                                :: iedge                  ! edge index
+      integer                                :: global_node            ! global node
+      integer                                :: global_edge            ! global adge
+      integer                                :: itype                  ! edge index
+      integer                                :: edge_type              ! edge type
       integer                                :: l_iedge                ! edge index in linked domain
+      integer                                :: global_face            ! global face in domain
+      integer                                :: l_global_face          ! global face in linked domain
       integer                                :: inode                  ! node index
-      integer                                :: face_edge              ! current edge of current face
-      integer                                :: g_face_edge            ! global edge nr of current face
+      integer                                :: inode1                 ! node
+      integer                                :: inode2                 ! node
+      integer                                :: l_node                 ! node index
+      integer                                :: l_inode                ! node index
       integer                                :: l_face                 ! linked face
-      integer                                :: l_edge                 ! linked edge
-      integer                                :: l_face_edge            ! edge number in other domain at domain boundary
-      integer                                :: l_face_link            ! linked face in other domain at domain boundary
       integer                                :: face_link              ! current linked face
-      integer                                :: face_node              ! current linked node
       double precision                       :: d_x1                   ! x-coordinate of first edge node 
       double precision                       :: d_y1                   ! y-coordinate of first edge node 
+      double precision                       :: d_x2                   ! x-coordinate of first edge node 
+      double precision                       :: d_y2                   ! y-coordinate of first edge node 
       double precision                       :: l_x1                   ! x-coordinate of first linked edge node 
       double precision                       :: l_y1                   ! y-coordinate of first linked edge node 
       integer, allocatable                   :: globface_domain(:)     ! domain of global face
       integer, allocatable                   :: globface_face(:)       ! local face number of global face
+      integer, parameter                     :: edge_type_orde(4) = [1, 2, 0, 3]
 
       ! allocate local arrays
-
       n_domain = domain_hyd_coll%cursize
       d_hyd => domain_hyd_coll%hyd_pnts(1)
 
       ! copy projection attributes
-      
       hyd%waqgeom%meshname = d_hyd%waqgeom%meshname
       hyd%waqgeom%dim =  d_hyd%waqgeom%dim
       hyd%waqgeom%start_index = d_hyd%waqgeom%start_index
@@ -129,7 +115,6 @@
       hyd%conv_version  = d_hyd%conv_version
 
       ! init totals
-
       hyd%nmax  = 1
       hyd%kmax  = d_hyd%kmax
       hyd%nolay = d_hyd%nolay
@@ -157,16 +142,12 @@
       hyd%dd_bound_coll%cursize = 0
       hyd%dd_bound_coll%maxsize = 0
 
-      ! jvb_check 2D, later 3D
-
-      ! iglobal is only partially filled first look for highest number
-
+      ! initialise
       nosegl = 0
-      hyd%waqgeom%numnode = 0
-      hyd%waqgeom%numedge = 0
-      hyd%waqgeom%maxnumfacenodes = 0
+      
+      ! count the number of faces
       hyd%waqgeom%numface = 0
-      do i_domain = 1, n_domain  ! loop over domains
+      do i_domain = 1, n_domain ! loop over domains
          idmn = i_domain - 1
          d_hyd => domain_hyd_coll%hyd_pnts(i_domain)
          call reallocP(d_hyd%global_edge, d_hyd%waqgeom%numedge, fill = 0)
@@ -176,306 +157,255 @@
                ! not a ghost cell, so count as global cell
                nosegl = max(nosegl,d_hyd%iglobal(iface))
                hyd%waqgeom%numface = hyd%waqgeom%numface + 1
-               do iedge = 1, d_hyd%waqgeom%maxnumfacenodes  ! loop over edges
-                  face_edge = d_hyd%waqgeom%face_edges(iedge,iface)
-                  if (face_edge.gt.0) then
-                     ! edge defined
-                     face_link = d_hyd%waqgeom%face_links(iedge,iface)
-                     if (face_link.gt.0) then
-                        ! and linked to another cel (internal)
-                        if(d_hyd%iglobal(iface).gt.d_hyd%iglobal(face_link)) then
-                           ! only add edges with the highest global number...
-                           hyd%waqgeom%numedge = hyd%waqgeom%numedge + 1
-                           d_hyd%global_edge(face_edge) = hyd%waqgeom%numedge
-                        end if
-                     else
-                        ! and edges that are not not connected to another segment (external)
-                        hyd%waqgeom%numedge = hyd%waqgeom%numedge + 1
-                        d_hyd%global_edge(face_edge) = hyd%waqgeom%numedge
-                     endif
-                  endif
-               enddo
-            endif
-         enddo
-         hyd%waqgeom%maxnumfacenodes = max(hyd%waqgeom%maxnumfacenodes, d_hyd%waqgeom%maxnumfacenodes)
-      enddo
-
-      if (hyd%waqgeom%numface.lt.nosegl) then
-         ! Apparently the highest iglobal is higher than the sum of the number of active cells of each domain.
-         ! We have to skip inactive cells, create a renumber list, and update the global segment numbers in each domain.
-         write (msgbuf, '(a)')  'Apparently the highest iglobal is higher than the sum of the number of active cells of each domain.'
-         call msg_flush()
-         write (msgbuf, '(a,i10,a,i10)') 'Highest iglobal:', nosegl, ', number of active cells:', hyd%waqgeom%numnode
-         call msg_flush()
-         write (msgbuf, '(a)') 'We have to skip inactive cells, create a renumber list,'
-         call msg_flush()
-         write (msgbuf, '(a)') 'and update the global segment numbers in each domain.'
-         call msg_flush()
-         
-         call realloc (iglobal_active, nosegl, fill=0)
-         call realloc (iglobal_new, nosegl, fill=0)
-         do i_domain = 1, n_domain
-            idmn = i_domain - 1
-            d_hyd => domain_hyd_coll%hyd_pnts(i_domain)
-            do iseg = 1, d_hyd%nosegl
-               iglobal_active(d_hyd%iglobal(iseg)) = 1
-            enddo
-         enddo
-         inew = 0
-         do iseg = 1, nosegl
-            if (iglobal_active(iseg).eq.1) then
-               inew = inew + 1
-               iglobal_new(iseg) = inew
-            endif
+            end if
          end do
-         if (inew.ne.hyd%waqgeom%numface) then
-            write (msgbuf, '(a)') 'Unfortunatly the renumbering went wrong!'
-            call msg_flush()
-            write (msgbuf, '(a,i10,a,i10)') 'Highest new global number: ', inew, ', number of active cells:', hyd%waqgeom%numnode
-            call err_flush()
-            write(*,*) 
-            stop
-         end if
-         write (msgbuf, '(a)')  'New numbering is fine!'
-         call msg_flush()
-         write (msgbuf, '(a,i10,a,i10)')  'Highest new global number: ', inew, ', number of active cells:', hyd%waqgeom%numnode
-         call msg_flush()
-         nosegl = hyd%waqgeom%numface
-         do i_domain = 1, n_domain
-            idmn = i_domain - 1
-            d_hyd => domain_hyd_coll%hyd_pnts(i_domain)
-            do iseg = 1, d_hyd%nosegl
-               d_hyd%iglobal(iseg) = iglobal_new(d_hyd%iglobal(iseg))
-            enddo
-         enddo
-      endif
+      end do
 
-! backpointer for global segment numbers
+      ! backpointer for global face numbers to domain and local face number
       call realloc(globface_domain, hyd%waqgeom%numface, fill = 0)
       call realloc(globface_face, hyd%waqgeom%numface, fill = 0)
-      do i_domain = 1, n_domain  ! loop over domains
+      do i_domain = 1, n_domain ! loop over domains
          idmn = i_domain - 1
          d_hyd => domain_hyd_coll%hyd_pnts(i_domain)
          do iface = 1, d_hyd%waqgeom%numface  ! loop over faces
             if ( d_hyd%idomain(iface) .eq. idmn ) then
                globface_domain(d_hyd%iglobal(iface)) = i_domain
                globface_face(d_hyd%iglobal(iface)) = iface
-            endif
+            end if
          end do
       end do
 
-! count the nodes
-      do i_domain = 1, n_domain  ! loop over domains
-         idmn = i_domain - 1
+      ! determine maximun number of nodes per face
+      hyd%waqgeom%maxnumfacenodes = 0
+      do i_domain = 1, n_domain
          d_hyd => domain_hyd_coll%hyd_pnts(i_domain)
-         if (i_domain.gt.1) then
-            ! copy existing global node numbers
-            do iface = 1, d_hyd%waqgeom%numface  ! loop over faces
-               if ( d_hyd%idomain(iface) .eq. idmn ) then
-                  ! not a ghost cell
-                  do iedge = 1, d_hyd%waqgeom%maxnumfacenodes  ! loop over edges
-                     face_edge = d_hyd%waqgeom%face_edges(iedge,iface)
-                     face_link = d_hyd%waqgeom%face_links(iedge,iface)
-                     if (face_edge.gt.0 .and. face_link.gt.0) then
-                        ! edge defined and linked to another cel (internal)
-                        if(d_hyd%idomain(iface).ge.d_hyd%idomain(face_link)) then
-                           ! link to a lower or equal ranked domain
-                           l_hyd => domain_hyd_coll%hyd_pnts(globface_domain(d_hyd%iglobal(face_link)))
-                           l_face = globface_face(d_hyd%iglobal(face_link))
-                           do l_iedge = 1, l_hyd%waqgeom%maxnumfacenodes  ! loop over edges
-                              l_face_link = l_hyd%waqgeom%face_links(l_iedge,l_face)
-                              if (l_face_link.gt.0) then
-                                 if(l_hyd%iglobal(l_face_link).eq.d_hyd%iglobal(iface)) then
-                                    ! this is the corresponding edge!
-                                    l_face_edge = l_hyd%waqgeom%face_edges(l_iedge,l_face)
-                                    d_x1 = d_hyd%waqgeom%nodex(d_hyd%waqgeom%edge_nodes(1,face_edge))
-                                    d_y1 = d_hyd%waqgeom%nodey(d_hyd%waqgeom%edge_nodes(1,face_edge))
-                                    l_x1 = l_hyd%waqgeom%nodex(l_hyd%waqgeom%edge_nodes(1,l_face_edge))
-                                    l_y1 = l_hyd%waqgeom%nodey(l_hyd%waqgeom%edge_nodes(1,l_face_edge))
-                                    if (d_x1.eq.l_x1 .and. d_y1.eq.l_y1) then
-                                       ! first nodes are the same
-                                       if (l_hyd%global_node(l_hyd%waqgeom%edge_nodes(1,l_face_edge)).gt.0) then
-                                          d_hyd%global_node(d_hyd%waqgeom%edge_nodes(1,face_edge)) = &
-                                          l_hyd%global_node(l_hyd%waqgeom%edge_nodes(1,l_face_edge))
-                                       end if
-                                       if (l_hyd%global_node(l_hyd%waqgeom%edge_nodes(2,l_face_edge)).gt.0) then
-                                          d_hyd%global_node(d_hyd%waqgeom%edge_nodes(2,face_edge)) = &
-                                          l_hyd%global_node(l_hyd%waqgeom%edge_nodes(2,l_face_edge))
-                                       end if
-                                    else
-                                       ! first node is second node on other side
-                                       if (l_hyd%global_node(l_hyd%waqgeom%edge_nodes(1,l_face_edge)).gt.0) then
-                                          d_hyd%global_node(d_hyd%waqgeom%edge_nodes(2,face_edge)) = &
-                                          l_hyd%global_node(l_hyd%waqgeom%edge_nodes(1,l_face_edge))
-                                       end if
-                                       if (l_hyd%global_node(l_hyd%waqgeom%edge_nodes(2,l_face_edge)).gt.0) then
-                                          d_hyd%global_node(d_hyd%waqgeom%edge_nodes(1,face_edge)) = &
-                                          l_hyd%global_node(l_hyd%waqgeom%edge_nodes(2,l_face_edge))
-                                       end if
-                                    endif
-                                    exit
+         hyd%waqgeom%maxnumfacenodes = max(hyd%waqgeom%maxnumfacenodes, d_hyd%waqgeom%maxnumfacenodes)
+      end do
+
+      ! determine number of edges used in the merged grid, asign global edge numbers and copy to higher domain
+      hyd%waqgeom%numedge = 0
+      do itype = 1, 4 ! loop over types
+         edge_type = edge_type_orde(itype)
+         do i_domain = 1, n_domain  ! loop over domains
+            idmn = i_domain - 1
+            d_hyd => domain_hyd_coll%hyd_pnts(i_domain)
+            do iedge = 1, d_hyd%waqgeom%numedge  ! loop over edges
+               if(d_hyd%edge_type(iedge) .eq. edge_type) then
+                  ! edge of current type to be added to the merged domain
+                  ip1 = d_hyd%waqgeom%edge_faces(1, iedge)
+                  ip2 = d_hyd%waqgeom%edge_faces(2, iedge)
+                  if(ip2 .gt. 0) then
+                     if(min(d_hyd%idomain(ip1), d_hyd%idomain(ip2)) .eq. idmn) then
+                        ! only when the lowest domain of either side of the edge is the current domain
+                        hyd%waqgeom%numedge = hyd%waqgeom%numedge + 1
+                        d_hyd%global_edge(iedge) = hyd%waqgeom%numedge
+                        if(max(d_hyd%idomain(ip1), d_hyd%idomain(ip2)) .gt. idmn) then
+                           ! copy global edge number to other domain when domainnumber is higher
+                           if(d_hyd%idomain(ip2).gt.idmn) then
+                              global_face = d_hyd%iglobal(ip1)
+                              l_global_face = d_hyd%iglobal(ip2)
+                           else
+                              global_face = d_hyd%iglobal(ip2)
+                              l_global_face = d_hyd%iglobal(ip1)
+                           end if
+                           ! link to a higher ranked domain
+                           l_hyd => domain_hyd_coll%hyd_pnts(globface_domain(l_global_face))
+                           ! get the local face number
+                           l_face = globface_face(l_global_face)
+                           do l_iedge = 1, l_hyd%waqgeom%maxnumfacenodes  ! loop over nodes of linked face
+                              if (l_hyd%waqgeom%face_links(l_iedge, l_face).gt.0) then
+                                 if(l_hyd%iglobal(l_hyd%waqgeom%face_links(l_iedge, l_face)).eq.global_face) then
+                                    ! shared edge was found
+                                    l_hyd%global_edge(l_hyd%waqgeom%face_edges(l_iedge, l_face)) = hyd%waqgeom%numedge
                                  end if
                               end if
                            end do
                         end if
                      end if
-                  enddo
-               endif
-            enddo
-         endif
-         ! now add global node numbers for this domain
-         do iface = 1, d_hyd%waqgeom%numface  ! loop over faces
-            if ( d_hyd%idomain(iface) .eq. idmn ) then
-               ! not a ghost cell
-               do iedge = 1, d_hyd%waqgeom%maxnumfacenodes  ! loop over edges
-                  face_edge = d_hyd%waqgeom%face_edges(iedge,iface)
-                  face_link = d_hyd%waqgeom%face_links(iedge,iface)
-                  if (face_edge.gt.0) then
-                     ! edge defined
-                     if (face_link.gt.0) then
-                        ! and linked to another cel (internal)
-                        if(d_hyd%iglobal(iface).gt.d_hyd%iglobal(face_link)) then
-                           ! only add edges with the highest global number...
-                           do ik = 1,2  ! loop over nodes of the edge
-                              inode = d_hyd%waqgeom%edge_nodes(ik, face_edge)
-                              if(d_hyd%global_node(inode).eq.0) then
-                                 ! add nodes that do not yet have a global number
-                                 hyd%waqgeom%numnode = hyd%waqgeom%numnode + 1
-                                 d_hyd%global_node(inode) = hyd%waqgeom%numnode
-                              endif
-                           end do
-                        end if
-                     else
-                        ! add edges that are not not connected to another segment (external)
-                        do ik = 1,2  ! loop over nodes of the edge
-                           inode = d_hyd%waqgeom%edge_nodes(ik, face_edge)
-                           if(d_hyd%global_node(inode).eq.0) then
-                              ! add nodes that do not yet have a global number
-                              hyd%waqgeom%numnode = hyd%waqgeom%numnode + 1
-                              d_hyd%global_node(inode) = hyd%waqgeom%numnode
-                           endif
-                        end do
-                     endif
-                  endif
-               enddo
-            endif
-         enddo
-      enddo
+                  else
+                     if(d_hyd%idomain(ip1) .eq. idmn) then
+                        ! or when there is only one face and we are in the current domain
+                        hyd%waqgeom%numedge = hyd%waqgeom%numedge + 1
+                        d_hyd%global_edge(iedge) = hyd%waqgeom%numedge
+                     end if
+                  end if
+               end if
+            end do
+         end do
+      end do
 
-      ! allocate all arrays needed for the grid
-      
-      call reallocP(hyd%waqgeom%edge_nodes, (/2, hyd%waqgeom%numedge /), fill = -999)                          !< Edge-to-node mapping array.
-      call reallocP(hyd%waqgeom%edge_faces, (/2, hyd%waqgeom%numedge /), fill = -999)                          !< Edge-to-face mapping array (optional, can be null()).
-      call reallocP(hyd%waqgeom%face_nodes, (/hyd%waqgeom%maxnumfacenodes, hyd%waqgeom%numface/), fill = -999) !< Face-to-node mapping array.
-      call reallocP(hyd%waqgeom%face_edges, (/hyd%waqgeom%maxnumfacenodes, hyd%waqgeom%numface/), fill = -999) !< Face-to-edge mapping array (optional, can be null()).
-      call reallocP(hyd%waqgeom%face_links, (/hyd%waqgeom%maxnumfacenodes, hyd%waqgeom%numface/), fill = -999) !< Face-to-face mapping array (optional, can be null()).
-      call reallocP(hyd%edge_type         ,  hyd%waqgeom%numedge , fill = -999)                                !< Edge type
-      call reallocP(hyd%waqgeom%nodex     ,  hyd%waqgeom%numnode , fill = -999d0)                              !< x-coordinates of the mesh nodes.
-      call reallocP(hyd%waqgeom%nodey     ,  hyd%waqgeom%numnode , fill = -999d0)                              !< y-coordinates of the mesh nodes.
-      call reallocP(hyd%waqgeom%nodez     ,  hyd%waqgeom%numnode , fill = -999d0)                              !< z-coordinates of the mesh nodes.
-      call reallocP(hyd%waqgeom%edgex     ,  hyd%waqgeom%numedge , fill = -999d0)                              !< x-coordinates of the mesh edges.
-      call reallocP(hyd%waqgeom%edgey     ,  hyd%waqgeom%numedge , fill = -999d0)                              !< y-coordinates of the mesh edges.
-!      call reallocP(hyd%waqgeom%edgez     ,  hyd%waqgeom%numedge , fill = -999d0)                              !< z-coordinates of the mesh edges.
-      call reallocP(hyd%waqgeom%facex     ,  hyd%waqgeom%numface , fill = -999d0)                              !< x-coordinates of the mesh faces.
-      call reallocP(hyd%waqgeom%facey     ,  hyd%waqgeom%numface , fill = -999d0)                              !< y-coordinates of the mesh faces.
-      call reallocP(hyd%waqgeom%facez     ,  hyd%waqgeom%numface , fill = -999d0)                              !< z-coordinates of the mesh faces.
-
-      ! now fill all geom arrays
+      ! determin number of nodes used in the merged grid and asign global node numbers
+      hyd%waqgeom%numnode = 0
       do i_domain = 1, n_domain  ! loop over domains
          idmn = i_domain - 1
          d_hyd => domain_hyd_coll%hyd_pnts(i_domain)
-         ! now add global node numbers for this domain
-         do iface = 1, d_hyd%waqgeom%numface  ! loop over faces
-            if ( d_hyd%idomain(iface) .eq. idmn ) then
-               ! not a ghost cell
-               iglobal = d_hyd%iglobal(iface)
-               hyd%waqgeom%facex(iglobal) = d_hyd%waqgeom%facex(iface)
-               hyd%waqgeom%facey(iglobal) = d_hyd%waqgeom%facey(iface)
-!               hyd%waqgeom%facez(iglobal) = d_hyd%waqgeom%facez(iface)
-               hyd%waqgeom%facez(iglobal) = -999d0
-               do iedge = 1, d_hyd%waqgeom%maxnumfacenodes  ! loop over edges
-                  face_node = d_hyd%waqgeom%face_nodes(iedge,iface)
-                  face_edge = d_hyd%waqgeom%face_edges(iedge,iface)
-                  face_link = d_hyd%waqgeom%face_links(iedge,iface)
-                  if (face_edge.gt.0) then
-                     ! edge defined
-                     g_face_edge = d_hyd%global_edge(face_edge)
-                     if(g_face_edge.gt.0) then
-                        hyd%waqgeom%face_nodes(iedge, iglobal) = d_hyd%global_node(face_node)
-                        hyd%waqgeom%face_edges(iedge, iglobal) = g_face_edge
-                        hyd%waqgeom%edge_faces(1, g_face_edge) = iglobal
-                        hyd%waqgeom%edgex(g_face_edge) = d_hyd%waqgeom%edgex(face_edge)
-                        hyd%waqgeom%edgey(g_face_edge) = d_hyd%waqgeom%edgey(face_edge)
-                        hyd%edge_type(g_face_edge) = d_hyd%edge_type(face_edge)
-                        if (face_link.gt.0) then
-                           ! and linked to another cel (internal)
-                           hyd%waqgeom%face_links(iedge, iglobal) = d_hyd%iglobal(face_link)
-                           hyd%waqgeom%edge_faces(2, g_face_edge) = d_hyd%iglobal(face_link)
-                           if(d_hyd%iglobal(iface).gt.d_hyd%iglobal(face_link)) then
-                              ! only add edges with the highest global number...
-                              do ik = 1,2  ! loop over nodes of the edge
-                                 inode = d_hyd%waqgeom%edge_nodes(ik, face_edge)
-                                 hyd%waqgeom%edge_nodes(ik,g_face_edge) = d_hyd%global_node(inode)
-                                 hyd%waqgeom%nodex(d_hyd%global_node(inode)) = d_hyd%waqgeom%nodex(inode)
-                                 hyd%waqgeom%nodey(d_hyd%global_node(inode)) = d_hyd%waqgeom%nodey(inode)
-                                 hyd%waqgeom%nodez(d_hyd%global_node(inode)) = d_hyd%waqgeom%nodez(inode)
-                              end do
-                           else
-                              continue
-                           end if
-                        else
-                           ! add nodes of edges that are not not connected to another segment (external)
-                           do ik = 1,2  ! loop over nodes of the edge
-                              inode = d_hyd%waqgeom%edge_nodes(ik, face_edge)
-                              hyd%waqgeom%edge_nodes(ik,g_face_edge) = d_hyd%global_node(inode)
-                              hyd%waqgeom%nodex(d_hyd%global_node(inode)) = d_hyd%waqgeom%nodex(inode)
-                              hyd%waqgeom%nodey(d_hyd%global_node(inode)) = d_hyd%waqgeom%nodey(inode)
-                              hyd%waqgeom%nodez(d_hyd%global_node(inode)) = d_hyd%waqgeom%nodez(inode)
-                           end do
-                        endif
+         do iedge = 1, d_hyd%waqgeom%numedge  ! loop over edges
+            ip1 = d_hyd%waqgeom%edge_faces(1, iedge)
+            ip2 = d_hyd%waqgeom%edge_faces(2, iedge)
+            if(ip2 .gt. 0) then
+               ! two faces
+               if(min(d_hyd%idomain(ip1), d_hyd%idomain(ip2)) .eq. idmn) then
+                  ! only when the lowest domain of either side of the edge is the current domain
+                  inode1 = d_hyd%waqgeom%edge_nodes(1, iedge)
+                  if(d_hyd%global_node(inode1).eq.0) then
+                     ! add nodes that do not yet have a global number
+                     hyd%waqgeom%numnode = hyd%waqgeom%numnode + 1
+                     d_hyd%global_node(inode1) = hyd%waqgeom%numnode
+                  end if
+                  inode2 = d_hyd%waqgeom%edge_nodes(2, iedge)
+                  if(d_hyd%global_node(inode2).eq.0) then
+                     ! add nodes that do not yet have a global number
+                     hyd%waqgeom%numnode = hyd%waqgeom%numnode + 1
+                     d_hyd%global_node(inode2) = hyd%waqgeom%numnode
+                  end if
+                  if(max(d_hyd%idomain(ip1), d_hyd%idomain(ip2)) .gt. idmn) then
+                     ! copy global node numbers to other domain
+                     if(d_hyd%idomain(ip1).gt.idmn) then
+                        face_link = ip1
                      else
-!                       look at the other side
-                        l_hyd => domain_hyd_coll%hyd_pnts(globface_domain(d_hyd%iglobal(face_link)))
-                        l_face = globface_face(d_hyd%iglobal(face_link))
-                        do l_iedge = 1, l_hyd%waqgeom%maxnumfacenodes  ! loop over edges
-                           l_face_link = l_hyd%waqgeom%face_links(l_iedge,l_face)
-                           if (l_face_link.gt.0) then
-                              if(l_hyd%iglobal(l_face_link).eq.d_hyd%iglobal(iface)) then
-                                 ! this is the corresponding edge!
-                                 hyd%waqgeom%face_links(iedge, iglobal) = l_hyd%iglobal(l_face)
-                                 l_face_edge = l_hyd%waqgeom%face_edges(l_iedge,l_face)
-                                 hyd%waqgeom%face_edges(iedge, iglobal) = l_hyd%global_edge(l_face_edge)
-                                 d_x1 = d_hyd%waqgeom%nodex(d_hyd%waqgeom%edge_nodes(1,face_edge))
-                                 d_y1 = d_hyd%waqgeom%nodey(d_hyd%waqgeom%edge_nodes(1,face_edge))
-                                 l_x1 = l_hyd%waqgeom%nodex(l_hyd%waqgeom%edge_nodes(1,l_face_edge))
-                                 l_y1 = l_hyd%waqgeom%nodey(l_hyd%waqgeom%edge_nodes(1,l_face_edge))
-                                 if (d_x1.eq.l_x1 .and. d_y1.eq.l_y1) then
-                                    ! first nodes are the same
-                                    if (l_hyd%global_node(l_hyd%waqgeom%edge_nodes(1,l_face_edge)).gt.0) then
-                                       hyd%waqgeom%face_nodes(iedge, iglobal) = &
-                                       l_hyd%global_node(l_hyd%waqgeom%edge_nodes(1,l_face_edge))
-                                    end if
-                                 else
-                                    ! first node is second node on other side
-                                    if (l_hyd%global_node(l_hyd%waqgeom%edge_nodes(2,l_face_edge)).gt.0) then
-                                       hyd%waqgeom%face_nodes(iedge, iglobal) = &
-                                       l_hyd%global_node(l_hyd%waqgeom%edge_nodes(2,l_face_edge))
-                                    end if
-                                 endif
-                                 exit
+                        face_link = ip2
+                     end if
+                     ! link to a higher ranked domain, copy global node numbers
+                     d_x1 = d_hyd%waqgeom%nodex(inode1)
+                     d_y1 = d_hyd%waqgeom%nodey(inode1)
+                     d_x2 = d_hyd%waqgeom%nodex(inode2)
+                     d_y2 = d_hyd%waqgeom%nodey(inode2)
+                     l_hyd => domain_hyd_coll%hyd_pnts(globface_domain(d_hyd%iglobal(face_link)))
+                     ! get the local face number
+                     l_face = globface_face(d_hyd%iglobal(face_link))
+                     do l_inode = 1, l_hyd%waqgeom%maxnumfacenodes  ! loop over nodes of linked face
+                        l_node = l_hyd%waqgeom%face_nodes(l_inode,l_face)
+                        if(l_node.gt.0) then
+                           ! it is a node
+                           if(l_hyd%global_node(l_node).eq.0) then
+                              ! and it doesn't have a global number yet
+                              l_x1 = l_hyd%waqgeom%nodex(l_node)
+                              l_y1 = l_hyd%waqgeom%nodey(l_node)
+                              if(comparereal(l_x1, d_x1) == 0 .and. comparereal(l_y1, d_y1) == 0) then
+                                 ! it is the first node of the edge
+                                 l_hyd%global_node(l_node) = d_hyd%global_node(inode1)
+                              end if                           
+                              if(comparereal(l_x1, d_x2) == 0 .and. comparereal(l_y1, d_y2) == 0) then
+                                 ! it is the second node of the edge
+                                 l_hyd%global_node(l_node) = d_hyd%global_node(inode2)
                               end if
-                           end if
-                        end do
-                     endif
-                  endif
-               enddo
-            endif
-         enddo
-      enddo
+                           end if                           
+                        end if                           
+                     end do
+                  end if
+               end if
+            else
+               if(d_hyd%idomain(ip1) .eq. idmn) then
+                  ! or when there is only one face and we are in the current domain
+                  ! add edges that are not not connected to another segment (external)
+                  do ik = 1,2  ! loop over nodes of the edge
+                     inode = d_hyd%waqgeom%edge_nodes(ik, iedge)
+                     if(d_hyd%global_node(inode).eq.0) then
+                        ! add nodes that do not yet have a global number
+                        hyd%waqgeom%numnode = hyd%waqgeom%numnode + 1
+                        d_hyd%global_node(inode) = hyd%waqgeom%numnode
+                     end if
+                  end do
+               end if
+            end if
+         end do
+      end do
 
+      ! allocate all arrays needed for the waqgeom data
+      
+      ! nodes
+      call reallocP(hyd%waqgeom%nodex     ,  hyd%waqgeom%numnode , fill = -999d0)                              !< x-coordinates of the mesh nodes
+      call reallocP(hyd%waqgeom%nodey     ,  hyd%waqgeom%numnode , fill = -999d0)                              !< y-coordinates of the mesh nodes
+      call reallocP(hyd%waqgeom%nodez     ,  hyd%waqgeom%numnode , fill = -999d0)                              !< z-coordinates of the mesh nodes
+
+      ! edges
+      call reallocP(hyd%waqgeom%edge_nodes, (/2, hyd%waqgeom%numedge /), fill = -999)                          !< Edge-to-node mapping array
+      call reallocP(hyd%waqgeom%edge_faces, (/2, hyd%waqgeom%numedge /), fill = -999)                          !< Edge-to-face mapping array
+      call reallocP(hyd%edge_type         ,  hyd%waqgeom%numedge , fill = -999)                                !< Edge type
+      call reallocP(hyd%waqgeom%edgex     ,  hyd%waqgeom%numedge , fill = -999d0)                              !< x-coordinates of the mesh edges
+      call reallocP(hyd%waqgeom%edgey     ,  hyd%waqgeom%numedge , fill = -999d0)                              !< y-coordinates of the mesh edges
+      call reallocP(hyd%waqgeom%edgez     ,  hyd%waqgeom%numedge , fill = -999d0)                              !< z-coordinates of the mesh edges
+
+      ! faces
+      call reallocP(hyd%waqgeom%face_nodes, (/hyd%waqgeom%maxnumfacenodes, hyd%waqgeom%numface/), fill = -999) !< Face-to-node mapping array
+      call reallocP(hyd%waqgeom%face_edges, (/hyd%waqgeom%maxnumfacenodes, hyd%waqgeom%numface/), fill = -999) !< Face-to-edge mapping array
+      call reallocP(hyd%waqgeom%face_links, (/hyd%waqgeom%maxnumfacenodes, hyd%waqgeom%numface/), fill = -999) !< Face-to-face mapping array
+      call reallocP(hyd%waqgeom%facex     ,  hyd%waqgeom%numface , fill = -999d0)                              !< x-coordinates of the mesh faces
+      call reallocP(hyd%waqgeom%facey     ,  hyd%waqgeom%numface , fill = -999d0)                              !< y-coordinates of the mesh faces
+      call reallocP(hyd%waqgeom%facez     ,  hyd%waqgeom%numface , fill = -999d0)                              !< z-coordinates of the mesh faces
+
+      ! now fill all waqgeom arrays
+      
+      ! fill the nodes data
+      do i_domain = 1, n_domain  ! loop over domains
+         idmn = i_domain - 1
+         d_hyd => domain_hyd_coll%hyd_pnts(i_domain)
+         do inode = 1, d_hyd%waqgeom%numnode
+            global_node = d_hyd%global_node(inode)
+            if(global_node.gt.0) then
+               ! node coordinates
+               hyd%waqgeom%nodex(global_node) = d_hyd%waqgeom%nodex(inode)
+               hyd%waqgeom%nodey(global_node) = d_hyd%waqgeom%nodey(inode)
+               hyd%waqgeom%nodez(global_node) = d_hyd%waqgeom%nodez(inode)
+            end if
+         end do
+      end do
+
+      ! fill the edges data
+      do i_domain = 1, n_domain  ! loop over domains
+         idmn = i_domain - 1
+         d_hyd => domain_hyd_coll%hyd_pnts(i_domain)
+         do iedge = 1, d_hyd%waqgeom%numedge
+            global_edge = d_hyd%global_edge(iedge)
+            if(global_edge.gt.0) then
+               ! edge nodes
+               hyd%waqgeom%edge_nodes(1, global_edge) = d_hyd%global_node(d_hyd%waqgeom%edge_nodes(1, iedge))
+               hyd%waqgeom%edge_nodes(2, global_edge) = d_hyd%global_node(d_hyd%waqgeom%edge_nodes(2, iedge))
+               ! edge faces
+               hyd%waqgeom%edge_faces(1, global_edge) = d_hyd%iglobal(d_hyd%waqgeom%edge_faces(1, iedge))
+               if(d_hyd%waqgeom%edge_faces(2, iedge).gt.0) then
+                  hyd%waqgeom%edge_faces(2, global_edge) = d_hyd%iglobal(d_hyd%waqgeom%edge_faces(2, iedge))
+               end if
+               ! edge type
+               hyd%edge_type(global_edge) = d_hyd%edge_type(iedge)
+               ! edge coordinates
+               hyd%waqgeom%edgex(global_edge) = d_hyd%waqgeom%edgex(iedge)
+               hyd%waqgeom%edgey(global_edge) = d_hyd%waqgeom%edgey(iedge)
+!               hyd%waqgeom%edgez(global_edge) = d_hyd%waqgeom%edgez(iedge)
+            end if
+         end do
+      end do
+
+      ! fill the faces data
+      do i_domain = 1, n_domain  ! loop over domains
+         idmn = i_domain - 1
+         d_hyd => domain_hyd_coll%hyd_pnts(i_domain)
+         do iface = 1, d_hyd%waqgeom%numface
+            if(d_hyd%idomain(iface) .eq. idmn ) then
+               global_face = d_hyd%iglobal(iface)
+               do inode = 1, d_hyd%waqgeom%maxnumfacenodes
+                  ! face nodes
+                  if (d_hyd%waqgeom%face_nodes(inode, iface).gt.0.and.hyd%waqgeom%face_nodes(inode, global_face).lt.0) then
+                     hyd%waqgeom%face_nodes(inode, global_face) = d_hyd%global_node(d_hyd%waqgeom%face_nodes(inode, iface))
+                  end if
+                  ! face edges
+                  if (d_hyd%waqgeom%face_edges(inode, iface).gt.0.and.hyd%waqgeom%face_edges(inode, global_face).lt.0) then
+                     hyd%waqgeom%face_edges(inode, global_face) = d_hyd%global_edge(d_hyd%waqgeom%face_edges(inode, iface))
+                  end if
+                  ! face links
+                  if (d_hyd%waqgeom%face_links(inode, iface).gt.0.and.hyd%waqgeom%face_links(inode, global_face).lt.0) then
+                     hyd%waqgeom%face_links(inode, global_face) = d_hyd%iglobal(d_hyd%waqgeom%face_links(inode, iface))
+                  end if
+                  ! face coordinates
+                  hyd%waqgeom%facex(global_face) = d_hyd%waqgeom%facex(iface)
+                  hyd%waqgeom%facey(global_face) = d_hyd%waqgeom%facey(iface)
+!                  hyd%waqgeom%facez(global_face) = d_hyd%waqgeom%facez(iface)
+               end do
+            end if
+         end do
+      end do
       
       ! sequentially fill in segment numbers in the third dimension (when hyd nolay > 1)
-
       if (hyd%nolay.gt.1) then
          do i_domain = 1, n_domain
             idmn = i_domain - 1
@@ -486,30 +416,111 @@
                do ilay = 2, d_hyd%nolay
                   d_hyd%idomain(iseg + (ilay - 1) * d_hyd%nosegl) = d_hyd%idomain(iseg)
                   d_hyd%iglobal(iseg + (ilay - 1) * d_hyd%nosegl) = d_hyd%iglobal(iseg) + (ilay - 1) * nosegl
-               enddo
-            enddo
-         enddo
-      endif
+               end do
+            end do
+         end do
+      end if
 
       ! set the dimensions of the overall domain
-
       hyd%nosegl = nosegl
       hyd%noseg  = nosegl * hyd%nolay
       hyd%mmax   = nosegl
 
-      ! global exchanges count, boundary count
+      ! boundaries, add the active sections and boundaries to the collections
+      do i_domain = 1, n_domain
+         d_hyd => domain_hyd_coll%hyd_pnts(i_domain)
+         call reallocP(d_hyd%ispoint_bnd, d_hyd%nobnd, fill = .false.)
+         no_sect = d_hyd%openbndsect_coll%cursize
+         do i_sect = 1 , no_sect
+            openbndsect => d_hyd%openbndsect_coll%openbndsect_pnts(i_sect)
+            no_bnd = openbndsect%openbndlin_coll%cursize
+            do i_bnd = 1 , no_bnd
+               openbndlin => openbndsect%openbndlin_coll%openbndlin_pnts(i_bnd)
+               if (comparereal(openbndlin%x1, openbndlin%x2) == 0 .and. comparereal(openbndlin%x1, openbndlin%x2) == 0) then
+                  do ilay = 1, d_hyd%nolay
+                     d_hyd%ispoint_bnd(abs(openbndlin%ibnd)+(ilay-1)*d_hyd%nobndl) = .true.
+                  end do
+               end if
+            end do
+         end do
+      end do
 
+      ! exchanges
+      ! gather the exchanges per layer, and in such a way that the internal exchanges come first, and overlap with the edge face table
       noq1  = 0
       nobnd = 0
+      ! loop over layers
+      do ilay = 1, hyd%nolay
+         ! first round internal links only
+         do i_domain = 1, n_domain
+            idmn = i_domain - 1
+            d_hyd => domain_hyd_coll%hyd_pnts(i_domain)
+            ! determine min and max segment number of this layer in this domain
+            min_seg = (ilay - 1) * d_hyd%nosegl + 1
+            max_seg = ilay * d_hyd%nosegl
+            do iq = 1, d_hyd%noq1
+               ip1 = d_hyd%ipoint(1,iq)
+               ip2 = d_hyd%ipoint(2,iq)
+               if (ip1 .ge. min_seg .and. ip1 .le. max_seg .and. ip2 .gt. 0) then
+                  ! ip1 is in this layer and ip2 not a boundary
+                  if (min(d_hyd%idomain(ip1),d_hyd%idomain(ip2)) .eq. idmn) then
+                     ! only add when lowest domain number of the cells is in the current domain (they are usually the same)
+                     noq1 = noq1 + 1
+                     d_hyd%iglobal_link(iq) = noq1
+                  end if
+               end if
+            end do
+         end do
+         ! second round the boundary links that are not point sources
+         do i_domain = 1, n_domain
+            idmn = i_domain - 1
+            d_hyd => domain_hyd_coll%hyd_pnts(i_domain)
+            ! determine min and max segment number of this layer in this domain
+            min_seg = (ilay - 1) * d_hyd%nosegl + 1
+            max_seg = ilay * d_hyd%nosegl
+            do iq = 1, d_hyd%noq1
+               ip1 = d_hyd%ipoint(1,iq)
+               ip2 = d_hyd%ipoint(2,iq)
+               if ( ip1 .lt. 0 .and. ip2 .ge. min_seg .and. ip2 .le. max_seg) then
+                  ! ip1 is a boundary and ip2 is in this layer
+                  if(d_hyd%idomain(ip2) .eq. idmn .and. (.not.d_hyd%ispoint_bnd(abs(ip1)))) then
+                     ! only add boundary links from current domain that are not point sources
+                     noq1 = noq1 + 1
+                     d_hyd%iglobal_link(iq) = noq1
+                     if (-ip1 .le. d_hyd%nobndl) then
+                        nobnd = nobnd + 1
+                        d_hyd%iglobal_bnd(-ip1) = -nobnd
+                        call renum_bnd(d_hyd%openbndsect_coll,ip1,-nobnd)
+                     end if
+                  end if
+               else if (ip1 .ge. min_seg .and. ip1 .le. max_seg .and. ip2 .lt. 0) then !ip1 between min +1 and max
+                  ! ip2 is a boundary and ip1 is in this layer
+                  if (d_hyd%idomain(ip1) .eq. idmn .and. (.not.d_hyd%ispoint_bnd(abs(ip1)))) then
+                     ! only add boundary links from current domain that are not point sources
+                     noq1 = noq1 + 1
+                     d_hyd%iglobal_link(iq) = noq1
+                     if (-ip2 .le. d_hyd%nobndl) then
+                        nobnd = nobnd + 1
+                        d_hyd%iglobal_bnd(-ip2) = -nobnd
+                        call renum_bnd(d_hyd%openbndsect_coll,ip2,-nobnd)
+                     end if
+                  end if
+               end if
+            end do
+         end do
+      end do
+
+      ! third round the point sources
       do i_domain = 1, n_domain
          idmn = i_domain - 1
          d_hyd => domain_hyd_coll%hyd_pnts(i_domain)
          do iq = 1, d_hyd%noq1
             ip1 = d_hyd%ipoint(1,iq)
             ip2 = d_hyd%ipoint(2,iq)
-            if ( ip1 .lt. 0 .and. ip2 .gt. 0) then
-               ! only add boundary links from current domain
-               if(d_hyd%idomain(ip2) .eq. idmn) then
+            if (ip1 .lt. 0 .and. ip2 .gt. 0) then
+               ! ip1 is a boundary to a valid segment
+               if (d_hyd%idomain(ip2) .eq. idmn .and. d_hyd%ispoint_bnd(abs(ip1))) then
+                  ! only add when the segment is in the current domain and it is a point source
                   noq1 = noq1 + 1
                   d_hyd%iglobal_link(iq) = noq1
                   if (-ip1 .le. d_hyd%nobndl) then
@@ -519,25 +530,22 @@
                   end if
                end if
             else if (ip1 .gt. 0 .and. ip2 .lt. 0) then
-               ! only add boundary links from current domain
-               if (d_hyd%idomain(ip1) .eq. idmn) then
+               ! ip2 is a boundary to a valid segment
+               if (d_hyd%idomain(ip1) .eq. idmn .and. d_hyd%ispoint_bnd(abs(ip2))) then
+                  ! only add when the segment is in the current domain and it is a point source
                   noq1 = noq1 + 1
                   d_hyd%iglobal_link(iq) = noq1
-                  if (-ip2 .le. d_hyd%nobndl) then
+                  if (-ip1 .le. d_hyd%nobndl) then
                      nobnd = nobnd + 1
-                     d_hyd%iglobal_bnd(-ip2) = -nobnd
-                     call renum_bnd(d_hyd%openbndsect_coll,ip2,-nobnd)
+                     d_hyd%iglobal_bnd(-ip1) = -nobnd
+                     call renum_bnd(d_hyd%openbndsect_coll,ip1,-nobnd)
                   end if
                end if
-            else if (ip1 .gt. 0 .and. ip2 .gt. 0) then
-               ! only add when lowest domain number of the cells is in the current domain (they are usually the same)
-               if (min(d_hyd%idomain(ip1),d_hyd%idomain(ip2)) .eq. idmn) then
-                  noq1 = noq1 + 1
-                  d_hyd%iglobal_link(iq) = noq1
-               end if
             end if
-         enddo
-      enddo
+         end do
+      end do
+
+      ! exchange totals
       hyd%noq1 = noq1
       hyd%noq2 = 0
       hyd%noq3 = hyd%nosegl*(hyd%nolay-1)
@@ -546,8 +554,7 @@
       hyd%nobndl = nobnd
       hyd%nobnd  = nobnd*hyd%nolay
 
-      ! sequentially fill in boundary numbers in the third dimension (when hyd nolay > 1)
-
+      ! fill in boundary numbers in the third dimension (when hyd nolay > 1)
       if (hyd%nolay.gt.1) then
          do i_domain = 1, n_domain
             idmn = i_domain - 1
@@ -556,14 +563,13 @@
                if ( d_hyd%iglobal_bnd(i_bnd).ne.0) then
                   do ilay = 2, d_hyd%nolay
                      d_hyd%iglobal_bnd(i_bnd + (ilay - 1) * d_hyd%nobndl) = d_hyd%iglobal_bnd(i_bnd) - (ilay - 1) * nobnd
-                  enddo
-               endif
-            enddo
-         enddo
-      endif
+                  end do
+               end if
+            end do
+         end do
+      end if
       
       ! make final pointer table
-
       nobnd  = 0
       nobndl = hyd%nobndl
       allocate(hyd%ipoint(4,hyd%noq))
@@ -574,77 +580,52 @@
             if ( iq_global .gt. 0 ) then
                ip1 = d_hyd%ipoint(1,iq)
                ip2 = d_hyd%ipoint(2,iq)
-               ip3 = d_hyd%ipoint(3,iq)
-               ip4 = d_hyd%ipoint(4,iq)
                if ( ip1 .gt. 0 ) then
                   ip1 = d_hyd%iglobal(ip1)
                elseif ( ip1 .lt. 0 ) then
                   ip1 = d_hyd%iglobal_bnd(-ip1)
-               else
-                  continue ! ip1 = 0
                endif
                if ( ip2 .gt. 0 ) then
                   ip2 = d_hyd%iglobal(ip2)
                elseif ( ip2 .lt. 0 ) then
                   ip2 = d_hyd%iglobal_bnd(-ip2)
-               else
-                  continue ! ip2 = 0
-               endif
-               if ( ip3 .gt. 0 ) then
-                  ip3 = d_hyd%iglobal(ip3)
-               else
-                  ip3 = 0
-               endif
-               if ( ip4 .gt. 0 ) then
-                  ip4 = d_hyd%iglobal(ip4)
-               else
-                  ip4 = 0
-               endif
-               if ( ip1 .eq. 0 .or. ip2.eq.0) then
-                  continue
                endif
                hyd%ipoint(1,iq_global) = ip1
                hyd%ipoint(2,iq_global) = ip2
-               hyd%ipoint(3,iq_global) = ip3
-               hyd%ipoint(4,iq_global) = ip4
             endif
          enddo
       enddo
 
       ! pointers in third dimension
-
       do iseg = 1, hyd%nosegl
          do ilay = 1, hyd%nolay - 1
-            iq_glob = hyd%noq1 + (ilay-1)*hyd%nosegl + iseg
+            iq_global = hyd%noq1 + (ilay-1)*hyd%nosegl + iseg
             ip1 = (ilay-1)*hyd%nosegl + iseg
             ip2 = (ilay  )*hyd%nosegl + iseg
             if ( ilay .ne. 1 ) then
                ip3 = (ilay-2)*hyd%nosegl + iseg
             else
                ip3 = 0
-            endif
+            end if
             if ( ilay .ne. hyd%nolay - 1 ) then
                ip4 = (ilay+1)*hyd%nosegl + iseg
             else
                ip4 = 0
-            endif
-            hyd%ipoint(1,iq_glob) = ip1
-            hyd%ipoint(2,iq_glob) = ip2
-            hyd%ipoint(3,iq_glob) = ip3
-            hyd%ipoint(4,iq_glob) = ip4
-         enddo
-      enddo
+            end if
+            hyd%ipoint(1,iq_global) = ip1
+            hyd%ipoint(2,iq_global) = ip2
+            hyd%ipoint(3,iq_global) = ip3
+            hyd%ipoint(4,iq_global) = ip4
+         end do
+      end do
 
       ! layering
-
       allocate(hyd%hyd_layers(hyd%kmax))
       allocate(hyd%waq_layers(hyd%nolay))
       hyd%hyd_layers = d_hyd%hyd_layers
       hyd%waq_layers = d_hyd%waq_layers
 
-
       ! boundaries, add the active sections and boundaries to the collections
-
       do i_domain = 1, n_domain
          d_hyd => domain_hyd_coll%hyd_pnts(i_domain)
          no_sect = d_hyd%openbndsect_coll%cursize
@@ -655,8 +636,8 @@
             do i_bnd = 1 , no_bnd
                if ( openbndsect%openbndlin_coll%openbndlin_pnts(i_bnd)%ibnd_new .ne. 0 ) then
                   bnd_active = .true.
-               endif
-            enddo
+               end if
+            end do
             if ( bnd_active ) then
                isect = openbndsect_coll_find( hyd%openbndsect_coll, openbndsect%name )
                if ( isect .le. 0 ) then
@@ -665,19 +646,18 @@
                   new_sect%openbndlin_coll%maxsize = 0
                   new_sect%openbndlin_coll%openbndlin_pnts => null()
                   isect = coll_add(hyd%openbndsect_coll, new_sect)
-               endif
+               end if
                do i_bnd = 1 , no_bnd
                   if ( openbndsect%openbndlin_coll%openbndlin_pnts(i_bnd)%ibnd_new .ne. 0 ) then
                      iret = coll_add(hyd%openbndsect_coll%openbndsect_pnts(isect)%openbndlin_coll,openbndsect%openbndlin_coll%openbndlin_pnts(i_bnd))
                      hyd%openbndsect_coll%openbndsect_pnts(isect)%openbndlin_coll%openbndlin_pnts(iret)%ibnd = openbndsect%openbndlin_coll%openbndlin_pnts(i_bnd)%ibnd_new
-                  endif
-               enddo
-            endif
-         enddo
-      enddo
+                  end if
+               end do
+            end if
+         end do
+      end do
 
       ! allocate rest of the arrays
-
       allocate(hyd%volume(hyd%noseg))
       allocate(hyd%area(hyd%noq))
       allocate(hyd%flow(hyd%noq))
@@ -691,33 +671,29 @@
       if (hyd%vdf_present) allocate(hyd%vdf(hyd%noseg))
 
       ! time independent items
-
       hyd%atr_type = ATR_FM
       hyd%no_atr = 2
-      nolay     = hyd%nolay
       hyd%displen = 0.0
-
       do i_domain = 1 , n_domain
          d_hyd => domain_hyd_coll%hyd_pnts(i_domain)
          do isegl = 1 , d_hyd%nosegl
-            iseg_glob = d_hyd%iglobal(isegl)
-            if ( iseg_glob .gt. 0 ) then
-               do ilay = 1,nolay
-                  hyd%surf(iseg_glob + (ilay - 1) * hyd%nosegl) = d_hyd%surf(isegl + (ilay - 1) * d_hyd%nosegl)
-                  hyd%attributes(iseg_glob + (ilay - 1) * hyd%nosegl) = d_hyd%attributes(isegl + (ilay - 1) * d_hyd%nosegl)
-               enddo
-               hyd%depth(iseg_glob) = d_hyd%depth(isegl)
-            endif
-         enddo
+            iseg_global = d_hyd%iglobal(isegl)
+            if ( iseg_global .gt. 0 ) then
+               do ilay = 1, hyd%nolay
+                  hyd%surf(iseg_global + (ilay - 1) * hyd%nosegl)       = d_hyd%surf(isegl + (ilay - 1) * d_hyd%nosegl)
+                  hyd%attributes(iseg_global + (ilay - 1) * hyd%nosegl) = d_hyd%attributes(isegl + (ilay - 1) * d_hyd%nosegl)
+               end do
+               hyd%depth(iseg_global) = d_hyd%depth(isegl)
+            end if
+         end do
          do iq = 1, d_hyd%noq1
             iq_global = d_hyd%iglobal_link(iq)
             if ( iq_global .gt. 0 ) then
                hyd%displen(1,iq_global) = d_hyd%displen(1,iq)
                hyd%displen(2,iq_global) = d_hyd%displen(2,iq)
-            endif
-         enddo
-      enddo
-
+            end if
+         end do
+      end do
       return
       end
 
@@ -742,13 +718,11 @@
       integer                                :: i_domain               ! index in collection
       integer                                :: idmn                   ! flow like domain index (0:n_domain-1)
       type(t_hyd), pointer                   :: domain_hyd             ! description of one domain hydrodynamics
-      integer                                :: noseg                  ! total number of segments
       integer                                :: nosegl                 ! total number of segments per layer
       integer                                :: nobnd                  ! total number of boundaries
       integer                                :: nobndl                 ! total number of boundaries per layer
       integer                                :: nolay                  ! number of layers
       integer                                :: noq1                   ! total number of exchanges in first directory
-      integer                                :: noq1l_domain           ! number of exchanhes per layer in domain
       integer                                :: iseg                   ! segment index
       integer                                :: isegl                  ! segment index in layer
       integer                                :: iseg_glob              ! global segment index
@@ -756,15 +730,10 @@
       integer                                :: iq                     ! exchange index
       integer                                :: iq_global              ! global exchange index layer
       integer                                :: iq_glob                ! global exchange index overall
-      integer                                :: iq_domain              ! domain exchange index
       integer                                :: ip1                    ! segment pointer index
       integer                                :: ip2                    ! segment pointer index
       integer                                :: ip3                    ! segment pointer index
       integer                                :: ip4                    ! segment pointer index
-      integer                                :: ip1_lay                ! segment pointer index
-      integer                                :: ip2_lay                ! segment pointer index
-      integer                                :: ip3_lay                ! segment pointer index
-      integer                                :: ip4_lay                ! segment pointer index
       integer                                :: numcontpts             ! numcontpts number of contour nodes
       integer                                :: no_sect                ! number of sections
       integer                                :: i_sect                 ! index of section
@@ -772,7 +741,6 @@
       integer                                :: no_bnd                 ! number of boundaries in section
       integer                                :: i_bnd                  ! index of boundary
       type(t_openbndsect), pointer           :: openbndsect            ! single section
-      type(t_openbndlin),pointer             :: openbndlin             ! single open boundary lin
       type(t_openbndsect)                    :: new_sect               ! single section new
       logical                                :: bnd_active             ! if a boundary is active
       integer                                :: iret                   ! return value
@@ -789,15 +757,12 @@
       integer                                :: inew                   ! new number
 
       ! allocate local arrays
-
       n_domain = domain_hyd_coll%cursize
 
       ! copy projection attributes
-      
       hyd%crs  = domain_hyd_coll%hyd_pnts(1)%crs
 
       ! init totals
-
       hyd%nmax  = 1
       hyd%kmax  = domain_hyd_coll%hyd_pnts(1)%kmax
       hyd%nolay = domain_hyd_coll%hyd_pnts(1)%nolay
@@ -825,10 +790,7 @@
       hyd%dd_bound_coll%cursize = 0
       hyd%dd_bound_coll%maxsize = 0
 
-      ! jvb_check 2D, later 3D
-
       ! iglobal is only partially filled first look for highest number
-
       nosegl = 0
       hyd%numk = 0
       hyd%numl = 0
@@ -841,12 +803,12 @@
             if ( domain_hyd%idomain(iseg) .eq. idmn ) then
                nosegl = max(nosegl,domain_hyd%iglobal(iseg))
                hyd%nump = hyd%nump + 1
-            endif
-         enddo
+            end if
+         end do
          hyd%numk = hyd%numk + domain_hyd%numk
          hyd%numl = hyd%numl + domain_hyd%numl
          hyd%nv   = max(hyd%nv, domain_hyd%nv)
-      enddo
+      end do
 
       if (hyd%nump.lt.nosegl) then
          ! Apparently the highest iglobal is higher than the sum of the number of active cells of each domain.
@@ -867,14 +829,14 @@
             domain_hyd => domain_hyd_coll%hyd_pnts(i_domain)
             do iseg = 1, domain_hyd%nosegl
                iglobal_active(domain_hyd%iglobal(iseg)) = 1
-            enddo
-         enddo
+            end do
+         end do
          inew = 0
          do iseg = 1, nosegl
             if (iglobal_active(iseg).eq.1) then
                inew = inew + 1
                iglobal_new(iseg) = inew
-            endif
+            end if
          end do
          if (inew.ne.hyd%nump) then
             write (msgbuf, '(a)') 'Unfortunatly the renumbering went wrong!'
@@ -894,9 +856,9 @@
             domain_hyd => domain_hyd_coll%hyd_pnts(i_domain)
             do iseg = 1, domain_hyd%nosegl
                domain_hyd%iglobal(iseg) = iglobal_new(domain_hyd%iglobal(iseg))
-            enddo
-         enddo
-      endif
+            end do
+         end do
+      end if
       
       ! sequentially fill in segment numbers in the third dimension (when hyd nolay > 1)
 
@@ -908,10 +870,10 @@
                do ilay = 2, domain_hyd%nolay
                   domain_hyd%idomain(iseg + (ilay - 1) * domain_hyd%nosegl) = domain_hyd%idomain(iseg)
                   domain_hyd%iglobal(iseg + (ilay - 1) * domain_hyd%nosegl) = domain_hyd%iglobal(iseg) + (ilay - 1) * nosegl
-               enddo
-            enddo
-         enddo
-      endif
+               end do
+            end do
+         end do
+      end if
 
       ! set the dimensions of the overall domain
 
@@ -957,8 +919,8 @@
                domain_hyd%iglobal_link(iq) = 0
                noq1 = noq1 - 1
             end if
-         enddo
-      enddo
+         end do
+      end do
       hyd%noq1 = noq1
       hyd%noq2 = 0
       hyd%noq3 = hyd%nosegl*(hyd%nolay-1)
@@ -977,11 +939,11 @@
                if ( domain_hyd%iglobal_bnd(i_bnd).ne.0) then
                   do ilay = 2, domain_hyd%nolay
                      domain_hyd%iglobal_bnd(i_bnd + (ilay - 1) * domain_hyd%nobndl) = domain_hyd%iglobal_bnd(i_bnd) - (ilay - 1) * nobnd
-                  enddo
-               endif
-            enddo
-         enddo
-      endif
+                  end do
+               end if
+            end do
+         end do
+      end if
       
       ! make final pointer table
 
@@ -1001,39 +963,27 @@
                   ip1 = domain_hyd%iglobal(ip1)
                elseif ( ip1 .lt. 0 ) then
                   ip1 = domain_hyd%iglobal_bnd(-ip1)
-               else
-                  continue ! ip1 = 0
-               endif
+               end if
                if ( ip2 .gt. 0 ) then
                   ip2 = domain_hyd%iglobal(ip2)
                elseif ( ip2 .lt. 0 ) then
                   ip2 = domain_hyd%iglobal_bnd(-ip2)
-               else
-                  continue ! ip2 = 0
-               endif
+               end if
                if ( ip3 .gt. 0 ) then
                   ip3 = domain_hyd%iglobal(ip3)
-               else
-                  ip3 = 0
-               endif
+               end if
                if ( ip4 .gt. 0 ) then
                   ip4 = domain_hyd%iglobal(ip4)
-               else
-                  ip4 = 0
-               endif
-               if ( ip1 .eq. 0 .or. ip2.eq.0) then
-                  continue
-               endif
+               end if
                hyd%ipoint(1,iq_global) = ip1
                hyd%ipoint(2,iq_global) = ip2
                hyd%ipoint(3,iq_global) = ip3
                hyd%ipoint(4,iq_global) = ip4
-            endif
-         enddo
-      enddo
+            end if
+         end do
+      end do
 
       ! pointers in third dimension
-
       do iseg = 1, hyd%nosegl
          do ilay = 1, hyd%nolay - 1
             iq_glob = hyd%noq1 + (ilay-1)*hyd%nosegl + iseg
@@ -1043,18 +993,18 @@
                ip3 = (ilay-2)*hyd%nosegl + iseg
             else
                ip3 = 0
-            endif
+            end if
             if ( ilay .ne. hyd%nolay - 1 ) then
                ip4 = (ilay+1)*hyd%nosegl + iseg
             else
                ip4 = 0
-            endif
+            end if
             hyd%ipoint(1,iq_glob) = ip1
             hyd%ipoint(2,iq_glob) = ip2
             hyd%ipoint(3,iq_glob) = ip3
             hyd%ipoint(4,iq_glob) = ip4
-         enddo
-      enddo
+         end do
+      end do
 
       ! all nodes, node links
       allocate (hyd%xk(hyd%numk))
@@ -1069,22 +1019,21 @@
             hyd%xk(ik + nodeoffset) = domain_hyd%xk(ik)
             hyd%yk(ik + nodeoffset) = domain_hyd%yk(ik)
             hyd%zk(ik + nodeoffset) = domain_hyd%zk(ik)
-         enddo
+         end do
          do il = 1, domain_hyd%numl
             hyd%kn(1,il + nodelinkoffset) = domain_hyd%kn(1, il) + nodeoffset
             hyd%kn(2,il + nodelinkoffset) = domain_hyd%kn(2, il) + nodeoffset
-         enddo
+         end do
          nodeoffset = nodeoffset + domain_hyd%numk
          nodelinkoffset = nodelinkoffset + domain_hyd%numl
-      enddo
+      end do
 
       ! coordinates segments
-
       hyd%numcontpts = 0
       do i_domain = 1, n_domain
          domain_hyd => domain_hyd_coll%hyd_pnts(i_domain)
          hyd%numcontpts = max(hyd%numcontpts,domain_hyd%numcontpts)
-      enddo
+      end do
       allocate(hyd%xdepth(1,hyd%nosegl))
       allocate(hyd%ydepth(1,hyd%nosegl))
       allocate(hyd%flowelemcontourx(hyd%numcontpts,hyd%nosegl))
@@ -1112,15 +1061,14 @@
                      hyd%netcellnod(inv,iseg_glob) = domain_hyd%netcellnod(inv,iseg) + nodeoffset
                   else
                      hyd%netcellnod(inv,iseg_glob) = 0
-                  endif
-               enddo
-            endif
-         enddo
+                  end if
+               end do
+            end if
+         end do
          nodeoffset = nodeoffset + domain_hyd%numk
-      enddo
+      end do
 
       ! coordinates exchanges
-
       allocate(hyd%xu(noq1))
       allocate(hyd%yu(noq1))
       hyd%xu = 0.0
@@ -1132,9 +1080,9 @@
             if ( iq_global .gt. 0 ) then
                hyd%xu(iq_global) = domain_hyd%xu(iq)
                hyd%yu(iq_global) = domain_hyd%yu(iq)
-            endif
-         enddo
-      enddo
+            end if
+         end do
+      end do
 
       ! layering
 
@@ -1143,9 +1091,7 @@
       hyd%hyd_layers = domain_hyd_coll%hyd_pnts(1)%hyd_layers
       hyd%waq_layers = domain_hyd_coll%hyd_pnts(1)%waq_layers
 
-
       ! boundaries, add the active sections and boundaries to the collections
-
       do i_domain = 1, n_domain
          domain_hyd => domain_hyd_coll%hyd_pnts(i_domain)
          no_sect = domain_hyd%openbndsect_coll%cursize
@@ -1156,8 +1102,8 @@
             do i_bnd = 1 , no_bnd
                if ( openbndsect%openbndlin_coll%openbndlin_pnts(i_bnd)%ibnd_new .ne. 0 ) then
                   bnd_active = .true.
-               endif
-            enddo
+               end if
+            end do
             if ( bnd_active ) then
                isect = openbndsect_coll_find( hyd%openbndsect_coll, openbndsect%name )
                if ( isect .le. 0 ) then
@@ -1166,19 +1112,18 @@
                   new_sect%openbndlin_coll%maxsize = 0
                   new_sect%openbndlin_coll%openbndlin_pnts => null()
                   isect = coll_add(hyd%openbndsect_coll, new_sect)
-               endif
+               end if
                do i_bnd = 1 , no_bnd
                   if ( openbndsect%openbndlin_coll%openbndlin_pnts(i_bnd)%ibnd_new .ne. 0 ) then
                      iret = coll_add(hyd%openbndsect_coll%openbndsect_pnts(isect)%openbndlin_coll,openbndsect%openbndlin_coll%openbndlin_pnts(i_bnd))
                      hyd%openbndsect_coll%openbndsect_pnts(isect)%openbndlin_coll%openbndlin_pnts(iret)%ibnd = openbndsect%openbndlin_coll%openbndlin_pnts(i_bnd)%ibnd_new
-                  endif
-               enddo
-            endif
-         enddo
-      enddo
+                  end if
+               end do
+            end if
+         end do
+      end do
 
       ! allocate rest of the arrays
-
       allocate(hyd%volume(hyd%noseg))
       allocate(hyd%area(hyd%noq))
       allocate(hyd%flow(hyd%noq))
@@ -1192,7 +1137,6 @@
       if (hyd%vdf_present) allocate(hyd%vdf(hyd%noseg))
 
       ! time independent items
-
       hyd%atr_type = ATR_FM
       hyd%no_atr = 2
       nolay     = hyd%nolay
@@ -1206,20 +1150,17 @@
                do ilay = 1,nolay
                   hyd%surf(iseg_glob + (ilay - 1) * hyd%nosegl) = domain_hyd%surf(isegl + (ilay - 1) * domain_hyd%nosegl)
                   hyd%attributes(iseg_glob + (ilay - 1) * hyd%nosegl) = domain_hyd%attributes(isegl + (ilay - 1) * domain_hyd%nosegl)
-               enddo
+               end do
                hyd%depth(iseg_glob) = domain_hyd%depth(isegl)
-            endif
-         enddo
+            end if
+         end do
          do iq = 1, domain_hyd%noq1
             iq_global = domain_hyd%iglobal_link(iq)
             if ( iq_global .gt. 0 ) then
                hyd%displen(1,iq_global) = domain_hyd%displen(1,iq)
                hyd%displen(2,iq_global) = domain_hyd%displen(2,iq)
-            endif
-         enddo
-      enddo
-
-
+            end if
+         end do
+      end do
       return
       end
-   
