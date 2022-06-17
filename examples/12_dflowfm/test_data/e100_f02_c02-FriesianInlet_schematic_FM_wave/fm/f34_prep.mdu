@@ -12,7 +12,6 @@ BathymetryFile                      =                                    # *.xyb
 WaterLevIniFile                     =                                    # Initial water levels sample file *.xyz
 LandBoundaryFile                    =                                    # Only for plotting
 ThinDamFile                         = f34_thd.pli                       # *_thd.pli, Polyline(s) for tracing thin dams.
-ThindykeFile                        =                                    # *_tdk.pli, Polyline(s) x,y,z, z = thin dyke top levels
 ProflocFile                         =                                    # *_proflocation.xyz)    x,y,z, z = profile refnumber
 ProfdefFile                         =                                    # *_profdefinition.def) definition for all profile nrs
 ManholeFile                         =                                    # *...
@@ -42,8 +41,6 @@ Limtypmom                           = 4                                  # Limit
 Limtypsa                            = 4                                  # Limiter type for salinity transport,           0=no, 1=minmod,2=vanLeer,3=Kooren,4=Monotone Central
 Icgsolver                           = 4                                  # Solver type , 1 = sobekGS_OMP, 2 = sobekGS_OMPthreadsafe, 3 = sobekGS, 4 = sobekGS + Saadilud, 5 = parallel/global Saad, 6 =
 Maxdegree                           = 6                                  # Maximum degree in Gauss elimination
-Thindykescheme                      =                                    # 0 = no, 1 = compact stencil, 2 = whole tile lifted, full subgrid weir + factor
-Thindykecontraction                 =                                    # flow width = flow width*thindykecontraction
 Izbndpos                            = 0                                  # Position of z boundary, 0=D3Dflow, 1=on net boundary, 2 = on specified polyline
 Jbasqbnddownwindhs                  = 0                                  # 0 : original hu on qbnd, 1 = downwind hs on qbnd
 Tlfsmo                              = 0.00                           # Fourier smoothing time on waterlevel boundaries (s)
