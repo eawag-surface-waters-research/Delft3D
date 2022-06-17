@@ -319,17 +319,17 @@
       call reallocP(hyd%waqgeom%nodez     ,  hyd%waqgeom%numnode , fill = -999d0)                              !< z-coordinates of the mesh nodes
 
       ! edges
-      call reallocP(hyd%waqgeom%edge_nodes, (/2, hyd%waqgeom%numedge /), fill = -999)                          !< Edge-to-node mapping array
-      call reallocP(hyd%waqgeom%edge_faces, (/2, hyd%waqgeom%numedge /), fill = -999)                          !< Edge-to-face mapping array
+      call reallocP(hyd%waqgeom%edge_nodes, [2, hyd%waqgeom%numedge], fill = -999)                          !< Edge-to-node mapping array
+      call reallocP(hyd%waqgeom%edge_faces, [2, hyd%waqgeom%numedge], fill = -999)                          !< Edge-to-face mapping array
       call reallocP(hyd%edge_type         ,  hyd%waqgeom%numedge , fill = -999)                                !< Edge type
       call reallocP(hyd%waqgeom%edgex     ,  hyd%waqgeom%numedge , fill = -999d0)                              !< x-coordinates of the mesh edges
       call reallocP(hyd%waqgeom%edgey     ,  hyd%waqgeom%numedge , fill = -999d0)                              !< y-coordinates of the mesh edges
       call reallocP(hyd%waqgeom%edgez     ,  hyd%waqgeom%numedge , fill = -999d0)                              !< z-coordinates of the mesh edges
 
       ! faces
-      call reallocP(hyd%waqgeom%face_nodes, (/hyd%waqgeom%maxnumfacenodes, hyd%waqgeom%numface/), fill = -999) !< Face-to-node mapping array
-      call reallocP(hyd%waqgeom%face_edges, (/hyd%waqgeom%maxnumfacenodes, hyd%waqgeom%numface/), fill = -999) !< Face-to-edge mapping array
-      call reallocP(hyd%waqgeom%face_links, (/hyd%waqgeom%maxnumfacenodes, hyd%waqgeom%numface/), fill = -999) !< Face-to-face mapping array
+      call reallocP(hyd%waqgeom%face_nodes, [hyd%waqgeom%maxnumfacenodes, hyd%waqgeom%numface], fill = -999) !< Face-to-node mapping array
+      call reallocP(hyd%waqgeom%face_edges, [hyd%waqgeom%maxnumfacenodes, hyd%waqgeom%numface], fill = -999) !< Face-to-edge mapping array
+      call reallocP(hyd%waqgeom%face_links, [hyd%waqgeom%maxnumfacenodes, hyd%waqgeom%numface], fill = -999) !< Face-to-face mapping array
       call reallocP(hyd%waqgeom%facex     ,  hyd%waqgeom%numface , fill = -999d0)                              !< x-coordinates of the mesh faces
       call reallocP(hyd%waqgeom%facey     ,  hyd%waqgeom%numface , fill = -999d0)                              !< y-coordinates of the mesh faces
       call reallocP(hyd%waqgeom%facez     ,  hyd%waqgeom%numface , fill = -999d0)                              !< z-coordinates of the mesh faces
@@ -572,7 +572,7 @@
       ! make final pointer table
       nobnd  = 0
       nobndl = hyd%nobndl
-      allocate(hyd%ipoint(4,hyd%noq))
+      call reallocP(hyd%ipoint, [4, hyd%noq] , fill = 0)
       do i_domain = 1, n_domain
          d_hyd => domain_hyd_coll%hyd_pnts(i_domain)
          do iq = 1, d_hyd%noq1
@@ -620,8 +620,8 @@
       end do
 
       ! layering
-      allocate(hyd%hyd_layers(hyd%kmax))
-      allocate(hyd%waq_layers(hyd%nolay))
+      call reallocP(hyd%hyd_layers, hyd%kmax, fill = 0e0)
+      call reallocP(hyd%waq_layers, hyd%nolay, fill = 0e0)
       hyd%hyd_layers = d_hyd%hyd_layers
       hyd%waq_layers = d_hyd%waq_layers
 
