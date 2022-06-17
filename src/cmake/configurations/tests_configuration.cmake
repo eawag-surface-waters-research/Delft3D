@@ -40,6 +40,10 @@ if(NOT TARGET flow1d)
 endif()
 
 # Waq
+if(NOT TARGET waq_include)
+    add_subdirectory(${checkout_src_root}/${waq_include_module} waq_include)
+endif()
+
 if(NOT TARGET waq_utils_c)
     add_subdirectory(${checkout_src_root}/${waq_utils_c_module} waq_utils_c)
 endif()
