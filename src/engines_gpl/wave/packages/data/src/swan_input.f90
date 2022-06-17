@@ -365,7 +365,61 @@ module swan_input
 
     private :: get_pointname
 
-contains
+    contains
+!
+!==============================================================================
+subroutine dealloc_swan(sr)
+   implicit none
+   !
+   type (swan_type) :: sr
+   integer     :: i
+   integer     :: istat
+   !
+   if (associated (sr%timwav)) deallocate(sr%timwav, stat=istat)
+   if (associated (sr%zeta)) deallocate(sr%zeta, stat=istat)
+   if (associated (sr%ux0)) deallocate(sr%ux0, stat=istat)
+   if (associated (sr%uy0)) deallocate(sr%uy0, stat=istat)
+   if (associated (sr%wvel)) deallocate(sr%wvel, stat=istat)
+   if (associated (sr%wdir)) deallocate(sr%wdir, stat=istat)
+   !!
+   if (associated (sr%nclin)) deallocate(sr%nclin, stat=istat)
+   if (associated (sr%nlin)) deallocate(sr%nlin, stat=istat)
+   if (associated (sr%f)) deallocate(sr%f, stat=istat)
+   if (associated (sr%obet)) deallocate(sr%obet, stat=istat)
+   if (associated (sr%ogam)) deallocate(sr%ogam, stat=istat)
+   if (associated (sr%trane)) deallocate(sr%trane, stat=istat)
+   if (associated (sr%xpcu)) deallocate(sr%xpcu, stat=istat)
+   if (associated (sr%xpob)) deallocate(sr%xpob, stat=istat)
+   if (associated (sr%ypcu)) deallocate(sr%ypcu, stat=istat)
+   if (associated (sr%ypob)) deallocate(sr%ypob, stat=istat)
+   !!
+   !! Only allocate the array below if output to locations has been defined
+   !! in the mdw file
+   !!
+   !if (sr%output_points .and. .not. sr%output_pnt_file) &
+   if (associated (sr%xyloc)) deallocate(sr%xyloc, stat=istat)
+   !
+   if (associated (sr%reflection)) deallocate(sr%reflection, stat=istat)
+   if (associated (sr%refl_type)) deallocate(sr%refl_type, stat=istat)
+   if (associated (sr%refl_coeff)) deallocate(sr%refl_coeff, stat=istat)
+   if (associated (sr%bnd)) then
+      do i = 1, sr%maxbound
+         if (associated (sr%bnd(i)%distance)) deallocate(sr%bnd(i)%distance, stat=istat)
+         if (associated (sr%bnd(i)%waveheight)) deallocate(sr%bnd(i)%waveheight, stat=istat)
+         if (associated (sr%bnd(i)%period)) deallocate(sr%bnd(i)%period, stat=istat)
+         if (associated (sr%bnd(i)%direction)) deallocate(sr%bnd(i)%direction, stat=istat)
+         if (associated (sr%bnd(i)%dirspread)) deallocate(sr%bnd(i)%dirspread, stat=istat)
+         if (associated (sr%bnd(i)%spectrum)) deallocate(sr%bnd(i)%spectrum, stat=istat)
+      enddo
+      deallocate(sr%bnd, stat=istat)
+   endif
+   if (associated (sr%dom)) deallocate(sr%dom, stat=istat)
+   if (allocated (sr%pntfilnam)) deallocate(sr%pntfilnam, stat=istat)
+   if (allocated (sr%pntfilnamtab)) deallocate(sr%pntfilnamtab, stat=istat)
+   if (allocated (sr%add_out_names)) deallocate(sr%add_out_names, stat=istat)
+   if (allocated (sr%extforce_names_gen)) deallocate(sr%extforce_names_gen, stat=istat)
+end subroutine dealloc_swan
+!
 !
 !==============================================================================
 subroutine read_swan (filnam, sr, wavedata)
