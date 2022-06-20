@@ -40,7 +40,7 @@
 !                                   +4       relaxb
 !        rows uses subprogram
 !           leave
-      include  'char1.inc'
+      use m_char1
       logical nerr
       character*6 nr1, nr2
       nmult = 5

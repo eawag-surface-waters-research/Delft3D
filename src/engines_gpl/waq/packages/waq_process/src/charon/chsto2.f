@@ -26,6 +26,7 @@
       ! Manipulates stoichiometric coefficients of Delwaq 4.0 for use with Charon
 
       use processet
+      use m_charon
       implicit none
 
       ! declaration of arguments
@@ -56,8 +57,6 @@
       integer                   :: indx            ! index ioitem
       integer                   :: mlevel          ! monitoring level
       integer                   :: iret            ! return value
-
-      INCLUDE 'charon.inc'
 
       DATA LUIN  /21/
       DATA LUOUT /22/

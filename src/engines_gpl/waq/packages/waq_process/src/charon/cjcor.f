@@ -35,9 +35,8 @@
 !        although charges and ionic diameters for water species are
 !        required for activity calculation.
 !        read in procedure is equivalent to that of matrix.
-      include  'char1.inc'
+      use m_char1
       dimension z(4)
-      equivalence (z(1),t(1))
       bnew = .false.
       IF(KA(2) .EQ. 'NEW   ')BNEW = .TRUE.
       kk = 1

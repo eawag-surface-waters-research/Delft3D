@@ -44,6 +44,8 @@
 module m_prcgrp
 use m_timings
 use m_coupcns
+use mpi
+
 implicit none
 !-----------------------------------------------------------------------------
 ! WARNING: using default PUBLIC instead of PRIVATE because of mpif.h
@@ -66,9 +68,7 @@ public
 ! now we assume that processes are ordered by rank, such that the task-id of a
 ! process is itid = irank = iprc-1.
 
-#ifdef HAVE_MPI_WAQ
-include 'mpif.h'
-#endif
+
 !integer, parameter, public :: MPI_REAL8 = MPI_DOUBLE_PRECISION
 
 ! subroutines for configuration of processes and groups:

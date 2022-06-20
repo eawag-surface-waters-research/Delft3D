@@ -32,7 +32,7 @@
 !        4-69
 !        phcalc uses double precision version of
 !           alog
-      include  'char1.inc'
+      use m_char1
 !        aliter is the constant used in the ph calculation
       mta = kl(1)
       mtb = kl(2) - 1

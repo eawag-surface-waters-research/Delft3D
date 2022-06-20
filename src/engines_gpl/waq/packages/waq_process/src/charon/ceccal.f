@@ -30,7 +30,7 @@
       subroutine ceccal
 !        ceccalc computes pie cec for compartment k
 !        procedure equivalent to phcalc
-      include  'char1.inc'
+      use m_char1
       character*6 cacec,cecc,capl
       DATA CACEC/'CACEC '/
       DATA CECC/'CEC   '/

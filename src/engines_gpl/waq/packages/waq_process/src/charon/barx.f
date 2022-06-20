@@ -25,8 +25,9 @@
 !           4-69
 !           for each compartment k compute wbar(k) as the sum of w(j),
 !        where j is each substance in the compartment
-      include  'char1.inc'
-      include  'char5.inc'
+      use m_char1
+      use m_char5
+      
       dimension w(1), wbar(1)
       do 20 k=1,ncomp
          kta = kl(k)

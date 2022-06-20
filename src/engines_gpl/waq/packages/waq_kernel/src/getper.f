@@ -31,9 +31,7 @@
 !                           one step (synchronised mode)
 !
 !
-!     use dio_streams
-!     use dio_plt_rw
-      include 'dio-plt.inc'
+      use m_dio_plt
 
       character*(*) StreamName,DataSetName
 
@@ -90,15 +88,12 @@ cjvb  logical getResult
 !
 !     Deltares
 !
-!     CREATED             : jan  2001 by J.v.Gils
-!
 !     FUNCTION            : Gets permission from DIO to proceed
 !                           one step (synchronised mode)
 !
 !
-!     use dio_streams
-!     use dio_plt_rw
-      include 'dio-plt.inc'
+      use m_dio_plt
+
 
       character*(*) StreamName,DataSetName
 

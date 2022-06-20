@@ -95,6 +95,7 @@
       use m_sysa          ! Pointers in real array workspace
       use m_sysj          ! Pointers in integer array workspace
       use m_sysc          ! Pointers in character array workspace
+      use m_dlwqdata_save_restore
 
       implicit none
 
@@ -128,27 +129,13 @@
 
       real            rdummy(1)
       logical         imflag , idflag , ihflag
-      logical         updatr , update , lstrec , lrewin
-      logical         litrep , ldummy, timon_old
-      real(8)         tol
+      logical         update , lrewin
+      logical         litrep , timon_old
       integer         laatst
       INTEGER         sindex
 
-      integer, save :: ithandl
       integer, save :: ithand1 = 0 ! Leave local
 
-      integer         itime
-      integer         itimel
-      integer         ifflag
-      integer         iaflag
-      integer         ibflag
-      integer         nddim
-      integer         nvdim
-      integer         noqt
-      integer         nosss
-      integer         noqtt
-      integer         nopred
-      integer         inwtyp
       integer         isys
       integer         nstep
 
@@ -165,12 +152,6 @@
       integer, save          :: iscale
 
 
-!       Dummy variables - used in DLWQD
-
-      logical                :: forester
-      integer                :: nowarn
-      integer                :: lleng
-      integer                :: ioptzb
 
 
 !     SPECIAL REMARKS    : MASS-ARRAY IS USED FOR RHS VECTOR!!
@@ -219,7 +200,7 @@
 !                                                              (KHT, 13/11/96)
 
       if ( action == ACTION_FINALISATION ) then
-          include 'dlwqdata_restore.inc'
+          call dlwqdata_restore(dlwqd)
           if ( timon ) call timstrt ( "dlwqnf", ithandl )
           goto 50
       endif
@@ -279,13 +260,13 @@
 !
       if ( action == ACTION_INITIALISATION ) then
           if ( timon ) call timstrt ( "dlwqnf", ithandl )
-          include 'dlwqdata_save.inc'
+          call dlwqdata_save(dlwqd)
           if ( timon ) call timstop ( ithandl )
           return
       endif
 
       if ( action == ACTION_SINGLESTEP ) then
-          include 'dlwqdata_restore.inc'
+          call dlwqdata_restore(dlwqd)
           call apply_operations( dlwqd )
       endif
 

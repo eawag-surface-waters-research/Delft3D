@@ -36,10 +36,9 @@
 !                                     2         addc
 !           matrix uses subprograms
 !              find, leave, pop, push
-      include  'char1.inc'
+      use m_char1
       dimension nslxv(mslr),nslrow(mslr),nslero(mslr,12),slaij(mslr,12)
       dimension z(5)
-      equivalence (z(1),t(1))
       character*6 kapr
 !           for this subroutine temporarily set toggle so that
 !        subroutine push will return control to matrix

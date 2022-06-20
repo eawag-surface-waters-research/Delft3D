@@ -118,9 +118,9 @@
 !     MONAME  CHARACTER  *      INPUT  Model identification strings
 
 !     Delft-IO for SRW
-!     use dio_streams
-!     use dio_plt_rw
-      include 'dio-plt.inc'
+
+      use m_dio_plt
+
 
 !     DELWAQ variables from argument list
 !

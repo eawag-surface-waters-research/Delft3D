@@ -28,7 +28,7 @@
 !    Programmer: Nicolaas M de Rooij
 !
       subroutine solvex(k1,str6)
-      include  'char1.inc'
+      use m_char1
       logical done,done2
       character*6 str6
       if(intitl .ne. 846342) then

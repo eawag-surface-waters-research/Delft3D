@@ -22,24 +22,22 @@
 !!  rights reserved.
 
 !
-!     dio-time.inc
-!
 !     F77 Interface to
 !     DelftIO Time Functions
 !
-!     Stef.Hummel@deltares.nl
-!
-!     (c) Deltares, Oct 02
 !---------------------------------------------
 !
 !     Function declarations
 !
-      integer     DioMaxTimLen
-      parameter ( DioMaxTimLen    = 25  )
+module m_dio_time
 
-      double precision  DiofTimeString2Julian
-      external          DiofTimeString2Julian
+    integer     DioMaxTimLen
+    parameter ( DioMaxTimLen    = 25  )
 
-      character*(DioMaxTimLen) DiofJulian2DioTime
-      external                 DiofJulian2DioTime
+    double precision  DiofTimeString2Julian
+    external          DiofTimeString2Julian
 
+    character*(DioMaxTimLen) DiofJulian2DioTime
+    external                 DiofJulian2DioTime
+
+end module m_dio_time

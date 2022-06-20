@@ -42,8 +42,7 @@
 !              bar, divide, leave, matinv, phcalc, rcalc
 !           arith uses double precision version of
 !              abs, exp, sqrt
-      include  'char1.inc'
-      equivalence (v3(1),aneg(1)), (v4(1),pos(1))
+      use m_char1
       dimension aneg(1), pos(1)
       common /ovflo/ anumbr, anumlg, aquot, iquot
       iopt = 0

@@ -95,6 +95,7 @@
       use m_sysa          ! Pointers in real array workspace
       use m_sysj          ! Pointers in integer array workspace
       use m_sysc          ! Pointers in character array workspace
+      use m_dlwqdata_save_restore
 
       implicit none
 
@@ -121,16 +122,9 @@
 !
 !     Local declarations
 !
-      LOGICAL         IMFLAG , IDFLAG , IHFLAG , LDUMMY
-      LOGICAL         UPDATR , UPDATE , LSTREC , LREWIN
-      INTEGER         ITIME
+      LOGICAL         IMFLAG , IDFLAG , IHFLAG
+      LOGICAL         UPDATE , LREWIN
       INTEGER         NSTEP
-      INTEGER         IFFLAG
-      INTEGER         IAFLAG
-      INTEGER         IBFLAG
-      INTEGER         NDDIM
-      INTEGER         NVDIM
-      INTEGER         INWTYP
       INTEGER         I
       INTEGER         IBND
       INTEGER         ISYS
@@ -141,22 +135,7 @@
       INTEGER         LAATST
       INTEGER         sindex
 
-      integer          :: ithandl
 
-
-      !
-      ! Dummy variables - used in DLWQD
-      !
-      integer          :: ioptzb
-      integer          :: nowarn
-      integer          :: nosss
-      integer          :: noqtt
-      integer          :: noqt
-      integer          :: nopred
-      integer          :: itimel
-      integer          :: lleng
-      logical          :: forester
-      real(kind=kind(1.0d0)) :: tol
 
 
 !
@@ -174,7 +153,7 @@
 !     (JvG, May 8 1992)
 
       if ( action == ACTION_FINALISATION ) then
-          include 'dlwqdata_restore.inc'
+          call dlwqdata_restore(dlwqd)
           if ( timon ) call timstrt ( "dlwqnb", ithandl )
           goto 50
       endif
@@ -225,13 +204,13 @@
 !
       IF ( ACTION == ACTION_INITIALISATION ) THEN
           if ( timon ) call timstrt ( "dlwqnb", ithandl )
-          INCLUDE 'dlwqdata_save.inc'
+          call dlwqdata_save(dlwqd)
           if ( timon ) call timstop ( ithandl )
           RETURN
       ENDIF
 
       IF ( ACTION == ACTION_SINGLESTEP ) THEN
-          INCLUDE 'dlwqdata_restore.inc'
+          call dlwqdata_restore(dlwqd)
           call apply_operations( dlwqd )
       ENDIF
 

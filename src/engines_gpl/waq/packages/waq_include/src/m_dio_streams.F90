@@ -21,4 +21,44 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-       PARAMETER (ITOTA= 2000000,ITOTI= 1000000,ITOTC=   20000)
+!    F77 Interface to
+!    DelftIO Streams
+
+
+module m_dio_streams
+
+    use m_dio_time
+
+!   Sizes for character strings
+
+    integer DioMaxStreamLen
+    parameter ( DioMaxStreamLen = 256 )
+
+!   Stream Types
+
+    integer dio_ASCII_stream
+    integer dio_Binary_stream
+    integer dio_His_stream
+    integer dio_Nefis_stream
+
+    parameter ( dio_ASCII_stream  = 1 , &
+                dio_Binary_stream = 2 , &
+                dio_His_stream    = 3 , &
+                dio_Nefis_stream  = 4 )
+
+
+!   ORIGINAL interface (used by SRW)
+
+    integer DioCreateStream, DioCreateStreamSynched
+    external DioCreateStream, DioCreateStreamSynched
+
+
+!   ODS Server interface
+
+    integer DiofMaxErrMsgLen
+    parameter ( DiofMaxErrMsgLen = 256 )
+
+    integer DiofGetLastError
+    external DiofGetLastError
+
+end module m_dio_streams

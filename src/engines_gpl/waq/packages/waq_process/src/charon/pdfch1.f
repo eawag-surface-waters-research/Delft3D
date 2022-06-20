@@ -27,6 +27,7 @@
       ! defines variable part of CHARON coupling interface
 
       use processet
+      use m_charon
       implicit none
 
       ! declaration of arguments
@@ -67,8 +68,6 @@
       integer               :: ip                  ! index in io list
       integer               :: nttob               ! nttob
       integer               :: nctot               ! nctot
-
-      INCLUDE 'charon.inc'
 
 !     Definitie unitnrs files
 

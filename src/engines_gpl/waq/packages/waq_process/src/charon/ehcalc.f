@@ -30,7 +30,7 @@
       subroutine ehcalc
 !        ehcalc computes eh from pie of the electron
 !        procedure equivalent to phcalc
-      include  'char1.inc'
+      use m_char1
       character*6 el,oh,o2
       DATA EL/'EL-   '/
       DATA oh/'OH-   '/

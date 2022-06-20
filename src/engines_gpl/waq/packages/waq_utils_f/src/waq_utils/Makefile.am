@@ -11,7 +11,6 @@ noinst_LTLIBRARIES = libwaq_utils.la
 #-------------------------------------------------------------------------------
 #Includes
 FMODULES += \
-        -I$(top_builddir)/engines_gpl/waq/include \
 	    -I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src/rd_token \
 	    -I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src
 

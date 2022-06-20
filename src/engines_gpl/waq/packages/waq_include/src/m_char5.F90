@@ -21,9 +21,13 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-      COMMON /SLA/ SLACK(maxp),BSLACK
-      LOGICAL BSLACK
-C***********************************************************************
-C       FILE INCLUDED IN: DELETE, INTERA, BERROR, RCALC, RSLACK,
-C                         BAR, MAINPC
-C***********************************************************************
+module m_char5
+  !common /sla/ slack(maxp),bslack
+  common /sla/ bslack
+  logical bslack
+!***********************************************************************
+!       FILE INCLUDED IN: DELETE, INTERA, BERROR, RCALC, RSLACK,
+!                         BAR, MAINPC
+!***********************************************************************
+
+end module m_char5

@@ -86,6 +86,7 @@
       use m_sysa          ! Pointers in real array workspace
       use m_sysj          ! Pointers in integer array workspace
       use m_sysc          ! Pointers in character array workspace
+      use m_dlwqdata_save_restore
 
       implicit none
 
@@ -105,43 +106,20 @@
 
 !     Local declarations
 
-      integer( 4) nosss           !  noseg_total  = noseg_water + noseg_bed
-      integer( 4) noqtt           !  noq_total    = noq_water + noq_bed
-      integer( 4) inwtyp          !  pointer to wasteload types (was missing)
       LOGICAL         IMFLAG , IDFLAG , IHFLAG
-      LOGICAL         LDUMMY , LSTREC , LREWIN
-      LOGICAL         FORESTER
-      REAL            RDUMMY(1)
-      INTEGER         IFFLAG
-      INTEGER         IAFLAG
-      INTEGER         IBFLAG
-      INTEGER         NDDIM
-      INTEGER         NVDIM
-      INTEGER         ITIME
+      LOGICAL         LREWIN
+      REAL            RDUMMY
       INTEGER         NSTEP
-      INTEGER         NOWARN
       INTEGER         IBND
       INTEGER         ISYS
       INTEGER         IERROR
 
-      INTEGER         NOQT
-      INTEGER         LLENG
       INTEGER         IDTOLD
       INTEGER         sindex
 
-      integer          :: ithandl
-      !
-      ! Dummy variables - used in DLWQD
-      !
-      integer          :: ioptzb
-      integer          :: nopred
-      integer          :: itimel
-      logical          :: updatr
-      real(kind=kind(1.0d0)) :: tol
-
 
       if ( ACTION == ACTION_FINALISATION ) then
-          include 'dlwqdata_restore.inc'
+          call dlwqdata_restore(dlwqd)
           if ( timon ) call timstrt ( "dlwqn1", ithandl )
           goto 20
       endif
@@ -206,13 +184,13 @@
 !
       IF ( ACTION == ACTION_INITIALISATION ) THEN
           if ( timon ) call timstrt ( "dlwqn1", ithandl )
-          INCLUDE 'dlwqdata_save.inc'
+          call dlwqdata_save(dlwqd)
           if ( timon ) call timstop ( ithandl )
           RETURN
       ENDIF
 
       IF ( ACTION == ACTION_SINGLESTEP ) THEN
-          INCLUDE 'dlwqdata_restore.inc'
+          call dlwqdata_restore(dlwqd)
           call apply_operations( dlwqd )
       ENDIF
 

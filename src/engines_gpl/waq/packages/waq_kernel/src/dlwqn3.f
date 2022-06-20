@@ -84,6 +84,7 @@
       use m_sysa          ! Pointers in real array workspace
       use m_sysj          ! Pointers in integer array workspace
       use m_sysc          ! Pointers in character array workspace
+      use m_dlwqdata_save_restore
 
       implicit none
 
@@ -103,35 +104,20 @@
 !
 !     Local declarations
 !
-      LOGICAL          :: IMFLAG , IDFLAG , IHFLAG , UPDATR
-      LOGICAL          :: LDUMMY , LSTREC , LREWIN
-      LOGICAL          :: FORESTER
-      INTEGER          :: IFFLAG , IAFLAG , IBFLAG , NOWARN
-      INTEGER          :: NOSSS  , NOQTT  , NOPRED , ITIMEL
-      INTEGER          :: NDDIM  , NVDIM  , LLENG
-      INTEGER          :: ITIME
+      LOGICAL          :: IMFLAG , IDFLAG , IHFLAG
+      LOGICAL          :: LREWIN
       INTEGER          :: NSTEP
 
       INTEGER          :: IBND
       INTEGER          :: ISYS
-      INTEGER          :: INWTYP
       INTEGER          :: IDTOLD
       INTEGER          :: IDTTOT
-      INTEGER          :: NOQT
       INTEGER          :: I
-      INTEGER         sindex
-
-      integer          :: ithandl
-
-      !
-      ! Dummy variables - used in DLWQD
-      !
-      integer          :: ioptzb
-      real(kind=kind(1.0d0)) :: tol
+      INTEGER          :: sindex
 
 
       if ( action == ACTION_FINALISATION ) then
-          include 'dlwqdata_restore.inc'
+          call dlwqdata_restore(dlwqd)
           if ( timon ) call timstrt ( "dlwqn3", ithandl )
           goto 20
       endif
@@ -186,13 +172,13 @@
 !
       IF ( ACTION == ACTION_INITIALISATION ) THEN
           if ( timon ) call timstrt ( "dlwqn3", ithandl )
-          INCLUDE 'dlwqdata_save.inc'
+          call dlwqdata_save(dlwqd)
           if ( timon ) call timstop ( ithandl )
           RETURN
       ENDIF
 
       IF ( ACTION == ACTION_SINGLESTEP ) THEN
-          INCLUDE 'dlwqdata_restore.inc'
+          call dlwqdata_restore(dlwqd)
           call apply_operations( dlwqd )
       ENDIF
 

@@ -96,6 +96,7 @@
       use m_sysa          ! Pointers in real array workspace
       use m_sysj          ! Pointers in integer array workspace
       use m_sysc          ! Pointers in character array workspace
+      use m_dlwqdata_save_restore
 
       implicit none
 
@@ -127,28 +128,16 @@
 !
       REAL             RDUMMY(1)
       LOGICAL          IMFLAG , IDFLAG , IHFLAG
-      LOGICAL          LDUMMY , LSTREC , LREWIN , LDUMM2
-      LOGICAL          FORESTER
-      INTEGER          ITIME
+      LOGICAL          LREWIN , LDUMM2
       INTEGER          NSTEP
-      INTEGER          IFFLAG
-      INTEGER          IAFLAG
-      INTEGER          IBFLAG
-      INTEGER          NDDIM
-      INTEGER          NVDIM
-      INTEGER          NOWARN
-      INTEGER          NOPRED
-      INTEGER          ITIMEL
-      INTEGER          INWTYP
-      INTEGER          LLENG
       INTEGER          ICREEP
       INTEGER          ICENTR
       INTEGER          IZ
       INTEGER          IDUMMY
       REAL             RDT
 
-      INTEGER         IBND
-      INTEGER         ISYS
+      INTEGER          IBND
+      INTEGER           ISYS
 
       real             dsdksi(1,1), dsdeta(1,1), dtdksi(1,1), dtdeta(1,1)
       real             rbnd
@@ -157,8 +146,7 @@
       integer          kmxsed
       logical          eqmbc
       character*4      sedtyp(2)
-      INTEGER         sindex
-      integer       :: ithandl
+      INTEGER          sindex
 
       !
       ! Variables local to this method
@@ -170,15 +158,7 @@
       real, save    :: vicmol
       real, save    :: eps
 
-      !
-      ! Dumy variables - used in DLWQD
-      !
-      integer       :: nosss
-      integer       :: noqtt
-      integer       :: noqt
-      integer       :: ioptzb
-      logical       :: updatr
-      real(kind=kind(1.0d0)) :: tol
+
 
 
 ! ====================================================================
@@ -191,7 +171,7 @@
 ! ====================================================================
 !
       if ( action == ACTION_FINALISATION ) then
-          include 'dlwqdata_restore.inc'
+          call dlwqdata_restore(dlwqd)
           if ( timon ) call timstrt ( "dlwqnj", ithandl )
           goto 20
       endif
@@ -260,13 +240,13 @@
 !
       IF ( ACTION == ACTION_INITIALISATION ) THEN
           if ( timon ) call timstrt ( "dlwqnj", ithandl )
-          INCLUDE 'dlwqdata_save.inc'
+          call dlwqdata_save(dlwqd)
           if ( timon ) call timstop ( ithandl )
           RETURN
       ENDIF
 
       IF ( ACTION == ACTION_SINGLESTEP ) THEN
-          INCLUDE 'dlwqdata_restore.inc'
+          call dlwqdata_restore(dlwqd)
           call apply_operations( dlwqd )
       ENDIF
 

@@ -30,9 +30,7 @@
       subroutine start_ch
 !        4-69
 !        clears data arrays and sets standard values for parameters.
-      include  'char1.inc'
-      equivalence (xx1(1),aij(1)), (nx1(1),irow(1)), (xx2(1),c1(1)),
-     2            (ix2(1),ka(1))
+      use m_char1
       dimension xx1(1),xx2(1),nx1(1)
       common /ndelu/ ndelz, nundel, ktally
       common /ovflo/ anumbr, anumlg, aquot, iquot

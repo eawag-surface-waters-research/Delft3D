@@ -41,6 +41,8 @@
 !     COMMON BLOCKS       : -
 !
       SUBROUTINE CHINP2 (RUNNAM, LUIC  , LUOC  )
+      
+      use m_charon
 !
 !     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
 !     ----    -----    ------     ------- -----------
@@ -54,10 +56,6 @@
       CHARACTER*12    RUNNAM
       INTEGER         LUIC  , LUOC  , I1 , I2 , I , i3(1)
       REAL            R1(1,12)
-!
-!     Commons CHARON
-
-      INCLUDE 'charon.inc'
 
 !     Initialization of CHARON
 

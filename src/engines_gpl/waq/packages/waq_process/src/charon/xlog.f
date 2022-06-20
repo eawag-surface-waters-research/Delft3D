@@ -27,8 +27,7 @@
 !        compartment k.
 !           clog uses double precision version of
 !              alog
-      include  'char1.inc'
-      equivalence (x2(1),alpha(1))
+      use m_char1
       dimension w(1), wbar(1), alpha(1)
       do 20 k=1,ncomp
          kla = kl(k)

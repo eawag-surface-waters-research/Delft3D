@@ -28,8 +28,10 @@
      +                    nx    , ny    , lgrid , bound , noloc ,
      +                    proloc, nodef , defaul, lunrep)
 
+      use m_dio_plt
+
       implicit none
-      include 'dio-plt.inc'
+
 
       ! arguments
 

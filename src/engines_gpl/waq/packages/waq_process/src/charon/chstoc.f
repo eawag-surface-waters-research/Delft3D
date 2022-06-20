@@ -44,6 +44,8 @@
 !     ----    -----    ------     ------- -----------
 !
       SUBROUTINE CHSTOC (LUREP,NAIJ2)
+      
+      use m_charon
 !
 !     Declarations
 !
@@ -55,8 +57,6 @@
       CHARACTER*12 ACTSUB, ACTFLU, SUBARR(NSTOCM), FLUARR(NSTOCM)
       CHARACTER*80 REGEL
       REAL         ACTSTO, RMSPEC, RMCOMP, STOCHI, STOARR(NSTOCM)
-
-      INCLUDE 'charon.inc'
 
       DATA LUIN  /21/
       DATA LUOUT /22/

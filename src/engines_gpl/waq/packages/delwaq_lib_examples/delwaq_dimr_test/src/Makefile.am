@@ -11,7 +11,6 @@ bin_PROGRAMS = delwaq2
 #-------------------------------------------------------------------------------
 #Includes
 FMODULES += \
-        -I$(top_builddir)/engines_gpl/waq/include \
         -I$(top_builddir)/engines_gpl/waq/packages/waq_kernel/src/waq_kernel \
         -I$(top_builddir)/engines_gpl/waq/packages/waq_utils_f/src/mod_timings \
         -I$(top_builddir)/engines_gpl/waq/packages/waq_utils_f/src/mod_couplib \

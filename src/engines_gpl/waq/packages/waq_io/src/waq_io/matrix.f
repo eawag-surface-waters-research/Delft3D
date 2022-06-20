@@ -67,12 +67,13 @@
 !     Logical units      : none
 
       use timers       !   performance timers
+      use m_char1
 
       implicit none
 
 !     Parameters
 
-!     kind           function         name                          Descriptipon
+!     kind           function         name                          Description
 
       integer  ( 4), intent(in   ) :: ntot                        !< first dimension of tab and tabnw
       integer  ( 4), intent(in   ) :: nvals                       !< number of values per variable

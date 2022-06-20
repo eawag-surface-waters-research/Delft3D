@@ -28,7 +28,7 @@
 !        array.
 !           push uses subprogram
 !              leave
-      include  'char1.inc'
+      use m_char1
       if (ij.gt.naij) go to 20
       i = naij
       if (i.ge.maxaij) go to 40

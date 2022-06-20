@@ -31,8 +31,8 @@
 !           much time. it find the entries in the ijfind array
 !           which is filled each time that solve is called.
 !           (n.m. de rooij)
-      include  'char1.inc'
-      include  'char5.inc'
+      use m_char1
+      use m_char5
       if (ijfind(1) .ge. 0) go to 9
       jj = 2
       ijfind(1) = 1

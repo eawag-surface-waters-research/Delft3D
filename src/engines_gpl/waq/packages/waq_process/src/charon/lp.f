@@ -35,9 +35,8 @@
 !              bar, leave, simple
 !           lp uses double precision version of
 !              alog, amin1, float
-      include  'char1.inc'
-      equivalence (cc(1),xmf(1)),(xx(1),x2(1)),(p(1),v1(1)),
-     2   (jh(1),v2(1))
+      use m_char1
+
       dimension xx(1), kout(7), cc(1), p(1), jh(1)
       mon = 0
       if (xstart.le.0.0) xstart = 1.e-6

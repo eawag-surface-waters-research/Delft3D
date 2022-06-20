@@ -17,7 +17,6 @@ AM_FFLAGS  += -fopenmp $(OPENMP_FFLAGS)  $(FINCLUDES) $(FMODULES) ${NETCDF_CFLAG
 
 
 FMODULES += \
-        -I$(top_builddir)/engines_gpl/waq/include \
         -I$(top_builddir)/engines_gpl/part/packages/data_f/src/ \
         -I$(top_builddir)/engines_gpl/part/packages/utils_f/src/ \
         -I$(top_builddir)/engines_gpl/part/packages/io_f/src/ \

@@ -11,7 +11,6 @@ noinst_LTLIBRARIES = libmod_couplib.la
 #-------------------------------------------------------------------------------
 #Includes
 FMODULES += \
-        -I$(top_builddir)/engines_gpl/waq/include \
         -I$(top_builddir)/engines_gpl/waq/packages/waq_utils_f/src/mod_timings
 
 #-------------------------------------------------------------------------------

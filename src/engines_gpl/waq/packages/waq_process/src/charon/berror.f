@@ -27,9 +27,8 @@
 !        solution.  bmax is the absolute maximum error.
 !           berror uses double precision version of
 !              abs
-      include  'char1.inc'
-      include  'char5.inc'
-      equivalence (g(1),v1(1))
+      use m_char1
+      use m_char5
       dimension g(1)
       do 10 i=1,m
          g(i) = 0.0

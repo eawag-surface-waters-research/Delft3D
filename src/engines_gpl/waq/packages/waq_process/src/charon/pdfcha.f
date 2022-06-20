@@ -48,6 +48,8 @@
 !
 !     Declarations
 !
+      use m_charon
+      
       INTEGER         LUPDF , MMAX  , NAIJ2 , NMAX  , LUREP , NNOTRA,
      J                LUIC  , LUOC  , I     , NALTOX,
      J                NTOX  , NALADS, NALSPE, NALSP2, N1MAX , N2MAX
@@ -64,7 +66,7 @@
       REAL            ABTTOB(N1MAX), RMTTOB(N1MAX),
      J                ABCTOT(N2MAX), RMCTOT(N2MAX)
 
-      INCLUDE 'charon.inc'
+
 
 !     Definition of programme version
 

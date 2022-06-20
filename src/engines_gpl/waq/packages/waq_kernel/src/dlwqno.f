@@ -84,6 +84,7 @@
       use m_sysa          ! Pointers in real array workspace
       use m_sysj          ! Pointers in integer array workspace
       use m_sysc          ! Pointers in character array workspace
+      use m_dlwqdata_save_restore
 
 
       implicit none
@@ -105,49 +106,31 @@
 !
 !     Local declarations
 !
-      LOGICAL         IMFLAG , IDFLAG , IHFLAG , UPDATR
-      LOGICAL         OPFLAG , LDUMMY , LSTREC , LREWIN
+      LOGICAL         IMFLAG , IDFLAG , IHFLAG
+      LOGICAL         OPFLAG , LREWIN
       LOGICAL         LITREP
-      LOGICAL         FORESTER
-      real(8)         tol
 
-      INTEGER         ITIME
-      INTEGER         ITIMEL
-      INTEGER         IFFLAG
-      INTEGER         IAFLAG
-      INTEGER         IBFLAG
-      INTEGER         NDDIM
-      INTEGER         NVDIM
       INTEGER         ISYS
       INTEGER         ICSYS
       INTEGER         NSYS
-      INTEGER         INWTYP
       INTEGER         INTOP2
       INTEGER         ISTEP
       INTEGER         ITH
       INTEGER         I
       INTEGER         ISCALE
-      INTEGER         NOPRED
       INTEGER         ITER
       INTEGER         IOPTPC
 
       INTEGER         IBND
 
-      INTEGER         NOSSS
-      INTEGER         NOQT
-      INTEGER         NOQTT
-      INTEGER         NOWARN
-      INTEGER         IOPTZB
-      INTEGER         LLENG
       INTEGER         NSTEP
       INTEGER         IDTOLD
       REAL            SECPREV
 
-      integer       :: ithandl
       integer, save :: ithand1 = 0 ! Leave local
 
       if ( action == ACTION_FINALISATION ) then
-          include 'dlwqdata_restore.inc'
+          call dlwqdata_restore(dlwqd)
           if ( timon ) call timstrt ( "dlwqno", ithandl )
           goto 20
       endif
@@ -205,13 +188,13 @@
 !
       IF ( ACTION == ACTION_INITIALISATION ) THEN
           if ( timon ) call timstrt ( "dlwqno", ithandl )
-          INCLUDE 'dlwqdata_save.inc'
+          call dlwqdata_save(dlwqd)
           if ( timon ) call timstop ( ithandl )
           RETURN
       ENDIF
 
       IF ( ACTION == ACTION_SINGLESTEP ) THEN
-          INCLUDE 'dlwqdata_restore.inc'
+          call dlwqdata_restore(dlwqd)
           call apply_operations( dlwqd )
       ENDIF
 

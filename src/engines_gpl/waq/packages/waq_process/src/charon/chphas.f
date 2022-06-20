@@ -43,12 +43,12 @@
 !     ----    -----    ------     ------- -----------
 !
       SUBROUTINE CHPHAS ( NAIJ2 )
+      
+      use m_charon
 !
 !     Declarations
 !
       INTEGER         NAIJ2 , IFPS , J
-
-      INCLUDE 'charon.inc'
 
 !     IFPS: number of first non water transportable phase
 

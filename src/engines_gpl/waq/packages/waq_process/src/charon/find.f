@@ -36,7 +36,7 @@
 !           if j has no entries and i not equal zero, set ijloc equal
 !        to current value.
 !           in both cases set iflag equal to one
-      include  'char1.inc'
+      use m_char1
       iflag = 0
       ij = 1
       if (j.lt.jcol(1)) go to 100

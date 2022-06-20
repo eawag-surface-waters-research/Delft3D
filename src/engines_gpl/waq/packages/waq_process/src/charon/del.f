@@ -26,7 +26,7 @@
 !           compute for each species j the sum of the products of each
 !        matrix entry for the species times q(i), where i is the row
 !        number.
-      include  'char1.inc'
+      use m_char1
       dimension w(1), q(1)
       do 10 j=1,n
          w(j) = 0.0
