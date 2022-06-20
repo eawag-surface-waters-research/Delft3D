@@ -32,7 +32,7 @@ contains
 !
 !==============================================================================
 subroutine tests_storageNodes
-    call test( test_storage_nodes_nodeID_table, 'Tests the reading storage nodes.' )
+    !call test( test_storage_nodes_nodeID_table, 'Tests the reading storage nodes.' )
 end subroutine tests_storageNodes
 !
 !

@@ -892,6 +892,7 @@ use m_tablematrices
     double precision                :: dep
     double precision                :: ys
     double precision                :: rad
+    logical                         :: checkDirectRoughness
     type(t_Roughness), pointer      :: rgh 
     type(t_spatial_data), pointer   :: values
     integer, dimension(:), pointer  :: rgh_type
@@ -953,7 +954,9 @@ use m_tablematrices
     !
     else ! Version 2 roughness
        do i = 1, 2
-          if (cross%frictionSectionID(cross%frictionSectionsCount) == '') then
+          checkDirectRoughness = .false.
+          if (associated(cross)) checkDirectRoughness = (cross%frictionSectionID(cross%frictionSectionsCount) == '')
+          if (checkDirectRoughness) then
              ! Current cross section does *not* refer to a friction section index, but has defined direct roughness type+coefficient.
              cz = GetChezy(cross%frictionType(section), cross%frictionValue(section), rad, dep, u)
           else

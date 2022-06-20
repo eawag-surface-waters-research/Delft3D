@@ -39,6 +39,7 @@ subroutine test_roughness_branches
    use m_roughness
    use m_read_roughness
    use m_hash_search
+   use ifport
    
    type(t_network)         :: network
    type(t_CSType), pointer :: cross
@@ -46,6 +47,7 @@ subroutine test_roughness_branches
    integer                 :: ibranch
    integer                 :: section
    integer                 :: igrid
+   integer                 :: istat
    double precision        :: h
    double precision        :: q
    double precision        :: u
@@ -66,10 +68,14 @@ subroutine test_roughness_branches
    network%brs%branch(7)%id = 'Channel7'
    call fill_hashtable(network%brs)
    cross => null()
-   
+
+   istat = CHANGEDIRQQ("roughness")
+
    roughnessfiles = 'roughness_main.ini;roughness-globals.ini'
    call roughness_reader(network, roughnessfiles)
-   
+
+   istat = CHANGEDIRQQ("..")
+
    ibranch  = 4
    section  = hashsearch(network%rgs%hashlist, 'chezy45')
    igrid    = 0

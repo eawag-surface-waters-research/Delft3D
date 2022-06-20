@@ -1397,13 +1397,15 @@ subroutine GetCSParsFlowCross(cross, dpt, flowArea, wetPerimeter, flowWidth, max
       
    endif
    ! correction for groundlayers
-   if (crossDef%groundlayer%used) then
-      widGr = crossDef%groundlayer%width
-      flowArea = flowArea - crossDef%groundlayer%area
-      af_sub_local(1) = af_sub_local(1) - crossDef%groundlayer%area
+   if (associated(crossDef)) then
+      if (crossDef%groundlayer%used) then
+         widGr = crossDef%groundlayer%width
+         flowArea = flowArea - crossDef%groundlayer%area
+         af_sub_local(1) = af_sub_local(1) - crossDef%groundlayer%area
 
-      wetPerimeter = wetPerimeter - crossDef%groundlayer%perimeter + widGr
-      perim_sub_local(1) = perim_sub_local(1) - crossDef%groundlayer%perimeter + widGr
+         wetPerimeter = wetPerimeter - crossDef%groundlayer%perimeter + widGr
+         perim_sub_local(1) = perim_sub_local(1) - crossDef%groundlayer%perimeter + widGr
+      endif
    endif
 
    
@@ -2775,7 +2777,7 @@ use messageHandling
    type(t_crsu), pointer   :: convTab
    integer                 :: i
    allocate(convtab)
-   nc = crs%tabDef%levelsCount
+
    ! Check if type is not equal to walLawNikuradse (type=2), since this option is not implemented yet
    do i = 1, crs%frictionSectionsCount
       if (crs%frictionTypePos(i) == 2 .or. crs%frictionTypeNeg(i) == 2 ) then
@@ -2784,14 +2786,17 @@ use messageHandling
          call err_flush()
       endif
    enddo
-   
-   call generateConvtab(convtab, crs%tabDef%levelsCount, crs%shift, crs%tabDef%groundLayer%thickness, crs%tabDef%crossType, &
+
+   if (associated(crs%tabDef)) then
+      nc = crs%tabDef%levelsCount
+      call generateConvtab(convtab, crs%tabDef%levelsCount, crs%shift, crs%tabDef%groundLayer%thickness, crs%tabDef%crossType, &
                         nc, crs%tabDef%frictionSectionsCount, crs%branchid, crs%frictionTypePos(1),                               &
                         crs%groundFriction, crs%tabdef%y, crs%tabdef%z,                                                        &
                         crs%tabDef%segmentToSectionIndex, crs%frictionTypePos,              &
                         crs%frictionValuePos, crs%frictionTypeNeg, crs%frictionValueNeg )
-  
-   convTab%conveyType = crs%tabDef%conveyanceType
+      convTab%conveyType = crs%tabDef%conveyanceType
+   end if
+
    convTab%last_position = 1
 
    if (associated(crs%convtab1)) then
