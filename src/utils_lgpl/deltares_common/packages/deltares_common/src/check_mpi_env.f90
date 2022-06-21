@@ -56,7 +56,7 @@ function running_in_mpi_environment() result(usempi)
 !! executable statements -------------------------------------------------------
 !
     ! use an environment variable to check whether MPI should be activated.
-    ! unfornately only the MPI calls are standardized, not the environment variables.
+    ! unfortunately only the MPI calls are standardized, not the environment variables.
     ! so, we have to check a couple of different environment variables ...
     !
     ! verify whether MPICH2 (or derived) environment is used

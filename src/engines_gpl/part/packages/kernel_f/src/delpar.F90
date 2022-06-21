@@ -337,6 +337,7 @@
       use alloc_mod
       use ibm_mod
       use larvae_mod
+      use omp_lib
       !use partwr_mod
       
       !use normal_mod
@@ -349,8 +350,6 @@
       implicit none                  ! force explicit typing
       !
       save
-
-      include "omp_lib.h"
 
       integer(ip)         :: itime   , lunpr, lunfil, lunini
       integer(ip)         :: nosubud , noth
