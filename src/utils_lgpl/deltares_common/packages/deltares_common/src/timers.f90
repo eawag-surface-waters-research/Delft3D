@@ -208,6 +208,15 @@
       return
       end subroutine timini
 
+      subroutine zerotimers( )
+      cpstart = 0d0
+      cptime  = 0d0
+      cpinc   = 0d0
+      wcstart = 0d0
+      wctime  = 0d0
+      wcinc   = 0d0
+      end subroutine zerotimers
+
 !***************
 
       !> Used internally if the arrays run out of space
