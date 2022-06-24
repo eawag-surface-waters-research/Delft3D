@@ -46,6 +46,10 @@
  call savepol()
  call reapol(minp0, 0)
 
+ if (layertype == 2 .and. keepzlayeringatbed .ne. 1 .and. jabaroczlaybed == 1) then 
+    call  keepzlayering()
+ endif
+ 
  do n=1,ndxi
     call getkbotktop(n,kb,kt)
     do k = kb, kt
@@ -55,6 +59,35 @@
     call lineinterp(xx, yy(kb:), ktx, xpl, ypl, npl)
  enddo
 
+ if (layertype == 2 .and. keepzlayeringatbed .ne. 1 .and. jabaroczlaybed == 1) then 
+    call setkbotktop(1)
+ endif
+
  call restorepol()
 
  end subroutine setinitialverticalprofile
+
+ ! 2 subroutines in 1 file, yes we can ! 
+
+ subroutine keepzlayering()
+ use m_flowgeom
+ use m_flow
+ implicit none
+ 
+ integer :: n, k, kb, kt, nlayb,nrlay, Ltn
+
+ do n=1,ndxi
+    call getkbotktop(n,kb,kt)
+    call getzlayerindices(n,nlayb,nrlay)
+    Ltn = laydefnr(n)
+    zws(kb)   = zslay(nlayb,Ltn)
+    if (nlayb == 1) then
+       zws(kb-1) = 2*zslay(nlayb,Ltn) - zslay(nlayb+1,Ltn)
+    else
+       zws(kb-1) = zslay(nlayb-1,Ltn)
+    endif
+    if (keepzlayeringatbed == 2) then
+       zws(kb) = zslay(nlayb,Ltn)
+    endif
+ enddo
+ end subroutine keepzlayering

@@ -1946,14 +1946,16 @@ subroutine tekwindvector()
     
     call upotukinueaa(upot,ukin,ueaa)     
 
-    yp  = yp - dyp
-    tex = 'Upot0+Ukin0:         (kg/(m.s2))'
-    if (upot0+ukin0 > 1000) then 
-       write(tex(8:20), '(F11.2)') ukin0
-    else
-       write(tex(8:20), '(F11.7)') ukin0
-    endif 
     ncol = ncoltx
+
+
+    yp  = yp - 2.5*dyp
+    tex = 'Ut0:                 (kg/(m.s2))'
+    if (upot0+ukin0 > 1000) then 
+       write(tex(8:20), '(F11.2)') ukin0+upot0
+    else
+       write(tex(8:20), '(F11.7)') ukin0+upot0
+    endif 
     call GTEXT(tex, xp, yp, ncol)
 
     yp  = yp - dyp
@@ -1963,7 +1965,6 @@ subroutine tekwindvector()
     else
        write(tex(8:20), '(F11.7)') upot 
     endif 
-    ncol = ncoltx
     call GTEXT(tex, xp, yp, ncol)
   
     yp  = yp - dyp
@@ -1985,21 +1986,18 @@ subroutine tekwindvector()
     call GTEXT(tex, xp, yp, ncol)
 
     yp  = yp - dyp
-    tex = 'Ukin/Ukin0:                 ( )'
-    if (upot + ukin > 1000) then 
-       write(tex(8:20), '(F11.2)') ukin/ukin0   
-    else
-       write(tex(8:20), '(F11.7)') ukin/ukin0
-    endif 
+    tex = 'Upot/Ut0:                   ( )'
+    write(tex(8:20), '(F11.7)') upot/(ukin0 + upot0)
     call GTEXT(tex, xp, yp, ncol)
 
     yp  = yp - dyp
-    tex = 'Utot/Utot0:                 ( )'
-    if (upot + ukin > 1000) then 
-       write(tex(8:20), '(F11.2)') (ukin+upot)/(ukin0)   
-    else
-       write(tex(8:20), '(F11.7)') (ukin+upot)/(ukin0)
-    endif 
+    tex = 'Ukin/Ut0:                   ( )'
+    write(tex(8:20), '(F11.7)') ukin/(ukin0 + upot0)
+    call GTEXT(tex, xp, yp, ncol)
+
+    yp  = yp - dyp
+    tex = 'Utot/Ut0:                   ( )'
+    write(tex(8:20), '(F11.7)') (ukin+upot)/(ukin0 + upot0)
     call GTEXT(tex, xp, yp, ncol)
 
     if (jasal > 0 .or. jatem > 0) then
@@ -2030,12 +2028,13 @@ use m_flowgeom
 use m_missing
 implicit none
 double precision :: upot, ukin, ueaa
-double precision :: vtot, roav, hh, zz, dzz, rhok
+double precision :: vtot, roav, hh, zz, dzz, rhok, bmin
 integer k, kk
        
-upot = 0d0 ; ukin = 0d0 ; ueaa = 0d0 ; vtot = 0d0 ; roav = 0d0
+upot = 0d0 ; ukin = 0d0 ; ueaa = 0d0 ; vtot = 0d0 ; roav = 0d0; bmin = 1d9
 
 do kk = 1,ndx
+   bmin = min(bmin, bl(kk))
    if ( hs(kk) == 0 ) cycle
    do k = kbot(kk), ktop(kk) 
       vtot = vtot + vol1(k)                                                 ! m3
@@ -2056,9 +2055,9 @@ do kk = 1,ndx
    if ( hs(kk) == 0 ) cycle
    do k = kbot(kk), ktop(kk) 
       if (kmx > 0) then 
-         zz   = (zws(k) + zws(k-1))*0.5d0                                   ! m
+         zz   = (zws(k) + zws(k-1))*0.5d0  - bmin                                 ! m
       else 
-         zz   = s1(k) - bl(k)
+         zz   = s1(k) - bmin
       endif
       if (jasal > 0) then 
          rhok = rho(k)
@@ -2078,7 +2077,7 @@ ukin  = ukin*0.5/vtot
 if (upot0 == dmiss) upot0 = upot
 if (ukin0 == dmiss) ukin0 = ukin
 
-upot = upot - upot0 
+! upot = upot - upot0 
                                                                   ! 
 end subroutine upotukinueaa
 

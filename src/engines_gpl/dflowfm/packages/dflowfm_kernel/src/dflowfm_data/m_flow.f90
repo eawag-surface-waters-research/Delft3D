@@ -271,7 +271,6 @@
  double precision, allocatable     :: qsho  (:)   !< higher order part of upwind salinity    fluxes (ppt*m3/s) (dim=lnkx)
  double precision, allocatable, target     :: tem0  (:)   !< [degC] water temperature at end of timestep {"location": "face", "shape": ["ndkx"]}
  double precision, allocatable, target     :: tem1  (:)   !< [degC] water temperature at end of timestep {"location": "face", "shape": ["ndkx"]}
- double precision, allocatable     :: Tupq  (:)   !< upwind temperature flux (deg*m3/s)
  double precision, allocatable     :: qtho  (:)   !< higher order part of upwind temperature fluxes (ppt*m3/s) (dim=lnkx)
 
  double precision, allocatable     :: sam0  (:)   !< salinity mass       (pptm3) at start of timestep  ! remove later

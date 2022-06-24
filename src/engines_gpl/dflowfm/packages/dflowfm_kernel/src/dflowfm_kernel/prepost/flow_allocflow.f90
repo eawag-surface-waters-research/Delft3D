@@ -559,7 +559,7 @@
  call aerr('uqcx(ndkx) , uqcy(ndkx)', ierr, 2*ndkx) ; uqcx = 0 ; uqcy = 0
  allocate ( ucxq(ndkx) , ucyq(ndkx) , stat = ierr)
  call aerr('ucxq(ndkx) , ucyq(ndkx)', ierr, 2*ndkx) ; ucxq = 0 ; ucyq = 0
- if (jamapucmag == 1 .or. jahisvelocity == 1 .or. len_trim(md_foufile) > 0 .or. allocated(map_classes_ucmag)) then
+ if (jamapucvec == 1 .or. jamapucmag == 1 .or. jahisvelocity == 1 .or. len_trim(md_foufile) > 0 .or. allocated(map_classes_ucmag)) then
     call realloc(ucmag, ndkx, keepExisting=.false.)
  end if
  allocate ( qin (ndkx) , vih (ndkx) , stat = ierr)
@@ -658,7 +658,7 @@ endif
  if (allocated(rho) ) deallocate(rho)
  allocate ( rho (ndkx) , stat= ierr )
  call aerr('rho (ndkx)', ierr, ndkx ) ; rho  = rhomean
- 
+
  if (stm_included) then 
     if (allocated(rhowat) ) deallocate(rhowat)
     allocate ( rhowat (ndkx) , stat= ierr )
@@ -685,6 +685,12 @@ endif
        if (allocated (rvdn) ) deallocate(rvdn, grn)
        allocate ( rvdn(ndkx), grn(ndkx) , stat= ierr ) ; rvdn = 0d0 ; grn = 0d0
        call aerr('rvdn(ndkx), grn(ndkx)', ierr, 2*ndkx )
+
+       if (jarhointerfaces == 1) then 
+          if (allocated (rhosww) ) deallocate(rhosww)
+          allocate ( rhosww(ndkx) , stat= ierr )
+          call aerr('rhosww(ndkx)', ierr, ndkx ) ; rhosww = 0d0
+       endif
     endif
 
  endif
@@ -1071,17 +1077,6 @@ endif
 
     if (allocated (sam0) ) deallocate (sam0, sam1, same)
     allocate (sam0(ndkx), sam1(ndkx), same(ndkx) )  ; sam0 = 0 ; sam1 = 0 ; same = 0
- 
-    if ( jatransportmodule == 0) then
-       if ( allocated (supq) )  deallocate (supq, qsho)
-       allocate ( supq(ndkx), qsho(lnkx)  , stat = ierr)
-       call aerr('supq(ndkx), qsho(lnkx) ', ierr, ndkx)
-
-       if (allocated (salsrc) ) deallocate (salsrc)
-       allocate ( salsrc(ndkx) , stat = ierr)
-       call aerr('salsrc(ndkx)', ierr, ndkx) ; salsrc = 0d0
-    endif
-
  endif
 
  if (jatem > 0) then
@@ -1094,12 +1089,6 @@ endif
     call aerr('heatsrc(ndkx), heatsrc0(ndkx)', ierr, ndkx)
     heatsrc = 0d0
     heatsrc0 = 0d0
-
-    if (jatransportmodule == 0) then
-        if ( allocated (tupq) )  deallocate (tupq,  qtho)
-        allocate ( tupq(ndkx), qtho(lnkx)  , stat = ierr)
-        call aerr('tupq(ndkx), qtho(lnkx))', ierr, ndkx)
-    endif
 
     if (jatem > 1) then ! also heat modelling involved
        if ( allocated (tair) )  deallocate (tair, rhum, clou)

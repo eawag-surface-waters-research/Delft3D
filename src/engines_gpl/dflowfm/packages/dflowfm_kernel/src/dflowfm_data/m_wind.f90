@@ -90,7 +90,6 @@ double precision, allocatable, target :: qrad(:)     !< solar radiation       (W
 double precision, allocatable, target :: longwave(:) !< long wave radiation   (W/m2)
 double precision, allocatable         :: heatsrc (:) !< resulting 2D or 3D heat source per cell (Km3/s)
 double precision, allocatable         :: heatsrc0(:) !< resulting 2D or 3D heat source per cell, only set at timeuser (Km3/s)
-double precision, allocatable         :: salsrc (:)  !< salinity source per cell (pptm3/s)
 double precision, allocatable         :: tbed(:)     !< bed temperature       (degC)
 
 

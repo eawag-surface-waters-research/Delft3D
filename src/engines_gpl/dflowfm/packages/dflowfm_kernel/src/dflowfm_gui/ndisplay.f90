@@ -537,7 +537,7 @@
       if (javeg == 0) then
       OPTION(22)= 'aifu ()                                 '
       OPTION(23)= 'Local waterlevel slope               ( )'
-      OPTION(24)= 'cfu=g/(HC2)                        (   )'
+      OPTION(24)= 'cfuhi=g/(HC2)                      (   )'
       else
       OPTION(22)= 'Plant diameter                       (m)'
       OPTION(23)= 'Plant density                     (1/m2)'

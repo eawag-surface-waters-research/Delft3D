@@ -147,6 +147,9 @@
  double precision                  :: alph0                      !< eckart density parameters
  integer                           :: idensform                  !< 0 = no, 1 = eckart
  integer                           :: Maxitpresdens = 1          !< max nr of density-pressure iterations 
+ integer                           :: Jarhointerfaces = 0        !< rho computed at vertical interfaces, yes=1, 0=cell center 
+ integer                           :: Jabaroczlaybed = 0         !< use fix for zlaybed yes/no 
+
  integer                           :: limiterhordif              !< 0=No, 1=Horizontal gradient densitylimiter, 2=Finite volume
 
  double precision                  :: Stanton                    !< coeff for convective  heat flux, if negative , take wind Cd

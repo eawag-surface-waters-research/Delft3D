@@ -72,7 +72,7 @@ subroutine update_verticalprofiles()
 
  double precision :: rhoLL, pkwmag, hrmsLL, dsurfLL, dwcapLL, wdep, hbot, dzwav, prsappr
 
- double precision, external :: setrho
+ double precision, external :: setrhofixedp
 
  integer          :: k, ku, kd, kb, kt, n, kbn, kbn1, kn, knu, kk, kbk, ktk, kku, LL, L, Lb, Lt, kxL, Lu, Lb0, kb0
  integer          :: k1, k2, k1u, k2u, n1, n2, ifrctyp, ierr, jadrhodz = 1, kup, ierror, Ltv, ktv, whit
@@ -387,7 +387,7 @@ subroutine update_verticalprofiles()
                   drhodz1 = ( rho(k1u) - rho(k1) ) / dzc1
                else
                   prsappr = ag*rhomean*( zws(ktop(ln(1,LL))) - zws(k1) )   
-                  drhodz1 = ( setrho(k1u,prsappr) - setrho(k1,prsappr) ) / dzc1
+                  drhodz1 = ( setrhofixedp(k1u,prsappr) - setrhofixedp(k1,prsappr) ) / dzc1
                endif
             endif
 
@@ -397,7 +397,7 @@ subroutine update_verticalprofiles()
                   drhodz2 = ( rho(k2u) - rho(k2) ) / dzc2
                else
                   prsappr = ag*rhomean*( zws(ktop(ln(2,LL))) - zws(k2) )  
-                  drhodz2 = ( setrho(k2u,prsappr) - setrho(k2,prsappr) ) / dzc2
+                  drhodz2 = ( setrhofixedp(k2u,prsappr) - setrhofixedp(k2,prsappr) ) / dzc2
                endif
             endif
 

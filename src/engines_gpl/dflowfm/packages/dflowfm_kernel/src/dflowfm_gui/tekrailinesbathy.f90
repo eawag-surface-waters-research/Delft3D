@@ -103,6 +103,8 @@
        endif
     endif
 
+    if (zz1 == dmiss .or. zz2 == dmiss) cycle
+
     if (yfac > 0) then
        zz1 = zz1 + (yy1 - ymn)*yfac
        zz2 = zz2 + (yy1 - ymn)*yfac

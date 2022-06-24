@@ -339,12 +339,12 @@ subroutine fill_valobs()
                if (kk < kt) then
                    if (idensform > 10 ) then           
                       prsappr = ag*rhomean*( zws(kt) - zws(kk) )  
-                      drhodz  = ( setrhofixedp(kk+1,prsappr) - setrhofixedp(kk,prsappr) ) / 0.5d0*(zws(kk+1) - zws(kk-1)) 
+                      drhodz  = ( setrhofixedp(kk+1,prsappr) - setrhofixedp(kk,prsappr) ) / (0.5d0*(zws(kk+1) - zws(kk-1))) 
                    else 
-                      drhodz  = ( rho(kk+1) - rho(kk)                                   ) / 0.5d0*(zws(kk+1) - zws(kk-1)) 
+                      drhodz  = ( rho(kk+1) - rho(kk)                                   ) / (0.5d0*(zws(kk+1) - zws(kk-1))) 
                    endif
                    rhomea  = 0.5d0*( rho(kk+1) + rho(kk) )
-                   valobs(IPNT_BRUV+klay-1,i) = coefn2*drhodz/rhomea
+                   valobs(IPNT_BRUV+klay-1,i) = -ag*drhodz/rhomea
                else
                    valobs(IPNT_BRUV+klay-1,i) = 0d0 
                endif

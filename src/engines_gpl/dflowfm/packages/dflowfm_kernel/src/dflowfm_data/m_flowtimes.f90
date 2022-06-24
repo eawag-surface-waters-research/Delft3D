@@ -319,6 +319,7 @@ subroutine reset_flowtimes()
 
     dsetb         = 0                !< number of setbacks ()
     alfsmo        = 1d0              !<
+
 end subroutine reset_flowtimes
 
 subroutine reset_timers()

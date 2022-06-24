@@ -82,10 +82,7 @@ subroutine transport()                           ! transport for now, advect sal
  double precision               :: ta(kmxx),tb(kmxx),tc(kmxx),td(kmxx),te(kmxx)
  double precision               :: sa(kmxx),sb(kmxx),sc(kmxx),sd(kmxx),se(kmxx)
 
-
- double precision, allocatable  :: sa00(:), vold(:), cch(:), ccv(:), diagn(:) ! help arrays scalar transport
-
- double precision               :: dq(kmxx), samiobnd, samerr2, dsadn
+ double precision               :: samiobnd, samerr2, dsadn
 
  double precision               :: dfac1, dfac2, src, viL, diuspL, qdsL
 

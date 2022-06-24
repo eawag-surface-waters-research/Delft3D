@@ -283,7 +283,7 @@ subroutine default_flowgeom()
     dxwuimin2D = 0.0d0  ! smallest fraction dx/wu , may increase dx if > 0
 
     wu1DUNI  =  2d0   ! Uniform 1D profile width
-    hh1DUNI  =  3d0   ! Uniform 1D profile height
+    hh1DUNI  =  3d3   ! Uniform 1D profile height
 
     wu1DUNI5 = 0.2d0  !< uniform 1D profile width in drain or street inlet
     hh1DUNI5 = 0.1d0  !< uniform 1D profile height in drain or street inlet

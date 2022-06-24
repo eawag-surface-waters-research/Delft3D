@@ -112,7 +112,7 @@
     endif
  enddo
 
- if (jased > 0 .and. zminrai == dmiss .and. .not.stm_included) then
+ if (jased == 1 .or. jased == 2 .and. zminrai == dmiss) then
     dlay = 0d0
     if (jaceneqtr == 1) then
        mx = ndxi
@@ -192,9 +192,10 @@
 
 
  if (kmx > 0) then
-    kplot = max(kplot,1)
-    kplot = min(kplot,kmxn(nplot))
     kplotorg = kplot
+    kplot    = max(kplot,1)
+    kplot    = min(kplot,kmxn(nplot))
+  
     if (ndraw(28) > 3) then ! show node values
 
 
@@ -335,19 +336,7 @@
         enddo
     endif
 
-    ncol = 221  ! markerpoint
-    n = nplot
-    k = kbot(n) + kplotorg - 1
-      xxmn  = minval( nd(n)%x )
-      xxmx  = maxval( nd(n)%x )
-      xp(1) = 0.5d0*(xxmx + xxmn)
-      yp(1) = 0.5d0*(zws(k) + zws(k-1))
-      call cirr(xp(1), yp(1), ncol)
-    ! xp(1) = xxmn ; xp(2) = xxmx ; xp(3) = xxmx ; xp(4) = xxmn
-    ! yp(1) = zws(k-1)  ; yp(2) = yp(1)
-    ! yp(3) = zws(k)    ; yp(4) = yp(3)
-    ! call PFILLER(xp,yp,4,ncol, ncol )
-
+    call setcol(ncolwhite)
     if ( NDRAW(2) > 0 ) then  ! draw layer interface lines in white
 
         do LL  = 1,lnxi
@@ -377,6 +366,20 @@
         enddo
 
     endif
+
+    n     = nplot           ! markerpoint
+    kplot = kplotorg
+    kplotfrombedorsurface = kplotfrombedorsurfacesav
+    call getktoplot(n,k)
+    xxmn  = minval( nd(n)%x )
+    xxmx  = maxval( nd(n)%x )
+    xp(1) = 0.5d0*(xxmx + xxmn)
+    yp(1) = 0.5d0*(zws(k) + zws(k-1))
+    call cirr(xp(1), yp(1), ncolblack)
+    !xp(1) = xxmn ; xp(2) = xxmx ; xp(3) = xxmx ; xp(4) = xxmn
+    !yp(1) = zws(k-1)  ; yp(2) = yp(1)
+    !yp(3) = zws(k)    ; yp(4) = yp(3)
+    !call PFILLER(xp,yp,4,ncol, ncol )
 
     if (jaanalytic == 0 ) then
 
@@ -592,8 +595,7 @@
     call htext_rai( x1+10d0*rcir, x1+12d0*rcir, zmn-2d0*zz,rcir,zz,2)
     call htext_rai( x2-10d0*rcir, x2-12d0*rcir, zmn-2d0*zz,rcir,zz,2)
  endif
-
-kplotfrombedorsurface = kplotfrombedorsurfacesav
+ kplotfrombedorsurface = kplotfrombedorsurfacesav
  call setwor(x1,y1,x2,y2)
 
  return

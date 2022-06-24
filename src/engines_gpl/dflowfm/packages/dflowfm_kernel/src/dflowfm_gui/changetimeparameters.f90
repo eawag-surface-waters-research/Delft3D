@@ -38,7 +38,7 @@
    use m_flow
    implicit none
    integer :: numpar, numfld, numparactual, numfldactual
-   PARAMETER  (NUMPAR = 13, NUMFLD = 2*NUMPAR)
+   PARAMETER  (NUMPAR = 14, NUMFLD = 2*NUMPAR)
    INTEGER  IX(NUMFLD),IY(NUMFLD),IS(NUMFLD),IT(NUMFLD)
    CHARACTER WRDKEY*40, OPTION(NUMPAR)*40, HELPM(NUMPAR)*60
    integer :: nlevel
@@ -50,37 +50,42 @@
    integer :: nbut, imp, inp, ierr
 
    NLEVEL     = 4
-   OPTION( 1) = 'Dt_user                             (s) ' ; it(2*1)  = 6
-   OPTION( 2) = 'Dt_max                              (s) ' ; it(2*2)  = 6
-   OPTION( 3) = 'Use automatic time step             ( ) ' ; it(2*3)  = 2
-   OPTION( 4) = 'Tstart_user                         (s) ' ; it(2*4)  = 6
-   OPTION( 5) = 'Tstop_user                          (s) ' ; it(2*5)  = 6
-   OPTION( 6) = 'HisInterval                         (s) ' ; it(2*6)  = 6
-   OPTION( 7) = 'MapInterval                         (s) ' ; it(2*7)  = 6
-   OPTION( 8) = 'RstInterval                         (s) ' ; it(2*8)  = 6
-   OPTION( 9) = 'WaqInterval                         (s) ' ; it(2*9)  = 6
-   OPTION(10) = 'Initial timestep                    (s) ' ; it(2*10) = 6
-   OPTION(11) = 'Current time                        (s) ' ; it(2*11) = 6
-   OPTION(12) = 'Smoothing time boundaries Tlfsmo    (s) ' ; it(2*12) = 6
-   OPTION(13) = 'Dtfacmax                            ( ) ' ; it(2*13) = 6
+   i = 1
+   OPTION( i) = 'Dt_user                             (s) ' ; it(2*i) = 6 ; i=i+1
+   OPTION( i) = 'Dt_max                              (s) ' ; it(2*i) = 6 ; i=i+1
+   OPTION( i) = 'Use automatic time step             ( ) ' ; it(2*i) = 2 ; i=i+1
+   OPTION( i) = 'Tstart_user                         (s) ' ; it(2*i) = 6 ; i=i+1
+   OPTION( i) = 'Tstop_user                          (s) ' ; it(2*i) = 6 ; i=i+1
+   OPTION( i) = 'HisInterval                         (s) ' ; it(2*i) = 6 ; i=i+1
+   OPTION( i) = 'MapInterval                         (s) ' ; it(2*i) = 6 ; i=i+1
+   OPTION( i) = 'RstInterval                         (s) ' ; it(2*i) = 6 ; i=i+1
+   OPTION( i) = 'WaqInterval                         (s) ' ; it(2*i) = 6 ; i=i+1
+   OPTION( i) = 'Initial timestep                    (s) ' ; it(2*i) = 6 ; i=i+1
+   OPTION( i) = 'Current time                        (s) ' ; it(2*i) = 6 ; i=i+1
+   OPTION( i) = 'Smoothing time boundaries Tlfsmo    (s) ' ; it(2*i) = 6 ; i=i+1
+   OPTION( i) = 'Dtfacmax                            ( ) ' ; it(2*i) = 6 ; i=i+1
+   OPTION( i) = 'Tspinupturblogprof                  ( ) ' ; it(2*i) = 6 ; i=i+1
 
 
 !   123456789012345678901234567890123456789012345678901234567890
 !            1         2         3         4         5         6
 
-   HELPM ( 1) = 'User timestep (rythm of external forcing updates)           '
-   HELPM ( 2) = 'Max timestep                                                '
-   HELPM ( 3) = ' 1=2D V/Qouth, 3=3D Vk/Qouthk, 5=3D Vk/Qouhvk, 8=5, kt-1    '
-   HELPM ( 4) = '                                                            '
-   HELPM ( 5) = '                                                            '
-   HELPM ( 6) = '                                                            '
-   HELPM ( 7) = '                                                            '
-   HELPM ( 8) = '                                                            '
-   HELPM ( 9) = '                                                            '
-   HELPM (10) = '                                                            '
-   HELPM (11) = '                                                            '
-   HELPM (12) = '                                                            '
-   HELPM (13) = 'dt = min(dtnew, dtfacmax*dtold)                             '
+   i = 1
+   HELPM ( i) = 'User timestep (rythm of external forcing updates)           ' ; i=i+1
+   HELPM ( i) = 'Max timestep                                                ' ; i=i+1
+   HELPM ( i) = ' 1=2D V/Qouth, 3=3D Vk/Qouthk, 5=3D Vk/Qouhvk, 8=5, kt-1    ' ; i=i+1
+   HELPM ( i) = '                                                            ' ; i=i+1
+   HELPM ( i) = '                                                            ' ; i=i+1
+   HELPM ( i) = '                                                            ' ; i=i+1
+   HELPM ( i) = '                                                            ' ; i=i+1
+   HELPM ( i) = '                                                            ' ; i=i+1
+   HELPM ( i) = '                                                            ' ; i=i+1
+   HELPM ( i) = '                                                            ' ; i=i+1
+   HELPM ( i) = '                                                            ' ; i=i+1
+   HELPM ( i) = '                                                            ' ; i=i+1
+   HELPM ( i) = 'dt = min(dtnew, dtfacmax*dtold)                             ' ; i=i+1
+   HELPM ( i) = '                                                            ' ; i=i+1
+
 
    CALL SAVEKEYS()
 
@@ -149,19 +154,21 @@
       CALL IFORMATTRIBUTEN(IR,0,0,7)
    ENDDO
 
-   CALL IFormPutDouble  (2* 1 ,dt_user          ,'(F10.3)')
-   CALL IFormPutDouble  (2* 2 ,dt_max           ,'(F10.3)')
-   CALL IFORMPUTINTEGER (2* 3 ,ja_timestep_auto           )
-   CALL IFormPutDouble  (2* 4 ,tstart_user      ,'(F10.0)')
-   CALL IFormPutDouble  (2* 5 ,tstop_user       ,'(F10.0)')
-   CALL IFormPutDouble  (2* 6 ,ti_his           ,'(F10.3)')
-   CALL IFormPutDouble  (2* 7 ,ti_map           ,'(F10.3)')
-   CALL IFormPutDouble  (2* 8 ,ti_rst           ,'(F10.3)')
-   CALL IFormPutDouble  (2* 9 ,ti_waq           ,'(F10.3)')
-   CALL IFormPutDouble  (2*10 ,dt_init          ,'(F10.3)')
-   CALL IFormPutDouble  (2*11 ,time1            ,'(F10.3)')
-   CALL IFormPutDouble  (2*12 ,Tlfsmo           ,'(F10.3)')
-   CALL IFormPutDouble  (2*13 ,Dtfacmax         ,'(F10.3)')
+   i = 1
+   CALL IFormPutDouble  (2* i ,dt_user           ,'(F10.3)') ; i=i+1
+   CALL IFormPutDouble  (2* i ,dt_max            ,'(F10.3)') ; i=i+1
+   CALL IFORMPUTINTEGER (2* i ,ja_timestep_auto            ) ; i=i+1
+   CALL IFormPutDouble  (2* i ,tstart_user       ,'(F10.0)') ; i=i+1
+   CALL IFormPutDouble  (2* i ,tstop_user        ,'(F10.0)') ; i=i+1
+   CALL IFormPutDouble  (2* i ,ti_his            ,'(F10.3)') ; i=i+1
+   CALL IFormPutDouble  (2* i ,ti_map            ,'(F10.3)') ; i=i+1
+   CALL IFormPutDouble  (2* i ,ti_rst            ,'(F10.3)') ; i=i+1 
+   CALL IFormPutDouble  (2* i ,ti_waq            ,'(F10.3)') ; i=i+1
+   CALL IFormPutDouble  (2* i ,dt_init           ,'(F10.3)') ; i=i+1
+   CALL IFormPutDouble  (2* i ,time1             ,'(F10.3)') ; i=i+1
+   CALL IFormPutDouble  (2* i ,Tlfsmo            ,'(F10.3)') ; i=i+1
+   CALL IFormPutDouble  (2* i ,Dtfacmax          ,'(F10.3)') ; i=i+1
+   CALL IFormPutDouble  (2* i ,Tspinupturblogprof,'(F10.3)') ; i=i+1
 
    ! Display the form with numeric fields left justified
    ! and set the initial field to number 2
@@ -200,18 +207,21 @@
    ELSE IF (KEY .EQ. 22 .OR. KEY .EQ. 23) THEN
        IF (KEY .EQ. 22) THEN
 
-           CALL IFormGetDouble  (2* 1 ,dt_user          )
-           CALL IFormGetDouble  (2* 2 ,dt_max           )
-           CALL IFORMgeTINTEGER (2* 3 ,ja_timestep_auto )
-           CALL IFormGetDouble  (2* 4 ,tstart_user      )
-           CALL IFormGetDouble  (2* 5 ,tstop_user       )
-           CALL IFormGetDouble  (2* 6 ,ti_his           )
-           CALL IFormGetDouble  (2* 7 ,ti_map           )
-           CALL IFormGetDouble  (2* 8 ,ti_rst           )
-           CALL IFormGetDouble  (2* 9 ,ti_waq           )
-           CALL IFormGetDouble  (2*10 ,dt_init          )
-           CALL IFormGetDouble  (2*12 ,Tlfsmo           )
-           CALL IFormGetDouble  (2*13 ,Dtfacmax         )
+           i = 1
+           CALL IFormGetDouble  (2* i ,dt_user           ) ; i=i+1
+           CALL IFormGetDouble  (2* i ,dt_max            ) ; i=i+1
+           CALL IFORMgeTINTEGER (2* i ,ja_timestep_auto  ) ; i=i+1
+           CALL IFormGetDouble  (2* i ,tstart_user       ) ; i=i+1
+           CALL IFormGetDouble  (2* i ,tstop_user        ) ; i=i+1 
+           CALL IFormGetDouble  (2* i ,ti_his            ) ; i=i+1
+           CALL IFormGetDouble  (2* i ,ti_map            ) ; i=i+1 
+           CALL IFormGetDouble  (2* i ,ti_rst            ) ; i=i+1
+           CALL IFormGetDouble  (2* i ,ti_waq            ) ; i=i+1
+           CALL IFormGetDouble  (2* i ,dt_init           ) ; i=i+1
+           CALL IFormGetDouble  (2* i ,Time1             ) ; i=i+1
+           CALL IFormGetDouble  (2* i ,Tlfsmo            ) ; i=i+1
+           CALL IFormGetDouble  (2* i ,Dtfacmax          ) ; i=i+1
+           CALL IFormGetDouble  (2* i ,Tspinupturblogprof) ; i=i+1
 
            if (dt_max > dt_user) then
                dt_max = dt_user

@@ -32,6 +32,7 @@
 
       SUBROUTINE TEKFN(NSC,NF,JW,X,Y,N,X1,X2,Y1,Y2,NCOL,TITLE,JAUTO,JP,DAG,kp1)
       use m_flow, only : kplotfrombedorsurface
+      use unstruc_colors, only: ncolblack
       implicit none
       double precision :: dag
       double precision :: dv
@@ -171,8 +172,8 @@
                   kp = n - kp + 1
                endif
                call movabs( x(kp), y(kp) )
-               call setcol(31)
-               call fbox(x(kp)-rcx,y(kp)-rcy,x(kp)+rcx,y(kp)+rcy)
+               call setcol(ncolblack) ! 31)
+               call fbox(x(kp)-2*rcx,y(kp)-2*rcy,x(kp)+2*rcx,y(kp)+2*rcy)
 
                WRITE (TEX,'(E13.5)') X(kp)
                xtx = x(kp)

@@ -112,6 +112,8 @@
 
  call resetflow()
 
+ call zerotimers()
+
  call reset_waq()
 
  call timstop(handle_extra(1)) ! End basic steps
@@ -123,7 +125,6 @@
     call xbeach_wave_input()  ! will set swave and lwave
  endif
  call timstop(handle_extra(2)) ! End wave input
-
 
  call timstrt('Make internal links      ', handle_extra(3)) ! Internal links
  if (md_jamake1d2dlinks == 1) then

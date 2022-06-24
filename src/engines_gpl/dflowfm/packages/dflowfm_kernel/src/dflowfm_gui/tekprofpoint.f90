@@ -37,7 +37,7 @@
  implicit none
  integer :: k, nn
  if (klprof > 0 .and. nplot.gt.0 ) then
-     call cirr(xz(nplot), yz(nplot), klprof)
+     call cirr(xz(nplot), yz(nplot), ncolblack) !klprof)
 
      ! k    = nplot
      ! nn   = size( nd(k)%x )

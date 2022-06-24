@@ -1251,6 +1251,9 @@ subroutine readMDUFile(filename, istat)
 
     call prop_get_integer(md_ptr, 'physics', 'Idensform'      , idensform)
     call prop_get_integer(md_ptr, 'physics', 'Maxitpresdens'  , maxitpresdens)
+    call prop_get_integer(md_ptr, 'physics', 'Rhointerfaces'  , jarhointerfaces)
+    call prop_get_integer(md_ptr, 'physics', 'baroczlaybed'   , jabaroczlaybed)
+
     call prop_get_integer(md_ptr, 'physics', 'Temperature'       , jatem)
     call prop_get_double (md_ptr, 'physics', 'InitialTemperature', temini)
     call prop_get_double (md_ptr, 'physics', 'Secchidepth'       , Secchidepth)
@@ -3142,6 +3145,13 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     if (writeall .or. Maxitpresdens .ne. 1) then
        call prop_set(prop_ptr, 'physics', 'Maxitpresdens', Maxitpresdens,'Max nr of iterations in pressure-density coupling, only used if idensform > 10 )')
     endif
+    if (writeall .or. jarhointerfaces .ne. 0) then
+       call prop_set(prop_ptr, 'physics', 'Rhointerfaces', jarhointerfaces,'Evaluate rho at interfaces, 0=org at centers, 1=at interfaces )')
+    endif
+
+    if (writeall .or. Jabaroczlaybed .ne. 1) then
+       call prop_set(prop_ptr, 'physics', 'Baroczlaybed' , jabaroczlaybed,'Use fix in barocp for zlaybed 0,1, 1=default)')
+    endif
  
     call prop_set(prop_ptr, 'physics', 'Ag'     ,          ag ,          'Gravitational acceleration')
     call prop_set(prop_ptr, 'physics', 'TidalForcing',     jatidep,      'Tidal forcing, if jsferic=1 (0: no, 1: yes)')
@@ -3211,7 +3221,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
           call prop_set(prop_ptr, 'physics', 'RhoairRhowater' , jaroro        ,  'windstress rhoa/rhow: 0=Rhoair/Rhomean, 1=Rhoair/rhow(), 2=rhoa0()/rhow(), 3=rhoa10()/Rhow()')
        endif
 
-       if ( janudge > 0 ) then
+       if ( janudge > 0 .or. jainiwithnudge > 0 ) then
           call prop_set_double(prop_ptr, 'physics', 'Nudgetimeuni', Tnudgeuni, 'Uniform nudge relaxation time')
           call prop_set_integer(prop_ptr, 'physics', 'IniWithNudge', jainiwithnudge, 'Initialize salinity and temperature with nudge variables')
        end if

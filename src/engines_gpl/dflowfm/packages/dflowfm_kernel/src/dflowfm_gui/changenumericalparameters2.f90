@@ -44,7 +44,7 @@
    implicit none
 
    integer :: numpar, numfld, numparactual, numfldactual
-   PARAMETER  (NUMPAR = 25, NUMFLD = 2*NUMPAR)
+   PARAMETER  (NUMPAR = 27, NUMFLD = 2*NUMPAR)
    INTEGER  IX(NUMFLD),IY(NUMFLD),IS(NUMFLD),IT(NUMFLD)
    CHARACTER WRDKEY*40, OPTION(NUMPAR)*40, HELPM(NUMPAR)*60
    integer :: nlevel
@@ -65,7 +65,6 @@
    OPTION( i) = 'JAVASAL                                 ' ; it(2* i) = 2 ; i = i+ 1
    OPTION( i) = 'IFIXEDWEIRSCHEME                        ' ; it(2* i) = 2 ; i = i+ 1
    OPTION( i) = 'Tsigma                                  ' ; it(2* i) = 6 ; i = i+ 1
-   OPTION( i) = 'Local timestepping in transport(1)      ' ; it(2* i) = 2 ; i = i+ 1
    OPTION( i) = 'Cffacver                                ' ; it(2* i) = 6 ; i = i+ 1
    OPTION( i) = 'Cffachormom                             ' ; it(2* i) = 6 ; i = i+ 1
    OPTION( i) = 'Cfexphormom                             ' ; it(2* i) = 6 ; i = i+ 1
@@ -81,8 +80,9 @@
    OPTION( i) = 'Drop2D                                  ' ; it(2* i) = 6 ; i = i+ 1
    OPTION( i) = 'Drop3D                                  ' ; it(2* i) = 6 ; i = i+ 1
    OPTION( i) = 'jaStructurelayersactive                 ' ; it(2* i) = 2 ; i = i+ 1
-
-
+   OPTION( i) = 'jarhointerfaces                         ' ; it(2* i) = 2 ; i = i+ 1
+   OPTION( i) = 'maxitpresdens                           ' ; it(2* i) = 2 ; i = i+ 1
+   OPTION( i) = 'jabaroczlaybed, (fix for zed problem)   ' ; it(2* i) = 2 ; i = i+ 1
 
 !   123456789012345678901234567890123456789012345678901234567890
 !            1         2         3         4         5         6
@@ -112,8 +112,10 @@
    HELPM ( i) = '0=no, 1 = yes                                               ' ; i=i+1
    HELPM ( i) = '0=no, 1 = yes                                               ' ; i=i+1
    HELPM ( i) = '0=no, 1 = yes                                               ' ; i=i+1
- 
-
+   HELPM ( i) = '0=centers, 1 = interfaces                                   ' ; i=i+1
+   HELPM ( i) = 'max nr of rho/pressure iterations, only for idensform > 10  ' ; i=i+1
+   HELPM ( i) = 'default now 1, was 0, keyword will disappear in future      ' ; i=i+1
+  
    CALL SAVEKEYS()
    NUMPARACTUAL = NUMPAR
    NUMFLDACTUAL = 2*NUMPARACTUAL
@@ -190,7 +192,6 @@
    CALL IFORMPUTINTEGER (2*i,JAVASAL          )               ; i=i+1
    CALL IFORMPUTINTEGER (2*i,ifixedweirscheme )               ; i=i+1
    CALL IFORMPUTdouble  (2*i,Tsigma           , '(F7.3)' )    ; i=i+1
-!   CALL IFORMPUTINTEGER (2*i,JALTS            )               ; i=i+1
    CALL IFORMPUTdouble  (2*i,Cffacver         , '(F7.3)' )    ; i=i+1
    CALL IFORMPUTdouble  (2*i,Cffachormom      , '(F7.3)' )    ; i=i+1
    CALL IFORMPUTdouble  (2*i,Cfexphormom      , '(F7.3)' )    ; i=i+1
@@ -206,6 +207,9 @@
    CALL IFORMPUTdouble  (2*i,drop2D           , '(F7.3)' )    ; i=i+1
    CALL IFORMPUTdouble  (2*i,drop3D           , '(F7.3)' )    ; i=i+1
    CALL IFORMputINTEGER (2*i,jastructurelayersactive)         ; i=i+1
+   CALL IFORMputINTEGER (2*i,jarhointerfaces)                 ; i=i+1
+   CALL IFORMputINTEGER (2*i,maxitpresdens)                   ; i=i+1
+   CALL IFORMputINTEGER (2*i,jabaroczlaybed)                  ; i=i+1
 
 
    !  Display the form with numeric fields left justified
@@ -255,7 +259,6 @@
           CALL IFORMGETINTEGER (2*i ,JAVASAL          )           ; i=i+1
           CALL IFORMGETINTEGER (2*i ,IFIXEDWEIRSCHEME )           ; i=i+1
           CALL IFORMGETdouble  (2*i ,Tsigma           )           ; i=i+1
-!          CALL IFORMGETINTEGER (2*i ,JALTS            )           ; i=i+1
           CALL IFORMGETdouble  (2*i ,Cffacver         )           ; i=i+1
           CALL IFORMGETdouble  (2*i ,Cffachormom      )           ; i=i+1
           CALL IFORMGETdouble  (2*i ,Cfexphormom      )           ; i=i+1
@@ -271,6 +274,9 @@
           CALL IFORMGETdouble  (2*i ,Drop2D           )           ; i=i+1
           CALL IFORMGETdouble  (2*i ,Drop3D           )           ; i=i+1
           CALL IFORMGETINTEGER (2*i ,jastructurelayersactive)     ; i=i+1
+          CALL IFORMGETINTEGER (2*i ,jarhointerfaces)             ; i=i+1
+          CALL IFORMGetINTEGER (2*i ,maxitpresdens)               ; i=i+1
+          CALL IFORMGetINTEGER (2*i ,jabaroczlaybed)              ; i=i+1
 
        ENDIF
        CALL IWinClose(1)
