@@ -32,7 +32,7 @@ module wave_data
 !!--pseudo code and references--------------------------------------------------
 ! NONE
 !!--declarations----------------------------------------------------------------
-!
+use precision_basics
 ! Module parameters
 !
 !
@@ -64,8 +64,8 @@ type wave_time_type
    integer  :: calccount       ! [-]        Counts the number of calculations. Used for naming the sp2 output files
    real     :: tscale          ! [sec]      Basic time unit: default = 60.0,
                                ! when running online with FLOW tscale = FLOW_time_step
-   real     :: timsec          ! [sec]      Current time of simulation since reference date (0:00h)
-   real     :: timmin          ! [min]      Current time of simulation since reference date (0:00h)
+   real(hp) :: timsec          ! [sec]      Current time of simulation since reference date (0:00h)
+   real(hp) :: timmin          ! [min]      Current time of simulation since reference date (0:00h)
 end type wave_time_type
 !
 type wave_output_type
@@ -76,7 +76,7 @@ type wave_output_type
                                   !            normally it's value will be 1, except when Flow also writes with append_com is true
    integer  :: ncmode             ! [3 or 4]   NetCDF creation mode: NetCDF3 (NF90_CLASSIC_MODEL) or NetCDF4 (NF90_NETCDF4)
    real     :: nexttim            ! [sec]      Next time to write to wavm-file
-   real     :: timseckeephot      ! [sec]      seconds since ref date on which time the hotfile should not be deleted
+   real(hp) :: timseckeephot      ! [sec]      seconds since ref date on which time the hotfile should not be deleted
    logical  :: write_wavm         ! [y/n]      True when writing to wavm file
 end type wave_output_type
 !
@@ -102,14 +102,14 @@ subroutine initialize_wavedata(wavedata)
    wavedata%time%calctimtscale_prev   =  -999
    wavedata%time%calccount            =  0
    wavedata%time%tscale               = 60.0
-   wavedata%time%timsec               =  0.0
-   wavedata%time%timmin               =  0.0
+   wavedata%time%timsec               =  0.0_hp
+   wavedata%time%timmin               =  0.0_hp
    wavedata%output%count              =  0
    wavedata%output%comcount           =  0
    wavedata%output%lastvalidflowfield =  0
    wavedata%output%ncmode             =  ncu_format_to_cmode(0)
    wavedata%output%nexttim            =  0.0
-   wavedata%output%timseckeephot      =  0.0
+   wavedata%output%timseckeephot      =  0.0_hp
    wavedata%output%write_wavm         =  .false.
 end subroutine initialize_wavedata
 !
@@ -140,8 +140,8 @@ subroutine settimtscale(wavetime, timtscale_in, modsim, nonstat_interval)
    type(wave_time_type) :: wavetime
 
    wavetime%timtscale = timtscale_in
-   wavetime%timsec    = real(wavetime%timtscale) * wavetime%tscale
-   wavetime%timmin    = wavetime%timsec / 60.0
+   wavetime%timsec    = real(wavetime%timtscale,hp) * wavetime%tscale
+   wavetime%timmin    = wavetime%timsec / 60.0_hp
    if (modsim == 3) then
       wavetime%calctimtscale = wavetime%timtscale + int(nonstat_interval*60.0/wavetime%tscale)
       wavetime%calctimtscale_prev = wavetime%timtscale
@@ -157,20 +157,20 @@ subroutine settscale(wavetime, tscale_in)
    type(wave_time_type) :: wavetime
 
    wavetime%tscale    = tscale_in
-   wavetime%timsec    = real(wavetime%timtscale) * wavetime%tscale
-   wavetime%timmin    = wavetime%timsec / 60.0
+   wavetime%timsec    = real(wavetime%timtscale,hp) * wavetime%tscale
+   wavetime%timmin    = wavetime%timsec / 60.0_hp
 end subroutine settscale
 !
 !
 !===============================================================================
 subroutine settimsec(wavetime, timsec_in, modsim, nonstat_interval)
-   real :: timsec_in
-   integer :: modsim                ! 1: stationary, 2: quasi-stationary, 3: non-stationary
-   real    :: nonstat_interval      ! used when modsim = 3: Interval of communication FLOW-WAVE
+   real(hp) :: timsec_in
+   integer  :: modsim                ! 1: stationary, 2: quasi-stationary, 3: non-stationary
+   real     :: nonstat_interval      ! used when modsim = 3: Interval of communication FLOW-WAVE
    type(wave_time_type) :: wavetime
 
    wavetime%timsec    = timsec_in
-   wavetime%timmin    = wavetime%timsec / 60.0
+   wavetime%timmin    = wavetime%timsec / 60.0_hp
    wavetime%timtscale = nint(wavetime%timsec / wavetime%tscale)
    if (modsim == 3) then
       wavetime%calctimtscale = wavetime%timtscale + int(nonstat_interval*60.0/wavetime%tscale)
@@ -183,13 +183,13 @@ end subroutine settimsec
 !
 !===============================================================================
 subroutine settimmin(wavetime, timmin_in, modsim, nonstat_interval)
-   real :: timmin_in
-   integer :: modsim                ! 1: stationary, 2: quasi-stationary, 3: non-stationary
-   real    :: nonstat_interval      ! used when modsim = 3: Interval of communication FLOW-WAVE
+   real(hp) :: timmin_in
+   integer  :: modsim                ! 1: stationary, 2: quasi-stationary, 3: non-stationary
+   real     :: nonstat_interval      ! used when modsim = 3: Interval of communication FLOW-WAVE
    type(wave_time_type) :: wavetime
 
    wavetime%timmin    = timmin_in
-   wavetime%timsec    = wavetime%timmin * 60.0
+   wavetime%timsec    = wavetime%timmin * 60.0_hp
    wavetime%timtscale = nint(wavetime%timsec / wavetime%tscale)
    if (modsim == 3) then
       wavetime%calctimtscale = wavetime%timtscale + int(nonstat_interval*60.0/wavetime%tscale)
@@ -220,7 +220,7 @@ end subroutine setoutputcount
 !
 !===============================================================================
 subroutine setnexttim(waveoutput, nexttim_in)
-   real :: nexttim_in
+   real(hp) :: nexttim_in
    type(wave_output_type) :: waveoutput
 
    waveoutput%nexttim = nexttim_in

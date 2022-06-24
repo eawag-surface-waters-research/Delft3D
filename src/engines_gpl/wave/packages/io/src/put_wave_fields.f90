@@ -489,6 +489,7 @@ subroutine crewav_netcdf(fg       ,itide    ,hrms     ,tp       ,dir      , &
     use wave_data
     use swan_flow_grid_maps
     use netcdf
+    use precision_basics
     !
     implicit none
 !
@@ -546,7 +547,7 @@ subroutine crewav_netcdf(fg       ,itide    ,hrms     ,tp       ,dir      , &
     integer                                     :: mmax_read
     integer                                     :: precision
     integer, external                           :: nc_def_var
-    real, dimension(1)                          :: time_read
+    real(hp), dimension(1)                      :: time_read
     character(50)                               :: string
     character(256)                              :: filename
     character(256)                              :: gridnam

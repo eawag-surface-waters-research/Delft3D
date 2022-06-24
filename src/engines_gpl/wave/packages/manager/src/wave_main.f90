@@ -541,7 +541,7 @@ function wave_master_step(stepsize) result(retval)
                ! Set the current time to "step_end_time" (to be sure it has the correct value)
                ! and exit the do-loop
                !
-               call settimmin(wavedata%time, real(tend,sp), swan_run%modsim, swan_run%nonstat_interval)
+               call settimmin(wavedata%time, real(tend,hp), swan_run%modsim, swan_run%nonstat_interval)
                exit
             endif
          enddo

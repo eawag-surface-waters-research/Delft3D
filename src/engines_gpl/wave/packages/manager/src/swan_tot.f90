@@ -122,7 +122,7 @@ subroutine swan_tot (n_swan_grids, n_flow_grids, wavedata, selectedtime)
       !
       ! Set time in case of standalone run
       !
-      if (wavedata%mode == stand_alone) call settimmin(wavedata%time, swan_run%timwav(itide), swan_run%modsim, swan_run%nonstat_interval)
+      if (wavedata%mode == stand_alone) call settimmin(wavedata%time, real(swan_run%timwav(itide),hp), swan_run%modsim, swan_run%nonstat_interval)
       !
       ! Update wave and wind conditions
       !
@@ -130,7 +130,7 @@ subroutine swan_tot (n_swan_grids, n_flow_grids, wavedata, selectedtime)
       !
       ! Start loop over SWAN grids
       !
-      refdstr = datetime_to_string(wavedata%time%refdate, 0.0)
+      refdstr = datetime_to_string(wavedata%time%refdate, 0.0_hp)
       write(*,'(a,f15.3,a,a)') '  Start loop over SWAN grids, time = ',wavedata%time%timmin, ' minutes since ', trim(refdstr)
       do i_swan = 1, n_swan_grids
          dom => swan_run%dom(i_swan)

@@ -278,7 +278,7 @@ subroutine get_current_time(t) bind(C, name="get_current_time")
   real(c_double), intent(out) :: t
   !
   ! Body
-  t = real(wavedata%time%timsec,hp)
+  t = wavedata%time%timsec
 end subroutine get_current_time
 !
 !

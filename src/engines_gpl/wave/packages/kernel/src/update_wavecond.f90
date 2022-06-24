@@ -32,7 +32,7 @@ module update_waves
 !!--pseudo code and references--------------------------------------------------
 ! NONE
 !!--declarations----------------------------------------------------------------
-!
+use precision_basics
 ! Module parameters
 !
     integer :: luniwp = -1  ! Unibest wave conditions input file unit
@@ -383,7 +383,7 @@ subroutine varcon(fname     ,timmin    ,result    ,isdir     ,nres )
 !
     integer                 , intent(in)  :: nres    ! number of values on record
     integer, dimension(nres), intent(in)  :: isdir   ! mask array, 0 if scalar, 1 if direction (deg)
-    real                    , intent(in)  :: timmin  ! time in minutes
+    real(hp)                , intent(in)  :: timmin  ! time in minutes
     real   , dimension(nres)              :: result  ! array containing interpolated values
     character(*)            , intent(in)  :: fname   ! filename time series file
 !

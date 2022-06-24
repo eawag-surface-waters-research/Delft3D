@@ -90,7 +90,7 @@ subroutine get_var_netcdf(i_flow, wavetime, varname, vararr, mmax, nmax, basenam
    real                                :: wght
    real                                :: wghtsum
    real, dimension(:),   allocatable   :: rlabda
-   real, dimension(:),   allocatable   :: times
+   real(hp),dimension(:),allocatable   :: times
    real, dimension(:,:), allocatable   :: vararr3d
    real, dimension(:,:), allocatable   :: flzw
    character(NF90_MAX_NAME)            :: string

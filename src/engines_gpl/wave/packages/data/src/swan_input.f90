@@ -3814,7 +3814,7 @@ subroutine write_swan_inp (wavedata, calccount, &
           !
           ! endtime
           !
-          tendc = datetime_to_string(wavedata%time%refdate, real(wavedata%time%calctimtscale)* wavedata%time%tscale)
+          tendc = datetime_to_string(wavedata%time%refdate, wavedata%time%calctimtscale* real(wavedata%time%tscale,hp))
           !
           if (sr%hotfile .and. sr%usehottime /= '00000000.000000') then
              !
