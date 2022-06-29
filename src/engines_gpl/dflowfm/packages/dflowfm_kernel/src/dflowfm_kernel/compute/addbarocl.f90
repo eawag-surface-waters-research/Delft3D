@@ -49,11 +49,11 @@
        k1t = ktop(ln(1,LL)) ; k2t = ktop(ln(2,LL))
     endif
 
-    rhovol(L-Lb+1) = 0.5d0*( zws(k1t) - zws(k1-1) + zws(k2t) - zws(k2-1) )*0.5d0*(rho(k1) + rho(k2)) ! write in rvdn
+    ! rhovol(L-Lb+1) = 0.5d0*( zws(k1t) - zws(k1-1) + zws(k2t) - zws(k2-1) )*0.5d0*(rho(k1) + rho(k2)) ! write in rvdn
 
-    ! rhovol(L-Lb+1) = 0.5d0*( (zws(k1t) - zws(k1-1))*rho(k1) + (zws(k2t) - zws(k2-1))*rho(k2) )
+    rhovol(L-Lb+1) = 0.5d0*( (zws(k1t) - zws(k1-1))*rho(k1) + (zws(k2t) - zws(k2-1))*rho(k2) )
     if (jarhoxu > 0) then
-       rhou(L) = rhovol(L-Lb+1) /  0.5d0*( zws(k1t) - zws(k1-1) + zws(k2t) - zws(k2-1) )
+       rhou(L) = rhovol(L-Lb+1) /  ( 0.5d0*( zws(k1t) - zws(k1-1) + zws(k2t) - zws(k2-1) ) )
     endif
     rhovol(L-Lb+1) = rhovol(L-Lb+1)*dx(LL)
 
@@ -62,7 +62,6 @@
     gr1 = grn (k1)
     gr2 = grn (k2)
 
-   if (jabaroczlaybed > 0) then ! keyword will vanish later
     if (L == Lb) then
        if (kmxn(ln(1,LL)) > kmxn(ln(2,LL)) .or. kmxn(ln(1,LL)) < kmxn(ln(2,LL))) then ! extrapolate at 'bed' layer of deepest side
 
@@ -91,7 +90,7 @@
           endif
        endif
     endif
-   endif
+  
 
     gr3 = 0.5d0*( rv1 + rv2 )*( zws(k1-1) - zws(k2-1) )
 
@@ -101,48 +100,8 @@
     endif
  enddo
 
- ! this last piece is identical to addbaroc2, that will be removed at some moment
- if (jabaroctimeint == 3) then                                           ! original AB implementation
-
-    do L = Lb, Lt
-       if (rhovol(L-Lb+1) > 0d0) then
-           barocl    = ag*gradpu(L-Lb+1) /rhovol(L-Lb+1)                  !
-           adve(L)   = adve(L) - 1.5d0*barocl + 0.5d0*dpbdx0(L)
-           dpbdx0(L) = barocL
-        endif
-    enddo
-
- else if (abs(jabaroctimeint) == 4) then                                 ! AB + better drying flooding
-
-    ft = 0.5d0*dts/dtprev
-    do L = Lb, Lt
-       if (rhovol(L-Lb+1) > 0d0) then
-           barocl  = ag*gradpu(L-Lb+1) / rhovol(L-Lb+1)
-
-           if (dpbdx0(L) .ne. 0d0) then
-               adve(L)   = adve(L) - (1d0+ft)*barocl + ft*dpbdx0(L)
-           else
-               adve(L)   = adve(L) - barocl
-           endif
-           dpbdx0(L) = barocL
-       endif
-    enddo
-
-    do L = Lt+1,Lb+kmxL(LL)-1
-       dpbdx0(L) = 0d0
-    enddo
-
- else
-
-    do L = Lb, Lt
-        if (rhovol(L-Lb+1) > 0d0) then
-           barocl  = ag*gradpu(L-Lb+1)/rhovol(L-Lb+1)                     !  Explicit
-           adve(L) = adve(L) - barocl
-       endif
-    enddo
-
- endif
-
+ call barocLtimeint(gradpu, rhovol, LL, Lb, Lt) 
+ 
  end subroutine addbarocL
 
  subroutine addbarocLrho_w(LL,Lb,Lt)
@@ -172,7 +131,7 @@
     rhovol(L-Lb+1) = 0.5d0*( rvdn(k1t) - rvdn(k1-1) + (zws(k1t) - zws(k1-1))*rhomean  +    &
                              rvdn(k2t) - rvdn(k2-1) + (zws(k2t) - zws(k2-1))*rhomean  )
     if (jarhoxu > 0) then
-       rhou(L) = rhovol(L-Lb+1) /  0.5d0*( zws(k1t) - zws(k1-1) + zws(k2t) - zws(k2-1) )
+       rhou(L) = rhovol(L-Lb+1) /  ( 0.5d0*( zws(k1t) - zws(k1-1) + zws(k2t) - zws(k2-1) ) )
     endif
     rhovol(L-Lb+1) = rhovol(L-Lb+1)*dx(LL)
 
@@ -181,7 +140,6 @@
     gr1 = grn (k1)
     gr2 = grn (k2)
 
-   if (jabaroczlaybed > 0) then ! keyword will vanish later
     if (L == Lb) then
        if (kmxn(ln(1,LL)) > kmxn(ln(2,LL)) .or. kmxn(ln(1,LL)) < kmxn(ln(2,LL))) then ! extrapolate at 'bed' layer of deepest side
           if ( kmxn(ln(1,LL)) > kmxn(ln(2,LL)) ) then ! k1=deepest
@@ -221,7 +179,6 @@
           endif
        endif
     endif
-   endif
 
     gr3            = 0.5d0*( rv1 + rv2 )*(zws(k1-1) - zws(k2-1))
     gradpu(L-Lb+1) = gr1 - gr2 + gr3
@@ -230,46 +187,7 @@
     endif
  enddo
 
- ! this last piece is identical to addbaroc2, that will be removed at some moment
- if (jabaroctimeint == 3) then                                           ! original AB implementation
-
-    do L = Lb, Lt
-       if (rhovol(L-Lb+1) > 0d0) then
-           barocl    = ag*gradpu(L-Lb+1)/rhovol(L-Lb+1)                  !
-           adve(L)   = adve(L) - 1.5d0*barocl + 0.5d0*dpbdx0(L)
-           dpbdx0(L) = barocL
-        endif
-    enddo
-
- else if (abs(jabaroctimeint) == 4) then                                 ! AB + better drying flooding
-
-    ft = 0.5d0*dts/dtprev
-    do L = Lb, Lt
-       if (rhovol(L-Lb+1) > 0d0) then
-           barocl  = ag*gradpu(L-Lb+1)/rhovol(L-Lb+1)
-           if (dpbdx0(L) .ne. 0d0) then
-               adve(L)   = adve(L) - (1d0+ft)*barocl + ft*dpbdx0(L)
-           else
-               adve(L)   = adve(L) - barocl
-           endif
-           dpbdx0(L) = barocL
-       endif
-    enddo
-
-    do L = Lt+1,Lb+kmxL(LL)-1
-       dpbdx0(L) = 0d0
-    enddo
-
- else
-
-    do L = Lb, Lt
-        if (rhovol(L-Lb+1) > 0d0) then
-           barocl  = ag*gradpu(L-Lb+1)/rhovol(L-Lb+1)                     !  Explicit
-           adve(L) = adve(L) - barocl
-       endif
-    enddo
-
- endif
+ call barocLtimeint(gradpu, rhovol, kmxx, LL, Lb, Lt) 
 
  end subroutine addbarocLrho_w
 
@@ -305,7 +223,7 @@
 ! $Id$
 ! $HeadURL$
 
- subroutine addbarocLorg(LL,Lb,Lt)
+subroutine addbarocLorg(LL,Lb,Lt)
  use m_flowgeom
  use m_flow
  use m_flowtimes
@@ -329,6 +247,22 @@
        gradpu(L-Lb) = gradpu(L-Lb)     - gr3            ! ceiling of ff# downstairs neighbours
     endif
  enddo
+
+ call barocLtimeint(gradpu, rhovol, LL, Lb, Lt) 
+
+ end subroutine addbarocLorg
+
+
+ subroutine barocLtimeint(gradpu, rhovol, LL, Lb, Lt) 
+ use m_flow
+ use m_flowtimes
+
+ integer             :: LL, Lb, Lt
+ double precision    :: gradpu(kmxx), rhovol(kmxx)
+
+
+ integer             :: L
+ double precision    :: barocL, ft
 
  ! this last piece is identical to addbaroc2, that will be removed at some moment
  if (jabaroctimeint == 3) then                                           ! original AB implementation
@@ -371,4 +305,4 @@
 
  endif
 
- end subroutine addbarocLorg
+ end subroutine barocLtimeint 
