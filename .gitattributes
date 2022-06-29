@@ -17462,6 +17462,8 @@ src/tools_gpl/agrhyd/packages/agrhyd/src/set_aggr_reg.f -text
 src/tools_gpl/agrhyd/packages/agrhyd/src/set_poi.f -text
 src/tools_gpl/agrhyd/packages/agrhyd/src/sing_dis.f -text
 src/tools_gpl/agrhyd/packages/agrhyd/src/write_sing_dis.f -text
+src/tools_gpl/agrhyd/scripts/run_agrhyd.bat -text
+src/tools_gpl/agrhyd/scripts/run_agrhyd.sh -text
 src/tools_gpl/datsel/Makefile.am -text
 src/tools_gpl/datsel/packages/Makefile.am -text
 src/tools_gpl/datsel/packages/datsel/CMakeLists.txt -text

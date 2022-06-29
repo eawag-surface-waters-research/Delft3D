@@ -1113,8 +1113,6 @@ rem ==========================
     if "%configuration%" == "Debug" (
     
         echo "Debug postbuild"
-        set dest_bin="%install_dir%\x64\Debug"
-        
         set dest_bin="!install_dir!\x64\Debug"
         set dest_default="!install_dir!\x64\Debug"
         set dest_scripts="!install_dir!\x64\Debug"
@@ -1282,6 +1280,8 @@ rem ==========================
         
         rem copy binaries and dll 
         call :copyFile "!build_dir!\agrhyd\!configuration!\agrhyd.exe"                            !dest_bin!
+        call :copyFile "!checkout_src_root!\tools_gpl\agrhyd\default\agrhyd.ini"                  !dest_default!
+        call :copyFile "!checkout_src_root!\tools_gpl\agrhyd\scripts\run_agrhyd.bat"              !dest_scripts!
     )
     
 goto :endproc

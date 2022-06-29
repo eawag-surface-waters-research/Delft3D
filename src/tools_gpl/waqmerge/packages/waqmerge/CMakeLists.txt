@@ -90,4 +90,6 @@ post_build_target (${executable_name}
                    ${executable_name})
 
 install(TARGETS ${executable_name} RUNTIME  DESTINATION bin)
-
+if (UNIX)
+    install(PROGRAMS ${CMAKE_SOURCE_DIR}/../tools_gpl/waqmerge/scripts/run_waqmerge.sh  DESTINATION bin)
+endif(UNIX)
