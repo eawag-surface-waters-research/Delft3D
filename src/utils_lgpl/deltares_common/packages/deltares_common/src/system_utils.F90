@@ -34,7 +34,7 @@ module system_utils
 !-------------------------------------------------------------------------------
 !
 
-#if (defined(HAVE_CONFIG_H))
+#if (defined(__linux__))
     character(5), parameter :: ARCH = 'linux'
     character(3), parameter :: SCRIPT_EXTENSION = '.sh'
     character(3), parameter :: SHARED_LIB_PREFIX = 'lib'
@@ -42,7 +42,7 @@ module system_utils
     character(1), parameter :: FILESEP = '/'
 
     character(1), parameter :: FILESEP_OTHER_ARCH = '\'
-#else
+#else    
     character(7), parameter :: ARCH = 'windows'
     character(4), parameter :: SCRIPT_EXTENSION = '.bat'
     character(0), parameter :: SHARED_LIB_PREFIX = ''
@@ -50,7 +50,7 @@ module system_utils
     character(1), parameter :: FILESEP = '\'
 
     character(1), parameter :: FILESEP_OTHER_ARCH = '/'
-#endif
+#endif    
 
 contains
 

@@ -777,7 +777,7 @@ subroutine unc_write_sedstat_filepointer_ugrid(sedids,tim)
       enddo
       ierr = unc_put_var_map(sedids%ncid, sedids%id_tsp, sedids%id_dmsedcum, UNC_LOC_S, work)
       if (ierr/=0) then
-          call mess(LEVEL_FATAL, 'fm_erosed::unc_write_sedstat_filepointer_ugrid - Error in subroutine unc_put_var_map (dmsedcum).')
+          call mess(LEVEL_FATAL, 'fm_morstatistics::unc_write_sedstat_filepointer_ugrid - Error in subroutine unc_put_var_map (dmsedcum).')
       end if
    endif
    !

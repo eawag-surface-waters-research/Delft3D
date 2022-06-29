@@ -28,7 +28,7 @@ module m_rddredge
 !  $Id$
 !  $HeadURL$
 !-------------------------------------------------------------------------------
-use m_depfil_stm
+
 implicit none
 
 private

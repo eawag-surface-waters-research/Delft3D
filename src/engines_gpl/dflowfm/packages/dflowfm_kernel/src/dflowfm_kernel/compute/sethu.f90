@@ -102,6 +102,7 @@ subroutine sethu(jazws0)                            ! Set upwind waterdepth hu
 !   for cut-cells
     if (wu(L).eq.0d0 ) then
        hu(L) = 0d0
+       au(L) = 0d0
        cycle
     end if
 

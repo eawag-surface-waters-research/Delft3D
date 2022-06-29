@@ -602,7 +602,7 @@ else if (icorio == 10) then                             ! vol2D type weigthings
     enddo
  endif
 
- do n  = 1, nbndz                                     ! waterlevel boundaries
+ do n  = 1, nbndz                                       ! waterlevel boundaries
     kb = kbndz(1,n)
     k2 = kbndz(2,n)
     LL = kbndz(3,n)

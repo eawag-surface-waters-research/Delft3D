@@ -83,11 +83,13 @@ subroutine update_integralstats()
    if (is_numndvals <= 0) then
       return
    end if
-   
-   if (jawave<3) then      ! do not overwrite current+wave induced bed shear stresses from tauwave
-      call gettaus(1, 1)
-   endif
 
+   if (jawave==0) then   
+      call gettaus(1,1)
+   else
+      call gettauswave(jawaveswartdelwaq)
+   endif      
+   
    do k=1,ndxi
       is_sumvalsnd(IDX_TAUS, k) =     is_sumvalsnd(IDX_TAUS, k) + dts * taus(k)
       is_sumvalsnd(IDX_UCM,  k) =     is_sumvalsnd(IDX_UCM,  k) + dts * sqrt(ucx(k)*ucx(k) + ucy(k)*ucy(k))

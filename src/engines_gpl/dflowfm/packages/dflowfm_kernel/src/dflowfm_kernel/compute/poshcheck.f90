@@ -64,7 +64,7 @@
 
  do n = 1,ndxi                                                  ! check result
 
-
+    
     if (abs(kfs(n)) /= 0) then ! Also check ghost nodes for posh/setbacks
        if ( s1(n) < bl(n) + dtrsh ) then
            if ( s1(n) < bl(n) + dtrsh - 1d-10 ) then                     ! if ( s1(n) < bl(n) ) then

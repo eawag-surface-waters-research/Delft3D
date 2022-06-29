@@ -725,6 +725,7 @@ subroutine poiseuille(init)
  hev = vicouv                   ! horizontal eddy viscosity
 
  c0  = -0.5d0*ag*bedslope       ! g*i/2
+ c2  = 0.0
 
  b   = 100d0                    ! channel width
 

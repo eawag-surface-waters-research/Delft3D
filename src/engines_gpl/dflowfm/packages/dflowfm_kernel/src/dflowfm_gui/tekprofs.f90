@@ -307,7 +307,7 @@
            call getvminmax(5,vmin,vmax,dijdij(1:km), km)
            call TEKFN(5,10, 1, dijdij(1:km) , hcref  , km, vmin, vmax, zmin, zmax, KLPROF, 'rhopot' , 1, 2 , 0d0,kplot)
         else         
-           call getvminmax(6,vmin,vmax,rho(kb:), kt-kb+1)
+        call getvminmax(6,vmin,vmax,rho(kb:), kt-kb+1)
            call TEKFN(5,10, 1, rho(kb:kt)  , hcref  , km, vmin, vmax, zmin, zmax, KLPROF, 'rhopot' , 1, 2 , 0d0,kplot)
         endif
      else
@@ -387,7 +387,7 @@
      if (vmax < abs(vmin)) vmax = -vmin
      if (abs(vmin-vmax) < 1d-20) then
         vmax = vmax + 1d-5 ; vmin = vmin - 1d-5
-     endif
+  endif
      call TEKFN(7,13, 1, dijdij(0:km), hwref  , Lm1, vmin, vmax, zmin, zmax, KLPROF, 'Bruva'      , 0, 2 , 0d0,kplot+1)
   else   if (jatem > 0) then
      if (jafahrenheit > 0) then
@@ -411,17 +411,17 @@
      call TEKFN(7, 13, 1, ucy(kb:kt)  , hcref   , km, vmin, vmax, zmin, zmax, KLPROF, 'y-velocity' , 0, 2 , 0d0,kplot)
   endif
 
-  vmin = minval(ucx(kb:kt))
-  vmax = maxval(ucx(kb:kt))
-  vmax = max(abs(vmin), abs(vmax), 1d-4 ) ; vmin = -vmax
-  if (jawaveStokes == 0) then
-     call TEKFN(8, 12, 1, ucx(kb:kt)  , hcref   , km, vmin, vmax, zmin, zmax, KLPROF, 'x-velocity' , 0, 2 , 0d0,kplot)
-  else
+  if (jawave>0 .and. jawaveStokes > 0) then
      vmin = minval( ucx(kb:kt)-ustokes(Lb:Lt) )
      vmax = maxval( ucx(kb:kt)-ustokes(Lb:Lt) )
      vmax = max(abs(vmin), abs(vmax) ) ; vmin = -vmax
      dijdij(1:km) =  ucx(kb:kt)-ustokes(Lb:Lt)
      call TEKFN(8, 12, 1,  dijdij(1:km)  , hcref   , km, vmin, vmax, zmin, zmax, KLPROF, 'x-velocity' , 0, 2 , 0d0,kplot)
+  else
+     vmin = minval(ucx(kb:kt))
+     vmax = maxval(ucx(kb:kt))
+     vmax = max(abs(vmin), abs(vmax), 1d-4 ) ; vmin = -vmax
+     call TEKFN(8, 12, 1, ucx(kb:kt)  , hcref   , km, vmin, vmax, zmin, zmax, KLPROF, 'x-velocity' , 0, 2 , 0d0,kplot)
   endif
 
   else if (jasal > 0) then

@@ -197,7 +197,7 @@
                 V = DBDISTANCE( XK(K1), YK(K1), XK(K2), YK(K2), jsferic, jasfer3D, dmiss)
                 if (v > 0) then
                    V = (zk(k2) - zk(k1)) / v
-                endif
+            end if
             end if
         ENDIF
         RLIN(L) = V

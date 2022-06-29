@@ -69,6 +69,8 @@
 
  integer                           :: jacomp = 1        !! same now for netnodes, 0 = default, 1 = use cs, sn in weighting, 2=regular scalar x,y interpolation based on banf
 
+ integer                           :: autotrisam = 1    !< Generate triangles after generating samplles in polygon (0:no 1:yes)
+
  integer                           :: icorio            !< Coriolis weigthing
 
  integer                           :: newcorio = 1      !< 0=prior to 27-11-2019, 1=no normal forcing on open bnds, plus 12 variants
@@ -131,9 +133,11 @@
 
  integer                           :: jawaveStokes      !< Vertical Stokes profile: 0=no, 1 = uniform, 2 = second order Stokes profile
 
- integer                           :: jawaveRoller      !< Roller contribution: 0=no, 1 = Rol1, 2 = Rol2
+ integer                           :: jawavedelta=1     !< Wave boundary layer formulation: 1=Sana 2007
 
- integer                           :: jawaveSwartDelwaq !< communicate to Delwaq taucur + tauwaveswart instead of taucur, specify z0wav
+ integer                           :: jawaveforces      !< Apply wave forces to model (1, default), or not (0)
+
+ integer                           :: jawaveSwartDelwaq !< communicate to Delwaq taucur + tauwave instead of taucur
 
  integer                           :: modind = 1        !< Nr of wave-current bed friction model, 9 = vanrijn, 1 = fredsoe, etc like d3d
 
@@ -202,7 +206,7 @@
  double precision                  :: ukin0=-999d0      !<  : initial potential energy
 
  integer                           :: jaupdbndbl        !< Update bl at boundary (1 = update, 0 = no update)
- integer                           :: jaupdbobbl1d      !< Update bl and bobs for 1d network (call to setbobs_1d only at initialization)
+ integer                           :: jaupdbobbl1d     !< Update bl and bobs for 1d network (call to setbobs_1d only at initialization)
 
  integer                           :: nonlin            !< 1 : non-linear continuity , == max(nonlin, nonlin2D) , 2 == pressurized nonlin
  integer                           :: nonlin1D          !< 1 : non-linear continuity eq for 1D points, only for non-rectangles
@@ -310,7 +314,6 @@
  integer                           :: testdryflood      !< Flag for testing alternative drying flooding algoritm; 0 = standard, 1 =Delft3D-FLOW
  double precision                  :: epshu             !< minimum waterdepth for setting hu>0
  double precision                  :: epshs             !< minimum waterdepth for setting cfu
- double precision                  :: epswav            !< minimum waterdepth for wave calculations
  double precision                  :: chkhuexpl         !< only for step_explicit:  check computed flux beneath this waterdepth
  double precision                  :: chkadvd           !< check advection  for 'drying' below this (upwind) waterdepth
  double precision                  :: chkdifd           !< check diffusion, only for jatransportautotimestepdiff== 1
@@ -336,7 +339,7 @@
 
  integer                           :: javau             !< vert. adv. u1   : 0=No, 1=UpwexpL, 2=Centralexpl, 3=UpwimpL, 4=CentraLimpL
 
- integer                           :: javau3onbnd = 0   !< vert. adv. u1 bnd UpwimpL: 0=follow javau , 1 = on bnd, 2= on and near bnd
+integer                            :: javau3onbnd = 0   !< vert. adv. u1 bnd UpwimpL: 0=follow javau , 1 = on bnd, 2= on and near bnd
 
  integer                           :: javakeps          !< vert. adv. keps : 0=No, 1=UpwexpL, 2=Centralexpl, 3=UpwimpL, 4=CentraLimpL
 
@@ -429,6 +432,7 @@
  integer                           :: jasourcesink              !< 1: source+sink 2:source 3:sink for sediment
 
  integer                           :: jalogsolverconvergence    !< log solver convergence message bloat (default 1, preferable 0)
+ integer                           :: jalogtransportsolverlimiting    !< log transport solver limiting message bloat (default 0, preferable 0)
 
  ! written to his file yes or no
  integer                           :: jahisbal                  !< Write mass balance/volume totals to his file, 0: no, 1: yes
@@ -472,6 +476,7 @@
  integer                           :: jamapww1                  !< upward velocity on flow link to map file, 0: no, 1: yes
  integer                           :: jamapnumlimdt             !< num limdt to map file, 0: no, 1: yes
  integer                           :: jamaptaucurrent           !< shear stress to map file, 0: no, 1: yes
+ integer                           :: jamapz0                   !< roughness heights to map file, 0: no, 1: yes
  integer                           :: jamapchezy                !< chezy to map file, 0: no, 1: yes
  integer                           :: jamapsal                  !< salinity to map file, 0: no, 1: yes
  integer                           :: jamaptem                  !< temperature to map file, 0: no, 1: yes
@@ -693,15 +698,17 @@ subroutine default_flowparameters()
 
     jawavestreaming = 0   ! Switch on in D3D model: >=1 : streaming mom , >= 2 : streaming mom + turb
 
-    jawaveStokes = 0      ! Vertical Stokes profile: 0=no, 1 = uniform, 2 = second order Stokes profile
+    jawavestokes = 1      ! Vertical Stokes profile: 0=no, 1 = uniform, 2 = second order Stokes profile
 
-    jawaveRoller = 0      ! Roller contribution: 0=no, 1 = Rol1, 2 = Rol2
+    jawavedelta = 1       ! Wave boundary layer formulation: 1=Sana; 2=Nguyen
 
-    jawaveSwartDelwaq = 0 !< communicate to Delwaq taucur + tauwaveswart instead of taucur, specify z0wav
+    jawaveforces = 1
+
+    jawaveSwartDelwaq = 0 !< communicate to Delwaq taucur + tauwave instead of taucur
 
     modind = 0            !< Nr of wave-current bed friction model, 9 = vanrijn, 1 = fredsoe, etc like d3d
 
-    jafrculin = 0     !< do not use linear friction
+    jafrculin = 0         !< do not use linear friction
 
     jafrcInternalTides2D = 0   !< do not use internal tides friction
 
@@ -830,7 +837,6 @@ subroutine default_flowparameters()
                          ! parameters controlling flooding/drying/solving
     epshu      = 1d-4    ! minimum waterdepth for setting hu>0
     epshs      = .2d0*epshu ! minimum waterdepth for setting cfu
-    epswav     = 1d-2    ! minimum waterdepth for wave calculations
     chkhuexpl  = 0.1d0   ! only for step_explicit:  check computed flux beneath this waterdepth
     chkadvd    = 0.1d0   ! check advection  for 'drying' below this (upwind) waterdepth
     chkdifd    = 0.01d0  ! check diffusion only for jatransportautotimestepdiff == 1
@@ -862,7 +868,7 @@ subroutine default_flowparameters()
     jahazlayer = 0       !<
     jaPure1D   = 0       !< 0 = org 1D advec, 1 = pure1D using vol1_f, 2 = pure1D using vol1
     jaJunction1D = 1     !< 0 = org 1D advec at junctions, 1 = junctions follow jaPure1D approach
-    JaZlayercenterbedvel      = 1
+    JaZlayercenterbedvel = 1
     jastructurelayersactive   = 1
     JaZerozbndinflowadvection = 0
 
@@ -895,6 +901,7 @@ subroutine default_flowparameters()
 
     jaupwindsrc = 1
     jalogsolverconvergence = 1
+    jalogtransportsolverlimiting = 0
 
     jahisbal = 1
     jahissourcesink = 1
@@ -936,6 +943,7 @@ subroutine default_flowparameters()
     jamapww1 = 1
     jamapnumlimdt = 1
     jamaptaucurrent = 1
+    jamapz0 = 0
     jamapchezy = 1
     jamapsal = 1
     jamaptem = 1

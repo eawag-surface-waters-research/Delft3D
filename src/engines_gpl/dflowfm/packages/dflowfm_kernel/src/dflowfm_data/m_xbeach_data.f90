@@ -32,7 +32,6 @@
 
 module m_xbeach_data
    use m_xbeach_typesandkinds
-   use m_solver
    !==================================================================================================================================
    ! XBeach related variables
    !==================================================================================================================================
@@ -40,13 +39,13 @@ module m_xbeach_data
    double precision, allocatable              :: ee0(:,:)        !< wave energy at begin of timestep
    double precision, allocatable              :: ee1(:,:)        !< wave energy at end of timestep
    double precision, allocatable              :: cwav(:)         !< phase speed (m/s)
+   double precision, allocatable              :: cwav_s(:)       !< phase speed (m/s) single_dir
    double precision, allocatable              :: cgwav(:)        !< wave group velocity (m/s)
+   double precision, allocatable              :: cgwav_s(:)      !< wave group velocity (m/s) single dir
+   double precision, allocatable              :: ctheta_s(:,:)   !< propagation speed in theta space single dir
+   double precision, allocatable              :: ee_s(:,:)       !< wave energy single dir
    double precision, allocatable              :: kwav(:)         !< wavenumber k (rad/m)
    double precision, allocatable              :: nwav(:)         !< cg/c (-)
-   double precision, allocatable              :: km(:)           !< wave number k with wci
-   double precision, allocatable              :: umwci(:)        !< weighted velocity components wci
-   double precision, allocatable              :: vmwci(:)
-   double precision, allocatable              :: zswci(:)
    double precision, allocatable              :: ctheta(:,:)     !< propagation speed in theta space
    double precision, allocatable              :: sigmwav(:)      !< wave frequency (rad/s)
    double precision, allocatable              :: sigt(:,:)
@@ -65,6 +64,9 @@ module m_xbeach_data
    double precision, allocatable              :: thet(:,:)       !< centre angle dir bin in each node
    double precision, allocatable              :: costh(:,:)
    double precision, allocatable              :: sinth(:,:)
+   double precision, allocatable              :: thet_s(:,:)
+   double precision, allocatable              :: sinth_s(:,:)
+   double precision, allocatable              :: costh_s(:,:)
    double precision, allocatable              :: Sxx(:)          !< Radiation stresses
    double precision, allocatable              :: Syy(:)
    double precision, allocatable              :: Sxy(:)
@@ -74,18 +76,15 @@ module m_xbeach_data
    double precision, allocatable              :: Fy(:)
    double precision, allocatable              :: Fx_cc(:)        !< wave forces in cc, for output
    double precision, allocatable              :: Fy_cc(:)
-   double precision, allocatable              :: urms(:)         !< contribution for wave induced bed shear stress, on links = urms_cc/sqrt(2)
-   double precision, allocatable              :: urms_cc(:)      !< orbital velocity, in cell centre, uorb from xbeach, equal to uorb in orbvel and trab11, trab12 in D3D
    double precision, allocatable              :: ust(:)          !< Stokes drift east
    double precision, allocatable              :: vst(:)          !< Stokes drift north
-   double precision, allocatable              :: xbdsdx(:)       !< water level gradient
-   double precision, allocatable              :: xbdsdy(:)       !< water level gradient
    double precision, allocatable              :: xbducxdx(:)     !< velocity gradients
    double precision, allocatable              :: xbducydx(:)     !<
    double precision, allocatable              :: xbducxdy(:)     !<
    double precision, allocatable              :: xbducydy(:)     !<
-   double precision, allocatable              :: dbetadx(:)      !<
+   double precision, allocatable              :: dbetadx(:)      !< riemann invariant gradients
    double precision, allocatable              :: dbetady(:)      !<
+   double precision, allocatable              :: sinh2kh(:)      !< sinh(2kh)
 
    double precision, allocatable              :: thetamean(:)    !< mean wave angle
    double precision, allocatable              :: Qb(:)           !< Wave breaking proportion
@@ -109,6 +108,7 @@ module m_xbeach_data
    double precision                           :: xref0, yref0    !< reference coordinates phase shift bc
    integer         , allocatable              :: randomseed(:)
 
+   !< absgen bc
    integer                                     :: maxnumbnds = 0
    integer,          allocatable, dimension(:) :: kbndu2kbndw    !< mapping velocity bc pts to wave bc pts
    integer,          allocatable, dimension(:) :: kbndw2kbndu    !< mapping velocity bc pts to wave bc pts
@@ -119,15 +119,15 @@ module m_xbeach_data
    double precision, allocatable, dimension(:) :: umeanrm        !< relaxated velocity riemann bnd
    double precision, allocatable, dimension(:) :: vmeanrm        !<
    double precision, allocatable, dimension(:) :: u1rm           !<
+   double precision, allocatable, dimension(:) :: hstokes        !<
 
-   !>  for stationary solver
-   type(tsolver)                                  :: solver
+   !> statsolver administration
    integer, dimension(:,:), allocatable           :: connected_nodes
    integer                                        :: no_connected_nodes
    integer, dimension(:), allocatable             :: nmmask
-   double precision, dimension(:,:), allocatable  :: wmask      ! not integer, has weights
+   double precision, dimension(:,:), allocatable  :: wmask                  ! not integer, has weights
    !
-   ! statsolver netnode oriented quantities
+   !> statsolver netnode oriented quantities
    integer                                                  :: noseapts     ! number of offshore wave boundary net nodes
    integer         , dimension(:)     , allocatable         :: seapts       ! netnodes on wave boundary
    double precision, dimension(:,:,:) , allocatable         :: w            ! weights of upwind grid points, 2 per grid point and per wave direction
@@ -137,21 +137,36 @@ module m_xbeach_data
    double precision, dimension(:)     , allocatable         :: hhstat       ! water depth
    double precision, dimension(:)     , allocatable         :: kwavstat     ! wave number
    double precision, dimension(:)     , allocatable         :: cgstat       ! group velocity
-   double precision, dimension(:)     , allocatable         :: cstat        ! group velocity
+   double precision, dimension(:)     , allocatable         :: cstat        ! phase velocity
    double precision, dimension(:,:)   , allocatable         :: cthetastat   ! refraction speed
    double precision, dimension(:,:)   , allocatable         :: eestat       ! wave energy distribution
+   double precision, dimension(:)     , allocatable         :: Erstat       ! bulk roller energy stationary model
    double precision, dimension(:)     , allocatable         :: fwstat       ! wave friction factor
    double precision, dimension(:)     , allocatable         :: Hstat        ! wave height
    double precision, dimension(:)     , allocatable         :: Dwstat       ! wave breaking dissipation
    double precision, dimension(:)     , allocatable         :: Dfstat       ! wave friction dissipation
+   double precision, dimension(:)     , allocatable         :: Drstat       ! roller dissipation
    double precision, dimension(:)     , allocatable         :: thetam       ! mean wave direction
    double precision, dimension(:)     , allocatable         :: uorbstat     ! orbital velocity
-   double precision, dimension(:)     , allocatable         :: dhdxstat    ! orbital velocity
-   double precision, dimension(:)     , allocatable         :: dhdystat     ! orbital velocity
+   double precision, dimension(:)     , allocatable         :: dhdxstat     ! depth gradient, x
+   double precision, dimension(:)     , allocatable         :: dhdystat     ! depth gradient, y
+   double precision, dimension(:,:,:) , allocatable         :: wmean        ! weights stationary roller model
+   integer         , dimension(:,:,:) , allocatable         :: prevmean     ! two upwind grid points per grid point roller model
+   double precision, dimension(:,:)   , allocatable         :: dsmean       ! distance to interpolated upwind point, per grid point roller model
+   integer         , dimension(:,:)   , allocatable         :: kp           ! computational kernel around all numk net nodes
+
+   !< Relaxated depth and velocities
+   double precision, dimension(:)     , allocatable         :: hhw          ! mode dependent water depth
+   double precision, dimension(:)     , allocatable         :: hhws         ! depth with relaxation, singledir
+   double precision, dimension(:)     , allocatable         :: ucxws        ! ucx with relaxation, singledir
+   double precision, dimension(:)     , allocatable         :: ucyws        ! ucy with relaxation, singledir
+   double precision, dimension(:)     , allocatable         :: hhwwci       ! depth with relaxation, wci
+   double precision, dimension(:)     , allocatable         :: km           !< wave number k with wci
+   double precision, dimension(:)     , allocatable         :: umwci        !< ucx with relaxation,  wci
+   double precision, dimension(:)     , allocatable         :: vmwci        !< ucx with relaxation,  wci
 
    !  for plotting
    integer                                     :: itheta_view=5
-   double precision, allocatable               :: ustx_cc(:),usty_cc(:)
 
    !! Model parameters
    !! 1. DFLOW specific
@@ -160,14 +175,14 @@ module m_xbeach_data
 
    integer                                    :: xb_started=0
 
-   !! 2. XBeach specific
-   !  Type             name                   initialize    !  [unit] (advanced/deprecated) description
+   !! 2. Surfbeat specific
+   !  Type                    name                          initialize    !  [unit] (advanced/deprecated) description
    ! [Section] Physical processes
    integer                 :: swave                      = -123    !  [-] Include short waves (1), exclude short waves (0)
    integer                 :: lwave                      = -123    !  [-] Include short wave forcing on NLSW equations and boundary conditions (1), or exclude (0)
 
    ! [Section] Wave boundary condition parameters
-   character(slen)         :: instat                     = 'abc'   !  [-] Wave boundary condtion type
+   character(slen)         :: instat                     = 'abc'   !  [-] Wave boundary condition type
    double precision        :: taper                      = -123    !  [s] Spin-up time of wave boundary conditions, in hydrodynamic time
    double precision        :: Hrms                       = -123    !  [m] Hrms wave height for instat = 0,1,2,3
    double precision        :: Tm01                       = -123    !  [s] (deprecated) Old name for Trep
@@ -178,6 +193,7 @@ module m_xbeach_data
    integer                 :: m                          = -123    !  [-] Power in cos^m directional distribution for instat = 0,1,2,3
    logical                 :: bccreated                  = .false. !  [-] Boundary conditions created or not for current run
    integer                 :: rmfilno                    = -123    !  [-] debug file id for bc check
+   integer                 :: single_dir                 = -123    !  [-] switch on single direction wave propagation
 
    ! [Section] Wave-spectrum boundary condition parameters
    character(slen)         :: bcfile                     = 'abc'   !  [-] Name of spectrum file
@@ -194,7 +210,11 @@ module m_xbeach_data
    integer                 :: nspectrumloc               = -123    !  [-] (advanced) Number of input spectrum locations
    integer                 :: oldnyq                     = -123    !  [-] (advanced) Turn off or on old nyquist switch
    double precision        :: swkhmin                    = -123    !  [-] (advanced,silent) Minimum kh value to include in wave action balance, lower included in NLSWE (default -1.d0)
-
+   double precision        :: wbcEvarreduce              = -123
+   double precision        :: wbcQvarreduce              = -123
+   integer                 :: wbcScaleEnergy             = -123
+   integer                 :: wbcRemoveStokes            = -123
+   
    ! [Section] Flow boundary condition parameters
    integer                 :: order                      = -123    !  [-] (advanced) Switch for order of wave steering, 1 = first order wave steering (short wave energy only), 2 = second oder wave steering (bound long wave corresponding to short wave forcing is added)
    integer                 :: freewave                   = -123    !  [-] (advanced) Switch for free wave propagation 0 = use cg (default); 1 = use sqrt(gh) in instat = 3
@@ -203,24 +223,28 @@ module m_xbeach_data
    character(slen)         :: absgentype                 = 'abc'   !  [-] (advanced) Switch for offshore boundary, 1d flumelike boundary or full 2d absorbing generating bnd
    integer                 :: ARC                        = -123    !  [-] (advanced) Switch for active reflection compensation at seaward boundary: 0 = reflective, 1 = weakly (non) reflective
    double precision        :: hminlw                     = -123    !  [-] minimum depth for wave forcing in flow momentum equation RHS
+   integer                 :: oldhmin                    = -123    !
+   double precision        :: deltahmin                  = -123    !
 
    ! [Section] Wave breaking parameters
-   character(slen)                :: break          = 'abc'   !  [-] Type of breaker formulation
-   double precision               :: gamma          = -123    !  [-] Breaker parameter in Baldock or Roelvink formulation
-   double precision               :: gamma2         = -123    !  [-] End of breaking parameter in break = 4 formulation
-   double precision               :: alpha          = -123    !  [-] (advanced) Wave dissipation coefficient in Roelvink formulation
-   double precision               :: nroelvink      = -123    !  [-] (advanced) Power in Roelvink dissipation model
-   double precision               :: gammaxxb         = -123    !  [-] (advanced) Maximum ratio wave height to water depth
-   double precision               :: deltaH         = -123    !  [-] (advanced) Fraction of wave height to add to water depth
-   double precision, allocatable  :: fw(:)                    !  [-] (advanced) Internally used bed friction factor
-   double precision               :: fwcutoff       = -123    !  [-] Depth greater than which the bed friction factor is NOT applied
-   character(slen)                :: wavefricfile   = 'abc'   !  [-] (advanced) Filename spatially varying sample file bed friction factor
-   double precision               :: wavefricval    = -123    !  [-] Bed friction factor from params file
+   character(slen)                :: break               = 'abc'   !  [-] Type of breaker formulation
+   double precision               :: gamma               = -123    !  [-] Breaker parameter in Baldock or Roelvink formulation
+   double precision               :: gamma2              = -123    !  [-] End of breaking parameter in break = 4 formulation
+   double precision               :: alpha               = -123    !  [-] (advanced) Wave dissipation coefficient in Roelvink formulation
+   double precision               :: nroelvink           = -123    !  [-] (advanced) Power in Roelvink dissipation model
+   double precision               :: gammaxxb            = -123    !  [-] (advanced) Maximum ratio wave height to water depth
+   double precision               :: deltaH              = -123    !  [-] (advanced) Fraction of wave height to add to water depth
+   double precision, allocatable  :: fw(:)                         !  [-] (advanced) Internally used bed friction factor
+   double precision               :: fwcutoff            = -123    !  [-] Depth greater than which the bed friction factor is NOT applied
+   character(slen)                :: wavefricfile        = 'abc'   !  [-] (advanced) Filename spatially varying sample file bed friction factor
+   double precision               :: wavefricval         = -123    !  [-] Bed friction factor from params file
+   integer                        :: rollergammax        = -123    !  [-] depth limitation of roller energy
 
    ! [Section] Roller parameters
    integer                 :: roller                     = -123    !  [-] (advanced) Turn on (1) or off(0) roller model
    double precision        :: beta                       = -123    !  [-] (advanced) Breaker slope coefficient in roller model
    integer                 :: rfb                        = -123    !  [-] (advanced) Switch to feed back maximum wave surface slope in roller energy balance, otherwise rfb = par%Beta
+   double precision        :: nuhfac                     = -123    !  [-] (advanced) Calibration factor for roller turbulence induced viscosity
 
    ! [Section] Wave-current interaction parameters
    integer                 :: wci                        = -123    !  [-] Turns on (1) or off (0) wave-current interaction
@@ -253,7 +277,6 @@ module m_xbeach_data
    double precision, allocatable              :: cgwavt(:,:)       !   [m/s] wave group velocity per itheta-bin
    double precision, allocatable              :: kwavt(:,:)        !   [rad/m] wavenumber k per itheta-bin
    double precision, allocatable              :: nwavt(:,:)        !   [-] cg/c per itheta-bin
-   !double precision, allocatable             :: kmt(:,:)          !   [rad/m] wave number k with wci
    double precision, allocatable              :: horadvec2(:,:)    !   [] horizontal advection 2nd moment
    double precision, allocatable              :: thetaadvec2(:,:)  !   [] directional advection 2nd moment
 
@@ -283,12 +306,12 @@ module m_xbeach_data
    double precision        :: CT1                        = -123    !  [-] wind source term parameter (MSc thesis MvdL)
    double precision        :: CT2                        = -123    !  [-] wind source term parameter (MSc thesis MvdL)
    ! arrays
-   double precision, allocatable              :: wmagcc(:)           !  [m/s] wind speed magnitude cell centered
+   double precision, allocatable              :: wmagcc(:)         !  [m/s] wind speed magnitude cell centered
    double precision, allocatable              :: windspreadfac(:,:)!  [-] distribution of inproducts thetabins per cell with wind direction
    double precision, allocatable              :: SwE(:)            !  [-] nodal wind source term energy
    double precision, allocatable              :: SwT(:)            !  [-] nodal wind source term period
    double precision, allocatable              :: wsorE(:,:)        !  [J/m2/s] wind source term for ee1
    double precision, allocatable              :: wsorT(:,:)        !  [s/s] wind source term for tt1
-   double precision, allocatable              :: egradcg(:,:)       !  [m/s/m] spatial gradient of cg
-   double precision, allocatable              :: ddT(:)             !  [s/s] dissipation of wave period
+   double precision, allocatable              :: egradcg(:,:)      !  [m/s/m] spatial gradient of cg
+   double precision, allocatable              :: ddT(:)            !  [s/s] dissipation of wave period
 end module m_xbeach_data

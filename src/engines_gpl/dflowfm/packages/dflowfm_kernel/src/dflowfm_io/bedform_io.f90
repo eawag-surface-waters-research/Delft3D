@@ -212,7 +212,6 @@ contains
       use precision
       use properties
       use table_handles
-      use m_flowtimes, only: dts, tfac                 ! JRE todo: check whether we want to keep this
       use m_flowgeom, only:  ndx, griddim, lnx
       use unstruc_files, only: mdia
       use unstruc_model, only: md_tunit
@@ -422,7 +421,6 @@ contains
                fmttmp = 'formatted'
                call depfil_stm_double(mdia    ,error     ,flnmD90   ,fmttmp    , &
                          & bedformD90,1         ,1         ,griddim)
-               !error = .true.
                if (error) then
                   write (errmsg,'(3a)') 'Error while reading bedformD90 from file ', trim(flnmD90), '.'
                   call write_error(errmsg, unit=mdia)
@@ -628,8 +626,8 @@ contains
          call prop_get(md_bfmptr,'bedform','BdfT_H',rtemp)              !Read adaptation time scale in seconds
          bedformT_H = rtemp
          !
-         txtput1 = '  T_H (s)'
-         write(mdia,'(a,a,e20.4,a,a)') txtput1, ':', bedformT_H , ' ', 's' 
+         txtput1 = '  T_H (Tunit)'
+         write(mdia,'(a,a,e20.4,a,a)') txtput1, ':', bedformT_H , ' ', 'Tunit' 
       case (2) 
          call prop_get(md_bfmptr,'bedform','BdfL_H',bedformL_H)         !Read adaptation length scale
          !
@@ -781,7 +779,7 @@ contains
       !
       8888 continue
       ! if Bdf keyword turned out to be NO, then bdfrpt will be 0 (Van Rijn 2004).
-      ! read those paremeters
+      ! read those parameters
       !
       select case (bdfrpt)
       case (0)
@@ -877,7 +875,7 @@ contains
             !
             write(mdia,'(a,a,a)') txtput1, ': ', flbdfh
             if (error) then
-               errmsg = 'RDBEDFORMPAR: error reading initial bedform heights from BdfUni'
+               errmsg = 'bedform_io::fm_rdbedformpar: error reading initial bedform heights from BdfUni'
                call write_error(errmsg, unit=mdia)
                return
             end if

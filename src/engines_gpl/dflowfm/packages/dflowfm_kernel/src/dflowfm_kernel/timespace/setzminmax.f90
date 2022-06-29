@@ -128,11 +128,10 @@
           do isf=1,numfracs
              do i=1,nbndsf(isf)
                 ki = bndsf(isf)%k(2,i)
-                call getkbotktop(ki,kb,kt)
                 bndsf(isf)%zminmax(i) = bl(ki)
                 bndsf(isf)%zminmax(i+nbndsf(isf)) = s1(ki)
              end do
           end do
-       end if
+    endif
     endif
  end subroutine setzminmax

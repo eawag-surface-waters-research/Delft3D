@@ -57,7 +57,7 @@
        !$OMP PARALLEL DO           &
        !$OMP PRIVATE(L,k1,k2)
        do L = 1,lnx
-          if (hu(L) > 0) then
+          if (hu(L) > 0d0) then 
              k1 = ln(1,L) ; k2 = ln(2,L)
              u1(L) = ru(L) - fu(L)*( s1(k2) - s1(k1) )
              q1(L) = au(L)*( teta(L)*u1(L) + (1d0-teta(L))*u0(L) )
@@ -77,7 +77,7 @@
        !$OMP PARALLEL DO           &
        !$OMP PRIVATE(L,k1,k2)
        do L=1,Lnx
-          if ( hu(L).gt.0 ) then
+          if ( hu(L).gt.0d0 ) then
              k1 = ln(1,L)
              k2 = ln(2,L)
              u1(L) = ru(L) - fu(L)*( s1(k2) - s1(k1) )

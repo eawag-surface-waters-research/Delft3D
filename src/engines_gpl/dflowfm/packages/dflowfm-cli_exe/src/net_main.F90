@@ -79,7 +79,7 @@
    use gridoperations
    use m_commandline_option
    use unstruc_channel_flow, only: network
-
+   
    use m_partitioninfo
    use check_mpi_env
 #ifdef HAVE_MPI
@@ -112,7 +112,7 @@
    character(len=maxnamelen) :: md_mapfile_base !< storing the user-defined map file
    character(len=maxnamelen) :: md_flowgeomfile_base !< storing the user-defined flowgeom file
    character(len=maxnamelen) :: md_classmapfile_base !< storing the user-defined class map file
-
+    
    integer, external         :: iget_jaopengl
    integer, external         :: read_commandline
    integer, external         :: flow_modelinit
@@ -173,7 +173,7 @@
 #else
    numranks=1
    !write(6,*) 'NO MPI'
-!  call pressakey()
+   !call pressakey()
 #endif
 
 
@@ -233,9 +233,7 @@
 
 
 #ifdef HAVE_PETSC
-    if (jampi > 0) then
-        call startpetsc()
-    end if
+      call startpetsc()
 #endif
 
     MODE = 1
@@ -393,7 +391,7 @@
                inquire (file = 'unstruc.cfg', exist = jawel)
                if (jawel) then
                    call load_displaysettings('unstruc.cfg')
-               endif
+           endif
            endif
 
            CALL DRAWNU(KEY) ! Draw model for the first time
@@ -453,9 +451,7 @@
 1234 continue
 
 !  finalize before exit in case we did "normal" computation
-   if (jampi > 0) then
-      call partition_finalize()
-   end if
+   call partition_finalize()
 
    call klok(tstopall)
 

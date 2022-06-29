@@ -127,13 +127,13 @@ subroutine start_logfiles(error)
    integer         :: error, logerr, warnerr, errerr
 
    if ( jampi.eq.0 ) then
-      open(newunit=logfileid,     file='XBlog.txt',       status='replace', iostat=logerr)
-      open(newunit=errorfileid,   file='XBerror.txt',     status='replace', iostat=errerr)
-      open(newunit=warningfileid, file='XBwarning.txt',   status='replace', iostat=warnerr)
+      open(newunit=logfileid,     file='surfbeatlog.txt',       status='replace', iostat=logerr)
+      open(newunit=errorfileid,   file='surfbeaterror.txt',     status='replace', iostat=errerr)
+      open(newunit=warningfileid, file='surfbeatwarning.txt',   status='replace', iostat=warnerr)
    else
-      open(newunit=logfileid,     file='XBlog'//'_'//sdmn//'.txt',       status='replace', iostat=logerr)
-      open(newunit=errorfileid,   file='XBerror'//'_'//sdmn//'.txt',     status='replace', iostat=errerr)
-      open(newunit=warningfileid, file='XBwarning'//'_'//sdmn//'.txt',   status='replace', iostat=warnerr)
+      open(newunit=logfileid,     file='surfbeatlog'//'_'//sdmn//'.txt',       status='replace', iostat=logerr)
+      open(newunit=errorfileid,   file='surfbeaterror'//'_'//sdmn//'.txt',     status='replace', iostat=errerr)
+      open(newunit=warningfileid, file='surfbeatwarning'//'_'//sdmn//'.txt',   status='replace', iostat=warnerr)
    end if
 
    if (logerr > 0 .or. errerr > 0 .or. warnerr > 0) error = 1
@@ -234,8 +234,7 @@ subroutine start_logfiles(error)
    call date_and_time(DATE=date, TIME=time, ZONE=zone)
 
    call writelog('ls','','**********************************************************')
-   call writelog('ls','','       Welcome to DFLOW FM - surfbeat version               ')
-
+   call writelog('ls','','       Welcome to DFLOW FM - surfbeat mode                ')
    call writelog('ls','','**********************************************************')
    call writelog('ls','','                                                          ')
    call writelog('ls','','Simulation started: yyyymmdd    hh:mm:ss     time zone (UTC)')
@@ -247,32 +246,6 @@ subroutine start_logfiles(error)
    call writelog('ls','','General Input Module')
 
    end subroutine writelog_startup
-
-  !subroutine writelog_finalize(tbegin, n, t, nx, ny, t0, t01)
-  !
-  !   implicit none
-  !
-  !   integer                                         :: n,nx,ny
-  !   real*8                                          :: tbegin,tend
-  !   real*8                                          :: t,duration,dt,performance
-  !   real*8, optional                                :: t0,t01
-  !
-  !   call cpu_time(tend)
-  !
-  !   duration    = tend-tbegin
-  !   dt          = t/n
-  !   performance = duration/(nx+1)/(ny+1)/n
-  !
-  !   call writelog('ls','','Duration   : ',duration,' seconds'       )
-  !   call writelog('ls','','Timesteps  : ',n                         )
-  !   call writelog('ls','','Average dt : ',dt,' seconds'             )
-  !   call writelog('ls','','Unit speed : ',performance,' seconds/1'  )
-  !   call writelog('ls','','End of surfbeat module')
-  !
-  !
-  !   call close_logfiles()
-  !
-  !end subroutine writelog_finalize
 
    subroutine writelog_distribute(destination,display)
 
@@ -1315,10 +1288,11 @@ subroutine start_logfiles(error)
    character(slen)             :: filename,dummy
    character(slen)             :: testc
    character(len=1)            :: ch
-   integer                     :: i,ier=0,nlines,filetype,fid,nlocs,ifid,fid2
+   integer                     :: i,ier=0,nlines,fid,nlocs,ifid,fid2
    real*8                      :: t,dt,total,d1,d2,d3,d4,d5
    type(fileinfo),dimension(:),allocatable :: bcfiles
    integer, intent(in)         :: nspectrumloc
+   integer, intent(inout)      :: filetype
    logical,intent(in),optional :: nonh
    logical                     :: lnonh
 

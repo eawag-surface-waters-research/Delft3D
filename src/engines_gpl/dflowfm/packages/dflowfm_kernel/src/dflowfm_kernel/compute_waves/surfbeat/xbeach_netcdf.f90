@@ -120,13 +120,21 @@ module m_xbeach_netcdf
       integer                  :: id_ucy_var(4)         = -1 
       integer                  :: id_ucy_min(4)         = -1 
       integer                  :: id_ucy_max(4)         = -1
+      integer                  :: id_dsdx(4)            = -1
+      integer                  :: id_dsdy(4)            = -1
+      integer                  :: id_ududx(4)          = -1
+      integer                  :: id_udvdx(4)          = -1
+      integer                  :: id_vdudy(4)          = -1
+      integer                  :: id_vdvdy(4)          = -1
+      integer                  :: id_visx(4)            = -1
+      integer                  :: id_visy(4)            = -1
 
    end type t_unc_wavids
 
 contains
 
 subroutine xbeach_write_stats(tim)
-   use m_flowparameters, only: jawave, jaavgwavquant, eps10
+   use m_flowparameters, only: jawave, jaavgwavquant, eps10, jamombal
    use m_flowtimes, only: ti_wav, ti_wavs, ti_wave, tstop_user, time_wav, Tudunitstr   
    use precision_basics
    
@@ -138,6 +146,9 @@ subroutine xbeach_write_stats(tim)
    ierr = 1
    if ((jawave.eq.4) .and. (ti_wav > 0) .and. (jaavgwavquant .eq. 1)) then
       if (comparereal(tim, time_wav, eps10) >= 0) then
+         if (jamombal>0) then
+            call xbeach_mombalance()
+         endif
          call unc_write_wav(tim)
          call xbeach_clearaverages()
          if (ti_wav > 0) then
@@ -196,8 +207,8 @@ subroutine unc_write_wav(tim)
        endif
 
        if (unc_noforcedflush == 0) then
-          ierr = nf90_sync(wavids%ncid) ! Flush file
-       end if
+       ierr = nf90_sync(wavids%ncid) ! Flush file
+    end if
     end if
 
 end subroutine unc_write_wav
@@ -210,7 +221,8 @@ subroutine unc_write_wav_filepointer_ugrid(wavids, tim)
    use m_flowtimes, only: refdat, ti_wav, ti_wavs, ti_wave
    use m_sferic, only: pi
    use m_flowtimes, only: Tudunitstr
-
+   use m_flowparameters, only: jamombal
+   
    implicit none
    
    type(t_unc_wavids), intent(inout)           :: wavids
@@ -220,10 +232,12 @@ subroutine unc_write_wav_filepointer_ugrid(wavids, tim)
    integer                                     :: ndim
    integer                                     :: itim
    integer                                     :: ierr
+
+   integer                                     :: jabndnd_
    
    double precision, allocatable, dimension(:) :: temp
    
-   if (jaavgwriteall>0 .or. jaavgwriteH>0 .or. jaavgwriteUrms>0) then
+   if (jaavgwriteall>0 .or. jaavgwriteH>0 .or. jaavgwriteUrms>0 .or. jaavgwriteDir>0) then
       allocate(temp(ndx), stat=ierr)
       temp = 0d0
    end if
@@ -243,7 +257,7 @@ subroutine unc_write_wav_filepointer_ugrid(wavids, tim)
       if (unc_nounlimited > 0) then
          ierr = nf90_def_dim(wavids%ncid, 'time', ceiling((ti_wave-ti_wavs)/ti_wav) + 1, wavids%id_tsp%id_timedim)
       else
-         ierr = nf90_def_dim(wavids%ncid, 'time', nf90_unlimited, wavids%id_tsp%id_timedim)
+      ierr = nf90_def_dim(wavids%ncid, 'time', nf90_unlimited, wavids%id_tsp%id_timedim)
       end if
 
       call check_error(ierr, 'def time dim')
@@ -329,10 +343,10 @@ subroutine unc_write_wav_filepointer_ugrid(wavids, tim)
          ierr = unc_def_var_map(wavids%ncid, wavids%id_tsp, wavids%id_Fx_max, nf90_double, UNC_LOC_S,  'Fx_max','max wave force, x-component', 'max wave force, x-component', 'N m-2')
          ierr = unc_def_var_map(wavids%ncid, wavids%id_tsp, wavids%id_Fx_min, nf90_double, UNC_LOC_S,  'Fx_min','min wave force, x-component', 'min wave force, x-component', 'N m-2')
                                                                                                         
-         ierr = unc_def_var_map(wavids%ncid, wavids%id_tsp, wavids%id_Fx_mean, nf90_double, UNC_LOC_S, 'Fy_mean','mean wave force, y-component', 'mean wave force, y-component', 'N m-2')
-         ierr = unc_def_var_map(wavids%ncid, wavids%id_tsp, wavids%id_Fx_var, nf90_double, UNC_LOC_S,  'Fy_var','variance wave force, y-component', 'variance wave force, y-component', 'N2 m-4')
-         ierr = unc_def_var_map(wavids%ncid, wavids%id_tsp, wavids%id_Fx_max, nf90_double, UNC_LOC_S,  'Fy_max','max wave force, y-component', 'max wave force, y-component', 'N m-2')
-         ierr = unc_def_var_map(wavids%ncid, wavids%id_tsp, wavids%id_Fx_min, nf90_double, UNC_LOC_S,  'Fy_min','min wave force, y-component', 'min wave force, y-component', 'N m-2')
+         ierr = unc_def_var_map(wavids%ncid, wavids%id_tsp, wavids%id_Fy_mean, nf90_double, UNC_LOC_S, 'Fy_mean','mean wave force, y-component', 'mean wave force, y-component', 'N m-2')
+         ierr = unc_def_var_map(wavids%ncid, wavids%id_tsp, wavids%id_Fy_var, nf90_double, UNC_LOC_S,  'Fy_var','variance wave force, y-component', 'variance wave force, y-component', 'N2 m-4')
+         ierr = unc_def_var_map(wavids%ncid, wavids%id_tsp, wavids%id_Fy_max, nf90_double, UNC_LOC_S,  'Fy_max','max wave force, y-component', 'max wave force, y-component', 'N m-2')
+         ierr = unc_def_var_map(wavids%ncid, wavids%id_tsp, wavids%id_Fy_min, nf90_double, UNC_LOC_S,  'Fy_min','min wave force, y-component', 'min wave force, y-component', 'N m-2')
       endif
       
       if (jaavgwriteall>0 .or. jaavgwriteUrms>0) then
@@ -348,6 +362,17 @@ subroutine unc_write_wav_filepointer_ugrid(wavids, tim)
          ierr = unc_def_var_map(wavids%ncid, wavids%id_tsp, wavids%id_thetamean_max, nf90_double, UNC_LOC_S,  'thetamean_max','max of mean wave angle', 'max of mean wave angle', 'deg from N')
          ierr = unc_def_var_map(wavids%ncid, wavids%id_tsp, wavids%id_thetamean_min, nf90_double, UNC_LOC_S,  'thetamean_min','min of mean wave angle', 'min of mean wave angle', 'deg from N')      
       endif
+
+      if (jamombal>0) then
+         ierr = unc_def_var_map(wavids%ncid, wavids%id_tsp, wavids%id_dsdx      , nf90_double, UNC_LOC_S, 'dsdx'      , ' ' , 'Water level gradient, x-component'          , 'm m-1', jabndnd=jabndnd_)
+         ierr = unc_def_var_map(wavids%ncid, wavids%id_tsp, wavids%id_dsdy      , nf90_double, UNC_LOC_S, 'dsdy'      , ' ' , 'Water level gradient, y-component'          , 'm m-1', jabndnd=jabndnd_)
+         ierr = unc_def_var_map(wavids%ncid, wavids%id_tsp, wavids%id_ududx     , nf90_double, UNC_LOC_S, 'ududx'     , ' ' , 'Advection term X vel, x-component'          , 'm s-1 m-1', jabndnd=jabndnd_)
+         ierr = unc_def_var_map(wavids%ncid, wavids%id_tsp, wavids%id_udvdx     , nf90_double, UNC_LOC_S, 'udvdx'     , ' ' , 'Advection term Y vel, x-component'          , 'm s-1 m-1', jabndnd=jabndnd_)
+         ierr = unc_def_var_map(wavids%ncid, wavids%id_tsp, wavids%id_vdudy     , nf90_double, UNC_LOC_S, 'vdudy'     , ' ' , 'Advection term X vel, y-component'          , 'm s-1 m-1', jabndnd=jabndnd_)
+         ierr = unc_def_var_map(wavids%ncid, wavids%id_tsp, wavids%id_vdvdy     , nf90_double, UNC_LOC_S, 'vdvdy'     , ' ' , 'Advection term Y vel, y-component'          , 'm s-1 m-1', jabndnd=jabndnd_)
+         ierr = unc_def_var_map(wavids%ncid, wavids%id_tsp, wavids%id_visx      , nf90_double, UNC_LOC_S, 'visx'      , ' ' , 'Horizontal viscosity, x-component'          , 'm s-2', jabndnd=jabndnd_)
+         ierr = unc_def_var_map(wavids%ncid, wavids%id_tsp, wavids%id_visy      , nf90_double, UNC_LOC_S, 'visy'      , ' ' , 'Horizontal viscosity, y-component'          , 'm s-2', jabndnd=jabndnd_)
+      end if
       
       ierr = nf90_enddef(wavids%ncid)      
    end if
@@ -423,15 +448,15 @@ subroutine unc_write_wav_filepointer_ugrid(wavids, tim)
       ierr = unc_put_var_map(wavids%ncid, wavids%id_tsp, wavids%id_usty_max,  UNC_LOC_S, vst_max)
       ierr = unc_put_var_map(wavids%ncid, wavids%id_tsp, wavids%id_usty_min,  UNC_LOC_S, vst_min)
       
-      ierr = unc_put_var_map(wavids%ncid, wavids%id_tsp, wavids%id_ucx_mean, UNC_LOC_S, u_mean)
-      ierr = unc_put_var_map(wavids%ncid, wavids%id_tsp, wavids%id_ucx_var,  UNC_LOC_S, u_var)
-      ierr = unc_put_var_map(wavids%ncid, wavids%id_tsp, wavids%id_ucx_max,  UNC_LOC_S, u_max)
-      ierr = unc_put_var_map(wavids%ncid, wavids%id_tsp, wavids%id_ucx_min,  UNC_LOC_S, u_min)
+      ierr = unc_put_var_map(wavids%ncid, wavids%id_tsp, wavids%id_ucx_mean, UNC_LOC_S, ucx_mean)
+      ierr = unc_put_var_map(wavids%ncid, wavids%id_tsp, wavids%id_ucx_var,  UNC_LOC_S, ucx_var)
+      ierr = unc_put_var_map(wavids%ncid, wavids%id_tsp, wavids%id_ucx_max,  UNC_LOC_S, ucx_max)
+      ierr = unc_put_var_map(wavids%ncid, wavids%id_tsp, wavids%id_ucx_min,  UNC_LOC_S, ucx_min)
       
-      ierr = unc_put_var_map(wavids%ncid, wavids%id_tsp, wavids%id_ucy_mean, UNC_LOC_S, v_mean)
-      ierr = unc_put_var_map(wavids%ncid, wavids%id_tsp, wavids%id_ucy_var,  UNC_LOC_S, v_var)
-      ierr = unc_put_var_map(wavids%ncid, wavids%id_tsp, wavids%id_ucy_max,  UNC_LOC_S, v_max)
-      ierr = unc_put_var_map(wavids%ncid, wavids%id_tsp, wavids%id_ucy_min,  UNC_LOC_S, v_min)
+      ierr = unc_put_var_map(wavids%ncid, wavids%id_tsp, wavids%id_ucy_mean, UNC_LOC_S, ucy_mean)
+      ierr = unc_put_var_map(wavids%ncid, wavids%id_tsp, wavids%id_ucy_var,  UNC_LOC_S, ucy_var)
+      ierr = unc_put_var_map(wavids%ncid, wavids%id_tsp, wavids%id_ucy_max,  UNC_LOC_S, ucy_max)
+      ierr = unc_put_var_map(wavids%ncid, wavids%id_tsp, wavids%id_ucy_min,  UNC_LOC_S, ucy_min)
    endif
    
    if (jaavgwriteall>0 .or. jaavgwriteF>0) then
@@ -461,14 +486,24 @@ subroutine unc_write_wav_filepointer_ugrid(wavids, tim)
    if (jaavgwriteall>0 .or. jaavgwriteDir>0) then 
       temp = 0d0
       do k = 1, ndx
-         temp(k) = 270.d0 - mod(2.d0*pi + atan2(nint(thetamean_mean(k))/1d7, mod(thetamean_mean(k),1.d0)*1d1), 2.d0*pi) / pi * 180d0
+         temp(k) = 270.d0 - mod(atan2(nint(thetamean_mean(k))/1d7, mod(thetamean_mean(k),1.d0)*1d1), 2.d0*pi) / pi * 180d0
       end do
-      
       ierr = unc_put_var_map(wavids%ncid, wavids%id_tsp, wavids%id_thetamean_mean, UNC_LOC_S, temp)
       ierr = unc_put_var_map(wavids%ncid, wavids%id_tsp, wavids%id_thetamean_var,  UNC_LOC_S, thetamean_var)
       ierr = unc_put_var_map(wavids%ncid, wavids%id_tsp, wavids%id_thetamean_max,  UNC_LOC_S, thetamean_max)
       ierr = unc_put_var_map(wavids%ncid, wavids%id_tsp, wavids%id_thetamean_min,  UNC_LOC_S, thetamean_min)
    endif
+
+   if (jamombal>0) then
+      ierr = unc_put_var_map(wavids%ncid, wavids%id_tsp, wavids%id_dsdx         , UNC_LOC_S, xbdsdx, jabndnd=jabndnd_)
+      ierr = unc_put_var_map(wavids%ncid, wavids%id_tsp, wavids%id_dsdy         , UNC_LOC_S, xbdsdy, jabndnd=jabndnd_)
+      ierr = unc_put_var_map(wavids%ncid, wavids%id_tsp, wavids%id_ududx        , UNC_LOC_S, ududx,  jabndnd=jabndnd_)
+      ierr = unc_put_var_map(wavids%ncid, wavids%id_tsp, wavids%id_udvdx        , UNC_LOC_S, udvdx,  jabndnd=jabndnd_)
+      ierr = unc_put_var_map(wavids%ncid, wavids%id_tsp, wavids%id_vdudy        , UNC_LOC_S, vdudy,  jabndnd=jabndnd_)
+      ierr = unc_put_var_map(wavids%ncid, wavids%id_tsp, wavids%id_vdvdy        , UNC_LOC_S, vdvdy,  jabndnd=jabndnd_)
+      ierr = unc_put_var_map(wavids%ncid, wavids%id_tsp, wavids%id_visx         , UNC_LOC_S, visx  , jabndnd=jabndnd_)
+      ierr = unc_put_var_map(wavids%ncid, wavids%id_tsp, wavids%id_visy         , UNC_LOC_S, visy  , jabndnd=jabndnd_)
+   end if
    
 
 end subroutine unc_write_wav_filepointer_ugrid
@@ -888,15 +923,15 @@ subroutine unc_write_wav_filepointer(imapfile, tim,  jaseparate)
       ierr = nf90_put_var(imapfile, id_usty_max,  vst_max(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /)) 
       ierr = nf90_put_var(imapfile, id_usty_min,  vst_min(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /))
 
-      ierr = nf90_put_var(imapfile, id_u_mean, u_mean(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /)) 
-      ierr = nf90_put_var(imapfile, id_u_var,  u_var(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /)) 
-      ierr = nf90_put_var(imapfile, id_u_max,  u_max(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /)) 
-      ierr = nf90_put_var(imapfile, id_u_min,  u_min(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /)) 
+      ierr = nf90_put_var(imapfile, id_u_mean, ucx_mean(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /)) 
+      ierr = nf90_put_var(imapfile, id_u_var,  ucx_var(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /)) 
+      ierr = nf90_put_var(imapfile, id_u_max,  ucx_max(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /)) 
+      ierr = nf90_put_var(imapfile, id_u_min,  ucx_min(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /)) 
 
-      ierr = nf90_put_var(imapfile, id_v_mean, v_mean(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /)) 
-      ierr = nf90_put_var(imapfile, id_v_var,  v_var(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /)) 
-      ierr = nf90_put_var(imapfile, id_v_max,  v_max(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /)) 
-      ierr = nf90_put_var(imapfile, id_v_min,  v_min(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /)) 
+      ierr = nf90_put_var(imapfile, id_v_mean, ucy_mean(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /)) 
+      ierr = nf90_put_var(imapfile, id_v_var,  ucy_var(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /)) 
+      ierr = nf90_put_var(imapfile, id_v_max,  ucy_max(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /)) 
+      ierr = nf90_put_var(imapfile, id_v_min,  ucy_min(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /)) 
    endif
 
    if (jaavgwriteall>0 .or. jaavgwriteUrms>0) then      
@@ -922,18 +957,30 @@ subroutine xbeach_makeaverages(dt)
 
    double precision, intent(in)              :: dt                         ! timestep
    double precision                          :: mult, fill
-   integer                                   :: ierr, result1, result2
+   double precision                          :: ucos, usin
+   integer                                   :: ierr, result1, result2, k
+   integer                                   :: jaeulervel_
 
-   double precision, allocatable                  :: tvar_sin(:)
-   double precision, allocatable                  :: tvar_cos(:)
-   double precision, allocatable                  :: oldmean(:), ux(:), uy(:)
+   double precision                          :: vis(2)
+   double precision, allocatable             :: tvar_sin(:)
+   double precision, allocatable             :: tvar_cos(:)
+   double precision, allocatable             :: oldmean(:), ust_cc(:), vst_cc(:), ux(:), uy(:), ucmag_(:)
 
    ierr = 1
    call realloc(tvar_sin, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
    call realloc(tvar_cos, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
    call realloc(oldmean, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+   call realloc(ust_cc, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+   call realloc(vst_cc, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
    call realloc(ux, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
    call realloc(uy, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+   call realloc(ucmag_, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+
+   if (jamombal>0) then        ! save GLM velocities for momentum balance
+      jaeulervel_=0
+   else
+      jaeulervel_=jaeulervel
+   endif
 
    mult = max(dt/ti_wav,0.d0)
    !multcum = multcum + mult
@@ -1009,14 +1056,12 @@ subroutine xbeach_makeaverages(dt)
       oldmean=-1.d0*epsilon(0.d0)
    endwhere
 
-   !< DEBUG
    DR_mean = DR_mean + mult*DR
    DR_varcross = 1d-20 + DR_varcross/oldmean*DR_mean + mult*2.d0*DR*DR_mean
    DR_varsquare = DR_varsquare + mult*(DR)**2
    DR_var = DR_varsquare - DR_varcross + DR_mean**2
    DR_max = max(DR_max,DR)
    DR_min = min(DR_min,DR)
-   !</ DEBUG
 
   ! cwav
    oldmean = cwav_mean
@@ -1083,99 +1128,96 @@ subroutine xbeach_makeaverages(dt)
    call realloc(oldmean, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
    call aerr('oldmean  (ndx)', ierr, ndx)
 
-   ! u: x-component
-   oldmean = u_mean
+   ! in terms of vel amplitude:
+   call getucxucyeulmag(ndx, ux, uy, ucmag_, jaeulervel_, 1)
+   ! ucx
+   oldmean = ucx_mean
    where (oldmean<epsilon(0.d0) .and. oldmean>=0.d0)
       oldmean=epsilon(0.d0)
    endwhere
    where (oldmean>-1.d0*epsilon(0.d0) .and. oldmean<0.d0)
       oldmean=-1.d0*epsilon(0.d0)
-   endwhere
-   ux = ucx
-   u_mean = u_mean + mult*ux
-   u_varcross = u_varcross/oldmean*u_mean + mult*2.d0*ux*u_mean
-   u_varsquare = u_varsquare + mult*(ux)**2
-   u_var = u_varsquare - u_varcross + u_mean**2
-   u_max = max(u_max,ux)
-   u_min = min(u_min,ux)
-
-   ! v: y-component
-   oldmean = v_mean
+   endwhere   
+   ucx_mean = ucx_mean + mult*ux
+   ucx_varcross = ucx_varcross/oldmean*ucx_mean + mult*2.d0*ux*ucx_mean
+   ucx_varsquare = ucx_varsquare + mult*(ux)**2
+   ucx_var = ucx_varsquare - ucx_varcross + ucx_mean**2
+   ucx_max = max(ucx_max,ux)
+   ucx_min = min(ucx_min,ux)
+   !
+   ! ucy
+   oldmean = ucy_mean
    where (oldmean<epsilon(0.d0) .and. oldmean>=0.d0)
       oldmean=epsilon(0.d0)
    endwhere
    where (oldmean>-1.d0*epsilon(0.d0) .and. oldmean<0.d0)
       oldmean=-1.d0*epsilon(0.d0)
-   endwhere
-   uy = ucy
-   v_mean = v_mean + mult*uy
-   v_varcross = v_varcross/oldmean*v_mean + mult*2.d0*uy*v_mean
-   v_varsquare = v_varsquare + mult*(uy)**2
-   v_var = v_varsquare - v_varcross + v_mean**2
-   v_max = max(v_max,uy)
-   v_min = min(v_min,uy)
+   endwhere   
+   ucy_mean = ucy_mean + mult*uy
+   ucy_varcross = ucy_varcross/oldmean*ucy_mean + mult*2.d0*uy*ucy_mean
+   ucy_varsquare = ucy_varsquare + mult*(uy)**2
+   ucy_var = ucy_varsquare - ucy_varcross + ucy_mean**2
+   ucy_max = max(ucy_max,uy)
+   ucy_min = min(ucy_min,uy)   
 
-   ! Fx: y-component
-   oldmean = Fx_mean
+   ! wave forces
+   oldmean = fx_mean
    where (oldmean<epsilon(0.d0) .and. oldmean>=0.d0)
       oldmean=epsilon(0.d0)
    endwhere
    where (oldmean>-1.d0*epsilon(0.d0) .and. oldmean<0.d0)
       oldmean=-1.d0*epsilon(0.d0)
-   endwhere
-   Fx_mean = Fx_mean + mult*Fx_cc
-   Fx_varcross = Fx_varcross/oldmean*Fx_mean + mult*2.d0*Fx_cc*Fx_mean
-   Fx_varsquare = Fx_varsquare + mult*(Fx_cc)**2
-   Fx_var = Fx_varsquare - Fx_varcross + Fx_mean**2
-   Fx_max = max(Fx_max,Fx_cc)
-   Fx_min = min(Fx_min,Fx_cc)
-
-   ! Fy
-   oldmean = Fy_mean
+   endwhere   
+   fx_mean = fx_mean + mult*fx_cc
+   fx_varcross = fx_varcross/oldmean*fx_mean + mult*2.d0*fx_cc*fx_mean
+   fx_varsquare = fx_varsquare + mult*(fx_cc)**2
+   fx_var = fx_varsquare - fx_varcross + fx_mean**2
+   fx_max = max(fx_max,fx_cc)
+   fx_min = min(fx_min,fx_cc)
+   !
+   oldmean = fy_mean
    where (oldmean<epsilon(0.d0) .and. oldmean>=0.d0)
       oldmean=epsilon(0.d0)
    endwhere
    where (oldmean>-1.d0*epsilon(0.d0) .and. oldmean<0.d0)
       oldmean=-1.d0*epsilon(0.d0)
-   endwhere
-   Fy_mean = Fy_mean + mult*Fy_cc
-   Fy_varcross = Fy_varcross/oldmean*Fy_mean + mult*2.d0*Fy_cc*Fy_mean
-   Fy_varsquare = Fy_varsquare + mult*(Fy_cc)**2
-   Fy_var = Fy_varsquare - Fy_varcross + Fy_mean**2
-   Fy_max = max(Fy_max,Fy_cc)
-   Fy_min = min(Fy_min,Fy_cc)
+   endwhere   
+   fy_mean = fy_mean + mult*fy_cc
+   fy_varcross = fy_varcross/oldmean*fy_mean + mult*2.d0*fy_cc*fy_mean
+   fy_varsquare = fy_varsquare + mult*(fy_cc)**2
+   fy_var = fy_varsquare - fy_varcross + fy_mean**2
+   fy_max = max(fy_max,fy_cc)
+   fy_min = min(fy_min,fy_cc)   
 
-   ! ust
+   ! wave mass flux
+   call reconstruct_cc_stokesdrift(ndx,ust_cc, vst_cc)
    oldmean = ust_mean
    where (oldmean<epsilon(0.d0) .and. oldmean>=0.d0)
       oldmean=epsilon(0.d0)
    endwhere
    where (oldmean>-1.d0*epsilon(0.d0) .and. oldmean<0.d0)
       oldmean=-1.d0*epsilon(0.d0)
-   endwhere
-   ux = ustx_cc
-   ust_mean = ust_mean + mult*ux
-   ust_varcross = ust_varcross/oldmean*ust_mean + mult*2.d0*ux*ust_mean
-   ust_varsquare = ust_varsquare + mult*(ux)**2
+   endwhere   
+   ust_mean = ust_mean + mult*ust_cc
+   ust_varcross = ust_varcross/oldmean*ust_mean + mult*2.d0*ust_cc*ust_mean
+   ust_varsquare = ust_varsquare + mult*(ust_cc)**2
    ust_var = ust_varsquare - ust_varcross + ust_mean**2
-   ust_max = max(ust_max,ux)
-   ust_min = min(ust_min,ux)
-
-   ! vst
+   ust_max = max(ust_max,ust_cc)
+   ust_min = min(ust_min,ust_cc)
+   !
    oldmean = vst_mean
    where (oldmean<epsilon(0.d0) .and. oldmean>=0.d0)
       oldmean=epsilon(0.d0)
    endwhere
    where (oldmean>-1.d0*epsilon(0.d0) .and. oldmean<0.d0)
       oldmean=-1.d0*epsilon(0.d0)
-   endwhere
-   uy = usty_cc
-   vst_mean = vst_mean + mult*uy
-   vst_varcross = vst_varcross/oldmean*vst_mean + mult*2.d0*uy*vst_mean
-   vst_varsquare = vst_varsquare + mult*(uy)**2
+   endwhere   
+   vst_mean = vst_mean + mult*vst_cc
+   vst_varcross = vst_varcross/oldmean*vst_mean + mult*2.d0*vst_cc*vst_mean
+   vst_varsquare = vst_varsquare + mult*(vst_cc)**2
    vst_var = vst_varsquare - vst_varcross + vst_mean**2
-   vst_max = max(vst_max,uy)
-   vst_min = min(vst_min,uy)
+   vst_max = max(vst_max,vst_cc)
+   vst_min = min(vst_min,vst_cc)   
 
    ! urms
    oldmean = urms_mean
@@ -1185,12 +1227,12 @@ subroutine xbeach_makeaverages(dt)
    where (oldmean>-1.d0*epsilon(0.d0) .and. oldmean<0.d0)
       oldmean=-1.d0*epsilon(0.d0)
    endwhere
-   urms_mean = urms_mean + mult*urms_cc
-   urms_varcross = urms_varcross/oldmean*urms_mean + mult*2.d0*urms_cc*urms_mean
-   urms_varsquare = urms_varsquare + mult*(urms_cc)**2
+   urms_mean = urms_mean + mult*uorb
+   urms_varcross = urms_varcross/oldmean*urms_mean + mult*2.d0*uorb*urms_mean
+   urms_varsquare = urms_varsquare + mult*(uorb)**2
    urms_var = urms_varsquare - urms_varcross + urms_mean**2
-   urms_max = max(urms_max,urms_cc)
-   urms_min = min(urms_min,urms_cc)
+   urms_max = max(urms_max,uorb)
+   urms_min = min(urms_min,uorb)
      
    ! s1
    oldmean = s1_mean
@@ -1206,6 +1248,15 @@ subroutine xbeach_makeaverages(dt)
    s1_var = s1_varsquare - s1_varcross + s1_mean**2
    s1_max = max(s1_max,s1)
    s1_min = min(s1_min,s1)
+
+   if (jamombal>0) then
+      do k=1,ndx
+         ! viscosity ico momentum balance
+         call linkstocentercartcomp(k,suu,vis)
+         visx(k) = visx(k) + mult*vis(1)
+         visy(k) = visy(k) + mult*vis(2)
+      enddo    
+   endif
 
    ierr = 0
 1234 continue
@@ -1228,22 +1279,344 @@ subroutine xbeach_clearaverages()
    D_mean = 0d0; D_var  = 0d0; D_min  = huge(0d0); D_max  = -1d0*huge(0d0); D_varcross = 0d0; D_varsquare = 0d0
    DR_mean = 0d0; DR_var  = 0d0; DR_min  = huge(0d0); DR_max  = -1d0*huge(0d0); DR_varcross = 0d0; DR_varsquare = 0d0
    ust_mean = 0d0; ust_var  = 0d0; ust_min  = huge(0d0); ust_max  = -1d0*huge(0d0); ust_varcross = 0d0; ust_varsquare = 0d0
+   vst_mean = 0d0; vst_var  = 0d0; vst_min  = huge(0d0); vst_max  = -1d0*huge(0d0); vst_varcross = 0d0; vst_varsquare = 0d0
    urms_mean = 0d0; urms_var  = 0d0; urms_min  = huge(0d0); urms_max  = -1d0*huge(0d0); urms_varcross = 0d0; urms_varsquare = 0d0
    thetamean_mean = 0d0; thetamean_var  = 0d0; thetamean_min  = huge(0d0); thetamean_max  = -1d0*huge(0d0); thetamean_varcross = 0d0; 
    thetamean_varsquare = 0d0; thetamean_sin = 0d0; thetamean_cos = 0d0
    cwav_mean = 0d0; cwav_var  = 0d0; cwav_min  = huge(0d0); cwav_max  = -1d0*huge(0d0); cwav_varcross = 0d0; cwav_varsquare = 0d0
    cgwav_mean = 0d0; cgwav_var  = 0d0; cgwav_min  = huge(0d0); cgwav_max  = -1d0*huge(0d0); cgwav_varcross = 0d0; cgwav_varsquare = 0d0
-   Fx_mean = 0d0; Fx_var  = 0d0; Fx_min  = huge(0d0); Fx_max  = -1d0*huge(0d0); Fx_varcross = 0d0; Fx_varsquare = 0d0
-   Fy_mean = 0d0; Fy_var  = 0d0; Fy_min  = huge(0d0); Fy_max  = -1d0*huge(0d0); Fy_varcross = 0d0; Fy_varsquare = 0d0
+   Fx_mean = 0d0; Fx_var  = 0d0; Fx_min  = huge(0d0); Fx_max  = -1d0*huge(0d0); fx_varcross = 0d0; fx_varsquare = 0d0
+   Fy_mean = 0d0; Fy_var  = 0d0; Fy_min  = huge(0d0); Fy_max  = -1d0*huge(0d0); fy_varcross = 0d0; fy_varsquare = 0d0
    s1_mean = 0d0; s1_var  = 0d0; s1_min  = huge(0d0); s1_max  = -1d0*huge(0d0); s1_varcross = 0d0; s1_varsquare = 0d0
-   u_mean = 0d0; u_var  = 0d0; u_min  = huge(0d0); u_max  = -1d0*huge(0d0); u_varcross = 0d0; u_varsquare = 0d0
-   v_mean = 0d0; v_var  = 0d0; v_min  = huge(0d0);v_max  = -1d0*huge(0d0); v_varcross = 0d0; v_varsquare = 0d0
    sigmwav_mean = 0d0; sigmwav_var  = 0d0; sigmwav_min  = huge(0d0); sigmwav_max  = -1d0*huge(0d0); sigmwav_varcross = 0d0; sigmwav_varsquare = 0d0
+   ucx_mean = 0d0; ucx_var  = 0d0; ucx_min  = huge(0d0); ucx_max  = -1d0*huge(0d0); ucx_varcross = 0d0; ucx_varsquare = 0d0
+   ucy_mean = 0d0; ucy_var  = 0d0; ucy_min  = huge(0d0); ucy_max  = -1d0*huge(0d0); ucy_varcross = 0d0; ucy_varsquare = 0d0
+   visx = 0d0; visy = 0d0
+   ududx = 0d0; udvdx = 0d0; vdudy=0d0;vdvdy=0d0
 
    ierr = 0
 1234 continue
    return
 
 end subroutine xbeach_clearaverages
+
+subroutine xbeach_allocateaverages()
+   use m_flowgeom
+   use m_xbeach_avgoutput
+   use m_alloc
+   use m_flowparameters, only: jamombal
+
+   implicit none
+
+   integer                            :: ierr
+
+   if (jamombal>0) then
+      call realloc(xbdsdx, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+      call aerr('xbdsdx  (ndx)', ierr, ndx)
+      call realloc(xbdsdy, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+      call aerr('xbdsdy  (ndx)', ierr, ndx)
+
+      call realloc(ududx, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+      call aerr('ududx  (ndx)', ierr, ndx)
+      call realloc(vdudy, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+      call aerr('vdudy  (ndx)', ierr, ndx)
+      call realloc(udvdx, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+      call aerr('udvdx  (ndx)', ierr, ndx)
+      call realloc(vdvdy, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+      call aerr('vdvdy  (ndx)', ierr, ndx)
+
+      call realloc(visx, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+      call aerr('visx  (ndx)', ierr, ndx)
+      call realloc(visy, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+      call aerr('visy  (ndx)', ierr, ndx)
+   endif
+
+   call realloc(E_mean, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+   call aerr('E_mean  (ndx)', ierr, ndx)
+   call realloc(E_var, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+   call aerr('E_var  (ndx)', ierr, ndx)
+   call realloc(E_min, ndx, stat=ierr, keepExisting = .false., fill = huge(0d0))
+   call aerr('E_min  (ndx)', ierr, ndx)
+   call realloc(E_max, ndx, stat=ierr, keepExisting = .false., fill = -1d0*huge(0d0))
+   call aerr('E_max  (ndx)', ierr, ndx)
+   call realloc(E_varcross, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+   call aerr('E_varcross  (ndx)', ierr, ndx)
+   call realloc(E_varsquare, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+   call aerr('E_varsquare  (ndx)', ierr, ndx)
+   
+   call realloc(H_mean, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+   call aerr('H_mean  (ndx)', ierr, ndx)
+   call realloc(H_var, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+   call aerr('H_var  (ndx)', ierr, ndx)
+   call realloc(H_min, ndx, stat=ierr, keepExisting = .false., fill = huge(0d0))
+   call aerr('H_min  (ndx)', ierr, ndx)
+   call realloc(H_max, ndx, stat=ierr, keepExisting = .false., fill = -1d0*huge(0d0))
+   call aerr('H_max  (ndx)', ierr, ndx)
+   call realloc(H_varcross, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+   call aerr('H_varcross  (ndx)', ierr, ndx)
+   call realloc(H_varsquare, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+   call aerr('H_varsquare  (ndx)', ierr, ndx)
+   
+   call realloc(R_mean, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+   call aerr('R_mean  (ndx)', ierr, ndx)
+   call realloc(R_var, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+   call aerr('R_var  (ndx)', ierr, ndx)
+   call realloc(R_min, ndx, stat=ierr, keepExisting = .false., fill = huge(0d0))
+   call aerr('R_min  (ndx)', ierr, ndx)
+   call realloc(R_max, ndx, stat=ierr, keepExisting = .false., fill = -1d0*huge(0d0))
+   call aerr('R_max  (ndx)', ierr, ndx)
+   call realloc(R_varcross, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+   call aerr('R_varcross  (ndx)', ierr, ndx)
+   call realloc(R_varsquare, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+   call aerr('R_varsquare  (ndx)', ierr, ndx)
+   
+   call realloc(D_mean, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+   call aerr('D_mean  (ndx)', ierr, ndx)
+   call realloc(D_var, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+   call aerr('D_var  (ndx)', ierr, ndx)
+   call realloc(D_min, ndx, stat=ierr, keepExisting = .false., fill = huge(0d0))
+   call aerr('D_min  (ndx)', ierr, ndx)
+   call realloc(D_max, ndx, stat=ierr, keepExisting = .false., fill = -1d0*huge(0d0))
+   call aerr('D_max  (ndx)', ierr, ndx)
+   call realloc(D_varcross, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+   call aerr('D_varcross  (ndx)', ierr, ndx)
+   call realloc(D_varsquare, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+   call aerr('D_varsquare  (ndx)', ierr, ndx)
+   
+   call realloc(DR_mean, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+   call aerr('DR_mean  (ndx)', ierr, ndx)
+   call realloc(DR_var, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+   call aerr('DR_var  (ndx)', ierr, ndx)
+   call realloc(DR_min, ndx, stat=ierr, keepExisting = .false., fill = huge(0d0))
+   call aerr('DR_min  (ndx)', ierr, ndx)
+   call realloc(DR_max, ndx, stat=ierr, keepExisting = .false., fill = -1d0*huge(0d0))
+   call aerr('DR_max  (ndx)', ierr, ndx)
+   call realloc(DR_varcross, ndx, stat=ierr, keepExisting = .false., fill = tiny(0d0))
+   call aerr('DR_varcross  (ndx)', ierr, ndx)
+   call realloc(DR_varsquare, ndx, stat=ierr, keepExisting = .false., fill = tiny(0d0))
+   call aerr('DR_varsquare  (ndx)', ierr, ndx)
+   
+   call realloc(ust_mean, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+   call aerr('ust_mean  (ndx)', ierr, ndx)
+   call realloc(ust_var, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+   call aerr('ust_var  (ndx)', ierr, ndx)
+   call realloc(ust_min, ndx, stat=ierr, keepExisting = .false., fill = huge(0d0))
+   call aerr('ust_min  (ndx)', ierr, ndx)
+   call realloc(ust_max, ndx, stat=ierr, keepExisting = .false., fill = -1d0*huge(0d0))
+   call aerr('ust_max  (ndx)', ierr, ndx)
+   call realloc(ust_varcross, ndx, stat=ierr, keepExisting = .false., fill = tiny(0d0))
+   call aerr('ust_varcross  (ndx)', ierr, ndx)
+   call realloc(ust_varsquare, ndx, stat=ierr, keepExisting = .false., fill = tiny(0d0))
+   call aerr('ust_varsquare  (ndx)', ierr, ndx)   
+   
+   call realloc(vst_mean, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+   call aerr('vst_mean  (ndx)', ierr, ndx)
+   call realloc(vst_var, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+   call aerr('vst_var  (ndx)', ierr, ndx)
+   call realloc(vst_min, ndx, stat=ierr, keepExisting = .false., fill = huge(0d0))
+   call aerr('vst_min  (ndx)', ierr, ndx)
+   call realloc(vst_max, ndx, stat=ierr, keepExisting = .false., fill = -1d0*huge(0d0))
+   call aerr('vst_max  (ndx)', ierr, ndx)
+   call realloc(vst_varcross, ndx, stat=ierr, keepExisting = .false., fill = tiny(0d0))
+   call aerr('vst_varcross  (ndx)', ierr, ndx)
+   call realloc(vst_varsquare, ndx, stat=ierr, keepExisting = .false., fill = tiny(0d0))
+   call aerr('vst_varsquare  (ndx)', ierr, ndx)
+   
+   call realloc(urms_mean, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+   call aerr('urms_mean  (ndx)', ierr, ndx)
+   call realloc(urms_var, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+   call aerr('urms_var  (ndx)', ierr, ndx)
+   call realloc(urms_min, ndx, stat=ierr, keepExisting = .false., fill = huge(0d0))
+   call aerr('urms_min  (ndx)', ierr, ndx)
+   call realloc(urms_max, ndx, stat=ierr, keepExisting = .false., fill = -1d0*huge(0d0))
+   call aerr('urms_max  (ndx)', ierr, ndx)
+   call realloc(urms_varcross, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+   call aerr('urms_varcross  (ndx)', ierr, ndx)
+   call realloc(urms_varsquare, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+   call aerr('urms_varsquare  (ndx)', ierr, ndx)
+   
+   call realloc(thetamean_mean, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+   call aerr('thetamean_mean  (ndx)', ierr, ndx)
+   call realloc(thetamean_var, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+   call aerr('thetamean_var  (ndx)', ierr, ndx)
+   call realloc(thetamean_min, ndx, stat=ierr, keepExisting = .false., fill = huge(0d0))
+   call aerr('thetamean_min  (ndx)', ierr, ndx)
+   call realloc(thetamean_max, ndx, stat=ierr, keepExisting = .false., fill = -1d0*huge(0d0))
+   call aerr('thetamean_max  (ndx)', ierr, ndx)
+   call realloc(thetamean_varcross, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+   call aerr('thetamean_varcross  (ndx)', ierr, ndx)
+   call realloc(thetamean_varsquare, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+   call aerr('thetamean_varsquare  (ndx)', ierr, ndx)
+   call realloc(thetamean_sin, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+   call aerr('thetamean_sin  (ndx)', ierr, ndx)
+   call realloc(thetamean_cos, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+   call aerr('thetamean_cos  (ndx)', ierr, ndx)
+   
+   call realloc(sigmwav_mean, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+   call aerr('sigmwav_mean  (ndx)', ierr, ndx)
+   call realloc(sigmwav_var, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+   call aerr('sigmwav_var  (ndx)', ierr, ndx)
+   call realloc(sigmwav_min, ndx, stat=ierr, keepExisting = .false., fill = huge(0d0))
+   call aerr('sigmwav_min  (ndx)', ierr, ndx)
+   call realloc(sigmwav_max, ndx, stat=ierr, keepExisting = .false., fill = -1d0*huge(0d0))
+   call aerr('sigmwav_max  (ndx)', ierr, ndx)
+   call realloc(sigmwav_varcross, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+   call aerr('sigmwav_varcross  (ndx)', ierr, ndx)
+   call realloc(sigmwav_varsquare, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+   call aerr('sigmwav_varsquare  (ndx)', ierr, ndx)
+   
+   call realloc(cwav_mean, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+   call aerr('cwav_mean  (ndx)', ierr, ndx)
+   call realloc(cwav_var, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+   call aerr('cwav_var  (ndx)', ierr, ndx)
+   call realloc(cwav_min, ndx, stat=ierr, keepExisting = .false., fill = huge(0d0))
+   call aerr('cwav_min  (ndx)', ierr, ndx)
+   call realloc(cwav_max, ndx, stat=ierr, keepExisting = .false., fill = -1d0*huge(0d0))
+   call aerr('cwav_max  (ndx)', ierr, ndx)
+   call realloc(cwav_varcross, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+   call aerr('cwav_varcross  (ndx)', ierr, ndx)
+   call realloc(cwav_varsquare, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+   call aerr('cwav_varsquare  (ndx)', ierr, ndx)
+   
+   call realloc(cgwav_mean, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+   call aerr('cgwav_mean  (ndx)', ierr, ndx)
+   call realloc(cgwav_var, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+   call aerr('cgwav_var  (ndx)', ierr, ndx)
+   call realloc(cgwav_min, ndx, stat=ierr, keepExisting = .false., fill =huge(0d0))
+   call aerr('cgwav_min  (ndx)', ierr, ndx)
+   call realloc(cgwav_max, ndx, stat=ierr, keepExisting = .false., fill = -1d0*huge(0d0))
+   call aerr('cgwav_max  (ndx)', ierr, ndx)
+   call realloc(cgwav_varcross, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+   call aerr('cgwav_varcross  (ndx)', ierr, ndx)
+   call realloc(cgwav_varsquare, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+   call aerr('cgwav_varsquare  (ndx)', ierr, ndx)
+   
+   call realloc(s1_mean, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+   call aerr('s1_mean  (ndx)', ierr, ndx)
+   call realloc(s1_var, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+   call aerr('s1_var  (ndx)', ierr, ndx)
+   call realloc(s1_min, ndx, stat=ierr, keepExisting = .false., fill = huge(0d0))
+   call aerr('s1_min  (ndx)', ierr, ndx)
+   call realloc(s1_max, ndx, stat=ierr, keepExisting = .false., fill = -1d0*huge(0d0))
+   call aerr('s1_max  (ndx)', ierr, ndx)
+   call realloc(s1_varcross, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+   call aerr('s1_varcross  (ndx)', ierr, ndx)
+   call realloc(s1_varsquare, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+   call aerr('s1_varsquare  (ndx)', ierr, ndx)
+     
+   call realloc(ucx_mean, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+   call aerr('ucx_mean  (ndx)', ierr, ndx)
+   call realloc(ucx_var, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+   call aerr('ucx_var  (ndx)', ierr, ndx)
+   call realloc(ucx_min, ndx, stat=ierr, keepExisting = .false., fill = huge(0d0))
+   call aerr('ucx_min  (ndx)', ierr, ndx)
+   call realloc(ucx_max, ndx, stat=ierr, keepExisting = .false., fill = -1d0*huge(0d0))
+   call aerr('ucx_max  (ndx)', ierr, ndx)
+   call realloc(ucx_varcross, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+   call aerr('ucx_varcross  (ndx)', ierr, ndx)
+   call realloc(ucx_varsquare, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+   call aerr('ucx_varsquare  (ndx)', ierr, ndx)
+   
+   call realloc(ucy_mean, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+   call aerr('ucy_mean  (ndx)', ierr, ndx)
+   call realloc(ucy_var, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+   call aerr('ucy_var  (ndx)', ierr, ndx)
+   call realloc(ucy_min, ndx, stat=ierr, keepExisting = .false., fill = huge(0d0))
+   call aerr('ucy_min  (ndx)', ierr, ndx)
+   call realloc(ucy_max, ndx, stat=ierr, keepExisting = .false., fill = -1d0*huge(0d0))
+   call aerr('ucy_max  (ndx)', ierr, ndx)
+   call realloc(ucy_varcross, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+   call aerr('ucy_varcross  (ndx)', ierr, ndx)
+   call realloc(ucy_varsquare, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+   call aerr('ucy_varsquare  (ndx)', ierr, ndx)   
+
+   call realloc(fx_mean, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+   call aerr('fx_mean  (ndx)', ierr, ndx)
+   call realloc(fx_var, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+   call aerr('fx_var  (ndx)', ierr, ndx)
+   call realloc(fx_min, ndx, stat=ierr, keepExisting = .false., fill = huge(0d0))
+   call aerr('fx_min  (ndx)', ierr, ndx)
+   call realloc(fx_max, ndx, stat=ierr, keepExisting = .false., fill = -1d0*huge(0d0))
+   call aerr('fx_max  (ndx)', ierr, ndx)
+   call realloc(fx_varcross, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+   call aerr('fx_varcross  (ndx)', ierr, ndx)
+   call realloc(fx_varsquare, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+   call aerr('fx_varsquare  (ndx)', ierr, ndx)
+
+   call realloc(fy_mean, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+   call aerr('fy_mean  (ndx)', ierr, ndx)
+   call realloc(fy_var, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+   call aerr('fy_var  (ndx)', ierr, ndx)
+   call realloc(fy_min, ndx, stat=ierr, keepExisting = .false., fill = huge(0d0))
+   call aerr('fy_min  (ndx)', ierr, ndx)
+   call realloc(fy_max, ndx, stat=ierr, keepExisting = .false., fill = -1d0*huge(0d0))
+   call aerr('fy_max  (ndx)', ierr, ndx)
+   call realloc(fy_varcross, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+   call aerr('fy_varcross  (ndx)', ierr, ndx)
+   call realloc(fy_varsquare, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+   call aerr('fy_varsquare  (ndx)', ierr, ndx)   
+   
+   ! bss
+   !call realloc(taubx_mean, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+   !call aerr('taubx_mean  (ndx)', ierr, ndx)
+   !call realloc(taubx_var, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+   !call aerr('taubx_var  (ndx)', ierr, ndx)
+   !call realloc(taubx_min, ndx, stat=ierr, keepExisting = .false., fill = huge(0d0))
+   !call aerr('taubx_min  (ndx)', ierr, ndx)
+   !call realloc(taubx_max, ndx, stat=ierr, keepExisting = .false., fill = -1d0*huge(0d0))
+   !call aerr('taubx_max  (ndx)', ierr, ndx)
+   !call realloc(taubx_varcross, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+   !call aerr('taubx_varcross  (ndx)', ierr, ndx)
+   !call realloc(taubx_varsquare, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+   !call aerr('taubx_varsquare  (ndx)', ierr, ndx)
+   !
+   !call realloc(tauby_mean, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+   !call aerr('tauby_mean  (ndx)', ierr, ndx)
+   !call realloc(tauby_var, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+   !call aerr('tauby_var  (ndx)', ierr, ndx)
+   !call realloc(tauby_min, ndx, stat=ierr, keepExisting = .false., fill = huge(0d0))
+   !call aerr('tauby_min  (ndx)', ierr, ndx)
+   !call realloc(tauby_max, ndx, stat=ierr, keepExisting = .false., fill = -1d0*huge(0d0))
+   !call aerr('tauby_max  (ndx)', ierr, ndx)
+   !call realloc(tauby_varcross, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+   !call aerr('tauby_varcross  (ndx)', ierr, ndx)
+   !call realloc(tauby_varsquare, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+   !call aerr('tauby_varsquare  (ndx)', ierr, ndx)   
+   
+end subroutine
+
+subroutine xbeach_mombalance
+   ! calculates some terms to construct momentum balances
+   ! still not sure about this one, discuss with Dano and use with caution for now
+   use m_xbeach_avgoutput
+   use m_flowgeom, only: ndx
+
+   implicit none
+
+   integer                           :: L, k, k1, k2, ierr
+   double precision, allocatable     :: ducxdx_(:),ducxdy_(:),ducydx_(:),ducydy_(:)
+   
+   if (.not. allocated(ducydx_)) then
+      allocate(ducxdx_(1:ndx),ducxdy_(1:ndx),ducydx_(1:ndx),ducydy_(1:ndx))   
+   endif
+
+   xbdsdx = 0d0; xbdsdy=0d0; 
+   ududx = 0.0; vdudy = 0d0; udvdx = 0d0; vdvdy = 0d0
+
+   call getcellcentergradients(s1_mean,xbdsdx, xbdsdy)
+   call getcellcentergradients(ucx_mean, ducxdx_, ducxdy_)
+   call getcellcentergradients(ucy_mean, ducydx_, ducydy_)
+   
+   do k=1,ndx
+      ! GLM velocity gradients
+      ududx(k) = ucx_mean(k)*ducxdx_(k)
+      vdudy(k) = ucy_mean(k)*ducxdy_(k)
+      udvdx(k) = ucx_mean(k)*ducydx_(k)
+      vdvdy(k) = ucy_mean(k)*ducydy_(k)
+   enddo   
+   
+1234 continue
+   return
+end subroutine xbeach_mombalance
 
 end module m_xbeach_netcdf

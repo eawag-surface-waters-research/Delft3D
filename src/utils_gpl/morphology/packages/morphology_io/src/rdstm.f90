@@ -44,7 +44,6 @@ public rdstm
 public clrstm
 
 type stmtype
-    integer                                                :: iopsus
     real(fp)                                               :: fwfac
     type(sedpar_type)                        , pointer     :: sedpar
     type(morpar_type)                        , pointer     :: morpar
@@ -172,7 +171,7 @@ subroutine rdstm(stm, griddim, filsed, filmor, filtrn, &
     !
     call rdsed  (lundia, error, lsal, ltem, stm%lsedsus, &
                & stm%lsedtot, lstsci, ltur, stm%namcon, &
-               & stm%iopsus, nmlb, nmub, filsed, &
+               & stm%morpar%iopsus, nmlb, nmub, filsed, &
                & sedfil_tree, stm%sedpar, stm%trapar, griddim)
     if (error) goto 999
     ! 
@@ -205,7 +204,7 @@ subroutine rdstm(stm, griddim, filsed, filmor, filtrn, &
     call setpardef(ipardef, rpardef, NPARDEF, -1, 5, stm%morpar%rdw)
     call setpardef(ipardef, rpardef, NPARDEF, -1, 6, stm%morpar%iopkcw)
     call setpardef(ipardef, rpardef, NPARDEF, -1, 7, stm%morpar%epspar)
-    call setpardef(ipardef, rpardef, NPARDEF, -2, 1, stm%morpar%iopsus)
+    call setpardef(ipardef, rpardef, NPARDEF, -2, 1, stm%morpar%iopsus)   ! jre
     call setpardef(ipardef, rpardef, NPARDEF, -2, 2, stm%morpar%pangle)
     call setpardef(ipardef, rpardef, NPARDEF, -2, 3, stm%morpar%fpco)
     call setpardef(ipardef, rpardef, NPARDEF, -2, 4, stm%morpar%subiw)
@@ -222,7 +221,7 @@ subroutine rdstm(stm, griddim, filsed, filmor, filtrn, &
     ! Echo sediment and transport parameters
     !
     call echosed(lundia, error, stm%lsedsus, stm%lsedtot, &
-               & stm%iopsus, stm%sedpar, stm%trapar)
+               & stm%morpar%iopsus, stm%sedpar, stm%trapar)
     if (error) goto 999
     !
     ! Echo morphology parameters

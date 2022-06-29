@@ -50,10 +50,10 @@ subroutine fm_bedform()
     use precision
     use m_bedform
     use m_sediment, only: sedtra, stmpar, stm_included
-    use m_physcoef, only: ag, rhomean, backgroundwatertemperature
+    use m_physcoef, only: ag, rhomean, backgroundwatertemperature, vismol
     use m_flowgeom, only: ndxi, ndx, lnx, lnxi, kfs, ln, wcl, bl
     use m_flowparameters, only: epshs, jawave, epshu, flowWithoutWaves
-    use m_flow, only: ucx, ucy, frcu, ifrcutp, hu, hs, u1, u0, s1, ucx_mor, ucy_mor
+    use m_flow, only: ucx, ucy, frcu, ifrcutp, hu, hs, u1, u0, s1, ucx_mor, ucy_mor, lnkx, z0ucur
     use m_flowtimes
     use m_waves
     !
@@ -81,7 +81,7 @@ subroutine fm_bedform()
 !
     integer  :: nm
     integer  :: ken
-    integer  :: kb, kt, k1, k2
+    integer  :: kb, kt, k1, k2, ki
     integer  :: ierr
     integer  :: L
     real(fp) :: depth
@@ -106,8 +106,8 @@ subroutine fm_bedform()
     real(fp) :: d50
     real(fp) :: d90
     real(fp) :: relden
-    real(fp) :: vicmol
-    double precision, allocatable     :: czn(:), czu(:)
+    real(fp) :: czu
+    double precision, allocatable     :: czn(:)
     double precision, allocatable     :: u1eul(:)
 !
 !! executable statements -------------------------------------------------------
@@ -130,34 +130,30 @@ subroutine fm_bedform()
        i90                     => stmpar%morpar%i90
     end if
     !
-    vicmol = (4.0e-5)/(20.0+backgroundwatertemperature) ! molecular viscosity according to Van Rijn 2004
     if (.not. allocated(czn)) then
-       allocate(czn(1:ndx), czu(1:lnx) , stat = ierr)
-       allocate(u1eul(1:ndx), stat = ierr)
+       allocate(czn(1:ndx) , stat = ierr)
+       allocate(u1eul(1:lnkx), stat = ierr)
     end if
     czn = 0d0; czu = 0d0; u1eul = 0d0
     !
     if (jawave > 0 .and. .not. flowWithoutWaves) then
-       u1eul = u1 - ustokes   
+       u1eul = u1 - ustokes
        call setucxucy_mor (u1eul)
     end if
     !
     do L = 1, lnx
        k1=ln(1,L);k2=ln(2,L)
        if (frcu(L)>0) then
-          call getcz(hu(L), frcu(L), ifrcutp(L), czu(L), L)
+          call getcz(hu(L), frcu(L), ifrcutp(L), czu, L)
        end if
-       czn(k1)=czn(k1)+wcl(1,L)*czu(L)
-       czn(k2)=czn(k2)+wcl(2,L)*czu(L)
+       czn(k1)=czn(k1)+wcl(1,L)*czu
+       czn(k2)=czn(k2)+wcl(2,L)*czu
     end do
     !
-    do nm = 1, ndx
-       if ((s1(nm)-bl(nm))>epshs) then
+    do nm = 1, ndxi
+       depth = s1(nm)-bl(nm)
+       if (depth>epshs) then
           call getkbotktop(nm, kb, kt)
-          !
-          !  Initialisation of depth and velocity.
-          !
-          depth = s1(nm)-bl(nm)
           !
           ! Calculate EQUILIBRIUM dune heights
           !
@@ -165,8 +161,7 @@ subroutine fm_bedform()
              !
              ! JRE: Not depth-avg, but bottom vel in 3D
              !
-             umodb   = sqrt(ucx_mor(kb)**2 + ucy_mor(kb)**2)
-             u2dhb   = umodb
+             u2dhb   = sqrt(ucx_mor(kb)**2 + ucy_mor(kb)**2)
              !
              ! Get d50 and d90 if defined.
              !
@@ -187,7 +182,7 @@ subroutine fm_bedform()
              !
              ! Dimensionless Particle Parameter
              !
-             dstar = d50*(ag*relden/vicmol**2)**(1.0_fp/3.0_fp)
+             dstar = d50*(ag*relden/vismol**2)**(1.0_fp/3.0_fp)
              !
              ! Calculate critical bed-shear velocity (Shields)
              !
@@ -276,6 +271,14 @@ subroutine fm_bedform()
           duneheightequi(nm) = duneheight(nm)
        endif
     enddo
+    
+    ! to get around the way the roughness is determined for incoming u/q bnds
+    do L = lnxi+1, lnx
+      kb = ln(1,L)
+      ki = ln(2,L)
+      duneheightequi(kb) = duneheightequi(ki)
+      dunelength(kb) = dunelength(ki)       
+    enddo
 
 end subroutine fm_bedform
 
@@ -291,9 +294,9 @@ subroutine fm_calbf()
     use m_bedform
     use m_sediment, only: stmpar, sedtra
     use m_physcoef, only: ag
-    use m_flowtimes, only: dts, dnt, time1, tfac, dt_user
+    use m_flowtimes, only: dts, dnt, time1, tfac, dt_user, tstart_user
     use m_flowgeom, only: ndxi, lnxi, ndx, lnx, kfs, wcx1, wcx2,wcy1,wcy2, ln, wu, nd, ba
-    use m_flow, only: hs, hu, u1, v, au, plotlin
+    use m_flow, only: hs, hu, u1, v, au, plotlin, kmx
     use m_flowparameters, only: epshu, epshs
     use unstruc_files, only: mdia
     use m_alloc
@@ -308,7 +311,7 @@ subroutine fm_calbf()
     !
     !Local parameters
     ! 
-    integer                                   :: nm, k1, k2, k, kb, ki, n
+    integer                                   :: nm, k1, k2, k, kb, ki, n, Lb, Lt
     integer                                   :: lsed
     integer                                   :: L
     integer                                   :: istat
@@ -317,13 +320,15 @@ subroutine fm_calbf()
     real(fp)                                  :: hdtb, hdtb_max, nsteps
     real(fp)                                  :: hpow
     real(fp)                                  :: cflcheck, dtsori   
-    real(fp)                                  :: T_relax
+    real(fp)                                  :: T_relax                     !< bedform relaxation time in seconds
     real(fp)                                  :: phi
     real(fp)                                  :: gamma
     real(fp)                                  :: fr_loc2
     real(fp)                                  :: sbu
     real(fp)                                  :: sbv
     real(fp)                                  :: utot2
+    real(fp)                                  :: umean
+    real(fp)                                  :: vmean
     real(fp)                                  :: dum
     real(fp)                                  :: qbf
     character(256)                            :: errmsg
@@ -345,6 +350,7 @@ subroutine fm_calbf()
     real(fp)                        , pointer :: bedformT_H
     real(fp)                        , pointer :: dryflc
     real(fp)                        , pointer :: morfac
+    real(fp)                        , pointer :: tcmp
     real(fp)      , dimension(:)    , pointer :: cdpar
     real(fp)      , dimension(:)    , pointer :: duneheight
     real(fp)      , dimension(:)    , pointer :: duneheightequi
@@ -385,11 +391,11 @@ subroutine fm_calbf()
     qbedformn               => bfmpar%qbedformx
     qbedformt               => bfmpar%qbedformy
     ubedform                => bfmpar%ubedform
-    itmor                   => stmpar%morpar%itmor
     morfac                  => stmpar%morpar%morfac
     e_sbn                   => sedtra%e_sbn
     e_sbt                   => sedtra%e_sbt
     lsedtot                 => stmpar%lsedtot
+    tcmp                    => stmpar%morpar%tcmp
     !
     call realloc(dh,   (/ 1, Ndx /), keepExisting=.false., fill=0d0)
     call realloc(uxbf, ndx, keepExisting=.false., fill=0d0)
@@ -405,7 +411,7 @@ subroutine fm_calbf()
     !
     if (lfbdfmor) then            ! oke, staat op false als .not. stm_included
         hdtb = dts*morfac
-        if ( (comparereal(morfac,0.0_fp) == 0) .or. (dnt <= itmor)) then
+        if ( (comparereal(morfac,0.0_fp) == 0) .or. (time1 < tstart_user + tcmp * tfac)) then    ! JRE+BJ to check: tcmp or tmor?
             ! no update of bedforms necessary
             return
         endif
@@ -425,7 +431,7 @@ subroutine fm_calbf()
        return
     endif
     !
-    ! Calculate staggered bedform celerity components and bedform celerity (ubedform)
+    ! Calculate bedform celerity components and bedform celerity (ubedform)
     !
     select case (bdfrlxtype)
        case(1:3)
@@ -442,9 +448,16 @@ subroutine fm_calbf()
                    !
                    ! Compute bedform celerity
                    !
-                   utot2 = u1(L)**2+v(L)**2
-                   qbedformn(L) = cdpar(1)*(utot2**hpow)*u1(L)/hu(L)
-                   qbedformt(L) = cdpar(1)*(utot2**hpow)*v(L)/hu(L)
+                   if (kmx>0) then
+                      call getLbotLtop(L, Lb, Lt)
+                      umean = sum(u1(Lb:Lt)*(hu(Lb:Lt)-hu(Lb-1:Lt-1)))/hu(L)
+                      vmean = sum(v(Lb:Lt)*(hu(Lb:Lt)-hu(Lb-1:Lt-1)))/hu(L)
+                   else
+                      umean = u1(L); vmean = v(L)
+                   endif   
+                   utot2 = umean**2+vmean**2   ! has to be depth-averaged value
+                   qbedformn(L) = cdpar(1)*(utot2**hpow)*umean/hu(L)
+                   qbedformt(L) = cdpar(1)*(utot2**hpow)*vmean/hu(L)
                    ubedformu(L) = qbedformn(L)
                    ! to nodes
                    k1 = ln(1,L); k2 = ln(2,L)
@@ -460,7 +473,9 @@ subroutine fm_calbf()
              !
              do k = 1, ndx
                 if (hs(k) > epshs) then
-                   ubedform(k) = sqrt(uxbf(k)**2+uybf(k)**2)
+                   ubedform(k) = hypot(uxbf(k),uybf(k))
+                else   
+                   ubedform(k) = 0d0
                 end if
              end do
              !
@@ -474,7 +489,15 @@ subroutine fm_calbf()
              ubedform = 0.0_fp
              if (hu(L) > epshu) then
                 gamma = min(max((hu(L)/bdfHmax)**bdfC_Hp,bdfGmin),1.0_fp)
-                fr_loc2 = (u1(L)**2+v(L)**2)/ag/hu(L)
+                if (kmx>0) then
+                   call getLbotLtop(L, Lb, Lt)
+                   umean = sum(u1(Lb:Lt)*(hu(Lb:Lt)-hu(Lb-1:Lt-1)))/hu(L)
+                   vmean = sum(v(Lb:Lt)*(hu(Lb:Lt)-hu(Lb-1:Lt-1)))/hu(L)
+                else
+                   umean = u1(L); vmean = v(L)
+                endif   
+                fr_loc2 = umean**2+vmean**2
+                fr_loc2 = fr_loc2/ag/hu(L)
                 sbu = 0.0_fp
                 sbv = 0.0_fp
                 do lsed = 1, lsedtot
@@ -497,7 +520,9 @@ subroutine fm_calbf()
           !
           do k = 1, ndx
              if (hs(k) > epshs) then
-                ubedform(k) = sqrt(uxbf(k)**2+uybf(k)**2)
+                ubedform(k) = hypot(uxbf(k),uybf(k))
+             else
+                ubedform(k) = 0d0
              end if
           end do
     end select
@@ -549,7 +574,7 @@ subroutine fm_calbf()
     select case (bdfrlxtype)
        case(1)
           ! TH = given
-          T_relax          = max(bedformT_H*tfac,hdtb)
+          T_relax          = max(bedformT_H*tfac,hdtb)    ! bedformT_H must be in mdu TUnits!
           do nm = 1, ndx
              if (hs(nm) > epshs) then
                 sour(nm) = duneheightequi(nm)/T_relax
@@ -627,9 +652,9 @@ subroutine fm_calksc()
     use sediment_basics_module, only: dsand, dgravel, dsilt
     use m_sferic,               only: pi
     use m_physcoef,             only: ag, frcuni, ifrctypuni
-    use m_flowtimes,            only: dts, dt_max
-    use m_flow,                 only: kmx, s1, u1, u0, hs, z0urou, ucx, ucy, frcu, ifrcutp, hu, ucx_mor, ucy_mor, zws
-    use m_flowgeom,             only: ndx, kfs, bl, ndxi, lnx, wcl, ln
+    use m_flowtimes,            only: dt_user, tfac
+    use m_flow,                 only: kmx, s1, u1, u0, hs, z0ucur, z0urou, ucx, ucy, frcu, ifrcutp, hu, ucx_mor, ucy_mor, zws, lnkx
+    use m_flowgeom,             only: ndx, kfs, bl, ndxi, lnx, lnxi, wcl, ln
     use m_flowparameters,       only: v2dwbl, jatrt, epshs, jawave, flowWithoutWaves
     use m_sediment
     use m_bedform
@@ -664,14 +689,14 @@ subroutine fm_calksc()
 
     real(fp), parameter                            :: rwe = 1.65
     
-    integer                                        :: nm, k, kk, kb, kt, ierr, k1, k2, L
+    integer                                        :: nm, k, kk, kb, kt, ierr, k1, k2, L, ki
     integer                                        :: kmaxx
     real(fp)                                       :: par1, par2, par3, par4, par5, par6
     real(fp)                                       :: relaxr, relaxmr, relaxd
     real(fp)                                       :: maxdepfrac, zcc, zz
     real(fp)                                       :: hh, arg, uw, rr, umax, t1, uu, a11, raih, rmax, uon, uoff, uwbih, depth, umod, u2dh
     real(fp)                                       :: d50l, d90l, fch2, fcoarse, uwc, psi, rksr0, rksmr0, rksd0, cz_dum, z00
-    double precision, dimension(:), allocatable    :: u1eul
+    double precision, dimension(:), allocatable    :: u0eul
     double precision, dimension(:), allocatable    :: z0rou, deltas
 
 !
@@ -698,44 +723,29 @@ subroutine fm_calksc()
        i90                     => stmpar%morpar%i90
        xx                      => stmpar%morpar%xx
     end if
-    !if (jatrt) then
-    !   ntrt                    => trachy_fl%ntrt
-    !   ittdef                  => trachy_fl%ittdef
-    !   rttdef                  => trachy_fl%rttdef
-    !end if
     !
     if (.not. allocated(z0rou)) then
-       allocate(u1eul(1:lnx), stat=ierr)
        allocate(z0rou(1:ndx), stat=ierr)
        allocate(deltas(1:ndx), stat=ierr)
     endif
-    z0rou = 0d0; u1eul = 0d0; deltas = 0d0
+    z0rou = 0d0; deltas = 0d0
     !
     ! Calculate Eulerian velocities at old time level
     if (jawave>0 .and. .not. flowWithoutWaves) then
-       u1eul = u0 - ustokes
-       call setucxucy_mor (u1eul)
+       if (.not. allocated(u0eul)) then
+          allocate(u0eul(1:lnkx), stat=ierr)
+       endif   
+       u0eul = u0 - ustokes
+       call setucxucy_mor (u0eul)
+    else
+       call setucxucy_mor (u0)
     endif
     !
-    if (jawave<3) then  ! current related, potentially including trachy
-       do L=1, lnx
-          k1 = ln(1,L); k2 = ln(2,L)
-          if (frcu(L)>0d0) then
-             call getczz0(hu(L), frcu(L), ifrcutp(L), cz_dum, z00)
-          else
-             call getczz0(hu(L), frcuni, ifrctypuni, cz_dum, z00)
-          end if
-          z0rou(k1) = z0rou(k1) + wcl(1,L)*z00
-          z0rou(k2) = z0rou(k2) + wcl(2,L)*z00
-       end do
-       !
-    else      !  wave enhanced roughness
-       do L=1,lnx
-          k1=ln(1,L); k2=ln(2,L)
-          z0rou(k1) = z0rou(k1) + wcl(1,L)*z0urou(L)
-          z0rou(k2) = z0rou(k2) + wcl(2,L)*z0urou(L)
-       end do
-    end if
+    do L=1,lnx
+       k1=ln(1,L); k2=ln(2,L)
+       z0rou(k1) = z0rou(k1) + wcl(1,L)*z0urou(L)
+       z0rou(k2) = z0rou(k2) + wcl(2,L)*z0urou(L)
+    end do
     !
     ! Calculate roughness based on bedforms.
     ! Either through input duneheight, dunelength or 
@@ -749,13 +759,13 @@ subroutine fm_calksc()
        par1 = kdpar(1)         ! scale factor ripples
        par2 = kdpar(2)         ! scale factor mega-ripples
        par3 = kdpar(3)         ! scale factor dunes
-       par4 = kdpar(4)*60d0    ! relaxation time scale ripples (minutes to sec)
-       par5 = kdpar(5)*60d0    ! relaxation time scale mega-ripples (minutes to sec)
-       par6 = kdpar(6)*60d0    ! relaxation time scale dunes (minutes to sec)
+       par4 = kdpar(4)*tfac    ! relaxation time scale ripples (Tunit to sec)
+       par5 = kdpar(5)*tfac    ! relaxation time scale mega-ripples (Tunit to sec)
+       par6 = kdpar(6)*tfac    ! relaxation time scale dunes (Tunit to sec)
        !
-       relaxr  = exp(- dt_max / max(1.0e-20_fp, par4))
-       relaxmr = exp(- dt_max / max(1.0e-20_fp, par5))
-       relaxd  = exp(- dt_max / max(1.0e-20_fp, par6))
+       relaxr  = exp(- dt_user / max(1.0e-20_fp, par4))
+       relaxmr = exp(- dt_user / max(1.0e-20_fp, par5))
+       relaxd  = exp(- dt_user / max(1.0e-20_fp, par6))
        !
        maxdepfrac = 0.05d0
        if (v2dwbl>0 .and. jawave>0 .and. kmx>0) then
@@ -768,12 +778,12 @@ subroutine fm_calksc()
           maxdepfrac = 0.5d0                   
        endif   
        !
-       do k = 1, ndx
-          if ((s1(k)-bl(k))>epshs) then
-              depth = s1(k)-bl(k)
-!             !
-!             ! Velocity in zeta point
-!             !
+       do k = 1, ndxi 
+          depth = s1(k)-bl(k)
+          if (depth>epshs) then
+             !
+             ! Velocity in zeta point
+             !
              call getkbotktop(k, kb, kt)
              kmaxx = kb
              !
@@ -801,8 +811,7 @@ subroutine fm_calksc()
                 u2dh = umod
              else    
                 zz   = 0.5*(zws(kmaxx)+zws(kmaxx-1))-bl(k)
-                u2dh = (umod/depth*((depth + z0rou(k))*log(1d0 + depth/z0rou(k)) - depth)) &
-                     & / log(1d0 + zz/z0rou(k))
+                u2dh = umod*(log((1d0+hs(k))/z0rou(k))-1d0)/(log(zz/z0rou(k))-1d0)
              endif
              !
              if (jawave>0 .and. .not. flowWithoutWaves) then
@@ -811,7 +820,7 @@ subroutine fm_calksc()
                 if (arg > 50.0_fp) then
                    uw = 0.0_fp
                 else
-                   uw = 2.0_fp * pi * hh / (2.0_fp * sinh(arg) * twav(k))
+                   uw = 2.0_fp * pi * hh / (2.0_fp * sinh(arg) * max(twav(k),0.1))
                 endif
                 rr    = -0.4_fp*hh/depth + 1.0_fp
                 umax  = rr * 2.0_fp * uw
@@ -819,7 +828,7 @@ subroutine fm_calksc()
                 uu    = umax / (ag*depth)**0.5_fp
                 a11   = -0.0049_fp*t1**2 - 0.069_fp*t1 + 0.2911_fp
                 raih  = max(0.5_fp  , -5.25_fp - 6.1_fp*tanh(a11*uu-1.76_fp))
-                rmax  = max(0.62_fp , min(0.75_fp , -2.5_fp*depth/rlabda(k)+0.85_fp))
+                rmax  = max(0.62_fp , min(0.75_fp , -2.5_fp*depth/max(rlabda(k),0.1)+0.85_fp))
                 uon   = umax * (0.5_fp+(rmax-0.5_fp)*tanh((raih-0.5_fp)/(rmax-0.5_fp)))
                 uoff  = umax - uon
                 uon   = max(1.0e-5_fp , uon)
@@ -849,25 +858,29 @@ subroutine fm_calksc()
              fcoarse = min((0.25_fp*dgravel/d50l)**1.5_fp , 1.0_fp)
              !
              uwc     = sqrt(uwbih**2 + u2dh**2)
-             d50l     = min(d50l,0.0005_fp)
-             d50l     = max(d50l,0.0001_fp)
+             d50l    = min(d50l,0.0005_fp)
+             d50l    = max(d50l,0.0001_fp)
              psi     = uwc**2/(rwe*ag*d50l)
              !
              ! Small-scale ripples
              !
-             if (psi <= 50.0_fp) then
-                rksr0 = 150.0_fp * fcoarse * d50l
-             elseif (psi >= 250.0_fp) then
-                rksr0 = 20.0_fp * fcoarse * d50l
+             if (par1>0.0_fp) then
+                if (psi <= 50.0_fp) then
+                   rksr0 = 150.0_fp * fcoarse * d50l
+                elseif (psi >= 250.0_fp) then
+                   rksr0 = 20.0_fp * fcoarse * d50l
+                else
+                   rksr0 = (182.5_fp-0.65_fp*psi) * fcoarse * d50l
+                endif
+                if (d50l < dsilt) then
+                   rksr0 = 20_fp * dsilt
+                endif
+                rksr0    = min(max(d90l , rksr0) , 0.02_fp*depth)
+                rksr0    = rksr0 * par1
              else
-                rksr0 = (182.5_fp-0.65_fp*psi) * fcoarse * d50l
+                rksr0 = 0.01_fp
              endif
-             if (d50l < dsilt) then
-                rksr0 = 20_fp * dsilt
-             endif
-             rksr0    = min(max(d90l , rksr0) , 0.02_fp*depth)
-             rksr0    = rksr0 * par1
-             rksr(k) = relaxr*rksr(k) + (1.0_fp-relaxr)*rksr0
+             rksr(k)  = relaxr*rksr(k) + (1.0_fp-relaxr)*rksr0
              !
              ! Mega-ripples
              !
@@ -891,20 +904,20 @@ subroutine fm_calksc()
                    rksmr0 = 0.0_fp
                 endif
              endif
-!             !
-!             ! In revision 7868, the following code was commented out because it doesn't
-!             ! match the paper of Van Rijn(2007). The following code may, however, be needed
-!             ! to solve some issues in shallow areas, so for the time being we leave it in
-!             ! such that it can be reactivated easily when needed.
-!             !
-             !if (depth <= 1.0_fp) then
-             !   rksmr0 = rksmr0 * depth
-             !endif
-             !if (d50l < dsilt) then
-             !   rksmr0 = 0.0_fp
-             !endif
+             !
+             ! In revision 7868, the following code was commented out because it doesn't
+             ! match the paper of Van Rijn(2007). The following code may, however, be needed
+             ! to solve some issues in shallow areas, so for the time being we leave it in
+             ! such that it can be reactivated easily when needed.
+             !
+             if (depth <= 1.0_fp) then
+                rksmr0 = rksmr0 * depth
+             endif
+             if (d50l < dsilt) then
+                rksmr0 = 0.0_fp
+             endif
              rksmr0    = min(0.2_fp, rksmr0*par2)
-             rksmr(k) = relaxmr*rksmr(k) + (1.0_fp-relaxmr)*rksmr0
+             rksmr(k)  = relaxmr*rksmr(k) + (1.0_fp-relaxmr)*rksmr0
              !
              ! Dunes
              !
@@ -920,19 +933,6 @@ subroutine fm_calksc()
              else
                 rksd0 = 0.0_fp
              endif
-             !
-             ! In revision 7868, the following code was commented out because it doesn't
-             ! match the paper of Van Rijn(2007). The following code may, however, be needed
-             ! to reproduce some projects, so for the time being we leave it in such that
-             ! it can be reactivated easily when needed.
-             !
-             !if (d50 < dsilt) then
-             !   rksd0 = 0.0_fp
-             !elseif (d50 <= 1.5_fp*dsand) then
-             !   rksd0 = 200.0_fp * (d50 / (1.5_fp * dsand)) * d50
-             !else
-             !   rksd0 = 0.0_fp
-             !endif
              rksd(k)  = relaxd*rksd(k) + (1.0_fp-relaxd)*rksd0
           else
              rksr(k)  = 0.01_fp
@@ -957,7 +957,7 @@ subroutine fm_calksc()
           if (hs(nm) .gt. epshs) then
              dunelength(nm) = max(dunelength(nm),1e-6_fp)
              t1 = 1.0_fp - exp(-25.0_fp*duneheight(nm)/dunelength(nm))
-             rksd(nm) = 1.1_fp*duneheight(nm)*t1
+             rksd(nm)  = 1.1_fp*duneheight(nm)*t1
              rksmr(nm) = 0.0_fp
              rksr(nm)  = 3.0_fp*d90l
           else
@@ -991,6 +991,14 @@ subroutine fm_calksc()
           endif
        enddo
     end select
+ 
+    do L = lnxi+1, lnx
+       kb = ln(1,L)
+       ki = ln(2,L)
+       rksr(kb)  = rksr(ki)
+       rksmr(kb) = rksmr(ki)
+       rksd(kb)  = rksd(ki)
+    enddo   
     
 1234 continue
 
@@ -1000,7 +1008,7 @@ end subroutine fm_calksc
 subroutine fm_advecbedform(thevar, uadv, qadv, bedform_sour, bedform_sink, limityp, ierror)
    use m_transport
    use m_flowgeom,   only: Ndx, Ndxi, Lnxi, Lnx, ln, nd, ba, wu  ! static mesh information
-   use m_flow,       only: Ndkx, Lnkx, au, qw, zws, kbot, ktop, Lbot, Ltop,  kmxn, kmxL, kmx, viu, vicwws, plotlin, vol1
+   use m_flow,       only: Ndkx, Lnkx, au, qw, zws, kbot, ktop, Lbot, Ltop,  kmxn, kmxL, kmx, viu, vicwws, plotlin, vol1,epshu
    use m_flowtimes,  only: dts, ja_timestep_auto
    use m_physcoef,   only: dicoww, vicouv, difmolsal
    use m_transport
@@ -1078,8 +1086,6 @@ subroutine fm_advecbedform(thevar, uadv, qadv, bedform_sour, bedform_sink, limit
    call realloc(dumy, Ndx, keepExisting=.true., fill=0d0)
    
 !  construct advective velocity field --> uadv, qadv, mind the orientation (>0 from ln(1,L) to ln(2,L))
-   dtol = 1d-8
- 
    do L=1,Lnx
       k1 = ln(1,L)
       k2 = ln(2,L)
@@ -1094,7 +1100,7 @@ subroutine fm_advecbedform(thevar, uadv, qadv, bedform_sour, bedform_sink, limit
    end do
       
    do k=1,Ndx
-      dvoli = 1d0/max(vol1(k),dtol)
+      dvoli = 1d0/max(vol1(k),epshu*ba(k))
       const_sourbf(1,k) = bedform_sour(k) - thevar(1,k)*bfsq(k)*dvoli
       const_sinkbf(1,k) = bedform_sink(k)
    end do

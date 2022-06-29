@@ -32,7 +32,7 @@
 module unstruc_netcdf_map_class
 use precision, only : hp
 use precision_basics, only : comparereal
-use m_flow, only : s1, hs, ucmag, workx, worky, ndkx, kmx
+use m_flow, only : s1, hs, ucmag, workx, worky, ndkx, kmx, ucx, ucy
 use m_flowtimes, only : map_classes_s1, map_classes_hs, map_classes_ucmag, map_classes_ucdir, ti_classmape, ti_classmaps, ti_classmap, Tudunitstr
 use m_flowgeom, only : ndx, ndxi
 use m_cell_geometry, only : ndx2d
@@ -161,7 +161,7 @@ end subroutine reset_unstruc_netcdf_map_class
       if (unc_nounlimited > 0) then
          ierr = nf90_def_dim(incids%ncid, 'time', ceiling((ti_classmape-ti_classmaps)/ti_classmap) + 1, incids%id_tsp%id_timedim)
       else
-         ierr = nf90_def_dim(incids%ncid, 'time', nf90_unlimited, incids%id_tsp%id_timedim)
+      ierr = nf90_def_dim(incids%ncid, 'time', nf90_unlimited, incids%id_tsp%id_timedim)
       end if
 
       ierr = nf90_inq_dimid(incids%ncid, 'Two', id_twodim)
@@ -224,7 +224,7 @@ end subroutine reset_unstruc_netcdf_map_class
    if (nclasses_ucdir > 0 .and. kmx == 0) then
       allocate(current_ucdir(ndx))
       allocate(ucdir(ndkx))
-      call getucxucyeulmag(ndkx, workx, worky, ucdir, jaeulervel, 0) ! NOTE: ucdir is only dummy placeholder for returned ucmag, not needed here.
+      call getucxucyeulmag(ndkx, workx, worky, ucdir, jaeulervel, 0)! NOTE: ucdir is only dummy placeholder for returned ucmag, not needed here.
       do i = 1, ndkx ! only works for ndkx==ndx in 2D mode now
          angle = atan2(workx(i), worky(i))
          ! CF:  The direction is a bearing in the usual geographical sense, measured positive clockwise from due north.

@@ -47,7 +47,7 @@
 
 
  k1  = ln(1,L) ; k2 = ln(2,L)
- if (bob0(1,L) < bob0(2,L)) then
+  if (bob0(1,L) < bob0(2,L)) then
     BL1 = bob0(1,L); BL2 = bob0(2,L)
  else
     BL1 = bob0(2,L); BL2 = bob0(1,L)
@@ -79,24 +79,24 @@
  else
     if (hu(L) > 0d0) then
 
-       hpr1    = hu(L)
+    hpr1    = hu(L)
 
-       if (jaconveyance2D > 0) then
+    if (jaconveyance2D > 0) then
 
-          jaconv = min(2,jaconveyance2D)
-          frcn = frcu(L) ; ifrctyp = ifrcutp(L)
-          CALL getprof2d(hpr1,wu2,b21,ai,frcn,ifrctyp, widu,aru,aconvu,jaconv, beta, deltaa,hyr)
+       jaconv = min(2,jaconveyance2D)
+       frcn = frcu(L) ; ifrctyp = ifrcutp(L)
+       CALL getprof2d(hpr1,wu2,b21,ai,frcn,ifrctyp, widu,aru,aconvu,jaconv, beta, deltaa,hyr)
 
-          if (frcn >  0) then
-              cfuhi(L) = aifu(L)*ag*aconvu
-          else
-              cfuhi(L) = 0d0
-          endif
-          au(L) = aru
+       if (frcn >  0) then
+           cfuhi(L) = aifu(L)*ag*aconvu
        else
-          au(L) = hpr1*wu(L)
+           cfuhi(L) = 0d0
        endif
+       au(L) = aru
+    else
+       au(L) = hpr1*wu(L)
     endif
+ endif
 
     if(network%loaded) then
        ! Only in case of a 1d-network, vol1 and vol1_f can be different

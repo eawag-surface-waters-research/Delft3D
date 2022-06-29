@@ -44,7 +44,7 @@
  use m_alloc
  use unstruc_files, only : basename
  use m_orthosettings
- use m_xbeach_data, only: swave, Lwave, itheta_view
+ use m_xbeach_data, only: itheta_view
  use m_heatfluxes
  use unstruc_boundaries
  use m_partitioninfo
@@ -59,14 +59,14 @@
  use sorting_algorithms, only: indexx
  use m_flowtimes, only: ti_waq
  use gridoperations
- use m_flow, only : numlimdt, numlimdt_baorg, a1ini
+ use m_flow, only : numlimdt, numlimdt_baorg
  use m_oned_functions
  use unstruc_channel_flow, only : network
- use m_dad, only: dad_included
  use m_sediment, only: stm_included
  use m_flowtimes, only: handle_extra
  use Timers
  use m_structures
+ use unstruc_messages
 
  implicit none
 
@@ -75,42 +75,36 @@
  character(len=100)      :: fnam
 
  ! locals
- integer                 :: m,n,k,k1,k2,k3,k4,L,Lf,LL,LLL,ierr,i12,nn,ja,kh, numswap, Li, n12, kk, La
- integer                 :: n1, n2, n1a, n2a, jaslopes, ja1D, ka, kb, k1n, k2n
- integer                 :: mcel                     ! unit nr Cells And Links file
- integer                 :: jarcinfo  = 1
- integer                 :: makecelfile, nc1, nc2, nex
- double precision        :: zzz, sig                 ! for bottom level help
+ integer                 :: m,n,k,k1,k2,k3,k4,L,Lf,LL,LLL,ierr,nn,ja,kh, numswap, n12, La
+ integer                 :: n1, n2, n1a, n2a, ja1D, ka, kb, k1n, k2n
+ integer                 :: nc1, nc2, nex
+ double precision        :: sig                      ! for bottom level help
  double precision        :: dxn1e                    ! node 1 - edge distance
  double precision        :: dxn2e                    ! node 2 - edge distance
  double precision        :: x12, y12                 ! link center coordinates
- double precision        :: x34, y34                 ! face center coordinates
  double precision        :: rn,rt                    ! for link L, normal and tangent base vectors
  double precision        :: rnl,rtl                  ! for other links LL, normal and tangent base vectors
- double precision        :: fi,fix,fiy               ! weight factor inverse area (m2)
- double precision        :: fil                      ! distance center to edge times edge width (m2)
- double precision        :: si, prodin               ! sign to make all links either incoming or outgoing, see down
  double precision        :: ortho, avortho           ! inner product of link and face
- double precision        :: af, csza                 ! only for subr readyy
- double precision        :: askew, aflat, triskew,triflat, bla, xza, yza, xx(6), yy(6), zz(2)          ! for skewness
- logical                 :: jawel                    ! filecheck
+ double precision        :: af                       ! only for subr readyy
+ double precision        :: xx(6), yy(6)             ! for skewness
  logical                 :: isbadlink                ! Bad link (e.g. too short)
+ logical                 :: noncrossinglink          ! At least 1 1D2D link fails to cross a 2D cell face
  character(len=5)        :: txt
  integer, allocatable    :: inonlin(:)               ! Array of nonLin1D, nonLin2D and nonLin, used for MPI communication
 
- integer                 :: nw, L1, L2, LLA , nw11   ! wall stuff
+ integer                 :: nw, L1, L2, LLA          ! wall stuff
  integer                 :: icn                      ! corner stuff
- integer                 :: kk1,kk2,kk3 , mout       ! banf stuff
+ integer                 :: kk1,kk2,kk3              ! banf stuff
  double precision        :: dlength, dlenmx, dxorgL
- double precision        :: dxx, dyy, rrr, cs, sn, dis, c11, c22, c12, xn, yn, xt, yt, rl, sf, hdx, alfa, dxlim, dxlink
- double precision        :: atpf_org, circumormasscenter_org, phase, zkk
+ double precision        :: rrr, cs, sn, dis, xn, yn, xt, yt, rl, sf, hdx, alfa, dxlim, dxlink
+ double precision        :: phase
  double precision        :: xref, yref
- integer                 :: itatp_org, jaend ! , jarerun=0
+ integer                 :: jaend  
  double precision        :: weirheight, weirlength
 
  double precision, allocatable :: banh(:) , rr(:)       ! temp
  integer         , allocatable :: nbanh(:,:) , nr(:)    ! temp
- 
+
  integer, dimension(:), allocatable :: nw_temp
  integer                            :: nwx
 
@@ -126,6 +120,8 @@
  COMMON /DRAWTHIS/ ndraw(50)
 
  if (numk <= 2 .or. numl <= 1 ) return               ! only do this for sufficient network
+
+ noncrossinglink = .false.
 
  do L = 1, numL   ! isolated 1D netlink not allowed for now, crash in parallel, please check and repair
     k1 = kn(1,L) ; k2 = kn(2,L) ; k3 = kn(3,L)
@@ -535,10 +531,16 @@
                 nc2 = n1a
              endif
              call WHICH2DNETLINKWASCROSSED(nc2,k1,k2,LL )  ! TEMP STORE CROSSED 2d NETLINK IN LC
-             if (lnn(LL) == 2) then
-                call dumpnetlink('netlink kn3==4 not on border of 2D net ', LL)
+             if (LL>0) then
+                if (lnn(LL) == 2) then
+                   call dumpnetlink('netlink kn3==4 not on border of 2D net ', LL)
+                endif
+                ln2lne(LF) = LL                               ! refer back to crossed 2D netlink instead of to 1D netlink
+             else
+                write (msgbuf, '(a,i0)') 'Could not find crossing with 2D cell boundary for 1D2D link ', L
+                call mess(LEVEL_WARN,trim(msgbuf))
+                noncrossinglink=.true.
              endif
-             ln2lne(LF) = LL                               ! refer back to crossed 2D netlink instead of to 1D netlink
           else                                             ! 1D link
              kcu(Lf) = 1
           endif
@@ -584,6 +586,10 @@
        lne2ln(L)  = -n1
     endif
  enddo
+
+ if (noncrossinglink) then
+    call mess(LEVEL_ERROR,'One or more 1D2D links found that do not cross a 2D cell face.')
+ endif
 
  call addexternalboundarypoints()                    ! add links due to open boundaries
 
@@ -1107,23 +1113,23 @@
        walls(1,nw) = k1                             ! waterlevel point on the inside
        walls(2,nw) = k3                             ! first wall corner
        walls(3,nw) = k4                             ! second wall corner
-       
+
        if (iPerot == -1) then
-          nwx = nd(k1)%nwx
-          if (nd(k1)%nwx == 0) then
-             allocate (nd(k1)%nw(1))
-             nd(k1)%nw(1) = nw
-             nd(k1)%nwx = 1
-          else
-             allocate (nw_temp(nwx))
-             nw_temp = nd(k1)%nw
-             deallocate (nd(k1)%nw)
-             allocate (nd(k1)%nw(nwx+1))
-             nd(k1)%nw(1:nwx) = nw_temp(1:nwx)
-             nd(k1)%nw(nwx+1) = nw
-             nd(k1)%nwx = nd(k1)%nwx + 1
-             deallocate (nw_temp)
-          endif
+       nwx = nd(k1)%nwx
+       if (nd(k1)%nwx == 0) then
+          allocate (nd(k1)%nw(1))
+          nd(k1)%nw(1) = nw
+          nd(k1)%nwx = 1
+       else
+          allocate (nw_temp(nwx))
+          nw_temp = nd(k1)%nw
+          deallocate (nd(k1)%nw)
+          allocate (nd(k1)%nw(nwx+1))
+          nd(k1)%nw(1:nwx) = nw_temp(1:nwx)
+          nd(k1)%nw(nwx+1) = nw
+          nd(k1)%nwx = nd(k1)%nwx + 1
+          deallocate (nw_temp)
+       endif
        endif
 
        call duitpl(xzw(k1), yzw(k1), xk(k3), yk(k3), xzw(k1), yzw(k1), xk(k4), yk(k4), sig, jsferic)
@@ -1431,13 +1437,6 @@
     ! now that ntheta is determined:
     itheta_view = max(ntheta/2, 1)
  end if
-
- !call makeba()
- !sf = ba(4) / ba(1588)
- !write(*,*) sf
-
- !sf = ba(96) / ba(1674)
- !write(*,*) sf
 
  blmin = minval(bl)
 

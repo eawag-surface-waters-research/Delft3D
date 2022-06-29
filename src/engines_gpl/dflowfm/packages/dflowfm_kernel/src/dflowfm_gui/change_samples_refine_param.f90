@@ -69,7 +69,7 @@ subroutine change_samples_refine_param(jacancelled)
    external :: highlight_form_line
 
    jacancelled = 0
-   NLEVEL      = 4
+   NLEVEL    = 4
    
    text = ''
    WRITE(text, "('TYPE: RIDGES (', I1, '), WAVE COURANT NUMBER (', I1,  ')')") ITYPE_RIDGE, ITYPE_WAVECOURANT
@@ -169,13 +169,13 @@ subroutine change_samples_refine_param(jacancelled)
       CALL IFORMATTRIBUTEN(IR,0,0,7)
    ENDDO
 
-   CALL IFORMPUTINTEGER(2*1 , irefinetype,  '(F12.3)')
-   CALL IFORMPUTDOUBLE (2*4 , threshold,    '(F12.3)')
-   CALL IFORMPUTDOUBLE (2*5 , thresholdmin, '(F12.3)')
-   CALL IFORMPUTDOUBLE (2*6 , hmin,         '(F12.3)')
-   CALL IFORMPUTINTEGER(2*7 , Nsamplesmooth)
+   CALL IFORMPUTINTEGER(2*1, irefinetype,  '(F12.3)')
+   CALL IFORMPUTDOUBLE(2*4,  threshold,    '(F12.3)')
+   CALL IFORMPUTDOUBLE(2*5,  thresholdmin, '(F12.3)')
+   CALL IFORMPUTDOUBLE(2*6,  hmin,         '(F12.3)')
+   CALL IFORMPUTINTEGER(2*7, Nsamplesmooth)
 
-   CALL IFORMPUTDOUBLE (2*10, Dt_maxcour,   '(F12.3)')
+   CALL IFORMPUTDOUBLE(2*10, Dt_maxcour,         '(F12.3)')
    CALL IFORMPUTDOUBLE (2*11, Dx_mincour,   '(F12.3)')
    CALL IFORMPUTINTEGER(2*12, jadirectional)
    CALL IFORMPUTINTEGER(2*13, jaoutsidecell)
@@ -218,13 +218,13 @@ subroutine change_samples_refine_param(jacancelled)
        CALL HELP(WRDKEY,NLEVEL)
    ELSE IF (KEY .EQ. 22 .OR. KEY .EQ. 23) THEN
        IF (KEY .EQ. 22) THEN
-           CALL IFORMGETINTEGER(2*1  , irefinetype)
-           CALL IFORMGETDOUBLE (2*4  , threshold)
-           CALL IFORMGETDOUBLE (2*5  , thresholdmin)
-           CALL IFORMGETDOUBLE (2*6  , hmin)
-           CALL IFORMGETINTEGER(2*7  , Nsamplesmooth)
+           CALL IFORMGETINTEGER(2*1, irefinetype)
+           CALL IFORMGETDOUBLE(2*4 , threshold)
+           CALL IFORMGETDOUBLE(2*5 , thresholdmin)
+           CALL IFORMGETDOUBLE(2*6 , hmin)
+           CALL IFORMGETINTEGER(2*7 , Nsamplesmooth)
 
-           CALL IFORMGETDOUBLE (2*10 , Dt_maxcour)
+           CALL IFORMGETDOUBLE(2*10 , Dt_maxcour)
            CALL IFORMGETDOUBLE (2*11 , Dx_mincour)
            CALL IFORMGETINTEGER(2*12 , jadirectional)
            CALL IFORMGETINTEGER(2*13 , jaoutsidecell)

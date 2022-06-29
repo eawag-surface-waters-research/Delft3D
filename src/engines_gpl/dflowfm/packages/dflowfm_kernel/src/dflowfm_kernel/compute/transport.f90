@@ -195,35 +195,35 @@ subroutine transport()                           ! transport for now, advect sal
 
  endif
 
- call apply_tracer_bc()
- call update_constituents(0) ! do all constituents
+       call apply_tracer_bc()
+       call update_constituents(0) ! do all constituents
 
-  if ( jasal.gt.0 ) then    !  compute salt error
+    if ( jasal.gt.0 ) then    !  compute salt error
 
-      sam0tot = sam1tot
-      sam1tot = 0d0
+       sam0tot = sam1tot
+       sam1tot = 0d0
 
-     !$OMP PARALLEL DO                &
-     !$OMP PRIVATE(kk,kb,kt,km,k)     &
-     !$OMP REDUCTION(+:sam1tot)
-     do kk = 1,ndxi
-        call getkbotktop(kk,kb,kt)
-        if ( kt < kb ) cycle
-        if ( vol1(kb) < eps10 ) cycle
-        km = kt - kb + 1
+       !$OMP PARALLEL DO                &
+       !$OMP PRIVATE(kk,kb,kt,km,k)     &
+       !$OMP REDUCTION(+:sam1tot)
+       do kk = 1,ndxi
+          call getkbotktop(kk,kb,kt)
+          if ( kt < kb ) cycle
+          if ( vol1(kb) < eps10 ) cycle
+          km = kt - kb + 1
 
-        do k = kb,kt
+          do k = kb,kt
             sam1tot = sam1tot + constituents(isalt,k)*vol1(k)
-        enddo
-     enddo
-     !$OMP END PARALLEL DO
+          enddo
+       enddo
+       !$OMP END PARALLEL DO
 
-      saminbnd = 0d0 ; samoutbnd = 0d0
+       saminbnd = 0d0 ; samoutbnd = 0d0
 
-      do LL = lnxi + 1, 0 !  lnx                                ! copy on outflow
+       do LL = lnxi + 1, 0 !  lnx                                ! copy on outflow
           call getLbotLtop(LL,Lb,Lt)
           if (Lt < Lb) then
-              cycle
+             cycle
           endif
           do L = Lb, Lt
              kb = ln(1,L) ; ki = ln(2,L)
@@ -235,14 +235,14 @@ subroutine transport()                           ! transport for now, advect sal
           enddo
        enddo
        samerr = sam1tot - sam0tot !  - saminbnd + samoutbnd
-   endif
+    endif
 
 
   ! !$OMP PARALLEL DO             &
   ! !$OMP PRIVATE(kk)
-   do kk = 1,ndx ! i
+    do kk = 1,ndx ! i
       call setrhokk(kk)  
-   enddo
+       enddo
   ! !$OMP END PARALLEL DO
 
    if (stm_included) then 
@@ -251,31 +251,31 @@ subroutine transport()                           ! transport for now, advect sal
        do kk = 1,ndx ! i5
          call getkbotktop(kk,kb,kt)
          do k = kt+1 , kb + kmxn(kk) - 1
-            rhowat(k) = rhowat(kt)    ! UNST-5170
-         enddo
-      enddo
-      !$OMP END PARALLEL DO
+         rhowat(k) = rhowat(kt)    ! UNST-5170
+       enddo
+    enddo
+    !$OMP END PARALLEL DO
    endif
  
-   ! propagate rho
-   if (jabaroctimeint == 5) then  ! rho advection
+    ! propagate rho
+    if (jabaroctimeint == 5) then  ! rho advection
        dts  = 0.5d0*dts
        if (jarhoxu > 0) then
-           rho0 = rho
+          rho0 = rho
        endif
        call update_constituents(1) ! do rho only
        dts = 2.0d0*dts
-   endif
-
+    endif
+  
 ! endif ! came from if (jasal > 0 .or. jatem > 0) then line 676, a jump to inside a check, I remove this check for clarity
  
  if (jarhoxu > 0 .and. jacreep == 1) then
-     do LL = 1,lnx
-        do L = Lbot(LL), Ltop(LL)
-           k1 = ln(1,L) ; k2 = ln(2,L)
-           rhou(L) = 0.5d0*( rho(k1) + rho(k2) )
-        enddo
-     enddo
+    do LL = 1,lnx
+       do L = Lbot(LL), Ltop(LL)
+          k1 = ln(1,L) ; k2 = ln(2,L)
+          rhou(L) = 0.5d0*( rho(k1) + rho(k2) )
+       enddo
+    enddo
  endif
  
  if (jased > 0 .and. jased < 4) then
@@ -453,4 +453,4 @@ subroutine transport()                           ! transport for now, advect sal
 
  call timstop(handle_extra(52)) ! transport
 
- end subroutine transport
+   end subroutine transport

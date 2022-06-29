@@ -44,9 +44,9 @@ subroutine flow_trachyinit()
     use unstruc_model   ! (contains md_ptr)
     use m_flowparameters
     use m_flowgeom
-    use m_physcoef, only: ifrctypuni, frcuni
-    use m_flow, only: kmx, zslay, hs, ucx, ucy, z0urou
-    use m_flowtimes, only: dts, dt_user
+    use m_physcoef, only: ifrctypuni
+    use m_flow, only: kmx, zslay, z0urou
+    use m_flowtimes, only: dt_user
     use m_trachy   ! (FM module containing trachy data structure)
     use m_rdtrt    ! (contains dimtrt)
     use m_trtrou   ! (contains chktrt)
@@ -62,6 +62,7 @@ subroutine flow_trachyinit()
     use m_sferic, only: jsferic,jasfer3D
     use geometry_module, only: dbdistance, half
     use m_vegetation, only: jabaptist
+    use m_physcoef
     !
     implicit none
     !
@@ -74,7 +75,7 @@ subroutine flow_trachyinit()
     double precision, dimension(:), allocatable :: xuL       !< xu points on net-links
     double precision, dimension(:), allocatable :: yuL       !< yu points on net-links
     !
-    integer :: istat, ierror
+    integer :: istat
     integer :: itt
     integer :: k, kL, kR, k1, k2
     integer :: icrs
@@ -88,7 +89,6 @@ subroutine flow_trachyinit()
     integer :: threshold_abort_current
 
     double precision :: dummy_tunit = 1d0
-    double precision :: cz_dum, hh
     !
     logical :: lftrto
     logical :: error
@@ -127,19 +127,12 @@ subroutine flow_trachyinit()
     threshold_abort_current = threshold_abort
     threshold_abort = LEVEL_FATAL
     !
-    if (jawave==0 .or. flowWithoutWaves) then
-       do k = 1, ndx
-          hh = max(hs(k), epshs)
-          call getczz0(hh, frcuni, ifrctypuni, cz_dum, z0rou(k))
-       end do
-    else
-       z0rou = 0d0
-       do L=1,lnx
-          k1=ln(1,L); k2=ln(2,L)
-          z0rou(k1) = z0rou(k1) + wcl(1,L)*z0urou(L)
-          z0rou(k2) = z0rou(k2) + wcl(2,L)*z0urou(L)
-       enddo
-    end if
+    z0rou=0d0
+    do L=1,lnx
+       k1=ln(1,L); k2=ln(2,L)
+       z0rou(k1) = z0rou(k1) + wcl(1,L)*z0urou(L)
+       z0rou(k2) = z0rou(k2) + wcl(2,L)*z0urou(L)
+    enddo
     !
                                                                ! Delft3D       sig        FM      slay        at centre cell (FM)         conversion FM to Delft3D style
                                                                !             0 = top             1 = top

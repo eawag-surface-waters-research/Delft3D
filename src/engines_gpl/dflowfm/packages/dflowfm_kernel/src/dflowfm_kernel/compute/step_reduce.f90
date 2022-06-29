@@ -42,11 +42,8 @@
  use m_ship
  use m_partitioninfo
  use m_timer
- use m_xbeach_data
  use MessageHandling
  use m_sobekdfm
- use unstruc_display
- use m_waves
  use m_subsidence
 
  implicit none
@@ -58,8 +55,8 @@
  integer            :: ja, k, ierror, n, kt, num, js1, noddifmaxlevm, nsiz
  character (len=40) :: tex
  logical            :: firstnniteration
- double precision   :: wave_tnow, wave_tstop, t0, t1, dif, difmaxlevm
- double precision   :: hw,tw, uorbi,rkw,ustt,hh,cs,sn,thresh
+ double precision   :: dif, difmaxlevm
+ double precision   :: thresh
 
  character(len=128) :: msg
 
@@ -278,72 +275,9 @@
  hs = s1-bl
  hs = max(hs,0d0)
 
-
-  if ((jawave==3 .or. jawave==6) .and. .not. flowWithoutWaves) then
-    ! Normal situation: use wave info in FLOW
-    ! 3D not implementend
-    if( kmx == 0 ) then
-       call wave_comp_stokes_velocities()
-       call wave_uorbrlabda()                                          ! hwav gets depth-limited here
-       call tauwave()
-    end if
-    call setwavfu()
-    call setwavmubnd()
- end if
-
-  if ((jawave==3 .or. jawave==6) .and. flowWithoutWaves) then
-    ! Exceptional situation: use wave info not in FLOW, only in WAQ
-    ! Only compute uorb
-    ! Works both for 2D and 3D
-    call wave_uorbrlabda()                       ! hwav gets depth-limited here
-  end if
-
-  if (jawave.eq.4 .and. jajre.eq.1 .and. .not. flowWithoutWaves) then
-    if (swave.eq.1 ) then
-       call xbeach_waves(ierror)
-    endif
-    call tauwave()
-    if ( jaGUI.eq.1 ) then                                          ! this part is for online visualisation
-       if (ntek > 0) then
-          if (mod(int(dnt_user),ntek) .eq. 0) then
-             call wave_makeplotvars()                                ! Potentially only at ntek interval
-          end if
-       endif
-    endif
-    if (jamombal==1) then
-       call xbeach_mombalance()
-    endif
-  end if
-
-  if (jawave==5 .and. .not. flowWithoutWaves) then
-    if (kmx==0) then
-       do k=1,ndx
-          hwav(k) = min(hwavuni, gammax*(s1(k)-bl(k)))
-       enddo
-       do L=1,lnx
-          k1=ln(1,L); k2=ln(2,L)
-          hh = hu(L); hw=0.5d0*(hwav(k1)+hwav(k2));tw=.5d0*(twav(k1)+twav(k2))
-          cs = 0.5*(cos(phiwav(k1)*dg2rd)+cos(phiwav(k2)*dg2rd))
-          sn = 0.5*(sin(phiwav(k1)*dg2rd)+sin(phiwav(k2)*dg2rd))
-          call tauwavehk(hw, tw, hh, uorbi, rkw, ustt)
-          ustokes(L) = ustt*(csu(L)*cs + snu(L)*sn)
-          vstokes(L) = ustt*(-snu(L)*cs + csu(L)*sn)
-       enddo
-       do k=1,ndx
-          call tauwavehk(hwav(k), twav(k), hs(k), uorbi, rkw, ustt)
-          rlabda(k) = rkw; uorb(k) = uorbi
-       enddo
-       call tauwave()
-    endif
- endif
-
  if (jased > 0 .and. stm_included) then
     if ( jatimer.eq.1 ) call starttimer(IEROSED)
-    if (jawave==0) then
-       call settaubxu_nowave()         ! set taubxu for no wave conditions BEFORE erosed
-    endif
     !
-!    call setucxucyucxuucyu()
     call setucxucy_mor (u1)
     call fm_fallve()                   ! update fall velocities
     call fm_erosed()                   ! source/sink, bedload/total load

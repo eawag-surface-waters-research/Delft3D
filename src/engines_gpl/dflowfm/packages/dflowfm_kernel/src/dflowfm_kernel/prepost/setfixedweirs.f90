@@ -106,6 +106,7 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
  allocate (iweirtyp(lnx)) ; iweirtyp = 0
  allocate (ifirstweir(lnx)) ; ifirstweir = 1                       ! added to check whether fixed weir data is set for the first time at a net link (1=true, 0=false)
 
+
  call klok(t0)
  t_extra(1,1) = t0
 
@@ -320,15 +321,15 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
 
                           if (Lf > 0 .and. adjacentbob .ne. dmiss) then
                              if (jaconveyance2D >= 1) then 
-                                if (lncn(1,Lf) == n1) then
-                                    bob(1,Lf) = adjacentbob
-                                else
-                                    bob(2,Lf) = adjacentbob
-                                endif
-                             else 
+                             if (lncn(1,Lf) == n1) then
                                  bob(1,Lf) = adjacentbob
+                             else 
                                  bob(2,Lf) = adjacentbob
                              endif
+                             else
+                                 bob(1,Lf) = adjacentbob
+                                 bob(2,Lf) = adjacentbob
+                          endif
                              !nl1 = ln(1,Lf) ; nl2 = ln(2,Lf)
                              !bl(nl1) = min(bl(nl1), adjacentbob )
                              !bl(nl2) = min(bl(nl2), adjacentbob ) ! still needs to be done 
@@ -433,7 +434,7 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
           if (zc > zcrest(L)) then
              zcrest(L) = zc
              !! write (msgbuf,'(a,i5,f10.3)') 'Higher crest level: ', L,  zcrest(L); call msg_flush()
-          endif
+         endif
           if (jakol45/=0) then
              call normalout( XPL(k), YPL(k), XPL(k+1), YPL(k+1) , xn, yn, jsferic, jasfer3D, dmiss, dxymis)  ! test EdG
              zhu =  (1d0-sl)*dzl(k) + sl*dzl(k+1)
@@ -441,22 +442,22 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
              if (xn*csu(L) + yn*snu(L) < 0d0) then  ! check left/right
                 zh = zhd; zhd = zhu;  zhu = zh
              endif
-            !
-            ! Check whether toe is lower. If so, also adjust toe level and the ground height
-            ! If ground height is smaller than 1 cm, then this neglected
-            !
-            if (zc-zhu .lt. ztoeu(L) .and. zhu .gt. 0.01) then 
-               ztoeu(L)   = zc - zhu                            
-               dzsillu(L) = zcrest(L) - ztoeu(L)              
-               !! write (msgbuf,'(a,i5,f10.3)') 'Larger sill up:     ', L,  dzsillu(L); call msg_flush()
-            endif
-            if (zc-zhd .lt. ztoed(L) .and. zhd .gt. 0.01) then
-               ztoed(L)   = zc - zhd
-               dzsilld(L) = zcrest(L) - ztoed(L)
-               !! write (msgbuf,'(a,i5,f10.3)') 'Larger sill down:   ', L, dzsilld(L); call msg_flush()
-            endif
-          endif
+         !
+         ! Check whether toe is lower. If so, also adjust toe level and the ground height
+         ! If ground height is smaller than 1 cm, then this neglected
+         !
+         if (zc-zhu .lt. ztoeu(L) .and. zhu .gt. 0.01) then 
+            ztoeu(L)   = zc - zhu                            
+            dzsillu(L) = zcrest(L) - ztoeu(L)              
+            !! write (msgbuf,'(a,i5,f10.3)') 'Larger sill up:     ', L,  dzsillu(L); call msg_flush()
+         endif
+         if (zc-zhd .lt. ztoed(L) .and. zhd .gt. 0.01) then
+            ztoed(L)   = zc - zhd
+            dzsilld(L)  = zcrest(L) - ztoed(L)
+            !! write (msgbuf,'(a,i5,f10.3)') 'Larger sill down:   ', L, dzsilld(L); call msg_flush()
+         endif
        endif
+    endif
     endif
     !! write (msgbuf,'(a,2i5,7f10.3)') 'Projected fixed weir', L, iweirtyp(L), zcrest(L), ztoeu(L), dzsillu(L),ztoed(L),dzsilld(L),taludu(L),taludd(L); call msg_flush()
 
@@ -525,7 +526,7 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
            call setfixedweirscheme3onlink(L)
            if (ifixedweirscheme == 7) then
                iadv(L) = 23
-           endif
+    endif
        endif
 
     endif

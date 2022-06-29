@@ -38,18 +38,17 @@
  use m_sediment
  use m_missing
  use m_partitioninfo
- use m_xbeach_data !, only: ee1, rr, ee1sum, H, Fx_cc, Fy_cc
+ use m_xbeach_data
  use m_transportdata
  use m_missing
  use m_observations
  use bedcomposition_module
  use precision
- use m_waves, only: waveparopt, numoptwav
+ use m_waves
  use m_flowparameters, only: ispirparopt
  use m_sferic, only:pi , rd2dg
  use m_wind, only: jawind
  use unstruc_display, only: grwhydopt
-
 
  implicit none
 
@@ -57,9 +56,10 @@
  integer          :: ndraw
 
  integer          :: kk, k, nodval,N,L, k2
- double precision :: uu, seq(mxgr), wse(mxgr),hsk, dum, czc, taucurc,ustw2,U10,FetchL,FetchD
+ double precision :: uu, seq(mxgr), wse(mxgr),hsk, dum, czc, taucurc,ustw2,U10,FetchL,FetchD,rkk, shs
  real(fp)       , dimension(:,:)   , pointer :: bedtmp
  integer :: istat, jawaveswartdelwaq_local
+ double precision, external :: sinhsafei
 
  nodval = ndraw(28)
 
@@ -122,8 +122,8 @@
        znod = sgrw1( kk )
     endif
  else if (nodval == 14) then
-    if (hs(k) > 0) then
-       znod = sqrt( ucx(k)*ucx(k) + ucy(k)*ucy(k) ) / sqrt(ag*hs(k)) ! Froude
+    if (hs(kk) > 0) then
+       znod = sqrt( ucx(k)*ucx(k) + ucy(k)*ucy(k) ) / sqrt(ag*hs(kk)) ! Froude
     else
        znod = 0d0
     endif
@@ -155,8 +155,6 @@
  else if (nodval == 26) then
     if (squ(k) > 0d0 .and. vol1(k) > 0d0 ) then
        znod = vol1(k) /squ(k)
-     else
-       znod = dmiss
      endif
 else if (nodval == 27) then
     if (kmx>1) znod = vicwws(k)
@@ -188,9 +186,6 @@ else if (nodval == 27) then
 
  else if (nodval == 34) then
     znod = volerror(k)
-    !if (abs(znod) > 1) then
-    !   znod = 0d0
-    !endif
  else if (nodval == 35) then
 
     znod = rho(k) ! sam0(k) !  kktop(kk) - kbot(kk) + 1
@@ -313,7 +308,7 @@ else if (nodval == 27) then
                 call gettau2(kk,taucurc,czc,ustw2,jawaveswartdelwaq)
                 znod = taucurc                ! taus to Delwaq
         case(8)
-                znod = ustk(kk)               ! Ustokes
+                znod = dmiss                  ! Ustokes
         case(9)
                 call getfetch(kk,U10,FetchL,FetchD)
                 znod = FetchL
@@ -323,199 +318,142 @@ else if (nodval == 27) then
       end select
 
     else
-     call wave_makeplotvars()
      select case (waveparopt)
-       case (1)
-          if (jawave.ne.4) then
-             znod = Hwav(kk) ! fwx%hrms(kk)
-          else
-             znod = H(kk)
-          endif
-       case (2)
-          if (jawave.ne.4) then
-             znod = Twav(kk) ! fwx%tp(kk)
-          elseif (windmodel.eq.0) then
-             znod = Trep
-          else
-             znod = tt1(itheta_view,kk)
-          endif
-       case (3)
-          znod = taus(kk)
-       case (4)
-          znod = fwav_mag(kk)
-       case (5)
-          znod = ust_mag(k)
-       case (6)
-          if (jawave.ne.4) then
-             znod = dmiss
-          else
-             znod = Fx_cc(kk)
-          endif
-       case (7)
-          if (jawave.ne.4) then
-             znod = dmiss
-          else
-             znod = Fy_cc(kk)
-          endif
-       case (8)
-          if (jawave.ne.4) then
-             znod = dmiss
-          else
-             znod = taux_cc(kk)
-          endif
-       case (9)
-          if (jawave.ne.4) then
-             znod = dmiss
-          else
-             znod = tauy_cc(kk)
-          endif
-       case (10)
-          if (jawave.ne.4) then
-             znod = dmiss
-          else
-             znod = ustx_cc(kk)
-          endif
-       case (11)
-          if (jawave.ne.4) then
-             znod = dmiss
-          else
-             znod = usty_cc(kk)
-          endif
-       case (12)
-          znod = ee1(itheta_view,kk)
-       case (13)
-          znod = rr(itheta_view,kk)
-       case (14)
-          if (jawave.ne.4) then
-             znod = dmiss
-          else
-             znod = uorb(kk)
-          endif
-       case (15)
-          if (jawave.ne.4) then
-             znod = dmiss
-          else
-             znod = D(kk)
-          endif
-       case (16)
-          if (jawave.ne.4) then
-             znod = dmiss
-          else
-             znod = DR(kk)
-          endif
-       case (17)
-          if (jawave.ne.4) then
-             znod = dmiss
-          else
-             znod = R(kk)
-          endif
-       case (18)
-          if (jawave.ne.4) then
-             znod = dmiss
-          else
-             znod = Sxx(kk)
-          endif
-       case (19)
-          if (jawave.ne.4) then
-             znod = dmiss
-          else
-             znod = Syy(kk)
-          endif
-       case (20)
-          if (jawave.ne.4) then
-             znod = dmiss
-          else
-             znod = Sxy(kk)
-          endif
-       case (21)
-          if (jawave.ne.4) then
-             znod = dmiss
-          else
-             znod = kwav(kk)
-          endif
-       case (22)
-          if (jawave.ne.4) then
-             znod = dmiss
-          else
-             znod = mod(270d0 - phiwav(kk),360d0)
-          endif
-       case (23)
-          if (jawave.ne.4) then
-             znod = dmiss
-          else
-             znod = dhsdx(kk)
-          endif
-       case (24)
-          if (jawave.ne.4) then
-             znod = dmiss
-          else
-             znod = dhsdy(kk)
-          endif
-       case(25)
-          if (jawave .ne. 4) then
-             znod = dmiss
-          else if (jawind>0 .and. jawsource>0) then
-             znod = wsorE(itheta_view, kk)
-          end if
-       case(26)
-           if (jawave .ne. 4 ) then
-               znod = dmiss
-           else
+         case (1)
+               znod = Hwav(kk)
+         case (2)
+            if (jawave.ne.4) then
+               znod = Twav(kk)
+            elseif (windmodel.eq.0) then
+               znod = Trep
+            else
+               znod = tt1(itheta_view,kk)
+            endif
+         case (3)
+            znod = taus(kk)
+         case (4)
+            znod = fwav_mag(k)
+         case (5)
+            znod = ust_mag(k)
+         case (6)
+            if (twav(kk)>0d0) then
+               call wavenr(hs(kk), twav(kk) ,rkk, ag)
+               znod = rkk
+            endif
+         case (7)
+            if (twav(kk)>0d0) then
+               call wavenr(hs(kk), twav(kk) ,rkk, ag)
+               shs    = sinhsafei(rkk*hs(kk))
+               znod = shs
+            else
+               znod=dmiss
+            endif
+         case (8)
+            znod = hypot(sxwav(kk),sywav(kk))
+         case (9)
+               znod = hypot(sbxwav(kk),sbywav(kk))
+         case (10)
+            if (jawave.eq.4) then
+               znod = ustx_cc(kk)
+            endif
+         case (11)
+            if (jawave.eq.4) then
+               znod = usty_cc(kk)
+            endif
+         case (12)
+            znod = ee1(itheta_view,kk)
+         case (13)
+            znod = rr(itheta_view,kk)
+         case (14)
+            if (jawave.eq.4) then
+               znod = uorb(kk)
+            endif
+         case (15)
+            if (jawave.eq.4) then
+               znod = D(kk)
+            endif
+         case (16)
+            if (jawave.eq.4) then
+               znod = DR(kk)
+            endif
+         case (17)
+            if (jawave.eq.4) then
+               znod = R(kk)
+            endif
+         case (18)
+            if (jawave.eq.4) then
+               znod = Sxx(kk)
+            endif
+         case (19)
+            if (jawave.eq.4) then
+               znod = Syy(kk)
+            endif
+         case (20)
+            if (jawave.eq.4) then
+               znod = Sxy(kk)
+            endif
+         case (21)
+            if (jawave.eq.4) then
+               znod = kwav(kk)
+            endif
+         case (22)
+               znod = mod(270d0 - phiwav(kk),360d0)
+
+         case (23)
+            if (jawave.eq.4) then
+               znod = dhsdx(kk)
+            endif
+         case (24)
+            if (jawave.eq.4) then
+               znod = dhsdy(kk)
+            endif
+         case(25)
+            if (jawave .eq. 4) then
+               if (jawind>0 .and. jawsource>0) then
+                  znod = wsorE(itheta_view, kk)
+               endif
+            end if
+         case(26)
+            if (jawave .eq. 4 ) then
                znod = sigt(itheta_view,kk)
-           end if
-       case(27)
-           if (jawave .ne. 4 ) then
-               znod = dmiss
-           elseif (windmodel.eq.0) then
-               znod = cgwav(kk)
-           else
-               znod = cgwavt(itheta_view,kk)
-           end if
-       case(28)
-          if (jawave == 1 .or. jawave == 2) then
-             znod = fetch(1,kk)
-          else
-             znod = dmiss
-          end if
-       case(29)
-           if (jawave.ne.4) then
-               znod = dmiss
-           else
+            end if
+         case(27)
+            if (jawave .eq. 4 ) then
+               if (windmodel.eq.0) then
+                  znod = cgwav(kk)
+               else
+                  znod = cgwavt(itheta_view,kk)
+               end if
+            endif
+         case(28)
+            if (jawave == 1 .or. jawave == 2) then
+               znod = fetch(1,kk)
+            end if
+         case(29)
+            if (jawave.eq.4) then
                znod = dtheta * egradcg(itheta_view,kk)
-           endif
-       case(30)
-           if (jawave.ne.4) then
-               znod = dmiss
-           else
+            endif
+         case(30)
+            if (jawave.eq.4) then
                znod = SwT(kk)
-           endif
-       case(31)
-           if(jawave.ne.4) then
-               znod = dmiss
-           else
+            endif
+         case(31)
+            if(jawave.eq.4) then
                znod = SwE(kk)
-           endif
-       case(32)
-           if(jawave.ne.4) then
-               znod = dmiss
-           else
+            endif
+         case(32)
+            if(jawave.eq.4) then
                znod = horadvec(itheta_view,kk)
-           endif
-       case(33)
-           if(jawave.ne.4) then
-               znod = dmiss
-           else
+            endif
+         case(33)
+            if(jawave.eq.4) then
                znod = horadvec2(itheta_view,kk)
-           endif
-       case(34)
-           if(jawave.ne.4) then
-               znod = dmiss
-           else
+            endif
+         case(34)
+            if(jawave.eq.4) then
                znod = ma(itheta_view,kk)
-           endif
-
-
-     end select
+            endif
+         end select
 
     endif
 

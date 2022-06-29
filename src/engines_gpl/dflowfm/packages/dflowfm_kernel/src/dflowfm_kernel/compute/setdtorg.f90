@@ -329,7 +329,7 @@
           if ( jampi.eq.1 ) then
 !            do not include ghost cells
              if ( idomain(kk).ne.my_rank ) cycle
-    endif
+          endif
           if ( hs(kk).gt.epshu ) then
              dtsc = 9d9
              if ( squ(kk).gt.eps10) then

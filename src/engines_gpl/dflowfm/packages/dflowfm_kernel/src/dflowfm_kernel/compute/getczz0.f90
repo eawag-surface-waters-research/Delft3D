@@ -35,14 +35,14 @@ subroutine getczz0(h1, frcn, ifrctyp, cz, z0)       ! basic get z0 (m),  this ro
  use m_flowparameters, only: epshu
  implicit none
 
- double precision, intent(inout) :: h1
- integer, intent(in) :: ifrctyp
+ double precision, intent(in) :: h1
+ integer, intent(in)          :: ifrctyp
  double precision, intent(in) :: frcn
  double precision, intent(out) :: cz
  double precision, intent(out) :: z0
 
  double precision    :: h0, sqcf, hurou  ! hydraulic radius, friction coeff, friction typ, chezy coeff
- double precision    :: sixth = 1d0/6d0
+ double precision :: sixth = 1d0/6d0
 
  h0    = max(h1,epshu)
  if (ifrctyp == 0) then                              ! Chezy type

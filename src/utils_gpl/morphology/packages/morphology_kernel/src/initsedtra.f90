@@ -88,6 +88,7 @@ subroutine initsedtra(sedtra, sedpar, trapar, morpar, morlyr, rhow, ag, vicmol, 
     real(fp)             , dimension(:,:,:), pointer :: logseddia
     real(fp)             , dimension(:)    , pointer :: mudcnt
     real(fp)             , dimension(:)    , pointer :: mudfrac
+    real(fp)             , dimension(:)    , pointer :: sandfrac
     real(fp)                               , pointer :: mwwjhe
     real(fp)             , dimension(:)    , pointer :: rhosol
     real(fp)             , dimension(:)    , pointer :: sedd50
@@ -110,6 +111,7 @@ subroutine initsedtra(sedtra, sedpar, trapar, morpar, morlyr, rhow, ag, vicmol, 
     asklhe    => morpar%asklhe
     frac      => sedtra%frac
     mudfrac   => sedtra%mudfrac
+    sandfrac  => sedtra%sandfrac
     anymud    => sedpar%anymud
     logsedsig => sedpar%logsedsig
     logseddia => sedpar%logseddia
@@ -195,6 +197,10 @@ subroutine initsedtra(sedtra, sedpar, trapar, morpar, morlyr, rhow, ag, vicmol, 
     else
        hidexp = 1.0
     endif
+    !
+    call compsandfrac(frac      ,sedd50       ,nmmax     ,lsedtot   , &
+                    & sedtyp    ,sandfrac     ,sedd50fld , &
+                    & nmlb      ,nmub         )  
 end subroutine initsedtra
 
 end module m_initsedtra

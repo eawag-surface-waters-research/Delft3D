@@ -1,7 +1,7 @@
 module morphology_data_module
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2011-2022.                                     
+!  Copyright (C)  Stichting Deltares, 2011-2022.                                
 !                                                                               
 !  This program is free software: you can redistribute it and/or modify         
 !  it under the terms of the GNU General Public License as published by         
@@ -379,7 +379,7 @@ type morpar_type
     real(fp):: factcr     !  calibration factor on Shields' critical shear stress   
     real(fp):: tmor       !  time where calculation for morphological changes start (tunit relative to ITDATE,00:00:00)
     real(fp):: tcmp       !  time where calculation for bed composition changes start (tunit relative to ITDATE,00:00:00)
-    real(fp):: thetsd     !  global dry bank erosion factor
+    real(fp):: thetsduni  !  uniform value for dry cell erosion factor
     real(fp):: susw       !  factor for adjusting wave-related suspended sand transport (included in bed-load)
     real(fp):: sedthr     !  minimum depth for sediment calculations
     real(fp):: hmaxth     !  maximum depth for setting theta for erosion of dry bank
@@ -456,6 +456,7 @@ type morpar_type
     type (cmpbndtype)     , dimension(:), pointer :: cmpbnd     ! bed composition boundary parameters
     real(hp)              , dimension(:), pointer :: mergebuf   ! buffer array for communcation with mormerge
     real(fp)              , dimension(:), pointer :: xx         ! percentile xx (dxx stored in erosed.ig*)
+    real(fp)              , dimension(:), pointer :: thetsd     ! global dry bank erosion factor
     ! 
     ! logicals
     !
@@ -474,6 +475,7 @@ type morpar_type
     logical :: varyingmorfac       !  true: morfac specified in a time serie file
     logical :: multi               !  Flag for merging bottoms of different parallel runs
     logical :: duneavalan          !  Flag for avalanching using wetslope and dryslope
+    logical :: l_suscor            !  Flag for applying correction to doublecounting of sus/bed transport in 3d
     !
     ! characters
     !
@@ -482,6 +484,7 @@ type morpar_type
     character(256) :: mmsyncfilnam !  name of output file for synchronisation of mormerge run
     character(256) :: telfil       !  name of file containing exchange layer thickness
     character(256) :: ttlfil       !  name of file containing transport layer thickness
+    character(256) :: flsthetsd    !  name of file containing dry cell erosion factor
     !
 end type morpar_type
 
@@ -1307,7 +1310,8 @@ subroutine nullmorpar(morpar)
     real(fp)                             , pointer :: bed
     real(fp)                             , pointer :: tmor
     real(fp)                             , pointer :: tcmp
-    real(fp)                             , pointer :: thetsd
+    real(fp)              , dimension(:) , pointer :: thetsd
+    real(fp)                             , pointer :: thetsduni
     real(fp)                             , pointer :: susw
     real(fp)                             , pointer :: sedthr
     real(fp)                             , pointer :: hmaxth
@@ -1354,11 +1358,13 @@ subroutine nullmorpar(morpar)
     logical                              , pointer :: multi
     logical                              , pointer :: eulerisoglm
     logical                              , pointer :: glmisoeuler
+    logical                              , pointer :: l_suscor
     character(256)                       , pointer :: bcmfilnam
     character(256)                       , pointer :: flcomp
     character(256)                       , pointer :: mmsyncfilnam
     character(256)                       , pointer :: ttlfil
     character(256)                       , pointer :: telfil
+    character(256)                       , pointer :: flsthetsd
     type (bedbndtype)     , dimension(:) , pointer :: morbnd
     type (cmpbndtype)     , dimension(:) , pointer :: cmpbnd
     !
@@ -1385,6 +1391,7 @@ subroutine nullmorpar(morpar)
     tmor                => morpar%tmor
     tcmp                => morpar%tcmp
     thetsd              => morpar%thetsd
+    thetsduni           => morpar%thetsduni
     susw                => morpar%susw
     sedthr              => morpar%sedthr
     hmaxth              => morpar%hmaxth
@@ -1447,6 +1454,7 @@ subroutine nullmorpar(morpar)
     mmsyncfilnam        => morpar%mmsyncfilnam
     ttlfil              => morpar%ttlfil
     telfil              => morpar%telfil
+    flsthetsd           => morpar%flsthetsd
     !
     istat = 0
     allocate (morpar%moroutput  , STAT = istat)
@@ -1459,6 +1467,7 @@ subroutine nullmorpar(morpar)
     subiw               => morpar%subiw
     eulerisoglm         => morpar%eulerisoglm
     glmisoeuler         => morpar%glmisoeuler
+    l_suscor            => morpar%l_suscor
     !
     call initmoroutput(morpar%moroutput)
     !
@@ -1480,6 +1489,7 @@ subroutine nullmorpar(morpar)
     mmsyncfilnam       = ' '
     ttlfil             = ' '
     telfil             = ' '
+    flsthetsd          = ' '
     !
     morfac             = 1.0_fp
     thresh             = 0.1_fp
@@ -1493,7 +1503,7 @@ subroutine nullmorpar(morpar)
     bed                = 1.0_fp
     tmor               = 0.0_fp
     tcmp               = 0.0_fp
-    thetsd             = 0.0_fp
+    thetsduni          = 0.0_fp
     susw               = 1.0_fp
     sedthr             = 0.5_fp
     hmaxth             = 1.0_fp
@@ -1544,6 +1554,7 @@ subroutine nullmorpar(morpar)
     eqmbcmud           = .false.
     eulerisoglm        = .false.    
     glmisoeuler        = .false.    
+    l_suscor           = .true.    
     densin             = .true.
     rouse              = .false.
     epspar             = .false.
@@ -1557,6 +1568,7 @@ subroutine nullmorpar(morpar)
     nullify(morpar%cmpbnd)
     nullify(morpar%xx)
     nullify(morpar%mergebuf)
+    nullify(morpar%thetsd)
     !
     call initfluffy(morpar%flufflyr)
 end subroutine nullmorpar
@@ -1770,6 +1782,7 @@ subroutine clrmorpar(istat, morpar)
         call clrfluffy(istat, morpar%flufflyr)
         deallocate(morpar%flufflyr, STAT = istat)
     endif
+    if (associated(morpar%thetsd))    deallocate(morpar%thetsd,    STAT = istat)
     !
 end subroutine clrmorpar
 

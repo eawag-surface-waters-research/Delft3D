@@ -424,8 +424,8 @@
        ! also allocate 3D-sigma bnd distribution for EC
        allocate ( sigmabndTM(kmxd*nbndTM) , stat=ierr )
        call aerr('sigmabndTM(kmxd*nbndTM)', ierr, kmxd*nbndTM )
-       allocate ( zminmaxTM(2*nbndTM) , stat=ierr )
-       call aerr('zminmaxTM(2*nbndTM)', ierr, 2*nbndTM )
+          allocate ( zminmaxTM(2*nbndTM) , stat=ierr )
+          call aerr('zminmaxTM(2*nbndTM)', ierr, 2*nbndTM )
        zbndTM = DMISS ;  kbndTM = 0 ; kdTM = 1
        do k = 1, nbndTM
           L = keTM(k)
@@ -819,8 +819,8 @@
  call setzminmax(); call setsigmabnds() ! our side of preparation for 3D ec module
 
 ! initialise mass balance areas - always allocate these arrays
- call realloc(mbadef, Ndkx, keepExisting=.false., fill =-999)
- call realloc(mbadefdomain, Ndkx, keepExisting=.false., fill =-999)
+call realloc(mbadef, Ndkx, keepExisting=.false., fill =-999)
+call realloc(mbadefdomain, Ndkx, keepExisting=.false., fill =-999)
 
  ! Start processing ext files, start with success.
  success = .true.
@@ -2176,7 +2176,7 @@ if (mext /= 0) then
           k = nnlat(k1)
           if (k > 0) then
              if (.not. is_ghost_node(k)) then
-                balat(n) = balat(n) + ba(k)
+             balat(n) = balat(n) + ba(k)
              end if
           endif
        end do
@@ -2410,7 +2410,7 @@ if (mext /= 0) then
           else
              msgbuf = 'File: ''' // trim(filename0) // '''  does not exist (associated with ''' // trim(filename) // ''').'
              call warn_flush()
-             success = .false.
+            success = .false.
           endif
        endif
     enddo
@@ -2419,7 +2419,7 @@ if (mext /= 0) then
        call warn_flush()
        iresult = DFM_EXTFORCERROR
        goto 888
-    endif
+ endif
  endif
 
 
@@ -2586,7 +2586,8 @@ end if
     endif
 
     javeg = 1
-    if (.not.allocated(stemheight) .and. japillar == 2) then
+    !if (.not.allocated(stemheight) .and. japillar == 2) then    ! needed for BMI model Sebrian
+    if (.not.allocated(stemheight)) then
        call realloc(  stemheight, Ndkx, keepExisting=.false., fill=0d0, stat=ierr)
        call aerr   (' stemheight (Ndkx)', ierr, Ndkx)
     endif

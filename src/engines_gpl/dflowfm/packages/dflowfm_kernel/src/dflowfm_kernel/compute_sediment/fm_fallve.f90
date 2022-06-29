@@ -39,11 +39,11 @@
    !              Fall velocity at layer interfaces.
    !!--declarations----------------------------------------------------------------
    use precision
-   use m_physcoef, only: ee, ag, sag, vonkar, frcuni, backgroundsalinity, backgroundwatertemperature
-   use m_sediment, only: stmpar, sedtra, stm_included, mtd, vismol
+   use m_physcoef, only: ee, ag, sag, vonkar, frcuni, backgroundsalinity, backgroundwatertemperature, vismol
+   use m_sediment, only: stmpar, sedtra, stm_included, mtd
    use m_flowtimes, only: time1
    use m_flowgeom, only: ndx, ln, kfs,bl, wcl, lnx
-   use m_flow    , only: ifrctypuni, z0, hs, iturbulencemodel,kbot,ktop,kmx,zws,ucxq,ucyq,sa1,tem1,ucx,ucy,ucz,ndkx,s1,z0urou,ifrcutp,hu,frcu,ucx_mor,ucy_mor
+   use m_flow    , only: ifrctypuni, z0, hs, iturbulencemodel,kbot,ktop,kmx,zws,ucxq,ucyq,sa1,tem1,ucx,ucy,ucz,ndkx,s1,z0ucur,z0urou,ifrcutp,hu,frcu,ucx_mor,ucy_mor
    use m_flowparameters, only: jasal, jatem, jawave, epshs, flowWithoutWaves
    use m_transport, only: constituents, ised1, isalt, itemp
    use m_turbulence, only:turkinepsws, rhowat
@@ -157,8 +157,6 @@
    end do
 
    ! calculate mean velocity in nodes
-!   call setucxucyucxuucyu()
-
    if (kmx>0) then                       ! 3D
       um = 0d0; vm = 0d0
       do k = 1, ndx
@@ -166,35 +164,21 @@
          call getkbotktop(k, kb, kt)
          do kk = kb, kt
             thick = zws(kk) - zws(kk-1)
-            um(k) = um(k) + thick/h0*ucxq(kk)
-            vm(k) = vm(k) + thick/h0*ucyq(kk)
+            um(k) = um(k) + thick/h0*ucxq_mor(kk)
+            vm(k) = vm(k) + thick/h0*ucyq_mor(kk)
          end do
       end do
    else
-      um   = ucxq                       ! discharge based velocities
-      vm   = ucyq
+      um   = ucxq_mor                       ! discharge based velocities
+      vm   = ucyq_mor
    end if
 
    ! Calculate roughness height
-   if (jawave<3 .or. flowWithoutWaves) then  ! current related, potentially including trachy
-      do L=1, lnx
-         k1 = ln(1,L); k2 = ln(2,L)
-         if (frcu(L)>0d0) then
-            call getczz0(hu(L), frcu(L), ifrcutp(L), cz_dum, z00)
-         else
-            call getczz0(hu(L), frcuni, ifrctypuni, cz_dum, z00)
-         end if
-         z0rou(k1) = z0rou(k1) + wcl(1,L)*z00
-         z0rou(k2) = z0rou(k2) + wcl(2,L)*z00
-      end do
-      !
-   else      !  wave enhanced roughness
-      do L=1,lnx
-         k1=ln(1,L); k2=ln(2,L)
-         z0rou(k1) = z0rou(k1) + wcl(1,L)*z0urou(L)
-         z0rou(k2) = z0rou(k2) + wcl(2,L)*z0urou(L)
-      end do
-   end if
+   do L=1,lnx
+      k1=ln(1,L); k2=ln(2,L)
+      z0rou(k1) = z0rou(k1) + wcl(1,L)*z0urou(L)   ! set for all cases in setcfuhi/getustbcfuhi
+      z0rou(k2) = z0rou(k2) + wcl(2,L)*z0urou(L)
+   end do
 
    do ll = 1, lsed   
       !
@@ -206,7 +190,8 @@
          if (s1(k)-bl(k)<epshs) cycle
          !
          h0 = s1(k)-bl(k)
-         chezy = sag * log( 1.0d0 + h0/max(1d-8,ee*z0rou(k)) ) / vonkar
+         !chezy = sag * log( 1.0d0 + h0/max(1d-5,ee*z0rou(k)) ) / vonkar
+         chezy = sag * log(h0/ee/z0rou(k) ) / vonkar                       ! consistency with getczz0
          !
          ! loop over the interfaces in the vertical
          !

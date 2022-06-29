@@ -87,7 +87,7 @@ subroutine unc_write_his(tim)            ! wrihis
                      id_qsun, id_qeva, id_qcon, id_qlong, id_qfreva, id_qfrcon, id_qtot, &
                      id_turkin, id_tureps , id_vicwwu, id_rich, id_zcs, id_zws, id_zwu, &
                      id_wind, id_tair, id_rhum, id_clou, &
-                     id_R, id_WH, id_WD, id_WL, id_WT, id_WU, id_WTAU, id_hs, id_taucur, &
+                     id_R, id_WH, id_WD, id_WL, id_WT, id_WU, id_hs, &
                      id_pumpdim,    id_pump_id,     id_pump_dis,     id_pump_cap,      id_pump_s1up,      id_pump_s1dn,     id_pump_head,      &
                      id_pump_xmid,  id_pump_ymid,   id_pump_struhead,id_pump_stage,    id_pump_redufact,  id_pump_s1del,    id_pump_s1suc,     id_pump_disdir, &
                      id_gatedim,    id_gatename,    id_gate_dis,    id_gate_edgel,     id_gate_s1up,      id_gate_s1dn,    &                              ! id_gate_head,
@@ -122,7 +122,7 @@ subroutine unc_write_his(tim)            ! wrihis
                      id_varucxq, id_varucyq, id_sf, id_ws, id_seddif, id_sink, id_sour, id_sedsusdim, &
                      id_latdim, id_lat_id, id_lat_predis_inst, id_lat_predis_ave, id_lat_realdis_inst, id_lat_realdis_ave, &
                      id_ustx, id_usty, id_nlyrdim, id_bodsed, id_dpsed, id_msed, id_thlyr, id_poros, id_lyrfrac, id_frac, id_mudfrac, id_sandfrac, id_fixfac, id_hidexp, id_taub, id_mfluff, &
-                     id_rugdim, id_rugx, id_rugy, id_rugid, id_rugname, id_varruh
+                     id_rugdim, id_rugx, id_rugy, id_rugid, id_rugname, id_varruh, id_taux, id_tauy
     ! ids for geometry variables, only use them once at the first time of history output
     integer :: id_statgeom_node_count,        id_statgeom_node_coordx,        id_statgeom_node_coordy,    &
                                               id_statgeom_node_lon,           id_statgeom_node_lat,       &
@@ -326,9 +326,6 @@ subroutine unc_write_his(tim)            ! wrihis
             if (jahiswatdep > 0) then
                call definencvar(ihisfile,id_hs, nf90_double, idims, 2, 'waterdepth'  , 'water depth', 'm', statcoordstring, station_geom_container_name)
             endif
-            if (jahistaucurrent > 0) then
-               call definencvar(ihisfile,id_taucur, nf90_double, idims, 2, 'taus'  , 'Total bed shear stress', 'N m-2', statcoordstring, station_geom_container_name)
-            endif
 
             if( jahisvelvec > 0 ) then
                if ( kmx.gt.0 ) then
@@ -426,7 +423,6 @@ subroutine unc_write_his(tim)            ! wrihis
             if (jaeulervel==0) then
                ierr = nf90_put_att(ihisfile, id_varucx, 'long_name', 'flow element center velocity vector, x-component')
                ierr = nf90_put_att(ihisfile, id_varucy, 'long_name', 'flow element center velocity vector, y-component')
-
             else
                ierr = nf90_put_att(ihisfile, id_varucx, 'long_name', 'flow element center Eulerian velocity vector, x-component')
                ierr = nf90_put_att(ihisfile, id_varucy, 'long_name', 'flow element center Eulerian velocity vector, y-component')
@@ -585,16 +581,22 @@ subroutine unc_write_his(tim)            ! wrihis
             endif
 
             if (jahistaucurrent>0) then
-               ! TODO: The wtau variable below is confusing: it contains the *total* bed shear stress.
-               !       The taus variable earlier in this subroutine writes the same total bed shear stress
-               !       as well. Duplication is to be removed, and possibly separate tauwav and taucur output
-               !       is more useful.
-               ierr = nf90_def_var(ihisfile, 'wtau',  nf90_double, ((/ id_statdim, id_timedim /)) , id_WTAU)
-               ierr = nf90_put_att(ihisfile, id_WTAU, 'coordinates'  , statcoordstring)
-               ierr = nf90_put_att(ihisfile, id_WTAU, 'long_name'    , 'Mean bed shear stress')
-               ierr = nf90_put_att(ihisfile, id_WTAU, 'units'        , 'Pa')
-               ierr = nf90_put_att(ihisfile, id_WTAU, 'geometry', station_geom_container_name)
-               ierr = nf90_put_att(ihisfile, id_WTAU, '_FillValue', dmiss)
+               
+               ierr = nf90_def_var(ihisfile, 'tausx',  nf90_double, ((/ id_statdim, id_timedim /)) , id_TAUX)
+               ierr = nf90_put_att(ihisfile, id_TAUX, 'coordinates'  , statcoordstring)
+               ierr = nf90_put_att(ihisfile, id_TAUX, 'standard_name', 'mean_bottom_shear_stress vector, x-component')
+               ierr = nf90_put_att(ihisfile, id_TAUX, 'long_name'    , 'Mean bottom shear stress vector, x-component')
+               ierr = nf90_put_att(ihisfile, id_TAUX, 'units'        , 'Pa')
+               ierr = nf90_put_att(ihisfile, id_TAUX, 'geometry', station_geom_container_name)
+               ierr = nf90_put_att(ihisfile, id_TAUX, '_FillValue', dmiss)
+               
+               ierr = nf90_def_var(ihisfile, 'tausy',  nf90_double, ((/ id_statdim, id_timedim /)) , id_TAUY)
+               ierr = nf90_put_att(ihisfile, id_TAUY, 'coordinates'  , statcoordstring)
+               ierr = nf90_put_att(ihisfile, id_TAUY, 'standard_name', 'mean_bottom_shear_stress vector, y-component')
+               ierr = nf90_put_att(ihisfile, id_TAUY, 'long_name'    , 'Mean bottom shear stress vector, y-component')
+               ierr = nf90_put_att(ihisfile, id_TAUY, 'units'        , 'Pa')
+               ierr = nf90_put_att(ihisfile, id_TAUY, 'geometry', station_geom_container_name)
+               ierr = nf90_put_att(ihisfile, id_TAUY, '_FillValue', dmiss)
             endif
 
             if (jatem > 0 .and. jahistem > 0) then
@@ -636,15 +638,15 @@ subroutine unc_write_his(tim)            ! wrihis
             if ((jasal > 0 .or. jatem > 0 .or. jased > 0) .and. jahisrho > 0) then
                if ( kmx.gt.0 ) then
                   idims(1) = id_laydim
-                  jawrizc  = 1
-                  call definencvar(ihisfile,id_varrhop,nf90_double, idims,3,'potential_density' , 'potential_density' , 'kg m-3' ,  trim(statcoordstring) // ' zcoordinate_c', station_geom_container_name, fillVal = dmiss)
+                  jawrizc = 1
+                  call definencvar(ihisfile,id_varrhop,nf90_double, idims,3,'potential_density'       , 'potential_density'         , 'kg m-3' ,  trim(statcoordstring) // ' zcoordinate_c', station_geom_container_name, fillVal = dmiss)
                   if (idensform > 10) then 
-                  call definencvar(ihisfile,id_varrho ,nf90_double, idims,3,'density'           , 'density'           , 'kg m-3' ,  trim(statcoordstring) // ' zcoordinate_c', station_geom_container_name, fillVal = dmiss)
+                  call definencvar(ihisfile,id_varrho ,nf90_double, idims,3,'density'                 , 'density'                   , 'kg m-3' ,  trim(statcoordstring) // ' zcoordinate_c', station_geom_container_name, fillVal = dmiss)
                   endif
                   idims(1) = id_laydimw
                   call definencvar(ihisfile,id_bruv   ,nf90_double, idims,3,'Brunt_Vaisala_N2'  , 'Brunt_Vaisala_N2'  , '1/s2'   ,  trim(statcoordstring) // ' zcoordinate_w', station_geom_container_name, fillVal = dmiss)
                else
-                  call definencvar(ihisfile,id_varrhop,nf90_double, idims,2,'potential_density' , 'potential_density' , 'kg m-3' ,  trim(statcoordstring)                    , station_geom_container_name, fillVal = dmiss)
+                  call definencvar(ihisfile,id_varrhop,nf90_double, idims,2,'potential_density'       , 'potential_density'         , 'kg m-3' ,  trim(statcoordstring)                    , station_geom_container_name, fillVal = dmiss)
                end if  ! en misschien kan iemand de kmx > 0 repetitie ook in definencvar afvangen en // ' zcoordinate_c' en idims,3  automatisch maken voor kmx>0
             endif
 
@@ -945,8 +947,8 @@ subroutine unc_write_his(tim)            ! wrihis
                         ierr = nf90_put_att(ihisfile, id_poros, '_FillValue', dmiss)
                         ierr = nf90_put_att(ihisfile, id_poros, 'coordinates', statcoordstring)
                         ierr = nf90_put_att(ihisfile, id_poros, 'geometry', station_geom_container_name)
-                     endif
-                     !
+            endif
+            !
                      ierr = nf90_def_var(ihisfile, 'lyrfrac', nf90_double, (/ id_nlyrdim, id_statdim,  id_sedtotdim, id_timedim /), id_lyrfrac)
                      ierr = nf90_put_att(ihisfile, id_lyrfrac, 'long_name', 'Volume fraction in a layer of the bed')
                      ierr = nf90_put_att(ihisfile, id_lyrfrac, 'units', 'm')
@@ -954,8 +956,8 @@ subroutine unc_write_his(tim)            ! wrihis
                      ierr = nf90_put_att(ihisfile, id_lyrfrac, 'coordinates', statcoordstring)
                      ierr = nf90_put_att(ihisfile, id_lyrfrac, 'geometry', station_geom_container_name)
                end select
-               !
-               if (stmpar%morpar%moroutput%frac) then
+		         !
+		         if (stmpar%morpar%moroutput%frac) then
                   ierr = nf90_def_var(ihisfile, 'frac', nf90_double, (/ id_statdim, id_sedtotdim, id_timedim /), id_frac)
                   ierr = nf90_put_att(ihisfile, id_frac, 'long_name', 'Availability fraction in top layer')
                   ierr = nf90_put_att(ihisfile, id_frac, 'units', '-')
@@ -1153,81 +1155,81 @@ subroutine unc_write_his(tim)            ! wrihis
             !ierr = nf90_put_att(ihisfile, id_varuavg, 'units', 'm s-1')
             !ierr = nf90_put_att(ihisfile, id_varuavg, 'coordinates', 'cross_section_name')
 
-            do num = 1,NUMCONST_MDU
-               tmpstr = const_names(num)
-               ! Forbidden chars in NetCDF names: space, /, and more.
-               call replace_char(tmpstr,32,95)
-               call replace_char(tmpstr,47,95)
-               ierr = nf90_def_var(ihisfile, 'cross_section_cumulative_'//trim(tmpstr), nf90_double, (/ id_crsdim, id_timedim /), id_const_cum(num))
-               ierr = nf90_put_att(ihisfile, id_const_cum(num), 'long_name', 'cumulative flux (based on upwind flow cell) for '//trim(tmpstr)//'.')
+               do num = 1,NUMCONST_MDU
+                  tmpstr = const_names(num)
+                  ! Forbidden chars in NetCDF names: space, /, and more.
+                  call replace_char(tmpstr,32,95)
+                  call replace_char(tmpstr,47,95)
+                  ierr = nf90_def_var(ihisfile, 'cross_section_cumulative_'//trim(tmpstr), nf90_double, (/ id_crsdim, id_timedim /), id_const_cum(num))
+                  ierr = nf90_put_att(ihisfile, id_const_cum(num), 'long_name', 'cumulative flux (based on upwind flow cell) for '//trim(tmpstr)//'.')
          
-               ierr = nf90_def_var(ihisfile, 'cross_section_'//trim(tmpstr), nf90_double, (/ id_crsdim, id_timedim /), id_const(num))
-               ierr = nf90_put_att(ihisfile, id_const(num), 'long_name', 'flux (based on upwind flow cell) for '//trim(tmpstr)//'.')
+                  ierr = nf90_def_var(ihisfile, 'cross_section_'//trim(tmpstr), nf90_double, (/ id_crsdim, id_timedim /), id_const(num))
+                  ierr = nf90_put_att(ihisfile, id_const(num), 'long_name', 'flux (based on upwind flow cell) for '//trim(tmpstr)//'.')
          
-               if (num >= ISED1 .and. num <= ISEDN) then    ! if the constituent is sediment
-                  select case(stmpar%morpar%moroutput%transptype)
-                  case (0)
-                     tmpstr = 'kg'
-                  case (1, 2)
-                     tmpstr = 'm3'
-                  end select
-               else
-                  if (const_units(num) /= ' ') then
-                     tmpstr = trim(const_units(num)) // ' m3'
+                  if (num >= ISED1 .and. num <= ISEDN) then    ! if the constituent is sediment
+                     select case(stmpar%morpar%moroutput%transptype)
+                     case (0)
+                        tmpstr = 'kg'
+                     case (1, 2)
+                        tmpstr = 'm3'
+                     end select
                   else
-                     tmpstr = '-'
+                     if (const_units(num) /= ' ') then
+                        tmpstr = trim(const_units(num)) // ' m3'
+                     else
+                        tmpstr = '-'
+                     endif
                   endif
-               endif
-               ierr = nf90_put_att(ihisfile, id_const_cum(num), 'units', tmpstr)
-               ierr = nf90_put_att(ihisfile, id_const_cum(num), 'coordinates', 'cross_section_name')
-               ierr = nf90_put_att(ihisfile, id_const_cum(num), 'geometry', crs_geom_container_name)
+                  ierr = nf90_put_att(ihisfile, id_const_cum(num), 'units', tmpstr)
+                  ierr = nf90_put_att(ihisfile, id_const_cum(num), 'coordinates', 'cross_section_name')
+                  ierr = nf90_put_att(ihisfile, id_const_cum(num), 'geometry', crs_geom_container_name)
          
-               if (num >= ISED1 .and. num <= ISEDN) then    ! if the constituent is sediment
-                  select case(stmpar%morpar%moroutput%transptype)
-                  case (0)
-                     tmpstr = 'kg/s'
-                  case (1, 2)
-                     tmpstr = 'm3/s'
-                  end select
-               else
-                  if (const_units(num) /= ' ') then
-                     tmpstr = trim(const_units(num)) // ' m3/s'
+                  if (num >= ISED1 .and. num <= ISEDN) then    ! if the constituent is sediment
+                     select case(stmpar%morpar%moroutput%transptype)
+                     case (0)
+                        tmpstr = 'kg/s'
+                     case (1, 2)
+                        tmpstr = 'm3/s'
+                     end select
                   else
-                     tmpstr = '-'
+                     if (const_units(num) /= ' ') then
+                        tmpstr = trim(const_units(num)) // ' m3/s'
+                     else
+                        tmpstr = '-'
+                     endif
                   endif
+                  ierr = nf90_put_att(ihisfile, id_const(num), 'units', tmpstr)
+                  ierr = nf90_put_att(ihisfile, id_const(num), 'coordinates', 'cross_section_name')
+                  ierr = nf90_put_att(ihisfile, id_const(num), 'geometry', crs_geom_container_name)
+               enddo
+            endif
+         
+            if( jased == 4 .and. stmpar%lsedtot > 0 ) then
+               ierr = nf90_def_var(ihisfile, 'cross_section_bedload_sediment_transport', nf90_double, (/ id_crsdim, id_timedim /), id_sedbtrans)
+               ierr = nf90_put_att(ihisfile, id_sedbtrans, 'long_name', 'cumulative bed load sediment transport')
+               ierr = nf90_put_att(ihisfile, id_sedbtrans, 'units', 'kg')
+               ierr = nf90_put_att(ihisfile, id_sedbtrans, 'coordinates', 'cross_section_name')
+               ierr = nf90_put_att(ihisfile, id_sedbtrans, 'geometry', crs_geom_container_name)
+               if( stmpar%lsedsus > 0 ) then
+                  ierr = nf90_def_var(ihisfile, 'cross_section_suspended_sediment_transport', nf90_double, (/ id_crsdim, id_timedim /), id_sedstrans)
+                  ierr = nf90_put_att(ihisfile, id_sedstrans, 'long_name', 'cumulative suspended load sediment transport')
+                  ierr = nf90_put_att(ihisfile, id_sedstrans, 'units', 'kg')
+                  ierr = nf90_put_att(ihisfile, id_sedstrans, 'coordinates', 'cross_section_name')
+                  ierr = nf90_put_att(ihisfile, id_sedstrans, 'geometry', crs_geom_container_name)
                endif
-               ierr = nf90_put_att(ihisfile, id_const(num), 'units', tmpstr)
-               ierr = nf90_put_att(ihisfile, id_const(num), 'coordinates', 'cross_section_name')
-               ierr = nf90_put_att(ihisfile, id_const(num), 'geometry', crs_geom_container_name)
-            enddo
-         endif
+               if (.not. allocated(id_sedbtransfrac)) then
+                  allocate(id_sedbtransfrac(stmpar%lsedtot))
+                  id_sedbtransfrac = 0
+               endif
+               do lsed = 1,stmpar%lsedtot    ! Making bedload on crosssections per fraction
+                  ierr = nf90_def_var(ihisfile, 'cross_section_bedload_sediment_transport_'//trim(stmpar%sedpar%namsed(lsed)), nf90_double, (/ id_crsdim, id_timedim /), id_sedbtransfrac(lsed))
+                  ierr = nf90_put_att(ihisfile, id_sedbtransfrac(lsed), 'long_name', 'cumulative bed load sediment transport per fraction')
+                  ierr = nf90_put_att(ihisfile, id_sedbtransfrac(lsed), 'units', 'kg')
+                  ierr = nf90_put_att(ihisfile, id_sedbtransfrac(lsed), 'coordinates', 'cross_section_name')
+                  ierr = nf90_put_att(ihisfile, id_sedbtransfrac(lsed), 'geometry', crs_geom_container_name)
+               enddo
          
-         if( jased == 4 .and. stmpar%lsedtot > 0 ) then
-            ierr = nf90_def_var(ihisfile, 'cross_section_bedload_sediment_transport', nf90_double, (/ id_crsdim, id_timedim /), id_sedbtrans)
-            ierr = nf90_put_att(ihisfile, id_sedbtrans, 'long_name', 'cumulative bed load sediment transport')
-            ierr = nf90_put_att(ihisfile, id_sedbtrans, 'units', 'kg')
-            ierr = nf90_put_att(ihisfile, id_sedbtrans, 'coordinates', 'cross_section_name')
-            ierr = nf90_put_att(ihisfile, id_sedbtrans, 'geometry', crs_geom_container_name)
-            if( stmpar%lsedsus > 0 ) then
-               ierr = nf90_def_var(ihisfile, 'cross_section_suspended_sediment_transport', nf90_double, (/ id_crsdim, id_timedim /), id_sedstrans)
-               ierr = nf90_put_att(ihisfile, id_sedstrans, 'long_name', 'cumulative suspended load sediment transport')
-               ierr = nf90_put_att(ihisfile, id_sedstrans, 'units', 'kg')
-               ierr = nf90_put_att(ihisfile, id_sedstrans, 'coordinates', 'cross_section_name')
-               ierr = nf90_put_att(ihisfile, id_sedstrans, 'geometry', crs_geom_container_name)
             endif
-            if (.not. allocated(id_sedbtransfrac)) then
-               allocate(id_sedbtransfrac(stmpar%lsedtot))
-               id_sedbtransfrac = 0
-            endif
-            do lsed = 1,stmpar%lsedtot    ! Making bedload on crosssections per fraction
-               ierr = nf90_def_var(ihisfile, 'cross_section_bedload_sediment_transport_'//trim(stmpar%sedpar%namsed(lsed)), nf90_double, (/ id_crsdim, id_timedim /), id_sedbtransfrac(lsed))
-               ierr = nf90_put_att(ihisfile, id_sedbtransfrac(lsed), 'long_name', 'cumulative bed load sediment transport per fraction')
-               ierr = nf90_put_att(ihisfile, id_sedbtransfrac(lsed), 'units', 'kg')
-               ierr = nf90_put_att(ihisfile, id_sedbtransfrac(lsed), 'coordinates', 'cross_section_name')
-               ierr = nf90_put_att(ihisfile, id_sedbtransfrac(lsed), 'geometry', crs_geom_container_name)
-            enddo
-         
-         endif
         
 
         ! runup gauges
@@ -2494,8 +2496,8 @@ subroutine unc_write_his(tim)            ! wrihis
                if (allocated(geomXCrs))     deallocate(geomXCrs)
                if (allocated(geomYCrs))     deallocate(geomYCrs)
                if (allocated(nodeCountCrs)) deallocate(nodeCountCrs)
-            end if
-        end if
+               end if
+                  end if
 
         if (nrug>0) then
             do i=1,nrug
@@ -2713,7 +2715,7 @@ subroutine unc_write_his(tim)            ! wrihis
 #ifdef HAVE_PROJ
           if (add_latlon) then
 !             call transform_and_put_latlon_coordinates(ihisfile, id_statgeom_node_lon, id_statgeom_node_lat, nccrs%proj_string, xobs, yobs)
-          end if
+       end if
 #endif
        end if
 
@@ -2731,9 +2733,9 @@ subroutine unc_write_his(tim)            ! wrihis
 #ifdef HAVE_PROJ
           if (add_latlon) then
 !             call transform_and_put_latlon_coordinates(ihisfile, id_statlon, id_statlat, nccrs%proj_string, xobs, yobs)
-          end if
-#endif
        endif
+#endif
+    endif
     endif
 
     if (timon) call timstrt('unc_write_his obs data 1', handle_extra(56))
@@ -2757,84 +2759,81 @@ subroutine unc_write_his(tim)            ! wrihis
     if (timon) call timstop(handle_extra(56))
 
     if (timon) call timstrt('unc_write_his obs/crs data 2', handle_extra(57))
-    if (jahistaucurrent > 0) then
-       ierr = nf90_put_var(ihisfile, id_taucur,  valobsT(:,IPNT_tau),    start = (/ 1, it_his /), count = (/ ntot, 1 /))
-    endif
 
     if (numobs+nummovobs > 0) then
-       if ( kmx>0 ) then
-!         3D
-          ierr = nf90_put_var(ihisfile,    id_varucxq, valobsT(:,IPNT_UCXQ),  start = (/ 1, it_his /), count = (/ ntot, 1 /)) ! depth-averaged velocity
-          ierr = nf90_put_var(ihisfile,    id_varucyq, valobsT(:,IPNT_UCYQ),  start = (/ 1, it_his /), count = (/ ntot, 1 /))
+      if ( kmx>0 ) then
+!      3D
+       ierr = nf90_put_var(ihisfile,    id_varucxq, valobsT(:,IPNT_UCXQ),  start = (/ 1, it_his /), count = (/ ntot, 1 /)) ! depth-averaged velocity
+       ierr = nf90_put_var(ihisfile,    id_varucyq, valobsT(:,IPNT_UCYQ),  start = (/ 1, it_his /), count = (/ ntot, 1 /))
 
-          do kk = 1,kmx
+       do kk = 1,kmx
              if (jahisvelvec > 0) then
-                ierr = nf90_put_var(ihisfile,    id_varucx, valobsT(:,IPNT_UCX+kk-1),  start = (/ kk, 1, it_his /), count = (/ 1, ntot, 1 /))
-                ierr = nf90_put_var(ihisfile,    id_varucy, valobsT(:,IPNT_UCY+kk-1),  start = (/ kk, 1, it_his /), count = (/ 1, ntot, 1 /))
-                ierr = nf90_put_var(ihisfile,    id_varucz, valobsT(:,IPNT_UCZ+kk-1),  start = (/ kk, 1, it_his /), count = (/ 1, ntot, 1 /))
+          ierr = nf90_put_var(ihisfile,    id_varucx, valobsT(:,IPNT_UCX+kk-1),  start = (/ kk, 1, it_his /), count = (/ 1, ntot, 1 /))
+          ierr = nf90_put_var(ihisfile,    id_varucy, valobsT(:,IPNT_UCY+kk-1),  start = (/ kk, 1, it_his /), count = (/ 1, ntot, 1 /))
+          ierr = nf90_put_var(ihisfile,    id_varucz, valobsT(:,IPNT_UCZ+kk-1),  start = (/ kk, 1, it_his /), count = (/ 1, ntot, 1 /))
              end if
-             if (jasal > 0) then
-                ierr = nf90_put_var(ihisfile, id_varsal, valobsT(:,IPNT_SA1 +kk-1), start = (/ kk, 1, it_his /), count = (/ 1, ntot, 1 /))
-             end if
-             if (jatem > 0) then
-                ierr = nf90_put_var(ihisfile, id_vartem, valobsT(:,IPNT_TEM1+kk-1), start = (/ kk, 1, it_his /), count = (/ 1, ntot, 1 /))
-             end if
+       if (jasal > 0) then
+             ierr = nf90_put_var(ihisfile, id_varsal, valobsT(:,IPNT_SA1 +kk-1), start = (/ kk, 1, it_his /), count = (/ 1, ntot, 1 /))
+       end if
+       if (jatem > 0) then
+             ierr = nf90_put_var(ihisfile, id_vartem, valobsT(:,IPNT_TEM1+kk-1), start = (/ kk, 1, it_his /), count = (/ 1, ntot, 1 /))
+       end if
              if( (jasal > 0 .or. jatem > 0 .or. jased > 0 ) .and. jahisrho > 0) then
                 ierr = nf90_put_var(ihisfile, id_varrhop , valobsT(:,IPNT_RHOP +kk-1), start = (/ kk, 1, it_his /), count = (/ 1, ntot, 1 /))
                 if (idensform > 10) then
                 ierr = nf90_put_var(ihisfile, id_varrho  , valobsT(:,IPNT_RHO +kk-1) , start = (/ kk, 1, it_his /), count = (/ 1, ntot, 1 /))
                 endif
                 ierr = nf90_put_var(ihisfile, id_bruv    , valobsT(:,IPNT_BRUV+kk-1) , start = (/ kk, 1, it_his /), count = (/ 1, ntot, 1 /))
-             end if
-             if (jased > 0 .and. .not. stm_included) then
-                ierr = nf90_put_var(ihisfile, id_varsed, valobsT(:,IPNT_SED +kk-1), start = (/ kk, 1, it_his /), count = (/ 1, ntot, 1 /))
-             end if
+       end if
+       if (jased > 0 .and. .not. stm_included) then
+             ierr = nf90_put_var(ihisfile, id_varsed, valobsT(:,IPNT_SED +kk-1), start = (/ kk, 1, it_his /), count = (/ 1, ntot, 1 /))
+       end if
              if (jahisvelocity > 0) then
                 ierr = nf90_put_var(ihisfile, id_varumag, valobsT(:,IPNT_UMAG+kk-1),  start = (/ kk, 1, it_his /), count = (/ 1, ntot, 1 /))
              end if
              if (jahisdischarge > 0) then
                 ierr = nf90_put_var(ihisfile, id_varqmag, valobsT(:,IPNT_QMAG+kk-1),  start = (/ kk, 1, it_his /), count = (/ 1, ntot, 1 /))
              end if
-             if (IVAL_TRA1 > 0) then
-                do j = IVAL_TRA1,IVAL_TRAN   ! enumerators of tracers in valobs array (not the pointer)
-                   i = j - IVAL_TRA1 + 1
-                   ierr = nf90_put_var(ihisfile, id_tra(i), valobsT(:,IPNT_TRA1 + (i-1)*kmx+kk-1), start = (/ kk, 1, it_his /), count = (/ 1, ntot, 1/))
-                enddo
-             end if
-             if (IVAL_HWQ1 > 0) then
-                do j = IVAL_HWQ1,IVAL_HWQN   ! enumerators of waq output in valobs array (not the pointer)
-                   i = j - IVAL_HWQ1 + 1
-                   if (i .le. noout_user + noout_statt) then
-                      ierr = nf90_put_var(ihisfile, id_hwq(i), valobsT(:,IPNT_HWQ1 + (i-1)*kmx+kk-1), start = (/ kk, 1, it_his /), count = (/ 1, ntot, 1/))
-                   else if (comparereal(tim, ti_hise, eps10) == 0) then
-                      ierr = nf90_put_var(ihisfile, id_hwq(i), valobsT(:,IPNT_HWQ1 + (i-1)*kmx+kk-1), start = (/ kk, 1 /), count = (/ 1, ntot, 1/))
-                   endif
+          if (IVAL_TRA1 > 0) then
+             do j = IVAL_TRA1,IVAL_TRAN   ! enumerators of tracers in valobs array (not the pointer)
+               i = j - IVAL_TRA1 + 1
+               ierr = nf90_put_var(ihisfile, id_tra(i), valobsT(:,IPNT_TRA1 + (i-1)*kmx+kk-1), start = (/ kk, 1, it_his /), count = (/ 1, ntot, 1/))
+             enddo
+          end if
+          if (IVAL_HWQ1 > 0) then
+             do j = IVAL_HWQ1,IVAL_HWQN   ! enumerators of waq output in valobs array (not the pointer)
+               i = j - IVAL_HWQ1 + 1
+               if (i .le. noout_user + noout_statt) then
+                  ierr = nf90_put_var(ihisfile, id_hwq(i), valobsT(:,IPNT_HWQ1 + (i-1)*kmx+kk-1), start = (/ kk, 1, it_his /), count = (/ 1, ntot, 1/))
+               else if (comparereal(tim, ti_hise, eps10) == 0) then
+                  ierr = nf90_put_var(ihisfile, id_hwq(i), valobsT(:,IPNT_HWQ1 + (i-1)*kmx+kk-1), start = (/ kk, 1 /), count = (/ 1, ntot, 1/))
+               endif
                 enddo       
-             end if
-             if (IVAL_WQB3D1 > 0) then
-                do j = IVAL_WQB3D1,IVAL_WQB3DN   ! enumerators of 3d waqbot output in valobs array (not the pointer)
-                   i = j - IVAL_WQB3D1 + 1
-                   ierr = nf90_put_var(ihisfile, id_hwqb3d(i), valobsT(:,IPNT_WQB3D1 + (i-1)*kmx+kk-1), start = (/ kk, 1, it_his /), count = (/ 1, ntot, 1/))
-                enddo
-             end if
-             if (IVAL_SF1 > 0) then
-                call realloc(toutputx, (/ntot, stmpar%lsedsus /), keepExisting=.false., fill = dmiss)
-                do j = IVAL_SF1,IVAL_SFN
-                   i = j - IVAL_SF1 + 1
-                   toutputx(:,i) = valobsT(:,IPNT_SF1 + (i-1)*(kmx+1)+kk-1)
-                enddo
-                ierr = nf90_put_var(ihisfile, id_sf, toutputx, start = (/ kk, 1, 1, it_his /), count = (/ 1, ntot, stmpar%lsedsus, 1/))
-             end if
-             if (jawave>0) then
-                ierr = nf90_put_var(ihisfile,    id_ustx, valobsT(:,IPNT_UCXST+kk-1),  start = (/ kk, 1, it_his /), count = (/ 1, ntot, 1 /))
-                ierr = nf90_put_var(ihisfile,    id_usty, valobsT(:,IPNT_UCYST+kk-1),  start = (/ kk, 1, it_his /), count = (/ 1, ntot, 1 /))
-             endif
-          enddo
-       else
-!        2D
+          end if
+          if (IVAL_WQB3D1 > 0) then
+             do j = IVAL_WQB3D1,IVAL_WQB3DN   ! enumerators of 3d waqbot output in valobs array (not the pointer)
+               i = j - IVAL_WQB3D1 + 1
+               ierr = nf90_put_var(ihisfile, id_hwqb3d(i), valobsT(:,IPNT_WQB3D1 + (i-1)*kmx+kk-1), start = (/ kk, 1, it_his /), count = (/ 1, ntot, 1/))
+             enddo
+          end if
+          if (IVAL_SF1 > 0) then
+             call realloc(toutputx, (/ntot, stmpar%lsedsus /), keepExisting=.false., fill = dmiss)
+             do j = IVAL_SF1,IVAL_SFN
+               i = j - IVAL_SF1 + 1
+               toutputx(:,i) = valobsT(:,IPNT_SF1 + (i-1)*(kmx+1)+kk-1)
+             enddo
+             ierr = nf90_put_var(ihisfile, id_sf, toutputx, start = (/ kk, 1, 1, it_his /), count = (/ 1, ntot, stmpar%lsedsus, 1/))
+          end if
+          if (jawave>0) then
+             ierr = nf90_put_var(ihisfile,    id_ustx, valobsT(:,IPNT_UCXST+kk-1),  start = (/ kk, 1, it_his /), count = (/ 1, ntot, 1 /))
+             ierr = nf90_put_var(ihisfile,    id_usty, valobsT(:,IPNT_UCYST+kk-1),  start = (/ kk, 1, it_his /), count = (/ 1, ntot, 1 /))
+          endif
+       enddo
+     else
+!      2D
           if (jahisvelvec > 0) then
-             ierr = nf90_put_var(ihisfile,    id_varucx, valobsT(:,IPNT_UCX),  start = (/ 1, it_his /), count = (/ ntot, 1 /))
-             ierr = nf90_put_var(ihisfile,    id_varucy, valobsT(:,IPNT_UCY),  start = (/ 1, it_his /), count = (/ ntot, 1 /))
+       ierr = nf90_put_var(ihisfile,    id_varucx, valobsT(:,IPNT_UCX),  start = (/ 1, it_his /), count = (/ ntot, 1 /))
+       ierr = nf90_put_var(ihisfile,    id_varucy, valobsT(:,IPNT_UCY),  start = (/ 1, it_his /), count = (/ ntot, 1 /))
           end if
           if (jahisvelocity > 0) then
              ierr = nf90_put_var(ihisfile, id_varumag, valobsT(:,IPNT_UMAG),  start = (/ 1, it_his /), count = (/ ntot, 1 /))
@@ -2842,84 +2841,85 @@ subroutine unc_write_his(tim)            ! wrihis
           if (jahisdischarge > 0) then
             ierr = nf90_put_var(ihisfile, id_varqmag, valobsT(:,IPNT_QMAG),  start = (/ 1, it_his /), count = (/ ntot, 1 /))
           end if
-          if (jasal > 0) then
-             ierr = nf90_put_var(ihisfile, id_varsal, valobsT(:,IPNT_SA1),  start = (/ 1, it_his /), count = (/ ntot, 1 /))
-          endif
-          if (jatem > 0) then
-             ierr = nf90_put_var(ihisfile, id_vartem, valobsT(:,IPNT_TEM1), start = (/ 1, it_his /), count = (/ ntot, 1 /))
-          end if
+       if (jasal > 0) then
+          ierr = nf90_put_var(ihisfile, id_varsal, valobsT(:,IPNT_SA1),  start = (/ 1, it_his /), count = (/ ntot, 1 /))
+       endif
+       if (jatem > 0) then
+          ierr = nf90_put_var(ihisfile, id_vartem, valobsT(:,IPNT_TEM1), start = (/ 1, it_his /), count = (/ ntot, 1 /))
+       end if
           if( (jasal > 0 .or. jatem > 0 .or. jased > 0 )  .and. jahisrho > 0) then
              ierr = nf90_put_var(ihisfile, id_varrhop, valobsT(:,IPNT_RHOP) ,  start = (/ 1, it_his /), count = (/ ntot, 1 /))
-          end if
-  
-          if (IVAL_TRA1 > 0) then
-             do j = IVAL_TRA1,IVAL_TRAN   ! enumerators of tracers in valobs array (not the pointer)
-                i = j - IVAL_TRA1 + 1
-                ierr = nf90_put_var(ihisfile, id_tra(i), valobsT(:,IPNT_TRA1 + i-1), start = (/ 1, it_his /), count = (/ ntot, 1/))
-             end do
-          end if
-          if (IVAL_HWQ1 > 0) then
-             do j = IVAL_HWQ1,IVAL_HWQN   ! enumerators of extra waq output in valobs array (not the pointer)
-                i = j - IVAL_HWQ1 + 1
-                ierr = nf90_put_var(ihisfile, id_hwq(i), valobsT(:,IPNT_HWQ1 + i-1), start = (/ 1, it_his /), count = (/ ntot, 1/))
-             end do
-          end if
-          if (IVAL_WQB3D1 > 0) then
-             do j = IVAL_WQB3D1,IVAL_WQB3DN   ! enumerators of waqbot variables in valobs array (not the pointer)
-                i = j - IVAL_WQB3D1 + 1
-                ierr = nf90_put_var(ihisfile, id_hwqb3d(i), valobsT(:,IPNT_WQB3D1 + i-1), start = (/ 1, it_his /), count = (/ ntot, 1/))
-             end do
-          end if
-          if (IVAL_SF1 > 0) then
-             call realloc(toutputx, (/ntot, stmpar%lsedsus /), keepExisting=.false., fill = dmiss)
-             do j = IVAL_SF1,IVAL_SFN
-                i = j - IVAL_SF1 + 1
-                toutputx(:,i) = valobsT(:,IPNT_SF1 + i-1)
-             end do
-             ierr = nf90_put_var(ihisfile, id_sf, toutputx, start = (/ 1, 1, it_his /), count = (/ ntot, stmpar%lsedsus, 1/))
-          end if
-          if (IVAL_WS1 > 0) then
-             call realloc(toutputx, (/ntot, stmpar%lsedsus /), keepExisting=.false., fill = dmiss)
-             do j = IVAL_WS1,IVAL_WSN
-                i = j - IVAL_WS1 + 1
-                toutputx(:,i) = valobsT(:,IPNT_WS1 + i-1)
-                ierr = nf90_put_var(ihisfile, id_ws, toutputx, start = (/ 1, 1, it_his /), count = (/ ntot, stmpar%lsedsus, 1/))
-             enddo
-          end if
-          !
-          if (jased > 0 .and. .not. stm_included) then
-             ierr = nf90_put_var(ihisfile, id_varsed, valobsT(:,IPNT_SED),  start = (/ 1, it_his /), count = (/ ntot, 1 /))
-          end if
-          !
-          if (jawave>0) then
-             ierr = nf90_put_var(ihisfile,    id_ustx, valobsT(:,IPNT_UCXST),  start = (/ 1, it_his /), count = (/ ntot, 1 /))
-             ierr = nf90_put_var(ihisfile,    id_usty, valobsT(:,IPNT_UCYST),  start = (/ 1, it_his /), count = (/ ntot, 1 /))
-          endif
-       endif
-
-       if (jahistaucurrent>0) then
-          ierr = nf90_put_var(ihisfile, id_WTAU,    valobsT(:,IPNT_WAVETAU), start = (/ 1, it_his /), count = (/ ntot, 1 /))
-       endif
-
-       if ( jawave.eq.4 ) then
-          ierr = nf90_put_var(ihisfile, id_R,      valobsT(:,IPNT_WAVER), start = (/ 1, it_his /), count = (/ ntot, 1 /))
        end if
-
+  
+       if (IVAL_TRA1 > 0) then
+          do j = IVAL_TRA1,IVAL_TRAN   ! enumerators of tracers in valobs array (not the pointer)
+            i = j - IVAL_TRA1 + 1
+            ierr = nf90_put_var(ihisfile, id_tra(i), valobsT(:,IPNT_TRA1 + i-1), start = (/ 1, it_his /), count = (/ ntot, 1/))
+          end do
+       end if
+       if (IVAL_HWQ1 > 0) then
+          do j = IVAL_HWQ1,IVAL_HWQN   ! enumerators of extra waq output in valobs array (not the pointer)
+            i = j - IVAL_HWQ1 + 1
+            ierr = nf90_put_var(ihisfile, id_hwq(i), valobsT(:,IPNT_HWQ1 + i-1), start = (/ 1, it_his /), count = (/ ntot, 1/))
+          end do
+       end if
+       if (IVAL_WQB3D1 > 0) then
+          do j = IVAL_WQB3D1,IVAL_WQB3DN   ! enumerators of waqbot variables in valobs array (not the pointer)
+            i = j - IVAL_WQB3D1 + 1
+            ierr = nf90_put_var(ihisfile, id_hwqb3d(i), valobsT(:,IPNT_WQB3D1 + i-1), start = (/ 1, it_his /), count = (/ ntot, 1/))
+          end do
+       end if
+       if (IVAL_SF1 > 0) then
+          call realloc(toutputx, (/ntot, stmpar%lsedsus /), keepExisting=.false., fill = dmiss)
+          do j = IVAL_SF1,IVAL_SFN
+            i = j - IVAL_SF1 + 1
+            toutputx(:,i) = valobsT(:,IPNT_SF1 + i-1)
+          end do
+          ierr = nf90_put_var(ihisfile, id_sf, toutputx, start = (/ 1, 1, it_his /), count = (/ ntot, stmpar%lsedsus, 1/))
+       end if
+       if (IVAL_WS1 > 0) then
+          call realloc(toutputx, (/ntot, stmpar%lsedsus /), keepExisting=.false., fill = dmiss)
+          do j = IVAL_WS1,IVAL_WSN
+            i = j - IVAL_WS1 + 1
+            toutputx(:,i) = valobsT(:,IPNT_WS1 + i-1)
+            ierr = nf90_put_var(ihisfile, id_ws, toutputx, start = (/ 1, 1, it_his /), count = (/ ntot, stmpar%lsedsus, 1/))
+          enddo
+       end if
+       !
+       if (jased > 0 .and. .not. stm_included) then
+          ierr = nf90_put_var(ihisfile, id_varsed, valobsT(:,IPNT_SED),  start = (/ 1, it_his /), count = (/ ntot, 1 /))
+       end if
+       !
        if (jawave>0) then
-          ierr = nf90_put_var(ihisfile, id_WH,      valobsT(:,IPNT_WAVEH),   start = (/ 1, it_his /), count = (/ ntot, 1 /))
-          ierr = nf90_put_var(ihisfile, id_WD,      valobsT(:,IPNT_WAVED),   start = (/ 1, it_his /), count = (/ ntot, 1 /))
-          ierr = nf90_put_var(ihisfile, id_WL,      valobsT(:,IPNT_WAVEL),   start = (/ 1, it_his /), count = (/ ntot, 1 /))
-          ierr = nf90_put_var(ihisfile, id_WT,      valobsT(:,IPNT_WAVET),   start = (/ 1, it_his /), count = (/ ntot, 1 /))
-          ierr = nf90_put_var(ihisfile, id_WU,      valobsT(:,IPNT_WAVEU),   start = (/ 1, it_his /), count = (/ ntot, 1 /))
+          ierr = nf90_put_var(ihisfile,    id_ustx, valobsT(:,IPNT_UCXST),  start = (/ 1, it_his /), count = (/ ntot, 1 /))
+          ierr = nf90_put_var(ihisfile,    id_usty, valobsT(:,IPNT_UCYST),  start = (/ 1, it_his /), count = (/ ntot, 1 /))
        endif
+     endif
+
+    if (jahistaucurrent>0) then
+       ierr = nf90_put_var(ihisfile, id_TAUX,   valobsT(:,IPNT_TAUX), start = (/ 1, it_his /), count = (/ ntot, 1 /))
+       ierr = nf90_put_var(ihisfile, id_TAUY,   valobsT(:,IPNT_TAUY), start = (/ 1, it_his /), count = (/ ntot, 1 /))
+    endif
+
+    if ( jawave.eq.4 ) then
+       ierr = nf90_put_var(ihisfile, id_R,      valobsT(:,IPNT_WAVER), start = (/ 1, it_his /), count = (/ ntot, 1 /))
+    end if
+
+    if (jawave>0) then
+       ierr = nf90_put_var(ihisfile, id_WH,      valobsT(:,IPNT_WAVEH),   start = (/ 1, it_his /), count = (/ ntot, 1 /))
+       ierr = nf90_put_var(ihisfile, id_WD,      valobsT(:,IPNT_WAVED),   start = (/ 1, it_his /), count = (/ ntot, 1 /))
+       ierr = nf90_put_var(ihisfile, id_WL,      valobsT(:,IPNT_WAVEL),   start = (/ 1, it_his /), count = (/ ntot, 1 /))
+       ierr = nf90_put_var(ihisfile, id_WT,      valobsT(:,IPNT_WAVET),   start = (/ 1, it_his /), count = (/ ntot, 1 /))
+       ierr = nf90_put_var(ihisfile, id_WU,      valobsT(:,IPNT_WAVEU),   start = (/ 1, it_his /), count = (/ ntot, 1 /))
+    endif
 
    !    waq bottom variables are always 2D
-       if (IVAL_WQB1 > 0) then
-          do j = IVAL_WQB1,IVAL_WQBN   ! enumerators of tracers in valobs array (not the pointer)
-             i = j - IVAL_WQB1 + 1
-             ierr = nf90_put_var(ihisfile, id_hwqb(i), valobsT(:,IPNT_WQB1 + i-1), start = (/ 1, it_his /), count = (/ ntot, 1/))
-          end do
-       endif
+     if (IVAL_WQB1 > 0) then
+       do j = IVAL_WQB1,IVAL_WQBN   ! enumerators of tracers in valobs array (not the pointer)
+         i = j - IVAL_WQB1 + 1
+         ierr = nf90_put_var(ihisfile, id_hwqb(i), valobsT(:,IPNT_WQB1 + i-1), start = (/ 1, it_his /), count = (/ ntot, 1/))
+       end do
+     endif
     endif
 
     if (jatem > 1 .and. jahisheatflux > 0) then
@@ -3103,28 +3103,28 @@ subroutine unc_write_his(tim)            ! wrihis
           ierr = nf90_put_var(ihisfile, id_varu,    crs(i)%sumvalcur(IPNT_U1A), (/ i, it_his /))
 !          ierr = nf90_put_var(ihisfile, id_varuavg, crs(i)%sumvalavg(IPNT_U1A), (/ i, it_his /))
 
-          IP = IPNT_HUA
-          do num = 1,NUMCONST_MDU
-             IP = IP + 1
-             if (num >= ISED1 .and. num <= ISEDN) then
-                l = sedtot2sedsus(num-ISED1+1)
-                select case(stmpar%morpar%moroutput%transptype)
-                case (0)
-                   rhol = 1d0
-                case (1)
-                   rhol = stmpar%sedpar%cdryb(l)
-                case (2)
-                   rhol = stmpar%sedpar%rhosol(l)
-                end select
-                toutput_cum = crs(i)%sumvalcum(IP)/rhol
-                toutput_cur = crs(i)%sumvalcur(IP)/rhol
-             else
-               toutput_cum = crs(i)%sumvalcum(IP)
-               toutput_cur = crs(i)%sumvalcur(IP)
-             endif
-             ierr = nf90_put_var(ihisfile, id_const_cum(num), toutput_cum, (/ i, it_his /))
-             ierr = nf90_put_var(ihisfile, id_const(num),     toutput_cur, (/ i, it_his /))
-          end do
+             IP = IPNT_HUA
+             do num = 1,NUMCONST_MDU
+                IP = IP + 1
+                if (num >= ISED1 .and. num <= ISEDN) then
+                   l = sedtot2sedsus(num-ISED1+1)
+                   select case(stmpar%morpar%moroutput%transptype)
+                   case (0)
+                      rhol = 1d0
+                   case (1)
+                      rhol = stmpar%sedpar%cdryb(l)
+                   case (2)
+                      rhol = stmpar%sedpar%rhosol(l)
+                   end select
+                   toutput_cum = crs(i)%sumvalcum(IP)/rhol
+                   toutput_cur = crs(i)%sumvalcur(IP)/rhol
+                else
+                  toutput_cum = crs(i)%sumvalcum(IP)
+                  toutput_cur = crs(i)%sumvalcur(IP)
+                endif
+                ierr = nf90_put_var(ihisfile, id_const_cum(num), toutput_cum, (/ i, it_his /))
+                ierr = nf90_put_var(ihisfile, id_const(num),     toutput_cur, (/ i, it_his /))
+             end do
      
           if( jased == 4 .and. stmpar%lsedtot > 0 ) then
              IP = IPNT_HUA + NUMCONST_MDU + 1
@@ -3274,7 +3274,7 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = nf90_put_var(ihisfile, id_genstru_head,          valobsT(1:ngenstru,5),  (/ 1, it_his /))
             ierr = nf90_put_var(ihisfile, id_genstru_au,            valobsT(1:ngenstru,6),  (/ 1, it_his /))
             ierr = nf90_put_var(ihisfile, id_genstru_vel,           valobsT(1:ngenstru,7),  (/ 1, it_his /))
-            if (network%sts%numGeneralStructures > 0) then
+               if (network%sts%numGeneralStructures > 0) then
                ierr = nf90_put_var(ihisfile, id_genstru_s1crest,       valobsT(1:ngenstru,8),  (/ 1, it_his /))
                ierr = nf90_put_var(ihisfile, id_genstru_crestw,        valobsT(1:ngenstru,10), (/ 1, it_his /))
                ierr = nf90_put_var(ihisfile, id_genstru_stat,      int(valobsT(1:ngenstru,11)),(/ 1, it_his /))
@@ -3290,7 +3290,7 @@ subroutine unc_write_his(tim)            ! wrihis
                ierr = nf90_put_var(ihisfile, id_genstru_velgateopen,   valobsT(1:ngenstru,23), (/ 1, it_his /))
                ierr = nf90_put_var(ihisfile, id_genstru_velgateover,   valobsT(1:ngenstru,24), (/ 1, it_his /))
                ierr = nf90_put_var(ihisfile, id_genstru_velgateunder,  valobsT(1:ngenstru,25), (/ 1, it_his /))
-            end if
+               end if
             ! write geometry variables at the first time of history output
             if (it_his == 1) then
                if (network%sts%numGeneralStructures > 0) then ! new general structure
@@ -3430,8 +3430,8 @@ subroutine unc_write_his(tim)            ! wrihis
             if (allocated(geomXOrif))     deallocate(geomXOrif)
             if (allocated(geomYOrif))     deallocate(geomYOrif)
             if (allocated(nodeCountOrif)) deallocate(nodeCountOrif)
+               end if
          end if
-      end if
 
       if (timon) call timstrt('unc_write_his bridge data', handle_extra(58))
       if (jahisbridge > 0 .and. network%sts%numBridges > 0) then
@@ -3465,8 +3465,8 @@ subroutine unc_write_his(tim)            ! wrihis
                if (allocated(geomYBridge))     deallocate(geomYBridge)
                if (allocated(nodeCountBridge)) deallocate(nodeCountBridge)
             if (timon) call timstop(handle_extra(74))
+               end if
          end if
-      end if
       if (timon) call timstop(handle_extra(58))
 
       if (jahisculv > 0 .and. network%sts%numCulverts > 0) then
@@ -3490,8 +3490,8 @@ subroutine unc_write_his(tim)            ! wrihis
             if (allocated(geomXCulv))     deallocate(geomXCulv)
             if (allocated(geomYCulv))     deallocate(geomYCulv)
             if (allocated(nodeCountCulv)) deallocate(nodeCountCulv)
+               end if
          end if
-      end if
 
       if (jahisuniweir > 0 .and. network%sts%numuniweirs > 0) then
          do i=1,network%sts%numuniweirs
@@ -3511,8 +3511,8 @@ subroutine unc_write_his(tim)            ! wrihis
             if (allocated(geomXUniweir))     deallocate(geomXUniweir)
             if (allocated(geomYUniweir))     deallocate(geomYUniweir)
             if (allocated(nodeCountUniweir)) deallocate(nodeCountUniweir)
+               end if
          end if
-      end if
 
       if (jahiscmpstru > 0 .and. network%cmps%count > 0) then
          do i=1,network%cmps%count
@@ -3543,8 +3543,8 @@ subroutine unc_write_his(tim)            ! wrihis
             if (allocated(geomXLongCulv))     deallocate(geomXLongCulv)
             if (allocated(geomYLongCulv))     deallocate(geomYLongCulv)
             if (allocated(nodeCountLongCulv)) deallocate(nodeCountLongCulv)
+               end if
          end if
-      end if
 
       if (jahislateral > 0 .and. numlatsg > 0) then
          ierr = nf90_put_var(ihisfile, id_lat_predis_inst,  qplat,       start = (/1,it_his/), count = (/numlatsg,1/))
@@ -3635,14 +3635,14 @@ subroutine unc_write_his(tim)            ! wrihis
          ierr = nf90_put_var(ihisfile, id_weirgen_s1dn  , valobsT(1:nweirgen,4), (/ 1, it_his /))
          ierr = nf90_put_var(ihisfile, id_weirgen_crestl, valobsT(1:nweirgen,9), (/ 1, it_his /))
          ierr = nf90_put_var(ihisfile, id_weirgen_crestw, valobsT(1:nweirgen,10),(/ 1, it_his /))
-         if (network%sts%numWeirs > 0) then ! write extra files for new weirs
+            if (network%sts%numWeirs > 0) then ! write extra files for new weirs
             ierr = nf90_put_var(ihisfile, id_weirgen_head  , valobsT(1:nweirgen,5),  (/ 1, it_his /))
             ierr = nf90_put_var(ihisfile, id_weirgen_au    , valobsT(1:nweirgen,6),  (/ 1, it_his /))
             ierr = nf90_put_var(ihisfile, id_weirgen_vel   , valobsT(1:nweirgen,7),  (/ 1, it_his /))
             ierr = nf90_put_var(ihisfile, id_weirgen_s1crest,valobsT(1:nweirgen,8),  (/ 1, it_his /))
             ierr = nf90_put_var(ihisfile, id_weir_stat, int(valobsT(1:nweirgen,11)),(/ 1, it_his /))
             ierr = nf90_put_var(ihisfile, id_weirgen_forcedif,valobsT(1:nweirgen,12),(/1, it_his /))
-         end if
+            end if
          ! write geometry variables at the first time of history output
          if (it_his == 1) then
             if (network%sts%numWeirs > 0) then ! new weir
@@ -3858,7 +3858,7 @@ subroutine unc_write_his(tim)            ! wrihis
     end if
 
     if (unc_noforcedflush == 0) then
-       ierr = nf90_sync(ihisfile) ! Flush file
+    ierr = nf90_sync(ihisfile) ! Flush file
     end if
 
     if (timon) call timstop (handle_extra(54))

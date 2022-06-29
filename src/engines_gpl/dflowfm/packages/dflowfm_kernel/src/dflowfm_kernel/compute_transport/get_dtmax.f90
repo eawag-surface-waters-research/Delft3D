@@ -32,7 +32,7 @@
 
 !> get maximum timestep for water columns (see setdtorg)
 subroutine get_dtmax()
-   use m_flowgeom, only: Ndx, Ndxi, bl, nd, Dx, ln, lnx
+   use m_flowgeom, only: Ndx, Ndxi, bl, nd, Dx, ln, lnx, ba
    use m_flow, only: s1, epshu, squ, sqi, vol1, kmx, u1, hu, diusp, viu, Lbot, Ltop
    use m_flowparameters, only: eps10, cflmx, jadiusp
    use m_turbulence, only: sigdifi
@@ -40,6 +40,7 @@ subroutine get_dtmax()
    use m_physcoef, only:  dicouv
    use m_timer
    use m_transport
+   use m_sediment, only: mtd, stm_included
    use m_partitioninfo
    use timers
 
@@ -53,6 +54,8 @@ subroutine get_dtmax()
    integer                                       :: k1, k2
    integer                                       :: j
    integer                                       :: ierror
+   
+   double precision                              :: sqtot, bak
 
    double precision,                 parameter   :: dtmax_default = 1d4
 
@@ -63,7 +66,7 @@ subroutine get_dtmax()
    kk_dtmin = 0
 
    if ( jalimitdtdiff.eq.1 ) then
-!     determine contribution of diffusion to time-step limitation, mosly copied from "comp_fluxhor3D"
+!     determine contribution of diffusion to time-step limitation, mostly copied from "comp_fluxhor3D"
       sumdifflim = 0d0
       do LL=1,Lnx
          if (jadiusp == 1) then
@@ -144,18 +147,41 @@ subroutine get_dtmax()
          if ( s1(kk)-bl(kk).gt.epshu ) then
             call getkbotktop(kk,kb,kt)
             if ( jalimitdtdiff.eq.0 ) then
-               do k=kb,kt
-                  if ( squ(k).gt.eps10 .or. sqi(k).gt.eps10 ) then
-                     dtmax(kk) = min(dtmax(kk),vol1(k)/max(squ(k),sqi(k)))
-                  end if
-               end do
+               if (stm_included .and. ISED1>0) then
+                  bak = ba(kk)
+                  do k=kb,kt
+                     !sqtot = max(sqi(k),maxval(mtd%ws(k,:))*bak)
+                     sqtot = sqi(k) + maxval(mtd%ws(k,:))*bak
+                     if ( squ(k).gt.eps10 .or. sqtot.gt.eps10 ) then
+                        dtmax(kk) = min(dtmax(kk),vol1(k)/max(squ(k),sqtot))
+                     end if
+                  end do
+               else
+                  do k=kb,kt
+                     if ( squ(k).gt.eps10 .or. sqi(k).gt.eps10 ) then
+                        dtmax(kk) = min(dtmax(kk),vol1(k)/max(squ(k),sqi(k)))
+                     end if
+                  end do                  
+               endif
             else
-               do k=kb,kt
-                  if ( sqi(k)+sumdifflim(k).gt.eps10 ) then
-                     dtmax(kk) = min(dtmax(kk),vol1(k)/(sqi(k)+sumdifflim(k)))
-!                     dtmax(kk) = min(dtmax(kk),vol1(k)/(squ(k)+sumdifflim(k)))
-                  end if
-               end do
+               if (stm_included .and. ISED1>0) then
+                  bak = ba(kk)
+                  do k=kb,kt
+                     !sqtot = max(sqi(k)+sumdifflim(k),maxval(mtd%ws(k,:))*bak)
+                     sqtot = sqi(k)+sumdifflim(k) + maxval(mtd%ws(k,:))*bak
+                     if ( sqtot.gt.eps10 ) then
+                        dtmax(kk) = min(dtmax(kk),vol1(k)/sqtot)
+                        ! dtmax(kk) = min(dtmax(kk),vol1(k)/(squ(k)+sumdifflim(k)))
+                     end if
+                  enddo
+               else
+                  do k=kb,kt
+                     if ( sqi(k)+sumdifflim(k).gt.eps10 ) then
+                        dtmax(kk) = min(dtmax(kk),vol1(k)/(sqi(k)+sumdifflim(k)))
+                        ! dtmax(kk) = min(dtmax(kk),vol1(k)/(squ(k)+sumdifflim(k)))
+                     end if
+                  end do
+               end if
             end if
             dtmax(kk) = cflmx*dtmax(kk)
 

@@ -122,6 +122,7 @@
 
                                                  !< Molecular diffusivity coefficients (m2/s):
  double precision                  :: viskin     !< kinematic  viscosity
+ double precision                  :: vismol     !< molecular viscosity (m2/s)
  double precision                  :: difmolsal  !< molecular diffusivity of salinity
  double precision                  :: difmoltem  !<           diffusivity of temperature
  double precision                  :: difmolsed  !<           diffusivity of sediment
@@ -213,6 +214,7 @@ secchidepth2fraction        = 0d0           !< (m) fraction of total absorbed by
 
                                             ! Molecular diffusivity coefficients:
 viskin                      = 1.D-6         ! kinematic  viscosity water in keps model
+vismol                      = 4.d0/(20.d0 + backgroundwatertemperature)*1d-5 ! Van Rijn, 1993, from iniphys.f90
 viskinair                   = 1.5d-5        ! kinematic  viscosity air
 difmolsal                   = viskin/700d0  ! molecular diffusivity of salinity
 difmoltem                   = viskin/6.7d0  !           diffusivity of temperature

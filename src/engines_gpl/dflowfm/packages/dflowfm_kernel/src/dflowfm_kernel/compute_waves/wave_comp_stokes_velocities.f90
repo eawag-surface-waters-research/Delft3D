@@ -36,27 +36,36 @@
    use m_flow, only: hu, huvli, hs
    use m_physcoef, only: sag
    use m_waves
+   use m_sferic
    use m_partitioninfo
    implicit none
 
    double precision :: Mu, Mv, hminlwi, massflux_max, mnorm, mangle          ! link-based and link-oriented wave-induced volume fluxes
+   double precision :: gammal, hwavL, hstokes, huL, deltahmin
    double precision, allocatable :: mx(:), my(:)
 
    integer :: k1, k2, L, k
    integer :: ierror ! error (1) or not (0)
 
+   double precision :: ac1, ac2
+
    ierror = 1
+
+   !
+   ustokes = 0d0
+   vstokes = 0d0
+   
+   ! switch off stokes drifts
+   if (jawavestokes==0) then
+      return
+   endif
 
    if (.not.(allocated(mx))) then
       allocate(mx(1:ndx), my(1:ndx), stat=ierror)
    end if
-
-   ! hminlwi = 1d0/hminlw
-   ustokes = 0d0
-   vstokes = 0d0
-   mx      = 0d0
-   my      = 0d0
-
+ 
+   deltahmin = 0.1d0   ! should be a parameter
+   !
    do k = 1,ndx
       massflux_max = 1d0/8d0*sag*(max(hs(k),0d0)**1.5)*gammax**2
       mnorm  = min(sqrt(mxwav(k)**2+mywav(k)**2), massflux_max)
@@ -72,16 +81,27 @@
 
    do L=1,Lnxi
       if ( hu(L).gt.epshu ) then
+         huL=hu(L)
          k1 = ln(1,L); k2 = ln(2,L)
+         ac1 = acl(L); ac2=1d0-ac1
+         !
+         ! civilized behaviour in shallow surf zone
+         hwavL = 0.5d0*(hwav(k1)+hwav(k2))
+         gammal = hwavL/huL
+         if (gammal>1.d0) then
+            hstokes = deltahmin*(gammal-1.d0)*hwavL+huL
+         else
+            hstokes = huL
+         endif
+         !
+         Mu =    ac1 *(csu(L)*(Mx(k1)) + snu(L)*(My(k1))) + &
+                 ac2 *(csu(L)*(Mx(k2)) + snu(L)*(My(k2)))
 
-         Mu =    acL(L) *(csu(L)*(Mx(k1)) + snu(L)*(My(k1))) + &
-            (1d0-acL(L))*(csu(L)*(Mx(k2)) + snu(L)*(My(k2)))
+         Mv =    ac1 *(-snu(L)*(Mx(k1)) + csu(L)*(My(k1))) + &
+                 ac2 *(-snu(L)*(Mx(k2)) + csu(L)*(My(k2)))
 
-         Mv =    acL(L) *(-snu(L)*(Mx(k1)) + csu(L)*(My(k1))) + &
-            (1d0-acL(L))*(-snu(L)*(Mx(k2)) + csu(L)*(My(k2)))
-
-         ustokes(L) = Mu * huvli(L)
-         vstokes(L) = Mv * huvli(L)
+         ustokes(L) = Mu/hstokes
+         vstokes(L) = Mv/hstokes
       else
          ustokes(L) = 0d0
          vstokes(L) = 0d0
@@ -90,24 +110,33 @@
 
    do L=lnxi+1,lnx                   ! Randen: Neumann
       if (hu(L)>epshu)  then
+         huL=hu(L)
          k1 = ln(1,L) ! buiten
          k2 = ln(2,L) ! binnen
+         !
+         hwavL = 0.5d0*(hwav(k1)+hwav(k2))
+         gammal = hwavL/huL
+         if (gammal>1.d0) then
+            hstokes = deltahmin*(gammal-1.d0)*hwavL+huL
+         else
+            hstokes = huL
+         endif
          Mx(k1) = Mx(k2);  My(k1) = My(k2)
+         !
+         Mu =    ac1 *(csu(L)*(Mx(k1)) + snu(L)*(My(k1))) + &
+                 ac2 *(csu(L)*(Mx(k2)) + snu(L)*(My(k2)))
 
-         Mu =    acL(L) *(csu(L)*(Mx(k1)) + snu(L)*(My(k1))) + &
-            (1d0-acL(L))*(csu(L)*(Mx(k2)) + snu(L)*(My(k2)))
-
-         Mv =    acL(L) *(-snu(L)*(Mx(k1)) + csu(L)*(My(k1))) + &
-            (1d0-acL(L))*(-snu(L)*(Mx(k2)) + csu(L)*(My(k2)))
-
-         ustokes(L) = Mu * huvli(L)
-         vstokes(L) = Mv * huvli(L)
+         Mv =    ac1 *(-snu(L)*(Mx(k1)) + csu(L)*(My(k1))) + &
+                 ac2 *(-snu(L)*(Mx(k2)) + csu(L)*(My(k2)))
+         !
+         ustokes(L) = Mu/hstokes
+         vstokes(L) = Mv/hstokes
       else
          ustokes(L) = 0d0
          vstokes(L) = 0d0
       end if
    end do
-
+   
    if (jampi>0) then
       call update_ghosts(ITYPE_U, 1, lnx, ustokes, ierror)
       call update_ghosts(ITYPE_U, 1, lnx, vstokes, ierror)

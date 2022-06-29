@@ -43,27 +43,32 @@ subroutine fill_valobs()
    use m_xbeach_data, only: R
    use m_ship
    use Timers
+   use m_alloc
 
    implicit none
 
    integer :: i, ii, j, kk, k, kb, kt, klay, L, LL, Lb, Lt, LLL, k1, k2, k3, LLa, n, nlayb, nrlay, nlaybL, nrlayLx
-   integer :: ipoint, ival, klayt, kmx_const, kk_const, nlyrs
+   integer :: kmx_const, kk_const, nlyrs
    double precision :: wavfac
    double precision :: dens, prsappr, drhodz, rhomea 
+   double precision :: ux,uy,um
    double precision, allocatable :: wa(:,:)
    double precision, allocatable :: frac(:,:)
    double precision, allocatable :: poros(:)
    double precision, external    :: setrhofixedp
+   double precision, allocatable :: ueux(:)
+   double precision, allocatable :: ueuy(:)
 
    kmx_const = kmx
    nlyrs     = 0
 
    if (timon) call timstrt ( "fill_valobs", handle_extra(55))
-
-   if (jaeulervel==1 .and. jawave > 0 .and. .not. flowWithoutWaves) then
-      call getucxucyeulmag(ndkx, workx, worky, ucmag, jaeulervel, jahisvelocity)
+   !
+   if (.not. allocated(ueux)) then
+      call realloc(ueux,ndkx,keepExisting=.false.,fill=0d0)
+      call realloc(ueuy,ndkx,keepExisting=.false.,fill=0d0)
    endif
-
+   !
    if (jawave>0) then
       if (jahissigwav==0) then
          wavfac = 1d0
@@ -73,13 +78,31 @@ subroutine fill_valobs()
       if (allocated(wa)) deallocate(wa)
       allocate(wa(1:2,1:max(kmx,1)))
    endif
-   if (flowWithoutWaves .and. jahistaucurrent>0) then
-      ! Ugly fix to have array taus filled
-      call gettaus(1,1)
-   endif
+   
+   call getucxucyeulmag(ndkx, ueux, ueuy, ucmag, jaeulervel, jahisvelocity)
+   if (jahistaucurrent>0) then
+      if (jawave==0) then
+         ! fill taus
+         call gettaus(1,1)
 
-   if (jawave<3 .and. .not. stm_included) then
-      call gettaus(1,1)
+         ! get vector comps
+         if (kmx==0) then
+            do k = 1, ndx
+               workx(k) = taus(k)*ueux(k)/max(ucmag(k),1d-4)
+               worky(k) = taus(k)*ueuy(k)/max(ucmag(k),1d-4)
+            enddo
+         else
+            do k = 1, ndx
+               call getkbotktop(k,kb,kt)
+               ux = ueux(kb); uy = ueuy(kb)
+               um = max(hypot(ux,uy),1d-4)
+               workx(k) = taus(k)*ux/max(ucmag(k),1d-4)   
+               worky(k) = taus(k)*uy/max(ucmag(k),1d-4)   
+            enddo
+         endif
+      else
+         call gettauswave(jawaveswartdelwaq)
+      endif
    endif
    !
    if (stm_included .and. jased>0) then
@@ -161,9 +184,9 @@ subroutine fill_valobs()
             endif
          endif
 
-
          if (jahistaucurrent>0) then
-         valobs(IPNT_WAVETAU,i) = taus(k)
+            valobs(IPNT_TAUX,i) = workx(k)
+            valobs(IPNT_TAUY,i) = worky(k)
          endif
 
          if (stm_included .and. jased>0) then
@@ -202,7 +225,7 @@ subroutine fill_valobs()
                enddo
             endif
             !
-            valobs(IPNT_TAUB,i) = sedtra%taub(k)
+            valobs(IPNT_TAUB,i) = sedtra%taub(k)  ! contains tausmax or Soulsby-Clarke shear stresses
             ! bed composition
             if (stmpar%morlyr%settings%iunderlyr==1) then
                do j = IVAL_BODSED1, IVAL_BODSEDN
@@ -302,24 +325,22 @@ subroutine fill_valobs()
             if (kmx > 0) then
                valobs(IPNT_ZCS+klay-1,i) = 0.5d0*( zws(kk)+zws(kk-1) )
             endif
-
-            valobs(IPNT_UCX+klay-1,i) = ucx(kk)
-            valobs(IPNT_UCY+klay-1,i) = ucy(kk)
-            if (jaeulervel==1 .and. hs(k) > epshu .and. jawave>0 .and. .not. flowWithoutWaves) then
-               valobs(IPNT_UCX+klay-1,i) = workx(kk)
-               valobs(IPNT_UCY+klay-1,i) = worky(kk)
+            
+            if (jahisvelocity>0) then
+               valobs(IPNT_UCX+klay-1,i) = ueux(kk)
+               valobs(IPNT_UCY+klay-1,i) = ueuy(kk)
             endif
 
             if (jawave > 0 .and. .not. flowWithoutWaves) then
                if (hs(k)>epshu) then
-                  if (kmx==0) then
-                     kk_const = 1
-                  else
-                     kk_const = klay
-                  endif
-                  valobs(IPNT_UCXST+klay-1,i) = wa(1,kk_const)
-                  valobs(IPNT_UCYST+klay-1,i) = wa(2,kk_const)
+               if (kmx==0) then
+                  kk_const = 1
+               else
+                  kk_const = klay
                endif
+               valobs(IPNT_UCXST+klay-1,i) = wa(1,kk_const)
+               valobs(IPNT_UCYST+klay-1,i) = wa(2,kk_const)
+            endif
             endif
 
             if ( kmx>0 ) then
@@ -334,8 +355,8 @@ subroutine fill_valobs()
             if( jasal > 0 .or. jatem > 0 .or. jased > 0 ) then
                valobs(IPNT_RHOP+klay-1,i) = setrhofixedp(kk, 0d0)
                if (idensform > 10 ) then  
-                valobs(IPNT_RHO+klay-1,i) = rho(kk)
-               endif
+               valobs(IPNT_RHO+klay-1,i) = rho(kk)
+            end if
                if (kk < kt) then
                    if (idensform > 10 ) then           
                       prsappr = ag*rhomean*( zws(kt) - zws(kk) )  
@@ -359,10 +380,6 @@ subroutine fill_valobs()
             end if
 
             if ( IVAL_TRA1.gt.0 ) then
-               !do j=IPNT_TRA1,IPNT_TRAN
-               !   valobs(j+klay-1,i) = constituents(ITRA1+j-IPNT_TRA1, kk)
-               !end do
-
                do j=IVAL_TRA1,IVAL_TRAN
                   ii = j-IVAL_TRA1+1
                   valobs(IPNT_TRA1+(ii-1)*kmx_const+klay-1,i) = constituents(ITRA1+ii-1, kk)
@@ -517,9 +534,9 @@ subroutine fill_valobs()
          end if
 
 !        Tau
-         if (jahistaucurrent > 0) then
-            valobs(IPNT_TAU,i) = taus(k)
-         end if
+         !if (jahistaucurrent > 0) then
+         !   valobs(IPNT_TAU,i) = taus(k)
+         !end if
 
 !        Heatflux
          if (jatem > 0 .and. jahisheatflux > 0) then

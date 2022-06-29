@@ -59,9 +59,9 @@
       ENDIF
 !     geen entry ALS NET BEZIG PUNT TE ZETTEN
 !     BIJ VERLATEN MET KEY = 3, TEKEN OPNIEUW
-      WRDKEY = 'Z   = ZOOMIN ;'
-      NLEVEL = 3
-      JADRAW = 1
+      WRDKEY   = 'Z   = ZOOMIN ;'
+      NLEVEL   = 3
+      JADRAW   = 1
 !
       IF (NPUT .EQ. 1) RETURN
 
@@ -97,7 +97,7 @@
 
       IF (X2B .GT. X2 .OR. X1B .LT. X1 .OR. Y2B .GT. Y2 .OR. Y1B .LT. Y1    ) THEN
          dy  = dyh
-         JA  = 1
+         JA = 1
       ELSE IF (KEY .EQ. 21) THEN
          JA  = 1
       ELSE IF (KEY .EQ. 22) THEN

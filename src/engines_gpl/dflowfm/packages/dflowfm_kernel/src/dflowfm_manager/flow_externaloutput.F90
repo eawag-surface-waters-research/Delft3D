@@ -95,7 +95,7 @@
    endif
 
    call timstrt('call wrimap', handle_extra(77))
-   if (ti_map > 0 .or. ti_mpt(1) > 0) then
+   if (ti_map > 0d0 .or. ti_mpt(1) > 0) then
      if (comparereal(tim, time_map, eps10) >= 0) then
         ! update for output, only for 1D
         if (network%loaded) then

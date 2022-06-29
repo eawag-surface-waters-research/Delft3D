@@ -116,14 +116,14 @@ implicit none
     integer                           :: IVAL_RAIN
     integer                           :: IVAL_INFILTCAP
     integer                           :: IVAL_INFILTACT
-    integer                           :: IVAL_TAU
     integer                           :: IVAL_WAVEH
     integer                           :: IVAL_WAVET
     integer                           :: IVAL_WAVED
     integer                           :: IVAL_WAVEL
     integer                           :: IVAL_WAVER
     integer                           :: IVAL_WAVEU
-    integer                           :: IVAL_WAVETAU
+    integer                           :: IVAL_TAUX
+    integer                           :: IVAL_TAUY
     integer                           :: IVAL_UCX         ! 3D, layer centered after 2D
     integer                           :: IVAL_UCY
     integer                           :: IVAL_UCZ
@@ -223,14 +223,14 @@ implicit none
     integer                           :: IPNT_INFILTCAP
     integer                           :: IPNT_INFILTACT
     integer                           :: IPNT_PATM
-    integer                           :: IPNT_TAU
     integer                           :: IPNT_WAVEH
     integer                           :: IPNT_WAVET
     integer                           :: IPNT_WAVEL
     integer                           :: IPNT_WAVED
     integer                           :: IPNT_WAVER
     integer                           :: IPNT_WAVEU
-    integer                           :: IPNT_WAVETAU
+    integer                           :: IPNT_TAUX
+    integer                           :: IPNT_TAUY
     integer                           :: IPNT_UCX
     integer                           :: IPNT_UCY
     integer                           :: IPNT_UCZ
@@ -393,7 +393,8 @@ subroutine init_valobs_pointers()
    IVAL_WAVEL      = 0
    IVAL_WAVER      = 0
    IVAL_WAVEU      = 0
-   IVAL_WAVETAU    = 0
+   IVAL_TAUX       = 0
+   IVAL_TAUY       = 0
    IVAL_UCX        = 0
    IVAL_UCY        = 0
    IVAL_UCZ        = 0
@@ -439,7 +440,6 @@ subroutine init_valobs_pointers()
    IVAL_RAIN       = 0
    IVAL_INFILTCAP  = 0
    IVAL_INFILTACT  = 0
-   IVAL_TAU        = 0
    IVAL_RHOP       = 0
    IVAL_RHO        = 0
    IVAL_BRUV       = 0
@@ -511,7 +511,10 @@ subroutine init_valobs_pointers()
       i=i+1;            IVAL_WAVER      = i
       i=i+1;            IVAL_WAVEU      = i
    end if
-   i=i+1;            IVAL_WAVETAU    = i
+   if (jahistaucurrent>0) then
+      i=i+1;            IVAL_TAUX   = i
+      i=i+1;            IVAL_TAUY   = i
+   endif
    if ( jatem.gt.1 ) then
       i=i+1;            IVAL_TAIR       = i
    end if
@@ -537,9 +540,6 @@ subroutine init_valobs_pointers()
    if ( jahisinfilt.gt.0 ) then
       i=i+1;            IVAL_INFILTCAP  = i
       i=i+1;            IVAL_INFILTACT  = i
-   end if
-   if ( jahistaucurrent.gt.0 ) then
-      i=i+1;            IVAL_TAU       = i
    end if
    if ( numwqbots.gt.0 ) then
       i=i+1;            IVAL_WQB1       = i
@@ -640,7 +640,7 @@ subroutine init_valobs_pointers()
       i=i+1;            IVAL_RHOP       = i
       if (idensform > 10) then 
       i=i+1;            IVAL_RHO        = i
-      endif
+   endif
       i=i+1;            IVAL_BRUV       = i
    endif
    MAXNUMVALOBS3D                       = i-i0
@@ -718,7 +718,8 @@ subroutine init_valobs_pointers()
    IPNT_WAVEH = ivalpoint(IVAL_WAVEH, kmx, nlyrs)
    IPNT_WAVET = ivalpoint(IVAL_WAVET, kmx, nlyrs)
    IPNT_WAVED = ivalpoint(IVAL_WAVED, kmx, nlyrs)
-   IPNT_WAVETAU = ivalpoint(IVAL_WAVETAU, kmx, nlyrs)
+   IPNT_TAUX = ivalpoint(IVAL_TAUX, kmx, nlyrs)
+   IPNT_TAUY = ivalpoint(IVAL_TAUY, kmx, nlyrs)
    IPNT_WAVEL = ivalpoint(IVAL_WAVEL, kmx, nlyrs)
    IPNT_WAVER = ivalpoint(IVAL_WAVER, kmx, nlyrs)
    IPNT_WAVEU = ivalpoint(IVAL_WAVEU, kmx, nlyrs)
@@ -796,7 +797,6 @@ subroutine init_valobs_pointers()
    IPNT_HIDEXPN  = ivalpoint(IVAL_HIDEXPN ,kmx, nlyrs)
    IPNT_MFLUFF1  = ivalpoint(IVAL_MFLUFF1 ,kmx, nlyrs)
    IPNT_MFLUFFN  = ivalpoint(IVAL_MFLUFFN ,kmx, nlyrs)
-   IPNT_TAU      = ivalpoint(IVAL_TAU     ,kmx, nlyrs)
 
    IPNT_NUM      = ivalpoint(0,          kmx, nlyrs)-1
 
@@ -1000,8 +1000,6 @@ subroutine addObservation_from_ini(network, filename)
    type(t_ObservationPoint), pointer     :: pOPnt
    integer,              allocatable     :: branchIdx_tmp(:), ibrch2obs(:)
    double precision    , allocatable     :: Chainage_tmp(:), xx_tmp(:), yy_tmp(:)
-   integer                               :: loctype_
-
 
    ierr    = DFM_NOERR
    nByBrch = 0

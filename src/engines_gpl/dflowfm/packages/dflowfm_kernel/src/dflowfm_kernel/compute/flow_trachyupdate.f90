@@ -33,31 +33,33 @@
 subroutine flow_trachyupdate()
     use unstruc_messages
     use unstruc_files, only: mdia
-    use m_flow, only: kmx, zslay, ucx, ucy, cftrt, hu, hs, frcu, ifrcutp, cftrtfac, jacftrtfac, s1
-    use m_flowgeom, only: ndx, lnx, lnx1d, kcu, dx, lne2ln, ln2lne, nd, bob, bl
+    use m_flow, only: kmx, u1, ucx_mor, ucy_mor, cftrt, hu, hs, frcu, ifrcutp, cftrtfac, jacftrtfac, lnkx
+    use m_flowgeom, only: ndx, lnx, lnx1d, lne2ln, ln2lne, nd, bob, bl
     use m_physcoef
     use m_trachy
     use m_trtrou
-    use m_flowparameters, only: eps8, epshs, jacali
-    use network_data, only: numl, lne, kn
+    use m_flowparameters, only: eps8, epshs, jacali, jawave
+    use network_data, only: numl, lne
     use m_monitoring_crosssections
-    use m_observations, only: numobs, valobs, IPNT_S1
+    use m_observations, only: valobs, IPNT_S1
     use m_calibration, only: calibration_backup_frcu
     use m_sediment
     use m_bedform,  only: bfmpar
     use m_alloc
     use m_vegetation, only: alfav
+    use m_waves, only: ustokes
     !
     implicit none
     !
     integer, pointer :: ntrtcrs
     integer, pointer :: ntrtobs
     !
-    integer n, L, LF, k, KL, KR
+    integer n, L, LF, k, KL, KR, kb, kt
     integer :: icrs
     integer :: iobs
     integer :: itrtcrs
     integer :: itrtobs
+    integer :: ierr
     !
     logical             :: error
     logical, save       :: init_trt = .true.              !< first time function is called
@@ -75,6 +77,8 @@ subroutine flow_trachyupdate()
     real(fp)             , dimension(:)    , pointer   :: rksr
     real(fp)             , dimension(:)    , pointer   :: rksmr
     real(fp)             , dimension(:)    , pointer   :: rksd
+    !
+    real(fp)         , dimension(:)    , allocatable   :: u1eul
     !
     error = .false.
     lfdxx = .false.
@@ -118,25 +122,30 @@ subroutine flow_trachyupdate()
     !
     !
     if (update_umag) then
-        ! probably cheaper than looping over all trachtope definitions first (see code below)?
-        do n = 1, ndx
-           umag(n) = sqrt(ucx(n)**2.0 + ucy(n)**2.0)
-        end do
         !
-        ! Same code as above but does only updates umag where it is needed
+        ! JRE: fixes for 3D models
+        ! - Trachy needs bottom layer umod in 3D cases
+        ! - D3D4 uses GLM velocities for trachytopes. Not sure if that is conceptually correct, to discuss.
+        !   For now, I added the code to use eulerian vector for consistency
         !
-        ! do itt = 1, trachy%dir(1)%nttaru
-        !    if ((trachy%dir(1)%ittaru(itt,3) == 103) .or. (trachy%dir(1)%ittaru(itt,3) == 104)) then    ! if Van Rijn roughness predictor or Struiksma roughness predictor
-        !        LF = trachy%dir(1)%ittaru(itt,4)                   ! corresponding flow link
-        !        do m = 1, 2
-        !            n = trachy%dir(1)%ln(m,LF)                       ! corresponding cell centre
-        !            umag(n) = sqrt(ucx(n)**2.0 + ucx(n)**2.0)
-        !        end do
-        !    end if
-        ! end do
+        if (jawave>0) then
+           if (.not. allocated(u1eul)) then
+              allocate(u1eul(1:lnkx), stat=ierr)
+           endif
+           u1eul = u1 - ustokes
+           call setucxucy_mor(u1eul)
+        else
+           call setucxucy_mor(u1)
+        endif
         !
-        ! Alternative: pre-determine flow links which require the variable umag to be set.
-        !
+        if (kmx==0) then
+           umag = hypot(ucx_mor,ucy_mor)
+        else
+           do k=1,ndx
+              call getkbotktop(k,kb,kt)
+              umag(k) = hypot(ucx_mor(kb),ucy_mor(kb))
+           enddo
+        endif   
     end if
     !
     ! Update water levels and link info (open or closed) on net-links
@@ -202,7 +211,7 @@ subroutine flow_trachyupdate()
     ! Perform computation of vegetation and alluvial roughness
     !
     if (stm_included) then
-       call trtrou(mdia     ,kmaxtrt   ,numl      ,            &                                            ! lnx instead of numl ?
+       call trtrou(mdia     ,kmaxtrt   ,numl      ,            &                          
                 & cftrt     ,rouflo    ,linit     ,dx_trt    , &
                 & hu_trt    ,kcu_trt   ,sig       ,            &
                 & z0rou     ,1         ,waqol     ,trachy_fl , &
@@ -248,20 +257,5 @@ subroutine flow_trachyupdate()
     if (jacali == 1) then
         call calibration_backup_frcu()
     endif
-
-    !
-    ! Example Delft3D call :
-    !
-    !    call trtrou(lundia    ,kmax      ,nmmax, &
-    !              & r(cfurou) ,rouflo    ,.false.   ,r(guu)    ,r(gvu)    , &
-    !              & r(hu)     ,i(kcu)    ,r(sig)    , &
-    !              & r(z0urou) ,1         ,waqol     , gdtrachy , &
-    !              & r(u1)     ,nmlb      ,nmub      , & ! first entry in row r(u1) should be gdp%gderosed%umod !!WO-temp
-    !              & rhow      ,ag        ,z0        , vonkar   , vicmol   , &
-    !              & eps       ,dryflc    , &
-    !              & lfdxx     ,nxx       , dxx      , i50      , i90      ,rhosol, &
-    !              & lsedtot   ,spatial_bedform      ,bedformD50,bedformD90, &
-    !              & rksr      ,rksmr     , rksd     ,error)
-    !
 
 end subroutine flow_trachyupdate

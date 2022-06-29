@@ -30,41 +30,6 @@
 ! $Id$
 ! $HeadURL$
 
- !subroutine getvanrijnwci(LL, z00, ustc2, ustw2, ustcw2, z0urou)
- !   use m_flow
- !   use m_bedform
- !
- !   implicit none
- !
- !   hrmsu    = 0.5_fp * (hrms  (nm) + hrms  (nmu))
- !   tpu      = 0.5_fp * (tp    (nm) + tp    (nmu))
- !   rlabdau  = 0.5_fp * (rlabda(nm) + rlabda(nmu))
- !   rr       = -0.4_fp * sqrt(2.0_fp) / hu(nm) + 1.0_fp
- !   umax     = rr * 2.0_fp * uorbhs
- !   t1       = tpu  * sqrt(ag/hu(nm))
- !   u11      = umax / sqrt(ag*hu(nm))
- !   a11      = -0.0049_fp*t1**2 - 0.069_fp*t1 + 0.2911_fp
- !   raih     = max(0.5_fp , -5.25_fp-6.1_fp*tanh(a11*u11-1.76_fp))
- !   rmax     = max(0.62_fp , min(0.75_fp , -2.5_fp*hu(nm)/max(rlabdau,1.0e-20_fp) + 0.85_fp))
- !   uon      = umax * (0.5_fp + (rmax-0.5_fp)*tanh((raih-0.5_fp)/(rmax-0.5_fp)))
- !   uoff     = umax - uon
- !   uon      = max(1.0e-5_fp , uon)
- !   uoff     = max(1.0e-5_fp , uoff)
- !   uwbih    = (0.5_fp*uon**3.0_fp + 0.5_fp*uoff**3.0_fp)**(1.0_fp/3.0_fp)
- !   rksru    = 0.5_fp*(rksr (nm) + rksr (nmu))
- !   rksmru   = 0.5_fp*(rksmr(nm) + rksmr(nmu))
- !   !
- !   ! Van Rijn 2004 formulation
- !   !
- !   phi        = acos((uuu*costu+vvv*sintu) / (umod+waveps))
- !   gamma      = 0.8_fp + phi - 0.3_fp*phi**2
- !   ksc        = sqrt(rksru**2 + rksmru**2)
- !   uratio     = min(uwbih/(u2dh+waveps) , 5.0_fp)
- !   ka(nm)     = ksc * exp(gamma*uratio)
- !   ka(nm)     = min(ka(nm) , 10.0_fp*ksc , 0.2_fp*hu(nm))
- !   ca         = 18.0_fp * log10(12.0_fp*hu(nm)/ka(nm))
- !   taubpu(nm) = ag * (u2dh * u2dh / umod0) / ca**2
- !end subroutine getvanrijnwci
 ! =================================================================================================
 ! =================================================================================================
  subroutine vertical_profile_u0(dzu, womegu, Lb, Lt, kxL, LL)
@@ -177,11 +142,11 @@ integer            :: jav3
     else if ( javau == 0 .or. javau >= 6) then  ! 3D checkerboard
 
        if (jarhoxu < 3) then
-       b(k+1)  = b(k+1)  + vstress / dzu(k+1)
-       a(k+1)  = a(k+1)  - vstress / dzu(k+1)
-
-       b(k  )  = b(k  )  + vstress / dzu(k)
-       c(k  )  = c(k  )  - vstress / dzu(k)
+          b(k+1)  = b(k+1)  + vstress / dzu(k+1)
+          a(k+1)  = a(k+1)  - vstress / dzu(k+1)
+          
+          b(k  )  = b(k  )  + vstress / dzu(k)
+          c(k  )  = c(k  )  - vstress / dzu(k)
        else if (jarhoxu == 3) then
           vstress = vstress*( rhou(L)*dzu(k) + rhou(L+1)*dzu(k+1) ) / (2d0*dzLw)
           dzurho  = dzu(k+1)*rhou(L+1)
@@ -253,7 +218,7 @@ integer            :: jav3
        adv = 0d0; adv1 = 0d0
     endif
 
-    if (jawave>0 .and. jawaveStokes >= 2) then                            ! ustokes correction in vertical viscosity
+    if (jawave>0 .and. jawaveStokes == 4) then        ! ustokes correction in vertical viscosity
        ustv   = vstress*(ustokes(L) - ustokes(L-1))
        d(k+1) = d(k+1) + ustv / dzu(k+1)
        d(k  ) = d(k  ) - ustv / dzu(k  )

@@ -487,31 +487,31 @@ subroutine loadModel(filename)
     network%sferic = jsferic==1
 
     threshold_abort = LEVEL_FATAL
-    if (istat == 0 .and. jadoorladen == 0 .and. network%numk > 0 .and. network%numl > 0) then 
+    if (istat == 0 .and. jadoorladen == 0 .and. network%numk > 0 .and. network%numl > 0) then
        timerHandle = 0
        call timstrt('Read 1d attributes', timerHandle)
        call read_1d_attributes(md_1dfiles, network)
        call timstop(timerHandle)
     endif
-    
+       
        timerHandle = 0
-       call timstrt('Read structures', timerHandle)
-       if (len_trim(md_1dfiles%structures) > 0) then
-          call SetMessage(LEVEL_INFO, 'Reading Structures ...')
-          call readStructures(network, md_1dfiles%structures)
-          call SetMessage(LEVEL_INFO, 'Reading Structures Done')
+    call timstrt('Read structures', timerHandle)
+    if (len_trim(md_1dfiles%structures) > 0) then
+      call SetMessage(LEVEL_INFO, 'Reading Structures ...')
+      call readStructures(network, md_1dfiles%structures)
+      call SetMessage(LEVEL_INFO, 'Reading Structures Done')
 
-          if ( md_convertlongculverts == 0) then
-             fnamesstring = md_1dfiles%structures
-             call strsplit(fnamesstring,1,fnames,1)
-             call loadLongCulvertsAsNetwork(fnames(1), 0, istat)
-             do ifil=2,size(fnames)
-                call loadLongCulvertsAsNetwork(fnames(ifil), 1, istat)
-             end do
-             deallocate(fnames)
-             if (.not. newculverts .and. nlongculvertsg > 0) then
-                call finalizeLongCulvertsInNetwork()
-             end if
+      if ( md_convertlongculverts == 0) then
+        fnamesstring = md_1dfiles%structures
+        call strsplit(fnamesstring,1,fnames,1)
+        call loadLongCulvertsAsNetwork(fnames(1), 0, istat)
+        do ifil=2,size(fnames)
+          call loadLongCulvertsAsNetwork(fnames(ifil), 1, istat)
+        end do
+        deallocate(fnames)
+        if (.not. newculverts .and. nlongculvertsg > 0) then
+           call finalizeLongCulvertsInNetwork()
+        end if
           end if
        end if
 
@@ -525,26 +525,26 @@ subroutine loadModel(filename)
     if (getMaxErrorLevel() >= LEVEL_ERROR) then
        msgbuf = 'loadModel for '''//trim(filename)//''': Errors were found, please check the diagnostics file.'
        call fatal_flush()
-    endif
+      endif
     
-  
-    ! fill bed levels from values based on links
-    do L = 1,  network%numl
-       tempbob = getbobs(network, L)
-       if (tempbob(1) > 0.5d0* huge(1d0)) tempbob(1) = dmiss
-       if (tempbob(2) > 0.5d0* huge(1d0)) tempbob(2) = dmiss
+    
+       ! fill bed levels from values based on links
+       do L = 1, network%numl
+          tempbob = getbobs(network, L)
+          if (tempbob(1) > 0.5d0* huge(1d0)) tempbob(1) = dmiss
+          if (tempbob(2) > 0.5d0* huge(1d0)) tempbob(2) = dmiss
 
-       k1 = kn(1,L)
-       k2 = kn(2,L)
-       if (zk(k1) == dmiss) then
-          zk(k1) = tempbob(1)
-       endif
-       if (zk(k2) == dmiss) then
-          zk(k2) = tempbob(2)
-       endif
-       zk(k1) = min(zk(k1),tempbob(1))
-       zk(k2) = min(zk(k2),tempbob(2))
-    enddo    
+          k1 = kn(1,L)
+          k2 = kn(2,L)
+          if (zk(k1) == dmiss) then
+             zk(k1) = tempbob(1)
+          endif
+          if (zk(k2) == dmiss) then
+             zk(k2) = tempbob(2)
+          endif
+          zk(k1) = min(zk(k1),tempbob(1))
+          zk(k2) = min(zk(k2),tempbob(2))
+       enddo
 
     ! Load land boundary from file.
     if (len_trim(md_ldbfile) > 0) then
@@ -647,10 +647,10 @@ subroutine loadModel(filename)
       call strsplit(md_rugfile,1,fnames,1)
       call loadRunupGauges(fnames(1),0)
       do ifil=2,size(fnames)
-         call loadRunupGauges(fnames(ifil), 1)
-      enddo
+         call loadRunupGauges(fnames(ifil), 1)     
+      enddo   
       deallocate(fnames)
-   endif
+   endif   
    call timstop(timerHandle)
 
     ! Load partition polygons from file
@@ -711,6 +711,7 @@ subroutine readMDUFile(filename, istat)
     use m_commandline_option, only: iarg_usecaching
     use m_subsidence, only: sdu_update_s1
     use unstruc_channel_flow
+    use m_bedform, only: bfm_included
 
     use m_sediment
     use m_waves, only: hwavuni, twavuni, phiwavuni
@@ -737,6 +738,7 @@ subroutine readMDUFile(filename, istat)
     double precision :: sumlaycof
     integer :: major, minor
     external :: unstruc_errorhandler
+
     istat = 0 ! Success
 
 ! Put .mdu file into a property tree
@@ -903,66 +905,67 @@ subroutine readMDUFile(filename, istat)
 
     kmx = 0
     call prop_get_integer( md_ptr, 'geometry', 'Kmx'             , kmx)
-    call prop_get_integer( md_ptr, 'geometry', 'Layertype'       , Layertype)
-    if (Layertype /= LAYTP_SIGMA) then
-        mxlayz = kmx
-    endif
-
-    call prop_get_integer( md_ptr, 'geometry', 'Numtopsig'        , Numtopsig)
-    call prop_get_integer( md_ptr, 'geometry', 'Numtopsiguniform' , JaNumtopsiguniform)
-    call prop_get_double ( md_ptr, 'geometry', 'SigmaGrowthFactor', sigmagrowthfactor)
-    call prop_get_double ( md_ptr, 'geometry', 'Dztopuniabovez'   , dztopuniabovez )
-    call prop_get_double ( md_ptr, 'geometry', 'Dztop'            , Dztop )
-    call prop_get_double ( md_ptr, 'geometry', 'Toplayminthick'   , Toplayminthick)
-    call prop_get_double ( md_ptr, 'geometry', 'Floorlevtoplay'   , Floorlevtoplay )
-    call prop_get_integer( md_ptr, 'geometry', 'OrgFloorlevtoplaydef'   , jaorgFloorlevtoplaydef )
-    call prop_get_double ( md_ptr, 'geometry', 'Tsigma'           , Tsigma )
-    call prop_get_double ( md_ptr, 'geometry', 'ZlayBot'          , zlaybot )
-    call prop_get_double ( md_ptr, 'geometry', 'ZlayTop'          , zlaytop )
-    call prop_get_integer( md_ptr, 'geometry', 'StretchType'      , iStrchType)
-
-    if (Dztop > 0d0) then  ! hk claims back original functionality
-        iStrchType = -1
-    endif
-
-    if( iStrchType == STRCH_USER ) then   
-        if( allocated(laycof) ) deallocate( laycof )
-        allocate( laycof(kmx) )
-        call prop_get_doubles( md_ptr, 'geometry', 'StretchCoef' , laycof, kmx )
+    if (kmx>0) then
+       call prop_get_integer( md_ptr, 'geometry', 'Layertype'       , Layertype)
+       if (Layertype /= LAYTP_SIGMA) then
+           mxlayz = kmx
+       endif
+       
+       call prop_get_integer( md_ptr, 'geometry', 'Numtopsig'        , Numtopsig)
+       call prop_get_integer( md_ptr, 'geometry', 'Numtopsiguniform' , JaNumtopsiguniform)
+       call prop_get_double ( md_ptr, 'geometry', 'SigmaGrowthFactor', sigmagrowthfactor)
+       call prop_get_double ( md_ptr, 'geometry', 'Dztopuniabovez'   , dztopuniabovez )
+       call prop_get_double ( md_ptr, 'geometry', 'Dztop'            , Dztop )
+       call prop_get_double ( md_ptr, 'geometry', 'Toplayminthick'   , Toplayminthick)
+       call prop_get_double ( md_ptr, 'geometry', 'Floorlevtoplay'   , Floorlevtoplay )
+       call prop_get_integer( md_ptr, 'geometry', 'OrgFloorlevtoplaydef'   , jaorgFloorlevtoplaydef )
+       call prop_get_double ( md_ptr, 'geometry', 'Tsigma'           , Tsigma )
+       call prop_get_double ( md_ptr, 'geometry', 'ZlayBot'          , zlaybot )
+       call prop_get_double ( md_ptr, 'geometry', 'ZlayTop'          , zlaytop )
+       call prop_get_integer( md_ptr, 'geometry', 'StretchType'      , iStrchType)
+       
+       if (Dztop > 0d0) then  ! hk claims back original functionality
+           iStrchType = -1
+       endif
+       
+       if( iStrchType == STRCH_USER ) then   
+          if( allocated(laycof) ) deallocate( laycof )
+          allocate( laycof(kmx) )
+          call prop_get_doubles( md_ptr, 'geometry', 'StretchCoef'   , laycof, kmx )     
         sumlaycof = sum(laycof)
         if (comparereal(sumlaycof, 100d0) /= 0) then
-          if (.not. allocated(tmpdouble)) allocate( tmpdouble(300) )
-          tmpdouble = 0d0
-          call prop_get_doubles( md_ptr, 'geometry', 'StretchCoef'   , tmpdouble, 300 )
-          n = 0
-          do i=1,300
-            if (.not.(tmpdouble(i)>0)) then
-               exit
-            endif 
-            n = n + 1
-          end do           
-          if ( kmx /= n ) then
-            call mess(LEVEL_ERROR, 'ERROR: The number of values specified in "StretchCoef" is inconsistent with "Kmx"!')
-          else
+             if (.not. allocated(tmpdouble)) allocate( tmpdouble(300) )
+             tmpdouble = 0d0
+             call prop_get_doubles( md_ptr, 'geometry', 'StretchCoef'   , tmpdouble, 300 )
+             n = 0
+             do i=1,300
+               if (.not.(tmpdouble(i)>0)) then
+                  exit
+               endif 
+               n = n + 1
+             end do           
+             if ( kmx /= n ) then
+               call mess(LEVEL_ERROR, 'ERROR: The number of values specified in "StretchCoef" is inconsistent with "Kmx"!')
+             else
               tmpstr = ' '
               write (tmpstr, "(a,f15.8)") 'ERROR: The values specified in "StretchCoef" do not add up to 100! We got: ', sumlaycof
             call mess(LEVEL_ERROR, tmpstr)
-          endif
-        endif
-    else if( iStrchType == STRCH_EXPONENT ) then
-       if( allocated(laycof) ) deallocate( laycof )
-       allocate( laycof(3) )
-       call prop_get_doubles( md_ptr, 'geometry', 'StretchCoef'   , laycof, 3)
+             endif
+           endif
+       else if( iStrchType == STRCH_EXPONENT ) then
+          if( allocated(laycof) ) deallocate( laycof )
+          allocate( laycof(3) )
+          call prop_get_doubles( md_ptr, 'geometry', 'StretchCoef'   , laycof, 3)
+       endif
+       
+       call prop_get_integer(md_ptr, 'geometry', 'Keepzlayeringatbed'      , keepzlayeringatbed , success)
+       if (.not. success) then
+          call prop_get_integer(md_ptr, 'numerics', 'Keepzlayeringatbed', keepzlayeringatbed)
+       endif
+       call prop_get_integer(md_ptr, 'geometry', 'Ihuz'    , ihuz    , success)
+       call prop_get_integer(md_ptr, 'geometry', 'ihuzcsig' , ihuzcsig , success)
+       call prop_get_integer(md_ptr, 'geometry', 'Zlayeratubybob'    , jaZlayeratubybob, success)
     endif
-
-    call prop_get_integer(md_ptr, 'geometry', 'Keepzlayeringatbed'   , keepzlayeringatbed , success)
-    if (.not. success) then
-       call prop_get_integer(md_ptr, 'numerics', 'Keepzlayeringatbed', keepzlayeringatbed)
-    endif
-    call prop_get_integer(md_ptr, 'geometry', 'Ihuz'    , ihuz    , success)
-    call prop_get_integer(md_ptr, 'geometry', 'ihuzcsig' , ihuzcsig , success)
-    call prop_get_integer(md_ptr, 'geometry', 'Zlayeratubybob'    , jaZlayeratubybob, success)
-
     call prop_get_integer( md_ptr, 'geometry', 'Makeorthocenters' , Makeorthocenters)
     call prop_get_double ( md_ptr, 'geometry', 'Dcenterinside'    , Dcenterinside)
     call prop_get_string ( md_ptr, 'geometry', 'PartitionFile'    , md_partitionfile, success)
@@ -984,11 +987,12 @@ subroutine readMDUFile(filename, istat)
     call prop_get_integer( md_ptr, 'geometry', 'AllowBndAtBifurcation',  jaAllowBndAtBifurcation)
     call prop_get_integer( md_ptr, 'geometry', 'CreateLinks1D2D',  md_jamake1d2dlinks)
     call prop_get_integer( md_ptr, 'geometry', 'RenumberFlowNodes',  jarenumber) ! hidden option for testing renumbering
+    call prop_get_integer( md_ptr, 'geometry', 'Autotrisam',  autotrisam) ! hidden option for auto generation of networks from samples or not
     call prop_get_logical( md_ptr, 'geometry', 'dxDoubleAt1DEndNodes', dxDoubleAt1DEndNodes)
     call prop_get_logical( md_ptr, 'geometry', 'ChangeVelocityAtStructures', changeVelocityAtStructures)
 
     call prop_get_logical( md_ptr, 'geometry', 'ChangeStructureDimensions', changeStructureDimensions)
-
+    
     ! 1D Volume tables
     useVolumeTables = .false.
     call prop_get_logical( md_ptr, 'volumeTables', 'useVolumeTables', useVolumeTables)
@@ -1030,14 +1034,14 @@ subroutine readMDUFile(filename, istat)
 
     call prop_get_integer(md_ptr, 'numerics', 'TransportAutoTimestepdiff' , jatransportautotimestepdiff)
     if (jatransportautotimestepdiff == 3 .and. kmx > 0) then
-       call mess(LEVEL_ERROR, 'Implicit horizontaldiffusion is only implemented in 2D', 'set TransportAutoTimestepdiff = 0, 1 or 2')
+       call mess(LEVEL_ERROR, 'Implicit horizontal diffusion is only implemented in 2D', 'set TransportAutoTimestepdiff = 0, 1 or 2')
     endif
 
     call prop_get_integer(md_ptr, 'numerics', 'Implicitdiffusion2D' , Implicitdiffusion2D)
-    if (Implicitdiffusion2D == 1) then
-       if (kmx > 0) then
+    if (Implicitdiffusion2D == 1) then 
+       if (kmx > 0) then 
           call mess(LEVEL_ERROR, 'Implicit horizontaldiffusion is only implemented in 2D',' ')
-       else
+       else 
           jatransportautotimestepdiff = 3
        endif
     endif
@@ -1182,14 +1186,15 @@ subroutine readMDUFile(filename, istat)
 
     call prop_get_integer(md_ptr, 'numerics', 'Numlimdt_baorg'  , Numlimdt_baorg)
     call prop_get_double (md_ptr, 'numerics', 'Baorgfracmin'    , Baorgfracmin)
-
+    
     call prop_get_integer(md_ptr, 'numerics', 'LogSolverConvergence', jalogsolverconvergence)
+    call prop_get_integer(md_ptr, 'numerics', 'LogTransportSolverLimiting', jalogtransportsolverlimiting)
     call prop_get_integer(md_ptr, 'numerics', 'SubsUplUpdateS1', sdu_update_s1)
     if (sdu_update_s1<0 .or. sdu_update_s1>1) then
        call mess(LEVEL_WARN, 'Invalid settings specified for SubsUplUpdateS1; using 0.')
        sdu_update_s1 = 0
     endif
-    
+
     call prop_get_integer(md_ptr, 'numerics', 'PerotType', iperot)
 
     call prop_get(md_ptr, 'numerics', 'Oceaneddysizefrac'   , Oceaneddysizefrac)
@@ -1285,6 +1290,8 @@ subroutine readMDUFile(filename, istat)
 
     call prop_get_double (md_ptr, 'physics', 'Backgroundsalinity', Backgroundsalinity)
     call prop_get_double (md_ptr, 'physics', 'Backgroundwatertemperature', Backgroundwatertemperature)
+    ! Set molecular viscosity
+    vismol = 4.d0/(20.d0 + backgroundwatertemperature)*1d-5 ! Van Rijn, 1993, from iniphys.f90
 
     call prop_get_integer(md_ptr, 'veg',     'Vegetationmodelnr', javeg) ! Vegetation model nr, (0=no, 1=Baptist DFM)
     if( japillar == 2 ) then
@@ -1314,13 +1321,14 @@ subroutine readMDUFile(filename, istat)
     call prop_get_string (md_ptr, 'sediment', 'DredgeFile',           md_dredgefile, success)
     call prop_get_integer(md_ptr, 'sediment', 'BndTreatment',         jabndtreatment, success)           ! separate treatment boundary links in upwinding transports
     call prop_get_integer(md_ptr, 'sediment', 'SourSink',             jasourcesink, success)             ! switch off source or sink terms for sed advection
-    call prop_get_string (md_ptr, 'sediment', 'MorphoPol',            md_morphopol, success)             ! Only apply mormerge operation/bottom change in polygon
+    call prop_get_string (md_ptr, 'sediment', 'MorphoPol',            md_morphopol, success)             ! Only apply mormerge operation/bottom change in polygon 
     call prop_get_integer(md_ptr, 'sediment', 'InMorphoPol',          inmorphopol, success)              ! value of the update inside morphopol (only 0 or 1 make sense)
     call prop_get_integer(md_ptr, 'sediment', 'MorCFL',               jamorcfl, success )                ! use morphological time step restriction (1, default) or not (0)
     call prop_get_double (md_ptr, 'sediment', 'DzbDtMax',             dzbdtmax, success)                 ! Max bottom level change per timestep
     call prop_get_double (md_ptr, 'sediment', 'MasBalMinDep',         botcrit, success)                  ! Minimum depth *after* bottom update for SSC adaptation mass balance
-    call prop_get_integer(md_ptr, 'sediment', 'MormergeDtUser',       jamormergedtuser, success)
-
+    call prop_get_integer(md_ptr, 'sediment', 'MormergeDtUser',       jamormergedtuser, success)         ! Mormerge operation at dtuser timesteps (1) or dts (0, default)
+    call prop_get_double (md_ptr, 'sediment', 'UpperLimitSSC',        upperlimitssc, success)             ! Upper limit of cell centre SSC concentration after transport timestep. Default 1d6 (effectively switched off)
+    
     call prop_get_integer(md_ptr, 'sediment', 'Nr_of_sedfractions' ,  Mxgr)
     call prop_get_integer(md_ptr, 'sediment', 'MxgrKrone'          ,  MxgrKrone)
     call prop_get_integer(md_ptr, 'sediment', 'Seddenscoupling'    ,  jaseddenscoupling)
@@ -1367,7 +1375,8 @@ subroutine readMDUFile(filename, istat)
 
     endif ! jased
 
-    call prop_get_string (md_ptr, 'bedform', 'BedformFile',  md_bedformfile, success)
+    call prop_get_string (md_ptr, 'bedform', 'BedformFile',  md_bedformfile, success) 
+    bfm_included = len_trim(md_bedformfile) /= 0
 
     call prop_get_integer(md_ptr, 'wind', 'ICdtyp'                    , ICdtyp)
     if (Icdtyp == 1) then
@@ -1415,26 +1424,59 @@ subroutine readMDUFile(filename, istat)
        call prop_get_double(md_ptr, 'waves', 'Twavuni'    , Twavuni)
        call prop_get_double(md_ptr, 'waves', 'Phiwavuni'  , Phiwavuni)
     endif
-    call prop_get_double (md_ptr,   'waves', 'Wavenikuradse'    , wavenikuradse)
+
     call prop_get_string (md_ptr,   'waves', 'Rouwav'           , rouwav)
     if (jawave > 0 .and. .not. flowWithoutWaves) then
-       call setmodind(rouwav, modind)
+       call setmodind(rouwav, modind)  
     endif
     call prop_get_double (md_ptr, 'waves', 'Gammax'         , gammax)
     call prop_get_double (md_ptr, 'waves', 'hminlw'         , hminlw)
-    call prop_get_integer(md_ptr, 'waves', 'uorbfac'        , jauorb)    ! 0=delft3d4, sqrt(pi)/2 included in uorb calculation; >0: FM, factor not included; default: 0
+    call prop_get_integer(md_ptr, 'waves', 'uorbfac'        , jauorb)                ! 0=delft3d4, sqrt(pi)/2 included in uorb calculation; >0: FM, factor not included; default: 0
     call prop_get_logical(md_ptr, 'waves', 'flowWithoutWaves'    , flowWithoutWaves) ! True: Do not use Wave data in the flow computations, it will only be passed through to D-WAQ
     ! backward compatibility for hk in tauwavehk:
-    if (jawave<3 .or. flowWithoutWaves) then
+    if (jawave>0 .and. jawave<3 .or. flowWithoutWaves) then
        jauorb=1
     endif
     call prop_get_integer(md_ptr, 'waves', 'jahissigwav'         , jahissigwav)     ! 1: sign wave height on his output; 0: hrms wave height on his output. Default=1
     call prop_get_integer(md_ptr, 'waves', 'jamapsigwav'         , jamapsigwav)     ! 1: sign wave height on map output; 0: hrms wave height on map output. Default=0 (legacy)
-    call prop_get_integer(md_ptr, 'waves', 'jauorbfromswan'      , jauorbfromswan)  ! 1: use orbital velocities from com file; 0=internal uorb calculation
-    call prop_get_double (md_ptr, 'waves', 'ftauw'               , ftauw)           ! factor for adjusting wave-related bed shear stress, default 1.0
-    call prop_get_integer(md_ptr, 'waves', '3Dstokesprofile'     , jawaveStokes)    ! Stokes profile. 0: no, 1:uniform over depth, 2: 2nd order Stokes theory; 3: 2, with vertical stokes gradient in adve
-    call prop_get_integer(md_ptr, 'waves', '3Dwavestreaming'     , jawavestreaming) ! Influence of wave streaming. 0: no, 1: added to adve, 2: added to adve+turb (2 not used now)
-
+    call prop_get_integer(md_ptr, 'waves', 'jauorbfromswan'      , jauorbfromswan)  ! 1: use orbital velocities from com file; 0=internal uorb calculation. Default=0
+    call prop_get_double (md_ptr, 'waves', 'fwfac'               , fwfac)           ! factor for adjusting wave boundary layer streaming, default 1.0
+    call prop_get_double (md_ptr, 'waves', 'ftauw'               , ftauw)           ! factor for adjusting wave related bottom shear stress
+    call prop_get_double (md_ptr, 'waves', 'fbreak'              , fbreak)          ! factor for adjusting wave breaking contribution to tke
+    if (ftauw<0d0) then
+       call mess(LEVEL_WARN, 'unstruc_model::readMDUFile: ftauw<0d0, reset to 0d0. Bed shear stress due to waves switched off.')
+       ftauw = 0d0
+    endif
+    if (fwfac<0d0) then
+       call mess(LEVEL_WARN, 'unstruc_model::readMDUFile: fwfac<0d0, reset to 0d0. Wave streaming effect switched off.') 
+       fwfac = 0d0  
+    endif
+    if (fbreak<0d0) then
+       call mess(LEVEL_WARN, 'unstruc_model::readMDUFile: fbreak<0d0, reset to 0d0. Wave breaking contribution to tke switched off.') 
+       fwfac = 0d0  
+    endif
+    
+    ! using stokes drift in very discontinuous wave fields in the fetch approach is discouraged (experience from SF Bay)
+    if (jawave==1 .or. jawave==2) then
+       jawaveStokes = 0
+    endif   
+    call prop_get_integer(md_ptr, 'waves', '3Dstokesprofile'     , jawaveStokes)    ! Stokes profile. 0: no, 1:uniform over depth, 2: 2nd order Stokes theory; 3: 2, with vertical stokes gradient in adve; 4: 3, with stokes contribution vert viscosity 
+    if ((jawave==1 .or. jawave==2) .and. jawaveStokes>0) then
+       write(msgbuf, *) 'unstruc_model::readMDUFile: wavemodelnr=',jawave,', and 3Dstokesprofile=',jawavestokes,'. It is *strongly* advised to leave 3Dstokesprofile at 0 when using fetch based wave models.'
+       call warn_flush()
+    endif   
+    call prop_get_integer(md_ptr, 'waves', '3Dwavestreaming'     , jawavestreaming) ! Influence of wave streaming. 0: no, 1: added to adve
+    call prop_get_integer(md_ptr, 'waves', '3Dwaveboundarylayer' , jawavedelta)     ! Boundary layer formulation. 1: Sana
+    call prop_get_integer(md_ptr, 'waves', '3Dwaveforces'        , jawaveforces)    ! Diagnostic mode: apply wave forces (1) or not (0)
+    call prop_get_double(md_ptr,  'waves', '3Dwaveturbpendepth'  , fwavpendep)      ! Layer thickness as proportion of Hrms over which wave breaking adds to TKE source. Default 0.5
+    !
+    ! safety
+    if (fwavpendep<0d0) then
+       fwavpendep = 0d0
+       write(msgbuf, *) 'unstruc_model::readMDUFile: 3Dwaveturbpendepth<0.0, reset to 0.0. Wave breaking switched off as a source for TKE.'
+       call warn_flush()
+    endif
+    
     call prop_get_integer(md_ptr, 'grw'  , 'groundwater'        , jagrw)
 
     call prop_get_integer(md_ptr, 'grw'  , 'Infiltrationmodel'  , Infiltrationmodel)
@@ -1548,7 +1590,7 @@ subroutine readMDUFile(filename, istat)
            Tstop_user = tim
         endif
     endif
-
+    
     ! Set update frequency for the time dependent roughness from frictFile.
     call prop_get (md_ptr, 'time', 'UpdateRoughnessInterval', dt_UpdateRoughness)
     if (dt_UpdateRoughness < dt_User) then
@@ -1757,6 +1799,7 @@ subroutine readMDUFile(filename, istat)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_spiral_flow', jamapspir, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_numlimdt', jamapnumlimdt, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_taucurrent', jamaptaucurrent, success)
+    call prop_get_integer(md_ptr, 'output', 'Wrimap_z0', jamapz0, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_salinity', jamapsal, success)
     if (success .and. jamapsal == 1 .and. jasal < 1) then
       write (msgbuf, '(a)') 'MDU setting "Wrimap_salinity = 1" asks to write salinity to the output map file, ' &
@@ -1817,7 +1860,7 @@ subroutine readMDUFile(filename, istat)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_bnd', jamapbnd, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_Qin', jamapqin, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_every_dt', jaeverydt, success)
-
+    
     if (md_mapformat /= 4 .and. jamapwindstress /= 0) then
        call mess(LEVEL_ERROR, 'writing windstress to mapfile is only implemented for NetCDF - UGrid (mapformat=4)')
     endif
@@ -1858,7 +1901,7 @@ subroutine readMDUFile(filename, istat)
     call getOutputTimeArrays(ti_rst_array, ti_rsts, ti_rst, ti_rste, success)
 
     call prop_get_double (md_ptr, 'output', 'MbaInterval', ti_mba, success)
-
+    
     call prop_get_integer (md_ptr, 'output', 'MbaWriteCsv', jambawritecsv, success)
 
     call prop_get_integer (md_ptr, 'output', 'MbaLumpFromToMba', jambalumpmba, success)
@@ -1879,12 +1922,14 @@ subroutine readMDUFile(filename, istat)
     call getOutputTimeArrays(ti_waq_array, ti_waqs, ti_waq, ti_waqe, success)
     call prop_get_string(md_ptr, 'output', 'WaqHorAggr', md_waqhoraggr, success)
     call prop_get_string(md_ptr, 'output', 'WaqVertAggr', md_waqvertaggr, success)
-
-    if (jawave > 0) then
-       jawaveSwartDelwaq = 1
-       call prop_get_integer(md_ptr, 'waves', 'waveSwartDelwaq' , jawaveSwartDelwaq, success)
+    call prop_get_integer(md_ptr, 'waves', 'waveSwartDelwaq' , jawaveSwartDelwaq, success)
+    if (jawave==0) then
+       if (jawaveSwartdelwaq==1) then
+          jawaveswartdelwaq = 0
+          call mess(LEVEL_WARN,'Waves inactive and waveswartdelwaq=1; Reset waveswartdelwaq to 0.')
+       endif
     endif
-
+    !
     if(dt_user > 0 .and. ti_waq > 0) then
        if(ti_waq < dt_user .or. modulo(ti_waq, dt_user) /= 0d0) then
          ti_waq = max(1,floor(ti_waq/dt_user))*dt_user
@@ -1900,8 +1945,6 @@ subroutine readMDUFile(filename, istat)
     end if
 
     call prop_get_double(md_ptr, 'output', 'StatsInterval', ti_stat, success)
-
-  !  call prop_get_string(md_ptr, 'output', 'SnapshotDir', md_snapshotdir, success) !not needed anymore
 
     call prop_get_double(md_ptr, 'output', 'TimingsInterval', ti_timings, success)
 
@@ -1997,9 +2040,9 @@ subroutine readMDUFile(filename, istat)
           jafullgridoutput = 1
        endif
     endif
-   
+
     call prop_get_integer( md_ptr, 'output', 'EulerVelocities', jaeulervel)
-    if ((jawave<3 .or. flowWithoutWaves) .and. jaeulervel == 1 ) then    ! also for surfbeat
+    if ((jawave<3 .or. flowWithoutWaves) .and. jaeulervel == 1 ) then 
        call mess(LEVEL_WARN, '''EulerVelocities'' is not compatible with the selected Wavemodelnr. ''EulerVelocities'' is set to zero.')
        jaeulervel = 0
     endif
@@ -2041,6 +2084,19 @@ subroutine readMDUFile(filename, istat)
            call prop_get_integer(md_ptr, 'output', 'AvgWaveWriteS'    , jaavgwriteS    , success)   ! water level
            call prop_get_integer(md_ptr, 'output', 'AvgWaveWriteSigm' , jaavgwriteSigm , success)   ! frequency
        end if
+
+       ! Override settings above if momentum balance data is switched on
+       if (jamombal>0) then
+          md_unc_conv = UNC_CONV_UGRID
+          call mess(LEVEL_WARN, 'Momentum balance terms requested as output, Mapformat set to UGRID.')
+          call warn_flush()
+          call mess(LEVEL_WARN, 'Momentum balance terms requested as output, GLM velocities saved on wav-file.')  ! set in make_averages
+          call warn_flush()
+          jaavgwriteU    = 1
+          jaavgwriteF    = 1  
+          jaavgwriteS    = 1 
+          jaavgwriteUrms = 1
+       endif 
 
     end if
 
@@ -2374,7 +2430,7 @@ subroutine final_check_of_mdu_keywords(md_tree, istat, prefix)
 ch:do ichapter = 1, nchapter
       achapter => md_tree%child_nodes(ichapter)%node_ptr
       chaptername = tree_get_name(achapter)
-      do i = 1,numignore
+      do i=1,numignore
          if (trim(ignorechaps(i)) == trim(chaptername)) then
             cycle ch
          end if
@@ -2402,7 +2458,7 @@ ch:do ichapter = 1, nchapter
                       ! keyword unknown, or known keyword that was not accessed because of the reading was switched off by the value of another keyword
                       num_notaccessed = num_notaccessed + 1
                       call mess(LEVEL_WARN, prefix//': keyword ['//trim(chaptername)//'] '//trim(nodename)//'='//trim(nodestring)//' was in file, but not used. Check possible typo.')
-                  endif
+               endif
                else
                    ! keyword is known and used (node_visit >= 1)
                   
@@ -2761,20 +2817,20 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
        if (writeall .or. keepzlayeringatbed /= 2) then
           call prop_set(prop_ptr, 'geometry', 'Keepzlayeringatbed'  , keepzlayeringatbed, '0:possibly very thin layer at bed, 1:bedlayerthickness == zlayerthickness, 2=equal thickness first two layers')
        endif
-
-       if (ihuz .ne. 1) then
+       
+       if (ihuz .ne. 1) then 
            call prop_set(prop_ptr, 'geometry', 'Ihuz'  , ihuz, 'if keepzlayeratbed>=3 : 1=central from bed til second, 2=all central, 3=from bed till highest equal levels')
-       endif
+       endif     
 
-       if (ihuzcsig .ne. 1) then
+       if (ihuzcsig .ne. 1) then 
            call prop_set(prop_ptr, 'geometry', 'ihuzcsig'  , ihuzcsig, 'if keepzlayeratbed>=3 : 1,2,3=av,mx,mn of Leftsig,Rightsig,4=uniform')
-       endif
+       endif     
 
        if (writeall .or. jaZlayeratubybob .ne. 0 .and. layertype .ne. 1) then
          call prop_set(prop_ptr, 'geometry', 'Zlayeratubybob', JaZlayeratubybob, 'Lowest connected cells governed by bob instead of by bL L/R' )
        endif
     endif
-
+    
     ! 1D Volume tables
     if (writeall .or. useVolumeTables) then
        call prop_set (prop_ptr, 'volumeTables', 'useVolumeTables',  merge(1, 0, useVolumeTables), 'Use 1D volume tables (1: yes, 0: no).')
@@ -2824,14 +2880,14 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
        call prop_set(prop_ptr, 'numerics', 'Limtypw'         , limtypw, 'Limiter type for wave action transport (0: none, 1: minmod, 2: van Leer, 3: Koren, 4: monotone central)')
     end if
 
-    call prop_set(prop_ptr, 'numerics', 'TransportAutoTimestepdiff', jatransportautotimestepdiff,   'Auto Timestepdiff in Transport, 0 : lim diff, no lim Dt_tr, 1 : no lim diff, lim Dt_tr, 2: no lim diff, no lim Dt_tr, 3=implicit (only 2D)')
-    call prop_set(prop_ptr, 'numerics', 'Implicitdiffusion2D', Implicitdiffusion2D,   '1 = Yes, 0 = No')
+       call prop_set(prop_ptr, 'numerics', 'TransportAutoTimestepdiff', jatransportautotimestepdiff,   'Auto Timestepdiff in Transport, 0 : lim diff, no lim Dt_tr, 1 : no lim diff, lim Dt_tr, 2: no lim diff, no lim Dt_tr, 3=implicit (only 2D)')
+       call prop_set(prop_ptr, 'numerics', 'Implicitdiffusion2D', Implicitdiffusion2D,   '1 = Yes, 0 = No')
   
     call prop_set(prop_ptr, 'numerics', 'Vertadvtypsal', Javasal,   'Vertical advection type for salinity (0: none, 1: upwind explicit, 2: central explicit, 3: upwind implicit, 4: central implicit, 5: central implicit but upwind for neg. stratif., 6: higher order explicit, no Forester)')
     call prop_set(prop_ptr, 'numerics', 'Vertadvtyptem', Javatem,   'Vertical advection type for temperature (0: none, 1: upwind explicit, 2: central explicit, 3: upwind implicit, 4: central implicit, 5: central implicit but upwind for neg. stratif., 6: higher order explicit, no Forester)')
     call prop_set(prop_ptr, 'numerics', 'Vertadvtypmom', javau, 'Vertical advection type for u1: 0: No, 3: Upwind implicit, 4: Central implicit, 5: QUICKEST implicit., 6: centerbased upwind expl, 7=6 HO' )
     if (writeall .or. javau3onbnd .ne. 0) then
-      call prop_set(prop_ptr, 'numerics', 'Vertadvtypmom3onbnd', javau3onbnd, 'vert. adv. u1 bnd UpwimpL: 0=follow javau , 1 = on bnd, 2= on and near bnd' )
+        call prop_set(prop_ptr, 'numerics', 'Vertadvtypmom3onbnd', javau3onbnd, 'vert. adv. u1 bnd UpwimpL: 0=follow javau , 1 = on bnd, 2= on and near bnd' )
     endif
     if (writeall .or. cffacver .ne. 0d0 ) then
       call prop_set(prop_ptr, 'numerics', 'Cffacver', Cffacver,   'Factor for including (1-CFL) in HO term vertical   (0d0: no, 1d0: yes)')
@@ -2867,7 +2923,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
            call mess(LEVEL_WARN, 'Pure1D options > 2 temporarily not supported.')
        endif
        call prop_set(prop_ptr, 'numerics', 'Junction1D'    , jaJunction1D, 'at 1D junctions: 0 = org 1D advec, 1 = same as along 1D channels')
-    endif
+    endif 
 
     if (jaZerozbndinflowadvection > 0) then
        call prop_set(prop_ptr, 'numerics', 'Zerozbndinflowadvection', jaZerozbndinflowadvection, 'On waterlevel boundaries set incoming advection velocity to zero (0=no, 1=on inflow, 2=also on outflow)')
@@ -2904,7 +2960,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
        elseif (waquaweirthetaw .lt. 0.0d0) then 
            waquaweirthetaw = 0.0d0
            call mess(LEVEL_INFO, 'WARNING: Fixed weir relaxation coefficient is reset to the minimum value of 0.0', '.')
-    endif
+       endif    
     endif
     if (writeall .or. (izbndpos > 0)) then
        call prop_set(prop_ptr, 'numerics', 'Izbndpos',  Izbndpos,   'Position of z boundary (0: D3Dflow, 1: on net boundary, 2: on specified polyline)')
@@ -3038,7 +3094,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     if (writeall .or. (dtminbreak > 0d0)) then
         call prop_set(prop_ptr, 'numerics', 'MinTimestepBreak', dtminbreak,  'smallest allowed timestep (in s), checked on a sliding average of several timesteps. Run will abort when violated.')
     end if
-
+    
     if ((writeall .or. (sscmax > 0d0)) .and. jased==4) then
         call prop_set(prop_ptr, 'numerics', 'MaxSSC', sscmax, 'upper bound (in kg/m3) on SSC (<= 0: no bounds). Run will abort when violated.')
     end if
@@ -3109,7 +3165,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
        call prop_set(prop_ptr, 'numerics', 'Oceaneddyyoff'       , Oceaneddyyoff)
        call prop_set(prop_ptr, 'numerics', 'Oceaneddyxoff'       , Oceaneddyxoff)
     endif
-
+    
     call prop_set(prop_ptr, 'numerics', 'Testdryingflooding', testdryflood,   'Test for drying flooding algoritm (0: D-Flow FM, 1: Delft3D-FLOW)')
 
 ! Physics
@@ -3271,8 +3327,8 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
              call prop_set(prop_ptr, 'sediment', 'Jaceneqtr', jaceneqtr,     '1=equilibriumtransport at cell centre, 2= at netnode (default) ( ) ')
              call prop_set(prop_ptr, 'sediment', 'Morfac ',  Dmorfac,        'Morphological acceleration factor (), bottom updates active for morfac > 0, 1d0=realtime, etc')
              call prop_set(prop_ptr, 'sediment', 'TMorfspinup', Tmorfspinup, 'Spin up time for morphological adaptations (s)')
-             call prop_set(prop_ptr, 'sediment', 'Alfabed', alfabed, 'Calibration par bed      load, default=1d0 ( ) ')
-             call prop_set(prop_ptr, 'sediment', 'Alfasus', alfasus, 'Calibration par suspende load, default=1d0 ( ) ')
+             call prop_set(prop_ptr, 'sediment', 'Alfabed', alfabed, 'Calibration par bed       load, default=1d0 ( ) ')
+             call prop_set(prop_ptr, 'sediment', 'Alfasus', alfasus, 'Calibration par suspended load, default=1d0 ( ) ')
              call prop_set(prop_ptr, 'sediment', 'Crefcav', crefcav, 'Calibration par only in jased==3, default=20d0 ( ) ')
           end if
        endif
@@ -3354,9 +3410,6 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
    ! JRE -> aanvullen, kijken wat aangeleverd wordt
     if (writeall .or. jawave > 0) then
        call prop_set(prop_ptr, 'waves', 'Wavemodelnr',         jawave,         'Wave model nr. (0: none, 1: fetch/depth limited hurdlestive, 2: Young-Verhagen, 3: SWAN, 5: uniform, 6: SWAN-NetCDF')
-       call prop_set(prop_ptr, 'waves', 'Wavenikuradse',       wavenikuradse,  'Wave friction Nikuradse ks coefficient (m), used in Krone-Swart')
-       ! TODO Check why /30?
-       z0wav = wavenikuradse/30d0
        call prop_set(prop_ptr, 'waves', 'Rouwav',              rouwav,         'Friction model for wave induced shear stress: FR84 (default) or: MS90, HT91, GM79, DS88, BK67, CJ85, OY88, VR04')
        call prop_set(prop_ptr, 'waves', 'Gammax',              gammax,         'Maximum wave height/water depth ratio')
        call prop_set(prop_ptr, 'waves', 'uorbfac',             jauorb,         'Orbital velocities: 0=D3D style; 1=Guza style')
@@ -3374,6 +3427,11 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
        endif
        if (jawave == 1 .or. jawave == 2) then
           call prop_set(prop_ptr, 'waves', 'Tifetchcomp'      , Tifetch,           'Time interval fetch comp (s) in wavemodel 1,2')
+       endif
+       if (kmx>0) then
+          call prop_set(prop_ptr, 'waves', '3Dstokesprofile'     , jawaveStokes    ,'Stokes profile. 0: no, 1:uniform over depth, 2: 2nd order Stokes theory; 3: 2, with vertical stokes gradient in adve ')
+          call prop_set(prop_ptr, 'waves', '3Dwavestreaming'     , jawavestreaming ,'Influence of wave streaming. 0: no, 1: added to adve                                                                 ')
+          call prop_set(prop_ptr, 'waves', '3Dwaveboundarylayer' , jawavedelta     ,'Boundary layer formulation. 1: Sana                                                                                  ')
        endif
 
     endif
@@ -3519,7 +3577,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     call prop_set(prop_ptr, 'output', 'MbaLumpBoundaries', jambalumpbnd, 'Lump MBA boundary mass balance terms (1: yes, 0: no)')
     call prop_set(prop_ptr, 'output', 'MbaLumpSourceSinks', jambalumpsrc, 'Lump MBA source/sink mass balance terms (1: yes, 0: no)')
     call prop_set(prop_ptr, 'output', 'MbaLumpProcesses', jambalumpproc, 'Lump MBA processes mass balance terms (1: yes, 0: no)')
-
+    
 !    call prop_set(prop_ptr, 'output', 'WaqFileBase', trim(md_waqfilebase), 'Basename (without extension) for all Delwaq files to be written.')
     call prop_set(prop_ptr, 'output', 'WaqOutputDir',   trim(md_waqoutputdir),    'Output directory of WAQ communication files (flowgeom, vol, flo, etc.), default: DFM_DELWAQ_<modelname>. Set to . for current dir.')
 

@@ -30,7 +30,7 @@
 ! $Id$
 ! $HeadURL$
 
-subroutine addlink1D(L,japerim)                        ! and add area's and volumes of 1D links
+ subroutine addlink1D(L,japerim)                        ! and add area's and volumes of 1D links
  use m_flowgeom
  use m_flow
  use m_missing
@@ -52,16 +52,16 @@ subroutine addlink1D(L,japerim)                        ! and add area's and volu
  k1 = ln(1,L)
  k2 = ln(2,L)
 
- if (dxDoubleAt1DEndNodes) then
-    if (kcu(L) == 1) then
-       if ( nd(k1)%lnx == 1 ) then
-          dx1 = 2d0*dx1
-       endif
-       if ( nd(k2)%lnx == 1 ) then
-          dx2 = 2d0*dx2
+    if (dxDoubleAt1DEndNodes) then
+       if (kcu(L) == 1) then
+          if ( nd(k1)%lnx == 1 ) then
+             dx1 = 2d0*dx1
+          endif
+          if ( nd(k2)%lnx == 1 ) then
+             dx2 = 2d0*dx2
+          endif
        endif
     endif
- endif
 
  if (japerim == 0) then
 
@@ -77,8 +77,8 @@ subroutine addlink1D(L,japerim)                        ! and add area's and volu
              call getprof_1D(L, epshu, ar1, wid1, japerim, calcConv, perim)
           endif
           a1(k1) =   a1(k1) + dx1*wid1
+          endif
        endif
-    endif
 
     if (kcs(k2) == 1) then ! TODO: consider *also* adding storage area to the 2D side k2, if kcu(L)==5, maybe not for kcu(L)==7
        hpr = s1(k2)-bob0(2,L)
@@ -90,8 +90,8 @@ subroutine addlink1D(L,japerim)                        ! and add area's and volu
              call getprof_1D(L, epshu, ar2, wid2, japerim, calcConv, perim)
           endif
           a1(k2) =   a1(k2) + dx2*wid2
+          endif
        endif
-    endif
 
     if (nonlin >= 2) then
 
@@ -143,7 +143,7 @@ subroutine addlink1D(L,japerim)                        ! and add area's and volu
     if (hu(L) > 0) then
        !DIR$ INLINE
        hpr = get_hpr_nostruc(L)
-       ! getprof1D sets cfu
+    ! getprof1D sets cfu
        call getprof_1D(L, hpr, au(L), widu, japerim, calcConv, perim)  ! memory closeness of profiles causes this statement here instead of in setau
     endif
 

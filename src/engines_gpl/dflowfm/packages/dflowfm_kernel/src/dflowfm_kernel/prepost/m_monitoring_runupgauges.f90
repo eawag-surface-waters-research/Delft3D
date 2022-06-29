@@ -79,20 +79,20 @@ subroutine increaseRunupGauges(n)
 
 end subroutine increaseRunupGauges
 
-!> Allocates an array of cross sections, deallocating any existing memory.
+!> Allocates an array of runup gauges, deallocating any existing memory.
 subroutine allocRunupGauges(cs, n)
 
    implicit none
 
-    type(trug), allocatable, intent(inout) :: cs(:)   !< Array of cross sections
-    integer,                 intent(in)    :: n       !< Desired nr of cross sections
+    type(trug), allocatable, intent(inout) :: cs(:)   !< Array of gauges
+    integer,                 intent(in)    :: n       !< Desired nr of gauges
 
     call deallocRunupGauges(cs)
     allocate(cs(n))
 
 end subroutine allocRunupGauges
 
-!> Deallocates an array of crs
+!> Deallocates an array of rugs
 subroutine deallocRunupGauges(cs)
     type(trug), allocatable, intent(inout) :: cs(:)
 
@@ -156,7 +156,7 @@ subroutine pol_to_runupgauges(xpl, ypl, npl, names)
                 i2 = i ! Last polyline, no dmiss separator, so also include last point #npl.
             end if
             if (i1 <= i2) then
-                ! 1: Special name for this CRS or not?
+                ! 1: Special name for this rug or not?
                 ic = ic + 1
                 if (ic <= numnam) then
                     name = names(ic)
@@ -176,13 +176,13 @@ subroutine pol_to_runupgauges(xpl, ypl, npl, names)
 end subroutine pol_to_runupgauges
 
 
-!> Reads observation cross sections and adds them to the normal rug adm
+!> Reads observation rug and adds them to the normal rug adm
 subroutine loadRunupGauges(filename, jadoorladen)
    use unstruc_messages
 
    implicit none
-   character(len=*), intent(in   ) :: filename    !< File containing the observation cross sections. Either a *_crs.pli or a *_crs.ini.
-   integer,          intent(in   ) :: jadoorladen !< Append to existing observation cross sections or not
+   character(len=*), intent(in   ) :: filename    !< File containing the observation rug. Either a *_rug.pli.
+   integer,          intent(in   ) :: jadoorladen !< Append to existing observation rug or not
 
    logical :: jawel
    integer :: tok_pli

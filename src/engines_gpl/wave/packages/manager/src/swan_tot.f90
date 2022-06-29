@@ -146,10 +146,8 @@ subroutine swan_tot (n_swan_grids, n_flow_grids, wavedata, selectedtime)
          !
          ! Vegetation map
          if (dom%vegetation == 1) then
-            write(*,'(a)') '  Allocate and read Vegetation map'
+            write(*,'(a)') '  Allocate and read vegetation map'
             call get_vegi_map (swan_input_fields,dom%vegfil)
-         else
-            write(*,'(a)') '  Vegetation is switched off for Wave'
          endif
          ! If flow results are used
          !

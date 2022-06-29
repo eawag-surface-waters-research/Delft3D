@@ -66,6 +66,7 @@
  use m_VolumeTables
  use timers
  use m_setucxcuy_leastsquare, only: reconst2nd
+ use mathconsts, only: sqrt2_hp
 
  implicit none
 
@@ -165,13 +166,6 @@ end if
     idensform = 0
  endif
  volerror = 0d0 ; squ = 0 ; sqi = 0
-
- ! nplot  = ndxi/2  ! vertical profile to be plotted at node nr
-
-
- ! so this is not yet time dependent...
-
- ! if (ndx .le. 100) s1(1) = s1(1) + 0.1d0
 
  ispecials = 1
  call str_lower(md_netfile) ! INTERACTOR!
@@ -396,12 +390,12 @@ end if
                 if (jatem > 0) then
                    tem1(kk) = 5d0
                 endif
-              else
+             else
                 sa1(kk) = locsaltmin
                 if (jatem > 0) then
                    tem1(kk) = 10d0
                 endif
-              endif
+          endif
           endif
           sa1(k)  = sa1(k) + vol1(kk)*sa1(kk)
 
@@ -648,7 +642,7 @@ end if
           rr  = sqrt(dxx*dxx + dyy*dyy)
           if (rr < 0.5d0*rmx) then
              !sa1(k) = 5d0 + 5d0*cos(twopi*rr/rmx)
-            sa1(k) = 10d0
+             sa1(k) = 10d0
           endif
        enddo
 
@@ -1078,7 +1072,7 @@ end if
        call read_restart_from_map(md_restartfile, iresult)
        if (jased > 0 .and. stm_included) then
           call setbobs()
-       endif
+       end if
 
        if (jampi == 1) then
           ! globally reduce the error
@@ -1121,7 +1115,7 @@ end if
     if (stmpar%morpar%morft < eps10) then
         !
         ! if the morphological start time is not set to some positive value due
-        ! to restart from trim-file, then make sure that the morphological start
+        ! to restart from mapfile, then make sure that the morphological start
         ! time corresponds to the hydrodynamic start time. This includes TStart!
         !
         stmpar%morpar%morft  = tstart_user/86400d0
@@ -1397,12 +1391,18 @@ end if
 
   if ((jawave==3 .or. jawave==6) .and. .not. flowWithoutWaves) then
     ! Normal situation: use wave info in FLOW
-    ! 3D not implementend
+    hs = max(hs, 0d0)
+    if (jawave == 6) then
+      ! HSIG is read from SWAN NetCDF file. Convert to HRMS
+      hwav = hwavcom / sqrt2_hp
+    else
+      hwav = hwavcom
+    endif
+    hwav = min(hwav, gammax*hs)
+    !
+    call wave_uorbrlabda()                      
     if( kmx == 0 ) then
-       hs = s1-bl                                   ! safety
-       hs = max(hs, 0d0)
        call wave_comp_stokes_velocities()
-       call wave_uorbrlabda()                       ! hwav gets depth-limited here
        call tauwave()
     end if
     call setwavfu()
@@ -1413,14 +1413,21 @@ end if
     ! Exceptional situation: use wave info not in FLOW, only in WAQ
     ! Only compute uorb
     ! Works both for 2D and 3D
+    if (jawave == 6) then
+      ! HSIG is read from SWAN NetCDF file. Convert to HRMS
+      hwav = hwavcom / sqrt2_hp
+    else
+      hwav = hwavcom
+    endif
+    hwav = min(hwav, gammax*hs)
     call wave_uorbrlabda()                       ! hwav gets depth-limited here
 end if
 
  if (jawave==5 .and. .not. flowWithoutWaves) then
-    if (kmx==0) then
-       do k=1,ndx
-          hwav(k) = min(hwavuni, gammax*(s1(k)-bl(k)))
-       enddo
+    hs = max(hs, 0d0)
+    hwav = min(hwavcom, gammax*hs)
+    call wave_uorbrlabda()
+    if( kmx == 0 ) then
        do L=1,lnx
           k1=ln(1,L); k2=ln(2,L)
           hh = hu(L); hw=0.5d0*(hwav(k1)+hwav(k2));tw=.5d0*(twav(k1)+twav(k2))
@@ -1428,10 +1435,7 @@ end if
           snw = 0.5*(sin(phiwav(k1)*dg2rd)+sin(phiwav(k2)*dg2rd))
           call tauwavehk(hw, tw, hh, uorbi, rkw, ustt)
           ustokes(L) = ustt*(csu(L)*csw + snu(L)*snw)
-       enddo
-       do k=1,ndx
-          call tauwavehk(hwav(k), twav(k), hs(k), uorbi, rkw, ustt)
-          rlabda(k) = rkw; uorb(k) = uorbi
+          vstokes(L) = ustt*(-snu(L)*csw + csu(L)*snw)
        enddo
        call tauwave()
     endif
@@ -1439,54 +1443,54 @@ end if
 
  if (jasal > 0) then
     if (kmx > 0 .and. inisal2D >= 1 .and. jarestart.eq.0 ) then
-       do kk = 1,ndx
-          call getkbotktop(kk,kb,kt)
-          if (inisal2D == 2) then
-             do k = kb, kt
-                if (kt == kb) then
-                   rr  = 1d0
-                else
-                   rr  = dble(k-kb)/dble(kt-kb)
-                endif
-                sa1(k) = (1d0 - rr)*sa1(kk) + rr*satop(kk)
-             enddo
-          else if (inisal2D == 3) then          ! uniform below is specified
-             do k = kb, kt
-                zz = 0.5d0*( zws(k) + zws(k-1) )
-                if (zz < uniformsalinitybelowz .and. sabot(kk) .ne. dmiss) then
-                   sa1(k) = sabot(kk)
-                else
-                   sa1(k) = sa1(kk)
-                endif
-             enddo
-          endif
-          do k = kt+1, kb+kmxn(kk)-1
-             sa1(k) = sa1(max(kt,kb))
+    do kk = 1,ndx
+       call getkbotktop(kk,kb,kt)
+       if (inisal2D == 2) then
+          do k = kb, kt
+             if (kt == kb) then
+                rr  = 1d0
+             else
+                rr  = dble(k-kb)/dble(kt-kb)
+             endif
+             sa1(k) = (1d0 - rr)*sa1(kk) + rr*satop(kk)
           enddo
+       else if (inisal2D == 3) then          ! uniform below is specified
+          do k = kb, kt
+             zz = 0.5d0*( zws(k) + zws(k-1) )
+             if (zz < uniformsalinitybelowz .and. sabot(kk) .ne. dmiss) then
+                sa1(k) = sabot(kk)
+             else
+                sa1(k) = sa1(kk)
+             endif
+          enddo
+       endif
+       do k = kt+1, kb+kmxn(kk)-1
+          sa1(k) = sa1(max(kt,kb))
        enddo
+    enddo
 
-       if ( allocated(satop) ) then
-          deallocate (satop)
-       endif
-       if ( allocated(sabot) ) then
-          deallocate (sabot)
-       endif
+    if ( allocated(satop) ) then
+       deallocate (satop)
     endif
+    if ( allocated(sabot) ) then
+       deallocate (sabot)
+    endif
+ endif
 
     do k = 1,ndkx
        sa1(k) = max( 0d0,  sa1(k) )
     enddo
 
     if (Sal0abovezlev .ne. dmiss) then
-        do kk = 1,ndx
-          call getkbotktop(kk,kb,kt)
-          do k = kb, kt
+    do kk = 1,ndx
+       call getkbotktop(kk,kb,kt)
+       do k = kb, kt
              if (zws(k) > Sal0abovezlev) then
                  sa1(k) = 0d0
              endif
-          enddo
-        enddo
-    endif
+       enddo
+    enddo
+ endif
 
     salmax = maxval(sa1)
 
@@ -1505,7 +1509,7 @@ end if
     inised2D = 0
  endif
 
- ! When restart, initialize salinity, temperature, sed on waterlevel boundaries
+  ! When restart, initialize salinity, temperature, sed on waterlevel boundaries
  ! NOTE: keep this identical to how it's done at the end of transport()
  ! hk: and, make sure this is done prior to fill constituents
  if (jarestart > 0) then
@@ -1545,16 +1549,16 @@ end if
  end if
 
  if (jasal > 0) then ! used to be in fill_constituents each step
-    do k = 1,ndkx
+         do k = 1,ndkx
        constituents(isalt,k) = max( 0d0,  sa1(k) )
     enddo
  endif
 
  if (itemp > 0) then ! used to be in fill_constituents each step
     do k = 1,ndkx
-       constituents(itemp,k) =  tem1(k)
-    enddo
- endif
+            constituents(itemp,k) = tem1(k)
+         enddo
+     endif
 
  if (jainirho == 1) then
     do kk = 1,ndx  ! initialise rho's
@@ -1571,10 +1575,10 @@ end if
  endif
 
  if (jaFlowNetChanged == 1 .or. nodtot /= ndx .or. lintot /= lnx) then
-    call reducept(Ndx,Ndxi,Lnx)                              ! also alloc arrays for reduce
-    if (icgsolver == 10) then
-       call alloc_jacobi(ndx,lnx)
-    endif
+       call reducept(Ndx,Ndxi,Lnx)                              ! also alloc arrays for reduce
+       if (icgsolver == 10) then
+          call alloc_jacobi(ndx,lnx)
+       endif
  end if
 
 

@@ -114,7 +114,7 @@
    logical                              , pointer :: bsskin
    real(fp)         , dimension(:)      , pointer :: thcmud
    real(fp)         , dimension(:)      , pointer :: tpsnumber
-   real(fp)         , dimension(:, :)   , pointer :: dss     !  Description and declaration in esm_alloc_real.f90
+   real(fp)         , dimension(:, :)   , pointer :: dss
 
    ! morpar
    real(fp)                             , pointer :: thresh
@@ -159,10 +159,11 @@
    integer                              , pointer :: islope
    real(fp)                             , pointer :: dzmax
    real(fp)                             , pointer :: hmaxth
-   real(fp)                             , pointer :: thetsd
+   real(fp)         , dimension(:)      , pointer :: thetsd
    logical                              , pointer :: eqmbcsand
    logical                              , pointer :: eqmbcmud
    logical                              , pointer :: eulerisoglm
+   logical                              , pointer :: l_suscor
 
    ! trapar
    integer          , dimension(:)      , pointer :: iform

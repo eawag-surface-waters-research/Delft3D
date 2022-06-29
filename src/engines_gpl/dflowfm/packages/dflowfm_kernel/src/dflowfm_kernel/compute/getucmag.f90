@@ -59,4 +59,4 @@ subroutine getucmag(N, ucxi, ucyi, ucmago)
       enddo
    end if
 
-end subroutine getucmag
+   end subroutine getucmag

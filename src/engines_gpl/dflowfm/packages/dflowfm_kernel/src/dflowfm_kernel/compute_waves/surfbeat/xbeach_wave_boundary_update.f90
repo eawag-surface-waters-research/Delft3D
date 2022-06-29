@@ -70,9 +70,9 @@ module wave_boundary_update_module
                                                            ! is stored, which is not scaled and is used for the generation of bound waves
       real*8,dimension(:,:),pointer          :: A          ! Amplitude, per wave train component, per offshore grid point A(ny+1,K)
       real*8,dimension(:,:),pointer          :: Sfinterp   ! S integrated over all directions at frequency locations of fgen,
-                                                           ! per offshore grid point Sfinterp(ny+1,K)
+                                                           ! per offshore grid point Sfinterp(npb,K)
       real*8,dimension(:,:),pointer          :: Sfinterpq  ! S integrated over all directions at frequency locations of fgen,
-                                                           ! per offshore grid point Sfinterpq(ny+1,K), uncorrected for generation of bound waves
+                                                           ! per offshore grid point Sfinterpq(npb,K), uncorrected for generation of bound waves
       real*8,dimension(:),pointer            :: Hm0interp  ! Hm0 per offshore point, based on intergration of Sfinterp and used to scale
                                                            ! final time series
       integer, dimension(:),pointer          :: Findex     ! Index of wave train component locations on frequency/Fourier axis
@@ -98,6 +98,8 @@ module wave_boundary_update_module
    ! Shortcut pointers to commonly used parameters
    integer                                   :: nspectra,bccount,npb
    integer                                   :: ntheta
+   integer                                   :: ntheta_s
+   integer                                   :: singledir
    real*8                                    :: hb0
    ! Physical constants
    real*8,parameter                          :: par_pi = 4.d0*atan(1.d0)
@@ -156,12 +158,14 @@ contains
     ! Offshore water depth, which is used in various computations in this module
     hb0 = waveBoundaryParameters(ibnd)%hboundary
     npb = waveBoundaryParameters(ibnd)%np
+    ntheta_s  = waveBoundaryParameters(ibnd)%ntheta_s
+    singledir = waveBoundaryParameters(ibnd)%singledir    
     if (.not. allocated(wL)) then
        allocate(wR(1:npb), wL(1:npb),kR(1:npb),kL(1:npb))
     endif
-    kL  = waveSpectrumAdministration(ibnd)%kL
+    kL  = waveSpectrumAdministration(ibnd)%kL    ! spectrum number in nspectra
     kR  = waveSpectrumAdministration(ibnd)%kR
-    wR  = waveSpectrumAdministration(ibnd)%wR
+    wR  = waveSpectrumAdministration(ibnd)%wR    ! associated weight
     wL  = waveSpectrumAdministration(ibnd)%wL
     !
     !
@@ -229,17 +233,20 @@ contains
        ! JRE TO DO: weighted interpolation, ref to nspectrumloc>1
        !
        call generate_combined_spectrum(ibnd, specinterp,combspec)
-       !call generate_combined_spectrum_weighted(ibnd, npb, kL, kR, wL, wR, specinterp,combspec)
+       !call generate_combined_spectrum_weighted(ibnd, npb, kL, kR, wL, wR, specinterp, combspec)
        !
        ! Store these data in wave administration for exchange with outer
        ! XBeach or D3D/FM models
-       waveSpectrumAdministration(ibnd)%Hbc = combspec%hm0
-       waveSpectrumAdministration(ibnd)%Tbc = combspec%trep
-       waveSpectrumAdministration(ibnd)%Dbc = combspec%dir0
+       waveSpectrumAdministration(ibnd)%Hbc  = combspec%hm0
+       waveSpectrumAdministration(ibnd)%Tbc  = combspec%trep
+       waveSpectrumAdministration(ibnd)%Dbc  = combspec%dir0
    
        call writelog('sl','(a,f0.2,a)','Overall Trep from all spectra calculated: ',& 
                                         waveSpectrumAdministration(ibnd)%Tbc,' s')
 
+       if (waveboundaryParameters(ibnd)%singledir>0) then
+          call set_stationary_spectrum (ibnd,wp,combspec)
+       endif
        ! Wave trains that are used by XBeach. The number of wave trains, their frequencies and directions
        ! are based on the combined spectra of all the locations to ensure all wave conditions are
        ! represented in the XBeach model
@@ -470,7 +477,7 @@ contains
     ! Check whether spectrum characteristics or table should be used
     if (     trim(instat) /= 'jons_table') then
        ! Use spectrum characteristics
-       call writelog('sl','','waveparams: Reading from ',trim(readfile),' ...')
+       call writelog('sl','','Reading jonswap info from ',trim(readfile),' ...')
        !
        ! First read if the spectrum is multinodal, and how many peaks there should be
        !
@@ -563,7 +570,7 @@ contains
        allocate(scoeff(nmodal))
        allocate(tma(nmodal))
        ! Use spectrum table
-       call writelog('sl','','waveparams: Reading from table ',trim(readfile),' ...')
+       call writelog('sl','','Reading jonswap info from table ',trim(readfile),' ...')
        open(newunit=fid,file=readfile,status='old',form='formatted')
        ! read junk up to the correct line in the file
        do i=1,listline                                      ! must be reset when reading second spectrum locfile
@@ -610,11 +617,11 @@ contains
         !
     ! Define 200 directions relative to main angle running from 0 to 2*pi
     ! we also need a temporary vector for direction distribution
-    specin%nang = naint             ! = 101, standard value
+    specin%nang = naint             ! = 401, standard value
     allocate(tempdir(specin%nang))
     allocate(Dd(specin%nang))
     allocate(specin%ang(specin%nang))
-    specin%dang = 2*par_pi/(naint-1)
+    specin%dang = 2*par_pi/dble(naint-1)
     do i=1,specin%nang
        specin%ang(i)=(i-1)*specin%dang
     enddo
@@ -634,14 +641,14 @@ contains
        if (tma(ip)==1) then
           do ii=1,specin%nf
               LL0 = par_g*(1/specin%f(ii))**2/2d0/par_pi    ! deep water wave length
-              LL = iteratedispersion(LL0,LL0,par_pi,wp%h0)
+              LL = iteratedispersion(LL0,LL0,par_pi,hb0)
               if (LL<0.d0) then
                  call writelog('lsw','','No dispersion convergence found for wave train ',i, &
                   ' in boundary condition generation')
                   LL = -LL
               endif
               k = 2*par_pi/LL
-              hh = wp%h0
+              hh = hb0
               nn = 0.5d0*(1+k*hh*((1-tanh(k*hh)**2)/(tanh(k*hh))))
               sigmatma = ((1/2.d0/nn)*tanh(k*hh)**2)
               y(ii) = y(ii) * sigmatma
@@ -662,13 +669,13 @@ contains
        ! Convert 200 directions relative to main angle to directions relative to
        ! internal grid
        ! Bas: apparently division by 2 for cosine law happens already here
-       tempdir = (specin%ang-mainang(ip))/2
+       tempdir = (specin%ang-mainang(ip))/2d0
        ! Make sure all directions around the main angle are defined between 0 and 2*pi
-       do while (any(tempdir>2*par_pi) .or. any(tempdir<0.d0))
-          where (tempdir>2*par_pi)
-             tempdir=tempdir-2*par_pi
+       do while (any(tempdir>2d0*par_pi) .or. any(tempdir<0.d0))
+          where (tempdir>2d0*par_pi)
+             tempdir=tempdir-2d0*par_pi
           elsewhere (tempdir<0.d0)
-             tempdir=tempdir+2*par_pi
+             tempdir=tempdir+2d0*par_pi
           endwhere
        enddo
        ! Calculate directional spreading based on cosine law
@@ -854,7 +861,7 @@ contains
         deallocate(newvariance,oldvariance)
      endif
      
-    ! We need frequency spectrum to ensure Sf remains correct between interpoloation
+    ! We need frequency spectrum to ensure Sf remains correct between interpolation
     ! routines
     allocate(specin%Sf(specin%nf))
     specin%Sf=0.d0
@@ -1034,7 +1041,7 @@ contains
     else
        ! cartesian to cartesian East
        specin%ang = specin%ang-     dthetaS_XB
-       ! dthetaS_XB is the (counter-clockwise) angle in the degrees to rotate from the x-axis in SWAN to the
+       ! dthetaS_XB is the (counter-clockwise) angle in the degrees to rotate from the grid x-axis in SWAN to the
        ! x-axis pointing East
     end if
   
@@ -1214,16 +1221,14 @@ contains
     ! Input / output variables
     character(len=*), intent(IN)            :: readfile
     type(spectrum),intent(inout)            :: specin
-  
+
     ! Internal variables
-    integer                                 :: fid,i,ii,nnz,ier,nt,Ashift
-    real*8,dimension(:),allocatable         :: Sd,temp
-    real*8, dimension(:,:),allocatable      :: tempA
-  
+    integer                                 :: fid,i,ii,nnz,ier
+
     ! Open file to start read
-    call writelog('sl','','Reading from vardens file ',trim(readfile),' ...')
+    call writelog('sl','','Reading from vardens file: ',trim(readfile),' ...')
     open(newunit=fid,file=readfile,form='formatted',status='old')
-  
+
     ! Read number of frequencies and frequency vector
     read(fid,*,iostat=ier)specin%nf
     if (ier .ne. 0) then
@@ -1236,7 +1241,7 @@ contains
           call report_file_read_error(readfile)
        endif
     end do
-  
+
     ! Read number of angles and angles vector
     read(fid,*,iostat=ier)specin%nang
     if (ier .ne. 0) then
@@ -1249,44 +1254,11 @@ contains
           call report_file_read_error(readfile)
        endif
     end do
-    ! Directions should span 0-360 degrees, not negative
-    nt = 0
-    Ashift = 0
-    ! Make sure that all angles are in range of 0 to 360 degrees
-    if(minval(specin%ang)<0.d0)then
-       allocate (temp(specin%nang))
-       Ashift=-1
-       temp=0.d0
-       do i=1,specin%nang
-          if (specin%ang(i)<0.d0) then
-             specin%ang(i)=specin%ang(i)+360.0d0
-             nt = nt+1
-          endif
-       enddo
-       temp(1:specin%nang-nt)=specin%ang(nt+1:specin%nang)
-       temp(specin%nang-nt+1:specin%nang)=specin%ang(1:nt)
-       specin%ang=temp
-       deallocate(temp)
-    elseif(maxval(specin%ang)>360.0d0)then
-       allocate (temp(specin%nang))
-       Ashift=1
-       temp=0.d0
-       do i=1,specin%nang
-          if (specin%ang(i)>360.d0) then
-             specin%ang(i)=specin%ang(i)-360.0d0
-             nt = nt+1
-          endif
-       enddo
-       temp(nt+1:specin%nang)=specin%ang(1:specin%nang-nt)
-       temp(1:nt)=specin%ang(specin%nang-nt+1:specin%nang)
-       specin%ang=temp
-       deallocate(temp)
-    endif
-  
+
     ! Convert from degrees to rad
     specin%ang=specin%ang*par_pi/180
     specin%dang=specin%ang(2)-specin%ang(1)
-  
+
     ! Read 2D S array
     allocate(specin%S(specin%nf,specin%nang))
     do i=1,specin%nf
@@ -1295,31 +1267,13 @@ contains
           call report_file_read_error(readfile)
        endif
     end do
-  
-    ! If the order of the angles in specin%ang was reordered, so the same in
-    ! specin%S array
-    if(Ashift==-1)then
-       allocate(tempA(specin%nf,specin%nang))
-       tempA=0
-       tempA(:,1:specin%nang-nt)=specin%S(:,nt+1:specin%nang)
-       tempA(:,specin%nang-nt+1:specin%nang)=specin%S(:,1:nt)
-       specin%S=tempA
-       deallocate(tempA)
-    elseif (Ashift==1) then
-       allocate(tempA(specin%nf,specin%nang))
-       tempA=0
-       tempA(:,nt+1:specin%nang)=specin%S(:,1:specin%nang-nt)
-       tempA(:,1:nt)=specin%S(:,specin%nang-nt+1:specin%nang)
-       specin%S=tempA
-       deallocate(tempA)
-    endif
-  
+
     ! Finished reading file
     close(fid)
-  
+
     ! Convert to m2/Hz/rad
     specin%S=specin%S*180/par_pi
-  
+
     ! We need a value for spreading. The assumption is that it is less than 1000
     ! if more than one direction column has variance. If only one column has variance
     ! we assume the model requires long crested waves, and wp%thetagen should be exactly
@@ -1327,16 +1281,16 @@ contains
     ! First flatten spectrum to direction only, then determine if all but one are zero,
     ! use the direction of the non-zero as the main wave direction, set spreading to
     ! a high value (greater than 1000). Else set spreading to a negative value.
-    allocate(Sd(specin%nang))
-    Sd = sum(specin%S,DIM = 1)
-    nnz = count(Sd>0.d0)
+    allocate(specin%Sd(specin%nang))
+    specin%Sd = sum(specin%S,DIM = 1)
+    nnz = count(specin%Sd>0.d0)
     if (nnz == 1) then
        specin%scoeff = 1024.d0
-       specin%dir0 = specin%ang(minval(maxloc(Sd)))
+       specin%dir0 = specin%ang(minval(maxloc(specin%Sd)))
     else
        specin%scoeff = -1.d0
     endif
-    
+
     ! We need frequency spectrum to ensure Sf remains correct between interpoloation
     ! routines
     allocate(specin%Sf(specin%nf))
@@ -1348,17 +1302,15 @@ contains
           elseif (ii==specin%nang) then
              specin%Sf(i) = specin%Sf(i)+specin%S(i,ii)*abs(specin%ang(ii)-specin%ang(ii-1))
           else
-             specin%Sf(i) = specin%Sf(i)+specin%S(i,ii)*abs(specin%ang(ii+1)-specin%ang(ii-1))/2
+             specin%Sf(i) = specin%Sf(i)+specin%S(i,ii)*abs(specin%ang(ii+1)-specin%ang(ii-1))/2d0
           endif
        enddo
     enddo
-    
-  
+
+
     ! We need to know if hm0 was set explicitly, not the case for vardens files
     specin%hm0 = -1.d0
-  
-    ! Free memory
-    deallocate(Sd)
+
   end subroutine read_vardens_file
   
 
@@ -1539,7 +1491,7 @@ contains
   ! --------------------------------------------------------------
   ! ----------- Merge all separate spectra into one --------------
   ! -------------- average spectrum for other use ----------------
-  subroutine generate_combined_spectrum(ibnd, specinterp,combspec)
+  subroutine generate_combined_spectrum(ibnd, specinterp, combspec)
 
     implicit none
     integer, intent(in)                             :: ibnd
@@ -1571,8 +1523,8 @@ contains
 
     do iloc = 1,nspectra
        do ifn = 1,nfint
-          combspec%S(ifn,:)    = combspec%S(ifn,:)   +specinterp(iloc)%S(ifn,:)   /nspectra
-          combspec%Sf(ifn)   = combspec%Sf(ifn)  +specinterp(iloc)%Sf(ifn)  /nspectra
+          combspec%S(ifn,:) = combspec%S(ifn,:) +specinterp(iloc)%S(ifn,:) /nspectra
+          combspec%Sf(ifn)  = combspec%Sf(ifn)  +specinterp(iloc)%Sf(ifn)  /nspectra
        enddo
     enddo
     !
@@ -1621,7 +1573,7 @@ contains
     !
     ! Compute combined wave height
     do iloc = 1,nspectra
-       combspec%hm0 = combspec%hm0+specinterp(iloc)%hm0**2/nspectra
+       combspec%hm0 = combspec%hm0+specinterp(iloc)%hm0**2/dble(nspectra)
     enddo 
     combspec%hm0 = sqrt(combspec%hm0)
     
@@ -1663,8 +1615,8 @@ contains
        combspec%S    = combspec%S   + wL(iloc)*specinterp(kL(iloc))%S +  wR(iloc)*specinterp(kR(iloc))%S
        combspec%Sf   = combspec%Sf  + wL(iloc)*specinterp(kL(iloc))%Sf +  wR(iloc)*specinterp(kR(iloc))%Sf
     enddo
-    combspec%S =   combspec%S/npb 
-    combspec%Sf =  combspec%Sf/npb
+    combspec%S =   combspec%S/dble(npb) 
+    combspec%Sf =  combspec%Sf/dble(npb)
     !
     ! Calculate peak wave angle
     !
@@ -1711,7 +1663,7 @@ contains
     !
     ! Compute combined wave height
     do iloc = 1,nspectra
-       combspec%hm0 = combspec%hm0+specinterp(iloc)%hm0**2/nspectra
+       combspec%hm0 = combspec%hm0+specinterp(iloc)%hm0**2/dble(nspectra)
     enddo 
     combspec%hm0 = sqrt(combspec%hm0)
     
@@ -1751,7 +1703,7 @@ contains
     else
        ! this is really already taken into account
        ! by specifying waveBoundaryParameters%sprdthr
-       fmax = 2*maxval(combspec%f)
+       fmax = 2d0*maxval(combspec%f)
     endif
 
     ! Determine frequencies around peak frequency of one-dimensional
@@ -1791,13 +1743,12 @@ contains
     ! if random integer given as seed)
     
     if (waveBoundaryParameters(ibnd)%randomseed .ne. -999) then
-       call init_seed(seed)
-       randnums(1) = random(seed)
+       randnums(1) = random(waveBoundaryParameters(ibnd)%randomseed)
     else
        randnums(1) = random(100)
     endif
     !
-    do i=1,2*wp%K
+    do i=2,2*wp%K
       randnums(i) = random(0)   
     enddo
 
@@ -1822,7 +1773,7 @@ contains
        ! Boundary condition, which may be nonzero:
        cdflocal(1) = pdflocal(1)
        do ii=2,naint
-          cdflocal(ii) = cdflocal(ii-1) + (pdflocal(ii)+pdflocal(ii-1))/2
+          cdflocal(ii) = cdflocal(ii-1) + (pdflocal(ii)+pdflocal(ii-1))/2d0
           ! Note: this only works if the directional
           ! bins are constant in size. Assumed multiplication
           ! by one.
@@ -1847,29 +1798,18 @@ contains
     
     ! determine wave number for each wave train component, using standard dispersion relation
     ! solver from wave_functions module. This function returns a negative wave length if the
-    ! solver did not converge.
-!#ifdef BUILDXBEACH    
+    ! solver did not converge. 
     do i=1,wp%K
-       L0 = par_g*(1/wp%fgen(i))**2/2/par_pi    ! deep water wave length
+       L0 = par_g*(1/wp%fgen(i))**2/2d0/par_pi    ! deep water wave length
        L = iteratedispersion(L0,L0,par_pi,hb0)
        if (L<0.d0) then
           call writelog('lsw','','No dispersion convergence found for wave train ',i, &
-               ' in boundary condition generation')
+                                 ' in boundary condition generation')
           L = -L
        endif
        wp%kgen(i) = 2*par_pi/L
     enddo
-!#else
-    ! do dispersion relation in other model
-    !allocate(kh(wp%K))
-    !kh = min((waveBoundaryParameters%hboundary/par_g*wp%wgen**2.) * &
-    !          (1-exp(-(wp%wgen*sqrt(waveBoundaryParameters%hboundary/par_g))**(5./2.)))**(-2./5.),10.)
-    !wp%kgen = kh/waveBoundaryParameters%hboundary
-    !deallocate(kh)
-!#endif
-
-   
-       
+ 
     ! Free memory
     deallocate(pdflocal,cdflocal,randnums)
 
@@ -1913,56 +1853,6 @@ contains
     endif
 
   end function iteratedispersion
-
-  ! -----------------------------------------------------------
-  ! --- Small subroutine to reseed random number generator ----
-  ! -----------------------------------------------------------
-  !subroutine init_seed
-  !  INTEGER :: i, n, clock
-  !  INTEGER, DIMENSION(:), ALLOCATABLE :: seed
-  !  ! RANDOM_SEED does not result in a random seed for each compiler, so we better make sure that we have a pseudo random seed.
-  !  ! I am not sure what is a good n
-  !  n = 40
-  !  i = 1
-  !  ! not sure what size means here
-  !  ! first call with size
-  !  CALL RANDOM_SEED(size = n)
-  !  ! define a seed array of size n
-  !  ALLOCATE(seed(n))
-  !  ! what time is it
-  !  CALL SYSTEM_CLOCK(COUNT=clock)
-  !  ! define the seed vector based on a prime, the clock and the set of integers
-  !  seed = clock + 37 * (/ (i - 1, i = 1, n) /)
-  !  ! if mpi do we need a different seed on each node or the same???
-  !  ! if we do need different seeds on each node
-  !  ! seed *= some big prime * rank ?
-  !  ! now use the seed
-  !  CALL RANDOM_SEED(PUT = seed)
-  !end subroutine init_seed
-  subroutine init_seed(outseed)
-      INTEGER :: i, n, clock
-      INTEGER, DIMENSION(:), ALLOCATABLE :: seed
-      integer,intent(out) :: outseed
-      ! RANDOM_SEED does not result in a random seed for each compiler, so we better make sure that we have a pseudo random seed.
-      ! I am not sure what is a good n
-      n = 40
-      i = 1
-      ! not sure what size means here
-      ! first call with size
-      CALL RANDOM_SEED(size = n)
-      ! define a seed array of size n
-      ALLOCATE(seed(n))
-      ! what time is it
-      CALL SYSTEM_CLOCK(COUNT=clock)
-      ! define the seed vector based on a prime, the clock and the set of integers
-      seed = clock + 37 * (/ (i - 1, i = 1, n) /)
-      ! if mpi do we need a different seed on each node or the same???
-      ! if we do need different seeds on each node
-      ! seed *= some big prime * rank ?
-      ! now use the seed
-      CALL RANDOM_SEED(PUT = seed)
-      outseed = seed(1)
-   end subroutine init_seed
 
   ! -----------------------------------------------------------
   ! ----------- Small subroutine to determine -----------------
@@ -2230,7 +2120,7 @@ contains
        wp%A(i,:) = sqrt(2*wp%Sfinterp(i,:)*wp%dfgen)
        wp%Hm0interp(i) = 4*sqrt(sum(wp%Sfinterp(i,:))*wp%dfgen)
        
-       ! determine if these components will be pahse-resolved, or resolved in the wave energy balance
+       ! determine if these components will be phase-resolved, or resolved in the wave energy balance
        allocate(wp%PRindex(wp%K))
        if (waveBoundaryParameters(ibnd)%nonhspectrum) then
           ! all components phase-resolved
@@ -2238,7 +2128,7 @@ contains
        else
           if(waveBoundaryParameters(ibnd)%swkhmin>0.d0) then 
              ! some components resolved, some not
-             where(wp%kgen*wp%h0 >= waveBoundaryParameters(ibnd)%swkhmin)
+             where(wp%kgen*hb0 >= waveBoundaryParameters(ibnd)%swkhmin)
                 wp%PRindex = 0
              elsewhere
                 wp%PRindex = 1
@@ -2248,9 +2138,7 @@ contains
              wp%PRindex = 0
           endif
        endif
-       !dum  = wwR * waveSpectrumAdministration(ibnd)%yspec(kkR) + &
-       !       wwL * waveSpectrumAdministration(ibnd)%yspec(kkL)
-       !write(6,*) 'ibnd=', ibnd, 'i=', i, 'ydum', dum, 'Hm0=', wp%Hm0interp(i)
+
   
     enddo
   
@@ -2437,12 +2325,8 @@ contains
   ! --------- Calculate energy envelope time series from ---------
   ! -------- Fourier components, and write to output file --------
   subroutine generate_ebcf(ibnd, wp)
-
-    
-
     use interp
     use m_xbeach_filefunctions
-
     use math_tools    
 
     implicit none
@@ -2454,12 +2338,13 @@ contains
     integer                                      :: itheta,iy,iwc,it,irec
     integer                                      :: index,status
     integer                                      :: reclen,fid
+    integer                                      :: nInBoundaryFile
     integer,dimension(:),allocatable             :: nwc
     real*8,dimension(:,:,:), allocatable         :: zeta, Ampzeta, E_tdir, E_interp
     real*8,dimension(:,:), allocatable           :: eta, Amp
     complex(fftkind),dimension(:),allocatable    :: Gn, tempcmplx,tempcmplxhalf
     integer,dimension(:),allocatable             :: tempindex,tempinclude
-    real*8                                       :: stdzeta,stdeta,etot,perc
+    real*8                                       :: stdzeta,stdeta,etot,perc,emean
     real*8, dimension(:), allocatable            :: E_t
 
     ! Allocate variables for water level exitation and amplitude with and without
@@ -2481,6 +2366,7 @@ contains
     allocate(tempinclude(wp%K))
     allocate(tempcmplx(wp%tslen))
     allocate(tempcmplxhalf(size(Gn(wp%tslen/2+2:wp%tslen))))
+
     do itheta=1,ntheta
        
        call writelog('ls','(A,I0,A,I0)','Calculating short wave time series for theta bin ',itheta,' of ',ntheta)
@@ -2553,7 +2439,7 @@ contains
              ! can safely copy zeta at the point in time where t=rtbc to lastwaveelevation for use
              ! in the generation of the next time series
              waveSpectrumAdministration(ibnd)%lastwaveelevation(iy,itheta) = zeta(iy,ind_end_taper,itheta)
-          enddo ! iy=1,ny+1
+          enddo ! iy=1,npb
        endif  ! nwc>0
        deallocate(tempindex)
     enddo ! itheta = 1,ntheta
@@ -2562,8 +2448,9 @@ contains
     deallocate(tempcmplxhalf)
     !
     ! Calculate energy envelope amplitude
-    
-    ! Robert: note oldwbc has been removed
+    call writelog('ls','(A,I0)','Calculating wave energy envelope at boundary ', ibnd)
+    call progress_indicator(.true.,0.d0,5.d0,2.d0) 
+
     do iy=1,npb
        ! Integrate instantaneous water level excitation of wave
        ! components over directions
@@ -2599,7 +2486,7 @@ contains
        end do   ! 1:ntheta
        ! Print status message to screen
        
-       call writelog('ls','(A,I0,A,I0,A)','Y-point ',iy,' of ',npb,' done.')
+       call progress_indicator(.false.,dble(iy)/(npb)*100,5.d0,2.d0)
        
     end do   ! 1:npb
     !
@@ -2613,6 +2500,28 @@ contains
     E_tdir=0.0d0
     E_tdir=0.5d0*waveBoundaryParameters(ibnd)%rho*par_g*Ampzeta**2
     E_tdir=E_tdir/waveBoundaryParameters(ibnd)%dtheta
+    !
+    ! Ensure we scale back to the correct Hm0
+    if(waveBoundaryParameters(ibnd)%wbcScaleEnergy==1) then
+       nInBoundaryFile = nint(wp%rtbc/wp%dtin) ! number of total time series in bcf (independent of dtin / dtbc differences)
+       do iy=1,npb
+          stdeta = sum(E_tdir(iy,1:nInBoundaryFile,:))*waveBoundaryParameters(ibnd)%dtheta   ! sum energy
+          stdeta = stdeta/nInBoundaryFile       ! mean energy
+    
+          stdzeta = (wp%Hm0interp(iy)/sqrt(2.d0))**2 * (waveBoundaryParameters(ibnd)%rho*par_g/8d0)
+    
+          E_tdir(iy,:,:) = E_tdir(iy,:,:)*stdzeta/stdeta
+       enddo
+    endif
+    !
+    if (waveBoundaryParameters(ibnd)%wbcEvarreduce<1.d0-1d-10) then
+       do itheta=1,ntheta
+          do iy=1,npb
+             emean = sum(E_tdir(iy,:,itheta))/wp%tslen
+             E_tdir(iy,:,itheta) = waveBoundaryParameters(ibnd)%wbcEvarreduce*(E_tdir(iy,:,itheta)-emean) + emean
+          enddo
+       enddo
+    endif
 
     ! Print directional energy distribution to screen
     etot = sum(E_tdir)
@@ -2693,8 +2602,11 @@ contains
     ! allocate memory for time series of data
     allocate(wp%zsits(npb,wp%tslen))
     allocate(wp%uits(npb,wp%tslen))
+    allocate(wp%vits(npb,wp%tslen))
     wp%zsits=0.d0
     wp%uits=0.d0
+    wp%vits=0.d0
+    !
     ! distance of each grid point to reference point
     do j=1,npb
        distx(j) = waveBoundaryParameters(ibnd)%xb(j)-waveBoundaryParameters(ibnd)%x0
@@ -2785,8 +2697,10 @@ contains
     integer                                      :: j,m,iq,irec,it  ! counters
     integer                                      :: K               ! copy of K
     integer                                      :: halflen,reclen,fid,status
+    integer                                      :: nInBoundaryFile
     logical                                      :: firsttime    ! used for output message only
     real*8                                       :: deltaf       ! difference frequency
+    real*8                                       :: qmean
     real*8,dimension(:), allocatable             :: term1,term2,term2new,dif,chk1,chk2, qinterp
     real*8,dimension(npb)                        :: distx,disty
     real*8,dimension(:,:),allocatable            :: Eforc,D,deltheta,KKx,KKy,dphi3,k3,cg3,theta3,Abnd, D_sign
@@ -2822,7 +2736,7 @@ contains
     ! Allocate variables for amplitude and Fourier coefficients of bound long wave
     allocate(Gn(wp%tslen))
     allocate(Abnd(K-1,K))
-    allocate(Ftemp(K-1,K,3)) ! Jaap qx, qy, zeta
+    allocate(Ftemp(K-1,K,4)) ! Jaap qx, qy, qtot, zeta
     ! Storage for output discharge
     allocate(q(npb,wp%tslen,4))   ! qx qy qtot, zeta
     allocate(qinterp(wp%tslen))
@@ -2881,29 +2795,7 @@ contains
        !                             explode when offshore boundary is too close to shore,
        !                             by limiting the interaction group velocity
        cg3(m,1:K-m) = min(cg3(m,1:K-m),waveBoundaryParameters(ibnd)%nmax*sqrt(par_g/k3(m,1:K-m)*tanh(k3(m,1:K-m)*hb0)))
-
-       ! Determine difference-interaction coefficient according to Herbers 1994
-       ! eq. A5
-       !term1 = (-wp%wgen(1:K-m))*wp%wgen(m+1:K)
-       !term2 = (-wp%wgen(1:K-m))+wp%wgen(m+1:K)
-       !term2new = cg3(m,1:K-m)*k3(m,1:K-m)
-       !dif = (abs(term2-term2new))
-       !if (any(dif>0.01*term2) .and. firsttime) then
-       !   firsttime = .false.
-       !endif
-       !chk1  = cosh(wp%kgen(1:K-m)*hb0)
-       !chk2  = cosh(wp%kgen(m+1:K)*hb0)
-       !
-       !D(m,1:K-m) = -par_g*wp%kgen(1:K-m)*wp%kgen(m+1:K)*dcos(deltheta(m,1:K-m))/2.d0/term1+par_g*term2*(chk1*chk2)/ &
-       !     ((par_g*k3(m,1:K-m)*tanh(k3(m,1:K-m)*hb0)-(term2new)**2)*term1*cosh(k3(m,1:K-m)*hb0))* &
-       !     (term2*((term1)**2/par_g/par_g - wp%kgen(1:K-m)*wp%kgen(m+1:K)*dcos(deltheta(m,1:K-m))) &
-       !     - 0.50d0*((-wp%wgen(1:K-m))*wp%kgen(m+1:K)**2/(chk2**2)+wp%wgen(m+1:K)*wp%kgen(1:K-m)**2/(chk1**2)))
-       !
-       !! Correct for surface elevation input and output instead of bottom pressure
-       !! so it is consistent with Van Dongeren et al 2003 eq. 18
-       !D(m,1:K-m) = D(m,1:K-m)*cosh(k3(m,1:K-m)*hb0)/(cosh(wp%kgen(1:K-m)*hb0)*cosh(wp%kgen(m+1:K)*hb0))
-       
-       
+            
        ! Determine difference-interaction coefficient according to Okihiro et al eq. 4a
        ! Instead of Herbers 1994 this coefficient is derived for the surface elavtion in stead of the bottom pressure. 
        term1 = (-wp%wgen(1:K-m))*wp%wgen(m+1:K)
@@ -2968,6 +2860,7 @@ contains
     enddo
     !
     ! Run a loop over the offshore boundary
+    call progress_indicator(.true.,0.d0,5.d0,2.d0)
     do j=1,npb
        ! Determine energy of bound long wave according to Herbers 1994 eq. 1 based
        ! on difference-interaction coefficient and energy density spectra of
@@ -2980,7 +2873,7 @@ contains
        enddo
        !
        ! Calculate bound wave amplitude for this offshore grid point
-       !Abnd = sqrt(2*Eforc*wp%dfgen)
+       ! Abnd = sqrt(2*Eforc*wp%dfgen)
        
        ! Menno: add the sign of the interaction coefficient in the amplitude. Large dtheta can result in a positive D. 
        ! The phase of the bound wave is now only determined by phi1+phi2
@@ -2989,20 +2882,18 @@ contains
        ! Menno: put the sign of D in front of D_sign
        D_sign = sign(D_sign,D)
        ! Multiply amplitude with the sign of D
-       Abnd = sqrt(2*Eforc*wp%dfgen) * D_sign
+       Abnd = sqrt(2d0*Eforc*wp%dfgen) * D_sign
        deallocate(D_sign)
-       !\DEBUG
-       
        !
        ! Determine complex description of bound long wave per interaction pair of
        ! primary waves for first y-coordinate along seaside boundary
-       Ftemp(:,:,1) = Abnd/2*exp(-1*par_compi*dphi3)*cg3*dcos(theta3) ! qx
-       Ftemp(:,:,2) = Abnd/2*exp(-1*par_compi*dphi3)*cg3*dsin(theta3) ! qy
-       !Ftemp(:,:,3) = Abnd/2*exp(-1*par_compi*dphi3)*cg3              ! qtot
-       Ftemp(:,:,3) = Abnd/2*exp(-1*par_compi*dphi3)                  ! eta
+       Ftemp(:,:,1) = Abnd/2d0*exp(-1*par_compi*dphi3)*cg3*dcos(theta3) ! qx
+       Ftemp(:,:,2) = Abnd/2d0*exp(-1*par_compi*dphi3)*cg3*dsin(theta3) ! qy
+       Ftemp(:,:,3) = Abnd/2d0*exp(-1*par_compi*dphi3)*cg3              ! qtot
+       Ftemp(:,:,4) = Abnd/2d0*exp(-1*par_compi*dphi3)                  ! eta
        !
        ! loop over qx,qy and qtot
-       do iq=1,3
+       do iq=1,4
           ! Unroll wave component to correct place along the offshore boundary
           Ftemp(:,:,iq) = Ftemp(:,:,iq)* &
                exp(-1*par_compi*(KKy*disty(j)+KKx*distx(j)))
@@ -3013,9 +2904,8 @@ contains
           Gn(halflen+2:wp%tslen) = Comptemp
           !
           ! Print status message to screen
-         
           if (iq==3) then
-             call writelog('ls','(A,I0,A,I0)','Flux ',j,' of ',npb)
+             call progress_indicator(.false.,dble(j)/(npb)*100,5.d0,2.d0)
           endif
           
           !
@@ -3029,17 +2919,37 @@ contains
           Comptemp2=Comptemp2/sqrt(dble(wp%tslen))
           q(j,:,iq)=dreal(Comptemp2*wp%tslen)*wp%taperf
        enddo ! iq=1,3
-    enddo ! j=1,s%ny+1
+    enddo ! j=1,npb
     !
     ! free memory
     deallocate(Comptemp,Comptemp2,Ftemp)
+    !
+    if ( waveBoundaryParameters(ibnd)%wbcRemoveStokes==1) then
+       nInBoundaryFile = nint(wp%rtbc/wp%dtin) ! number of total time series in bcf (independent of dtin / dtbc differences)
+       do iq=1,4
+          do j=1,npb
+             qmean = sum(q(j,1:nInBoundaryFile,iq))/nInBoundaryFile
+             q(j,:,iq) = q(j,:,iq)-qmean
+          enddo
+       enddo
+    endif
+    !
+    if (waveBoundaryParameters(ibnd)%wbcQvarreduce<1.d0-1d-10) then
+       do iq=1,4
+          do j=1,npb
+             qmean = sum(q(j,:,iq))/wp%tslen
+             q(j,:,iq) = waveBoundaryParameters(ibnd)%wbcQvarreduce*(q(j,:,iq)-qmean) + qmean
+          enddo
+       enddo
+    endif
     !
     if (.not. waveBoundaryParameters(ibnd)%nonhspectrum) then
        ! If doing combined wave action balance and swell wave flux with swkhmin>0 then we need to add short wave velocity
        ! to time series of q here:
        if (waveBoundaryParameters(ibnd)%swkhmin>0.d0) then
           do j=1,npb
-             q(j,:,1) = q(j,:,1) + wp%uits(j,:)*wp%h0 ! u flux
+             q(j,:,1) = q(j,:,1) + wp%uits(j,:)*hb0   ! x, y flux
+             q(j,:,2) = q(j,:,2) + wp%vits(j,:)*hb0   
              q(j,:,4) = q(j,:,4) + wp%zsits(j,:)      ! eta
           enddo
        endif
@@ -3074,8 +2984,9 @@ contains
        do j=1,npb
           ! add to velocity time series
           wp%uits(j,:)=wp%uits(j,:)+q(j,:,1)/hb0
+          wp%vits(j,:)=wp%vits(j,:)+q(j,:,2)/hb0
           ! add to surface elevation time series
-          wp%zsits(j,:)=wp%zsits(j,:)+q(j,:,3)
+          wp%zsits(j,:)=wp%zsits(j,:)+q(j,:,4)
        enddo
     endif !      nonhspectrum==1
 
@@ -3120,6 +3031,38 @@ contains
     
   end subroutine generate_nhtimeseries_file
   
-  
+  subroutine set_stationary_spectrum (ibnd,wp,combspec)
+     use m_sferic
+     use m_physcoef
+     use interp
+     
+     implicit none
+     
+     integer, intent(in)                         :: ibnd
+     type(spectrum), intent(in)                  :: combspec
+     type(waveparamsnew),intent(in)              :: wp
+                                                 
+     double precision                            :: xcycle
+     double precision, dimension(:), allocatable :: angcart,Sdcart,eet
+     integer                                     :: j
+     integer                                     :: reclen,fid
+     
+     allocate(angcart(combspec%nang))
+     allocate(Sdcart(combspec%nang))
+     allocate(eet(ntheta_s)); eet=0d0
+     
+     xcycle=2d0*pi
+     ! combspec%ang contains nautical directions from 0 to 2 pi; convert to cartesian from -3/2pi to 1/2 pi
+     ! in reverse order
+     
+     ! Dit verwacht een 1:ntheta ding voor ee_s
+     call interp_using_trapez_rule(combspec%ang,combspec%Sd,combspec%nang,xcycle,waveBoundaryParameters(ibnd)%theta_s,eet,waveBoundaryParameters(ibnd)%ntheta_s)
+     do j=1, npb
+        waveSpectrumAdministration(ibnd)%ee_s(:,j)=eet    ! need mapping to correct waveboundary ghostcells here
+     end do
+     
+     waveSpectrumAdministration(ibnd)%ee_s(:,1:npb)=waveSpectrumAdministration(ibnd)%ee_s(:,1:npb)*rhomean*ag
+
+   end subroutine set_stationary_spectrum
 
 end module

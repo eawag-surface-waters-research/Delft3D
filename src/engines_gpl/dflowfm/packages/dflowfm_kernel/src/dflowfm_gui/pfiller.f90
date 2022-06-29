@@ -58,8 +58,8 @@
           xr(i) = xx ; yr(i) = yy
        enddo
     else
-       xr(1:N) = x(1:N)
-       yr(1:N) = y(1:N)
+    xr(1:N) = x(1:N)
+    yr(1:N) = y(1:N)
     endif
 
     CALL PFILLERCORE(xr,yr,N)

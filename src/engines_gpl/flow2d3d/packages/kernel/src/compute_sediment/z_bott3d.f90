@@ -82,7 +82,7 @@ subroutine z_bott3d(nmmax     ,kmax      ,lsed      ,lsedtot   , &
     real(fp)                             , pointer :: morfac
     real(fp)                             , pointer :: sus
     real(fp)                             , pointer :: bed
-    real(fp)                             , pointer :: thetsd
+    real(fp)              , dimension(:) , pointer :: thetsd
     real(fp)                             , pointer :: sedthr
     real(fp)                             , pointer :: hmaxth
     integer                              , pointer :: mergehandle
@@ -103,6 +103,7 @@ subroutine z_bott3d(nmmax     ,kmax      ,lsed      ,lsedtot   , &
     logical                              , pointer :: sedim
     logical                              , pointer :: scour
     logical                              , pointer :: snelli
+    logical                              , pointer :: l_suscor
     real(fp), dimension(:)               , pointer :: factor
     real(fp)                             , pointer :: slope
     real(fp), dimension(:)               , pointer :: bc_mor_array
@@ -285,6 +286,7 @@ subroutine z_bott3d(nmmax     ,kmax      ,lsed      ,lsedtot   , &
     bedupd              => gdp%gdmorpar%bedupd
     cmpupd              => gdp%gdmorpar%cmpupd
     neglectentrainment  => gdp%gdmorpar%neglectentrainment
+    l_suscor            => gdp%gdmorpar%l_suscor    
     multi               => gdp%gdmorpar%multi
     wind                => gdp%gdprocs%wind
     temp                => gdp%gdprocs%temp
@@ -357,7 +359,7 @@ subroutine z_bott3d(nmmax     ,kmax      ,lsed      ,lsedtot   , &
     !
     ! calculate corrections
     !
-    if (sus /= 0.0_fp) then
+    if (sus /= 0.0_fp .and. l_suscor) then
        !
        ! suspension transport correction vector only for 3D
        !
@@ -925,10 +927,10 @@ subroutine z_bott3d(nmmax     ,kmax      ,lsed      ,lsedtot   , &
                 !
                 if (hmaxth > sedthr) then
                    h1   = real(dps(nm),fp) + s1(nm)
-                   thet = (h1 - sedthr)/(hmaxth - sedthr)*thetsd
-                   thet = min(thet, thetsd)
+                   thet = (h1 - sedthr)/(hmaxth - sedthr)*thetsd(nm)
+                   thet = min(thet, thetsd(nm))
                 else
-                   thet = thetsd
+                   thet = thetsd(nm)
                 endif
                 !
                 ! Combine some constant factors in variable THET

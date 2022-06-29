@@ -49,13 +49,13 @@
    use precision
    use bedcomposition_module
    use sediment_basics_module
-   use m_flow     , only: vol0, vol1, s0, s1, hs, u1, kmx, hu, au, zws, sa1, tem1
-   use m_flowgeom , only: bai, ndxi, nd, wu, bl, ba, ln, dx, ndx, lnx, lnxi, acl, wcx1, wcy1, wcx2, wcy2, xz, yz, wu_mor, ba_mor, bai_mor, bl_ave, ndx2d
-   use m_flowexternalforcings, only: nbndz, nbndu, nopenbndsect
-   use m_flowparameters, only: epshs, epshu, jawave, eps10, jasal, jatem, flowWithoutWaves, jawaveswartdelwaq
-   use m_sediment,  only: stmpar, sedtra, mtd, sedtot2sedsus, m_sediment_sed=>sed, avalflux, botcrit, kcsmor, jamormergedtuser, mergebodsed
-   use m_flowtimes, only: dts, tstart_user, time1, dnt, julrefdat, tfac, ti_sed, ti_seds, time_user, dt_user
-   use m_transport, only: fluxhortot, ised1, isedn, constituents, sinksetot, sinkftot, itra1, itran, numconst, isalt, itemp
+   use m_flow     , only: vol1, s0, s1, hs, u1, kmx, hu
+   use m_flowgeom , only: ndxi, nd, wu, bl, ba, ln, ndx, lnx, lnxi, acl, xz, yz, wu_mor, bai_mor, bl_ave
+   use m_flowexternalforcings, only: nopenbndsect
+   use m_flowparameters, only: epshs, epshu, eps10, jasal, flowWithoutWaves, jawaveswartdelwaq
+   use m_sediment,  only: stmpar, sedtra, mtd, m_sediment_sed=>sed, avalflux, botcrit, kcsmor, jamormergedtuser, mergebodsed
+   use m_flowtimes, only: dts, tstart_user, time1, dnt, julrefdat, tfac, ti_sed, ti_seds, time_user
+   use m_transport, only: fluxhortot, ised1, constituents, sinksetot, sinkftot, itra1, itran, numconst, isalt
    use unstruc_files, only: mdia, close_all_files
    use m_fm_erosed
    use Messagehandling
@@ -86,10 +86,10 @@
    !!
    logical                                     :: bedload, error, jamerge
    integer                                     :: ierror
-   integer                                     :: l, nm, ii, ll, Lx, LLL, Lf, lstart, j, bedchangemesscount, k, k1, k2, knb, nb, kb, ki, mout, kk, ised, itrac
-   integer                                     :: Lb, Lt, ka, kf1, kf2, kt, nto, n1, n2, iL, ac1, ac2
-   double precision                            :: dsdnm, eroflx, sedflx, thick0, thick1, trndiv, flux, sumflux, dtmor, hsk, ddp
-   double precision                            :: dhmax, h1, totdbodsd, totfixfrac, bamin, thet, dv, zktop, cflux, bedflxtot
+   integer                                     :: l, nm, ii, ll, Lx, Lf, lstart, j, bedchangemesscount, k, k1, k2, knb, kb, kk, itrac
+   integer                                     :: Lb, Lt, ka, kf1, kf2, kt, nto, iL, ac1, ac2
+   double precision                            :: dsdnm, eroflx, sedflx, thick1, trndiv, flux, sumflux, dtmor, hsk, ddp
+   double precision                            :: dhmax, h1, totdbodsd, totfixfrac, bamin, thet, dv, zktop, cflux
 
    integer,          parameter                 :: bedchangemessmax = 50
    double precision, parameter                 :: dtol = 1d-16
@@ -97,17 +97,14 @@
    double precision                            :: tausum2(1)
    double precision                            :: sbsum, taucurc, czc
    double precision, dimension(lsedtot)        :: bc_sed_distribution
-   double precision, dimension(:), allocatable :: bl0
    double precision, dimension(:), allocatable :: bl_ave0
 
    integer                                     :: icond
    integer                                     :: jb
    integer                                     :: ib
-   integer                                     :: kvalue
    integer                                     :: li
    integer                                     :: lsedbed
    integer                                     :: nxmx
-   integer                                     :: nmk
    integer                                     :: lm
    integer                                     :: jawaveswartdelwaq_local
    double precision                            :: aksu
@@ -121,13 +118,11 @@
    double precision                            :: alfa_mag
    double precision                            :: dz
    double precision                            :: dzup
-   double precision                            :: htdif
    double precision                            :: rate
    double precision                            :: r1avg
    double precision                            :: z
    double precision                            :: timhr
-   double precision                            :: smax
-    real(hp) :: dim_real
+   real(hp)                                    :: dim_real
    !!
    !!! executable statements -------------------------------------------------------
    !!
@@ -173,7 +168,7 @@
    !
    ! calculate corrections
    !
-   if (sus /= 0d0) then
+   if (sus /= 0d0 .and. l_suscor) then
       !
       ! suspension transport correction vector only for 3D
       !
@@ -184,7 +179,7 @@
          endif
          !
          do l = 1, lsed
-            ll = ised1-1 + l
+            ll = ISED1-1 + l
             if (sedtyp(l) == SEDTYP_NONCOHESIVE_SUSPENDED) then
                !
                ! Determine aks
@@ -218,40 +213,43 @@
                         aksu = ac1*aks(k1, l) + ac2*aks(k2, l)
                      end if
                      !
-                     ! work up through layers integrating transport
+                     ! work up through layers integrating transport flux
                      ! below aksu, according to Bert's new implementation
                      !
                      zktop = 0d0
                      ka = 0
-                     do Lf = Lb, Lt
-                        zktop = hu(Lf)
-                        if (Lf==Lt) then
-                           dz = hu(Lx)
+                     if (kmx==1) then
+                        if (aksu>hu(Lx)) then
+                           ka = 0
                         else
+                           ka = Lt
+                        endif   
+                     else   
+                        do Lf = Lb, Lt
+                           zktop = hu(Lf)
                            dz = hu(Lf)-hu(Lf-1)
-                        end if
-                        !
-                        ! if layer containing aksu
-                        !
-                        if (aksu <= zktop) then
-                           ka = Lf
-                           if (Lf/=Lt) then
-                              dzup = hu(Lf+1)-hu(Lf)
+                           !
+                           ! if layer contains aksu
+                           !
+                           if (aksu <= zktop) then
+                              ka = Lf
+                              if (Lf/=Lt) then
+                                 dzup = hu(Lf+1)-hu(Lf)
+                              endif
+                              ! the contribution of this layer is computed below
+                              exit
+                           else
+                              cumflux = cumflux + fluxhortot(ll,Lf)
                            endif
-                           ! the contribution of this layer is computed below
-                           exit
-                        else
-                           cumflux = cumflux + fluxhortot(ll,Lf)
-                        endif
-                     enddo
+                        enddo
+                     endif   
                      !
-                     k = ka
-                     if (k==0) then
+                     if (ka==0) then
                         ! aksu larger than water depth, so all done
-                     elseif (k==Lt) then
+                     elseif (ka==Lt) then
                         ! aksu is located in top layer; use simple flux
                         ! approximation assuming uniform flux
-                        cumflux = cumflux + fluxhortot(ll,k)*(aksu - zktop + dz)/dz
+                        cumflux = cumflux + fluxhortot(ll,ka)*(aksu - hu(Lt-1))/dz    ! kg/s
                      else
                         ! aksu is located in a layer below the top layer
                         !
@@ -265,7 +263,7 @@
                         !
                         ! Get concentration in layer above this layer
                         !
-                        kf1 = ln(1,k+1); kf2 = ln(2,k+1)
+                        kf1 = ln(1,ka+1); kf2 = ln(2,ka+1)
                         r1avg = ac1*constituents(ll,kf1) + ac2*constituents(ll,kf2)
                         !
                         ! If there is a significant concentration gradient, and significant
@@ -290,38 +288,36 @@
                            !
                            z = zktop + dzup/2.0_fp
                            apower = log(max(r1avg/ceavg,1d-5)) / log(z/aksu)
-                           if (apower>-1.05d0 .and. apower<=-1.0d0) then
+                           if (apower>-1.05d0 .and. apower<=-1.0d0) then           ! you have decide on the eq to -1.0
                               apower = -1.05d0
-                           elseif (apower>=-1.0d0 .and. apower<-0.95d0) then
+                           elseif (apower>-1.0d0 .and. apower<-0.95d0) then
                               apower = -0.95d0
-                           else
                            endif
                            apower  = min(max(-10.0d0 , apower), 10.0d0)
                            !
                            ! Compute the average concentration cavg between the reference
                            ! height a and the top of the current layer (bottom of layer above) z.
-                           !         /zktop                           zktop                       zktop
-                           ! cavg = | c(z) dz = c_a/(-R+1)*(z/a)^(-R+1)*a | = c_a/(-R+1)*a^R*z^(-R+1) |
-                           !       /a                                     a                           a
+                           !           /zktop                           zktop                       zktop
+                           ! cavg*dz = | c(z) dz = c_a/(-R+1)*(z/a)^(-R+1)*a | = c_a/(-R+1)*a^R*z^(-R+1) |
+                           !          /a                                     a                           a
                            !
-                           dz     = max(zktop - aksu,eps10)                ! not guaranteed to be >0
-                           cavg1   = (ceavg/(apower+1.0d0)) * aksu**(-apower)
-                           cavg2   = zktop**(apower+1.0d0) - aksu**(apower+1.0d0)
-                           cavg    = cavg1 * cavg2 / dz
+                           cavg1  = (ceavg/(apower+1.0d0)) * (1d0/aksu)**apower
+                           cavg2  = zktop**(apower+1.0d0) - aksu**(apower+1.0d0)
+                           cavg   = cavg1 * cavg2                 ! kg/m3/m
                            !
                            ! The corresponding effective suspended load flux is
                            !
-                           cflux   = u1(k)*cavg*dz*wu(Lx)
+                           cflux   = u1(ka)*cavg*wu(Lx)           ! kg/s
                            !
                            ! Increment the correction by the part of the suspended load flux
                            ! that is in excess of the flux computed above, but never opposite.
                            !
-                           if (fluxhortot(ll, k)>0.0d0 .and. cflux>0.0d0) then
-                              cumflux = cumflux + max(0.0d0, fluxhortot(ll, k)-cflux)
-                           elseif (fluxhortot(ll, k)<0.0d0 .and. cflux<0.0_fp) then
-                              cumflux = cumflux + min(fluxhortot(ll, k)-cflux, 0.0d0)
-                           else
-                              cumflux = cumflux + fluxhortot(ll,k)
+                           if (fluxhortot(ll, ka)>0.0d0 .and. cflux>0.0d0) then
+                              cumflux = cumflux + max(0.0d0, fluxhortot(ll, ka)-cflux)
+                           elseif (fluxhortot(ll, ka)<0.0d0 .and. cflux<0.0_fp) then
+                              cumflux = cumflux + min(fluxhortot(ll, ka)-cflux, 0.0d0)
+                           !else
+                           !   cumflux = cumflux + fluxhortot(ll,ka)    ! don't correct in aksu layer
                            endif
                         endif
                      endif
@@ -333,9 +329,9 @@
                      ! also be reduced.
                      !
                      if (e_scrn(Lx,l) > 0.0d0 .and. Lx<=lnxi) then
-                        e_scrn(Lx,l) = e_scrn(Lx,l)*fixfac(k1, l)      ! to check
+                        e_scrn(Lx,l) = e_scrn(Lx,l)*fixfac(k1, l)      ! outgoing (cumflux<0)
                      else
-                        e_scrn(Lx,l) = e_scrn(Lx,l)*fixfac(k2, l)      ! binnenpunt
+                        e_scrn(Lx,l) = e_scrn(Lx,l)*fixfac(k2, l)      ! take inner point fixfac on bnd
                      endif
                   else
                      e_scrn(Lx,l) = 0.0d0
@@ -356,10 +352,11 @@
       j = lstart + ll   ! constituent index
       do L=1,lnx
          e_ssn(L, ll) = 0d0
+         if (wu_mor(L)==0d0) cycle
          call getLbotLtop(L,Lb,Lt)
          if (Lt<Lb) cycle
          do iL = Lb,Lt
-            e_ssn(L, ll)  = e_ssn(L, ll) + fluxhortot(j,iL)/max(wu(L), epshu)             ! timestep transports per layer [kg/s/m]
+            e_ssn(L, ll)  = e_ssn(L, ll) + fluxhortot(j,iL)/max(wu_mor(L), epshu)             ! timestep transports per layer [kg/s/m]
          enddo
          e_ssn(L, ll)  = e_ssn(L, ll) + e_scrn(L, ll)  ! bottom layer correction
       enddo
@@ -378,6 +375,7 @@
    if (time1 >= tstart_user + tcmp * tfac) then   ! tmor/tcmp in tunit since start of computations, time1 in seconds since reference date
       !
       ! Bed boundary conditions: transport condition
+      ! JRE+BJ To check: bedload condition now based in taucur only distribution, waves necessary? Probably not considering use cases...
       !
       do jb = 1, nto                                ! no of open bnd sections
          icond = morbnd(jb)%icond
@@ -646,13 +644,12 @@
                ! Only write bed change warning when bed updating is true
                ! (otherwise no problem)
                ! Limit the number of messages with bedchangemessmax
-               ! (otherwise tri-diag will grow very fast)
                !
                bedchangemesscount = bedchangemesscount + 1
                if (bedchangemesscount <= bedchangemessmax) then
-                  write (mdia, '(a,f5.1,a,i0,a,i0,a)') &
+                  write (mdia, '(a,f5.1,a,i0,a,i0,a,f10.0,a,f10.0)') &
                      & '*** WARNING Bed change exceeds ' , dhmax*100.0d0, ' % of waterdepth after ', int(dnt),  &
-                     & ' timesteps, flow node = (', nm,')'
+                     & ' timesteps, flow node = (', nm,') at x=', xz(nm),', y=', yz(nm)
                endif
             endif
             !
@@ -728,10 +725,10 @@
                ! Compute local re-distribution factor THET
                !
                if (hmaxth > sedthr) then
-                  thet = (hs(nm) - sedthr)/(hmaxth - sedthr)*thetsd
-                  thet = min(thet, thetsd)
+                  thet = (hs(nm) - sedthr)/(hmaxth - sedthr)*thetsd(nm)
+                  thet = min(thet, thetsd(nm))
                else
-                  thet = thetsd
+                  thet = thetsd(nm)
                end if
                !
                ! Combine some constant factors in variable THET
@@ -1018,20 +1015,11 @@
       !
       call fm_update_crosssections(blchg) ! blchg gets updated for 1d cross-sectional profiles in this routine
       !
-      !if (jampi==1) then    ! restrict ifs in do loops
-      !   do nm = 1, Ndx
-      !      !
-      !      if (.not. (idomain(nm)==my_rank)) cycle
-      !      bl(nm) = bl(nm) + blchg(nm)
-      !      !
-      !   enddo
-      !else
-         do nm = 1, Ndx
-            !
-            bl(nm) = bl(nm) + blchg(nm)
-            !
-         enddo
-      !endif
+      do nm = 1, Ndx
+         !
+         bl(nm) = bl(nm) + blchg(nm)
+         !
+      enddo
       !
       ! AvD: Sander suggestie: call update_geom(2)
       !if (jampi>0) then
@@ -1056,7 +1044,11 @@
       if (kmx==0) then
          do k = 1, ndx
             hsk = hs(k)
+            ! After review, botcrit as a parameter is a really bad idea, as it causes concentration explosions if chosen poorly or blchg is high.
+            ! Instead, allow bottom level changes up until 5% of the waterdepth to influence concentrations
+            ! This is in line with the bed change messages above. Above that threshold, change the concentrations as if blchg==0.95hs 
             if (hsk<epshs) cycle
+            botcrit=0.95*hsk
             ddp = hsk/max(hsk-blchg(k),botcrit)
             do ll = 1, stmpar%lsedsus
                m_sediment_sed(ll,k) = m_sediment_sed(ll,k) * ddp
@@ -1065,10 +1057,6 @@
             if (jasal>0) then
                constituents(isalt,k) =  constituents(isalt,k) * ddp
             endif
-            !
-            !if (jatem>0) then
-            !   tem1(k) =  tem1(k)* ddp
-            !end if
             !
             if (ITRA1>0) then
                do itrac=ITRA1,ITRAN
@@ -1081,6 +1069,7 @@
             do k=1,ndx
                hsk = hs(k)
                if (hsk<epshs) cycle
+               botcrit=0.95*hsk
                ddp = hsk/max(hsk-blchg(k),botcrit)
                call getkbotktop(k,kb,kt)
                do kk=kb,kt
@@ -1091,31 +1080,25 @@
          !
          if (jasal>0) then
             do k=1,ndx
-               if (hs(k)<epshs) cycle
+               hsk=hs(k)
+               if (hsk<epshs) cycle
+               botcrit=0.95*hsk
                call getkbotktop(k,kb,kt)
                do kk=kb,kt
-                  constituents(isalt,kk) = constituents(isalt,kk) * hs(k) / max(hs(k) - blchg(k), botcrit)
+                  constituents(isalt,kk) = constituents(isalt,kk) * hsk / max(hsk - blchg(k), botcrit)
                enddo
             enddo
          endif
          !
-         !if (jatem>0) then
-         !   do k=1,ndx
-         !      if (hs(k)<epshs) cycle
-         !      call getkbotktop(k,kb,kt)
-         !      do kk=kb,kt
-         !         tem1(kk) = tem1(kk) * hs(k) / max(hs(k) - blchg(k), botcrit)
-         !      enddo
-         !   enddo
-         !endif
-         !
          if (ITRA1>0) then
             do itrac=ITRA1,ITRAN
                do k=1,ndx
-                  if (hs(k)<epshs) cycle
+                  hsk=hs(k)
+                  if (hsk<epshs) cycle
+                  botcrit=0.95*hsk
                   call getkbotktop(k,kb,kt)
                   do kk=kb,kt
-                     constituents(itrac,kk) = constituents(itrac,kk)*hs(k) / max(hs(k) - blchg(k), botcrit)
+                     constituents(itrac,kk) = constituents(itrac,kk)*hsk / max(hsk - blchg(k), botcrit)
                   enddo
                enddo
             enddo

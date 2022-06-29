@@ -43,11 +43,11 @@
       character*7      xyform, zform, disform
       CHARACTER POSITI*25
 
-      POSITI =    'X,Y:          ,          '
+      POSITI = 'X,Y:         ,         '
       IF (JVIEW .EQ. 2) THEN
-         POSITI = 'Z,Y:          ,          '
+         POSITI = 'Z,Y:         ,         '
       ELSE IF (JVIEW .EQ. 3) THEN
-         POSITI = 'X-Z:          ,          '
+         POSITI = 'X-Z:         ,         '
       ENDIF
 
       if (jsferic == 1) then ! nou ja, laat maar even staan

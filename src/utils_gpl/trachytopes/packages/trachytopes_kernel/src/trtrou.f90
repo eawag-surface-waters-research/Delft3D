@@ -127,7 +127,7 @@ subroutine trtrou(lundia    ,kmax      ,nmmax   , &
     real(fp), dimension(nmlb:nmub, 3)                                                :: cfrou
 !    real(fp), dimension(nmlb:nmub)              :: uvdir    (not used) 
 !    real(fp), dimension(nmlb:nmub), intent(in)  :: uvperp   (not used) 
-    real(fp), dimension(nmlbc:nmubc)                                                 :: umod  !,kmax) ?? WO
+    real(fp), dimension(nmlbc:nmubc)                                                 :: umod
     character(4)                                                                     :: rouflo
     logical                                                                          :: waqol
     real(fp)                                                            , intent(in) :: eps
@@ -495,16 +495,15 @@ subroutine trtrou(lundia    ,kmax      ,nmmax   , &
           !
           ! Depth-average velocity (similar as in TAUBOT)
           !
-!          uuu  = uvdir(nc, mc, kmax)
-          umag = rttacLin(nm)*umod(nm1) + (1d0-rttacLin(nm))*umod(nm2) !sqrt(uuu**2 + vvv**2)
-          if (kmax==1) then
+          umag = rttacLin(nm)*umod(nm1) + (1d0-rttacLin(nm))*umod(nm2)
+          if (kmax==0) then
              u2dh = umag
           else
              z0rouL = rttacLin(nm)*z0rou(nm1)  + (1d0-rttacLin(nm))*z0rou(nm2)
              u2dh = (umag/depth*((depth + z0rouL)         &
-                  &              *log(1.0_fp + depth/max(z0rouL,1.0e-20_fp)) &
+                  &              *log(1.0_fp + depth/max(z0rouL,1.0e-5_fp)) &
                   &              - depth)                         ) &
-                  & /log(1.0_fp + (1.0_fp + sig(kmax))*depth/max(z0rouL,1.0e-20_fp))
+                  & /log(1.0_fp + (1.0_fp + sig(kmax))*depth/max(z0rouL,1.0e-5_fp))
           endif
        endif
        !

@@ -50,11 +50,12 @@ subroutine tauwavefetch(tim)               ! fetchlength and fetchdepth based si
  double precision :: tim
 
  double precision :: U10, fetchL, fetchd, hsig, tsig, tlim, rl, rl0, sqrt2, rk, ust, xkk1, ykk1, xkk2, ykk2
- double precision :: dir, uwin, vwin, prin, cs, sn, fetc, fetd, xn, yn, sumw, www , dsk2
+ double precision :: dir, uwin, vwin, prin, cs, sn, fetc, fetd, xn, yn, sumw, www , dsk2, dum
  double precision :: SL,SM,XCR,YCR,CRP, alfa1, alfa2, wdep,  xzk, yzk, dist, distmin, celsiz
  double precision :: sind, cosd, ustx1, ustx2, usty1, usty2
- integer          :: k, L, kk, kkk, k1, k2, kup, n, ndone, ierr, nup, nupf, jacros, nw1, nw2, nodenum, LL, knw = 5
+ integer          :: k, L, kk, kkk, k1, k2, kup, n, ndone, ierr, nup, nupf, jacros, nw1, nw2, nodenum, LL, knw = 5, kb
  INTEGER          :: NDIR, NWND, NSTAT, MOUT, ndoneprevcycle, kkmin, ndoner, k12, ks, ke, ki, msam = 0, jaopen
+ double precision, dimension(:), allocatable :: wxc, wyc
 
  integer :: ndraw
  COMMON /DRAWTHIS/ ndraw(50)
@@ -266,7 +267,6 @@ mainloop:do n  = 1, nwf
     Twav(k)   = 0d0
     Uorb(k)   = 0d0
     rlabda(k) = 0d0
-    ustk(k)   = 0d0
 
     if ( hs(k) > 0.01d0 ) then
 
@@ -285,7 +285,7 @@ mainloop:do n  = 1, nwf
 
           Hwav(k) = Hsig / sqrt2          ! Hwav === hrms
           Twav(k) = Tsig
-          call tauwavehk(Hwav(k), Twav(k), hs(k), Uorb(k), rlabda(k), ustk(k))      ! basically now just a dispersion function with 2DH stokes drift
+          call tauwavehk(Hwav(k), Twav(k), hs(k), Uorb(k), rlabda(k), dum)      ! basically now just a dispersion function with 2DH stokes drift magnitude
        endif
     endif
 
@@ -304,25 +304,41 @@ mainloop:do n  = 1, nwf
     endif
 
  enddo
+ 
+ ! get phiwav
+ call realloc(wxc,ndx, keepExisting=.true.)
+ call realloc(wyc,ndx, keepExisting=.true.)
+ wxc = 0d0; wyc = 0d0
+ do L = 1, lnx
+    k1 = ln(1,L); k2=ln(2,L)
+    wxc(k1) = wxc(k1) + wcL(1,L)*wx(L)
+    wxc(k2) = wxc(k2) + wcL(2,L)*wx(L)
+    wyc(k1) = wyc(k1) + wcL(1,L)*wy(L)
+    wyc(k2) = wyc(k2) + wcL(2,L)*wy(L)  
+ enddo   
+ phiwav = atan2(wyc,wxc)*180d0/pi
+ 
+ ! Copy values to boundary nodes
+ do n = 1, nbndz
+    kb = kbndz(1,n)
+    ki = kbndz(2,n)
+    hwav(kb) = hwav(ki)
+    twav(kb) = twav(ki)
+    Uorb(kb) = uorb(ki)
+    rlabda(kb) = rlabda(ki)
+    phiwav(kb) = phiwav(ki)
+ enddo
+ 
+  do n = 1, nbndu
+    kb = kbndu(1,n)
+    ki = kbndu(2,n)
+    hwav(kb) = hwav(ki)
+    twav(kb) = twav(ki)
+    Uorb(kb) = uorb(ki)
+    rlabda(kb) = rlabda(ki)
+    phiwav(kb) = phiwav(ki)    
+ enddo  
+ 
 
- ! need something for 2D ustokes
- do LL = 1, lnx
-   if (hu(LL)>epswav) then
-       k1 = ln(1,LL); k2 = ln(2,LL)
-       dir   = atan2(wy(LL), wx(LL))
-       sind  = sin(dir); cosd = cos(dir)
-       ustx1 = ustk(k1)*cosd
-       ustx2 = ustk(k2)*cosd
-       usty1 = ustk(k1)*sind
-       usty2 = ustk(k2)*sind
-       ustokes(LL) =      acL(LL) *( csu(LL)*ustx1 + snu(LL)*usty1) + &
-                     (1d0-acL(LL))*( csu(LL)*ustx2 + snu(LL)*usty2)
-       vstokes(LL) =      acL(LL) *(-snu(LL)*ustx1 + csu(LL)*usty1) + &
-                     (1d0-acL(LL))*(-snu(LL)*ustx2 + csu(LL)*usty2)
-    else
-       ustokes(LL) = 0d0
-       vstokes(LL) = 0d0
-    endif
- end do
 
 end subroutine tauwavefetch

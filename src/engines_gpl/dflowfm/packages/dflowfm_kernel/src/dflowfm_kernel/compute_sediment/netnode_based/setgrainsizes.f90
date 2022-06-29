@@ -32,17 +32,13 @@
 
  subroutine setgrainsizes() ! for all fractions:
  USE M_SEDIMENT
- use m_physcoef,       only : ag, rhomean, vonkar, backgroundwatertemperature
+ use m_physcoef,       only : ag, rhomean, vonkar, backgroundwatertemperature, vismol
  use MessageHandling
  implicit none
  integer          :: m, j
  double precision :: Ucr, sster, c1, c2, wster, wschk, taucr, taucr1, thetcr, pclay=0d0, fcr=1d0
 
  double precision :: a = 2.414d-5, b = 247.8d0, c= 140d0, TempK, s
-
- TempK         = 273d0 + backgroundwatertemperature
- vismol        = A*10**( B / (TempK-C) ) / rhomean
- vismol        = 4.d0/(20.d0 + backgroundwatertemperature)*1d-5 ! Van rijn, 1993
 
  if (allocated (D90) ) then
      deallocate(D90, rhodelta, sqsgd50, dstar, dstar03, Accr, Awcr)

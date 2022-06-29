@@ -42,7 +42,7 @@
          call LNABSNOP(dble(XR(I)),dble(YR(I)))
       10 CONTINUE
     ELSE
-         CALL IGRPOLYLINE(XR,YR,N)
+        CALL IGRPOLYLINE(XR,YR,N)
     ENDIF
 
     END SUBROUTINE

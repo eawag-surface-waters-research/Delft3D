@@ -149,10 +149,10 @@
  double precision, allocatable     :: snu   (:)      !< sine   comp of u0, u1
  double precision, allocatable     :: wcl   (:,:)    !< link weights (2,lnx) for center scalar , 1,L for k1, 2,L for k2 Ln
  double precision, allocatable     :: wcLn  (:,:)    !< link weights (2,lnx) for corner scalar , 1,L for k3, 2,L for k4 Lncn
- double precision, allocatable     :: wcx1(:)        !< link weights (lnx) for cartesian comps center vectors k3
- double precision, allocatable     :: wcy1(:)        !< link weights (lnx) for cartesian comps center vectors k3
- double precision, allocatable     :: wcx2(:)        !< link weights (lnx) for cartesian comps center vectors k4
- double precision, allocatable     :: wcy2(:)        !< link weights (lnx) for cartesian comps center vectors k4
+ double precision, allocatable     :: wcx1(:)        !< link weights (lnx) for cartesian comps center vectors k1
+ double precision, allocatable     :: wcy1(:)        !< link weights (lnx) for cartesian comps center vectors k1
+ double precision, allocatable     :: wcx2(:)        !< link weights (lnx) for cartesian comps center vectors k2
+ double precision, allocatable     :: wcy2(:)        !< link weights (lnx) for cartesian comps center vectors k2
  double precision, allocatable     :: wcnx3(:)       !< link weights (lnx) for corner velocities k3
  double precision, allocatable     :: wcny3(:)       !< link weights (lnx) for corner velocities k3
  double precision, allocatable     :: wcnx4(:)       !< link weights (lnx) for corner velocities k4
@@ -241,8 +241,8 @@ double precision, allocatable      :: thindam(:,:)
 
 
 ! netnode/flownode  related, dim = mxban
- double precision, allocatable     :: banf  (:)     !< horizontal netnode/flownode area (m2)
- double precision, allocatable     :: ban  (:)      !< horizontal netnode          area (m2)
+ double precision, allocatable     :: banf  (:)     !< horizontal netnode-flownode area (m2) (partial netnode area)
+ double precision, allocatable     :: ban  (:)      !< horizontal netnode          area (m2) (complete netnode area)
  integer         , allocatable     :: nban  (:,:)   !< base area pointers to banf, 1,* = netnode number, 2,* = flow node number, 3,* = link number, 4,* = 2nd link number
  integer                           :: mxban         !< max dim of ban
 
@@ -256,12 +256,15 @@ double precision, allocatable      :: thindam(:,:)
  
 ! JRE Stuff related to setting up wave directional grid
  integer                                     :: ntheta          !< Number of wave direction bins
+ integer                                     :: ntheta_s        !< Number of wave direction bins, singledir
  double precision                            :: thetamax        !< upper limit wave directional sector
  double precision                            :: thetamin        !< lower limit wave directional sector
  integer                                     :: thetanaut       !< nautical convention or not
  double precision                            :: dtheta          !< directional resolution
+ double precision                            :: dtheta_s        !< directional resolution single direction stationary part
  double precision                            :: theta0          !< mean theta-grid direction
  double precision, allocatable               :: thetabin(:)     !< bin-means of theta-grid
+ double precision, allocatable               :: thetabin_s(:)   !< bin-means of theta-grid singledir
 
  ! Villemonte calibration coefficients :
  double precision                            :: VillemonteCD1 = 1.0d0      !< default for VillemonteCD1 = 1
@@ -324,6 +327,7 @@ subroutine reset_flowgeom()
 
     if (jawave .eq. 4) then  ! reinitialize wave directional grid
        ntheta = 0
+       ntheta_s = 0
     end if
 end subroutine reset_flowgeom
  end module m_flowgeom

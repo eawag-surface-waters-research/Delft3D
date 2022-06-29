@@ -61,7 +61,7 @@ double precision :: perimgr, perimgr2, alfg, czg, hpr
 
 double precision :: frcn, cz, cf, conv, af_sub(3), perim_sub(3), cz_sub(3)
 double precision :: q_sub(3)             ! discharge per segment
-integer          :: LL, ka, kb, itp, ifrctyp, ibndsect
+integer          :: LL, ka, kb, itp, itpa, ifrctyp, ibndsect
 integer          :: k1, k2
 integer          :: jacustombnd1d
 double precision :: u1L, q1L, s1L, dpt, factor, maxflowwidth
@@ -170,9 +170,9 @@ else if (abs(kcu(ll))==1 .and. network%loaded) then !flow1d used only for 1d cha
 endif
 
 
-! No flow1d cross input, OR a 1d2d link. Proceeed with conventional prof1D approach.
+! No flow1d cross input, OR a 1d2d link. Proceed with conventional prof1D approach.
 if (prof1D(1,LL) >= 0 ) then            ! direct profile based upon link value
-    ka    = 0; kb = 0                  ! do not use profiles
+    ka    = 0; kb = 0                   ! do not use profiles
     profw = prof1D(1,LL)
     profh = prof1D(2,LL)
     itp   = prof1D(3,LL)
@@ -186,6 +186,7 @@ else
     profh = profiles1D(ka)%height
     itp   = profiles1D(ka)%ityp
     alfa  = prof1d(3,LL)
+    itpa  = itp
 
     if (japerim == 1) then
        if (profiles1D(ka)%frccf .ne. dmiss .and. profiles1D(kb)%frccf .ne. dmiss .and.  &
@@ -215,10 +216,22 @@ else if (abs(itp) == 100 .or. abs(itp) == 101) then  !                          
    call yzprofile(hpr,ka,itp, area, width, japerim, frcn, ifrctyp, perim, cf )
 endif
 
+
 if (ka .ne. 0 .and. kb .ne. ka) then     ! interpolate in profiles
     profw = profiles1D(kb)%width
     profh = profiles1D(kb)%height
     itp   = profiles1D(kb)%ityp
+
+   if (abs(itpa)<100 .and. abs(itp)>99) then
+      ! doe hier backup cf
+      if (frcn > 0) then
+            hydrad  = area / perim                   ! hydraulic radius
+            call getcz(hydrad, frcn, ifrctyp, cz,L)
+            cf = ag/(hydrad*cz*cz)             ! see note on 2D conveyance in sysdoc5
+         else
+            cf = 0d0
+         endif
+   endif
 
     if (abs(itp) == 1) then                   ! pipe
        call pipe(hpr, profw, area2, width2, japerim, perim2)

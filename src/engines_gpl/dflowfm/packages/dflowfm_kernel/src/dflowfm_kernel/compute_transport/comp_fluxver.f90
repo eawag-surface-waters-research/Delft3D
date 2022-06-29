@@ -35,7 +35,7 @@ subroutine comp_fluxver(NUMCONST, limtyp, thetavert, Ndkx, kmx, zws, qw, kbot, k
    use m_flowgeom, only: Ndx, ba, kfs  ! static mesh information
    use m_flowtimes, only: dts
    use m_flowparameters, only: cflmx
-   use m_flow, only : hs, epshs, s1, epshsdif, cffacver, a1  ! do not use m_flow, please put this in the argument list
+   use m_flow, only : hs, s1, epshsdif, cffacver, a1  ! do not use m_flow, please put this in the argument list
    use m_transport, only : ISED1, ISEDN   ! preferably in argument list
    use m_sediment,  only: mtd
    use unstruc_messages
@@ -131,7 +131,6 @@ subroutine comp_fluxver(NUMCONST, limtyp, thetavert, Ndkx, kmx, zws, qw, kbot, k
                endif
             endif
 
-            cf = cffacver*dt_loc*abs(qw_loc)/(ba(kk)*dz(k-kb+2))
             if (cffacver > 0d0) then
                cf = cffacver*dt_loc*abs(qw_loc)/(ba(kk)*dz(k-kb+2)) ! courant nr
                cf = max(0d0,1d0-cf)                                 ! use high order only for small courant

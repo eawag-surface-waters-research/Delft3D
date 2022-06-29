@@ -90,7 +90,6 @@ module m_sediment
 
  integer                           :: jased         !< Include sediment, 1=Krone, 2=Soulsby van Rijn 2007, 3=Bert's morphology module
  integer                           :: jaseddenscoupling=0    !< Include sediment in rho 1 = yes , 0 = no
- double precision                  :: vismol        !< molecular viscosity (m2/s)
  integer                           :: mxgr          !< nr of grainsizes
  integer                           :: jatranspvel   !< transport velocities: 0=all lagr, 1=eul bed+lagr sus, 2=all eul; default=1
  integer, allocatable              :: sedtot2sedsus(:) !< mapping of suspended fractions to total fraction index; name is somewhat misleading, but hey, who said this stuff should make sense..
@@ -101,6 +100,7 @@ module m_sediment
  double precision                  :: dzbdtmax
  double precision                  :: botcrit       !< mass balance: minimum depth after bottom update to adapt concentrations
  integer                           :: jamormergedtuser
+ double precision                  :: upperlimitssc
  integer                           :: inmorphopol   !< value of the update inside morphopol (only 0 or 1 make sense)
  !
  !-------------------------------------------------- old sediment transport and morphology
@@ -145,7 +145,7 @@ module m_sediment
  integer                           :: jgrtek = 1        !< grainsize fraction nr to plot
  integer                           :: numintverticaleinstein = 10 !< number of vertical intervals in einstein integrals
 
-contains
+ contains
 
  subroutine default_sediment()
  use m_physcoef
@@ -153,9 +153,6 @@ contains
 
  mxgr          = 0
  mxgrKrone     = 0
-
- wavenikuradse = 0.01d0
- z0wav         = wavenikuradse / 30d0
 
  sedmax              = 30d0
  dmorfac             = 1d0
@@ -166,8 +163,8 @@ contains
  jaBndTreatment      = 0
  jamorcfl            = 1
  dzbdtmax            = 0.1d0
- botcrit             = 1d-4
  jamormergedtuser    = 0
+ upperlimitssc       = 1d6
  inmorphopol         = 1
  
  end subroutine default_sediment

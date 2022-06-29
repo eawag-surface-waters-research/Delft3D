@@ -42,7 +42,7 @@ subroutine flow_sedmorinit()
     use unstruc_files
     use m_flowgeom
     use m_flowtimes
-    use m_physcoef, only: rhomean, ag, backgroundwatertemperature
+    use m_physcoef, only: rhomean, ag, backgroundwatertemperature, vismol
     use m_initsedtra, only: initsedtra
     use m_rdmorlyr, only: rdinimorlyr
     use m_flowexternalforcings, only: sfnames, numfracs, nopenbndsect, openbndname, openbndlin, nopenbndlin
@@ -85,7 +85,7 @@ subroutine flow_sedmorinit()
 !
     if (.not.stm_included) return
 
-      !
+    !
     inquire (file = trim(md_sedfile), exist = ex)
     if (.not. ex) then
        call mess(LEVEL_FATAL, 'unstruc::flow_sedmorinit - *.sed file in mdu file does not exist.')
@@ -108,15 +108,9 @@ subroutine flow_sedmorinit()
     ltur_ = 0
     if (kmx>0) then
        select case (iturbulencemodel)
-          case (0)
+          case (0,1,2)
              ltur_ = 0
-          case (1)
-             ltur_ = 0
-          case (2)
-             ltur_ = 0
-          case (3)
-             ltur_ = 2
-          case (4)
+          case (3,4)
              ltur_ = 2
        end select
     end if
@@ -290,7 +284,6 @@ subroutine flow_sedmorinit()
        allocate(sed(stmpar%lsedsus,Ndkx))
        sed = 0d0
     end if
-    vismol          = 4.d0/(20.d0 + backgroundwatertemperature)*1d-5 ! Van Rijn, 1993, from iniphys.f90
     !
     call rdinimorlyr(stmpar%lsedtot, stmpar%lsedsus, mdia, error, &
                    & griddim, stmpar%morlyr, stmpar%morpar, stmpar%sedpar, &

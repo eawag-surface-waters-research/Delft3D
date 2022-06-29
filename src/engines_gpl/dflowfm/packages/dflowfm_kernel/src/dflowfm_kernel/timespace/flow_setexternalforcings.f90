@@ -63,7 +63,7 @@ subroutine flow_setexternalforcings(tim, l_initPhase, iresult)
    integer,          intent(out)   :: iresult !< Integer error status: DFM_NOERR==0 if succesful.
 
    double precision :: timmin
-   integer          :: k, L, i, k1, k2, iFirst, iLast
+   integer          :: k, L, i, k1, k2, iFirst, iLast, kb, ki, n
    logical          :: l_set_frcu_mor = .false.
 
    logical, external :: flow_initwaveforcings_runtime, flow_trachy_needs_update
@@ -243,60 +243,42 @@ subroutine flow_setexternalforcings(tim, l_initPhase, iresult)
             success = flow_initwaveforcings_runtime()
          endif
          if (allocated (hwavcom) ) then
-            ! Don't make them zero: ecGetValues might do nothing
-            !hwav = 0.0
             success = success .and. ecGetValues(ecInstancePtr, item_hrms, ecTime)
          endif
          if (allocated (twav) ) then
-            ! Don't make them zero: ecGetValues might do nothing
-            !twav = 0.0
             success = success .and. ecGetValues(ecInstancePtr, item_tp, ecTime)
          endif
          if (allocated (phiwav) ) then
-            ! Don't make them zero: ecGetValues might do nothing
-            !phiwav = 0.0
             success_copy = success
             success = success .and. ecGetValues(ecInstancePtr, item_dir, ecTime)
             if (jawave == 6) success = success_copy
          endif
          if (allocated (sxwav) ) then
-            ! Don't make them zero: ecGetValues might do nothing
-            !sxwav = 0.0
             success_copy = success
             success = success .and. ecGetValues(ecInstancePtr, item_fx, ecTime)
             if (jawave == 6) success = success_copy
          endif
          if (allocated (sywav) ) then
-            ! Don't make them zero: ecGetValues might do nothing
-            !sywav = 0.0
             success_copy = success
             success = success .and. ecGetValues(ecInstancePtr, item_fy, ecTime)
             if (jawave == 6) success = success_copy
          endif
          if (allocated (sbxwav) ) then
-            ! Don't make them zero: ecGetValues might do nothing
-            !sxwav = 0.0
             success_copy = success
             success = success .and. ecGetValues(ecInstancePtr, item_wsbu, ecTime)
             if (jawave == 6) success = success_copy
          endif
          if (allocated (sbywav) ) then
-            ! Don't make them zero: ecGetValues might do nothing
-            !sywav = 0.0
             success_copy = success
             success = success .and. ecGetValues(ecInstancePtr, item_wsbv, ecTime)
             if (jawave == 6) success = success_copy
          endif
          if (allocated (mxwav) ) then
-            ! Don't make them zero: ecGetValues might do nothing
-            !mxwav = 0.0
             success_copy = success
             success = success .and. ecGetValues(ecInstancePtr, item_mx, ecTime)
             if (jawave == 6) success = success_copy
          endif
          if (allocated (mywav) ) then
-            ! Don't make them zero: ecGetValues might do nothing
-            !mywav = 0.0
             success_copy = success
             success = success .and. ecGetValues(ecInstancePtr, item_my, ecTime)
             if (jawave == 6) success = success_copy
@@ -337,23 +319,108 @@ subroutine flow_setexternalforcings(tim, l_initPhase, iresult)
       !          NOTE:
       !                not necessary are; tmean (Tm01), urms, wavedirpeak
       !
-      !   JRE: moved this part to step_reduce, update needed at compu dt
+      ! For badly converged SWAN sums, dwcap and dsurf can be NaN. Put these to 0d0, 
+      ! as they cause saad errors as a result of NaNs in the turbulence model
+      if (any(isnan(dsurf)) .or. any(isnan(dwcap))) then
+         write (msgbuf, '(a)') 'Surface dissipation fields from SWAN contain NaN values, which have been converted to 0d0. &
+                              & Check the correctness of the wave results before running the coupling.'
+         call warn_flush() ! No error, just warning and continue
+         !
+         where (isnan(dsurf))
+            dsurf = 0d0
+         endwhere
+         !
+         where (isnan(dwcap))
+            dwcap = 0d0
+         endwhere
+      endif
+      
+      ! Fill open boundary cells with inner values, needed for values on flowlinks fo calculating stresses etc
+      ! In MPI case, partition ghost cells are filled properly already, open boundaires are not
+      do n=1,nbndu
+         kb = kbndu(1,n)
+         ki = kbndu(2,n)
+         L  = kbndu(3,n)
+         !if (hu(L)<epshu) cycle
+         hwavcom(kb) = hwavcom(ki)
+         twav(kb)    = twav(ki)
+         phiwav(kb)  = phiwav(ki)
+         uorbwav(kb) = uorbwav(ki)
+         sbxwav(kb)  = sbxwav(ki)
+         sbywav(kb)  = sbywav(ki)
+         sxwav(kb)   = sxwav(ki)
+         sywav(kb)   = sywav(ki)
+         dsurf(kb)   = dsurf(ki)
+         dwcap(kb)   = dwcap(ki)
+         mxwav(kb)   = mxwav(ki)
+         mywav(kb)   = mywav(ki)
+      enddo
       !
-      !if( kmx == 0 ) then
-      !   call wave_comp_stokes_velocities()
-      !   call wave_uorbrlabda()                       ! hwav gets depth-limited here
-      !   call tauwave()
-      !   if ( jaGUI.eq.1 ) then                                          ! this part is for online visualisation
-      !      if (ntek > 0) then
-      !         if (mod(int(dnt_user),ntek) .eq. 0) then
-      !            call wave_makeplotvars()
-      !         end if
-      !      endif
-      !   endif
-      !   ! wavfu: wave force at links, to be used in the advection equation
-      !   call setwavfu()
-      !   call setwavmubnd()
-      !end if
+      ! waterlevels
+      do n=1,nbndz
+         kb = kbndz(1,n)
+         ki = kbndz(2,n)
+         L  = kbndz(3,n)
+         !if (hu(L)<epshu) cycle
+         hwavcom(kb) = hwavcom(ki)
+         twav(kb)    = twav(ki)
+         phiwav(kb)  = phiwav(ki)
+         uorbwav(kb) = uorbwav(ki)
+         sbxwav(kb)  = sbxwav(ki)
+         sbywav(kb)  = sbywav(ki)
+         sxwav(kb)   = sxwav(ki)
+         sywav(kb)   = sywav(ki)
+         dsurf(kb)   = dsurf(ki)
+         dwcap(kb)   = dwcap(ki)
+         mxwav(kb)   = mxwav(ki)
+         mywav(kb)   = mywav(ki)
+      enddo
+      !
+      !  normal-velocity boundaries
+      do n=1,nbndn
+         kb = kbndn(1,n)
+         ki = kbndn(2,n)
+         L  = kbndn(3,n)
+         !if (hu(L)<epshu) cycle
+         hwavcom(kb) = hwavcom(ki)
+         twav(kb)    = twav(ki)
+         phiwav(kb)  = phiwav(ki)
+         uorbwav(kb) = uorbwav(ki)
+         sbxwav(kb)  = sbxwav(ki)
+         sbywav(kb)  = sbywav(ki)
+         sxwav(kb)   = sxwav(ki)
+         sywav(kb)   = sywav(ki)
+         dsurf(kb)   = dsurf(ki)
+         dwcap(kb)   = dwcap(ki)
+         mxwav(kb)   = mxwav(ki)
+         mywav(kb)   = mywav(ki)
+      end do
+      !
+      !  tangential-velocity boundaries
+      do n=1,nbndt
+         kb = kbndt(1,n)
+         ki = kbndt(2,n)
+         L  = kbndt(3,n)
+         !if (hu(L)<epshu) cycle
+         hwavcom(kb) = hwavcom(ki)
+         twav(kb)    = twav(ki)
+         phiwav(kb)  = phiwav(ki)
+         uorbwav(kb) = uorbwav(ki)
+         sbxwav(kb)  = sbxwav(ki)
+         sbywav(kb)  = sbywav(ki)
+         sxwav(kb)   = sxwav(ki)
+         sywav(kb)   = sywav(ki)
+         dsurf(kb)   = dsurf(ki)
+         dwcap(kb)   = dwcap(ki)
+         mxwav(kb)   = mxwav(ki)
+         mywav(kb)   = mywav(ki)
+      end do
+   endif
+
+   if (jawave>0) then
+      ! this call  is needed for bedform updates with van Rijn 2007 (cal_bf, cal_ksc below)
+      ! These subroutines need uorb, rlabda
+      call compute_wave_parameters()
    endif
 
 !   !$OMP SECTION
@@ -479,13 +546,13 @@ subroutine flow_setexternalforcings(tim, l_initPhase, iresult)
       call heatu(timmin/60d0)                                  ! from externalforcings
    endif
 
-   if (bfm_included) then
+   if (bfm_included .and. .not. l_initPhase) then
       if (bfmpar%lfbedfrm) then
-          call fm_calbf()            ! JRE TODO: see with which timestep we update this?
+          call fm_calbf()            ! JRE+BJ to check: see with which timestep we update this?
        end if
    end if
 
-   if (bfmpar%lfbedfrmrou)  then     ! .true. if van rijn 2004 or trachy contains ripple roughness
+   if (bfmpar%lfbedfrmrou .and. .not. l_initPhase)  then     ! .true. if van rijn 2004 or trachy contains ripple roughness
       call fm_calksc()
    end if
 
@@ -509,7 +576,7 @@ subroutine flow_setexternalforcings(tim, l_initPhase, iresult)
 
    if (stm_included) then
        if ((jased>0) .and. l_set_frcu_mor) then
-           call set_frcu_mor(1)     !otherwise frcu_mor is set in getprof_1d()
+               call set_frcu_mor(1)     !otherwise frcu_mor is set in getprof_1d()
            call set_frcu_mor(2)
        endif
    endif

@@ -215,57 +215,56 @@
     if (zn1 == dmiss) zn1 = zkuni
     if (zn2 == dmiss) zn2 = zkuni
 
- if (kcu(L) == 3) then                             ! 1D2D internal link, bobs at minimum
-    if (kcs(n1) == 21) then
-       blv   = bl(n1)
-       call get2Dnormal(n1,xn,yn)                  ! xn, yn = 2D land normal vector pointing upward, both zero = flat
-       call get1Ddir(n2,xt,yt)                     ! xt, yt = 1D river tangential normal vector
+    if (kcu(L) == 3) then                             ! 1D2D internal link, bobs at minimum
+       if (kcs(n1) == 21) then
+          blv   = bl(n1)
+          call get2Dnormal(n1,xn,yn)                  ! xn, yn = 2D land normal vector pointing upward, both zero = flat
+          call get1Ddir(n2,xt,yt)                     ! xt, yt = 1D river tangential normal vector
+       endif
+       if (kcs(n2) == 21) then
+          blv   = bl(n2)
+          call get2Dnormal(n2,xn,yn)
+          call get1Ddir(n1,xt,yt)
+       endif
+       skewn     = abs(xn*xt + yn*yt)
+       bob(1,L)  = blv
+       bob(2,L)  = blv    ! revisit later+ wu(L)*skewn ! TODO: HK: why wu here? Why not dx(L) or something similar?
+       bob0(1,L)  = blv
+       bob0(2,L)  = blv    ! revisit later+ wu(L)*skewn ! TODO: HK: why wu here? Why not dx(L) or something similar?
+       bl(n1)    = min(bl(n1) , blv)
+       bl(n2)    = min(bl(n2) , blv)
+    else if (kcu(L) == 4) then                           ! left right
+       blv       = min(zn1,zn2)
+       bob(1,L)  = zn1
+       bob(2,L)  = zn2
+       bob0(1,L)  = zn1
+       bob0(2,L)  = zn2
+       bl(n1)    = min(bl(n1) , blv)
+       bl(n2)    = min(bl(n2) , blv)
+    else if (kcu(L) == 5 .or. kcu(L) == 7) then         ! keep 1D and 2D levels
+       if (bl(n1) .ne. 1d30 ) then
+          bob(1,L) = bl(n1)
+       else
+          bob(1,L) = zn1
+       endif
+       if (bl(n2) .ne. 1d30 ) then
+          bob(2,L) = bl(n2)
+       else
+          bob(2,L) = zn2
+       endif
+       if (zk(k1) .ne. dmiss .and. nmk(k1) == 1) then   ! if zk specified at endpoint
+           bob(1,L) = zk(k1)
+       endif
+       if (zk(k2) .ne. dmiss .and. nmk(k2) == 1) then   ! if zk specified at endpoint
+           bob(2,L) = zk(k2)
+       endif
+       if (setHorizontalBobsFor1d2d) then
+          bob(:,L) = max(bob(1,L), bob(2,L))
+       endif
+       bob0(:,L) = bob(:,L)
+       bl(n1) = min( bl(n1) , bob(1,L) )
+       bl(n2) = min( bl(n2) , bob(2,L) )
     endif
-    if (kcs(n2) == 21) then
-       blv   = bl(n2)
-       call get2Dnormal(n2,xn,yn)
-       call get1Ddir(n1,xt,yt)
-    endif
-    skewn     = abs(xn*xt + yn*yt)
-    bob(1,L)  = blv
-    bob(2,L)  = blv    ! revisit later+ wu(L)*skewn ! TODO: HK: why wu here? Why not dx(L) or something similar?
-    bob0(1,L)  = blv
-    bob0(2,L)  = blv    ! revisit later+ wu(L)*skewn ! TODO: HK: why wu here? Why not dx(L) or something similar?
-    bl(n1)    = min(bl(n1) , blv)
-    bl(n2)    = min(bl(n2) , blv)
- else if (kcu(L) == 4) then                           ! left right
-    blv       = min(zn1,zn2)
-    bob(1,L)  = zn1
-    bob(2,L)  = zn2
-    bob0(1,L)  = zn1
-    bob0(2,L)  = zn2
-    bl(n1)    = min(bl(n1) , blv)
-    bl(n2)    = min(bl(n2) , blv)
- else if (kcu(L) == 5 .or. kcu(L) == 7) then         ! keep 1D and 2D levels
-    if (bl(n1) .ne. 1d30 ) then
-       bob(1,L) = bl(n1)
-    else
-       bob(1,L) = zn1
-    endif
-    if (bl(n2) .ne. 1d30 ) then
-       bob(2,L) = bl(n2)
-    else
-       bob(2,L) = zn2
-    endif
-    if (zk(k1) .ne. dmiss .and. nmk(k1) == 1) then   ! if zk specified at endpoint
-        bob(1,L) = zk(k1)
-    endif
-    if (zk(k2) .ne. dmiss .and. nmk(k2) == 1) then   ! if zk specified at endpoint
-        bob(2,L) = zk(k2)
-    endif
-    if (setHorizontalBobsFor1d2d) then
-       bob(:,L) = max(bob(1,L), bob(2,L))
-    endif
-    bob0(:,L) = bob(:,L)
-    bl(n1) = min( bl(n1) , bob(1,L) )
-    bl(n2) = min( bl(n2) , bob(2,L) )
- endif
-
  enddo
 
  do k = 1,ndx  !losse punten die geen waarde kregen
@@ -282,10 +281,6 @@
      if (jaupdbndbl == 1) then
         bl(n1)   = bl(n2)
      endif
-
-     !if (stm_included .and. jawave>0) then
-     !   bl(n1) = bl(n2)
-     !end if
 
      if (kcu(L) == -1) then                       ! 1D randjes extrapoleren voor 1D straight channel convecyance testcase
         k1  = lncn(1,L) ; k2 = lncn(2,L)
@@ -349,7 +344,7 @@
     !endif 
   enddo
   call longculvertsToProfs( .true. )
- else
+    else
   !if ( cacheRetrieved() ) then
   !  if (allocated(longculverts)) then
   !     call copyCachedLongCulverts( longculverts, success )

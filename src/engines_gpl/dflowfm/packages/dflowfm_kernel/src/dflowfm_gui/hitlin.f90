@@ -33,8 +33,8 @@
       SUBROUTINE HITLIN(P1,P2,X1,Y1,X2,Y2,V,XHIT,YHIT,JA)
       implicit none
       double precision :: dp, dv, dx, dy, frac, p1, p2, v, x1, x2, xhit, y1, y2, yhit
-      integer          :: ja
-      ! SNIJDT EEN ISOLIJN EEN LIJNTJE ?
+      integer :: ja
+!     SNIJDT EEN ISOLIJN EEN LIJNTJE ?
       DX   = X2 - X1
       DY   = Y2 - Y1
       DP   = P2 - P1

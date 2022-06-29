@@ -31,6 +31,7 @@
 ! $HeadURL$
 
    SUBROUTINE CREATESAMPLESINPOLYGON()
+   use m_flowparameters, only: autotrisam
    use m_polygon
    use m_missing
    use m_samples
@@ -60,7 +61,7 @@
 
       call CREATESAMPLESINPOLYGON2()
 
-      if (jadoall == 1) then
+      if (jadoall == 1 .and. autotrisam==1) then
          call Triangulatesamplestonetwork(1)
       endif
 

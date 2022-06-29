@@ -62,15 +62,18 @@
              if (jaconveyance2D == 0) then           ! original default
                 h0 = max(epshs, 1d0 / huvli(L))
              else if (jaconveyance2D == -1) then     ! better for straight test
-                h0 = max(epshs, hu(L)) ! does it whole not
+                h0 = max(epshs, hu(L))               ! does it whole not
              endif
              frcn = frcu(L)
              if ( frcn.gt.0d0 ) then
                 call getcz(h0, frcn, ifrcutp(L), cz, L)
                 cfuhi(L) = ag/(h0*cz*cz)
+                z0ucur(L) = h0*exp(-1d0 - vonkar*cz/sag)
              else
                 cfuhi(L) = 0d0
+                z0ucur(L) = 1d-5
              end if
+             z0urou(L) = z0ucur(L)   ! 3D analogue in getustbcfhi
           endif
        enddo
        !$OMP END PARALLEL DO

@@ -69,11 +69,11 @@
 !>   solves for each column {k | 1<=k<k=top} an equation of the form
 !>     aaj(k) sedj(k-1) + bbj(k) sedj(k) + ccj(k) sedj(k+1) = ddj(k)
 subroutine update_constituents(jarhoonly)
-   use m_flowgeom,   only: Ndx, Ndxi, Lnxi, Lnx, ln, nd  ! static mesh information
-   use m_flow,       only: Ndkx, Lnkx, u1, q1, au, qw, zws, sq, sqi, vol1, kbot, ktop, Lbot, Ltop,  kmxn, kmxL, kmx, viu, vicwws, plotlin, wsf, jadecaytracers
-   use m_flowtimes,  only: dts, ja_timestep_auto
+   use m_flowgeom,   only: Ndx, Ndxi, Lnx  ! static mesh information
+   use m_flow,       only: Ndkx, Lnkx, u1, q1, au, qw, zws, sqi, vol1, kbot, ktop, Lbot, Ltop,  kmxn, kmxL, kmx, viu, vicwws, wsf, jadecaytracers
+   use m_flowtimes,  only: dts
    use m_turbulence, only: sigdifi
-   use m_physcoef,   only: dicoww, vicouv, difmolsal
+   use m_physcoef,   only: vicouv
    use m_transport
    use m_mass_balance_areas
    use m_flowparameters, only: limtypsa, limtyptm, limtypsed
@@ -81,7 +81,7 @@ subroutine update_constituents(jarhoonly)
    use m_partitioninfo
    use m_timer
    use unstruc_messages
-   use m_sediment,   only: jatranspvel, jased, stmpar, stm_included, mtd
+   use m_sediment,   only: jatranspvel, jased, stmpar, stm_included
    use m_waves
    use timers
 
@@ -92,10 +92,9 @@ subroutine update_constituents(jarhoonly)
    integer :: ierror
 
    integer                                               :: limtyp  !< limiter type (>0), or first-order upwind (0)
-   double precision                                      :: dvoli
-   double precision                                      :: dt, dts_store
+   double precision                                      :: dts_store
 
-   integer                                               :: k, LL, L, j, numconst_store,kk,lll,Lb,Lt
+   integer                                               :: LL, L, j, numconst_store,Lb,Lt
    integer                                               :: istep
    integer                                               :: numstepssync
 
@@ -122,13 +121,7 @@ subroutine update_constituents(jarhoonly)
 !  get maximum transport time step
    call get_dtmax()
 
-   !if ( jalts.eq.1 ) then  ! local time-stepping
-      call get_ndeltasteps()
-   !else
-   !   nsubsteps = 1  ! maybe remove later  
-   !   ndeltasteps = 1
-   !   numnonglobal = 0
-   !end if
+   call get_ndeltasteps()
 
 !  store dts
    dts_store = dts
@@ -157,15 +150,6 @@ subroutine update_constituents(jarhoonly)
       if ( kmx.gt.0 ) then
          fluxver = 0d0
       end if
-
-!     BEGIN DEBUG
-!      difsedu = 0d0
-!      difsedw = 0d0
-!     END DEBUG
-
-!     BEGIN DEBUG
-!      call comp_sq(Ndkx, Lnkx, kbot, ktop, Lbot, Ltop, q1, qw, sq)
-!     END DEBUG
 
 !     determine which fluxes need to be updated
       if ( nsubsteps.gt.1 ) then
@@ -256,17 +240,6 @@ subroutine update_constituents(jarhoonly)
          sinkftot(j,:)   = sinkftot(j,:)   / dts_store
       enddo
    endif
-
-!!  communicate
-!   if ( jampi.gt.0 ) then
-!      if ( jatimer.eq.1 ) call starttimer(IUPDSALL)
-!      if ( kmx.lt.1 ) then ! 2D
-!         call update_ghosts(ITYPE_Sall, NUMCONST, Ndx, constituents, ierror)
-!      else                 ! 3D
-!         call update_ghosts(ITYPE_Sall3D, NUMCONST, Ndkx, constituents, ierror)
-!      end if
-!      if ( jatimer.eq.1 ) call stoptimer(IUPDSALL)
-!   end if
 
    if (jarhoonly == 1) then
       call extract_rho() ; numconst = numconst_store

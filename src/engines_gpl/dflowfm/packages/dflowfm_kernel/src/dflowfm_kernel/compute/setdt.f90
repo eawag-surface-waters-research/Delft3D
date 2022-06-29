@@ -39,6 +39,7 @@ subroutine setdt()
    use m_timer
    use unstruc_display,  only: jaGUI
    use m_sediment,       only: jased, stm_included, stmpar, jamorcfl, jamormergedtuser
+   use m_fm_erosed,      only: duneavalan
    implicit none
 
    double precision :: dtsc_loc
@@ -75,7 +76,17 @@ subroutine setdt()
    end if
 
    if (jased.eq.4 .and. stm_included) then
-     call setdtmaxavalan(dts)
+      if (duneavalan) then
+         call setdtmaxavalan(dts)
+      endif
+   end if
+
+   !  globally reduce time step
+   if ( jampi.eq.1 ) then
+      !     globally reduce dts (dtsc may now be larger)
+      if ( jatimer.eq.1 ) call starttimer(IMPIREDUCE)
+      call reduce_double_min(dts)
+      if ( jatimer.eq.1 ) call stoptimer(IMPIREDUCE)
    end if
 
    dtsc = dts

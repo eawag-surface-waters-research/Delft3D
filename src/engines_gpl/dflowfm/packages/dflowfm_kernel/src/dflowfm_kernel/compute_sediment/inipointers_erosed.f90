@@ -139,6 +139,7 @@
    hmaxth              => stmpar%morpar%hmaxth
    thetsd              => stmpar%morpar%thetsd
    eulerisoglm         => stmpar%morpar%eulerisoglm
+   l_suscor            => stmpar%morpar%l_suscor
 
    ! trapar
    iform               => stmpar%trapar%iform
@@ -221,10 +222,6 @@
    rca                 => sedtra%rca
    statqnt             => sedtra%statqnt
 
-   allocate(ucxq_mor(1:ndkx), ucyq_mor(1:ndkx), hs_mor(1:ndkx), stat=ierr)   ! JRE TODO
-   ucxq_mor = 0d0; ucyq_mor = 0d0; hs_mor = 0d0
-   allocate(ucx_mor(1:ndkx), ucy_mor(1:ndkx), stat=ierr)
-   ucx_mor = 0d0; ucy_mor = 0d0
    allocate(q_zeta(2,lnx), stat=ierr)
    q_zeta = 0d0
 

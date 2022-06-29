@@ -35,7 +35,6 @@
  use m_flowgeom
  use m_flow
  use m_flowtimes
- ! use m_flowexternalforcings
  use m_missing
  use unstruc_model
  use m_netw, only : netcell, numk, numl
@@ -49,6 +48,8 @@
  use m_transport, only : NUMCONST
  use m_integralstats
  use unstruc_channel_flow
+ use m_bedform
+ use m_fm_erosed, only: ucxq_mor, ucyq_mor, hs_mor
  use m_hydrology, only: jadhyd, alloc_hydrology, init_hydrology
 
  implicit none
@@ -479,7 +480,7 @@
        if ( Lt1 == 2 .and. Lt2 == 2) then
 
           call getzlayerindices(n1,nlayb1,nrlay1)                               ! connection to be made at bedcell of highest adjacent cell
-          call getzlayerindices(n2,nlayb2,nrlay2)
+             call getzlayerindices(n2,nlayb2,nrlay2)
           kb1 = max(0, nlayb2-nlayb1)
           kb2 = max(0, nlayb1-nlayb2)
   
@@ -582,6 +583,13 @@
  call aerr('vol1_f(ndkx)', ierr , ndkx)             ; vol1_f = 0
  allocate ( volerror(ndkx) , stat = ierr)
  call aerr('volerror(ndkx)', ierr,   ndx)           ; volerror = 0
+ 
+ if (stm_included .or. bfm_included .or. bfmpar%lfbedfrmrou .or. jatrt > 0) then
+   allocate(ucxq_mor(1:ndkx), ucyq_mor(1:ndkx), hs_mor(1:ndkx), stat=ierr) 
+   ucxq_mor = 0d0; ucyq_mor = 0d0; hs_mor = 0d0
+   allocate(ucx_mor(1:ndkx), ucy_mor(1:ndkx), stat=ierr)
+   ucx_mor = 0d0; ucy_mor = 0d0
+ endif   
 
  if (lnxi > 0 .and. kmx == 0) then
     call realloc(uc1D, ndx, keepExisting = .false., fill = 0d0, stat = ierr)
@@ -660,9 +668,9 @@ endif
  call aerr('rho (ndkx)', ierr, ndkx ) ; rho  = rhomean
 
  if (stm_included) then 
-    if (allocated(rhowat) ) deallocate(rhowat)
-    allocate ( rhowat (ndkx) , stat= ierr )
-    call aerr('rhowat (ndkx)', ierr, ndkx ) ; rhowat  = rhomean
+ if (allocated(rhowat) ) deallocate(rhowat)
+ allocate ( rhowat (ndkx) , stat= ierr )
+ call aerr('rhowat (ndkx)', ierr, ndkx ) ; rhowat  = rhomean
  endif
 
  if (jasal > 0 .or. jatem > 0 .or. jased> 0 .or. stm_included ) then
@@ -690,7 +698,7 @@ endif
           if (allocated (rhosww) ) deallocate(rhosww)
           allocate ( rhosww(ndkx) , stat= ierr )
           call aerr('rhosww(ndkx)', ierr, ndkx ) ; rhosww = 0d0
-       endif
+    endif
     endif
 
  endif
@@ -912,17 +920,16 @@ endif
     call aerr('eqcu(Ndkx)', ierr, ndkx ) ; eqcu = 0
  endif
 
- if (allocated (rhou) ) deallocate(rhou)
- call realloc( z0ucur,lnx  , stat=ierr, keepExisting = .false., fill = 1d-10)
+ call realloc( z0ucur,lnx  , stat=ierr, keepExisting = .false., fill = 1d-5)  !1d-10
  call aerr   ('z0ucur(lnx)', ierr, lnx)
- call realloc( z0urou,lnx  , stat=ierr, keepExisting = .false., fill = 1d-10)
+ call realloc( z0urou,lnx  , stat=ierr, keepExisting = .false., fill = 1d-5)! 1d-10
  call aerr   ('z0urou(lnx)', ierr, lnx)
  call realloc( taus,    ndx,  stat=ierr, keepExisting = .false., fill = 0d0)
  call aerr   ('taus    (ndx)',     ierr, ndx)
- if (jamaptaucurrent>0) then
-    call realloc(tausmax, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-    call aerr('tausmax(ndx)', ierr, ndx)
- endif
+ call realloc(taubxu, lnx, stat=ierr, keepExisting = .false., fill = 0d0)   ! Always needs to be allocated, even if jawave == 0, used in gettau()
+ call aerr   ('taubxu(lnx)', ierr, lnx)
+ call realloc(taubu, lnx, stat=ierr, keepExisting = .false., fill = 0d0)
+ call aerr   ('taubu(lnx)', ierr, lnx)
 
  ! link related
  if (allocated(cfuhi))    deallocate(cfuhi)
@@ -1077,7 +1084,7 @@ endif
 
     if (allocated (sam0) ) deallocate (sam0, sam1, same)
     allocate (sam0(ndkx), sam1(ndkx), same(ndkx) )  ; sam0 = 0 ; sam1 = 0 ; same = 0
- endif
+    endif
 
  if (jatem > 0) then
     if ( allocated (tem1) ) deallocate (tem1)

@@ -553,7 +553,7 @@ subroutine processexternalboundarypoints(qid, filename, filetype, return_time, n
          nqhbnd = nqhbnd + 1
          numqh  = numz
          if (filetype == poly_tim) then
-            call realloc(qhpliname,nqhbnd)  ; qhpliname(nqhbnd) = pliname
+         call realloc(qhpliname,nqhbnd)  ; qhpliname(nqhbnd) = pliname
          end if
 
          call realloc(L1qhbnd,nqhbnd) ; L1qhbnd(nqhbnd) = nbndz + 1
@@ -614,7 +614,6 @@ subroutine processexternalboundarypoints(qid, filename, filetype, return_time, n
            call err_flush()
         end if
         itpbn = 5
-        !ftpet(nbndu+1:nbndu+numu) = tfc(7)   ! riemann relaxation
      else if ( qidfm == 'qhubnd') then
         itpbn = 6
      else if ( qidfm == 'criticaloutflowbnd') then
@@ -646,7 +645,6 @@ subroutine processexternalboundarypoints(qid, filename, filetype, return_time, n
         call appendrettime(qidfm, nbnds + 1, return_time)
         nbnds = nbnds + nums
      end if
-  ! JRE
 
   else if (qidfm == 'waveenergybnd' ) then
 
@@ -655,14 +653,14 @@ subroutine processexternalboundarypoints(qid, filename, filetype, return_time, n
      write(msgbuf,'(a,x,a,i8,a)') trim(qid), trim(filename), numw, ' nr of wave energy bndcells' ; call msg_flush()
 
      nwbnd = nwbnd + 1
-
+     
      call realloc(L1wbnd,nwbnd) ; L1wbnd(nwbnd) = nbndw + 1
      call realloc(L2wbnd,nwbnd) ; L2wbnd(nwbnd) = nbndw + numw
-
+     
      nbndw = nbndw + numw
      call realloc(fnamwbnd,nwbnd,fill='')
      fnamwbnd(nwbnd) = trim(filename)
-
+     
   else if (qidfm == 'temperaturebnd' .and. jatem > 0 ) then
 
      kce   = abs(kce) ! switch kce back on, but only for all net boundaries (some of which may have been set to -1 by a flow boundary)
@@ -1461,7 +1459,7 @@ logical function initboundaryblocksforcings(filename)
           k = nnlat(k1)
           if (k > 0) then
              if (.not. is_ghost_node(k)) then
-                balat(n) = balat(n) + ba(k)
+             balat(n) = balat(n) + ba(k)
              end if
           endif
        end do

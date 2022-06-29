@@ -40,6 +40,7 @@
    use m_xbeach_filefunctions
    use m_xbeach_errorhandling
    use m_xbeach_paramsconst
+   use m_xbeach_netcdf
    use M_SAMPLES
    use m_missing
    use m_alloc
@@ -56,43 +57,29 @@
 
    ierr = DFM_NOERR
 
-   call realloc(uin, nbndw, stat=ierr, keepExisting = .false., fill = 0d0)
-   call aerr('uin  (nbndw)', ierr, nbndw)
-   call realloc(vin, nbndw, stat=ierr, keepExisting = .false., fill = 0d0)
-   call aerr('vin  (nbndw)', ierr, nbndw)
+   call realloc(uin, nbndu, stat=ierr, keepExisting = .false., fill = 0d0)
+   call aerr('uin  (nbndu)', ierr, nbndu)
+   call realloc(vin, nbndu, stat=ierr, keepExisting = .false., fill = 0d0)
+   call aerr('vin  (nbndu)', ierr, nbndu)
    call realloc(u1rm, nbndu, stat=ierr, keepExisting=.false., fill=0d0)   ! remember u1 state
    call aerr('u1rm  (nbndu)', ierr, nbndu)
 
-   call realloc(ypar, lnx, stat=ierr, keepExisting = .false., fill = 0d0)
-   call aerr('ypar(lnx)', ierr, lnx)
-   call realloc(cfwavhi, lnx, stat=ierr, keepExisting = .false., fill = 0d0)
-   call aerr('cfwavhi(lnx)', ierr, lnx)
-   call realloc(cfhi_vanrijn, lnx, stat=ierr, keepExisting = .false., fill = 0d0)
-   call aerr('cfhi_vanrijn(lnx)', ierr, lnx)
-   call realloc(taubxu, lnx, stat=ierr, keepExisting = .false., fill = 0d0)   ! Always needs to be allocated, even if jawave == 0, used in gettau()
-   call aerr('taubxu(lnx)', ierr, lnx)
-   call realloc(taubu, lnx, stat=ierr, keepExisting = .false., fill = 0d0)
-   call aerr('taubu(lnx)', ierr, lnx)
    call realloc(ktb, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
    call aerr('ktb  (ndx)', ierr, ndx)
-   call realloc(taux_cc, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-   call aerr('taux_cc  (ndx)', ierr, ndx)
-   call realloc(tauy_cc, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-   call aerr('tauy_cc  (ndx)', ierr, ndx)
-   call realloc(ust_mag, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-   call aerr('ust_mag  (ndx)', ierr, ndx)
-   call realloc(fwav_mag, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-   call aerr('fwav_mag  (ndx)', ierr, ndx)
-   call realloc(wblt, lnx, stat=ierr, keepExisting = .false., fill = 0d0  )
-   call aerr('wblt(lnx)', ierr, lnx)
+   call realloc(ust_mag, ndkx, stat=ierr, keepExisting = .false., fill = 0d0)
+   call aerr('ust_mag  (ndkx)', ierr, ndkx)
+   call realloc(fwav_mag, ndkx, stat=ierr, keepExisting = .false., fill = 0d0)
+   call aerr('fwav_mag  (ndkx)', ierr, ndkx)
+   call realloc(ustx_cc, ndkx, stat=ierr, keepExisting = .false., fill = 0d0)
+   call aerr('ustx_cc  (ndkx)', ierr, ndkx)
+   call realloc(usty_cc, ndkx, stat=ierr, keepExisting = .false., fill = 0d0)
+   call aerr('usty_cc  (ndkx)', ierr, ndkx)
 
-   if (jawave==3 .or. jawave==6) then
+   if (jawave==3 .or. jawave==4 .or. jawave==6) then
       call realloc(wavfu, lnkx, stat=ierr, keepExisting = .false., fill = 0d0)
-      call aerr('wavfu  (lnkx)', ierr, lnx)
-      call realloc(wavfv, lnx, stat=ierr, keepExisting = .false., fill = 0d0)
-      call aerr('wavfv  (lnx)', ierr, lnx)
-      call realloc(wavmubnd, lnkx, stat=ierr, keepExisting = .false., fill = 0d0)
-      call aerr('wavmubnd  (lnkx)', ierr, lnx)
+      call aerr('wavfu  (lnkx)', ierr, lnkx)
+      call realloc(wavfv, lnkx, stat=ierr, keepExisting = .false., fill = 0d0)
+      call aerr('wavfv  (lnkx)', ierr, lnkx)
       call realloc(sxwav, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
       call aerr('sxwav  (ndx)', ierr, ndx)
       call realloc(sywav, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
@@ -101,6 +88,11 @@
       call aerr('sbxwav  (ndx)', ierr, ndx)
       call realloc(sbywav, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
       call aerr('sbywav  (ndx)', ierr, ndx)
+   endif
+
+   if (jawave==3) then
+      call realloc(wavmubnd, lnkx, stat=ierr, keepExisting = .false., fill = 0d0)
+      call aerr('wavmubnd  (lnkx)', ierr, lnkx)
       call realloc(uorbwav, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
       call aerr('uorbwav  (ndx)', ierr, ndx)
       call realloc(wlenwav, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
@@ -115,9 +107,6 @@
       call aerr('dsurf(ndx)', ierr, ndx)
       call realloc(dwcap, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
       call aerr('dwcap(ndx)', ierr, ndx)
-      call realloc(kdismx, lnx, stat=ierr, keepExisting = .false., fill = 0  )
-      call aerr('kdismx(lnx)', ierr, lnx)
-
    end if
    !
    if  (jawave > 0) then
@@ -125,6 +114,7 @@
       call aerr   ('hwavcom   (ndx)', ierr, ndx)
    endif
    !
+   ! Ugly, fix with allocate9basic andsoon
    if  (jawave == 6) then
       call realloc( hwav,   ndx, stat=ierr, keepExisting = .false., fill = hwavuni)
       call aerr   ('hwav   (ndx)', ierr, ndx)
@@ -139,9 +129,13 @@
    if (jawave .eq. 4) then
       if (trim(instat)=='stat' .or. &
           trim(instat)=='stat_table') then
-         call allocstatsolverarrays(ierr)
+         call allocstatsolverarrays(0,ierr)
       endif
-
+      !
+      if (single_dir>0) then
+         call allocstatsolverarrays(1,ierr)
+      endif
+      !
       call realloc(ee0, (/ntheta,ndx/), stat=ierr, keepExisting = .false., fill = 0d0)
       call aerr('ee0  (ntheta,ndx)', ierr, ntheta*ndx)
       call realloc(ee1, (/ntheta,ndx/), stat=ierr, keepExisting = .false., fill = 0d0)
@@ -152,14 +146,6 @@
       call aerr('cgwav  (ndx)', ierr, ndx)
       call realloc(kwav, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
       call aerr('kwav  (ndx)', ierr, ndx)
-      call realloc(km, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-      call aerr('km  (ndx)', ierr, ndx)
-      call realloc(umwci, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-      call aerr('umwci  (ndx)', ierr, ndx)
-      call realloc(vmwci, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-      call aerr('vmwci  (ndx)', ierr, ndx)
-      call realloc(zswci, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-      call aerr('zswci  (ndx)', ierr, ndx)
       call realloc(nwav, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
       call aerr('nwav  (ndx)', ierr, ndx)
       call realloc(ctheta, (/ntheta,ndx/), stat=ierr, keepExisting = .false., fill = 0d0)
@@ -206,19 +192,6 @@
       call aerr('Fx_cc  (ndx)', ierr, ndx)
       call realloc(Fy_cc, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
       call aerr('Fy_cc  (ndx)', ierr, ndx)
-      call realloc(urms, lnx, stat=ierr, keepExisting = .false., fill = 0d0)
-      call aerr('urms  (lnx)', ierr, lnx)
-      call realloc(urms_cc, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-      call aerr('urms_cc  (ndx)', ierr, ndx)
-      call realloc(ust, lnx, stat=ierr, keepExisting = .false., fill = 0d0)
-      call aerr('ust  (lnx)', ierr, lnx)
-      call realloc(vst, lnx, stat=ierr, keepExisting = .false., fill = 0d0)
-      call aerr('vst  (lnx)', ierr, lnx)
-
-      call realloc(ustx_cc, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-      call aerr('ustx_cc  (ndx)', ierr, ndx)
-      call realloc(usty_cc, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-      call aerr('usty_cc  (ndx)', ierr, ndx)
 
       call realloc(dhsdx, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
       call aerr('dhsdx  (ndx)', ierr, ndx)
@@ -239,31 +212,60 @@
       call aerr('BR  (ndx)', ierr, ndx)
       call realloc(bi, nbndw, stat=ierr, keepExisting = .false., fill = 0d0)
       call aerr('bi  (nbndw)', ierr, nbndw)
-      !call realloc(rolthick, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-      !call aerr('rolthick  (ndx)', ierr, ndx)
-      !call realloc(kturb, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-      !call aerr('kturb  (ndx)', ierr, ndx)
+      !
       call realloc(Tbore, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
       call aerr('Tbore  (ndx)', ierr, ndx)
-      if (wci>0d0 .or. trim(absgentype)=='abs_2d') then
-         call realloc(xbducxdx, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-         call aerr('xbducxdx  (ndx)', ierr, ndx)
-         call realloc(xbducydx, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-         call aerr('xbducydx  (ndx)', ierr, ndx)
-         call realloc(xbducxdy, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-         call aerr('xbducxdy  (ndx)', ierr, ndx)
-         call realloc(xbducydy, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-         call aerr('xbducydy  (ndx)', ierr, ndx)
-      endif
+      call realloc(hhw, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+      call aerr('hhw  (ndx)', ierr, ndx)
+      call realloc(hdisp, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+      call aerr('hdisp  (ndx)', ierr, ndx)
+      call realloc(hstokes, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+      call aerr('hstokes  (ndx)', ierr, ndx)
+      !
+      call realloc(xbducxdx, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+      call aerr('xbducxdx  (ndx)', ierr, ndx)
+      call realloc(xbducydx, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+      call aerr('xbducydx  (ndx)', ierr, ndx)
+      call realloc(xbducxdy, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+      call aerr('xbducxdy  (ndx)', ierr, ndx)
+      call realloc(xbducydy, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+      call aerr('xbducydy  (ndx)', ierr, ndx)
+      !
       if (trim(absgentype)=='abs_2d') then
          call realloc(dbetadx, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
          call aerr('dbetadx  (ndx)', ierr, ndx)
          call realloc(dbetady, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
          call aerr('dbetady  (ndx)', ierr, ndx)
       endif
-      call realloc(hdisp, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-      call aerr('hdisp  (ndx)', ierr, ndx)
-
+      !
+      if (single_dir>0) then
+         call realloc(cgwav_s, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+         call aerr('cgwav_s  (ndx)', ierr, ndx)
+         call realloc(cwav_s, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+         call aerr('cwav_s  (ndx)', ierr, ndx)
+         call realloc(ctheta_s, (/ntheta_s, ndx/), stat=ierr, keepExisting = .false., fill = 0d0)
+         call aerr('ctheta_s  (ntheta_s,ndx)', ierr, ntheta_s*ndx)
+         call realloc(ee_s, (/ntheta_s,ndx/), stat=ierr, keepExisting = .false., fill = 0d0)
+         call aerr('ee_s  (ntheta_s,ndx)', ierr, ntheta_s*ndx)
+         call realloc(hhws, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+         call aerr('hhws  (ndx)', ierr, ndx)
+         call realloc(ucxws, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+         call aerr('ucxws  (ndx)', ierr, ndx)
+         call realloc(ucyws, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+         call aerr('ucyws  (ndx)', ierr, ndx)
+      endif
+      !
+      if (wci>0) then
+         call realloc(km, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+         call aerr('km  (ndx)', ierr, ndx)
+         call realloc(umwci, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+         call aerr('umwci  (ndx)', ierr, ndx)
+         call realloc(vmwci, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+         call aerr('vmwci  (ndx)', ierr, ndx)
+         call realloc(hhwwci, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+         call aerr('hhwwci  (ndx)', ierr, ndx)
+      endif
+      !
       if (windmodel .eq. 0) then
          call realloc(L1, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
          call aerr('L1  (ndx)', ierr, ndx)
@@ -271,8 +273,6 @@
          call aerr('Ltemp  (ndx)', ierr, ndx)
          call realloc(L0, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
          call aerr('L0  (ndx)', ierr, ndx)
-         !call realloc(khdisp, ndx, stat=ierr, keepExisting = .false., fill = 0d0)   ML: unused
-         !call aerr('khdisp  (ndx)', ierr, ndx)
       endif
 
       if (windmodel .eq. 1) then
@@ -318,12 +318,6 @@
          call aerr('SwT  (ndx)', ierr, ntheta*ndx)
       endif
 
-      !    for stationary solver
-      !call realloc(isweepup, (/2,ntheta*Ndxi/), stat=ierr, keepExisting = .false., fill = 0)
-      !call aerr('isweepup (2*ntheta*ndxi)', ierr, 2*ntheta*Ndxi)
-      !call realloc(isweepdown, (/2,ntheta*Ndxi/), stat=ierr, keepExisting = .false., fill = 0)
-      !call aerr('isweepdown (2*ntheta*ndxi)', ierr, 2*ntheta*Ndxi)
-
       ! handle wave friction, has to be post-poned until here because of unavailability of ndx
       if (wavefricfile .ne. ' ') then
          call check_file_exist(wavefricfile)   ! if not, program will exit here
@@ -359,239 +353,8 @@
          fw = wavefricval
       endif
 
-      !if (jamombal>0) then    ! compute some gradients
-      call realloc(xbdsdx, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-      call aerr('xbdsdx  (ndx)', ierr, ndx)
-      call realloc(xbdsdy, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-      call aerr('xbdsdy  (ndx)', ierr, ndx)
-
-      !end if
-
-      if (jaavgwavquant .eq. 1) then            !! arrays for statistical output wave quantities
-         call realloc(E_mean, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-         call aerr('E_mean  (ndx)', ierr, ndx)
-         call realloc(E_var, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-         call aerr('E_var  (ndx)', ierr, ndx)
-         call realloc(E_min, ndx, stat=ierr, keepExisting = .false., fill = huge(0d0))
-         call aerr('E_min  (ndx)', ierr, ndx)
-         call realloc(E_max, ndx, stat=ierr, keepExisting = .false., fill = -1d0*huge(0d0))
-         call aerr('E_max  (ndx)', ierr, ndx)
-         call realloc(E_varcross, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-         call aerr('E_varcross  (ndx)', ierr, ndx)
-         call realloc(E_varsquare, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-         call aerr('E_varsquare  (ndx)', ierr, ndx)
-
-         call realloc(H_mean, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-         call aerr('H_mean  (ndx)', ierr, ndx)
-         call realloc(H_var, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-         call aerr('H_var  (ndx)', ierr, ndx)
-         call realloc(H_min, ndx, stat=ierr, keepExisting = .false., fill = huge(0d0))
-         call aerr('H_min  (ndx)', ierr, ndx)
-         call realloc(H_max, ndx, stat=ierr, keepExisting = .false., fill = -1d0*huge(0d0))
-         call aerr('H_max  (ndx)', ierr, ndx)
-         call realloc(H_varcross, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-         call aerr('H_varcross  (ndx)', ierr, ndx)
-         call realloc(H_varsquare, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-         call aerr('H_varsquare  (ndx)', ierr, ndx)
-
-         call realloc(R_mean, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-         call aerr('R_mean  (ndx)', ierr, ndx)
-         call realloc(R_var, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-         call aerr('R_var  (ndx)', ierr, ndx)
-         call realloc(R_min, ndx, stat=ierr, keepExisting = .false., fill = huge(0d0))
-         call aerr('R_min  (ndx)', ierr, ndx)
-         call realloc(R_max, ndx, stat=ierr, keepExisting = .false., fill = -1d0*huge(0d0))
-         call aerr('R_max  (ndx)', ierr, ndx)
-         call realloc(R_varcross, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-         call aerr('R_varcross  (ndx)', ierr, ndx)
-         call realloc(R_varsquare, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-         call aerr('R_varsquare  (ndx)', ierr, ndx)
-
-         call realloc(D_mean, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-         call aerr('D_mean  (ndx)', ierr, ndx)
-         call realloc(D_var, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-         call aerr('D_var  (ndx)', ierr, ndx)
-         call realloc(D_min, ndx, stat=ierr, keepExisting = .false., fill = huge(0d0))
-         call aerr('D_min  (ndx)', ierr, ndx)
-         call realloc(D_max, ndx, stat=ierr, keepExisting = .false., fill = -1d0*huge(0d0))
-         call aerr('D_max  (ndx)', ierr, ndx)
-         call realloc(D_varcross, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-         call aerr('D_varcross  (ndx)', ierr, ndx)
-         call realloc(D_varsquare, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-         call aerr('D_varsquare  (ndx)', ierr, ndx)
-
-         call realloc(DR_mean, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-         call aerr('DR_mean  (ndx)', ierr, ndx)
-         call realloc(DR_var, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-         call aerr('DR_var  (ndx)', ierr, ndx)
-         call realloc(DR_min, ndx, stat=ierr, keepExisting = .false., fill = huge(0d0))
-         call aerr('DR_min  (ndx)', ierr, ndx)
-         call realloc(DR_max, ndx, stat=ierr, keepExisting = .false., fill = -1d0*huge(0d0))
-         call aerr('DR_max  (ndx)', ierr, ndx)
-         call realloc(DR_varcross, ndx, stat=ierr, keepExisting = .false., fill = tiny(0d0))
-         call aerr('DR_varcross  (ndx)', ierr, ndx)
-         call realloc(DR_varsquare, ndx, stat=ierr, keepExisting = .false., fill = tiny(0d0))
-         call aerr('DR_varsquare  (ndx)', ierr, ndx)
-
-         call realloc(ust_mean, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-         call aerr('ust_mean  (ndx)', ierr, ndx)
-         call realloc(ust_var, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-         call aerr('ust_var  (ndx)', ierr, ndx)
-         call realloc(ust_min, ndx, stat=ierr, keepExisting = .false., fill = huge(0d0))
-         call aerr('ust_min  (ndx)', ierr, ndx)
-         call realloc(ust_max, ndx, stat=ierr, keepExisting = .false., fill = -1d0*huge(0d0))
-         call aerr('ust_max  (ndx)', ierr, ndx)
-         call realloc(ust_varcross, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-         call aerr('ust_varcross  (ndx)', ierr, ndx)
-         call realloc(ust_varsquare, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-         call aerr('ust_varsquare  (ndx)', ierr, ndx)
-
-         call realloc(vst_mean, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-         call aerr('vst_mean  (ndx)', ierr, ndx)
-         call realloc(vst_var, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-         call aerr('vst_var  (ndx)', ierr, ndx)
-         call realloc(vst_min, ndx, stat=ierr, keepExisting = .false., fill = huge(0d0))
-         call aerr('vst_min  (ndx)', ierr, ndx)
-         call realloc(vst_max, ndx, stat=ierr, keepExisting = .false., fill = -1d0*huge(0d0))
-         call aerr('vst_max  (ndx)', ierr, ndx)
-         call realloc(vst_varcross, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-         call aerr('vst_varcross  (ndx)', ierr, ndx)
-         call realloc(vst_varsquare, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-         call aerr('vst_varsquare  (ndx)', ierr, ndx)
-
-         call realloc(urms_mean, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-         call aerr('urms_mean  (ndx)', ierr, ndx)
-         call realloc(urms_var, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-         call aerr('urms_var  (ndx)', ierr, ndx)
-         call realloc(urms_min, ndx, stat=ierr, keepExisting = .false., fill = huge(0d0))
-         call aerr('urms_min  (ndx)', ierr, ndx)
-         call realloc(urms_max, ndx, stat=ierr, keepExisting = .false., fill = -1d0*huge(0d0))
-         call aerr('urms_max  (ndx)', ierr, ndx)
-         call realloc(urms_varcross, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-         call aerr('urms_varcross  (ndx)', ierr, ndx)
-         call realloc(urms_varsquare, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-         call aerr('urms_varsquare  (ndx)', ierr, ndx)
-
-         call realloc(thetamean_mean, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-         call aerr('thetamean_mean  (ndx)', ierr, ndx)
-         call realloc(thetamean_var, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-         call aerr('thetamean_var  (ndx)', ierr, ndx)
-         call realloc(thetamean_min, ndx, stat=ierr, keepExisting = .false., fill = huge(0d0))
-         call aerr('thetamean_min  (ndx)', ierr, ndx)
-         call realloc(thetamean_max, ndx, stat=ierr, keepExisting = .false., fill = -1d0*huge(0d0))
-         call aerr('thetamean_max  (ndx)', ierr, ndx)
-         call realloc(thetamean_varcross, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-         call aerr('thetamean_varcross  (ndx)', ierr, ndx)
-         call realloc(thetamean_varsquare, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-         call aerr('thetamean_varsquare  (ndx)', ierr, ndx)
-         call realloc(thetamean_sin, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-         call aerr('thetamean_sin  (ndx)', ierr, ndx)
-         call realloc(thetamean_cos, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-         call aerr('thetamean_cos  (ndx)', ierr, ndx)
-
-         call realloc(sigmwav_mean, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-         call aerr('sigmwav_mean  (ndx)', ierr, ndx)
-         call realloc(sigmwav_var, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-         call aerr('sigmwav_var  (ndx)', ierr, ndx)
-         call realloc(sigmwav_min, ndx, stat=ierr, keepExisting = .false., fill = huge(0d0))
-         call aerr('sigmwav_min  (ndx)', ierr, ndx)
-         call realloc(sigmwav_max, ndx, stat=ierr, keepExisting = .false., fill = -1d0*huge(0d0))
-         call aerr('sigmwav_max  (ndx)', ierr, ndx)
-         call realloc(sigmwav_varcross, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-         call aerr('sigmwav_varcross  (ndx)', ierr, ndx)
-         call realloc(sigmwav_varsquare, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-         call aerr('sigmwav_varsquare  (ndx)', ierr, ndx)
-
-         call realloc(cwav_mean, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-         call aerr('cwav_mean  (ndx)', ierr, ndx)
-         call realloc(cwav_var, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-         call aerr('cwav_var  (ndx)', ierr, ndx)
-         call realloc(cwav_min, ndx, stat=ierr, keepExisting = .false., fill = huge(0d0))
-         call aerr('cwav_min  (ndx)', ierr, ndx)
-         call realloc(cwav_max, ndx, stat=ierr, keepExisting = .false., fill = -1d0*huge(0d0))
-         call aerr('cwav_max  (ndx)', ierr, ndx)
-         call realloc(cwav_varcross, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-         call aerr('cwav_varcross  (ndx)', ierr, ndx)
-         call realloc(cwav_varsquare, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-         call aerr('cwav_varsquare  (ndx)', ierr, ndx)
-
-         call realloc(cgwav_mean, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-         call aerr('cgwav_mean  (ndx)', ierr, ndx)
-         call realloc(cgwav_var, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-         call aerr('cgwav_var  (ndx)', ierr, ndx)
-         call realloc(cgwav_min, ndx, stat=ierr, keepExisting = .false., fill =huge(0d0))
-         call aerr('cgwav_min  (ndx)', ierr, ndx)
-         call realloc(cgwav_max, ndx, stat=ierr, keepExisting = .false., fill = -1d0*huge(0d0))
-         call aerr('cgwav_max  (ndx)', ierr, ndx)
-         call realloc(cgwav_varcross, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-         call aerr('cgwav_varcross  (ndx)', ierr, ndx)
-         call realloc(cgwav_varsquare, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-         call aerr('cgwav_varsquare  (ndx)', ierr, ndx)
-
-         call realloc(s1_mean, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-         call aerr('s1_mean  (ndx)', ierr, ndx)
-         call realloc(s1_var, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-         call aerr('s1_var  (ndx)', ierr, ndx)
-         call realloc(s1_min, ndx, stat=ierr, keepExisting = .false., fill = huge(0d0))
-         call aerr('s1_min  (ndx)', ierr, ndx)
-         call realloc(s1_max, ndx, stat=ierr, keepExisting = .false., fill = -1d0*huge(0d0))
-         call aerr('s1_max  (ndx)', ierr, ndx)
-         call realloc(s1_varcross, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-         call aerr('s1_varcross  (ndx)', ierr, ndx)
-         call realloc(s1_varsquare, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-         call aerr('s1_varsquare  (ndx)', ierr, ndx)
-
-         call realloc(Fx_mean, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-         call aerr('Fx_mean  (ndx)', ierr, ndx)
-         call realloc(Fx_var, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-         call aerr('Fx_var  (ndx)', ierr, ndx)
-         call realloc(Fx_min, ndx, stat=ierr, keepExisting = .false., fill = huge(0d0))
-         call aerr('Fx_min  (ndx)', ierr, ndx)
-         call realloc(Fx_max, ndx, stat=ierr, keepExisting = .false., fill = -1d0*huge(0d0))
-         call aerr('Fx_max  (ndx)', ierr, ndx)
-         call realloc(Fx_varcross, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-         call aerr('Fx_varcross  (ndx)', ierr, ndx)
-         call realloc(Fx_varsquare, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-         call aerr('Fx_varsquare  (ndx)', ierr, ndx)
-
-         call realloc(Fy_mean, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-         call aerr('Fy_mean  (ndx)', ierr, ndx)
-         call realloc(Fy_var, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-         call aerr('Fy_var  (ndx)', ierr, ndx)
-         call realloc(Fy_min, ndx, stat=ierr, keepExisting = .false., fill = huge(0d0))
-         call aerr('Fy_min  (ndx)', ierr, ndx)
-         call realloc(Fy_max, ndx, stat=ierr, keepExisting = .false., fill = -1d0*huge(0d0))
-         call aerr('Fy_max  (ndx)', ierr, ndx)
-         call realloc(Fy_varcross, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-         call aerr('Fy_varcross  (ndx)', ierr, ndx)
-         call realloc(Fy_varsquare, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-         call aerr('Fy_varsquare  (ndx)', ierr, ndx)
-
-         call realloc(u_mean, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-         call aerr('u_mean  (ndx)', ierr, ndx)
-         call realloc(u_var, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-         call aerr('u_var  (ndx)', ierr, ndx)
-         call realloc(u_min, ndx, stat=ierr, keepExisting = .false., fill = huge(0d0))
-         call aerr('u_min  (ndx)', ierr, ndx)
-         call realloc(u_max, ndx, stat=ierr, keepExisting = .false., fill = -1d0*huge(0d0))
-         call aerr('u_max  (ndx)', ierr, ndx)
-         call realloc(u_varcross, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-         call aerr('u_varcross  (ndx)', ierr, ndx)
-         call realloc(u_varsquare, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-         call aerr('u_varsquare  (ndx)', ierr, ndx)
-
-         call realloc(v_mean, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-         call aerr('v_mean  (ndx)', ierr, ndx)
-         call realloc(v_var, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-         call aerr('v_var  (ndx)', ierr, ndx)
-         call realloc(v_min, ndx, stat=ierr, keepExisting = .false., fill = huge(0d0))
-         call aerr('v_min  (ndx)', ierr, ndx)
-         call realloc(v_max, ndx, stat=ierr, keepExisting = .false., fill = -1d0*huge(0d0))
-         call aerr('v_max  (ndx)', ierr, ndx)
-         call realloc(v_varcross, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-         call aerr('v_varcross  (ndx)', ierr, ndx)
-         call realloc(v_varsquare, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-         call aerr('v_varsquare  (ndx)', ierr, ndx)
+      if (jaavgwavquant .eq. 1) then            ! arrays for statistical output wave quantities
+         call xbeach_allocateaverages()
       end if
    end if
    end subroutine flow_waveinit

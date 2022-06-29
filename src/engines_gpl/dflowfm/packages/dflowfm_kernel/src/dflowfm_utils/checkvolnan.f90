@@ -44,5 +44,5 @@
     if (isnan(vol1(n))) then
        write(msgbuf,*)  ' volnan ', i, n ; call msg_flush()
     endif
-   enddo
-end subroutine checkvolnan
+ enddo
+ end subroutine checkvolnan

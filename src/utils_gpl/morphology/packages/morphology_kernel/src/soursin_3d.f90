@@ -48,7 +48,7 @@ subroutine soursin_3d(h1          ,thick0      ,thick1      ,sigsed      ,thicks
     real(fp), intent(in)  :: r0
     real(fp), intent(in)  :: rhosol
     real(fp), intent(in)  :: seddif
-    real(fp), intent(in)  :: sigsed
+    real(fp), intent(in)  :: sigsed  
     real(fp), intent(in)  :: sigmol
     real(fp), intent(in)  :: thicksed
     real(fp), intent(in)  :: thick0

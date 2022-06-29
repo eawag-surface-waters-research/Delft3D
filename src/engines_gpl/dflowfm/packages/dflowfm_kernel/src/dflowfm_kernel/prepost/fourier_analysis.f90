@@ -52,8 +52,8 @@ module m_fourier_analysis
 
     !> struct to enable different sizes of suma and sumb
     type fdata
-       real(kind=fp), allocatable   :: rdata(:)           !< actual data for suma and sumb of fourier analysis
-       real(kind=sp), allocatable   :: sdata(:)           !< actual data for min/max calculations
+       real(kind=fp), allocatable :: rdata(:)  !< actual data for suma and sumb of fourier analysis
+       real(kind=sp), allocatable :: sdata(:)  !< actual data for min/max calculations
        type (TRunningMean), pointer :: running => null()  !< struct holding data for running mean calculations
     end type
 
@@ -110,9 +110,9 @@ module m_fourier_analysis
 
     real(kind=fp)             :: time_unit_factor
 
-    real(kind=fp), parameter   :: defaultd = -999.0_fp   ! Default value for doubles
+    real(kind=fp), parameter   :: defaultd = -999.0_fp ! Default value for doubles
     real(kind=fp), parameter   :: dmiss_minmax = 1e30_fp ! Default values for min/max calculations
-    real(kind=fp), parameter   :: tol_time = 1d-9        ! tolerance for comparing times
+    real(kind=fp), parameter   :: tol_time = 1d-9      ! tolerance for comparing times
 
     public :: fouini
     public :: alloc_fourier_analysis_arrays
@@ -173,20 +173,20 @@ module m_fourier_analysis
           names(2) = gdfourier%founamc(ivar)
           do i = 1, 2
              select case (names(i))
-             case ('ws')
-                gdfourier%iblws = gdfourier%iblws + 1
+          case ('ws')
+             gdfourier%iblws = gdfourier%iblws + 1
              case ('sul')
                 gdfourier%iblsul = gdfourier%iblsul + 1
-             case ('uc')
-                gdfourier%ibluc = gdfourier%ibluc + 1
+          case ('uc')
+             gdfourier%ibluc = gdfourier%ibluc + 1
              case ('fb')
                 gdfourier%iblfb = gdfourier%iblfb + 1
              case ('wdog')
                 gdfourier%iblwdog = gdfourier%iblwdog + 1
              case ('vog')
                 gdfourier%iblvog = gdfourier%iblvog + 1
-             end select
-          enddo
+          end select
+       enddo
        enddo
     end subroutine count_fourier_variables
 
@@ -194,7 +194,7 @@ module m_fourier_analysis
    subroutine alloc_fourier_analysis_arrays()
        use m_flowgeom, only : bl, bl_min, ndx
        use m_flow, only: s1, s1max, kmx, laytyp, numtopsig
-       !!--declarations----------------------------------------------------------------
+   !!--declarations----------------------------------------------------------------
        use precision
 
        !
@@ -581,7 +581,7 @@ module m_fourier_analysis
              fouelp(ifou) = 'l'
           case('max', 'min', 'avg')
              isRunningMean = .false.
-             if (fnumcy(ifou) > 0) then
+             if (fnumcy(ifou)>0) then
                 if (cdummy /= 'avg') then
                    RMmeta = fillMetaRM(founam(ifou), fnumcy(ifou), rstart, rstop, ti_fou)
                    call init_running_mean(fousma(ifou)%running, RMmeta)
@@ -605,7 +605,7 @@ module m_fourier_analysis
                 end select
              else if ( .not. isRunningMean) then
                 select case (cdummy)
-                case ('max')
+                   case ('max')
                       if (irelp /= nveld .and. valid_combi(founam(ifou), columns(nveld))) then
                          fouelp(ifou) = 'c'
                          gdfourier%founamc = columns(nveld)
@@ -613,7 +613,7 @@ module m_fourier_analysis
                          fouelp(ifou) = 'x'
                          gdfourier%withTime(ifou) = .true.
                       else
-                         fouelp(ifou) = 'x'
+                      fouelp(ifou) = 'x'
                       end if
                    case ('min')
                       if (irelp /= nveld .and. valid_combi(founam(ifou), columns(nveld))) then
@@ -623,7 +623,7 @@ module m_fourier_analysis
                          fouelp(ifou) = 'i'
                          gdfourier%withTime(ifou) = .true.
                       else
-                         fouelp(ifou) = 'i'
+                      fouelp(ifou) = 'i'
                       end if
                    case ('avg')
                       fouelp(ifou) = 'a'
@@ -637,7 +637,7 @@ module m_fourier_analysis
                 goto 6666
              endif
           end select
-       endif
+          endif
        !
        if ((fouelp(ifou)=='x'.or.fouelp(ifou)=='e') .and. founam(ifou)=='s1') then
           !
@@ -670,7 +670,7 @@ module m_fourier_analysis
              if (fouelp(ifou) /= 'x') then
                 fouvarnam(ivar) = "running_mean" // cref // "_max"
              else
-                fouvarnam(ivar) = "fourier" // cref // "_max"
+             fouvarnam(ivar) = "fourier" // cref // "_max"
              end if
              fouvarnamlong(ivar) = "maximum value"
              if (index('ux|uy|uxa|uya',trim(founam(ifou)))==0) then
@@ -708,7 +708,7 @@ module m_fourier_analysis
              if (fouelp(ifou) /= 'i') then
                 fouvarnam(ivar) = "running_mean" // cref // "_min"
              else
-                fouvarnam(ivar) = "fourier" // cref // "_min"
+             fouvarnam(ivar) = "fourier" // cref // "_min"
              end if
              fouvarnamlong(ivar) = "minimum value"
              call setfouunit(founam(ifou), lsal, ltem, fconno(ifou), fouvarunit(ivar))
@@ -780,14 +780,14 @@ module m_fourier_analysis
           end select
           select case (fouelp(ifou))
              case('x', 'i', 'r', 'u', 'c', 'C')
-                if (ierr == 0) call realloc(fousma(ifou)%sdata, sizea, stat=ierr, fill=real(fillValue,sp))
-                if (ierr == 0) call realloc(fousmb(ifou)%sdata, sizeb, stat=ierr, fill=real(fillValue,sp))
+             if (ierr == 0) call realloc(fousma(ifou)%sdata, sizea, stat=ierr, fill=real(fillValue,sp))
+             if (ierr == 0) call realloc(fousmb(ifou)%sdata, sizeb, stat=ierr, fill=real(fillValue,sp))
              case('R', 'U')
                 if (ierr == 0) call realloc(fousma(ifou)%sdata, sizea, stat=ierr, fill=real(fillValue,sp))
                 if (ierr == 0) call realloc(fousmb(ifou)%sdata, sizeb, stat=ierr, fill=real(dmiss,sp))
              case default
-                if (ierr == 0) call realloc(fousma(ifou)%rdata, sizea, stat=ierr, fill=fillValue)
-                if (ierr == 0) call realloc(fousmb(ifou)%rdata, sizeb, stat=ierr, fill=fillValue)
+             if (ierr == 0) call realloc(fousma(ifou)%rdata, sizea, stat=ierr, fill=fillValue)
+             if (ierr == 0) call realloc(fousmb(ifou)%rdata, sizeb, stat=ierr, fill=fillValue)
           end select
        enddo
        if (ierr /= 0) then
@@ -966,25 +966,25 @@ end subroutine setfoustandardname
    !
    ! Global variables
    !
-       integer                      , intent(in)            :: ifou    !<  Counter
-       real(kind=fp)                , intent(in)            :: time0   !<  Current time
-       real(kind=fp)  , dimension(:), intent(in)            :: rarray  !<  Array for fourier analysis
-       real(kind=fp)                , intent(in)            :: dtw     !<  weight for time step
+       integer                      , intent(in)            :: ifou   !<  Counter
+       real(kind=fp)                , intent(in)            :: time0  !<  Current time
+       real(kind=fp)  , dimension(:), intent(in)            :: rarray !<  Array for fourier analysis
+       real(kind=fp)                , intent(in)            :: dtw    !<  weight for time step
        real(kind=prec), dimension(:), intent(in)            :: bl      !<  bottom level
-       integer                      , intent(inout)         :: nfou    !<  counter for update fou quantities
+       integer                      , intent(inout)         :: nfou   !< counter for update fou quantities
        real(kind=fp)  , dimension(:), intent(in), optional  :: rarray2 !<  Array for combined min/max
        !
        ! The following list of pointer parameters is used to point inside the gdfourier structure
        !
-       real(kind=fp)               :: ftmsto
-       real(kind=fp)               :: ftmstr
-       real(kind=fp)               :: foufas
-       real(kind=fp)    ,  pointer :: fousma(:)
-       real(kind=fp)    ,  pointer :: fousmb(:)
-       real(kind=sp)    ,  pointer :: fousmas(:)
-       real(kind=sp)    ,  pointer :: fousmbs(:)
-       character(len=16),  pointer :: founam
-       integer                     :: nmaxus
+       real(kind=fp)              :: ftmsto
+       real(kind=fp)              :: ftmstr
+       real(kind=fp)              :: foufas
+       real(kind=fp)    , pointer :: fousma(:)
+       real(kind=fp)    , pointer :: fousmb(:)
+       real(kind=sp)    , pointer :: fousmas(:)
+       real(kind=sp)    , pointer :: fousmbs(:)
+       character(len=16), pointer :: founam
+       integer                    :: nmaxus
    !
    ! Local variables
    !
@@ -1014,8 +1014,8 @@ end subroutine setfoustandardname
              !
              ! Calculate MAX value
              !
-             do n = 1, nmaxus
-                fousmas(n) = max(fousmas(n), rarray(n))
+                do n = 1, nmaxus
+                   fousmas(n) = max(fousmas(n), rarray(n))
              enddo
              if (gdfourier%withTime(ifou)) then
                 do n = 1, nmaxus
@@ -1042,12 +1042,12 @@ end subroutine setfoustandardname
                    if (rarray(n) < fousmas(n)) fousmbs(n) = time0
                 end do
              else
-               if (founam == 's1') then
-                  do n = 1, nmaxus
+             if (founam == 's1') then
+                do n = 1, nmaxus
                      ! waterdepth (fousmb)
-                     fousmbs(n) = min(fousmbs(n), rarray(n) - real(bl(n),sp))
-                  enddo
-               endif
+                   fousmbs(n) = min(fousmbs(n), rarray(n) - real(bl(n),sp))
+                enddo
+             endif
              endif
           case ('a', 'l')
              !
@@ -1237,19 +1237,19 @@ end subroutine setfoustandardname
        withMinMax = ( index(record,'max')>0 .or. index(record,'min')>0 )
        if (withMinMax .and. columns(nveld) == 'time') then
           nofouvarstep = 2
-       else if (numcyc == 0) then
+          else if (numcyc == 0) then
           nofouvarstep = 1
-       else
+          else
           nofouvarstep = 2
-       end if
+          endif
 
        if (columns(1)(1:2)=='wl') then
           ! requested fourier analysis water-level
           nofou = nofou + 1
           if (withMinMax) then
-             !
+       !
              ! max and min: also write max depth
-             !
+       !
              nofouvar = nofouvar + 2
           else
              nofouvar = nofouvar + nofouvarstep
@@ -1258,7 +1258,7 @@ end subroutine setfoustandardname
        ! requested fourier analysis constituent
        !
        elseif (ReadConstituentNumber(columns(1), number)) then
-          nofou    = nofou + 1
+          nofou = nofou + 1
           nofouvar = nofouvar + nofouvarstep
        !
        ! remaining quantities
@@ -1266,14 +1266,14 @@ end subroutine setfoustandardname
        else
           select case (columns(1))
           case ('ws', 'ct', 'ux', 'uy', 'uxa', 'uya', 'uc', 'cs', 'bs', 'fb', 'wdog', 'vog', 'q1', 'sul')
-             nofou    = nofou + 1
+          nofou = nofou + 1
              nofouvar = nofouvar + nofouvarstep
           case default
-            !
-            ! requested fourier analysis undefined
-            !
-            msgbuf = 'Fourier analysis: variable keyword ''' // trim(columns(1)) // ''' not recognized, ignored'
-            call msg_flush()
+       !
+          ! requested fourier analysis undefined
+          !
+          msgbuf = 'Fourier analysis: variable keyword ''' // trim(columns(1)) // ''' not recognized, ignored'
+          call msg_flush()
           end select
        endif
        !
@@ -1341,7 +1341,7 @@ end subroutine setfoustandardname
     if (kmx >0 .and. (laytyp(1) == 1 .or. numtopsig > 0)) then
        bl_min = min(bl, bl_min) ! lowest bed level
        s1max = max(s1, s1max) ! highest water level
-    endif
+       endif
     
     if (gdfourier%iblws > 0) then
        allocate(wmag(lnx), stat=ierr)
@@ -1428,7 +1428,11 @@ end subroutine setfoustandardname
        case ('r1')
           fieldptr => constituents(gdfourier%fconno(ifou),:)
        case ('ta')
-          call gettaus(1, 1)
+            if (jawave==0) then  
+                call gettaus(1,1)
+             else
+                call gettauswave(jawaveswartdelwaq)
+             endif
           fieldptr => taus
        case ('fb')
           fieldptr => freeboard      ! freeboard
@@ -1640,7 +1644,7 @@ end subroutine setfoustandardname
            idvar(:,ivar) = imissval
            if (index(founam(ifou),'fb') > 0 .or. index(founam(ifou),'wdog') > 0 .or. index(founam(ifou),'vog') > 0) then 
            ! Freeboard, waterdepth on ground and volume on ground are only for 1D
-              ierr = unc_def_var_map(fileids%ncid,fileids%id_tsp, idvar(:,ivar), NF90_DOUBLE, unc_loc, trim(fouvarnam(ivar)), trim(fouvarnamstd(ivar)), &
+           ierr = unc_def_var_map(fileids%ncid,fileids%id_tsp, idvar(:,ivar), NF90_DOUBLE, unc_loc, trim(fouvarnam(ivar)), trim(fouvarnamstd(ivar)), &
                           AnalyseTypeShort // namfunlong // ', ' // trim(fouvarnamlong(ivar)), fouvarunit(ivar), is_timedep = 0, which_meshdim = 1)
            else
               ierr = unc_def_var_map(fileids%ncid,fileids%id_tsp, idvar(:,ivar), NF90_DOUBLE, unc_loc, trim(fouvarnam(ivar)), trim(fouvarnamstd(ivar)), &
@@ -1656,8 +1660,8 @@ end subroutine setfoustandardname
 
            if (ierr == NF90_NOERR) ierr = unc_add_gridmapping_att(fileids%ncid, idvar(:,ivar), jsferic)
            if ( .not. is_min_max_avg) then
-              if (ierr == NF90_NOERR) ierr = unc_put_att(fileids%ncid,idvar(:,ivar), 'number_of_cycles', fnumcy(ifou))
-              if (ierr == NF90_NOERR) ierr = unc_put_att(fileids%ncid,idvar(:,ivar), 'frequency_degrees_per_hour', freqnt)
+           if (ierr == NF90_NOERR) ierr = unc_put_att(fileids%ncid,idvar(:,ivar), 'number_of_cycles', fnumcy(ifou))
+           if (ierr == NF90_NOERR) ierr = unc_put_att(fileids%ncid,idvar(:,ivar), 'frequency_degrees_per_hour', freqnt)
            end if
 
            if (ierr /= NF90_NOERR) goto 99

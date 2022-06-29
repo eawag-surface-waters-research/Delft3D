@@ -42,6 +42,7 @@ subroutine solve_vertical(NUMCONST, ISED1, ISEDN, limtyp, thetavert, Ndkx, Lnkx,
    use m_flow,      only: epshsdif, s1, kmxn, xlozmidov, rhomean, rho, ag, a1, wsf  ! do not use m_flow, please put this in the argument list
    use m_flowparameters, only: epshu, testdryflood
    use m_sediment,  only: mtd, jased, ws, sedtra, stmpar
+   use m_fm_erosed, only: tpsnumber
    use sediment_basics_module
    use timers
 
@@ -164,8 +165,8 @@ subroutine solve_vertical(NUMCONST, ISED1, ISEDN, limtyp, thetavert, Ndkx, Lnkx,
 
 !           ! diffusion
             if (jased > 3 .and. j >= ISED1 .and. j <= ISEDN) then  ! sediment d3d
-               fluxfac = (mtd%seddif(j-ISED1+1,k))*dtbazi
-               ! D3D: vicmol/sigmol(l) + ozmid + seddif(nm, k, ls)/sigdif(l)
+               fluxfac = (ozmid + mtd%seddif(j-ISED1+1,k)/tpsnumber(j-ISED1+1) + difsed(j)          )*dtbazi
+                        ! i.w.  + vicwws/van rijn                              + background (dicoww)
             else
                fluxfac = (sigdifi(j)*vicwws(k) + difsed(j) + ozmid)*dtbazi
             end if

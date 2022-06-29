@@ -37,7 +37,7 @@
 
  implicit none
  double precision           :: Hrms, Tsig, Depth, uorbi, Tauw, hrm, ust
- integer                    :: k, jatauw = 2
+ integer                    :: k
  double precision           :: hk, sh2hk,hksh2,rn,asg,ew,sxx,syy,sxy,syx,dtau,shs, h2k, cp, cg, omeg
  double precision           :: dsk2, rk, rkx, rky, astar, fw, cgcp, rk2cgcp,  cgcp5, arms, rlabd
 
@@ -46,7 +46,7 @@
  COMMON /DRAWTHIS/ ndraw(50)
 
 
- if (depth < 0.1d0 .or. Tsig == 0) then
+ if (depth < 0.01d0 .or. Tsig<0.1d0) then      ! flume cases with wave nr 5
     Uorbi = 0d0 ; rlabd = 0d0 ; ust = 0d0
  else
     call getwavenr(depth,tsig,rk)

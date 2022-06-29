@@ -42,8 +42,8 @@
 
     rnL = 0.5d0*( rnveg(k1) + rnveg(k2) )
 
-    if (hu(L) > 0 .and. rnL > densvegminbap) then  ! overwrite cfuhi on veg locations with 2D Baptist
-        if (jaBaptist <= 2) then                   ! compute Baptist on board
+    if (hu(L) > 0 .and. rnL > densvegminbap) then              ! overwrite cfuhi on veg locations with 2D Baptist
+        if (jaBaptist <= 2) then                               ! compute Baptist on board
            call getcz(hu(L), frcu(L), ifrcutp(L), Czb, L)      ! standard Chezy coeff
            if (diaveg(k1) > 0 .and. diaveg(k2) > 0) then
               diaL = 0.5d0*( diaveg(k1) + diaveg(k2) )
@@ -104,7 +104,7 @@
               cfuhi(L)   = ag/(Cz*Cz*hu(L))                    ! better for morfo
               alfav(L)   = ag*( 1d0/(Czr*Czr) - 1d0/(Cz*Cz) )  / hu(L)
            endif
-        else if (jaBaptist == 3) then                          ! bij biologists through Python
+        else if (jaBaptist == 3) then                          ! by biologists through Python
            cfuhi(L) = cfuveg(L)/hu(L)
            alfav(L) = alfaveg(L)/hu(L)
         endif

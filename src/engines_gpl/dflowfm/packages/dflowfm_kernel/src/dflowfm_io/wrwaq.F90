@@ -1696,6 +1696,7 @@ subroutine waq_wri_couple_files(time)
     use m_flowgeom
     use m_flow
     use m_flowexternalforcings
+    use m_waves
     use unstruc_files, only: defaultFilename
     implicit none
 !
@@ -1707,7 +1708,7 @@ subroutine waq_wri_couple_files(time)
 !
     integer          :: itim !< Time (seconds) since simulation start.
     integer, save    :: itim_prev = -1
- !   integer          :: i, n, L, LL, nn, ifrctyp
+    integer          :: L,k1,k2
  !   double precision ::  wrc, cf, cfn, cz, frcn, ar, wa
 !
 !! executable statements -------------------------------------------------------
@@ -1737,8 +1738,10 @@ subroutine waq_wri_couple_files(time)
     end if
 
     ! Taus file (contains taus at the bottom of computational cells)
-    if (jawave /= 3) then   ! If jawave == 3, then taus is obtained from subroutine tauwave (taus = taucur + tauwave).
-        call gettaus(1,2)
+    if (jawave == 0) then   ! If jawave > 0, then taus is obtained from subroutine tauwave (taus = taucur + tauwave).
+        call gettaus(1,2)   
+    else
+        call gettauswave(jawaveswartdelwaq)
     endif
     call waq_wri_tau(itim, defaultFilename('tau'), waqpar%luntau)
 
@@ -2046,8 +2049,8 @@ subroutine waq_make_aggr_lnk()
 ! first 2D
     waqpar%noq12  = 0
     do L=1,lnx
-        ip1 = waqpar%iapnt(ln(1,L))
-        ip2 = waqpar%iapnt(ln(2,L))
+        ip1   = waqpar%iapnt(ln(1,L))
+        ip2   = waqpar%iapnt(ln(2,L))
 
         if ( (ip1 > 0 .or. ip2 > 0) .and. ip1 /= ip2 ) then
             ip = 0

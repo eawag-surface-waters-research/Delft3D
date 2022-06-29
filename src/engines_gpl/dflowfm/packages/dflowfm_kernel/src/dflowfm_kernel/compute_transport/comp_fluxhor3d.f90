@@ -219,13 +219,6 @@ subroutine comp_fluxhor3D(NUMCONST, limtyp, Ndkx, Lnkx, u1, q1, au, sqi, vol1, k
                is = -1 ; ku = k2 ; half = 1d0 - acl(LL)
             endif
 
-
-!        BEGIN DEBUG
-!         if ( dnt.eq.5 .and. ( ( k1.eq.1736 .and. q1(L).gt.0d0 ) .or. ( k2.eq.1736 .and. q1(L).lt.0d0 ) ) ) then
-!            continue
-!         end if
-!        END DEBUG
-
          QL = max(q1(L),0d0)
          QR = min(q1(L),0d0)
 
@@ -288,10 +281,6 @@ subroutine comp_fluxhor3D(NUMCONST, limtyp, Ndkx, Lnkx, u1, q1, au, sqi, vol1, k
    end do
 
 !$OMP END PARALLEL DO
-
-!  BEGIN DEBUG
-!   return
-!  END DEBUG
 
 !  diffusion
    if (dicouv >= 0d0 .and. jalimitdiff .ne. 3) then

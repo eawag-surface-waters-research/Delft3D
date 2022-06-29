@@ -63,7 +63,7 @@ contains
       if (allocated(contactnetlinks)) deallocate(contactnetlinks)
       contactnlinks = 0
       call dealloc(hashlist_contactids)
-  end subroutine default_save_ugrid_state
+   end subroutine default_save_ugrid_state
 
    !> Resets only waves variables intended for a restart of flow simulation.
    !! Upon loading of new model/MDU, call default_save_ugrid_state() instead.
@@ -75,4 +75,4 @@ contains
       
    end subroutine reset_save_ugrid_state
 
-   end module m_save_ugrid_state
+end module m_save_ugrid_state

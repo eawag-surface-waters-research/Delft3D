@@ -43,15 +43,14 @@
  use m_alloc
  use m_sobekdfm
  use unstruc_channel_flow
- use unstruc_display, only : ntek, jaGUI
  use iso_c_utils, only : MAXSTRINGLEN
 
  implicit none
 
  integer          :: n
- integer          :: kb , k2 , L, k, LL, LS, itpbn
- integer          :: kbk, k2k, Lk, ibr
- double precision :: dtiba, hh, zb, dir, dtgh, alf
+ integer          :: kb , k2 , L, k, LL, itpbn
+ integer          :: ibr
+ double precision :: dtiba, hh, zb, dtgh
  double precision :: sqrtgfh, cffu, rowsum, fuL, ruL, huL, hep
  integer          :: i, ierr
  character(len=2) :: dim_text
@@ -163,9 +162,6 @@
     endif                                            ! then also setback s1 !
  enddo
  !$OMP END PARALLEL DO
-
- ! compute riemann bnd mean state
- ! call  riemann_setmean()
 
  ! compute right-hand sides
  do n  = 1, nbndz                                    ! overrides for waterlevel boundaries

@@ -30,32 +30,54 @@
 ! $Id$
 ! $HeadURL$
 
-   !> subroutine to compute wave forces from SWAN output
+   !> subroutine to compute wave forces
    subroutine setwavfu()
    use unstruc_messages
    use MessageHandling
    use m_flowparameters
    use m_flowgeom
    use m_flow, only: hu, huvli, wavfu, wavfv, rhomean,kmx,rho
-   use m_waves
+   use m_waves, m_waves_hminlw=>hminlw
+   use m_xbeach_data, xb_hminlw=>hminlw
    use m_physcoef, only: sag
    implicit none
 
    integer          :: mout
    integer          :: L,LL,Lb,Lt
    double precision :: wavfx, wavfy, wavfbx, wavfby
-   double precision :: wavfu_loc, wavfbu_loc, twavL, hwavL, wavfuL, cc
+   double precision :: wavfu_loc, wavfbu_loc, twavL, hwavL, wavfuL, wavfvL, cc
    double precision :: wavfv_loc, wavfbv_loc, wavfmag, wavfbmag,wavfang, wavfbang
-   double precision :: fmax, ac1, ac2, hminlwi, rhoL, zw
+   double precision :: fmax, ac1, ac2, hminlwi, rhoL, zw, hminlw, gammaloc, halfwav
 
    integer          :: k1, k2
 
-   hminlwi = 1d0/hminlw
+   if (jawaveforces==0) then
+      wavfu = 0d0
+      wavfv = 0d0
+      return
+   endif
+
+   ! Set correct limiting depth
+   if (jawave==3) then
+      hminlw = m_waves_hminlw
+      hminlwi = 1d0/m_waves_hminlw
+      gammaloc = gammax
+   endif
+
+   if (jawave==4) then
+      hminlw = xb_hminlw
+      hminlwi = 1d0/xb_hminlw
+      gammaloc = gammaxxb
+   endif
+
+   facmax     = 0.25d0*sag*rhomean*gammaloc**2
+
    wavfu = 0d0
+   wavfv = 0d0
 
    if (kmx==0) then
       do L = 1,lnx
-         if (hu(L) < epshu) cycle
+         if (hu(L) <= epshu) cycle
          if (L > lnx1D) then
             k1 = ln(1,L) ; k2 = ln(2,L)
             ac1 = acl(L)
@@ -69,18 +91,18 @@
 
             twavL = ac1*twav(k1)   + ac2*twav(k2)
 
+            ! limit forces
+            fmax       = facmax*hu(L)**1.5 / max(0.1d0, twavL)
+
             ! projection in face-normal direction
             wavfu_loc  = wavfx*csu(L)  + wavfy*snu(L)
             wavfv_loc  = -wavfx*snu(L)  + wavfy*csu(L)
             wavfbu_loc = wavfbx*csu(L) + wavfby*snu(L)
             wavfbv_loc = -wavfbx*snu(L) + wavfby*csu(L)
 
-            ! limit forces
-            fmax       = facmax*hu(L)**1.5 / max(0.1d0, twavL)
-
             ! Should be done on the vector norm, nt separate comps
-            wavfmag = min(sqrt(wavfu_loc*wavfu_loc + wavfv_loc*wavfv_loc),fmax)
-            wavfbmag = min(sqrt(wavfbu_loc*wavfbu_loc + wavfbv_loc*wavfbv_loc),fmax)
+            wavfmag = min(hypot(wavfu_loc,wavfv_loc),fmax)
+            wavfbmag = min(hypot(wavfbu_loc,wavfbv_loc),fmax)
             wavfang  = atan2(wavfv_loc,wavfu_loc)
             wavfbang  = atan2(wavfbv_loc,wavfbu_loc)    ! necessary?
             wavfu_loc = wavfmag*cos(wavfang)
@@ -96,44 +118,66 @@
       enddo
    else  ! kmx>0
       do LL=1, lnx
-         if (hu(LL)<epshu) cycle
+         if (hu(LL)<=epshu) cycle
          call getLbotLtop(LL, Lb, Lt)
          if (Lt<Lb) cycle
          k1 = ln(1,LL); k2 = ln(2,LL)
          ac1 = acL(LL); ac2 = 1d0-ac1
          !
-         hwavL = ac1*hwav(k1) + ac2*hwav(k2)
-         twavL = ac1*twav(k1) + ac2*twav(k2)
-         fmax  = facmax*hu(LL)**1.5 / max(0.1d0, twavL)
-         rhoL  = ac1*rho(ln(1,Lt)) + ac2*rho(ln(2,Lt))
+         hwavL = max(ac1*hwav(k1) + ac2*hwav(k2),0.01d0)
+         twavL = max(ac1*twav(k1) + ac2*twav(k2),0.1d0)
+         fmax  = facmax*hu(LL)**1.5 / twavL
+         rhoL  = rhomean
          !
-         ! Surface force, linear decrease over 0.5*hrms
+         ! Surface force, assign to top layer
          !
          wavfx     = ac1*sxwav(k1) + ac2*sxwav(k2)
          wavfy     = ac1*sywav(k1) + ac2*sywav(k2)
          wavfu_loc = csu(LL)*wavfx + snu(LL)*wavfy
-         wavfuL    = 4d0*sign(min(abs(wavfu_loc), fmax), wavfu_loc)/max(hwavL,gammax*hminlw) ! to check
-         zw=0.5*(hu(Lt)-hu(Lt-1))    ! center top layer
-         do L=Lt,Lb+1,-1
-            if (zw<=0.5*hwavL) then
-               wavfu(L) = wavfuL*(1d0-2d0*zw/hwavL)/rhoL/hu(LL)*(hu(L)-hu(L-1))/hu(LL)
-               zw = zw + 0.5*(hu(L)-hu(L-1)) + 0.5*(hu(L-1)-hu(L-2))
-            elseif (zw>0.5*hwavL .and. hu(L)>(hu(LL)-0.5*hwavL)) then                      ! partial layer
-               cc = 0.5*(hu(L)+(hu(LL)-0.5*hwavL))                                         ! replaced layer center
-               wavfu(L) = wavfuL*(1d0-2d0*zw/hwavL)/rhoL/hu(LL)*(hu(L)-cc)/hu(LL)          ! contribution over partial layer
-            endif
-         enddo
+         wavfv_loc = -snu(LL)*wavfx + csu(LL)*wavfy
+         wavfu(Lt) = sign(min(abs(wavfu_loc), fmax), wavfu_loc)/rhoL/max(hu(LL)-hu(Lt-1),hminlw)    ! top layer, as in D3D
+         wavfv(Lt) = sign(min(abs(wavfv_loc), fmax), wavfv_loc)/rhoL/max(hu(LL)-hu(Lt-1),hminlw)    ! this limitation only works in sigma layers
+         !
+         ! The following is pretty inaccurate for limited nr of layers:
+         !
+         !wavfuL    = 4d0*sign(min(abs(wavfu_loc), fmax), wavfu_loc)/hwavL
+         !wavfvL    = 4d0*sign(min(abs(wavfv_loc), fmax), wavfv_loc)/hwavL          ! hwavL/4 is integral over 0.5*hwavL waterdepth of linear decrease
+         !! Check if first layer is thicker than 0.5*hrms
+         !! In that case, distribute over first layer
+         !dzu=hu(Lt)-hu(Lt-1)
+         !halfwav=0.5*hwavL
+         !!
+         !if (dzu > halfwav) then
+         !   wavfu(Lt) = wavfuL*0.25d0*hwavL/rhoL/dzu                               ! division by 0.5*hrms done above
+         !   wavfv(Lt) = wavfvL*0.25d0*hwavL/rhoL/dzu          
+         !else
+            !zw=0.5d0*dzu
+            !do L=Lt,Lb+1,-1
+            !   if (zw<=halfwav) then
+            !      wavfu(L) = wavfuL*(1d0-2d0*zw/hwavL)/rhoL                                     ! division by 0.5*hrms done above
+            !      wavfv(L) = wavfvL*(1d0-2d0*zw/hwavL)/rhoL                         
+            !      zw = zw + 0.5*(hu(L)-hu(L-2))
+            !   elseif (zw>halfwav .and. hu(L)>(hu(LL)-halfwav)) then                        ! partial layer
+            !      cc = 0.5*(hu(L)+(hu(LL)-halfwav))                                           ! replaced layer center
+            !      zw = hu(LL)-cc                                                                ! depth below surface
+            !      wavfu(L) = wavfuL*(1d0-zw/halfwav)/rhoL                                     ! contribution over partial layer
+            !      wavfv(L) = wavfvL*(1d0-zw/halfwav)/rhoL
+            !   endif
+            !enddo
+         !endif
          !
          ! Body forces, uniform over depth
          !
          wavfx     = ac1*sbxwav(k1) + ac2*sbxwav(k2)
          wavfy     = ac1*sbywav(k1) + ac2*sbywav(k2)
          wavfu_loc = csu(LL)*wavfx + snu(LL)*wavfy
+         wavfv_loc = -snu(LL)*wavfx + csu(LL)*wavfy
          do L=Lb,Lt
-            rhoL  = ac1*rho(ln(1,L)) + ac2*rho(ln(2,L))
-            wavfu(L) = wavfu(L) + sign(min(abs(wavfu_loc), fmax),wavfu_loc)/rhoL/hu(LL)/hu(LL)*(hu(L)-hu(L-1))   ! integral equals wavfu_loc/rho/hu
+            wavfu(L) = wavfu(L) + sign(min(abs(wavfu_loc), fmax),wavfu_loc)/rhoL/max(hu(LL),hminlw)
+            wavfv(L) = wavfv(L) + sign(min(abs(wavfv_loc), fmax),wavfv_loc)/rhoL/max(hu(LL),hminlw)
          enddo
       enddo
    endif
-
+1234 continue
+   return
    end subroutine setwavfu

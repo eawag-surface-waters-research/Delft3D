@@ -31,8 +31,7 @@
 ! $HeadURL$
 
    subroutine wave_makeplotvars
-   use m_waves, only: ustokes, vstokes, ust_mag, fwav_mag, taubxu, taux_cc, tauy_cc
-   use m_xbeach_data, only: Fx_cc, Fy_cc
+   use m_waves, only: ustokes, vstokes, ust_mag, fwav_mag, ustx_cc, usty_cc
    use m_flowparameters, only: jawave
    use m_flow
    use m_flowgeom
@@ -45,35 +44,53 @@
 
    ust_mag=0d0
    fwav_mag=0d0
-   taux_cc=0d0
-   tauy_cc=0d0
+   if (jawave.ne.4) then
+      ustx_cc=0d0
+      usty_cc=0d0
+   endif
 
    do L = 1, lnx   ! safe for 3D
-      k1=ln(1,L);k2=ln(2,L)
-      taux_cc(k1) = taux_cc(k1)+wcx1(L)*taubxu(L)
-      taux_cc(k2) = taux_cc(k2)+wcx2(L)*taubxu(L)
-      tauy_cc(k1) = tauy_cc(k1)+wcy1(L)*taubxu(L)
-      tauy_cc(k2) = tauy_cc(k2)+wcy2(L)*taubxu(L)
+      k1 = ln(1,L); k2 = ln(2,L)
       call getLbotLtop(L, Lb, Lt)
       do LL = Lb,Lt
          k1=ln(1,LL);k2=ln(2,LL)
-         ust_mag_u = sqrt(ustokes(LL)*ustokes(LL) + vstokes(LL)*vstokes(LL))
-         ust_mag(k1) = ust_mag(k1)+wcl(1,L)*ust_mag_u
-         ust_mag(k2) = ust_mag(k2)+wcl(2,L)*ust_mag_u
+         ustx_cc(k1) = ustx_cc(k1)+wcx1(L)*ustokes(LL)
+         usty_cc(k1) = usty_cc(k1)+wcy1(L)*ustokes(LL)
+         ustx_cc(k2) = ustx_cc(k2)+wcx2(L)*ustokes(LL)
+         usty_cc(k2) = usty_cc(k2)+wcy2(L)*ustokes(LL)
       end do
+
    end do
+   ust_mag = hypot(ustx_cc,usty_cc)
 
-   if (jawave==3 .or. jawave==6) then
+   if (jawave==3 .or. jawave==4 .or. jawave==6) then
       do L=1,lnx
-         k1=ln(1,L);k2=ln(2,L)
-         fwav_mag(k1) = fwav_mag(k1)+wcl(1,L)*wavfu(L)*rhomean*hu(L)
-         fwav_mag(k2) = fwav_mag(k2)+wcl(2,L)*wavfu(L)*rhomean*hu(L)
+         call getLbotLtop(L, Lb, Lt)
+         do LL = Lb,Lt
+            k1=ln(1,LL);k2=ln(2,LL)
+            fwav_mag(k1) = fwav_mag(k1)+wcl(1,L)*hypot(wavfu(LL),wavfv(LL))*rhomean*hu(L)
+            fwav_mag(k2) = fwav_mag(k2)+wcl(2,L)*hypot(wavfu(LL),wavfv(LL))*rhomean*hu(L)
+         enddo
       enddo
+   else
+      fwav_mag = 0d0
    end if
+   !
+   ! bed shear stress
+   workx = 0d0
+   worky = 0d0
+   do L=1,lnx
+      k1=ln(1,L)
+      k2=ln(2,L)
+      if (hu(L) > epshu) then
+         workx(k1) = workx(k1) + taubu(L)*wcx1(L)
+         workx(k2) = workx(k2) + taubu(L)*wcx2(L)
+         worky(k1) = worky(k1) + taubu(L)*wcy1(L)
+         worky(k2) = worky(k2) + taubu(L)*wcy2(L)
+      end if
+   enddo
+   taus = hypot(workx(1:ndx),worky(1:ndx))
 
-   if (jawave==4) then
-      fwav_mag = sqrt(Fx_cc*Fx_cc + Fy_cc*Fy_cc)
-   endif
    ierror = 0
 1234 continue
    return

@@ -43,40 +43,33 @@ subroutine setumod(jazws0)                          ! set cell center Perot velo
  use m_wind
  use m_ship
  use m_missing
- use m_xbeach_data, only : DR, roller, swave
+ use m_xbeach_data, only : DR, roller, swave, nuhfac
  use unstruc_model, only : md_restartfile
  use m_setucxcuy_leastsquare, only: reconst2nd
  implicit none
 
  integer,intent(in):: jazws0
  ! locals
- integer           :: L, LL, k, k1, k2, k12, k3, k4, kb, n, n1, n2, nn, ks, ierr
- double precision  :: ux, uy                         ! centre or node velocity x- and y components
- double precision  :: hsi, humx                      ! inverse centre depth, max depth u points
- double precision  :: qwd,qwd1,qwd2                  !
- double precision  :: qucx, qucy
+ integer           :: L, LL, k, k1, k2, k3, k4, kb, n, n1, n2                 !
  double precision  :: duxdn, duydn, duxdt, duydt     ! normal and tangential global ux,uy gradients
- double precision  :: vicl, c11, c12, c22, wudx, bai2, sxx, syy, snn
+ double precision  :: vicl, c11, c12, c22
 
- double precision  :: sxw, syw, sf, ac1, ac2, csl, snl, wuw, ustar, suxw, suyw, uin, suxL, suyL
- double precision  :: cs, sn, dxi2, dyi2, sucheck
- double precision  :: chezy2, hhu, rt, hmin, hs1, hs2
- double precision  :: uu,vv,uucx,uucy, ff, ds, hup, fcor, vcor, fcor1, fcor2, fvcor, fvcorab
+ double precision  :: sf, ac1, ac2, csl, snl, wuw, ustar, suxw, suyw,suxL, suyL
+ double precision  :: cs, sn
+ double precision  :: hmin, hs1, hs2
+ double precision  :: fcor, vcor, fcor1, fcor2, fvcor
  double precision  :: dundn, dutdn, dundt, dutdt, shearvar, delty, vksag6, Cz
- double precision  :: umodLL, volu, hul, dzz, adx, hdx, huv, qL, wcxu, wcyu
+ double precision  :: huv
  double precision, allocatable:: u1_tmp(:), vluban(:)
 
- integer           :: nw, L1, L2, kbk, k2k, Ld, Lu, kt, Lb, Lt, Lb1, Lt1, Lb2, Lt2, kb1, kb2, ntmp, m
+ integer           :: nw, L1, L2, kt, Lb, Lt, Lb1, Lt1, Lb2, Lt2, kb1, kb2, ntmp, m
 
- double precision  :: depumin  ! external
  double precision  :: horvic   ! external
  double precision  :: horvic3  ! external
 
  double precision  :: DRL, nuhroller
 
  double precision  :: dxiAu, vicc, vlban, fcLL
-
- integer :: ini = 0
 
  integer :: ndraw
  COMMON /DRAWTHIS/ ndraw(50)
@@ -99,7 +92,7 @@ subroutine setumod(jazws0)                          ! set cell center Perot velo
     if (newcorio == 1) then
        call setucxucyucxuucyunew() !reconstruct cell-center velocities
     else
-       call setucxucyucxuucyu() !reconstruct cell-center velocities
+    call setucxucyucxuucyu() !reconstruct cell-center velocities
     endif
     u1     = u1_tmp
     deallocate(u1_tmp)
@@ -110,15 +103,15 @@ subroutine setumod(jazws0)                          ! set cell center Perot velo
     if (newcorio == 1) then
        call setucxucyucxuucyunew()
     else
-       call setucxucyucxuucyu()
-    endif
+    call setucxucyucxuucyu()
+ endif
  endif
 
  !$OMP PARALLEL DO                           &
  !$OMP PRIVATE(L,LL,Lb,Lt,k1,k2,cs,sn,hmin,fcor,vcor)
  do LL   = lnx1D+1,lnx
     if (newcorio == 0) then
-       hmin = min( hs(ln(1,LL)),hs(ln(2,LL)) )
+    hmin = min( hs(ln(1,LL)),hs(ln(2,LL)) )
     elseif (newcorio == 1) then
        if (hu(LL) == 0) cycle
     endif
@@ -129,13 +122,13 @@ subroutine setumod(jazws0)                          ! set cell center Perot velo
        k1 = ln(1,L) ; k2 = ln(2,L)
 
        if (iperot /= -1) then
-          if ( jasfer3D == 1 ) then
-             v(L) =      acL(LL) *(-sn*nod2linx(LL,1,ucx(k1),ucy(k1)) + cs*nod2liny(LL,1,ucx(k1),ucy(k1))) +  &
-                    (1d0-acL(LL))*(-sn*nod2linx(LL,2,ucx(k2),ucy(k2)) + cs*nod2liny(LL,2,ucx(k2),ucy(k2)))
-          else
-             v(L) =      acl(LL) *(-sn*ucx(k1) + cs*ucy(k1) ) + &
-                    (1d0-acl(LL))*(-sn*ucx(k2) + cs*ucy(k2) )
-          endif
+       if ( jasfer3D == 1 ) then
+          v(L) =      acL(LL) *(-sn*nod2linx(LL,1,ucx(k1),ucy(k1)) + cs*nod2liny(LL,1,ucx(k1),ucy(k1))) +  &
+                 (1d0-acL(LL))*(-sn*nod2linx(LL,2,ucx(k2),ucy(k2)) + cs*nod2liny(LL,2,ucx(k2),ucy(k2)))
+       else
+          v(L) =      acl(LL) *(-sn*ucx(k1) + cs*ucy(k1) ) + &
+                 (1d0-acl(LL))*(-sn*ucx(k2) + cs*ucy(k2) )
+       endif
        endif
        if (kmx > 0) then
           v(LL) = v(LL) + v(L)*Au(L) ! hk: activate when needed
@@ -266,7 +259,7 @@ subroutine setumod(jazws0)                          ! set cell center Perot velo
              endif
           endif
 
-       enddo
+ enddo
 
        if (icorio > 0 .and. Corioadamsbashfordfac > 0d0) then
           fvcoro( Lt+1:Lb+kmxL(LL)-1 ) = 0d0
@@ -387,9 +380,9 @@ if (ihorvic > 0 .or. NDRAW(29) == 37) then
              endif
 
              ! JRE: add roller induced viscosity
-             if ((jawave .eq. 4) .and. (swave .eq. 1) .and. (roller .eq. 1)) then
+             if ((jawave .eq. 4) .and. (swave .eq. 1) .and. (roller .eq. 1) .and. (smagorinsky==0d0)) then
                 DRL = acL(L) * DR(k1) + (1-acL(L)) * DR(k2)
-                nuhroller = hu(L) * (DRL / rhomean) ** (1d0/3d0)
+                nuhroller = nuhfac*hu(L) * (DRL / rhomean) ** (1d0/3d0)
                 vicL = max(nuhroller, vicL)
              end if
 

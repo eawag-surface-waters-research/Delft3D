@@ -54,7 +54,7 @@
       do k = 1,npl-1
          if (zpl(k) .ne. dmiss .and. zpl(k+1) .ne. dmiss) then
             call isoline( xpl(k), ypl(k), zpl(k), xpl(k+1), ypl(k+1), zpl(k+1) )
-         endif
+            endif
       enddo
 
    else if (ndrawpol >= 5 .and. ndrawpol <= 10) then
@@ -95,13 +95,13 @@
 
                call sincosdis (xpl(k), ypl(k), xpl(k+1), ypl(k+1), s, c, d)
 
-               dy =  rcir*c
+               dy = rcir*c
                dx = -rcir*s
 
                k2 = max(2, int (d /(3d0*rcir)) )
                do kk = 1, k2
                   a  = 1d0 - dble(kk)/dble(k2)
-                  b  = 1d0-a
+                  b = 1d0-a
                   x  = a*xpl(k) + b*xpl(k+1)
                   y  = a*ypl(k) + b*ypl(k+1)
                   z  = a*zpl(k) + b*zpl(k+1)

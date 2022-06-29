@@ -35,18 +35,18 @@
  use m_flowtimes
  use m_flow
  use m_flowgeom
- use unstruc_model, only: md_ident, md_restartfile
- use m_xbeach_data, only: swave, Lwave, uin, vin, cgwav, instat
+ use unstruc_model, only: md_restartfile
  use unstruc_channel_flow
  use m_1d_structures, only: initialize_structures_actual_params, set_u0isu1_structures
  use dfm_error
  use MessageHandling
  use m_partitioninfo
+ use m_sediment, only: stm_included
+
  implicit none
 
  integer              :: jazws0
  integer, intent(out) :: iresult !< Error status, DFM_NOERR==0 if succesful.
- integer              :: k, n, LL
  integer              :: ierror
 
  iresult = DFM_GENERICERROR
@@ -94,23 +94,6 @@
     alfsmo  = (tim1bnd - tstart_user) / tlfsmo
  endif
 
-! apply XBeach wave boundary conditions
- if (jawave .eq. 4) then
-    if ( swave.eq.1 ) then
-       call xbeach_wave_bc()
-       call xbeach_apply_wave_bc()
-       if (.not.(trim(instat)=='stat') .and. .not.(trim(instat)=='stat_table')) then
-          call xbeach_wave_compute_celerities()        ! for setdt
-       else
-          call xbeach_wave_compute_statcelerities(iresult)
-       endif
-    else
-       uin = 0d0
-       vin = 0d0
-    endif
-    call xbeach_flow_bc()
- end if
-
  call timstrt('u0u1        ', handle_extra(42)) ! Start u0u1
  if (jazws0.eq.0) then
     u0 = u1                           ! progress velocities
@@ -128,16 +111,27 @@
  call setau()                                        ! set au and cfuhi for conveyance after limited h upwind at u points
  call timstop(handle_extra(39)) ! End huau
 
- call timstrt('Setumod     ', handle_extra(43))      ! Start setumod
- call setumod(jazws0)                                ! set cell center velocities, should be here as prior to 2012 orso
+ call timstrt('Setumod     ', handle_extra(43)) ! Start setumod
+    call setumod(jazws0)                             ! set cell center velocities, should be here as prior to 2012 orso
  call timstop(handle_extra(43)) ! End setumod
 
  call timstrt('Set conveyance       ', handle_extra(44)) ! Start cfuhi
- call setcfuhi()                                     ! set frictioncoefficient
+ call setcfuhi()                                     ! set current related frictioncoefficient
  call timstop(handle_extra(44)) ! End cfuhi
 
- if (kmx == 0 .and. javeg > 0) then                  ! overwrite cfuhi in 2D with veg in plant area's
+ if (kmx == 0 .and. javeg > 0) then                  ! overwrite cfuhi in 2D with veg in plant areas
     call setbaptist()
+ endif
+
+ ! Calculate max bed shear stress amplitude and z0rou without waves
+ if (jawave==0) then
+    call settaubxu_nowave()
+ endif
+
+ ! Set wave parameters, adapted for present water depth/velocity fields
+ if (jawave>0) then
+    taubxu = 0d0
+    call compute_wave_parameters()
  endif
 
  call timstrt('Set structures actual parameters', handle_extra(45)) ! Start structactual
@@ -156,12 +150,18 @@
  end if
  call timstop(handle_extra(40)) ! End setdt
 
+ ! Add wave model dependent wave force in RHS
+ ! After setdt because surfbeat needs updated dts
+if (jawave>0) then
+   call compute_wave_forcing_RHS()
+endif
+
  if (nshiptxy > 0) then
-     call setship()                                  ! in initimestep
+     call setship()                                        ! in initimestep
  endif
 
  call timstrt('Compute advection term', handle_extra(41)) ! Start advec
- call advecdriver()                                  ! advec limiting for depths below chkadvdp, so should be called after all source terms such as spiralforce
+ call advecdriver()                                       ! advec limiting for depths below chkadvdp, so should be called after all source terms such as spiralforce
  call timstop(handle_extra(41)) ! End advec
 
  if (jazws0.eq.1)  then

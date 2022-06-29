@@ -98,10 +98,10 @@
       ENDIF
 
 !     muisbeweging
-      Xloc = InfoGraphics(5)
-      Yloc = InfoGraphics(6)
-      X    = dble(xloc)
-      y    = dble(yloc)
+      Xloc   = InfoGraphics(5)
+      Yloc   = InfoGraphics(6)
+      X=dble(xloc)
+      y=dble(yloc)
 
       CALL IGRUNITSTOPIXELS(Xloc,Yloc,IXP,IYP)
       CALL dPROJECT(X,Y,XLC,YLC,2)

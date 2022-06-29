@@ -49,9 +49,9 @@ subroutine getucxucyeuler(N, ucxeu, ucyeu)
 
    ucxeu(1:ndkx) = ucx(1:ndkx) ; ucyeu(1:ndkx) = ucy(1:ndkx)
    if (jawave > 0 .and. .not. flowWithoutWaves) then
-      do LL = 1,lnx
+         do LL = 1,lnx
          Lb = Lbot(LL) ; Lt = Lb - 1 + kmxL(LL)
-         do L = Lb, Lt
+            do L = Lb, Lt
             if (ustokes(L) .ne. 0d0) then                    ! link flows
                k1 = ln(1,L)
                k2 = ln(2,L)
@@ -60,7 +60,7 @@ subroutine getucxucyeuler(N, ucxeu, ucyeu)
                ucxeu(k2) = ucxeu(k2) - wcx2(LL)*ustokes(L)
                ucyeu(k2) = ucyeu(k2) - wcy2(LL)*ustokes(L)
             endif
+            enddo
          enddo
-      enddo
-   endif
-end subroutine getucxucyeuler
+      endif
+   end subroutine getucxucyeuler

@@ -37,6 +37,7 @@ subroutine flow_bedforminit(stage)
    use m_bedform
    use m_bedform_io, only: fm_rdbedformpar, fm_initbedformpar
    use unstruc_model, only: md_bedformfile
+   use m_flowparameters, only: jawave, modind
    use MessageHandling, only: mess, LEVEL_FATAL
 
    implicit none
@@ -57,8 +58,6 @@ subroutine flow_bedforminit(stage)
 
    else if (stage==2) then
 
-      !
-      bfm_included = len_trim(md_bedformfile) /= 0
       if (.not. bfm_included) return
       !
       call fm_rdbedformpar(bfmpar, md_bedformfile, error)
@@ -66,6 +65,11 @@ subroutine flow_bedforminit(stage)
          call mess(LEVEL_FATAL, 'unstruc::flow_bedforminit - Error in reading of bedform file.')
          return
       end if
+      !
+      ! safety: running waves with rouwav=vr04 can happen without sediment, or trachytopes for that matter
+      if (jawave>0 .and. modind==9) then
+         bfmpar%lfbedfrmrou = .true.
+      endif      
    end if
 
 end subroutine flow_bedforminit

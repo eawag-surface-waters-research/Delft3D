@@ -1987,12 +1987,12 @@ subroutine tekwindvector()
 
     yp  = yp - dyp
     tex = 'Upot/Ut0:                   ( )'
-    write(tex(8:20), '(F11.7)') upot/(ukin0 + upot0)
+    write(tex(8:20), '(F11.7)') upot/max(ukin0 + upot0,eps4)
     call GTEXT(tex, xp, yp, ncol)
 
     yp  = yp - dyp
     tex = 'Ukin/Ut0:                   ( )'
-    write(tex(8:20), '(F11.7)') ukin/(ukin0 + upot0)
+    write(tex(8:20), '(F11.7)') ukin/max(ukin0 + upot0,eps4)
     call GTEXT(tex, xp, yp, ncol)
 
     yp  = yp - dyp

@@ -470,9 +470,9 @@
       end if
       if (isftau.gt.0) then
          if (jawaveSwartDelwaq == 0) then
-            call mess(LEVEL_INFO, 'jawaveSwartDelwaq == 0 so tau/tauflow = taucur')
+            call mess(LEVEL_INFO, 'jawaveSwartDelwaq == 0 so tau/tauflow = taucur or tau from wave-current interaction if waves activated')
          else if (jawaveSwartDelwaq == 1) then
-            call mess(LEVEL_INFO, 'jawaveSwartDelwaq == 1 so tau/tauflow = taucur + tauwave')
+            call mess(LEVEL_INFO, 'jawaveSwartDelwaq == 1 so tau/tauflow = taucur + ftauw*tauwave')
          else if (jawaveSwartDelwaq == 2) then
             call mess(LEVEL_INFO, 'jawaveSwartDelwaq == 2 so tau/tauflow = taubxu')
          endif
@@ -1396,13 +1396,17 @@
       do k=0,ktx-kbx
          pmsa(ipoivol + k) = vol1(k+kbx)
       end do
-
+      
       if (isftau.gt.0) then
          ipoitau  = arrpoi(iisfun) + (isftau-1)*noseg
+         if (jawave==0) then
+            call gettaus(1,1)
+         else
+            call gettauswave(jawaveswartdelwaq)
+         endif   
          do kk=1,Ndxi
             call getkbotktop(kk,kb,kt)
-            call gettau(kk,taucurc,czc,jawaveswartdelwaq)
-            pmsa(ipoitau+kb-kbx) = taucurc
+            pmsa(ipoitau+kb-kbx) = taus(kk)
          end do
       end if
 

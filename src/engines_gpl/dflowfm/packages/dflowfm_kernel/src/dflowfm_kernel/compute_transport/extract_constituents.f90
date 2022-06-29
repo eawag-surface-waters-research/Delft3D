@@ -49,7 +49,9 @@ subroutine extract_constituents()
 
    integer(4) ithndl /0/
    if (timon) call timstrt ( "extract_constituents", ithndl )
-
+   limmax = 0
+   limmin = 0
+   
    do k=1,Ndkx
  
       if( jasecflow > 0 .and. jaequili == 0 .and. kmx == 0 ) then
@@ -59,10 +61,29 @@ subroutine extract_constituents()
       if ( ISED1.ne.0 ) then
          do i=1,mxgr
             iconst = ISED1+i-1
+            if (constituents(iconst,k)<0d0) then
+               limmin = limmin + 1
+               constituents(iconst,k) = 0d0
+            endif
+            !
+            if (constituents(iconst,k)>upperlimitssc) then
+               limmax = limmax + 1
+               constituents(iconst,k) = upperlimitssc
+            endif
             sed(i,k) = constituents(iconst,k)
          end do
       end if
    end do
+   
+   if (ISED1.ne.0 .and. jalogtransportsolverlimiting>0) then
+      if (limmin>0) then
+         write(msgbuf , *) 'Negative ssc encountered and limited, number of cells = ' , limmin  ; call msg_flush()
+      endif
+      !
+      if (limmax>0) then
+         write(msgbuf , *) 'SSC overshoots encountered and limited to ', upperlimitssc, ', number of cells = ',  limmax  ; call msg_flush()
+      endif   
+   endif
 
    if (jatem .ne. 0) then
       if (tempmax .ne. dmiss) then ! tem is now positive
@@ -100,7 +121,7 @@ subroutine extract_constituents()
             do k = kbot(kk),ktop(kk)
                if (constituents(isalt,k) > salimax) then
                    constituents(isalt,k) = salimax
-                   limmax  = limmax + 1
+                  limmax  = limmax + 1
                endif
             enddo
          endif

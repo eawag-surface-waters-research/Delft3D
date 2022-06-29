@@ -74,18 +74,18 @@ module m_xbeach_readkey
 
 contains
 
-  real*8 function readkey_dbl(fname,key,defval,mnval,mxval,bcast,required, strict)
+  real*8 function readkey_dbl(fname,key,defval,mnval,mxval,bcast,required, silent, strict)
     use m_xbeach_errorhandling
     use m_xbeach_filefunctions
     implicit none
     character(len=*)  :: fname,key
     character(slen)     :: printkey
     real*8            :: defval,mnval,mxval
-    logical, intent(in), optional :: bcast,required, strict
+    logical, intent(in), optional :: bcast,required, strict, silent
 
     character(slen)   :: value,tempout
     real*8         :: value_dbl
-    logical        :: lbcast,lrequired, lstrict
+    logical        :: lbcast,lrequired, lstrict, lsilent
     character(slen)  :: fmt
     integer          :: ier
 
@@ -107,7 +107,13 @@ contains
          lstrict = strict
       else
          lstrict = .false.
-    endif
+      endif
+      
+    if (present(silent)) then
+         lsilent = silent
+      else
+         lsilent = .false.
+    endif      
 
     printkey = ' '
     printkey(2:24)=trim(key)
@@ -142,14 +148,14 @@ contains
              call xbeach_errorhandler()
           else
              value_dbl=defval
-             call writelog('l','(a12,a,f0.4,a)',(printkey),' = ',value_dbl,' (no record found, default value used)')
+             if (.not. lsilent) call writelog('l','(a12,a,f0.4,a)',(printkey),' = ',value_dbl,' (no record found, default value used)')
           endif
        endif
 
     readkey_dbl=value_dbl
   end function readkey_dbl
 
-  function readkey_int(fname,key,defval,mnval,mxval,bcast,required,strict) result (value_int)
+  function readkey_int(fname,key,defval,mnval,mxval,bcast,required, silent, strict) result (value_int)
     use m_xbeach_errorhandling
     use m_xbeach_filefunctions
     implicit none
@@ -158,8 +164,8 @@ contains
     character(slen)  :: value
     integer*4      :: value_int
     integer*4      :: defval,mnval,mxval,ier
-    logical, intent(in), optional :: bcast, required, strict
-    logical        :: lbcast,lrequired,lstrict
+    logical, intent(in), optional :: bcast, required, strict, silent
+    logical        :: lbcast,lrequired,lstrict, lsilent
     character(slen)  :: fmt,tempout
 
     fmt = '(a,a,a,i0,a,i0)'
@@ -181,6 +187,13 @@ contains
     else
        lstrict = .false.
     end if
+    
+    if (present(silent)) then
+       lsilent = silent
+    else
+       lsilent = .false.
+    end if    
+    
     printkey = ' '
     printkey(2:24)=trim(key)
     printkey(1:1)=' '
@@ -213,7 +226,7 @@ contains
              call xbeach_errorhandler()
           else
              value_int=defval
-             call writelog('l','(a12,a,i0,a)',(printkey),' = ',value_int,' (no record found, default value used)')
+             if (.not. lsilent)call writelog('l','(a12,a,i0,a)',(printkey),' = ',value_int,' (no record found, default value used)')
           endif
        endif
   end function readkey_int
@@ -292,7 +305,7 @@ contains
 
    end function readkey_intvec
   
-  function readkey_str(fname,key,defval,nv,nov,allowed,old,bcast,required) result (value_str)
+  function readkey_str(fname,key,defval,nv,nov,allowed,old,bcast,required, silent) result (value_str)
     use m_xbeach_filefunctions
     use m_xbeach_errorhandling
     implicit none
@@ -302,8 +315,8 @@ contains
     integer*4      :: nv,nov,i,j
     character(slen),dimension(nv) :: allowed
     character(slen),dimension(nov):: old
-    logical, intent(in), optional :: bcast,required
-    logical        :: lbcast,lrequired,passed
+    logical, intent(in), optional :: bcast,required, silent
+    logical        :: lbcast,lrequired,passed, lsilent
     character(slen)  :: printkey
 
     printkey(2:slen)=key
@@ -320,6 +333,12 @@ contains
     else
        lrequired = .false.
     endif
+    
+    if (present(silent)) then
+       lsilent = silent
+    else
+       lsilent = .false.
+    endif    
 
     passed = .false.
 
@@ -332,7 +351,7 @@ contains
              call xbeach_errorhandler()
           else 
              value_str=defval
-             call writelog('l','(a12,a,a,a)',(printkey),' = ',trim(value_str),' (no record found, default value used)')
+             if (.not. lsilent)call writelog('l','(a12,a,a,a)',(printkey),' = ',trim(value_str),' (no record found, default value used)')
           endif
        else
           value=adjustl(value)
@@ -365,15 +384,15 @@ contains
   end function readkey_str
 
 
-  function readkey_name(fname,key,bcast,required) result (value_str)
+  function readkey_name(fname,key,bcast,required, silent) result (value_str)
     use m_xbeach_filefunctions
     use m_xbeach_errorhandling
     implicit none
     character*(*)  :: fname,key
     character(slen)  :: value_str
     character(slen)   :: value
-    logical, intent(in), optional :: bcast,required
-    logical        :: lbcast,lrequired
+    logical, intent(in), optional :: bcast,required, silent
+    logical        :: lbcast,lrequired, lsilent
     character(slen)  :: printkey
 
     printkey(2:slen)=key
@@ -391,6 +410,11 @@ contains
        lrequired = .false.
     endif
 
+    if (present(silent)) then
+       lsilent = silent
+    else
+       lsilent = .false.
+    endif
        call readkey(fname,key,value)
        if (value == ' ') then
           if (lrequired) then
@@ -398,7 +422,7 @@ contains
              call xbeach_errorhandler()
           else 
              value_str=' '
-             call writelog('l',' (a12,a)'    ,printkey,' = None specified')
+             if (.not. lsilent)call writelog('l',' (a12,a)'    ,printkey,' = None specified')
              ! write to basic params data file
              !    write(pardatfileid,*)'c ',key,' ','none'
           endif
@@ -536,7 +560,7 @@ contains
        nkeys=0
        ier=0
        ! Read the file for all lines with "=" 
-       call writelog('ls','','XBeach reading from ',trim(fname))
+       call writelog('ls','','Reading model parameters from ',trim(fname))
        i=0
        open(newunit=lun,file=fname)
        do while (ier==0)

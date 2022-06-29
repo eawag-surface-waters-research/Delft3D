@@ -41,9 +41,10 @@
    implicit none
 
    integer           :: k, k1, k2, kk, L, ised, ac1, ac2
-   double precision  :: dum, sx, sy, sL, dt, dtmaxmor, dhmax
+   double precision  :: dum, sx, sy, sL, dt, dtmaxmor, dhmax, kkcflmxloc
 
    dtmaxmor = huge(0d0)
+   kkcflmxloc = 0
 
    do k = 1, ndx
       dum = 0.d0
@@ -66,7 +67,7 @@
 
             if (k2 .eq. k) sL = -sL
 
-            if (sL .ge. 0.) then        ! outgoing transport fluxes only
+            if (sL .ge. 0d0) then        ! outgoing transport fluxes only
                dum = dum + sL*wu(L)
             end if
          end do
@@ -75,18 +76,20 @@
          dt = dzbdtmax*ba(k) / max(dum,eps10)   ! safety
          if ( dt.lt.dtmaxmor ) then
             dtmaxmor = dt
+            kkcflmxloc = k
          end if
       end if
    end do
-
-   if ( jampi.eq.1 ) then
-      call reduce_double_min(dtmaxmor)
+   !
+   if (dtmaxmor > dts) then    ! dts already reduced, okay
+      dtmaxmor = dts
+   else
+      kkcflmx = kkcflmxloc    ! overwrite cell number for numlimdt when new smallest timestep
+      if (jamapFlowAnalysis > 0) then
+         limitingTimestepEstimation(kkcflmx) = limitingTimestepEstimation(kkcflmx) +1
+      endif
    end if
 
-   if (dtmaxmor > dts) dtmaxmor = dts
-   dtmaxmor = dts/ceiling(dts/dtmaxmor)
-   !
    dts = dtmaxmor
-   dti = 1d0/dts
 
    end subroutine fm_mor_maxtimestep

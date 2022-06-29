@@ -30,8 +30,6 @@
 ! $Id$
 ! $HeadURL$
 
-! JRE TODO: ustokes values used here are in 3D from previous timestep (updateverticalprofile)
-! Potential solution is to separate this in subroutine to use here and in updatevp. You will lose point operation speed
    subroutine setwavmubnd()
    use m_flowgeom
    use m_flowparameters
@@ -43,7 +41,7 @@
    double precision :: ac1, ac2
 
    integer          :: kb, ki, L, n, LL, Lb, Lt
-   double precision :: hminlwi
+   double precision :: hminlwi, wavmubndL
 
    hminlwi = 1d0/hminlw
 
@@ -54,22 +52,24 @@
       kb = kbndu(1,n)
       ki = kbndu(2,n)
       L  = kbndu(3,n)
-      ! interpolate cell-centered mass fluxes to flow links
+      ac1 = acl(L)
+      ac2 = 1d0-ac1
       if (hu(L) < epshu) cycle
+
+      ! interpolate cell-centered mass fluxes to flow links
       if (kmx==0) then
-         ac1 = acl(L)
-         ac2 = 1d0-ac1
          wavmubnd(L) = (ac1*mxwav(kb) + ac2*mxwav(ki)) * csu(L) + &
                        (ac1*mywav(kb) + ac2*mywav(ki)) * snu(L)
 
          wavmubnd(L) = wavmubnd(L) * min(huvli(L),hminlwi)
       else
+         ! 3d: depth-uniform like D3D
          call getLbotLtop(L,Lb,Lt)
+         wavmubndL = (ac1*mxwav(kb) + ac2*mxwav(ki)) * csu(L) + &
+                     (ac1*mywav(kb) + ac2*mywav(ki)) * snu(L)
          do LL=Lb,Lt
-            wavmubnd(LL) = ustokes(LL)
-            wavmubnd(L)  = wavmubnd(L) + ustokes(LL)*(hu(LL)-hu(LL-1))  ! needed for check below
+            wavmubnd(LL) = wavmubndL* min(huvli(L),hminlwi)
          enddo
-         wavmubnd(L) = wavmubnd(L)/max(hu(L),epshu)
       endif
    end do
 
@@ -78,23 +78,22 @@
          kb = kbndz(1,n)
          ki = kbndz(2,n)
          L  = kbndz(3,n)
-         if (hu(L) < epshu) cycle
-         if ( wavmubnd(L).ne.0d0 ) cycle
+         ac1 = acl(L)
+         ac2 = 1d0-ac1
+         if (hu(L) <= epshu) cycle
+         if ( wavmubnd(L).ne.0d0 ) cycle   ! ?
          if (kmx==0) then
             ! interpolate cell-centered mass fluxes to flow links
-            ac1 = acl(L)
-            ac2 = 1d0-ac1
-            wavmubnd(L) = (ac1*mxwav(kb) + ac2*mxwav(ki)) * csu(L) + &
-               (ac1*mywav(kb) + ac2*mywav(ki)) * snu(L)
+            wavmubndL = (ac1*mxwav(kb) + ac2*mxwav(ki)) * csu(L) + &
+                        (ac1*mywav(kb) + ac2*mywav(ki)) * snu(L)
 
-            wavmubnd(L) = wavmubnd(L) * min(huvli(L),hminlwi)
+            wavmubnd(L) = wavmubndL * min(huvli(L),hminlwi)
          else
-            call getLbotLtop(L,Lb,Lt)
+            wavmubndL = (ac1*mxwav(kb) + ac2*mxwav(ki)) * csu(L) + &
+                        (ac1*mywav(kb) + ac2*mywav(ki)) * snu(L)
             do LL=Lb,Lt
-               wavmubnd(LL) = ustokes(LL)
-               wavmubnd(L)  = wavmubnd(L) + ustokes(LL)*(hu(LL)-hu(LL-1))
+               wavmubnd(LL) = wavmubndL* min(huvli(L),hminlwi)
             enddo
-            wavmubnd(L) = wavmubnd(L)/max(hu(L),epshu)
          endif
       end if
    end do
@@ -104,27 +103,25 @@
       kb = kbndn(1,n)
       ki = kbndn(2,n)
       L  = kbndn(3,n)
-      if (hu(L) < epshu) cycle
+      ac1 = acl(L)
+      ac2 = 1d0-ac1
+      if (hu(L) <= epshu) cycle
       if ( wavmubnd(L).ne.0d0 ) cycle
       if (kmx==0) then
          ! interpolate cell-centered mass fluxes to flow links
-         ac1 = acl(L)
-         ac2 = 1d0-ac1
-         wavmubnd(L) = (ac1*mxwav(kb) + ac2*mxwav(ki)) * csu(L) + &
-            (ac1*mywav(kb) + ac2*mywav(ki)) * snu(L)
-
-         wavmubnd(L) = wavmubnd(L) * min(huvli(L),hminlwi)
+         wavmubndL = (ac1*mxwav(kb) + ac2*mxwav(ki)) * csu(L) + &
+                     (ac1*mywav(kb) + ac2*mywav(ki)) * snu(L)
+         wavmubnd(L) = wavmubndL * min(huvli(L),hminlwi)
       else
          call getLbotLtop(L,Lb,Lt)
+         wavmubndL = (ac1*mxwav(kb) + ac2*mxwav(ki)) * csu(L) + &
+                     (ac1*mywav(kb) + ac2*mywav(ki)) * snu(L)
          do LL=Lb,Lt
-            wavmubnd(LL) = ustokes(LL)
-            wavmubnd(L)  = wavmubnd(L) + ustokes(LL)*(hu(LL)-hu(LL-1))
+            wavmubnd(LL) = wavmubndL* min(huvli(L),hminlwi)
          enddo
-         wavmubnd(L) = wavmubnd(L)/max(hu(L),epshu)
       endif
    end do
 
    !  tangential-velocity boundaries: not needed to define mass fluxes
 
-   return
    end subroutine setwavmubnd

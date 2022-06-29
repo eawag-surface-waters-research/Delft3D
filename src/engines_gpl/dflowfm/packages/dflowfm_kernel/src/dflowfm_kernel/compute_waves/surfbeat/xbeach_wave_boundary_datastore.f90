@@ -53,12 +53,19 @@ module wave_boundary_datastore
       real*8                           :: sprdthr,trepfac
       integer                          :: Tm01switch
       real*8,dimension(:),allocatable  :: xb,yb,theta     ! Note, can these be changed to pointers?
+      real*8,dimension(:),allocatable  :: theta_s    
       integer                          :: randomseed
       integer                          :: nspr
       real*8                           :: rho
       real*8                           :: nmax
       real*8                           :: fcutoff
       real*8                           :: swkhmin
+      integer                          :: singledir
+      integer                          :: ntheta_s
+      integer                          :: wbcScaleEnergy
+      integer                          :: wbcRemoveStokes
+      real*8                           :: wbcEvarreduce
+      real*8                           :: wbcQvarreduce
    end type waveBoundaryParametersType
    !
    !
@@ -81,7 +88,7 @@ module wave_boundary_datastore
    !
    ! Define derived type to store spectral boundary administration information
    type waveSpectrumAdministrationType
-      integer                                  :: nspectra        ! number of input spectrs, set in init spectrum
+      integer                                  :: nspectra        ! number of input spectra, set in init spectrum
       integer,        dimension(:),allocatable :: ispectra
       type(filenames),dimension(:),allocatable :: bcfiles         ! input wave spectrum files
       logical                                  :: repeatwbc       ! switch to repeat all of the wave boundary conditions
@@ -90,6 +97,7 @@ module wave_boundary_datastore
       real*8,dimension(:,:),allocatable        :: lastwaveelevation ! wave height at the end of the last spectrum
       real*8,dimension(:),allocatable          :: xspec,yspec     ! x,y coordinates of input wave spectra
       real*8                                   :: Hbc,Tbc,Dbc     ! computed representative wave height, period and wave direction
+      real*8,dimension(:,:),allocatable        :: ee_s            ! single_dir: stationary wave energy distribution along boundary (ntheta_s,npb)
       integer,dimension(:),allocatable         :: n_index_loc     ! y-index locations of all input spectra, set in init spectrum
       integer                                  :: ind_end_taper   ! index of where the taper function equals rtbc
       integer,dimension(:),allocatable         :: kL, kR

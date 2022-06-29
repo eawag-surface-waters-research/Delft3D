@@ -84,10 +84,11 @@ subroutine create_incident_waves_surfbeat(np,ibnd,xb,yb,ntheta,dtheta,theta,t, &
                                            x0,y0,hboundary, &
                                            randomseed, &
                                            eebc,qxbc,qybc, &
-                                           Hbc,Tbc,Dbc,isRecomputed, &
+                                           Hbc,Tbc,Dbc,isRecomputed, singledir, ntheta_s, theta_s, ee_s, &
                                            nonhspectrum, &
                                            sprdthr,trepfac,nmax,fcutoff,rho, &
-                                           Tm01switch,nspr, swkhmin)
+                                           Tm01switch,nspr, swkhmin, wbcScaleEnergy, wbcEvarreduce, wbcQvarreduce, &
+                                           wbcRemoveStokes)
    ! This subroutine handles all calls for surf-beat wave boundary conditions.
    ! The subroutine automatically initialises all variables if needed, and returns
    ! boundary condition information at all offshore points at the required point
@@ -120,6 +121,9 @@ subroutine create_incident_waves_surfbeat(np,ibnd,xb,yb,ntheta,dtheta,theta,t, &
    !                   If set to same integer throughout simulation, identical random numbers
    !                   will be generated. Use int(clocktime) to have new random numbers for
    !                   each time series generation.
+   ! singledir       : use option to calculate refraction and mean wave direction from stationary solution
+   ! ntheta_s        : number of directional bins for interpolation stationary spectrum
+   ! theta_s         : directional bins for interpolation stationary spectrum
    !
    ! Output variables
    ! eebc            : array of size (np,ntheta) containing wave energy density per 
@@ -135,6 +139,8 @@ subroutine create_incident_waves_surfbeat(np,ibnd,xb,yb,ntheta,dtheta,theta,t, &
    !                   valid for the duration of the entire spectrum (rad)
    ! isRecomputed    : logical, indicating whether a new spectrum has been read and computed and therfore
    !                   showing new values for Hbc, Tbc and Dbc
+   ! ee_s            : boundary conditions for stationary wave model from spectral input
+
    !
    ! Optional input variables
    ! nonhspectrum    : generate a non-hydrostatic time series instead of a surf-beat time
@@ -158,28 +164,34 @@ subroutine create_incident_waves_surfbeat(np,ibnd,xb,yb,ntheta,dtheta,theta,t, &
    implicit none
    !
    ! Input variables
-   integer                    ,intent(in)     :: np,ibnd,ntheta,bctype
-   real*8                     ,intent(in)     :: t,x0,y0,hboundary,dtheta
-   character(len=*)           ,intent(in)     :: bcfile
-   real*8,dimension(np)       ,intent(in)     :: xb,yb
-   real*8,dimension(ntheta)   ,intent(in)     :: theta
-   integer                    ,intent(in)     :: randomseed
+   integer                      ,intent(in)   :: np,ibnd,ntheta,bctype
+   real*8                       ,intent(in)   :: t,x0,y0,hboundary,dtheta
+   character(len=*)             ,intent(in)   :: bcfile
+   real*8,dimension(np)         ,intent(in)   :: xb,yb
+   real*8,dimension(ntheta)     ,intent(in)   :: theta
+   real*8,dimension(ntheta_s)   ,intent(in)   :: theta_s
+   integer                      ,intent(in)   :: randomseed
+   integer                      ,intent(in)   :: singledir
+   integer                      ,intent(in)   :: ntheta_s
    
    ! output variables
-   real*8                     ,intent(out)    :: Hbc,Tbc,Dbc
-   logical                    ,intent(out)    :: isRecomputed
-   real*8,dimension(np)       ,intent(out)    :: qxbc,qybc
-   real*8,dimension(np,ntheta),intent(out)    :: eebc
+   real*8                       ,intent(out)  :: Hbc,Tbc,Dbc
+   logical                      ,intent(out)  :: isRecomputed
+   real*8,dimension(np)         ,intent(out)  :: qxbc,qybc
+   real*8,dimension(np,ntheta)  ,intent(out)  :: eebc
+   real*8,dimension(ntheta_s,np),intent(out)  :: ee_s
    
    ! Optional variables
-   logical   ,optional        ,intent(in)     :: nonhspectrum
-   real*8    ,optional        ,intent(in)     :: sprdthr,trepfac,nmax,rho,fcutoff,swkhmin
-   integer   ,optional        ,intent(in)     :: Tm01switch,nspr
-   
-   ! internal variables
+   logical   ,optional          ,intent(in)   :: nonhspectrum
+   real*8    ,optional          ,intent(in)   :: sprdthr,trepfac,nmax,rho,fcutoff,swkhmin
+   integer   ,optional          ,intent(in)   :: Tm01switch,nspr
+   integer   ,optional          ,intent(in)   :: wbcScaleEnergy, wbcRemoveStokes
+   real*8    ,optional          ,intent(in)   :: wbcEvarreduce, wbcQvarreduce
+                                
+   ! internal variables         
    integer                                    :: i,itheta,l,dummy
    real*8                                     :: durationlength
-   real*8    ,dimension(:)    ,allocatable    :: inttemp 
+   real*8    ,dimension(:)      ,allocatable  :: inttemp 
    !
    !
    ! Check function input arguments and set defaults
@@ -229,6 +241,35 @@ subroutine create_incident_waves_surfbeat(np,ibnd,xb,yb,ntheta,dtheta,theta,t, &
       waveboundaryParameters(ibnd)%swkhmin = swkhmin
    end if
    !
+   waveboundaryParameters(ibnd)%singledir = singledir
+   if (singledir>0) then      
+      waveboundaryParameters(ibnd)%ntheta_s = ntheta_s 
+      waveboundaryParameters(ibnd)%theta_s  = theta_s      
+   endif  
+   !
+   if (.not.present(wbcScaleEnergy)) then
+      waveboundaryParameters(ibnd)%wbcScaleEnergy = 1
+   else
+      waveboundaryParameters(ibnd)%wbcScaleEnergy = wbcScaleEnergy
+   end if
+   !
+   if (.not.present(wbcEvarreduce)) then
+      waveboundaryParameters(ibnd)%wbcEvarreduce = 1d0
+   else
+      waveboundaryParameters(ibnd)%wbcEvarreduce = wbcEvarreduce
+   end if 
+   !
+   if (.not.present(wbcQvarreduce)) then
+      waveboundaryParameters(ibnd)%wbcQvarreduce = 1d0
+   else
+      waveboundaryParameters(ibnd)%wbcQvarreduce = wbcQvarreduce
+   end if  
+   !
+   if (.not.present(wbcRemoveStokes)) then
+      waveboundaryParameters(ibnd)%wbcRemoveStokes = 1
+   else
+      waveboundaryParameters(ibnd)%wbcRemoveStokes = wbcRemoveStokes
+   end if     
    !
    ! Generate or interpolate boundary condition time series
    if (t>=waveBoundaryAdministration(ibnd)%startComputeNewSeries) then
@@ -273,106 +314,11 @@ subroutine create_incident_waves_surfbeat(np,ibnd,xb,yb,ntheta,dtheta,theta,t, &
    Tbc = waveSpectrumAdministration(ibnd)%Tbc
    Dbc = waveSpectrumAdministration(ibnd)%Dbc
 
-end subroutine create_incident_waves_surfbeat
+   if (singledir>0) then
+      ee_s = waveSpectrumAdministration(ibnd)%ee_s
+   endif
                                            
-!subroutine initialise_wave_spectrum_parameters
-!    ! This subroutine reads 
-!    use wave_boundary_datastore
-!
-!    use m_xbeach_filefunctions
-!    use m_xbeach_errorhandling
-!
-!    
-!    !internal variables
-!    integer                     :: fid,err
-!    integer                     :: i,nspectra
-!    character(1024)             :: testline
-!    character(1)                :: testchar
-!    
-!
-!    call writelog('l','','--------------------------------')
-!    call writelog('l','','Initializing spectral wave boundary conditions ')
-!
-!    ! Initialize that wave boundary conditions need to be calculated (first time at least)
-!    ! Stored and defined in wave_boundary_main_module
-!    waveSpectrumAdministration%repeatwbc = .false.
-!    ! Initialize the number of times wave boundary conditions have been generated.
-!    ! Stored and defined in wave_boundary_main_module
-!    waveSpectrumAdministration%bccount  = 0
-!    ! Initialize bcendtime to zero.
-!    ! Stored and defined in wave_boundary_main_module
-!    waveSpectrumAdministration%spectrumendtime = 0.d0
-!    ! Initialise lastwaveheight to zero
-!    ! Stored and defined in wave_boundary_main_module
-!    allocate(waveSpectrumAdministration%lastwaveelevation(waveBoundaryParameters%np,&
-!                                                          waveBoundaryParameters%ntheta))
-!    !
-!    ! open location list file
-! 
-!    err = 0
-!    open(newunit=fid,file=waveBoundaryParameters%masterFileName,status='old',form='formatted')
-!    ! check for LOCLIST
-!    read(fid,*)testline
-!    if (trim(testline)=='LOCLIST') then
-!       ! check the length of this file
-!       i = 0
-!       do while (err==0)
-!          i=i+1
-!          read(fid,*,IOSTAT=err)testchar
-!       enddo
-!       rewind(fid)
-!       nspectra = i-1
-!       ! store this information in the main module
-!       waveSpectrumAdministration%nspectra = nspectra
-!       ! We need at least 1 spectrum location
-!       if (nspectra<1) then
-!         call writelog('ewls','(a,a)','Error reading file ', & 
-!                       trim(waveBoundaryParameters%masterFileName))
-!         call writelog('ewls','(a,a)','Ensure that if LOCLIST option is used, ', & 
-!                                      'at least one spectrum location is specified')
-!         call xbeach_errorhandler
-!       endif
-!       ! read first line again to set cursor at correct point in the file
-!       read(fid,*,IOSTAT=err)testline       
-!       ! 
-!       !
-!       ! Now allocate space for variables
-!       !allocate(waveSpectrumAdministration%bcfiles(nspectra))      ! already allocated and assigned in spectral_wave_init
-!       !allocate(waveSpectrumAdministration%xspec(nspectra))
-!       !allocate(waveSpectrumAdministration%yspec(nspectra))
-!       do i=1,nspectra
-!          ! read x,y and file name per location
-!          read(fid,*,IOSTAT=err)waveSpectrumAdministration%xspec(i), &
-!                                waveSpectrumAdministration%yspec(i), &
-!                                waveSpectrumAdministration%bcfiles(i)%fname
-!          waveSpectrumAdministration%bcfiles(i)%listline = 0
-!          if (err /= 0) then
-!            
-!             ! something has gone wrong during the read of this file
-!             call writelog('ewls','(a,i0,a,a)','error reading line ',i+1,' of file ', &
-!                                           trim(waveBoundaryParameters%masterFileName))
-!             call writelog('ewls','','check file for format errors')
-!             call xbeach_errorhandler
-!            
-!          endif
-!       enddo
-!    else
-!       nspectra = 1
-!       allocate(waveSpectrumAdministration%bcfiles(nspectra))
-!       allocate(waveSpectrumAdministration%xspec(nspectra))
-!       allocate(waveSpectrumAdministration%yspec(nspectra))
-!       waveSpectrumAdministration%bcfiles(1)%fname = waveBoundaryParameters%masterFileName
-!       waveSpectrumAdministration%bcfiles(1)%listline = 0
-!       waveSpectrumAdministration%xspec = waveBoundaryParameters%x0
-!       waveSpectrumAdministration%yspec = waveBoundaryParameters%y0
-!       waveSpectrumAdministration%nspectra = nspectra
-!    endif
-!    close(fid)
-!
-!    call writelog('l','','--------------------------------')
-!
-!end subroutine initialise_wave_spectrum_parameters
-!   
+end subroutine create_incident_waves_surfbeat 
                                            
 end module wave_boundary_main_module
 

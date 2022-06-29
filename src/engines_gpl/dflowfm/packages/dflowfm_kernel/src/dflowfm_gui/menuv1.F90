@@ -149,7 +149,7 @@
       OPTION(2) = 'Display network                         '
       OPTION(3) = 'Display previous state network          '
       OPTION(4) = 'Display splines                         '
-      OPTION(5) = 'Display land boundary                '
+      OPTION(5) = 'Display land boundary                   '
       OPTION(6) = 'Display mode net/flow nodes             '
       OPTION(7) = 'Display mode net/flow links             '
       OPTION(8) = 'Values at net  nodes                    '

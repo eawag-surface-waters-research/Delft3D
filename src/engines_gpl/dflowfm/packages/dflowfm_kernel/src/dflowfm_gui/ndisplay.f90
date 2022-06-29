@@ -564,9 +564,9 @@
       OPTION(43)= 'vicwwu                           (m2/s )'
       OPTION(44)= 'ustb                             (     )'
       if (jawind > 0) then
-      OPTION(45)= 'ustw                             (m/s  )'
+         OPTION(45)= 'ustw                             (m/s  )'
       else
-      OPTION(45)= 'womegu                           (m/s  )'
+         OPTION(45)= 'womegu                           (m/s  )'
       endif
       OPTION(46)= 'Layer Thickness at u             (m    )'
       if (jafrculin > 0) then
@@ -574,7 +574,11 @@
       else
       OPTION(47)= 'Coriolis parameter fcorio        (1/s  )'
       endif
-      OPTION(48)= '                                        '
+      if (jawave>2 .and. jawave<5) then
+         OPTION(48)= 'Wave forcing term at u            (m/s2)'
+      else
+         OPTION(48)= '                                        '
+      endif
       OPTION(49)= 'Number of active layers          (     )'
       OPTION(50)= 'Maximum nr of layers             (     )'
       OPTION(51)= 'Lbot                             (     )'
@@ -696,18 +700,18 @@
       ENDIF
       key = 3
    ELSE IF (NWHAT .EQ. 16) THEN
-      EXP(1)     = 'MENU                                    '
-      EXP(2)     = 'SHOW observation stations               '
-      OPTION(1)  = 'NO observation stations                 '
-      OPTION(2)  = 'Cross                                   '
-      OPTION(3)  = 'Cross + name                            '
-      OPTION(4)  = 'Polyfil                                 '
-      OPTION(5)  = 'Polyfil + name                          '
-      OPTION(6)  = 'Cross   + waterlevel (m)                '
-      OPTION(7)  = 'Cross   + waterdepth (m)                '
-      OPTION(8)  = 'Cross   + velocity magnitudes (m/s)     '
-      OPTION(9)  = 'Cross   + znod                          '
-      OPTION(10) = 'Cross   + temperatures surface + bed    '
+      EXP(1)    = 'MENU                                    '
+      EXP(2)    = 'SHOW observation stations               '
+      OPTION(1) = 'NO observation stations                 '
+      OPTION(2) = 'Cross                                   '
+      OPTION(3) = 'Cross + name                            '
+      OPTION(4) = 'Polyfil                                 '
+      OPTION(5) = 'Polyfil + name                          '
+      OPTION(6) = 'Cross   + waterlevel (m)                '
+      OPTION(7) = 'Cross   + waterdepth (m)                '
+      OPTION(8) = 'Cross   + velocity magnitudes (m/s)     '
+      OPTION(9) = 'Cross   + znod                          '
+      OPTION(10) = 'Cross   + temperatures surface + bed   '
       OPTION(11) = 'Cross   + kobs index number             '
 
       MAXOPT    = 10
@@ -1013,10 +1017,10 @@
       OPTION(3)  = 'Total shear stress (c+w)          (N/m2)'
       OPTION(4)  = 'Wave force, magnitude             (N/m2)'
       OPTION(5)  = 'Ustokes, magnitude                 (m/s)'
-      OPTION(6)  = 'Wave force, X component              (N)'
-      OPTION(7)  = 'Wave force, Y component              (N)'
-      OPTION(8)  = 'Bottom stress, X component        (N/m2)'
-      OPTION(9)  = 'Bottom stress, Y component        (N/m2)'
+      OPTION(6)  = 'Wave number                      (rad/m)'
+      OPTION(7)  = 'sinh(kh)                             (-)'
+      OPTION(8)  = 'Surface force term                (N/m2)'
+      OPTION(9)  = 'Body force term                   (N/m2)'
       OPTION(10) = 'Stokes drift, X component          (m/s)'
       OPTION(11) = 'Stokes drift, Y component          (m/s)'
       OPTION(12) = 'Wave energy                          (J)'

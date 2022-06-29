@@ -73,7 +73,7 @@
    OPTION(13) = 'Epsmaxlevm                           (m)' ; it(2*13) = 6
    OPTION(14) = 'jawavestreaming terms in D3Dwavemodel( )' ; it(2*14) = 2
    OPTION(15) = 'jawaveStokes 0,1,2,3                 ( )' ; it(2*15) = 2
-   OPTION(16) = 'jawaveRoller                         ( )' ; it(2*16) = 2
+   OPTION(16) = 'jawavelogprof                        ( )' ; it(2*16) = 2
    OPTION(17) = 'Maxitforestersal                     ( )' ; it(2*17) = 2
    OPTION(18) = 'Maxitforestertem                     ( )' ; it(2*18) = 2
    OPTION(19) = 'Noderivedtypes (Noderivedtypes in mdu)     ( )' ; it(2*19) = 2
@@ -100,7 +100,7 @@
    HELPM (13) = 'Max level diff in outer loop of Nested Newton def 1d-8  (m) '
    HELPM (14) = '>=1 streaming, >= 2 streaming + turb                        '
    HELPM (15) = '0=no, 1 = uniform, 2 = non-uniform, 3=2+vertical visc Stokes'
-   HELPM (16) = '0=no, 1 = rol1, 2 = rol2                                    '
+   HELPM (16) = '0=depth-av, 1 = log profile                                 '
    HELPM (17) = 'Max nr of iterations                                        '
    HELPM (18) = 'Max nr of iterations                                        '
    HELPM (19) = '0=use der. types, 1 = less, 2 = lesser, 5 = also deallo der.'
@@ -190,13 +190,12 @@
    CALL IFORMputdouble  (2*13 ,Epsmaxlevm       , '(E8.2)' )
    CALL IFORMputinteger (2*14 ,jawavestreaming             )
    CALL IFORMputinteger (2*15 ,jawaveStokes                )
-   CALL IFORMputinteger (2*16 ,jawaveRoller                )
-   CALL IFORMputinteger (2*17 ,Maxitverticalforestersal    )
-   CALL IFORMputinteger (2*18 ,Maxitverticalforestertem    )
-   CALL IFORMputinteger (2*19 ,Noderivedtypes                    )
-   CALL IFORMputinteger (2*20 ,maxdge                      )
-   CALL IFORMputinteger (2*21 ,Jaevap                      )
-   CALL IFORMputinteger (2*22 ,Jaseddenscoupling           )
+   CALL IFORMputinteger (2*16 ,Maxitverticalforestersal    )
+   CALL IFORMputinteger (2*17 ,Maxitverticalforestertem    )
+   CALL IFORMputinteger (2*18 ,Noderivedtypes                    )
+   CALL IFORMputinteger (2*19 ,maxdge                      )
+   CALL IFORMputinteger (2*20 ,Jaevap                      )
+   CALL IFORMputinteger (2*21 ,Jaseddenscoupling           )
 
 
    !  Display the form with numeric fields left justified
@@ -251,13 +250,12 @@
           CALL IFORMGETdouble  (2*13 ,Epsmaxlevm       )
           CALL IFORMGETinteger (2*14 ,jawavestreaming         )
           CALL IFORMGETinteger (2*15 ,jawaveStokes            )
-          CALL IFORMGETinteger (2*16 ,jawaveRoller            )
-          CALL IFORMGETinteger (2*17 ,Maxitverticalforestersal)
-          CALL IFORMGETinteger (2*18 ,Maxitverticalforestertem)
-          CALL IFORMGETinteger (2*19 ,Noderivedtypes                )
-          CALL IFORMGETinteger (2*20 ,Maxdge                  )
-          CALL IFORMGETinteger (2*21 ,Jaevap                  )
-          CALL IFORMgetinteger (2*22 ,Jaseddenscoupling            )
+          CALL IFORMGETinteger (2*16 ,Maxitverticalforestersal)
+          CALL IFORMGETinteger (2*17 ,Maxitverticalforestertem)
+          CALL IFORMGETinteger (2*18 ,Noderivedtypes                )
+          CALL IFORMGETinteger (2*19 ,Maxdge                  )
+          CALL IFORMGETinteger (2*20 ,Jaevap                  )
+          CALL IFORMgetinteger (2*21 ,Jaseddenscoupling            )
           if (jaevap > 0) then
              if (.not. allocated (evap) ) then
                 allocate (evap(ndx))
