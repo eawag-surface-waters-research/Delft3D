@@ -132,14 +132,24 @@ subroutine gettauswave(waveswartdelwaq)
          endif   
       end select
       
-   ! Calculate direction from Eulerian velocities
-   do k=1,ndx
-      call getkbotktop(k,kb,kt)
-      call linkstocentercartcomp(k,ustokes,ustv)
-      ucxb = ucx(kb); ucyb=ucy(kb); ucxs = ustv(1,1); ucys = ustv(2,1)
-      um = max(hypot(ucxb-ucxs,ucyb-ucys),1d-4)
-      workx(k)  = taus(k)*(ucxb-ucxs)/um    ! taus amplitude but euler directions
-      worky(k)  = taus(k)*(ucyb-ucys)/um
-   enddo
-   
+   ! Calculate direction from GLM velocities, ustokes unavailable
+   if (flowwithoutwaves) then
+      do k=1,ndx
+         call getkbotktop(k,kb,kt)
+         ucxb = ucx(kb); ucyb=ucy(kb)
+         um = max(hypot(ucxb,ucyb),1d-4)
+         workx(k)  = taus(k)*(ucxb)/um    
+         worky(k)  = taus(k)*(ucyb)/um
+      enddo
+   else
+      ! Calculate direction from Eulerian velocities
+      do k=1,ndx
+         call getkbotktop(k,kb,kt)
+         call linkstocentercartcomp(k,ustokes,ustv)
+         ucxb = ucx(kb); ucyb=ucy(kb); ucxs = ustv(1,1); ucys = ustv(2,1)
+         um = max(hypot(ucxb-ucxs,ucyb-ucys),1d-4)
+         workx(k)  = taus(k)*(ucxb-ucxs)/um    ! taus amplitude but euler directions
+         worky(k)  = taus(k)*(ucyb-ucys)/um
+      enddo
+   endif
 end subroutine

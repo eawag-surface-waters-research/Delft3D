@@ -321,106 +321,109 @@ subroutine flow_setexternalforcings(tim, l_initPhase, iresult)
       !
       ! For badly converged SWAN sums, dwcap and dsurf can be NaN. Put these to 0d0, 
       ! as they cause saad errors as a result of NaNs in the turbulence model
-      if (any(isnan(dsurf)) .or. any(isnan(dwcap))) then
-         write (msgbuf, '(a)') 'Surface dissipation fields from SWAN contain NaN values, which have been converted to 0d0. &
-                              & Check the correctness of the wave results before running the coupling.'
-         call warn_flush() ! No error, just warning and continue
+      if (.not. flowwithoutwaves) then
+         if (any(isnan(dsurf)) .or. any(isnan(dwcap))) then
+            write (msgbuf, '(a)') 'Surface dissipation fields from SWAN contain NaN values, which have been converted to 0d0. &
+                                 & Check the correctness of the wave results before running the coupling.'
+            call warn_flush() ! No error, just warning and continue
+            !
+            where (isnan(dsurf))
+               dsurf = 0d0
+            endwhere
+            !
+            where (isnan(dwcap))
+               dwcap = 0d0
+            endwhere
+         endif
+         
+         ! Fill open boundary cells with inner values, needed for values on flowlinks fo calculating stresses etc
+         ! In MPI case, partition ghost cells are filled properly already, open boundaires are not
+         do n=1,nbndu
+            kb = kbndu(1,n)
+            ki = kbndu(2,n)
+            L  = kbndu(3,n)
+            !if (hu(L)<epshu) cycle
+            hwavcom(kb) = hwavcom(ki)
+            twav(kb)    = twav(ki)
+            phiwav(kb)  = phiwav(ki)
+            uorbwav(kb) = uorbwav(ki)
+            sbxwav(kb)  = sbxwav(ki)
+            sbywav(kb)  = sbywav(ki)
+            sxwav(kb)   = sxwav(ki)
+            sywav(kb)   = sywav(ki)
+            dsurf(kb)   = dsurf(ki)
+            dwcap(kb)   = dwcap(ki)
+            mxwav(kb)   = mxwav(ki)
+            mywav(kb)   = mywav(ki)
+         enddo
          !
-         where (isnan(dsurf))
-            dsurf = 0d0
-         endwhere
+         ! waterlevels
+         do n=1,nbndz
+            kb = kbndz(1,n)
+            ki = kbndz(2,n)
+            L  = kbndz(3,n)
+            !if (hu(L)<epshu) cycle
+            hwavcom(kb) = hwavcom(ki)
+            twav(kb)    = twav(ki)
+            phiwav(kb)  = phiwav(ki)
+            uorbwav(kb) = uorbwav(ki)
+            sbxwav(kb)  = sbxwav(ki)
+            sbywav(kb)  = sbywav(ki)
+            sxwav(kb)   = sxwav(ki)
+            sywav(kb)   = sywav(ki)
+            dsurf(kb)   = dsurf(ki)
+            dwcap(kb)   = dwcap(ki)
+            mxwav(kb)   = mxwav(ki)
+            mywav(kb)   = mywav(ki)
+         enddo
          !
-         where (isnan(dwcap))
-            dwcap = 0d0
-         endwhere
+         !  normal-velocity boundaries
+         do n=1,nbndn
+            kb = kbndn(1,n)
+            ki = kbndn(2,n)
+            L  = kbndn(3,n)
+            !if (hu(L)<epshu) cycle
+            hwavcom(kb) = hwavcom(ki)
+            twav(kb)    = twav(ki)
+            phiwav(kb)  = phiwav(ki)
+            uorbwav(kb) = uorbwav(ki)
+            sbxwav(kb)  = sbxwav(ki)
+            sbywav(kb)  = sbywav(ki)
+            sxwav(kb)   = sxwav(ki)
+            sywav(kb)   = sywav(ki)
+            dsurf(kb)   = dsurf(ki)
+            dwcap(kb)   = dwcap(ki)
+            mxwav(kb)   = mxwav(ki)
+            mywav(kb)   = mywav(ki)
+         end do
+         !
+         !  tangential-velocity boundaries
+         do n=1,nbndt
+            kb = kbndt(1,n)
+            ki = kbndt(2,n)
+            L  = kbndt(3,n)
+            !if (hu(L)<epshu) cycle
+            hwavcom(kb) = hwavcom(ki)
+            twav(kb)    = twav(ki)
+            phiwav(kb)  = phiwav(ki)
+            uorbwav(kb) = uorbwav(ki)
+            sbxwav(kb)  = sbxwav(ki)
+            sbywav(kb)  = sbywav(ki)
+            sxwav(kb)   = sxwav(ki)
+            sywav(kb)   = sywav(ki)
+            dsurf(kb)   = dsurf(ki)
+            dwcap(kb)   = dwcap(ki)
+            mxwav(kb)   = mxwav(ki)
+            mywav(kb)   = mywav(ki)
+         end do
       endif
-      
-      ! Fill open boundary cells with inner values, needed for values on flowlinks fo calculating stresses etc
-      ! In MPI case, partition ghost cells are filled properly already, open boundaires are not
-      do n=1,nbndu
-         kb = kbndu(1,n)
-         ki = kbndu(2,n)
-         L  = kbndu(3,n)
-         !if (hu(L)<epshu) cycle
-         hwavcom(kb) = hwavcom(ki)
-         twav(kb)    = twav(ki)
-         phiwav(kb)  = phiwav(ki)
-         uorbwav(kb) = uorbwav(ki)
-         sbxwav(kb)  = sbxwav(ki)
-         sbywav(kb)  = sbywav(ki)
-         sxwav(kb)   = sxwav(ki)
-         sywav(kb)   = sywav(ki)
-         dsurf(kb)   = dsurf(ki)
-         dwcap(kb)   = dwcap(ki)
-         mxwav(kb)   = mxwav(ki)
-         mywav(kb)   = mywav(ki)
-      enddo
-      !
-      ! waterlevels
-      do n=1,nbndz
-         kb = kbndz(1,n)
-         ki = kbndz(2,n)
-         L  = kbndz(3,n)
-         !if (hu(L)<epshu) cycle
-         hwavcom(kb) = hwavcom(ki)
-         twav(kb)    = twav(ki)
-         phiwav(kb)  = phiwav(ki)
-         uorbwav(kb) = uorbwav(ki)
-         sbxwav(kb)  = sbxwav(ki)
-         sbywav(kb)  = sbywav(ki)
-         sxwav(kb)   = sxwav(ki)
-         sywav(kb)   = sywav(ki)
-         dsurf(kb)   = dsurf(ki)
-         dwcap(kb)   = dwcap(ki)
-         mxwav(kb)   = mxwav(ki)
-         mywav(kb)   = mywav(ki)
-      enddo
-      !
-      !  normal-velocity boundaries
-      do n=1,nbndn
-         kb = kbndn(1,n)
-         ki = kbndn(2,n)
-         L  = kbndn(3,n)
-         !if (hu(L)<epshu) cycle
-         hwavcom(kb) = hwavcom(ki)
-         twav(kb)    = twav(ki)
-         phiwav(kb)  = phiwav(ki)
-         uorbwav(kb) = uorbwav(ki)
-         sbxwav(kb)  = sbxwav(ki)
-         sbywav(kb)  = sbywav(ki)
-         sxwav(kb)   = sxwav(ki)
-         sywav(kb)   = sywav(ki)
-         dsurf(kb)   = dsurf(ki)
-         dwcap(kb)   = dwcap(ki)
-         mxwav(kb)   = mxwav(ki)
-         mywav(kb)   = mywav(ki)
-      end do
-      !
-      !  tangential-velocity boundaries
-      do n=1,nbndt
-         kb = kbndt(1,n)
-         ki = kbndt(2,n)
-         L  = kbndt(3,n)
-         !if (hu(L)<epshu) cycle
-         hwavcom(kb) = hwavcom(ki)
-         twav(kb)    = twav(ki)
-         phiwav(kb)  = phiwav(ki)
-         uorbwav(kb) = uorbwav(ki)
-         sbxwav(kb)  = sbxwav(ki)
-         sbywav(kb)  = sbywav(ki)
-         sxwav(kb)   = sxwav(ki)
-         sywav(kb)   = sywav(ki)
-         dsurf(kb)   = dsurf(ki)
-         dwcap(kb)   = dwcap(ki)
-         mxwav(kb)   = mxwav(ki)
-         mywav(kb)   = mywav(ki)
-      end do
-   endif
 
-   if (jawave>0) then
-      ! this call  is needed for bedform updates with van Rijn 2007 (cal_bf, cal_ksc below)
-      ! These subroutines need uorb, rlabda
-      call compute_wave_parameters()
+      if (jawave>0) then
+         ! this call  is needed for bedform updates with van Rijn 2007 (cal_bf, cal_ksc below)
+         ! These subroutines need uorb, rlabda
+         call compute_wave_parameters()
+      endif
+
    endif
 
 !   !$OMP SECTION
