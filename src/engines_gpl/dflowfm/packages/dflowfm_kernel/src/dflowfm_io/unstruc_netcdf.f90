@@ -11924,11 +11924,11 @@ subroutine assign_restart_data_to_local_array(array1, array2, iloc, kmx, loccoun
                array2(iloc,k) = array1(k)
             end do
          else
-            array2(iloc,kloc) = array1(kk)
+            array2(iloc,kloc) = array1(kloc)
          end if
       else ! It is a 2D waq bottom variable
          call getkbotktop(kloc,kb,kt)
-         array2(iloc,kb) = array1(kk)
+         array2(iloc,kb) = array1(kloc)
       end if
    enddo
 end subroutine assign_restart_data_to_local_array
