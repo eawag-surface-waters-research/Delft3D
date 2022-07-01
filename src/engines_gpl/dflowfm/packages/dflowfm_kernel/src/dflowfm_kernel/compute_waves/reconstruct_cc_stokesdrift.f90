@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2021.                                
+!  Copyright (C)  Stichting Deltares, 2017-2022.                                
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -34,18 +34,17 @@
     use m_flowgeom, only: lnx, ln, wcx1, wcx2,wcy1,wcy2
     use m_flow, only: kmx
     use m_waves, only: ustokes, vstokes
- 
+
     implicit none
-    
+
     ! Input variables
     integer                          , intent(in) :: ndkx
     double precision, dimension(ndkx), intent(out):: ust_x, ust_y
-    
-    
+
     ! Local variables
     integer          :: L, LL, Lb, Lt, k1, k2
     double precision :: ustL
-    
+
     ust_x = 0d0; ust_y = 0d0
 
     if (kmx==0) then
@@ -70,4 +69,4 @@
           end do
        end do
     endif
-end subroutine
+ end subroutine reconstruct_cc_stokesdrift

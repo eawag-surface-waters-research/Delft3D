@@ -169,7 +169,7 @@
                call getsoulsbywci(modind, z00, ustc2, ustw2, fw, cdrag, umod, abscos, taubpuLL, taubxuLL)
              ustbLL = sqrt(umod*taubpuLL)
             else if (modind == 9) then                            ! wave-current interaction van Rijn (2004)
-               call getvanrijnwci(LL, z00, umod, u2dh, taubpuLL, z0urouL)
+               call getvanrijnwci(LL, umod, u2dh, taubpuLL, z0urouL)
                taubxuLL = rhoL*(ustc2+ustw2)                      ! depth-averaged, see taubot
             elseif (modind==10) then                              ! Ruessink 2001
                if (cz > 0d0) then

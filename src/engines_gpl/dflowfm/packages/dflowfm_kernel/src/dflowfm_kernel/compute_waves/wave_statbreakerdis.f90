@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2021.                                
+!  Copyright (C)  Stichting Deltares, 2017-2022.                                
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -45,11 +45,11 @@ subroutine wave_statbreakerdis(h, hrms, tp, k, D)
       double precision, intent(in)   :: k
       double precision, intent(out)  :: D
 
-      double precision               :: alpha, f, kh, gam, Hb, R, Qb
+      double precision               :: alpha, Hb
 
       alpha = 1d0    ! can be slope dependent, see work of Bertin et al
 
-      Hb=0.88d0/k*tanh(gammax*k*h/0.88d0);
+      Hb=0.88d0/k*tanh(gammax*k*h/0.88d0)
       D=0.25d0*alpha*rhomean*ag/tp*exp(-(Hb/hrms)**2)*(Hb**3+hrms**3)/gammax/h
 
-   end subroutine
+   end subroutine wave_statbreakerdis

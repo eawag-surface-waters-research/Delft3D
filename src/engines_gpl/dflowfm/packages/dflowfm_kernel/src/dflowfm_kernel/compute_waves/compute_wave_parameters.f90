@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2021.                                
+!  Copyright (C)  Stichting Deltares, 2017-2022.                                
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -44,7 +44,7 @@
 
       implicit none
 
-      integer                                     :: k1, k2, k, L, ierror
+      integer                                     :: k1, k2, k, L
       double precision                            :: hh, hw, tw, cs, sn, uorbi, rkw, ustt, uwi
 
       ! Fetch models
@@ -57,7 +57,7 @@
                hh = hu(L); 
                if (hh<=epshu) then
                   ustokes(L) = 0d0; vstokes(L) = 0d0
-               else   
+               else
                   hw=0.5d0*(hwav(k1)+hwav(k2));tw=.5d0*(twav(k1)+twav(k2))
                   uwi = sqrt(wx(L)*wx(L) + wy(L)*wy(L) )
                   if (uwi > 0d0) then
@@ -69,7 +69,7 @@
                   call tauwavehk(hw, tw, hh, uorbi, rkw, ustt)
                   ustokes(L) = ustt*(csu(L)*cs + snu(L)*sn)
                   vstokes(L) = ustt*(-snu(L)*cs + csu(L)*sn)
-               endif   
+               endif
             enddo
          endif
          ! get uorb, rlabda
@@ -121,7 +121,7 @@
                hh = hu(L); 
                if (hh<=epshu) then
                   ustokes(L) = 0d0; vstokes(L) = 0d0
-               else   
+               else
                   hw=0.5d0*(hwav(k1)+hwav(k2));tw=.5d0*(twav(k1)+twav(k2))
                   cs = 0.5*(cos(phiwav(k1)*dg2rd)+cos(phiwav(k2)*dg2rd))
                   sn = 0.5*(sin(phiwav(k1)*dg2rd)+sin(phiwav(k2)*dg2rd))
@@ -133,12 +133,12 @@
             call wave_uorbrlabda()
          endif
       endif
-      
+
       ! shortcut to switch off stokes influence
       if (jawavestokes==0) then
          ustokes = 0d0; vstokes = 0d0
-      endif   
+      endif
 
 1234 continue
      return
-   end subroutine !compute_wave_parameters
+   end subroutine compute_wave_parameters

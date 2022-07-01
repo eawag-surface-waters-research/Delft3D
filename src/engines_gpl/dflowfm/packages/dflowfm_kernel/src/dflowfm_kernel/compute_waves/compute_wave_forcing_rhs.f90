@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2021.                                
+!  Copyright (C)  Stichting Deltares, 2017-2022.                                
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -63,8 +63,8 @@
       end if
       !
       ! Surfbeat model
-      if (jawave.eq.4 .and. jajre.eq.1 .and. nwbnd>0 .and. .not. flowWithoutWaves) then
-         if ( swave.eq.1 ) then
+      if (jawave == 4 .and. jajre == 1 .and. nwbnd>0 .and. .not. flowWithoutWaves) then
+         if ( swave == 1 ) then
             call xbeach_wave_bc()
             call xbeach_apply_wave_bc()
             call xbeach_waves(ierror)
@@ -74,7 +74,7 @@
                call xbeach_wave_compute_flowforcing3D()       ! set wavfu 3D
             endif
             !
-            if (jaavgwavquant .eq. 1) then
+            if (jaavgwavquant  ==  1) then
                call xbeach_makeaverages(dts)          ! time-averaged stats
             end if
          else
@@ -96,9 +96,9 @@
       endif
       !
       ! this part is for online interacter visualisation
-      if ( jaGUI.eq.1 .and. jawave>2) then
+      if ( jaGUI == 1 .and. jawave>2) then
          if (ntek > 0) then
-            if (mod(int(dnt),ntek) .eq. 0) then
+            if (mod(int(dnt),ntek)  ==  0) then
                call wave_makeplotvars()
             end if
          endif
@@ -106,4 +106,4 @@
 
 1234 continue
      return
-   end subroutine !compute_wave_forcing_RHS
+   end subroutine compute_wave_forcing_RHS

@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2021.                                
+!  Copyright (C)  Stichting Deltares, 2017-2022.                                
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -30,7 +30,7 @@
 ! $Id$
 ! $HeadURL$
 
- subroutine getvanrijnwci(LL, z00, umod, u2dh, taubpuLL, z0urouL)
+ subroutine getvanrijnwci(LL, umod, u2dh, taubpuLL, z0urouL)
    use m_flow
    use m_bedform
    use m_flowgeom
@@ -40,14 +40,13 @@
    implicit none
 
    integer, intent(in) :: LL
-   double precision, intent(in)  :: z00
    double precision, intent(in)  :: umod
    double precision, intent(in)  :: u2dh
    double precision, intent(out) :: taubpuLL
    double precision, intent(out) :: z0urouL
 
    ! Locals
-   integer          :: k1, k2,Lb,Lt
+   integer          :: k1, k2,Lb
    double precision :: hrmsu, tpu, rlabdau, rr, t1, u11, a11, raih, rmax, uon, uoff
    double precision :: cosk1, cosk2, sink1, sink2, cphi, sphi,ac1,ac2
    double precision :: phi, gamma, ksc, ka, ca, uwbih, rksru, rksmru, uratio

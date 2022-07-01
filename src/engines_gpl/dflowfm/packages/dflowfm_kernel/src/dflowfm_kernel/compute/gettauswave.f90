@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2021.                                
+!  Copyright (C)  Stichting Deltares, 2017-2022.                                
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -30,22 +30,22 @@
 ! $Id$
 ! $HeadURL$
 
-   
-! Make output arrays for bed shear stress icm jawave>0, depending on waq coupling and 2D/3D   
+
+! Make output arrays for bed shear stress icm jawave>0, depending on waq coupling and 2D/3D
 subroutine gettauswave(waveswartdelwaq)
    use m_flow
    use m_waves
    use m_flowgeom
    use m_sediment, only: sedtra, stm_included
-   
+
    implicit none
-   
+
    ! Input variables
    integer, intent(in)  :: waveswartdelwaq
-   
+
    ! Local variables
    integer                          :: L, LL, k1, k2, k, kb, kt, nn
-   double precision                 :: fw, ustw2, ust2, ust, cfn, czc, wa, ar, cf, frcn, cz, z00 
+   double precision                 :: fw, ustw2, ust2, ust, cfn, wa, ar, cf, frcn, cz, z00
    double precision                 :: ucxb, ucyb, ucxs, ucys, um, tauL 
    double precision, allocatable    :: ustv(:,:)
 
@@ -55,12 +55,12 @@ subroutine gettauswave(waveswartdelwaq)
    if (.not. allocated(ustv)) then
       allocate(ustv(2,max(kmx,1)))
    endif
-   ustv   = 0d0   
-   
+   ustv   = 0d0
+
    ! Calculate magnitude
    select case (waveswartdelwaq)
       ! Regular hydrodynamic shear stress, from Soulsby/Van Rijn/Ruessink (default)
-      case (0)  
+      case (0)
          do L=1,lnx
             k1 = ln(1,L); k2=ln(2,L)
             tauL = taubu(L)
@@ -70,7 +70,7 @@ subroutine gettauswave(waveswartdelwaq)
             worky(k2) = worky(k2) + tauL*wcy2(L)
          enddo
          taus=hypot(workx(1:ndx),worky(1:ndx))
-      
+
       ! Linear sum current + wave hydrodynamics (like gettau2)
       case (1)
          do k=1,ndx
@@ -114,7 +114,7 @@ subroutine gettauswave(waveswartdelwaq)
             endif
             taus(k) = rhomean*ust2
          enddo
-      
+
       ! Morphological bed shear stress
       case (2)
          if (stm_included) then
@@ -126,19 +126,19 @@ subroutine gettauswave(waveswartdelwaq)
                workx(k1) = workx(k1) + tauL*wcx1(L)
                workx(k2) = workx(k2) + tauL*wcx2(L)
                worky(k1) = worky(k1) + tauL*wcy1(L)
-               worky(k2) = worky(k2) + tauL*wcy2(L)               
+               worky(k2) = worky(k2) + tauL*wcy2(L)
             enddo
             taus=hypot(workx(1:ndx),worky(1:ndx))
-         endif   
+         endif
       end select
-      
+
    ! Calculate direction from GLM velocities, ustokes unavailable
    if (flowwithoutwaves) then
       do k=1,ndx
          call getkbotktop(k,kb,kt)
          ucxb = ucx(kb); ucyb=ucy(kb)
          um = max(hypot(ucxb,ucyb),1d-4)
-         workx(k)  = taus(k)*(ucxb)/um    
+         workx(k)  = taus(k)*(ucxb)/um
          worky(k)  = taus(k)*(ucyb)/um
       enddo
    else
@@ -152,4 +152,4 @@ subroutine gettauswave(waveswartdelwaq)
          worky(k)  = taus(k)*(ucyb-ucys)/um
       enddo
    endif
-end subroutine
+end subroutine gettauswave

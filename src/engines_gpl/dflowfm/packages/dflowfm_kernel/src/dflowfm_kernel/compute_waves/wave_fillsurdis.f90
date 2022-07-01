@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2021.                                
+!  Copyright (C)  Stichting Deltares, 2017-2022.                                
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -61,12 +61,12 @@
                if (twav(k)<0.1d0) then
                   surdis = 0d0
                   return
-               endif   
-               rk = 2*pi/rlabda(k) 
+               endif
+               rk = 2*pi/rlabda(k)
                call wave_statbreakerdis(hsk, hwav(k), twav(k), rk, surdis)
             else
                surdis = 0d0
             endif
       end select
 
-   end subroutine !wave_fillsurdis
+   end subroutine wave_fillsurdis
