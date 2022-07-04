@@ -5,7 +5,7 @@ set(src_path src)
 get_fortran_source_files(${src_path} source_files)
 
 # Define the library
-set(library_name waq_include)
+set(library_name waq_data)
 add_library(${library_name} ${source_files})
 
 

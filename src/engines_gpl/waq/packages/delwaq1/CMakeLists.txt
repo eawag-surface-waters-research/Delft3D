@@ -4,7 +4,7 @@ set(waq_root_path ${CMAKE_CURRENT_SOURCE_DIR}/../../) # Trace back to the WAQ pa
 
 # Set version file variables
 set(waq_version_path ${waq_root_path}/version)
-set(waq_include_path ${waq_root_path}/include)
+set(waq_data_path ${waq_root_path}/include)
 
 set(ini_version_file ${waq_version_path}/version_number.ini)
 set(fortran_version_file ${CMAKE_CURRENT_SOURCE_DIR}/src/delwaq1_version.F90)
@@ -77,7 +77,7 @@ if(UNIX)
                             nefis
                             delwaq_lib
                             waq_io
-                            waq_include
+                            waq_data
                             waq_kernel
                             waq_plugin_wasteload
                             waq_process
@@ -105,7 +105,7 @@ target_compile_options(${executable_name} PRIVATE "${waq_default_flags}")
 target_compile_options(${executable_name} PRIVATE "$<$<CONFIG:Debug>:${waq_debug_flags}>")
 
 if(UNIX)
-    target_include_directories(${executable_name} PRIVATE ${waq_include_path})
+    target_include_directories(${executable_name} PRIVATE ${waq_data_path})
 
     message(STATUS "netcdf lib dir is ${NETCDF_LIBRARY_DIRS}")
     target_link_directories(${executable_name} PRIVATE ${NETCDF_LIBRARY_DIRS})
@@ -115,7 +115,7 @@ if(UNIX)
 endif(UNIX)
 
 if (WIN32)
-    target_include_directories(${executable_name} PRIVATE ${waq_include_path} ${mpi_include_path})
+    target_include_directories(${executable_name} PRIVATE ${waq_data_path} ${mpi_include_path})
 
     # Set linker properties
     message(STATUS "Setting linker properties in windows")

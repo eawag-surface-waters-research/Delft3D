@@ -158,7 +158,7 @@ module m_delwaq1_data
                         '.res         ' , '-proces.wrk  ' , &    !           23, 24
                         '-output.wrk  ' , '.inp         ' , &    !           25, 26
                         '             ' , '-delwaq02.wrk' , &    !           27, 28
-                        '.lst         ' , '-dlwqstrt.inc' , &    !           29, 30
+                        '.lst         ' , '             ' , &    !           29, 30
                         '-scratch1opt3' , '-scratch2opt3' , &    !           31, 32
                         '-auxfileop1  ' , '-proces.def  ' , &    !           33, 34
                         '.lsp         ' , '-stochi.inp  ' , &    !           35, 36

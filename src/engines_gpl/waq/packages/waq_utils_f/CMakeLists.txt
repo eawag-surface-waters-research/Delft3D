@@ -33,7 +33,7 @@ if (UNIX)
     # WARNING: waq_process and waq_util_f are (weakly) circular dependent
     # Just add waq_process to "target_lib_libraries", nothing more
     set(oss_dependencies    deltares_common
-                            waq_include
+                            waq_data
                             io_netcdf)
     target_link_libraries(${library_name}
          ${oss_dependencies}
@@ -43,7 +43,7 @@ if (UNIX)
 endif(UNIX)
 if (WIN32)
     set(oss_dependencies    deltares_common
-                            waq_include
+                            waq_data
                             io_netcdf
                             netcdf4
                             netcdff)

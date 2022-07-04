@@ -133,7 +133,7 @@ subroutine delwaq2_global_data_initialize(runid_given)
                   '.res         ' , '-proces.wrk  ' , &
                   '-output.wrk  ' , '.inp         ' , &
                   '             ' , '-delwaq02.wrk' , &
-                  '.lst         ' , '-dlwqstrt.inc' , &
+                  '.lst         ' , '             ' , &
                   '-scratch1opt3' , '-scratch2opt3' , &
                   '-auxfileop1  ' , '-proces.def  ' , &
                   '.lsp         ' , '-stochi.inp  ' , &
