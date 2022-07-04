@@ -1887,12 +1887,18 @@
       do i = 1, nodye + nocont + noudef
          npmax = npmax + ndprt(i)
       enddo
-      if ( npmax .ne. nopart ) then
-         npmax = max(npmax,nopart)           ! the whole computation is a bit strange
-      endif                                  ! dimensioning and is set to 0 in delpar
+
+      ! 'npmax' is the estimate (maximum) number of particles used in the calculation based on the wastes.
+      ! This is used for the allocation of the arrays instead of the user provided 'nopart' read from the
+      ! inp-file, because the sum of particles used for the wastes could be more (or less) than 100%.
+      ! 'nopart' is used to scale the total number of particles in the calculation, only relative numbers are
+      ! given for the wastes.
+      write ( lun2, 3100 ) npmax
+
+      ! Add 1% + 1 uncertainty margin here for the actual allocation because round offs might add some extra particles
       npmargin = npmax / 100
-      npmax = npmax + npmargin + 1           ! we add a 1% + 1 uncertainty margin here...
-      write ( lun2, 3100 ) npmax             ! nopart variable is only used for
+      npmax = npmax + npmargin + 1           
+      write ( lun2, 3110 ) npmax
 
 !     further allocations
 
@@ -2133,7 +2139,8 @@
              ,'  dd-hh-mm-ss '                                         )
  2379 format( ' ',i4.2,'-',i2.2,'-',i2.2,'-',i2.2,':',2(i4,4x)         )
  2389 format(/'   time on file for mud release = ',i9                   )
- 3100 format(/,'   Number of particles for calculation set to',i11, '.')
+ 3100 format(/,'   The estimated number of particles in the calculation is approximately ',i11, '.')
+ 3110 format(  '   The number of particles used for memory allocation (ca. 1% extra) is  ',i11, '.')
  3115 format(  '  Relative thickness per layer')
  3120 format(  '        layer ',i4,'; relative thickness = ',f12.5    )
  3125 format(/,'  Critical shear stress sedimentation= ',f12.5,' (Pa)',    &
