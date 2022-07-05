@@ -41,7 +41,7 @@
  integer           :: japerim, L
 
  integer           :: k1, k2, k3, k4, K, jaconv, jaconvu,ifrctyp
- double precision  :: hpr1, ar1, wid1, aconv1, hpr2, ar2, wid2, aconv2, aru, widu, aconvu
+ double precision  :: hpr1, ar1, wid1, aconv1, hpr2, ar2, wid2, aconv2, aru, widu, aconvu, cz
  double precision  :: dx1, dx2, frcn, BL1, BL2, b21, wu2, ai
  double precision  :: beta, bt2, deltaa,hyr, uucn, ucna
 
@@ -81,10 +81,10 @@
 
     hpr1    = hu(L)
 
+    frcn = frcu(L) ; ifrctyp = ifrcutp(L)
     if (jaconveyance2D > 0) then
 
        jaconv = min(2,jaconveyance2D)
-       frcn = frcu(L) ; ifrctyp = ifrcutp(L)
        CALL getprof2d(hpr1,wu2,b21,ai,frcn,ifrctyp, widu,aru,aconvu,jaconv, beta, deltaa,hyr)
 
        if (frcn >  0) then
@@ -94,7 +94,14 @@
        endif
        au(L) = aru
     else
-       au(L) = hpr1*wu(L)
+      if (frcn > 0d0) then
+         call getcz(hpr1, frcn, ifrctyp, cz, L)
+         cfuhi(L) = ag/(hpr1*cz*cz)
+       else
+           cfuhi(L) = 0d0
+      end if
+
+      au(L) = hpr1*wu(L)
     endif
  endif
 
