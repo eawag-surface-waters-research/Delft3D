@@ -3144,8 +3144,8 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
           ierr = nf90_put_att(irstfile, id_tr1(j),  'coordinates'  , 'FlowElem_xcc FlowElem_ycc')
           ierr = nf90_put_att(irstfile, id_tr1(j),  'standard_name', trim(tmpstr))
           ierr = nf90_put_att(irstfile, id_tr1(j),  'long_name'    , trim(tmpstr))
-          if (const_units(j).ne.' ') then
-             tmpstr = const_units(j)
+          if (const_units(i).ne.' ') then
+             tmpstr = const_units(i)
           else
              tmpstr = '1e-3'
           endif
