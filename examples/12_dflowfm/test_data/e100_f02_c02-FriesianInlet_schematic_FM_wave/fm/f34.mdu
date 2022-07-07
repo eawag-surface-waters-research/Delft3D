@@ -12,7 +12,7 @@ BathymetryFile                      =                                    # *.xyb
 WaterLevIniFile                     =                                    # Initial water levels sample file *.xyz
 LandBoundaryFile                    =                                    # Only for plotting
 ThinDamFile                         = f34_thd.pli                        # *_thd.pli, Polyline(s) for tracing thin dams.
-Drypointsfile                       = f34_drypoints.xyz                  # *_tdk.pli, Polyline(s) x,y,z, z = thin dyke top levels
+Drypointsfile                       = f34_drypoints.xyz                  #
 ProflocFile                         =                                    # *_proflocation.xyz)    x,y,z, z = profile refnumber
 ProfdefFile                         =                                    # *_profdefinition.def) definition for all profile nrs
 ManholeFile                         =                                    # *...
@@ -28,7 +28,7 @@ BedlevMode                          = 1                                  # 1: FM
                                                                          # 2: Delft3D DPSOPT=MAX approach: Bed levels at waterlevel cells is lowest value at surrounding nodes
 AngLat                              = 55.00                              # Angle of latitude (deg), 0=no Coriolis
 Conveyance2D                        = -1                                 # -1:R=HU,0:R=H, 1:R=A/P, 2:K=analytic-1D conv, 3:K=analytic-2D conv
-Sillheightmin                       =                                    # Weir treatment only if both sills larger than this value (m) 
+Sillheightmin                       =                                    # Weir treatment only if both sills larger than this value (m)
 Kmx                                 =                                    # Max nr of vertical layers
 Makeorthocenters                    = 0                                  # 1=yes, 0=no switch from circumcentres to orthocentres in geominit
 Dcenterinside                       = 1.                                 # limit cell center; 1.0:in cell <-> 0.0:on c/g
@@ -46,11 +46,11 @@ Icgsolver                           = 4                                  # Solve
 Maxdegree                           = 6                                  # Maximum degree in Gauss elimination
 Izbndpos                            = 0                                  # Position of z boundary, 0=D3Dflow, 1=on net boundary, 2 = on specified polyline
 Jbasqbnddownwindhs                  = 0                                  # 0 : original hu on qbnd, 1 = downwind hs on qbnd
-Tlfsmo                              = 0.00                               # Fourier smoothing time on waterlevel boundaries (s) 
-Slopedrop2D                         = 0.0                                # Apply droplosses only if local bottom slope > Slopedrop2D 
+Tlfsmo                              = 0.00                               # Fourier smoothing time on waterlevel boundaries (s)
+Slopedrop2D                         = 0.0                                # Apply droplosses only if local bottom slope > Slopedrop2D
 Lincontin                           =                                    # 0 = no, 1 = yes linear continuity
 Jaembed1D                           =                                    # 1 : use embedded 1d channels, first run: Operations: Embed 1D channels
-Chkadvd                             =                                    # Check advection terms if depth < chkadvdp, => less setbacks 
+Chkadvd                             =                                    # Check advection terms if depth < chkadvdp, => less setbacks
 Teta0                               =                                    # Teta of time integration, 0.5 < Teta < 1d0
 Maxitverticalforester               =                                    # 0 : no vertical filter, > 0 = Max nr of iterations
 

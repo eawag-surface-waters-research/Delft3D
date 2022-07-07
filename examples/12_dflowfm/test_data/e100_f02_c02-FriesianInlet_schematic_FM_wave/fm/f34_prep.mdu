@@ -7,11 +7,11 @@ Version                             = 1.1.81
 AutoStart                           = 0                                  # Autostart simulation after loading MDU or not (0=no, 1=autostart, 2=autostartstop).
 
 [geometry]
-NetFile                             = f34_net.nc                        # *_net.nc
+NetFile                             = f34_net.nc                         # *_net.nc
 BathymetryFile                      =                                    # *.xyb
 WaterLevIniFile                     =                                    # Initial water levels sample file *.xyz
 LandBoundaryFile                    =                                    # Only for plotting
-ThinDamFile                         = f34_thd.pli                       # *_thd.pli, Polyline(s) for tracing thin dams.
+ThinDamFile                         = f34_thd.pli                        # *_thd.pli, Polyline(s) for tracing thin dams.
 ProflocFile                         =                                    # *_proflocation.xyz)    x,y,z, z = profile refnumber
 ProfdefFile                         =                                    # *_profdefinition.def) definition for all profile nrs
 ManholeFile                         =                                    # *...
