@@ -100,7 +100,7 @@
     endif
  enddo
 
- call barocLtimeint(gradpu, rhovol, LL, Lb, Lt) 
+ call barocLtimeint(gradpu, rhovol, LL, Lb, Lt)  
  
  end subroutine addbarocL
 
@@ -187,7 +187,7 @@
     endif
  enddo
 
- call barocLtimeint(gradpu, rhovol, kmxx, LL, Lb, Lt) 
+ call barocLtimeint(gradpu, rhovol, LL, Lb, Lt) 
 
  end subroutine addbarocLrho_w
 
@@ -248,14 +248,16 @@ subroutine addbarocLorg(LL,Lb,Lt)
     endif
  enddo
 
- call barocLtimeint(gradpu, rhovol, LL, Lb, Lt) 
-
+ call barocLtimeint(gradpu, rhovol, LL, Lb, Lt)  
+ 
  end subroutine addbarocLorg
 
 
  subroutine barocLtimeint(gradpu, rhovol, LL, Lb, Lt) 
  use m_flow
  use m_flowtimes
+
+ implicit none
 
  integer             :: LL, Lb, Lt
  double precision    :: gradpu(kmxx), rhovol(kmxx)
@@ -297,7 +299,7 @@ subroutine addbarocLorg(LL,Lb,Lt)
  else
 
     do L = Lb, Lt
-        if (rhovol(L-Lb+1) > 0d0) then
+       if (rhovol(L-Lb+1) > 0d0) then
            barocl  = ag*gradpu(L-Lb+1)/rhovol(L-Lb+1)                     !  Explicit
            adve(L) = adve(L) - barocl
        endif
