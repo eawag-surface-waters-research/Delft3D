@@ -56,7 +56,6 @@
  use m_integralstats
  use m_xbeach_data, only: bccreated
  use m_oned_functions
- use unstruc_display, only : ntek, jaGUI
  use m_alloc
  use m_bedform
  use m_fm_update_crosssections, only: fm_update_mor_width_area, fm_update_mor_width_mean_bedlevel
@@ -108,8 +107,6 @@
  call reset_unstruc_netcdf_map_class()
 
  call resetflow()
-
- if (jagui == 1) call zerotimers()
 
  call reset_waq()
 
