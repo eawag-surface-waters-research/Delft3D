@@ -68,7 +68,7 @@
     zlin = au(L)
  else if (  linval == 6) then
     if (hu(LL)>epshu) then
-       zlin = hu(L)
+    zlin = hu(L)
     else
        zlin = dmiss
     endif
@@ -115,7 +115,7 @@
  else if ( linval == 22) then
     if (javeg == 0) then
        if (jaconveyance2D >= 1) then
-          zlin = aifu(LL) ! ccr(lv2(LL))
+       zlin = aifu(LL) ! ccr(lv2(LL))
        endif
     else
         k1 = ln(1,L) ; k2 = ln(2,L)
@@ -145,16 +145,16 @@
     endif
  else if ( linval == 25) then
     if (jawind>0) then
-       zlin = wx(LL)
+    zlin = wx(LL)
     endif
  else if ( linval == 26) then
     if (jawind>0) then
-       zlin = wy(LL)
+    zlin = wy(LL)
     endif
  else if ( linval == 27) then
-    if (jawind>0) then
-       zlin = wdsu(LL)
-    endif
+   if (jawind>0) then
+    zlin = wdsu_x(LL) ; jamapwindstress = 1
+   endif
  else if ( linval == 28) then
     zlin = dabs(cosphiu(LL))
  else if ( linval == 29) then

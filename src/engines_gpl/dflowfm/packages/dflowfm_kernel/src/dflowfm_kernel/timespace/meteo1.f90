@@ -6522,6 +6522,12 @@ module m_meteo
    integer, target :: item_windy                                             !< Unique Item id of the ext-file's 'windy' quantity's y-component.
    integer, target :: item_windxy_x                                          !< Unique Item id of the ext-file's 'windxy' quantity's x-component.
    integer, target :: item_windxy_y                                          !< Unique Item id of the ext-file's 'windxy' quantity's y-component.
+  
+   integer, target :: item_stressx                                           !< Unique Item id of the ext-file's 'windx' quantity's x-component.
+   integer, target :: item_stressy                                           !< Unique Item id of the ext-file's 'windy' quantity's y-component.
+   integer, target :: item_stressxy_x                                        !< Unique Item id of the ext-file's 'windxy' quantity's x-component.
+   integer, target :: item_stressxy_y                                        !< Unique Item id of the ext-file's 'windxy' quantity's y-component.
+      
    integer, target :: item_apwxwy_p                                          !< Unique Item id of the ext-file's 'airpressure_windx_windy' quantity 'p'.
    integer, target :: item_apwxwy_x                                          !< Unique Item id of the ext-file's 'airpressure_windx_windy' quantity 'x'.
    integer, target :: item_apwxwy_y                                          !< Unique Item id of the ext-file's 'airpressure_windx_windy' quantity 'y'.
@@ -6630,6 +6636,12 @@ module m_meteo
       item_windy                                 = ec_undef_int
       item_windxy_x                              = ec_undef_int
       item_windxy_y                              = ec_undef_int
+ 
+      item_stressx                               = ec_undef_int
+      item_stressy                               = ec_undef_int
+      item_stressxy_x                            = ec_undef_int
+      item_stressxy_y                            = ec_undef_int
+   
       item_apwxwy_p                              = ec_undef_int
       item_apwxwy_x                              = ec_undef_int
       item_apwxwy_y                              = ec_undef_int
@@ -6893,17 +6905,28 @@ module m_meteo
       dataPtr3 => null()
       dataPtr4 => null()
       select case (trim(qidname))
-         case ('windx', 'stressx')
+         case ('windx')
             itemPtr1 => item_windx
             dataPtr1 => wx
-         case ('windy', 'stressy')
+         case ('windy')
             itemPtr1 => item_windy
             dataPtr1 => wy
-         case ('windxy', 'stressxy')
+         case ('windxy')
             itemPtr1 => item_windxy_x
             dataPtr1 => wx
             itemPtr2 => item_windxy_y
             dataPtr2 => wy
+       case ('stressx')
+            itemPtr1 => item_stressx
+            dataPtr1 => wdsu_x
+         case ('stressy')
+            itemPtr1 => item_stressy
+            dataPtr1 => wdsu_y
+         case ( 'stressxy')
+            itemPtr1 => item_stressxy_x
+            dataPtr1 => wdsu_x
+            itemPtr2 => item_stressxy_y
+            dataPtr2 => wdsu_y
          case ('airpressure_windx_windy', 'airpressure_stressx_stressy')
             itemPtr1 => item_apwxwy_p
             dataPtr1 => patm

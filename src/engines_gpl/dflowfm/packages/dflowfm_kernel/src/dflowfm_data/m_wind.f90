@@ -101,6 +101,7 @@ integer                           :: jawind              !< use wind yes or no
 integer                           :: japatm              !< use patm yes or no
 integer                           :: jaspacevarcharn     !< use space and time varying Charnock coefficients yes or no
 integer                           :: jawindstressgiven   !< wind given as stress, no conversion needed
+integer                           :: jastresstowind      !< if jawindstressgiven==1, convert stress to wind yes/no 1/0 
 integer                           :: jarain              !< use rain yes or no
 integer                           :: jaevap              !< use evap yes or no
 integer                           :: jatair              !< use air temperature   yes or no
@@ -168,7 +169,8 @@ use m_physcoef, only : rhomean
     jaqin   = 0         !< use qin , sum of all in fluxes
     jaQext  = 0         !< use Qin externally provided yes or no
     jawind  = 0         !< use wind yes or no
-
+    jastresstowind    = 0  !< if jawindstressgiven==1, convert stress to wind yes/no 1/0 
+ 
     ! Remaining of variables is handled in reset_wind()
     call reset_wind()
    end subroutine default_wind
@@ -179,7 +181,7 @@ use m_physcoef, only : rhomean
    japatm   = 0           !< use patm yes or no
    numlatsg = 0           !< [] nr of lateral discharge providers
    nlatnd   = 0           !< lateral nodes dimension, counter of nnlat(:)
-   jaspacevarcharn = 0   !< use space varying Charnock coefficients
-   jawindstressgiven = 0 !< wind stress given in meteo file
+   jaspacevarcharn   = 0  !< use space varying Charnock coefficients
+   jawindstressgiven = 0  !< wind stress given in meteo file
    end subroutine reset_wind
 end module m_wind

@@ -1358,20 +1358,11 @@ logical function initboundaryblocksforcings(filename)
        end if
 
        select case (quantity)
-          case ('rainfall','rainfall_rate')
+          case ('rainfall','rainfall_rate') ! case is zeer waarschijnlijk overbodig 
              if (.not. allocated(rain) ) then
                 allocate ( rain(ndx) , stat=ierr)
                 call aerr('rain(ndx)', ierr, ndx)
                 rain = 0d0
-             endif
-             kx = 1
-          case ('windxy')
-             if (.not. allocated(wx) ) then
-                call realloc(kcw, lnx, stat=ierr, keepExisting=.false.)
-                call aerr('kcw(lnx)', ierr, lnx)
-                allocate ( wx(lnx), wy(lnx), stat=ierr)
-                call aerr('wx(lnx), wy(lnx)', ierr, 2*lnx)
-                wx = 0.0_hp ; wy = 0.0_hp ; kcw = 1
              endif
              kx = 1
           case ('qext')

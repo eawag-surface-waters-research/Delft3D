@@ -5084,8 +5084,8 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
          ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_patm,  nf90_double, UNC_LOC_S, 'Patm',  'surface_air_pressure', 'Atmospheric pressure near surface', 'N m-2', jabndnd=jabndnd_)
       end if
 
-      if ((jamapwind > 0 .or. jamapwindstress > 0) .and. jawind /= 0) then
-         if (jawindstressgiven == 0 .and. jamapwind > 0) then
+      if (jawind > 0) then 
+         if (jamapwind > 0) then
             if (jsferic == 0) then
                ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_windx,  nf90_double, UNC_LOC_S, 'windx',  'x_wind', 'velocity of air on flow element center, x-component', 'm s-1', jabndnd=jabndnd_)
                ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_windy,  nf90_double, UNC_LOC_S, 'windy',  'y_wind', 'velocity of air on flow element center, y-component', 'm s-1', jabndnd=jabndnd_)
@@ -6689,28 +6689,27 @@ if (jamapsed > 0 .and. jased > 0 .and. stm_included) then
    end if
 
    ! Meteo forcings
-   if (jamapwind > 0 .and. jawind /= 0 .and. jawindstressgiven == 0) then
-      allocate (windx(ndxndxi), windy(ndxndxi), stat=ierr)
+   if (jawind > 0) then
+      allocate (windx(ndxndxi), windy(ndxndxi), stat=ierr)  
       if (ierr /= 0) call aerr( 'windx/windy', ierr, ndxndxi)
 
-      !windx/y is set to 0.0 for flownodes without links
-      windx = 0.0d0
-      windy = 0.0d0
-      do n = 1,ndxndxi
-         do LL=1,nd(n)%lnx
-            LLL = abs(nd(n)%ln(LL))
-            k1 = ln(1,LLL) ; k2 = ln(2,LLL)
-            k3 = 1 ; if( nd(n)%ln(LL) > 0 ) k3 = 2
-            windx(n) = windx(n) + wx(LLL) * wcL(k3,LLL)
-            windy(n) = windy(n) + wy(LLL) * wcL(k3,LLL)
-         end do
-      end do
-      ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_windx , UNC_LOC_S, windx, jabndnd=jabndnd_)
-      ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_windy , UNC_LOC_S, windy, jabndnd=jabndnd_)
-      ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_windxu, UNC_LOC_U, wx, jabndnd=jabndnd_)
-      ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_windyu, UNC_LOC_U, wy, jabndnd=jabndnd_)
-      deallocate (windx, windy, stat=ierr)
-   end if
+      if (jamapwind > 0) then
+         call linktonode2(wx,wy,windx,windy, ndxndxi)
+         ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_windx , UNC_LOC_S, windx, jabndnd=jabndnd_)
+         ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_windy , UNC_LOC_S, windy, jabndnd=jabndnd_)
+         ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_windxu, UNC_LOC_U, wx   , jabndnd=jabndnd_)
+         ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_windyu, UNC_LOC_U, wy   , jabndnd=jabndnd_)
+      endif
+     
+      if (jamapwindstress > 0) then
+         call linktonode2(wdsu_x,wdsu_y,windx,windy, ndxndxi)
+         ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_windstressx, UNC_LOC_S, windx, jabndnd=jabndnd_)
+         ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_windstressy, UNC_LOC_S, windy, jabndnd=jabndnd_)
+      endif 
+      
+      deallocate(windx, windy, stat=ierr)
+  
+   endif
 
    ! Rain
    if (jamaprain > 0 .and. jarain /= 0) then
@@ -6731,25 +6730,7 @@ if (jamapsed > 0 .and. jased > 0 .and. stm_included) then
       ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_patm  , UNC_LOC_S, patm, jabndnd=jabndnd_)
    endif
 
-   if (jawind /= 0 .and. jamapwindstress > 0) then
-      allocate (windx(ndxndxi), windy(ndxndxi), stat=ierr)
-      if (ierr /= 0) call aerr( 'windx/windy', ierr, ndxndxi)
 
-      windx = 0.0d0
-      windy = 0.0d0
-      do n = 1,ndxndxi
-         do LL=1,nd(n)%lnx
-            LLL = abs(nd(n)%ln(LL))
-            k1 = ln(1,LLL) ; k2 = ln(2,LLL)
-            k3 = 1 ; if( nd(n)%ln(LL) > 0 ) k3 = 2
-            windx(n) = windx(n) + wdsu_x(LLL) * wcL(k3,LLL) * rhomean
-            windy(n) = windy(n) + wdsu_y(LLL) * wcL(k3,LLL) * rhomean
-         end do
-      end do
-      ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_windstressx, UNC_LOC_S, windx, jabndnd=jabndnd_)
-      ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_windstressy, UNC_LOC_S, windy, jabndnd=jabndnd_)
-      deallocate(windx, windy, stat=ierr)
-   endif
 
    ! Heat flux models
    if (jamapheatflux > 0 .and. jatem > 1) then ! here less verbose
@@ -9811,7 +9792,7 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
     if (jawind > 0 .and. ((jamapwind > 0 .and. jawindstressgiven == 0) .or. (jaseparate_==2))) then
        allocate (windx(ndxndxi), windy(ndxndxi), stat=ierr)
        if (ierr /= 0) call aerr( 'windx/windy', ierr, ndxndxi)
-       !windx/y is not set to 0.0 for flownodes without links
+       !windx/y is not set to 0.0 for flownodes without links !  
        windx = 0.0d0
        windy = 0.0d0
        do n = 1,ndxndxi
@@ -16667,4 +16648,31 @@ subroutine convert_hysteresis_summerdike(logic2int, work1di)
       end do
    end if
 end subroutine convert_hysteresis_summerdike
+
+subroutine linktonode2(u_x, u_y, s_x, s_y, ndxndxi)   ! bring 2 scalars on u points to zeta points
+
+use m_flowgeom
+use m_flow
+
+implicit none
+
+double precision :: u_x(:),  u_y(:), s_x(:),  s_y(:) 
+integer :: ndxndxi
+
+integer :: n, L, LL, LLL, k1, k2, k3
+
+s_x = 0.0d0
+s_y = 0.0d0
+do n = 1,ndxndxi
+   do LL=1,nd(n)%lnx
+      LLL = abs(nd(n)%ln(LL))
+      k1 = ln(1,LLL) ; k2 = ln(2,LLL)
+      k3 = 1 ; if( nd(n)%ln(LL) > 0 ) k3 = 2
+      s_x(n) = s_x(n) + u_x(LLL) * wcL(k3,LLL) 
+      s_y(n) = s_y(n) + u_y(LLL) * wcL(k3,LLL) 
+   end do
+end do
+end subroutine linktonode2
+
+
 end module unstruc_netcdf

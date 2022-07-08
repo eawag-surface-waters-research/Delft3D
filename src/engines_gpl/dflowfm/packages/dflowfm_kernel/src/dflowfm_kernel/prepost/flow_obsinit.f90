@@ -35,10 +35,15 @@
  !! And bookkeeping for time series output on structures.
  subroutine flow_obsinit()
  use m_observations, only: init_valobs
+ use m_wind
  use m_structures
  implicit none
     call crosssections_on_flowgeom()
     call runupgauges_on_flowgeom()
+
+    if (jawind == 1 ) then ! was needed here if jawind was set 1 by windext
+       call allocatewindarrays()
+    endif 
 
     call obs_on_flowgeom(0)
 

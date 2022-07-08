@@ -689,7 +689,7 @@ endif
 
     endif
 
-    if (jabarocterm == 4) then
+    if (jabarocterm >= 4) then
        if (allocated (rvdn) ) deallocate(rvdn, grn)
        allocate ( rvdn(ndkx), grn(ndkx) , stat= ierr ) ; rvdn = 0d0 ; grn = 0d0
        call aerr('rvdn(ndkx), grn(ndkx)', ierr, 2*ndkx )
@@ -935,9 +935,6 @@ endif
  if (allocated(cfuhi))    deallocate(cfuhi)
  if (allocated(frcu))     deallocate(frcu)
  if (allocated(ifrcutp))  deallocate(ifrcutp)
- if (allocated(wdsu))     deallocate(wdsu)
- if (allocated(wdsu_x))   deallocate(wdsu_x)
- if (allocated(wdsu_y))   deallocate(wdsu_y)
  if (allocated(u0))       deallocate(u0)
  if (allocated(u1))       deallocate(u1)
  if (allocated(q1))       deallocate(q1)
@@ -970,14 +967,7 @@ endif
  call aerr('frcu_mor (lnx)'  , ierr,   lnx) ; frcu_mor    = dmiss
  allocate ( ifrcutp(lnx) , stat = ierr)
  call aerr('ifrcutp(lnx)', ierr,   lnx) ; ifrcutp = abs(ifrctypuni)
- allocate ( wdsu  (lnx)  , stat=ierr  )
- call aerr('wdsu  (lnx)' , ierr, lnx  ) ; wdsu     = 0
- if (jamapwindstress > 0) then
-    allocate ( wdsu_x(lnx)  , stat=ierr  )
-    call aerr('wdsu_x(lnx)' , ierr, lnx  ) ; wdsu_x  = 0
-    allocate ( wdsu_y(lnx)  , stat=ierr  )
-    call aerr('wdsu_y(lnx)' , ierr, lnx  ) ; wdsu_y  = 0
- endif
+ 
  allocate ( u0   (lnkx)  , stat = ierr)
  call aerr('u0   (lnkx)' , ierr , lnkx )  ; u0    = 0
  allocate ( u1   (lnkx)  , stat = ierr)
@@ -1247,12 +1237,6 @@ endif
 
  if (jaevap > 0) then
     call realloc(evap, ndx, keepExisting = .false., fill = 0d0, stat = ierr)
- end if
-
- if (jawind > 0) then
-    call realloc(wx, lnx, keepExisting = .false., fill = 0d0, stat = ierr)
-    call realloc(wy, lnx, keepExisting = .false., fill = 0d0, stat = ierr)
-    call realloc(kcw, lnx, keepExisting = .false., fill = 1, stat = ierr)
  end if
 
  if (jaQext > 0) then

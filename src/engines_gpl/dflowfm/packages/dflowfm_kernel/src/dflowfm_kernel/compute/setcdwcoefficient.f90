@@ -42,7 +42,7 @@
  implicit none
  integer, intent (in) :: L
  integer              :: k1, maxnit = 100, nit, jalightwind = 0
- double precision     :: uwi, cd10, rk, hsurf = 10d0
+ double precision     :: uwi, cd10, rk, hsurf = 10d0, ust2, z0w 
  double precision     :: omw, cdL2, dkpz0, s, sold, eps = 1d-4, awin
  double precision     :: p = -12d0, pinv = -0.083333d0, A, A10log, bvis, bfit, balf, r
 
@@ -118,6 +118,9 @@
        cd10 = 1d0/(s*s)
     endif
 
+    !ust2 = cd10*uwi*uwi
+    !z0w  = cdb(1)*ust2/ag 
+    
  else if (icdtyp == 5) then                     ! Hwang 2005, wave frequency dependent
 
     ! (A.)=http://onlinelibrary.wiley.com/doi/10.1029/2005JC002912/full

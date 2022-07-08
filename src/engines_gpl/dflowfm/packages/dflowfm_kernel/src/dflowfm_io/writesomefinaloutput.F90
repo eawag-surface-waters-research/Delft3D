@@ -213,7 +213,7 @@
 
  ! if (ti_xls > 0) then
  ! call wrirstfileold(time1)                     ! schrijf aan het einde     een ascii.rst-file weg
- call wrinumlimdt()                                 ! number of limitating timesteps per node
+ ! call wrinumlimdt()                                 ! number of limitating timesteps per node
  ! endif
  !call unc_write_his(time1)                         ! schrijf aan het einde ook een .his-file weg
  !call wrimap(time1)                                ! schrijf aan het einde ook een .map-file weg

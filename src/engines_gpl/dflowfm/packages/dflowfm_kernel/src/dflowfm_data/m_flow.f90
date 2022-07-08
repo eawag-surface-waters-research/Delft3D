@@ -336,17 +336,17 @@
 
  double precision, allocatable     :: wavfu (:)   !< wave force u point
  double precision, allocatable     :: wavfv (:)   !< wave force u point
- real            , allocatable     :: wdsu  (:)   !< windstress u point  (m2/s2)
- real            , allocatable     :: wdsu_x(:)   !< windstress u point  (m2/s2) x-component
- real            , allocatable     :: wdsu_y(:)   !< windstress u point  (m2/s2) y-component
- double precision, allocatable     :: wavmubnd (:)   !< wave-induced mass flux (on open boundaries)
+ double precision, allocatable     :: wdsu  (:)     !< windstress/rhow u point  (m2/s2)
+ double precision, allocatable, target :: wdsu_x(:) !< windstress u point  (N/m2) x-component
+ double precision, allocatable, target :: wdsu_y(:) !< windstress u point  (N/m2) y-component
+ double precision, allocatable     :: wavmubnd (:)  !< wave-induced mass flux (on open boundaries)
  real            , allocatable     :: vicLu   (:) !< horizontal eddy viscosity coefficient at u point (m2/s)  (limited only if ja_timestep_auto_visc==0)
  real            , allocatable     :: viu   (:)   !< horizontal eddy viscosity coefficient at u point (m2/s), modeled part of viscosity = vicLu - viusp
  double precision, allocatable, target    :: viusp(:)   !< [m2/s] user defined spatial eddy viscosity coefficient at u point (m2/s) {"location": "edge", "shape": ["lnx"]}
  double precision, allocatable, target    :: diusp(:)   !< [m2/s] user defined spatial eddy diffusivity coefficient at u point (m2/s) {"location": "edge", "shape": ["lnx"]}
                                                         !< so in transport, total diffusivity = viu*sigdifi + diusp
  real            , allocatable     :: fcori (:)   !< spatially variable fcorio coeff at u point (1/s)
-double precision, allocatable     :: fvcoro (:)  !< 3D adamsbashford u point (m/s2)
+ double precision, allocatable     :: fvcoro (:)  !< 3D adamsbashford u point (m/s2)
 
  real            , allocatable     :: tidgs (:)   !< spatially variable earth tide potential at s point (m2/s2)
  double precision, allocatable     :: plotlin(:)  !< for plotting on u points

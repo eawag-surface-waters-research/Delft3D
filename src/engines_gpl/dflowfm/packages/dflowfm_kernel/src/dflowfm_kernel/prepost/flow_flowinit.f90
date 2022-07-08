@@ -1421,7 +1421,7 @@ end if
     endif
     hwav = min(hwav, gammax*hs)
     call wave_uorbrlabda()                       ! hwav gets depth-limited here
-end if
+ end if
 
  if (jawave==5 .and. .not. flowWithoutWaves) then
     hs = max(hs, 0d0)

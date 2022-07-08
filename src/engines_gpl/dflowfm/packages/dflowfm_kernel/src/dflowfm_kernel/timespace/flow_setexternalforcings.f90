@@ -74,6 +74,9 @@ subroutine flow_setexternalforcings(tim, l_initPhase, iresult)
    logical                               :: foundtempforcing, success_copy
    double precision                      :: tUnitFactor
 
+   double precision, allocatable :: wxtest(:)  , wytest(:)   
+
+
    iresult = DFM_EXTFORCERROR
    call timstrt('External forcings', handle_ext)
 
@@ -89,19 +92,25 @@ subroutine flow_setexternalforcings(tim, l_initPhase, iresult)
 
    if (jawind == 1 .or. japatm > 0) then   ! setwind
       if (allocated(wx)) then              ! initialize all winds to zero
-        wx = 0.d0
+         wx = 0.d0
       end if
       if (allocated(wy)) then
-        wy = 0.d0
+         wy = 0.d0
       end if
+      if (allocated(wdsu_x)) then
+         wdsu_x = 0d0
+      endif
+      if (allocated(wdsu_y)) then
+         wdsu_y = 0d0
+      endif
       if (allocated(wcharnock)) then
-        wcharnock = 0.d0
+         wcharnock = 0.d0
       end if
       if (allocated(ec_pwxwy_x)) then
-        ec_pwxwy_x = 0.d0
+         ec_pwxwy_x = 0.d0
       end if
       if (allocated(ec_pwxwy_y)) then
-        ec_pwxwy_y = 0.d0
+         ec_pwxwy_y = 0.d0
       end if
 
       first_time_wind = (id_last_wind < 0)
@@ -143,13 +152,23 @@ subroutine flow_setexternalforcings(tim, l_initPhase, iresult)
          endif
       enddo
 
+      if (jawindstressgiven > 0) then 
+         success = ec_gettimespacevalue(ecInstancePtr, item_stressx, irefdate, tzone, tunit, tim, wdsu_x)
+         success = ec_gettimespacevalue(ecInstancePtr, item_stressy, irefdate, tzone, tunit, tim, wdsu_y)
+      endif   
+   
       ! FM performs an additional spatial interpolation:
       if (allocated(ec_pwxwy_x) .and. allocated( ec_pwxwy_y)) then
          do L  = 1, lnx
             k1 = ln(1,L)
             k2 = ln(2,L)
-            wx(L) = wx(L) + 0.5d0*( ec_pwxwy_x(k1) + ec_pwxwy_x(k2) )
-            wy(L) = wy(L) + 0.5d0*( ec_pwxwy_y(k1) + ec_pwxwy_y(k2) )
+            if (jawindstressgiven == 1) then 
+               wdsu_x(L) = wdsu_x(L) + 0.5d0*( ec_pwxwy_x(k1) + ec_pwxwy_x(k2) )
+               wdsu_y(L) = wdsu_y(L) + 0.5d0*( ec_pwxwy_y(k1) + ec_pwxwy_y(k2) )
+            else 
+               wx(L)     = wx(L)     + 0.5d0*( ec_pwxwy_x(k1) + ec_pwxwy_x(k2) )
+               wy(L)     = wy(L)     + 0.5d0*( ec_pwxwy_y(k1) + ec_pwxwy_y(k2) )
+            endif
             if (allocated(ec_pwxwy_c)) then
                wcharnock(L) = wcharnock(L) + 0.5d0*( ec_pwxwy_c(k1) + ec_pwxwy_c(k2) )
             endif

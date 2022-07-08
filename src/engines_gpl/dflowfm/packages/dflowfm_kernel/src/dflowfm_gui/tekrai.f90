@@ -504,10 +504,11 @@
  endif
  ! call LINEWIDTH(1)
 
+ call setcol(ncolblack)
  do ng = 1,ngatesg  ! loop over gate signals, tekrai
     zgaten = zgate(ng)
-    do n  = L1gatesg(ng), L2gatesg(ng)
-       L  = kgate(3,n) ; k1 = ln(1,L) ; k2 = ln(2,L)
+    do n   = L1gatesg(ng), L2gatesg(ng)
+       L   = kgate(3,n) ; k1 = ln(1,L) ; k2 = ln(2,L)
        bup = min( bob(1,L), bob(2,L) )
        call fbox(xz(k1),zgaten,xz(k2),zgaten+20d0)
        ! call fbox(xz(k1),bup   ,xz(k2),bup-10d0)

@@ -543,9 +543,9 @@
       OPTION(23)= 'Plant density                     (1/m2)'
       OPTION(24)= 'Stem  height                       ( m )'
       endif
-      OPTION(25)= 'wind x                             (m/s)'
-      OPTION(26)= 'wind y                             (m/s)'
-      OPTION(27)= 'windstress                        (N/m2)'
+      OPTION(25)= 'wx      windspeed                  (m/s)'
+      OPTION(26)= 'wy      windspeed                  (m/s)'
+      OPTION(27)= 'wdsu_x  windstress                (N/m2)'
       OPTION(28)= 'cosphiu , link orthogonality          ()'
       OPTION(29)= 'link nr                                 '
       OPTION(30)= 'tangential velocity                (m/s)'

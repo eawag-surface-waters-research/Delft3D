@@ -1464,82 +1464,59 @@ if (mext /= 0) then
         else if (qid == 'windx' .or. qid == 'windy' .or. qid == 'windxy' .or. &
                  qid == 'stressxy' .or. qid == 'stressx' .or. qid == 'stressy') then
 
-           jawindstressgiven = merge(1, 0, qid(1:6) == 'stress')
-           success = (.not. (jawindstressgiven == 1 .and. kmx > 0))
-           if (.not. success) then
-              msgbuf = "Quantity 'stress(x/y)' not implemented for 3D (yet)"
-              call err_flush()
-           endif
-
            if (allocated (kcw) ) deallocate(kcw)
-           call realloc(kcw, lnx, stat=ierr, keepExisting=.false.)
-           call aerr('kcw(lnx)', ierr, lnx)
+           allocate( kcw(lnx) )
            kcw = 1
-           if (.not. allocated(wx) ) then
-              allocate ( wx(lnx), stat=ierr)
-              call aerr('wx(lnx)', ierr, lnx)
-              wx = 0.0_hp
-           endif
-           if (.not. allocated(wy) ) then
-              allocate ( wy(lnx), stat=ierr)
-              call aerr('wy(lnx)', ierr, lnx)
-              wy = 0.0_hp
-           endif
 
+           jawindstressgiven = merge(1, 0, qid(1:6) == 'stress')    ! if (index(qid,'str') > 0) jawindstressgiven = 1
+       
            if (len_trim(sourcemask)>0)  then
               success = ec_addtimespacerelation(qid, xu(1:lnx), yu(1:lnx), kcw, kx, filename, filetype, method, operand, srcmaskfile=sourcemask, varname=varname)
            else
               success = ec_addtimespacerelation(qid, xu(1:lnx), yu(1:lnx), kcw, kx, filename, filetype, method, operand, varname=varname)
            endif
 
-           if (success) jawind = 1
+           if (success) then 
+               jawind = 1
+           endif
 
         else if (qid == 'airpressure_windx_windy' .or. &
                  qid == 'airpressure_stressx_stressy' .or. &
                  qid == 'airpressure_windx_windy_charnock') then
 
+           if (allocated (kcw) ) deallocate(kcw)
+           allocate( kcw(ndx) )
+           kcw = 1
+
            jawindstressgiven = merge(1, 0, qid == 'airpressure_stressx_stressy')
            jaspacevarcharn   = merge(1, 0, qid == 'airpressure_windx_windy_charnock')
-
-           success = (.not. (jawindstressgiven == 1 .and. kmx > 0))
-
-           if (.not. success) then
-              msgbuf = "Quantity 'airpressure_stressx_stressy' not implemented for 3D (yet)"
-              call err_flush()
-           else
-              if (.not. allocated(patm) ) then
-                 allocate ( patm(ndx) , stat=ierr)
-                 call aerr('patm(ndx)', ierr, ndx)
-                 patm = 100000d0
-              endif
-              if (.not. allocated(wx) ) then
-                 allocate ( wx(lnx), wy(lnx) , stat=ierr)
-                 call aerr('wx(lnx), wy(lnx)', ierr, 2*lnx)
-                 wx = 0d0 ; wy = 0d0
-              endif
-              if (.not. allocated(ec_pwxwy_x) ) then
-                 allocate ( ec_pwxwy_x(ndx) , ec_pwxwy_y(ndx)  , stat=ierr)
-                 call aerr('ec_pwxwy_x(ndx) , ec_pwxwy_y(ndx)' , ierr, 2*ndx)
-                 ec_pwxwy_x = 0d0 ; ec_pwxwy_y = 0d0
-              endif
-              if (jaspacevarcharn == 1) then
-                 if (.not. allocated(ec_pwxwy_c) ) then
-                    allocate ( ec_pwxwy_c(ndx) , wcharnock(lnx), stat=ierr)
-                    call aerr('ec_pwxwy_c(ndx), wcharnock(lnx)' , ierr, ndx+lnx)
-                    ec_pwxwy_c = 0d0
-                 endif
-              endif
-              call realloc(kcw, ndx, stat=ierr)
-              call aerr('kcw(ndx)', ierr, ndx)
-              kcw = 1
-
-              if (len_trim(sourcemask)>0)  then
-                 success = ec_addtimespacerelation(qid, xz(1:ndx), yz(1:ndx), kcw, kx, filename, filetype, method, operand, srcmaskfile=sourcemask, varname=varname)
-              else
-                 success = ec_addtimespacerelation(qid, xz(1:ndx), yz(1:ndx), kcw, kx, filename, filetype, method, operand, varname=varname)
-              endif
+              
+           if (.not. allocated(patm) ) then
+              allocate ( patm(ndx) , stat=ierr)
+              call aerr('patm(ndx)', ierr, ndx)
+              patm = 100000d0
+           endif
+    
+           if (.not. allocated(ec_pwxwy_x) ) then
+              allocate ( ec_pwxwy_x(ndx) , ec_pwxwy_y(ndx)  , stat=ierr)
+              call aerr('ec_pwxwy_x(ndx) , ec_pwxwy_y(ndx)' , ierr, 2*ndx)
+              ec_pwxwy_x = 0d0 ; ec_pwxwy_y = 0d0
            endif
 
+           if (jaspacevarcharn == 1) then
+              if (.not. allocated(ec_pwxwy_c) ) then
+                  allocate ( ec_pwxwy_c(ndx) , wcharnock(lnx), stat=ierr)
+                  call aerr('ec_pwxwy_c(ndx), wcharnock(lnx)' , ierr, ndx+lnx)
+                  ec_pwxwy_c = 0d0
+              endif
+           endif
+      
+           if (len_trim(sourcemask)>0)  then
+              success = ec_addtimespacerelation(qid, xz(1:ndx), yz(1:ndx), kcw, kx, filename, filetype, method, operand, srcmaskfile=sourcemask, varname=varname)
+           else
+              success = ec_addtimespacerelation(qid, xz(1:ndx), yz(1:ndx), kcw, kx, filename, filetype, method, operand, varname=varname)
+           endif
+   
            if (success) then
               jawind = 1
               japatm = 1
@@ -2425,6 +2402,10 @@ if (mext /= 0) then
 
 endif ! read mext file
 
+ if (jawind > 0) then 
+    call allocatewindarrays()
+ endif
+
  if (loglevel_StdOut == LEVEL_DEBUG) then
     call ecInstancePrintState(ecInstancePtr,callback_msg,LEVEL_DEBUG)
  endif
@@ -2800,4 +2781,33 @@ if (ti_mba>0) then
  ! Copy NUMCONST to NUMCONST_MDU, before the user (optionally) adds tracers interactively
  NUMCONST_MDU = NUMCONST
 
+
+
  end function flow_initexternalforcings
+
+
+ subroutine allocatewindarrays()
+ use m_wind
+ use m_flow
+ use m_flowgeom
+
+ implicit none
+
+ integer:: ierr
+
+ if (allocated (wx) ) then 
+    deallocate(wx,wy,wdsu_x,wdsu_y,wdsu)
+ endif 
+ 
+ allocate  ( wx(lnx), wy(lnx), wdsu(lnx), wdsu_x(lnx), wdsu_y(lnx) , stat=ierr)
+ call aerr ('wx(lnx), wy(lnx), wdsu(lnx), wdsu_x(lnx), wdsu_y(lnx)', ierr, lnx)
+
+ wx     = 0d0
+ wy     = 0d0
+ wdsu   = 0d0
+ wdsu_x = 0d0
+ wdsu_y = 0d0
+
+ end subroutine allocatewindarrays
+
+ 

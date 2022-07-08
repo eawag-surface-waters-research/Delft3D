@@ -651,7 +651,7 @@ integer           :: num
 character(len=132):: tex, regime
 
 
-hup = s0(64); hdown= s0(62) ; agate = zgate(1)
+hup = s0(17); hdown= s0(13) ; agate = zgate(1)
 if (hup > hdown + 0.0001) then
 
    call findqorifice(agate,0d0,hup,hdown,qgate,z2,zg,regime,num,qcrit)
