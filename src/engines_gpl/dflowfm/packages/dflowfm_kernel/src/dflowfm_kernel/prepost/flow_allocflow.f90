@@ -720,7 +720,7 @@ endif
        Ltn = laytyp(Ldn)
        kb  = kbot(n1)
        zws(kb-1) = bl(n1) - zwsbtol
-       if (Ltn == 2 .and. keepzlayeringatbed == 1) then
+       if (Ltn == 2 .and. keepzlayeringatbed == 1 .and. kmxn(n1) > numtopsig) then
           call getzlayerindices(n1,nlayb1,nrlay1)
           zws(kb-1) = zslay(nlayb1-1,Ldn)
        endif
