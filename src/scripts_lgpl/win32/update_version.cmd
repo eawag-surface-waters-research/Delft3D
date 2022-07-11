@@ -18,8 +18,7 @@ rem
 rem %1 - path to the target source file
 rem %2 - path to the folder to be used to check svnversion
 rem %3 - Single file with version number information version_number.ini
-rem %4 - CMake_Binary_Dir, needed to set VN
-rem %5 - --onlyifmissing: only regenerate when target source file does not exist (optional, default: off)
+rem %4 - --onlyifmissing: only regenerate when target source file does not exist (optional, default: off)
 
 echo Generating version number in '%1' ...
 
@@ -28,12 +27,8 @@ set SCRIPT_DIRECTORY=%~dp0
 set SVNVERSION="%SCRIPT_DIRECTORY%\..\..\third_party_open\subversion\bin\win32\svnversion.exe"
 REM Temporariry fix until TeamCity is compatible with svn 1.8
 set SVNVERSION17="%SCRIPT_DIRECTORY%\..\..\third_party_open\subversion\bin\win32-17\svnversion.exe"
-rem Check if CMake_Binary_Dir is null or unset. Then use location inside src, else use CMake_Binary_Dir
-IF [%~4]==[] (
-    set VN="%SCRIPT_DIRECTORY%\..\..\third_party_open\version_number\bin\win32\version_number.exe"
-) ELSE (
-    set VN="%4\version_number\Debug\version_number.exe"
-)
+set VN="%SCRIPT_DIRECTORY%\..\..\third_party_open\version_number\bin\win32\version_number.exe"
+
 set version=000000
 
 rem Obtain the svn version number 
@@ -60,7 +55,7 @@ IF "%version:~0,11%" == "Unversioned" (
 )
 echo %0: %version%
 
-IF "%5" == "--onlyifmissing" (
+IF "%4" == "--onlyifmissing" (
    IF EXIST "%1" (
       echo %0: Leaving existing file '%1' as is.
       goto end

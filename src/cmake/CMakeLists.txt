@@ -111,16 +111,17 @@ if (UNIX)
 
     # Proj
     pkg_check_modules(PROJ REQUIRED proj)
+
+    # Version number
+    message(STATUS "Configuring and building the version number executable under unix")
+    execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" -B ${CMAKE_BINARY_DIR}/version_number ${checkout_src_root}/third_party_open/version_number/packages/version_number
+                         RESULT_VARIABLE result)
+    if(result)
+       message(FATAL_ERROR "CMake could not generate the version number executable")
+    endif()
+    execute_process(COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/version_number)
 endif(UNIX)
 
-# Build version_number binary
-message(STATUS "Configuring and building the version number executable")
-execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" -B ${CMAKE_BINARY_DIR}/version_number ${checkout_src_root}/third_party_open/version_number/packages/version_number
-                     RESULT_VARIABLE result)
-if(result)
-   message(FATAL_ERROR "CMake could not generate the version number executable")
-endif()
-execute_process(COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/version_number)
 
 
 # Set the location of the update_version script
