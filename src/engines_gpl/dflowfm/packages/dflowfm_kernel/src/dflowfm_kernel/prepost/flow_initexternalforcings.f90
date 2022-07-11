@@ -2782,8 +2782,6 @@ if (ti_mba>0) then
  ! Copy NUMCONST to NUMCONST_MDU, before the user (optionally) adds tracers interactively
  NUMCONST_MDU = NUMCONST
 
-
-
  end function flow_initexternalforcings
 
 
@@ -2796,19 +2794,19 @@ if (ti_mba>0) then
 
  integer:: ierr
 
- if (allocated (wx) ) then 
-    deallocate(wx,wy,wdsu_x,wdsu_y,wdsu)
+ if (.not. allocated (wx) ) then 
+ 
+    allocate  ( wx(lnx), wy(lnx), wdsu(lnx), wdsu_x(lnx), wdsu_y(lnx) , stat=ierr)
+    call aerr ('wx(lnx), wy(lnx), wdsu(lnx), wdsu_x(lnx), wdsu_y(lnx)', ierr, lnx)
+
+    wx     = 0d0
+    wy     = 0d0
+    wdsu   = 0d0
+    wdsu_x = 0d0
+    wdsu_y = 0d0
+
  endif 
  
- allocate  ( wx(lnx), wy(lnx), wdsu(lnx), wdsu_x(lnx), wdsu_y(lnx) , stat=ierr)
- call aerr ('wx(lnx), wy(lnx), wdsu(lnx), wdsu_x(lnx), wdsu_y(lnx)', ierr, lnx)
-
- wx     = 0d0
- wy     = 0d0
- wdsu   = 0d0
- wdsu_x = 0d0
- wdsu_y = 0d0
-
  end subroutine allocatewindarrays
 
  
