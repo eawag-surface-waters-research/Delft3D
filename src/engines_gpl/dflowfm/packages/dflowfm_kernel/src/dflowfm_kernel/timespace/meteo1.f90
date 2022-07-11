@@ -6523,10 +6523,10 @@ module m_meteo
    integer, target :: item_windxy_x                                          !< Unique Item id of the ext-file's 'windxy' quantity's x-component.
    integer, target :: item_windxy_y                                          !< Unique Item id of the ext-file's 'windxy' quantity's y-component.
   
-   integer, target :: item_stressx                                           !< Unique Item id of the ext-file's 'windx' quantity's x-component.
-   integer, target :: item_stressy                                           !< Unique Item id of the ext-file's 'windy' quantity's y-component.
-   integer, target :: item_stressxy_x                                        !< Unique Item id of the ext-file's 'windxy' quantity's x-component.
-   integer, target :: item_stressxy_y                                        !< Unique Item id of the ext-file's 'windxy' quantity's y-component.
+   integer, target :: item_stressx                                           !< Unique Item id of the ext-file's 'stressx' quantity's x-component.
+   integer, target :: item_stressy                                           !< Unique Item id of the ext-file's 'stressy' quantity's y-component.
+   integer, target :: item_stressxy_x                                        !< Unique Item id of the ext-file's 'stressxy_x' quantity's x-component.
+   integer, target :: item_stressxy_y                                        !< Unique Item id of the ext-file's 'stressxy_y' quantity's y-component.
       
    integer, target :: item_apwxwy_p                                          !< Unique Item id of the ext-file's 'airpressure_windx_windy' quantity 'p'.
    integer, target :: item_apwxwy_x                                          !< Unique Item id of the ext-file's 'airpressure_windx_windy' quantity 'x'.

@@ -1464,6 +1464,8 @@ if (mext /= 0) then
         else if (qid == 'windx' .or. qid == 'windy' .or. qid == 'windxy' .or. &
                  qid == 'stressxy' .or. qid == 'stressx' .or. qid == 'stressy') then
 
+           call allocatewindarrays()           
+
            if (allocated (kcw) ) deallocate(kcw)
            allocate( kcw(lnx) )
            kcw = 1
@@ -1483,6 +1485,8 @@ if (mext /= 0) then
         else if (qid == 'airpressure_windx_windy' .or. &
                  qid == 'airpressure_stressx_stressy' .or. &
                  qid == 'airpressure_windx_windy_charnock') then
+
+           call allocatewindarrays()           
 
            if (allocated (kcw) ) deallocate(kcw)
            allocate( kcw(ndx) )
@@ -2402,9 +2406,6 @@ if (mext /= 0) then
 
 endif ! read mext file
 
- if (jawind > 0) then 
-    call allocatewindarrays()
- endif
 
  if (loglevel_StdOut == LEVEL_DEBUG) then
     call ecInstancePrintState(ecInstancePtr,callback_msg,LEVEL_DEBUG)
