@@ -1119,11 +1119,18 @@ subroutine readMDUFile(filename, istat)
     call prop_get_integer(md_ptr, 'numerics', 'Turbulenceadvection' , javakeps)
     call prop_get_double (md_ptr, 'numerics', 'Eddyviscositybedfacmax' , Eddyviscositybedfacmax)
     call prop_get_integer(md_ptr, 'numerics', 'AntiCreep' , jacreep)
+
+   
     call prop_get_integer(md_ptr, 'numerics', 'Orgbarockeywords' , jaorgbarockeywords)
     if (jaorgbarockeywords == 1) then
        call prop_get_integer(md_ptr, 'numerics', 'Barocterm' , jabarocterm)
        call prop_get_integer(md_ptr, 'numerics', 'Baroctimeint' , jabaroctimeint)
     endif
+    call prop_get_integer(md_ptr, 'numerics', 'Baroczlaybed'   , jabaroczlaybed)
+    call prop_get_integer(md_ptr, 'numerics', 'Barocponbnd'    , jaBarocponbnd)
+    call prop_get_integer(md_ptr, 'numerics', 'Maxitpresdens'  , maxitpresdens)
+    call prop_get_integer(md_ptr, 'numerics', 'Rhointerfaces'  , jarhointerfaces)
+ 
     call prop_get_integer(md_ptr, 'numerics', 'EnableJRE', jajre)
 
     if ( icgsolver.eq.8 ) then   ! for parms solver
@@ -1254,10 +1261,12 @@ subroutine readMDUFile(filename, istat)
     call prop_get_integer(md_ptr, 'physics', 'Equili'         , jaequili ) ! TODO: Ottevanger/Nabi: consider changing the name of these settings: add "spiral/secondary flow" into it.
 
     call prop_get_integer(md_ptr, 'physics', 'Idensform'      , idensform)
-    call prop_get_integer(md_ptr, 'physics', 'Maxitpresdens'  , maxitpresdens)
-    call prop_get_integer(md_ptr, 'physics', 'Rhointerfaces'  , jarhointerfaces)
-    call prop_get_integer(md_ptr, 'physics', 'baroczlaybed'   , jabaroczlaybed)
 
+    !call prop_get_integer(md_ptr, 'physics', 'Baroczlaybed'   , jabaroczlaybed)
+    !call prop_get_integer(md_ptr, 'physics', 'Barocponbnd'    , jaBarocponbnd)
+    !call prop_get_integer(md_ptr, 'physics', 'Maxitpresdens'  , maxitpresdens)
+    !call prop_get_integer(md_ptr, 'physics', 'Rhointerfaces'  , jarhointerfaces)
+   
     call prop_get_integer(md_ptr, 'physics', 'Temperature'       , jatem)
     call prop_get_double (md_ptr, 'physics', 'InitialTemperature', temini)
     call prop_get_double (md_ptr, 'physics', 'Secchidepth'       , Secchidepth)
@@ -3059,6 +3068,19 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
         call prop_set(prop_ptr, 'numerics', 'Baroctimeint'    , jabaroctimeint    , '(     )')
     endif
 
+    if (writeall .or. Jabaroczlaybed .ne. 0) then
+       call prop_set(prop_ptr, 'numerics', 'Baroczlaybed' , jabaroczlaybed ,'Use fix in barocp for zlaybed 0,1, 1=default)')
+    endif
+    if (writeall .or. Jabarocponbnd .ne. 0) then
+       call prop_set(prop_ptr, 'numerics', 'Barocponbnd'  , jabarocponbnd  ,'Use fix in barocp for zlaybed 0,1, 1=default)')
+    endif
+   if (writeall .or. Maxitpresdens .ne. 1) then
+       call prop_set(prop_ptr, 'numerics', 'Maxitpresdens', Maxitpresdens  ,'Max nr of iterations in pressure-density coupling, only used if idensform > 10 )')
+    endif
+    if (writeall .or. jarhointerfaces .ne. 0) then
+       call prop_set(prop_ptr, 'numerics', 'Rhointerfaces', jarhointerfaces,'Evaluate rho at interfaces, 0=org at centers, 1=at interfaces )')
+    endif
+  
     if ( icgsolver.eq.8 ) then   ! for parms solver
        do i=1,NPARMS_INT
           call prop_set_integer(prop_ptr, 'numerics', trim(iparmsnam(i)), iparms(i), '0: parms-default')
@@ -3196,20 +3218,11 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     call prop_set(prop_ptr, 'physics', 'irov',             irov,         '0=free slip, 1 = partial slip using wall_ks')
     call prop_set(prop_ptr, 'physics', 'wall_ks',          wall_ks,      'Wall roughness type (0: free slip, 1: partial slip using wall_ks)')
     call prop_set(prop_ptr, 'physics', 'Rhomean',          rhomean,      'Average water density (kg/m3)')
+  
     if (writeall .or. idensform .ne. 1) then
        call prop_set(prop_ptr, 'physics', 'Idensform',     idensform,    'Density calulation (0: uniform, 1: Eckart, 2: Unesco, 3=Unesco83, 13=3+pressure)')
     endif
-    if (writeall .or. Maxitpresdens .ne. 1) then
-       call prop_set(prop_ptr, 'physics', 'Maxitpresdens', Maxitpresdens,'Max nr of iterations in pressure-density coupling, only used if idensform > 10 )')
-    endif
-    if (writeall .or. jarhointerfaces .ne. 0) then
-       call prop_set(prop_ptr, 'physics', 'Rhointerfaces', jarhointerfaces,'Evaluate rho at interfaces, 0=org at centers, 1=at interfaces )')
-    endif
-
-    if (writeall .or. Jabaroczlaybed .ne. 0) then
-       call prop_set(prop_ptr, 'physics', 'Baroczlaybed' , jabaroczlaybed,'Use fix in barocp for zlaybed 0,1, 1=default)')
-    endif
- 
+  
     call prop_set(prop_ptr, 'physics', 'Ag'     ,          ag ,          'Gravitational acceleration')
     call prop_set(prop_ptr, 'physics', 'TidalForcing',     jatidep,      'Tidal forcing, if jsferic=1 (0: no, 1: yes)')
     call prop_set(prop_ptr, 'physics', 'SelfAttractionLoading',  jaselfal,     'Self attraction and loading (0=no, 1=yes, 2=only self attraction)')

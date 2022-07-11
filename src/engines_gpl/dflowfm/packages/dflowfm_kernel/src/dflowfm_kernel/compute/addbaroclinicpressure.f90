@@ -40,12 +40,18 @@ use m_transport, only: NUMCONST, ISALT, ITEMP, ISED1, ISEDN, ITRA1, ITRAN, ITRAN
 implicit none
 integer                    :: L,LL,Lb,Lt,n, k, lnxbc
 
+if (jabarocponbnd == 0) then 
+   lnxbc = lnxi
+else
+   lnxbc = lnx             
+endif
+
 if (jabarocterm == 1) then
 
    !$OMP PARALLEL DO       &
    !$OMP PRIVATE(LL,Lb,Lt)
 
-   do LL = 1,lnxi
+   do LL = 1,lnxbc
       if (hu(LL) == 0d0) cycle
       call getLbotLtop(LL,Lb,Lt)
       if (Lt < Lb) then
@@ -60,7 +66,7 @@ else if (jabarocterm == 2 .or. jabarocterm == 3 .or. kmx == 0) then
 
    !$OMP PARALLEL DO       &
    !$OMP PRIVATE(LL,Lb,Lt)
-   do LL = 1,lnxi
+   do LL = 1,lnxbc
       if (hu(LL) == 0d0) cycle
       call getLbotLtop(LL,Lb,Lt)
       if (Lt < Lb) then
@@ -85,7 +91,7 @@ else if (jabarocterm == 2 .or. jabarocterm == 3 .or. kmx == 0) then
     
        !$OMP PARALLEL DO       &
        !$OMP PRIVATE(LL,Lb,Lt)
-       do LL = 1,lnxi
+       do LL = 1,lnxbc
          if (hu(LL) == 0d0) cycle
          call getLbotLtop(LL,Lb,Lt)
          if (Lt < Lb) then
@@ -96,12 +102,6 @@ else if (jabarocterm == 2 .or. jabarocterm == 3 .or. kmx == 0) then
        !$OMP END PARALLEL DO
 
     else                                ! these are the routines we want to keep if all ink is dry
-
-       if (keepstbndonoutflow > 0) then 
-          lnxbc = lnx
-       else
-          lnxbc = lnxi             
-       endif
 
        if (jarhointerfaces == 1) then   
 

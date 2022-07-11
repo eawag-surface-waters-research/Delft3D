@@ -150,6 +150,7 @@
  integer                           :: Maxitpresdens = 1          !< max nr of density-pressure iterations 
  integer                           :: Jarhointerfaces = 0        !< rho computed at vertical interfaces, yes=1, 0=cell center 
  integer                           :: Jabaroczlaybed = 0         !< use fix for zlaybed yes/no 
+ integer                           :: Jabarocponbnd = 0          !< baroclini pressure on open boundaries yes/no 
 
  integer                           :: limiterhordif              !< 0=No, 1=Horizontal gradient densitylimiter, 2=Finite volume
 
@@ -160,7 +161,7 @@
  double precision                  :: Salimax = -999d0           !< limit
  double precision                  :: Salimin = 0d0              !< limit
  double precision                  :: epshstem = 0.001d0         !< only compute heatflx + evap if depth > trsh
- double precision                  :: surftempsmofac = 0.0d0     !< surface temperature smoothing factor 0-1d0
+ double precision                  :: surftempsmofac = 0.0d0     !< surface temperature smoothing factor 0-1d05
  double precision                  :: Soiltempthick   = 0.0d0    !< if soil buffer desired make thick > 0, e.g. 0.2 m
 
  integer                           :: Jadelvappos                !< only positive forced evaporation fluxes
