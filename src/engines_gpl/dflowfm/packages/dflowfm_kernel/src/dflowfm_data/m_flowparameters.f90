@@ -955,7 +955,7 @@ subroutine default_flowparameters()
     jamaprain = 0
     jamapicept = 0
     jamapwind = 1
-    jamapwindstress = 1
+    jamapwindstress = 0
     jamapviu = 1
     jamapdiu = 1
     jamaprho = 1
