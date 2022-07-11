@@ -4421,8 +4421,13 @@ src/engines_gpl/waq/packages/wq_processes/src/wq_processes_velocities.f90 -text
 src/engines_gpl/waq/packages/wq_processes/src/wq_processes_version.F90.svn -text
 src/engines_gpl/waq/packages/wq_processes/wq_processes.vfproj -text
 src/engines_gpl/waq/scripts/Makefile.am -text
+src/engines_gpl/waq/scripts/dev_export_procdef_csvfiles.bat -text
+src/engines_gpl/waq/scripts/dev_import_procesasc_changes.bat -text
+src/engines_gpl/waq/scripts/export_procdef_csvfiles.bat -text
+src/engines_gpl/waq/scripts/import_procesasc_changes.bat -text
 src/engines_gpl/waq/scripts/run_delwaq.bat -text
 src/engines_gpl/waq/scripts/run_delwaq.sh -text
+src/engines_gpl/waq/scripts/waqpb_help.bat -text
 src/engines_gpl/waq/tree.f -text
 src/engines_gpl/waq/version/resource.h -text
 src/engines_gpl/waq/version/version_number.ini -text
@@ -17881,6 +17886,10 @@ src/tools_gpl/waqpb/packages/waqpb_lib/src/writex.f -text
 src/tools_gpl/waqpb/packages/waqpb_lib/src/writrm.f -text
 src/tools_gpl/waqpb/packages/waqpb_lib/src/zoek.f -text
 src/tools_gpl/waqpb/packages/waqpb_lib/waqpb_lib.vfproj -text
+src/tools_gpl/waqpb/scripts/run_waqpb_export.bat -text
+src/tools_gpl/waqpb/scripts/run_waqpb_export.sh -text
+src/tools_gpl/waqpb/scripts/run_waqpb_import.bat -text
+src/tools_gpl/waqpb/scripts/run_waqpb_import.sh -text
 src/tools_gpl/waqpb/waqpb.sln -text
 src/tools_lgpl/matlab/delftio/dio_core/dio_core.cpp -text
 src/tools_lgpl/matlab/delftio/dio_core/dio_core.f -text
