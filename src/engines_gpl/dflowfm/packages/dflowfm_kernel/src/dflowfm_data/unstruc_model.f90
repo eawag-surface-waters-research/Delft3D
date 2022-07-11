@@ -1862,9 +1862,9 @@ subroutine readMDUFile(filename, istat)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_Qin', jamapqin, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_every_dt', jaeverydt, success)
 
-    if (md_mapformat /= 4 .and. jamapwindstress /= 0) then
-       call mess(LEVEL_ERROR, 'writing windstress to mapfile is only implemented for NetCDF - UGrid (mapformat=4)')
-    endif
+    !if (md_mapformat /= 4 .and. jamapwindstress /= 0) then
+     !  call mess(LEVEL_ERROR, 'writing windstress to mapfile is only implemented for NetCDF - UGrid (mapformat=4)')
+    !endif
 
     if (jatem <= 1) then
       jamapheatflux = 0
