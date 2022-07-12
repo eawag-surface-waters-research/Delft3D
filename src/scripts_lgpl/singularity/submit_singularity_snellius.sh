@@ -29,7 +29,7 @@ module load Delft3DFM/2022.04-intel-2021a
 
 # The root folder of the model, i.e. the folder that contains ALL of the input files and sub-folders:
 modelFolder=${PWD}/../../..
-# Or, for large models with a lot of output generation, copying the model to your scratch file space '/scratch-shared/<username>' and running from there might be faster.
+# Or, for large models that generate a lot of output, copying the model to your scratch file space '/scratch-shared/<username>' and running from there might be faster.
 # See: https://servicedesk.surf.nl/wiki/display/WIKI/Snellius+hardware+and+file+systems#Snelliushardwareandfilesystems-Filesystems
 # Don't forget to copy your results back to a permanent location on Snellius since data on the scratch space is removed automatically!
 
@@ -46,8 +46,7 @@ dimrFile=dimr_config.xml
 #---You do not need to modify anything below this line---
 
 # Set the location of the Singularity container.
-# singularityFolder=${EBROOTDELFT3DFM}/bin
-singularityFolder=${PWD}
+singularityFolder=${EBROOTDELFT3DFM}/bin
 
 # Use SLURM_NTASKS to update the line "<process>" in the dimrFile.
 PROCESSSTR="$(seq -s " " 0 $((SLURM_NTASKS-1)))"
