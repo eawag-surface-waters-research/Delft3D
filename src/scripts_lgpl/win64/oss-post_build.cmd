@@ -257,25 +257,51 @@ rem =============================================================
 goto :endproc     
 
 
+rem =============================================================
+rem === setWaqFolders sets all folders               for Waq  ===
+rem =============================================================
+:setWaqFolders
+
+    if "%configuration%" == "Debug" (
+    
+        echo "Debug postbuild"
+        
+        set dest_bin="!install_dir!\x64\Debug"
+        set dest_default="!install_dir!\x64\Debug"
+        set dest_scripts="!install_dir!\x64\Debug"
+        set dest_plugins="!install_dir!\x64\Debug"
+        set dest_share="!install_dir!\x64\Debug"
+    )
+    
+    if "%configuration%" == "Release" ( 
+    
+        echo "Release postbuild"
+
+        set dest_bin="!install_dir!\x64\Release\dwaq\bin"
+        set dest_default="!install_dir!\x64\Release\dwaq\default"
+        set dest_scripts="!install_dir!\x64\Release\dwaq\scripts"
+        set dest_plugins="!install_dir!\x64\Release\plugins\bin"
+        set dest_share="!install_dir!\x64\Release\share\bin"
+     )
+    
+goto :endproc
+
+
 
 rem =============================================================
 rem === copyWaqProcessFiles copies all process files for Waq  ===
 rem =============================================================
 :copyWaqProcessFiles
 
-    rem files used for calculations, can be modified by user
-    call :copyFile "!checkout_src_root!\engines_gpl\waq\default\bloom.spe"                                             !dest_default!
-    call :copyFile "!checkout_src_root!\engines_gpl\waq\default\proc_def.dat"                                          !dest_default!
-    call :copyFile "!checkout_src_root!\engines_gpl\waq\default\proc_def.def"                                          !dest_default!
-    call :copyFile "!checkout_src_root!\engines_gpl\waq\default\csvFiles\*"                                            !dest_csvFiles!
+    set destination=%~1
+    set destination_csv=%~2
+
+    call :copyFile "!checkout_src_root!\engines_gpl\waq\default\bloom.spe"                                             !destination!
+    call :copyFile "!checkout_src_root!\engines_gpl\waq\default\proc_def.dat"                                          !destination!
+    call :copyFile "!checkout_src_root!\engines_gpl\waq\default\proc_def.def"                                          !destination!
+    call :copyFile "!checkout_src_root!\engines_gpl\waq\default\csvFiles\*"                                            !destination_csv!
     
-    rem backup files present in installation
-    call :copyFile "!checkout_src_root!\engines_gpl\waq\default\bloom.spe"                                             !dest_default_backup!
-    call :copyFile "!checkout_src_root!\engines_gpl\waq\default\proc_def.dat"                                          !dest_default_backup!
-    call :copyFile "!checkout_src_root!\engines_gpl\waq\default\proc_def.def"                                          !dest_default_backup!
-    call :copyFile "!checkout_src_root!\engines_gpl\waq\default\csvFiles\*"                                            !dest_csvFiles_backup!
-    
-goto :endproc     
+goto :endproc
 
 
 
@@ -481,7 +507,7 @@ rem ==========================
         set dest_plugins="!install_dir!\x64\Release\plugins\bin"
         set dest_share="!install_dir!\x64\Release\share\bin"
         
-        call :makeAllDirs   
+        call :makeAllDirs
         call :copyDflowfmDependentRuntimeLibraries
         
         rem Temporarily rename dest_bin to share_bin to copy libraries there as well
@@ -521,8 +547,6 @@ rem ==========================
         set dest_bin="!install_dir!\x64\Release\dflowfm\bin"
         set dest_default="!install_dir!\x64\Release\dflowfm\default"
         set dest_csvFiles="!install_dir!\x64\Release\dflowfm\default\csvFiles"
-        set dest_default_backup="!install_dir!\x64\Release\dflowfm\installation_default"
-        set dest_csvFiles_backup="!install_dir!\x64\Release\dflowfm\installation_default\csvFiles"
         set dest_scripts="!install_dir!\x64\Release\dflowfm\scripts"
         set dest_plugins="!install_dir!\x64\Release\plugins\bin"
         set dest_share="!install_dir!\x64\Release\share\bin"
@@ -535,7 +559,7 @@ rem ==========================
         
         call :copyFile "!build_dir!\dflowfm_cli_exe\!configuration!\dflowfm-cli.*"                                           !dest_bin!
         
-        call :copyWaqProcessFiles
+        call :copyWaqProcessFiles !dest_default! !dest_csvFiles!
         
         call :copyFile "!checkout_src_root!\engines_gpl\dflowfm\scripts\team-city\run_dflowfm_processes.bat"               !dest_scripts!
         call :copyFile "!checkout_src_root!\engines_gpl\dflowfm\scripts\team-city\run_dflowfm.bat"                         !dest_scripts!
@@ -568,8 +592,6 @@ rem =================================
         set dest_bin="!install_dir!\x64\Release\dflowfm\bin"
         set dest_default="!install_dir!\x64\Release\dflowfm\default"
         set dest_csvFiles="!install_dir!\x64\Release\dflowfm\default\csvFiles"
-        set dest_default_backup="!install_dir!\x64\Release\dflowfm\installation_default"
-        set dest_csvFiles_backup="!install_dir!\x64\Release\dflowfm\installation_default\csvFiles"
         set dest_scripts="!install_dir!\x64\Release\dflowfm\scripts"
         set dest_plugins="!install_dir!\x64\Release\plugins\bin"
         set dest_share="!install_dir!\x64\Release\share\bin"
@@ -582,7 +604,7 @@ rem =================================
         
         call :copyFile "!build_dir!\dflowfm\!configuration!\dflowfm.exe"                                                   !dest_bin!
 
-        call :copyWaqProcessFiles
+        call :copyWaqProcessFiles !dest_default! !dest_csvFiles!
         
         
         call :copyFile "!checkout_src_root!\engines_gpl\dflowfm\scripts\MSDOS\run_dflowfm_processes.bat"                   !dest_scripts!
@@ -735,7 +757,7 @@ rem ==========================
     set dest_plugins="!install_dir!\x64\Release\plugins\bin"
     set dest_share="!install_dir!\x64\Release\share\bin"
     
-    call :makeAllDirs 
+    call :makeAllDirs
     call :copyDimrDependentRuntimeLibraries                                                                               !dest_share!
     call :copyFile "!build_dir!\dimr_lib\!configuration!\dimr_dll.*"                                                      !dest_bin!
     
@@ -752,41 +774,14 @@ rem ===================================
 
     echo "postbuild waq_plugin_wasteload . . ."
     
-    if "%configuration%" == "Debug" (
+    call :setWaqFolders
     
-        echo "Debug postbuild"
-        set dest_bin="%install_dir%\x64\Debug"
-        
-        set dest_bin="!install_dir!\x64\Debug"
-        set dest_default="!install_dir!\x64\Debug"
-        set dest_scripts="!install_dir!\x64\Debug"
-        set dest_plugins="!install_dir!\x64\Debug"
-        set dest_share="!install_dir!\x64\Debug"
-        
-        call :makeDir !dest_bin!   
-        call :copyDwaqDependentRuntimeLibraries                                                                            !dest_bin!
-        
-        rem copy binaries and dll 
-        call :copyFile "!build_dir!\waq_plugin_wasteload\!configuration!\waq_plugin_wasteload.*"                           !dest_bin!
-    )
+    call :makeAllDirs
+    call :copyDwaqDependentRuntimeLibraries                                                                             !dest_share!
     
-    if "%configuration%" == "Release" ( 
-    
-        echo "Release postbuild"
+    rem copy binaries and dll 
+    call :copyFile "!build_dir!\waq_plugin_wasteload\!configuration!\waq_plugin_wasteload.*"                            !dest_bin! 
 
-        set dest_bin="!install_dir!\x64\Release\dwaq\bin"
-        set dest_default="!install_dir!\x64\Release\dwaq\default"
-        set dest_scripts="!install_dir!\x64\Release\dwaq\scripts"
-        set dest_plugins="!install_dir!\x64\Release\plugins\bin"
-        set dest_share="!install_dir!\x64\Release\share\bin"
-        
-        call :makeAllDirs   
-        call :copyDwaqDependentRuntimeLibraries                                                                             !dest_share!
-        
-        rem copy binaries and dll 
-        call :copyFile "!build_dir!\waq_plugin_wasteload\!configuration!\waq_plugin_wasteload.*"                            !dest_bin! 
-    )
-    
 goto :endproc
 
 
@@ -797,54 +792,30 @@ rem ==========================
 :delwaq_lib
 
     echo "postbuild delwaq_lib . . ."
-
-    if "%configuration%" == "Debug" (
     
-        echo "Debug postbuild"
-        set dest_bin="%install_dir%\x64\Debug"
-        
-        set dest_bin="!install_dir!\x64\Debug"
-        set dest_default="!install_dir!\x64\Debug"
-        set dest_scripts="!install_dir!\x64\Debug"
-        set dest_plugins="!install_dir!\x64\Debug"
-        set dest_share="!install_dir!\x64\Debug"
-        
-        call :makeDir !dest_bin!   
-        call :copyDwaqDependentRuntimeLibraries                                                         !dest_bin!
-        
-        rem copy binaries and dll 
-        call :copyFile "!build_dir!\waq_plugin_wasteload\!configuration!\waq_plugin_wasteload.*"        !dest_bin!
-        call :copyFile "!build_dir!\delwaq_lib\!configuration!\delwaq.*"                                !dest_bin!
-    )
+    call :setWaqFolders
+    
+    call :makeAllDirs
+    call :copyDwaqDependentRuntimeLibraries                                                        !dest_share!
+    
+    rem copy binaries and dll 
+    call :copyFile "!build_dir!\delwaq_lib\!configuration!\delwaq.*"                               !dest_bin! 
+    call :copyFile "!build_dir!\waq_plugin_wasteload\!configuration!\waq_plugin_wasteload.*"       !dest_bin! 
     
     if "%configuration%" == "Release" ( 
-    
-        echo "Release postbuild"
 
-        set dest_bin="!install_dir!\x64\Release\dwaq\bin"
-        set dest_default="!install_dir!\x64\Release\dwaq\default"
         set dest_csvFiles="!install_dir!\x64\Release\dwaq\default\csvFiles"
         set dest_default_backup="!install_dir!\x64\Release\dwaq\installation_default"
         set dest_csvFiles_backup="!install_dir!\x64\Release\dwaq\installation_default\csvFiles"
-        set dest_scripts="!install_dir!\x64\Release\dwaq\scripts"
-        set dest_plugins="!install_dir!\x64\Release\plugins\bin"
-        set dest_share="!install_dir!\x64\Release\share\bin"
         
-        call :makeAllDirs
         call :makeDir !dest_csvFiles!
         call :makeDir !dest_default_backup!
         call :makeDir !dest_csvFiles_backup!
-        call :copyDwaqDependentRuntimeLibraries                                                        !dest_share!
-        
-        rem copy binaries and dll 
-        call :copyFile "!build_dir!\delwaq_lib\!configuration!\delwaq.dll"                             !dest_bin! 
         
         rem copy waq process files
-        call :copyWaqProcessFiles
-        
-        call :copyFile !checkout_src_root!\engines_gpl\waq\default\proc_def.def                        !dest_default!
+        call :copyWaqProcessFiles !dest_default! !dest_csvFiles!
+        call :copyWaqProcessFiles !dest_default_backup! !dest_csvFiles_backup!
     )
-    
 goto :endproc
 
 
@@ -856,44 +827,18 @@ rem ==========================
 
     echo "postbuild delwaq1 . . ."
     
-    if "%configuration%" == "Debug" (
+    call :setWaqFolders
     
-        echo "Debug postbuild"
-        set dest_bin="%install_dir%\x64\Debug"
-        
-        set dest_bin="!install_dir!\x64\Debug"
-        set dest_default="!install_dir!\x64\Debug"
-        set dest_scripts="!install_dir!\x64\Debug"
-        set dest_plugins="!install_dir!\x64\Debug"
-        set dest_share="!install_dir!\x64\Debug"
-        
-        call :makeDir !dest_bin!   
-        call :copyDwaqDependentRuntimeLibraries                                                       !dest_bin!
-        
-        rem copy binaries and dll 
-        call :copyFile "!build_dir!\waq_plugin_wasteload\!configuration!\waq_plugin_wasteload.*"      !dest_bin!
-        call :copyFile "!build_dir!\delwaq_lib\!configuration!\delwaq.*"                              !dest_bin!
-        call :copyFile "!build_dir!\delwaq1\!configuration!\delwaq1.*"                                !dest_bin!
-    )
+    call :makeAllDirs
+    call :copyDwaqDependentRuntimeLibraries                                                       !dest_share!
+    
+    rem copy binaries and dll 
+    call :copyFile "!build_dir!\delwaq_lib\!configuration!\delwaq.*"                              !dest_bin!
+    call :copyFile "!build_dir!\delwaq1\!configuration!\delwaq1.*"                                !dest_bin!
+    call :copyFile "!build_dir!\waq_plugin_wasteload\!configuration!\waq_plugin_wasteload.*"      !dest_bin!
     
     if "%configuration%" == "Release" ( 
-    
-        echo "Release postbuild"
-
-        set dest_bin="!install_dir!\x64\Release\dwaq\bin"
-        set dest_default="!install_dir!\x64\Release\dwaq\default"
-        set dest_scripts="!install_dir!\x64\Release\dwaq\scripts"
-        set dest_plugins="!install_dir!\x64\Release\plugins\bin"
-        set dest_share="!install_dir!\x64\Release\share\bin"
-        
-        call :makeAllDirs   
-        call :copyDwaqDependentRuntimeLibraries                                                     !dest_share!
-        
-        rem copy binaries and dll 
-        call :copyFile "!build_dir!\delwaq_lib\!configuration!\delwaq.dll"                          !dest_bin! 
-        call :copyFile "!build_dir!\delwaq1\!configuration!\delwaq1.exe"                            !dest_bin! 
-
-        call :copyFile "!checkout_src_root!\engines_gpl\waq\scripts\run_delwaq.bat"                 !dest_scripts!
+        call :copyFile "!checkout_src_root!\engines_gpl\waq\scripts\run_delwaq.bat"               !dest_scripts!
     )
     
 goto :endproc
@@ -907,47 +852,19 @@ rem ==========================
 
     echo "postbuild delwaq2 . . ."
     
-    if "%configuration%" == "Debug" (
+    call :setWaqFolders
     
-        echo "Debug postbuild"
-        set dest_bin="%install_dir%\x64\Debug"
+    call :makeAllDirs
+    call :copyDwaqDependentRuntimeLibraries                                                         !dest_share!
         
-        set dest_bin="!install_dir!\x64\Debug"
-        set dest_default="!install_dir!\x64\Debug"
-        set dest_scripts="!install_dir!\x64\Debug"
-        set dest_plugins="!install_dir!\x64\Debug"
-        set dest_share="!install_dir!\x64\Debug"
-        
-        call :makeDir !dest_bin!   
-        call :copyDwaqDependentRuntimeLibraries                                                        !dest_bin!
-        
-        rem copy binaries and dll 
-        call :copyFile "!build_dir!\waq_plugin_wasteload\!configuration!\waq_plugin_wasteload.*"       !dest_bin!
-        call :copyFile "!build_dir!\waq_plugin_wasteload\!configuration!\waq_plugin_wasteload.*"       !build_dir!\delwaq2\!configuration!  ! also copy this dll to debug directory of delwaq2
-        call :copyFile "!build_dir!\delwaq_lib\!configuration!\delwaq.*"                                   !dest_bin!
-        call :copyFile "!build_dir!\delwaq2\!configuration!\delwaq2.*"                                 !dest_bin!
-    )
+    rem copy binaries and dll 
+    call :copyFile "!build_dir!\delwaq_lib\!configuration!\delwaq.*"                                !dest_bin!
+    call :copyFile "!build_dir!\delwaq2\!configuration!\delwaq2.*"                                  !dest_bin!
+    call :copyFile "!build_dir!\waq_plugin_wasteload\!configuration!\waq_plugin_wasteload.*"        !dest_bin! 
     
     if "%configuration%" == "Release" ( 
-    
-        echo "Release postbuild"
-
-        set dest_bin="!install_dir!\x64\Release\dwaq\bin"
-        set dest_default="!install_dir!\x64\Release\dwaq\default"
-        set dest_scripts="!install_dir!\x64\Release\dwaq\scripts"
-        set dest_plugins="!install_dir!\x64\Release\plugins\bin"
-        set dest_share="!install_dir!\x64\Release\share\bin"
-        
-        call :makeAllDirs   
-        call :copyDwaqDependentRuntimeLibraries                                                         !dest_share!
-        
-        rem copy binaries and dll 
-        call :copyFile "!build_dir!\delwaq_lib\!configuration!\delwaq.*"                                !dest_bin!
-        call :copyFile "!build_dir!\delwaq2\!configuration!\delwaq2.*"                                  !dest_bin!
-
-        call :copyFile "!checkout_src_root!\engines_gpl\waq\scripts\run_delwaq.bat"                     !dest_scripts! 
+        call :copyFile "!checkout_src_root!\engines_gpl\waq\scripts\run_delwaq.bat"                 !dest_scripts! 
     )
-    
 goto :endproc
 
 
@@ -959,49 +876,18 @@ rem ==========================
 
     echo "postbuild waqpb_export . . ."
     
-    if "%configuration%" == "Debug" (
+    call :setWaqFolders
     
-        echo "Debug postbuild"
-        set dest_bin="%install_dir%\x64\Debug"
-        
-        set dest_bin="!install_dir!\x64\Debug"
-        set dest_default="!install_dir!\x64\Debug"
-        set dest_scripts="!install_dir!\x64\Debug"
-        set dest_plugins="!install_dir!\x64\Debug"
-        set dest_share="!install_dir!\x64\Debug"
-        
-        call :makeDir !dest_bin!   
-        call :copyDwaqDependentRuntimeLibraries                                           !dest_bin!
-        
-        rem copy binaries and dll 
-        call :copyFile "!build_dir!\waqpb_export\!configuration!\waqpb_export.*"          !dest_bin!
-        
-        rem copy run scripts
-        call :copyFile "!checkout_src_root!\tools_gpl\waqpb\scripts\run_waqpb_export.bat"    !dest_scripts!
-        call :copyFile "!checkout_src_root!\engines_gpl\waq\scripts\export_procdef_csvfiles*"        !dest_bin!
-    )
+    call :makeAllDirs
+    call :copyDwaqDependentRuntimeLibraries                                                         !dest_share!
     
-    if "%configuration%" == "Release" ( 
+    rem copy binaries and dll 
+    call :copyFile "!build_dir!\waqpb_export\!configuration!\waqpb_export.*"                        !dest_bin! 
     
-        echo "Release postbuild"
-
-        set dest_bin="!install_dir!\x64\Release\dwaq\bin"
-        set dest_default="!install_dir!\x64\Release\dwaq\default"
-        set dest_scripts="!install_dir!\x64\Release\dwaq\scripts"
-        set dest_plugins="!install_dir!\x64\Release\plugins\bin"
-        set dest_share="!install_dir!\x64\Release\share\bin"
+    rem copy run scripts
+    call :copyFile "!checkout_src_root!\tools_gpl\waqpb\scripts\run_waqpb_export.bat"               !dest_scripts!
+    call :copyFile "!checkout_src_root!\engines_gpl\waq\scripts\export_procdef_csvfiles.bat"        !dest_scripts!
         
-        call :makeAllDirs   
-        call :copyDwaqDependentRuntimeLibraries                                               !dest_share!
-        
-        rem copy binaries and dll 
-        call :copyFile "!build_dir!\waqpb_export\!configuration!\waqpb_export.*"              !dest_bin! 
-        
-        rem copy run scripts
-        call :copyFile "!checkout_src_root!\tools_gpl\waqpb\scripts\run_waqpb_export.bat"     !dest_scripts!
-        call :copyFile "!checkout_src_root!\engines_gpl\waq\scripts\export_procdef_csvfiles*"            !dest_scripts!
-    )
-    
 goto :endproc
 
 
@@ -1013,48 +899,17 @@ rem ==========================
 
     echo "postbuild waqpb_import . . ."
     
-    if "%configuration%" == "Debug" (
+    call :setWaqFolders
     
-        echo "Debug postbuild"
-        set dest_bin="%install_dir%\x64\Debug"
-        
-        set dest_bin="!install_dir!\x64\Debug"
-        set dest_default="!install_dir!\x64\Debug"
-        set dest_scripts="!install_dir!\x64\Debug"
-        set dest_plugins="!install_dir!\x64\Debug"
-        set dest_share="!install_dir!\x64\Debug"
-        
-        call :makeDir !dest_bin!   
-        call :copyDwaqDependentRuntimeLibraries                                           !dest_bin!
-        
-        rem copy binaries and dll 
-        call :copyFile "!build_dir!\waqpb_import\!configuration!\waqpb_import.*"          !dest_bin!
-        
-        rem copy run scripts
-        call :copyFile "!checkout_src_root!\tools_gpl\waqpb\scripts\run_waqpb_import.bat"       !dest_scripts!
-        call :copyFile "!checkout_src_root!\engines_gpl\waq\scripts\import_procesasc_changes*"            !dest_scripts!
-    )
+    call :makeAllDirs
+    call :copyDwaqDependentRuntimeLibraries                                               !dest_share!
     
-    if "%configuration%" == "Release" ( 
+    rem copy binaries and dll 
+    call :copyFile "!build_dir!\waqpb_import\!configuration!\waqpb_import.*"              !dest_bin!
     
-        echo "Release postbuild"
-
-        set dest_bin="!install_dir!\x64\Release\dwaq\bin"
-        set dest_default="!install_dir!\x64\Release\dwaq\default"
-        set dest_scripts="!install_dir!\x64\Release\dwaq\scripts"
-        set dest_plugins="!install_dir!\x64\Release\plugins\bin"
-        set dest_share="!install_dir!\x64\Release\share\bin"
-        
-        call :makeAllDirs   
-        call :copyDwaqDependentRuntimeLibraries                                               !dest_share!
-        
-        rem copy binaries and dll 
-        call :copyFile "!build_dir!\waqpb_import\!configuration!\waqpb_import.*"              !dest_bin!
-        
-        rem copy run scripts
-        call :copyFile "!checkout_src_root!\tools_gpl\waqpb\scripts\run_waqpb_import.bat"        !dest_scripts!
-        call :copyFile "!checkout_src_root!\engines_gpl\waq\scripts\import_procesasc_changes*"            !dest_scripts!
-    )
+    rem copy run scripts
+    call :copyFile "!checkout_src_root!\tools_gpl\waqpb\scripts\run_waqpb_import.bat"        !dest_scripts!
+    call :copyFile "!checkout_src_root!\engines_gpl\waq\scripts\import_procesasc_changes.bat"            !dest_scripts!
     
 goto :endproc
 
@@ -1067,40 +922,13 @@ rem ==========================
 
     echo "postbuild waq_run_processes . . ."
     
-    if "%configuration%" == "Debug" (
+    call :setWaqFolders
     
-        echo "Debug postbuild"
-        set dest_bin="%install_dir%\x64\Debug"
-        
-        set dest_bin="!install_dir!\x64\Debug"
-        set dest_default="!install_dir!\x64\Debug"
-        set dest_scripts="!install_dir!\x64\Debug"
-        set dest_plugins="!install_dir!\x64\Debug"
-        set dest_share="!install_dir!\x64\Debug"
-        
-        call :makeDir !dest_bin!   
-        call :copyDwaqDependentRuntimeLibraries                                                     !dest_bin!
-        
-        rem copy binaries and dll 
-        call :copyFile "!build_dir!\waq_run_processes\!configuration!\waq_run_processes.*"          !dest_bin!
-    )
+    call :makeAllDirs
+    call :copyDwaqDependentRuntimeLibraries                                                         !dest_share!
     
-    if "%configuration%" == "Release" ( 
-    
-        echo "Release postbuild"
-
-        set dest_bin="!install_dir!\x64\Release\dwaq\bin"
-        set dest_default="!install_dir!\x64\Release\dwaq\default"
-        set dest_scripts="!install_dir!\x64\Release\dwaq\scripts"
-        set dest_plugins="!install_dir!\x64\Release\plugins\bin"
-        set dest_share="!install_dir!\x64\Release\share\bin"
-        
-        call :makeAllDirs   
-        call :copyDwaqDependentRuntimeLibraries                                                         !dest_share!
-        
-        rem copy binaries and dll 
-        call :copyFile "!build_dir!\waq_run_processes\!configuration!\waq_run_processes.*"              !dest_bin! 
-    )
+    rem copy binaries and dll 
+    call :copyFile "!build_dir!\waq_run_processes\!configuration!\waq_run_processes.*"              !dest_bin! 
     
 goto :endproc
 
@@ -1113,40 +941,13 @@ rem ==========================
 
     echo "postbuild waq_run_processes . . ."
     
-    if "%configuration%" == "Debug" (
+    call :setWaqFolders
     
-        echo "Debug postbuild"
-        set dest_bin="%install_dir%\x64\Debug"
-        
-        set dest_bin="!install_dir!\x64\Debug"
-        set dest_default="!install_dir!\x64\Debug"
-        set dest_scripts="!install_dir!\x64\Debug"
-        set dest_plugins="!install_dir!\x64\Debug"
-        set dest_share="!install_dir!\x64\Debug"
-        
-        call :makeDir !dest_bin!   
-        call :copyDwaqDependentRuntimeLibraries                                             !dest_bin!
-        
-        rem copy binaries and dll 
-        call :copyFile "!build_dir!\duprol2delwaq\!configuration!\duprol2delwaq.*"          !dest_bin!
-    )
+    call :makeAllDirs
+    call :copyDwaqDependentRuntimeLibraries                                                 !dest_share!
     
-    if "%configuration%" == "Release" ( 
-    
-        echo "Release postbuild"
-
-        set dest_bin="!install_dir!\x64\Release\dwaq\bin"
-        set dest_default="!install_dir!\x64\Release\dwaq\default"
-        set dest_scripts="!install_dir!\x64\Release\dwaq\scripts"
-        set dest_plugins="!install_dir!\x64\Release\plugins\bin"
-        set dest_share="!install_dir!\x64\Release\share\bin"
-        
-        call :makeAllDirs   
-        call :copyDwaqDependentRuntimeLibraries                                                 !dest_share!
-        
-        rem copy binaries and dll 
-        call :copyFile "!build_dir!\duprol2delwaq\!configuration!\duprol2delwaq.*"              !dest_bin! 
-    )
+    rem copy binaries and dll 
+    call :copyFile "!build_dir!\duprol2delwaq\!configuration!\duprol2delwaq.*"              !dest_bin! 
     
 goto :endproc
 
@@ -1203,41 +1004,17 @@ rem ==========================
 
     echo "postbuild waqmerge . . ."
     
-    if "%configuration%" == "Debug" (
+    call :setWaqFolders
     
-        echo "Debug postbuild"
-        set dest_bin="%install_dir%\x64\Debug"
-        
-        set dest_bin="!install_dir!\x64\Debug"
-        set dest_default="!install_dir!\x64\Debug"
-        set dest_scripts="!install_dir!\x64\Debug"
-        set dest_plugins="!install_dir!\x64\Debug"
-        set dest_share="!install_dir!\x64\Debug"
-        
-        call :makeDir !dest_bin!   
-        
-        rem copy binaries and dll 
-        call :copyFile "!build_dir!\waqmerge\!configuration!\waqmerge.*"                                !dest_bin!
-    )
+    call :makeAllDirs
+    call :copyDwaqDependentRuntimeLibraries                                                     !dest_share!
+    
+    rem copy binaries and dll 
+    call :copyFile "!build_dir!\waqmerge\!configuration!\waqmerge.exe"                          !dest_bin!
     
     if "%configuration%" == "Release" ( 
-    
-        echo "Release postbuild"
-
-        set dest_bin="!install_dir!\x64\Release\dwaq\bin"
-        set dest_default="!install_dir!\x64\Release\dwaq\default"
-        set dest_scripts="!install_dir!\x64\Release\dwaq\scripts"
-        set dest_plugins="!install_dir!\x64\Release\plugins\bin"
-        set dest_share="!install_dir!\x64\Release\share\bin"
-        
-        call :makeAllDirs   
-        
-        rem copy binaries and dll 
-        call :copyFile "!build_dir!\waqmerge\!configuration!\waqmerge.exe"                            !dest_bin!
-                
-        call :copyFile "!checkout_src_root!\tools_gpl\waqmerge\scripts\run_waqmerge.bat"              !dest_scripts!
+        call :copyFile "!checkout_src_root!\tools_gpl\waqmerge\scripts\run_waqmerge.bat"        !dest_scripts!
     )
-    
 goto :endproc
 
 
@@ -1250,43 +1027,17 @@ rem ==========================
 
     echo "postbuild ddcouple . . ."
     
-    if "%configuration%" == "Debug" (
+    call :setWaqFolders
     
-        echo "Debug postbuild"
-        set dest_bin="%install_dir%\x64\Debug"
-        
-        set dest_bin="!install_dir!\x64\Debug"
-        set dest_default="!install_dir!\x64\Debug"
-        set dest_scripts="!install_dir!\x64\Debug"
-        set dest_plugins="!install_dir!\x64\Debug"
-        set dest_share="!install_dir!\x64\Debug"
-        
-        call :makeDir !dest_bin!   
-        
-        rem copy binaries and dll 
-        call :copyFile "!build_dir!\ddcouple\!configuration!\ddcouple.*"                                !dest_bin!
-        call :copyFile "!compiler_redist_dir!*.dll"                                                     !dest_share!
-    )
+    call :makeAllDirs
+    call :copyDwaqDependentRuntimeLibraries                                                       !dest_share!
+    
+    rem copy binaries and dll 
+    call :copyFile "!build_dir!\ddcouple\!configuration!\ddcouple.exe"                            !dest_bin!
     
     if "%configuration%" == "Release" ( 
-    
-        echo "Release postbuild"
-
-        set dest_bin="!install_dir!\x64\Release\dwaq\bin"
-        set dest_default="!install_dir!\x64\Release\dwaq\default"
-        set dest_scripts="!install_dir!\x64\Release\dwaq\scripts"
-        set dest_plugins="!install_dir!\x64\Release\plugins\bin"
-        set dest_share="!install_dir!\x64\Release\share\bin"
-        
-        call :makeAllDirs   
-        
-        rem copy binaries and dll 
-        call :copyFile "!build_dir!\ddcouple\!configuration!\ddcouple.exe"                            !dest_bin!
-        call :copyFile "!compiler_redist_dir!*.dll"                                                   !dest_share!
-        
-        call :copyFile "!checkout_src_root!\tools_gpl\ddcouple\scripts\run_ddcouple.bat"              !dest_scripts!
+        call :copyFile "!checkout_src_root!\tools_gpl\ddcouple\scripts\run_ddcouple.bat"          !dest_scripts!
     )
-    
 goto :endproc
 
 
@@ -1298,37 +1049,15 @@ rem ==========================
 
     echo "postbuild agrhyd . . ."
     
-    if "%configuration%" == "Debug" (
+    call :setWaqFolders
     
-        echo "Debug postbuild"
-        set dest_bin="%install_dir%\x64\Debug"
-        
-        set dest_bin="!install_dir!\x64\Debug"
-        set dest_default="!install_dir!\x64\Debug"
-        set dest_scripts="!install_dir!\x64\Debug"
-        set dest_plugins="!install_dir!\x64\Debug"
-        set dest_share="!install_dir!\x64\Debug"
-        
-        call :makeDir !dest_bin!   
-        
-        rem copy binaries and dll 
-        call :copyFile "!build_dir!\agrhyd\!configuration!\agrhyd.*"                                !dest_bin!
-    )
+    call :makeAllDirs
+    call :copyDwaqDependentRuntimeLibraries                                                       !dest_share!
+    
+    rem copy binaries and dll 
+    call :copyFile "!build_dir!\agrhyd\!configuration!\agrhyd.exe"                                !dest_bin!
     
     if "%configuration%" == "Release" ( 
-    
-        echo "Release postbuild"
-
-        set dest_bin="!install_dir!\x64\Release\dwaq\bin"
-        set dest_default="!install_dir!\x64\Release\dwaq\default"
-        set dest_scripts="!install_dir!\x64\Release\dwaq\scripts"
-        set dest_plugins="!install_dir!\x64\Release\plugins\bin"
-        set dest_share="!install_dir!\x64\Release\share\bin"
-        
-        call :makeAllDirs   
-        
-        rem copy binaries and dll 
-        call :copyFile "!build_dir!\agrhyd\!configuration!\agrhyd.exe"                            !dest_bin!
         call :copyFile "!checkout_src_root!\tools_gpl\agrhyd\default\agrhyd.ini"                  !dest_default!
         call :copyFile "!checkout_src_root!\tools_gpl\agrhyd\scripts\run_agrhyd.bat"              !dest_scripts!
     )
@@ -1375,7 +1104,7 @@ rem ==========================
         set dest_bin_esmf="!install_dir!\x64\Release\esmf\bin"
         set dest_scripts_esmf="!install_dir!\x64\Release\esmf\scripts"
         
-        call :makeAllDirs   
+        call :makeAllDirs
         call :makeDir !dest_bin_esmf!
         call :makeDir !dest_scripts_esmf!
         call :copyDwavesDependentRuntimeLibraries                                                                       !dest_bin!
@@ -1423,7 +1152,7 @@ rem ==========================
         set dest_plugins="!install_dir!\x64\Release\plugins\bin"
         set dest_share="!install_dir!\x64\Release\share\bin"
         
-        call :makeAllDirs   
+        call :makeAllDirs
         call :copyDwavesDependentRuntimeLibraries                                                                           !dest_bin!
         
         rem copy binaries and dll 
@@ -1469,7 +1198,7 @@ rem ==========================
         set dest_plugins="!install_dir!\x64\Release\plugins\bin"
         set dest_share="!install_dir!\x64\Release\share\bin"
         
-        call :makeAllDirs   
+        call :makeAllDirs
         call :copySwanOmpDependentRuntimeLibraries                                                                           !dest_bin!
         
         rem copy binaries and dll
@@ -1565,7 +1294,7 @@ rem ==========================
         set dest_plugins="!install_dir!\x64\Release\plugins\bin"
         set dest_share="!install_dir!\x64\Release\share\bin"
         
-        call :makeAllDirs   
+        call :makeAllDirs
         call :copyFlow2D3DDependentRuntimeLibraries                                                                             !dest_bin!
         
         rem Temporarily rename dest_bin to share_bin to copy libraries there as well
