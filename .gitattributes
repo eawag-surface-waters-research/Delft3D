@@ -4282,10 +4282,6 @@ src/engines_gpl/waq/packages/waq_process/src/waq_process/watage.f -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/wkcomp.f -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/wlcwoc.f -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/zerome.f -text
-src/engines_gpl/waq/packages/waq_process/src/waq_tables/bloom.spe -text
-src/engines_gpl/waq/packages/waq_process/src/waq_tables/waqpb_export.bat -text
-src/engines_gpl/waq/packages/waq_process/src/waq_tables/waqpb_help.bat -text
-src/engines_gpl/waq/packages/waq_process/src/waq_tables/waqpb_import.bat -text
 src/engines_gpl/waq/packages/waq_process/waq_process.vfproj -text
 src/engines_gpl/waq/packages/waq_utils_c/CMakeLists.txt -text
 src/engines_gpl/waq/packages/waq_utils_c/Makefile.am -text
