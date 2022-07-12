@@ -386,6 +386,10 @@ rem =============================================================
     call :copyMPI                                                                                                       !destination!
     call :copyFile "!checkout_src_root!\third_party_open\netcdf\netCDF 4.6.1\bin\*"                                     !destination!  
     call :copyFile "!checkout_src_root!\third_party_open\pthreads\bin\x64\*.dll"                                        !destination!
+    
+    rem copy intel dlls
+    call :copyFile "!compiler_redist_dir!*.dll"                                                                         !destination!
+    
 
 goto :endproc
 
@@ -806,14 +810,11 @@ rem ==========================
         set dest_share="!install_dir!\x64\Debug"
         
         call :makeDir !dest_bin!   
-        call :copyDwaqDependentRuntimeLibraries                                                                          !dest_bin!
-        
-        rem copy intel dlls
-        call :copyFile "!compiler_redist_dir!*.dll"                                                    !dest_share!
+        call :copyDwaqDependentRuntimeLibraries                                                         !dest_bin!
         
         rem copy binaries and dll 
-        call :copyFile "!build_dir!\waq_plugin_wasteload\!configuration!\waq_plugin_wasteload.*"                         !dest_bin!
-        call :copyFile "!build_dir!\delwaq_lib\!configuration!\delwaq.*"                                                 !dest_bin!
+        call :copyFile "!build_dir!\waq_plugin_wasteload\!configuration!\waq_plugin_wasteload.*"        !dest_bin!
+        call :copyFile "!build_dir!\delwaq_lib\!configuration!\delwaq.*"                                !dest_bin!
     )
     
     if "%configuration%" == "Release" ( 
@@ -838,14 +839,10 @@ rem ==========================
         rem copy binaries and dll 
         call :copyFile "!build_dir!\delwaq_lib\!configuration!\delwaq.dll"                             !dest_bin! 
         
-        rem copy intel dlls
-        call :copyFile "!compiler_redist_dir!*.dll"                                                    !dest_share!
-
         rem copy waq process files
         call :copyWaqProcessFiles
         
         call :copyFile !checkout_src_root!\engines_gpl\waq\default\proc_def.def                        !dest_default!
-
     )
     
 goto :endproc
