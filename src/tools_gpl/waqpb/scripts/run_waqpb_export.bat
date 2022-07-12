@@ -39,9 +39,12 @@ if [%3] EQU [] (
         set procDefLoc=%3
     )
 )
+set csvFilesLoc=%procDefLoc%\csvFiles
+
 echo Version: %version%
 echo Serial: %serial%
 echo Proc_def location: %procDefLoc%
+echo CSV files location: %csvFilesLoc%
 
 
 set workdir=%CD%
@@ -68,8 +71,8 @@ set PATH=%waqdir%;%sharedir%
     rem Run
 set PATH=%waqdir%;%sharedir%;%~dp0
 
-    rem go to directory, run waqpb_export, and return
-cd /d %procDefLoc%
+    rem go to csv files directory, run waqpb_export, and return
+cd /d %csvFilesLoc%
 
 echo executing in this window: "%waqdir%\waqpb_export.exe" "%version%" "%serial%"
 "%waqdir%\waqpb_export.exe" "%version%" "%serial%"

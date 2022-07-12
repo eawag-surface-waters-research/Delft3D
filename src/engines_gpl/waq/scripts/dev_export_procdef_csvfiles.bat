@@ -1,6 +1,6 @@
 @echo off
 set version=5.10
-set serial=20220302
+set serial=20220712
 set toolFound=false
 set cmakeConfiguration=build_all
 
@@ -20,7 +20,17 @@ if %toolFound%==true (
     echo Run waqpb_help.bat for more information
     echo.
     pause
-    call ..\..\..\..\%cmakeConfiguration%\x64\Release\dwaq\scripts\run_waqpb_export.bat -version%version% -serial%serial% %procDefLoc%\csvFiles
+    call ..\..\..\..\%cmakeConfiguration%\x64\Release\dwaq\scripts\run_waqpb_export.bat -version%version% -serial%serial% %procDefLoc%
+    
+    rem copy files to installation directory
+    if exist ..\..\..\..\%cmakeConfiguration%\x64\dwaq\default\ (
+        copy ..\default\proc_def.* ..\..\..\..\..\..\..\%cmakeConfiguration%\x64\dwaq\default\
+        copy ..\default\csvFiles\*.csv ..\..\..\..\..\..\..\%cmakeConfiguration%\x64\dwaq\default\csvFiles
+    )
+    if exist ..\..\..\..\%cmakeConfiguration%\x64\Release\dwaq\default\ (
+        copy ..\default\proc_def.* ..\..\..\..\%cmakeConfiguration%\x64\Release\dwaq\default\
+        copy ..\default\csvFiles\*.csv ..\..\..\..\%cmakeConfiguration%\x64\Release\dwaq\default\csvFiles
+    )
     echo.
     pause
 ) else (

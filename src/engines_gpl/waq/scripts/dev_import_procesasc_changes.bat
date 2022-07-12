@@ -18,7 +18,7 @@ if %toolFound%==true (
     echo Run waqpb_help.bat for more information
     echo.
     pause
-    call ..\..\..\..\%cmakeConfiguration%\x64\Release\dwaq\scripts\run_waqpb_import.bat %procDefLoc%\csvFiles
+    call ..\..\..\..\%cmakeConfiguration%\x64\Release\dwaq\scripts\run_waqpb_import.bat %procDefLoc%
     echo.
     pause
 ) else (

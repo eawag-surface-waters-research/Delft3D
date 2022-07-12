@@ -1,6 +1,6 @@
 @echo off
 set version=5.10
-set serial=20220302
+set serial=20220712
 set toolFound=false
 set userProcDef=false
 
@@ -19,7 +19,7 @@ if %toolFound%==true (
     echo Run waqpb_help.bat for more information
     echo.
     pause
-    call %~dp0\run_waqpb_export.bat -version%version% -serial%serial% %userProcDefLoc%\csvFiles
+    call %~dp0\run_waqpb_export.bat -version%version% -serial%serial% %userProcDefLoc%
     echo.
     pause
 ) else (

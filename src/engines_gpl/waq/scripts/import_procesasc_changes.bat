@@ -16,7 +16,7 @@ if %toolFound%==true  (
     echo Run waqpb_help.bat for more information
     echo.
     pause
-    call %~dp0\run_waqpb_import.bat %userProcDefLoc%\csvFiles
+    call %~dp0\run_waqpb_import.bat %userProcDefLoc%
     echo.
     pause
 ) else (

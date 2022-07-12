@@ -43,10 +43,14 @@ if [%1] EQU [] (
         set procDefLoc=%1
     )
 )
+set csvFilesLoc=%procDefLoc%\csvFiles
+
 echo Proc_def location: %procDefLoc%
+echo CSV files location: %csvFilesLoc%
+
 
     rem go to directory, run waqpb_import, and return
-cd /d %procDefLoc%
+cd /d %csvFilesLoc%
 
 echo executing in this window: "%waqdir%\waqpb_import.exe"
 "%waqdir%\waqpb_import.exe"

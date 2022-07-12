@@ -259,6 +259,27 @@ goto :endproc
 
 
 rem =============================================================
+rem === copyWaqProcessFiles copies all process files for Waq  ===
+rem =============================================================
+:copyWaqProcessFiles
+
+    rem files used for calculations, can be modified by user
+    call :copyFile "!checkout_src_root!\engines_gpl\waq\default\bloom.spe"                                             !dest_default!
+    call :copyFile "!checkout_src_root!\engines_gpl\waq\default\proc_def.dat"                                          !dest_default!
+    call :copyFile "!checkout_src_root!\engines_gpl\waq\default\proc_def.def"                                          !dest_default!
+    call :copyFile "!checkout_src_root!\engines_gpl\waq\default\csvFiles\*"                                            !dest_csvFiles!
+    
+    rem backup files present in installation
+    call :copyFile "!checkout_src_root!\engines_gpl\waq\default\bloom.spe"                                             !dest_default_backup!
+    call :copyFile "!checkout_src_root!\engines_gpl\waq\default\proc_def.dat"                                          !dest_default_backup!
+    call :copyFile "!checkout_src_root!\engines_gpl\waq\default\proc_def.def"                                          !dest_default_backup!
+    call :copyFile "!checkout_src_root!\engines_gpl\waq\default\csvFiles\*"                                            !dest_csvFiles_backup!
+    
+goto :endproc     
+
+
+
+rem =============================================================
 rem === copies runtime libraries for dflowfm and dflowfm_dll  ===
 rem =============================================================
 :copyDflowfmDependentRuntimeLibraries
@@ -495,18 +516,22 @@ rem ==========================
 
         set dest_bin="!install_dir!\x64\Release\dflowfm\bin"
         set dest_default="!install_dir!\x64\Release\dflowfm\default"
+        set dest_csvFiles="!install_dir!\x64\Release\dflowfm\default\csvFiles"
+        set dest_default_backup="!install_dir!\x64\Release\dflowfm\installation_default"
+        set dest_csvFiles_backup="!install_dir!\x64\Release\dflowfm\installation_default\csvFiles"
         set dest_scripts="!install_dir!\x64\Release\dflowfm\scripts"
         set dest_plugins="!install_dir!\x64\Release\plugins\bin"
         set dest_share="!install_dir!\x64\Release\share\bin"
 
         call :makeAllDirs 
+        call :makeDir !dest_csvFiles!
+        call :makeDir !dest_default_backup!
+        call :makeDir !dest_csvFiles_backup!
         call :copyDflowfmDependentRuntimeLibraries
         
         call :copyFile "!build_dir!\dflowfm_cli_exe\!configuration!\dflowfm-cli.*"                                           !dest_bin!
-
-        call :copyFile "!checkout_src_root!\engines_gpl\waq\default\bloom.spe"                                             !dest_default!
-        call :copyFile "!checkout_src_root!\engines_gpl\waq\default\proc_def.dat"                                          !dest_default!
-        call :copyFile "!checkout_src_root!\engines_gpl\waq\default\proc_def.def"                                          !dest_default!
+        
+        call :copyWaqProcessFiles
         
         call :copyFile "!checkout_src_root!\engines_gpl\dflowfm\scripts\team-city\run_dflowfm_processes.bat"               !dest_scripts!
         call :copyFile "!checkout_src_root!\engines_gpl\dflowfm\scripts\team-city\run_dflowfm.bat"                         !dest_scripts!
@@ -538,18 +563,23 @@ rem =================================
 
         set dest_bin="!install_dir!\x64\Release\dflowfm\bin"
         set dest_default="!install_dir!\x64\Release\dflowfm\default"
+        set dest_csvFiles="!install_dir!\x64\Release\dflowfm\default\csvFiles"
+        set dest_default_backup="!install_dir!\x64\Release\dflowfm\installation_default"
+        set dest_csvFiles_backup="!install_dir!\x64\Release\dflowfm\installation_default\csvFiles"
         set dest_scripts="!install_dir!\x64\Release\dflowfm\scripts"
         set dest_plugins="!install_dir!\x64\Release\plugins\bin"
         set dest_share="!install_dir!\x64\Release\share\bin"
 
         call :makeAllDirs 
+        call :makeDir !dest_csvFiles!
+        call :makeDir !dest_default_backup!
+        call :makeDir !dest_csvFiles_backup!
         call :copyDflowfmDependentRuntimeLibraries
         
         call :copyFile "!build_dir!\dflowfm\!configuration!\dflowfm.exe"                                                   !dest_bin!
 
-        call :copyFile "!checkout_src_root!\engines_gpl\waq\default\bloom.spe"                                             !dest_default!
-        call :copyFile "!checkout_src_root!\engines_gpl\waq\default\proc_def.dat"                                          !dest_default!
-        call :copyFile "!checkout_src_root!\engines_gpl\waq\default\proc_def.def"                                          !dest_default!
+        call :copyWaqProcessFiles
+        
         
         call :copyFile "!checkout_src_root!\engines_gpl\dflowfm\scripts\MSDOS\run_dflowfm_processes.bat"                   !dest_scripts!
         call :copyFile "!checkout_src_root!\engines_gpl\dflowfm\scripts\team-city\run_dflowfm.bat"                         !dest_scripts!
@@ -783,7 +813,7 @@ rem ==========================
         
         rem copy binaries and dll 
         call :copyFile "!build_dir!\waq_plugin_wasteload\!configuration!\waq_plugin_wasteload.*"                         !dest_bin!
-        call :copyFile "!build_dir!\delwaq_lib\!configuration!\delwaq.*"                                                     !dest_bin!
+        call :copyFile "!build_dir!\delwaq_lib\!configuration!\delwaq.*"                                                 !dest_bin!
     )
     
     if "%configuration%" == "Release" ( 
@@ -792,22 +822,28 @@ rem ==========================
 
         set dest_bin="!install_dir!\x64\Release\dwaq\bin"
         set dest_default="!install_dir!\x64\Release\dwaq\default"
+        set dest_csvFiles="!install_dir!\x64\Release\dwaq\default\csvFiles"
+        set dest_default_backup="!install_dir!\x64\Release\dwaq\installation_default"
+        set dest_csvFiles_backup="!install_dir!\x64\Release\dwaq\installation_default\csvFiles"
         set dest_scripts="!install_dir!\x64\Release\dwaq\scripts"
         set dest_plugins="!install_dir!\x64\Release\plugins\bin"
         set dest_share="!install_dir!\x64\Release\share\bin"
         
-        call :makeAllDirs   
+        call :makeAllDirs
+        call :makeDir !dest_csvFiles!
+        call :makeDir !dest_default_backup!
+        call :makeDir !dest_csvFiles_backup!
         call :copyDwaqDependentRuntimeLibraries                                                        !dest_share!
         
         rem copy binaries and dll 
-        call :copyFile "!build_dir!\delwaq_lib\!configuration!\delwaq.dll"                                 !dest_bin! 
+        call :copyFile "!build_dir!\delwaq_lib\!configuration!\delwaq.dll"                             !dest_bin! 
         
         rem copy intel dlls
         call :copyFile "!compiler_redist_dir!*.dll"                                                    !dest_share!
 
-        rem default
-        call :copyFile !checkout_src_root!\engines_gpl\waq\default\bloom.spe                           !dest_default!
-        call :copyFile !checkout_src_root!\engines_gpl\waq\default\proc_def.dat                        !dest_default!
+        rem copy waq process files
+        call :copyWaqProcessFiles
+        
         call :copyFile !checkout_src_root!\engines_gpl\waq\default\proc_def.def                        !dest_default!
 
     )
@@ -839,7 +875,7 @@ rem ==========================
         
         rem copy binaries and dll 
         call :copyFile "!build_dir!\waq_plugin_wasteload\!configuration!\waq_plugin_wasteload.*"      !dest_bin!
-        call :copyFile "!build_dir!\delwaq_lib\!configuration!\delwaq.*"                                  !dest_bin!
+        call :copyFile "!build_dir!\delwaq_lib\!configuration!\delwaq.*"                              !dest_bin!
         call :copyFile "!build_dir!\delwaq1\!configuration!\delwaq1.*"                                !dest_bin!
     )
     
@@ -857,7 +893,7 @@ rem ==========================
         call :copyDwaqDependentRuntimeLibraries                                                     !dest_share!
         
         rem copy binaries and dll 
-        call :copyFile "!build_dir!\delwaq_lib\!configuration!\delwaq.dll"                              !dest_bin! 
+        call :copyFile "!build_dir!\delwaq_lib\!configuration!\delwaq.dll"                          !dest_bin! 
         call :copyFile "!build_dir!\delwaq1\!configuration!\delwaq1.exe"                            !dest_bin! 
 
         call :copyFile "!checkout_src_root!\engines_gpl\waq\scripts\run_delwaq.bat"                 !dest_scripts!
@@ -909,7 +945,7 @@ rem ==========================
         call :copyDwaqDependentRuntimeLibraries                                                         !dest_share!
         
         rem copy binaries and dll 
-        call :copyFile "!build_dir!\delwaq_lib\!configuration!\delwaq.*"                                    !dest_bin! 
+        call :copyFile "!build_dir!\delwaq_lib\!configuration!\delwaq.*"                                !dest_bin!
         call :copyFile "!build_dir!\delwaq2\!configuration!\delwaq2.*"                                  !dest_bin!
 
         call :copyFile "!checkout_src_root!\engines_gpl\waq\scripts\run_delwaq.bat"                     !dest_scripts! 
@@ -942,6 +978,10 @@ rem ==========================
         
         rem copy binaries and dll 
         call :copyFile "!build_dir!\waqpb_export\!configuration!\waqpb_export.*"          !dest_bin!
+        
+        rem copy run scripts
+        call :copyFile "!checkout_src_root!\tools_gpl\waqpb\scripts\run_waqpb_export.bat"    !dest_scripts!
+        call :copyFile "!checkout_src_root!\engines_gpl\waq\scripts\export_procdef_csvfiles*"        !dest_bin!
     )
     
     if "%configuration%" == "Release" ( 
@@ -959,6 +999,10 @@ rem ==========================
         
         rem copy binaries and dll 
         call :copyFile "!build_dir!\waqpb_export\!configuration!\waqpb_export.*"              !dest_bin! 
+        
+        rem copy run scripts
+        call :copyFile "!checkout_src_root!\tools_gpl\waqpb\scripts\run_waqpb_export.bat"     !dest_scripts!
+        call :copyFile "!checkout_src_root!\engines_gpl\waq\scripts\export_procdef_csvfiles*"            !dest_scripts!
     )
     
 goto :endproc
@@ -988,6 +1032,10 @@ rem ==========================
         
         rem copy binaries and dll 
         call :copyFile "!build_dir!\waqpb_import\!configuration!\waqpb_import.*"          !dest_bin!
+        
+        rem copy run scripts
+        call :copyFile "!checkout_src_root!\tools_gpl\waqpb\scripts\run_waqpb_import.bat"       !dest_scripts!
+        call :copyFile "!checkout_src_root!\engines_gpl\waq\scripts\import_procesasc_changes*"            !dest_scripts!
     )
     
     if "%configuration%" == "Release" ( 
@@ -1004,7 +1052,11 @@ rem ==========================
         call :copyDwaqDependentRuntimeLibraries                                               !dest_share!
         
         rem copy binaries and dll 
-        call :copyFile "!build_dir!\waqpb_import\!configuration!\waqpb_import.*"              !dest_bin! 
+        call :copyFile "!build_dir!\waqpb_import\!configuration!\waqpb_import.*"              !dest_bin!
+        
+        rem copy run scripts
+        call :copyFile "!checkout_src_root!\tools_gpl\waqpb\scripts\run_waqpb_import.bat"        !dest_scripts!
+        call :copyFile "!checkout_src_root!\engines_gpl\waq\scripts\import_procesasc_changes*"            !dest_scripts!
     )
     
 goto :endproc
