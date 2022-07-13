@@ -39,26 +39,16 @@ contains
 !
 !                        d e l p a r    v3.60
 !
-!     created               : december 2000, by antoon koster
-!
-!     function              : define platform-dependent file types
-!                                  'binary'      for pc
-!                                  'unformatted' for unix
+!     function              : define file types
 !
 !     subroutines called    : -
 !
       integer(4) ithndl              ! handle to time this subroutine
       data       ithndl / 0 /
       if ( timon ) call timstrt( "filtyp", ithndl )
-#ifdef HAVE_CONFIG_H
-
-      ftype(1) = 'unformatted'
-      ftype(2) = 'unformatted'
-#else
 
       ftype(1) = 'binary'
       ftype(2) = 'binary'
-#endif
 
       if ( timon ) call timstop ( ithndl )
       return

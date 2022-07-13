@@ -342,10 +342,7 @@
       
       !use normal_mod
 
-#ifdef HAVE_CONFIG_H
-#else
       use ifcore
-#endif
       !
       implicit none                  ! force explicit typing
       !
@@ -374,7 +371,7 @@
 
       call norm_init()
 
-!     set file types (binary for pc ; unformatted for unix)
+!     set file types
 
       call filtyp()
       alone = .true.
@@ -385,12 +382,9 @@
                     1       , alone   )
       lunpr = lun(2)
 
-#ifdef HAVE_CONFIG_H
-#else
       hyd%file_hyd%name = fname(18)
       call read_hyd(hyd)
       call read_hyd_init(hyd)
-#endif
 
       call report_date_time ( lunpr   )
 
@@ -399,17 +393,12 @@
       write ( lunpr  , 2020 ) noth
       write (    *   , 2020 ) noth
 
-#ifdef HAVE_CONFIG_H
-      zmodel = .false.
-      fmmodel = .false.
-#else
       zmodel = hyd%layer_type == HYD_LAYERS_Z
       fmmodel = hyd%geometry == HYD_GEOM_UNSTRUC
       if (fmmodel) then
          call partfm(lunpr)
          goto 999
       endif
-#endif
 
 !     rdlgri also calculates tcktot ! Data is put in the partmem module
 

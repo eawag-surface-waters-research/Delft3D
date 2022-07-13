@@ -43,23 +43,6 @@ contains
 !     CREATING PLO FILE FOR PLOT GRID
 !       (Nefis and binary files / per time step)
 
-!     system administration : r.j. vos
-
-!     created               : february 1990, by l. postma
-
-!     modified              : cleared may 1996
-!                             also for isfile =1, follows from ext. mapfile
-!                             version with conc-array as delwaq standard
-!                             25/11/96: rjvos: set thickn array always!!!
-!                           : nov 1997: oil version(3.40)
-!                           : jul 1998: version with settling (v3.43)
-!                           : apr 1998: vs 3.60: version for release of 1 jun
-!                           : jun 1999: vs 3.60: error in jsub==2 when testing rel 1 jun
-!                           : febr  2003: vs 3.64: new plo file implemented similar to the
-!                                         map-file; this means that substance names will be
-!                                         written same as on the map files, without layer
-!                                         information appended as on the previous plo file.
-
 !     note                  : delpar sort different from partplot
 !                             partplot:  first layers
 !                             delpar  :  first substances

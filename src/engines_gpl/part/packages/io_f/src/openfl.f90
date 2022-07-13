@@ -43,23 +43,11 @@ contains
 !
 !     Deltares
 !
-!     version: 2.40      : windows 95 version
-!
-!     created            : oktober '95  by  robert vos
-!
-!     modified           : november '97 by robert vos
-!                          delete file first when iopt = 1
-!                          for iopt=0 file is 'old'
-!
 !     subroutines called : delete_file
 !                          stop_exit
 !
 !     function           : open file dependent on ftype
 !
-!     note               : possible types
-!                          'unformatted' (all platforms)
-!                          'transparent' (pc lahey     )
-!                          'binary'      (pc microsoft )
 !
 !*********************************************************************
 !     system dependent routine

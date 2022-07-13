@@ -60,20 +60,6 @@ contains
 !     WRITING HISTORY FILE (*.his)
 !            (per time step)
 !
-!     system administration : r.j. vos
-!
-!     created               : january  1993, by r.j. vos
-!
-!     modified              : cleared may 1996, now 3d
-!                             20/11/96 restored error in amap (ippl and not ipos)
-!                                      amap should be intialized with nosubt
-!                             contains openfl
-!                             july 1998: for settling substances also
-!                                        also correction for floating oil
-!                             sept 1998: also for sticking material
-!                                        corrected normalization for oil
-!                             apr  1998: vs 3.60: version for release of 1 jun
-!
 !
 !     note                  : for 3d all layers are plotted for one (x,y) observation point
 !
