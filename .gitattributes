@@ -4615,6 +4615,7 @@ src/scripts_lgpl/singularity/dflowfm_recipe_external_mpi.def -text
 src/scripts_lgpl/singularity/execute_singularity.sh -text
 src/scripts_lgpl/singularity/execute_singularity_snellius.sh -text
 src/scripts_lgpl/singularity/readme.txt -text
+src/scripts_lgpl/singularity/readme_snellius.txt -text
 src/scripts_lgpl/singularity/run_singularity.sh -text
 src/scripts_lgpl/singularity/submit_singularity.sh -text
 src/scripts_lgpl/singularity/submit_singularity_snellius.sh -text
