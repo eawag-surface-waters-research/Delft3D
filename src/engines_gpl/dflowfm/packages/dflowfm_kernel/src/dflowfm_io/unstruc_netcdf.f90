@@ -5414,7 +5414,7 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
                !ierr = nf90_put_att(mapids%ncid, mapids%id_tsp%id_blave, 'unit', 'm')
             endif
             if (stmpar%morpar%moroutput%bamor) then
-               ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_bamor, nf90_double, UNC_LOC_S, 'mor_area', '', '', 'm2', is_timedep = 0, which_meshdim = 1, jabndnd=jabndnd_)
+               ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_bamor, nf90_double, UNC_LOC_S, 'mor_area', '', 'Main channel cell area', 'm2', is_timedep = 0, which_meshdim = 1, jabndnd=jabndnd_)
             endif
             if (stmpar%morpar%moroutput%wumor) then
                ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_wumor, nf90_double, UNC_LOC_U, 'mor_width_u', '', 'Main channel cell width at flow link', 'm', is_timedep = 0, which_meshdim = 1, jabndnd=jabndnd_)
