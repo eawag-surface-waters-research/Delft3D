@@ -5,7 +5,8 @@ Running Delft3dfm in a Singularity container on Snellius:
    "Working folder" is the location of your dimr configuration file.
    
 2. Modify "submit_singularity_snellius.sh" according to your own requirements.
-   The number of nodes, and number of tasks per node, can be specified within the SBATCH directives.  
+   The comments in "submit_singularity_snellius.sh" will provide guidance.
+   The number of nodes, and number of tasks per node, can be specified within the SBATCH directives at the top of the file.  
    
 3. Run the script with SBATCH from your working folder: 
    sbatch ./submit_singularity_snellius.sh
