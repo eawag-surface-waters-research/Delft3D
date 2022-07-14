@@ -4905,8 +4905,8 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
       end if
       if(jamapucqvec > 0) then
          if (jaeulervel==1 .and. jawave>0 .and. .not. flowWithoutWaves) then ! TODO: AvD:refactor such that yes<->no Eulerian velocities are in parameters below:
-            ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_ucxq, nf90_double, iLocS, 'ucxq', 'ucxq_eulerian_velocity', 'Flow element center eulerian velocity vector, x-component', 'm s-1', jabndnd=jabndnd_)
-            ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_ucyq, nf90_double, iLocS, 'ucyq', 'ucyq_eulerian_velocity', 'Flow element center eulerian velocity vector, y-component', 'm s-1', jabndnd=jabndnd_)
+            ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_ucxq, nf90_double, iLocS, 'ucxq', 'ucxq_eulerian_velocity', 'Flow element center eulerian velocity vector based on discharge, x-component', 'm s-1', jabndnd=jabndnd_)
+            ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_ucyq, nf90_double, iLocS, 'ucyq', 'ucyq_eulerian_velocity', 'Flow element center eulerian velocity vector based on discharge, y-component', 'm s-1', jabndnd=jabndnd_)
          else
             ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_ucxq, nf90_double, iLocS, 'ucxq', 'ucxq_velocity', 'Flow element center velocity vector based on discharge, x-component', 'm s-1', jabndnd=jabndnd_)
             ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_ucyq, nf90_double, iLocS, 'ucyq', 'ucyq_velocity', 'Flow element center velocity vector based on discharge, y-component', 'm s-1', jabndnd=jabndnd_)
