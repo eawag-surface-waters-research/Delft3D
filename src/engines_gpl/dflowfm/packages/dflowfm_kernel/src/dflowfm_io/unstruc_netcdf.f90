@@ -5596,7 +5596,7 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
       if (javeg > 0) then
          ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_rnveg        	, nf90_double, UNC_LOC_S, 'rnveg'        , 'stem density of vegetation'      , 'stem density per square meter', 'm-2')
          ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_diaveg        , nf90_double, UNC_LOC_S, 'diaveg'       , 'stem diameter of vegetation'     , 'stem diameter of vegetation', 'm')
-         ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_veg_stemheight, nf90_double, UNC_LOC_S, 'stemheight'   , 'stem height of vegetation'       , 'stem height of vegetation', 'm-2')
+         ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_veg_stemheight, nf90_double, UNC_LOC_S, 'stemheight'   , 'stem height of vegetation'       , 'stem height of vegetation', 'm')
       endif
 
       if (jamapcali > 0 .and. jacali == 1) then
