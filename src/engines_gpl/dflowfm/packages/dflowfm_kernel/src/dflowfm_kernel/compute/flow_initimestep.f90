@@ -48,6 +48,7 @@
  integer              :: jazws0
  integer, intent(out) :: iresult !< Error status, DFM_NOERR==0 if succesful.
  integer              :: ierror
+ double precision, parameter :: mmphr_to_mps = 1d-3/3600d0
 
  iresult = DFM_GENERICERROR
 
@@ -178,6 +179,10 @@ endif
     call heatu(tim1bnd/3600d0)                                  ! from externalforcings
  endif
 
+  if (infiltrationmodel == DFM_HYD_INFILT_HORTON) then
+    infiltcap0 = infiltcap/mmphr_to_mps
+ endif
+ 
  call timstop(handle_inistep)
 
  iresult = DFM_NOERR

@@ -77,7 +77,7 @@ module m_hydrology_data
 
    double precision                      :: infiltcapuni           !< [m s-1] Uniform infiltration capacity. Only used if infiltrationmodel == 2 (DFM_HYD_INFILT_CONST).
    double precision, allocatable, target :: infilt(:)              !< [m3 s-1] Actual infiltration flux at current time {"location": "face", "shape": ["ndx"]}
-   double precision, allocatable, target :: infiltcap0(:)          !< [m s-1] Maximum infiltration capacity on each cell at previous timestep {"location": "face", "shape": ["ndx"]}
+   double precision, allocatable, target :: infiltcap0(:)          !< [mm h-1] Maximum infiltration capacity on each cell at previous timestep {"location": "face", "shape": ["ndx"]}
    double precision, allocatable, target :: infiltcap(:)           !< [m s-1] Maximum infiltration capacity on each cell {"location": "face", "shape": ["ndx"]}
    double precision, allocatable         :: infiltcaproofs(:)      !< temporary of the same
 
