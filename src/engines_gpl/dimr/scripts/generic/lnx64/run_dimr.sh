@@ -212,7 +212,7 @@ if [ $debuglevel -eq 0 ]; then
    if [ -z "${TIME}" ]; then
        export TIME="\n\n %PCPU (%Xtext+%Ddata %Mmax)k \nreal %e \nuser %U \nsys %s"
    fi
-   timecmd=/usr/bin/time
+   timecmd="/usr/bin/time -o resource_dimr.out"
 fi
 
 
