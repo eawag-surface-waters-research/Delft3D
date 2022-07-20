@@ -91,7 +91,7 @@
       if (his_output_file.ne.' ') then
          inquire(file=his_output_file,exist=Leho)
          if ( .not.Leho) then
-            call mess(LEVEL_ERROR, 'Additional histrory output file specified, but does not exist: ', trim(his_output_file))
+            call mess(LEVEL_ERROR, 'Additional history output file specified, but does not exist: ', trim(his_output_file))
          end if
       else
          Leho = .false.
