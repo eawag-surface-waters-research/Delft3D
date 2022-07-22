@@ -3126,7 +3126,7 @@ subroutine write_swan_inp (wavedata, calccount, &
        !
        inquire (file = trim(fname), exist = exists)
        if (exists) then
-          line  = 'INIT HOTS ''' // trim(fname) // ''''
+          line  = 'INIT HOTS ''' // trim(fname) // ''' UNF'
           write (luninp, '(1X,A)') line
           write(*,'(2a)') '  Using SWAN hotstart file: ',trim(fname)
        else ! check if there exists at least 1 partioned hotfile
@@ -3134,7 +3134,7 @@ subroutine write_swan_inp (wavedata, calccount, &
           inquire (file = trim(fname), exist = exists)
           if (exists) then
              write (fname,'(a,i0,2a)') 'hot_', inest, '_', trim(sr%usehottime) ! swan input needs filename without partition no
-             line  = 'INIT HOTS ''' // trim(fname) // ''''
+             line  = 'INIT HOTS ''' // trim(fname) // ''' UNF'
              write (luninp, '(1X,A)') line
              write(*,'(2a)') '  Using SWAN hotstart file: ',trim(fname)
           else   
@@ -3853,7 +3853,7 @@ subroutine write_swan_inp (wavedata, calccount, &
        ! line to ensure that SWAN is going to produce a hotfile
        !
        write (fname,'(a,i0,2a)') 'hot_', inest, '_', trim(sr%writehottime)
-       line  = 'HOTF ''' // trim(fname) // ''''
+       line  = 'HOTF ''' // trim(fname) // ''' UNF'
        write (luninp, '(1X,A)') line
     endif
     !
