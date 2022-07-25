@@ -58,6 +58,7 @@ if (UNIX)
                          deltares_common_c
                          io_netcdf
                          io_hyd
+                         waq_utils_c
                          waq_utils_f
                          waq_kernel)
 
@@ -76,6 +77,7 @@ if (WIN32)
                          io_hyd
                          netcdf4
                          netcdff
+                         waq_utils_c
                          waq_utils_f
                          waq_kernel)
 
