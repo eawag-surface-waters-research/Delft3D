@@ -214,7 +214,6 @@ rem ===============
     call :waqmerge
     call :ddcouple
     call :agrhyd
-    call :maptonetcdf
     call :waq_run_processes
     call :duprol2delwaq
     call :delpar
@@ -1065,28 +1064,6 @@ rem ==========================
     
 goto :endproc
 
-
-
-rem ==========================
-rem === POST_BUILD_maptonetcdf
-rem ==========================
-:maptonetcdf
-
-    echo "postbuild maptonetcdf . . ."
-    
-    call :setWaqFolders
-    
-    call :makeAllDirs
-    call :copyDwaqDependentRuntimeLibraries                                                       !dest_share!
-    
-    rem copy binaries and dll 
-    call :copyFile "!build_dir!\maptonetcdf\!configuration!\maptonetcdf.exe"                      !dest_bin!
-    
-    if "%configuration%" == "Release" ( 
-        call :copyFile "!checkout_src_root!\tools_gpl\maptonetcdf\scripts\run_maptonetcdf.bat"    !dest_scripts!
-    )
-    
-goto :endproc
 
 
 

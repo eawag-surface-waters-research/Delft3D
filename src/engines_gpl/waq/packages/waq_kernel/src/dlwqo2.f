@@ -163,7 +163,6 @@
       use precision
       use output
       use nan_check_module
-      use m_outmnc
       implicit none
 !
       integer       notot , noseg , nopa  , nosfun, itime ,

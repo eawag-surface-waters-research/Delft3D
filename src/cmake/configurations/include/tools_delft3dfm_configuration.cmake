@@ -47,8 +47,3 @@ endif()
 if(NOT TARGET agrhyd)
     add_subdirectory(${checkout_src_root}/${agrhyd_module} agrhyd)
 endif()
-
-# Maptonetcdf
-if(NOT TARGET maptonetcdf)
-    add_subdirectory(${checkout_src_root}/${maptonetcdf_module} maptonetcdf)
-endif()
