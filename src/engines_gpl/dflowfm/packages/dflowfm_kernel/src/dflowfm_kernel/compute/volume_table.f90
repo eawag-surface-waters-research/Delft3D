@@ -74,6 +74,7 @@ module m_VolumeTables
       integer :: numberOfSummerDikes                              !< number of summerdikes connected to the volume table.   
       logical, allocatable, dimension(:) :: inundationPhase       !< During the inundation phase the storage area is different from the                         
                                                                   !< period, when the water levels are declining.   
+      integer, allocatable, dimension(:) :: linkNumber            !< Flow link number of the location of the summer dike.
       double precision, allocatable, dimension(:)   :: summerDikeCrestLevel    !< crest level of the summerdike.
       double precision, allocatable, dimension(:)   :: summerDikeBaseLevel     !< base level (bottom level) of the summerdike.
       double precision, allocatable, dimension(:,:) :: sdinVolume !< correction for the volume due to the hysteresis during the inundation phase of the summerdike.
@@ -108,6 +109,7 @@ module m_VolumeTables
 
       if (this%numberOfSummerDikes /= 0) then
          allocate(this%inundationPhase(this%numberOfSummerDikes))
+         allocate(this%linkNumber(this%numberOfSummerDikes))
          allocate(this%summerDikeCrestLevel(this%numberOfSummerDikes))
          allocate(this%summerDikeBaseLevel(this%numberOfSummerDikes))
          allocate(this%sdinVolume(this%numberOfSummerDikes, this%count))
@@ -134,6 +136,7 @@ module m_VolumeTables
       
       if (this%numberOfSummerDikes /= 0) then
          if (allocated(this%inundationPhase))   deallocate(this%inundationPhase)
+         if (allocated(this%linkNumber))        deallocate(this%linkNumber)
          if (allocated(this%sdinVolume))        deallocate(this%sdinVolume)
          if (allocated(this%sdinArea))          deallocate(this%sdinArea)
       endif
@@ -236,10 +239,9 @@ module m_VolumeTables
    end function getSurfaceDecreasingVoltable
 
    !> Generate the volume tables, by using GetCSParsTotal.
-   subroutine makeVolumeTables()
+   subroutine makeVolumeTables(filename)
 
       use unstruc_channel_flow
-      use unstruc_files
       use m_flowparameters
       use m_flowgeom
       use m_GlobalParameters
@@ -247,6 +249,8 @@ module m_VolumeTables
       use m_flow
       use m_missing
 
+      character(len=*), intent(in   ) :: filename !< Name of the volumetablefile
+      
       integer :: ndx1d
       integer :: nstor
       integer :: nod
@@ -273,7 +277,7 @@ module m_VolumeTables
       type(t_CrossSection), pointer                   :: cross1, cross2
       type(t_storage), dimension(:), pointer          :: stors
       if (useVolumeTableFile) then
-         volumeTableFile = defaultFilename('volumeTables')
+         volumeTableFile = fileName
          if (readVolumeTables()) then
             return
          endif
@@ -448,6 +452,7 @@ module m_VolumeTables
                      if (cross(line2cross(L, 2)%c1)%hasSummerDike() .or. cross(line2cross(L, 2)%c2)%hasSummerDike()) then
                         numberOfSummerDikes = numberOfSummerDikes+1
                         if (j ==2) then
+                           vltb(n)%linkNumber(numberOfSummerDikes) = L
                            call getSummerDikeData(line2cross(L,index), cross, vltb(n)%summerDikeCrestLevel(numberOfSummerDikes), &
                                                vltb(n)%summerDikeBaseLevel(numberOfSummerDikes))
                         endif
