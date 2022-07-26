@@ -7,28 +7,44 @@ title run_maptonetcdf
 setlocal enabledelayedexpansion
 
     rem
-    rem Set the mdu file
+    rem Set the input arguments
     rem
-set argfile= 
+set mapfile= 
 if [%1] EQU [] (
     goto usage
 ) else (
     if [%1] EQU [--help] (
         goto usage
     ) else (
-        set argfile=%1
+        set mapfile=%1
     )
 )
-echo Configfile:%argfile%
-if not exist %argfile% (
-    if not exist %argfile%.inp (
-        echo ERROR: input ini file "%argfile%" does not exist
+set ncfile= 
+if [%2] EQU [] (
+    goto usage
+) else (
+    if [%2] EQU [--help] (
         goto usage
+    ) else (
+        set ncfile=%2
+    )
+)
+set numLayers= 
+if [%3] EQU [] (
+    goto usage
+) else (
+    if [%3] EQU [--help] (
+        goto usage
+    ) else (
+        set numLayers=%3
     )
 )
 
+
 set workdir=%CD%
-set argfile=%workdir%\%argfile%
+set mapfile=%workdir%\%mapfile%
+set ncfile=%workdir%\%ncfile%
+
 echo Working directory: %workdir%
     rem
     rem Set the directories containing the binaries
@@ -37,6 +53,7 @@ set D3D_HOME=%~dp0..\..\..
 
 rem Remove "\dwaq\scripts\..\..\.." from D3D_HOME
 set D3DT=%D3D_HOME:~0,-22%
+
 rem last directory will be the architecture directory
 for %%f in ("%D3DT%") do set ARCH=%%~nxf
 
@@ -53,13 +70,13 @@ set PATH=%waqdir%;%sharedir%
 set PATH=%waqdir%;%sharedir%;%~dp0
 
     rem go to directory, run maptonetcdf, and return
-For %%A in ("%argfile%") do (
-    set argName=%%~nxA
-    set argPath=%%~dpA
+For %%A in ("%mapfile%") do (
+    set mapName=%%~nxA
+    set mapPath=%%~dpA
 )
-cd /d "%argPath%"
-echo executing in this window: "%waqdir%\maptonetcdf.exe" "%argfile%"
-"%waqdir%\maptonetcdf.exe" "%argName%"
+cd /d "%mapPath%"
+echo executing in this window: "%waqdir%\maptonetcdf.exe" "%mapfile%" "%ncfile%" "%numLayers%"
+"%waqdir%\maptonetcdf.exe" "%mapfile%" "%ncfile%" "%numLayers%"
 cd /d "%workdir%"
 
 
@@ -68,9 +85,11 @@ goto end
 
 :usage
 echo Usage:
-echo run_maptonetcdf.bat [--help] maptonetcdf.ini
+echo run_maptonetcdf.bat [--help] mapFile.map ncFile.nc numLayers
 echo     --help             : (Optional) show this usage
-echo     maptonetcdf.inp    : (Mandatory) maptonetcdf input file.
+echo     mapFile.map        : (Mandatory) maptonetcdf .map input file.
+echo     ncFile.nc          : (Mandatory) maptonetcdf .nc output file.
+echo     numLayers          : (Mandatory) number of layers.
 :end
     rem To prevent the DOS box from disappearing immediately: remove the rem on the following line
 rem pause
