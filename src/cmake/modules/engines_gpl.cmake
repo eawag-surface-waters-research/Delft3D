@@ -57,6 +57,9 @@ set(dimr_module "${dimr_module_path}/dimr")
 # Agrhyd
 set(agrhyd_module "tools_gpl/agrhyd/packages/agrhyd")
 
+# Maptonetcdf
+set(maptonetcdf_module "tools_gpl/maptonetcdf/packages/maptonetcdf")
+
 # Tests
 set(dflowfm_kernel_test_module test/engines_gpl/dflowfm/packages/dflowfm_kernel)
 

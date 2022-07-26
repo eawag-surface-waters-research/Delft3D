@@ -39,3 +39,6 @@ set(datsel_module ${datsel_module_path}/datsel)
 
 # Agrhyd
 set(agrhyd_module ${tools_gpl_path}/agrhyd/packages/agrhyd)
+
+# Maptonetcdf
+set(maptonetcdf_module ${tools_gpl_path}/maptonetcdf/packages/maptonetcdf)

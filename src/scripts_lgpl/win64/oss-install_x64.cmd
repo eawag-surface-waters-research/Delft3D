@@ -220,6 +220,7 @@ rem     call :delwaq2_openda_lib
     call :waq_plugin_wasteload
     call :part
     call :agrhyd
+    call :maptonetcdf
     call :ddcouple
     call :waqmerge
     call :wave
@@ -669,6 +670,19 @@ rem ===================
     call :makeDir !dest_bin!
 
     call :copyFile engines_gpl\waq\bin\x64\Release\agrhyd.exe                     !dest_bin!
+goto :endproc
+
+rem ===================
+rem === INSTALL_MAPTONETCDF
+rem ===================
+:maptonetcdf
+    echo "installing maptonetcdf . . ."
+
+    set dest_bin="!dest_main!\x64\dwaq\bin"
+
+    call :makeDir !dest_bin!
+
+    call :copyFile engines_gpl\waq\bin\x64\Release\maptonetcdf.exe                !dest_bin!
 goto :endproc
 
 

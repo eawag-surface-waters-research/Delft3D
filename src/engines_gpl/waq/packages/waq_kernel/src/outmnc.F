@@ -21,6 +21,9 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
+      module m_outmnc
+      contains
+
       subroutine outmnc ( ncidmap, mncnam , ugridf , timeid, bndtimeid, mncrec , itime  , moname ,
      &                    noseg  , notot1 , conc1  , synam1 , sysnm1, syuni1, sydsc1, wqid1  , notot2 ,
      &                    conc2  , synam2 , sysnm2, syuni2, sydsc2, wqid2  , volume, iknmrk , lunut)
@@ -582,4 +585,6 @@
  2594 format ( / ' Dimension "',A,'" not found' )
  2600 format ( / ' NetCDF error number: ', I6 )
  2610 format ( / ' NetCDF error message: ', A )
-      end
+
+      end subroutine outmnc
+      end module m_outmnc
