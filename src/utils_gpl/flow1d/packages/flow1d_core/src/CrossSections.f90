@@ -60,6 +60,7 @@ module m_CrossSections
    public write_crosssection_data
    public getYZConveyance
    public getHighest1dLevel
+   public getSummerDikeData
    double precision, public :: default_width
 
    interface fill_hashtable
@@ -261,6 +262,11 @@ module m_CrossSections
        integer, allocatable                     :: frictionTypeNeg(:)        !< Friction type for negative flow direction
        double precision, allocatable            :: frictionValueNeg(:)       !< Friction value for negative flow direction
 
+    contains
+      procedure, pass :: hasSummerDike   => hasSummerDike                    !< Indicates if the cross  section has a summer dike
+  
+
+
     end type
 
    !> Derived type to store the cross-section set
@@ -274,6 +280,18 @@ module m_CrossSections
    end type t_CrossSectionSet
 
 contains
+
+!> Indicates if the cross  section has a summer dike.
+logical function hasSummerDike(this)
+   class(t_CrossSection) :: this       !< Current cross section
+   if (associated(this%tabDef) ) then
+      hasSummerDike = associated(this%tabDef%summerdike)
+   else 
+      hasSummerDike = .false.
+   endif
+end function hasSummerDike
+
+
 
 !> Free the memory used by a cross-section definition
 subroutine deallocCrossDefinition(CrossDef)
@@ -3510,4 +3528,35 @@ subroutine createTablesForTabulatedProfile(crossDef)
       endif
 
     end subroutine getYZConveyance
+
+    !> retrieve the interpolated summerdike  data
+    subroutine getSummerDikeData(line2cross, cross, crestLevel, baseLevel)
+       type(t_chainage2cross),intent(in)         :: line2cross     !< cross section indirection
+       type(t_CrossSection), target, intent(in)  :: cross(:)       !< array containing cross section information
+       double precision,      intent(  out)      :: crestLevel     !< Crest level of the summerdike at the given location
+       double precision,      intent(  out)      :: baseLevel      !< Base level of the summerdike at the given location  
+
+       double precision :: f
+       type (t_CrossSection), pointer        :: cross1         !< cross section
+       type (t_CrossSection), pointer        :: cross2         !< cross section
+
+       cross1 => cross(line2cross%c1)
+       cross2 => cross(line2cross%c2)
+       f = line2cross%f
+
+        if (cross1%hasSummerDike() .and. cross2%hasSummerDike()) then
+          crestLevel = (1.0d0 - f) * cross1%tabDef%summerdike%crestLevel + f * cross2%tabDef%summerdike%crestLevel
+          baseLevel  = (1.0d0 - f) * cross1%tabDef%summerdike%baseLevel  + f * cross2%tabDef%summerdike%baseLevel
+       else if (cross1%hasSummerDike()) then
+         crestLevel = cross1%tabDef%summerdike%crestLevel
+         baseLevel  = cross1%tabDef%summerdike%baseLevel 
+       else if (cross2%hasSummerDike()) then
+         crestLevel = cross2%tabDef%summerdike%crestLevel
+         baseLevel  = cross2%tabDef%summerdike%baseLevel
+       else
+         crestLevel = missingvalue
+         baseLevel  = missingvalue
+       endif
+
+    end subroutine getSummerDikeData
 end module m_CrossSections
