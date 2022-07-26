@@ -8,11 +8,12 @@
     #
 
 function print_usage_info {
-    echo "Usage: ${0##*/} <maptonetcdf.ini> [OPTION]..."
+    echo "Usage: ${0##*/} <mapFile.map> <ncFile.nc> <numLayers> [OPTIONS]"
     echo "Run maptonetcdf on Linux."
     echo
-    echo "<maptonetcdf.inp>"
-    echo "       (Mandatory) maptonetcdf input file"
+    echo  "   mapFile.map        : (Mandatory) maptonetcdf .map input file."
+    echo  "   ncFile.nc          : (Mandatory) maptonetcdf .nc output file."
+    echo  "   numLayers          : (Mandatory) number of layers."
     echo
     echo "Options:"
     echo "-h, --help"
@@ -32,8 +33,10 @@ ulimit -s unlimited
 #
 ## Start processing command line options:
 
-argfile=$1
-case $argfile in
+mapfile=$1
+ncfile=$2
+numLayers=$3
+case $mapfile in
     -h|--help)
     print_usage_info
     ;;
@@ -41,9 +44,9 @@ esac
 
 workdir=`pwd`
 
-if [ ! -f $argfile ]; then
-    if [ ! -f $argfile.inp ]; then
-        echo "ERROR: input mdu file $argfile does not exist in working directory $workdir"
+if [ ! -f $mapfile ]; then
+    if [ ! -f $mapfile ]; then
+        echo "ERROR: input map file $mapfile does not exist in working directory $workdir"
         print_usage_info
     fi
 fi
@@ -66,7 +69,9 @@ fi
 export D3D_HOME
 
 
-echo "    Argfile       : $argfile"
+echo "    mapFile          : $mapfile"
+echo "    ncFile           : $ncfile"
+echo "    numLayers        : $numLayers"
 echo "    D3D_HOME         : $D3D_HOME"
 echo "    Working directory: $workdir"
 echo 
@@ -91,9 +96,9 @@ export FI_PROVIDER=tcp
 
 
 echo "executing:"
-echo "$bindir/maptonetcdf $argfile"
+echo "$bindir/maptonetcdf $mapfile $ncfile $numlayers"
 echo 
-$bindir/maptonetcdf $argfile
+$bindir/maptonetcdf $mapfile $ncfile $numlayers
 
 
 
