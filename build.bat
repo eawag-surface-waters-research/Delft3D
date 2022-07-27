@@ -469,6 +469,7 @@ rem =======================
         xcopy %root%\build_all\x64\Release\dwaq\bin\delwaq*.exe     %root%\build_all\x64\dwaq\bin\        /E /C /Y /Q > del.log 2>&1
         xcopy %root%\build_all\x64\Release\dwaq\bin\agrhyd.exe      %root%\build_all\x64\dwaq\bin\        /E /C /Y /Q > del.log 2>&1
         xcopy %root%\build_all\x64\Release\dwaq\bin\ddcouple.exe    %root%\build_all\x64\dwaq\bin\        /E /C /Y /Q > del.log 2>&1
+        xcopy %root%\build_all\x64\Release\dwaq\bin\maptonetcdf.exe      %root%\build_all\x64\dwaq\bin\        /E /C /Y /Q > del.log 2>&1
         xcopy %root%\build_all\x64\Release\dwaq\bin\waqmerge.exe    %root%\build_all\x64\dwaq\bin\        /E /C /Y /Q > del.log 2>&1
         xcopy %root%\build_all\x64\Release\dwaq\bin\waqpb_export.exe    %root%\build_all\x64\dwaq\bin\        /E /C /Y /Q > del.log 2>&1
         xcopy %root%\build_all\x64\Release\dwaq\bin\waqpb_import.exe    %root%\build_all\x64\dwaq\bin\        /E /C /Y /Q > del.log 2>&1
