@@ -96,9 +96,9 @@ export FI_PROVIDER=tcp
 
 
 echo "executing:"
-echo "$bindir/maptonetcdf $mapfile $ncfile $numlayers"
+echo "$bindir/maptonetcdf $mapfile $ncfile $numLayers"
 echo 
-$bindir/maptonetcdf $mapfile $ncfile $numlayers
+$bindir/maptonetcdf $mapfile $ncfile $numLayers
 
 
 
