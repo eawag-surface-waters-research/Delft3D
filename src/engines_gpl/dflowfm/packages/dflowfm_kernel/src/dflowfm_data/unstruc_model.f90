@@ -2358,9 +2358,9 @@ logical function isdeprecated(chap, key)
    
    isdeprecated = .false.
    select case (trim(chap))
-   case (' ') ! just template code for the time being
+   case ('processes')
       select case (trim(key))
-      case (' ')
+      case ('dtmassbalance')
          isdeprecated = .true.
       end select
    end select
@@ -2490,7 +2490,8 @@ ch:do ichapter = 1, nchapter
 
    if (num_deprecated > 0) then
       ! to bring this message to the attention of the user, we write an error but continue ..
-      call mess(LEVEL_ERROR, prefix//': Deprecated keywords used: Check Section "Overview of deprecated and removed keywords" in the User Manual for information on how to update the input file.')
+      ! but set it to warning because it leads to a stop futher on in loadModel when the highest message level is checked...
+      call mess(LEVEL_WARN, prefix//': Deprecated keywords used: Check Section "Overview of deprecated and removed keywords" in the User Manual for information on how to update the input file.')
    end if
 
    threshold_abort = threshold_abort_current
