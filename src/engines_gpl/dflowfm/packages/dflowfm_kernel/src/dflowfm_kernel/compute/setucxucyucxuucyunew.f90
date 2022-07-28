@@ -41,7 +41,7 @@
  use m_sferic
  implicit none
 
- integer          :: L, KK, k1, k2, k, nw, Lb, Lt, LL, nn, n, kt,kb, kbk, k2k, n1, n2, ip, i12, La, nx
+ integer          :: L, KK, k1, k2, k, nw, Lb, Lt, LL, nn, n, kt,kb, kbk, k2k, n1, n2, ip, i12, La, nx, i
  integer          :: itpbn, newucxq=0
  double precision :: uu, vv, uucx, uucy, wcxu, wcyu, cs, sn, adx, ac1, ac2, wuw, hdx, hul, hsk, uin, duxdn, duydn, uhu, htrs
  double precision :: dischcorrection
@@ -62,19 +62,11 @@
 
     do L = 1,lnx1D
        if (u1(L) .ne. 0d0 .and. kcu(L) .ne. 3) then  ! link flows ; in 2D, the loop is split to save kcu check in 2D
-          ! In some cases the flow area of the hydraulic structure is larger than the flow area of the branch.
-          ! In those cases the flow velocity at the structure 
-          if ((kcu(L)==4 .or. (iadv(L) >= 21 .and. iadv(L) <=29)) .and. ChangeVelocityAtStructures .and. comparereal(au_nostrucs(L), 0d0) ==1) then
-             ! Apply only on some barrier-like hydraulic structures, and typically on 1D2D links for dambreaks
-             u1L = q1(L)/au_nostrucs(L)
-          else
-             u1L = u1(L)
-          endif
           k1 = ln(1,L) ; k2 = ln(2,L)
-          ucx(k1) = ucx(k1) + wcx1(L)*u1L
-          ucy(k1) = ucy(k1) + wcy1(L)*u1L
-          ucx(k2) = ucx(k2) + wcx2(L)*u1L
-          ucy(k2) = ucy(k2) + wcy2(L)*u1L
+          ucx(k1) = ucx(k1) + wcx1(L)*u1(L)
+          ucy(k1) = ucy(k1) + wcy1(L)*u1(L)
+          ucx(k2) = ucx(k2) + wcx2(L)*u1(L)
+          ucy(k2) = ucy(k2) + wcy2(L)*u1(L)
        endif
     enddo
 
@@ -83,21 +75,34 @@
           if ( struclink(L) == 1 ) cycle
        endif
        if (u1(L) .ne. 0d0) then                      ! link flows
-          ! In some cases the flow area of the hydraulic structure is larger than the flow area of the branch.
-          ! In those cases the flow velocity at the structure 
-          if (( kcu(L)==3 .or. kcu(L)==4 .or. (iadv(L) >= 21 .and. iadv(L) <=29)) .and. ChangeVelocityAtStructures .and. comparereal(au_nostrucs(L), 0d0) ==1) then
-             ! Apply only on some barrier-like hydraulic structures, and typically on 1D2D links for dambreaks
-             u1L = q1(L)/au_nostrucs(L)
-          else
-             u1L = u1(L)
-          endif
           k1 = ln(1,L) ; k2 = ln(2,L)
-          ucx(k1) = ucx(k1) + wcx1(L)*u1L
-          ucy(k1) = ucy(k1) + wcy1(L)*u1L
-          ucx(k2) = ucx(k2) + wcx2(L)*u1L
-          ucy(k2) = ucy(k2) + wcy2(L)*u1L
+          ucx(k1) = ucx(k1) + wcx1(L)*u1(L)
+          ucy(k1) = ucy(k1) + wcy1(L)*u1(L)
+          ucx(k2) = ucx(k2) + wcx2(L)*u1(L)
+          ucy(k2) = ucy(k2) + wcy2(L)*u1(L)
        endif
     enddo
+
+    if (ChangeVelocityAtStructures) then
+       ! Perform velocity correction for fixed weir and structures
+       ! In some cases the flow area of the hydraulic structure is larger than the flow area of the branch.
+       ! In those cases the flow velocity at the structure is not used, but the upstream velocity
+       do i = 1, numberOfStructuresAndWeirs
+          L = structuresAndWeirsList(i)
+          if (jabarrieradvection == 3 .and. L > lnx1D) then
+             if ( struclink(L) == 1 ) cycle
+          endif
+          if (comparereal(au_nostrucs(L), 0d0) ==1) then
+            k1 = ln(1,L) 
+            k2 = ln(2,L)
+            u1L = q1(L)/au_nostrucs(L)
+            ucx(k1) = ucx(k1) + wcx1(L)*(u1L-u1(L))
+            ucy(k1) = ucy(k1) + wcy1(L)*(u1L-u1(L))
+            ucx(k2) = ucx(k2) + wcx2(L)*(u1L-u1(L))
+            ucy(k2) = ucy(k2) + wcy2(L)*(u1L-u1(L))
+          endif
+       enddo
+    endif
 
  else
     do LL = 1,lnx

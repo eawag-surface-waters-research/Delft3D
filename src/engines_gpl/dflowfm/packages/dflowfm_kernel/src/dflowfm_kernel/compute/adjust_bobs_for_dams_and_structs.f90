@@ -32,7 +32,9 @@
 
  !> adjust bobs and iadvec for dams and structs
  subroutine adjust_bobs_for_dams_and_structs()
+    use m_alloc
     use m_flowgeom
+    use m_flowparameters
     use m_flow
     use m_netw
     use m_fixedweirs
@@ -48,7 +50,24 @@
 
     integer :: L0
     integer          :: ng, k1, k2, L, n, istru, icompound, i
+    integer          :: count, j, lowest, help
 
+    if (ChangeVelocityAtStructures) then
+       ! Generate a list for all possible flow links, where bob0 /= bob, resulting in a difference between au_nostrucs and au.
+       ! In general this will be the locations of fixed weirs. Because this check is not completely water tight., all structures
+       ! a fixed weir with crest level == bed level will be skipped.
+       ! All other structures are added to the list seperately.
+       call realloc(structuresAndWeirsList, lnx, keepExisting=.false.)
+       numberOfStructuresAndWeirs = 0
+       do L = 1, lnx
+          if (bob(1,L) /= bob0(1,L) .or. bob(2,L) /= bob0(2,L)) then
+             numberOfStructuresAndWeirs = numberOfStructuresAndWeirs + 1
+             structuresAndWeirsList(numberOfStructuresAndWeirs) = L
+          endif
+       enddo
+    endif
+ 
+  
     do ng = 1,ncdamsg                                   ! loop over cdam signals, sethu
        zcdamn = zcdam(ng)
        do n   = L1cdamsg(ng), L2cdamsg(ng)
@@ -58,6 +77,10 @@
            blmx     = max(bl(k1), bl(k2))
            bob(1,L) = max(zcdamn,blmx)
            bob(2,L) = max(zcdamn,blmx)
+           if (ChangeVelocityAtStructures) then
+              numberOfStructuresAndWeirs = numberOfStructuresAndWeirs + 1
+              structuresAndWeirsList(numberOfStructuresAndWeirs) = L
+           endif
         enddo
     enddo
 
@@ -71,11 +94,24 @@
            bob(1,L) = max(zcdamn,blmx)
            bob(2,L) = max(zcdamn,blmx)
            call switchiadvnearlink(L)
+           if (ChangeVelocityAtStructures) then
+              numberOfStructuresAndWeirs = numberOfStructuresAndWeirs + 1
+              structuresAndWeirsList(numberOfStructuresAndWeirs) = L
+           endif
        enddo
     enddo
 
     do istru = 1, network%sts%count
         pstru => network%sts%struct(istru)
+        do L0 = 1, pstru%numlinks
+           L  = iabs(pstru%linknumbers(L0))
+           k1 = ln(1,L)
+           k2 = ln(2,L)
+           if (ChangeVelocityAtStructures) then
+              numberOfStructuresAndWeirs = numberOfStructuresAndWeirs + 1
+              structuresAndWeirsList(numberOfStructuresAndWeirs) = L
+           endif
+        enddo
         zcdamn = get_crest_level(pstru)
         if (zcdamn == huge(1d0)) then
            ! Do not shut off structures that have no relevant crest (e.g. pumps)
@@ -144,14 +180,46 @@
 
    !Adjust bobs for dambreak
    if (ndambreak > 0) then ! needed, because ndambreaksg may be > 0, but ndambreak==0, and then arrays are not available.
-   do n = 1, ndambreaksg
-      istru = dambreaks(n)
-      if (istru.ne.0) then
-         ! Update the bottom levels
-         call adjust_bobs_on_dambreak_breach(network%sts%struct(istru)%dambreak%width, network%sts%struct(istru)%dambreak%crl,  LStartBreach(n), L1dambreaksg(n), L2dambreaksg(n), network%sts%struct(istru)%id)
-      endif
-   enddo
+      do n = 1, ndambreaksg
+         istru = dambreaks(n)
+         if (istru.ne.0) then
+            ! Update the bottom levels
+            call adjust_bobs_on_dambreak_breach(network%sts%struct(istru)%dambreak%width, network%sts%struct(istru)%dambreak%crl,  LStartBreach(n), L1dambreaksg(n), L2dambreaksg(n), network%sts%struct(istru)%id)
+            if (ChangeVelocityAtStructures) then
+               do L = L1dambreaksg(n), L2dambreaksg(n)
+                  numberOfStructuresAndWeirs = numberOfStructuresAndWeirs + 1
+                  structuresAndWeirsList(numberOfStructuresAndWeirs) = L
+               enddo
+            endif
+         endif
+      enddo
    end if
+
+   if (ChangeVelocityAtStructures) then
+      ! Sort the flow links and remove double occurrences
+      count = numberOfStructuresAndWeirs
+      numberOfStructuresAndWeirs = 1
+      do i = 1, count
+         lowest = i
+         do j = i+1, count
+            if (structuresAndWeirsList(lowest) > structuresAndWeirsList(j)) then 
+               lowest = j
+            endif
+         enddo
+         help = structuresAndWeirsList(i)
+         structuresAndWeirsList(i) = structuresAndWeirsList(lowest)
+         structuresAndWeirsList(lowest) = help
+         if (i > 1) then
+            ! skip double occurrences
+            if (structuresAndWeirsList(numberOfStructuresAndWeirs) == structuresAndWeirsList(i)) then
+               continue
+            else
+               numberOfStructuresAndWeirs = numberOfStructuresAndWeirs + 1
+               structuresAndWeirsList(numberOfStructuresAndWeirs) = structuresAndWeirsList(i)
+            endif
+         endif
+      enddo
+   endif
 
    return
    end subroutine adjust_bobs_for_dams_and_structs
