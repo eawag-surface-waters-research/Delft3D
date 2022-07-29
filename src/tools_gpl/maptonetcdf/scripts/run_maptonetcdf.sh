@@ -36,6 +36,12 @@ ulimit -s unlimited
 mapfile=$1
 ncfile=$2
 numLayers=$3
+
+## Remove starting and trailing double quotes (needed to get teamcity runs working)
+mapfile=`sed -e 's/^"//' -e 's/"$//' <<<"$mapfile"`
+ncfile=`sed -e 's/^"//' -e 's/"$//' <<<"$ncfile"`
+numLayers=`sed -e 's/^"//' -e 's/"$//' <<<"$numLayers"`
+
 case $mapfile in
     -h|--help)
     print_usage_info
@@ -44,11 +50,9 @@ esac
 
 workdir=`pwd`
 
-if [ ! -f $mapfile ]; then
-    if [ ! -f $mapfile ]; then
-        echo "ERROR: input map file $mapfile does not exist in working directory $workdir"
-        print_usage_info
-    fi
+if [ ! -f $mapfile ] || [ ! -f $ncfile ]; then
+    echo "ERROR: input file $mapfile and/or $ncfile do not exist in working directory $workdir"
+    print_usage_info
 fi
 
 
