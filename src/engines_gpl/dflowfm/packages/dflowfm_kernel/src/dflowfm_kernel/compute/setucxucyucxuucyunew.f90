@@ -45,7 +45,7 @@
  integer          :: itpbn, newucxq=0
  double precision :: uu, vv, uucx, uucy, wcxu, wcyu, cs, sn, adx, ac1, ac2, wuw, hdx, hul, hsk, uin, duxdn, duydn, uhu, htrs
  double precision :: dischcorrection
- double precision :: u1L
+ double precision :: u1correction
  double precision :: uinx, uiny, ahu, uxy
 
  double precision,  allocatable :: husx, husy
@@ -95,11 +95,11 @@
           if (comparereal(au_nostrucs(L), 0d0) ==1) then
             k1 = ln(1,L) 
             k2 = ln(2,L)
-            u1L = q1(L)/au_nostrucs(L)
-            ucx(k1) = ucx(k1) + wcx1(L)*(u1L-u1(L))
-            ucy(k1) = ucy(k1) + wcy1(L)*(u1L-u1(L))
-            ucx(k2) = ucx(k2) + wcx2(L)*(u1L-u1(L))
-            ucy(k2) = ucy(k2) + wcy2(L)*(u1L-u1(L))
+            u1correction = q1(L)/au_nostrucs(L) - u1(L)
+            ucx(k1) = ucx(k1) + wcx1(L)*u1correction
+            ucy(k1) = ucy(k1) + wcy1(L)*u1correction
+            ucx(k2) = ucx(k2) + wcx2(L)*u1correction
+            ucy(k2) = ucy(k2) + wcy2(L)*u1correction
           endif
        enddo
     endif

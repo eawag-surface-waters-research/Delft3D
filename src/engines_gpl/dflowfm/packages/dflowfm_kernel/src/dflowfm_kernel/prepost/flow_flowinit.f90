@@ -968,6 +968,7 @@ end if
 
 
  call adjust_bobs_for_dams_and_structs()
+ call setup_structures_and_weirs_list()
 
  ! Floodfill water levels based on sample file.
  if (len_trim(md_s1inifile) > 0) then
