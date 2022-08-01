@@ -45,15 +45,17 @@
       use exception_waq
 
       integer  ( 4), intent(in   ) :: iexit             !< return value
+      integer  ( 4)                :: lunfil
+
       if ( iexit .ne. 0 ) then
          write (*,*) 'Stopped with error code :',iexit
       else
          write (*,*) 'Normal end'
       endif
 
-      open  ( 13 , file = 'delwaq.rtn' )
-      write ( 13 , * ) iexit
-      close ( 13 )
+      open  ( newunit=lunfil , file = 'delwaq.rtn' )
+      write ( lunfil , * ) iexit
+      close ( lunfil )
 
       !if (useexception_waq) call throwexception()
 
