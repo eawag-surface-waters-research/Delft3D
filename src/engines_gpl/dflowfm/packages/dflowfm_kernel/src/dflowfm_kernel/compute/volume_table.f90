@@ -502,8 +502,8 @@ module m_VolumeTables
 
          enddo
 
-         if (vltb(nod)%numberOfSummerDikes>0) then
-            vltb(nod)%inundationPhase = .true.
+         if (vltb(n)%numberOfSummerDikes>0) then
+            vltb(n)%inundationPhase = .true.
          endif
 
       enddo
