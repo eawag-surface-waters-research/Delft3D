@@ -338,14 +338,8 @@
       use ibm_mod
       use larvae_mod
       use omp_lib
-      !use partwr_mod
-      
-      !use normal_mod
 
-      use ifcore
-      !
       implicit none                  ! force explicit typing
-      !
       save
 
       integer(ip)         :: itime   , lunpr, lunfil, lunini
