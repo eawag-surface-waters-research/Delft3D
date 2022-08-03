@@ -10838,6 +10838,9 @@ subroutine unc_write_net_ugrid2(ncid, id_tsp, janetcell, jaidomain, jaiglobal_s)
          end do
       end if
 
+      if (.not. allocated(face_nodes)) then
+         allocate(face_nodes(0,0))
+      end if
       if (associated(meshgeom1d%ngeopointx)) then
          if (meshgeom1d%numnode >= 0) then ! TODO: LC:  check the number of mesh nodes has not changed
             ierr = ug_write_mesh_arrays(ncid, id_tsp%meshids1d, mesh1dname, 1, UG_LOC_NODE + UG_LOC_EDGE, numk1d, n1dedges, 0, 0, &
