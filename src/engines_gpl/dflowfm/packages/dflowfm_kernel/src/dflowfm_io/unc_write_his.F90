@@ -456,7 +456,7 @@ subroutine unc_write_his(tim)            ! wrihis
                ierr = nf90_put_att(ihisfile, id_varsal, 'units', '1e-3')
                ierr = nf90_put_att(ihisfile, id_varsal, 'geometry', station_geom_container_name)
                ierr = nf90_put_att(ihisfile, id_varsal, '_FillValue', dmiss)
-               ierr = nf90_put_att(ihisfile, id_varsal, 'standard_name', 'salinity')
+               ierr = nf90_put_att(ihisfile, id_varsal, 'standard_name', 'sea_water_salinity')
             endif
 
             if ( jahisvelocity > 0 ) then
