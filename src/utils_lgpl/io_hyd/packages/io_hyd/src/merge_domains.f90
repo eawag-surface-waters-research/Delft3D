@@ -487,7 +487,7 @@
                      ! only add boundary links from current domain that are not point sources
                      noq1 = noq1 + 1
                      d_hyd%iglobal_link(iq) = noq1
-                     if (-ip1 .le. d_hyd%nobndl) then
+                     if (abs(ip1) .le. d_hyd%nobndl) then
                         nobnd = nobnd + 1
                         d_hyd%iglobal_bnd(-ip1) = -nobnd
                         call renum_bnd(d_hyd%openbndsect_coll,ip1,-nobnd)
@@ -499,7 +499,7 @@
                      ! only add boundary links from current domain that are not point sources
                      noq1 = noq1 + 1
                      d_hyd%iglobal_link(iq) = noq1
-                     if (-ip2 .le. d_hyd%nobndl) then
+                     if (abs(ip2) .le. d_hyd%nobndl) then
                         nobnd = nobnd + 1
                         d_hyd%iglobal_bnd(-ip2) = -nobnd
                         call renum_bnd(d_hyd%openbndsect_coll,ip2,-nobnd)
@@ -523,7 +523,7 @@
                   ! only add when the segment is in the current domain and it is a point source
                   noq1 = noq1 + 1
                   d_hyd%iglobal_link(iq) = noq1
-                  if (-ip1 .le. d_hyd%nobndl) then
+                  if (abs(ip1) .le. d_hyd%nobndl) then
                      nobnd = nobnd + 1
                      d_hyd%iglobal_bnd(-ip1) = -nobnd
                      call renum_bnd(d_hyd%openbndsect_coll,ip1,-nobnd)
@@ -535,10 +535,10 @@
                   ! only add when the segment is in the current domain and it is a point source
                   noq1 = noq1 + 1
                   d_hyd%iglobal_link(iq) = noq1
-                  if (-ip1 .le. d_hyd%nobndl) then
+                  if (abs(ip2) .le. d_hyd%nobndl) then
                      nobnd = nobnd + 1
-                     d_hyd%iglobal_bnd(-ip1) = -nobnd
-                     call renum_bnd(d_hyd%openbndsect_coll,ip1,-nobnd)
+                     d_hyd%iglobal_bnd(-ip2) = -nobnd
+                     call renum_bnd(d_hyd%openbndsect_coll,ip2,-nobnd)
                   end if
                end if
             end if
@@ -895,7 +895,7 @@
             ip1 = domain_hyd%ipoint(1,iq)
             ip2 = domain_hyd%ipoint(2,iq)
             if ( ip1 .lt. 0 ) then
-               if (-ip1 .le. domain_hyd%nobndl .and. domain_hyd%idomain(ip2) .eq. idmn) then
+               if (abs(ip1) .le. domain_hyd%nobndl .and. domain_hyd%idomain(ip2) .eq. idmn) then
                   nobnd = nobnd + 1
                   domain_hyd%iglobal_bnd(-ip1) = -nobnd
                   call renum_bnd(domain_hyd%openbndsect_coll,ip1,-nobnd)
@@ -905,7 +905,7 @@
                   noq1 = noq1 - 1
                end if
             else if ( ip2 .lt. 0 ) then
-               if (-ip2 .le. domain_hyd%nobndl .and. domain_hyd%idomain(ip1) .eq. idmn) then
+               if (abs(ip2) .le. domain_hyd%nobndl .and. domain_hyd%idomain(ip1) .eq. idmn) then
                   nobnd = nobnd + 1
                   domain_hyd%iglobal_bnd(-ip2) = -nobnd
                   call renum_bnd(domain_hyd%openbndsect_coll,ip2,-nobnd)
