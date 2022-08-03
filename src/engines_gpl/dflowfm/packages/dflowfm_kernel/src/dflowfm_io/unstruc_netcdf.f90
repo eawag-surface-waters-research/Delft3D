@@ -11536,7 +11536,8 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
       call realloc(contacttype, ncontacts, keepExisting = .false.)
 
       call realloc(hashlist_contactids%id_list, contactnlinks + ncontacts, keepExisting = .true.) ! Remember contactids for later use.
-      call realloc(contactnetlinks, contactnlinks + ncontacts, keepExisting = .true.) ! Remember contact netlinks for later use.
+      call realloc(contactnetlinks, contactnlinks + ncontacts, keepExisting = .true.) ! Remember contact netlink numbers for later use.
+      call realloc(contact1d2didx, (/ 2, contactnlinks + ncontacts /), keepExisting = .true.) ! Remember contact connectivity table for later use.
 
       ierr = ionc_get_mesh_contact_ugrid(ioncid, im, mesh1indexes, mesh2indexes, hashlist_contactids%id_list(contactnlinks+1:contactnlinks+ncontacts), contactslongnames, contacttype, 1 )
       hashlist_contactids%id_count = contactnlinks + ncontacts
@@ -11569,6 +11570,8 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
          !      exit
          !   endif
          !enddo
+         contact1d2didx(1,contactnlinks+L) = mesh1indexes(L)
+         contact1d2didx(2,contactnlinks+L) = mesh2indexes(L)
          if (nodesOnBranchVertices == 1) then
             kn(1,numl_last+l) = mesh1dUnmergedToMerged(mesh1indexes(l))
          else

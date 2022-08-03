@@ -37,6 +37,7 @@ subroutine preparecells(md_netfile, jaidomain, jaiglobal_s, ierr)
  use dfm_error
  use unstruc_display, only: jareinitialize
  use gridoperations
+ use m_save_ugrid_state, only: contactnlinks, netlink2contact, contact1d2didx
  use unstruc_messages
 
  implicit none
@@ -44,7 +45,7 @@ subroutine preparecells(md_netfile, jaidomain, jaiglobal_s, ierr)
  integer,          intent(in) :: jaidomain   !< read subdomain numbers (1) or not (0)
  integer,          intent(in) :: jaiglobal_s !< read global cell numbers (1) or not (0)
  integer,          intent(out):: ierr
- integer                      ::k, L, nv, flag, c, i, k1, nc1, j
+ integer                      ::k, L, Lcontact, nv, flag, c, i, k1, nc1, j
 
  ierr = DFM_NOERR
 
@@ -101,7 +102,15 @@ subroutine preparecells(md_netfile, jaidomain, jaiglobal_s, ierr)
              k1 = kn(2, L)
           endif
           nc1 = 0
-          call incells(xk(k1), yk(k1), nc1)
+          if (contactnlinks > 0) then
+             Lcontact = netlink2contact(L)
+             if (Lcontact > 0) then
+               nc1 = contact1d2didx(2,Lcontact) ! 2D face is always on position #2 (as read from UGRID file)
+             end if
+          else
+             call incells(xk(k1), yk(k1), nc1)
+          end if
+
           if (nc1 .ne. 0) then
              if (lnn(L) >= 2) then
                 write (msgbuf, '(a,i0,a,i0,a)') 'Illegal: net link ', L, ' already has 2 2D cells, and is also connected to 1D netnode ', k, '.'
