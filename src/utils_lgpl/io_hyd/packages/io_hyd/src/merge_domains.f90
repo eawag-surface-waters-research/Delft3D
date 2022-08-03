@@ -196,7 +196,7 @@
                   ip2 = d_hyd%waqgeom%edge_faces(2, iedge)
                   if(ip2 .gt. 0) then
                      if(min(d_hyd%idomain(ip1), d_hyd%idomain(ip2)) .eq. idmn) then
-                        ! only when the lowest domain of either side of the edge is the current domain
+                        ! only add when the lowest domain on either side of the edge is in the current domain to avoid double inclusion
                         hyd%waqgeom%numedge = hyd%waqgeom%numedge + 1
                         d_hyd%global_edge(iedge) = hyd%waqgeom%numedge
                         if(max(d_hyd%idomain(ip1), d_hyd%idomain(ip2)) .gt. idmn) then
@@ -245,7 +245,7 @@
             if(ip2 .gt. 0) then
                ! two faces
                if(min(d_hyd%idomain(ip1), d_hyd%idomain(ip2)) .eq. idmn) then
-                  ! only when the lowest domain of either side of the edge is the current domain
+                  ! only add when the lowest domain on either side of the edge is in the current domain to avoid double inclusion
                   inode1 = d_hyd%waqgeom%edge_nodes(1, iedge)
                   if(d_hyd%global_node(inode1).eq.0) then
                      ! add nodes that do not yet have a global number
@@ -464,7 +464,7 @@
                if (ip1 .ge. min_seg .and. ip1 .le. max_seg .and. ip2 .gt. 0) then
                   ! ip1 is in this layer and ip2 not a boundary
                   if (min(d_hyd%idomain(ip1),d_hyd%idomain(ip2)) .eq. idmn) then
-                     ! only add when lowest domain number of the cells is in the current domain (they are usually the same)
+                     ! only add when the lowest domain on either side of the link is in the current domain to avoid double inclusion
                      noq1 = noq1 + 1
                      d_hyd%iglobal_link(iq) = noq1
                   end if
@@ -915,7 +915,7 @@
                   noq1 = noq1 - 1
                end if
             else if (min(domain_hyd%idomain(ip1),domain_hyd%idomain(ip2)) .ne. idmn) then
-               ! one of the cells is in ghost domain with a lower domain number, revert addition of exchange 
+               ! one of the cells is in ghost domain with a lower domain number, revert addition of exchange to avoid double inclusion
                domain_hyd%iglobal_link(iq) = 0
                noq1 = noq1 - 1
             end if
