@@ -2694,14 +2694,17 @@ end if
           k1    = ln(1,L)
           k2    = ln(2,L)
           if (kcu(L) == 1) then
-                ! Calculate maximal total area by using a water depth of 1000 m.
-                hyst_dummy = .false.
-                call GetCSParsTotal(network%adm%line2cross(L,2), network%crs%cross, 1d3, area, width, CS_TYPE_NORMAL,hyst_dummy)
+             ! Calculate maximal total area by using a water depth of 1000 m. FOR BARE we need the maximal possible catchment area.
+             ! For this reason the total width is used and also the area of the storage nodes is added tot BARE.
+             ! Since BA contains the flow area only and not the total area or the area of the storage nodes, BARE has to be recalculated.
+             
+             hyst_dummy = .false.
+             call GetCSParsTotal(network%adm%line2cross(L,2), network%crs%cross, 1d3, area, width, CS_TYPE_NORMAL,hyst_dummy)
 
-                hdx = 0.5d0*dx(L)
-                if (k1 > ndx2d) bare(k1) = bare(k1) + hdx*width
-                if (k2 > ndx2d) bare(k2) = bare(k2) + hdx*width
-             endif
+             hdx = 0.5d0*dx(L)
+             if (k1 > ndx2d) bare(k1) = bare(k1) + hdx*width
+             if (k2 > ndx2d) bare(k2) = bare(k2) + hdx*width
+          endif
        enddo
     endif
 
@@ -2711,8 +2714,8 @@ end if
        do i = 1, nstor
           k1 = stors(i)%gridPoint
           if (k1 > 0) then
-             ! Add storage area to BA by using a water depth of 1000 m
-             bare(k1)   = bare(k1)   + getSurface(stors(i), bl(k1) + 1d3) ! TODO: needs change! Don't catch rain on storage area, only on manhole area.
+             ! Add storage area to BARE by using a water depth of 1000 m
+             bare(k1)   = bare(k1)   + getSurface(stors(i), bl(k1) + 1d3) 
           endif
        enddo
     endif
