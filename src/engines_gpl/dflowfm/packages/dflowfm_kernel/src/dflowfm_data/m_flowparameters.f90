@@ -428,6 +428,8 @@ integer                            :: javau3onbnd = 0   !< vert. adv. u1 bnd Upw
  integer                           :: jadiffusiononbnd   = 1    !< 0 switches off diffusion on open boundaries 
 
  integer                           :: jajre                     !< 0: default, 1: sb
+ 
+ integer                           :: jasedtrails               !< sedtrails custom averaged output - 0: no (default) ; 1: yes
 
  integer                           :: jasourcesink              !< 1: source+sink 2:source 3:sink for sediment
 
@@ -689,7 +691,9 @@ subroutine default_flowparameters()
     jarhoxu  = 0      ! rho effects in momentum, 0=no, 1=in horizontal adv, 2=+ in vertical adv, 3 = + in pressure term
 
     jased    = 0      ! Include sediment
-
+    
+    jasedtrails = 0   ! Include sedtrail averaging 
+    
     jatrt    = 0      !< Include alluvial and vegetation roughness (trachytopes)
 
     jacali   = 0      !< Include calibration factor for roughness
@@ -708,7 +712,7 @@ subroutine default_flowparameters()
 
     modind = 0            !< Nr of wave-current bed friction model, 9 = vanrijn, 1 = fredsoe, etc like d3d
 
-    jafrculin = 0         !< do not use linear friction
+    jafrculin = 0     !< do not use linear friction
 
     jafrcInternalTides2D = 0   !< do not use internal tides friction
 
@@ -868,7 +872,7 @@ subroutine default_flowparameters()
     jahazlayer = 0       !<
     jaPure1D   = 0       !< 0 = org 1D advec, 1 = pure1D using vol1_f, 2 = pure1D using vol1
     jaJunction1D = 1     !< 0 = org 1D advec at junctions, 1 = junctions follow jaPure1D approach
-    JaZlayercenterbedvel = 1
+    JaZlayercenterbedvel      = 1
     jastructurelayersactive   = 1
     JaZerozbndinflowadvection = 0
 

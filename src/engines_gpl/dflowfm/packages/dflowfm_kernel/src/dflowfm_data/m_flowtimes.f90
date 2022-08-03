@@ -95,8 +95,11 @@
  double precision                  :: ti_wavs     !< averaging interval spatial wave quantities
  double precision                  :: ti_wave     !< averaging interval spatial wave quantities
  double precision                  :: ti_sed      !< averaging interval sedmor quantities (s)
- double precision                  :: ti_seds     !< averaging interval sedmor wave quantities
- double precision                  :: ti_sede     !< averaging interval sedmor wave quantities
+ double precision                  :: ti_seds     !< averaging interval sedmor quantities
+ double precision                  :: ti_sede     !< averaging interval sedmor quantities
+ double precision                  :: ti_st       !< averaging interval sedtrails quantities (s)
+ double precision                  :: ti_sts      !< averaging interval sedtrails wave quantities
+ double precision                  :: ti_ste      !< averaging interval sedtrails wave quantities
  double precision                  :: ti_xls      !< history interval (s) xls
  double precision                  :: ti_rst      !< restart interval (s)
  double precision                  :: ti_rsts     !< Start of restart output period (as assigned in mdu-file) (s)
@@ -131,6 +134,7 @@
  double precision                  :: time_map      !< Map output interval
  double precision                  :: time_wav      !< Time-avg'd output interval xb JRE
  double precision                  :: time_sed      !< Time-avg'd output interval sedmor
+ double precision                  :: time_st      !< Time-avg'd output interval sedtrails
  double precision                  :: time_his      !< Next time for his output
  double precision                  :: time_xls      !< Next time for his output
  double precision                  :: time_rst      !< Next time for restart output
@@ -156,6 +160,7 @@
  integer                           :: it_rst      !< Nr of snapshots presently in rst file
  integer                           :: it_waq      !< Nr of snapshots presently in delwaq files.
  integer                           :: it_stat     !< Nr of simulation statistics presently in log file.
+ integer                           :: it_st       !< Nr of simulation statistics presently in sedtrails output file.
  ! for performance timings
  logical                           :: debugtimeon     !< timing yes or no
  integer                           :: handle_user     !< timer handle for user timesteps
@@ -231,6 +236,9 @@ subroutine default_flowtimes()
     ti_his      = 120d0             !< history interval (s)
     ti_seds     = 0d0
     ti_sede     = 0d0
+    ti_sts      = 0d0
+    ti_ste      = 0d0
+    ti_st       = 3600d0
     ti_xls      = 0d0               !< history interval (s) xls
     ti_rst      = 24d0*3600d0       !< restart interval (s)
     ti_mba      = 0d0
@@ -276,6 +284,7 @@ subroutine reset_flowtimes()
     time_map     = tstart_user       !< next time for map output
     time_wav     = tstart_user       !< same, wav
     time_sed     = tstart_user       !< same, morstats
+    time_st      = tstart_user       !< same, sedtrails
     time_his     = tstart_user       !< next time for his output
     time_xls     = tstart_user       !< next time for his output
     time_rst     = tstart_user       !< next time for restart output
@@ -305,6 +314,7 @@ subroutine reset_flowtimes()
     it_map       = 0                 !< Nr of snapshots presently in map file
     it_wav       = 0                 !< Nr of snapshots presently in time-avg'd file JRE
     it_sed       = 0                 !< Nr of snapshots presently in time-avg'd sed file JRE
+    it_st        = 0                 !< Nr of snapshots presently in time-avg'd sedtrails file JRE
     it_map_tec   = 0                 !< Nr of snapshots presently in map file
     it_his       = 0                 !< Nr of snapshots presently in his file
     it_inc       = 0                 !< Nr of lines     presently in inc file

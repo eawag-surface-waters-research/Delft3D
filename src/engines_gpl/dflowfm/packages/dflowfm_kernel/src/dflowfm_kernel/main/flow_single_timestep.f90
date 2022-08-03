@@ -40,6 +40,7 @@
  use m_timer
  use unstruc_display, only : jaGUI
  use dfm_error
+ use m_sedtrails_netcdf, only: sedtrails_write_stats
  implicit none
 
  integer :: key
@@ -64,9 +65,13 @@
       goto 888
    end if
 
-   ! JRE avoid annoying dt_user interference   
-    call xbeach_write_stats(time1)
-    call sedmor_write_stats(time1)
+   ! JRE avoid annoying dt_user interference
+   ! This may induce slight inaccuracies when dts is relatively large
+   call xbeach_write_stats(time1)
+   call sedmor_write_stats(time1)
+   if (jasedtrails>0) then
+      call sedtrails_write_stats(time1)
+   endif   
    iresult = DFM_NOERR
    return ! Return with success
 

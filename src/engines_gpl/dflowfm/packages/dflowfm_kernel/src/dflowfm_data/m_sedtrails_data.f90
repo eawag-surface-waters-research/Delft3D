@@ -30,65 +30,44 @@
 ! $Id$
 ! $HeadURL$
 
- !> Resets the current flow- and time-state, but keeps al active parameter settings.
- !! To be called upon flow_modelinit().
- !! Upon program startup and loading of new model/MDU, call resetFullFlowModel() instead.
- subroutine resetFlow()
- use m_wind
- use m_flow
- use m_flowexternalforcings
- use m_flowparameters
- use m_statistics
- use m_flowgeom
- use m_flowtimes
- use waq
- use m_waves
- use m_hydrology_data
- use m_sobekdfm
- use m_save_ugrid_state, only: reset_save_ugrid_state
- use m_longculverts, only: reset_longculverts
- use m_sedtrails_data
- implicit none
+module m_sedtrails_data
+   use coordinate_reference_system
+   implicit none
+   
+   character(len=255)                    :: sedtrails_analysis
+   !
+   ! flow geometry from md_sedtrailsfile
+   ! 
+   double precision, allocatable, target :: xk(:)           !< [-] net node x coordinate {"shape": ["numk"]}
+   double precision, allocatable, target :: yk(:)           !< [-] net node y coordinate {"shape": ["numk"]}
+   double precision, allocatable, target :: zk(:)           !< [-] net node z coordinate {"shape": ["numk"]}
+   double precision, allocatable         :: xk0(:), yk0(:), zk0(:) !< backup for xk, etc.
+   double precision, allocatable         :: xk1(:), yk1(:), zk1(:) !< work array for xk, etc.   
+   
 
-    ! Only reset counters and other scalars, allocatables should be
-    ! automatically reset elsewhere (e.g., allocateandset*, flow_geominit)
+   integer                               :: numk0
+   integer, target                       :: numk            !< [-] nr. of sedtrails nodes. {"shape": []}
+   integer                               :: kmax
+   type(t_crs), target                   :: crs             !< crs read from net file, to be written to output geom.
+   
+   integer, allocatable                  :: st_ind(:,:)     !< indexes and weight factors for interpolation cell centre->sedtrails grid
+   double precision, allocatable         :: st_wf(:,:)      !< (3,:)
+   
+   integer, allocatable                  :: idomain(:)
+   integer, allocatable                  :: iglobal_s(:)
+   integer, allocatable                  :: iwork(:)
+      
+   contains
+   
+   subroutine sedtrails_resetdata()
+   
+      implicit none
+      
+      sedtrails_analysis = 'all'
+      numk0 = 0
+      numk = 0
+      kmax = 0
 
-    call reset_wind()
-
-    call reset_waves()
-
-    call reset_sobekdfm()
-
-    ! Reset some flow (rest is done in flow_geominit())
-    call reset_flowgeom()
-    
-    ! Sedtrails
-    call sedtrails_resetdata()
-
-    call reset_flowexternalforcings()
-
-    call reset_longculverts()
-
-    call reset_flowtimes()
-
-    ! call reset_flowparameters()
-
-    call reset_flow()
-
-    call reset_waq()
-
-    call reset_movobs()
-
-    call reset_statistics()
-
-    if ( jawave.eq.4 ) then
-       call xbeach_reset()
-    end if
-
-    call reset_save_ugrid_state()
-
-    call reset_sedtra()
-
-    call reset_hydrology_data()
-
- end subroutine resetFlow
+   end subroutine sedtrails_resetdata
+   
+end module m_sedtrails_data

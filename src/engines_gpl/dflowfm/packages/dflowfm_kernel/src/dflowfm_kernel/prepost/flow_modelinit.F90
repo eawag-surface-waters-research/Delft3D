@@ -44,16 +44,16 @@
  use m_partitioninfo
  use m_timer
  use m_flowtimes
- use unstruc_model ! , only: md_ident, md_restartfile,  writeMDUFilepointer, md_foufile, md_flowgeomfile, md_snapshotdir, md_numthreads
+ use unstruc_model 
  use unstruc_files, only: mdia
  use unstruc_netcdf
  use MessageHandling
- use m_flowparameters, only: jawave, jatrt, jacali, flowWithoutWaves, jajre, modind
+ use m_flowparameters, only: jawave, jatrt, jacali, jacreep, jatransportmodule, flowWithoutWaves, jasedtrails, jajre, modind
  use dfm_error
  use m_fm_wq_processes, only: jawaqproc
  use m_vegetation
  use m_hydrology, only: jadhyd, init_hydrology
- use m_integralstats
+ use m_integralstats, is_is_numndvals=>is_numndvals
  use m_xbeach_data, only: bccreated
  use m_oned_functions
  use m_alloc
@@ -64,6 +64,9 @@
  use m_monitoring_crosssections, only: ncrs, fill_geometry_arrays_crs
  use m_setucxcuy_leastsquare, only: reconst2ndini
  use m_flowexternalforcings, only: nwbnd
+ use m_sedtrails_network
+ use m_sedtrails_netcdf, only: sedtrails_loadNetwork
+ use m_sedtrails_stats, only: default_sedtrails_stats, alloc_sedtrails_stats
  !
  ! To raise floating-point invalid, divide-by-zero, and overflow exceptions:
  ! Activate the following line (See also statements below)
@@ -194,9 +197,9 @@
 
  if (javeg > 0) then
     ! NOTE: AvD: hardcoded for now: if vegetation is on, maintain max shear stresses for Peter and Jasper.
-    is_numndvals = 3
+    is_is_numndvals = 3
  end if
-
+ 
  ! 3D: flow_allocflow will set kmxn, kmxL and kmxc arrays
  call timstrt('Flow allocate arrays          ', handle_extra(37)) ! alloc flow
  call flow_allocflow()                               ! allocate   flow arrays
@@ -215,7 +218,7 @@
  endif
  call timstop(handle_extra(7)) ! End flow griddim
 
- call timstrt('Bedforms init (1)   ', handle_extra(8)) ! Bed forms
+ call timstrt('Bed forms init (1)  ', handle_extra(8)) ! Bed forms
  if ((jased > 0 .and. stm_included) .or. bfm_included .or. jatrt > 0 .or. (jawave>0 .and. modind==9)) then
     call flow_bedforminit(1)        ! bedforms stage 1: datastructure init
  endif
@@ -233,7 +236,7 @@
  endif
  call timstop(handle_extra(10)) ! End sedmor
 
- call timstrt('Bedforms init (2)   ', handle_extra(11)) ! bedform
+ call timstrt('Bed forms init (2)  ', handle_extra(11)) ! bedform
  if ((jased > 0 .and. stm_included) .or. bfm_included .or. jatrt > 0) then
     call flow_bedforminit(2)        ! bedforms  stage 2: parameter read and process
  endif
@@ -254,7 +257,7 @@
       goto 1234
     end if
 
-    end if
+ end if
  call timstop(handle_extra(12)) ! vertical administration
 
  ierr = init_openmp(md_numthreads, jampi)
@@ -282,7 +285,7 @@
      call netlink_tree(1)
  endif
  call timstop(handle_extra(16)) ! netlink tree 1
-
+ 
   if (iperot == -1) then
      call reconst2ndini ()
   endif
@@ -302,7 +305,7 @@
  call timstop(handle_extra(18)) ! end waq processes init
 
  call timstrt('Transport init      ', handle_extra(19)) ! transport module
-    call ini_transport()
+ call ini_transport()
  call timstop(handle_extra(19)) ! end transport module
 
 ! initialize part
@@ -368,11 +371,11 @@
     if (jampi==0) then
        if (nwbnd==0) then
           call mess(LEVEL_ERROR, 'unstruc::flow_modelinit - No wave boundary defined for surfbeat model')
-       endif
-    endif
+             end if
+          endif
     call xbeach_wave_init()
     call timstop(handle_extra(27))
- end if
+       endif
 
  call timstrt('Observations init 2 ', handle_extra(28)) ! observations init 2
  call flow_obsinit()                                 ! initialise stations and cross sections on flow grid + structure his (2nd time required to fill values in observation stations)
@@ -390,7 +393,7 @@
 
  call timstrt('Set friction values for MOR        ', handle_extra(31)) ! set fcru mor
  if ((jased>0) .and. stm_included) then
-       call set_frcu_mor(1)        !otherwise frcu_mor is set in getprof_1d()
+    call set_frcu_mor(1)        !otherwise frcu_mor is set in getprof_1d()
     call set_frcu_mor(2)
  endif
  call timstop(handle_extra(31)) ! end set fcru mor
@@ -407,7 +410,12 @@
  endif
  call timstop(handle_extra(33)) ! end Fourier init
 
-
+ ! Initialise sedtrails statistics
+  if (jasedtrails>0) then
+    call default_sedtrails_stats()
+    call alloc_sedtrails_stats()
+ endif
+ 
  call timstrt('MDU file pointer    ', handle_extra(34)) ! writeMDUFilepointer
  call mess(LEVEL_INFO, '** Model initialization was successful **')
  call mess(LEVEL_INFO, '* Active Model definition:')! Print model settings in diagnostics file.
@@ -425,6 +433,15 @@
     end if
  end if
  call timstop(handle_extra(35)) ! end write flowgeom ugrid
+ 
+ if (jasedtrails>0) then
+    call default_sedtrails_geom()
+    call sedtrails_loadNetwork(md_sedtrailsfile, istat, 0)
+    if (istat>0) then
+       call mess(LEVEL_ERROR,'unstruc_model::loadModel - Could not load sedtrails network.')
+    endif 
+   call sedtrails_get_grid_on_network()   
+ endif   
 
  ! store the grid-based information in the cache file
  call timstrt('Remainder           ', handle_extra(36)) ! remainder
@@ -438,10 +455,5 @@
 
  return
 1234 continue
-!  BEGIN DEBUG
-   !call dum_makesal()
-   !call dum_makeflowfield()
-!  END DEBUG
-
 
 end function flow_modelinit

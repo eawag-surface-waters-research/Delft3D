@@ -643,6 +643,7 @@ src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_data/m_samples_refin
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_data/m_save_ugrid_state.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_data/m_seastate.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_data/m_sediment.f90 -text
+src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_data/m_sedtrails_data.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_data/m_ship.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_data/m_solver.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_data/m_spline2curvi.f90 -text
@@ -1077,6 +1078,8 @@ src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_io/rearst.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_io/reathd2pli.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_io/reaweir.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_io/sedmor_write_stats.f90 -text
+src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_io/sedtrails_netcdf.f90 -text
+src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_io/sedtrails_network.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_io/tecplot.F90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_io/unc_write_his.F90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_io/unc_write_part.f90 -text
@@ -1817,6 +1820,7 @@ src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_kernel/prepost/sam2n
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_kernel/prepost/samdif.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_kernel/prepost/sample_spline.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_kernel/prepost/samples_to_cellmask.f90 -text
+src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_kernel/prepost/sedtrails_stats.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_kernel/prepost/selllinksinpol.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_kernel/prepost/set_nudgerate.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_kernel/prepost/set_saltem_nudge.f90 -text

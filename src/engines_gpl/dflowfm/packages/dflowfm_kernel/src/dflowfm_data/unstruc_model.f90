@@ -149,6 +149,7 @@ implicit none
     character(len=255) :: md_dredgefile    = ' ' !< File containing dredging settings (e.g., *.dad)
     character(len=255) :: md_bedformfile   = ' ' !< File containing bedform settings (e.g., *.bfm)
     character(len=255) :: md_morphopol     = ' ' !< File containing boundaries of morphologic change extent (e.g., *.pol)
+    character(len=255) :: md_sedtrailsfile = ' ' !< File containing extent of sedtrails output grid
 
     character(len=1024):: md_obsfile       = ' ' !< File containing observation points  (e.g., *_obs.xyn, *_obs.ini)
     character(len=255) :: md_crsfile       = ' ' !< File containing cross sections (e.g., *_crs.pli, observation cross section *_crs.ini)
@@ -162,6 +163,7 @@ implicit none
     character(len=255) :: md_timingsfile   = ' ' !< Output timings file (auto-set)
     character(len=255) :: md_avgwavquantfile = ' ' !< Output map file for time-averaged wave output (e.g., *_wav.nc)
     character(len=255) :: md_avgsedquantfile = ' ' !< Output map file for time-averaged sedmor output (e.g., *_sed.nc)
+    character(len=255) :: md_avgsedtrailsfile = ' ' !< Output map file for time-averaged sedtrails output (e.g., *_sedtrails.nc)
     character(len=255) :: md_waqfilebase   = ' ' !< File basename for all Delwaq files. (defaults to md_ident)
     character(len=255) :: md_waqoutputdir  = ' ' !< Output directory for all WAQ communication files (waqgeom, vol, flo, etc.)
     character(len=255) :: md_waqhoraggr    = ' ' !< DELWAQ output horizontal aggregation file (*.dwq)
@@ -333,6 +335,7 @@ use unstruc_channel_flow
     md_dredgefile = ' '
     md_bedformfile = ' '
     md_morphopol = ' '
+    md_sedtrailsfile = ' '
 
     md_obsfile = ' '
     md_crsfile = ' '
@@ -683,7 +686,6 @@ subroutine readMDUFile(filename, istat)
     use m_flowgeom !,              only : wu1Duni, bamin, rrtol, jarenumber, VillemonteCD1, VillemonteCD2
     use m_flowtimes
     use m_flowparameters
-    !use m_xbeach_data,           only: limtypw
     use m_waves,                 only: rouwav, gammax, hminlw, jauorb, jahissigwav, jamapsigwav
     use m_wind ! ,                  only : icdtyp, cdb, wdb,
     use network_data,            only : zkuni, Dcenterinside, removesmalllinkstrsh, cosphiutrsh
@@ -715,6 +717,7 @@ subroutine readMDUFile(filename, istat)
 
     use m_sediment
     use m_waves, only: hwavuni, twavuni, phiwavuni
+    use m_sedtrails_data, only: sedtrails_analysis
 
 
 
@@ -722,7 +725,7 @@ subroutine readMDUFile(filename, istat)
     integer,      intent(out) :: istat    !< Return status (0=success)
 
     character(len=32):: program
-    logical :: success
+    logical :: success, ex
     character(len=1),dimension(1) :: dummychar
     logical :: dummylog
     character(len=1000) :: charbuf = ' '
@@ -731,7 +734,7 @@ subroutine readMDUFile(filename, istat)
     integer :: ibuf, ifil, mptfile, warn
     integer :: i, n, j, je, iostat, readerr, ierror
     integer :: jadum
-    real(kind=hp) :: ti_rst_array(3), ti_map_array(3), ti_his_array(3), acc, ti_wav_array(3), ti_waq_array(3), ti_classmap_array(3)
+    real(kind=hp) :: ti_rst_array(3), ti_map_array(3), ti_his_array(3), acc, ti_wav_array(3), ti_waq_array(3), ti_classmap_array(3),ti_st_array(3)
     character(len=200), dimension(:), allocatable       :: fnames
     double precision, external     :: densfm
     double precision :: tim
@@ -1386,6 +1389,32 @@ subroutine readMDUFile(filename, istat)
     call prop_get_string (md_ptr, 'bedform', 'BedformFile',  md_bedformfile, success)
     bfm_included = len_trim(md_bedformfile) /= 0
 
+    call prop_get_string (md_ptr, 'sedtrails', 'SedtrailsGrid',  md_sedtrailsfile, success)
+    if (md_sedtrailsfile/='') then
+       inquire(file=md_sedtrailsfile,exist=ex)
+       if (ex) then
+          jasedtrails=1
+          call mess(LEVEL_INFO, 'SedTrails enabled.')
+          call prop_get_string (md_ptr, 'sedtrails', 'SedtrailsAnalysis',  sedtrails_analysis, success)
+          
+          ti_st_array = 0d0
+          call prop_get_doubles(md_ptr, 'sedtrails', 'SedtrailsInterval'   ,  ti_st_array, 3, success)
+          if (ti_st_array(1) .gt. 0d0) ti_st_array(1) = max(ti_st_array(1) , dt_user)
+          call getOutputTimeArrays(ti_st_array, ti_sts, ti_st, ti_ste, success)
+          call prop_get_string (md_ptr, 'sedtrails', 'SedtrailsOutputFile',  md_avgsedtrailsfile, success)
+          
+          call str_lower(sedtrails_analysis)
+          if (.not.(trim(sedtrails_analysis)=='all' .or. &
+                    trim(sedtrails_analysis)=='flowvelocity' .or. & 
+                    trim(sedtrails_analysis)=='transport' .or. &
+                    trim(sedtrails_analysis)=='soulsby')) then
+             call mess(LEVEL_WARN,'Invalid entry for SedtrailsAnalysis. Should be all, transport, flowvelocity or soulsby. Sedtrails output switched off.')
+             jasedtrails=0
+          endif  
+       endif
+    endif
+    
+    
     call prop_get_integer(md_ptr, 'wind', 'ICdtyp'                    , ICdtyp)
     if (Icdtyp == 1) then
        call prop_get_doubles(md_ptr, 'wind', 'Cdbreakpoints'          , Cdb, 1)
@@ -1697,6 +1726,13 @@ subroutine readMDUFile(filename, istat)
 
        ! md_unc_conv = UNC_CONV_UGRID ! TODO: AvD: TEMP for testing. REMOVE!
     end if
+    !
+    ! If sedtrails is used, only use Mapformat=4
+    if (jasedtrails>0 .and. md_mapformat==IFORMAT_NETCDF) then
+       md_unc_conv = UNC_CONV_UGRID
+       write (msgbuf, '(a,i0,a,i0,a)') 'Old format MapFormat=', IFORMAT_NETCDF, ' requested, which is not used when SedTrails output is activated. Output set to MapFormat=', IFORMAT_UGRID, '.'
+       call warn_flush()
+    endif   
 
     call prop_get_integer(md_ptr, 'output', 'NcFormat', md_ncformat, success)
     call unc_set_ncformat(md_ncformat)
@@ -2553,6 +2589,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     use m_subsidence, only: sdu_update_s1
     use m_xbeach_data, only: swave
     use unstruc_channel_flow
+    use m_sedtrails_data
 
     integer, intent(in)  :: mout  !< File pointer where to write to.
     logical, intent(in)  :: writeall !< Write all fields, including default values
@@ -2564,7 +2601,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     character(len=128)             :: helptxt
     character(len=256)             :: tmpstr
     integer                        :: i, ibuf, help
-    real(kind=hp)                  :: ti_map_array(3), ti_rst_array(3), ti_his_array(3), ti_waq_array(3), ti_classmap_array(3)
+    real(kind=hp)                  :: ti_wav_array(3), ti_map_array(3), ti_rst_array(3), ti_his_array(3), ti_waq_array(3), ti_classmap_array(3), ti_st_array(3)
 
     logical, external              :: get_japart
     istat = 0 ! Success
@@ -3454,6 +3491,16 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
        endif
 
     endif
+
+    if (writeall .or. jasedtrails>0) then
+       call prop_set(prop_ptr, 'sedtrails', 'SedtrailsGrid',  trim(md_sedtrailsfile), 'Grid file for sedtrails output locations on corners')
+       call prop_set(prop_ptr, 'sedtrails', 'SedtrailsAnalysis',  trim(sedtrails_analysis), 'Sedtrails analysis. Should be all, transport, flowvelocity or soulsby.')
+       ti_st_array(1) = ti_st
+       ti_st_array(2) = ti_sts
+       ti_st_array(3) = ti_ste
+       call prop_set(prop_ptr, 'sedtrails', 'SedtrailsInterval', ti_st_array, 'Sedtrails output times (s), interval, starttime, stoptime (s), if starttime, stoptime are left blank, use whole simulation period')
+       call prop_set(prop_ptr, 'sedtrails', 'SedtrailsOutputFile', trim(md_avgsedtrailsfile), 'Sedtrails time-avgd output file')
+    endif   
 
     ! Time
     call prop_set(prop_ptr, 'time', 'RefDate',                 refdat,         'Reference date (yyyymmdd)')
