@@ -14526,7 +14526,7 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd,jafou)
    if (mb_latmin /= dmiss .and. mb_latmax /= dmiss .and. mb_lonmin /= dmiss .and. mb_lonmax /= dmiss) then
       ierr = ionc_add_geospatial_bounds(ncid, mb_latmin, mb_latmax, mb_lonmin, mb_lonmax)
    end if
-datetime2string(
+
    ! Leave the dataset in the same mode as we got it.
    if (jaInDefine == 1) then
       ierr = nf90_redef(ncid)
