@@ -25,11 +25,12 @@
 !>\file
 !>                    delwaq1_write_messages
 
-subroutine delwaq1_write_messages()
+subroutine delwaq1_write_messages(errorcode)
     use m_delwaq1_data
       
     implicit none
 
+    integer, intent(inout)                        :: errorcode
 
     write ( lunrep,'(//'' Messages presented including .lsp file:'')')
     write ( lunrep,'(  '' Number of WARNINGS            :'',I6)') iwar
@@ -56,7 +57,7 @@ subroutine delwaq1_write_messages()
     else
         write ( lunrep , '(  '' SIMULATION PROHIBITED !!!!!!!!'')' )
         call dhopnf  ( lun(1) , lchar(1) , 1     , 3     , ioerr )
-        call srstop ( 1 )
+        errorcode = 1
     endif
 
     call dattim(rundat)

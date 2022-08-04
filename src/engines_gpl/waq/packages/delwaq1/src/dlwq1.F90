@@ -32,7 +32,8 @@
       character(len=120)               :: idstr
       integer(4)                       :: errorcode
       integer(4)                       :: i
-      
+      integer(4)                       :: lunfil
+
       call getfullversionstring_delwaq1(idstr)
 
       argc = iargc() + 1
@@ -44,14 +45,15 @@
       
       call delwaq1(argc, argv, errorcode)
 
+      open  ( newunit=lunfil , file = 'delwaq.rtn' )
+      write ( lunfil , * ) errorcode
+      close ( lunfil )
+
       if (errorcode == 0) then
         write (*,*) ' Normal end'
       else
         write (*,*) ' Error code:', errorcode
+        stop 1
       end if
-
-      open  ( 1111 , file = 'delwaq.rtn' )
-      write ( 1111 , * ) errorcode
-      close ( 1111 )
 
       end program

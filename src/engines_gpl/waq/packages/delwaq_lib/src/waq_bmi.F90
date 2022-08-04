@@ -150,12 +150,14 @@ contains
     argc = argc + 2
 
     call delwaq1(argc, argv, errorcode)
-    call delwaq2_global_data_initialize(runid_given)
-    call dlwqmain( ACTION_INITIALISATION, argc, argv, dlwqd )
-
-    call delwaq2_global_data_copy( dlwqd )
-
-    initialize = 0
+    if (errorcode==0) then
+       call delwaq2_global_data_initialize(runid_given)
+       call dlwqmain( ACTION_INITIALISATION, argc, argv, dlwqd )
+       call delwaq2_global_data_copy( dlwqd )
+       initialize = 0
+    else
+       initialize = 1
+    endif
   end function initialize
   
   subroutine get_version_string(c_version_string) bind(C, name="get_version_string")
