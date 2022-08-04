@@ -95,14 +95,14 @@
       real     ( sp), pointer     :: ypoltmp(:)      ! temp y-coordinates polygon
       integer  ( ip)                 nrowstmp        ! temp length polygon
       integer  ( ip)                 npmargin        ! allocation margin in number of particles
-      
+
       character( 20)                 cplastic        ! plastic name
-      real     ( sp)                 rdpldensity     ! read plastic density    
+      real     ( sp)                 rdpldensity     ! read plastic density
       real     ( sp)                 rdplshapefactor ! read plastic shapefactor
-      real     ( sp)                 rdplmeansize    ! read plastic meansize   
-      real     ( sp)                 rdplvarsize     ! read plastic stdevsize  
-      real     ( sp)                 rdplmusize      ! read plastic meansize   
-      real     ( sp)                 rdplsigmasize   ! read plastic stdevsize  
+      real     ( sp)                 rdplmeansize    ! read plastic meansize
+      real     ( sp)                 rdplvarsize     ! read plastic stdevsize
+      real     ( sp)                 rdplmusize      ! read plastic meansize
+      real     ( sp)                 rdplsigmasize   ! read plastic stdevsize
       real     ( sp)                 rdplfragrate    ! read plastic fragmentation rate
       integer  ( ip)                 plmissing
 
@@ -786,7 +786,7 @@
                case ('screens')
                   write ( lun2, '(/a)' ) '  Found keyword "screens".'
                   screens = .true.
-                  if ( gettoken( permealeft  , ierr2 ) .ne. 0 ) goto 9201   ! leftside permeability of screeens 
+                  if ( gettoken( permealeft  , ierr2 ) .ne. 0 ) goto 9201   ! leftside permeability of screeens
                   if ( gettoken( permearight , ierr2 ) .ne. 0 ) goto 9202   ! rightside permeability of screeens
                   if ( gettoken( fiscreens   , ierr2 ) .ne. 0 ) goto 9203   ! screens polygon
 
@@ -829,9 +829,9 @@
                     case ("horseshoecrab")
                         ibmmt = 4        ! model type Horseshoe crab
                     case ("mangrove_seeds")
-                        ibmmt = 5        ! model type Mangrove propagules          
+                        ibmmt = 5        ! model type Mangrove propagules
                     case ("asian_carp_eggs")
-                        ibmmt = 6        ! model type Asian Carp Eggs            
+                        ibmmt = 6        ! model type Asian Carp Eggs
                     case default         !IBM model not filled
                         write(lun2, '(/a)') ' Unrecognised IBM model name : ', trim(ibmmodelname)
                         goto 9403
@@ -850,8 +850,8 @@
                         ibmsd = 3 !dev_asian_carp_eggs
                     case default        !IBM model not filled
                         write(lun2, '(/a)') ' Unrecognised IBM model stage development : ', trim(ibmstagedev)
-                        goto 9405      
-                   end select 
+                        goto 9405
+                   end select
                case ('revchron')
                   if (modtyp /= model_ibm) goto 9406
                   write ( lun2, '(/a)' ) '  Found keyword "revchron".'
@@ -866,7 +866,7 @@
             end do
          end if
       end if
-      
+
 !     read the simulation timers
 !     simulation start time (the value of id is read above in the special features section)
 
@@ -1055,7 +1055,7 @@
             close ( lunfil )
          endif
 !        ini_opt = 2 : ascii text file from rasterdata
-         if (ini_opt .eq. 2 ) then                              
+         if (ini_opt .eq. 2 ) then
             if ( gettoken( ini_file, ierr2 ) .ne. 0 ) goto 6012
             open ( newunit=lunfil, file=ini_file, status='old', iostat=ierr2 )
             if ( ierr2 .ne. 0 ) go to 1710
@@ -1185,10 +1185,11 @@
             endif
          endif
 
+         call alloc ( "xpoltmp", xpoltmp, nrowsmax )
+         call alloc ( "ypoltmp", ypoltmp, nrowsmax )
+
          if ( ndisapp .gt. 0 .and. nrowsmax .gt. 0) then
 !     allocate memory for the dispersant polygons, and read them into memory
-            call alloc ( "xpoltmp", xpoltmp, nrowsmax )
-            call alloc ( "ypoltmp", ypoltmp, nrowsmax )
             call alloc ( "xpoldis", xpoldis, nrowsmax, ndisapp )
             call alloc ( "ypoldis", ypoldis, nrowsmax, ndisapp )
             call alloc ( "nrowsdis", nrowsdis, ndisapp )
@@ -1435,7 +1436,7 @@
                fidye(i) = ' '
             elseif (itype.eq.3) then
                fidye(i) = ' '
-            else               
+            else
                radius(i) = -999.0
                open ( newunit=lunfil, file=fidye(i), status='old', iostat=ierr2 )
                if ( ierr2 .ne. 0 ) go to 1702
@@ -1542,14 +1543,14 @@
             fiwaste(i+nodye) = ' '
          elseif (itype.eq.3) then
             fiwaste(i+nodye) = ' '
-         else               
+         else
             radius(i+nodye) = -999.0
             open ( newunit=lunfil, file=fiwaste(i+nodye), status='old', iostat=ierr2 )
             if ( ierr2 .ne. 0 ) go to 1703
             call getdim_dis ( lunfil, fiwaste(i+nodye), nrowsmax, lun2 )
             close (lunfil)
          endif
-         
+
          if ( gettoken( wparm (i+nodye), ierr2 ) .ne. 0 ) goto 4043
          ndprt(i+nodye) = int(wparm(i+nodye)*nopart/100.0 + 0.5)
 
@@ -1897,7 +1898,7 @@
 
       ! Add 1% + 1 uncertainty margin here for the actual allocation because round offs might add some extra particles
       npmargin = npmax / 100
-      npmax = npmax + npmargin + 1           
+      npmax = npmax + npmargin + 1
       write ( lun2, 3110 ) npmax
 
 !     further allocations
@@ -2510,7 +2511,7 @@
       call stop_exit(1)
 
       end
-   
+
       subroutine getdim_dis ( lun      , dis_file , nrowsmax, lunlog   )
 !
 !     programmer : michelle jeuken
