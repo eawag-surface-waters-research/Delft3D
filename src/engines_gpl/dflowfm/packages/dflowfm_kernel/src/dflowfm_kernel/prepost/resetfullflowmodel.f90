@@ -41,6 +41,7 @@
  use m_flowexternalforcings
  use m_flowparameters
  use m_flowgeom
+ use m_modelbounds
  use m_flowtimes
  use m_samples
  use unstruc_netcdf
@@ -111,6 +112,8 @@
     call default_turbulence()
 
     call default_flowgeom()
+
+    call default_modelbounds()
 
     call default_flowexternalforcings()
 

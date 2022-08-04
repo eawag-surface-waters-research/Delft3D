@@ -244,6 +244,7 @@ set_source_files_properties(${fortran_version_file}
                             ${CMAKE_CURRENT_SOURCE_DIR}/${dflowfm_kernel_prepost_path}/flow_modelinit.F90
                             ${CMAKE_CURRENT_SOURCE_DIR}/${dflowfm_kernel_prepost_path}/inidat.F90
                             ${CMAKE_CURRENT_SOURCE_DIR}/${dflowfm_kernel_prepost_path}/print_help_commandline.F90
+                            ${CMAKE_CURRENT_SOURCE_DIR}/${dflowfm_kernel_prepost_path}/set_model_boundingbox.F90
                             ${CMAKE_CURRENT_SOURCE_DIR}/${dflowfm_kernel_timespace_path}/timespaceinitialfield_mpi.F90
                             ${CMAKE_CURRENT_SOURCE_DIR}/${dflowfm_manager_path}/inctime_user.F90
                             ${CMAKE_CURRENT_SOURCE_DIR}/${dflowfm_manager_path}/dfm_signals.F90

@@ -30,68 +30,43 @@
 ! $Id$
 ! $HeadURL$
 
- !> Resets the current flow- and time-state, but keeps al active parameter settings.
- !! To be called upon flow_modelinit().
- !! Upon program startup and loading of new model/MDU, call resetFullFlowModel() instead.
- subroutine resetFlow()
- use m_wind
- use m_flow
- use m_flowexternalforcings
- use m_flowparameters
- use m_statistics
- use m_flowgeom
- use m_modelbounds
- use m_flowtimes
- use waq
- use m_waves
- use m_hydrology_data
- use m_sobekdfm
- use m_save_ugrid_state, only: reset_save_ugrid_state
- use m_longculverts, only: reset_longculverts
- use m_sedtrails_data
- implicit none
+!> Store the model bounding box coordinates to quickly present this model's extent.
+!! If applicable, also geospatial bounds with lat+_lon values can be set.
+!!
+!! Note: x/y or lat/lon pairs may be set to dmiss if they are not applicable.
+module m_modelbounds
+   double precision :: mb_xmin   !< Smallest x-value (of 2D cell vertices/1D nodes).
+   double precision :: mb_xmax   !< Largest  x-value (of 2D cell vertices/1D nodes).
+   double precision :: mb_ymin   !< Smallest y-value (of 2D cell vertices/1D nodes).
+   double precision :: mb_ymax   !< Largest  y-value (of 2D cell vertices/1D nodes).
 
-    ! Only reset counters and other scalars, allocatables should be
-    ! automatically reset elsewhere (e.g., allocateandset*, flow_geominit)
+   double precision :: mb_lonmin !< Smallest longitude-value (of 2D cell vertices/1D nodes).
+   double precision :: mb_lonmax !< Largest  longitude-value (of 2D cell vertices/1D nodes).
+   double precision :: mb_latmin !< Smallest latitude-value (of 2D cell vertices/1D nodes).
+   double precision :: mb_latmax !< Largest  latitude-value (of 2D cell vertices/1D nodes).
 
-    call reset_wind()
+   contains
 
-    call reset_waves()
+   !> Sets ALL (scalar) variables in this module to their default values.
+   !! For a reinit prior to flow computation, call reset_modelbounds() instead.
+   subroutine default_modelbounds()
+      ! Remaining of variables is handled in reset_modelbounds()
+      call reset_modelbounds()
+   end subroutine default_modelbounds
 
-    call reset_sobekdfm()
 
-    ! Reset some flow (rest is done in flow_geominit())
-    call reset_flowgeom()
-    
-    ! Sedtrails
-    call sedtrails_resetdata()
+   !> Resets only modelbounds variables intended for a restart of flow simulation.
+   !! Upon loading of new model/MDU, use default_modelbounds() instead.
+   subroutine reset_modelbounds()
+      mb_xmin   =  huge(1d0) !< Smallest x-value (of 2D cell vertices/1D nodes).
+      mb_xmax   = -huge(1d0) !< Largest  x-value (of 2D cell vertices/1D nodes).
+      mb_ymin   =  huge(1d0) !< Smallest y-value (of 2D cell vertices/1D nodes).
+      mb_ymax   = -huge(1d0) !< Largest  y-value (of 2D cell vertices/1D nodes).
 
-    call reset_modelbounds()
+      mb_lonmin =  huge(1d0) !< Smallest longitude-value (of 2D cell vertices/1D nodes).
+      mb_lonmax = -huge(1d0) !< Largest  longitude-value (of 2D cell vertices/1D nodes).
+      mb_latmin =  huge(1d0) !< Smallest latitude-value (of 2D cell vertices/1D nodes).
+      mb_latmax = -huge(1d0) !< Largest  latitude-value (of 2D cell vertices/1D nodes).
+   end subroutine reset_modelbounds
 
-    call reset_flowexternalforcings()
-
-    call reset_longculverts()
-
-    call reset_flowtimes()
-
-    ! call reset_flowparameters()
-
-    call reset_flow()
-
-    call reset_waq()
-
-    call reset_movobs()
-
-    call reset_statistics()
-
-    if ( jawave.eq.4 ) then
-       call xbeach_reset()
-    end if
-
-    call reset_save_ugrid_state()
-
-    call reset_sedtra()
-
-    call reset_hydrology_data()
-
- end subroutine resetFlow
+end module m_modelbounds

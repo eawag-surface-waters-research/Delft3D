@@ -31,6 +31,7 @@
 !> Utility module for additional manipulation/inquiry of NetCDF files, on top of the basic nf90* primitives.
 module netcdf_utils
 use netcdf
+use ionc_constants
 implicit none
 
 private
@@ -133,12 +134,13 @@ end function ncu_copy_atts
 !! Returns:
 !     nf90_noerr if all okay, otherwise an error code
 !!
-function ncu_append_atts( ncid, varid, attname, extension) result(ierr)
+function ncu_append_atts(ncid, varid, attname, extension) result(ierr)
    integer                        :: ierr
-   integer, intent(in)            :: ncid      !< ID of the NetCDF file
-   integer, intent(in)            :: varid     !< ID of the NetCDF variable, or NF90_GLOBAL for global attributes.
-   character(len=*), intent(in)   :: extension !< name of the attribute
+   integer,          intent(in)   :: ncid      !< ID of the NetCDF file
+   integer,          intent(in)   :: varid     !< ID of the NetCDF variable, or NF90_GLOBAL for global attributes.
    character(len=*), intent(in)   :: attname   !< name of the attribute
+   character(len=*), intent(in)   :: extension !< text value to be added to the attribute
+
    integer                        :: atttype   !< attribute data type
    character(len=:), allocatable  :: atttext
    integer                        :: attlen    !< attribute length
@@ -146,12 +148,22 @@ function ncu_append_atts( ncid, varid, attname, extension) result(ierr)
    ierr = -1
    atttype = 0
    ierr = nf90_inquire_attribute(ncid, varid, attname, xtype=atttype, len=attlen)
-   if (atttype == NF90_CHAR) then
-      allocate(character(len=attlen) :: atttext)
-      ierr = nf90_get_att(ncid, varid, attname, atttext)
-      ierr = nf90_put_att(ncid, varid, attname, atttext//trim(extension))
-      ierr = nf90_noerr
-   endif
+   if (ierr == nf90_noerr) then
+      if (atttype == NF90_CHAR) then
+         allocate(character(len=attlen) :: atttext)
+         ierr = nf90_get_att(ncid, varid, attname, atttext)
+      else
+         ! Attribute already exists, but is not of type char, so cannot add more text to it.
+         ierr = IONC_ENOTATT
+         return
+      end if
+   else
+      allocate(character(len=0) :: atttext)
+   end if
+
+   ! Put the new attribute value (either appended, or afresh)
+   ierr = nf90_put_att(ncid, varid, attname, atttext//trim(extension))
+
 end function ncu_append_atts
 
 !> Clones a NetCDF variable definition.
