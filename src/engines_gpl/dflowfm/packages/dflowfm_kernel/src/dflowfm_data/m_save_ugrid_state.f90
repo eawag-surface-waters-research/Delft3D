@@ -56,7 +56,7 @@
 contains
    subroutine default_save_ugrid_state()
       implicit none
-      call reset_save_ugrid_state()
+
       network1dname = 'network1d'
       mesh1dname    = 'mesh1d'
       mesh2dname    = 'mesh2d'
