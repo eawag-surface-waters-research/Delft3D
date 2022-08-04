@@ -134,7 +134,7 @@
  double precision                  :: time_map      !< Map output interval
  double precision                  :: time_wav      !< Time-avg'd output interval xb JRE
  double precision                  :: time_sed      !< Time-avg'd output interval sedmor
- double precision                  :: time_st      !< Time-avg'd output interval sedtrails
+ double precision                  :: time_st       !< Time-avg'd output interval sedtrails
  double precision                  :: time_his      !< Next time for his output
  double precision                  :: time_xls      !< Next time for his output
  double precision                  :: time_rst      !< Next time for restart output
@@ -227,20 +227,25 @@ subroutine default_flowtimes()
     fhr         = 1d0/3600d0        !< Factor sec hrs
     fday        = 1d0/(3600d0*24d0) !< Factor sec day
 
-    ti_map      = 1200d0            !< map interval (s)
     ti_wav      = 1200d0            !< wave avg'ing interval (s), 20 minutes okay default  JRE
     ti_wavs     = 0d0
     ti_wave     = 0d0
-    ti_maps     = 0d0               !< start interval (s)
-    ti_mape     = 0d0               !< end   interval (s)
+    ti_map      = 1200d0            !< map interval (s)
+    ti_maps     = 0d0               !< Start map output (s)
+    ti_mape     = 0d0               !< End   map output (s)
     ti_his      = 120d0             !< history interval (s)
-    ti_seds     = 0d0
-    ti_sede     = 0d0
-    ti_sts      = 0d0
-    ti_ste      = 0d0
-    ti_st       = 3600d0
-    ti_xls      = 0d0               !< history interval (s) xls
-    ti_rst      = 24d0*3600d0       !< restart interval (s)
+    ti_hiss     = 0d0               !< Start history output (s)
+    ti_hise     = 0d0               !< End   history output (s)
+    ti_sed      = 0d0               !< Time-avg'd output interval sedmor (s), (Default: off)
+    ti_seds     = 0d0               !< Start time-avg'd output sedmor (s)
+    ti_sede     = 0d0               !< End   time-avg'd output sedmor (s)
+    ti_st       = 3600d0            !< Time-avg'd output interval sedtrails
+    ti_sts      = 0d0               !< Start time-avg'd output sedtrails
+    ti_ste      = 0d0               !< End   time-avg'd output sedtrails
+    ti_xls      = 0d0               !< history interval (s) xls, (Default: off)
+    ti_rst      = 24d0*3600d0       !< Restart interval (s)
+    ti_rsts     = 0d0               !< Start restart output (s)
+    ti_rste     = 0d0               !< End   restart output (s)
     ti_mba      = 0d0
     ti_waq      = 0d0               !< delwaq interval (s) (Default: off)
     ti_waqproc  = 0d0
@@ -249,7 +254,9 @@ subroutine default_flowtimes()
     ti_split    = 0d0               !< Time interval for time splitting of output files.
     ti_split_unit= 's'              !< Unit for time partitioning interval
 
-    ti_classmap           = -999d0  !< default no class map
+    ti_classmap           = 0d0     !< Class map interval (s), (Default: off)
+    ti_classmaps          = 0d0     !< Start class map output (s)
+    ti_classmape          = 0d0     !< End   class map output (s)
     map_classes_ucdirstep = -999d0  !< default no step size given for classes of flow direction
     if (allocated(map_classes_ucdir)) deallocate(map_classes_ucdir)
 
