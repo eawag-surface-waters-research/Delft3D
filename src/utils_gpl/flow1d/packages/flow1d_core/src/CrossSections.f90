@@ -3545,14 +3545,14 @@ subroutine createTablesForTabulatedProfile(crossDef)
        f = line2cross%f
 
         if (cross1%hasSummerDike() .and. cross2%hasSummerDike()) then
-          crestLevel = (1.0d0 - f) * cross1%tabDef%summerdike%crestLevel + f * cross2%tabDef%summerdike%crestLevel
-          baseLevel  = (1.0d0 - f) * cross1%tabDef%summerdike%baseLevel  + f * cross2%tabDef%summerdike%baseLevel
+          crestLevel = (1.0d0 - f) * (cross1%tabDef%summerdike%crestLevel + cross1%shift) + f * (cross2%tabDef%summerdike%crestLevel + cross2%shift)
+          baseLevel  = (1.0d0 - f) * (cross1%tabDef%summerdike%baseLevel + cross1%shift)  + f * (cross2%tabDef%summerdike%baseLevel + cross2%shift)
        else if (cross1%hasSummerDike()) then
-         crestLevel = cross1%tabDef%summerdike%crestLevel
-         baseLevel  = cross1%tabDef%summerdike%baseLevel 
+         crestLevel = cross1%tabDef%summerdike%crestLevel + cross1%shift
+         baseLevel  = cross1%tabDef%summerdike%baseLevel  + cross1%shift 
        else if (cross2%hasSummerDike()) then
-         crestLevel = cross2%tabDef%summerdike%crestLevel
-         baseLevel  = cross2%tabDef%summerdike%baseLevel
+         crestLevel = cross2%tabDef%summerdike%crestLevel + cross2%shift
+         baseLevel  = cross2%tabDef%summerdike%baseLevel  + cross2%shift
        else
          crestLevel = missingvalue
          baseLevel  = missingvalue

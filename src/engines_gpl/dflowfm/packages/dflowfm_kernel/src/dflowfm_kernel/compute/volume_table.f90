@@ -63,9 +63,8 @@ module m_VolumeTables
                                                                     !< non-increasing part. In case of Nested Newton and 1 or more 
                                                                     !< surrounding closed cross sections, volDecreasing is allocated and
                                                                     !< filled.
-      logical :: hysteresis                                         !< hysteresis value for summerdike
       double precision :: bedLevel                                  !< The bed level at the location of the volume table.
-      double precision :: topLevel                                  !< Highest level (w.r.t. the bed level) of the surrounding cross sections
+      double precision :: topHeight                                  !< Highest level (w.r.t. the bed level) of the surrounding cross sections
       double precision, allocatable, dimension(:) :: vol            !< Volume at each level of the table.
       double precision, allocatable, dimension(:) :: sur            !< Surface area at each level of the table.
       double precision, allocatable, dimension(:) :: volDecreasing  !< Volume table for decreasing widths (Nested Newton)
@@ -107,7 +106,7 @@ module m_VolumeTables
       this%vol   = 0.0d0
       this%sur   = 0.0d0
 
-      if (this%numberOfSummerDikes /= 0) then
+      if (this%numberOfSummerDikes > 0) then
          allocate(this%inundationPhase(this%numberOfSummerDikes))
          allocate(this%linkNumber(this%numberOfSummerDikes))
          allocate(this%summerDikeCrestLevel(this%numberOfSummerDikes))
@@ -137,6 +136,8 @@ module m_VolumeTables
       if (this%numberOfSummerDikes /= 0) then
          if (allocated(this%inundationPhase))   deallocate(this%inundationPhase)
          if (allocated(this%linkNumber))        deallocate(this%linkNumber)
+         if (allocated(this%summerDikeCrestLevel)) deallocate(this%summerDikeCrestLevel)
+         if (allocated(this%summerDikeBaseLevel))  deallocate(this%summerDikeBaseLevel)
          if (allocated(this%sdinVolume))        deallocate(this%sdinVolume)
          if (allocated(this%sdinArea))          deallocate(this%sdinArea)
       endif
@@ -166,9 +167,9 @@ module m_VolumeTables
       ! Take the effect of summerdikes into account, only a correction is necessary during the indundation phase. The other phase 
       ! is already taken into account in the volume table.
       do i = 1, this%numberOfSummerDikes
-         if (level-this%bedLevel >= (this%summerDikeCrestLevel(i) + summerDikeTransitionHeight )) then
+         if (level >= (this%summerDikeCrestLevel(i) + summerDikeTransitionHeight )) then
             this%inundationPhase(i) = .false.
-         elseif (level-this%bedLevel <= this%summerDikeBaseLevel(i)) then
+         elseif (level < this%summerDikeBaseLevel(i)) then
             this%inundationPhase(i) = .true.
          endif
          
@@ -195,9 +196,9 @@ module m_VolumeTables
       
       ! During the inundation phase the water surface area must be corrected
       do i = 1, this%numberOfSummerDikes
-         if (level-this%bedLevel >= (this%summerDikeCrestLevel(i) + summerDikeTransitionHeight )) then
+         if (level >= (this%summerDikeCrestLevel(i) + summerDikeTransitionHeight )) then
             this%inundationPhase(i) = .false.
-         else if (level-this%bedLevel <= this%summerDikeBaseLevel(i)) then
+         else if (level < this%summerDikeBaseLevel(i)) then
             this%inundationPhase(i) = .true.
          endif
          if (this%inundationPhase(i)) then
@@ -268,7 +269,7 @@ module m_VolumeTables
       double precision :: sdarea
       double precision :: width, widthdecr
       double precision :: sdwidth
-      double precision :: topLevel
+      double precision :: topHeight
       double precision :: bobAboveBedLevel
       logical, dimension(2) :: inundationPhase
 
@@ -294,7 +295,7 @@ module m_VolumeTables
       allocate(vltb(ndx1d))
       do n = 1, ndx1d
          vltb(n)%count = 0
-         vltb(n)%topLevel = 0d0
+         vltb(n)%topHeight = 0d0
       enddo
 
       ! determine the highest level for the storage nodes
@@ -305,7 +306,7 @@ module m_VolumeTables
             nod = stors(i)%gridPoint 
             n = nod-ndx2d
             if (n > 0) then
-               vltb(n)%topLevel = max(vltb(n)%topLevel, getTopLevel(stors(i))) - bl(nod)
+               vltb(n)%topHeight = max(vltb(n)%topHeight, getTopLevel(stors(i))) - bl(nod)
             endif
          enddo
       endif
@@ -335,18 +336,18 @@ module m_VolumeTables
                   L = LBND1D(L)
                endif
                if (line2cross(L,index)%c1 > 0) then
-                  ! The toplevel is the highest point w.r.t. the bedlevel in that point.
+                  ! The topheight is the highest point w.r.t. the bedlevel in that point.
                   ! Since the bed level and the bob of the link can be different, the actual highest point of the 
                   ! cross section is the characteristic height + bob - bl
                   cross1 => cross(line2cross(L,index)%c1)
                   cross2 => cross(line2cross(L,index)%c2)
-                  topLevel = getHighest1dLevel(cross1) + bobAboveBedLevel -bl(nod)
-                  if (topLevel > vltb(n)%topLevel) then
-                     vltb(n)%topLevel = topLevel
+                  topHeight = getHighest1dLevel(cross1) + bobAboveBedLevel -bl(nod)
+                  if (topHeight > vltb(n)%topHeight) then
+                     vltb(n)%topHeight = topHeight
                   endif
-                  topLevel = getHighest1dLevel(cross2) + bobAboveBedLevel -bl(nod)
-                  if (topLevel > vltb(n)%topLevel) then
-                     vltb(n)%topLevel = topLevel
+                  topHeight = getHighest1dLevel(cross2) + bobAboveBedLevel -bl(nod)
+                  if (topHeight > vltb(n)%topHeight) then
+                     vltb(n)%topHeight = topHeight
                   endif
 
                   ! Count the number of summerdikes and subsequently set the crestlevel and the base level of the summerdikes
@@ -354,15 +355,15 @@ module m_VolumeTables
                      vltb(n)%hasSummerDike = .true.
                      numberOfSummerDikes = numberOfSummerDikes + 1
                      if (cross1%hasSummerDike()) then
-                        topLevel = cross1%tabDef%summerdike%crestLevel + summerDikeTransitionHeight
-                        if (topLevel > vltb(n)%topLevel) then
-                           vltb(n)%topLevel = topLevel
+                        topHeight = cross1%tabDef%summerdike%crestLevel + summerDikeTransitionHeight
+                        if (topHeight > vltb(n)%topHeight) then
+                           vltb(n)%topHeight = topHeight
                         endif
                      endif
                      if (cross2%hasSummerDike()) then
-                        topLevel = cross2%tabDef%summerdike%crestLevel + summerDikeTransitionHeight
-                        if (topLevel > vltb(n)%topLevel) then
-                           vltb(n)%topLevel = topLevel
+                        topHeight = cross2%tabDef%summerdike%crestLevel + summerDikeTransitionHeight
+                        if (topHeight > vltb(n)%topHeight) then
+                           vltb(n)%topHeight = topHeight
                         endif
                      endif
                   endif
@@ -372,7 +373,7 @@ module m_VolumeTables
          vltb(n)%numberOfSummerDikes = numberOfSummerDikes
 
          ! Make sure the volume table consists of at least two levels
-         vltb(n)%count = max(2,int(vltb(n)%topLevel / tableIncrement) + 2)
+         vltb(n)%count = max(2,int(vltb(n)%topHeight / tableIncrement) + 2)
          call vltb(n)%alloc()
       enddo
 
@@ -457,7 +458,9 @@ module m_VolumeTables
                                                vltb(n)%summerDikeBaseLevel(numberOfSummerDikes))
                         endif
                         
-
+                        ! a summerdike has a hysteresis during inundation the characteristic for the total volume is different from the
+                        ! drainage phase. In the overall volume table the summerdike during drainage is taken into account.
+                        ! During inundation SDINVOLUME contains the correction for the proper storage during inundation.
                         inundationPhase = .true.
                         call GetCSParsTotal(line2cross(L, 2), cross, height-bobAboveBedLevel, sdarea, sdwidth, CSCalculationOption, inundationPhase, &
                                             doSummerDike=.true.)
@@ -557,10 +560,12 @@ module m_VolumeTables
          count = vltb(n)%count
          write(ibin) count
          write(ibin) vltb(n)%hasSummerdike
+         numberOfSummerdikes = vltb(n)%numberOfSummerDikes
+         write(ibin) numberOfSummerDikes
          write(ibin) vltb(n)%hasDecreasingWidths
          write(ibin) (vltb(n)%inundationPhase(i), i = 1, vltb(n)%numberOfSummerDikes)
          write(ibin) vltb(n)%bedLevel
-         write(ibin) vltb(n)%topLevel
+         write(ibin) vltb(n)%topHeight
          write(ibin) (vltb(n)%vol(i), i = 1, count)
          write(ibin) (vltb(n)%sur(i), i = 1, count)
          if (vltb(n)%hasDecreasingWidths) then
@@ -568,8 +573,6 @@ module m_VolumeTables
             write(ibin) (vltb(n)%surDecreasing(i), i = 1, count)
          endif
          if (vltb(n)%hasSummerdike) then
-            numberOfSummerdikes = vltb(n)%numberOfSummerDikes
-            write(ibin) numberOfSummerDikes
             write(ibin) (vltb(n)%summerDikeCrestLevel(i), i = 1, numberOfSummerDikes)
             write(ibin) (vltb(n)%summerDikeBaseLevel(i),  i = 1, numberOfSummerDikes)  
             write(ibin) ((vltb(n)%sdinVolume(i, j),       i = 1, numberOfSummerdikes), j = 1, count)           
@@ -654,7 +657,7 @@ module m_VolumeTables
          read(ibin) vltb(n)%hasSummerdike
          read(ibin) numberOfSummerDikes
          read(ibin) vltb(n)%bedLevel
-         read(ibin) vltb(n)%topLevel
+         read(ibin) vltb(n)%topHeight
          call vltb(n)%alloc()
          read(ibin) (vltb(n)%vol(i), i = 1, count)
          read(ibin) (vltb(n)%sur(i), i = 1, count)
