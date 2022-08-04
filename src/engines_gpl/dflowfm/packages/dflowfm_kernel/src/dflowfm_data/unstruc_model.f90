@@ -2275,7 +2275,7 @@ subroutine readMDUFile(filename, istat)
 
    if (len_trim(md_crsfile) == 0 .and. jashp_crs > 0) then
       write (msgbuf, '(a,I1,a)') 'MDU settings does not specify any cross section: CrsFile =  , but sets to write a shape file' &
-         //' for cross section: Wrishp_crs = ', jashp_crs, '. In this situation, no such shape file is written.'
+         //' for cross sections: Wrishp_crs = ', jashp_crs, '. In this situation, no such shape file is written.'
       call warn_flush()
       jashp_crs = 0
    endif
@@ -2288,15 +2288,15 @@ subroutine readMDUFile(filename, istat)
    endif
 
    if (len_trim(md_structurefile) == 0 .and. (jashp_weir > 0 .or. jashp_gate > 0 .or. jashp_genstruc > 0 )) then
-      write (msgbuf, '(a)') 'MDU settings does not specify any structur: StructureFile =  , but sets to write a ' &
-         //'shape file for structure (Wrishp_weir/Wrishp_gate/Wrishp_genstruc = 1). In this situation, no such shape file is written.'
+      write (msgbuf, '(a)') 'MDU settings does not specify any structure: StructureFile =  , but sets to write a ' &
+         //'shape file for structures (Wrishp_weir/Wrishp_gate/Wrishp_genstruc = 1). In this situation, no such shape file is written.'
       call warn_flush()
       jashp_weir = 0
       jashp_gate = 0
    endif
 
    if (len_trim(md_thdfile) == 0 .and. jashp_thd > 0) then
-      write (msgbuf, '(a,I1,a)') 'MDU settings do not specify any structures: ThinDamFile =  , but sets to write a ' &
+      write (msgbuf, '(a,I1,a)') 'MDU settings do not specify any thin dam: ThinDamFile =  , but sets to write a ' &
          //'shape file for thin dams: Wrishp_thindam = ', jashp_thd, '. In this situation, no such shape file is written.'
       call warn_flush()
       jashp_thd = 0
@@ -2304,7 +2304,7 @@ subroutine readMDUFile(filename, istat)
 
    if (len_trim(md_fixedweirfile) == 0 .and. jashp_fxw > 0) then
       write (msgbuf, '(a,I1,a)') 'MDU settings does not specify any fixed weir: FixedWeirFile =  , but sets to write a ' &
-         //'shape file for fixed weir: Wrishp_fixed_weir = ', jashp_fxw, '. In this situation, no such shape file is written.'
+         //'shape file for fixed weirs: Wrishp_fixed_weir = ', jashp_fxw, '. In this situation, no such shape file is written.'
       call warn_flush()
       jashp_fxw = 0
    endif
@@ -2967,9 +2967,6 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
 
     if (writeall .or. jaPure1D > 0) then
        call prop_set(prop_ptr, 'numerics', 'Pure1D'        , jaPure1D, 'along 1D channels: 0 = 2D Perot, 1 = 1D Perot using vol1_f, 2 = 1D Perot using vol1, 3 and 4 = 1D links')
-       if (jaPure1D > 2) then
-           call mess(LEVEL_WARN, 'Pure1D options > 2 temporarily not supported.')
-       endif
        call prop_set(prop_ptr, 'numerics', 'Junction1D'    , jaJunction1D, 'at 1D junctions: 0 = org 1D advec, 1 = same as along 1D channels')
     endif
 
