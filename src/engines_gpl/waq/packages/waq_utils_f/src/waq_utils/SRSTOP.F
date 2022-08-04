@@ -57,7 +57,7 @@
       write ( lunfil , * ) iexit
       close ( lunfil )
 
-      !if (useexception_waq) call throwexception()
+      if (useexception_waq) call throwexception()
 
       select case ( iexit )
          case ( :0 )
