@@ -221,13 +221,13 @@ end function ncu_copy_atts
 !     nf90_noerr if all okay, otherwise an error code
 !!
 function ncu_append_atts(ncid, varid, attname, extension, separator, check_presence) result(ierr)
-   integer                        :: ierr
-   integer,           intent(in   ) :: ncid      !< ID of the NetCDF file
-   integer,           intent(in   ) :: varid     !< ID of the NetCDF variable, or NF90_GLOBAL for global attributes.
-   character(len=*),  intent(in   ) :: attname   !< name of the attribute
-   character(len=*),  intent(in   ) :: extension !< text value to be added to the attribute
-   character(len=*), optional, intent(in   ) :: separator !< (Optional) Separator string to be inserted between existing and extension string (Default: ' ').
-   logical, optional, intent(in   ) :: check_presence !< (Optional) Check whether the extension text is already present, and if so, don't add it again (Default: .false.).
+   integer                                   :: ierr
+   integer,                    intent(in   ) :: ncid           !< ID of the NetCDF file
+   integer,                    intent(in   ) :: varid          !< ID of the NetCDF variable, or NF90_GLOBAL for global attributes.
+   character(len=*),           intent(in   ) :: attname        !< name of the attribute
+   character(len=*),           intent(in   ) :: extension      !< text value to be added to the attribute
+   character(len=*), optional, intent(in   ) :: separator      !< (Optional) Separator string to be inserted between existing and extension string (Default: ' ').
+   logical,          optional, intent(in   ) :: check_presence !< (Optional) Check whether the extension text is already present, and if so, don't add it again (Default: .false.).
 
    integer                        :: atttype   !< attribute data type
    character(len=:), allocatable  :: atttext
@@ -239,7 +239,7 @@ function ncu_append_atts(ncid, varid, attname, extension, separator, check_prese
    ierr = -1
 
    if (present(separator)) then
-      separator_ = separator ! Intentionally don't trim/adjustl!
+      separator_ = separator ! Intentionally don't trim/adjust!
    else
       separator_ = ' '
    end if

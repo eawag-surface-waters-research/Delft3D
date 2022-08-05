@@ -621,12 +621,12 @@ module time_module
       !! P[YYYY]-[MM]-[DD]T[hh]:[mm]:[ss] is returned. For longer durations,
       !! the basic format P[n]Y[n]M[n]DT[n]H[n]M[n]S is returned.
       function duration_to_string(seconds_total) result(duration_string)
-         double precision,  intent(in   ) :: seconds_total !< Seconds numeric value for the duration period.
+         double precision,  intent(in   ) :: seconds_total   !< Seconds numeric value for the duration period.
          character(len=20)                :: duration_string !< Resulting duration string, consider trimming at call site.
-      
+
          integer :: days, hours, mins, secs
          double precision :: seconds_remaining
-      
+
          days  = int(seconds_total / 86400d0)
          seconds_remaining = seconds_total - days*86400d0
          hours = int(seconds_remaining / 3600d0)
@@ -651,11 +651,11 @@ module time_module
       !! 2015-08-07T18:30:27+00:00
       !! Performs no check on validity of input numbers!
       function datetime2string(iyear, imonth, iday, ihour, imin, isec, ioffsethour, ioffsetmin, ierr) result(datetimestr)
-         integer,           intent(in)  :: iyear, imonth, iday
-         integer, optional, intent(in)  :: ihour, imin, isec !< Time is optional, will be printed as 00:00:00 if omitted.
-         integer, optional, intent(in)  :: ioffsethour !< UTC offset hours, optional, will only be printed as [+-]HH:** when given.
-         integer, optional, intent(in)  :: ioffsetmin  !< UTC offset minutes, optional, will be printed as [+-]HH:00 if omitted. Requires also ioffsethour when given.
-         integer, optional, intent(out) :: ierr !< Error status, 0 if success, nonzero in case of format error.
+         integer,           intent(in   )  :: iyear, imonth, iday
+         integer, optional, intent(in   )  :: ihour, imin, isec !< Time is optional, will be printed as 00:00:00 if omitted.
+         integer, optional, intent(in   )  :: ioffsethour       !< UTC offset hours, optional, will only be printed as [+-]HH:** when given.
+         integer, optional, intent(in   )  :: ioffsetmin        !< UTC offset minutes, optional, will be printed as [+-]HH:00 if omitted. Requires also ioffsethour when given.
+         integer, optional, intent(  out)  :: ierr              !< Error status, 0 if success, nonzero in case of format error.
 
          character(len=25) :: datetimestr !< The resulting date time string. Considering using trim() on it.
 
@@ -703,12 +703,12 @@ module time_module
 
       function jul_frac2string(jul, dayfrac, ioffsethour, ioffsetmin, ierr) result(datetimestr)
          implicit none
-         integer                , intent(in)  :: jul
-         real(kind=hp), optional, intent(in)  :: dayfrac
-         integer,       optional, intent(in)  :: ioffsethour !< UTC offset hours, optional, will only be printed as [+-]HH:** when given.
-         integer,       optional, intent(in)  :: ioffsetmin  !< UTC offset minutes, optional, will be printed as [+-]HH:00 if omitted. Requires also ioffsethour when given.
-         integer      , optional, intent(out) :: ierr        !< Error status, 0 if success, nonzero in case of format error.
-         character(len=25)                    :: datetimestr !< The resulting date time string. Considering using trim() on it.
+         integer                , intent(in   )  :: jul
+         real(kind=hp), optional, intent(in   )  :: dayfrac
+         integer,       optional, intent(in   )  :: ioffsethour !< UTC offset hours, optional, will only be printed as [+-]HH:** when given.
+         integer,       optional, intent(in   )  :: ioffsetmin  !< UTC offset minutes, optional, will be printed as [+-]HH:00 if omitted. Requires also ioffsethour when given.
+         integer      , optional, intent(  out)  :: ierr        !< Error status, 0 if success, nonzero in case of format error.
+         character(len=25)                       :: datetimestr !< The resulting date time string. Considering using trim() on it.
 
          real(kind=hp) :: days
          real(kind=hp) :: dayfrac_
@@ -727,11 +727,11 @@ module time_module
 
       function mjd2string(days, ioffsethour, ioffsetmin, ierr) result(datetimestr)
          implicit none
-         real(kind=hp)    , intent(in)  :: days        !< Modified Julian date, including fractional time part.
-         integer, optional, intent(in)  :: ioffsethour !< UTC offset hours, optional, will only be printed as [+-]HH:** when given.
-         integer, optional, intent(in)  :: ioffsetmin  !< UTC offset minutes, optional, will be printed as [+-]HH:00 if omitted. Requires also ioffsethour when given.
-         integer, optional, intent(out) :: ierr        !< Error status, 0 if success, nonzero in case of format error.
-         character(len=25)              :: datetimestr !< The resulting date time string. Considering using trim() on it.
+         real(kind=hp)    , intent(in   )  :: days        !< Modified Julian date, including fractional time part.
+         integer, optional, intent(in   )  :: ioffsethour !< UTC offset hours, optional, will only be printed as [+-]HH:** when given.
+         integer, optional, intent(in   )  :: ioffsetmin  !< UTC offset minutes, optional, will be printed as [+-]HH:00 if omitted. Requires also ioffsethour when given.
+         integer, optional, intent(  out)  :: ierr        !< Error status, 0 if success, nonzero in case of format error.
+         character(len=25)                 :: datetimestr !< The resulting date time string. Considering using trim() on it.
 
          integer       :: iyear, imonth, iday, ihour, imin, isec
          real(kind=hp) :: second

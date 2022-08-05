@@ -52,7 +52,7 @@ contains
 !> Convenience function to set the ACDD version into a dataset's :Convevtions attribute.
 
 function ionc_acdd_add_conventions(ncid) result(ierr)
-   integer,          intent(in   ) :: ncid    !< Already opened NetCDF id to set :Conventions global attribute into.
+   integer,          intent(in   ) :: ncid    !< Already opened NetCDF id to set Conventions global attribute into.
    integer                         :: ierr    !< Result status (IONC_NOERR==NF90_NOERR) if successful.
 
    ierr = ncu_append_atts(ncid, nf90_global, 'Conventions', trim(IONC_CONV_ACDD), separator = ' ', check_presence = .true.)
@@ -83,7 +83,7 @@ function ionc_add_geospatial_bounds(ncid, lat_min, lat_max, lon_min, lon_max) re
    ierr = nf90_put_att(ncid, nf90_global, 'geospatial_lon_max',   lon_max)
    ierr = nf90_put_att(ncid, nf90_global, 'geospatial_lon_units', trim(geospatial_lon_units))
 
-   ! Record this also in the :Conventions attribute
+   ! Record this also in the Conventions attribute
    ierr = ionc_acdd_add_conventions(ncid)
 
    ! Leave the dataset in the same mode as we got it.
@@ -106,19 +106,22 @@ function ionc_add_time_coverage(ncid, time_coverage_start, time_coverage_end, ti
    ierr = IONC_NOERR
 
    ierr = ncu_ensure_define_mode(ncid, InDefine)
-   ! time_coverage_start: Describes the time of the first data point in the data set. Use the ISO 8601:2004 date format, preferably the extended format as recommended in the Attribute Content Guidance section.
+
+   ! The followings use the ISO 8601:2004 date format, preferably the extended format as
+   ! recommended in the Attribute Content Guidance section.
+   ! time_coverage_start: Describes the time of the first data point in the data set.
    ierr = nf90_put_att(ncid, nf90_global, 'time_coverage_start', trim(time_coverage_start))
 
-   ! time_coverage_end: Describes the time of the last data point in the data set. Use ISO 8601:2004 date format, preferably the extended format as recommended in the Attribute Content Guidance section.
+   ! time_coverage_end: Describes the time of the last data point in the data set.
    ierr = nf90_put_att(ncid, nf90_global, 'time_coverage_end', trim(time_coverage_end))
 
-   ! time_coverage_duration: Describes the duration of the data set. Use ISO 8601:2004 duration format, preferably the extended format as recommended in the Attribute Content Guidance section.
+   ! time_coverage_duration: Describes the duration of the data set.
    ierr = nf90_put_att(ncid, nf90_global, 'time_coverage_duration' , trim(time_coverage_duration))
 
-   ! time_coverage_resolution Describes the targeted time period between each value in the data set. Use ISO 8601:2004 duration format, preferably the extended format as recommended in the Attribute Content Guidance section.
+   ! time_coverage_resolution Describes the targeted time period between each value in the data set.
    ierr = nf90_put_att(ncid, nf90_global, 'time_coverage_resolution' , trim(time_coverage_resolution))
 
-   ! Record this also in the :Conventions attribute
+   ! Record this also in the Conventions attribute
    ierr = ionc_acdd_add_conventions(ncid)
 
    ! Leave the dataset in the same mode as we got it.
