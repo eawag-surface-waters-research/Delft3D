@@ -40,7 +40,7 @@ use unstruc_model, only : md_classmap_file
 use unstruc_files
 use unstruc_netcdf, only : check_error, t_unc_mapids, unc_close, unc_create, ug_meta_fm, unc_def_var_nonspatial, MAX_ID_VAR, &
        UNC_LOC_S, unc_def_var_map, unc_write_flowgeom_filepointer_ugrid, unc_put_var_map_byte, unc_put_var_map_byte_timebuffer, &
-       unc_nounlimited, unc_noforcedflush
+       unc_nounlimited, unc_noforcedflush, unc_add_time_coverage
 use io_ugrid, only : ug_addglobalatts
 use netcdf
 use MessageHandling, only : mess, LEVEL_ERROR, LEVEL_INFO, LEVEL_FATAL
@@ -155,6 +155,8 @@ end subroutine reset_unstruc_netcdf_map_class
 
       ierr = ug_addglobalatts(incids%ncid, ug_meta_fm)
       call unc_write_flowgeom_filepointer_ugrid(incids%ncid,incids%id_tsp, jabndnd_)
+
+      ierr = unc_add_time_coverage(incids%ncid, ti_classmaps, ti_classmape, ti_classmap)
 
       !
       ! define dimensions:

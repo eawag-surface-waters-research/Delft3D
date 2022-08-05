@@ -49,6 +49,7 @@ subroutine unc_write_his(tim)            ! wrihis
     use unstruc_netcdf, only: ihisfile
     use unstruc_netcdf, only: UNC_LOC_S3D, UNC_LOC_WU, UNC_LOC_W
     use unstruc_netcdf, only: unc_writeopts, unc_noforcedflush, UG_WRITE_LATLON
+    use unstruc_netcdf, only: unc_add_time_coverage
     use unstruc_messages
     use m_sferic, only: jsferic
     use m_partitioninfo
@@ -246,6 +247,8 @@ subroutine unc_write_his(tim)            ! wrihis
         if (ierr /= nf90_noerr) then
             call mess(LEVEL_WARN, 'Could not create history file.')
         end if
+
+        ierr = unc_add_time_coverage(ihisfile, ti_hiss, ti_hise, ti_his)
 
         !if (unc_nounlimited > 0) then ! UNST-4764: His file has never shown good results with NcNoUnlimited option on.
         ierr = nf90_def_dim(ihisfile, 'time', nf90_unlimited, id_timedim)

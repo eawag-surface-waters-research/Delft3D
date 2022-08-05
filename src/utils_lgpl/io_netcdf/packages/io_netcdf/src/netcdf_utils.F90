@@ -37,6 +37,9 @@ implicit none
 private
 
 public :: ncu_format_to_cmode
+public :: ncu_ensure_define_mode
+public :: ncu_ensure_data_mode
+public :: ncu_restore_mode
 public :: ncu_inq_var_fill, ncu_copy_atts, ncu_copy_chunking_deflate
 public :: ncu_clone_vardef
 public :: ncu_append_atts
@@ -87,7 +90,90 @@ pure function ncu_format_to_cmode(iformatnumber) result(cmode)
    end select
 end function ncu_format_to_cmode
 
-      
+
+!> Puts a NetCDF dataset into define mode, if it isn't so already.
+!! Returns the original mode, such that the caller can later put back this
+!! dataset into its original mode.
+!!
+!! @see ncu_restore_mode
+function ncu_ensure_define_mode(ncid, originally_in_define) result(ierr)
+   integer, intent(in   ) :: ncid                 !< ID of the NetCDF dataset
+   logical, intent(  out) :: originally_in_define !< Whether the dataset was already in define mode (for later restoral).
+   integer                :: ierr                 !< Result status (nf90_noerr if successful)
+
+   integer :: ierrloc
+
+   ierr = nf90_noerr
+
+   ! Put dataset in define mode (possibly again)
+   originally_in_define = .false.
+   
+   ierrloc = nf90_redef(ncid)
+   if (ierrloc == nf90_eindefine) then
+      originally_in_define = .true.
+   else
+      ierr = ierrloc ! Some other error occurred
+   end if
+end function ncu_ensure_define_mode
+
+
+!> Puts a NetCDF dataset into data mode, if it isn't so already.
+!! Returns the original mode, such that the caller can later put back this
+!! dataset into its original mode.
+!!
+!! @see ncu_restore_mode
+function ncu_ensure_data_mode(ncid, originally_in_define) result(ierr)
+   integer, intent(in   ) :: ncid                 !< ID of the NetCDF dataset
+   logical, intent(  out) :: originally_in_define !< Whether the dataset was originally in define mode (for later restoral).
+   integer                :: ierr                 !< Result status (nf90_noerr if successful)
+
+   integer :: ierrloc
+
+   ierr = nf90_noerr
+
+   ! Put dataset in data mode (possibly again)
+   originally_in_define = .true.
+   
+   ierrloc = nf90_enddef(ncid)
+   if (ierrloc == nf90_enotindefine) then
+      originally_in_define = .false.
+   else
+      ierr = ierrloc ! Some other error occurred
+   end if
+end function ncu_ensure_data_mode
+
+
+!> Restores a NetCDF dataset into its original mode (define/data), if needed.
+!!
+!! @see ncu_ensure_define_mode
+!! @see ncu_ensure_data_mode
+function ncu_restore_mode(ncid, originally_in_define) result(ierr)
+   integer, intent(in   ) :: ncid                 !< ID of the NetCDF dataset
+   logical, intent(in   ) :: originally_in_define !< Whether the dataset was originally in define mode.
+   integer                :: ierr                 !< Result status (nf90_noerr if successful)
+
+   integer :: ierrloc
+
+   ierr = nf90_noerr
+
+   ! Leave the dataset in the same mode as we got it.
+   if (originally_in_define) then
+      ! Attempt define mode
+      ierrloc = nf90_redef(ncid)
+      if (ierrloc /= nf90_eindefine) then
+         ierr = ierrloc ! Some error occurred
+      end if
+   else
+      ! Attempt data mode
+      ierrloc = nf90_enddef(ncid)
+      if (ierrloc /= nf90_enotindefine) then
+         ierr = ierrloc ! Some error occurred
+      end if
+   end if
+
+end function ncu_restore_mode
+
+
 !> Copy all attributes from a variable or dataset into another variable/dataset.
 !! Returns:
 !     nf90_noerr if all okay, otherwise an error code
@@ -134,24 +220,56 @@ end function ncu_copy_atts
 !! Returns:
 !     nf90_noerr if all okay, otherwise an error code
 !!
-function ncu_append_atts(ncid, varid, attname, extension) result(ierr)
+function ncu_append_atts(ncid, varid, attname, extension, separator, check_presence) result(ierr)
    integer                        :: ierr
-   integer,          intent(in)   :: ncid      !< ID of the NetCDF file
-   integer,          intent(in)   :: varid     !< ID of the NetCDF variable, or NF90_GLOBAL for global attributes.
-   character(len=*), intent(in)   :: attname   !< name of the attribute
-   character(len=*), intent(in)   :: extension !< text value to be added to the attribute
+   integer,           intent(in   ) :: ncid      !< ID of the NetCDF file
+   integer,           intent(in   ) :: varid     !< ID of the NetCDF variable, or NF90_GLOBAL for global attributes.
+   character(len=*),  intent(in   ) :: attname   !< name of the attribute
+   character(len=*),  intent(in   ) :: extension !< text value to be added to the attribute
+   character(len=*), optional, intent(in   ) :: separator !< (Optional) Separator string to be inserted between existing and extension string (Default: ' ').
+   logical, optional, intent(in   ) :: check_presence !< (Optional) Check whether the extension text is already present, and if so, don't add it again (Default: .false.).
 
    integer                        :: atttype   !< attribute data type
    character(len=:), allocatable  :: atttext
    integer                        :: attlen    !< attribute length
+   character(len=:), allocatable  :: separator_
+   logical :: check_presence_
+   integer :: ifound
    
    ierr = -1
+
+   if (present(separator)) then
+      separator_ = separator ! Intentionally don't trim/adjustl!
+   else
+      separator_ = ' '
+   end if
+
+   if (present(check_presence)) then
+      check_presence_ = check_presence
+   else
+      check_presence_ = .false.
+   end if
+
+   
    atttype = 0
    ierr = nf90_inquire_attribute(ncid, varid, attname, xtype=atttype, len=attlen)
    if (ierr == nf90_noerr) then
       if (atttype == NF90_CHAR) then
          allocate(character(len=attlen) :: atttext)
          ierr = nf90_get_att(ncid, varid, attname, atttext)
+
+         if (check_presence_) then
+            ifound = index(atttext, trim(extension), back=.true.)
+            if (ifound > 0) then
+               ! Extension text already present in current attribute, do nothing.
+               return
+            end if
+         end if
+
+         if (attlen > 0) then
+            ! Prepare for later appending
+            atttext = atttext // separator_
+         end if
       else
          ! Attribute already exists, but is not of type char, so cannot add more text to it.
          ierr = IONC_ENOTATT

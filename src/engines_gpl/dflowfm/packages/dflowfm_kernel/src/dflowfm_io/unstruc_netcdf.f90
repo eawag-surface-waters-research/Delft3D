@@ -50,6 +50,7 @@ use unstruc_version_module
 use io_ugrid
 use m_sediment
 use string_module
+use io_netcdf_acdd
 
 implicit none
 
@@ -541,6 +542,38 @@ subroutine unc_set_ncformat(iformatnumber)
 end subroutine unc_set_ncformat
 
 
+!> Wrapper function around ionc_add_time_coverage() to set the time coverage
+!! attributes for dflowfm's various output files (map/his, etc.).
+!! Input are parameters in seconds since refdat; this subroutine will take
+!! care of date calculations, time zones and string conversion.
+function unc_add_time_coverage(ncid, start_since_ref, end_since_ref, resolution) result(ierr)
+   use time_module, only: duration_to_string, datetime_to_string, ymd2reduced_jul
+   use m_flowtimes, only: refdat, tzone
+   use dfm_error
+   implicit none
+   integer,          intent(in   ) :: ncid            !< NetCDF dataset id
+   double precision, intent(in   ) :: start_since_ref !< Start of time coverage/output [seconds since refdat]
+   double precision, intent(in   ) :: end_since_ref   !< End   of time coverage/output [seconds since refdat]
+   double precision, intent(in   ) :: resolution      !< Time interval between outputs [seconds]
+   integer                         :: ierr            !< Result status, DFM_NOERR if successful.
+
+   logical :: success_
+   real(kind=hp) :: refdate_rjul
+
+   ierr = DFM_NOERR
+
+   success_ = ymd2reduced_jul(refdat, refdate_rjul)
+   if (.not. success_) then
+      ierr = DFM_WRONGINPUT
+      return
+   end if
+
+   ierr = ionc_add_time_coverage(ncid, datetime_to_string(refdate_rjul+start_since_ref/86400d0, int(tzone), int(mod(tzone,1d0)*60d0), ierr), &
+                                       datetime_to_string(refdate_rjul+end_since_ref/86400d0, int(tzone), int(mod(tzone,1d0)*60d0), ierr), &
+                                       duration_to_string(end_since_ref - start_since_ref), duration_to_string(resolution))
+end function unc_add_time_coverage
+
+
 !> Defines a NetCDF variable that has no spatial dimension, also setting the most used attributes.
 !! Typically only used for variables without a space dimension.
 !! For variables with either his-station-range or map-grid-range in the dimensions:
@@ -900,7 +933,7 @@ character(len=50) :: checkvars(5) ! small array to check on presence of some var
       checkvars(1:4) = (/ 'layer_sigma_z', 'layer_z', 'layer_sigma', 'flowelem_zcc' /)
       do i=1,4
          if (nf90_inq_varid( ncid, trim(mesh2dname)//'_'//trim(checkvars(i)), varid)==NF90_NOERR) then 
-            ierr = ncu_append_atts( ncid, id_var(2), 'coordinates', ' '//trim(mesh2dname)//'_'//trim(checkvars(i)))
+            ierr = ncu_append_atts( ncid, id_var(2), 'coordinates', trim(mesh2dname)//'_'//trim(checkvars(i)))
             exit
       end if
       end do
@@ -909,7 +942,7 @@ character(len=50) :: checkvars(5) ! small array to check on presence of some var
       checkvars(1:4) = (/ 'interface_sigma_z', 'interface_z', 'interface_sigma', 'flowelem_zw' /)
       do i=1,4
          if (nf90_inq_varid( ncid, trim(mesh2dname)//'_'//trim(checkvars(i)), varid)==NF90_NOERR) then 
-            ierr = ncu_append_atts( ncid, id_var(2), 'coordinates', ' '//trim(mesh2dname)//'_'//trim(checkvars(i)))
+            ierr = ncu_append_atts( ncid, id_var(2), 'coordinates', trim(mesh2dname)//'_'//trim(checkvars(i)))
             exit
       end if
       end do
@@ -4743,6 +4776,8 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
       ierr = ug_addglobalatts(mapids%ncid, ug_meta_fm)
       call unc_write_flowgeom_filepointer_ugrid(mapids%ncid, mapids%id_tsp, jabndnd_)
 
+      ierr = unc_add_time_coverage(mapids%ncid, ti_maps, ti_mape, ti_map)
+
       ! Current time t1
       if (unc_nounlimited > 0) then
          ierr = nf90_def_dim(mapids%ncid, 'time', ceiling((ti_mape-ti_maps)/ti_map) + 1, mapids%id_tsp%id_timedim)
@@ -8518,13 +8553,13 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
         ! For all 3D variables, expand the coordinate attribute with a vertical coordinate
         ierr = nf90_inq_varid( imapfile, 'LayCoord_cc', varid)
         if (ierr==NF90_NOERR) then 
-           zcc_elem = ' LayCoord_cc'
-           zw_elem = ' LayCoord_w'
-           zu_link = ' LayCoord_cc'   ! z/sigma coords are the same for u-positions and cc-positions.
-           zwu_link = ' LayCoord_w'
+           zcc_elem = 'LayCoord_cc'
+           zw_elem = 'LayCoord_w'
+           zu_link = 'LayCoord_cc'   ! z/sigma coords are the same for u-positions and cc-positions.
+           zwu_link = 'LayCoord_w'
         else
-           zcc_elem = ' FlowElem_zcc'
-           zw_elem = ' FlowElem_zw'
+           zcc_elem = 'FlowElem_zcc'
+           zw_elem = 'FlowElem_zw'
            zu_link = ''                        ! To be added, Issue UNST-4880
            zwu_link = ''
         endif
