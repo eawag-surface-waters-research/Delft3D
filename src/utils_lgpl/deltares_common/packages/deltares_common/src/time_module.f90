@@ -685,7 +685,7 @@ module time_module
          integer       :: ierr_
 
          ierr_ = -1
-         if (mjd2datetime(days,iyear,imonth,iday,ihour,imin,second)/=0) then
+         if (mjd2datetime_fix(days,iyear,imonth,iday,ihour,imin,second)/=0) then
             isec = nint(second) ! unfortunately rounding instead of truncating requires all of the following checks
             if (isec == 60) then
                imin = imin+1
@@ -806,6 +806,10 @@ module time_module
          if (present(frac)) then
              frac = mod(days,0.5_hp)
          endif
+         ! NOTE: AvD: I think the above is incorrect, since the introduction of the *modified* JD offset (2400000.5)
+         ! TODO: UNST-6300: To be reviewed: is this correct? (if so: remove temp routine mjd2jul_fix)
+         ! jul = nint(days+offset_reduced_jd) ! juldate whole nr is at 12:00, so round it to get correct day (for times in the night/morning)
+         ! frac = days+offset_reduced_jd-jul
       end function mjd2jul
 
       function jul2mjd(jul,frac) result(days)
@@ -871,6 +875,33 @@ module time_module
          second = mod(dayfrac*24*60*60,60.d0)
          success = 1
       end function mjd2datetime
+
+      !> Correct version of mjd2datetime, converting a modified Julian date into
+      !! separate integer date+time components.
+      !!
+      !! TODO: UNST-6300: move the fix below into the original routine and properly test it via testbenches + unit tests.
+      function mjd2datetime_fix(days,year,month,day,hour,minute,second) result(success)
+         implicit none
+         real(kind=hp), intent(in)  :: days
+         integer,  intent(out)      :: year, month, day
+         integer,  intent(out)      :: hour, minute
+         real(kind=hp), intent(out) :: second
+         real(kind=hp) :: dbjul, dayfrac
+         integer       :: jul
+         integer       :: success
+
+         success = 0
+         !jul = mjd2jul(days,dayfrac) ! <-- wrong
+         dbjul = days+offset_reduced_jd
+         jul = nint(dbjul) ! juldate whole nr is at 12:00, so round it to get correct day (for times in the night/morning)
+         dayfrac = dbjul-jul+.5d0
+
+         call JulianDateNumberToCalendarYearMonthDay(jul,year,month,day)
+         hour = int(dayfrac*24)
+         minute = int(mod(dayfrac*24*60,60.d0))
+         second = mod(dayfrac*24*60*60,60.d0)
+         success = 1
+      end function mjd2datetime_fix
 
       !> split a string in date, time and time zone part
       function split_date_time(string, date, time, tz) result(success)
