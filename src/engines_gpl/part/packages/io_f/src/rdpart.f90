@@ -1185,8 +1185,10 @@
             endif
          endif
 
-         call alloc ( "xpoltmp", xpoltmp, nrowsmax )
-         call alloc ( "ypoltmp", ypoltmp, nrowsmax )
+         if ( nrowsmax .gt. 0) then
+            call alloc ( "xpoltmp", xpoltmp, nrowsmax )
+            call alloc ( "ypoltmp", ypoltmp, nrowsmax )
+         endif
 
          if ( ndisapp .gt. 0 .and. nrowsmax .gt. 0) then
 !     allocate memory for the dispersant polygons, and read them into memory
