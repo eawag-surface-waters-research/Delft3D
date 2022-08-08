@@ -1185,9 +1185,8 @@
             endif
          endif
 
-         if ( nrowsmax .gt. 0) then
-            call alloc ( "xpoltmp", xpoltmp, nrowsmax )
-            call alloc ( "ypoltmp", ypoltmp, nrowsmax )
+         call alloc ( "xpoltmp", xpoltmp, max( nrowsmax, 1 ) )
+         call alloc ( "ypoltmp", ypoltmp, max( nrowsmax, 1 ) )
          endif
 
          if ( ndisapp .gt. 0 .and. nrowsmax .gt. 0) then
