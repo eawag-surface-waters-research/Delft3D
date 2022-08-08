@@ -44,7 +44,7 @@
    use m_flowtimes, only: time1
    use m_flowgeom, only: ndx, ln, kfs,bl, wcl, lnx
    use m_flow    , only: ifrctypuni, z0, hs, iturbulencemodel,kbot,ktop,kmx,zws,ucxq,ucyq,sa1,tem1,ucx,ucy,ucz,ndkx,s1,z0ucur,z0urou,ifrcutp,hu,frcu,ucx_mor,ucy_mor
-   use m_flowparameters, only: jasal, jatem, jawave, epshs, flowWithoutWaves
+   use m_flowparameters, only: jasal, jatem, jawave, epshs, flowWithoutWaves, epsz0
    use m_transport, only: constituents, ised1, isalt, itemp
    use m_turbulence, only:turkinepsws, rhowat
    use morphology_data_module
@@ -191,7 +191,7 @@
          !
          h0 = s1(k)-bl(k)
          !chezy = sag * log( 1.0d0 + h0/max(1d-5,ee*z0rou(k)) ) / vonkar
-         chezy = sag * log(h0/ee/z0rou(k) ) / vonkar                       ! consistency with getczz0
+         chezy = sag * log(h0/ee/max(epsz0,z0rou(k)) ) / vonkar                       ! consistency with getczz0
          !
          ! loop over the interfaces in the vertical
          !

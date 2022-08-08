@@ -54,7 +54,7 @@
 
    if (hu(LL)<=epshu) then   ! safety
       taubpuLL = 0d0
-      z0urouL = 1d-5
+      z0urouL = epsz0
       return
    endif
    waveps = 1d-4

@@ -134,6 +134,8 @@ subroutine flow_trachyinit()
        z0rou(k2) = z0rou(k2) + wcl(2,L)*z0urou(L)
     enddo
     !
+    z0rou=max(z0rou,epsz0)
+    !
                                                                ! Delft3D       sig        FM      slay        at centre cell (FM)         conversion FM to Delft3D style
                                                                !             0 = top             1 = top
     do k = 1, kmx                                              ! k = 1         -1/6      j=kmx      1                                       sig(1) = 1.0 - 0.5*slay(kmx)   - 0.5*slay(kmx-1)

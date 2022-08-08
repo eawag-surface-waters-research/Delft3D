@@ -61,7 +61,7 @@
    use m_sediment, only: stmpar, sedtra, stm_included, mtd, jatranspvel, sbcx_raw,sbcy_raw,sswx_raw,sswy_raw,sbwx_raw,sbwy_raw
    use m_flowgeom, only: bl, lnxi, lnx, ln, dxi, ndx, csu, snu, wcx1, wcx2, wcy1, wcy2, acl, nd, csu, snu, wcl, wu_mor
    use m_flow, only: s0, s1, u1, kmx, zws, hs, &
-      iturbulencemodel, z0urou, ifrcutp, hu, spirint, spiratx, spiraty, u_to_umain, qa, frcu_mor, javeg,jabaptist,cfuhi, epshu, taubxu
+      iturbulencemodel, z0urou, ifrcutp, hu, spirint, spiratx, spiraty, u_to_umain, qa, frcu_mor, javeg,jabaptist,cfuhi, epshu, taubxu, epsz0
    use m_flowtimes, only: julrefdat, dts, time1
    use unstruc_files, only: mdia
    use unstruc_channel_flow, only: network, t_branch, t_node, nt_LinkNode
@@ -422,6 +422,7 @@
             z0curk(k) = z0curk(k)+wcl(2,L)*z0u
          endif
       enddo
+      z0curk(k)=max(epsz0,z0curk(k))
    enddo
    !
    z0rouk = 0d0; taub = 0d0; dzdx=0d0; dzdy=0d0
@@ -709,13 +710,12 @@
       ! Calculate total (possibly wave enhanced) roughness
       !
       if (jawave > 0 .and. .not. flowWithoutWaves) then
-         z0rou = z0rouk(nm)
+         z0rou = max(epsz0,z0rouk(nm))
       else ! currents only
          z0rou = z0curk(nm)       ! currents+potentially trachy
       end if
       !
-      !chezy = sag * log( 1.0_fp + h1/max(1.0d-10,ee*z0rou) ) / vonkar
-      chezy = sag * log(h1/ee/z0rou) / vonkar                          ! consistent with getczz0, max not necessary
+      chezy = sag * log(h1/ee/z0rou) / vonkar                          ! consistent with getczz0
       !
       ! bed shear stress as used in flow, or
       ! skin fiction following Soulsby; "Bed shear stress under

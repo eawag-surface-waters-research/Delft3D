@@ -185,7 +185,7 @@
                   taubpuLL = ustbLL*ustbLL/umod                     ! use flow ustar
                   taubxuLL = rhoL*taubpuLL*umod
                else
-                  z0urouL  = 1d-5
+                  z0urouL  = epsz0
                   taubpuLL = 0d0
                   taubxuLL = 0d0
                endif
@@ -201,7 +201,7 @@
                z0urou(LL) = dzb*exp(-vonkar/sqcf - 1d0)            ! inverse of jaustarint == 1 above, updated ustar        
                z0urou(LL) = min(z0urou(LL), 10d0)
             else
-               z0urou(LL) = 1d-5
+               z0urou(LL) = epsz0
             endif   
             if (modind==9 .or. modind==0) then
                z0urou(LL) = z0urouL
@@ -239,7 +239,7 @@
             else
                taubu(LL)    = 0d0
                taubxu(LL)   = 0d0
-               z0urou(LL)   = 1d-5
+               z0urou(LL)   = epsz0
             endif
          endif
       endif          ! end jawave

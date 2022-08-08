@@ -314,6 +314,7 @@
  integer                           :: testdryflood      !< Flag for testing alternative drying flooding algoritm; 0 = standard, 1 =Delft3D-FLOW
  double precision                  :: epshu             !< minimum waterdepth for setting hu>0
  double precision                  :: epshs             !< minimum waterdepth for setting cfu
+ double precision                  :: epsz0             !< minimum value for roughness height
  double precision                  :: chkhuexpl         !< only for step_explicit:  check computed flux beneath this waterdepth
  double precision                  :: chkadvd           !< check advection  for 'drying' below this (upwind) waterdepth
  double precision                  :: chkdifd           !< check diffusion, only for jatransportautotimestepdiff== 1
@@ -841,6 +842,7 @@ subroutine default_flowparameters()
                          ! parameters controlling flooding/drying/solving
     epshu      = 1d-4    ! minimum waterdepth for setting hu>0
     epshs      = .2d0*epshu ! minimum waterdepth for setting cfu
+    epsz0      = 1d-5    ! minimum value for z0
     chkhuexpl  = 0.1d0   ! only for step_explicit:  check computed flux beneath this waterdepth
     chkadvd    = 0.1d0   ! check advection  for 'drying' below this (upwind) waterdepth
     chkdifd    = 0.01d0  ! check diffusion only for jatransportautotimestepdiff == 1

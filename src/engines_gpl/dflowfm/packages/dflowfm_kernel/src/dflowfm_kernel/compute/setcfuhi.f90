@@ -71,7 +71,7 @@
                 z0ucur(L) = h0*exp(-1d0 - vonkar*cz/sag)
              else
                 cfuhi(L) = 0d0
-                z0ucur(L) = 1d-5
+                z0ucur(L) = epsz0
              end if
              z0urou(L) = z0ucur(L)   ! 3D analogue in getustbcfhi
           endif

@@ -920,9 +920,9 @@ endif
     call aerr('eqcu(Ndkx)', ierr, ndkx ) ; eqcu = 0
  endif
 
- call realloc( z0ucur,lnx  , stat=ierr, keepExisting = .false., fill = 1d-5)  !1d-10
+ call realloc( z0ucur,lnx  , stat=ierr, keepExisting = .false., fill = epsz0)  !1d-10
  call aerr   ('z0ucur(lnx)', ierr, lnx)
- call realloc( z0urou,lnx  , stat=ierr, keepExisting = .false., fill = 1d-5)! 1d-10
+ call realloc( z0urou,lnx  , stat=ierr, keepExisting = .false., fill = epsz0)! 1d-10
  call aerr   ('z0urou(lnx)', ierr, lnx)
  call realloc( taus,    ndx,  stat=ierr, keepExisting = .false., fill = 0d0)
  call aerr   ('taus    (ndx)',     ierr, ndx)

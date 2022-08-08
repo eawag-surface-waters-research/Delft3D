@@ -655,7 +655,7 @@ subroutine fm_calksc()
     use m_flowtimes,            only: dt_user, tfac
     use m_flow,                 only: kmx, s1, u1, u0, hs, z0ucur, z0urou, ucx, ucy, frcu, ifrcutp, hu, ucx_mor, ucy_mor, zws, lnkx
     use m_flowgeom,             only: ndx, kfs, bl, ndxi, lnx, lnxi, wcl, ln
-    use m_flowparameters,       only: v2dwbl, jatrt, epshs, jawave, flowWithoutWaves
+    use m_flowparameters,       only: v2dwbl, jatrt, epshs, jawave, flowWithoutWaves, epsz0
     use m_sediment
     use m_bedform
     use m_rdtrt
@@ -746,6 +746,8 @@ subroutine fm_calksc()
        z0rou(k1) = z0rou(k1) + wcl(1,L)*z0urou(L)
        z0rou(k2) = z0rou(k2) + wcl(2,L)*z0urou(L)
     end do
+    !
+    z0rou=max(z0rou,epsz0)
     !
     ! Calculate roughness based on bedforms.
     ! Either through input duneheight, dunelength or 

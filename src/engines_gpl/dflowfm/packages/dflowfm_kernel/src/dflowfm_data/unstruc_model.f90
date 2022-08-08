@@ -1161,6 +1161,7 @@ subroutine readMDUFile(filename, istat)
     call prop_get_double(md_ptr, 'numerics', 'MinTimestepBreak', dtminbreak)
     call prop_get_double(md_ptr, 'numerics', 'MaxSSC', sscmax)
     call prop_get_double(md_ptr, 'numerics', 'Epshu' , epshu)
+    call prop_get_double(md_ptr, 'numerics', 'Epsz0' , epsz0)
     epshs = .2d0*epshu ! minimum waterdepth for setting cfu
 
     call prop_get_double(md_ptr, 'numerics', 'SobekDFM_umin', sbkdfm_umin)
@@ -4235,8 +4236,6 @@ else
 end if
 
 end subroutine getOutputTimeArrays
-
-
 
    end module unstruc_model
 

@@ -72,7 +72,7 @@
       if (huL<=epshu) then
          taubu(L)  = 0d0 ! flow
          taubxu(L) = 0d0 ! flow
-         z0urou(L) = 1d-5 ! flow 
+         z0urou(L) = epsz0 ! flow 
          cfwavhi(L)= 0d0 
          if (modind==9) then
             cfhi_vanrijn(L) = 0d0 
