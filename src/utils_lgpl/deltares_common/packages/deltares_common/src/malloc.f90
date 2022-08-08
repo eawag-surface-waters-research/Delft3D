@@ -103,6 +103,7 @@ interface realloc
    module procedure reallocCharacter2x
    module procedure reallocCharacter3
    module procedure reallocCharacter4
+   module procedure reallocString
    module procedure reallocReal
    module procedure reallocReal2
    module procedure reallocReal2x
@@ -1504,6 +1505,74 @@ subroutine reallocCharacter4(arr, uindex, lindex, stat, fill, shift, keepExistin
 999 continue
    if (present(stat)) stat = localErr
 end subroutine reallocCharacter4
+!
+!
+!
+!===============================================================================
+!> Reallocates a single allocatable string.
+!! NOTE: Do not confuse this with an allocatable array of strings!
+subroutine reallocString(string, newlen, stat, fill, shift, keepExisting)
+   implicit none
+   character(len=:), allocatable, intent(inout) :: string
+   integer, intent(in)                          :: newlen
+   integer, intent(out), optional               :: stat
+   character(len=*), intent(in), optional       :: fill
+   integer, intent(in), optional                :: shift
+   logical, intent(in), optional                :: keepExisting
+
+   character(len=:), allocatable                :: b
+   integer        :: curlen, minlen, shift_
+   integer        :: i, lenfill, numrep
+   integer        :: localErr
+   logical        :: docopy
+   logical        :: equalSize
+
+   if (present(shift)) then
+      shift_ = shift
+   else
+      shift_ = 0
+   endif
+
+   if (present(keepExisting)) then
+      docopy = keepExisting
+   else
+      docopy = .true.
+   end if
+
+   if (present(stat)) stat = 0
+   localErr = 0
+   if (allocated(string)) then
+      curlen = len(string)
+      equalSize = (newlen == curlen)
+      if (equalSize .and. (docopy .or. .not. present(fill)) .and. shift_==0) then
+         goto 999 ! output=input
+      end if
+!
+      if (docopy) then
+         minlen = min(curlen + shift_, newlen)
+         allocate(character(len=minlen) :: b)
+         b(1+shift_:minlen) = string(1:minlen-shift_)
+      endif
+      if (.not.equalSize) deallocate(string, stat = localErr)
+   endif
+   if (.not.allocated(string) .and. localErr==0) then
+       allocate(character(len=newlen) :: string, stat = localErr)
+   endif
+   if (present(fill) .and. localErr==0) then
+      lenfill = len(fill)
+      numrep  = int(newlen/lenfill)
+      do i=1,newlen,lenfill
+         string(i:max(newlen, i+lenfill-1)) = fill
+      end do
+   end if
+
+   if (allocated(b) .and. localErr==0 .and. len(b)>0) then
+      string(1+shift_:minlen) = b(1+shift_:minlen)
+      deallocate(b, stat = localErr)
+   endif
+999 continue
+   if (present(stat)) stat = localErr
+end subroutine reallocString
 !
 !
 !

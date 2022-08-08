@@ -94,6 +94,39 @@ integer, parameter :: UNC_LOC_WU  = 16 !< Data location: vertical viscosity poin
 integer, parameter :: MAX_ID_VAR = 4   !< Maximum dimension for id_var arrays
 
 type(t_ug_meta) :: ug_meta_fm  !< Meta information on file.
+character(len=255) :: unc_metadatafile !< Input metadata NetCDF file to be included into other NetCDF output files, (e.g., *_meta.nc)
+character(len=64)  :: unc_meta_md_ident !< Identifier of the model, provided via unstruc_model, to be used in pattern substitution of attribute values.
+character(len=64)  :: unc_meta_net_file !< Filename of input net/grid file, provided via unstruc_model, to be used in pattern substitution of attribute values.
+
+!> List of attribute names that are forbidden to be set via a custom metadata file by the user.
+character(len=32), dimension(18), parameter :: unc_meta_forbidden_atts = [character(len=32) :: &
+   'references', &
+   'source', &
+   'history', &
+   'Conventions', &
+   'date_created', &
+   'date_modified', &
+   'geospatial_bounds', &
+   'geospatial_bounds_crs', &
+   'geospatial_lat_min', &
+   'geospatial_lat_max', &
+   'geospatial_lat_units', &
+   'geospatial_lon_min', &
+   'geospatial_lon_max', &
+   'geospatial_lon_units', &
+   'time_coverage_start', &
+   'time_coverage_end', &
+   'time_coverage_duration', &
+   'time_coverage_resolution' &
+]
+
+!> List of attribute names that can be set via environment variables.
+!! Associated environment variable name for a particular attname is DFM_META_<str_toupper(attname)>.
+character(len=32), dimension(3), parameter :: unc_meta_fromenv_atts = [character(len=32) :: &
+   'creator_name', &
+   'creator_email', &
+   'creator_url' &
+]
 
 ! This type collects the time and space administration relevant for repeat writes to
 ! netcdf files in FM
@@ -514,6 +547,9 @@ use unstruc_version_module
    ug_meta_fm%references  = trim(unstruc_company_url)
    ug_meta_fm%version     = trim(unstruc_version)
    ug_meta_fm%modelname   = ''
+   unc_metadatafile = ''
+   unc_meta_md_ident = ''
+   unc_meta_net_file = ''
 
    ierr = ug_reset_mesh(mapids%id_tsp%meshids1d)
    ierr = ug_reset_mesh(mapids%id_tsp%meshids2d)
@@ -572,6 +608,126 @@ function unc_add_time_coverage(ncid, start_since_ref, end_since_ref, resolution)
                                        datetime_to_string(refdate_rjul+end_since_ref/86400d0, int(tzone), int(mod(tzone,1d0)*60d0), ierr), &
                                        duration_to_string(end_since_ref - start_since_ref), duration_to_string(resolution))
 end function unc_add_time_coverage
+
+
+!> Adds additional metadata into an output file, given a separate metadata NetCDF file.
+function unc_meta_add_from_file(ncid, ncmeta_filename) result(ierr)
+   use dfm_error
+   use netcdf_utils, only: ncu_copy_atts
+
+   integer,          intent(in   ) :: ncid !< NetCDF dataset ID to write into
+   character(len=*), intent(in   ) :: ncmeta_filename !< Filename of NetCDF containing (only) metadata.
+   integer                         :: ierr !< Result status (DFM_NOERR if successful)
+
+   integer :: ncid_meta
+
+   ierr = DFM_NOERR
+
+   if (len_trim(ncmeta_filename) == 0) then
+      return
+   end if
+
+   ierr = unc_open(ncmeta_filename, nf90_nowrite, ncid_meta)
+   if (ierr /= nf90_noerr) then
+      call mess(LEVEL_ERROR, 'Could not open NetCDF metadata file '''//trim(ncmeta_filename)//''' for inclusion in output files.')
+      return
+   end if
+
+   ierr = ncu_copy_atts(ncid_meta, ncid, nf90_global, nf90_global, unc_meta_forbidden_atts, unc_meta_fill_placeholders)
+
+   ierr = unc_close(ncid_meta)
+
+end function unc_meta_add_from_file
+
+
+!> Adds some standard metadata into an output file, if set as environment variables.
+function unc_meta_add_from_environment(ncid) result(ierr)
+   use dfm_error
+   use netcdf_utils, only: ncu_copy_atts
+   use m_alloc
+
+   integer,          intent(in   ) :: ncid !< NetCDF dataset ID to write into
+   integer                         :: ierr !< Result status (DFM_NOERR if successful)
+
+   character(len=9), parameter :: env_prefix = 'DFM_META_'
+   integer :: iatt, natt, vallen, istat, ierr_
+   character(len=32) :: envvar
+   character(len=:), allocatable :: envval
+
+   ierr = DFM_NOERR
+
+   natt = size(unc_meta_fromenv_atts)
+   do iatt=1,natt
+      envvar = env_prefix // str_toupper(trim(unc_meta_fromenv_atts(iatt)))
+      call get_environment_variable (envvar, length=vallen)
+      call realloc(envval, vallen, keepExisting=.false., fill=' ')
+      call get_environment_variable (envvar, envval, status = istat)
+      if (istat <= 0) then
+         if (istat < 0) then
+            call mess(LEVEL_WARN, 'While adding metadata from environment variable '//trim(envvar)//': value is too long,  will be trimmed in output file.')
+            continue
+         end if
+         if (len_trim(envval) > 0) then
+            ierr_ = unc_meta_fill_placeholders(trim(unc_meta_fromenv_atts(iatt)), envval)
+            ierr_ = nf90_put_att(ncid, nf90_global, trim(unc_meta_fromenv_atts(iatt)), trim(envval))
+            if (ierr_ /= nf90_noerr) then
+               call mess(LEVEL_WARN, 'While adding metadata from environment variable '//trim(envvar)//': error while putting into output file, error code:', ierr_)
+               ierr = ierr_ ! Remember error occurred
+            end if
+         end if
+      endif
+   end do
+
+end function unc_meta_add_from_environment
+
+
+!> Returns the given valuetext with any placeholder variables substituted by the actual value.
+!! Currently supported placeholders:
+!!  * ${dfm_md_ident}: Model identifier (MDU name without extension)
+!!  * ${dfm_net_file}: Net/grid filename (as specified via MDU NetFile, without the full directory path if present.)
+!!  * ${dfm_program_name}: "D-Flow FM"
+!!
+!! NOTE: this function is an implementation of the netcdf_utils::ncu_apply_to_att interface.
+function unc_meta_fill_placeholders(attname, valuetext) result(ierr)
+   use dfm_error
+   use unstruc_version_module, only: unstruc_program
+
+   character(len=*),              intent(in   ) :: attname   !< attribute name
+   character(len=:), allocatable, intent(inout) :: valuetext !< attribute value text, placeholders will be replaced in-place.
+   integer                                      :: ierr !< Result status (DFM_NOERR if successful)
+
+   ierr = DFM_NOERR
+
+   valuetext = replace_string(valuetext, '${dfm_md_ident}', trim(unc_meta_md_ident))
+   valuetext = replace_string(valuetext, '${dfm_net_file}', trim(unc_meta_net_file))
+   valuetext = replace_string(valuetext, '${dfm_program_name}', trim(unstruc_program))
+end function unc_meta_fill_placeholders
+
+
+!> Adds user-defined metadata into an output file.
+!! Done in two steps:
+!! 1. read from a NetCDF metadata file (if provided).
+!! 2. read from some environment variables (if set).
+function unc_meta_add_user_defined(ncid) result(ierr)
+   use dfm_error
+   integer,          intent(in   ) :: ncid !< NetCDF dataset ID to write into
+   integer                         :: ierr !< Result status (DFM_NOERR if successful)
+
+   integer :: ierr_
+   
+   ierr = DFM_NOERR
+   
+   ierr_ = unc_meta_add_from_file(ncid, unc_metadatafile)
+   if (ierr_ /= DFM_NOERR) then
+      ierr = ierr_
+   end if
+
+   ierr_ = unc_meta_add_from_environment(ncid)
+   if (ierr_ /= DFM_NOERR) then
+      ierr = ierr_
+   end if
+
+end function unc_meta_add_user_defined
 
 
 !> Defines a NetCDF variable that has no spatial dimension, also setting the most used attributes.
@@ -4774,6 +4930,9 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
       if (timon) call timstrt ( "unc_write_flowgeom_filepointer_ugrid INIT", handle_extra(71))
 
       ierr = ug_addglobalatts(mapids%ncid, ug_meta_fm)
+
+      ierr = unc_meta_add_user_defined(mapids%ncid)
+
       call unc_write_flowgeom_filepointer_ugrid(mapids%ncid, mapids%id_tsp, jabndnd_)
 
       ierr = unc_add_time_coverage(mapids%ncid, ti_maps, ti_mape, ti_map)

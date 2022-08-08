@@ -48,6 +48,7 @@ public :: ncu_get_var_attset
 public :: ncu_put_var_attset
 public :: ncu_att_to_varid
 public :: ncu_att_to_dimid
+public :: ncu_apply_to_att
 
 integer, parameter :: maxMessageLen = 1024  ! copy taken from io_ugrid
 character(len=maxMessageLen) :: ncu_messagestr !< Placeholder string for storing diagnostic messages. /see{ug_get_message}
@@ -66,6 +67,14 @@ interface ncu_inq_var_fill
    module procedure ncu_inq_var_fill_int4
    module procedure ncu_inq_var_fill_real8
 end interface ncu_inq_var_fill
+
+abstract interface
+   function ncu_apply_to_att(attname, attvalue) result(ierr)
+      character(len=*),              intent(in   ) :: attname  !< Name of the attribute, cannot be changed.
+      character(len=:), allocatable, intent(inout) :: attvalue !< value of the attribute, can be changed. Should be an allocatable character string.
+      integer                                      :: ierr     !< Result status (recommended IONC_NOERR if successful)
+   end function ncu_apply_to_att
+end interface
 
    contains
 
@@ -179,17 +188,23 @@ end function ncu_restore_mode
 !     nf90_noerr if all okay, otherwise an error code
 !!
 !! Note: The variable in the output file must already exist.
-function ncu_copy_atts( ncidin, ncidout, varidin, varidout ) result(ierr)
-   integer, intent(in)            :: ncidin   !< ID of the input NetCDF file
-   integer, intent(in)            :: ncidout  !< ID of the output NetCDF file
-   integer, intent(in)            :: varidin  !< ID of the variable in the input file, or NF90_GLOBAL for global attributes.
-   integer, intent(in)            :: varidout !< ID of the variable in the output file, or NF90_GLOBAL for global attributes.
+function ncu_copy_atts( ncidin, ncidout, varidin, varidout, forbidden_atts, apply_fun) result(ierr)
+   use m_alloc
+   integer,                               intent(in   ) :: ncidin   !< ID of the input NetCDF file
+   integer,                               intent(in   ) :: ncidout  !< ID of the output NetCDF file
+   integer,                               intent(in   ) :: varidin  !< ID of the variable in the input file, or NF90_GLOBAL for global attributes.
+   integer,                               intent(in   ) :: varidout !< ID of the variable in the output file, or NF90_GLOBAL for global attributes.
+   character(len=*),            optional, intent(in   ) :: forbidden_atts(:) !< (Optional) list of forbidden attribute names, will be skipped for copying.
+   procedure(ncu_apply_to_att), optional                :: apply_fun !< (Optional) function pointer to facilitate changing the attribute values.
 
    integer                        :: ierr
    integer                        :: i
 
    character(len=nf90_max_name)   :: attname
    integer                        :: natts
+   integer                        :: atttype   !< attribute data type
+   integer                        :: attlen    !< attribute length
+   character(len=:), allocatable  :: atttext   !< attribute value
 
    ierr = -1
 
@@ -207,7 +222,25 @@ function ncu_copy_atts( ncidin, ncidout, varidin, varidout ) result(ierr)
          return
       endif
 
-      ierr = nf90_copy_att( ncidin, varidin, attname, ncidout, varidout )
+      if (present(forbidden_atts)) then
+         if (any(forbidden_atts==trim(attname))) then
+            cycle
+         end if
+      end if
+
+      atttype = -1
+      ierr = nf90_inquire_attribute(ncidin, varidin, attname, xtype=atttype, len=attlen)
+      if (ierr == nf90_noerr .and. atttype == NF90_CHAR .and. present(apply_fun)) then
+         ! Special case: do not just copy, but apply a user-provided function to the attribute text first.
+         call realloc(atttext, attlen, keepExisting=.false., fill=' ')
+         ierr = nf90_get_att(ncidin, varidin, attname, atttext)
+         ierr = apply_fun(attname, atttext)
+         ierr = nf90_put_att(ncidout, varidout, attname, atttext)
+      else
+         ! Standard case: copy attribute+value as-is from input dataset to output dataset.
+         ierr = nf90_copy_att( ncidin, varidin, attname, ncidout, varidout )
+      end if
+
       if ( ierr /= nf90_noerr ) then
          return
       endif

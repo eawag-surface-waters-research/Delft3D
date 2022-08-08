@@ -1534,6 +1534,9 @@ end subroutine setfoustandardname
         ierr = unc_create(trim(FouOutputFile), 0, fileids%ncid)
         if (ierr == NF90_NOERR) ierr = ug_addglobalatts(fileids%ncid, ug_meta_fm)
         if (ierr /= NF90_NOERR) goto 99
+
+        ierr = unc_meta_add_user_defined(fileids%ncid)
+
         call unc_write_flowgeom_filepointer_ugrid(fileids%ncid, fileids%id_tsp,jafou = .true.)
 
         call realloc(all_unc_loc, nofou)

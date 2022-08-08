@@ -60,6 +60,7 @@ module string_module
    public :: remove_substr
    public :: remove_chars
    public :: replace_char
+   public :: replace_string
    public :: splitstr
    public :: strsplit
    public :: char_array_to_string_by_len
@@ -669,6 +670,55 @@ module string_module
          enddo
       end subroutine replace_char      
 
+
+      !> Replace substring in a total string by a replacement string.
+      !! If the search string occurs multiple times, all will be replaced.
+      function replace_string(totalstring, searchstring, replstring) result(resultstring)
+         use m_alloc
+
+         character(len=*), intent(in   ) :: totalstring  !< Input string in which searching is done.
+         character(len=*), intent(in   ) :: searchstring !< Search string, will be used completely, without trimming.
+         character(len=*), intent(in   ) :: replstring   !< Replacement string, will be used completely, without trimming.
+         character(len=:), allocatable   :: resultstring !< Resulting string containing all of totalstring, and all occurrences of searchstring replaced by replstring.
+         !
+         integer :: istart, ifound, iresult, ntotal, nsearch, nrepl, nresult
+         !
+         istart  = 1
+         iresult = 1
+         ntotal  = len(totalstring)
+         nsearch = len(searchstring)
+         nrepl   = len(replstring)
+
+         allocate(character(len=ntotal) :: resultstring)
+         nresult = len(resultstring)
+
+         do while (istart <= ntotal)
+            ifound = index(totalstring(istart:), searchstring)
+            if (ifound > 0) then
+               ! Copy substring preceding the newly found match
+               resultstring(iresult:iresult+ifound-2) = totalstring(istart:istart+ifound-2)
+               iresult = iresult+ifound-1
+               ! Next, put the replacement string
+               if (iresult+nrepl-1 > nresult) then
+                  call realloc(resultstring, iresult+nrepl-1, keepExisting=.true.)
+                  nresult = iresult+nrepl-1
+               end if
+               resultstring(iresult:iresult+nrepl-1) = replstring
+               iresult = iresult+nrepl
+               istart = istart+ifound-1+nsearch
+            else
+               exit
+            end if
+         end do
+         ! End with appending the last remaining part of the input string.
+         if (iresult+ntotal-istart > nresult) then
+            call realloc(resultstring, iresult+ntotal-istart, keepExisting=.true.)
+            nresult = iresult+ntotal-istart
+         end if
+         resultstring(iresult:iresult+ntotal-istart) = totalstring(istart:ntotal)
+      end function replace_string
+
+      
       !> For each character in the given set, remove any occurrence in the subject
       subroutine remove_chars(r,charset) 
          character(len=*), intent(inout) :: r               !< subject on which to perform removal

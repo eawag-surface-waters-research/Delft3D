@@ -434,6 +434,8 @@ subroutine loadModel(filename)
     use unstruc_caching
     use m_longculverts
     use unstruc_channel_flow
+    use unstruc_netcdf, only: unc_meta_net_file
+    use system_utils, only: remove_path
 
     interface
        subroutine realan(mlan, antot)
@@ -485,6 +487,10 @@ subroutine loadModel(filename)
     timerHandle = 0
     call timstrt('Load network', timerHandle)
     call loadNetwork(md_netfile, istat, jadoorladen)
+    if (istat == 0) then
+       ! Pass a copy of netfile name to unstruc_netcdf to avoid cyclic dependency.
+       call remove_path(md_netfile, unc_meta_net_file)
+    end if
     call timstop(timerHandle)
 
     network%sferic = jsferic==1
@@ -705,7 +711,7 @@ subroutine readMDUFile(filename, istat)
     use m_heatfluxes
     use m_fm_wq_processes
     use m_xbeach_avgoutput
-    use unstruc_netcdf, only: UNC_CONV_CFOLD, UNC_CONV_UGRID, unc_set_ncformat, unc_writeopts, UG_WRITE_LATLON, UG_WRITE_NOOPTS, unc_nounlimited, unc_noforcedflush
+    use unstruc_netcdf, only: UNC_CONV_CFOLD, UNC_CONV_UGRID, unc_set_ncformat, unc_writeopts, UG_WRITE_LATLON, UG_WRITE_NOOPTS, unc_nounlimited, unc_noforcedflush, unc_metadatafile
     use unstruc_version_module
     use dfm_error
     use MessageHandling
@@ -1698,7 +1704,6 @@ subroutine readMDUFile(filename, istat)
     call prop_get_string(md_ptr, 'output', 'FouFile', md_foufile, success)
     call prop_get_integer(md_ptr, 'output', 'FouUpdateStep', md_fou_step, success)
 
-
     call prop_get_string(md_ptr, 'output', 'HisFile', md_hisfile, success)
     ti_his_array = 0d0
     call prop_get_doubles(md_ptr, 'output', 'HisInterval'   ,  ti_his_array, 3, success)
@@ -1745,6 +1750,8 @@ subroutine readMDUFile(filename, istat)
     if (success .and. ibuf > 0) then
        unc_writeopts = UG_WRITE_LATLON
     end if
+
+    call prop_get_string(md_ptr, 'output', 'MetaDataFile', unc_metadatafile, success)
 
     call prop_get_integer(md_ptr, 'output', 'Wrihis_balance', jahisbal, success)
     call prop_get_integer(md_ptr, 'output', 'Wrihis_sourcesink', jahissourcesink, success)
@@ -2571,7 +2578,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     use network_data,            only : zkuni, Dcenterinside, removesmalllinkstrsh, cosphiutrsh
     use m_sferic,                only : anglat, anglon, jsferic, jasfer3D
     use m_physcoef
-    use unstruc_netcdf, only: unc_writeopts, UG_WRITE_LATLON, UG_WRITE_NOOPTS, unc_nounlimited, unc_noforcedflush
+    use unstruc_netcdf, only: unc_writeopts, UG_WRITE_LATLON, UG_WRITE_NOOPTS, unc_nounlimited, unc_noforcedflush, unc_metadatafile
     use unstruc_version_module
     use m_equatorial
     use m_sediment
@@ -3709,6 +3716,9 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
        end if
        call prop_set(prop_ptr, 'output', 'NcWriteLatLon', ibuf, 'Write extra lat-lon coordinates for all projected coordinate variables in each NetCDF file (for CF-compliancy).')
     end if
+    if (writeall .or. len_trim(unc_metadatafile) > 0) then
+       call prop_set(prop_ptr, 'output', 'MetaDataFile', unc_metadatafile, 'Metadata NetCDF file with user-defined global dataset attributes (*_meta.nc).')
+    end if
 
     if (writeall .or. jahisbal /= 1) then
        call prop_set(prop_ptr, 'output', 'Wrihis_balance', jahisbal, 'Write mass balance totals to his file (1: yes, 0: no)' )
@@ -4072,6 +4082,7 @@ subroutine setmd_ident(filename)
 use m_partitioninfo
 USE MessageHandling
 use string_module, only: get_dirsep
+use unstruc_netcdf, only: unc_meta_md_ident
 
 character(*),     intent(inout) :: filename !< Name of file to be read (in current directory or with full path).
                                             !! in case of parallel computing, the partition number is inserted.
@@ -4098,6 +4109,9 @@ else
 
    !  NOTE: The switch_dia_file() call is now in loadModel().
 end if
+
+! Pass a copy to unstruc_netcdf to avoid cyclic dependency.
+unc_meta_md_ident = md_ident
 
 end subroutine setmd_ident
 
