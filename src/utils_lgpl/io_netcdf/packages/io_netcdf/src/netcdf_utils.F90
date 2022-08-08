@@ -239,7 +239,7 @@ function ncu_append_atts(ncid, varid, attname, extension, separator, check_prese
    ierr = -1
 
    if (present(separator)) then
-      separator_ = separator ! Intentionally don't trim/adjust!
+      separator_ = separator ! Intentionally don't trim/adjustl!
    else
       separator_ = ' '
    end if
