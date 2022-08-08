@@ -711,7 +711,7 @@ subroutine readMDUFile(filename, istat)
     use m_heatfluxes
     use m_fm_wq_processes
     use m_xbeach_avgoutput
-    use unstruc_netcdf, only: UNC_CONV_CFOLD, UNC_CONV_UGRID, unc_set_ncformat, unc_writeopts, UG_WRITE_LATLON, UG_WRITE_NOOPTS, unc_nounlimited, unc_noforcedflush, unc_metadatafile
+    use unstruc_netcdf, only: UNC_CONV_CFOLD, UNC_CONV_UGRID, unc_set_ncformat, unc_writeopts, UG_WRITE_LATLON, UG_WRITE_NOOPTS, unc_nounlimited, unc_noforcedflush, unc_uuidgen, unc_metadatafile
     use unstruc_version_module
     use dfm_error
     use MessageHandling
@@ -1753,6 +1753,8 @@ subroutine readMDUFile(filename, istat)
 
     call prop_get_string(md_ptr, 'output', 'MetaDataFile', unc_metadatafile, success)
 
+    call prop_get_integer(md_ptr, 'output', 'GenerateUUID', unc_uuidgen, success)
+
     call prop_get_integer(md_ptr, 'output', 'Wrihis_balance', jahisbal, success)
     call prop_get_integer(md_ptr, 'output', 'Wrihis_sourcesink', jahissourcesink, success)
     call prop_get_integer(md_ptr, 'output', 'Wrihis_structure_gen', jahiscgen, success)
@@ -2578,7 +2580,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     use network_data,            only : zkuni, Dcenterinside, removesmalllinkstrsh, cosphiutrsh
     use m_sferic,                only : anglat, anglon, jsferic, jasfer3D
     use m_physcoef
-    use unstruc_netcdf, only: unc_writeopts, UG_WRITE_LATLON, UG_WRITE_NOOPTS, unc_nounlimited, unc_noforcedflush, unc_metadatafile
+    use unstruc_netcdf, only: unc_writeopts, UG_WRITE_LATLON, UG_WRITE_NOOPTS, unc_nounlimited, unc_noforcedflush, unc_uuidgen, unc_metadatafile
     use unstruc_version_module
     use m_equatorial
     use m_sediment
@@ -3718,6 +3720,9 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     end if
     if (writeall .or. len_trim(unc_metadatafile) > 0) then
        call prop_set(prop_ptr, 'output', 'MetaDataFile', unc_metadatafile, 'Metadata NetCDF file with user-defined global dataset attributes (*_meta.nc).')
+    end if
+    if (writeall .or. unc_uuidgen /= 0) then
+       call prop_set(prop_ptr, 'output', 'GenerateUUID', unc_uuidgen, 'Generate UUID as unique dataset identifier and include in output NetCDF files.')
     end if
 
     if (writeall .or. jahisbal /= 1) then

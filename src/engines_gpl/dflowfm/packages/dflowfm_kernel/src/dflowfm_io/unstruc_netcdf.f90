@@ -51,7 +51,6 @@ use io_ugrid
 use m_sediment
 use string_module
 use io_netcdf_acdd
-
 implicit none
 
 integer            :: nerr_
@@ -80,6 +79,7 @@ integer            :: unc_cmode      = 0 !< Default NetCDF creation mode flag va
 integer            :: unc_nounlimited    !< NetCDF output with time dimension set to full length of simulation, avoids "unlimited dimension" overhead. Often requires md_ncformat=4/unc_cmode=NF90_NETCDF4.
 integer            :: unc_noforcedflush  !< Do not force NetCDF file flushing every output timestep (map-like files).
 integer            :: unc_writeopts !< Default write options (currently only: UG_WRITE_LATLON)
+integer            :: unc_uuidgen        !< Generate UUID and store into each newly created NetCDF file.
 
 ! The following location codes generalize for 1D/2D/3D models. See function unc_def_var_map for the details.
 integer, parameter :: UNC_LOC_CN  = 1  !< Data location: corner point.
@@ -99,11 +99,12 @@ character(len=64)  :: unc_meta_md_ident !< Identifier of the model, provided via
 character(len=64)  :: unc_meta_net_file !< Filename of input net/grid file, provided via unstruc_model, to be used in pattern substitution of attribute values.
 
 !> List of attribute names that are forbidden to be set via a custom metadata file by the user.
-character(len=32), dimension(18), parameter :: unc_meta_forbidden_atts = [character(len=32) :: &
+character(len=32), dimension(19), parameter :: unc_meta_forbidden_atts = [character(len=32) :: &
    'references', &
    'source', &
    'history', &
    'Conventions', &
+   'uuid', &
    'date_created', &
    'date_modified', &
    'geospatial_bounds', &
@@ -559,6 +560,7 @@ use unstruc_version_module
    unc_writeopts          = UG_WRITE_NOOPTS ! Default: 0, no special write options.
    unc_nounlimited        = 0               !< NetCDF output with time dimension set to full length of simulation, avoids "unlimited dimension" overhead. Often requires md_ncformat=4/unc_cmode=NF90_NETCDF4.
    unc_noforcedflush      = 0               !< Do not force NetCDF file flushing every output timestep (map-like files).
+   unc_uuidgen            = 1
 end subroutine init_unstruc_netcdf
 
 !> Sets the default NetCDF cmode flag values for all D-Flow FM's created files.
@@ -576,6 +578,22 @@ subroutine unc_set_ncformat(iformatnumber)
 
    call unc_set_cmode(ncu_format_to_cmode(iformatnumber))
 end subroutine unc_set_ncformat
+
+
+function unc_add_uuid(ncid) result (ierr)
+   use dlwq_netcdf, only: getuuid
+   use dfm_error
+   integer,          intent(in   ) :: ncid            !< NetCDF dataset id
+   integer                         :: ierr            !< Result status, DFM_NOERR if successful.
+
+   character(len=40) :: uuid
+
+   ierr = DFM_NOERR
+
+   ! Generate the UUID and store it as an attibute
+   call getuuid(uuid)
+   ierr = nf90_put_att(ncid, nf90_global, "uuid", uuid)
+end function unc_add_uuid
 
 
 !> Wrapper function around ionc_add_time_coverage() to set the time coverage
@@ -2347,6 +2365,10 @@ subroutine unc_addglobalatts(ncid)
     ierr = nf90_put_att(ncid, nf90_global,  'date_modified', cdate(1:4)//'-'//cdate(5:6)//'-'//cdate(7:8)//'T'//ctime(1:2)//':'//ctime(3:4)//':'//ctime(5:6)//czone(1:5))
 
     ierr = nf90_put_att(ncid, nf90_global,  'Conventions', 'CF-1.5 Deltares-0.1')
+
+    if (unc_uuidgen /= 0) then
+       ierr = unc_add_uuid(ncid)
+    end if
 
     ! Leave the dataset in the same mode as we got it.
     if (jaInDefine == 0) then
