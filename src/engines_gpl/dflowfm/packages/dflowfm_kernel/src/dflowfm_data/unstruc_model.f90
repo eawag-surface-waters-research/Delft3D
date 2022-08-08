@@ -2988,7 +2988,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
        !call prop_set(prop_ptr, 'numerics', 'Noderivedtypes', Noderivedtypes,  '0=use der. types. , 1,2,3,4,5 etc = do use them')
     end if
     if (writeall .or. jposhchk /= 2) then
-       call prop_set(prop_ptr, 'numerics', 'jposhchk',       jposhchk, 'Check for positive waterdepth (0: no, 1: 0.7*dts, just redo, 2: 1.0*dts, close all links, 3: 0.7*dts, close all links, 4: 1.0*dts, reduce au, 5: 0.7*dts, reduce au)')
+       call prop_set(prop_ptr, 'numerics', 'jposhchk',       jposhchk, 'Check for positive waterdepth (0: no, 1: 0.7*dts, just redo, 2: 1.0*dts, close all links, 3: 0.7*dts, close all links, 4: 1.0*dts, reduce au, 5: 0.7*dts, reduce au, 6: 1.0*dts, close outflowing links, 7: 0.7*dts, close outflowing links)')
     end if
 
     if (writeall .or. (len_trim(md_fixedweirfile) > 0)) then
