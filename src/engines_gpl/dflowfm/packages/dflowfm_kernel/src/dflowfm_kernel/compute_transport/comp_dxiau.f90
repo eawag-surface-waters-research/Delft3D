@@ -77,36 +77,40 @@ subroutine comp_dxiAu()                          ! or: setdxiau
          end do
       else
          do LL=1,Lnx
-            call getLbotLtop(LL,Lb,Lt)
-            do L=Lb,Lt
-               if (au(L) > 0d0) then
-                  k1 = ln(1,L)
-                  k2 = ln(2,L)
-                  hh =  min( zws(k1)-zws(k1-1), zws(k2)-zws(k2-1), hu(L)-hu(L-1) )
-                  if (chkdifd > 0 .and. hh < chkdifd) then
-                      hh = hh*hh/chkdifd
+            if (au(LL) > 0d0) then
+               call getLbotLtop(LL,Lb,Lt)
+               do L=Lb,Lt
+                  if (au(L) > 0d0) then
+                     k1 = ln(1,L)
+                     k2 = ln(2,L)
+                     hh =  min( zws(k1)-zws(k1-1), zws(k2)-zws(k2-1), hu(L)-hu(L-1) )
+                     if (chkdifd > 0 .and. hh < chkdifd) then
+                         hh = hh*hh/chkdifd
+                     endif
+                     dxiAu(L) = dxi(LL)*wu(LL)*hh
+                  else
+                     dxiAu(L) = 0d0
                   endif
-                  dxiAu(L) = dxi(LL)*wu(LL)*hh
-               else
-                  dxiAu(L) = 0d0
-               endif
-            end do
+               end do
+            endif 
          end do
       end if
    end if
 
-   if (ifixedweirscheme >= 7 .or. ifixedweirscheme <= 9) then  ! reduce diff. area's in tabelb and villemonte that diffused through dikes originally  
+   if (ifixedweirscheme >= 7 .and. ifixedweirscheme <= 9) then  ! reduce diff. area's in tabelb and villemonte that diffused through dikes originally  
       do i = 1,nfxw
          L = lnfxw(i)
          if (L > 0) then 
-            k1 = ln(1,L) ; k2 = ln(2,L) 
-            hh = max( s1(k1), s1(k2) ) - max( bob(1,L), bob(2,L) )
-            if (hh > 0 .and. au(L) > 0d0) then
-               ff = wu(L) * hh / au(L) 
-               call getLbotLtop(L,Lb,Lt)
-               do L=Lb,Lt
-                  dxiAu(L) = dxiAu(L)*ff
-               end do
+            if (au(L) > 0d0) then 
+               k1 = ln(1,L) ; k2 = ln(2,L) 
+               hh = max( s1(k1), s1(k2) ) - max( bob(1,L), bob(2,L) )
+               if (hh > 0) then
+                  ff = wu(L) * hh / au(L) 
+                  call getLbotLtop(L,Lb,Lt)
+                  do LL=Lb,Lt
+                     dxiAu(LL) = dxiAu(LL)*ff
+                  end do
+               endif
             endif
          endif  
       enddo
