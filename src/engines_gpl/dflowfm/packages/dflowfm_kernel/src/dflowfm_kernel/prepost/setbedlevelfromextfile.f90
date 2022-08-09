@@ -43,7 +43,7 @@ subroutine setbedlevelfromextfile()    ! setbedlevels()  ! check presence of old
  use string_module, only: strcmpi
  use unstruc_inifields, only: readIniFieldProvider, checkIniFieldFileVersion
  use dfm_error
-
+ 
  use unstruc_netcdf
  implicit none
 
@@ -216,7 +216,9 @@ bft:do ibathyfiletype=1,2
     end do bft ! ibathyfiletype=1,2
 
     ! Clean up *.ext file
-    rewind (mext)
+    if (mext /= 0) then
+       rewind (mext)
+    endif   
 
     ! Clean up *.ini file.
     call tree_destroy(inifield_ptr)
