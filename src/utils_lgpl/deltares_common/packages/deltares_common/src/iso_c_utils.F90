@@ -62,7 +62,7 @@ contains
     character(len=*), intent(in) :: string
     character(kind=c_char,len=1) :: char_array(MAXSTRINGLEN)
     integer :: i
-    do i = 1, len(string)
+    do i = 1, min(MAXSTRINGLEN, len(string))
        char_array(i) = string(i:i)
     enddo
     char_array(min(MAXSTRINGLEN, len(string)+1)) = C_NULL_CHAR
