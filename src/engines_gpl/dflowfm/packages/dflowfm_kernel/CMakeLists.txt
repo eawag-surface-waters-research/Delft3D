@@ -161,7 +161,8 @@ if (UNIX)
     target_link_libraries(${library_name} ${oss_dependencies}
          PkgConfig::NETCDF
          PkgConfig::NETCDF_FTN
-         PkgConfig::PETSC)
+         PkgConfig::PETSC
+         uuid)
 
 
     include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include"
