@@ -101,7 +101,7 @@ subroutine comp_dxiAu()                          ! or: setdxiau
          if (L > 0) then 
             k1 = ln(1,L) ; k2 = ln(2,L) 
             hh = max( s1(k1), s1(k2) ) - max( bob(1,L), bob(2,L) )
-            if (hh > 0) then
+            if (hh > 0 .and. au(L) > 0d0) then
                ff = wu(L) * hh / au(L) 
                call getLbotLtop(L,Lb,Lt)
                do L=Lb,Lt
