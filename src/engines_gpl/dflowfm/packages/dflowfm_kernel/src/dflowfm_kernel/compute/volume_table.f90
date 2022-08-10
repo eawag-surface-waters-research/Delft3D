@@ -450,25 +450,27 @@ module m_VolumeTables
                      call GetCSParsTotal(line2cross(L, 2), cross, height-bobAboveBedLevel, area, width, CSCalculationOption, inundationPhase, &
                                          doSummerDike=.true.)
                      
-                     if (cross(line2cross(L, 2)%c1)%hasSummerDike() .or. cross(line2cross(L, 2)%c2)%hasSummerDike()) then
-                        numberOfSummerDikes = numberOfSummerDikes+1
-                        if (j ==2) then
-                           vltb(n)%linkNumber(numberOfSummerDikes) = L
-                           call getSummerDikeData(line2cross(L,index), cross, vltb(n)%summerDikeCrestLevel(numberOfSummerDikes), &
-                                               vltb(n)%summerDikeBaseLevel(numberOfSummerDikes))
+                     if (line2cross(L, 2)%c1 > 0) then
+                        if (cross(line2cross(L, 2)%c1)%hasSummerDike() .or. cross(line2cross(L, 2)%c2)%hasSummerDike()) then
+                           numberOfSummerDikes = numberOfSummerDikes+1
+                           if (j ==2) then
+                              vltb(n)%linkNumber(numberOfSummerDikes) = L
+                              call getSummerDikeData(line2cross(L,index), cross, vltb(n)%summerDikeCrestLevel(numberOfSummerDikes), &
+                                                  vltb(n)%summerDikeBaseLevel(numberOfSummerDikes))
+                           endif
+                        
+                           ! a summerdike has a hysteresis during inundation the characteristic for the total volume is different from the
+                           ! drainage phase. In the overall volume table the summerdike during drainage is taken into account.
+                           ! During inundation SDINVOLUME contains the correction for the proper storage during inundation.
+                           inundationPhase = .true.
+                           call GetCSParsTotal(line2cross(L, 2), cross, height-bobAboveBedLevel, sdarea, sdwidth, CSCalculationOption, inundationPhase, &
+                                               doSummerDike=.true.)
+                           sdarea = sdarea - area
+                           vltb(nod)%sdinVolume(numberOfSummerdikes, j) = vltb(nod)%sdinVolume(numberOfSummerdikes, j) + &
+                                             sdarea * dxL
                         endif
-                        
-                        ! a summerdike has a hysteresis during inundation the characteristic for the total volume is different from the
-                        ! drainage phase. In the overall volume table the summerdike during drainage is taken into account.
-                        ! During inundation SDINVOLUME contains the correction for the proper storage during inundation.
-                        inundationPhase = .true.
-                        call GetCSParsTotal(line2cross(L, 2), cross, height-bobAboveBedLevel, sdarea, sdwidth, CSCalculationOption, inundationPhase, &
-                                            doSummerDike=.true.)
-                        sdarea = sdarea - area
-                        vltb(nod)%sdinVolume(numberOfSummerdikes, j) = vltb(nod)%sdinVolume(numberOfSummerdikes, j) + &
-                                          sdarea * dxL
-                     endif
-                        
+                     end if
+
                      if (vltb(n)%hasDecreasingWidths) then
                         call GetCSParsTotal(network%adm%line2cross(L, 2), cross, height-bobAboveBedLevel, areadecr, widthdecr, CS_TYPE_MIN)
                      end if

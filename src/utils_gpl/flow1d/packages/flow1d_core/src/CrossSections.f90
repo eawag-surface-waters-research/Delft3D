@@ -2243,7 +2243,7 @@ subroutine GetSummerDikeFlow(summerdike, wlev, sdArea, sdWidth)
 
    implicit none
 
-   type(t_summerdike), pointer, intent(in)      :: summerdike     !< summerdike data
+   type(t_summerdike), pointer, intent(in)      :: summerdike     !< summerdike data (note: baseLevel and crestlevel should already be absolute levels)
    double precision, intent(in)                 :: wlev           !< water level at cross section
    double precision, intent(out)                :: sdArea         !< area for summerdike
    double precision, intent(out)                :: sdWidth        !< width for summerdike
@@ -2297,7 +2297,7 @@ subroutine GetSummerDikeTotal(summerdike, wlev, sdArea, sdWidth, hysteresis)
 
    implicit none
 
-   type(t_summerdike), pointer                  :: summerdike      !< summerdike data
+   type(t_summerdike), pointer                  :: summerdike      !< summerdike data (note: baseLevel and crestlevel should already be absolute levels)
    double precision, intent(in)                 :: wlev            !< water level at cross section
    double precision, intent(out)                :: sdArea          !< area for summerdike
    double precision, intent(out)                :: sdWidth         !< width for summerdike
