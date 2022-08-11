@@ -495,4 +495,7 @@ subroutine sethu(jazws0)                            ! Set upwind waterdepth hu
     call setveg()
  endif
 
+ ! Create an index array containing the wet flow links.
+ call fill_onlyWetLinks()
+
 end subroutine sethu

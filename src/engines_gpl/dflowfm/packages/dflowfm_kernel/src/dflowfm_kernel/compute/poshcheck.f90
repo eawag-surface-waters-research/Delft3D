@@ -42,7 +42,7 @@
 
  integer :: key
 
- integer :: n, L, LL, LLL
+ integer :: n, L, LL, LLL, jaHuChanged
 
  integer, dimension(2) :: idum
  double precision      :: dtrsh=0d-0
@@ -62,6 +62,7 @@
  
  if (jposhchk == 0) return
 
+ jaHuChanged = 0
  do n = 1,ndxi                                                  ! check result
 
     
@@ -87,6 +88,7 @@
                  do LL  = 1, nd(n)%lnx
                     L   = iabs(nd(n)%ln(LL))
                     hu(L) = 0d0
+                    jaHuChanged = 1
                  enddo
 
               else if (jposhchk == 4 .or. jposhchk == 5) then    ! reduce links au
@@ -97,6 +99,7 @@
                        au(L) = 0.2d0*au(L)
                        if (au(L) < eps6) then
                           hu(L) = 0d0 ;  key = 2                 ! flag redo setkfs
+                          jaHuChanged = 1
                        endif
                     endif
                  enddo
@@ -108,6 +111,7 @@
                     if (LLL < 0 .and. u1(L) > 0 .or. &
                         LLL > 0 .and. u1(L) < 0 ) then
                         hu(L) = 0d0   ; key = 2                  !  flag redo setkfs
+                        jaHuChanged = 1
                     endif
                  enddo
 
@@ -153,5 +157,10 @@
         key = 1                                      ! for easier mouse interrupt
     endif
  endif
+
+ ! If hu is changed, then re-fill array onlyWetLinks
+ if (jaHuChanged > 0) then
+    call fill_onlyWetLinks()
+ end if
 
  end subroutine poshcheck
