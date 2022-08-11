@@ -464,6 +464,8 @@
  integer, allocatable              :: ksrcwaq(:)        !< index array, starting point in qsrcwaq
  double precision, allocatable     :: qsrcwaq (:)       !< Cumulative qsrc within current waq-timestep
  double precision, allocatable     :: qsrcwaq0 (:)      !< Cumulative qsrc at the beginning of the time step before possible reduction
+ double precision, allocatable     :: qlatwaq (:)       !< Cumulative qsrc within current waq-timestep
+ double precision, allocatable     :: qlatwaq0 (:)      !< Cumulative qsrc at the beginning of the time step before possible reduction
  double precision                  :: addksources = 0d0 !< Add k of sources to turkin 1/0
 
  contains

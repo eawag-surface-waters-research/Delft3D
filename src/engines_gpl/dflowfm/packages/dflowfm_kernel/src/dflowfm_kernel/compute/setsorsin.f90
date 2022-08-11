@@ -234,10 +234,6 @@
 
  enddo
 
- if (wrwaqon) then ! Update waq output
-    call update_waq_sink_source_fluxes()
- end if
-
  do n  = 1,numsrc
     if (jamess(n) == 1) then
         write(msgbuf, *) 'Extraction flux larger than cell volume at point 1 of : ', trim( srcname(n) )

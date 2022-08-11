@@ -226,6 +226,15 @@
        call setsorsin()                                      ! add sources and sinks
     endif
 
+    if (wrwaqon) then ! Update waq output
+       if (numsrc > 0) then
+          call update_waq_sink_source_fluxes()
+       endif
+       if (numlatsg > 0) then
+          call update_waq_lateral_fluxes()
+       endif
+    end if
+
     if (nshiptxy > 0) then
        ! qin = qin - qinship
     endif

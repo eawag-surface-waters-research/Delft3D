@@ -351,11 +351,12 @@ module waq
       integer                        :: nosegl        !  number of WAQ segments per layer
       integer                        :: noq           !  total number of WAQ exchanges
       integer                        :: noql          !  number of horizontal WAQ exchanges per layer
-      integer                        :: noq12         !  number of horizontal WAQ exchanges (excluding sink/sources)
-      integer                        :: noq12s        !  number of horizontal WAQ exchanges (including sink/sources)
-      integer                        :: numsrc        !  number of sinks/sources
+      integer                        :: noq12         !  number of horizontal WAQ exchanges (excluding sink/sources and laterals)
+      integer                        :: noq12s        !  number of horizontal WAQ exchanges (including sink/sources, excluding laterals)
+      integer                        :: noq12sl       !  number of horizontal WAQ exchanges (including sink/sources and laterals)
       integer                        :: numsrcbnd     !  number of sinks/sources that are boundary conditions
       integer                        :: numsrcwaq     !  number of adition sources/sinks exchanges in waq (based on posible combinations)
+      integer                        :: numlatwaq     !  number of lateral boundary conditions
       integer                        :: kmxnx         ! maximum number of active layers
       integer                        :: kmxnxa        ! maximum number of aggregated layers
       integer                        :: ndkxi         ! nr of internal flowcells (3D)
@@ -367,6 +368,7 @@ module waq
       integer,           allocatable :: iqwaggr(:)    ! exchange aggregation pointer for the vertical
       integer,           allocatable :: ifrmto(:,:)   ! from-to pointer table
       integer,           allocatable :: ifrmtosrc(:,:) ! from-to pointer table for sources
+      integer,           allocatable :: ifrmtolat(:,:) ! from-to pointer table for sources
       integer,           allocatable :: ifsmin(:)     ! first active layer (counting from the top) (z-model)
       integer,           allocatable :: ifsmax(:)     ! maximum active layer (counting from the top) (z-model)
       integer,           allocatable :: nosega(:)     ! no of segments aggregated into WAQ segments
@@ -504,9 +506,9 @@ subroutine waq_wri_hyd()
    write (lunhyd, '(a,i10)') 'number-hydrodynamic-layers              ', waqpar%kmxnx
    write (lunhyd, '(a,i10)') 'number-water-quality-segments-per-layer ', waqpar%nosegl
    write (lunhyd, '(a,i10)') 'number-water-quality-layers             ', waqpar%kmxnxa
-   write (lunhyd, '(a,i10)') 'number-horizontal-exchanges             ', waqpar%noq12s ! Including open boundaries
+   write (lunhyd, '(a,i10)') 'number-horizontal-exchanges             ', waqpar%noq12sl ! Including open boundaries and laterals
    if (waqpar%kmxnxa > 1) then
-      write (lunhyd, '(a,i10)') 'number-vertical-exchanges               ', waqpar%noq - waqpar%noq12s
+      write (lunhyd, '(a,i10)') 'number-vertical-exchanges               ', waqpar%noq - waqpar%noq12sl
    else
       write (lunhyd, '(a,i10)') 'number-vertical-exchanges               ', 0
    end if
@@ -1571,7 +1573,9 @@ subroutine waq_wri_bnd()
 
    use m_flowgeom
    use network_data
+   use m_partitioninfo, only: is_ghost_node
    use m_flowexternalforcings
+   use m_wind, only: numlatsg, nodeCountLat, n1latsg, n2latsg, nnlat
    use unstruc_files
    use m_sferic, only: jsferic, jasfer3D
    use m_missing, only : dmiss, dxymis
@@ -1582,7 +1586,7 @@ subroutine waq_wri_bnd()
    !           Local variables
    !
    integer :: LL, L, Lf, n, i, istart, n1, n2
-   integer :: ibnd, isrc, kk, nopenbndsectnonempty
+   integer :: ibnd, isrc, ilat, k1, kk, nopenbndsectnonempty
    integer :: lunbnd
    character(len=255) :: filename
    double precision :: x1, y1, x2, y2, xn, yn
@@ -1671,6 +1675,25 @@ subroutine waq_wri_bnd()
          write(lunbnd, '(i8,4f18.8)') -(ibnd), xz(kk), yz(kk), xz(kk), yz(kk)
       endif
    enddo
+   if (numlatsg > 0) then
+      do ilat = 1, numlatsg
+         if (nodeCountLat(ilat) > 0) then
+            write(lunbnd, '(a)')  trim('lat_'//lat_ids(ilat))  ! Section name
+            write(lunbnd, '(i8)') nodeCountLat(ilat)      ! Nr of nodes connected to this lateral
+            do k1=n1latsg(ilat),n2latsg(ilat)
+               kk = nnlat(k1)
+               if (kk > 0) then
+                  if (.not. is_ghost_node(kk)) then
+                     ! This is a lateral within the current domain
+                     ibnd = ibnd + 1
+                     ! use coordinates of the nodes the lateral is connected to for now. not geomXLat, geomYLat
+                     write(lunbnd, '(i8,4f18.8)') -(ibnd), xz(kk), yz(kk), xz(kk), yz(kk)
+                  end if
+               end if
+            end do
+         endif
+      end do
+   endif
 
    call doclose(lunbnd)
 end subroutine waq_wri_bnd
@@ -1812,6 +1835,9 @@ subroutine waq_wri_couple_files(time)
          if (numsrc > 0) then
             qsrcwaq = 0d0 ! Reset accumulated discharges
          end if
+         if(numlatsg > 0) then
+            qlatwaq = 0d0 ! Reset accumulated discharges
+         end if
 
          ! Dummy area record
          call waq_wri_are(itim, defaultFilename('are'), waqpar%lunare)
@@ -1826,6 +1852,9 @@ subroutine waq_wri_couple_files(time)
    end if
    if (numsrc > 0) then
       qsrcwaq = 0d0 ! Reset accumulated discharges
+   end if
+   if(numlatsg > 0) then
+      qlatwaq = 0d0 ! Reset accumulated discharges
    end if
    itim_prev = itim
 end subroutine waq_wri_couple_files
@@ -1995,12 +2024,15 @@ subroutine waq_prepare_aggr()
    ! Prepare arrays for sinks and sources.
    call waq_prepare_src()
 
+   ! Prepare arrays for sinks and sources.
+   call waq_prepare_lat()
+
    ! allocate maximum possible number of exchanges before aggregation
    waqpar%noq12 = lnx * waqpar%kmxnxa
    if (waqpar%kmxnxa > 1) then
-      waqpar%noq = waqpar%noq12 + waqpar%numsrcwaq + ndxi * waqpar%kmxnxa
+      waqpar%noq = waqpar%noq12 + waqpar%numsrcwaq + waqpar%numlatwaq + ndxi * waqpar%kmxnxa
    else
-      waqpar%noq = waqpar%noq12 + numsrc
+      waqpar%noq = waqpar%noq12 + numsrc + waqpar%numlatwaq
    end if
    call realloc(waqpar%ifrmto, (/ 4, waqpar%noq /), keepExisting=.false., fill = 0)
 
@@ -2084,7 +2116,7 @@ subroutine waq_make_aggr_lnk()
 
    implicit none
 
-   integer :: dseg, dbnd, isrc
+   integer :: dseg, dbnd, isrc, ilatwaq
    integer :: L, LL, Lb, Lbb, Ltx, ip, ipa, ip1, ip2, iq
    integer :: k, kk, kb, kt, ktx
 
@@ -2129,7 +2161,14 @@ subroutine waq_make_aggr_lnk()
          enddo
       endif
       waqpar%noq12s = waqpar%noq12 + waqpar%numsrcwaq
-      waqpar%noq = waqpar%noq12s
+      if (waqpar%numlatwaq > 0) then
+         do ilatwaq = 1, waqpar%numlatwaq
+            waqpar%ifrmto(1,waqpar%noq12s + ilatwaq) = waqpar%ifrmtolat(1, ilatwaq)
+            waqpar%ifrmto(2,waqpar%noq12s + ilatwaq) = waqpar%ifrmtolat(2, ilatwaq)
+         enddo
+      endif
+      waqpar%noq12sl = waqpar%noq12s + waqpar%numlatwaq
+      waqpar%noq = waqpar%noq12sl
    else
       ! In 3D copy aggregated 2D exchanges to all layers
       do L=1,lnx
@@ -2166,8 +2205,7 @@ subroutine waq_make_aggr_lnk()
       end do
       waqpar%noq12 = waqpar%noq12 * waqpar%kmxnxa
       waqpar%noq = waqpar%noq12
-      ! Add links from sink source here!!
-      ! No checking on doubles due to aggregation yet!!
+      ! Add links from sink source
       if (waqpar%numsrcwaq > 0) then
          do isrc = 1, waqpar%numsrcwaq
             waqpar%ifrmto(1,waqpar%noq12 + isrc) = waqpar%ifrmtosrc(1, isrc)
@@ -2175,7 +2213,16 @@ subroutine waq_make_aggr_lnk()
          enddo
       endif
       waqpar%noq12s = waqpar%noq12 + waqpar%numsrcwaq
-      waqpar%noq = waqpar%noq12s
+
+      ! Add links from laterals
+      if (waqpar%numlatwaq > 0) then
+         do ilatwaq = 1, waqpar%numlatwaq
+            waqpar%ifrmto(1,waqpar%noq12s + ilatwaq) = waqpar%ifrmtolat(1, ilatwaq)
+            waqpar%ifrmto(2,waqpar%noq12s + ilatwaq) = waqpar%ifrmtolat(2, ilatwaq)
+         enddo
+      endif
+      waqpar%noq12sl = waqpar%noq12s + waqpar%numlatwaq
+      waqpar%noq = waqpar%noq12sl
 
       ! And now the vertical exchanges and pointer (note: upward flow direction in FM is reversed for WAQ!)
       do k = 1, waqpar%nosegl
@@ -2193,7 +2240,7 @@ subroutine waq_make_aggr_lnk()
          call getkbotktopmax(k,kb,kt,ktx)
          do kk = ktx - 1, kb, -1
             if(waqpar%ilaggr(ktx - kk + 1) /= waqpar%ilaggr(ktx - kk)) then
-               waqpar%iqwaggr(kk) = waqpar%noq12s + waqpar%iapnt(k) + (waqpar%ilaggr(ktx - kk) - 1) * waqpar%nosegl
+               waqpar%iqwaggr(kk) = waqpar%noq12sl + waqpar%iapnt(k) + (waqpar%ilaggr(ktx - kk) - 1) * waqpar%nosegl
             end if
          enddo
       end do
@@ -2295,6 +2342,59 @@ end subroutine waq_prepare_src
 !
 !------------------------------------------------------------------------------
 
+!> Prepare additional exchanges for waq to store lateral discharges
+subroutine waq_prepare_lat()
+   use m_partitioninfo, only: is_ghost_node
+   use m_flowgeom
+   use m_flow
+   use m_flowexternalforcings
+   use m_wind, only: numlatsg, nodeCountLat, n1latsg, n2latsg, nnlat
+   use m_alloc
+   implicit none
+
+   integer :: ilat, ilatwaq, ibnd, k1, kk
+
+   waqpar%numlatwaq = 0
+   if (numlatsg==0) return ! skip is no resources
+   ! First determine the number of laterals actually used and the allocations needed
+   do ilat = 1, numlatsg
+      if (nodeCountLat(ilat) > 0) then
+         do k1=n1latsg(ilat),n2latsg(ilat)
+            kk = nnlat(k1)
+            if (kk > 0) then
+               if (.not. is_ghost_node(kk)) then
+                  ! This is a lateral within the current domain
+                  waqpar%numlatwaq = waqpar%numlatwaq + 1
+               end if
+            end if
+         end do
+      endif
+   end do
+   call realloc (waqpar%ifrmtolat, (/ 2,waqpar%numlatwaq /), keepexisting=.true., fill=0 )
+   call realloc (qlatwaq, waqpar%numlatwaq , keepexisting=.true., fill=0.0D0 )
+   call realloc (qlatwaq0, waqpar%numlatwaq , keepexisting=.true., fill=0.0D0 )
+   
+   ibnd = (ndx - ndxi + waqpar%numsrcbnd) * waqpar%kmxnxa
+   ilatwaq = 0
+   do ilat = 1, numlatsg
+      if (nodeCountLat(ilat) > 0) then
+         do k1=n1latsg(ilat),n2latsg(ilat)
+            kk = nnlat(k1)
+            if (kk > 0) then
+               if (.not. is_ghost_node(kk)) then
+                  ! This is a lateral within the current domain
+                  ibnd = ibnd + 1
+                  ilatwaq = ilatwaq + 1
+                  waqpar%ifrmtolat(1, ilatwaq) = -ibnd
+                  waqpar%ifrmtolat(2, ilatwaq) = kk
+               end if
+            end if
+         end do
+      endif
+   end do
+end subroutine waq_prepare_lat
+!
+!------------------------------------------------------------------------------
 
 !> Write WAQ pointer file.
 subroutine waq_wri_poi(filename)
@@ -2373,8 +2473,14 @@ subroutine waq_wri_poi(filename)
       lenex(2,ip) = 1d5
    enddo
 
+   !   dummy lengthes for laterals
+   do ip = waqpar%noq12s + 1, waqpar%noq12sl
+      lenex(1,ip) = 1d5
+      lenex(2,ip) = 1d5
+   enddo
+
    !   dummy lengthes in third direction for all layers (will be calculated by WAQ from volume and surface)
-   do ip = waqpar%noq12s + 1, waqpar%noq
+   do ip = waqpar%noq12sl + 1, waqpar%noq
       lenex(1,ip) = 1d0
       lenex(2,ip) = 1d0
    end do
@@ -2921,10 +3027,15 @@ subroutine waq_wri_are(itim, filename, lun)
       waqpar%area(i) = 0.1D0
    enddo
 
+   ! dummy areas for laterals
+   do i = waqpar%noq12s + 1, waqpar%noq12sl
+      waqpar%area(i) = 0.1D0
+   enddo
+
    ! Add area of the vertical exchanges
    if (waqpar%kmxnxa > 1) then
       do i = 1, waqpar%noseg - waqpar%nosegl
-         waqpar%area(waqpar%noq12s + i) = waqpar%horsurf(i)
+         waqpar%area(waqpar%noq12sl + i) = waqpar%horsurf(i)
       end do
    end if
 
@@ -2953,7 +3064,7 @@ subroutine waq_wri_flo(itim, ti_waq, filename, lun)
    !
    !           Local variables
    !
-   integer :: isrc
+   integer :: isrc, ilatwaq
    integer :: i, L, LL, Lb, Ltx, ip
    integer :: k, kk, kb, kt, ktx
    !
@@ -2995,6 +3106,13 @@ subroutine waq_wri_flo(itim, ti_waq, filename, lun)
    if(waqpar%numsrcwaq > 0) then
       do isrc = 1, waqpar%numsrcwaq
          waqpar%qag(waqpar%noq12 + isrc) = qsrcwaq(isrc) / dble(ti_waq)
+      enddo
+   endif
+   
+   ! Add laterals
+   if(waqpar%numlatwaq > 0) then
+      do ilatwaq = 1, waqpar%numlatwaq
+         waqpar%qag(waqpar%noq12s + ilatwaq) = qlatwaq(ilatwaq) / dble(ti_waq)
       enddo
    endif
 

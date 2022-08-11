@@ -64,6 +64,7 @@
  numnodneg = 0
  if (wrwaqon.and.allocated(qsrcwaq)) then
     qsrcwaq0 = qsrcwaq ! store current cumulative qsrc for waq at the beginning of this time step
+    qlatwaq0 = qlatwaq
  end if
 
  111 continue
@@ -146,7 +147,8 @@
 
        if (wrwaqon.and.allocated(qsrcwaq)) then
           qsrcwaq = qsrcwaq0                            ! restore cumulative qsrc for waq from start of this time step to avoid
-       end if                                           ! double accumulation and use of incorrect dts in case of time step reduction
+          qlatwaq = qlatwaq0                            ! double accumulation and use of incorrect dts in case of time step reduction
+       end if                                           
        call setkfs()
        if (jposhchk == 2 .or. jposhchk == 4) then       ! redo without timestep reduction, setting hu=0 => 333 s1ini
           if (nonlin >= 2) then
