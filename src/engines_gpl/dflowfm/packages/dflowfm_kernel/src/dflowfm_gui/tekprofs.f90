@@ -361,7 +361,9 @@
       dijdij(0)    = ustb(L)*ustb(L)
       if ( csu(L)*u1(Lb) < 0 ) dijdij(0)  = - dijdij(0)
       dijdij(km)   = ustw(L)*ustw(L)
-      if ( wdsu(L) < 0)        dijdij(km) = -dijdij(km)
+      if (allocated(wdsu)) then
+         if ( wdsu(L) < 0)        dijdij(km) = -dijdij(km)
+      end if
 
       call getvminmax(6,vmin,vmax,dijdij(0:km), km+1)
       call TEKFN(6,11, 1, dijdij(0:km), hwref  , Lm1, vmin, vmax, zmin, zmax, KLPROF, 'Reyn'      , 0, 2 , 0d0,kplot+1)
