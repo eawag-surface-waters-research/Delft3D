@@ -562,7 +562,13 @@ function init1dField(filename, inifieldfilename, quant) result (ierr)
 
    call tree_create(trim(filename), field_ptr)
    call prop_file('ini',trim(filename),field_ptr,istat) 
-      
+
+   if (istat /= 0) then
+      write(msgbuf, '(3a)') 'Error opening 1D field file ''', trim(filename), '''. Is the file path correct?'
+      call warn_flush()
+      goto 888
+   end if
+
    num_items_in_file = 0
    if (associated(field_ptr%child_nodes)) then
        num_items_in_file = size(field_ptr%child_nodes)
