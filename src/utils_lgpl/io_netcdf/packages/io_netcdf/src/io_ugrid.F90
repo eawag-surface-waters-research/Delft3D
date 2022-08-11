@@ -1402,9 +1402,8 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
             ierr = nf90_put_att(ncid, meshids%varids(mid_layersigma)    , 'computed_standard_name', 'altitude')
             ierr = nf90_put_att(ncid, meshids%varids(mid_interfacesigma), 'computed_standard_name', 'altitude')
          end if
-
-     endif
-     if (layertype == LAYERTYPE_Z .or. layertype == LAYERTYPE_OCEAN_SIGMA_Z) then
+      endif
+      if (layertype == LAYERTYPE_Z .or. layertype == LAYERTYPE_OCEAN_SIGMA_Z) then
          ierr = nf90_def_var(ncid, prefix//'_layer_z',     nf90_double, meshids%dimids(mdim_layer),     meshids%varids(mid_layerz))
          ierr = nf90_def_var(ncid, prefix//'_interface_z', nf90_double, meshids%dimids(mdim_interface), meshids%varids(mid_interfacez))
          ierr = nf90_put_att(ncid, meshids%varids(mid_layerz),     'standard_name', 'altitude')
