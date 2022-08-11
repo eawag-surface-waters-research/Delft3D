@@ -14060,8 +14060,8 @@ subroutine get_2d_edge_data(edge_nodes, edge_faces, edge_type, xue, yue, edge_ma
 
       ! L is net link number.
       L = ln2lne(Lf)
-      if (present(edge_mapping_table)) edge_mapping_table(L) = i
-      if (present(reverse_edge_mapping_table)) reverse_edge_mapping_table(i) = L
+      if (present(edge_mapping_table)) edge_mapping_table(L - numl1d) = i
+      if (present(reverse_edge_mapping_table)) reverse_edge_mapping_table(i) = L - numl1d
    end do
 
    ! Write all edges that are 2D boundary flow links.
@@ -14081,8 +14081,8 @@ subroutine get_2d_edge_data(edge_nodes, edge_faces, edge_type, xue, yue, edge_ma
 
       ! L is net link number.
       L = ln2lne(Lf)
-      if (present(edge_mapping_table)) edge_mapping_table(L) = i
-      if (present(reverse_edge_mapping_table)) reverse_edge_mapping_table(i) = L
+      if (present(edge_mapping_table)) edge_mapping_table(L - numl1d) = i
+      if (present(reverse_edge_mapping_table)) reverse_edge_mapping_table(i) = L - numl1d
    end do
 
    ! Write all remaining edges, which are closed.
@@ -14108,8 +14108,8 @@ subroutine get_2d_edge_data(edge_nodes, edge_faces, edge_type, xue, yue, edge_ma
             xue(i) = .5d0*(xk(kn(1,L)) + xk(kn(2,L)))
             yue(i) = .5d0*(yk(kn(1,L)) + yk(kn(2,L)))
 
-            if (present(edge_mapping_table)) edge_mapping_table(L) = i
-            if (present(reverse_edge_mapping_table)) reverse_edge_mapping_table(i) = L
+            if (present(edge_mapping_table)) edge_mapping_table(L - numl1d) = i
+            if (present(reverse_edge_mapping_table)) reverse_edge_mapping_table(i) = L - numl1d
          end if
       end do
    end if
@@ -14170,7 +14170,7 @@ subroutine get_layer_data_ugrid(layer_count, layer_type, layer_zs, interface_zs)
 end subroutine get_layer_data_ugrid
 
 !> Writes the unstructured flow geometry in UGRID format to an already opened netCDF dataset.
-subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd,jafou)
+subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd,jafou, ja2D)
 
    use m_flowgeom
    use network_data
@@ -14194,6 +14194,7 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd,jafou)
    type(t_unc_timespace_id), intent(inout) :: id_tsp   !< Set of time and space related variable id's
    integer, optional, intent(in) :: jabndnd !< Whether to include boundary nodes (1) or not (0). Default: no.
    logical, optional, intent(in) :: jaFou   !< Whether this flowgeom writing is part of a Fourier file or not (affects 3D layer writing)
+   logical, optional, intent(in) :: ja2D    !< Whether to include the 2D grid (default = .true.)
 
    integer                         :: jabndnd_      !< Flag specifying whether boundary nodes are to be written.
    integer                         :: ndxndxi       !< Last 2/3D node to be saved. Equals ndx when boundary nodes are written, or ndxi otherwise.
@@ -14212,6 +14213,7 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd,jafou)
    real(kind=dp), dimension(:), pointer :: layer_zs => null(), interface_zs => null()
    character(len=10) :: waterlevelname , bldepthname
    logical :: jafou_
+   logical :: ja2D_
 !   type(t_crs) :: pj
 
    integer :: ierr
@@ -14265,6 +14267,12 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd,jafou)
       jafou_ = jaFou
    else
       jafou_ = .false.
+   end if
+
+   if (present(ja2D)) then
+      ja2D_ = ja2D
+   else
+      ja2D_ = .true.
    end if
 
    ! Put dataset in define mode (possibly again) to add dimensions and variables.
@@ -14512,7 +14520,7 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd,jafou)
 
    numk2d = 0
    ndx1d = ndxi - ndx2d
-   if (ndx2d > 0) then ! 2D flow geometry
+   if (ndx2d > 0 .and. ja2D_ == .true.) then ! 2D flow geometry
       numl2d = numl-numl1d
       numk2d = (numk-n1d2dcontacts) - ndx1d
       call realloc(edge_nodes, (/ 2, numl2d /), fill = -999 , keepExisting = .false.)
@@ -14655,7 +14663,7 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd,jafou)
 
 
    !define 1d2dcontacts only after mesh2d is completly defined
-   if (n1d2dcontacts.gt.0) then
+   if (n1d2dcontacts.gt.0 .and. ja2D_ == .true.) then
       ierr = ug_def_mesh_contact(ncid, id_tsp%meshcontacts, trim(contactname), n1d2dcontacts, id_tsp%meshids1d, id_tsp%meshids2d, UG_LOC_NODE, UG_LOC_FACE, start_index)
    endif
 
@@ -14673,7 +14681,7 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd,jafou)
       ierr = nf90_put_var(ncid, id_tsp%id_flowelembl(1), bl(ndx2d+1:last_1d)) ! TODO: AvD: handle 1D/2D boundaries
       ! TODO: AvD: UNST-1318: handle 1d zk as well
    end if
-   if (ndx2d > 0) then
+   if (ndx2d > 0 .and. ja2D_ == .true.) then
       ierr = nf90_put_var(ncid, id_tsp%id_flowelemba(2), ba(1:ndx2d)) ! TODO: AvD: handle 1D/2D boundaries
       ierr = nf90_put_var(ncid, id_tsp%id_flowelembl(2), bl(1:ndx2d)) ! TODO: AvD: handle 1D/2D boundaries
       ierr = nf90_put_var(ncid, id_tsp%id_netnodez(2)  , z2dn)

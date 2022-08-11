@@ -713,8 +713,9 @@ end subroutine waq_write_waqgeom_ugrid
 !> Writes the (possibly aggregated) unstructured network and edge type to an already opened netCDF dataset for DelWAQ.
 subroutine waq_write_waqgeom_filepointer_ugrid(igeomfile)
    use io_ugrid
-   use m_flowgeom, only: ndxi
-   use unstruc_netcdf, only: crs, check_error, ug_meta_fm
+   use network_data, only: numl1d
+   use m_flowgeom, only: ndxi, ndx2d
+   use unstruc_netcdf
    use m_partitioninfo, only: jampi, idomain, iglobal_s
    use m_alloc
 
@@ -726,6 +727,7 @@ subroutine waq_write_waqgeom_filepointer_ugrid(igeomfile)
    type(t_ug_meshgeom)                :: meshgeom, aggregated_meshgeom !< Mesh geometry to be written to the NetCDF file.
    type(t_ug_mesh)                    :: meshids  !< Set of NetCDF-ids for all mesh geometry variables.
    type(t_ug_network)                 :: networkids !< Set of NetCDF-ids for all network variables
+   type(t_unc_mapids)                 :: geomids !< Set of file and variable ids for this file.
    integer, dimension(:), allocatable :: edge_type, aggregated_edge_type !< Edge type array to be written to the NetCDF file.
    integer                            :: ierr     !< Result status (UG_NOERR==NF90_NOERR if successful).
    logical                            :: success  !< Helper variable.
@@ -737,52 +739,58 @@ subroutine waq_write_waqgeom_filepointer_ugrid(igeomfile)
    ierr = ug_addglobalatts(igeomfile, ug_meta_fm)
    call check_error(ierr)
 
-   ! Get mesh geometry and edge type array.
-   ierr = create_ugrid_geometry(meshgeom, edge_type)
-   call check_error(ierr)
-
-   ! Aggregate mesh geometry, if needed.
-   if (waqpar%aggre == 1) then
-      ! Create empty meshgeom.
-      ierr = t_ug_meshgeom_destructor(aggregated_meshgeom)
-      aggregated_meshgeom%meshName = 'mesh2d'
-      aggregated_meshgeom%start_index = 1
+   if (ndx2d > 0) then 
+      ! Get mesh geometry and edge type array.
+      ierr = create_ugrid_geometry(meshgeom, edge_type)
       call check_error(ierr)
-
-      ! Aggregate.
-      call klok(startTime)
-      success = aggregate_ugrid_geometry(meshgeom, aggregated_meshgeom, edge_type, aggregated_edge_type, waqpar%iapnt)
-      call klok(endTime)
-      if (success) then ! If no errors occurred.
-         write(message, "('Aggregated grid for waq geometry file, elapsed time: ', F10.3, ' s.')") endTime - startTime
-         call mess(LEVEL_INFO, trim(message))
-
-         ! Replace meshgeom and edge_type variables with their aggregated counterparts.
-         meshgeom = aggregated_meshgeom
-         call realloc(edge_type, size(aggregated_edge_type))
-         edge_type = aggregated_edge_type
+   
+      ! Aggregate mesh geometry, if needed.
+      if (waqpar%aggre == 1) then
+         ! Create empty meshgeom.
+         ierr = t_ug_meshgeom_destructor(aggregated_meshgeom)
+         aggregated_meshgeom%meshName = 'mesh2d'
+         aggregated_meshgeom%start_index = 1
+         call check_error(ierr)
+   
+         ! Aggregate.
+         call klok(startTime)
+         success = aggregate_ugrid_geometry(meshgeom, aggregated_meshgeom, edge_type, aggregated_edge_type, waqpar%iapnt)
+         call klok(endTime)
+         if (success) then ! If no errors occurred.
+            write(message, "('Aggregated grid for waq geometry file, elapsed time: ', F10.3, ' s.')") endTime - startTime
+            call mess(LEVEL_INFO, trim(message))
+   
+            ! Replace meshgeom and edge_type variables with their aggregated counterparts.
+            meshgeom = aggregated_meshgeom
+            call realloc(edge_type, size(aggregated_edge_type))
+            edge_type = aggregated_edge_type
+         end if
+   
+         !TODO deallocate aggregated_meshgeom
+         if (allocated(aggregated_edge_type)) deallocate(aggregated_edge_type)
       end if
+   
+      ! Write mesh geometry.
+      ierr = ug_write_mesh_struct(igeomfile, meshids, networkids, crs, meshgeom) ! NOTE: UNST-5477: this call is not valid yet for 3D models with ocean_sigma_z combined layering
+      call check_error(ierr)
+   
+      ! Write edge type variable (this is an extra variable that is not part of the UGRID standard).
+      call write_edge_type_variable(igeomfile, meshids, meshgeom%meshName, edge_type)
+      deallocate(edge_type)
+   
+      ! when in mpi mode, add face domain numbers and global face numbers
+      if ( jampi.eq.1 ) then
+         ! face domain numbers
+         call write_face_domain_number_variable(igeomfile, meshids, meshgeom%meshName, idomain(1:ndxi))
+         ! global face numbers
+         call write_face_global_number_variable(igeomfile, meshids, meshgeom%meshName, iglobal_s(1:ndxi))
+      end if
+   endif
 
-      !TODO deallocate aggregated_meshgeom
-      if (allocated(aggregated_edge_type)) deallocate(aggregated_edge_type)
-   end if
-
-
-   ! Write mesh geometry.
-   ierr = ug_write_mesh_struct(igeomfile, meshids, networkids, crs, meshgeom) ! NOTE: UNST-5477: this call is not valid yet for 3D models with ocean_sigma_z combined layering
-   call check_error(ierr)
-
-   ! Write edge type variable (this is an extra variable that is not part of the UGRID standard).
-   call write_edge_type_variable(igeomfile, meshids, meshgeom%meshName, edge_type)
-   deallocate(edge_type)
-
-   ! when in mpi mode, add face domain numbers and global face numbers
-   if ( jampi.eq.1 ) then
-      ! face domain numbers
-      call write_face_domain_number_variable(igeomfile, meshids, meshgeom%meshName, idomain(1:ndxi))
-      ! global face numbers
-      call write_face_global_number_variable(igeomfile, meshids, meshgeom%meshName, iglobal_s(1:ndxi))
-   end if
+   if (numl1d > 0) then 
+      ! use the generic routine to write the 1D grid, the 2D grid might need extra data, and contains extra info.
+      call unc_write_flowgeom_filepointer_ugrid(igeomfile, geomids%id_tsp, ja2D = .false.) 
+   endif
 
 end subroutine waq_write_waqgeom_filepointer_ugrid
 
@@ -879,6 +887,7 @@ function create_ugrid_geometry(meshgeom, edge_type) result(ierr)
    use network_data
    use m_flow
    use io_ugrid
+   use m_flowgeom, only: ndx2d
    use unstruc_netcdf, only: crs, check_error, get_2d_edge_data
    use m_missing
    use m_alloc
@@ -889,97 +898,135 @@ function create_ugrid_geometry(meshgeom, edge_type) result(ierr)
    integer, dimension(:), allocatable, intent(out) :: edge_type !< Edge type array that is to be created and filled.
 
    integer, dimension(:), allocatable       :: edge_mapping_table, reverse_edge_mapping_table !< Mapping tables.
-   integer                                  :: edge, face, maxNodesPerFace, nodesPerFace !< Counters.
+   integer                                  :: node, edge, face, maxNodesPerFace, nodesPerFace !< Counters.
    integer, parameter                       :: missing_value = -999
    integer                                  :: ierr !< Result status (UG_NOERR==NF90_NOERR if successful).
+   integer                                  :: numk1d, n1d2dcontacts
+   integer                                  :: k1, k2, L, n1, n2
 
    ierr = UG_NOERR
 
+   ! count number of 1D nodes and 1D2D contacts
+   numk1d = 0
+   n1d2dcontacts = 0
+   if (numl1d > 0) then ! there is a 1D grid
+      ! count 1d mesh nodes and 1d2d contacts
+      do L=1,numl1d
+         if (kn(3,L) == 1 .or. kn(3,L) == 6) then
+            ! Regular 1D net link, or: when no cells, all 1D2D-type net links will also be included with both start and end node.
+            numk1d = max(numk1d, kn(1,l), kn(2,l))
+         else
+            ! 1D2D-type net links, with cell info available.
+            n1d2dcontacts = n1d2dcontacts + 1
+            n1 = abs(lne(1,l))
+            n2 = abs(lne(2,l))
+            if (n1 > nump) then  ! First point of 1D link is 1D cell
+               numk1d = max(numk1d, netcell(n1)%nod(1))
+            end if
+            if (n2 > nump) then  ! Second point of 1D link is 1D cell
+               numk1d = max(numk1d, netcell(n2)%nod(1))
+            end if
+         end if
+      enddo
+   endif
 
-   ! Create 2D (layered) mesh geometry that contains all 2D faces, edges and nodes.
-   ierr = t_ug_meshgeom_destructor(meshgeom)
-   call check_error(ierr)
-   meshgeom%meshName = 'mesh2d'
-   meshgeom%start_index = 1
-   meshgeom%dim = 2
-
-
-   ! Nodes.
-   ! Use all net nodes (= nodes).
-   ! TODO this uses *all* net nodes (numk). This may also contain '1D' nodes, but that is not problematic: they will simply not be referenced in face_nodes/edge_nodes. AK
-   meshgeom%numNode = numk
-
-   ! Get node coordinates.
-   meshgeom%nodex => xk
-   meshgeom%nodey => yk
-   meshgeom%nodez => zk
-
-
-   ! Edges.
-   ! Use only 2D net links (= edges).
-   meshgeom%numEdge = NUML - NUML1d
-
-   ! Get edge nodes connectivity, edge types and edge coordinates (ordered as follows: first flow links, then closed edges).
-   call reallocP(meshgeom%edge_nodes, (/ 2, meshgeom%numEdge /), fill=missing_value)
-   call realloc(edge_type, meshgeom%numEdge, fill=missing_value)
-   call reallocP(meshgeom%edgex, meshgeom%numEdge, fill=dmiss)
-   call reallocP(meshgeom%edgey, meshgeom%numEdge, fill=dmiss)
-   call realloc(edge_mapping_table, meshgeom%numEdge, fill=missing_value)
-   call realloc(reverse_edge_mapping_table, meshgeom%numEdge, fill=missing_value)
-   call get_2d_edge_data(meshgeom%edge_nodes, null(), edge_type, meshgeom%edgex, meshgeom%edgey, edge_mapping_table, reverse_edge_mapping_table)
-   ! Edge z coordinates are unknown.
-
-   ! Get edge faces connectivity.
-   call reallocP(meshgeom%edge_faces, (/ 2, meshgeom%numEdge /))
-   ! Here need to use reverse_edge_mapping_table to map edges to net links, because edges are ordered as follows: first flow links, then closed edges.
-   do edge = 1,meshgeom%numEdge
-      meshgeom%edge_faces(1:2, edge) = lne(1:2, reverse_edge_mapping_table(edge))
-
-      ! 0 means no face, i.e. edge is on the boundary of the mesh.
-      ! Replace zeroes with missing values.
-      if (meshgeom%edge_faces(1, edge) == 0) meshgeom%edge_faces(1, edge) = missing_value
-      if (meshgeom%edge_faces(2, edge) == 0) meshgeom%edge_faces(2, edge) = missing_value
-   end do
+   if (ndx2d > 0) then ! there is a 2D grid
+      ! Create 2D (layered) mesh geometry that contains all 2D faces, edges and nodes.
+      ierr = t_ug_meshgeom_destructor(meshgeom)
+      call check_error(ierr)
+      meshgeom%meshName = 'mesh2d'
+      meshgeom%start_index = 1
+      meshgeom%dim = 2
 
 
-   ! Faces.
-   ! Use only 2D internal net cells = 2D internal flow nodes (= faces).
-   meshgeom%numFace = nump
+      ! Nodes.
+      ! Use only 2D net nodes (= nodes).
+      meshgeom%numNode = numk - numk1d - n1d2dcontacts
 
-   ! Get face coordinates.
-   meshgeom%facex => xzw(1:nump)
-   meshgeom%facey => yzw(1:nump)
-   ! Face z coordinates are unknown.
+      ! Get node coordinates.
+      call reallocP(meshgeom%nodex, meshgeom%numNode, fill=dmiss)
+      call reallocP(meshgeom%nodey, meshgeom%numNode, fill=dmiss)
+      call reallocP(meshgeom%nodez, meshgeom%numNode, fill=dmiss)
+      do node = 1, meshgeom%numNode
+         meshgeom%nodex(node) = xk(numk1d + node)
+         meshgeom%nodey(node) = yk(numk1d + node)
+         meshgeom%nodez(node) = zk(numk1d + node)
+      end do
 
-   ! Determine max nr of net nodes per 2D net cell = face.
-   maxNodesPerFace = 0
-   do face=1,nump
-      maxNodesPerFace = max(maxNodesPerFace, netcell(face)%n)
-   end do
+      ! Edges.
+      ! Use only 2D net links (= edges).
+      meshgeom%numEdge = NUML - NUML1d
 
-   ! Get face nodes connectivity, face edges connectivity and face-face connectivity.
-   call reallocP(meshgeom%face_nodes, (/ maxNodesPerFace, meshgeom%numFace /), fill = missing_value)
-   call reallocP(meshgeom%face_edges, (/ maxNodesPerFace, meshgeom%numFace /), fill = missing_value)
-   call reallocP(meshgeom%face_links, (/ maxNodesPerFace, meshgeom%numFace /), fill = missing_value)
-   do face = 1,nump
-      nodesPerFace = netcell(face)%n
-      meshgeom%face_nodes(1:nodesPerFace, face) = netcell(face)%nod
+      ! Get edge nodes connectivity, edge types and edge coordinates (ordered as follows: first flow links, then closed edges).
+      call reallocP(meshgeom%edge_nodes, (/ 2, meshgeom%numEdge /), fill=missing_value)
+      call realloc(edge_type, meshgeom%numEdge, fill=missing_value)
+      call reallocP(meshgeom%edgex, meshgeom%numEdge, fill=dmiss)
+      call reallocP(meshgeom%edgey, meshgeom%numEdge, fill=dmiss)
+      call realloc(edge_mapping_table, meshgeom%numEdge, fill=missing_value)
+      call realloc(reverse_edge_mapping_table, meshgeom%numEdge, fill=missing_value)
+      call get_2d_edge_data(meshgeom%edge_nodes, null(), edge_type, meshgeom%edgex, meshgeom%edgey, edge_mapping_table, reverse_edge_mapping_table)
+      ! shift node numbers by numk1d
+      do edge = 1, meshgeom%numEdge
+         if (meshgeom%edge_nodes(1, edge) /= missing_value) then
+            meshgeom%edge_nodes(1, edge) = meshgeom%edge_nodes(1, edge) - numk1d
+         endif
+         if (meshgeom%edge_nodes(2, edge) /= missing_value) then
+            meshgeom%edge_nodes(2, edge) = meshgeom%edge_nodes(2, edge) - numk1d
+         endif
+      end do
+      ! Edge z coordinates are unknown.
 
-      ! Here need to use edge_mapping_table to map net links to edges, because edges are ordered as follows: first flow links, then closed edges.
-      meshgeom%face_edges(1:nodesPerFace, face) = edge_mapping_table(netcell(face)%lin)
+      ! Get edge faces connectivity.
+      call reallocP(meshgeom%edge_faces, (/ 2, meshgeom%numEdge /))
+      ! Here need to use reverse_edge_mapping_table to map edges to net links, because edges are ordered as follows: first flow links, then closed edges.
+      do edge = 1,meshgeom%numEdge
+         meshgeom%edge_faces(1:2, edge) = lne(1:2, reverse_edge_mapping_table(edge))
 
-      ! Get faces that are adjacent to the current face.
-      call get_adjacent_faces(face, meshgeom%face_edges, meshgeom%edge_faces, meshgeom%face_links(1:nodesPerFace, face))
-   end do
+         ! 0 means no face, i.e. edge is on the boundary of the mesh.
+         ! Replace zeroes with missing values.
+         if (meshgeom%edge_faces(1, edge) == 0) meshgeom%edge_faces(1, edge) = missing_value
+         if (meshgeom%edge_faces(2, edge) == 0) meshgeom%edge_faces(2, edge) = missing_value
+      end do
 
+      ! Faces.
+      ! Use only 2D internal net cells = 2D internal flow nodes (= faces).
+      meshgeom%numFace = nump
 
-   ! Layers.
-   ierr = add_layers_to_meshgeom(meshgeom)
-   call check_error(ierr)
+      ! Get face coordinates.
+      meshgeom%facex => xzw(1:nump)
+      meshgeom%facey => yzw(1:nump)
+      ! Face z coordinates are unknown.
 
+      ! Determine max nr of net nodes per 2D net cell = face.
+      maxNodesPerFace = 0
+      do face=1,nump
+         maxNodesPerFace = max(maxNodesPerFace, netcell(face)%n)
+      end do
 
-   deallocate(edge_mapping_table)
-   deallocate(reverse_edge_mapping_table)
+      ! Get face nodes connectivity, face edges connectivity and face-face connectivity.
+      call reallocP(meshgeom%face_nodes, (/ maxNodesPerFace, meshgeom%numFace /), fill = missing_value)
+      call reallocP(meshgeom%face_edges, (/ maxNodesPerFace, meshgeom%numFace /), fill = missing_value)
+      call reallocP(meshgeom%face_links, (/ maxNodesPerFace, meshgeom%numFace /), fill = missing_value)
+      do face = 1,nump
+         nodesPerFace = netcell(face)%n
+         ! shift node numbers by numk1d
+         meshgeom%face_nodes(1:nodesPerFace, face) = netcell(face)%nod - numk1d
+
+         ! Here need to use edge_mapping_table to map net links to edges, because edges are ordered as follows: first flow links, then closed edges.
+         ! shift node numbers by numk1d
+         meshgeom%face_edges(1:nodesPerFace, face) = edge_mapping_table(netcell(face)%lin - numl1d)
+
+         ! Get faces that are adjacent to the current face.
+         call get_adjacent_faces(face, meshgeom%face_edges, meshgeom%edge_faces, meshgeom%face_links(1:nodesPerFace, face))
+      end do
+
+      ! Layers.
+      ierr = add_layers_to_meshgeom(meshgeom)
+      call check_error(ierr)
+
+      deallocate(edge_mapping_table)
+      deallocate(reverse_edge_mapping_table)
+   endif
 
 end function create_ugrid_geometry
 
