@@ -33,21 +33,18 @@
 
 !> Fills array onlyWetLinks, which contains indices of flowlinks that are wet.
 subroutine fill_onlyWetLinks()
-   use m_alloc
    use m_flowgeom, only: lnx, wetLinkCount, onlyWetLinks
    use m_flow, only: hu
-   use m_flowparameters, only: epshu
    implicit none
 
    integer :: L
 
-   call realloc(onlyWetLinks, lnx, keepExisting = .false., fill=0)
    wetLinkCount = 0
    do L = 1, lnx
-      if (hu(L) > epshu) then
+      if (hu(L) > 0d0) then
         wetLinkCount = wetLinkCount +1
         onlyWetLinks(wetLinkCount) = L
       endif
    enddo
-   call realloc(onlyWetLinks, wetLinkCount, keepExisting = .true.)
+
 end subroutine fill_onlyWetLinks

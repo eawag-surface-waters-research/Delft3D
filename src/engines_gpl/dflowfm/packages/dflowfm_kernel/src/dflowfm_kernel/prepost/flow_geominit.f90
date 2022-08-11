@@ -484,6 +484,8 @@
  call aerr( 'ibot   (lnx)', ierr, lnx )
  ibot = 0
 
+ call realloc(onlyWetLinks, lnx, keepExisting = .false., fill = 0)
+ 
  if (allocated(xu) ) deallocate(xu,yu,blu)
  allocate ( xu(lnx), yu(lnx) , blu(lnx) ,  stat = ierr)
  call aerr('xu(lnx), yu(lnx) , blu(lnx)',  ierr, 3*lnx)
