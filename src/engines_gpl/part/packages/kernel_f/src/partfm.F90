@@ -71,14 +71,23 @@
    call init_alloc( lunmem , lunpr )
 
    if (hyd%nolay /= 1) then
-      write ( lunpr, * ) ' ERROR: 3D hydrodynamics is not yet supported for unstructured grids!'
-      write (   *  , * ) ' ERROR: 3D hydrodynamics is not yet supported for unstructured grids!'
+      write ( lunpr, * ) ' WARNING: 3D hydrodynamics is not yet supported for unstructured grids!'
+      write (   *  , * ) ' WARNING: 3D hydrodynamics is not yet supported for unstructured grids!'
    endif
    !dts   = real(hyd%cnv_step_sec, 8)  !idelt in seconds taken from the hyd file (conversion timestep)
    tzone = 0.0_hp
    refdat = hyd%HYD_REF(1:8)
    call setTUDUnitString()
 
+   !
+   ! For a model based on z-layers we need extra administration
+   ! but that is not part of the current implementation yet
+   !
+   allocate( laytop(0,0), laybot(0,0), laytopp(0,0) )
+
+   !
+   ! Read the grid information and the actual input file
+   !
    call ini_part_grid(hyd)
 
    call rdpart ( lun(1)   , lun(2)   , fname(1) )
@@ -240,7 +249,7 @@ endif
 
       call unc_write_trk()
       if (mapfil) call unc_write_map()
-      
+
       write ( lunpr, '('' Current timestep: '',I15,'' of '',I15)' ) int(time0), itstopp
       write (   *  , '('' Current timestep: '',I15,'' of '',I15)' ) int(time0), itstopp
       write ( lunpr, '('' Active particles: '',I15,'' of '',I15)' ) Nopart, npmax

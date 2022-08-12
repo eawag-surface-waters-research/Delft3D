@@ -588,12 +588,12 @@ module oildspfm_mod
          end if
       end if
 
-!$OMP PARALLEL DO PRIVATE   ( wsum, isuboil, ifrac, volfracw, tmpfracte, ic, wevap, cdelv, qentr,     &
-!$OMP                         cfloat, ix, iy, ilay, tmpfractd, rrand, dfwatoil, dviso, fw, tp, fbw,&
-!$OMP                         h0wav, hrms, de, wfact, inside, fractdapp, tmpevap, tmpevapold ),    &
-!$OMP             REDUCTION ( + : wsums, wevapt, ndisp, wsumt, wsumd, viscsurf, fwatoilsurf,       &
-!$OMP                             densurf, isurf ),                                                &
-!$OMP             SCHEDULE  ( DYNAMIC, max((nopart-npwndw)/100,1)           )
+!XX$OMP PARALLEL DO PRIVATE   ( wsum, isuboil, ifrac, volfracw, tmpfracte, ic, wevap, cdelv, qentr,     &
+!XX$OMP                         cfloat, ix, iy, ilay, tmpfractd, rrand, dfwatoil, dviso, fw, tp, fbw,&
+!XX$OMP                         h0wav, hrms, de, wfact, inside, fractdapp, tmpevap, tmpevapold ),    &
+!XX$OMP             REDUCTION ( + : wsums, wevapt, ndisp, wsumt, wsumd, viscsurf, fwatoilsurf,       &
+!XX$OMP                             densurf, isurf ),                                                &
+!XX$OMP             SCHEDULE  ( DYNAMIC, max((nopart-npwndw)/100,1)           )
       do 100 i = 1, Nopart  ! here we loop the particles TODO: check the start end end, because in fm npdndw may not exist.
 
 !     sticky part of a fraction does not evaporate (but is accumulated in wsums(ifrac)
@@ -804,7 +804,7 @@ module oildspfm_mod
 !     End of the loop ovver all particles i
 
   100 continue
-!$OMP END PARALLEL DO
+!XX$OMP END PARALLEL DO
 
       write( lun(2), 1010  ) nopart-npwndw+1, nevap, ndisp
       write( lun(2), '(/)' )
