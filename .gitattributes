@@ -4380,7 +4380,7 @@ src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/getcom.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/gkwini.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/gregor.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/julian.f -text
-src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/m_aggreration_types.F90 -text
+src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/m_aggregation_types.F90 -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/makpnt.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/monsys.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/movchr.f -text
