@@ -164,7 +164,7 @@
 		<File RelativePath=".\src\waq_utils\dattim.f"/>
 		<File RelativePath=".\src\waq_utils\delwaq_loads.f"/>
 		<File RelativePath=".\src\waq_utils\dhagg2.f"/>
-		<File RelativePath=".\src\waq_utils\m_aggregation_types.F90">
+		<File RelativePath=".\src\waq_utils\m_aggregation_types.F90"/>
 		<File RelativePath=".\src\waq_utils\dhaggr.f">
 			<FileConfiguration Name="Release|Win32">
 				<Tool Name="VFFortranCompilerTool" ReentrantCode="reentrancyThreaded" LocalVariableStorage="localStorageAutomatic"/></FileConfiguration></File>
@@ -188,21 +188,14 @@
 		<File RelativePath=".\src\waq_utils\dhgpoi.f">
 			<FileConfiguration Name="Release|Win32">
 				<Tool Name="VFFortranCompilerTool" ReentrantCode="reentrancyThreaded" LocalVariableStorage="localStorageAutomatic"/></FileConfiguration></File>
-		<File RelativePath=".\src\waq_utils\dhgvar.f">
-			<FileConfiguration Name="Release|Win32">
-				<Tool Name="VFFortranCompilerTool" ReentrantCode="reentrancyThreaded" LocalVariableStorage="localStorageAutomatic"/></FileConfiguration></File>
 		<File RelativePath=".\src\waq_utils\dhgwrd.f"/>
 		<File RelativePath=".\src\waq_utils\DHHASP.F"/>
 		<File RelativePath=".\src\waq_utils\dhimov.f"/>
-		<File RelativePath=".\src\waq_utils\dhisys.f"/>
 		<File RelativePath=".\src\waq_utils\dhkmrk.f">
 			<FileConfiguration Name="Release|Win32">
 				<Tool Name="VFFortranCompilerTool" ReentrantCode="reentrancyThreaded" LocalVariableStorage="localStorageAutomatic"/></FileConfiguration></File>
 		<File RelativePath=".\src\waq_utils\dhkmst.f"/>
-		<File RelativePath=".\src\waq_utils\dhltim.f"/>
 		<File RelativePath=".\src\waq_utils\dhnlun.f"/>
-		<File RelativePath=".\src\waq_utils\dhnolay.f"/>
-		<File RelativePath=".\src\waq_utils\dhnoseg.f"/>
 		<File RelativePath=".\src\waq_utils\dhopnf.F"/>
 		<File RelativePath=".\src\waq_utils\dhpath.f"/>
 		<File RelativePath=".\src\waq_utils\dhralloc.f"/>
@@ -221,7 +214,6 @@
 		<File RelativePath=".\src\waq_utils\dlwq_data.f"/>
 		<File RelativePath=".\src\waq_utils\dwq_proces_set.f"/>
 		<File RelativePath=".\src\waq_utils\errsys.f"/>
-		<File RelativePath=".\src\waq_utils\fffind.f"/>
 		<File RelativePath=".\src\waq_utils\fileutils.f90"/>
 		<File RelativePath=".\src\waq_utils\filldm.f"/>
 		<File RelativePath=".\src\waq_utils\getcom.f"/>
@@ -243,7 +235,6 @@
 		<File RelativePath=".\src\waq_utils\rd_stt.f90"/>
 		<File RelativePath=".\src\waq_utils\rd_sub.f90"/>
 		<File RelativePath=".\src\waq_utils\rdvers.f"/>
-		<File RelativePath=".\src\waq_utils\rdwrk3.f"/>
 		<File RelativePath=".\src\waq_utils\rdwrk4.f"/>
 		<File RelativePath=".\src\waq_utils\reptim.f"/>
 		<File RelativePath=".\src\waq_utils\SRSTOP.F"/>
@@ -254,7 +245,6 @@
 		<File RelativePath=".\src\waq_utils\wapdef.f"/>
 		<File RelativePath=".\src\waq_utils\waqmem.f90"/>
 		<File RelativePath=".\src\waq_utils\wbpdef.f"/>
-		<File RelativePath=".\src\waq_utils\wrwrk3.f"/>
 		<File RelativePath=".\src\waq_utils\zero.f"/>
 		<File RelativePath=".\src\waq_utils\zoek.f"/></Filter></Filter></Files>
 	<Globals/></VisualStudioProject>
