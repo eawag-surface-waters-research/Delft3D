@@ -83,6 +83,7 @@ subroutine inimorlyr(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
     real(fp)         , dimension(lsedtot)         :: mfrac
     real(fp)                                      :: mfracsum
     real(fp)                                      :: poros
+    real(fp)                                      :: rdum    !< value used for initialization of array
     real(fp)                                      :: svf
     real(prec)       , dimension(:,:)   , pointer :: bodsed
     real(fp)         , dimension(:)     , pointer :: dpsed
@@ -130,17 +131,19 @@ subroutine inimorlyr(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
        !
        ! restarting from file containing bed levels, so let's check other quantities as well
        !
+       rdum = -9999999.0_fp
        if (gdp%gdmorpar%flufflyr%iflufflyr>0) then
            mfluff => gdp%gdmorpar%flufflyr%mfluff
            !
            call restart_trim_fluff ( &
-                  & lundia    ,mfluff    ,rst_fluff ,lsed      ,gdp       )
+                  & lundia, mfluff, rst_fluff, lsed, rdum, gdp)
        endif
        !
        call restart_trim_lyrs ( &
               & msed      ,thlyr     ,lsedtot   ,cdryb     , &
               & nlyr      ,rst_bedcmp,svfrac    ,iporosity , &
-              & iunderlyr ,bodsed    ,dpsed     ,gdp       )
+              & iunderlyr ,bodsed    ,dpsed     ,rdum      , &
+              & gdp       )
     endif
     !
     ! Any parameters not obtained from restart file will be initialized using
