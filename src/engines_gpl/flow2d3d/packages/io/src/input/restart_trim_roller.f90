@@ -2,7 +2,7 @@ subroutine restart_trim_roller(lundia    ,error     ,fds       ,filename  ,filet
                              & i_restart ,ewave1    ,eroll1    ,qxkr      , &
                              & qykr      ,qxkw      ,qykw      ,fxw       ,fyw       , &
                              & wsu       ,wsv       ,guu       ,gvv       , &
-                             & hrms      ,rdum      ,gdp       )
+                             & hrms      ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2022.                                
@@ -57,7 +57,6 @@ subroutine restart_trim_roller(lundia    ,error     ,fds       ,filename  ,filet
     integer                                                      , intent(in)  :: i_restart
     integer                                                                    :: lundia    !  Description and declaration in inout.igs
     logical                                                      , intent(out) :: error
-    real(fp)                                                     , intent(in)  :: rdum    !< value used for initialization of array
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(out) :: eroll1    !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(out) :: ewave1    !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(out) :: fxw       !  Description and declaration in esm_alloc_real.f90
@@ -100,7 +99,7 @@ subroutine restart_trim_roller(lundia    ,error     ,fds       ,filename  ,filet
     !
     call rdarray_nm(fds, filename, filetype, grnam4, i_restart, &
                  & nf, nl, mf, ml, iarrc, gdp, &
-                 & ierror, lundia, hrms, 'HS', rdum)
+                 & ierror, lundia, hrms, 'HS')
     if (ierror /= 0) goto 9999
     hrms = hrms / sqrt(2.0_fp) 
     !
@@ -108,85 +107,85 @@ subroutine restart_trim_roller(lundia    ,error     ,fds       ,filename  ,filet
     !
     call rdarray_nm(fds, filename, filetype, grnam4, i_restart, &
                  & nf, nl, mf, ml, iarrc, gdp, &
-                 & ierror, lundia, ewave1, 'EWAVE1', rdum)
+                 & ierror, lundia, ewave1, 'EWAVE1')
     if (ierror /= 0) goto 9999
     !
     ! element 'EROLL1'
     !
     call rdarray_nm(fds, filename, filetype, grnam4, i_restart, &
                  & nf, nl, mf, ml, iarrc, gdp, &
-                 & ierror, lundia, eroll1, 'EROLL1', rdum)
+                 & ierror, lundia, eroll1, 'EROLL1')
     if (ierror /= 0) goto 9999
     !
     ! element 'QXKR'
     !
     call rdarray_nm(fds, filename, filetype, grnam4, i_restart, &
                  & nf, nl, mf, ml, iarrc, gdp, &
-                 & ierror, lundia, qxkr, 'QXKR', rdum)
+                 & ierror, lundia, qxkr, 'QXKR')
     if (ierror /= 0) goto 9999
     !
     ! element 'QYKR'
     !
     call rdarray_nm(fds, filename, filetype, grnam4, i_restart, &
                  & nf, nl, mf, ml, iarrc, gdp, &
-                 & ierror, lundia, qykr, 'QYKR', rdum)
+                 & ierror, lundia, qykr, 'QYKR')
     if (ierror /= 0) goto 9999
     !
     ! element 'QXKW'
     !
     call rdarray_nm(fds, filename, filetype, grnam4, i_restart, &
                  & nf, nl, mf, ml, iarrc, gdp, &
-                 & ierror, lundia, qxkw, 'QXKW', rdum)
+                 & ierror, lundia, qxkw, 'QXKW')
     if (ierror /= 0) goto 9999
     !
     ! element 'QYKW'
     !
     call rdarray_nm(fds, filename, filetype, grnam4, i_restart, &
                  & nf, nl, mf, ml, iarrc, gdp, &
-                 & ierror, lundia, qykw, 'QYKW', rdum)
+                 & ierror, lundia, qykw, 'QYKW')
     if (ierror /= 0) goto 9999
     !
     ! element 'FXW'
     !
     call rdarray_nm(fds, filename, filetype, grnam4, i_restart, &
                  & nf, nl, mf, ml, iarrc, gdp, &
-                 & ierror, lundia, fxw, 'FXW', rdum)
+                 & ierror, lundia, fxw, 'FXW')
     if (ierror /= 0) goto 9999
     !
     ! element 'FYW'
     !
     call rdarray_nm(fds, filename, filetype, grnam4, i_restart, &
                  & nf, nl, mf, ml, iarrc, gdp, &
-                 & ierror, lundia, fyw, 'FYW', rdum)
+                 & ierror, lundia, fyw, 'FYW')
     if (ierror /= 0) goto 9999
     !
     ! element 'WSU'
     !
     call rdarray_nm(fds, filename, filetype, grnam4, i_restart, &
                  & nf, nl, mf, ml, iarrc, gdp, &
-                 & ierror, lundia, wsu, 'WSU', rdum)
+                 & ierror, lundia, wsu, 'WSU')
     if (ierror /= 0) goto 9999
     !
     ! element 'WSV'
     !
     call rdarray_nm(fds, filename, filetype, grnam4, i_restart, &
                  & nf, nl, mf, ml, iarrc, gdp, &
-                 & ierror, lundia, wsv, 'WSV', rdum)
+                 & ierror, lundia, wsv, 'WSV')
     if (ierror /= 0) goto 9999
     !
     ! Check restart data for not-a-numbers
     !
-    if (.not. nan_check(hrms  , 'HS (restart-file)'    , lundia, gdp%d%nlb, gdp%d%mlb)) ierror = 1
-    if (.not. nan_check(eroll1, 'EROLL1 (restart-file)', lundia, gdp%d%nlb, gdp%d%mlb)) ierror = 1
-    if (.not. nan_check(ewave1, 'EWAVE1 (restart-file)', lundia, gdp%d%nlb, gdp%d%mlb)) ierror = 1
-    if (.not. nan_check(qxkr  , 'QXKR (restart-file)'  , lundia, gdp%d%nlb, gdp%d%mlb)) ierror = 1
-    if (.not. nan_check(qykr  , 'QYKR (restart-file)'  , lundia, gdp%d%nlb, gdp%d%mlb)) ierror = 1
-    if (.not. nan_check(qxkw  , 'QXKW (restart-file)'  , lundia, gdp%d%nlb, gdp%d%mlb)) ierror = 1
-    if (.not. nan_check(qykw  , 'QYKW (restart-file)'  , lundia, gdp%d%nlb, gdp%d%mlb)) ierror = 1
-    if (.not. nan_check(fxw   , 'FXW (restart-file)'   , lundia, gdp%d%nlb, gdp%d%mlb)) ierror = 1
-    if (.not. nan_check(fyw   , 'FYW (restart-file)'   , lundia, gdp%d%nlb, gdp%d%mlb)) ierror = 1
-    if (.not. nan_check(wsu   , 'WSU (restart-file)'   , lundia, gdp%d%nlb, gdp%d%mlb)) ierror = 1
-    if (.not. nan_check(wsv   , 'WSV (restart-file)'   , lundia, gdp%d%nlb, gdp%d%mlb)) ierror = 1
+    if (.not. nan_check(hrms  , 'HS (restart-file)'    , lundia)) ierror = 1
+    if (.not. nan_check(eroll1, 'EROLL1 (restart-file)', lundia)) ierror = 1
+    if (.not. nan_check(ewave1, 'EWAVE1 (restart-file)', lundia)) ierror = 1
+    if (.not. nan_check(qxkr  , 'QXKR (restart-file)'  , lundia)) ierror = 1
+    if (.not. nan_check(qykr  , 'QYKR (restart-file)'  , lundia)) ierror = 1
+    if (.not. nan_check(qxkw  , 'QXKW (restart-file)'  , lundia)) ierror = 1
+    if (.not. nan_check(qykw  , 'QYKW (restart-file)'  , lundia)) ierror = 1
+    if (.not. nan_check(fxw   , 'FXW (restart-file)'   , lundia)) ierror = 1
+    if (.not. nan_check(fyw   , 'FYW (restart-file)'   , lundia)) ierror = 1
+    if (.not. nan_check(wsu   , 'WSU (restart-file)'   , lundia)) ierror = 1
+    if (.not. nan_check(wsv   , 'WSV (restart-file)'   , lundia)) ierror = 1
     call dfreduce_gdp( ierror, 1, dfint, dfmax, gdp )
     !
 9999 continue

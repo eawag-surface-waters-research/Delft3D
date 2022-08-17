@@ -1,4 +1,4 @@
-subroutine restart_trim_fluff (lundia, mfluff, rst_fluff, lsed, rdum, gdp)
+subroutine restart_trim_fluff (lundia    ,mfluff    ,rst_fluff ,lsed      ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2022.                                
@@ -57,7 +57,6 @@ subroutine restart_trim_fluff (lundia, mfluff, rst_fluff, lsed, rdum, gdp)
 !
     integer                                                                               :: lundia
     logical                                                                 , intent(out) :: rst_fluff
-    real(fp)                                                                , intent(in)  :: rdum    !< value used for initialization of array
     real(fp), dimension(lsed, gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)     , intent(out) :: mfluff
     integer                                                                 , intent(in)  :: lsed
 !
@@ -133,7 +132,7 @@ subroutine restart_trim_fluff (lundia, mfluff, rst_fluff, lsed, rdum, gdp)
     grnam = 'map-sed-series'
     call rdarray_nml(fds, filename, filetype, grnam, i_restart, &
                  & nf, nl, mf, ml, iarrc, gdp, &
-                 & lsed, ierror, lundia, mfluff, 'MFLUFF', rdum)
+                 & lsed, ierror, lundia, mfluff, 'MFLUFF')
     if (ierror == 0) then
        write(lundia, '(a)') 'Fluff layer content read from restart file.'
        rst_fluff = .true.

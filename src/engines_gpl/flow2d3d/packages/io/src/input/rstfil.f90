@@ -114,7 +114,7 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
     character(256)                                       :: filpath ! Path specification of restid
     integer                                              :: nm_pos ! indicating the array to be exchanged has nm index at the 2nd place, e.g., dbodsd(lsedtot,nm)
     real(fp), dimension(:,:,:), pointer                  :: rst_rtur1
-    real(fp)                                             :: rdum    !< value used for initialization of array
+    real(fp)                                             :: rdum
 !
 !! executable statements -------------------------------------------------------
 !
@@ -144,7 +144,14 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
     ! entries used.
     !
     rdum = -9999999.0_fp
-    ! this fill value is now used inside the rdarray_nm calls
+    s1 = rdum
+    u1 = rdum
+    v1 = rdum
+    if (lstsci > 0) r1 = rdum
+    if (ltur > 0) rtur1 = rdum
+    umnldf = rdum
+    vmnldf = rdum
+    ! dps, roller, fluff layer, ... not initialized.
     !
     ! test file existence, first 'tri-rst.<restid>.idate.itime'
     !
@@ -180,8 +187,7 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
                                & nmaxus    ,kmax      ,lstsci    ,ltur      , &
                                & s1        ,u1        ,v1        ,r1        ,rtur1     , &
                                & umnldf    ,vmnldf    ,kfu       ,kfv       , &
-                               & dp        ,ex_nfs    ,namcon    ,coninit   ,rdum      , &
-                               & gdp       )
+                               & dp        ,ex_nfs    ,namcon    ,coninit   ,gdp       )
           if (error .and. .not.ex_nfs) then
              call prterr(lundia    ,'G004'    , &
                  & 'tri-rst.' // trim(restid0) // trim(datetime) // ', tri-rst.' // trim(restid0) // &
@@ -234,17 +240,17 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
        !
        call rdarray_nm(luntmp, filtmp, ftype, 'DUMMY', 0, &
                     & nf, nl, mf, ml, iarrc, gdp, &
-                    & ierror, lundia, s1, 'DUMMY', rdum)
+                    & ierror, lundia, s1, 'DUMMY')
        if (ierror /= 0) goto 9999
        !
        call rdarray_nmk(luntmp, filtmp, ftype, 'DUMMY', 0, &
                      & nf, nl, mf, ml, iarrc, gdp, &
-                     & 1, kmax, ierror, lundia, u1, 'DUMMY', rdum)
+                     & 1, kmax, ierror, lundia, u1, 'DUMMY')
        if (ierror /= 0) goto 9999
        !
        call rdarray_nmk(luntmp, filtmp, ftype, 'DUMMY', 0, &
                      & nf, nl, mf, ml, iarrc, gdp, &
-                     & 1, kmax, ierror, lundia, v1, 'DUMMY', rdum)
+                     & 1, kmax, ierror, lundia, v1, 'DUMMY')
        if (ierror /= 0) goto 9999
        !
        ! per constituent l: kmax nmaxus mmax values in r1 array
@@ -254,7 +260,7 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
        if (lstsci > 0) then
           call rdarray_nmkl(luntmp, filtmp, ftype, 'DUMMY', 0, &
                         & nf, nl, mf, ml, iarrc, gdp, &
-                        & 1, kmax, lstsci, ierror, lundia, r1, 'DUMMY', rdum)
+                        & 1, kmax, lstsci, ierror, lundia, r1, 'DUMMY')
           if (ierror /= 0) goto 9999
           coninit = 1
        endif
@@ -266,7 +272,7 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
           allocate(rst_rtur1(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 0:kmax), stat = ierror)
           call rdarray_nmk(luntmp, filtmp, ftype, 'DUMMY', 0, &
                         & nf, nl, mf, ml, iarrc, gdp, &
-                        & 0, kmax, ierror, lundia, rst_rtur1, 'DUMMY', rdum)
+                        & 0, kmax, ierror, lundia, rst_rtur1, 'DUMMY')
           if (ierror /= 0) then
               ! If no turbulence arrays on restart file then rtur1 will be
               ! initialized in INITUR
@@ -286,7 +292,7 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
           if (ltur==2 .and. lturi==0) then
               call rdarray_nmk(luntmp, filtmp, ftype, 'DUMMY', 0, &
                             & nf, nl, mf, ml, iarrc, gdp, &
-                            & 0, kmax, ierror, lundia, rst_rtur1, 'DUMMY', rdum)
+                            & 0, kmax, ierror, lundia, rst_rtur1, 'DUMMY')
               if (ierror /= 0) then
                   ! If only K on restart file EPS will be calculated in INITUR
                   lturi = -ltur
@@ -309,7 +315,7 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
        !
        call rdarray_nm(luntmp, filtmp, ftype, 'DUMMY', 0, &
                     & nf, nl, mf, ml, iarrc, gdp, &
-                    & ierror, lundia, umnldf, 'DUMMY', rdum)
+                    & ierror, lundia, umnldf, 'DUMMY')
        if (ierror /= 0) then
            ierror = 0
            goto 9999
@@ -317,7 +323,7 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
        !
        call rdarray_nm(luntmp, filtmp, ftype, 'DUMMY', 0, &
                     & nf, nl, mf, ml, iarrc, gdp, &
-                    & ierror, lundia, vmnldf, 'DUMMY', rdum)
+                    & ierror, lundia, vmnldf, 'DUMMY')
        if (ierror /= 0) goto 9999
        !
        ! close file
@@ -326,13 +332,13 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
        if (inode == master) close (luntmp)
        !
        if (ierror == 0) then
-           if ( .not. nan_check(s1    , 's1 (restart-file)'    , lundia, gdp%d%nlb, gdp%d%mlb) .or. &
-              & .not. nan_check(u1    , 'u1 (restart-file)'    , lundia, gdp%d%nlb, gdp%d%mlb, 1) .or. &
-              & .not. nan_check(v1    , 'v1 (restart-file)'    , lundia, gdp%d%nlb, gdp%d%mlb, 1) .or. &
-              & .not. nan_check(r1    , 'r1 (restart-file)'    , lundia, gdp%d%nlb, gdp%d%mlb, 1, 1) .or. &
-              & .not. nan_check(rtur1 , 'rtur1 (restart-file)' , lundia, gdp%d%nlb, gdp%d%mlb, 0, 1) .or. &
-              & .not. nan_check(umnldf, 'umnldf (restart-file)', lundia, gdp%d%nlb, gdp%d%mlb) .or. &
-              & .not. nan_check(vmnldf, 'vmnldf (restart-file)', lundia, gdp%d%nlb, gdp%d%mlb)      ) then
+           if ( .not. nan_check(s1    , 's1 (restart-file)'    , lundia) .or. &
+              & .not. nan_check(u1    , 'u1 (restart-file)'    , lundia) .or. &
+              & .not. nan_check(v1    , 'v1 (restart-file)'    , lundia) .or. &
+              & .not. nan_check(r1    , 'r1 (restart-file)'    , lundia) .or. &
+              & .not. nan_check(rtur1 , 'rtur1 (restart-file)' , lundia) .or. &
+              & .not. nan_check(umnldf, 'umnldf (restart-file)', lundia) .or. &
+              & .not. nan_check(vmnldf, 'vmnldf (restart-file)', lundia)      ) then
                ierror = 1
            endif
        endif

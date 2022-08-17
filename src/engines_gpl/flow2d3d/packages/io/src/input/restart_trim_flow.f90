@@ -2,8 +2,7 @@ subroutine restart_trim_flow(lundia    ,error     ,restid1   ,lturi     ,mmax   
                            & nmaxus    ,kmax      ,lstsci    ,ltur      , &
                            & s1        ,u1        ,v1        ,r1        ,rtur1     , &
                            & umnldf    ,vmnldf    ,kfu       ,kfv       , &
-                           & dp        ,ex_nfs    ,namcon    ,coninit   ,rdum      , &
-                           & gdp       )
+                           & dp        ,ex_nfs    ,namcon    ,coninit   ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2022.                                
@@ -94,8 +93,7 @@ subroutine restart_trim_flow(lundia    ,error     ,restid1   ,lturi     ,mmax   
     integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)               , intent(out) :: kfv
     integer, dimension(lstsci)                                                               :: coninit ! Flag=1 if constituent is initialized, all 0 upon entry
     logical                                                                                  :: error
-    logical                                                                                  :: ex_nfs  ! Flag indicating whether Nefis restart files exist
-    real(fp)                                                                   , intent(in)  :: rdum    !< value used for initialization of array
+    logical                                                                                  :: ex_nfs !  Flag indicating whether Nefis restart files exist
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              , intent(out) :: dp
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              , intent(out) :: s1
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              , intent(out) :: umnldf
@@ -217,15 +215,15 @@ subroutine restart_trim_flow(lundia    ,error     ,restid1   ,lturi     ,mmax   
     ewave1              => gdp%gdr_i_ch%ewave1
     fxw                 => gdp%gdr_i_ch%fxw
     fyw                 => gdp%gdr_i_ch%fyw
-    hrms                => gdp%gdr_i_ch%hrms
+    hrms                => gdp%gdr_i_ch%hrms    
     qxkr                => gdp%gdr_i_ch%qxkr
     qxkw                => gdp%gdr_i_ch%qxkw
     qykr                => gdp%gdr_i_ch%qykr
-    qykw                => gdp%gdr_i_ch%qykw
+    qykw                => gdp%gdr_i_ch%qykw        
     wsu                 => gdp%gdr_i_ch%wsu
-    wsv                 => gdp%gdr_i_ch%wsv
+    wsv                 => gdp%gdr_i_ch%wsv    
     guu                 => gdp%gdr_i_ch%guu
-    gvv                 => gdp%gdr_i_ch%gvv
+    gvv                 => gdp%gdr_i_ch%gvv    
     mfg                 => gdp%gdparall%mfg
     mlg                 => gdp%gdparall%mlg
     nfg                 => gdp%gdparall%nfg
@@ -558,7 +556,7 @@ subroutine restart_trim_flow(lundia    ,error     ,restid1   ,lturi     ,mmax   
     !
     call rdarray_nm(fds, filename, filetype, grnam3, i_restart, &
                  & nf, nl, mf, ml, iarrc, gdp, &
-                 & ierror, lundia, s1, 'S1', rdum)
+                 & ierror, lundia, s1, 'S1')
     if (ierror /= 0) goto 9999
     !
     ! element 'DPS'
@@ -566,7 +564,7 @@ subroutine restart_trim_flow(lundia    ,error     ,restid1   ,lturi     ,mmax   
     if (dp_from_map_file) then
        call rdarray_nm(fds, filename, filetype, grnam4, i_restart, &
                     & nf, nl, mf, ml, iarrc, gdp, &
-                    & ierror, lundia, dp, 'DPS', rdum)
+                    & ierror, lundia, dp, 'DPS')
        if (ierror /= 0) goto 9999
     endif
     !
@@ -574,11 +572,11 @@ subroutine restart_trim_flow(lundia    ,error     ,restid1   ,lturi     ,mmax   
     !
     call rdarray_nmk(fds, filename, filetype, grnam3, i_restart, &
                   & nf, nl, mf, ml, iarrc, gdp, &
-                  & 1, kmax, ierror, lundia, u1, 'U1', rdum)
+                  & 1, kmax, ierror, lundia, u1, 'U1')
     if (ierror /= 0) goto 9999
     call rdarray_nmk(fds, filename, filetype, grnam3, i_restart, &
                   & nf, nl, mf, ml, iarrc, gdp, &
-                  & 1, kmax, ierror, lundia, v1, 'V1', rdum)
+                  & 1, kmax, ierror, lundia, v1, 'V1')
     if (ierror /= 0) goto 9999
     !
     ! element 'UMNLDF' & 'VMNLDF'
@@ -589,11 +587,11 @@ subroutine restart_trim_flow(lundia    ,error     ,restid1   ,lturi     ,mmax   
        !
        call rdarray_nm(fds, filename, filetype, grnam3, i_restart, &
                     & nf, nl, mf, ml, iarrc, gdp, &
-                    & ierror, lundia, umnldf, 'UMNLDF', rdum)
+                    & ierror, lundia, umnldf, 'UMNLDF')
        if (ierror /= 0) goto 9999
        call rdarray_nm(fds, filename, filetype, grnam3, i_restart, &
                     & nf, nl, mf, ml, iarrc, gdp, &
-                    & ierror, lundia, vmnldf, 'VMNLDF', rdum)
+                    & ierror, lundia, vmnldf, 'VMNLDF')
        if (ierror /= 0) goto 9999
     elseif (htur2d) then
        call prterr(lundia, 'P004', 'umean (umnldf and/or vmnldf) not found in restart-data, but using 2D turbulence')
@@ -604,11 +602,11 @@ subroutine restart_trim_flow(lundia    ,error     ,restid1   ,lturi     ,mmax   
     !
     call rdarray_nm(fds, filename, filetype, grnam3, i_restart, &
                  & nf, nl, mf, ml, iarrc, gdp, &
-                 & ierror, lundia, kfu, 'KFU', 0)
+                 & ierror, lundia, kfu, 'KFU')
     if (ierror /= 0) goto 9999
     call rdarray_nm(fds, filename, filetype, grnam3, i_restart, &
                  & nf, nl, mf, ml, iarrc, gdp, &
-                 & ierror, lundia, kfv, 'KFV', 0)
+                 & ierror, lundia, kfv, 'KFV')
     if (ierror /= 0) goto 9999
     !
     ! Constituents sal, temp, constituents
@@ -618,7 +616,7 @@ subroutine restart_trim_flow(lundia    ,error     ,restid1   ,lturi     ,mmax   
         rst_r1 = 0.0_fp
         call rdarray_nmkl(fds, filename, filetype, grnam3, i_restart, &
                       & nf, nl, mf, ml, iarrc, gdp, &
-                      & 1, kmax, rst_lstsci, ierror, lundia, rst_r1, 'R1', rdum)
+                      & 1, kmax, rst_lstsci, ierror, lundia, rst_r1, 'R1')
         if (ierror /= 0) goto 9999
         do l = 1,lstsci
             if (coninit(l)>0) then
@@ -647,7 +645,7 @@ subroutine restart_trim_flow(lundia    ,error     ,restid1   ,lturi     ,mmax   
        rst_rtur1 = 0.0_fp
        call rdarray_nmkl(fds, filename, filetype, grnam3, i_restart, &
                      & nf, nl, mf, ml, iarrc, gdp, &
-                     & 0, kmax, rst_ltur, ierror, lundia, rst_rtur1, 'RTUR1', rdum)
+                     & 0, kmax, rst_ltur, ierror, lundia, rst_rtur1, 'RTUR1')
        if (ierror /= 0) goto 9999
         do l = 1,min(ltur,rst_ltur)
             rtur1(:,:,:,l) = rst_rtur1(:,:,:,l)
@@ -660,21 +658,21 @@ subroutine restart_trim_flow(lundia    ,error     ,restid1   ,lturi     ,mmax   
     !
     ! Check restart data for not-a-numbers
     !
-    if (.not. nan_check(s1    , 'S1 (restart-file)', lundia, gdp%d%nlb, gdp%d%mlb)) ierror = 1
+    if (.not. nan_check(s1    , 'S1 (restart-file)', lundia)) ierror = 1
     if (dp_from_map_file) then
-       if (.not. nan_check(dp    , 'DPS (restart-file)', lundia, gdp%d%nlb, gdp%d%mlb)) ierror = 1
+       if (.not. nan_check(dp    , 'DPS (restart-file)', lundia)) ierror = 1
     endif
-    if (.not. nan_check(u1    , 'U1 (restart-file)', lundia, gdp%d%nlb, gdp%d%mlb, 1)) ierror = 1
-    if (.not. nan_check(v1    , 'V1 (restart-file)', lundia, gdp%d%nlb, gdp%d%mlb, 1)) ierror = 1
+    if (.not. nan_check(u1    , 'U1 (restart-file)', lundia)) ierror = 1
+    if (.not. nan_check(v1    , 'V1 (restart-file)', lundia)) ierror = 1
     if (has_umean /= 0) then
-       if (.not. nan_check(umnldf, 'UMNLDF (restart-file)', lundia, gdp%d%nlb, gdp%d%mlb)) ierror = 1
-       if (.not. nan_check(vmnldf, 'VMNLDF (restart-file)', lundia, gdp%d%nlb, gdp%d%mlb)) ierror = 1
+       if (.not. nan_check(umnldf, 'UMNLDF (restart-file)', lundia)) ierror = 1
+       if (.not. nan_check(vmnldf, 'VMNLDF (restart-file)', lundia)) ierror = 1
     endif
     if (rst_lstsci>0 .and. lstsci>0) then
-       if (.not. nan_check(r1    , 'R1 (restart-file)', lundia, gdp%d%nlb, gdp%d%mlb, 1, 1)) ierror = 1
+       if (.not. nan_check(r1    , 'R1 (restart-file)', lundia)) ierror = 1
     endif
     if (rst_ltur>0 .and. ltur>0) then
-       if (.not. nan_check(rtur1 , 'RTUR1 (restart-file)', lundia, gdp%d%nlb, gdp%d%mlb, 0, 1)) ierror = 1
+       if (.not. nan_check(rtur1 , 'RTUR1 (restart-file)', lundia)) ierror = 1
     endif
     call dfreduce_gdp( ierror, 1, dfint, dfmax, gdp )
     if (ierror /= 0) goto 9999
@@ -686,7 +684,7 @@ subroutine restart_trim_flow(lundia    ,error     ,restid1   ,lturi     ,mmax   
                               & i_restart ,r(ewave1) ,r(eroll1) ,r(qxkr)   , &
                               & r(qykr)   ,r(qxkw)   ,r(qykw)   ,r(fxw)    ,r(fyw)    , &
                               & r(wsu)    ,r(wsv)    ,r(guu)    ,r(gvv)    , &
-                              & r(hrms)   ,rdum      ,gdp       )
+                              & r(hrms)   ,gdp       )
     endif
     !
 9999 continue

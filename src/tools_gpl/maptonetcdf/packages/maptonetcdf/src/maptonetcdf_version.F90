@@ -32,7 +32,7 @@ module maptonetcdf_version_module
     character(*),  public, parameter :: maptonetcdf_major        = '**'
     character(*),  public, parameter :: maptonetcdf_minor        = '**'
     character(*),  public, parameter :: maptonetcdf_revision     = '**'
-    character(*),  public, parameter :: maptonetcdf_build_number = '141581M'
+    character(*),  public, parameter :: maptonetcdf_build_number = '141484M'
 
     character(*),  public, parameter :: maptonetcdf_company      = 'Deltares'
     character(*),  public, parameter :: maptonetcdf_company_url  = 'http://www.deltares.nl'

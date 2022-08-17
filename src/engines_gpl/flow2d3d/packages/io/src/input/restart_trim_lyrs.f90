@@ -4,8 +4,7 @@ contains
 
 subroutine restart_trim_lyrs (msed      ,thlyr     ,lsedtot   ,cdryb     , &
                             & nlyr      ,success   ,svfrac    ,iporosity , &
-                            & iunderlyr ,bodsed    ,dpsed     ,rdum      , &
-                            & gdp       )
+                            & iunderlyr ,bodsed    ,dpsed     ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2022.                                
@@ -73,7 +72,6 @@ subroutine restart_trim_lyrs (msed      ,thlyr     ,lsedtot   ,cdryb     , &
     integer                                                                     , intent(in)  :: lsedtot
     integer                                                                     , intent(in)  :: nlyr
     logical                                                                     , intent(out) :: success
-    real(fp)                                                                    , intent(in)  :: rdum    !< value used for initialization of array
     real(fp), dimension(lsedtot)                                                , intent(in)  :: cdryb
     !
     real(fp), dimension(:, :, :)                                                , pointer     :: msed
@@ -260,15 +258,15 @@ subroutine restart_trim_lyrs (msed      ,thlyr     ,lsedtot   ,cdryb     , &
     case (0)
         call rdarray_nmkl(fds, filename, filetype, 'map-sed-series', i_restart, &
                       & nf, nl, mf, ml, iarrc, gdp, &
-                      & 1, rst_nlyr, lsedtot, ierror, lundia, rst_msed, 'MSED', rdum)
+                      & 1, rst_nlyr, lsedtot, ierror, lundia, rst_msed, 'MSED')
     case (1)
         call rdarray_nmkl(fds, filename, filetype, 'map-sed-series', i_restart, &
                       & nf, nl, mf, ml, iarrc, gdp, &
-                      & 1, rst_nlyr, lsedtot, ierror, lundia, rst_msed, 'LYRFRAC', rdum)
+                      & 1, rst_nlyr, lsedtot, ierror, lundia, rst_msed, 'LYRFRAC')
     case (2)
         call rdarray_nmkl(fds, filename, filetype, 'map-sed-series', i_restart, &
                       & nf, nl, mf, ml, iarrc, gdp, &
-                      & 1, rst_nlyr, lsedtot, ierror, lundia, rst_msed, 'BODSED', rdum)
+                      & 1, rst_nlyr, lsedtot, ierror, lundia, rst_msed, 'BODSED')
     end select
     if (ierror/=0) goto 9999
     !
@@ -300,11 +298,11 @@ subroutine restart_trim_lyrs (msed      ,thlyr     ,lsedtot   ,cdryb     , &
     case (1)
         call rdarray_nmk(fds, filename, filetype, 'map-sed-series', i_restart, &
                       & nf, nl, mf, ml, iarrc, gdp, &
-                      & 1, rst_nlyr, ierror, lundia, rst_thlyr, 'THLYR', rdum)
+                      & 1, rst_nlyr, ierror, lundia, rst_thlyr, 'THLYR')
     case (2)
         call rdarray_nmk(fds, filename, filetype, 'map-sed-series', i_restart, &
                       & nf, nl, mf, ml, iarrc, gdp, &
-                      & 1, rst_nlyr+1, ierror, lundia, rst_thlyr, 'DP_BEDLYR', rdum)
+                      & 1, rst_nlyr+1, ierror, lundia, rst_thlyr, 'DP_BEDLYR')
         if (ierror == 0) then
             do k = 1, rst_nlyr
                 do m = gdp%d%mlb, gdp%d%mub

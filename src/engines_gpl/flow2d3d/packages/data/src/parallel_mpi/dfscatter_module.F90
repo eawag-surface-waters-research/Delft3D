@@ -77,7 +77,7 @@ contains
 !
 !
 !===============================================================================
-subroutine dfscatter_I2e(inparr, ouparr, nf, nl, mf, ml, iarrc, fillval, gdp)
+subroutine dfscatter_I2e(inparr, ouparr, nf, nl, mf, ml, iarrc, gdp)
 !!--description-----------------------------------------------------------------
 !
 !    Function:    Scatter from inparr (on master) to distributed arrays ouparr (on all threads)
@@ -97,7 +97,6 @@ subroutine dfscatter_I2e(inparr, ouparr, nf, nl, mf, ml, iarrc, fillval, gdp)
 ! Global variables
 !
 type(globdat), target                                        :: gdp
-integer                                      , intent(in)    :: fillval !< value used for initialization of array
 integer, dimension(:,:)         , allocatable, intent(in)    :: inparr ! only allocated on master thread
 integer, dimension(:,:)                      , intent(out)   :: ouparr
 integer, dimension(4,0:nproc-1)              , intent(in)    :: iarrc
@@ -156,7 +155,6 @@ integer, dimension(:,:), allocatable      :: ouparr_slice
           lengl = lengl + msiz*nsiz
        enddo
        allocate(tmp(lengl))
-       tmp = fillval
        !
        is = 0
        do ip = 0, nproc-1
@@ -192,7 +190,7 @@ end subroutine dfscatter_I2e
 !
 !
 !===============================================================================
-subroutine dfscatter_I3e(inparr, ouparr, nf, nl, mf, ml, iarrc, fillval, gdp)
+subroutine dfscatter_I3e(inparr, ouparr, nf, nl, mf, ml, iarrc, gdp)
 !!--description-----------------------------------------------------------------
 !
 !    Function:    Scatter from inparr (on master) to distributed arrays ouparr (on all threads)
@@ -212,7 +210,6 @@ subroutine dfscatter_I3e(inparr, ouparr, nf, nl, mf, ml, iarrc, fillval, gdp)
 ! Global variables
 !
 type(globdat), target                                        :: gdp
-integer                                      , intent(in)    :: fillval !< value used for initialization of array
 integer, dimension(:,:,:)       , allocatable, intent(in)    :: inparr ! only allocated on master thread
 integer, dimension(:,:,:)                    , intent(out)   :: ouparr
 integer, dimension(4,0:nproc-1)              , intent(in)    :: iarrc
@@ -277,7 +274,6 @@ integer, dimension(:,:,:), allocatable    :: ouparr_slice
        enddo
        lengl = lengl*(kl-kf+1)
        allocate(tmp(lengl))
-       tmp = fillval
        !
        is = 0
        do ip = 0, nproc-1
@@ -316,7 +312,7 @@ end subroutine dfscatter_I3e
 !
 !
 !===============================================================================
-subroutine dfscatter_R2e_sp2sp(inparr, ouparr, nf, nl, mf, ml, iarrc, fillval, gdp)
+subroutine dfscatter_R2e_sp2sp(inparr, ouparr, nf, nl, mf, ml, iarrc, gdp)
 !!--description-----------------------------------------------------------------
 !
 !    Function:    Scatter from inparr (on master) to distributed arrays ouparr (on all threads)
@@ -336,7 +332,6 @@ subroutine dfscatter_R2e_sp2sp(inparr, ouparr, nf, nl, mf, ml, iarrc, fillval, g
 ! Global variables
 !
 type(globdat), target                                        :: gdp
-real(sp)                                     , intent(in)    :: fillval !< value used for initialization of array
 real(sp), dimension(:,:)        , allocatable, intent(in)    :: inparr ! only allocated on master thread
 real(sp), dimension(:,:)                     , intent(out)   :: ouparr
 integer , dimension(4,0:nproc-1)             , intent(in)    :: iarrc
@@ -395,7 +390,6 @@ real(sp), dimension(:,:), allocatable  :: ouparr_slice
           lengl = lengl + msiz*nsiz
        enddo
        allocate(tmp(lengl))
-       tmp = fillval
        !
        is = 0
        do ip = 0, nproc-1
@@ -435,7 +429,7 @@ end subroutine dfscatter_R2e_sp2sp
 !
 !
 !===============================================================================
-subroutine dfscatter_R2e_hp2sp(inparr, ouparr, nf, nl, mf, ml, iarrc, fillval, gdp)
+subroutine dfscatter_R2e_hp2sp(inparr, ouparr, nf, nl, mf, ml, iarrc, gdp)
 !!--description-----------------------------------------------------------------
 !
 !    Function:    Scatter from inparr (on master) to distributed arrays ouparr (on all threads)
@@ -452,7 +446,6 @@ subroutine dfscatter_R2e_hp2sp(inparr, ouparr, nf, nl, mf, ml, iarrc, fillval, g
 ! Global variables
 !
 type(globdat), target                                        :: gdp
-real(sp)                                     , intent(in)    :: fillval !< value used for initialization of array
 real(hp), dimension(:,:)        , allocatable, intent(in)    :: inparr ! only allocated on master thread
 real(sp), dimension(:,:)                     , intent(out)   :: ouparr
 integer , dimension(4,0:nproc-1)             , intent(in)    :: iarrc
@@ -469,13 +462,13 @@ real(sp), dimension(:,:), allocatable    :: tmp
 !
 allocate(tmp(size(inparr,1),size(inparr,2)))
 tmp = real(inparr,sp)
-call dfscatter_R2e_sp2sp(tmp,ouparr,nf,nl,mf,ml,iarrc,fillval,gdp)
+call dfscatter_R2e_sp2sp(tmp,ouparr,nf,nl,mf,ml,iarrc,gdp)
 deallocate(tmp)
 end subroutine dfscatter_R2e_hp2sp
 !
 !
 !===============================================================================
-subroutine dfscatter_R2e_hp2hp(inparr, ouparr, nf, nl, mf, ml, iarrc, fillval, gdp)
+subroutine dfscatter_R2e_hp2hp(inparr, ouparr, nf, nl, mf, ml, iarrc, gdp)
 !!--description-----------------------------------------------------------------
 !
 !    Function:    Scatter from inparr (on master) to distributed arrays ouparr (on all threads)
@@ -495,7 +488,6 @@ subroutine dfscatter_R2e_hp2hp(inparr, ouparr, nf, nl, mf, ml, iarrc, fillval, g
 ! Global variables
 !
 type(globdat), target                                        :: gdp
-real(hp)                                     , intent(in)    :: fillval !< value used for initialization of array
 real(hp), dimension(:,:)        , allocatable, intent(in)    :: inparr ! only allocated on master thread
 real(hp), dimension(:,:)                     , intent(out)   :: ouparr
 integer , dimension(4,0:nproc-1)             , intent(in)    :: iarrc
@@ -554,7 +546,6 @@ real(hp), dimension(:,:), allocatable  :: ouparr_slice
           lengl = lengl + msiz*nsiz
        enddo
        allocate(tmp(lengl))
-       tmp = fillval
        !
        is = 0
        do ip = 0, nproc-1
@@ -593,7 +584,7 @@ end subroutine dfscatter_R2e_hp2hp
 !
 !
 !===============================================================================
-subroutine dfscatter_R3e_sp2sp(inparr, ouparr, nf, nl, mf, ml, iarrc, fillval, gdp)
+subroutine dfscatter_R3e_sp2sp(inparr, ouparr, nf, nl, mf, ml, iarrc, gdp)
 !!--description-----------------------------------------------------------------
 !
 !    Function:    Scatter from inparr (on master) to distributed arrays ouparr (on all threads)
@@ -613,7 +604,6 @@ subroutine dfscatter_R3e_sp2sp(inparr, ouparr, nf, nl, mf, ml, iarrc, fillval, g
 ! Global variables
 !
 type(globdat), target                                        :: gdp
-real(sp)                                     , intent(in)    :: fillval !< value used for initialization of array
 real(sp), dimension(:,:,:)      , allocatable, intent(in)    :: inparr ! only allocated on master thread
 real(sp), dimension(:,:,:)                   , intent(out)   :: ouparr
 integer , dimension(4,0:nproc-1)             , intent(in)    :: iarrc
@@ -693,7 +683,6 @@ real(sp), dimension(:,:,:), allocatable :: ouparr_slice
        enddo
        lengl = lengl*(kl-kf+1)
        allocate(tmp(lengl))
-       tmp = fillval
        !
        is = 0
        do ip = 0, nproc-1
@@ -733,7 +722,7 @@ end subroutine dfscatter_R3e_sp2sp
 !
 !
 !===============================================================================
-subroutine dfscatter_R3e_hp2sp(inparr, ouparr, nf, nl, mf, ml, iarrc, fillval, gdp)
+subroutine dfscatter_R3e_hp2sp(inparr, ouparr, nf, nl, mf, ml, iarrc, gdp)
 !!--description-----------------------------------------------------------------
 !
 !    Function:    Scatter from inparr (on master) to distributed arrays ouparr (on all threads)
@@ -750,7 +739,6 @@ subroutine dfscatter_R3e_hp2sp(inparr, ouparr, nf, nl, mf, ml, iarrc, fillval, g
 ! Global variables
 !
 type(globdat), target                                        :: gdp
-real(sp)                                     , intent(in)    :: fillval !< value used for initialization of array
 real(hp), dimension(:,:,:)      , allocatable, intent(in)    :: inparr ! only allocated on master thread
 real(sp), dimension(:,:,:)                   , intent(out)   :: ouparr
 integer , dimension(4,0:nproc-1)             , intent(in)    :: iarrc
@@ -767,13 +755,13 @@ real(sp), dimension(:,:,:), allocatable    :: tmp
 !
 allocate(tmp(size(inparr,1),size(inparr,2),size(inparr,3)))
 tmp = real(inparr,sp)
-call dfscatter_R3e_sp2sp(tmp,ouparr,nf,nl,mf,ml,iarrc,fillval,gdp)
+call dfscatter_R3e_sp2sp(tmp,ouparr,nf,nl,mf,ml,iarrc,gdp)
 deallocate(tmp)
 end subroutine dfscatter_R3e_hp2sp
 !
 !
 !===============================================================================
-subroutine dfscatter_R3e_hp2hp(inparr, ouparr, nf, nl, mf, ml, iarrc, fillval, gdp)
+subroutine dfscatter_R3e_hp2hp(inparr, ouparr, nf, nl, mf, ml, iarrc, gdp)
 !!--description-----------------------------------------------------------------
 !
 !    Function:    Scatter from inparr (on master) to distributed arrays ouparr (on all threads)
@@ -793,7 +781,6 @@ subroutine dfscatter_R3e_hp2hp(inparr, ouparr, nf, nl, mf, ml, iarrc, fillval, g
 ! Global variables
 !
 type(globdat), target                                        :: gdp
-real(hp)                                     , intent(in)    :: fillval !< value used for initialization of array
 real(hp), dimension(:,:,:)      , allocatable, intent(in)    :: inparr ! only allocated on master thread
 real(hp), dimension(:,:,:)                   , intent(out)   :: ouparr
 integer , dimension(4,0:nproc-1)             , intent(in)    :: iarrc
@@ -873,7 +860,6 @@ real(hp), dimension(:,:,:), allocatable :: ouparr_slice
        enddo
        lengl = lengl*(kl-kf+1)
        allocate(tmp(lengl))
-       tmp = fillval
        !
        is = 0
        do ip = 0, nproc-1
@@ -913,7 +899,7 @@ end subroutine dfscatter_R3e_hp2hp
 !
 !
 !===============================================================================
-subroutine dfscatter_R4e_sp2sp(inparr, ouparr, nf, nl, mf, ml, iarrc, fillval, gdp)
+subroutine dfscatter_R4e_sp2sp(inparr, ouparr, nf, nl, mf, ml, iarrc, gdp)
 !!--description-----------------------------------------------------------------
 !
 !    Function:    Scatter from inparr (on master) to distributed arrays ouparr (on all threads)
@@ -933,7 +919,6 @@ subroutine dfscatter_R4e_sp2sp(inparr, ouparr, nf, nl, mf, ml, iarrc, fillval, g
 ! Global variables
 !
 type(globdat), target                                        :: gdp
-real(sp)                                     , intent(in)    :: fillval !< value used for initialization of array
 real(sp), dimension(:,:,:,:)    , allocatable, intent(in)    :: inparr ! only allocated on master thread
 real(sp), dimension(:,:,:,:)                 , intent(out)   :: ouparr
 integer , dimension(4,0:nproc-1)             , intent(in)    :: iarrc
@@ -1019,7 +1004,6 @@ real(sp), dimension(:,:,:,:), allocatable  :: ouparr_slice
        enddo
        lengl = lengl*(kl-kf+1)*(ll-lf+1)
        allocate(tmp(lengl), stat=istat)
-       tmp = fillval
        !
        is = 0
        do ip = 0, nproc-1
@@ -1061,7 +1045,7 @@ end subroutine dfscatter_R4e_sp2sp
 !
 !
 !===============================================================================
-subroutine dfscatter_R4e_hp2sp(inparr, ouparr, nf, nl, mf, ml, iarrc, fillval, gdp)
+subroutine dfscatter_R4e_hp2sp(inparr, ouparr, nf, nl, mf, ml, iarrc, gdp)
 !!--description-----------------------------------------------------------------
 !
 !    Function:    Scatter from inparr (on master) to distributed arrays ouparr (on all threads)
@@ -1078,7 +1062,6 @@ subroutine dfscatter_R4e_hp2sp(inparr, ouparr, nf, nl, mf, ml, iarrc, fillval, g
 ! Global variables
 !
 type(globdat), target                                        :: gdp
-real(sp)                                     , intent(in)    :: fillval !< value used for initialization of array
 real(hp), dimension(:,:,:,:)    , allocatable, intent(in)    :: inparr ! only allocated on master thread
 real(sp), dimension(:,:,:,:)                 , intent(out)   :: ouparr
 integer , dimension(4,0:nproc-1)             , intent(in)    :: iarrc
@@ -1095,13 +1078,13 @@ real(sp), dimension(:,:,:,:), allocatable    :: tmp
 !
 allocate(tmp(size(inparr,1),size(inparr,2),size(inparr,3),size(inparr,4)))
 tmp = real(inparr,sp)
-call dfscatter_R4e_sp2sp(tmp,ouparr,nf,nl,mf,ml,iarrc,fillval,gdp)
+call dfscatter_R4e_sp2sp(tmp,ouparr,nf,nl,mf,ml,iarrc,gdp)
 deallocate(tmp)
 end subroutine dfscatter_R4e_hp2sp
 !
 !
 !===============================================================================
-subroutine dfscatter_R4e_hp2hp(inparr, ouparr, nf, nl, mf, ml, iarrc, fillval, gdp)
+subroutine dfscatter_R4e_hp2hp(inparr, ouparr, nf, nl, mf, ml, iarrc, gdp)
 !!--description-----------------------------------------------------------------
 !
 !    Function:    Scatter from inparr (on master) to distributed arrays ouparr (on all threads)
@@ -1121,7 +1104,6 @@ subroutine dfscatter_R4e_hp2hp(inparr, ouparr, nf, nl, mf, ml, iarrc, fillval, g
 ! Global variables
 !
 type(globdat), target                                        :: gdp
-real(hp)                                     , intent(in)    :: fillval !< value used for initialization of array
 real(hp), dimension(:,:,:,:)    , allocatable, intent(in)    :: inparr ! only allocated on master thread
 real(hp), dimension(:,:,:,:)                 , intent(out)   :: ouparr
 integer , dimension(4,0:nproc-1)             , intent(in)    :: iarrc
@@ -1207,7 +1189,6 @@ real(hp), dimension(:,:,:,:), allocatable  :: ouparr_slice
        enddo
        lengl = lengl*(kl-kf+1)*(ll-lf+1)
        allocate(tmp(lengl), stat=istat)
-       tmp = fillval
        !
        is = 0
        do ip = 0, nproc-1

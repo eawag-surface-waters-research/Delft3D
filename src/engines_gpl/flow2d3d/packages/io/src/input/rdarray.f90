@@ -1592,7 +1592,7 @@ end subroutine rdarray_char_1d
 
 subroutine rdarray_nmkl_ptr(fds, filename, filetype, grpnam, &
                      & itime, nf, nl, mf, ml, iarrc, gdp, &
-                     & lk, uk, ul, ierr, lundia, varptr, varnam, fillval)
+                     & lk, uk, ul, ierr, lundia, varptr, varnam)
     use precision
     use dfparall, only: inode, master, nproc, parll
     use globaldata
@@ -1614,7 +1614,6 @@ subroutine rdarray_nmkl_ptr(fds, filename, filetype, grpnam, &
     integer      , dimension(0:nproc-1)                                          , intent(in)  :: nf            ! first index w.r.t. global grid in y-direction
     integer      , dimension(0:nproc-1)                                          , intent(in)  :: nl            ! last index w.r.t. global grid in y-direction
     integer      , dimension(4,0:nproc-1)                                        , intent(in)  :: iarrc         ! array containing collected grid indices 
-    real(fp)                                                                     , intent(in)  :: fillval       !< value used for initialization of array
     real(fp)     , dimension(:,:,:)                                              , pointer     :: varptr
     character(*)                                                                 , intent(in)  :: varnam
     character(*)                                                                 , intent(in)  :: grpnam
@@ -1629,7 +1628,7 @@ subroutine rdarray_nmkl_ptr(fds, filename, filetype, grpnam, &
     if (associated(varptr)) then
        call rdarray_nmkl(fds, filename, filetype, grpnam, &
                      & itime, nf, nl, mf, ml, iarrc, gdp, &
-                     & lk, uk, ul, ierr, lundia, varptr, varnam, fillval)
+                     & lk, uk, ul, ierr, lundia, varptr, varnam)
     else
        ! not allowed!
     endif
@@ -1637,7 +1636,7 @@ end subroutine rdarray_nmkl_ptr
 
 subroutine rdarray_nmkl(fds, filename, filetype, grpnam, &
                      & itime, nf, nl, mf, ml, iarrc, gdp, &
-                     & lk, uk, ul,ierr, lundia, var, varnam, fillval)
+                     & lk, uk, ul,ierr, lundia, var, varnam)
     use precision
     use dfparall, only: inode, master, nproc, parll
     use dffunctionals, only: dfscatter, dfscatter_seq
@@ -1660,7 +1659,6 @@ subroutine rdarray_nmkl(fds, filename, filetype, grpnam, &
     integer      , dimension(0:nproc-1)                                          , intent(in)            :: nf            ! first index w.r.t. global grid in y-direction
     integer      , dimension(0:nproc-1)                                          , intent(in)            :: nl            ! last index w.r.t. global grid in y-direction
     integer      , dimension(4,0:nproc-1)                                        , intent(in)            :: iarrc         ! array containing collected grid indices 
-    real(fp)                                                                     , intent(in)            :: fillval       !< value used for initialization of array
     real(fp)     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, lk:uk, ul), intent(out)           :: var
     character(*)                                                                 , intent(in)            :: varnam
     character(*)                                                                 , intent(in)            :: grpnam
@@ -1672,15 +1670,11 @@ subroutine rdarray_nmkl(fds, filename, filetype, grpnam, &
     !
     ! body
     !
-    if (inode==master) then
-        allocate(rbuff4gl(gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl,lk:uk,ul))
-        rbuff4gl = fillval
-    endif
-    var = fillval
+    if (inode==master) allocate(rbuff4gl(gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl,lk:uk,ul))
     call rdvar(fds, filename, filetype, grpnam, &
               & itime, gdp, ierr, lundia, rbuff4gl, varnam)
     if (parll) then
-       call dfscatter(rbuff4gl, var, nf, nl, mf, ml, iarrc, fillval, gdp)
+       call dfscatter(rbuff4gl, var, nf, nl, mf, ml, iarrc, gdp)
     else
        call dfscatter_seq(rbuff4gl, var, 1-gdp%d%nlb, 1-gdp%d%mlb, gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl)
     endif
@@ -1690,7 +1684,7 @@ end subroutine rdarray_nmkl
 
 subroutine rdarray_nmll(fds, filename, filetype, grpnam, &
                     & itime, nf, nl, mf, ml, iarrc, gdp, &
-                    & u3, u4, ierr, lundia, var, varnam, fillval)
+                    & u3, u4, ierr, lundia, var, varnam)
     use precision
     use dfparall, only: inode, master, nproc, parll
     use dffunctionals, only: dfscatter, dfscatter_seq
@@ -1712,7 +1706,6 @@ subroutine rdarray_nmll(fds, filename, filetype, grpnam, &
     integer      , dimension(0:nproc-1)                                       , intent(in)  :: nf            ! first index w.r.t. global grid in y-direction
     integer      , dimension(0:nproc-1)                                       , intent(in)  :: nl            ! last index w.r.t. global grid in y-direction
     integer      , dimension(4,0:nproc-1)                                     , intent(in)  :: iarrc         ! array containing collected grid indices 
-    real(fp)                                                                  , intent(in)  :: fillval       !< value used for initialization of array
     real(fp)     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, u3, u4), intent(out) :: var
     character(*)                                                              , intent(in)  :: varnam
     character(*)                                                              , intent(in)  :: grpnam
@@ -1724,15 +1717,11 @@ subroutine rdarray_nmll(fds, filename, filetype, grpnam, &
     !
     ! body
     !
-    if (inode==master) then
-        allocate(rbuff4gl(gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl,u3,u4))
-        rbuff4gl = fillval
-    endif
-    var = fillval
+    if (inode==master) allocate(rbuff4gl(gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl,u3,u4))
     call rdvar(fds, filename, filetype, grpnam, &
               & itime, gdp, ierr, lundia, rbuff4gl, varnam)
     if (parll) then
-       call dfscatter(rbuff4gl, var, nf, nl, mf, ml, iarrc, fillval, gdp)
+       call dfscatter(rbuff4gl, var, nf, nl, mf, ml, iarrc, gdp)
     else
        call dfscatter_seq(rbuff4gl, var, 1-gdp%d%nlb, 1-gdp%d%mlb, gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl)
     endif
@@ -1742,7 +1731,7 @@ end subroutine rdarray_nmll
 
 subroutine rdarray_nmk_ptr(fds, filename, filetype, grpnam, &
                      & itime, nf, nl, mf, ml, iarrc, gdp, &
-                     & lk, uk, ierr, lundia, varptr, varnam, fillval)
+                     & lk, uk, ierr, lundia, varptr, varnam)
     use precision
     use dfparall, only: inode, master, nproc, parll
     use globaldata
@@ -1763,7 +1752,6 @@ subroutine rdarray_nmk_ptr(fds, filename, filetype, grpnam, &
     integer      , dimension(0:nproc-1)                                          , intent(in)  :: nf            ! first index w.r.t. global grid in y-direction
     integer      , dimension(0:nproc-1)                                          , intent(in)  :: nl            ! last index w.r.t. global grid in y-direction
     integer      , dimension(4,0:nproc-1)                                        , intent(in)  :: iarrc         ! array containing collected grid indices 
-    real(fp)                                                                     , intent(in)  :: fillval       !< value used for initialization of array
     real(fp)     , dimension(:,:,:)                                              , pointer     :: varptr
     character(*)                                                                 , intent(in)  :: varnam
     character(*)                                                                 , intent(in)  :: grpnam
@@ -1778,7 +1766,7 @@ subroutine rdarray_nmk_ptr(fds, filename, filetype, grpnam, &
     if (associated(varptr)) then
        call rdarray_nmk(fds, filename, filetype, grpnam, &
                      & itime, nf, nl, mf, ml, iarrc, gdp, &
-                     & lk, uk, ierr, lundia, varptr, varnam, fillval)
+                     & lk, uk, ierr, lundia, varptr, varnam)
     else
        ! not allowed!
     endif
@@ -1786,7 +1774,7 @@ end subroutine rdarray_nmk_ptr
 
 subroutine rdarray_nmk(fds, filename, filetype, grpnam, &
                     & itime, nf, nl, mf, ml, iarrc, gdp, &
-                    & lk, uk, ierr, lundia, var, varnam, fillval)
+                    & lk, uk, ierr, lundia, var, varnam)
     use precision
     use dfparall, only: inode, master, nproc, parll
     use dffunctionals, only: dfscatter, dfscatter_seq
@@ -1808,7 +1796,6 @@ subroutine rdarray_nmk(fds, filename, filetype, grpnam, &
     integer      , dimension(0:nproc-1)                                      , intent(in)            :: nf            ! first index w.r.t. global grid in y-direction
     integer      , dimension(0:nproc-1)                                      , intent(in)            :: nl            ! last index w.r.t. global grid in y-direction
     integer      , dimension(4,0:nproc-1)                                    , intent(in)            :: iarrc         ! array containing collected grid indices 
-    real(fp)                                                                 , intent(in)            :: fillval       !< value used for initialization of array
     real(fp)     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, lk:uk), intent(out)           :: var
     character(*)                                                             , intent(in)            :: varnam
     character(*)                                                             , intent(in)            :: grpnam
@@ -1820,15 +1807,11 @@ subroutine rdarray_nmk(fds, filename, filetype, grpnam, &
     !
     ! body
     !
-    if (inode==master) then
-        allocate(rbuff3gl(gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl,lk:uk))
-        rbuff3gl = fillval
-    endif
-    var = fillval
+    if (inode==master) allocate(rbuff3gl(gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl,lk:uk))
     call rdvar(fds, filename, filetype, grpnam, &
               & itime, gdp, ierr, lundia, rbuff3gl, varnam)
     if (parll) then
-       call dfscatter(rbuff3gl, var, nf, nl, mf, ml, iarrc, fillval, gdp)
+       call dfscatter(rbuff3gl, var, nf, nl, mf, ml, iarrc, gdp)
     else
        call dfscatter_seq(rbuff3gl, var, 1-gdp%d%nlb, 1-gdp%d%mlb, gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl)
     endif
@@ -1838,7 +1821,7 @@ end subroutine rdarray_nmk
 
 subroutine rdarray_nml_2d_ptr(fds, filename, filetype, grpnam, &
                      & itime, nf, nl, mf, ml, iarrc, gdp, &
-                     & ul, ierr, lundia, varptr, varnam, fillval)
+                     & ul, ierr, lundia, varptr, varnam)
     use precision
     use dfparall, only: nproc
     use globaldata
@@ -1858,7 +1841,6 @@ subroutine rdarray_nml_2d_ptr(fds, filename, filetype, grpnam, &
     integer      , dimension(0:nproc-1)                                          , intent(in)  :: nf            ! first index w.r.t. global grid in y-direction
     integer      , dimension(0:nproc-1)                                          , intent(in)  :: nl            ! last index w.r.t. global grid in y-direction
     integer      , dimension(4,0:nproc-1)                                        , intent(in)  :: iarrc         ! array containing collected grid indices 
-    real(fp)                                                                     , intent(in)  :: fillval       !< value used for initialization of array
     real(fp)     , dimension(:,:)                                                , pointer     :: varptr
     character(*)                                                                 , intent(in)  :: varnam
     character(*)                                                                 , intent(in)  :: grpnam
@@ -1873,7 +1855,7 @@ subroutine rdarray_nml_2d_ptr(fds, filename, filetype, grpnam, &
     if (associated(varptr)) then
        call rdarray_nml(fds, filename, filetype, grpnam, &
                      & itime, nf, nl, mf, ml, iarrc, gdp, &
-                     & ul, ierr, lundia, varptr, varnam, fillval)
+                     & ul, ierr, lundia, varptr, varnam)
     else
        ! not allowed!
     endif
@@ -1881,7 +1863,7 @@ end subroutine rdarray_nml_2d_ptr
 
 subroutine rdarray_nml_3d_ptr(fds, filename, filetype, grpnam, &
                      & itime, nf, nl, mf, ml, iarrc, gdp, &
-                     & ul, ierr, lundia, varptr, varnam, fillval)
+                     & ul, ierr, lundia, varptr, varnam)
     use precision
     use dfparall, only: inode, master, nproc, parll
     use globaldata
@@ -1901,7 +1883,6 @@ subroutine rdarray_nml_3d_ptr(fds, filename, filetype, grpnam, &
     integer      , dimension(0:nproc-1)                                          , intent(in)  :: nf            ! first index w.r.t. global grid in y-direction
     integer      , dimension(0:nproc-1)                                          , intent(in)  :: nl            ! last index w.r.t. global grid in y-direction
     integer      , dimension(4,0:nproc-1)                                        , intent(in)  :: iarrc         ! array containing collected grid indices 
-    real(fp)                                                                     , intent(in)  :: fillval       !< value used for initialization of array
     real(fp)     , dimension(:,:,:)                                              , pointer     :: varptr
     character(*)                                                                 , intent(in)  :: varnam
     character(*)                                                                 , intent(in)  :: grpnam
@@ -1916,7 +1897,7 @@ subroutine rdarray_nml_3d_ptr(fds, filename, filetype, grpnam, &
     if (associated(varptr)) then
        call rdarray_nml(fds, filename, filetype, grpnam, &
                      & itime, nf, nl, mf, ml, iarrc, gdp, &
-                     & ul, ierr, lundia, varptr, varnam, fillval)
+                     & ul, ierr, lundia, varptr, varnam)
     else
        ! not allowed!
     endif
@@ -1924,7 +1905,7 @@ end subroutine rdarray_nml_3d_ptr
 
 subroutine rdarray_nml(fds, filename, filetype, grpnam, &
                     & itime, nf, nl, mf, ml, iarrc, gdp, &
-                    & ul, ierr, lundia, var, varnam, fillval)
+                    & ul, ierr, lundia, var, varnam)
     use precision
     use dfparall, only: inode, master, nproc, parll
     use dffunctionals, only: dfscatter, dfscatter_seq
@@ -1945,7 +1926,6 @@ subroutine rdarray_nml(fds, filename, filetype, grpnam, &
     integer      , dimension(0:nproc-1)                                      , intent(in)  :: nf            ! first index w.r.t. global grid in y-direction
     integer      , dimension(0:nproc-1)                                      , intent(in)  :: nl            ! last index w.r.t. global grid in y-direction
     integer      , dimension(4,0:nproc-1)                                    , intent(in)  :: iarrc         ! array containing collected grid indices 
-    real(fp)                                                                 , intent(in)  :: fillval       !< value used for initialization of array
     real(fp)     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, ul)   , intent(out) :: var
     character(*)                                                             , intent(in)  :: varnam
     character(*)                                                             , intent(in)  :: grpnam
@@ -1957,15 +1937,11 @@ subroutine rdarray_nml(fds, filename, filetype, grpnam, &
     !
     ! body
     !
-    if (inode==master) then
-        allocate(rbuff3gl(gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl,ul))
-        rbuff3gl = fillval
-    endif
-    var = fillval
+    if (inode==master) allocate(rbuff3gl(gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl,ul))
     call rdvar(fds, filename, filetype, grpnam, &
               & itime, gdp, ierr, lundia, rbuff3gl, varnam)
     if (parll) then
-       call dfscatter(rbuff3gl, var, nf, nl, mf, ml, iarrc, fillval, gdp)
+       call dfscatter(rbuff3gl, var, nf, nl, mf, ml, iarrc, gdp)
     else
        call dfscatter_seq(rbuff3gl, var, 1-gdp%d%nlb, 1-gdp%d%mlb, gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl)
     endif
@@ -1974,7 +1950,7 @@ end subroutine rdarray_nml
 
 subroutine rdarray_nm_sp_1d_ptr(fds, filename, filetype, grpnam, &
                      & itime, nf, nl, mf, ml, iarrc, gdp, &
-                     & ierr, lundia, varptr, varnam, fillval)
+                     & ierr, lundia, varptr, varnam)
     use precision
     use dfparall, only: nproc
     use globaldata
@@ -1993,7 +1969,6 @@ subroutine rdarray_nm_sp_1d_ptr(fds, filename, filetype, grpnam, &
     integer      , dimension(0:nproc-1)                                          , intent(in)  :: nf            ! first index w.r.t. global grid in y-direction
     integer      , dimension(0:nproc-1)                                          , intent(in)  :: nl            ! last index w.r.t. global grid in y-direction
     integer      , dimension(4,0:nproc-1)                                        , intent(in)  :: iarrc         ! array containing collected grid indices 
-    real(sp)                                                                     , intent(in)  :: fillval       !< value used for initialization of array
     real(sp)     , dimension(:)                                                  , pointer     :: varptr
     character(*)                                                                 , intent(in)  :: varnam
     character(*)                                                                 , intent(in)  :: grpnam
@@ -2008,7 +1983,7 @@ subroutine rdarray_nm_sp_1d_ptr(fds, filename, filetype, grpnam, &
     if (associated(varptr)) then
        call rdarray_nm_sp(fds, filename, filetype, grpnam, &
                      & itime, nf, nl, mf, ml, iarrc, gdp, &
-                     & ierr, lundia, varptr, varnam, fillval)
+                     & ierr, lundia, varptr, varnam)
     else
        ! not allowed!
     endif
@@ -2016,7 +1991,7 @@ end subroutine rdarray_nm_sp_1d_ptr
 
 subroutine rdarray_nm_hp_1d_ptr(fds, filename, filetype, grpnam, &
                      & itime, nf, nl, mf, ml, iarrc, gdp, &
-                     & ierr, lundia, varptr, varnam, fillval)
+                     & ierr, lundia, varptr, varnam)
     use precision
     use dfparall, only: nproc
     use globaldata
@@ -2035,7 +2010,6 @@ subroutine rdarray_nm_hp_1d_ptr(fds, filename, filetype, grpnam, &
     integer      , dimension(0:nproc-1)                                          , intent(in)  :: nf            ! first index w.r.t. global grid in y-direction
     integer      , dimension(0:nproc-1)                                          , intent(in)  :: nl            ! last index w.r.t. global grid in y-direction
     integer      , dimension(4,0:nproc-1)                                        , intent(in)  :: iarrc         ! array containing collected grid indices 
-    real(hp)                                                                     , intent(in)  :: fillval       !< value used for initialization of array
     real(hp)     , dimension(:)                                                  , pointer     :: varptr
     character(*)                                                                 , intent(in)  :: varnam
     character(*)                                                                 , intent(in)  :: grpnam
@@ -2050,7 +2024,7 @@ subroutine rdarray_nm_hp_1d_ptr(fds, filename, filetype, grpnam, &
     if (associated(varptr)) then
        call rdarray_nm_hp(fds, filename, filetype, grpnam, &
                      & itime, nf, nl, mf, ml, iarrc, gdp, &
-                     & ierr, lundia, varptr, varnam, fillval)
+                     & ierr, lundia, varptr, varnam)
     else
        ! not allowed!
     endif
@@ -2058,7 +2032,7 @@ end subroutine rdarray_nm_hp_1d_ptr
 
 subroutine rdarray_nm_sp_2d_ptr(fds, filename, filetype, grpnam, &
                      & itime, nf, nl, mf, ml, iarrc, gdp, &
-                     & ierr, lundia, varptr, varnam, fillval)
+                     & ierr, lundia, varptr, varnam)
     use precision
     use dfparall, only: inode, master, nproc, parll
     use globaldata
@@ -2077,7 +2051,6 @@ subroutine rdarray_nm_sp_2d_ptr(fds, filename, filetype, grpnam, &
     integer      , dimension(0:nproc-1)                                          , intent(in)  :: nf            ! first index w.r.t. global grid in y-direction
     integer      , dimension(0:nproc-1)                                          , intent(in)  :: nl            ! last index w.r.t. global grid in y-direction
     integer      , dimension(4,0:nproc-1)                                        , intent(in)  :: iarrc         ! array containing collected grid indices 
-    real(sp)                                                                     , intent(in)  :: fillval       !< value used for initialization of array
     real(sp)     , dimension(:,:)                                                , pointer     :: varptr
     character(*)                                                                 , intent(in)  :: varnam
     character(*)                                                                 , intent(in)  :: grpnam
@@ -2092,7 +2065,7 @@ subroutine rdarray_nm_sp_2d_ptr(fds, filename, filetype, grpnam, &
     if (associated(varptr)) then
        call rdarray_nm_sp(fds, filename, filetype, grpnam, &
                      & itime, nf, nl, mf, ml, iarrc, gdp, &
-                     & ierr, lundia, varptr, varnam, fillval)
+                     & ierr, lundia, varptr, varnam)
     else
        ! not allowed!
     endif
@@ -2100,7 +2073,7 @@ end subroutine rdarray_nm_sp_2d_ptr
 
 subroutine rdarray_nm_hp_2d_ptr(fds, filename, filetype, grpnam, &
                      & itime, nf, nl, mf, ml, iarrc, gdp, &
-                     & ierr, lundia, varptr, varnam, fillval)
+                     & ierr, lundia, varptr, varnam)
     use precision
     use dfparall, only: inode, master, nproc, parll
     use globaldata
@@ -2119,7 +2092,6 @@ subroutine rdarray_nm_hp_2d_ptr(fds, filename, filetype, grpnam, &
     integer      , dimension(0:nproc-1)                                          , intent(in)  :: nf            ! first index w.r.t. global grid in y-direction
     integer      , dimension(0:nproc-1)                                          , intent(in)  :: nl            ! last index w.r.t. global grid in y-direction
     integer      , dimension(4,0:nproc-1)                                        , intent(in)  :: iarrc         ! array containing collected grid indices 
-    real(hp)                                                                     , intent(in)  :: fillval       !< value used for initialization of array
     real(hp)     , dimension(:,:)                                                , pointer     :: varptr
     character(*)                                                                 , intent(in)  :: varnam
     character(*)                                                                 , intent(in)  :: grpnam
@@ -2134,7 +2106,7 @@ subroutine rdarray_nm_hp_2d_ptr(fds, filename, filetype, grpnam, &
     if (associated(varptr)) then
        call rdarray_nm_hp(fds, filename, filetype, grpnam, &
                      & itime, nf, nl, mf, ml, iarrc, gdp, &
-                     & ierr, lundia, varptr, varnam, fillval)
+                     & ierr, lundia, varptr, varnam)
     else
        ! not allowed!
     endif
@@ -2142,7 +2114,7 @@ end subroutine rdarray_nm_hp_2d_ptr
 
 subroutine rdarray_nm_2d(fds, filename, filetype, grpnam, &
                    & itime, nf, nl, mf, ml, iarrc, gdp, &
-                   & ierr, lundia, var, varnam, fillval)
+                   & ierr, lundia, var, varnam)
     use precision
     use dfparall, only: nproc
     use globaldata
@@ -2161,7 +2133,6 @@ subroutine rdarray_nm_2d(fds, filename, filetype, grpnam, &
     integer      , dimension(0:nproc-1)                                          , intent(in)  :: nf            ! first index w.r.t. global grid in y-direction
     integer      , dimension(0:nproc-1)                                          , intent(in)  :: nl            ! last index w.r.t. global grid in y-direction
     integer      , dimension(4,0:nproc-1)                                        , intent(in)  :: iarrc         ! array containing collected grid indices 
-    real(fp)                                                                     , intent(in)  :: fillval       !< value used for initialization of array
     real(fp)     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)           , intent(out) :: var
     character(*)                                                                 , intent(in)  :: varnam
     character(*)                                                                 , intent(in)  :: grpnam
@@ -2175,12 +2146,12 @@ subroutine rdarray_nm_2d(fds, filename, filetype, grpnam, &
     !
     call rdarray_nm(fds, filename, filetype, grpnam, &
                    & itime, nf, nl, mf, ml, iarrc, gdp, &
-                   & ierr, lundia, var, varnam, fillval)
+                   & ierr, lundia, var, varnam)
 end subroutine rdarray_nm_2d
 
 subroutine rdarray_nm_sp(fds, filename, filetype, grpnam, &
                    & itime, nf, nl, mf, ml, iarrc, gdp, &
-                   & ierr, lundia, var, varnam, fillval)
+                   & ierr, lundia, var, varnam)
     use precision
     use dfparall, only: inode, master, nproc, parll
     use dffunctionals, only: dfscatter, dfscatter_seq
@@ -2200,7 +2171,6 @@ subroutine rdarray_nm_sp(fds, filename, filetype, grpnam, &
     integer      , dimension(0:nproc-1)                                          , intent(in)  :: nf            ! first index w.r.t. global grid in y-direction
     integer      , dimension(0:nproc-1)                                          , intent(in)  :: nl            ! last index w.r.t. global grid in y-direction
     integer      , dimension(4,0:nproc-1)                                        , intent(in)  :: iarrc         ! array containing collected grid indices 
-    real(sp)                                                                     , intent(in)  :: fillval       !< value used for initialization of array
     real(sp)     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)           , intent(out) :: var
     character(*)                                                                 , intent(in)  :: varnam
     character(*)                                                                 , intent(in)  :: grpnam
@@ -2212,15 +2182,11 @@ subroutine rdarray_nm_sp(fds, filename, filetype, grpnam, &
     !
     ! body
     !
-    if (inode==master) then
-        allocate(rbuff2gl(gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl))
-        rbuff2gl = fillval
-    endif
-    var = fillval
+    if (inode==master) allocate(rbuff2gl(gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl))
     call rdvar(fds, filename, filetype, grpnam, &
               & itime, gdp, ierr, lundia, rbuff2gl, varnam)
     if (parll) then
-       call dfscatter(rbuff2gl, var, nf, nl, mf, ml, iarrc, fillval, gdp)
+       call dfscatter(rbuff2gl, var, nf, nl, mf, ml, iarrc, gdp)
     else
        call dfscatter_seq(rbuff2gl, var, 1-gdp%d%nlb, 1-gdp%d%mlb, gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl)
     endif
@@ -2229,7 +2195,7 @@ end subroutine rdarray_nm_sp
 
 subroutine rdarray_nm_hp(fds, filename, filetype, grpnam, &
                    & itime, nf, nl, mf, ml, iarrc, gdp, &
-                   & ierr, lundia, var, varnam, fillval)
+                   & ierr, lundia, var, varnam)
     use precision
     use dfparall, only: inode, master, nproc, parll
     use dffunctionals, only: dfscatter, dfscatter_seq
@@ -2249,7 +2215,6 @@ subroutine rdarray_nm_hp(fds, filename, filetype, grpnam, &
     integer      , dimension(0:nproc-1)                                          , intent(in)  :: nf            ! first index w.r.t. global grid in y-direction
     integer      , dimension(0:nproc-1)                                          , intent(in)  :: nl            ! last index w.r.t. global grid in y-direction
     integer      , dimension(4,0:nproc-1)                                        , intent(in)  :: iarrc         ! array containing collected grid indices 
-    real(hp)                                                                     , intent(in)  :: fillval       !< value used for initialization of array
     real(hp)     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)           , intent(out) :: var
     character(*)                                                                 , intent(in)  :: varnam
     character(*)                                                                 , intent(in)  :: grpnam
@@ -2258,28 +2223,23 @@ subroutine rdarray_nm_hp(fds, filename, filetype, grpnam, &
     ! local
     !
     real(hp)   , dimension(:,:)    , allocatable  :: rbuff2gl
-    integer :: n,m
     !
     ! body
     !
-    if (inode==master) then
-        allocate(rbuff2gl(gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl))
-        rbuff2gl = fillval
-    endif
-    var = fillval
+    if (inode==master) allocate(rbuff2gl(gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl))
     call rdvar(fds, filename, filetype, grpnam, &
               & itime, gdp, ierr, lundia, rbuff2gl, varnam)
     if (parll) then
-       call dfscatter(rbuff2gl, var, nf, nl, mf, ml, iarrc, fillval, gdp)
+       call dfscatter(rbuff2gl, var, nf, nl, mf, ml, iarrc, gdp)
     else
        call dfscatter_seq(rbuff2gl, var, 1-gdp%d%nlb, 1-gdp%d%mlb, gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl)
     endif
     if (inode==master) deallocate(rbuff2gl)
 end subroutine rdarray_nm_hp
-
+                   
 subroutine rdarray_nm_int(fds, filename, filetype, grpnam, &
                    & itime, nf, nl, mf, ml, iarrc, gdp, &
-                   & ierr, lundia, var, varnam, fillval)
+                   & ierr, lundia, var, varnam)
     use precision
     use dfparall, only: inode, master, nproc, parll
     use dffunctionals, only: dfscatter, dfscatter_seq
@@ -2299,7 +2259,6 @@ subroutine rdarray_nm_int(fds, filename, filetype, grpnam, &
     integer      , dimension(0:nproc-1)                                          , intent(in)  :: nf            ! first index w.r.t. global grid in y-direction
     integer      , dimension(0:nproc-1)                                          , intent(in)  :: nl            ! last index w.r.t. global grid in y-direction
     integer      , dimension(4,0:nproc-1)                                        , intent(in)  :: iarrc         ! array containing collected grid indices 
-    integer                                                                      , intent(in)  :: fillval       !< value used for initialization of array
     integer      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)           , intent(out) :: var
     character(*)                                                                 , intent(in)  :: varnam
     character(*)                                                                 , intent(in)  :: grpnam
@@ -2311,15 +2270,11 @@ subroutine rdarray_nm_int(fds, filename, filetype, grpnam, &
     !
     ! body
     !
-    if (inode==master) then
-        allocate(ibuff2gl(gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl))
-        ibuff2gl = fillval
-    endif
-    var = fillval
+    if (inode==master) allocate(ibuff2gl(gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl))
     call rdvar(fds, filename, filetype, grpnam, &
               & itime, gdp, ierr, lundia, ibuff2gl, varnam)
     if (parll) then
-       call dfscatter(ibuff2gl, var, nf, nl, mf, ml, iarrc, fillval, gdp)
+       call dfscatter(ibuff2gl, var, nf, nl, mf, ml, iarrc, gdp)
     else
        call dfscatter_seq(ibuff2gl, var, 1-gdp%d%nlb, 1-gdp%d%mlb, gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl)
     endif

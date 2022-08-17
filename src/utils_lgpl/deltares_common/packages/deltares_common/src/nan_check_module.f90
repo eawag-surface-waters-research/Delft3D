@@ -47,7 +47,7 @@ end interface
 
 contains
 
-logical function nan_check_1D_sp(field, fieldnam, lundia, ilb) result (retval)
+logical function nan_check_1D_sp(field, fieldnam, lundia) result (retval)
 !!--description-----------------------------------------------------------------
 !
 !    Function: - Checks a 1D single precision array on NaN's.
@@ -56,10 +56,9 @@ logical function nan_check_1D_sp(field, fieldnam, lundia, ilb) result (retval)
     !
     ! Arguments
     !
-    integer, intent(in)                                      :: ilb
-    real(kind=4), dimension(ilb:), intent(in)                :: field
-    character*(*), intent(in)                                :: fieldnam
-    integer, intent(in)                                      :: lundia
+    real(kind=4), dimension(:), intent(in) :: field
+    character*(*), intent(in)              :: fieldnam
+    integer, intent(in)                    :: lundia
     !
     ! Local variables
     !
@@ -80,7 +79,7 @@ logical function nan_check_1D_sp(field, fieldnam, lundia, ilb) result (retval)
     enddo
 end function nan_check_1D_sp
 
-logical function nan_check_2D_sp(field, fieldnam, lundia, nlb, mlb) result (retval)
+logical function nan_check_2D_sp(field, fieldnam, lundia) result (retval)
 !!--description-----------------------------------------------------------------
 !
 !    Function: - Checks a 2D single precision array on NaN's.
@@ -89,11 +88,9 @@ logical function nan_check_2D_sp(field, fieldnam, lundia, nlb, mlb) result (retv
     !
     ! Arguments
     !
-    integer, intent(in)                                      :: nlb
-    integer, intent(in)                                      :: mlb
-    real(kind=4), dimension(mlb:,mlb:), intent(in)           :: field
-    character*(*), intent(in)                                :: fieldnam
-    integer, intent(in)                                      :: lundia
+    real(kind=4), dimension(:,:), intent(in) :: field
+    character*(*), intent(in)                :: fieldnam
+    integer, intent(in)                      :: lundia
     !
     ! Local variables
     !
@@ -116,7 +113,7 @@ logical function nan_check_2D_sp(field, fieldnam, lundia, nlb, mlb) result (retv
     enddo
 end function nan_check_2D_sp
 
-logical function nan_check_3D_sp(field, fieldnam, lundia, nlb, mlb, klb) result (retval)
+logical function nan_check_3D_sp(field, fieldnam, lundia) result (retval)
 !!--description-----------------------------------------------------------------
 !
 !    Function: - Checks a 3D single precision array on NaN's.
@@ -125,12 +122,9 @@ logical function nan_check_3D_sp(field, fieldnam, lundia, nlb, mlb, klb) result 
     !
     ! Arguments
     !
-    integer, intent(in)                                      :: nlb
-    integer, intent(in)                                      :: mlb
-    integer, intent(in)                                      :: klb
-    real(kind=4), dimension(nlb:,mlb:,klb:), intent(in)      :: field
-    character*(*), intent(in)                                :: fieldnam
-    integer, intent(in)                                      :: lundia
+    real(kind=4), dimension(:,:,:), intent(in) :: field
+    character*(*), intent(in)                  :: fieldnam
+    integer, intent(in)                        :: lundia
     !
     ! Local variables
     !
@@ -155,7 +149,7 @@ logical function nan_check_3D_sp(field, fieldnam, lundia, nlb, mlb, klb) result 
      enddo
     end function nan_check_3D_sp
 
-logical function nan_check_4D_sp(field, fieldnam, lundia, nlb, mlb, klb, llb) result (retval)
+logical function nan_check_4D_sp(field, fieldnam, lundia) result (retval)
 !!--description-----------------------------------------------------------------
 !
 !    Function: - Checks a 4D single precision array on NaN's.
@@ -164,13 +158,9 @@ logical function nan_check_4D_sp(field, fieldnam, lundia, nlb, mlb, klb, llb) re
     !
     ! Arguments
     !
-    integer, intent(in)                                      :: nlb
-    integer, intent(in)                                      :: mlb
-    integer, intent(in)                                      :: klb
-    integer, intent(in)                                      :: llb
-    real(kind=4), dimension(nlb:,mlb:,klb:,llb:), intent(in) :: field
-    character*(*), intent(in)                                :: fieldnam
-    integer, intent(in)                                      :: lundia
+    real(kind=4), dimension(:,:,:,:), intent(in) :: field
+    character*(*), intent(in)                    :: fieldnam
+    integer, intent(in)                          :: lundia
     !
     ! Local variables
     !
@@ -197,7 +187,7 @@ logical function nan_check_4D_sp(field, fieldnam, lundia, nlb, mlb, klb, llb) re
     enddo
     end function nan_check_4D_sp
 
-logical function nan_check_1D_dp(field, fieldnam, lundia, ilb) result (retval)
+logical function nan_check_1D_dp(field, fieldnam, lundia) result (retval)
 !!--description-----------------------------------------------------------------
 !
 !    Function: - Checks a 1D double precision array on NaN's.
@@ -206,10 +196,9 @@ logical function nan_check_1D_dp(field, fieldnam, lundia, ilb) result (retval)
     !
     ! Arguments
     !
-    integer, intent(in)                                      :: ilb
-    real(kind=8), dimension(ilb:), intent(in)                :: field
-    character*(*), intent(in)                                :: fieldnam
-    integer, intent(in)                                      :: lundia
+    real(kind=8), dimension(:), intent(in) :: field
+    character*(*), intent(in)              :: fieldnam
+    integer, intent(in)                    :: lundia
     !
     ! Local variables
     !
@@ -230,7 +219,7 @@ logical function nan_check_1D_dp(field, fieldnam, lundia, ilb) result (retval)
     enddo
 end function nan_check_1D_dp
 
-logical function nan_check_2D_dp(field, fieldnam, lundia, nlb, mlb) result (retval)
+logical function nan_check_2D_dp(field, fieldnam, lundia) result (retval)
 !!--description-----------------------------------------------------------------
 !
 !    Function: - Checks a 2D double precision array on NaN's.
@@ -239,11 +228,9 @@ logical function nan_check_2D_dp(field, fieldnam, lundia, nlb, mlb) result (retv
     !
     ! Arguments
     !
-    integer, intent(in)                                      :: nlb
-    integer, intent(in)                                      :: mlb
-    real(kind=8), dimension(nlb:,mlb:), intent(in)           :: field
-    character*(*), intent(in)                                :: fieldnam
-    integer, intent(in)                                      :: lundia
+    real(kind=8), dimension(:,:), intent(in) :: field
+    character*(*), intent(in)                :: fieldnam
+    integer, intent(in)                      :: lundia
     !
     ! Local variables
     !
@@ -266,7 +253,7 @@ logical function nan_check_2D_dp(field, fieldnam, lundia, nlb, mlb) result (retv
     enddo
 end function nan_check_2D_dp
 
-logical function nan_check_3D_dp(field, fieldnam, lundia, nlb, mlb, klb) result (retval)
+logical function nan_check_3D_dp(field, fieldnam, lundia) result (retval)
 !!--description-----------------------------------------------------------------
 !
 !    Function: - Checks a 3D double precision array on NaN's.
@@ -275,12 +262,9 @@ logical function nan_check_3D_dp(field, fieldnam, lundia, nlb, mlb, klb) result 
     !
     ! Arguments
     !
-    integer, intent(in)                                      :: nlb
-    integer, intent(in)                                      :: mlb
-    integer, intent(in)                                      :: klb
-    real(kind=8), dimension(nlb:,mlb:,klb:), intent(in)      :: field
-    character*(*), intent(in)                                :: fieldnam
-    integer, intent(in)                                      :: lundia
+    real(kind=8), dimension(:,:,:), intent(in) :: field
+    character*(*), intent(in)                  :: fieldnam
+    integer, intent(in)                        :: lundia
     !
     ! Local variables
     !
@@ -305,7 +289,7 @@ logical function nan_check_3D_dp(field, fieldnam, lundia, nlb, mlb, klb) result 
      enddo
     end function nan_check_3D_dp
 
-logical function nan_check_4D_dp(field, fieldnam, lundia, nlb, mlb, klb, llb) result (retval)
+logical function nan_check_4D_dp(field, fieldnam, lundia) result (retval)
 !!--description-----------------------------------------------------------------
 !
 !    Function: - Checks a 4D double precision array on NaN's.
@@ -314,13 +298,9 @@ logical function nan_check_4D_dp(field, fieldnam, lundia, nlb, mlb, klb, llb) re
     !
     ! Arguments
     !
-    integer, intent(in)                                      :: nlb
-    integer, intent(in)                                      :: mlb
-    integer, intent(in)                                      :: klb
-    integer, intent(in)                                      :: llb
-    real(kind=8), dimension(nlb:,mlb:,klb:,llb:), intent(in) :: field
-    character*(*), intent(in)                                :: fieldnam
-    integer, intent(in)                                      :: lundia
+    real(kind=8), dimension(:,:,:,:), intent(in) :: field
+    character*(*), intent(in)                    :: fieldnam
+    integer, intent(in)                          :: lundia
     !
     ! Local variables
     !
