@@ -84,7 +84,7 @@ contains
 
       len_file          =  len_trim(ini_file)
 
-      open(lun_ini,file=ini_file,form='binary',status='old',iostat=ios)
+      open(lun_ini,file=ini_file,access='stream',form='unformatted',status='old',iostat=ios)
       if (ios /= 0) go to 900
       read(lun_ini,end=920,err=930) nopart_ini,nosubs_ini
       if ( nosubs_ini .gt. nosubs ) then

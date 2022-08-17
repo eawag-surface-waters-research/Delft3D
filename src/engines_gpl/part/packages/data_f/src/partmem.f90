@@ -40,7 +40,6 @@ module partmem
       integer(ip)  , parameter          :: nfilesp =  100
       integer(ip)                       :: lunitp(nfilesp) = 0    ! logical unit numbers for in-/output files
       character(len=256)                :: fnamep(nfilesp) = ' '  ! file names for in-/output files
-      character(len=20) , dimension(2)  :: ftypep          = ' '  ! file types, i.e. unformatted or binary
       logical                           :: alone                  ! if .false. coupled with Delwaq
       integer(ip)   :: itrakc  , itraki  , npwndn  , npwndw  , nstep  , nstept
       real   (sp)   :: defang  , hmin    , ptlay   , accrjv

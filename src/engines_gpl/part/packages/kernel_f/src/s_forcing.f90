@@ -57,7 +57,7 @@
             read(847,*) t_file
             allocate(salinity(noseg))
             allocate(salprev(noseg))
-            open(846,file=t_file,form='binary')
+            open(846,file=t_file, access='stream', form='unformatted')
             read(846) it1,salinity
             read(846) it2
          else

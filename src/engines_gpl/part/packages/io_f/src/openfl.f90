@@ -38,7 +38,7 @@ use delete_file_mod        ! explicit interface
 implicit none              ! force explicit typing
 !
 contains
-      subroutine openfl ( lun, finam, ftype, iopt)
+      subroutine openfl ( lun, finam, iopt)
 !
 !
 !     Deltares
@@ -46,7 +46,7 @@ contains
 !     subroutines called : delete_file
 !                          stop_exit
 !
-!     function           : open file dependent on ftype
+!     function           : open file
 !
 !
 !*********************************************************************
@@ -63,7 +63,6 @@ contains
 !     name    kind       length      funct.  description
 !     ---------------------------------------------------------
 !     finam   character*80 1         input   file name
-!     ftype   character*20 1         input   file type
 !     ierror  integer      1         local   error in delete_file
 !     iopt    integer      1         input   if 1 delete existing file
 !                                            with same name
@@ -72,7 +71,6 @@ contains
 !
       implicit none
 
-      character(len=20)  :: ftype
       character(len=256) :: finam
 !
 !     local scalars
@@ -87,40 +85,11 @@ contains
       select case ( iopt )
          case ( 1 )
             call delete_file ( finam, ierror )
-            if(ftype=='unformatted') then
-               open ( newunit = lun, file = finam, form = ftype, access='stream', err = 99)
-            elseif (ftype=='binary') then
-               open ( newunit = lun, file = finam, form = ftype, err = 99)
-            else
-               write(*,*) ' Error when opening file with name: '
-               write(*,*) finam
-               write(*,*) ' of type: ', ftype
-               call error(' Filetype not known by openfl ')
-            endif
+            open ( newunit = lun, file = finam, access='stream', form='unformatted', err = 99)
          case ( 0 )
-            if(ftype=='unformatted') then
-               open ( newunit = lun, file = finam, form = ftype, access='stream', status ='old', err = 99)
-            elseif (ftype=='binary') then
-               open ( newunit = lun, file = finam, form = ftype, status = 'old', err = 99)
-            else
-               write(*,'(//a,a40)') ' Error on opening file: ',finam
-               write(*,'(  a,a  )') ' Expected file type   : ',ftype
-               write(*,'(  a    )') ' Please check if file exists'
-               write(*,'(  a    )') ' Please check correct file type'
-               call error(' filetype not known by openfl ')
-            endif
+            open ( newunit = lun, file = finam, access='stream', form='unformatted', status = 'old', err = 99)
          case ( 3 )
-            if(ftype=='unformatted') then
-               open ( newunit = lun, file = finam, form = ftype, access='stream', status ='old', err = 10)
-            elseif (ftype=='binary') then
-               open ( newunit = lun, file = finam, form = ftype, status = 'old', err = 10)
-            else
-               write(*,'(//a,a40)') ' Error on opening file: ',finam
-               write(*,'(  a,a  )') ' Expected file type   : ',ftype
-               write(*,'(  a    )') ' Please check if file exists'
-               write(*,'(  a    )') ' Please check correct file type'
-               call error(' filetype not known by openfl ')
-            endif
+            open ( newunit = lun, file = finam, access='stream', form='unformatted', status = 'old', err = 10)
       end select
 !
       if ( timon ) call timstop ( ithndl )
@@ -132,7 +101,6 @@ contains
       return
 !
  99   write(*,'(//a,a40)') ' Error on opening file: ',finam
-      write(*,'(  a,a  )') ' Expected file type   : ',ftype
       write(*,'(  a    )') ' Please check if file exists'
       write(*,'(  a    )') ' Please check correct file type'
       call stop_exit(1)

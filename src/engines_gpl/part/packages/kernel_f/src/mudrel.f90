@@ -140,7 +140,7 @@ contains
 !
 !.. open files
 !
-      call openfl ( lunin, finam, ftype(2), 0 )
+      call openfl ( lunin, finam, 0 )
 !
 !.. delwaq map file or restart file
 !

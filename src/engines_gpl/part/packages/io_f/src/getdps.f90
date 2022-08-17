@@ -77,7 +77,7 @@
          
          inquire (file = trim(lnam), exist = ex)
          if (ex) then
-            call openfl ( lundp, lnam, ftype(2), 0 )
+            call openfl ( lundp, lnam, 0 )
             read (lundp) idum,idum,nmnw,nmnw,nmnw,idum
             if ( nmnw .ne. nosegl ) then
                write ( lunpr, * ) 'ERROR, dimension in dps file does not match!',nmnw,nosegl

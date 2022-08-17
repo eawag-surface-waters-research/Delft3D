@@ -308,7 +308,6 @@
       use precision_part                  ! single/double precision
       use timers
       use fileinfo  , lun=> lunit    ! logical unit numbers for files
-      use filtyp_mod                 ! explicit interface
       use spec_feat_par
       use normal_mod
       !
@@ -367,7 +366,6 @@
 
 !     set file types
 
-      call filtyp()
       alone = .true.
 
 !     read unit-numbers and file-names
@@ -396,11 +394,11 @@
 
 !     rdlgri also calculates tcktot ! Data is put in the partmem module
 
-      call rdlgri ( nfiles , lun    , fname  , ftype )
+      call rdlgri ( nfiles , lun    , fname   )
 
 !     read curved grid
 
-      call rdccol ( nmaxp   , mmaxp   , lun(5)  , fname(5) , ftype  ,    &
+      call rdccol ( nmaxp   , mmaxp   , lun(5)  , fname(5) ,   &
                     lgrid2  , xb      , yb      , lun(2)   )
 
       if((maxval(xb).le.180.0).and.(minval(xb).ge.-180.0).and. &
@@ -428,7 +426,7 @@
                     flow1    , flow2m   , vdiff1   , update   , cellpntp , flowpntp ,    &
                     tau      , tau1     , caltau   , salin    , salin1   ,    &
                     temper   , temper1  , nfiles   , lun      , fname    ,    &
-                    ftype    , flow2    , rhowatc)
+                    flow2    , rhowatc)
 
 !     Read the whole input file ! Data is put in the partmem module !
 
@@ -561,7 +559,7 @@
       if ( idp_file .ne. ' ' .and. modtyp .ne. model_ibm ) then
          if (modtyp .ne. model_prob_dens_settling) then
             write ( lunpr, * ) ' Opening initial particles file:', idp_file(1:len_trim(idp_file))
-            call openfl ( lunini, idp_file, ftype(2), 0 )
+            call openfl ( lunini, idp_file, 0 )
             read ( lunini ) ilp, nopart, nosubs
             do ilp = 1, nopart
                read( lunini ) npart(ilp), mpart(ilp), kpart(ilp), xpart(ilp), ypart(ilp), zpart(ilp), wpart(1:nosubs,ilp), iptime(ilp),track(1,ilp),track(2,ilp),track(3,ilp), &
@@ -570,7 +568,7 @@
             close ( lunini )
          else
             write ( lunpr, * ) ' Opening initial particles file:', idp_file(1:len_trim(idp_file))
-            call openfl ( lunini, idp_file, ftype(2), 0 )
+            call openfl ( lunini, idp_file, 0 )
             read ( lunini ) ilp, nopart, nosubs
             do ilp = 1, nopart
                read( lunini ) npart(ilp), mpart(ilp), kpart(ilp), xpart(ilp), ypart(ilp), zpart(ilp), wpart(1:nosubs,ilp), &
@@ -644,7 +642,7 @@
                        flow1    , flow2m   , vdiff1   , update   , cellpntp , flowpntp ,    &
                        tau      , tau1     , caltau   , salin    , salin1   ,    &
                        temper   , temper1  , nfiles   , lun      , fname    ,    &
-                       ftype    , flow2    , rhowatc)
+                       flow2    , rhowatc)
 
 !        Part03 computes velocities and depth (immediately after reading the new hydro)
          call part03 ( lgrid    , volumep  , flow     , dx       , dy       ,    &
@@ -914,7 +912,7 @@
                res_file(iext+1:iext+4) = 'res'     !all results, except those that are inactive (outside model)
             end if
             write ( lunpr, * ) ' Opening restart particles file:', idp_file(1:len_trim(res_file))
-            call openfl ( lunfil, res_file, ftype(2), 1 )
+            call openfl ( lunfil, res_file, 1 )
             write ( lunfil ) 0, nores, nosubs
 
             do ilp = 1, nopart
@@ -942,7 +940,7 @@
             end if
             write ( lunpr, * ) ' Opening restart particles file:', idp_file(1:len_trim(res_file))
             write ( lunpr, * ) ' Particles older than ',max_restart_age,' seconds are removed'
-            call openfl ( lunfil, res_file, ftype(2), 1 )
+            call openfl ( lunfil, res_file, 1 )
             write ( lunfil ) 0, noras, nosubs
 
             do ilp = 1, nopart

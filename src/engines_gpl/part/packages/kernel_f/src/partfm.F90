@@ -2469,7 +2469,7 @@ endif
                 flow1,    flow2m,   vdiff1,   update,    cellpnt,          flowpnt,    &
                 hyd%tau,  tau1,     caltau,    hyd%sal,          salin1,     &
                 hyd%tem,  temper1,  nfiles,    lunit,            fname,      &
-                ftype,    flow2,    rhowatc                                  )
+                flow2,    rhowatc                                  )
 
    istat = 0 ! Assume it goes well
    end subroutine read_hyd_step_fm

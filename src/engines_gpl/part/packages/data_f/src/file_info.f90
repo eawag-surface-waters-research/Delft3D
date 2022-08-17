@@ -34,7 +34,6 @@ module fileinfo
       integer(ip)  , parameter          :: nfiles =  100
       integer(ip)                       :: lunit(nfiles) = 0    ! logical unit numbers for in-/output files
       character(len=256)                :: fname(nfiles) = ' '  ! file names for in-/output files
-      character(len=20) , dimension(2)  :: ftype         = ' '  ! file types, i.e. unformatted or binary
       character(len=255)                :: filebase             ! base for filenames
       character(len=255)                :: partinifile          ! part FM initial particles file
       character(len=255)                :: partrelfile          ! part FM particle release file

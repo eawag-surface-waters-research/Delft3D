@@ -1232,7 +1232,7 @@
          idp_file = cbuffer
          if ( idp_file .ne. ' ' ) then
             write ( lun2, * ) ' Reading number of initial particles from file:', idp_file(1:len_trim(idp_file))
-            call openfl ( lunfil, idp_file, ftype(2), 0 )
+            call openfl ( lunfil, idp_file, 0 )
 !           get maximum no. of initial particles (nrespart), don't combine ini_oil with this!
             read ( lunfil ) idummy, nopart_res, idummy
             close ( lunfil )
@@ -1731,7 +1731,7 @@
             iftime(i) = id*86400 + ih*3600 + im*60 + is
          else
             lunin = 51
-            call openfl ( lunin, finud(i), ftype(2), 0  )
+            call openfl ( lunin, finud(i), 0  )
             read  ( lunin, err=5001 )
             read  ( lunin, err=5002 ) iftime(i)
             write ( lun2 , 2389 ) iftime(i)
@@ -2743,29 +2743,22 @@ subroutine getdim_asc ( lun , asc_file , npart_ini, nrowsmax , &
       return
       end function more_data
 
-      subroutine open_inifile ( lun, finam, ftype)
+      subroutine open_inifile ( lun, finam)
       use precision_part       ! flexible size definition
       implicit none
 
-      character(len=20)  :: ftype
       character(len=256) :: finam
 !
 !     local scalars
 !
       integer(ip) :: lun
 !
-      if(ftype=='unformatted') then
-         open ( newunit = lun, file = finam, form = ftype, status ='old',  &
-                 err = 99)
-      elseif (ftype=='binary') then
-            open ( newunit = lun, file = finam, form = ftype, status = 'old', &
-                   err = 99)
-      endif
+      open ( newunit = lun, file = finam, access='stream', form='unformatted', status = 'old', &
+              err = 99)
 !
       return
 !
  99   write(*,'(//a,a40)') ' Error on opening file: ',finam
-      write(*,'(  a,a  )') ' Expected file type   : ',ftype
       write(*,'(  a    )') ' Please check if file exists'
       write(*,'(  a    )') ' Please check correct file type'
       call stop_exit(1)

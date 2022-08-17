@@ -65,7 +65,7 @@ subroutine write_part_restart_file()
          res_file(iext+1:iext+4) = 'res'     !all results, except those that are inactive (outside model)
       end if
       write ( lunut, * ) ' Opening restart particles file:', idp_file(1:len_trim(res_file))
-      call openfl ( lures, res_file, ftype(2), 1 )
+      call openfl ( lures, res_file, 1 )
       write ( lures ) 0, nores, nosubs
 
       do ilp = 1, nopart
@@ -93,7 +93,7 @@ subroutine write_part_restart_file()
       end if
       write ( lunut, * ) ' Opening restart particles file:', idp_file(1:len_trim(res_file))
       write ( lunut, * ) ' Particles older than ',max_restart_age,' seconds are removed'
-      call openfl ( lures, res_file, ftype(2), 1 )
+      call openfl ( lures, res_file, 1 )
       write ( lures ) 0, noras, nosubs
 
       do ilp = 1, nopart

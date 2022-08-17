@@ -44,7 +44,6 @@ libio_f_la_SOURCES = \
          dlwqbl.f90 \
          parttd.f90 \
          dlwqfl.f90 \
-         filtyp.F90 \
          m_sferic.f90 \
          meteo1temphelpers.f90 \
          meteo1.f90 \

@@ -48,7 +48,7 @@ module rdhydr_mod
                           flow1  , flow2m , vdiff1 , update , cellpnt, flowpnt,  &
                           tau    , tau1   , caltau , salin  , salin1 ,  &
                           temper , temper1, nfiles , lunit  , fname  ,  &
-                          ftype  , flow2  , rhowatc)
+                          flow2  , rhowatc)
 !
 !     READING HYDRODYNAMICS FILE (*.hyd)
 !              (initially)
@@ -108,7 +108,6 @@ module rdhydr_mod
       integer  (ip), intent(in   ) :: nfiles           !< nr. of files
       integer  (ip), intent(inout) :: lunit(nfiles)    !< unit nrs of all files
       character(* ), intent(inout) :: fname(nfiles)    !< file names of all files
-      character(20), intent(inout) :: ftype(2)         !< 'binary'
       real     (sp), intent(  out) :: flow2  ( noq  )  !< flow record in file second record
 
 !     locals
@@ -143,14 +142,14 @@ module rdhydr_mod
 !        Save current value of idelt for later
          ideltold = idelt
          write ( lunut, * ) ' Opening the volume file:', fname(6)(1:len_trim(fname(6)))
-         call openfl ( lunit(6), fname(6), ftype(2), 0 )
+         call openfl ( lunit(6), fname(6), 0 )
 !        if (iocond  /=  0) goto 100
          write ( lunut, * ) ' Opening the flow   file:', fname(7)(1:len_trim(fname(7)))
-         call openfl ( lunit(7), fname(7), ftype(2), 0 )
+         call openfl ( lunit(7), fname(7), 0 )
 
          if ( lunit(20) .ne. 0 .and. fname(20) .ne. 'none' ) then
             write ( lunut, * ) ' Opening the vdf    file:', fname(20)(1:len_trim(fname(20)))
-            call openfl ( lunit(20), fname(20), ftype(2), 3 )
+            call openfl ( lunit(20), fname(20), 3 )
             if ( lunit(20) .eq. 0 ) write ( lunut, * ) ' Warning the vdf file does not exist !'
          else
             lunit(20) = 0
@@ -159,7 +158,7 @@ module rdhydr_mod
 
          if ( lunit(21) .ne. 0 .and. fname(21)(1:4) .ne. 'none' ) then
             write ( lunut, * ) ' Opening the tau    file:', fname(21)(1:len_trim(fname(21)))
-            call openfl ( lunit(21), fname(21), ftype(2), 3 )
+            call openfl ( lunit(21), fname(21), 3 )
             if ( lunit(21) .eq. 0 ) write ( lunut, * ) ' Warning the tau file does not exist !'
          else
             lunit(21) = 0
@@ -169,7 +168,7 @@ module rdhydr_mod
 
          if ( lunit(22) .ne. 0 .and. fname(22)(1:4) .ne. 'none' ) then
             write ( lunut, * ) ' Opening the salinity file:', fname(22)(1:len_trim(fname(22)))
-            call openfl ( lunit(22), fname(22), ftype(2), 3 )
+            call openfl ( lunit(22), fname(22), 3 )
             if ( lunit(22) .eq. 0 ) write ( lunut, * ) ' Warning the salinity file does not exist !'
          else
             lunit(22) = 0
@@ -177,7 +176,7 @@ module rdhydr_mod
 
          if ( lunit(23) .ne. 0 .and. fname(23)(1:4) .ne. 'none' ) then
             write ( lunut, * ) ' Opening the temperature file:', fname(23)(1:len_trim(fname(23)))
-            call openfl ( lunit(23), fname(23), ftype(2), 3 )
+            call openfl ( lunit(23), fname(23), 3 )
             if ( lunit(23) .eq. 0 ) write ( lunut, * ) ' Warning the temperature file does not exist !'
          else
             lunit(23) = 0

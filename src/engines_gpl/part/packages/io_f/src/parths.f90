@@ -31,7 +31,6 @@ module parths_mod
 use precision_part            ! single and double precision
 use m_part_modeltypes         ! part model definitions
 use timers
-use filtyp_mod
 use openfl_mod
 !
 !  module procedure(s)
@@ -254,7 +253,7 @@ contains
          thickn(2) = pblay
          nosubt    = (nosubs + 1) * nolay
          write ( lun2, * ) ' Writing to new history file:', finam(1:len_trim(finam))
-         call openfl ( lun1, finam, ftype(2), 1 )
+         call openfl ( lun1, finam, 1 )
 
 !        map file stations:
 

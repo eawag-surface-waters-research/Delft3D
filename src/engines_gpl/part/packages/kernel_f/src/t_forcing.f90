@@ -54,7 +54,7 @@
             read(849,*) noseg
             read(849,*) t_file
             allocate(temperature(noseg))
-            open(848,file=t_file,form='binary')
+            open(848,file=t_file,access='stream', form='unformatted')
             read(848) it1,temperature
             read(848) it2
          else

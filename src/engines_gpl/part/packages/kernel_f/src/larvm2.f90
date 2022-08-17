@@ -76,7 +76,7 @@ contains
             istage = isys - 1
             write(syname(isys),'(''sole'',i2.2,''stage'')') istage
          enddo
-         open (lunmm2, file=filmm2, form='binary')
+         open (lunmm2, file=filmm2, access='stream', form='unformatted')
          write(lunmm2) moname
          write(lunmm2) nosubs-3,nosegl
          write(lunmm2) syname

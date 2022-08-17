@@ -21,7 +21,7 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-      subroutine rdlgri ( nfiles , lunit  , fname  , ftype   )
+      subroutine rdlgri ( nfiles , lunit  , fname   )
 
 !     Deltares Software Centre
 
@@ -72,7 +72,6 @@
       integer  ( ip), intent(in   ) :: nfiles            !< nr. of files
       integer  ( ip), intent(inout) :: lunit(nfiles)     !< unit nrs of all files
       character(256), intent(inout) :: fname(nfiles)     !< file names of all files
-      character( 20), intent(inout) :: ftype(2)          !< 'binary'
 
 !     locals
 
@@ -115,7 +114,7 @@
 
       write (lunit(2), *)
       write ( lunit(2), * ) ' Opening the active grid file file:', fname(3)(1:len_trim(fname(3)))
-      call openfl ( lunit(3), fname(3), ftype(2), 0 )
+      call openfl ( lunit(3), fname(3), 0 )
       
       read ( lunit(3), end = 10, err = 10 ) nmaxp, mmaxp, noseglp, layt2, noq1 , noq2 , noq3
       write( lunit(2),*) '   '
@@ -248,7 +247,7 @@
             enddo
          enddo
          write ( lunit(2), * ) ' Opening the pointers file:', fname(19)(1:len_trim(fname(19)))
-         call openfl ( lunit(19), fname(19), ftype(2), 0 )
+         call openfl ( lunit(19), fname(19), 0 )
          read  ( lunit(19) ) frm_to
          close ( lunit(19) )
          write ( lunit(2),'(a,a)') '  Succesful reading of the pointers file   : ',fname(19)(:len_trim(fname(19)))

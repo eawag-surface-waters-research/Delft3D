@@ -23,7 +23,6 @@
 
 module part12_mod
 
-use filtyp_mod
 use openfl_mod
 
 contains
@@ -267,7 +266,7 @@ contains
          if ( mapfil ) then
             first = .false.
             write ( lun2, * ) ' Writing to new map file:', lname(1:len_trim(lname))
-            call openfl ( lun1, lname, ftype(2), 1 )
+            call openfl ( lun1, lname, 1 )
             write( lun1 ) (title(i),i=1,4)
             write( lun1 ) nosubs+2, noseg
             write( lun1 ) (subst(i), i = 1, nosubs+2)

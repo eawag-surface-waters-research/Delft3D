@@ -23,7 +23,6 @@
 
 module part13_mod
 
-use filtyp_mod
 use openfl_mod
 
 contains
@@ -367,7 +366,7 @@ contains
 !       open ordinary plo output unit
 !
         write ( lun2, * ) ' Writing to new plotgrid file:', lname(1:len_trim(lname))
-        call openfl ( lun1, lname, ftype(2), 1 )
+        call openfl ( lun1, lname, 1 )
         write(lun1) title
         write(lun1) -1,nosubs+2 , nmap, mmap, nolay ,    & 
                        iyear, imonth, iofset

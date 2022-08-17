@@ -25,7 +25,6 @@
      &                      nosfun , sfname , segfun )
 
       use partmem      !   for PARTicle tracking
-      use filtyp_mod   !   for PARTicle tracking
       use alloc_mod    !   for PARTicle tracking
       use writrk_mod   !   for PARTicle tracking
       use timers
@@ -77,10 +76,9 @@
          call rdfnam ( lunitp    , mdpfile   , fnamep    , nfilesp  , 2       ,
      &                 1         , .false.   )
          lunut = lunitp(2)
-         call filtyp()
          call report_date_time   ( lunut     )
-         call rdlgri ( nfilesp   , lunitp    , fnamep    , ftype   )
-         call rdccol ( nmaxp     , mmaxp     , lunitp(5) , fnamep(5), ftype  ,
+         call rdlgri ( nfilesp   , lunitp    , fnamep    )
+         call rdccol ( nmaxp     , mmaxp     , lunitp(5) , fnamep(5), 
      &                 lgrid2    , xb        , yb        , lunut    )
          call part01 ( lgrid     , lgrid2    , xb        , yb       , dx      ,
      &                 dy        , area      , angle     , nmaxp    , mmaxp   )
@@ -230,7 +228,7 @@
       if ( modtyp .ne. model_ibm .and. idp_file .ne. ' ' ) then
          if (modtyp .ne. model_prob_dens_settling) then
             write ( lunut, * ) ' Opening initial particles file:', idp_file(1:len_trim(idp_file))
-            call openfl ( luini, idp_file, ftype(2), 0 )
+            call openfl ( luini, idp_file, 0 )
             read ( 50 ) ilp, nopart, nosubs_idp
             if (nosubs_idp.ne.nosubs) then
                write ( lunut, * ) ' Error: number of substances in the ini-file   : ',nosubs_idp
@@ -246,7 +244,7 @@
             close ( luini )
          else
             write ( lunut, * ) ' Opening initial particles file:', idp_file(1:len_trim(idp_file))
-            call openfl ( luini, idp_file, ftype(2), 0 )
+            call openfl ( luini, idp_file, 0 )
             read ( luini ) ilp, nopart, nosubs_idp
             if (nosubs_idp.ne.nosubs) then
                write ( lunut, * ) ' Error: number of substances in the ini-file   : ',nosubs_idp

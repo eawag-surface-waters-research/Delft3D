@@ -149,8 +149,6 @@ contains
       real   (sp), dimension(:,:)      :: conc
       real   (sp), dimension(:,:)      :: wpart
 !
-!     character(len=20) ::  ftype
-!     common /wnmnef4/ ftype(2)
 !
 !     data
 !
@@ -187,7 +185,7 @@ contains
 !
           if ( .not. un1opn) then
             un1opn = .true.
-            call openfl ( lun1, lname, ftype(2), 1 )
+            call openfl ( lun1, lname, 1 )
             if (nodye  >  0 .and. nocont  < 1) then
 !
 !             run for dye(s)
