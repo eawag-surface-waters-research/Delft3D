@@ -104,20 +104,22 @@ subroutine setup_structures_and_weirs_list()
 
 ! Sort the flow links and remove double occurrences
    count = numberOfStructuresAndWeirs
-   numberOfStructuresAndWeirs = 0
-   allocate(indx(count), listtmp(count))
-   listtmp = structuresAndWeirsList(1:count)
-   call indexxi(count, listtmp, indx)
-   Llast = 0
-   do i = 1, count
-      L = listtmp(indx(i))
-      if (l /= Llast) then
-         numberOfStructuresAndWeirs = numberOfStructuresAndWeirs + 1
-         structuresAndWeirsList(numberOfStructuresAndWeirs) = L
-         Llast = L
-      endif
-   enddo
-
-   deallocate(indx,listtmp)
+   if (count > 0) then 
+      numberOfStructuresAndWeirs = 0
+      allocate(indx(count), listtmp(count))
+      listtmp = structuresAndWeirsList(1:count)
+      call indexxi(count, listtmp, indx)
+      Llast = 0
+      do i = 1, count
+         L = listtmp(indx(i))
+         if (l /= Llast) then
+            numberOfStructuresAndWeirs = numberOfStructuresAndWeirs + 1
+            structuresAndWeirsList(numberOfStructuresAndWeirs) = L
+            Llast = L
+         endif
+      enddo
+      
+      deallocate(indx,listtmp)
+   endif 
    return
   end subroutine setup_structures_and_weirs_list
