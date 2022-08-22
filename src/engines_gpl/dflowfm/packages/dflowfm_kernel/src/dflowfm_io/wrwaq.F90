@@ -356,7 +356,9 @@ module waq
       integer                        :: noq12sl       !  number of horizontal WAQ exchanges (including sink/sources and laterals)
       integer                        :: numsrcbnd     !  number of sinks/sources that are boundary conditions
       integer                        :: numsrcwaq     !  number of adition sources/sinks exchanges in waq (based on posible combinations)
-      integer                        :: numlatwaq     !  number of lateral boundary conditions
+      integer                        :: numlatsectwaq !  number of lateral boundary sections
+      integer,           allocatable :: numlatinsectwaq(:) !  number of lateral boundaries in this section
+      integer                        :: numlatwaq     !  number of lateral boundary links
       integer                        :: kmxnx         ! maximum number of active layers
       integer                        :: kmxnxa        ! maximum number of aggregated layers
       integer                        :: ndkxi         ! nr of internal flowcells (3D)
@@ -1590,8 +1592,8 @@ subroutine waq_wri_bnd()
    integer :: lunbnd
    character(len=255) :: filename
    double precision :: x1, y1, x2, y2, xn, yn
-   integer, parameter :: waqmaxnamelen = 20
    integer :: namelen
+   character(len=20) :: sectionname
    !
    !! executable statements -------------------------------------------------------
    !
@@ -1609,15 +1611,15 @@ subroutine waq_wri_bnd()
       nopenbndsectnonempty = nopenbndsectnonempty+1
    end do
 
-   write(lunbnd, '(i8)') nopenbndsectnonempty + waqpar%numsrcbnd             ! Nr of open boundary sections and sink sources.
+   write(lunbnd, '(i8)') nopenbndsectnonempty + waqpar%numsrcbnd + waqpar%numlatsectwaq  ! Nr of open boundary sections, sink sources and laterals.
    istart = 0
    do i=1,nopenbndsect
       if (nopenbndlin(i) - istart == 0) then
          cycle
       end if
-      namelen = len_trim(openbndname(i))
-      write(lunbnd, '(a)')  trim(openbndname(i)(1:min(namelen, waqmaxnamelen)))  ! Section name
-      write(lunbnd, '(i8)') nopenbndlin(i)-istart ! Nr of lins in section
+      sectionname = makesectionname('bnd_',openbndname(i))
+      write(lunbnd, '(a)')  sectionname           ! Section name
+      write(lunbnd, '(i8)') nopenbndlin(i)-istart ! Nr of links in section
 
       do LL=istart+1,nopenbndlin(i)
          L  = openbndlin(LL)
@@ -1670,16 +1672,19 @@ subroutine waq_wri_bnd()
          else
             kk = ksrc(4,isrc)
          endif
-         write(lunbnd, '(a)')  trim(srcname(isrc))  ! Section name
-         write(lunbnd, '(i8)') 1                    ! Nr of lins in section
+         sectionname = makesectionname('src_',srcname(i))
+         write(lunbnd, '(a)')  sectionname          ! Section name
+         write(lunbnd, '(i8)') 1                    ! Nr of source links in section
          write(lunbnd, '(i8,4f18.8)') -(ibnd), xz(kk), yz(kk), xz(kk), yz(kk)
       endif
    enddo
+
    if (numlatsg > 0) then
       do ilat = 1, numlatsg
-         if (nodeCountLat(ilat) > 0) then
-            write(lunbnd, '(a)')  trim('lat_'//lat_ids(ilat))  ! Section name
-            write(lunbnd, '(i8)') nodeCountLat(ilat)      ! Nr of nodes connected to this lateral
+         if (waqpar%numlatinsectwaq(ilat) > 0) then
+            sectionname = makesectionname('lat_',lat_ids(ilat))
+            write(lunbnd, '(a)')  trim(sectionname)             ! Section name
+            write(lunbnd, '(i8)') waqpar%numlatinsectwaq(ilat)  ! Nr of lateral links in section
             do k1=n1latsg(ilat),n2latsg(ilat)
                kk = nnlat(k1)
                if (kk > 0) then
@@ -2353,18 +2358,28 @@ subroutine waq_prepare_lat()
    implicit none
 
    integer :: ilat, ilatwaq, ibnd, k1, kk
+   logical :: firstinsection
 
    waqpar%numlatwaq = 0
+   waqpar%numlatsectwaq = 0
+   call realloc(waqpar%numlatinsectwaq, numlatsg, fill=0, keepExisting=.false.)
+
    if (numlatsg==0) return ! skip is no resources
    ! First determine the number of laterals actually used and the allocations needed
    do ilat = 1, numlatsg
       if (nodeCountLat(ilat) > 0) then
+         firstinsection = .true.
          do k1=n1latsg(ilat),n2latsg(ilat)
             kk = nnlat(k1)
             if (kk > 0) then
                if (.not. is_ghost_node(kk)) then
                   ! This is a lateral within the current domain
                   waqpar%numlatwaq = waqpar%numlatwaq + 1
+                  waqpar%numlatinsectwaq(ilat) = waqpar%numlatinsectwaq(ilat) + 1
+                  if (firstinsection) then
+                     waqpar%numlatsectwaq = waqpar%numlatsectwaq + 1
+                     firstinsection = .false.
+                  end if
                end if
             end if
          end do
@@ -3211,5 +3226,30 @@ subroutine waq_read_dwq(ndxi, ndx, iapnt, filename)
 end subroutine waq_read_dwq
 !
 !------------------------------------------------------------------------------
+
+function makesectionname(prefix, id) result (sectionname)
+   ! Make sure the Delwaq section id contains letters and is not just a number disguised as a string
+   implicit none
+
+   character(len=*), intent(in)   :: prefix      !< Optional prefix
+   character(len=*), intent(in)   :: id          !< Input D-FM id
+   character(len=20)              :: sectionname !< Delwaq section name
+   
+   integer  (8) :: int
+   real     (8) :: reel
+   integer      :: ierrint
+   integer      :: ierrreel
+   
+   read ( id , '(i)', iostat=ierrint)  int
+   read ( id , '(g)', iostat=ierrreel) reel
+
+   if(ierrint == 0 .or. ierrreel == 0) then
+      ! id could be read as an integer or real, add prefix
+      sectionname = trim(prefix)//id
+   else
+      ! use original id
+      sectionname = id
+   end if
+end function makesectionname
 
 end module waq
