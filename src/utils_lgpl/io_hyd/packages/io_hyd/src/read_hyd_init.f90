@@ -102,8 +102,9 @@
                call read_waqgeom(hyd)
             else
                ! not UGRID
-               write(lunrep,*) 'error reading waqgeom file (not a UGRID-file):',hyd%file_geo%name
-               call srstop(1)
+               call mess(LEVEL_ERROR, 'error reading waqgeom file (not a UGRID-file): '//trim(hyd%file_geo%name))
+!               write(*,*) 'error reading waqgeom file (not a UGRID-file): '//trim(hyd%file_geo%name)
+!               write(lunrep,*) 'error reading waqgeom file (not a UGRID-file): '//trim(hyd%file_geo%name)
             endif
          endif
             
