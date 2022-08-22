@@ -17,6 +17,7 @@ FMODULES += \
 #-------------------------------------------------------------------------------
 #Sources
 libwaq_utils_la_SOURCES =  \
+       m_aggregation_types.F90 \
        julian.f \
        waqmem.f90 \
        progress.f90 \
@@ -38,7 +39,6 @@ libwaq_utils_la_SOURCES =  \
        delwaq_loads.f \
        dhagg2.f \
        dhaggr.f \
-       m_aggregation_types.F90 \
        dhagkm.f \
        dhc20m.f \
        dhcarg.f \
@@ -53,17 +53,12 @@ libwaq_utils_la_SOURCES =  \
        dhggd.f \
        dhgnam.f \
        dhgpoi.f \
-       dhgvar.f \
        dhgwrd.f \
        dhimov.f \
-       dhisys.f \
        dhkmrk.f \
        dhkmst.f \
        partition_arrays.f90 \
-       dhltim.f \
        dhnlun.f \
-       dhnolay.f \
-       dhnoseg.f \
        dhopnf.F \
        dhpath.f \
        dhralloc.f \
@@ -76,7 +71,6 @@ libwaq_utils_la_SOURCES =  \
        dhzerc.f \
        dhzeri.f \
        errsys.f \
-       fffind.f \
        filldm.f \
        getcom.f \
        gkwini.f \
@@ -92,7 +86,6 @@ libwaq_utils_la_SOURCES =  \
        rapdef.f \
        rbpdef.f \
        rdvers.f \
-       rdwrk3.f \
        rdwrk4.f \
        reptim.f \
        stasub.f \
@@ -100,7 +93,6 @@ libwaq_utils_la_SOURCES =  \
        usedcp.f \
        wapdef.f \
        wbpdef.f \
-       wrwrk3.f \
        zero.f \
        zoek.f
 
