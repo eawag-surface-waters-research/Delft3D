@@ -917,12 +917,21 @@
            is = mod(iwndtm(i),    60)
            write ( lun2, 2074 ) id, ih, im, is, wveloa(i), wdira(i)
            if ( i .eq. 1 ) then
-              if ( iwndtm(i) .ne. itstrtp ) write(lun2 , 2072)
+              if ( iwndtm(i) .gt. itstrtp ) then
+                 ierr = ierr + 1
+                 write(lun2 , 2072)
+              endif
            else
-              if ( iwndtm(i) .le. iwndtm(i-1) ) write(lun2 , 2073)
+              if ( iwndtm(i) .le. iwndtm(i-1) ) then
+                 ierr = ierr + 1
+                 write(lun2 , 2073)
+              endif
            endif
          enddo
-         if ( iwndtm(nowind) .ne. itstopp ) write(lun2 , 2075)
+         if ( iwndtm(nowind) .lt. itstopp ) then
+            ierr = ierr + 1
+            write(lun2 , 2075)
+         endif
       endif
 
 !     map file start time
@@ -1297,9 +1306,9 @@
       if ( gettoken( i, xw1f, itype, ierr2 ) .ne. 0 ) goto 4038
       if ( itype .eq. 2 ) then
          npgrid = i
-         write ( lun2, '(A,I4)' ) 'Number of plot grids: ',npgrid
+         write ( lun2, '(A,I4)' ) '  Number of plot grids: ',npgrid
       endif
-      if ( npgrid .ne. 0 ) allocate ( pg(npgrid) )
+      allocate ( pg(max(1,npgrid)) )
       do i = 1, npgrid
          if ( npgrid .gt. 1 ) write ( lun2, '(/A,i4)' ) 'Information for plotgrid: ', i
          if ( itype .eq. 2 ) then
@@ -2176,11 +2185,11 @@
  2070 format(/' Error 1104. Number of wind variations; min. 2, max.',  &
                 i4, '; choosen :', i4, '!'                             )
  2072 format(/' Error 1201. Start time wind series must be equal to',  &
-              ' start time simulation!'                                )
+              ' or lower than start time simulation!'                  )
  2073 format(/' Error 1202. Wind time serie must be in ascending',     &
               ' order!'                                                )
  2075 format(/' Error 1203. Stop time wind series must be equal to',   &
-              ' stop time simulation!'                                 )
+              ' or greater than stop time simulation!'                 )
  2100 format(/' Error 1301. Start time flow-file: ',i4,'D-',i2,'H-',i2,&
                'M-',i2,'s; times do not match!'                        )
  2120 format('  Error 1302. Simulation time does not divide by time',  &
