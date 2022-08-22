@@ -322,7 +322,7 @@ module oildspfm_mod
 
 !     open output files for mass balances
 
-         do ifrac = 1, nfract
+          do ifrac = 1, nfract
             luncsv(ifrac) = 70+ifrac
             write( csv_fnam, '(a,a)' ) trim(substi((ifrac-1)*3 + 1)),'.csv'
             open ( newunit=luncsv(ifrac), file=trim(csv_fnam) )
