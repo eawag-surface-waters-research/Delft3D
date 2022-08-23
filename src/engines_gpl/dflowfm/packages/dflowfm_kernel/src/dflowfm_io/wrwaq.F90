@@ -1672,7 +1672,7 @@ subroutine waq_wri_bnd()
          else
             kk = ksrc(4,isrc)
          endif
-         sectionname = makesectionname('src_',srcname(i))
+         sectionname = makesectionname('src_',srcname(isrc))
          write(lunbnd, '(a)')  sectionname          ! Section name
          write(lunbnd, '(i8)') 1                    ! Nr of source links in section
          write(lunbnd, '(i8,4f18.8)') -(ibnd), xz(kk), yz(kk), xz(kk), yz(kk)
