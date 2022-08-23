@@ -66,7 +66,7 @@
 !     Local variables     :
 
       integer                         ierr2     !< Error flag
-      logical                         ierr_cwd  !< Error flag for obtaining current working directory
+      integer                         ierr_cwd  !< Error flag for obtaining current working directory
       character(256)                  wd_path   !< Current working directory path
       
       ierr   =   0
