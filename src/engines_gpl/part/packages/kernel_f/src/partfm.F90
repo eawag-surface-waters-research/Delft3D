@@ -250,10 +250,10 @@ endif
       call unc_write_trk()
       if (mapfil) call unc_write_map()
 
-      write ( lunpr, '('' Current timestep: '',I15,'' of '',I15)' ) int(time0), itstopp
-      write (   *  , '('' Current timestep: '',I15,'' of '',I15)' ) int(time0), itstopp
-      write ( lunpr, '('' Active particles: '',I15,'' of '',I15)' ) Nopart, npmax
-      write (   *  , '('' Active particles: '',I15,'' of '',I15)' ) Nopart, npmax
+      call report_progress( lunpr, int(time0), itstrtp, itstopp, nopart, npmax )
+
+
+
       if (time1 .ge. tstop_user) then
          exit
       endif
@@ -285,6 +285,28 @@ endif
    if ( timon ) call timstop ( ithndl )
 
    return
+
+   contains
+
+   subroutine report_progress( lunpr, itime, itstrtp, itstopp, nopart, npmax )
+   integer, intent(in) :: lunpr, itime, itstrtp, itstopp, nopart, npmax
+
+   real                :: pctprogress
+
+   pctprogress = 100.0 * (real(itime,4) - real(itstrtp,4)) / (real(itstopp,4) - real(itstrtp,4)) ! percentage progress
+
+   write ( lunpr, 1020) itime  /86400, mod(itime  , 86400)/3600, mod(itime  , 3600)/60, mod(itime  , 60),  &
+                        itstopp/86400, mod(itstopp, 86400)/3600, mod(itstopp, 3600)/60, mod(itstopp, 60),  &
+                        pctprogress, nopart, npmax
+   write ( lunpr, 1020) itime  /86400, mod(itime  , 86400)/3600, mod(itime  , 3600)/60, mod(itime  , 60),  &
+                        itstopp/86400, mod(itstopp, 86400)/3600, mod(itstopp, 3600)/60, mod(itstopp, 60),  &
+                        pctprogress, nopart, npmax
+
+ 1020 format(/,'  Time ', i6.4 ,'D-', i2.2 ,'H-', i2.2 ,'M-', i2.2 ,'S.',' Stop time ',     &
+                 i6.4 ,'D-', i2.2 ,'H-', i2.2 ,'M-', i2.2 ,'S. (', f5.1, '% completed) ',   &
+                 i11,' part. (of',i11,')')
+
+   end subroutine report_progress
    end subroutine partfm
 
    subroutine update_particles(q,h0,h1,Dt)
