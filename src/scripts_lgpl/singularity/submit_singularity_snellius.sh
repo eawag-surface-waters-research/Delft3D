@@ -15,7 +15,11 @@
 #SBATCH --chdir=./              #chdir set as /path/to/runfolder is useful when calling this script from a different directory
 #SBATCH --partition=thin        #type of node
 #SBATCH --exclusive             #To avoid any interference from other jobs running on the same node, or when a user wants to use all RAM available on the node. In many cases this option can be omitted. 
-#SBATCH --contiguous            #To ensure that all nodes allocated for a job are allocated in a contiguous ways, i.e. next to each other. Clearly, use of this option makes sense only for multi-node jobs. The idea behind the contiguous allocation is to improve MPI messages routing and, therefore, improve the communication performance. Basically, if nodes are allocated contiguously, less routers are involved and, often, messages can be communicated using a local node-to-node network connection. Otherwise, messages will have to travel across the whole network tree to reach the destination. Again, I used this option for scalability tests only. In real life, it's often better to skip it, because allocation of contiguous nodes may take more time, then allocation of random nodes.
+#SBATCH --contiguous            #To ensure that all nodes allocated for a job are allocated in a contiguous way, i.e. next to each other. Clearly, use of this option makes sense only for multi-node jobs.
+                                #The idea behind the contiguous allocation is to improve MPI message routing and therefore improve the communication performance.
+								#If nodes are allocated contiguously, less routers are involved and, often, messages can be communicated using a local node-to-node network connection.
+								#Otherwise, messages will have to travel across the whole network tree to reach the destination.
+								#In practice, it's often better to omit it, because allocation of contiguous nodes may take more time than allocation of random nodes.
  
  
 echo "---Load modules..."
