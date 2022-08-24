@@ -52,6 +52,11 @@
      integer, dimension(nf90_max_var_dims) :: localStart, localCount, localStride, localMap
      integer                               :: counter
  
+     if (size(values) < 1) then
+       nf90_put_var_1D_text = -1
+       return 
+     endif
+     
      ! Set local arguments to default values
      localStart (:         ) = 1
      localCount ( :numDims+1) = (/ len(values(1)), shape(values) /)
@@ -70,6 +75,7 @@
        nf90_put_var_1D_text = &
           nf_put_vars_text(ncid, varid, localStart, localCount, localStride, values(1))
      end if
+
    end function nf90_put_var_1D_text
 
 

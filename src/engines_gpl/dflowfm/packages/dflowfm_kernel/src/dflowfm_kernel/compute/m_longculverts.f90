@@ -123,7 +123,7 @@ contains
 
    implicit none
 
-   character(len=*),              intent(in   ) :: structurefile  	  !< File name of the structure.ini file.
+   character(len=*),              intent(inout) :: structurefile  	  !< File name of the structure.ini file.
    integer,                       intent(in   ) :: jaKeepExisting     !< Whether or not (1/0) to keep the existing already read long culverts.
    character(len=*),              intent(in   ) :: culvertprefix      !< Command line argument prefix to add to the converted files
    character(len=:), allocatable, intent(  out) :: structures_output  !< structures ini output file ( = culvertprefix // structurefile )
@@ -147,10 +147,14 @@ contains
    integer :: istart
    integer :: nlongculvertsg0
    integer :: mout
-   integer :: longculvertindex
+   integer :: longculvertindex, dirindex
 
    ierr = DFM_NOERR
    filename = trim(culvertprefix)//filename
+   dirindex = scan(structurefile, '\/', back = .true. )
+   if (dirindex /= 0) then !the filename has a directory preceding it
+    structurefile = structurefile(dirindex+1:len(structurefile))
+   endif
    
    allocate(character(maxlen)::line)
 
