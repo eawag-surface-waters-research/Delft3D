@@ -107,7 +107,8 @@ subroutine rdbedformpar(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , 
     character(20)     :: ctemp
     character(60)     :: txtput2
     character(40)     :: txtput1 
-    real              :: rtemp
+    real(fp)          :: rdum    !< value used for initialization of array
+    real(fp)          :: rtemp
     logical           :: bdfhfile_exists
     logical           :: hdread
     logical           :: ldread
@@ -649,8 +650,10 @@ subroutine rdbedformpar(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , 
     !---------------------------
     ! Reading initial dune height/dune length
     !
+    rdum = -9999999.0_fp
     call restart_trim_bdf(lundia   ,nmaxus   ,mmax     ,duneheight, &
-                        & hdread   ,dunelength,ldread  ,gdp      )
+                        & hdread   ,dunelength,ldread  ,rdum      , &
+                        & gdp      )
     !
     if (.not.hdread) then
        !

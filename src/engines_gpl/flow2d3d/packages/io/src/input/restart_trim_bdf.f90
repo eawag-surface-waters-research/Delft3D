@@ -1,5 +1,6 @@
-subroutine restart_trim_bdf(lundia   ,nmaxus   ,mmax     ,bdfh     , &
-                          & bdfhread ,bdfl     ,bdflread ,gdp      )
+subroutine restart_trim_bdf(lundia    ,nmaxus    ,mmax      ,bdfh      , &
+                          & bdfhread  ,bdfl      ,bdflread  ,rdum      , &
+                          & gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2022.                                
@@ -62,6 +63,7 @@ subroutine restart_trim_bdf(lundia   ,nmaxus   ,mmax     ,bdfh     , &
     integer                                                                    , intent(in)  :: nmaxus
     logical                                                                    , intent(out) :: bdfhread
     logical                                                                    , intent(out) :: bdflread
+    real(fp)                                                                   , intent(in)  :: rdum    !< value used for initialization of array
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              , intent(out) :: bdfh
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              , intent(out) :: bdfl
     !
@@ -112,7 +114,7 @@ subroutine restart_trim_bdf(lundia   ,nmaxus   ,mmax     ,bdfh     , &
     grnam = 'map-sed-series'
     call rdarray_nm(fds, filename, filetype, grnam, i_restart, &
                  & nf, nl, mf, ml, iarrc, gdp, &
-                 & ierror, lundia, bdfh, 'DUNEHEIGHT')
+                 & ierror, lundia, bdfh, 'DUNEHEIGHT', rdum)
     if (ierror /= 0) then
        !
        ! In the research version, DUNEHEIGHT was stored in the map-series group.
@@ -121,7 +123,7 @@ subroutine restart_trim_bdf(lundia   ,nmaxus   ,mmax     ,bdfh     , &
        grnam = 'map-series'
        call rdarray_nm(fds, filename, filetype, grnam, i_restart, &
                     & nf, nl, mf, ml, iarrc, gdp, &
-                    & ierror, lundia, bdfh, 'DUNEHEIGHT')
+                    & ierror, lundia, bdfh, 'DUNEHEIGHT', rdum)
     endif
     if (ierror == 0) then
        write(lundia, '(a)') 'Bed form height read from restart file.'
@@ -132,7 +134,7 @@ subroutine restart_trim_bdf(lundia   ,nmaxus   ,mmax     ,bdfh     , &
     !
     call rdarray_nm(fds, filename, filetype, grnam, i_restart, &
                  & nf, nl, mf, ml, iarrc, gdp, &
-                 & ierror, lundia, bdfl, 'DUNELENGTH')
+                 & ierror, lundia, bdfl, 'DUNELENGTH', rdum)
     if (ierror == 0) then
        write(lundia, '(a)') 'Bed form length read from restart file.'
        bdflread = .true.
