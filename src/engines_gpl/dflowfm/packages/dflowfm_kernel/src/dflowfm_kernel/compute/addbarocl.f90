@@ -38,7 +38,7 @@
  implicit none
  integer, intent(in) :: LL,Lb,Lt
 
- integer             :: L, k1, k2, k1t, k2t, k, kt, kz ! ,%ktz
+ integer             :: L, k1, k2, k1t, k2t, k, kt, kz, ktz
  double precision    :: gradpu(kmxx), rhovol(kmxx), gr3, barocL, ft, dum
  double precision    :: rv1, rv2, gr1, gr2, rvk, grk, saw0, saw1, tmw0, tmw1, fzu, fzd, dzz, rv0, rhow0, rhow1, pdb, p0d
 
@@ -63,25 +63,30 @@
     gr2 = grn (k2)
 
     if (L == Lb) then
-       if (kmxn(ln(1,LL)) > kmxn(ln(2,LL)) .or. kmxn(ln(1,LL)) < kmxn(ln(2,LL))) then ! extrapolate at 'bed' layer of deepest side
+       if (kmxn(ln(1,LL)) > kmxn(ln(2,LL)) .or. kmxn(ln(1,LL)) < kmxn(ln(2,LL)) ) then ! extrapolate at 'bed' layer of deepest side
 
           if ( kmxn(ln(1,LL)) > kmxn(ln(2,LL)) ) then ! k1=deepest
              k  = k1 ; kt  = ktop(ln(1,LL))
-             kz = k2 !; ktz = ktop(ln(2,LL))
+             kz = k2 ; ktz = ktop(ln(2,LL))
           else
              k  = k2 ; kt  = ktop(ln(2,LL))
-             kz = k1 !; ktz = ktop(ln(1,LL))
+             kz = k1 ; ktz = ktop(ln(1,LL))
           endif
 
-          fzu   = (zws(kz+1) - zws(kz)) / (zws(kz+1) - zws(kz-1)) ; fzd = 1d0 - fzu
-          dzz   =  zws(kz) - zws(kz-1)
+          if (ktz - kz > 0) then ! high bed side extrapolates, so coeff are:
+             fzu   = (zws(kz+1) - zws(kz)) / (zws(kz+1) - zws(kz-1)) ; fzd = 1d0 - fzu
+             rhow1 = fzu*rho(k+1) + fzd*rho(k)
+             rhow0 = 2d0*rho(k) - rhow1
+          else                   ! one layer
+             rhow1 = rho(k)
+             rhow0 = rhow1
+          endif   
 
-          rhow1 = fzu*rho(k+1) + fzd*rho(k)
-          rhow0 = 2d0*rho(k) - rhow1
           rhow1 = rhow1 - rhomean
           rhow0 = rhow0 - rhomean
+          dzz   =   zws(kz) - zws(kz-1)  
           rvk   =   rvdn(k+1) + 0.5d0*dzz*    ( rhow1 + rhow0 )
-          grk   = ( rvdn(k+1) + 0.5d0*dzz*( 2d0*rhow1 + rhow0 )/3d0 )*dzz
+          grk   = ( rvdn(k+1) + 0.5d0*dzz*( 2d0*rhow1 + rhow0 )/3d0 )*dzz 
 
           if ( kmxn(ln(1,LL)) > kmxn(ln(2,LL)) ) then ! k1=deepest
              rv1 = rvk ; gr1 = grk
