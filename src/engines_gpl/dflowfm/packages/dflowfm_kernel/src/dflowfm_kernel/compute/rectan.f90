@@ -32,6 +32,7 @@
 
 subroutine rectan(hpr, br, hr, area, width, japerim, perim, closed)
 use m_flow, only : slotw1D
+use m_longculverts, only: newculverts
 implicit none
 integer          :: japerim
 double precision :: hpr                  ! hoogte   in profiel
@@ -50,7 +51,7 @@ endif
 area  = hp*br
 width = br
 perim = 2d0*hp + br
-if (hpr >= hr .and. closed) then
+if (hpr >= hr .and. closed .and. newculverts) then
    perim = perim+br
 end if
 
