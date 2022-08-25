@@ -724,8 +724,7 @@ subroutine readMDUFile(filename, istat)
     use m_sediment
     use m_waves, only: hwavuni, twavuni, phiwavuni
     use m_sedtrails_data, only: sedtrails_analysis
-
-
+    use unstruc_display,  only: jaGUI 
 
     character(*), intent(in)  :: filename !< Name of file to be read (the MDU file must be in current working directory).
     integer,      intent(out) :: istat    !< Return status (0=success)
@@ -1109,10 +1108,14 @@ subroutine readMDUFile(filename, istat)
     call prop_get_integer(md_ptr, 'numerics', 'Logprofkepsbndin'  , jaLogprofkepsbndin )
 
     call prop_get_double( md_ptr, 'numerics', 'Slopedrop2D'  , Slopedrop2D)
-    call prop_get_logical(md_ptr, 'numerics', 'Drop1D'      , Drop1D)
+    call prop_get_logical(md_ptr, 'numerics', 'Drop1D'       , Drop1D)
     call prop_get_double( md_ptr, 'numerics', 'Drop3D'       , Drop3D)
     call prop_get_integer(md_ptr, 'numerics', 'Lincontin'    , lincontin)
     call prop_get_double (md_ptr, 'numerics', 'Chkadvd'      , chkadvd)
+
+ !   call prop_get_integer(md_ptr, 'numerics', 'Linkdriedmx'  , Linkdriedmx)
+ !   call prop_get_double (md_ptr, 'numerics', 'Huweirregular', Huweirregular) 
+
     call prop_get_double (md_ptr, 'numerics', 'Chkdifd'      , chkdifd)
     call prop_get_double (md_ptr, 'numerics', 'Zwsbtol'      , zwsbtol)
     call prop_get_double (md_ptr, 'numerics', 'Trsh_u1Lb'    , Trsh_u1Lb)
@@ -1438,7 +1441,7 @@ subroutine readMDUFile(filename, istat)
        Wdb(3) = max(Wdb(3), Wdb(2) + .1d0)
     else if (Icdtyp == 4) then
        call prop_get_doubles(md_ptr, 'wind', 'Cdbreakpoints'          , Cdb, 1)
-    else if (Icdtyp == 7) then
+    else if (Icdtyp == 7 .or. Icdtyp == 8) then
        call prop_get_doubles(md_ptr, 'wind', 'Cdbreakpoints'          , Cdb, 2)
     endif
     call prop_get_double    (md_ptr, 'wind',  'Relativewind'          , relativewind)
@@ -2328,11 +2331,13 @@ subroutine readMDUFile(filename, istat)
    !   jarstbnd=1
    !endif
 
-   ! If obsolete entries are used in the mdu-file, return with that error code.
-   call final_check_of_mdu_keywords (md_ptr, ierror, prefix='While reading '''//trim(filename)//'''')
-   if (ierror /= DFM_NOERR) then
-      istat = ierror
-   end if
+   if (jagui == 0) then 
+      ! If obsolete entries are used in the mdu-file, return with that error code.
+      call final_check_of_mdu_keywords (md_ptr, ierror, prefix='While reading '''//trim(filename)//'''')
+      if (ierror /= DFM_NOERR) then
+         istat = ierror
+      end if
+   endif
 end subroutine readMDUFile
 
 !> helper routine to read the class boundaries
@@ -2443,6 +2448,7 @@ end function isobsolete
 subroutine final_check_of_mdu_keywords(md_tree, istat, prefix)
    use MessageHandling
    use dfm_error
+   
    implicit none
    type (TREE_DATA), pointer      :: md_tree           !< MDU-tree
    integer, intent(out)           :: istat             !< Results status (DFM_NOERR if no ignored entries)
@@ -2543,7 +2549,7 @@ ch:do ichapter = 1, nchapter
    threshold_abort = threshold_abort_current
 
    if (num_obsolete > 0) then
-      ! this is a fatal error that we want to stop at.
+      ! this is a fatal error that we want to stop at. 
       call mess(LEVEL_ERROR, prefix//': Old unsupported keywords used: Check Section "Overview of deprecated and removed keywords" in the User Manual for information on how to update the input file.')
       istat = DFM_WRONGINPUT
    end if
@@ -3057,6 +3063,14 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
        call prop_set(prop_ptr, 'numerics', 'Chkadvd'  , Chkadvd, 'Check advection terms if depth < chkadvdp, => less setbacks')
     endif
 
+   ! if (writeall .or. Linkdriedmx .ne. 0) then
+   !    call prop_set(prop_ptr, 'numerics', 'Linkdriedmx'    , Linkdriedmx, 'Nr of Au reduction steps after having dried')
+   ! endif
+
+   ! if (writeall .or. Huweirregular .ne. 0d0) then
+   !    call prop_set(prop_ptr, 'numerics', 'Huweirregular'  , Huweirregular, 'For villemonte and Tabellenboek, regular hu below Huweirregular')
+   ! endif
+
     if ( writeall .or. Chkdifd .ne. 0.01d0 .and. jatransportautotimestepdiff == 1) then
        call prop_set(prop_ptr, 'numerics', 'Chkdifd'  , Chkdifd, 'Check diffusion terms if depth < chkdifd, only if jatransportautotimestepdiff==1')
     endif
@@ -3413,15 +3427,17 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
        endif
     endif
 
-    call prop_set(prop_ptr,    'wind', 'ICdtyp',               ICdtyp,   'Wind drag coefficient type (1=Const; 2=Smith&Banke (2 pts); 3=S&B (3 pts); 4=Charnock 1955, 5=Hwang 2005, 6=Wuest 2005, 7=Hersbach 2010 (2 pts)' )
-    if (ICdtyp == 1 .or. ICdtyp == 4) then
-       call prop_set(prop_ptr, 'wind', 'Cdbreakpoints',        Cdb(1:1), 'Wind drag coefficient break points')
-    else if (ICdtyp == 2 .or. ICdtyp == 7) then
+    call prop_set(prop_ptr,    'wind', 'ICdtyp',               ICdtyp,   'Wind drag coefficient type (1=Const; 2=Smith&Banke (2 pts); 3=S&B (3 pts); 4=Charnock 1955, 5=Hwang 2005, 6=Wuest 2005, 7=Hersbach 2010 (2 pts), 8=4+viscous' )
+    if (ICdtyp == 1 .or. ICdtyp == 4 .or. ICdtyp == 5 .or. ICdtyp == 6) then
+       call prop_set(prop_ptr, 'wind', 'Cdbreakpoints',        Cdb(1:1), 'Wind drag coefficient ')
+    else if (ICdtyp == 2) then
        call prop_set(prop_ptr, 'wind', 'Cdbreakpoints',        Cdb(1:2), 'Wind drag coefficient break points')
        call prop_set(prop_ptr, 'wind', 'Windspeedbreakpoints', Wdb(1:2), 'Wind speed break points (m/s)')
     else if (ICdtyp == 3) then
        call prop_set(prop_ptr, 'wind', 'Cdbreakpoints',        Cdb(1:3), 'Wind drag coefficient break points')
        call prop_set(prop_ptr, 'wind', 'Windspeedbreakpoints', Wdb(1:3), 'Wind speed break points (m/s)')
+   else 
+       call prop_set(prop_ptr, 'wind', 'Cdbreakpoints',        Cdb(1:2), 'Wind drag coefficients')
     endif
     if (writeall .or. relativewind > 0d0) then
        call prop_set(prop_ptr,    'wind', 'Relativewind',      relativewind,   'Wind speed relative to top-layer water speed*relativewind, 0d0=no relative wind, 1d0=using full top layer spreed)')
