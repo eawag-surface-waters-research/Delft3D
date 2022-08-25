@@ -3,7 +3,7 @@ subroutine restart_trim_flow(lundia    ,error     ,restid1   ,lturi     ,mmax   
                            & s1        ,u1        ,v1        ,r1        ,rtur1     , &
                            & umnldf    ,vmnldf    ,kfu       ,kfv       , &
                            & dp        ,ex_nfs    ,namcon    ,coninit   ,rdum      , &
-                           & gdp       )
+                           & idum      ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2022.                                
@@ -83,6 +83,7 @@ subroutine restart_trim_flow(lundia    ,error     ,restid1   ,lturi     ,mmax   
 !
 ! Global variables
 !
+    integer                                                                    , intent(in)  :: idum    !< value used for initialization of integer arrays
     integer                                                                    , intent(in)  :: kmax
     integer                                                                    , intent(in)  :: lstsci
     integer                                                                    , intent(in)  :: ltur
@@ -95,7 +96,7 @@ subroutine restart_trim_flow(lundia    ,error     ,restid1   ,lturi     ,mmax   
     integer, dimension(lstsci)                                                               :: coninit ! Flag=1 if constituent is initialized, all 0 upon entry
     logical                                                                                  :: error
     logical                                                                                  :: ex_nfs  ! Flag indicating whether Nefis restart files exist
-    real(fp)                                                                   , intent(in)  :: rdum    !< value used for initialization of array
+    real(fp)                                                                   , intent(in)  :: rdum    !< value used for initialization of real arrays
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              , intent(out) :: dp
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              , intent(out) :: s1
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              , intent(out) :: umnldf
@@ -604,11 +605,11 @@ subroutine restart_trim_flow(lundia    ,error     ,restid1   ,lturi     ,mmax   
     !
     call rdarray_nm(fds, filename, filetype, grnam3, i_restart, &
                  & nf, nl, mf, ml, iarrc, gdp, &
-                 & ierror, lundia, kfu, 'KFU', 0)
+                 & ierror, lundia, kfu, 'KFU', idum)
     if (ierror /= 0) goto 9999
     call rdarray_nm(fds, filename, filetype, grnam3, i_restart, &
                  & nf, nl, mf, ml, iarrc, gdp, &
-                 & ierror, lundia, kfv, 'KFV', 0)
+                 & ierror, lundia, kfv, 'KFV', idum)
     if (ierror /= 0) goto 9999
     !
     ! Constituents sal, temp, constituents

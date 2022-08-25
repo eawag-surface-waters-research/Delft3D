@@ -95,6 +95,7 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
 !
     integer                                              :: ftype   ! File type FTYPE_UNFORM32 or FTYPE_UNFORM64
     integer                                              :: idate
+    integer                                              :: idum    !< value used for initialization of integer arrays
     integer                                              :: ierror
     integer                                              :: iprec
     integer                                              :: iocond  ! IO status for reading 
@@ -114,7 +115,7 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
     character(256)                                       :: filpath ! Path specification of restid
     integer                                              :: nm_pos ! indicating the array to be exchanged has nm index at the 2nd place, e.g., dbodsd(lsedtot,nm)
     real(fp), dimension(:,:,:), pointer                  :: rst_rtur1
-    real(fp)                                             :: rdum    !< value used for initialization of array
+    real(fp)                                             :: rdum    !< value used for initialization of real arrays
 !
 !! executable statements -------------------------------------------------------
 !
@@ -143,7 +144,9 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
     ! using an extreme number such that it's still clear if these array
     ! entries used.
     !
+    idum = -9999999
     rdum = -9999999.0_fp
+    !
     ! this fill value is now used inside the rdarray_nm calls
     !
     ! test file existence, first 'tri-rst.<restid>.idate.itime'
@@ -181,7 +184,7 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
                                & s1        ,u1        ,v1        ,r1        ,rtur1     , &
                                & umnldf    ,vmnldf    ,kfu       ,kfv       , &
                                & dp        ,ex_nfs    ,namcon    ,coninit   ,rdum      , &
-                               & gdp       )
+                               & idum      ,gdp       )
           if (error .and. .not.ex_nfs) then
              call prterr(lundia    ,'G004'    , &
                  & 'tri-rst.' // trim(restid0) // trim(datetime) // ', tri-rst.' // trim(restid0) // &
