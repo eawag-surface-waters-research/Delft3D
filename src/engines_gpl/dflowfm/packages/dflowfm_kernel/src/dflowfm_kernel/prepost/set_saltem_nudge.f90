@@ -39,10 +39,12 @@
       use m_missing
       implicit none
 
-      integer :: k, kk, KB, KT
+      integer :: k, kk, KB, KT, keepzlayeringatbedorg 
 
+      keepzlayeringatbedorg = keepzlayeringatbed  
       if (layertype == 2 .and. keepzlayeringatbed .ne. 1 .and. jabaroczlaybed == 1) then 
-          call  keepzlayering()
+          keepzlayeringatbed = 1
+          call  setkbotktop(0)
       endif
 
       do kk=1,Ndx
@@ -65,7 +67,8 @@
       end do
 
       if (layertype == 2 .and. keepzlayeringatbed .ne. 1 .and. jabaroczlaybed == 1) then 
-          call  setkbotktop(1)
+          keepzlayeringatbed = keepzlayeringatbedorg 
+          call  setkbotktop(0)
       endif
 
    end subroutine set_saltem_nudge
