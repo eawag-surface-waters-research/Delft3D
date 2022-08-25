@@ -281,7 +281,7 @@
       if (lnancheck) then
 !        Check for NANs in the concentration array
          lunout = lun(19)
-         lnonans = nan_check(conc, 'conc(notot, noseg)', lunout)
+         lnonans = nan_check(conc, 'conc(notot, noseg)', lunout, 1, 1)
          if ( .not. lnonans ) then
             write(lunout,'(/A)')  '  ERROR : NAN found the concentration array, ending calculation.'
             write(*     ,'(/A)')  '  ERROR : NAN found the concentration array, ending calculation. See location in mon-file.'
