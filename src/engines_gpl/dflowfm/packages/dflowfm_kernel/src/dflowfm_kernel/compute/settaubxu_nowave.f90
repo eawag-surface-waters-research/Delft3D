@@ -54,7 +54,7 @@
          umod = hypot(u1(Lb),v(Lb))
          z0urou(L) = hu(L)*exp(-1d0 - vonkar*cz/sag)         ! getczz0
          if (kmx>0) then
-            rz = hu(Lb)/ee/z0urou(L)                         ! cz/sag, jaustarint=1, compatible with getustbcfuhi
+            rz = max(hu(Lb),epshu)/ee/z0urou(L)              ! cz/sag, jaustarint=1, compatible with getustbcfuhi
          else                                                ! previous version had hu(Lb)/2, which is jaustarint=0
             rz = hu(L)/ee/z0urou(L)
          endif
