@@ -349,7 +349,7 @@ c     write(*,'('' SO FAR SO GOOD'
 c======================================================================
       SUBROUTINE GTALAT (FDS)
 
-      INTEGER FDS(*)
+      INTEGER FDS
 
       CHARACTER ATTNAM*16
      +         ,GRPNAM*16
