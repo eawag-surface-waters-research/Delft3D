@@ -295,7 +295,7 @@ endif
 
    pctprogress = 100.0 * (real(itime,4) - real(itstrtp,4)) / (real(itstopp,4) - real(itstrtp,4)) ! percentage progress
 
-   write ( lunpr, 1020) itime  /86400, mod(itime  , 86400)/3600, mod(itime  , 3600)/60, mod(itime  , 60),  &
+   write ( *,     1020) itime  /86400, mod(itime  , 86400)/3600, mod(itime  , 3600)/60, mod(itime  , 60),  &
                         itstopp/86400, mod(itstopp, 86400)/3600, mod(itstopp, 3600)/60, mod(itstopp, 60),  &
                         pctprogress, nopart, npmax
    write ( lunpr, 1020) itime  /86400, mod(itime  , 86400)/3600, mod(itime  , 3600)/60, mod(itime  , 60),  &
