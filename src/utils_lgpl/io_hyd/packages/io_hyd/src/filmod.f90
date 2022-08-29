@@ -81,15 +81,16 @@
       type(t_dlwqfile)                       :: dlwqfile               ! the file to be opened
 
       integer                                :: io_error               ! error indicator
+      character(len=120)                     :: io_msg                 ! error message
       integer                                :: lunrep                 ! unit number report file
 
       if ( dlwqfile%status .eq. 0 ) then
          if ( dlwqfile%type .eq. FT_ASC ) then
-            open(newunit=dlwqfile%unit_nr,file=dlwqfile%name,iostat=io_error)
+            open(newunit=dlwqfile%unit_nr,file=dlwqfile%name,iostat=io_error,iomsg=io_msg)
          elseif ( dlwqfile%type .eq. FT_BIN ) then
-            open(newunit=dlwqfile%unit_nr,file=dlwqfile%name,access='STREAM',iostat=io_error)
+            open(newunit=dlwqfile%unit_nr,file=dlwqfile%name,access='STREAM',iostat=io_error,iomsg=io_msg)
          elseif ( dlwqfile%type .eq. FT_UNF ) then
-            open(newunit=dlwqfile%unit_nr,file=dlwqfile%name,form='UNFORMATTED',iostat=io_error)
+            open(newunit=dlwqfile%unit_nr,file=dlwqfile%name,form='UNFORMATTED',iostat=io_error,iomsg=io_msg)
          else
             call getmlu(lunrep)
             write(*,*) 'ERROR opening file:',trim(dlwqfile%name)
@@ -102,6 +103,8 @@
             call getmlu(lunrep)
             write(*,*) 'ERROR opening file:',trim(dlwqfile%name)
             write(lunrep,*) 'ERROR opening file:',trim(dlwqfile%name)
+            write(*,*) 'ERROR message: ', trim(io_msg)
+            write(lunrep,*) 'ERROR message: ', trim(io_msg)
             call srstop(1)
          endif
          dlwqfile%status = 1
