@@ -153,7 +153,7 @@ contains
    filename = trim(culvertprefix)//filename
    dirindex = scan(structurefile, '\/', back = .true. )
    if (dirindex /= 0) then !the filename has a directory preceding it
-    structurefile = structurefile(dirindex+1:len(structurefile))
+    structures_output = structurefile(dirindex+1:len(structurefile))
    endif
    
    allocate(character(maxlen)::line)
@@ -353,8 +353,8 @@ contains
    call newfil(mout,filename)
    crsdef_output = filename
    call prop_write_inifile(mout, prop_ptr, ierr)
-   call newfil(mout,trim(culvertprefix)//structurefile)
-   structures_output = trim(culvertprefix)//structurefile
+   call newfil(mout,trim(culvertprefix)//structures_output)
+   structures_output = trim(culvertprefix)//structures_output
    call prop_write_inifile(mout, strs_ptr, ierr)
    call tree_destroy(strs_ptr)
    call tree_destroy(prop_ptr)
