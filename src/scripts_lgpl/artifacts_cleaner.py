@@ -194,7 +194,6 @@ def dimrsetRemove():
         'GPLv2.txt'
         ]
     removeDirs = [
-        'x64/dpart',
         'lnx64/share/doc',
         'lnx64/share/man'
         ]
