@@ -33,18 +33,26 @@
    !> fill initial salinity and temperature with nudge variables
    subroutine set_saltem_nudge()
       use m_flowgeom
-      use m_flow, only: sa1, tem1, kmxn, layertype, keepzlayeringatbed, jabaroczlaybed
+      use m_flow, only: sa1, tem1, kmxn, layertype, keepzlayeringatbed, jabaroczlaybed, zws, zslay
       use m_transport
       use m_nudge
       use m_missing
       implicit none
 
-      integer :: k, kk, KB, KT, keepzlayeringatbedorg 
+      integer :: k, kk, KB, KT, nlayb, nrlay 
 
-      keepzlayeringatbedorg = keepzlayeringatbed  
       if (layertype == 2 .and. keepzlayeringatbed .ne. 1 .and. jabaroczlaybed == 1) then 
-          keepzlayeringatbed = 1
-          call  setkbotktop(0)
+          do kk = 1,ndx
+             call getkbotktop(kk,kb,kt)
+             call getzlayerindices(kk,nlayb,nrlay)
+             if (keepzlayeringatbed >= 0) then
+                zws(kb-1) = zslay(nlayb-1,1)
+                zws(kb  ) = zslay(nlayb  ,1)
+             endif 
+             if (kt > kb .and. keepzlayeringatbed >= 2) then
+                zws(kb+1) = zslay(nlayb+1,1)
+             endif
+         enddo
       endif
 
       do kk=1,Ndx
@@ -67,7 +75,6 @@
       end do
 
       if (layertype == 2 .and. keepzlayeringatbed .ne. 1 .and. jabaroczlaybed == 1) then 
-          keepzlayeringatbed = keepzlayeringatbedorg 
           call  setkbotktop(0)
       endif
 
