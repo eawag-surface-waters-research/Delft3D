@@ -163,7 +163,6 @@ def dimrsetRemove():
         'nc-config',
         'd_hydro',
         'datsel',
-        'delpar',
         'esm_create',
         'esm_delete',
         'esm_info',
