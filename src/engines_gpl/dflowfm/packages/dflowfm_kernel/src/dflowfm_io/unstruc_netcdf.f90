@@ -3997,7 +3997,7 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
         call gettaus(2,1)
     endif
     !
-    if (jawave>0) then  
+    if (jawave>0 .and. .not. flowWithoutWaves) then  
        call gettauswave(jawaveswartdelwaq)
     endif   
     !
@@ -7132,7 +7132,7 @@ if (jamapsed > 0 .and. jased > 0 .and. stm_included) then
    !     + taus depends on jawaveswartdelwaq; 
    !     + taus derived from taubxu (jawaveswartdelwaq==2) calculated in getustbcfuhi (3D), in 2D in tauwave().
    !  * for swan etc (jawave>2): 
-   !     + taus for output are calculated in gettauswave(), based on jawaceswartdelwaq:
+   !     + taus for output are calculated in gettauswave(), based on jawaveswartdelwaq:
    !        * 0: taus based on soulsby wave-current formulas taubu's
    !        * 1: taus linear sum like gettau2
    !        * 2: taus = sedtra%taub if sediment included, otherwise based on taubxu from wave shear stress subroutines
@@ -7160,7 +7160,7 @@ if (jamapsed > 0 .and. jased > 0 .and. stm_included) then
          call gettaus(2,1)       ! Only update czs
       end if
       
-      if (jawave>0) then
+      if (jawave>0 .and. .not. flowWithoutWaves) then
          call gettauswave(jawaveswartdelwaq)
       endif   
    end if
@@ -9200,7 +9200,7 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
           elseif (jamapchezy > 0) then
              call gettaus(2,1)       ! Only update czs 
           endif
-          if (jawave>0) then
+          if (jawave>0 .and. .not. flowWithoutWaves) then
              call gettauswave(jawaveswartdelwaq)
           endif
        endif

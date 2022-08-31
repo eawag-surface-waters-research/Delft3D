@@ -1428,7 +1428,7 @@ end subroutine setfoustandardname
        case ('r1')
           fieldptr => constituents(gdfourier%fconno(ifou),:)
        case ('ta')
-            if (jawave==0) then  
+            if (jawave==0 .or. flowWithoutWaves) then  
                 call gettaus(1,1)
              else
                 call gettauswave(jawaveswartdelwaq)

@@ -1808,7 +1808,7 @@ subroutine waq_wri_couple_files(time)
    end if
 
    ! Taus file (contains taus at the bottom of computational cells)
-   if (jawave == 0) then   ! If jawave > 0, then taus is obtained from subroutine tauwave (taus = taucur + tauwave).
+   if (jawave==0 .or. flowWithoutWaves) then   ! If jawave > 0, then taus is obtained from subroutine tauwave (taus = taucur + tauwave).
       call gettaus(1,2)
    else
       call gettauswave(jawaveswartdelwaq)

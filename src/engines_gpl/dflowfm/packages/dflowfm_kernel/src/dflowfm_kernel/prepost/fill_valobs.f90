@@ -81,7 +81,7 @@ subroutine fill_valobs()
    
    call getucxucyeulmag(ndkx, ueux, ueuy, ucmag, jaeulervel, jahisvelocity)
    if (jahistaucurrent>0) then
-      if (jawave==0) then
+      if (jawave==0 .or. flowWithoutWaves) then
          ! fill taus
          call gettaus(1,1)
 

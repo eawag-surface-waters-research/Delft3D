@@ -84,7 +84,7 @@ subroutine update_integralstats()
       return
    end if
 
-   if (jawave==0) then   
+   if (jawave==0 .or. flowWithoutWaves) then   
       call gettaus(1,1)
    else
       call gettauswave(jawaveswartdelwaq)

@@ -1399,8 +1399,8 @@
       
       if (isftau.gt.0) then
          ipoitau  = arrpoi(iisfun) + (isftau-1)*noseg
-         if (jawave==0) then
-            call gettaus(1,1)
+         if (jawave==0 .or. flowWithoutWaves) then
+            call gettaus(1,2)
          else
             call gettauswave(jawaveswartdelwaq)
          endif   
