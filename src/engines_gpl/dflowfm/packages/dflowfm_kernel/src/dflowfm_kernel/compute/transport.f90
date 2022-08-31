@@ -70,17 +70,11 @@ subroutine transport()                           ! transport for now, advect sal
 
  integer                        :: LL, Lb, Lt, kt, km, ivert, ja, m, LL1, LL2, jachange
 
- double precision               :: sedku(mxgr)           !< upper slope sed value                   , dimension = mxgr
  double precision               :: flx  (mxgr)           !< sed erosion flux (kg/s)                 , dimension = mxgr
  double precision               :: seq  (mxgr)           !< sed equilibrium transport rate (kg/m/s) , dimension = mxgr
  double precision               :: wse  (mxgr)           !< effective fall velocity (m/s)           , dimension = mxgr, ws*crefa=wse*seq
 
-
  double precision               :: cpuorg(3), cpunew(3), adv, adv1, hordif, qsk, qsa
-
- double precision               ::  a(kmxx), b(kmxx), c(kmxx), d(kmxx), e(kmxx)
- double precision               :: ta(kmxx),tb(kmxx),tc(kmxx),td(kmxx),te(kmxx)
- double precision               :: sa(kmxx),sb(kmxx),sc(kmxx),sd(kmxx),se(kmxx)
 
  double precision               :: samiobnd, samerr2, dsadn
 
