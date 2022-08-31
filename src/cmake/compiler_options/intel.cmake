@@ -25,6 +25,13 @@ if (WIN32)
     set(generate_reentrancy_threaded_flag /reentrancy:threaded)
     set(floating_point_exception_flag /fpe:0)
     set(traceback_flag /traceback)
+    
+    # To prevent Visual Studio compilation failures when trying to write the manifest file
+    # to a blocked .exe
+    set(CMAKE_EXE_LINKER_FLAGS    "${CMAKE_EXE_LINKER_FLAGS} /MANIFEST:NO")
+    set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} /MANIFEST:NO")
+    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /MANIFEST:NO")
+
 endif(WIN32)
 
 if (UNIX)
