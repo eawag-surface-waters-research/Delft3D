@@ -62,7 +62,7 @@ subroutine transport()                           ! transport for now, advect sal
 
  double precision               :: ucxku, ucyku, s1ku, sl1, sl2, sl3, fi, qb, wsemx, dgrlay, dtvi, hsk, xx,yy,dmorfax, dv, aa
 
- double precision, allocatable, save  :: dsq(:), pp(:), pm(:), qp(:), qm(:), alf(:) ! todo kuzmin limiting jalim2D==1
+ ! kuzmin 2D limiting 
 
  double precision, external     :: dslim, setrho, dlimitercentral
 
