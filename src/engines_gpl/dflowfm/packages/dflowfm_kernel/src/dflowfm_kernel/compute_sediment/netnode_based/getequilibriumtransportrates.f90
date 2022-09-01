@@ -53,7 +53,7 @@
  double precision :: qsseq,garciaeinstein, effic, bav, caver, botsu, qsseqcheck, eincheck, eincheck2
  double precision :: qssevr84 ,vr84rel, deltaa, seqbed
  double precision :: blmax, hpr,dzz,wu2,wid,ar,hyr, zbu
- double precision :: erodable, sumlay, hseqb, aa , dmorfacL, dh, ustar2swart, ustw2, astar, fw, qeng, cf, wa, z0w
+ double precision :: erodable, sumlay, hseqb, aa , dmorfacL, dh, ustar2swart, ustw2, astar, fw, qeng, cf, wa, z00
  integer          :: j, kj, n, k, kg, nn, n1, L, LL,  jabanhydrad = 0, kb
 
  integer :: ndraw
@@ -152,22 +152,23 @@
        uwave = uorb(k)                                             ! (m/s) for jased == 2, tauwav contains uorb
        do nn = 1,nd(k)%lnx
           LL = abs( nd(n)%ln(nn) )
-          if (hu(LL) > 0) then
+          if (hu(LL) > 0d0) then
              ar  = au(LL)*dx(LL)
              wa  = wa + ar       ! area  weigthed
-             z0w = z0w + z0urou(LL)*ar
+             z00 = z00 + ar*hu(LL)*exp(-1d0 - vonkar*cz/sag)   ! z0ucur, to avoid double counting
           endif
        enddo
        if (wa > 0) then
-          z0w = z0w / wa
+          z00 = z00 / wa
        endif
+       z00 = max(z00,1d-5)
 
        beta  = ucur   / ( ucur + uwave )                           ! ( )
 
        Ueff  = Ucur   +    0.4d0*uwave                             ! (m/s) SvR 2007
 
        if (MxgrKrone > 0) then
-          call Swart(Twave, uwave, z0w, fw, ustw2)
+          call Swart(Twave, uwave, z00, fw, ustw2)
           ustar2swart = ustar2swart + ustw2                        ! Swart
        endif
 
