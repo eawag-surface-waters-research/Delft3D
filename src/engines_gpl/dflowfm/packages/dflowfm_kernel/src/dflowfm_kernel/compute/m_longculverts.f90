@@ -154,6 +154,8 @@ contains
    dirindex = scan(structurefile, '\/', back = .true. )
    if (dirindex /= 0) then !the filename has a directory preceding it
     structures_output = structurefile(dirindex+1:len(structurefile))
+   else
+     structures_output = structurefile
    endif
    
    allocate(character(maxlen)::line)
