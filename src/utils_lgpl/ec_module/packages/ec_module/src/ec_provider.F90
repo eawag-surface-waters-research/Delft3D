@@ -374,6 +374,8 @@ module m_ec_provider
                            "windxy", "stressxy", "windx", "windy", "stressx", "stressy",  &
                            "nudge_salinity_temperature",                                  &
                            "airpressure","atmosphericpressure",                           &
+                           "airtemperature", "humidity", "cloudiness",                    &
+                           "wind_speed", "wind_from_direction",                           &
                            "humidity_airtemperature_cloudiness",                          &
                            "humidity_airtemperature_cloudiness_solarradiation",           &
                            "dewpoint_airtemperature_cloudiness",                          &
@@ -2547,6 +2549,18 @@ module m_ec_provider
             ncstdnames(3) = 'northward_wind'
             ncvarnames(4) = 'c'                              ! space varying Charnock coefficients
             ncstdnames(4) = 'charnock'
+         case ('airtemperature')
+            ncvarnames(1) = 't2m'                            ! 2-meter air temperature
+            ncstdnames(1) = 'air_temperature'
+         case ('cloudiness')
+            ncvarnames(3) = 'tcc'                            ! cloud cover (fraction)
+            ncstdnames(3) = 'cloud_area_fraction'
+         case ('humidity')
+            ncstdnames(1) = 'humidity'
+         case ('wind_speed')
+            ncstdnames(1) = 'wind_speed'
+         case ('wind_from_direction')
+            ncstdnames(1) = 'wind_from_direction'
          case ('dewpoint_airtemperature_cloudiness')
             ncvarnames(1) = 'd2m'                            ! dew-point temperature
             ncstdnames(1) = 'dew_point_temperature'
@@ -2718,6 +2732,9 @@ module m_ec_provider
                      endif 
                   endif 
                end if
+            else
+               call setECMessage("coordsystem is not set for EC instance")
+               return
             end if
 
             tgd_id = z_varid
