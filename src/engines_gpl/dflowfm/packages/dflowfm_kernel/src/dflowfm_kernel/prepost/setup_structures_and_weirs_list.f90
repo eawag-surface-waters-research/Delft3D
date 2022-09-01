@@ -82,6 +82,11 @@ subroutine setup_structures_and_weirs_list()
    
    do istru = 1, network%sts%count
       pstru => network%sts%struct(istru)
+      if (pstru%type ==ST_PUMP) then
+         ! skip pump structures
+         cycle
+      endif
+      
       do L0 = 1, pstru%numlinks
          L  = iabs(pstru%linknumbers(L0))
          numberOfStructuresAndWeirs = numberOfStructuresAndWeirs + 1
