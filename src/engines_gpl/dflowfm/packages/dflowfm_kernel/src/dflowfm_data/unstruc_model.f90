@@ -1056,7 +1056,6 @@ subroutine readMDUFile(filename, istat)
     call prop_get_integer(md_ptr, 'numerics', 'Vertadvtypsal'   , javasal)
 
     call prop_get_integer(md_ptr, 'numerics', 'Vertadvtyptem'   , javatem)
-    call prop_get_integer(md_ptr, 'numerics', 'Vertadvtypsed'   , javased)
     call prop_get_integer(md_ptr, 'numerics', 'Vertadvtypmom', javau)
     call prop_get_integer(md_ptr, 'numerics', 'Vertadvtypmom3onbnd', javau3onbnd)
 
@@ -2950,7 +2949,6 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
   
     call prop_set(prop_ptr, 'numerics', 'Vertadvtypsal', Javasal,   'Vertical advection type for salinity (0: none, 1: upwind explicit, 2: central explicit, 3: upwind implicit, 4: central implicit, 5: central implicit but upwind for neg. stratif., 6: higher order explicit, no Forester)')
     call prop_set(prop_ptr, 'numerics', 'Vertadvtyptem', Javatem,   'Vertical advection type for temperature (0: none, 1: upwind explicit, 2: central explicit, 3: upwind implicit, 4: central implicit, 5: central implicit but upwind for neg. stratif., 6: higher order explicit, no Forester)')
-    call prop_set(prop_ptr, 'numerics', 'Vertadvtypsed', Javased,   'Vertical advection type for sediment (0: none, 1: upwind explicit, 2: central explicit, 3: upwind implicit, 4: central implicit, 5: central implicit but upwind for neg. stratif., 6: higher order explicit, no Forester)')
     call prop_set(prop_ptr, 'numerics', 'Vertadvtypmom', javau, 'Vertical advection type for u1: 0: No, 3: Upwind implicit, 4: Central implicit, 5: QUICKEST implicit., 6: centerbased upwind expl, 7=6 HO' )
     if (writeall .or. javau3onbnd .ne. 0) then
       call prop_set(prop_ptr, 'numerics', 'Vertadvtypmom3onbnd', javau3onbnd, 'vert. adv. u1 bnd UpwimpL: 0=follow javau , 1 = on bnd, 2= on and near bnd' )
