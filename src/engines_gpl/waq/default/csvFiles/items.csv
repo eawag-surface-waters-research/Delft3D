@@ -2175,7 +2175,7 @@ itemid,itemse,itemex,itemde,itemun,itemnm,itemag,itemda,itemwk,itemgr
 "dMinPON3  ","x"," ",   -999.000    ,"(gN/m3/d)           ","mineralization flux PON3 to NH4                   ","volume    ","volume    "," ","                              "
 "dMinPOP3  ","x"," ",   -999.000    ,"(gP/m3/d)           ","mineralization flux POP3 to PO4                   ","volume    ","volume    "," ","                              "
 "dMinPOS3  ","x"," ",   -999.000    ,"(gS/m3/d)           ","mineralization flux POS3 to SUD                   ","volume    ","volume    "," ","                              "
-"f_minPOC4 ","x"," ",    0.00000    ,"(gC/m3/d            ","mineralization flux POC4                          ","volume    ","volume    "," ","                              "
+"f_minPOC4 ","x"," ",    0.00000    ,"(gC/m3/d)           ","mineralization flux POC4                          ","volume    ","volume    "," ","                              "
 "dMinPOC4G ","x"," ",   -999.000    ,"(gC/m3/d)           ","mineralization flux POC4 to CO2                   ","volume    ","volume    "," ","                              "
 "dMinPON4  ","x"," ",   -999.000    ,"(gN/m3/d)           ","mineralization flux PON4 to NH4                   ","volume    ","volume    "," ","                              "
 "dMinPOP4  ","x"," ",   -999.000    ,"(gP/m3/d)           ","mineralization flux POP4 to PO4                   ","volume    ","volume    "," ","                              "
