@@ -335,7 +335,7 @@
  
  if ( newculverts) then
   ! find the 1d2d flowlinks required for longculvertsToProfs
-  do i  = 1, nlongculvertsg
+  do i  = 1, nlongculverts
     numcoords = size(longculverts(i)%xcoords)
     !if (numcoords > 2) then
     call find1d2dculvertlinks(network,longculverts(i), numcoords)

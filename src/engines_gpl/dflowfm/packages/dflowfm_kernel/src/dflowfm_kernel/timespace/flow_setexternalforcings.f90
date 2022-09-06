@@ -509,7 +509,7 @@ subroutine flow_setexternalforcings(tim, l_initPhase, iresult)
       success = success .and. ec_gettimespacevalue(ecInstancePtr, item_general_structure_gateOpeningWidth, irefdate, tzone, tunit, tim)
    endif
 
-   if (nlongculvertsg > 0) then
+   if (nlongculverts > 0) then
       success = success .and. ec_gettimespacevalue(ecInstancePtr, item_longculvert_valve_relative_opening, irefdate, tzone, tunit, tim)
    endif
 

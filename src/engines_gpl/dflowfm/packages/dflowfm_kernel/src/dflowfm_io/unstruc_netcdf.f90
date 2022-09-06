@@ -2912,6 +2912,7 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
     use m_structures
     use m_1d_structures
     use m_GlobalParameters
+    use m_longculverts
     
     integer,           intent(in) :: irstfile
     real(kind=hp),     intent(in) :: tim
@@ -2930,6 +2931,7 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
         id_bndseddim,         &
         id_bnddim,            &
         id_culvertdim,        &
+        id_longculvertdim,    &
         id_genstrudim,        &
         id_genstru_furudim,   &
         id_genstru_linkdim,   &
@@ -2954,7 +2956,7 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
         id_flowelemxbnd, id_flowelemybnd, id_bl, id_s0bnd, id_s1bnd, id_blbnd, &
         id_unorma, id_vicwwu, id_tureps1, id_turkin1, id_qw, id_qa, id_squ, id_sqi, &
         id_jmax, id_flowelemcrsz, id_ncrs, id_morft, id_morCrsName, id_strlendim, &
-        id_culvert_openh, &
+        id_culvert_openh, id_longcul_valverelo, &
         id_genstru_crestl, id_genstru_edgel, id_genstru_openw, id_genstru_fu, id_genstru_ru, id_genstru_au, id_genstru_crestw, &
         id_genstru_area, id_genstru_linkw, id_genstru_state, id_genstru_sOnCrest,&
         id_weirgen_crestl, id_weirgen_crestw, id_weirgen_area, id_weirgen_linkw, id_weirgen_fu, id_weirgen_ru, id_weirgen_au, id_weirgen_state, id_weirgen_sOnCrest, &
@@ -3682,6 +3684,13 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
           ierr = nf90_def_var(irstfile, 'culvert_valve_opening_height', nf90_double, (/ id_culvertdim, id_timedim /), id_culvert_openh)
           ierr = nf90_put_att(irstfile, id_culvert_openh, 'long_name', 'Valve opening height of culvert')
           ierr = nf90_put_att(irstfile, id_culvert_openh, 'units', 'm')
+       end if
+
+       if (nlongculverts > 0) then ! write longculvert info.
+          ierr = nf90_def_dim(irstfile, 'nLongCulvert', nlongculverts, id_longculvertdim)
+          ierr = nf90_def_var(irstfile, 'longculvert_valve_relative_opening', nf90_double, (/ id_longculvertdim, id_timedim /), id_longcul_valverelo)
+          ierr = nf90_put_att(irstfile, id_longcul_valverelo, 'long_name', 'Relative valve opening of long culvert')
+          ierr = nf90_put_att(irstfile, id_longcul_valverelo, 'units', 'none')
        end if
 
        nlen = network%sts%numGeneralStructures
@@ -4435,6 +4444,10 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
        ! wrtie info. of culvert
        if (network%sts%numculverts > 0) then
           ierr = nf90_put_var(irstfile, id_culvert_openh, valculvert(11, 1:network%sts%numculverts), (/1, itim/), (/network%sts%numculverts, 1/))
+       end if
+
+       if (nlongculverts > 0) then
+          ierr = nf90_put_var(irstfile, id_longcul_valverelo, longculverts(1:nlongculverts)%valve_relative_opening, (/1, itim/), (/nlongculverts, 1/))
        end if
 
        ! write info. of general structure
@@ -16095,6 +16108,7 @@ subroutine read_structures_from_rst(ncid, filename, it_read)
    use m_1d_structures
    use m_General_Structure
    use m_flowexternalforcings
+   use m_longculverts
    implicit none
    integer,          intent(in   )   :: ncid        !< ID of the rst file
    character(len=*), intent(in   )   :: filename    !< Name of rst file.
@@ -16107,7 +16121,7 @@ subroutine read_structures_from_rst(ncid, filename, it_read)
    double precision,     allocatable :: tmpvar(:), tmpvar3d(:,:,:), tmpvar2d(:,:)
    integer,              allocatable :: tmpvar3di(:,:,:), tmpvar2di(:,:)
    integer :: strucDimErr, i, nLinks, nStru, ierr, iStru, nfuru, numlinks, strucVarErr, L, L0, nstages, maxNumStages
-   integer :: id_culvert_openh, &
+   integer :: id_culvert_openh, id_longcul_valverelo, &
                id_genstru_crestl, id_genstru_edgel, id_genstru_openw, id_genstru_fu, id_genstru_ru, id_genstru_au, id_genstru_crestw, id_genstru_area, id_genstru_linkw, id_genstru_state, id_genstru_sOnCrest,&
                id_weirgen_crestl, id_weirgen_crestw, id_weirgen_area, id_weirgen_linkw, id_weirgen_fu, id_weirgen_ru, id_weirgen_au, id_weirgen_state, id_weirgen_sOnCrest, &
                id_orifgen_crestl, id_orifgen_edgel, id_orifgen_openw, id_orifgen_fu, id_orifgen_ru, id_orifgen_au, id_orifgen_crestw, &
@@ -16123,6 +16137,22 @@ subroutine read_structures_from_rst(ncid, filename, it_read)
       !call mess(LEVEL_WARN, 'read_structures_from_rst: the network array is not loaded, then skip reading structures. The simulation will continue but the results may not be reliable.')
       return
    end if
+
+
+   if(nlongculverts > 0) then
+
+      call realloc(tmpvar, nlongculverts, stat=ierr, keepExisting=.false.)
+      ierr = nf90_inq_varid(ncid, 'longculvert_valve_relative_opening', id_longcul_valverelo)
+      ierr = nf90_get_var(ncid, id_longcul_valverelo, tmpvar, start=(/1, it_read/), count=(/nlongculverts, 1/))
+      call check_error(ierr, 'longculvert_valve_relative_opening", The simulation will continue but the results may not be reliable.', LEVEL_WARN)
+
+      if (ierr == 0) then
+         do i = 1, nlongculverts
+            longculverts(i)%valve_relative_opening = tmpvar(i)
+         end do
+      end if
+
+   endif
 
    ! Read info. of culverts
    nStru = network%sts%numCulverts

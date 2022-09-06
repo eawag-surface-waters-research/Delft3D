@@ -44,7 +44,7 @@
       use m_1d_structures
       use m_compound
       use m_GlobalParameters
-      use m_longculverts, only: nlongculvertsg, longculverts, newculverts
+      use m_longculverts, only: nlongculverts, longculverts, newculverts
       implicit none
       integer                       :: i, n, L, Lf, La, ierr, ntmp, k, ku, kd, istru, nlinks
       double precision              :: dir
@@ -60,7 +60,7 @@
                        + ngategen*NUMVALS_GATEGEN + nweirgen*NUMVALS_WEIRGEN + ngenstru*NUMVALS_GENSTRU + ngenstru*NUMVALS_GENSTRU &
                        + ndambreaksg * NUMVALS_DAMBREAK + network%sts%numUniWeirs*NUMVALS_UNIWEIR + network%sts%numOrifices*NUMVALS_ORIFGEN &
                        + network%sts%numCulverts*NUMVALS_CULVERT + network%sts%numBridges*NUMVALS_BRIDGE + network%cmps%count*NUMVALS_CMPSTRU &
-                       + nlongculvertsg*NUMVALS_LONGCULVERT
+                       + nlongculverts*NUMVALS_LONGCULVERT
             allocate ( reducebuf  ( nreducebuf ) , stat = ierr      )
             call aerr('reducebuf  ( nreducebuf )', ierr, nreducebuf ) ; reducebuf  = 0d0
          endif
@@ -545,7 +545,7 @@
       ! === Long culvert
       !
       if (allocated(vallongculvert)) then
-         do n = 1, nlongculvertsg
+         do n = 1, nlongculverts
             vallongculvert(1:NUMVALS_LONGCULVERT,n) = 0d0
             if (longculverts(n)%numlinks > 0) then ! This long culvert is valid on the current domain/subdomain
                ! Firstly we fill in the waterlevel at up- and down-stream points.
@@ -642,8 +642,8 @@
             call fill_reduce_buffer( valcmpstru, network%cmps%count*NUMVALS_CMPSTRU )
             n = 1
          endif
-         if(allocated(vallongculvert) .and. nlongculvertsg > 0) then
-            call fill_reduce_buffer( vallongculvert, nlongculvertsg*NUMVALS_LONGCULVERT )
+         if(allocated(vallongculvert) .and. nlongculverts > 0) then
+            call fill_reduce_buffer( vallongculvert, nlongculverts*NUMVALS_LONGCULVERT )
             n = 1
          endif
          if( n == 1 ) then
@@ -652,11 +652,11 @@
       end if
 
       ! === Long culvert
-      if (nlongculvertsg > 0 .and. allocated(vallongculvert)) then
+      if (nlongculverts > 0 .and. allocated(vallongculvert)) then
          if (jampi > 0) then
-            call subsitute_reduce_buffer( vallongculvert, nlongculvertsg*NUMVALS_LONGCULVERT )
+            call subsitute_reduce_buffer( vallongculvert, nlongculverts*NUMVALS_LONGCULVERT )
          end if
-         do n=1,nlongculvertsg
+         do n=1,nlongculverts
             call average_valstruct(vallongculvert(:,n), ST_LONGCULVERT, n, nlinks)
          end do
       end if

@@ -230,7 +230,7 @@ subroutine unc_write_his(tim)            ! wrihis
         maxlocT = max(size(valobs, 2), npumpsg, network%sts%numPumps, ngatesg, ncdamsg, ncgensg, ngategen, &
                       nweirgen, network%sts%numWeirs, ngenstru,  network%sts%numGeneralStructures, &
                       ndambreak, network%sts%numOrifices, network%sts%numBridges, network%sts%numculverts, &
-                      network%sts%numuniweirs, network%cmps%count, nlongculvertsg)
+                      network%sts%numuniweirs, network%cmps%count, nlongculverts)
         maxvalT = max(size(valobs, 1), NUMVALS_PUMP, NUMVALS_GATE, NUMVALS_CDAM, NUMVALS_CGEN, NUMVALS_GATEGEN, &
                       NUMVALS_WEIRGEN, NUMVALS_GENSTRU, &
                       NUMVALS_DAMBREAK, NUMVALS_ORIFGEN, NUMVALS_BRIDGE, NUMVALS_CULVERT, &
@@ -2324,8 +2324,8 @@ subroutine unc_write_his(tim)            ! wrihis
         endif
 
         ! Long culvert
-        if(jahislongculv > 0 .and. nlongculvertsg > 0) then
-            ierr = nf90_def_dim(ihisfile, 'longculvert', nlongculvertsg, id_longculvertdim)
+        if(jahislongculv > 0 .and. nlongculverts > 0) then
+            ierr = nf90_def_dim(ihisfile, 'longculvert', nlongculverts, id_longculvertdim)
             ierr = nf90_def_var(ihisfile, 'longculvert_id',  nf90_char,   (/ id_strlendim, id_longculvertdim /), id_longculvert_id)
             ierr = nf90_put_att(ihisfile, id_longculvert_id,  'cf_role',   'timeseries_id')
             ierr = nf90_put_att(ihisfile, id_longculvert_id,  'long_name', 'Id of long culvert')
@@ -2653,8 +2653,8 @@ subroutine unc_write_his(tim)            ! wrihis
             end do
         end if
 
-        if (jahislongculv > 0 .and. nlongculvertsg > 0) then
-           do i = 1, nlongculvertsg
+        if (jahislongculv > 0 .and. nlongculverts > 0) then
+           do i = 1, nlongculverts
               ierr = nf90_put_var(ihisfile, id_longculvert_id,  trimexact(longculverts(i)%id, strlen_netcdf),  (/ 1, i /))
            end do
         end if
@@ -3530,8 +3530,8 @@ subroutine unc_write_his(tim)            ! wrihis
          enddo
       end if
 
-      if (jahislongculv > 0 .and. nlongculvertsg > 0) then
-         do i=1,nlongculvertsg
+      if (jahislongculv > 0 .and. nlongculverts > 0) then
+         do i=1,nlongculverts
             ierr = nf90_put_var(ihisfile, id_longculvert_dis,       vallongculvert(2,i),      (/ i, it_his /))
             ierr = nf90_put_var(ihisfile, id_longculvert_s1up,      vallongculvert(3,i),      (/ i, it_his /))
             ierr = nf90_put_var(ihisfile, id_longculvert_s1dn,      vallongculvert(4,i),      (/ i, it_his /))
@@ -3544,7 +3544,7 @@ subroutine unc_write_his(tim)            ! wrihis
          if (it_his == 1) then
             ierr = nf90_put_var(ihisfile, id_longculvertgeom_node_coordx, geomXLongCulv,     start = (/ 1 /), count = (/ nNodesLongCulv /))
             ierr = nf90_put_var(ihisfile, id_longculvertgeom_node_coordy, geomYLongCulv,     start = (/ 1 /), count = (/ nNodesLongCulv /))
-            ierr = nf90_put_var(ihisfile, id_longculvertgeom_node_count,  nodeCountLongCulv, start = (/ 1 /), count = (/ nlongculvertsg /))
+            ierr = nf90_put_var(ihisfile, id_longculvertgeom_node_count,  nodeCountLongCulv, start = (/ 1 /), count = (/ nlongculverts /))
             if (allocated(geomXLongCulv))     deallocate(geomXLongCulv)
             if (allocated(geomYLongCulv))     deallocate(geomYLongCulv)
             if (allocated(nodeCountLongCulv)) deallocate(nodeCountLongCulv)

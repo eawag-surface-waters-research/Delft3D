@@ -93,7 +93,7 @@ subroutine getStructureIndex(strtypename, strname, index, is_in_network)
          end if
       end do
    else if (trim(strtypename) == 'longculverts') then
-      do i=1,nlongculvertsg
+      do i=1,nlongculverts
          if (trim(longculverts(i)%id) == trim(strname)) then
             index = i
             exit

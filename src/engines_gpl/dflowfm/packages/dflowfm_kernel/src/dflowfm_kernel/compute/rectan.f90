@@ -51,9 +51,9 @@ endif
 area  = hp*br
 width = br
 perim = 2d0*hp + br
-if (hpr >= hr .and. closed .and. newculverts) then
-   perim = perim+br
-end if
+!if (hpr >= hr .and. closed .and. newculverts) then
+!   perim = perim+br
+!end if
 
 if (slotw1D > 0 .and. japerim == 0) then
    width = width + slotw1D

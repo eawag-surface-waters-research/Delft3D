@@ -61,7 +61,7 @@ use unstruc_files, only: resolvePath
 use string_module, only: str_lower, strcmpi
 use iso_c_binding
 use m_inquire_flowgeom
-use m_longculverts, only: nlongculvertsg
+use m_longculverts, only: nlongculverts
 
 implicit none
 logical                       :: status
@@ -1548,8 +1548,8 @@ end if
 if(jahisbridge > 0 .and. network%sts%numBridges > 0) then
    call fill_geometry_arrays_structure(ST_BRIDGE, network%sts%numBridges, nNodesBridge, nodeCountBridge, geomXBridge, geomYBridge)
 end if
-if(jahislongculv > 0 .and. nlongculvertsg > 0) then
-   call fill_geometry_arrays_structure(ST_LONGCULVERT, nlongculvertsg, nNodesLongCulv, nodeCountLongCulv, geomXLongCulv, geomYLongCulv)
+if(jahislongculv > 0 .and. nlongculverts > 0) then
+   call fill_geometry_arrays_structure(ST_LONGCULVERT, nlongculverts, nNodesLongCulv, nodeCountLongCulv, geomXLongCulv, geomYLongCulv)
 end if
 ! Cleanup:
 888 continue

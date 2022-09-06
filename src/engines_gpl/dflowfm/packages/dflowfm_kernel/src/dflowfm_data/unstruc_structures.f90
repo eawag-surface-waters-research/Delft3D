@@ -272,7 +272,7 @@ integer :: jaoldstr !< tmp backwards comp: we cannot mix structures from EXT and
       !                        NUMVALS_GATEGEN, NUMVALS_WEIRGEN, NUMVALS_GENSTRU
       use m_alloc
       use m_flowtimes, only: ti_rst
-      use m_longculverts, only: nlongculvertsg
+      use m_longculverts, only: nlongculverts
       implicit none
 
       if((ti_rst > 0 .or. jahispump > 0) .and. npumpsg > 0) then
@@ -339,9 +339,9 @@ integer :: jaoldstr !< tmp backwards comp: we cannot mix structures from EXT and
          if( allocated( valcmpstru ) ) deallocate( valcmpstru )
          allocate( valcmpstru(NUMVALS_CMPSTRU,network%cmps%count) ) ; valcmpstru = 0d0
       endif
-      if( jahislongculv > 0 .and. nlongculvertsg > 0) then
+      if( jahislongculv > 0 .and. nlongculverts > 0) then
          if( allocated( vallongculvert) ) deallocate( vallongculvert )
-         allocate( vallongculvert(NUMVALS_LONGCULVERT,nlongculvertsg) ) ; vallongculvert = 0d0
+         allocate( vallongculvert(NUMVALS_LONGCULVERT,nlongculverts) ) ; vallongculvert = 0d0
       endif
 
 ! TIDAL TURBINES: Insert init_turbines here
