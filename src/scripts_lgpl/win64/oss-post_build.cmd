@@ -670,6 +670,7 @@ rem ==========================
         call :makeDir !dest_bin!
         rem call :copyFile "!build_dir!\mormerge\!configuration!\mormerge.*"                               !dest_bin!
         call :copyFile "!checkout_src_root!\tools_gpl\mormerge\scripts\mormerge.tcl"                       !dest_bin!
+        call :copyFile "!checkout_src_root!\third_party_open\tcl\bin\win64\tclkitsh852.exe"                !dest_bin!
     )
     
     if "%configuration%" == "Release" ( 
@@ -684,6 +685,7 @@ rem ==========================
         call :copyFile "!build_dir!\mormerge\!configuration!\mormerge.*"                                   !dest_bin!
         call :copyFile "!checkout_src_root!\tools_gpl\mormerge\scripts\mormerge.tcl"                       !dest_scripts!
         call :copyFile "!checkout_src_root!\tools_gpl\mormerge\scripts\run_mormerge.bat"                   !dest_scripts!
+        call :copyFile "!checkout_src_root!\third_party_open\tcl\bin\win64\tclkitsh852.exe"                !dest_bin!
     )
     
 goto :endproc
