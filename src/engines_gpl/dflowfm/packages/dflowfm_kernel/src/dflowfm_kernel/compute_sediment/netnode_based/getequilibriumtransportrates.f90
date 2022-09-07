@@ -161,7 +161,7 @@
        if (wa > 0) then
           z00 = z00 / wa
        endif
-       z00 = max(z00,1d-5)
+       z00 = max(z00,epsz0)
 
        beta  = ucur   / ( ucur + uwave )                           ! ( )
 

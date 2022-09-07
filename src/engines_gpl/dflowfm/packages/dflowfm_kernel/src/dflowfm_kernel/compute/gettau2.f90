@@ -78,7 +78,7 @@ subroutine gettau2(n,taucurc,czc,ustw2,jawaveswartdelwaq_par)
       ust = ust / wa
       z00 = z00 / wa
    endif
-   z00 = max(z00,1d-5)
+   z00 = max(z00,epsz0)
    !
    if (cfn > 0) then
       czc = sqrt(ag/cfn)

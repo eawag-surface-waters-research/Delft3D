@@ -98,7 +98,7 @@ subroutine gettauswave(waveswartdelwaq)
                ust = ust / wa
                z00 = z00 / wa
             endif
-            z00 = max(z00,1d-5)
+            z00 = max(z00,epsz0)
             !
             ust2 = 0d0
             if (kmx == 0) then
