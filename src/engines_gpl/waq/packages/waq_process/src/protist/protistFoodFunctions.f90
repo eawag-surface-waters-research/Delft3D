@@ -109,7 +109,7 @@ module protist_food_functions
         ingSat = maxIng * sumCP / (sumCP + KI)
 
         ! ingestion of C
-        ! Units: gC gC d-1
+        ! Units: gC gC-1 d-1
         ingC = min(ingSat, sumCP)   
         ingN = ingC * ingNC            
         ingP = ingC * ingPC    
