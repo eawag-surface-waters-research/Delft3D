@@ -666,11 +666,12 @@ rem ==========================
     
         echo "Debug postbuild"
         set dest_bin="%install_dir%\x64\Debug"
+        set dest_share="!install_dir!\x64\Release\share\bin"
 
         call :makeDir !dest_bin!
         rem call :copyFile "!build_dir!\mormerge\!configuration!\mormerge.*"                               !dest_bin!
         call :copyFile "!checkout_src_root!\tools_gpl\mormerge\scripts\mormerge.tcl"                       !dest_bin!
-        call :copyFile "!checkout_src_root!\third_party_open\tcl\bin\win64\tclkitsh852.exe"                !dest_bin!
+        call :copyFile "!checkout_src_root!\third_party_open\tcl\bin\win64\tclkitsh852.exe"                !dest_share!
     )
     
     if "%configuration%" == "Release" ( 
@@ -679,13 +680,14 @@ rem ==========================
 
         set dest_bin="!install_dir!\x64\Release\dmor\bin"
         set dest_scripts="!install_dir!\x64\Release\dmor\scripts"
+        set dest_share="!install_dir!\x64\Release\share\bin"
 
         call :makeDir !dest_bin! 
         call :makeDir !dest_scripts! 
         call :copyFile "!build_dir!\mormerge\!configuration!\mormerge.*"                                   !dest_bin!
         call :copyFile "!checkout_src_root!\tools_gpl\mormerge\scripts\mormerge.tcl"                       !dest_scripts!
         call :copyFile "!checkout_src_root!\tools_gpl\mormerge\scripts\run_mormerge.bat"                   !dest_scripts!
-        call :copyFile "!checkout_src_root!\third_party_open\tcl\bin\win64\tclkitsh852.exe"                !dest_bin!
+        call :copyFile "!checkout_src_root!\third_party_open\tcl\bin\win64\tclkitsh852.exe"                !dest_share!
     )
     
 goto :endproc
