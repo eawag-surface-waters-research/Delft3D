@@ -14538,7 +14538,7 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd,jafou, ja2D
 
    numk2d = 0
    ndx1d = ndxi - ndx2d
-   if (ndx2d > 0 .and. ja2D_ == .true.) then ! 2D flow geometry
+   if (ndx2d > 0 .and. ja2D_) then ! 2D flow geometry
       numl2d = numl-numl1d
       numk2d = (numk-n1d2dcontacts) - ndx1d
       call realloc(edge_nodes, (/ 2, numl2d /), fill = -999 , keepExisting = .false.)
@@ -14681,7 +14681,7 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd,jafou, ja2D
 
 
    !define 1d2dcontacts only after mesh2d is completly defined
-   if (n1d2dcontacts.gt.0 .and. ja2D_ == .true.) then
+   if (n1d2dcontacts.gt.0 .and. ja2D_) then
       ierr = ug_def_mesh_contact(ncid, id_tsp%meshcontacts, trim(contactname), n1d2dcontacts, id_tsp%meshids1d, id_tsp%meshids2d, UG_LOC_NODE, UG_LOC_FACE, start_index)
    endif
 
@@ -14699,7 +14699,7 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd,jafou, ja2D
       ierr = nf90_put_var(ncid, id_tsp%id_flowelembl(1), bl(ndx2d+1:last_1d)) ! TODO: AvD: handle 1D/2D boundaries
       ! TODO: AvD: UNST-1318: handle 1d zk as well
    end if
-   if (ndx2d > 0 .and. ja2D_ == .true.) then
+   if (ndx2d > 0 .and. ja2D_) then
       ierr = nf90_put_var(ncid, id_tsp%id_flowelemba(2), ba(1:ndx2d)) ! TODO: AvD: handle 1D/2D boundaries
       ierr = nf90_put_var(ncid, id_tsp%id_flowelembl(2), bl(1:ndx2d)) ! TODO: AvD: handle 1D/2D boundaries
       ierr = nf90_put_var(ncid, id_tsp%id_netnodez(2)  , z2dn)

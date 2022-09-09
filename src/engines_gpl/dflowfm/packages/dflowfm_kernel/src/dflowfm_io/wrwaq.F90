@@ -792,6 +792,7 @@ subroutine waq_write_waqgeom_filepointer_ugrid(igeomfile)
    endif
 
    if (numl1d > 0) then 
+      ! number of 1D links (numl1d) if greater than zero
       ! use the generic routine to write the 1D grid, the 2D grid might need extra data, and contains extra info.
       call unc_write_flowgeom_filepointer_ugrid(igeomfile, geomids%id_tsp, ja2D = .false.) 
    endif
@@ -905,7 +906,8 @@ function create_ugrid_geometry(meshgeom, edge_type) result(ierr)
    integer                                  :: node, edge, face, maxNodesPerFace, nodesPerFace !< Counters.
    integer, parameter                       :: missing_value = -999
    integer                                  :: ierr !< Result status (UG_NOERR==NF90_NOERR if successful).
-   integer                                  :: numk1d, n1d2dcontacts
+   integer                                  :: numk1d          ! Number of 1D nodes
+   integer                                  :: n1d2dcontacts   ! Number of 1D2D contacts (exchanges)
    integer                                  :: k1, k2, L, n1, n2
 
    ierr = UG_NOERR
@@ -924,7 +926,7 @@ function create_ugrid_geometry(meshgeom, edge_type) result(ierr)
             n1d2dcontacts = n1d2dcontacts + 1
             n1 = abs(lne(1,l))
             n2 = abs(lne(2,l))
-            if (n1 > nump) then  ! First point of 1D link is 1D cell
+            if (n1 > nump) then  ! First point of 1D link is 1D cell (nump = number of 2D flow cells)
                numk1d = max(numk1d, netcell(n1)%nod(1))
             end if
             if (n2 > nump) then  ! Second point of 1D link is 1D cell
