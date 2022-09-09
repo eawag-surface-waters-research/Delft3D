@@ -3360,7 +3360,7 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
           if (const_units(i).ne.' ') then
              tmpstr = const_units(i)
           else
-             tmpstr = '1e-3'
+             tmpstr = '-'
           endif
           ierr = nf90_put_att(irstfile, id_tr1(j),  'units'        , tmpstr)
        enddo
@@ -3592,7 +3592,12 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
                ierr = nf90_put_att(irstfile, id_ttrabnd(i), 'units', 's')
                ierr = nf90_def_var(irstfile, 'ztrabnd'//numtrastr, nf90_double, (/ id_bndtradim(i), id_timedim /), id_ztrabnd(i))
                ierr = nf90_put_att(irstfile, id_ztrabnd(i), 'long_name', 'Thatcher-Harleman concentration of tracer '//numtrastr)
-               ierr = nf90_put_att(irstfile, id_ztrabnd(i), 'units', '1e-3')
+               if (const_units(iconst).ne.' ') then
+                  tmpstr = const_units(iconst)
+               else
+                  tmpstr = '-'
+               endif
+               ierr = nf90_put_att(irstfile, id_ztrabnd(i), 'units', trim(tmpstr))
             endif
          enddo
       endif
@@ -7860,7 +7865,7 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
                  if (const_units(j).ne.' ') then
                     tmpstr = const_units(j)
                  else
-                    tmpstr = '1e-3'
+                    tmpstr = '-'
                  endif
                  ierr = nf90_put_att(imapfile, id_const(iid,j),  'units'        , tmpstr)
                  ierr = nf90_put_att(imapfile, id_const(iid,j),  '_FillValue'   , dmiss)

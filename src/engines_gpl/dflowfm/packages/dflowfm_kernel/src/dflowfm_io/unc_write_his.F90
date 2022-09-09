@@ -674,7 +674,7 @@ subroutine unc_write_his(tim)            ! wrihis
                   if (const_units(j).ne.' ') then
                      tmpstr = const_units(j)
                   else
-                     tmpstr = '1e-3'
+                     tmpstr = '-'
                   endif
                   ierr = nf90_put_att(ihisfile, id_tra(i), 'units', tmpstr)
                   ierr = nf90_put_att(ihisfile, id_tra(i), 'geometry', station_geom_container_name)
