@@ -50,6 +50,9 @@ prebuild_version_number(${library_name} ${fortran_version_file}
 if(WIN32)
     target_compile_definitions(${library_name} PRIVATE "WIN32")
 endif(WIN32)
+if(UNIX)
+    target_compile_definitions(${library_name} PRIVATE "HAVE_CONFIG_H")
+endif(UNIX)
 
 # Define how the files should be structured within Visual Studio
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${delftio_sync}
