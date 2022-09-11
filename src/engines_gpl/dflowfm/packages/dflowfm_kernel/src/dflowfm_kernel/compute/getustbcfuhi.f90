@@ -44,7 +44,7 @@
    double precision, intent (out) :: ustbLL, cfuhiLL, hdzb, z00
    double precision, intent (out) :: cfuhi3D                                       ! 3D bedfriction coeffient, advi(Lb) = advi(Lb) + cfuhi3D
 
-   integer          :: ifrctyp, L, k1, k2
+   integer          :: ifrctyp, L
    double precision :: frcn, sqcf, cz, umod, u1Lb, gsx, ustw2, ustc2, fw, cdrag, abscos, dfuc, costu
    double precision :: taubpuLL                                ! taubpu = umod*ag/C2 or ypar*(taucur+tauwav)/rho/umod or ustar*ustar/u
    double precision :: taubxuLL                                ! taubxu = ymxpar*(taucur+tauwav)
@@ -139,16 +139,26 @@
       ustbLL = sqcf*umod                                   ! ustar based upon bottom layer/layer integral velocity
 
     if (jawave > 0 .and. .not. flowWithoutWaves) then
+         rhoL = rhomean      ! for now
          if (ustw2 > 1d-8) then
-            k1=ln(1,Lb); k2=ln(2,Lb)
-            rhoL = rhomean      ! for now
             !
             ! Virtual 2dh velocity, delft3d style
             if (LL==Lb) then    ! take into account layer integral approach on bnd
                u2dh = umod
             else
                ! here we assume that z0/dzb is small and c9of1==1, ie we use jaustarint==1 approach, cf 3D validation doc Mohamed
-               u2dh = umod*(log((1d0+hu(LL))/z0urou(LL))-1d0)/(log(dzb/z0urou(LL))-1d0)
+               !u2dh = umod*(log((1d0+hu(LL))/z0urou(LL))-1d0)/(log(dzb/z0urou(LL))-1d0)
+
+               ! UNST-6297 formulation above gives u2dh of order too big in very shallow water
+
+               ! Delft3D:
+               !u2dh = (umod/hu(LL)                                             &
+               !     & *((hu(LL) + z0urou(LL))*log(1d0 + hu(LL)/z0urou(LL))     &
+               !     & - hu(LL)))/log(1d0 + 0.5d0*(max(dzb,0.01d0))/z0urou(LL))
+
+               ! use available depth-averaged u1, v
+               u2dh = sqrt((u1(LL)-ustokes(LL))**2 + &
+                           (v(LL)-vstokes(LL))**2)
             endif
             !
             if (cz > 0d0) then
@@ -167,7 +177,7 @@
                sphi = -csw*snu(LL)+snw*csu(LL)
                abscos = abs(cphi*uu + sphi*vv) / umod
                call getsoulsbywci(modind, z00, ustc2, ustw2, fw, cdrag, umod, abscos, taubpuLL, taubxuLL)
-             ustbLL = sqrt(umod*taubpuLL)
+               ustbLL = sqrt(umod*taubpuLL)
             else if (modind == 9) then                            ! wave-current interaction van Rijn (2004)
                call getvanrijnwci(LL, umod, u2dh, taubpuLL, z0urouL)
                taubxuLL = rhoL*(ustc2+ustw2)                      ! depth-averaged, see taubot
@@ -249,13 +259,13 @@
 
     if (jawave==0 .or. flowWithoutWaves) then
          z0urou(LL) = z0ucur(LL)                                ! morfo, bedforms, trachytopes
-      endif
+    endif
 
     if (jawave>0 .and. jawaveStokes >= 1 .and. .not. flowWithoutWaves) then                               ! Ustokes correction at bed
          adve(Lb)  = adve(Lb) - cfuhi3D*ustokes(Lb)
       endif
 
-   else if (ifrctyp == 10) then                                 ! Hydraulically smooth, glass etc
+    else if (ifrctyp == 10) then                                 ! Hydraulically smooth, glass etc
       nit = 0
       u1Lb = u1(Lb)
       umod  = sqrt( u1Lb*u1Lb + v(Lb)*v(Lb) )
