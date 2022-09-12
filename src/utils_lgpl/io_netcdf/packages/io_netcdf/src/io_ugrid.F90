@@ -228,6 +228,9 @@ enumerator cid_contacttopo                !< Top-level variable ID for contact t
 enumerator cid_contactids                 !< Variable ID for contacts ids
 enumerator cid_contactlongnames           !< Variable ID for contacts longnames
 enumerator cid_contacttype                !< Variable ID for contact types
+enumerator cid_compositemesh             !< Top-level variable ID for composite mesh
+enumerator cid_meshes                    
+enumerator cid_mesh_contact       
 enumerator cid_end
 end enum
 
@@ -4224,6 +4227,12 @@ function ug_def_mesh_contact(ncid, contactids, linkmeshname, ncontacts, meshidfr
    ierr = nf90_put_att(ncid, contactids%varids(cid_contacttype), 'valid_range',  (/ 3, 4/))
    ierr = nf90_put_att(ncid, contactids%varids(cid_contacttype), 'flag_values',  (/ 3, 4/))
    ierr = nf90_put_att(ncid, contactids%varids(cid_contacttype), 'flag_meanings', 'lateral_1d2d_link longitudinal_1d2d_link')
+
+   !define the variable contacts and its attributes
+   ierr = nf90_def_var(ncid, "composite_mesh", nf90_int,  contactids%varids(cid_compositemesh))
+   ierr = nf90_put_att(ncid, contactids%varids(cid_compositemesh), 'cf_role'              , 'parent_mesh_topology')
+   ierr = nf90_put_att(ncid, contactids%varids(cid_compositemesh), 'meshes'               , trim(mesh1)//' '//trim(mesh2))
+   ierr = nf90_put_att(ncid, contactids%varids(cid_compositemesh), 'mesh_contact'         , prefix)
 
    if (wasInDefine==0) then
       ierr = nf90_enddef(ncid)
