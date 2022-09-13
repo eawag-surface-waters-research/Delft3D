@@ -17335,9 +17335,7 @@ src/third_party_open/subversion/bin/win32/zlib1.dll -text
 src/third_party_open/subversion/subversion_license_info.txt -text
 src/third_party_open/swan/CMakeLists.txt -text
 src/third_party_open/swan/include/swanout1_deltares.inc -text
-src/third_party_open/swan/res/version_number-mpi.rc -text
 src/third_party_open/swan/res/version_number-mpi.rc.svn -text
-src/third_party_open/swan/res/version_number-omp.rc -text
 src/third_party_open/swan/res/version_number-omp.rc.svn -text
 src/third_party_open/swan/scripts/Makefile.am -text
 src/third_party_open/swan/scripts/swan.bat -text

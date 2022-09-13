@@ -1,4 +1,7 @@
 # Shared definitions
+
+message(STATUS "swan mpi:")
+
 # Set directory which contains all source files
 set(src_path ../src)
 
@@ -12,15 +15,15 @@ list(FILTER swan_sourcefiles EXCLUDE REGEX ".*swanhcat.for$")
 set(executable_files ${swan_sourcefiles})
 
 # Set the directory referring to the res folder
-set(res_path ../res)
+set(swan_path "${CMAKE_CURRENT_SOURCE_DIR}/..")
+set(res_path ${swan_path}/res)
 
 # Set version file variables
 set(ini_version_file ${res_path}/version_number.ini)
 set(rc_version_file ${res_path}/version_number-mpi.rc)
 
 # Generate the version files
-generate_version_files(${rc_version_file} {ini_version_file} TRUE)
-set(svn_version_file ${rc_version_file}.svn)
+generate_version_files(${rc_version_file} ${ini_version_file})
 
 # Define executable
 set(executable_name swan_mpi)

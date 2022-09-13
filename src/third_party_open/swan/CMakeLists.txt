@@ -1,3 +1,4 @@
+message(STATUS "swan lib:")
 # Include directories that are required as references
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
