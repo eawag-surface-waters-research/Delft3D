@@ -4501,7 +4501,6 @@ src/engines_gpl/wave/packages/io/src/readn.f90 -text
 src/engines_gpl/wave/packages/io/src/scan_fl.f90 -text
 src/engines_gpl/wave/packages/io/src/wavcur2d.f90 -text
 src/engines_gpl/wave/packages/io/src/wavenr.f90 -text
-src/engines_gpl/wave/packages/io/src/wavenr_wave.f90 -text
 src/engines_gpl/wave/packages/io/src/write_bnd_loc.f90 -text
 src/engines_gpl/wave/packages/io/src/write_swan_datafile.f90 -text
 src/engines_gpl/wave/packages/io/src/write_wave_grid_netcdf.f90 -text
