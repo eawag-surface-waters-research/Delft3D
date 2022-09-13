@@ -17337,6 +17337,7 @@ src/third_party_open/swan/CMakeLists.txt -text
 src/third_party_open/swan/include/swanout1_deltares.inc -text
 src/third_party_open/swan/res/version_number-mpi.rc.svn -text
 src/third_party_open/swan/res/version_number-omp.rc.svn -text
+src/third_party_open/swan/res/version_number.ini -text
 src/third_party_open/swan/scripts/Makefile.am -text
 src/third_party_open/swan/scripts/swan.bat -text
 src/third_party_open/swan/scripts/swan.sh -text
