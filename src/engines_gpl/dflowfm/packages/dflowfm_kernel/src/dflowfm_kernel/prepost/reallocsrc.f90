@@ -49,7 +49,7 @@ subroutine reallocsrc(n)
  call realloc (cssrc, (/ 2,n /), keepExisting = .true.)
  call realloc (snsrc, (/ 2,n /), keepExisting = .true.)
  call realloc (zsrc , (/ 2,n /), keepExisting = .true.)
- call realloc (zsrc2, (/ 2,n /), keepExisting = .true.) ; zsrc2 = dmiss
+ call realloc (zsrc2, (/ 2,n /), keepExisting = .true., fill = dmiss) ! ipv  ; zsrc2 = dmiss
  ! call realloc (srsn , (/ 6,n /), keepExisting = .true.)
  call realloc (srsn , (/ 2*(NUMCONST+1),n /), keepExisting = .true.)
  call realloc (jamess, n,        keepExisting = .true.)
