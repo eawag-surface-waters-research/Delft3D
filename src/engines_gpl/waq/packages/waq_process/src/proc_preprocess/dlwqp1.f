@@ -552,7 +552,7 @@
 
          ! when no algae were found, turn of eco mode
          if (noalg == 0) then
-            write(line,'(a)') ' no BLOOM algae were found, switching of eco mode.'
+            write(line,'(a)') ' no BLOOM algae were found, switching off eco mode.'
             call monsys(line,1)
             l_eco = .false.
          else
