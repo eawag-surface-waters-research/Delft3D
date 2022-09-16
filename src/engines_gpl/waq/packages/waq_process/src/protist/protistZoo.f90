@@ -70,7 +70,6 @@ use ieee_arithmetic
     integer spInc         ! local species PMSA number counter
     integer inpItems      ! nr of input items need for output PMSA
     integer nrSp_par
-    integer iSp
     
      ! INPUT PARAMETERS  
      integer    maxNrSp, nrSp, nrSpCon, nrSpInd     ! constant and species numbers   
@@ -144,7 +143,6 @@ use ieee_arithmetic
     nrOutSp   = PMSA(ipnt(   6 ))   !   nr of output items per individual species              (-)   
     maxNrPr   = PMSA(ipnt(   7 ))   !   nr of prey species implemented                         (-)
     nrSp_par  = PMSA(ipnt(   9 ))   !   nr of parameters per species                           (-)
-    iSp       = PMSA(ipnt(  10 ))   !   selector of species parameter (needed to share code with for protistCM)   (-)
     
     ! allocation of prey input array
     call allocate_prot_array(prot_array,maxNrPr)
@@ -216,7 +214,7 @@ use ieee_arithmetic
             mot = motility(rZoo)
 
             
-            call initialize_prot_array(prot_array,maxNrPr, PMSA, plen, ipnt, nrSpInd, maxNrSp, nrSpCon, iSp, nrSp_par)
+            call initialize_prot_array(prot_array,maxNrPr, PMSA, plen, ipnt, nrSpInd, maxNrSp, nrSpCon, iSpec, nrSp_par)
 
             
             ! for output (-)
