@@ -239,8 +239,11 @@ subroutine sethu(jazws0)                            ! Set upwind waterdepth hu
 
                  wsbov  =  sup
                  wsben  =  s0(kd)
-                 hkruin = -bup
-
+                 if (simonafixedweirs == 0 ) then
+                     hkruin = -bup
+                 else if (simonafixedweirs == 1 ) then
+                     hkruin = -crestlevxw(nfw)
+                 endif
                  ! d1     =  bup - blu(L)   !! old implementation
 
                  ! determine sill height downstream of weir

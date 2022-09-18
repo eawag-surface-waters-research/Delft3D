@@ -312,6 +312,7 @@
 
  ! parameters controlling flooding/drying/solving
  integer                           :: testdryflood      !< Flag for testing alternative drying flooding algoritm; 0 = standard, 1 =Delft3D-FLOW
+ integer                           :: simonafixedweirs  !< Flag for fixed weir options; 0 = D-Flow FM, 1 =Simona
  double precision                  :: epshu             !< minimum waterdepth for setting hu>0
  double precision                  :: epshs             !< minimum waterdepth for setting cfu
  double precision                  :: epsz0             !< minimum value for roughness height
@@ -852,6 +853,9 @@ subroutine default_flowparameters()
                          !                                0 = standard D-Flow FM
                          !                                1 = Delft3D-FLOW check in water level points
                          !                                2 = Minimum value for VOL1 of ba*epshu in transport equation
+    simonafixedweirs = 0 ! test different options for fixed weirs: 
+                         !                                0 = standard D-Flow FM
+                         !                                1 = Simona
 
     jposhchk   = 2       ! check for positive waterdepth; 0 = no
                          !                                1 = 0.7*dts, just redo
