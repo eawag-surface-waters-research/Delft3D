@@ -4224,9 +4224,9 @@ function ug_def_mesh_contact(ncid, contactids, linkmeshname, ncontacts, meshidfr
    !define the variable and attributes long names
    ierr = nf90_def_var(ncid, prefix//'_contact_type', nf90_int, (/ contactids%dimids(cdim_ncontacts) /) , contactids%varids(cid_contacttype))
    ierr = nf90_put_att(ncid, contactids%varids(cid_contacttype), '_FillValue',  -1)
-   ierr = nf90_put_att(ncid, contactids%varids(cid_contacttype), 'valid_range',  (/ 3, 4/))
-   ierr = nf90_put_att(ncid, contactids%varids(cid_contacttype), 'flag_values',  (/ 3, 4/))
-   ierr = nf90_put_att(ncid, contactids%varids(cid_contacttype), 'flag_meanings', 'lateral_1d2d_link longitudinal_1d2d_link')
+   ierr = nf90_put_att(ncid, contactids%varids(cid_contacttype), 'valid_range',  (/ 3, 4, 5, 7/))
+   ierr = nf90_put_att(ncid, contactids%varids(cid_contacttype), 'flag_values',  (/ 3, 4, 5, 7/))
+   ierr = nf90_put_att(ncid, contactids%varids(cid_contacttype), 'flag_meanings', 'lateral_1d2d_link longitudinal_1d2d_link street_inlet_1d2d_link roof_gutter_1d2d_link')
 
    !define the variable contacts and its attributes
    ierr = nf90_def_var(ncid, "composite_mesh", nf90_int,  contactids%varids(cid_compositemesh))
