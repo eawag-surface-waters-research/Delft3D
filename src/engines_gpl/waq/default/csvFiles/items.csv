@@ -13489,7 +13489,7 @@ itemid,itemse,itemex,itemde,itemun,itemnm,itemag,itemda,itemwk,itemgr
 "maxNrSp_Z ","x"," ",    1.00000    ,"(-)                 ","total nr zoo species (DON'T CHANGE)               ","volume    ","volume    "," ","                              "
 "nrSp_Z    ","x"," ",    1.00000    ,"(-)                 ","nr of zoo species user wants to model             ","volume    ","volume    "," ","                              "
 "nrSpCon_Z ","x"," ",    23.0000    ,"(-)                 ","nr of zoo species dependent items                 ","volume    ","volume    "," ","                              "
-"nrInd_Z   ","x"," ",    10.0000    ,"(-)                 ","nr of zoo species independent items               ","volume    ","volume    "," ","                              "
+"nrInd_Z   ","x"," ",    9.00000    ,"(-)                 ","nr of zoo species independent items               ","volume    ","volume    "," ","                              "
 "maxNrPr_Z ","x"," ",    7.00000    ,"(-)                 ","total nr prey species (DON'T CHANGE)              ","volume    ","volume    "," ","                              "
 "nrSp_parZ ","x"," ",    9.00000    ,"(-)                 ","number of parameters per species (DON'T CHANGE)   ","volume    ","volume    "," ","                              "
 "zooC_1    ","x"," ",   -999.000    ,"(gC/m3)             ","zoo 1 C-biomass (Protist)                         ","volume    ","volume    ","x","Algae                         "
