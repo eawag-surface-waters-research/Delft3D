@@ -38,5 +38,6 @@ module protist_constants
     real(8),  parameter                 :: C_velProt = 1e-6
     real(8),  parameter                 :: threshCmass = 1e-9
     
+    integer                             :: nrLossFluxes = 5
     
 end module protist_constants

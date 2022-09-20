@@ -35,11 +35,10 @@ subroutine PROSED     ( pmsa   , fl     , ipoint , increm, noseg , &
 !                                                                                                     
 !     Type    Name         I/O Description                                                            
 !          
-    integer, parameter :: plen = 39 ! total length of the PMSA input and output array
     real(4) pmsa(*)      ! I/O Process Manager System Array, window of routine to process library     
     real(4) fl(*)        ! O  Array of fluxes made by this process in mass/volume/time               
-    integer ipoint(plen) ! I  Array of pointers in pmsa to get and store the data                    
-    integer increm(plen) ! I  Increments in ipoint for segment loop, 0=constant, 1=spatially varying 
+    integer ipoint(*)    ! I  Array of pointers in pmsa to get and store the data                    
+    integer increm(*)    ! I  Increments in ipoint for segment loop, 0=constant, 1=spatially varying 
     integer noseg        ! I  Number of computational elements in the whole model schematisation     
     integer noflux       ! I  Number of fluxes, increment in the fl array                            
     integer iexpnt(4,*)  ! I  From, To, From-1 and To+1 segment numbers of the exchange surfaces     
@@ -54,6 +53,10 @@ subroutine PROSED     ( pmsa   , fl     , ipoint , increm, noseg , &
 !     Type    Name         I/O Description                                        Unit                
 !                                                                                                     
 !     support variables
+    integer, parameter :: nrIndInp = 6     !   nr of species independent input items
+    integer, parameter :: nrSpecInp = 7    !   nr of inputs per species
+    integer, parameter :: nrSpecOut = 6    !   nr of outputs per species
+    integer, parameter :: plen = 36        ! total length of the PMSA input and output array
     integer ipnt(plen)    ! Local work array for the pointering                                    
     integer iseg          ! Local loop counter for computational element loop                      
     integer ioq
@@ -70,7 +73,7 @@ subroutine PROSED     ( pmsa   , fl     , ipoint , increm, noseg , &
     integer inpItems      ! nr of input items need for output PMSA
     
      !input parameters
-     real    maxNrSp, nrSp, nrSpCon, nrInd              ! constant and species numbers   
+     integer nrSpec       ! total nr species implemented in process (from proc_def)
      real    DELT, MinDepth, TaucSDiat                  ! segment independent input
      real    Tau, Depth                                 ! segment dependent input
      real    ZSedDiat, VSedDiat                         ! species dependent input
@@ -88,22 +91,19 @@ subroutine PROSED     ( pmsa   , fl     , ipoint , increm, noseg , &
 !                                                                                                     
 !******************************************************************************* 
 !                                                                                                     
-    ipnt  = ipoint
+    ipnt(1:plen) = ipoint(1:plen)
            
     iflux = 0
     
     ! segment and species independent items
-    maxNrSp    = PMSA(ipnt(   1 ))   !   total nr species implemented in process                (-)
-    nrSp       = PMSA(ipnt(   2 ))   !   nr of species to be modelled                           (-)                
-    nrSpCon    = PMSA(ipnt(   3 ))   !   nr of species dependent items                          (-)                
-    nrInd      = PMSA(ipnt(   4 ))   !   nr of species independent items                        (-)  
-    DELT       = PMSA(ipnt(   5 ))   !   timestep for processes                                 (d)    
-    MinDepth   = PMSA(ipnt(   6 ))   !   minimum waterdepth for sedimentation/resuspension      (m)    
-    TaucSDiat  = PMSA(ipnt(   7 ))   !   critical shear stress for sedimentation Diatoms        (N/m2) 
+    nrSpec     = nint(PMSA(ipnt(   1 )))   !   total nr species implemented in process                (-)
+    DELT       = PMSA(ipnt(   2 ))         !   timestep for processes                                 (d)    
+    MinDepth   = PMSA(ipnt(   3 ))         !   minimum waterdepth for sedimentation/resuspension      (m)    
+    TaucSDiat  = PMSA(ipnt(   4 ))         !   critical shear stress for sedimentation Diatoms        (N/m2) 
       
     ! length of the PMSA input array (for segment and for exchange). 
     ! first and second term = input for segment; third term input for exchange
-    inpItems = maxNrSp * nrSpCon + nrInd  
+    inpItems = nrIndInp + nrSpec * nrSpecInp
    
     ! segment loop
     do iseg = 1 , noseg
@@ -113,24 +113,24 @@ subroutine PROSED     ( pmsa   , fl     , ipoint , increm, noseg , &
             call dhkmrk(2,iknmrk(iseg),ikmrk2)
             if ((ikmrk2.eq.0).or.(ikmrk2.eq.3)) then
                 ! species independent items
-                Tau         = PMSA(ipnt(   8 ))  !    total bottom shear stress                              (N/m2)   
-                Depth       = PMSA(ipnt(   9 ))  !    depth of segment                                       (m)     
+                Tau         = PMSA(ipnt(   5 ))  !    total bottom shear stress                              (N/m2)   
+                Depth       = PMSA(ipnt(   6 ))  !    depth of segment                                       (m)     
                 
                 ! species loop
-                do iSpec = 0, (nrSp-1)
+                do iSpec = 0, (nrSpec-1)
                     
-                    spInc = nrSpCon * iSpec
+                    spInc = nrSpecInp * iSpec
                
                     ! species dependent items
                     ! (number of species independent items + location of input item in vector + species loop)
                     ! Protect against negativ values
-                    diatC        = max( 0.0 , PMSA(ipnt( nrInd +  1 + spInc )) )  !      C-biomass                                              (gC m-3)  
-                    diatChl      = max( 0.0 , PMSA(ipnt( nrInd +  2 + spInc )) )  !      Chl-biomass                                            (gChl m-3)  
-                    diatN        = max( 0.0 , PMSA(ipnt( nrInd +  3 + spInc )) )  !      N-biomass                                              (gN m-3)   
-                    diatP        = max( 0.0 , PMSA(ipnt( nrInd +  4 + spInc )) )  !      P-biomass                                              (gP m-3)   
-                    diatSi       = max( 0.0 , PMSA(ipnt( nrInd +  5 + spInc )) )  !      Si-biomass                                             (gSi m-3)  
-                    ZSedDiat     = PMSA(ipnt( nrInd +  6 + spInc ))               !      zeroth-order sedimentation flux Diatoms                (gC/m2/d)  
-                    VSedDiat     = max( 0.0 , PMSA(ipnt( nrInd +  7 + spInc )) )  !      sedimentation velocity Diatoms                         (m/d)  
+                    diatC        = max( 0.0 , PMSA(ipnt( nrIndInp +  1 + spInc )) )  !      C-biomass                                              (gC m-3)  
+                    diatChl      = max( 0.0 , PMSA(ipnt( nrIndInp +  2 + spInc )) )  !      Chl-biomass                                            (gChl m-3)  
+                    diatN        = max( 0.0 , PMSA(ipnt( nrIndInp +  3 + spInc )) )  !      N-biomass                                              (gN m-3)   
+                    diatP        = max( 0.0 , PMSA(ipnt( nrIndInp +  4 + spInc )) )  !      P-biomass                                              (gP m-3)   
+                    diatSi       = max( 0.0 , PMSA(ipnt( nrIndInp +  5 + spInc )) )  !      Si-biomass                                             (gSi m-3)  
+                    ZSedDiat     =            PMSA(ipnt( nrIndInp +  6 + spInc ))    !      zeroth-order sedimentation flux Diatoms                (gC/m2/d)  
+                    VSedDiat     = max( 0.0 , PMSA(ipnt( nrIndInp +  7 + spInc )) )  !      sedimentation velocity Diatoms                         (m/d)  
                     
                     ! Calculate sedimentation probabality-------------------------------------------------------------------------------
                     ! Units: (-)   
@@ -155,11 +155,11 @@ subroutine PROSED     ( pmsa   , fl     , ipoint , increm, noseg , &
                         MaxSed_P   = 0.0
                         MaxSed_Si  = 0.0
                         
-                        fl( 1 + iSpec * 5 + iflux) =  0.0
-                        fl( 2 + iSpec * 5 + iflux) =  0.0
-                        fl( 3 + iSpec * 5 + iflux) =  0.0
-                        fl( 4 + iSpec * 5 + iflux) =  0.0
-                        fl( 5 + iSpec * 5 + iflux) =  0.0
+                        fl( 1 + iSpec * nrLossFluxes + iflux) =  0.0
+                        fl( 2 + iSpec * nrLossFluxes + iflux) =  0.0
+                        fl( 3 + iSpec * nrLossFluxes + iflux) =  0.0
+                        fl( 4 + iSpec * nrLossFluxes + iflux) =  0.0
+                        fl( 5 + iSpec * nrLossFluxes + iflux) =  0.0
                     else
                         PotSed_C   = ZSedDiat + ( VSedDiat * diatC   ) * PSed
                         PotSed_Chl = ZSedDiat + ( VSedDiat * diatChl ) * PSed
@@ -176,21 +176,21 @@ subroutine PROSED     ( pmsa   , fl     , ipoint , increm, noseg , &
                         
                         ! convert sedimentation to flux  
                         ! Units: m/l3/day
-                        fl( 1 + iSpec * 5 + iflux) =  MaxSed_C / Depth
-                        fl( 2 + iSpec * 5 + iflux) =  MaxSed_Chl / Depth
-                        fl( 3 + iSpec * 5 + iflux) =  MaxSed_N   / Depth
-                        fl( 4 + iSpec * 5 + iflux) =  MaxSed_P   / Depth
-                        fl( 5 + iSpec * 5 + iflux) =  MaxSed_Si  / Depth
+                        fl( 1 + iSpec * nrLossFluxes + iflux) =  MaxSed_C / Depth
+                        fl( 2 + iSpec * nrLossFluxes + iflux) =  MaxSed_Chl / Depth
+                        fl( 3 + iSpec * nrLossFluxes + iflux) =  MaxSed_N   / Depth
+                        fl( 4 + iSpec * nrLossFluxes + iflux) =  MaxSed_P   / Depth
+                        fl( 5 + iSpec * nrLossFluxes + iflux) =  MaxSed_Si  / Depth
                     endif
                     
                     ! Output -------------------------------------------------------------------
                     ! (input items + input exchange + position of specific output item in vector + species loop * total number of output) 
-                    PMSA(ipnt( inpItems + maxNrSp + 1 + iSpec * 6 )) = PSed 
-                    PMSA(ipnt( inpItems + maxNrSp + 2 + iSpec * 6 )) = MaxSed_C  
-                    PMSA(ipnt( inpItems + maxNrSp + 3 + iSpec * 6 )) = MaxSed_Chl
-                    PMSA(ipnt( inpItems + maxNrSp + 4 + iSpec * 6 )) = MaxSed_N  
-                    PMSA(ipnt( inpItems + maxNrSp + 5 + iSpec * 6 )) = MaxSed_P  
-                    PMSA(ipnt( inpItems + maxNrSp + 6 + iSpec * 6 )) = MaxSed_Si 
+                    PMSA(ipnt( inpItems + nrSpec + 1 + iSpec * nrSpecOut )) = PSed 
+                    PMSA(ipnt( inpItems + nrSpec + 2 + iSpec * nrSpecOut )) = MaxSed_C  
+                    PMSA(ipnt( inpItems + nrSpec + 3 + iSpec * nrSpecOut )) = MaxSed_Chl
+                    PMSA(ipnt( inpItems + nrSpec + 4 + iSpec * nrSpecOut )) = MaxSed_N  
+                    PMSA(ipnt( inpItems + nrSpec + 5 + iSpec * nrSpecOut )) = MaxSed_P  
+                    PMSA(ipnt( inpItems + nrSpec + 6 + iSpec * nrSpecOut )) = MaxSed_Si 
                     
                 enddo ! end loop over species 
                 
@@ -200,19 +200,19 @@ subroutine PROSED     ( pmsa   , fl     , ipoint , increm, noseg , &
         
         !allocate pointers
         iflux = iflux + noflux
-        ipnt = ipnt + increm
+        ipnt(1:plen) = ipnt(1:plen) + increm(1:plen)
         
     enddo ! end loop over segments
        
     iSpec = 0
-    ipnt = ipoint
+    ipnt(1:plen) = ipoint(1:plen)
     ! Exchange loop over horizontal direction -------------------------------------------------------------------
     do ioq = 1, noq1 + noq2
-        do iSpec = 0, (nrSp-1)
+        do iSpec = 0, (nrSpec-1)
             ! input+ input exchange + output + exchange + loop over species
-            PMSA(ipnt( inpItems + maxNrSp + 6 * maxNrSp + 1 + iSpec )) = 0.0 
+            PMSA(ipnt( inpItems + nrSpec + nrSpec * nrSpecOut + 1 + iSpec )) = 0.0 
         enddo
-        ipnt = ipnt + increm
+        ipnt(1:plen) = ipnt(1:plen) + increm(1:plen)
     enddo        
     
     iSpec = 0
@@ -228,23 +228,23 @@ subroutine PROSED     ( pmsa   , fl     , ipoint , increm, noseg , &
             if (ikmrkv.eq.1 .and. ikmrkn.eq.1) then
                 ! water-water exchange 
                 ! convert value from m/d to m/s
-                Depth  = PMSA( ipnt(9) + (i_origin - 1) * increm(9) )                  
-                Depth2 = PMSA( ipnt(9) + (i_dest - 1) * increm(9) )
-                MinDepth  = PMSA( ipnt(6) + (i_origin - 1) * increm(6) )
-                MinDepth2 = PMSA( ipnt(6) + (i_dest - 1) * increm(6) ) 
+                Depth  = PMSA( ipnt(6) + (i_origin - 1) * increm(6) )                  
+                Depth2 = PMSA( ipnt(6) + (i_dest - 1)   * increm(6) )
+                MinDepth  = PMSA( ipnt(3) + (i_origin - 1) * increm(3) )
+                MinDepth2 = PMSA( ipnt(3) + (i_dest - 1)   * increm(3) ) 
                 
-                do iSpec = 0, (nrSp-1)
+                do iSpec = 0, (nrSpec-1)
                     
                     if ( Depth .gt. MinDepth .and. Depth2 .gt. MinDepth2 ) then
-                        PMSA(ipnt( inpItems + maxNrSp + 6 * maxNrSp+1+iSpec)) = PMSA(ipnt(inpItems+1+iSpec))/numSecPerDay
+                        PMSA(ipnt( inpItems + nrSpec + nrSpec * nrSpecOut + 1 + iSpec)) = PMSA(ipnt(inpItems + 1 + iSpec))/numSecPerDay
                     else
-                        PMSA(ipnt( inpItems + maxNrSp + 6 * maxNrSp + 1 + iSpec )) = 0.0
+                        PMSA(ipnt( inpItems + nrSpec + nrSpec * nrSpecOut + 1 + iSpec )) = 0.0
                     endif ! end check if min depth large enough
                     
                 enddo ! end loop over species
             endif ! end check water - water 
         endif ! end check boundaries
-        ipnt = ipnt + increm
+        ipnt(1:plen) = ipnt(1:plen) + increm(1:plen)
     enddo ! end loop of vertical exchange    
     return
 end ! end subroutine 
