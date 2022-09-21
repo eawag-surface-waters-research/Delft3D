@@ -70,7 +70,8 @@ subroutine unc_write_his(tim)            ! wrihis
     use m_structures
     use m_GlobalParameters
     use m_longculverts
-
+    use odugrid
+    
     implicit none
 
     double precision, intent(in) :: tim !< Current time, should in fact be time1, since the data written is always s1, ucx, etc.
@@ -93,7 +94,7 @@ subroutine unc_write_his(tim)            ! wrihis
                      id_pump_xmid,  id_pump_ymid,   id_pump_struhead,id_pump_stage,    id_pump_redufact,  id_pump_s1del,    id_pump_s1suc,     id_pump_disdir, &
                      id_gatedim,    id_gatename,    id_gate_dis,    id_gate_edgel,     id_gate_s1up,      id_gate_s1dn,    &                              ! id_gate_head,
                      id_cdamdim,    id_cdamname,    id_cdam_dis,    id_cdam_crestl,    id_cdam_s1up,      id_cdam_s1dn,    &                              ! id_cdam_head,
-                     id_weirgendim, id_weirgen_id, id_weirgen_dis, id_weirgen_crestl, id_weirgen_crestw, id_weirgen_s1up,  id_weirgen_s1dn,  &        ! id_weirgen_head,
+                     id_weirgendim,id_weirgendim_input, id_weirgen_id, id_weirgen_dis, id_weirgen_crestl, id_weirgen_crestw, id_weirgen_s1up,  id_weirgen_s1dn,  &        ! id_weirgen_head,
                      id_weir_stat,  id_weirgen_vel, id_weirgen_au,  id_weirgen_head,   id_weirgen_forcedif, id_weirgen_s1crest,               &
                      id_gategendim, id_gategenname, id_gategen_dis, id_gategen_sillh,  id_gategen_sillw,  id_gategen_edgel, id_gategen_openw, &           ! id_gategen_head,
                      id_gategen_flowh, id_gategen_s1up, id_gategen_s1dn,                                                                      &
@@ -128,6 +129,7 @@ subroutine unc_write_his(tim)            ! wrihis
     integer :: id_statgeom_node_count,        id_statgeom_node_coordx,        id_statgeom_node_coordy,    &
                                               id_statgeom_node_lon,           id_statgeom_node_lat,       &
                id_crsgeom_node_count,         id_crsgeom_node_coordx,         id_crsgeom_node_coordy,     &
+               id_weirgeom_input_node_count,  id_weirgeom_input_node_coordx,  id_weirgeom_input_node_coordy,&
                id_weirgeom_node_count,        id_weirgeom_node_coordx,        id_weirgeom_node_coordy,    &
                id_orifgeom_node_count,        id_orifgeom_node_coordx,        id_orifgeom_node_coordy,    &
                id_genstrugeom_node_count,     id_genstrugeom_node_coordx,     id_genstrugeom_node_coordy, &
@@ -141,7 +143,7 @@ subroutine unc_write_his(tim)            ! wrihis
                id_longculvertgeom_node_count, id_longculvertgeom_node_coordx, id_longculvertgeom_node_coordy
 
     double precision, allocatable :: geom_x(:), geom_y(:)
-    integer, allocatable          :: node_count(:)
+    integer, allocatable          :: node_count(:), weirindex(:)
     integer, allocatable, save :: id_tra(:)
     integer, allocatable, save :: id_hwq(:)
     integer, allocatable, save :: id_hwqb(:)
@@ -1790,16 +1792,55 @@ subroutine unc_write_his(tim)            ! wrihis
         endif
 
         if(jahisweir > 0 .and. nweirgen > 0 ) then
-            ierr = nf90_def_dim(ihisfile, 'weirgens', nweirgen, id_weirgendim)
-            ierr = nf90_def_var(ihisfile, 'weirgen_id',  nf90_char,   (/ id_strlendim, id_weirgendim /), id_weirgen_id)
-            ierr = nf90_put_att(ihisfile, id_weirgen_id,  'cf_role',   'timeseries_id')
-            ierr = nf90_put_att(ihisfile, id_weirgen_id,  'long_name', 'Id of weir'    )
+           ierr = nf90_def_dim(ihisfile, 'weirgens', nweirgen, id_weirgendim)
+           ierr = nf90_def_dim(ihisfile, 'weirgens_input', nweirgen, id_weirgendim_input)
+           ierr = nf90_def_var(ihisfile, 'weirgen_id',  nf90_char,   (/ id_strlendim, id_weirgendim /), id_weirgen_id)
+           ierr = nf90_put_att(ihisfile, id_weirgen_id,  'cf_role',   'timeseries_id')
+           ierr = nf90_put_att(ihisfile, id_weirgen_id,  'long_name', 'Id of weir'    )
 
-            ! Define geometry related variables
-            weir_geom_container_name = 'weirgen_geom'
-            nNodeTot = 0
-            if (network%sts%numWeirs > 0) then ! new weir
-               nNodeTot = nNodesWeir
+           ! Define geometry related variables
+           weir_geom_container_name = 'weirgen_geom'
+           nNodeTot = 0
+           i = 1
+           if (network%sts%numWeirs > 0) then ! new weir
+              allocate(weirindex(network%sts%numWeirs),nodecountweirinput(network%sts%numWeirs))
+
+              do n = 1, network%sts%numWeirs
+                 do j = 1, network%sts%count  !find structure belonging to weir
+                    if (network%sts%struct(j)%ID == network%sts%HASHLIST_WEIR%ID_LIST(n)  ) then
+                       weirindex(n) = j
+                       if (network%sts%struct(j)%NUMCOORDINATES > 0) then
+                          nNodeTot = nNodeTot + network%sts%struct(j)%NUMCOORDINATES
+                       else
+                          nNodeTot = nNodeTot + 1
+                       endif
+                       exit
+                    endif
+                 enddo
+              enddo
+              allocate(geomXWeirInput(nNodeTot),geomYWeirInput(nNodeTot))
+              do n = 1, network%sts%numWeirs
+                 j = weirindex(n)
+
+                 if (network%sts%struct(j)%NUMCOORDINATES > 0) then
+
+                    geomXWeirInput(i:i+network%sts%struct(j)%NUMCOORDINATES-1)= network%sts%struct(j)%XCOORDINATES
+                    geomYWeirInput(i:i+network%sts%struct(j)%NUMCOORDINATES-1)= network%sts%struct(j)%YCOORDINATES
+                    nodecountweirinput(n) = network%sts%struct(j)%NUMCOORDINATES
+
+                    i = i + network%sts%struct(j)%NUMCOORDINATES
+                 else
+
+                    ASSOCIATE ( branch => network%brs%branch(network%sts%struct(j)%IBRAN ))
+
+                       ierr = odu_get_xy_coordinates( (/ 1 /) ,  network%sts%struct(j:j)%CHAINAGE , branch%xs , branch%ys , &
+                          (/ branch%gridpointscount /),(/ branch%length /), jsferic  , geomXWeirInput(i:i) , geomYWeirInput(i:i) )
+
+                       nodecountweirinput(n) = 1
+                       i = i + 1
+                    end ASSOCIATE
+                 endif
+              enddo
             else ! old weir
                do n = 1, nweirgen
                   i = weir2cgen(n)
@@ -1813,7 +1854,10 @@ subroutine unc_write_his(tim)            ! wrihis
                end do
             end if
 
-            ierr = sgeom_def_geometry_variables(ihisfile, weir_geom_container_name, 'weir', 'line', nNodeTot, id_weirgendim, &
+            ierr = sgeom_def_geometry_variables(ihisfile, 'weirgen_input_geom', 'weir', 'line', nNodeTot, id_weirgendim_input, &
+               id_weirgeom_input_node_count, id_weirgeom_input_node_coordx, id_weirgeom_input_node_coordy)
+
+            ierr = sgeom_def_geometry_variables(ihisfile, weir_geom_container_name, 'weir', 'line', nNodesWeir, id_weirgendim, &
                id_weirgeom_node_count, id_weirgeom_node_coordx, id_weirgeom_node_coordy)
 
             ierr = nf90_def_var(ihisfile, 'weirgen_discharge',     nf90_double, (/ id_weirgendim, id_timedim /), id_weirgen_dis)
@@ -3651,9 +3695,14 @@ subroutine unc_write_his(tim)            ! wrihis
          ! write geometry variables at the first time of history output
          if (it_his == 1) then
             if (network%sts%numWeirs > 0) then ! new weir
+               ierr = nf90_put_var(ihisfile, id_weirgeom_input_node_coordx, geomXWeirInput,     start = (/ 1 /), count = (/ nNodeTot /))
+               ierr = nf90_put_var(ihisfile, id_weirgeom_input_node_coordy, geomYWeirInput,     start = (/ 1 /), count = (/ nNodeTot /))
+               ierr = nf90_put_var(ihisfile, id_weirgeom_input_node_count,  nodeCountWeirInput, start = (/ 1 /), count = (/ network%sts%numWeirs /))
+               
                ierr = nf90_put_var(ihisfile, id_weirgeom_node_coordx, geomXWeir,     start = (/ 1 /), count = (/ nNodesWeir /))
                ierr = nf90_put_var(ihisfile, id_weirgeom_node_coordy, geomYWeir,     start = (/ 1 /), count = (/ nNodesWeir /))
                ierr = nf90_put_var(ihisfile, id_weirgeom_node_count,  nodeCountWeir, start = (/ 1 /), count = (/ network%sts%numWeirs /))
+               
                if (allocated(geomXWeir))     deallocate(geomXWeir)
                if (allocated(geomYWeir))     deallocate(geomYWeir)
                if (allocated(nodeCountWeir)) deallocate(nodeCountWeir)
