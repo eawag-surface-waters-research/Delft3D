@@ -240,9 +240,9 @@ subroutine sethu(jazws0)                            ! Set upwind waterdepth hu
                  wsbov  =  sup
                  wsben  =  s0(kd)
                  if (simonafixedweirs == 0 ) then
-                     hkruin = -bup
-                 else if (simonafixedweirs == 1 ) then
                      hkruin = -crestlevxw(nfw)
+                 else if (simonafixedweirs == 1 ) then
+                     hkruin = -bup
                  endif
                  ! d1     =  bup - blu(L)   !! old implementation
 

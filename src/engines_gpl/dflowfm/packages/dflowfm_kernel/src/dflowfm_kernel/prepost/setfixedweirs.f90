@@ -402,11 +402,11 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
                 iadv(L)    = 23    !  Rajaratnam
              else if (ifixedweirscheme == 8) then
                 iadv(L)    = 24    !  Tabellenboek
-                dzsillu(L) = zc - bl(n1) ; dzsilld(L) = zc - bl(n2)  ! if not specified then estimate
+                dzsillu(L) = max(0.0d0, zc - blu(L));  dzsilld(L) = max(0.0d0, zc - blu(L))  ! if not specified then estimate
                 zcrest(L) = zc
              else if (ifixedweirscheme == 9) then
                 iadv(L)    = 25    !  Villemonte
-                dzsillu(L) = max(0d0, zc - bl(n1) ) ; dzsilld(L) = max(0d0, zc - bl(n2) ) ! if not specified then estimate
+                dzsillu(L) = max(0.0d0, zc - blu(L));  dzsilld(L) = max(0.0d0, zc - blu(L))  ! if not specified then estimate
                 zcrest(L) = zc
              else
                 iadv(L)    = 21    !  Ifixedweirscheme 6
