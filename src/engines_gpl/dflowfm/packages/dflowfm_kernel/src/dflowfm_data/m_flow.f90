@@ -475,11 +475,14 @@
  logical                           :: validateon    !< should we validate flow state yes or no (switched off at water drop)
  integer                           :: noddifmaxlev  !< node number of max lev diff ()
  integer                           :: nodneg        !< node nr with negative hs
+ integer                           :: numnodneg     !< nr of posh checks
+ integer                           :: jaLinkdried   !< there was at least 1 setback in this step
+ integer                           :: Linkdriedmx=0 !< max nr of au growth steps after having dried 
+ integer                           :: nodnegtek     !< node nr with negative hs to draw
  integer                           :: kkcflmx       !< 2D Node nr with max courant
  integer                           :: kcflmx        !< 3D Node nr with max courant
  integer                           :: itsol         !< act nr. of iterations in solve
  integer                           :: nochkadv      !< nr of chkadvd checks
- integer                           :: numnodneg     !< nr of posh checks
  integer                           :: nrimptran     !< nr of implicit transport points
  integer                           :: ndmin         !< node nr where min znod is found in viewing area
  integer                           :: ndmax         !< node nr where max znod is found in viewing area

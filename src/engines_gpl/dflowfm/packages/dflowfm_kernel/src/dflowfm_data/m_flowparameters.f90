@@ -231,6 +231,8 @@
 
  double precision                  :: Uniformhu         !< Uniformhu for arjen's membranes
  double precision                  :: bedslope          !< bed inclination testcases
+ double precision                  :: bedslopedir=45d0  !< bed inclination dir (deg)
+ double precision                  :: bedwidth=100d0    !< width of channel 
  double precision                  :: bedwaveamplitude=0d0  !< bed testcases
  double precision                  :: bedwavelength=0d0     !< bed testcases
 
@@ -260,7 +262,8 @@
                                                         !! (set teta=1.0)      (set teta=0.51->0.99)   (set teta<0)
  integer                           :: japiaczek33 = 1   ! testing 1 2
 
- integer                           :: jacstbnd           !< Delft-3D type cell-centered velocities at boundaries (ucx, ucy)
+ integer                           :: jacstbnd          !< Delft-3D type cell-centered velocities at boundaries (ucx, ucy)
+                                                        !< or more precise: copy of inside cell vector, WITHOUT taking bnd. normal comp.    
  integer                           :: jaLogprofatubndin  !< ubnds inflow: 0=uniform U1, 1 = log U1, 2 = log U1 and k-eps accordingly
  integer                           :: jaLogprofkepsbndin !< ubnds inflow: 0=uniform U1, 1 = log U1, 2 = log U1 and k-eps accordingly
  integer                           :: jamodelspecific = 0 !< override for above two parameters
@@ -281,7 +284,9 @@
  double precision                  :: fixedweirtopfrictcoef  !< if .ne. dmiss, use this friction coefficient on top width
  double precision                  :: fixedweirtalud         !< , e.g. 4 ( ) for 1 to 4 talud
  double precision                  :: waquaweirthetaw=0.6d0  !< , e.g. 0.6
-
+ double precision                  :: huweirregular = 0.0d0  !< For Tabellenboek and Villemonte:
+                                                             !< hu <  huweirregular : true flow area 
+                                                             !< hu >= huweirregular : flow area as if no weir present
  double precision                  :: sini              !< uniform initial waterlevel (m),     (uniform bottom level = zkuni)
  double precision                  :: waterdepthini1D   !< uniform initial depth (m)
  double precision                  :: uini              !< uniform initial velociy    (m/s),

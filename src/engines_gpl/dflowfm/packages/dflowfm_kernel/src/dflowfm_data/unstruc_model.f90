@@ -1114,8 +1114,8 @@ subroutine readMDUFile(filename, istat)
     call prop_get_integer(md_ptr, 'numerics', 'Lincontin'    , lincontin)
     call prop_get_double (md_ptr, 'numerics', 'Chkadvd'      , chkadvd)
 
- !   call prop_get_integer(md_ptr, 'numerics', 'Linkdriedmx'  , Linkdriedmx)
- !   call prop_get_double (md_ptr, 'numerics', 'Huweirregular', Huweirregular) 
+    call prop_get_integer(md_ptr, 'numerics', 'Linkdriedmx'  , Linkdriedmx)
+    call prop_get_double (md_ptr, 'numerics', 'Huweirregular', Huweirregular) 
 
     call prop_get_double (md_ptr, 'numerics', 'Chkdifd'      , chkdifd)
     call prop_get_double (md_ptr, 'numerics', 'Zwsbtol'      , zwsbtol)
@@ -1442,6 +1442,7 @@ subroutine readMDUFile(filename, istat)
        Wdb(3) = max(Wdb(3), Wdb(2) + .1d0)
     else if (Icdtyp == 4) then
        call prop_get_doubles(md_ptr, 'wind', 'Cdbreakpoints'          , Cdb, 1)
+       cdb(2) = 0d0
     else if (Icdtyp == 7 .or. Icdtyp == 8) then
        call prop_get_doubles(md_ptr, 'wind', 'Cdbreakpoints'          , Cdb, 2)
     endif
@@ -2332,10 +2333,11 @@ subroutine readMDUFile(filename, istat)
    !   jarstbnd=1
    !endif
 
-   if (jagui == 0) then 
-      ! If obsolete entries are used in the mdu-file, return with that error code.
-      call final_check_of_mdu_keywords (md_ptr, ierror, prefix='While reading '''//trim(filename)//'''')
-      if (ierror /= DFM_NOERR) then
+   
+   ! If obsolete entries are used in the mdu-file, return with that error code.
+   call final_check_of_mdu_keywords (md_ptr, ierror, prefix='While reading '''//trim(filename)//'''')
+   if (ierror /= DFM_NOERR) then
+      if (jagui == 0) then 
          istat = ierror
       end if
    endif
@@ -2432,7 +2434,7 @@ logical function isobsolete(chap, key)
       end select
    case ('numerics')
       select case (trim(key))
-      case ('hkad','ithindykescheme','thindykecontraction')
+      case ('hkad','ithindykescheme','thindykecontraction', 'TransportMethod', 'TransportTimestepping')
          isobsolete = .true.
       end select
    case ('output')
@@ -3064,13 +3066,13 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
        call prop_set(prop_ptr, 'numerics', 'Chkadvd'  , Chkadvd, 'Check advection terms if depth < chkadvdp, => less setbacks')
     endif
 
-   ! if (writeall .or. Linkdriedmx .ne. 0) then
-   !    call prop_set(prop_ptr, 'numerics', 'Linkdriedmx'    , Linkdriedmx, 'Nr of Au reduction steps after having dried')
-   ! endif
+    if (writeall .or. Linkdriedmx .ne. 0) then
+       call prop_set(prop_ptr, 'numerics', 'Linkdriedmx'    , Linkdriedmx, 'Nr of Au reduction steps after having dried')
+    endif
 
-   ! if (writeall .or. Huweirregular .ne. 0d0) then
-   !    call prop_set(prop_ptr, 'numerics', 'Huweirregular'  , Huweirregular, 'For villemonte and Tabellenboek, regular hu below Huweirregular')
-   ! endif
+    if (writeall .or. Huweirregular .ne. 0d0) then
+       call prop_set(prop_ptr, 'numerics', 'Huweirregular'  , Huweirregular, 'For villemonte and Tabellenboek, regular hu below Huweirregular')
+    endif
 
     if ( writeall .or. Chkdifd .ne. 0.01d0 .and. jatransportautotimestepdiff == 1) then
        call prop_set(prop_ptr, 'numerics', 'Chkdifd'  , Chkdifd, 'Check diffusion terms if depth < chkdifd, only if jatransportautotimestepdiff==1')
