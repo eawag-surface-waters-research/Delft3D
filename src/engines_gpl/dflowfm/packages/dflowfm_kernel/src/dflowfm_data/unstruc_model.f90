@@ -1023,7 +1023,7 @@ subroutine readMDUFile(filename, istat)
     call prop_get_logical(md_ptr, 'numerics', 'setHorizontalBobsFor1d2d', setHorizontalBobsFor1d2d)
     
     call prop_get_integer(md_ptr, 'numerics', 'Testdryingflooding', testdryflood)
-    call prop_get_integer(md_ptr, 'numerics', 'Simonafixedweirs', simonafixedweirs)
+    call prop_get_integer(md_ptr, 'numerics', 'Testfixedweirs'    , testfixedweirs)
 
     call prop_get_integer(md_ptr, 'numerics', 'Icoriolistype'   , icorio)
     call prop_get_integer(md_ptr, 'numerics', 'Newcorio'        , newcorio)
@@ -3252,7 +3252,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     endif
 
     call prop_set(prop_ptr, 'numerics', 'Testdryingflooding', testdryflood,   'Test for drying flooding algoritm (0: D-Flow FM, 1: Delft3D-FLOW)')
-    call prop_set(prop_ptr, 'numerics', 'Simonafixedweirs', simonafixedweirs, 'Test for fixed weir algoritms (0: Simona approach, 1: old D-Flow FM approach )')
+    call prop_set(prop_ptr, 'numerics', 'Testfixedweirs', testfixedweirs, 'Test for fixed weir algoritms (0: old D-Flow FM approach, 1: Simona approach )')
 
 ! Physics
     call prop_set(prop_ptr, 'physics', 'UnifFrictCoef',     frcuni,      'Uniform friction coefficient (0: no friction)')
