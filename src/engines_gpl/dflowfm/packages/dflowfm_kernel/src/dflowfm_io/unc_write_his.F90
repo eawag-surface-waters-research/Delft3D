@@ -1804,20 +1804,17 @@ subroutine unc_write_his(tim)            ! wrihis
            i = 1
            if (network%sts%numWeirs > 0) then ! new weir
               allocate(weirindex(network%sts%numWeirs),nodecountweirinput(network%sts%numWeirs))
+              weirindex = network%sts%WEIRINDICES
 
               do n = 1, network%sts%numWeirs
-                 do j = 1, network%sts%count  !find structure belonging to weir
-                    if (network%sts%struct(j)%ID == network%sts%HASHLIST_WEIR%ID_LIST(n)  ) then
-                       weirindex(n) = j
-                       if (network%sts%struct(j)%NUMCOORDINATES > 0) then
-                          nNodeTot = nNodeTot + network%sts%struct(j)%NUMCOORDINATES
-                       else
-                          nNodeTot = nNodeTot + 1
-                       endif
-                       exit
-                    endif
-                 enddo
+                 j = weirindex(n)
+                 if (network%sts%struct(j)%NUMCOORDINATES > 0) then
+                    nNodeTot = nNodeTot + network%sts%struct(j)%NUMCOORDINATES
+                 else
+                    nNodeTot = nNodeTot + 1
+                 endif
               enddo
+              nNodesWeirInput = nNodeTot
               allocate(geomXWeirInput(nNodeTot),geomYWeirInput(nNodeTot))
               do n = 1, network%sts%numWeirs
                  j = weirindex(n)
@@ -3695,8 +3692,8 @@ subroutine unc_write_his(tim)            ! wrihis
          ! write geometry variables at the first time of history output
          if (it_his == 1) then
             if (network%sts%numWeirs > 0) then ! new weir
-               ierr = nf90_put_var(ihisfile, id_weirgeom_input_node_coordx, geomXWeirInput,     start = (/ 1 /), count = (/ nNodeTot /))
-               ierr = nf90_put_var(ihisfile, id_weirgeom_input_node_coordy, geomYWeirInput,     start = (/ 1 /), count = (/ nNodeTot /))
+               ierr = nf90_put_var(ihisfile, id_weirgeom_input_node_coordx, geomXWeirInput,     start = (/ 1 /), count = (/ nNodesWeirInput /))
+               ierr = nf90_put_var(ihisfile, id_weirgeom_input_node_coordy, geomYWeirInput,     start = (/ 1 /), count = (/ nNodesWeirInput /))
                ierr = nf90_put_var(ihisfile, id_weirgeom_input_node_count,  nodeCountWeirInput, start = (/ 1 /), count = (/ network%sts%numWeirs /))
                
                ierr = nf90_put_var(ihisfile, id_weirgeom_node_coordx, geomXWeir,     start = (/ 1 /), count = (/ nNodesWeir /))

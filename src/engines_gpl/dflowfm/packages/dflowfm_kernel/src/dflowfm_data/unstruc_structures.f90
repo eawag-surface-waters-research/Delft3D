@@ -205,7 +205,7 @@ integer :: jaoldstr !< tmp backwards comp: we cannot mix structures from EXT and
  
  !! Geometry variables
  ! weir
- integer                               :: nNodesWeir           !< [-] Total number of nodes for all weirs
+ integer                               :: nNodesWeir, nNodesWeirInput           !< [-] Total number of nodes for all weirs
  integer,          allocatable, target :: nodeCountWeir(:)     !< [-] Count of nodes per weir.
  integer,          allocatable, target :: nodeCountWeirInput(:)!< [-] Input Count of nodes per weir.
  double precision, allocatable, target :: geomXWeir(:)         !< [m] x coordinates of weirs.
