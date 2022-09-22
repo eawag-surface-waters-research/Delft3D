@@ -14053,14 +14053,14 @@ subroutine get_2d_edge_data(edge_nodes, edge_faces, edge_type, xue, yue, edge_ma
    implicit none
 
    integer, intent(out)                          :: edge_nodes(:,:) !< Edge node connectivity array to be filled.
-   integer, pointer, intent(in)                  :: edge_faces(:,:) !< Edge face type to be filled
+   integer, pointer, intent(in)                  :: edge_faces(:,:) !< Edge face connectivity array to be filled (uses -999 as fill value).
    integer, intent(out)                          :: edge_type(:)    !< Edge type array to be filled.
    real(kind=dp), intent(out)                    :: xue(:)          !< Edge x coordinate array to be filled.
    real(kind=dp), intent(out)                    :: yue(:)          !< Edge y coordinate array to be filled.
    integer, optional, intent(out)                :: edge_mapping_table(:) !< Mapping from original edges to ordered edges (first flow links, then closed edges). To be filled if present.
    integer, optional, intent(out)                :: reverse_edge_mapping_table(:) !< Mapping from ordered edges (first flow links, then closed edges) to original edges. To be filled if present.
 
-   integer :: i, L, Lf !< Counters.
+   integer :: is, i, L, Lf !< Counters.
 
    ! Write all edges that are 2D internal flow links.
    i = 0
@@ -14090,7 +14090,10 @@ subroutine get_2d_edge_data(edge_nodes, edge_faces, edge_type, xue, yue, edge_ma
 
       edge_nodes(1:2, i) = lncn(1:2, Lf)
       if (associated(edge_faces)) then
-         edge_faces(1:2,i) = (/ 0, ln(2, Lf) /)
+         ! NOTE: the internal face intentionally gets placed on index 1,
+         ! even though the flow link has it on index 2 by definition.
+         edge_faces(1,i) = ln(2, Lf)
+         edge_faces(2,i) = -999
       endif
 
       edge_type(i) = UG_EDGETYPE_BND
@@ -14121,7 +14124,16 @@ subroutine get_2d_edge_data(edge_nodes, edge_faces, edge_type, xue, yue, edge_ma
                edge_type(i) = UG_EDGETYPE_INTERNAL_CLOSED
             end if
 
-            if (associated(edge_faces)) edge_faces(1:2, i) = lne(1:2, L)
+            if (associated(edge_faces)) then
+               do is=1,2
+                  if (lne(is, L) > 0) then
+                     edge_faces(is, i) = lne(is, L)
+                  else
+                     edge_faces(is, i) = -999
+                  end if
+               end do
+            end if
+
             ! Edge coordinate is in the middle of the net link.
             xue(i) = .5d0*(xk(kn(1,L)) + xk(kn(2,L)))
             yue(i) = .5d0*(yk(kn(1,L)) + yk(kn(2,L)))
