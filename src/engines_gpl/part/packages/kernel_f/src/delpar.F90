@@ -619,7 +619,7 @@
       do itime = itstrtp, itstopp, idelt
 
 !        Echo actual time to screen
-         pctprogress = 100.0 * (real(itime,4) - real(itstrtp,4)) / (real(itstopp,4) - real(itstrtp,4)) ! percentage progress
+         pctprogress = 100.0 * (real(itime) - real(itstrtp)) / (real(itstopp) - real(itstrtp)) ! percentage progress
 
          write ( *, 1020) itime  /86400, mod(itime  , 86400)/3600, mod(itime  , 3600)/60, mod(itime  , 60),  &
                           itstopp/86400, mod(itstopp, 86400)/3600, mod(itstopp, 3600)/60, mod(itstopp, 60),  &
