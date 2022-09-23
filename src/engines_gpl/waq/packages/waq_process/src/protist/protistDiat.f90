@@ -78,8 +78,8 @@ use ieee_arithmetic
     integer iflux   
     integer ikmrk1        ! first segment attribute
           
-    integer ispec         ! local species number counter
-    integer spInc         ! local species PMSA number counter
+    integer iSpec         ! local species number counter
+    integer spInc         ! local species PSMA/FL number increment
     integer inpItems      ! nr of input items need for output PMSA
     
      ! input parameters
@@ -129,7 +129,7 @@ use ieee_arithmetic
     iflux = 0
     
     ! segment and species independent items
-    nrSpec      = PMSA(ipnt(   1 ))   !   nr of species to be modelled                                 (-)  
+    nrSpec      = nint(PMSA(ipnt(   1 )))   !   nr of species in the interface                                 (-)  
       
     ! length of the PMSA input array. 
     inpItems = nrIndInp + nrSpec * nrSpecInp
@@ -150,55 +150,55 @@ use ieee_arithmetic
         exat         = EXP(-atten)        !    -ve exponent of attenuation                            (-)              
                       
         ! species loop
-        speciesLoop: do iSpec = 0, (nrSpec-1)
+        speciesLoop: do iSpec = 1, nrSpec
 
-            spInc = nrSpecInp * iSpec
+            spInc = nrIndInp + (iSpec - 1) * nrSpecInp
                
             ! species dependent items
             ! (number of species independent items + location of input item in vector + species loop)
-            protC        = PMSA(ipnt( nrIndInp +  1 + spInc ))   !      C-biomass                                              (gC m-3)  
+            protC        = PMSA(ipnt( spInc +  1 ))   !      C-biomass                                              (gC m-3)  
 
             ! skip if biomass is below threshold
             if (protC <= threshCmass) then 
                 cycle speciesLoop
             end if
 
-            protChl      = PMSA(ipnt( nrIndInp +  2 + spInc ))   !      Chl-biomass                                            (gChl m-3)   
-            protN        = PMSA(ipnt( nrIndInp +  3 + spInc ))   !      N-biomass                                              (gN m-3)   
-            protP        = PMSA(ipnt( nrIndInp +  4 + spInc ))   !      P-biomass                                              (gP m-3)   
-            protSi       = PMSA(ipnt( nrIndInp +  5 + spInc ))   !      Si-biomass                                             (gSi m-3) 
-            alpha        = PMSA(ipnt( nrIndInp +  6 + spInc ))   !      alpha for photosynthesis in protist                    (Figure this out!)
-            ChlCm        = PMSA(ipnt( nrIndInp +  7 + spInc ))   !      maximum cellular Chl:C ratio                           (gChl gC-1)
-            ChlCo        = PMSA(ipnt( nrIndInp +  8 + spInc ))   !      minimum cellular Chl:C ratio                           (gChl gC-1)
-            CR           = PMSA(ipnt( nrIndInp +  9 + spInc ))   !      catabolic respiration quotient                         (-)
-            FrAut        = PMSA(ipnt( nrIndInp + 10 + spInc ))   !      fraction of mortality to autolysis                     (-)
-            FrDet        = PMSA(ipnt( nrIndInp + 11 + spInc ))   !      fraction of mortality to detritus                      (-)
-            KtNH4        = PMSA(ipnt( nrIndInp + 12 + spInc ))   !      Kt for NH4 transport                                   (gN m-3)
-            KtNO3        = PMSA(ipnt( nrIndInp + 13 + spInc ))   !      Kt for NO3 transport                                   (gN m-3) 
-            KtP          = PMSA(ipnt( nrIndInp + 14 + spInc ))   !      Kt for DIP transport                                   (gP m-3) 
-            KtSi         = PMSA(ipnt( nrIndInp + 15 + spInc ))   !      Kt for Si transport                                    (gSi m-3) 
-            MrtRT        = PMSA(ipnt( nrIndInp + 16 + spInc ))   !      mortality at reference temperature                     (-) 
-            NCm          = PMSA(ipnt( nrIndInp + 17 + spInc ))   !      N:C that totally represses NH4 transport               (gN gC-1) 
-            NCo          = PMSA(ipnt( nrIndInp + 18 + spInc ))   !      minimum N-quota                                        (gN gC-1) 
-            NCopt        = PMSA(ipnt( nrIndInp + 19 + spInc ))   !      N:C for growth under optimal conditions                (gN gC-1) 
-            NO3Cm        = PMSA(ipnt( nrIndInp + 20 + spInc ))   !      N:C that totally represses NO3 transport               (gN gC-1)
-            NO3Copt      = PMSA(ipnt( nrIndInp + 21 + spInc ))   !      N:C for growth on NO3 under optimal conditions         (gN gC-1) 
-            PCm          = PMSA(ipnt( nrIndInp + 22 + spInc ))   !      PC maximum quota                                       (gP gC-1) 
-            PCo          = PMSA(ipnt( nrIndInp + 23 + spInc ))   !      PC minimum quota                                       (gP gC-1) 
-            PCoNCm       = PMSA(ipnt( nrIndInp + 24 + spInc ))   !      maximum NC when PC is minimum (PCu = 0)                (gN gC-1)
-            PCoNCopt     = PMSA(ipnt( nrIndInp + 25 + spInc ))   !      optimum NC when PC is minimum (PCu = 0)                (gN gC-1) 
-            PCopt        = PMSA(ipnt( nrIndInp + 26 + spInc ))   !      PC optimum quota                                       (gP gC-1)
-            PSDOC        = PMSA(ipnt( nrIndInp + 27 + spInc ))   !      proportion of current PS being leaked as DOC           (-)
-            Q10          = PMSA(ipnt( nrIndInp + 28 + spInc ))   !      Q10 for UmRT                                           (-) 
-            redco        = PMSA(ipnt( nrIndInp + 29 + spInc ))   !      C respired to support nitrate reduction for NH4        (gC gN-1) 
-            relPS        = PMSA(ipnt( nrIndInp + 30 + spInc ))   !      relative PSmax:Umax on phototrophy                     (-)
-            ReUmNH4      = PMSA(ipnt( nrIndInp + 31 + spInc ))   !      max. growth rate supported by NH4-N:Umax               (-)   
-            ReUmNO3      = PMSA(ipnt( nrIndInp + 32 + spInc ))   !      max. growth rate supported by NO3-N:Umax               (-)                    
-            RT           = PMSA(ipnt( nrIndInp + 33 + spInc ))   !      reference temperature for UmRT                         (deg C)     
-            SiCm         = PMSA(ipnt( nrIndInp + 34 + spInc ))   !      absolute maximum Si:C (diatom)                         (gSi gC-1) 
-            SiCo         = PMSA(ipnt( nrIndInp + 35 + spInc ))   !      optimum Si:C for (diatom) growth                       (gSi gC-1)
-            SiCopt       = PMSA(ipnt( nrIndInp + 36 + spInc ))   !      minimum Si:C (diatom)                                  (gSi gC-1)
-            UmRT         = PMSA(ipnt( nrIndInp + 37 + spInc ))   !      maximum growth rate at reference T                     (d-1) 
+            protChl      = PMSA(ipnt( spInc +  2 ))   !      Chl-biomass                                            (gChl m-3)   
+            protN        = PMSA(ipnt( spInc +  3 ))   !      N-biomass                                              (gN m-3)   
+            protP        = PMSA(ipnt( spInc +  4 ))   !      P-biomass                                              (gP m-3)   
+            protSi       = PMSA(ipnt( spInc +  5 ))   !      Si-biomass                                             (gSi m-3) 
+            alpha        = PMSA(ipnt( spInc +  6 ))   !      alpha for photosynthesis in protist                    (Figure this out!)
+            ChlCm        = PMSA(ipnt( spInc +  7 ))   !      maximum cellular Chl:C ratio                           (gChl gC-1)
+            ChlCo        = PMSA(ipnt( spInc +  8 ))   !      minimum cellular Chl:C ratio                           (gChl gC-1)
+            CR           = PMSA(ipnt( spInc +  9 ))   !      catabolic respiration quotient                         (-)
+            FrAut        = PMSA(ipnt( spInc + 10 ))   !      fraction of mortality to autolysis                     (-)
+            FrDet        = PMSA(ipnt( spInc + 11 ))   !      fraction of mortality to detritus                      (-)
+            KtNH4        = PMSA(ipnt( spInc + 12 ))   !      Kt for NH4 transport                                   (gN m-3)
+            KtNO3        = PMSA(ipnt( spInc + 13 ))   !      Kt for NO3 transport                                   (gN m-3) 
+            KtP          = PMSA(ipnt( spInc + 14 ))   !      Kt for DIP transport                                   (gP m-3) 
+            KtSi         = PMSA(ipnt( spInc + 15 ))   !      Kt for Si transport                                    (gSi m-3) 
+            MrtRT        = PMSA(ipnt( spInc + 16 ))   !      mortality at reference temperature                     (-) 
+            NCm          = PMSA(ipnt( spInc + 17 ))   !      N:C that totally represses NH4 transport               (gN gC-1) 
+            NCo          = PMSA(ipnt( spInc + 18 ))   !      minimum N-quota                                        (gN gC-1) 
+            NCopt        = PMSA(ipnt( spInc + 19 ))   !      N:C for growth under optimal conditions                (gN gC-1) 
+            NO3Cm        = PMSA(ipnt( spInc + 20 ))   !      N:C that totally represses NO3 transport               (gN gC-1)
+            NO3Copt      = PMSA(ipnt( spInc + 21 ))   !      N:C for growth on NO3 under optimal conditions         (gN gC-1) 
+            PCm          = PMSA(ipnt( spInc + 22 ))   !      PC maximum quota                                       (gP gC-1) 
+            PCo          = PMSA(ipnt( spInc + 23 ))   !      PC minimum quota                                       (gP gC-1) 
+            PCoNCm       = PMSA(ipnt( spInc + 24 ))   !      maximum NC when PC is minimum (PCu = 0)                (gN gC-1)
+            PCoNCopt     = PMSA(ipnt( spInc + 25 ))   !      optimum NC when PC is minimum (PCu = 0)                (gN gC-1) 
+            PCopt        = PMSA(ipnt( spInc + 26 ))   !      PC optimum quota                                       (gP gC-1)
+            PSDOC        = PMSA(ipnt( spInc + 27 ))   !      proportion of current PS being leaked as DOC           (-)
+            Q10          = PMSA(ipnt( spInc + 28 ))   !      Q10 for UmRT                                           (-) 
+            redco        = PMSA(ipnt( spInc + 29 ))   !      C respired to support nitrate reduction for NH4        (gC gN-1) 
+            relPS        = PMSA(ipnt( spInc + 30 ))   !      relative PSmax:Umax on phototrophy                     (-)
+            ReUmNH4      = PMSA(ipnt( spInc + 31 ))   !      max. growth rate supported by NH4-N:Umax               (-)   
+            ReUmNO3      = PMSA(ipnt( spInc + 32 ))   !      max. growth rate supported by NO3-N:Umax               (-)                    
+            RT           = PMSA(ipnt( spInc + 33 ))   !      reference temperature for UmRT                         (deg C)     
+            SiCm         = PMSA(ipnt( spInc + 34 ))   !      absolute maximum Si:C (diatom)                         (gSi gC-1) 
+            SiCo         = PMSA(ipnt( spInc + 35 ))   !      optimum Si:C for (diatom) growth                       (gSi gC-1)
+            SiCopt       = PMSA(ipnt( spInc + 36 ))   !      minimum Si:C (diatom)                                  (gSi gC-1)
+            UmRT         = PMSA(ipnt( spInc + 37 ))   !      maximum growth rate at reference T                     (d-1) 
 
 
             ! Calculate the nutrient quota of the cell-------------------------------------------------------------------------------                            
@@ -265,30 +265,32 @@ use ieee_arithmetic
             ! Output -------------------------------------------------------------------
                
             ! (input items + position of specific output item in vector + species loop * total number of output) 
-            PMSA(ipnt( inpItems +  1 + iSpec * nrSpecOut )) = NC 
-            PMSA(ipnt( inpItems +  2 + iSpec * nrSpecOut )) = PC 
-            PMSA(ipnt( inpItems +  3 + iSpec * nrSpecOut )) = SC 
-            PMSA(ipnt( inpItems +  4 + iSpec * nrSpecOut )) = ChlC
-            PMSA(ipnt( inpItems +  5 + iSpec * nrSpecOut )) = UmT 
-            PMSA(ipnt( inpItems +  6 + iSpec * nrSpecOut )) = BR
-            PMSA(ipnt( inpItems +  7 + iSpec * nrSpecOut )) = NCu 
-            PMSA(ipnt( inpItems +  8 + iSpec * nrSpecOut )) = PCu 
-            PMSA(ipnt( inpItems +  9 + iSpec * nrSpecOut )) = SCu 
-            PMSA(ipnt( inpItems + 10 + iSpec * nrSpecOut )) = NPSiCu
-            PMSA(ipnt( inpItems + 11 + iSpec * nrSpecOut )) = upP 
-            PMSA(ipnt( inpItems + 12 + iSpec * nrSpecOut )) = upNH4 
-            PMSA(ipnt( inpItems + 13 + iSpec * nrSpecOut )) = upNO3 
-            PMSA(ipnt( inpItems + 14 + iSpec * nrSpecOut )) = upSi
-            PMSA(ipnt( inpItems + 15 + iSpec * nrSpecOut )) = PSqm 
-            PMSA(ipnt( inpItems + 16 + iSpec * nrSpecOut )) = PS
-            PMSA(ipnt( inpItems + 17 + iSpec * nrSpecOut )) = Cfix 
-            PMSA(ipnt( inpItems + 18 + iSpec * nrSpecOut )) = synChl
-            PMSA(ipnt( inpItems + 19 + iSpec * nrSpecOut )) = degChl
-            PMSA(ipnt( inpItems + 20 + iSpec * nrSpecOut )) = totR 
-            PMSA(ipnt( inpItems + 21 + iSpec * nrSpecOut )) = Cu
-            PMSA(ipnt( inpItems + 22 + iSpec * nrSpecOut )) = mrt 
-            PMSA(ipnt( inpItems + 23 + iSpec * nrSpecOut )) = mrtFrAut 
-            PMSA(ipnt( inpItems + 24 + iSpec * nrSpecOut )) = mrtFrDet
+            spInc = inpItems +  (iSpec - 1) * nrSpecOut
+
+            PMSA(ipnt( spInc +  1 )) = NC 
+            PMSA(ipnt( spInc +  2 )) = PC 
+            PMSA(ipnt( spInc +  3 )) = SC 
+            PMSA(ipnt( spInc +  4 )) = ChlC
+            PMSA(ipnt( spInc +  5 )) = UmT 
+            PMSA(ipnt( spInc +  6 )) = BR
+            PMSA(ipnt( spInc +  7 )) = NCu 
+            PMSA(ipnt( spInc +  8 )) = PCu 
+            PMSA(ipnt( spInc +  9 )) = SCu 
+            PMSA(ipnt( spInc + 10 )) = NPSiCu
+            PMSA(ipnt( spInc + 11 )) = upP 
+            PMSA(ipnt( spInc + 12 )) = upNH4 
+            PMSA(ipnt( spInc + 13 )) = upNO3 
+            PMSA(ipnt( spInc + 14 )) = upSi
+            PMSA(ipnt( spInc + 15 )) = PSqm 
+            PMSA(ipnt( spInc + 16 )) = PS
+            PMSA(ipnt( spInc + 17 )) = Cfix 
+            PMSA(ipnt( spInc + 18 )) = synChl
+            PMSA(ipnt( spInc + 19 )) = degChl
+            PMSA(ipnt( spInc + 20 )) = totR 
+            PMSA(ipnt( spInc + 21 )) = Cu
+            PMSA(ipnt( spInc + 22 )) = mrt 
+            PMSA(ipnt( spInc + 23 )) = mrtFrAut 
+            PMSA(ipnt( spInc + 24 )) = mrtFrDet
 
             ! FLUXES -------------------------------------------------------------------   
             ! Protist gains------------------------------------------------------------                                 
@@ -336,28 +338,30 @@ use ieee_arithmetic
             dDetChl     = protChl * mrtFrDet
               
             ! (1 + SpeciesLoop * (nr of fluxes per individual species) + total number of fluxes) 
-            fl (  1 +  iSpec * nrSpecFlux  + iflux )  = dNH4up
-            fl (  2 +  iSpec * nrSpecFlux  + iflux )  = dNO3up
-            fl (  3 +  iSpec * nrSpecFlux  + iflux )  = dPup  
-            fl (  4 +  iSpec * nrSpecFlux  + iflux )  = dSiup 
-            fl (  5 +  iSpec * nrSpecFlux  + iflux )  = dCfix
-            fl (  6 +  iSpec * nrSpecFlux  + iflux )  = dChlsyn
-            fl (  7 +  iSpec * nrSpecFlux  + iflux )  = dChldeg
-            fl (  8 +  iSpec * nrSpecFlux  + iflux )  = dCresp
-            fl (  9 +  iSpec * nrSpecFlux  + iflux )  = dDOCleak
-            fl ( 10 +  iSpec * nrSpecFlux  + iflux )  = dDOCvoid
-            fl ( 11 +  iSpec * nrSpecFlux  + iflux )  = dNH4out
-            fl ( 12 +  iSpec * nrSpecFlux  + iflux )  = dPout      
-            fl ( 13 +  iSpec * nrSpecFlux  + iflux )  = dAutC    
-            fl ( 14 +  iSpec * nrSpecFlux  + iflux )  = dDetC    
-            fl ( 15 +  iSpec * nrSpecFlux  + iflux )  = dAutN    
-            fl ( 16 +  iSpec * nrSpecFlux  + iflux )  = dDetN    
-            fl ( 17 +  iSpec * nrSpecFlux  + iflux )  = dAutP    
-            fl ( 18 +  iSpec * nrSpecFlux  + iflux )  = dDetP    
-            fl ( 19 +  iSpec * nrSpecFlux  + iflux )  = dAutSi   
-            fl ( 20 +  iSpec * nrSpecFlux  + iflux )  = dDetSi   
-            fl ( 21 +  iSpec * nrSpecFlux  + iflux )  = dAutChl  
-            fl ( 22 +  iSpec * nrSpecFlux  + iflux )  = dDetChl  
+            spInc = iflux + (iSpec - 1) * nrSpecFlux
+
+            fl ( spInc +  1 )  = dNH4up
+            fl ( spInc +  2 )  = dNO3up
+            fl ( spInc +  3 )  = dPup  
+            fl ( spInc +  4 )  = dSiup 
+            fl ( spInc +  5 )  = dCfix
+            fl ( spInc +  6 )  = dChlsyn
+            fl ( spInc +  7 )  = dChldeg
+            fl ( spInc +  8 )  = dCresp
+            fl ( spInc +  9 )  = dDOCleak
+            fl ( spInc + 10 )  = dDOCvoid
+            fl ( spInc + 11 )  = dNH4out
+            fl ( spInc + 12 )  = dPout      
+            fl ( spInc + 13 )  = dAutC    
+            fl ( spInc + 14 )  = dDetC    
+            fl ( spInc + 15 )  = dAutN    
+            fl ( spInc + 16 )  = dDetN    
+            fl ( spInc + 17 )  = dAutP    
+            fl ( spInc + 18 )  = dDetP    
+            fl ( spInc + 19 )  = dAutSi   
+            fl ( spInc + 20 )  = dDetSi   
+            fl ( spInc + 21 )  = dAutChl  
+            fl ( spInc + 22 )  = dDetChl  
             
             if ( ieee_is_nan(protC) ) write (*,*) 'ERROR: in ProtistDiat, NaN in protC in segment:', iseg
             if ( ieee_is_nan(Cfix) )  write (*,*) 'ERROR: in ProtistDiat, NaN in Cfix in segment:' , iseg

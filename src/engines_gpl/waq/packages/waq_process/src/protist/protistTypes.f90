@@ -62,70 +62,73 @@ module protist_types
     contains
     
     ! allocate arrays
-    subroutine allocate_prot_array(prot_array,maxNrPr)
+    subroutine allocate_prot_array(prot_array,nrPrey)
         type(protist_array), intent(inout)  :: prot_array
-        integer, intent(in)                 :: maxNrPr
+        integer, intent(in)                 :: nrPrey
         
         ! allocate statements
-        allocate( prot_array%preyC(maxNrPr)        )    
-        allocate( prot_array%preyChl(maxNrPr)      )  
-        allocate( prot_array%preyN(maxNrPr)        )    
-        allocate( prot_array%preyP(maxNrPr)        )    
-        allocate( prot_array%preySi(maxNrPr)       )   
-        allocate( prot_array%CcellPrey(maxNrPr)    )
-        allocate( prot_array%rPrey(maxNrPr)        )    
-        allocate( prot_array%motPrey(maxNrPr)      )  
-        allocate( prot_array%PR(maxNrPr)           )       
+        allocate( prot_array%preyC(nrPrey)        )    
+        allocate( prot_array%preyChl(nrPrey)      )  
+        allocate( prot_array%preyN(nrPrey)        )    
+        allocate( prot_array%preyP(nrPrey)        )    
+        allocate( prot_array%preySi(nrPrey)       )   
+        allocate( prot_array%CcellPrey(nrPrey)    )
+        allocate( prot_array%rPrey(nrPrey)        )    
+        allocate( prot_array%motPrey(nrPrey)      )  
+        allocate( prot_array%PR(nrPrey)           )       
     
         ! allocation of food quantity and quality arrays
-        allocate( prot_array%nrPrey(maxNrPr)       )
-        allocate( prot_array%preyFlag(maxNrPr)     )
-        allocate( prot_array%smallerVel(maxNrPr)   )
-        allocate( prot_array%largerVel(maxNrPr)    )
-        allocate( prot_array%encPrey(maxNrPr)      )
-        allocate( prot_array%capturedPrey(maxNrPr) )
-        allocate( prot_array%propPrey(maxNrPr)     )
-        allocate( prot_array%ingNC(maxNrPr)        )
-        allocate( prot_array%ingPC(maxNrPr)        )
-        allocate( prot_array%dPreyC(maxNrPr)       )  
-        allocate( prot_array%dPreyChl(maxNrPr)     )
-        allocate( prot_array%dPreyN(maxNrPr)       )  
-        allocate( prot_array%dPreyP(maxNrPr)       )  
-        allocate( prot_array%dPreySi(maxNrPr)      ) 
+        allocate( prot_array%nrPrey(nrPrey)       )
+        allocate( prot_array%preyFlag(nrPrey)     )
+        allocate( prot_array%smallerVel(nrPrey)   )
+        allocate( prot_array%largerVel(nrPrey)    )
+        allocate( prot_array%encPrey(nrPrey)      )
+        allocate( prot_array%capturedPrey(nrPrey) )
+        allocate( prot_array%propPrey(nrPrey)     )
+        allocate( prot_array%ingNC(nrPrey)        )
+        allocate( prot_array%ingPC(nrPrey)        )
+        allocate( prot_array%dPreyC(nrPrey)       )  
+        allocate( prot_array%dPreyChl(nrPrey)     )
+        allocate( prot_array%dPreyN(nrPrey)       )  
+        allocate( prot_array%dPreyP(nrPrey)       )  
+        allocate( prot_array%dPreySi(nrPrey)      ) 
     
     end subroutine allocate_prot_array
    
     
     ! initialize arrays
-    subroutine initialize_prot_array(prot_array,maxNrPr, PMSA, plen, ipnt, nrSpInd, maxNrSp, nrSpCon, iSpec, nrSp_par)
+    subroutine initialize_prot_array(prot_array,nrPrey, PMSA, plen, ipnt, nrIndInp, nrSpec, nrSpecInp, iSpec, nrPreyInp)
         type(protist_array), intent(inout)  :: prot_array
-        integer, intent(in)                 :: maxNrPr
+        integer, intent(in)                 :: nrPrey
         integer, intent(in)                 :: ipnt(:)
         integer, intent(in)                 :: plen
-        integer, intent(in)                 :: maxNrSp, nrSpCon, nrSpInd, iSpec, nrSp_par
+        integer, intent(in)                 :: nrSpec, nrSpecInp, nrIndInp, iSpec, nrPreyInp
         real(4)                             :: pmsa(*)
-        integer     iPrey
+        integer iPrey         ! local prey number counter
+        integer prInc         ! local pray PMSA number increment
 
 
-        do iPrey = 0, (maxNrPr - 1)
+        do iPrey = 1, nrPrey
             !prey specific input
             ! independentItems + all input items of all zoo species + first prey item + current PreyNumber * total nr of prey specific items
-            prot_array%preyC(iPrey + 1)         = PMSA(ipnt( nrSpInd + maxNrSp * nrSpCon + 1 + iPrey * nrSp_par))   !      C-biomass                                              (gC m-3)   
-            prot_array%preyChl(iPrey + 1)       = PMSA(ipnt( nrSpInd + maxNrSp * nrSpCon + 2 + iPrey * nrSp_par))   !      Chl-biomass                                            (gC m-3)  
-            prot_array%preyN(iPrey + 1)         = PMSA(ipnt( nrSpInd + maxNrSp * nrSpCon + 3 + iPrey * nrSp_par))   !      N-biomass                                              (gN m-3)  
-            prot_array%preyP(iPrey + 1)         = PMSA(ipnt( nrSpInd + maxNrSp * nrSpCon + 4 + iPrey * nrSp_par))   !      P-biomass                                              (gP m-3)  
-            prot_array%preySi(iPrey + 1)        = PMSA(ipnt( nrSpInd + maxNrSp * nrSpCon + 5 + iPrey * nrSp_par))   !      Si-biomass                                             (gP m-3)  
-            prot_array%CcellPrey(iPrey + 1)     = PMSA(ipnt( nrSpInd + maxNrSp * nrSpCon + 6 + iPrey * nrSp_par))   !      C content of protist cell                              (pgC cell-1) 
-            prot_array%rPrey(iPrey + 1)         = PMSA(ipnt( nrSpInd + maxNrSp * nrSpCon + 7 + iPrey * nrSp_par))   !      radius of nutrient repleted protist cell               (um)
-            prot_array%motPrey(iPrey + 1)       = PMSA(ipnt( nrSpInd + maxNrSp * nrSpCon + 8 + iPrey * nrSp_par))   !      swimming velocity                                      (m s-1)
-            prot_array%PR(iPrey + 1)            = PMSA(ipnt( nrSpInd + maxNrSp * nrSpCon + 9 + iSpec + iPrey * nrSp_par))   !      handling index of prey 1 by pred 1             (-)  
+            prInc = nrIndInp + nrSpec * nrSpecInp + (iPrey - 1) * (nrPreyInp + nrSpec)
+            
+            prot_array%preyC(iPrey)         = PMSA(ipnt( prInc + 1 ))          ! C-biomass                                              (gC m-3)   
+            prot_array%preyChl(iPrey)       = PMSA(ipnt( prInc + 2 ))          ! Chl-biomass                                            (gC m-3)  
+            prot_array%preyN(iPrey)         = PMSA(ipnt( prInc + 3 ))          ! N-biomass                                              (gN m-3)  
+            prot_array%preyP(iPrey)         = PMSA(ipnt( prInc + 4 ))          ! P-biomass                                              (gP m-3)  
+            prot_array%preySi(iPrey)        = PMSA(ipnt( prInc + 5 ))          ! Si-biomass                                             (gP m-3)  
+            prot_array%CcellPrey(iPrey)     = PMSA(ipnt( prInc + 6 ))          ! C content of protist cell                              (pgC cell-1) 
+            prot_array%rPrey(iPrey)         = PMSA(ipnt( prInc + 7 ))          ! radius of nutrient repleted protist cell               (um)
+            prot_array%motPrey(iPrey)       = PMSA(ipnt( prInc + 8 ))          ! swimming velocity                                      (m s-1)
+            prot_array%PR(iPrey)            = PMSA(ipnt( prInc + 8 + iSpec))   !      handling index of prey 1 by pred 1             (-)  
             
             
             ! if loop to protect against small preys (-)
-            if (prot_array%preyC(iPrey + 1) >= 1.0E-5) then 
-                prot_array%preyFlag(iPrey + 1) = 1.0
+            if (prot_array%preyC(iPrey) >= 1.0E-5) then 
+                prot_array%preyFlag(iPrey) = 1.0
             else 
-                prot_array%preyFlag(iPrey + 1) = 0.0
+                prot_array%preyFlag(iPrey) = 0.0
             end if 
                             
         end do
