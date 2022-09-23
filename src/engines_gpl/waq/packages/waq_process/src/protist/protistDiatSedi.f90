@@ -53,11 +53,14 @@ subroutine PROSED     ( pmsa   , fl     , ipoint , increm, noseg , &
 !     Type    Name         I/O Description                                        Unit                
 !                                                                                                     
 !     support variables
-    integer, parameter :: nrIndInp = 6     !   nr of species independent input items
-    integer, parameter :: nrSpecInp = 7    !   nr of inputs per species
-    integer, parameter :: nrSpecOut = 6    !   nr of outputs per species
-    integer, parameter :: plen = 36        ! total length of the PMSA input and output array
-    integer ipnt(plen)    ! Local work array for the pointering                                    
+    integer, parameter    :: nrIndInp = 6     !   nr of species independent input items
+    integer, parameter    :: nrSpecInp = 7    !   nr of inputs per species
+    integer, parameter    :: nrSpecOut = 6    !   nr of outputs per species
+    integer               :: nrInputItems     !   nr of input items need for output PMSA
+    integer               :: nrOutputItems    !   nr of output items need for output PMSA
+    integer               :: ipointLength     !   total length of the PMSA input and output pointer array
+    integer, allocatable  :: ipnt(:)          !   Local work array for the pointering                                    
+
     integer iseg          ! Local loop counter for computational element loop                      
     integer ioq
     integer iflux   
@@ -91,12 +94,24 @@ subroutine PROSED     ( pmsa   , fl     , ipoint , increm, noseg , &
 !                                                                                                     
 !******************************************************************************* 
 !                                                                                                     
-    ipnt(1:plen) = ipoint(1:plen)
-           
+    ! segment and species independent items
+    nrSpec = nint(PMSA(ipoint(   1 )))   !   nr of species in the interface                                 (-)  
+
+!   nrInputItems  = nrIndInp + nrSpec * nrSpecInp = 6 + 2 * 7 = 20
+!   nrOutputItems = nrSpec * nrSpecOut = 2 * 6 = 12
+!   ipointLength = nrInputItems + nrOutputItems = 20 + 12 = 32
+!   nrFluxes  = nrSpec * (nrSpexFlx + nrPrey * nrLossFluxes) = 2 * 5 = 10
+
+    ! length of the PMSA input pointer array. 
+    nrInputItems = nrIndInp + nrSpec * nrSpecInp     ! only input on segments, not on exchanges!
+    nrOutputItems = nrSpec * nrSpecOut               ! only output on segments, not on exchanges!
+    ipointLength = nrInputItems + nrSpec + nrOutputItems + nrSpec ! includes one input and one output per species on exchanges
+
+    allocate (ipnt(ipointLength))
+    ipnt(1:ipointLength) = ipoint(1:ipointLength)
     iflux = 0
     
     ! segment and species independent items
-    nrSpec     = nint(PMSA(ipnt(   1 )))   !   total nr species implemented in process                (-)
     DELT       = PMSA(ipnt(   2 ))         !   timestep for processes                                 (d)    
     MinDepth   = PMSA(ipnt(   3 ))         !   minimum waterdepth for sedimentation/resuspension      (m)    
     TaucSDiat  = PMSA(ipnt(   4 ))         !   critical shear stress for sedimentation Diatoms        (N/m2) 
@@ -204,18 +219,18 @@ subroutine PROSED     ( pmsa   , fl     , ipoint , increm, noseg , &
         
         !allocate pointers
         iflux = iflux + noflux
-        ipnt(1:plen) = ipnt(1:plen) + increm(1:plen)
+        ipnt(1:ipointLength) = ipnt(1:ipointLength) + increm(1:ipointLength)
         
     enddo ! end loop over segments
        
-    ipnt(1:plen) = ipoint(1:plen)
+    ipnt(1:ipointLength) = ipoint(1:ipointLength)
     ! Exchange loop over horizontal direction -------------------------------------------------------------------
     do ioq = 1, noq1 + noq2
         do iSpec = 1, nrSpec
             ! input+ input exchange + output + exchange + loop over species
             PMSA(ipnt( inpItems + nrSpec + nrSpec * nrSpecOut + iSpec )) = 0.0 
         enddo
-        ipnt(1:plen) = ipnt(1:plen) + increm(1:plen)
+        ipnt(1:ipointLength) = ipnt(1:ipointLength) + increm(1:ipointLength)
     enddo        
     
     ! Exchange loop over vertical direction -------------------------------------------------------------------
@@ -246,7 +261,8 @@ subroutine PROSED     ( pmsa   , fl     , ipoint , increm, noseg , &
                 enddo ! end loop over species
             endif ! end check water - water 
         endif ! end check boundaries
-        ipnt(1:plen) = ipnt(1:plen) + increm(1:plen)
+        ipnt(1:ipointLength) = ipnt(1:ipointLength) + increm(1:ipointLength)
     enddo ! end loop of vertical exchange    
+    deallocate (ipnt)
     return
 end ! end subroutine 

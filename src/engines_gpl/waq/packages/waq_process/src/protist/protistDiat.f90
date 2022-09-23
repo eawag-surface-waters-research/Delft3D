@@ -60,19 +60,15 @@ use ieee_arithmetic
 !     Type    Name         I/O Description                                        Unit                
 !                                                                                                     
 !     support variables
-    integer, parameter :: nrIndInp = 8     !   nr of species independent input items
-    integer, parameter :: nrSpecInp = 37   !   nr of inputs per species
-    integer, parameter :: nrSpecOut = 24   !   nr of outputs per species
-    integer, parameter :: nrSpecFlux = 22  !   nr of fluxes per species
-    
-!   nrInputs  = nrIndInp + nrSpec * nrSpecInp = 8 + 2 * 37 = 82
-!   nrOutputs = nrSpec * nrSpecOut = 2 * 24 = 48
-!   plen = nrInputs + nrOutputs = 82 + 48 = 130
-!   nrFluxes  = nrSpec * (nrSpexFlx + nrPrey * nrLossFluxes) = 2 * 22 = 44
+    integer, parameter    :: nrIndInp = 8     !   nr of species independent input items
+    integer, parameter    :: nrSpecInp = 37   !   nr of inputs per species
+    integer, parameter    :: nrSpecOut = 24   !   nr of outputs per species
+    integer, parameter    :: nrSpecFlux = 22  !   nr of fluxes per species
+    integer               :: nrInputItems     !   nr of input items need for output PMSA
+    integer               :: nrOutputItems    !   nr of output items need for output PMSA
+    integer               :: ipointLength     !   total length of the PMSA input and output pointer array
+    integer, allocatable  :: ipnt(:)          !   Local work array for the pointering                                    
 
-    integer, parameter :: plen = 130 ! total length of the PMSA input and output array
-
-    integer ipnt(plen)    ! Local work array for the pointering                                    
     integer iseg          ! Local loop counter for computational element loop                      
     integer ioq
     integer iflux   
@@ -80,7 +76,6 @@ use ieee_arithmetic
           
     integer iSpec         ! local species number counter
     integer spInc         ! local species PSMA/FL number increment
-    integer inpItems      ! nr of input items need for output PMSA
     
      ! input parameters
     integer nrSpec       ! total nr species implemented in process (from proc_def)
@@ -124,16 +119,24 @@ use ieee_arithmetic
 !                                                                                                     
 !******************************************************************************* 
 !                                                                                                     
-    ipnt(1:plen) = ipoint(1:plen)
-           
-    iflux = 0
     
     ! segment and species independent items
-    nrSpec      = nint(PMSA(ipnt(   1 )))   !   nr of species in the interface                                 (-)  
+    nrSpec = nint(PMSA(ipoint(   1 )))   !   nr of species in the interface                                 (-)  
       
-    ! length of the PMSA input array. 
-    inpItems = nrIndInp + nrSpec * nrSpecInp
-   
+!   nrInputItems  = nrIndInp + nrSpec * nrSpecInp = 8 + 2 * 37 = 82
+!   nrOutputItems = nrSpec * nrSpecOut = 2 * 24 = 48
+!   ipointLength = nrInputItems + nrOutputItems = 82 + 48 = 130
+!   nrFluxes  = nrSpec * (nrSpexFlx + nrPrey * nrLossFluxes) = 2 * 22 = 44
+
+    ! length of the PMSA input pointer array. 
+    nrInputItems = nrIndInp + nrSpec * nrSpecInp
+    nrOutputItems = nrSpec * nrSpecOut
+    ipointLength = nrInputItems + nrOutputItems
+
+    allocate (ipnt(ipointLength))
+    ipnt(1:ipointLength) = ipoint(1:ipointLength)
+    iflux = 0
+
     ! segment loop
     segmentLoop: do iseg = 1 , noseg
         call dhkmrk(1,iknmrk(iseg),ikmrk1)
@@ -265,7 +268,7 @@ use ieee_arithmetic
             ! Output -------------------------------------------------------------------
                
             ! (input items + position of specific output item in vector + species loop * total number of output) 
-            spInc = inpItems +  (iSpec - 1) * nrSpecOut
+            spInc = nrInputItems +(iSpec - 1) * nrSpecOut
 
             PMSA(ipnt( spInc +  1 )) = NC 
             PMSA(ipnt( spInc +  2 )) = PC 
@@ -379,8 +382,9 @@ use ieee_arithmetic
 
         !allocate pointers
         iflux = iflux + noflux
-        ipnt(1:plen) = ipnt(1:plen) + increm(1:plen)
+        ipnt(1:ipointLength) = ipnt(1:ipointLength) + increm(1:ipointLength)
 
     enddo segmentLoop ! end loop over segments
+    deallocate (ipnt)
     return
 end ! end subroutine 

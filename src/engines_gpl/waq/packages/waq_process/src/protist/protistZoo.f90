@@ -59,19 +59,16 @@ use ieee_arithmetic
 !     Type    Name         I/O Description                                        Unit                
 !                                                                                                     
 !     support variables
-    integer, parameter :: nrIndInp = 3    !   nr of species independent input items
-    integer, parameter :: nrSpecInp = 23  !   nr of inputs per species
-    integer, parameter :: nrSpecOut = 29  !   nr of outputs per species
-    integer, parameter :: nrSpecFlux = 15 !   nr of fluxes per species
-    integer, parameter :: nrPreyInp = 8   !   nr of inputs per prey
+    integer, parameter    :: nrIndInp = 3     !   nr of species independent input items
+    integer, parameter    :: nrSpecInp = 23   !   nr of inputs per species
+    integer, parameter    :: nrSpecOut = 29   !   nr of outputs per species
+    integer, parameter    :: nrSpecFlux = 15  !   nr of fluxes per species
+    integer, parameter    :: nrPreyInp = 8    !   nr of inputs per prey
+    integer               :: nrInputItems     !   nr of input items need for output PMSA
+    integer               :: nrOutputItems    !   nr of output items need for output PMSA
+    integer               :: ipointLength     !   total length of the PMSA input and output pointer array
+    integer, allocatable  :: ipnt(:)          !   Local work array for the pointering                                    
 
-!   nrInputs  = nrIndInp + nrSpec * nrSpecInp + nrPrey * (nrPreyInp + nrSpec) = 3 + 1 * 23 + 7 * (8 + 1) = 89
-!   nrOutputs = nrSpec * nrSpecOut = 1 * 29 = 29
-!   plen = nrInputs + nrOutputs = 118
-!   nrFluxes  = nrSpec * (nrSpexFlx + nrPrey * nrLossFluxes) = 1 * (15 + 7 * 5) = 50
-
-    integer, parameter :: plen = 118 ! total length of the PMSA input and output array
-    integer ipnt(plen)    ! Local work array for the pointering                                    
     integer iseg          ! Local loop counter for computational element loop                      
     integer ioq
     integer iflux   
@@ -81,7 +78,6 @@ use ieee_arithmetic
     integer iPrey         ! local prey number counter
     integer spInc         ! local species PMSA/FL number increment
     integer prInc         ! local pray FL number increment
-    integer inpItems      ! nr of input items need for output PMSA
     
      ! INPUT PARAMETERS  
      integer    nrSpec        ! total nr species implemented in process (from proc_def)
@@ -138,20 +134,28 @@ use ieee_arithmetic
 !                                                                                                     
 !******************************************************************************* 
 !                                                                                                     
-    ipnt(1:plen) = ipoint(1:plen)
-           
-    iflux = 0
-    
     ! segment and species independent items
-    nrSpec   = nint(PMSA(ipnt(   1 )))   !   total nr species implemented in process                (-)
-    nrPrey   = nint(PMSA(ipnt(   2 )))   !   nr of prey species implemented                         (-)
+    nrSpec    = nint(PMSA(ipoint(   1 )))   !   total nr species implemented in process                (-)
+    nrPrey    = nint(PMSA(ipoint(   2 )))   !   nr of prey species implemented                         (-)
+
+!   nrInputs  = nrIndInp + nrSpec * nrSpecInp + nrPrey * (nrPreyInp + nrSpec) = 3 + 1 * 23 + 7 * (8 + 1) = 89
+!   nrOutputs = nrSpec * nrSpecOut = 1 * 29 = 29
+!   ipointLength = nrInputs + nrOutputs = 118
+!   nrFluxes  = nrSpec * (nrSpexFlx + nrPrey * nrLossFluxes) = 1 * (15 + 7 * 5) = 50
+
+    ! length of the PMSA input pointer array. 
+    nrInputItems  = nrIndInp + nrSpec * nrSpecInp + nrPrey * (nrPreyInp + nrSpec)
+    nrOutputItems = nrSpec * nrSpecOut
+    ipointLength = nrInputItems + nrOutputItems
+
+    allocate (ipnt(ipointLength))
+    ipnt(1:ipointLength) = ipoint(1:ipointLength)
+    iflux = 0
 
     ! allocation of prey input array
     call allocate_prot_array(prot_array,nrPrey)
     
-    ! length of the PMSA input array.         
-    inpItems = nrIndInp   + nrSpec * nrSpecInp + nrPrey * (nrPreyInp + nrSpec)
-         
+
     ! segment loop
     segmentLoop: do iseg = 1 , noseg
         call dhkmrk(1,iknmrk(iseg),ikmrk1)
@@ -218,7 +222,7 @@ use ieee_arithmetic
             mot = motility(rZoo)
 
             
-            call initialize_prot_array(prot_array,nrPrey, PMSA, plen, ipnt, nrIndInp, nrSpec, nrSpecInp, iSpec, nrPreyInp)
+            call initialize_prot_array(prot_array,nrPrey, PMSA, ipnt, nrIndInp, nrSpec, nrSpecInp, iSpec, nrPreyInp)
 
             
             ! for output (-)
@@ -273,7 +277,7 @@ use ieee_arithmetic
             ! Output -------------------------------------------------------------------
                
             ! (input items + position of specific output item in vector + species loop * total number of output)
-            spInc = inpItems + (iSpec - 1) * nrSpecOut
+            spInc = nrInputItems + (iSpec - 1) * nrSpecOut
 
             PMSA(ipnt( spInc +  1 )) = NC
             PMSA(ipnt( spInc +  2 )) = PC
@@ -387,13 +391,14 @@ use ieee_arithmetic
 
         !allocate pointers
         iflux = iflux + noflux
-        ipnt(1:plen) = ipnt(1:plen) + increm(1:plen)
+        ipnt(1:ipointLength) = ipnt(1:ipointLength) + increm(1:ipointLength)
 
     enddo segmentLoop ! end loop over segments
     
     
     ! deallocation of prey input array
     call deallocate_prot_array(prot_array)
+    deallocate (ipnt)
     return
   end ! end subroutine 
 

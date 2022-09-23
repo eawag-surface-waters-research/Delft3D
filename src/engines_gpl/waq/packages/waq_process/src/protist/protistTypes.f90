@@ -97,13 +97,12 @@ module protist_types
    
     
     ! initialize arrays
-    subroutine initialize_prot_array(prot_array,nrPrey, PMSA, plen, ipnt, nrIndInp, nrSpec, nrSpecInp, iSpec, nrPreyInp)
+    subroutine initialize_prot_array(prot_array,nrPrey, PMSA, ipnt, nrIndInp, nrSpec, nrSpecInp, iSpec, nrPreyInp)
         type(protist_array), intent(inout)  :: prot_array
         integer, intent(in)                 :: nrPrey
-        integer, intent(in)                 :: ipnt(:)
-        integer, intent(in)                 :: plen
-        integer, intent(in)                 :: nrSpec, nrSpecInp, nrIndInp, iSpec, nrPreyInp
         real(4)                             :: pmsa(*)
+        integer, intent(in)                 :: ipnt(:)
+        integer, intent(in)                 :: nrIndInp, nrSpec, nrSpecInp, iSpec, nrPreyInp
         integer iPrey         ! local prey number counter
         integer prInc         ! local pray PMSA number increment
 
