@@ -32,6 +32,8 @@ module precision_basics
 !!--pseudo code and references--------------------------------------------------
 ! NONE
 !!--declarations----------------------------------------------------------------
+use, intrinsic :: ieee_arithmetic, only : ieee_is_nan, ieee_is_finite
+
 implicit none
 !
 ! parameters, used in conversions: sp=single precision, hp=high (double) precision
@@ -59,9 +61,11 @@ function comparerealdouble(val1, val2, eps)
 ! Compares two double precision numbers
 ! Allow users to define the value of eps. If not, eps equals to the default machine eps
 !
-! Return value: -1 if val1 < val2
-!                0 if val1 = val2
+! Return value: -2 if val1 = NaN and val2 not NaN
+!               -1 if val1 < val2
+!                0 if val1 = val2 (also if both val1 and val2 are NaN, or both Inf with the same sign)
 !               +1 if val1 > val2
+!               +2 if val1 is not NaN and val2 is NaN
 !
 !!--pseudo code and references--------------------------------------------------
 !
@@ -98,19 +102,36 @@ else
     eps0 = 2.0_hp * epsilon(val1)
 endif
 !
-if (abs(val1)<1.0_hp .or. abs(val2)<1.0_hp) then
-   value = val1 - val2
+if (ieee_is_finite(val1) .and. ieee_is_finite(val2)) then
+   if (abs(val1)<1.0_hp .or. abs(val2)<1.0_hp) then
+      value = val1 - val2
+   else
+      value = val1/val2 - 1.0_hp
+   endif
+   !
+   if (abs(value)<eps0) then
+      comparerealdouble = 0
+   elseif (val1<val2) then
+      comparerealdouble = -1
+   else
+      comparerealdouble = 1
+   endif
 else
-   value = val1/val2 - 1.0_hp
-endif
-!
-if (abs(value)<eps0) then
-   comparerealdouble = 0
-elseif (val1<val2) then
-   comparerealdouble = -1
-else
-   comparerealdouble = 1
-endif
+   if (ieee_is_nan(val1) .and. ieee_is_nan(val2)) then
+      comparerealdouble = 0
+   else if (ieee_is_nan(val1) .and. ieee_is_finite(val2)) then
+      comparerealdouble = -2
+   else if (ieee_is_finite(val1) .and. ieee_is_nan(val2)) then
+      comparerealdouble = 2
+   else if (val1 > val2) then ! now val1 = +/- Inf or val2 = +/- Inf
+      comparerealdouble = 1
+   else if (val1 < val2) then
+      comparerealdouble = -1
+   else
+      comparerealdouble = 0
+   end if
+end if
+
 end function comparerealdouble
 
 
@@ -118,15 +139,14 @@ end function comparerealdouble
 function comparerealsingle(val1, val2,eps)
 !!--description-----------------------------------------------------------------
 !
-! REMARK: THE NAME OF THIS FUNCTION IS WRONG!
-!         The name should be comparefp
-!
-! Compares two real numbers of type fp
+! Compares two real numbers of type sp
 ! Allow users to define the value of eps. If not, eps equals to the default machine eps
 !
-! Return value: -1 if val1 < val2
-!                0 if val1 = val2
+! Return value: -2 if val1 = NaN and val2 not NaN
+!               -1 if val1 < val2
+!                0 if val1 = val2 (also if both val1 and val2 are NaN, or both Inf with the same sign)
 !               +1 if val1 > val2
+!               +2 if val1 is not NaN and val2 is NaN
 !
 !!--pseudo code and references--------------------------------------------------
 !
@@ -164,19 +184,36 @@ else
     eps0 = 2.0_sp * epsilon(val1)
 endif
 !
-if (abs(val1)<1.0_sp .or. abs(val2)<1.0_sp) then
-   value = val1 - val2
+if (ieee_is_finite(val1) .and. ieee_is_finite(val2)) then
+   if (abs(val1)<1.0_sp .or. abs(val2)<1.0_sp) then
+      value = val1 - val2
+   else
+      value = val1/val2 - 1.0_sp
+   endif
+   !
+   if (abs(value)<eps0) then
+      comparerealsingle = 0
+   elseif (val1<val2) then
+      comparerealsingle = -1
+   else
+      comparerealsingle = 1
+   endif
 else
-   value = val1/val2 - 1.0_sp
-endif
-!
-if (abs(value)<eps0) then
-   comparerealsingle = 0
-elseif (val1<val2) then
-   comparerealsingle = -1
-else
-   comparerealsingle = 1
-endif
+   if (ieee_is_nan(val1) .and. ieee_is_nan(val2)) then
+      comparerealsingle = 0
+   else if (ieee_is_nan(val1) .and. ieee_is_finite(val2)) then
+      comparerealsingle = -2
+   else if (ieee_is_finite(val1) .and. ieee_is_nan(val2)) then
+      comparerealsingle = 2
+   else if (val1 > val2) then ! now val1 = +/- Inf or val2 = +/- Inf
+      comparerealsingle = 1
+   else if (val1 < val2) then
+      comparerealsingle = -1
+   else
+      comparerealsingle = 0
+   end if
+end if
+
 end function comparerealsingle
 
 
