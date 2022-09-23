@@ -833,6 +833,10 @@ module m_ec_filereader_read
                         else
                            ierror = nf90_get_var(fileReaderPtr%fileHandle, varid, data_block, start=(/col0, row0, timesndx/), count=(/ncol, nrow, 1/))
                         end if
+                        if (ierror /= 0) then
+                           call setECMessage("Error retrieving time index ", timesndx)
+                           return
+                        end if
                         ! copy data to source Field's 1D array, store (X1Y1, X1Y2, ..., X1Yn_rows, X2Y1, XYy2, ..., Xn_colsY1, ...)
                         do i=1, nrow
                            do j=1, ncol

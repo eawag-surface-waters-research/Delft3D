@@ -383,14 +383,14 @@ module m_ec_filereader
                      success = ecNetcdfReadNextBlock(fileReaderPtr, fileReaderPtr%items(i)%ptr, t0t1, timesndx)
                      if (.not.success) then
                          return
-                     end if                     
+                     end if
                   end do
                   if (itemPtr%sourceT1FieldPtr%timesndx < 0) then
                      t0t1 = 1
                      timesndx = timesndx + 1
                      do i=1, fileReaderPtr%nItems
                         success = ecNetcdfReadNextBlock(fileReaderPtr, fileReaderPtr%items(i)%ptr, t0t1, timesndx)
-                     end do      
+                     end do
                   endif
                   if (t0t1 == 0) then
                      ! flip t0 and t1
