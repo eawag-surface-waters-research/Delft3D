@@ -27,16 +27,16 @@
 
 !!   contains the derived types and associated functions:
 !!    - protist_allocate
-!!              allocate derived types 
+!!              allocate derived types
 !!    - protist_initialize
-!!              initialize derived types 
+!!              initialize derived types
 !!    - protist_deallocate
-!!              deallocate derived types 
-  
-  
+!!              deallocate derived types
 
-!!    
-    
+
+
+!!
+
 module protist_types
 
     implicit none
@@ -44,39 +44,39 @@ module protist_types
     ! Protist arrays
     type :: protist_array
         ! prey state variables
-        real, dimension(:), allocatable :: preyC, preyChl, preyN, preyP, preySi 
+        real, dimension(:), allocatable :: preyC, preyChl, preyN, preyP, preySi
         ! other prey input parameters
         real, dimension(:), allocatable :: CcellPrey, rPrey, motPrey, PR
         ! food quantity
-        real, dimension(:), allocatable :: preyFlag                       ! protection aginst small prey conc. 
+        real, dimension(:), allocatable :: preyFlag                       ! protection aginst small prey conc.
         real, dimension(:), allocatable :: nrPrey                         ! prey abundance
         real, dimension(:), allocatable :: smallerVel, largerVel          ! velocities
         real, dimension(:), allocatable :: encPrey                        ! prey encounter
         real, dimension(:), allocatable :: capturedPrey                   ! prey capture
-        real, dimension(:), allocatable :: propPrey, ingNC, ingPC         ! preyN and preyP proprtion in diet    
+        real, dimension(:), allocatable :: propPrey, ingNC, ingPC         ! preyN and preyP proprtion in diet
         ! ingestion of prey by predator fluxes
         real, dimension(:), allocatable :: dPreyC, dPreyChl, dPreyN, dPreyP, dPreySi
     end type
-    
-    
+
+
     contains
-    
+
     ! allocate arrays
     subroutine allocate_prot_array(prot_array,nrPrey)
         type(protist_array), intent(inout)  :: prot_array
         integer, intent(in)                 :: nrPrey
-        
+
         ! allocate statements
-        allocate( prot_array%preyC(nrPrey)        )    
-        allocate( prot_array%preyChl(nrPrey)      )  
-        allocate( prot_array%preyN(nrPrey)        )    
-        allocate( prot_array%preyP(nrPrey)        )    
-        allocate( prot_array%preySi(nrPrey)       )   
+        allocate( prot_array%preyC(nrPrey)        )
+        allocate( prot_array%preyChl(nrPrey)      )
+        allocate( prot_array%preyN(nrPrey)        )
+        allocate( prot_array%preyP(nrPrey)        )
+        allocate( prot_array%preySi(nrPrey)       )
         allocate( prot_array%CcellPrey(nrPrey)    )
-        allocate( prot_array%rPrey(nrPrey)        )    
-        allocate( prot_array%motPrey(nrPrey)      )  
-        allocate( prot_array%PR(nrPrey)           )       
-    
+        allocate( prot_array%rPrey(nrPrey)        )
+        allocate( prot_array%motPrey(nrPrey)      )
+        allocate( prot_array%PR(nrPrey)           )
+
         ! allocation of food quantity and quality arrays
         allocate( prot_array%nrPrey(nrPrey)       )
         allocate( prot_array%preyFlag(nrPrey)     )
@@ -87,15 +87,15 @@ module protist_types
         allocate( prot_array%propPrey(nrPrey)     )
         allocate( prot_array%ingNC(nrPrey)        )
         allocate( prot_array%ingPC(nrPrey)        )
-        allocate( prot_array%dPreyC(nrPrey)       )  
+        allocate( prot_array%dPreyC(nrPrey)       )
         allocate( prot_array%dPreyChl(nrPrey)     )
-        allocate( prot_array%dPreyN(nrPrey)       )  
-        allocate( prot_array%dPreyP(nrPrey)       )  
-        allocate( prot_array%dPreySi(nrPrey)      ) 
-    
+        allocate( prot_array%dPreyN(nrPrey)       )
+        allocate( prot_array%dPreyP(nrPrey)       )
+        allocate( prot_array%dPreySi(nrPrey)      )
+
     end subroutine allocate_prot_array
-   
-    
+
+
     ! initialize arrays
     subroutine initialize_prot_array(prot_array,nrPrey, PMSA, ipnt, nrIndInp, nrSpec, nrSpecInp, iSpec, nrPreyInp)
         type(protist_array), intent(inout)  :: prot_array
@@ -111,46 +111,46 @@ module protist_types
             !prey specific input
             ! independentItems + all input items of all zoo species + first prey item + current PreyNumber * total nr of prey specific items
             prInc = nrIndInp + nrSpec * nrSpecInp + (iPrey - 1) * (nrPreyInp + nrSpec)
-            
-            prot_array%preyC(iPrey)         = PMSA(ipnt( prInc + 1 ))          ! C-biomass                                              (gC m-3)   
-            prot_array%preyChl(iPrey)       = PMSA(ipnt( prInc + 2 ))          ! Chl-biomass                                            (gC m-3)  
-            prot_array%preyN(iPrey)         = PMSA(ipnt( prInc + 3 ))          ! N-biomass                                              (gN m-3)  
-            prot_array%preyP(iPrey)         = PMSA(ipnt( prInc + 4 ))          ! P-biomass                                              (gP m-3)  
-            prot_array%preySi(iPrey)        = PMSA(ipnt( prInc + 5 ))          ! Si-biomass                                             (gP m-3)  
-            prot_array%CcellPrey(iPrey)     = PMSA(ipnt( prInc + 6 ))          ! C content of protist cell                              (pgC cell-1) 
+
+            prot_array%preyC(iPrey)         = PMSA(ipnt( prInc + 1 ))          ! C-biomass                                              (gC m-3)
+            prot_array%preyChl(iPrey)       = PMSA(ipnt( prInc + 2 ))          ! Chl-biomass                                            (gC m-3)
+            prot_array%preyN(iPrey)         = PMSA(ipnt( prInc + 3 ))          ! N-biomass                                              (gN m-3)
+            prot_array%preyP(iPrey)         = PMSA(ipnt( prInc + 4 ))          ! P-biomass                                              (gP m-3)
+            prot_array%preySi(iPrey)        = PMSA(ipnt( prInc + 5 ))          ! Si-biomass                                             (gP m-3)
+            prot_array%CcellPrey(iPrey)     = PMSA(ipnt( prInc + 6 ))          ! C content of protist cell                              (pgC cell-1)
             prot_array%rPrey(iPrey)         = PMSA(ipnt( prInc + 7 ))          ! radius of nutrient repleted protist cell               (um)
             prot_array%motPrey(iPrey)       = PMSA(ipnt( prInc + 8 ))          ! swimming velocity                                      (m s-1)
-            prot_array%PR(iPrey)            = PMSA(ipnt( prInc + 8 + iSpec))   !      handling index of prey 1 by pred 1             (-)  
-            
-            
+            prot_array%PR(iPrey)            = PMSA(ipnt( prInc + 8 + iSpec))   !      handling index of prey 1 by pred 1             (-)
+
+
             ! if loop to protect against small preys (-)
-            if (prot_array%preyC(iPrey) >= 1.0E-5) then 
+            if (prot_array%preyC(iPrey) >= 1.0E-5) then
                 prot_array%preyFlag(iPrey) = 1.0
-            else 
+            else
                 prot_array%preyFlag(iPrey) = 0.0
-            end if 
-                            
+            end if
+
         end do
     end subroutine initialize_prot_array
-    
-    
-    
-    
+
+
+
+
     ! deallocate arrays
     subroutine deallocate_prot_array(prot_array)
         type(protist_array), intent(inout)  :: prot_array
-        
+
         ! deallocate statements
-        deallocate( prot_array%preyC        )    
-        deallocate( prot_array%preyChl      )  
-        deallocate( prot_array%preyN        )    
-        deallocate( prot_array%preyP        )    
-        deallocate( prot_array%preySi       )   
+        deallocate( prot_array%preyC        )
+        deallocate( prot_array%preyChl      )
+        deallocate( prot_array%preyN        )
+        deallocate( prot_array%preyP        )
+        deallocate( prot_array%preySi       )
         deallocate( prot_array%CcellPrey    )
-        deallocate( prot_array%rPrey        )    
-        deallocate( prot_array%motPrey      )  
-        deallocate( prot_array%PR           )       
-    
+        deallocate( prot_array%rPrey        )
+        deallocate( prot_array%motPrey      )
+        deallocate( prot_array%PR           )
+
         ! deallocation of food quantity and quality arrays
         deallocate( prot_array%nrPrey       )
         deallocate( prot_array%preyFlag     )
@@ -161,13 +161,13 @@ module protist_types
         deallocate( prot_array%propPrey     )
         deallocate( prot_array%ingNC        )
         deallocate( prot_array%ingPC        )
-        deallocate( prot_array%dPreyC       )  
+        deallocate( prot_array%dPreyC       )
         deallocate( prot_array%dPreyChl     )
-        deallocate( prot_array%dPreyN       )  
-        deallocate( prot_array%dPreyP       )  
-        deallocate( prot_array%dPreySi      ) 
-    
+        deallocate( prot_array%dPreyN       )
+        deallocate( prot_array%dPreyP       )
+        deallocate( prot_array%dPreySi      )
+
     end subroutine deallocate_prot_array
-    
+
 
 end module protist_types
