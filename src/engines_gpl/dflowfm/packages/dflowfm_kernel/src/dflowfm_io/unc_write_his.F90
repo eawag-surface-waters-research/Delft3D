@@ -50,7 +50,6 @@ subroutine unc_write_his(tim)            ! wrihis
     use unstruc_netcdf, only: UNC_LOC_S3D, UNC_LOC_WU, UNC_LOC_W
     use unstruc_netcdf, only: unc_writeopts, unc_noforcedflush, UG_WRITE_LATLON
     use unstruc_netcdf, only: unc_add_time_coverage
-    use unstruc_netcdf, only: unc_write_struc_input_coordinates
     use unstruc_messages
     use m_sferic, only: jsferic
     use m_partitioninfo
@@ -1794,6 +1793,7 @@ subroutine unc_write_his(tim)            ! wrihis
 
         if(jahisweir > 0 .and. nweirgen > 0 ) then
            ierr = nf90_def_dim(ihisfile, 'weirgens', nweirgen, id_weirgendim)
+           ierr = nf90_def_dim(ihisfile, 'weirgens_input', nweirgen, id_weirgendim_input)
            ierr = nf90_def_var(ihisfile, 'weirgen_id',  nf90_char,   (/ id_strlendim, id_weirgendim /), id_weirgen_id)
            ierr = nf90_put_att(ihisfile, id_weirgen_id,  'cf_role',   'timeseries_id')
            ierr = nf90_put_att(ihisfile, id_weirgen_id,  'long_name', 'Id of weir'    )
@@ -1803,6 +1803,41 @@ subroutine unc_write_his(tim)            ! wrihis
            nNodeTot = 0
            i = 1
            if (network%sts%numWeirs > 0) then ! new weir
+              allocate(weirindex(network%sts%numWeirs),nodecountweirinput(network%sts%numWeirs))
+              weirindex = network%sts%WEIRINDICES
+
+              do n = 1, network%sts%numWeirs
+                 j = weirindex(n)
+                 if (network%sts%struct(j)%NUMCOORDINATES > 0) then
+                    nNodeTot = nNodeTot + network%sts%struct(j)%NUMCOORDINATES
+                 else
+                    nNodeTot = nNodeTot + 1
+                 endif
+              enddo
+              nNodesWeirInput = nNodeTot
+              allocate(geomXWeirInput(nNodeTot),geomYWeirInput(nNodeTot))
+              do n = 1, network%sts%numWeirs
+                 j = weirindex(n)
+
+                 if (network%sts%struct(j)%NUMCOORDINATES > 0) then
+
+                    geomXWeirInput(i:i+network%sts%struct(j)%NUMCOORDINATES-1)= network%sts%struct(j)%XCOORDINATES
+                    geomYWeirInput(i:i+network%sts%struct(j)%NUMCOORDINATES-1)= network%sts%struct(j)%YCOORDINATES
+                    nodecountweirinput(n) = network%sts%struct(j)%NUMCOORDINATES
+
+                    i = i + network%sts%struct(j)%NUMCOORDINATES
+                 else
+
+                    ASSOCIATE ( branch => network%brs%branch(network%sts%struct(j)%IBRAN ))
+
+                       ierr = odu_get_xy_coordinates( (/ 1 /) ,  network%sts%struct(j:j)%CHAINAGE , branch%xs , branch%ys , &
+                          (/ branch%gridpointscount /),(/ branch%length /), jsferic  , geomXWeirInput(i:i) , geomYWeirInput(i:i) )
+
+                       nodecountweirinput(n) = 1
+                       i = i + 1
+                    end ASSOCIATE
+                 endif
+              enddo
             else ! old weir
                do n = 1, nweirgen
                   i = weir2cgen(n)
@@ -1816,7 +1851,9 @@ subroutine unc_write_his(tim)            ! wrihis
                end do
             end if
 
-           
+            ierr = sgeom_def_geometry_variables(ihisfile, 'weirgen_input_geom', 'weir', 'line', nNodeTot, id_weirgendim_input, &
+               id_weirgeom_input_node_count, id_weirgeom_input_node_coordx, id_weirgeom_input_node_coordy)
+
             ierr = sgeom_def_geometry_variables(ihisfile, weir_geom_container_name, 'weir', 'line', nNodesWeir, id_weirgendim, &
                id_weirgeom_node_count, id_weirgeom_node_coordx, id_weirgeom_node_coordy)
 
@@ -3654,9 +3691,11 @@ subroutine unc_write_his(tim)            ! wrihis
             end if
          ! write geometry variables at the first time of history output
          if (it_his == 1) then
-
             if (network%sts%numWeirs > 0) then ! new weir
-
+               ierr = nf90_put_var(ihisfile, id_weirgeom_input_node_coordx, geomXWeirInput,     start = (/ 1 /), count = (/ nNodesWeirInput /))
+               ierr = nf90_put_var(ihisfile, id_weirgeom_input_node_coordy, geomYWeirInput,     start = (/ 1 /), count = (/ nNodesWeirInput /))
+               ierr = nf90_put_var(ihisfile, id_weirgeom_input_node_count,  nodeCountWeirInput, start = (/ 1 /), count = (/ network%sts%numWeirs /))
+               
                ierr = nf90_put_var(ihisfile, id_weirgeom_node_coordx, geomXWeir,     start = (/ 1 /), count = (/ nNodesWeir /))
                ierr = nf90_put_var(ihisfile, id_weirgeom_node_coordy, geomYWeir,     start = (/ 1 /), count = (/ nNodesWeir /))
                ierr = nf90_put_var(ihisfile, id_weirgeom_node_count,  nodeCountWeir, start = (/ 1 /), count = (/ network%sts%numWeirs /))
@@ -3862,12 +3901,6 @@ subroutine unc_write_his(tim)            ! wrihis
        enddo
     endif
 
-    if (it_his == 1) then
-      do n = 1, ST_MAX_TYPE
-        call unc_write_struc_input_coordinates(ihisfile,n)
-      enddo
-    endif
-    
     if ( jacheckmonitor.eq.1 ) then
       ierr = nf90_put_var(ihisfile, id_checkmon, checkmonitor, start=(/ 1, it_his /))
 
