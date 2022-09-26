@@ -150,10 +150,10 @@ use ieee_arithmetic
     nrSpec    = nint(PMSA(ipoint(   1 )))   !   total nr species implemented in process                (-)
     nrPrey    = nint(PMSA(ipoint(   2 )))   !   nr of prey species implemented                         (-)
 
-!   nrInputs  = nrIndInp + nrSpec * nrSpecInp + nrPrey * (nrPreyInp + nrSpec) = 5 + 1 * 32 + 6 * (8 + 1) = 91
-!   nrOutputs = nrSpec * nrSpecOut = 1 * 34 = 34
-!   ipointLength = nrInputs + nrOutputs = 125
-!   nrFluxes  = nrSpec * (nrSpexFlx + nrPrey * nrLossFluxes) = 1 * (23 + 6 * 5) = 53
+!   nrInputs  = nrIndInp + nrSpec * nrSpecInp + nrPrey * (nrPreyInp + nrSpec) = 5 + 2 * 32 + 6 * (8 + 2) = 129
+!   nrOutputs = nrSpec * nrSpecOut = 2 * 34 = 68
+!   ipointLength = nrInputs + nrOutputs = 197
+!   nrFluxes  = nrSpec * (nrSpexFlx + nrPrey * nrLossFluxes) = 2 * (23 + 6 * 5) = 106
 
     ! length of the PMSA input pointer array.
     nrInputItems  = nrIndInp + nrSpec * nrSpecInp + nrPrey * (nrPreyInp + nrSpec)

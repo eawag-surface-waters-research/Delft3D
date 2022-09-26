@@ -3600,6 +3600,80 @@ stocfl,stocsu,stocsc
 "dC2P_N1   ","cmP_2     ",  -1.00000
 "dC2Si_N1  ","cmSi_2    ",  -1.00000
 "dC2Si_N1  ","Opal      ",   1.00000
+"dCeat_N2  ","ncmC_2    ",   1.00000
+"dNeat_N2  ","ncmN_2    ",   1.00000
+"dPeat_N2  ","ncmP_2    ",   1.00000
+"dCfix_N2  ","ncmC_2    ",   1.00000
+"dCfix_N2  ","OXY       ",   2.67000
+"dChldeg_N2","ncmChl_2  ",  -1.00000
+"dChlout_N2","ncmChl_2  ",  -1.00000
+"dCresp_N2 ","ncmC_2    ",  -1.00000
+"dCresp_N2 ","OXY       ",  -2.67000
+"dCleak_N2 ","DOClab    ",   1.00000
+"dCleak_N2 ","ncmC_2    ",  -1.00000
+"dCvoid_N2 ","DOClab    ",   1.00000
+"dCvoid_N2 ","ncmC_2    ",  -1.00000
+"dPOCout_N2","POC1      ",   1.00000
+"dPONout_N2","PON1      ",   1.00000
+"dPOPout_N2","POP1      ",   1.00000
+"dNH4out_N2","ncmN_2    ",  -1.00000
+"dNH4out_N2","NH4       ",   1.00000
+"dPout_N2  ","ncmP_2    ",  -1.00000
+"dPout_N2  ","PO4       ",   1.00000
+"dAutC_N2  ","ncmC_2    ",  -1.00000
+"dAutC_N2  ","OXY       ",  -2.67000
+"dDetC_N2  ","POC1      ",   1.00000
+"dDetC_N2  ","POS1      ",   0.01700
+"dDetC_N2  ","ncmC_2    ",  -1.00000
+"dAutN_N2  ","NH4       ",   1.00000
+"dAutN_N2  ","ncmN_2    ",  -1.00000
+"dAutN_N2  ","ALKA      ",   4.35700
+"dDetN_N2  ","PON1      ",   1.00000
+"dDetN_N2  ","ncmN_2    ",  -1.00000
+"dAutP_N2  ","PO4       ",   1.00000
+"dAutP_N2  ","ncmP_2    ",  -1.00000
+"dAutP_N2  ","ALKA      ",  -1.96800
+"dDetP_N2  ","POP1      ",   1.00000
+"dDetP_N2  ","ncmP_2    ",  -1.00000
+"dAutChl_N2","ncmChl_2  ",  -1.00000
+"dDetChl_N2","ncmChl_2  ",  -1.00000
+"dChlup_N2 ","ncmChl_2  ",   1.00000
+"dD1C_N2   ","diatC_1   ",  -1.00000
+"dD1Chl_N2 ","diatChl_1 ",  -1.00000
+"dD1N_N2   ","diatN_1   ",  -1.00000
+"dD1P_N2   ","diatP_1   ",  -1.00000
+"dD1Si_N2  ","diatSi_1  ",  -1.00000
+"dD1Si_N2  ","Opal      ",   1.00000
+"dD2C_N2   ","diatC_2   ",  -1.00000
+"dD2Chl_N2 ","diatChl_2 ",  -1.00000
+"dD2N_N2   ","diatN_2   ",  -1.00000
+"dD2P_N2   ","diatP_2   ",  -1.00000
+"dD2Si_N2  ","diatSi_2  ",  -1.00000
+"dD2Si_N2  ","Opal      ",   1.00000
+"dG1C_N2   ","greenC_1  ",  -1.00000
+"dG1Chl_N2 ","greenChl_1",  -1.00000
+"dG1N_N2   ","greenN_1  ",  -1.00000
+"dG1P_N2   ","greenP_1  ",  -1.00000
+"dG1Si_N2  ","greenSi_1 ",  -1.00000
+"dG1Si_N2  ","Opal      ",   1.00000
+"dG2C_N2   ","greenC_2  ",  -1.00000
+"dG2Chl_N2 ","greenChl_2",  -1.00000
+"dG2N_N2   ","greenN_2  ",  -1.00000
+"dG2P_N2   ","greenP_2  ",  -1.00000
+"dG2Si_N2  ","greenSi_2 ",  -1.00000
+"dG2Si_N2  ","Opal      ",   1.00000
+"dC1C_N2   ","cmC_1     ",  -1.00000
+"dC1Chl_N2 ","cmChl_1   ",  -1.00000
+"dC1N_N2   ","cmN_1     ",  -1.00000
+"dC1P_N2   ","cmP_1     ",  -1.00000
+"dC1Si_N2  ","cmSi_1    ",  -1.00000
+"dC1Si_N2  ","Opal      ",   1.00000
+"dC2C_N2   ","cmC_2     ",  -1.00000
+"dC2Chl_N2 ","cmChl_2   ",  -1.00000
+"dC2N_N2   ","cmN_2     ",  -1.00000
+"dC2P_N2   ","cmP_2     ",  -1.00000
+"dC2Si_N2  ","cmSi_2    ",  -1.00000
+"dC2Si_N2  ","Opal      ",   1.00000
 "dCeat_Z1  ","zooC_1    ",   1.00000
 "dNeat_Z1  ","zooN_1    ",   1.00000
 "dPeat_Z1  ","zooP_1    ",   1.00000
@@ -3669,6 +3743,87 @@ stocfl,stocsu,stocsc
 "dN1P_Z1   ","ncmP_1    ",  -1.00000
 "dN1Si_Z1  ","ncmSi_1   ",  -1.00000
 "dN1Si_Z1  ","Opal      ",   1.00000
+"dN2C_Z1   ","ncmC_2    ",  -1.00000
+"dN2Chl_Z1 ","ncmChl_2  ",  -1.00000
+"dN2N_Z1   ","ncmN_2    ",  -1.00000
+"dN2P_Z1   ","ncmP_2    ",  -1.00000
+"dN2Si_Z1  ","ncmSi_2   ",  -1.00000
+"dN2Si_Z1  ","Opal      ",   1.00000
+"dCeat_Z2  ","zooC_2    ",   1.00000
+"dNeat_Z2  ","zooN_2    ",   1.00000
+"dPeat_Z2  ","zooP_2    ",   1.00000
+"dCresp_Z2 ","zooC_2    ",  -1.00000
+"dCresp_Z2 ","OXY       ",  -2.67000
+"dPOCout_Z2","POC1      ",   1.00000
+"dPONout_Z2","PON1      ",   1.00000
+"dPOPout_Z2","POP1      ",   1.00000
+"dNH4out_Z2","zooN_2    ",  -1.00000
+"dNH4out_Z2","NH4       ",   1.00000
+"dPout_Z2  ","zooP_2    ",  -1.00000
+"dPout_Z2  ","PO4       ",   1.00000
+"dAutC_Z2  ","zooC_2    ",  -1.00000
+"dAutC_Z2  ","OXY       ",  -2.67000
+"dDetC_Z2  ","POC1      ",   1.00000
+"dDetC_Z2  ","POS1      ",   0.01700
+"dDetC_Z2  ","zooC_2    ",  -1.00000
+"dAutN_Z2  ","NH4       ",   1.00000
+"dAutN_Z2  ","zooN_2    ",  -1.00000
+"dAutN_Z2  ","ALKA      ",   4.35700
+"dDetN_Z2  ","PON1      ",   1.00000
+"dDetN_Z2  ","zooN_2    ",  -1.00000
+"dAutP_Z2  ","PO4       ",   1.00000
+"dAutP_Z2  ","zooP_2    ",  -1.00000
+"dAutP_Z2  ","ALKA      ",  -1.96800
+"dDetP_Z2  ","POP1      ",   1.00000
+"dDetP_Z2  ","zooP_2    ",  -1.00000
+"dD1C_Z2   ","diatC_1   ",  -1.00000
+"dD1Chl_Z2 ","diatChl_1 ",  -1.00000
+"dD1N_Z2   ","diatN_1   ",  -1.00000
+"dD1P_Z2   ","diatP_1   ",  -1.00000
+"dD1Si_Z2  ","diatSi_1  ",  -1.00000
+"dD1Si_Z2  ","Opal      ",   1.00000
+"dD2C_Z2   ","diatC_2   ",  -1.00000
+"dD2Chl_Z2 ","diatChl_2 ",  -1.00000
+"dD2N_Z2   ","diatN_2   ",  -1.00000
+"dD2P_Z2   ","diatP_2   ",  -1.00000
+"dD2Si_Z2  ","diatSi_2  ",  -1.00000
+"dD2Si_Z2  ","Opal      ",   1.00000
+"dG1C_Z2   ","greenC_1  ",  -1.00000
+"dG1Chl_Z2 ","greenChl_1",  -1.00000
+"dG1N_Z2   ","greenN_1  ",  -1.00000
+"dG1P_Z2   ","greenP_1  ",  -1.00000
+"dG1Si_Z2  ","greenSi_1 ",  -1.00000
+"dG1Si_Z2  ","Opal      ",   1.00000
+"dG2C_Z2   ","greenC_2  ",  -1.00000
+"dG2Chl_Z2 ","greenChl_2",  -1.00000
+"dG2N_Z2   ","greenN_2  ",  -1.00000
+"dG2P_Z2   ","greenP_2  ",  -1.00000
+"dG2Si_Z2  ","greenSi_2 ",  -1.00000
+"dG2Si_Z2  ","Opal      ",   1.00000
+"dC1C_Z2   ","cmC_1     ",  -1.00000
+"dC1Chl_Z2 ","cmChl_1   ",  -1.00000
+"dC1N_Z2   ","cmN_1     ",  -1.00000
+"dC1P_Z2   ","cmP_1     ",  -1.00000
+"dC1Si_Z2  ","cmSi_1    ",  -1.00000
+"dC1Si_Z2  ","Opal      ",   1.00000
+"dC2C_Z2   ","cmC_2     ",  -1.00000
+"dC2Chl_Z2 ","cmChl_2   ",  -1.00000
+"dC2N_Z2   ","cmN_2     ",  -1.00000
+"dC2P_Z2   ","cmP_2     ",  -1.00000
+"dC2Si_Z2  ","cmSi_2    ",  -1.00000
+"dC2Si_Z2  ","Opal      ",   1.00000
+"dN1C_Z2   ","ncmC_1    ",  -1.00000
+"dN1Chl_Z2 ","ncmChl_1  ",  -1.00000
+"dN1N_Z2   ","ncmN_1    ",  -1.00000
+"dN1P_Z2   ","ncmP_1    ",  -1.00000
+"dN1Si_Z2  ","ncmSi_1   ",  -1.00000
+"dN1Si_Z2  ","Opal      ",   1.00000
+"dN2C_Z2   ","ncmC_2    ",  -1.00000
+"dN2Chl_Z2 ","ncmChl_2  ",  -1.00000
+"dN2N_Z2   ","ncmN_2    ",  -1.00000
+"dN2P_Z2   ","ncmP_2    ",  -1.00000
+"dN2Si_Z2  ","ncmSi_2   ",  -1.00000
+"dN2Si_Z2  ","Opal      ",   1.00000
 "dRadioU   ","Uranium   ",  -1.00000
 "dRadioCs  ","Caesium137",  -1.00000
 "dRadioR1  ","Radio1    ",  -1.00000
