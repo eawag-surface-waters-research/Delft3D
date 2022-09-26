@@ -60,7 +60,7 @@ subroutine test_precision_nan_single
 
     val1 = ieee_value(val1, ieee_quiet_nan)
     val2 = ieee_value(val2, ieee_quiet_nan)
-    r = comparereal(val1, val2)
+    r = comparereal(val1, val2, .true.)
     call assert_equal(r, 0, "compare 2 nans")
 
 end subroutine test_precision_nan_single
@@ -73,7 +73,7 @@ subroutine test_precision_nan_double
 
     val1 = ieee_value(val1, ieee_quiet_nan)
     val2 = ieee_value(val2, ieee_quiet_nan)
-    r = comparereal(val1, val2)
+    r = comparereal(val1, val2, .true.)
     call assert_equal(r, 0, "compare 2 nans")
 
 end subroutine test_precision_nan_double
@@ -86,12 +86,12 @@ subroutine test_precision_inf_single
 
     val1 = ieee_value(val1, ieee_positive_inf)
     val2 = ieee_value(val2, ieee_negative_inf)
-    r = comparereal(val1, val2)
+    r = comparereal(val1, val2, .true.)
     call assert_equal(r, 1, "compare +/- inf")
 
     val1 = ieee_value(val1, ieee_positive_inf)
     val2 = ieee_value(val2, ieee_positive_inf)
-    r = comparereal(val1, val2)
+    r = comparereal(val1, val2, .true.)
     call assert_equal(r, 0, "compare +/- inf")
 
 end subroutine test_precision_inf_single
@@ -104,12 +104,12 @@ subroutine test_precision_inf_double
 
     val1 = ieee_value(val1, ieee_positive_inf)
     val2 = ieee_value(val2, ieee_negative_inf)
-    r = comparereal(val1, val2)
+    r = comparereal(val1, val2, .true.)
     call assert_equal(r, 1, "compare +/- inf")
 
     val1 = ieee_value(val1, ieee_positive_inf)
     val2 = ieee_value(val2, ieee_positive_inf)
-    r = comparereal(val1, val2)
+    r = comparereal(val1, val2, .true.)
     call assert_equal(r, 0, "compare +/- inf")
 
 end subroutine test_precision_inf_double

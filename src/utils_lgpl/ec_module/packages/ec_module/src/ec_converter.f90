@@ -1957,8 +1957,8 @@ module m_ec_converter
                      nmiss = 0
                      do jj=0,1
                         do ii=0,1
-                           if ( comparereal(s2D_T0(mp+ii, np+jj), sourceT0Field%missingValue)==0 .or.   &
-                                comparereal(s2D_T1(mp+ii, np+jj), sourceT1Field%missingValue)==0 ) then
+                           if ( comparereal(s2D_T0(mp+ii, np+jj), sourceT0Field%missingValue, .true.)==0 .or.   &
+                                comparereal(s2D_T1(mp+ii, np+jj), sourceT1Field%missingValue, .true.)==0 ) then
                                 nmiss = nmiss + 1
                            end if
                         end do
@@ -2988,8 +2988,8 @@ module m_ec_converter
                               end if
                      kloop2D: do jj=0,1
                                  do ii=0,1
-                                    if ( comparereal(sourcevals(1+ii, 1+jj, 1, 1), sourceMissing)==0 .or.   &
-                                         comparereal(sourcevals(1+ii, 1+jj, 1, 2), sourceMissing)==0 ) then
+                                    if ( comparereal(sourcevals(1+ii, 1+jj, 1, 1), sourceMissing, .true.)==0 .or.   &
+                                         comparereal(sourcevals(1+ii, 1+jj, 1, 2), sourceMissing, .true.)==0 ) then
                                        jamissing = jamissing + 1
                                        exit kloop2D
                                     end if
