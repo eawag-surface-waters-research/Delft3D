@@ -1455,4 +1455,99 @@ subroutine fill_valstruct_per_structure(valstruct, istrtypein, istru, nlinks)
    end if
 
 end subroutine fill_valstruct_per_structure
+
+
+subroutine get_input_coordinates_of_structure(structuretype, geomXStructInput, geomYStructInput, nNodesStructInput,nNodeTot,numstructs)
+
+use m_network
+use m_globalparameters
+use odugrid
+use m_sferic, only: jsferic
+
+integer, intent(in)                                :: structuretype
+double precision, allocatable, target, intent(out) :: geomXStructInput(:)         !< [m] x coordinates of weirs.
+double precision, allocatable, target, intent(out) :: geomYStructInput(:)         !< [m] y coordinates of weirs.
+integer,          allocatable, target, intent(out) :: nNodesStructInput(:)
+integer, intent(out)                               :: nNodeTot, numstructs
+
+integer                       ::  i, n, j, ierr
+integer,  pointer :: structindex(:)
+
+select case (structuretype)
+case (ST_WEIR)
+   numstructs = network%sts%numweirs
+   if (numstructs > 0) structindex => network%sts%WEIRINDICES
+case (ST_UNI_WEIR)
+   numstructs = network%sts%numuniweirs
+   if (numstructs > 0) structindex => network%sts%uniWEIRINDICES
+case (ST_CULVERT)
+   numstructs = network%sts%numculverts
+   if (numstructs > 0) structindex => network%sts%culvertINDICES
+case (ST_BRIDGE)   
+   numstructs = network%sts%numBRIDGEs
+   if (numstructs > 0) structindex => network%sts%BRIDGEINDICES
+case (ST_PUMP)
+   numstructs = network%sts%numPUMPs
+   if (numstructs > 0) structindex => network%sts%PUMPINDICES
+case (ST_ORIFICE)
+   numstructs = network%sts%numORIFICEs
+   if (numstructs > 0) structindex => network%sts%ORIFICEINDICES
+case (ST_GATE)  
+   numstructs = network%sts%numGATEs
+   if (numstructs > 0) structindex => network%sts%GATEINDICES
+case (ST_GENERAL_ST) 
+   numstructs = network%sts%numgeneralstructures
+   if (numstructs > 0) structindex => network%sts%generalstructureINDICES
+case default
+   return
+end select
+
+if (allocated(geomXStructInput) ) deallocate(geomXStructInput)
+if (allocated(geomYStructInput) ) deallocate(geomYStructInput)
+if (allocated(nNodesStructInput)) deallocate(nNodesStructInput)
+
+
+nNodeTot = 0
+i = 1
+
+if (numstructs > 0) then ! new struct
+
+   allocate(nNodesStructInput(numstructs))
+   do n = 1, numstructs
+      j = structindex(n)
+      if (network%sts%struct(j)%NUMCOORDINATES > 0) then
+         nNodeTot = nNodeTot + network%sts%struct(j)%NUMCOORDINATES
+      else if (network%sts%struct(j)%ibran > -1) then
+         nNodeTot = nNodeTot + 1
+      endif
+   enddo
+   !nNodesStructInput = nNodeTot
+   allocate(geomXStructInput(nNodeTot),geomYStructInput(nNodeTot))
+   do n = 1, numstructs
+      j = structindex(n)
+
+      if (network%sts%struct(j)%NUMCOORDINATES > 0) then
+
+         geomXStructInput(i:i+network%sts%struct(j)%NUMCOORDINATES-1)= network%sts%struct(j)%XCOORDINATES
+         geomYStructInput(i:i+network%sts%struct(j)%NUMCOORDINATES-1)= network%sts%struct(j)%YCOORDINATES
+         nNodesStructInput(n) = network%sts%struct(j)%NUMCOORDINATES
+
+         i = i + network%sts%struct(j)%NUMCOORDINATES
+      else if (network%sts%struct(j)%ibran > -1) then
+
+         ASSOCIATE ( branch => network%brs%branch(network%sts%struct(j)%IBRAN ))
+
+            ierr = odu_get_xy_coordinates( (/ 1 /) ,  network%sts%struct(j:j)%CHAINAGE , branch%xs , branch%ys , &
+               (/ branch%gridpointscount /),(/ branch%length /), jsferic  , geomXStructInput(i:i) , geomYStructInput(i:i) )
+
+            nNodesStructInput(n) = 1
+            i = i + 1
+         end ASSOCIATE
+
+      endif
+   enddo
+endif
+
+end subroutine get_input_coordinates_of_structure
+
 end module m_structures
