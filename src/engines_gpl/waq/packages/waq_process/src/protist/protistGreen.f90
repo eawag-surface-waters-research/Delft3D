@@ -227,7 +227,7 @@ use ieee_arithmetic
             ! Units: gNut gC-1 d-1
             upP = uptakeP(PC, PCo, PCopt, PCm, UmT, PO4, KtP)
             upNH4 = uptakeNH4(PCoNCopt, PCoNCm, PCu, NCu, NC, NCo, NCopt, NCm, UmT, ReUmNH4, NH4, KtNH4)
-            upNO3 = uptakeNO3(PCoNCm, PCu, NC, NC, NCo, NO3Copt, NO3Cm, UmT, ReUmNO3, NO3, KtNO3)
+            upNO3 = uptakeNO3(PCoNCm, PCu, NCu, NC, NCo, NO3Copt, NO3Cm, UmT, ReUmNO3, NO3, KtNO3)
 
             ! Calculate photosynthesis related equation ---------------------------------------
             ! Units: gC gC-1 d-1
