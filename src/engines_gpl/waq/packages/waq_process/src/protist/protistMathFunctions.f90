@@ -65,7 +65,8 @@ module protist_math_functions
       real, intent(in) :: k                  ! growth rate curve
       real, intent(in) :: b                  ! displacement along the x-axis
       real, intent(in) :: x
-      y = L / (1.0 + exp(-k * (x - b)))
+      real, parameter  :: maxexp = log(huge(1.0)) - 1.0
+      y = L / (1.0 + exp(min(maxexp, -k * (x - b))))
    end function sigmoidLogistic
 
 end module protist_math_functions
