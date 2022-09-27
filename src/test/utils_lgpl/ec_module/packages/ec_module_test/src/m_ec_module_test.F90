@@ -145,6 +145,8 @@ contains
              logLun_open = .True.
              logging = .True.
           endif
+       else
+          logging = .false.
        endif
 
        ! Create and initialize EC instance
