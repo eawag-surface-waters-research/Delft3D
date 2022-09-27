@@ -126,7 +126,7 @@
       REAL                   :: RDUMMY(1)
       LOGICAL                :: IMFLAG , IDFLAG , IHFLAG
       LOGICAL                :: UPDATE , LREWIN
-      LOGICAL                :: LITREP , timon_old
+      LOGICAL                :: timon_old
       INTEGER                :: ISYS
       INTEGER                :: NSTEP
       INTEGER                :: sindex

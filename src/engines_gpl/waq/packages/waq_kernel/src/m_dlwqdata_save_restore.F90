@@ -45,6 +45,7 @@ module m_dlwqdata_save_restore
     integer   :: noqt
     integer   :: nopred
     integer   :: ithandl
+    logical   :: litrep
     logical   :: ldummy
     integer   :: inwtyp
     integer   :: nowarn
@@ -77,6 +78,7 @@ module m_dlwqdata_save_restore
         DLWQD%ITIMEL    =  ITIMEL
         DLWQD%LSTREC    =  LSTREC
         DLWQD%ITHANDL   =  ITHANDL
+        DLWQD%LITREP    =  LITREP
         DLWQD%LDUMMY    =  LDUMMY
         DLWQD%INWTYP    =  INWTYP
 
@@ -122,6 +124,7 @@ module m_dlwqdata_save_restore
         NOPRED    =  DLWQD%NOPRED
         ITIMEL    =  DLWQD%ITIMEL
         ITHANDL   =  DLWQD%ITHANDL
+        LITREP    =  DLWQD%LITREP
         LSTREC    =  DLWQD%LSTREC
         LDUMMY    =  DLWQD%LDUMMY
         INWTYP    =  DLWQD%INWTYP

@@ -108,7 +108,6 @@
 !
       LOGICAL         IMFLAG , IDFLAG , IHFLAG
       LOGICAL         OPFLAG , LREWIN
-      LOGICAL         LITREP
 
       INTEGER         ISYS
       INTEGER         ICSYS

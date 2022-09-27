@@ -196,6 +196,7 @@
           logical                                     :: lstrec
           logical                                     :: forester
           logical                                     :: updatr
+          logical                                     :: litrep
           logical                                     :: ldummy
           type(progress_data)                         :: progress
           type(operation_data), dimension(:), pointer :: operation => null()

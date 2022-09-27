@@ -115,7 +115,8 @@
 !
       LOGICAL          IMFLAG , IDFLAG , IHFLAG
       LOGICAL          LDUMMY , LSTREC , LREWIN
-      LOGICAL          LITREP , UPDATE
+      logical, save :: litrep
+      logical          update
       real(8)          tol
 
       INTEGER         ITIME

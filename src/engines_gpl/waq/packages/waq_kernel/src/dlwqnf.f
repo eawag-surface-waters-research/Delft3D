@@ -130,7 +130,7 @@
       real            rdummy(1)
       logical         imflag , idflag , ihflag
       logical         update , lrewin
-      logical         litrep , timon_old
+      logical         timon_old
       integer         laatst
       INTEGER         sindex
 
