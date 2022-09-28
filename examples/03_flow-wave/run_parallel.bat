@@ -17,7 +17,7 @@
 
 set build_configuration=build_all
 set script_path=..\..\src\bin\x64\dflow2d3d\scripts
-call %script_path%\run_dflow2d3d_parallel_dwaves.bat -w r17.mdw
+call %script_path%\run_dflow2d3d_parallel_dwaves.bat 3 config_d_hydro.xml -w r17.mdw
 
 
     rem To prevent the DOS box from disappearing immediately: remove the rem on the following line
