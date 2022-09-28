@@ -1,21 +1,22 @@
 @ echo off
 
-    rem When using mpich2 for the first time on a machine:
-    rem Execute "smpd -install" as administrator:
-    rem     Preparation: Check that your Delft3D installation contains "...\x64\share\bin\smpd.exe". Optionally copy it to a local directory (it will run as a service).
-    rem     "Start" -> "All programs" -> "Accessories", right-click "Command Prompt", "Run as Administrator"
+    rem When using intelMPI for the first time on a machine:
+    rem Execute "hydra_service.exe -install" as administrator:
+    rem     Preparation: Check that your Delft3D installation contains "...\x64\share\bin\hydra_service.exe". Optionally copy it to a local directory (it will run as a service).
+    rem     "Windows Start button" -> type "cmd", right-click "Command Prompt" App, "Run as Administrator"
     rem     In this command box:
-    rem         cd ...\x64\share\bin
-    rem         smpd -install
-    rem     When there is an smpd already running on the machine, it must be ended first, using the Microsoft Task Manager, 
-    rem     or in the command  box: smpd -uninstall
+    rem         cd ...\x64\share\bin (or your local copy)
+    rem         hydra_service.exe -install
+    rem         mpiexec.exe -register -username <user> -password <password> -noprompt
+    rem     When there is an hydra_service/smpd already running on the machine, it must be ended first, using the Microsoft Task Manager, 
+    rem     or in the command  box: hydra_service.exe -uninstall (smpd -uninstall)
 
     rem At present, this runscript will only work after having executed the following command in a DOS-box, at the top folder of the source tree:
     rem build.bat all
     rem See README.md there for more information
 
 set build_configuration=build_all
-set script_path=..\..\%build_configuration%\x64\dflow2d3d\scripts
+set script_path=..\..\src\bin\x64\dflow2d3d\scripts
 call %script_path%\run_dflow2d3d_parallel_dwaves.bat -w r17.mdw
 
 
