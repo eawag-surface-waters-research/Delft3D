@@ -206,36 +206,7 @@ rem ===============
 rem === INSTALL_ALL
 rem ===============
 :install_all
-    echo "installing all open source projects . . ."
-
-    call :d_hydro
-    call :dflowfm
-    call :dimr
-    call :flow2d3d
-    call :flow2d3d_openda
-    call :delwaq1
-    call :delwaq2
-    call :delwaq_dll
-rem     call :delwaq2_openda_lib
-    call :waq_plugin_wasteload
-    call :part
-    call :agrhyd
-    call :maptonetcdf
-    call :ddcouple
-    call :waqmerge
-    call :wave
-    call :waveexe
-    call :plugin_culvert
-    call :plugin_delftflow_traform
-    call :datsel
-    call :kubint
-    call :lint
-    call :mormerge
-    call :vs
-    call :nesthd1
-    call :nesthd2
-    call :nestwq1
-    call :nestwq2
+    echo " WARNING: DISABLED: oss-install_x64::install_all . . ."
 goto :endproc
 
 
@@ -255,12 +226,9 @@ rem ========================
     echo "installing delft3d-flow . . ."
 
     call :d_hydro
-    call :dimr
     call :flow2d3d
-    call :flow2d3d_openda
     call :plugin_culvert
     call :plugin_delftflow_traform
-    call :mormerge
 goto :endproc
 
 
@@ -283,8 +251,6 @@ rem ====================
     call :makeDir !dest_share!
 
     call :copyFile "third_party_open\expat\x64\x64\Release\libexpat.dll"        !dest_share!
-    call :copyFile "third_party_open\mpich2\x64\bin\*.exe"                      !dest_share!
-    call :copyFile "third_party_open\mpich2\x64\lib\*.dll"                      !dest_share!
     call :copyFile "third_party_open\pthreads\bin\x64\*.dll"                    !dest_share!
     call :copyNetcdf                                                            !dest_share!
     echo This directory is automatically created by script https://svn.oss.deltares.nl/repos/delft3d/trunk/src/scripts_lgpl/win64/oss-install_x64.cmd >!dest_share!\readme.txt
@@ -316,76 +282,7 @@ rem ====================
 rem === INSTALL_DFLOWFM
 rem ====================
 :dflowfm
-    echo "installing dflowfm . . ."
-
-    set dest_bin="!dest_main!\x64\dflowfm\bin"
-    set dest_default="!dest_main!\x64\dflowfm\default"
-    set dest_scripts="!dest_main!\x64\dflowfm\scripts"
-    set dest_plugins="!dest_main!\x64\plugins\bin"
-    set dest_share="!dest_main!\x64\share\bin"
-
-    call :makeDir !dest_bin!
-    call :makeDir !dest_default!
-    call :makeDir !dest_scripts!
-    call :makeDir !dest_plugins!
-    call :makeDir !dest_share!
-
-    call :copyFile engines_gpl\waq\default\bloom.spe                           !dest_default!
-    call :copyFile engines_gpl\waq\default\proc_def.dat                        !dest_default!
-    call :copyFile engines_gpl\waq\default\proc_def.def                        !dest_default!
-
-    call :copyFile engines_gpl\dflowfm\scripts\team-city\run_dflowfm_processes.bat !dest_scripts!
-    call :copyFile engines_gpl\dflowfm\scripts\team-city\run_dflowfm.bat           !dest_scripts!
-    call :copyFile engines_gpl\dflowfm\scripts\team-city\run_dfmoutput.bat         !dest_scripts!
-
-
-
-    call :copyNetcdf                                                                        !dest_share!
-    call :copyFile "third_party_open\Tecplot\lib\x64\*.dll"                                 !dest_share!
-    call :copyFile "third_party_open\petsc\petsc-3.10.2\lib\x64\Release\*.dll"              !dest_share!
-    call :copyFile "third_party_open\GISInternals\release-1911-x64\bin\xerces-c_3_2.dll"    !dest_share!
-    call :copyFile "third_party_open\GISInternals\release-1911-x64\bin\gdal300.dll"         !dest_share!
-    call :copyFile "third_party_open\GISInternals\release-1911-x64\bin\expat.dll"           !dest_share!
-    call :copyFile "third_party_open\GISInternals\release-1911-x64\bin\libpq.dll"           !dest_share!
-    call :copyFile "third_party_open\GISInternals\release-1911-x64\bin\sqlite3.dll"         !dest_share!
-    call :copyFile "third_party_open\GISInternals\release-1911-x64\bin\libmysql.dll"        !dest_share!
-    call :copyFile "third_party_open\GISInternals\release-1911-x64\bin\spatialite.dll"      !dest_share!
-    call :copyFile "third_party_open\GISInternals\release-1911-x64\bin\proj.dll"            !dest_share!
-    call :copyFile "third_party_open\GISInternals\release-1911-x64\bin\proj_6_1.dll"        !dest_share!
-    call :copyFile "third_party_open\GISInternals\release-1911-x64\bin\openjp2.dll"         !dest_share!
-    call :copyFile "third_party_open\GISInternals\release-1911-x64\bin\geos_c.dll"          !dest_share!
-    call :copyFile "third_party_open\GISInternals\release-1911-x64\bin\libxml2.dll"         !dest_share!
-    call :copyFile "third_party_open\GISInternals\release-1911-x64\bin\iconv.dll"           !dest_share!
-    call :copyFile "third_party_open\GISInternals\release-1911-x64\bin\geos.dll"            !dest_share!
-    call :copyFile "third_party_open\GISInternals\release-1911-x64\bin\freexl.dll"          !dest_share!
-
-    if !compiler_redist_dir!=="" (
-        rem Compiler_dir not set
-    ) else (
-        rem "Compiler_dir:!compiler_redist_dir!"
-        set localstring="!compiler_redist_dir!*.dll"
-        rem Note the awkward usage of !-characters
-        call :copyFile !!localstring! !dest_share!!
-    )
-
-    if !mkl_redist_dir!=="" (
-        rem mkl_redist_dir not set
-    ) else (
-        rem note that for onaApi MKL, the DLL names end in '.1.dll'
-        set localstring="!mkl_redist_dir!mkl_core*.dll"
-        call :copyFile !!localstring! !dest_share!
-        set localstring="!mkl_redist_dir!mkl_def*.dll"
-        call :copyFile !!localstring! !dest_share!
-        set localstring="!mkl_redist_dir!mkl_core*.dll"
-        call :copyFile !!localstring! !dest_share!
-        set localstring="!mkl_redist_dir!mkl_avx*.dll"
-        call :copyFile !!localstring! !dest_share!
-        rem is needed for dimr nuget package? please check
-        call :copyFile !!localstring! !dest_share!
-        set localstring="!mkl_redist_dir!mkl_intel_thread*.dll"
-        call :copyFile !!localstring! !dest_share!
-    )
-
+    echo " WARNING: DISABLED: oss-install_x64::dflowfm . . ."
 goto :endproc
 
 
@@ -394,28 +291,7 @@ rem ================
 rem === INSTALL_DIMR
 rem ================
 :dimr
-    echo "installing dimr . . ."
-
-    set dest_bin="!dest_main!\x64\dimr\bin"
-    set dest_menu="!dest_main!\x64\menu\bin"
-    set dest_scripts="!dest_main!\x64\dimr\scripts"
-	set dest_schemas="!dest_main!\x64\dimr\schema"
-    set dest_share="!dest_main!\x64\share\bin"
-
-    call :makeDir !dest_bin!
-    call :makeDir !dest_menu!
-    call :makeDir !dest_scripts!
-    call :makeDir !dest_schemas!
-    call :makeDir !dest_share!
-
-    call :copyFile engines_gpl\dimr\bin\x64\Release\dimr.exe             !dest_bin!
-    call :copyFile engines_gpl\dimr\bin\x64\Release\dimr_dll.dll         !dest_bin!
-
-    call :copyFile engines_gpl\d_hydro\scripts\create_config_xml.tcl     !dest_menu!
-
-    call :copyFile "engines_gpl\dimr\scripts\generic\win64\*.*"     !dest_scripts!
-    call :copyFolderContent "engines_gpl\dimr\schemas"          !dest_schemas!
-
+    echo " WARNING: DISABLED: oss-install_x64 . . ."
 goto :endproc
 
 
@@ -458,6 +334,14 @@ rem ====================
     call :copyFile "engines_gpl\flow2d3d\scripts\run_*.bat"                         !dest_scripts!
     call :copyFile "third_party_open\tcl\bin\win64\tclkitsh852.exe"                 !dest_share!
 
+    rem IntelMPI, copied from "oss-post_build.cmd"
+    call :copyFile "%I_MPI_ONEAPI_ROOT%\bin\*.dll"                !dest_share!
+    call :copyFile "%I_MPI_ONEAPI_ROOT%\bin\*.exe"                !dest_share!
+    call :copyFile "%I_MPI_ONEAPI_ROOT%\bin\release\*.dll"        !dest_share!
+    call :copyFile "%I_MPI_ONEAPI_ROOT%\libfabric\bin\*.dll"      !dest_share!
+    call :copyFile "%I_MPI_ONEAPI_ROOT%\libfabric\bin\*.dll"      !dest_share!
+
+
     if !compiler_redist_dir!=="" (
         rem Compiler_dir not set
     ) else (
@@ -474,21 +358,7 @@ rem ===========================
 rem === INSTALL_FLOW2D3D_OPENDA
 rem ===========================
 :flow2d3d_openda
-rem    echo "installing flow2d3d_openda . . ."
-rem
-rem    copy engines_gpl\flow2d3d\bin\x64\Release\flow2d3d_openda.dll !dest_bin!
-rem    if NOT %ErrorLevel%==0 (
-rem        set ErrorLevel_opendadll=1
-rem    )
-rem    copy engines_gpl\flow2d3d\bin\x64\Release\flow2d3d_openda_sp.dll !dest_bin!
-rem    if NOT !ErrorLevel!==0 (
-rem        if NOT !ErrorLevel_opendadll!==0 (
-rem            set GlobalErrorLevel=1
-rem        )
-rem    )
-rem    rem One of these two dlls will not exist and cause an ErrorLevel=1. Reset it.
-rem    set ErrorLevel=0
-rem    call :copyFile "third_party_open\openda\core\native\lib\win64\*.dll"      !dest_bin!
+    echo " WARNING: DISABLED: oss-install_x64::flow2d3d_openda . . ."
 goto :endproc
 
 
@@ -497,13 +367,8 @@ rem ===================
 rem === INSTALL_DELWAQ1
 rem ===================
 :delwaq1
-    echo "installing delwaq1 . . ."
-
-    set dest_bin="!dest_main!\x64\dwaq\bin"
-
-    call :makeDir !dest_bin!
-
-    call :copyFile engines_gpl\waq\bin\x64\Release\delwaq1.exe                     !dest_bin!
+    echo " WARNING: DISABLED: oss-install_x64::delwaq1 . . ."
+ase\delwaq1.exe                     !dest_bin!
 goto :endproc
 
 
@@ -512,13 +377,7 @@ rem ===================
 rem === INSTALL_DELWAQ2
 rem ===================
 :delwaq2
-    echo "installing delwaq2 . . ."
-
-    set dest_bin="!dest_main!\x64\dwaq\bin"
-
-    call :makeDir !dest_bin!
-
-    call :copyFile engines_gpl\waq\bin\x64\Release\delwaq2.exe               	   !dest_bin!
+    echo " WARNING: DISABLED: oss-install_x64::delwaq2 . . ."
 goto :endproc
 
 
@@ -527,13 +386,7 @@ rem ============================
 rem === INSTALL_DELWAQ_DIMR_TEST
 rem ============================
 :delwaq_dimr_test
-    echo "installing delwaq_dimr_test . . ."
-
-    set dest_bin="!dest_main!\x64\dwaq\bin"
-
-    call :makeDir !dest_bin!
-
-    call :copyFile engines_gpl\waq\bin\x64\Release\delwaq_dimr_test.exe               	   !dest_bin!
+    echo " WARNING: DISABLED: oss-install_x64::delwaq_dimr_test . . ."
 goto :endproc
 
 
@@ -542,42 +395,7 @@ rem ======================
 rem === INSTALL_DELWAQ_DLL
 rem ======================
 :delwaq_dll
-    echo "installing delwaq dll . . ."
-
-    set dest_bin="!dest_main!\x64\dwaq\bin"
-    set dest_default="!dest_main!\x64\dwaq\default"
-    set dest_scripts="!dest_main!\x64\dwaq\scripts"
-    set dest_share="!dest_main!\x64\share\bin"
-
-    call :makeDir !dest_bin!
-    call :makeDir !dest_default!
-    call :makeDir !dest_scripts!
-    call :makeDir !dest_share!
-
-    call :copyFile engines_gpl\waq\bin\x64\Release\delwaq.dll                  !dest_bin!
-
-    call :copyFile engines_gpl\waq\default\bloom.spe                           !dest_default!
-    call :copyFile engines_gpl\waq\default\proc_def.dat                        !dest_default!
-    call :copyFile engines_gpl\waq\default\proc_def.def                        !dest_default!
-
-    if !compiler_redist_dir!=="" (
-           rem Compiler_dir not set
-       ) else (
-           rem "Compiler_dir:!compiler_redist_dir!"
-           rem Note the awkward usage of !-characters
-           set localstring="!compiler_redist_dir!libiomp5md.dll"
-           call :copyFile !!localstring! !dest_bin!!
-           set localstring="!compiler_redist_dir!libifcoremd.dll"
-           call :copyFile !!localstring! !dest_bin!!
-           set localstring="!compiler_redist_dir!libifportmd.dll"
-           call :copyFile !!localstring! !dest_bin!!
-           set localstring="!compiler_redist_dir!libmmd.dll"
-           call :copyFile !!localstring! !dest_bin!!
-           set localstring="!compiler_redist_dir!svml_dispmd.dll"
-           call :copyFile !!localstring! !dest_bin!!
-       )
-
-    call :copyFile "engines_gpl\waq\scripts\run_*.bat"                                          !dest_scripts!
+    echo " WARNING: DISABLED: oss-install_x64::delwaq dll . . ."
 goto :endproc
 
 
@@ -586,31 +404,7 @@ rem ==============================
 rem === INSTALL_DELWAQ2_OPENDA_LIB
 rem ==============================
 :delwaq2_openda_lib
-rem    echo "installing delwaq2_openda_lib . . ."
-rem
-rem    set dest_bin="!dest_main!\x64\dwaq\bin"
-rem
-rem    call :makeDir !dest_bin!
-rem
-rem    call :copyFile engines_gpl\waq\bin\Release\delwaq2_openda_lib.dll          !dest_bin!
-rem	
-
-rem    if !compiler_redist_dir!=="" (
-rem        rem Compiler_dir not set
-rem    ) else (
-rem        rem "Compiler_dir:!compiler_redist_dir!"
-rem        rem Note the awkward usage of !-characters
-rem        set localstring="!compiler_redist_dir!libiomp5md.dll"
-rem        call :copyFile !!localstring! !dest_bin!!
-rem        set localstring="!compiler_redist_dir!libifcoremd.dll"
-rem        call :copyFile !!localstring! !dest_bin!!
-rem        set localstring="!compiler_redist_dir!libifportmd.dll"
-rem        call :copyFile !!localstring! !dest_bin!!
-rem        set localstring="!compiler_redist_dir!libmmd.dll"
-rem        call :copyFile !!localstring! !dest_bin!!
-rem        set localstring="!compiler_redist_dir!svml_dispmd.dll"
-rem        call :copyFile !!localstring! !dest_bin!!
-rem    )
+    echo " WARNING: DISABLED: oss-install_x64::delwaq2_openda_lib . . ."
 goto :endproc
 
 
@@ -619,13 +413,7 @@ rem ================================
 rem === INSTALL_WAQ_PLUGIN_WASTELOAD
 rem ================================
 :waq_plugin_wasteload
-    echo "installing waq_plugin_wasteload . . ."
-
-    set dest_bin="!dest_main!\x64\dwaq\bin"
-
-    call :makeDir !dest_bin!
-
-    call :copyFile engines_gpl\waq\bin\x64\Release\waq_plugin_wasteload.dll        !dest_bin!
+    echo " WARNING: DISABLED: oss-install_x64::waq_plugin_wasteload . . ."
 goto :endproc
 
 
@@ -636,26 +424,7 @@ rem ================
 rem === INSTALL PART
 rem ================
 :part
-    echo "installing part . . ."
-
-    set dest="!dest_main!\x64\dpart\bin"
-    set dest_scripts="!dest_main!\x64\dpart\scripts"
-
-    call :makeDir !dest!
-    call :makeDir !dest_scripts!
-
-    call :copyFile engines_gpl\part\bin\x64\release\delpar.exe !dest!
-    call :copyFile "engines_gpl\part\scripts\run_*.bat"        !dest_scripts!
-
-    if !compiler_redist_dir!=="" (
-        rem Compiler_dir not set
-    ) else (
-        rem "Compiler_dir:!compiler_redist_dir!"
-        rem Note the awkward usage of !-characters
-        set localstring="!compiler_redist_dir!libiomp5md.dll"
-        call :copyFile !localstring! !dest!
-    )
-
+    echo " WARNING: DISABLED: oss-install_x64::part . . ."
 goto :endproc
 
 
@@ -663,26 +432,14 @@ rem ===================
 rem === INSTALL_AGRHYD
 rem ===================
 :agrhyd
-    echo "installing agrhyd . . ."
-
-    set dest_bin="!dest_main!\x64\dwaq\bin"
-
-    call :makeDir !dest_bin!
-
-    call :copyFile engines_gpl\waq\bin\x64\Release\agrhyd.exe                     !dest_bin!
+    echo " WARNING: DISABLED: oss-install_x64::agrhyd . . ."
 goto :endproc
 
 rem ===================
 rem === INSTALL_MAPTONETCDF
 rem ===================
 :maptonetcdf
-    echo "installing maptonetcdf . . ."
-
-    set dest_bin="!dest_main!\x64\dwaq\bin"
-
-    call :makeDir !dest_bin!
-
-    call :copyFile engines_gpl\waq\bin\x64\Release\maptonetcdf.exe                !dest_bin!
+    echo " WARNING: DISABLED: oss-install_x64::maptonetcdf . . ."
 goto :endproc
 
 
@@ -690,13 +447,7 @@ rem ===================
 rem === INSTALL_DDCOUPLE
 rem ===================
 :ddcouple
-    echo "installing ddcouple . . ."
-
-    set dest_bin="!dest_main!\x64\dwaq\bin"
-
-    call :makeDir !dest_bin!
-
-    call :copyFile engines_gpl\waq\bin\x64\Release\ddcouple.exe                     !dest_bin!
+    echo " WARNING: DISABLED: oss-install_x64::ddcouple . . ."
 goto :endproc
 
 
@@ -704,13 +455,7 @@ rem ===================
 rem === INSTALL_WAQMERGE
 rem ===================
 :waqmerge
-    echo "installing waqmerge . . ."
-
-    set dest_bin="!dest_main!\x64\dwaq\bin"
-
-    call :makeDir !dest_bin!
-
-    call :copyFile engines_gpl\waq\bin\x64\Release\waqmerge.exe                     !dest_bin!
+    echo " WARNING: DISABLED: oss-install_x64::waqmerge . . ."
 goto :endproc
 
 
@@ -719,57 +464,7 @@ rem ================
 rem === INSTALL_WAVE
 rem ================
 :wave
-    echo "installing wave . . .%1"
-    if [%1] EQU [exe] (
-        set binary=exe
-    ) else (
-        set binary=dll
-    )
-    rem echo "binary:%binary%
-
-    set dest_bin=!dest_main!\x64\dwaves\bin
-    set dest_default=!dest_main!\x64\dwaves\default
-    set dest_swan_bin=!dest_main!\x64\swan\bin
-       rem When adding quotes here AND when using dest_swan_scripts, xcopy also gets confused
-       rem Neat solution: do not add quotes on defining the destination folders, but only at calling :copyFile
-    set dest_swan_scripts=!dest_main!\x64\swan\scripts
-    set dest_esmf_bin=!dest_main!\x64\esmf\bin
-    set dest_esmf_scripts=!dest_main!\x64\esmf\scripts
-    set dest_scripts=!dest_main!\x64\dwaves\scripts
-
-    call :makeDir !dest_bin!
-    call :makeDir !dest_default!
-    call :makeDir !dest_swan_bin!
-    call :makeDir !dest_swan_scripts!
-    call :makeDir !dest_esmf_bin!
-    call :makeDir !dest_esmf_scripts!
-    call :makeDir !dest_scripts!
-
-    rem
-    rem This wave block is called twice:
-    rem - once for wave.dll     (then wave_exe.exe might not be present yet)
-    rem - once for wave_exe.exe (then wave.dll     might not be present yet)
-    rem
-    if [%binary%] EQU [dll] (
-        call :copyFile engines_gpl\wave\bin\x64\release\wave.dll          "!dest_bin!"
-    ) else (
-        call :copyFile engines_gpl\wave\bin\x64\release\wave_exe.exe      "!dest_bin!\wave.exe"
-    )
-    call :copyFile engines_gpl\flow2d3d\default\dioconfig.ini         "!dest_default!"
-    call :copyFile "third_party_open\swan\bin\w64_i11\*.*"            "!dest_swan_bin!"
-    call :copyFile third_party_open\swan\scripts\swan.bat             "!dest_swan_scripts!"
-    call :copyFile "third_party_open\esmf\win64\bin\*.*"              "!dest_esmf_bin!"
-    call :copyFile "third_party_open\esmf\win64\scripts\*.*"          "!dest_esmf_scripts!"
-    call :copyFile "engines_gpl\wave\scripts\run_*.bat"               "!dest_scripts!"
-
-    if !compiler_redist_dir!=="" (
-        rem Compiler_dir not set
-    ) else (
-        rem "Compiler_dir:!compiler_redist_dir!"
-        set localstring="!compiler_redist_dir!*.dll"
-        rem Note the awkward usage of !-characters
-        call :copyFile !!localstring! !dest_bin!!
-    )
+    echo " WARNING: DISABLED: oss-install_x64::installing wave . . .%1"
 goto :endproc
 
 
@@ -778,8 +473,7 @@ rem ===================
 rem === INSTALL_WAVEEXE
 rem ===================
 :waveexe
-    echo "installing waveexe . . ."
-    call :wave exe
+    echo " WARNING: DISABLED: oss-install_x64::waveexe . . ."
 goto :endproc
 
 
@@ -788,13 +482,7 @@ rem ==========================
 rem === INSTALL_PLUGIN_CULVERT
 rem ==========================
 :plugin_culvert
-    echo "installing plugin_culvert . . ."
-
-    set dest_bin="!dest_main!\x64\dflow2d3d\bin"
-
-    call :makeDir !dest_bin!
-
-    call :copyFile plugins_lgpl\plugin_culvert\bin\x64\Release\plugin_culvert.dll !dest_bin!
+    echo " WARNING: DISABLED: oss-install_x64::plugin_culvert . . ."
 goto :endproc
 
 
@@ -959,13 +647,7 @@ rem =====================
 rem === INSTALL IO_NETCDF
 rem =====================
 :io_netcdf
-    echo "installing io_netcdf . . ."
-
-    set dest_bin="!dest_main!\x64\share\bin"
-
-    call :makeDir !dest_bin!
-
-    call :copyFile "utils_lgpl\io_netcdf\packages\io_netcdf\dll\x64\Release\io_netcdf.dll"                  !dest_bin!
+    echo " WARNING: DISABLED: oss-install_x64::io_netcdf . . ."
 goto :endproc
 
 
@@ -974,13 +656,7 @@ rem =====================
 rem === INSTALL EC_MODULE
 rem =====================
 :ec_module
-    echo "installing ec_module . . ."
-
-    set dest_bin="!dest_main!\x64\share\bin"
-
-    call :makeDir !dest_bin!
-
-    call :copyFile "utils_lgpl\ec_module\packages\ec_module\dll\x64\Release\ec_module.dll"                  !dest_bin!
+    echo " WARNING: DISABLED: oss-install_x64::ec_module . . ."
 goto :endproc
 
 
@@ -989,13 +665,7 @@ rem =====================
 rem === INSTALL GRIDGEOM
 rem =====================
 :gridgeom
-    echo "installing gridgeom . . ."
-
-    set dest_bin="!dest_main!\x64\share\bin"
-
-    call :makeDir !dest_bin!
-
-    call :copyFile "utils_lgpl\gridgeom\packages\gridgeom\dll\x64\Release\gridgeom.dll"                  !dest_bin!
+    echo " WARNING: DISABLED: oss-install_x64::gridgeom . . ."
 goto :endproc
 
 

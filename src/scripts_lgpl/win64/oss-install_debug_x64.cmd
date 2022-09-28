@@ -78,30 +78,7 @@ rem ===============
 rem === INSTALL_ALL
 rem ===============
 :install_all
-    echo "    installing all open source projects (debug) . . ."
-
-    call :d_hydro
-    call :dimr
-    call :flow2d3d
-    call :flow2d3d_openda
-    call :delwaq1
-    call :delwaq2
-    call :delwaq_dll
-rem     call :delwaq2_openda_lib
-    call :waq_plugin_wasteload
-    call :waqmerge
-    call :ddcouple
-    call :agrhyd
-    call :maptonetcdf
-    call :wave
-    call :plugin_culvert
-    call :plugin_delftflow_traform
-    call :datsel
-    call :kubint
-    call :lint
-    call :mormerge
-    call :vs
-
+    echo "    WARNING: DISABLED: oss-install_debug_x64.cmd::install_all . . ."
 goto :endproc
 
 
@@ -123,17 +100,7 @@ rem ==========================
 rem === INSTALL_DIMR
 rem ==========================
 :dimr
-    echo "installing dimr . . ."
-    set dest_bin="engines_gpl\dimr\bin\x64\Debug"
-
-    if not exist !dest_bin!     mkdir !dest_bin!
-
-    copy third_party_open\pthreads\bin\x64\*.dll                                             !dest_bin!
-
-    copy third_party_open\mpich2\x64\bin\*.exe                                               !dest_bin!
-    copy third_party_open\mpich2\x64\lib\*.dll                                               !dest_bin!
-    copy third_party_open\expat\x64\x64\Debug\libexpat.dll                                   !dest_bin!
-
+    echo "WARNING: DISABLED: oss-install_debug_x64::dimr . . ."
 goto :endproc
 
 
@@ -155,8 +122,6 @@ rem ====================
     copy third_party_open\DelftOnline\lib\x64\Debug\DelftOnline.dll                          !dest_bin!
     copy third_party_open\pthreads\bin\x64\*.dll                                             !dest_bin!
 
-    copy third_party_open\mpich2\x64\bin\*.exe                                               !dest_bin!
-    copy third_party_open\mpich2\x64\lib\*.dll                                               !dest_bin!
     copy third_party_open\expat\x64\x64\Debug\libexpat.dll                                   !dest_bin!
     copy utils_lgpl\delftonline\lib\x64\Debug\dynamic\delftonline.dll                        !dest_bin!
     call :copyNetcdf
@@ -172,8 +137,6 @@ rem ====================
     copy third_party_open\DelftOnline\lib\x64\Debug\DelftOnline.dll                          !dest_bin!
     copy third_party_open\pthreads\bin\x64\*.dll                                             !dest_bin!
 
-    copy third_party_open\mpich2\x64\bin\*.exe                                               !dest_bin!
-    copy third_party_open\mpich2\x64\lib\*.dll                                               !dest_bin!
     copy third_party_open\expat\x64\x64\Debug\libexpat.dll                                   !dest_bin!
     copy utils_lgpl\delftonline\lib\x64\Debug\dynamic\delftonline.dll                        !dest_bin!
     call :copyNetcdf
@@ -185,26 +148,7 @@ rem ===========================
 rem === INSTALL_FLOW2D3D_OPENDA
 rem ===========================
 :flow2d3d_openda
-rem    echo "installing flow2d3d_openda . . ."
-rem
-rem    set dest_bin="engines_gpl\d_hydro\bin\Debug"
-rem
-rem    if not exist !dest_bin!     mkdir !dest_bin!
-rem
-rem    copy engines_gpl\flow2d3d\bin\Debug\flow2d3d_openda.dll                              !dest_bin!
-rem    copy engines_gpl\flow2d3d\bin\Debug\flow2d3d_openda_sp.dll                           !dest_bin!
-rem       rem One of these two dlls will not exist and cause an ErrorLevel=1. Reset it.
-rem    set ErrorLevel=0
-rem    copy third_party_open\DelftOnline\lib\Debug\DelftOnline.dll                          !dest_bin!
-rem    copy third_party_open\pthreads\bin\win32\pthreadVCE2.dll                             !dest_bin!
-rem    copy third_party_open\pthreads\bin\win32\pthreadvce.dll                              !dest_bin!
-rem    copy third_party_open\mpich2\bin\*.exe                                               !dest_bin!
-rem    copy third_party_open\mpich2\lib\*.dll                                               !dest_bin!
-rem    copy third_party_open\expat\win32\bin\Release\libexpat.dll                           !dest_bin!
-rem    copy third_party_open\netcdf\lib\win32\release\netcdf.dll                            !dest_bin!
-rem    copy third_party_open\openda\core\native\lib\win32\*.dll                             !dest_bin!
-rem    copy utils_lgpl\delftonline\lib\Debug\dynamic\delftonline.dll                        !dest_bin!
-rem    call :copyNetcdf
+    echo " WARNING: DISABLED: oss-install_debug_x64::flow2d3d_openda . . ."
 goto :endproc
 
 
@@ -234,11 +178,7 @@ rem === INSTALL_DELWAQ_DLL
 rem ======================
 :delwaq_dll
     echo "installing delwaq dll . . ."
-
-    set dest_bin="engines_gpl\waq\bin\x64\debug"
-
-    if not exist !dest_bin!     mkdir !dest_bin!
-    call :copyNetcdf
+    echo "... nothing to be done"
 goto :endproc
 
 
@@ -267,15 +207,7 @@ rem ================
 rem === INSTALL_WAVE
 rem ================
 :wave
-    echo "installing wave . . ."
-
-    set dest_bin="engines_gpl\wave\bin\x64\Debug"
-
-    if not exist !dest_bin!     mkdir !dest_bin!
-
-    copy third_party_open\pthreads\bin\win32\pthreadVCE2.dll                             !dest_bin!
-    copy third_party_open\pthreads\bin\win32\pthreadvce.dll                              !dest_bin!
-    call :copyNetcdf
+    echo " WARNING: DISABLED: oss-install_debug_x64::wave . . ."
 goto :endproc
 
 
