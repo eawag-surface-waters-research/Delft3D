@@ -93,13 +93,6 @@ set waveexedir=%D3D_HOME%\%ARCH%\dwaves\bin
 
     rem Start FLOW
 set PATH=%dflow2d3ddir%;%sharedir%
-if exist %sharedir%\vars.bat (
-    echo executing: "%sharedir%\vars.bat"
-        call "%sharedir%\vars.bat"
-) else (
-    echo "WARNING: File not found: %sharedir%\vars.bat"
-    echo "         Problems may occur when using IntelMPI"
-)
 
 echo executing in separate window: "%sharedir%\mpiexec.exe" -n %numpar% -localonly "%dflow2d3ddir%\d_hydro.exe" %argfile%
               start "Delft3D-FLOW" "%sharedir%\mpiexec.exe" -n %numpar% -localonly "%dflow2d3ddir%\d_hydro.exe" %argfile%
