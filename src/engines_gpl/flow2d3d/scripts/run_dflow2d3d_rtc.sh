@@ -9,7 +9,7 @@
 
 function print_usage_info {
     echo "Usage: ${0##*/} [OPTION]..."
-    echo "Run a Delft3D-FLOW model on Linux."
+    echo "Run a Delft3D-FLOW model online with RTC on Linux."
     echo
     echo "Options:"
     echo "-h, --help"
@@ -43,15 +43,11 @@ case $key in
     -h|--help)
     print_usage_info
     ;;
-    -m|--masterfile)
-    configfile="$1"
-    shift
-    ;;
     --D3D_HOME)
     D3D_HOME="$1"
     shift
     ;;
-	--NNODES)
+    --NNODES)
     NNODES="$1"
     shift
     ;;
@@ -78,7 +74,7 @@ if [ -z "${D3D_HOME}" ]; then
 else
     # D3D_HOME is passed through via argument --D3D_HOME
     # Commonly its value is "/some/path/bin/.."
-    # Scriptdir: remove "/.." at the end of the string
+    # Scriptdir: Remove "/.." at the end of the string
     scriptdir=${D3D_HOME%"/.."}
 fi
 if [ ! -d $D3D_HOME ]; then
@@ -113,6 +109,7 @@ echo
 
 bindir=$D3D_HOME/bin
 libdir=$D3D_HOME/lib
+sharedir=$D3D_HOME/share
 
 
     #
@@ -121,14 +118,27 @@ libdir=$D3D_HOME/lib
 
     # Run
 export LD_LIBRARY_PATH=$libdir:$LD_LIBRARY_PATH
+export PATH=$bindir:$PATH
 
+# Shared memory allocation
+export DIO_SHM_ESM=`$bindir/esm_create`
+# Start Delft3D-FLOW in the background
+echo "executing:"
+echo "$bindir/d_hydro $configfile &"
+      $bindir/d_hydro $configfile &
 
-    echo "executing:"
-    echo "$bindir/d_hydro $configfile"
-    echo 
-    $bindir/d_hydro $configfile
+# Be sure Delft3D-FLOW is started before RTC is started
+sleep 5
+# echo press enter to continue
+# read dummy
 
+# Start RTC
+echo "executing:"
+echo "$bindir/rtc $sharedir/rtc/RTC.FNM $workdir/RTC.RTN"
+      $bindir/rtc $sharedir/rtc/RTC.FNM $workdir/RTC.RTN
 
+# Remove allocated shared memory
+$bindir/esm_delete $DIO_SHM_ESM 
 
     # Wait until all child processes are finished
 wait

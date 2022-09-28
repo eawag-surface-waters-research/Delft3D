@@ -3,12 +3,12 @@
 #$ -j yes
 #$ -cwd
     #
-    # This script runs dimr on Linux
+    # This script runs Delft3D-FLOW on Linux
     # Adapt and use it for your own purpose
     #
     # Usage example:
     # Execute in the working directory:
-    # /path/to/delft3d/installation/lnx64/bin/run_dimr.sh
+    # /path/to/delft3d/installation/lnx64/bin/submit_dflow2d3d.sh
     # More examples: check run scripts in https://svn.oss.deltares.nl/repos/delft3d/trunk/examples/*
 
 function print_usage_info {
@@ -136,25 +136,31 @@ fi
 export D3D_HOME
 
 
+# On Deltares systems only:
+if [ -f "/opt/apps/deltares/.nl" ]; then
+    # Try the following module load
+    module load intelmpi/21.2.0 &>/dev/null
+
+    # If not defined yet: Define I_MPI_FABRICS and FI_PROVIDER with proper values for Deltares systems
+    [ ! -z "$I_MPI_FABRICS" ] && echo "I_MPI_FABRICS is already defined" || export I_MPI_FABRICS=shm
+    [ ! -z "$FI_PROVIDER" ] && echo "FI_PROVIDER is already defined" || export FI_PROVIDER=tcp
+fi
+
+
 echo "    Configfile           : $configfile"
 echo "    D3D_HOME             : $D3D_HOME"
 echo "    Working directory    : $workdir"
 echo "    Number of partitions : $NSLOTS"
+echo "    `type mpiexec`"
+echo "    FI_PROVIDER          : $FI_PROVIDER"
+echo "    I_MPI_FABRICS        : $I_MPI_FABRICS" 
 if [ "$wavefile" != "runwithoutwaveonlinebydefault" ]; then
     echo "    Wave file            : $wavefile"
 fi
 if [ $withrtc -ne 0 ] ; then
     echo "    Online with RTC      : YES"
 fi
-if [ $NSLOTS -ne 1 ]; then
-    testmpiexec=$(type mpiexec 2>/dev/null)
-    if [[ $testmpiexec != "mpiexec is"* ]]; then
-        # Try to module load mpi.
-        module load mpich/3.3.2_intel18.0.3
-    fi
-    echo "    `type mpiexec`"
-fi
-echo 
+
 
     #
     # Set the directories containing the binaries
@@ -253,29 +259,8 @@ else
         echo Contents of machinefile:
         cat $(pwd)/machinefile
         echo ----------------------------------------------------------------------
-
-        if [ $NNODES -ne 1 ]; then
-            # echo "Starting mpd; not needed on h6 (but will not harm): suppress messages"
-            mpd &>/dev/null &
-            mpdboot -n $NSLOTS &>/dev/null
-        fi
-
-        node_number=$NSLOTS
-        while [ $node_number -ge 1 ]; do
-           node_number=`expr $node_number - 1`
-           ln -s /dev/null log$node_number.irlog
-        done
-
         echo "mpiexec -np $NSLOTS $bindir/d_hydro $configfile"
               mpiexec -np $NSLOTS $bindir/d_hydro $configfile
-
-
-        rm -f log*.irlog
-    fi
-
-    if [ $NNODES -ne 1 ]; then
-        # Not needed on h6 (but will not harm): suppress messages"
-        mpdallexit &>/dev/null
     fi
 fi
 

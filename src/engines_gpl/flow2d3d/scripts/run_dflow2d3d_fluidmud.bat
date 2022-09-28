@@ -4,6 +4,12 @@ title run_flow2d3d_fluidmud
     rem This script runs two Delft3D-FLOW instances on Windows
     rem Adapt and use it for your own purpose
     rem
+    rem Usage example:
+    rem Leave this script where it is.
+    rem Call this script from within the working directory:
+    rem path\to\delft3d\installation\x64\dflow2d3d\scripts\run_dflow2d3d_fluidmud.bat
+    rem More examples: check run scripts in https://svn.oss.deltares.nl/repos/delft3d/trunk/examples/*
+
 setlocal enabledelayedexpansion
 
 set waterconfigfile=config_d_hydro_sed.xml

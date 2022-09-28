@@ -3374,6 +3374,7 @@ src/engines_gpl/flow2d3d/scripts/run_dflow2d3d_parallel.sh -text
 src/engines_gpl/flow2d3d/scripts/run_dflow2d3d_parallel_dwaves.bat -text
 src/engines_gpl/flow2d3d/scripts/run_dflow2d3d_parallel_dwaves.sh -text
 src/engines_gpl/flow2d3d/scripts/run_dflow2d3d_rtc.bat -text
+src/engines_gpl/flow2d3d/scripts/run_dflow2d3d_rtc.sh -text
 src/engines_gpl/flow2d3d/scripts/submit_dflow2d3d.sh -text
 src/engines_gpl/part/Makefile.am -text
 src/engines_gpl/part/packages/Makefile.am -text

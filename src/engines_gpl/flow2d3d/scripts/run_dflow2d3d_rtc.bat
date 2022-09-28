@@ -4,6 +4,12 @@ title run_flow2d3d_rtc
     rem This script runs Delft3D-FLOW online with RTC on Windows
     rem Adapt and use it for your own purpose
     rem
+    rem Usage example:
+    rem Leave this script where it is.
+    rem Call this script from within the working directory:
+    rem path\to\delft3d\installation\x64\dflow2d3d\scripts\run_dflow2d3d_rtc.bat
+    rem More examples: check run scripts in https://svn.oss.deltares.nl/repos/delft3d/trunk/examples/*
+
 setlocal enabledelayedexpansion
 
 set argfile= 
@@ -66,7 +72,7 @@ title RTC simulation
     echo "        Part VI   - Initialisation and checking second part..."
     echo "        Part VII  - Initialisation output..."
     echo "    Then press a key in the first command box to start RTC"
-pause
+%SystemRoot%\System32\timeout.exe 10
 
 set PATH=%rtcexedir%;%sharedir%
 echo executing: "%rtcexedir%\rtc.exe" "%rtcdefaultdir%\RTC.FNM" "RTC.RTN"

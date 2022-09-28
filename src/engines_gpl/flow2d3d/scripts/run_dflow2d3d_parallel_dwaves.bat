@@ -1,9 +1,25 @@
 @ echo off
 title run_flow2d3d__parallel_dwaves
+    rem When using intelMPI for the first time on a machine:
+    rem Execute "hydra_service.exe -install" as administrator:
+    rem     Preparation: Check that your Delft3D installation contains "...\x64\share\bin\hydra_service.exe". Optionally copy it to a local directory (it will run as a service).
+    rem     "Windows Start button" -> type "cmd", right-click "Command Prompt" App, "Run as Administrator"
+    rem     In this command box:
+    rem         cd ...\x64\share\bin (or your local copy)
+    rem         hydra_service.exe -install
+    rem         mpiexec.exe -register -username <user> -password <password> -noprompt
+    rem     When there is an hydra_service/smpd already running on the machine, it must be ended first, using the Microsoft Task Manager, 
+    rem     or in the command  box: hydra_service.exe -uninstall (smpd -uninstall)
     rem
     rem This script runs Delft3D-FLOW in parallel online with Delft3D-WAVE on Windows
     rem Adapt and use it for your own purpose
     rem
+    rem Usage example:
+    rem Leave this script where it is.
+    rem Call this script from within the working directory:
+    rem path\to\delft3d\installation\x64\dflow2d3d\scripts\run_dflow2d3d_parallel_dwaves.bat
+    rem More examples: check run scripts in https://svn.oss.deltares.nl/repos/delft3d/trunk/examples/*
+
 setlocal enabledelayedexpansion
 
 set numpar= 
@@ -77,8 +93,16 @@ set waveexedir=%D3D_HOME%\%ARCH%\dwaves\bin
 
     rem Start FLOW
 set PATH=%dflow2d3ddir%;%sharedir%
+if exist %sharedir%\vars.bat (
+    echo executing: "%sharedir%\vars.bat"
+        call "%sharedir%\vars.bat"
+) else (
+    echo "WARNING: File not found: %sharedir%\vars.bat"
+    echo "         Problems may occur when using IntelMPI"
+)
+
 echo executing in separate window: "%sharedir%\mpiexec.exe" -n %numpar% -localonly "%dflow2d3ddir%\d_hydro.exe" %argfile%
-start "Delft3D-FLOW" "%sharedir%\mpiexec.exe" -n %numpar% -localonly "%dflow2d3ddir%\d_hydro.exe" %argfile%
+              start "Delft3D-FLOW" "%sharedir%\mpiexec.exe" -n %numpar% -localonly "%dflow2d3ddir%\d_hydro.exe" %argfile%
 
     rem Start WAVE
 title Delft3D-WAVE simulation
