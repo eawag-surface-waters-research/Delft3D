@@ -47,6 +47,10 @@ delwaq2_LDADD = \
     $(top_builddir)/engines_gpl/waq/packages/waq_utils_c/src/libwaq_utils_c.la \
     $(top_builddir)/engines_gpl/waq/packages/delwaq2_version_number/src/libdelwaq2_version_number.la \
     $(top_builddir)/utils/nefis/packages/nefis_version_number/src/libnefis_version_number.la \
+    $(top_builddir)/utils/esmfsm/packages/esmfsm/src/fsm/libfsm.la \
+    $(top_builddir)/utils/esmfsm/packages/esmfsm_c/src/fsm/libfsm_c.la \
+    $(top_builddir)/utils/esmfsm/packages/esmfsm_c/src/esm/libesm_c.la \
+    $(top_builddir)/utils/esmfsm/packages/esmfsm_version_number/src/libesmfsm_version_number.la \
     -lpthread
 
 # To be added when using Intel 11:

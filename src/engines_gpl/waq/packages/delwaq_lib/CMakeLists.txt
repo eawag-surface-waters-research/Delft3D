@@ -51,6 +51,7 @@ if (WIN32)
                             deltares_common_c
                             delftio
                             delftio_shm
+                            esmfsm
                             io_netcdf
                             nefis
                             netcdf4
@@ -119,7 +120,8 @@ if (UNIX)
                             waq_process
                             waq_utils_c
                             waq_utils_f
-                            part_utils_f)
+                            part_utils_f
+                            esmfsm)
     oss_include_libraries(${library_name} oss_dependencies)
     target_link_libraries(${library_name}
          ${oss_dependencies}

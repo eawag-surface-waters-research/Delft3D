@@ -72,6 +72,7 @@ libdelwaq_la_LIBADD = \
     $(top_builddir)/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/libwaq_utils.la \
     $(top_builddir)/utils_lgpl/delftio/packages/delftio/src/diof90/libDIOF90.la \
     $(top_builddir)/utils_lgpl/delftio/packages/delftio_shm/src/diof90/libDelftIOSHM.la \
+    $(top_builddir)/utils_lgpl/esmfsm/packages/esmfsm/src/fsm/libESMFSM.la \
     $(top_builddir)/utils_lgpl/io_netcdf/packages/io_netcdf/src/libIONetcdf.la \ 
     $(top_builddir)/utils_lgpl/nefis/packages/nefis/src/libNefis.la \
     $(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src/libDeltaresCommon.la \

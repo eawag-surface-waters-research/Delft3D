@@ -82,7 +82,8 @@ if(UNIX)
                             waq_plugin_wasteload
                             waq_process
                             waq_utils_c
-                            waq_utils_f)
+                            waq_utils_f 
+                            esmfsm)
     target_link_libraries(${executable_name}
          ${oss_dependencies}
          PkgConfig::NETCDF
