@@ -36,7 +36,6 @@ delwaq1_SOURCES = \
 # Libraries
 delwaq1_LDADD = \
     $(top_builddir)/utils_lgpl/nefis/packages/nefis/src/libNefis.la \
-    $(top_builddir)/utils_lgpl/esmfsm/packages/esmfsm/src/fsm/libESMFSM.la \
     $(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src/rd_token/libRDToken.la \
     $(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src/libDeltaresCommon.la \
     $(top_builddir)/utils_lgpl/delftio/packages/delftio_shm/src/diof90/libDelftIOSHM.la \
