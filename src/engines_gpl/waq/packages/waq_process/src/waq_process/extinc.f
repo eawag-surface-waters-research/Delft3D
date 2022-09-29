@@ -42,32 +42,34 @@
       IMPLICIT NONE
 !
       REAL     PMSA  ( * ) , FL    (*)
-      INTEGER  IPOINT(38) , INCREM(38) , NOSEG , NOFLUX,
+      INTEGER  IPOINT(40) , INCREM(40) , NOSEG , NOFLUX,
      +         IEXPNT(4,*) , IKNMRK(*) , NOQ1, NOQ2, NOQ3, NOQ4
 !
 !     Local declaration
 !
-      REAL A1    !  R*4 1 I specific ext. inorganic suspended matter 1  [m2/gDM]
-      REAL A2    !  R*4 1 I specific ext. inorganic suspended matter 2  [m2/gDM]
-      REAL A3    !  R*4 1 I specific ext. inorganic suspended matter 3  [m2/gDM]
-      REAL EXT    ! R*4 1 O total extinction                               [1/m]
-      REAL EXTIM  ! R*4 1 O calculated extinction IM                       [1/m]
-      REAL EXTPOC ! R*4 1 O extinction POC                                 [1/m]
-      REAL EXTDOC ! R*4 1 O extinction DOC                                 [1/m]
-      REAL EXT0    !R*4 1 I background extinction                          [1/m]
-      REAL EXTALG  !R*4 1 I extinction algae                               [1/m]
-      REAL EXTMAC  !R*4 1 I extinction macrophytes                         [1/m]
-      REAL EXTSAL  !R*4 1 O extinction DOC for fresh water fraction        [1/m]
-      REAL AIM1    !R*4 1 I suspended solids  fraction 1                [gDM/m3]
-      REAL AIM2    !R*4 1 I suspended solids  fraction 2                [gDM/m3]
-      REAL AIM3    !R*4 1 I suspended solids  fraction 3                [gDM/m3]
-      REAL POC1  !  R*4 1 I fast decomposing detritus                    [gC/m3]
-      REAL POC2  !  R*4 1 I medium decomposing detritus                  [gC/m3]
-      REAL POC3  !  R*4 1 I slow decomposing detritus                    [gC/m3]
-      REAL POC4  !  R*4 1 I refractory detritus                          [gC/m3]
-      INTEGER SW_UIT  ! Extinction by UITZICHT on (1) or Off (0)             [-]
-      REAL DOC     ! R*4 1 I dissolved organic carbon                    [gC/m3]
-      REAL ADOC    ! R*4 1 I Specific extinction of DOC                  [m2/gC]
+      REAL A1      ! R*4 1 I specific ext. inorganic suspended matter 1  [m2/gDM]
+      REAL A2      ! R*4 1 I specific ext. inorganic suspended matter 2  [m2/gDM]
+      REAL A3      ! R*4 1 I specific ext. inorganic suspended matter 3  [m2/gDM]
+      REAL EXT     ! R*4 1 O total extinction                               [1/m]
+      REAL EXTIM   ! R*4 1 O calculated extinction IM                       [1/m]
+      REAL EXTPOC  ! R*4 1 O extinction POC                                 [1/m]
+      REAL EXTDOC  ! R*4 1 O extinction DOC                                 [1/m]
+      REAL EXT0    ! R*4 1 I background extinction                          [1/m]
+      REAL EXTBL   ! R*4 1 I extinction algae (Bloom)                       [1/m]
+      REAL EXTDYN  ! R*4 1 I extinction algae (Dynamo)                      [1/m]
+      REAL EXTPRO  ! R*4 1 I extinction algae (Protist)                     [1/m]
+      REAL EXTMAC  ! R*4 1 I extinction macrophytes                         [1/m]
+      REAL EXTSAL  ! R*4 1 O extinction DOC for fresh water fraction        [1/m]
+      REAL AIM1    ! R*4 1 I suspended solids  fraction 1                [gDM/m3]
+      REAL AIM2    ! R*4 1 I suspended solids  fraction 2                [gDM/m3]
+      REAL AIM3    ! R*4 1 I suspended solids  fraction 3                [gDM/m3]
+      REAL POC1    ! R*4 1 I fast decomposing detritus                    [gC/m3]
+      REAL POC2    ! R*4 1 I medium decomposing detritus                  [gC/m3]
+      REAL POC3    ! R*4 1 I slow decomposing detritus                    [gC/m3]
+      REAL POC4    ! R*4 1 I refractory detritus                          [gC/m3]
+      INTEGER SW_UIT  ! Extinction by UITZICHT on (1) or Off (0)              [-]
+      REAL DOC     ! R*4 1 I dissolved organic carbon                     [gC/m3]
+      REAL ADOC    ! R*4 1 I Specific extinction of DOC                   [m2/gC]
       REAL DIEP1   ! R*4 1 I argument UITZICHT
       REAL DIEP2   ! R*4 1 I argument UITZICHT
       REAL CORCHL  ! R*4 1 I argument UITZICHT
@@ -90,7 +92,7 @@
       REAL SECCHI, D_1   , EXTP_D, EXTDET, EXTGL, EXTHUM
       INTEGER      IFLUX, ISEG
 !
-      INTEGER  IPNT(38)
+      INTEGER  IPNT(40)
       INTEGER  NR_MES
       SAVE     NR_MES
       DATA     NR_MES / 0 /
@@ -108,34 +110,36 @@
       A3        = PMSA(IPNT(3))
       APOC1     = PMSA(IPNT(4))
       EXT0      = PMSA(IPNT(5))
-      EXTALG    = PMSA(IPNT(6))
-      EXTMAC    = PMSA(IPNT(7))
-      AIM1      = PMSA(IPNT(8))
-      AIM2      = PMSA(IPNT(9))
-      AIM3      = PMSA(IPNT(10))
-      POC1      = PMSA(IPNT(11))
-      POC2      = PMSA(IPNT(12))
-      SW_UIT    = NINT(PMSA(IPNT(13)))
-      DOC       = PMSA(IPNT(14))
-      ADOC      = PMSA(IPNT(15))
-      DIEP1     = PMSA(IPNT(16))
-      DIEP2     = PMSA(IPNT(17))
-      CORCHL    = PMSA(IPNT(18))
-      C_DET     = PMSA(IPNT(19))
-      C_GL1     = PMSA(IPNT(20))
-      C_GL2     = PMSA(IPNT(21))
-      HELHUM    = PMSA(IPNT(22))
-      TAU       = PMSA(IPNT(23))
-      ANGLE     = PMSA(IPNT(24))
-      DETCDM    = PMSA(IPNT(25))
-      XTSAL0    = PMSA(IPNT(26))
-      SALIN     = PMSA(IPNT(27))
-      SALMAX    = PMSA(IPNT(28))
-      APOC2     = PMSA(IPNT(29))
-      APOC3     = PMSA(IPNT(30))
-      APOC4     = PMSA(IPNT(31))
-      POC3      = PMSA(IPNT(32))
-      POC4      = PMSA(IPNT(33))
+      EXTBL     = PMSA(IPNT(6))
+      EXTDYN    = PMSA(IPNT(7))
+      EXTPRO    = PMSA(IPNT(8))
+      EXTMAC    = PMSA(IPNT(9))
+      AIM1      = PMSA(IPNT(10))
+      AIM2      = PMSA(IPNT(11))
+      AIM3      = PMSA(IPNT(12))
+      POC1      = PMSA(IPNT(13))
+      POC2      = PMSA(IPNT(14))
+      SW_UIT    = NINT(PMSA(IPNT(15)))
+      DOC       = PMSA(IPNT(16))
+      ADOC      = PMSA(IPNT(17))
+      DIEP1     = PMSA(IPNT(18))
+      DIEP2     = PMSA(IPNT(19))
+      CORCHL    = PMSA(IPNT(20))
+      C_DET     = PMSA(IPNT(21))
+      C_GL1     = PMSA(IPNT(22))
+      C_GL2     = PMSA(IPNT(23))
+      HELHUM    = PMSA(IPNT(24))
+      TAU       = PMSA(IPNT(25))
+      ANGLE     = PMSA(IPNT(26))
+      DETCDM    = PMSA(IPNT(27))
+      XTSAL0    = PMSA(IPNT(28))
+      SALIN     = PMSA(IPNT(29))
+      SALMAX    = PMSA(IPNT(30))
+      APOC2     = PMSA(IPNT(31))
+      APOC3     = PMSA(IPNT(32))
+      APOC4     = PMSA(IPNT(33))
+      POC3      = PMSA(IPNT(34))
+      POC4      = PMSA(IPNT(35))
 !
       IF (SW_UIT.EQ.0) THEN
 !
@@ -147,8 +151,7 @@
         SALIN  =  MIN(SALIN,SALMAX)
         SALIN  =  MAX(SALIN,0.0)
         EXTSAL =  XTSAL0 * (1.0-SALIN/SALMAX)
-        EXT    =  EXT0 + EXTIM + EXTPOC + EXTDOC + EXTALG  + EXTMAC
-     J            + EXTSAL
+        EXT    =  EXT0 + EXTIM + EXTPOC + EXTDOC + EXTBL + EXTDYN + EXTPRO + EXTMAC + EXTSAL
 !
         IF ( EXT .LT. 1.0E-20 ) THEN
            IF ( NR_MES .LT. 25 ) THEN
@@ -156,7 +159,9 @@
               WRITE(*,*) ' WARNING : zero or negative extinction'
               WRITE(*,*) ' Extinction due to inorganic matter:',EXTIM
               WRITE(*,*) ' Extinction due to organic matter  :',EXTPOC
-              WRITE(*,*) ' Extinction due to algae           :',EXTALG
+              WRITE(*,*) ' Extinction due to algae (Bloom)   :',EXTBL
+              WRITE(*,*) ' Extinction due to algae (Dynamo)  :',EXTDYN
+              WRITE(*,*) ' Extinction due to algae (Protist) :',EXTPRO
               WRITE(*,*) ' Background extinction             :',EXT0
               WRITE(*,*) ' Extinction by macrophytes         :',EXTMAC
               WRITE(*,*) ' In segment number                 :',ISEG
@@ -218,15 +223,15 @@
         EXTPOC =  EXTDET
         EXTDOC =  EXTHUM
         EXTSAL =  0.0
-        EXT    =  EXT0 + EXT + EXTALG + EXTMAC
+        EXT    =  EXT0 + EXT + EXTBL + EXTDYN + EXTPRO + EXTMAC
 !
       ENDIF
 !
-      PMSA(IPNT(34)) = EXT
-      PMSA(IPNT(35)) = EXTIM
-      PMSA(IPNT(36)) = EXTPOC
-      PMSA(IPNT(37)) = EXTDOC
-      PMSA(IPNT(38)) = EXTSAL
+      PMSA(IPNT(36)) = EXT
+      PMSA(IPNT(37)) = EXTIM
+      PMSA(IPNT(38)) = EXTPOC
+      PMSA(IPNT(39)) = EXTDOC
+      PMSA(IPNT(40)) = EXTSAL
 !
       ENDIF
 !

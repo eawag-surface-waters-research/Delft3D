@@ -2560,6 +2560,7 @@ outfpr,outffl,outfnm,outfdo
 "VB09Procs ","dMN3VB09P5",  30,"x"
 "VB09Procs ","dMP3VB09P5",  31,"x"
 "VB09Procs ","dMS3VB09P5",  32,"x"
+"VBSum     ","dDumVBSum ",   1,"x"
 "htragg    ","dTyreAgg11",   1,"x"
 "htragg    ","dTyreAgg12",   2,"x"
 "htragg    ","dTyreAgg13",   3,"x"

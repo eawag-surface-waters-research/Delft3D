@@ -3126,6 +3126,7 @@ stocfl,stocsu,stocsc
 "dP2VB09upw","PO4       ",  -1.00000
 "dS1VB09upw","SO4       ",  -1.00000
 "dS2VB09upw","SUD       ",  -1.00000
+"dDumVBSum ","VB01      ",   0.00000
 "dTyreAgg11","Tyre1     ",  -1.00000
 "dTyreAgg11","TyreAgg11 ",   1.00000
 "dTyreAgg12","Tyre1     ",  -1.00000
