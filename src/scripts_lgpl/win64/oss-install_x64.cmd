@@ -482,7 +482,13 @@ rem ==========================
 rem === INSTALL_PLUGIN_CULVERT
 rem ==========================
 :plugin_culvert
-    echo " WARNING: DISABLED: oss-install_x64::plugin_culvert . . ."
+    echo "installing plugin_culvert . . ."
+
+    set dest_bin="!dest_main!\x64\dflow2d3d\bin"
+
+    call :makeDir !dest_bin!
+
+    call :copyFile plugins_lgpl\plugin_culvert\bin\x64\Release\plugin_culvert.dll !dest_bin!
 goto :endproc
 
 
