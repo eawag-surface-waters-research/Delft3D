@@ -600,6 +600,11 @@ engines_gpl/flow2d3d/packages/plugin_user/Makefile
 engines_gpl/flow2d3d/packages/plugin_user/src/Makefile
 engines_gpl/flow2d3d/scripts/Makefile
 engines_gpl/Makefile
+plugins_lgpl/Makefile
+plugins_lgpl/plugin_culvert/Makefile
+plugins_lgpl/plugin_culvert/src/Makefile
+plugins_lgpl/plugin_delftflow_traform/Makefile
+plugins_lgpl/plugin_delftflow_traform/src/Makefile
 scripts_lgpl/linux/Makefile
 scripts_lgpl/Makefile
 third_party_open/esmf/lnx64/bin/Makefile

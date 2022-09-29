@@ -5,6 +5,7 @@ SUBDIRS = \
     utils_lgpl \
     utils_gpl \
     engines_gpl \
+    plugins_lgpl \
     tools_gpl \
     scripts_lgpl
 
