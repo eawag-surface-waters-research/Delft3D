@@ -15,4 +15,5 @@ dist_bin_SCRIPTS = \
 	run_dflow2d3d_fluidmud.sh \
 	run_dflow2d3d_parallel.sh \
 	run_dflow2d3d_parallel_dwaves.sh \
+	run_dflow2d3d_rtc.sh \
 	submit_dflow2d3d.sh
