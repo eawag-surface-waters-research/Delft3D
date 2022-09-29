@@ -144,30 +144,17 @@ outppr,outpit,outpnm,outpdo,outpsx
 "EXTINABVLP","ExtVlPhyt ",   1,"x",1
 "EXTINABVL ","ExtVlPhyt ",   1," ",1
 "ExtPhDVL  ","ExtVlPhyt ",   1,"x",1
-"EXTINABUVP","ExtUvPhyt ",   1,"x",1
-"EXTINABUV ","ExtUvPhyt ",   1," ",1
-"ExtPhDUV  ","ExtUvPhyt ",   1,"x",1
-"ExtMacroVl","ExtVlMacro",   1,"x",1
-"ExtMacroUV","ExtUvMacro",   1,"x",1
 "Extinc_VLG","ExtVl     ",   1,"x",1
 "Extinc_VLG","ExtVlISS  ",   2,"x",1
 "Extinc_VLG","ExtVlOSS  ",   3,"x",1
 "Extinc_VLG","ExtVlODS  ",   4,"x",1
 "Extinc_VLG","ExtVlFresh",   5,"x",1
-"Extinc_UVG","ExtUv     ",   1,"x",1
-"Extinc_UVG","ExtUvISS  ",   2,"x",1
-"Extinc_UVG","ExtUVOSS  ",   3,"x",1
-"Extinc_UVG","ExtUVODS  ",   4,"x",1
-"Extinc_UVG","ExtUVFresh",   5,"x",1
 "CalcRad   ","Rad       ",   1,"x",1
 "CalcRad   ","RadBot    ",   2,"x",1
 "CalcRad   ","atten     ",   3," ",1
 "CalcRadDay","RadDay    ",   1,"x",1
 "CalcRadDay","RadBotDay ",   2,"x",1
 "CalcRadDay","atten     ",   3," ",1
-"CalcRadUV ","Rad_uv    ",   1,"x",1
-"CalcRadUV ","RadBot_uv ",   2,"x",1
-"CalcRadUV ","atten     ",   3," ",1
 "Daylength ","DayL      ",   1,"x",1
 "Reflection","fRefl     ",   1,"x",1
 "DepAve    ","BloomDepth",   1,"x",1
