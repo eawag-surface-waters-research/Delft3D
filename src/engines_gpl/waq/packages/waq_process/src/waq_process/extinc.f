@@ -42,7 +42,7 @@
       IMPLICIT NONE
 !
       REAL     PMSA  ( * ) , FL    (*)
-      INTEGER  IPOINT(40) , INCREM(40) , NOSEG , NOFLUX,
+      INTEGER  IPOINT(41) , INCREM(41) , NOSEG , NOFLUX,
      +         IEXPNT(4,*) , IKNMRK(*) , NOQ1, NOQ2, NOQ3, NOQ4
 !
 !     Local declaration
