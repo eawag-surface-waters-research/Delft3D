@@ -355,8 +355,16 @@ integer          :: k1, k3, kb3, kk1, kk2, kk3
        ! zws(kt-1) = 0.5d0*(zws(kt) + zws(kt-2))   ! toplayers equal thickness
     endif
 
-    do kk  = kb,kt ! x
-       vol1(kk) = ba(n)*(zws(kk) - zws(kk-1))    ! just for now here
+    if (keepzlay1bedvol == 1) then                 ! inconsistent control volumes in baroclinic terms   
+       vol1(kb) = ba(n)*(zws(kb) - bl(n))          ! transport and momentum volumes not too big anymore 
+       vol1(n)  = vol1(n) + vol1(kb)
+       kb1 = kb+1
+     else                                          ! Default, transport and momentum volumes too big     
+       kb1 = kb                                    ! consistent with control volumes in baroclinic terms
+    endif 
+
+    do kk  = kb1,kt ! x
+       vol1(kk) = ba(n)*(zws(kk) - zws(kk-1))      ! just for now here
        vol1(n)  = vol1(n) + vol1(kk)
     enddo
 

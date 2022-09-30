@@ -969,9 +969,10 @@ subroutine readMDUFile(filename, istat)
        if (.not. success) then
           call prop_get_integer(md_ptr, 'numerics', 'Keepzlayeringatbed', keepzlayeringatbed)
        endif
-       call prop_get_integer(md_ptr, 'geometry', 'Ihuz'    , ihuz    , success)
-       call prop_get_integer(md_ptr, 'geometry', 'ihuzcsig' , ihuzcsig , success)
-       call prop_get_integer(md_ptr, 'geometry', 'Zlayeratubybob'    , jaZlayeratubybob, success)
+       call prop_get_integer(md_ptr, 'geometry', 'Ihuz'           , ihuz             , success)
+       call prop_get_integer(md_ptr, 'geometry', 'Ihuzcsig'       , ihuzcsig         , success)
+       call prop_get_integer(md_ptr, 'geometry', 'Keepzlay1bedvol', keepzlay1bedvol  , success)
+       call prop_get_integer(md_ptr, 'geometry', 'Zlayeratubybob' , jaZlayeratubybob , success)
     endif
     call prop_get_integer( md_ptr, 'geometry', 'Makeorthocenters' , Makeorthocenters)
     call prop_get_double ( md_ptr, 'geometry', 'Dcenterinside'    , Dcenterinside)
@@ -2885,12 +2886,16 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
           call prop_set(prop_ptr, 'geometry', 'Keepzlayeringatbed'  , keepzlayeringatbed, '0:possibly very thin layer at bed, 1:bedlayerthickness == zlayerthickness, 2=equal thickness first two layers')
        endif
 
+       if (keepzlayeringatbed == 1) then
+          call prop_set(prop_ptr, 'geometry', 'Keepzlay1bedvol'  , keepzlay1bedvol, 'only for keepzlayeringatbed=1: 1=correct bedcell volumes, 0=too large bedcell volumes') 
+       endif
+
        if (ihuz .ne. 1) then
-           call prop_set(prop_ptr, 'geometry', 'Ihuz'  , ihuz, 'if keepzlayeratbed>=3 : 1=central from bed til second, 2=all central, 3=from bed till highest equal levels')
+           call prop_set(prop_ptr, 'geometry', 'Ihuz'  , ihuz, 'if keepzlayeratbed>=2 : 1=central from bed til second, 2=all central, 3=from bed till highest equal levels')
        endif
 
        if (ihuzcsig .ne. 1) then
-           call prop_set(prop_ptr, 'geometry', 'ihuzcsig'  , ihuzcsig, 'if keepzlayeratbed>=3 : 1,2,3=av,mx,mn of Leftsig,Rightsig,4=uniform')
+           call prop_set(prop_ptr, 'geometry', 'ihuzcsig'  , ihuzcsig, 'if keepzlayeratbed>=2 : 1,2,3=av,mx,mn of Leftsig,Rightsig,4=uniform')
        endif
 
        if (writeall .or. jaZlayeratubybob .ne. 0 .and. layertype .ne. 1) then

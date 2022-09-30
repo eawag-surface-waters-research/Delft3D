@@ -50,7 +50,7 @@
  mx  = laymx(Ltn)
  nlayb = mx ; nrlay = 1 ! default
 
- if (keepzlayeringatbed == 0) then 
+ if (keepzlayeringatbed == 0 .or. keepzlayeringatbed == 1 .and. keepzlay1bedvol == 1) then 
     fac = 0.2d0
  else 
     fac = 0.0d0

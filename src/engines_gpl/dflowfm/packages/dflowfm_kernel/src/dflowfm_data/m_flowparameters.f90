@@ -254,7 +254,8 @@
                                                         !< 2= : sig = max (Leftsig,Rightsig)
                                                         !< 3= : sig = min (Leftsig,Rightsig)
                                                         !< 4= : sig = dble(LL-Lb+1) / dble(LLbc-Lb+1), uniform independent of L,R
-
+ integer                           :: keepzlay1bedvol=0 !< 1=: Correct bed volumes for keepzlayeringatbed=1
+                                                        !< 0=: default, consistent volumes transport and baroclinic terms 
  double precision                  :: cflmx             !< max Courant nr ()
  double precision                  :: cflw              !< wave velocity fraction, total courant vel = u + cflw*wavevelocity
  double precision                  :: teta0             !< 1.00d0   ! .52      ! uniform teta in horizontal (),
