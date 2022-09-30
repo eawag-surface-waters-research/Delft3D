@@ -141,14 +141,15 @@ outppr,outpit,outpnm,outpdo,outpsx
 "SpecCarb  ","FrH2CO3d  ",   6,"x",1
 "SpecCarb  ","FrHCO3dis ",   7,"x",1
 "SpecCarb  ","FrCO3dis  ",   8,"x",1
-"EXTINABVLP","ExtVlPhyt ",   1,"x",1
-"EXTINABVL ","ExtVlPhyt ",   1," ",1
-"ExtPhDVL  ","ExtVlPhyt ",   1,"x",1
+"EXTINABVLP","ExtVlPhBl ",   1,"x",1
+"EXTINABVL ","ExtVlPhBl ",   1," ",1
+"ExtPhDVL  ","ExtVlPhDyn",   1,"x",1
 "Extinc_VLG","ExtVl     ",   1,"x",1
 "Extinc_VLG","ExtVlISS  ",   2,"x",1
 "Extinc_VLG","ExtVlOSS  ",   3,"x",1
 "Extinc_VLG","ExtVlODS  ",   4,"x",1
-"Extinc_VLG","ExtVlFresh",   5,"x",1
+"Extinc_VLG","ExtVlPhyt ",   5,"x",1
+"Extinc_VLG","ExtVlFresh",   6,"x",1
 "CalcRad   ","Rad       ",   1,"x",1
 "CalcRad   ","RadBot    ",   2,"x",1
 "CalcRad   ","atten     ",   3," ",1
@@ -4889,7 +4890,7 @@ outppr,outpit,outpnm,outpdo,outpsx
 "SumTRWP   ","TyreNN    ",   1,"x",1
 "SumTRWP   ","TAggSedNN ",   2,"x",1
 "SumTRWP   ","SuspNN    ",   3,"x",1
-"ExtinaPro ","ExtVlPhyt ",   1,"x",1
+"ExtinaPro ","ExtVlPhPro",   1," ",1
 "Prot_PFD  ","PFD       ",   1," ",1
 "Prot_PFD  ","PARRAD    ",   2," ",1
 "Prot_Dia  ","NC_D1     ",   1," ",1

@@ -549,34 +549,36 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "Extinc_VLG","ExtVlIM3  ",   3,"Y","x",1
 "Extinc_VLG","ExtVlPOC1 ",   4,"Y","x",1
 "Extinc_VLG","ExtVlBak  ",   5,"Y","x",1
-"Extinc_VLG","ExtVlPhyt ",   6,"Y","x",1
-"Extinc_VLG","ExtVlMacro",   7,"Y","x",1
-"Extinc_VLG","IM1       ",   8,"Y","x",1
-"Extinc_VLG","IM2       ",   9,"Y","x",1
-"Extinc_VLG","IM3       ",  10,"Y","x",1
-"Extinc_VLG","POC1      ",  11,"Y","x",1
-"Extinc_VLG","POC2      ",  12,"Y","x",1
-"Extinc_VLG","SW_Uitz   ",  13,"Y"," ",1
-"Extinc_VLG","DOC       ",  14,"Y","x",1
-"Extinc_VLG","ExtVlDOC  ",  15,"Y","x",1
-"Extinc_VLG","UitZDEPT1 ",  16,"Y"," ",1
-"Extinc_VLG","UitZDEPT2 ",  17,"Y"," ",1
-"Extinc_VLG","UitZCORCH ",  18,"Y"," ",1
-"Extinc_VLG","UitZC_DET ",  19,"Y"," ",1
-"Extinc_VLG","UitZC_GL1 ",  20,"Y"," ",1
-"Extinc_VLG","UitZC_GL2 ",  21,"Y"," ",1
-"Extinc_VLG","UitZHELHM ",  22,"Y"," ",1
-"Extinc_VLG","UitZTAU   ",  23,"Y"," ",1
-"Extinc_VLG","UitZangle ",  24,"Y"," ",1
-"Extinc_VLG","DMCFDetC  ",  25,"Y"," ",1
-"Extinc_VLG","ExtVLSal0 ",  26,"Y","x",1
-"Extinc_VLG","Salinity  ",  27,"Y","x",1
-"Extinc_VLG","SalExt0   ",  28,"Y","x",1
-"Extinc_VLG","ExtVlPOC2 ",  29,"Y","x",1
-"Extinc_VLG","ExtVlPOC3 ",  30,"Y","x",1
-"Extinc_VLG","ExtVlPOC4 ",  31,"Y","x",1
-"Extinc_VLG","POC3      ",  32,"Y","x",1
-"Extinc_VLG","POC4      ",  33,"Y","x",1
+"Extinc_VLG","ExtVlPhBl ",   6,"Y","x",1
+"Extinc_VLG","ExtVlPhDyn",   7,"Y","x",1
+"Extinc_VLG","ExtVlPhPro",   8,"Y","x",1
+"Extinc_VLG","ExtVlMacro",   9,"Y","x",1
+"Extinc_VLG","IM1       ",  10,"Y","x",1
+"Extinc_VLG","IM2       ",  11,"Y","x",1
+"Extinc_VLG","IM3       ",  12,"Y","x",1
+"Extinc_VLG","POC1      ",  13,"Y","x",1
+"Extinc_VLG","POC2      ",  14,"Y","x",1
+"Extinc_VLG","SW_Uitz   ",  15,"Y"," ",1
+"Extinc_VLG","DOC       ",  16,"Y","x",1
+"Extinc_VLG","ExtVlDOC  ",  17,"Y","x",1
+"Extinc_VLG","UitZDEPT1 ",  18,"Y"," ",1
+"Extinc_VLG","UitZDEPT2 ",  19,"Y"," ",1
+"Extinc_VLG","UitZCORCH ",  20,"Y"," ",1
+"Extinc_VLG","UitZC_DET ",  21,"Y"," ",1
+"Extinc_VLG","UitZC_GL1 ",  22,"Y"," ",1
+"Extinc_VLG","UitZC_GL2 ",  23,"Y"," ",1
+"Extinc_VLG","UitZHELHM ",  24,"Y"," ",1
+"Extinc_VLG","UitZTAU   ",  25,"Y"," ",1
+"Extinc_VLG","UitZangle ",  26,"Y"," ",1
+"Extinc_VLG","DMCFDetC  ",  27,"Y"," ",1
+"Extinc_VLG","ExtVLSal0 ",  28,"Y","x",1
+"Extinc_VLG","Salinity  ",  29,"Y","x",1
+"Extinc_VLG","SalExt0   ",  30,"Y","x",1
+"Extinc_VLG","ExtVlPOC2 ",  31,"Y","x",1
+"Extinc_VLG","ExtVlPOC3 ",  32,"Y","x",1
+"Extinc_VLG","ExtVlPOC4 ",  33,"Y","x",1
+"Extinc_VLG","POC3      ",  34,"Y","x",1
+"Extinc_VLG","POC4      ",  35,"Y","x",1
 "CalcRad   ","ExtVl     ",   1,"N","x",1
 "CalcRad   ","Depth     ",   2,"N","x",1
 "CalcRad   ","RadSurf   ",   3,"Y","x",1
@@ -701,7 +703,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "BLOOM_P   ","BLComment ",   1,"Y"," ",1
 "BLOOM_P   ","TimMultBl ",   2,"Y","x",1
 "BLOOM_P   ","ExtVl     ",   3,"N","x",1
-"BLOOM_P   ","ExtVlPhyt ",   4,"N","x",1
+"BLOOM_P   ","ExtVlPhBl ",   4,"N","x",1
 "BLOOM_P   ","Temp      ",   5,"Y","x",1
 "BLOOM_P   ","Rad       ",   6,"N","x",1
 "BLOOM_P   ","Depth     ",   7,"N","x",1
@@ -767,7 +769,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "BLOOM_P   ","EffiAlg   ",  67,"O"," ",1
 "BLOOM     ","TimMultBl ",   1,"Y","x",1
 "BLOOM     ","ExtVl     ",   2,"N","x",1
-"BLOOM     ","ExtVlPhyt ",   3,"N","x",1
+"BLOOM     ","ExtVlPhBl ",   3,"N","x",1
 "BLOOM     ","Temp      ",   4,"Y","x",1
 "BLOOM     ","Rad       ",   5,"N","x",1
 "BLOOM     ","Depth     ",   6,"N","x",1
