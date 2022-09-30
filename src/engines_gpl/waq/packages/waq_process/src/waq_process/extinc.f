@@ -93,7 +93,7 @@
       REAL(8) SECCHI, D_1   , EXTP_D, EXTDET, EXTGL, EXTHUM
       INTEGER      IFLUX, ISEG
 !
-      INTEGER  IPNT(40)
+      INTEGER  IPNT(41)
       INTEGER  NR_MES
       SAVE     NR_MES
       DATA     NR_MES / 0 /
