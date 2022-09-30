@@ -28,7 +28,7 @@ function print_usage_info {
 
 #
 ## Defaults
-waterconfigfile=config_d_hydro_sed.xml
+waterconfigfile=config_d_hydro.xml
 mudconfigfile=config_d_hydro_mud.xml
 D3D_HOME=
 ulimit -s unlimited
