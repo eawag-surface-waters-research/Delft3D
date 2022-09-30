@@ -47,47 +47,47 @@
 !
 !     Local declaration
 !
-      REAL A1    !  R*4 1 I specific ext. inorganic suspended matter 1  [m2/gDM]
-      REAL A2    !  R*4 1 I specific ext. inorganic suspended matter 2  [m2/gDM]
-      REAL A3    !  R*4 1 I specific ext. inorganic suspended matter 3  [m2/gDM]
-      REAL EXT    ! R*4 1 O total extinction                               [1/m]
-      REAL EXTIM  ! R*4 1 O calculated extinction IM                       [1/m]
-      REAL EXTPOC ! R*4 1 O extinction POC                                 [1/m]
-      REAL EXTDOC ! R*4 1 O extinction DOC                                 [1/m]
-      REAL EXT0    !R*4 1 I background extinction                          [1/m]
-      REAL EXTALG  !R*4 1 I extinction algae                               [1/m]
-      REAL EXTMAC  !R*4 1 I extinction macrophytes                         [1/m]
-      REAL EXTSAL  !R*4 1 O extinction DOC for fresh water fraction        [1/m]
-      REAL AIM1    !R*4 1 I suspended solids  fraction 1                [gDM/m3]
-      REAL AIM2    !R*4 1 I suspended solids  fraction 2                [gDM/m3]
-      REAL AIM3    !R*4 1 I suspended solids  fraction 3                [gDM/m3]
-      REAL POC1  !  R*4 1 I fast decomposing detritus                    [gC/m3]
-      REAL POC2  !  R*4 1 I medium decomposing detritus                  [gC/m3]
-      REAL POC3  !  R*4 1 I slow decomposing detritus                    [gC/m3]
-      REAL POC4  !  R*4 1 I refractory detritus                          [gC/m3]
+      REAL(8) A1    !  R*4 1 I specific ext. inorganic suspended matter 1  [m2/gDM]
+      REAL(8) A2    !  R*4 1 I specific ext. inorganic suspended matter 2  [m2/gDM]
+      REAL(8) A3    !  R*4 1 I specific ext. inorganic suspended matter 3  [m2/gDM]
+      REAL(8) EXT    ! R*4 1 O total extinction                               [1/m]
+      REAL(8) EXTIM  ! R*4 1 O calculated extinction IM                       [1/m]
+      REAL(8) EXTPOC ! R*4 1 O extinction POC                                 [1/m]
+      REAL(8) EXTDOC ! R*4 1 O extinction DOC                                 [1/m]
+      REAL(8) EXT0    !R*4 1 I background extinction                          [1/m]
+      REAL(8) EXTALG  !R*4 1 I extinction algae                               [1/m]
+      REAL(8) EXTMAC  !R*4 1 I extinction macrophytes                         [1/m]
+      REAL(8) EXTSAL  !R*4 1 O extinction DOC for fresh water fraction        [1/m]
+      REAL(8) AIM1    !R*4 1 I suspended solids  fraction 1                [gDM/m3]
+      REAL(8) AIM2    !R*4 1 I suspended solids  fraction 2                [gDM/m3]
+      REAL(8) AIM3    !R*4 1 I suspended solids  fraction 3                [gDM/m3]
+      REAL(8) POC1  !  R*4 1 I fast decomposing detritus                    [gC/m3]
+      REAL(8) POC2  !  R*4 1 I medium decomposing detritus                  [gC/m3]
+      REAL(8) POC3  !  R*4 1 I slow decomposing detritus                    [gC/m3]
+      REAL(8) POC4  !  R*4 1 I refractory detritus                          [gC/m3]
       INTEGER SW_UIT  ! Extinction by UITZICHT on (1) or Off (0)             [-]
-      REAL DOC     ! R*4 1 I dissolved organic carbon                    [gC/m3]
-      REAL ADOC    ! R*4 1 I Specific extinction of DOC                  [m2/gC]
-      REAL DIEP1   ! R*4 1 I argument UITZICHT
-      REAL DIEP2   ! R*4 1 I argument UITZICHT
-      REAL CORCHL  ! R*4 1 I argument UITZICHT
-      REAL C_DET   ! R*4 1 I argument UITZICHT
-      REAL C_GL1   ! R*4 1 I argument UITZICHT
-      REAL C_GL2   ! R*4 1 I argument UITZICHT
-      REAL HELHUM  ! R*4 1 I argument UITZICHT
-      REAL TAU     ! R*4 1 I argument UITZICHT
-      REAL ANGLE   ! R*4 1 I argument UITZICHT
-      REAL DETCDM  ! R*4 1 I dry matter carbon ratio detritus              [g/g]
-      REAL XTSAL0  ! R*4 1 I extra VL extinction at Salinity = 0           [1/m]
-      REAL SALMAX  ! R*4 1 I salinity value for extra extinction = 0      [g/kg]
-      REAL SALIN   ! R*4 1 I actual salinity                              [g/kg]
-      REAL APOC1   ! R*4 1 I specific extintion POC1                [1/m/(G/M3)]
-      REAL APOC2   ! R*4 1 I specific extintion POC2                [1/m/(G/M3)]
-      REAL APOC3   ! R*4 1 I specific extintion POC3                [1/m/(G/M3)]
-      REAL APOC4   ! R*4 1 I specific extintion POC4                [1/m/(G/M3)]
+      REAL(8) DOC     ! R*4 1 I dissolved organic carbon                    [gC/m3]
+      REAL(8) ADOC    ! R*4 1 I Specific extinction of DOC                  [m2/gC]
+      REAL(8) DIEP1   ! R*4 1 I argument UITZICHT
+      REAL(8) DIEP2   ! R*4 1 I argument UITZICHT
+      REAL(8) CORCHL  ! R*4 1 I argument UITZICHT
+      REAL(8) C_DET   ! R*4 1 I argument UITZICHT
+      REAL(8) C_GL1   ! R*4 1 I argument UITZICHT
+      REAL(8) C_GL2   ! R*4 1 I argument UITZICHT
+      REAL(8) HELHUM  ! R*4 1 I argument UITZICHT
+      REAL(8) TAU     ! R*4 1 I argument UITZICHT
+      REAL(8) ANGLE   ! R*4 1 I argument UITZICHT
+      REAL(8) DETCDM  ! R*4 1 I dry matter carbon ratio detritus              [g/g]
+      REAL(8) XTSAL0  ! R*4 1 I extra VL extinction at Salinity = 0           [1/m]
+      REAL(8) SALMAX  ! R*4 1 I salinity value for extra extinction = 0      [g/kg]
+      REAL(8) SALIN   ! R*4 1 I actual salinity                              [g/kg]
+      REAL(8) APOC1   ! R*4 1 I specific extintion POC1                [1/m/(G/M3)]
+      REAL(8) APOC2   ! R*4 1 I specific extintion POC2                [1/m/(G/M3)]
+      REAL(8) APOC3   ! R*4 1 I specific extintion POC3                [1/m/(G/M3)]
+      REAL(8) APOC4   ! R*4 1 I specific extintion POC4                [1/m/(G/M3)]
 !
-      REAL CHLORP, DETRIC, GLOEIR, AH_380
-      REAL SECCHI, D_1   , EXTP_D, EXTDET, EXTGL, EXTHUM
+      REAL(8) CHLORP, DETRIC, GLOEIR, AH_380
+      REAL(8) SECCHI, D_1   , EXTP_D, EXTDET, EXTGL, EXTHUM
       INTEGER      IFLUX, ISEG
 !
       INTEGER  IPNT(38)
