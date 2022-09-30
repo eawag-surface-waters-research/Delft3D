@@ -12,7 +12,7 @@ title run_flow2d3d_fluidmud
 
 setlocal enabledelayedexpansion
 
-set waterconfigfile=config_d_hydro_sed.xml
+set waterconfigfile=config_d_hydro.xml
 set mudconfigfile=config_d_hydro_mud.xml
     rem
     rem Set the config files
