@@ -2440,6 +2440,7 @@ module m_ec_provider
          character(len=NF90_MAX_NAME), dimension(:), allocatable :: coord_names           !< helper variable
          character(len=NF90_MAX_NAME)                            :: name                  !< helper variable
          character(len=NF90_MAX_NAME), dimension(4)              :: ncstdnames            !< helper variable : temp. list of standard names to search for in netcdf
+         character(len=NF90_MAX_NAME), dimension(1)              :: ncstdnames_fallback   !< idem
          character(len=NF90_MAX_NAME), dimension(:), allocatable :: ncvarnames            !< helper variable : temp. list of variable names to search for in netcdf
          character(len=NF90_MAX_NAME), dimension(:), allocatable :: nccustomnames         !< helper variable : temp. list of user-defined variables names to search for
          integer                                                 :: quantityId            !< helper variable 
@@ -2493,6 +2494,7 @@ module m_ec_provider
          ncstdnames(:) = '' 
          allocate(ncvarnames(4))  ! todo: error handling
          ncvarnames(:) = '' 
+         ncstdnames_fallback = ' '
          idvar = -1 
          select case (trim(quantityName))
          case ('rainfall') 
@@ -2557,6 +2559,7 @@ module m_ec_provider
             ncstdnames(3) = 'cloud_area_fraction'
          case ('humidity')
             ncstdnames(1) = 'humidity'
+            ncstdnames_fallback(1) = 'relative_humidity'
          case ('wind_speed')
             ncstdnames(1) = 'wind_speed'
          case ('wind_from_direction')
@@ -2580,6 +2583,7 @@ module m_ec_provider
          case ('solarradiation')
             ncvarnames(1) = 'ssr'                            ! outgoing SW radiation at the top-of-the-atmosphere
             ncstdnames(1) = 'surface_net_downward_shortwave_flux'
+            ncstdnames_fallback(1) = 'solar_irradiance'
          case ('longwaveradiation')
             ncvarnames(1) = 'strd'                           ! outgoing long wave radiation
             ncstdnames(1) = 'surface_net_downward_longwave_flux'
@@ -2653,6 +2657,9 @@ module m_ec_provider
 
          do i = 1, expectedLength
             call ecProviderSearchStdOrVarnames(fileReaderPtr, i, idvar, ncstdnames, ncvarnames, uservarnames = nccustomnames)
+            if (idvar <= 0 .and. ncstdnames_fallback(1) /= ' ') then
+               call ecProviderSearchStdOrVarnames(fileReaderPtr, i, idvar, ncstdnames_fallback, ncvarnames)
+            end if
             if (idvar <= 0) then                              ! Variable not found among standard names and variable names either
                if (allocated(nccustomnames)) then
                   nameVar = trim(nccustomnames(i))
