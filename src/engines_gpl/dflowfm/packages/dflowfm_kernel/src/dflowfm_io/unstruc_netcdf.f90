@@ -13982,12 +13982,14 @@ function unc_read_merged_map(um, imapfile, filename, ierr) result (success)
    success = .true.
 end function unc_read_merged_map
 
+! Write input coordinates of all structures of input structuretype to open history file
 subroutine unc_write_struc_input_coordinates(ihisfile,structuretype)
 use m_structures
 use m_globalparameters
 use simple_geometry, only: sgeom_def_geometry_variables
 
-integer, intent(in) :: structuretype, ihisfile
+integer, intent(in) :: structuretype ! Structure type, see: m_globalparameters
+integer, intent(in) :: ihisfile      ! Handle to already open history file
 
 double precision, allocatable :: geomXStrucInput(:), geomYStrucInput(:)
 integer, allocatable          :: nNodesStrucInput(:)
@@ -14031,9 +14033,9 @@ if (jahis > 0) then
   if (nstruc > 0) then
     
     ierr = nf90_redef(ihisfile)
-    ierr = nf90_def_dim(ihisfile, trim(structstring)//'gens_input', nstruc, id_Strucgendim_input)
-    ierr = sgeom_def_geometry_variables(ihisfile, trim(structstring)//'gen_input_geom', structstring, 'line', nNodeTot, id_Strucgendim_input, &
-      id_Strucgeom_input_node_count, id_Strucgeom_input_node_coordx, id_Strucgeom_input_node_coordy)
+    ierr = nf90_def_dim(ihisfile, trim(structstring)//'_input', nstruc, id_strucgendim_input)
+    ierr = sgeom_def_geometry_variables(ihisfile, trim(structstring)//'_input_geom', structstring, 'line', nNodeTot, id_strucgendim_input, &
+      id_strucgeom_input_node_count, id_strucgeom_input_node_coordx, id_strucgeom_input_node_coordy)
     ierr = nf90_enddef(ihisfile)
     
     ierr = nf90_put_var(ihisfile, id_Strucgeom_input_node_coordx, geomXStrucInput,     start = (/ 1 /), count = (/ nNodeTot /))

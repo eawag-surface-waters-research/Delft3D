@@ -1456,7 +1456,7 @@ subroutine fill_valstruct_per_structure(valstruct, istrtypein, istru, nlinks)
 
 end subroutine fill_valstruct_per_structure
 
-
+! This subroutine fills two arrays with the input x- and y- coordinates of the chosen structure type. 
 subroutine get_input_coordinates_of_structure(structuretype, geomXStructInput, geomYStructInput, nNodesStructInput,nNodeTot,numstructs)
 
 use m_network
@@ -1464,13 +1464,14 @@ use m_globalparameters
 use odugrid
 use m_sferic, only: jsferic
 
-integer, intent(in)                                :: structuretype
-double precision, allocatable, target, intent(out) :: geomXStructInput(:)         !< [m] x coordinates of weirs.
-double precision, allocatable, target, intent(out) :: geomYStructInput(:)         !< [m] y coordinates of weirs.
-integer,          allocatable, target, intent(out) :: nNodesStructInput(:)
-integer, intent(out)                               :: nNodeTot, numstructs
+integer,                               intent(in   ) :: structuretype               !< Structure type, see: m_globalparameters
+double precision, allocatable, target, intent(  out) :: geomXStructInput(:)         !< [m] array with input x coordinates of structures.
+double precision, allocatable, target, intent(  out) :: geomYStructInput(:)         !< [m] array with input y coordinates of structures.
+integer,          allocatable, target, intent(  out) :: nNodesStructInput(:)        !< Array with number of coordinates for each structure
+integer,                               intent(out)   :: numstructs                  !< Number of structures of structure type
+integer,                               intent(out)   :: nNodeTot                    !< Total number of nodes of structure type,
 
-integer                       ::  i, n, j, ierr
+integer           ::  i, n, j, ierr, nodes
 integer,  pointer :: structindex(:)
 
 select case (structuretype)
@@ -1510,29 +1511,30 @@ if (allocated(nNodesStructInput)) deallocate(nNodesStructInput)
 nNodeTot = 0
 i = 1
 
-if (numstructs > 0) then ! new struct
-
+if (numstructs > 0) then 
+  
    allocate(nNodesStructInput(numstructs))
    do n = 1, numstructs
       j = structindex(n)
-      if (network%sts%struct(j)%NUMCOORDINATES > 0) then
-         nNodeTot = nNodeTot + network%sts%struct(j)%NUMCOORDINATES
+      nodes = network%sts%struct(j)%NUMCOORDINATES
+      if (nodes > 0) then
+         nNodeTot = nNodeTot + nodes
       else if (network%sts%struct(j)%ibran > -1) then
          nNodeTot = nNodeTot + 1
       endif
    enddo
-   !nNodesStructInput = nNodeTot
+
    allocate(geomXStructInput(nNodeTot),geomYStructInput(nNodeTot))
    do n = 1, numstructs
       j = structindex(n)
+      nodes = network%sts%struct(j)%NUMCOORDINATES
+      if (nodes > 0) then
 
-      if (network%sts%struct(j)%NUMCOORDINATES > 0) then
+         geomXStructInput(i:i+nodes-1)= network%sts%struct(j)%XCOORDINATES
+         geomYStructInput(i:i+nodes-1)= network%sts%struct(j)%YCOORDINATES
+         nNodesStructInput(n) = nodes
 
-         geomXStructInput(i:i+network%sts%struct(j)%NUMCOORDINATES-1)= network%sts%struct(j)%XCOORDINATES
-         geomYStructInput(i:i+network%sts%struct(j)%NUMCOORDINATES-1)= network%sts%struct(j)%YCOORDINATES
-         nNodesStructInput(n) = network%sts%struct(j)%NUMCOORDINATES
-
-         i = i + network%sts%struct(j)%NUMCOORDINATES
+         i = i + nodes
       else if (network%sts%struct(j)%ibran > -1) then
 
          ASSOCIATE ( branch => network%brs%branch(network%sts%struct(j)%IBRAN ))
