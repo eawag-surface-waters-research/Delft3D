@@ -1149,6 +1149,10 @@ end if
  tim1bnd = tstart_user
  tim1fld = tstart_user
 
+ if (tlfsmo > 0d0 ) then
+    alfsmo  = 0d0    
+ endif
+
  if (jaoldrstfile==1) then ! If the restart file is of old version (which does not have waterlevel etc info on boundaries), then need to set.
     call sets01zbnd(0, 0)
  endif
@@ -1250,8 +1254,6 @@ end if
     enddo
  enddo
 
-
-
  if (.not. jawelrestart) then
     if (japatm > 0 .and. PavIni > 0) then
        if ( trshcorio.gt.0d0 ) then
@@ -1272,6 +1274,7 @@ end if
 
     u0 = u1
  endif
+
  s1  = max(bl, s1)
  s00 = s1
 
