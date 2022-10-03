@@ -60,7 +60,7 @@ use ieee_arithmetic
 !     support variables
     integer, parameter    :: nrIndInp = 7     !   nr of species independent input items
     integer, parameter    :: nrSpecInp = 33   !   nr of inputs per species
-    integer, parameter    :: nrSpecOut = 22   !   nr of outputs per species
+    integer, parameter    :: nrSpecOut = 23   !   nr of outputs per species
     integer, parameter    :: nrSpecFlux = 19  !   nr of fluxes per species
     integer               :: nrInputItems     !   nr of input items need for output PMSA
     integer               :: nrOutputItems    !   nr of output items need for output PMSA
@@ -103,7 +103,7 @@ use ieee_arithmetic
     real    upP, upNH4, upNO3                           ! nutrient uptake
     real    PSqm, Cfix, synChl, degChl                  ! plateau and Cifx through photosynthesis
     real    maxPSreq, PS                                ! req for C to come from PS (==1 for diatoms)
-    real    totR, Cu                                    ! respiration and C-growth
+    real    totR, Cu, NPP                               ! respiration, C-growth and nett primary production
     real    mrt, mrtFrAut, mrtFrDet                     ! mortality to detritus and autolysis
 
 
@@ -251,6 +251,10 @@ use ieee_arithmetic
             end if
             !totR = totalRespiration(redco, upNO3, upNH4, 0.0, 0.0, 0.0, BR)
             Cu   = Cfix - totR
+            
+            ! Calulate nett primary production per m3 ---------------------------------------
+            ! Units: gC m-3 d-1
+            NPP = Cu * protC
 
             ! Calculate mortality  ---------------------------------------
             ! Units: gC gC-1 d-1
@@ -283,13 +287,14 @@ use ieee_arithmetic
             PMSA(ipnt( spInc + 13 )) = PSqm
             PMSA(ipnt( spInc + 14 )) = PS
             PMSA(ipnt( spInc + 15 )) = Cfix
-            PMSA(ipnt( spInc + 16 )) = synChl
-            PMSA(ipnt( spInc + 17 )) = degChl
-            PMSA(ipnt( spInc + 18 )) = totR
-            PMSA(ipnt( spInc + 19 )) = Cu
-            PMSA(ipnt( spInc + 20 )) = mrt
-            PMSA(ipnt( spInc + 21 )) = mrtFrAut
-            PMSA(ipnt( spInc + 22 )) = mrtFrDet
+            PMSA(ipnt( spInc + 16 )) = NPP
+            PMSA(ipnt( spInc + 17 )) = synChl
+            PMSA(ipnt( spInc + 18 )) = degChl
+            PMSA(ipnt( spInc + 19 )) = totR
+            PMSA(ipnt( spInc + 20 )) = Cu
+            PMSA(ipnt( spInc + 21 )) = mrt
+            PMSA(ipnt( spInc + 22 )) = mrtFrAut
+            PMSA(ipnt( spInc + 23 )) = mrtFrDet
 
 
             ! FLUXES -------------------------------------------------------------------

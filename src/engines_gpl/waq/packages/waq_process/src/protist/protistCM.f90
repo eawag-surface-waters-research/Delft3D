@@ -64,7 +64,7 @@ use ieee_arithmetic
 !     support variables
     integer, parameter    :: nrIndInp = 8    !   nr of species independent input items
     integer, parameter    :: nrSpecInp = 41  !   nr of inputs per species
-    integer, parameter    :: nrSpecOut = 41  !   nr of outputs per species
+    integer, parameter    :: nrSpecOut = 42  !   nr of outputs per species
     integer, parameter    :: nrSpecFlux = 25 !   nr of fluxes per species
     integer, parameter    :: nrPreyInp = 8   !   nr of inputs per prey
     integer               :: nrInputItems     !   nr of input items need for output PMSA
@@ -130,7 +130,7 @@ use ieee_arithmetic
      real    maxIng, ingSat, ingC, ingN, ingP, KI   ! ingestion
      real    assC, assN, assP                       ! assimilation
      ! respiration, Cu and mortality
-     real    totR, Cu                                    ! respiration and C-growth
+     real    totR, Cu, NPP                               ! respiration, C-growth and nett primary production
      real    mrt, mrtFrAut, mrtFrDet                     ! mortality to detritus and autolysis
 
      ! other parameters
@@ -290,6 +290,10 @@ use ieee_arithmetic
             ! rate of (positive) net phototrophy
             ! Units: gC gC-1 d-1
             CfixPS = Cfix - totalRespiration(redco, upNO3, upNH4, 0.0, 0.0, 0.0, 0.0)
+            
+            ! Calulate nett primary production per m3 ---------------------------------------
+            ! Units: gC m-3 d-1
+            NPP = CfixPS * protC
 
             ! Calculate chlorophyll synthesis and degradation ---------------------------------------
             ! Units: gChl gC-1 d-1
@@ -386,31 +390,32 @@ use ieee_arithmetic
             PMSA(ipnt( spInc + 14 )) = PS
             PMSA(ipnt( spInc + 15 )) = Cfix
             PMSA(ipnt( spInc + 16 )) = CfixPS
-            PMSA(ipnt( spInc + 17 )) = synChl
-            PMSA(ipnt( spInc + 18 )) = degChl
-            PMSA(ipnt( spInc + 19 )) = sumCP
-            PMSA(ipnt( spInc + 20 )) = ingNC
-            PMSA(ipnt( spInc + 21 )) = ingPC
-            PMSA(ipnt( spInc + 22 )) = ppNC
-            PMSA(ipnt( spInc + 23 )) = ppPC
-            PMSA(ipnt( spInc + 24 )) = stoichP
-            PMSA(ipnt( spInc + 25 )) = opAE
-            PMSA(ipnt( spInc + 26 )) = reqPred
-            PMSA(ipnt( spInc + 27 )) = maxIng
-            PMSA(ipnt( spInc + 28 )) = ingSat
-            PMSA(ipnt( spInc + 29 )) = ingC
-            PMSA(ipnt( spInc + 30 )) = assC
-            PMSA(ipnt( spInc + 31 )) = ingN
-            PMSA(ipnt( spInc + 32 )) = ingP
-            PMSA(ipnt( spInc + 33 )) = assN
-            PMSA(ipnt( spInc + 34 )) = assP
-            PMSA(ipnt( spInc + 35 )) = totR
-            PMSA(ipnt( spInc + 36 )) = Cu
-            PMSA(ipnt( spInc + 37 )) = mrt
-            PMSA(ipnt( spInc + 38 )) = mrtFrAut
-            PMSA(ipnt( spInc + 39 )) = mrtFrDet
-            PMSA(ipnt( spInc + 40 )) = preyFlag
-            PMSA(ipnt( spInc + 41 )) = lightInh
+            PMSA(ipnt( spInc + 17 )) = NPP
+            PMSA(ipnt( spInc + 18 )) = synChl
+            PMSA(ipnt( spInc + 19 )) = degChl
+            PMSA(ipnt( spInc + 20 )) = sumCP
+            PMSA(ipnt( spInc + 21 )) = ingNC
+            PMSA(ipnt( spInc + 22 )) = ingPC
+            PMSA(ipnt( spInc + 23 )) = ppNC
+            PMSA(ipnt( spInc + 24 )) = ppPC
+            PMSA(ipnt( spInc + 25 )) = stoichP
+            PMSA(ipnt( spInc + 26 )) = opAE
+            PMSA(ipnt( spInc + 27 )) = reqPred
+            PMSA(ipnt( spInc + 28 )) = maxIng
+            PMSA(ipnt( spInc + 29 )) = ingSat
+            PMSA(ipnt( spInc + 30 )) = ingC
+            PMSA(ipnt( spInc + 31 )) = assC
+            PMSA(ipnt( spInc + 32 )) = ingN
+            PMSA(ipnt( spInc + 33 )) = ingP
+            PMSA(ipnt( spInc + 34 )) = assN
+            PMSA(ipnt( spInc + 35 )) = assP
+            PMSA(ipnt( spInc + 36 )) = totR
+            PMSA(ipnt( spInc + 37 )) = Cu
+            PMSA(ipnt( spInc + 38 )) = mrt
+            PMSA(ipnt( spInc + 39 )) = mrtFrAut
+            PMSA(ipnt( spInc + 40 )) = mrtFrDet
+            PMSA(ipnt( spInc + 41 )) = preyFlag
+            PMSA(ipnt( spInc + 42 )) = lightInh
 
             ! FLUXES -------------------------------------------------------------------
             ! Protist gains------------------------------------------------------------
