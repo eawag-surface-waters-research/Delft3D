@@ -121,7 +121,7 @@
 
       umod = sqrt( u1Lb*u1Lb + v(Lb)*v(Lb) )
       ! updated ustokes needed before conversion to eulerian velocities
-      if (jawave>0) then
+      if (jawave>0 .and. .not. flowwithoutwaves) then
          ! get ustar wave squared, fw and wavedirection cosines based upon Swart, ustokes
          call getustwav(LL, z00, umod, fw, ustw2, csw, snw, Dfu, Dfuc, deltau, costu, uorbu)
          !
