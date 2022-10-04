@@ -72,7 +72,7 @@
       integer  ( 4) defite  /  100/    ! Default maximum number of iterations
       integer  ( 4) defsca  /    1/    ! Default value for row scaling
       real     ( 8) deftol  /1.D-7/    ! Default tolerance value
-      integer  ( 4) defrep  /    1/    ! Default value for iteration report
+      integer  ( 4) defrep  /    0/    ! Default value for iteration report
       integer  ( 4) idef, itrep        ! Help variables
       character(20) defnam             ! Help string
       integer  ( 4) noth               ! Number of available threads
