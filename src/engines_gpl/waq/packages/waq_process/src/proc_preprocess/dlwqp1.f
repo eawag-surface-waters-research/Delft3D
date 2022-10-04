@@ -262,9 +262,10 @@
 
       call dhopnf ( lun(35) , lchar(35), 35    , 1     , ierr2 )
       lurep = lun(35)
-      call setmlu ( lurep )
-      call monsys(line,11)
       line = ' '
+      call setmlu ( lurep )
+      call startup_screen( lurep )
+      call monsys(line,11)
       call monsys(line,1)
 
       ! command line settingen , commands
@@ -624,7 +625,7 @@
 
          ! add the processes in the structure
 
-         call prprop ( lurep, laswi, config, no_act, actlst, allitems, procesdef, 
+         call prprop ( lurep, laswi, config, no_act, actlst, allitems, procesdef,
      +                 noinfo, nowarn, old_items, ierr2 )
          if ( ierr2 .ne. 0 ) ierr = ierr + 1
          nbpr   = procesdef%cursize

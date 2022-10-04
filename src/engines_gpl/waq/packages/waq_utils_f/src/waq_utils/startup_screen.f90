@@ -54,14 +54,15 @@
       '|                                                                       |', &
       '| Version xx.xxxx  xx-xx-xxxx                                           |', &
       '+-----------------------------------------------------------------------+'/
-     
+
       integer(4) ithndl /0/
       if ( timon ) call timstrt( "startup_screen", ithndl )
 
+      ! set version_string
+      call getidentification(version_string)
+
       if ( first ) then
          first = .false.
-         ! set version_string
-         call getidentification(version_string)
          do i = 1 , size(startup_screen_text)
             if ( startup_screen_text(i)(3:15) .eq. 'Version xx.xx' ) then
                write(startup_screen_text(i)(3:72),'(a)') version_string(1:70)
