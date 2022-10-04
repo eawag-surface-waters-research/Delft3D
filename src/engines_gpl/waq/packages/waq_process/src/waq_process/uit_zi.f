@@ -26,7 +26,7 @@
 !     SPECTRALE GEGEVENS VAN 400 TOT 700 NM MET STAPPEN VAN 5 NM
 !***********************************************************************
 !
-      REAL(4), DIMENSION(61) :: AWATER, BWATER, CHLSPE, PLANCK
+      REAL(8), DIMENSION(61) :: AWATER, BWATER, CHLSPE, PLANCK
 !
 !     SPECIFIEKE ABSORPTIE ALGEN
 !
@@ -126,65 +126,65 @@
 !     ARGUMENTS:
 !     NAME   TYPE SIZE   I/O DESCRIPTION
 !     ------ ---- ------ --- -------------------------------------------
-!     ANGLE   R*4        IN  FUNCTION, DEFAULT constant = 30 x
-!     AH_380  R*4        IN  PARAMETER: EXTINCTIE HUMUSZUREN (1/m)
-!     CHLORO  R*4        IN  PARAMETER: CHLOROPHYL (mg/m3)
-!     CORCHL  R*4        IN  CONSTANT, DEFAULT = 2.5
-!     C_DET   R*4        IN  CONSTANT, DEFAULT = 0.026
-!     C_GL1   R*4        IN  CONSTANT, DEFAULT = 0.73
-!     C_GL2   R*4        IN  CONSTANT, DEFAULT = 1.0
-!     DETRIT  R*4        IN  PARAMETER: GESUSPENDEERD DETRITUS (gDW/m3)
-!     DIEP1   R*4        IN  CONSTANT, DEFAULT = 1.0 (m)
-!     DIEP2   R*4        IN  CONSTANT, DEFAULT = 1.2 (m)
-!     D_1     R*4        OUT DUMMY PARAMETER D 10% TRANSMIS 560 NM (m)
-!     EXTPAR  R*4        OUT PARAMETER: EXTINCTIE OP 1M (1/m)
-!     EXTP_D  R*4        OUT DUMMY PARAMETER EXTINCTIE OP D_1 (1/m)
-!     GLOEIR  R*4        IN  PARAMETER: ANORGANISCH ZWEVEND STOF (gDW/m3)
-!     HELHUM  R*4        IN  CONSTANT, DEFAULT = 0.014
-!     SECCHI  R*4        OUT PARAMETER: DOORZICHT (m)
-!     TAU     R*4        IN  CONSTANT, DEFAULT = 7.8
+!     ANGLE   R*8        IN  FUNCTION, DEFAULT constant = 30 x
+!     AH_380  R*8        IN  PARAMETER: EXTINCTIE HUMUSZUREN (1/m)
+!     CHLORO  R*8        IN  PARAMETER: CHLOROPHYL (mg/m3)
+!     CORCHL  R*8        IN  CONSTANT, DEFAULT = 2.5
+!     C_DET   R*8        IN  CONSTANT, DEFAULT = 0.026
+!     C_GL1   R*8        IN  CONSTANT, DEFAULT = 0.73
+!     C_GL2   R*8        IN  CONSTANT, DEFAULT = 1.0
+!     DETRIT  R*8        IN  PARAMETER: GESUSPENDEERD DETRITUS (gDW/m3)
+!     DIEP1   R*8        IN  CONSTANT, DEFAULT = 1.0 (m)
+!     DIEP2   R*8        IN  CONSTANT, DEFAULT = 1.2 (m)
+!     D_1     R*8        OUT DUMMY PARAMETER D 10% TRANSMIS 560 NM (m)
+!     EXTPAR  R*8        OUT PARAMETER: EXTINCTIE OP 1M (1/m)
+!     EXTP_D  R*8        OUT DUMMY PARAMETER EXTINCTIE OP D_1 (1/m)
+!     GLOEIR  R*8        IN  PARAMETER: ANORGANISCH ZWEVEND STOF (gDW/m3)
+!     HELHUM  R*8        IN  CONSTANT, DEFAULT = 0.014
+!     SECCHI  R*8        OUT PARAMETER: DOORZICHT (m)
+!     TAU     R*8        IN  CONSTANT, DEFAULT = 7.8
 !***********************************************************************
 !***********************************************************************
 !     COMMON VARIABLES:
 !     NAME   TYPE SIZE   DESCRIPTION
 !     ------ ---- ------ -----------------------------------------------
-!     AWATER  R*4 (61)   ABSORPTIE WATER
-!     BWATER  R*4 (61)   VERSTROOING WATER
-!     CHLSPE  R*4 (61)   SPECIFIEKE ABSORPTIE ALGEN
-!     PLANCK  R*4 (61)   VERDELING INVALLEND LICHT
+!     AWATER  R*8 (61)   ABSORPTIE WATER
+!     BWATER  R*8 (61)   VERSTROOING WATER
+!     CHLSPE  R*8 (61)   SPECIFIEKE ABSORPTIE ALGEN
+!     PLANCK  R*8 (61)   VERDELING INVALLEND LICHT
 !***********************************************************************
 !***********************************************************************
 !     LOCAL VARIABLES:
 !     NAME   TYPE SIZE   DESCRIPTION
 !     ------ ---- ------ -----------------------------------------------
-!     A       R*4
-!     A_CHL   R*4
-!     A_DET   R*4
-!     A_HUM   R*4
-!     B       R*4
-!     B_CHL   R*4
-!     B_GL    R*4
-!     C_CHL   R*4
-!     C_GL    R*4
-!     C_MU    R*4
-!     D_2     R*4
-!     EXT_KI  R*4
-!     I_550   I*4
-!     LAMBDA  I*4
-!     SOM_C   R*4
-!     SOM_D1  R*4
-!     SOM_D2  R*4
-!     SOM_H   R*4
-!     S_D1    R*4
-!     S_D2    R*4
-!     TELLER  I*4
-!     ZW_STF  R*4
+!     A       R*8
+!     A_CHL   R*8
+!     A_DET   R*8
+!     A_HUM   R*8
+!     B       R*8
+!     B_CHL   R*8
+!     B_GL    R*8
+!     C_CHL   R*8
+!     C_GL    R*8
+!     C_MU    R*8
+!     D_2     R*8
+!     EXT_KI  R*8
+!     I_550   I*8
+!     LAMBDA  I*8
+!     SOM_C   R*8
+!     SOM_D1  R*8
+!     SOM_D2  R*8
+!     SOM_H   R*8
+!     S_D1    R*8
+!     S_D2    R*8
+!     TELLER  I*8
+!     ZW_STF  R*8
 !***********************************************************************
 !
 !     include '..\inc\ioblck.inc'
       USE UITZICHT_DATA
 !
-      REAL    A     , A_CHL , A_DET , A_HUM , AH_380,
+      REAL(8) A     , A_CHL , A_DET , A_HUM , AH_380,
      1        ANGLE , B     , B_CHL , B_GL  ,
      2        C_CHL , C_DET , C_GL  , C_GL1 , C_GL2 ,
      3        C_MU  , CHLORO, CORCHL, D_1   , D_2   ,
@@ -279,51 +279,51 @@
 !     ARGUMENTS:
 !     NAME   TYPE SIZE   I/O DESCRIPTION
 !     ------ ---- ------ --- -------------------------------------------
-!     AH_380  R*4        IN  PARAMETER: EXTINCTIE HUMUSZUREN (1/M)
-!     CHLORO  R*4        IN  PARAMETER: CHLOROPHYL (fG/L)
-!     CORCHL  R*4        IN  CONSTANT,  DEFAULT  =  2.5
-!     C_DET   R*4        IN  CONSTANT,  DEFAULT  =  0.026
-!     C_GL1   R*4        IN  CONSTANT,  DEFAULT  =  0.73
-!     C_GL2   R*4        IN  CONSTANT,  DEFAULT  =  1.0
-!     C_MU    R*4        IN  CONSTANT,  COSINUS VAN ANGLE (DEFAULT  =  30)
-!     DETRIT  R*4        IN  PARAMETER: GESUSPENDEERD DETRITUS (MG/L)
-!     D_1     R*4        OUT DUMMY PARAMETER D 10% TRANSMIS 560 NM (M)
-!     D_2     R*4        OUT DUMMY PARAMETER D_1 + 0.1 (M)
-!     GLOEIR  R*4        IN  PARAMETER: ANORGANISCH ZWEVEND STOF (MG/L)
-!     HELHUM R*4        IN  CONSTANT,  DEFAULT  =  0.014
+!     AH_380  R*8        IN  PARAMETER: EXTINCTIE HUMUSZUREN (1/M)
+!     CHLORO  R*8        IN  PARAMETER: CHLOROPHYL (fG/L)
+!     CORCHL  R*8        IN  CONSTANT,  DEFAULT  =  2.5
+!     C_DET   R*8        IN  CONSTANT,  DEFAULT  =  0.026
+!     C_GL1   R*8        IN  CONSTANT,  DEFAULT  =  0.73
+!     C_GL2   R*8        IN  CONSTANT,  DEFAULT  =  1.0
+!     C_MU    R*8        IN  CONSTANT,  COSINUS VAN ANGLE (DEFAULT  =  30)
+!     DETRIT  R*8        IN  PARAMETER: GESUSPENDEERD DETRITUS (MG/L)
+!     D_1     R*8        OUT DUMMY PARAMETER D 10% TRANSMIS 560 NM (M)
+!     D_2     R*8        OUT DUMMY PARAMETER D_1 + 0.1 (M)
+!     GLOEIR  R*8        IN  PARAMETER: ANORGANISCH ZWEVEND STOF (MG/L)
+!     HELHUM  R*8        IN  CONSTANT,  DEFAULT  =  0.014
 !***********************************************************************
 !***********************************************************************
 !     COMMON VARIABLES:
 !     NAME   TYPE SIZE   DESCRIPTION
 !     ------ ---- ------ -----------------------------------------------
-!     AWATER  R*4 (61)   ABSORPTIE WATER
-!     BWATER  R*4 (61)   VERSTROOING WATER
-!     CHLSPE  R*4 (61)   SPECIFIEKE ABSORPTIE ALGEN
-!     PLANCK  R*4 (61)   VERDELING INVALLEND LICHT
+!     AWATER  R*8 (61)   ABSORPTIE WATER
+!     BWATER  R*8 (61)   VERSTROOING WATER
+!     CHLSPE  R*8 (61)   SPECIFIEKE ABSORPTIE ALGEN
+!     PLANCK  R*8 (61)   VERDELING INVALLEND LICHT
 !***********************************************************************
 !***********************************************************************
 !     LOCAL VARIABLES:
 !     NAME   TYPE SIZE   DESCRIPTION
 !     ------ ---- ------ -----------------------------------------------
-!     A      R*4
-!     A_CHL  R*4
-!     A_DET  R*4
-!     A_HUM  R*4
-!     B      R*4
-!     B_CHL  R*4
-!     B_GL   R*4
-!     C_CHL  R*4
-!     C_GL   R*4
-!     EXT_KI R*4
-!     I_550  I*4
-!     LAMBDA I*4
-!     TELLER I*4
-!     ZW_STF R*4
+!     A      R*8
+!     A_CHL  R*8
+!     A_DET  R*8
+!     A_HUM  R*8
+!     B      R*8
+!     B_CHL  R*8
+!     B_GL   R*8
+!     C_CHL  R*8
+!     C_GL   R*8
+!     EXT_KI R*8
+!     I_550  I*8
+!     LAMBDA I*8
+!     TELLER I*8
+!     ZW_STF R*8
 !***********************************************************************
 
       USE UITZICHT_DATA
 !
-      REAL    A     , A_CHL , A_DET , A_HUM , AH_380,
+      REAL(8) A     , A_CHL , A_DET , A_HUM , AH_380,
      1        B     , B_CHL , B_GL  , C_CHL , C_DET ,
      2        C_GL  , C_GL1 , C_GL2 , C_MU  , CHLORO,
      3        CORCHL, D_1   , D_2   , DETRIT, EXT_KI,
