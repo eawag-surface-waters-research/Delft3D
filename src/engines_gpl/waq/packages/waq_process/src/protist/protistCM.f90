@@ -160,7 +160,7 @@ use ieee_arithmetic
     nrPrey    = nint(PMSA(ipoint(   2 )))   !   nr of prey species implemented                         (-)
 
 !   nrInputItems  = nrIndInp + nrSpec * nrSpecInp + nrPrey * (nrPreyInp + nrSpec) = 8 + 2 * 41 + 4 * (8 + 2) = 130
-!   nrOutputItems = nrSpec * nrSpecOut = 2 * 22 = 44
+!   nrOutputItems = nrSpec * nrSpecOut = 2 * 42 = 84
 !   ipointLength = nrInputItems + nrOutputItems = 176
 !   nrFluxes  = nrSpec * (nrSpexFlx + nrPrey * nrLossFluxes) = 2 * (25 + 4 * 5) = 90
 
@@ -291,7 +291,7 @@ use ieee_arithmetic
             ! Units: gC gC-1 d-1
             CfixPS = Cfix - totalRespiration(redco, upNO3, upNH4, 0.0, 0.0, 0.0, 0.0)
             
-            ! Calulate nett primary production per m3 ---------------------------------------
+            ! Calculate nett primary production per m3 ---------------------------------------
             ! Units: gC m-3 d-1
             NPP = CfixPS * protC
 

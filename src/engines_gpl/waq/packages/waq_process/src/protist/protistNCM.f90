@@ -63,7 +63,7 @@ use ieee_arithmetic
 !     support variables
     integer, parameter    :: nrIndInp = 5    !   nr of species independent input items
     integer, parameter    :: nrSpecInp = 32  !   nr of inputs per species
-    integer, parameter    :: nrSpecOut = 34  !   nr of outputs per species
+    integer, parameter    :: nrSpecOut = 35  !   nr of outputs per species
     integer, parameter    :: nrSpecFlux = 23 !   nr of fluxes per species
     integer, parameter    :: nrPreyInp = 8   !   nr of inputs per prey
     integer               :: nrInputItems     !   nr of input items need for output PMSA
@@ -120,7 +120,7 @@ use ieee_arithmetic
     real    maxIng, ingSat, ingC, ingN, ingP, KI   ! ingestion
     real    assC, assN, assP                       ! assimilation
     ! ingestion and assimilation
-    real    totR, Cu                               ! respiration and C-growth
+    real    totR, Cu, NPP                          ! respiration, C-growth and nett primary production
     real    mrt, mrtFrAut, mrtFrDet                ! mortality to detritus and autolysis
     ! photosynthesis
     real    PSqm, PS, Cfix
@@ -151,7 +151,7 @@ use ieee_arithmetic
     nrPrey    = nint(PMSA(ipoint(   2 )))   !   nr of prey species implemented                         (-)
 
 !   nrInputs  = nrIndInp + nrSpec * nrSpecInp + nrPrey * (nrPreyInp + nrSpec) = 5 + 2 * 32 + 6 * (8 + 2) = 129
-!   nrOutputs = nrSpec * nrSpecOut = 2 * 34 = 68
+!   nrOutputs = nrSpec * nrSpecOut = 2 * 35 = 70
 !   ipointLength = nrInputs + nrOutputs = 197
 !   nrFluxes  = nrSpec * (nrSpexFlx + nrPrey * nrLossFluxes) = 2 * (23 + 6 * 5) = 106
 
@@ -299,6 +299,11 @@ use ieee_arithmetic
             PS   = grossPS(ChlC, PFD, exat, atten, PSqm, alpha)
             Cfix = netPS(PS, PSDOC)
 
+            ! Calculate nett primary production per m3 ---------------------------------------
+            ! Units: gC m-3 d-1
+            ! NCM can't do nutrient uptake like Diat, Green, CM so there is no respiration directly associated with PP
+            NPP = Cfix * protC
+
             ! Calculate respiration   ---------------------------------------
             ! Units: gC gC-1 d-1
             ! protzoo cannot recover loss N
@@ -350,13 +355,14 @@ use ieee_arithmetic
             PMSA(ipnt( spInc +  25 )) = PSqm
             PMSA(ipnt( spInc +  26 )) = PS
             PMSA(ipnt( spInc +  27 )) = Cfix
-            PMSA(ipnt( spInc +  28 )) = totR
-            PMSA(ipnt( spInc +  29 )) = Cu
-            PMSA(ipnt( spInc +  30 )) = mrt
-            PMSA(ipnt( spInc +  31 )) = mrtFrAut
-            PMSA(ipnt( spInc +  32 )) = mrtFrDet
-            PMSA(ipnt( spInc +  33 )) = preyFlag
-            PMSA(ipnt( spInc +  34 )) = lightInh
+            PMSA(ipnt( spInc +  28 )) = NPP
+            PMSA(ipnt( spInc +  29 )) = totR
+            PMSA(ipnt( spInc +  30 )) = Cu
+            PMSA(ipnt( spInc +  31 )) = mrt
+            PMSA(ipnt( spInc +  32 )) = mrtFrAut
+            PMSA(ipnt( spInc +  33 )) = mrtFrDet
+            PMSA(ipnt( spInc +  34 )) = preyFlag
+            PMSA(ipnt( spInc +  35 )) = lightInh
 
             ! FLUXES -------------------------------------------------------------------
             ! Protist gains------------------------------------------------------------

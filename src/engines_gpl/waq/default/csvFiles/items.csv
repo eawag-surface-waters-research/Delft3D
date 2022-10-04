@@ -13805,3 +13805,5 @@ itemid,itemse,itemex,itemde,itemun,itemnm,itemag,itemda,itemwk,itemgr
 "NPP_G2    ","x"," ",   -999.000    ,"(gC/m3/d)           ","nett primary production of green 2                ","volume    ","volume    "," ","                              "
 "NPP_C1    ","x"," ",   -999.000    ,"(gC/m3/d)           ","nett primary production of CM 1                   ","volume    ","volume    "," ","                              "
 "NPP_C2    ","x"," ",   -999.000    ,"(gC/m3/d)           ","nett primary production of CM 2                   ","volume    ","volume    "," ","                              "
+"NPP_N1    ","x"," ",   -999.000    ,"(gC/m3/d)           ","nett primary production of NCM 1                  ","volume    ","volume    "," ","                              "
+"NPP_N2    ","x"," ",   -999.000    ,"(gC/m3/d)           ","nett primary production of NCM 2                  ","volume    ","volume    "," ","                              "

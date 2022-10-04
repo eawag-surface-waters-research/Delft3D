@@ -125,7 +125,7 @@ use ieee_arithmetic
     nrSpec    = nint(PMSA(ipoint(   1 )))   !   total nr species implemented in process                (-)
 
 !   nrInputItems  = nrIndInp + nrSpec * nrSpecInp = 7 + 2 * 33 = 73
-!   nrOutputItems = nrSpec * nrSpecOut = 2 * 22 = 44
+!   nrOutputItems = nrSpec * nrSpecOut = 2 * 23 = 46
 !   ipointLength = nrInputItems + nrOutputItems = 117
 !   nrFluxes  = nrSpec * (nrSpexFlx + nrPrey * nrLossFluxes) = 2 * 19 = 38
 
@@ -252,7 +252,7 @@ use ieee_arithmetic
             !totR = totalRespiration(redco, upNO3, upNH4, 0.0, 0.0, 0.0, BR)
             Cu   = Cfix - totR
             
-            ! Calulate nett primary production per m3 ---------------------------------------
+            ! Calculate nett primary production per m3 ---------------------------------------
             ! Units: gC m-3 d-1
             NPP = Cu * protC
 
