@@ -62,52 +62,52 @@ ulimit -s unlimited
 
 while [[ $# -ge 1 ]]
 do
-key="$1"
-shift
+    key="$1"
+    shift
 
-case $key in
-    -c|--corespernode)
-    corespernode=$1
-    shift
-    ;;
-    -h|--help)
-    print_usage_info
-    ;;
-    -n|--numnode)
-    numnode="$1"
-    shift
-    ;;
-    -q|--queue)
-    queue="$1"
-    shift
-    ;;
-    --rtc)
-    withrtc=true
-    shift
-    ;;
-    -w|--wavefile)
-    wavefile="$1"
-    shift
-    ;;
-    -j|--jobname)
-    JOBNAME="$1"
-    shift
-    ;;
-    -m|--masterfile)
-    configfile="$1"
-    shift
-    ;;
-    --)
-    echo "-- sign detected, remained options are going to be passed to dimr"
-    runscript_extraopts="$runscript_extraopts $*"
-    break       # exit loop, stop shifting, all remaining arguments without dashes handled below
-    ;;
-    -*)
-    echo "option ${key} seems dedicated for dimr, therefore passing it and the following ones to the dimr"
-    runscript_extraopts="$key $*"
-    break       # exit loop, $key+all remaining options to dflowfm executable
-    ;;
-esac
+    case $key in
+        -c|--corespernode)
+        corespernode=$1
+        shift
+        ;;
+        -h|--help)
+        print_usage_info
+        ;;
+        -n|--numnode)
+        numnode="$1"
+        shift
+        ;;
+        -q|--queue)
+        queue="$1"
+        shift
+        ;;
+        --rtc)
+        withrtc=true
+        shift
+        ;;
+        -w|--wavefile)
+        wavefile="$1"
+        shift
+        ;;
+        -j|--jobname)
+        JOBNAME="$1"
+        shift
+        ;;
+        -m|--masterfile)
+        configfile="$1"
+        shift
+        ;;
+        --)
+        echo "-- sign detected, remained options are going to be passed to dimr"
+        runscript_extraopts="$runscript_extraopts $*"
+        break       # exit loop, stop shifting, all remaining arguments without dashes handled below
+        ;;
+        -*)
+        echo "option ${key} seems dedicated for dimr, therefore passing it and the following ones to the dimr"
+        runscript_extraopts="$key $*"
+        break       # exit loop, $key+all remaining options to dflowfm executable
+        ;;
+    esac
 done
 
 

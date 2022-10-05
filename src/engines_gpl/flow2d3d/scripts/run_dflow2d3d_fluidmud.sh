@@ -39,30 +39,30 @@ ulimit -s unlimited
 
 while [[ $# -ge 1 ]]
 do
-key="$1"
-shift
+    key="$1"
+    shift
 
-case $key in
-    -h|--help)
-    print_usage_info
-    ;;
-    -mconfig)
-    mudconfigfile="$1"
-    shift
-    ;;
-    -wconfig)
-    waterconfigfile="$1"
-    shift
-    ;;
-    --D3D_HOME)
-    D3D_HOME="$1"
-    shift
-    ;;
-	--NNODES)
-    NNODES="$1"
-    shift
-    ;;
-esac
+    case $key in
+        -h|--help)
+        print_usage_info
+        ;;
+        -mconfig)
+        mudconfigfile="$1"
+        shift
+        ;;
+        -wconfig)
+        waterconfigfile="$1"
+        shift
+        ;;
+        --D3D_HOME)
+        D3D_HOME="$1"
+        shift
+        ;;
+        --NNODES)
+        NNODES="$1"
+        shift
+        ;;
+    esac
 done
 
 

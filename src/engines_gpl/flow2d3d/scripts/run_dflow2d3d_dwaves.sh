@@ -40,30 +40,29 @@ ulimit -s unlimited
 
 while [[ $# -ge 1 ]]
 do
-key="$1"
-shift
+    key="$1"
+    shift
 
-case $key in
-    -h|--help)
-    print_usage_info
-    ;;
-    -w|--mdwfile)
-    mdwfile="$1"
-    shift
-    ;;
-    --D3D_HOME)
-    D3D_HOME="$1"
-    shift
-    ;;
-    --NNODES)
-    NNODES="$1"
-    shift
-    ;;
-    *)
-    configfile="$key"
-    break
-    ;;
-esac
+    case $key in
+        -h|--help)
+        print_usage_info
+        ;;
+        -w|--mdwfile)
+        mdwfile="$1"
+        shift
+        ;;
+        --D3D_HOME)
+        D3D_HOME="$1"
+        shift
+        ;;
+        --NNODES)
+        NNODES="$1"
+        shift
+        ;;
+        *)
+        configfile="$key"
+        ;;
+    esac
 done
 
 
