@@ -335,7 +335,11 @@ subroutine reset_flowtimes()
     debugtimeon   = .false.          !< timing yes or no
 
     dsetb         = 0                !< number of setbacks ()
-    alfsmo        = 1d0              !<
+    if (tlfsmo > 0d0 ) then
+        alfsmo = 0d0    
+    else 
+        alfsmo = 1d0                 !<
+    endif
 
 end subroutine reset_flowtimes
 
