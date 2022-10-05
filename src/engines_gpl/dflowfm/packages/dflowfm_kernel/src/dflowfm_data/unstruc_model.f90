@@ -2255,7 +2255,6 @@ subroutine readMDUFile(filename, istat)
       end if
    else if (md_dt_waqproc < 0d0) then
       ! DtProcesses is negative
-      ti_waqproc = dt_user
       call mess(LEVEL_INFO, 'DtProcesses is negative. Water quality processes are calculated with every hydrodynamic time step.')
    end if
 
