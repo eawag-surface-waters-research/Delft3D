@@ -61,7 +61,7 @@ contains
       real   (sp), pointer, dimension(:,:)        :: wpart
 
 
-      integer(ip)                       :: lun_ini=50
+      integer(ip)                       :: lun_ini
       integer(ip)                       :: ios
       integer(ip)                       :: i
       integer(ip)                       :: np
@@ -84,7 +84,7 @@ contains
 
       len_file          =  len_trim(ini_file)
 
-      open(lun_ini,file=ini_file,access='stream',form='unformatted',status='old',iostat=ios)
+      open(newunit=lun_ini,file=ini_file,access='stream',form='unformatted',status='old',iostat=ios)
       if (ios /= 0) go to 900
       read(lun_ini,end=920,err=930) nopart_ini,nosubs_ini
       if ( nosubs_ini .gt. nosubs ) then

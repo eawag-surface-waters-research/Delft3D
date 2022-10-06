@@ -119,7 +119,7 @@ contains
       integer, save              :: iday = 0            ! for csv output
       integer, save              :: ncum = 0            ! for csv output
       character*256              :: filcsv
-      integer, save              :: luncsv = 631
+      integer, save              :: luncsv
       real(sp), pointer,save     :: astage(:)           ! a coefficient in stage development (-)
       real(sp), pointer,save     :: bstage(:)           ! b coefficient in stage development (-)
       integer(ip), pointer,save  :: btype(:)       ! behaviour type
@@ -317,7 +317,7 @@ contains
 
       !Set debugging mode
       ! debug = .true.
-            
+
       if(debug) write(88,*) 'Time: ', itime
 
       ! Check if the current time (sec) is equal to start time
@@ -560,7 +560,7 @@ contains
             l_csv_now = .true.
             iday = (itime-it_start_m2)/idt_csv
             write(filcsv,'(a,i5.5,a)') 'position_day_',iday,'.csv'
-            open(luncsv,file=filcsv)
+            open(newunit=luncsv,file=filcsv)
          endif
          ncum = ncum + 1
       endif
@@ -577,7 +577,7 @@ contains
          iseg   = lgrid3(n,m)             !The original grid number (conc array)
 
          if(debug) write(88,*) '     iseg, n , m, kb :', iseg , n , m, kb
-         
+
          if (iseg .gt. 0) then    !If the segment numer is larger than 0 and the particle is within model domain
 
             ktopp = laytop(n,m)
@@ -737,10 +737,10 @@ contains
                     oldduration = (stime + delt)/fstage          ! Calculate the previous duration time
                     if(debug) write(88,*) 'Calc old duration', oldduration
                 endif
-                
+
                 if(0.0 .gt. stime) then                           ! if next stage reached
                     if(debug) write(88,*) '     stime, istage, duration before new stage:', stime, istage, duration, nduration, oldduration
-                       
+
                     istage = istage - 1                           ! Stage - 1
                     istage = max(istage,0)                        ! Minimum of stages set on 0
                     stime  = nduration * 0.9999                   ! Set the stage timer to new duration

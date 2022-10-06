@@ -320,7 +320,7 @@ module rdhydr_mod
 !
 !     end of routine
 !
-      if ( lunit(22) .gt. 0 .and. lunit(23) .gt. 0 .and. ideltold .ne. -999 ) then
+      if ( lunit(22) .ne. 0 .and. lunit(23) .ne. 0 .and. ideltold .ne. -999 ) then
          do i = 1, noseg
             rhowatc(i) = densty(max(0.0e0,salin1(i)), temper1(i))
          enddo

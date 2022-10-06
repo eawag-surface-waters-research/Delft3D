@@ -37,34 +37,36 @@
 
 !     Locals
 
-      integer                      :: ifirst = 1
+      integer, save                :: ifirst = 1
+      integer, save                :: lun_forcing, lun_binforcing
       integer                      :: notime
       integer                      :: noseg
-      integer                      :: it, it0, it1, it2
-      integer, allocatable         :: t_time(:)
-      real   , allocatable         :: salinity(:)
-      real   , allocatable         :: salprev(:)
+      integer                      :: it
+      integer, save                :: it0, it1, it2
+      integer, allocatable, save   :: t_time(:)
+      real   , allocatable, save   :: salinity(:)
+      real   , allocatable, save   :: salprev(:)
       character(len=256)           :: t_file
       integer                      :: io_err
 
       if ( ifirst .eq. 1 ) then
          ifirst = 0
-         open(847,file='s_forcing.dat')
-         read(847,*) notime
+         open(newunit=lun_forcing,file='s_forcing.dat')
+         read(lun_forcing,*) notime
          if ( notime .eq. -2 ) then
             ! binary salinity file
-            read(847,*) noseg
-            read(847,*) t_file
+            read(lun_forcing,*) noseg
+            read(lun_forcing,*) t_file
             allocate(salinity(noseg))
             allocate(salprev(noseg))
-            open(846,file=t_file, access='stream', form='unformatted')
-            read(846) it1,salinity
-            read(846) it2
+            open(newunit=lun_binforcing,file=t_file, access='stream', form='unformatted')
+            read(lun_binforcing) it1,salinity
+            read(lun_binforcing) it2
          else
             allocate(t_time(notime))
             allocate(salinity(notime))
             do it = 1, notime
-               read(847,*) t_time(it),salinity(it)
+               read(lun_forcing,*) t_time(it),salinity(it)
             enddo
             salprev = salinity
             it = 1
@@ -76,8 +78,8 @@
             if ( itime .ge. it2 ) then
                it1 = it2
                salprev = salinity
-               read(846) salinity
-               read(846,iostat=io_err) it2
+               read(lun_binforcing) salinity
+               read(lun_binforcing,iostat=io_err) it2
             else
                exit
             endif

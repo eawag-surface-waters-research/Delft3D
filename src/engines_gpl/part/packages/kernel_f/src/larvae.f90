@@ -44,7 +44,7 @@ implicit none
                           nocons   , const    , conc     , xa       , ya       )
 
       ! function  : calculates larval development and behaviour
- 
+
       ! arguments :
 
       integer(ip), intent(in)    :: lunrep              ! report file
@@ -89,7 +89,7 @@ implicit none
       integer, save              :: iday = 0            ! for csv output
       integer, save              :: ncum = 0            ! for csv output
       character*256              :: filcsv
-      integer, save              :: luncsv = 631
+      integer, save              :: luncsv
       real(sp), allocatable,save :: astage(:)           ! a coefficient in stage development (-)
       real(sp), allocatable,save :: bstage(:)           ! b coefficient in stage development (-)
       integer , allocatable,save :: btype(:)            ! behaviour type
@@ -278,7 +278,7 @@ implicit none
             l_csv_now = .true.
             iday = itime/idt_csv
             write(filcsv,'(a,i5.5,a)') 'position_day_',iday,'.csv'
-            open(luncsv,file=filcsv)
+            open(newunit=luncsv,file=filcsv)
          endif
          ncum = ncum + 1
       endif

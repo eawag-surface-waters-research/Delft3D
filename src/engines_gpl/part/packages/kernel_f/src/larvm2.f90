@@ -36,7 +36,7 @@ contains
       use timers
       implicit none
 
-      
+
       ! arguments :
 
       integer(ip), intent(in)    :: lunrep              ! report file
@@ -48,7 +48,7 @@ contains
 
       ! function            : calculate larvae per m2 over the water column
 
-      integer, parameter                :: lunmm2 = 845
+      integer, save                     :: lunmm2
       character(len=256)                :: filmm2
       real   , allocatable, save        :: c_m2(:,:)
       character(len=20), allocatable    :: syname(:)
@@ -76,7 +76,7 @@ contains
             istage = isys - 1
             write(syname(isys),'(''sole'',i2.2,''stage'')') istage
          enddo
-         open (lunmm2, file=filmm2, access='stream', form='unformatted')
+         open (newunit=lunmm2, file=filmm2, access='stream', form='unformatted')
          write(lunmm2) moname
          write(lunmm2) nosubs-3,nosegl
          write(lunmm2) syname

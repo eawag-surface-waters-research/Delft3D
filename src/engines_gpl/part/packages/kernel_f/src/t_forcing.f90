@@ -36,32 +36,34 @@
 
 !     Locals
 
-      integer                      :: ifirst = 1
+      integer, save                :: ifirst = 1
+      integer, save                :: lun_forcing, lun_binforcing
       integer                      :: notime
       integer                      :: noseg
-      integer                      :: it, it1, it2
-      integer, allocatable         :: t_time(:)
-      real   , allocatable         :: temperature(:)
+      integer                      :: it
+      integer, save                :: it1, it2
+      integer, allocatable, save   :: t_time(:)
+      real   , allocatable, save   :: temperature(:)
       character(len=256)           :: t_file
       integer                      :: io_err
 
       if ( ifirst .eq. 1 ) then
          ifirst = 0
-         open(849,file='t_forcing.dat')
-         read(849,*) notime
+         open(newunit=lun_forcing,file='t_forcing.dat')
+         read(lun_forcing,*) notime
          if ( notime .eq. -2 ) then
             ! binary temperature file
-            read(849,*) noseg
-            read(849,*) t_file
+            read(lun_forcing,*) noseg
+            read(lun_forcing,*) t_file
             allocate(temperature(noseg))
-            open(848,file=t_file,access='stream', form='unformatted')
-            read(848) it1,temperature
-            read(848) it2
+            open(newunit=lun_binforcing,file=t_file,access='stream', form='unformatted')
+            read(lun_binforcing) it1,temperature
+            read(lun_binforcing) it2
          else
             allocate(t_time(notime))
             allocate(temperature(notime))
             do it = 1, notime
-               read(849,*) t_time(it),temperature(it)
+               read(lun_forcing,*) t_time(it),temperature(it)
             enddo
             it = 1
          endif
@@ -71,8 +73,8 @@
          do
             if ( itime .ge. it2 ) then
                it1 = it2
-               read(848) temperature
-               read(848,iostat=io_err) it2
+               read(lun_binforcing) temperature
+               read(lun_binforcing,iostat=io_err) it2
             else
                exit
             endif
