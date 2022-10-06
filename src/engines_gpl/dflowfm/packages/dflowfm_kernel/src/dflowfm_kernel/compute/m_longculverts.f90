@@ -1164,8 +1164,8 @@ contains
      ! Find the flownode numbers for the starting and ending points of the long culvert polyline
      call realloc(inode,     2, keepExisting=.false.,fill=0)
      call realloc(inodeGlob, 2, keepExisting=.false.,fill=0)
-     call inflowcell(xpl(is), ypl(is), inode(1), 0, INDTP_ALL)
-     call inflowcell(xpl(ie), ypl(ie), inode(2), 0, INDTP_ALL)
+     call inflowcell(xpl(is), ypl(is), inode(1), -1, INDTP_ALL)
+     call inflowcell(xpl(ie), ypl(ie), inode(2), -1, INDTP_ALL)
 
      inodeGlob(1:2) = inode(1:2)
      if (jampi > 0) then
