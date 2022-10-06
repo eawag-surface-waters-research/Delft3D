@@ -1195,7 +1195,7 @@ end subroutine read_netcdf_grd
 !
 !==============================================================================
 subroutine readregulargrid(filnam, sferic_exp, xorigin, yorigin, alpha, &
-                          & mmax, nmax, dx, dy)
+                          & mmax, nmax, dx, dy)!,xymiss) !BS
     use geometry_module, only: clockwise
     implicit none
 !
@@ -1210,6 +1210,7 @@ subroutine readregulargrid(filnam, sferic_exp, xorigin, yorigin, alpha, &
     real   , intent(out)                              :: alpha
     real   , intent(out)                              :: dx
     real   , intent(out)                              :: dy
+    !real(hp), intent(out)                              :: xymiss !BS
 !
 ! Local variables
 !
@@ -1238,6 +1239,7 @@ subroutine readregulargrid(filnam, sferic_exp, xorigin, yorigin, alpha, &
 !
 !! executable statements -------------------------------------------------------
 !
+    !xymiss = 0.0_hp !BS
     sferic_read = .false.
     open (newunit=irgf, file = filnam, form = 'formatted', status = 'old')
     !
@@ -1282,6 +1284,9 @@ subroutine readregulargrid(filnam, sferic_exp, xorigin, yorigin, alpha, &
        pos = index(rec,'Missing Value')
        if (pos >= 1) then
           kw_found = .true.
+          ! BS UNST-6204 save the missing vallue value 
+          !pos      = index(rec,'=') + 1 
+          !read(rec(pos:),*,err=8888) xymiss
        endif
     if (kw_found) goto 10
     !

@@ -35,6 +35,7 @@ subroutine write_wave_map_netcdf (sg, sof, sif, n_swan_grids, wavedata, casl, pr
     use wave_data
     use swan_flow_grid_maps
     use netcdf
+    use precision_basics !BS
     !
     implicit none
 !
@@ -55,6 +56,7 @@ subroutine write_wave_map_netcdf (sg, sof, sif, n_swan_grids, wavedata, casl, pr
 !
 ! Local variables
 !
+    integer                                     :: m, n !BS
     integer                                     :: epsg
     integer                                     :: i
     integer                                     :: idfile
@@ -117,6 +119,9 @@ subroutine write_wave_map_netcdf (sg, sof, sif, n_swan_grids, wavedata, casl, pr
     character(10)                               :: ctime
     character(5)                                :: czone
     character(11)                               :: epsgstring
+    !real(kind=hp)                               :: tmp_xymiss          !BS missing value
+    real(kind=hp), dimension(:,:), allocatable  :: tmp_x               !BS x-coordinates cell center
+    real(kind=hp), dimension(:,:), allocatable  :: tmp_y               !BS y-coordinates cell center
 !
 !! executable statements -------------------------------------------------------
 !
@@ -161,6 +166,21 @@ subroutine write_wave_map_netcdf (sg, sof, sif, n_swan_grids, wavedata, casl, pr
        write(filename,'(5a)')'wavm-', trim(casl), '-', trim(gridnam), '.nc'
     endif
     !
+    ! BS UNST-6204 here replace the dummy with NF90_FILL_FLOAT in the x,y coordinates 
+            ! will change the values of tmp_x and tmp_y
+    allocate(tmp_x(sg%mmax,sg%nmax), stat=ierror)
+    allocate(tmp_y(sg%mmax,sg%nmax), stat=ierror)
+    tmp_x = sg%x
+    tmp_y = sg%y
+    !tmp_xymiss = NF90_FILL_FLOAT ! probably not needed
+    do m=1,sg%mmax
+        do n=1,sg%nmax
+            if ( .not.abs(comparereal(sg%x(m,n), sg%xymiss)) .and. .not.abs(comparereal(sg%y(m,n), sg%xymiss)) ) then     
+                tmp_x(m,n) = NF90_FILL_FLOAT ! does this require use netcdf_tools ??
+                tmp_y(m,n) = NF90_FILL_FLOAT
+            endif
+        enddo
+    enddo
     if (wavedata%output%count == 1) then
        !
        ! create file
@@ -216,8 +236,10 @@ subroutine write_wave_map_netcdf (sg, sof, sif, n_swan_grids, wavedata, casl, pr
        ! name, type, dims, standardname, longname, unit, xycoordinates
        idvar_x       = nc_def_var(idfile, 'x'       , nf90_double, 2, (/iddim_mmax, iddim_nmax/), 'projection_x_coordinate', 'x-coordinate of cell centres', trim(string), .false., filename)
              ierror  = nf90_put_att(idfile, idvar_x , 'grid_mapping', 'projected_coordinate_system'); call nc_check_err(ierror, "put_att x grid_mapping", filename)
+             ierror  = nf90_put_att(idfile, idvar_x ,'_FillValue',NF90_FILL_DOUBLE); call nc_check_err(ierror, "put_att x _FillValue", filename) !BS
        idvar_y       = nc_def_var(idfile, 'y'       , nf90_double, 2, (/iddim_mmax, iddim_nmax/), 'projection_y_coordinate', 'y-coordinate of cell centres', trim(string), .false., filename)
              ierror  = nf90_put_att(idfile, idvar_y , 'grid_mapping', 'projected_coordinate_system'); call nc_check_err(ierror, "put_att y grid_mapping", filename)
+             ierror  = nf90_put_att(idfile, idvar_y , '_FillValue',NF90_FILL_DOUBLE); call nc_check_err(ierror, "put_att y _FillValue", filename) !BS
        write(string,'(a,i0.4,a,i0.2,a,i0.2,a)') 'seconds since ', year, '-', month, '-', day,' 00:00:00'
        idvar_time    = nc_def_var(idfile, 'time'    , nf90_double, 1, (/iddim_time/)                        , 'time', 'time'            , trim(string), .false., filename)
        idvar_kcs     = nc_def_var(idfile, 'kcs'     , nf90_int , 2, (/iddim_mmax, iddim_nmax/)            , ''    , 'Active(1), Inactive(0), boundary(2) indicator', '-', .true., filename)
@@ -265,8 +287,10 @@ subroutine write_wave_map_netcdf (sg, sof, sif, n_swan_grids, wavedata, casl, pr
        !
        ! put vars (time independent)
        !
-       ierror = nf90_put_var(idfile, idvar_x  , sg%x  , start=(/ 1, 1 /), count = (/ sof%mmax, sof%nmax, 1 /)); call nc_check_err(ierror, "put_var x", filename)
-       ierror = nf90_put_var(idfile, idvar_y  , sg%y  , start=(/ 1, 1 /), count = (/ sof%mmax, sof%nmax, 1 /)); call nc_check_err(ierror, "put_var y", filename)
+       !ierror = nf90_put_var(idfile, idvar_x  , sg%x  , start=(/ 1, 1 /), count = (/ sof%mmax, sof%nmax, 1 /)); call nc_check_err(ierror, "put_var x", filename) !BSold
+       !ierror = nf90_put_var(idfile, idvar_y  , sg%y  , start=(/ 1, 1 /), count = (/ sof%mmax, sof%nmax, 1 /)); call nc_check_err(ierror, "put_var y", filename) !BSold
+       ierror = nf90_put_var(idfile, idvar_x  , tmp_x  , start=(/ 1, 1 /), count = (/ sof%mmax, sof%nmax, 1 /)); call nc_check_err(ierror, "put_var x", filename) !BS
+       ierror = nf90_put_var(idfile, idvar_y  , tmp_y  , start=(/ 1, 1 /), count = (/ sof%mmax, sof%nmax, 1 /)); call nc_check_err(ierror, "put_var y", filename) !BS
        ierror = nf90_put_var(idfile, idvar_kcs, sg%kcs, start=(/ 1, 1 /), count = (/ sof%mmax, sof%nmax, 1 /)); call nc_check_err(ierror, "put_var kcs", filename)
     else
        !
@@ -365,4 +389,6 @@ subroutine write_wave_map_netcdf (sg, sof, sif, n_swan_grids, wavedata, casl, pr
     ierror = nf90_close(idfile); call nc_check_err(ierror, "closing file", filename)
 
     deallocate(idvar_outpars, stat=ierror)
+    deallocate(tmp_x        , stat=ierror) !BS
+    deallocate(tmp_y        , stat=ierror) !BS
 end subroutine write_wave_map_netcdf

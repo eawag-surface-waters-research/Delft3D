@@ -2652,7 +2652,7 @@ subroutine write_swan_inp (wavedata, calccount, &
     else
        fname = dom%depfil
        call readregulargrid(fname, sferic, xpb, ypb, alpb, &
-                          & dom%mxb, dom%myb, dxb, dyb)
+                          & dom%mxb, dom%myb, dxb, dyb)!,xymiss) !BS
        !
        ! poles? no, fences!
        !
@@ -3579,6 +3579,7 @@ subroutine write_swan_inp (wavedata, calccount, &
     !
     if (sr%output_points) then
        do loc = 1, sr%nloc
+          pointname = get_pointname(sr%pntfilnam(loc))
           pointname = get_pointname(sr%pntfilnam(loc))
 
           line(1:7)       = 'POINTS '
