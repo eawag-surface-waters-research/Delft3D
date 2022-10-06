@@ -241,7 +241,7 @@ subroutine sethu(jazws0)                            ! Set upwind waterdepth hu
                  wsben  =  s0(kd)
                  if (testfixedweirs == 0 ) then
                      hkruin = -bup                           ! original D-Flow FM approach 
-                 else if (testfixedweirs == 1 ) then
+                 else if (testfixedweirs >= 1 ) then
                      hkruin = -crestlevxw(nfw)               ! Simona approach
                  endif
 
@@ -290,7 +290,7 @@ subroutine sethu(jazws0)                            ! Set upwind waterdepth hu
                              qunit, qvolk, toest, vov,                     &
                              ewben, wsbov, wsben, weirdte(nfw),              &
                              dtefri,iadv(L), crestlxw(nfw),                &
-                             taludlxw(nfw), taludrxw(nfw), vegxw(nfw) )
+                             taludlxw(nfw), taludrxw(nfw), vegxw(nfw), testfixedweirs )
                  weirdte(nfw) = (1d0 - waquaweirthetaw)*weirdte(nfw) + waquaweirthetaw*dte0
                  !
                  ! attention total waterdepth instead of water above crest
