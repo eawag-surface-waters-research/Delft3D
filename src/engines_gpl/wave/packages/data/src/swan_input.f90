@@ -2652,7 +2652,7 @@ subroutine write_swan_inp (wavedata, calccount, &
     else
        fname = dom%depfil
        call readregulargrid(fname, sferic, xpb, ypb, alpb, &
-                          & dom%mxb, dom%myb, dxb, dyb)!,xymiss) !BS
+                          & dom%mxb, dom%myb, dxb, dyb)
        !
        ! poles? no, fences!
        !

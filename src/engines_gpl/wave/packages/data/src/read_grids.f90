@@ -1195,7 +1195,7 @@ end subroutine read_netcdf_grd
 !
 !==============================================================================
 subroutine readregulargrid(filnam, sferic_exp, xorigin, yorigin, alpha, &
-                          & mmax, nmax, dx, dy)!,xymiss) !BS
+                          & mmax, nmax, dx, dy)
     use geometry_module, only: clockwise
     implicit none
 !
@@ -1210,7 +1210,6 @@ subroutine readregulargrid(filnam, sferic_exp, xorigin, yorigin, alpha, &
     real   , intent(out)                              :: alpha
     real   , intent(out)                              :: dx
     real   , intent(out)                              :: dy
-    !real(hp), intent(out)                              :: xymiss !BS
 !
 ! Local variables
 !
@@ -1239,7 +1238,6 @@ subroutine readregulargrid(filnam, sferic_exp, xorigin, yorigin, alpha, &
 !
 !! executable statements -------------------------------------------------------
 !
-    !xymiss = 0.0_hp !BS
     sferic_read = .false.
     open (newunit=irgf, file = filnam, form = 'formatted', status = 'old')
     !
