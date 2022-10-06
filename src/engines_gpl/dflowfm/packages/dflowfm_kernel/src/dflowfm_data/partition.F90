@@ -5712,7 +5712,7 @@ end subroutine gatherv_int_data_mpi_dif
          jadj = jadj-1
       endif
 
-      netstat = NETSTAT_CELLS_DIRTY
+     ! netstat = NETSTAT_CELLS_DIRTY
 
       select case (method)
       case (0,1)
