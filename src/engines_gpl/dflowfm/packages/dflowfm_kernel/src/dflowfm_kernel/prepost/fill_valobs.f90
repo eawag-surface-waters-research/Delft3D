@@ -325,8 +325,8 @@ subroutine fill_valobs()
             if (kmx > 0) then
                valobs(IPNT_ZCS+klay-1,i) = 0.5d0*( zws(kk)+zws(kk-1) )
             endif
-            
-            if (jahisvelocity>0) then
+
+            if (jahisvelocity>0 .or. jahisvelvec>0) then
                valobs(IPNT_UCX+klay-1,i) = ueux(kk)
                valobs(IPNT_UCY+klay-1,i) = ueuy(kk)
             endif
