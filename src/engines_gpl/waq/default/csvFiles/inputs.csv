@@ -17737,6 +17737,67 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "Prot_Zoo  ","mot_N2    ", 127,"Y"," ",1
 "Prot_Zoo  ","PRN2_Z1   ", 128,"Y"," ",1
 "Prot_Zoo  ","PRN2_Z2   ", 129,"Y"," ",1
+"Phy_Prot  ","nrPrSum   ",   1,"Y"," ",1
+"Phy_Prot  ","nrPrAlgC  ",   2,"Y"," ",1
+"Phy_Prot  ","cfPrAlgC  ",   3,"Y"," ",1
+"Phy_Prot  ","diatC_1   ",   4,"Y"," ",1
+"Phy_Prot  ","diatC_2   ",   5,"Y"," ",1
+"Phy_Prot  ","greenC_1  ",   6,"Y"," ",1
+"Phy_Prot  ","greenC_2  ",   7,"Y"," ",1
+"Phy_Prot  ","cmC_1     ",   8,"Y"," ",1
+"Phy_Prot  ","cmC_2     ",   9,"Y"," ",1
+"Phy_Prot  ","ncmC_1    ",  10,"Y"," ",1
+"Phy_Prot  ","ncmC_2    ",  11,"Y"," ",1
+"Phy_Prot  ","zooC_1    ",  12,"Y"," ",1
+"Phy_Prot  ","zooC_2    ",  13,"Y"," ",1
+"Phy_Prot  ","nrPrAlgN  ",  14,"Y"," ",1
+"Phy_Prot  ","sfPrAlgN  ",  15,"Y"," ",1
+"Phy_Prot  ","diatN_1   ",  16,"Y"," ",1
+"Phy_Prot  ","diatN_2   ",  17,"Y"," ",1
+"Phy_Prot  ","greenN_1  ",  18,"Y"," ",1
+"Phy_Prot  ","greenN_2  ",  19,"Y"," ",1
+"Phy_Prot  ","cmN_1     ",  20,"Y"," ",1
+"Phy_Prot  ","cmN_2     ",  21,"Y"," ",1
+"Phy_Prot  ","ncmN_1    ",  22,"Y"," ",1
+"Phy_Prot  ","ncmN_2    ",  23,"Y"," ",1
+"Phy_Prot  ","zooN_1    ",  24,"Y"," ",1
+"Phy_Prot  ","zooN_2    ",  25,"Y"," ",1
+"Phy_Prot  ","nrPrAlgP  ",  26,"Y"," ",1
+"Phy_Prot  ","sfPrAlgP  ",  27,"Y"," ",1
+"Phy_Prot  ","diatP_1   ",  28,"Y"," ",1
+"Phy_Prot  ","diatP_2   ",  29,"Y"," ",1
+"Phy_Prot  ","greenP_1  ",  30,"Y"," ",1
+"Phy_Prot  ","greenP_2  ",  31,"Y"," ",1
+"Phy_Prot  ","cmP_1     ",  32,"Y"," ",1
+"Phy_Prot  ","cmP_2     ",  33,"Y"," ",1
+"Phy_Prot  ","ncmP_1    ",  34,"Y"," ",1
+"Phy_Prot  ","ncmP_2    ",  35,"Y"," ",1
+"Phy_Prot  ","zooP_1    ",  36,"Y"," ",1
+"Phy_Prot  ","zooP_2    ",  37,"Y"," ",1
+"Phy_Prot  ","nrPrAlgSi ",  38,"Y"," ",1
+"Phy_Prot  ","sfPrAlgSi ",  39,"Y"," ",1
+"Phy_Prot  ","diatSi_1  ",  40,"Y"," ",1
+"Phy_Prot  ","diatSi_2  ",  41,"Y"," ",1
+"Phy_Prot  ","nrPrAlgChl",  42,"Y"," ",1
+"Phy_Prot  ","sfPrAlgChl",  43,"Y"," ",1
+"Phy_Prot  ","diatChl_1 ",  44,"Y"," ",1
+"Phy_Prot  ","diatChl_2 ",  45,"Y"," ",1
+"Phy_Prot  ","greenChl_1",  46,"Y"," ",1
+"Phy_Prot  ","greenChl_2",  47,"Y"," ",1
+"Phy_Prot  ","cmChl_1   ",  48,"Y"," ",1
+"Phy_Prot  ","cmChl_2   ",  49,"Y"," ",1
+"Phy_Prot  ","ncmChl_1  ",  50,"Y"," ",1
+"Phy_Prot  ","ncmChl_2  ",  51,"Y"," ",1
+"Phy_Prot  ","nrPrAlgNPP",  52,"Y"," ",1
+"Phy_Prot  ","sfPrAlgNPP",  53,"Y"," ",1
+"Phy_Prot  ","NPP_D1    ",  54,"Y"," ",1
+"Phy_Prot  ","NPP_D2    ",  55,"Y"," ",1
+"Phy_Prot  ","NPP_G1    ",  56,"Y"," ",1
+"Phy_Prot  ","NPP_G2    ",  57,"Y"," ",1
+"Phy_Prot  ","NPP_C1    ",  58,"Y"," ",1
+"Phy_Prot  ","NPP_C2    ",  59,"Y"," ",1
+"Phy_Prot  ","NPP_N1    ",  60,"Y"," ",1
+"Phy_Prot  ","NPP_N2    ",  61,"Y"," ",1
 "RadioU    ","Uranium   ",   1,"N","x",1
 "RadioU    ","HalflifeU ",   2,"Y"," ",1
 "RadioU    ","AtommassU ",   3,"Y"," ",1

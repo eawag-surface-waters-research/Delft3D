@@ -2995,6 +2995,7 @@ outfpr,outffl,outfnm,outfdo
 "Prot_Zoo  ","dN2N_Z2   ", 108," "
 "Prot_Zoo  ","dN2P_Z2   ", 109," "
 "Prot_Zoo  ","dN2Si_Z2  ", 110," "
+"Phy_Prot  ","dDumPhyPr ",   1,"x"
 "RadioU    ","dRadioU   ",   1,"x"
 "RadioCs   ","dRadioCs  ",   1,"x"
 "RadioSub1 ","dRadioR1  ",   1,"x"
