@@ -343,7 +343,11 @@
     if ( jawaqproc .eq. 1 ) then
        call fm_wq_processes_ini_proc()
        jawaqproc = 2
-       call fm_wq_processes_step(ti_waqproc,tstart_user)
+       if (ti_waqproc > 0d0) then
+          call fm_wq_processes_step(ti_waqproc,tstart_user)
+       else
+          call fm_wq_processes_step(dt_init,tstart_user)
+       endif
     endif
  endif
  call timstop(handle_extra(18)) ! end waq processes init
