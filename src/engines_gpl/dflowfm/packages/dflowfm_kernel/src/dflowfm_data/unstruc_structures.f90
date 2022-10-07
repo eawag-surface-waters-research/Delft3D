@@ -1538,10 +1538,13 @@ if (numstructs > 0) then
       else if (network%sts%struct(j)%ibran > -1) then
 
          ASSOCIATE ( branch => network%brs%branch(network%sts%struct(j)%IBRAN ))
-
+            if (branch%GRIDPOINTSCOUNT > 0) then
             ierr = odu_get_xy_coordinates( (/ 1 /) ,  network%sts%struct(j:j)%CHAINAGE , branch%xs , branch%ys , &
                (/ branch%gridpointscount /),(/ branch%length /), jsferic  , geomXStructInput(i:i) , geomYStructInput(i:i) )
-
+            else
+            ierr = odu_get_xy_coordinates( (/ 1 /) ,  network%sts%struct(j:j)%CHAINAGE ,(/ branch%FROMNODE%X, branch%TONODE%X /) , (/ branch%FROMNODE%Y, branch%TONODE%Y /) , &
+               (/ 2 /),(/ branch%length /), jsferic  , geomXStructInput(i:i) , geomYStructInput(i:i) )
+            endif
             nNodesStructInput(n) = 1
             i = i + 1
          end ASSOCIATE
