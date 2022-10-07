@@ -107,7 +107,7 @@ subroutine write_wave_map_netcdf (sg, sof, sif, n_swan_grids, wavedata, casl, pr
     integer                                     :: day
     integer       , dimension(1)                :: idummy ! Help array to read/write Nefis files 
     integer, external                           :: nc_def_var
-    integer                                     :: count_xymiss !BS UNST-6204
+    integer                                     :: count_xymiss
     real(hp)                                    :: dearthrad
     character(100)                              :: string
     character(256)                              :: filename
@@ -177,12 +177,12 @@ subroutine write_wave_map_netcdf (sg, sof, sif, n_swan_grids, wavedata, casl, pr
             if ( .not.abs(comparereal(sg%x(m,n), sg%xymiss)) .and. .not.abs(comparereal(sg%y(m,n), sg%xymiss)) ) then     
                 tmp_x(m,n) = NF90_FILL_FLOAT
                 tmp_y(m,n) = NF90_FILL_FLOAT
-                count_xymiss = count_xymiss + 1 !BS UNST-6204 count non-existing grid points
+                count_xymiss = count_xymiss + 1 
             endif
         enddo
     enddo
-    !BS write a statement about the amount of non-existing grid points found in the grid
     write(*,*) 'Number of non-existing grid points detected: ', count_xymiss
+    !
     if (wavedata%output%count == 1) then
        !
        ! create file
