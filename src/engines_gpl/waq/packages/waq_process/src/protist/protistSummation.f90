@@ -49,7 +49,7 @@
                iexpnt(4,*) , iknmrk(*) , noq1, noq2, noq3, noq4
 
    integer, allocatable  :: ipnt(:)          ! Local work array for the pointering
-   integer  :: ioffset, ioffsetoutput        ! Offsets for input and start off output
+   integer  :: ioffset, ioffsetoutput        ! Offsets for input and start of output
    integer  :: ipointLength
    integer  :: iseg, isum, iinpt
    integer  :: nrsums
