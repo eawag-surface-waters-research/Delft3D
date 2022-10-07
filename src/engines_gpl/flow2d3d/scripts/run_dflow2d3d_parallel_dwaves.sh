@@ -18,8 +18,6 @@ function print_usage_info {
     echo "Options:"
     echo "-h, --help"
     echo "       print this help message and exit"
-    echo "--dockerparallel"
-    echo "       A parallel run inside docker"
     echo "<filename>"
     echo "       Delft3D-FLOW configuration filename, default config_d_hydro.xml"
     exit 1
@@ -67,7 +65,6 @@ case $key in
     ;;
     *)
     configfile="$key"
-    break
     ;;
 esac
 done
@@ -132,6 +129,9 @@ bindir=$D3D_HOME/bin
 libdir=$D3D_HOME/lib
 
 
+    #
+    # No adaptions needed below
+    #
 
 export LD_LIBRARY_PATH=$libdir:$LD_LIBRARY_PATH
 export PATH="$bindir:${PATH}"
@@ -147,6 +147,7 @@ echo
 echo "executing in the foreground:"
 echo "$bindir/wave $mdwfile 1"
       $bindir/wave $mdwfile 1
+echo
 
 
 

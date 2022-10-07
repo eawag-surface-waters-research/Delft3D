@@ -16,6 +16,7 @@ set flowConfigFile=config_d_hydro.xml
 set debugLevel=-1
 set forceExit=0
 set goToUsage=0
+set minDFound=0
     rem WARNING: execute the following line before handling arguments, otherwise it will be screwed up
 set scriptDir=%~dp0
 
@@ -61,13 +62,13 @@ set sharedir=%D3D_HOME%\%ARCH%\share\bin
 
 if  %debugLevel% EQU 0 (
     echo.
-    echo run_dflow2d3d_dwaves.bat arguments:
-    echo     Configfile       : %flowConfigFile%
-    echo     debugLevel       : %debugLevel%
-    echo     forceExit        : %forceExit%
-    echo     Working directory: %workdir%
-    echo     D3D_HOME         : %D3D_HOME%
-    echo     ARCH             : %ARCH%
+    echo "run_dflow2d3d.bat arguments:"
+    echo "    Configfile       : %flowConfigFile%"
+    echo "    debugLevel       : %debugLevel%"
+    echo "    forceExit        : %forceExit%"
+    echo "    Working directory: %workdir%"
+    echo "    D3D_HOME         : %D3D_HOME%"
+    echo "    ARCH             : %ARCH%"
     echo.
 )
 

@@ -43,10 +43,6 @@ do
         -h|--help)
         print_usage_info
         ;;
-        -m|--masterfile)
-        configfile="$1"
-        shift
-        ;;
         --D3D_HOME)
         D3D_HOME="$1"
         shift
@@ -118,14 +114,15 @@ libdir=$D3D_HOME/lib
     # No adaptions needed below
     #
 
-    # Run
 export LD_LIBRARY_PATH=$libdir:$LD_LIBRARY_PATH
+export PATH="$bindir:${PATH}"
 
 
+# Run
     echo "executing:"
     echo "$bindir/d_hydro $configfile"
-    echo 
-    $bindir/d_hydro $configfile
+          $bindir/d_hydro $configfile
+echo 
 
 
 

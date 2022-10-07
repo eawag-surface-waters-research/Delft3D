@@ -16,8 +16,6 @@ function print_usage_info {
     echo "Options:"
     echo "-h, --help"
     echo "       print this help message and exit"
-    echo "--dockerparallel"
-    echo "       A parallel run inside docker"
     echo "<filename>"
     echo "       Delft3D-FLOW configuration filename, default config_d_hydro.xml"
     exit 1
@@ -43,26 +41,25 @@ NPART="$1"
 shift
 while [[ $# -ge 1 ]]
 do
-key="$1"
-shift
+    key="$1"
+    shift
 
-case $key in
-    -h|--help)
-    print_usage_info
-    ;;
-    --D3D_HOME)
-    D3D_HOME="$1"
-    shift
-    ;;
-	--NNODES)
-    NNODES="$1"
-    shift
-    ;;
-    *)
-    configfile="$key"
-    break
-    ;;
-esac
+    case $key in
+        -h|--help)
+        print_usage_info
+        ;;
+        --D3D_HOME)
+        D3D_HOME="$1"
+        shift
+        ;;
+        --NNODES)
+        NNODES="$1"
+        shift
+        ;;
+        *)
+        configfile="$key"
+        ;;
+    esac
 done
 
 
@@ -119,6 +116,9 @@ bindir=$D3D_HOME/bin
 libdir=$D3D_HOME/lib
 
 
+    #
+    # No adaptions needed below
+    #
 
 export LD_LIBRARY_PATH=$libdir:$LD_LIBRARY_PATH
 export PATH="$bindir:${PATH}"
@@ -129,6 +129,7 @@ echo "executing:"
 echo "mpirun -np $NPART $bindir/d_hydro $configfile"
       mpirun -np $NPART $bindir/d_hydro $configfile
 echo 
+
 
 
     # Wait until all child processes are finished

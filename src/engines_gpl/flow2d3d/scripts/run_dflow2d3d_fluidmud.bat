@@ -72,14 +72,14 @@ set sharedir=%D3D_HOME%\%ARCH%\share\bin
 
 if  %debugLevel% EQU 0 (
     echo.
-    echo run_dflow2d3d_fluidmud.bat arguments:
-    echo     Water configfile : %flowConfigFile%
-    echo     Mud   configfile : %mudConfigFile%
-    echo     debugLevel       : %debugLevel%
-    echo     forceExit        : %forceExit%
-    echo     Working directory: %workdir%
-    echo     D3D_HOME         : %D3D_HOME%
-    echo     ARCH             : %ARCH%
+    echo "run_dflow2d3d_fluidmud.bat arguments:"
+    echo "    Water configfile : %flowConfigFile%"
+    echo "    Mud   configfile : %mudConfigFile%"
+    echo "    debugLevel       : %debugLevel%"
+    echo "    forceExit        : %forceExit%"
+    echo "    Working directory: %workdir%"
+    echo "    D3D_HOME         : %D3D_HOME%"
+    echo "    ARCH             : %ARCH%"
     echo.
 )
 

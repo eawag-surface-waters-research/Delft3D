@@ -72,14 +72,14 @@ set waveexedir=%D3D_HOME%\%ARCH%\dwaves\bin
 
 if  %debugLevel% EQU 0 (
     echo.
-    echo run_dflow2d3d_dwaves.bat arguments:
-    echo     Configfile       : %flowConfigFile%
-    echo     mdw-file         : %mdwfile%
-    echo     debugLevel       : %debugLevel%
-    echo     forceExit        : %forceExit%
-    echo     Working directory: %workdir%
-    echo     D3D_HOME         : %D3D_HOME%
-    echo     ARCH             : %ARCH%
+    echo "run_dflow2d3d_dwaves.bat arguments:"
+    echo "    Configfile       : %flowConfigFile%"
+    echo "    mdw-file         : %mdwfile%"
+    echo "    debugLevel       : %debugLevel%"
+    echo "    forceExit        : %forceExit%"
+    echo "    Working directory: %workdir%"
+    echo "    D3D_HOME         : %D3D_HOME%"
+    echo "    ARCH             : %ARCH%"
     echo.
 )
 
