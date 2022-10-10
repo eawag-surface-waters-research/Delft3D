@@ -916,7 +916,7 @@ subroutine default_flowparameters()
     dparms = 0d0  ! parms-default
 
     jaupwindsrc = 1
-    jalogsolverconvergence = 1
+    jalogsolverconvergence = 0
     jalogtransportsolverlimiting = 0
 
     jahisbal = 1
