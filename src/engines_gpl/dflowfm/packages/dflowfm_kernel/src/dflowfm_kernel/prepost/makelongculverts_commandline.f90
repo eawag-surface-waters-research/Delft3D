@@ -44,8 +44,10 @@ subroutine makelongculverts_commandline()
    character(len=:), allocatable :: converted_crsdefsstring
    character(len=:), allocatable :: tempstring_crsdef
    character(len=:), allocatable :: tempstring_fnames
+   character(len=:), allocatable :: tempstring_netfile
    character(len=200), dimension(:), allocatable       :: fnames
-  
+   integer                       :: dirindex
+   
    
     if (len_trim(md_1dfiles%structures) > 0) then
     
@@ -59,10 +61,16 @@ subroutine makelongculverts_commandline()
       end do
       deallocate(fnames)
       call finalizeLongCulvertsInNetwork()
-     
-      call unc_write_net(trim(md_culvertprefix)//md_netfile, janetcell = 1, janetbnd = 0, jaidomain = 0, iconventions = UNC_CONV_UGRID)
+      
+   dirindex = scan(md_netfile, '\/', back = .true. )
+   if (dirindex /= 0) then !the filename has a directory preceding it
+    tempstring_netfile = trim(md_culvertprefix)//md_netfile(dirindex+1:len(md_netfile))
+   else
+     tempstring_netfile = trim(md_culvertprefix)//md_netfile
+   endif
+      call unc_write_net(tempstring_netfile, janetcell = 1, janetbnd = 0, jaidomain = 0, iconventions = UNC_CONV_UGRID)
 
-      md_netfile = trim(md_culvertprefix)//md_netfile
+      md_netfile = tempstring_netfile
       md_1dfiles%structures = converted_fnamesstring
       md_1dfiles%cross_section_definitions = converted_crsdefsstring   
       converted_fnamesstring = trim( trim(md_culvertprefix)//md_ident )//'.mdu'
