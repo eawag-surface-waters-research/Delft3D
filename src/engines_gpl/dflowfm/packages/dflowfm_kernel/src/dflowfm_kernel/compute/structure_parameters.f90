@@ -444,25 +444,31 @@
                valdambreak(6,n) = valdambreak(6,n) + au(La) ! flow area
                valdambreak(9,n) = valdambreak(9,n) + dambreakLinksActualLength(L)
             enddo
-            if (network%sts%struct(istru)%dambreak%width > 0d0) then
-               valdambreak(8,n) = network%sts%struct(istru)%dambreak%crl ! crest level
+            if (L2dambreaksg(n) < L1dambreaksg(n)) then ! NOTE: valdambreak(12,n) in a parallel simulation already gets values after mpi communication
+                                                        ! from the previous timestep. In the case that the dambreak does not exist on the current domain, it should
+                                                        ! not contribute to the cumulative discharge in the coming mpi communication so we set it to 0.
+               valdambreak(12,n) = 0d0
             else
-               valdambreak(1:NUMVALS_DAMBREAK-1,n) = dmiss               ! No breach started yet, set FillValue
-               La = abs(kdambreak(3,LStartBreach(n)))
-               valdambreak(8,n) = bob(1,La)                              ! No breach started yet, use bob as 'crest'.
-               valdambreak(9,n) = 0d0                                    ! No breach started yet, set crest width to 0
-               cycle
+               if (network%sts%struct(istru)%dambreak%width > 0d0) then
+                  valdambreak(8,n) = network%sts%struct(istru)%dambreak%crl ! crest level
+               else
+                  valdambreak(1:NUMVALS_DAMBREAK-1,n) = dmiss               ! No breach started yet, set FillValue
+                  La = abs(kdambreak(3,LStartBreach(n)))
+                  valdambreak(8,n) = bob(1,La)                              ! No breach started yet, use bob as 'crest'.
+                  valdambreak(9,n) = 0d0                                    ! No breach started yet, set crest width to 0
+                  cycle
+               end if
+               ! TODO: UNST-5102: code below needs checking: when dambreak #n not active in current partition,
+               ! most values below *are* available (based on other partitions). And in the code ahead, a call to reduce_crs
+               ! assumes that all values are present and will be sum-reduced in a flowlinkwidth-weighted manner.
+               valdambreak(3,n)  = waterLevelsDambreakUpStream(n)
+               valdambreak(4,n)  = waterLevelsDambreakDownStream(n)
+               valdambreak(5,n)  = valdambreak(3,n) - valdambreak(4,n)
+               valdambreak(7,n)  = normalVelocityDambreak(n)
+               valdambreak(10,n) = waterLevelJumpDambreak(n)
+               valdambreak(11,n) = breachWidthDerivativeDambreak(n)
+               valdambreak(12,n) = valdambreak(12,n) + valdambreak(2,n) * timstep ! cumulative discharge
             end if
-            ! TODO: UNST-5102: code below needs checking: when dambreak #n not active in current partition,
-            ! most values below *are* available (based on other partitions). And in the code ahead, a call to reduce_crs
-            ! assumes that all values are present and will be sum-reduced in a flowlinkwidth-weighted manner.
-            valdambreak(3,n)  = waterLevelsDambreakUpStream(n)
-            valdambreak(4,n)  = waterLevelsDambreakDownStream(n)
-            valdambreak(5,n)  = valdambreak(3,n) - valdambreak(4,n)
-            valdambreak(7,n)  = normalVelocityDambreak(n)
-            valdambreak(10,n) = waterLevelJumpDambreak(n)
-            valdambreak(11,n) = breachWidthDerivativeDambreak(n)
-            valdambreak(12,n) = valdambreak(12,n) + valdambreak(2,n) * timstep ! cumulative discharge
          enddo
       end if
       !

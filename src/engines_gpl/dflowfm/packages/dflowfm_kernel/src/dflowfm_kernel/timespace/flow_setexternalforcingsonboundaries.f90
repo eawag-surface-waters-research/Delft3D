@@ -253,7 +253,11 @@ subroutine flow_setexternalforcingsonboundaries(tim, iresult)
    endif
 
    !dambreak
-   if (ndambreak > 0) then
+   if (ndambreak > 0 .or. jampi > 0) then
+      ! In a parallel simulation, we need to call this subroutine even in a special situation that there is no dambreak
+      ! on the current subdomain (i.e. ndambreak == 0), because this subroutine calls function
+      ! getAverageQuantityFromLinks, which involves mpi communication among all subdomains. However, in this special situation,
+      ! all the necessary variables will be set to 0 and will not participate the dambreak related computation in this subroutine.
       call update_dambreak_breach(tim, dts)
    endif
 
