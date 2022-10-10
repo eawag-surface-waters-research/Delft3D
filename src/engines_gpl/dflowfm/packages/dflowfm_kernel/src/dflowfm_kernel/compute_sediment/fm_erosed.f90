@@ -270,7 +270,7 @@
    !
    u1_tmp = u1 * u_to_umain
 
-   if (jatranspvel > 0 .and. jawave > 0) then
+   if (jatranspvel > 0 .and. jawave > 0 .and. .not. flowWithoutWaves) then
       u1_tmp = u1 - ustokes
       call setucxucy_mor (u1_tmp)
    else
@@ -1131,8 +1131,9 @@
                enddo
                rsedeq(nm, l)    = rsdqlc(kmaxsd)
                !
-               thick0 = thicklc(kmaxsd) * h0
-               thick1 = thicklc(kmaxsd) * h1
+               thick0 = max(thicklc(kmaxsd) * h0, epshu)
+               thick1 = max(thicklc(kmaxsd) * h1, epshu)
+               thick1 =thicklc(kmaxsd) * h1
                !
                call soursin_3d  (h1                ,thick1         ,thick1             ,              &      ! thick1 iso thick0 mass conservation
                               &  siglc(kmaxsd)     ,thicklc(kmaxsd),constituents(ll,kmxsed(nm,l))    , &
@@ -1481,7 +1482,7 @@
    !
    ! Update sourse fluxes due to sand-mud interaction
    !
-   allocate(evel(lsedtot), stat=istat)
+   allocate(evel(lsed), stat=istat)
    do nm = 1, ndx
       if (pmcrit(nm)<0.0_fp) cycle
       if (mudfrac(nm)<=0.0_fp .or. mudfrac(nm)>=1.0_fp) cycle
@@ -1489,7 +1490,6 @@
       ! compute erosion velocities
       !
       evel = 0.0_fp
-      !call getkbotktop(nm, kb, kt)
       do l = 1, lsed
          ll = lstart + l
          kmaxsd = kmxsed(nm,l)              ! meaning of kmaxsd changes here!

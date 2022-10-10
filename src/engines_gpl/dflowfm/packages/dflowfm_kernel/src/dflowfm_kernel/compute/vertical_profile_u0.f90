@@ -218,7 +218,7 @@ integer            :: jav3
        adv = 0d0; adv1 = 0d0
     endif
 
-    if (jawave>0 .and. jawaveStokes == 4) then        ! ustokes correction in vertical viscosity
+    if (jawave>0 .and. jawaveStokes == 4 .and. .not. flowWithoutWaves) then        ! ustokes correction in vertical viscosity
        ustv   = vstress*(ustokes(L) - ustokes(L-1))
        d(k+1) = d(k+1) + ustv / dzu(k+1)
        d(k  ) = d(k  ) - ustv / dzu(k  )

@@ -36,6 +36,7 @@
  use m_reduce
  use m_flowtimes ! for volerr
  use m_sediment
+ use m_fm_erosed, only: ucxq_mor,ucyq_mor
  use m_missing
  use m_partitioninfo
  use m_xbeach_data
@@ -101,10 +102,19 @@
     znod = s1(kk) - bl(kk)
  else if (nodval == 8) then
     znod = sqrt( ucx(k)*ucx(k) + ucy(k)*ucy(k) )
+    if (stm_included) then
+       znod = sqrt( ucxq_mor(k)*ucxq_mor(k) + ucyq_mor(k)*ucyq_mor(k) )
+    endif
  else if (nodval == 9) then
     znod = ucx(k)
+    if (stm_included) then
+       znod = ucxq_mor(k)
+    endif
  else if (nodval == 10) then
    znod = ucy(k)
+    if (stm_included) then
+       znod = ucyq_mor(k)
+    endif
  else if (nodval == 11) then
     if (jasal > 0) znod = constituents(isalt, k)
  else if (nodval == 12) then

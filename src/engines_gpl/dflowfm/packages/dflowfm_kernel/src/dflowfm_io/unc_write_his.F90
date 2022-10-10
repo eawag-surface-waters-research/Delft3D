@@ -563,29 +563,30 @@ subroutine unc_write_his(tim)            ! wrihis
                ierr = nf90_put_att(ihisfile, id_WU, 'geometry', station_geom_container_name)
                ierr = nf90_put_att(ihisfile, id_WU, '_FillValue', dmiss)
 
-               if (kmx==0) then
-                   ierr = nf90_def_var(ihisfile, 'ustokes',  nf90_double, ((/ id_statdim, id_timedim /)) , id_USTX)
-                   ierr = nf90_put_att(ihisfile, id_USTX,   'coordinates'  , statcoordstring)
-                   ierr = nf90_def_var(ihisfile, 'vstokes',  nf90_double, ((/ id_statdim, id_timedim /)) , id_USTY)
-                   ierr = nf90_put_att(ihisfile, id_USTY,   'coordinates'  , statcoordstring)
-               else
-                   ierr = nf90_def_var(ihisfile, 'ustokes',  nf90_double, ((/ id_laydim, id_statdim, id_timedim /)) , id_USTX)
-                   ierr = nf90_put_att(ihisfile, id_USTX,   'coordinates'  , trim(statcoordstring) // ' zcoordinate_c')
-                   ierr = nf90_def_var(ihisfile, 'vstokes',  nf90_double, ((/ id_laydim, id_statdim, id_timedim /)) , id_USTY)
-                   ierr = nf90_put_att(ihisfile, id_USTY,   'coordinates'  , trim(statcoordstring) // ' zcoordinate_c')
-                   jawrizc = 1
+               if (.not. flowWithoutWaves) then
+                  if (kmx==0) then
+                      ierr = nf90_def_var(ihisfile, 'ustokes',  nf90_double, ((/ id_statdim, id_timedim /)) , id_USTX)
+                      ierr = nf90_put_att(ihisfile, id_USTX,   'coordinates'  , statcoordstring)
+                      ierr = nf90_def_var(ihisfile, 'vstokes',  nf90_double, ((/ id_statdim, id_timedim /)) , id_USTY)
+                      ierr = nf90_put_att(ihisfile, id_USTY,   'coordinates'  , statcoordstring)
+                  else
+                      ierr = nf90_def_var(ihisfile, 'ustokes',  nf90_double, ((/ id_laydim, id_statdim, id_timedim /)) , id_USTX)
+                      ierr = nf90_put_att(ihisfile, id_USTX,   'coordinates'  , trim(statcoordstring) // ' zcoordinate_c')
+                      ierr = nf90_def_var(ihisfile, 'vstokes',  nf90_double, ((/ id_laydim, id_statdim, id_timedim /)) , id_USTY)
+                      ierr = nf90_put_att(ihisfile, id_USTY,   'coordinates'  , trim(statcoordstring) // ' zcoordinate_c')
+                      jawrizc = 1
+                  endif
+                  
+                  ierr = nf90_put_att(ihisfile, id_USTX,   'standard_name', 'sea_surface_wave_stokes_drift_x')
+                  ierr = nf90_put_att(ihisfile, id_USTX,   'long_name'    , 'Stokes drift, x-component')
+                  ierr = nf90_put_att(ihisfile, id_USTX,   'units'        , 'm s-1')
+                  ierr = nf90_put_att(ihisfile, id_USTX, '_FillValue', dmiss)
+                  
+                  ierr = nf90_put_att(ihisfile, id_USTY,   'standard_name', 'sea_surface_wave_stokes_drift_y')
+                  ierr = nf90_put_att(ihisfile, id_USTY,   'long_name'    , 'Stokes drift, y-component')
+                  ierr = nf90_put_att(ihisfile, id_USTY,   'units'        , 'm s-1')
+                  ierr = nf90_put_att(ihisfile, id_USTY, '_FillValue', dmiss)
                endif
-
-               ierr = nf90_put_att(ihisfile, id_USTX,   'standard_name', 'sea_surface_wave_stokes_drift_x')
-               ierr = nf90_put_att(ihisfile, id_USTX,   'long_name'    , 'Stokes drift, x-component')
-               ierr = nf90_put_att(ihisfile, id_USTX,   'units'        , 'm s-1')
-               ierr = nf90_put_att(ihisfile, id_USTX, '_FillValue', dmiss)
-
-               ierr = nf90_put_att(ihisfile, id_USTY,   'standard_name', 'sea_surface_wave_stokes_drift_y')
-               ierr = nf90_put_att(ihisfile, id_USTY,   'long_name'    , 'Stokes drift, y-component')
-               ierr = nf90_put_att(ihisfile, id_USTY,   'units'        , 'm s-1')
-               ierr = nf90_put_att(ihisfile, id_USTY, '_FillValue', dmiss)
-
             endif
 
             if (jahistaucurrent>0) then
@@ -2833,7 +2834,7 @@ subroutine unc_write_his(tim)            ! wrihis
              enddo
              ierr = nf90_put_var(ihisfile, id_sf, toutputx, start = (/ kk, 1, 1, it_his /), count = (/ 1, ntot, stmpar%lsedsus, 1/))
           end if
-          if (jawave>0) then
+          if (jawave>0 .and. .not. flowwithoutwaves) then
              ierr = nf90_put_var(ihisfile,    id_ustx, valobsT(:,IPNT_UCXST+kk-1),  start = (/ kk, 1, it_his /), count = (/ 1, ntot, 1 /))
              ierr = nf90_put_var(ihisfile,    id_usty, valobsT(:,IPNT_UCYST+kk-1),  start = (/ kk, 1, it_his /), count = (/ 1, ntot, 1 /))
           endif
@@ -2899,7 +2900,7 @@ subroutine unc_write_his(tim)            ! wrihis
           ierr = nf90_put_var(ihisfile, id_varsed, valobsT(:,IPNT_SED),  start = (/ 1, it_his /), count = (/ ntot, 1 /))
        end if
        !
-       if (jawave>0) then
+       if (jawave>0 .and. .not. flowwithoutwaves) then
           ierr = nf90_put_var(ihisfile,    id_ustx, valobsT(:,IPNT_UCXST),  start = (/ 1, it_his /), count = (/ ntot, 1 /))
           ierr = nf90_put_var(ihisfile,    id_usty, valobsT(:,IPNT_UCYST),  start = (/ 1, it_his /), count = (/ ntot, 1 /))
        endif

@@ -109,7 +109,7 @@ double precision, external :: setrhofixedp
           call getustbcfuhi( LL,Lb,ustb(LL),cfuhi(LL),hdzb, z00, cfuhi3D)   !Constant
           advi(Lb) = advi(Lb)+cfuhi3D
           !
-          if (jawave>0 .and. jawaveStokes >= 1) then                               ! Ustokes correction at bed
+          if (jawave>0 .and. jawaveStokes >= 1 .and. .not. flowWithoutWaves) then                               ! Ustokes correction at bed
              adve(Lb)  = adve(Lb) - cfuhi3D*ustokes(Lb)
           endif
 
@@ -164,7 +164,7 @@ double precision, external :: setrhofixedp
           call getustbcfuhi( LL,Lb,ustb(LL),cfuhi(LL),hdzb, z00, cfuhi3D)   ! algebraic
           advi(Lb) = advi(Lb)+cfuhi3D
           !
-          if (jawave>0 .and. jawaveStokes >= 1) then                        ! Ustokes correction at bed
+          if (jawave>0 .and. jawaveStokes >= 1 .and. .not. flowWithoutWaves) then                        ! Ustokes correction at bed
              adve(Lb)  = adve(Lb) - cfuhi3D*ustokes(Lb)
           endif
 
@@ -330,7 +330,7 @@ double precision, external :: setrhofixedp
      endif
 
      ! JRE with HK move out of subroutine getustb
-     if (jawave>0 .and. jawaveStokes >= 1) then            ! Ustokes correction at bed
+     if (jawave>0 .and. jawaveStokes >= 1 .and. .not. flowWithoutWaves) then            ! Ustokes correction at bed
         adve(Lb)  = adve(Lb) - cfuhi3D*ustokes(Lb)
      endif
 
@@ -477,7 +477,7 @@ double precision, external :: setrhofixedp
         ! Addition of production and of dissipation to matrix ;
         ! observe implicit treatment by Newton linearization.
 
-        if (jawave>0 .and. jawaveStokes>=3) then  ! vertical shear based on eulerian velocity field, see turclo,note JvK, Ardhuin 2006
+        if (jawave>0 .and. jawaveStokes>=3 .and. .not. flowWithoutWaves) then  ! vertical shear based on eulerian velocity field, see turclo,note JvK, Ardhuin 2006
            dijdij(k) = ( ( u1(Lu)-ustokes(Lu) - u1(L)+ustokes(L) ) ** 2 + ( v(Lu)-vstokes(Lu) - v(L)+vstokes(L) ) ** 2 ) / dzw(k)**2
         else
            dijdij(k) = ( ( u1(Lu) - u1(L) ) ** 2 + ( v(Lu) - v(L) ) ** 2 ) / dzw(k)**2

@@ -96,7 +96,7 @@
       endif
       !
       ! this part is for online interacter visualisation
-      if ( jaGUI == 1 .and. jawave>2) then
+      if ( jaGUI == 1 .and. jawave>2 .and. .not. flowWithoutWaves) then
          if (ntek > 0) then
             if (mod(int(dnt),ntek)  ==  0) then
                call wave_makeplotvars()
