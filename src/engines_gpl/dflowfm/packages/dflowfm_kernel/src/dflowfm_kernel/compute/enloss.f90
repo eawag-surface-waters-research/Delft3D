@@ -190,7 +190,7 @@ subroutine enloss(ag        ,d1        ,eweir     ,hkruin    ,hov       , &
           !    +         (1.-exp(-0.5*e1/lkruin)) * (0.8+0.65*exp(-0.1*mben)) )
           !        p = 27/(4*cd0**2) * (1 + max(5.,d1/e1)*(1-exp(-0.1*mben)))**2
           !
-          alfitp = exp(-0.15d0*eweir/max(0.01d0,crestl))
+          alfitp = exp(-0.5d0*eweir/max(0.01d0,crestl))
           cd0ref = vilcd(1) *                                             &
                    ( alfitp      * (1.0d0-0.25d0*exp(-0.5d0*rmpbov)) +    &
                    (1.-alfitp)   * (0.8d0+0.65d0*exp(-0.1d0*rmpben)) )
