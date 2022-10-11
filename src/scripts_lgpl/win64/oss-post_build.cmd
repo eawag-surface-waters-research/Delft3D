@@ -204,6 +204,7 @@ rem ===============
     call :dflowfm
     call :dflowfm_dll
     call :dfmoutput
+    call :dfm_volume_tool
     call :mormerge
     call :waq_plugin_wasteload
     call :delwaq_lib
@@ -650,6 +651,43 @@ rem ==========================
         call :copyFile "!build_dir!\dfmoutput\!configuration!\dfmoutput.exe"                                                   !dest_bin!
 
         call :copyFile "!checkout_src_root!\engines_gpl\dflowfm\scripts\team-city\run_dfmoutput.bat"                       !dest_scripts!
+    )
+    
+goto :endproc
+
+
+rem ==========================
+rem === POST_BUILD_dfm_volume_tool
+rem ==========================
+:dfm_volume_tool
+    echo "postbuild dfm_volume_tool . . ."
+    
+    if "%configuration%" == "Debug" (
+    
+        echo "Debug postbuild"
+        set dest_bin="%install_dir%\x64\Debug"
+
+        call :makeDir !dest_bin!
+        call :copyDflowfmDependentRuntimeLibraries
+        call :copyFile "!build_dir!\dfm_volume_tool\!configuration!\dfm_volume_tool.*"                                                    !dest_bin!
+    )
+    
+    if "%configuration%" == "Release" ( 
+    
+        echo "Release postbuild"
+
+        set dest_bin="!install_dir!\x64\Release\dflowfm\bin"
+        set dest_default="!install_dir!\x64\Release\dflowfm\default"
+        set dest_scripts="!install_dir!\x64\Release\dflowfm\scripts"
+        set dest_plugins="!install_dir!\x64\Release\plugins\bin"
+        set dest_share="!install_dir!\x64\Release\share\bin"
+
+        call :makeAllDirs 
+        call :copyDflowfmDependentRuntimeLibraries
+        
+        call :copyFile "!build_dir!\dfm_volume_tool\!configuration!\dfm_volume_tool.exe"                                                   !dest_bin!
+
+        call :copyFile "!checkout_src_root!\engines_gpl\dflowfm\scripts\team-city\run_dfm_volume_tool.bat"                       !dest_scripts!
     )
     
 goto :endproc
