@@ -40,45 +40,64 @@ module m_StorageTable
 implicit none
 private
   
-   public generateVolumeTableData
+   public generateVolumeTableDataOnGridpoints
+   public generateVolumeTableDataOnLinks
    public getBedToplevel
 
 contains
   
 !> Generate the total volumes/surfaces (TODO: and the totalised volumes/surfaces for each branch).
-subroutine generateVolumeTableData(volumes, surfaces, voltb, voltbOnlinks, bedlevel, increment, numpoints, numlevels, nodes, links)
+subroutine generateVolumeTableDataOnGridPoints(volumes, surfaces, voltb, bedlevel, increment, numpoints, numlevels, nodes)
 
    use unstruc_channel_flow
    double precision, dimension(:),  intent(  out)     :: volumes         !< Aggregated volumes per level 
    double precision, dimension(:),  intent(  out)     :: surfaces        !< Aggregated areas per level
-   type(T_voltable), dimension(:),  intent(in   )     :: voltb            !< Volume tables on grid points
-   type(T_voltable), dimension(:,:),intent(in   )     :: voltbOnLinks     !< Volume tables on links
+   type(T_voltable), dimension(:),  intent(in   )     :: voltb           !< Volume tables on grid points
    double precision,                intent(in   )     :: bedlevel        !< Bed level of the model
    double precision,                intent(in   )     :: increment       !< Requested increment
    integer,                         intent(in   )     :: numpoints       !< number of 1d grid points also the size of voltb
    integer,                         intent(in   )     :: numlevels       !< number of levels in volume, surface and levels
-   integer, optional,dimension(:),  intent(in   )     :: nodes           !< mask array for defining a sub set on nodes.  
-   integer, optional,dimension(:),  intent(in   )     :: links           !< mask array for defining a sub set on flow links.  
+   integer,          dimension(:),  intent(in   )     :: nodes           !< mask array for defining a sub set on nodes.  
 
    integer           :: j, i, ipoint, L
 
    volumes = 0d0
-   if (present(nodes)) then
-      do j = 1, numpoints
-         ipoint = nodes(j)
-         call AddVolumeAndSurface(volumes, surfaces, voltb(ipoint), bedlevel, increment, numlevels)
-      enddo
-      call ComputeSurface(volumes, surfaces, increment, numlevels)
-   else if (present(links)) then
-      do j = 1, numpoints
-        L = links(j)
-        call AddVolumeAndSurface(volumes, surfaces, voltbOnLinks(1, L), bedlevel, increment, numlevels)
-        call AddVolumeAndSurface(volumes, surfaces, voltbOnLinks(2, L), bedlevel, increment, numlevels)
-      enddo
-      call ComputeSurface(volumes, surfaces, increment, numlevels)
-   endif
 
-end subroutine generateVolumeTableData
+   do j = 1, numpoints
+     ipoint = nodes(j)
+     call AddVolumeAndSurface(volumes, surfaces, voltb(ipoint), bedlevel, increment, numlevels)
+   enddo
+   
+   call ComputeSurface(volumes, surfaces, increment, numlevels)
+
+end subroutine generateVolumeTableDataOnGridPoints
+
+!> Generate the total volumes/surfaces (TODO: and the totalised volumes/surfaces for each branch).
+subroutine generateVolumeTableDataOnLinks(volumes, surfaces, voltbOnlinks, bedlevel, increment, numpoints, numlevels, links)
+
+   use unstruc_channel_flow
+   double precision, dimension(:),  intent(  out)     :: volumes         !< Aggregated volumes per level 
+   double precision, dimension(:),  intent(  out)     :: surfaces        !< Aggregated areas per level
+   type(T_voltable), dimension(:,:),intent(in   )     :: voltbOnLinks    !< Volume tables on links
+   double precision,                intent(in   )     :: bedlevel        !< Bed level of the model
+   double precision,                intent(in   )     :: increment       !< Requested increment
+   integer,                         intent(in   )     :: numpoints       !< number of 1d grid points also the size of voltb
+   integer,                         intent(in   )     :: numlevels       !< number of levels in volume, surface and levels
+   integer,          dimension(:),  intent(in   )     :: links           !< mask array for defining a sub set on flow links.  
+
+   integer           :: j, i, ipoint, L
+
+   volumes = 0d0
+
+   do j = 1, numpoints
+     L = links(j)
+     call AddVolumeAndSurface(volumes, surfaces, voltbOnLinks(1, L), bedlevel, increment, numlevels)
+     call AddVolumeAndSurface(volumes, surfaces, voltbOnLinks(2, L), bedlevel, increment, numlevels)
+   enddo
+   
+   call ComputeSurface(volumes, surfaces, increment, numlevels)
+
+end subroutine generateVolumeTableDataOnLinks
 
 !> Add the volumes and surfaces for this volume table to the aggregated volumes and surfaces
 subroutine AddVolumeAndSurface(vol, sur, voltb, bedlevel, increment, numlevels)
