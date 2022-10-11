@@ -1041,6 +1041,7 @@ subroutine get_var(c_var_name, x) bind(C, name="get_var")
    real(c_double), target, allocatable, save :: xd(:,:)
 
    integer :: i, j, k, Lf, knb, kb, kt, n
+   double precision :: numvalues
 
 
    ! The fortran name of the attribute name
@@ -1247,6 +1248,7 @@ subroutine get_var(c_var_name, x) bind(C, name="get_var")
       ! If we return here, the var_name was no valid triplet 'weirs/Lith/crest_level',
       ! so continue below with all default variables.
       continue
+
    end select
 
    !

@@ -4,6 +4,10 @@ set(tools_gpl_path tools_gpl)
 # Dfmoutput
 set(dfmoutput_module "${tools_gpl_path}/dfmoutput")
 
+# Dfm_volume_tool
+set(dfm_volume_tool_module "${tools_gpl_path}/dfm_volume_tool/packages/dfm_volume_tool")
+set(dfm_api_access_module "${tools_gpl_path}/dfm_volume_tool/packages/dfm_api_access")
+
 # Mormerge
 set(mormerge_module "${tools_gpl_path}/mormerge/packages/mormerge")
 

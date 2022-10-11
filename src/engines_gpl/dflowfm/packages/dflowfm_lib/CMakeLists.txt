@@ -22,7 +22,9 @@ if(UNIX)
 endif(UNIX)
 
 # Gather the source files
-set(source ${src_path}/unstruc_bmi.F90)
+set(source ${src_path}/unstruc_bmi.F90
+           ${src_path}/unstruc_dll_api.F90
+           )
 file(GLOB includes ${include_path}/*.inc)
 
 # Define the executable

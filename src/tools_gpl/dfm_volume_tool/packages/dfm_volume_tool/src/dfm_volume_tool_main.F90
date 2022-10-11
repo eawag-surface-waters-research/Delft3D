@@ -1,0 +1,242 @@
+!----- AGPL --------------------------------------------------------------------
+!                                                                               
+!  Copyright (C)  Stichting Deltares, 2017-2022.                                
+!                                                                               
+!  This file is part of Delft3D (D-Flow Flexible Mesh component).               
+!                                                                               
+!  Delft3D is free software: you can redistribute it and/or modify              
+!  it under the terms of the GNU Affero General Public License as               
+!  published by the Free Software Foundation version 3.                         
+!                                                                               
+!  Delft3D  is distributed in the hope that it will be useful,                  
+!  but WITHOUT ANY WARRANTY; without even the implied warranty of               
+!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the                
+!  GNU Affero General Public License for more details.                          
+!                                                                               
+!  You should have received a copy of the GNU Affero General Public License     
+!  along with Delft3D.  If not, see <http://www.gnu.org/licenses/>.             
+!                                                                               
+!  contact: delft3d.support@deltares.nl                                         
+!  Stichting Deltares                                                           
+!  P.O. Box 177                                                                 
+!  2600 MH Delft, The Netherlands                                               
+!                                                                               
+!  All indications and logos of, and references to, "Delft3D",                  
+!  "D-Flow Flexible Mesh" and "Deltares" are registered trademarks of Stichting 
+!  Deltares, and remain the property of Stichting Deltares. All rights reserved.
+!                                                                               
+!-------------------------------------------------------------------------------
+
+! $Id$
+! $HeadURL$
+
+!> DFMOUTPUT - A postprocessing tool for output files from D-Flow Flexible Mesh.
+!! Combines several commands/operations into a single program.
+!!
+!! Available commands:
+!!
+!! $Id$
+program dfm_volume_tool
+!-----------------------------------------------------------------------------------------------------------------------------------
+
+use IR_Precision                                                        ! Integers and reals precision definition.
+use precision 
+use iso_c_utils
+use string_module
+use messagehandling
+use dfm_volume_tool_version_module
+use Data_Type_Command_Line_Interface, only: Type_Command_Line_Interface ! Definition of Type_Command_Line_Interface.
+use m_netcdf_output
+use m_VolumeTables
+use m_network
+use m_StorageTable
+use unstruc_channel_flow, only: tableincrement
+!-----------------------------------------------------------------------------------------------------------------------------------
+
+!-----------------------------------------------------------------------------------------------------------------------------------
+implicit none
+
+character(len=Idlen) :: dll_name
+character(len=Idlen) :: mdufile
+integer(pntrsize)    :: dfm
+integer              :: ret_val, dia
+integer              :: i
+integer              :: idindex
+integer              :: numids
+integer              :: numbranches
+integer              :: ioutput
+double precision     :: increment
+double precision     :: bedlevel, toplevel
+character(len=Idlen) :: output_type
+character(len=Idlen) :: output_file
+character(len=Idlen) :: var_name
+type(c_ptr)          :: xptr
+integer,pointer              :: numpoints, numlinks
+logical              :: computeTotal
+logical              :: computeOnBranches
+
+
+real(c_double), pointer, dimension(:,:) :: volume
+real(c_double), pointer, dimension(:,:) :: surface
+real(c_double), pointer, dimension(:) :: levels
+real(C_double), pointer, dimension(:) :: help
+
+character(kind=c_char)                          :: c_output_type(15)
+character(len=idlen), allocatable, dimension(:) :: ids
+integer :: numlevels
+type(t_voltable), dimension(:),   pointer       :: volumetable
+type(t_voltable), dimension(:,:), pointer       :: volumetableOnLinks
+type(t_network),                  pointer       :: network
+type(t_branch),   dimension(:),   pointer       :: branches
+integer,          dimension(:),   allocatable   :: mask
+
+! externals
+
+integer, external  :: open_shared_library, bmi_initialize
+
+type(Type_Command_Line_Interface) :: cli          !< Command Line Interface (CLI).
+integer(I4P)                      :: ierr         !< Error trapping flag.
+
+!-----------------------------------------------------------------------------------------------------------------------------------
+open(newunit = dia, file='dfm_volume_tool.dia')
+call SetMessageHandling(write2screen = .true., lunmessages = dia)
+
+call get_full_versionstring_dfm_volume_tool_full(msgbuf)
+call msg_flush()
+call get_dfm_volume_tool_source(msgbuf)
+call msg_flush()
+
+numids = 0
+!-----------------------------------------------------------------------------------------------------------------------------------
+!! initializing Command Line Interface
+call cli%init(progname    = dfm_volume_tool_basename,                                            &
+              version     = dfm_volume_tool_version,                                             &
+              description = 'Tool for generating volume output for D-Flow FM') 
+!
+!! setting Command Line Arguments
+call cli%add(switch='--mdufile',  switch_ab='-f', help='Name of the input mdu file.',required=.true.,act='store',def=char(0),valname='FILE')
+call cli%add(switch='--increment',switch_ab='-i', help='required interval for the volume tables',required=.true.,act='store',def='',valname='INCREMENT')
+call cli%add(switch='--output',switch_ab='-o', help='output type: "Total", "Branches", "All"',required=.false.,act='store',def='',valname='OUTPUT_TYPE')
+call cli%add(switch='--outputfile',switch_ab='-p', help='name of the output file',required=.false.,act='store',def='',valname='OUTPUT_FILE')
+
+! parsing Command Line Interface
+call cli%parse(error=ierr)
+
+if (ierr /= 0) then
+   call SetMessage(LEVEL_ERROR, 'Error reading input parameters')
+endif
+
+! Check options
+output_type = 'Total'
+output_file = ''
+if (ierr==0) call cli%get(switch='--mdufile', val = mdufile, error=ierr)
+if (ierr==0) call cli%get(switch='--increment', val = increment, error=ierr)
+if (ierr==0) call cli%get(switch='--output', val = output_type, error=ierr)
+if (ierr==0) then
+   output_file = ''
+   call cli%get(switch='--outputfile', val = output_file, error=ierr)
+   if (len_trim(output_file)==0) then
+      i = index(mdufile, '.', .true.)
+      output_file = mdufile(1:i-1)//'.nc'
+   endif
+endif
+
+
+#ifdef WIN32
+   dll_name = 'dflowfm'
+#else
+   dll_name = 'libdflowfm.so'
+#endif
+if (ierr==0) then
+   ierr = open_shared_library(dfm, dll_name)
+   if (ierr /= 0) then
+      msgbuf = 'Cannot open'//trim(dll_name)//'.'
+      call msg_flush()
+   endif
+   
+endif
+
+if (ierr==0) then
+   ! Initialise the model 
+   ierr = bmi_initialize(dfm, mdufile)
+   if (ierr /= 0) then
+      msgbuf = 'Cannot initialize '''// trim(mdufile)//'''.'
+      call msg_flush()
+   endif
+
+   ! Generate the volume tables
+   call dfm_generate_volume_tables(dfm, increment)
+   
+   ! Retrieve data from the D-FLOW FM dll
+   call get_variable_pointer(dfm, string_to_char_array('numpoints'), xptr)
+   call c_f_pointer(xptr, numpoints)
+   call get_variable_pointer(dfm, string_to_char_array('numlinks'), xptr)
+   call c_f_pointer(xptr, numlinks)
+   call get_variable_pointer(dfm, string_to_char_array('vltb'), xptr)
+   call c_f_pointer(xptr, volumetable, (/numpoints/))
+   call get_variable_pointer(dfm, string_to_char_array('vltbOnLinks'), xptr)
+   call c_f_pointer(xptr, volumetableOnLinks, (/2, numlinks/))
+   call get_variable_pointer(dfm, string_to_char_array('network'), xptr)
+   call c_f_pointer(xptr, network, (/0/))
+   
+   ! Determine the number of levels for the aggregated volume tables
+   call getBedToplevel(volumetable, numpoints, toplevel,bedlevel)
+   numlevels = ceiling((toplevel-bedlevel)/increment+1)
+   
+   computeTotal      = .false.
+   computeOnBranches = .false.
+   numbranches = network%brs%Count
+   if (strcmpi(output_type, 'Total')) then
+      computeTotal = .true.
+      numids = 1
+   else if (strcmpi(output_type, 'OnBranches')) then
+      computeOnBranches = .true.
+      numids = numbranches
+   else if (strcmpi(output_type, 'All')) then
+      computeTotal = .true.
+      computeOnBranches = .true.
+      numids = numbranches + 1 
+   endif
+      
+   allocate(surface(numlevels,numids),volume(numlevels,numids), levels(numlevels), ids(numids), mask(numpoints))
+   surface = 0d0
+   volume  = 0d0
+
+   do i = 1, numlevels
+      levels(i) = (i-1)*increment
+   enddo
+   tableincrement = increment
+   idindex = 0
+   
+   !> setup the mask array for the complete model
+   if (computeTotal) then
+      idIndex = 1
+      do i = 1, numpoints
+         mask(i) = i
+      enddo
+      
+      !> Calculate the total volumes and surfaces for this model
+      ids(1) = 'Total'
+      call generateVolumeTableData(volume(:,1), surface(:,1), volumetable, volumetableOnLinks, bedlevel, increment, &
+                  numpoints, numlevels, nodes=mask)
+                  
+   endif
+   
+   if (computeOnBranches) then
+      branches => network%brs%branch
+      do i = 1, numbranches
+         idindex = idindex + 1
+         ids(idindex) = branches(i)%id
+         call generateVolumeTableData(volume(:,idindex), surface(:,idindex), volumetable, volumetableOnLinks, bedlevel, &
+         increment, branches(i)%uPointsCount, numlevels, links=branches(i)%lin)
+      enddo
+   endif
+   
+   ! Write the output to the netcdf file
+   ioutput = nc_create(output_file)
+   call nc_write(ioutput, ids, levels, volume, surface, numlevels, numids)
+                  
+   deallocate(surface,volume, levels, ids, mask)
+endif
+      
+end program dfm_volume_tool

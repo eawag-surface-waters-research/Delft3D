@@ -78,16 +78,19 @@ module m_VolumeTables
       double precision, allocatable, dimension(:)   :: summerDikeBaseLevel     !< base level (bottom level) of the summerdike.
       double precision, allocatable, dimension(:,:) :: sdinVolume !< correction for the volume due to the hysteresis during the inundation phase of the summerdike.
       double precision, allocatable, dimension(:,:) :: sdinArea   !< correction for the area due to the hysteresis during the inundation phase of the summerdike.
- contains
+      contains
       procedure, pass :: alloc               => allocVoltable                !< Allocates the allocatable arrays in this structure
       procedure, pass :: dealloc             => deallocVoltable              !< Deallocates the allocatable arrays in this structure
       procedure, pass :: getVolume           => getVolumeVoltable            !< Returns the volume for a given water level
       procedure, pass :: getSurface          => getSurfaceVoltable           !< Returns the surface area for a given water level
       procedure, pass :: getVolumeDecreasing => getVolumeDecreasingVoltable  !< Returns the volume which is the result of a decreasing width for a given water level
       procedure, pass :: getSurfaceDecreasing=> getSurfaceDecreasingVoltable !< Returns the decreasing surface area for a given water level
+      procedure, pass :: computeSurface      => computeSurfaceVoltable       !< Computes the surface areas for the different levels
    end type
    
-   type(t_voltable),       public, allocatable, dimension(:)   :: vltb  !< 1D Volume tables
+   type(t_voltable), target,      public, allocatable, dimension(:)     :: vltb  !< 1D Volume tables
+   type(t_voltable),       public, allocatable, dimension(:,:)   :: vltbOnLinks  !< 1D Volume tables, used for storage table output on branches.
+                                                                               !< Only the entries VOL and SUR will be filled.
 
    contains
    
@@ -190,6 +193,11 @@ module m_VolumeTables
       
       integer           :: index
       integer           :: i
+      if (level < this%bedlevel) then
+         getSurfaceVoltable = 0d0
+         return
+      endif
+         
       index = min(int( max(0d0,level-this%bedLevel)/ tableIncrement)+1,this%count)
       
       getSurfaceVoltable = this%sur(index)
@@ -239,9 +247,29 @@ module m_VolumeTables
       
    end function getSurfaceDecreasingVoltable
 
-   !> Generate the volume tables, by using GetCSParsTotal.
-   subroutine makeVolumeTables(filename)
+   !> Compute the surfaces in the volume table out of the volumes.
+   subroutine computeSurfaceVoltable(this)
+      use unstruc_channel_flow
+      
+      class(t_voltable)             :: this
 
+      integer i, j
+
+      do j = 2, this%count
+         this%sur(j-1) = (this%vol(j) - this%vol(j-1))/tableIncrement
+         if (this%hasDecreasingWidths) then
+            this%surDecreasing(j-1) = (this%volDecreasing(j) - this%volDecreasing(j-1))/tableIncrement
+         endif
+         do i = 1, this%numberOfSummerDikes
+            this%sdinArea(i, j-1) = (this%sdinVolume(i, j) - this%sdinVolume(i, j-1))/tableIncrement
+         enddo
+      enddo
+   end subroutine computeSurfaceVoltable
+
+
+   !> Generate the volume tables, by using GetCSParsTotal.
+   subroutine makeVolumeTables(filename, branchOutput)
+   
       use unstruc_channel_flow
       use m_flowparameters
       use m_flowgeom
@@ -250,18 +278,23 @@ module m_VolumeTables
       use m_flow
       use m_missing
 
-      character(len=*), intent(in   ) :: filename !< Name of the volumetablefile
+      character(len=*),  intent(in   ) :: filename       !< Name of the volumetablefile
+      logical, optional, intent(in   ) :: branchOutput   !< Flag indicates whether the volumes on flow links are required.
+                                                         !< This option is used by the volume tool to aggregate volumes to branches.      
       
       integer :: ndx1d
       integer :: nstor
       integer :: nod
       integer :: n
-      integer :: LL, L
+      integer :: LL, L, Lindex, LLinternal
       integer :: i, j
+      integer :: numlinks
       integer :: index
       integer :: jacustombnd1d, ibndsect
       integer :: numberOfSummerDikes
+      integer :: summerDikeIndex
 
+      logical :: generateVLTBOnLinks
       double precision :: height
       double precision :: level
       double precision :: dxL
@@ -277,7 +310,15 @@ module m_VolumeTables
       type(t_CrossSection), pointer, dimension(:)     :: cross
       type(t_CrossSection), pointer                   :: cross1, cross2
       type(t_storage), dimension(:), pointer          :: stors
-      if (useVolumeTableFile) then
+
+      if (present(branchOutput)) then
+        generateVLTBOnLinks = branchOutput
+      else
+         generateVLTBOnLinks = .false.
+      endif
+
+      if (useVolumeTableFile .and. .not. generateVLTBOnLinks) then
+         ! Do not use the volumetable file for the storage tables.
          volumeTableFile = fileName
          if (readVolumeTables()) then
             return
@@ -290,7 +331,7 @@ module m_VolumeTables
 
       ndx1d = ndx - ndx2d     ! include also the 2d boundary nodes.
       if (allocated(vltb)) then
-         deallocate(vltb)
+         call dealloc(vltb)
       end if
       allocate(vltb(ndx1d))
       do n = 1, ndx1d
@@ -298,19 +339,103 @@ module m_VolumeTables
          vltb(n)%topHeight = 0d0
       enddo
 
-      ! determine the highest level for the storage nodes
-      nstor = network%stors%count
-      if (nstor > 0) then
-         stors => network%stors%stor
-         do i = 1, nstor
-            nod = stors(i)%gridPoint 
-            n = nod-ndx2d
-            if (n > 0) then
-               vltb(n)%topHeight = max(vltb(n)%topHeight, getTopLevel(stors(i))) - bl(nod)
-            endif
+      if (generateVLTBOnLinks) then
+         allocate(vltbOnLinks(2,lnx1d))
+         do n = 1, lnx1d
+            vltbOnLinks(2,n)%count = 0
+            vltbOnLinks(2,n)%topHeight = 0d0
          enddo
       endif
+
+      ! determine the highest level for the storage nodes
+      call calculateHighestLevelOnStorageNodes(vltb)
       
+      call initializeVltb(vltb, ndx1d)
+
+      call addStorageToVltb(vltb)
+
+      if (generateVLTBOnLinks) then
+         call initializeVltbOnlinks(vltb, vltbOnLinks)
+      endif
+     
+      ! Compute the contributions of all incoming and outgoing links to the volume table of the corresponding node
+      do n = 1, ndx1d
+
+         nod = n+ndx2d
+         summerDikeIndex = 0
+
+         ! compute volumes, NOTE the volume at the first level is 0 by design
+         do LL = 1, nd(nod)%lnx
+            L = iabs(nd(nod)%ln(LL))
+            if (L > lnxi) then
+               L = lbnd1d(L)
+            endif
+            
+            if (cross(line2cross(L, 2)%c1)%hasSummerDike() .or. cross(line2cross(L, 2)%c2)%hasSummerDike()) then
+               summerDikeIndex = summerDikeIndex+1
+            endif
+            
+            ! Reset L to original value
+            L = iabs(nd(nod)%ln(LL))
+            if (generateVLTBOnLinks) then
+               call addVolumeAtLinkToVltb(L, n, summerDikeIndex, nd(nod)%ln(LL), vltb, vltbOnLinks)
+            else
+               call addVolumeAtLinkToVltb(L, n, summerDikeIndex, nd(nod)%ln(LL), vltb)
+            endif
+         enddo
+         
+         if (vltb(n)%numberOfSummerDikes>0) then
+            vltb(n)%sdinArea(i, vltb(n)%count) = 0d0
+            vltb(n)%inundationPhase = .true.
+         endif
+      enddo
+      
+      
+      do n = 1, ndx1d
+         call vltb(n)%computeSurface()
+      enddo
+      
+      if (generateVLTBOnLinks) then
+         do L = 1, lnx1d
+            call vltbOnLinks(1,L)%computeSurface()
+            call vltbOnLinks(2,L)%computeSurface()
+         enddo
+      endif
+
+      if (useVolumeTableFile) then
+         call writeVolumeTables()
+      endif
+
+   end subroutine makeVolumeTables
+
+   !> Initialize the volume table:
+   !> * compute the dimensions of the tables:
+   !> ** number of levels
+   !> ** number of summerdikes
+   !> * allocate the arrays in the volume tables.
+   subroutine initializeVltb(vltb, ndx1d)
+      use m_flowparameters
+      use m_flowgeom
+      use unstruc_channel_flow
+      
+      type(t_voltable), dimension(:), intent(inout) :: vltb    !< Volume tables.
+      integer,                        intent(in   ) :: ndx1d   !< Number of 1d nodes.
+
+      integer :: n, nod
+      integer :: LL, L
+      integer :: index
+      integer :: numberOfSummerDikes
+      double precision :: bobAboveBedLevel
+      double precision :: topheight
+      type(t_chainage2cross), dimension(:,:), pointer :: line2cross
+      type(t_CrossSection), pointer                   :: cross1, cross2
+      type(t_storage), dimension(:), pointer          :: stors
+      type(t_CrossSection), pointer, dimension(:)     :: cross
+
+      line2cross => network%adm%line2cross
+      cross => network%crs%cross
+      stors => network%storS%stor
+
       do n = 1, ndx1d
          vltb(n)%hasDecreasingWidths = nonlin1D >= 2
          nod = n+ndx2d
@@ -320,6 +445,7 @@ module m_VolumeTables
          
          ! Determine highest level (characteristic height) of all incoming and outgoing links to node nod,
          ! also determine the number of links that have a summerdike in it's cross section.
+
          do LL = 1, nd(nod)%lnx
             L = nd(nod)%ln(LL)
             index = 2
@@ -376,7 +502,47 @@ module m_VolumeTables
          vltb(n)%count = max(2,int(vltb(n)%topHeight / tableIncrement) + 2)
          call vltb(n)%alloc()
       enddo
+   end subroutine initializeVltb
 
+   !> Calculate the highest level for all storage nodes.
+   subroutine calculateHighestLevelOnStorageNodes(vltb)
+      use unstruc_channel_flow
+      use m_flowgeom
+
+      type(t_voltable), dimension(:),  intent(inout)  :: vltb     !< Volume table
+      
+      type(t_storage), dimension(:), pointer          :: stors
+      integer :: nstor, i, nod, n
+   
+      nstor = network%stors%count
+      if (nstor > 0) then
+         stors => network%stors%stor
+         do i = 1, nstor
+            nod = stors(i)%gridPoint 
+            n = nod-ndx2d
+            if (n > 0) then
+               vltb(n)%topHeight = max(vltb(n)%topHeight, getTopLevel(stors(i))) - bl(nod)
+            endif
+         enddo
+      endif
+   end subroutine calculateHighestLevelOnStorageNodes
+
+   !> Add the storage of storage nodes to the volume tables.
+   subroutine addStorageToVltb(vltb)
+      use m_Storage
+      use m_flowgeom
+      use m_flowparameters
+      use unstruc_channel_flow
+
+      type(t_voltable), dimension(:), intent(inout) :: vltb    !< Volume table
+ 
+      type(t_storage), dimension(:), pointer          :: stors
+
+      integer :: i, n, nod, nstor, j
+      double precision :: level
+
+      stors=> network%stors%stor
+      nstor = network%stors%count
       ! Compute the contribution of all the storage nodes to the volume table of the corresponding node
       do i = 1, nstor
          nod = stors(i)%gridPoint 
@@ -390,137 +556,211 @@ module m_VolumeTables
             enddo
             vltb(n)%sur(vltb(n)%count) = vltb(n)%sur(vltb(n)%count) + GetSurface(stors(i), level)
          endif
-         
       enddo
-     
-      ! Compute the contributions of all incoming and outgoing links to the volume table of the corresponding node
-      do n = 1, ndx1d
+   end subroutine addStorageToVltb
 
+   !> Initialize vltbOnLinks, using the volume table on nodes.
+   subroutine initializeVltbOnlinks(vltb, vltbOnLinks)
+      use m_flowgeom
+
+      type(t_voltable), dimension(:),     intent(in   ) :: vltb         !< Volume tables on nodes.
+      type(t_voltable), dimension(:, :),  intent(inout) :: vltbOnLinks  !< Volume tables on links.
+
+      integer :: n, ndx1d, nod, L, LL, numlinks
+      integer :: Lindex, dir
+
+      ndx1d = ndx - ndx2d
+      do n = 1, ndx1d
          nod = n+ndx2d
+         ! there is additional storage on this node, split this over the flow links
+         numlinks = nd(nod)%lnx
+         do LL = 1, numlinks
+            L = iabs(nd(nod)%ln(LL))
             
-         ! compute volumes, NOTE the volume at the first level is 0 by design
+            if (L > lnx1d) then
+               !Skip boundary links
+               
+               cycle
+            endif
+            
+            if (nd(nod)%ln(LL) < 0) then
+               ! link from this flow node
+               Lindex = 1
+            else
+               ! link to this node
+               Lindex = 2
+            endif
+            vltbOnLinks(Lindex, L)%count               = vltb(n)%count
+            vltbOnLinks(Lindex, L)%hasSummerdike       = .false.
+            vltbOnLinks(Lindex, L)%hasDecreasingWidths = .false.
+            vltbOnLinks(Lindex, L)%bedLevel            = vltb(n)%bedLevel           
+            vltbOnLinks(Lindex, L)%topHeight           = vltb(n)%topHeight          
+            vltbOnLinks(Lindex, L)%numberOfSummerDikes = 0
+            call vltbOnLinks(Lindex, L)%alloc()
+
+            ! Distribute storage node contribution over flow links
+            if (vltb(n)%vol(vltb(n)%count) > 0d0) then
+               vltbOnLinks(Lindex,L)%vol = vltb(n)%vol/numlinks
+               vltbOnLinks(Lindex,L)%sur(vltb(n)%count) = vltb(n)%sur(vltb(n)%count)/numlinks
+            endif
+         enddo
+      enddo
+   end subroutine initializeVltbOnlinks
+
+   !> Add the volumes for flow link Lorg to the volume tables.
+   subroutine addVolumeAtLinkToVltb(Lorg, n, summerDikeIndex, dir, vltb, vltbOnLinks)
+      use m_flowgeom
+      use unstruc_channel_flow
+      use m_flowparameters
+      use m_flowexternalforcings
+      use m_Crosssections
+
+      integer,                            intent(in   )           :: Lorg              !< FLow link.
+      integer,                            intent(in   )           :: n                 !< 1d node number.
+      integer,                            intent(in   )           :: summerDikeIndex   !< Index of the summer dike for this flow link.
+      integer,                            intent(in   )           :: dir               !< Direction of the flow link.
+      type(t_voltable), dimension(:),     intent(inout)           :: vltb              !< Volume tables on nodes.
+      type(t_voltable), dimension(:, :),  intent(inout), optional :: vltbOnLinks       !< Volume tables on flow links.
+
+      integer :: nod, nodintern
+      integer :: Lindex, L, LL
+      integer :: i, j
+      integer :: jacustombnd1d, ibndsect
+      
+      logical :: inundationPhase(2)
+      
+      double precision :: height
+      double precision :: area, areadecr, sdarea
+      double precision :: width, widthdecr, sdwidth
+      double precision :: bobAboveBedLevel
+      double precision :: dxL
+      
+      type(t_chainage2cross), dimension(:,:), pointer :: line2cross
+      type(t_CrossSection), pointer, dimension(:)     :: cross
+
+      line2cross => network%adm%line2cross
+      cross => network%crs%cross
+      
+      L = Lorg
+      nod = n + ndx2d
+      if (dir < 0) then
+         ! link from this flow node
+         bobAboveBedLevel = bob0(1,L) - bl(nod)
+         Lindex = 1
+      else
+         ! link to this node
+         bobAboveBedLevel = bob0(2,L) - bl(nod)
+         Lindex = 2
+      endif
+      
+      if (iabs(kcu(L))==1) then                      ! for 1D boundary links, refer to attached link
+         
+         ! Handle boundary links
+         if (dxDoubleAt1DEndNodes .and. nd(nod)%lnx == 1 ) then
+            dxL = dx(L)
+         else 
+            dxL = 0.5d0*dx(L)
+         endif
+         
+         jacustombnd1d = 0
+         if (kcu(L) == -1 .and. allocated(bndWidth1D)) then
+            ibndsect = lnxbnd(L-lnxi)
+            if (ibndsect > 0) then
+               if (bndWidth1D(ibndsect) /= dmiss) then
+                  jacustombnd1d = 1
+               end if
+            end if
+         end if
+         
+         ! Loop over all levels
          do j = 2, vltb(n)%count
             height = (j-1)*tableIncrement
-            numberOfSummerDikes = 0
-            do LL = 1, nd(nod)%lnx
-               L = iabs(nd(nod)%ln(LL))
-               if (nd(nod)%ln(LL) < 0) then
-                  ! link from this flow node
-                  bobAboveBedLevel = bob0(1,L) - bl(nod)
-               else
-                  ! link to this node
-                  bobAboveBedLevel = bob0(2,L) - bl(nod)
+            if (jacustombnd1d == 1) then ! This link is a 1D bnd *and* has a custom width.
+               width = bndwidth1D(ibndsect)
+               area = (height-bobAboveBedLevel)*width
+               ! Use the water level at the inner point of the boundary link
+               
+               if (vltb(n)%hasDecreasingWidths) then
+                  widthdecr = 0d0
+                  areadecr  = 0d0
+               end if
+            else 
+               if (L > lnxi) then                      ! for 1D boundary links, refer to attached link
+                  L = LBND1D(L)
                endif
-               L = iabs(nd(nod)%ln(LL))
-               if (iabs(kcu(L))==1) then                      ! for 1D boundary links, refer to attached link
-
-                  if (dxDoubleAt1DEndNodes .and. nd(nod)%lnx == 1 ) then
-                     dxL = dx(L)
-                  else 
-                     dxL = 0.5d0*dx(L)
-                  endif
-
-                  jacustombnd1d = 0
-                  if (kcu(L) == -1 .and. allocated(bndWidth1D)) then
-                     ibndsect = lnxbnd(L-lnxi)
-                     if (ibndsect > 0) then
-                        if (bndWidth1D(ibndsect) /= dmiss) then
-                           jacustombnd1d = 1
-                        end if
-                     end if
-                  end if
-
-                  if (jacustombnd1d == 1) then ! This link is a 1D bnd *and* has a custom width.
-                     width = bndwidth1D(ibndsect)
-                     area = (height-bobAboveBedLevel)*width
-                     ! Use the water level at the inner point of the boundary link
-
-                     if (vltb(n)%hasDecreasingWidths) then
-                        widthdecr = 0d0
-                        areadecr  = 0d0
-                     end if
-                  else 
-                     if (L > lnxi) then                      ! for 1D boundary links, refer to attached link
-                        L = LBND1D(L)
-                     endif
-                  
-                     ! The bed level is the lowest point of all flow links and possibly storage nodes. 
-                     ! In order to take this difference into account the variable bobAboveBedLevel is used
-                     inundationPhase = .false.
-                     call GetCSParsTotal(line2cross(L, 2), cross, height-bobAboveBedLevel, area, width, CSCalculationOption, inundationPhase, &
-                                         doSummerDike=.true.)
-                     
-                     if (line2cross(L, 2)%c1 > 0) then
-                        if (cross(line2cross(L, 2)%c1)%hasSummerDike() .or. cross(line2cross(L, 2)%c2)%hasSummerDike()) then
-                           numberOfSummerDikes = numberOfSummerDikes+1
-                           if (j ==2) then
-                              vltb(n)%linkNumber(numberOfSummerDikes) = L
-                              call getSummerDikeData(line2cross(L,index), cross, vltb(n)%summerDikeCrestLevel(numberOfSummerDikes), &
-                                                  vltb(n)%summerDikeBaseLevel(numberOfSummerDikes))
-                           endif
-                        
-                           ! a summerdike has a hysteresis during inundation the characteristic for the total volume is different from the
-                           ! drainage phase. In the overall volume table the summerdike during drainage is taken into account.
-                           ! During inundation SDINVOLUME contains the correction for the proper storage during inundation.
-                           inundationPhase = .true.
-                           call GetCSParsTotal(line2cross(L, 2), cross, height-bobAboveBedLevel, sdarea, sdwidth, CSCalculationOption, inundationPhase, &
-                                               doSummerDike=.true.)
-                           sdarea = sdarea - area
-                           vltb(nod)%sdinVolume(numberOfSummerdikes, j) = vltb(nod)%sdinVolume(numberOfSummerdikes, j) + &
-                                             sdarea * dxL
-                        endif
-                     end if
-
-                     if (vltb(n)%hasDecreasingWidths) then
-                        call GetCSParsTotal(network%adm%line2cross(L, 2), cross, height-bobAboveBedLevel, areadecr, widthdecr, CS_TYPE_MIN)
-                     end if
-
-                  endif
-                  
-                  vltb(n)%vol(j) = vltb(n)%vol(j) + dxL*area
-                  
-                  if (j==vltb(n)%count) then
-                     ! water surface at the highest level is equal to the width*dx of the cross section at the highest level.
-                     vltb(n)%sur(vltb(n)%count) = vltb(n)%sur(vltb(n)%count) + dxL*width
-                     do i = 1, vltb(n)%numberOfSummerDikes
-                        vltb(n)%sdinArea(i, vltb(n)%count) = 0d0
-                     enddo
-                  endif
-                  ! compute the decreasing volumes and areas
-                  if (vltb(n)%hasDecreasingWidths) then
-                     vltb(n)%volDecreasing(j) = vltb(n)%volDecreasing(j) + dxL*areadecr
-                     if (j==vltb(n)%count) then
-                        ! water surface at the highest level is equal to the width*dx of the cross section at the highest level.
-                        vltb(n)%surDecreasing(vltb(n)%count) = vltb(n)%surDecreasing(vltb(n)%count) + dxL*widthdecr
+               
+               ! The bed level is the lowest point of all flow links and possibly storage nodes. 
+               ! In order to take this difference into account the variable bobAboveBedLevel is used
+               inundationPhase = .false.
+               call GetCSParsTotal(line2cross(L, 2), cross, height-bobAboveBedLevel, area, width, CSCalculationOption, hysteresis=inundationPhase, &
+                                 doSummerDike=.true.)
+                                 
+               vltb(n)%vol(j) = vltb(n)%vol(j) + dxL*area
+               if (present(vltbOnLinks)) then
+                  if (lorg > lnxi) then
+                     nodintern = ln(2,Lorg)
+                     if (ln(1, L) == nodintern) then
+                        lindex = 1
+                     else
+                        lindex = 2
                      endif
                   endif
+                  
+                  ! Note: vltbOnlinks is only used for aggregated per branch, and the hysteresis for summerdikes
+                  !       is turned of, as well as the Nested Newton solver
+                  vltbOnLinks(Lindex, L)%vol(j) = vltbOnLinks(Lindex, L)%vol(j) +dxL*area
                endif
-            enddo
-            ! compute water surface area
-            vltb(n)%sur(j-1) = (vltb(n)%vol(j) - vltb(n)%vol(j-1))/tableIncrement
-            if (vltb(n)%hasDecreasingWidths) then
-               vltb(n)%surDecreasing(j-1) = (vltb(n)%volDecreasing(j) - vltb(n)%volDecreasing(j-1))/tableIncrement
+
+               ! A summerdike has a hysteresis during inundation the characteristic for the total volume is different from the
+               ! drainage phase. In the overall volume table the summerdike during drainage is taken into account.
+               ! During inundation SDINVOLUME contains the correction for the proper storage during inundation.
+               if (line2cross(L, 2)%c1 > 0) then
+                  if (cross(line2cross(L, 2)%c1)%hasSummerDike() .or. cross(line2cross(L, 2)%c2)%hasSummerDike()) then
+                     if (j ==2) then
+                        vltb(n)%linkNumber(summerDikeIndex) = L
+                        call getSummerDikeData(line2cross(L,2), cross, vltb(n)%summerDikeCrestLevel(summerDikeIndex), &
+                                          vltb(n)%summerDikeBaseLevel(summerDikeIndex))
+                                          
+                     endif
+                     inundationPhase = .true.
+                     call GetCSParsTotal(line2cross(L, 2), cross, height-bobAboveBedLevel, sdarea, sdwidth, CSCalculationOption, inundationPhase, &
+                                       doSummerDike=.true.)
+                     sdarea = sdarea - area
+                     vltb(nod)%sdinVolume(summerDikeIndex, j) = vltb(nod)%sdinVolume(summerDikeIndex, j) + &
+                                       sdarea * dxL
+                  endif
+               endif
+
+               ! For Nested Newton, the 
+               if (vltb(n)%hasDecreasingWidths) then
+                  call GetCSParsTotal(network%adm%line2cross(L, 2), cross, height-bobAboveBedLevel, areadecr, widthdecr, CS_TYPE_MIN)
+               end if
             endif
-            do i = 1, vltb(n)%numberOfSummerDikes
-               vltb(n)%sdinArea(i, j-1) = (vltb(n)%sdinVolume(i, j) - vltb(n)%sdinVolume(i, j-1))/tableIncrement
-            enddo
-
+            
+            ! compute the decreasing volumes and areas
+            if (vltb(n)%hasDecreasingWidths) then
+               vltb(n)%volDecreasing(j) = vltb(n)%volDecreasing(j) + dxL*areadecr
+               if (j==vltb(n)%count) then
+                  ! water surface at the highest level is equal to the width*dx of the cross section at the highest level.
+                  vltb(n)%surDecreasing(vltb(n)%count) = vltb(n)%surDecreasing(vltb(n)%count) + dxL*widthdecr
+               endif
+            endif
          enddo
 
-         if (vltb(n)%numberOfSummerDikes>0) then
-            vltb(n)%inundationPhase = .true.
+         ! water surface at the highest level is equal to the width*dx of the cross section at the highest level.
+         vltb(n)%sur(vltb(n)%count) = vltb(n)%sur(vltb(n)%count) + dxL*width
+         if (present(vltbOnLinks) .and. lorg <= lnxi) then
+            vltbOnLinks(Lindex, L)%sur(vltb(n)%count) = vltbOnLinks(Lindex, L)%sur(vltb(n)%count) + dxL*width
          endif
-
-      enddo
-
-      if (useVolumeTableFile) then
-         call writeVolumeTables()
+         
       endif
 
-   end subroutine makeVolumeTables
+   end subroutine addVolumeAtLinkToVltb
 
    !> Deallocate all volume tables.
-   subroutine deallocVolTables()
+   subroutine deallocVolTables(vltb)
+   
+   type(t_voltable), allocatable, dimension(:)   :: vltb  
 
       integer i
       
@@ -685,6 +925,7 @@ module m_VolumeTables
 
    end function readVolumeTables
 
+   !> Returns the nonlinear option in a text string.
    function getNonlin(nlin1D) result(string)
 
       character(len=30) :: string

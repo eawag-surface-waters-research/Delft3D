@@ -2258,6 +2258,7 @@ src/engines_gpl/dflowfm/packages/dflowfm_lib/include/bmi_get_var_type.inc -text
 src/engines_gpl/dflowfm/packages/dflowfm_lib/include/bmi_set_var.inc -text
 src/engines_gpl/dflowfm/packages/dflowfm_lib/include/bmi_set_var_slice.inc -text
 src/engines_gpl/dflowfm/packages/dflowfm_lib/src/unstruc_bmi.F90 -text
+src/engines_gpl/dflowfm/packages/dflowfm_lib/src/unstruc_dll_api.F90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_lib/templates/bmi_get_var.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_lib/templates/bmi_get_var_count.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_lib/templates/bmi_get_var_location.f90 -text
@@ -17560,6 +17561,16 @@ src/tools_gpl/ddcouple/packages/ddcouple_version_number/src/f2c.c -text
 src/tools_gpl/ddcouple/packages/ddcouple_version_number/src/version.c -text
 src/tools_gpl/ddcouple/scripts/run_ddcouple.bat -text
 src/tools_gpl/ddcouple/scripts/run_ddcouple.sh -text
+src/tools_gpl/dfm_volume_tool/packages/dfm_api_access/CMakeLists.txt -text
+src/tools_gpl/dfm_volume_tool/packages/dfm_api_access/config.h.cmake.in -text
+src/tools_gpl/dfm_volume_tool/packages/dfm_api_access/include/so_fortran_api.h -text
+src/tools_gpl/dfm_volume_tool/packages/dfm_api_access/src/dfm_lib_fortran_api.c -text
+src/tools_gpl/dfm_volume_tool/packages/dfm_volume_tool/CMakeLists.txt -text
+src/tools_gpl/dfm_volume_tool/packages/dfm_volume_tool/res/version_number.ini -text
+src/tools_gpl/dfm_volume_tool/packages/dfm_volume_tool/src/dfm_volume_tool_main.F90 -text
+src/tools_gpl/dfm_volume_tool/packages/dfm_volume_tool/src/dfm_volume_tool_version.F90.svn -text
+src/tools_gpl/dfm_volume_tool/packages/dfm_volume_tool/src/m_netcdf_output.f90 -text
+src/tools_gpl/dfm_volume_tool/packages/dfm_volume_tool/src/m_storagetable.f90 -text
 src/tools_gpl/dfmoutput/CMakeLists.txt -text
 src/tools_gpl/dfmoutput/Makefile.am -text
 src/tools_gpl/dfmoutput/dfmoutput.vfproj -text

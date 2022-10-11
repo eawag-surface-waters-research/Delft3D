@@ -46,6 +46,16 @@ if(NOT TARGET dfmoutput)
     add_subdirectory(${checkout_src_root}/${dfmoutput_module} dfmoutput)
 endif()
 
+# dfm_volume_tool
+if(NOT TARGET dfm_volume_tool)
+    add_subdirectory(${checkout_src_root}/${dfm_volume_tool_module} dfm_volume_tool)
+endif()
+
+# dfm_api_access
+if(NOT TARGET dfm_api_access)
+    add_subdirectory(${checkout_src_root}/${dfm_api_access_module} dfm_api_access)
+endif()
+
 # Third party
 # FLAP
 if(NOT TARGET FLAP)
