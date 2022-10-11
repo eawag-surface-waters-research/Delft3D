@@ -56,9 +56,10 @@ subroutine update_dambreak_breach(startTime, deltaTime)
    integer                               :: nAverageUpStream, nAverageDownStream
    integer                               :: n, ierr, istru, indexLevelsAndWidths
 
-   if (ndambreak > 0 .or. jampi > 0) then ! In a parallel simulation, we need to run this
-      ! subroutine even in a special situation that there is no dambreak on the current subdomain (i.e. ndambreak == 0), because the following function
-      ! getAverageQuantityFromLinks involves mpi communication among all subdomains. However, in this special situation,
+   if (ndambreaksg > 0) then ! Variable ndambreaksg is >0 for all partitions if there is a dambreak, even if it is outside
+      ! of a partition. In a parallel simulation, we need to run this subroutine even in a special situation that there is
+      ! no dambreak on the current subdomain (i.e. ndambreak == 0), because the following function getAverageQuantityFromLinks
+      ! involves mpi communication among all subdomains. However, in this special situation,
       ! all the necessary variables are set to 0 and do not participate the dambreak related computation in this subroutine.
 
       !

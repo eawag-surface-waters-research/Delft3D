@@ -253,7 +253,8 @@ subroutine flow_setexternalforcingsonboundaries(tim, iresult)
    endif
 
    !dambreak
-   if (ndambreak > 0 .or. jampi > 0) then
+   if (ndambreaksg > 0) then
+      ! Variable ndambreaksg is >0 for all partitions if there is a dambreak, even if it is outside of a partition.
       ! In a parallel simulation, we need to call this subroutine even in a special situation that there is no dambreak
       ! on the current subdomain (i.e. ndambreak == 0), because this subroutine calls function
       ! getAverageQuantityFromLinks, which involves mpi communication among all subdomains. However, in this special situation,
