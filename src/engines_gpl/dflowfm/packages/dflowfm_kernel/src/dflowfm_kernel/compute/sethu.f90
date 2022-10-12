@@ -239,11 +239,7 @@ subroutine sethu(jazws0)                            ! Set upwind waterdepth hu
 
                  wsbov  =  sup
                  wsben  =  s0(kd)
-                 if (testfixedweirs == 0 ) then
-                     hkruin = -bup                           ! original D-Flow FM approach 
-                 else if (testfixedweirs >= 1 ) then
-                     hkruin = -crestlevxw(nfw)               ! Simona approach
-                 endif
+                 hkruin = -bup
 
                  ! determine sill height downstream of weir
                  !

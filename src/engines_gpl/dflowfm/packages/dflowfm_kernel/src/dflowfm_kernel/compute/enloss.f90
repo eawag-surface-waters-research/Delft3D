@@ -177,7 +177,7 @@ subroutine enloss(ag        ,d1        ,eweir     ,hkruin    ,hov       , &
        vil2 = 1.0 / (vil2**2)
        pref = 3.0**3 / (4.0 * cd0**2) / (max(0.001d0,vil1 - vil2))
 
-       if (testfixedweirs == 2) then
+       if (testfixedweirs == 1) then
           !
           !  Sieben2001 (NOT USED BELOW):
           !        cd0 = 0.85 * ( exp(-0.15*e1/lkruin) * (1.-0.25*exp(-0.5*mbov))+

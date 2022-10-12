@@ -3257,7 +3257,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     endif
 
     call prop_set(prop_ptr, 'numerics', 'Testdryingflooding', testdryflood,   'Test for drying flooding algoritm (0: D-Flow FM, 1: Delft3D-FLOW)')
-    call prop_set(prop_ptr, 'numerics', 'Testfixedweirs', testfixedweirs, 'Test for fixed weir algoritms (0: old D-Flow FM approach, 1: Simona approach )')
+    call prop_set(prop_ptr, 'numerics', 'Testfixedweirs', testfixedweirs, 'Test for fixed weir algoritms (0 = Sieben2010, 1 = Sieben2007 )')
 
 ! Physics
     call prop_set(prop_ptr, 'physics', 'UnifFrictCoef',     frcuni,      'Uniform friction coefficient (0: no friction)')
