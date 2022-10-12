@@ -52,6 +52,8 @@
 #elif defined(linux)
 #  include "config.h"
 #  define INITIALIZE_VOLUME_TABLES FC_FUNC(initialize_volume_tables,INITIALIZE_VOLUME_TABLES)
+#  define DFM_GENERATE_VOLUME_TABLES FC_FUNC(dfm_generate_volume_tables,DFM_GENERATE_VOLUME_TABLES)
+#  define GET_VARIABLE_POINTER FC_FUNC(get_variable_pointer,GET_VARIABLE_POINTER)
 #  define STDCALL
 #endif
 /*
