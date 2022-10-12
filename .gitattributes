@@ -4170,7 +4170,9 @@ src/engines_gpl/waq/packages/waq_process/src/waq_process/effblo.f -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/emersi.f -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/extina.f -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/extinc.f -text
+src/engines_gpl/waq/packages/waq_process/src/waq_process/flocculation_dwq.f90 -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/floceq.f90 -text
+src/engines_gpl/waq/packages/waq_process/src/waq_process/flocsd.f90 -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/flxfrc.f90 -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/gemmpb.f -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/get_effi.f -text
