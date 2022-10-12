@@ -4529,7 +4529,9 @@ function ug_put_1d_network_branches(ncid,netids, sourceNodeId, targetNodeId, bra
 
    ierr = nf90_put_var(ncid, netids%varids(ntid_1dedgenodes), sourcestargets)
    ierr = nf90_put_var(ncid, netids%varids(ntid_1dbranchids), branchids)
-   ierr = nf90_put_var(ncid, netids%varids(ntid_1dbranchlongnames), branchlongnames)
+   if (size(branchlongnames) > 0) then
+     ierr = nf90_put_var(ncid, netids%varids(ntid_1dbranchlongnames), branchlongnames)
+   endif
    ierr = nf90_put_var(ncid, netids%varids(ntid_1dbranchlengths), branchlengths)
    ierr = nf90_put_var(ncid, netids%varids(ntid_1dgeopointsperbranch), nbranchgeometrynodes)
 
