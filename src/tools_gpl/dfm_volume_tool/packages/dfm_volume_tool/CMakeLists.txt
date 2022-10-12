@@ -32,10 +32,12 @@ if (UNIX)
     pkg_check_modules(NETCDF_FTN REQUIRED IMPORTED_TARGET netcdf-fortran)
 
     set(oss_dependencies deltares_common 
+                         deltares_common_c
                          dflowfm_kernel
                          flow1d_core
                          io_netcdf 
-                         FLAP)
+                         FLAP
+                         dfm_api_access)
 
     oss_include_libraries(${executable_name} oss_dependencies)
 
