@@ -96,7 +96,7 @@ long STDCALL DFM_GENERATE_VOLUME_TABLES(int64_t* sharedDLLHandle, double* increm
 
 long STDCALL GET_VARIABLE_POINTER(int64_t* sharedDLLHandle, char* var_name, void *xptr)
 {
-	typedef void* (STDCALL* MyProc)(void *);
+	typedef void* (STDCALL* MyProc)(char *, void *);
 	MyProc proc = (MyProc)GetDllProcedure(sharedDLLHandle, "dfm_get_variable_pointer");
 
 
