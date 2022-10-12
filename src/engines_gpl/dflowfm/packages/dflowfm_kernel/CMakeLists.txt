@@ -231,13 +231,15 @@ prebuild_version_number(${library_name} ${fortran_version_file}
 
 set_source_files_properties(${fortran_version_file}
                             ${CMAKE_CURRENT_SOURCE_DIR}/${dflowfm_data_path}/partition.F90
-                            ${CMAKE_CURRENT_SOURCE_DIR}/${dflowfm_gui_path}/setwor.F90
                             ${CMAKE_CURRENT_SOURCE_DIR}/${dflowfm_gui_path}/menuv1.F90
+                            ${CMAKE_CURRENT_SOURCE_DIR}/${dflowfm_gui_path}/setwor.F90
+                            ${CMAKE_CURRENT_SOURCE_DIR}/${dflowfm_gui_path}/viewport.F90
                             ${CMAKE_CURRENT_SOURCE_DIR}/${dflowfm_io_path}/read_commandline.F90
                             ${CMAKE_CURRENT_SOURCE_DIR}/${dflowfm_io_path}/writesomefinaloutput.F90
                             ${CMAKE_CURRENT_SOURCE_DIR}/${dflowfm_io_path}/wrwaq.F90
                             ${CMAKE_CURRENT_SOURCE_DIR}/${dflowfm_io_path}/tecplot.F90
                             ${CMAKE_CURRENT_SOURCE_DIR}/${dflowfm_io_path}/unc_write_his.F90
+                            ${CMAKE_CURRENT_SOURCE_DIR}/${dflowfm_io_path}/unc_write_shp.F90
                             ${CMAKE_CURRENT_SOURCE_DIR}/${dflowfm_kernel_compute_path}/filter.F90
                             ${CMAKE_CURRENT_SOURCE_DIR}/${dflowfm_kernel_compute_particles_path}/sendrecv_particledata.F90
                             ${CMAKE_CURRENT_SOURCE_DIR}/${dflowfm_kernel_compute_particles_path}/update_particles.F90
