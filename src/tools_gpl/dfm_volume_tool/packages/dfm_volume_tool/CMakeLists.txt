@@ -34,6 +34,7 @@ if (UNIX)
     set(oss_dependencies deltares_common 
                          deltares_common_c
                          dflowfm_kernel
+                         gridgeom
                          flow1d_core
                          io_netcdf 
                          FLAP
@@ -51,6 +52,7 @@ if (WIN32)
     set(oss_dependencies deltares_common
                          deltares_common_c
                          dflowfm_kernel
+                         gridgeom
                          flow1d_core
                          io_netcdf
                          FLAP
