@@ -1702,3 +1702,6 @@ r2_cid,r2_sid
 "WAQ       ","S1_POS2   "
 "WAQ       ","S1_POS3   "
 "WAQ       ","S1_POS4   "
+"DummyConfg","ncmSi_2   "
+"DummyConfg","OONS3     "
+"DummyConfg","OOPS3     "

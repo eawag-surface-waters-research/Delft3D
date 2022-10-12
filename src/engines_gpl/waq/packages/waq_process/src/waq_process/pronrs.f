@@ -133,7 +133,7 @@
      +   'PRIRON',
      +   'CALSED',
      +   'SEDCAR',
-     +   'SEDNUT',
+     +   'SEDNU2',
      +   'SEDSOD',
      +   'SSEDPH',
      +   'SOMSED',

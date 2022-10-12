@@ -306,7 +306,7 @@
          case (76 ) ;  call SEDCAR ( pmsa   , flux   , ipoint , increm , noseg  ,               ! &
      &                                 noflux , iexpnt , iknmrk , noq1   , noq2   ,               ! &
      &                                 noq3   , noq4   )
-         case (77 ) ;  call SEDNUT ( pmsa   , flux   , ipoint , increm , noseg  ,               ! &
+         case (77 ) ;  call SEDNU2 ( pmsa   , flux   , ipoint , increm , noseg  ,               ! &
      &                                 noflux , iexpnt , iknmrk , noq1   , noq2   ,               ! &
      &                                 noq3   , noq4   )
          case (78 ) ;  call SEDSOD ( pmsa   , flux   , ipoint , increm , noseg  ,               ! &

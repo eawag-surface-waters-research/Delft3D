@@ -75,7 +75,6 @@ fortid
 "PRIRON    "
 "CALSED    "
 "SEDCAR    "
-"SEDNUT    "
 "SEDSOD    "
 "SSEDPH    "
 "SOMSED    "
@@ -167,3 +166,5 @@ fortid
 "PROPFD    "
 "RESBUF    "
 "PHPROT    "
+"SEDIM    ;"
+"SEDNU2    "

@@ -4244,7 +4244,7 @@ src/engines_gpl/waq/packages/waq_process/src/waq_process/sedcar.f -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/sedcom.f -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/sedhm.f -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/sedim.f -text
-src/engines_gpl/waq/packages/waq_process/src/waq_process/sednut.f -text
+src/engines_gpl/waq/packages/waq_process/src/waq_process/sednu2.f90 -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/sedomv.f -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/sedox.f -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/sedsod.f -text

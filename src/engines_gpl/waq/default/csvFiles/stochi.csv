@@ -838,53 +838,66 @@ stocfl,stocsu,stocsc
 "dSedMPB2  ","MPB2psamS1",   1.00000
 "dSedOpal  ","Opal      ",  -1.00000
 "dSedOpal  ","DetSiS1   ",   1.00000
-"dSedOpal  ","S1_Opal   ",   1.00000
+"dSedOpalS2","Opal      ",  -1.00000
+"dSedOpalS2","DetSiS2   ",   1.00000
 "dSedPOC1  ","POC1      ",  -1.00000
 "dSedPOC1  ","DetCS1    ",   1.00000
-"dSedPOC1  ","S1_PC1    ",   1.00000
+"dSedPOC1S2","POC1      ",  -1.00000
+"dSedPOC1S2","DetCS2    ",   1.00000
 "dSedPOC2  ","POC2      ",  -1.00000
 "dSedPOC2  ","OOCS1     ",   1.00000
-"dSedPOC2  ","S1_PC2    ",   1.00000
+"dSedPOC2S2","POC2      ",  -1.00000
+"dSedPOC2S2","OOCS2     ",   1.00000
 "dSedPOC3  ","POC3      ",  -1.00000
 "dSedPOC3  ","OOCS1     ",   1.00000
-"dSedPOC3  ","S1_PC3    ",   1.00000
+"dSedPOC3S2","POC3      ",  -1.00000
+"dSedPOC3S2","OOCS2     ",   1.00000
 "dSedPOC4  ","POC4      ",  -1.00000
 "dSedPOC4  ","OOCS1     ",   1.00000
-"dSedPOC4  ","S1_PC4    ",   1.00000
+"dSedPOC4S2","POC2      ",  -1.00000
+"dSedPOC4S2","OOCS2     ",   1.00000
 "dSedVIVP  ","S1_VIVP   ",   1.00000
 "dSedAPATP ","S1_APATP  ",   1.00000
 "dSedPON1  ","PON1      ",  -1.00000
 "dSedPON1  ","DetNS1    ",   1.00000
-"dSedPON1  ","S1_PN1    ",   1.00000
 "dSedPOP1  ","POP1      ",  -1.00000
 "dSedPOP1  ","DetPS1    ",   1.00000
-"dSedPOP1  ","S1_PP1    ",   1.00000
 "dSedPOS1  ","POS1      ",  -1.00000
-"dSedPOS1  ","S1_PS1    ",   1.00000
+"dSedPON1S2","PON1      ",  -1.00000
+"dSedPON1S2","DetNS2    ",   1.00000
+"dSedPOP1S2","POP1      ",  -1.00000
+"dSedPOP1S2","DetPS2    ",   1.00000
+"dSedPOS1S2","POS1      ",  -1.00000
 "dSedPON2  ","PON2      ",  -1.00000
 "dSedPON2  ","OONS1     ",   1.00000
-"dSedPON2  ","S1_PN2    ",   1.00000
 "dSedPOP2  ","POP2      ",  -1.00000
 "dSedPOP2  ","OOPS1     ",   1.00000
-"dSedPOP2  ","S1_PP2    ",   1.00000
 "dSedPOS2  ","POS2      ",  -1.00000
-"dSedPOS2  ","S1_PS2    ",   1.00000
+"dSedPON2S2","PON2      ",  -1.00000
+"dSedPON2S2","OONS2     ",   1.00000
+"dSedPOP2S2","POP2      ",  -1.00000
+"dSedPOP2S2","OOPS2     ",   1.00000
+"dSedPOS2S2","POS2      ",  -1.00000
 "dSedPON3  ","PON3      ",  -1.00000
 "dSedPON3  ","OONS1     ",   1.00000
-"dSedPON3  ","S1_PN3    ",   1.00000
 "dSedPOP3  ","POP3      ",  -1.00000
 "dSedPOP3  ","OOPS1     ",   1.00000
-"dSedPOP3  ","S1_PP3    ",   1.00000
 "dSedPOS3  ","POS3      ",  -1.00000
-"dSedPOS3  ","S1_PS3    ",   1.00000
+"dSedPON3S2","PON3      ",  -1.00000
+"dSedPON3S2","OONS3     ",   1.00000
+"dSedPOP3S2","POP3      ",  -1.00000
+"dSedPOP3S2","OOPS3     ",   1.00000
+"dSedPOS3S2","POS3      ",  -1.00000
 "dSedPON4  ","PON4      ",  -1.00000
 "dSedPON4  ","OONS1     ",   1.00000
-"dSedPON4  ","S1_PN4    ",   1.00000
 "dSedPOP4  ","POP4      ",  -1.00000
 "dSedPOP4  ","OOPS1     ",   1.00000
-"dSedPOP4  ","S1_PP4    ",   1.00000
 "dSedPOS4  ","POS4      ",  -1.00000
-"dSedPOS4  ","S1_PS4    ",   1.00000
+"dSedPON4S2","PON4      ",  -1.00000
+"dSedPON4S2","OONS2     ",   1.00000
+"dSedPOP4S2","POP4      ",  -1.00000
+"dSedPOP4S2","OOPS2     ",   1.00000
+"dSedPOS4S2","POS4      ",  -1.00000
 "dSedAAP   ","AAP       ",  -1.00000
 "dSedAAP   ","AAPS1     ",   1.00000
 "dSedAAPS2 ","AAP       ",  -1.00000
