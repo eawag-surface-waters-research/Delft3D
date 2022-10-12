@@ -120,6 +120,7 @@ contains
    use properties
    use unstruc_channel_flow
    use m_save_ugrid_state
+   use system_utils
 
    implicit none
 
@@ -147,16 +148,15 @@ contains
    integer :: istart
    integer :: nlongculverts0
    integer :: mout
-   integer :: longculvertindex, dirindex
-
+   integer :: longculvertindex
+   character(len=IdLen) :: temppath, tempname, tempext 
+   
    ierr = DFM_NOERR
    filename = trim(culvertprefix)//filename
-   dirindex = scan(structurefile, '\/', back = .true. )
-   if (dirindex /= 0) then !the filename has a directory preceding it
-    structures_output = structurefile(1:dirindex)//trim(culvertprefix)//structurefile(dirindex+1:len(structurefile))
-   else
-     structures_output = trim(culvertprefix)//structurefile
-   endif
+
+   call split_filename(structurefile, temppath, tempname, tempext)
+   tempname = trim(culvertprefix)//tempname
+   structures_output = cat_filename(temppath, tempname, tempext)
    
    allocate(character(maxlen)::line)
 

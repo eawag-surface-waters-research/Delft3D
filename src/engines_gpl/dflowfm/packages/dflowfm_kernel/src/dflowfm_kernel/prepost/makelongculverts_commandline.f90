@@ -38,6 +38,7 @@ subroutine makelongculverts_commandline()
    use m_longculverts
    use unstruc_netcdf, only :  unc_write_net, UNC_CONV_UGRID
    use unstruc_channel_flow, only: network
+   use system_utils
    
    character(len=1024) :: fnamesstring
    character(len=:), allocatable :: converted_fnamesstring
@@ -46,6 +47,7 @@ subroutine makelongculverts_commandline()
    character(len=:), allocatable :: tempstring_fnames
    character(len=:), allocatable :: tempstring_netfile
    character(len=200), dimension(:), allocatable       :: fnames
+   character(len=IdLen)          :: temppath, tempname, tempext 
    integer                       :: dirindex
    
    
@@ -61,13 +63,11 @@ subroutine makelongculverts_commandline()
       end do
       deallocate(fnames)
       call finalizeLongCulvertsInNetwork()
-      
-   dirindex = scan(md_netfile, '\/', back = .true. )
-   if (dirindex /= 0) then !the filename has a directory preceding it
-    tempstring_netfile = trim(md_culvertprefix)//md_netfile(dirindex+1:len(md_netfile))
-   else
-     tempstring_netfile = trim(md_culvertprefix)//md_netfile
-   endif
+
+      call split_filename(md_netfile, temppath, tempname, tempext)
+      tempname = trim(md_culvertprefix)//tempname
+      tempstring_netfile = cat_filename(temppath, tempname, tempext)
+
       call unc_write_net(tempstring_netfile, janetcell = 1, janetbnd = 0, jaidomain = 0, iconventions = UNC_CONV_UGRID)
 
       md_netfile = tempstring_netfile
