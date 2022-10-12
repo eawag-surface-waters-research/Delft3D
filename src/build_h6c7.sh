@@ -330,30 +330,30 @@ fi
 # Additional library settings
 
 #---------------------
-# mpich
-mpichModule=""
+# MPI
+mpiModule=""
 
 if [ "$compiler" = 'gnu' ]; then
-    mpichModule="mpich/3.3.2_gcc$gccVersion"
+    mpiModule="mpich/3.3.2_gcc$gccVersion"
 else
     # Intel compilers
     if [ "$compiler" = 'intel14' ]; then
-        mpichModule="mpich/3.1.4_intel_14.0.3"
+        mpiModule="mpich/3.1.4_intel_14.0.3"
     elif [ "$compiler" = 'intel16' ]; then
-        mpichModule="mpich/3.1.4_intel_16.0.3"
+        mpiModule="mpich/3.1.4_intel_16.0.3"
 
     elif [ "$compiler" = 'intel18' ]; then
-    mpichModule="mpich/3.3.2_intel18.0.3" 
+    mpiModule="mpich/3.3.2_intel18.0.3" 
     elif [ "$compiler" = 'intel19' ]; then
-    mpichModule="mpich/3.3.2_intel19.1.1" 
+    mpiModule="mpich/3.3.2_intel19.1.1" 
     elif [ "$compiler" = 'intel21' ]; then
-    mpichModule="mpich/3.3.2_intel21.2.0" 
+    mpiModule="intelmpi/21.2.0" 
     fi
 fi
-initMpich="module load $mpichModule"
-eval $initMpich
+initMpi="module load $mpiModule"
+eval $initMpi
 if [ $? -ne 0 ]; then
-    echo 'ERROR: Mpich initialization fails!'
+    echo 'ERROR: Mpi initialization fails!'
     cd $orgdir
     exit 1
 fi
@@ -376,7 +376,7 @@ else
     elif [ "$compiler" = 'intel19' ]; then
     petscModule="petsc/3.13.3_intel19.1.1_mpich3.3.2"
     elif [ "$compiler" = 'intel21' ]; then
-    petscModule="petsc/3.13.3_intel21.2.0_mpich3.3.2"
+    petscModule="petsc/3.13.3_intel21.2.0_intelmpi21.2.0_no_mkl"
     fi
 fi
 initPetsc="module load $petscModule"
@@ -564,7 +564,7 @@ echo "module load $fortranModule"
 echo "module load $automakeModule"
 echo "module load $autoconfModule"
 echo "module load $libtoolModule"
-echo "module load $mpichModule"
+echo "module load $mpiModule"
 echo "module load $petscModule"
 echo "module load $metisModule"
 echo "module load $netcdfModule"
@@ -576,7 +576,7 @@ module display $fortranModule
 module display $automakeModule
 module display $autoconfModule
 module display $libtoolModule
-module display $mpichModule
+module display $mpiModule
 module display $petscModule
 module display $metisModule
 module display $netcdfModule
