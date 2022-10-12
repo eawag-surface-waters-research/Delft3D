@@ -14,7 +14,7 @@ setlocal enabledelayedexpansion
     rem Read arguments
 
     rem --help:
-if [%1] EQU [--help] ( goto usage )
+rem if [%1] EQU [--help] ( goto usage )
 
 
     rem Sets the number of threads if it is not defined
@@ -51,8 +51,8 @@ set sharedir=%D3D_HOME%\%ARCH%\share\bin
 
     rem Run
 set PATH=%dflowfmexedir%;%sharedir%
-echo executing: "%dflowfmexedir%\dfm_volume_tool.exe" --verbose %1 %2 %3 %4 %5 %6 %7 %8 %9
-"%dflowfmexedir%\dfm_volume_tool.exe" --verbose %1 %2 %3 %4 %5 %6 %7 %8 %9
+echo executing: "%dflowfmexedir%\dfm_volume_tool.exe"  %1 %2 %3 %4 %5 %6 %7 %8 %9
+"%dflowfmexedir%\dfm_volume_tool.exe" %1 %2 %3 %4 %5 %6 %7 %8 %9
 
 goto end
 
