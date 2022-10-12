@@ -596,6 +596,17 @@ contains
                                 "' in file "//trim(bc%fname)//", block "//trim(bc%bcname)//".") 
              return
           end select
+       case default
+           ! Give a warning/error if the key that looks like one of the keys
+           ! related to vertical positions is used, but is not recoqnized.
+           ! Note that key "NAME" is ignored here.
+           if (index(hdrkeys(ifld)%s, "VERT") > 0 .and. index(hdrkeys(ifld)%s, "POS") > 0) then
+               call setECMessage("Unknown keyword '"//trim(adjustl(hdrkeys(ifld)%s))//           &
+                                "' in file "//trim(bc%fname)//", block "//trim(bc%bcname)//".")
+               call setECMessage("Use one of: 'VERTICALPOSITION', 'VERTPOSITIONINDEX', " // &
+                                              "'VERTICALPOSITIONSPECIFICATION', 'VERTPOSITIONS'")
+               return
+           end if
        end select
     enddo
 
