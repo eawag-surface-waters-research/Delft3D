@@ -2059,7 +2059,7 @@ src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_utils/dropland.f90 -
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_utils/dropwater.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_utils/dropzout.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_utils/dumpnetlink.f90 -text
-src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_utils/filez.f90 -text
+src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_utils/filez.F90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_utils/hrfft.f -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_utils/inflowcell.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_utils/init_openmp.F90 -text
