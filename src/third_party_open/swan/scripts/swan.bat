@@ -23,13 +23,10 @@ if "%OMP_NUM_THREADS_SWAN%" == "" (
 @echo SWAN batchfile executed for Delft3D >>swan_bat.log
 @echo Using swan.bat in directory %~dp0 >>swan_bat.log
 @echo Using %swanexec% >>swan_bat.log
-@echo Performing wave computation for: %1.swn >>swan_bat.log
+@echo Performing wave computation for: INPUT >>swan_bat.log
 
 if exist PRINT (
 del PRINT >>swan_bat.log 2>&1
-)
-if exist INPUT (
-del INPUT >>swan_bat.log 2>&1
 )
 if exist swaninit (
 del swaninit >>swan_bat.log 2>&1
@@ -46,9 +43,8 @@ del %1.erf >>swan_bat.log 2>&1
 if exist %1.erp (
 del %1.erp >>swan_bat.log 2>&1
 )
-if not exist %1.swn goto error1
+if not exist INPUT goto error1
 if not exist "%swanexec%" goto error2
-copy %1.swn INPUT >>swan_bat.log 2>&1
 
 "%swanexec%" >>swan_bat.log
 
@@ -66,7 +62,7 @@ goto finish
 :error1
 @echo >>swan_bat.log
 @echo     ************************************************************** >>swan_bat.log
-@echo                SWAN input file %1.swn does not exist >>swan_bat.log
+@echo                SWAN input file INPUT does not exist >>swan_bat.log
 @echo     ************************************************************** >>swan_bat.log
 rem pause
 goto finish

@@ -110,7 +110,6 @@ subroutine del_temp_files(n_swan_grids)
     ! Remove all known temporary files
     !
     tmpfiles(1) = 'TMP_write_wavm'
-    tmpfiles(2) = 'swan.inp'
     tmpfiles(3) = 'norm_end'
     tmpfiles(4) = 'BOTNOW'
     tmpfiles(5) = 'CURNOW'

@@ -262,6 +262,7 @@ module swan_input
        logical                                 :: varfri
        logical                                 :: windgrowth
        logical                                 :: flowLinkConnectivity ! false: (default) use netlink connectivity from DFlowFM, true: use flowlink connectivity from DFlowFM
+       logical                                 :: keepinput 
        !
        real                                    :: alpw
        real                                    :: alfa
@@ -1178,6 +1179,7 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
     sr%swflux              = .true.
     sr%swmapwritenetcdf    = .true.
     sr%netcdf_sp           = .false.
+    sr%keepinput           = .false.
     par                    = 0
     !
     ! Standard output options
@@ -1195,11 +1197,12 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
        write(*,'(a)') "ERROR: No longer supported: stand alone WAVE computation using FLOW data in a com-file via keyword 'FlowGridForCom'"
        goto 999
     endif
-    call prop_get_string (mdw_ptr, 'Output', 'COMFile'         , sr%flowgridfile)
-    call prop_get_logical(mdw_ptr, 'Output', 'AppendCOM'       , sr%append_com)
-    call prop_get_logical(mdw_ptr, 'Output', 'MapWriteNetCDF'  , sr%swmapwritenetcdf)
+    call prop_get_string (mdw_ptr, 'Output', 'COMFile'                , sr%flowgridfile)
+    call prop_get_logical(mdw_ptr, 'Output', 'AppendCOM'              , sr%append_com)
+    call prop_get_logical(mdw_ptr, 'Output', 'MapWriteNetCDF'         , sr%swmapwritenetcdf)
     call prop_get_logical(mdw_ptr, 'Output', 'NetCDFSinglePrecision'  , sr%netcdf_sp)
-    call prop_get_integer(mdw_ptr, 'Output', 'ncFormat'  , par)
+    call prop_get_logical(mdw_ptr, 'Output', 'KeepINPUT'              , sr%keepinput)
+    call prop_get_integer(mdw_ptr, 'Output', 'ncFormat'               , par)
     call set_ncmode(wavedata%output, ncu_format_to_cmode(par))
     !
     sr%output_ice = 0
@@ -2379,6 +2382,7 @@ subroutine write_swan_inp (wavedata, calccount, &
     integer                     :: sect
     integer                     :: shape
     integer                     :: loc    
+    integer                     :: nuerr
     logical                     :: exists
     logical                     :: frame
     real                        :: alpb
@@ -2411,6 +2415,7 @@ subroutine write_swan_inp (wavedata, calccount, &
     character(85)               :: line
     character(79)               :: pointname
     character(256)              :: fname
+    character(4)                :: copy
     type(swan_bnd), pointer     :: bnd
     type(swan_dom), pointer     :: dom
     !
@@ -2484,7 +2489,7 @@ subroutine write_swan_inp (wavedata, calccount, &
        write(*,'(5a)') '*** MESSAGE: ''',trim(casl),''' is truncated to ''',trim(casl_short),''' in SWAN input file'
        lc = len_trim(casl_short)
     endif
-    open (newunit = luninp, file = 'swan.inp')
+    open (newunit = luninp, file = 'INPUT', status = 'replace')
     line       = ' '
     line(1:72) =                                           &
      & '$***************************** HEADING ************&
@@ -3864,6 +3869,19 @@ subroutine write_swan_inp (wavedata, calccount, &
     write (luninp, '(1X,A)') line
     line        = ' '
     close (luninp)
+    !
+    ! keepinput:
+    ! keepinput = true : keep a copy of the swan INPUT file
+    !
+    if(sr%keepinput) then
+        copy = 'copy'
+        write(fname, '(a,i0,4a)') 'INPUT_', inest,'_', tbegc(1:8), '_', tbegc(10:15)
+        call cp_file( 'INPUT', fname, copy, nuerr)
+        if (nuerr > 0) then
+            write (*,*) '*** ERROR: While copying INPUT to ', trim(fname),', errorcode:', nuerr
+            call wavestop(1, '*** ERROR: While copying INPUT to ', trim(fname)) 
+        endif
+    endif
 !
 !
 !

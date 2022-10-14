@@ -139,7 +139,7 @@ if [ "${1:-0}" = "0" ]; then
   # ready=1
 fi
 if [ ${ready} -eq 0 ]; then
-  echo "Performing computation for: ${1}.swn" >>swan_sh.log
+  echo "Performing computation for: INPUT" >>swan_sh.log
   #
   # Check whether SWAN executable exist
   #
@@ -147,15 +147,11 @@ if [ ${ready} -eq 0 ]; then
     #
     # Check whether inputfile $1.swn exists
     #
-    if [ -f "${1}.swn" ]; then
+	if [ -f "INPUT" ]; then
       #
       # Delete scratch files first
       #
-      rm -rf PRINT INPUT swaninit Errfile errpts ${1}.erf ${1}.erp >/dev/null
-      #
-      # Copy input to INPUT file and run SWAN executable
-      #
-      cp $1.swn INPUT >/dev/null
+	  rm -rf PRINT swaninit Errfile errpts ${1}.erf ${1}.erp >/dev/null
       #
       #echo press enter to continue
       #read dummy
@@ -213,7 +209,7 @@ if [ ${ready} -eq 0 ]; then
       fi
     else
       echo " " >>swan_sh.log
-      echo "*** Error: SWAN input file ${1}.swn does not exist" >>swan_sh.log
+	  echo "*** Error: SWAN input file INPUT does not exist" >>swan_sh.log
       echo " " >>swan_sh.log
       # read dummy
     fi

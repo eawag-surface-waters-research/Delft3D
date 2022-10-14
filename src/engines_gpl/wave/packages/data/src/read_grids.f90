@@ -1282,9 +1282,6 @@ subroutine readregulargrid(filnam, sferic_exp, xorigin, yorigin, alpha, &
        pos = index(rec,'Missing Value')
        if (pos >= 1) then
           kw_found = .true.
-          ! BS UNST-6204 save the missing vallue value 
-          !pos      = index(rec,'=') + 1 
-          !read(rec(pos:),*,err=8888) xymiss
        endif
     if (kw_found) goto 10
     !

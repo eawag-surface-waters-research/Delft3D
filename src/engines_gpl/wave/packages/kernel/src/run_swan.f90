@@ -52,32 +52,14 @@ subroutine run_swan (casl)
     logical                 :: ex
     character(*)            :: casl
     character(4)            :: labl     
-    character(4)            :: copy
     character(5)            :: prints
     character(6)            :: append
-    character(8)            :: swninp
-    character(256)          :: wvsswn
     character(256)          :: string
     character(1024)         :: swanCommand
 !
 !! executable statements -------------------------------------------------------
 !
-    wvsswn = ' '
     labl   = ' '
-    swninp = 'swan.inp'
-    write (wvsswn, '(a)') trim(casl)
-    ind    = index( wvsswn, ' ')
-    ncasl  = ind - 1
-    if (ncasl == 0) then
-       ncasl = 3
-    endif
-    wvsswn(ind:) = '.swn'
-    copy = 'copy'
-    call cp_file( swninp, wvsswn, copy, nuerr)
-    if (nuerr > 0) then
-       write (*, '(3a,i3)') '*** ERROR: While copying swan.inp to ',trim(wvsswn),', errorcode:', nuerr
-       call wavestop(1, '*** ERROR: While copying swan.inp to <case>.swn')
-    endif
     !
     ! SWAN execution
     !
@@ -101,16 +83,6 @@ subroutine run_swan (casl)
            if (.not. ex) then
               write (*,'(3a)') '*** ERROR: preprocessing script "', trim(swan_run%scriptname), '" ran without generating ''INPUT'' file'
               call wavestop(1, '*** ERROR: preprocessing script ran without generating ''INPUT'' file')
-           endif
-       else
-           !
-           ! No preprocessing script specified.
-           ! Copy input file directly to INPUT.
-           !
-           call cp_file( swninp, 'INPUT', copy, nuerr)
-           if (nuerr > 0) then
-              write (*, '(a,i3)') '*** ERROR: While copying swan.inp to INPUT, errorcode:', nuerr
-              call wavestop(1, '*** ERROR: While copying swan.inp to INPUT')
            endif
        endif
        !
