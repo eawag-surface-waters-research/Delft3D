@@ -337,23 +337,10 @@
   ! find the 1d2d flowlinks required for longculvertsToProfs
   do i  = 1, nlongculverts
     numcoords = size(longculverts(i)%xcoords)
-    !if (numcoords > 2) then
     call find1d2dculvertlinks(network,longculverts(i), numcoords)
-    !longculverts(i)%flowlinks(1)           = find1d2dculvertlink(network, longculverts(i)%xcoords(1        ),longculverts(i)%ycoords(1        ),longculverts(i)%xcoords(2          ),longculverts(i)%ycoords(2          ) )
-    !longculverts(i)%flowlinks(numcoords-1) = find1d2dculvertlink(network, longculverts(i)%xcoords(numcoords),longculverts(i)%ycoords(numcoords),longculverts(i)%xcoords(numcoords-1),longculverts(i)%ycoords(numcoords-1) )
-    !endif 
   enddo
   call longculvertsToProfs( .true. )
     else
-  !if ( cacheRetrieved() ) then
-  !  if (allocated(longculverts)) then
-  !     call copyCachedLongCulverts( longculverts, success )
-  !  else
-  !     success = .true.
-  !  end if
-  !else
-  !  success = .false.
-  !endif
   call longculvertsToProfs( .false. )
  endif
  if (blmeanbelow .ne. -999d0) then

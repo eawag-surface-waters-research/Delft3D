@@ -1144,7 +1144,8 @@ contains
    use m_flowparameters, only: eps10
    use m_partitioninfo, only: jampi,reduce_int_max
    use kdtree2Factory
-
+   use m_hash_search
+   
    type(t_network) , intent(inout)    :: network      !< Network structure
    integer, intent(in)                :: numcoords    !< number of polyline coordinates
    type(t_longculvert), intent(inout) :: longculvert  !< A givin long culvert
@@ -1163,9 +1164,26 @@ contains
      ! Find the flownode numbers for the starting and ending points of the long culvert polyline
      call realloc(inode,     2, keepExisting=.false.,fill=0)
      call realloc(inodeGlob, 2, keepExisting=.false.,fill=0)
-     call inflowcell(xpl(is), ypl(is), inode(1), -1, INDTP_ALL)
-     call inflowcell(xpl(ie), ypl(ie), inode(2), -1, INDTP_ALL)
 
+     i = hashsearch(network%brs%hashlist, longculvert%branchId)
+     !Find the last 1D node of the branch
+     if (i > 0 .and. network%BRS%size >= i) then
+        inode(1) = network%BRS%Branch(i)%FROMNODE%GRIDNUMBER
+        inode(2) = network%BRS%Branch(i)%TONODE%GRIDNUMBER
+
+        !find Flownode connected to this node by 1D2D link
+        do j = 1,2
+           do i = 1, nd(inode(j))%lnx
+              linknum = nd(inode(j))%ln(i)
+              linkabs = abs(linknum)
+              if (kcu(linkabs) == 5) then
+                 inode(j) = ln(1,linkabs) + ln(2,linkabs) - inode(j)
+                 exit
+              endif
+           enddo
+        enddo
+     endif
+     
      inodeGlob(1:2) = inode(1:2)
      if (jampi > 0) then
         ! Communicate inode in parallel run to get inodeGlob
