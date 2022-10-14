@@ -141,6 +141,7 @@ set(dflowfm_interacter_configuration "DFLOWFM_INTERACTER")
 set(tests_configuration "TESTS")
 set(dimr_configuration "DIMR")
 set(dwaq_configuration "DWAQ")
+set(drr_configuration "DRR")
 set(dwaves_configuration "DWAVES")
 set(swan_configuration "SWAN")
 set(flow2d3d_configuration "FLOW2D3D")
@@ -157,6 +158,7 @@ if(NOT (${configuration_type} STREQUAL ${tests_configuration}
      OR ${configuration_type} STREQUAL ${dflowfm_interacter_configuration}
      OR ${configuration_type} STREQUAL ${dimr_configuration}
      OR ${configuration_type} STREQUAL ${dwaq_configuration}
+     OR ${configuration_type} STREQUAL ${drr_configuration}
      OR ${configuration_type} STREQUAL ${dwaves_configuration}
      OR ${configuration_type} STREQUAL ${swan_configuration}
      OR ${configuration_type} STREQUAL ${flow2d3d_configuration}
@@ -197,6 +199,12 @@ endif()
 if(${configuration_type} STREQUAL ${dwaq_configuration})
     message(STATUS "Generating solution for D-Waq ...")
     include(configurations/dwaq_configuration.cmake)
+endif()
+
+# D-RR configuration
+if(${configuration_type} STREQUAL ${drr_configuration})
+    message(STATUS "Generating solution for D-RR ...")
+    include(configurations/drr_configuration.cmake)
 endif()
 
 # D-Waves configuration
