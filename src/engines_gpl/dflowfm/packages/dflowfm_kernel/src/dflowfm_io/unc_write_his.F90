@@ -3275,32 +3275,32 @@ subroutine unc_write_his(tim)            ! wrihis
             !      ierr = nf90_put_var(ihisfile, id_genstru_velgateunder,  valgenstru(25,i), (/ i, it_his /))
             !   end if
             !enddo
-            ierr = nf90_put_var(ihisfile, id_genstru_dis   , valobsT(1:ngenstru,2),  (/ 1, it_his /))
-            ierr = nf90_put_var(ihisfile, id_genstru_crestl, valobsT(1:ngenstru,9),  (/ 1, it_his /)) ! changed
-            ierr = nf90_put_var(ihisfile, id_genstru_edgel , valobsT(1:ngenstru,14), (/ 1, it_his /)) ! changed
-            ierr = nf90_put_var(ihisfile, id_genstru_openw , valobsT(1:ngenstru,13), (/ 1, it_his /)) ! changed
-            ierr = nf90_put_var(ihisfile, id_genstru_s1up  , valobsT(1:ngenstru,3),  (/ 1, it_his /))
-            ierr = nf90_put_var(ihisfile, id_genstru_s1dn  , valobsT(1:ngenstru,4),  (/ 1, it_his /))
-            ierr = nf90_put_var(ihisfile, id_genstru_head,          valobsT(1:ngenstru,5),  (/ 1, it_his /))
-            ierr = nf90_put_var(ihisfile, id_genstru_au,            valobsT(1:ngenstru,6),  (/ 1, it_his /))
-            ierr = nf90_put_var(ihisfile, id_genstru_vel,           valobsT(1:ngenstru,7),  (/ 1, it_his /))
-               if (network%sts%numGeneralStructures > 0) then
-               ierr = nf90_put_var(ihisfile, id_genstru_s1crest,       valobsT(1:ngenstru,8),  (/ 1, it_his /))
-               ierr = nf90_put_var(ihisfile, id_genstru_crestw,        valobsT(1:ngenstru,10), (/ 1, it_his /))
-               ierr = nf90_put_var(ihisfile, id_genstru_stat,      int(valobsT(1:ngenstru,11)),(/ 1, it_his /))
-               ierr = nf90_put_var(ihisfile, id_genstru_forcedif,      valobsT(1:ngenstru,12), (/ 1, it_his /))
-               ierr = nf90_put_var(ihisfile, id_genstru_openh,         valobsT(1:ngenstru,15), (/ 1, it_his /))
-               ierr = nf90_put_var(ihisfile, id_genstru_uppl,          valobsT(1:ngenstru,16), (/ 1, it_his /))
-               ierr = nf90_put_var(ihisfile, id_genstru_dis_gate_open, valobsT(1:ngenstru,17), (/ 1, it_his /))
-               ierr = nf90_put_var(ihisfile, id_genstru_dis_gate_over, valobsT(1:ngenstru,18), (/ 1, it_his /))
-               ierr = nf90_put_var(ihisfile, id_genstru_dis_gate_under,valobsT(1:ngenstru,19), (/ 1, it_his /))
-               ierr = nf90_put_var(ihisfile, id_genstru_au_open,       valobsT(1:ngenstru,20), (/ 1, it_his /))
-               ierr = nf90_put_var(ihisfile, id_genstru_au_over,       valobsT(1:ngenstru,21), (/ 1, it_his /))
-               ierr = nf90_put_var(ihisfile, id_genstru_au_under,      valobsT(1:ngenstru,22), (/ 1, it_his /))
-               ierr = nf90_put_var(ihisfile, id_genstru_velgateopen,   valobsT(1:ngenstru,23), (/ 1, it_his /))
-               ierr = nf90_put_var(ihisfile, id_genstru_velgateover,   valobsT(1:ngenstru,24), (/ 1, it_his /))
-               ierr = nf90_put_var(ihisfile, id_genstru_velgateunder,  valobsT(1:ngenstru,25), (/ 1, it_his /))
-               end if
+            ierr = nf90_put_var(ihisfile, id_genstru_dis   , valobsT(1:ngenstru,IVAL_DIS),       (/ 1, it_his /))
+            ierr = nf90_put_var(ihisfile, id_genstru_crestl, valobsT(1:ngenstru,IVAL_CRESTL),    (/ 1, it_his /)) ! changed
+            ierr = nf90_put_var(ihisfile, id_genstru_edgel , valobsT(1:ngenstru,IVAL_EDGEL),     (/ 1, it_his /)) ! changed
+            ierr = nf90_put_var(ihisfile, id_genstru_openw , valobsT(1:ngenstru,IVAL_OPENW),     (/ 1, it_his /)) ! changed
+            ierr = nf90_put_var(ihisfile, id_genstru_s1up  , valobsT(1:ngenstru,IVAL_S1UP),      (/ 1, it_his /))
+            ierr = nf90_put_var(ihisfile, id_genstru_s1dn  , valobsT(1:ngenstru,IVAL_S1DN),      (/ 1, it_his /))
+            ierr = nf90_put_var(ihisfile, id_genstru_head,   valobsT(1:ngenstru,IVAL_HEAD),      (/ 1, it_his /))
+            ierr = nf90_put_var(ihisfile, id_genstru_au,     valobsT(1:ngenstru,IVAL_AREA),      (/ 1, it_his /))
+            ierr = nf90_put_var(ihisfile, id_genstru_vel,    valobsT(1:ngenstru,IVAL_VEL),       (/ 1, it_his /))
+            if (network%sts%numGeneralStructures > 0) then
+               ierr = nf90_put_var(ihisfile, id_genstru_s1crest,       valobsT(1:ngenstru,IVAL_S1ONCREST),  (/ 1, it_his /))
+               ierr = nf90_put_var(ihisfile, id_genstru_crestw,        valobsT(1:ngenstru,IVAL_CRESTW),     (/ 1, it_his /))
+               ierr = nf90_put_var(ihisfile, id_genstru_stat,      int(valobsT(1:ngenstru,IVAL_STATE)),     (/ 1, it_his /))
+               ierr = nf90_put_var(ihisfile, id_genstru_forcedif,      valobsT(1:ngenstru,IVAL_FORCEDIF),   (/ 1, it_his /))
+               ierr = nf90_put_var(ihisfile, id_genstru_openh,         valobsT(1:ngenstru,IVAL_OPENH),      (/ 1, it_his /))
+               ierr = nf90_put_var(ihisfile, id_genstru_uppl,          valobsT(1:ngenstru,IVAL_UPPL),       (/ 1, it_his /))
+               ierr = nf90_put_var(ihisfile, id_genstru_dis_gate_open, valobsT(1:ngenstru,IVAL_DIS_OPEN),   (/ 1, it_his /))
+               ierr = nf90_put_var(ihisfile, id_genstru_dis_gate_over, valobsT(1:ngenstru,IVAL_DIS_OVER),   (/ 1, it_his /))
+               ierr = nf90_put_var(ihisfile, id_genstru_dis_gate_under,valobsT(1:ngenstru,IVAL_DIS_UNDER),  (/ 1, it_his /))
+               ierr = nf90_put_var(ihisfile, id_genstru_au_open,       valobsT(1:ngenstru,IVAL_AREA_OPEN),  (/ 1, it_his /))
+               ierr = nf90_put_var(ihisfile, id_genstru_au_over,       valobsT(1:ngenstru,IVAL_AREA_OVER),  (/ 1, it_his /))
+               ierr = nf90_put_var(ihisfile, id_genstru_au_under,      valobsT(1:ngenstru,IVAL_AREA_UNDER), (/ 1, it_his /))
+               ierr = nf90_put_var(ihisfile, id_genstru_velgateopen,   valobsT(1:ngenstru,IVAL_VEL_OPEN),   (/ 1, it_his /))
+               ierr = nf90_put_var(ihisfile, id_genstru_velgateover,   valobsT(1:ngenstru,IVAL_VEL_OVER),   (/ 1, it_his /))
+               ierr = nf90_put_var(ihisfile, id_genstru_velgateunder,  valobsT(1:ngenstru,IVAL_VEL_UNDER),  (/ 1, it_his /))
+            end if
             ! write geometry variables at the first time of history output
             if (it_his == 1) then
                if (network%sts%numGeneralStructures > 0) then ! new general structure
@@ -3351,17 +3351,17 @@ subroutine unc_write_his(tim)            ! wrihis
          !   ierr = nf90_put_var(ihisfile, id_pump_s1del,   valpump(10,i),(/ i, it_his /))
          !   ierr = nf90_put_var(ihisfile, id_pump_s1suc,   valpump(11,i),(/ i, it_his /))
          !end do
-         ierr = nf90_put_var(ihisfile, id_pump_dis,     valobsT(1:npumpsg,2), (/ 1, it_his /))
-         ierr = nf90_put_var(ihisfile, id_pump_s1up,    valobsT(1:npumpsg,3), (/ 1, it_his /))
-         ierr = nf90_put_var(ihisfile, id_pump_s1dn,    valobsT(1:npumpsg,4), (/ 1, it_his /))
-         ierr = nf90_put_var(ihisfile, id_pump_struhead,valobsT(1:npumpsg,5), (/ 1, it_his /))
-         ierr = nf90_put_var(ihisfile, id_pump_cap,     valobsT(1:npumpsg,6), (/ 1, it_his /))
-         ierr = nf90_put_var(ihisfile, id_pump_disdir,  valobsT(1:npumpsg,12), (/ 1, it_his /))
-         ierr = nf90_put_var(ihisfile, id_pump_stage,int(valobsT(1:npumpsg,7)),(/ 1, it_his /))
-         ierr = nf90_put_var(ihisfile, id_pump_head,    valobsT(1:npumpsg,8), (/ 1, it_his /))
-         ierr = nf90_put_var(ihisfile, id_pump_redufact,valobsT(1:npumpsg,9), (/ 1, it_his /))
-         ierr = nf90_put_var(ihisfile, id_pump_s1del,   valobsT(1:npumpsg,10),(/ 1, it_his /))
-         ierr = nf90_put_var(ihisfile, id_pump_s1suc,   valobsT(1:npumpsg,11),(/ 1, it_his /))
+         ierr = nf90_put_var(ihisfile, id_pump_dis,     valobsT(1:npumpsg,IVAL_DIS),      (/ 1, it_his /))
+         ierr = nf90_put_var(ihisfile, id_pump_s1up,    valobsT(1:npumpsg,IVAL_S1UP),     (/ 1, it_his /))
+         ierr = nf90_put_var(ihisfile, id_pump_s1dn,    valobsT(1:npumpsg,IVAL_S1DN),     (/ 1, it_his /))
+         ierr = nf90_put_var(ihisfile, id_pump_struhead,valobsT(1:npumpsg,IVAL_HEAD),     (/ 1, it_his /))
+         ierr = nf90_put_var(ihisfile, id_pump_cap,     valobsT(1:npumpsg,IVAL_PP_CAP),   (/ 1, it_his /))
+         ierr = nf90_put_var(ihisfile, id_pump_disdir,  valobsT(1:npumpsg,IVAL_PP_DISDIR),(/ 1, it_his /))
+         ierr = nf90_put_var(ihisfile, id_pump_stage,int(valobsT(1:npumpsg,IVAL_PP_STAG)),(/ 1, it_his /))
+         ierr = nf90_put_var(ihisfile, id_pump_head,    valobsT(1:npumpsg,IVAL_PP_HEAD),  (/ 1, it_his /))
+         ierr = nf90_put_var(ihisfile, id_pump_redufact,valobsT(1:npumpsg,IVAL_PP_RED),   (/ 1, it_his /))
+         ierr = nf90_put_var(ihisfile, id_pump_s1del,   valobsT(1:npumpsg,IVAL_PP_S1DEL), (/ 1, it_his /))
+         ierr = nf90_put_var(ihisfile, id_pump_s1suc,   valobsT(1:npumpsg,IVAL_PP_S1SUC), (/ 1, it_his /))
          ! write geometry variables at the first time of history output
          if (it_his == 1) then
             if (network%sts%numPumps > 0) then ! new pump
@@ -3418,19 +3418,19 @@ subroutine unc_write_his(tim)            ! wrihis
 
       if (jahisorif > 0 .and. network%sts%numOrifices > 0) then
          do i=1,network%sts%numOrifices
-            ierr = nf90_put_var(ihisfile, id_orifgen_dis   ,        valorifgen(2,i),   (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_orifgen_s1up  ,        valorifgen(3,i),   (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_orifgen_s1dn  ,        valorifgen(4,i),   (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_orifgen_head,          valorifgen(5,i),   (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_orifgen_au,            valorifgen(6,i),   (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_orifgen_vel,           valorifgen(7,i),   (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_orifgen_s1crest,       valorifgen(8,i),   (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_orifgen_crestl,        valorifgen(9,i),   (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_orifgen_crestw,        valorifgen(10,i),  (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_orifgen_stat,      int(valorifgen(11,i)), (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_orifgen_forcedif,      valorifgen(12,i),  (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_orifgen_edgel ,        valorifgen(14,i),  (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_orifgen_openh,         valorifgen(15,i),  (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_orifgen_dis   ,        valorifgen(IVAL_DIS,i),        (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_orifgen_s1up  ,        valorifgen(IVAL_S1UP,i),       (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_orifgen_s1dn  ,        valorifgen(IVAL_S1DN,i),       (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_orifgen_head,          valorifgen(IVAL_HEAD,i),       (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_orifgen_au,            valorifgen(IVAL_AREA,i),       (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_orifgen_vel,           valorifgen(IVAL_VEL,i),        (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_orifgen_s1crest,       valorifgen(IVAL_S1ONCREST,i),  (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_orifgen_crestl,        valorifgen(IVAL_CRESTL,i),     (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_orifgen_crestw,        valorifgen(IVAL_CRESTW,i),     (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_orifgen_stat,      int(valorifgen(IVAL_STATE,i)),     (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_orifgen_forcedif,      valorifgen(IVAL_FORCEDIF,i),   (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_orifgen_edgel ,        valorifgen(IVAL_EDGEL,i),      (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_orifgen_openh,         valorifgen(IVAL_OPENH,i),      (/ i, it_his /))
          enddo
          ! write geometry variables at the first time of history output
          if (it_his == 1) then
@@ -3456,15 +3456,15 @@ subroutine unc_write_his(tim)            ! wrihis
          !   ierr = nf90_put_var(ihisfile, id_bridge_bldn,  valbridge(9,i), (/ i, it_his /))
          !   ierr = nf90_put_var(ihisfile, id_bridge_bl_act,valbridge(10,i),(/ i, it_his /))
          !enddo
-            ierr = nf90_put_var(ihisfile, id_bridge_dis,   valbridge(2, 1:network%sts%numBridges), (/ 1, it_his /))
-            ierr = nf90_put_var(ihisfile, id_bridge_s1up,  valbridge(3, 1:network%sts%numBridges), (/ 1, it_his /))
-            ierr = nf90_put_var(ihisfile, id_bridge_s1dn,  valbridge(4, 1:network%sts%numBridges), (/ 1, it_his /))
-            ierr = nf90_put_var(ihisfile, id_bridge_head,  valbridge(5, 1:network%sts%numBridges), (/ 1, it_his /))
-            ierr = nf90_put_var(ihisfile, id_bridge_au,    valbridge(6, 1:network%sts%numBridges), (/ 1, it_his /))
-            ierr = nf90_put_var(ihisfile, id_bridge_vel,   valbridge(7, 1:network%sts%numBridges), (/ 1, it_his /))
-            ierr = nf90_put_var(ihisfile, id_bridge_blup,  valbridge(8, 1:network%sts%numBridges), (/ 1, it_his /))
-            ierr = nf90_put_var(ihisfile, id_bridge_bldn,  valbridge(9, 1:network%sts%numBridges), (/ 1, it_his /))
-            ierr = nf90_put_var(ihisfile, id_bridge_bl_act,valbridge(10,1:network%sts%numBridges), (/ 1, it_his /))
+            ierr = nf90_put_var(ihisfile, id_bridge_dis,   valbridge(IVAL_DIS, 1:network%sts%numBridges),     (/ 1, it_his /))
+            ierr = nf90_put_var(ihisfile, id_bridge_s1up,  valbridge(IVAL_S1UP, 1:network%sts%numBridges),    (/ 1, it_his /))
+            ierr = nf90_put_var(ihisfile, id_bridge_s1dn,  valbridge(IVAL_S1DN, 1:network%sts%numBridges),    (/ 1, it_his /))
+            ierr = nf90_put_var(ihisfile, id_bridge_head,  valbridge(IVAL_HEAD, 1:network%sts%numBridges),    (/ 1, it_his /))
+            ierr = nf90_put_var(ihisfile, id_bridge_au,    valbridge(IVAL_AREA, 1:network%sts%numBridges),    (/ 1, it_his /))
+            ierr = nf90_put_var(ihisfile, id_bridge_vel,   valbridge(IVAL_VEL, 1:network%sts%numBridges),     (/ 1, it_his /))
+            ierr = nf90_put_var(ihisfile, id_bridge_blup,  valbridge(IVAL_BLUP, 1:network%sts%numBridges),    (/ 1, it_his /))
+            ierr = nf90_put_var(ihisfile, id_bridge_bldn,  valbridge(IVAL_BLDN, 1:network%sts%numBridges),    (/ 1, it_his /))
+            ierr = nf90_put_var(ihisfile, id_bridge_bl_act,valbridge(IVAL_BLACTUAL,1:network%sts%numBridges), (/ 1, it_his /))
          ! write geometry variables at the first time of history output
          if (it_his == 1) then
             if (timon) call timstrt('Bridge geom', handle_extra(74))
@@ -3481,16 +3481,16 @@ subroutine unc_write_his(tim)            ! wrihis
 
       if (jahisculv > 0 .and. network%sts%numCulverts > 0) then
          do i=1,network%sts%numCulverts
-            ierr = nf90_put_var(ihisfile, id_culvert_dis,    valculvert(2,i),      (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_culvert_s1up,   valculvert(3,i),      (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_culvert_s1dn,   valculvert(4,i),      (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_culvert_head,   valculvert(5,i),      (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_culvert_au,     valculvert(6,i),      (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_culvert_vel,    valculvert(7,i),      (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_culvert_crestl, valculvert(8,i),      (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_culvert_stat,  int(valculvert(9,i)),  (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_culvert_edgel , valculvert(10,i),     (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_culvert_openh,  valculvert(11,i),     (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_culvert_dis,    valculvert(IVAL_DIS,i),           (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_culvert_s1up,   valculvert(IVAL_S1UP,i),          (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_culvert_s1dn,   valculvert(IVAL_S1DN,i),          (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_culvert_head,   valculvert(IVAL_HEAD,i),          (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_culvert_au,     valculvert(IVAL_AREA,i),          (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_culvert_vel,    valculvert(IVAL_VEL,i),           (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_culvert_crestl, valculvert(IVAL_CL_CRESTL,i),     (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_culvert_stat,  int(valculvert(IVAL_CL_STATE,i)),  (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_culvert_edgel , valculvert(IVAL_CL_EDGEL,i),      (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_culvert_openh,  valculvert(IVAL_CL_OPENH,i),      (/ i, it_his /))
          enddo
          ! write geometry variables at the first time of history output
          if (it_his == 1) then
@@ -3505,13 +3505,13 @@ subroutine unc_write_his(tim)            ! wrihis
 
       if (jahisuniweir > 0 .and. network%sts%numuniweirs > 0) then
          do i=1,network%sts%numuniweirs
-            ierr = nf90_put_var(ihisfile, id_uniweir_dis,    valuniweir(2,i),      (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_uniweir_s1up,   valuniweir(3,i),      (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_uniweir_s1dn,   valuniweir(4,i),      (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_uniweir_head,   valuniweir(5,i),      (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_uniweir_au,     valuniweir(6,i),      (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_uniweir_vel,    valuniweir(7,i),      (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_uniweir_crestl, valuniweir(8,i),      (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_uniweir_dis,    valuniweir(IVAL_DIS,i),       (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_uniweir_s1up,   valuniweir(IVAL_S1UP,i),      (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_uniweir_s1dn,   valuniweir(IVAL_S1DN,i),      (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_uniweir_head,   valuniweir(IVAL_HEAD,i),      (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_uniweir_au,     valuniweir(IVAL_AREA,i),      (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_uniweir_vel,    valuniweir(IVAL_VEL,i),       (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_uniweir_crestl, valuniweir(IVAL_UW_CRESTL,i), (/ i, it_his /))
          enddo
          ! write geometry variables at the first time of history output
          if (it_his == 1) then
@@ -3526,24 +3526,24 @@ subroutine unc_write_his(tim)            ! wrihis
 
       if (jahiscmpstru > 0 .and. network%cmps%count > 0) then
          do i=1,network%cmps%count
-            ierr = nf90_put_var(ihisfile, id_cmpstru_dis,            valcmpstru(2,i), (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_cmpstru_s1up,           valcmpstru(3,i), (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_cmpstru_s1dn,           valcmpstru(4,i), (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_cmpstru_head,           valcmpstru(5,i), (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_cmpstru_au,             valcmpstru(6,i), (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_cmpstru_vel,            valcmpstru(7,i), (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_cmpstru_dis,            valcmpstru(IVAL_DIS,i),  (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_cmpstru_s1up,           valcmpstru(IVAL_S1UP,i), (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_cmpstru_s1dn,           valcmpstru(IVAL_S1DN,i), (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_cmpstru_head,           valcmpstru(IVAL_HEAD,i), (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_cmpstru_au,             valcmpstru(IVAL_AREA,i), (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_cmpstru_vel,            valcmpstru(IVAL_VEL,i),  (/ i, it_his /))
          enddo
       end if
 
       if (jahislongculv > 0 .and. nlongculverts > 0) then
          do i=1,nlongculverts
-            ierr = nf90_put_var(ihisfile, id_longculvert_dis,       vallongculvert(2,i),      (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_longculvert_s1up,      vallongculvert(3,i),      (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_longculvert_s1dn,      vallongculvert(4,i),      (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_longculvert_head,      vallongculvert(5,i),      (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_longculvert_au,        vallongculvert(6,i),      (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_longculvert_vel,       vallongculvert(7,i),      (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_longculvert_valveopen, vallongculvert(8,i),      (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_longculvert_dis,       vallongculvert(IVAL_DIS,i),      (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_longculvert_s1up,      vallongculvert(IVAL_S1UP,i),     (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_longculvert_s1dn,      vallongculvert(IVAL_S1DN,i),     (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_longculvert_head,      vallongculvert(IVAL_HEAD,i),     (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_longculvert_au,        vallongculvert(IVAL_AREA,i),     (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_longculvert_vel,       vallongculvert(IVAL_VEL,i),      (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_longculvert_valveopen, vallongculvert(IVAL_LC_VALVE,i), (/ i, it_his /))
          enddo
          ! write geometry variables at the first time of history output
          if (it_his == 1) then
@@ -3581,13 +3581,13 @@ subroutine unc_write_his(tim)            ! wrihis
       if (jahisgate > 0 .and. ngategen > 0) then
          do i=1,ngategen
             igen = gate2cgen(i)
-            ierr = nf90_put_var(ihisfile, id_gategen_dis  , valgategen(2,i), (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_gategen_sillh, valgategen(9,i), (/ i, it_his /))   ! changed
-            ierr = nf90_put_var(ihisfile, id_gategen_edgel, valgategen(8,i), (/ i, it_his /))   ! changed
-            ierr = nf90_put_var(ihisfile, id_gategen_flowh, valgategen(5,i), (/ i, it_his /))   ! TODO: AvD sillw
-            ierr = nf90_put_var(ihisfile, id_gategen_openw, valgategen(7,i), (/ i, it_his /))   ! changed
-            ierr = nf90_put_var(ihisfile, id_gategen_s1up , valgategen(3,i), (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_gategen_s1dn , valgategen(4,i), (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_gategen_dis  , valgategen(IVAL_DIS,i),        (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_gategen_sillh, valgategen(IVAL_GATE_SILLH,i), (/ i, it_his /))   ! changed
+            ierr = nf90_put_var(ihisfile, id_gategen_edgel, valgategen(IVAL_GATE_EDGEL,i), (/ i, it_his /))   ! changed
+            ierr = nf90_put_var(ihisfile, id_gategen_flowh, valgategen(IVAL_GATE_FLOWH,i), (/ i, it_his /))   ! TODO: AvD sillw
+            ierr = nf90_put_var(ihisfile, id_gategen_openw, valgategen(IVAL_GATE_OPENW,i), (/ i, it_his /))   ! changed
+            ierr = nf90_put_var(ihisfile, id_gategen_s1up , valgategen(IVAL_S1UP,i),       (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_gategen_s1dn , valgategen(IVAL_S1DN,i),       (/ i, it_his /))
          end do
          ! write geometry variables at the first time of history output
          if (it_his == 1) then
@@ -3640,19 +3640,19 @@ subroutine unc_write_his(tim)            ! wrihis
          !      ierr = nf90_put_var(ihisfile, id_weirgen_forcedif,valweirgen(12,i),(/i, it_his /))
          !   end if
          !end do
-         ierr = nf90_put_var(ihisfile, id_weirgen_dis   , valobsT(1:nweirgen,2), (/ 1, it_his /))
-         ierr = nf90_put_var(ihisfile, id_weirgen_s1up  , valobsT(1:nweirgen,3), (/ 1, it_his /))
-         ierr = nf90_put_var(ihisfile, id_weirgen_s1dn  , valobsT(1:nweirgen,4), (/ 1, it_his /))
-         ierr = nf90_put_var(ihisfile, id_weirgen_crestl, valobsT(1:nweirgen,9), (/ 1, it_his /))
-         ierr = nf90_put_var(ihisfile, id_weirgen_crestw, valobsT(1:nweirgen,10),(/ 1, it_his /))
-            if (network%sts%numWeirs > 0) then ! write extra files for new weirs
-            ierr = nf90_put_var(ihisfile, id_weirgen_head  , valobsT(1:nweirgen,5),  (/ 1, it_his /))
-            ierr = nf90_put_var(ihisfile, id_weirgen_au    , valobsT(1:nweirgen,6),  (/ 1, it_his /))
-            ierr = nf90_put_var(ihisfile, id_weirgen_vel   , valobsT(1:nweirgen,7),  (/ 1, it_his /))
-            ierr = nf90_put_var(ihisfile, id_weirgen_s1crest,valobsT(1:nweirgen,8),  (/ 1, it_his /))
-            ierr = nf90_put_var(ihisfile, id_weir_stat, int(valobsT(1:nweirgen,11)),(/ 1, it_his /))
-            ierr = nf90_put_var(ihisfile, id_weirgen_forcedif,valobsT(1:nweirgen,12),(/1, it_his /))
-            end if
+         ierr = nf90_put_var(ihisfile, id_weirgen_dis   , valobsT(1:nweirgen,IVAL_DIS),    (/ 1, it_his /))
+         ierr = nf90_put_var(ihisfile, id_weirgen_s1up  , valobsT(1:nweirgen,IVAL_S1UP),   (/ 1, it_his /))
+         ierr = nf90_put_var(ihisfile, id_weirgen_s1dn  , valobsT(1:nweirgen,IVAL_S1DN),   (/ 1, it_his /))
+         ierr = nf90_put_var(ihisfile, id_weirgen_crestl, valobsT(1:nweirgen,IVAL_CRESTL), (/ 1, it_his /))
+         ierr = nf90_put_var(ihisfile, id_weirgen_crestw, valobsT(1:nweirgen,IVAL_CRESTW), (/ 1, it_his /))
+         if (network%sts%numWeirs > 0) then ! write extra files for new weirs
+            ierr = nf90_put_var(ihisfile, id_weirgen_head  , valobsT(1:nweirgen,IVAL_HEAD),     (/ 1, it_his /))
+            ierr = nf90_put_var(ihisfile, id_weirgen_au    , valobsT(1:nweirgen,IVAL_AREA),     (/ 1, it_his /))
+            ierr = nf90_put_var(ihisfile, id_weirgen_vel   , valobsT(1:nweirgen,IVAL_VEL),      (/ 1, it_his /))
+            ierr = nf90_put_var(ihisfile, id_weirgen_s1crest,valobsT(1:nweirgen,IVAL_S1ONCREST),(/ 1, it_his /))
+            ierr = nf90_put_var(ihisfile, id_weir_stat, int(valobsT(1:nweirgen,IVAL_STATE)),    (/ 1, it_his /))
+            ierr = nf90_put_var(ihisfile, id_weirgen_forcedif,valobsT(1:nweirgen,IVAL_FORCEDIF),(/ 1, it_his /))
+         end if
          ! write geometry variables at the first time of history output
          if (it_his == 1) then
 
@@ -3692,17 +3692,17 @@ subroutine unc_write_his(tim)            ! wrihis
 
       if (jahisdambreak > 0 .and. ndambreak > 0) then
          do i = 1,ndambreaksg
-            ierr = nf90_put_var(ihisfile, id_dambreak_discharge,                    valdambreak(2,i),  (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_dambreak_s1up,                         valdambreak(3,i),  (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_dambreak_s1dn,                         valdambreak(4,i),  (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_dambreak_head,                         valdambreak(5,i),  (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_dambreak_au,                           valdambreak(6,i),  (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_dambreak_normal_velocity,              valdambreak(7,i),  (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_dambreak_cresth,                       valdambreak(8,i),  (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_dambreak_crestw,                       valdambreak(9,i),  (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_dambreak_water_level_jump,             valdambreak(10,i), (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_dambreak_breach_width_time_derivative, valdambreak(11,i), (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_dambreak_cumulative_discharge,         valdambreak(12,i), (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_dambreak_discharge,                    valdambreak(IVAL_DIS,i),        (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_dambreak_s1up,                         valdambreak(IVAL_S1UP,i),       (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_dambreak_s1dn,                         valdambreak(IVAL_S1DN,i),       (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_dambreak_head,                         valdambreak(IVAL_HEAD,i),       (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_dambreak_au,                           valdambreak(IVAL_AREA,i),       (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_dambreak_normal_velocity,              valdambreak(IVAL_VEL,i),        (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_dambreak_cresth,                       valdambreak(IVAL_DB_CRESTH,i),  (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_dambreak_crestw,                       valdambreak(IVAL_DB_CRESTW,i),  (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_dambreak_water_level_jump,             valdambreak(IVAL_DB_JUMP,i),    (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_dambreak_breach_width_time_derivative, valdambreak(IVAL_DB_TIMEDIV,i), (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_dambreak_cumulative_discharge,         valdambreak(IVAL_DB_DISCUM,i),  (/ i, it_his /))
          end do
       end if
       if (timon) call timstop ( handle_extra(62))

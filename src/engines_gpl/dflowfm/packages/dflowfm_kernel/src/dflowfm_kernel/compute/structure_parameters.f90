@@ -78,8 +78,8 @@
       !
       if (allocated(valpump)) then
          do n = 1,npumpsg
-            valpump(1:5,n) = 0d0
-            valpump(6:NUMVALS_PUMP,n) = dmiss
+            valpump(1:NUMVALS_COMMON_PUMP,n)   = 0d0
+            valpump(NUMVALS_COMMON_PUMP+1:NUMVALS_PUMP,n) = dmiss
             if (allocated(pumpsWithLevels)) then
                istru = pumpsWithLevels(n)
             else
@@ -238,29 +238,46 @@
                   ku = ln(2,La)
                   kd = ln(1,La)
                end if
-               valgategen(1,n) = valgategen(1,n) + wu(La)
-               valgategen(2,n) = valgategen(2,n) + q1(La) * dir
-               valgategen(3,n) = valgategen(3,n) + s1(ku) * wu(La)
-               valgategen(4,n) = valgategen(4,n) + s1(kd) * wu(La)
+               valgategen(IVAL_WIDTH,n) = valgategen(IVAL_WIDTH,n) + wu(La)
+               valgategen(IVAL_DIS,n) = valgategen(IVAL_DIS,n) + q1(La) * dir
+               if (hs(ku) > epshs) then
+                  valgategen(IVAL_WIDTHUP,n) = valgategen(IVAL_WIDTHUP,n) + wu(L)
+                  valgategen(IVAL_S1UP,n)    = valgategen(IVAL_S1UP,n) + s1(ku)*wu(L)
+               end if
+               if (hs(kd) > epshs) then
+                  valgategen(IVAL_WIDTHDN,n) = valgategen(IVAL_WIDTHDN,n) + wu(L)
+                  valgategen(IVAL_S1DN,n)    = valgategen(IVAL_S1DN,n) + s1(kd)*wu(L)
+               end if
+               if (hs(ku) > epshs .and. hs(kd) > epshs) then
+                  valgategen(IVAL_WIDTHUPDN,n) = valgategen(IVAL_WIDTHUPDN,n) + wu(L)
+                  valgategen(IVAL_HEAD,n)      = valgategen(IVAL_HEAD,n) + (s1(ku) - s1(kd))*wu(L)
+               end if
+
                k = kcgen(1,L) ; if( q1(La) < 0d0 ) k = kcgen(2,L)
-               valgategen(5,n) = valgategen(5,n) + s1(k) * wu(La)
+               valgategen(IVAL_GATE_FLOWH,n) = valgategen(IVAL_GATE_FLOWH,n) + s1(k) * wu(La)
             enddo
             if (L1cgensg(i) <= L2cgensg(i)) then ! At least one flow link in this domain is affected by this structure.
-               valgategen(6,n) = 1               ! rank contains the gate.
-               valgategen(7,n) = zcgen(3*i  )    ! id_gategen_openw.
-               valgategen(8,n) = zcgen(3*i-1)    ! id_gategen_edgel.
-               valgategen(9,n) = zcgen(3*i-2)    ! id_gategen_sillh.
+               valgategen(IVAL_GATE_COUNT,n) = 1               ! rank contains the gate.
+               valgategen(IVAL_GATE_OPENW,n) = zcgen(3*i  )    ! id_gategen_openw.
+               valgategen(IVAL_GATE_EDGEL,n) = zcgen(3*i-1)    ! id_gategen_edgel.
+               valgategen(IVAL_GATE_SILLH,n) = zcgen(3*i-2)    ! id_gategen_sillh.
             end if
             if( jampi == 0 ) then
-               if( valgategen(1,n) == 0d0 ) then
-                  valgategen(2,n) = dmiss
-                  valgategen(3,n) = dmiss
-                  valgategen(4,n) = dmiss
-                  valgategen(5,n) = dmiss
+               if (valgategen(IVAL_WIDTHUP,n) > 0) then
+                  valgategen(IVAL_S1UP,n) = valgategen(IVAL_S1UP,n) / valgategen(IVAL_WIDTHUP,n)
                else
-                  valgategen(3,n) = valgategen(3,n) / valgategen(1,n)
-                  valgategen(4,n) = valgategen(4,n) / valgategen(1,n)
-                  valgategen(5,n) = max( min( zcgen(3*i-1)-zcgen(3*i-2), valgategen(5,n)/valgategen(1,n)-zcgen(3*i-2) ), 0.0d0)  ! flow through height is always positive
+                  valgategen(IVAL_S1UP,n) = dmiss
+               end if
+               if (valgategen(IVAL_WIDTHDN,n) > 0) then
+                  valgategen(IVAL_S1DN,n) = valgategen(IVAL_S1DN,n) / valgategen(IVAL_WIDTHDN,n)
+               else
+                  valgategen(IVAL_S1DN,n) = dmiss
+               end if
+               if( valgategen(IVAL_WIDTH,n) == 0d0 ) then
+                  valgategen(IVAL_DIS,n) = dmiss
+                  valgategen(IVAL_GATE_FLOWH,n) = dmiss
+               else
+                  valgategen(IVAL_GATE_FLOWH,n) = max( min( zcgen(3*i-1)-zcgen(3*i-2), valgategen(IVAL_GATE_FLOWH,n)/valgategen(IVAL_WIDTH,n)-zcgen(3*i-2) ), 0.0d0)  ! flow through height is always positive
                endif
             endif
          enddo
@@ -382,10 +399,10 @@
             enddo
 
             if (nLinks > 0 .and. jaghost == 0) then ! This assumes that each culvert has only 1 link
-               valculvert(8,n) = get_crest_level(pstru)
-               valculvert(9,n) = dble(get_culvert_state(pstru))
-               valculvert(10,n) = get_gle(pstru)
-               valculvert(11,n) = get_opening_height(pstru)
+               valculvert(IVAL_CL_CRESTL,n) = get_crest_level(pstru)
+               valculvert(IVAL_CL_STATE,n)  = dble(get_culvert_state(pstru))
+               valculvert(IVAL_CL_EDGEL,n)  = get_gle(pstru)
+               valculvert(IVAL_CL_OPENH,n)  = get_opening_height(pstru)
             end if
          enddo
       end if
@@ -411,7 +428,7 @@
                call fill_valstruct_perlink(valuniweir(:,n), La, dir, ST_UNI_WEIR, istru, L)
             enddo
             if (nLinks > 0 .and. jaghost == 0) then ! This assumes that each universal weir has only 1 link
-               valuniweir(8,n) = get_crest_level(pstru)
+               valuniweir(IVAL_UW_CRESTL,n) = get_crest_level(pstru)
             end if
          enddo
       end if
@@ -439,10 +456,10 @@
                if( Ln(1,La) /= kdambreak(1,L) ) then
                   dir = -1d0
                end if
-               valdambreak(1,n) = valdambreak(1,n) + dambreakLinksActualLength(L)
-               valdambreak(2,n) = valdambreak(2,n) + q1(La)*dir
-               valdambreak(6,n) = valdambreak(6,n) + au(La) ! flow area
-               valdambreak(9,n) = valdambreak(9,n) + dambreakLinksActualLength(L)
+               valdambreak(IVAL_WIDTH,n)     = valdambreak(IVAL_WIDTH,n) + dambreakLinksActualLength(L)
+               valdambreak(IVAL_DIS,n)       = valdambreak(IVAL_DIS,n) + q1(La)*dir
+               valdambreak(IVAL_AREA,n)      = valdambreak(IVAL_AREA,n) + au(La) ! flow area
+               valdambreak(IVAL_DB_CRESTW,n) = valdambreak(IVAL_DB_CRESTW,n) + dambreakLinksActualLength(L)
             enddo
             if (L2dambreaksg(n) < L1dambreaksg(n)) then ! NOTE: valdambreak(12,n) in a parallel simulation already gets values after mpi communication
                                                         ! from the previous timestep. In the case that the dambreak does not exist on the current domain, it should
@@ -450,24 +467,24 @@
                valdambreak(12,n) = 0d0
             else
                if (network%sts%struct(istru)%dambreak%width > 0d0) then
-                  valdambreak(8,n) = network%sts%struct(istru)%dambreak%crl ! crest level
+                  valdambreak(IVAL_DB_CRESTH,n) = network%sts%struct(istru)%dambreak%crl ! crest level
                else
                   valdambreak(1:NUMVALS_DAMBREAK-1,n) = dmiss               ! No breach started yet, set FillValue
                   La = abs(kdambreak(3,LStartBreach(n)))
-                  valdambreak(8,n) = bob(1,La)                              ! No breach started yet, use bob as 'crest'.
-                  valdambreak(9,n) = 0d0                                    ! No breach started yet, set crest width to 0
+                  valdambreak(IVAL_DB_CRESTH,n) = bob(1,La)                 ! No breach started yet, use bob as 'crest'.
+                  valdambreak(IVAL_DB_CRESTW,n) = 0d0                       ! No breach started yet, set crest width to 0
                   cycle
                end if
                ! TODO: UNST-5102: code below needs checking: when dambreak #n not active in current partition,
                ! most values below *are* available (based on other partitions). And in the code ahead, a call to reduce_crs
                ! assumes that all values are present and will be sum-reduced in a flowlinkwidth-weighted manner.
-               valdambreak(3,n)  = waterLevelsDambreakUpStream(n)
-               valdambreak(4,n)  = waterLevelsDambreakDownStream(n)
-               valdambreak(5,n)  = valdambreak(3,n) - valdambreak(4,n)
-               valdambreak(7,n)  = normalVelocityDambreak(n)
-               valdambreak(10,n) = waterLevelJumpDambreak(n)
-               valdambreak(11,n) = breachWidthDerivativeDambreak(n)
-               valdambreak(12,n) = valdambreak(12,n) + valdambreak(2,n) * timstep ! cumulative discharge
+               valdambreak(IVAL_S1UP,n)       = waterLevelsDambreakUpStream(n)
+               valdambreak(IVAL_S1DN,n)       = waterLevelsDambreakDownStream(n)
+               valdambreak(IVAL_HEAD,n)       = valdambreak(IVAL_S1UP,n) - valdambreak(IVAL_S1DN,n)
+               valdambreak(IVAL_VEL,n)        = normalVelocityDambreak(n)
+               valdambreak(IVAL_DB_JUMP,n)    = waterLevelJumpDambreak(n)
+               valdambreak(IVAL_DB_TIMEDIV,n) = breachWidthDerivativeDambreak(n)
+               valdambreak(IVAL_DB_DISCUM,n)  = valdambreak(IVAL_DB_DISCUM,n) + valdambreak(IVAL_DIS,n) * timstep ! cumulative discharge
             end if
          enddo
       end if
@@ -517,9 +534,9 @@
                ! Fill in values for each structure if it exists on the current subdomain
                if (L1cgensg(i) <= L2cgensg(i)) then  ! At least one flow link in this domain is affected by this structure.
                   valgenstru(NUMVALS_GENSTRU,n) = 1  ! rank contains the general structure.
-                  valgenstru(13,n) = zcgen(3*i  )    ! id_genstru_openw.
-                  valgenstru(14,n) = zcgen(3*i-1)    ! id_genstru_edgel.
-                  valgenstru(9,n)  = zcgen(3*i-2)    ! id_genstru_cresth.
+                  valgenstru(IVAL_OPENW,n)    = zcgen(3*i  )    ! id_genstru_openw.
+                  valgenstru(IVAL_EDGEL,n)    = zcgen(3*i-1)    ! id_genstru_edgel.
+                  valgenstru(IVAL_CRESTL,n)   = zcgen(3*i-2)    ! id_genstru_cresth.
                end if
             enddo
          end if
@@ -558,14 +575,22 @@
                ku = longculverts(n)%flownode_up
                if (ku > 0) then ! this upstream point is on the current subdomain/domain
                   if (jampi == 0 .or. (jampi > 0 .and. (.not. is_ghost_node(ku)))) then
-                     vallongculvert(3,n) = s1(ku)
+                     if (hs(ku) > epshs) then
+                        vallongculvert(IVAL_S1UP,n) = s1(ku)
+                     else
+                        vallongculvert(IVAL_S1UP,n) = dmiss
+                     end if
                   end if
                end if
 
                kd = longculverts(n)%flownode_dn
                if (kd > 0) then ! this downstream point is on the current subdomain/domain
                   if (jampi == 0 .or. (jampi > 0 .and. (.not. is_ghost_node(kd)))) then
-                     vallongculvert(4,n) = s1(kd)
+                     if (hs(kd) > epshs) then
+                        vallongculvert(IVAL_S1DN,n) = s1(kd)
+                     else
+                        vallongculvert(IVAL_S1DN,n) = dmiss
+                     end if
                   end if
                end if
 
@@ -701,7 +726,7 @@
             nlinks = pstru%numlinks
             call average_valstruct(valculvert(:,n), ST_CULVERT, istru, nlinks)
             if (valculvert(1,n) == 0) then
-               valculvert(8:NUMVALS_CULVERT,n) = dmiss
+               valculvert(IVAL_CL_CRESTL:NUMVALS_CULVERT,n) = dmiss
             end if
          end do
       end if
@@ -727,8 +752,8 @@
             pstru => network%sts%struct(istru)
             nlinks = pstru%numlinks
             call average_valstruct(valuniweir(:,n), ST_UNI_WEIR, istru, nlinks)
-            if (valuniweir(1,n) == 0) then
-               valuniweir(8:NUMVALS_UNIWEIR,n) = dmiss
+            if (valuniweir(IVAL_WIDTH,n) == 0) then
+               valuniweir(IVAL_UW_CRESTL:NUMVALS_UNIWEIR,n) = dmiss
             end if
          enddo
       endif
@@ -758,9 +783,9 @@
                call average_valstruct(valgenstru(:,n), ST_UNSET, 0, 0)
                if (jampi > 0) then
                   if (valgenstru(NUMVALS_GENSTRU,n) > 1) then ! The structure lies on more than one partition
-                     valgenstru(13,n) = valgenstru(13,n)/valgenstru(NUMVALS_GENSTRU,n)    ! id_genstru_openw.
-                     valgenstru(14,n) = valgenstru(14,n)/valgenstru(NUMVALS_GENSTRU,n)    ! id_genstru_edgel.
-                     valgenstru(9,n)  = valgenstru(9,n)/valgenstru(NUMVALS_GENSTRU,n)     ! id_genstru_cresth.
+                     valgenstru(IVAL_OPENW,n)  = valgenstru(IVAL_OPENW,n)/valgenstru(NUMVALS_GENSTRU,n)    ! id_genstru_openw.
+                     valgenstru(IVAL_EDGEL,n)  = valgenstru(IVAL_EDGEL,n)/valgenstru(NUMVALS_GENSTRU,n)    ! id_genstru_edgel.
+                     valgenstru(IVAL_CRESTL,n) = valgenstru(IVAL_CRESTL,n)/valgenstru(NUMVALS_GENSTRU,n)   ! id_genstru_cresth.
                   end if
                end if
             end do
@@ -783,10 +808,10 @@
             do n = 1,nweirgen
                call average_valstruct(valweirgen(:,n), ST_UNSET, 0, 0)
                i = weir2cgen(n)
-               if (L1cgensg(i) <= L2cgensg(i)) then  ! At least one flow link in this domain is affected by this structure.
-                  valweirgen(NUMVALS_WEIRGEN,n) = 1  ! rank contains the weir.
-                  valweirgen(10,n) = zcgen(3*i  )    ! id_weirgen_crestw.
-                  valweirgen(9,n) = zcgen(3*i-2)     ! id_weirgen_cresth.
+               if (L1cgensg(i) <= L2cgensg(i)) then            ! At least one flow link in this domain is affected by this structure.
+                  valweirgen(NUMVALS_WEIRGEN,n) = 1            ! rank contains the weir.
+                  valweirgen(IVAL_CRESTW,n)     = zcgen(3*i  ) ! id_weirgen_crestw.
+                  valweirgen(IVAL_CRESTL,n)     = zcgen(3*i-2) ! id_weirgen_cresth.
                end if
             end do
          end if
@@ -796,22 +821,28 @@
          if( ngategen > 0 .and. allocated(valgategen) ) then
             call subsitute_reduce_buffer( valgategen, ngategen*NUMVALS_GATEGEN )
             do n = 1,ngategen
-               if( valgategen(1,n) == 0d0 ) then
-                  valgategen(2,n) = dmiss
-                  valgategen(3,n) = dmiss
-                  valgategen(4,n) = dmiss
-                  valgategen(5,n) = dmiss
-                  valgategen(7,n) = dmiss
-                  valgategen(8,n) = dmiss
-                  valgategen(9,n) = dmiss
+               if (valgategen(IVAL_WIDTHUP,n) > 0) then
+                  valgategen(IVAL_S1UP,n) = valgategen(IVAL_S1UP,n) / valgategen(IVAL_WIDTHUP,n)
+               else
+                  valgategen(IVAL_S1UP,n) = dmiss
+               end if
+               if (valgategen(IVAL_WIDTHDN,n) > 0) then
+                  valgategen(IVAL_S1DN,n) = valgategen(IVAL_S1DN,n) / valgategen(IVAL_WIDTHDN,n)
+               else
+                  valgategen(IVAL_S1DN,n) = dmiss
+               end if
+               if( valgategen(IVAL_WIDTH,n) == 0d0 ) then
+                  valgategen(IVAL_DIS,n) = dmiss
+                  valgategen(IVAL_GATE_FLOWH,n) = dmiss
+                  valgategen(IVAL_GATE_OPENW,n) = dmiss
+                  valgategen(IVAL_GATE_EDGEL,n) = dmiss
+                  valgategen(IVAL_GATE_SILLH,n) = dmiss
                else
                   i = gate2cgen(n)
-                  valgategen(3,n) = valgategen(3,n) / valgategen(1,n)
-                  valgategen(4,n) = valgategen(4,n) / valgategen(1,n)
-                  valgategen(5,n) = max( min( zcgen(3*i-1)-zcgen(3*i-2), valgategen(5,n)/valgategen(1,n)-zcgen(3*i-2) ), 0.0d0)  ! flow through height is always positive
-                  valgategen(7,n) = valgategen(7,n) / valgategen(6,n) !id_gategen_openw
-                  valgategen(8,n) = valgategen(8,n) / valgategen(6,n) !id_gategen_edgel
-                  valgategen(9,n) = valgategen(9,n) / valgategen(6,n) !id_gategen_sillh
+                  valgategen(IVAL_GATE_FLOWH,n) = max( min( zcgen(3*i-1)-zcgen(3*i-2), valgategen(IVAL_GATE_FLOWH,n)/valgategen(IVAL_WIDTH,n)-zcgen(3*i-2) ), 0.0d0)  ! flow through height is always positive
+                  valgategen(IVAL_GATE_OPENW,n) = valgategen(IVAL_GATE_OPENW,n) / valgategen(IVAL_GATE_COUNT,n) !id_gategen_openw
+                  valgategen(IVAL_GATE_EDGEL,n) = valgategen(IVAL_GATE_EDGEL,n) / valgategen(IVAL_GATE_COUNT,n) !id_gategen_edgel
+                  valgategen(IVAL_GATE_SILLH,n) = valgategen(IVAL_GATE_SILLH,n) / valgategen(IVAL_GATE_COUNT,n) !id_gategen_sillh
                endif
             enddo
          endif
@@ -879,7 +910,7 @@
                endif
             end do
             if (jampi > 0) then
-               valpump(6:12,n) = 0d0
+               valpump(NUMVALS_COMMON_PUMP+1:NUMVALS_PUMP,n) = 0d0
             end if
             if (L1pumpsg(n) <= L2pumpsg(n) .and. jaghostexist == 0) then
                if (allocated(pumpsWithLevels)) then
@@ -889,26 +920,30 @@
                end if
                if (istru > 0) then ! TODO: UNST-2587: once all pump code is done, remove this temp IF.
                   pstru => network%sts%struct(istru)
-                  valpump(6,n) = GetPumpCapacity(pstru)
-                  valpump(12,n) = sign(1,pstru%pump%direction) * valpump(2,n) ! Discharge w.r.t. pump direction (same sign as capacity)
-                  valpump(7,n) = GetPumpStage(pstru)
-                  if (valpump(7,n) < 0d0) then
-                     valpump(7,n) = dmiss ! Set to fill value if stage is irrelevant.
+                  valpump(IVAL_PP_CAP,n)    = GetPumpCapacity(pstru)
+                  valpump(IVAL_PP_DISDIR,n) = sign(1,pstru%pump%direction) * valpump(IVAL_DIS,n) ! Discharge w.r.t. pump direction (same sign as capacity)
+                  valpump(IVAL_PP_STAG,n)   = GetPumpStage(pstru)
+                  if (valpump(IVAL_PP_STAG,n) < 0d0) then
+                     valpump(IVAL_PP_STAG,n) = dmiss ! Set to fill value if stage is irrelevant.
                   end if
                   if (pstru%pump%direction*pstru%pump%capacity(1) > 0) then
-                     valpump(11,n) = valpump(3,n) ! water level at delivery side
-                     valpump(10,n) = valpump(4,n) ! water level at suction side
+                     valpump(IVAL_PP_S1SUC,n) = valpump(IVAL_S1UP,n) ! water level at delivery side
+                     valpump(IVAL_PP_S1DEL,n) = valpump(IVAL_S1DN,n) ! water level at suction side
                   else
-                     valpump(11,n) = valpump(4,n)
-                     valpump(10,n) = valpump(3,n)
+                     valpump(IVAL_PP_S1SUC,n) = valpump(IVAL_S1DN,n)
+                     valpump(IVAL_PP_S1DEL,n) = valpump(IVAL_S1UP,n)
                   end if
-                  valpump(8,n) = valpump(10,n) - valpump(11,n) ! Pump head
-                  valpump(9,n) = GetPumpReductionFactor(pstru)
+                  if (valpump(IVAL_WIDTHUPDN,n) > 0) then
+                     valpump(IVAL_PP_HEAD,n) = valpump(IVAL_PP_S1DEL,n) - valpump(IVAL_PP_S1SUC,n) ! Pump head
+                  else
+                     valpump(IVAL_PP_HEAD,n) = dmiss
+                  end if
+                  valpump(IVAL_PP_RED,n)  = GetPumpReductionFactor(pstru)
                end if
             end if
          enddo
          if (jampi > 0) then
-            call reduce_crs(valpump(6:12,1:npumpsg),npumpsg,7)
+            call reduce_crs(valpump(NUMVALS_COMMON_PUMP+1:NUMVALS_PUMP,1:npumpsg),npumpsg,NUMVALS_PUMP-NUMVALS_COMMON_PUMP)
          end if
       endif
 
