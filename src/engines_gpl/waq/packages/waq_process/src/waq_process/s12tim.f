@@ -91,83 +91,13 @@
       iswres = nint(pmsa(ip(17)))
 !     if iswres = 1 then the resuspension flux is independent of the other fractions and calculated here
       if ( iswres .eq. 1 ) then
-         isw_zf = nint(pmsa(ip(18)))
-         dms1   = pmsa(ip(19))
-         dms2   = pmsa(ip(20))
-         zres   = pmsa(ip(21))
-         vres   = pmsa(ip(22))
-         tau    = pmsa(ip(23))
-         tcrrs1 = pmsa(ip(24))
-         tcrrs2 = pmsa(ip(25))
-         delt   = pmsa(ip(26))
-         mindep = pmsa(ip(27))
-
-         press1 = 0.0
-         press2 = 0.0
-
-!        Calculation of resuspension probability in S1
-         if (tau .eq. -1.0) then
-              press1 = 1.0
-         else
-!            Compare with critical shear stress
-             press1 = max ( 0.0, (tau/tcrrs1 - 1.0) )
-         endif
-
-!        Calculation of resuspension probability in S2
-         if (tau .eq. -1.0) then
-            press2 = 1.0
-         else
-!           Compare with critical shear stress
-            press2 = max ( 0.0, (tau/tcrrs2 - 1.0) )
-         endif
-
-!        Calculate resuspension
-
-!        No resuspension when depth below min depth
-         if ( depth .lt. mindep) then
-            flres1 = 0.0
-            flres2 = 0.0
-         else
-!           Resuspension from S1
-            if ( isw_zf .eq. 0 ) then
-               ! Add zero and first order resuspension
-               rfdms1 = zres + ( vres * dms1 )
-            else
-               ! Take the minimum of the first order and second order
-               rfdms1 = min(zres,( vres * dms1 ))
-            endif
-
-!           Limit resuspension to available material in S1
-            mrdms1 = max (0.0, dms1 / delt )
-            flres1 = min ( rfdms1 * press1,  mrdms1 )
-
-!           If first layer is exhausted then resuspension from the second layer for the remaining of the timestep (DELTS2)
-            if ( rfdms1*press1 .gt. 1e-20 ) then
-               delts2 = max(0.0,(1.-flres1/(rfdms1*press1))*delt)
-            else
-               delts2 = 0.0
-            endif
-
-            if ( isw_zf .eq. 0 ) then
-               rfdms2 = zres + ( vres * dms2 )
-            else
-               rfdms2 = min(zres,( vres * dms2 ))
-            endif
-
-!           Limit resuspension to available material in S2
-            mrdms2 = max (0.0, dms2 / delt )
-            flres2 = min ( rfdms2 * press2 * delts2/delt , mrdms2 )
-         endif
-
-         fress1 = flres1
-         fress2 = flres2
-
-         ! in this case the resuspension is independent of the fraction, so set fraction to 1
-
-         fracs1_res = 1.0
-         fracs2_res = 1.0
-         scals1_res = 1.0
-         scals2_res = 1.0
+         call getmlu(lunrep)
+         write(LUNREP,*) "Please remove processes S12TraIMx from your 
+     +   sub-file if you are using the Res_Pickup process"
+         write(*,*) "Please remove processes S12TraIMx from your 
+     +   sub-file if you are using the Res_Pickup process"       
+         call srstop(1)
+          
       else
          fracs1_res = fracs1
          fracs2_res = fracs2
