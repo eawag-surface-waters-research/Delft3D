@@ -293,6 +293,8 @@
                   proc1%active = .true.
                   write(line,'(a)') '   Process is activated'
                   call monsys( line , 4 )
+                  write(line,'(a,a)') '   Process subroutine: ', proc1%routine
+                  call monsys( line , 4 )
                else
                   if (proc1%name(1:8).eq.'VertDisp') then
                      nowarn = nowarn + 1
