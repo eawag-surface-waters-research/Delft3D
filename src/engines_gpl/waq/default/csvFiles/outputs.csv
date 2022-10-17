@@ -1237,6 +1237,10 @@ outppr,outpit,outpnm,outpdo,outpsx
 "Sed_POC4  ","fSedPOC4  ",   2,"x",1
 "Sed_POC4  ","fSedPOC4S2",   3,"x",1
 "Sed_POC4  ","VxSedPOC4 ",   4,"x",0
+"Sed_POC5  ","PSedPOC5  ",   1,"x",1
+"Sed_POC5  ","fSedPOC5  ",   2,"x",1
+"Sed_POC5  ","fSedPOC5S2",   3,"x",1
+"Sed_POC5  ","VxSedPOC5 ",   4,"x",0
 "Sed_VivP  ","PSedVIVP  ",   1,"x",1
 "Sed_VivP  ","fSedVIVP  ",   2,"x",1
 "Sed_VivP  ","VxSedVIVP ",   3,"x",0
@@ -1282,6 +1286,12 @@ outppr,outpit,outpnm,outpdo,outpsx
 "SedNPOC4  ","fSedPON4S2",   4,"x",1
 "SedNPOC4  ","fSedPOP4S2",   5,"x",1
 "SedNPOC4  ","fSedPOS4S2",   6,"x",1
+"SedNPOC5  ","fSedPON5  ",   1,"x",1
+"SedNPOC5  ","fSedPOP5  ",   2,"x",1
+"SedNPOC5  ","fSedPOS5  ",   3,"x",1
+"SedNPOC5  ","fSedPON5S2",   4,"x",1
+"SedNPOC5  ","fSedPOP5S2",   5,"x",1
+"SedNPOC5  ","fSedPOS5S2",   6,"x",1
 "Sum_Sedim ","fSedDM    ",   1,"x",1
 "Sum_Sedim ","fSedTIM   ",   2,"x",1
 "Sum_Sedim ","fSedPOC   ",   3,"x",1

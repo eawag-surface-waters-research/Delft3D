@@ -856,6 +856,10 @@ stocfl,stocsu,stocsc
 "dSedPOC4  ","OOCS1     ",   1.00000
 "dSedPOC4S2","POC2      ",  -1.00000
 "dSedPOC4S2","OOCS2     ",   1.00000
+"dSedPOC5  ","POC5      ",  -1.00000
+"dSedPOC5  ","OOCS1     ",   1.00000
+"dSedPOC5S2","POC2      ",  -1.00000
+"dSedPOC5S2","OOCS2     ",   1.00000
 "dSedVIVP  ","S1_VIVP   ",   1.00000
 "dSedAPATP ","S1_APATP  ",   1.00000
 "dSedPON1  ","PON1      ",  -1.00000
@@ -898,6 +902,16 @@ stocfl,stocsu,stocsc
 "dSedPOP4S2","POP4      ",  -1.00000
 "dSedPOP4S2","OOPS2     ",   1.00000
 "dSedPOS4S2","POS4      ",  -1.00000
+"dSedPON5  ","PON5      ",  -1.00000
+"dSedPON5  ","OONS1     ",   1.00000
+"dSedPOP5  ","POP5      ",  -1.00000
+"dSedPOP5  ","OOPS1     ",   1.00000
+"dSedPOS5  ","POS5      ",  -1.00000
+"dSedPON5S2","PON5      ",  -1.00000
+"dSedPON5S2","OONS2     ",   1.00000
+"dSedPOP5S2","POP5      ",  -1.00000
+"dSedPOP5S2","OOPS2     ",   1.00000
+"dSedPOS5S2","POS5      ",  -1.00000
 "dSedAAP   ","AAP       ",  -1.00000
 "dSedAAP   ","AAPS1     ",   1.00000
 "dSedAAPS2 ","AAP       ",  -1.00000

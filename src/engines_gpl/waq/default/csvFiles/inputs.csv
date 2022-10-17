@@ -4259,6 +4259,19 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "Sed_POC4  ","FrPOMS2Max",  11,"Y","x",1
 "Sed_POC4  ","PsedminPO2",  12,"Y","x",1
 "Sed_POC4  ","VSedPOC4  ",  13,"Y"," ",0
+"Sed_POC5  ","POC5      ",   1,"N","x",1
+"Sed_POC5  ","ZSedPOC5  ",   2,"Y","x",1
+"Sed_POC5  ","VSedPOC5  ",   3,"Y","x",1
+"Sed_POC5  ","Tau       ",   4,"N","x",1
+"Sed_POC5  ","TaucSPOC5 ",   5,"Y","x",1
+"Sed_POC5  ","Depth     ",   6,"N","x",1
+"Sed_POC5  ","DELT      ",   7,"N","x",1
+"Sed_POC5  ","MinDepth  ",   8,"Y","x",1
+"Sed_POC5  ","FrPO2SedS2",   9,"Y","x",1
+"Sed_POC5  ","FrPOMS2   ",  10,"Y","x",1
+"Sed_POC5  ","FrPOMS2Max",  11,"Y","x",1
+"Sed_POC5  ","PsedminPO2",  12,"Y","x",1
+"Sed_POC5  ","VSedPOC5  ",  13,"Y"," ",0
 "Sed_VivP  ","VIVP      ",   1,"N","x",1
 "Sed_VivP  ","ZSedVIVP  ",   2,"Y","x",1
 "Sed_VivP  ","VSedVIVP  ",   3,"Y","x",1
@@ -4346,6 +4359,12 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "SedNPOC4  ","C-PPOC4   ",   4,"N","x",1
 "SedNPOC4  ","C-SPOC4   ",   5,"N","x",1
 "SedNPOC4  ","Depth     ",   6,"N","x",1
+"SedNPOC5  ","fSedPOC5  ",   1,"N","x",1
+"SedNPOC5  ","fSedPOC5S2",   2,"N","x",1
+"SedNPOC5  ","C-NPOC5   ",   3,"N","x",1
+"SedNPOC5  ","C-PPOC5   ",   4,"N","x",1
+"SedNPOC5  ","C-SPOC5   ",   5,"N","x",1
+"SedNPOC5  ","Depth     ",   6,"N","x",1
 "Sum_Sedim ","fSedIM1   ",   1,"Y","x",1
 "Sum_Sedim ","fSedIM2   ",   2,"Y","x",1
 "Sum_Sedim ","fSedIM3   ",   3,"Y","x",1
