@@ -76,7 +76,7 @@ subroutine  dfm_get_variable_pointer(name_var, x) bind(C, name="dfm_get_variable
    character(kind=c_char), intent(in) :: name_var(*)
    
    character(len=idlen) :: varname
-   integer, save :: numpoints
+   integer, target :: numpoints
    
    varname = char_array_to_string(name_var)
 

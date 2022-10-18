@@ -89,7 +89,7 @@ module m_VolumeTables
    end type
    
    type(t_voltable), target,      public, allocatable, dimension(:)     :: vltb  !< 1D Volume tables
-   type(t_voltable),       public, allocatable, dimension(:,:)   :: vltbOnLinks  !< 1D Volume tables, used for storage table output on branches.
+   type(t_voltable), target,      public, allocatable, dimension(:,:)   :: vltbOnLinks  !< 1D Volume tables, used for storage table output on branches.
                                                                                !< Only the entries VOL and SUR will be filled.
 
    contains
