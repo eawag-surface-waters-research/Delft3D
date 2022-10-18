@@ -147,6 +147,10 @@ subroutine run_swan (casl)
     !
     ! Remove SWAN input/output/tmp files (except SWANOUT output data file)
     !
+    ncasl = index(casl,' ')-1
+    if(ncasl == 0)then
+        ncasl = 3
+    endif
     call rm_del('norm_end')
     call rm_del('INPUT')
     call rm_del('PRINT')
@@ -158,8 +162,6 @@ subroutine run_swan (casl)
     call rm_del('BOTNOW')
     call rm_del('CURNOW')
     call rm_del('AICENOW')
-    string = casl(1:ncasl) // '.swn'
-    call rm_del(string)
     string = casl(1:ncasl) // '.prt'
     call rm_del(string)
     string = 'fname'
