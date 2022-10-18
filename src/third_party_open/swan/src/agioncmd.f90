@@ -405,7 +405,7 @@
                 !
                 call nccheck ( nf90_def_dim( ncid, 'direction', spcgrid%ndir, spcgrid%dir_dimid ) )
                 call nccheck ( nf90_def_var( ncid, 'direction', NF90_FLOAT, spcgrid%dir_dimid, spcgrid%dir_varid ) );
-                call nccheck ( nf90_put_att( ncid, spcgrid%dir_varid, 'units', 'radians') )
+                call nccheck ( nf90_put_att( ncid, spcgrid%dir_varid, 'units', 'degrees') )
                 call nccheck ( nf90_put_att( ncid, spcgrid%dir_varid, 'long_name', 'direction') )
                 if ( nautical ) then
                     call nccheck ( nf90_put_att( ncid, spcgrid%dir_varid, 'standard_name', 'sea_surface_wave_from_direction') )
@@ -870,12 +870,17 @@
             integer,              intent (   in)                  :: ncid
             type (spcgrid_type),  intent (inout)                  :: spcgrid
 
+            real(kind=8), allocatable :: direction(:)
+
             if ( spcgrid%frq_varid < 1 ) then
                 call agnc_get_griddef(ncid, spcgrid)
             end if
             call nccheck ( nf90_put_var(ncid, spcgrid%frq_varid, spcgrid%frequency) )
-            if (spcgrid%ndir > 0) &
-                call nccheck ( nf90_put_var(ncid, spcgrid%dir_varid, spcgrid%direction) )
+            if (spcgrid%ndir > 0) then
+                allocate(direction(spcgrid%ndir))
+                direction = spcgrid%direction / degrad
+                call nccheck ( nf90_put_var(ncid, spcgrid%dir_varid, direction) )
+            end if
 
         end subroutine agnc_set_spcgrid
 
@@ -1105,6 +1110,7 @@
             type (spcgrid_type), intent (out)   :: spcgrid
 
             character(len=32) :: unit
+            character(len=64) :: stdname
             integer           :: ierr
 
             logical, external :: eqcstr
@@ -1121,6 +1127,12 @@
                     if (ierr == nf90_noerr) then
                         if (eqcstr(trim(unit), 'degrees')) then
                             spcgrid%direction = DEGRAD * spcgrid%direction
+                        endif
+                    endif
+                    ierr = nf90_get_att(ncid, spcgrid%dir_varid, "standard_name", stdname)
+                    if (ierr == nf90_noerr) then
+                        if (eqcstr(trim(stdname), 'sea_surface_wave_from_direction')) then
+                            spcgrid%direction = 0.5d0 * PI - spcgrid%direction
                         endif
                     endif
                 end if
