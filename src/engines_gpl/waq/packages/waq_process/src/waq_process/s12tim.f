@@ -63,6 +63,7 @@
       real    :: scals1_res
       real    :: fracs2_res
       real    :: scals2_res
+      integer :: lunrep
 
       ip  = ipoint
 !
@@ -92,7 +93,7 @@
 !     if iswres = 1 then the resuspension flux is independent of the other fractions and calculated here
       if ( iswres .eq. 1 ) then
          call getmlu(lunrep)
-         write(LUNREP,*) "Please remove processes S12TraIMx from your 
+         write(lunrep,*) "Please remove processes S12TraIMx from your 
      +   sub-file if you are using the Res_Pickup process"
          write(*,*) "Please remove processes S12TraIMx from your 
      +   sub-file if you are using the Res_Pickup process"       
