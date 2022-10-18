@@ -94,11 +94,10 @@
       if ( iswres .eq. 1 ) then
          call getmlu(lunrep)
          write(lunrep,*) "Please remove processes S12TraIMx from your 
-     +   sub-file if you are using the Res_Pickup process"
+     +   sub-file, and use the Res_Pickup process instead."
          write(*,*) "Please remove processes S12TraIMx from your 
-     +   sub-file if you are using the Res_Pickup process"       
+     +   sub-file, and use the Res_Pickup process instead."
          call srstop(1)
-          
       else
          fracs1_res = fracs1
          fracs2_res = fracs2
