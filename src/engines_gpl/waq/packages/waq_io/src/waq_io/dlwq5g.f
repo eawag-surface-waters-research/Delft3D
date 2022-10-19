@@ -34,7 +34,7 @@
 !
 !     MODIFIED           :
 !
-!     FUNCTION           : Checks if collumn header exists
+!     FUNCTION           : Checks if column header exists
 !
 !     SUBROUTINES CALLED : none
 !
