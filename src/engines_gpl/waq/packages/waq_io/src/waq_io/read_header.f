@@ -26,7 +26,7 @@
 
 !     Deltares Software Centre
 
-!     function : Checks if collumn header exists
+!     function : Checks if column header exists
 
 !     Global declarations
 
