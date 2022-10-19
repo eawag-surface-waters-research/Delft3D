@@ -187,6 +187,8 @@
  double precision                  :: grounlayuni    = -999d0   !< used if >= 0, default = dmiss
  integer                           :: jagrounlay     = 0        !< use groundlayer 0/1
  integer, target                   :: wetLinkCount              !< [-] nr of flow links that are wet
+ integer, target                   :: wetLink2D                 !< Startposition of 2d links in onlywetLinks
+ integer, target                   :: wetLinkBnd                !< Startposition of boundary links in onlywetLinks
  integer,          allocatable     :: onlyWetLinks(:)           !< indices of flowlinks that are wet
 
  ! cell corner related, the links attached to a cell corner

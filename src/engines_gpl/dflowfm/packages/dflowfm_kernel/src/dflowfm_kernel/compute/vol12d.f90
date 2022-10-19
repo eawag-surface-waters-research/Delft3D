@@ -45,6 +45,7 @@
  integer           :: japerim
 
  integer           :: L, k1, k2, K, n, kk, kb, kt, nl1 , nl2, i, nstor, n1d
+ integer           :: loopcount
  double precision  :: hh, slotsav, sl1, sl2
  type(t_storage), dimension(:), pointer :: stors
 
@@ -55,52 +56,74 @@
 
  if (japerim == 1 .or. nonlin > 0) then
 
- if (japerim == 0 .and. useVolumeTables) then
-    ! Compute 1d volumes, using volume tables (still excl. 1D2D contributions)
-    do n = ndx2d+1, ndx
-       n1d = n - ndx2d
-       vol1(n) = vltb(n1d)%getVolume(s1(n))
-       a1(n)   = vltb(n1d)%getSurface(s1(n))
-    enddo
-    if (nonlin1D >= 2) then
+   if (japerim == 0 .and. useVolumeTables) then
+      ! Compute 1d volumes, using volume tables (still excl. 1D2D contributions)
       do n = ndx2d+1, ndx
          n1d = n - ndx2d
-         vol1(n) = vol1(n) - vltb(n1d)%getVolumeDecreasing(s1m(n))
-         a1m(n)  = vltb(n1d)%getSurfaceDecreasing(s1m(n))
+         vol1(n) = vltb(n1d)%getVolume(s1(n))
+         a1(n)   = vltb(n1d)%getSurface(s1(n))
       enddo
-    endif
- end if
+      if (nonlin1D >= 2) then
+         do n = ndx2d+1, ndx
+            n1d = n - ndx2d
+            vol1(n) = vol1(n) - vltb(n1d)%getVolumeDecreasing(s1m(n))
+            a1m(n)  = vltb(n1d)%getSurfaceDecreasing(s1m(n))
+         enddo
+      endif
+   end if
 
- nstor = network%stors%count
- if (japerim == 0 .and. nstor > 0 .and. .not. useVolumeTables) then
-    stors => network%stors%stor
-    do i = 1, nstor
-       k1 = stors(i)%gridPoint
-       if (k1 > 0) then
-         vol1(k1) = vol1(k1) + getVolume(stors(i), s1(k1))
-         a1(k1)   = a1(k1)   + getSurface(stors(i), s1(k1))
-       end if
-    enddo
+   nstor = network%stors%count
+   if (japerim == 0 .and. nstor > 0 .and. .not. useVolumeTables) then
+      stors => network%stors%stor
+      do i = 1, nstor
+         k1 = stors(i)%gridPoint
+         if (k1 > 0) then
+            vol1(k1) = vol1(k1) + getVolume(stors(i), s1(k1))
+            a1(k1)   = a1(k1)   + getSurface(stors(i), s1(k1))
+         end if
+      enddo
+   endif
+
+   ! NOTE: In order to speed up the calculation, the loop over all flow links is replaced
+   !       by a loop over the wet flow links for the case the flow data has to be calculated.
+   !       (JAPERIM == 1). Since for the calculation of the flow volumes the water depth at 
+   !       either side of the flow link is used, this part cannot be skipped. Therefore it was 
+   !       necessary to copy the loops over the flow links.
+   if (japerim == 0) then
+      loopcount = lnx1D
+   else
+      loopcount = wetLink2D-1
+   endif
+      
+   do i = 1,loopcount                                  ! regular 1D links
+      if (japerim == 0) then
+         L = i
+      else
+         L = onlyWetLinks(i)
+      endif
+      
+      if (kcu(L) == 4) then
+         call addlink1D2D(L,japerim)                 ! 1D2D lateral inherits 2D
+      else if (kcu(L) == 3) then
+         if (ja1D2Dinternallinktype >= 1) then       ! testing one two...
+            call addlink1D2Dinternal(L, japerim)
+         else
+            call addlink1Dkcu3(L,japerim)
+         endif
+      elseif (japerim == 1 .or. .not. useVolumeTables) then
+         call addlink1D(L,japerim)                   ! regular 1D link and original 1D2D internal links
+      endif
+   enddo
  endif
 
- do L   = 1,lnx1D                                  ! regular 1D links
-    if (kcu(L) == 4) then
-       call addlink1D2D(L,japerim)                 ! 1D2D lateral inherits 2D
-    else if (kcu(L) == 3) then
-       if (ja1D2Dinternallinktype >= 1) then       ! testing one two...
-          call addlink1D2Dinternal(L, japerim)
-       else
-          call addlink1Dkcu3(L,japerim)
-       endif
-    elseif (japerim == 1 .or. .not. useVolumeTables) then
-       call addlink1D(L,japerim)                   ! regular 1D link and original 1D2D internal links
-    endif
- enddo
- endif
-
- if (japerim == 1 .or. nonlin2D > 0) then
-    do L = lnx1D + 1, lnxi
-       call addlink2D(L,japerim)                   ! regular 2D links
+ if (japerim == 1 ) then
+   do i = wetLink2D, wetLinkBnd-1
+      L = onlyWetLinks(i)
+      call addlink2D(L,japerim)                   ! regular 2D links
+   enddo
+ else if (nonlin2D > 0) then
+    do L = lnx+1, lnx
+       call addlink2D(L,japerim)
     enddo
  endif
 
@@ -108,7 +131,7 @@
     if (kcu(L) == -1) then
        if (japerim == 0 .and. nonlin1D == 0) cycle
        if (japerim == 1 .or. .not. useVolumeTables) then
-       call addlink1D(L,japerim)                   ! 1D boundary links
+         call addlink1D(L,japerim)                   ! 1D boundary links
        endif
     else
        if (japerim == 0 .and. nonlin2D == 0) cycle
