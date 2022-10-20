@@ -18392,6 +18392,7 @@ src/tools_lgpl/matlab/quickplot/progsrc/private/qp_plot_pnt.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/qp_plot_polyl.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/qp_plot_seg.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/qp_plot_ugrid.m -text
+src/tools_lgpl/matlab/quickplot/progsrc/private/qp_plot_xzt.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/qp_plotmanager.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/qp_preferences_interface.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/qp_prefs.m -text
