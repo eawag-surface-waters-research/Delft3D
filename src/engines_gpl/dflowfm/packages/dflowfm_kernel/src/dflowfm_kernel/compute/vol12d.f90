@@ -86,7 +86,8 @@
 
    ! NOTE: In order to speed up the calculation, the loop over all flow links is replaced
    !       by a loop over the wet flow links for the case the flow data has to be calculated.
-   !       (JAPERIM == 1). Since for the calculation of the flow volumes the water depth at 
+   !       (JAPERIM == 1). When JAPERIM == 0, all flow links are considered in the loop (no speedup)
+   !       Since for the calculation of the flow volumes the water depth at 
    !       either side of the flow link is used, this part cannot be skipped. Therefore it was 
    !       necessary to copy the loops over the flow links.
    if (japerim == 0) then
@@ -122,7 +123,7 @@
       call addlink2D(L,japerim)                   ! regular 2D links
    enddo
  else if (nonlin2D > 0) then
-    do L = lnx+1, lnx
+    do L = lnx1D + 1, lnxi
        call addlink2D(L,japerim)
     enddo
  endif
