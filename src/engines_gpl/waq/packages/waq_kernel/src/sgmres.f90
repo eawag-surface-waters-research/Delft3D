@@ -42,21 +42,7 @@
 !>          - if no convergence at end of Krilov space, solver restarts
 !>          - if no convergence at maxiter the solver stops
 
-!     Created   : Nov. 1996 by Kian Tan
 
-!     Modified  : Dec. 1996, Kian Tan    : reorthogonalization added
-!                 Feb. 1997, Jan van Beek: added option LITREP (report file)
-!                 Feb. 1997, Robert Vos  : also each iteration printed
-!                 Sep. 1998, Robert Vos  : small2 introdcued for small values of bnrm2
-!                 July 2008, Leo Postma  : WAQ performance timers
-!                 July 2009, Leo Postma  : double precission version
-!                 June 2011, Leo Postma  : many trivial blas routines replaced by array instructions
-!                                          this improved basis (25% of solver time) with factor 2.
-!
-!                 The following blas routines remained:
-!                           saxpy  :
-!                           srot   :
-!                           srotg  :
 
       use timers                         ! WAQ performance timers
       implicit none

@@ -43,7 +43,6 @@
 !                          LUN(23) , output, unformatted dump file
 !
 !     SUBROUTINES CALLED : DLWQTR, user transport routine
-!                          DLWQWQ, user waterquality routine
 !                          DLWQPP, user postprocessing routine
 !                          DLWQ10, system monitoring routine
 !                          DLWQ11, system dump routine
@@ -185,11 +184,6 @@
 !
 !          do the user water quality processes
 !
-      CALL DLWQWQ ( NOTOT   , NOSYS   , NOSEG   , NOPA    , NOSFUN  ,
-     *              A(IVOL) , A(ICONC), A(ICONS), A(IPARM), A(IFUNC),
-     *              A(ISFUN), A(IDERV), ITSTRT  , IDT     , A(ISMAS),
-     *              IBFLAG  , C(ISNAM), NOCONS  , NOFUN   , C(ICNAM),
-     *              C(IPNAM), C(IFNAM), C(ISFNA), NODUMP  , J(IDUMP))
       CALL DLWQ80 ( A(IDERV), NOTOT   , NOSEG   , ITFACT  , A(ITIMR),
      *              A(IMASS), A(IMAS2), IAFLAG  , A(IDMPS), INTOPT  ,
      *              J(ISDMP))

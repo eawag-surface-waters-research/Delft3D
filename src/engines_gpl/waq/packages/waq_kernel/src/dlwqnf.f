@@ -56,7 +56,6 @@
 !      |                   setset: not so clear what this does, probably process related
 !      |                   hsurf : set the surface array from the proces parameters
 !      |                   proces: DELWAQ water quality process system
-!      |                   dlwqwq: user linkeable waterquality routine, generally not used
 !      |                   dlwq_boundio: interface to on line boundary provision in bigger systems
 !      |                   dlwqo2: DELWAQ output system, provides all output to files
 !    time  ===> jump out   zercum: zero's the cummulative array's of balances and monitoring areas
@@ -343,12 +342,6 @@
      &                 j(iprvpt), j(iprdon), nrref    , j(ipror) , nodef    ,
      &                 surface  , lun(19)  )
 
-!     add user defined routine
-         call dlwqwq ( notot    , nosys    , noseg    , nopa     , nosfun   ,
-     &                 a(ivol)  , a(iconc) , a(icons) , a(iparm) , a(ifunc) ,
-     &                 a(isfun) , a(iderv) , itime    , idt      , a(ismas) ,
-     &                 ibflag   , c(isnam) , nocons   , nofun    , c(icnam) ,
-     &                 c(ipnam) , c(ifnam) , c(isfna) , nodump   , j(idump) )
 
 
 !          communicate with flow

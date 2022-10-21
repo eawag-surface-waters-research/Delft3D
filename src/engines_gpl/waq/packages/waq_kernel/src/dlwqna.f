@@ -45,7 +45,6 @@
 !                          LUN(23) , output, unformatted dump file
 !
 !     SUBROUTINES CALLED : DLWQTR, user transport routine
-!                          DLWQWQ, user waterquality routine
 !                          PROCES, DELWAQ proces system
 !                          DLWQO2, DELWAQ output system
 !                          DLWQPP, user postprocessing routine
@@ -420,14 +419,6 @@
          call dlwq42 ( nosys    , notot    , nototp   , nosss    , a(ivol2) ,
      &                 surface  , a(imass) , a(iconc) , a(iderv) , idt      ,
      &                 ivflag   , lun(19)  , j(iowns) , mypart   )
-!
-!          user water quality processes implicit part
-!
-      CALL DLWQWX ( NOTOT   , NOSYS   , nosss   , NOPA    , NOSFUN  ,
-     *              A(IVOL2), A(IDERV), A(ICONS), A(IPARM), A(IFUNC),
-     *              A(ISFUN), A(ICONC), ITIME   , IDT     , A(ISMAS),
-     *              IBFLAG  , C(ISNAM), NOCONS  , NOFUN   , C(ICNAM),
-     *              C(IPNAM), C(IFNAM), C(ISFNA), NODUMP  , J(IDUMP))
 
 !          performs the implicit part of the transport step
 
@@ -438,14 +429,6 @@
      &                 ilflag   , idt      , a(iderv) , iaflag   , a(imas2) ,
      &                 j(iowns) , mypart   , lun(19)  , ndmpq    , j(lqdmp) ,
      &                 a(idmpq) , arhs     , adiag    , acodia   , bcodia   )
-!
-!          user water quality processes implicit part
-!
-      CALL DLWQWY ( NOTOT   , NOSYS   , nosss   , NOPA    , NOSFUN  ,
-     *              A(IVOL2), A(IDERV), A(ICONS), A(IPARM), A(IFUNC),
-     *              A(ISFUN), A(ICONC), ITIME   , IDT     , A(ISMAS),
-     *              IBFLAG  , C(ISNAM), NOCONS  , NOFUN   , C(ICNAM),
-     *              C(IPNAM), C(IFNAM), C(ISFNA), NODUMP  , J(IDUMP))
 
 !          update the nescessary arrays
 

@@ -109,14 +109,11 @@
 		<File RelativePath=".\src\waq_io\read_initials.f"/>
 		<File RelativePath=".\src\waq_io\read_items.f"/>
 		<File RelativePath=".\src\waq_io\read_nobottomlay.f"/>
-		<File RelativePath=".\src\waq_io\read_opt2.f"/>
-		<File RelativePath=".\src\waq_io\read_opt3.f"/>
 		<File RelativePath=".\src\waq_io\read_proc_time.f"/>
 		<File RelativePath=".\src\waq_io\read_sub_procgrid.f"/>
 		<File RelativePath=".\src\waq_io\read_time_delay.f"/>
 		<File RelativePath=".\src\waq_io\readmp.f"/>
 		<File RelativePath=".\src\waq_io\rearaa.f"/>
-		<File RelativePath=".\src\waq_io\rwfun2.f"/>
 		<File RelativePath=".\src\waq_io\rwfunc.f"/>
 		<File RelativePath=".\src\waq_io\scale.f"/>
 		<File RelativePath=".\src\waq_io\timer.f"/>

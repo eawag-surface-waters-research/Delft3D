@@ -8,7 +8,6 @@ set(src_path src)
 
 # Gather source files
 get_fortran_source_files(${src_path} source_files)
-list(REMOVE_ITEM source_files   ${CMAKE_CURRENT_SOURCE_DIR}/${src_path}/dlwqtr_template.f)
 
 # Define library
 set(library_name waq_kernel)

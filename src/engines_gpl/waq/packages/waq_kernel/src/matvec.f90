@@ -33,8 +33,6 @@
 
 !     Modified  : July 2009, Leo Postma  : allocation double precission arrays
 
-!     Subroutines called  : sscald (blas1)
-
       use timers                         ! WAQ performance timers
 
       implicit none

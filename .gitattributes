@@ -3704,14 +3704,11 @@ src/engines_gpl/waq/packages/waq_io/src/waq_io/read_hydfile.f90 -text
 src/engines_gpl/waq/packages/waq_io/src/waq_io/read_initials.f -text
 src/engines_gpl/waq/packages/waq_io/src/waq_io/read_items.f -text
 src/engines_gpl/waq/packages/waq_io/src/waq_io/read_nobottomlay.f -text
-src/engines_gpl/waq/packages/waq_io/src/waq_io/read_opt2.f -text
-src/engines_gpl/waq/packages/waq_io/src/waq_io/read_opt3.f -text
 src/engines_gpl/waq/packages/waq_io/src/waq_io/read_proc_time.f -text
 src/engines_gpl/waq/packages/waq_io/src/waq_io/read_sub_procgrid.f -text
 src/engines_gpl/waq/packages/waq_io/src/waq_io/read_time_delay.f -text
 src/engines_gpl/waq/packages/waq_io/src/waq_io/readmp.f -text
 src/engines_gpl/waq/packages/waq_io/src/waq_io/rearaa.f -text
-src/engines_gpl/waq/packages/waq_io/src/waq_io/rwfun2.f -text
 src/engines_gpl/waq/packages/waq_io/src/waq_io/rwfunc.f -text
 src/engines_gpl/waq/packages/waq_io/src/waq_io/scale.f -text
 src/engines_gpl/waq/packages/waq_io/src/waq_io/timer.f -text
@@ -3816,7 +3813,6 @@ src/engines_gpl/waq/packages/waq_kernel/src/dlwqh3.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/dlwqh6.f90 -text
 src/engines_gpl/waq/packages/waq_kernel/src/dlwqi0.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/dlwqi2.f -text
-src/engines_gpl/waq/packages/waq_kernel/src/dlwqia.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/dlwqib.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/dlwqio.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/dlwqip.f -text
@@ -3829,7 +3825,6 @@ src/engines_gpl/waq/packages/waq_kernel/src/dlwqm2.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/dlwqm3.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/dlwqm4.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/dlwqm5.f -text
-src/engines_gpl/waq/packages/waq_kernel/src/dlwqm6.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/dlwqm7.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/dlwqm8.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/dlwqn0.f -text
@@ -3872,10 +3867,6 @@ src/engines_gpl/waq/packages/waq_kernel/src/dlwqtc.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/dlwqtd.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/dlwqtk.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/dlwqtr.f -text
-src/engines_gpl/waq/packages/waq_kernel/src/dlwqtr_template.f -text
-src/engines_gpl/waq/packages/waq_kernel/src/dlwqwq.f -text
-src/engines_gpl/waq/packages/waq_kernel/src/dlwqwx.f -text
-src/engines_gpl/waq/packages/waq_kernel/src/dlwqwy.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/dlwsol.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/dmpsurf.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/dmpval.f -text
@@ -3917,9 +3908,6 @@ src/engines_gpl/waq/packages/waq_kernel/src/provel.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/psolve.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/putper.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/raatra.f -text
-src/engines_gpl/waq/packages/waq_kernel/src/saxpy.f -text
-src/engines_gpl/waq/packages/waq_kernel/src/scopy.f -text
-src/engines_gpl/waq/packages/waq_kernel/src/sdot.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/segcol.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/setset.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/sgemv.f -text
@@ -3929,7 +3917,6 @@ src/engines_gpl/waq/packages/waq_kernel/src/sobbal.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/space.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/srot.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/srotg.f -text
-src/engines_gpl/waq/packages/waq_kernel/src/sscal.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/stepyn.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/strsv.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/usolve.f -text

@@ -44,7 +44,6 @@
 !                          LUN(23) , output, unformatted dump file
 !
 !     SUBROUTINES CALLED : DLWQTR, user transport routine
-!                          DLWQWQ, user waterquality routine
 !                          PROCES, DELWAQ proces system
 !                          DLWQO2, DELWAQ output system
 !                          DLWQPP, user postprocessing routine
@@ -420,13 +419,6 @@
      &                 j(iprvpt), j(iprdon), nrref    , j(ipror) , nodef    ,
      &                 surface  , lun(19)  )
 !
-!          user kinetics at intermediate time level plus accumulation
-!
-      CALL DLWQWQ ( NOTOT   , NOSYS   , nosss   , NOPA    , NOSFUN  ,
-     *              A(IVOL2), A(ICONC), A(ICONS), A(IPARM), A(IFUNC),
-     *              A(ISFUN), A(IDERV), ITIME   , IDTTOT  , A(ISMAS),
-     *              IBFLAG  , C(ISNAM), NOCONS  , NOFUN   , C(ICNAM),
-     *              C(IPNAM), C(IFNAM), C(ISFNA), NODUMP  , J(IDUMP))
 
 !          add processes
 

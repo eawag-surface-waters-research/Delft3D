@@ -46,7 +46,6 @@
 !                          LUN(23) , output, unformatted restart file
 !
 !     SUBROUTINES CALLED : DLWQTR, user transport routine
-!                          DLWQWQ, user waterquality routine
 !                          DLWQPP, user postprocessing routine
 !                          DLWQO2, DELWAQ4 output routine
 !                          DLWQ13, system postpro-dump routine
@@ -271,11 +270,6 @@
 !          do the user water quality processes
 
          ICSYS = ISYS
-         CALL DLWQWQ ( NOTOT   , NOSYS   , NOSEG   , NOPA    , NOSFUN  ,
-     &                 A(IVOL) , A(ICONC), A(ICONS), A(IPARM), A(IFUNC),
-     &                 A(ISFUN), A(IDERV), ICSYS   , IDT     , A(ISMAS),
-     &                 IBFLAG  , C(ISNAM), NOCONS  , NOFUN   , C(ICNAM),
-     &                 C(IPNAM), C(IFNAM), C(ISFNA), NODUMP  , J(IDUMP))
          call dlwq60 ( a(iderv) , a(iconc) , notot    , noseg    , itfact   ,
      &                 a(imas2) , isys     , 1        , a(idmps) , intopt   ,
      &                 j(isdmp) )

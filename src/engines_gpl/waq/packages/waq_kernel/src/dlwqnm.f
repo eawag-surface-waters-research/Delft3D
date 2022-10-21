@@ -50,7 +50,6 @@
 !                          lun(23) , output, unformatted dump file
 !
 !     subroutines called : dlwqtr, user transport routine
-!                          dlwqwq, user waterquality routine
 !                          proces, delwaq proces system
 !                          dlwqo2, delwaq output system
 !                          dlwqpp, user postprocessing routine
@@ -328,12 +327,6 @@
      &                 j(iprvpt), j(iprdon), nrref , j(ipror), nodef   ,
      &                 surface  ,lun(19) )
 
-!     add user defined routine
-         call dlwqwq ( notot   , nosys   , noseg   , nopa    , nosfun  ,
-     &                 a(ivol) , a(iconc), a(icons), a(iparm), a(ifunc),
-     &                 a(isfun), a(iderv), itime   , idt     , a(ismas),
-     &                 ibflag  , c(isnam), nocons  , nofun   , c(icnam),
-     &                 c(ipnam), c(ifnam), c(isfna), nodump  , j(idump))
 
 !     communicate boundaries
          call dlwq_boundio( lun  (19), notot   , nosys   , noseg   , nobnd   ,

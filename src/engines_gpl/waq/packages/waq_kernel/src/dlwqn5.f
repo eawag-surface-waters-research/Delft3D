@@ -42,7 +42,6 @@
 !                          LUN(23) , restart file
 
 !     SUBROUTINES CALLED : DLWQTR, user transport routine
-!                          DLWQWQ, user waterquality routine
 !                          PROCES, DELWAQ proces system
 !                          DLWQO2, DELWAQ output system
 !                          DLWQPP, user postprocessing routine

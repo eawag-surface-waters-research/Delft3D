@@ -44,7 +44,6 @@
 !                          LUN(23) , output, unformatted dump file
 !
 !     SUBROUTINES CALLED : DLWQTR, user transport routine
-!                          DLWQWQ, user waterquality routine
 !                          PROCES, DELWAQ proces system
 !                          DLWQO2, DELWAQ output system
 !                          DLWQPP, user postprocessing routine
@@ -440,18 +439,7 @@
      &                 surface  , a(imass) , a(iconc) , a(iderv) , idt      ,
      &                 ivflag   , lun(19)  , j(iowns) , mypart   )
          call timer_stop(timer_transport)
-!
-!          user water quality processes implicit part
-!
-      if (mypart.eq.1) then
-         call timer_start(timer_user)
-         CALL DLWQWX ( NOTOT   , NOSYS   , nosss   , NOPA    , NOSFUN  ,
-     *                 A(IVOL2), A(IDERV), A(ICONS), A(IPARM), A(IFUNC),
-     *                 A(ISFUN), A(ICONC), ITIME   , IDT     , A(ISMAS),
-     *                 IBFLAG  , C(ISNAM), NOCONS  , NOFUN   , C(ICNAM),
-     *                 C(IPNAM), C(IFNAM), C(ISFNA), NODUMP  , J(IDUMP))
-         call timer_stop(timer_user)
-      endif
+
 
 !          performs the implicit part of the transport step
 
@@ -472,18 +460,6 @@
      *                 MYPART )
       ENDIF
       call timer_stop(timer_transport)
-!
-!          user water quality processes implicit part
-!
-      if (mypart.eq.1) then
-         call timer_start(timer_user)
-         CALL DLWQWY ( NOTOT   , NOSYS   , nosss   , NOPA    , NOSFUN  ,
-     *                 A(IVOL2), A(IDERV), A(ICONS), A(IPARM), A(IFUNC),
-     *                 A(ISFUN), A(ICONC), ITIME   , IDT     , A(ISMAS),
-     *                 IBFLAG  , C(ISNAM), NOCONS  , NOFUN   , C(ICNAM),
-     *                 C(IPNAM), C(IFNAM), C(ISFNA), NODUMP  , J(IDUMP))
-         call timer_stop(timer_user)
-      endif
 
 !        update the nescessary arrays
 

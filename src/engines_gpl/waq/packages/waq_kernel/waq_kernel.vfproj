@@ -245,7 +245,6 @@
 		<File RelativePath=".\src\dlwqh6.f90"/>
 		<File RelativePath=".\src\dlwqi0.f"/>
 		<File RelativePath=".\src\dlwqi2.f"/>
-		<File RelativePath=".\src\dlwqia.f"/>
 		<File RelativePath=".\src\dlwqib.f"/>
 		<File RelativePath=".\src\dlwqio.f"/>
 		<File RelativePath=".\src\dlwqip.f"/>
@@ -306,7 +305,6 @@
 				<Tool Name="VFFortranCompilerTool" ReentrantCode="reentrancyThreaded" LocalVariableStorage="localStorageAutomatic"/></FileConfiguration>
 			<FileConfiguration Name="Release|Win32">
 				<Tool Name="VFFortranCompilerTool" ReentrantCode="reentrancyThreaded" LocalVariableStorage="localStorageAutomatic"/></FileConfiguration></File>
-		<File RelativePath=".\src\dlwqm6.f"/>
 		<File RelativePath=".\src\dlwqm7.f"/>
 		<File RelativePath=".\src\dlwqm8.f">
 			<FileConfiguration Name="Debug|Win32">
@@ -381,9 +379,6 @@
 		<File RelativePath=".\src\dlwqtd.f"/>
 		<File RelativePath=".\src\dlwqtk.f"/>
 		<File RelativePath=".\src\dlwqtr.f"/>
-		<File RelativePath=".\src\dlwqwq.f"/>
-		<File RelativePath=".\src\dlwqwx.f"/>
-		<File RelativePath=".\src\dlwqwy.f"/>
 		<File RelativePath=".\src\dlwsol.f"/>
 		<File RelativePath=".\src\dmpsurf.f"/>
 		<File RelativePath=".\src\dmpval.f"/>
@@ -477,9 +472,6 @@
 				<Tool Name="VFFortranCompilerTool" ReentrantCode="reentrancyThreaded" LocalVariableStorage="localStorageAutomatic"/></FileConfiguration></File>
 		<File RelativePath=".\src\putper.f"/>
 		<File RelativePath=".\src\raatra.f"/>
-		<File RelativePath=".\src\saxpy.f"/>
-		<File RelativePath=".\src\scopy.f"/>
-		<File RelativePath=".\src\sdot.f"/>
 		<File RelativePath=".\src\segcol.f"/>
 		<File RelativePath=".\src\setset.f"/>
 		<File RelativePath=".\src\sgemv.f">
@@ -521,7 +513,6 @@
 				<Tool Name="VFFortranCompilerTool" ReentrantCode="reentrancyThreaded" LocalVariableStorage="localStorageAutomatic"/></FileConfiguration>
 			<FileConfiguration Name="Release|Win32">
 				<Tool Name="VFFortranCompilerTool" ReentrantCode="reentrancyThreaded" LocalVariableStorage="localStorageAutomatic"/></FileConfiguration></File>
-		<File RelativePath=".\src\sscal.f"/>
 		<File RelativePath=".\src\stepyn.f"/>
 		<File RelativePath=".\src\strsv.f">
 			<FileConfiguration Name="Debug|Win32">

@@ -137,7 +137,6 @@ libWaqKernel_la_SOURCES = \
        dlwqh3.f \
        dlwqh6.f90 \
        dlwqi2.f \
-       dlwqia.f \
        dlwqib.f \
        dlwqio.f \
        dlwqip.f \
@@ -150,7 +149,6 @@ libWaqKernel_la_SOURCES = \
        dlwqm3.f \
        dlwqm4.f \
        dlwqm5.f \
-       dlwqm6.f \
        dlwqm7.f \
        dlwqm8.f \
        dlwqn0.f \
@@ -192,9 +190,6 @@ libWaqKernel_la_SOURCES = \
        dlwqtc.f \
        dlwqtd.f \
        dlwqtk.f \
-       dlwqwq.f \
-       dlwqwx.f \
-       dlwqwy.f \
        dlwsol.f \
        dmpval.f \
        dumpconc.f \
@@ -233,9 +228,6 @@ libWaqKernel_la_SOURCES = \
        psolve.f \
        putper.f \
        raatra.f \
-       saxpy.f \
-       scopy.f \
-       sdot.f \
        setset.f \
        sgemv.f \
        sgmres.f90 \
@@ -243,7 +235,6 @@ libWaqKernel_la_SOURCES = \
        sobbal.f \
        srot.f \
        srotg.f \
-       sscal.f \
        stepyn.f \
        strsv.f \
        usolve.f \

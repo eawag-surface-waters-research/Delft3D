@@ -16,8 +16,8 @@ FMODULES += \
         -I$(top_builddir)/engines_gpl/part/packages/io_f/src \
         -I$(top_builddir)/engines_gpl/part/packages/utils_f/src \
         -I$(top_builddir)/engines_gpl/part/packages/data_f/src \
-	    -I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src/rd_token \
-	    -I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src
+        -I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src/rd_token \
+        -I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src
 
 AM_FCFLAGS += $(FINCLUDES) $(FMODULES) ${NETCDF_CFLAGS} ${NETCDF_FORTRAN_CFLAGS}
 AM_FFLAGS  += $(FINCLUDES) $(FMODULES) ${NETCDF_CFLAGS} ${NETCDF_FORTRAN_CFLAGS}
@@ -68,7 +68,6 @@ libwaq_io_la_SOURCES = bound.f \
        readmp.f \
        rearaa.f \
        rwfunc.f \
-       rwfun2.f \
        scale.f \
        timer.f \
        uniset.f \
@@ -76,8 +75,6 @@ libwaq_io_la_SOURCES = bound.f \
        read_grid.f \
        read_nobottomlay.f \
        read_proc_time.f \
-       read_opt2.f \
-       read_opt3.f \
        read_initials.f \
        read_block.f \
        read_data.f \
