@@ -964,7 +964,7 @@ use meshdata, only : ug_idsLen, ug_idsLongNamesLen
       integer, dimension(:,:),      allocatable :: tmp_lne
       integer, dimension(:)  ,      allocatable :: indx, indxinv, cellnrs, tmpNetcellNod
       real(kind=hp), dimension(:),  allocatable :: tmpCoord
-      integer                                   :: i, k, kother, LL, L, L_org
+      integer                                   :: i, k, kother, LL, L, L_org, nc
       integer                                   :: ic1, ic2, ic3, ic4
       integer                                   :: nump1d2d_org
      
@@ -1094,9 +1094,11 @@ use meshdata, only : ug_idsLen, ug_idsLongNamesLen
          tmp_lne(1:2,1:numl1d) = lne(1:2,1:numl1d)
          do LL=1,numl1D
             do i=1,LNN(LL) ! 0/1/2
-               L = tmp_lne(i,LL)
-               if (L /= 0) then ! Should not be needed?
-                  lne(i,LL) = sign(indxinv(abs(L)), L) ! Use sorted cell numbers, but keep original sign ('-' denoting 1D cells)
+               nc = tmp_lne(i,LL) !cell number
+               if (abs(nc) > nump) then 
+                  lne(i,LL) = sign(indxinv(abs(nc)), nc) ! Use sorted cell numbers, but keep original sign ('-' denoting 1D cells)
+               else
+                 continue ! 2d cell numbers remain unchanged
                end if
             end do
          end do
