@@ -33,8 +33,8 @@
 !
       real(4) ::   pmsa(*)     !I/O Process Manager System Array, window of routine to process library
       real(4) ::   fl(*)       ! O  Array of fluxes made by this process in mass/volume/time
-      integer ::   ipoint(44)  ! I  Array of pointers in pmsa to get and store the data
-      integer ::   increm(44)  ! I  Increments in ipoint for segment loop, 0=constant, 1=spatially varying
+      integer ::   ipoint(45)  ! I  Array of pointers in pmsa to get and store the data
+      integer ::   increm(45)  ! I  Increments in ipoint for segment loop, 0=constant, 1=spatially varying
       integer ::   noseg       ! I  Number of computational elements in the whole model schematisation
       integer ::   noflux      ! I  Number of fluxes, increment in the fl array
       integer ::   iexpnt(4,*) ! I  From, To, From-1 and To+1 segment numbers of the exchange surfaces
@@ -80,7 +80,7 @@
 ! FrIM1S2Pup    O fraction IM1 in layer S2 pick-up         (gDM/gDM)
 ! dResS2Pup     F pick-up resuspension flux IM1 from S2     (g/m3/d)
 
-      integer ::   ipnt( 44)   !    local work array for the pointering
+      integer ::   ipnt( 45)   !    local work array for the pointering
       integer ::   iseg        !    local loop counter for computational element loop
       integer ::   iflux
       integer ::   ikmrk2
@@ -127,6 +127,7 @@
       real(4) ::   flres2
       real(4) ::   press2
       real(4) ::   frtims2pup
+      real(4) ::   frpoms2pup
       real(4) ::   flrim1s1
       real(4) ::   flrim2s1
       real(4) ::   flrim3s1
@@ -269,6 +270,7 @@
             frim3s2pup = im3s2/rhosand/(thicks2*(1.-pors2))
             tims2      = im1s2+im2s2+im3s2
             frtims2pup = tims2/rhosand/(thicks2*(1.-pors2))
+            frpoms2pup = max(0.0,dms2-tims2)/rhosand/(thicks2*(1.-pors2))
 
       !     No resuspension when depth below min depth
             if ( depth .lt. mindep) then
@@ -337,11 +339,12 @@
             pmsa (ipnt (37) ) = flres2
             pmsa (ipnt (38) ) = press2
             pmsa (ipnt (39) ) = frtims2pup
-            pmsa (ipnt (40) ) = flrim1s1
-            pmsa (ipnt (41) ) = flrim2s1
-            pmsa (ipnt (42) ) = flrim3s1
-            pmsa (ipnt (43) ) = flrdms1
-            pmsa (ipnt (44) ) = flrdms2
+            pmsa (ipnt (40) ) = frpoms2pup
+            pmsa (ipnt (41) ) = flrim1s1
+            pmsa (ipnt (42) ) = flrim2s1
+            pmsa (ipnt (43) ) = flrim3s1
+            pmsa (ipnt (44) ) = flrdms1
+            pmsa (ipnt (45) ) = flrdms2
 
           endif
         endif

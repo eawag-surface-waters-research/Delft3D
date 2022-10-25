@@ -1058,11 +1058,12 @@ outppr,outpit,outpnm,outpdo,outpsx
 "Res_Buffer","fRTIMS2Pup",   4,"x",1
 "Res_Buffer","Pshields  ",   5,"x",1
 "Res_Buffer","FrTIMS2   ",   6,"x",1
-"Res_Buffer","fResS1IM1 ",   7,"x",1
-"Res_Buffer","fResS1IM2 ",   8,"x",1
-"Res_Buffer","fResS1IM3 ",   9,"x",1
-"Res_Buffer","fResS1DM  ",  10,"x",1
-"Res_Buffer","fResS2DM  ",  11,"x",1
+"Res_Buffer","FrPOMS2   ",   7,"x",1
+"Res_Buffer","fResS1IM1 ",   8,"x",1
+"Res_Buffer","fResS1IM2 ",   9,"x",1
+"Res_Buffer","fResS1IM3 ",  10,"x",1
+"Res_Buffer","fResS1DM  ",  11,"x",1
+"Res_Buffer","fResS2DM  ",  12,"x",1
 "Sed_IM1   ","PSedIM1   ",   1,"x",1
 "Sed_IM1   ","fSedIM1   ",   2,"x",1
 "Sed_IM1   ","fSedIM1S2 ",   3," ",1
