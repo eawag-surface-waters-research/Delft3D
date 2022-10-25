@@ -80,6 +80,10 @@ libdir["fortran2132"] = "$(IFORT_COMPILER21)\\compiler\\lib\\ia32"
 libdir["c2132"] = libdir["fortran2132"]
 libdir["fortran2164"] = "$(IFORT_COMPILER21)\\compiler\\lib\\intel64"
 libdir["c2164"] = libdir["fortran2164"]
+libdir["fortran2232"] = "$(IFORT_COMPILER22)\\compiler\\lib\\ia32"
+libdir["c2232"] = libdir["fortran2232"]
+libdir["fortran2264"] = "$(IFORT_COMPILER22)\\compiler\\lib\\intel64"
+libdir["c2264"] = libdir["fortran2264"]
 
 #
 #
@@ -109,6 +113,10 @@ redistdir["fortran2132"] = "$(IFORT_COMPILER21)redist\\ia32_win\\compiler\\&quot
 redistdir["c2132"] = "$(IFORT_COMPILER21)redist\\ia32_win\\compiler\\"
 redistdir["fortran2164"] = "$(IFORT_COMPILER21)redist\\intel64_win\\compiler\\&quot"
 redistdir["c2164"] = "$(IFORT_COMPILER21)redist\\intel64_win\\compiler\\"
+redistdir["fortran2232"] = "$(IFORT_COMPILER22)redist\\ia32_win\\compiler\\&quot"
+redistdir["c2232"] = "$(IFORT_COMPILER22)redist\\ia32_win\\compiler\\"
+redistdir["fortran2264"] = "$(IFORT_COMPILER22)redist\\intel64_win\\compiler\\&quot"
+redistdir["c2264"] = "$(IFORT_COMPILER22)redist\\intel64_win\\compiler\\"
 
 # redistdir specifies the directory containing the ifort redistributable dlls
 # The string to be added can be set depending on:
@@ -136,6 +144,10 @@ mkldir["fortran2132"] = "$(ONEAPI_ROOT)mkl\\latest\\redist\\ia32\\&quot"
 mkldir["c2132"] = "$(ONEAPI_ROOT)mkl\\latest\\redist\\ia32\\"
 mkldir["fortran2164"] = "$(ONEAPI_ROOT)mkl\\latest\\redist\\intel64\\&quot"
 mkldir["c2164"] = "$(ONEAPI_ROOT)mkl\\latest\\redist\\intel64\\"
+mkldir["fortran2232"] = "$(ONEAPI_ROOT)mkl\\latest\\redist\\ia32\\&quot"
+mkldir["c2232"] = "$(ONEAPI_ROOT)mkl\\latest\\redist\\ia32\\"
+mkldir["fortran2264"] = "$(ONEAPI_ROOT)mkl\\latest\\redist\\intel64\\&quot"
+mkldir["c2264"] = "$(ONEAPI_ROOT)mkl\\latest\\redist\\intel64\\"
 
 #
 #
@@ -145,6 +157,7 @@ toolsversion[2015] = "14.0"
 toolsversion[2016] = "14.0"
 toolsversion[2017] = "15.0"
 toolsversion[2019] = "15.0"
+toolsversion[2022] = "15.0"
 
 #
 #
@@ -163,6 +176,7 @@ platformtoolset[2015] = "    <PlatformToolset>v140</PlatformToolset>"
 platformtoolset[2016] = "    <PlatformToolset>v140</PlatformToolset>"
 platformtoolset[2017] = "    <PlatformToolset>v141</PlatformToolset>"
 platformtoolset[2019] = "    <PlatformToolset>v142</PlatformToolset>"
+platformtoolset[2022] = "    <PlatformToolset>v143</PlatformToolset>"
 
 #
 #
@@ -180,6 +194,8 @@ ucrtlibdir["201732"] = "$(UniversalCRTSdkDir)Lib\\UCRTLIBDIRVERSIONNUMBER\\ucrt\
 ucrtlibdir["201764"] = "$(UniversalCRTSdkDir)Lib\\UCRTLIBDIRVERSIONNUMBER\\ucrt\\x64"
 ucrtlibdir["201932"] = "$(UniversalCRTSdkDir)Lib\\UCRTLIBDIRVERSIONNUMBER\\ucrt\\x86"
 ucrtlibdir["201964"] = "$(UniversalCRTSdkDir)Lib\\UCRTLIBDIRVERSIONNUMBER\\ucrt\\x64"
+ucrtlibdir["202232"] = "$(UniversalCRTSdkDir)Lib\\UCRTLIBDIRVERSIONNUMBER\\ucrt\\x86"
+ucrtlibdir["202264"] = "$(UniversalCRTSdkDir)Lib\\UCRTLIBDIRVERSIONNUMBER\\ucrt\\x64"
 
 #
 #
@@ -190,6 +206,7 @@ getucrtdir = {}
 getucrtdir["2015"] = '"' + str(os.environ.get("VS140COMNTOOLS")) + "..\\..\\VC\\vcvarsall.bat" + '" amd64&&set UniversalCRTSdkDir'
 getucrtdir["2017"] = '"' + str(os.environ.get("VS2017INSTALLDIR")) + "\\VC\\Auxiliary\\Build\\vcvarsall.bat" + '" amd64&&set UniversalCRTSdkDir'
 getucrtdir["2019"] = '"' + str(os.environ.get("VS2019INSTALLDIR")) + "\\VC\\Auxiliary\\Build\\vcvarsall.bat" + '" amd64&&set UniversalCRTSdkDir'
+getucrtdir["2022"] = '"' + str(os.environ.get("VS2022INSTALLDIR")) + "\\VC\\Auxiliary\\Build\\vcvarsall.bat" + '" amd64&&set UniversalCRTSdkDir'
 
 #
 #
@@ -247,6 +264,8 @@ def process_solution_file(sln, slntemplate):
                     line = "Microsoft Visual Studio Solution File, Format Version 12.00\r\n"
                 elif vs == 2019:
                     line = "Microsoft Visual Studio Solution File, Format Version 12.00\r\n"
+                elif vs == 2022:
+                    line = "Microsoft Visual Studio Solution File, Format Version 12.00\r\n"
                 else:
                     pass
             startpos = line.find("# Visual Studio")
@@ -258,6 +277,8 @@ def process_solution_file(sln, slntemplate):
                 elif vs == 2017:
                     line = "# Visual Studio 2017\r\n"
                 elif vs == 2019:
+                    line = "# Visual Studio 16\r\n"
+                elif vs == 2022:
                     line = "# Visual Studio 16\r\n"
                 else:
                     pass
@@ -631,9 +652,10 @@ def build_gui():
     Label(text=" ").grid(row=99)
     Label(text="Visual Studio Version:", relief=RIDGE, width=20).grid(row=100, column=0)
     
-    Radiobutton(root, text="VS 2019                           ", variable=vs_gui, value=2019).grid(row=101, column=0, sticky=W)
-    Radiobutton(root, text="VS 2017                           ", variable=vs_gui, value=2017).grid(row=102, column=0, sticky=W)
-    Radiobutton(root, text="VS 2015, Update 3                 ", variable=vs_gui, value=2015).grid(row=103, column=0, sticky=W)
+    Radiobutton(root, text="VS 2022                           ", variable=vs_gui, value=2022).grid(row=101, column=0, sticky=W)
+    Radiobutton(root, text="VS 2019                           ", variable=vs_gui, value=2019).grid(row=102, column=0, sticky=W)
+    Radiobutton(root, text="VS 2017                           ", variable=vs_gui, value=2017).grid(row=103, column=0, sticky=W)
+    Radiobutton(root, text="VS 2015, Update 3                 ", variable=vs_gui, value=2015).grid(row=104, column=0, sticky=W)
     # default value
     vs_gui.set(2017)
     
@@ -648,11 +670,12 @@ def build_gui():
     
     if chooseIfort == 1:
         Label(text="IFORT Version:", relief=RIDGE, width=20).grid(row=100, column=2)
-        Radiobutton(root, text="IFORT21: Intel oneAPI HPC 2021                 ", variable=ifort_gui, value=21).grid(row=101, column=2, sticky=W)
-        Radiobutton(root, text="IFORT19: Intel Parallel Studio XE 2019         ", variable=ifort_gui, value=19).grid(row=102, column=2, sticky=W)
-        Radiobutton(root, text="IFORT18: Intel Parallel Studio XE 2018 Update 4", variable=ifort_gui, value=18).grid(row=103, column=2, sticky=W)
-        Radiobutton(root, text="IFORT17: (Not Recommended)                     ", variable=ifort_gui, value=17).grid(row=104, column=2, sticky=W)
-        Radiobutton(root, text="IFORT16: Intel Parallel Studio XE 2016 Update 4", variable=ifort_gui, value=16).grid(row=105, column=2, sticky=W)
+        Radiobutton(root, text="IFORT22: Intel oneAPI HPC 2022                 ", variable=ifort_gui, value=22).grid(row=101, column=2, sticky=W)
+        Radiobutton(root, text="IFORT21: Intel oneAPI HPC 2021                 ", variable=ifort_gui, value=21).grid(row=102, column=2, sticky=W)
+        Radiobutton(root, text="IFORT19: Intel Parallel Studio XE 2019         ", variable=ifort_gui, value=19).grid(row=103, column=2, sticky=W)
+        Radiobutton(root, text="IFORT18: Intel Parallel Studio XE 2018 Update 4", variable=ifort_gui, value=18).grid(row=104, column=2, sticky=W)
+        Radiobutton(root, text="IFORT17: (Not Recommended)                     ", variable=ifort_gui, value=17).grid(row=105, column=2, sticky=W)
+        Radiobutton(root, text="IFORT16: Intel Parallel Studio XE 2016 Update 4", variable=ifort_gui, value=16).grid(row=106, column=2, sticky=W)
         # default value
         ifort_gui.set(18)
     else:
