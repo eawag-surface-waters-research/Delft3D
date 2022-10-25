@@ -579,17 +579,17 @@ subroutine average_valstruct(valstruct, istrtypein, istru, nlinks)
    ! 1a. average for waterlevel upstream, downstream and head
    if (valstruct(IVAL_WIDTHUP) > 0) then
       valstruct(IVAL_S1UP) = valstruct(IVAL_S1UP) / valstruct(IVAL_WIDTHUP)
-   else
+   else if (istrtypein /= ST_LONGCULVERT) then
       valstruct(IVAL_S1UP) = dmiss
    end if
    if (valstruct(IVAL_WIDTHDN) > 0) then
       valstruct(IVAL_S1DN) = valstruct(IVAL_S1DN) / valstruct(IVAL_WIDTHDN)
-   else
+   else if (istrtypein /= ST_LONGCULVERT) then
       valstruct(IVAL_S1DN) = dmiss
    end if
    if (valstruct(IVAL_WIDTHUPDN) > 0) then
       valstruct(IVAL_HEAD) = valstruct(IVAL_HEAD) / valstruct(IVAL_WIDTHUPDN)
-   else
+   else if (istrtypein /= ST_LONGCULVERT) then
       valstruct(IVAL_HEAD) = dmiss
    end if
    ! 1b. other generic variables
