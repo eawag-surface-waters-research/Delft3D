@@ -874,7 +874,7 @@ else if (icorio == 10) then                             ! vol2D type weigthings
     ucyu = 0d0
     if (jasfer3D == 1) then
        !$OMP PARALLEL DO           &
-       !$OMP PRIVATE(L)
+       !$OMP PRIVATE(L, i)
        do i = 1, wetLinkCount
           L = onlyWetLinks(i)
           if (qa(L) > 0) then                               ! set upwind ucxu, ucyu  on links
@@ -888,7 +888,7 @@ else if (icorio == 10) then                             ! vol2D type weigthings
        !$OMP END PARALLEL DO
     else
        !$OMP PARALLEL DO           &
-       !$OMP PRIVATE(L)
+       !$OMP PRIVATE(L,i)
        do i = 1, wetLinkCount
           L = onlyWetLinks(i)
           if (qa(L) > 0) then                               ! set upwind ucxu, ucyu  on links
