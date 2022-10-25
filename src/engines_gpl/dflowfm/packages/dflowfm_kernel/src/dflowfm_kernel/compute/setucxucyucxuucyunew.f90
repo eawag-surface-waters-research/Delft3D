@@ -56,82 +56,82 @@
  ucxq = 0d0 ; ucyq = 0d0           ! zero arrays
  
  if (iperot /= -1) then
-    ucx  = 0d0 ; ucy  = 0d0
+ ucx  = 0d0 ; ucy  = 0d0
 
-    if (kmx < 1) then                                   ! original 2D coding
+ if (kmx < 1) then                                   ! original 2D coding
 
-       do i = 1, wetLink2D - 1
-          L = onlyWetLinks(i)
-          if (kcu(L) .ne. 3) then  ! link flows ; in 2D, the loop is split to save kcu check in 2D
-             k1 = ln(1,L) ; k2 = ln(2,L)
-             ucx(k1) = ucx(k1) + wcx1(L)*u1(L)
-             ucy(k1) = ucy(k1) + wcy1(L)*u1(L)
-             ucx(k2) = ucx(k2) + wcx2(L)*u1(L)
-             ucy(k2) = ucy(k2) + wcy2(L)*u1(L)
-          endif
-       enddo
-
-       do i = wetLink2D, wetLinkCount
-          L = onlyWetLinks(i)
-          if (jabarrieradvection == 3) then
-             if ( struclink(L) == 1 ) cycle
-          endif
+    do L = 1,lnx1D
+       if (u1(L) .ne. 0d0 .and. kcu(L) .ne. 3) then  ! link flows ; in 2D, the loop is split to save kcu check in 2D
           k1 = ln(1,L) ; k2 = ln(2,L)
           ucx(k1) = ucx(k1) + wcx1(L)*u1(L)
           ucy(k1) = ucy(k1) + wcy1(L)*u1(L)
           ucx(k2) = ucx(k2) + wcx2(L)*u1(L)
           ucy(k2) = ucy(k2) + wcy2(L)*u1(L)
+       endif
+    enddo
+
+    do L = lnx1D + 1,lnx
+       if (jabarrieradvection == 3) then
+          if ( struclink(L) == 1 ) cycle
+       endif
+       if (u1(L) .ne. 0d0) then                      ! link flows
+          k1 = ln(1,L) ; k2 = ln(2,L)
+          ucx(k1) = ucx(k1) + wcx1(L)*u1(L)
+          ucy(k1) = ucy(k1) + wcy1(L)*u1(L)
+          ucx(k2) = ucx(k2) + wcx2(L)*u1(L)
+          ucy(k2) = ucy(k2) + wcy2(L)*u1(L)
+       endif
+    enddo
+
+    if (ChangeVelocityAtStructures) then
+       ! Perform velocity correction for fixed weir and structures
+       ! In some cases the flow area of the hydraulic structure is larger than the flow area of the branch.
+       ! In those cases the flow velocity at the structure is not used, but the upstream velocity
+       do i = 1, numberOfStructuresAndWeirs
+          L = structuresAndWeirsList(i)
+          if (jabarrieradvection == 3 .and. L > lnx1D) then
+             if ( struclink(L) == 1 ) cycle
+          endif
+          if (comparereal(au_nostrucs(L), 0d0) ==1) then
+            k1 = ln(1,L) 
+            k2 = ln(2,L)
+            u1correction = q1(L)/au_nostrucs(L) - u1(L)
+            ucx(k1) = ucx(k1) + wcx1(L)*u1correction
+            ucy(k1) = ucy(k1) + wcy1(L)*u1correction
+            ucx(k2) = ucx(k2) + wcx2(L)*u1correction
+            ucy(k2) = ucy(k2) + wcy2(L)*u1correction
+          endif
+       enddo
+    endif
+
+ else
+    do LL = 1,lnx
+       Lb = Lbot(LL) ; Lt = Lb - 1 + kmxL(LL)
+       do L = Lb, Lt
+          if (u1(L) .ne. 0d0) then                         ! link flows
+             k1 = ln0(1,L)                                 ! use ln0 in reconstruction and in computing ucxu, use ln when fluxing
+             k2 = ln0(2,L)
+             ucx (k1) = ucx (k1) + wcx1(LL)*u1(L)
+             ucy (k1) = ucy (k1) + wcy1(LL)*u1(L)
+             ucx (k2) = ucx (k2) + wcx2(LL)*u1(L)
+             ucy (k2) = ucy (k2) + wcy2(LL)*u1(L)
+          endif
        enddo
 
-       if (ChangeVelocityAtStructures) then
-          ! Perform velocity correction for fixed weir and structures
-          ! In some cases the flow area of the hydraulic structure is larger than the flow area of the branch.
-          ! In those cases the flow velocity at the structure is not used, but the upstream velocity
-          do i = 1, numberOfStructuresAndWeirs
-             L = structuresAndWeirsList(i)
-             if (jabarrieradvection == 3 .and. L > lnx1D) then
-                if ( struclink(L) == 1 ) cycle
-             endif
-             if (comparereal(au_nostrucs(L), 0d0) ==1) then
-               k1 = ln(1,L) 
-               k2 = ln(2,L)
-               u1correction = q1(L)/au_nostrucs(L) - u1(L)
-               ucx(k1) = ucx(k1) + wcx1(L)*u1correction
-               ucy(k1) = ucy(k1) + wcy1(L)*u1correction
-               ucx(k2) = ucx(k2) + wcx2(L)*u1correction
-               ucy(k2) = ucy(k2) + wcy2(L)*u1correction
-             endif
-          enddo
+       if (jazlayercenterbedvel == 1) then ! copy bed velocity down
+           do k1 = kbot(ln0(1,LL)), ln0(1,Lb) - 1
+              ucx(k1) = ucx(k1) + wcx1(LL)*u1(Lb)
+              ucy(k1) = ucy(k1) + wcy1(LL)*u1(Lb)
+           enddo
+           do k2 = kbot(ln0(2,LL)), ln0(2,Lb) - 1
+              ucx(k2) = ucx(k2) + wcx2(LL)*u1(Lb)
+              ucy(k2) = ucy(k2) + wcy2(LL)*u1(Lb)
+           enddo
        endif
 
-    else
-       do LL = 1,lnx
-          Lb = Lbot(LL) ; Lt = Lb - 1 + kmxL(LL)
-          do L = Lb, Lt
-             if (u1(L) .ne. 0d0) then                         ! link flows
-                k1 = ln0(1,L)                                 ! use ln0 in reconstruction and in computing ucxu, use ln when fluxing
-                k2 = ln0(2,L)
-                ucx (k1) = ucx (k1) + wcx1(LL)*u1(L)
-                ucy (k1) = ucy (k1) + wcy1(LL)*u1(L)
-                ucx (k2) = ucx (k2) + wcx2(LL)*u1(L)
-                ucy (k2) = ucy (k2) + wcy2(LL)*u1(L)
-             endif
-          enddo
+    enddo
 
-          if (jazlayercenterbedvel == 1) then ! copy bed velocity down
-              do k1 = kbot(ln0(1,LL)), ln0(1,Lb) - 1
-                 ucx(k1) = ucx(k1) + wcx1(LL)*u1(Lb)
-                 ucy(k1) = ucy(k1) + wcy1(LL)*u1(Lb)
-              enddo
-              do k2 = kbot(ln0(2,LL)), ln0(2,Lb) - 1
-                 ucx(k2) = ucx(k2) + wcx2(LL)*u1(Lb)
-                 ucy(k2) = ucy(k2) + wcy2(LL)*u1(Lb)
-              enddo
-          endif
-
-       enddo
-
-    endif
+ endif
  endif 
 
 
@@ -139,16 +139,17 @@
 
     if (kmx < 1) then
 
-       do i = wetLink2D, wetLinkCount
-          L = onlyWetLinks(i)
-          k1 = ln(1,L) ; k2 = ln(2,L)
-          huL = hu(L)
-          if (hhtrshcor > 0) huL = max(huL, hhtrshcor )
-          uhu = u1(L)*huL
-          ucxq(k1) = ucxq(k1) + wcx1(L)*uhu
-          ucyq(k1) = ucyq(k1) + wcy1(L)*uhu
-          ucxq(k2) = ucxq(k2) + wcx2(L)*uhu
-          ucyq(k2) = ucyq(k2) + wcy2(L)*uhu
+       do L = lnx1D + 1,lnx
+          if (u1(L) .ne. 0d0) then                      ! link flows
+             k1 = ln(1,L) ; k2 = ln(2,L)
+             huL = hu(L)
+             if (hhtrshcor > 0) huL = max(huL, hhtrshcor )
+             uhu = u1(L)*huL
+             ucxq(k1) = ucxq(k1) + wcx1(L)*uhu
+             ucyq(k1) = ucyq(k1) + wcy1(L)*uhu
+             ucxq(k2) = ucxq(k2) + wcx2(L)*uhu
+             ucyq(k2) = ucyq(k2) + wcy2(L)*uhu
+          endif
        enddo
 
     else
@@ -176,16 +177,17 @@
 
     if (kmx < 1) then
 
-       do i = wetLink2D, wetLinkCount
-          L = onlyWetLinks(i)
-          k1 = ln(1,L) ; k2 = ln(2,L)
-          huL = hu(L)
-          if (hhtrshcor > 0) huL = max(huL, hhtrshcor )
-          uhu = u1(L)*huL
-          ucxq(k1) = ucxq(k1) + wcx1(L)*uhu
-          ucyq(k1) = ucyq(k1) + wcy1(L)*uhu
-          ucxq(k2) = ucxq(k2) + wcx2(L)*uhu
-          ucyq(k2) = ucyq(k2) + wcy2(L)*uhu
+       do L = lnx1D + 1,lnx
+          if (u1(L) .ne. 0d0) then                      ! link flows
+             k1 = ln(1,L) ; k2 = ln(2,L)
+             huL = hu(L)
+             if (hhtrshcor > 0) huL = max(huL, hhtrshcor )
+             uhu = u1(L)*huL
+             ucxq(k1) = ucxq(k1) + wcx1(L)*uhu
+             ucyq(k1) = ucyq(k1) + wcy1(L)*uhu
+             ucxq(k2) = ucxq(k2) + wcx2(L)*uhu
+             ucyq(k2) = ucyq(k2) + wcy2(L)*uhu
+          endif
        enddo
 
     else
@@ -211,18 +213,19 @@
 
  else if (icorio == 7) then                             ! ahuk type weigthings
 
-    if (kmx < 1) then
+   if (kmx < 1) then
 
-       do i = wetLink2D, wetLinkCount
-          L = onlyWetLinks(i)
-          k1 = ln(1,L) ; k2 = ln(2,L)
-          huL = acl(L)*hs(k1) + (1d0-acl(L))*hs(k2)
-          if (hhtrshcor > 0) huL = max(huL, hhtrshcor )
-          uhu = u1(L)*huL
-          ucxq(k1) = ucxq(k1) + wcx1(L)*uhu
-          ucyq(k1) = ucyq(k1) + wcy1(L)*uhu
-          ucxq(k2) = ucxq(k2) + wcx2(L)*uhu
-          ucyq(k2) = ucyq(k2) + wcy2(L)*uhu
+       do L = lnx1D + 1,lnx
+          if (u1(L) .ne. 0d0) then                      ! link flows
+             k1 = ln(1,L) ; k2 = ln(2,L)
+             huL = acl(L)*hs(k1) + (1d0-acl(L))*hs(k2)
+             if (hhtrshcor > 0) huL = max(huL, hhtrshcor )
+             uhu = u1(L)*huL
+             ucxq(k1) = ucxq(k1) + wcx1(L)*uhu
+             ucyq(k1) = ucyq(k1) + wcy1(L)*uhu
+             ucxq(k2) = ucxq(k2) + wcx2(L)*uhu
+             ucyq(k2) = ucyq(k2) + wcy2(L)*uhu
+          endif
        enddo
 
     else
@@ -248,18 +251,19 @@
 
 else if (icorio == 8) then                             ! ahu2D type weigthings
 
-    if (kmx < 1) then
+   if (kmx < 1) then
 
-       do i = wetLink2D, wetLinkCount
-          L = onlyWetLinks(i)
-          k1 = ln(1,L) ; k2 = ln(2,L)
-          huL = acl(L)*hs(k1) + (1d0-acl(L))*hs(k2)
-          if (hhtrshcor > 0) huL = max(huL, hhtrshcor )
-          uhu = u1(L)*huL
-          ucxq(k1) = ucxq(k1) + wcx1(L)*uhu
-          ucyq(k1) = ucyq(k1) + wcy1(L)*uhu
-          ucxq(k2) = ucxq(k2) + wcx2(L)*uhu
-          ucyq(k2) = ucyq(k2) + wcy2(L)*uhu
+       do L = lnx1D + 1,lnx
+          if (u1(L) .ne. 0d0) then                      ! link flows
+             k1 = ln(1,L) ; k2 = ln(2,L)
+             huL = acl(L)*hs(k1) + (1d0-acl(L))*hs(k2)
+             if (hhtrshcor > 0) huL = max(huL, hhtrshcor )
+             uhu = u1(L)*huL
+             ucxq(k1) = ucxq(k1) + wcx1(L)*uhu
+             ucyq(k1) = ucyq(k1) + wcy1(L)*uhu
+             ucxq(k2) = ucxq(k2) + wcx2(L)*uhu
+             ucyq(k2) = ucyq(k2) + wcy2(L)*uhu
+          endif
        enddo
 
     else
@@ -286,18 +290,19 @@ else if (icorio == 8) then                             ! ahu2D type weigthings
 
 else if (icorio == 9) then                             ! volk type weigthings
 
-    if (kmx < 1) then
+   if (kmx < 1) then
 
-       do i = wetLink2D, wetLinkCount
-          L = onlyWetLinks(i)
-          k1 = ln(1,L) ; k2 = ln(2,L)
-          huL = acl(L)*vol1(k1) + (1d0-acl(L))*vol1(k2)
-          if (hhtrshcor > 0)  huL = max(huL, hhtrshcor*( acl(L)*ba(k1) + (1d0-acl(L))*ba(k2) ) )
-          uhu = u1(L)*huL
-          ucxq(k1) = ucxq(k1) + wcx1(L)*uhu
-          ucyq(k1) = ucyq(k1) + wcy1(L)*uhu
-          ucxq(k2) = ucxq(k2) + wcx2(L)*uhu
-          ucyq(k2) = ucyq(k2) + wcy2(L)*uhu
+       do L = lnx1D + 1,lnx
+          if (u1(L) .ne. 0d0) then                      ! link flows
+             k1 = ln(1,L) ; k2 = ln(2,L)
+             huL = acl(L)*vol1(k1) + (1d0-acl(L))*vol1(k2)
+             if (hhtrshcor > 0)  huL = max(huL, hhtrshcor*( acl(L)*ba(k1) + (1d0-acl(L))*ba(k2) ) )
+             uhu = u1(L)*huL
+             ucxq(k1) = ucxq(k1) + wcx1(L)*uhu
+             ucyq(k1) = ucyq(k1) + wcy1(L)*uhu
+             ucxq(k2) = ucxq(k2) + wcx2(L)*uhu
+             ucyq(k2) = ucyq(k2) + wcy2(L)*uhu
+          endif
        enddo
 
     else
@@ -325,18 +330,19 @@ else if (icorio == 9) then                             ! volk type weigthings
 
 else if (icorio == 10) then                             ! vol2D type weigthings
 
-    if (kmx < 1) then
+   if (kmx < 1) then
 
-       do i = wetLink2D, wetLinkCount
-          L = onlyWetLinks(i)
-          k1 = ln(1,L) ; k2 = ln(2,L)
-          huL = acl(L)*vol1(k1) + (1d0-acl(L))*vol1(k2)
-          if (hhtrshcor > 0)  huL = max(huL, hhtrshcor*( acl(L)*ba(k1) + (1d0-acl(L))*ba(k2) ) )
-          uhu = u1(L)*huL
-          ucxq(k1) = ucxq(k1) + wcx1(L)*uhu
-          ucyq(k1) = ucyq(k1) + wcy1(L)*uhu
-          ucxq(k2) = ucxq(k2) + wcx2(L)*uhu
-          ucyq(k2) = ucyq(k2) + wcy2(L)*uhu
+       do L = lnx1D + 1,lnx
+          if (u1(L) .ne. 0d0) then                      ! link flows
+             k1 = ln(1,L) ; k2 = ln(2,L)
+             huL = acl(L)*vol1(k1) + (1d0-acl(L))*vol1(k2)
+             if (hhtrshcor > 0)  huL = max(huL, hhtrshcor*( acl(L)*ba(k1) + (1d0-acl(L))*ba(k2) ) )
+             uhu = u1(L)*huL
+             ucxq(k1) = ucxq(k1) + wcx1(L)*uhu
+             ucyq(k1) = ucyq(k1) + wcy1(L)*uhu
+             ucxq(k2) = ucxq(k2) + wcx2(L)*uhu
+             ucyq(k2) = ucyq(k2) + wcy2(L)*uhu
+          endif
        enddo
 
     else
@@ -367,8 +373,7 @@ else if (icorio == 10) then                             ! vol2D type weigthings
  if (icorio == 7 .or. icorio == 27) then   ! make ahus or ahusk
     hus = 0
     if (kmx < 1) then ! original 2D coding
-       do i = 1, wetLinkCount
-          L = onlyWetLinks(i)
+       do L = 1,lnx
           k1  = ln(1,L) ; k2 = ln(2,L)
           huL = acl(L)*hs(k1) + (1d0-acl(L))*hs(k2)
           hus(k1) = hus(k1) + wcl(1,L)*huL
@@ -387,8 +392,7 @@ else if (icorio == 10) then                             ! vol2D type weigthings
  else if (icorio == 8 .or. icorio == 28) then
     hus = 0
     if (kmx < 1) then ! original 2D coding
-       do i = 1, wetLinkCount
-          L = onlyWetLinks(i)
+       do L = 1,lnx
           k1  = ln(1,L) ; k2 = ln(2,L)
           huL = acl(L)*hs(k1) + (1d0-acl(L))*hs(k2)
           hus(k1) = hus(k1) + wcl(1,L)*huL
@@ -870,33 +874,36 @@ else if (icorio == 10) then                             ! vol2D type weigthings
  endif
 
  if (kmx < 1) then
-    ucxu = 0d0
-    ucyu = 0d0
+
     if (jasfer3D == 1) then
        !$OMP PARALLEL DO           &
-       !$OMP PRIVATE(L, i)
-       do i = 1, wetLinkCount
-          L = onlyWetLinks(i)
+       !$OMP PRIVATE(L)
+       do L = 1,lnx
           if (qa(L) > 0) then                               ! set upwind ucxu, ucyu  on links
              ucxu(L) = nod2linx(L,1,ucx(ln(1,L)),ucy(ln(1,L)))
              ucyu(L) = nod2liny(L,1,ucx(ln(1,L)),ucy(ln(1,L)))
           else if (qa(L) < 0) then
              ucxu(L) = nod2linx(L,2,ucx(ln(2,L)),ucy(ln(2,L)))
              ucyu(L) = nod2liny(L,2,ucx(ln(2,L)),ucy(ln(2,L)))
+          else
+             ucxu(L) = 0d0
+             ucyu(L) = 0d0
           endif
        enddo
        !$OMP END PARALLEL DO
     else
        !$OMP PARALLEL DO           &
-       !$OMP PRIVATE(L,i)
-       do i = 1, wetLinkCount
-          L = onlyWetLinks(i)
+       !$OMP PRIVATE(L)
+       do L = 1,lnx
           if (qa(L) > 0) then                               ! set upwind ucxu, ucyu  on links
              ucxu(L) = ucx(ln(1,L))
              ucyu(L) = ucy(ln(1,L))
           else if (qa(L) < 0) then
              ucxu(L) = ucx(ln(2,L))
              ucyu(L) = ucy(ln(2,L))
+          else
+             ucxu(L) = 0d0
+             ucyu(L) = 0d0
           endif
        enddo
        !$OMP END PARALLEL DO
@@ -907,7 +914,7 @@ else if (icorio == 10) then                             ! vol2D type weigthings
     if (jasfer3D == 1) then
        !$OMP PARALLEL DO           &
        !$OMP PRIVATE(LL,L,Lb,Lt)
-       do LL = 1, lnx
+       do LL = 1,lnx
           call getLbotLtop(LL,Lb,Lt)
           do L = Lb,Lt
              if (qa(L) > 0) then                               ! set upwind ucxu, ucyu  on links
@@ -936,7 +943,7 @@ else if (icorio == 10) then                             ! vol2D type weigthings
 
        !$OMP PARALLEL DO           &
        !$OMP PRIVATE(LL,L,Lb,Lt)
-       do LL = 1, lnx
+       do LL = 1,lnx
           call getLbotLtop(LL,Lb,Lt)
           do L = Lb,Lt
              if (qa(L) > 0) then                               ! set upwind ucxu, ucyu  on links
