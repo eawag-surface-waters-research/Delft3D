@@ -1772,13 +1772,14 @@ subroutine xbeach_wave_bc()
       end if
       !
       do n = 1,nwbnd
+         Trep = 1d-1       ! safety for max reduction below
          LL1 = L1wbnd(n)
          LL2 = L2wbnd(n)
          if (LL1>LL2) cycle
          if (jampi==1) then
-            k = ln(2,LL1)
-            if (.not.(idomain(k)==my_rank) .or. LL2==0) then     ! then not a boundary domain, second check is safety
-               Trep = 1d-1       ! safety for max reduction below
+            !k = ln(2,LL1)
+            !if (.not.(idomain(k)==my_rank) .or. LL2==0) then     ! then not a boundary domain, second check is safety
+            if (LL2==0) then
                cycle
             endif
          endif
