@@ -593,6 +593,11 @@
                      end if
                   end if
                end if
+               
+               if (vallongculvert(IVAL_S1UP,n) == bl(ku) .and. vallongculvert(IVAL_S1DN,n) == bl(kd)) then ! If both nodes are dry there is no head difference
+                 vallongculvert(IVAL_S1DN,n) = dmiss
+                 vallongculvert(IVAL_S1UP,n) = dmiss
+               endif
 
                ! Then fill in for the representative flow ilnk
                if (newculverts) then
