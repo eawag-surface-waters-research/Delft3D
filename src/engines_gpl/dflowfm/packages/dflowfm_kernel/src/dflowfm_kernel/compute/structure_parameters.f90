@@ -33,7 +33,7 @@
 ! =================================================================================================
 ! =================================================================================================
    subroutine structure_parameters
-      use m_flowgeom , only : ln, wu, bob
+      use m_flowgeom , only : ln, wu, bob, bl
       use m_flow
       use m_structures
       use m_flowexternalforcings, only: ngenstru
@@ -578,7 +578,7 @@
                      if (hs(ku) > epshs) then
                         vallongculvert(IVAL_S1UP,n) = s1(ku)
                      else
-                        vallongculvert(IVAL_S1UP,n) = dmiss
+                        vallongculvert(IVAL_S1UP,n) = bl(ku)
                      end if
                   end if
                end if
@@ -589,7 +589,7 @@
                      if (hs(kd) > epshs) then
                         vallongculvert(IVAL_S1DN,n) = s1(kd)
                      else
-                        vallongculvert(IVAL_S1DN,n) = dmiss
+                        vallongculvert(IVAL_S1DN,n) = bl(kd)
                      end if
                   end if
                end if
