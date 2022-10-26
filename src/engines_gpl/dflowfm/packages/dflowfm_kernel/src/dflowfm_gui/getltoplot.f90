@@ -41,6 +41,9 @@ subroutine getLtoplot(kk,k)
      k = min(k, Ltop(kk) )
  else
      k = Lbot(kk) + kmxL(kk) - kplot
-     k = max(k, Lbot(kk) )
+     !k = max(k, Lbot(kk) )
+     if ( k < Lbot(kk) ) then
+          k = -1
+     endif 
  endif
  end subroutine getLtoplot

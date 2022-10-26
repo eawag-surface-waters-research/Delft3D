@@ -31,19 +31,30 @@
 ! $HeadURL$
 
  subroutine setzcs()
-    use m_flow
-    use m_flowgeom
-    implicit none
+ use m_flow
+ use m_flowgeom
+ implicit none
 
-    integer :: kk, k, kb, kt
+ integer :: kk, k, kb, kt, nlayb, nrlay, ierr 
 
-    if ( .not. allocated (zcs) ) call realloc(zcs, Ndkx)
-    do kk=1,Ndx
-       call getkbotktop(kk,kb,kt)
-       do k=kb,kt
-          zcs(k) = 0.5d0*(zws(k)+zws(k-1))
-       end do
+ if ( .not. allocated (zcs) ) then 
+    call realloc(zcs, Ndkx)
+ endif
+
+ do kk=1,Ndx
+    call getkbotktop(kk,kb,kt)
+    do k=kb,kt
+       zcs(k) = 0.5d0*(zws(k)+zws(k-1))
     end do
+    if (layertype == 2 .and. keepzlayeringatbed .ne. 1 .and. jabaroczlaybed == 1) then 
+       call getzlayerindices(kk,nlayb,nrlay)
+       zcs(kb) = 0.5d0*(zslay(nlayb-1,1) + zslay(nlayb,1) )
+       if (kt > kb .and. keepzlayeringatbed == 2) then ! only 2
+          zcs(kb+1) = 0.5d0*(zslay(nlayb+1,1) + zslay(nlayb,1) )
+       endif 
+    endif
 
-    return
+ end do
+
+ return
  end subroutine setzcs

@@ -371,6 +371,7 @@
     kplot = kplotorg
     kplotfrombedorsurface = kplotfrombedorsurfacesav
     call getktoplot(n,k)
+    k     = max(k, kbot(n))
     xxmn  = minval( nd(n)%x )
     xxmx  = maxval( nd(n)%x )
     xp(1) = 0.5d0*(xxmx + xxmn)
@@ -545,7 +546,7 @@
  if (kmx > 0) then
    do n = 1,numsrc                            ! teksorsin rai
      qsrck  = qsrc(n)
-     kk     = ksrc(1,n)                      ! 2D pressure cell nr from
+     kk     = ksrc(1,n)                       ! 2D pressure cell nr from
      if (kk .ne. 0 .and.  ksrc(2,n) > 0 ) then
         xp(1) = xz(kk)
         bup   = 0.1d0*sqrt(ba(kk))

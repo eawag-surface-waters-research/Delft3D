@@ -40,28 +40,27 @@
  double precision          :: yy(ny)
  character(*),  intent(in) :: filename              ! file name for polygonfile
 
- integer :: minp0, n, k, kb, kt, ktx
+ integer :: minp0, n, k, kb, kt, ktx, nlayb,nrlay
 
  call oldfil(minp0, filename)
  call savepol()
  call reapol(minp0, 0)
 
- if (layertype == 2 .and. keepzlayeringatbed .ne. 1 .and. jabaroczlaybed == 1) then 
-    call  keepzlayering()
- endif
- 
  do n=1,ndxi
     call getkbotktop(n,kb,kt)
     do k = kb, kt
        xx(k-kb+1) = 0.5d0*( zws(k) + zws(k-1) )
     enddo
     ktx = kt-kb + 1
+    if (layertype == 2 .and. keepzlayeringatbed .ne. 1 .and. jabaroczlaybed == 1) then 
+       call getzlayerindices(n,nlayb,nrlay)
+       xx(1) = 0.5d0*(zslay(nlayb-1,1) + zslay(nlayb,1) )
+       if (kt > kb .and. keepzlayeringatbed == 2) then ! only 2
+          xx(2) = 0.5d0*(zslay(nlayb+1,1) + zslay(nlayb,1) )
+       endif 
+    endif
     call lineinterp(xx, yy(kb:), ktx, xpl, ypl, npl)
  enddo
-
- if (layertype == 2 .and. keepzlayeringatbed .ne. 1 .and. jabaroczlaybed == 1) then 
-    call setkbotktop(1)
- endif
 
  call restorepol()
 

@@ -2335,12 +2335,12 @@ subroutine readMDUFile(filename, istat)
    !endif
 
    
-   ! If obsolete entries are used in the mdu-file, return with that error code.
-   call final_check_of_mdu_keywords (md_ptr, ierror, prefix='While reading '''//trim(filename)//'''')
-   if (ierror /= DFM_NOERR) then
-      if (jagui == 0) then 
+   if (jagui == 0) then 
+      ! If obsolete entries are used in the mdu-file, return with that error code.
+      call final_check_of_mdu_keywords (md_ptr, ierror, prefix='While reading '''//trim(filename)//'''')
+      if (ierror /= DFM_NOERR) then
          istat = ierror
-      end if
+      endif
    endif
 end subroutine readMDUFile
 
@@ -2710,13 +2710,10 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
        call prop_set(prop_ptr, 'geometry', '1D2DLinkFile', trim(md_1d2dlinkfile), 'File *.ini containing custom parameters for 1D2D links'  )
     endif
 
-
     if (dxmin1D .ne. 1d-3) then
     call prop_set(prop_ptr, 'geometry', 'Dxmin1D',          Dxmin1D,                'Minimum 1D link length, (except for duikers) ')
     endif
-    if (Dxwuimin2D .ne. 0.1d0) then
     call prop_set( prop_ptr, 'geometry', 'Dxwuimin2D'    , Dxwuimin2D,             'Smallest fraction dx/wu , set dx > Dxwuimin2D*wu, Default = 0.1' )
-    endif
 
     if (removesmalllinkstrsh .ne. 1d-1) then
     call prop_set(prop_ptr, 'geometry', 'Removesmalllinkstrsh',   removesmalllinkstrsh,  '0-1, 0= no removes')

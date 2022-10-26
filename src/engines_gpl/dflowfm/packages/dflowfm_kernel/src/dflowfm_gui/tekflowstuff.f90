@@ -282,6 +282,7 @@
            k = kk
            if (kmx > 0) then
               call getktoplot(kk,k)
+              if (k < 0) cycle
            endif
 
            if      ( ndraw(13) == 2) then
@@ -328,9 +329,10 @@
      enddo
  endif
 
- if (nodneg .ne. 0) then
+ if (nodnegtek .ne. 0) then
     call setcol(221)
-    call rcirc( xz(nodneg), yz(nodneg) )
+    call rcirc( xz(nodnegtek), yz(nodnegtek) )
+    nodnegtek = 0
  endif
 
  ! call tekcflmx()

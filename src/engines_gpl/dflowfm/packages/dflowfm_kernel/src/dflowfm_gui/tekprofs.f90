@@ -298,7 +298,7 @@
         call TEKFN(4, 8, 1, turkin1(Lb0:Lt), hwref  , Lm1, vmin, vmax, zmin, zmax, KLPROF, 'tkin1'      , 0, 2 , 0d0,kplot+1)
      endif
 
-     if (jasal > 0 .and. jatem > 0 .and. idensform > 0)  then
+     if (jasal > 0 .and. jatem > 0 .and. idensform < 0)  then
         if (idensform == 13) then 
            do k = kb,kt
               rhop0 = setrhofixedp(k,0d0)
@@ -307,7 +307,7 @@
            call getvminmax(5,vmin,vmax,dijdij(1:km), km)
            call TEKFN(5,10, 1, dijdij(1:km) , hcref  , km, vmin, vmax, zmin, zmax, KLPROF, 'rhopot' , 1, 2 , 0d0,kplot)
         else         
-        call getvminmax(6,vmin,vmax,rho(kb:), kt-kb+1)
+           call getvminmax(6,vmin,vmax,rho(kb:), kt-kb+1)
            call TEKFN(5,10, 1, rho(kb:kt)  , hcref  , km, vmin, vmax, zmin, zmax, KLPROF, 'rhopot' , 1, 2 , 0d0,kplot)
         endif
      else

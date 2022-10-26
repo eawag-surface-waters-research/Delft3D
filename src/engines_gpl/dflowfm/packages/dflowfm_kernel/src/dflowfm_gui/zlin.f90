@@ -55,6 +55,7 @@
  L  = LL
  if (kmx > 0) then
     call getLtoplot(LL,L)
+    if (L < 0) return
  endif
 
  linval = ndraw(29)
