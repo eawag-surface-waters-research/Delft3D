@@ -3137,6 +3137,7 @@ subroutine get_snapped_feature(c_feature_type, c_Nin, cptr_xin, cptr_yin, c_Nout
 
    double precision, dimension(:), target, allocatable, save      :: xout, yout      !< memory leak
    integer,          dimension(:), target, allocatable, save      :: feature_ids     !< memory leak  
+   integer,          dimension(:), target, allocatable            :: dummy_ids       !< temporary storage for snappnt 
    double precision, dimension(:), allocatable                    :: xintemp, yintemp
    integer                                                        :: ntemp
    double precision, dimension(:), allocatable                    :: xin, yin
@@ -3171,6 +3172,8 @@ subroutine get_snapped_feature(c_feature_type, c_Nin, cptr_xin, cptr_yin, c_Nout
       call snappol(c_Nin, xin, yin, DMISS, 2, c_Nout, xout, yout, feature_ids, c_ierror)
    case("obspoint")
       call snappnt(c_Nin, xin, yin, DMISS, c_Nout, xout, yout, feature_ids, c_ierror)
+   case("flownode")
+      call snappnt(c_Nin, xin, yin, DMISS, c_Nout, xout, yout, dummy_ids, c_ierror, kout=feature_ids)
    case("sourcesink")
       startIndex = 1
       i = 1

@@ -238,7 +238,7 @@ implicit none
 
 
 !> snap point to flow node
-  subroutine snappnt(Nin, xin, yin, dsep, Nout, xout, yout, ipoLout, ierror)
+  subroutine snappnt(Nin, xin, yin, dsep, Nout, xout, yout, ipoLout, ierror, kout)
      use m_alloc
      use m_flowgeom, only: xz, yz
      use m_GlobalParameters, only: INDTP_ALL
@@ -254,6 +254,7 @@ implicit none
      double precision, dimension(:), allocatable, intent(out) :: Xout, Yout   !< output polygon coordinates, dim(Nout)
      integer,          dimension(:), allocatable, intent(out) :: ipoLout      !< reference to input points (>0), no flownode found (0), dim(Nout)
      integer,                                     intent(out) :: ierror       !< error (1) or not (0)
+     integer, optional,dimension(:), allocatable, intent(out) :: kout         !< flownode numbers found by snapping (0=not flownode found)
 
      character(len=IdLen), dimension(:), allocatable          :: namobs
 
@@ -282,6 +283,9 @@ implicit none
      Nout = Nin
      call realloc(xout, Nout, keepExisting=.false., fill=dsep)
      call realloc(yout, Nout, keepExisting=.false., fill=dsep)
+     if (present(kout)) then
+        call realloc(kout, Nout, keepExisting=.false., fill=0)
+     end if
      call realloc(ipoLout, Nout, keepExisting=.false., fill=0)
 
      do i=1,Nout
@@ -290,6 +294,9 @@ implicit none
            xout(i) = xz(k)
            yout(i) = yz(k)
            ipoLout(i) = i
+           if (present(kout)) then
+              kout(i) = k
+           end if
         else
            xout(i) = dsep
            yout(i) = dsep
