@@ -135,17 +135,22 @@ program waqmerge
          if ( exists ) then
             write(*,'(2a)') 'Found: ', trim(domain_hydname)
             n_domain = n_domain + 1
-         else
-            write(*,'(2a)') 'Last domain found'
          endif
       end do
-      write (msgbuf, '(a,a,a,i4)') 'Number of domains found for project ''',trim(hyd%file_hyd%name),''':', n_domain
-      call msg_flush()
+      if ( n_domain > 0 ) then
+         write(*,'(2a)') 'Last domain found'
+         write (msgbuf, '(a,a,a,i4)') 'Number of domains found for project ''',trim(hyd%file_hyd%name),''':', n_domain
+         call msg_flush()
+      endif
 
 !     stop when nothing was found!
       if (n_domain .eq.0) then
-         write(lunrep,'(a,a,a)') ' ERROR: no hydrodynamic descriptions found for ',trim(waq_output_dir)
-         write(*     ,'(a,a,a)') ' ERROR: no hydrodynamic descriptions found for ',trim(waq_output_dir)
+         write(lunrep,'(a,a,a)') ' ERROR: no hydrodynamic descriptions found in directory ',trim(waq_output_dir)
+         write(*     ,'(a,a,a)') ' ERROR: no hydrodynamic descriptions found in directory ',trim(waq_output_dir)
+         write(lunrep,'(a)')     '        Possible cause: the outputper domain is in separate directories', &
+                                 '        - this is an obsolete organisation of the files'
+         write(*     ,'(a)')     '        Possible cause: the outputper domain is in separate directories', &
+                                 '        - this is an obsolete organisation of the files'
          write(lunrep,'(a,a)') ' Execution will stop '
          write(*     ,'(a,a)') ' Execution will stop '
          stop (1)
