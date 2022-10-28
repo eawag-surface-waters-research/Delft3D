@@ -316,6 +316,14 @@
       ENDIF
 
       IF (TWOFRC) THEN
+        IF (IN1.EQ.0) THEN
+          CALL GETMLU(LUNREP)
+          WRITE(LUNREP,*)
+     &      'PARTMP: MP with the combination MPDIS/MPPAR is invalid'
+          WRITE(*,*)
+     &      'PARTMP: MP with the combination MPDIS/MPPAR is invalid'
+          CALL SRSTOP(1)
+        ENDIF
         IF (IN2.EQ.0) THEN
           CALL GETMLU(LUNREP)
           WRITE(LUNREP,*)
