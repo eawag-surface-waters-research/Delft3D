@@ -31,14 +31,13 @@
 ! $HeadURL$
 
    subroutine settaubxu_nowave()
-      use m_flowgeom
-      use m_flow
-      use m_physcoef
-      implicit none
+   use m_flowgeom
+   use m_flow
+   use m_physcoef
+   implicit none
 
-      integer            :: L , Lb, Lt
-      integer            :: k1, k2
-      double precision   :: cz, z00, cwall, rz, umod, sqcf
+   integer            :: L , Lb, Lt
+   double precision   :: cz, cwall, rz, umod2
 
    taubxu = 0d0
    
@@ -48,22 +47,16 @@
       if (hu(L)>epshu) then
          if (frcu(L)>0d0) then       ! input, or result from trachytopes
             call getcz(hu(L), frcu(L), ifrcutp(L), cz, L)
-         else
-            call getcz(hu(L), frcuni, ifrctypuni, cz, L)
-         end if
-         umod = hypot(u1(Lb),v(Lb))
-         z0urou(L) = hu(L)*exp(-1d0 - vonkar*cz/sag)         ! getczz0
-         if (kmx>0) then
-            rz = max(hu(Lb),epshu)/ee/z0urou(L)              ! cz/sag, jaustarint=1, compatible with getustbcfuhi
-         else                                                ! previous version had hu(Lb)/2, which is jaustarint=0
-            rz = hu(L)/ee/z0urou(L)
-         endif
-         cz           = log(rz)/vonkar
-         cwall        = 1d0/(cz**2)
-         taubxu(L)    = rhomean*cwall*umod*umod              ! Note that taubxu for 3D without waves is based on bottom layer velocity, whereas 
-      else                                                   ! the value with waves based on Soulsby is based on depth-averaged velocities. This is inconsistent.
-         taubxu(L)    = 0d0
-      endif
+            z0urou(L) = hu(L)*exp(-1d0 - vonkar*cz/sag)         ! getczz0
+            rz        = max(hu(Lb),epshu)/ee/z0urou(L)          ! cz/sag, jaustarint=1, compatible with getustbcfuhi
+            cz        = log(rz)/vonkar
+            cwall     = 1d0/(cz**2)
+            umod2     = u1(LB)*u1(LB) + v(Lb)*v(Lb)
+            taubxu(L) = rhomean*cwall*umod2                     ! Note that taubxu for 3D without waves is based on bottom layer velocity, whereas 
+            ! comment HK: dit blijft een merkwaardig verhaal, zowel in 2D als in 3D  
+            ! Verder wordt deze code altijd doorlopen, maar is dat zelden nodig.  
+         endif   
+     endif
    enddo
 
    end subroutine
