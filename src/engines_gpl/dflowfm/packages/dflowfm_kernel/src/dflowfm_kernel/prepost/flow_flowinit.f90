@@ -1100,6 +1100,7 @@ end if
       if (iperot == -1) then
          call reconst2nd ()
       endif
+       call fill_onlyWetLinks()
        call setucxucyucxuucyunew() !reconstruct cell-center velocities
        u1     = u1_tmp
        deallocate(u1_tmp)
