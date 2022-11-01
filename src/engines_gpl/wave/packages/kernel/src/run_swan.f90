@@ -46,8 +46,7 @@ subroutine run_swan (casl)
 !
     integer                 :: ierr
     integer                 :: ind
-    integer                 :: strlen
-    integer                 :: ncasl 
+    integer                 :: strlen 
     integer                 :: nuerr
     logical                 :: ex
     character(*)            :: casl
@@ -73,7 +72,7 @@ subroutine run_swan (casl)
            ! The script will generate 'INPUT' based on 'swan.inp'.
            !
            write (*,'(2a)') 'Preprocessing SWAN input file using: ', trim(swan_run%scriptname)
-           write(swanCommand, '(3a)') trim(swan_run%scriptname), ' ', trim(casl)
+           write(swanCommand, '(3a)') trim(swan_run%scriptname)
            !
            ! In debug mode, util_system wants spaces at the end...
            !
@@ -105,7 +104,7 @@ subroutine run_swan (casl)
        ! As executable
        !
        write(*,'(3a)')'>>...Check file swan_',SCRIPT_EXTENSION(2:),'.log'
-       write(swanCommand, '(4a)') 'swan', SCRIPT_EXTENSION, ' ', trim(casl)
+       write(swanCommand, '(4a)') 'swan', SCRIPT_EXTENSION
        !
        ! In debug mode, util_system wants spaces at the end...
        !
@@ -114,7 +113,7 @@ subroutine run_swan (casl)
        inquire (file = 'norm_end', exist = ex)
        if (.not. ex .and. SCRIPT_EXTENSION=='.sh') then
           write (*,'(a)') '*** WARNING: unable to run SWAN using "swan.sh". Trying with "swan.bat" ...'
-          write(swanCommand,'(3a)') 'swan.bat', ' ', trim(casl)
+          write(swanCommand,'(3a)') 'swan.bat'
           !
           ! In debug mode, util_system wants spaces at the end...
           !
@@ -147,10 +146,6 @@ subroutine run_swan (casl)
     !
     ! Remove SWAN input/output/tmp files (except SWANOUT output data file)
     !
-    ncasl = index(casl,' ')-1
-    if(ncasl == 0)then
-        ncasl = 3
-    endif
     call rm_del('norm_end')
     call rm_del('INPUT')
     call rm_del('PRINT')
@@ -162,8 +157,6 @@ subroutine run_swan (casl)
     call rm_del('BOTNOW')
     call rm_del('CURNOW')
     call rm_del('AICENOW')
-    string = casl(1:ncasl) // '.prt'
-    call rm_del(string)
     string = 'fname'
     call rm_del(string) 
 end subroutine run_swan
