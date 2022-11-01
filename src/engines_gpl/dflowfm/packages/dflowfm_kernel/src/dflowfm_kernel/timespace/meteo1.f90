@@ -362,139 +362,9 @@ contains
      else
         return
      end if
-   
-     transformcoef = -999d0
-   
-     keywrd = 'VALUE'
-     call zoekopt(minp, rec, trim(keywrd), jaopt)
-     if (jaopt == 1) then
-         read (rec,*) transformcoef(1)
-     end if
-   
-     keywrd = 'FACTOR'
-     call zoekopt(minp, rec, trim(keywrd), jaopt)
-     if (jaopt == 1) then
-         read (rec,*) transformcoef(2)
-     end if
-   
-     keywrd = 'LAYER'
-     call zoekopt(minp, rec, trim(keywrd), jaopt)
-     if (jaopt == 1) then
-         read (rec,*) transformcoef(3)
-     end if
 
-     keywrd = 'IFRCTYP'
-     call zoekopt(minp, rec, trim(keywrd), jaopt)
-     if (jaopt == 1) then
-         read (rec,*) transformcoef(3)
-     end if
-   
-     keywrd = 'AVERAGINGTYPE'
-     call zoekopt(minp, rec, trim(keywrd), jaopt)
-     if (jaopt == 1) then
-         read (rec,*) transformcoef(4)
-     end if
+     call readTransformcoefficients(minp, transformcoef)
 
-     keywrd = 'TRACERFALLVELOCITY'
-     call zoekopt(minp, rec, trim(keywrd), jaopt)
-     if (jaopt == 1) then
-         read (rec,*) transformcoef(4)
-     end if
-
-     keywrd = 'TRACERDECAYTIME'
-     call zoekopt(minp, rec, trim(keywrd), jaopt)
-     if (jaopt == 1) then
-         read (rec,*) transformcoef(5)
-     end if
-
-     keywrd = 'RELATIVESEARCHCELLSIZE'
-     call zoekopt(minp, rec, trim(keywrd), jaopt)
-     if (jaopt == 1) then
-         read (rec,*) transformcoef(5)
-     end if
-
-     keywrd = 'EXTRAPOLTOL' 
-     call zoekopt(minp, rec, trim(keywrd), jaopt) 
-     if (jaopt == 1) then 
-         read (rec,*) transformcoef(6) 
-     end if 
-
-     keywrd = 'PERCENTILEMINMAX'
-     call zoekopt(minp, rec, trim(keywrd), jaopt)
-     if (jaopt == 1) then
-         read (rec,*) transformcoef(7)
-     end if
-     
-     ! constant keywrd = 'DISCHARGE'/'SALINITY'/'TEMPERATURE' removed, now always via time series, in future also via new ext [discharge]
-
-     keywrd = 'AREA' ! Area for source-sink pipe
-     call zoekopt(minp, rec, trim(keywrd), jaopt)
-     if (jaopt == 1) then
-         read (rec,*) transformcoef(4)
-     end if
-     
-     keywrd = 'TREF' ! relaxation time for riemann boundary
-     call zoekopt(minp, rec, trim(keywrd), jaopt)
-     if (jaopt == 1) then
-        read (rec,*) transformcoef(7)
-     end if
-!
-     
-     keywrd = 'NUMMIN' ! minimum number of points in averaging
-     call zoekopt(minp, rec, trim(keywrd), jaopt)
-     if (jaopt == 1) then
-        read (rec,*) transformcoef(8)
-     end if
-     
-     keywrd = 'startlevelsuctionside' 
-     call zoekopt(minp, rec, trim(keywrd), jaopt)
-     if (jaopt == 1) then
-        read (rec,*) transformcoef(4)
-     end if
-
-     keywrd = 'stoplevelsuctionside' 
-     call zoekopt(minp, rec, trim(keywrd), jaopt)
-     if (jaopt == 1) then
-        read (rec,*) transformcoef(5)
-     end if
-
-     keywrd = 'startleveldeliveryside' 
-     call zoekopt(minp, rec, trim(keywrd), jaopt)
-     if (jaopt == 1) then
-        read (rec,*) transformcoef(6)
-     end if
-
-     keywrd = 'stopleveldeliveryside' 
-     call zoekopt(minp, rec, trim(keywrd), jaopt)
-     if (jaopt == 1) then
-        read (rec,*) transformcoef(7)
-     end if
-     
-     keywrd = 'UNIFORMSALINITYABOVEZ'
-     call zoekopt(minp, rec, trim(keywrd), jaopt)
-     if (jaopt == 1) then
-         read (rec,*) transformcoef(3)
-     end if
-
-     keywrd = 'UNIFORMSALINITYBELOWZ'
-     call zoekopt(minp, rec, trim(keywrd), jaopt)
-     if (jaopt == 1) then
-         read (rec,*) transformcoef(4)
-     end if
-     
- 
-     keywrd = 'UNIFORMVALUEABOVEZ'
-     call zoekopt(minp, rec, trim(keywrd), jaopt)
-     if (jaopt == 1) then
-         read (rec,*) transformcoef(13)
-     end if
-
-     keywrd = 'UNIFORMVALUEBELOWZ'
-     call zoekopt(minp, rec, trim(keywrd), jaopt)
-     if (jaopt == 1) then
-         read (rec,*) transformcoef(14)
-     end if
-     
     if (qid == 'generalstructure') then 
         do k = 1,numgeneralkeywrd        ! generalstructure 
            call readandchecknextrecord(minp, rec, generalkeywrd_old(k), jaopt)
@@ -513,6 +383,78 @@ contains
    
    end subroutine readprovider
    !
+   subroutine readTransformcoefficients(minp, transformcoef)
+     integer,       intent(in) :: minp
+     real(kind=hp), intent(out) :: transformcoef(:)
+
+     type tKeyInt
+        character(len=32) :: key
+        integer           :: value
+     end type tKeyInt
+
+     character(len=maxnamelen) :: rec
+     integer                   :: jaopt, i, ierr
+     type(tKeyInt)             :: pairs(21)
+
+     ! constant keywrd = 'DISCHARGE'/'SALINITY'/'TEMPERATURE' removed, now always via time series, in future also via new ext [discharge]
+
+     transformcoef = -999d0
+
+     pairs(1)%key =  'VALUE'
+     pairs(1)%value = 1
+     pairs(2)%key =  'FACTOR'
+     pairs(2)%value = 2
+     pairs(3)%key =  'LAYER'
+     pairs(3)%value = 3
+     pairs(4)%key =  'IFRCTYP'
+     pairs(4)%value = 3
+     pairs(5)%key =  'AVERAGINGTYPE'
+     pairs(5)%value = 4
+     pairs(6)%key = 'TRACERFALLVELOCITY'
+     pairs(6)%value = 4
+     pairs(7)%key =  'TRACERDECAYTIME'
+     pairs(7)%value = 5
+     pairs(8)%key =  'RELATIVESEARCHCELLSIZE'
+     pairs(8)%value = 5
+     pairs(9)%key =  'EXTRAPOLTOL'
+     pairs(9)%value = 6
+     pairs(10)%key =  'PERCENTILEMINMAX'
+     pairs(10)%value = 7
+     pairs(11)%key =  'AREA' ! Area for source-sink pipe
+     pairs(11)%value = 4
+     pairs(12)%key =  'TREF' ! relaxation time for riemann boundary
+     pairs(12)%value = 7
+     pairs(13)%key =  'NUMMIN' ! minimum number of points in averaging
+     pairs(13)%value = 8
+     pairs(14)%key =  'startlevelsuctionside'
+     pairs(14)%value = 4
+     pairs(15)%key =  'stoplevelsuctionside'
+     pairs(15)%value = 5
+     pairs(16)%key =  'startleveldeliveryside'
+     pairs(16)%value = 6
+     pairs(17)%key =  'stopleveldeliveryside'
+     pairs(17)%value = 7
+     pairs(18)%key =  'UNIFORMSALINITYABOVEZ'
+     pairs(18)%value = 3
+     pairs(19)%key =  'UNIFORMSALINITYBELOWZ'
+     pairs(19)%value = 4
+     pairs(20)%key =  'UNIFORMVALUEABOVEZ'
+     pairs(20)%value = 13
+     pairs(21)%key =  'UNIFORMVALUEBELOWZ'
+     pairs(21)%value = 14
+
+     do i = 1, size(pairs)
+        call zoekopt(minp, rec, trim(pairs(i)%key), jaopt)
+        if (jaopt == 1) then
+            read (rec,*, iostat=ierr) transformcoef(pairs(i)%value)
+            if (ierr /= 0) then
+                call readerror('reading '//trim(pairs(i)%key)//' but getting ', rec, minp)
+            end if
+        end if
+     end do
+
+    end subroutine readTransformcoefficients
+
    !
    ! ==========================================================================
    !> 
