@@ -47,7 +47,7 @@
 
  implicit none
 
- integer L, k1, k2, n1, n2, LK, n, k, k3, LL, kk, Ls, mis, i, j, numcoords
+ integer L, k1, k2, n1, n2, LK, n, k, k3, LL, kk, Ls, mis, i, j, numcoords, sign
  double precision           :: bl1, bl2, blv, bln, zn1, zn2, zn3, wn, alf, banow, xnow, ynow, skewn, xt, yt, xn, yn
  ! double precision, external :: skewav
 
@@ -338,6 +338,20 @@
   do i  = 1, nlongculverts
     numcoords = size(longculverts(i)%xcoords)
     call find1d2dculvertlinks(network,longculverts(i), numcoords)
+    if (longculverts(i)%numlinks >= 3) then
+      L = abs(longculverts(i)%flowlinks(1))
+      sign = abs(longculverts(i)%flowlinks(1))/longculverts(i)%flowlinks(1)
+      if (L < 999) then
+        csu(L) = sign*csu(abs(longculverts(i)%flowlinks(2)))
+        snu(L) = sign*snu(abs(longculverts(i)%flowlinks(2)))
+      endif     
+      L = abs(longculverts(i)%flowlinks(longculverts(i)%numlinks))
+      sign = abs(longculverts(i)%flowlinks(longculverts(i)%numlinks))/longculverts(i)%flowlinks(longculverts(i)%numlinks)
+      if (L < 999) then
+        csu(L) = sign*csu(abs(longculverts(i)%flowlinks(longculverts(i)%numlinks-1)))
+        snu(L) = sign*snu(abs(longculverts(i)%flowlinks(longculverts(i)%numlinks-1)))
+      endif
+    endif
   enddo
   call longculvertsToProfs( .true. )
     else
