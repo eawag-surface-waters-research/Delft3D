@@ -18405,6 +18405,7 @@ src/tools_lgpl/matlab/quickplot/progsrc/private/qp_uimenu.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/qp_unwrapfi.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/qp_update_evalhistmenu.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/qp_update_options.m -text
+src/tools_lgpl/matlab/quickplot/progsrc/private/qp_updateaxes.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/qp_updatefieldprop.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/qp_updaterecentfiles.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/qp_updatescroller.m -text
