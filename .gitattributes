@@ -18339,6 +18339,7 @@ src/tools_lgpl/matlab/quickplot/progsrc/private/pcraster.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/pcrasterfil.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/pharosfil.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/piecewise.m -text
+src/tools_lgpl/matlab/quickplot/progsrc/private/plotslice.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/plotstatestruct.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/procargs.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/process_polygons.m -text
@@ -18428,6 +18429,7 @@ src/tools_lgpl/matlab/quickplot/progsrc/private/reducepoints_r2007a_7p4.mexw32 -
 src/tools_lgpl/matlab/quickplot/progsrc/private/reducepoints_r2007a_7p4.mexw64 -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/relativepath.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/removequant.m -text
+src/tools_lgpl/matlab/quickplot/progsrc/private/resize2data.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/resourceobject.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/rgb2hls.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/samplesfil.m -text
