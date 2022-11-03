@@ -338,20 +338,8 @@
   do i  = 1, nlongculverts
     numcoords = size(longculverts(i)%xcoords)
     call find1d2dculvertlinks(network,longculverts(i), numcoords)
-    if (longculverts(i)%numlinks >= 3) then
-      L = abs(longculverts(i)%flowlinks(1))
-      sign = abs(longculverts(i)%flowlinks(1))/longculverts(i)%flowlinks(1)
-      if (L < 999) then
-        csu(L) = sign*csu(abs(longculverts(i)%flowlinks(2)))
-        snu(L) = sign*snu(abs(longculverts(i)%flowlinks(2)))
-      endif     
-      L = abs(longculverts(i)%flowlinks(longculverts(i)%numlinks))
-      sign = abs(longculverts(i)%flowlinks(longculverts(i)%numlinks))/longculverts(i)%flowlinks(longculverts(i)%numlinks)
-      if (L < 999) then
-        csu(L) = sign*csu(abs(longculverts(i)%flowlinks(longculverts(i)%numlinks-1)))
-        snu(L) = sign*snu(abs(longculverts(i)%flowlinks(longculverts(i)%numlinks-1)))
-      endif
-    endif
+    !this routine is called here because the culvert links need to be filled, cannot be done during Geominit.
+    call setLongCulvert1D2DLinkAngles(i) 
   enddo
   call longculvertsToProfs( .true. )
     else
