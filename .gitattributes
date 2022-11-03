@@ -18066,6 +18066,7 @@ src/tools_lgpl/matlab/quickplot/progsrc/colormaps/pastel.clrmap -text
 src/tools_lgpl/matlab/quickplot/progsrc/colormaps/pink.clrmap -text
 src/tools_lgpl/matlab/quickplot/progsrc/colormaps/purpjet.clrmap -text
 src/tools_lgpl/matlab/quickplot/progsrc/colormaps/qncmap.clrmap -text
+src/tools_lgpl/matlab/quickplot/progsrc/colormaps/red-green.clrmap -text
 src/tools_lgpl/matlab/quickplot/progsrc/colormaps/revbluemap.clrmap -text
 src/tools_lgpl/matlab/quickplot/progsrc/colormaps/revhot.clrmap -text
 src/tools_lgpl/matlab/quickplot/progsrc/colormaps/sedconc.clrmap -text
