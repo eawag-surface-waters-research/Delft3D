@@ -1268,20 +1268,18 @@ contains
   use m_flowgeom, only: csu, snu
   integer, intent(in) :: i !index of current long culvert (this function is called in a loopt)
   
-  integer :: sign, L 
+  integer :: L 
   
   if (longculverts(i)%numlinks >= 3) then
     L = abs(longculverts(i)%flowlinks(1))
     if (L > 0) then
-      sign = abs(longculverts(i)%flowlinks(1))/longculverts(i)%flowlinks(1)
-      csu(L) = sign*csu(abs(longculverts(i)%flowlinks(2)))
-      snu(L) = sign*snu(abs(longculverts(i)%flowlinks(2)))
+      csu(L) = csu(abs(longculverts(i)%flowlinks(2)))
+      snu(L) = snu(abs(longculverts(i)%flowlinks(2)))
     endif
     L = abs(longculverts(i)%flowlinks(longculverts(i)%numlinks))
     if (L > 0) then
-      sign = abs(longculverts(i)%flowlinks(longculverts(i)%numlinks))/longculverts(i)%flowlinks(longculverts(i)%numlinks)
-      csu(L) = sign*csu(abs(longculverts(i)%flowlinks(longculverts(i)%numlinks-1)))
-      snu(L) = sign*snu(abs(longculverts(i)%flowlinks(longculverts(i)%numlinks-1)))
+      csu(L) = csu(abs(longculverts(i)%flowlinks(longculverts(i)%numlinks-1)))
+      snu(L) = snu(abs(longculverts(i)%flowlinks(longculverts(i)%numlinks-1)))
     endif
   endif
 
