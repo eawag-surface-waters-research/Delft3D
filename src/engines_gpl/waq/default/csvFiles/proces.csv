@@ -742,3 +742,4 @@ procid,procco,procfo,procnm
 "RadioSub1 ",123,"DRADIO    ","Radio-active decay of substance Radio1            "
 "RadioSub2 ",123,"DRADIO    ","Radio-active decay of substance Radio2            "
 "RadioSub3 ",123,"DRADIO    ","Radio-active decay of substance Radio3            "
+"AgeCART   ",123,"AGECAR    ","Water age according to CART method                "
