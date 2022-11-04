@@ -1057,7 +1057,7 @@ use meshdata, only : ug_idsLen, ug_idsLongNamesLen
          cellnrs = iorg
          call indexxi(size(iorg), cellnrs, indx)
 
-         do i = 1,nump1d2d
+         do i = nump+1,nump1d2d
             indxinv(indx(i)) = i       ! Construct helper table with inverse of sorting permutation indx.
             iorg(i) = cellnrs(indx(i)) ! Global cell numbers, after the 1D netcell sorting
          end do
