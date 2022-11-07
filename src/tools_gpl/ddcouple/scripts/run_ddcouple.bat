@@ -58,8 +58,8 @@ For %%A in ("%argfile%") do (
     set argPath=%%~dpA
 )
 cd /d "%argPath%"
-echo executing in this window: "%waqdir%\ddcouple.exe" "%argfile%"
-"%waqdir%\ddcouple.exe" "%argName%"
+echo executing in this window: "%waqdir%\ddcouple.exe" "%argfile%" %2 %3 %4
+"%waqdir%\ddcouple.exe" "%argName%" %2 %3 %4
 cd /d "%workdir%"
 
 

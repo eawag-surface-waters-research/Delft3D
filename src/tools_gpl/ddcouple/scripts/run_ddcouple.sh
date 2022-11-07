@@ -91,9 +91,9 @@ export FI_PROVIDER=tcp
 
 
 echo "executing:"
-echo "$bindir/ddcouple $argfile"
+echo "$bindir/ddcouple $argfile $2 $3 $4"
 echo 
-$bindir/ddcouple $argfile
+$bindir/ddcouple $argfile $2 $3 $4
 
 
 
