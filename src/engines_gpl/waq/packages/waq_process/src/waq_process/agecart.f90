@@ -28,7 +28,7 @@
 !                                                                                                     
 !     Type    Name         I/O Description                                        Unit                
 !                                                                                                     
-      real(4) cTR1        ! I  Conservative Tracer Source 1                       (g/m3)              
+      real(4) watersrc    ! I  Source of water to be traced                       (g/m3)              
       real(4) ageprod     ! F  production of waterage                             (d)                 
       integer Iageprod    !    Pointer to the production of waterage                                  
 !                                                                                                     
@@ -39,11 +39,11 @@
 !                                                                                                     
       do 9000 iseg = 1 , noseg
 !                                                                                                     
-         cTR1       = pmsa( ipnt(  1) )
+         watersrc       = pmsa( ipnt(  1) )
 !                                                                                                     
 !   *****     Insert your code here  *****
 !                                                                                                     
-         ageprod    = cTR1
+         ageprod    = watersrc
 !                                                                                                     
 !   *****     End of your code       *****
 !                                                                                                     
