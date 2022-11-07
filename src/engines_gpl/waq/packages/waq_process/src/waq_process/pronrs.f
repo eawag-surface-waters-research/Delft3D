@@ -53,7 +53,7 @@
 !
 !     Local declarations
 !
-      PARAMETER   ( NOMODU = 180)
+      PARAMETER   ( NOMODU = 179)
       CHARACTER*6   MODNAM(NOMODU)
       SAVE          MODNAM
       DATA MODNAM /
@@ -235,8 +235,7 @@
      +   'PROZOO',
      +   'DRADIO',
      +   'PHPROT',
-     +   'FLOCSD',
-     +   'AGECAR'
+     +   'FLOCSD'
      +   /
 !
 !     Set module number
