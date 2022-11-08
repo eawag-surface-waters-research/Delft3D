@@ -136,7 +136,8 @@
    implicit none
    integer :: L, LL, LLL, LLLa, La, L1, L2, L1a, L2a, n, nx, ip, i12, k2, ja1D
 
-   if (allocated (isnbnod) ) deallocate(isnbnod,isnblin)
+   if (allocated (isnbnod) ) deallocate(isnbnod)
+   if (allocated (isnblin) ) deallocate(isnblin)
    allocate(isnbnod(2,lnx), isnblin(2,lnx))
 
    if (kmx == 0 .and. lnx1D > 0) then ! setuc
