@@ -1,4 +1,4 @@
-project(dflow2d3d)
+project(flow2d3d)
 
 # Specify the modules to be included
 
