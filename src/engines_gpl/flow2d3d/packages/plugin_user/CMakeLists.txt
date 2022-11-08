@@ -7,12 +7,19 @@ get_module_include_path(${checkout_src_root}/${deltares_common_module}
 get_module_include_path(${checkout_src_root}/${esmfsm_module} 
                         ${library_name} 
                         esmfsm_module_include_path)
+get_module_include_path(${checkout_src_root}/${flow2d3d_data_module} 
+                        ${library_name}
+                        flow2d3d_data_include_path)
 
 message(STATUS "Configuring '${library_name}' with the following deltares_common include path: '${deltares_common_include_path}'")
 message(STATUS "Configuring '${library_name}' with the following esmfsm include path: '${esmfsm_module_include_path}'")
+message(STATUS "Configuring '${library_name}' with the following data include path: '${flow2d3d_data_include_path}'")
 
-include_directories(${deltares_common_include_path}
-                    ${esmfsm_module_include_path})
+set(include_path ${CMAKE_CURRENT_SOURCE_DIR}/include)
+include_directories(${include_path}
+                    ${deltares_common_include_path}
+                    ${esmfsm_module_include_path}
+                    ${flow2d3d_data_include_path})
 
 # Set directory which contains all source files
 set(src_path src)
@@ -25,8 +32,7 @@ add_library(${library_name} ${source_files})
 
 # Set dependencies
 set(oss_dependencies    data
-                        deltares_common
-                        ec_module) 
+                        deltares_common) 
 oss_include_libraries(${library_name} oss_dependencies)
 
 if(UNIX)

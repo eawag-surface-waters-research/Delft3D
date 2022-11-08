@@ -35,6 +35,7 @@ set(oss_dependencies    data
                         deltares_common_mpi
                         delftio
                         ec_module
+                        io
                         io_dol_f
                         kernel) 
 oss_include_libraries(${library_name} oss_dependencies)

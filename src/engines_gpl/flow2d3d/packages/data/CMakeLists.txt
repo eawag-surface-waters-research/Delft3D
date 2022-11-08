@@ -21,7 +21,8 @@ include_directories(${include_path}
                     ${mpi_include_path}
                     ${deltares_common_include_path}
                     ${delftio_include_path}
-                    ${esmfsm_module_include_path})
+                    ${esmfsm_module_include_path}
+                    ${morphology_kernel_module_include_path})
 
 # Set public include path to make it accessible for other components
 set(public_include_path ${include_path})
@@ -53,14 +54,37 @@ set_source_files_properties(${parallel_mpi_files}
                             PROPERTIES COMPILE_OPTIONS "${file_preprocessor_flag}")
 
 # Set dependencies
-set(oss_dependencies    delftio
+set(oss_dependencies_general    delftio
                         deltares_common
                         deltares_common_mpi
                         ec_module
-                        morphology_data
-                        morphology_kernel
+                        morphology_data 
+                        morphology_kernel)
+# Add dependencies
+if (UNIX)
+    # the `pkg_check_modules` function is created with this call
+    find_package(PkgConfig REQUIRED)
+
+    # these calls create special `PkgConfig::<MODULE>` variables
+    pkg_check_modules(NETCDF REQUIRED IMPORTED_TARGET netcdf)
+    pkg_check_modules(NETCDF_FTN REQUIRED IMPORTED_TARGET netcdf-fortran)
+
+    set(oss_dependencies ${oss_dependencies_general})
+
+    target_link_libraries(${library_name}
+         ${oss_dependencies}
+         PkgConfig::NETCDF
+         PkgConfig::NETCDF_FTN)
+    
+endif(UNIX)
+if (WIN32)
+    set(oss_dependencies ${oss_dependencies_general}
                         netcdf4
-                        netcdff) 
+                        netcdff)
+
+    target_link_libraries(${library_name} ${oss_dependencies})
+endif(WIN32)
+
 oss_include_libraries(${library_name} oss_dependencies)
 
 if(UNIX)
