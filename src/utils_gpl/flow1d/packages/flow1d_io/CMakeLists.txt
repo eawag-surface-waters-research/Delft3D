@@ -1,10 +1,10 @@
+set(library_name flow1d_io)
 set(src_path src) 
 
 # Gather source files
 get_fortran_source_files(${src_path} source_files)
 
 # Define the library
-set(library_name flow1d_io)
 add_library(${library_name} ${source_files})
 
 # Specify dependencies
