@@ -478,12 +478,12 @@ src/cmake/README -text svneol=unset#application/octet-stream
 src/cmake/compiler_options/intel.cmake -text
 src/cmake/configurations/all_configuration.cmake -text
 src/cmake/configurations/delft3dfm_configuration.cmake -text
-src/cmake/configurations/dflow2d3d_configuration.cmake -text
 src/cmake/configurations/dflowfm_configuration.cmake -text
 src/cmake/configurations/dflowfm_interacter_configuration.cmake -text
 src/cmake/configurations/dimr_configuration.cmake -text
 src/cmake/configurations/dwaq_configuration.cmake -text
 src/cmake/configurations/dwaves_configuration.cmake -text
+src/cmake/configurations/flow2d3d_configuration.cmake -text
 src/cmake/configurations/include/dflowfm_configuration_basic.cmake -text
 src/cmake/configurations/include/tools_configuration.cmake -text
 src/cmake/configurations/include/tools_delft3dfm_configuration.cmake -text
