@@ -32,7 +32,7 @@ function print_usage_info {
     echo "-n, --numnode <N>"
     echo "       number of nodes, default 1"
     echo "-q, --queue <qname>"
-    echo "       queue, default normal-e3"
+    echo "       queue, default normal-e3-c7"
     echo "-s, --sequential"
     echo "       sequential (non-MPI) run, equivalent to -n 1 -c 1"
     exit 1
@@ -49,7 +49,7 @@ corespernodedefault=1
 corespernode=$corespernodedefault
 debuglevel=-1
 configfile=dimr_config.xml
-queue=normal-e3
+queue=normal-e3-c7
 JOBNAME=dimr
 D3D_HOME=
 runscript_extraopts=

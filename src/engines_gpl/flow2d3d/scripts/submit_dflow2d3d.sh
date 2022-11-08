@@ -27,7 +27,7 @@ function print_usage_info {
     echo "-n, --numnode <N>"
     echo "       number of nodes, default 1"
     echo "-q, --queue <qname>"
-    echo "       queue, default normal-e3"
+    echo "       queue, default normal-e3-c7"
     echo "--rtc"
     echo "       Online with RTC. Not possible with parallel Delft3D-FLOW."
     echo "-w, --wavefile <wname>"
@@ -48,7 +48,7 @@ corespernode=$corespernodedefault
 D3D_HOME=
 JOBNAME=Delft3D4-FLOW
 numnode=1
-queue=normal-e3
+queue=normal-e3-c7
 runscript_extraopts=
 wavefile=runwithoutwaveonlinebydefault
 withrtc=false
