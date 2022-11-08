@@ -23,6 +23,7 @@
 
 program ddcouple
       use hydmod
+      use merge_step_mod
       implicit none
 
       type(t_hyd)              :: hyd             ! description of the overall hydrodynamics

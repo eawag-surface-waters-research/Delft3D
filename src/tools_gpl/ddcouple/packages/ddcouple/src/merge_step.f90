@@ -21,6 +21,8 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
+      module merge_step_mod
+      contains
       subroutine merge_step( hyd, domain_hyd_coll,maxseg,maxnoq,n_domain,ipnew,iqnew)
 
       ! function : merges a step in the hydrodynamics
@@ -38,9 +40,9 @@
       integer                                :: maxseg                ! maximum segment id
       integer                                :: maxnoq                ! maximum exchange id
       integer                                :: n_domain              ! number of domains
-      integer                                :: ipnew(maxseg,n_domain) ! renumber table segments 
-      integer                                :: iqnew(maxnoq,n_domain) ! renumber table exchanges 
-      
+      integer                                :: ipnew(:,:)            ! renumber table segments
+      integer                                :: iqnew(maxnoq,n_domain) ! renumber table exchanges
+
       ! local declarations
 
       type(t_hyd), pointer                   :: domain_hyd            ! description of one domain hydrodynamics
@@ -75,4 +77,5 @@
       enddo
 
       return
-      end
+      end subroutine merge_step
+      end module merge_step_mod
