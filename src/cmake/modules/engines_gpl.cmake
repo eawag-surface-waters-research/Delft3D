@@ -54,6 +54,10 @@ set(dimr_module_path "${engines_gpl_path}/dimr/packages")
 set(dimr_lib_module "${dimr_module_path}/dimr_lib")
 set(dimr_module "${dimr_module_path}/dimr")
 
+# d_hydro.exe
+set(d_hydro_module_path "${engines_gpl_path}/d_hydro/packages")
+set(d_hydro_module "${d_hydro_module_path}/d_hydro")
+
 # Agrhyd
 set(agrhyd_module "tools_gpl/agrhyd/packages/agrhyd")
 

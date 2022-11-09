@@ -477,6 +477,7 @@ src/cmake/CMakeLists.txt -text
 src/cmake/README -text svneol=unset#application/octet-stream
 src/cmake/compiler_options/intel.cmake -text
 src/cmake/configurations/all_configuration.cmake -text
+src/cmake/configurations/d_hydro_configuration.cmake -text
 src/cmake/configurations/delft3dfm_configuration.cmake -text
 src/cmake/configurations/dflowfm_configuration.cmake -text
 src/cmake/configurations/dflowfm_interacter_configuration.cmake -text
