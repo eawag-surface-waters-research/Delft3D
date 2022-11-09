@@ -528,6 +528,7 @@ src/doxyfile_delwaq -text
 src/engines_gpl/Makefile.am -text
 src/engines_gpl/d_hydro/Makefile.am -text
 src/engines_gpl/d_hydro/packages/Makefile.am -text
+src/engines_gpl/d_hydro/packages/d_hydro/CMakeLists.txt -text
 src/engines_gpl/d_hydro/packages/d_hydro/Makefile.am -text
 src/engines_gpl/d_hydro/packages/d_hydro/d_hydro.vcxproj -text
 src/engines_gpl/d_hydro/packages/d_hydro/include/d_hydro_version.h.svn -text
