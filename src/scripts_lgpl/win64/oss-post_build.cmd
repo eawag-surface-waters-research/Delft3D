@@ -1524,8 +1524,6 @@ rem ==========================
     call :copyFile "!build_dir!\d_hydro\!configuration!\d_hydro.exe"                                                          !dest_bin!
 
     call :copyFile "!checkout_src_root!\engines_gpl\d_hydro\scripts\create_config_xml.tcl"                              !dest_menu!
-    call :copyFile "!checkout_src_root!\engines_gpl\d_hydro\scripts\generic\win64\*.*"                                     !dest_scripts!
-    call :copyDir  "!checkout_src_root!\engines_gpl\d_hydro\schemas"                                                       !dest_schema!
     )
 
 goto :endproc
