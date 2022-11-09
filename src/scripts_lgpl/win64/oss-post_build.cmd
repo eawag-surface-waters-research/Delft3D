@@ -223,6 +223,7 @@ rem ===============
     call :wave_exe
     call :cf_dll
     call :flow1d2d
+    call :d_hydro
     call :flow2d3d
     call :rr_dll
     call :rtc
@@ -487,6 +488,18 @@ rem =============================================================
 
 goto :endproc
 
+
+rem =============================================================
+rem === copies runtime libraries for D_HYDRO        ===
+rem =============================================================
+:copyDHydroDependentRuntimeLibraries
+
+    set destination=%~1
+    call :copyMPI                                                                                                       !destination!
+    call :copyFile "!checkout_src_root!\third_party_open\pthreads\bin\x64\*.dll"                                        !destination!
+    call :copyFile "!checkout_src_root!\third_party_open\expat\x64\x64\%configuration%\libexpat.dll"                    !destination!
+
+goto :endproc
 
 
 rem =============================================================
@@ -1473,6 +1486,46 @@ rem ==========================
         
         rem copy binaries and dll 
         call :copyFile "!build_dir!\flow1d2d\!configuration!\flow1d2d.*"                                                      !dest_bin! 
+    )
+
+goto :endproc
+
+rem ==========================
+rem === POST_BUILD_D_HYDRO
+rem ==========================
+:d_hydro
+    echo "postbuild d_hydro . . ."
+    
+    if "%configuration%" == "Debug" (
+    
+    echo "Debug postbuild"
+    set dest_bin="!install_dir!\x64\Debug"
+
+    call :makeDir !dest_bin!
+
+    call :copyDHydroDependentRuntimeLibraries                                                                               !dest_bin!
+    call :copyFile "!build_dir!\d_hydro\!configuration!\d_hydro.*"                                                              !dest_bin!
+    )
+    
+    
+    if "%configuration%" == "Release" (
+    
+    echo "Release postbuild"
+
+    set dest_bin="!install_dir!\x64\Release\d_hydro\bin"
+    set dest_default="!install_dir!\x64\Release\d_hydro\default"
+    set dest_scripts="!install_dir!\x64\Release\d_hydro\scripts"
+    set dest_plugins="!install_dir!\x64\Release\plugins\bin"
+    set dest_share="!install_dir!\x64\Release\share\bin"
+    set dest_schema="!install_dir!\x64\Release\d_hydro\schema"
+
+    call :makeAllDirs
+    call :copyDHydroDependentRuntimeLibraries                                                                             !dest_share!
+    call :copyFile "!build_dir!\d_hydro\!configuration!\d_hydro.exe"                                                          !dest_bin!
+
+    call :copyFile "!checkout_src_root!\engines_gpl\d_hydro\scripts\create_config_xml.tcl"                              !dest_menu!
+    call :copyFile "!checkout_src_root!\engines_gpl\d_hydro\scripts\generic\win64\*.*"                                     !dest_scripts!
+    call :copyDir  "!checkout_src_root!\engines_gpl\d_hydro\schemas"                                                       !dest_schema!
     )
 
 goto :endproc
