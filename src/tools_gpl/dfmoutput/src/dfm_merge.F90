@@ -105,7 +105,9 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
    integer :: inodefile, netedgecount2
    integer :: id_nodex, id_nodey, id_edgex, id_edgey
    integer :: intmiss = -2147483647 ! integer fillvalue
+   integer :: imiss = -999
    double precision :: dmiss = -999d0, intfillv
+   integer :: ja1DCNVar = 0
 !netface_g2c(:)
    integer :: id_flownodedomain , id_flownodeglobnr, id_edgefaces, id_netfacenodes, id_edgenodes, id_netedgefaces, id_netfaceedges
    integer :: ierri
@@ -1523,7 +1525,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
                do ip = 1, numl(itopo,ii)
                    k1 = netedgefaces(1, netedgecount+ip)  ! flowelem that edge L connects
                    k2 = netedgefaces(2, netedgecount+ip)
-                   if (k1.ne.0 .and. k2.ne. 0) then       ! When edge L is not on the boundary
+                   if (k1.ne.0 .and. k2.ne. 0 .and. k1.ne.imiss .and. k2.ne.imiss) then       ! When edge L is not on the boundary
                        g1 = face_domain(nfacecount(itopo)+k1,itopo)    ! domain number of this flownode
                        g2 = face_domain(nfacecount(itopo)+k2,itopo)
                        if (g1 .ne. g2) then               ! if edge L lies on the boundary of two different domains
@@ -2445,6 +2447,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
                   else if (jaugrid == 1 .and. topodim(imesh,ii) == 1 .and. var_loctype(iv,itopo) == UNC_LOC_CN) then
                   ! For 1D mesh, the node indices in the merged file are read directly from flowelem_globalnr into node_c2g.
                   ! So for variables that locate on nodes, we do not use the shift method, but use the global numbers in node_c2g.
+                     ja1DCNVar = 1
                      nnodecount(itopo) = sum(numk(itopo,1:ii-1))
                      do ip=1,item_counts(ii)
                         if (item_domain(nnodecount(itopo)+ip) == ii-1) then ! only for the node which belongs to the current domain
@@ -2463,19 +2466,6 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
                         end if
                      end do
                      nitemglob  = nnodecount(itopo) + item_counts(ii) ! This variable needs to be updated for reading variables from input map files.
-
-                     if (ii == nfiles) then
-                        nitemglob = item_counts(noutfile) ! Update nitemglob, otherwise the check on nitemglob after the outer do-loop will show unexpected error message.
-                        if (var_types(iv,itopo) == nf90_double) then
-                           tmpvar1D(1:nitemglob) = tmpvar1D_tmp(1:nitemglob)
-                        else if (var_types(iv,itopo) == nf90_int .or. var_types(iv,itopo) == nf90_short) then
-                           itmpvar1D(1:nitemglob) = itmpvar1D_tmp(1:nitemglob)
-                        else if (var_types(iv,itopo) == nf90_byte) then
-                           btmpvar1D(1:nitemglob,itm:itm) = btmpvar1D_tmp(1:nitemglob,itm:itm)
-                        else if (var_types(iv,itopo) == nf90_char) then
-                           ctmpvar2D(:,1:nitemglob) = ctmpvar2D_tmp(:,1:nitemglob)
-                        end if
-                     end if
                   else
                      needshift = .false. ! The get_var above started at the right place, so no shifting needed yet.
                      if (var_types(iv,itopo) == nf90_double) then ! TODO: AvD: try to remove this ugly code-copy for just different types
@@ -2515,6 +2505,21 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
                      nitemcount = nitemcount + item_counts(ii)
                   end if
                end do ! ii
+
+               ! For 1D mesh variables, after merging among all files, copy tmp array to 1D array for later writing to the merged file.
+               if (ja1DCNVar == 1) then
+                  nitemglob = item_counts(noutfile) ! Update nitemglob, otherwise the check on nitemglob after the outer do-loop will show unexpected error message.
+                  if (var_types(iv,itopo) == nf90_double) then
+                     tmpvar1D(1:nitemglob) = tmpvar1D_tmp(1:nitemglob)
+                  else if (var_types(iv,itopo) == nf90_int .or. var_types(iv,itopo) == nf90_short) then
+                     itmpvar1D(1:nitemglob) = itmpvar1D_tmp(1:nitemglob)
+                  else if (var_types(iv,itopo) == nf90_byte) then
+                     btmpvar1D(1:nitemglob,itm:itm) = btmpvar1D_tmp(1:nitemglob,itm:itm)
+                  else if (var_types(iv,itopo) == nf90_char) then
+                     ctmpvar2D(:,1:nitemglob) = ctmpvar2D_tmp(:,1:nitemglob)
+                  end if
+               end if
+               ja1DCNVar = 0
 
                if (item_counts(noutfile) /= nitemglob) then
                   write (*,'(a,i0,a,i0,a)') 'Error: mapmerge: accumulated ', nitemglob, ' items, but expected ', item_counts(noutfile), ', for `'//var_names(iv,itopo)//'''.'
