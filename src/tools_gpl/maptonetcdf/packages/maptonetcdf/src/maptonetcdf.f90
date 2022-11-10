@@ -123,8 +123,8 @@ program maptonetcdf
 
     call cleanup_names( syname )
 
-    syunit = '?TODO?'  ! Dummy arrays ...
-    systd  = syname
+    syunit = ''  ! Dummy arrays ...
+    systd  = ''
     sydesc = syname
     iknmrk = 1
     volume = 1.0
