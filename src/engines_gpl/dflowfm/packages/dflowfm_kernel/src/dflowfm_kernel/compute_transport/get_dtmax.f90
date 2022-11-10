@@ -33,7 +33,7 @@
 !> get maximum timestep for water columns (see setdtorg)
 subroutine get_dtmax()
    use m_flowgeom, only: Ndx, Ndxi, bl, nd, Dx, ln, lnx, ba
-   use m_flow, only: s1, epshu, squ, sqi, vol1, kmx, u1, hu, diusp, viu, Lbot, Ltop
+   use m_flow, only: s1, epshu, squ, sqi, vol1, kmx, u1, hu, diusp, viu, Lbot, Ltop, jaimplicitfallvelocity
    use m_flowparameters, only: eps10, cflmx, jadiusp
    use m_turbulence, only: sigdifi
    use m_flowtimes, only: time1
@@ -147,7 +147,7 @@ subroutine get_dtmax()
          if ( s1(kk)-bl(kk).gt.epshu ) then
             call getkbotktop(kk,kb,kt)
             if ( jalimitdtdiff.eq.0 ) then
-               if (stm_included .and. ISED1>0) then
+               if (stm_included .and. ISED1>0  .and. jaimplicitfallvelocity == 0) then
                   bak = ba(kk)
                   do k=kb,kt
                      !sqtot = max(sqi(k),maxval(mtd%ws(k,:))*bak)
@@ -164,7 +164,7 @@ subroutine get_dtmax()
                   end do                  
                endif
             else
-               if (stm_included .and. ISED1>0) then
+               if (stm_included .and. ISED1>0 .and. jaimplicitfallvelocity == 0) then
                   bak = ba(kk)
                   do k=kb,kt
                      !sqtot = max(sqi(k)+sumdifflim(k),maxval(mtd%ws(k,:))*bak)

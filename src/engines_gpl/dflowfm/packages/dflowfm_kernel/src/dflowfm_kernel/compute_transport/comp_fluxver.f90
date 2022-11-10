@@ -35,7 +35,7 @@ subroutine comp_fluxver(NUMCONST, limtyp, thetavert, Ndkx, kmx, zws, qw, kbot, k
    use m_flowgeom, only: Ndx, ba, kfs  ! static mesh information
    use m_flowtimes, only: dts
    use m_flowparameters, only: cflmx
-   use m_flow, only : hs, s1, epshsdif, cffacver, a1  ! do not use m_flow, please put this in the argument list
+   use m_flow, only : hs, s1, epshsdif, cffacver, a1, jaimplicitfallvelocity  ! do not use m_flow, please put this in the argument list
    use m_transport, only : ISED1, ISEDN   ! preferably in argument list
    use m_sediment,  only: mtd
    use unstruc_messages
@@ -120,16 +120,19 @@ subroutine comp_fluxver(NUMCONST, limtyp, thetavert, Ndkx, kmx, zws, qw, kbot, k
 
          do j=1,NUMCONST
             qw_loc = qw(k)
-            if (jased < 4) then
-               qw_loc = qw(k) - wsf(j)*ba(kk)
-            else  if ( stm_included .and. j.ge.ISED1 .and. j.le.ISEDN ) then
-               ll = j-ISED1+1
-               if (k<sedtra%kmxsed(kk,ll)) then
-                  qw_loc = qw(k)     ! settling flux zero below kmxsed layer
-               else
-                  qw_loc = qw(k) - mtd%ws(k,ll)*ba(kk)
+            if (jaimplicitfallvelocity == 0) then  ! explicit
+               if (jased < 4) then
+                  qw_loc = qw(k) - wsf(j)*ba(kk)
+               else  if ( stm_included .and. j.ge.ISED1 .and. j.le.ISEDN ) then
+                  ll = j-ISED1+1
+                  if (k<sedtra%kmxsed(kk,ll)) then
+                     qw_loc = qw(k)     ! settling flux zero below kmxsed layer
+                  else
+                     qw_loc = qw(k) - mtd%ws(k,ll)*ba(kk)
+                  endif
                endif
             endif
+                         
 
             if (cffacver > 0d0) then
                cf = cffacver*dt_loc*abs(qw_loc)/(ba(kk)*dz(k-kb+2)) ! courant nr

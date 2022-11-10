@@ -39,7 +39,7 @@ subroutine solve_vertical(NUMCONST, ISED1, ISEDN, limtyp, thetavert, Ndkx, Lnkx,
                           a, b, c, d, e, sol, rhs)
    use m_flowgeom,  only: Ndxi, Ndx, Lnx, Ln, ba, kfs, bl  ! static mesh information
    use m_flowtimes, only: dts
-   use m_flow,      only: epshsdif, s1, kmxn, xlozmidov, rhomean, rho, ag, a1, wsf  ! do not use m_flow, please put this in the argument list
+   use m_flow,      only: epshsdif, s1, kmxn, xlozmidov, rhomean, rho, ag, a1, wsf, jaimplicitfallvelocity  ! do not use m_flow, please put this in the argument list
    use m_flowparameters, only: epshu, testdryflood
    use m_sediment,  only: mtd, jased, ws, sedtra, stmpar
    use m_fm_erosed, only: tpsnumber
@@ -187,10 +187,14 @@ subroutine solve_vertical(NUMCONST, ISED1, ISEDN, limtyp, thetavert, Ndkx, Lnkx,
                 ! if ( .false. .and. thetavert(j).gt.0d0 ) then ! semi-implicit, use central scheme
                 ! END DEBUG
 
-                if (jased < 4) then
-                   qw_loc = qw(k) - wsf(j)*a1(kk)
-                else  if ( j.ge.ISED1 .and. j.le.ISEDN ) then
-                   qw_loc = qw(k) - mtd%ws(k,ISED1+j-1)*a1(kk)
+                if (jased > 0 .and. jaimplicitfallvelocity == 0) then ! explicit fallvelocity
+                   if (jased < 4) then
+                      qw_loc = qw(k) - wsf(j)*a1(kk)
+                   else  if ( j.ge.ISED1 .and. j.le.ISEDN ) then
+                      qw_loc = qw(k) - mtd%ws(k,ISED1+j-1)*a1(kk)
+                   endif
+                else 
+                   qw_loc = qw(k)
                 endif
 
                 fluxfac  = qw_loc*0.5d0*thetavert(j)*dt_loc
@@ -201,6 +205,28 @@ subroutine solve_vertical(NUMCONST, ISED1, ISEDN, limtyp, thetavert, Ndkx, Lnkx,
                 b(n,j)   = b(n,j)   + fluxfac*dvol1i
                 c(n,j)   = c(n,j)   + fluxfac*dvol1i
             end if
+
+            if (jased > 0 .and. jaimplicitfallvelocity == 1) then 
+               fluxfac = 0d0
+               if (jased > 3) then 
+                  if ( j.ge.ISED1 .and. j.le.ISEDN ) then
+                     fluxfac = mtd%ws(k,ISED1+j-1)*a1(kk)*dt_loc
+                  else
+                     fluxfac = wsf(j)*a1(kk)*dt_loc
+                  endif
+               else 
+                  fluxfac = wsf(j)*a1(kk)*dt_loc
+               endif
+
+               if (fluxfac > 0d0 ) then 
+                  c(n,j)   = c(n,j)   - fluxfac*dvol1i
+                  b(n+1,j) = b(n+1,j) + fluxfac*dvol2i
+               else if (fluxfac < 0d0 ) then 
+                  b(n,j)   = b(n,j)   - fluxfac*dvol1i
+                  a(n+1,j) = a(n+1,j) + fluxfac*dvol2i                   
+               endif
+
+            endif
 
          end do
       end do

@@ -1055,11 +1055,10 @@ subroutine readMDUFile(filename, istat)
        endif
     endif
 
-    call prop_get_integer(md_ptr, 'numerics', 'Vertadvtypsal'   , javasal)
-
-    call prop_get_integer(md_ptr, 'numerics', 'Vertadvtyptem'   , javatem)
-    call prop_get_integer(md_ptr, 'numerics', 'Vertadvtypmom', javau)
-    call prop_get_integer(md_ptr, 'numerics', 'Vertadvtypmom3onbnd', javau3onbnd)
+    call prop_get_integer(md_ptr, 'numerics', 'Vertadvtypsal'       , javasal)
+    call prop_get_integer(md_ptr, 'numerics', 'Vertadvtyptem'       , javatem)
+    call prop_get_integer(md_ptr, 'numerics', 'Vertadvtypmom'       , javau)
+    call prop_get_integer(md_ptr, 'numerics', 'Vertadvtypmom3onbnd' , javau3onbnd)
 
     call prop_get_double (md_ptr, 'numerics', 'Cffacver'        , Cffacver)
     call prop_get_double (md_ptr, 'numerics', 'Cffachormom'     , Cffachormom)
@@ -1355,6 +1354,8 @@ subroutine readMDUFile(filename, istat)
     call prop_get_integer(md_ptr, 'sediment', 'Nr_of_sedfractions' ,  Mxgr)
     call prop_get_integer(md_ptr, 'sediment', 'MxgrKrone'          ,  MxgrKrone)
     call prop_get_integer(md_ptr, 'sediment', 'Seddenscoupling'    ,  jaseddenscoupling)
+    call prop_get_integer(md_ptr, 'sediment', 'Implicitfallvelocity', jaimplicitfallvelocity)
+
 
     stm_included = (len_trim(md_sedfile) /= 0 .and. len_trim(md_morfile) /= 0 .and. jased .eq. 4)
 
@@ -3376,6 +3377,8 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
 
     if (writeall .or. jased > 0) then
        call prop_set(prop_ptr, 'sediment', 'Sedimentmodelnr'    ,  jased, 'Sediment model nr, (0=no, 1=Krone, 2=SvR2007, 3=E-H, 4=MorphologyModule)')
+       call prop_set(prop_ptr, 'sediment', 'Implicitfallvelocity', jaimplicitfallvelocity, '1=Impl., 0 = Expl.')
+       
        if (jased==4) then
           call prop_set(prop_ptr, 'sediment', 'SedFile'    , trim(md_sedfile), 'Sediment characteristics file (*.sed)')
           call prop_set(prop_ptr, 'sediment', 'MorFile'    , trim(md_morfile), 'Morphology settings file (*.mor)')
@@ -3385,10 +3388,12 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
           call prop_set(prop_ptr, 'sediment', 'DzbDtMax', dzbdtmax, 'Maximum bed level change (m) per time step for the case MorCFL=1 (default=0.1 m)')
           call prop_set(prop_ptr, 'sediment', 'InMorphoPol', inmorphopol, 'Value of the update inside MorphoPol (0=inside polygon no update, 1=inside polygon yes update)')
        end if
+
        if (jased .ne. 4) then
           call prop_set(prop_ptr, 'sediment', 'Nr_of_sedfractions' ,  mxgr , 'Nr of sediment fractions, (specify the next parameters for each fraction) ')
           call prop_set(prop_ptr, 'sediment', 'MxgrKrone'  ,  MxgrKrone    , 'Highest fraction index treated by Krone ')
           call prop_set(prop_ptr, 'sediment', 'Seddenscoupling',  jaseddenscoupling     , 'Sed rho coupling (0=no, 1=yes')
+
           if (Mxgr > 0) then
 
              call prop_set(prop_ptr, 'sediment', 'D50'       ,              D50,   'Mean Sandgrain diameter (m), e.g. 0.0001')

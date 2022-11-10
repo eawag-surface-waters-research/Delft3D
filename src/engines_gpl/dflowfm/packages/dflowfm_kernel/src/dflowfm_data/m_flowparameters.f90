@@ -359,6 +359,8 @@ integer                            :: javau3onbnd = 0   !< vert. adv. u1 bnd Upw
 
  integer                           :: javatest          !< vert. adv. keps : test, 0 = no
 
+ integer                           :: jaimplicitfallvelocity=0 !< fallvelocity implicit 1/0 
+
  integer                           :: jahazlayer        !< vertical treatment of horizontal advection in z layers 1=org, 2=sigma, 3=node volumes
 
  integer                           :: jaZlayeratubybob=0  !< 0 = BL left/right based, 1: Linkbob based
