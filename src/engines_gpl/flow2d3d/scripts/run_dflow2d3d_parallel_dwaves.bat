@@ -29,7 +29,7 @@ set debugLevel=-1
 set forceExit=0
 set goToUsage=0
 set numparFound=0
-set minwFound=0
+set minWFound=0
 set minDFound=0
     rem WARNING: execute the following line before handling arguments, otherwise it will be screwed up
 set scriptDir=%~dp0

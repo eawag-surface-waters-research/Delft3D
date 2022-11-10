@@ -16,6 +16,7 @@ set flowConfigFile=config_d_hydro.xml
 set mudConfigFile=config_d_hydro_mud.xml
 set debugLevel=-1
 set forceExit=0
+set minDFound=0
 set minMConfigFound=0
 set minWConfigFound=0
 set goToUsage=0

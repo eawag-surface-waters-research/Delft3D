@@ -16,6 +16,7 @@ set flowConfigFile=config_d_hydro.xml
 set debugLevel=-1
 set forceExit=0
 set goToUsage=0
+set minDFound=0
     rem WARNING: execute the following line before handling arguments, otherwise it will be screwed up
 set scriptDir=%~dp0
 
