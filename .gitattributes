@@ -3343,6 +3343,9 @@ src/engines_gpl/flow2d3d/packages/manager/src/trisim.F90 -text
 src/engines_gpl/flow2d3d/packages/manager/src/trisim_mod.F90 -text
 src/engines_gpl/flow2d3d/packages/plugin_culvert_c/CMakeLists.txt -text
 src/engines_gpl/flow2d3d/packages/plugin_culvert_c/Makefile.am -text
+src/engines_gpl/flow2d3d/packages/plugin_culvert_c/config.h.cmake.in -text
+src/engines_gpl/flow2d3d/packages/plugin_culvert_c/include/FortranCInterface.h -text
+src/engines_gpl/flow2d3d/packages/plugin_culvert_c/include/config.h -text
 src/engines_gpl/flow2d3d/packages/plugin_culvert_c/plugin_culvert_c.vcxproj -text
 src/engines_gpl/flow2d3d/packages/plugin_culvert_c/src/Makefile.am -text
 src/engines_gpl/flow2d3d/packages/plugin_culvert_c/src/f902c.c -text
