@@ -608,7 +608,7 @@ subroutine average_valstruct(valstruct, istrtypein, istru, nlinks)
          valstruct(IVAL_FORCEDIF)  = dmiss ! force difference per unit width
       end if
    else
-      if (istrtypein == ST_LONGCULVERT) then
+      if (istrtypein == ST_LONGCULVERT .and. valstruct(IVAL_S1UP) /= dmiss .and. valstruct(IVAL_S1DN) /= dmiss ) then
          valstruct(IVAL_HEAD) = valstruct(IVAL_S1UP) - valstruct(IVAL_S1DN)
       end if
 
