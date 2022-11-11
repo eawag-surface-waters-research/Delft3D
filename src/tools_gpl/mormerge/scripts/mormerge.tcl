@@ -20,7 +20,7 @@
 #
 
 global version
-set version "2.17"
+set version "2.18"
 
 global debug
 set debug 0
@@ -548,6 +548,7 @@ proc readInputFile { inputfilename iflist } {
    global localhost
 
    set runscript       " "
+   set runscriptargs   " "
    set dimrexedir      " "
    set dimrexename     "run_dimr"
    set dimrargs        " "
@@ -574,6 +575,9 @@ proc readInputFile { inputfilename iflist } {
       switch -- $keyword {
          "runscript" {
             set runscript $value
+         }
+         "runscriptargs" {
+            set runscriptargs $value
          }
          "dimrexedir" {
             set dimrexedir $value
@@ -805,6 +809,7 @@ proc readInputFile { inputfilename iflist } {
    cd $curdir
 
    set infillist(runscript)      $runscript
+   set infillist(runscriptargs)  $runscriptargs
    set infillist(dimrexedir)     $dimrexedir
    set infillist(dimrexename)    $dimrexename
    set infillist(dimrargs)       $dimrargs
@@ -1296,6 +1301,7 @@ proc spaceSafe { apath } {
       regsub -all {/} $result {"\\"} result
       # Then: Remove the first one and add one at the end
       regsub {"} $result {} result
+      # To get the syntax highlighting working in Notepad: "
       set result "$result\""
    }
    return $result
@@ -1650,8 +1656,8 @@ proc startFlow { inflist alist condition runids waveonline tdatomexe flowexe wav
          puts $scriptfile "\n# Start $infillist(dimrexename)\n"
          puts $scriptfile "\"$dimrexe\" $infillist(dimrargs) >$infillist(dimrexename).scr 2>&1 &"
       } elseif { $infillist(runscript) != " " } {
-         puts $scriptfile "\n# Start $infillist(runscript)\n"
-         puts $scriptfile "\"$infillist(runscript)\" >runscript.scr 2>&1 &"
+         puts $scriptfile "\n# Start $infillist(runscript) $infillist(runscriptargs)\n"
+         puts $scriptfile "\"$infillist(runscript)\" $infillist(runscriptargs) >runscript.scr 2>&1 &"
       } else {
          puts $scriptfile "\n# Start $infillist(flowexename)\n"
          puts $scriptfile "export LD_LIBRARY_PATH=$libdir:\$LD_LIBRARY_PATH"
@@ -1982,6 +1988,7 @@ putsDebug "waveexedir        : $infillist(waveexedir)"
 putsDebug "waveargs          : $infillist(waveargs)"
 putsDebug "swanbatdir        : $infillist(swanbatdir)"
 putsDebug "runscript         : $infillist(runscript)"
+putsDebug "runscriptargs     : $infillist(runscriptargs)"
 putsDebug "mormergeexedir    : $infillist(mormergeexedir)"
 putsDebug "$infillist(numconditions) conditions:"
 for {set i 0} {$i < $infillist(numconditions)} {incr i} {
