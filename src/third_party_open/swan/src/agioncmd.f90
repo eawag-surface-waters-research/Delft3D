@@ -1132,7 +1132,12 @@
                     ierr = nf90_get_att(ncid, spcgrid%dir_varid, "standard_name", stdname)
                     if (ierr == nf90_noerr) then
                         if (eqcstr(trim(stdname), 'sea_surface_wave_from_direction')) then
-                            spcgrid%direction = 0.5d0 * PI - spcgrid%direction
+                            spcgrid%direction = 1.5d0 * PI - spcgrid%direction
+                            where (spcgrid%direction < 0.0)
+                               spcgrid%direction = spcgrid%direction + 2.0 * PI
+                            else where (spcgrid%direction > 2.0 * PI)
+                               spcgrid%direction = spcgrid%direction - 2.0 * PI
+                            end where
                         endif
                     endif
                 end if
