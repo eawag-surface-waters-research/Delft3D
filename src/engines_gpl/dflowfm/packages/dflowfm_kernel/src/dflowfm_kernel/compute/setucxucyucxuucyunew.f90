@@ -41,6 +41,7 @@
  use m_sferic
  implicit none
 
+ logical          :: make2dh
  integer          :: L, KK, k1, k2, k, nw, Lb, Lt, LL, nn, n, kt,kb, kbk, k2k, n1, n2, ip, i12, La, nx, i
  integer          :: itpbn, newucxq=0
  double precision :: uu, vv, uucx, uucy, wcxu, wcyu, cs, sn, adx, ac1, ac2, wuw, hdx, hul, hsk, uin, duxdn, duydn, uhu, htrs
@@ -54,12 +55,15 @@
  double precision, external :: lin2nodx, lin2nody
 
  ucxq = 0d0 ; ucyq = 0d0           ! zero arrays
+
+ ! keep track of depth averaged flow velocity
+ make2dh = (kmx<1) .or. (kmx>0 .and. (jasedtrails>0 .or. jamapucmag>0 .or. jamapucvec>0)) 
  
  if (iperot /= -1) then
     ucx  = 0d0 ; ucy  = 0d0
-
-    if (kmx < 1) then                                   ! original 2D coding
-
+    
+    if (make2dh) then                                   ! original 2D coding
+    
        do i = 1, wetLink2D - 1
           L = onlyWetLinks(i)
           if (kcu(L) .ne. 3) then  ! link flows ; in 2D, the loop is split to save kcu check in 2D
@@ -102,9 +106,10 @@
                ucy(k2) = ucy(k2) + wcy2(L)*u1correction
              endif
           enddo
-       endif
-
-    else
+      endif
+   endif
+   
+   if (kmx >0) then
        do LL = 1,lnx
           Lb = Lbot(LL) ; Lt = Lb - 1 + kmxL(LL)
           do L = Lb, Lt
@@ -609,7 +614,7 @@ else if (icorio == 10) then                             ! vol2D type weigthings
     LL = kbndz(3,n)
     itpbn = kbndz(4,n)
     cs = csu(LL) ; sn = snu(LL)
-    if (kmx == 0) then
+    if (make2dh) then
        if (hs(kb) > epshs)  then
           if ( jacstbnd.eq.0 .and. itpbn.ne.2 ) then    ! Neumann: always
              if (jasfer3D == 1) then
@@ -633,7 +638,9 @@ else if (icorio == 10) then                             ! vol2D type weigthings
              endif
           end if
        endif
-    else
+    endif
+
+    if (kmx>0) then
        call getLbotLtop(LL,Lb,Lt)
        do L = Lb, Lt
           kbk = ln(1,L) ; k2k = ln(2,L)
@@ -687,7 +694,7 @@ else if (icorio == 10) then                             ! vol2D type weigthings
     k2 = kbndu(2,n)
     LL = kbndu(3,n)
     cs = csu(LL) ; sn = snu(LL)
-    if (kmx == 0) then
+    if (make2dh) then
        if (hs(kb) > epshs)  then
           if ( jacstbnd.eq.0 ) then
              if (jasfer3D == 1) then
@@ -711,7 +718,9 @@ else if (icorio == 10) then                             ! vol2D type weigthings
              end if
           end if
        endif
-    else
+    endif
+
+    if (kmx>0) then
        do k   = 1, kmxL(LL)
           kbk = kbot(kb) - 1 + min(k,kmxn(kb))
           k2k = kbot(k2) - 1 + min(k,kmxn(k2))
@@ -814,7 +823,7 @@ else if (icorio == 10) then                             ! vol2D type weigthings
     k2      = kbnd1d2d(2,n)
     LL      = kbnd1d2d(3,n)
 
-    if (kmx == 0) then     ! 2D
+    if (make2dh) then     ! 2D
        if (jasfer3D == 1) then
           uinx = nod2linx(LL,2,ucx(k2),ucy(k2))
           uiny = nod2liny(LL,2,ucx(k2),ucy(k2))

@@ -6107,14 +6107,14 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
          call reconstructucz(0)
          if (jamapucvec == 1) then 
             ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_ucz, UNC_LOC_S3D, ucz, jabndnd=jabndnd_)
-            ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_ucxa, UNC_LOC_S, ucxq, jabndnd=jabndnd_)
-            ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_ucya, UNC_LOC_S, ucyq, jabndnd=jabndnd_)
+            ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_ucxa, UNC_LOC_S, ucx(1:ndxndxi), jabndnd=jabndnd_)
+            ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_ucya, UNC_LOC_S, ucy(1:ndxndxi), jabndnd=jabndnd_)
          end if
 
          if (jamapucmag == 1) then    
             call realloc(work1d, ndkx, keepExisting = .false., fill=0d0)
-            do k=1,size(ucxq)                            ! NOTE: this does not include Stokes drift, no Eulerian velocities here!
-               work1d(k) = sqrt(ucxq(k)**2 + ucyq(k)**2) ! TODO: this does not include vertical/w-component now.
+            do k=1,ndxndxi                               ! NOTE: this does not include Stokes drift, no Eulerian velocities here!
+               work1d(k) = sqrt(ucx(k)**2 + ucy(k)**2)   ! TODO: this does not include vertical/w-component now.
             end do
             ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_ucmaga, UNC_LOC_S, work1d, jabndnd=jabndnd_)
          end if

@@ -315,8 +315,8 @@ subroutine fill_valobs()
          end if
 
          if (kmx>0) then
-            valobs(IPNT_UCXQ,i) = ucxq(k)
-            valobs(IPNT_UCYQ,i) = ucyq(k)
+            valobs(IPNT_UCXQ,i) = ucx(k)
+            valobs(IPNT_UCYQ,i) = ucy(k)
          endif
 
          do kk=kb,kt
@@ -360,9 +360,9 @@ subroutine fill_valobs()
                if (kk < kt) then
                    if (idensform > 10 ) then           
                       prsappr = ag*rhomean*( zws(kt) - zws(kk) )  
-                      drhodz  = ( setrhofixedp(kk+1,prsappr) - setrhofixedp(kk,prsappr) ) / (0.5d0*(zws(kk+1) - zws(kk-1))) 
+                      drhodz  = ( setrhofixedp(kk+1,prsappr) - setrhofixedp(kk,prsappr) ) / max(0.5d0*(zws(kk+1) - zws(kk-1)),epshs)    ! FIXME!!!!
                    else 
-                      drhodz  = ( rho(kk+1) - rho(kk)                                   ) / (0.5d0*(zws(kk+1) - zws(kk-1))) 
+                      drhodz  = ( rho(kk+1) - rho(kk)                                   ) / max(0.5d0*(zws(kk+1) - zws(kk-1)),epshs) 
                    endif
                    rhomea  = 0.5d0*( rho(kk+1) + rho(kk) )
                    valobs(IPNT_BRUV+klay-1,i) = -ag*drhodz/rhomea

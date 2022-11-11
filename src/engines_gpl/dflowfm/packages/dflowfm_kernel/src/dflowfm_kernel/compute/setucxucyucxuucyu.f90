@@ -40,6 +40,7 @@
  use m_sferic
  implicit none
 
+ logical          :: make2dh
  integer          :: L, KK, k1, k2, k, nw, Lb, Lt, LL, nn, n, kt,kb, kbk, k2k
  integer          :: itpbn, newucxq=0
  double precision :: uu, vv, uucx, uucy, wcxu, wcyu, cs, sn, adx, ac1, ac2, wuw, hdx, hul, dzz, uin, duxdn, duydn
@@ -50,137 +51,141 @@
  double precision, external :: lin2nodx, lin2nody
 
  if (iperot /= -1) then
- ucxq = 0d0 ; ucyq = 0d0           ! zero arrays
- ucx = 0d0 ; ucy = 0d0
-
- if (kmx < 1) then                                   ! original 2D coding
-
-    do L = 1,lnx1D
-       if (u1(L) .ne. 0d0) then  ! link flows ; in 2D, the loop is split to save kcu check in 2D
-          if (( kcu(L)==3 .or. kcu(L)==4 .or. (iadv(L) >= 21 .and. iadv(L) <=29)) .and. ChangeVelocityAtStructures) then
-             ! Apply only on some barrier-like hydraulic structures, and typically on 1D2D links for dambreaks
-             u1L = q1(L)/au_nostrucs(L)
-          else
-             u1L = u1(L)
-          endif
-          k1 = ln(1,L) ; k2 = ln(2,L)
-          wcxu      = wcx1(L)*u1L
-          ucx  (k1) = ucx  (k1) + wcxu
-          ucxq (k1) = ucxq (k1) + wcxu*hu(L)
-          wcyu      = wcy1(L)*u1L
-          ucy  (k1) = ucy  (k1) + wcyu
-          ucyq (k1) = ucyq (k1) + wcyu*hu(L)
-          wcxu      = wcx2(L)*u1L
-          ucx  (k2) = ucx  (k2) + wcxu
-          ucxq (k2) = ucxq (k2) + wcxu*hu(L)
-          wcyu      = wcy2(L)*u1L
-          ucy  (k2) = ucy  (k2) + wcyu
-          ucyq (k2) = ucyq (k2) + wcyu*hu(L)
-       endif
-    enddo
-
-    do L = lnx1D + 1,lnx
-       if (jabarrieradvection == 3) then
-          if ( struclink(L) == 1 ) cycle
-       endif 
-       if (u1(L) .ne. 0d0) then                      ! link flows
-          if (( kcu(L)==3 .or. kcu(L)==4 .or. (iadv(L) >= 21 .and. iadv(L) <=29)) .and. ChangeVelocityAtStructures) then
-             ! Apply only on some barrier-like hydraulic structures, and typically on 1D2D links for dambreaks
-             u1L = q1(L)/au_nostrucs(L)
-          else
-             u1L = u1(L)
-          endif
-          k1 = ln(1,L) ; k2 = ln(2,L)
-          wcxu      = wcx1(L)*u1L
-          ucx  (k1) = ucx  (k1) + wcxu
-          ucxq (k1) = ucxq (k1) + wcxu*hu(L)
-          wcyu      = wcy1(L)*u1L
-          ucy  (k1) = ucy  (k1) + wcyu
-          ucyq (k1) = ucyq (k1) + wcyu*hu(L)
-          wcxu      = wcx2(L)*u1L
-          ucx  (k2) = ucx  (k2) + wcxu
-          ucxq (k2) = ucxq (k2) + wcxu*hu(L)
-          wcyu      = wcy2(L)*u1L
-          ucy  (k2) = ucy  (k2) + wcyu
-          ucyq (k2) = ucyq (k2) + wcyu*hu(L)
-       endif
-    enddo
-
- else
-    do LL = 1,lnx
-       Lb = Lbot(LL) ; Lt = Lb - 1 + kmxL(LL)
-       do L = Lb, Lt
-          if (u1(L) .ne. 0d0) then                         ! link flows
-             k1 = ln0(1,L)                                 ! use ln0 in reconstruction and in computing ucxu, use ln when fluxing
-             k2 = ln0(2,L)
-
-             huL = hu(L)
-             if (L>Lbot(LL)) then
-                huL   = huL - hu(L-1)
+    ucxq = 0d0 ; ucyq = 0d0           ! zero arrays
+    ucx = 0d0 ; ucy = 0d0
+    
+    make2dh = (kmx<1) .or. (kmx>0 .and. (jasedtrails>0 .or. jamapucmag>0 .or. jamapucvec>0)) 
+    
+    if (make2dh) then                                   ! original 2D coding
+    
+       do L = 1,lnx1D
+          if (u1(L) .ne. 0d0) then  ! link flows ; in 2D, the loop is split to save kcu check in 2D
+             if (( kcu(L)==3 .or. kcu(L)==4 .or. (iadv(L) >= 21 .and. iadv(L) <=29)) .and. ChangeVelocityAtStructures) then
+                ! Apply only on some barrier-like hydraulic structures, and typically on 1D2D links for dambreaks
+                u1L = q1(L)/au_nostrucs(L)
+             else
+                u1L = u1(L)
              endif
-             ucx (k1) = ucx (k1) + wcx1(LL)*u1(L)
-             ucxq(k1) = ucxq(k1) + wcx1(LL)*u1(L)*huL
-             ucy (k1) = ucy (k1) + wcy1(LL)*u1(L)
-             ucyq(k1) = ucyq(k1) + wcy1(LL)*u1(L)*huL
-             ucx (k2) = ucx (k2) + wcx2(LL)*u1(L)
-             ucxq(k2) = ucxq(k2) + wcx2(LL)*u1(L)*huL
-             ucy (k2) = ucy (k2) + wcy2(LL)*u1(L)
-             ucyq(k2) = ucyq(k2) + wcy2(LL)*u1(L)*huL
-
+             k1 = ln(1,L) ; k2 = ln(2,L)
+             wcxu      = wcx1(L)*u1L
+             ucx  (k1) = ucx  (k1) + wcxu
+             ucxq (k1) = ucxq (k1) + wcxu*hu(L)
+             wcyu      = wcy1(L)*u1L
+             ucy  (k1) = ucy  (k1) + wcyu
+             ucyq (k1) = ucyq (k1) + wcyu*hu(L)
+             wcxu      = wcx2(L)*u1L
+             ucx  (k2) = ucx  (k2) + wcxu
+             ucxq (k2) = ucxq (k2) + wcxu*hu(L)
+             wcyu      = wcy2(L)*u1L
+             ucy  (k2) = ucy  (k2) + wcyu
+             ucyq (k2) = ucyq (k2) + wcyu*hu(L)
           endif
        enddo
-
-       if (jazlayercenterbedvel == 1) then ! copy bed velocity down
-           do k1 = kbot(ln0(1,LL)), ln0(1,Lb) - 1
-              ucx(k1) = ucx(k1) + wcx1(LL)*u1(Lb)
-              ucy(k1) = ucy(k1) + wcy1(LL)*u1(Lb)
-           enddo
-           do k2 = kbot(ln0(2,LL)), ln0(2,Lb) - 1
-              ucx(k2) = ucx(k2) + wcx2(LL)*u1(Lb)
-              ucy(k2) = ucy(k2) + wcy2(LL)*u1(Lb)
-           enddo
-       endif
-
-    enddo
-
- endif
-
- if (kmx < 1) then ! original 2D coding
-    !$OMP PARALLEL DO           &
-    !$OMP PRIVATE(k)
-    do k = 1,ndxi
-       if (hs(k) > 0d0)  then
-          ucxq(k) = ucxq(k)/hs(k)
-          ucyq(k) = ucyq(k)/hs(k)
-          if (iperot == 2) then
-             ucx (k) = ucxq(k)
-             ucy (k) = ucyq(k)
-          endif
-       endif
-    enddo
-    !$OMP END PARALLEL DO
- else
-    do nn = 1,ndxi
-       if (hs(nn) > 0d0)  then
-          kb = kbot(nn)
-          kt = ktop(nn)
-          ucxq(nn) = sum(ucxq(kb:kt)) / hs(nn) ! Depth-averaged cell center velocity in 3D, based on ucxq
-          ucyq(nn) = sum(ucyq(kb:kt)) / hs(nn)
-          do k = kb,kt
-             dzz = zws(k) - zws(k-1)
-             if (dzz > 0d0) then
-                ucxq(k) = ucxq(k)/dzz
-                ucyq(k) = ucyq(k)/dzz
+    
+       do L = lnx1D + 1,lnx
+          if (jabarrieradvection == 3) then
+             if ( struclink(L) == 1 ) cycle
+          endif 
+          if (u1(L) .ne. 0d0) then                      ! link flows
+             if (( kcu(L)==3 .or. kcu(L)==4 .or. (iadv(L) >= 21 .and. iadv(L) <=29)) .and. ChangeVelocityAtStructures) then
+                ! Apply only on some barrier-like hydraulic structures, and typically on 1D2D links for dambreaks
+                u1L = q1(L)/au_nostrucs(L)
+             else
+                u1L = u1(L)
              endif
+             k1 = ln(1,L) ; k2 = ln(2,L)
+             wcxu      = wcx1(L)*u1L
+             ucx  (k1) = ucx  (k1) + wcxu
+             ucxq (k1) = ucxq (k1) + wcxu*hu(L)
+             wcyu      = wcy1(L)*u1L
+             ucy  (k1) = ucy  (k1) + wcyu
+             ucyq (k1) = ucyq (k1) + wcyu*hu(L)
+             wcxu      = wcx2(L)*u1L
+             ucx  (k2) = ucx  (k2) + wcxu
+             ucxq (k2) = ucxq (k2) + wcxu*hu(L)
+             wcyu      = wcy2(L)*u1L
+             ucy  (k2) = ucy  (k2) + wcyu
+             ucyq (k2) = ucyq (k2) + wcyu*hu(L)
+          endif
+       enddo
+    endif
+    
+    if (kmx>0) then
+       do LL = 1,lnx
+          Lb = Lbot(LL) ; Lt = Lb - 1 + kmxL(LL)
+          do L = Lb, Lt
+             if (u1(L) .ne. 0d0) then                         ! link flows
+                k1 = ln0(1,L)                                 ! use ln0 in reconstruction and in computing ucxu, use ln when fluxing
+                k2 = ln0(2,L)
+    
+                huL = hu(L)
+                if (L>Lbot(LL)) then
+                   huL   = huL - hu(L-1)
+                endif
+                ucx (k1) = ucx (k1) + wcx1(LL)*u1(L)
+                ucxq(k1) = ucxq(k1) + wcx1(LL)*u1(L)*huL
+                ucy (k1) = ucy (k1) + wcy1(LL)*u1(L)
+                ucyq(k1) = ucyq(k1) + wcy1(LL)*u1(L)*huL
+                ucx (k2) = ucx (k2) + wcx2(LL)*u1(L)
+                ucxq(k2) = ucxq(k2) + wcx2(LL)*u1(L)*huL
+                ucy (k2) = ucy (k2) + wcy2(LL)*u1(L)
+                ucyq(k2) = ucyq(k2) + wcy2(LL)*u1(L)*huL
+    
+             endif
+          enddo
+    
+          if (jazlayercenterbedvel == 1) then ! copy bed velocity down
+              do k1 = kbot(ln0(1,LL)), ln0(1,Lb) - 1
+                 ucx(k1) = ucx(k1) + wcx1(LL)*u1(Lb)
+                 ucy(k1) = ucy(k1) + wcy1(LL)*u1(Lb)
+              enddo
+              do k2 = kbot(ln0(2,LL)), ln0(2,Lb) - 1
+                 ucx(k2) = ucx(k2) + wcx2(LL)*u1(Lb)
+                 ucy(k2) = ucy(k2) + wcy2(LL)*u1(Lb)
+              enddo
+          endif
+    
+       enddo
+    
+    endif
+    
+    if (make2dh) then ! original 2D coding
+       !$OMP PARALLEL DO           &
+       !$OMP PRIVATE(k)
+       do k = 1,ndxi
+          if (hs(k) > 0d0)  then
+             ucxq(k) = ucxq(k)/hs(k)
+             ucyq(k) = ucyq(k)/hs(k)
              if (iperot == 2) then
                 ucx(k) = ucxq(k)
                 ucy(k) = ucyq(k)
              endif
-          enddo
-       endif
-    enddo
-
- endif
+          endif
+       enddo
+       !$OMP END PARALLEL DO
+    endif
+    
+    if (kmx>0) then
+       do nn = 1,ndxi
+          if (hs(nn) > 0d0)  then
+             kb = kbot(nn)
+             kt = ktop(nn)
+             ucxq(nn) = sum(ucxq(kb:kt)) / hs(nn) ! Depth-averaged cell center velocity in 3D, based on ucxq
+             ucyq(nn) = sum(ucyq(kb:kt)) / hs(nn)
+             do k = kb,kt
+                dzz = zws(k) - zws(k-1)
+                if (dzz > 0d0) then
+                   ucxq(k) = ucxq(k)/dzz
+                   ucyq(k) = ucyq(k)/dzz
+                endif
+                if (iperot == 2) then
+                   ucx(k) = ucxq(k)
+                   ucy(k) = ucyq(k)
+                endif
+             enddo
+          endif
+       enddo
+    endif
  endif
 
  do n  = 1, nbndz                                     ! waterlevel boundaries
@@ -189,7 +194,7 @@
     LL = kbndz(3,n)
     itpbn = kbndz(4,n)
     cs = csu(LL) ; sn = snu(LL)
-    if (kmx == 0) then
+    if (make2dh) then
        if (hs(kb) > epshs)  then
           if ( jacstbnd.eq.0 .and. itpbn.ne.2 ) then    ! Neumann: always
              if (jasfer3D == 1) then
@@ -232,7 +237,9 @@
              ucyq(kb) = ucyq(kb) * dischcorrection
           endif
        endif
-    else
+    endif
+
+    if (kmx>0) then
        call getLbotLtop(LL,Lb,Lt)
        do L = Lb, Lt
           kbk = ln(1,L) ; k2k = ln(2,L)
@@ -267,14 +274,6 @@
                 ucyq(kbk) = ucyq(k2k)
              end if
           end if
-
-          !if (jased > 0 .and. stm_included) then   ! similar as 2D, JRE to check
-          !   dischcorrection = hs(k2) / hs(kb)
-          !   !ucx(kb)  = ucx(kb)  * dischcorrection
-          !   !ucy(kb)  = ucy(kb)  * dischcorrection
-          !   ucxq(kbk) = ucxq(kbk) * dischcorrection
-          !   ucyq(kbk) = ucyq(kbk) * dischcorrection
-          !endif
        enddo
     endif
  enddo
@@ -304,7 +303,7 @@
     k2 = kbndu(2,n)
     LL = kbndu(3,n)
     cs = csu(LL) ; sn = snu(LL)
-    if (kmx == 0) then
+    if (make2dh) then
        if (hs(kb) > epshs)  then
           if ( jacstbnd.eq.0 ) then
              if (jasfer3D == 1) then
@@ -349,7 +348,9 @@
              ucyq(kb) = ucyq(kb) * dischcorrection
           endif
        endif
-    else
+    endif 
+
+    if (kmx>0) then
        do k   = 1, kmxL(LL)
           kbk = kbot(kb) - 1 + min(k,kmxn(kb))
           k2k = kbot(k2) - 1 + min(k,kmxn(k2))
@@ -467,25 +468,25 @@
 
  newucxq = 0
  if (newucxq == 1) then  ! test later, see testcase willem
- if (jasfer3D == 1) then  ! boundary points ucxq, ucyq, independend of bnd types
-    do L = lnxi+1, lnx
-       kb = ln(1,L) ; k2 = ln(2,L)
-       do LL = Lbot(L), Ltop(L)
-          uinx     = nod2linx(LL,2,ucxq(k2),ucyq(k2))
-          uiny     = nod2liny(LL,2,ucxq(k2),ucyq(k2))
-          ucxq(kb) = lin2nodx(LL,1,uinx,uiny)
-          ucyq(kb) = lin2nody(LL,1,uinx,uiny)
+    if (jasfer3D == 1) then  ! boundary points ucxq, ucyq, independend of bnd types
+       do L = lnxi+1, lnx
+          kb = ln(1,L) ; k2 = ln(2,L)
+          do LL = Lbot(L), Ltop(L)
+             uinx     = nod2linx(LL,2,ucxq(k2),ucyq(k2))
+             uiny     = nod2liny(LL,2,ucxq(k2),ucyq(k2))
+             ucxq(kb) = lin2nodx(LL,1,uinx,uiny)
+             ucyq(kb) = lin2nody(LL,1,uinx,uiny)
+          enddo
        enddo
-    enddo
- else
-    do L = lnxi+1, lnx
-       kb = ln(1,L) ; k2 = ln(2,L)
-       do LL = Lbot(L), Ltop(L)
-          ucxq(kb) = ucxq(k2)
-          ucyq(kb) = ucyq(k2)
+    else
+       do L = lnxi+1, lnx
+          kb = ln(1,L) ; k2 = ln(2,L)
+          do LL = Lbot(L), Ltop(L)
+             ucxq(kb) = ucxq(k2)
+             ucyq(kb) = ucyq(k2)
+          enddo
        enddo
-    enddo
- endif
+    endif
  endif
 
 
