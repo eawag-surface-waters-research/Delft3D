@@ -43,6 +43,7 @@ private
    public generateVolumeTableDataOnGridpoints
    public generateVolumeTableDataOnLinks
    public getBedToplevel
+   public calculateDeadStorage
 
 contains
   
@@ -78,9 +79,9 @@ subroutine generateVolumeTableDataOnLinks(volumes, surfaces, voltbOnlinks, bedle
    use unstruc_channel_flow
    double precision, dimension(:),  intent(  out)     :: volumes         !< Aggregated volumes per level 
    double precision, dimension(:),  intent(  out)     :: surfaces        !< Aggregated areas per level
-   type(T_voltable), dimension(:,:),intent(in   )     :: voltbOnLinks    !< Volume tables on links
-   double precision,                intent(in   )     :: bedlevel        !< Bed level of the model
-   double precision,                intent(in   )     :: increment       !< Requested increment
+   type(T_voltable), dimension(:,:),intent(in   )     :: voltbOnLinks   !< Volume tables on links
+   double precision,                intent(in   )     :: bedlevel       !< Bed level of the model
+   double precision,                intent(in   )     :: increment      !< Requested increment
    integer,                         intent(in   )     :: numpoints       !< number of 1d grid points also the size of voltb
    integer,                         intent(in   )     :: numlevels       !< number of levels in volume, surface and levels
    integer,          dimension(:),  intent(in   )     :: links           !< mask array for defining a sub set on flow links.  
@@ -103,7 +104,7 @@ end subroutine generateVolumeTableDataOnLinks
 subroutine AddVolumeAndSurface(vol, sur, voltb, bedlevel, increment, numlevels)
 double precision, dimension(:), intent(inout) :: vol              !< Aggregated volumes
 double precision, dimension(:), intent(inout) :: sur              !< Aggregated surfaces
-type(t_voltable),               intent(in   ) :: voltb             !< Volume table
+type(t_voltable),               intent(in   ) :: voltb            !< Volume table
 integer,                        intent(in   ) :: numlevels        !< Number of levels in the aggregated data
 double precision,               intent(in   ) :: bedlevel         !< Bed level
 double precision,               intent(in   ) :: increment        !< Requested increment   
@@ -112,12 +113,12 @@ integer :: i
 double precision :: waterlevel, help
 
 do i = 2, numlevels
-  waterlevel = bedlevel + (i-1)*increment
+   waterlevel = bedlevel + (i-1)*increment
   ! Compute 1d volumes, using volume tables (still excl. 1D2D contributions)
   help = voltb%getVolume (waterlevel)
-  vol(i)  = vol(i) +  voltb%getVolume (waterlevel)
+   vol(i)  = vol(i) +  voltb%getVolume (waterlevel)
   help = voltb%getSurface(waterlevel)
-  sur(i) = sur(i) + voltb%getSurface(waterlevel)
+   sur(i) = sur(i) + voltb%getSurface(waterlevel)
 enddo
 !sur(numlevels) = sur(numlevels) + voltb%getSurface(waterlevel)
 
@@ -156,5 +157,93 @@ subroutine getBedToplevel(voltb, numpoints, toplevel, bedlevel)
    enddo
 
 end subroutine getBedToplevel
+
+subroutine calculateDeadStorage(wl_deadstorage, network, bndvalues, inslevtube, bndindex, ln2nd, numlinks, numpoints, numboundaries)
+
+   use m_flowgeom
+   use m_network
+   use m_1d_structures
+   use m_Pump
+
+   type(t_network),                  intent(in)       :: network
+   double precision, dimension(:),   intent(inout)    :: wl_deadstorage
+   double precision, dimension(:),   intent(in   )    :: bndvalues
+   double precision, dimension(:,:), intent(in   )    :: inslevtube
+   integer,          dimension(:,:), intent(in   )    :: bndindex
+   integer,          dimension(:,:), intent(in   )    :: ln2nd
+   integer,                          intent(in   )    :: numpoints
+   integer,                          intent(in   )    :: numlinks
+   integer,                          intent(in   )    :: numboundaries
+   
+   
+   integer :: numberOfChanges
+   integer :: i, n, k1, k2, kb, L, j
+   integer :: itpbn
+   integer :: istru
+   integer :: suctionSideNode
+   integer :: nstages
+   type(t_structure), pointer, dimension(:)  :: structs
+   integer, pointer, dimension(:)            :: indices
+   type(t_pump), pointer                     :: pump
+
+   ! Set water levels to large value
+   wl_deadstorage = huge(1d0)
+
+   ! Set the boundary conditions
+   
+   do n  = 1, numboundaries                              
+      kb      = bndindex(1,n)
+      k2      = bndindex(2,n)
+      L       = bndindex(3,n)
+      itpbn   = bndindex(4,n)
+      if (     itpbn == 1) then                        ! waterlevelbnd
+         wl_deadstorage(k2) = bndvalues(n)
+         wl_deadstorage(kb) = bndvalues(n)
+      endif
+   enddo
+
+   ! Set the waterlevel at the suction side of a pump to the turn off level.
+   ! Also set the bob of this flow link to 0.5d0 * huge
+   if (network%sts%count > 0) then
+      structs => Network%sts%struct
+      indices => Network%sts%pumpIndices
+      do i = 1, Network%sts%numPumps
+         istru = indices(i)
+         pump => structs(istru)%pump
+         L = structs(istru)%linknumbers(1)
+         if (pump%direction * pump%capacity(1) > 0) then
+            suctionsideNode = ln2nd(1,L)
+         else
+            suctionsideNode = ln2nd(2,L)
+         end if
+
+         nstages = pump%nrstages
+         do j = 1, nstages
+            wl_deadstorage(suctionsideNode) = min(wl_deadstorage(suctionsideNode), pump%ss_offlevel(j))
+         enddo
+      enddo
+   endif
+
+   ! Now iterate over all flow links in order to find the lowest level in the model
+   numberOfChanges = numpoints
+   do while (numberOfChanges > 0)
+      numberOfChanges = 0
+      do L = 1, numlinks
+         do k1 = 1, 2
+            if (k1==1) then
+               k2 = 2
+            else
+               k2 = 1
+            endif
+            if (wl_deadstorage(ln2nd(k1,L)) > max(inslevtube(1,L), inslevtube(2,L), wl_deadstorage(ln2nd(k2,L)))) then
+               numberOfChanges = numberOfChanges + 1
+               wl_deadstorage(ln2nd(k1,L)) = max(inslevtube(1,L), inslevtube(2,L), wl_deadstorage(ln2nd(k2,L)))
+            endif
+         enddo
+      enddo
+      continue
+   enddo
+
+end subroutine calculateDeadStorage
 
 end module m_StorageTable

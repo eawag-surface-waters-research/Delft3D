@@ -71,6 +71,7 @@ subroutine  dfm_get_variable_pointer(name_var, x) bind(C, name="dfm_get_variable
    use m_VolumeTables
    use iso_c_utils
    use m_flowgeom
+   use m_flowexternalforcings
    
    type(c_ptr), intent(inout)  :: x
    character(kind=c_char), intent(in) :: name_var(*)
@@ -84,8 +85,12 @@ subroutine  dfm_get_variable_pointer(name_var, x) bind(C, name="dfm_get_variable
    case('numpoints')
       numpoints = size(vltb)
       x = c_loc(numpoints)
-   case('numlinks')
-      x = c_loc(lnx1d)
+   case('nbndz')
+      x = c_loc(nbndz)
+   case('ln')
+      x = c_loc(ln)
+   case('kbndz')
+      x = c_loc(kbndz)
    case('vltb')
       x = c_loc(vltb)
    case('vltbOnLinks')
