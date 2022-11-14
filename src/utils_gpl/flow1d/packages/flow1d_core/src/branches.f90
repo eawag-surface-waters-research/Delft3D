@@ -266,7 +266,7 @@ module m_branch
             else
                lastchainage = branch%length
             end if
-            if (comparereal(chainage, lastchainage, flow1d_eps10) == 1 .and. branch%isGPLastAtBranchEnd) then
+            if (comparereal(chainage, lastchainage, flow1d_eps10) >= 0 .and. branch%isGPLastAtBranchEnd) then
                getGridPointNumber = branch%grd(branch%gridPointsCount)
             end if
          end if
