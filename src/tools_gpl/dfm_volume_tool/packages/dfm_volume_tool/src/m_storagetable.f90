@@ -47,12 +47,16 @@ private
 
 contains
   
-!> Generate the total volumes/surfaces (TODO: and the totalised volumes/surfaces for each branch).
-subroutine generateVolumeTableDataOnGridPoints(volumes, surfaces, voltb, bedlevel, increment, numpoints, numlevels, nodes)
+!> Generate the total volume/surface 
+subroutine generateVolumeTableDataOnGridPoints(volume, surface, storage, deadstorage, wl_deadstorage, voltb, &
+                  bedlevel, increment, numpoints, numlevels, nodes)
 
    use unstruc_channel_flow
-   double precision, dimension(:),  intent(  out)     :: volumes         !< Aggregated volumes per level 
-   double precision, dimension(:),  intent(  out)     :: surfaces        !< Aggregated areas per level
+   double precision, dimension(:),  intent(  out)     :: volume         !< Aggregated volume per level 
+   double precision, dimension(:),  intent(  out)     :: surface        !< Aggregated areas per level
+   double precision, dimension(:),  intent(  out)     :: storage        !< Aggregated storage per level (=volume - deadstorage)
+   double precision, dimension(:),  intent(  out)     :: deadstorage    !< Aggregated dead storage per level
+   double precision, dimension(:),  intent(  out)     :: wl_deadstorage  !< Minimal waterlevel 
    type(T_voltable), dimension(:),  intent(in   )     :: voltb           !< Volume tables on grid points
    double precision,                intent(in   )     :: bedlevel        !< Bed level of the model
    double precision,                intent(in   )     :: increment       !< Requested increment
@@ -62,48 +66,57 @@ subroutine generateVolumeTableDataOnGridPoints(volumes, surfaces, voltb, bedleve
 
    integer           :: j, i, ipoint, L
 
-   volumes = 0d0
-
+   volume      = 0d0
+   deadstorage = 0d0
+   storage     = 0d0
+   surface     = 0d0
    do j = 1, numpoints
      ipoint = nodes(j)
-     call AddVolumeAndSurface(volumes, surfaces, voltb(ipoint), bedlevel, increment, numlevels)
+     call AddVolumeAndSurface(volume, surface, deadstorage, wl_deadstorage(ipoint), voltb(ipoint), bedlevel, increment, numlevels)
    enddo
    
-   call ComputeSurface(volumes, surfaces, increment, numlevels)
+   call ComputeSurfaceAndStorage(volume, surface, storage, deadstorage, increment, numlevels)
 
 end subroutine generateVolumeTableDataOnGridPoints
 
-!> Generate the total volumes/surfaces (TODO: and the totalised volumes/surfaces for each branch).
-subroutine generateVolumeTableDataOnLinks(volumes, surfaces, voltbOnlinks, bedlevel, increment, numpoints, numlevels, links)
+!> Generate the total volume/surface (TODO: and the totalised volume/surface for each branch).
+subroutine generateVolumeTableDataOnLinks(volume, surface, storage, deadstorage, wl_deadstorage, voltbOnlinks, &
+                  bedlevel, increment, numpoints, numlevels, links, ln2nd)
 
    use unstruc_channel_flow
-   double precision, dimension(:),  intent(  out)     :: volumes         !< Aggregated volumes per level 
-   double precision, dimension(:),  intent(  out)     :: surfaces        !< Aggregated areas per level
+   double precision, dimension(:),  intent(  out)     :: volume         !< Aggregated volume per level 
+   double precision, dimension(:),  intent(  out)     :: surface        !< Aggregated areas per level
+   double precision, dimension(:),  intent(  out)     :: storage        !< Aggregated storage per level (=volume - deadstorage)
+   double precision, dimension(:),  intent(  out)     :: deadstorage    !< Aggregated dead storage per level
+   double precision, dimension(:),  intent(in   )     :: wl_deadstorage !< Water level for dead storage
    type(T_voltable), dimension(:,:),intent(in   )     :: voltbOnLinks   !< Volume tables on links
    double precision,                intent(in   )     :: bedlevel       !< Bed level of the model
    double precision,                intent(in   )     :: increment      !< Requested increment
-   integer,                         intent(in   )     :: numpoints       !< number of 1d grid points also the size of voltb
-   integer,                         intent(in   )     :: numlevels       !< number of levels in volume, surface and levels
-   integer,          dimension(:),  intent(in   )     :: links           !< mask array for defining a sub set on flow links.  
+   integer,                         intent(in   )     :: numpoints      !< Number of 1d grid points also the size of voltb
+   integer,                         intent(in   )     :: numlevels      !< Number of levels in volume, surface and levels
+   integer,          dimension(:),  intent(in   )     :: links          !< Mask array for defining a sub set on flow links.  
+   integer,          dimension(:,:),intent(in   )     :: ln2nd          !< Indirection array links to nodes.  
 
    integer           :: j, i, ipoint, L
 
-   volumes = 0d0
+   volume = 0d0
 
    do j = 1, numpoints
      L = links(j)
-     call AddVolumeAndSurface(volumes, surfaces, voltbOnLinks(1, L), bedlevel, increment, numlevels)
-     call AddVolumeAndSurface(volumes, surfaces, voltbOnLinks(2, L), bedlevel, increment, numlevels)
+     call AddVolumeAndSurface(volume, surface, deadstorage, wl_deadstorage(ln2nd(1,L)), voltbOnLinks(1, L), bedlevel, increment, numlevels)
+     call AddVolumeAndSurface(volume, surface, deadstorage, wl_deadstorage(ln2nd(2,L)), voltbOnLinks(2, L), bedlevel, increment, numlevels)
    enddo
    
-   call ComputeSurface(volumes, surfaces, increment, numlevels)
+   call ComputeSurfaceAndStorage(volume, surface, storage, deadstorage, increment, numlevels)
 
 end subroutine generateVolumeTableDataOnLinks
 
-!> Add the volumes and surfaces for this volume table to the aggregated volumes and surfaces
-subroutine AddVolumeAndSurface(vol, sur, voltb, bedlevel, increment, numlevels)
-double precision, dimension(:), intent(inout) :: vol              !< Aggregated volumes
-double precision, dimension(:), intent(inout) :: sur              !< Aggregated surfaces
+!> Add the volume and surface for this volume table to the aggregated volume and surface
+subroutine AddVolumeAndSurface(vol, sur, deadstorage, wl_deadstorage, voltb, bedlevel, increment, numlevels)
+double precision, dimension(:), intent(inout) :: vol              !< Aggregated volume
+double precision, dimension(:), intent(inout) :: sur              !< Aggregated surface
+double precision, dimension(:), intent(inout) :: deadstorage      !< Aggregated dead storage
+double precision              , intent(in   ) :: wl_deadstorage   !< Aggregated dead storage
 type(t_voltable),               intent(in   ) :: voltb            !< Volume table
 integer,                        intent(in   ) :: numlevels        !< Number of levels in the aggregated data
 double precision,               intent(in   ) :: bedlevel         !< Bed level
@@ -114,30 +127,36 @@ double precision :: waterlevel, help
 
 do i = 2, numlevels
    waterlevel = bedlevel + (i-1)*increment
-  ! Compute 1d volumes, using volume tables (still excl. 1D2D contributions)
-  help = voltb%getVolume (waterlevel)
+   ! Compute 1d volume, using volume tables (still excl. 1D2D contributions)
    vol(i)  = vol(i) +  voltb%getVolume (waterlevel)
-  help = voltb%getSurface(waterlevel)
    sur(i) = sur(i) + voltb%getSurface(waterlevel)
+   if (wl_deadstorage >= waterlevel) then
+      deadstorage(i) = deadstorage(i) + voltb%getVolume(waterlevel)
+   else
+      deadstorage(i) = deadstorage(i) + voltb%getVolume(wl_deadstorage)
+   endif
 enddo
-!sur(numlevels) = sur(numlevels) + voltb%getSurface(waterlevel)
 
 end subroutine 
 
 !> derive the surface areas from the volume table
-subroutine ComputeSurface(vol, sur, increment, numlevels)
-double precision, dimension(:), intent(inout) :: vol              !< Aggregated volumes
-double precision, dimension(:), intent(inout) :: sur              !< Aggregated surfaces
+subroutine ComputeSurfaceAndStorage(vol, sur, storage, deadstorage, increment, numlevels)
+double precision, dimension(:), intent(inout) :: vol              !< Aggregated volume
+double precision, dimension(:), intent(inout) :: sur              !< Aggregated surface
+double precision, dimension(:), intent(inout) :: storage         !< Aggregated storage
+double precision, dimension(:), intent(in   ) :: deadstorage     !< Aggregated dead storage
 integer,                        intent(in   ) :: numlevels        !< Number of levels in the aggregated data
 double precision,               intent(in   ) :: increment        !< Requested increment   
 
 integer :: i
 double precision :: waterlevel
 
+storage(1) = 0d0
 do i = 2, numlevels
    sur(i-1) = (vol(i)-vol(i-1))/increment
+   storage(i) = vol(i) - deadstorage(i)
 enddo
-end subroutine ComputeSurface
+end subroutine ComputeSurfaceAndStorage
 
 
 !> Determine the lowest level and the highest level in the model.

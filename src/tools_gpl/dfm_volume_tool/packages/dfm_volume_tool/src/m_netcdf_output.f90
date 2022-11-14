@@ -35,6 +35,7 @@
 module m_netcdf_output
    
    use netcdf
+   implicit none
 private
 
 public nc_create
@@ -85,7 +86,7 @@ function nc_create(ncfile) result (ioutput)
 end function nc_create
 
 !> Write the volumes and surfaces to the Netcdf file
-subroutine nc_write(ioutput, ids, levels, volume, surface, numlevels, numids)
+subroutine nc_write(ioutput, ids, levels, volume, surface, storage, deadstorage, numlevels, numids)
 
    use MessageHandling
 
@@ -94,19 +95,22 @@ subroutine nc_write(ioutput, ids, levels, volume, surface, numlevels, numids)
    double precision, dimension(:),     intent(in)  :: levels            !< Levels w.r.t. the bedlevel.
    double precision, dimension(:,:),   intent(in)  :: volume            !< Volumes. 
    double precision, dimension(:,:),   intent(in)  :: surface           !< Wet surface area.
+   double precision, dimension(:,:),   intent(in)  :: deadstorage       !< Dead storage
+   double precision, dimension(:,:),   intent(in)  :: storage           !< Storage (=volume - deadstorage)
    integer,                            intent(in)  :: numlevels         !< Number of levels in the volume table
    integer,                            intent(in)  :: numids            !< Number of volume tables (per Id)
 
    integer :: dimid_levels, dimid_ids, dimid_chars
-   integer :: varid_id, varid_levels, varid_volume, varid_surface
+   integer :: varid_id, varid_levels, varid_volume, varid_surface, varid_storage, varid_deadstorage
+   integer :: ierr
 
    ierr = nf90_def_dim(ioutput, 'levels', numlevels, dimid_levels)    ! ... if not, make this an unlimited dimension
-   if (ierr .ne. 0) call nc_error(ierr, 'nc_prepare')
+   if (ierr .ne. 0) call nc_error(ierr, 'nc_write')
    
    ierr = nf90_def_dim(ioutput, 'id', numids, dimid_ids)
-   if (ierr .ne. 0) call nc_error(ierr, 'nc_prepare')
+   if (ierr .ne. 0) call nc_error(ierr, 'nc_write')
    ierr = nf90_def_dim(ioutput, 'id_charlen', IdLen, dimid_chars)
-   if (ierr .ne. 0) call nc_error(ierr, 'nc_prepare')
+   if (ierr .ne. 0) call nc_error(ierr, 'nc_write')
    
    ! Create 1D-array of location ID's
    varid_id          = SetupVariable(ioutput,'id',          nf90_char,   (/ dimid_chars,dimid_ids /),  '', 'Id',       '-')     
@@ -114,28 +118,34 @@ subroutine nc_write(ioutput, ids, levels, volume, surface, numlevels, numids)
    varid_levels      = SetupVariable(ioutput,'levels',      nf90_double, (/ dimid_levels/),            '', 'Levels',    'm AD') 
    varid_volume      = SetupVariable(ioutput,'volume',      nf90_double, (/ dimid_levels, dimid_ids/), '', 'Volume',    'm3') 
    varid_surface     = SetupVariable(ioutput,'surface',     nf90_double, (/ dimid_levels, dimid_ids/), '', 'Surface',   'm2') 
+   varid_deadstorage = SetupVariable(ioutput,'dead_storage',nf90_double, (/ dimid_levels, dimid_ids/), '', 'Dead storage',    'm3') 
+   varid_storage     = SetupVariable(ioutput,'storage',     nf90_double, (/ dimid_levels, dimid_ids/), '', 'Storage',    'm3') 
    ierr = nf90_put_att(ioutput, varid_volume, 'coordinates', 'id levels')   ! if present, standard_name should obey CF-convention 
-   if (ierr .ne. 0) call nc_error(ierr, 'nc_prepare')
+   if (ierr .ne. 0) call nc_error(ierr, 'nc_write')
    ierr = nf90_put_att(ioutput, varid_surface, 'coordinates', 'id levels')   ! if present, standard_name should obey CF-convention 
-   if (ierr .ne. 0) call nc_error(ierr, 'nc_prepare')
+   if (ierr .ne. 0) call nc_error(ierr, 'nc_write')
    ierr = nf90_put_att(ioutput, varid_levels, 'positive', 'up')
-   if (ierr .ne. 0) call nc_error(ierr, 'nc_prepare')
+   if (ierr .ne. 0) call nc_error(ierr, 'nc_write')
    
    ierr = nf90_enddef(ioutput)
 
-   if (ierr .ne. 0) call nc_error(ierr, 'nc_prepare')
+   if (ierr .ne. 0) call nc_error(ierr, 'nc_write')
 
    ierr = nf90_put_var(ioutput, varid_id, ids(1:numids), start=(/1,1/), count = (/IdLen,numids/))
-   if (ierr .ne. 0) call nc_error(ierr, 'nc_prepare')
+   if (ierr .ne. 0) call nc_error(ierr, 'nc_write')
    ierr = nf90_put_var(ioutput, varid_levels    , levels, start=(/1/)  , count = (/numlevels/))
-   if (ierr .ne. 0) call nc_error(ierr, 'nc_prepare')
+   if (ierr .ne. 0) call nc_error(ierr, 'nc_write')
    ierr = nf90_put_var(ioutput, varid_volume    , volume, start=(/1,1/), count = (/numlevels, numids/))
-   if (ierr .ne. 0) call nc_error(ierr, 'nc_prepare')
+   if (ierr .ne. 0) call nc_error(ierr, 'nc_write')
    ierr = nf90_put_var(ioutput, varid_surface   , surface, start=(/1,1/), count = (/numlevels, numids/))
-   if (ierr .ne. 0) call nc_error(ierr, 'nc_prepare')
+   if (ierr .ne. 0) call nc_error(ierr, 'nc_write')
+   ierr = nf90_put_var(ioutput, varid_deadstorage,deadstorage, start=(/1,1/), count = (/numlevels, numids/))
+   if (ierr .ne. 0) call nc_error(ierr, 'nc_write')
+   ierr = nf90_put_var(ioutput, varid_storage   , storage, start=(/1,1/), count = (/numlevels, numids/))
+   if (ierr .ne. 0) call nc_error(ierr, 'nc_write')
    
    ierr = nf90_close(ioutput)
-   if (ierr .ne. 0) call nc_error(ierr, 'nc_prepare')
+   if (ierr .ne. 0) call nc_error(ierr, 'nc_write')
 
 end subroutine nc_write
 

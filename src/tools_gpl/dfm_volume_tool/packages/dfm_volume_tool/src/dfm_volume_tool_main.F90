@@ -79,6 +79,7 @@ logical              :: computeOnBranches
 
 real(c_double), pointer, dimension(:,:) :: volume
 real(c_double), pointer, dimension(:,:) :: surface
+real(c_double), pointer, dimension(:,:) :: storage
 real(c_double), pointer, dimension(:,:) :: deadstorage
 real(c_double), pointer, dimension(:) :: levels
 real(C_double), pointer, dimension(:) :: help
@@ -220,7 +221,7 @@ if (ierr==0) then
       numids = numbranches + 1 
    endif
       
-   allocate(surface(numlevels,numids),volume(numlevels,numids), deadstorage(numlevels,numids))
+   allocate(surface(numlevels,numids),volume(numlevels,numids), storage(numlevels,numids), deadstorage(numlevels,numids))
    allocate(levels(numlevels), ids(numids), mask(numpoints), wl_deadstorage(numpoints))
    
    surface = 0d0
@@ -243,8 +244,8 @@ if (ierr==0) then
       
       !> Calculate the total volumes and surfaces for this model
       ids(1) = 'Total'
-      call generateVolumeTableDataOnGridPoints(volume(:,1), surface(:,1), volumetable, bedlevel, increment, &
-                  numpoints, numlevels, mask)
+      call generateVolumeTableDataOnGridPoints(volume(:,1), surface(:,1), storage(:,1), deadstorage(:,1), &
+                  wl_deadstorage, volumetable, bedlevel, increment, numpoints, numlevels, mask)
                   
    endif
    
@@ -253,14 +254,15 @@ if (ierr==0) then
       do i = 1, numbranches
          idindex = idindex + 1
          ids(idindex) = branches(i)%id
-         call generateVolumeTableDataOnLinks(volume(:,idindex), surface(:,idindex), volumetableOnLinks, bedlevel, &
-         increment, branches(i)%uPointsCount, numlevels, branches(i)%lin)
+         call generateVolumeTableDataOnLinks(volume(:,idindex), surface(:,idindex), storage(:,idindex), deadstorage(:,idindex), &
+                        wl_deadstorage, volumetableOnLinks, bedlevel, &
+                        increment, branches(i)%uPointsCount, numlevels, branches(i)%lin, ln2nd)
       enddo
    endif
    
    ! Write the output to the netcdf file
    ioutput = nc_create(output_file)
-   call nc_write(ioutput, ids, levels, volume, surface, numlevels, numids)
+   call nc_write(ioutput, ids, levels, volume, surface, storage, deadstorage, numlevels, numids)
                   
    deallocate(surface,volume, levels, ids, mask)
 endif
