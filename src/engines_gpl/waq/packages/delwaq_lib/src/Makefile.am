@@ -5,7 +5,7 @@
 
 include $(top_srcdir)/common.am
 lib_LTLIBRARIES = libdelwaq.la
- 
+
 AM_FCFLAGS += -fopenmp $(OPENMP_FCFLAGS)
 AM_FFLAGS += -fopenmp $(OPENMP_FFLAGS)
 LDFLAGS += -fopenmp
@@ -17,7 +17,7 @@ FMODULES += \
         -I$(top_builddir)/engines_gpl/waq/packages/waq_utils_f/src/mod_timings \
         -I$(top_builddir)/engines_gpl/waq/packages/waq_utils_f/src/mod_couplib \
         -I$(top_builddir)/engines_gpl/waq/packages/waq_utils_f/src/waq_utils \
-        -I$(top_builddir)/engines_gpl/waq/packages/delftio/src/diof90 \
+        -I$(top_builddir)/engines_gpl/waq/packages/waq_delftio/src/diof90 \
         -I$(top_builddir)/engines_gpl/part/packages/data_f/src \
         -I$(top_builddir)/engines_gpl/part/packages/io_f/src \
         -I$(top_builddir)/engines_gpl/part/packages/utils_f/src \
@@ -47,13 +47,13 @@ libdelwaq_la_SOURCES = \
        delwaq2_main.F90 \
        delwaq2_main_init.F90 \
        delwaq2_main_finalise.F90 \
-       waq_bmi.F90 
+       waq_bmi.F90
 
 #-------------------------------------------------------------------------------
 # Libraries
 
 libdelwaq_la_LIBADD = \
-    $(NETCDF_LIBS) $(NETCDF_FORTRAN_LIBS) -lnetcdff \ 
+    $(NETCDF_LIBS) $(NETCDF_FORTRAN_LIBS) -lnetcdff \
     $(top_builddir)/engines_gpl/part/packages/data_f/src/libdata_f.la \
     $(top_builddir)/engines_gpl/part/packages/io_f/src/libio_f.la \
     $(top_builddir)/engines_gpl/part/packages/kernel_f/src/libkernel_f.la \
@@ -70,10 +70,8 @@ libdelwaq_la_LIBADD = \
     $(top_builddir)/engines_gpl/waq/packages/waq_utils_f/src/mod_couplib/libmod_couplib.la \
     $(top_builddir)/engines_gpl/waq/packages/waq_utils_f/src/mod_timings/libmod_timings.la \
     $(top_builddir)/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/libwaq_utils.la \
-    $(top_builddir)/utils_lgpl/delftio/packages/delftio/src/diof90/libDIOF90.la \
-    $(top_builddir)/utils_lgpl/delftio/packages/delftio_shm/src/diof90/libDelftIOSHM.la \
-    $(top_builddir)/utils_lgpl/esmfsm/packages/esmfsm/src/fsm/libESMFSM.la \
-    $(top_builddir)/utils_lgpl/io_netcdf/packages/io_netcdf/src/libIONetcdf.la \ 
+    $(top_builddir)/engines_gpl/waq/packages/waq_delftio/packages/waq_delftio/src/diof90/libDIOF90.la \
+    $(top_builddir)/utils_lgpl/io_netcdf/packages/io_netcdf/src/libIONetcdf.la \
     $(top_builddir)/utils_lgpl/nefis/packages/nefis/src/libNefis.la \
     $(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src/libDeltaresCommon.la \
     ${EXTRALIBS} \
@@ -82,13 +80,13 @@ libdelwaq_la_LIBADD = \
 # To be added when using Intel 11:
 #    $(FCLIBS)
 
-EXTRALIBS= 
+EXTRALIBS=
 
 if USEPROJ
 AM_FCFLAGS+=${PROJ_CFLAGS}
 LIBS+=${PROJ_LIBS}
 USEFORTRANGIS=TRUE
-endif 
+endif
 
 if USEFORTRANGIS
 FMODULES += \
@@ -97,7 +95,7 @@ FMODULES += \
 EXTRALIBS += \
     $(top_builddir)/third_party_open/fortrangis/libfortranc/libfortranc.la \
     $(top_builddir)/third_party_open/fortrangis/libfortrangis/libfortrangis.la
-endif 
+endif
 
 BUILT_SOURCES = ./always \
 	./delwaq_version.F90

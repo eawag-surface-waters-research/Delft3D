@@ -23,7 +23,7 @@
 
 module M_WQHBComm
 
-    use dio_plt_rw
+    use waq_Dio_plt_rw
 
     implicit none
 

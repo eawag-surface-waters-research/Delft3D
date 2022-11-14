@@ -1,4 +1,4 @@
-# Set path for include files 
+# Set path for include files
 # Note that the CMAKE_CURRENT_SOURCE_DIR has a path to THIS CMakeLists location
 set(waq_kernel_include_path ${CMAKE_CURRENT_SOURCE_DIR}/../../include)
 include_directories(${waq_kernel_include_path})
@@ -23,7 +23,7 @@ if(UNIX)
     pkg_check_modules(NETCDF_FTN REQUIRED IMPORTED_TARGET netcdf-fortran)
 
     set(oss_dependencies    deltares_common
-                            delftio
+                            waq_delftio
                             part_data_f
                             part_io_f
                             part_kernel_f
@@ -45,7 +45,7 @@ endif(UNIX)
 
 if(WIN32)
     set(oss_dependencies    deltares_common
-                            delftio
+                            waq_delftio
                             netcdf4
                             netcdff
                             part_data_f

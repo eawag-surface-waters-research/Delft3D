@@ -479,13 +479,7 @@
       integer, intent(in) :: ilun
 
       if ( file_locked(ilun) ) then
-#if (defined(WIN32))
-            call sleepqq(1)
-#elif (defined(salford32))
-            call sleep@(real(1))
-#elif (defined(HAVE_CONFIG_H))
-            call DIOSYNCcSLEEP(1)
-#endif
+         call sleepqq(1)
       endif
 
       end subroutine sleep_a_while

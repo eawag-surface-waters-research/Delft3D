@@ -100,7 +100,7 @@
 !     INIT    LOGICAL  1       if T boot the system if F no initialisation
 !     ACTION  INTEGER  1       indication of the action to be performed
 !
-      USE DIO_PLT_RW
+      USE waq_Dio_plt_rw
       use grids
       USE DLWQI0_MOD
       USE Timers
@@ -293,10 +293,10 @@
             IF ( OLCFWQ .OR. SRWACT .OR. RTCACT ) THEN
                if ( dioconfig .ne. ' ' ) then
                   write(lun(19),*) ' Using DelftIO ini file : ',trim(dioconfig)
-                  CALL DIOINIT(dioconfig)
+                  CALL waq_DioInit(dioconfig)
                else
                   write(lun(19),*) ' Using default DelftIO ini file'
-                  CALL DIOINIT()
+                  CALL waq_DioInit()
                endif
             ENDIF
 !

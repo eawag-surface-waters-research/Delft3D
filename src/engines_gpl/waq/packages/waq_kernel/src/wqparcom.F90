@@ -23,7 +23,7 @@
 
 module M_WQParComm
 
-use dio_plt_rw
+use waq_Dio_plt_rw
 
 implicit none
 
@@ -68,8 +68,8 @@ type TWQParCommBlock
     character(Len=WQParMaxLen):: inName       ! name of incoming dataset
     character(Len=WQParMaxLen):: outName      ! name of outgoing dataset
 
-    type(DioPltType)          :: inDataset    ! DIO dataset for incoming values
-    type(DioPltType)          :: outDataset   ! DIO dataset for outgoing values
+    type(waq_DioPltType)          :: inDataset    ! DIO dataset for incoming values
+    type(waq_DioPltType)          :: outDataset   ! DIO dataset for outgoing values
 
 end type TWQParCommBlock
 
@@ -177,7 +177,7 @@ function WQParPutValues(wqParComm) result(success)
 
         commBlock => wqParComm % commBlock(cb)
         if ( .not. commBlock % putInited ) then
-            commBlock % outDataset = DioPltDefine(commBlock % outName, &
+            commBlock % outDataset = waq_DioPltDefine(commBlock % outName, &
                                                   Dio_Var_Real,        &
                                                   wqParComm % namsys,  &
                                                   wqParComm % nambnd   )
@@ -190,7 +190,7 @@ function WQParPutValues(wqParComm) result(success)
         endif
         if ( success ) then
             commBlock % putInited = .true.
-            call DioPltPut(commBlock % outDataset, wqParComm % bndput)
+            call waq_DioPltPut(commBlock % outDataset, wqParComm % bndput)
         endif
         cb = cb + 1
     enddo
@@ -230,7 +230,7 @@ function WQParGetValues(wqParComm) result(success)
 
         commBlock => wqParComm % commBlock(cb)
         if ( .not. commBlock % getInited ) then
-            commBlock % inDataset = DioPltGetDataset(commBlock % inName )
+            commBlock % inDataset = waq_DioPltGetDataset(commBlock % inName )
             success = .false.
             if ( DioGetLastError() .ne. 0 ) then
                 write(*,*) 'WQPar DIO: ', trim(DioGetLastErrorMsg())
@@ -286,7 +286,7 @@ function WQParGetValues(wqParComm) result(success)
         endif
         if ( success ) then
             commBlock % getInited = .true.
-            if (DioPltGet(commBlock % inDataset, inValues)) then
+            if (waq_DioPltGet(commBlock % inDataset, inValues)) then
                 do ibnd = 1 , wqParComm % nobnd
                     ipoint = commBlock % LocIndex(ibnd)
                     if ( ipoint .gt. 0 ) then

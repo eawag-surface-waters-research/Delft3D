@@ -16,16 +16,16 @@ set(rc_version_file ${waq_version_path}/version_number_delwaq2.rc)
 set(icon_file ${waq_version_path}/waq_icon.rc)
 
 # Generate version files
-generate_version_files(${rc_version_file} 
-                       ${ini_version_file} 
+generate_version_files(${rc_version_file}
+                       ${ini_version_file}
                        ON)
 
-generate_version_files(${fortran_version_file} 
-                       ${ini_version_file} 
+generate_version_files(${fortran_version_file}
+                       ${ini_version_file}
                        ON)
 
-generate_version_files(${fortran_version_file_delwaq} 
-                       ${ini_version_file} 
+generate_version_files(${fortran_version_file_delwaq}
+                       ${ini_version_file}
                        ON)
 
 # Set directory which contains all source files
@@ -42,17 +42,17 @@ add_executable(${executable_name} ${source_files}
                                   ${fortran_version_file_delwaq})
 
 # Define prebuild events
-prebuild_version_number(${executable_name} ${rc_version_file} 
+prebuild_version_number(${executable_name} ${rc_version_file}
                                         ${checkout_src_root}
                                         ${ini_version_file}
                                         ON)
 
-prebuild_version_number(${executable_name} ${fortran_version_file} 
+prebuild_version_number(${executable_name} ${fortran_version_file}
                                         ${checkout_src_root}
                                         ${ini_version_file}
                                         ON)
 
-prebuild_version_number(${executable_name} ${fortran_version_file_delwaq} 
+prebuild_version_number(${executable_name} ${fortran_version_file_delwaq}
                                         ${waq_root_path}
                                         ${ini_version_file}
                                         ON)
@@ -71,8 +71,7 @@ if(UNIX)
 
     set(oss_dependencies    deltares_common
                             deltares_common_c
-                            delftio
-                            delftio_shm
+                            waq_delftio
                             io_netcdf
                             nefis
                             delwaq_lib
@@ -82,8 +81,7 @@ if(UNIX)
                             waq_plugin_wasteload
                             waq_process
                             waq_utils_c
-                            waq_utils_f 
-                            esmfsm)
+                            waq_utils_f)
     target_link_libraries(${executable_name}
          ${oss_dependencies}
          PkgConfig::NETCDF
@@ -94,7 +92,7 @@ endif(UNIX)
 if(WIN32)
     set(oss_dependencies    delwaq_lib
                             netcdf4
-                            netcdff) 
+                            netcdff)
     target_link_libraries(${executable_name} ${oss_dependencies})
 endif(WIN32)
 
@@ -110,7 +108,7 @@ if(UNIX)
 
     message(STATUS "netcdf lib dir is ${NETCDF_LIBRARY_DIRS}")
     target_link_directories(${executable_name} PRIVATE ${NETCDF_LIBRARY_DIRS})
-    
+
     target_link_options(${executable_name} PRIVATE ${openmp_flag})
     set_property(TARGET ${executable_name} PROPERTY LINKER_LANGUAGE Fortran)
 endif(UNIX)
@@ -127,12 +125,12 @@ if (WIN32)
                             "${checkout_src_root}/third_party_open/pthreads/bin/x64")
 
 
-    target_link_libraries(${executable_name}   
+    target_link_libraries(${executable_name}
                             "comctl32.lib"
                             "wsock32.lib"
                             "netapi32.lib"
                             "kernel32.lib"
-                            "user32.lib" 
+                            "user32.lib"
                             "Shlwapi.lib"
                             "Gdi32.lib"
                             "Winspool.lib"
@@ -147,7 +145,7 @@ endif(WIN32)
 
 # Define how the files should be structured within Visual Studio
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${source_files})
-source_group(Resources FILES    ${icon_file} 
+source_group(Resources FILES    ${icon_file}
                                 ${rc_version_file})
 target_compile_options(${executable_name} PRIVATE ${openmp_flag})
 set_target_properties (${executable_name} PROPERTIES FOLDER engines_gpl/waq)
@@ -160,9 +158,9 @@ set(install_dir ${CMAKE_BINARY_DIR})
 set(build_dir ${CMAKE_BINARY_DIR})
 
 post_build_target (${executable_name}
-                   ${install_dir} 
-                   ${build_dir} 
-                   ${checkout_src_root} 
+                   ${install_dir}
+                   ${build_dir}
+                   ${checkout_src_root}
                    ${executable_name})
 
 install(TARGETS ${executable_name} RUNTIME  DESTINATION bin)

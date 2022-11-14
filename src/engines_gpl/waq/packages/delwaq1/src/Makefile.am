@@ -36,11 +36,9 @@ delwaq1_SOURCES = \
 # Libraries
 delwaq1_LDADD = \
     $(top_builddir)/utils_lgpl/nefis/packages/nefis/src/libNefis.la \
-    $(top_builddir)/utils_lgpl/esmfsm/packages/esmfsm/src/fsm/libESMFSM.la \
     $(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src/rd_token/libRDToken.la \
     $(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src/libDeltaresCommon.la \
-    $(top_builddir)/utils_lgpl/delftio/packages/delftio_shm/src/diof90/libDelftIOSHM.la \
-    $(top_builddir)/utils_lgpl/delftio/packages/delftio/src/diof90/libDIOF90.la \
+    $(top_builddir)/engines_gpl/waq/packages/waq_delftio/packages/waq_delftio/src/diof90/libDIOF90.la \
     $(top_builddir)/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/libwaq_utils.la \
     $(top_builddir)/engines_gpl/waq/packages/waq_utils_f/src/mod_timings/libmod_timings.la \
     $(top_builddir)/engines_gpl/waq/packages/waq_utils_f/src/mod_couplib/libmod_couplib.la \
@@ -60,7 +58,7 @@ delwaq1_LDADD = \
     -lpthread  -luuid \
     -ldl
 
-delwaq1_LDFLAGS = -export-dynamic 
+delwaq1_LDFLAGS = -export-dynamic
 
 # To be added when using Intel 11:
 #    $(FCLIBS)
