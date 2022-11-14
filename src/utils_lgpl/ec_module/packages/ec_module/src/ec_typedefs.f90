@@ -145,7 +145,7 @@ module m_ec_typedefs
    ! the keyvaluestr, nfld and nq can be passed to processhdr to initialize a filereader for a particular block in the BC-file
    type tEcBlocklist
       character(len=:), allocatable :: keyvaluestr      !< contains information key-value pairs from the header
-      integer                       :: position         !< position of data in the file
+      integer(kind=8)               :: position         !< position of data in the file
       integer                       :: blocktype        !< type of the block (BT_GENERAL, BT_FORCING, ....) 
       integer                       :: nfld             !< number of fields (i.e. key-value pairs)
       integer                       :: nq               !< number of quantities detected among these fields
@@ -159,7 +159,7 @@ module m_ec_typedefs
       type (tEcBlocklist), pointer  :: blocklist => null() !< list of blocks (table of contents for this BC-file)
       integer(kind=8)               :: fhandle = -1        !< file handle
       integer                       :: last_blocktype      !< type of the block (BT_GENERAL, BT_FORCING, ....) 
-      integer                       :: last_position = 0   !< last position in the scan-process                   
+      integer(kind=8)               :: last_position = 0   !< last position in the scan-process
       character(len=15)             :: FileVersion         !< File version stamp read from [General]::FileVersion in the bc-file
       character(len=15)             :: FileType            !< File type read from [General]::FileType in the bc-file
    end type tEcBCFile
