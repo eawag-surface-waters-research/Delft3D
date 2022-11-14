@@ -158,6 +158,7 @@ subroutine getBedToplevel(voltb, numpoints, toplevel, bedlevel)
 
 end subroutine getBedToplevel
 
+!> Calculate the dead storage using boundary conditions, turn off levels of pumping stations and the geometry of the network.
 subroutine calculateDeadStorage(wl_deadstorage, network, bndvalues, inslevtube, bndindex, ln2nd, numlinks, numpoints, numboundaries)
 
    use m_flowgeom
@@ -165,15 +166,16 @@ subroutine calculateDeadStorage(wl_deadstorage, network, bndvalues, inslevtube, 
    use m_1d_structures
    use m_Pump
 
-   type(t_network),                  intent(in)       :: network
-   double precision, dimension(:),   intent(inout)    :: wl_deadstorage
-   double precision, dimension(:),   intent(in   )    :: bndvalues
-   double precision, dimension(:,:), intent(in   )    :: inslevtube
-   integer,          dimension(:,:), intent(in   )    :: bndindex
-   integer,          dimension(:,:), intent(in   )    :: ln2nd
-   integer,                          intent(in   )    :: numpoints
-   integer,                          intent(in   )    :: numlinks
-   integer,                          intent(in   )    :: numboundaries
+   type(t_network),                  intent(in)       :: network         !< Network definition of the model.
+   double precision, dimension(:),   intent(inout)    :: wl_deadstorage  !< On output this array contains the minimal water levels, after the model is 
+                                                                         !< drained.
+   double precision, dimension(:),   intent(in   )    :: bndvalues       !< Boundary condition values. See ZBNDZ in D-FlowFM.
+   double precision, dimension(:,:), intent(in   )    :: inslevtube      !< Inside level tubes. See BOB in D-FlowFM.
+   integer,          dimension(:,:), intent(in   )    :: bndindex        !< Index numbers for boundary condtions. See KBNDZ in D-FfowFM.
+   integer,          dimension(:,:), intent(in   )    :: ln2nd           !< Link nodes to node numbers. See LN in D-FfowFM.
+   integer,                          intent(in   )    :: numpoints       !< Number of 1d points in volume tables.
+   integer,                          intent(in   )    :: numlinks        !< Number of 1d internal links
+   integer,                          intent(in   )    :: numboundaries   !< Number of water level boundaries
    
    
    integer :: numberOfChanges
