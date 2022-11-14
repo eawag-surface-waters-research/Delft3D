@@ -119,7 +119,10 @@
  integer :: ndraw
  COMMON /DRAWTHIS/ ndraw(50)
 
- if (numk <= 2 .or. numl <= 1 ) return               ! only do this for sufficient network
+ if (numk <= 2 .or. numl <= 1 ) then
+    call mess(LEVEL_ERROR,'A valid network requires > 2 nodes and > 1 netlinks')
+    return               ! only do this for sufficient network
+ endif
 
  noncrossinglink = .false.
 
