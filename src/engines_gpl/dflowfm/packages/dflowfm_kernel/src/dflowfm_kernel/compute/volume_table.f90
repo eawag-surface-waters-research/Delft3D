@@ -370,9 +370,10 @@ module m_VolumeTables
             if (L > lnxi) then
                L = lbnd1d(L)
             endif
-            
-            if (cross(line2cross(L, 2)%c1)%hasSummerDike() .or. cross(line2cross(L, 2)%c2)%hasSummerDike()) then
-               summerDikeIndex = summerDikeIndex+1
+            if (line2cross(L, 2)%c1 > 0) then
+               if (cross(line2cross(L, 2)%c1)%hasSummerDike() .or. cross(line2cross(L, 2)%c2)%hasSummerDike()) then
+                  summerDikeIndex = summerDikeIndex+1
+               endif
             endif
             
             ! Reset L to original value
