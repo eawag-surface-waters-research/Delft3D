@@ -437,6 +437,9 @@ subroutine fill_valstruct_perlink(valstruct, L, dir, istrtypein, istru, L0)
          ku = ln(2,L)
          kd = ln(1,L)
       end if
+   else 
+     ku = longculverts(istru)%flownode_up
+     kd = longculverts(istru)%flownode_dn
    end if
 
    ! 1. Generic values that apply to all structure types
@@ -459,20 +462,20 @@ subroutine fill_valstruct_perlink(valstruct, L, dir, istrtypein, istru, L0)
      valstruct(IVAL_DIS) = valstruct(IVAL_DIS) + q1(L)*dir
    end if
 
-   if (istrtypein /= ST_LONGCULVERT) then
-      if (hs(ku) > epshs) then
-         valstruct(IVAL_WIDTHUP) = valstruct(IVAL_WIDTHUP) + wu(L)
-         valstruct(IVAL_S1UP)    = valstruct(IVAL_S1UP) + s1(ku)*wu(L)
-      end if
-      if (hs(kd) > epshs) then
-         valstruct(IVAL_WIDTHDN) = valstruct(IVAL_WIDTHDN) + wu(L)
-         valstruct(IVAL_S1DN)    = valstruct(IVAL_S1DN) + s1(kd)*wu(L)
-      end if
-      if (hs(ku) > epshs .and. hs(kd) > epshs) then
-         valstruct(IVAL_WIDTHUPDN) = valstruct(IVAL_WIDTHUPDN) + wu(L)
-         valstruct(IVAL_HEAD)      = valstruct(IVAL_HEAD) + (s1(ku) - s1(kd))*wu(L)
-      end if
+
+   if (hs(ku) > epshs) then
+     valstruct(IVAL_WIDTHUP) = valstruct(IVAL_WIDTHUP) + wu(L)
+     valstruct(IVAL_S1UP)    = valstruct(IVAL_S1UP) + s1(ku)*wu(L)
    end if
+   if (hs(kd) > epshs) then
+     valstruct(IVAL_WIDTHDN) = valstruct(IVAL_WIDTHDN) + wu(L)
+     valstruct(IVAL_S1DN)    = valstruct(IVAL_S1DN) + s1(kd)*wu(L)
+   end if
+   if (hs(ku) > epshs .and. hs(kd) > epshs) then
+     valstruct(IVAL_WIDTHUPDN) = valstruct(IVAL_WIDTHUPDN) + wu(L)
+     valstruct(IVAL_HEAD)      = valstruct(IVAL_HEAD) + (s1(ku) - s1(kd))*wu(L)
+   end if
+
 
    if (istrtypein /= ST_PUMP) then ! Compute flow area for structures except for pump
       if (istru > 0) then ! When it is not old weir and not old general structure and not a compound structure
@@ -579,17 +582,17 @@ subroutine average_valstruct(valstruct, istrtypein, istru, nlinks)
    ! 1a. average for waterlevel upstream, downstream and head
    if (valstruct(IVAL_WIDTHUP) > 0) then
       valstruct(IVAL_S1UP) = valstruct(IVAL_S1UP) / valstruct(IVAL_WIDTHUP)
-   else if (istrtypein /= ST_LONGCULVERT) then
+   else 
       valstruct(IVAL_S1UP) = dmiss
    end if
    if (valstruct(IVAL_WIDTHDN) > 0) then
       valstruct(IVAL_S1DN) = valstruct(IVAL_S1DN) / valstruct(IVAL_WIDTHDN)
-   else if (istrtypein /= ST_LONGCULVERT) then
+   else 
       valstruct(IVAL_S1DN) = dmiss
    end if
    if (valstruct(IVAL_WIDTHUPDN) > 0) then
       valstruct(IVAL_HEAD) = valstruct(IVAL_HEAD) / valstruct(IVAL_WIDTHUPDN)
-   else if (istrtypein /= ST_LONGCULVERT) then
+   else 
       valstruct(IVAL_HEAD) = dmiss
    end if
    ! 1b. other generic variables
@@ -608,9 +611,6 @@ subroutine average_valstruct(valstruct, istrtypein, istru, nlinks)
          valstruct(IVAL_FORCEDIF)  = dmiss ! force difference per unit width
       end if
    else
-      if (istrtypein == ST_LONGCULVERT .and. valstruct(IVAL_S1UP) /= dmiss .and. valstruct(IVAL_S1DN) /= dmiss ) then
-         valstruct(IVAL_HEAD) = valstruct(IVAL_S1UP) - valstruct(IVAL_S1DN)
-      end if
 
       if (istrtypein /= ST_PUMP) then
          if (valstruct(IVAL_AREA) > 0d0) then ! non-zero flow area
