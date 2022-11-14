@@ -296,15 +296,15 @@ subroutine fill_valobs()
             enddo
             !
             if (stmpar%lsedsus>0) then
-               do j = IVAL_SOUR1, IVAL_SOURN
-                  ii = j-IVAL_SOUR1+1
-                  valobs(IPNT_SOUR1+ii-1,i)=sedtra%sourse(k,ii)
-               enddo
-               do j = IVAL_SINK1, IVAL_SINKN
-                  ii = j-IVAL_SINK1+1
-                  valobs(IPNT_SINK1+ii-1,i)=sedtra%sinkse(k,ii)
-               enddo
-            endif
+            do j = IVAL_SOUR1, IVAL_SOURN
+               ii = j-IVAL_SOUR1+1
+               valobs(IPNT_SOUR1+ii-1,i)=sedtra%sourse(k,ii)
+            enddo
+            do j = IVAL_SINK1, IVAL_SINKN
+               ii = j-IVAL_SINK1+1
+               valobs(IPNT_SINK1+ii-1,i)=sedtra%sinkse(k,ii)
+            enddo
+         endif
          endif
          !
          if ( IVAL_WQB1.gt.0 ) then
@@ -333,14 +333,14 @@ subroutine fill_valobs()
 
             if (jawave > 0 .and. .not. flowWithoutWaves) then
                if (hs(k)>epshu) then
-                  if (kmx==0) then
-                     kk_const = 1
-                  else
-                     kk_const = klay
-                  endif
-                  valobs(IPNT_UCXST+klay-1,i) = wa(1,kk_const)
-                  valobs(IPNT_UCYST+klay-1,i) = wa(2,kk_const)
+               if (kmx==0) then
+                  kk_const = 1
+               else
+                  kk_const = klay
                endif
+               valobs(IPNT_UCXST+klay-1,i) = wa(1,kk_const)
+               valobs(IPNT_UCYST+klay-1,i) = wa(2,kk_const)
+            endif
             endif
 
             if ( kmx>0 ) then
@@ -352,12 +352,12 @@ subroutine fill_valobs()
             if ( jatem.gt.0 ) then
                valobs(IPNT_TEM1+klay-1,i) = constituents(itemp, kk)
             end if
-            if ((jasal > 0 .or. jatem > 0 .or. jased > 0) .and. jahisrho > 0) then
+            if( jasal > 0 .or. jatem > 0 .or. jased > 0 ) then
                valobs(IPNT_RHOP+klay-1,i) = setrhofixedp(kk, 0d0)
                if (idensform > 10 ) then  
-                  valobs(IPNT_RHO+klay-1,i) = rho(kk)
-               endif
-               if (zws(kt) - zws(kb-1) > epshu .and. k < kt ) then
+               valobs(IPNT_RHO+klay-1,i) = rho(kk)
+            end if
+               if (kk < kt) then
                    if (idensform > 10 ) then           
                       prsappr = ag*rhomean*( zws(kt) - zws(kk) )  
                       drhodz  = ( setrhofixedp(kk+1,prsappr) - setrhofixedp(kk,prsappr) ) / max(0.5d0*(zws(kk+1) - zws(kk-1)),epshs)    ! FIXME!!!!
@@ -508,7 +508,7 @@ subroutine fill_valobs()
 
             if (iturbulencemodel.ge.2) then
                call reorder_valobs_array(kmx+1,valobs(IPNT_VICWW:IPNT_VICWW+kmx,i), kb, kt, nlayb, dmiss)
-            endif
+         endif
             if (iturbulencemodel.ge.3) then
                call reorder_valobs_array(kmx+1,valobs(IPNT_TKIN:IPNT_TKIN+kmx,i), kb, kt, nlayb, dmiss)
                call reorder_valobs_array(kmx+1,valobs(IPNT_TEPS:IPNT_TEPS+kmx,i), kb, kt, nlayb, dmiss)
@@ -530,7 +530,7 @@ subroutine fill_valobs()
                valobs(IPNT_INFILTACT,i) = infilt(k)/ba(k)*1d3*3600d0 ! m/s -> mm/hr
             else
                valobs(IPNT_INFILTACT,i) = 0d0
-            end if
+         end if
          end if
 
 !        Tau
