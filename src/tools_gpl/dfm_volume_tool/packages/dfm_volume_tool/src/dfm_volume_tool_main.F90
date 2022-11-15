@@ -244,7 +244,7 @@ if (ierr==0) then
       
       !> Calculate the total volumes and surfaces for this model
       ids(1) = 'Total'
-      call generateVolumeTableDataOnGridPoints(volume(:,1), surface(:,1), storage(:,1), deadstorage(:,1), &
+      call generateTotalVolumeTable(volume(:,1), surface(:,1), storage(:,1), deadstorage(:,1), &
                   wl_deadstorage, volumetable, bedlevel, increment, numpoints, numlevels, mask)
                   
    endif
@@ -254,7 +254,7 @@ if (ierr==0) then
       do i = 1, numbranches
          idindex = idindex + 1
          ids(idindex) = branches(i)%id
-         call generateVolumeTableDataOnLinks(volume(:,idindex), surface(:,idindex), storage(:,idindex), deadstorage(:,idindex), &
+         call generateVolumeTableOnBranches(volume(:,idindex), surface(:,idindex), storage(:,idindex), deadstorage(:,idindex), &
                         wl_deadstorage, volumetableOnLinks, bedlevel, &
                         increment, branches(i)%uPointsCount, numlevels, branches(i)%lin, ln2nd)
       enddo

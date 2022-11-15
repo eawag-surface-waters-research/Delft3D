@@ -40,15 +40,15 @@ module m_StorageTable
 implicit none
 private
   
-   public generateVolumeTableDataOnGridpoints
-   public generateVolumeTableDataOnLinks
+   public generateTotalVolumeTable
+   public generateVolumeTableOnBranches
    public getBedToplevel
    public calculateDeadStorage
 
 contains
   
 !> Generate the total volume/surface 
-subroutine generateVolumeTableDataOnGridPoints(volume, surface, storage, deadstorage, wl_deadstorage, voltb, &
+subroutine generateTotalVolumeTable(volume, surface, storage, deadstorage, wl_deadstorage, voltb, &
                   bedlevel, increment, numpoints, numlevels, nodes)
 
    use unstruc_channel_flow
@@ -77,10 +77,10 @@ subroutine generateVolumeTableDataOnGridPoints(volume, surface, storage, deadsto
    
    call ComputeSurfaceAndStorage(volume, surface, storage, deadstorage, increment, numlevels)
 
-end subroutine generateVolumeTableDataOnGridPoints
+end subroutine generateTotalVolumeTable
 
 !> Generate the total volume/surface (TODO: and the totalised volume/surface for each branch).
-subroutine generateVolumeTableDataOnLinks(volume, surface, storage, deadstorage, wl_deadstorage, voltbOnlinks, &
+subroutine generateVolumeTableOnBranches(volume, surface, storage, deadstorage, wl_deadstorage, voltbOnlinks, &
                   bedlevel, increment, numpoints, numlevels, links, ln2nd)
 
    use unstruc_channel_flow
@@ -109,7 +109,7 @@ subroutine generateVolumeTableDataOnLinks(volume, surface, storage, deadstorage,
    
    call ComputeSurfaceAndStorage(volume, surface, storage, deadstorage, increment, numlevels)
 
-end subroutine generateVolumeTableDataOnLinks
+end subroutine generateVolumeTableOnBranches
 
 !> Add the volume and surface for this volume table to the aggregated volume and surface
 subroutine AddVolumeAndSurface(vol, sur, deadstorage, wl_deadstorage, voltb, bedlevel, increment, numlevels)
