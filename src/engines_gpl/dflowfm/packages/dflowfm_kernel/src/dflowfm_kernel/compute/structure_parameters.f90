@@ -571,43 +571,21 @@
          do n = 1, nlongculverts
             vallongculvert(1:NUMVALS_LONGCULVERT,n) = 0d0
             if (longculverts(n)%numlinks > 0) then ! This long culvert is valid on the current domain/subdomain
-               ! Firstly we fill in the waterlevel at up- and down-stream points.
-               ku = longculverts(n)%flownode_up
-               if (ku > 0) then ! this upstream point is on the current subdomain/domain
-                  if (jampi == 0 .or. (jampi > 0 .and. (.not. is_ghost_node(ku)))) then
-                     if (hs(ku) > epshs) then
-                        vallongculvert(IVAL_S1UP,n) = s1(ku)
-                     else
-                        vallongculvert(IVAL_S1UP,n) = dmiss
-                     end if
-                  end if
-               end if
-
-               kd = longculverts(n)%flownode_dn
-               if (kd > 0) then ! this downstream point is on the current subdomain/domain
-                  if (jampi == 0 .or. (jampi > 0 .and. (.not. is_ghost_node(kd)))) then
-                     if (hs(kd) > epshs) then
-                        vallongculvert(IVAL_S1DN,n) = s1(kd)
-                     else
-                        vallongculvert(IVAL_S1DN,n) = dmiss
-                     end if
-                  end if
-               end if
-
-               ! Then fill in for the representative flow ilnk
+               ! fill in for the representative flow ilnk
                if (newculverts) then
-                  Lf = longculverts(n)%flowlinks(2) ! We use the 2st link as a representative flow link
+                  La = abs(longculverts(n)%flowlinks(2)) ! We use the 2st link as a representative flow link
+                  dir = sign(1d0,dble(longculverts(n)%flowlinks(2)))
                else
-                  Lf = longculverts(n)%flowlinks(1)
+                  La = abs(longculverts(n)%flowlinks(1))
+                  dir = sign(1d0,dble(longculverts(n)%flowlinks(1)))
                endif
 
-               La = abs( Lf )
                if (La > 0) then
                   if( jampi > 0 ) then
                      call link_ghostdata(my_rank,idomain(ln(1,La)), idomain(ln(2,La)), jaghost, idmn_ghost)
                      if ( jaghost.eq.1 ) cycle
                   endif
-                  dir = sign(1d0,dble(Lf))
+                  
                   call fill_valstruct_perlink(vallongculvert(:,n), La, dir, ST_LONGCULVERT, n, 0)
                end if
             end if
