@@ -191,7 +191,7 @@ subroutine solve_vertical(NUMCONST, ISED1, ISEDN, limtyp, thetavert, Ndkx, Lnkx,
                    if (jased < 4) then
                       qw_loc = qw(k) - wsf(j)*a1(kk)
                    else  if ( j.ge.ISED1 .and. j.le.ISEDN ) then
-                      qw_loc = qw(k) - mtd%ws(k,ISED1+j-1)*a1(kk)
+                      qw_loc = qw(k) - mtd%ws(k,j-ISED1+1)*a1(kk)
                    endif
                 else 
                    qw_loc = qw(k)
