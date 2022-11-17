@@ -152,6 +152,14 @@ echo "Executing singularity exec $container_bindir/$executable $executable_opts"
 # --cleanenv will probably not work for multiple node computations.
 # See also https://sylabs.io/guides/3.8/user-guide/environment_and_metadata.html
 #
+# Warning! For the SYSADMIN, it might be necessary to extend the bindings.
+# When using D-Waves/SWAN inside the container and SWAN aborts with a message like:
+#     OMP: Error #179: Function Can't open SHM2 failed:
+#     OMP: System error #20: Not a directory
+#     forrtl: error (76): Abort trap signal
+# Then try to add the binding /run/shm:/run/shm below. Example line:
+#     --bind /run/shm:/run/shm,$working_dir:$mountdir,$MPI_DIR:$MPI_DIR,/usr/:/host \
+
 
 singularity exec \
                  --bind $working_dir:$mountdir,$MPI_DIR:$MPI_DIR,/usr/:/host \
