@@ -601,7 +601,7 @@ end function unc_add_uuid
 !! Input are parameters in seconds since refdat; this subroutine will take
 !! care of date calculations, time zones and string conversion.
 function unc_add_time_coverage(ncid, start_since_ref, end_since_ref, resolution) result(ierr)
-   use time_module, only: duration_to_string, datetime_to_string, ymd2reduced_jul
+   use time_module, only: duration_to_string, datetime_to_string, ymd2modified_jul
    use m_flowtimes, only: refdat, tzone
    use dfm_error
    implicit none
@@ -616,7 +616,7 @@ function unc_add_time_coverage(ncid, start_since_ref, end_since_ref, resolution)
 
    ierr = DFM_NOERR
 
-   success_ = ymd2reduced_jul(refdat, refdate_rjul)
+   success_ = ymd2modified_jul(refdat, refdate_rjul)
    if (.not. success_) then
       ierr = DFM_WRONGINPUT
       return
