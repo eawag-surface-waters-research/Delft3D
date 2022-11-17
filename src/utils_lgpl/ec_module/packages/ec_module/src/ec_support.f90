@@ -108,8 +108,8 @@ module m_ec_support
          integer                                 :: hh, mm, ss          !< hours, minutes, seconds helper variables
          integer                                 :: iyear, imonth, iday !< year, month and day
 
-         !! TODO very ugly to add offset_reduced_jd here
-         call gregor(timestamp_mjd + offset_reduced_jd, iyear, imonth, iday, hh, mm, ss, dsec)
+         !! TODO very ugly to add offset_modified_jd here
+         call gregor(timestamp_mjd + offset_modified_jd, iyear, imonth, iday, hh, mm, ss, dsec)
 
          yyyymmdd = 10000 * iyear + 100 * imonth + iday
          hhmmss = 10000 * hh + 100 * mm + ss
@@ -750,7 +750,7 @@ end subroutine ecInstanceListSourceItems
             end if
 
             ! Date
-            if (ymd2reduced_jul(date, ref_date)) then
+            if (ymd2modified_jul(date, ref_date)) then
                ! Time
                if ( time /= ' ') then
                   ref_date = ref_date + parse_time(time, ok)
