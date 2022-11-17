@@ -210,7 +210,7 @@ subroutine solve_vertical(NUMCONST, ISED1, ISEDN, limtyp, thetavert, Ndkx, Lnkx,
                fluxfac = 0d0
                if (jased > 3) then 
                   if ( j.ge.ISED1 .and. j.le.ISEDN ) then
-                     fluxfac = mtd%ws(k,ISED1+j-1)*a1(kk)*dt_loc
+                     fluxfac = mtd%ws(k,j-ISED1+1)*a1(kk)*dt_loc
                   else
                      fluxfac = wsf(j)*a1(kk)*dt_loc
                   endif
