@@ -191,6 +191,17 @@ subroutine rdsedmortra(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
     if (error) goto 999
     !
     !--------------------------------------------------------------------------
+    if (gdp%gdprocs%flmd2l) then
+       if (gdp%gdmorpar%bedupd) then
+           call prterr(lundia, 'U190', 'Bed level updating automatically switched off for 2-layer fluid mud computation')
+           gdp%gdmorpar%bedupd = .false.
+       endif
+       if (gdp%gdmorpar%cmpupd) then
+           call prterr(lundia, 'U190', 'Bed composition updating automatically switched off for 2-layer fluid mud computation')
+           gdp%gdmorpar%cmpupd = .false.
+       endif
+    endif
+    !--------------------------------------------------------------------------
     !
     ! Echo sediment and transport parameters
     !

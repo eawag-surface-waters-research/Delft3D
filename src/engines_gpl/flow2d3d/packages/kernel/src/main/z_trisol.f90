@@ -1735,7 +1735,7 @@ subroutine z_trisol(dischy    ,solver    ,icreep    ,ithisc    , &
        ! Suspended transport correction vector
        ! Suspended transport vector for output
        !
-       if ((lsedtot>0) .and. (.not.flmd2l)) then
+       if (lsedtot>0) then
           call timer_start(timer_3dmor, gdp)
           !
           ! don't compute suspended transport vector in middle of timestep
@@ -2662,7 +2662,7 @@ subroutine z_trisol(dischy    ,solver    ,icreep    ,ithisc    , &
        ! except when run parallel to fluid mud
        !
        call timer_start(timer_3dmor, gdp)
-       if ((lsedtot>0) .and. (.not.flmd2l)) then
+       if (lsedtot>0) then
           !
           ! compute suspended sediment transport vector at the end of each
           ! dt. Would be better to just calculate it when required for
@@ -2696,7 +2696,7 @@ subroutine z_trisol(dischy    ,solver    ,icreep    ,ithisc    , &
           call incsdu(timhr  ,d(dps)   ,r(s1)   ,i(kcs)  ,i(kfs) ,gdp    )
        endif
        !
-       if (((lsedtot>0) .and. (.not.flmd2l) .and. bedupd) .or. lfsdu) then
+       if (((lsedtot>0) .and. bedupd) .or. lfsdu) then
           !icx = nmaxddb
           !icy = 1
           !call z_updzm(jstart    ,nmmaxj    ,nmmax     ,kmax      ,icx       , &

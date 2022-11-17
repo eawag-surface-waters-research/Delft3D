@@ -1493,7 +1493,7 @@ subroutine tricom_init(olv_handle, gdp)
        endif
     endif
     !
-    if ((lsedtot>0) .and. (.not.flmd2l)) then
+    if (lsedtot>0) then
        call morbndfill(i(kcs)    ,r(guu)    ,r(gvv)    ,icx       , &
                      & icy       ,i(mnbnd)  ,nto       ,gdp       )
     endif

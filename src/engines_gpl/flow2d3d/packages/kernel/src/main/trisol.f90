@@ -2134,7 +2134,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
        ! mass flux and temporary set in WRKB5 (U0EUL) and WRKB6 (V0EUL)
        ! these are used in BOTT3D
        !
-       if ((lsedtot>0) .and. (.not.flmd2l)) then
+       if (lsedtot>0) then
           call timer_start(timer_3dmor, gdp)
           !
           ! don't compute suspended transport vector in middle of timestep
@@ -3201,7 +3201,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
        ! these are used in BOTT3D
        !
        call timer_start(timer_3dmor, gdp)
-       if ((lsedtot>0) .and. (.not.flmd2l)) then
+       if (lsedtot>0) then
           !
           ! compute suspended sediment transport vector at the end of each
           ! dt. Would be better to just calculate it when required for
@@ -3249,7 +3249,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
           call incsdu(timhr  ,d(dps)   ,r(s1)   ,i(kcs)  ,i(kfs) ,gdp    )
        endif
        !
-       if (((lsedtot>0) .and. (.not.flmd2l) .and. bedupd) .or. lfsdu) then
+       if (((lsedtot>0) .and. bedupd) .or. lfsdu) then
           !
           ! Recalculate DPU/DPV (depth at velocity points)
           !

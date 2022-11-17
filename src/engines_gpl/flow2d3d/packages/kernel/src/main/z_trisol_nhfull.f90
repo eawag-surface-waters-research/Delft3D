@@ -1914,7 +1914,7 @@ subroutine z_trisol_nhfull(dischy    ,solver    ,icreep   ,ithisc    , &
        ! Suspended transport vector for output
        !
        call timer_start(timer_3dmor, gdp)
-       if ((lsedtot>0) .and. (.not.flmd2l)) then
+       if (lsedtot>0) then
           !
           ! don't compute suspended transport vector in middle of timestep
           ! note: IWRK1 used as local work array
@@ -1946,7 +1946,7 @@ subroutine z_trisol_nhfull(dischy    ,solver    ,icreep   ,ithisc    , &
           call incsdu(timhr  ,d(dps)   ,r(s1)   ,i(kcs)  ,i(kfs) ,gdp    )
        endif
        !
-       if (((lsedtot>0) .and. (.not.flmd2l) .and. bedupd) .or. lfsdu) then
+       if (((lsedtot>0) .and. bedupd) .or. lfsdu) then
           ! icx = nmaxddb
           ! icy = 1
           !   call z_updzm(jstart    ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
