@@ -10,6 +10,8 @@
     </control>
     <component name="myNameDFlowFM">
         <library>dflowfm</library>
+        <process>0</process>
+        <mpiCommunicator>DFM_COMM_DFMWORLD</mpiCommunicator>
         <workingDir>.</workingDir>
         <inputFile>f34.mdu</inputFile>
         <setting key="processlibrary" value="${D3D_HOME}\x64\dwaq\default\proc_def.dat"/>
