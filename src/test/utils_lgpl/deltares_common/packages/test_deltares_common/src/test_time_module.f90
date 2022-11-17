@@ -48,18 +48,19 @@ module test_time_module
    contains
 
       subroutine tests_time_module
-         call test( testconversion1,  'Test CalendarYearMonthDayToJulianDateNumber' )
-         call test( testconversion2,  'Test julian' )
+         call test( test_conversion2juliandate, 'Test CalendarYearMonthDayToJulianDate' )
+         call test( test_julian, 'Test julian' )
+         call test( test_date2mjd2date, 'Test CalendarYearMonthDayToModifiedJulianDateAndBack')
          call test( test_split_date_time, 'Test split_date_time' )
          call test( test_split_date_time_invalid, 'Test split_date_time with invalid input')
          call test( test_parse_time_valid, 'Test parse_time with valid input')
          call test( test_parse_time_invalid, 'Test parse_time with invalid input')
-         call test( test_ymd2reduced_jul_string_valid, 'Test ymd2reduced_jul_string with valid input')
-         call test( test_ymd2reduced_jul_string_invalid, 'Test ymd2reduced_jul_string with invalid input')
+         call test( test_ymd2modified_jul_string_valid, 'Test ymd2modified_jul_string with valid input')
+         call test( test_ymd2modified_jul_string_invalid, 'Test ymd2modified_jul_string with invalid input')
       end subroutine tests_time_module
 
-      !> test CalendarYearMonthDayToJulianDateNumber
-      subroutine testConversion1()
+      !> test CalendarYearMonthDayToJulianDate
+      subroutine test_conversion2juliandate()
 
          integer :: jdn1, jdn2, jdn3, jdn4, yyyymmdd, yyyymmdd2, istat
          real(kind=hp) :: mjd, mjd2
@@ -91,10 +92,10 @@ module test_time_module
          call assert_equal (yyyymmdd, yyyymmdd2, 'error for yyyymmdd = 15821004')
          call assert_false (abs(mjd - mjd2 - 1d0) > 1d-4, 'error for jump 15821004 -> 15821015')
 
-      end subroutine testConversion1
+      end subroutine test_conversion2juliandate
 
       !> test julian
-      subroutine testConversion2()
+      subroutine test_julian()
 
          real(kind=hp) :: jdn1, jdn2, jdn3, jdn4
 
@@ -108,7 +109,24 @@ module test_time_module
          call assert_comparable(jdn3, -100840.0_hp, tol, 'error for 15-10-1582')
          call assert_comparable(jdn4, 51910.0_hp, tol, 'error for 1-1-2001')
 
-      end subroutine testConversion2
+      end subroutine test_julian
+
+      !> test yyyymmddToModifieldJulianDateToyyyymmdd
+      subroutine test_date2mjd2date()
+         implicit none
+         logical       :: success_
+         real(kind=hp) :: expected_mjd, refdate_mjd
+         integer       :: refdate
+         integer       :: returndate
+         
+         refdate = 20221101
+         expected_mjd = 59884.5_hp
+         success_ = ymd2modified_jul(refdate, refdate_mjd)
+         call assert_comparable(refdate_mjd, expected_mjd, tol, 'error in conversion ymd to modified julian date')
+         success_ = mjd2date(refdate_mjd, returndate)
+         call assert_equal(refdate, returndate,'error in conversion modified julian date to ymd')
+                  
+      end subroutine test_date2mjd2date
 
       !> test split_date_time with valid input
       subroutine test_split_date_time
@@ -214,7 +232,7 @@ module test_time_module
          end do
       end subroutine test_parse_time_invalid
 
-      subroutine test_ymd2reduced_jul_string_valid
+      subroutine test_ymd2modified_jul_string_valid
          integer, parameter           :: nr_cases = 9
          character(len=16), parameter :: date(nr_cases) = (/ &
             "20200904        ", &   ! no separators
@@ -226,19 +244,19 @@ module test_time_module
             "2020 9 04       ", &   ! space separator, two digit day, one digit month
             "002020 9 04       ", & ! space separator, six digit year
             "2020/9/04       "/)    ! / separator, one digit day, two digit month
-         real(kind=hp), parameter :: mjd_expected = 59096
+         real(kind=hp), parameter :: mjd_expected = 59096.0_hp
          integer                  :: i
          logical                  :: ok
          real(kind=hp)            :: mjd
 
          do i = 1, nr_cases
-            ok = ymd2reduced_jul(date(i), mjd)
+            ok = ymd2modified_jul(date(i), mjd)
             call assert_true( ok, "unexpected success status (must succeed)")
             call assert_comparable(mjd, mjd_expected, tol, "difference in Modified Julian Day")
          end do
-      end subroutine test_ymd2reduced_jul_string_valid
+      end subroutine test_ymd2modified_jul_string_valid
       
-      subroutine test_ymd2reduced_jul_string_invalid
+      subroutine test_ymd2modified_jul_string_invalid
          integer, parameter           :: nr_cases = 7
          character(len=16), parameter :: date(nr_cases) = (/ &
             "20201904        ", &   ! no separators, month 19
@@ -253,10 +271,10 @@ module test_time_module
          real(kind=hp)            :: mjd
 
          do i = 1, nr_cases
-            ok = ymd2reduced_jul(date(i), mjd)
+            ok = ymd2modified_jul(date(i), mjd)
             call assert_false( ok, "unexpected success status (must fail)")
          end do
-      end subroutine test_ymd2reduced_jul_string_invalid
+      end subroutine test_ymd2modified_jul_string_invalid
       
 
 end module test_time_module

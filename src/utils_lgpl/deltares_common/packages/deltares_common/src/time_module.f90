@@ -42,10 +42,8 @@ module time_module
    public :: time_module_info
    public :: datetime2sec
    public :: sec2ddhhmmss
-   public :: ymd2jul, ymd2reduced_jul
-   public :: mjd2jul
-   public :: jul2mjd
-   public :: date2mjd   ! obsolete, use ymd2reduced_jul
+   public :: ymd2jul, ymd2modified_jul
+   public :: date2mjd   ! obsolete, use ymd2modified_jul
    public :: mjd2date
    public :: duration_to_string
    public :: datetime_to_string
@@ -53,26 +51,26 @@ module time_module
    public :: parse_time
    public :: split_date_time
    public :: CalendarYearMonthDayToJulianDateNumber
-   public :: julian, gregor, offset_reduced_jd
+   public :: julian, gregor, offset_modified_jd
 
    interface ymd2jul
-      ! obsolete, use ymd2reduced_jul
+      ! obsolete, use ymd2modified_jul
       module procedure CalendarDateToJulianDateNumber
       module procedure CalendarYearMonthDayToJulianDateNumber
    end interface ymd2jul
 
    interface date2mjd
-      ! obsolete, use ymd2reduced_jul
+      ! obsolete, use ymd2modfified_jul
       module procedure ymd2mjd
       module procedure datetime2mjd
       module procedure ymdhms2mjd
    end interface date2mjd
 
-   interface ymd2reduced_jul
-      module procedure ymd2reduced_jul_string
-      module procedure ymd2reduced_jul_int
-      module procedure ymd2reduced_jul_int3
-   end interface ymd2reduced_jul
+   interface ymd2modified_jul
+      module procedure ymd2modified_jul_string
+      module procedure ymd2modified_jul_int
+      module procedure ymd2modified_jul_int3
+   end interface ymd2modified_jul
 
    interface mjd2date
       module procedure mjd2datetime
@@ -86,7 +84,7 @@ module time_module
       module procedure mjd2string
    end interface datetime_to_string
 
-   real(kind=hp), parameter :: offset_reduced_jd   = 2400000.5_hp
+   real(kind=hp), parameter :: offset_modified_jd  = 2400000.5_hp
    integer      , parameter :: firstGregorianDayNr = 2299161
    integer      , parameter :: justBeforeFirstGregorian(3) = [1582, 10, 14]
    integer      , parameter :: justAfterLastJulian(3)      = [1582, 10,  5]
@@ -198,13 +196,13 @@ module time_module
       end function sec2ddhhmmss
 
 !---------------------------------------------------------------------------------------------
-! implements interface ymd2reduced_jul
+! implements interface ymd2modified_jul
 !---------------------------------------------------------------------------------------------
-      !> calculates reduced Julian Date base on a string 'yyyyddmm' with or without separators
-      function ymd2reduced_jul_string(date, reduced_jul_date) result (success)
+      !> calculates modified Julian Date base on a string 'yyyyddmm' with or without separators
+      function ymd2modified_jul_string(date, modified_jul_date) result (success)
          use string_module, only: strsplit
          character(len=*), intent(in) :: date             !< date as string 'yyyyddmm' or 'yyyy dd mm' or 'yyyy d m'
-         real(kind=hp), intent(out)   :: reduced_jul_date !< returned date as reduced modified julian
+         real(kind=hp), intent(out)   :: modified_jul_date !< returned date as modified julian
          logical                      :: success          !< function result
 
          integer :: year, month, day, ierr, npc, intdate
@@ -242,34 +240,34 @@ module time_module
          endif
 
          if (month>=1 .and. month <= 12 .and. day>=1 .and. year>=1) then
-            reduced_jul_date = julian(year*10000 + month * 100 + day, 0)
-            if (reduced_jul_date == -1) return 
+            modified_jul_date = julian(year*10000 + month * 100 + day, 0)
+            if (modified_jul_date == -1) return 
          else
             return
          endif
          success = .true. 
-      end function ymd2reduced_jul_string
+      end function ymd2modified_jul_string
 
-      !> calculates reduced Julian Date base on a integer yyyyddmm
-      function ymd2reduced_jul_int(yyyymmdd, reduced_jul_date) result(success)
+      !> calculates modified Julian Date base on a integer yyyyddmm
+      function ymd2modified_jul_int(yyyymmdd, modified_jul_date) result(success)
          integer,       intent(in)  :: yyyymmdd          !< date as integer yyyymmdd
-         real(kind=hp), intent(out) :: reduced_jul_date  !< output reduced Julian Date number
+         real(kind=hp), intent(out) :: modified_jul_date  !< output modified Julian Date number
          logical                    :: success           !< function result
 
          integer :: year, month, day
 
          call splitDate(yyyymmdd, year, month, day)
 
-         success = ymd2reduced_jul_int3(year, month, day, reduced_jul_date)
+         success = ymd2modified_jul_int3(year, month, day, modified_jul_date)
 
-      end function ymd2reduced_jul_int
+      end function ymd2modified_jul_int
 
-      !> calculates reduced Julian Date base on integers year, month and day
-      function ymd2reduced_jul_int3(year, month, day, reduced_jul_date) result(success)
+      !> calculates modified Julian Date base on integers year, month and day
+      function ymd2modified_jul_int3(year, month, day, modified_jul_date) result(success)
          integer      , intent(in)  :: year              !< year
          integer      , intent(in)  :: month             !< month
          integer      , intent(in)  :: day               !< day
-         real(kind=hp), intent(out) :: reduced_jul_date  !< output reduced Julian Date number
+         real(kind=hp), intent(out) :: modified_jul_date  !< output modified Julian Date number
          logical                    :: success           !< function result
 
          integer :: jdn
@@ -277,14 +275,14 @@ module time_module
          jdn = CalendarYearMonthDayToJulianDateNumber(year, month, day)
 
          if (jdn == 0) then
-            reduced_jul_date = 0.0_hp
+            modified_jul_date = 0.0_hp
             success = .false.
          else
-            reduced_jul_date = real(jdn, hp) - offset_reduced_jd
+            modified_jul_date = real(jdn, hp) - offset_modified_jd
             success = .true.
          endif
 
-      end function ymd2reduced_jul_int3
+      end function ymd2modified_jul_int3
 
 !---------------------------------------------------------------------------------------------
 ! implements interface ymd2jul
@@ -738,7 +736,7 @@ module time_module
          integer       :: ierr_
 
          ierr_ = -1
-         if (mjd2datetime_fix(days,iyear,imonth,iday,ihour,imin,second)/=0) then
+         if (mjd2datetime(days,iyear,imonth,iday,ihour,imin,second)/=0) then
             isec = nint(second) ! unfortunately rounding instead of truncating requires all of the following checks
             if (isec == 60) then
                imin = imin+1
@@ -849,29 +847,28 @@ module time_module
       end function datetime2mjd
 
 !---------------------------------------------------------------------------------------------
+! private: convert Modified Julian day to Julian day.
+!---------------------------------------------------------------------------------------------
       function mjd2jul(days,frac) result(jul)
          implicit none
          real(kind=hp)          , intent(in)  :: days
          real(kind=hp), optional, intent(out) :: frac
          integer                              :: jul
 
-         jul = int(days+offset_reduced_jd)
-         if (present(frac)) then
-             frac = mod(days,0.5_hp)
-         endif
-         ! NOTE: AvD: I think the above is incorrect, since the introduction of the *modified* JD offset (2400000.5)
-         ! TODO: UNST-6300: To be reviewed: is this correct? (if so: remove temp routine mjd2jul_fix)
-         ! jul = nint(days+offset_reduced_jd) ! juldate whole nr is at 12:00, so round it to get correct day (for times in the night/morning)
-         ! frac = days+offset_reduced_jd-jul
+         jul = nint(days+offset_modified_jd) ! juldate whole nr is at 12:00, so round it to get correct day (for times in the night/morning)
+         frac = days+offset_modified_jd-jul
       end function mjd2jul
-
+      
+!---------------------------------------------------------------------------------------------
+! private: convert Julian day to Modified Julian 
+!---------------------------------------------------------------------------------------------
       function jul2mjd(jul,frac) result(days)
          implicit none
          integer                , intent(in)  :: jul
          real(kind=hp), optional, intent(in)  :: frac
          real(kind=hp)                        :: days
 
-         days = real(jul,hp)-offset_reduced_jd
+         days = real(jul,hp)-offset_modified_jd
          if (present(frac)) then
              days = days + frac
          endif
@@ -928,33 +925,6 @@ module time_module
          second = mod(dayfrac*24*60*60,60.d0)
          success = 1
       end function mjd2datetime
-
-      !> Correct version of mjd2datetime, converting a modified Julian date into
-      !! separate integer date+time components.
-      !!
-      !! TODO: UNST-6300: move the fix below into the original routine and properly test it via testbenches + unit tests.
-      function mjd2datetime_fix(days,year,month,day,hour,minute,second) result(success)
-         implicit none
-         real(kind=hp), intent(in)  :: days
-         integer,  intent(out)      :: year, month, day
-         integer,  intent(out)      :: hour, minute
-         real(kind=hp), intent(out) :: second
-         real(kind=hp) :: dbjul, dayfrac
-         integer       :: jul
-         integer       :: success
-
-         success = 0
-         !jul = mjd2jul(days,dayfrac) ! <-- wrong
-         dbjul = days+offset_reduced_jd
-         jul = nint(dbjul) ! juldate whole nr is at 12:00, so round it to get correct day (for times in the night/morning)
-         dayfrac = dbjul-jul+.5d0
-
-         call JulianDateNumberToCalendarYearMonthDay(jul,year,month,day)
-         hour = int(dayfrac*24)
-         minute = int(mod(dayfrac*24*60,60.d0))
-         second = mod(dayfrac*24*60*60,60.d0)
-         success = 1
-      end function mjd2datetime_fix
 
       !> split a string in date, time and time zone part
       function split_date_time(string, date, time, tz) result(success)
@@ -1152,7 +1122,7 @@ module time_module
          TEMP1  = FLOAT ( IHOUR ) * 3600.0 + &
                   FLOAT ( IMIN  ) *   60.0 + &
                   FLOAT ( ISEC  ) - 43200.0
-         JULIAN = TEMP2 + ( TEMP1 / 86400.0 ) - offset_reduced_jd
+         JULIAN = TEMP2 + ( TEMP1 / 86400.0 ) - offset_modified_jd
       ELSE
          TEMP1  = INT (( IMONTH-14.0) / 12.0 )
          TEMP2  = IDAY - 32075.0 + &
@@ -1163,7 +1133,7 @@ module time_module
          TEMP1  = FLOAT ( IHOUR ) * 3600.0 + &
                   FLOAT ( IMIN  ) *   60.0 + &
                   FLOAT ( ISEC  ) - 43200.0
-         JULIAN = TEMP2 + ( TEMP1 / 86400.0 ) - offset_reduced_jd
+         JULIAN = TEMP2 + ( TEMP1 / 86400.0 ) - offset_modified_jd
       ENDIF
   999 RETURN
       END FUNCTION JULIAN
