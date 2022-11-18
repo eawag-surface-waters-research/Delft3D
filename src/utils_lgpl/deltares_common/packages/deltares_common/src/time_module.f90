@@ -43,6 +43,7 @@ module time_module
    public :: datetime2sec
    public :: sec2ddhhmmss
    public :: ymd2jul, ymd2modified_jul
+   public :: jul2mjd    ! obsolete, but in use in rtc
    public :: date2mjd   ! obsolete, use ymd2modified_jul
    public :: mjd2date
    public :: duration_to_string
