@@ -696,8 +696,12 @@
 
  800  continue
 ! There were errors!
+      write (   *   , 2600 ) inc_error
       write ( lunut , 2600 ) inc_error
+      write (   *   , 2610 ) trim(nf90_strerror(inc_error))
       write ( lunut , 2610 ) trim(nf90_strerror(inc_error))
+      write (   *   , 2542 )
+      write ( lunut , 2542 )
       call srstop (1)
 
  900  continue
@@ -711,6 +715,7 @@
  2540 format ( / ' ERROR, no mesh(es) found with required attribute "delwaq_role" or "cf_role"'
      &         / '        this version of Delwaq is not compatible with older non-ugrid waqgeom-files'  )
  2541 format ( / ' ERROR, reading dimensions from "delwaq_role"/"cf_type" in NetCDF file.' )
+ 2542 format ( / ' ERROR, this version of Delwaq is not compatible with older non-ugrid waqgeom-files'  )
  2550 format ( / ' Mesh used for Delwaq 2D/3D output: ', A )
  2551 format ( / ' Mesh used for Delwaq 1D output: ', A )
  2555 format ( / ' ERROR, Getting the mesh name failed' )
