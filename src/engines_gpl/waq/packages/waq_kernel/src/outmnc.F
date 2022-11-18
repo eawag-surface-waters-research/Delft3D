@@ -107,6 +107,7 @@
 
       save ncid, noseglmesh2d, nolay, nosegmesh1d, varid, meshid2d, meshid1d, networkid, network_geometryid
       save nosegmesh2d3d, aggr2d3d, aggr1d, wqidvolume_2d3d, wqidvolume_2d, wqidvolume_1d
+      save sumconc1, sumconc2
 
 
       integer(4) ithandl /0/
