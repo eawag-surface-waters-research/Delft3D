@@ -116,7 +116,7 @@ program maptonetcdf
     allocate( syname(nosys), conc(nosys,noseg) )
     allocate( volume(noseg), iknmrk(noseg) )
     allocate( syunit(nosys), sydesc(nosys), systd(nosys) )
-    allocate( wqid1(nosys,2), wqid2(nosys,2) )
+    allocate( wqid1(nosys,3), wqid2(nosys,3) )
     allocate( extreme(nosys,2) )
 
     read( 11 ) syname

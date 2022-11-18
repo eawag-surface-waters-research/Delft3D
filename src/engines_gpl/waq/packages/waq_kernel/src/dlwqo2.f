@@ -270,7 +270,7 @@
       if ( timon ) call timstrt ( "dlwqo2", ithandl )
 
       if (first) then
-         allocate(mncwqid1(notot,2) , mncwqid2(novar,2))
+         allocate(mncwqid1(notot,3) , mncwqid2(novar,3))
          allocate(hncwqid1(notot,2) , hncwqid2(novar,2))
 !        allow switching of NAN concentrations check
          call getcom ( '-nonancheck', 0, lfound, idummy, rdummy, adummy, ierr2)

@@ -248,7 +248,7 @@
 
          mesh_name = 'history'
          t0string = moname(4)
-         inc_error = dlwqnc_create_wqtime( ncidhis, mesh_name, t0string, timeid, bndtimeid, ntimeid )
+         inc_error = dlwqnc_create_wqtime( ncidhis, t0string, timeid, bndtimeid, ntimeid )
          if ( inc_error /= nf90_noerr ) then
              write( lunut , 2581)
              goto 800

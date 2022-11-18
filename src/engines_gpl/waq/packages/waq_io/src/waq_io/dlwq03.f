@@ -128,7 +128,8 @@
       character*255           ugridfile         !  name of the ugrid-file
       character*255           hydfile           !  name of the hyd-file
       integer :: ncid, ncidout
-      integer :: varid, varidout, meshid, meshidout, timeid, bndtimeid, ntimeid, wqid
+      integer :: varid, varidout, meshid, timeid, bndtimeid, ntimeid, wqid
+      integer :: meshid2d, type_ugrid, meshid1d, networkid, network_geometryid
       integer :: inc_error
 
       character(len=nf90_max_name) :: mesh_name
@@ -205,58 +206,28 @@
          end if
 
          if ( lncout ) then
-            ! Find the variable with the attribute "delwaq_role"
-            ! If that does not exist, try and find one with the attribute "cf_role"
-            ! that has the value "mesh_topology"
-            inc_error = dlwqnc_find_var_with_att( ncid, "delwaq_role", varid )
-            if ( inc_error == nf90_noerr ) then
-               ! Determine the mesh variable from that
-               mesh_name = ' '
-               inc_error = nf90_get_att( ncid, varid, "mesh", mesh_name )
-               if ( inc_error /= nf90_noerr ) then
-                  write ( lunut , 2555 )
-                  write ( lunut , 2599 ) trim(nf90_strerror(inc_error))
-                  lncout    = .false.
-                  lchar(46) = ' '
-                  iwar = iwar + 1
-    !              ierr = ierr + 1
-               endif
-            else
-               inc_error = dlwqnc_find_var_with_att( ncid, "cf_role", varid, "mesh_topology" )
-
-               if ( inc_error /= nf90_noerr ) then
-                  write ( lunut , 2540 )
-                  write ( lunut , 2599 ) trim(nf90_strerror(inc_error))
-                  lncout    = .false.
-                  lchar(46) = ' '
-                  iwar = iwar + 1
-    !              ierr      = ierr + 1
-               else
-                  ! Get the name of this variable
-                  inc_error = nf90_inquire_variable( ncid, varid, name = mesh_name )
-                  if ( inc_error /= nf90_noerr ) then
-                     write ( lunut , 2540 )
-                     write ( lunut , 2599 ) trim(nf90_strerror(inc_error))
-                     lncout    = .false.
-                     lchar(46) = ' '
-                     iwar = iwar + 1
-    !                 ierr      = ierr + 1
-                  endif
-               endif
+            ! Find all grids
+            inc_error = dlwqnc_find_meshes_by_att( ncid, meshid2d, type_ugrid, meshid1d, networkid, network_geometryid )
+            if ( inc_error /= nf90_noerr ) then
+               write ( lunut , 2540 )
+               lncout    = .false.
+               lchar(46) = ' '
+               ierr = ierr + 1
             endif
 
             if ( lncout ) then
-               write ( lunut , 2550 ) trim(mesh_name)
-
-               ! Get the meshid
-               inc_error = nf90_inq_varid( ncid, mesh_name, meshid )
-               if ( inc_error /= nf90_noerr ) then
-                  write ( lunut , 2556 ) trim(mesh_name)
-                  write ( lunut , 2599 ) trim(nf90_strerror(inc_error))
-!                 ierr      = ierr + 1
-                  lncout    = .false.
-                  lchar(46) = ' '
-                  iwar = iwar + 1
+               if (meshid2d > 0 ) then
+                  if ( type_ugrid == type_ugrid_face_crds ) then
+                     inc_error = nf90_get_att( ncid, meshid2d, "mesh", mesh_name )
+                  else if ( type_ugrid == type_ugrid_node_crds ) then
+                     inc_error  = nf90_inquire_variable( ncid, meshid2d, mesh_name )
+                  endif
+                  write ( lunut , 2550 ) trim(mesh_name)
+               endif
+   
+               if (meshid1d > 0 ) then
+                  inc_error = nf90_inquire_variable( ncid, meshid1d, mesh_name )
+                  write ( lunut , 2551 ) trim(mesh_name)
                endif
             endif
             ! Everything seems to be fine for now, switch on netcdf output
@@ -678,14 +649,14 @@
  2450 format ( / ' Found HYD_FILE keyword' )
  2460 format ( / ' Retrieving file names and grid parameters from: ', A )
  2500 format ( / ' Found UGRID keyword' )
- 2510 format ( / ' File containing the grid: ', A )
+ 2510 format ( / ' File containing the mesh(es): ', A )
  2511 format ( / ' Warning: the file does not exist - turning NetCDF output off')
  2520 format ( / ' NetCDF version: ', A )
  2530 format ( / ' ERROR, opening NetCDF file. Filename: ',A )
- 2540 format ( / ' WARNING, no variable found with required attribute "delwaq_role" or "cf_role"'
-     &         / '          this version of Delwaq is not compatible with older non-ugrid waqgeom-files'  )
- 2550 format ( / ' Mesh used for Delwaq output: ', A )
- 2555 format ( / ' ERROR, Getting the mesh name failed' )
+ 2540 format ( / ' ERROR, no mesh(es) found with required attribute "delwaq_role" or "cf_role"'
+     &         / '        this version of Delwaq is not compatible with older non-ugrid waqgeom-files'  )
+ 2550 format ( / ' Mesh used for Delwaq 2D/3D output: ', A )
+ 2551 format ( / ' Mesh used for Delwaq 1D output: ', A )
  2556 format ( / ' Getting the mesh ID failed - variable: ', A )
 
  2590 format ( / ' ERROR, closing NetCDF file. Filename: ',A )
