@@ -475,8 +475,12 @@ subroutine unc_write_sedtrails_filepointer(imapfile,tim)
    ierr = nf90_put_var(imapfile, id_timestep(iid), is_dtint, (/ itim /))
    
    ! analysis:
-   call realloc(work,(/ numk, lsedtot/), keepexisting=.false., fill=0d0)
-   
+   if (stm_included) then 
+      call realloc(work,(/ numk, lsedtot/), keepexisting=.false., fill=0d0)
+   else
+      call realloc(work,(/ numk, 1/), keepexisting=.false., fill=0d0)
+   endif 
+
    ! bottom level
    do k=1, numk
       nodes = pack([(ii,ii=1,size(st_ind(:,k)))], st_ind(:,k) > 0)

@@ -92,12 +92,17 @@ module m_sedtrails_stats
    subroutine alloc_sedtrails_stats()
       use m_alloc
       use m_fm_erosed, only: lsedtot
+      use m_sediment, only: stm_included
       use m_flowgeom, only: ndx
       
       implicit none
       
       if (is_numndvals > 0) then
-         call realloc(is_sumvalsnd, (/ is_numndvals, ndx, lsedtot /), keepExisting = .false., fill = 0d0)
+         if (stm_includeds) then 
+            call realloc(is_sumvalsnd, (/ is_numndvals, ndx, lsedtot /), keepExisting = .false., fill = 0d0)
+         else
+            call realloc(is_sumvalsnd, (/ is_numndvals, ndx, 1 /), keepExisting = .false., fill = 0d0)
+         end if
       end if
    
    end subroutine alloc_sedtrails_stats
@@ -105,32 +110,38 @@ module m_sedtrails_stats
    !> Update the (time-)integral statistics for all flow nodes, typically after each time step.
    subroutine update_sedtrails_stats()
       use m_flowtimes, only: dts
-      use m_flow, only: hs, ucx, ucy, taus
-      use m_flowgeom, only: ndx, bl
+      use m_flow, only: hs, ucx, ucy, taus, kmx, ucxq, ucyq, hs, vol1
+      use m_flowgeom, only: ndx, bl, ba
       use m_fm_erosed
       use m_transport, only: constituents, ISED1
       use m_sediment, only: sedtot2sedsus, stm_included, sedtra
-      use m_flowparameters, only: jawave
+      use m_flowparameters, only: jawave, flowWithoutWaves, jawaveswartdelwaq,epshs
 
       implicit none
 
-      integer :: k, l
+      integer          :: k, l
+      integer          :: kk, kbot, ktop
+      double precision :: ssc
 
       if (is_numndvals <= 0) then
          return
       end if
       
-      if (jawave<3) then      ! do not overwrite current+wave induced bed shear stresses from tauwave
-         call gettaus(1, 1)   ! tausmax known from taubxu_nowave. This needs updating after JRE TRUNKMERGE
+      if (jawave==0 .or. flowWithoutWaves) then      ! do not overwrite current+wave induced bed shear stresses from tauwave
+         call gettaus(1, 1)                           
+      else
+         call gettauswave(jawaveSwartdelwaq)
       endif
    
       do k=1,ndx
          is_sumvalsnd(IDX_BL  , k, 1) = is_sumvalsnd(IDX_BL      ,k, 1) + dts * bl(k)
          is_sumvalsnd(IDX_HS  , k, 1) = is_sumvalsnd(IDX_HS      ,k, 1) + dts * hs(k)
+         is_sumvalsnd(IDX_TAUS, k, 1) = is_sumvalsnd(IDX_TAUS    ,k, 1) + dts * taus(k)
+         
          is_sumvalsnd(IDX_UCX , k, 1) = is_sumvalsnd(IDX_UCX     ,k, 1) + dts * ucx(k)     ! assumes depth-averaged value in base node index
          is_sumvalsnd(IDX_UCY , k, 1) = is_sumvalsnd(IDX_UCY     ,k, 1) + dts * ucy(k)
-         is_sumvalsnd(IDX_TAUS, k, 1) = is_sumvalsnd(IDX_TAUS    ,k, 1) + dts * taus(k)
       enddo
+
       
       if (stm_included) then
          do k=1,ndx
@@ -146,11 +157,25 @@ module m_sedtrails_stats
             enddo
          end do 
          
-         do l=1, lsed
-            do k=1,ndx
-               is_sumvalsnd(IDX_SSC , k, sedtot2sedsus(l)) = is_sumvalsnd(IDX_SSC  ,k, sedtot2sedsus(l)) + dts * constituents(ISED1+l-1,k)   ! this works just for 2D now
+         if (kmx==0) then
+            do l=1, lsed
+               do k=1,ndx
+                  is_sumvalsnd(IDX_SSC , k, sedtot2sedsus(l)) = is_sumvalsnd(IDX_SSC  ,k, sedtot2sedsus(l)) + dts * constituents(ISED1+l-1,k)   ! this works just for 2D now
+               enddo   
             enddo   
-         enddo   
+         else
+            do l=1, lsed
+               do k=1,ndx
+                  if (hs(k)<=epshu) cycle
+                  call getkbotktop(k,kbot,ktop)
+                  ssc=0d0
+                  do kk=kbot,ktop
+                     ssc=ssc+constituents(ISED1+l-1,kk)*vol1(kk)
+                  enddo
+                  is_sumvalsnd(IDX_SSC , k, sedtot2sedsus(l)) = is_sumvalsnd(IDX_SSC  ,k, sedtot2sedsus(l)) + dts * ssc / ba(k) / hs(k) 
+               enddo   
+            enddo              
+         endif
       endif
       
       is_dtint = is_dtint + dts
