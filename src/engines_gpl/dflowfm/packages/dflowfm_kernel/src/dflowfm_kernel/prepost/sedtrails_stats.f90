@@ -98,7 +98,7 @@ module m_sedtrails_stats
       implicit none
       
       if (is_numndvals > 0) then
-         if (stm_includeds) then 
+         if (stm_included) then 
             call realloc(is_sumvalsnd, (/ is_numndvals, ndx, lsedtot /), keepExisting = .false., fill = 0d0)
          else
             call realloc(is_sumvalsnd, (/ is_numndvals, ndx, 1 /), keepExisting = .false., fill = 0d0)
@@ -115,7 +115,7 @@ module m_sedtrails_stats
       use m_fm_erosed
       use m_transport, only: constituents, ISED1
       use m_sediment, only: sedtot2sedsus, stm_included, sedtra
-      use m_flowparameters, only: jawave, flowWithoutWaves, jawaveswartdelwaq,epshs
+      use m_flowparameters, only: jawave, flowWithoutWaves, jawaveswartdelwaq,epshu
 
       implicit none
 
