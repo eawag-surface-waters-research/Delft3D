@@ -242,6 +242,8 @@ integer function dlwqnc_find_meshes_by_att( ncid, varid2d, type_ugrid, varid1d, 
                   return
                endif
             endif
+         else
+            if (dlwqnc_debug) write(*,*) 'Error: topology_dimension has a value that is not supported (not equal to 1 or 2).'
          endif
       endif
    enddo
@@ -1093,7 +1095,7 @@ integer function dlwqnc_create_wqtime( ncidout, t0string, timeid, bndtimeid, nti
 
     timeid = 0
 
-    name = 'n_dlwq_time'
+    name = 'nTimesDlwq'
     dimvalue = nf90_unlimited
 
     ierror = nf90_redef( ncidout )
@@ -1123,7 +1125,7 @@ integer function dlwqnc_create_wqtime( ncidout, t0string, timeid, bndtimeid, nti
         return
     endif
 
-    name = 'n_dlwq_time_bnd'
+    name = 'nTimesDlwqBnd'
     ierror = nf90_def_var( ncidout, name, nf90_int, (/ twoid, ntimeid /), bndtimeid )
     if ( ierror /= 0 ) then
         dlwqnc_create_wqtime = ierror
@@ -1483,7 +1485,7 @@ integer function dlwqnc_create_layer_dim( ncidout, mesh_name, nolay, thickness, 
         return
     endif
 
-    write( name, '(3a)' ) 'n', mesh_name(1:k), '_layer_dlwq'
+    write( name, '(2a)' ) mesh_name(1:k), '_nLayersDlwq'
     ierror = nf90_def_dim( ncidout, name, nolay, nolayid )
     if ( ierror /= 0 ) then
         if (dlwqnc_debug) write(*,*) 'Note: Creating layer dimension failed (def_dim): ', ierror

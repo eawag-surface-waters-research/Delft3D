@@ -222,11 +222,23 @@
                   else if ( type_ugrid == type_ugrid_node_crds ) then
                      inc_error  = nf90_inquire_variable( ncid, meshid2d, mesh_name )
                   endif
+                  if (inc_error /= nf90_noerr ) then
+                     write ( lunut , 2535 ) trim(ugridfile)
+                     write ( lunut , 2599 ) trim(nf90_strerror(inc_error))
+                     ierr = ierr + 1
+                     lncout    = .false.
+                  end if
                   write ( lunut , 2550 ) trim(mesh_name)
                endif
    
                if (meshid1d > 0 ) then
                   inc_error = nf90_inquire_variable( ncid, meshid1d, mesh_name )
+                  if (inc_error /= nf90_noerr ) then
+                     write ( lunut , 2535 ) trim(ugridfile)
+                     write ( lunut , 2599 ) trim(nf90_strerror(inc_error))
+                     ierr = ierr + 1
+                     lncout    = .false.
+                  end if
                   write ( lunut , 2551 ) trim(mesh_name)
                endif
             endif
@@ -653,6 +665,7 @@
  2511 format ( / ' Warning: the file does not exist - turning NetCDF output off')
  2520 format ( / ' NetCDF version: ', A )
  2530 format ( / ' ERROR, opening NetCDF file. Filename: ',A )
+ 2535 format ( / ' ERROR, unable to retrieve mesh name from file:',A )
  2540 format ( / ' ERROR, no mesh(es) found with required attribute "delwaq_role" or "cf_role"'
      &         / '        this version of Delwaq is not compatible with older non-ugrid waqgeom-files'  )
  2550 format ( / ' Mesh used for Delwaq 2D/3D output: ', A )

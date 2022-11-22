@@ -153,19 +153,24 @@
              goto 800
          endif
 
-         ! Find all grids
+         ! We don't assume variable names, but we try to find all meshes by their attributes using dlwqnc_find_meshes_by_att
          inc_error = dlwqnc_find_meshes_by_att( ncid, meshid2d, type_ugrid, meshid1d, networkid, network_geometryid )
          if ( inc_error /= nf90_noerr ) then
             write ( lunut , 2540 )
             goto 800
          endif
 
+         ! Find the 1D mesh name and number of 1D segments when available
          mesh_name1d = ' '
          nosegmesh1d = 0
          if (meshid1d > 0 ) then
-            ! get number of segments from node_dimension = "mesh1d_nNodes" (1D)
+            ! Find the 1D mesh name
             inc_error = nf90_inquire_variable( ncid, meshid1d, mesh_name1d )
-            ! Use the number of nodes
+            if (inc_error /= nf90_noerr ) then
+               write ( lunut , 2535 ) trim(mncnam)
+                goto 800
+            end if
+            ! get number of segments from dimension mentiond in the attribute node_dimension (e.g. "mesh1d_nNodes")
             inc_error = nf90_get_att( ncid, meshid1d, 'node_dimension', dimname )
             if ( inc_error /= nf90_noerr ) then
                 write ( lunut , 2593 )
@@ -179,12 +184,18 @@
             nosegmesh1d = dimsizes(nosegid1d)
          endif
 
+         ! Find the network name
          network_name = ' '
          if (networkid > 0 ) then
-            ! get number of segments from node_dimension = "mesh1d_nNodes" (1D)
+            ! Find the network name
             inc_error = nf90_inquire_variable( ncid, networkid, network_name )
+            if (inc_error /= nf90_noerr ) then
+               write ( lunut , 2535 ) trim(mncnam)
+                goto 800
+            end if
          endif
 
+         ! Find the 2D mesh name, number of 2D segments and number of layers in the 2D part of the grid when available
          mesh_name2d = ' '
          noseglmesh2d = 0
          nosegmesh2d3d = 0
@@ -208,7 +219,7 @@
             allocate (aggr2d3d(noseglmesh2d, nolay))
             inc_error = nf90_get_var( ncid, meshid2d, aggr2d3d )
 
-            ! Determine the mesh variable from that
+            ! Determine the 2D mesh variable from that
             mesh_name2d = ' '
             inc_error = nf90_get_att( ncid, meshid2d, "mesh", mesh_name2d )
             if ( inc_error /= nf90_noerr ) then
@@ -218,7 +229,11 @@
          else if ( type_ugrid == type_ugrid_node_crds ) then
             ! get number of segments from face_dimension = "mesh2d_nFaces" (2D)
             inc_error  = nf90_inquire_variable( ncid, meshid2d, mesh_name2d )
-            ! Use the number of faces
+            if (inc_error /= nf90_noerr ) then
+               write ( lunut , 2535 ) trim(mncnam)
+                goto 800
+            end if
+            ! Get the number of faces by the dimension mentioned in the variable name 'face_dimension')
             inc_error = nf90_get_att( ncid, meshid2d, 'face_dimension', dimname )
             if ( inc_error /= nf90_noerr ) then
                 write ( lunut , 2594 )
@@ -713,6 +728,7 @@
  2520 format ( / ' NetCDF version: ', A )
  2530 format ( / ' ERROR, opening NetCDF file. Filename: ',A )
  2531 format ( / ' ERROR, reading dimensions from NetCDF file.' )
+ 2535 format ( / ' ERROR, unable to retrieve mesh name from file:',A )
  2540 format ( / ' ERROR, no mesh(es) found with required attribute "delwaq_role" or "cf_role"'
      &         / '        this version of Delwaq is not compatible with older non-ugrid waqgeom-files'  )
  2541 format ( / ' ERROR, reading dimensions from "delwaq_role"/"cf_type" in NetCDF file.' )
