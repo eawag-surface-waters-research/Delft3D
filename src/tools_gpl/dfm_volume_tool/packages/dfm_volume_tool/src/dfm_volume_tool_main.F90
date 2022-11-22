@@ -75,6 +75,7 @@ integer              :: numpoints, numlinks, lnx, numbnd
 integer, pointer     :: count
 logical              :: computeTotal
 logical              :: computeOnBranches
+logical              :: computeOnGridpoints
 
 
 real(c_double), pointer, dimension(:,:) :: volume
@@ -124,7 +125,7 @@ call cli%init(progname    = dfm_volume_tool_basename,                           
 !! setting Command Line Arguments
 call cli%add(switch='--mdufile',  switch_ab='-f', help='Name of the input mdu file.',required=.true.,act='store',def=char(0),valname='FILE')
 call cli%add(switch='--increment',switch_ab='-i', help='required interval for the volume tables',required=.true.,act='store',def='',valname='INCREMENT')
-call cli%add(switch='--output',switch_ab='-o', help='output type: "Total", "Branches", "All"',required=.false.,act='store',def='',valname='OUTPUT_TYPE')
+call cli%add(switch='--output',switch_ab='-o', help='output type: "Total", "Branches", "Gridpoints", "All"',required=.false.,act='store',def='',valname='OUTPUT_TYPE')
 call cli%add(switch='--outputfile',switch_ab='-p', help='name of the output file',required=.false.,act='store',def='',valname='OUTPUT_FILE')
 
 ! parsing Command Line Interface
@@ -212,13 +213,16 @@ if (ierr==0) then
    if (strcmpi(output_type, 'Total')) then
       computeTotal = .true.
       numids = 1
-   else if (strcmpi(output_type, 'OnBranches')) then
+   else if (strcmpi(output_type, 'Branches')) then
       computeOnBranches = .true.
       numids = numbranches
+   else if (strcmpi(output_type, 'Gridpoints')) then
+      computeOnGridpoints = .true.
    else if (strcmpi(output_type, 'All')) then
       computeTotal = .true.
       computeOnBranches = .true.
-      numids = numbranches + 1 
+      computeOnGridpoints = .true.
+      numids = numbranches + 1
    endif
       
    allocate(surface(numlevels,numids),volume(numlevels,numids), storage(numlevels,numids), deadstorage(numlevels,numids))
@@ -260,7 +264,11 @@ if (ierr==0) then
       enddo
    endif
    
-   ! Write the output to the netcdf file
+   if (computeOnGridpoints) then
+      ! Write the output to the netcdf file
+      call write_volume_table_geom(dfm, "PerGridpoint"//output_file)
+   endif
+   
    ioutput = nc_create(output_file)
    call nc_write(ioutput, ids, levels, volume, surface, storage, deadstorage, numlevels, numids)
                   

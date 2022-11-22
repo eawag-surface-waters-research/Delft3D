@@ -48,14 +48,17 @@
 
 #if defined(WIN32)
 #  define DFM_GENERATE_VOLUME_TABLES  DFM_GENERATE_VOLUME_TABLES
+#  define WRITE_VOLUME_TABLE_GEOM WRITE_VOLUME_TABLE_GEOM
 #  define GET_VARIABLE_POINTER GET_VARIABLE_POINTER
 #  define STDCALL
 #elif defined(linux)
 #  include "config.h"
 #  define DFM_GENERATE_VOLUME_TABLES FC_FUNC(dfm_generate_volume_tables,DFM_GENERATE_VOLUME_TABLES)
+#  define WRITE_VOLUME_TABLE_GEOM FC_FUNC(write_volume_table_geom,WRITE_VOLUME_TABLE_GEOM)
 #  define GET_VARIABLE_POINTER FC_FUNC(get_variable_pointer,GET_VARIABLE_POINTER)
 #  define STDCALL
 #endif
+
 /*
 *
 * Connection routine between F90 (main) -> C (interface) -> F90 (DLL).
@@ -93,6 +96,20 @@ long STDCALL DFM_GENERATE_VOLUME_TABLES(int64_t* sharedDLLHandle, double* increm
 		(void*)(*proc)(*increment);
         return 0;
 	} 
+	return -1;
+}
+
+long STDCALL WRITE_VOLUME_TABLE_GEOM(int64_t* sharedDLLHandle, char* var_name)
+{
+	typedef void* (STDCALL* MyProc)(char*);
+	MyProc proc = (MyProc)GetDllProcedure(sharedDLLHandle, "write_volume_table_geom");
+
+
+	if (proc != NULL)
+	{
+		(void*)(*proc)(var_name);
+		return 0;
+	}
 	return -1;
 }
 

@@ -62,6 +62,21 @@ subroutine  dfm_generate_volume_tables(increment) bind(C, name="dfm_generate_vol
    
 end subroutine dfm_generate_volume_tables
 
+subroutine write_volume_table_geom(name_var) bind(C, name="write_volume_table_geom")
+   !DEC$ ATTRIBUTES DLLEXPORT :: write_volume_table_geom
+
+   use unstruc_netcdf, only: unc_write_1D_flowgeom_volumetables_ugrid
+   use messageHandling, only: Idlen
+   use iso_c_utils
+   
+   character(kind=c_char), intent(in) :: name_var(*)
+   character(len=Idlen)               :: filename
+   
+      filename = char_array_to_string(name_var)
+   call unc_write_1D_flowgeom_volumetables_ugrid(filename)
+
+end subroutine write_volume_table_geom
+
 !!> generate the volume table with the given increment
 subroutine  dfm_get_variable_pointer(name_var, x) bind(C, name="dfm_get_variable_pointer")
    !DEC$ ATTRIBUTES DLLEXPORT :: dfm_get_variable_pointer
