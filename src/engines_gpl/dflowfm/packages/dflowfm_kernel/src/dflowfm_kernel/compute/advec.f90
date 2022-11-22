@@ -349,11 +349,9 @@
  !$OMP PARALLEL DO                                                                   &
  !$OMP PRIVATE(L, advel,k1,k2,iadvL,qu1,qu2,volu,ai,ae,iad,volui,abh,hh,v12t,ku,kd,isg,n12, ucxku, ucyku, ucin, fdx, vol_k1, vol_k2)
 
- do L  = 1,lnx
-
-  advel = 0                                          !  advi (1/s), adve (m/s2)
-
-  if ( hu(L) > 0 ) then
+ do i = 1, wetLinkCount
+    L = onlyWetLinks(i)
+    advel = 0                                          !  advi (1/s), adve (m/s2)
 
     k1    = ln(1,L) ; k2 = ln(2,L)
     iadvL = iadv(L)
@@ -732,8 +730,6 @@
     endif
 
     adve(L) = adve(L) + advel
-
-  endif
 
  enddo
 

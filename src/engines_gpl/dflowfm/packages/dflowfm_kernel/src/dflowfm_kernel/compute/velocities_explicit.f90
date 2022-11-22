@@ -35,7 +35,7 @@
  use m_flow
  use m_flowtimes
  implicit none
- integer :: n, L, LL, k1, k2
+ integer :: n, L, LL, k1, k2, i
 
  if (itstep == 1) then
     u1 = (u0 - dts*adve)/(1d0 + dts*advi)
@@ -48,7 +48,8 @@
 
  squ = 0d0 ; sqi = 0d0
  if ( kmx.eq.0 ) then
-    do L = 1,lnx
+   do i = 1, wetLinkCount
+      L = onlyWetLinks(i)
       if (q1(L) > 0) then
           k1 = ln(1,L) ; k2 = ln(2,L)
           squ(k1) = squ(k1) + q1(L)

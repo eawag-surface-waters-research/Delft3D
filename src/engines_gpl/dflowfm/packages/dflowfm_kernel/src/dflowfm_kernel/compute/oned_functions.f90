@@ -1092,17 +1092,16 @@ module m_oned_functions
    !! Preparation for map output.
    subroutine updateS1Gradient()
    use m_flow, only: s1Gradient, s1, hu, epshu
-   use m_flowgeom, only: lnx1d, ln, dx
+   use m_flowgeom, only: lnx1d, ln, dx, wetLink2D, onlyWetLinks
    implicit none
-   integer :: k1, k2, L
+   integer :: k1, k2, L, i
    
    s1Gradient = dmiss
-   do L=1,lnx1d
-      if (hu(L) > epshu) then
-         k1 = ln(1,L)
-         k2 = ln(2,L)
-         s1Gradient(L) = (s1(k1) - s1(k2)) / dx(L)
-      end if
+   do i = 1, wetLink2D-1
+      L = onlyWetLinks(i)
+      k1 = ln(1,L)
+      k2 = ln(2,L)
+      s1Gradient(L) = (s1(k1) - s1(k2)) / dx(L)
    end do
    
    end subroutine updateS1Gradient

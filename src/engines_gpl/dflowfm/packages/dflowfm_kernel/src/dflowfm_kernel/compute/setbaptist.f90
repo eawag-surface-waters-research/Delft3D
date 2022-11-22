@@ -34,15 +34,16 @@
  use m_flow
  use m_flowgeom
  implicit none
- integer          :: L, k1, k2
+ integer          :: L, k1, k2, i
  double precision :: ap, Cz, Czb, Czr, rnL, diaL, stemhL, gamhg,Cda, areastem, umag,fac, facL, Cdaleaf
 
- do L = 1,lnx
+ do i = 1, wetLinkCount
+    L = onlyWetLinks(i)
     k1  = ln(1,L) ; k2 = ln(2,L)
 
     rnL = 0.5d0*( rnveg(k1) + rnveg(k2) )
 
-    if (hu(L) > 0 .and. rnL > densvegminbap) then              ! overwrite cfuhi on veg locations with 2D Baptist
+    if (rnL > densvegminbap) then              ! overwrite cfuhi on veg locations with 2D Baptist
         if (jaBaptist <= 2) then                               ! compute Baptist on board
            call getcz(hu(L), frcu(L), ifrcutp(L), Czb, L)      ! standard Chezy coeff
            if (diaveg(k1) > 0 .and. diaveg(k2) > 0) then

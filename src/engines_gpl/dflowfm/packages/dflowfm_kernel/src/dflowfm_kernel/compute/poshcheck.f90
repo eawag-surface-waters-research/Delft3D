@@ -88,6 +88,8 @@
                  do LL  = 1, nd(n)%lnx
                     L   = iabs(nd(n)%ln(LL))
                     hu(L) = 0d0
+                    fu(L) = 0d0
+                    ru(L) = 0d0
                     jaHuChanged = 1
                  enddo
 
@@ -99,6 +101,8 @@
                        au(L) = 0.2d0*au(L)
                        if (au(L) < eps6) then
                           hu(L) = 0d0 ;  key = 2                 ! flag redo setkfs
+                          fu(L) = 0d0
+                          ru(L) = 0d0
                           jaHuChanged = 1
                        endif
                     endif
@@ -111,6 +115,8 @@
                     if (LLL < 0 .and. u1(L) > 0 .or. &
                         LLL > 0 .and. u1(L) < 0 ) then
                         hu(L) = 0d0   ; key = 2                  !  flag redo setkfs
+                        fu(L) = 0d0
+                        ru(L) = 0d0
                         jaHuChanged = 1
                     endif
                  enddo

@@ -44,7 +44,7 @@
    double precision :: gammal, hwavL, hstokes, huL, deltahmin
    double precision, allocatable :: mx(:), my(:)
 
-   integer :: k1, k2, L, k
+   integer :: k1, k2, L, k, i
    integer :: ierror ! error (1) or not (0)
 
    double precision :: ac1, ac2
@@ -79,33 +79,31 @@
       call update_ghosts(ITYPE_SALL, 1, ndx, my, ierror)
    endif
 
-   do L=1,Lnxi
-      if ( hu(L).gt.epshu ) then
-         huL=hu(L)
-         k1 = ln(1,L); k2 = ln(2,L)
-         ac1 = acl(L); ac2=1d0-ac1
-         !
-         ! civilized behaviour in shallow surf zone
-         hwavL = 0.5d0*(hwav(k1)+hwav(k2))
-         gammal = hwavL/huL
-         if (gammal>1.d0) then
-            hstokes = deltahmin*(gammal-1.d0)*hwavL+huL
-         else
-            hstokes = huL
-         endif
-         !
-         Mu =    ac1 *(csu(L)*(Mx(k1)) + snu(L)*(My(k1))) + &
-                 ac2 *(csu(L)*(Mx(k2)) + snu(L)*(My(k2)))
-
-         Mv =    ac1 *(-snu(L)*(Mx(k1)) + csu(L)*(My(k1))) + &
-                 ac2 *(-snu(L)*(Mx(k2)) + csu(L)*(My(k2)))
-
-         ustokes(L) = Mu/hstokes
-         vstokes(L) = Mv/hstokes
+   ustokes = 0d0
+   vstokes = 0d0
+   do i = 1, wetLinkBnd-1
+      L = onlyWetLinks(i)
+      huL=hu(L)
+      k1 = ln(1,L); k2 = ln(2,L)
+      ac1 = acl(L); ac2=1d0-ac1
+      !
+      ! civilized behaviour in shallow surf zone
+      hwavL = 0.5d0*(hwav(k1)+hwav(k2))
+      gammal = hwavL/huL
+      if (gammal>1.d0) then
+         hstokes = deltahmin*(gammal-1.d0)*hwavL+huL
       else
-         ustokes(L) = 0d0
-         vstokes(L) = 0d0
-      end if
+         hstokes = huL
+      endif
+      !
+      Mu =    ac1 *(csu(L)*(Mx(k1)) + snu(L)*(My(k1))) + &
+               ac2 *(csu(L)*(Mx(k2)) + snu(L)*(My(k2)))
+
+      Mv =    ac1 *(-snu(L)*(Mx(k1)) + csu(L)*(My(k1))) + &
+               ac2 *(-snu(L)*(Mx(k2)) + csu(L)*(My(k2)))
+
+      ustokes(L) = Mu/hstokes
+      vstokes(L) = Mv/hstokes
    end do
 
    do L=lnxi+1,lnx                   ! Randen: Neumann
