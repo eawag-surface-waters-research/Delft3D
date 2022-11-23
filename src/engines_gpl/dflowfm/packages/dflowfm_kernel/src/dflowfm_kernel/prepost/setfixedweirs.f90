@@ -470,36 +470,37 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
 
  if (jakol45 == 2 .and. sillheightmin > 0d0) then  ! when a minimum threshold is specified    
                                                    ! and toe heights are known, and agreed upon 
-   do i = 1, wetLinkBnd-1
-      L = onlyWetLinks(i)
-
-      do ii = 1,2                             ! loop over adjacent cells
-         k = 0
-         if (ii == 1 .and. dzsillu(L) < sillheightmin .and. dzsilld(L) > sillheightmin .or. & 
-            ii == 2 .and. dzsilld(L) < sillheightmin .and. dzsillu(L) > sillheightmin ) then
-            k = ln(ii,L) 
-         endif
-         if (k > 0) then                                          ! flatland on node k 
-            nx      = nd(k)%lnx 
-            do LL   = 1, nx                                      ! loop over all attached links
-               LLL  = nd(k)%ln(LL) ; LLLa = iabs(LLL)
-               if (LLLa == L) then                                
-                     LLLa = LL-1 ; if (LLLa == 0) LLLa = nx        ! left of weir link
-                     LLLa = iabs(nd(k)%ln(LLLa))
-                     if (ihu(LLLa) == 0) then                      ! if not already marked as weir 
-                        bob(1,LLLa) = max( zcrest(L),bob(1,LLLa) ) ! raise both bobs 
-                        bob(2,LLLa) = max( zcrest(L),bob(2,LLLa) ) ! raise both bobs
+    do L = 1,lnxi
+       if (ihu(L) > 0) then                        ! when flagged as weir
+ 
+           do ii = 1,2                             ! loop over adjacent cells
+              k = 0
+              if (ii == 1 .and. dzsillu(L) < sillheightmin .and. dzsilld(L) > sillheightmin .or. & 
+                  ii == 2 .and. dzsilld(L) < sillheightmin .and. dzsillu(L) > sillheightmin ) then
+                  k = ln(ii,L) 
+              endif
+              if (k > 0) then                                          ! flatland on node k 
+                  nx      = nd(k)%lnx 
+                  do LL   = 1, nx                                      ! loop over all attached links
+                     LLL  = nd(k)%ln(LL) ; LLLa = iabs(LLL)
+                     if (LLLa == L) then                                
+                         LLLa = LL-1 ; if (LLLa == 0) LLLa = nx        ! left of weir link
+                         LLLa = iabs(nd(k)%ln(LLLa))
+                         if (ihu(LLLa) == 0) then                      ! if not already marked as weir 
+                            bob(1,LLLa) = max( zcrest(L),bob(1,LLLa) ) ! raise both bobs 
+                            bob(2,LLLa) = max( zcrest(L),bob(2,LLLa) ) ! raise both bobs
+                         endif
+                         LLLa = LL+1 ; if (LLLa > nx) LLLa = 1         ! right of weir link
+                         LLLa = iabs(nd(k)%ln(LLLa))
+                         if (ihu(LLLa) == 0) then                      ! if not already marked as weir 
+                            bob(1,LLLa) = max( zcrest(L),bob(1,LLLa) ) ! raise both bobs 
+                            bob(2,LLLa) = max( zcrest(L),bob(2,LLLa) ) ! raise both bobs o
+                         endif
                      endif
-                     LLLa = LL+1 ; if (LLLa > nx) LLLa = 1         ! right of weir link
-                     LLLa = iabs(nd(k)%ln(LLLa))
-                     if (ihu(LLLa) == 0) then                      ! if not already marked as weir 
-                        bob(1,LLLa) = max( zcrest(L),bob(1,LLLa) ) ! raise both bobs 
-                        bob(2,LLLa) = max( zcrest(L),bob(2,LLLa) ) ! raise both bobs o
-                     endif
+                  enddo
                endif
-            enddo
-         endif
-       enddo 
+          enddo 
+       endif
     enddo
 
     BL = 1d9 

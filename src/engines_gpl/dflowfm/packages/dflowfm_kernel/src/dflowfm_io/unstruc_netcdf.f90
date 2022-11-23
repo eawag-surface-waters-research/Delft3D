@@ -7104,8 +7104,7 @@ if (jamapsed > 0 .and. jased > 0 .and. stm_included) then
               call realloc(wavout2,lnkx,keepExisting=.false.,fill=0d0)
               wavout=0d0; wavout2=0d0
               if (kmx==0) then
-              do i = 1,  wetLinkCount
-                    L = onlyWetLinks(i)
+                 do L= 1, lnx
                     k1 = ln(1,L); k2=ln(2,L)
                     windx(k1)  = windx(k1) + wcx1(L)*wavfu(L)*hu(L)*rhomean
                     windx(k2)  = windx(k2) + wcx2(L)*wavfu(L)*hu(L)*rhomean

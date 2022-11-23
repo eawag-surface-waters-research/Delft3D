@@ -32,7 +32,7 @@
 
    subroutine setucxqucyq_mor (u1, ucxq, ucyq)
    use m_fm_erosed, only: ucxq_mor, ucyq_mor, hs_mor, link1, link1sign
-   use m_flowgeom, only: ndx, lnx, lnxi, ln, nd, wcx1, wcx2, wcy1, wcy2, csu, snu, bl, ndxi, lnx1D, kcs, onlywetLinks, wetLinkCount
+   use m_flowgeom, only: ndx, lnx, lnxi, ln, nd, wcx1, wcx2, wcy1, wcy2, csu, snu, bl, ndxi, lnx1D, kcs
    use m_flow, only: hs, hu, zws, kmx, kmxL, au, q1, ucx_mor, ucy_mor, lnkx, ndkx
    use m_flowparameters ,only: jacstbnd, epshs, eps10
    use m_sediment, only: stmpar
@@ -44,7 +44,7 @@
    double precision, dimension(lnkx), intent(in ) :: u1
    double precision, dimension(ndkx), intent(in ) :: ucxq
    double precision, dimension(ndkx), intent(in ) :: ucyq
-   integer          :: L, LL, k, k1, k2, Lt, Lb, kk, kb, kt, i
+   integer          :: L, LL, k, k1, k2, Lt, Lb, kk, kb, kt
    double precision :: wcxu, wcyu, cs, sn, uin, huL
    logical, pointer :: maximumwaterdepth
    double precision, dimension(:), allocatable :: area
@@ -151,9 +151,7 @@
       endif
       
       if (kmx==0) then
-         do i = 1, wetLinkCount
-            L = onlyWetLinks(i)
-
+         do L = 1,lnx
             if (u1(L) == 0d0) cycle
             k1 = ln(1,L) ; k2 = ln(2,L)
             wcxu = wcx1(L)*u1(L)

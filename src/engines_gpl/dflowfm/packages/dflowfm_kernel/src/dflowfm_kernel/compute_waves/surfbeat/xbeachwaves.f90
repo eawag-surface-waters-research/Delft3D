@@ -875,23 +875,24 @@ subroutine xbeach_wave_init()
    double precision, intent(in), dimension(ndx)   :: hh
    double precision, intent(out), dimension(ndx)  :: dhsdx, dhsdy
 
-   integer                                        :: L, k1, k2, k, kb, ki, ierr, i
+   integer                                        :: L, k1, k2, k, kb, ki, ierr
    double precision                               :: hs1, hs2
 
    ! Tegeltjesdiepte approach is eenvoudiger en onnauwkeuriger, maar werkt altijd, ook met morfologie
    dhsdx = 0d0
    dhsdy = 0d0
-   do i = 1, wetLinkCount
-      L = onlyWetLinks(i)
-      k1 = ln(1,L)
-      k2 = ln(2,L)
-      hs1 = hh(k1)
-      hs2 = hh(k2)
+   do L = 1,Lnx
+      if (hu(L) > epshu) then                            ! link flows
+         k1 = ln(1,L)
+         k2 = ln(2,L)
+         hs1 = hh(k1)
+         hs2 = hh(k2)
 
-      dhsdx(k1) = dhsdx(k1) + wcx1(L)*(hs2 - hs1) * dxi(L) ! dimension m/m
-      dhsdy(k1) = dhsdy(k1) + wcy1(L)*(hs2 - hs1) * dxi(L)
-      dhsdx(k2) = dhsdx(k2) + wcx2(L)*(hs2 - hs1) * dxi(L)
-      dhsdy(k2) = dhsdy(k2) + wcy2(L)*(hs2 - hs1) * dxi(L)
+         dhsdx(k1) = dhsdx(k1) + wcx1(L)*(hs2 - hs1) * dxi(L) ! dimension m/m
+         dhsdy(k1) = dhsdy(k1) + wcy1(L)*(hs2 - hs1) * dxi(L)
+         dhsdx(k2) = dhsdx(k2) + wcx2(L)*(hs2 - hs1) * dxi(L)
+         dhsdy(k2) = dhsdy(k2) + wcy2(L)*(hs2 - hs1) * dxi(L)
+      endif
    enddo
 
    do k  = 1,nbndu
@@ -6058,7 +6059,7 @@ subroutine xbeach_compute_stokesdrift()
    implicit none
    
    integer :: ierr
-   integer :: L, k, k1, k2, i
+   integer :: L, k, k1, k2
    double precision, allocatable  :: hh(:), uwf(:), vwf(:), ustr(:), urf(:), vrf(:), ustw(:)
    
    ierr=0
@@ -6102,10 +6103,7 @@ subroutine xbeach_compute_stokesdrift()
       endif
    end do
 
-   ustokes=0d0
-   vstokes=0d0
-   do i = 1, wetLinkCount
-      L = onlyWetLinks(i)
+   do L=1,lnx                                    ! facenormal decomposition
       if (hu(L)>m_xbeach_data_hminlw) then
          k1 = ln(1,L); k2 = ln(2,L)
          ustokes(L) = acL(L)*(csu(L)*(uwf(k1)+urf(k1))+snu(L)*(vwf(k1)+vrf(k1))) + &
@@ -6114,6 +6112,9 @@ subroutine xbeach_compute_stokesdrift()
      
          vstokes(L) = acL(L)*(-snu(L)*(uwf(k1)+urf(k1))+csu(L)*(vwf(k1)+vrf(k1))) + &
                 (1d0-acL(L))*(-snu(L)*(uwf(k2)+urf(k2))+csu(L)*(vwf(k2)+vrf(k2)))
+      else
+         ustokes(L)=0d0
+         vstokes(L)=0d0
       endif   
    enddo
    
