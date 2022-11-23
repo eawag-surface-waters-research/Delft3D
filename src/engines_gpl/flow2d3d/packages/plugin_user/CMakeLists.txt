@@ -32,11 +32,29 @@ add_library(${library_name} ${source_files})
 
 # Set dependencies
 set(oss_dependencies    data
-                        deltares_common) 
+                        delftio
+                        deltares_common
+                        deltares_common_mpi
+                        ec_module
+                        morphology_data 
+                        morphology_kernel) 
 oss_include_libraries(${library_name} oss_dependencies)
 
 if(UNIX)
-    target_link_libraries(${library_name} ${oss_dependencies})
+     # the `pkg_check_modules` function is created with this call
+    find_package(PkgConfig REQUIRED)
+
+    # these calls create special `PkgConfig::<MODULE>` variables
+    pkg_check_modules(NETCDF REQUIRED IMPORTED_TARGET netcdf)
+    pkg_check_modules(NETCDF_FTN REQUIRED IMPORTED_TARGET netcdf-fortran)
+
+    set(oss_dependencies ${oss_dependencies_general})
+
+   target_link_libraries(${library_name}
+         ${oss_dependencies}
+         PkgConfig::NETCDF
+         PkgConfig::NETCDF_FTN)
+    add_definitions(-DHAVE_CONFIG_H)    
 endif(UNIX)
 
 # Define how the files should be structured within Visual Studio

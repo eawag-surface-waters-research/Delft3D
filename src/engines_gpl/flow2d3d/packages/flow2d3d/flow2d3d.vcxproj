@@ -218,7 +218,6 @@ echo "This file is overwritten by the post-build command of the project flow2d3d
     <ClCompile Include="src\flow2d3d.cpp" />
     <ClCompile Include="src\flow2d3d_version.cpp" />
     <ClCompile Include="src\flowol.cpp" />
-    <ClCompile Include="src\readxmldd.cpp" />
     <ClCompile Include="src\dd\blob.cpp" />
     <ClCompile Include="src\dd\category.cpp" />
     <ClCompile Include="src\dd\dd.cpp" />

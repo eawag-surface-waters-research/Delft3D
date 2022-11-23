@@ -55,11 +55,18 @@ set_source_files_properties(${parallel_mpi_files}
 
 # Set dependencies
 set(oss_dependencies_general    delftio
-                        deltares_common
-                        deltares_common_mpi
-                        ec_module
-                        morphology_data 
-                        morphology_kernel)
+                                delftio_shm
+                                deltares_common
+                                deltares_common_c
+                                deltares_common_mpi
+                                ec_module
+                                gridgeom
+                                io_netcdf
+                                kdtree2
+                                kdtree_wrapper
+                                morphology_data 
+                                morphology_kernel
+                                morphology_plugins_c)
 # Add dependencies
 if (UNIX)
     # the `pkg_check_modules` function is created with this call
@@ -75,7 +82,7 @@ if (UNIX)
          ${oss_dependencies}
          PkgConfig::NETCDF
          PkgConfig::NETCDF_FTN)
-    
+    add_definitions(-DHAVE_CONFIG_H)        
 endif(UNIX)
 if (WIN32)
     set(oss_dependencies ${oss_dependencies_general}
