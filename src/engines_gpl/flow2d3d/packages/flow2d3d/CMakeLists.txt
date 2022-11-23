@@ -86,12 +86,13 @@ prebuild_version_number(${library_name} ${h_version_file}
                                         ${ini_version_file})
 
 # Set dependencies
-set(oss_dependencies_general    d_hydro_lib
-                        delftio
+set(oss_dependencies_general    delftio
                         delftio_shm
                         deltares_common
-                        deltares_common_c
                         deltares_common_mpi
+                        deltares_common_c
+                        d_hydro_lib
+                        gridgeom
                         ec_module
                         esmfsm
                         esmfsm_c
@@ -104,9 +105,6 @@ set(oss_dependencies_general    d_hydro_lib
                         flow2d3d_manager
                         flow2d3d_plugin_culvert_c
                         flow2d3d_plugin_user
-                        fortranc
-                        fortrangis
-                        gridgeom
                         io_hyd
                         io_netcdf
                         kdtree_wrapper
