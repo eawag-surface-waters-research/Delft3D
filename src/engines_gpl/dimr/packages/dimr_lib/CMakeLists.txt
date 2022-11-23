@@ -43,26 +43,32 @@ add_library(${library_name} SHARED  ${source}
 prebuild_version_number(${library_name} ${rc_version_file} 
                                         ${checkout_src_root}
                                         ${ini_version_file})
-prebuild_version_number(${library_name} ${header_version_file} 
+prebuild_version_number(${library_name} ${header_version_file}
                                         ${checkout_src_root}
                                         ${ini_version_file})
 
-# Define dependencies
-set(oss_dependencies deltares_common_c) 
-oss_include_libraries(${library_name} oss_dependencies)
-
-# Common UNIX and WIN32 link library dependency
-target_link_libraries(${library_name} netcdf)
 
 if(UNIX)
+    set(oss_dependencies    deltares_common_c
+                            expat)
+    oss_include_libraries(${library_name} oss_dependencies)
+
     target_compile_definitions(${library_name} PRIVATE LINUX64)
 
-    target_link_libraries(${library_name} ${oss_dependencies})                      
+    target_include_directories(${library_name} 
+                               PRIVATE  
+                               ${header_path}
+                              "${checkout_src_root}/third_party_open/expat/x64/include")
+
+    target_link_libraries(${library_name} ${oss_dependencies})
     target_link_directories(${library_name} PRIVATE ${NETCDF_LIBRARY_DIRS})
-    target_compile_options(${library_name} PRIVATE ${cpp_compiler_flags})        
+    target_compile_options(${library_name} PRIVATE ${cpp_compiler_flags})
 endif()
 
 if(WIN32)
+    set(oss_dependencies deltares_common_c) 
+    oss_include_libraries(${library_name} oss_dependencies)
+
     # Define output name
     set_target_properties(${library_name} 
                           PROPERTIES
@@ -90,6 +96,7 @@ if(WIN32)
                             "${checkout_src_root}/third_party_open/pthreads/bin/x64")
 
     target_link_libraries(${library_name}   ${oss_dependencies}
+                                            netcdf
                                             "${mpi_c_library}"
                                             "libexpat.lib"
                                             "pthreadVC2.lib"
