@@ -4238,6 +4238,7 @@ src/engines_gpl/waq/packages/waq_process/src/waq_process/pprlim.f -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/pripro.f -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/priron.f90 -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/procal.f -text
+src/engines_gpl/waq/packages/waq_process/src/waq_process/process_registration.f90 -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/pronrs.f -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/ptewor.f -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/radalg.f -text

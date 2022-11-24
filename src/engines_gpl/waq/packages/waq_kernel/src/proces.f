@@ -68,8 +68,8 @@
 !     Files               : Monitoring file if needed for messages
 
       use timers
-      use m_couplib
       use iso_c_binding
+      use process_registration
 
       implicit none
 
@@ -828,9 +828,8 @@
      +                    DSPNDT, VELNDT, dll_opb)
 !
       use timers
-!     use m_timers_waq
-      use m_couplib
       use iso_c_binding
+      use process_registration
 !
       INTEGER             IPROC , K     , IDT   , ITFACT, NOGRID,
      +                    NOSEG , NOFLUX, NOQ1  , NOQ2  , NOQ3  ,

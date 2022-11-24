@@ -87,6 +87,7 @@
 !     Declaration of arguments
 !
       use timers
+      use process_registration
 
       INTEGER       LUNWRP, LUREP , NOTOT , NIPMSA, NPROC ,
      +              NOLOC , NFLUX , NODEF , IPBLOO, IPCHAR,
