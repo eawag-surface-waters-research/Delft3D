@@ -1137,7 +1137,6 @@ src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_kernel/compute/advec
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_kernel/compute/advecdriver.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_kernel/compute/afhouwendammit.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_kernel/compute/anticreep.f90 -text
-src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_kernel/compute/barocpsteric.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_kernel/compute/bathyupdate.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_kernel/compute/comp_cross_time_1.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_kernel/compute/comp_cross_time_2.f90 -text

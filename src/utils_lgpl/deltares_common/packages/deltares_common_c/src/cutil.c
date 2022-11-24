@@ -578,7 +578,6 @@ CUTIL_GETEXEDIR (
     ) {
 
     char    slash;                    /* UNIX or Windows directory separator */
-    char    buf [1000];
     char    path_buffer[1000];
     char    drive[1000];
     char    dir[1000];
