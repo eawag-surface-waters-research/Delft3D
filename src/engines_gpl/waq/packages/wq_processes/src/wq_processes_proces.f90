@@ -43,6 +43,7 @@
 !>         Control routine of PROCES system. Process sub-system of DELWAQ waterquality modelling system.
 
       use processes_pointers, only: dll_opb
+      use process_registration
       use timers
 
       implicit none
