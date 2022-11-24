@@ -328,6 +328,7 @@
 
       use timers
       use iso_c_binding
+      use process_registration
 
       integer             iproc , k, noseg , noflux, noq1  , noq2  , noq3  , noq4
       integer             prvnio(*)      , prvtyp(*)      , &
