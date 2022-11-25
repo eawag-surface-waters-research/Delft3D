@@ -35,7 +35,7 @@ module process_registration
         procedure(), pointer, nopass :: procpnt
     end type process_routine_info
 
-    type(process_routine_info) :: process_routine(max_processes)
+    type(process_routine_info), save :: process_routine(max_processes)
 
 contains
 
@@ -301,6 +301,8 @@ subroutine pronrs( pronam, imodul )
 !
     imodul = findloc( process_routine%pronam, pronam, 1 )
 
+    write(*,*) 'PRONRS: ', pronam, imodul
+
 end subroutine pronrs
 
 subroutine procal (pmsa   , imodul , flux   , ipoint , increm , &
@@ -352,6 +354,8 @@ subroutine procal (pmsa   , imodul , flux   , ipoint , increm , &
 
     integer, parameter  :: nomax = 500
     integer(4), save    :: ithand(nomax) = 0 !  timer handles
+
+    write(*,*) 'PROCAL: ', pronam, imodul
 
     if ( timon ) then
         if ( imodul .le. nomax ) call timstrt ( pronam, ithand(imodul) )
