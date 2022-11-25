@@ -105,7 +105,6 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
    integer :: inodefile, netedgecount2
    integer :: id_nodex, id_nodey, id_edgex, id_edgey
    integer :: intmiss = -2147483647 ! integer fillvalue
-   integer :: imiss = -999
    double precision :: dmiss = -999d0, intfillv
    integer :: ja1DCNVar = 0
 !netface_g2c(:)
@@ -247,6 +246,8 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
    id_timestep= -1
    id_dimTwo  = -1
    nMeshOld   = 1 ! For old format input file, the number of meshes is 1
+   ifill_value= -999 ! initialize ifill_value
+   nofill     = 1
 
    !! 0a. Open input files
    call dfm_order_by_partition(infiles, nfiles)
@@ -1522,10 +1523,11 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
             do ii = 2, nfiles
                netedgecount = sum(numl(itopo,1:ii-1))
                nfacecount(itopo) = sum(nump(itopo,1:ii-1))
+               ierr = ncu_inq_var_fill(ncids(ii), id_netedgefaces, nofill, ifill_value)
                do ip = 1, numl(itopo,ii)
                    k1 = netedgefaces(1, netedgecount+ip)  ! flowelem that edge L connects
                    k2 = netedgefaces(2, netedgecount+ip)
-                   if (k1.ne.0 .and. k2.ne. 0 .and. k1.ne.imiss .and. k2.ne.imiss) then       ! When edge L is not on the boundary
+                   if (k1.ne.0 .and. k2.ne. 0 .and. k1.ne.ifill_value .and. k2.ne.ifill_value) then       ! When edge L is not on the boundary
                        g1 = face_domain(nfacecount(itopo)+k1,itopo)    ! domain number of this flownode
                        g2 = face_domain(nfacecount(itopo)+k2,itopo)
                        if (g1 .ne. g2) then               ! if edge L lies on the boundary of two different domains
