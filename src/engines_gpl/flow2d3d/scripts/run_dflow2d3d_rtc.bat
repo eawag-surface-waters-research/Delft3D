@@ -97,7 +97,7 @@ title RTC simulation
     echo "        Part VI   - Initialisation and checking second part..."
     echo "        Part VII  - Initialisation output..."
     echo "    Then press a key in the first command box to start RTC"
-%SystemRoot%\System32\timeout.exe 10
+C:\Windows\System32\timeout.exe 10
 
 set PATH=%rtcexedir%;%sharedir%
 echo executing: "%rtcexedir%\rtc.exe" "%rtcdefaultdir%\RTC.FNM" "RTC.RTN"
