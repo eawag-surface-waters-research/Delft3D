@@ -313,8 +313,6 @@ subroutine pronrs( pronam, imodul )
         endif
     enddo
 
-    write(*,*) 'PRONRS: ', pronam, imodul
-
 end subroutine pronrs
 
 subroutine procal (pmsa   , imodul , flux   , ipoint , increm , &
@@ -366,8 +364,6 @@ subroutine procal (pmsa   , imodul , flux   , ipoint , increm , &
 
     integer, parameter  :: nomax = 500
     integer(4), save    :: ithand(nomax) = 0 !  timer handles
-
-    write(*,*) 'PROCAL: ', pronam, imodul
 
     if ( timon ) then
         if ( imodul .le. nomax ) call timstrt ( pronam, ithand(imodul) )

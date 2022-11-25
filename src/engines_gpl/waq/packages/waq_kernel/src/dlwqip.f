@@ -230,7 +230,6 @@
 !
 !     Set module numbers
 !
-      write(*,*) 'DLWQIP:', nproc
       DO 20 K = 1,NPROC
          CALL PRONRS ( PRONAM(K), IMODU(K) )
 !        IF ( IMODU(K) .EQ. 0 ) THEN
@@ -238,7 +237,6 @@
 !           IERR = IERR + 1
 !        ENDIF
    20 CONTINUE
-      write(*,*) 'DLWQIP: registration done', imodu(1:nproc)
 !
 !     Report on process decomposition
 !
