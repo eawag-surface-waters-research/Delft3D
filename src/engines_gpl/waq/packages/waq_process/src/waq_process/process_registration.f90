@@ -299,7 +299,19 @@ subroutine pronrs( pronam, imodul )
 !
 !   Determine the index of the routine
 !
-    imodul = findloc( process_routine%pronam, pronam, 1 )
+!
+!   Note: This statement did not work with builds from TeamCity.
+!         I saw a problem report on the Intel Forum that seems relevant in this context.
+!         For now I will do it the pedestrian way.
+!
+!   imodul = findloc( process_routine%pronam, pronam, 1 )
+!
+    do i = 1,size(process_routine)
+        if ( process_routine(i)%pronam == pronam ) then
+            imodul = i
+            exit
+        endif
+    enddo
 
     write(*,*) 'PRONRS: ', pronam, imodul
 
