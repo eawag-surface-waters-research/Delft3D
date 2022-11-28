@@ -246,8 +246,6 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
    id_timestep= -1
    id_dimTwo  = -1
    nMeshOld   = 1 ! For old format input file, the number of meshes is 1
-   ifill_value= -999 ! initialize ifill_value
-   nofill     = 1
 
    !! 0a. Open input files
    call dfm_order_by_partition(infiles, nfiles)
