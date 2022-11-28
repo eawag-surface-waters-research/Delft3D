@@ -93,7 +93,7 @@
    call rdpart ( lun(1)   , lun(2)   , fname(1) )
 
    dts       = real(idelt, kind=kind(dts))
-   noparttot = npmax
+   noparttot = npmax + npmax/100
    nopart    = 0
    allocate( nplay(hyd%nolay) )
 
@@ -1806,22 +1806,23 @@ endif
    logical, intent(in)  :: LkeepExisting  !< keep existing data (1) or not (0)
    integer, intent(out) :: ierror         !< error (1) or not
 
+   ! local
+   integer                                        :: npmargin
    ierror = 1
-
+   npmargin = Nsize / 100 + 1 + Nsize
    !  reallocate
-   call realloc(xpart, Nsize, keepExisting=LkeepExisting, fill=DMISS)
-   call realloc(ypart, Nsize, keepExisting=LkeepExisting, fill=DMISS)
-   call realloc(xpart_prevt, Nsize, keepExisting=LkeepExisting, fill=DMISS)
-   call realloc(ypart_prevt, Nsize, keepExisting=LkeepExisting, fill=DMISS)
-   call realloc(zpart, Nsize, keepExisting=LkeepExisting, fill=DMISS)
-   call realloc(zpart_prevt, Nsize, keepExisting=LkeepExisting, fill=DMISS)
-   call realloc(dtremaining, Nsize, keepExisting=LkeepExisting, fill=0d0)
-   call reallocp(mpart, Nsize, keepExisting=LkeepExisting, fill=0)
-   call realloc(mpart_prevt, Nsize, keepExisting=LkeepExisting, fill=0)
+   call realloc(xpart, npmargin, keepExisting=LkeepExisting, fill=DMISS)
+   call realloc(ypart, npmargin, keepExisting=LkeepExisting, fill=DMISS)
+   call realloc(xpart_prevt, npmargin, keepExisting=LkeepExisting, fill=DMISS)
+   call realloc(ypart_prevt, npmargin, keepExisting=LkeepExisting, fill=DMISS)
+   call realloc(zpart, npmargin, keepExisting=LkeepExisting, fill=DMISS)
+   call realloc(zpart_prevt, npmargin, keepExisting=LkeepExisting, fill=DMISS)
+   call realloc(dtremaining, npmargin, keepExisting=LkeepExisting, fill=0d0)
+   call reallocp(mpart, npmargin, keepExisting=LkeepExisting, fill=0)
+   call realloc(mpart_prevt, npmargin, keepExisting=LkeepExisting, fill=0)
 
-   call realloc(numzero, Nsize, keepExisting=LkeepExisting, fill=0)
+   call realloc(numzero, npmargin, keepExisting=LkeepExisting, fill=0)
    numzero = 0
-
    ierror = 0
 1234 continue
 
