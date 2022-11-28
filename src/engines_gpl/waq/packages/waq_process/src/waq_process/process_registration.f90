@@ -46,8 +46,6 @@ subroutine pronrs( pronam, imodul )
 !
 !     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
 !
-!     CREATED             : jan -1994 by Jan van Beek
-!
 !     FUNCTION            : Set the pointers to the process routines
 !
 !     SUBROUTINES CALLED  : -
@@ -303,6 +301,7 @@ subroutine pronrs( pronam, imodul )
 !   Note: This statement did not work with builds from TeamCity.
 !         I saw a problem report on the Intel Forum that seems relevant in this context.
 !         For now I will do it the pedestrian way.
+!         MDK: There is a known bug in intel oneAPI 2021.03 regarding findloc
 !
 !   imodul = findloc( process_routine%pronam, pronam, 1 )
 !
@@ -324,11 +323,6 @@ subroutine procal (pmsa   , imodul , flux   , ipoint , increm , &
 
 !     Deltares Software Centre
 
-!     Created   : November 1992 by Jos van Gils and Jan van Beek
-
-!     Modified  : ????? 2007, Jan van Beek : implemented user defined processes through dll
-!                 ????? 2009, Leo Postma   : implemented timers
-!                 March 2010, Leo Postma   : implemented parallel processing
 
     use timers
     use iso_c_binding
