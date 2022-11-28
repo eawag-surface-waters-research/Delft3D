@@ -120,7 +120,7 @@
  COMMON /DRAWTHIS/ ndraw(50)
 
  if (numk <= 2 .or. numl <= 1 ) then
-    call mess(LEVEL_ERROR,'A valid network requires at least 3 computational grid points (net nodes) and at least 2 netlinks for 1D or 3 netlinks for 2D.')
+    call mess(LEVEL_WARN,'A valid network requires at least 3 computational grid points (net nodes) and at least 2 netlinks for 1D or 3 netlinks for 2D.')
     return               ! only do this for sufficient network
  endif
 
