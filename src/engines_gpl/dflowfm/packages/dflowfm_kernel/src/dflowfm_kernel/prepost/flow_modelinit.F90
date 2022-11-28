@@ -145,7 +145,7 @@
     call mess(LEVEL_INFO,'Done initializing flow model geometry.')
 
     if (ndx == 0) then
-      call mess(LEVEL_WARN,'ndx == 0, please check MDU-file')
+      call mess(LEVEL_WARN,'Model initialization has resulted in an empty model (0 gridcells/points). Is input grid correct?')
       iresult = DFM_MODELNOTINITIALIZED
       goto 1234
     end if
