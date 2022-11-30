@@ -209,27 +209,20 @@ real(kind=hp), optional, intent(in) :: eps
 !
 ! Local variables
 !
-real(kind=hp) :: eps0
 real(kind=hp) :: value
 !
 !! executable statements -------------------------------------------------------
 !
-if (present(eps)) then
-    eps0 = eps
-else 
-    eps0 = 2.0_hp * epsilon(val1)
-endif
-!
 if (.not. check_finite) then
-   compare = comparereal(val1, val2, eps0)
+   compare = comparereal(val1, val2, eps)
 else if (ieee_is_finite(val1) .and. ieee_is_finite(val2)) then
-   compare = comparereal(val1, val2, eps0)
+   compare = comparereal(val1, val2, eps)
 else
    if (ieee_is_nan(val1) .and. ieee_is_nan(val2)) then
       compare = 0
-   else if (ieee_is_nan(val1) .and. ieee_is_finite(val2)) then
+   else if (ieee_is_nan(val1)) then
       compare = -2
-   else if (ieee_is_finite(val1) .and. ieee_is_nan(val2)) then
+   else if (ieee_is_nan(val2)) then
       compare = 2
    else if (val1 > val2) then ! now val1 = +/- Inf or val2 = +/- Inf
       compare = 1
@@ -272,28 +265,20 @@ real(kind=sp), optional, intent(in) :: eps
 !
 ! Local variables
 !
-real(kind=sp) :: eps0
 real(kind=sp) :: value
 !
 !! executable statements -------------------------------------------------------
 !
-!
-if (present(eps)) then
-    eps0 = eps
-else
-    eps0 = 2.0_sp * epsilon(val1)
-endif
-!
 if (.not. check_finite) then
-   compare = comparereal(val1, val2, eps0)
+   compare = comparereal(val1, val2, eps)
 else if (ieee_is_finite(val1) .and. ieee_is_finite(val2)) then
-   compare = comparereal(val1, val2, eps0)
+   compare = comparereal(val1, val2, eps)
 else
    if (ieee_is_nan(val1) .and. ieee_is_nan(val2)) then
       compare = 0
-   else if (ieee_is_nan(val1) .and. ieee_is_finite(val2)) then
+   else if (ieee_is_nan(val1)) then
       compare = -2
-   else if (ieee_is_finite(val1) .and. ieee_is_nan(val2)) then
+   else if (ieee_is_nan(val2)) then
       compare = 2
    else if (val1 > val2) then ! now val1 = +/- Inf or val2 = +/- Inf
       compare = 1
