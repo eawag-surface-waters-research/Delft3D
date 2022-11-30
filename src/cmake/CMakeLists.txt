@@ -83,9 +83,6 @@ if (WIN32)
     # Set the petsc path
     set(petsc_path ${checkout_src_root}/third_party_open/petsc/petsc-3.10.2/include)
 
-    # Set the expat path
-    set(expat_path ${checkout_src_root}/third_party_open/expat/x64/include)
-    
     # Set the GDAL path
     set(gisinternals_path ${checkout_src_root}/third_party_open/GISInternals/release-1911-x64/lib)
     
@@ -122,6 +119,14 @@ if (UNIX)
     execute_process(COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/version_number)
 endif(UNIX)
 
+
+# Expat:
+#     Windows: use prebuild library in ".../expat/x64/x64"
+#     Linux  : compile source code  using ".../expat/cmake_deltares/CMakeLists.txt"
+set(expat_include_path ${checkout_src_root}/third_party_open/expat/x64/include)
+if (WIN32)
+    set(expat_library_path_win ${checkout_src_root}/third_party_open/expat/x64/x64)
+endif(WIN32)
 
 
 # Set the location of the update_version script

@@ -38,7 +38,7 @@ generate_version_files(${h_version_file}
 include_directories(${d_hydro_lib_include_path}
                     ${d_hydro_lib_version_path}
                     ${pthreads_path}
-                    ${expat_path})
+                    ${expat_include_path})
 
 # Gather source files
 file(GLOB header_files ${d_hydro_lib_include_path}/*.h)

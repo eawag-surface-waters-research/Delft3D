@@ -34,7 +34,7 @@ include_directories(${include_path}
                     ${dd_mapper_path}
                     ${pthreads_path}
                     ${mpi_include_path}
-                    ${expat_path})
+                    ${expat_include_path})
 
 # Set version file variables
 set(version_path ${CMAKE_CURRENT_SOURCE_DIR}/../) # Path to determine the version number from
@@ -148,7 +148,7 @@ if (WIN32)
                             PRIVATE
                             "${checkout_src_root}/third_party_open/netcdf/${netcdf_version}/lib"
                             "${mpi_library_path}"
-                            "${checkout_src_root}/third_party_open/expat/x64/x64"
+                            "${expat_library_path_win}"
                             "${checkout_src_root}/third_party_open/pthreads/bin/x64")
 
     target_link_libraries(${library_name}

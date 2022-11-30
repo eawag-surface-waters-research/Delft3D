@@ -60,7 +60,7 @@ if(UNIX)
                                PRIVATE  
                                ${header_path}
                               "${d_hydro_lib_path}/include"
-                              "${checkout_src_root}/third_party_open/expat/x64/include")
+                              "${expat_include_path}")
 
     target_link_libraries(${executable_name} ${oss_dependencies}) 
     target_link_directories(${executable_name} PRIVATE ${NETCDF_LIBRARY_DIRS})
@@ -82,7 +82,7 @@ if (WIN32)
                                 PRIVATE  
                                 ${header_path}
                                 "${d_hydro_lib_path}/include"
-                                "${checkout_src_root}/third_party_open/expat/x64/include"
+                                "${expat_include_path}"
                                 "${mpi_include_path}"
                                 "${checkout_src_root}/third_party_open/netcdf/${netcdf_version}/include"
                                 "${checkout_src_root}/third_party_open/pthreads/include/x64")
@@ -91,7 +91,7 @@ if (WIN32)
     target_link_directories(${executable_name}
                             PRIVATE
                             "${checkout_src_root}/third_party_open/netcdf/${netcdf_version}/lib"
-                            "${checkout_src_root}/third_party_open/expat/x64/x64/"
+                            "${expat_library_path_win}"
                             "${mpi_library_path}"
                             "${checkout_src_root}/third_party_open/pthreads/bin/x64")
 
