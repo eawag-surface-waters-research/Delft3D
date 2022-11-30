@@ -40,6 +40,7 @@ private
 
 public nc_create
 public nc_write
+public write_volume_table_gridpoint_data
 
 contains
    
@@ -84,6 +85,71 @@ function nc_create(ncfile) result (ioutput)
    ! if (ierr .ne. 0) call nc_error(ierr, 'nc_create')
 
 end function nc_create
+
+subroutine write_volume_table_gridpoint_data(ioutput,bedlevel,topheight,volume,surface,count,numnodes,increment)
+ use MessageHandling
+
+   integer,                            intent(in)  :: ioutput           !< Handle to the output file.
+   double precision, dimension(:),     intent(in)  :: bedlevel             !< Levels w.r.t. the bedlevel.
+   double precision, dimension(:),     intent(in)  :: topheight             !< Levels w.r.t. the bedlevel.
+   double precision, dimension(:,:),   intent(in)  :: volume            !< Volumes. 
+   double precision, dimension(:,:),   intent(in)  :: surface           !< Wet surface area.
+   integer         , dimension(:),     intent(in)  :: count         !< Number of levels in the volume table
+   integer,                            intent(in)  :: numnodes         !< Number of levels in the volume table
+   double precision,                   intent(in)  :: increment      !< increment between two volume table levels
+
+
+   integer :: dimid_levels, dimid_nodes, dimid_increment
+   integer :: varid_volume, varid_surface, varid_numlevels, varid_bedlevel, varid_topheight, varid_increment
+   integer :: ierr
+   integer :: numlevels, mesh1d_nNodes
+   character (len =  NF90_MAX_NAME) :: mesh1d_nNodes_name
+   
+   numlevels = maxval(count)
+  
+   ierr = nf90_redef(ioutput)
+   if (ierr .ne. 0 .and. ierr /= nf90_eindefine) call nc_error(ierr, 'nc_write') 
+   ierr = nf90_def_dim(ioutput, 'levels', numlevels, dimid_levels)    ! ... if not, make this an unlimited dimension
+   if (ierr .ne. 0) call nc_error(ierr, 'nc_write') 
+   ierr = nf90_inq_dimid(ioutput, 'mesh1d_nNodes', dimid_nodes)
+   if (ierr .ne. 0) call nc_error(ierr, 'nc_write')
+   ierr = nf90_inquire_dimension(ioutput, dimid_nodes, mesh1d_nNodes_name, mesh1d_nNodes)
+   if (ierr .ne. 0) call nc_error(ierr, 'nc_write')
+   if (mesh1d_nNodes /= numnodes) then
+   call nc_error(-57, 'nc_write')
+   endif
+   ierr = nf90_def_dim(ioutput, 'increment', 1, dimid_increment)
+   if (ierr .ne. 0) call nc_error(ierr, 'nc_write')
+   
+   
+   varid_volume      = SetupVariable(ioutput,'volume',      nf90_double, (/ dimid_nodes, dimid_levels/), '', 'Volume',    'm3') 
+   varid_surface     = SetupVariable(ioutput,'surface',     nf90_double, (/ dimid_nodes, dimid_levels/), '', 'Surface',   'm2') 
+   varid_numlevels   = SetupVariable(ioutput,'numlevels',   nf90_int   , (/ dimid_nodes/), '', 'Number of levels',   '') 
+   varid_bedlevel    = SetupVariable(ioutput,'bedlevel' ,   nf90_double, (/ dimid_nodes/), '', 'Bedlevel',   'm') 
+   varid_topheight   = SetupVariable(ioutput,'topheight',   nf90_double, (/ dimid_nodes/), '', 'TopHeight',   'm') 
+   varid_increment   = SetupVariable(ioutput,'increment',   nf90_double, (/ dimid_increment/), '', 'Increment',   'm') 
+   
+   ierr = nf90_enddef(ioutput)
+
+   if (ierr .ne. 0) call nc_error(ierr, 'nc_write')
+
+   ierr = nf90_put_var(ioutput, varid_volume    , volume, start=(/1,1/), count = (/numnodes, numlevels/))
+   if (ierr .ne. 0) call nc_error(ierr, 'nc_write')
+   ierr = nf90_put_var(ioutput, varid_surface   , surface, start=(/1,1/), count = (/numnodes, numlevels/))
+   if (ierr .ne. 0) call nc_error(ierr, 'nc_write')
+   ierr = nf90_put_var(ioutput, varid_numlevels    , count)
+   if (ierr .ne. 0) call nc_error(ierr, 'nc_write')
+   ierr = nf90_put_var(ioutput, varid_bedlevel    , bedlevel, start=(/1/)  , count = (/numnodes/))
+   if (ierr .ne. 0) call nc_error(ierr, 'nc_write')
+   ierr = nf90_put_var(ioutput, varid_topheight    , topheight, start=(/1/)  , count = (/numnodes/))
+   if (ierr .ne. 0) call nc_error(ierr, 'nc_write')
+   ierr = nf90_put_var(ioutput, varid_increment, increment)
+   if (ierr .ne. 0) call nc_error(ierr, 'nc_write')
+   
+   ierr = nf90_close(ioutput)
+   if (ierr .ne. 0) call nc_error(ierr, 'nc_write')
+
+end subroutine write_volume_table_gridpoint_data
 
 !> Write the volumes and surfaces to the Netcdf file
 subroutine nc_write(ioutput, ids, levels, volume, surface, storage, deadstorage, numlevels, numids)

@@ -99,15 +99,15 @@ long STDCALL DFM_GENERATE_VOLUME_TABLES(int64_t* sharedDLLHandle, double* increm
 	return -1;
 }
 
-long STDCALL WRITE_VOLUME_TABLE_GEOM(int64_t* sharedDLLHandle, char* var_name)
+long STDCALL WRITE_VOLUME_TABLE_GEOM(int64_t* sharedDLLHandle, int64_t* ncid)
 {
-	typedef void* (STDCALL* MyProc)(char*);
+	typedef void* (STDCALL* MyProc)(int64_t*);
 	MyProc proc = (MyProc)GetDllProcedure(sharedDLLHandle, "write_volume_table_geom");
 
 
 	if (proc != NULL)
 	{
-		(void*)(*proc)(var_name);
+		(void*)(*proc)(ncid);
 		return 0;
 	}
 	return -1;

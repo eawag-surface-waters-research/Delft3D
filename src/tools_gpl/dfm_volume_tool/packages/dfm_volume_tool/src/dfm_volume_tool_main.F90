@@ -60,15 +60,15 @@ character(len=Idlen) :: dll_name
 character(len=Idlen) :: mdufile
 integer(pntrsize)    :: dfm
 integer              :: ret_val, dia
-integer              :: i
+integer              :: i, j
 integer              :: idindex
 integer              :: numids
 integer              :: numbranches
-integer              :: ioutput
+integer              :: ioutput, ncid
 double precision     :: increment
 double precision     :: bedlevel, toplevel
 character(len=Idlen) :: output_type
-character(len=Idlen) :: output_file
+character(len=Idlen) :: output_file, grid_output_file
 character(len=Idlen) :: var_name
 type(c_ptr)          :: xptr
 integer              :: numpoints, numlinks, lnx, numbnd
@@ -96,7 +96,8 @@ integer,          dimension(:),   allocatable   :: mask
 integer,          dimension(:,:), pointer       :: bndindex
 integer,          dimension(:,:), pointer       :: ln2nd
 double precision, dimension(:),   pointer       :: bndvalues
-double precision, dimension(:,:),   pointer     :: inslevtube
+double precision, dimension(:,:), pointer       :: inslevtube
+double precision, dimension(:,:), pointer       :: gridvolume, gridsurface
 double precision, dimension(:),   allocatable   :: wl_deadstorage
 
 ! externals
@@ -127,6 +128,7 @@ call cli%add(switch='--mdufile',  switch_ab='-f', help='Name of the input mdu fi
 call cli%add(switch='--increment',switch_ab='-i', help='required interval for the volume tables',required=.true.,act='store',def='',valname='INCREMENT')
 call cli%add(switch='--output',switch_ab='-o', help='output type: "Total", "Branches", "Gridpoints", "All"',required=.false.,act='store',def='',valname='OUTPUT_TYPE')
 call cli%add(switch='--outputfile',switch_ab='-p', help='name of the output file',required=.false.,act='store',def='',valname='OUTPUT_FILE')
+call cli%add(switch='--gridoutputfile',switch_ab='-g', help='name of the per-gridpoint output file',required=.false.,act='store',def='',valname='GRID_OUTPUT_FILE')
 
 ! parsing Command Line Interface
 call cli%parse(error=ierr)
@@ -150,6 +152,13 @@ if (ierr==0) then
    endif
 endif
 
+if (ierr==0) then
+   grid_outpute_file = ''
+   call cli%get(switch='--gridoutputfile', val = grid_output_file, error=ierr)
+   if (len_trim(grid_output_file)==0) then
+      grid_output_file ="PerGridpoint_"//output_file
+   endif
+endif
 
 #ifdef WIN32
    dll_name = 'dflowfm'
@@ -164,6 +173,8 @@ if (ierr==0) then
    endif
    
 endif
+
+pause 
 
 if (ierr==0) then
    ! Initialise the model 
@@ -265,8 +276,25 @@ if (ierr==0) then
    endif
    
    if (computeOnGridpoints) then
+      !compute maximum volume table length
+      numlevels = 0
+      do i = 1, numpoints
+      numlevels = max(numlevels,volumetable(i)%count)
+      enddo
+      
+      allocate(gridsurface(numpoints,numlevels),gridvolume(numpoints,numlevels))
+   
+      do i = 1, numpoints         
+         do j = 1,volumetable(i)%count
+            gridsurface(i,j) = volumetable(i)%sur(j)
+            gridvolume(i,j) = volumetable(i)%vol(j)
+         enddo
+      enddo
+      
+      ncid = nc_create(grid_output_file)
       ! Write the output to the netcdf file
-      call write_volume_table_geom(dfm, "PerGridpoint"//output_file)
+      call write_volume_table_geom(dfm, ncid)
+      call write_volume_table_gridpoint_data(ncid,volumetable(:)%bedlevel,volumetable(:)%topheight,gridvolume,gridsurface,volumetable(:)%count,numpoints,increment)
    endif
    
    ioutput = nc_create(output_file)

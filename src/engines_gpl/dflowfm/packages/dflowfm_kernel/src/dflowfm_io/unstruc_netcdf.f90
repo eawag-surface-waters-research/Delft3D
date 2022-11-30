@@ -14865,7 +14865,7 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd,jafou, ja2D
 end subroutine unc_write_flowgeom_filepointer_ugrid
 
 !> Writes the unstructured 1D flow geometry in UGRID format to an already opened netCDF dataset for use in the dfm volume tool.
-subroutine unc_write_1D_flowgeom_volumetables_ugrid(filename)
+subroutine unc_write_1D_flowgeom_volumetables_ugrid(ncid)
 
    use m_flowgeom
    use network_data
@@ -14885,9 +14885,8 @@ subroutine unc_write_1D_flowgeom_volumetables_ugrid(filename)
    use io_netcdf_acdd, only: ionc_add_geospatial_bounds
    implicit none
 
-   character(len=*), intent(in) :: filename
+   integer, intent(in)             :: ncid
    type(t_unc_timespace_id)                :: id_tsp   !< Set of time and space related variable id's
-   integer :: ncid
 
    integer                         :: jabndnd_      !< Flag specifying whether boundary nodes are to be written.
    integer                         :: ndxndxi       !< Last 2/3D node to be saved. Equals ndx when boundary nodes are written, or ndxi otherwise.
@@ -14930,12 +14929,12 @@ subroutine unc_write_1D_flowgeom_volumetables_ugrid(filename)
    double precision, allocatable                 :: x2dn(:), y2dn(:), z2dn(:)
    integer                                       :: netNodeReMappedIndex, nnSize
    
-       ierr = unc_create(filename, 0, ncid)
-    if (ierr /= nf90_noerr) then
-        call mess(LEVEL_ERROR, 'Could not create flow geometry file '''//trim(filename)//'''.')
-        call check_error(ierr)
-        return
-    endif
+    !   ierr = unc_create(filename, 0, ncid)
+    !if (ierr /= nf90_noerr) then
+    !    call mess(LEVEL_ERROR, 'Could not create flow geometry file '''//trim(filename)//'''.')
+    !    call check_error(ierr)
+    !    return
+    !endif
         
    jaInDefine    = 0
    n1d2dcontacts = 0
@@ -14949,7 +14948,7 @@ subroutine unc_write_1D_flowgeom_volumetables_ugrid(filename)
 
    if (timon) call timstrt ( "unc_write_flowgeom_filepointer_ugrid", handle_extra(69))
 
-      jabndnd_ = 0
+      jabndnd_ = 1 !boundary nodes are in volume table
 
    ! Include boundary cells in output (ndx) or not (ndxi)
    if (jabndnd_ == 1) then
@@ -15196,7 +15195,6 @@ subroutine unc_write_1D_flowgeom_volumetables_ugrid(filename)
    if (timon) call timstop (handle_extra(69))
 
    ierr =  nf90_sync(ncid)
-   ierr = nf90_close(ncid)
    !call readyy('Writing flow geometry data',-1d0)
    return
 
