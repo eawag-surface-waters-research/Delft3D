@@ -63,6 +63,7 @@
    double precision        :: dpangle, dxp, dyp, dradius, xx, yy
    integer(4) ithndl              ! handle to time this subroutine
    logical                 :: mapfil  ! true if map file extension
+   logical                 :: trkfil   ! true if track file extension
    data ithndl / 0 /
    if ( timon ) call timstrt( "partfm", ithndl )
 
@@ -221,7 +222,7 @@ endif
    ptref = 0.0D0
    !call part_findcell(Nrpart,xrpart,yrpart,mrpart,ierror)
 
-   call unc_init_trk()
+   if ( notrak > 0 ) call unc_init_trk()
    call unc_init_map(hyd%crs, hyd%waqgeom, hyd%nosegl, hyd%nolay)
 
    time0 = tstart_user
@@ -239,15 +240,18 @@ endif
    end if
 
    do while (istat == 0)
-   !     determine if map file must be produced
+   !     determine if map and track files must be produced
 
       mapfil = .true.
+      trkfil = .true.
+      if ( notrak .eq. 0 ) trkfil = .false. 
       if (icwste                     < 1     ) mapfil = .false.
       if (itime                      < icwsta) mapfil = .false.
       if (itime - idelt              >=  icwsto) mapfil = .false.
       if (mod(itime-icwsta, icwste)  >=  idelt ) mapfil = .false.
 
-      call unc_write_trk()
+      if ( trkfil .and. mod(itime, notrak * idelt) .ge. idelt) trkfil = .false. 
+      if ( trkfil ) call unc_write_trk()
       if (mapfil) call unc_write_map()
 
       call report_progress( lunpr, int(time0), itstrtp, itstopp, nopart, npmax )
