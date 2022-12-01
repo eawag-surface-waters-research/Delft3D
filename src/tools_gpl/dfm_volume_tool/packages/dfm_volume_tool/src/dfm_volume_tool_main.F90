@@ -153,7 +153,7 @@ if (ierr==0) then
 endif
 
 if (ierr==0) then
-   grid_outpute_file = ''
+   grid_output_file = ''
    call cli%get(switch='--gridoutputfile', val = grid_output_file, error=ierr)
    if (len_trim(grid_output_file)==0) then
       grid_output_file ="PerGridpoint_"//output_file
