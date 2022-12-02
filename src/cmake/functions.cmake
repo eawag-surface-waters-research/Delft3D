@@ -194,16 +194,16 @@ function(post_build_target target_name install_dir build_dir checkout_src_root b
 
    if(UNIX)
    
-    set(build_config ${CMAKE_BUILD_TYPE}) 
+#    set(build_config ${CMAKE_BUILD_TYPE}) 
 
-    add_custom_command(TARGET ${target_name}
-                       POST_BUILD
-                       COMMAND /bin/bash "${checkout_src_root}/scripts_lgpl/linux/oss-post_build.sh"  
-                       ${install_dir} 
-                       ${build_dir} 
-                       ${checkout_src_root} 
-                       ${build_config}
-                       ${build_project} )
+#    add_custom_command(TARGET ${target_name}
+#                       POST_BUILD
+#                       COMMAND /bin/bash "${checkout_src_root}/scripts_lgpl/linux/oss-post_build.sh"  
+#                       ${install_dir} 
+#                       ${build_dir} 
+#                       ${checkout_src_root} 
+#                       ${build_config}
+#                       ${build_project} )
 
    endif(UNIX)
    

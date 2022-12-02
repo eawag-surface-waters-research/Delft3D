@@ -1,3 +1,5 @@
+# Define library
+set(library_name d_hydro_lib)
 # Set directory which contains all source files
 set(src_path src)
 
@@ -13,11 +15,8 @@ if (UNIX)
     set(configFile "${CMAKE_CURRENT_SOURCE_DIR}/include/config.h") 
     
     include_directories(${NETCDF_INCLUDEDIR}) 
-    add_definitions(-DHAVE_CONFIG_H)
+    add_definitions(-DHAVE_CONFIG_H=1)
 endif(UNIX)
-if(WIN32)
-    target_compile_definitions(${library_name} PRIVATE "WIN32")
-endif(WIN32)
 
 # Set public include path to make it accessible for other components
 set(public_include_path ${d_hydro_lib_include_path})
@@ -44,8 +43,7 @@ include_directories(${d_hydro_lib_include_path}
 file(GLOB header_files ${d_hydro_lib_include_path}/*.h)
 file(GLOB source_files ${src_path}/*.cpp)
 
-# Define library
-set(library_name d_hydro_lib)
+
 add_library(${library_name} ${header_files}
                             ${h_version_file}
                             ${source_files})
@@ -55,6 +53,13 @@ prebuild_version_number(${library_name} ${h_version_file}
                                         ${version_path}
                                         ${ini_version_file})
 
+# Set preprocessor definitions
+if(WIN32)
+    target_compile_definitions(${library_name} PRIVATE "WIN32")
+endif(WIN32)
+if(UNIX)
+    target_compile_definitions(${library_name} PRIVATE "HAVE_CONFIG_H")
+endif(UNIX)
 # Define how the files should be structured within Visual Studio
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${source_files})
 source_group(Include FILES  ${header_files}
