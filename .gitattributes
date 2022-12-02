@@ -2422,9 +2422,12 @@ src/engines_gpl/flow2d3d/doc/parallel_status.txt -text
 src/engines_gpl/flow2d3d/packages/Makefile.am -text
 src/engines_gpl/flow2d3d/packages/flow2d3d/CMakeLists.txt -text
 src/engines_gpl/flow2d3d/packages/flow2d3d/Makefile.am -text
+src/engines_gpl/flow2d3d/packages/flow2d3d/config.h.cmake.in -text
 src/engines_gpl/flow2d3d/packages/flow2d3d/flow2d3d.vcxproj -text
+src/engines_gpl/flow2d3d/packages/flow2d3d/include/FortranCInterface.h -text
 src/engines_gpl/flow2d3d/packages/flow2d3d/include/blob.h -text
 src/engines_gpl/flow2d3d/packages/flow2d3d/include/category.h -text
+src/engines_gpl/flow2d3d/packages/flow2d3d/include/config.h -text
 src/engines_gpl/flow2d3d/packages/flow2d3d/include/context-flowside.h -text
 src/engines_gpl/flow2d3d/packages/flow2d3d/include/context-gawsside.h -text
 src/engines_gpl/flow2d3d/packages/flow2d3d/include/context-mapside.h -text
@@ -2496,7 +2499,9 @@ src/engines_gpl/flow2d3d/packages/flow2d3d/src/flow2d3d_version.cpp -text
 src/engines_gpl/flow2d3d/packages/flow2d3d/src/flowol.cpp -text
 src/engines_gpl/flow2d3d/packages/flow2d3d_data/CMakeLists.txt -text
 src/engines_gpl/flow2d3d/packages/flow2d3d_data/Makefile.am -text
+src/engines_gpl/flow2d3d/packages/flow2d3d_data/config.h.cmake.in -text
 src/engines_gpl/flow2d3d/packages/flow2d3d_data/data.vfproj -text
+src/engines_gpl/flow2d3d/packages/flow2d3d_data/include/FortranCInterface.h -text
 src/engines_gpl/flow2d3d/packages/flow2d3d_data/include/address.igs -text
 src/engines_gpl/flow2d3d/packages/flow2d3d_data/include/adv2d.igs -text
 src/engines_gpl/flow2d3d/packages/flow2d3d_data/include/bcdat.igs -text
@@ -2504,6 +2509,7 @@ src/engines_gpl/flow2d3d/packages/flow2d3d_data/include/bedformpar.igs -text
 src/engines_gpl/flow2d3d/packages/flow2d3d_data/include/betaro.igs -text
 src/engines_gpl/flow2d3d/packages/flow2d3d_data/include/bubble.igs -text
 src/engines_gpl/flow2d3d/packages/flow2d3d_data/include/cline.igs -text
+src/engines_gpl/flow2d3d/packages/flow2d3d_data/include/config.h -text
 src/engines_gpl/flow2d3d/packages/flow2d3d_data/include/const.igs -text
 src/engines_gpl/flow2d3d/packages/flow2d3d_data/include/constd.igs -text
 src/engines_gpl/flow2d3d/packages/flow2d3d_data/include/coup.igs -text
