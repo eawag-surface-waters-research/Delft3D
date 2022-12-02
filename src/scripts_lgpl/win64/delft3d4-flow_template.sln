@@ -116,7 +116,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "kubint_version_number", "to
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lint_version_number", "tools_gpl\lint\packages\lint_version_number\lint_version_number.vcxproj", "{83B2DCB2-3F71-41A7-B235-C4E32045C730}"
 EndProject
-Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "data", "engines_gpl\flow2d3d\packages\data\data.vfproj", "{E4DD914F-DCA3-4CF6-A2C0-6461270D3235}"
+Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "data", "engines_gpl\flow2d3d\packages\flow2d3d_data\data.vfproj", "{E4DD914F-DCA3-4CF6-A2C0-6461270D3235}"
 	ProjectSection(ProjectDependencies) = postProject
 		{91C4971E-914C-4AD8-9711-6B53E856884C} = {91C4971E-914C-4AD8-9711-6B53E856884C}
 		{C29AA190-5BE8-4674-AA8A-E858964D3C08} = {C29AA190-5BE8-4674-AA8A-E858964D3C08}
@@ -127,7 +127,7 @@ Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "data", "engines_gpl\flow2d3
 		{5F3AF3FA-1CF3-4D3D-A105-8859BE35B757} = {5F3AF3FA-1CF3-4D3D-A105-8859BE35B757}
 	EndProjectSection
 EndProject
-Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "io", "engines_gpl\flow2d3d\packages\io\io.vfproj", "{10D19D73-B9E4-42BB-844A-082A986ED6C5}"
+Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "io", "engines_gpl\flow2d3d\packages\flow2d3d_io\io.vfproj", "{10D19D73-B9E4-42BB-844A-082A986ED6C5}"
 	ProjectSection(ProjectDependencies) = postProject
 		{18FB4D20-7250-4F05-A237-E0E8D6BA601A} = {18FB4D20-7250-4F05-A237-E0E8D6BA601A}
 		{E4DD914F-DCA3-4CF6-A2C0-6461270D3235} = {E4DD914F-DCA3-4CF6-A2C0-6461270D3235}
@@ -140,12 +140,12 @@ Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "io", "engines_gpl\flow2d3d\
 		{5F3AF3FA-1CF3-4D3D-A105-8859BE35B757} = {5F3AF3FA-1CF3-4D3D-A105-8859BE35B757}
 	EndProjectSection
 EndProject
-Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "io_dol_f", "engines_gpl\flow2d3d\packages\io_dol_f\io_dol_f.vfproj", "{AAE44000-23CC-4039-B135-3E04708C6CE2}"
+Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "io_dol_f", "engines_gpl\flow2d3d\packages\flow2d3d_io_dol_f\io_dol_f.vfproj", "{AAE44000-23CC-4039-B135-3E04708C6CE2}"
 	ProjectSection(ProjectDependencies) = postProject
 		{E9A42412-934D-4E9C-B035-FA6CDABD97BC} = {E9A42412-934D-4E9C-B035-FA6CDABD97BC}
 	EndProjectSection
 EndProject
-Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "kernel", "engines_gpl\flow2d3d\packages\kernel\kernel.vfproj", "{6BD9299F-31B8-4AB1-B6CE-62DA33CF19B5}"
+Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "kernel", "engines_gpl\flow2d3d\packages\flow2d3d_kernel\kernel.vfproj", "{6BD9299F-31B8-4AB1-B6CE-62DA33CF19B5}"
 	ProjectSection(ProjectDependencies) = postProject
 		{AAE44000-23CC-4039-B135-3E04708C6CE2} = {AAE44000-23CC-4039-B135-3E04708C6CE2}
 		{FEBFF54E-5BBA-454C-A4A5-326B8D858990} = {FEBFF54E-5BBA-454C-A4A5-326B8D858990}
@@ -155,19 +155,19 @@ Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "kernel", "engines_gpl\flow2
 		{5F3AF3FA-1CF3-4D3D-A105-8859BE35B757} = {5F3AF3FA-1CF3-4D3D-A105-8859BE35B757}
 	EndProjectSection
 EndProject
-Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "kernel_dd_f", "engines_gpl\flow2d3d\packages\kernel_dd_f\kernel_dd_f.vfproj", "{FEBFF54E-5BBA-454C-A4A5-326B8D858990}"
+Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "kernel_dd_f", "engines_gpl\flow2d3d\packages\flow2d3d_kernel_dd_f\kernel_dd_f.vfproj", "{FEBFF54E-5BBA-454C-A4A5-326B8D858990}"
 	ProjectSection(ProjectDependencies) = postProject
 		{10D19D73-B9E4-42BB-844A-082A986ED6C5} = {10D19D73-B9E4-42BB-844A-082A986ED6C5}
 	EndProjectSection
 EndProject
-Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "manager", "engines_gpl\flow2d3d\packages\manager\manager.vfproj", "{F9102D02-48CF-4954-B1C2-ED815BAA11A6}"
+Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "manager", "engines_gpl\flow2d3d\packages\flow2d3d_manager\manager.vfproj", "{F9102D02-48CF-4954-B1C2-ED815BAA11A6}"
 	ProjectSection(ProjectDependencies) = postProject
 		{AAE44000-23CC-4039-B135-3E04708C6CE2} = {AAE44000-23CC-4039-B135-3E04708C6CE2}
 		{6BD9299F-31B8-4AB1-B6CE-62DA33CF19B5} = {6BD9299F-31B8-4AB1-B6CE-62DA33CF19B5}
 		{B57FD1B0-684A-4A26-946D-2B54D0EB3994} = {B57FD1B0-684A-4A26-946D-2B54D0EB3994}
 	EndProjectSection
 EndProject
-Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "plugin_user", "engines_gpl\flow2d3d\packages\plugin_user\plugin_user.vfproj", "{E9A42412-934D-4E9C-B035-FA6CDABD97BC}"
+Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "plugin_user", "engines_gpl\flow2d3d\packages\flow2d3d_plugin_user\plugin_user.vfproj", "{E9A42412-934D-4E9C-B035-FA6CDABD97BC}"
 	ProjectSection(ProjectDependencies) = postProject
 		{E4DD914F-DCA3-4CF6-A2C0-6461270D3235} = {E4DD914F-DCA3-4CF6-A2C0-6461270D3235}
 	EndProjectSection
@@ -289,7 +289,7 @@ Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "morphology_io", "utils_gpl\
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "morphology_plugins_c", "utils_gpl\morphology\packages\morphology_plugins_c\morphology_plugins_c.vcxproj", "{59281EC5-5DAF-44C9-9B26-5A1F8DE3CB44}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "plugin_culvert_c", "engines_gpl\flow2d3d\packages\plugin_culvert_c\plugin_culvert_c.vcxproj", "{0C894FD0-D65E-42D5-B343-EC2076E98641}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "plugin_culvert_c", "engines_gpl\flow2d3d\packages\flow2d3d_plugin_culvert_c\plugin_culvert_c.vcxproj", "{0C894FD0-D65E-42D5-B343-EC2076E98641}"
 EndProject
 Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "deltares_common_mpi", "utils_lgpl\deltares_common\packages\deltares_common_mpi\deltares_common_mpi.vfproj", "{B57FD1B0-684A-4A26-946D-2B54D0EB3994}"
 	ProjectSection(ProjectDependencies) = postProject
