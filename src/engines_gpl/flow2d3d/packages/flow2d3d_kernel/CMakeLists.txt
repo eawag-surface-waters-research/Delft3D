@@ -1,4 +1,4 @@
-set(library_name kernel)
+set(library_name flow2d3d_kernel)
 
 # Define include directories
 get_module_include_path(${checkout_src_root}/${deltares_common_module} 
@@ -58,13 +58,13 @@ set_source_files_properties(${preprocessor_files}
                             PROPERTIES COMPILE_OPTIONS "${file_preprocessor_flag}")
 
 # Set dependencies
-set(oss_dependencies    data
-                        deltares_common
+set(oss_dependencies    deltares_common
                         deltares_common_mpi
                         delftio
                         ec_module
-                        io_dol_f
-                        kernel_dd_f
+                        flow2d3d_data
+                        flow2d3d_io_dol_f
+                        flow2d3d_kernel_dd_f
                         morphology_data
                         morphology_kernel) 
 oss_include_libraries(${library_name} oss_dependencies)

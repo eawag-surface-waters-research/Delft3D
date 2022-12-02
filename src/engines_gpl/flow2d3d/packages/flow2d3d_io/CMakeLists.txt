@@ -1,4 +1,4 @@
-set(library_name io)
+set(library_name flow2d3d_io)
 
 # Define include directories
 get_module_include_path(${checkout_src_root}/${deltares_common_module} 
@@ -36,14 +36,19 @@ add_library(${library_name} ${input_files}
                             ${preprocessor_files})
 
 # Set dependencies
-set(oss_dependencies_general    data
-                        deltares_common
-                        deltares_common_mpi
-                        ec_module
-                        io_hyd
-                        io_netcdf
-                        morphology_io
-                        morphology_kernel) 
+set(oss_dependencies_general    deltares_common
+                                deltares_common_c
+                                deltares_common_mpi
+                                delftio
+                                delftio_shm
+                                ec_module
+                                flow2d3d_data
+                                io_hyd
+                                io_netcdf
+                                morphology_data
+                                morphology_io
+                                morphology_kernel
+                                morphology_plugins_c) 
 # Add dependencies
 if (UNIX)
     # the `pkg_check_modules` function is created with this call

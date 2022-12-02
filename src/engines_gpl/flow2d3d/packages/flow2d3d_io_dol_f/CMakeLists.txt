@@ -1,4 +1,4 @@
-set(library_name io_dol_f)
+set(library_name flow2d3d_io_dol_f)
 
 # Define include directories
 get_module_include_path(${checkout_src_root}/${deltares_common_module} 
@@ -32,14 +32,14 @@ get_fortran_source_files(${src_path} source_files)
 add_library(${library_name} ${source_files})
 
 # Set dependencies
-set(oss_dependencies_general    data
-                        deltares_common
-                        deltares_common_mpi
-                        ec_module
-                        io_hyd
-                        io_netcdf
-                        morphology_io
-                        morphology_kernel) 
+set(oss_dependencies_general    deltares_common
+                                deltares_common_mpi
+                                ec_module
+                                flow2d3d_data
+                                io_hyd
+                                io_netcdf
+                                morphology_io
+                                morphology_kernel) 
 # Add dependencies
 if (UNIX)
     # the `pkg_check_modules` function is created with this call

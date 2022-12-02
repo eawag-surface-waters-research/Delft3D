@@ -1,3 +1,5 @@
+# Define library
+set(library_name flow2d3d_plugin_culvert_c)
 # Set directory which contains all source files
 set(src_path src)
 set(plugin_culvert_c_include_path ${CMAKE_CURRENT_SOURCE_DIR}/include)
@@ -20,8 +22,6 @@ include_directories(${plugin_culvert_c_include_path})
 file(GLOB header_files ${plugin_culvert_c_include_path}/*.h)
 file(GLOB source_files ${src_path}/*.c)
 
-# Define library
-set(library_name plugin_culvert_c)
 add_library(${library_name} ${header_files} 
                             ${source_files})
 

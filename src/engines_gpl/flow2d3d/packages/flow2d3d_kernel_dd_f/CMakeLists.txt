@@ -1,4 +1,4 @@
-set(library_name kernel_dd_f)
+set(library_name flow2d3d_kernel_dd_f)
 # Set directory which contains all source files
 set(src_path src)
 
@@ -14,9 +14,9 @@ get_fortran_source_files(${src_path} source_files)
 add_library(${library_name} ${source_files})
 
 # Set dependencies
-set(oss_dependencies    data
-                        deltares_common
-                        io) 
+set(oss_dependencies    deltares_common
+                        flow2d3d_data
+                        flow2d3d_io) 
 oss_include_libraries(${library_name} oss_dependencies)
 
 if(UNIX)

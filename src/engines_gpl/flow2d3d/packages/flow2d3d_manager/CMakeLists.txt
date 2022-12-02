@@ -1,4 +1,4 @@
-set(library_name manager)
+set(library_name flow2d3d_manager)
 
 # Define include directories
 get_module_include_path(${checkout_src_root}/${deltares_common_module} 
@@ -30,14 +30,14 @@ get_fortran_source_files(${src_path} source_files)
 add_library(${library_name} ${source_files})
 
 # Set dependencies
-set(oss_dependencies    data
-                        deltares_common
+set(oss_dependencies    deltares_common
                         deltares_common_mpi
                         delftio
                         ec_module
-                        io
-                        io_dol_f
-                        kernel) 
+                        flow2d3d_data
+                        flow2d3d_io
+                        flow2d3d_io_dol_f
+                        flow2d3d_kernel) 
 oss_include_libraries(${library_name} oss_dependencies)
 
 if(UNIX)

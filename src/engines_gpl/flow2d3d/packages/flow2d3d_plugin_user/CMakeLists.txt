@@ -1,4 +1,4 @@
-set(library_name plugin_user)
+set(library_name flow2d3d_plugin_user)
 
 # Define include directories
 get_module_include_path(${checkout_src_root}/${deltares_common_module} 
@@ -7,13 +7,9 @@ get_module_include_path(${checkout_src_root}/${deltares_common_module}
 get_module_include_path(${checkout_src_root}/${esmfsm_module} 
                         ${library_name} 
                         esmfsm_module_include_path)
-get_module_include_path(${checkout_src_root}/${flow2d3d_data_module} 
-                        ${library_name}
-                        flow2d3d_data_include_path)
 
 message(STATUS "Configuring '${library_name}' with the following deltares_common include path: '${deltares_common_include_path}'")
 message(STATUS "Configuring '${library_name}' with the following esmfsm include path: '${esmfsm_module_include_path}'")
-message(STATUS "Configuring '${library_name}' with the following data include path: '${flow2d3d_data_include_path}'")
 
 set(include_path ${CMAKE_CURRENT_SOURCE_DIR}/include)
 include_directories(${include_path}
@@ -31,14 +27,22 @@ get_fortran_source_files(${src_path} source_files)
 add_library(${library_name} ${source_files})
 
 # Set dependencies
-set(oss_dependencies    data
-                        delftio
-                        deltares_common
-                        deltares_common_mpi
-                        ec_module
-                        morphology_data 
-                        morphology_kernel) 
-oss_include_libraries(${library_name} oss_dependencies)
+set(oss_dependencies_general    delftio
+                                delftio_shm
+                                deltares_common
+                                deltares_common_c
+                                deltares_common_mpi
+                                ec_module
+                                flow2d3d_data
+                                fortranc
+                                fortrangis
+                                gridgeom
+                                io_netcdf
+                                kdtree2
+                                kdtree_wrapper
+                                morphology_data 
+                                morphology_kernel
+                                morphology_plugins_c)
 
 if(UNIX)
      # the `pkg_check_modules` function is created with this call
@@ -50,12 +54,22 @@ if(UNIX)
 
     set(oss_dependencies ${oss_dependencies_general})
 
-   target_link_libraries(${library_name}
-         ${oss_dependencies}
-         PkgConfig::NETCDF
-         PkgConfig::NETCDF_FTN)
+    target_link_libraries(${library_name} 
+        ${oss_dependencies}
+        PkgConfig::NETCDF
+        PkgConfig::NETCDF_FTN)
     add_definitions(-DHAVE_CONFIG_H)    
 endif(UNIX)
+if (WIN32)
+    set(oss_dependencies ${oss_dependencies_general}
+                        netcdf4
+                        netcdff)
+
+    target_link_libraries(${library_name} ${oss_dependencies})
+endif(WIN32)
+
+oss_include_libraries(${library_name} oss_dependencies)
+
 
 # Define how the files should be structured within Visual Studio
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${source_files})
