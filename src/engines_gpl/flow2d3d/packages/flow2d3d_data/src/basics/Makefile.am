@@ -17,7 +17,7 @@ noinst_LTLIBRARIES = libDataBasics.la
 AM_FCFLAGS += $(NETCDF_CFLAGS) $(NETCDF_FORTRAN_CFLAGS)
 
 FINCLUDES += \
-	-I$(top_builddir)/engines_gpl/flow2d3d/packages/data/include
+	-I$(top_builddir)/engines_gpl/flow2d3d/packages/flow2d3d_data/include
 
 FMODULES += \
         -I$(top_builddir)/utils_gpl/morphology/packages/morphology_data/src \

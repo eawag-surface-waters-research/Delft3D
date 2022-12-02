@@ -18,13 +18,13 @@ AM_FCFLAGS += $(NETCDF_CFLAGS) $(NETCDF_FORTRAN_CFLAGS)
 
 FINCLUDES += \
 	-I$(top_builddir)/utils_lgpl/esmfsm/include \
-	-I$(top_builddir)/engines_gpl/flow2d3d/packages/data/include
+	-I$(top_builddir)/engines_gpl/flow2d3d/packages/flow2d3d_data/include
 
 FMODULES += \
 	-I$(top_builddir)/utils_gpl/morphology/packages/morphology_io/src \
 	-I$(top_builddir)/utils_gpl/morphology/packages/morphology_kernel/src \
-	-I$(top_builddir)/engines_gpl/flow2d3d/packages/data/src/basics \
-	-I$(top_builddir)/engines_gpl/flow2d3d/packages/data/src/parallel_mpi \
+	-I$(top_builddir)/engines_gpl/flow2d3d/packages/flow2d3d_data/src/basics \
+	-I$(top_builddir)/engines_gpl/flow2d3d/packages/flow2d3d_data/src/parallel_mpi \
 	-I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/include \
 	-I$(top_builddir)/utils_lgpl/ec_module/packages/ec_module/src/meteo \
 	-I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src \

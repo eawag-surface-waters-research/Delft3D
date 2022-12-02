@@ -17,11 +17,11 @@ noinst_LTLIBRARIES = libIODolF.la
 FINCLUDES += \
 	-I$(top_builddir)/utils_lgpl/esmfsm/include \
 	-I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/include \
-	-I$(top_builddir)/engines_gpl/flow2d3d/packages/data/include \
-	-I$(top_builddir)/engines_gpl/flow2d3d/packages/io_dol_f/include
+	-I$(top_builddir)/engines_gpl/flow2d3d/packages/flow2d3d_data/include \
+	-I$(top_builddir)/engines_gpl/flow2d3d/packages/flow2d3d_io_dol_f/include
 
 FMODULES += \
-	-I$(top_builddir)/engines_gpl/flow2d3d/packages/data/src/basics \
+	-I$(top_builddir)/engines_gpl/flow2d3d/packages/flow2d3d_data/src/basics \
 	-I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src \
 	-I$(top_builddir)/utils_lgpl/ec_module/packages/ec_module/src
 

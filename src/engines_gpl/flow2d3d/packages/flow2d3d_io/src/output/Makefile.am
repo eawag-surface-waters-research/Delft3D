@@ -19,7 +19,7 @@ AM_FCFLAGS += $(NETCDF_CFLAGS) $(NETCDF_FORTRAN_CFLAGS)
 FINCLUDES += \
 	-I$(top_builddir)/utils_lgpl/esmfsm/include \
 	-I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/include \
-	-I$(top_builddir)/engines_gpl/flow2d3d/packages/data/include
+	-I$(top_builddir)/engines_gpl/flow2d3d/packages/flow2d3d_data/include
 
 FMODULES += \
 	-I$(top_builddir)/utils_gpl/morphology/packages/morphology_data/src \
@@ -31,9 +31,9 @@ FMODULES += \
 	-I$(top_builddir)/utils_lgpl/io_hyd/packages/io_hyd/src \
 	-I$(top_builddir)/utils_lgpl/delftio/packages/delftio/src/diof90 \
 	-I$(top_builddir)/utils_lgpl/delftio/packages/delftio/src/delftio_sync \
-	-I$(top_builddir)/engines_gpl/flow2d3d/packages/data/src/basics \
-	-I$(top_builddir)/engines_gpl/flow2d3d/packages/data/src/parallel_mpi \
-	-I$(top_builddir)/engines_gpl/flow2d3d/packages/data/src/general
+	-I$(top_builddir)/engines_gpl/flow2d3d/packages/flow2d3d_data/src/basics \
+	-I$(top_builddir)/engines_gpl/flow2d3d/packages/flow2d3d_data/src/parallel_mpi \
+	-I$(top_builddir)/engines_gpl/flow2d3d/packages/flow2d3d_data/src/general
 
 
 #-------------------------------------------------------------------------------

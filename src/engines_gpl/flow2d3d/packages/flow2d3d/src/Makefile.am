@@ -30,30 +30,30 @@ libflow2d3d_la_SOURCES = \
 #Libraries
 libflow2d3d_la_LIBADD = \
     $(top_builddir)/engines_gpl/flow2d3d/packages/flow2d3d/src/dd/libDD.la \
-    $(top_builddir)/engines_gpl/flow2d3d/packages/manager/src/libFlow2d3dManager.la \
-    $(top_builddir)/engines_gpl/flow2d3d/packages/kernel/src/main/libKernelMain.la \
-    $(top_builddir)/engines_gpl/flow2d3d/packages/kernel/src/non_hydro/libKernelNonHydro.la \
-    $(top_builddir)/engines_gpl/flow2d3d/packages/kernel/src/taylor/libKernelTaylor.la \
-    $(top_builddir)/engines_gpl/flow2d3d/packages/kernel/src/timedep/libKernelTimedep.la \
-    $(top_builddir)/engines_gpl/flow2d3d/packages/kernel/src/compute/libKernelCompute.la \
-    $(top_builddir)/engines_gpl/flow2d3d/packages/kernel/src/compute_nearfar/libKernelComputeNearfar.la \
-    $(top_builddir)/engines_gpl/flow2d3d/packages/kernel/src/compute_roller/libKernelComputeRoller.la \
-    $(top_builddir)/engines_gpl/flow2d3d/packages/kernel/src/compute_sediment/libKernelComputeSediment.la \
-    $(top_builddir)/engines_gpl/flow2d3d/packages/kernel_dd_f/src/libKernelDDF.la \
-    $(top_builddir)/engines_gpl/flow2d3d/packages/io/src/preprocessor/libIOPreprocessor.la \
-    $(top_builddir)/engines_gpl/flow2d3d/packages/io/src/output/libIOOutput.la \
-    $(top_builddir)/engines_gpl/flow2d3d/packages/kernel/src/inichk/libKernelInichk.la \
-    $(top_builddir)/engines_gpl/flow2d3d/packages/kernel/src/dd/libKernelDD.la \
-    $(top_builddir)/engines_gpl/flow2d3d/packages/io/src/input/libIOInput.la \
-    $(top_builddir)/engines_gpl/flow2d3d/packages/kernel/src/general/libKernelGeneral.la \
-    $(top_builddir)/engines_gpl/flow2d3d/packages/io_dol_f/src/libIODolF.la \
-    $(top_builddir)/engines_gpl/flow2d3d/packages/plugin_user/src/libPluginUser.la \
-    $(top_builddir)/engines_gpl/flow2d3d/packages/plugin_culvert_c/src/libPluginCulvertC.la \
-    $(top_builddir)/engines_gpl/flow2d3d/packages/data/src/allocation/libDataAllocation.la \
-    $(top_builddir)/engines_gpl/flow2d3d/packages/data/src/general/libDataGeneral.la \
-    $(top_builddir)/engines_gpl/flow2d3d/packages/data/src/gdp/libDataGDP.la \
-    $(top_builddir)/engines_gpl/flow2d3d/packages/data/src/parallel_mpi/libDataParallelMPI.la \
-    $(top_builddir)/engines_gpl/flow2d3d/packages/data/src/basics/libDataBasics.la \
+    $(top_builddir)/engines_gpl/flow2d3d/packages/flow2d3d_manager/src/libFlow2d3dManager.la \
+    $(top_builddir)/engines_gpl/flow2d3d/packages/flow2d3d_kernel/src/main/libKernelMain.la \
+    $(top_builddir)/engines_gpl/flow2d3d/packages/flow2d3d_kernel/src/non_hydro/libKernelNonHydro.la \
+    $(top_builddir)/engines_gpl/flow2d3d/packages/flow2d3d_kernel/src/taylor/libKernelTaylor.la \
+    $(top_builddir)/engines_gpl/flow2d3d/packages/flow2d3d_kernel/src/timedep/libKernelTimedep.la \
+    $(top_builddir)/engines_gpl/flow2d3d/packages/flow2d3d_kernel/src/compute/libKernelCompute.la \
+    $(top_builddir)/engines_gpl/flow2d3d/packages/flow2d3d_kernel/src/compute_nearfar/libKernelComputeNearfar.la \
+    $(top_builddir)/engines_gpl/flow2d3d/packages/flow2d3d_kernel/src/compute_roller/libKernelComputeRoller.la \
+    $(top_builddir)/engines_gpl/flow2d3d/packages/flow2d3d_kernel/src/compute_sediment/libKernelComputeSediment.la \
+    $(top_builddir)/engines_gpl/flow2d3d/packages/flow2d3d_kernel_dd_f/src/libKernelDDF.la \
+    $(top_builddir)/engines_gpl/flow2d3d/packages/flow2d3d_io/src/preprocessor/libIOPreprocessor.la \
+    $(top_builddir)/engines_gpl/flow2d3d/packages/flow2d3d_io/src/output/libIOOutput.la \
+    $(top_builddir)/engines_gpl/flow2d3d/packages/flow2d3d_kernel/src/inichk/libKernelInichk.la \
+    $(top_builddir)/engines_gpl/flow2d3d/packages/flow2d3d_kernel/src/dd/libKernelDD.la \
+    $(top_builddir)/engines_gpl/flow2d3d/packages/flow2d3d_io/src/input/libIOInput.la \
+    $(top_builddir)/engines_gpl/flow2d3d/packages/flow2d3d_kernel/src/general/libKernelGeneral.la \
+    $(top_builddir)/engines_gpl/flow2d3d/packages/flow2d3d_io_dol_f/src/libIODolF.la \
+    $(top_builddir)/engines_gpl/flow2d3d/packages/flow2d3d_plugin_user/src/libPluginUser.la \
+    $(top_builddir)/engines_gpl/flow2d3d/packages/flow2d3d_plugin_culvert_c/src/libPluginCulvertC.la \
+    $(top_builddir)/engines_gpl/flow2d3d/packages/flow2d3d_data/src/allocation/libDataAllocation.la \
+    $(top_builddir)/engines_gpl/flow2d3d/packages/flow2d3d_data/src/general/libDataGeneral.la \
+    $(top_builddir)/engines_gpl/flow2d3d/packages/flow2d3d_data/src/gdp/libDataGDP.la \
+    $(top_builddir)/engines_gpl/flow2d3d/packages/flow2d3d_data/src/parallel_mpi/libDataParallelMPI.la \
+    $(top_builddir)/engines_gpl/flow2d3d/packages/flow2d3d_data/src/basics/libDataBasics.la \
     $(top_builddir)/utils_gpl/morphology/packages/morphology_io/src/libMorphologyIO.la \
     $(top_builddir)/utils_gpl/morphology/packages/morphology_kernel/src/libMorphologyKernel.la \
     $(top_builddir)/utils_gpl/morphology/packages/morphology_plugins_c/src/libMorphologyPluginsC.la \

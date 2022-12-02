@@ -19,8 +19,8 @@ noinst_LTLIBRARIES = libFlow2d3dManager.la
 FINCLUDES += \
     -I$(top_builddir)/utils_lgpl/esmfsm/include \
     -I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/include \
-    -I$(top_builddir)/engines_gpl/flow2d3d/packages/data/include \
-    -I$(top_builddir)/engines_gpl/flow2d3d/packages/io_dol_f/include
+    -I$(top_builddir)/engines_gpl/flow2d3d/packages/flow2d3d_data/include \
+    -I$(top_builddir)/engines_gpl/flow2d3d/packages/flow2d3d_io_dol_f/include
 
 FMODULES += \
     -I$(top_builddir)/utils_lgpl/delftio/packages/delftio/src/diof90 \
@@ -29,10 +29,10 @@ FMODULES += \
     -I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common_mpi/src \
     -I$(top_builddir)/utils_lgpl/ec_module/packages/ec_module/src \
     -I$(top_builddir)/utils_lgpl/ec_module/packages/ec_module/src/meteo \
-    -I$(top_builddir)/engines_gpl/flow2d3d/packages/data/src/basics \
-    -I$(top_builddir)/engines_gpl/flow2d3d/packages/data/src/parallel_mpi \
-    -I$(top_builddir)/engines_gpl/flow2d3d/packages/io_dol_f/src \
-    -I$(top_builddir)/engines_gpl/flow2d3d/packages/kernel/src/inichk
+    -I$(top_builddir)/engines_gpl/flow2d3d/packages/flow2d3d_data/src/basics \
+    -I$(top_builddir)/engines_gpl/flow2d3d/packages/flow2d3d_data/src/parallel_mpi \
+    -I$(top_builddir)/engines_gpl/flow2d3d/packages/flow2d3d_io_dol_f/src \
+    -I$(top_builddir)/engines_gpl/flow2d3d/packages/flow2d3d_kernel/src/inichk
 
 #-------------------------------------------------------------------------------
 #   Sources
