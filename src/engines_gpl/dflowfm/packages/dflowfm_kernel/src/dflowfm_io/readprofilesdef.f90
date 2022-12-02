@@ -234,7 +234,7 @@ subroutine readprofilesdef(ja)    ! in afwachting van een module die profieldefi
      npr = npr2
      deallocate (npr2)
      ja  = 1
-     if (myzprofs > 0) then
+     if (myzprofs < 0) then
         call doclose(myzprofs)
      endif
 
