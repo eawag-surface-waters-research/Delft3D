@@ -18813,11 +18813,14 @@ src/utils_lgpl/d_hydro_lib/include/xmltree.h -text
 src/utils_lgpl/d_hydro_lib/packages/Makefile.am -text
 src/utils_lgpl/d_hydro_lib/packages/d_hydro_lib/CMakeLists.txt -text
 src/utils_lgpl/d_hydro_lib/packages/d_hydro_lib/Makefile.am -text
+src/utils_lgpl/d_hydro_lib/packages/d_hydro_lib/config.h.cmake.in -text
 src/utils_lgpl/d_hydro_lib/packages/d_hydro_lib/d_hydro_lib.vcproj -text
 src/utils_lgpl/d_hydro_lib/packages/d_hydro_lib/d_hydro_lib.vcxproj -text
 src/utils_lgpl/d_hydro_lib/packages/d_hydro_lib/d_hydro_lib_2012.vcxproj -text
 src/utils_lgpl/d_hydro_lib/packages/d_hydro_lib/d_hydro_lib_vs2013.vcxproj -text
+src/utils_lgpl/d_hydro_lib/packages/d_hydro_lib/include/FortranCInterface.h -text
 src/utils_lgpl/d_hydro_lib/packages/d_hydro_lib/include/Makefile.am -text
+src/utils_lgpl/d_hydro_lib/packages/d_hydro_lib/include/config.h -text
 src/utils_lgpl/d_hydro_lib/packages/d_hydro_lib/include/d_hydro_lib_version.h.svn -text
 src/utils_lgpl/d_hydro_lib/packages/d_hydro_lib/include/version_number.ini -text
 src/utils_lgpl/d_hydro_lib/packages/d_hydro_lib/src/Makefile.am -text
