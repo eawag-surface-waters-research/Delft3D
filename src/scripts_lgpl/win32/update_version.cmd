@@ -67,6 +67,11 @@ IF "%4" == "--onlyifmissing" (
 )
 
 
+rem MDK 06-12-2022. The statement below leads to warnings on a local machine
+rem it is however necessary on teamcity
+if exist %1 (
+	del %1
+)
 
 rem Generate version number source module using version_number.exe
 %VN% "%version%" "%3" "%1.svn" "%1"
