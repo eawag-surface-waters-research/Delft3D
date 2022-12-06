@@ -293,7 +293,7 @@ subroutine sethu(jazws0)                            ! Set upwind waterdepth hu
                  if ( toest == 'volk' ) then
                      vbov = qvolk/max(hunoweir, 1d-6 )
                  endif
-                 if (vbov > 1d-4) then
+                 if (vbov > 1d-8) then
                      agwdxi  = ag*weirdte(nfw)*dxi(L)
                      if (kmx == 0) then
                         advi(L) = advi(L) + agwdxi/vbov        ! 1/s
