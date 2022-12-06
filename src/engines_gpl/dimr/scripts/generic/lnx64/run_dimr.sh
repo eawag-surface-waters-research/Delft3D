@@ -18,6 +18,8 @@ function print_usage_info {
     echo "Options:"
     echo "-c, --corespernode <M>"
     echo "       number of cores per node, default $corespernodedefault"
+    echo "--cleanup <scriptname.sh>"
+    echo "       option to execute a user provided script directly after dimr has finished"
     echo "-d, --debug <D>"
     echo "       0:ALL, 6:SILENT; ALL includes overall time output"
     echo "-h, --help"
@@ -43,6 +45,8 @@ corespernodedefault=1
 corespernode=$corespernodedefault
 debuglevel=-1
 configfile=dimr_config.xml
+cleanup=0
+cleanupfile=
 D3D_HOME=
 runscript_extraopts=
 NNODES=1
@@ -71,6 +75,11 @@ case $key in
     ;;
     -m|--masterfile)
     configfile="$1"
+    shift
+    ;;
+    --cleanup)
+    cleanup=1
+    cleanupfile="$1"
     shift
     ;;
     --D3D_HOME)
@@ -248,11 +257,27 @@ else
 fi
 
 
-    # Wait until all child processes are finished
+# Wait until all child processes are finished
 wait
 
-    # Nefis files don't get write permission for the group bit
-    # Add it explicitly, only when stderr = 0
+# Execute only when stderr = 0
 if [ $? -eq 0 ]; then
+    # Nefis files don't get write permission for the group bit
+    # Add it explicitly
     chmod -R g+rw *.dat *.def &>/dev/null || true
+
+    # Check cleanup option
+    if [ $cleanup -eq 1 ]; then
+        echo ""
+        if [ "$cleanupfile" = "" ]; then
+            echo "ERROR: option --cleanup is active, but no filename is found"
+        else
+            if [ ! -f $cleanupfile ]; then
+                echo "ERROR: option --cleanup is active, but file $cleanupfile is not found in local directory"
+            else
+                echo "option --cleanup is active, script $cleanupfile is executed now"
+                . $cleanupfile
+            fi 
+        fi
+    fi
 fi

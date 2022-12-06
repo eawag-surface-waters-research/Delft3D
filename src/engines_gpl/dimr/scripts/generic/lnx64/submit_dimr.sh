@@ -35,6 +35,9 @@ function print_usage_info {
     echo "       queue, default normal-e3-c7"
     echo "-s, --sequential"
     echo "       sequential (non-MPI) run, equivalent to -n 1 -c 1"
+    echo 
+    echo "Starting from the first option that is not in the above list,"
+    echo "all remaining command line options are passed to run_dimr.sh."
     exit 1
 }
 
@@ -98,7 +101,7 @@ case $key in
     shift
     ;;
     --)
-    echo "-- sign detected, remained options are going to be passed to dimr"
+    echo "-- sign detected, remaining options are going to be passed to dimr"
     runscript_extraopts="$runscript_extraopts $*"
     break       # exit loop, stop shifting, all remaining arguments without dashes handled below
     ;;
