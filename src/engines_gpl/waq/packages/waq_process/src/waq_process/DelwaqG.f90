@@ -799,10 +799,6 @@
           do iseg = 1,noseg
               CALL DHKMRK(1,IKNMRK(iseg),iatt1) ! pick up first attribute
               CALL DHKMRK(2,IKNMRK(iseg),iatt2) ! pick up second attribute
-!             if (iatt1.gt.0) then
-!                 if (iatt2.eq.0.or.iatt2.eq.3) then
-!                     noseg2d = noseg2d+1
-!                 endif
               if (iatt2.eq.0.or.iatt2.eq.3) then
                   noseg2d = noseg2d+1
               endif
@@ -813,12 +809,7 @@
           do iseg = 1,noseg
               CALL DHKMRK(1,IKNMRK(iseg),iatt1) ! pick up first attribute
               CALL DHKMRK(2,IKNMRK(iseg),iatt2) ! pick up second attribute
-!             if (iatt1.gt.0) then
-!                 if (iatt2.eq.0.or.iatt2.eq.3) then
-!                     itel = itel+1
-!                     bottomsegments(itel) = iseg
-!                 endif
-!             endif
+
               if (iatt2.eq.0.or.iatt2.eq.3) then
                   itel = itel+1
                   bottomsegments(itel) = iseg
@@ -979,23 +970,6 @@
     !
           TFE  = fr_feim1 * IM1 + fr_feim2 * IM2 + fr_feim3 * IM3
 
-          ! the below part has been removed as it only calculates output items that are not (yet) noutput
-    !      QIM1 = 0.0
-    !      QIM2 = 0.0
-    !      QIM3 = 0.0
-    !      IF ( TFE .LT. 1E-10) THEN
-    !           FIM1 = 0.0
-    !           FIM2 = 0.0
-    !           FIM3 = 0.0
-    !      ELSE
-    !           FIM1 = fr_feim1 * IM1 / TFE
-    !           FIM2 = fr_feim2 * IM2 / TFE
-    !           FIM3 = fr_feim3 * IM3 / TFE
-    !           IF ( IM1 .GT. 1E-10 ) QIM1 = AAP*FIM1/IM1
-    !           IF ( IM2 .GT. 1E-10 ) QIM2 = AAP*FIM2/IM2
-    !           IF ( IM3 .GT. 1E-10 ) QIM3 = AAP*FIM3/IM3
-    !      ENDIF
-    !!
     !     Start the calculation of the sorption flux
     !     Use one of three options
     !
@@ -1769,10 +1743,6 @@
           iflux = nototseddis + 73
           fl(iflux+(iseg-1)*noflux) = fl(iflux+(iseg-1)*noflux) + fluxox*dl(ilay) /depth
 
-          if ( iseg2d == 1740 .or. iseg2d == 1940 ) then
-              !call print_kp( 'Fluxox', ilay, kp )
-          endif
-!
           ! +++++++++++++++++++++++++++++++++++++++++++
           ! Existing process PRECSUL
           ! +++++++++++++++++++++++++++++++++++++++++++

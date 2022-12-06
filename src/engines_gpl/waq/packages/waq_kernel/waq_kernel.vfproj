@@ -89,11 +89,6 @@
 				<Tool Name="VFFortranCompilerTool" NullPointerCheck="true" BoundsCheck="true" UninitializedVariablesCheck="true"/></FileConfiguration>
 			<FileConfiguration Name="Debug|x64">
 				<Tool Name="VFFortranCompilerTool" NullPointerCheck="true" BoundsCheck="true" UninitializedVariablesCheck="true"/></FileConfiguration></File>
-		<File RelativePath=".\src\dlforf.f">
-			<FileConfiguration Name="Debug|Win32">
-				<Tool Name="VFFortranCompilerTool" NullPointerCheck="true" BoundsCheck="true" UninitializedVariablesCheck="true"/></FileConfiguration>
-			<FileConfiguration Name="Debug|x64">
-				<Tool Name="VFFortranCompilerTool" NullPointerCheck="true" BoundsCheck="true" UninitializedVariablesCheck="true"/></FileConfiguration></File>
 		<File RelativePath=".\src\dlinit.f">
 			<FileConfiguration Name="Debug|Win32">
 				<Tool Name="VFFortranCompilerTool" NullPointerCheck="true" BoundsCheck="true" UninitializedVariablesCheck="true"/></FileConfiguration>
@@ -105,9 +100,6 @@
 			<FileConfiguration Name="Debug|x64">
 				<Tool Name="VFFortranCompilerTool" NullPointerCheck="true" BoundsCheck="true" UninitializedVariablesCheck="true"/></FileConfiguration></File>
 		<File RelativePath=".\src\dltest.f"/>
-		<File RelativePath=".\src\dlwq10.f"/>
-		<File RelativePath=".\src\dlwq11.f"/>
-		<File RelativePath=".\src\dlwq12.f"/>
 		<File RelativePath=".\src\dlwq13.f"/>
 		<File RelativePath=".\src\dlwq14.f"/>
 		<File RelativePath=".\src\dlwq15.f"/>
@@ -133,7 +125,6 @@
 		<File RelativePath=".\src\dlwq42.f"/>
 		<File RelativePath=".\src\dlwq43.f"/>
 		<File RelativePath=".\src\dlwq44.f"/>
-		<File RelativePath=".\src\dlwq45.f"/>
 		<File RelativePath=".\src\dlwq46.f"/>
 		<File RelativePath=".\src\dlwq50.f"/>
 		<File RelativePath=".\src\dlwq51.f"/>
@@ -372,18 +363,14 @@
 		<File RelativePath=".\src\dlwqt2.f"/>
 		<File RelativePath=".\src\dlwqt3.f"/>
 		<File RelativePath=".\src\dlwqt4.f"/>
-		<File RelativePath=".\src\dlwqt5.f"/>
 		<File RelativePath=".\src\dlwqta.f"/>
 		<File RelativePath=".\src\dlwqtb.f"/>
-		<File RelativePath=".\src\dlwqtc.f"/>
 		<File RelativePath=".\src\dlwqtd.f"/>
 		<File RelativePath=".\src\dlwqtk.f"/>
 		<File RelativePath=".\src\dlwqtr.f"/>
-		<File RelativePath=".\src\dlwsol.f"/>
 		<File RelativePath=".\src\dmpsurf.f"/>
 		<File RelativePath=".\src\dmpval.f"/>
 		<File RelativePath=".\src\dryfld.f90"/>
-		<File RelativePath=".\src\dumpconc.f"/>
 		<File RelativePath=".\src\dwtest.f"/>
 		<File RelativePath=".\src\fioraa.f"/>
 		<File RelativePath=".\src\fiosub.f"/>

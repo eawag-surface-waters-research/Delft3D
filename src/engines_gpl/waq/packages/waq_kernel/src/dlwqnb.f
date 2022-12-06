@@ -315,7 +315,7 @@
      +              A(ICONC), A(ICONS), A(IPARM), A(IFUNC), A(ISFUN),
      +              A(IVOL) , NOCONS  , NOFUN   , IDT     , NOUTP   ,
      +              LCHAR   , LUN     , J(IIOUT), J(IIOPO), A(IRIOB),
-     +              C(IOSNM), C(IOUNI), C(IODSC), C(ISSNM), C(ISUNI), C(ISDSC), 
+     +              C(IOSNM), C(IOUNI), C(IODSC), C(ISSNM), C(ISUNI), C(ISDSC),
      +              C(IONAM), NX      , NY      , J(IGRID), C(IEDIT),
      +              NOSYS   , A(IBOUN), J(ILP)  , A(IMASS), A(IMAS2),
      +              A(ISMAS), NFLUX   , A(IFLXI), ISFLAG  , IAFLAG  ,
@@ -516,19 +516,11 @@
 
       IF ( OLCFWQ ) THEN
 !     Synchronizing with CF(i) for on-line mode outside SRW only
-!         write (*,*) ' Stop WQ i=',TELLER,' '
-!          read  (*,*)
-!         write (*,*) ' PUTPER WQtoCF'
           call putpcf('WQtoCF','DataWQtoCF')
-!         write (*,*) ' DONE'
 !     Synchronizing with CF(i+1) for on-line mode outside SRW only
 !     ONLY if this is NOT the last time step!!!!!!!!!!!!!
           IF ( ITIME+IDT .LT. ITSTOP ) then
-!             write (*,*) ' GETPER CFtoWQ'
               call getpcf('CFtoWQ','DataCFtoWQ')
-!             write (*,*) ' DONE'
-!             write (*,*) ' Start WQ i=',TELLER+1,' '
-!              read  (*,*)
               LAATST = 0
           ELSE
               LAATST = -1
@@ -539,16 +531,8 @@
 !
       IF ( OLCFWQ .OR. SRWACT ) THEN
 !     Note: time step (i+1) of WQINT!
-!         write (*,*) ' Start WQI i=',TELLER+1,' '
-!          read  (*,*)
-!         write (*,*) ' PUTPEV WQtoWQI'
           call putpev ('WQtoWQI','DataWQtoWQI',LAATST)
-!         write (*,*) ' DONE '
-!         write (*,*) ' GETPER WQItoWQ'
           call GETPER ('WQItoWQ','DataWQItoWQ')
-!         write (*,*) ' DONE '
-!         write (*,*) ' Stop WQI i=',TELLER+1,' '
-!          read  (*,*)
       ENDIF
 
          call dlwqt0 ( lun      , itime    , itimel   , a(iharm) , a(ifarr) ,

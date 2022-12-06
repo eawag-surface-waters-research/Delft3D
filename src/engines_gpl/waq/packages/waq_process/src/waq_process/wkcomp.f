@@ -60,9 +60,7 @@
 !
       IFLUX = 0
       DO 9000 ISEG = 1 , NOSEG
-!        CALL DHKMRK(1,IKNMRK(ISEG),IKMRK1)
-!        IF (IKMRK1.EQ.1.OR.IKMRK1.EQ.2) THEN
-!
+
             NO3     = PMSA(IP(1 ))
             NH4     = PMSA(IP(2 ))
             PO4     = PMSA(IP(3 ))

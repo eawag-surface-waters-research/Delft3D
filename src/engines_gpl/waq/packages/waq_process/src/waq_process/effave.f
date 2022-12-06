@@ -69,7 +69,6 @@
       do iseg = 1 , noseg
 
          do igro = 1, nspe
-!            if (btest(iknmrk(iseg),0)) then
                efftalg = pmsa(ip(2+igro))
                limralg = pmsa(ip(32+igro))
                if (istep .eq. 0) then
@@ -81,11 +80,6 @@
                   ! Add contribution of present time step to tracer
                   fl(iflux + igro) = ((1.0/(rstep + 1.0) * limralg) + (rstep/(rstep + 1.0) - 1.0) * efftalg) / delt
                endif
- !           else
- !             pmsa(ip(62+igro)) = efftalg
- !             fleffi = 0.0
- !           endif
-!
          end do
          ip  = ip  + increm
          iflux = iflux + noflux

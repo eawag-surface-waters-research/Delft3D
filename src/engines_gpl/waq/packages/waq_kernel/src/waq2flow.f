@@ -218,7 +218,6 @@
          time(1) = itime*86400.d0
          tims(1) = ' '
          call dioputpltdatasetreals(diooutset, tims(1), nrvar, noseg, parval)
-!	   write(*,*)parval
 
       endif
 

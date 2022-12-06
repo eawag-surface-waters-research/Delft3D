@@ -40,9 +40,7 @@ libwaq_utils_la_SOURCES =  \
        dhagg2.f \
        dhaggr.f \
        dhagkm.f \
-       dhc20m.f \
        dhcarg.f \
-       dhcmov.f \
        dhctim.f \
        dhcwrd.f \
        dhdag2.f \
@@ -53,7 +51,6 @@ libwaq_utils_la_SOURCES =  \
        dhggd.f \
        dhgnam.f \
        dhgpoi.f \
-       dhgwrd.f \
        dhimov.f \
        dhkmrk.f \
        dhkmst.f \
@@ -63,12 +60,9 @@ libwaq_utils_la_SOURCES =  \
        dhpath.f \
        dhralloc.f \
        dhrmis.f \
-       dhscal.f \
        dhslen.f \
-       dhsuma.f \
        dhswtr.f \
        dhucas.f \
-       dhzerc.f \
        dhzeri.f \
        errsys.f \
        filldm.f \
@@ -84,7 +78,6 @@ libwaq_utils_la_SOURCES =  \
        putget.f \
        putgtc.f \
        rapdef.f \
-       rbpdef.f \
        rdvers.f \
        rdwrk4.f \
        reptim.f \
@@ -92,7 +85,6 @@ libwaq_utils_la_SOURCES =  \
        strip.f \
        usedcp.f \
        wapdef.f \
-       wbpdef.f \
        zero.f \
        zoek.f
 

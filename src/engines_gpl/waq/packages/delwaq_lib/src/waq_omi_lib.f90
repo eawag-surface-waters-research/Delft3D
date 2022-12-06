@@ -265,7 +265,7 @@ logical function SetOutputTimers(type, startTime, endTime, timeStep)
     use delwaq2_global_data
     use m_sysn
     use m_sysi
-  
+
     implicit none
 
     integer, intent(in)              :: type
@@ -556,7 +556,6 @@ logical function GetCurrentValue(name, value)
 
     call find_index( name, substance_name, idx )
     if ( idx > 0 ) then
-        !write(*,*) 'DELWAQ (ODA): iconc = ', iconc, ' notot = ', notot
         do i = 1,noseg
             value(i) = dlwqd%rbuf(iconc+idx-1+(i-1)*notot)
         enddo
@@ -1260,10 +1259,6 @@ logical function SetFlowData( volume, area, flow )
 
     SetFlowData = .true.
 
-!    write(*,*) 'Volume: ', volume(1), volume(2), volume(3)
-!    write(*,*) 'Flow:   ', flow  (1), flow  (2), flow  (3)
-!    write(*,*) 'Area:   ', area  (1), area  (2), area  (3)
-
 end function SetFlowData
 
 ! SetFlowData --
@@ -1314,8 +1309,6 @@ logical function SetFlowDataVelocity( velocity )
     dlwqd%rbuf(ivelo:ivelo+noq-1) = velocity
 
     SetFlowDataVelocity = .true.
-
-!    write(*,*) 'Velocity:   ', velocity  (1), velocity  (2), velocity  (3)
 
 end function SetFlowDataVelocity
 
@@ -1516,7 +1509,7 @@ integer function ModelPerformTimeStep ()
 
     use delwaq2_global_data
     use m_actions
-    
+
     implicit none
 
 
@@ -1682,7 +1675,6 @@ integer function ModelInitialize ()
 
    !
    ! Require SetInitialVolume instead
-   !call write_array_const( argv(2), 'volumes',  1.0, noseg )
     call write_array_const( argv(2), 'flows',    0.0, noq )
     call write_array_const( argv(2), 'areas',    1.0, noq )
     call write_array_const( argv(2), 'wastload', 0.0, nowst*(notot+1) )
@@ -1796,10 +1788,8 @@ subroutine write_delwaq04( name )
 
     write( lunwrk ) substance_name
 
-    !write( lunwrk ) ( monitor_cell(i), monitor_name(i), i = 1,nodump ) ! Classic form
     write( lunwrk ) ( monitor_name(i), i = 1,ndmpar )
     write( lunwrk ) ( monitor_cell(i), i = 1,ndmpar )
-    !write( lunwrk ) transect_name ! Not yet
 
     ! Grid definitions - base grid only
     iref = 1
@@ -1860,7 +1850,6 @@ subroutine write_delwaq04( name )
     if ( nobnd > 0 ) then
         write( lunwrk ) (boundary_id(i), boundary_name(i) ,i=1,nobnd )
         write( lunwrk ) boundary_type
-!!      write( lunwrk ) inwtyp(...)
         write( lunwrk ) (/ (i ,i=1,nobnd) /)  ! Type
         write( lunwrk ) ibpnt_array(1,:)      ! Time lag
     endif
@@ -1871,7 +1860,6 @@ subroutine write_delwaq04( name )
         load_kind = 0
         write( lunwrk ) (load_cell(i), load_kind, load_type(i), load_name(i) ,i=1,nowst)
         write( lunwrk ) load_type_def
-!!      write( lunwrk ) inwtyp(...)
         write( lunwrk ) (1 ,i=1,nowst )
     endif
 
@@ -2113,9 +2101,6 @@ subroutine write_functions( name )
     character(len=ITEM_NAME_SIZE) :: loc
 
     open( lun, file = trim(name) // '-function.wrk', form = 'unformatted',access='stream' )
-!    write( lun ) ' 4.900PROCES'
-!    write( lun ) 1, nocons, (k ,k=1,nocons), 0, 0, 0
-!    write( lun ) 1, 0, procparam_const_value
     write( lun ) ' 5.000PROCES'
     i = 0
     if (nocons>0) then
@@ -2264,13 +2249,6 @@ integer function ModelFinalize( )
 
 ! now deallocate all arrays in this lib!
     call delwaq2_global_data_finalize
-
-    ! close alle netcdf-corestatefiles !! obsolete!!!
-    !call dlwq_close_cta_state_files(ierr)
-
-    ! reset number of instances etc
-    !call dlwq_reset_all()
-
 
     ModelFinalize = 0
 

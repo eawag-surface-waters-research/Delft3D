@@ -487,7 +487,6 @@ integer                 :: iel, ioffs
             write(LOUT,*) '    local coordinates: identity'
          endif
          fmt = trim(fmt) // ')'
-         !write(LOUT,*) 'fmt=',trim(fmt)
 
 !        write information on the elements of factor ifac
 
@@ -562,8 +561,6 @@ type(t_ixset), pointer               :: new
 type(t_ixset), dimension(:), pointer :: wrk_indset
 !-----------------------------------------------------------------------------
 
-   !write(LOUT,*) 'ixset_define: starting for namixs="',trim(namixs),'"'
-
 !  Verify that the CouPLib datastructures have been initialized
 
    if (.not.associated(indset)) then
@@ -590,7 +587,6 @@ type(t_ixset), dimension(:), pointer :: wrk_indset
 !   - global coordinates (labels) are not yet supported
 !   - storage (local) coordinates are not yet supported
 
-   !write(LOUT,*) 'ixset_define: check present(parameters)...'
 
    if (present(iowner)) then
       if (size(iowner).ne.nelem) then

@@ -95,12 +95,8 @@
             cc(j) = c(j) + xmf(j) - 1.0
    90    continue
          fn = dble(nn) - 1.0
-!     write(not,1234)nn
-!1234  format(' loop in lp, simplex: ',i4)
          call simple(1, m, n, naij, aij, irow, jcol, p, cc, kout, xx,
      1    pie, jh, v3, v4, x3, r)
-!     write(not,1235)kout(1)
-!1235  format(' loop in lp, kout(1): ',i4)
          if (kout(1).ne.0) go to 240
          do 110 j=1,ntot
             x(j) = xx(j)
@@ -157,9 +153,6 @@
 !           simplex declared an unbounded solution.  species number is
 !        in kout(6).  lp will continue with current solution.  no
 !        message output.
-!     go to 100
-!     write(not,99990)
-!99990 format(' lp: the microsoft compiler could not handle this, apologies')
       mon = -kout(6)
       write(not,1001)kn(-mon)
 1001  format(' simplex declared an unbounded solution for species: ',a6)

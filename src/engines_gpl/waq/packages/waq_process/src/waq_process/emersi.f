@@ -101,8 +101,6 @@
 
          call dhkmrk(1,iknmrk(iseg),ikmrk1)
          if ( ikmrk1 .eq. 1 ) then
-!jvb     if (btest(iknmrk_save(iseg),0)) then
-
             depth      = pmsa(ip1 )
             zthreshold = pmsa(ip2 )
 

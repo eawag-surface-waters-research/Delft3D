@@ -828,24 +828,6 @@ C           NH4 over NO3 preferency
 !           you get a correction on both fluxes. The fact that there is no flux to NO3 in the water means
 !           you have an exclusively negative contribution to NO3 in the water.
 
-            !FN_MPB1 = FAM_S1_MPB1 + (1.-FAM_S1_MPB1)*FNI_S1_MPB1
-!            FN_MPB1 = FNI_S1_MPB1 + FAM_S1_MPB1
-!           IF ( FN_MPB1 .GT. 1.E-20 ) THEN
-!              FNO3_MPB1 = FNI_S1_MPB1 / FN_MPB1
-!              FNH4_MPB1 = FAM_S1_MPB1 / FN_MPB1
-!           ELSE
-!              FNO3_MPB1 = 0.0
-!              FNH4_MPB1 = 1.0
-!           ENDIF
-            !FN_MPB2 = FAM_S1_MPB2 + (1.-FAM_S1_MPB2)*FNI_S1_MPB2
-!            FN_MPB2 = FNI_S1_MPB2 + FAM_S1_MPB2
-!           IF ( FN_MPB2 .GT. 1.E-20 ) THEN
-!              FNO3_MPB2 = FNI_S1_MPB2 / FN_MPB2
-!              FNH4_MPB2 = FAM_S1_MPB2 / FN_MPB2
-!           ELSE
-!              FNO3_MPB2 = 0.0
-!              FNH4_MPB2 = 1.0
-!           ENDIF
             FNO3_MPB1 = 0.0
             FNH4_MPB1 = 1.0
             FNO3_MPB2 = 0.0

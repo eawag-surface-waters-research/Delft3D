@@ -334,7 +334,6 @@
          case ( 19 )                          !     DELWAQ2 monitoring file (.mon)
             select case ( opmode )
                case ( 1 )
-                  !call dhdelf ( finam, ierr2 )
                   open ( newunit=lun, file = finam, err = 910 )
                case default
                   ierr = 3
@@ -343,7 +342,6 @@
          case ( 20 )                          !     dump file
             select case ( opmode )
                case ( 1 )
-                  !call dhdelf ( finam, ierr2 )
                   open ( newunit=lun, file = finam, err = 910 )
                case default
                   ierr = 3
@@ -352,7 +350,6 @@
          case ( 21 )                          !     history file
             select case ( opmode )
                case ( 1 )
-                  !call dhdelf ( finam, ierr2 )
                   open ( newunit=lun, file = finam, err = 910, form='unformatted', access='stream', status = 'replace'  )
                case default
                   ierr = 3
@@ -361,7 +358,6 @@
          case ( 22 )                          !     map file
             select case ( opmode )
                case ( 1 )
-                  !call dhdelf ( finam, ierr2 )
                   open ( newunit=lun, file = finam, err = 910, form='unformatted', access='stream', status = 'replace'  )
                case default
                   ierr = 3
@@ -370,7 +366,6 @@
          case ( 23 )                          !     restart file
             select case ( opmode )
                case ( 1 )
-                  !call dhdelf ( finam, ierr2 )
                   open ( newunit=lun, file = finam, err = 910, form='unformatted', access='stream', status = 'replace'  )
                case default
                   ierr = 3
@@ -498,7 +493,6 @@
          case ( 37 )                          !     bal file
             select case ( opmode )
                case ( 1 )
-                  !call dhdelf(finam,ierr2)
                   open ( newunit=lun, file = finam, err = 910, form='unformatted', access='stream' )
                case default
                   ierr = 3

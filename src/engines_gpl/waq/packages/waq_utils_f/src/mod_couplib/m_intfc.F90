@@ -191,8 +191,6 @@ integer                                 :: intfc_hndl_namixs
 integer                 :: iset
 !-----------------------------------------------------------------------------
 
-   !write(LOUT,*) 'intfc_hndl_namixs: starting...'
-
 !  Get handle to index-set namixs
 
    iset = ixset_hndl(namixs)
@@ -246,7 +244,6 @@ character(len=STRLEN)   :: namixs
 integer                 :: iierr
 !-----------------------------------------------------------------------------
 
-   !write(LOUT,*) 'intfc_hndl_iset: starting...'
    if (present(ierr)) then
       iierr = ierr
    else
@@ -254,9 +251,6 @@ integer                 :: iierr
    endif
 
    call ixset_getprops(iset, namixs)
-   !write(LOUT,'(3a,i3,3a)') ' intfc_hndl: searching intfc="',trim(namitf), &
-   !     '" on index-set', iset, ' ("', trim(namixs), '")'
-   !, nintfc=', nintfc
 
    iitf = 0
    found = .false.
@@ -270,7 +264,6 @@ integer                 :: iierr
 !  Report result, return appropriate handle iitf or IDUNNO
 
    if (found) then
-      !write(LOUT,*) '...found, iitf=',iitf
       if (iierr.eq.-IWARN .or. iierr.eq.-IFATAL) then
          write(LOUT,*) 'Intfc_hdnl: an interface with name "',trim(namitf),&
              '" was found but should not (yet) exist.'
@@ -539,7 +532,7 @@ type(t_intfc), pointer               :: new
 integer                              :: ingb
 !-----------------------------------------------------------------------------
 
-   !write(LOUT,*) 'intfc_define: starting for namitf=',trim(namitf)
+
 
 !  Verify that the CouPLib datastructures have been initialized
 
@@ -590,7 +583,7 @@ integer                              :: ingb
 
 !  Register the number of neighbours and the send/receive-areas
 
-   !write(LOUT,*) '  registering nngb, nghtbl'
+
 
    new%nngb   = nngb
    new%nghtbl => nghtbl
@@ -608,7 +601,7 @@ integer                              :: ingb
       endif
    enddo
 
-   !write(LOUT,*) '  intfc_define: done, returning...'
+
 
 end subroutine intfc_define
 
@@ -809,10 +802,6 @@ integer                        :: nngb
 integer                        :: iprc, ingb
 integer                        :: iel, is, nsend, nrecv
 !-----------------------------------------------------------------------------
-
-   !write(LOUT,*) 'intfc_define_collcitf_owner: starting for namitf="',&
-   !     trim(namitf),'" on ixset "',trim(namixs),'"'
-
 !  get handle to index-set
 
    iset = ixset_hndl(namixs)
@@ -820,9 +809,6 @@ integer                        :: iel, is, nsend, nrecv
 !  get pointer to ownership-array of index-set
 
    call ixset_getprops(iset, nelem=nelem, piownr=iowner)
-
-   !write(LOUT,*) '  iset=',iset,', nelem=',nelem,', iowner='
-   !write(LOUT,*) iowner
 
 !  determine number of neighbours
 !   - master: all processes except myself that own one or more points
@@ -836,7 +822,6 @@ integer                        :: iel, is, nsend, nrecv
    else
       nngb = 1
    endif
-   !write(LOUT,*) '  nngb=',nngb
 
 !  construct neighbour-table
 
@@ -878,9 +863,6 @@ integer                        :: iel, is, nsend, nrecv
                   sndrcv%ircv(is) = iel
                endif
             enddo
-            !write(LOUT,*) '  ingb=',ingb,': iprc=',iprc,',', nrecv, &
-            !    ' recv-points:'
-            !write(LOUT,*) sndrcv%ircv
          endif
  100  continue
 
@@ -908,8 +890,6 @@ integer                        :: iel, is, nsend, nrecv
          endif
       enddo
 
-      !write(LOUT,*) '  ingb=1: iprc=1,', nsend,' send-points:'
-      !write(LOUT,*) sndrcv%isnd
    endif
 
 !  Use intfc_define to register the data collected as a new interface
@@ -1053,10 +1033,7 @@ integer                        :: idebug
                sndrcv%ircv(is) = iel
             endif
          enddo
-         !write(LOUT,*) '  ingb=',ingb,': iprc=',iprc,',', nrecv, &
-         !    ' recv-points:'
-         !write(LOUT,*) sndrcv%ircv
- 100  continue
+4 100  continue
 
    else
 !     worker-processes
@@ -1088,10 +1065,6 @@ integer                        :: idebug
             sndrcv%isnd(is) = iel
          endif
       enddo
-      !write(LOUT,*) '  ingb=',ingb,': iprc=',iprc,',', nsend, &
-      !    ' send-points:'
-      !write(LOUT,*) sndrcv%isnd
-
    endif
 #endif
 !  Use intfc_define to register the data collected as a new interface
@@ -1388,9 +1361,6 @@ integer                        :: idebug=0
                sndrcv%isnd(is) = iel
             endif
          enddo
-         !write(LOUT,*) '  ingb=',ingb,': iprc=',iprc,',', nsend, &
-         !    ' send-points:'
-         !write(LOUT,*) sndrcv%isnd
  100  continue
 
    else
@@ -1423,10 +1393,6 @@ integer                        :: idebug=0
             sndrcv%ircv(is) = iel
          endif
       enddo
-      !write(LOUT,*) '  ingb=',ingb,': iprc=',iprc,',', nrecv, &
-      !    ' recv-points:'
-      !write(LOUT,*) sndrcv%ircv
-
    endif
 #endif
 !  Use intfc_define to register the data collected as a new interface

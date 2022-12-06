@@ -160,8 +160,6 @@
   100         CONTINUE
           ENDIF
 
-!!        CALL DHKMRK(1,IKNMRK(ISEG),IKMRK1)
-!!        IF (IKMRK1.EQ.1) THEN
           IF (BTEST(IKNMRK(ISEG),0)) THEN
 !
 !            Compute FLUX only if SWITCH is 1.0
@@ -174,8 +172,6 @@
                 IF ( T1 .GE. 24.0 ) T1 = T1 - 24.0
                 T2 = T1 + DELTAT*24.0
                 IF ( T2 .GT. 24.001 ) THEN
-!                   WRITE (*,*) ' VAROXY: Illegal time frame'
-!                   CALL SRSTOP(1)
                     T2 = 24.
                     T1 = T2 - DELTAT*24.0
                 ENDIF
@@ -184,15 +180,10 @@
 !               Compute flux for interval [T1:T2] by subtracting integrals
 !               for both times and dividing by time interval
 
-!               FL(IFLUX)  = (( INTEGR(NINT(T2*12.0))
-!    J                         -INTEGR(NINT(T1*12.0)) )
-!    J                       / (T2-T1)- FRESPI ) /DEPTHW
                 FL(IFLUX)  = (( INTEGR(NINT(T2*12.0))
      J                         -INTEGR(NINT(T1*12.0)) )
      J                       / (T2-T1)* (FPPTOT+FRESPI)
      J                       - FRESPI ) / DEPTHW
-!                IF (ISEG.LE.2)
-!    J           WRITE (*,*) ISEG,FL(IFLUX),DEPTHW
 
              ELSE
                 FL(IFLUX)  = 0.0

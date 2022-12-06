@@ -216,17 +216,7 @@
             npmsa = lins+line+louts+loute
 
             allocate( ipnt(npmsa) )
-!!            write (*,*) 'NPMSA = ', npmsa
-!!            if (npmsa.gt.npmsamax) then
-!!                write (*,*) 'lins = ',lins
-!!                write (*,*) 'line = ',line
-!!                write (*,*) 'louts = ',louts
-!!                write (*,*) 'loute = ',loute
-!!                write (*,*) 'npmsa = ',npmsa
-!!                write (*,*) 'npmsamax = ',npmsamax
-!           if (npmsa.gt.npmsamax) then
-!!               call errsys ('PMSA admin array too small',1)
-!!            endif
+
             offset_vel = lins+line+louts
 
             ! Fluxes Admin

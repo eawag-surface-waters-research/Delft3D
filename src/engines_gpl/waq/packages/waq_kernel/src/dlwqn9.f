@@ -41,8 +41,6 @@
 !
 !     SUBROUTINES CALLED : DLWQTR, user transport routine
 !                          DLWQPP, user postprocessing routine
-!                          DLWQ10, system monitoring routine
-!                          DLWQ11, system dump routine
 !                          DLWQ13, system postpro-dump routine
 !                          DLWQ80, convert water quality processes
 !                          DLWQ81, add waste loads
@@ -230,7 +228,7 @@
      +              A(ICONC), A(ICONS), A(IPARM), A(IFUNC), A(ISFUN),
      +              A(IVOL) , NOCONS  , NOFUN   , 1       , NOUTP   ,
      +              LCHAR   , LUN     , J(IIOUT), J(IIOPO), A(IRIOB),
-     +              C(IOSNM), C(IOUNI), C(IODSC), C(ISSNM), C(ISUNI), C(ISDSC), 
+     +              C(IOSNM), C(IOUNI), C(IODSC), C(ISSNM), C(ISUNI), C(ISDSC),
      +              C(IONAM), NX      , NY      , J(IGRID), C(IEDIT),
      +              NOSYS   , A(IBOUN), J(ILP)  , A(IDERV), A(IMAS2),
      +              A(ISMAS), NFLUX   , A(IFLXI), ISFLAG  , IAFLAG  ,

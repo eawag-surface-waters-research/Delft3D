@@ -96,7 +96,6 @@
          call barx(x, xbar)
          call berror(err)
          call rcalc
-!        call matinx(r, mend, g, -1, v2, v3, ke)
          call matinv(r, mend, g, -1, v2, v3, ke)
          if (ke.ne.0) go to 70
          call del(dx, g)
@@ -159,7 +158,6 @@
             pie(i) = g(i) + pie(i)
   130    continue
          call rcalc
-!        call matinx(r, mend, pie, -1, v2, v3, ke)
          call matinv(r, mend, pie, -1, v2, v3, ke)
          if (ke.ne.0) go to 380
          dmax = 1.e+20
@@ -180,7 +178,6 @@
                ideg = ideg + 1
                th(j) = dmax1(th(j),0.0d00)
   140          tda = tda + th(j)*alpha(j)
-!              if (x(j).lt.(-dmax)*th(j)) dmax = -x(j)/th(j)
                if (x(j).lt.(-dmax)*th(j)) dmax = divide(-x(j),th(j))
                fe = fe + x(j)*alpha(j)
   150       continue
@@ -190,7 +187,7 @@
          fe2 = fe
          if (iter.eq.1) go to 170
          itr = iter - 1
-!        if (pf.gt.0) write (not,99997)itr,dfe,fe,optl,eps,err,tda,ideg
+
          if (pf.gt.0) write (not,99997)itr,dfe,eps,err,tda,ideg
 170      if(ijohn .ge. 1) call scrgen('Solve ','meth 1',iter,25,60)
          optl = dmin1(1.0d00,0.99*dmax)
@@ -256,7 +253,6 @@
      1    to 350
          call berror(err)
          call rcalc
-!        call matinx(r, mend, g, -1, v2, v3, ke)
          call matinv(r, mend, g, -1, v2, v3, ke)
          if (ke.ne.0) go to 380
          pmax2 = pmax1

@@ -84,15 +84,7 @@
 
 !     look for unstructured setting, this is misuse of nolay, fractim depends also on this
 
-      if ( .not. btest(intopt,15) ) then
-!jvb     believe nolay from delwaq1
-!        if ( noq3 .gt. 0 ) then
-!           if ( noseg - noq3 .ne. 0 ) then
-!              nolay = noseg / (noseg-noq3)
-!              if ( nolay*(noseg-noq3) .ne. noseg ) nolay = 1
-!           endif
-!        endif
-      else
+      if ( btest(intopt,15) ) then
          nolay = 1
       endif
 

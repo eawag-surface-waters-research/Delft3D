@@ -45,7 +45,7 @@
 !>      level of particles that are still to young to be migrated.
 
 !     Created             : April     2013 by Leo Postma
-!     Adapted             : May 2013 Frank Kleissen - adapted from par2waq.f: specifc for the oil module 
+!     Adapted             : May 2013 Frank Kleissen - adapted from par2waq.f: specifc for the oil module
 !                           to transfer dispersed oil, no take over time
 !     Files               : none
 
@@ -102,8 +102,6 @@
       integer                       ipb, isys         ! help variables
 
       integer(4) ithandl /0/
-
-!      if ( iddtim .eq. 0 ) return
 
       if ( timon ) call timstrt ( "oil2waq", ithandl )
 

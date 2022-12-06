@@ -115,15 +115,6 @@
       BMIN  = PMSA(IP7)
       BMAX  = PMSA(IP8)
 
-!     IF ( NOBUCK .LT. 1 ) THEN
-!        CALL GETMLU( LUNREP )
-!        WRITE( LUNREP, * ) 'ERROR in STAQTL'
-!        WRITE( LUNREP, * )
-!    &'Number of buckets must be at least 1'
-!        WRITE( LUNREP, * )
-!    &'Number of buckets: ', NOBUCK
-!        CALL SRSTOP( 1 )
-!     ENDIF
       IF ( NOBUCK .GT. MAXBCK ) THEN
          CALL GETMLU( LUNREP )
          WRITE( LUNREP, * ) 'ERROR in STAQTL'
@@ -133,16 +124,6 @@
      &'Number of buckets: ', NOBUCK-1, ' - maximum: ', MAXBCK-1
          CALL SRSTOP( 1 )
       ENDIF
-!
-!     IF ( BMIN .GE. BMAX ) THEN
-!        CALL GETMLU( LUNREP )
-!        WRITE( LUNREP, * ) 'ERROR in STAQTL'
-!        WRITE( LUNREP, * )
-!    &'Expected range inappropriate: minimum must lower than maximum'
-!        WRITE( LUNREP, * )
-!    &'Minimum: ', BMIN, ' - maximum: ', BMAX
-!        CALL SRSTOP( 1 )
-!     ENDIF
 
       BDIFF = ( BMAX - BMIN ) / REAL(NOBUCK-1)
 

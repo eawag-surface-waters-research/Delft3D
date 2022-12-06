@@ -66,10 +66,8 @@
 !                          DLCONV, conversion to TRISULA arrays
 !                          DLDIFU, performs time step
 !                          DLFLUX, computes fluxes for mass balance
-!                          DLFORF, applies Forester filter
 !                          DLINIT, initializes TRISULA arrays
 !                          DLMASB, updates mass balance
-!                          DLWSOL, print concentrations at end of simulation
 !
 !     PARAMETERS    :
 !
@@ -355,7 +353,7 @@
      +              A(ICONC), A(ICONS), A(IPARM), A(IFUNC), A(ISFUN),
      +              A(IVOL) , NOCONS  , NOFUN   , IDT     , NOUTP   ,
      +              LCHAR   , LUN     , J(IIOUT), J(IIOPO), A(IRIOB),
-     +              C(IOSNM), C(IOUNI), C(IODSC), C(ISSNM), C(ISUNI), C(ISDSC), 
+     +              C(IOSNM), C(IOUNI), C(IODSC), C(ISSNM), C(ISUNI), C(ISDSC),
      +              C(IONAM), NX      , NY      , J(IGRID), C(IEDIT),
      +              NOSYS   , A(IBOUN), J(ILP)  , A(IMASS), A(IMAS2),
      +              A(ISMAS), NFLUX   , A(IFLXI), ISFLAG  , IAFLAG  ,
@@ -509,17 +507,6 @@
      &                 rscale   , adummy   , eps      , vicmol   , a(idifx) ,
      &                 a(idify) , icentr   , dfluxx   , dfluxy   )
 
-!        Applies forester filter
-
-!             CALL DLFORF (
-!     *              LUN(19) ,
-!     *              NMAX    , 1       , JSTART  , NMMAXJ  ,
-!     *              NMAX*MMAX,KMAX    ,
-!     *              J(IKCS) , J(IKFS) , J(IKFU) , J(IKFV) ,
-!     *              r11     ,
-!     *              A(IWRK1), A(IWRK2),
-!     *              NOSYS   , NOTOT   , A(IVOLB)          )
-
 !        Computes fluxes for mass balance
 
          call dlflux ( jstart   , nmmaxj   , nmax*mmax, kmax     , nosys    ,
@@ -553,17 +540,6 @@
      &                 eqmbc    , eqmbc    , adummy   , a(ivola) , a(ivolb) ,
      &                 rscale   , adummy   , eps      , vicmol   , a(idify) ,
      &                 a(idifx) , icentr   , dfluxx   , dfluxy              )
-!
-! APPLIES FORESTER FILTER
-!
-!             CALL DLFORF (
-!     *              LUN(19) ,
-!     *              NMAX    , 1       , JSTART  , NMMAXJ  ,
-!     *              NMAX*MMAX,KMAX    ,
-!     *              J(IKCS) , J(IKFS) , J(IKFU) , J(IKFV) ,
-!     *              r11     ,
-!     *              A(IWRK1), A(IWRK2),
-!     *              NOSYS   , NOTOT   , A(IVOLB)          )
 
 !        Computes fluxes for mass balance
 

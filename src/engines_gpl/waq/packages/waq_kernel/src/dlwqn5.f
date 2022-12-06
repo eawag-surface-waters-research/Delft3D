@@ -128,7 +128,7 @@
 !     Dummy variables - used in DLWQD
           ITIMEL  = ITIME
           lleng   = 0
-          ioptzb  = 0 
+          ioptzb  = 0
           nopred  = 6
           NOWARN  = 0
           tol     = 0.0D0
@@ -273,7 +273,7 @@
      +              A(ICONC), A(ICONS), A(IPARM), A(IFUNC), A(ISFUN),
      +              A(IVOL) , NOCONS  , NOFUN   , IDT     , NOUTP   ,
      +              LCHAR   , LUN     , J(IIOUT), J(IIOPO), A(IRIOB),
-     +              C(IOSNM), C(IOUNI), C(IODSC), C(ISSNM), C(ISUNI), C(ISDSC), 
+     +              C(IOSNM), C(IOUNI), C(IODSC), C(ISSNM), C(ISUNI), C(ISDSC),
      +              C(IONAM), NX      , NY      , J(IGRID), C(IEDIT),
      +              NOSYS   , A(IBOUN), J(ILP)  , A(IMASS), A(IMAS2),
      +              A(ISMAS), NFLUX   , A(IFLXI), ISFLAG  , IAFLAG  ,
@@ -424,10 +424,6 @@
          if (itime.ge.itstop) then
             call collect_rdata(mypart, A(iconc), notot,'noseg',1, ierr)
             call collect_rdata(mypart, A(imass), notot,'noseg',1, ierr)
-!           do isys = 1, 1
-!             call dumpconc(lun(19),'na dlwq18, conc',A(iconc), notot, noseg, isys)
-!             call dumpconc(lun(19),'na dlwq18, mass',A(imass), notot, noseg, isys)
-!           enddo
          endif
 
 !     calculate closure error

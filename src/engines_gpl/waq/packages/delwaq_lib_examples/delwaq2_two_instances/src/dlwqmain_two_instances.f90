@@ -72,7 +72,6 @@ program delwaq2_two_instances
         call dlwqmain( action, argc, argv, dlwqd(1) )
 
         call dlwqmain( action, argc, argv, dlwqd(2) )
-        !call dlwqmain( action, argc, argv, dlwqd(2) )
     enddo
 
     !

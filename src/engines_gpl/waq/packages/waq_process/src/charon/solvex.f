@@ -45,8 +45,6 @@
         if(ierror .eq. 3) call solve2(kk)
         if(ierror .eq. 1) go to 999
         if(ierror .eq. 8) then
-!          write(not,1234)kk
-!1234      format(' second order failed ',i4)
 ! change to projection
           kk  = 1
         endif
@@ -58,8 +56,6 @@
         if(ierror .eq. 1) go to 999
         if(ierror .eq. 8) then
           if(done) go to 90
-!          write(not,1235)kk
-!1235      format(' projection failed ',i4)
 ! if simplex already done go to sec order
           if(kk .eq. 2) then
             done = .true.
@@ -77,8 +73,6 @@
         if(ierror .eq. 1) go to 999
         write(not,1236)kk
 1236    format(' simplex failed ',i4)
-!        write(not,1237)str6
-!1237    format('****warning:  solve could not find a solution in ',a6)
         if(.not.done) then
 ! simplex failed, try once projection
           done = .true.

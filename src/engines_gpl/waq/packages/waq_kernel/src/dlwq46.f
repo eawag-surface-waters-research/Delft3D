@@ -116,9 +116,6 @@
          ENDIF
          A    = AREA(IQ)
          Q    = FLOW(IQ)
-!jvb     IF ( MOD(IOPT,2) .EQ. 1 ) THEN
-!             IF ( ABS(Q) .LT. 10.0E-25 )  GOTO 60
-!jvb     ENDIF
 !
 !     Check if exchange is dump exchange, set IPB
 !

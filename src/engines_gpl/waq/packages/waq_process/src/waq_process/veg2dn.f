@@ -296,10 +296,6 @@
                     TIN = 0.0
                 endif
 
-!                if (porewater .le. 1.0e-10 .or. TIN .le. 1.0e-10) then
-!                    TIN = 0.0
-!                endif
-
                 pmsa(ipnt(ioffout+5)) = 0.0
                 pmsa(ipnt(ioffout+6)) = Vini + (Vmax*TIN)/(Km + TIN)
                 pmsa(ipnt(ioffout+7)) = 0.0

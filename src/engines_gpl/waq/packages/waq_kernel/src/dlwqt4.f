@@ -227,7 +227,6 @@
       end do
 
       if ( iGo .eq. UseDefColl % cursize )               ! Before the range of all descriptions (simulation stops in MESSAG)
-!jvb *   CALL MESSAG ( LUNOUT , 6 , ISFLAG , UseDefColl%unitnr , 'Simulation time earlier!', ITIME , -iTt ) ! give at least first filename to give a hint on the problem :
      *   CALL MESSAG ( LUNOUT , 6 , ISFLAG , UseDefColl%unitnr ,
      *                       UseDefColl%FileUseDefs(1)%afilePnt%pnt%name, ITIME, -iTt )
 

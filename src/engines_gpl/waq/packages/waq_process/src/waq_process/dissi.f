@@ -25,7 +25,7 @@
      &                    noflux , iexpnt , iknmrk , noq1   , noq2   ,
      &                    noq3   , noq4   )
 !>\file
-!>       Dissolution of Si in opal 
+!>       Dissolution of Si in opal
 
 !
 !     Description of the module :
@@ -43,7 +43,7 @@
 ! TC      R*4 1 I     temperature coefficient of dissolution           [-]
 ! TEMP    R*4 1 I     temperature                                     [oC]
 ! TEMPC   R*4 1 -     temperature function                             [-]
-! SWDISSI R*4 1 I     option: 0.0 2nd order diss., 1.0 1st order diss.  
+! SWDISSI R*4 1 I     option: 0.0 2nd order diss., 1.0 1st order diss.
 !
 !     Logical Units : -
 !
@@ -77,9 +77,6 @@
       IFLUX = 0
 !
       DO 9000 ISEG = 1 , NOSEG
-!
-!!    CALL DHKMRK(1,IKNMRK(ISEG),IKMRK1)
-!!    IF (IKMRK1.EQ.1.OR.IKMRK1.EQ.3) THEN
 !
       IF (BTEST(IKNMRK(ISEG),0)) THEN
          CSID    = MAX(PMSA(IP1),0.0)

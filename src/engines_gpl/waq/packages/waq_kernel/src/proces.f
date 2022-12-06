@@ -266,8 +266,6 @@
 !
 !     Start timings
 !
-!     call timer_start(timer_proces)
-!
 !     allocate velndt, dspndt
 !
       if ( .not. allocated(velndt) ) then
@@ -724,23 +722,9 @@
 !     processen hebben met een grotere tijdstap de integratie samen met het
 !     transport doen.
 
-!grd  IF ( NOFLUX .GT. 0 .AND. NOGRID .GT. 1 ) THEN
       if ( noflux .gt. 0 .and. maxgrid .gt. 1 ) then
          do igrd = 2 , nogrid
-!           DO ISYS = 1 , NOTOT
-!              ISWCUM = 1
-!              NOSEG2 = GRDNOS(IGRD)
-!              IPGR   = NOTOT*NOSEG*(IGRD-1) + 1
-!              CALL DHDAGG( NOSEG         , NOSEG2     ,
-!    +                      NOTOT         , NOTOT      ,
-!    +                      NOTOT         , NOTOT      ,
-!    +                      ISYS          , ISYS       ,
-!    +                      ISYS          , ISYS       ,
-!    +                      GRDSEG(1,IGRD), 2          ,
-!    +                      DERIV(1,1,igrd)   , AMASS      ,
-!    +                      ISWCUM        , AMASS(IPGR),
-!    +                      DERIV         )
-!           ENDDO
+
             iswcum = 1
             noseg2 = grdnos(igrd)
             call dhdag2( noseg   , noseg2           , notot  , notot           , notot  ,
@@ -803,13 +787,6 @@
      &                 noq    , ownerq , mypart , velndt , istep  )
       endif
 
-!     Update output-data between neighbouring processors
-
-!     call update_data(deriv, notot, 'noseg', 1, 'stc1', ierr)
-!     call update_data(amass, notot, 'noseg', 1, 'stc1', ierr)
-!     if (ndspn.gt.0) call update_data(dispnw, ndspn,'noq',1, 'exchg_for_ownseg', ierr)
-!     if (nveln.gt.0) call update_data(velonw, nveln,'noq',1, 'exchg_for_ownseg', ierr)
-
  9999 if ( timon ) call timstop ( ithandl )
       return
  2000 format ( ' ERROR: undefined kind of array in PROCES :', i8 )
@@ -861,7 +838,6 @@
 !
 !     get the general local work array, first index of LOCAL array
 !
-!     call timer_start(timer_proces_grids)
       IX_HLP = 1
       IA_HLP = 33
       CALL DHGVAR( IA_HLP, IX_HLP, IV_HLP)
@@ -1088,7 +1064,6 @@
          ENDIF
 !
       ENDDO
-!     call timer_stop(timer_proces_grids)
 !
 !     compute fluxes
 !

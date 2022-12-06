@@ -232,10 +232,6 @@
 !
       DO 20 K = 1,NPROC
          CALL PRONRS ( PRONAM(K), IMODU(K) )
-!        IF ( IMODU(K) .EQ. 0 ) THEN
-!           WRITE ( LUREP, 2080 ) PRONAM(K)
-!           IERR = IERR + 1
-!        ENDIF
    20 CONTINUE
 !
 !     Report on process decomposition

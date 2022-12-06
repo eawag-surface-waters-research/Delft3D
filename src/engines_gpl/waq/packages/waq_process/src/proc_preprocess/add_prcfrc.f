@@ -108,8 +108,6 @@
 
                   ! include also "dummy" rules (factor equal zero)
 
-                  !if ( abs(proc%fluxstochi(istochi)%scale) .gt. 1e-10 ) then
-
                      call zoek( basnam, 1, proc%fluxstochi(istochi)%substance, 10, indx)
                      if ( indx .eq. 1 ) then
 

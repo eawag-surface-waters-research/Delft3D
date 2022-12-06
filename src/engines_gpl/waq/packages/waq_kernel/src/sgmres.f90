@@ -242,7 +242,7 @@
      &                  hess( I,SN )                            )
 
             RESID = ABS( WORK(I+1,S) ) / BNRM2
-!           WRITE (*,'(''GMRES'',I7,E13.5)') ITER, RESID
+
             IF ( LITREP ) THEN
                WRITE (LUREP,'(''GMRES'',I7,E13.5)') ITER, RESID
             ENDIF
@@ -317,8 +317,7 @@
      &          KLAY   , IOPTPC   , NOBND     , TRIWRK , iexseg   )
       work(i+1,s) = sqrt( sum(work(:,r)*work(:,r)) )
       RESID = WORK(I+1,S) / BNRM2
-!     WRITE (*,'(''T.U.P.E.RES,T.S.P.E.RES,BNRM2'',I6,3E13.5)')
-!    .      ITER, WORK(I+1,S),RESID,BNRM2
+
       IF ( LITREP ) THEN
          WRITE (LUREP,'(''Cycles,T.U.P.E.RES,T.S.P.E.RES,BNRM2'',                               &
      &         I8,3E13.5)')                                                                     &

@@ -246,16 +246,13 @@
 
       ! case sensitivity
       call setzmo ( 0 )
-      ! call setzmo ( 1 )
 
       ! monitoring level
-      !call setmmo ( mlevel )
       call setmmo ( 10     )
 
       ! active processes only switch
       ! only activated processes are switched on
       laswi = .true.
-      ! laswi = .false.
 
       ! initialise statistical processes
       statprocesdef%cursize = 0
@@ -548,7 +545,6 @@
 
       ! handle output from statistical processes
 
-!      call set_stat_output( statprocesdef, noutp, ioutps, nrvart, outputs)
       noout_statt = 0
       noout_state = 0
 !     first statistics with temporal output

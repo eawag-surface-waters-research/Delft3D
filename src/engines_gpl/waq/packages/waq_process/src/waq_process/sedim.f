@@ -239,7 +239,6 @@
                 FL ( 1 + (IVAN-1)*NOFLUX ) = 0.0
 
             ELSEIF (IKMRKV.EQ.1.AND.IKMRKN.EQ.1) THEN
-!           IF (IKMRKV.EQ.1.AND.IKMRKN.EQ.1) THEN
 
 !               Water-water uitwisseling
 !rs             merk op: sedimentatie tussen waterlagen: geen taucr correctie,

@@ -122,11 +122,6 @@
 !          Even if not, then the file should be available on all
 !          nodes, as they share the directory.
 !
-!     IF ( NPARTp .GT. 1 ) THEN
-!        WRITE(LUNREP,2060) NPARTp
-!        CALL SRSTOP(1)
-!     ENDIF
-!
 !          check number of parameters
 !
 !     Initialisation set index pointers, read surface areas
@@ -155,8 +150,6 @@
 !
 !              It is assumed the SURF parameter has been set in the input
 !
-!              WRITE (LUNREP,2020)
-!              WRITE (  *   ,2020)
             ELSE
                OPEN ( NEWUNIT = LCCCO, FILE='areachar.dat', FORM  ='UNFORMATTED',
      +                                 STATUS='OLD'       , IOSTAT=IER2         )

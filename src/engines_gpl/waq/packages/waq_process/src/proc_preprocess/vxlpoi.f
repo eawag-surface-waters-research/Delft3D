@@ -125,7 +125,6 @@
 !
 !     as constant ?
 !
-!jcb  call zoek ( valnam , nocons, coname , 10   , ico    )
       ico = dlwq_find(constants,valnam)
       if ( ico .gt. 0 ) then
          write(line,'(a,i3,a,g13.6)') '       Using constant nr',ico,' with value:',constants%constant(ico)

@@ -44,8 +44,6 @@
 !
 !     SUBROUTINES CALLED : DLWQTR, user transport routine
 !                          DLWQPP, user postprocessing routine
-!                          DLWQ10, system monitoring routine
-!                          DLWQ11, system dump routine
 !                          DLWQ13, system postpro-dump routine
 !                          DLWQ15, wasteload routine
 !                          DLWQ60, scales water quality
@@ -83,7 +81,7 @@
       use m_sysa          ! Pointers in real array workspace
       use m_sysj          ! Pointers in integer array workspace
       use m_sysc          ! Pointers in character array workspace
-      
+
       implicit none
 
 !
@@ -241,7 +239,7 @@
      +              A(ICONC), A(ICONS), A(IPARM), A(IFUNC), A(ISFUN),
      +              A(IVOL) , NOCONS  , NOFUN   , 1       , NOUTP   ,
      +              LCHAR   , LUN     , J(IIOUT), J(IIOPO), A(IRIOB),
-     +              C(IOSNM), C(IOUNI), C(IODSC), C(ISSNM), C(ISUNI), C(ISDSC), 
+     +              C(IOSNM), C(IOUNI), C(IODSC), C(ISSNM), C(ISUNI), C(ISDSC),
      +              C(IONAM), NX      , NY      , J(IGRID), C(IEDIT),
      +              NOSYS   , A(IBOUN), J(ILP)  , A(IDERV), A(IMAS2),
      +              A(ISMAS), NFLUX   , A(IFLXI), ISFLAG  , IAFLAG  ,

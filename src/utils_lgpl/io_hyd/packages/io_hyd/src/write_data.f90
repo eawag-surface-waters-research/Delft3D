@@ -146,11 +146,7 @@
    40          continue
             endif
          else
-!           if ( flagsf .eq. 1 ) then
-!              itime2 = itime/86400.
-!           else
-               call dhctim(itime,itime2,.true.,.false.)
-!           endif
+            call dhctim(itime,itime2,.true.,.false.)
             write ( lun , 2060 ) itime2
             do 50 il = 1 , noloc
                write ( lun , 2070 ) (ardata(i+(il-1)*noval),i=1,noval)

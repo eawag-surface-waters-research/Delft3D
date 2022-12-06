@@ -65,7 +65,7 @@
       IFLUX = 0
       DO 9000 ISEG = 1 , NOSEG
          CALL DHKMRK(1,IKNMRK(ISEG),IKMRK1)
-!!       IF (IKMRK1.EQ.1.OR.IKMRK1.EQ.3) THEN
+
          IF (BTEST(IKNMRK(ISEG),0)) THEN
 
             Surf    = PMSA(IP1 )

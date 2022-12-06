@@ -228,38 +228,6 @@
       RETURN
       END
 !
-      SUBROUTINE GETZMO (ICASGT)
-!
-!     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
-!
-!     CREATED: april 1993 by Jan van Beek
-!
-!     FUNCTION            : gives search mode
-!
-!     SUBROUTINES CALLED  : -
-!
-!     COMMON's            : CZOEK , search settings
-!
-!     PARAMETERS          : 1
-!
-!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-!     ----    -----    ------     ------- -----------
-!     ICASGT  INTEGER       1     OUTPUT  actual search mode
-!
-!     Declaration of arguments
-!
-      INTEGER    ICASGT
-!
-!     COMMON's
-!
-      INTEGER          ICASEM
-      COMMON / CZOEK / ICASEM
-      SAVE   / CZOEK /
-!
-      ICASGT = ICASEM
-!
-      RETURN
-      END
 !
       BLOCK DATA BCZOEK
 !

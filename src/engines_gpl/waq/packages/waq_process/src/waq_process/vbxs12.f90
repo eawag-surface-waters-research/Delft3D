@@ -372,11 +372,7 @@
           do iseg = 1,noseg
               call dhkmrk(1,iknmrk(iseg),ikmrk1)
               call dhkmrk(2,iknmrk(iseg),ikmrk2)
-!             if (ikmrk1 == 1 ) then
-!                 if (ikmrk1.lt.3 .and. (ikmrk2.eq.0).or.(ikmrk2.eq.3)) then
-!                     botseg(iseg) = iseg
-!                 endif
-!             endif
+
               if (ikmrk1.lt.3 .and. (ikmrk2.eq.0).or.(ikmrk2.eq.3)) then
                   botseg(iseg) = iseg
               endif
@@ -693,7 +689,6 @@
 !                         initial biomass exceeds minimum
                           IF ( (iniVB - minVB) .gt. 1.E-10) then
 !                             initial biomass less than maximum biomass
-!                             IF ((maxVB - iniVB) .gt. 1.E-10) THEN
                               IF ( (iniVB/maxVB) .lt. 0.99) THEN
                                   ageVB  = hlfAgeVB + LOG((minVB-maxVB) /(iniVB-maxVB) - 1 ) / sfVB
                               ELSE
@@ -710,14 +705,6 @@
 
                          VBha  = VB / iniCovVB / tonha_gm2
                          dVB   = ( VBAha - VBha ) * tonha_gm2 * surf / volume / delt * iniCovVB
-!                        no growth reduction during initialisation
-!                         if (dVB .gt. 1.E-20) then
-!                             NutLimVB = min (1.0, (dVBMaxNL / dVB) )
-!                         else
-!                             NutLimVB = 1
-!                         endif
-!                         dVB = min(dVBMaxNL, dVB)
-
                       ELSE
 
                           VBha  = VB / iniCovVB / tonha_gm2
@@ -725,14 +712,14 @@
 !                         vegetation is flooded
                           if ( NINT (SWVBMrt) .eq. 1 ) then
                               SWVBDec = 1
-!                             WRITE (ILUMON, *) 'vbgro-deadstart ', iseg, ' ' , SWVBDec
+
                           endif
 
 !                         check if vegetation died long enough - regrowth allowed again
                           if  ( (VBha .lt. VBAge0ha) .and. (SWVBDec .eq. 1) .and.  SWRegrVB .eq. 1 )  then
                               SWVBDec = 0
                               ageVB = 0
-!                             WRITE (ILUMON, *) 'vbgro-decayklaar ', iseg, ' ' , SWVBDec
+
                           endif
 
 !                         calculate new age for decaying vegetation based on current biomass
@@ -745,9 +732,6 @@
                               else
 !                                 cannot calc age
                               endif
-!                             if (vbtype .eq. 5) then
-!                                 WRITE (ILUMON, *) 'agecalc at dying', iseg,'ifirst: ',ifirst(5),ageVB, VBha
-!                             endif
                           endif
 
 !                         calculate attainable biomass per ha using age
@@ -826,11 +810,6 @@
                           endif
 
                           if (rVB .lt. 1.0 .and. NINT(SWVBGro) .eq. 1 .and. NINT (SWVBMrt) .eq. 0) then
-!                             Checking for nutrient availability
-!                             if ( (F4VB + F5VB) - 1.E-10 .lt. 0.0 ) then
-!                                 CALL ERRSYS ('(no valid values for F4VB and F5VB (alloction factors vegetation  roots)', 1 )
-!                             end if
-!                             TODO check if sum (F1VB ... F5VB) = 1.00??
 
 !                             average Nutrient content of vegetation
                               weighCN = F1VB*CNf1VB + F2VB*CNf2VB + F3VB*CNf3VB + F4VB*CNf4VB + F5VB*CNf5VB
@@ -1156,10 +1135,6 @@
 
           call dhkmrk(1,iknmrk(iseg),ikmrk1)
           call dhkmrk(2,iknmrk(iseg),ikmrk2)
-!         if (ikmrk1.eq.1 .or. ikmrk1 .eq. 3) then !=> NO TESTING ON IKMRK1, PROCESS IS ALLWAYS ON!
-
-!         inicovvbxx  = pmsa(ipoint( 19)+(ibotseg-1)*increm( 19)) / 100. WHY NEEDED THERE IS A VALID UPTAKE FLUX DEFINED ALREADY
-!         if (inicovvbxx .gt. 0.001) then
 
           depth = pmsa(ipnt(ip_depth))
           totaldepth = pmsa(ipnt(ip_totaldepth))

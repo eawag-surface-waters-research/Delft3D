@@ -109,11 +109,10 @@
 !
 !     Read all elements
 !
-!     WRITE(LUNREP,*) ' reading GROUP:',GRPNAM
       UINDEX(1) = 1
       UINDEX(2) = 1
       UINDEX(3) = 1
-!     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(1)
+
       BUFLEN = NBYTSG(1)*ELMDMS(2,1)
       IERROR = GETELT (DEFFDS ,
      +                 GRPNAM , ELMNMS(1),
@@ -137,7 +136,7 @@
       DO IELM = 2 , NELEMS
          ELMDMS(2,IELM) = n_old_items
       ENDDO
-!     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(2)
+
       BUFLEN = NBYTSG(2)*ELMDMS(2,2)
       IERROR = GETELS (DEFFDS ,
      +                 GRPNAM , ELMNMS(2),
@@ -149,7 +148,7 @@
          WRITE(LUNREP,*) 'ERROR number:',IERROR
          GOTO 900
       ENDIF
-!     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(3)
+
       BUFLEN = NBYTSG(3)*ELMDMS(2,3)
       IERROR = GETELS (DEFFDS ,
      +                 GRPNAM , ELMNMS(3),
@@ -161,7 +160,7 @@
          WRITE(LUNREP,*) 'ERROR number:',IERROR
          GOTO 900
       ENDIF
-!     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(4)
+
       BUFLEN = NBYTSG(4)*ELMDMS(2,4)
       IERROR = GETELS (DEFFDS ,
      +                 GRPNAM , ELMNMS(4),
@@ -173,7 +172,7 @@
          WRITE(LUNREP,*) 'ERROR number:',IERROR
          GOTO 900
       ENDIF
-!     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(5)
+
       BUFLEN = NBYTSG(5)*ELMDMS(2,5)
       IERROR = GETELT (DEFFDS ,
      +                 GRPNAM , ELMNMS(5),
@@ -185,7 +184,7 @@
          WRITE(LUNREP,*) 'ERROR number:',IERROR
          GOTO 900
       ENDIF
-!     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(6)
+
       BUFLEN = NBYTSG(6)*ELMDMS(2,6)
       IERROR = GETELS (DEFFDS ,
      +                 GRPNAM , ELMNMS(6),
@@ -197,7 +196,7 @@
          WRITE(LUNREP,*) 'ERROR number:',IERROR
          GOTO 900
       ENDIF
-!     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(7)
+
       BUFLEN = NBYTSG(7)*ELMDMS(2,7)
       IERROR = GETELS (DEFFDS ,
      +                 GRPNAM , ELMNMS(7),

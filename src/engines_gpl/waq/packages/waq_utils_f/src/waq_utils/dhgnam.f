@@ -63,7 +63,6 @@
 !
       CALL DHGARG ( 1     , NAME  )
 
-!     write(*,*) 'AM: ',trim(name)
 !
 !     Get filename from steering file Delft3D
 !

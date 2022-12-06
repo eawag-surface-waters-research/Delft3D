@@ -408,22 +408,11 @@
 !         the inverse case is treated as DIGGING (see RESKOL)
 !         numerical parameter determines max.rel.corr. per time step
 
-!jvb      CORBUR = 0.0
           IF ( PORINP .GT. 0.0001 ) then
-!         IF ( PORACT .LT. PORINP-0.001 ) THEN
           IF ( PORACT .LT. PORINP ) THEN
-!jvb          CORBUR = ACTH/DELT*DM*(PORINP-PORACT)/(1.0-PORACT)*MXRCOR
               CORBUR = CORBUR + ACTH/DELT*DM*(PORINP-PORACT)/(1.0-PORACT)*MXRCOR
           ENDIF
           ENDIF
-!         write (78,*) 'iq ',iq
-!         write (78,*) 'porinp ',porinp
-!         write (78,*) 'poract ',poract
-!         write (78,*) 'acth   ',acth
-!         write (78,*) 'delt   ',delt
-!         write (78,*) 'dm     ',dm
-!         write (78,*) 'mxrcor ',mxrcor
-!         write (78,*) 'corbur ',corbur
 
 !         Flux from segment
 
@@ -433,7 +422,6 @@
 
           IF ( DM .GT. 1E-20 )
      J    PMSA(IPBVEL+(IQ-1)*INBVEL) = (TOTBUR+CORBUR)/DM/86400.
-!         WRITE(78,*) ' SED_BUR ',IQ,TOTBUR/DM/86400.
 
 !         Velocity for volume change, variable thickness ONLY,
 !         correction flux for porosity EXCLUDED
@@ -549,8 +537,6 @@
 
           DMTOP   = PMSA(IPDM  +(IBODEM-1)*INDM  )
 
-!         Skip if resuspension is zero
-!         IF ( ZRES .LE. 0.0 ) GOTO 20
 !         No resuspensie if depth is below minimum value
           IF ( DEPTH .LT. MINDEP ) GOTO 20
 
@@ -748,7 +734,7 @@
           DVOL   = 0.0
           IF (DM .GT. 0.0) DVOL = SEDFLX/DM/86400.
           PMSA (IPSVEL+(IQ-1)*INSVEL) = DVOL
-!          WRITE(*,*) ' SED_VEL ',IQ,DVOL
+
           IF ( SW .GE. 0.5 ) THEN
 !             Compute volume change velocity
 !             Massa in DOWNwind segment!!!!!!!!!!!!!!!!!!!!!!
@@ -954,7 +940,6 @@
 !         numerical parameter determines max.rel.corr. per time step
 
           IF ( PORINP .GT. 0.0001 ) THEN
-!             IF ( PORACT .GT. PORINP+0.001 ) THEN
               IF ( PORACT .GT. PORINP ) THEN
                   CORDIG = CORDIG+ACTH/DELT*DM*(PORINP-PORACT)/(1.0-PORACT)*MXRCOR
               ENDIF

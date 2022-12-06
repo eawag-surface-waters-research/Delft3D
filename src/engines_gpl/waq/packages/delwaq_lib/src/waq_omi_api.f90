@@ -46,7 +46,7 @@ logical function SetValuePriv(dlwqtype, parid, locid, values, operation)
 
     use m_sysn          ! System characteristics
     use m_sysa          ! Pointers in real array workspace
-      
+
     implicit none
 
     integer, intent(in)              :: dlwqtype         !< Type of parameter to be set
@@ -102,7 +102,7 @@ function DetermineIndex( dlwqtype, parid, locid )
 
     use m_sysn          ! System characteristics
     use m_sysa          ! Pointers in real array workspace
-    
+
     integer, intent(in)   :: dlwqtype
     integer, intent(in)   :: parid
     integer, intent(in)   :: locid
@@ -114,7 +114,7 @@ function DetermineIndex( dlwqtype, parid, locid )
     integer               :: idxmass
     integer               :: idxvol
     integer               :: volcorr
-    
+
 
     idxmass = -1
     idxvol  = -1
@@ -631,7 +631,7 @@ end function GetLocationIndexPriv
 subroutine GetTimeParameters( start, stop, step, current )
 
     use m_sysi
-  
+
     implicit none
 
     real(kind=kind(1.0d0)), intent(out)                :: start
@@ -854,8 +854,6 @@ integer function Get_Values(partype, parid, loctype, locid, number, values)
     Get_Values = merge( 1, 0, success )
 
     dummy = GetWQCurrentTime(currentTime)
-   ! write(*,*) 'DELWAQ: Get_Values ', current_instance, parid, locid, number, values(1), &
-   !     ' time = ', GetWQCurrentTime(currentTime)
 
 end function Get_Values
 
@@ -937,7 +935,7 @@ subroutine SetCommonVars( icons_, iparm_, iconc_, ibset_, iwste_, nosys_, notot_
     use m_sysn          ! System characteristics
     use m_sysa          ! Pointers in real array workspace
 
-      
+
     implicit none
 
     integer :: icons_, iparm_, iconc_, ibset_, iwste_, nosys_, notot_, nocons_, nopa_, noseg_, nowst_, nobnd_

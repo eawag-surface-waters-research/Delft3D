@@ -90,15 +90,14 @@
       IP34 = IPOINT(34)
       IP35 = IPOINT(35)
       IP36 = IPOINT(36)
-!
+
       IFLUX = 0
       DO 9000 ISEG = 1 , NOSEG
-!!    CALL DHKMRK(1,IKNMRK(ISEG),IKMRK1)
-!!    IF (IKMRK1.EQ.1) THEN
+
       IF (BTEST(IKNMRK(ISEG),0)) THEN
       CALL DHKMRK(2,IKNMRK(ISEG),IKMRK2)
       IF ((IKMRK2.EQ.0).OR.(IKMRK2.EQ.3)) THEN
-!
+
 
       SURF      = PMSA(IP26)
       DEPTH     = PMSA(IP27)
@@ -211,8 +210,6 @@
         PRODD = AMIN1(UPTAKC, UPTAKN/NCRAT, UPTAKP/PCRAT, UPTAKS/SICRAT)
         PRODD = AMAX1 ( PRODD , 0.0 )
 
-!16/2   PMSA(IP11) = PRODD
-
 !       Nett primary production and uptake of nutrients
 
         FL ( 1 + IFLUX ) =  PRODD / DEPTH
@@ -298,9 +295,6 @@
         ENDIF
 
       ENDIF
-
-!16/2   PMSA(IP12) = RESP
-
 
 !     Mortality, including processes as autolysis and zooplankton 'graas
       FL ( 2 + IFLUX ) = MORT0  *  TFUNM * DIAT / DEPTH

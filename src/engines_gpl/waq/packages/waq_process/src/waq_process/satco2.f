@@ -80,17 +80,13 @@
       IP6  = IPOINT( 6)
 !
       DO 9000 ISEG = 1 , NOSEG
-!!    CALL DHKMRK(1,IKNMRK(ISEG),IKMRK1)
-!!    IF (IKMRK1.EQ.1) THEN
-!jvb  IF (BTEST(IKNMRK(ISEG),0)) THEN
-!
+
       CL2    = PMSA(IP1 )/1000.
       TEMP   = PMSA(IP2 )
       SWITCH = NINT(PMSA(IP3 ))
       SAL    = PMSA(IP4 )
       PAPCO2 = PMSA(IP5)
-!     PAPCO2 = 3.162E-4
-!
+
 
       IF ( SWITCH .EQ. 1 ) THEN
 

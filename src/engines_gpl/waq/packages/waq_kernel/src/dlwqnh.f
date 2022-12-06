@@ -357,15 +357,7 @@
      +              INTOPT  , C(IPNAM), C(IFNAM), C(ISFNA), J(IDMPB),
      +              NOWST   , NOWTYP  , C(IWTYP), J(IWAST), J(INWTYP),
      +              A(IWDMP), iknmkv  , J(IOWNS), MYPART  , isegcol )
-!
-!
-!          printout of results
-!
-!     CALL DLWQ10 ( LUN(19) , J(IDUMP), A(IDERV), A(ICONC), A(IMAS2),
-!    *              ITSTRT  ,    1    , ITSTRT  , ITSTRT+1,    1    ,
-!    *              C(IDNAM), C(ISNAM), C(IMNAM), NODUMP  , NOTOT   ,
-!    *              NOSEG   , J(ILP)  , ISFLAG  , IAFLAG  , IMFLAG  ,
-!    *              A(ISMAS), INTOPT  , NDMPAR  , C(IDANA))
+
 !
 !          close files, except monitor file
 !

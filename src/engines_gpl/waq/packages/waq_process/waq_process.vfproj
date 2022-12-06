@@ -84,7 +84,6 @@
 		<File RelativePath=".\src\charon\chinpu.f"/>
 		<File RelativePath=".\src\charon\chmapd.f"/>
 		<File RelativePath=".\src\charon\chphas.f"/>
-		<File RelativePath=".\src\charon\chsto2.f"/>
 		<File RelativePath=".\src\charon\chstoc.f"/>
 		<File RelativePath=".\src\charon\cjcor.f"/>
 		<File RelativePath=".\src\charon\cjtemp.f"/>
@@ -99,9 +98,6 @@
 		<File RelativePath=".\src\charon\lp.f"/>
 		<File RelativePath=".\src\charon\matinv.f"/>
 		<File RelativePath=".\src\charon\matrix.f"/>
-		<File RelativePath=".\src\charon\partb.f"/>
-		<File RelativePath=".\src\charon\pdfch1.f"/>
-		<File RelativePath=".\src\charon\pdfch2.f"/>
 		<File RelativePath=".\src\charon\phcalc.f"/>
 		<File RelativePath=".\src\charon\pop.f"/>
 		<File RelativePath=".\src\charon\push.f"/>
@@ -124,10 +120,7 @@
 		<File RelativePath=".\src\proc_preprocess\bleffpro.f"/>
 		<File RelativePath=".\src\proc_preprocess\blmeff.f"/>
 		<File RelativePath=".\src\proc_preprocess\cnfrep.f"/>
-		<File RelativePath=".\src\proc_preprocess\cnvpro.f"/>
 		<File RelativePath=".\src\proc_preprocess\dhpfil.f"/>
-		<File RelativePath=".\src\proc_preprocess\dhrep2.f"/>
-		<File RelativePath=".\src\proc_preprocess\dhrepc.f"/>
 		<File RelativePath=".\src\proc_preprocess\dlwqp1.f"/>
 		<File RelativePath=".\src\proc_preprocess\dlwqs1.f"/>
 		<File RelativePath=".\src\proc_preprocess\expand_frc.f"/>
@@ -142,7 +135,6 @@
 		<File RelativePath=".\src\proc_preprocess\proc_totals.f"/>
 		<File RelativePath=".\src\proc_preprocess\prprop.f"/>
 		<File RelativePath=".\src\proc_preprocess\prsort.f"/>
-		<File RelativePath=".\src\proc_preprocess\rbpdf2.f"/>
 		<File RelativePath=".\src\proc_preprocess\rd_filid.f"/>
 		<File RelativePath=".\src\proc_preprocess\rd_tabm1.f"/>
 		<File RelativePath=".\src\proc_preprocess\rd_tabp1.f"/>
@@ -181,7 +173,6 @@
 		<File RelativePath=".\src\proc_preprocess\setqtl.f"/>
 		<File RelativePath=".\src\proc_preprocess\setvat.f"/>
 		<File RelativePath=".\src\proc_preprocess\tabdim.f"/>
-		<File RelativePath=".\src\proc_preprocess\timers.f"/>
 		<File RelativePath=".\src\proc_preprocess\valpoi.f"/>
 		<File RelativePath=".\src\proc_preprocess\vxlpoi.f"/>
 		<File RelativePath=".\src\proc_preprocess\wr_proceswrk.f"/>

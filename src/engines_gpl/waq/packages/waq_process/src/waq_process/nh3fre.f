@@ -80,11 +80,9 @@
 !
 !     Eerste kenmerk actief of inactief segment
 !
-!!    CALL DHKMRK(1,IKNMRK(ISEG),IKMRK1)
 !
 !     Alleen actieve segmenten behandelen ( KENMERK1 = 1 )
 !
-!!    IF (IKMRK1.EQ.1) THEN
       IF (BTEST(IKNMRK(ISEG),0)) THEN
 !
 !     Map PMSA on local variables

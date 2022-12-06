@@ -139,18 +139,6 @@
          ! Write the version of the netcdf library
          write ( lunut , 2520 ) trim(nf90_inq_libvers())
 
-         ! Open the ugrid-file file
-!        inc_error = nf90_open(ugridf, nf90_nowrite, ncid )
-!        if (inc_error /= nf90_noerr ) then
-!           write ( lunut , 2530 ) trim(ugridf)
-!           goto 800
-!        end if
-!
-!        inc_error = dlwqnc_read_dims( ncid, dimsizes )
-!        if (inc_error /= nf90_noerr ) then
-!           write ( lunut , 2531 ) trim(ugridf)
-!           goto 800
-!        end if
 
          ! Create the new file
 #ifdef NetCDF4

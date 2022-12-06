@@ -318,8 +318,6 @@
            ALGTYP(14,IALG) = PMSA(IP)
 !          SDMIXALG
            IP = NIPFIX + 20*NTYP_M + IALG
-!jvb       set SDMIX for all types, time/space dependent
-!jvb       IF (INCREM(IP).NE.0) CALL BLSTOP('SDMixAlg',IALG)
            IP = IPOINT(IP)
            ALGTYP(19,IALG) = PMSA(IP)
 !          MRTEXALG
@@ -467,7 +465,7 @@
       IF (.NOT.ACTIVE_EFFT) THEN
          DO ISEG = 1 , NOSEG
             CALL DHKMRK(1,IKNMRK(ISEG),IKMRK1)
-!!          IF (IKMRK1.EQ.1) THEN
+
             IF (BTEST(IKNMRK(ISEG),0)) THEN
                CALL DHKMRK(2,IKNMRK(ISEG),IKMRK2)
                ISEG_3DL = ISEG
@@ -490,7 +488,6 @@
                DO IALG = 1,NTYP_A
 
 !jvb              set SDMIX for all types, time/space dependent
-!                 SDMIXALG
                   IOFF = NIPFIX + 20*NTYP_M + IALG
                   IP = IPOINT(IOFF) + (ISEG-1)*INCREM(IOFF)
                   SDMIXN = PMSA(IP)

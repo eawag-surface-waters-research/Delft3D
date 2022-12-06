@@ -65,9 +65,6 @@ end subroutine prepare_tests
 subroutine show_result
     !character(len=1) :: answer
     !
-    !write(*,*)     'Press ENTER ...'
-    !read(*,'(a)' ) answer
-
     call system( 'ftnunit.html' )
 
 end subroutine show_result

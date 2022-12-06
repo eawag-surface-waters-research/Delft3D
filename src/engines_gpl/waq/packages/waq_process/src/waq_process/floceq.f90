@@ -111,7 +111,7 @@
             elseif ( swfloceq .eq. 2 ) then
                macro = im2
                micro = im3
-            else ! if ( swfloceq .eq. 3 ) then
+            else
                macro = im3
                micro = im2
             endif
@@ -142,7 +142,7 @@
                dflocim1   =  0.0
                dflocim2   =  dfloc
                dflocim3   = -dfloc
-            else ! if ( swfloceq .eq. 3 ) then
+            else
                dflocim1   =  0.0
                dflocim2   = -dfloc
                dflocim3   =  dfloc

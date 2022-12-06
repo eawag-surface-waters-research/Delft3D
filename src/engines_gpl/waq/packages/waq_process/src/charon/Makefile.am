@@ -25,7 +25,6 @@ libcharon_la_SOURCES = arith.f \
        chinpu.f \
        chmapd.f \
        chphas.f \
-       chsto2.f \
        chstoc.f \
        cjcor.f \
        cjtemp.f \
@@ -40,9 +39,6 @@ libcharon_la_SOURCES = arith.f \
        lp.f \
        matinv.f \
        matrix.f \
-       partb.f \
-       pdfch1.f \
-       pdfch2.f \
        pdfcha.f \
        phcalc.f \
        pop.f \

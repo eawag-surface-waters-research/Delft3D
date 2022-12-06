@@ -169,8 +169,6 @@ integer :: itimer, iinstn, ninstn
 
    if (allocated(timer_table)) then
       deallocate(timer_table)
-!      write(LOUTTM,*) 'timer_table_size: Error: table is already allocated!'
-!      call srstop(1)
    endif
 
 !  Allocate the table

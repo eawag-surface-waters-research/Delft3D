@@ -84,7 +84,6 @@ program test_kalman0
     !
     ! Get the run-ID or quit
     !
-    !call get_command_argument( 1, runid, status )
     runid = 'arjen-ws'
 
     if ( runid == ' ' ) then

@@ -51,7 +51,6 @@
 
 !     Routines            : zoek20  - to search the DRY_THRESH constant
 !                           dhkmst  - to set features
-!                           dhkmrk  - to get features
 
       use timers
       use dryfld_mod
@@ -122,8 +121,6 @@
          ! Is ikm important?
          !$omp parallel do private(ikm,ivol)
          do isegl = 1, nosegl
-            !call dhkmrk( 1, iknmrk(isegl), ikm )
-            !if ( ikm .eq. 0 ) cycle                            ! whole collumn is inactive
             ivol          = isegl + (ilay-1) * nosegl
             sumvol(isegl) = sumvol(isegl) + volume(ivol)
          enddo
@@ -138,11 +135,9 @@
             if ( sumvol(isegl) .lt. surface(isegl)*threshold ) then
                call dhkmst(1, iknmkv(ivol), 0 )               ! zero the last bit
                call dhkmst(2, iknmkv(ivol), 0 )               ! and the second feature
-               !if ( volume(ivol) .lt. 1.0e-25 ) volume(ivol) = minvolume
                volume(ivol) = max( volume(ivol), minvolume )
             else
                iknmkv(ivol) = iknmrk(ivol)                    ! become wet again
-               !if ( volume(ivol) .lt. 1.0e-25 ) volume(ivol) = minvolume
                volume(ivol) = max( volume(ivol), minvolume )
             endif
          enddo
@@ -241,8 +236,6 @@
          ! Use OpenMP? ikm, ivol private
          !$omp parallel do private(ikm,ivol)
          do isegl = 1, nosegl
-            !call dhkmrk( 1, iknmrk(isegl), ikm )
-            !if ( ikm .eq. 0 ) cycle                            ! whole collumn is inactive
             ivol = isegl + (ilay-1)*nosegl
             sumvol(isegl) = sumvol(isegl) + volume(ivol)
          enddo
@@ -256,7 +249,6 @@
             if ( sumvol(isegl) .gt. surface(isegl)*threshold ) then
                iknmkv(ivol) = iknmrk(ivol)
             endif
-            !if ( volume(ivol) .lt. 1.0e-25 ) volume(ivol) = minvolume
             volume(ivol) = max( volume(ivol), minvolume )
          enddo
       enddo

@@ -207,8 +207,6 @@
 !
 !       In all "active" segments
 !
-!!      CALL DHKMRK(1,IKNMRK(ISEG),IKMRK1)
-!!      IF (IKMRK1.EQ.1.OR.IKMRK1.EQ.3) THEN
         IF (BTEST(IKNMRK(ISEG),0)) THEN
 !
 !          INPUT of subroutine
@@ -283,7 +281,6 @@
 !
 !          If  detritus = 0 : set fluxes to zero and skip algorithm
 !
-!jvb       IF (POC .LT. 1E-10 .OR. PON .LT. 1E-10 .OR. POP .LT. 1E-10)
            IF (POC .LT. 1E-10)
      &        THEN
 !

@@ -138,25 +138,6 @@
       IdVB1       = 1
 
       CALL GETMLU(ILUMON)
-!
-
-!      SWiniVB1   = nint(pmsa( ipnt(  9) ))
-!      if (SWiniVB1) .ne. 0) then
-!            allocate(SWini(noseg))
-!!         store SWiniVB values to array
-!          do iseg = 1,noseg
-!               SWini(iseg) = 0
-!            enddo
-!      first = .false.
-!        endif
-
-!      if  ( first )  then
-!          allocate (SWDying(noseg))
-!          do iseg = 1, noseg
-!                   SWDying(iseg) = 0
-!          enddo
-!          first = .false.
-!      endif
 
       do  iseg = 1 , noseg
 
@@ -227,10 +208,6 @@
             if (ifirst (vbtype + 9) .eq. 0) then
                SWDying = IniSWDying
             endif
-
-!            if (vbtype .eq. 5) then
-!                WRITE (ILUMON, *) 'iniage/swdy ', 'seg:', iseg, 'ifirst: ',ifirst(5),'dec: ' , SWDying, 'age:  ', agevb1
-!            endif
 
 !           evaluate use initialisation 0=no, 1=yes
 !           always use iniCovVB1, 100% (default) means ha=haC, if unequal 100% ha<>haC
@@ -304,7 +281,6 @@
 !                    initial biomass exceeds minimum
                      IF ( (iniVB1 - minVB1) .gt. 1.E-10) then
 !                        initial biomass less than maximum biomass
-!                        IF ((maxVB1 - iniVB1) .gt. 1.E-10) THEN
                          IF ( (iniVB1/maxVB1) .lt. 0.99) THEN
                             ageVB1  = hlfAgeVB1 + LOG((minVB1-maxVB1) /(iniVB1-maxVB1) - 1 ) / sfVB1
                          ELSE
@@ -320,14 +296,6 @@
 
                      VB1ha  = VB1 / iniCovVB1 /100
                      dVB1   = ( VBA1ha - VB1ha ) * 100.0 * surf / volume / delt * iniCovVB1
-!                    no growth reduction during initialisation
-!                     if (dVB1 .gt. 1.E-20) then
-!                         NutGroFac = min (1.0, (dVB1MaxNL / dVB1) )
-!                     else
-!                         NutGroFac = 1
-!                     endif
-!                     dVB1 = min(dVB1MaxNL, dVB1)
-
                   ELSE
 
                      VB1ha  = VB1 / iniCovVB1 /100
@@ -335,14 +303,12 @@
 !                    vegetation is flooded
                      if ( NINT (SWmrt) .eq. 1 ) then
                          SWDying = 1.0
-!                        WRITE (ILUMON, *) 'vbgro-deadstart ', iseg, ' ' , SWDying
                      endif
 
 !                    check if vegetation died long enough - regrowth allowed again
                      if  ( (VB1ha .lt. VBAge0ha) .and. (SWDying .eq. 1) .and.  SWRegro .eq. 1 )  then
 	                     SWDying = 0.0
                         ageVB1 = 0
-!	                     WRITE (ILUMON, *) 'vbgro-decayklaar ', iseg, ' ' , SWDying
 	                  endif
 
 !                    calculate new age for decaying vegetation based on current biomass
@@ -355,9 +321,6 @@
                        else
 !                          cannot calc age
                        endif
-!                    	  if (vbtype .eq. 5) then
-!	                        WRITE (ILUMON, *) 'agecalc at dying', iseg,'ifirst: ',ifirst(5),agevb1, vb1ha
-!	                     endif
                      endif
 
 !                    calculate attainable biomass per ha using age
@@ -435,12 +398,6 @@
                      endif
 
                      if (rVB1 .lt. 1.0 .and. NINT(SwGrowth) .eq. 1 .and. NINT (SWmrt) .eq. 0) then
-!                       Checking for nutrient availability
-!                        if ( (F4VB + F5VB) - 1.E-10 .lt. 0.0 ) then
-!                           CALL ERRSYS ('(no valid values for F4VB and F5VB (alloction factors vegetation  roots)', 1 )
-!                        end if
-!                       TODO check if sum (F1VB ... F5VB) = 1.00??
-
 !                       average Nutrient content of vegetation
                         weighCN = F1VB*CNf1VB + F2VB*CNf2VB + F3VB*CNf3VB + F4VB*CNf4VB + F5VB*CNf5VB
                         weighCP = F1VB*CPf1VB + F2VB*CPf2VB + F3VB*CPf3VB + F4VB*CPf4VB + F5VB*CPf5VB

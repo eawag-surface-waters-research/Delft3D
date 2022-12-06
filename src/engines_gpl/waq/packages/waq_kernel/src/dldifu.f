@@ -232,7 +232,6 @@
     !
     !  INITIALIZE
     !
-!   call timer_start(timer_difu_ini, gdp)
     !
     ! Initialise arrays aak - cck for all (nm,k)
     !
@@ -271,11 +270,9 @@
             enddo
          enddo
       enddo
-!   call timer_stop(timer_difu_ini, gdp)
     !
     ! CONTRIBUTION OF ADVECTION IN X-DIRECTION
     !
-!   call timer_start(timer_difu_horadv, gdp)
       do k = 1, kmax
        !
        ! CONTRIBUTION TO VOLUME NM AND NMU
@@ -354,7 +351,6 @@
             enddo
          enddo
       enddo
-!   call timer_stop(timer_difu_horadv, gdp)
     !
     !
     ! Explicit algoritm (call DIFACR) leads to extra stablity criterium
@@ -363,7 +359,6 @@
     ! This diffusion part (loop 410) is constituent independent.
     ! The value of SIGDIF(L) = 0.7 (see TKECOF) for all LSTSCI
     !
-!   call timer_start(timer_difu_hordiff, gdp)
       if (icreep==0 .or. kmax==1) then
        !
        ! HORIZONTAL DIFFUSION IN X-DIRECTION ALONG SIGMA PLANES
@@ -377,9 +372,6 @@
                nmu = nmu + 1
                if (kfu(nm)*kadu(nm, k) /= 0) then
 !2nd difference, WAQ gives diffusion per exchange area directly
-!                 difl    = dicuv(nm, k)                      ! WAQ gives values per area
-!                 difr    = dicuv(nmu, k)
-!                 flux    = 0.5*(difl + difr)/(0.7*gvu(nm))
                   flux    = difx(nm,k)/(0.7*gvu(nm))        ! check on 0.7 is still pending
                   maskval = max(0, 2 - kcs(nm))
                   bbk(nm, k) = bbk(nm, k) + areau(nm, k)*flux*maskval
@@ -437,8 +429,6 @@
      &               dfluxx    ,dfluxy                                     )
 !                  & gdp       )                             WAQ has no gdp
       endif
-!   call timer_stop(timer_difu_hordiff, gdp)
-!   call timer_start(timer_difu_vertadv, gdp)
       if (kmax > 1) then
          do k = 1, kmax - 1
             if (k==1 .or. k==kmax - 1) then
@@ -487,11 +477,9 @@
             enddo
          enddo
       enddo
-!   call timer_stop(timer_difu_vertadv, gdp)
     !
     ! DIFFUSION IN VERTICAL DIRECTION
     !
-!   call timer_start(timer_difu_vertdiff, gdp)
       if (kmax > 1) then
          do l = 1, lstsci
           !
@@ -509,24 +497,8 @@
                    !
                    ! Internal wave contribution
                    !
-!                  sqrtbv = max(0.0_fp, bruvai(nm, k))      ! WAQ has no sediments in difu
-!                  sqrtbv = sqrt(sqrtbv)
-!                  difiwe = 0.2 * sqrtbv * xlo**2
-!                  if (ls > 0) then
-                      !
-                      ! sediment constituent:
-                      ! No dicoww-restriction in reddic
-                      !
-!                     diz1 = vicmol/sigmol(l) + difiwe + seddif(nm, k, ls)/sigdif(l)
-!                  else
-                      !
-                      ! all other constituents:
-                      ! dicoww-restriction is moved from TURCLO to here (in reddic)
-                      ! vicww is used instead of dicww
-                      !
-                        diz1 = vicmol/sigmol(l) + dicww(nm, k)/sigdif(l)
-!                     diz1 = vicmol/sigmol(l) + reddic(difiwe + vicww(nm,k)/sigdif(l), gdp)
-!                  endif
+                     diz1 = vicmol/sigmol(l) + dicww(nm, k)/sigdif(l)
+
                      ddzc             = gsqs(nm) * diz1 * h0i / tsg
                      aakl(nm, k+1, l) = aakl(nm, k+1, l) - ddzc
                      bbkl(nm, k+1, l) = bbkl(nm, k+1, l) + ddzc
@@ -537,24 +509,7 @@
             enddo
          enddo
       endif
-!   call timer_stop(timer_difu_vertdiff, gdp)
-    !
-    ! Include settling velocities and Dirichlet BC for sediments in
-    ! matrices AAKL/BBKL/CCKL/DDKL
-    !
-!   if (lsed > 0) then                   not applicable for WAQ
-!      call timer_start(timer_difu_difws, gdp)
-!      call dif_ws(j         ,nmmaxj    ,nmmax     ,kmax      ,lsal      , &
-!                & ltem      ,lstsci    ,lsed      ,kcs       ,kfs       , &
-!                & gsqs      ,ws        ,aakl      ,bbkl      ,cckl      , &
-!                & kmxsed    ,gdp       )
-!      call timer_stop(timer_difu_difws, gdp)
-!   endif
-    !
-    ! SET VALUES IN OPEN BOUNDARY POINTS (IN PART. FOR Y-DIRECTION)
-    !     On open boundary no seconday flow (=> loop over LSTSC)
-    !
-!   call timer_start(timer_difu_bounopen, gdp)
+
       do nm = 1, nmmax
          if (kcs(nm) == 2) then
             do l = 1, lstsc
@@ -601,32 +556,13 @@
        !
        ! optional Neumann boundary condition for suspended sediment fractions
        !
-!      lst = max(lsal, ltem)                      NO specific sed in WAQ
-!      do l = 1, lsed
-!         ll = lst + l
-!         if ((eqmbcsand .and. sedtyp(l) == 'sand') .or. &
-!           & (eqmbcmud  .and. sedtyp(l) == 'mud' )       ) then
-!            if (kcu(nmf) == 1) then
-!               do k = 1, kmax
-!                  ddkl(nmf, k, ll) = r0(nmfu, k, ll)
-!               enddo
-!            endif
-!            if (kcu(nml) == 1) then
-!               do k = 1, kmax
-!                  ddkl(nmlu, k, ll) = r0(nml, k, ll)
-!               enddo
-!            endif
-!         endif
-!      enddo
       enddo
-!   call timer_stop(timer_difu_bounopen, gdp)
       do l = 1, lstsci
        !
        ! SOURCES AND SINK TERMS
        !
        ! SINKS ARE TREATED IMPLICITLY
        !
-!      call timer_start(timer_difu_sourcesink, gdp)
        if (lsec==2 .and. l==lsecfl) then
           !
           ! secondary flow (equilibrium equals to new intensity)
@@ -666,58 +602,7 @@
                enddo
             enddo
          endif
-!      call timer_stop(timer_difu_sourcesink, gdp)
-       !
-!      if (l == lsecfl) then             Not applicable for WAQ
-          !
-          ! boundary conditions secondary flow (spiral motion intensity)
-          !
-!         call timer_start(timer_difu_secbou, gdp)
-!         call secbou(j         ,nmmaxj    ,kmax      ,icx       ,icy       , &
-!                   & lstsci    ,lsecfl    ,kfu       ,irocol    ,norow     , &
-!                   & s0        ,s1        ,dps       ,r1        ,sour      , &
-!                   & sink      ,gdp       )
-!         call timer_stop(timer_difu_secbou, gdp)
-!         if (lsec == 2) then
-             !
-             ! exchange r1 with neighbours for parallel runs
-             !
-!            call dfexchg ( r1(:,:,l), 1, kmax, dfloat, gdp )
-             !
-!            cycle
-!         endif
-!      endif
-       !
-       ! DD code added:
-       !
-       ! left hand-side is now set by Delft3D-FLOW instead of the mapper
-       !
-!      call timer_start(timer_difu_lhs, gdp)
-!      do nm = 1, nmmax
-!         if (kcs(nm) == 3 ) then
-!            do k = 1, kmax
-!               aakl(nm,k,l) = 0.0
-!               bbkl(nm,k,l) = 1.0
-!               cckl(nm,k,l) = 0.0
-!               ddkl(nm,k,l) = r0(nm,k,l)
-!            enddo
-!         endif
-!      enddo
-!      call timer_stop(timer_difu_lhs, gdp)
-       !
-       !
-       !        D3dFlow_Build_ADI_Conc: poke the coupling equations into system
-       !
-!      nhystp = nxtstp(d3dflow_build_adi_conc, gdp)
-       !
-       ! DD code added end
-       !
-       !***SCALE ROWS OF MATRIX/RIGHT HAND SIDE VECTOR
-       !
-       !   Store scale factor in array rscale
-       !   They are used for the constituent independent flux arrays b[d/u][d/u][d/u]x
-       !
-!      call timer_start(timer_difu_rowsc, gdp)
+
          do k = 1, kmax
             do nm = 1, nmmax
                if (kfs(nm)==1) then
@@ -729,14 +614,7 @@
                endif
             enddo
          enddo
-!      call timer_stop(timer_difu_rowsc, gdp)
-       !
-       !***SOLUTION PROCEDURE SYSTEM OF EQUATIONS
-       !
-       ! Division by the pivot for k=1 is not needed anymore
-       ! because of row scaling
-       !
-!      call timer_start(timer_difu_solve1, gdp)
+
          do nm = 1, nmmax
             if ( (kfs(nm)==1) .and. (kcs(nm)==1) ) then
                do k = 2, kmax
@@ -746,11 +624,9 @@
                enddo
             endif
          enddo
-!      call timer_stop(timer_difu_solve1, gdp)
        !
        ! ITERATION LOOP
        !
-!      call timer_start(timer_difu_solve2, gdp)
          iter = 0
          do k = 1, kmax
             do nm = 1, nmmax
@@ -760,29 +636,6 @@
                endif
             enddo
          enddo
-!      call timer_stop(timer_difu_solve2, gdp)
-       !
-       ! exchange r1 with neighbours for parallel runs
-       !
-!      call dfexchg ( r1(:,:,l), 1, kmax, dfloat, gdp )
-       !
-       ! assure that loop starts at point of correct color in own subdomain
-       !
-!      if (mod(mfg+nfg,2) == 1) then
-          ! red points
-!         nmsta = 1
-!      else
-          ! black points
-!         nmsta = 2
-!      endif
-       !
-       ! DD code added:
-       !
-       !
-       !       (re)solve system of equations
-       !
-! 111  continue
-!      gdp%dd%difuiter = gdp%dd%difuiter + 1
        !
        ! DD code added end
        !
@@ -796,7 +649,6 @@
        !
        !   set concentrations in coupling points
        !
-!      call timer_start(timer_difu_solve3, gdp)
          do k = 1, kmax
             do nm = 1, nmmax
                if (kcs(nm) == 3) then
@@ -804,16 +656,8 @@
                endif
             enddo
          enddo
-!      call timer_stop(timer_difu_solve3, gdp)
-!      if(icx == 1) then
-!        call timer_start(timer_difu_solve4u, gdp)
-!      else
-!        call timer_start(timer_difu_solve6v, gdp)
-!      end if
        !
        ! loop starts at red or black point depending on own subdomain
-       !
-!      nmsta = 3 - nmsta
        !
          do k = 1, kmax
             do nm = 1, nmmax, 2
@@ -832,13 +676,7 @@
                endif
             enddo
          enddo
-!      if(icx == 1) then
-!        call timer_stop(timer_difu_solve4u, gdp)
-!        call timer_start(timer_difu_solve5u, gdp)
-!      else
-!        call timer_stop(timer_difu_solve6v, gdp)
-!        call timer_start(timer_difu_solve7v, gdp)
-!      end if
+
          do nm = 1, nmmax, 2
             if (kfs(nm)*kcs(nm) == 1) vvdwk(nm, 1) = uvdwk(nm, 1)*bbkl(nm, 1, l)
          enddo
@@ -867,19 +705,8 @@
                endif
             enddo
          enddo
-!      if(icx == 1) then
-!        call timer_stop(timer_difu_solve5u, gdp)
-!        call timer_start(timer_difu_solve4u, gdp)
-!      else
-!        call timer_stop(timer_difu_solve7v, gdp)
-!        call timer_start(timer_difu_solve6v, gdp)
-!      end if
-       !
-!      call dfexchg ( r1(:,:,l), 1, kmax, dfloat, gdp )
        !
        ! loop starts at point of other color now (black respectively red)
-       !
-!      nmsta = 3 - nmsta
        !
          do k = 1, kmax
             do nm = 2, nmmax, 2
@@ -897,13 +724,7 @@
                endif
             enddo
          enddo
-!      if(icx == 1) then
-!        call timer_stop(timer_difu_solve4u, gdp)
-!        call timer_start(timer_difu_solve5u, gdp)
-!      else
-!        call timer_stop(timer_difu_solve6v, gdp)
-!        call timer_start(timer_difu_solve7v, gdp)
-!      end if
+
          do nm = 2, nmmax, 2
             if (kfs(nm)==1 .and. kcs(nm) == 1) then
                vvdwk(nm, 1) = uvdwk(nm, 1)*bbkl(nm, 1, l)
@@ -935,17 +756,9 @@
                endif
             enddo
          enddo
-!      if(icx == 1) then
-!        call timer_stop(timer_difu_solve5u, gdp)
-!      else
-!        call timer_stop(timer_difu_solve7v, gdp)
-!      end if
-!      call dfexchg ( r1(:,:,l), 1, kmax, dfloat, gdp )
        !
        ! determine global maximum of 'itr' over all nodes
        ! Note: this enables to synchronize the iteration process
-       !
-!      call dfreduce_gdp( itr, 1, dfint, dfmax, gdp )
        !
          if (itr>0 .and. iter<50) goto 1100
 
@@ -957,17 +770,6 @@
             write ( * , * )     'max number of iterations exceeded'
             call srstop(1)
          endif
-       !
-       ! DD code added:
-       !
-       !
-       !       D3dFlow_Solve_ADI_Conc: Check for convergence
-       !
-!      nhystp = nxtstp(d3dflow_solve_adi_conc, gdp)
-!      if (nhystp == d3dflow_solve_adi_conc) goto 111
-       !
-       ! DD code added end
-       !
       enddo
 
       if ( timon ) call timstop ( ithandl )

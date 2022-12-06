@@ -120,18 +120,11 @@
      &                    ipi       , luntxt     , 7     , isflag    , ifflag     ,
      &                    update    , .false.    , 0     , iwork     , lstrec     ,
      &                    lrewin    , vollst     , ftype , dlwqd     )
-!           ldum(1) = update
-!           ldum(2) = lrewin
          endif
 
-!        call distribute_data(mypart, ldum, 2, ierr)
-!        update = ldum(1)
-!        lrewin = ldum(2)
          if ( update ) then
             updatv = .true.
-!           call distribute_data( mypart, volume, 'noseg', 'distrib_itf', ierr )
          endif
-!        if ( lrewin ) call distribute_data( mypart, vollst, 'noseg', 'distrib_itf', ierr )
       endif
 
       if ( timon ) call timstop ( ithandl )

@@ -269,22 +269,6 @@
                endif
             endif
          endif
-!         if ( ifrom .gt. 0 .and. ito .lt. 0 .and. .not. btest(iopt,2) ) then ! ito   is a boundary volume
-!            conc(isys,ifrom) = conc(isys,ifrom) - lim(iq)*real(idt)*flux(iq)/volnew(ifrom)
-!            if ( flux(iq) .gt. 0 ) then
-!               amass2(isys,5) = amass2(isys,5) + real(idt)*lim(iq)*flux(iq)
-!            else
-!               amass2(isys,4) = amass2(isys,4) - real(idt)*lim(iq)*flux(iq)
-!            endif
-!         endif
-!         if ( ifrom .lt. 0 .and. ito .gt. 0 .and. .not. btest(iopt,2) ) then ! ifrom is a boundary volume
-!            conc(isys, ito ) = conc(isys, ito ) + lim(iq)*real(idt)*flux(iq)/volnew( ito )
-!            if ( flux(iq) .gt. 0 ) then
-!               amass2(isys,4) = amass2(isys,4) + real(idt)*lim(iq)*flux(iq)
-!            else
-!               amass2(isys,5) = amass2(isys,5) - real(idt)*lim(iq)*flux(iq)
-!            endif
-!         endif
       enddo
 
       if ( timon ) call timstop ( ithandl )

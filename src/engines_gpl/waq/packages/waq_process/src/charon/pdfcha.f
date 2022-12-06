@@ -49,7 +49,7 @@
 !     Declarations
 !
       use m_charon
-      
+
       INTEGER         LUPDF , MMAX  , NAIJ2 , NMAX  , LUREP , NNOTRA,
      J                LUIC  , LUOC  , I     , NALTOX,
      J                NTOX  , NALADS, NALSPE, NALSP2, N1MAX , N2MAX
@@ -191,8 +191,6 @@
 
       CALL  CHALIA ( N      , KN     , 6  , NALTOX , ALITOX )
       CALL  CHALIA ( NTRANS , VARNAM , 10 , NALTOX , ALITOX )
-!     CALL  CHALIA ( N      , KN     , 6  , NALSP2 , ALISP2 )
-!     CALL  CHALIA ( NTRANS , VARNAM , 10 , NALSP2 , ALISP2 )
 
 !     Manipulate PDF file
 

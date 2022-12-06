@@ -3774,13 +3774,9 @@ src/engines_gpl/waq/packages/waq_kernel/src/dlback.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/dlconv.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/dldifu.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/dlflux.f -text
-src/engines_gpl/waq/packages/waq_kernel/src/dlforf.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/dlinit.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/dlmasb.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/dltest.f -text
-src/engines_gpl/waq/packages/waq_kernel/src/dlwq10.f -text
-src/engines_gpl/waq/packages/waq_kernel/src/dlwq11.f -text
-src/engines_gpl/waq/packages/waq_kernel/src/dlwq12.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/dlwq13.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/dlwq14.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/dlwq15.f -text
@@ -3798,7 +3794,6 @@ src/engines_gpl/waq/packages/waq_kernel/src/dlwq41.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/dlwq42.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/dlwq43.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/dlwq44.f -text
-src/engines_gpl/waq/packages/waq_kernel/src/dlwq45.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/dlwq46.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/dlwq50.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/dlwq51.f -text
@@ -3897,18 +3892,14 @@ src/engines_gpl/waq/packages/waq_kernel/src/dlwqt1.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/dlwqt2.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/dlwqt3.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/dlwqt4.f -text
-src/engines_gpl/waq/packages/waq_kernel/src/dlwqt5.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/dlwqta.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/dlwqtb.f -text
-src/engines_gpl/waq/packages/waq_kernel/src/dlwqtc.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/dlwqtd.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/dlwqtk.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/dlwqtr.f -text
-src/engines_gpl/waq/packages/waq_kernel/src/dlwsol.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/dmpsurf.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/dmpval.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/dryfld.f90 -text
-src/engines_gpl/waq/packages/waq_kernel/src/dumpconc.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/dwtest.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/fioraa.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/fiosub.f -text
@@ -3971,7 +3962,6 @@ src/engines_gpl/waq/packages/waq_plugin_wasteload/Makefile.am -text
 src/engines_gpl/waq/packages/waq_plugin_wasteload/src/Makefile.am -text
 src/engines_gpl/waq/packages/waq_plugin_wasteload/src/delwaq_user_wasteloads.f -text
 src/engines_gpl/waq/packages/waq_plugin_wasteload/src/waq_plugin_wasteload_version.F90.svn -text
-src/engines_gpl/waq/packages/waq_plugin_wasteload/src/zoekns.f -text
 src/engines_gpl/waq/packages/waq_plugin_wasteload/waq_plugin_wasteload.vfproj -text
 src/engines_gpl/waq/packages/waq_process/CMakeLists.txt -text
 src/engines_gpl/waq/packages/waq_process/Makefile.am -text
@@ -4014,7 +4004,6 @@ src/engines_gpl/waq/packages/waq_process/src/charon/chinp2.f -text
 src/engines_gpl/waq/packages/waq_process/src/charon/chinpu.f -text
 src/engines_gpl/waq/packages/waq_process/src/charon/chmapd.f -text
 src/engines_gpl/waq/packages/waq_process/src/charon/chphas.f -text
-src/engines_gpl/waq/packages/waq_process/src/charon/chsto2.f -text
 src/engines_gpl/waq/packages/waq_process/src/charon/chstoc.f -text
 src/engines_gpl/waq/packages/waq_process/src/charon/cjcor.f -text
 src/engines_gpl/waq/packages/waq_process/src/charon/cjtemp.f -text
@@ -4029,9 +4018,6 @@ src/engines_gpl/waq/packages/waq_process/src/charon/lookup.f -text
 src/engines_gpl/waq/packages/waq_process/src/charon/lp.f -text
 src/engines_gpl/waq/packages/waq_process/src/charon/matinv.f -text
 src/engines_gpl/waq/packages/waq_process/src/charon/matrix.f -text
-src/engines_gpl/waq/packages/waq_process/src/charon/partb.f -text
-src/engines_gpl/waq/packages/waq_process/src/charon/pdfch1.f -text
-src/engines_gpl/waq/packages/waq_process/src/charon/pdfch2.f -text
 src/engines_gpl/waq/packages/waq_process/src/charon/pdfcha.f -text
 src/engines_gpl/waq/packages/waq_process/src/charon/phcalc.f -text
 src/engines_gpl/waq/packages/waq_process/src/charon/pop.f -text
@@ -4055,11 +4041,8 @@ src/engines_gpl/waq/packages/waq_process/src/proc_preprocess/algrep.f -text
 src/engines_gpl/waq/packages/waq_process/src/proc_preprocess/bleffpro.f -text
 src/engines_gpl/waq/packages/waq_process/src/proc_preprocess/blmeff.f -text
 src/engines_gpl/waq/packages/waq_process/src/proc_preprocess/cnfrep.f -text
-src/engines_gpl/waq/packages/waq_process/src/proc_preprocess/cnvpro.f -text
 src/engines_gpl/waq/packages/waq_process/src/proc_preprocess/data.inc -text
 src/engines_gpl/waq/packages/waq_process/src/proc_preprocess/dhpfil.f -text
-src/engines_gpl/waq/packages/waq_process/src/proc_preprocess/dhrep2.f -text
-src/engines_gpl/waq/packages/waq_process/src/proc_preprocess/dhrepc.f -text
 src/engines_gpl/waq/packages/waq_process/src/proc_preprocess/dlwqp1.f -text
 src/engines_gpl/waq/packages/waq_process/src/proc_preprocess/dlwqs1.f -text
 src/engines_gpl/waq/packages/waq_process/src/proc_preprocess/expand_frc.f -text
@@ -4074,7 +4057,6 @@ src/engines_gpl/waq/packages/waq_process/src/proc_preprocess/primpro.f -text
 src/engines_gpl/waq/packages/waq_process/src/proc_preprocess/proc_totals.f -text
 src/engines_gpl/waq/packages/waq_process/src/proc_preprocess/prprop.f -text
 src/engines_gpl/waq/packages/waq_process/src/proc_preprocess/prsort.f -text
-src/engines_gpl/waq/packages/waq_process/src/proc_preprocess/rbpdf2.f -text
 src/engines_gpl/waq/packages/waq_process/src/proc_preprocess/rd_filid.f -text
 src/engines_gpl/waq/packages/waq_process/src/proc_preprocess/rd_tabm1.f -text
 src/engines_gpl/waq/packages/waq_process/src/proc_preprocess/rd_tabp1.f -text
@@ -4113,7 +4095,6 @@ src/engines_gpl/waq/packages/waq_process/src/proc_preprocess/setprg.f -text
 src/engines_gpl/waq/packages/waq_process/src/proc_preprocess/setqtl.f -text
 src/engines_gpl/waq/packages/waq_process/src/proc_preprocess/setvat.f -text
 src/engines_gpl/waq/packages/waq_process/src/proc_preprocess/tabdim.f -text
-src/engines_gpl/waq/packages/waq_process/src/proc_preprocess/timers.f -text
 src/engines_gpl/waq/packages/waq_process/src/proc_preprocess/valpoi.f -text
 src/engines_gpl/waq/packages/waq_process/src/proc_preprocess/vxlpoi.f -text
 src/engines_gpl/waq/packages/waq_process/src/proc_preprocess/wr_proceswrk.f -text
@@ -4351,8 +4332,6 @@ src/engines_gpl/waq/packages/waq_utils_f/src/mod_timings/m_timers_waq.f90 -text
 src/engines_gpl/waq/packages/waq_utils_f/src/mod_timings/m_timings.f90 -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/DHGARG.F -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/DHHASP.F -text
-src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/DHSTOP.F -text
-src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/DHTIME.F -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/Makefile.am -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/SRSTOP.F -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/cnvper.f -text
@@ -4364,9 +4343,7 @@ src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/delwaq_loads.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/dhagg2.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/dhaggr.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/dhagkm.f -text
-src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/dhc20m.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/dhcarg.f -text
-src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/dhcmov.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/dhcommand.f90 -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/dhctim.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/dhcwrd.f -text
@@ -4379,7 +4356,6 @@ src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/dhggd.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/dhgnam.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/dhgpoi.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/dhgvar.f -text
-src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/dhgwrd.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/dhimov.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/dhisys.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/dhkmrk.f -text
@@ -4392,12 +4368,9 @@ src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/dhopnf.F -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/dhpath.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/dhralloc.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/dhrmis.f -text
-src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/dhscal.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/dhslen.f -text
-src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/dhsuma.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/dhswtr.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/dhucas.f -text
-src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/dhzerc.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/dhzeri.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/dlwq0t.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/dlwq1_grid_mod.f -text
@@ -4424,7 +4397,6 @@ src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/progress.f90 -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/putget.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/putgtc.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/rapdef.f -text
-src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/rbpdef.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/rd_stt.f90 -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/rd_sub.f90 -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/rdvers.f -text
@@ -4437,8 +4409,6 @@ src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/strip.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/usedcp.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/wapdef.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/waqmem.f90 -text
-src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/wbpdef.f -text
-src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/wrwrk3.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/zero.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/zoek.f -text
 src/engines_gpl/waq/packages/waq_utils_f/waq_utils_f.vfproj -text

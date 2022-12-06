@@ -76,11 +76,9 @@
 !
       IFLUX = 0
       DO 9000 ISEG = 1 , NOSEG
-!!    CALL DHKMRK(1,IKNMRK(ISEG),IKMRK1)
-!!    IF (IKMRK1.EQ.1) THEN
+
       IF (BTEST(IKNMRK(ISEG),0)) THEN
       CALL DHKMRK(2,IKNMRK(ISEG),IKMRK2)
-!     IF (IKMRK2.EQ.0) THEN
       IF (IKMRK2.EQ.0 .OR. IKMRK2.EQ.3) THEN
 !
       VWIND   = PMSA(IP1 )
@@ -89,7 +87,6 @@
       INIDEP  = PMSA(IP4 )
 
       IF (FETCH .LT. 1E-20 )  CALL ERRSYS ('FETCH in CALWAVE zero', 1)
-!     IF (VWIND .LT. 1E-20 )  CALL ERRSYS ('VWIND in CALTAU zero', 1 )
 
 !     Initialisation
       H       = 0.0
@@ -104,11 +101,9 @@
 
 !     dimensieloze strijklengte
       FS   = G * FETCH / VWIND**2
-!     write(*,*) 'FS:', FS
 
 !     dimensieloze diepte
       DS   = G * INIDEP / VWIND**2
-!     write(*,*) 'DS:', DS
 
 !     bepaal golfhoogte H
       A1   = 0.710 *( DS**0.763 )
@@ -116,19 +111,15 @@
       A3   = 0.0150*( FS**0.450 ) / TANH(A1)
       A4   = 0.0345*( FS**0.370 ) / TANH(A2)
       HS   = 0.240 * TANH( A1) * TANH( A3)
-!     write(*,*) 'HS:', HS
       TS   = 2.0*PI* TANH( A2) * TANH( A4)
-!     write(*,*) 'TS:', TS
+
       H    = HS * ( VWIND * VWIND) / G
-!     write(*,*) 'H:', H
 
 !     bepaal golfperiode T
       T    = TS * VWIND /G
-!     write(*,*) 'T:', T
 
 !     bepaling golflengte (iteratief hier niet opgenomen)
       RL0  = G * T * T / ( 2.0 * PI)
-!     write(*,*) 'L0:', RL0
       A5   = 2.0 * PI * INIDEP / RL0
 
 !     afscherming voor te groot argument functie tanh
@@ -140,7 +131,6 @@
 !     let op sommige documentatie stelt: RL = RL0*SQRT (TANH (A5))
          RL  = RL0 * TANH(A5)
       endif
-!     write(*,*) 'L:', RL
 
   150 CONTINUE
 !

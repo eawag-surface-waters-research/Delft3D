@@ -64,11 +64,7 @@
 
       do iseg = 1, noseg
          do j = 1, nsys
-!           if ( btest(iknmrk(iseg),0) ) then
                conc(isys+j-1,iseg) = rhs(j,iseg)
-!           else
-!              conc(isys+j-1,iseg) = 0.0
-!           endif
             rhs (  j     ,iseg) = 0.0d00
          enddo
       enddo

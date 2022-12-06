@@ -518,7 +518,6 @@
 !     Note: removed printing of timers to monitoring file
 
           call timer_stop(timer_total)
-!         call timers_waq_print()
 
           call sync_processes()
           call couplib_stop()

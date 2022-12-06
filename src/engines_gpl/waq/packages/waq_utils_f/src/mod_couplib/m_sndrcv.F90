@@ -1029,7 +1029,6 @@ integer                                    :: my_idebug
 !  If sendrecv has been called before: wait for completion of previous
 !     sendrecv-operation
 
-   !write(LOUT,*) 'cnt_sndrcv=',cnt_sndrcv
    if (cnt_sndrcv.gt.0) then
       if (my_idebug.ge.7) write(LOUT,*) 'sendrecv: wait for completion of ',&
          'previous sendrecv-operation...'
@@ -1130,9 +1129,8 @@ integer                                    :: my_idebug
 
 !     prepare message: items sndrcv%isnd of iarray, rarray or darray
 
-      !write(LOUT,*) 'send_data: starting ingb=',ingb
       sndrcv => nghtbl(ingb)
-      !write(LOUT,*) 'send_data: ingb=',ingb,': iprc=',sndrcv%iprc
+
       if (associated(sndrcv%isnd)) then
          nsend = size(sndrcv%isnd)
       else
@@ -1251,7 +1249,6 @@ integer                                    :: my_idebug
 
       if (associated(sndrcv%ircv)) then
          nrecv = size(sndrcv%ircv)
-         !write(LOUT,*) 'ircv=',sndrcv%ircv,': nrecv=',nrecv
       else
          nrecv = 0
       endif

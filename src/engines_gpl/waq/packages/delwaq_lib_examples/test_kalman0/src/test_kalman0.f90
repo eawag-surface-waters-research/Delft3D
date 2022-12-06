@@ -118,8 +118,6 @@ program test_kalman0
 
     call getarg(1,runidname)
 
-    ! call system('delwaq1.exe arjen-ws.inp')
-
 
     result = MODELINITIALIZE_BY_ID(runidName)
 

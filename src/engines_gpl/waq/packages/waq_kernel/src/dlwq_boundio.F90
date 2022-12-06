@@ -163,9 +163,6 @@ boundio: &
 
         bound = wqParComm % bndget
 
-        ! if last step close communications, clean up datasets
-    !   call WQParClose(wqParComm) ! jvb waar zetten we deze, of een if met de tijd, of buiten deze routine wqParComm wordt dan argument
-
     endif boundio
 
 hotbound: &

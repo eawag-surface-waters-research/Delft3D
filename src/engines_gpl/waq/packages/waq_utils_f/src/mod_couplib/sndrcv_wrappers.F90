@@ -446,9 +446,8 @@ integer :: my_idebug
 
    iroot = 0
    num_calls(IDSTRBC) = num_calls(IDSTRBC) + 1
-   !write(LOUT,*) 'mypart=',mypart,': nelem=',nelem
    call mpi_bcast(carray, nelem, MPI_CHARACTER, iroot, MPI_COMM_ALL, ierror)
-   !write(LOUT,*) 'mypart=',mypart,': ierror=',ierror
+
    info = ierror
 
    if (mypart.eq.1) then
@@ -524,8 +523,6 @@ integer, intent(out)                            :: info
 integer, intent(in), optional                   :: idebug
 integer                                         :: my_idebug
 
-!  write(LOUT,*) 'distribute_1d_rdata_on_namedset: starting for namixs="', &
-!     trim(namixs),'", namitf="',trim(namitf),'"'
    my_idebug = idebug_distribute_named
    if (present(idebug)) my_idebug = idebug
    call sendrecv_data(rarray=rarray, namixs=namixs, namitf=namitf, &
@@ -542,8 +539,6 @@ integer, intent(out)                            :: info
 integer, intent(in), optional                   :: idebug
 integer                                         :: my_idebug
 
-!  write(LOUT,*) 'distribute_2d_rdata_on_namedset: starting for namixs="', &
-!     trim(namixs),'", namitf="',trim(namitf),'"'
    my_idebug = idebug_distribute_named
    if (present(idebug)) my_idebug = idebug
    call sendrecv_data(rarray=rarray, namixs=namixs, namitf=namitf, &
@@ -560,8 +555,6 @@ integer, intent(out)                            :: info
 integer, intent(in), optional                   :: idebug
 integer                                         :: my_idebug
 
-!  write(LOUT,*) 'distribute_3d_rdata_on_namedset: starting for namixs="', &
-!     trim(namixs),'", namitf="',trim(namitf),'"'
    my_idebug = idebug_distribute_named
    if (present(idebug)) my_idebug = idebug
    call sendrecv_data(rarray=rarray, namixs=namixs, namitf=namitf, &
@@ -578,8 +571,6 @@ integer, intent(out)                            :: info
 integer, intent(in), optional                   :: idebug
 integer                                         :: my_idebug
 
-!  write(LOUT,*) 'distribute_4d_rdata_on_namedset: starting for namixs="', &
-!     trim(namixs),'", namitf="',trim(namitf),'"'
    my_idebug = idebug_distribute_named
    if (present(idebug)) my_idebug = idebug
    call sendrecv_data(rarray=rarray, namixs=namixs, namitf=namitf, &

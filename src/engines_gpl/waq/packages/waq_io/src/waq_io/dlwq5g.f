@@ -158,7 +158,6 @@
      *                 NODIM  , IORDER , CNAMES , IOFFI  , IOFFC  ,
      *                          IODS   , IOFFD  , K      , ICNT   )
          iwar = iwar + 1
-!!         IF ( I + ICNT .GE. NITM ) GOTO 9999
    70 CONTINUE
 !
  9999 if (timon) call timstop( ithndl )

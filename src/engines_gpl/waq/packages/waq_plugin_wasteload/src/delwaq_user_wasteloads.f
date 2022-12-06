@@ -165,8 +165,6 @@
 
       if ( noscrn .eq. 0 ) return
 
-!     write ( lunrep , * ) 'Time:',itime
-
 !        First  step: sum the withdrawn masses and flow per screen
 
       scrwtd = 0.0                                  !  zero the withdrawal
@@ -195,7 +193,7 @@
       do iscrn = 1, noscrn                          !  make the mixed
          wflow = scrwdf( iscrn )                    !  concentrations
          if ( wflow .ne. 0.0 ) then                 !  per active screen
-!           write ( lunrep , * ) 'Screen:',iscrn,' Abstracted:',wflow
+
             do isub = 1, notot
                scrwtd ( iscrn, isub ) = scrwtd ( iscrn, isub ) / wflow
             enddo
@@ -209,7 +207,6 @@
          if ( iscrn .ne. 0 ) then                   !  screens only
             wflow = wls(iwst)%flow
             if ( wflow .gt. 0.0 ) then              !  releases only
-!              write ( lunrep , * ) 'Screen:',iscrn,' Released:',wflow
                do isub = 1, notot
                   wls(iwst)%loads(isub ) = scrwtd ( iscrn, isub )
                enddo

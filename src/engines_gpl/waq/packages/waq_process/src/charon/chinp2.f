@@ -41,7 +41,7 @@
 !     COMMON BLOCKS       : -
 !
       SUBROUTINE CHINP2 (RUNNAM, LUIC  , LUOC  )
-      
+
       use m_charon
 !
 !     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
@@ -117,27 +117,6 @@
       write (not,'(''COMPONENT MASSES''/(a6,6x,f12.4))')
      j      (nr(i,1),commas(i),i=1,m)
 
-!     New part to read desired list of transported substances
-
-!     read (nit,*,end=40)
-!     ntrans = 0
-!  10 read (nit,'(a20)') C20
-!     if ( c20(1:3) .eq. 'END' ) goto 50
-!     ntrans = ntrans + 1
-!     read ( c20 , '(6x,a10,4x)' ) varnam(ntrans)
-!     goto 10
-
-!     Defaults: all components are transported substances
-
-!  40 continue
-!     ntrans = m
-!     do 45 i = 1,m
-!  45 write ( varnam(i) , '(a6,''_tot'')' ) nr(i,1)
-
-!  50 CONTINUE
-!     write (not,'(''TRANSPORTED VECTOR''/(i4,2x,a10))')
-!    j      (i, varnam(i),i=1,ntrans)
-!     CLOSE (NIT)
       WRITE (NOT,*)'STOP READING INPUT FILE COUPLING DELWAQ-CHARON'
 
       RETURN

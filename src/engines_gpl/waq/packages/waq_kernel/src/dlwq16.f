@@ -150,12 +150,6 @@
          else
             if ( owners(ifrom) .ne. mypart .and. owners(ito) .ne. mypart ) cycle
          endif
-  !      if ( ifrom .gt. 0 ) then
-  !         if ( .not. btest(iknmrk(ifrom),0) ) cycle       ! identified dry at start and end of timestep
-  !      endif                                              ! aggregated time step can be wet in between
-  !      if ( ito   .gt. 0 ) then                           ! start and end, that is why a check on 1 cm3/s
-  !         if ( .not. btest(iknmrk(ito  ),0) ) cycle       ! life is not easy
-  !      endif
 
          a = area(iq)
          q = flow(iq)

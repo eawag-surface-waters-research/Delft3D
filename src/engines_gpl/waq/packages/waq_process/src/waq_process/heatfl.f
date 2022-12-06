@@ -153,8 +153,6 @@
 
 !     Heat exchange only for active water segments
 !
-!!    CALL DHKMRK(1,IKNMRK(ISEG),IKMRK1)
-!!    IF (IKMRK1.EQ.1) THEN
       IF (BTEST(IKNMRK(ISEG),0)) THEN
 !
 !     Heat exchange only for top layer segments
@@ -196,6 +194,8 @@
             Qsn = Qsw * (1- Fsw)
 !
 !     ------Long wave atmospheric radiation------
+!
+!           cloud = (100.0 - SunFac) / 100.0
 !
             Psvap = 6.131 + 0.467 * TempAt + 0.0089 *
      j               TempAt ** 2.0 + 0.000527 * TempAt ** 3.0

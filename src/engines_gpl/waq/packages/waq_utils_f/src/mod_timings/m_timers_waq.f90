@@ -41,16 +41,6 @@ module m_timers_waq
 ! 4) Add an explanation (module subroutine timers_finish)
 !    Example:
 !    write(LOUTTM,'(a)') '|Momentum eq.   : Part of Simulation ("UZD")|'
-! 5) Add in the source code calls to timer_start and timer_stop around the
-!    code you want to time
-!    Example:
-!    call timer_start(timer_new, 1)
-!    ... code to be timed ...
-!    call timer_stop(timer_new, 1)
-! Remarks/restrictions:
-! - The subroutines containing calls to timer_start/timer_stop must contain
-!   the line:
-!   use m_timers_waq
 !
 !!--pseudo code and references--------------------------------------------------
 ! NONE
@@ -58,9 +48,7 @@ module m_timers_waq
 use m_timings
 implicit none
 !
-public timer_start
-public timer_stop
-!
+
 integer, parameter :: timer_total          = 1
 integer, parameter :: timer_init           = timer_total + 1
 !

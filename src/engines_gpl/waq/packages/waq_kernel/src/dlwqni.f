@@ -337,7 +337,7 @@
      +              A(ICONC), A(ICONS), A(IPARM), A(IFUNC), A(ISFUN),
      +              A(IVOL) , NOCONS  , NOFUN   , 1       , NOUTP   ,
      +              LCHAR   , LUN     , J(IIOUT), J(IIOPO), A(IRIOB),
-     +              C(IOSNM), C(IOUNI), C(IODSC), C(ISSNM), C(ISUNI), C(ISDSC), 
+     +              C(IOSNM), C(IOUNI), C(IODSC), C(ISSNM), C(ISUNI), C(ISDSC),
      +              C(IONAM), NX      , NY      , J(IGRID), C(IEDIT),
      +              NOSYS   , A(IBOUN), J(ILP)  , A(IDERV), A(IMAS2),
      +              A(ISMAS), NFLUX   , A(IFLXI), ISFLAG  , IAFLAG  ,
@@ -356,15 +356,6 @@
      +              INTOPT  , C(IPNAM), C(IFNAM), C(ISFNA), J(IDMPB),
      +              NOWST   , NOWTYP  , C(IWTYP), J(IWAST), J(INWTYP),
      +              A(IWDMP), iknmkv  , J(IOWNS), MYPART  , isegcol )
-!
-!
-!          printout of results
-!
-!     CALL DLWQ10 ( LUN(19) , J(IDUMP), A(IDERV), A(ICONC), A(IMAS2),
-!    *              ITSTRT  ,    1    , ITSTRT  , ITSTRT+1,    1    ,
-!    *              C(IDNAM), C(ISNAM), C(IMNAM), NODUMP  , NOTOT   ,
-!    *              NOSEG   , J(ILP)  , ISFLAG  , IAFLAG  , IMFLAG  ,
-!    *              A(ISMAS), INTOPT  , NDMPAR  , C(IDANA))
 !
 !          close files, except monitor file
 !

@@ -167,7 +167,6 @@
 
       integer srwBoundOutSet,    srwBoundInSet
       integer srwBoundInStream, srwBoundOutStream
-!jvb  logical srwStatus
       integer srwStatus
 
       save srwBoundOutSet, srwBoundInSet
@@ -175,8 +174,6 @@
       data procid / 0 /
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "online", ithandl )
-
-!     WRITE (*,*) ' SRWSHELL itime = ' , itime
 
 !***********************************************************************
 !     System initialisation
@@ -216,22 +213,21 @@
 
 !         Open Data Stream
 
-!         write (*,*) ' Create BoundInStream'
           srwBoundInStream = dioCreateStreamSynched (
      j                       dio_Binary_stream,
      j                       'BoundToDelwaq',
      j                       'r' )
-!         write (*,*) ' Done'
+
 
 !         Open Data Set and Collect Info
-!         write (*,*) ' Open BoundInDataSet'
+
           srwBoundInSet = dioGetPltDatasetInfo (
      j                       srwBoundInStream,
      j                       'IncomingBoundaries',
      j                       NrVarBoundIn, VarBoundIn,
      j                       NrLocBoundIn, LocBoundIn,
      +                       Nr_Times, Times )
-!         write (*,*) ' Done'
+
 
           if ( srwBoundInSet .gt. 0 ) then
 !             SRW run
@@ -270,24 +266,11 @@
           enddo
 
 !         Open data stream
-!         write (*,*) ' Create BoundOutStream'
 
           srwBoundOutStream = dioCreateStreamSynched (
      j                          dio_Binary_stream,
      j                          'BoundFromDelwaq',
      j                          'w')
-!         write (*,*) ' Done'
-!         Create data set
-!         write (*,*) ' Open BoundOutSet'
-
-!          write (*,*) ' Locations'
-!          do iloc=1,NrLocBoundOut
-!              write (*,*) iloc,locBoundOut(iloc)
-!          enddo
-!          write (*,*) ' Variables'
-!          do iloc=1,NrVarBoundOut
-!              write (*,*) ivar,VarBoundOut(ivar)
-!          enddo
 
           srwBoundOutSet = dioDefinePltDataset (
      j                          srwBoundOutStream,
@@ -295,10 +278,6 @@
      j                          Dio_Plt_Real,
      j                          NrVarBoundOut,VarBoundOut,
      j                          NrLocBoundOut,LocBoundOut)
-!          do iwst = 1,nowst
-!              write (*,*) ' Lateral ',iwst,' segment',iwaste(iwst)
-!          enddo
-!         write (*,*) ' Done'
 
 !         Map boundaries to segments
 
@@ -331,15 +310,12 @@
           iseg = bn2seg(ibnd)
           do isys = 1,nosys
               values(isys,ibnd) = conc(isys,iseg)
-!              write (*,*) ' val(',isys,',',ibnd,')=',conc(isys,iseg)
           enddo
       enddo
       do iwst = 1,nowst
           iseg = iwaste(iwst)
           do isys = 1,nosys
               values(isys,nobnd+iwst) = conc(isys,iseg)
-!              write (*,*) ' val(',isys,',',nobnd+iwst,')=',
-!     j                     conc(isys,iseg)
           enddo
       enddo
 
@@ -349,10 +325,8 @@
 
 !***********************************************************************
 !     Send output
-!     write (*,*) ' Send output to SRW ...'
       call DioPutPltDataSetReals (srwBoundOutSet,times(1),
      j               NrVarBoundOut, NrLocBoundOut,  values)
-!     write (*,*) ' Done'
 
 !***********************************************************************
 !     Collect Input (and implicitly get permission to proceed)
@@ -362,10 +336,10 @@
 
       if ( itime .lt. itstop ) then
 
-!     write (*,*) ' Get Boundaries from SRW ...'
+
       srwStatus = dioGetPltDataSetReals (srwBoundInSet,times(1),
      j            NrVarBoundIn,NrLocBoundIn,values)
-!     write (*,*) ' Done'
+
 
       if ( srwStatus .gt. 0 ) then
           do ibnd = 1,nobnd
@@ -413,13 +387,10 @@
       if ( timon ) call timstrt ( "map_input", ithandl )
 
       do ilocin = 1,nlocin
-!         write ( 11 , * ) ' loc ',Locin(ilocin)
           call zoek (Locin(ilocin),nloc,loc,20,iloc)
           do ivarin = 1,nvarin
-!             write ( 11 , * ) ' Var ', varin(ivarin)
               call zoek (Varin(ivarin),nvar,var,20,ivar)
               if ( iloc .ge. 1 .and. ivar .ge. 1 ) then
-!                 write (*,*) ' BINGO!'
                   map(ivar,iloc,1) = ilocin
                   map(ivar,iloc,2) = ivarin
               endif

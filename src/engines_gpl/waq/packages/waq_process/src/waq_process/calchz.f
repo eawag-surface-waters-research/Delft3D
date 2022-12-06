@@ -71,8 +71,6 @@
 ! you need this for maninng
 
       DO 9000 ISEG = 1 , NOSEG
-!!    CALL DHKMRK(1,IKNMRK(ISEG),IKMRK1)
-!!    IF (IKMRK1.EQ.1) THEN
       IF (BTEST(IKNMRK(ISEG),0)) THEN
 ! 0-inactive cell  1-active cell
        CALL DHKMRK(2,IKNMRK(ISEG),IKMRK2)

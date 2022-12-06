@@ -104,8 +104,6 @@
          xeq = dexp2(pda)
          if((xeq.eq.0.0 .or. xmf(j).eq.0.0 ).and.dabs(xeq-xmf(j)).lt.
      2   1.0d-60) go to 130
-!        if(xeq.gt.1.0 .and. dabs(xeq-xmf(j)) .lt. 0.1 .and. x(j) .lt.
-!    2   1.0d-10) go to 130
          if(xeq.gt.0.990d+00 .and. dabs(xeq-xmf(j)) .lt. 0.10d+00
      2    .and. x(j) .lt.  slacks/1.0d-10) go to 130
          xemaa = 2.0*dabs((xeq-xmf(j))/(xeq+xmf(j)))
@@ -127,9 +125,6 @@
       fe2 = rt*fe
 !        compute ph and eh and ceccal
 ! already done in solvex 7-11-1992 NMdR
-!     call  phcalc
-!     call  ehcalc
-!     call  ceccal
 !        recompute r and r inverse
       call rcalc
       call matinv(r, mend, v4, 0, v1, v2, ke)

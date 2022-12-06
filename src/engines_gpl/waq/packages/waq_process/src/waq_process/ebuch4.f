@@ -104,8 +104,7 @@
 !
       IFLUX = 0
       DO 9000 ISEG = 1 , NOSEG
-!!    CALL DHKMRK(1,IKNMRK(ISEG),IKMRK1)
-!!    IF ( IKMRK1 .GT. 0) THEN
+
       IF (BTEST(IKNMRK(ISEG),0)) THEN
 !
             CCH4   = MAX ( 0.0, PMSA(IP1 ) )

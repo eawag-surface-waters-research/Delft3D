@@ -51,7 +51,6 @@
       do 50 k=1,ntot
          mta=ijfind(k)
          mtb=ijfind(k+1)-1
-!        call find(0, k, mta, mtb)
          if (mta.eq.0) go to 50
          do 40 ii=mta,mtb
             aikx = aij(ii)*x(k)
@@ -71,14 +70,12 @@
          j2 = kl(k+1) - 1
    60    mta=ijfind(j1)
          ii= ijfind(j1+1)-1
-!  60    call find(0, j1, mta, ii)
          if (mta.ne.0) go to 70
          j1 = j1 + 1
          if (j1.gt.j2) go to 100
          go to 60
    70    ii= ijfind(j2)
          mtb=ijfind(j2+1)-1
-!  70    call find(0, j2, ii, mtb)
          if (ii.ne.0) go to 80
          j2 = j2 - 1
          if (j2.lt.kl(k)) go to 100

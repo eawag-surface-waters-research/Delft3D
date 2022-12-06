@@ -227,13 +227,10 @@
       ELSE
         AFACT  = .TRUE.
       ENDIF
-!     write(*,*) 'afact:' , afact
-
 !
       IFLUX = 0
       DO 9000 ISEG = 1 , NOSEG
-!!    CALL DHKMRK(1,IKNMRK(ISEG),IKMRK1)
-!!    IF (IKMRK1.EQ.1) THEN
+
       IF (BTEST(IKNMRK(ISEG),0)) THEN
 !
       IF ( TFACT ) THEN
@@ -321,7 +318,6 @@
       IF (AFACT) THEN
 
         AGEFL  = PMSA(IP23)
-!       write(*,*) 'agefl: ', agefl
 
         IF ((COD.LT.1.0E-06).OR.(BOD5.LT.1.0E-6)) THEN
           AGEFUN = AGEFL
@@ -330,25 +326,15 @@
           AGEFU  = PMSA(IP24)
           AGEIL  = PMSA(IP25)
           AGEIU  = PMSA(IP26)
-!       write(*,*) 'agefu: ', agefu
-!       write(*,*) 'ageil: ', ageil
-!       write(*,*) 'ageiu: ', ageiu
 
-!         AGEIND = BOD5 / COD
           AGEIND = COD / BOD5
-!         write(*,*) 'ageind: ', ageind
 
           IF (AGEIND.LE.AGEIL) THEN
             AGEFUN = AGEFU
-!         write(*,*) 'agefun-1: ', agefun
 
-!         ELSEIF (AGEIND.GE.AGEIU) THEN
-!           AGEFUN = AGEFL
-!         write(*,*) 'agefun-2: ', agefun
           ELSE
             AGEFUN = AGEFL + (AGEFU - AGEFL) *
      1               EXP(-((AGEIND-AGEIL)/AGEIU)**2)
-!         write(*,*) 'agefun-3: ', agefun
 
           ENDIF
         ENDIF

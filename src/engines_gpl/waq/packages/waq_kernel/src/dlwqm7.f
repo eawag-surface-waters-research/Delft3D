@@ -106,7 +106,6 @@
       endif
 
       do iq = 1,noq                                                   ! drying and flooding
- !       if ( abs(flow(iq)) .lt. 1.0e-6 ) then                        ! less than 1 cm3/s
             ifrom = ipoint(1,iq)
             ito   = ipoint(2,iq)
             if ( ifrom .gt. 0 ) then
@@ -115,7 +114,6 @@
             if ( ito   .gt. 0 ) then                                  ! start and end, that is why a check on 1 cm3/s
                if ( .not. btest(iknmrk(ito  ),0) ) mixlen(iq) = 0.0   ! life is not easy
             endif
- !       endif
       enddo
 
       if ( timon ) call timstop ( ithandl )

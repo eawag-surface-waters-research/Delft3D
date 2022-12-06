@@ -129,15 +129,6 @@
     if (log) write(lunlog,'(A)') 'currentTime:'
     if (log) write(lunlog,'(E17.6)') currentTime
 
-    !    dummy = update((stopTime-startTime)/2.0)
-    !    call get_current_time(currentTime)
-    !    if (log) write(lunlog,'(A)') 'currentTime:'
-    !    if (log) write(lunlog,'(E17.6)') currentTime
-    !    dummy = update((stopTime-startTime)/2.0)
-    !    call get_current_time(currentTime)
-    !    if (log) write(lunlog,'(A)') 'currentTime:'
-    !    if (log) write(lunlog,'(E17.6)') currentTime
-
     dummy = finalize()
 
     stop(0)

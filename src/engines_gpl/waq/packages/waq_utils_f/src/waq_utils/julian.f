@@ -129,16 +129,6 @@
          GOTO 999
       ELSE
          TEMP1  = INT (( IMONTH-14.0) / 12.0 )
-*-----------------------------
-!        WRITE(*,*) 'TEMP1 : ', TEMP1
-!        WRITE(*,*) 'dbg 1 : ',
-!    1          INT ( 1461.0 * ( IYEAR + 4800.0 + TEMP1 ) / 4.0 )
-!        WRITE(*,*) 'dbg 2 : ',
-!    2          INT ( 367.0 * ( IMONTH - 2.0 - TEMP1 * 12.0 ) / 12.0 )
-!        WRITE(*,*) 'dbg 3 : ',
-!    1          INT ( 3.0 * INT ( ( IYEAR + 4900.0 + TEMP1 ) / 100.0 ) /
-!    2          4.0 )
-*-----------------------------
          TEMP2  = IDAY - 32075.0 +
      1          INT ( 1461.0 * ( IYEAR + 4800.0 + TEMP1 ) / 4.0 ) +
      2          INT ( 367.0 * ( IMONTH - 2.0 - TEMP1 * 12.0 ) / 12.0 ) -

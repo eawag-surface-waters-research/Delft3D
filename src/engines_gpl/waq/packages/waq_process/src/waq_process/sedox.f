@@ -202,8 +202,6 @@
          PMSA (IP32)  = 0.0
          PMSA (IP33)  = 0.0
 
-!!       CALL DHKMRK(1,IKNMRK(ISEG),IKMRK1)
-!!       IF (IKMRK1.EQ.1) THEN
          IF (BTEST(IKNMRK(ISEG),0)) THEN
             CALL DHKMRK(2,IKNMRK(ISEG),IKMRK2)
 

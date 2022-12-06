@@ -737,18 +737,6 @@
          integer                          :: i
          integer                          :: iaindx
 
-!        name_loc = name
-!        call dhucas(name_loc, name_ucas, NAME_SIZE)
-!
-!        iret = 0
-!        do i = 1 , dlwq_item%no_item
-!           call dhucas(dlwq_item%name(i), name_loc, NAME_SIZE)
-!           if ( name_loc .eq. name_ucas ) then
-!              iret = i
-!              exit
-!           endif
-!        end do
-
          iret = 0
          do i = 1 , dlwq_item%no_item
             call zoekns ( name  , 1 , dlwq_item%name(i), NAME_SIZE , iaindx)

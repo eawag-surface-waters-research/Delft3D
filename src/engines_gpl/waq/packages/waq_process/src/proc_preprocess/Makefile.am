@@ -28,10 +28,7 @@ libproc_preprocess_la_SOURCES = \
        bleffpro.f \
        blmeff.f \
        cnfrep.f \
-       cnvpro.f \
        dhpfil.f \
-       dhrep2.f \
-       dhrepc.f \
        dlwqp1.f \
        dlwqs1.f \
        expand_frc.f \
@@ -45,7 +42,6 @@ libproc_preprocess_la_SOURCES = \
        proc_totals.f \
        prprop.f \
        prsort.f \
-       rbpdf2.f \
        rd_filid.f \
        rd_tabm1.f \
        rd_tabp1.f \

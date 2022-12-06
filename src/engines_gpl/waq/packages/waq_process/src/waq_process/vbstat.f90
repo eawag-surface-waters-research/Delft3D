@@ -165,7 +165,6 @@
             if ( SwWV .eq. 0) then
                if (ifirst(1) .eq. 0) then
                   nsfVB = Initnsf
-!                  WRITE (ILUMON, *) 'ifirst, iseg, nsf', ifirst, iseg, nsfvb
                endif
 
                if ( NINT(SwEmersion) .eq. 0 ) then
