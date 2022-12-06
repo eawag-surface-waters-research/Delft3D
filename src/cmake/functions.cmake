@@ -98,7 +98,8 @@ function(oss_include_libraries library_name dependencies)
 
     foreach(dependency IN LISTS ${dependencies})
         add_dependencies(${library_name} ${dependency})
-        if (UNIX)
+
+        if (NOT CMAKE_GENERATOR MATCHES "Visual Studio")
             include_directories( ${PROJECT_BINARY_DIR}/${dependency} )
         endif()
     endforeach()
