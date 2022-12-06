@@ -13,8 +13,11 @@ set(GKLIB_PATH "${source_path}/GKlib" CACHE PATH "path to GKlib")
 set(SHARED FALSE CACHE BOOL "build a shared library")
 add_definitions(-DHAVE_METIS)
 
-set(METIS_INSTALL FALSE)
-
+if(MSVC)
+  set(METIS_INSTALL FALSE)
+else()
+  set(METIS_INSTALL FALSE)
+endif()
 
 # Configure libmetis library.
 if(SHARED)

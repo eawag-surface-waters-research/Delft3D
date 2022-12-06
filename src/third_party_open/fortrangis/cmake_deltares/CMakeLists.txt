@@ -4,6 +4,7 @@ set(src_path "${CMAKE_CURRENT_SOURCE_DIR}/..")
 # Define the fortranc library
 set(fortranc_path ${src_path}/libfortranc)
 
+add_compile_options(-fpic)
 set(fortranc_sources ${fortranc_path}/fortranc.F90
                         ${fortranc_path}/iso_varying_string.F90)
                   
