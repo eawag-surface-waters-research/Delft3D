@@ -67,9 +67,6 @@ IF "%4" == "--onlyifmissing" (
 )
 
 
-if exist %1 (
-	del %1
-)
 
 rem Generate version number source module using version_number.exe
 %VN% "%version%" "%3" "%1.svn" "%1"

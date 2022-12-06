@@ -1,9 +1,8 @@
 set(library_name metisoptions)
 
 # Check if the include path is defined. If it is not present, it cannot be guaranteed that this module can be configured correctly
-if (UNIX)
-    include_directories($ENV{METIS_DIR}/include)
-endif(UNIX)
+include_directories($ENV{METIS_DIR}/include)
+
 
 if (WIN32)
     get_module_include_path(${checkout_src_root}/${metis_module} 
