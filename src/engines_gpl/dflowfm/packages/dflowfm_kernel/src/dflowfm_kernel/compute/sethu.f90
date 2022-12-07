@@ -31,7 +31,7 @@
 ! $HeadURL$
 
 subroutine sethu(jazws0)                            ! Set upwind waterdepth hu
- use m_flowgeom                                      ! Todo: higher order + limiter, see transport
+ use m_flowgeom                                     ! Todo: higher order + limiter, see transport
  use m_flow
  use m_flowtimes
  use m_sediment
@@ -39,7 +39,7 @@ subroutine sethu(jazws0)                            ! Set upwind waterdepth hu
  use m_sobekdfm
  use m_sferic
  use m_missing
- use m_netw, only: xk, yk
+ use m_netw, only: xk, yk, zk
  use unstruc_model, only:md_restartfile
  use geometry_module, only: dbdistance
 
@@ -64,10 +64,12 @@ subroutine sethu(jazws0)                            ! Set upwind waterdepth hu
  double precision  :: dp, d2, aa, hucrest, hunoweir, qweirsimple, ufac, efac
 
  double precision  :: avolk, hkruin, wsbov, wsben, d1, ewben, eweir, qvolk, qunit, hov, vov, vbov, hvolk, dte0, dtefri, qov, tol
- double precision  :: sl1, sl2, sl3, sku, hskub, hub, sigmd
+ double precision  :: sl1, sl2, sl3, sku, hskub, hub, sigmd, hskd, hskx
  character (len=4) :: toest
 
- integer           :: k3, k4, itel, kuu, ku2, kku, ip , Lnu, kbd, ktd, kbd0, LLbc
+ integer           :: k3, k4, itel, kuu, ku2, kku, ip , Lnu, kbd, ktd, kbd0, LLbc, kkd
+
+ double precision  :: zw0u
 
  double precision, external :: dslim,  nod2linx, nod2liny
 
@@ -284,7 +286,7 @@ subroutine sethu(jazws0)                            ! Set upwind waterdepth hu
                  dtefri = 0.0d0
                  call enloss(ag, d1, eweir, hkruin, hov,                   &
                              qunit, qvolk, toest, vov,                     &
-                             ewben, wsbov, wsben, weirdte(nfw),              &
+                             ewben, wsbov, wsben, weirdte(nfw),            &
                              dtefri,iadv(L), crestlxw(nfw),                &
                              taludlxw(nfw), taludrxw(nfw), vegxw(nfw), testfixedweirs )
                  weirdte(nfw) = (1d0 - waquaweirthetaw)*weirdte(nfw) + waquaweirthetaw*dte0
@@ -304,8 +306,18 @@ subroutine sethu(jazws0)                            ! Set upwind waterdepth hu
                         enddo
                     endif
                  endif
-                 huL = hunoweir
-
+                 
+                 !if (huweirregular > 0d0) then 
+                 !   if (huL < huweirregular) then  
+                 !   else if (hul < 2d0*huweirregular) then 
+                 !      huL = huweirregular + hunoweir*(hul - huweirregular) /  huweirregular  
+                 !   else 
+                 !      huL = hunoweir
+                 !   endif
+                 !else 
+                    huL = hunoweir
+                 !endif
+ 
              else
 
 
@@ -446,22 +458,48 @@ subroutine sethu(jazws0)                            ! Set upwind waterdepth hu
 
              else                                     ! default: upwind sigma oriented distribution of hu(L)
 
-                do LL = Lb, Ltop(L)
-                   sigm   = (zws(kb+LL-Lb)-zws(kb0)) / hsku
-                   hu(LL) = sigm*hu(L)
-                   au(LL) = wu(L)*(hu(LL)-hu(LL-1))   ! this is only for now here, later move to addlink etc
-                   au(L)  = au(L) + au(LL)            ! add to integrated 2Dh layer
-                enddo
+                if (keepzlay1bedvol == 0) then        ! default, upwind based  
+                   do LL = Lb, Ltop(L)
+                      sigm   = (zws(kb+LL-Lb)-zws(kb0)) / hsku
+                      hu(LL) = sigm*hu(L)
+                      au(LL) = wu(L)*(hu(LL)-hu(LL-1))   ! this is only for now here, later move to addlink etc
+                      au(L)  = au(L) + au(LL)            ! add to integrated 2Dh layer
+                   enddo
+                else 
+                   ktd  = ktop(kd)
+                   kbd  = min ( ln0(3-iup,Lb ) , ktd )
+                   hskd = zws(ktd) - bl(kd)
+                   if (hskd > 0d0) then
+                      zw0u = max(bl(ku), bl(kd)) 
+                      hskx = max(zws(kt),zws(ktd)) - zw0u
+                      do LL  = Lb, Ltop(L)
+                         kkd   =  min(ktd, kbd+LL-Lb)
+                         sigm  = (max( zws(kb+LL-Lb),zws(kkd) ) - zw0u) / hskx
+                         hu(LL) = sigm*hu(L)
+                         au(LL) = wu(L)*(hu(LL)-hu(LL-1))   ! this is only for now here, later move to addlink etc
+                         au(L)  = au(L) + au(LL)            ! add to integrated 2Dh layer
+                      enddo
+                   else 
+                      zw0u = bl(ku)
+                      hsku = zws(kt ) - bl(ku)
+                      do LL  = Lb, Ltop(L)
+                         sigm  = ( zws(kb+LL-Lb) - zw0u ) / hsku 
+                         hu(LL) = sigm*hu(L)
+                         au(LL) = wu(L)*(hu(LL)-hu(LL-1))   ! this is only for now here, later move to addlink etc
+                         au(L)  = au(L) + au(LL)            ! add to integrated 2Dh layer
+                      enddo
+                   endif 
+                endif
 
              endif
 
           endif
 
-          do LL = Lb, Ltop(L)
-             if (hu(LL) - hu(LL-1)  <= 0d0 ) then 
-                sigm = hu(LL)
-             endif
-          enddo
+          !do LL = Lb, Ltop(L)
+          !   if (hu(LL) - hu(LL-1)  <= 0d0 ) then 
+          !      sigm = hu(LL)
+          !   endif
+          !enddo
 
        else
           Ltop(L) = 1 ! lb - 1 ! 1 ! flag dry
@@ -472,7 +510,7 @@ subroutine sethu(jazws0)                            ! Set upwind waterdepth hu
  enddo
 
 
-  do L = 1,lnx
+ do L = 1,lnx
     k1 = ln(1,L) ; k2 = ln(2,L)
     hsav  = max(epshs, acl(L)*hs(k1) + (1d0-acl(L))*hs(k2) )
     huvli(L) = 1d0 / hsav

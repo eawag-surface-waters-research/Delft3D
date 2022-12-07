@@ -149,6 +149,13 @@
  allocate ( laymx(mxlaydefs)   , stat= ierr      )
  call aerr('laymx(mxlaydefs)'  , ierr, mxlaydefs )
 
+ if (layertype >= 2) then    
+    allocate ( nlaybn(ndx) , stat= ierr) ; nlaybn = 0
+    call aerr('nlaybn(ndx)', ierr, ndx)
+    allocate ( nrlayn(ndx) , stat= ierr) ; nrlayn = 0
+    call aerr('nrlayn(ndx)', ierr, ndx)
+ endif
+
  do k=1,Ndx
     kbot(k) = k
     ktop(k) = k
