@@ -2413,6 +2413,8 @@ logical function isdeprecated(chap, key)
    character(len=*)                           :: key   !< keyword name
    
    isdeprecated = .false.
+
+   ! NOTE: make sure to have all chapter names and key names all in lowercase below:
    select case (trim(chap))
    case ('processes')
       select case (trim(key))
@@ -2428,6 +2430,8 @@ logical function isobsolete(chap, key)
    character(len=*)                           :: key   !< keyword name
    
    isobsolete = .false.
+   
+   ! NOTE: make sure to have all chapter names and key names all in lowercase below:
    select case (trim(chap))
    case ('geometry')
       select case (trim(key))
@@ -2436,7 +2440,7 @@ logical function isobsolete(chap, key)
       end select
    case ('numerics')
       select case (trim(key))
-      case ('hkad','ithindykescheme','thindykecontraction', 'TransportMethod', 'TransportTimestepping')
+      case ('hkad','ithindykescheme','thindykecontraction', 'transportmethod', 'transporttimestepping')
          isobsolete = .true.
       end select
    case ('output')
