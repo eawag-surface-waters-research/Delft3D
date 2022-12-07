@@ -136,6 +136,8 @@
  integer, allocatable              :: laydefnr(:)       !< dim = (ndx), pointer to laydef, if positive to unique laydef, otherwise interpolate in 1,2, and 3
  integer, allocatable              :: laytyp(:)         !< dim = (mxlaydefs), 1 = sigma, 2 = z
  integer, allocatable              :: laymx(:)          !< dim = (mxlaydefs), max nr of layers
+ integer, allocatable              :: nrlayn(:)         !< dim = (ndx), max nr of layers
+ integer, allocatable              :: nlaybn(:)         !< dim = (ndx), bed lay nr
  double precision, allocatable     :: zslay(:,:)        !< dim = (: , maxlaydefs) z or s coordinate,
  double precision, allocatable     :: wflaynod(:,:)     !< dim = (3 , ndx) weight factors to flownodes indlaynod
  integer,          allocatable     :: indlaynod(:,:)    !< dim = (3 , ndx)
