@@ -294,19 +294,18 @@ subroutine sethu(jazws0)                            ! Set upwind waterdepth hu
                  ! attention total waterdepth instead of water above crest
                  if ( toest == 'volk' ) then
                      vbov = qvolk/max(hunoweir, 1d-6 )
+                     vbov = max (1d-4, vbov)                   ! set minimum value for vbov so that always an energy loss can be applied 
                  endif
-                 if (vbov > 1d-8) then
-                     agwdxi  = ag*weirdte(nfw)*dxi(L)
-                     if (kmx == 0) then
-                        advi(L) = advi(L) + agwdxi/vbov        ! 1/s
-                     else
-                        do LL = Lbot(L), Ltop(L)
-                           uLL      = max(1d-4, abs(u1(LL)))
-                           advi(LL) = advi(LL) + agwdxi/uLL
-                        enddo
-                    endif
+                 agwdxi  = ag*weirdte(nfw)*dxi(L)
+                 if (kmx == 0) then
+                    advi(L) = advi(L) + agwdxi/vbov        ! 1/s
+                 else
+                    do LL = Lbot(L), Ltop(L)
+                       uLL      = max(1d-4, abs(u1(LL)))
+                       advi(LL) = advi(LL) + agwdxi/uLL
+                    enddo
                  endif
-                 
+                                  
                  !if (huweirregular > 0d0) then 
                  !   if (huL < huweirregular) then  
                  !   else if (hul < 2d0*huweirregular) then 
