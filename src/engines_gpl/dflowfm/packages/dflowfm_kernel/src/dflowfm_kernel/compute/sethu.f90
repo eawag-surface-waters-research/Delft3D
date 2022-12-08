@@ -459,34 +459,46 @@ subroutine sethu(jazws0)                            ! Set upwind waterdepth hu
              else                                     ! default: upwind sigma oriented distribution of hu(L)
 
                 if (keepzlay1bedvol == 0) then        ! default, upwind based  
+
                    do LL = Lb, Ltop(L)
                       sigm   = (zws(kb+LL-Lb)-zws(kb0)) / hsku
                       hu(LL) = sigm*hu(L)
                       au(LL) = wu(L)*(hu(LL)-hu(LL-1))   ! this is only for now here, later move to addlink etc
                       au(L)  = au(L) + au(LL)            ! add to integrated 2Dh layer
                    enddo
-                else 
+
+                else if (kmxn(ku) == kmxn(kd) .and. kmxn(ku) <= numtopsig) then ! in sigma identical
+                                                                                ! but only checked here 
+                   do LL = Lb, Ltop(L)                                        
+                      sigm   = (zws(kb+LL-Lb)-zws(kb0)) / hsku                   
+                      hu(LL) = sigm*hu(L)
+                      au(LL) = wu(L)*(hu(LL)-hu(LL-1))   ! this is only for now here, later move to addlink etc
+                      au(L)  = au(L) + au(LL)            ! add to integrated 2Dh layer
+                   enddo
+ 
+                else                                     ! different nr of layers 
+
                    ktd  = ktop(kd)
                    kbd  = min ( ln0(3-iup,Lb ) , ktd )
-                   hskd = zws(ktd) - bl(kd)
-                   if (hskd > 0d0) then
+                   hskd = zws(ktd) - max(zws(kbd-1), bl(kd))
+                   if (hskd > 0d0) then                  ! downwind wet => maxtop-maxbot
                       zw0u = max(bl(ku), bl(kd)) 
                       hskx = max(zws(kt),zws(ktd)) - zw0u
                       do LL  = Lb, Ltop(L)
                          kkd   =  min(ktd, kbd+LL-Lb)
                          sigm  = (max( zws(kb+LL-Lb),zws(kkd) ) - zw0u) / hskx
                          hu(LL) = sigm*hu(L)
-                         au(LL) = wu(L)*(hu(LL)-hu(LL-1))   ! this is only for now here, later move to addlink etc
-                         au(L)  = au(L) + au(LL)            ! add to integrated 2Dh layer
+                         au(LL) = wu(L)*(hu(LL)-hu(LL-1)) ! this is only for now here, later move to addlink etc
+                         au(L)  = au(L) + au(LL)          ! add to integrated 2Dh layer
                       enddo
-                   else 
-                      zw0u = bl(ku)
-                      hsku = zws(kt ) - bl(ku)
+                   else                                   ! downwind dry => upwind only
+                      zw0u = max(zws(kb-1), bl(ku) )
+                      hsku = zws(kt ) - zw0u 
                       do LL  = Lb, Ltop(L)
                          sigm  = ( zws(kb+LL-Lb) - zw0u ) / hsku 
                          hu(LL) = sigm*hu(L)
-                         au(LL) = wu(L)*(hu(LL)-hu(LL-1))   ! this is only for now here, later move to addlink etc
-                         au(L)  = au(L) + au(LL)            ! add to integrated 2Dh layer
+                         au(LL) = wu(L)*(hu(LL)-hu(LL-1)) ! this is only for now here, later move to addlink etc
+                         au(L)  = au(L) + au(LL)          ! add to integrated 2Dh layer
                       enddo
                    endif 
                 endif
