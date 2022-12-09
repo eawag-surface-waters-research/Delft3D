@@ -2963,7 +2963,7 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
         id_orifgen_crestl, id_orifgen_edgel, id_orifgen_openw, id_orifgen_fu, id_orifgen_ru, id_orifgen_au, id_orifgen_crestw, &
         id_orifgen_area, id_orifgen_linkw, id_orifgen_state, id_orifgen_sOnCrest, &
         id_pump_cap, id_pump_ssTrigger, id_pump_dsTrigger, &
-        id_hysteresis
+        id_hysteresis, id_flowelemxcc, id_flowelemycc
 
     integer, allocatable, save :: id_tr1(:), id_rwqb(:), id_bndtradim(:), id_ttrabnd(:), id_ztrabnd(:)
     integer, allocatable, save :: id_sf1(:), id_bndsedfracdim(:), id_tsedfracbnd(:), id_zsedfracbnd(:)
@@ -3613,6 +3613,13 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
     ierr = nf90_put_att(irstfile, id_flowelemxzw, 'long_name'    , 'x-coordinate of flow element center of mass')
     ierr = nf90_put_att(irstfile, id_flowelemyzw, 'long_name'    , 'y-coordinate of flow element center of mass')
 
+    ! Flow cells cell center
+    ierr = nf90_def_var(irstfile, 'FlowElem_xcc', nf90_double, id_flowelemdim, id_flowelemxcc)
+    ierr = nf90_def_var(irstfile, 'FlowElem_ycc', nf90_double, id_flowelemdim, id_flowelemycc)
+    ierr = unc_addcoordatts(irstfile, id_flowelemxcc, id_flowelemycc, jsferic)
+    ierr = nf90_put_att(irstfile, id_flowelemxcc, 'long_name', 'x-coordinate of flow element circumcenter')
+    ierr = nf90_put_att(irstfile, id_flowelemycc, 'long_name', 'y-coordinate of flow element circumcenter')
+
     if (lnx > 0) then
        ierr = nf90_def_var(irstfile, 'FlowLink_xu',     nf90_double, (/ id_flowlinkdim /) ,   id_flowlinkxu)
        ierr = nf90_def_var(irstfile, 'FlowLink_yu',     nf90_double, (/ id_flowlinkdim /) ,   id_flowlinkyu)
@@ -3880,8 +3887,10 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
        end if
     end if
 
-
     ierr = nf90_enddef(irstfile)
+
+    ierr = nf90_put_var(irstfile, id_flowelemxcc, xz(1:ndxi))
+    ierr = nf90_put_var(irstfile, id_flowelemycc, yz(1:ndxi))
 
     ! 1D profile names
     if (ndx1d > 0 .and. stm_included) then
