@@ -36,7 +36,7 @@ module m_ec_support
    use m_alloc
    use string_module
    use m_ec_parameters
-   use time_module
+   use time_module, only: split_date_time, parse_time, ymd2modified_jul, mjd2date
 
    implicit none
 
@@ -105,16 +105,15 @@ module m_ec_support
          integer,                    intent(out) :: yyyymmdd            !< calculated Gregorian date
          integer,                    intent(out) :: hhmmss              !< time of the day
          real(hp)                                :: dsec                !< fraction of seconds
-         integer                                 :: hh, mm, ss          !< hours, minutes, seconds helper variables
+         integer                                 :: hh, mm              !< hours, minutes, seconds helper variables
          integer                                 :: iyear, imonth, iday !< year, month and day
-
-         !! TODO very ugly to add offset_modified_jd here
-         call gregor(timestamp_mjd + offset_modified_jd, iyear, imonth, iday, hh, mm, ss, dsec)
-
-         yyyymmdd = 10000 * iyear + 100 * imonth + iday
-         hhmmss = 10000 * hh + 100 * mm + ss
-
-         success = .true.
+        
+         success = .false.
+         if (mjd2date(timestamp_mjd, iyear, imonth, iday, hh, mm, dsec) /= 0) then
+            yyyymmdd = 10000 * iyear + 100 * imonth + iday
+            hhmmss = 10000 * hh + 100 * mm + int(dsec)
+            succes = .true.
+         endif
 
       end function ecTimeFrameRealHpTimestepsToDateTime
 
@@ -832,8 +831,7 @@ end subroutine ecInstanceListSourceItems
             endif
 
             if (ierr == 0) then
-               success = .true.
-               ref_date = JULIAN(yyyymmdd, 0)
+               success = ymd2modified_jul(yyyymmdd, ref_date)
                ref_date = ref_date + real(hh, hp) / 24.0_hp
             endif
          endif
