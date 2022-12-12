@@ -112,7 +112,7 @@ module m_ec_support
          if (mjd2date(timestamp_mjd, iyear, imonth, iday, hh, mm, dsec) /= 0) then
             yyyymmdd = 10000 * iyear + 100 * imonth + iday
             hhmmss = 10000 * hh + 100 * mm + int(dsec)
-            succes = .true.
+            success = .true.
          endif
 
       end function ecTimeFrameRealHpTimestepsToDateTime

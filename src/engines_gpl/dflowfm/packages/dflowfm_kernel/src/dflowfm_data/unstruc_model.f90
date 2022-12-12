@@ -1556,7 +1556,7 @@ subroutine readMDUFile(filename, istat)
     call prop_get_string(md_ptr, 'time', 'RefDate', refdat)
     read(refdat,*) irefdate
     success = ymd2modified_jul(irefdate, refdate_mjd)
-    if (.not.succes) then
+    if (.not.success) then
         call mess(LEVEL_ERROR, 'Something went wrong in conversion from RefDate to Modified Julian Date')
     endif
     call prop_get_double(md_ptr, 'time', 'Tzone', Tzone)
