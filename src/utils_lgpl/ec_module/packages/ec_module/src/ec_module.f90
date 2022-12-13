@@ -410,7 +410,7 @@ module m_ec_module
    !     use m_ec_module, only: ecFindFileReader ! TODO: Refactor this private data access (UNST-703).
          use m_ec_filereader_read, only: ecParseARCinfoMask
          use m_ec_support
-         use time_module, only: ymd2modified_jul
+         use time_module, only: JULIAN, date2mjd
  
          type(tEcInstance), pointer :: instancePtr !< intent(in)
          character(len=*),                         intent(inout) :: name         !< Name for the target Quantity, possibly compounded with a tracer name.
@@ -471,7 +471,7 @@ module m_ec_module
             fileReaderPtr => ecSupportFindFileReader(instancePtr, fileReaderId)
             fileReaderPtr%vectormax = vectormax
             
-            success = ymd2modified_jul(tgt_refdate, tgt_mjd) ! TODO: handle time zone (and time?)
+            tgt_mjd = JULIAN(tgt_refdate, 0) ! TODO: handle time zone (and time?)
 
             if (present(forcingfile)) then
                if (present(dtnodal)) then
@@ -662,8 +662,7 @@ module m_ec_module
       real(hp), dimension(:), target, optional, intent(inout) :: target_array !< kernel's data array for the requested values
 
       type(c_time)                                            :: ecReqTime    !< time stamp for request to EC
-      real(kind=hp)                                           :: tUnitFactor  !< factor for time step unit
-      real(kind=hp)                                           :: tgt_mjd      !< time in modified julian days
+      real(hp)                                                :: tUnitFactor  !< factor for time step unit
       character(len=20) :: datestring
       integer           :: ierr
       
@@ -675,8 +674,7 @@ module m_ec_module
          success = .false.
          call clearECMessage()
          tUnitFactor = ecSupportTimeUnitConversionFactor(tgt_tunit)
-         success = ymd2modified_jul(tgt_refdate, tgt_mjd)
-         call ecReqTime%set2(tgt_mjd, timesteps * tUnitFactor / 86400.0_hp - tgt_tzone / 24.0_hp)
+         call ecReqTime%set2(JULIAN(tgt_refdate, 0), timesteps * tUnitFactor / 86400.0_hp - tgt_tzone / 24.0_hp)
          if (.not. ecGetValues(instancePtr, itemId, ecReqTime, target_array)) then
             datestring = datetime_to_string(ecReqTime%mjd(), ierr)
             if (ierr==0) then

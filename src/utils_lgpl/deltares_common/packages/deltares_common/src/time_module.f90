@@ -43,8 +43,8 @@ module time_module
    public :: datetime2sec
    public :: sec2ddhhmmss
    public :: ymd2jul, ymd2modified_jul
-   public :: jul2mjd, mjd2jul    ! jul2mjd is in use in rtc, mjd2jul is used in test_time_module
-   public :: date2mjd            ! obsolete, use ymd2modified_jul
+   public :: jul2mjd    ! obsolete, but in use in rtc
+   public :: date2mjd   ! obsolete, use ymd2modified_jul
    public :: mjd2date
    public :: duration_to_string
    public :: datetime_to_string
@@ -243,7 +243,6 @@ module time_module
          if (month>=1 .and. month <= 12 .and. day>=1 .and. year>=1) then
             modified_jul_date = julian(year*10000 + month * 100 + day, 0)
             if (modified_jul_date == -1) return 
-            modified_jul_date = modified_jul_date - offset_modified_jd 
          else
             return
          endif
@@ -1124,7 +1123,7 @@ module time_module
          TEMP1  = FLOAT ( IHOUR ) * 3600.0 + &
                   FLOAT ( IMIN  ) *   60.0 + &
                   FLOAT ( ISEC  ) - 43200.0
-         JULIAN = TEMP2 + ( TEMP1 / 86400.0 )
+         JULIAN = TEMP2 + ( TEMP1 / 86400.0 ) - offset_modified_jd
       ELSE
          TEMP1  = INT (( IMONTH-14.0) / 12.0 )
          TEMP2  = IDAY - 32075.0 + &
@@ -1135,7 +1134,7 @@ module time_module
          TEMP1  = FLOAT ( IHOUR ) * 3600.0 + &
                   FLOAT ( IMIN  ) *   60.0 + &
                   FLOAT ( ISEC  ) - 43200.0
-         JULIAN = TEMP2 + ( TEMP1 / 86400.0 )
+         JULIAN = TEMP2 + ( TEMP1 / 86400.0 ) - offset_modified_jd
       ENDIF
   999 RETURN
       END FUNCTION JULIAN

@@ -310,23 +310,19 @@
 
    double precision, intent(in) :: time !< time     for waq in seconds
 
-   integer :: iyear, imonth, iday, ihour, imin
-   real(kind=hp) :: sec
+   integer :: iyear, imonth, iday, ihour, imin, isec
+   double precision :: sec
    character(len=19) :: datembastart, datembaend
    integer :: iconst, imbs, imba, jmba, iflx, isrc, j
    logical :: writebalance
 
    timembaend = time
 
-   datembastart = ""
-   if (mjd2date(refdate_mjd + timembastart/86400.0, iyear, imonth, iday, ihour, imin, sec) /= 0) then
-      write(datembastart, '(i4,"-",i2.2,"-",i2.2," ",i2.2,":",i2.2,":",i2.2)') iyear, imonth, iday, ihour, imin, int(sec)      
-   endif
-   datembaend = ""
-   if (mjd2date(refdate_mjd + timembaend/86400.0, iyear, imonth, iday, ihour, imin, sec) /= 0) then
-      write(datembaend, '(i4,"-",i2.2,"-",i2.2," ",i2.2,":",i2.2,":",i2.2)') iyear, imonth, iday, ihour, imin, int(sec)
-   endif
-   
+   call gregor(refdate_mjd + offset_modified_jd + timembastart/86400.0, iyear, imonth, iday, ihour, imin, isec, sec)
+   write(datembastart, '(i4,"-",i2.2,"-",i2.2," ",i2.2,":",i2.2,":",i2.2)') iyear, imonth, iday, ihour, imin, isec
+   call gregor(refdate_mjd + offset_modified_jd + timembaend/86400.0, iyear, imonth, iday, ihour, imin, isec, sec)
+   write(datembaend, '(i4,"-",i2.2,"-",i2.2," ",i2.2,":",i2.2,":",i2.2)') iyear, imonth, iday, ihour, imin, isec
+
 !  New total volumes and masses
    call mba_sum(nombs, nomba, mbadefdomain, mbavolumeend, mbamassend)
 
@@ -477,22 +473,18 @@
 
    double precision, intent(in) :: time !< time     for waq in seconds
 
-   integer :: iyear, imonth, iday, ihour, imin
-   real(kind=hp) :: sec
+   integer :: iyear, imonth, iday, ihour, imin, isec
+   double precision :: sec
    character(len=19) :: datembastart, datembaend
    integer :: isys, imba, jmba, j
-   logical :: writebalance, success
+   logical :: writebalance
 
    timembaend = time
 
-   datembastart = ""
-   if (mjd2date(refdate_mjd + timembastarttot/86400.0, iyear, imonth, iday, ihour, imin, sec) /= 0) then
-      write(datembastart, '(i4,"-",i2.2,"-",i2.2," ",i2.2,":",i2.2,":",i2.2)') iyear, imonth, iday, ihour, imin, int(sec)
-   endif
-   datembaend = ""
-   if (mjd2date(refdate_mjd + timembaend/86400.0, iyear, imonth, iday, ihour, imin, sec) /= 0) then
-      write(datembaend, '(i4,"-",i2.2,"-",i2.2," ",i2.2,":",i2.2,":",i2.2)') iyear, imonth, iday, ihour, imin, int(sec)
-   endif
+   call gregor(refdate_mjd + offset_modified_jd + timembastarttot/86400.0, iyear, imonth, iday, ihour, imin, isec, sec)
+   write(datembastart, '(i4,"-",i2.2,"-",i2.2," ",i2.2,":",i2.2,":",i2.2)') iyear, imonth, iday, ihour, imin, isec
+   call gregor(refdate_mjd + offset_modified_jd + timembaend/86400.0, iyear, imonth, iday, ihour, imin, isec, sec)
+   write(datembaend, '(i4,"-",i2.2,"-",i2.2," ",i2.2,":",i2.2,":",i2.2)') iyear, imonth, iday, ihour, imin, isec
 
    writebalance = .true.
    if ( jampi.eq.1 ) then

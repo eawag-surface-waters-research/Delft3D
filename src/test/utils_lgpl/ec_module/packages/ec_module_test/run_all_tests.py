@@ -23,16 +23,15 @@ def runThisTest(dir, files):
                 sys.stdout.write("##teamcity[testFailed name='"+testname+"' message='Crash']\n")
                 sys.stdout.write("##teamcity[testFinished name='"+testname+"' message='Comparison failed']\n\n")
 
-# print(os.path.dirname(os.path.realpath(__file__)))
-configuration = "Release"
-# configuration = "Debug"
+print(os.path.dirname(os.path.realpath(__file__)))
+#configuration = "Release"
+configuration = "Debug"
 executable = ""
 
 if os.name == 'posix':
     executable = "../lnx64/bin/ec_module_test"
 if os.name == 'nt':
-    sys.path += ["../x64/share/bin"]
-    executable = "../x64/test/utils_lgpl/ec_module/packages/ec_module_test/x64/Release/ec_module_test.exe"
+    executable = "d:/D-HYDRO/delft3d/build_tests/test_ec_module/Debug/ec_module_test.exe"
 
 if (executable == ""):
     sys.stderr.write("Invalid OS = "+os.name)
@@ -42,6 +41,8 @@ if len(sys.argv)>1:
     executable = sys.argv[1]
 
 abs_exec = os.path.abspath(executable)
+print(executable+"\n")
+print(abs_exec)
 args = ["-v", "-c"] 
 
 for root, dirs, files in os.walk("."):
