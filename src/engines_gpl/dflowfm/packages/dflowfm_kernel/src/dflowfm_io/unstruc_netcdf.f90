@@ -5905,7 +5905,7 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
       end if
 
       ! for 1D only, urban
-      if (ndxi-ndx2d>0) then
+      if (ndxi-ndx2d>0 .and. network%loaded) then
          if (jamapTimeWetOnGround > 0) then ! cumulative time when water is above ground level
             ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_timewetground, nf90_double, UNC_LOC_S, 'time_water_on_ground', '', 'Cumulative time water above ground level', 's', which_meshdim = 1, jabndnd=jabndnd_)
          end if
@@ -7354,7 +7354,7 @@ if (jamapsed > 0 .and. jased > 0 .and. stm_included) then
       ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_depth_averaged_particle_concentration, UNC_LOC_S, workx, jabndnd=jabndnd_)
    end if
 
-   if (ndxi-ndx2d>0) then
+   if (ndxi-ndx2d>0 .and. network%loaded) then
       if (jamapTimeWetOnGround > 0) then ! Cumulative time water above ground level
          ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_timewetground, UNC_LOC_S, time_wetground, jabndnd=jabndnd_)
       end if
