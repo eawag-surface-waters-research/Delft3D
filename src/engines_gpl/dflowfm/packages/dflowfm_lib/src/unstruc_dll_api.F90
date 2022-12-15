@@ -62,15 +62,17 @@ subroutine  dfm_generate_volume_tables(increment) bind(C, name="dfm_generate_vol
    
 end subroutine dfm_generate_volume_tables
 
+!!> DLL handle to unc_write_1D_flowgeom_ugrid, used by volume tool to write 1D flowgeom
 subroutine write_volume_table_geom(ncid) bind(C, name="write_volume_table_geom")
    !DEC$ ATTRIBUTES DLLEXPORT :: write_volume_table_geom
 
-   use unstruc_netcdf, only: unc_write_1D_flowgeom_volumetables_ugrid
+   use unstruc_netcdf, only: unc_write_1D_flowgeom_ugrid, t_unc_mapids      
    use messageHandling, only: Idlen
    use iso_c_utils
    
-   integer :: ncid
-   call unc_write_1D_flowgeom_volumetables_ugrid(ncid)
+   integer, intent(in) :: ncid !< Handle to open Netcdf file to write the geometry to.
+   type(t_unc_mapids)  :: mapids
+   call unc_write_1D_flowgeom_ugrid(mapids%id_tsp,ncid)
 
 end subroutine write_volume_table_geom
 
