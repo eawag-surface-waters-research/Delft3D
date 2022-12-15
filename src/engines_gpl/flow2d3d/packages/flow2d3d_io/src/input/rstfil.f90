@@ -143,11 +143,13 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
     ! array to unnecessarily raise the alarm. Initialize all array entries
     ! using an extreme number such that it's still clear if these array
     ! entries used.
+    ! idum = -9999999
+    ! rdum = -9999999.0_fp
+    ! Using these values cause testcases to fail, see DELFT3D-37763
+    ! Therefore the following values are used temporary inside the rdarray_nm calls
     !
-    idum = -9999999
-    rdum = -9999999.0_fp
-    !
-    ! this fill value is now used inside the rdarray_nm calls
+    idum = 0
+    rdum = 0.0_fp
     !
     ! test file existence, first 'tri-rst.<restid>.idate.itime'
     !
