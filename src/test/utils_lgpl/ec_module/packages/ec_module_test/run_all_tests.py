@@ -31,7 +31,7 @@ executable = ""
 if os.name == 'posix':
     executable = "../lnx64/bin/ec_module_test"
 if os.name == 'nt':
-    executable = "d:/D-HYDRO/delft3d/build_tests/test_ec_module/Debug/ec_module_test.exe"
+    executable = "../x64/test/ec_module_test.exe"
 
 if (executable == ""):
     sys.stderr.write("Invalid OS = "+os.name)
@@ -41,8 +41,6 @@ if len(sys.argv)>1:
     executable = sys.argv[1]
 
 abs_exec = os.path.abspath(executable)
-print(executable+"\n")
-print(abs_exec)
 args = ["-v", "-c"] 
 
 for root, dirs, files in os.walk("."):
