@@ -100,7 +100,7 @@ oss_include_libraries(${executable_name} oss_dependencies)
 
 # Set additional compilation properties
 target_compile_options(${executable_name} PRIVATE "${waq_default_flags}")
-target_compile_options(${executable_name} PRIVATE "$<$<CONFIG:Debug>:${waq_debug_flags}>")
+target_compile_options(${executable_name} PRIVATE "$<$<CONFIG:Debug>:${waq_debug_flags} ${check_bounds_flag}>")
 
 if(UNIX)
     target_include_directories(${executable_name} PRIVATE ${waq_data_path})

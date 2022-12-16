@@ -29,6 +29,13 @@ set(src_path src)
 get_fortran_source_files(${src_path}/input input_files)
 get_fortran_source_files(${src_path}/output output_files)
 get_fortran_source_files(${src_path}/preprocessor preprocessor_files)
+set_source_files_properties(
+                    src/output/wrwaqcco.F90
+                    src/output/wrwaqfil.F90
+                    src/output/wrwaqpnt.F90
+                    src/output/wrwaqsrf.F90
+                    ${fortran_version_file}
+                    PROPERTIES COMPILE_OPTIONS "${file_preprocessor_flag}")
 
 # Define library
 add_library(${library_name} ${input_files}
@@ -72,6 +79,7 @@ if (WIN32)
                         netcdff)
 
     target_link_libraries(${library_name} ${oss_dependencies})
+    add_definitions(-DHAVE_FC_FORM_BINARY)
 endif(WIN32)
 oss_include_libraries(${library_name} oss_dependencies)
 

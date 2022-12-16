@@ -36,6 +36,8 @@ if (UNIX)
     include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include")
 endif(UNIX)
 
+# Set additional compilation properties, specific for Debug mode
+target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${check_bounds_flag}>")
 
 # Define how the files should be structured within Visual Studio
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${source_files})
