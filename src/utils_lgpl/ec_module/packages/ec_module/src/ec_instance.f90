@@ -71,9 +71,10 @@ module m_ec_instance
 
       !> Dynamically allocates memory for a new tEcInstance, making the tEcInstance an unnamed data object.
       !! Subsequently, the new tEcInstance is initialized.
-      function ecInstanceCreate(ptr) result (success)
-         logical                    :: success !< function status
-         type(tEcInstance), pointer :: ptr     !< intent(out)
+      function ecInstanceCreate(ptr, parallel) result (success)
+         logical                    :: success     !< function status
+         type(tEcInstance), pointer :: ptr         !< intent(out)
+         logical, optional, intent(in) :: parallel !< model runs in parallel; default is not running in parallel
 
          integer                    :: istat        !< allocate() status
          integer                    :: maxOpenFiles !< default for max. open files
@@ -151,6 +152,8 @@ module m_ec_instance
             end if
          end if
 
+         ptr%parallelComputation = .false.
+         if (present(parallel)) ptr%parallelComputation = parallel
          !
          ! set max open files
          maxOpenFiles = maxFileUnits
