@@ -375,7 +375,7 @@
       write ( lunout1 , '(a      )' ) 'end-water-quality-layers'
       write ( lunout2 , '(a      )' ) 'end-water-quality-layers'
       write ( lunout1 , '(a      )' ) 'discharges'
-      write ( lunout2 , '(a      )' ) 'discharges'
+      write ( lunout2 , '(a      )' ) 'sink-sources'
       nowalk = 0
       il     = 1
       do i = 1,nsrc
@@ -475,7 +475,7 @@
          endif
       enddo
       write ( lunout1 , '(a      )' ) 'end-discharges'
-      write ( lunout2 , '(a      )' ) 'end-discharges'
+      write ( lunout2 , '(a      )' ) 'end-sink-sources'
       close ( lunout1 )
       close ( lunout2 )
       end subroutine wrwaqhyd
