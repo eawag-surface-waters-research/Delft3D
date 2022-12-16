@@ -14604,6 +14604,14 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd,jafou, ja2D
       if (ndx2d > 0) then
          ierr = nf90_put_var(ncid, id_tsp%id_flowelemglobalnr(2), iglobal_s(1:ndx2d))
       endif
+      ! FlowElemDomain
+      if (ndx1d > 0) then
+         ierr = nf90_put_var(ncid, id_tsp%id_flowelemdomain(1), idomain(ndx2d+1:last_1d))
+      end if
+      ! FlowElemGlobalNr
+      if (ndx1d > 0) then
+         ierr = nf90_put_var(ncid, id_tsp%id_flowelemglobalnr(1), iglobal_s(ndx2d+1:last_1d))
+      end if
    end if
 
    if (mb_latmin /= dmiss .and. mb_latmax /= dmiss .and. mb_lonmin /= dmiss .and. mb_lonmax /= dmiss) then
@@ -14966,18 +14974,6 @@ subroutine unc_write_1D_flowgeom_ugrid(id_tsp, ncid,jabndnd,jafou, ja2D, contact
    if (allocated(contacts)) deallocate(contacts)
    if (allocated(contacttype)) deallocate(contacttype)
    if (allocated(edge_nodes)) deallocate(edge_nodes)
-
-   ! domain numbers
-   if ( jampi.eq.1 ) then
-      ! FlowElemDomain
-      if (ndx1d > 0) then
-         ierr = nf90_put_var(ncid, id_tsp%id_flowelemdomain(1), idomain(ndx2d+1:last_1d))
-      end if
-      ! FlowElemGlobalNr
-      if (ndx1d > 0) then
-         ierr = nf90_put_var(ncid, id_tsp%id_flowelemglobalnr(1), iglobal_s(ndx2d+1:last_1d))
-      end if
-   end if
 
    if (mb_latmin /= dmiss .and. mb_latmax /= dmiss .and. mb_lonmin /= dmiss .and. mb_lonmax /= dmiss) then
       ierr = ionc_add_geospatial_bounds(ncid, mb_latmin, mb_latmax, mb_lonmin, mb_lonmax)
