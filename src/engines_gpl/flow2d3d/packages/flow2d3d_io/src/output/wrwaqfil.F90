@@ -383,7 +383,7 @@
                         ilaggr , nd     , nlb    , nub    , mlb    ,    &
                         mub    , kfsmin , ksrwaq , noseg  , noq1   ,    &
                         noq2   , noq3   , xz     , yz     , zbot   ,    &
-                        ztop )
+                        ztop   , gdp)
          if (parll) then
             write(filnam,'(3a,i3.3,a)') 'com-', trim(runid), '-', inode, '.'
          else
