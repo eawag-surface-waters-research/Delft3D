@@ -64,7 +64,6 @@ module m_ec_typedefs
       integer                                         :: nBCFiles                    !< Number of tEcBCFilePtrs <= size(ecBCFilesPtr)
       integer                                         :: idCounter                   !< helper variable for assigning unique ids to the Instance's stored objects
       integer                                         :: coordsystem = -1            !< Coordinate system of 
-      logical                                         :: parallelComputation         !< model runs in parallel; mainly used to give the appropriate error message
    end type tEcInstance
    
    !===========================================================================

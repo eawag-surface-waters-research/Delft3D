@@ -678,11 +678,10 @@ module m_ec_converter
                         connection%sourceItemsPtr(i)%ptr%sourceT0fieldPtr%bbox = (/jjmin,iimin,jjmax,iimax/)
                         connection%sourceItemsPtr(i)%ptr%sourceT1fieldPtr%bbox = (/jjmin,iimin,jjmax,iimax/)
                      end do
-                     if (iimax == 0 .and. jjmax == 0 .and. .not. instancePtr%parallelComputation) then
-                         call setECMessage( 'ERROR: ec_converter: no overlapping points found for quantity: "' // &
-                                             trim(connection%sourceItemsPtr(1)%ptr%quantityPtr%name) // &
-                                             '". This is only allowed in parallel runs.' )
-                         return
+                     if (iimax == 0 .and. jjmax == 0) then
+                         write(*,*) "WARNING: ec_converter: no overlapping points found for quantity:"
+                         write(*,*) trim(connection%sourceItemsPtr(1)%ptr%quantityPtr%name)
+                         write(*,*) "This is allowed in parallel runs"
                      endif
                   end if
                   ! Final step for gridded providers: when not masked, reset indices to undefined.

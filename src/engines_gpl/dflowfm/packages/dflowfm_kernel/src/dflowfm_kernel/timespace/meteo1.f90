@@ -7123,7 +7123,6 @@ module m_meteo
    !> Construct and initialize a new Instance of the EC-module.
    subroutine initialize_ec_module()
    use m_sferic
-   use m_partitioninfo, only: jampi
    implicit none
       ! FM re-initialize call: First destroy the EC-module instance.
       if (associated(ecInstancePtr)) then
@@ -7134,7 +7133,7 @@ module m_meteo
       ! FM initialize call or second phase of re-initialize call.
       if (.not. associated(ecInstancePtr)) then
          call init_variables()
-         if (.not. ecCreateInstance(ecInstancePtr, jampi>0)) then
+         if (.not. ecCreateInstance(ecInstancePtr)) then
             message = dumpECMessageStack(LEVEL_WARN,callback_msg)
          end if
       end if
@@ -8279,9 +8278,8 @@ module m_meteo
             endif
          endif
       end if
-
+      
       success = ecSetConnectionIndexWeights(ecInstancePtr, connectionId)
-      if (.not. success) goto 1234
 
       if ( target_name=='nudge_salinity_temperature' ) then
          call ecConverterGetBbox(ecInstancePtr, SourceItemID, 0, col0, col1, row0, row1, ncols, nrows, issparse, Ndatasize)
