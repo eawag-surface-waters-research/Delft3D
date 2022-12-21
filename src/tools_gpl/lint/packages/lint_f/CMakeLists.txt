@@ -1,4 +1,4 @@
-set(library_name datsel_f)
+set(library_name lint_f)
 set(src_path src)
 
 # Define include directories
@@ -32,4 +32,4 @@ endif()
 # Define how the files should be structured within Visual Studio
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${source_files}
                                                     ${preprocessor_files})
-set_target_properties (${library_name} PROPERTIES FOLDER tools_gpl/datsel)
+set_target_properties (${library_name} PROPERTIES FOLDER tools_gpl/lint)

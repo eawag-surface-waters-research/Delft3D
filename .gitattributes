@@ -17491,6 +17491,7 @@ src/tools_gpl/datsel/packages/datsel_f/src/uv2cen.f90 -text
 src/tools_gpl/datsel/packages/datsel_f/src/vecmag.f90 -text
 src/tools_gpl/datsel/packages/datsel_version_number/CMakeLists.txt -text
 src/tools_gpl/datsel/packages/datsel_version_number/Makefile.am -text
+src/tools_gpl/datsel/packages/datsel_version_number/config.h.cmake.in -text
 src/tools_gpl/datsel/packages/datsel_version_number/datsel_version_number.vcxproj -text
 src/tools_gpl/datsel/packages/datsel_version_number/include/resource.h -text
 src/tools_gpl/datsel/packages/datsel_version_number/include/version_number.h.svn -text
@@ -17600,10 +17601,12 @@ src/tools_gpl/duprol2delwaq/packages/parse/config.h.cmake.in -text
 src/tools_gpl/duprol2delwaq/packages/parse/src/parse.c -text
 src/tools_gpl/kubint/Makefile.am -text
 src/tools_gpl/kubint/packages/Makefile.am -text
+src/tools_gpl/kubint/packages/kubint/CMakeLists.txt -text
 src/tools_gpl/kubint/packages/kubint/Makefile.am -text
 src/tools_gpl/kubint/packages/kubint/kubint.vcxproj -text
 src/tools_gpl/kubint/packages/kubint/src/Makefile.am -text
 src/tools_gpl/kubint/packages/kubint/src/main.cpp -text
+src/tools_gpl/kubint/packages/kubint_f/CMakeLists.txt -text
 src/tools_gpl/kubint/packages/kubint_f/Makefile.am -text
 src/tools_gpl/kubint/packages/kubint_f/kubint_f.vfproj -text
 src/tools_gpl/kubint/packages/kubint_f/src/Makefile.am -text
@@ -17619,6 +17622,7 @@ src/tools_gpl/kubint/packages/kubint_f/src/pldep.F90 -text
 src/tools_gpl/kubint/packages/kubint_f/src/precision.f90 -text
 src/tools_gpl/kubint/packages/kubint_f/src/readldb.f90 -text
 src/tools_gpl/kubint/packages/kubint_f/src/sort.f90 -text
+src/tools_gpl/kubint/packages/kubint_version_number/CMakeLists.txt -text
 src/tools_gpl/kubint/packages/kubint_version_number/Makefile.am -text
 src/tools_gpl/kubint/packages/kubint_version_number/include/resource.h -text
 src/tools_gpl/kubint/packages/kubint_version_number/include/version_number.h.svn -text
@@ -17631,10 +17635,12 @@ src/tools_gpl/kubint/packages/kubint_version_number/src/f2c.c -text
 src/tools_gpl/kubint/packages/kubint_version_number/src/version.c -text
 src/tools_gpl/lint/Makefile.am -text
 src/tools_gpl/lint/packages/Makefile.am -text
+src/tools_gpl/lint/packages/lint/CMakeLists.txt -text
 src/tools_gpl/lint/packages/lint/Makefile.am -text
 src/tools_gpl/lint/packages/lint/lint.vcxproj -text
 src/tools_gpl/lint/packages/lint/src/Makefile.am -text
 src/tools_gpl/lint/packages/lint/src/main.cpp -text
+src/tools_gpl/lint/packages/lint_f/CMakeLists.txt -text
 src/tools_gpl/lint/packages/lint_f/Makefile.am -text
 src/tools_gpl/lint/packages/lint_f/lint_f.vfproj -text
 src/tools_gpl/lint/packages/lint_f/src/Makefile.am -text
@@ -17649,6 +17655,7 @@ src/tools_gpl/lint/packages/lint_f/src/pldep.F90 -text
 src/tools_gpl/lint/packages/lint_f/src/precision.f90 -text
 src/tools_gpl/lint/packages/lint_f/src/readldb.f90 -text
 src/tools_gpl/lint/packages/lint_f/src/sort.f90 -text
+src/tools_gpl/lint/packages/lint_version_number/CMakeLists.txt -text
 src/tools_gpl/lint/packages/lint_version_number/Makefile.am -text
 src/tools_gpl/lint/packages/lint_version_number/include/resource.h -text
 src/tools_gpl/lint/packages/lint_version_number/include/version_number.h.svn -text
@@ -17688,6 +17695,7 @@ src/tools_gpl/mormerge/scripts/run_mormerge.bat -text
 src/tools_gpl/mormerge/scripts/run_mormerge.sh -text
 src/tools_gpl/nesthd1/Makefile.am -text
 src/tools_gpl/nesthd1/packages/Makefile.am -text
+src/tools_gpl/nesthd1/packages/nesthd1/CMakeLists.txt -text
 src/tools_gpl/nesthd1/packages/nesthd1/Makefile.am -text
 src/tools_gpl/nesthd1/packages/nesthd1/include/params.inc -text
 src/tools_gpl/nesthd1/packages/nesthd1/include/version_number.ini -text
@@ -17717,6 +17725,7 @@ src/tools_gpl/nesthd1/packages/nesthd1/src/wrinst.f -text
 src/tools_gpl/nesthd1/packages/nesthd1/src/wrista.f -text
 src/tools_gpl/nesthd2/Makefile.am -text
 src/tools_gpl/nesthd2/packages/Makefile.am -text
+src/tools_gpl/nesthd2/packages/nesthd2/CMakeLists.txt -text
 src/tools_gpl/nesthd2/packages/nesthd2/Makefile.am -text
 src/tools_gpl/nesthd2/packages/nesthd2/include/version_number.ini -text
 src/tools_gpl/nesthd2/packages/nesthd2/nesthd2.vfproj -text
