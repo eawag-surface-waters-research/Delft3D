@@ -745,6 +745,7 @@ subroutine readMDUFile(filename, istat)
     double precision :: tim
     double precision :: sumlaycof
     double precision, parameter :: tolSumLay = 1d-12
+    integer, parameter :: maxLayers = 300
     integer :: major, minor
     external :: unstruc_errorhandler
     istat = 0 ! Success
@@ -935,37 +936,32 @@ subroutine readMDUFile(filename, istat)
        if (Dztop > 0d0) then  ! hk claims back original functionality
            iStrchType = -1
        endif
-       
-       if( iStrchType == STRCH_USER ) then   
-          if( allocated(laycof) ) deallocate( laycof )
-          allocate( laycof(kmx) )
-          call prop_get_doubles( md_ptr, 'geometry', 'StretchCoef'   , laycof, kmx )     
-        sumlaycof = sum(laycof)
-        if (comparereal(sumlaycof, 100d0, tolSumLay) /= 0) then
-             if (.not. allocated(tmpdouble)) allocate( tmpdouble(300) )
-             tmpdouble = 0d0
-             call prop_get_doubles( md_ptr, 'geometry', 'StretchCoef'   , tmpdouble, 300 )
+
+       if( iStrchType == STRCH_USER ) then
+          call realloc(laycof, kmx)
+          call prop_get_doubles( md_ptr, 'geometry', 'StretchCoef', laycof, kmx )
+          sumlaycof = sum(laycof)
+          if (comparereal(sumlaycof, 100d0, tolSumLay) /= 0) then
+             call realloc(tmpdouble, maxLayers, fill=0d0)
+             call prop_get_doubles( md_ptr, 'geometry', 'StretchCoef', tmpdouble, maxLayers )
              n = 0
-             do i=1,300
-               if (.not.(tmpdouble(i)>0)) then
-                  exit
-               endif 
-               n = n + 1
-             end do           
+             do i = 1, maxLayers
+                if (.not.(tmpdouble(i) > 0)) then
+                   exit
+                endif
+                n = n + 1
+             end do
              if ( kmx /= n ) then
-               call mess(LEVEL_ERROR, 'ERROR: The number of values specified in "StretchCoef" is inconsistent with "Kmx"!')
+                call mess(LEVEL_ERROR, 'The number of values specified in "StretchCoef" is inconsistent with "Kmx"!')
              else
-              tmpstr = ' '
-              write (tmpstr, "(a,f15.8)") 'ERROR: The values specified in "StretchCoef" do not add up to 100! We got: ', sumlaycof
-            call mess(LEVEL_ERROR, tmpstr)
+                call mess(LEVEL_ERROR, 'The values specified in "StretchCoef" do not add up to 100! We got: ', sumlaycof)
              endif
-           endif
+          endif
        else if( iStrchType == STRCH_EXPONENT ) then
-          if( allocated(laycof) ) deallocate( laycof )
-          allocate( laycof(3) )
-          call prop_get_doubles( md_ptr, 'geometry', 'StretchCoef'   , laycof, 3)
+          call realloc(laycof, 3)
+          call prop_get_doubles( md_ptr, 'geometry', 'StretchCoef', laycof, 3)
        endif
-       
+
        call prop_get_integer(md_ptr, 'geometry', 'Keepzlayeringatbed'      , keepzlayeringatbed , success)
        if (.not. success) then
           call prop_get_integer(md_ptr, 'numerics', 'Keepzlayeringatbed', keepzlayeringatbed)
