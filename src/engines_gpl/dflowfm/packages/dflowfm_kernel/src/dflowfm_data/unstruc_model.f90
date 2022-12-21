@@ -744,6 +744,7 @@ subroutine readMDUFile(filename, istat)
     double precision, external     :: densfm
     double precision :: tim
     double precision :: sumlaycof
+    double precision, parameter :: tolSumLay = 1d-12
     integer :: major, minor
     external :: unstruc_errorhandler
     istat = 0 ! Success
@@ -940,7 +941,7 @@ subroutine readMDUFile(filename, istat)
           allocate( laycof(kmx) )
           call prop_get_doubles( md_ptr, 'geometry', 'StretchCoef'   , laycof, kmx )     
         sumlaycof = sum(laycof)
-        if (comparereal(sumlaycof, 100d0) /= 0) then
+        if (comparereal(sumlaycof, 100d0, tolSumLay) /= 0) then
              if (.not. allocated(tmpdouble)) allocate( tmpdouble(300) )
              tmpdouble = 0d0
              call prop_get_doubles( md_ptr, 'geometry', 'StretchCoef'   , tmpdouble, 300 )
