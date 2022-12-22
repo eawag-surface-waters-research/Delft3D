@@ -36,6 +36,8 @@
  use m_netw
  use m_flowgeom
  use m_sferic
+ 
+ use m_partitioninfo, only : my_rank
 
  implicit none
 

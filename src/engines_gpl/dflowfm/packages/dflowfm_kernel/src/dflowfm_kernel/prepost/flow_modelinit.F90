@@ -78,6 +78,8 @@
  integer, external    :: flow_flowinit
  integer, external    :: init_openmp
  integer, external    :: set_model_boundingbox
+ 
+ character(len=1000) :: file_name_testing !GNM
  !
  ! To raise floating-point invalid, divide-by-zero, and overflow exceptions:
  ! Activate the following 3 lines, See also statements below
@@ -155,8 +157,11 @@
     if ( Ndx.gt.0 ) then
        call mess(LEVEL_INFO,'Start partitioning model...')
        if ( jatimer.eq.1 ) call starttimer(IPARTINIT)
+       write(file_name_testing,'(a,i1,a)') 'test_ghosts',my_rank,'.txt' !GNM
+       Open(876,file=file_name_testing)
 
        call partition_init_1D2D(md_ident, iresult)   ! 1D & 2D (hence the name, thanks to Herman for pointing this out)
+       close(876)
 
        if ( jatimer.eq.1 ) call stoptimer(IPARTINIT)
        call mess(LEVEL_INFO,'Done partitioning model.')
