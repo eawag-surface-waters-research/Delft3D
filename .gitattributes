@@ -490,6 +490,7 @@ src/cmake/configurations/flow1d_configuration.cmake -text
 src/cmake/configurations/flow2d3d_configuration.cmake -text
 src/cmake/configurations/include/dflowfm_configuration_basic.cmake -text
 src/cmake/configurations/include/tools_configuration.cmake -text
+src/cmake/configurations/include/tools_delft3d4_configuration.cmake -text
 src/cmake/configurations/include/tools_delft3dfm_configuration.cmake -text
 src/cmake/configurations/rr_configuration.cmake -text
 src/cmake/configurations/rtc_configuration.cmake -text
