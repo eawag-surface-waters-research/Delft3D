@@ -151,6 +151,7 @@ set(dwaves_configuration "DWAVES")
 set(swan_configuration "SWAN")
 set(flow2d3d_configuration "FLOW2D3D")
 set(tools_configuration "TOOLS")
+set(tools_gpl_configuration "TOOLS_GPL")
 
 # Combined (multi-component) configurations
 set(delft3dfm_configuration "DELFT3DFM")
@@ -168,6 +169,7 @@ if(NOT (${configuration_type} STREQUAL ${tests_configuration}
      OR ${configuration_type} STREQUAL ${swan_configuration}
      OR ${configuration_type} STREQUAL ${flow2d3d_configuration}
      OR ${configuration_type} STREQUAL ${tools_configuration}
+     OR ${configuration_type} STREQUAL ${tools_gpl_configuration}
      OR ${configuration_type} STREQUAL ${delft3dfm_configuration}
      OR ${configuration_type} STREQUAL ${delft3d4_configuration}
      OR ${configuration_type} STREQUAL ${all_configuration}))
@@ -234,6 +236,12 @@ endif()
 if(${configuration_type} STREQUAL ${tools_configuration})
     message(STATUS "Generating solution for Tools ...")
     include(configurations/tools_configuration.cmake)
+endif()
+
+# Tools_gpl configuration
+if(${configuration_type} STREQUAL ${tools_gpl_configuration})
+    message(STATUS "Generating solution for Tools_GPL ...")
+    include(configurations/tools_gpl_configuration.cmake)
 endif()
 
 ### Composed configurations
