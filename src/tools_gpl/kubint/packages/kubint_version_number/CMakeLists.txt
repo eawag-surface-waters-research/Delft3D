@@ -31,10 +31,12 @@ generate_version_files(${h_version_file}
 
 
 # Gather source files
-file(GLOB source_files  ${src_path}/*.c)
-file(GLOB headers       ${kubint_version_number_include_path}/*.h)
+set(header_path include)
 
-# Define library
+file(GLOB source_files  ${src_path}/*.c)
+file(GLOB headers       ${header_path}/*.h)
+include_directories(${header_path})
+
 add_library(${library_name} ${source_files}
                             ${h_version_file}
                             ${headers})
