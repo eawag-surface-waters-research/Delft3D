@@ -2049,7 +2049,7 @@ implicit none
       integer                                    :: i, icount, k, num, other_domain
       integer                                    :: from_send_list
       
-      integer, parameter                         :: NUMRECINI=10
+      !integer, parameter                         :: NUMRECINI=10
       character(len=1024)                        :: str
       
       integer,           target                  :: idumzero(-1:ndomains-1)
@@ -2124,8 +2124,8 @@ implicit none
       ighostlev_nodebased_bak = ighostlev_nodebased
       
 !     allocate send and recieve arrays
-      allocate(xy_send(2,NUMRECINI))
-      allocate(xy_recv(2,NUMRECINI))
+!      allocate(xy_send(2,NUMRECINI))
+!      allocate(xy_recv(2,NUMRECINI))
     
       if ( .not.associated(nfromlist) ) then
           idumzero(:)  = 0
@@ -2133,8 +2133,9 @@ implicit none
       end if
          
       num = nfromlist(ndomains-1)
-      call realloc(xy_send, (/ 2, num /), keepExisting=.false., fill=0d0)
-         
+      allocate(xy_send(2,max(num,1)))
+      allocate(xy_recv(2,max(num,1)))
+               
       do i = 1, num
           xy_send(1,i) = x_coords(ifromlist(i))
           xy_send(2,i) = y_coords(ifromlist(i))
