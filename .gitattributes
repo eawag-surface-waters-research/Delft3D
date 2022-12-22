@@ -17630,6 +17630,7 @@ src/tools_gpl/kubint/packages/kubint_f/src/readldb.f90 -text
 src/tools_gpl/kubint/packages/kubint_f/src/sort.f90 -text
 src/tools_gpl/kubint/packages/kubint_version_number/CMakeLists.txt -text
 src/tools_gpl/kubint/packages/kubint_version_number/Makefile.am -text
+src/tools_gpl/kubint/packages/kubint_version_number/config.h.cmake.in -text
 src/tools_gpl/kubint/packages/kubint_version_number/include/resource.h -text
 src/tools_gpl/kubint/packages/kubint_version_number/include/version_number.h.svn -text
 src/tools_gpl/kubint/packages/kubint_version_number/include/version_number.ini -text
@@ -17663,6 +17664,7 @@ src/tools_gpl/lint/packages/lint_f/src/readldb.f90 -text
 src/tools_gpl/lint/packages/lint_f/src/sort.f90 -text
 src/tools_gpl/lint/packages/lint_version_number/CMakeLists.txt -text
 src/tools_gpl/lint/packages/lint_version_number/Makefile.am -text
+src/tools_gpl/lint/packages/lint_version_number/config.h.cmake.in -text
 src/tools_gpl/lint/packages/lint_version_number/include/resource.h -text
 src/tools_gpl/lint/packages/lint_version_number/include/version_number.h.svn -text
 src/tools_gpl/lint/packages/lint_version_number/include/version_number.ini -text
