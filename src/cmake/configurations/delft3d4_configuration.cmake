@@ -14,4 +14,6 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/configurations/d_hydro_configuration.cmake)
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/configurations/dimr_configuration.cmake)
 
+include(${CMAKE_CURRENT_SOURCE_DIR}/configurations/tools_gpl_configuration.cmake)
+
 project(delft3d4)
