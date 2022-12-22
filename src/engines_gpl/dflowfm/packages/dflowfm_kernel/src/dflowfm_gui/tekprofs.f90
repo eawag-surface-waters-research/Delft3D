@@ -320,21 +320,7 @@
 
   endif
 
-
-  if (jasal > 0) then
-
-     vmin =  1d6 ; vmin = min(vmin, minval(constituents(iconst_cur,kb:kt)) )
-     vmax = -1d6 ; vmax = max(vmax, maxval(constituents(iconst_cur,kb:kt)) , vmin+1d-5 )
-     call TEKFN(6,11, 1, constituents(isalt, kb:kt) , hcref  , km, vmin, vmax, zmin, zmax, KLPROF, 'sal' , 1, 2 , 0d0,kplot)
-
-    ! do k = kb,kt-1
-    !    kk     = k-kb+1
-    !    drhodz    = ( rho(k+1) - rho(k) ) / (hcref(kk+1) - hcref(kk))
-    !    rhomea    = 0.5d0*( rho(k+1) + rho(k) )
-    !    bruva(kk) = coefn2*drhodz
-    ! enddo
-  
-  else if ( iconst_cur.gt.0 .and. iconst_cur.le.NUMCONST ) then
+  if ( iconst_cur.gt.0 .and. iconst_cur.le.NUMCONST ) then
 
       vmin =  1d2
       vmax = -1d2

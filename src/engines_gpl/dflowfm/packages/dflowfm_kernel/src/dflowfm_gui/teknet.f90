@@ -130,7 +130,7 @@
                 if (ja == 1) exit
              endif
              K3 = KN(3,L)
-             if (k3 .ne. 2) then
+             if (k3 .ne. 2 .and. k3 .ne. 0) then
                 K1 = KN(1,L)
                 K2 = KN(2,L)
                 IF (K1 .NE. 0 .AND. K2 .NE. 0) THEN

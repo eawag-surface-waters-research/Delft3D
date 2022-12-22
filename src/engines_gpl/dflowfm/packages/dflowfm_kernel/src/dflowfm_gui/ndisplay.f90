@@ -73,8 +73,10 @@
       OPTION(3) = 'Flow display                            '
       OPTION(4) = 'Load display settings                   '
       OPTION(5) = 'Save current display settings           '
+      OPTION(6) = 'Load unstruc.cfg                        '   
+      OPTION(7) = 'Save unstruc.cfg                        '
 
-      MAXOPT    = 5
+      MAXOPT    = 7
       NWHAT2    = 0
       CALL MENUV3(NWHAT2,OPTION,MAXOPT,EXP,MAXEXP)
       IF (NWHAT2 == 1) THEN ! Network topology
@@ -136,6 +138,10 @@
              CALL save_displaysettings(filnam)
              CALL MESSAGE('YOU SAVED ' , filnam, ' ')
          ENDIF
+      ELSE IF (NWHAT2 .EQ. 6) THEN
+         CALL load_displaysettings('unstruc.cfg')
+      ELSE IF (NWHAT2 .EQ. 7) THEN
+         CALL save_displaysettings('unstruc.cfg')
       ENDIF
    ELSEIF (NWHAT .EQ. 2) THEN
       EXP(1)    = 'MENU 9                                  '
@@ -448,6 +454,10 @@
       NWHAT2    = NDRAW(28)
       CALL MENUV3(NWHAT2,OPTION,MAXOPT,EXP,MAXEXP)
       ! Set default display mode to numbers for nodenums/codes, etc.
+      if (nwhat2 == 11 .and. isalt > 0) iconst_cur = isalt
+      if (nwhat2 == 12 .and. itemp > 0) iconst_cur = itemp
+      if (nwhat2 == 13 .and. ised1 > 0) iconst_cur = ised1
+ 
       if (ndraw(19) == 1) then
          if (nwhat2 == 15 .or. nwhat2 == 16) then
             ndraw(19) = 2

@@ -240,7 +240,11 @@ else if (nodval == 27) then
        znod = constituents(iconst_cur,k)
     end if
  else if (nodval == 46) then
-    znod =  turkinepsws(1,k)
+    if ( allocated(FrcInternalTides2D) ) then
+       znod = FrcInternalTides2D(kk)
+    else
+       znod = turkinepsws(1,k)
+    endif
  else if (nodval == 47 .and. (jagrw > 0 .or. jadhyd > 0)) then
     select case (grwhydopt)
     case (1) ! Ground water pressure

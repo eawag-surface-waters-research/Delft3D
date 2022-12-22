@@ -576,21 +576,24 @@ contains
    !
    ! ==========================================================================
    !> 
-   subroutine meteo_tidepotential(jul0, TIME , xz , yz , Np, TIDEP, ndx, dstart, dstop , eps) ! call schrama's routines on reduced set
+   subroutine meteo_tidepotential(jul0, TIME , dstart, dstop , eps) ! call schrama's routines on reduced set
    use m_sferic
    use m_flowparameters, only: jatidep, jaselfal, jamaptidep
    use m_partitioninfo
-   integer                                             :: jul0, ndx                                       ! interpolate results in ndx 
-   integer,                              intent(in)    :: Np      !< number of potentials in tidep
-   double precision, dimension(Np, Ndx), intent(inout) :: tidep   !< potentials, first is total
-   double precision                                    :: time, dstart, dstop , eps
-   double precision                                    :: xz(ndx), yz(ndx), xx(4), yy(4)!, DAREA, DLENGTH, DLENMX
-                                                       
+   use m_flow
+   use m_flowgeom
+   integer                                             :: jul0    ! interpolate results in ndx 
+   integer                                             :: Np      !< number of potentials in tidep
+ 
+   double precision                                    :: time, dstart, dstop , eps, dxx, dyy
+   double precision                                    :: xx(4), yy(4)!, DAREA, DLENGTH, DLENMX
+                                                     
    double precision, allocatable, save                 :: xz2(:,:),  yz2(:,:), td2(:,:), self(:,:), avhs(:,:)!, area(:,:)
    double precision                                    :: xmn, xmx, ymn, ymx, di, dj, f11,f21,f12,f22  
-                                                       
-   integer                                             :: i,j,n,ierr, m1,m2,n1,n2
-                                                       
+                  
+   double precision, allocatable, save                 :: td2_x(:,:), td2_y(:,:)   
+                                     
+   integer                                             :: i,j,n,ierr, m1,m2,n1,n2 , L                                                       
    integer, save                                       :: ndx2
    integer, save                                       :: i1
    integer, save                                       :: i2
@@ -598,6 +601,8 @@ contains
    integer, save                                       :: j2
    integer, save                                       :: INI    = 0
    
+   np = size(tidep,1)
+
    if (INI == 0 ) then 
        INI = 1  
    
@@ -611,8 +616,12 @@ contains
    
       i1  = floor(xmn); i2 = floor(xmx) + 1
       j1  = floor(ymn); j2 = floor(ymx) + 1
+      if (jatidep == 2) then ! gradient intp., one extra
+         i1 = i1-1 ; i2 = i2+1
+         j1 = j1-1 ; j2 = j2+1
+      endif
       
-      if ( jaselfal .eq.1 > 0 .and. jampi == 1) then
+      if ( jaselfal .eq.1 .and. jampi == 1) then
 !        globally reduce i1, i2, j1, j2
          i1 = -i1
          j1 = -j1
@@ -626,6 +635,13 @@ contains
       allocate ( xz2(i1:i2,j1:j2), stat=ierr)   ! tot aerr 
       allocate ( yz2(i1:i2,j1:j2), stat=ierr)  
       allocate ( td2(i1:i2,j1:j2), stat=ierr)
+
+      if (jatidep > 1) then ! gradient intp.
+         if (allocated(td2_x)) deallocate(td2_x, td2_y)  
+         allocate ( td2_x(i1:i2,j1:j2), stat=ierr)
+         allocate ( td2_y(i1:i2,j1:j2), stat=ierr)
+      endif  
+
       td2 = 0d0
    
       if (jaselfal > 0) then
@@ -702,6 +718,42 @@ contains
       endif
    enddo
    
+   if ( jatidep > 1) then ! gradient intp., get gradient  
+
+      dyy = 2d0*ra*dg2rd
+      do j = j1+1,j2-1 
+         dxx  = dyy*cos(yz2(i1,j))
+         do i = i1+1,i2-1
+            td2_x(i,j) = ( td2(i+1,j) - td2(i-1,j) ) / dxx 
+            td2_y(i,j) = ( td2(i,j+1) - td2(i,j-1) ) / dyy 
+            if (jaselfal >0) then 
+               td2_x(i,j) = td2_x(i,j) + ( self(i+1,j) - self(i-1,j) ) / dxx 
+               td2_y(i,j) = td2_y(i,j) + ( self(i,j+1) - self(i,j-1) ) / dyy 
+            endif 
+         enddo
+      enddo
+
+      do L = 1,Lnx
+         m1  = floor(xu(L))     ; m2 = m1+1 
+         n1  = floor(yu(L))     ; n2 = n1+1
+         di  = xu(L) - m1   
+         dj  = yu(L) - n1
+         f11 = (1d0-di)*(1d0-dj)
+         f21 = (    di)*(1d0-dj)
+         f22 = (    di)*(    dj)
+         f12 = (1d0-di)*(    dj)
+            
+         tidef(L) = csu(L)*( td2_x(m1,n1)*f11 +    &
+                             td2_x(m2,n1)*f21 +    &
+                             td2_x(m2,n2)*f22 +    &
+                             td2_x(m1,n2)*f12 )    &
+                  + snu(L)*( td2_y(m1,n1)*f11 +    &
+                             td2_y(m2,n1)*f21 +    &
+                             td2_y(m2,n2)*f22 +    &
+                             td2_y(m1,n2)*f12 )
+      enddo
+     
+   endif
 
    end subroutine meteo_tidepotential
    
