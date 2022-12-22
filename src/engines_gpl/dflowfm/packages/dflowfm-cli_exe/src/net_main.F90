@@ -267,6 +267,18 @@
        goto 1234
     end if
 
+    if (md_jasavenet == 1) then
+       if (len_trim(iarg_outfile) == 0) then
+          ! Do not overwrite existing file
+          write (msgbuf, '(a)') 'Error, option --savenet given, but missing required option -o OUTPUTFILE.'
+          call warn_flush()
+          goto 1234
+       end if
+       call unc_write_net(iarg_outfile, janetcell = 1, janetbnd = 0, jaidomain = 0, iconventions = UNC_CONV_UGRID)
+       write (msgbuf, '(a)') 'Network was saved in latest format into '''//trim(iarg_outfile)//'''. Done.'
+       call msg_flush()
+       goto 1234
+    end if
 
     if ( md_jamake1d2dlinks .eq. 1 ) then
        ! Make 1D2D links for already loaded net file.
