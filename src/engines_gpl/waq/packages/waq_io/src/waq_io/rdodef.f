@@ -306,9 +306,9 @@
          end select
 
          ! Read the options for the NetCDF file:
-         ! ncFormat (3), ncDeflate (0), ncChunk (0), ncShuffle (0 = false)
+         ! ncFormat (4), ncDeflate (0), ncChunk (0), ncShuffle (0 = false)
 
-         ncopt = [3, 0, 0, 0]
+         ncopt = [4, 0, 0, 0]
          do
             if ( gettoken( keyword, ierr2 ) .gt. 0 ) exit
             if ( keyword(1:1) == '#' ) exit
@@ -316,7 +316,7 @@
             select case ( keyword )
                case ('NCFORMAT' )
                   if ( gettoken( keyvalue, ierr2 ) .gt. 0 ) exit
-                  ncopt(1) = merge( keyvalue, 3, keyvalue == 3 .or. keyvalue == 4 )
+                  ncopt(1) = merge( keyvalue, 4, keyvalue == 3 .or. keyvalue == 4 )
                case ('NCDEFLATE' )
                   if ( gettoken( keyvalue, ierr2 ) .gt. 0 ) exit
                   ncopt(2) = merge( keyvalue, 2, keyvalue >= 0 .and. keyvalue <= 9 )
