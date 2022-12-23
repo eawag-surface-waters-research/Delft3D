@@ -34,6 +34,7 @@
 
       use timers
       use dlwq_netcdf  !   read/write grid in netcdf
+!!      use delwaq_version_module
       use output, only: ncopt
       implicit none
 
@@ -68,9 +69,9 @@
       integer   (4), intent(in   ) :: iknmrk(noseg)        ! Feature array. Bit zero set means active.
       integer   (4), intent(in   ) :: lunut                ! unit number monitoring file
 
-      integer(4) iseg                   ! loop counter for segments
-      integer(4) k                      ! loop counter for substances
-      real   (4) amiss   /-999.0/       ! missing value indicator
+      integer(4) iseg                         ! loop counter for segments
+      integer(4) k                            ! loop counter for substances
+      real   (4), parameter :: amiss = -999.0 ! missing value indicator
 
       integer :: ncid
       integer :: varid, varidout, meshidout, ntimeid, wqid, noseglmesh2d, nosegmesh2d3d, nosegmesh1d, nolay
@@ -89,6 +90,7 @@
       character(len=40) :: timestamp
       character(len=40) :: t0string
       character(len=40) :: uuid
+      character(len=80) :: versionid
 
       character(len=nf90_max_name) :: mesh_name2d
       character(len=nf90_max_name) :: mesh_name1d
@@ -345,6 +347,14 @@
          inc_error = nf90_redef( ncidmap )
          if ( inc_error /= nf90_noerr ) then
              write ( lunut , 2565 )
+             goto 800
+         endif
+
+!!         call getfullversionstring_delwaq( versionid )
+         versionid = "Deltares, DELWAQ version 5.10.00"
+         inc_error = nf90_put_att( ncidmap, nf90_global, 'source', trim(versionid) )
+         if ( inc_error /= nf90_noerr ) then
+             write ( lunut , 2573 )
              goto 800
          endif
 
