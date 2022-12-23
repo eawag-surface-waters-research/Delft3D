@@ -17682,7 +17682,6 @@ src/tools_gpl/maptonetcdf/packages/maptonetcdf/include/maptonetcdf_version.rc.sv
 src/tools_gpl/maptonetcdf/packages/maptonetcdf/include/resource.h -text
 src/tools_gpl/maptonetcdf/packages/maptonetcdf/include/version_number.ini -text
 src/tools_gpl/maptonetcdf/packages/maptonetcdf/src/maptonetcdf.f90 -text
-src/tools_gpl/maptonetcdf/packages/maptonetcdf/src/maptonetcdf_version.F90 -text
 src/tools_gpl/maptonetcdf/packages/maptonetcdf/src/maptonetcdf_version.F90.svn -text
 src/tools_gpl/maptonetcdf/scripts/run_maptonetcdf.bat -text
 src/tools_gpl/maptonetcdf/scripts/run_maptonetcdf.sh -text
