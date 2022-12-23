@@ -141,15 +141,11 @@
 
 
          ! Create the new file
-#ifdef NetCDF4
          if ( ncopt(1) == 4 ) then
              inc_error = nf90_create( hncnam, ior(nf90_clobber,nf90_netcdf4), ncidhis )
          else
              inc_error = nf90_create( hncnam, ior(nf90_clobber,nf90_format_classic), ncidhis )
          endif
-#else
-         inc_error = nf90_create( hncnam, nf90_clobber, ncidhis )
-#endif
          if ( inc_error /= nf90_noerr ) then
              write ( lunut , 2560 ) trim(hncnam)
              goto 800

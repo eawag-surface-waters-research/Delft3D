@@ -141,15 +141,11 @@
          end if
 
          ! Copy the global attributes to a new file
-#ifdef NetCDF4
          if ( ncopt(1) == 4 ) then
              inc_error = nf90_create( mncnam, ior(nf90_clobber,nf90_netcdf4), ncidmap )
          else
              inc_error = nf90_create( mncnam, ior(nf90_clobber,nf90_format_classic), ncidmap )
          endif
-#else
-         inc_error = nf90_create( mncnam, nf90_clobber, ncidmap )
-#endif
          if ( inc_error /= nf90_noerr ) then
              write ( lunut , 2560 ) trim(mncnam)
              goto 800
