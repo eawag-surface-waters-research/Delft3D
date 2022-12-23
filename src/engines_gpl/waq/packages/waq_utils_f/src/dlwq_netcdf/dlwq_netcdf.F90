@@ -766,7 +766,7 @@ recursive function dlwqnc_copy_associated( ncidin, ncidout, meshidin, meshidout,
             case( nf90_double )
                 ierror = dlwqnc_copy_double_var( ncidin,  ncidout, oldvarid, newvarid, ndims, dimids, dimsizes )
             case ( nf90_char )
-                continue ! TODO: function to copy character strings
+                ierror = dlwqnc_copy_char_var( ncidin,  ncidout, oldvarid, newvarid, ndims, dimids, dimsizes )
             case default
                 ierror = -1
         end select
@@ -949,6 +949,48 @@ integer function dlwqnc_copy_double_var( ncidin, ncidout, varin, varout, ndims, 
 
     dlwqnc_copy_double_var = nf90_noerr
 end function dlwqnc_copy_double_var
+
+integer function dlwqnc_copy_char_var( ncidin, ncidout, varin, varout, ndims, dimids, dimsizes )
+!   use ISO_C_BINDING
+
+    integer, intent(in)                   :: ncidin, ncidout, varin, varout, ndims
+    integer, intent(in), dimension(:)     :: dimids, dimsizes
+
+    integer                               :: dim1, dim2
+    integer                               :: ierror
+    integer                               :: ierr
+    integer                               :: i, j
+    integer                               :: xtype, length, attnum
+    integer                               :: oldvarid, newvarid
+
+    character(len=:), dimension(:), allocatable :: value
+
+    integer                               :: start, count, chunk
+
+    dlwqnc_copy_char_var = -1
+
+    dim1 = dimsizes(dimids(1))
+    dim2 = dimsizes(dimids(2))
+
+    allocate( character(len=dim1) :: value(dim2), stat = ierr )
+    if ( ierr /= 0 ) then
+        return
+    endif
+
+    ierror = nf90_get_var( ncidin, varin, value )
+    if ( ierror /= nf90_noerr ) then
+        dlwqnc_copy_char_var = ierror
+        return
+    endif
+
+    ierror = nf90_put_var( ncidout, varout, value )
+    if ( ierror /= nf90_noerr ) then
+        dlwqnc_copy_char_var = ierror
+        return
+    endif
+
+    dlwqnc_copy_char_var = nf90_noerr
+end function dlwqnc_copy_char_var
 
 ! dlwqnc_write_wqtime --
 !     Write the time to the output file
