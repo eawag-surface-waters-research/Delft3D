@@ -9103,7 +9103,7 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
            ierr = nf90_inq_varid(imapfile, '1d2d_flow_cond'   , id_1d2d_flow_cond(iid))
         end if
 
-        if ( jamaptidep.eq.1 .and. jatidep.gt.0 ) then
+        if ( jamaptidep.eq.1 .and. jatidep > 0 ) then
            if ( jaselfal.eq.0 ) then
               ierr = nf90_inq_varid(imapfile, 'TidalPotential', id_tidep(iid))
            else
@@ -10005,7 +10005,7 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
           ierr = nf90_put_var(imapfile, id_1d2d_flow_cond(iid),   FlowCond,   (/ 1, itim /), (/ nbnd1d2d, 1 /))
        end if
 
-       if ( jatidep.gt.0 .and. jamaptidep.eq.1 ) then
+       if ( jatidep > 0 .and. jamaptidep.eq.1 ) then
           if ( jaselfal.eq.0 ) then
              do k=1,Ndx
                 workx(k) = tidep(1,k)

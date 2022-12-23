@@ -123,6 +123,27 @@
 
     frL = a*frL + (1d0-a)*( (frLk1+frLk2)*0.5d0 )
 
+else if (ifxedweirfrictscheme == 4) then       ! full undisturbed velocity reconstruction
+
+    flatlength = max(weirlength , dx(L) - (weirlength + weirheight*fixedweirtalud) )
+    a          = weirlength / (weirlength + flatlength)
+
+   if (hs(k1) > 0d0) then
+       ff   = min(1d0, hu(L)/hs(k1) )
+       umod = sqrt( u1(L)*u1(L)*ff*ff + v(L)*v(L) )
+       call getcz(hs(k1), frcu(L), ifrcutp(L), Cz, L)
+       frLk1 = umod*ff*ag / (Cz*Cz*hs(k1))
+    endif
+
+    if (hs(k2) > 0d0) then
+       ff   = min(1d0, hu(L)/hs(k2) )
+       umod = sqrt( u1(L)*u1(L)*ff*ff + v(L)*v(L) )
+       call getcz(hs(k2), frcu(L), ifrcutp(L), Cz, L)
+       frLk2 = umod*ff*ag / (Cz*Cz*hs(k2))
+    endif
+
+    frL  = a*frL + (1d0-a)*( (frLk1+frLk2)*0.5d0 )
+
  endif
 
  end subroutine fixedweirfriction2D

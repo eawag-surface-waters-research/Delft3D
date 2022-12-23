@@ -219,6 +219,7 @@
  double precision                  :: slotw1D           !< minimum slotwidth 1D
 
  integer                           :: jaconveyance2D    !< 1 : yes, 0 : no
+ integer                           :: jaconveyance3D=0  !< 1 : yes, 0 : no
  integer                           :: nums1it           !<   : nr of non-linear continuity iterations
  integer                           :: nums1mit          !<   : nr of non-linear continuity iterations outer loop ic nested
  integer                           :: isimplefixedweirs !< 1=only links stored, 0=complete crossection paths stored

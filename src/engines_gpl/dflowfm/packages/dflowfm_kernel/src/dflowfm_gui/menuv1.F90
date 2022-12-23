@@ -244,8 +244,9 @@
       OPTION(35)= 'Convert crsdef/loc to profdef/loc files '
       OPTION(36)= 'Connecthangingnodes                     '
       OPTION(37)= 'Removelinksofhangingnodes               '
+      OPTION(38)= 'MakeZKbedlevels                         '
 
-      MAXOPT    =  37
+      MAXOPT    =  38
    ELSE IF (NUM .EQ. 6) THEN
       EXP(1)     = 'MENU 6                                  '
       EXP(2)     = 'VARIOUS                                 '

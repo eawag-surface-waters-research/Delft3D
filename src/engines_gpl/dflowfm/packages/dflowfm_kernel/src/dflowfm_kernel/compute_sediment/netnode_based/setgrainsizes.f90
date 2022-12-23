@@ -40,6 +40,11 @@
 
  double precision :: a = 2.414d-5, b = 247.8d0, c= 140d0, TempK, s
 
+! where was this moved to or why was it removed?
+! TempK         = 273d0 + backgroundwatertemperature
+! vismol        = A*10**( B / (TempK-C) ) / rhomean
+! vismol        = 4.d0/(20.d0 + backgroundwatertemperature)*1d-5 ! Van rijn, 1993
+
  if (allocated (D90) ) then
      deallocate(D90, rhodelta, sqsgd50, dstar, dstar03, Accr, Awcr)
  endif

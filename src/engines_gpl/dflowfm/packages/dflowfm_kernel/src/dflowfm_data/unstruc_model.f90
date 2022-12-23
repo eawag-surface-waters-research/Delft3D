@@ -903,6 +903,7 @@ subroutine readMDUFile(filename, istat)
     call prop_get_integer( md_ptr, 'geometry', 'Helmert'     , jaHelmert)
 
     call prop_get_integer( md_ptr, 'geometry', 'Conveyance2D', Jaconveyance2D)
+    call prop_get_integer( md_ptr, 'geometry', 'Conveyance3D', Jaconveyance3D)
     call prop_get_integer( md_ptr, 'geometry', 'Nonlin2D'    , Nonlin2D)
     call prop_get_integer( md_ptr, 'geometry', 'Nonlin1D'    , Nonlin1D)
     call prop_get_double ( md_ptr, 'geometry', 'Slotw2D'     , slotw2D)
@@ -2787,6 +2788,9 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     endif
 
     call prop_set(prop_ptr, 'geometry', 'Conveyance2D', Jaconveyance2D, '-1: R=HU,0: R=H, 1: R=A/P, 2: K=analytic-1D conv, 3: K=analytic-2D conv')
+    if (jaconveyance3D .ne. 0) then 
+    call prop_set(prop_ptr, 'geometry', 'Conveyance3D', Jaconveyance3D, '-1: R=HU,0: R=H, 1: R=A/P, 2: K=analytic-1D conv, 3: K=analytic-2D conv')
+    endif 
     if (nonlin2D .ne. 0) then
     call prop_set(prop_ptr, 'geometry', 'Nonlin2D', Nonlin2D, 'Non-linear 2D volumes, 1 = yes, only used if ibedlevtype=3 and Conveyance2D>=1')
     endif

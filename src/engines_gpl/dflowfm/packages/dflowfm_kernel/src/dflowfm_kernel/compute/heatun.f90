@@ -83,6 +83,7 @@ call getkbotktop(n,kb,kt)
 twatn = constituents(itemp, kt)
 if (surftempsmofac > 0d0) then
    arn    = ba(n)
+   twatn  = twatn*arn 
    do LL  = 1,nd(n)%lnx
       L   = iabs( nd(n)%ln(LL) )
       k2  = ln(1,L) + ln(2,L) - n
