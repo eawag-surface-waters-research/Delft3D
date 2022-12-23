@@ -178,12 +178,12 @@ integer function dlwqnc_find_meshes_by_att( ncid, varid2d, type_ugrid, varid1d, 
       else
          cycle
       endif
-      
+
       topology_dimension = 0
       ierror = nf90_inquire_attribute( ncid, ivar, 'topology_dimension')
       if ( ierror /= nf90_noerr .and. ierror /= nf90_enotatt ) then
          return
-      elseif ( ierror == nf90_noerr ) then ! 
+      elseif ( ierror == nf90_noerr ) then !
          ierror = nf90_get_att( ncid, ivar, 'topology_dimension', topology_dimension )
          if ( ierror /= nf90_noerr ) then
             return
@@ -1235,7 +1235,11 @@ integer function dlwqnc_create_wqvariable( ncidout, mesh_name, wqname, longname,
         k = k - 1
     endif
     write( name, '(a,a,a)' ) mesh_name(1:k), '_', trim(wqname)
-    write( name2d, '(a,a,a)' ) mesh_name(1:k), '_2d_', trim(wqname)
+    if ( nolayid > 0 ) then
+        write( name2d, '(a,a,a)' ) mesh_name(1:k), '_2d_', trim(wqname)
+    else
+        name2d = name
+    endif
 
     do i = 1,len_trim(name)
         if ( name(i:i) == ' ' ) then
@@ -1496,7 +1500,7 @@ integer function dlwqnc_create_layer_dim( ncidout, mesh_name, nolay, thickness, 
     !
     ! Cumulative sigma coordinate
     !
-    write( name, '(3a)' ) mesh_name(1:k), '_sigma_dlwq'
+    write( name, '(3a)' ) mesh_name(1:k), '_layer_dlwq'
     ierror = nf90_def_var( ncidout, name, nf90_float, (/ nolayid /), cumlayid )
     if ( ierror /= 0 ) then
         if (dlwqnc_debug) write(*,*) 'Note: Creating layer dimension failed (def_var): ', ierror
