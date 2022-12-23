@@ -28,9 +28,9 @@
 
 echo "---Load modules..."
 module purge
-module load 2021
-module load intel/2021a
-module load Delft3DFM/2022.04-intel-2021a 
+module load 2022
+module load intel/2022a
+module load Delft3DFM/2023.01-intel-2022a
 
 
 #---You will need to modify the input below this line---
