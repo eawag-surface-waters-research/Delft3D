@@ -616,6 +616,11 @@ module m_oned_functions
       integer              :: k2
       integer              :: dir
       
+      if (struct%numlinks == 0) then
+         ! Possibly outside of this partition
+         return
+      end if
+
       ! First compute average waterlevels on suction side and delivery side of the pump
       s1k1 = 0d0
       s1k2 = 0d0
