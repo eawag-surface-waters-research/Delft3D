@@ -2908,10 +2908,10 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
 
     ! 1D Volume tables
     if (writeall .or. useVolumeTables) then
-       call prop_set (prop_ptr, 'volumeTables', 'useVolumeTables',  merge(1, 0, useVolumeTables), 'Use 1D volume tables (1: yes, 0: no).')
+       call prop_set (prop_ptr, 'volumeTables', 'useVolumeTables',  merge(1, 0, useVolumeTables), 'Use 1D volume tables (0: no, 1: yes).')
        if (useVolumeTables) then
           call prop_set(md_ptr, 'volumeTables', 'increment', tableIncrement, 'Desired increment for volume tables')
-          call prop_set(md_ptr, 'volumeTables', 'useVolumeTableFile', merge(1, 0, useVolumeTableFile), 'Use volume table file (1:yes, 0: no)')
+          call prop_set(md_ptr, 'volumeTables', 'useVolumeTableFile', merge(1, 0, useVolumeTableFile), 'Use volume table file (0: no, 1: yes)')
        endif
     endif
 
@@ -3308,7 +3308,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     endif
     call prop_set(prop_ptr, 'physics', 'VillemonteCD1', VillemonteCD1,   'Calibration coefficient for Villemonte. Default = 1.0.')
     call prop_set(prop_ptr, 'physics', 'VillemonteCD2', VillemonteCD2,   'Calibration coefficient for Villemonte. Default = 10.0.')
-    call prop_set(prop_ptr,    'physics', 'Salinity',      jasal,        'Include salinity, (0=no, 1=yes)' )
+    call prop_set(prop_ptr,    'physics', 'Salinity',      jasal,        'Include salinity, (0: no, 1: yes)' )
     if (writeall .or. (jasal > 0)) then
        call prop_set(prop_ptr, 'physics','InitialSalinity',salini,       'Uniform initial salinity concentration (ppt)')
        if (writeall .or. (Sal0abovezlev .ne. dmiss)) then
@@ -3374,7 +3374,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     call prop_set(prop_ptr, 'physics', 'SecondaryFlow'  , jasecflow, 'Secondary flow (0: no, 1: yes)')
 
     if (writeall .or. (jasecflow > 0)) then
-       call prop_set(prop_ptr, 'physics', 'BetaSpiral'     , spirbeta , 'Weight factor of the spiral flow intensity on flow dispersion stresses')
+       call prop_set(prop_ptr, 'physics', 'BetaSpiral'     , spirbeta , 'Weight factor of the spiral flow intensity on flow dispersion stresses (0d0 = disabled)')
     endif
     if (writeall .or. jaequili > 0) then
        call prop_set(prop_ptr, 'physics', 'Equili'     , jaequili , 'Equilibrium spiral flow intensity (0: no, 1: yes)')
@@ -3427,8 +3427,8 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
        call prop_set(prop_ptr, 'veg', 'Vegetationmodelnr', javeg      , 'Vegetation model nr, (0=no, 1=Baptist DFM)')
        call prop_set(prop_ptr, 'veg', 'Clveg'          , Clveg        , 'Stem distance factor, default 0.8 ()' )
        call prop_set(prop_ptr, 'veg', 'Cdveg'          , Cdveg        , 'Stem Cd coefficient , default 0.7 ()' )
-       call prop_set(prop_ptr, 'veg', 'Cbveg'          , Cbveg        , 'Stem stiffness coefficient , default 0.7 ()' )
-       call prop_set(prop_ptr, 'veg', 'Rhoveg'         , Rhoveg       , 'Stem Rho, if > 0, -> bouyant stick procedure, default 0.0 ()' )
+       call prop_set(prop_ptr, 'veg', 'Cbveg'          , Cbveg        , 'Stem stiffness coefficient , default 0.0 ()' )
+       call prop_set(prop_ptr, 'veg', 'Rhoveg'         , Rhoveg       , 'Stem Rho, if > 0, -> bouyant stick procedure, default 0.0 (kg/m3)' )
        call prop_set(prop_ptr, 'veg', 'Stemheightstd'  , Stemheightstd, 'Stem height standard deviation fraction, e.g. 0.1  ()' )
        if (kmx == 0) then
           call prop_set(prop_ptr, 'veg', 'Densvegminbap'  , Densvegminbap, 'Minimum vegetation density in Baptist formula  (1/m2)' )
@@ -3443,7 +3443,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
        endif
     endif
 
-    call prop_set(prop_ptr,    'wind', 'ICdtyp',               ICdtyp,   'Wind drag coefficient type (1=Const; 2=Smith&Banke (2 pts); 3=S&B (3 pts); 4=Charnock 1955, 5=Hwang 2005, 6=Wuest 2005, 7=Hersbach 2010 (2 pts), 8=4+viscous' )
+    call prop_set(prop_ptr,    'wind', 'ICdtyp',               ICdtyp,   'Wind drag coefficient type (1: Const, 2: Smith&Banke (2 pts), 3: S&B (3 pts), 4: Charnock 1955, 5: Hwang 2005, 6: Wuest 2005, 7: Hersbach 2010 (2 pts), 8: 4+viscous).' )
     if (ICdtyp == 1 .or. ICdtyp == 4 .or. ICdtyp == 5 .or. ICdtyp == 6) then
        call prop_set(prop_ptr, 'wind', 'Cdbreakpoints',        Cdb(1:1), 'Wind drag coefficient ')
     else if (ICdtyp == 2) then
@@ -3456,7 +3456,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
        call prop_set(prop_ptr, 'wind', 'Cdbreakpoints',        Cdb(1:2), 'Wind drag coefficients')
     endif
     if (writeall .or. relativewind > 0d0) then
-       call prop_set(prop_ptr,    'wind', 'Relativewind',      relativewind,   'Wind speed relative to top-layer water speed*relativewind, 0d0=no relative wind, 1d0=using full top layer spreed)')
+       call prop_set(prop_ptr,    'wind', 'Relativewind',      relativewind,   'Wind speed relative to top-layer water speed*relativewind, 0d0=no relative wind, 1d0=using full top layer speed)')
     endif
     if (kmx == 0 .and. jawindhuorzwsbased == 0 .or. kmx > 0 .and. jawindhuorzwsbased == 0) then
        call prop_set(prop_ptr, 'wind', 'Windhuorzwsbased', jawindhuorzwsbased,   'Wind hu or zws based , 0 = hu, 1 = zws ' )
@@ -3481,16 +3481,16 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
        call prop_set(prop_ptr, 'grw', 'Infiltrationmodel'  , Infiltrationmodel, trim(tmpstr))
        call prop_set(prop_ptr, 'grw', 'Hinterceptionlayer' , Hinterceptionlayer,'Intercept this amount of rain (m)' )
        call prop_set(prop_ptr, 'grw', 'UnifInfiltrationCapacity' , infiltcapuni, 'Uniform maximum infiltration capacity (m/s)' )
-       call prop_set(prop_ptr, 'grw', 'Conductivity'       , Conductivity,      'non dimensionless K conductivity   saturated (m/s), Q = K*A*i (m3/s)' )
+       call prop_set(prop_ptr, 'grw', 'Conductivity'       , Conductivity,      'Non-dimensionless K conductivity   saturated (m/s), Q = K*A*i (m3/s)' )
 
        call prop_set(prop_ptr, 'grw', 'h_aquiferuni'       , h_aquiferuni,      'bgrw = bl - h_aquiferuni (m), if negative, bgrw = bgrwuni '  )
        if (bgrwuni .ne. dmiss) then
-       call prop_set(prop_ptr, 'grw', 'bgrwuni'            , bgrwuni,           'uniform level of impervious layer, only used if h_aquiferuni is negative')
+       call prop_set(prop_ptr, 'grw', 'bgrwuni'            , bgrwuni,           'Uniform level of impervious layer, only used if h_aquiferuni is negative')
        endif
 
-       call prop_set(prop_ptr, 'grw', 'h_unsatini'         , h_unsatini,        'initial level groundwater is bedlevel - h_unsatini (m), if negative, sgrw = sgrwini')
+       call prop_set(prop_ptr, 'grw', 'h_unsatini'         , h_unsatini,        'Initial level groundwater is bedlevel - h_unsatini (m), if negative, sgrw = sgrwini')
        if (sgrwini .ne. dmiss) then
-       call prop_set(prop_ptr, 'grw', 'sgrwini'            , sgrwini,           'initial groundwater level, if h_unsatini < 0')
+       call prop_set(prop_ptr, 'grw', 'sgrwini'            , sgrwini,           'Initial groundwater level, if h_unsatini < 0')
        endif
     endif
 
@@ -3548,7 +3548,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     if (writeall .or. dt_nodal > 0d0) then
         call prop_set(prop_ptr, 'time', 'DtNodal',             dt_nodal,       'Time interval (s) for updating nodal factors in astronomical boundary conditions')
     endif
-    call prop_set(prop_ptr, 'time', 'DtMax',                   dt_max,         'Maximal computation timestep (s)')
+    call prop_set(prop_ptr, 'time', 'DtMax',                   dt_max,         'Maximum computation timestep (s)')
     call prop_set(prop_ptr, 'time', 'Dtfacmax',                dtfacmax,       'Max timestep increase factor ( )')
     call prop_set(prop_ptr, 'time', 'DtInit',                  dt_init,        'Initial computation timestep (s)')
 
@@ -3642,8 +3642,8 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
  ! Calibration factor
     if (writeall .or. jacali == 1) then
         call prop_set(prop_ptr, 'calibration', 'UseCalibration'   , jacali              , 'Activate calibration factor friction multiplier (1 = yes, 0 = no)')    ! Could be updated to check if both strings are empty or filled
-        call prop_set(prop_ptr, 'calibration', 'DefinitionFile'   , trim(md_cldfile)    , 'File (*.cld) including calibration definitions')
-        call prop_set(prop_ptr, 'calibration', 'AreaFile'         , trim(md_cllfile)    , 'File (*.cll) including area distribution of calibration definitions')
+        call prop_set(prop_ptr, 'calibration', 'DefinitionFile'   , trim(md_cldfile)    , 'File (*.cld) containing calibration definitions')
+        call prop_set(prop_ptr, 'calibration', 'AreaFile'         , trim(md_cllfile)    , 'File (*.cll) containing area distribution of calibration definitions')
     end if
 
 ! Output
