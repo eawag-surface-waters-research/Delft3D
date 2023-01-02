@@ -33,8 +33,8 @@
 !
       real(4) pmsa(*)     !I/O Process Manager System Array, window of routine to process library
       real(4) fl(*)       ! O  Array of fluxes made by this process in mass/volume/time
-      integer ipoint(  2) ! I  Array of pointers in pmsa to get and store the data
-      integer increm(  2) ! I  Increments in ipoint for segment loop, 0=constant, 1=spatially varying
+      integer ipoint(  3) ! I  Array of pointers in pmsa to get and store the data
+      integer increm(  3) ! I  Increments in ipoint for segment loop, 0=constant, 1=spatially varying
       integer noseg       ! I  Number of computational elements in the whole model schematisation
       integer noflux      ! I  Number of fluxes, increment in the fl array
       integer iexpnt(4,*) ! I  From, To, From-1 and To+1 segment numbers of the exchange surfaces
@@ -43,7 +43,7 @@
       integer noq2        ! I  Nr of exchanges in 2nd direction, noq1+noq2 gives hor. dir. reg. grid
       integer noq3        ! I  Nr of exchanges in 3rd direction, vertical direction, pos. downward
       integer noq4        ! I  Nr of exchanges in the bottom (bottom layers, specialist use only)
-      integer ipnt(  2)   !    Local work array for the pointering
+      integer ipnt(  3)   !    Local work array for the pointering
       integer iseg        !    Local loop counter for computational element loop
 !
 !*******************************************************************************

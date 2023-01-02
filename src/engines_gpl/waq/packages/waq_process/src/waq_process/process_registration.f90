@@ -312,6 +312,8 @@ subroutine pronrs( pronam, imodul )
         endif
     enddo
 
+    write(*,*) 'PRONRS:', pronam, imodul
+
 end subroutine pronrs
 
 subroutine procal (pmsa   , imodul , flux   , ipoint , increm , &
@@ -359,7 +361,14 @@ subroutine procal (pmsa   , imodul , flux   , ipoint , increm , &
     integer, parameter  :: nomax = 500
     integer(4), save    :: ithand(nomax) = 0 !  timer handles
 
+    !write(*,*) 'PROCAL:', pronam, imodul
+
     if ( timon ) then
+        if ( imodul .eq. 0 ) then
+            write( lunrep, '(2a)' ) 'Unknown process module: ', pronam
+            write( lunrep, '(2a)' ) 'Program stopped!'
+            error stop
+        endif
         if ( imodul .le. nomax ) call timstrt ( pronam, ithand(imodul) )
     endif
 
