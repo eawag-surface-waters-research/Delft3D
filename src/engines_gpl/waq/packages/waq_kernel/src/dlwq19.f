@@ -226,7 +226,7 @@
       vertical_upwind = .not. btest(iopt,18)
 
       if ( init .eq. 0 ) then
-         write ( lunut, '(A)' ) ' Using local flexible time step method (scheme 24 - beta functionality)'
+         write ( lunut, '(A)' ) ' Using local flexible time step method (scheme 24)'
          if ( vertical_upwind ) then
             write ( lunut, '(A)' ) ' Using upwind discretisation for vertical advection.'
          else
