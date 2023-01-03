@@ -813,14 +813,10 @@ integer function dlwqnc_copy_int_var( ncidin, ncidout, varin, varout, ndims, dim
     integer                               :: sz, sz1
     integer                               :: ierror
     integer                               :: ierr
-    integer                               :: i, j
-    integer                               :: xtype, length, attnum
-    integer                               :: oldvarid, newvarid
+    integer                               :: i
 
     integer, dimension(:), allocatable    :: value
     integer, dimension(:,:), allocatable  :: value2d
-
-    integer                               :: start, count, chunk
 
     dlwqnc_copy_int_var = -1
 
@@ -857,9 +853,7 @@ integer function dlwqnc_copy_real_var( ncidin, ncidout, varin, varout, ndims, di
     integer                               :: sz
     integer                               :: ierror
     integer                               :: ierr
-    integer                               :: i, j
-    integer                               :: xtype, length, attnum
-    integer                               :: oldvarid, newvarid
+    integer                               :: i
 
     real, dimension(:), allocatable       :: value
     real, dimension(:,:), allocatable     :: value2d
@@ -905,9 +899,7 @@ integer function dlwqnc_copy_double_var( ncidin, ncidout, varin, varout, ndims, 
     integer                               :: sz
     integer                               :: ierror
     integer                               :: ierr
-    integer                               :: i, j
-    integer                               :: xtype, length, attnum
-    integer                               :: oldvarid, newvarid
+    integer                               :: i
 
     real(kind=kind(1.0d0)), dimension(:), allocatable   :: value
     real(kind=kind(1.0d0)), dimension(:,:), allocatable :: value2d
@@ -955,13 +947,8 @@ integer function dlwqnc_copy_char_var( ncidin, ncidout, varin, varout, ndims, di
     integer                               :: dim1, dim2
     integer                               :: ierror
     integer                               :: ierr
-    integer                               :: i, j
-    integer                               :: xtype, length, attnum
-    integer                               :: oldvarid, newvarid
 
     character(len=:), dimension(:), allocatable :: value
-
-    integer                               :: start, count, chunk
 
     dlwqnc_copy_char_var = -1
 
