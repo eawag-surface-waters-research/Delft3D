@@ -132,7 +132,7 @@ source_group(Resources FILES    ${rc_version_file})
 
 target_compile_options(${library_name} PRIVATE "${openmp_flag}")
 target_compile_options(${library_name} PRIVATE "${waq_default_flags}")
-target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${waq_debug_flags} ${check_bounds_flag}>")
+target_compile_options(${library_name} PRIVATE $<$<CONFIG:Debug>:${waq_debug_flags} ${check_bounds_flag}>)
 
 set_target_properties(${library_name} PROPERTIES FOLDER engines_gpl/waq)
 
