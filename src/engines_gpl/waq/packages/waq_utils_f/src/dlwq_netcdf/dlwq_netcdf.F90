@@ -1273,11 +1273,7 @@ integer function dlwqnc_create_wqvariable( ncidout, mesh_name, wqname, longname,
         k = k - 1
     endif
     write( name, '(a,a,a)' ) mesh_name(1:k), '_', trim(wqname)
-    if ( nolayid > 0 ) then
-        write( name2d, '(a,a,a)' ) mesh_name(1:k), '_2d_', trim(wqname)
-    else
-        name2d = name
-    endif
+    write( name2d, '(a,a,a)' ) mesh_name(1:k), '_2d_', trim(wqname)
 
     do i = 1,len_trim(name)
         if ( name(i:i) == ' ' ) then
