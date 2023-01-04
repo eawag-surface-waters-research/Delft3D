@@ -133,7 +133,7 @@ integer :: jaoldstr !< tmp backwards comp: we cannot mix structures from EXT and
                                                                              !< NUMVALS_COMMON common variables (see definitation at top) and above extra variables.
  
  ! gate (new),  extra variables:
- integer, parameter :: NUMVALS_COMMON_GATE = 7                                    !< Number of common variables shared by gate
+ integer, parameter :: NUMVALS_COMMON_GATE = 8                                    !< Number of common variables shared by gate
  integer, parameter :: IVAL_GATE_FLOWH    = NUMVALS_COMMON_GATE + 1               !< Upstream average water level
  integer, parameter :: IVAL_GATE_COUNT    = NUMVALS_COMMON_GATE + 2               !< Counter
  integer, parameter :: IVAL_GATE_OPENW    = NUMVALS_COMMON_GATE + 3               !< Gate opening width
@@ -149,8 +149,8 @@ integer :: jaoldstr !< tmp backwards comp: we cannot mix structures from EXT and
  integer, parameter :: NUMVALS_CMPSTRU = NUMVALS_COMMON       !< Total number of variables for compound structure, no extra variables.
  double precision, dimension(:,:), allocatable :: valcmpstru  !< Array for compound structure(1:NUMVALS_CMPSTRU,:)
 
- ! Pump shares the first 8 indices in common indices, extra variables are as follows:
- integer, parameter :: NUMVALS_COMMON_PUMP = 8                              !< Number of common variables shared by pump
+ ! Pump shares the first 9 indices in common indices, extra variables are as follows:
+ integer, parameter :: NUMVALS_COMMON_PUMP = 9                              !< Number of common variables shared by pump
  integer, parameter :: IVAL_PP_CAP    = NUMVALS_COMMON_PUMP + 1               !< Pump capacity
  integer, parameter :: IVAL_PP_STAG   = NUMVALS_COMMON_PUMP + 2               !< Actual pump stage
  integer, parameter :: IVAL_PP_HEAD   = NUMVALS_COMMON_PUMP + 3               !< Pump head
