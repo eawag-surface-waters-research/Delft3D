@@ -53,7 +53,7 @@ module m_fixedweirs
     double precision, allocatable   :: weirdte(:)            ! loss coeff
     integer         , allocatable   :: iweirtxw(:)           ! weir type
 
-    double precision                :: sillheightmin    = 0.5d0 ! waqua dams with both sillheights > sillheightmin go to fixedweirs.pli
+    double precision                :: sillheightmin    = 0.0d0 ! waqua dams with both sillheights > sillheightmin go to fixedweirs.pli
                                                                 ! the rest goes to
 contains
 
