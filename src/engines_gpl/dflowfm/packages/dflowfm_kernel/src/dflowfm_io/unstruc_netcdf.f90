@@ -14953,13 +14953,21 @@ subroutine unc_write_1D_flowgeom_ugrid(id_tsp, ncid,jabndnd,jafou, ja2D, contact
    !end if
    
    if (present(contacts_)) then
-   call realloc(contacts_, (/ 2, n1d2dcontacts /), fill = -999)
-   contacts_ = contacts
+     call realloc(contacts_, (/ 2, n1d2dcontacts /), fill = -999)
+     if ( allocated(contacts)) then
+        contacts_ = contacts
+     else
+       contacts_ = 0
+     end if
    endif
 
    if (present(contacttype_)) then
       call realloc(contacttype_, n1d2dcontacts, keepExisting = .false., fill = 0)
-      contacttype_ = contacttype
+      if ( allocated(contacttype)) then
+         contacttype_ = contacttype
+      else
+        contacttype_ = 0
+      endif
    endif
    
    if (present(numcontacts)) then
