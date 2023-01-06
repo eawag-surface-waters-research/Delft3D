@@ -62,9 +62,6 @@
  double precision   :: thresh
 
  character(len=128) :: msg
- 
- !testing update_ghosts for corners
- integer :: index
 
 !-----------------------------------------------------------------------------------------------
  numnodneg = 0
@@ -118,14 +115,6 @@
     !    call tekrai(nsiz,ja)
     !    call toemaar()
     ! endif
-    
-    !testing update_ghost corners GNM
-    do index = 1, numk
-        zk(index) = my_rank
-    enddo
-    if ( jampi == 1 ) then
-       call update_ghosts(ITYPE_CN, 1, numk, zk, ierror)
-    end if
     
 !    synchronise all water-levels
     if ( jampi == 1 ) then
