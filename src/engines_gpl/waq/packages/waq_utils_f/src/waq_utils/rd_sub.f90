@@ -25,7 +25,7 @@
 
    use dlwq_data      ! for definition and storage of data
    use rd_token       ! tokenized reading
-   
+
    implicit none
 
    logical           , intent (in   )  :: allocated       !< only store actual data when arrays are allocated
@@ -73,52 +73,52 @@
    integer   (4)                       :: itype
 
    data starttag  / 'substance           ','parameter           ', &
-                    'output              ','active-processes    ' /  
-   data endtag    / 'end-substance       ','end-parameter       ', & 
-                    'end-output          ','end-active-processes' /  
-   data attribute / 'active              ','inactive            ', & 
-                    'description         ','concentration-unit  ', & 
-                    'waste-load-unit     ','unit                ', & 
-                    'value               ','name                ' /  
+                    'output              ','active-processes    ' /
+   data endtag    / 'end-substance       ','end-parameter       ', &
+                    'end-output          ','end-active-processes' /
+   data attribute / 'active              ','inactive            ', &
+                    'description         ','concentration-unit  ', &
+                    'waste-load-unit     ','unit                ', &
+                    'value               ','name                ' /
 
    call getmlu(lunut)
    ilun    = 0
    lch (1) = input_file
    open (newunit=ilun(1), file=lch(1), status='old', iostat=ierr)
-   if(ierr.ne.0) then 
+   if(ierr.ne.0) then
       cerr = 'Error reading file: '//trim(lch(1))
       return
    endif
    npos   = 1000
-   cchar  = ';'
-    
+   cchar  = '#'
+
    nosys  = 0
    notot  = 0
    nocons = 0
    noout  = 0
    cerr = 'Error: Something went wrong during the reading of the substance file.'
 
-   do 
+   do
       if ( gettoken ( ctag, anint, areal, itype, ierr) .ne. 0 ) exit
       if (itype .ne. 1) then
          ierr = 101
          cerr = 'Error: Expected a keyword, but found a real or integer while reading file: '//trim(lch(1))
          return
       endif
-      
+
       call zoekns(ctag,ntag,starttag,20,itag)
       select case (itag)
 
       case (1)
 
    ! case 1  substance
-   
+
    !  substance 'name' active/inactive
    !     description        'text'
    !     concentration-unit '(text)'
    !     waste-load-unit    '(text)'
    !  end-substance
-   
+
          if ( gettoken ( csub, ierr ) .ne. 0 ) exit
          if ( gettoken ( catt, ierr ) .ne. 0 ) exit
          call zoekns(catt,natt,attribute,20,iatt)
@@ -137,7 +137,7 @@
          endif
 
    !  substance attributes
-      
+
          if ( gettoken ( catt, ierr ) .ne. 0 ) exit
          call zoekns(catt,natt,attribute,20,iatt)
          if (iatt.ne.3) then
@@ -179,15 +179,15 @@
          endif
 
       case (2)
-   
+
    ! case 2  parameter
-   
+
    !  parameter 'name'
    !     description   'text'
    !     unit          'text'
    !     value          0.0E+00
    !  end-parameter
-   
+
          if ( gettoken ( cpar, ierr ) .ne. 0 ) exit
          nocons = nocons + 1
          if (allocated) coname(nocons) = cpar
@@ -231,8 +231,8 @@
             cerr='Expected end-tag ''end-parameter'' for parameter '//trim(cpar)//', but read: '//trim(catt)
             exit
          endif
-   
-      case(3)  
+
+      case(3)
 
    !  case 3  output
 
@@ -309,7 +309,7 @@
          exit
       end select
    end do
-   
+
    if ( ierr.eq.3) then
       ! end of file
       ierr = 0
@@ -322,11 +322,11 @@
       end do
    end if
    notot = notot + nosys
-   
+
    do i = 1, lstack
       close (unit = ilun(i), err=1)
  1    continue
    end do
 
-   return      
+   return
    end subroutine
