@@ -15788,7 +15788,14 @@ subroutine readcells(filename, ierr, jaidomain, jaiglobal_s, jareinitialize)
        end if
        ! Fill 1D netcells with default linear order 1:nump1d
        do n=1,nump1d
-          netcellnod(1, nump+n) = n ! Is node order correct here? (in line with xk?, because 1D order comes from 1d *links*)
+          ! Note: the node ordering construction below may be different when compared to find1dcells().
+          ! For pure 1D models, results are identical if also the netlinks are sorted in the input:
+          ! by increasing branch index, and within a branch by increasing chainage.
+          ! This is because when reading non-UGRID files (or forcing --findcells), 1D order comes from 1d *links*).
+          ! When 1D2D links are also present, after the regular 1D links, then the ordering below
+          ! may differ from the order if it had been produced with find1dcells(). In the case of orphan
+          ! 1D2D links. Results can still be correct, only with different 1D flow node ordering.
+          netcellnod(1, nump+n) = n
        end do
        
     else

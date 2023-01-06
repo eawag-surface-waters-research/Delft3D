@@ -485,7 +485,7 @@ contains
                igpt = pbran%grd(m)
                
                ! Skip gridpoints not in this partition
-               if (igpt > size(adm%gpnt2cross)) cycle
+               if (igpt > size(adm%gpnt2cross)) cycle ! this is probably not always caused by parallel models: igpt includes auto-added branch start/end grid points
                
                if (icrsBeg == icrsEnd) then
                   
@@ -1290,6 +1290,7 @@ subroutine update_flow1d_admin(network, lc)
       pbr%Xs(1)                  = pbr%Xs(1)                 
       pbr%Ys(1)                  = pbr%Ys(1)                 
       pbr%grd(1)                 = pbr%grd(1)                
+      ! TODO: is this code already safe for gridpointssequences?
       do LL = 1, upointscount
          if (pbr%lin(LL)==LC(Ltoberemoved_index) ) then
             Ltoberemoved_index = Ltoberemoved_index + 1
@@ -1317,6 +1318,7 @@ subroutine update_flow1d_admin(network, lc)
             pbr%uPointsChainages(LL_new)      = pbr%uPointsChainages(LL)   
             pbr%lin(LL_new)                   = Lnew               
             pbr%grd(LL_new+1)                 = pbr%grd(LL+1)                
+            ! TODO: %grd_input
          endif
       enddo
    enddo
