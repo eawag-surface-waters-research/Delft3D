@@ -992,7 +992,9 @@
  enddo
 
  do n = 1,ndx
-    bai(n) = 1d0/ba(n)                               ! initially, ba based on 'max wet envelopes', take bai used in linktocentreweights
+    if (ba(n) > 0d0) then
+       bai(n) = 1d0/ba(n)                               ! initially, ba based on 'max wet envelopes', take bai used in linktocentreweights
+    end if
  enddo
 
  ! call message ('cutcell call 4',' ',' ')
