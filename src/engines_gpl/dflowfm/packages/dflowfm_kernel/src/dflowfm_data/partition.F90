@@ -2670,6 +2670,7 @@ implicit none
 #endif      
       use m_flowgeom
       use m_flow, only: kmxn, kmxL, kbot, Lbot, Ndkx, Lnkx
+      use network_data, only: numk
       use messageHandling
 
       implicit none
@@ -2704,6 +2705,12 @@ implicit none
             goto 1234
          end if
          call update_ghost_loc(ndomains, NDIM, N, var, nghostlist_u(ndomains-1), ighostlist_u, nghostlist_u, nsendlist_u(ndomains-1), isendlist_u, nsendlist_u, itag_u, ierror)
+      else if ( itype == ITYPE_CN ) then
+         if ( N /= numk ) then
+            call qnerror('update_ghosts, ITYPE_CN: numbering error', ' ', ' ')
+            goto 1234
+         end if
+         call update_ghost_loc(ndomains, NDIM, N, var, nghostlist_cn(ndomains-1), ighostlist_cn, nghostlist_cn, nsendlist_cn(ndomains-1), isendlist_cn, nsendlist_cn, itag_u, ierror)
 !
 !     3D-extension         
       else if ( itype.eq.ITYPE_S3D ) then
@@ -5163,76 +5170,76 @@ enddo
 
 end subroutine   print_ghosts_to_file
 
-!> counts a number of ghost cells/links
-integer function count_list_size(min_ghost_level, max_ghost_level, ghost)
+!> counts a number of ghost data
+integer function count_list_size(min_ghost_level, max_ghost_level, ghost_list)
 implicit none
-integer, intent(in) :: min_ghost_level, max_ghost_level
-type(tghost), dimension(:), allocatable, intent(in)   :: ghost 
+integer,      intent(in)   :: min_ghost_level, max_ghost_level
+type(tghost), intent(in)   :: ghost_list(:) 
 
-integer :: ghost_level, domain_number
+integer                    :: ghost_level, domain_number
 
 count_list_size = 0
 do ghost_level = min_ghost_level, max_ghost_level
-    if ( ghost_level < lbound(ghost,1) .or. ghost_level > ubound(ghost,1) ) cycle   ! should not happen
-    do domain_number = 0, ghost(ghost_level)%numdomains - 1
-        if ( ghost(ghost_level)%N(domain_number) - ghost(ghost_level)%N(domain_number-1) < 0 ) cycle
-        count_list_size = count_list_size + ghost(ghost_level)%N(domain_number) - ghost(ghost_level)%N(domain_number-1)
+    if ( ghost_level < lbound(ghost_list,1) .or. ghost_level > ubound(ghost_list,1) ) cycle   ! should not happen
+    do domain_number = 0, ghost_list(ghost_level)%numdomains - 1
+        if ( ghost_list(ghost_level)%N(domain_number) < ghost_list(ghost_level)%N(domain_number-1) ) cycle
+        count_list_size = count_list_size + ghost_list(ghost_level)%N(domain_number) - ghost_list(ghost_level)%N(domain_number-1)
     end do
 end do
 end function count_list_size
    
 !> allocates ghost lists
-subroutine  allocate_ghost_lists(list_size, ghost_list, nr_ghost_list)
+subroutine  allocate_ghost_data_lists(list_size, ghost_data_list, nr_ghost_data_list)
 implicit none
 integer, intent(in)                 :: list_size
-integer, allocatable, intent(inout) :: ghost_list(:)
-integer, allocatable, intent(inout) :: nr_ghost_list(:)
+integer, allocatable, intent(inout) :: ghost_data_list(:)
+integer, allocatable, intent(inout) :: nr_ghost_data_list(:)
 
 !     deallocate
-if ( allocated(ghost_list)   ) deallocate(ghost_list)
-if ( allocated(nr_ghost_list)) deallocate(nr_ghost_list)
+if ( allocated(ghost_data_list)   ) deallocate(ghost_data_list)
+if ( allocated(nr_ghost_data_list)) deallocate(nr_ghost_data_list)
       
 !     allocate
-allocate(ghost_list(list_size))
-allocate(nr_ghost_list(-1:ndomains-1))
-ghost_list    = 0
-nr_ghost_list = 0
-end subroutine  allocate_ghost_lists
+allocate(ghost_data_list(list_size))
+allocate(nr_ghost_data_list(-1:ndomains-1))
+ghost_data_list    = 0
+nr_ghost_data_list = 0
+end subroutine  allocate_ghost_data_lists
 
-!> fills ghost list
-subroutine fill_ghost_list(min_ghost_level, max_ghost_level, ghost, ghost_list, nr_ghost_list)
+!> fills ghost data list
+subroutine fill_ghost_data_list(min_ghost_level, max_ghost_level, ghost_list, ghost_data_list, nr_ghost_data_list)
 implicit none
 integer,                                 intent(in) :: min_ghost_level, max_ghost_level
-type(tghost), dimension(:), allocatable, intent(in) :: ghost 
-integer, allocatable,                 intent(inout) :: ghost_list(:)
-integer, allocatable,                 intent(inout) :: nr_ghost_list(:)
+type(tghost), dimension(:), allocatable, intent(in) :: ghost_list 
+integer, allocatable,                 intent(inout) :: ghost_data_list(:)
+integer, allocatable,                 intent(inout) :: nr_ghost_data_list(:)
 
 integer :: num, domain_number, ghost_level, index
 
 num = 0
 do domain_number = 0, ndomains - 1
     do ghost_level = min_ghost_level, max_ghost_level
-        if ( ghost_level < lbound(ghost,1) .or. ghost_level > ubound(ghost,1) ) cycle
-        if ( domain_number > ghost(ghost_level)%numdomains-1 ) cycle
-        do index = ghost(ghost_level)%N(domain_number - 1) + 1, ghost(ghost_level)%N(domain_number)
+        if ( ghost_level < lbound(ghost_list,1) .or. ghost_level > ubound(ghost_list,1) ) cycle
+        if ( domain_number > ghost_list(ghost_level)%numdomains-1 ) cycle
+        do index = ghost_list(ghost_level)%N(domain_number - 1) + 1, ghost_list(ghost_level)%N(domain_number)
             num  = num + 1
-            ghost_list(num) = ghost(ghost_level)%list(index)
-            nr_ghost_list(domain_number:ndomains-1) = nr_ghost_list(domain_number:ndomains-1) + 1
+            ghost_data_list(num) = ghost_list(ghost_level)%list(index)
+            nr_ghost_data_list(domain_number:ndomains-1) = nr_ghost_data_list(domain_number:ndomains-1) + 1
         end do
     end do
 end do
-end subroutine fill_ghost_list
+end subroutine fill_ghost_data_list
 
 !> get ghost cells 
 !! get the sorted ghost flow node list and count the number of flow nodes per ghost domain
-subroutine get_ghost_cells(idmn, min_ghost_level, max_ghost_level, ghost_type, ghost)
+subroutine get_ghost_cells(domain_number, min_ghost_level, max_ghost_level, ghost_type, ghost_list)
 use m_flowgeom, only: Ndx
 use m_alloc
 
 implicit none
-integer,                   intent(in)  :: idmn   !< domain number
+integer,                   intent(in)  :: domain_number
 integer,                   intent(in)  :: min_ghost_level, max_ghost_level, ghost_type
-type(tghost), allocatable, intent(out) :: ghost(:)  !< tghost-type ghost list
+type(tghost), allocatable, intent(out) :: ghost_list(:) 
 
 integer, pointer :: ghost_level(:)
 integer          :: cell
@@ -5245,78 +5252,76 @@ else  ! combined
     ghost_level => ighostlev
 end if
         
-call alloc_tghost(ghost, max_ghost_level, min_ghost_level)
+call alloc_tghost(ghost_list, max_ghost_level, min_ghost_level)
 
 do cell = 1, Ndx ! also include fictitious boundary node
-    if ( idomain(cell) /= idmn .and. &
+    if ( idomain(cell) /= domain_number .and. &
         ghost_level(cell) >= min_ghost_level .and. ghost_level(cell) <= max_ghost_level ) then
-        call add_data_to_ghost(ghost_level(cell), idomain(cell), ghost, cell)
+        call add_data_to_ghost_list(ghost_level(cell), idomain(cell), ghost_list, cell)
     end if
 end do
 
-call accumulate_ghost_N(min_ghost_level, max_ghost_level, ghost)
-call count_neighboring_domains(min_ghost_level, max_ghost_level, ghost)
+call accumulate_ghost_N(min_ghost_level, max_ghost_level, ghost_list)
+call count_neighboring_domains(min_ghost_level, max_ghost_level, ghost_list)
 
 end subroutine get_ghost_cells
          
-!> add value (flow node, flow link, corner) to ghost
-subroutine add_data_to_ghost(ghost_level, idmn_ghost, ghost, value)
+!> add value (flow node, flow link, corner) to ghost_list
+subroutine add_data_to_ghost_list(ghost_level, domain_number, ghost_list, value)
 use m_alloc
 
 implicit none
-integer, intent(in)                      :: ghost_level, idmn_ghost, value
-type(tghost), allocatable, intent(inout) :: ghost(:)  !< tghost-type ghost list
+integer, intent(in)                      :: ghost_level, domain_number, value
+type(tghost), allocatable, intent(inout) :: ghost_list(:)
 
-integer :: num, numdomains
+integer :: number_of_data, number_of_domains
 
-num        = ghost(ghost_level)%num + 1
-numdomains = max(ghost(ghost_level)%numdomains, idmn_ghost + 1)   ! domain numbers are zero-based
+number_of_data    = ghost_list(ghost_level)%num + 1
+number_of_domains = max(ghost_list(ghost_level)%numdomains, domain_number + 1)   ! domain numbers are zero-based
                
-!   reallocate if necessary
-if ( numdomains - 1 > ubound(ghost(ghost_level)%N,1) ) then
-    call realloc(ghost(ghost_level)%N, numdomains-1, -1, fill=0, keepExisting=.true.)
+if ( number_of_domains - 1 > ubound(ghost_list(ghost_level)%N,1) ) then
+    call realloc(ghost_list(ghost_level)%N, number_of_domains-1, -1, fill=0, keepExisting=.true.)
 end if
-if ( num > ubound(ghost(ghost_level)%list,1) ) then
-    call realloc(ghost(ghost_level)%list, int(1.2d0*dble(num))+1, fill=0, keepExisting=.true.)
+if ( number_of_data > ubound(ghost_list(ghost_level)%list,1) ) then
+    call realloc(ghost_list(ghost_level)%list, int(1.2d0*dble(number_of_data))+1, fill=0, keepExisting=.true.)
 end if
 
-ghost(ghost_level)%N(idmn_ghost) = ghost(ghost_level)%N(idmn_ghost) + 1
-call insert_in_ghost_list(ghost_level, idmn_ghost, ghost, num, value)
-ghost(ghost_level)%num        = num
-ghost(ghost_level)%numdomains = numdomains
+ghost_list(ghost_level)%N(domain_number) = ghost_list(ghost_level)%N(domain_number) + 1
+call insert_in_ghost_list(ghost_level, domain_number, ghost_list, number_of_data, value)
+ghost_list(ghost_level)%num        = number_of_data
+ghost_list(ghost_level)%numdomains = number_of_domains
         
-end subroutine add_data_to_ghost
+end subroutine add_data_to_ghost_list
 
 !> insert node/link/corner into ghost list
-subroutine insert_in_ghost_list(ghost_level, idmn_ghost, ghost, number, value)
+subroutine insert_in_ghost_list(ghost_level, domain_number, ghost_list, number_of_data, value)
 implicit none
-integer, intent(in)                      :: ghost_level, idmn_ghost, number, value
-type(tghost), allocatable, intent(inout) :: ghost(:)  !< tghost-type ghost list
+integer, intent(in)                      :: ghost_level, domain_number, number_of_data, value
+type(tghost), allocatable, intent(inout) :: ghost_list(:)
 
-integer  :: ipoint, i
+integer  :: number_of_data_in_list, i
 
-!   determine the position of the ghost cell in the array
-ipoint = sum(ghost(ghost_level)%N(0:idmn_ghost))
-do i = number, ipoint + 1, -1
-    ghost(ghost_level)%list(i)  = ghost(ghost_level)%list(i-1)
+number_of_data_in_list = sum(ghost_list(ghost_level)%N(0:domain_number))
+do i = number_of_data, number_of_data_in_list + 1, -1
+    ghost_list(ghost_level)%list(i)  = ghost_list(ghost_level)%list(i-1)
 end do
-ghost(ghost_level)%list(ipoint) = value
+ghost_list(ghost_level)%list(number_of_data_in_list) = value
 
 end subroutine insert_in_ghost_list
 
 
 !> get ghost links
-subroutine get_ghost_links(idmn, min_ghost_level, max_ghost_level, ghost_type, ghost)
+subroutine get_ghost_links(domain_number, min_ghost_level, max_ghost_level, ghost_type, ghost_list)
 use m_flowgeom, only: Lnx, ln
 use m_alloc
 
 implicit none
-integer,                   intent(in)  :: idmn      !< domain number
+integer,                   intent(in)  :: domain_number
 integer,                   intent(in)  :: min_ghost_level, max_ghost_level, ghost_type
-type(tghost), allocatable, intent(out) :: ghost(:)  !< tghost-type ghost list
+type(tghost), allocatable, intent(out) :: ghost_list(:)
 
 integer, pointer :: ghost_level(:)
-integer          :: link, iglev, idmn_ghost, jaghost
+integer          :: link, link_ghost_level, ghost_domain_number, jaghost
 
 if ( ghost_type == IGHOSTTYPE_CELLBASED ) then
     ghost_level => ighostlev_cellbased
@@ -5326,75 +5331,74 @@ else  ! combined
     ghost_level => ighostlev
 end if
 
-call alloc_tghost(ghost, max_ghost_level, min_ghost_level)
+call alloc_tghost(ghost_list, max_ghost_level, min_ghost_level)
 
 do link = 1, lnx
-!   determine if flow link is a ghost link and get domain number and ghost level of link
-    call link_ghostdata(idmn, idomain(ln(1,link)), idomain(ln(2,link)), jaghost, idmn_ghost, &
-            ghost_level(ln(1,link)), ghost_level(ln(2,link)), iglev)
+!   determine if flow link is a ghost link and get ghost domain number and ghost level of link
+    call link_ghostdata(domain_number, idomain(ln(1,link)), idomain(ln(2,link)), jaghost, ghost_domain_number, &
+            ghost_level(ln(1,link)), ghost_level(ln(2,link)), link_ghost_level)
 
-    if ( jaghost >= 1 .and. iglev >= min_ghost_level .and. iglev <= max_ghost_level ) then
-        call add_data_to_ghost(iglev, idmn_ghost, ghost, link)
+    if ( jaghost > 0 .and. link_ghost_level >= min_ghost_level .and. link_ghost_level <= max_ghost_level ) then
+        call add_data_to_ghost_list(link_ghost_level, ghost_domain_number, ghost_list, link)
     end if
 end do 
 
-call accumulate_ghost_N(min_ghost_level, max_ghost_level, ghost)
-call count_neighboring_domains(min_ghost_level, max_ghost_level, ghost)
+call accumulate_ghost_N(min_ghost_level, max_ghost_level, ghost_list)
+call count_neighboring_domains(min_ghost_level, max_ghost_level, ghost_list)
 
 end subroutine get_ghost_links
 
-!>     accumulate ghost()%N
-subroutine accumulate_ghost_N(min_ghost_level, max_ghost_level, ghost)
+!>     accumulate ghost_list()%N
+subroutine accumulate_ghost_N(min_ghost_level, max_ghost_level, ghost_list)
 implicit none
 integer,                   intent(in)    :: min_ghost_level, max_ghost_level
-type(tghost), allocatable, intent(inout) :: ghost(:)  !< tghost-type ghost list
+type(tghost), allocatable, intent(inout) :: ghost_list(:)
 
-integer :: iglev, i, j
+integer :: ghost_level, domain_number, j
 
-do iglev = min_ghost_level, max_ghost_level
-    do i  = ghost(iglev)%numdomains - 1, 0, -1
-        do j = 0, i - 1
-            ghost(iglev)%N(i) = ghost(iglev)%N(i) + ghost(iglev)%N(j)
+do ghost_level = min_ghost_level, max_ghost_level
+    do domain_number  = ghost_list(ghost_level)%numdomains - 1, 0, -1
+        do j = 0, domain_number - 1
+            ghost_list(ghost_level)%N(domain_number) = ghost_list(ghost_level)%N(domain_number) + ghost_list(ghost_level)%N(j)
         end do
     end do
 end do
 end subroutine accumulate_ghost_N
 
 !>     count the neighboring domains
-subroutine count_neighboring_domains(min_ghost_level, max_ghost_level, ghost)
+subroutine count_neighboring_domains(min_ghost_level, max_ghost_level, ghost_list)
 use m_alloc
 implicit none
 integer,                   intent(in)    :: min_ghost_level, max_ghost_level
-type(tghost), allocatable, intent(inout) :: ghost(:)  !< tghost-type ghost list
+type(tghost), allocatable, intent(inout) :: ghost_list(:)
 
-integer :: iglev, i, j, num
+integer :: ghost_level, domain_number, num
 
-do iglev = min_ghost_level, max_ghost_level
+do ghost_level = min_ghost_level, max_ghost_level
     num = 0
-    do i = 0, ghost(iglev)%numdomains - 1
-        if ( ghost(iglev)%N(i) - ghost(iglev)%N(i-1) > 0 ) then
+    do domain_number = 0, ghost_list(ghost_level)%numdomains - 1
+        if ( ghost_list(ghost_level)%N(domain_number) - ghost_list(ghost_level)%N(domain_number-1) > 0 ) then
             num = num + 1
-            if ( num > ubound(ghost(iglev)%neighdmn,1) ) then
-                call realloc(ghost(iglev)%neighdmn, int(1.2d0*dble(num)+1d0), keepExisting=.true., fill=0)
+            if ( num > ubound(ghost_list(ghost_level)%neighdmn,1) ) then
+                call realloc(ghost_list(ghost_level)%neighdmn, int(1.2d0*dble(num)+1d0), keepExisting=.true., fill=0)
             end if
-            ghost(iglev)%neighdmn(num) = i
+            ghost_list(ghost_level)%neighdmn(num) = domain_number
         end if
     end do
-    ghost(iglev)%numneighdmn = num
+    ghost_list(ghost_level)%numneighdmn = num
 end do
 end subroutine count_neighboring_domains
 
 
 !> get ghost corners 
-subroutine get_ghost_corners(idmn, min_ghost_level, max_ghost_level, ghost_type, ghost)
+subroutine get_ghost_corners(domain_number, min_ghost_level, max_ghost_level, ghost_type, ghost_list)
 use network_data, only : numk, nmk, nod
-!use m_netw, only : numk
 use m_alloc
 
 implicit none
-integer,                   intent(in)  :: idmn   !< domain number
+integer,                   intent(in)  :: domain_number
 integer,                   intent(in)  :: min_ghost_level, max_ghost_level, ghost_type
-type(tghost), allocatable, intent(out) :: ghost(:)  !< tghost-type ghost list
+type(tghost), allocatable, intent(out) :: ghost_list(:)
 
 integer, external :: common_cell_for_two_net_links
 
@@ -5410,11 +5414,12 @@ else  ! combined
     ghost_level => ighostlev
 end if
         
-call alloc_tghost(ghost, max_ghost_level, min_ghost_level)
+call alloc_tghost(ghost_list, max_ghost_level, min_ghost_level)
       
 allocate( list_of_cells(  maxval(nmk(1:numk)) ) )
 
-do node = 1, numk 
+loop_over_nodes: &
+    do node = 1, numk      
     number_of_cells = 0
     do index = 1, nmk(node)
         first_link = nod(node)%lin(index)
@@ -5428,7 +5433,9 @@ do node = 1, numk
                      
         if ( cell == 0 ) cycle  ! no cell
         
-        if ( idomain(cell) == idmn .or. ghost_level(cell) < min_ghost_level .or. ghost_level(cell) > max_ghost_level ) cycle 
+        if ( idomain(cell) == domain_number ) cycle loop_over_nodes
+                
+        if ( ghost_level(cell) < min_ghost_level .or. ghost_level(cell) > max_ghost_level ) cycle 
         
         number_of_cells = number_of_cells + 1
         list_of_cells(number_of_cells) = cell
@@ -5442,19 +5449,19 @@ do node = 1, numk
              min_ghost_level_for_cell = ghost_level(list_of_cells(index))
              cell                     = list_of_cells(index)
         else if ( min_ghost_level_for_cell == ghost_level(list_of_cells(index)) ) then
-            if ( iabs(idmn - idomain(cell)) > iabs(idmn - idomain(list_of_cells(index))) ) then
+            if ( iabs(domain_number - idomain(cell)) > iabs(domain_number - idomain(list_of_cells(index))) ) then
                 cell = list_of_cells(index)
             end if
         end if  
     end do
     
     if ( min_ghost_level <= max_ghost_level) then
-        call add_data_to_ghost(ghost_level(cell), idomain(cell), ghost, node)
+        call add_data_to_ghost_list(ghost_level(cell), idomain(cell), ghost_list, node)
     end if
-end do
+end do loop_over_nodes
 
-call accumulate_ghost_N(min_ghost_level, max_ghost_level, ghost)
-call count_neighboring_domains(min_ghost_level, max_ghost_level, ghost)
+call accumulate_ghost_N(min_ghost_level, max_ghost_level, ghost_list)
+call count_neighboring_domains(min_ghost_level, max_ghost_level, ghost_list)
 
 end subroutine get_ghost_corners
 
@@ -5474,8 +5481,8 @@ integer, intent(inout)                    :: error         !< error (1) or not (
       
 call partition_get_ghosts(idmn, itype, ghost, error)
 list_size = count_list_size(min_ghost_level, max_ghost_level, ghost)
-call allocate_ghost_lists(list_size, ghost_list, nr_ghost_list)
-call fill_ghost_list(min_ghost_level, max_ghost_level, ghost, ghost_list, nr_ghost_list)
+call allocate_ghost_data_lists(list_size, ghost_list, nr_ghost_list)
+call fill_ghost_data_list(min_ghost_level, max_ghost_level, ghost, ghost_list, nr_ghost_list)
 
 end subroutine make_ghost_list
     
