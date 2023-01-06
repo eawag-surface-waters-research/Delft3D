@@ -880,6 +880,7 @@
        endif
        hdx = 0.5d0*dx(L)
        if (kcu(L) .ne. 3) then
+          ! TODO: UNST-6592: consider excluding ghost links here and do an mpi_allreduce sum later
           if (k1 > ndx2d) ba(k1) = ba(k1) + hdx*wu(L)     ! todo, on 1d2d nodes, choose appropriate wu1DUNI = min ( wu1DUNI, intersected 2D face)
           if (k2 > ndx2d) ba(k2) = ba(k2) + hdx*wu(L)
        endif
