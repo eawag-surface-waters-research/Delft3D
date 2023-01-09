@@ -221,8 +221,9 @@ if (ierr==0) then
       numlevels = max(numlevels,volumetable(i)%count)
    enddo
    
-   computeTotal      = .false.
-   computeOnBranches = .false.
+   computeTotal        = .false.
+   computeOnBranches   = .false.
+   computeOnGridpoints = .false.
    numbranches = network%brs%Count
    if (strcmpi(output_type, 'Total')) then
       computeTotal = .true.
