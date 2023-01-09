@@ -262,7 +262,7 @@ module swan_input
        logical                                 :: varfri
        logical                                 :: windgrowth
        logical                                 :: flowLinkConnectivity ! false: (default) use netlink connectivity from DFlowFM, true: use flowlink connectivity from DFlowFM
-       logical                                 :: keepinput 
+       logical                                 :: keepinput
        !
        real                                    :: alpw
        real                                    :: alfa
@@ -2381,7 +2381,7 @@ subroutine write_swan_inp (wavedata, calccount, &
     integer                     :: rindx
     integer                     :: sect
     integer                     :: shape
-    integer                     :: loc    
+    integer                     :: loc
     integer                     :: nuerr
     logical                     :: exists
     logical                     :: frame
@@ -3125,21 +3125,21 @@ subroutine write_swan_inp (wavedata, calccount, &
        !
        ! define the name of the hotfile to be used
        !
-       write (fname,'(a,i0,2a)') 'hot_', inest, '_', trim(sr%usehottime)
+       write (fname,'(a,i0,5a)') 'hot_', inest, '_', trim(sr%usehottime(1:8)), '_', trim(sr%usehottime(10:15)), '.nc'
        !
        ! use it when it exists
        !
        inquire (file = trim(fname), exist = exists)
        if (exists) then
-          line  = 'INIT HOTS ''' // trim(fname) // ''''
+           line  = "INITIAL HOTSTART '"  // trim(fname) //  "' NETCDF"
           write (luninp, '(1X,A)') line
           write(*,'(2a)') '  Using SWAN hotstart file: ',trim(fname)
        else ! check if there exists at least 1 partioned hotfile
-          write (fname,'(a,i0,3a,i3.3)') 'hot_', inest, '_', trim(swan_run%usehottime), '-', 1
+          write (fname,'(a,i0,5a,i3.3,a)') 'hot_', inest, '_', trim(sr%usehottime(1:8)), '_', trim(sr%usehottime(10:15)), '-', 1, '.nc'
           inquire (file = trim(fname), exist = exists)
           if (exists) then
-             write (fname,'(a,i0,2a)') 'hot_', inest, '_', trim(sr%usehottime) ! swan input needs filename without partition no
-             line  = 'INIT HOTS ''' // trim(fname) // ''''
+             write (fname,'(a,i0,5a)') 'hot_', inest, '_', trim(sr%usehottime(1:8)), '_', trim(sr%usehottime(10:15)), '.nc' ! swan input needs filename without partition no
+             line  = 'INITIAL HOTSTART ''' // trim(fname) // ''''' NETCDF'
              write (luninp, '(1X,A)') line
              write(*,'(2a)') '  Using SWAN hotstart file: ',trim(fname)
           else   
@@ -3585,7 +3585,6 @@ subroutine write_swan_inp (wavedata, calccount, &
     if (sr%output_points) then
        do loc = 1, sr%nloc
           pointname = get_pointname(sr%pntfilnam(loc))
-          pointname = get_pointname(sr%pntfilnam(loc))
 
           line(1:7)       = 'POINTS '
           i               = 8
@@ -3771,10 +3770,38 @@ subroutine write_swan_inp (wavedata, calccount, &
        write (luninp, '(1X,A)') line
        line       = ' '
     endif
+    !
+    ! Default: put current time in writehottime
+    ! writehottime will be overwritten by tendc when quasi-/non-stationary
+    !
+    sr%writehottime = datetime_to_string(wavedata%time%refdate, wavedata%time%timsec)
+    !
+    ! hotstart:
+    ! hotfile= true: use hotfile
+    ! modsim = 2   : quasi-stationary
+    ! modsim = 3   : non-stationary
+    !
+    if(sr%hotfile) then 
+       if (sr%modsim == 2) then 
+           ! quasi-stationary
+           sr%writehottime = datetime_to_string(wavedata%time%refdate, wavedata%time%timsec)
+       elseif (sr%modsim == 3) then
+          ! non-stationary 
+           sr%writehottime = datetime_to_string(wavedata%time%refdate, wavedata%time%calctimtscale* real(wavedata%time%tscale,hp))
+       else
+       endif
+       !
+       ! line to ensure that SWAN is going to produce a hotfile
+       !
+       write (fname,'(a,i0,5a)') 'hot_', inest, '_', trim(sr%writehottime(1:8)), '_', trim(sr%writehottime(10:15)), '.nc'
+       line = "SPEC 'COMPGRID' RELATIVE '" // trim(fname) // "' MDGRID OUTPUT & "  
+       write (luninp, '(1X,A)') line
+       write(luninp,'(2a)') sr%writehottime, ' 1 HR'
+    endif
     line       = ' '
     line(1:2) = '$ '
     write (luninp, '(1X,A)') line
-!-----------------------------------------------------------------------
+!-----------------------------------------------------------------------    
     !
     !     Compute and test parameters
     !
@@ -3785,12 +3812,6 @@ subroutine write_swan_inp (wavedata, calccount, &
     line(36:)   = ' '
     write (luninp, '(1X,A)') line
     line       = ' '
-    !
-    ! Default: put current time in writehottime
-    ! writehottime will be overwritten by tendc when quasi-/non-stationary
-    !
-    sr%writehottime = datetime_to_string(wavedata%time%refdate, wavedata%time%timsec)
-    !
     ! 
     if (.not.sr%compmode) then
        line(1:1) = '$'
@@ -3809,7 +3830,6 @@ subroutine write_swan_inp (wavedata, calccount, &
        elseif (sr%modsim == 2) then
           tendc = datetime_to_string(wavedata%time%refdate, wavedata%time%timsec)
           write (line,'(A,1X,A)') 'COMPUTE STAT  ',tendc
-          sr%writehottime = tendc
        elseif (sr%modsim == 3) then
           !
           ! non-stationary
@@ -3843,25 +3863,10 @@ subroutine write_swan_inp (wavedata, calccount, &
           write (line(33:40), '(f8.2)') sr%deltc
           line(41:44) = ' MIN'
           write (line(46:61), '(a)')    tendc
-          sr%writehottime = tendc
        else
        endif
     endif
     write (luninp, '(1X,A)') line
-    !
-    ! hotstart:
-    ! hotfile= true: use hotfile
-    ! modsim = 2   : quasi-stationary
-    ! modsim = 3   : non-stationary
-    !
-    if (sr%hotfile) then
-       !
-       ! line to ensure that SWAN is going to produce a hotfile
-       !
-       write (fname,'(a,i0,2a)') 'hot_', inest, '_', trim(sr%writehottime)
-       line  = 'HOTF ''' // trim(fname) // ''''
-       write (luninp, '(1X,A)') line
-    endif
     !
     line        = ' '
     line(1:4)   = 'STOP'

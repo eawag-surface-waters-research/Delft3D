@@ -439,7 +439,7 @@ subroutine swan_tot (n_swan_grids, n_flow_grids, wavedata, selectedtime)
             !
             ! The hotfile related to "usehottime" has been used and can now be deleted
             !
-            write (fname,'(a,i0,2a)') 'hot_', i_swan, '_', trim(swan_run%usehottime)
+            write (fname,'(a,i0,5a)') 'hot_', i_swan, '_', trim(swan_run%usehottime(1:8)), '_', trim(swan_run%usehottime(10:15)), '.nc'
             inquire (file = trim(fname), exist = exists)
             if (exists) then
                open (newunit=lunhot, file = trim(fname))
@@ -452,7 +452,8 @@ subroutine swan_tot (n_swan_grids, n_flow_grids, wavedata, selectedtime)
             count = 0
             do
                count = count + 1
-               write (fname,'(a,i0,3a,i3.3)') 'hot_', i_swan, '_', trim(swan_run%usehottime), '-', count
+               write (fname,'(a,i0,5a,i3.3,a)') 'hot_', i_swan, '_', trim(swan_run%usehottime(1:8)), '_', trim(swan_run%usehottime(10:15)), '-', count,'.nc'
+               
                inquire (file = trim(fname), exist = exists)
                if (exists) then
                   open (newunit = lunhot, file = trim(fname))
