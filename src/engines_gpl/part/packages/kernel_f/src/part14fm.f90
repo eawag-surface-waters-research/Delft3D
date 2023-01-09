@@ -147,8 +147,10 @@ module part14fm_mod
       real   (dp) :: dpangle, dxp, dyp, dradius, xx, yy
       integer(ip) :: ilay  , isub      ! loop variables layers and substances
 
-      integer(4) ithndl              ! handle to time this subroutine
-      data       ithndl / 0 /
+      integer(ip) :: np                ! Number of particles to add
+
+      integer(4), save :: ithndl = 0   ! handle to time this subroutine
+
       if ( timon ) call timstrt( "part14", ithndl )
 
 !     at first zero the remainder
@@ -234,7 +236,8 @@ module part14fm_mod
 !              rpnul = rest /aconu * dts
                rpnul = rest /avcon            ! time span first particle
                rest  = rest + amass
-               do i = 1 , 1 + int(rest/aconu-1.d-10)
+               np    = min( ndprt(ie) - ncheck(ic), 1 + int(rest/aconu-1.d-10) )
+               do i = 1 , np
                   iptime(ipb) = int(rpnul)
                   ipb         = ipb + 1
                   rpnul       = rpnul - dts
@@ -257,6 +260,9 @@ module part14fm_mod
          iend   = nopart + nopnow
          nopart = iend
          ncheck(ic) = ncheck(ic) + nopnow
+
+!!       write( lun2, * ) 'tmassu(ic), aconu, nopnow, rem(ic)', &
+!!                         tmassu(ic), aconu, nopnow, rem(ic)
 
          write ( lun2, 1010 ) tmassu(ic), aconu, nopnow*aconu, rem(ic)
          write ( lun2, 1020 ) ndprt (ie), nopnow, ncheck(ic)
@@ -361,7 +367,7 @@ module part14fm_mod
 !
 !         enddo
 
-            
+
 !         give the particles a layer number
 
     70      ipart = ipart + 1
