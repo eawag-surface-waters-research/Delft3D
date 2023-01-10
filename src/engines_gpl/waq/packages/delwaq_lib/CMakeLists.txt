@@ -157,13 +157,13 @@ post_build_target (${library_name}
 
 install(TARGETS ${library_name} DESTINATION lib)
 if (UNIX)
-    install(PROGRAMS ${CMAKE_SOURCE_DIR}/../engines_gpl/waq/default/bloom.spe      DESTINATION share/delft3d)
-    install(PROGRAMS ${CMAKE_SOURCE_DIR}/../engines_gpl/waq/default/proc_def.dat   DESTINATION share/delft3d)
-    install(PROGRAMS ${CMAKE_SOURCE_DIR}/../engines_gpl/waq/default/proc_def.def   DESTINATION share/delft3d)
-    install(PROGRAMS ${CMAKE_SOURCE_DIR}/../engines_gpl/waq/default/csvFiles/*.csv     DESTINATION share/delft3d/csvFiles)
-    install(PROGRAMS ${CMAKE_SOURCE_DIR}/../engines_gpl/waq/default/subFiles/*.0     DESTINATION share/delft3d/subFiles)
-    install(PROGRAMS ${CMAKE_SOURCE_DIR}/../engines_gpl/waq/default/subFiles/*.des     DESTINATION share/delft3d/subFiles)
-    install(PROGRAMS ${CMAKE_SOURCE_DIR}/../engines_gpl/waq/default/subFiles/*.sub     DESTINATION share/delft3d/subFiles)
+    install(PROGRAMS ${CMAKE_SOURCE_DIR}/../engines_gpl/waq/default/bloom.spe          DESTINATION share/delft3d)
+    install(PROGRAMS ${CMAKE_SOURCE_DIR}/../engines_gpl/waq/default/proc_def.dat       DESTINATION share/delft3d)
+    install(PROGRAMS ${CMAKE_SOURCE_DIR}/../engines_gpl/waq/default/proc_def.def       DESTINATION share/delft3d)
+    #install(PROGRAMS ${CMAKE_SOURCE_DIR}/../engines_gpl/waq/default/csvFiles/*.csv     DESTINATION share/delft3d/csvFiles)
+    #install(PROGRAMS ${CMAKE_SOURCE_DIR}/../engines_gpl/waq/default/subFiles/*.0       DESTINATION share/delft3d/subFiles)
+    #install(PROGRAMS ${CMAKE_SOURCE_DIR}/../engines_gpl/waq/default/subFiles/*.des     DESTINATION share/delft3d/subFiles)
+    #install(PROGRAMS ${CMAKE_SOURCE_DIR}/../engines_gpl/waq/default/subFiles/*.sub     DESTINATION share/delft3d/subFiles)
 endif(UNIX)
 
 
