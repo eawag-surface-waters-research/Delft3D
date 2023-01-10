@@ -17779,6 +17779,15 @@ src/tools_gpl/agrhyd/packages/agrhyd/src/sing_dis.f -text
 src/tools_gpl/agrhyd/packages/agrhyd/src/write_sing_dis.f -text
 src/tools_gpl/agrhyd/scripts/run_agrhyd.bat -text
 src/tools_gpl/agrhyd/scripts/run_agrhyd.sh -text
+src/tools_gpl/cosumo_bmi/Makefile.am -text
+src/tools_gpl/cosumo_bmi/cosumo_bmi.f90 -text
+src/tools_gpl/cosumo_bmi/cosumo_bmi.vfproj -text
+src/tools_gpl/cosumo_bmi/coupled.f90 -text
+src/tools_gpl/cosumo_bmi/determine_densprof.f90 -text
+src/tools_gpl/cosumo_bmi/nfl_data.f90 -text
+src/tools_gpl/cosumo_bmi/read_cosumo_file.f90 -text
+src/tools_gpl/cosumo_bmi/read_nf2ff_files.f90 -text
+src/tools_gpl/cosumo_bmi/write_ff2nf_files.f90 -text
 src/tools_gpl/datsel/Makefile.am -text
 src/tools_gpl/datsel/packages/Makefile.am -text
 src/tools_gpl/datsel/packages/datsel/CMakeLists.txt -text
