@@ -160,7 +160,7 @@ if (UNIX)
     install(FILES ${CMAKE_SOURCE_DIR}/../engines_gpl/waq/default/bloom.spe          DESTINATION share/delft3d)
     install(FILES ${CMAKE_SOURCE_DIR}/../engines_gpl/waq/default/proc_def.dat       DESTINATION share/delft3d)
     install(FILES ${CMAKE_SOURCE_DIR}/../engines_gpl/waq/default/proc_def.def       DESTINATION share/delft3d)
-    install(DIRECTORY  ${CMAKE_SOURCE_DIR}/../engines_gpl/waq/default/csvFiles     DESTINATION share/delft3d)
+    install(DIRECTORY  ${CMAKE_SOURCE_DIR}/../engines_gpl/waq/default/csvFiles      DESTINATION share/delft3d)
     install(DIRECTORY  ${CMAKE_SOURCE_DIR}/../engines_gpl/waq/default/subFiles      DESTINATION share/delft3d)
 endif(UNIX)
 
