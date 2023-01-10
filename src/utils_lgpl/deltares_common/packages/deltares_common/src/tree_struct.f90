@@ -85,7 +85,7 @@ module TREE_STRUCTURES
    !
    public  :: TREE_DATA
    public  :: tree_create, tree_create_node, tree_add_node, tree_get_node_by_name, tree_num_nodes, &
-              tree_count_nodes_byname,                                                             &
+              tree_count_nodes_byname, tree_disconnect_node,                                       &
               tree_get_data_ptr, tree_put_data, tree_get_name, tree_get_data,                      &
               tree_get_datatype, tree_get_data_string,                                             &
               tree_traverse, tree_traverse_level, print_tree,                                      &
@@ -272,6 +272,55 @@ subroutine tree_add_node(tree, node, ierror)
       ierror = 2
    endif
 end subroutine tree_add_node
+
+
+!> Disconnect an existing node , in the children array, from a tree.
+!! Both the tree and the new node are pointers, use this to efficiently
+!! disconnect existing trees without destroying them.
+subroutine tree_disconnect_node(tree, inode, ierror)
+   type(TREE_DATA), pointer        :: tree   !< Pointer to the root of an existing tree, from which the node should be disconnected.
+   integer,            intent(in ) :: inode  !< Index of child node to be disconnected
+   integer,            intent(out) :: ierror !< Error status, 0 if succesful.
+   !
+   ! Locals
+   type(TREE_DATA_PTR), dimension(:), pointer :: children
+   integer                                    :: i
+   integer                                    :: i_new
+   integer                                    :: newsize
+   !
+   ! Body
+   ierror = 0
+
+   if (.not. associated(tree)) then
+      ierror = 1
+      return
+   end if
+   if (.not. associated(tree%child_nodes) ) then
+      ierror = 1
+      return
+   end if
+       
+   newsize = size(tree%child_nodes) - 1
+   if (newsize <= 0) then
+       deallocate(tree%child_nodes, stat=ierror)
+       ierror = 0
+       return
+   endif
+   
+   allocate( children(1:newsize), stat=ierror)
+   if ( ierror .ne. 0 ) then
+      return
+   else
+      i_new = 1
+      do i=1, size(tree%child_nodes)
+         if ( i /= inode ) then
+            children(i_new) = tree%child_nodes(i)
+            i_new = i_new + 1
+         endif
+      enddo
+      tree%child_nodes => children
+   endif
+end subroutine tree_disconnect_node
 
 
 !> Returns the number of nodes in a tree.
@@ -768,19 +817,17 @@ subroutine tree_get_data_string( tree, string, success )
       if ( .not. associated(data_ptr) ) then
          return
       endif
-      if ( data_type /= 'STRING' ) then
+      if ( data_type(1:6) /= 'STRING' ) then
          return
       endif
 
       success = .true.
       length  = size(data_ptr)
       string  = ' '
-      if (length <= len(string)) then
-         length = min(length,len(string))
-         do i=1, length
-            string(i:i) = data_ptr(i)
-         end do
-      endif
+      length = min(length,len(string))
+      do i=1, length
+         string(i:i) = data_ptr(i)
+      end do
    endif
 
 end subroutine tree_get_data_string
@@ -808,7 +855,7 @@ subroutine tree_get_data_alloc_string( tree, string, success )
       if ( .not. associated(data_ptr) ) then
          return
       endif
-      if ( data_type /= 'STRING' ) then
+      if ( data_type(1:6) /= 'STRING' ) then
          return
       endif
 

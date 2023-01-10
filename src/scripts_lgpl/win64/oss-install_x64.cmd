@@ -574,6 +574,24 @@ goto :endproc
 
 
 
+rem ======================
+rem === INSTALL_COSUMO_BMI
+rem ======================
+:cosumo_bmi
+    echo "installing cosumo_bmi . . ."
+
+    set dest_bin="!dest_main!\x64\cosumo_bmi\bin"
+    rem set dest_scripts="!dest_main!\x64\cosumo_bmi\scripts"
+    set dest_share="!dest_main!\x64\share\bin"
+
+    call :makeDir !dest_bin!
+    rem call :makeDir !dest_scripts!
+
+    call :copyFile tools_gpl\cosumo_bmi\x64\Release\cosumo_bmi.dll !dest_bin!
+goto :endproc
+
+
+
 rem ==============
 rem === INSTALL_VS
 rem ==============

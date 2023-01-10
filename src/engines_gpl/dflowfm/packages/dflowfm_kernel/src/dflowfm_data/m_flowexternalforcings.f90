@@ -437,6 +437,7 @@
 
  integer                           :: numsrc            !< nr of point sources/sinks
  integer                           :: numvalssrc        !< nr of point constituents
+ integer                           :: numsrc_nf         !< nr of sources/sinks added for nearfield
  integer                           :: msrc = 0          !< maximal number of points that polylines contains for all sources/sinks
  integer, allocatable              :: ksrc(:,:)         !< index array, 1=nodenr sink, 2 =kbsin , 3=ktsin, 4 = nodenr source, 5 =kbsor , 6=ktsor
  double precision, allocatable     :: qsrc(:)           !< cell influx (m3/s) if negative: outflux
