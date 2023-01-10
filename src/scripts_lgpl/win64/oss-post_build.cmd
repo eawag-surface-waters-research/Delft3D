@@ -302,13 +302,13 @@ rem =============================================================
 
     set destination=%~1
     set destination_csv=%~2
-    set destination_sub="!destination!\sub-files"
+    set destination_sub="!destination!\subFiles"
 
     call :copyFile "!checkout_src_root!\engines_gpl\waq\default\bloom.spe"                                             !destination!
     call :copyFile "!checkout_src_root!\engines_gpl\waq\default\proc_def.dat"                                          !destination!
     call :copyFile "!checkout_src_root!\engines_gpl\waq\default\proc_def.def"                                          !destination!
     call :copyFile "!checkout_src_root!\engines_gpl\waq\default\csvFiles\*"                                            !destination_csv!
-    call :copyFile "!checkout_src_root!\engines_gpl\waq\default\sub-files\*"                                           !destination_sub!
+    call :copyFile "!checkout_src_root!\engines_gpl\waq\default\subFiles\*"                                            !destination_sub!
 
 goto :endproc
 
@@ -617,7 +617,7 @@ rem ==========================
         set dest_bin="!install_dir!\x64\Release\dflowfm\bin"
         set dest_default="!install_dir!\x64\Release\dflowfm\default"
         set dest_csvFiles="!install_dir!\x64\Release\dflowfm\default\csvFiles"
-        set dest_subFiles="!install_dir!\x64\Release\dflowfm\default\sub-files"
+        set dest_subFiles="!install_dir!\x64\Release\dflowfm\default\subFiles"
         set dest_default_backup="!install_dir!\x64\Release\dflowfm\installation_default"
         set dest_csvFiles_backup="!install_dir!\x64\Release\dflowfm\installation_default\csvFiles
         set dest_scripts="!install_dir!\x64\Release\dflowfm\scripts"
@@ -666,7 +666,7 @@ rem =================================
         set dest_bin="!install_dir!\x64\Release\dflowfm\bin"
         set dest_default="!install_dir!\x64\Release\dflowfm\default"
         set dest_csvFiles="!install_dir!\x64\Release\dflowfm\default\csvFiles"
-        set dest_subFiles="!install_dir!\x64\Release\dflowfm\default\sub-files"
+        set dest_subFiles="!install_dir!\x64\Release\dflowfm\default\subFiles"
         set dest_scripts="!install_dir!\x64\Release\dflowfm\scripts"
         set dest_plugins="!install_dir!\x64\Release\plugins\bin"
         set dest_share="!install_dir!\x64\Release\share\bin"
@@ -922,7 +922,7 @@ rem ==========================
     if "%configuration%" == "Release" (
 
         set dest_csvFiles="!install_dir!\x64\Release\dwaq\default\csvFiles"
-        set dest_subFiles="!install_dir!\x64\Release\dwaq\default\sub-files"
+        set dest_subFiles="!install_dir!\x64\Release\dwaq\default\subFiles"
         set dest_default_backup="!install_dir!\x64\Release\dwaq\installation_default"
         set dest_csvFiles_backup="!install_dir!\x64\Release\dwaq\installation_default\csvFiles"
 
