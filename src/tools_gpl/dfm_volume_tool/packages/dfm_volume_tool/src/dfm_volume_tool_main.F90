@@ -82,8 +82,8 @@ real(c_double), pointer, dimension(:,:) :: volume
 real(c_double), pointer, dimension(:,:) :: surface
 real(c_double), pointer, dimension(:,:) :: storage
 real(c_double), pointer, dimension(:,:) :: deadstorage
-real(c_double), pointer, dimension(:) :: levels
-real(C_double), pointer, dimension(:) :: help
+real(c_double), pointer, dimension(:)   :: levels
+real(C_double), pointer, dimension(:)   :: help
 
 character(kind=c_char)                          :: c_output_type(15)
 character(len=idlen), allocatable, dimension(:) :: ids
@@ -92,13 +92,13 @@ type(t_voltable), dimension(:),   pointer       :: volumetable
 type(t_voltable), dimension(:,:), pointer       :: volumetableOnLinks
 type(t_network),                  pointer       :: network
 type(t_branch),   dimension(:),   pointer       :: branches
-integer,          dimension(:),   allocatable   :: mask
+integer,          dimension(:),   allocatable   :: mask, tablecount
 integer,          dimension(:,:), pointer       :: bndindex
 integer,          dimension(:,:), pointer       :: ln2nd
 double precision, dimension(:),   pointer       :: bndvalues
 double precision, dimension(:,:), pointer       :: inslevtube
 double precision, dimension(:,:), pointer       :: gridvolume, gridsurface
-double precision, dimension(:),   allocatable   :: wl_deadstorage
+double precision, dimension(:),   allocatable   :: wl_deadstorage, bedlevels, topheights
 
 ! externals
 
@@ -174,6 +174,8 @@ if (ierr==0) then
    
 endif
 
+pause
+
 if (ierr==0) then
    ! Initialise the model 
    ierr = bmi_initialize(dfm, mdufile)
@@ -211,7 +213,7 @@ if (ierr==0) then
    call get_variable_pointer(dfm, string_to_char_array('vltbOnLinks'), xptr)
    call c_f_pointer(xptr, volumetableOnLinks, (/2, numlinks/))
    call get_variable_pointer(dfm, string_to_char_array('network'), xptr)
-   call c_f_pointer(xptr, network, (/0/))
+   call c_f_pointer(xptr, network)
    
    ! Determine the number of levels for the aggregated volume tables
    call getBedToplevel(volumetable, numpoints, toplevel,bedlevel)
@@ -250,10 +252,10 @@ if (ierr==0) then
       levels(i) = (i-1)*increment
    enddo
    tableincrement = increment
-   idindex = 0
    
    call calculateDeadStorage(wl_deadstorage, network, bndvalues, inslevtube, bndindex, ln2nd, numlinks, numpoints, numbnd)
 
+   idindex = 0
    if (computeTotal) then
       idIndex = 1
       !> setup the mask array for the complete model
@@ -279,12 +281,18 @@ if (ierr==0) then
       enddo
    endif
    
-   if (computeOnGridpoints) then
+   ioutput = nc_create(output_file)
+   call write_volume_surface_arrays(ioutput, ids, levels, volume, surface, storage, deadstorage, numlevels, numids)
+         
+   if (computeOnGridpoints) then !Gridpoints are written separately
       !compute maximum volume table length
       
-      allocate(gridsurface(numpoints,numlevels),gridvolume(numpoints,numlevels))
+      allocate(gridsurface(numpoints,numlevels),gridvolume(numpoints,numlevels),bedlevels(numpoints),topheights(numpoints),tablecount(numpoints))
    
-      do i = 1, numpoints         
+      do i = 1, numpoints   
+         bedlevels(i)   = volumetable(i)%bedlevel
+         topheights(i)  = volumetable(i)%topheight
+         tablecount(i)  = volumetable(i)%count
          do j = 1,volumetable(i)%count
             gridsurface(i,j) = volumetable(i)%sur(j)
             gridvolume(i,j) = volumetable(i)%vol(j)
@@ -293,13 +301,11 @@ if (ierr==0) then
       
       ncid = nc_create(grid_output_file)
       ! Write the output to the netcdf file
-      call write_volume_table_geom(dfm, ncid)
-      call write_volume_table_gridpoint_data(ncid,volumetable(:)%bedlevel,volumetable(:)%topheight,gridvolume,gridsurface,volumetable(:)%count,numpoints,increment)
+      call write_1d_flowgeom_ugrid(dfm, ncid)
+      
+      call write_volume_table_gridpoint_data(ncid,bedlevels,topheights,gridvolume,gridsurface,tablecount,numpoints,increment)
    endif
-   
-   ioutput = nc_create(output_file)
-   call nc_write(ioutput, ids, levels, volume, surface, storage, deadstorage, numlevels, numids)
-                  
+            
    deallocate(surface,volume, levels, ids, mask)
 endif
       

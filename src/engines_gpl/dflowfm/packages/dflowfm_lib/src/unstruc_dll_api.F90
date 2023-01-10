@@ -63,8 +63,8 @@ subroutine  dfm_generate_volume_tables(increment) bind(C, name="dfm_generate_vol
 end subroutine dfm_generate_volume_tables
 
 !!> DLL handle to unc_write_1D_flowgeom_ugrid, used by volume tool to write 1D flowgeom
-subroutine write_volume_table_geom(ncid) bind(C, name="write_volume_table_geom")
-   !DEC$ ATTRIBUTES DLLEXPORT :: write_volume_table_geom
+subroutine write_1D_flowgeom_ugrid(ncid) bind(C, name="write_1D_flowgeom_ugrid")
+   !DEC$ ATTRIBUTES DLLEXPORT :: write_1D_flowgeom_ugrid
 
    use unstruc_netcdf, only: unc_write_1D_flowgeom_ugrid, t_unc_mapids      
    use messageHandling, only: Idlen
@@ -74,7 +74,7 @@ subroutine write_volume_table_geom(ncid) bind(C, name="write_volume_table_geom")
    type(t_unc_mapids)  :: mapids
    call unc_write_1D_flowgeom_ugrid(mapids%id_tsp,ncid)
 
-end subroutine write_volume_table_geom
+end subroutine write_1D_flowgeom_ugrid
 
 !!> generate the volume table with the given increment
 subroutine  dfm_get_variable_pointer(name_var, x) bind(C, name="dfm_get_variable_pointer")
