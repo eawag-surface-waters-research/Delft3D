@@ -14,4 +14,11 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/configurations/d_hydro_configuration.cmake)
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/configurations/dimr_configuration.cmake)
 
+include(${CMAKE_CURRENT_SOURCE_DIR}/configurations/tools_gpl_configuration.cmake)
+
+# Mormerge
+if(NOT TARGET mormerge)
+    add_subdirectory(${checkout_src_root}/${mormerge_module} mormerge)
+endif()
+
 project(delft3d4)

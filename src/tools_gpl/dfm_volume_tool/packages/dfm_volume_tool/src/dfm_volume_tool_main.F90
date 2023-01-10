@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2022.                                
+!  Copyright (C)  Stichting Deltares, 2017-2023.                                
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -174,8 +174,6 @@ if (ierr==0) then
    
 endif
 
-pause 
-
 if (ierr==0) then
    ! Initialise the model 
    ierr = bmi_initialize(dfm, mdufile)
@@ -199,12 +197,13 @@ if (ierr==0) then
    
    allocate(inslevtube(2,lnx), ln2nd(2,lnx), bndvalues(numbnd), bndindex(6,numbnd))
    call bmi_get_var(dfm, 'bob', inslevtube, 2*lnx)
-   call bmi_get_var(dfm, 'zbndz', bndvalues, numbnd)
-
+   if (numbnd > 0) then
+      call bmi_get_var(dfm, 'zbndz', bndvalues, numbnd)
+      call get_variable_pointer(dfm, string_to_char_array('kbndz'), xptr)
+   endif
    call get_variable_pointer(dfm, string_to_char_array('ln'), xptr)
    call c_f_pointer(xptr, ln2nd, (/2, lnx/))
    
-   call get_variable_pointer(dfm, string_to_char_array('kbndz'), xptr)
    call c_f_pointer(xptr, bndindex, (/6, numbnd/))
    
    call get_variable_pointer(dfm, string_to_char_array('vltb'), xptr)
@@ -216,10 +215,15 @@ if (ierr==0) then
    
    ! Determine the number of levels for the aggregated volume tables
    call getBedToplevel(volumetable, numpoints, toplevel,bedlevel)
-   numlevels = ceiling((toplevel-bedlevel)/increment+1)
+
+   numlevels = 0
+   do i = 1, numpoints
+      numlevels = max(numlevels,volumetable(i)%count)
+   enddo
    
-   computeTotal      = .false.
-   computeOnBranches = .false.
+   computeTotal        = .false.
+   computeOnBranches   = .false.
+   computeOnGridpoints = .false.
    numbranches = network%brs%Count
    if (strcmpi(output_type, 'Total')) then
       computeTotal = .true.
@@ -277,10 +281,6 @@ if (ierr==0) then
    
    if (computeOnGridpoints) then
       !compute maximum volume table length
-      numlevels = 0
-      do i = 1, numpoints
-      numlevels = max(numlevels,volumetable(i)%count)
-      enddo
       
       allocate(gridsurface(numpoints,numlevels),gridvolume(numpoints,numlevels))
    

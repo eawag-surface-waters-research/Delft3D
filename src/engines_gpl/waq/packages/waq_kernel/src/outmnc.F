@@ -1,4 +1,4 @@
-!!  Copyright (C)  Stichting Deltares, 2012-2022.
+!!  Copyright (C)  Stichting Deltares, 2012-2023.
 !!
 !!  This program is free software: you can redistribute it and/or modify
 !!  it under the terms of the GNU General Public License version 3,
@@ -34,6 +34,7 @@
 
       use timers
       use dlwq_netcdf  !   read/write grid in netcdf
+!!      use delwaq_version_module
       use output, only: ncopt
       implicit none
 
@@ -68,9 +69,9 @@
       integer   (4), intent(in   ) :: iknmrk(noseg)        ! Feature array. Bit zero set means active.
       integer   (4), intent(in   ) :: lunut                ! unit number monitoring file
 
-      integer(4) iseg                   ! loop counter for segments
-      integer(4) k                      ! loop counter for substances
-      real   (4) amiss   /-999.0/       ! missing value indicator
+      integer(4) iseg                         ! loop counter for segments
+      integer(4) k                            ! loop counter for substances
+      real   (4), parameter :: amiss = -999.0 ! missing value indicator
 
       integer :: ncid
       integer :: varid, varidout, meshidout, ntimeid, wqid, noseglmesh2d, nosegmesh2d3d, nosegmesh1d, nolay
@@ -89,6 +90,7 @@
       character(len=40) :: timestamp
       character(len=40) :: t0string
       character(len=40) :: uuid
+      character(len=80) :: versionid
 
       character(len=nf90_max_name) :: mesh_name2d
       character(len=nf90_max_name) :: mesh_name1d
@@ -139,15 +141,11 @@
          end if
 
          ! Copy the global attributes to a new file
-#ifdef NetCDF4
          if ( ncopt(1) == 4 ) then
              inc_error = nf90_create( mncnam, ior(nf90_clobber,nf90_netcdf4), ncidmap )
          else
              inc_error = nf90_create( mncnam, ior(nf90_clobber,nf90_format_classic), ncidmap )
          endif
-#else
-         inc_error = nf90_create( mncnam, nf90_clobber, ncidmap )
-#endif
          if ( inc_error /= nf90_noerr ) then
              write ( lunut , 2560 ) trim(mncnam)
              goto 800
@@ -212,6 +210,7 @@
             nolayid = dimids(2)
             noseglmesh2d = dimsizes(noseglid2d)
             nolay = dimsizes(nolayid)
+
             nosegmesh2d3d = noseglmesh2d * nolay
             type_ugrid = type_ugrid_face_crds
 
@@ -249,12 +248,12 @@
             ! calculate number of layers
             nolay = (noseg - nosegmesh1d) / noseglmesh2d
             nosegmesh2d3d = noseglmesh2d * nolay
-            
+
             ! check number of layers
             if (nosegmesh2d3d + nosegmesh1d /= noseg ) then
                 write ( lunut , 2596 ) noseg, noseglmesh2d, nolay, nosegmesh1d
                 goto 800
-            endif   
+            endif
 
             ! We do not have an aggregation table: construct one
             allocate (aggr2d3d(noseglmesh2d, nolay))
@@ -347,6 +346,14 @@
              goto 800
          endif
 
+!!         call getfullversionstring_delwaq( versionid )
+         versionid = "Deltares, DELWAQ version 5.10.00"
+         inc_error = nf90_put_att( ncidmap, nf90_global, 'source', trim(versionid) )
+         if ( inc_error /= nf90_noerr ) then
+             write ( lunut , 2573 )
+             goto 800
+         endif
+
          inc_error = nf90_put_att( ncidmap, nf90_global, 'date_created', trim(timestamp) )
          if ( inc_error /= nf90_noerr ) then
              write ( lunut , 2573 )
@@ -368,6 +375,11 @@
             allocate(laythickness(nolay))
             laythickness = 1.0/real(nolay)  ! Uniform distribution for now !!
             inc_error = dlwqnc_create_layer_dim( ncidmap, mesh_name2d, nolay, laythickness, nolayid )
+
+            if ( nolay == 1 ) then
+                nolayid = dlwqnc_type2d
+            endif
+
             if ( inc_error /= nf90_noerr ) then
                 write ( lunut , 2580 )
                 goto 800
@@ -382,7 +394,7 @@
          endif
 
 
-         ! Write output variables and proces library info to NetCDF-file
+         ! Write output variables and process library info to NetCDF-file
          ! long name and unit will follow later, they are in the ouput.wrk-file!
          !
          ! Create 3D and only when nolay > 1 also 2D variables. This is controlled by the NetCDF ID for the layer dimension
@@ -565,7 +577,11 @@
                enddo
             enddo
 
-            inc_error = dlwqnc_write_wqvariable( ncidmap, wqid1(iout,1), mncrec, dlwq_values_2d3d)
+            if ( nolay > 1 ) then
+                inc_error = dlwqnc_write_wqvariable( ncidmap, wqid1(iout,1), mncrec, dlwq_values_2d3d )
+            else
+                inc_error = dlwqnc_write_wqvariable( ncidmap, wqid1(iout,1), mncrec, dlwq_values_2d3d(:,1) )
+            endif
             if ( inc_error /= nf90_noerr ) then
                 write( lunut , 2591)
                 goto 800
@@ -618,7 +634,11 @@
                enddo
             enddo
 
-            inc_error = dlwqnc_write_wqvariable( ncidmap, wqid2(iout,1), mncrec, dlwq_values_2d3d)
+            if ( nolay >  1 ) then
+                inc_error = dlwqnc_write_wqvariable( ncidmap, wqid2(iout,1), mncrec, dlwq_values_2d3d )
+            else
+                inc_error = dlwqnc_write_wqvariable( ncidmap, wqid2(iout,1), mncrec, dlwq_values_2d3d(:,1) )
+            endif
             if ( inc_error /= nf90_noerr ) then
                 write( lunut , 2591)
                 goto 800
@@ -759,8 +779,8 @@
  2594 format ( / ' Attribute "face_dimension" in mesh not found' )
  2595 format ( / ' Dimension "',A,'" not found' )
  2596 format ( / ' ERROR: Dimension mismatch!'
-     &         / ' noseg        :', I8 
-     &         / ' noseglmesh2d :', I8 
+     &         / ' noseg        :', I8
+     &         / ' noseglmesh2d :', I8
      &         / ' nolay    :', I8
      &         / ' nosegmesh1d  :', I8  )
  2600 format ( / ' NetCDF error number: ', I6 )

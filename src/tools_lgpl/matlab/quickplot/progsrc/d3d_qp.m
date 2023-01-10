@@ -6,7 +6,7 @@ function outdata=d3d_qp(cmd,varargin)
 
 %----- LGPL --------------------------------------------------------------------
 %
-%   Copyright (C) 2011-2022 Stichting Deltares.
+%   Copyright (C) 2011-2023 Stichting Deltares.
 %
 %   This library is free software; you can redistribute it and/or
 %   modify it under the terms of the GNU Lesser General Public
@@ -1219,11 +1219,16 @@ switch cmd
         d3d_qp updatedatafields
         
     case 'selectdomain'
-        domains=findobj(mfig,'tag','selectdomain');
-        Domains=get(domains,'string');
+        domains = findobj(mfig,'tag','selectdomain');
+        Domains = get(domains,'string');
         if ~isempty(cmdargs)
-            i=ustrcmpi(cmdargs{1},Domains);
-            if i<0
+            if ischar(cmdargs{1})
+                i = ustrcmpi(cmdargs{1},Domains);
+            elseif isnumeric(cmdargs{1})
+                i = cmdargs{1};
+                cmdargs{1} = sprintf('%g',i); % only for error handling
+            end
+            if i < 0 || i > length(Domains)
                 error('Cannot select field: %s',cmdargs{1})
             else
                 set(domains,'value',i);
@@ -3964,6 +3969,15 @@ switch cmd
             auto = strcmp(lbl,'<automatic>');
         end
         %
+        set(XLblAuto,'value',auto)
+        if auto
+            if isappdata(ax,xlbl)
+                rmappdata(ax,xlbl)
+            end
+        else
+            setappdata(ax,xlbl,lbl)
+        end
+        %
         if auto
             lbl = '<automatic>';
             if isappdata(ax,[xlbl 'auto'])
@@ -3989,21 +4003,13 @@ switch cmd
         %
         switch x
             case 'title'
-                title(ax,expanded_lbl)
+                qp_title('update',ax)
             case 'x'
                 xlabel(ax,expanded_lbl)
             case 'y'
                 ylabel(ax,expanded_lbl)
             case 'z'
                 zlabel(ax,expanded_lbl)
-        end
-        set(XLblAuto,'value',auto)
-        if auto
-            if isappdata(ax,xlbl)
-                rmappdata(ax,xlbl)
-            end
-        else
-            setappdata(ax,xlbl,lbl)
         end
         if strcmp(cmd,'title')
             d3d_qp refreshaxes

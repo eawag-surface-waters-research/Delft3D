@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2022.                                
+!  Copyright (C)  Stichting Deltares, 2017-2023.                                
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -40,6 +40,7 @@
    use m_turbulence, only: rhou
    use precision
    use m_fm_erosed
+   use m_sediment, only: bermslopeindexbed
    use m_alloc
 
    implicit none
@@ -78,6 +79,9 @@
    do Lf = 1, Lnx
       ! for cutcell
       if (wu_mor(Lf)==0d0) cycle
+      !
+      ! no bed slope effects on links with bermslope adjustments
+      if (stmpar%morpar%bermslopetransport .and. bermslopeindexbed(Lf)) cycle
       !
       if (hu(Lf) > 0d0) then
          k1 = ln(1, Lf)
@@ -208,10 +212,6 @@
                end if      ! sbedm
                !               !
                if (avalan .and. (.not. duneavalan) .and. wetslope<9.99d0) then
-                  !
-                  ! Avalanching (MvO, 2011-04-06)
-                  !
-                  ! To be used instead of avalanching routine that is called at the end of BOTT3D.
                   ! Uses a maximum wet slope (keyword WetSlope in the mor file).
                   ! The default for Wetslope is 10.0 (i.e. 10:1, extremely steep, so no avalanching).
                   !

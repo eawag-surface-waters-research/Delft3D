@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2022.                                
+!  Copyright (C)  Stichting Deltares, 2017-2023.                                
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -32,7 +32,7 @@
 
 !----- AGPL --------------------------------------------------------------------
 !
-!  Copyright (C)  Stichting Deltares, 2017-2022.
+!  Copyright (C)  Stichting Deltares, 2017-2023.
 !
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).
 !
@@ -342,7 +342,8 @@
         OPTION(2) = 'Copy polygon to observation points      '
         OPTION(3) = 'Copy polygon to samples                 '
         OPTION(4) = 'Copy polygon to spline                  '
-        MAXOPT    = 4
+        OPTION(5) = 'Copy polygon to 1D network              '
+        MAXOPT    = 5
         NWHAT2    = 0
         CALL MENUV3(NWHAT2,OPTION,MAXOPT,EXP,MAXEXP)
         if (nwhat2 == 1) then
@@ -353,6 +354,8 @@
             CALL copyPolygonToSamples()
         else if (nwhat2 == 4) then
             CALL copyPolToSpline()
+        else if (nwhat2 == 5) then
+            CALL copyPolTo1Dnet()
         end if
         KEY = 3
       ELSE IF (NWHAT .EQ.25) THEN
@@ -428,6 +431,8 @@
          call connecthangingnodes()
       ELSE iF (NWHAT .EQ.37) THEN
          call removelinksofhangingnodes()
+      ELSE iF (NWHAT .EQ.38) THEN
+         call makezkbedlevels()
       ENDIF
       NUM  = 0
       KEY  = 3

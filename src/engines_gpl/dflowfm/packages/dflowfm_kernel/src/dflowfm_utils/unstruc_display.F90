@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2022.                                
+!  Copyright (C)  Stichting Deltares, 2017-2023.                                
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -1283,7 +1283,12 @@ if (network%loaded) then
    do is = 1,network%sts%Count
    
       ! Get structure x,y coordinates.
-      link = abs(network%sts%struct(is)%linknumbers(1))
+      if (network%sts%struct(is)%numlinks > 0) then
+         link = abs(network%sts%struct(is)%linknumbers(1))
+      else
+         link = 0
+      end if
+
       if (link > 0 .and. link <= lnx) then ! for safety
          x = xu(link)
          y = yu(link)
@@ -1752,7 +1757,8 @@ subroutine tekwindvector()
  use m_wearelt
  use unstruc_display
  use m_heatfluxes
- use m_flow ! , only : qinrain, jatem, a1tot, vol1tot, volgrw, vinraincum, jagrw, vinbndcum, voutbndcum, a1ini, vol1ini, volgrwini, qouteva, voutraincum
+ use m_flow 
+ use m_transport
  use m_flowgeom
  use m_wind
  use m_xbeach_data, only: csx, snx, itheta_view
@@ -1766,7 +1772,7 @@ subroutine tekwindvector()
  integer :: ndraw 
  double precision :: xp, yp, vfw, ws, dyp, upot,ukin,ueaa
  character tex*60 
- integer :: ncol, k, vlatin, vlatout, i, mout
+ integer :: ncol, k, kk, vlatin, vlatout, i, mout
  
  
  if (ndraw(40) == 0 .and. npdf == 0) return
@@ -1960,7 +1966,7 @@ subroutine tekwindvector()
 
     yp  = yp - dyp
     tex = 'Upot :               (kg/(m.s2))'
-    if (upot + ukin > 1000) then 
+    if (upot > 1000) then 
        write(tex(8:20), '(F11.2)') upot   
     else
        write(tex(8:20), '(F11.7)') upot 
@@ -1969,7 +1975,7 @@ subroutine tekwindvector()
   
     yp  = yp - dyp
     tex = 'Ukin :               (kg/(m.s2))'
-    if (upot + ukin > 1000) then 
+    if (ukin > 1000) then 
        write(tex(8:20), '(F11.2)') ukin   
     else
        write(tex(8:20), '(F11.7)') ukin 
@@ -2006,7 +2012,29 @@ subroutine tekwindvector()
     write(tex(8:20), '(F11.2)') ueaa    
     call GTEXT(tex, xp, yp, ncol)
     endif
-           
+
+ else if (ndraw(40) == 3) then 
+
+    ncol = ncoltx
+    do i = 1,numconst
+       ueaa = 0d0
+       do kk = 1,ndxi
+          do k = kbot(kk), ktop(kk)
+             ueaa = ueaa + vol1(k)*constituents(i,k)
+          enddo   
+       enddo  
+     
+       yp  = yp - 2.5*dyp
+       tex = 'Mass :                 (c*m3)'
+       if (ueaa > 1000) then 
+          write(tex(8:20), '(F11.2)') ueaa
+       else
+          write(tex(8:20), '(F11.7)') ueaa
+       endif 
+       call GTEXT(tex, xp, yp, ncol)
+
+    enddo      
+     
  endif   
  
  if ( jawave.eq.4 ) then

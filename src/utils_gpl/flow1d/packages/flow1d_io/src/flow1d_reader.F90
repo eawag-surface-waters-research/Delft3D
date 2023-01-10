@@ -1,7 +1,7 @@
 module m_flow1d_reader
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2022.                                
+!  Copyright (C)  Stichting Deltares, 2017-2023.                                
 !                                                                               
 !  This program is free software: you can redistribute it and/or modify              
 !  it under the terms of the GNU Affero General Public License as               
@@ -116,6 +116,7 @@ module m_flow1d_reader
       call readCrossSectionLocationFile(network, filenames%cross_section_locations)
          
      if (network%crs%Count < 1) then
+        allocate(network%crs%cross(0))
         call SetMessage(LEVEL_WARN, 'No Cross Sections Found')
      endif
 

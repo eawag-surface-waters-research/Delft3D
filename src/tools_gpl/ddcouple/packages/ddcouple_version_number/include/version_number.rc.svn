@@ -48,7 +48,7 @@ BEGIN
             VALUE "FileDescription", "Coupling between FLOW DD and WAQ\0"
             VALUE "FileVersion", "VN_MAJOR.VN_MINOR.VN_REVISION\0"
             VALUE "InternalName", "ddcouple\0"
-            VALUE "LegalCopyright", "Copyright © 1999-2022\0"
+            VALUE "LegalCopyright", "Copyright © 1999-2023\0"
             VALUE "LegalTrademarks", "Copyright © Deltares\0"
             VALUE "OriginalFilename", "ddcouple.exe\0"
             VALUE "PrivateBuild", "-\0"

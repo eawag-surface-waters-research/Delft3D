@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !
-!  Copyright (C)  Stichting Deltares, 2017-2022.
+!  Copyright (C)  Stichting Deltares, 2017-2023.
 !
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).
 !
@@ -42,7 +42,7 @@
 !! \li \b Model \b setup: unstruc_model.f90
 !! \li \b Network \b data: network.f90 + network_data.f90
 !! \li \b Global \b data: modules.f90 (flow, geometry, times, parameters, ...)
-
+!!
 !! \li \b GUI \b and \b network \b algorithms: net.f90 (and utils_lgpl/gridgeom)
 !! \li \b Unstructured \b flow \b solver: unstruc.f90
 !! \li \b Matrix \b solver: solve_guus.f90, saadf90.F90, solve_petsc.F90
@@ -267,6 +267,18 @@
        goto 1234
     end if
 
+    if (md_jasavenet == 1) then
+       if (len_trim(iarg_outfile) == 0) then
+          ! Do not overwrite existing file
+          write (msgbuf, '(a)') 'Error, option --savenet given, but missing required option -o OUTPUTFILE.'
+          call warn_flush()
+          goto 1234
+       end if
+       call unc_write_net(iarg_outfile, janetcell = 1, janetbnd = 0, jaidomain = 0, iconventions = UNC_CONV_UGRID)
+       write (msgbuf, '(a)') 'Network was saved in latest format into '''//trim(iarg_outfile)//'''. Done.'
+       call msg_flush()
+       goto 1234
+    end if
 
     if ( md_jamake1d2dlinks .eq. 1 ) then
        ! Make 1D2D links for already loaded net file.

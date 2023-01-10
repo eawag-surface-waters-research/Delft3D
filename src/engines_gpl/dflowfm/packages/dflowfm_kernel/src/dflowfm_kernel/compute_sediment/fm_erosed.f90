@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2022.                                
+!  Copyright (C)  Stichting Deltares, 2017-2023.                                
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -73,7 +73,7 @@
    use m_missing
    use m_physcoef, only: frcuni, ifrctypuni
    use m_turbulence, only: vicwws, turkinepsws, rhowat
-   use m_flowparameters, only: jasal, jatem, jawave, epshs, jasecflow, jasourcesink, v2dwbl, flowWithoutWaves
+   use m_flowparameters, only: jasal, jatem, jawave, epshs, jasecflow, jasourcesink, v2dwbl, flowWithoutWaves, eps10, epshu
    use m_fm_erosed
    use m_bedform
    use m_xbeach_data
@@ -87,16 +87,12 @@
    !
    real(fp)                                       :: eps = 1.0e-6_fp
    logical                                        :: scour = .false.
-   logical                                        :: ubot_from_com != .true. !! promoted approach, so only option in FM
+   logical                                        :: ubot_from_com
    logical                                        :: flmd2l = .false.
    logical                                        :: wave
 
    integer                              , pointer :: iunderlyr
    real(prec)       , dimension(:,:)    , pointer :: bodsed
-   type(t_nodefraction)                 , pointer :: pFrac
-   type(t_noderelation)                 , pointer :: pNodRel
-   type(t_node)                         , pointer :: pnod
-
    !
    ! Local parameters
    !
@@ -126,7 +122,8 @@
    logical                       :: error
    integer                       :: klc
    integer                       :: kmaxlc
-   integer                       :: k1, k2, k3
+   integer                       :: k1, k2, k3, k4
+   integer                       :: lsd
    logical                       :: suspfrac  ! suspended component sedtyp(l)/=SEDTYP_NONCOHESIVE_TOTALLOAD
    logical                       :: javegczu
    real(fp)                      :: afluff
@@ -207,21 +204,8 @@
    double precision                    :: dzdn, dzds
    double precision                    :: z0u, czu
    double precision                    :: facCheck
-   integer                             :: nrd_idx
-   double precision                    :: expQ
-   double precision                    :: expW
-   double precision                    :: facQ
-   double precision                    :: facW
-   double precision                    :: qb1d, wb1d, sb1d
-   double precision                    :: sbrratio, qbrratio, Qbr1, Qbr2
    !
    real(fp), dimension(:), allocatable :: localpar        !< local array for sediment transport parameters
-   real(fp), dimension(:), allocatable :: qb_out          !< sum of outgoing discharge at 1d node
-   real(fp), dimension(:), allocatable :: width_out       !< sum of outgoing main channel widths
-   real(fp), dimension(:,:), allocatable :: sb_in         !< sum of incoming sediment transport at 1d node
-   integer, dimension(:,:,:), allocatable :: sb_dir       !< direction of transport at node (nnod, lsedtot, nbr) (-1 = incoming or no transport, +1 = outgoing)
-   integer, dimension(:), allocatable :: branInIDLn       !< ID of Incoming Branch (If there is only one) (nnod)
-   !
    !! executable statements -------------------------------------------------------
    !
    !   exit the routine immediately if sediment transport (and morphology) is not included in the simulation
@@ -235,16 +219,9 @@
    if (istat == 0) allocate(localpar (npar), stat = istat)
    if (istat == 0) allocate(ua(1:ndx), va(1:ndx), stat=istat)
    if (istat == 0) allocate(z0rouk(1:ndx), z0curk(1:ndx), deltas(1:ndx), stat=istat)
-   if (istat == 0) allocate(qb_out(network%nds%Count), stat = istat)
-   if (istat == 0) allocate(width_out(network%nds%Count), stat = istat)
-   if (istat == 0) allocate(sb_in(network%nds%Count, lsedtot), stat = istat)
-   if (istat == 0) allocate(sb_dir(network%nds%Count, lsedtot, network%nds%maxnumberofconnections), stat = istat)
-   if (istat == 0) allocate(branInIDLn(network%nds%Count), stat = istat)
 
    localpar = 0.0_fp
    ua = 0d0; va = 0d0; z0rouk = 0d0; z0curk=0d0
-   qb_out = 0d0; width_out = 0d0; sb_in = 0d0; sb_dir = -1
-   BranInIDLn = 0
 
    if ((istat == 0) .and. (.not. allocated(u1_tmp))) allocate(u1_tmp(1:lnx), ucxq_tmp(1:ndx), ucyq_tmp(1:ndx), stat=ierr)
 
@@ -1277,209 +1254,6 @@
       call fm_upwbed(lsedtot, sswx, sswy, sxtot, sytot, e_sswn, e_sswt)
    endif
    !
-   ! Bed-slope and sediment availability effects for
-   ! current-related bed load transport
-   !
-   if (bed > 0.0_fp) then
-      call fm_adjust_bedload(e_sbcn, e_sbct, .true.)
-   endif
-   !
-   ! Determine incoming discharge and transport at nodes
-   !
-   qb_out = 0d0; width_out = 0d0; sb_in = 0d0; sb_dir = 1
-   BranInIDLn = 0
-   do inod = 1, network%nds%Count
-      pnod => network%nds%node(inod)
-      if (pnod%numberofconnections > 1) then
-         k3 = pnod%gridnumber ! TODO: Not safe in parallel models (check gridpointsseq as introduced in UNST-5013)
-         do j=1,nd(k3)%lnx
-            L = iabs(nd(k3)%ln(j))
-            Ldir = sign(1,nd(k3)%ln(j))
-            !
-            wb1d = wu_mor(L)
-            !
-            if (u1(L)*Ldir < 0d0) then
-               ! Outgoing discharge
-               qb1d = -qa(L)*Ldir  ! replace with junction advection: to do WO
-               width_out(inod) = width_out(inod) + wb1d
-               qb_out(inod)    = qb_out(inod) + qb1d
-               do ised = 1, lsedtot
-                  sb_dir(inod, ised, j) = -1           ! set direction to outgoing
-               enddo
-            else
-               ! Incoming discharge
-               if (branInIDLn(inod) == 0) then
-                  branInIDLn(inod) = L
-               else
-                  branInIDLn(inod) = -444               ! multiple incoming branches
-               endif
-            endif
-         enddo
-      endif
-   enddo
-   !
-   ! Apply nodal relations to transport
-   !
-   do inod = 1, network%nds%Count
-      pnod => network%nds%node(inod)
-      if (pnod%numberofconnections == 1) cycle
-      if (pnod%nodeType == nt_LinkNode) then  ! connection node
-         k1 = pnod%gridnumber ! TODO: Not safe in parallel models (check gridpointsseq as introduced in UNST-5013)
-         do j=1,nd(k1)%lnx
-            L = iabs(nd(k1)%ln(j))
-            Ldir = sign(1,nd(k1)%ln(j))
-            !
-            wb1d = wu_mor(L)
-            do ised = 1, lsedtot
-               sb1d = e_sbcn(L, ised) * Ldir  ! first compute all outgoing sed. transport.
-               ! this works for one incoming branch TO DO: WO
-               if (sb_dir(inod, ised, j) == -1) then
-                  sb_in(inod, ised) = sb_in(inod, ised) + max(-wb1d*sb1d, 0.0_fp)  ! outgoing transport is negative
-               endif
-            enddo
-         enddo
-      endif
-   enddo
-   !
-   ! Determining sediment redistribution
-   !
-   ! loop over sediment fractions
-   do ised = 1, lsedtot
-
-      ! mor%nrd%nFractions = or 1 (One for All Fractions) or lsedtot (One for Every Fraction)
-      iFrac = min(ised, stmpar%nrd%nFractions)
-
-      pFrac => stmpar%nrd%nodefractions(iFrac)
-
-      do inod = 1, network%nds%Count
-         pnod => network%nds%node(inod)
-         if (pnod%nodeType == nt_LinkNode) then  ! connection node
-
-            facCheck = 0.d0
-
-            if (pnod%numberofconnections == 1) cycle
-
-
-            ! loop over branches and determine redistribution of incoming sediment
-            k3 = pnod%gridnumber ! TODO: Not safe in parallel models (check gridpointsseq as introduced in UNST-5013)
-            do j=1,nd(k3)%lnx
-               L = iabs(nd(k3)%ln(j))
-               Ldir = sign(1,nd(k3)%ln(j))
-               qb1d = -qa(L)*Ldir
-               wb1d = wu_mor(L)
-
-               ! Get Nodal Point Relation Data
-               nrd_idx = get_noderel_idx(inod, pFrac, pnod%gridnumber, branInIDLn(inod), pnod%numberofconnections)
-
-               pNodRel => pFrac%noderelations(nrd_idx)
-
-               if (sb_dir(inod, ised, j) == -1) then ! is outgoing
-
-                  if (qb_out(inod) > 0.0_fp) then
-
-                     if (pNodRel%Method == 'function') then
-
-                        expQ = pNodRel%expQ
-                        expW = pNodRel%expW
-
-                        facQ = (qb1d / qb_out(inod))**expQ
-                        facW = (wb1d / width_out(inod))**expW
-
-                        facCheck = facCheck + facQ * facW
-
-                        e_sbcn(L,ised) = -Ldir * facQ * facW * sb_in(inod, ised) / wu_mor(L)
-
-                     elseif (pNodRel%Method == 'table') then
-
-                        facCheck = 1.0d0
-
-                        if (L == pNodRel%BranchOut1Ln) then
-                           Qbr1 = qb1d
-                           Qbr2 = qb_out(inod) - qb1d
-                        elseif (L == pNodRel%BranchOut2Ln) then
-                           Qbr1 = qb_out(inod) - qb1d
-                           Qbr2 = qb1d
-                        else
-                           call SetMessage(LEVEL_FATAL, 'Unknown Branch Out (This should never happen!)')
-                        endif
-
-                        QbrRatio = Qbr1 / Qbr2
-
-                        SbrRatio = interpolate(pNodRel%Table, QbrRatio)
-
-                        if (L == pNodRel%BranchOut1Ln) then
-                           e_sbcn(L,ised) = -Ldir * SbrRatio * sb_in(inod, ised) / (1 + SbrRatio) / wu_mor(L)
-                           e_sbct(L,ised) = 0.0
-                        elseif (L == pNodRel%BranchOut2Ln) then
-                           e_sbcn(L,ised) = -Ldir * sb_in(inod, ised) / (1 + SbrRatio) / wu_mor(L)
-                           e_sbct(L,ised) = 0.0
-                        endif
-
-
-                     else
-                        call SetMessage(LEVEL_FATAL, 'Unknown Nodal Point Relation Method Specified')
-                     endif
-
-                  else
-                     e_sbcn(L,ised) = 0.0_fp
-                     e_sbct(L,ised) = 0.0
-                  endif
-
-               endif
-
-            enddo    ! Branches
-
-            ! Correct Total Outflow
-            if ((facCheck /= 1.0_fp) .and. (facCheck > 0.0_fp)) then
-               ! loop over branches and correct redistribution of incoming sediment
-               do j=1,nd(k3)%lnx
-                  L = iabs(nd(k3)%ln(j))
-                  if (sb_dir(inod, ised, j) == -1) then
-                     e_sbcn(L,ised) = e_sbcn(L,ised)/facCheck
-                  endif
-               enddo    ! Branches
-            endif
-         endif
-      enddo      ! Nodes
-
-   enddo    ! Fractions
-
-   !
-   ! Bed-slope and sediment availability effects for
-   ! wave-related bed load transport
-   !
-   if (bedw>0.0_fp .and. jawave > 0 .and. .not. flowWithoutWaves) then
-      call fm_adjust_bedload(e_sbwn, e_sbwt,.false.)
-   endif
-   !
-   ! Sediment availability effects for
-   ! wave-related suspended load transport
-   !
-   if (susw>0.0_fp .and. jawave > 0 .and. .not. flowWithoutWaves) then
-      call fm_adjust_bedload(e_sswn, e_sswt, .false.)
-   endif
-   !
-   if (duneavalan) then
-      call duneaval(error)         ! only on current related bed transport
-      if (error) then
-         write(errmsg,'(a)') 'fm_erosed::duneavalan returned an error. Check your inputs.'
-         call mess(LEVEL_FATAL, errmsg)
-      end if
-   end if
-   !
-   ! Summation of current-related and wave-related transports on links
-   !
-   e_sbn = 0d0
-   e_sbt = 0d0
-   do l = 1,lsedtot
-      if (sedtyp(l)/=SEDTYP_COHESIVE) then
-         do nm = 1, lnx
-            e_sbn(nm, l) = e_sbcn(nm, l) + e_sbwn(nm, l) + e_sswn(nm, l)
-            e_sbt(nm, l) = e_sbct(nm, l) + e_sbwt(nm, l) + e_sswt(nm, l)
-         enddo
-      endif
-   enddo
-   !
    ! Update sourse fluxes due to sand-mud interaction
    !
    allocate(evel(lsed), stat=istat)
@@ -1534,12 +1308,6 @@
 
    deallocate(dzdx, dzdy, stat = istat)
    if (istat == 0) deallocate(localpar, stat = istat)
-   if (istat == 0) deallocate(qb_out, stat = istat)
-   if (istat == 0) deallocate(width_out, stat = istat)
-   if (istat == 0) deallocate(sb_in, stat = istat)
-   if (istat == 0) deallocate(sb_dir, stat = istat)
-   if (istat == 0) deallocate(BranInIDLn, stat = istat)
-
    if (istat /= 0) then
       error = .true.
       write(errmsg,'(a)') 'fm_erosed::error deallocating memory.'

@@ -48,7 +48,7 @@ BEGIN
             VALUE "FileDescription", "io_netcdf library\0"
             VALUE "FileVersion", "VN_MAJOR.VN_MINOR.VN_REVISION.VN_BUILD_NUMBER\0"
             VALUE "InternalName", "IO_NETCDF\0"
-            VALUE "LegalCopyright", "Copyright © 1999-2022\0"
+            VALUE "LegalCopyright", "Copyright © 1999-2023\0"
             VALUE "LegalTrademarks", "Copyright © Deltares\0"
             VALUE "OriginalFilename", "io_netcdf.dll\0"
             VALUE "PrivateBuild", "-\0"

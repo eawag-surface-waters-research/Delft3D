@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2022.                                
+!  Copyright (C)  Stichting Deltares, 2017-2023.                                
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -47,7 +47,7 @@ subroutine flow_sedmorinit()
     use m_rdmorlyr, only: rdinimorlyr
     use m_flowexternalforcings, only: sfnames, numfracs, nopenbndsect, openbndname, openbndlin, nopenbndlin
     use m_transport, only: ISED1, ISEDN, ifrac2const, const_names, constituents
-    use m_flowparameters, only: jatransportmodule, jasecflow, ibedlevtyp, jasal, jatem
+    use m_flowparameters, only: jatransportmodule, jasecflow, ibedlevtyp, jasal, jatem, eps4
     use m_bedform, only: bfmpar, bfm_included
     use unstruc_channel_flow
     use m_branch
@@ -58,6 +58,8 @@ subroutine flow_sedmorinit()
     use MessageHandling
     use dfm_error
     use m_mormerge
+    use m_xbeach_data, only: gammaxxb
+    use m_waves, only: gammax
 
     implicit none
 
@@ -392,6 +394,31 @@ subroutine flow_sedmorinit()
        call realloc(sbwy_raw,(/ndx, stmpar%lsedtot/),stat=ierr,fill=0d0, keepExisting=.false.)
        call realloc(sswx_raw,(/ndx, stmpar%lsedtot/),stat=ierr,fill=0d0, keepExisting=.false.)
        call realloc(sswy_raw,(/ndx, stmpar%lsedtot/),stat=ierr,fill=0d0, keepExisting=.false.)
+    endif
+    !
+    ! Allocate berm slope index array if wanted
+    if (stmpar%morpar%bermslopetransport) then
+       if (allocated(bermslopeindex)) then
+          deallocate(bermslopeindex, bermslopeindexbed, bermslopeindexsus, bermslopecontrib, stat=ierr)
+       endif
+       call realloc(bermslopeindex,   lnx,stat=ierr,fill=.false., keepExisting=.false.)
+       call realloc(bermslopeindexbed,lnx,stat=ierr,fill=.false., keepExisting=.false.)
+       call realloc(bermslopeindexsus,lnx,stat=ierr,fill=.false., keepExisting=.false.)
+       call realloc(bermslopecontrib, (/lnx, stmpar%lsedtot/),stat=ierr, fill=0d0, keepExisting=.false.)
+       if (.not.(ierr==0)) then
+          call mess(LEVEL_WARN, 'unstruc::flow_sedmorinit - Could not allocate bermslope arrays. Bermslope transport switched off.')
+          stmpar%morpar%bermslopetransport=.false.
+       endif
+       if (jawave>0 .and. jawave.ne.4) then
+          if (comparereal(gammax, stmpar%morpar%bermslopegamma)== 0) then
+             stmpar%morpar%bermslopegamma=stmpar%morpar%bermslopegamma+eps4               ! if they are exactly the same, rounding errors set index to false wrongly
+          endif
+       endif
+       if (jawave==4) then
+          if (comparereal(gammaxxb, stmpar%morpar%bermslopegamma)== 0) then
+             stmpar%morpar%bermslopegamma=stmpar%morpar%bermslopegamma+eps4
+          endif
+       endif
     endif
 
     if (stmpar%morpar%duneavalan) then

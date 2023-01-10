@@ -10,7 +10,7 @@
      &                      zmodel , ztop   , zbot   , gdp    )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2011-2022.                                
+!  Copyright (C)  Stichting Deltares, 2011-2023.                                
 !                                                                               
 !  This program is free software: you can redistribute it and/or modify         
 !  it under the terms of the GNU General Public License as published by         
@@ -383,7 +383,7 @@
                         ilaggr , nd     , nlb    , nub    , mlb    ,    &
                         mub    , kfsmin , ksrwaq , noseg  , noq1   ,    &
                         noq2   , noq3   , xz     , yz     , zbot   ,    &
-                        ztop )
+                        ztop   , gdp)
          if (parll) then
             write(filnam,'(3a,i3.3,a)') 'com-', trim(runid), '-', inode, '.'
          else

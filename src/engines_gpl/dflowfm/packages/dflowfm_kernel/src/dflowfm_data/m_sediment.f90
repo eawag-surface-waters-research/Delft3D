@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2022.                                
+!  Copyright (C)  Stichting Deltares, 2017-2023.                                
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -87,6 +87,10 @@ module m_sediment
 
  integer,          allocatable     :: kcsmor(:)
  double precision, allocatable     :: mergebodsed(:,:)
+ logical         , allocatable     :: bermslopeindex(:)
+ logical         , allocatable     :: bermslopeindexbed(:)
+ logical         , allocatable     :: bermslopeindexsus(:)
+ double precision, allocatable     :: bermslopecontrib(:,:)
 
  integer                           :: jased         !< Include sediment, 1=Krone, 2=Soulsby van Rijn 2007, 3=Bert's morphology module
  integer                           :: jaseddenscoupling=0    !< Include sediment in rho 1 = yes , 0 = no

@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2022.                                
+!  Copyright (C)  Stichting Deltares, 2017-2023.                                
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -750,7 +750,7 @@ module m_VolumeTables
 
          ! water surface at the highest level is equal to the width*dx of the cross section at the highest level.
          vltb(n)%sur(vltb(n)%count) = vltb(n)%sur(vltb(n)%count) + dxL*width
-         if (present(vltbOnLinks) .and. lorg <= lnxi) then
+         if (present(vltbOnLinks)) then
             vltbOnLinks(Lindex, L)%sur(vltb(n)%count) = vltbOnLinks(Lindex, L)%sur(vltb(n)%count) + dxL*width
          endif
          

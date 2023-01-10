@@ -6,7 +6,7 @@ AC_INIT(Delft3D, 0.0, delft3d.support@deltares.nl)
 dnl Store generated files in config dir
 AC_CONFIG_AUX_DIR(config)
 dnl Define a unique file to check if we're in the right directory
-AC_CONFIG_SRCDIR([engines_gpl/flow2d3d/packages/kernel/src/compute/adi.f90])
+AC_CONFIG_SRCDIR([engines_gpl/flow2d3d/packages/flow2d3d_kernel/src/compute/adi.f90])
 
 AC_CONFIG_HEADER([config.h])
 dnl m4 macro's in m4 directory.

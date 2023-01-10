@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2022.                                
+!  Copyright (C)  Stichting Deltares, 2017-2023.                                
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -133,6 +133,10 @@ endif
    write (*,*) '        connect1dend = VAL  The search distance for coupling 1D endpoints.'
    write (*,*) '      OUTPUTFILE is the name under which the file will be saved.'
    write (*,*) '        When not specified, the original NETFILE will be overwritten.'
+   write (*,*) ' '
+   write (*,*) '  --savenet NETFILE -o OUTPUTFILE'
+   write (*,*) '      Read network from NETFILE and save it in the latest UGRID format.'
+   write (*,*) '      OUTPUTFILE is the name under which the file will be saved.'
    write (*,*) ' '
    write (*,*) ' --cutcells NETFILE'
    write (*,*) '      Cut the unstructured grid in NETFILE with the polygons specified'

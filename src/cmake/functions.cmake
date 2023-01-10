@@ -192,21 +192,6 @@ function(post_build_target target_name install_dir build_dir checkout_src_root b
                          ${mkl_redist_dir}
                          ${mpi_redist_dir}) 
    endif(WIN32)
-
-   if(UNIX)
-   
-#    set(build_config ${CMAKE_BUILD_TYPE}) 
-
-#    add_custom_command(TARGET ${target_name}
-#                       POST_BUILD
-#                       COMMAND /bin/bash "${checkout_src_root}/scripts_lgpl/linux/oss-post_build.sh"  
-#                       ${install_dir} 
-#                       ${build_dir} 
-#                       ${checkout_src_root} 
-#                       ${build_config}
-#                       ${build_project} )
-
-   endif(UNIX)
    
 endfunction()
 

@@ -1,13 +1,4 @@
 set(executable_name datsel)
-
-# Retrieve the .rc file for writing the version metadata into the executable
-get_module_include_path(${checkout_src_root}/${datsel_version_number_module} 
-                        ${executable_name}
-                        datsel_version_number_include_path)
-
-message(STATUS "Configuring '${executable_name}' with the following datsel_version_number_module include path: '${datsel_version_number_include_path}'")
-
-# Set directory which contains all source files
 set(src_path src)
 
 # Gather source files
@@ -37,7 +28,7 @@ if (WIN32)
     target_link_options(${executable_name} PRIVATE ${nologo_flag})
 
     if(CMAKE_Fortran_COMPILER_ID MATCHES "Intel")
-        target_link_options(${executable_name} PRIVATE "/LIBPATH: $(IFORT_COMPILER19)/compiler/lib/intel64;")
+        target_link_options(${executable_name} PRIVATE "/LIBPATH: $(IFORT_COMPILER21)/compiler/lib/intel64;")
     endif()
 endif(WIN32)
 

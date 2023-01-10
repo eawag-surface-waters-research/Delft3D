@@ -1,7 +1,7 @@
 module m_rdmor
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2011-2022.                                
+!  Copyright (C)  Stichting Deltares, 2011-2023.                                
 !                                                                               
 !  This program is free software: you can redistribute it and/or modify         
 !  it under the terms of the GNU General Public License as published by         
@@ -118,6 +118,10 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
     real(fp)                               , pointer :: dzmaxdune
     real(fp)                               , pointer :: avaltime
     real(fp)                               , pointer :: thetsduni    
+    real(fp)                               , pointer :: bermslope
+    real(fp)                               , pointer :: bermslopefac
+    real(fp)                               , pointer :: bermslopegamma
+    real(fp)                               , pointer :: bermslopedepth
     real(fp)              , dimension(:)   , pointer :: xx
     logical                                , pointer :: bedupd
     logical                                , pointer :: cmpupd
@@ -135,6 +139,9 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
     logical                                , pointer :: eulerisoglm
     logical                                , pointer :: glmisoeuler
     logical                                , pointer :: l_suscor
+    logical                                , pointer :: bermslopetransport
+    logical                                , pointer :: bermslopesus
+    logical                                , pointer :: bermslopebed
     character(256)                         , pointer :: bcmfilnam
     character(256)                         , pointer :: flsthetsd
     character(20)          , dimension(:)  , pointer :: namsed
@@ -294,6 +301,13 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
     avaltime            => morpar%avaltime
     hswitch             => morpar%hswitch
     dzmaxdune           => morpar%dzmaxdune
+    bermslopetransport  => morpar%bermslopetransport
+    bermslopebed        => morpar%bermslopetransport
+    bermslopesus        => morpar%bermslopetransport
+    bermslope           => morpar%bermslope
+    bermslopefac        => morpar%bermslopefac
+    bermslopegamma      => morpar%bermslopegamma
+    bermslopedepth      => morpar%bermslopedepth
     xx                  => morpar%xx
     bedupd              => morpar%bedupd
     cmpupd              => morpar%cmpupd
@@ -626,6 +640,22 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
        ! === flag for merging bottoms of parallel runs
        !
        call prop_get_logical(mor_ptr, 'Morphology', 'Multi', multi)
+       !
+       ! === bermslope (FM only)
+       !
+       call prop_get_logical(mor_ptr, 'Morphology', 'bermslopetransport' , bermslopetransport)
+       if (bermslopetransport) then
+          call prop_get(mor_ptr, 'Morphology', 'bermslope'          , bermslope         )
+          call prop_get(mor_ptr, 'Morphology', 'bermslopefac'       , bermslopefac      )
+          call prop_get(mor_ptr, 'Morphology', 'bermslopegamma'     , bermslopegamma    )
+          call prop_get(mor_ptr, 'Morphology', 'bermslopedepth'     , bermslopedepth    )
+          call prop_get(mor_ptr, 'Morphology', 'bermslopesus'       , bermslopesus      )
+          call prop_get(mor_ptr, 'Morphology', 'bermslopebed'       , bermslopebed      )
+          if (bermslopefac>5) then
+             errmsg = 'bermslopefac set to value higher than 5. It is advised to lower the value in order to maintain stable morphology.'
+             call write_warning(errmsg, unit=lundia)
+          endif
+       endif
        !
        if (updinf) then
           !
@@ -1331,6 +1361,13 @@ subroutine echomor(lundia    ,error     ,lsec      ,lsedtot   ,nto       , &
     real(fp)                               , pointer :: avaltime
     real(fp)                               , pointer :: hswitch
     real(fp)                               , pointer :: dzmaxdune
+    logical                                , pointer :: bermslopetransport
+    logical                                , pointer :: bermslopebed
+    logical                                , pointer :: bermslopesus
+    real(fp)                               , pointer :: bermslope
+    real(fp)                               , pointer :: bermslopefac
+    real(fp)                               , pointer :: bermslopegamma
+    real(fp)                               , pointer :: bermslopedepth
     real(fp)              , dimension(:)   , pointer :: xx
     logical                                , pointer :: bedupd
     logical                                , pointer :: cmpupd
@@ -1470,6 +1507,13 @@ subroutine echomor(lundia    ,error     ,lsec      ,lsedtot   ,nto       , &
     thetsduni           => morpar%thetsduni
     upwindbedload       => mornum%upwindbedload
     pure1d_mor          => mornum%pure1d
+    bermslopetransport  => morpar%bermslopetransport
+    bermslopebed        => morpar%bermslopebed
+    bermslopesus        => morpar%bermslopesus
+    bermslope           => morpar%bermslope
+    bermslopefac        => morpar%bermslopefac
+    bermslopegamma      => morpar%bermslopegamma
+    bermslopedepth      => morpar%bermslopedepth
     !
     ! output values to file
     !
@@ -1766,6 +1810,34 @@ subroutine echomor(lundia    ,error     ,lsec      ,lsedtot   ,nto       , &
        txtput2 = '                  NO'
     endif
     write (lundia, '(3a)') txtput1, ':', txtput2 
+    !
+    if (bermslopetransport) then
+       txtput1 = 'Berm slope adjustment mechanism activated'
+       txtput2 = '                 YES'
+       write (lundia, '(3a)') txtput1,':', txtput2
+       txtput1 = 'Berm slope adjustment for bedload'
+       if (bermslopebed) then
+          txtput2 = '                 YES'
+       else
+          txtput2 = '                  NO'
+       endif       
+       write (lundia, '(3a)') txtput1,':', txtput2
+       txtput1 = 'Berm slope adjustment for suspended load'
+       if (bermslopesus) then
+          txtput2 = '                 YES'
+       else
+          txtput2 = '                  NO'
+       endif       
+       write (lundia, '(3a)') txtput1,':', txtput2
+       txtput1 = '   Equilibrium slope'
+       write (lundia, '(2a,f20.4)') txtput1, ':', bermslope
+       txtput1 = '   Transport proportionality factor'
+       write (lundia, '(2a,f20.4)') txtput1, ':', bermslopefac
+       txtput1 = '   Breaker index to activate cells'
+       write (lundia, '(2a,f20.4)') txtput1, ':', bermslopegamma
+       txtput1 = '   Depth limit to activate cells'
+       write (lundia, '(2a,f20.4)') txtput1, ':', bermslopedepth 
+    endif
     !
     ! User requested sediment percentiles
     !

@@ -1,7 +1,7 @@
 module morphology_data_module
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2011-2022.                                
+!  Copyright (C)  Stichting Deltares, 2011-2023.                                
 !                                                                               
 !  This program is free software: you can redistribute it and/or modify         
 !  it under the terms of the GNU General Public License as published by         
@@ -405,6 +405,10 @@ type morpar_type
     real(fp):: avaltime   !  time scale in seconds (used for avalanching)
     real(fp):: hswitch    !  depth to switch dryslope and wetslope
     real(fp):: dzmaxdune  !  Maximum bed level change per hydrodynamic time step
+    real(fp):: bermslope       !  Swash zone slope for (semi-) reflective beaches
+    real(fp):: bermslopefac    !  Bed slope transport factor for bermslope model
+    real(fp):: bermslopegamma  !  Wave height - water depth ratio to turn on bermslope swash transport
+    real(fp):: bermslopedepth  !  Depth to turm on berm slope swash transport
     !
     !  (sp)
     !
@@ -476,6 +480,10 @@ type morpar_type
     logical :: multi               !  Flag for merging bottoms of different parallel runs
     logical :: duneavalan          !  Flag for avalanching using wetslope and dryslope
     logical :: l_suscor            !  Flag for applying correction to doublecounting of sus/bed transport in 3d
+    logical :: bermslopetransport  !  Flag to turn on bermslope swash transport model
+    logical :: bermslopebed        !  Flag to turn on bermslope swash transport model for bedload
+    logical :: bermslopesus        !  Flag to turn on bermslope swash transport model for suspended load
+    
     !
     ! characters
     !
@@ -1341,6 +1349,13 @@ subroutine nullmorpar(morpar)
     logical                              , pointer :: duneavalan
     real(fp)                             , pointer :: hswitch
     real(fp)                             , pointer :: dzmaxdune
+    logical                              , pointer :: bermslopetransport
+    logical                              , pointer :: bermslopebed
+    logical                              , pointer :: bermslopesus
+    real(fp)                             , pointer :: bermslope
+    real(fp)                             , pointer :: bermslopefac
+    real(fp)                             , pointer :: bermslopegamma
+    real(fp)                             , pointer :: bermslopedepth
     real(fp)              , dimension(:) , pointer :: xx
     !
     real(hp)              , dimension(:) , pointer :: mergebuf
@@ -1418,6 +1433,13 @@ subroutine nullmorpar(morpar)
     duneavalan          => morpar%duneavalan
     hswitch             => morpar%hswitch
     dzmaxdune           => morpar%dzmaxdune
+    bermslopetransport  => morpar%bermslopetransport
+    bermslopebed        => morpar%bermslopebed
+    bermslopesus        => morpar%bermslopesus
+    bermslope           => morpar%bermslope
+    bermslopefac        => morpar%bermslopefac
+    bermslopegamma      => morpar%bermslopegamma
+    bermslopedepth      => morpar%bermslopedepth
     !
     ihidexp             => morpar%ihidexp
     itmor               => morpar%itmor
@@ -1534,6 +1556,13 @@ subroutine nullmorpar(morpar)
     duneavalan         = .false.
     hswitch            = 0.1_fp
     dzmaxdune          = 100.0_fp           ! with Marlies, 20180417
+    bermslopetransport = .false.
+    bermslopebed       = .true.
+    bermslopesus       = .true.
+    bermslope          = 1d-1
+    bermslopefac       = 1d0
+    bermslopegamma     = 1d0
+    bermslopedepth     = 1d0
     !
     ihidexp            = 1
     itmor              = 0

@@ -1,7 +1,7 @@
 module m_compound
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2022.                                
+!  Copyright (C)  Stichting Deltares, 2017-2023.                                
 !                                                                               
 !  This program is free software: you can redistribute it and/or modify              
 !  it under the terms of the GNU Affero General Public License as               
@@ -164,8 +164,10 @@ end subroutine
       do i = 1, cmps%count
          istru = cmps%compound(i)%structure_indices(1)
          numlinks = sts%struct(istru)%numlinks
-         allocate(cmps%compound(i)%linknumbers(numlinks))
-         cmps%compound(i)%linknumbers = sts%struct(istru)%linknumbers
+         if (numlinks > 0) then
+            allocate(cmps%compound(i)%linknumbers(numlinks))
+            cmps%compound(i)%linknumbers = sts%struct(istru)%linknumbers
+         end if
          cmps%compound(i)%numlinks = numlinks
          ! now check if other members contain the same links
          do j = 2, cmps%compound(i)%numstructs
