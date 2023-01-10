@@ -48,7 +48,7 @@ BEGIN
             VALUE "FileDescription", "Maptonetcdf tool\0"
             VALUE "FileVersion", "VN_MAJOR.VN_MINOR.VN_REVISION.VN_BUILD_NUMBER\0"
             VALUE "InternalName", "maptonetcdf\0"
-            VALUE "LegalCopyright", "Copyright © 1999-2022\0"
+            VALUE "LegalCopyright", "Copyright © 1999-2023\0"
             VALUE "LegalTrademarks", "Copyright © Deltares\0"
             VALUE "OriginalFilename", "maptonetcdf.exe\0"
             VALUE "PrivateBuild", "-\0"
