@@ -980,6 +980,7 @@ src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_data/m_wind.f90 -tex
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_data/m_xbeach_avgoutput.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_data/m_xbeach_data.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_data/m_xytexts.f90 -text
+src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_data/nearfield.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_data/partition.F90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_data/splines.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_data/unstruc_channel_flow.f90 -text
