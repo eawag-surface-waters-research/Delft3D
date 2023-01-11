@@ -174,8 +174,6 @@ if (ierr==0) then
    
 endif
 
-pause
-
 if (ierr==0) then
    ! Initialise the model 
    ierr = bmi_initialize(dfm, mdufile)
