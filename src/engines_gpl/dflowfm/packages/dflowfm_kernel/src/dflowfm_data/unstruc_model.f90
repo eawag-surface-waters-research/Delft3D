@@ -2557,8 +2557,8 @@ ch:do ichapter = 1, nchapter
 
    if (num_obsolete > 0) then
       ! this is a fatal error that we want to stop at. 
-      call mess(LEVEL_WARN, prefix//': Old unsupported keywords used: Check Section "Overview of deprecated and removed keywords" in the User Manual for information on how to update the input file.')
-      !istat = DFM_WRONGINPUT
+      call mess(LEVEL_ERROR, prefix//': Old unsupported keywords used: Check Section "Overview of deprecated and removed keywords" in the User Manual for information on how to update the input file.')
+      istat = DFM_WRONGINPUT
    end if
 
 end subroutine final_check_of_mdu_keywords
