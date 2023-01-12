@@ -4436,6 +4436,7 @@ src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/startup_screen.f90 -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/stasub.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/strip.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/usedcp.f -text
+src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/version_info.f90.svn -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/wapdef.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/waqmem.f90 -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/zero.f -text
