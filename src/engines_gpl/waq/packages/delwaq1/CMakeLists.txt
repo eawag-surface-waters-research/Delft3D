@@ -7,7 +7,6 @@ set(waq_version_path ${waq_root_path}/version)
 set(waq_data_path ${waq_root_path}/include)
 
 set(ini_version_file ${waq_version_path}/version_number.ini)
-set(fortran_version_file ${CMAKE_CURRENT_SOURCE_DIR}/src/delwaq1_version.F90)
 set(fortran_version_file_delwaq ${waq_root_path}/packages/delwaq_lib/src/delwaq_version.F90)
 set(rc_version_file ${waq_version_path}/version_number_delwaq1.rc)
 
@@ -17,10 +16,6 @@ set(icon_file ${waq_version_path}/waq_icon.rc)
 
 # Generate version files
 generate_version_files(${rc_version_file}
-                       ${ini_version_file}
-                       ON)
-
-generate_version_files(${fortran_version_file}
                        ${ini_version_file}
                        ON)
 
@@ -43,11 +38,6 @@ add_executable(${executable_name} ${source_files}
 
 # Define prebuild events
 prebuild_version_number(${executable_name} ${rc_version_file}
-                                        ${checkout_src_root}
-                                        ${ini_version_file}
-                                        ON)
-
-prebuild_version_number(${executable_name} ${fortran_version_file}
                                         ${checkout_src_root}
                                         ${ini_version_file}
                                         ON)

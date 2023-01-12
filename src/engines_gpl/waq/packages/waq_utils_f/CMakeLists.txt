@@ -1,6 +1,20 @@
+# Set version file variables
+# Note that the CMAKE_CURRENT_SOURCE_DIR has a path to THIS CMakeLists location
+set(waq_root_path ${CMAKE_CURRENT_SOURCE_DIR}/../..) # Trace back to the WAQ path
+set(waq_version_path ${waq_root_path}/version)
+
+set(ini_version_file ${waq_version_path}/version_number.ini)
+set(fortran_version_file ${CMAKE_CURRENT_SOURCE_DIR}/src/waq_utils/version_info.f90)
+
+# Generate version files
+generate_version_files(${fortran_version_file}
+                       ${ini_version_file}
+                       ON)
+
 # Set directory which contains all source files
 set(src_path src)
 
+# Gather the source files
 set(dlwq_netcdf_path ${src_path}/dlwq_netcdf)
 get_fortran_source_files(${dlwq_netcdf_path} dlwq_netcdf_source)
 
@@ -20,6 +34,12 @@ add_library(${library_name} ${dlwq_netcdf_source}
                             ${mod_couplib_source}
                             ${mod_timings_source}
                             ${waq_utils_source})
+
+# Define prebuild events
+prebuild_version_number(${library_name} ${fortran_version_file}
+                                        ${checkout_src_root}
+                                        ${ini_version_file}
+                                        ON)
 
 # Set dependencies
 if (UNIX)

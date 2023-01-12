@@ -312,7 +312,7 @@ subroutine pronrs( pronam, imodul )
         endif
     enddo
 
-    write(*,*) 'PRONRS:', pronam, imodul
+    !write(*,*) 'PRONRS:', pronam, imodul
 
 end subroutine pronrs
 

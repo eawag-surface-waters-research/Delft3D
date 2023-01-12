@@ -7,15 +7,10 @@ include_directories(${waq_root_path}/include)
 set(waq_version_path ${waq_root_path}/version)
 
 set(ini_version_file ${waq_version_path}/version_number.ini)
-set(fortran_version_file ${CMAKE_CURRENT_SOURCE_DIR}/src/delwaq_version.F90)
 set(rc_version_file ${waq_version_path}/version_number.rc)
 
 # Generate version files
 generate_version_files(${rc_version_file}
-                       ${ini_version_file}
-                       ON)
-
-generate_version_files(${fortran_version_file}
                        ${ini_version_file}
                        ON)
 
@@ -36,15 +31,6 @@ prebuild_version_number(${library_name} ${rc_version_file}
                                         ${checkout_src_root}
                                         ${ini_version_file}
                                         ON)
-
-prebuild_version_number(${library_name} ${fortran_version_file}
-                                        ${checkout_src_root}
-                                        ${ini_version_file}
-                                        ON)
-
-set_source_files_properties(${fortran_version_file}
-                            ${preprocessor_files}
-                            PROPERTIES COMPILE_OPTIONS "${file_preprocessor_flag}")
 
 if (WIN32)
     set(oss_dependencies    deltares_common
