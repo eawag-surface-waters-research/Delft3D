@@ -39,3 +39,13 @@ target_link_libraries(${executable_name} ${oss_dependencies})
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${source_files})
 source_group("Resource" FILES ${version_files})
 set_target_properties (${executable_name} PROPERTIES FOLDER tools_gpl/datsel)
+
+# Set post-build step
+set(install_dir ${CMAKE_BINARY_DIR})
+set(build_dir ${CMAKE_BINARY_DIR})
+
+post_build_target (${executable_name}
+                   ${install_dir} 
+                   ${build_dir} 
+                   ${checkout_src_root} 
+                   ${executable_name})

@@ -227,6 +227,11 @@ rem ===============
     call :flow2d3d
     call :rr_dll
     call :rtc
+    call :nesthd1
+    call :nesthd2
+    call :datsel
+    call :kubint
+    call :lint
 
 goto :endproc
 
@@ -514,6 +519,56 @@ rem =============================================================
     call :copyFile "!checkout_src_root!\third_party_open\netcdf\netCDF 4.6.1\bin\*"                                     !destination!
     call :copyFile "!checkout_src_root!\third_party_open\pthreads\bin\x64\*.dll"                                        !destination!
     call :copyFile "!checkout_src_root!\third_party_open\expat\x64\x64\%configuration%\libexpat.dll"                    !destination!
+
+goto :endproc
+
+
+rem =============================================================
+rem === copies runtime libraries for nesthd1                  ===
+rem =============================================================
+:copyNestHD1DependentRuntimeLibraries
+
+    set destination=%~1
+
+goto :endproc
+
+
+rem =============================================================
+rem === copies runtime libraries for nesthd2                  ===
+rem =============================================================
+:copyNestHD2DependentRuntimeLibraries
+
+    set destination=%~1
+
+goto :endproc
+
+
+rem =============================================================
+rem === copies runtime libraries for datsel                   ===
+rem =============================================================
+:copyDatselDependentRuntimeLibraries
+
+    set destination=%~1
+
+goto :endproc
+
+
+rem =============================================================
+rem === copies runtime libraries for kubint                   ===
+rem =============================================================
+:copyKubintDependentRuntimeLibraries
+
+    set destination=%~1
+
+goto :endproc
+
+
+rem =============================================================
+rem === copies runtime libraries for lint                     ===
+rem =============================================================
+:copyLintDependentRuntimeLibraries
+
+    set destination=%~1
 
 goto :endproc
 
@@ -1589,6 +1644,223 @@ rem ==========================
     )
 
 goto :endproc
+
+
+rem ==========================
+rem === nesthd1
+rem ==========================
+:nesthd1
+
+    echo "postbuild nesthd1. . ."
+
+    if "%configuration%" == "Debug" (
+    
+        echo "Debug postbuild"
+        set dest_bin="!install_dir!\x64\Debug"
+        set dest_share="!install_dir!\x64\Debug"
+        
+        call :makeDir !dest_bin!
+        call :makeDir !dest_share!
+        call :copyNestHD1DependentRuntimeLibraries    !dest_bin!
+        
+        rem copy binaries and dll 
+        call :copyFile "!build_dir!\nesthd1\!configuration!\nesthd1.*"    !dest_bin!
+    )
+    
+    if "%configuration%" == "Release" ( 
+    
+        echo "Release postbuild"
+
+        set dest_bin="!install_dir!\x64\Release\dflow2d3d\bin"
+        set dest_share="!install_dir!\x64\Release\share\bin"
+        
+        call :makeDir !dest_bin!
+        call :makeDir !dest_share!
+        
+        call :copyNestHD1DependentRuntimeLibraries    !dest_bin!
+        
+        rem Temporarily rename dest_bin to share_bin to copy libraries there as well
+        set dest_bin=!dest_share!
+        call :copyNestHD1DependentRuntimeLibraries    !dest_bin!
+        set dest_bin="!install_dir!\x64\Release\dflow2d3d\bin"
+
+        call :copyFile "!build_dir!\nesthd1\!configuration!\nesthd1.*"    !dest_bin! 
+    )
+    
+goto :endproc
+
+
+rem ==========================
+rem === nesthd2
+rem ==========================
+:nesthd2
+
+    echo "postbuild nesthd2. . ."
+
+    if "%configuration%" == "Debug" (
+    
+        echo "Debug postbuild"
+        set dest_bin="!install_dir!\x64\Debug"
+        set dest_share="!install_dir!\x64\Debug"
+        
+        call :makeDir !dest_bin!   
+        call :copyNestHD2DependentRuntimeLibraries    !dest_bin!
+        
+        rem copy binaries and dll 
+        call :copyFile "!build_dir!\nesthd2\!configuration!\nesthd2.*"    !dest_bin!
+    )
+    
+    if "%configuration%" == "Release" ( 
+    
+        echo "Release postbuild"
+
+        set dest_bin="!install_dir!\x64\Release\dflow2d3d\bin"
+        set dest_share="!install_dir!\x64\Release\share\bin"
+        
+        call :makeDir !dest_bin!
+        call :makeDir !dest_share!
+        call :copyNestHD2DependentRuntimeLibraries    !dest_bin!
+        
+        rem Temporarily rename dest_bin to share_bin to copy libraries there as well
+        set dest_bin=!dest_share!
+        call :copyNestHD2DependentRuntimeLibraries    !dest_bin!
+        set dest_bin="!install_dir!\x64\Release\dflow2d3d\bin"
+        
+        rem copy binaries and dll 
+        call :copyFile "!build_dir!\nesthd2\!configuration!\nesthd2.*"    !dest_bin! 
+    )
+    
+goto :endproc
+
+
+rem ==========================
+rem === datsel
+rem ==========================
+:datsel
+
+    echo "postbuild datsel. . ."
+
+    if "%configuration%" == "Debug" (
+    
+        echo "Debug postbuild"
+        set dest_bin="!install_dir!\x64\Debug"
+        set dest_share="!install_dir!\x64\Debug"
+        
+        call :makeDir !dest_bin!   
+        call :copyDatselDependentRuntimeLibraries    !dest_bin!
+        
+        rem copy binaries and dll 
+        call :copyFile "!build_dir!\datsel\!configuration!\datsel.*"    !dest_bin!
+    )
+    
+    if "%configuration%" == "Release" ( 
+    
+        echo "Release postbuild"
+
+        set dest_bin="!install_dir!\x64\Release\dflow2d3d\bin"
+        set dest_share="!install_dir!\x64\Release\share\bin"
+        
+        call :makeDir !dest_bin!
+        call :makeDir !dest_share!
+        call :copyDatselDependentRuntimeLibraries    !dest_bin!
+        
+        rem Temporarily rename dest_bin to share_bin to copy libraries there as well
+        set dest_bin=!dest_share!
+        call :copyDatselDependentRuntimeLibraries    !dest_bin!
+        set dest_bin="!install_dir!\x64\Release\dflow2d3d\bin"
+        
+        rem copy binaries and dll 
+        call :copyFile "!build_dir!\datsel\!configuration!\datsel.*"    !dest_bin! 
+    )
+    
+goto :endproc
+
+
+rem ==========================
+rem === kubint
+rem ==========================
+:kubint
+
+    echo "postbuild kubint. . ."
+
+    if "%configuration%" == "Debug" (
+    
+        echo "Debug postbuild"
+        set dest_bin="!install_dir!\x64\Debug"
+        set dest_share="!install_dir!\x64\Debug"
+        
+        call :makeDir !dest_bin!   
+        call :copyKubintDependentRuntimeLibraries    !dest_bin!
+        
+        rem copy binaries and dll 
+        call :copyFile "!build_dir!\kubint\!configuration!\kubint.*"    !dest_bin!
+    )
+    
+    if "%configuration%" == "Release" ( 
+    
+        echo "Release postbuild"
+
+        set dest_bin="!install_dir!\x64\Release\dflow2d3d\bin"
+        set dest_share="!install_dir!\x64\Release\share\bin"
+        
+        call :makeDir !dest_bin!
+        call :makeDir !dest_share!
+        call :copyKubintDependentRuntimeLibraries    !dest_bin!
+        
+        rem Temporarily rename dest_bin to share_bin to copy libraries there as well
+        set dest_bin=!dest_share!
+        call :copyKubintDependentRuntimeLibraries    !dest_bin!
+        set dest_bin="!install_dir!\x64\Release\dflow2d3d\bin"
+        
+        rem copy binaries and dll 
+        call :copyFile "!build_dir!\kubint\!configuration!\kubint.*"    !dest_bin! 
+    )
+    
+goto :endproc
+
+
+rem ==========================
+rem === lint
+rem ==========================
+:lint
+
+    echo "postbuild lint. . ."
+
+    if "%configuration%" == "Debug" (
+    
+        echo "Debug postbuild"
+        set dest_bin="!install_dir!\x64\Debug"
+        set dest_share="!install_dir!\x64\Debug"
+        
+        call :makeDir !dest_bin!   
+        call :copyLintDependentRuntimeLibraries    !dest_bin!
+        
+        rem copy binaries and dll 
+        call :copyFile "!build_dir!\lint\!configuration!\lint.*"    !dest_bin!
+    )
+    
+    if "%configuration%" == "Release" ( 
+    
+        echo "Release postbuild"
+
+        set dest_bin="!install_dir!\x64\Release\dflow2d3d\bin"
+        set dest_share="!install_dir!\x64\Release\share\bin"
+        
+        call :makeDir !dest_bin!
+        call :makeDir !dest_share!
+        call :copyLintDependentRuntimeLibraries    !dest_bin!
+        
+        rem Temporarily rename dest_bin to share_bin to copy libraries there as well
+        set dest_bin=!dest_share!
+        call :copyLintDependentRuntimeLibraries    !dest_bin!
+        set dest_bin="!install_dir!\x64\Release\dflow2d3d\bin"
+        
+        rem copy binaries and dll 
+        call :copyFile "!build_dir!\lint\!configuration!\lint.*"    !dest_bin! 
+    )
+    
+goto :endproc
+
 
 rem ==========================
 rem === rr_dll
