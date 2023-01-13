@@ -502,9 +502,15 @@ src/cmake/doc/CMake[!!-~]Inventory.xlsx -text
 src/cmake/doc/CMake_for_OSS_tree_[!!-~]project_report.docx -text
 src/cmake/doc/Readme-CMake-GUI.docx -text
 src/cmake/functions.cmake -text
+src/cmake/install_d_hydro/CMakeLists.txt -text
+src/cmake/install_d_hydro/ReadMe.txt -text
+src/cmake/install_d_hydro/install_and_bundle.cmake -text
 src/cmake/install_dimr/CMakeLists.txt -text
 src/cmake/install_dimr/ReadMe.txt -text
 src/cmake/install_dimr/install_and_bundle.cmake -text
+src/cmake/install_flow2d3d/CMakeLists.txt -text
+src/cmake/install_flow2d3d/ReadMe.txt -text
+src/cmake/install_flow2d3d/install_and_bundle.cmake -text
 src/cmake/install_fm/CMakeLists.txt -text
 src/cmake/install_fm/ReadMe.txt -text
 src/cmake/install_fm/install_and_bundle.cmake -text
