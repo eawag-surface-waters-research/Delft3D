@@ -113,7 +113,7 @@
  double precision, allocatable     :: zbndz0(:)         !< waterlevel boundary points function
  double precision, allocatable     :: xy2bndz(:,:)      !< waterlevel boundary 'external tolerance point'
  integer         , allocatable     :: kdz  (:)          !< waterlevel boundary points temp array
- integer         , allocatable     :: kbndz(:,:)        !< waterlevel boundary points index array
+ integer         , allocatable, target :: kbndz(:,:)        !< waterlevel boundary points index array
                                                         !! 1,* = index in s1 boundary point
                                                         !! 2,* = index in s1 first point on the inside
                                                         !! 3,* = index in u1 of their connecting link (always positive to the inside)
