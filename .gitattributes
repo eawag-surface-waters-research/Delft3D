@@ -17503,7 +17503,9 @@ src/tools_gpl/datsel/Makefile.am -text
 src/tools_gpl/datsel/packages/Makefile.am -text
 src/tools_gpl/datsel/packages/datsel/CMakeLists.txt -text
 src/tools_gpl/datsel/packages/datsel/Makefile.am -text
+src/tools_gpl/datsel/packages/datsel/config.h.cmake.in -text
 src/tools_gpl/datsel/packages/datsel/datsel.vcxproj -text
+src/tools_gpl/datsel/packages/datsel/include/FortranCInterface.h -text
 src/tools_gpl/datsel/packages/datsel/src/Makefile.am -text
 src/tools_gpl/datsel/packages/datsel/src/main.cpp -text
 src/tools_gpl/datsel/packages/datsel_f/CMakeLists.txt -text
@@ -17638,6 +17640,8 @@ src/tools_gpl/kubint/Makefile.am -text
 src/tools_gpl/kubint/packages/Makefile.am -text
 src/tools_gpl/kubint/packages/kubint/CMakeLists.txt -text
 src/tools_gpl/kubint/packages/kubint/Makefile.am -text
+src/tools_gpl/kubint/packages/kubint/config.h.cmake.in -text
+src/tools_gpl/kubint/packages/kubint/include/FortranCInterface.h -text
 src/tools_gpl/kubint/packages/kubint/kubint.vcxproj -text
 src/tools_gpl/kubint/packages/kubint/src/Makefile.am -text
 src/tools_gpl/kubint/packages/kubint/src/main.cpp -text
@@ -17673,6 +17677,8 @@ src/tools_gpl/lint/Makefile.am -text
 src/tools_gpl/lint/packages/Makefile.am -text
 src/tools_gpl/lint/packages/lint/CMakeLists.txt -text
 src/tools_gpl/lint/packages/lint/Makefile.am -text
+src/tools_gpl/lint/packages/lint/config.h.cmake.in -text
+src/tools_gpl/lint/packages/lint/include/FortranCInterface.h -text
 src/tools_gpl/lint/packages/lint/lint.vcxproj -text
 src/tools_gpl/lint/packages/lint/src/Makefile.am -text
 src/tools_gpl/lint/packages/lint/src/main.cpp -text
@@ -17711,6 +17717,7 @@ src/tools_gpl/maptonetcdf/packages/maptonetcdf/include/maptonetcdf_version.rc.sv
 src/tools_gpl/maptonetcdf/packages/maptonetcdf/include/resource.h -text
 src/tools_gpl/maptonetcdf/packages/maptonetcdf/include/version_number.ini -text
 src/tools_gpl/maptonetcdf/packages/maptonetcdf/src/maptonetcdf.f90 -text
+src/tools_gpl/maptonetcdf/packages/maptonetcdf/src/maptonetcdf_version.F90 -text
 src/tools_gpl/maptonetcdf/packages/maptonetcdf/src/maptonetcdf_version.F90.svn -text
 src/tools_gpl/maptonetcdf/scripts/run_maptonetcdf.bat -text
 src/tools_gpl/maptonetcdf/scripts/run_maptonetcdf.sh -text
