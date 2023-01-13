@@ -3601,6 +3601,7 @@ src/engines_gpl/waq/packages/delwaq1/CMakeLists.txt -text
 src/engines_gpl/waq/packages/delwaq1/Makefile.am -text
 src/engines_gpl/waq/packages/delwaq1/delwaq1.vfproj -text
 src/engines_gpl/waq/packages/delwaq1/src/Makefile.am -text
+src/engines_gpl/waq/packages/delwaq1/src/delwaq1_version.F90 -text
 src/engines_gpl/waq/packages/delwaq1/src/dlwq1.F90 -text
 src/engines_gpl/waq/packages/delwaq2/CMakeLists.txt -text
 src/engines_gpl/waq/packages/delwaq2/Makefile.am -text
