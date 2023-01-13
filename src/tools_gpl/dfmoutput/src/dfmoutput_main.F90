@@ -208,7 +208,7 @@ if (cli%run_command('mapmerge')) then
 
    call cli%get(group='mapmerge', switch='-f', val = force, error=ierr)
    if (ierr /= 0) goto 888
-pause
+
    ierr = dfm_merge_mapfiles(infiles, ninfiles, outfiles(1), force)
 
 ! MAX_RUNNING_MEAN command for water levels
