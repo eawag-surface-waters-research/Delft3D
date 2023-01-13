@@ -105,8 +105,8 @@
  double precision, allocatable     :: thrtt(:)          !< temp array for Thatcher-Harleman return time readout, stores return times
  integer,          allocatable     :: thrtn(:)          !< temp array for Thatcher-Harleman return time readout, stores cell indices (first one)
 
- integer                           :: nzbnd             !< number of waterlevel boundary segments
- integer                           :: nbndz             !< waterlevel boundary points dimension
+ integer, target                   :: nzbnd             !< number of waterlevel boundary segments
+ integer, target                   :: nbndz             !< waterlevel boundary points dimension
  double precision, allocatable     :: xbndz(:)          !< waterlevel boundary points xcor
  double precision, allocatable     :: ybndz(:)          !< waterlevel boundary points ycor
  double precision, allocatable, target :: zbndz(:)      !< [m] waterlevel boundary points function  {"location": "edge", "shape": ["nbndz"]}
