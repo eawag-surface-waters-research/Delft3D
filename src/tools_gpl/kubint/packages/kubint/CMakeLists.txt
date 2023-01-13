@@ -9,7 +9,7 @@ if (UNIX)
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config.h.cmake.in ${CMAKE_CURRENT_SOURCE_DIR}/include/config.h)  
     set(configFile "${CMAKE_CURRENT_SOURCE_DIR}/include/config.h") 
     
-    include_directories(${NETCDF_INCLUDEDIR}) 
+    include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include) 
     add_definitions(-DHAVE_CONFIG_H=1)
 endif(UNIX)
 
