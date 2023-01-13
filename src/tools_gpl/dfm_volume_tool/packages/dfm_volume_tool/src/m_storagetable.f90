@@ -167,8 +167,8 @@ subroutine getBedToplevel(voltb, numpoints, toplevel, bedlevel)
    double precision, intent(  out) :: bedlevel       !< Lowest level in the model, where cross sections or storage nodes are defined.
 
    integer :: n
-   toplevel = voltb(1)%topheight + voltb(1)%bedlevel
-   bedlevel = voltb(1)%bedlevel
+   toplevel = -huge(1d0)
+   bedlevel = huge(1d0)
    
    do n = 1, numpoints
       toplevel = max(toplevel, voltb(n)%topheight + voltb(n)%bedlevel)
