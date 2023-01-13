@@ -19,10 +19,6 @@ generate_version_files(${rc_version_file}
                        ${ini_version_file}
                        ON)
 
-generate_version_files(${fortran_version_file_delwaq}
-                       ${ini_version_file}
-                       ON)
-
 # Set directory which contains all source files
 set(src_path src)
 

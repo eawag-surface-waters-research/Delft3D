@@ -4,7 +4,7 @@ set(waq_root_path ${CMAKE_CURRENT_SOURCE_DIR}/../..) # Trace back to the WAQ pat
 set(waq_version_path ${waq_root_path}/version)
 
 set(ini_version_file ${waq_version_path}/version_number.ini)
-set(fortran_version_file ${CMAKE_CURRENT_SOURCE_DIR}/src/waq_utils/version_info.f90)
+set(fortran_version_file ${CMAKE_CURRENT_SOURCE_DIR}/src/waq_utils/static_version_info.f90)
 
 # Generate version files
 generate_version_files(${fortran_version_file}
