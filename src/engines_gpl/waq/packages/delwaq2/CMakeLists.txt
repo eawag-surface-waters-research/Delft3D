@@ -38,11 +38,6 @@ prebuild_version_number(${executable_name} ${rc_version_file}
                                         ${ini_version_file}
                                         ON)
 
-prebuild_version_number(${executable_name} ${fortran_version_file_delwaq}
-                                        ${waq_root_path}
-                                        ${ini_version_file}
-                                        ON)
-
 set_source_files_properties(${fortran_version_file} ${fortran_version_file_delwaq}
                             PROPERTIES COMPILE_OPTIONS "${file_preprocessor_flag}")
 
