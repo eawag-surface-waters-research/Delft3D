@@ -1040,6 +1040,7 @@ subroutine readMDUFile(filename, istat)
     endif
 
     call prop_get_integer(md_ptr, 'numerics', 'TransportAutoTimestepdiff' , jatransportautotimestepdiff)
+
     if (jatransportautotimestepdiff == 3 .and. kmx > 0) then
        call mess(LEVEL_ERROR, 'Implicit horizontaldiffusion is only implemented in 2D', 'set TransportAutoTimestepdiff = 0, 1 or 2')
     endif
@@ -1053,6 +1054,8 @@ subroutine readMDUFile(filename, istat)
        endif
     endif
 
+    call prop_get_integer(md_ptr, 'numerics', 'DiagnosticTransport' , jadiagnostictransport)
+    
     call prop_get_integer(md_ptr, 'numerics', 'Vertadvtypsal'       , javasal)
     call prop_get_integer(md_ptr, 'numerics', 'Vertadvtyptem'       , javatem)
     call prop_get_integer(md_ptr, 'numerics', 'Vertadvtypmom'       , javau)
