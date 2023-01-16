@@ -5563,8 +5563,8 @@ end subroutine gatherv_int_data_mpi_dif
       real,             allocatable, dimension(:) :: ubvec           ! specify the allowed load imbalance tolerance for each constraint.=1.001 when ncon=1
       integer                                     :: L, k1, k2
 
-      integer,          allocatable, dimension(:)  :: iadj_tmp
-      integer,          allocatable, dimension(:)  :: iadj, jadj, adjw
+      integer,          allocatable, dimension(:)  :: xadj_tmp
+      integer,          allocatable, dimension(:)  :: xadj, adjncy, adjw
 
       integer,                       external      :: metisopts, METIS_PartGraphKway, METIS_PartGraphRecursive, METIS_PARTMESHDUAL
 
@@ -5663,62 +5663,60 @@ end subroutine gatherv_int_data_mpi_dif
          ubvec = 1.001                      ! allowed load imbalance tolerance
 
 !        generate adjacency structure in CSR format 
-         allocate(iadj(nump1d2d+1), stat=ierror)
-         call aerr('iadj(nump1d2d+1)', ierror, nump1d2d+1)
-         iadj = 0
-         allocate(iadj_tmp(nump1d2d+1), stat=ierror)
-         call aerr('iadj_tmp(nump1d2d+1)', ierror, nump1d2d+1)
+         allocate(xadj(nump1d2d+1), stat=ierror)
+         call aerr('xadj(nump1d2d+1)', ierror, nump1d2d+1)
+         xadj = 0
+         allocate(xadj_tmp(nump1d2d+1), stat=ierror)
+         call aerr('xadj_tmp(nump1d2d+1)', ierror, nump1d2d+1)
 
 !        count number of connection per vertex
-         iadj_tmp = 0
+         xadj_tmp = 0
          do L=1,numL
             if ( lnn(L) > 1 ) then
                k1 = abs(lne(1,L))
                k2 = abs(lne(2,L))
-               iadj_tmp(k1) = iadj_tmp(k1) + 1
-               iadj_tmp(k2) = iadj_tmp(k2) + 1
+               xadj_tmp(k1) = xadj_tmp(k1) + 1
+               xadj_tmp(k2) = xadj_tmp(k2) + 1
             end if
          end do
 
 !        set startpointers
-         iadj(1) = 1
+         xadj(1) = 1
          do k=1,nump1d2d
-            iadj(k+1) = iadj(k) + iadj_tmp(k)
+            xadj(k+1) = xadj(k) + xadj_tmp(k)
          end do
 
 !        set connections
-         allocate(jadj(iadj(nump1d2d+1)-1), stat=ierror)
-         call aerr('jadj(iadj(nump1d2d+1)-1)', ierror, iadj(nump1d2d+1)-1)
-         jadj = 0
+         allocate(adjncy(xadj(nump1d2d+1)-1), stat=ierror)
+         call aerr('adjncy(xadj(nump1d2d+1)-1)', ierror, xadj(nump1d2d+1)-1)
+         adjncy = 0
 
-         iadj_tmp = iadj
+         xadj_tmp = xadj
          do L=1,numL
             if ( lnn(L).gt.1 ) then
                k1 = abs(lne(1,L))
                k2 = abs(lne(2,L))
-               jadj(iadj_tmp(k1)) = k2
-               jadj(iadj_tmp(k2)) = k1
-               iadj_tmp(k1) = iadj_tmp(k1)+1
-               iadj_tmp(k2) = iadj_tmp(k2)+1
+               adjncy(xadj_tmp(k1)) = k2
+               adjncy(xadj_tmp(k2)) = k1
+               xadj_tmp(k1) = xadj_tmp(k1)+1
+               xadj_tmp(k2) = xadj_tmp(k2)+1
             end if
          end do
 
-         allocate(adjw(iadj(nump1d2d+1)-1), stat=ierror)
-         call aerr('jadjw(iadj(nump1d2d+1)-1)', ierror, iadj(nump1d2d+1)-1)
-         adjw = 0
-!        set edge weights and vsize
-         call set_weights_for_METIS(nump1d2d, Nparts, iadj(nump1d2d+1)-1, iadj, jadj,vsize, adjw)
+         allocate(adjw(xadj(nump1d2d+1)-1), stat=ierror)
+         call aerr('jadjw(xadj(nump1d2d+1)-1)', ierror, xadj(nump1d2d+1)-1)
+         call set_edge_weights_and_vsize_for_METIS(nump1d2d, Nparts, xadj(nump1d2d+1)-1, xadj, adjncy, vsize, adjw)
 
 !        make CSR arrays zero-based
-         iadj = iadj-1
-         jadj = jadj-1
+         xadj   = xadj-1
+         adjncy = adjncy-1
       endif
 
      ! netstat = NETSTAT_CELLS_DIRTY
 
       select case (method)
       case (0,1)
-         ierror = METIS_PartGraphKway(Ne, Ncon, iadj, jadj, vwgt, vsize, adjw, Nparts, tpwgts, ubvec, opts, objval, idomain)
+         ierror = METIS_PartGraphKway(Ne, Ncon, xadj, adjncy, vwgt, vsize, adjw, Nparts, tpwgts, ubvec, opts, objval, idomain)
          if (ierror /= METIS_OK .and. jacontiguous == 1) then
             call mess(LEVEL_INFO, 'The above METIS error message is not a problem.')
             call mess(LEVEL_INFO, 'It means that partitioning failed for k-way method with option contiguous=1')
@@ -5726,13 +5724,13 @@ end subroutine gatherv_int_data_mpi_dif
             call mess(LEVEL_INFO, 'contiguous=0.')
             ierror = metisopts(opts, "CONTIG", 0) ! Fallback, allow non-contiguous domains in case of non-contiguous network.
             if (ierror == 0) then ! Note: metisopts does not use METIS_OK status, but simply 0 instead.
-               ierror = METIS_PartGraphKway(Ne, Ncon, iadj, jadj, vwgt, vsize, adjw, Nparts, tpwgts, ubvec, opts, objval, idomain)
+               ierror = METIS_PartGraphKway(Ne, Ncon, xadj, adjncy, vwgt, vsize, adjw, Nparts, tpwgts, ubvec, opts, objval, idomain)
             else
                call mess(LEVEL_ERROR, 'Fallback fails.')
             end if
          end if
       case (2)
-         ierror = METIS_PartGraphRecursive(Ne, Ncon, iadj, jadj, vwgt, vsize, adjw, Nparts, tpwgts, ubvec, opts, objval, idomain)
+         ierror = METIS_PartGraphRecursive(Ne, Ncon, xadj, adjncy, vwgt, vsize, adjw, Nparts, tpwgts, ubvec, opts, objval, idomain)
       case (3)
          ierror = METIS_PARTMESHDUAL(Ne, Nn, eptr, eind, vwgt, vsize, ncommon, Nparts, tpwgts, opts, objval, idomain, npart)
       case default
@@ -6453,47 +6451,77 @@ end subroutine gatherv_int_data_mpi_dif
 ! =================================================================================================
 !> Sets weights of edges and vsize on mesh that is to be partitioned by METIS
 !! If there are structures defined by polylines, then for structure related cells and edges, it gives special values to edges weights and vertex size.
-!! The purpose is to avoid structures intercross partition boundaries.
+!! The purpose is to avoid structures intercross partition boundaries including ghost cells.
 !! NOTE: It uses "Ne/Nparts" as the special weights on structures, othere weight values can also be investigated.
 !! Now ONLY support structures defined by polylines. TODO: support setting special weights on structures that are defined by other ways.
-   subroutine set_weights_for_METIS(Ne, Nparts, njadj, iadj, jadj,vsize, adjw)
-      use m_alloc
-      implicit none
-      integer,                      intent(in)    :: Ne     !< Number of vertices
-      integer,                      intent(in)    :: Nparts !< Number of partition subdomains
-      integer,                      intent(in)    :: njadj  !< Length of array jadj
-      integer, dimension(Ne),       intent(in)    :: iadj   !< Array for mesh structure (CSR format, see METIS manual)
-      integer, dimension(njadj),    intent(in)    :: jadj   !< Array for mesh structure (CSR format, see METIS manual)
-      integer, dimension(njadj),    intent(inout) :: adjw   !< Edge weight
-      integer, dimension(Ne),       intent(inout) :: vsize  !< Size of vertices
+subroutine set_edge_weights_and_vsize_for_METIS(Ne, Nparts, njadj, xadj, adjncy, vsize, adjw)
+   implicit none
+   integer,                    intent(in)    :: Ne     !< Number of vertices
+   integer,                    intent(in)    :: Nparts !< Number of partition subdomains
+   integer,                    intent(in)    :: njadj  !< Length of array adjncy
+   integer, dimension(Ne),     intent(in)    :: xadj   !< The adjacency structure of the graph as described in Section 5.5. of METIS manual
+   integer, dimension(njadj),  intent(in)    :: adjncy !< The adjacency structure of the graph as described in Section 5.5. of METIS manual
+   integer, dimension(njadj),  intent(inout) :: adjw   !< Edge weight used to minimize edge cut (see METIS manual)
+   integer, dimension(Ne),     intent(inout) :: vsize  !< Vertex size used to minimize total communication volume (see METIS manual)
 
-      integer              :: nstrucells         ! Number of netcells that relate to structures
-      integer, allocatable :: istrucells(:)      ! Indices of netcells that relate to structures, there can be duplicated
-                                                 ! indices here, and it is no problem
-      integer              :: i, j, k, val_adjw, val_vsize, val
+   integer                                   :: number_of_vertices_related_to_structures
+   integer, dimension(Ne)                    :: list_of_vertices_related_to_structures
+   integer                                   :: vertex_index, vertex, higher_weight
+   integer, parameter                        :: DEFAULT_WEIGHT_VALUE = 1
+   integer, parameter                        :: INITIAL_HALO_LEVEL   = 0 
 
-      ! Find indices of net cells that relate to structures
-      nstrucells = Ne
-      call realloc(istrucells, nstrucells, keepExisting=.false., fill = 0)
-      call find_netcells_for_structures(nstrucells, istrucells)
+   adjw(:)  = DEFAULT_WEIGHT_VALUE
+   vsize(:) = DEFAULT_WEIGHT_VALUE
 
-      ! Set weights, the structure cells and their connected edges get bigger weights
-      val  = 1
-      if (nstrucells > 0) then      ! If there are structures
-         adjw  = val                ! edge weight, used to minimize edge cut (see METIS manual)
-         vsize = val                ! size of vertex, used to minimize total communication volume (see METIS manual)
-         val_adjw = int(Ne/Nparts)  ! edge weight of structure related edges
-         val_vsize = int(Ne/Nparts) ! size of vertex of structure related cells
+   call find_netcells_for_structures(Ne, number_of_vertices_related_to_structures, list_of_vertices_related_to_structures)
 
-         do i = 1, nstrucells
-            k = istrucells(i)
-            vsize(k) = val_vsize
-            do j = iadj(k), iadj(k+1)-1
-               adjw(j) = val_adjw
-            end do
-         end do
-      else ! no structures, set the same weights
-         adjw  = val
-         vsize = val
+   if (number_of_vertices_related_to_structures > 0) then
+      higher_weight = int(Ne/Nparts)  
+      do vertex_index = 1, number_of_vertices_related_to_structures
+         vertex = list_of_vertices_related_to_structures(vertex_index)
+         call set_edge_weights_and_vsize_with_halo(INITIAL_HALO_LEVEL, vertex, higher_weight, DEFAULT_WEIGHT_VALUE, &
+                                                   Ne, xadj, njadj, adjncy, adjw, vsize)
+      end do
+   end if
+end subroutine set_edge_weights_and_vsize_for_METIS
+    
+!> set edge weight and vsize for vertex and associated edges with halo around structures  
+recursive subroutine set_edge_weights_and_vsize_with_halo(halo_level, vertex, higher_weight, default_weight_value, &
+                                                          size_xadj, xadj, size_jadj, adjncy, adjw, vsize)
+   implicit none
+   integer,                        intent(in)    :: halo_level           !< halo_level around the structures
+   integer,                        intent(in)    :: vertex               !< vertex of the graph
+   integer,                        intent(in)    :: higher_weight        !< higher_weight to be assigned to vsize and adjw around structures
+   integer,                        intent(in)    :: default_weight_value !< default_weight_value
+   integer,                        intent(in)    :: size_xadj            !< size of xadj array
+   integer, dimension(size_xadj),  intent(in)    :: xadj                 !< starting points for adjacency list, the adjacency structure of the graph is described in Section 5.5. of METIS manual
+   integer,                        intent(in)    :: size_jadj            !< size of adjacency list array
+   integer, dimension(size_jadj),  intent(in)    :: adjncy               !< adjacency list, the adjacency structure of the graph is described in Section 5.5. of METIS manual
+   integer, dimension(size_jadj),  intent(inout) :: adjw                 !< Edge weight used to minimize edge cut (see METIS manual)
+   integer, dimension(size_xadj),  intent(inout) :: vsize                !< Vertex size used to minimize total communication volume (see METIS manual)
+
+   integer, parameter     :: MAX_HALO_LEVEL  = 6 ! perhaps, it is too strong, some experiments are needed on MAX_HALO_LEVEL and MAX_GHOST_LEVEL
+   integer, parameter     :: MAX_GHOST_LEVEL = 4 ! maxghostlev_sall is not defined yet at this stage 
+   integer                :: edge, next_halo_level, next_halo_level_higher_weight
+   
+   if ( halo_level <= MAX_HALO_LEVEL .and. higher_weight > default_weight_value ) then
+      next_halo_level = halo_level + 1
+      if ( halo_level > MAX_GHOST_LEVEL ) then 
+          next_halo_level_higher_weight = higher_weight / 2 ! an attemp to smooth constraints
+      else
+          next_halo_level_higher_weight = higher_weight
       end if
-   end subroutine set_weights_for_METIS
+      
+      if ( vsize(vertex) < higher_weight ) then
+           vsize(vertex) = higher_weight
+      end if
+      do edge = xadj(vertex), xadj(vertex + 1) - 1
+         if ( adjw(edge) < higher_weight ) then
+              adjw(edge) = higher_weight
+         end if
+         call set_edge_weights_and_vsize_with_halo(next_halo_level, adjncy(edge), next_halo_level_higher_weight, &
+                                         default_weight_value, size_xadj, xadj, size_jadj, adjncy, adjw, vsize)
+      end do
+   end if
+end subroutine set_edge_weights_and_vsize_with_halo
+    
