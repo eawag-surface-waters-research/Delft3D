@@ -48,6 +48,8 @@ if(WIN32)
                             netcdff
                             part_data_f
                             part_io_f
+                            io_hyd
+                            io_netcdf
                             waq_data
                             waq_kernel
                             waq_plugin_wasteload

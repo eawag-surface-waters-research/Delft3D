@@ -73,7 +73,8 @@ endif(UNIX)
 if(WIN32)
     set(oss_dependencies    delwaq_lib
                             netcdf4
-                            netcdff)
+                            netcdff
+                            waq_utils_f)
     target_link_libraries(${executable_name} ${oss_dependencies})
 endif(WIN32)
 
