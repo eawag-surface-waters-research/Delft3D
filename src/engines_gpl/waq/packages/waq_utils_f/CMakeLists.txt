@@ -41,7 +41,12 @@ prebuild_version_number(${library_name} ${fortran_version_file}
                                         ${ini_version_file}
                                         ON)
 
+
 # Set dependencies
+set(oss_dependencies_general deltares_common
+                             waq_data
+                             io_netcdf)
+
 if (UNIX)
     # the `pkg_check_modules` function is created with this call
     find_package(PkgConfig REQUIRED)
@@ -52,9 +57,8 @@ if (UNIX)
 
     # WARNING: waq_process and waq_util_f are (weakly) circular dependent
     # Just add waq_process to "target_lib_libraries", nothing more
-    set(oss_dependencies    deltares_common
-                            waq_data
-                            io_netcdf)
+    set(oss_dependencies ${oss_dependencies_general})
+
     target_link_libraries(${library_name}
          ${oss_dependencies}
          waq_process
@@ -62,11 +66,9 @@ if (UNIX)
          PkgConfig::NETCDF_FTN)
 endif(UNIX)
 if (WIN32)
-    set(oss_dependencies    deltares_common
-                            waq_data
-                            io_netcdf
-                            netcdf4
-                            netcdff)
+    set(oss_dependencies ${oss_dependencies_general}
+                         netcdf4
+                         netcdff)
 endif(WIN32)
 
 oss_include_libraries(${library_name} oss_dependencies)

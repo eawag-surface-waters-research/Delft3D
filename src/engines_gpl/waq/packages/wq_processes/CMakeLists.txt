@@ -36,7 +36,13 @@ prebuild_version_number(${library_name} ${fortran_version_file}
 set_source_files_properties(${fortran_version_file}
                             PROPERTIES COMPILE_OPTIONS "${file_preprocessor_flag}")
 
+
 # Set dependencies
+set(oss_dependencies_general deltares_common
+                             waq_process
+                             waq_utils_c
+                             waq_utils_f)
+
 if (UNIX)
     # the `pkg_check_modules` function is created with this call
     find_package(PkgConfig REQUIRED)
@@ -45,22 +51,17 @@ if (UNIX)
     pkg_check_modules(NETCDF     REQUIRED IMPORTED_TARGET netcdf)
     pkg_check_modules(NETCDF_FTN REQUIRED IMPORTED_TARGET netcdf-fortran)
 
-    set(oss_dependencies    deltares_common
-                            waq_process
-                            waq_utils_c
-                            waq_utils_f)
+    set(oss_dependencies ${oss_dependencies_general})
+
     target_link_libraries(${library_name}
          ${oss_dependencies}
          PkgConfig::NETCDF
          PkgConfig::NETCDF_FTN)
 endif(UNIX)
 if (WIN32)
-    set(oss_dependencies    deltares_common
-                            netcdf4
-                            netcdff
-                            waq_process
-                            waq_utils_c
-                            waq_utils_f)
+    set(oss_dependencies ${oss_dependencies_general}
+                         netcdf4
+                         netcdff)
 endif(WIN32)
 
 oss_include_libraries(${library_name} oss_dependencies)

@@ -1,3 +1,10 @@
+# Set directory which contains all source files
+set(src_path src)
+
+# Gather source files
+get_fortran_source_files(${src_path} source_files)
+
+
 # Define include directories
 # Note that the CMAKE_CURRENT_SOURCE_DIR has a path to THIS CMakeLists location
 set(part_root_path ${CMAKE_CURRENT_SOURCE_DIR}/../../) # Trace back to the WAQ path
@@ -15,11 +22,7 @@ generate_version_files(${fortran_version_file}
                        ${ini_version_file} 
                        ON)
 
-# Set directory which contains all source files
-set(src_path src)
 
-# Gather source files
-get_fortran_source_files(${src_path} source_files)
 
 # Define executable
 set(executable_name delpar)
