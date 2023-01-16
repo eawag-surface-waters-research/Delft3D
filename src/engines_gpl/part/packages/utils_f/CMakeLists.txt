@@ -1,14 +1,6 @@
 # Set directory which contains all source files
 set(src_path src)
 
-# Gather source files
-get_fortran_source_files(${src_path} source_files)
-
-# Define library
-set(library_name part_utils_f)
-add_library(${library_name} ${source_files})
-
-
 # Set version file variables
 # Note that the CMAKE_CURRENT_SOURCE_DIR has a path to THIS CMakeLists location
 set(ini_version_file ${CMAKE_CURRENT_SOURCE_DIR}/../../res/version_number.ini)
@@ -17,6 +9,14 @@ set(fortran_version_file ${CMAKE_CURRENT_SOURCE_DIR}/${src_path}/part_version.F9
 generate_version_files(${fortran_version_file} 
                        ${ini_version_file} 
                        ON)
+
+# Gather source files
+get_fortran_source_files(${src_path} source_files)
+
+# Define library
+set(library_name part_utils_f)
+add_library(${library_name} ${source_files})
+
 
 
 set(oss_dependencies_general deltares_common

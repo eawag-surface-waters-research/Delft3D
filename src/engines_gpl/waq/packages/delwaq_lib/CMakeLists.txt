@@ -32,27 +32,22 @@ prebuild_version_number(${library_name} ${rc_version_file}
                                         ${ini_version_file}
                                         ON)
 
-
-set(oss_dependencies_general deltares_common
-                             deltares_common_c
-                             waq_delftio
-                             io_netcdf
-                             nefis
-                             waq_data
-                             waq_io
-                             waq_kernel
-                             waq_plugin_wasteload
-                             waq_process
-                             waq_utils_c
-                             waq_utils_f
-                             part_utils_f)
-
-
 if (WIN32)
-    set(oss_dependencies ${oss_dependencies_general}
-                         netcdf4
-                         netcdff)
-
+    set(oss_dependencies    deltares_common
+                            deltares_common_c
+                            waq_delftio
+                            io_netcdf
+                            nefis
+                            netcdf4
+                            netcdff
+                            waq_data
+                            waq_io
+                            waq_kernel
+                            waq_plugin_wasteload
+                            waq_process
+                            waq_utils_c
+                            waq_utils_f
+                            part_utils_f)
     oss_include_libraries(${library_name} oss_dependencies)
     target_link_libraries(${library_name} ${oss_dependencies})
     target_include_directories(${library_name} PRIVATE ${mpi_include_path})
@@ -96,8 +91,19 @@ if (UNIX)
     pkg_check_modules(NETCDF REQUIRED IMPORTED_TARGET netcdf)
     pkg_check_modules(NETCDF_FTN REQUIRED IMPORTED_TARGET netcdf-fortran)
 
-    set(oss_dependencies ${oss_dependencies_general})
-
+    set(oss_dependencies    deltares_common
+                            deltares_common_c
+                            waq_delftio
+                            io_netcdf
+                            nefis
+                            waq_data
+                            waq_io
+                            waq_kernel
+                            waq_plugin_wasteload
+                            waq_process
+                            waq_utils_c
+                            waq_utils_f
+                            part_utils_f)
     oss_include_libraries(${library_name} oss_dependencies)
     target_link_libraries(${library_name}
          ${oss_dependencies}
