@@ -10920,6 +10920,10 @@ subroutine unc_write_net_ugrid2(ncid, id_tsp, janetcell, jaidomain, jaiglobal_s)
                   KC(K2) = 1
                end if
             end if
+            if ((n1 > nump .and. n2 > nump) .or. (n1 <= nump .and. n2 <= nump)) then
+              n1d2dcontacts = n1d2dcontacts -1
+            endif
+            
          end if
       enddo
 
@@ -10977,11 +10981,14 @@ subroutine unc_write_net_ugrid2(ncid, id_tsp, janetcell, jaidomain, jaiglobal_s)
 
             else if (kn(3,L) == 3 .or. kn(3,L) == 4 .or. kn(3,L) == 5 .or. kn(3,L) == 7) then  ! 1d2d, lateralLinks, streetinlet, roofgutterpipe
                ! 1D2D-type net links, with cell info available.
-               n1d2dcontacts = n1d2dcontacts + 1
-
+                
                N1 = abs(lne(1,L))
                N2 = abs(lne(2,L))
-
+               if ((n1 > nump .and. n2 > nump) .or. (n1 <= nump .and. n2 <= nump)) then !invalid 1d2dlink
+                    cycle
+               endif 
+               
+               n1d2dcontacts = n1d2dcontacts + 1
                if (N1 > nump) then  ! First point of 1D link is 1D cell
                   contacts(1,n1d2dcontacts) = abs(KC(netcell(N1)%nod(1))) ! cell -> orig node -> new node
                   contacts(2,n1d2dcontacts) = N2   ! 2D cell number in network_data is the same in UGRID mesh2d numbering (see below).
