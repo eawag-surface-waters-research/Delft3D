@@ -18,6 +18,18 @@ add_library(${library_name} ${mpidum_files}
                             ${waq_io_files})
 
 # Set dependencies
+set(oss_dependencies_general deltares_common
+                             part_data_f
+                             part_io_f
+                             io_hyd
+                             io_netcdf
+                             waq_data
+                             waq_kernel
+                             waq_plugin_wasteload
+                             waq_utils_c
+                             waq_utils_f) 
+
+
 if(UNIX)
     # the `pkg_check_modules` function is created with this call
     find_package(PkgConfig REQUIRED)
@@ -26,16 +38,7 @@ if(UNIX)
     pkg_check_modules(NETCDF     REQUIRED IMPORTED_TARGET netcdf)
     pkg_check_modules(NETCDF_FTN REQUIRED IMPORTED_TARGET netcdf-fortran)
 
-    set(oss_dependencies    deltares_common
-                            part_data_f
-                            part_io_f
-                            io_hyd
-                            io_netcdf
-                            waq_data
-                            waq_kernel
-                            waq_plugin_wasteload
-                            waq_utils_c
-                            waq_utils_f) 
+    set(oss_dependencies ${oss_dependencies_general})
 
     target_link_libraries(${library_name}
          ${oss_dependencies}
@@ -43,18 +46,9 @@ if(UNIX)
          PkgConfig::NETCDF_FTN)
 endif(UNIX)
 if(WIN32)
-    set(oss_dependencies    deltares_common
-                            netcdf4
-                            netcdff
-                            part_data_f
-                            part_io_f
-                            io_hyd
-                            io_netcdf
-                            waq_data
-                            waq_kernel
-                            waq_plugin_wasteload
-                            waq_utils_c
-                            waq_utils_f) 
+    set(oss_dependencies ${oss_dependencies_general}
+                         netcdf4
+                         netcdff)
 
     target_link_libraries(${library_name} ${oss_dependencies})
 endif(WIN32)
