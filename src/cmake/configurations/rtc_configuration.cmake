@@ -1,5 +1,3 @@
-project(drr)
-
 # DRR Rainfall Runoff
 # ============
 add_subdirectory(${checkout_src_root}/${rtc_module} rtc)
@@ -49,3 +47,6 @@ if(WIN32)
         add_subdirectory(${checkout_src_root}/${netcdf_module} netcdff)
     endif()
 endif()
+
+# Project name must be at the end of the configuration: it might get a name when including other configurations and needs to overwrite that
+project(drr)

@@ -1,5 +1,3 @@
-project(rr)
-
 # RR Rainfall Runoff
 # ============
 add_subdirectory(${checkout_src_root}/${rr_dll_module} rr_dll)
@@ -89,3 +87,6 @@ endif()
 if(NOT TARGET kdtree_wrapper)
     add_subdirectory(${checkout_src_root}/${kdtree_wrapper_module} kdtree_wrapper)
 endif()
+
+# Project name must be at the end of the configuration: it might get a name when including other configurations and needs to overwrite that
+project(rr)

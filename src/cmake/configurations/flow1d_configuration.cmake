@@ -1,4 +1,3 @@
-project(flow1d)
 # ============
 add_subdirectory(${checkout_src_root}/${flow1d_cf_module} delftflow)
 add_subdirectory(${checkout_src_root}/${flow1d_kernel_cf_module} kernel_cf)
@@ -117,3 +116,5 @@ if(NOT TARGET d_hydro_lib)
     add_subdirectory(${checkout_src_root}/${d_hydro_lib_module} d_hydro_lib)
 endif()
 
+# Project name must be at the end of the configuration: it might get a name when including other configurations and needs to overwrite that
+project(flow1d)

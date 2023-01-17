@@ -1,5 +1,3 @@
-project(flow1d2d)
-
 # flow1d2d
 # ============
 add_subdirectory(${checkout_src_root}/${flow1d2d_module} flow1d2d)
@@ -22,3 +20,6 @@ endif()
 
 # Third party
 # ===========
+
+# Project name must be at the end of the configuration: it might get a name when including other configurations and needs to overwrite that
+project(flow1d2d)
