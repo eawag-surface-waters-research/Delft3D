@@ -38,6 +38,7 @@
  use unstruc_model, only: md_restartfile
  use unstruc_channel_flow
  use m_1d_structures, only: initialize_structures_actual_params, set_u0isu1_structures
+ use m_nearfield, only : nearfield_mode, NEARFIELD_DISABLED, setNFEntrainmentMomentum
  use dfm_error
  use MessageHandling
  use m_partitioninfo
@@ -159,6 +160,12 @@ endif
 
  if (nshiptxy > 0) then
      call setship()                                        ! in initimestep
+ endif
+
+ if (nearfield_mode /= NEARFIELD_DISABLED .and. NFEntrainmentMomentum > 0) then
+     !
+     ! Update momentum exchange, based on current flow field
+     call setNFEntrainmentMomentum()
  endif
 
  call timstrt('Compute advection term', handle_extra(41)) ! Start advec

@@ -622,6 +622,7 @@ third_party_open/version_number/Makefile
 third_party_open/version_number/packages/Makefile
 third_party_open/version_number/packages/version_number/Makefile
 third_party_open/version_number/packages/version_number/src/Makefile
+tools_gpl/cosumo_bmi/Makefile
 tools_gpl/datsel/Makefile
 tools_gpl/datsel/packages/datsel_f/Makefile
 tools_gpl/datsel/packages/datsel_f/src/Makefile

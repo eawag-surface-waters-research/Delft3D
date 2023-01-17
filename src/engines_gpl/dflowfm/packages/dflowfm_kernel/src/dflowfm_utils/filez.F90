@@ -605,9 +605,9 @@ subroutine unstruc_errorhandler(level)
     use unstruc_messages
     use unstruc_files
     use dfm_error
+    use m_partitioninfo, only: DFM_COMM_DFMWORLD, jampi
 #ifdef HAVE_MPI
     use mpi
-    use m_partitioninfo, only: DFM_COMM_DFMWORLD, jampi
 #endif
     implicit none
     integer, intent(in) :: level

@@ -56,6 +56,7 @@
  use m_integralstats, is_is_numndvals=>is_numndvals
  use m_xbeach_data, only: bccreated
  use m_oned_functions
+ use m_nearfield, only: reset_nearfieldData
  use m_alloc
  use m_bedform
  use m_fm_update_crosssections, only: fm_update_mor_width_area, fm_update_mor_width_mean_bedlevel
@@ -113,6 +114,8 @@
  call resetflow()
 
  call reset_waq()
+
+ call reset_nearfieldData()
 
  call timstop(handle_extra(1)) ! End basic steps
 

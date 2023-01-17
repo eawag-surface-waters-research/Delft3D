@@ -518,6 +518,7 @@ subroutine default_flowexternalforcings()
     nzbnd = 0
     nubnd = 0
     numsrc  = 0
+    numsrc_nf = 0
 end subroutine default_flowexternalforcings
 
 end module m_flowexternalforcings

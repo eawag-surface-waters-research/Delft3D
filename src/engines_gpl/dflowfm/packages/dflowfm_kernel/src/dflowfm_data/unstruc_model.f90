@@ -1315,6 +1315,8 @@ subroutine readMDUFile(filename, istat)
     ! Set molecular viscosity
     vismol = 4.d0/(20.d0 + backgroundwatertemperature)*1d-5 ! Van Rijn, 1993, from iniphys.f90
 
+    call prop_get_integer(md_ptr, 'physics', 'NFEntrainmentMomentum'  , NFEntrainmentMomentum)
+
     call prop_get_integer(md_ptr, 'veg',     'Vegetationmodelnr', javeg) ! Vegetation model nr, (0=no, 1=Baptist DFM)
     if( japillar == 2 ) then
        javeg = 1
@@ -1923,6 +1925,7 @@ subroutine readMDUFile(filename, istat)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_bnd', jamapbnd, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_Qin', jamapqin, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_every_dt', jaeverydt, success)
+    call prop_get_integer(md_ptr, 'output', 'Wrimap_NearField', jamapNearField, success)
 
     !if (md_mapformat /= 4 .and. jamapwindstress /= 0) then
      !  call mess(LEVEL_ERROR, 'writing windstress to mapfile is only implemented for NetCDF - UGrid (mapformat=4)')
@@ -3367,6 +3370,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
        end if
 
     endif
+    call prop_set(prop_ptr, 'physics', 'NFEntrainmentMomentum', NFEntrainmentMomentum, '1: Switch on momentum transfer in NearField related entrainment')
 
 ! secondary flow
 ! output to mdu file
@@ -4022,6 +4026,10 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     if (jaFrcInternalTides2D > 0 .and. (writeall .or. jamapIntTidesDiss /=1 )) then
        call prop_set(prop_ptr, 'output', 'Wrimap_internal_tides_dissipation', jamapIntTidesDiss, 'Write internal tides dissipation to map file (1: yes, 0: no)')
     end if
+
+    if (writeall .or. jamapNearField /= 0) then
+        call prop_set(prop_ptr, 'output', 'Wrimap_NearField', jamapNearField, 'Write near field parameters (1: yes, 0: no)')
+    endif
 
     call prop_set(prop_ptr, 'output', 'Writepart_domain', japartdomain, 'Write partition domain info. for postprocessing')
 

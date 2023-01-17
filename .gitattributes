@@ -2564,6 +2564,7 @@ src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_utils/unstruc_opengi
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_utils/unstruc_opengl.F90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_utils/unstruc_shapefile.F90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_utils/unstruc_startup.f90 -text
+src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/nearfield.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/to_thirdparty/rcm.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/unstruc_version.F90.svn -text
 src/engines_gpl/dflowfm/packages/dflowfm_lib/CMakeLists.txt -text

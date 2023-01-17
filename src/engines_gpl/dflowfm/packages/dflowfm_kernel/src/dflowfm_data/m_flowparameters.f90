@@ -542,6 +542,7 @@ integer                            :: javau3onbnd = 0   !< vert. adv. u1 bnd Upw
  integer                           :: jamapqin                  !< Includes sum of all influxes in map output
  integer                           :: jaeverydt                 !< Write output to map file every dt, based on start and stop from MapInterval, 0=no (default), 1=yes
  integer                           :: jamapFlowAnalysis         !< Write flow analysis output to map file   
+ integer                           :: jamapNearField            !< Nearfield related output
 
 ! read from restart
  integer                           :: jarstignorebl             !< Flag indicating if bed level on restart file should be ignored (0/1, default: 0)
@@ -994,6 +995,7 @@ subroutine default_flowparameters()
     jamapTotalInflowLat = 0
     jamapS1Gradient = 0
     jamapFlowAnalysis = 0
+    jamapNearField = 0
 
     jarstignorebl = 0
 
