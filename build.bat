@@ -518,8 +518,8 @@ rem =======================
         del /f/q del.log
         echo.
         echo.
-        echo "Executing python ..\src\scripts_lgpl\artifacts_cleaner.py --product delft3d4 --root ."
-        python src\scripts_lgpl\artifacts_cleaner.py --product delft3d4 --root .
+        echo "Executing python src\scripts_lgpl\artifacts_cleaner.py --product delft3d4 --root build_delft3d4"
+        python src\scripts_lgpl\artifacts_cleaner.py --product delft3d4 --root build_delft3d4
     )
     goto :endproc
 
