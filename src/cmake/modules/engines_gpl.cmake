@@ -75,5 +75,5 @@ set(install_wave_module cmake/install_wave)
 set(install_dimr_module cmake/install_dimr)
 set(install_tests_module cmake/install_tests)
 set(install_d_hydro_module cmake/install_d_hydro)
-set(install_d_hydro_module cmake/install_flow2d3d)
+set(install_flow2d3d_module cmake/install_flow2d3d)
 
