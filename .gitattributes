@@ -4607,6 +4607,7 @@ src/m4/fortranextra.m4 -text
 src/m4/gwqt.m4 -text
 src/m4/pkg.m4 -text
 src/plugins_lgpl/Makefile.am -text
+src/plugins_lgpl/plugin_culvert/CMakeLists.txt -text
 src/plugins_lgpl/plugin_culvert/Makefile.am -text
 src/plugins_lgpl/plugin_culvert/plugin_culvert.sln -text
 src/plugins_lgpl/plugin_culvert/plugin_culvert.vfproj -text
@@ -4614,6 +4615,7 @@ src/plugins_lgpl/plugin_culvert/src/Makefile.am -text
 src/plugins_lgpl/plugin_culvert/src/Makefile_external -text
 src/plugins_lgpl/plugin_culvert/src/README -text
 src/plugins_lgpl/plugin_culvert/src/plugin_culvert.f90 -text
+src/plugins_lgpl/plugin_delftflow_traform/CMakeLists.txt -text
 src/plugins_lgpl/plugin_delftflow_traform/Makefile.am -text
 src/plugins_lgpl/plugin_delftflow_traform/plugin_delftflow_traform.sln -text
 src/plugins_lgpl/plugin_delftflow_traform/plugin_delftflow_traform.vfproj -text

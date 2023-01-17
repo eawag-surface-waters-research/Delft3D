@@ -225,6 +225,8 @@ rem ===============
     call :flow1d2d
     call :d_hydro
     call :flow2d3d
+    call :plugin_culvert
+    call :plugin_delftflow_traform
     call :rr_dll
     call :rtc
     call :nesthd1
@@ -267,6 +269,7 @@ rem =============================================================
     call :makeDir !dest_share!
 
 goto :endproc
+
 
 
 rem =============================================================
@@ -449,6 +452,7 @@ rem =============================================================
 goto :endproc
 
 
+
 rem =============================================================
 rem === copies runtime libraries for SwanOMP                  ===
 rem =============================================================
@@ -458,6 +462,7 @@ rem =============================================================
     call :copyFile "!checkout_src_root!\third_party_open\netcdf\netCDF 4.6.1\bin\*"                                     !destination!
 
 goto :endproc
+
 
 
 rem =============================================================
@@ -471,6 +476,8 @@ rem =============================================================
 
 goto :endproc
 
+
+
 rem =============================================================
 rem === copies runtime libraries for flow1d                   ===
 rem =============================================================
@@ -482,6 +489,8 @@ rem =============================================================
     call :copyFile "!checkout_src_root!\third_party_open\pthreads\bin\x64\*.dll"                                        !destination!
 
 goto :endproc
+
+
 
 rem =============================================================
 rem === copies runtime libraries for flow1d2d                 ===
@@ -496,6 +505,7 @@ rem =============================================================
 goto :endproc
 
 
+
 rem =============================================================
 rem === copies runtime libraries for D_HYDRO        ===
 rem =============================================================
@@ -507,6 +517,7 @@ rem =============================================================
     call :copyFile "!checkout_src_root!\third_party_open\expat\x64\x64\%configuration%\libexpat.dll"                    !destination!
 
 goto :endproc
+
 
 
 rem =============================================================
@@ -523,6 +534,7 @@ rem =============================================================
 goto :endproc
 
 
+
 rem =============================================================
 rem === copies runtime libraries for nesthd1                  ===
 rem =============================================================
@@ -531,6 +543,7 @@ rem =============================================================
     set destination=%~1
 
 goto :endproc
+
 
 
 rem =============================================================
@@ -543,6 +556,7 @@ rem =============================================================
 goto :endproc
 
 
+
 rem =============================================================
 rem === copies runtime libraries for datsel                   ===
 rem =============================================================
@@ -551,6 +565,7 @@ rem =============================================================
     set destination=%~1
 
 goto :endproc
+
 
 
 rem =============================================================
@@ -563,6 +578,7 @@ rem =============================================================
 goto :endproc
 
 
+
 rem =============================================================
 rem === copies runtime libraries for lint                     ===
 rem =============================================================
@@ -571,6 +587,7 @@ rem =============================================================
     set destination=%~1
 
 goto :endproc
+
 
 
 rem =============================================================
@@ -586,6 +603,8 @@ rem =============================================================
 
 goto :endproc
 
+
+
 rem =============================================================
 rem === copies runtime libraries for RTC                      ===
 rem =============================================================
@@ -596,6 +615,8 @@ rem =============================================================
     call :copyFile "!checkout_src_root!\third_party_open\pthreads\bin\x64\*.dll"                                        !destination!
 
 goto :endproc
+
+
 
 rem ==========================
 rem === POST_BUILD_DFLOWFM_DLL
@@ -781,6 +802,7 @@ rem ==========================
     )
 
 goto :endproc
+
 
 
 rem ==========================
@@ -1193,7 +1215,6 @@ goto :endproc
 
 
 
-
 rem ==========================
 rem === POST_BUILD_ddcouple
 rem ==========================
@@ -1313,6 +1334,8 @@ rem ==========================
 
 goto :endproc
 
+
+
 rem ==========================
 rem === POST_BUILD_wave_exe
 rem ==========================
@@ -1358,6 +1381,8 @@ rem ==========================
     )
 
 goto :endproc
+
+
 
 rem ==========================
 rem === POST_BUILD_swan_omp
@@ -1408,6 +1433,7 @@ rem ==========================
 goto :endproc
 
 
+
 rem ==========================
 rem === POST_BUILD_swan_mpi
 rem ==========================
@@ -1454,6 +1480,8 @@ rem ==========================
     )
 
 goto :endproc
+
+
 
 rem ==========================
 rem === cf_dll (flow1d)
@@ -1504,6 +1532,8 @@ rem ==========================
 
 goto :endproc
 
+
+
 rem ==========================
 rem === flow1d2d
 rem ==========================
@@ -1553,6 +1583,8 @@ rem ==========================
 
 goto :endproc
 
+
+
 rem ==========================
 rem === POST_BUILD_D_HYDRO
 rem ==========================
@@ -1566,8 +1598,8 @@ rem ==========================
 
     call :makeDir !dest_bin!
 
-    call :copyDHydroDependentRuntimeLibraries                                                                               !dest_bin!
-    call :copyFile "!build_dir!\d_hydro\!configuration!\d_hydro.*"                                                              !dest_bin!
+    call :copyDHydroDependentRuntimeLibraries                                                             !dest_bin!
+    call :copyFile "!build_dir!\d_hydro\!configuration!\d_hydro.*"                                        !dest_bin!
     )
 
 
@@ -1583,13 +1615,15 @@ rem ==========================
     set dest_schema="!install_dir!\x64\Release\d_hydro\schema"
 
     call :makeAllDirs
-    call :copyDHydroDependentRuntimeLibraries                                                                             !dest_share!
-    call :copyFile "!build_dir!\d_hydro\!configuration!\d_hydro.exe"                                                          !dest_bin!
+    call :copyDHydroDependentRuntimeLibraries                                                             !dest_share!
+    call :copyFile "!build_dir!\d_hydro\!configuration!\d_hydro.exe"                                      !dest_bin!
 
-    call :copyFile "!checkout_src_root!\engines_gpl\d_hydro\scripts\create_config_xml.tcl"                              !dest_menu!
+    call :copyFile "!checkout_src_root!\engines_gpl\d_hydro\scripts\create_config_xml.tcl"                !dest_menu!
     )
 
 goto :endproc
+
+
 
 rem ==========================
 rem === POST_BUILD_flow2d3d
@@ -1610,10 +1644,10 @@ rem ==========================
         set dest_share="!install_dir!\x64\Debug"
 
         call :makeDir !dest_bin!
-        call :copyFlow2D3DDependentRuntimeLibraries                                                                             !dest_bin!
+        call :copyFlow2D3DDependentRuntimeLibraries                                                       !dest_bin!
 
         rem copy binaries and dll
-        call :copyFile "!build_dir!\flow2d3d\!configuration!\flow2d3d.*"                                                      !dest_bin!
+        call :copyFile "!build_dir!\flow2d3d\!configuration!\flow2d3d.*"                                  !dest_bin!
     )
 
     if "%configuration%" == "Release" (
@@ -1627,23 +1661,112 @@ rem ==========================
         set dest_share="!install_dir!\x64\Release\share\bin"
 
         call :makeAllDirs
-        call :copyFlow2D3DDependentRuntimeLibraries                                                                             !dest_bin!
+        call :copyFlow2D3DDependentRuntimeLibraries                                                       !dest_bin!
 
         rem Temporarily rename dest_bin to share_bin to copy libraries there as well
         set dest_bin=!dest_share!
-        call :copyFlow2D3DDependentRuntimeLibraries                                                                             !dest_bin!
+        call :copyFlow2D3DDependentRuntimeLibraries                                                       !dest_bin!
         set dest_bin="!install_dir!\x64\Release\dflow2d3d\bin"
 
         rem copy binaries and dll
-        call :copyFile "!build_dir!\flow2d3d\!configuration!\flow2d3d.*"                                                      !dest_bin!
+        call :copyFile "!build_dir!\flow2d3d\!configuration!\flow2d3d.*"                                  !dest_bin!
 
-        call :copyFile "!checkout_src_root!\engines_gpl\flow2d3d\scripts\*.bat"                                                 !dest_scripts!
-        call :copyFile "!checkout_src_root!\engines_gpl\flow2d3d\scripts\*.m"                                                   !dest_scripts!
+        call :copyFile "!checkout_src_root!\engines_gpl\flow2d3d\scripts\*.bat"                           !dest_scripts!
+        call :copyFile "!checkout_src_root!\engines_gpl\flow2d3d\scripts\*.m"                             !dest_scripts!
 
-        call :copyFile "!checkout_src_root!\engines_gpl\flow2d3d\default\*"                                                     !dest_default!
+        call :copyFile "!checkout_src_root!\engines_gpl\flow2d3d\default\*"                               !dest_default!
     )
 
 goto :endproc
+
+
+
+rem ==========================
+rem === POST_BUILD_plugin_culvert
+rem ==========================
+:plugin_culvert
+
+    echo "postbuild plugin_culvert. . ."
+
+    if "%configuration%" == "Debug" (
+
+        echo "Debug postbuild"
+        set dest_bin="%install_dir%\x64\Debug"
+
+        set dest_bin="!install_dir!\x64\Debug"
+        set dest_default="!install_dir!\x64\Debug"
+        set dest_scripts="!install_dir!\x64\Debug"
+        set dest_plugins="!install_dir!\x64\Debug"
+        set dest_share="!install_dir!\x64\Debug"
+
+        call :makeDir !dest_bin!
+
+        rem copy binaries and dll
+        call :copyFile "!build_dir!\plugin_culvert\!configuration!\plugin_culvert.*"                                  !dest_bin!
+    )
+
+    if "%configuration%" == "Release" (
+
+        echo "Release postbuild"
+
+        set dest_bin="!install_dir!\x64\Release\dflow2d3d\bin"
+        set dest_default="!install_dir!\x64\Release\dflow2d3d\default"
+        set dest_scripts="!install_dir!\x64\Release\dflow2d3d\scripts"
+        set dest_plugins="!install_dir!\x64\Release\plugins\bin"
+        set dest_share="!install_dir!\x64\Release\share\bin"
+
+        call :makeAllDirs
+
+        rem copy binaries and dll
+        call :copyFile "!build_dir!\plugin_culvert\!configuration!\plugin_culvert.*"                      !dest_bin!
+    )
+
+goto :endproc
+
+
+
+rem ==========================
+rem === POST_BUILD_plugin_delftflow_traform
+rem ==========================
+:plugin_delftflow_traform
+
+    echo "postbuild plugin_delftflow_traform. . ."
+
+    if "%configuration%" == "Debug" (
+
+        echo "Debug postbuild"
+        set dest_bin="%install_dir%\x64\Debug"
+
+        set dest_bin="!install_dir!\x64\Debug"
+        set dest_default="!install_dir!\x64\Debug"
+        set dest_scripts="!install_dir!\x64\Debug"
+        set dest_plugins="!install_dir!\x64\Debug"
+        set dest_share="!install_dir!\x64\Debug"
+
+        call :makeDir !dest_bin!
+
+        rem copy binaries and dll
+        call :copyFile "!build_dir!\plugin_delftflow_traform\!configuration!\plugin_delftflow_traform.*"                                  !dest_bin!
+    )
+
+    if "%configuration%" == "Release" (
+
+        echo "Release postbuild"
+
+        set dest_bin="!install_dir!\x64\Release\dflow2d3d\bin"
+        set dest_default="!install_dir!\x64\Release\dflow2d3d\default"
+        set dest_scripts="!install_dir!\x64\Release\dflow2d3d\scripts"
+        set dest_plugins="!install_dir!\x64\Release\plugins\bin"
+        set dest_share="!install_dir!\x64\Release\share\bin"
+
+        call :makeAllDirs
+
+        rem copy binaries and dll
+        call :copyFile "!build_dir!\plugin_delftflow_traform\!configuration!\plugin_delftflow_traform.*"                      !dest_bin!
+    )
+
+goto :endproc
+
 
 
 rem ==========================
@@ -1690,6 +1813,7 @@ rem ==========================
 goto :endproc
 
 
+
 rem ==========================
 rem === nesthd2
 rem ==========================
@@ -1731,6 +1855,7 @@ rem ==========================
     )
     
 goto :endproc
+
 
 
 rem ==========================
@@ -1776,6 +1901,7 @@ rem ==========================
 goto :endproc
 
 
+
 rem ==========================
 rem === kubint
 rem ==========================
@@ -1819,6 +1945,7 @@ rem ==========================
 goto :endproc
 
 
+
 rem ==========================
 rem === lint
 rem ==========================
@@ -1860,6 +1987,7 @@ rem ==========================
     )
     
 goto :endproc
+
 
 
 rem ==========================
@@ -1911,6 +2039,8 @@ rem ==========================
 
 goto :endproc
 
+
+
 rem ==========================
 rem === rtc
 rem ==========================
@@ -1959,6 +2089,9 @@ rem ==========================
     )
 
 goto :endproc
+
+
+
 rem ===========================
 rem === POST_BUILD_GRIDGEOM_DLL
 rem ===========================
@@ -1988,6 +2121,7 @@ rem ===========================
     )
 
 goto :endproc
+
 
 
 rem ==================================
@@ -2023,6 +2157,7 @@ rem ==================================
     )
 
 goto :endproc
+
 
 
 rem ===============================
