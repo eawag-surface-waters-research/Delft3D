@@ -19613,10 +19613,13 @@ src/utils_lgpl/esmfsm/tests/allocate_local/Makefile.am -text
 src/utils_lgpl/esmfsm/tests/allocate_local/allocate.cpp -text
 src/utils_lgpl/esmfsm/tests/allocate_local/allocate_local.plg -text
 src/utils_lgpl/esmfsm/tests/allocate_local/allocate_local.vcproj -text
+src/utils_lgpl/esmfsm/tests/esm_create/CMakeLists.txt -text
 src/utils_lgpl/esmfsm/tests/esm_create/Makefile.am -text
 src/utils_lgpl/esmfsm/tests/esm_create/esm_create.c -text
+src/utils_lgpl/esmfsm/tests/esm_delete/CMakeLists.txt -text
 src/utils_lgpl/esmfsm/tests/esm_delete/Makefile.am -text
 src/utils_lgpl/esmfsm/tests/esm_delete/esm_delete.c -text
+src/utils_lgpl/esmfsm/tests/esm_info/CMakeLists.txt -text
 src/utils_lgpl/esmfsm/tests/esm_info/Makefile.am -text
 src/utils_lgpl/esmfsm/tests/esm_info/esm_info.c -text
 src/utils_lgpl/esmfsm/tests/sizeof.c -text

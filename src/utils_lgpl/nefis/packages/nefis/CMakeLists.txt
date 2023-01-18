@@ -71,7 +71,8 @@ set_target_properties (${library_name} PROPERTIES FOLDER utils_lgpl/nefis)
 # nefis_dll
 ###############
 string(TOUPPER ${CONFIGURATION_TYPE} configuration_type)
-if ( ${configuration_type} STREQUAL "TOOLS" )    
+if ( ${configuration_type} STREQUAL "DELFT3D4" OR 
+     ${configuration_type} STREQUAL "TOOLS" )    
     set(library_name nefis_dll)
 
     add_library(${library_name} ${headers} ${source} ${ini_version_file})
