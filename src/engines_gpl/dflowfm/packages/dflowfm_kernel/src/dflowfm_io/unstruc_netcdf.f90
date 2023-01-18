@@ -237,7 +237,10 @@ type t_unc_mapids
    integer :: id_taus(MAX_ID_VAR)     = -1 !< Variable ID for
    integer :: id_tausmax(MAX_ID_VAR)     = -1 !< Variable ID for
    integer :: id_tausx(MAX_ID_VAR)    = -1 !< Variable ID for
-   integer :: id_tausy(MAX_ID_VAR)    = -1 !< Variable ID for   
+   integer :: id_tausy(MAX_ID_VAR)    = -1 !< Variable ID for
+   integer :: id_tidep(MAX_ID_VAR)    = -1 !< Variable ID for
+   integer :: id_salp(MAX_ID_VAR)     = -1 !< Variable ID for
+   integer :: id_IntTidesDiss(MAX_ID_VAR)  = -1 !< Variable ID for
    integer :: id_ucx(MAX_ID_VAR)      = -1 !< Variable ID for
    integer :: id_ucy(MAX_ID_VAR)      = -1 !< Variable ID for
    integer :: id_ucz(MAX_ID_VAR)      = -1 !< Variable ID for
@@ -5191,6 +5194,30 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
          endif
       endif
 
+      if ( jamaptidep > 0 .and. jatidep > 0 ) then
+        if ( jaselfal == 0 ) then
+           ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_tidep, nf90_double, UNC_LOC_S, &
+               'TidalPotential', 'TidalPotential', 'TidalPotential in flow element center', 'm2 s-2', &
+               jabndnd=jabndnd_)
+        else
+           ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_tidep, nf90_double, UNC_LOC_S, &
+               'TidalPotential_without_SAL', 'TidalPotential without SAL', 'TidalPotential without SAL in flow element center',&
+               'm2 s-2', jabndnd=jabndnd_)
+        end if
+     end if
+     if ( jamapselfal > 0 ) then
+        if ( jaselfal >  0 ) then
+            ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_salp, nf90_double, UNC_LOC_S, &
+                'SALPotential', 'SALPotential', 'SALPotential in flow element center', 'm2 s-2', jabndnd=jabndnd_)
+        end if
+     end if
+
+     if ( jaFrcInternalTides2D > 0 .and. jamapIntTidesDiss > 0 ) then
+        ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_IntTidesDiss, nf90_double, UNC_LOC_S, &
+            'internal_tides_dissipation', 'internal_tides_dissipation', 'internal tides dissipation in flow element center',&
+            'J s-1 m-2', jabndnd=jabndnd_)
+     end if
+
       ! Chezy data on flow nodes and flow links
       ! Input roughness value and type on flow links for input check (note: overwritten when jatrt==1)
       if (jamapchezy > 0) then
@@ -7209,6 +7236,30 @@ if (jamapsed > 0 .and. jased > 0 .and. stm_included) then
       endif                                                                                                               ! JRE+BJ to do: keep this one, or through moroutput 
    end if
 
+   if ( jatidep > 0 .and. jamaptidep == 1 ) then
+     if ( jaselfal == 0 ) then
+        do k = 1, Ndx
+            workx(k) = tidep(1,k) 
+        end do
+     else ! write potential without SAL and SAL potential
+        do k = 1, Ndx
+          workx(k) = tidep(1,k) - tidep(2,k)
+        end do
+     end if
+     ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_tidep, UNC_LOC_S, workx(1:ndx), jabndnd=jabndnd_)
+   end if
+   if ( jaselfal > 0 .and. jamapselfal == 1 ) then
+     do k = 1, Ndx
+        workx(k) = tidep(2,k) 
+     end do
+     ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_salp, UNC_LOC_S, workx(1:ndx), jabndnd=jabndnd_)
+   end if
+
+   if ( jaFrcInternalTides2D >  0 .and. jamapIntTidesDiss == 1 ) then
+     ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_inttidesdiss, UNC_LOC_S, DissInternalTidesPerArea(1:ndx), jabndnd=jabndnd_)  
+   end if
+       
+   
    if (jamapchezy > 0) then
       ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_czs , UNC_LOC_S, czs, jabndnd=jabndnd_)
       ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_czu , UNC_LOC_U, czu, jabndnd=jabndnd_)
