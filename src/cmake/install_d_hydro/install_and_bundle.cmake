@@ -1,6 +1,6 @@
-set(BUILD_LIBRARIES
-   ${CMAKE_INSTALL_PREFIX}/lib/libd_hydro_lib.so
-)
+# set(BUILD_LIBRARIES
+#    ${CMAKE_INSTALL_PREFIX}/lib/libd_hydro_lib.so
+# )
 set(THIRDPARTY_x64_LIB_FOLDERS
   ${CMAKE_INSTALL_PREFIX}
   ${CMAKE_INSTALL_PREFIX}/bin
@@ -23,12 +23,7 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/../src/cmake/functions.cmake)
 
 set(BU_CHMOD_BUNDLE_ITEMS 1)
 
-fixup_bundle("${CMAKE_INSTALL_PREFIX}/bin/d_hydro" "${BUILD_LIBRARIES}" "${THIRDPARTY_x64_LIB_FOLDERS}")
-
-# Ugly way to rename file "libd_hydro_lib.so" to "libd_hydro.so", repairing the reference in d_hydro
-message("Renaming libd_hydro_lib.so to libd_hydro.so, repairing reference in d_hydro")
-file(RENAME ${CMAKE_INSTALL_PREFIX}/lib/libd_hydro_lib.so ${CMAKE_INSTALL_PREFIX}/lib/libd_hydro.so)
-execute_process(COMMAND bash -c "patchelf --replace-needed libd_hydro_lib.so libd_hydro.so ${CMAKE_INSTALL_PREFIX}/bin/d_hydro")
+# fixup_bundle("${CMAKE_INSTALL_PREFIX}/bin/d_hydro" "${BUILD_LIBRARIES}" "${THIRDPARTY_x64_LIB_FOLDERS}")
 
 
 set_rpath("${CMAKE_INSTALL_PREFIX}/bin" "$ORIGIN:$ORIGIN/../lib")
