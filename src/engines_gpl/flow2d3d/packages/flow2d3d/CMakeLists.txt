@@ -190,3 +190,6 @@ post_build_target (${library_name}
                    ${build_dir} 
                    ${checkout_src_root} 
                    ${library_name})
+
+install(TARGETS ${library_name} DESTINATION lib)
+
