@@ -1,6 +1,6 @@
 set(executable_name esm_info)
 set(src_path .)
-set(esfsm_include_path ${CMAKE_CURRENT_SOURCE_DIR}/../../include) # Trace back to the esmfsm path
+set(esmfsm_include_path ${CMAKE_CURRENT_SOURCE_DIR}/../../include) # Trace back to the esmfsm path
 set(esm_include_path ${CMAKE_CURRENT_SOURCE_DIR}/../../packages/esmfsm_c/include)
 
 if (UNIX)
@@ -17,13 +17,13 @@ if (UNIX)
 endif(UNIX)
 
 # Gather source files
-file(GLOB esm_global_header_files ${esfsm_include_path}/*.h)
+file(GLOB esm_global_header_files ${esmfsm_include_path}/*.h)
 file(GLOB esm_header_files ${esm_include_path}/*.h)
 file(GLOB source_files ${src_path}/*.c)
 
 # Define executable
 add_executable(${executable_name} ${source_files}
-                                  ${esfsm_include_path}
+                                  ${esmfsm_include_path}
                                   ${esm_include_path})
 
 # Set dependencies
@@ -38,13 +38,13 @@ if(UNIX)
     target_link_libraries(${executable_name} Threads::Threads)
     target_include_directories(${executable_name} 
                                PRIVATE  
-                               ${esfsm_include_path}
+                               ${esmfsm_include_path}
                                ${esm_include_path})
 endif(UNIX)
 if (WIN32)
     target_include_directories(${executable_name} 
                                PRIVATE  
-                               ${esfsm_include_path}
+                               ${esmfsm_include_path}
                                ${esm_include_path}
                                "${checkout_src_root}/third_party_open/pthreads/include/x64")
     target_link_directories(${executable_name}
@@ -75,7 +75,7 @@ target_link_libraries(${executable_name} ${oss_dependencies})
 
 # Define how the files should be structured within Visual Studio
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${source_files}
-                                                    ${esfsm_include_path}
+                                                    ${esmfsm_include_path}
                                                     ${esm_include_path})
 set_target_properties (${executable_name} PROPERTIES FOLDER utils_lgpl/esmfsm/test)
 
