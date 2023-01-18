@@ -1,4 +1,6 @@
-set(library_name flow2d3d)
+# WARNING: The space before the closing bracket is essential.
+#          It's used by script changeprecision.tcl
+set(library_name flow2d3d )
 
 # Set directory which contains all source files
 set(src_path src)
@@ -192,4 +194,3 @@ post_build_target (${library_name}
                    ${library_name})
 
 install(TARGETS ${library_name} DESTINATION lib)
-

@@ -1659,6 +1659,7 @@ rem ==========================
 rem === POST_BUILD_flow2d3d
 rem ==========================
 :flow2d3d
+:flow2d3d_sp
     echo "postbuild flow2d3d. . ."
     if "%configuration%" == "Debug" (
         echo "Debug postbuild"
@@ -1671,7 +1672,8 @@ rem ==========================
         call :makeDir !dest_bin!
         call :copyFlow2D3DDependentRuntimeLibraries                                                       !dest_bin!
         rem copy binaries and dll
-        call :copyFile "!build_dir!\flow2d3d\!configuration!\flow2d3d.*"                                  !dest_bin!
+        rem take care of both flow2d3d and flow2d3d_sp
+        call :copyFile "!build_dir!\flow2d3d\!configuration!\flow2d3d*.*"                                  !dest_bin!
     )
     if "%configuration%" == "Release" (
         echo "Release postbuild"
@@ -1687,7 +1689,8 @@ rem ==========================
         call :copyFlow2D3DDependentRuntimeLibraries                                                       !dest_bin!
         set dest_bin="!install_dir!\x64\Release\dflow2d3d\bin"
         rem copy binaries and dll
-        call :copyFile "!build_dir!\flow2d3d\!configuration!\flow2d3d.*"                                  !dest_bin!
+        rem take care of both flow2d3d and flow2d3d_sp
+        call :copyFile "!build_dir!\flow2d3d\!configuration!\flow2d3d*.*"                                  !dest_bin!
         call :copyFile "!checkout_src_root!\engines_gpl\flow2d3d\scripts\*.bat"                           !dest_scripts!
         call :copyFile "!checkout_src_root!\engines_gpl\flow2d3d\scripts\*.m"                             !dest_scripts!
         call :copyFile "!checkout_src_root!\engines_gpl\flow2d3d\default\*"                               !dest_default!

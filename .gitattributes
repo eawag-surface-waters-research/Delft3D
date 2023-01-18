@@ -19430,7 +19430,9 @@ src/utils_lgpl/deltares_common/packages/deltares_common_mpi/src/quickin_dep_file
 src/utils_lgpl/deltares_common/packages/deltares_common_nompi/deltares_common_nompi.vfproj -text
 src/utils_lgpl/deltares_common/scripts/changeprecision.tcl -text
 src/utils_lgpl/deltares_common/scripts/doubleprecision.bat -text
+src/utils_lgpl/deltares_common/scripts/doubleprecision.sh -text
 src/utils_lgpl/deltares_common/scripts/singleprecision.bat -text
+src/utils_lgpl/deltares_common/scripts/singleprecision.sh -text
 src/utils_lgpl/deltares_common/tests/01_getenv_test/main.c -text
 src/utils_lgpl/deltares_common/tests/01_getenv_test/test_01.f90 -text
 src/utils_lgpl/deltares_common/tests/01_getenv_test/test_01.vcproj -text

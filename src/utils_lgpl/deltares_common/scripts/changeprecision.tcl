@@ -39,6 +39,7 @@ lappend files [file join $rootdir ".." ".." "engines_gpl" "flow2d3d" "packages" 
 # parse flow2d3d/Makefile.am twice for two strings to be replaced
 lappend files [file join $rootdir ".." ".." "engines_gpl" "flow2d3d" "packages" "flow2d3d" "src" "Makefile.am"]
 lappend files [file join $rootdir ".." ".." "engines_gpl" "flow2d3d" "packages" "flow2d3d" "src" "Makefile.am"]
+lappend files [file join $rootdir ".." ".." "engines_gpl" "flow2d3d" "packages" "flow2d3d" "CMakeLists.txt"]
 
 # file types:
 # f: fortran
@@ -53,6 +54,8 @@ lappend filetypes "o"
 # flow2d3d/Makefile.am:
 lappend filetypes "o"
 lappend filetypes "o"
+# CMakeLists.txt:
+lappend filetypes "o"
 
 set hplines {}
 lappend hplines "integer, parameter :: fp=hp"
@@ -63,6 +66,8 @@ lappend hplines "flow2d3d.dll"
 # flow2d3d/Makefile.am:
 lappend hplines "libflow2d3d.la"
 lappend hplines "libflow2d3d_la"
+# CMakeLists.txt:
+lappend hplines "library_name flow2d3d "
 
 set splines {}
 lappend splines "integer, parameter :: fp=sp"
@@ -73,6 +78,8 @@ lappend splines "flow2d3d_sp.dll"
 # flow2d3d/Makefile.am:
 lappend splines "libflow2d3d_sp.la"
 lappend splines "libflow2d3d_sp_la"
+# CMakeLists.txt:
+lappend splines "library_name flow2d3d_sp "
 
 puts "The following files are going to be changed:"
 foreach f $files {
@@ -180,7 +187,7 @@ for {set i 0} {$i<[llength $files]} {incr i} {
          if {[lindex $filetypes $i] == "o"} {
             if { $mode == "double" } {
                puts "   sp word deactivated."
-               regsub -all [lindex $splines $i] $line [lindex $hplines $i] line 
+               regsub -all [lindex $splines $i] $line [lindex $hplines $i] line
                lappend newfile $line
             } else {
                puts "   sp word already activated; not changed."
