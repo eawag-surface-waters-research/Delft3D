@@ -2865,7 +2865,7 @@ use meshdata, only : ug_idsLen, ug_idsLongNamesLen
     end subroutine partition_fill_ghostsendlist_nonoverlap
    
    
-   subroutine update_ghosts(itype, NDIM, N, var, ierror)
+   subroutine update_ghosts(itype, NDIM, N, var, ierror, ignore_orientation)
 #ifdef HAVE_MPI   
       use mpi
 #endif      
@@ -2880,9 +2880,8 @@ use meshdata, only : ug_idsLen, ug_idsLongNamesLen
       integer,                                     intent(in)    :: N            !< number of flownodes/links
       double precision, dimension(NDIM*N),         intent(inout) :: var          !< solution
       integer,                                     intent(out)   :: ierror       !< error (1) or not (0)
-      
+      logical,                                     intent(in), optional :: ignore_orientation !< Ignore orientation of ghost and own location, useful for directionless quantities on u-points. Default: .false.
 
-      
       ierror = 1
       
       if ( .not.allocated(isendlist_sall) ) goto 1234   ! safety
@@ -2892,19 +2891,19 @@ use meshdata, only : ug_idsLen, ug_idsLongNamesLen
             call qnerror('update_ghosts, ITYPE_S: numbering error', ' ', ' ')
             goto 1234
          end if
-         call update_ghost_loc(ndomains, NDIM, N, var, nghostlist_s(ndomains-1), ighostlist_s, nghostlist_s, nsendlist_s(ndomains-1), isendlist_s, nsendlist_s, itag_s, ierror)
+         call update_ghost_loc(ndomains, NDIM, N, var, nghostlist_s(ndomains-1), ighostlist_s, nghostlist_s, nsendlist_s(ndomains-1), isendlist_s, nsendlist_s, itag_s, ierror, ignore_orientation=ignore_orientation)
       else if ( itype.eq.ITYPE_SALL ) then
          if ( N.ne.Ndx) then
             call qnerror('update_ghosts, ITYPE_Sall: numbering error', ' ', ' ')
             goto 1234
          end if
-         call update_ghost_loc(ndomains, NDIM, N, var, nghostlist_sall(ndomains-1), ighostlist_sall, nghostlist_sall, nsendlist_sall(ndomains-1), isendlist_sall, nsendlist_sall, itag_sall, ierror)
+         call update_ghost_loc(ndomains, NDIM, N, var, nghostlist_sall(ndomains-1), ighostlist_sall, nghostlist_sall, nsendlist_sall(ndomains-1), isendlist_sall, nsendlist_sall, itag_sall, ierror, ignore_orientation=ignore_orientation)
       else if ( itype.eq.ITYPE_U ) then
          if ( N.ne.Lnx) then
             call qnerror('update_ghosts, ITYPE_U: numbering error', ' ', ' ')
             goto 1234
          end if
-         call update_ghost_loc(ndomains, NDIM, N, var, nghostlist_u(ndomains-1), ighostlist_u, nghostlist_u, nsendlist_u(ndomains-1), isendlist_u, nsendlist_u, itag_u, ierror)
+         call update_ghost_loc(ndomains, NDIM, N, var, nghostlist_u(ndomains-1), ighostlist_u, nghostlist_u, nsendlist_u(ndomains-1), isendlist_u, nsendlist_u, itag_u, ierror, ignore_orientation=ignore_orientation)
 !
 !     3D-extension         
       else if ( itype.eq.ITYPE_S3D ) then
@@ -2912,26 +2911,26 @@ use meshdata, only : ug_idsLen, ug_idsLongNamesLen
             call qnerror('update_ghosts, ITYPE_S3D: numbering error', ' ', ' ')
             goto 1234
          end if
-         call update_ghost_loc(ndomains, NDIM, N, var, nghostlist_s(ndomains-1), ighostlist_s, nghostlist_s, nsendlist_s(ndomains-1), isendlist_s, nsendlist_s, itag_s, ierror, nghostlist_s_3D, nsendlist_s_3D, kmxn, kbot)
+         call update_ghost_loc(ndomains, NDIM, N, var, nghostlist_s(ndomains-1), ighostlist_s, nghostlist_s, nsendlist_s(ndomains-1), isendlist_s, nsendlist_s, itag_s, ierror, nghostlist_s_3D, nsendlist_s_3D, kmxn, kbot, ignore_orientation=ignore_orientation)
       else if ( itype.eq.ITYPE_SALL3D ) then
          if ( N.ne.Ndkx) then
             call qnerror('update_ghosts, ITYPE_Sall3D: numbering error', ' ', ' ')
             goto 1234
          end if
-         call update_ghost_loc(ndomains, NDIM, N, var, nghostlist_sall(ndomains-1), ighostlist_sall, nghostlist_sall, nsendlist_sall(ndomains-1), isendlist_sall, nsendlist_sall, itag_sall, ierror, nghostlist_sall_3D, nsendlist_sall_3D, kmxn, kbot)
+         call update_ghost_loc(ndomains, NDIM, N, var, nghostlist_sall(ndomains-1), ighostlist_sall, nghostlist_sall, nsendlist_sall(ndomains-1), isendlist_sall, nsendlist_sall, itag_sall, ierror, nghostlist_sall_3D, nsendlist_sall_3D, kmxn, kbot, ignore_orientation=ignore_orientation)
       else if ( itype.eq.ITYPE_U3D ) then
          if ( N.ne.Lnkx) then
             call qnerror('update_ghosts, ITYPE_U3D: numbering error', ' ', ' ')
             goto 1234
          end if
 !         call update_ghost_loc(ndomains, NDIM, N, var, nghostlist_u(ndomains-1), ighostlist_u, nghostlist_u, nsendlist_u(ndomains-1), isendlist_u, nsendlist_u, itag_u, ierror, nghost3d=nghostlist_u_3D, nsend3d=nsendlist_u_3D, kmxnL=kmxL, kbot=Lbot)
-         call update_ghost_loc(ndomains, NDIM, N, var, nghostlist_u(ndomains-1), ighostlist_u, nghostlist_u, nsendlist_u(ndomains-1), isendlist_u, nsendlist_u, itag_u, ierror, nghostlist_u_3D, nsendlist_u_3D, kmxL, Lbot)
+         call update_ghost_loc(ndomains, NDIM, N, var, nghostlist_u(ndomains-1), ighostlist_u, nghostlist_u, nsendlist_u(ndomains-1), isendlist_u, nsendlist_u, itag_u, ierror, nghostlist_u_3D, nsendlist_u_3D, kmxL, Lbot, ignore_orientation=ignore_orientation)
        else if ( itype.eq.ITYPE_U3DW ) then
          if ( N.ne.Lnkx) then
             call qnerror('update_ghosts, ITYPE_U3DW: numbering error', ' ', ' ')
             goto 1234
          end if
-         call update_ghost_loc(ndomains, NDIM, N, var, nghostlist_u(ndomains-1), ighostlist_u, nghostlist_u, nsendlist_u(ndomains-1), isendlist_u, nsendlist_u, itag_u, ierror, nghostlist_u_3Dw, nsendlist_u_3Dw, kmxL+1, Lbot-1)
+         call update_ghost_loc(ndomains, NDIM, N, var, nghostlist_u(ndomains-1), ighostlist_u, nghostlist_u, nsendlist_u(ndomains-1), isendlist_u, nsendlist_u, itag_u, ierror, nghostlist_u_3Dw, nsendlist_u_3Dw, kmxL+1, Lbot-1, ignore_orientation=ignore_orientation)
                  
 !     overlap
       else if ( itype.eq.ITYPE_Snonoverlap ) then
@@ -2940,9 +2939,9 @@ use meshdata, only : ug_idsLen, ug_idsLongNamesLen
             goto 1234
          end if
          if ( jaoverlap.eq.1 ) then
-            call update_ghost_loc(ndomains, NDIM, N, var, nghostlist_snonoverlap(ndomains-1), ighostlist_snonoverlap, nghostlist_snonoverlap, nsendlist_snonoverlap(ndomains-1), isendlist_snonoverlap, nsendlist_snonoverlap, itag_snonoverlap, ierror)
+            call update_ghost_loc(ndomains, NDIM, N, var, nghostlist_snonoverlap(ndomains-1), ighostlist_snonoverlap, nghostlist_snonoverlap, nsendlist_snonoverlap(ndomains-1), isendlist_snonoverlap, nsendlist_snonoverlap, itag_snonoverlap, ierror, ignore_orientation=ignore_orientation)
          else  ! no overlap: use sall
-            call update_ghost_loc(ndomains, NDIM, N, var, nghostlist_sall(ndomains-1), ighostlist_sall, nghostlist_sall, nsendlist_sall(ndomains-1), isendlist_sall, nsendlist_sall, itag_sall, ierror)
+            call update_ghost_loc(ndomains, NDIM, N, var, nghostlist_sall(ndomains-1), ighostlist_sall, nghostlist_sall, nsendlist_sall(ndomains-1), isendlist_sall, nsendlist_sall, itag_sall, ierror, ignore_orientation=ignore_orientation)
          end if
       else
          call qnerror('update_ghosts: unknown ghost type', ' ', ' ')
@@ -2959,7 +2958,7 @@ use meshdata, only : ug_idsLen, ug_idsLongNamesLen
      
 !> update ghost values
 !>   3D extension: we assume that kbot/Lbot and kmxn/kmxL match their counterparts in the other domain(s)
-   subroutine update_ghost_loc(ndomains, NDIM, N, s, numghost, ighost, nghost, numsend, isend, nsend, itag, ierror, nghost3d, nsend3d, kmxnL, kbot)
+   subroutine update_ghost_loc(ndomains, NDIM, N, s, numghost, ighost, nghost, numsend, isend, nsend, itag, ierror, nghost3d, nsend3d, kmxnL, kbot, ignore_orientation)
 #ifdef HAVE_MPI   
       use mpi
 #endif      
@@ -2971,7 +2970,7 @@ use meshdata, only : ug_idsLen, ug_idsLongNamesLen
       integer,                                     intent(in)     :: ndomains        !< number of subdomains
       integer,                                     intent(in)     :: NDIM            !< number of unknowns per flownode/link
       integer,                                     intent(in)     :: N               !< number of flownodes/links
-      double precision, dimension(NDIM*N),         intent(inout)  :: s               !< solution
+      double precision, dimension(NDIM*N),         intent(inout)  :: s               !< Solution. Note: will correct for orientation between ghost and own location if needed (typically only for u-points).
       integer,                                     intent(in)     :: numghost        !< number of ghost nodes/links
       integer,          dimension(numghost),       intent(in)     :: ighost          !< ghost nodes/links
       integer,          dimension(-1:ndomains-1),  intent(in)     :: nghost          !< ghost list pointers
@@ -2985,6 +2984,7 @@ use meshdata, only : ug_idsLen, ug_idsLongNamesLen
       integer,          dimension(-1:ndomains-1),  intent(in), optional :: nsend3d   !< number of unknowns to be send     per domain
       integer,          dimension(N),              intent(in), optional :: kmxnL     !< number of layers
       integer,          dimension(N),              intent(in), optional :: kbot      !< bottom layer indices
+      logical,                                     intent(in), optional :: ignore_orientation !< Ignore orientation of ghost and own location, useful for directionless quantities on u-points. Default: .false.
 
 !      double precision, dimension(:), allocatable                :: work         ! work array
 #ifdef HAVE_MPI
@@ -3002,6 +3002,7 @@ use meshdata, only : ug_idsLen, ug_idsLongNamesLen
 !      double precision, parameter                                 :: DNOCELL = -1234.5678
       
       character(len=1024)                                         :: str
+      logical :: ignore_orientation_
 #endif
       ierror = 1
 #ifdef HAVE_MPI
@@ -3010,6 +3011,11 @@ use meshdata, only : ug_idsLen, ug_idsLongNamesLen
       ja3d = 0
       if ( present(nghost3d) .and. present(nsend3d) .and. present(kmxnL) .and. present(kbot) ) then
          ja3d = 1
+      end if
+
+      ignore_orientation_ = .false.
+      if (present(ignore_orientation)) then
+         ignore_orientation_ = ignore_orientation
       end if
          
 !     allocate work array (will be reallocated later)
@@ -3206,7 +3212,12 @@ use meshdata, only : ug_idsLen, ug_idsLongNamesLen
                 if ( ighost(i).gt.0 ) then
                    s(ighost(i)) = workrec(i)
                 else if ( ighost(i).lt.0 ) then
-                   s(-ighost(i)) = -workrec(i)
+                   ! Some quantities may not need an orientation fix on u-points:
+                   if (ignore_orientation_) then
+                      s(-ighost(i)) =  workrec(i)
+                   else
+                      s(-ighost(i)) = -workrec(i)
+                   end if
                 end if
                   
 !               else  ! no cell was found during handshake
