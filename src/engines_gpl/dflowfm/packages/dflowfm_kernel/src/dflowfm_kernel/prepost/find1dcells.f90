@@ -82,7 +82,11 @@
          endif
 
          if (nc1 .ne. 0 .and. nc1 == nc2) then
-             nc2 = 0
+             ! Both net nodes inside 2D cell, but assume that the first is
+             ! then the 1D net node (because unc_read_net_ugrid() always
+             ! sets the 1D side of 1D2D mesh contacts as the first net link
+             ! node kn(1,L)).
+             nc1 = 0
          endif
 
          LNN(L) = 0
