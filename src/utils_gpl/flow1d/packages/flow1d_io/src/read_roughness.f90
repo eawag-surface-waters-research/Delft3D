@@ -141,8 +141,11 @@ contains
       rgs%count = 3
       call realloc(rgs)
       rgs%rough(1)%id = 'Main'
+      rgs%rough(1)%frictionValuesFile = ''
       rgs%rough(2)%id = 'FloodPlain1'
+      rgs%rough(2)%frictionValuesFile = ''
       rgs%rough(3)%id = 'FloodPlain2'
+      rgs%rough(3)%frictionValuesFile = ''
       success = .true.
       do i = 1, 3
          if (success) then
@@ -356,6 +359,8 @@ contains
          call setmessage(LEVEL_ERROR, 'In inputfile '//trim(inputfile)// ' more than 1 Global section is found, together with a Branch section, this is not allowed')
          return
       endif
+         
+      frictionValuesFileName = trim(inputfile)
       
       !> when branches are defined, the friction can be defined per branch, then additional arrays are required
       if (branchdef) then
@@ -367,7 +372,6 @@ contains
             return
          endif
 
-         frictionValuesFileName = ' '
          call prop_get_string(tree_ptr, 'General', 'frictionValuesFile', frictionValuesFileName, success)
 
          irgh = hashsearch_or_add(rgs%hashlist, frictionId)
@@ -420,8 +424,9 @@ contains
                endif
             endif
             
-            rgs%rough(irgh)%useGlobalFriction = .not. branchdef
+            rgs%rough(irgh)%useGlobalFriction  = .not. branchdef
             rgs%rough(irgh)%frictionValuesFile = frictionValuesFileName
+            rgs%rough(irgh)%id                 = frictionId
             fricType = ''
             call prop_get_string(tree_ptr%child_nodes(i)%node_ptr, '', 'frictionType', fricType, success)
             if (.not. success) then

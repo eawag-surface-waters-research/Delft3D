@@ -458,16 +458,16 @@ module m_readCrossSections
          call realloc(fricTypes, maxnumsections, keepExisting = .false.)
          allocate(pCS%frictionValue      (pCs%frictionSectionsCount))
 
-         if (plural) then
-            call prop_get_strings(md_ptr%child_nodes(i)%node_ptr, '', 'frictionIds', pCs%frictionSectionsCount, pCS%frictionSectionID, success)
-         else
+         ! The use of "s" in case of plural is not clear. So it was decided to support both possibilities
+         call prop_get_strings(md_ptr%child_nodes(i)%node_ptr, '', 'frictionIds', pCs%frictionSectionsCount, pCS%frictionSectionID, success)
+         if (.not. success) then
             call prop_get_strings(md_ptr%child_nodes(i)%node_ptr, '', 'frictionId', pCs%frictionSectionsCount, pCS%frictionSectionID, success)
          endif
             
          if (.not. success) then
-            if (plural) then
-               call prop_get_strings(md_ptr%child_nodes(i)%node_ptr, '', 'frictionTypes', pCs%frictionSectionsCount, fricTypes, success)
-            else
+            ! The use of "s" in case of plural is not clear. So it was decided to support both possibilities
+            call prop_get_strings(md_ptr%child_nodes(i)%node_ptr, '', 'frictionTypes', pCs%frictionSectionsCount, fricTypes, success)
+            if (.not. success) then
                call prop_get_strings(md_ptr%child_nodes(i)%node_ptr, '', 'frictionType' , pCs%frictionSectionsCount, fricTypes, success)
             end if
             
@@ -482,9 +482,9 @@ module m_readCrossSections
                   endif
                end do
                
-               if (plural) then                  
-                  call prop_get(md_ptr%child_nodes(i)%node_ptr, '', 'frictionValues', pCS%frictionValue, pCs%frictionSectionsCount, success)
-               else
+               ! The use of "s" in case of plural is not clear. So it was decided to support both possibilities
+               call prop_get(md_ptr%child_nodes(i)%node_ptr, '', 'frictionValues', pCS%frictionValue, pCs%frictionSectionsCount, success)
+               if (.not. success) then
                   call prop_get(md_ptr%child_nodes(i)%node_ptr, '', 'frictionValue' , pCS%frictionValue, pCs%frictionSectionsCount, success)
                end if
             endif
