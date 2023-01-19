@@ -88,35 +88,35 @@ prebuild_version_number(${library_name} ${h_version_file}
                                         ${ini_version_file})
 
 # Set dependencies
-set(oss_dependencies_general    delftio
-                        delftio_shm
-                        deltares_common
-                        deltares_common_mpi
-                        deltares_common_c
-                        d_hydro_lib
-                        gridgeom
-                        ec_module
-                        esmfsm
-                        esmfsm_c
-                        esmfsm_version_number
-                        flow2d3d_data
-                        flow2d3d_io
-                        flow2d3d_io_dol_f
-                        flow2d3d_kernel
-                        flow2d3d_kernel_dd_f
-                        flow2d3d_manager
-                        flow2d3d_plugin_culvert_c
-                        flow2d3d_plugin_user
-                        io_hyd
-                        io_netcdf
-                        kdtree_wrapper
-                        kdtree2
-                        morphology_data
-                        morphology_io
-                        morphology_kernel
-                        morphology_plugins_c
-                        nefis
-                        triangle_c) 
+# WARNING: the order is important: first the call, then the definition
+set(oss_dependencies_general flow2d3d_manager
+                             flow2d3d_io
+                             flow2d3d_io_dol_f
+                             flow2d3d_kernel
+                             flow2d3d_kernel_dd_f
+                             flow2d3d_plugin_culvert_c
+                             flow2d3d_plugin_user
+                             flow2d3d_data
+                             morphology_io
+                             morphology_kernel
+                             morphology_plugins_c
+                             morphology_data
+                             gridgeom
+                             ec_module
+                             delftio
+                             delftio_shm
+                             d_hydro_lib
+                             esmfsm
+                             esmfsm_c
+                             esmfsm_version_number
+                             io_netcdf
+                             io_hyd
+                             nefis
+                             deltares_common_mpi
+                             deltares_common
+                             deltares_common_c
+                             kdtree_wrapper
+                             kdtree2) 
 # Add dependencies
 if (UNIX)
     # the `pkg_check_modules` function is created with this call
