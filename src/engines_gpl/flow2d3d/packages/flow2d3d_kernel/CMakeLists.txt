@@ -86,3 +86,6 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${compute_files}
                                                     ${taylor_files}
                                                     ${timedep_files})
 set_target_properties (${library_name} PROPERTIES FOLDER engines_gpl/flow2d3d)
+
+# Change project flags at the end of this file
+target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${check_nobounds_flag}>")

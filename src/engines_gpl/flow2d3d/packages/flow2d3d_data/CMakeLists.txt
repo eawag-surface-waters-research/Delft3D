@@ -62,8 +62,9 @@ add_library(${library_name} ${include_files}
                             ${parallel_mpi_files})
 
 # Set additional compilation properties
-set_source_files_properties(${parallel_mpi_files}
-                            PROPERTIES COMPILE_OPTIONS "${file_preprocessor_flag}")
+set_source_files_properties(
+                     ${parallel_mpi_files}
+                     PROPERTIES COMPILE_OPTIONS "${file_preprocessor_flag}")
 
 # Set dependencies
 set(oss_dependencies_general    delftio
@@ -118,3 +119,6 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${include_files}
                                                     ${general_files}
                                                     ${parallel_mpi_files})
 set_target_properties (${library_name} PROPERTIES FOLDER engines_gpl/flow2d3d)
+
+# Change project flags at the end of this file
+target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${check_nobounds_flag}>")
