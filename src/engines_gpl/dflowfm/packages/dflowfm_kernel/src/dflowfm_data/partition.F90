@@ -4819,10 +4819,10 @@ end subroutine partition_make_globalnumbers
          integer :: ibr, inext
          
 !     see if any of the left/right links of other domain's branches is in a netbranch in this domain
-         ibr_glob_left = 0
-         ibr_glob_right = 0
-         Lother_left  = 0
-         Lother_right = 0
+         ibr_glob_left = -huge(0)
+         ibr_glob_right= -huge(0)
+         Lother_left   = -huge(0)
+         Lother_right  = -huge(0)
          ioff = 0
          do idmn=0,numranks-1
             istart = 1 + ioff                   ! global branch number of first branch in other domain
@@ -4896,22 +4896,36 @@ end subroutine partition_make_globalnumbers
          end do
       
 !        gather information from all domains
-         call MPI_allreduce(ibr_glob_left,idum,numallnetbr,MPI_INTEGER,MPI_SUM,DFM_COMM_DFMWORLD,ierror)
+         call MPI_allreduce(ibr_glob_left,idum,numallnetbr,MPI_INTEGER,MPI_MAX,DFM_COMM_DFMWORLD,ierror)
          if ( ierror.ne.0 ) goto 1234
          ibr_glob_left = idum
       
-         call MPI_allreduce(ibr_glob_right,idum,numallnetbr,MPI_INTEGER,MPI_SUM,DFM_COMM_DFMWORLD,ierror)
+         call MPI_allreduce(ibr_glob_right,idum,numallnetbr,MPI_INTEGER,MPI_MAX,DFM_COMM_DFMWORLD,ierror)
          if ( ierror.ne.0 ) goto 1234
          ibr_glob_right = idum
       
-         call MPI_allreduce(Lother_left,idum,numallnetbr,MPI_INTEGER,MPI_SUM,DFM_COMM_DFMWORLD,ierror)
+         call MPI_allreduce(Lother_left,idum,numallnetbr,MPI_INTEGER,MPI_MAX,DFM_COMM_DFMWORLD,ierror)
          if ( ierror.ne.0 ) goto 1234
          Lother_left = idum
       
-         call MPI_allreduce(Lother_right,idum,numallnetbr,MPI_INTEGER,MPI_SUM,DFM_COMM_DFMWORLD,ierror)
+         call MPI_allreduce(Lother_right,idum,numallnetbr,MPI_INTEGER,MPI_MAX,DFM_COMM_DFMWORLD,ierror)
          if ( ierror.ne.0 ) goto 1234
          Lother_right = idum
 
+         where (ibr_glob_left == -huge(0))
+             ibr_glob_left = 0
+         end where
+         where (ibr_glob_right == -huge(0))
+             ibr_glob_right = 0
+         end where
+         where (Lother_left == -huge(0))
+             Lother_left = 0
+         end where
+         where (Lother_right == -huge(0))
+             Lother_right = 0
+         end where
+
+             
    !     check for mutual connectivity
          do ibr=1,numallnetbr
    !        check right
