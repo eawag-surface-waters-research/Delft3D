@@ -139,6 +139,11 @@ rem =================================
         set config=%1
         set mode=quiet
     )
+    if "%1" == "flow2d3d" (
+        set prepareonly=0
+        set config=%1
+        set mode=quiet
+    )
     
   set "options=-vs:0 -ifort:0 -coverage: -prepareonly:"
 
@@ -553,6 +558,7 @@ rem =======================
     echo "- dimr"
     echo "- tests"
     echo "- delft3d4"
+    echo "- flow2d3d"
     echo.
     echo "[OPTIONS]: usage [OPTION], sometimes followed by a value, space separated, in any order"
     echo "-coverage: Instrument object files for code-coverage tool (codecov) Example: -coverage"

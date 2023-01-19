@@ -26,6 +26,7 @@ function print_usage_info {
     echo "- tests"
     echo "- swan"
     echo "- delft3d4"
+    echo "- flow2d3d"
     echo
     echo "Options:"
     echo "-p, --prepareonly"
@@ -225,6 +226,10 @@ case $key in
     ;;
     delft3d4)
     config="delft3d4"
+    shift
+    ;;
+    flow2d3d)
+    config="flow2d3d"
     shift
     ;;
     --debug)
