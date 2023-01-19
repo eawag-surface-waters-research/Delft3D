@@ -7,7 +7,7 @@ if (WIN32)
     # Set global Fortran compiler flags that apply for each Fortran project
     set(nologo_flag /nologo)
     set(compiler_flags "/W1 ${nologo_flag} /libs:dll /threads")
-    set(debug_flags "/check:uninit /check:stack /check:pointers /traceback /fpe:0")
+    set(debug_flags "/check:uninit /check:stack /check:pointers /check:bounds /traceback /fpe:0")
 
     # Set optional flags:
     message(STATUS "Setting optional Intel Fortran compiler flags in Windows")

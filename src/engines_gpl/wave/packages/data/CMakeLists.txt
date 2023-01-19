@@ -55,9 +55,6 @@ if (UNIX)
 
 endif(UNIX)
 
-# Set additional compilation properties, specific for Debug mode
-target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${check_bounds_flag}>")
-
 # Define additional compilation flags
 set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/src/wave_mpi.F90
                             PROPERTIES COMPILE_OPTIONS "${file_preprocessor_flag}")
