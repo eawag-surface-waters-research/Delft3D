@@ -590,6 +590,7 @@ contains
       rgh => rgs%rough(irgh)
       rgh%iSection = irgh
       rgh%useGlobalFriction = .false.
+      rgh%frictionValuesFile=trim(inputfile)
       flowDir = 0
       call prop_get_logical(tree_ptr, 'Content', 'flowDirection', flowdir, success)
    
