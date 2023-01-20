@@ -20,7 +20,6 @@ get_fortran_source_files(${dlwq_netcdf_path} dlwq_netcdf_source)
 
 set(waq_utils_path ${src_path}/waq_utils)
 get_fortran_source_files(${waq_utils_path} waq_utils_source)
-list(REMOVE_ITEM waq_utils_source ${CMAKE_CURRENT_SOURCE_DIR}/${src_path}/waq_utils/gregor.f)
 
 set(library_name waq_utils_f)
 add_library(${library_name} ${dlwq_netcdf_source}
