@@ -77,7 +77,6 @@ oss_include_libraries(${library_name} oss_dependencies)
 # Set additional compilation properties
 target_compile_options(${library_name} PRIVATE "${qauto_threaded_flags}")
 target_compile_options(${library_name} PRIVATE "${waq_default_flags}")
-target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${waq_debug_flags}>")
 
 target_include_directories(${library_name}  PRIVATE ${mpi_include_path}/
                                                     "${CMAKE_CURRENT_SOURCE_DIR}/../../include")

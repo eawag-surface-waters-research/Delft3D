@@ -84,7 +84,6 @@ endif(WIN32)
 
 # Set additional compilation properties
 target_compile_options(${executable_name} PRIVATE "${waq_default_flags}")
-target_compile_options(${executable_name} PRIVATE "$<$<CONFIG:Debug>:${waq_debug_flags}>")
 
 if(UNIX)
     message(STATUS "netcdf lib dir is ${NETCDF_LIBRARY_DIRS}")
