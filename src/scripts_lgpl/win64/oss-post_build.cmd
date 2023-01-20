@@ -2351,6 +2351,27 @@ goto :endproc
 
 
 
+rem =============================
+rem === POST_BUILD_NEFIS_DLL
+rem =============================
+:nefis_dll
+    echo "postbuild nefis_dll . . ."
+    if "%configuration%" == "Debug" (
+        echo "Debug postbuild"
+        set dest_bin="!install_dir!\x64\Debug"
+        call :makeDir !dest_bin!
+        call :copyFile "!build_dir!\nefis\!configuration!\nefis_dll.*"               !dest_bin!
+    )
+    if "%configuration%" == "Release" (
+        echo "Release postbuild"
+        set dest_share=!install_dir!\x64\Release\share\bin
+        call :makeDir "!dest_share!"
+        call :copyFile "!build_dir!\nefis\!configuration!\nefis_dll.dll"             "!dest_share!\nefis.dll"
+    )
+goto :endproc
+
+
+
 
 
 
