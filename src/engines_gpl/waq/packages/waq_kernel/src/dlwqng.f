@@ -88,7 +88,6 @@
 !
       use grids
       use timers
-      use m_timers_waq
       use waqmem                         ! Global memory with allocatable GMRES arrays
       use delwaq2_data
       use m_openda_exchange_items, only : get_openda_buffer
@@ -332,7 +331,6 @@
 
 !          communicate boundaries (for domain decomposition)
 
-      call timer_start(timer_bound)
          call dlwq_boundio ( lun(19)  , notot    , nosys    , nosss    , nobnd    ,
      &                       c(isnam) , c(ibnid) , j(ibpnt) , a(iconc) , a(ibset) ,
      &                       lchar(19))
@@ -352,11 +350,9 @@
             call dlwq17 ( a(ibset), a(ibsav), j(ibpnt), nobnd   , nosys   ,
      &                    notot   , idt     , a(iconc), a(iflow), a(iboun))
          endif
-         call timer_stop(timer_bound)
 !
 !     Call OUTPUT system
 !
-      call timer_start(timer_output)
       CALL DLWQO2 ( NOTOT   , NOSEG   , NOPA    , NOSFUN  , ITIME   ,
      +              C(IMNAM), C(ISNAM), C(IDNAM), J(IDUMP), NODUMP  ,
      +              A(ICONC), A(ICONS), A(IPARM), A(IFUNC), A(ISFUN),
@@ -381,11 +377,9 @@
      +              INTOPT  , C(IPNAM), C(IFNAM), C(ISFNA), J(IDMPB),
      +              NOWST   , NOWTYP  , C(IWTYP), J(IWAST), J(INWTYP),
      +              A(IWDMP), iknmkv  , J(IOWNS), MYPART  , isegcol )
-      call timer_stop(timer_output)
 
 !        zero cumulative arrays
 
-         call timer_start(timer_output)
          if ( imflag .or. ( ihflag .and. noraai .gt. 0 ) ) then
             call zercum ( notot   , nosys   , nflux   , ndmpar  , ndmpq   ,
      &                    ndmps   , a(ismas), a(iflxi), a(imas2), a(iflxd),
@@ -393,7 +387,6 @@
      &                    a(itrra), ibflag  , nowst   , a(iwdmp))
          endif
          call write_progress( dlwqd%progress )
-         call timer_stop(timer_output)
 
 !        simulation done ?
 
@@ -402,7 +395,6 @@
 
 !          restore conc-array from mass array
 
-         call timer_start(timer_transport)
          call dlwqb8 ( nosys    , notot    , nototp   , noseg    , a(ivol ) ,
      &                 surface  , a(imass) , a(iconc) )
 
@@ -411,13 +403,11 @@
          call dlwq14 ( a(iderv), notot   , noseg   , itfact  , a(imas2),
      &                 idt     , iaflag  , a(idmps), intopt  , j(isdmp),
      &                 j(iowns), mypart )
-         call timer_stop(timer_transport)
 
 !        get new volumes
 
          itimel = itime
          itime  = itime + idt
-         call timer_start(timer_readdata)
          select case ( ivflag )
             case ( 1 )                 !     computation of volumes for computed volumes only
                call move   ( a(ivol)  , a(ivol2) , noseg    )
@@ -444,7 +434,6 @@
      &                       updatr   , j(inisp) , a(inrsp) , j(intyp) , j(iwork) ,
      &                       lstrec   , lrewin   , a(ivoll) , mypart   , dlwqd    )
          end select
-         call timer_stop(timer_readdata)
 
 !     Update the info on dry volumes with the new volumes        ( dryfle )
 !      Compute new from-topointer on the basis of non-zeroflows  ( zflows )
@@ -460,7 +449,6 @@
 
 !          add the waste loads
 
-         call timer_start(timer_wastes)
          call dlwq15 ( nosys     , notot    , noseg    , noq      , nowst    ,
      &                 nowtyp    , ndmps    , intopt   , idt      , itime    ,
      &                 iaflag    , c(isnam) , a(iconc) , a(ivol)  , a(ivol2) ,
@@ -469,7 +457,6 @@
      &                 iknmkv    , nopa     , c(ipnam) , a(iparm) , nosfun   ,
      &                 c(isfna ) , a(isfun) , j(isdmp) , a(idmps) , a(imas2) ,
      &                 a(iwdmp)  , 1        , notot    , j(iowns ), mypart   )
-         call timer_stop(timer_wastes)
 !
 !          Here we implement a loop that inverts the same matrix
 !          for series of subsequent substances having the same
@@ -484,7 +471,6 @@
 !                                                               (KHT, 11/11/96)
 
 
-      call timer_start(timer_transport)
       if (timon) call timstrt ( "ADE solver", ithand1 )
       timon_old = timon
       noth = OMP_GET_MAX_THREADS()
@@ -576,11 +562,9 @@
             call proint ( nflux   , ndmpar  , idt     , itfact  , a(iflxd),
      &                    a(iflxi), j(isdmp), j(ipdmp), ntdmpq  )
          endif
-         call timer_stop(timer_transport)
 
 !          new time values, volumes excluded
 
-         call timer_start(timer_readdata)
          call dlwqt0 ( lun      , itime    , itimel   , a(iharm) , a(ifarr) ,
      &                 j(inrha) , j(inrh2) , j(inrft) , idt      , a(ivol)  ,
      &                 a(idiff) , a(iarea) , a(iflow) , a(ivelo) , a(ileng) ,
@@ -591,7 +575,6 @@
      &                 j(intyp) , j(iwork) , .false.  , ldummy   , rdummy   ,
      &                 .false.  , gridps   , dlwqd    )
          if ( update ) updatr = .true.
-         call timer_stop(timer_readdata)
 
 !          end of time loop
 
@@ -605,14 +588,12 @@
      &     action == ACTION_FULLCOMPUTATION      ) then
 
 !     close files, except monitor file
-         call timer_start(timer_close)
          call CloseHydroFiles( dlwqd%collcoll )
          call close_files( lun )
 
 !     write restart file
          call dlwq13 ( lun      , lchar , a(iconc) , itime , c(imnam) ,
      &                 c(isnam) , notot , noseg    )
-         call timer_stop(timer_close)
       endif
 
  9999 if ( timon ) call timstop ( ithandl )

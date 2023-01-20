@@ -71,8 +71,6 @@
 !
       use grids
       use timers
-      use m_couplib
-      use m_timers_waq
       use delwaq2_data
       use m_openda_exchange_items, only : get_openda_buffer
       use report_progress
@@ -316,7 +314,6 @@
 
 !        zero cumulative arrays
 
-         call timer_start(timer_output)
          if ( imflag .or. ( ihflag .and. noraai .gt. 0 ) ) then
             call zercum ( notot   , nosys   , nflux   , ndmpar  , ndmpq   ,
      &                    ndmps   , a(ismas), a(iflxi), a(imas2), a(iflxd),

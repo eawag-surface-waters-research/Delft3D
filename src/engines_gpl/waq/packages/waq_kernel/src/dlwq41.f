@@ -46,7 +46,6 @@
 !     Subroutines called  : DLWQT1, makes one time function
 
       use timers                     ! WAQ performance timers
-      use m_couplib                  ! some first steps on paralellism
       use delwaq2_data
       use m_syst
 

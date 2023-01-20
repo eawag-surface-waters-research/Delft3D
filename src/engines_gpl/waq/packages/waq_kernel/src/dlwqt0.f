@@ -53,7 +53,6 @@
 !                           DLWQTK, make values for kenmerk array
 !                           DHOPNF, opens files
       use timers
-      use m_couplib
       use delwaq2_data
       use grids
       use m_sysn          ! System characteristics
@@ -163,11 +162,9 @@
             ldum(2) = othset
          endif
 
-         call distribute_data(mypart, ldum, 2, ierr)
          update = ldum(1)
          othset = ldum(2)
 
-         if ( update .or. .true. ) call distribute_data(mypart, adt, 1, ierr)
          if ( othset ) then
             is = 5
             goto 10
@@ -194,13 +191,9 @@
                   ldum(3) = lrewin
                endif
 
-               call distribute_data(mypart, ldum, 3, ierr)
                update = ldum(1)
                othset = ldum(2)
                lrewin = ldum(3)
-
-               if ( update .or. .true. )
-     &             call distribute_data(mypart, volume, 'noseg','distrib_itf', ierr)
             endif
          else
             ipa = ipa + nrftot(2)*2
@@ -226,13 +219,9 @@
             ldum(2) = othset
          endif
 
-         call distribute_data(mypart, ldum, 2, ierr)
          update = ldum(1)
          othset = ldum(2)
 
-         if ( update .or. .true. )
-     &      call distribute_data(mypart, disper, nodisp,'noq',1,
-     &                           'distrib_itf', ierr)
          if ( othset ) then
             is = 9
             goto 10
@@ -253,12 +242,9 @@
             ldum(2) = othset
          endif
 
-         call distribute_data(mypart, ldum, 2, ierr)
          update = ldum(1)
          othset = ldum(2)
 
-         if ( update .or. .true. )
-     &      call distribute_data(mypart, area, 'noq', 'distrib_itf', ierr)
          if ( othset ) then
             is = 10
             goto 10
@@ -279,12 +265,9 @@
             ldum(2) = othset
          endif
 
-         call distribute_data(mypart, ldum, 2, ierr)
          update = ldum(1)
          othset = ldum(2)
 
-         if ( update .or. .true. )
-     &      call distribute_data(mypart, flow, 'noq', 'distrib_itf', ierr)
          if ( othset ) then
             is = 11
             goto 10
@@ -305,12 +288,9 @@
             ldum(2) = othset
          endif
 
-         call distribute_data(mypart, ldum, 2, ierr)
          update = ldum(1)
          othset = ldum(2)
 
-         if ( update .or. .true. )
-     &      call distribute_data(mypart,velo,novelo,'noq',1, 'distrib_itf',ierr)
          if ( othset ) then
             is = 12
             goto 10
@@ -331,11 +311,8 @@
             ldum(2) = othset
          endif
 
-         call distribute_data(mypart, ldum, 2, ierr)
          update = ldum(1)
          othset = ldum(2)
-         if ( update .or. .true. )
-     &      call distribute_data(mypart, aleng, 2,'noq',1, 'distrib_itf', ierr)
          if ( othset ) then
             is = 13
             goto 10
@@ -362,13 +339,10 @@
             ldum(3) = bndset
          endif
 
-         call distribute_data(mypart, ldum, 3, ierr)
          update = ldum(1)
          othset = ldum(2)
          bndset = ldum(3)
 
-         if ( update .or. .true. )
-     &      call distribute_data(mypart, bounds, nosubs*nobnd, ierr)
       endif
 
       if ( bndset ) then
@@ -383,12 +357,9 @@
             ldum(2) = othset
          endif
 
-         call distribute_data(mypart, ldum, 2, ierr)
          update = ldum(1)
          othset = ldum(2)
 
-         if ( update .or. .true. )
-     &      call distribute_data(mypart, bounds, nosubs*nobnd, ierr)
 
          it     = it + nobnd
       endif
@@ -408,13 +379,10 @@
             ldum(3) = wstset
          endif
 
-         call distribute_data(mypart, ldum, 3, ierr)
          update = ldum(1)
          othset = ldum(2)
          wstset = ldum(3)
 
-         if ( update .or. .true. )
-     &      call distribute_data(mypart, wastes, (notot+1)*nowst, ierr)
       endif
       isnul = 0
       isnul2= 0
@@ -430,12 +398,8 @@
             ldum(2) = othset
          endif
 
-         call distribute_data(mypart, ldum, 2, ierr)
          update = ldum(1)
          othset = ldum(2)
-
-         if ( update .or. .true. )
-     &      call distribute_data(mypart, wastes, (notot+1)*nowst, ierr)
 
          it     = it + nowst
       endif
@@ -450,17 +414,8 @@
      &                    funcs  , sfuncs    , isflag , ifflag , itime  ,
      &                    gridps , dlwqd     , ierr   )
          endif
-         call distribute_data(mypart, ifflag, 1, ierr)
-         if (ifflag .eq. 1) then
-            call distribute_data(mypart, consts, nocons, ierr)
-            call distribute_data(mypart, param , nopa,'noseg',1,
-     &                           'distrib_itf' , ierr)
-         endif
-         call distribute_data(mypart, funcs , nofun      , ierr)
-         call distribute_data(mypart, sfuncs, nosss*nosfun , ierr)
       endif
 
-      call distribute_data(mypart, nrharm, 10, ierr)
 
 !     kenmerk array
 

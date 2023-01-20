@@ -60,7 +60,6 @@
       use waqmem
       use delwaq2_data
       use timers
-      use m_couplib
       use workspace
       use string_module  ! string manipulation tools
       use m_sysn          ! System characteristics
@@ -274,15 +273,6 @@
 
       IBFLAG = 0
       IF ( MOD(INTOPT,16) .GE. 8 ) IBFLAG = 1
-
-      if ( init_ixset ) then
-          init_ixset = .false.
-          CALL IXSETS ( LUN(19) , MYPART  , NOTOT   , NOSYS   ,
-     +                  NOSSS   , NOQ     , J(IXPNT), J(IOWNS),
-     +                  J(IOWNQ), NDMPAR  , NDMPS   , NTDMPQ  ,
-     +                  NDMPQ   , IBFLAG  , J(ISDMP), J(IPDMP),
-     +                  J(IQDMP) )
-      endif
 
 !
 !     locally/per processor adapt the feature array:

@@ -7,14 +7,12 @@ include_directories(${waq_io_include_path})
 set(src_path src)
 
 # Gather source files
-get_fortran_source_files(${src_path}/mpidum mpidum_files)
 get_fortran_source_files(${src_path}/ods ods_files)
 get_fortran_source_files(${src_path}/waq_io waq_io_files)
 
 # Define the library
 set(library_name waq_io)
-add_library(${library_name} ${mpidum_files}
-                            ${ods_files}
+add_library(${library_name} ${ods_files}
                             ${waq_io_files})
 
 # Set dependencies
@@ -59,7 +57,6 @@ oss_include_libraries(${library_name} oss_dependencies)
 target_compile_options(${library_name} PRIVATE "${waq_default_flags}")
 
 # Define how the files should be structured within Visual Studio
-source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${mpidum_files}
-                                                    ${ods_files}
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${ods_files}
                                                     ${waq_io_files})
 set_target_properties (${library_name} PROPERTIES FOLDER engines_gpl/waq)

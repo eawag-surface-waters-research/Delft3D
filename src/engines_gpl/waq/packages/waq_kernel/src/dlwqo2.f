@@ -159,7 +159,6 @@
 !     ==================================================================
 !
       use timers
-      use m_couplib
       use precision
       use output
       use nan_check_module
@@ -307,9 +306,6 @@
 !
       if ( imflag ) then
          damass2 = amass2
-
-         call collect_data(mypart, amass , notot,'noseg',1,ierr)
-         call combine_1d_rdata(amass2, notot*5, cp_sum, ierr)
          iaflag = 1
          if (mypart.eq.1) then
             do 20 i2 = 1,notot
@@ -327,9 +323,6 @@
 !
       if ( imflag .or. ( ihflag .and. noraai .gt. 0) ) then
          if ( ibflag .eq. 1 ) then
-            call collect_data(mypart, flxdmp, noflux,'ndmps',1, ierr)
-            call collect_data(mypart, dmps  , notot ,'ndmps',3, ierr)
-            call collect_data(mypart, dmpq  , nosys ,'ndmpq',2, ierr)
             if (mypart.eq.1) then
                call baldmp (notot , nosys , noflux, ndmpar, ndmpq ,
      +                      ndmps , ntdmpq, iqdmp , isdmp , ipdmp ,
@@ -342,7 +335,6 @@
             if ( lhfirs ) then
                call zero   (trraai, noraai*nosys  )
             else
-               call collect_data(mypart, dmpq  , nosys , 'ndmps',2,ierr)
                if (mypart.eq.1) then
                   call raatra (nosys , ndmpq , noraai, ntraaq, ioraai,
      +                         nqraai, iqraai, iqdmp , dmpq  , trraai)
@@ -378,11 +370,6 @@
 !        Collect data on master-process
 !
          if (lread) then
-            call collect_data(mypart, conc  , notot ,'noseg',1, ierr)
-            call collect_data(mypart, volume, 1     ,'noseg',1, ierr)
-            call collect_data(mypart, proloc, noloc ,'noseg',1, ierr)
-            if (ibflag.gt.0)
-     +         call accumulate_data(flxint, noflux,'ndmpar',1, 'my_dmpar', ierr)
             lread = .false.
          endif
 

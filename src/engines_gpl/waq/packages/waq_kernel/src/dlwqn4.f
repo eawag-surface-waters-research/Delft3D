@@ -75,8 +75,6 @@
 !
       use grids
       use timers
-      use m_timers_waq
-      use m_couplib
       use delwaq2_data
       use m_openda_exchange_items, only : get_openda_buffer
       use waqmem          ! module with the more recently added arrays
@@ -493,7 +491,6 @@
 
 !         close files, except monitor file
 
-          call timer_start(timer_close)
           call CloseHydroFiles( dlwqd%collcoll )
           call close_files( lun )
 
@@ -501,7 +498,6 @@
 
           CALL DLWQ13 ( LUN      , LCHAR , A(ICONC) , ITIME , C(IMNAM) ,
      *                  C(ISNAM) , NOTOT , NOSEG    )
-          call timer_stop(timer_close)
       endif
 
  9999 if ( timon ) call timstop ( ithandl )

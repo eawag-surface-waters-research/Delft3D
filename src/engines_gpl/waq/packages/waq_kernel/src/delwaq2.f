@@ -104,8 +104,6 @@
       use grids
       USE DLWQI0_MOD
       USE Timers
-      use m_timers_waq
-      use m_couplib
       use delwaq2_data
       use m_actions
       use m_sysn          ! System characteristics
@@ -156,7 +154,6 @@
       integer, save            :: filtype(nlun)
       CHARACTER*(LCHMAX), SAVE :: RUNID
       LOGICAL, SAVE            :: INIT2        = .TRUE. ! To suppress the start-up screen
-      LOGICAL, SAVE            :: INIT_COUPLIB = .TRUE. ! Initialise the couplib library only once
 
 !     Common to define external communications in SOBEK
 !     OLCFWQ             Flag indicating ONLINE running of CF and WQ
@@ -226,27 +223,11 @@
             CLOSE ( LUN(ILUN) )
     5    CONTINUE
          close(lunin)
-!
-!        start couplib
-!
-         if ( init_couplib ) then
-             init_couplib = .false.
-             call couplib_init(lunout=lun(19), idebug=0)
-         endif
-!
-!        store number of processes and own process number in sysn
-!
-         mypart = myprc
-         npartp = numprc
-!
-         if (mypart .gt. 1) then
-! open lokale monitor-files voor uitvoer tijdens initialisatie
-            write(lchar(19),'(a,i3.3,a)') 'part-', mypart,'.mon'
-         end if
+
 
          CALL DHOPNF ( LUN(19) , LCHAR(19) , 19    , 1    , IERRD  )
          CALL SETMLU ( LUN(19) )
-
+         MYPART = 1                      ! to be removed soon. 20-jan-2023. DELWAQ-182
          IF (MYPART .EQ. 1) THEN
 
 !      Initialise communication options SOBEK
@@ -317,18 +298,7 @@
 !
 !        end of reading master proces
 !
-!        initialize timers
-!
-         call timers_waq_init(lun(19))
-         call couplib_timers_init(timer_start_couplib,
-     +       couplib_max_timers, measr_idle=.false.)
-!
-         call timer_start(timer_total)
-!
-         call timer_start(timer_init)
-
 ! collaborative call to i0
-         call sync_processes()
 !
          IERR = 0
          gridps => dlwqd%gridps
@@ -347,7 +317,6 @@
             WRITE ( * , * )
             WRITE ( * , * ) ' INTEGRATION ROUTINE =', intsrt
          endif
-         call timer_stop(timer_init)
       ENDIF
 !     SOBEK external communications ONLY implemented in scheme 10!
       IF ( OLCFWQ .OR. SRWACT .OR. RTCACT ) THEN
@@ -387,109 +356,67 @@
       select case ( intsrt )
 
          case (  0 )     !      not transport, just processes
-            call timer_start(timer_offs_intsrt+0)
             call dlwqn0 ( a , j , c , lun , lchar, action, dlwqd, gridps )
-            call timer_stop(timer_offs_intsrt+0)
 
          case (  1 )     !      backward in space and time
-            call timer_start(timer_offs_intsrt+1)
             call dlwqn1 ( a , j , c , lun , lchar, action, dlwqd, gridps )
-            call timer_stop(timer_offs_intsrt+1)
 
          case (  2 )     !      modified 2nd order Runge Kutta
-            call timer_start(timer_offs_intsrt+2)
             call dlwqn2 ( a , j , c , lun , lchar, action, dlwqd, gridps )
-            call timer_stop(timer_offs_intsrt+2)
 
          case (  3 )     !      2nd order Lax Wendroff
-            call timer_start(timer_offs_intsrt+3)
             call dlwqn3 ( a , j , c , lun , lchar, action, dlwqd, gridps )
-            call timer_stop(timer_offs_intsrt+3)
 
          case (  4 )     !      Aternating direction implicit
-            call timer_start(timer_offs_intsrt+4)
             call dlwqn4 ( a , j , c , lun , lchar, action, dlwqd, gridps )
-            call timer_stop(timer_offs_intsrt+4)
 
          case (  5 )     !      Flux corrected transport
-            call timer_start(timer_offs_intsrt+5)
             call dlwqn5 ( a , j , c , lun , lchar, action, dlwqd, gridps )
-            call timer_stop(timer_offs_intsrt+5)
 
          case (  6 )     !      Direct steady state, backward differences in space
-            call timer_start(timer_offs_intsrt+6)
             call dlwqn6 ( a , j , c , lun , lchar, action, dlwqd, gridps )
-            call timer_stop(timer_offs_intsrt+6)
 
          case (  7 )     !      Direct steady state, central differences in space
-            call timer_start(timer_offs_intsrt+7)
             call dlwqn7 ( a , j , c , lun , lchar, action, dlwqd, gridps )
-            call timer_stop(timer_offs_intsrt+7)
 
          case (  8 )     !      Iteratively steady state, backward differences in space
-            call timer_start(timer_offs_intsrt+8)
             call dlwqn8 ( a , j , c , lun , lchar, action, dlwqd, gridps )
-            call timer_stop(timer_offs_intsrt+8)
 
          case (  9 )     !      Iteratively steady state, central differences in space
-            call timer_start(timer_offs_intsrt+9)
             call dlwqn9 ( a , j , c , lun , lchar, action, dlwqd, gridps )
-            call timer_stop(timer_offs_intsrt+9)
 
          case ( 10 )     !      Fully implicit, direct method, upwind
-            call timer_start(timer_offs_intsrt+10)
             call dlwqnb ( a , j , c , lun , lchar, action, dlwqd, gridps )
-            call timer_stop(timer_offs_intsrt+10)
 
          case ( 11 )     !      Horizontal explicit upwind, vertical implicit central
-            call timer_start(timer_offs_intsrt+11)
             call dlwqnc ( a , j , c , lun , lchar, action, dlwqd, gridps )
-            call timer_stop(timer_offs_intsrt+11)
 
          case ( 12 )     !      Horizontal explicit FCT   , vertical implicit central
-            call timer_start(timer_offs_intsrt+12)
             call dlwqnd ( a , j , c , lun , lchar, action, dlwqd, gridps )
-            call timer_stop(timer_offs_intsrt+12)
 
          case ( 13 )     !      Horizontal explicit upwind, vertical implicit upwind
-            call timer_start(timer_offs_intsrt+13)
             call dlwqne ( a , j , c , lun , lchar, action, dlwqd, gridps )
-            call timer_stop(timer_offs_intsrt+13)
 
          case ( 14 )     !      Horizontal explicit FCT   , vertical implicit upwind
-            call timer_start(timer_offs_intsrt+14)
             call dlwqna ( a , j , c , lun , lchar, action, dlwqd, gridps )
-            call timer_stop(timer_offs_intsrt+14)
 
          case ( 15 )     !      GMRES, horizontal upwind, vertical upwind
-            call timer_start(timer_offs_intsrt+15)
             call dlwqnf ( a , j , c , lun , lchar, action, dlwqd, gridps )
-            call timer_stop(timer_offs_intsrt+15)
 
          case ( 16 )     !      GMRES, horizontal upwind, vertical central
-            call timer_start(timer_offs_intsrt+16)
             call dlwqng ( a , j , c , lun , lchar, action, dlwqd, gridps )
-            call timer_stop(timer_offs_intsrt+16)
 
          case ( 17 )     !      stationary GMRES, horizontal upwind, vertical upwind
-            call timer_start(timer_offs_intsrt+17)
             call dlwqnh ( a , j , c , lun , lchar, action, dlwqd, gridps )
-            call timer_stop(timer_offs_intsrt+17)
 
          case ( 18 )     !      stationary GMRES, horizontal upwind, vertical central
-            call timer_start(timer_offs_intsrt+18)
             call dlwqni ( a , j , c , lun , lchar, action, dlwqd, gridps )
-            call timer_stop(timer_offs_intsrt+18)
 
          case ( 19 )     !      TRISULA-ADI 1 (vertically upwind)
-            call timer_start(timer_offs_intsrt+19)
             call dlwqnj ( a , j , c , lun , lchar, action, dlwqd, gridps )
-            call timer_stop(timer_offs_intsrt+19)
 
          case ( 20 )     !      TRISULA-ADI 2 (vertically central)
-            call timer_start(timer_offs_intsrt+20)
             call dlwqnj ( a , j , c , lun , lchar, action, dlwqd, gridps )
-            call timer_stop(timer_offs_intsrt+20)
 
          case ( 21 )     !      Self adjusting teta method (limiter Salezac)
             call dlwqnm ( a , j , c , lun , lchar, action, dlwqd, gridps )
@@ -517,10 +444,7 @@
 !     print timer-results
 !     Note: removed printing of timers to monitoring file
 
-          call timer_stop(timer_total)
 
-          call sync_processes()
-          call couplib_stop()
 
           if ( timon ) then
              call timstop ( ithndl )

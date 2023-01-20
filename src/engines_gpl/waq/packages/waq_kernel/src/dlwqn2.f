@@ -72,8 +72,6 @@
 !
       use grids
       use timers
-      use m_timers_waq
-      use m_couplib
       use delwaq2_data
       use m_openda_exchange_items, only : get_openda_buffer
       use report_progress
