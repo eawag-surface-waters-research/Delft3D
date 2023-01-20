@@ -228,6 +228,7 @@
          CALL DHOPNF ( LUN(19) , LCHAR(19) , 19    , 1    , IERRD  )
          CALL SETMLU ( LUN(19) )
          MYPART = 1                      ! to be removed soon. 20-jan-2023. DELWAQ-182
+         npartp = 1                      ! to be removed soon. 20-jan-2023. DELWAQ-182
          IF (MYPART .EQ. 1) THEN
 
 !      Initialise communication options SOBEK
