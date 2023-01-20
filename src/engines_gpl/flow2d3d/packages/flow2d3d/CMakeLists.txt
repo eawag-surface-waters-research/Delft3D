@@ -209,4 +209,4 @@ if (UNIX)
 endif(UNIX)
 
 # Change project flags at the end of this file
-target_compile_options(${library_name} PRIVATE "${qauto_threaded_flags}")
+# target_compile_options(${library_name} PRIVATE "${qauto_threaded_flags}")
