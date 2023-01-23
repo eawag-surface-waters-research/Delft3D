@@ -28,8 +28,7 @@
      &                    iwtype  , iwaste  , iwstkind, waste   , deriv   ,
      &                    wdrawal , iknmrk  , nopa    , paname  , param   ,
      &                    nosfun  , sfname  , segfun  , isdmp   , dmps    ,
-     &                    amass2  , wstdmp  , isys    , nsys    , owners  ,
-     &                    mypart  )
+     &                    amass2  , wstdmp  , isys    , nsys    , owners  )
 
 !     Deltares Software Centre
 
@@ -64,22 +63,6 @@
 !>                             - surface and bed loads require the presence of a parameter SURF
 !>                             - bank loads require the presence of a parameter LENGTH
 
-!     Created             : april 3  1988 by LeoPostma
-!     Modified            : Some date     by Jan van Beek
-!                                         accumulation for balances
-!                                         per segment / area
-!                           Some date     by Jan van Beek
-!                                         call to the user wasteload dll
-!                           November 2002 by Leo Postma,
-!                                         detection of missing flows from mass balance
-!                           November 2007 by Vortech
-!                                         introduction of owners and mypart for parallelism
-!                                         through MPI
-!                           December 2010 by Leo Postma
-!                                         precipitation/evaporation/well/sinks added
-!                           March    2011 by Jos van Gils
-!                                         mass balances only if relevant flag is active
-!                                         start at ISYS, NSYS substances
 
 !     Function            : Adds the wasteloads to DERIV.
 
@@ -134,7 +117,6 @@
       integer   (4), intent(in   ) :: isys                     !< first substance in array
       integer   (4), intent(in   ) :: nsys                     !< number of substances  to deal with
       integer   (4), intent(in   ) :: owners (noseg  )         !< ownership array for comp. volumes
-      integer   (4), intent(in   ) :: mypart                   !< number of current part/subdomain
 
 !     local simple variables
 
@@ -371,13 +353,12 @@
            case ( 1 )         ! always MASS
               wflow = 0.0
               if ( iwst .gt. 0 ) then               ! normal processing
-                 if (owners(iwst) .ne. mypart) cycle
                  wflow(iwst) = 1.0
                  istrt = iwst
                  istop = iwst
               else                                  ! surface or bed processing
                  do i1 = 1, noseg
-                    if ( btest( iknmrk(i1), 0 ) .and. owners(i1) .eq. mypart ) then
+                    if ( btest( iknmrk(i1), 0 ) ) then
                        select case ( iwst )
                           case ( -1 )               ! surface processing
                              call dhkmrk( 2, iknmrk(i1), ikmrk2 )
@@ -419,13 +400,12 @@
            case ( 2 )         ! always CONC
               wflow = 0.0
               if ( iwst .gt. 0 ) then               ! normal processing
-                 if (owners(iwst) .ne. mypart) cycle
                  wflow(iwst) = waste(0,i)
                  istrt = iwst
                  istop = iwst
               else                                  ! surface or bed processing
                  do i1 = 1, noseg
-                    if ( btest( iknmrk(i1), 0 ) .and. owners(i1) .eq. mypart ) then
+                    if ( btest( iknmrk(i1), 0 ) ) then
                        select case ( iwst )
                           case ( -1 )
                              call dhkmrk( 2, iknmrk(i1), ikmrk2 )
@@ -467,13 +447,12 @@
            case ( 3 )         ! RAIN ( load is CONC, withdrawal is zero )
               wflow = 0.0
               if ( iwst .gt. 0 ) then               ! normal processing
-                 if (owners(iwst) .ne. mypart) cycle
                  wflow(iwst) = waste(0,i)
                  istrt = iwst
                  istop = iwst
               else                                  ! surface or bed processing
                  do i1 = 1, noseg
-                    if ( btest( iknmrk(i1), 0 ) .and. owners(i1) .eq. mypart ) then
+                    if ( btest( iknmrk(i1), 0 ) ) then
                        select case ( iwst )
                           case ( -1 )
                              call dhkmrk( 2, iknmrk(i1), ikmrk2 )
@@ -506,13 +485,12 @@
            case ( 4 )         ! WELL ( load is CONC, withdrawal is with model conc
               wflow = 0.0
               if ( iwst .gt. 0 ) then               ! normal processing
-                 if (owners(iwst) .ne. mypart) cycle
                  wflow(iwst) = waste(0,i)
                  istrt = iwst
                  istop = iwst
               else                                  ! surface or bed processing
                  do i1 = 1, noseg
-                    if ( btest( iknmrk(i1), 0 ) .and. owners(i1) .eq. mypart ) then
+                    if ( btest( iknmrk(i1), 0 ) ) then
                        select case ( iwst )
                           case ( -1 )
                              call dhkmrk( 2, iknmrk(i1), ikmrk2 )

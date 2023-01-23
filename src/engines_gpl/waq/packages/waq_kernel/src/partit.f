@@ -22,7 +22,7 @@
 !!  rights reserved.
 
       subroutine partit ( lunrep , noseg  , nolay  , noq    , ipoint ,
-     +                    mypart , npart  , owners , ownerq , intsrt )
+     +                    npart  , owners , ownerq , intsrt )
 !
 !     Deltares     Sector Waterresources and Environment
 !
@@ -43,7 +43,6 @@
       integer, intent(in)  :: noseg         ! total number of segments
       integer, intent(in)  :: nolay         ! number of layers in the water
       integer, intent(in)  :: noq           ! total number of exchanges
-      integer, intent(in)  :: mypart        ! own subdomain number
       integer, intent(in)  :: npart         ! requested number of parts
       integer, intent(in)  :: ipoint(4,noq) ! exchange pointers
       integer, intent(out) :: owners(noseg) ! partitioning of segments, for
@@ -213,7 +212,7 @@
 !
 !     write partitioning to output-file for visualisation by user
 !
-      if (mypart.eq.1 .and. npart.gt.1) then
+      if (npart.gt.1) then
          is_ok  = .false.
   10     if (.not.is_ok) then
             inquire(unit=lunout, opened=lopen)

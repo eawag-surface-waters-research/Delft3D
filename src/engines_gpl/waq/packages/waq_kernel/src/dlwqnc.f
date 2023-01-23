@@ -261,7 +261,7 @@
      &                 j(ivtda) , j(ivdag) , j(ivtag) , j(ivagg) , j(iapoi) ,
      &                 j(iaknd) , j(iadm1) , j(iadm2) , j(ivset) , j(ignos) ,
      &                 j(igseg) , novar    , a        , nogrid   , ndmps    ,
-     &                 c(iprna) , intsrt   , j(iowns) , j(iownq) , mypart   ,
+     &                 c(iprna) , intsrt   , j(iowns) , j(iownq) , 
      &                 j(iprvpt), j(iprdon), nrref    , j(ipror) , nodef    ,
      &                 surface  , lun(19)  )
 
@@ -312,7 +312,7 @@
      +              C(IBTYP), J(INTYP), C(ICNAM), noqtt   , J(IXPNT),
      +              INTOPT  , C(IPNAM), C(IFNAM), C(ISFNA), J(IDMPB),
      +              NOWST   , NOWTYP  , C(IWTYP), J(IWAST), J(INWTYP),
-     +              A(IWDMP), iknmkv  , J(IOWNS), MYPART  , isegcol )
+     +              A(IWDMP), iknmkv  , J(IOWNS), isegcol )
 
 !          zero cummulative array's
 
@@ -333,7 +333,7 @@
 
          call dlwq14 ( a(iderv) , notot   , nosss   , itfact  , a(imas2),
      &                 idt      , iaflag  , a(idmps), intopt  , j(isdmp),
-     &                 j(iowns) , mypart  )
+     &                 j(iowns)  )
 
 !     get new volumes
          itimel = itime
@@ -351,7 +351,7 @@
      &                       j(inrha), j(inrh2), j(inrft), noseg   , a(ivoll),
      &                       j(ibulk), lchar   , ftype   , isflag  , ivflag  ,
      &                       updatr  , j(inisp), a(inrsp), j(intyp), j(iwork),
-     &                       lstrec  , lrewin  , a(ivol2), mypart  , dlwqd   )
+     &                       lstrec  , lrewin  , a(ivol2), dlwqd   )
                if ( lrewin ) call move ( a(ivol2), a(ivoll) , noseg   )
                call dlwqf8 ( noseg   , noq     , j(ixpnt), idt     , iknmkv  ,
      &                       a(ivol ), a(iflow), a(ivoll), a(ivol2))
@@ -363,7 +363,7 @@
      &                       j(inrha), j(inrh2), j(inrft), noseg   , a(ivol2),
      &                       j(ibulk), lchar   , ftype   , isflag  , ivflag  ,
      &                       updatr  , j(inisp), a(inrsp), j(intyp), j(iwork),
-     &                       lstrec  , lrewin  , a(ivoll), mypart  , dlwqd   )
+     &                       lstrec  , lrewin  , a(ivoll), dlwqd   )
          end select
 
 !        update the info on dry volumes with the new volumes
@@ -380,7 +380,7 @@
      &                 j(inwtyp) , j(iwast) , iwstkind , a(iwste) , a(iderv) ,
      &                 iknmkv    , nopa     , c(ipnam) , a(iparm) , nosfun   ,
      &                 c(isfna ) , a(isfun) , j(isdmp) , a(idmps) , a(imas2) ,
-     &                 a(iwdmp)  , 1        , notot    , j(iowns ), mypart   )
+     &                 a(iwdmp)  , 1        , notot    , j(iowns )  )
 
 !             explicit part of the transport step, derivative
 
@@ -390,13 +390,13 @@
      &                 j(ixpnt) , iknmkv  , j(idpnw), j(ivpnw), a(iconc),
      &                 a(iboun) , intopt  , ilflag  , idt     , a(iderv),
      &                 iaflag   , a(imas2), ndmpq   , j(iqdmp), a(idmpq),
-     &                 j(iowns) , mypart  )
+     &                 j(iowns)   )
 
 !             explicit part of transport done, volumes on diagonal
 
          call dlwq42 ( nosys   , notot   , nototp  , nosss   , a(ivol2),
      &                 surface , a(imass), a(iconc), a(iderv), idt     ,
-     &                 ivflag  , lun(19) , j(iowns), mypart  )
+     &                 ivflag  , lun(19) , j(iowns)  )
 
 !          performs the implicit part of the transport step
 
@@ -405,21 +405,20 @@
      &              a(larea), a(lflow), a(lleng), j(lxpnt), iknmkv  ,
      &              j(idpnw), j(ivpnw), a(iconc), a(iboun), intopt  ,
      &              ilflag  , idt     , a(iderv), iaflag  , a(imas2),
-     &              j(iowns), mypart  , lun(19) , ndmpq   , j(lqdmp),
+     &              j(iowns), lun(19) , ndmpq   , j(lqdmp),
      &              a(idmpq), arhs    , adiag   , acodia  , bcodia  )
 !
 !          Forester filter on the vertical
 !
       IF ( FORESTER ) THEN
          CALL DLWQD2 ( LUN(19) , NOSYS   , NOTOT   , nosss   , NOQ3    ,
-     *                 KMAX    , A(ICONC), A(LLENG), NOWARN  , J(IOWNS),
-     *                 MYPART )
+     *                 KMAX    , A(ICONC), A(LLENG), NOWARN  , J(IOWNS))
       ENDIF
 
 !          update the nescessary arrays
 
          call dlwq44 ( nosys   , notot   , nosss   , a(ivol2), a(imass),
-     &                 a(iconc), a(iderv), j(iowns), mypart  )
+     &                 a(iconc), a(iderv), j(iowns) )
 !
 !          new time values, volumes excluded
 !

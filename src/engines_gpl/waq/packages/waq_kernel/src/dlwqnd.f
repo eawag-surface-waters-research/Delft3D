@@ -263,7 +263,7 @@
      &                 j(ivtda) , j(ivdag) , j(ivtag) , j(ivagg) , j(iapoi) ,
      &                 j(iaknd) , j(iadm1) , j(iadm2) , j(ivset) , j(ignos) ,
      &                 j(igseg) , novar    , a        , nogrid   , ndmps    ,
-     &                 c(iprna) , intsrt   , j(iowns) , j(iownq) , mypart   ,
+     &                 c(iprna) , intsrt   , j(iowns) , j(iownq) , 
      &                 j(iprvpt), j(iprdon), nrref    , j(ipror) , nodef    ,
      &                 surface  , lun(19)  )
 
@@ -314,7 +314,7 @@
      +              C(IBTYP), J(INTYP), C(ICNAM), noqtt   , J(IXPNT),
      +              INTOPT  , C(IPNAM), C(IFNAM), C(ISFNA), J(IDMPB),
      +              NOWST   , NOWTYP  , C(IWTYP), J(IWAST), J(INWTYP),
-     +              A(IWDMP), iknmkv  , J(IOWNS), MYPART  , isegcol )
+     +              A(IWDMP), iknmkv  , J(IOWNS), isegcol )
 
 !        zero cummulative array's
 
@@ -324,7 +324,7 @@
      &                    a(idmpq), a(idmps), noraai  , imflag  , ihflag  ,
      &                    a(itrra), ibflag  , nowst   , a(iwdmp))
          endif
-         if (mypart.eq.1) call write_progress( dlwqd%progress )
+         call write_progress( dlwqd%progress )
 
 !        simulation done ?
 
@@ -335,7 +335,7 @@
 
          call dlwq14 ( a(iderv), notot   , nosss   , itfact  , a(imas2),
      &                 idt     , iaflag  , a(idmps), intopt  , j(isdmp),
-     &                 j(iowns), mypart )
+     &                 j(iowns)  )
 
 !        get new volumes
 
@@ -354,7 +354,7 @@
      &                       j(inrha), j(inrh2), j(inrft), noseg   , a(ivoll),
      &                       j(ibulk), lchar   , ftype   , isflag  , ivflag  ,
      &                       updatr  , j(inisp), a(inrsp), j(intyp), j(iwork),
-     &                       lstrec  , lrewin  , a(ivol2), mypart  , dlwqd   )
+     &                       lstrec  , lrewin  , a(ivol2), dlwqd   )
                call dlwqf8 ( noseg   , noq     , j(ixpnt), idt     , iknmkv  ,
      &                       a(ivol ), a(iflow), a(ivoll), a(ivol2))
                updatr = .true.
@@ -365,7 +365,7 @@
      &                       j(inrha), j(inrh2), j(inrft), noseg   , a(ivol2),
      &                       j(ibulk), lchar   , ftype   , isflag  , ivflag  ,
      &                       updatr  , j(inisp), a(inrsp), j(intyp), j(iwork),
-     &                       lstrec  , lrewin  , a(ivoll), mypart  , dlwqd   )
+     &                       lstrec  , lrewin  , a(ivoll), dlwqd   )
          end select
 
 !        update the info on dry volumes with the new volumes
@@ -382,20 +382,20 @@
      &                 j(inwtyp), j(iwast) , iwstkind , a(iwste) , a(iderv) ,
      &                 iknmkv   , nopa     , c(ipnam) , a(iparm) , nosfun   ,
      &                 c(isfna ), a(isfun) , j(isdmp) , a(idmps) , a(imas2) ,
-     &                 a(iwdmp) , 1        , notot    , j(iowns ), mypart   )
+     &                 a(iwdmp) , 1        , notot    , j(iowns )  )
 
 !        explicit part of the transport step, derivative
 
          call dlwq50 ( nosys    , notot    , nosss    , noqt     , nvdim    ,
      &                 a(ivnew) , a(iarea) , a(iflow) , j(ixpnt) , j(ivpnw) ,
      &                 a(iconc) , a(iboun) , idt      , a(iderv) , iaflag   ,
-     &                 a(imas2) , j(iowns) , mypart   )
+     &                 a(imas2) , j(iowns)   )
 
 !          set the first guess in array CONC2 == ITIMR
 
          call dlwq18 ( nosys    , notot    , nototp   , nosss    , a(ivol2) ,
      &                 surface  , a(imass) , a(itimr) , a(iderv) , idt      ,
-     &                 ivflag   , lun(19)  , j(iowns) , mypart   )
+     &                 ivflag   , lun(19)  , j(iowns)   )
 
 !        perform the flux correction on conc2 == a(itimr)
 
@@ -405,15 +405,15 @@
      &                 a(ileng) , j(ixpnt) , iknmkv   , j(idpnw) , j(ivpnw) ,
      &                 a(iconc) , a(itimr) , a(iboun) , intopt   , ilflag   ,
      &                 idt      , iaflag   , a(imas2) , ndmpq    , j(iqdmp) ,
-     &                 a(idmpq) , j(iowns) , mypart   )
+     &                 a(idmpq) , j(iowns)   )
          call dlwq52 ( nosys    , notot    , nosss    , a(ivol2) , a(imass) ,
-     &                 a(itimr) , a(iconc) , j(iowns) , mypart   )
+     &                 a(itimr) , a(iconc) , j(iowns)   )
 
 !          explicit part of transport done, volumes on diagonal
 
          call dlwq42 ( nosys    , notot    , nototp   , nosss    , a(ivol2) ,
      &                 surface  , a(imass) , a(iconc) , a(iderv) , idt      ,
-     &                 ivflag   , lun(19)  , j(iowns) , mypart   )
+     &                 ivflag   , lun(19)  , j(iowns)   )
 
 
 !          performs the implicit part of the transport step
@@ -423,21 +423,20 @@
      &                 a(larea) , a(lflow) , a(lleng) , j(lxpnt) , iknmkv   ,
      &                 j(idpnw) , j(ivpnw) , a(iconc) , a(iboun) , intopt   ,
      &                 ilflag   , idt      , a(iderv) , iaflag   , a(imas2) ,
-     &                 j(iowns) , mypart   , lun(19)  , ndmpq    , j(lqdmp) ,
+     &                 j(iowns) , lun(19)  , ndmpq    , j(lqdmp) ,
      &                 a(idmpq) , arhs     , adiag    , acodia   , bcodia   )
 !
 !          Forester filter on the vertical
 !
       IF ( FORESTER ) THEN
          CALL DLWQD2 ( LUN(19) , NOSYS   , NOTOT   , nosss   , NOQ3    ,
-     *                 KMAX    , A(ICONC), A(LLENG), NOWARN  , J(IOWNS),
-     *                 MYPART )
+     *                 KMAX    , A(ICONC), A(LLENG), NOWARN  , J(IOWNS))
       ENDIF
 
 !        update the necessary arrays
 
          call dlwq44 ( nosys   , notot   , nosss   , a(ivol2), a(imass),
-     &                 a(iconc), a(iderv), j(iowns), mypart  )
+     &                 a(iconc), a(iderv), j(iowns)  )
 
 !          new time values, volumes excluded
 
@@ -453,10 +452,8 @@
 
 !        calculate closure error
          if ( lrewin .and. lstrec ) then
-            if (mypart.eq.1) then
-               call dlwqce ( a(imass), a(ivoll), a(ivol2), nosys , notot ,
+            call dlwqce ( a(imass), a(ivoll), a(ivol2), nosys , notot ,
      &                       noseg   , lun(19) )
-            endif
             call move   ( a(ivoll), a(ivol) , noseg   )
          else
 !           replace old by new volumes
@@ -478,18 +475,15 @@
 
       if ( ACTION == ACTION_FINALISATION    .or.
      &     ACTION == ACTION_FULLCOMPUTATION      ) then
-          if (mypart .eq. 1) then
-
 !            close files, except monitor file
 
-             call CloseHydroFiles( dlwqd%collcoll )
-             call close_files( lun )
+            call CloseHydroFiles( dlwqd%collcoll )
+            call close_files( lun )
 
 !            write restart file
 
-             CALL DLWQ13 ( LUN      , LCHAR , A(ICONC) , ITIME , C(IMNAM) ,
+            CALL DLWQ13 ( LUN      , LCHAR , A(ICONC) , ITIME , C(IMNAM) ,
      *                     C(ISNAM) , NOTOT , NOSSS    )
-         endif
       endif
 
  9999 if ( timon ) call timstop ( ithandl )

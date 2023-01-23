@@ -278,7 +278,7 @@
      &                 j(ivtda) , j(ivdag) , j(ivtag) , j(ivagg) , j(iapoi) ,
      &                 j(iaknd) , j(iadm1) , j(iadm2) , j(ivset) , j(ignos) ,
      &                 j(igseg) , novar    , a        , nogrid   , ndmps    ,
-     &                 c(iprna) , intsrt   , j(iowns) , j(iownq) , mypart   ,
+     &                 c(iprna) , intsrt   , j(iowns) , j(iownq) ,
      &                 j(iprvpt), j(iprdon), nrref    , j(ipror) , nodef    ,
      &                 surface  , lun(19)  )
 
@@ -330,7 +330,7 @@
      +              C(IBTYP), J(INTYP), C(ICNAM), NOQ     , J(IXPNT),
      +              INTOPT  , C(IPNAM), C(IFNAM), C(ISFNA), J(IDMPB),
      +              NOWST   , NOWTYP  , C(IWTYP), J(IWAST), J(INWTYP),
-     +              A(IWDMP), iknmkv  , J(IOWNS), MYPART  , isegcol )
+     +              A(IWDMP), iknmkv  , J(IOWNS), isegcol )
 
 !        zero cummulative array's
 
@@ -356,7 +356,7 @@
 
          call dlwq14 ( a(iderv) , notot    , nosss    , itfact   , a(imas2) ,
      &                 idt      , iaflag   , a(idmps) , intopt   , j(isdmp) ,
-     &                 j(iowns) , mypart   )
+     &                 j(iowns)  )
 !
 !          get new volumes
 !
@@ -380,7 +380,7 @@
      *                 J(INRHA), J(INRH2), J(INRFT), NOSEG   , A(IVOL2),
      *                 J(IBULK), LCHAR   , ftype   , ISFLAG  , IVFLAG  ,
      *                 UPDATE  , J(INISP), A(INRSP), J(INTYP), J(IWORK),
-     *                 LSTREC  , LREWIN  , A(IVOLL), MYPART  , dlwqd   )
+     *                 LSTREC  , LREWIN  , A(IVOLL), dlwqd   )
          IF ( UPDATE ) UPDATR = .TRUE.
       ENDIF
 
@@ -398,7 +398,7 @@
      &                 j(inwtyp) , j(iwast) , iwstkind , a(iwste) , a(iderv) ,
      &                 iknmkv    , nopa     , c(ipnam) , a(iparm) , nosfun   ,
      &                 c(isfna ) , a(isfun) , j(isdmp) , a(idmps) , a(imas2) ,
-     &                 a(iwdmp)  , 1        , notot    , j(iowns ), mypart   )
+     &                 a(iwdmp)  , 1        , notot    , j(iowns ) )
 
 !          Here we implement a loop that inverts the same matrix
 !          for series of subsequent substances having the same

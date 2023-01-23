@@ -23,7 +23,7 @@
 
       SUBROUTINE PRODR2 (DERIV , NOTOT , NOFLUX, STOCHI, NFLUX1,
      +                   NFLUXP, FLUX  , NOSEG , VOLUME, NDT   ,
-     +                   OWNERS, MYPART)
+     +                   OWNERS)
 !
 !     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
 !
@@ -52,12 +52,11 @@
 !     VOLUME  REAL          *     INPUT   Segment volumes
 !     NDT     INTEGER       1     INPUT   nuber of timesteps in fractional step
 !     OWNERS  INTEGER     NOSEG   INPUT   Ownership array for segments
-!     MYPART  INTEGER       1     INPUT   Number of current part/subdomain
 !
 !     Declaration of arguments
 !
       use timers
-      INTEGER NOTOT , NOFLUX, NFLUX1, NFLUXP, NOSEG, MYPART
+      INTEGER NOTOT , NOFLUX, NFLUX1, NFLUXP, NOSEG
       INTEGER OWNERS(NOSEG)
       REAL    DERIV(NOTOT,NOSEG) , STOCHI(NOTOT,NOFLUX) ,
      +        FLUX(NOFLUX,NOSEG) , VOLUME(NOSEG)
@@ -74,14 +73,12 @@
                FACT = FDT*ST
                IF ( ABS(FACT-1.0) .LT. 1.E-10 ) THEN
                   DO ISEG = 1 , NOSEG
-                     IF ( OWNERS(ISEG) .EQ. MYPART )
-     +                  DERIV(ISYS,ISEG) = DERIV(ISYS,ISEG) +
+                        DERIV(ISYS,ISEG) = DERIV(ISYS,ISEG) +
      +                                     FLUX(IFLUX,ISEG)*VOLUME(ISEG)
                   ENDDO
                ELSE
                   DO ISEG = 1 , NOSEG
-                     IF ( OWNERS(ISEG) .EQ. MYPART )
-     +                  DERIV(ISYS,ISEG) = DERIV(ISYS,ISEG) +
+                        DERIV(ISYS,ISEG) = DERIV(ISYS,ISEG) +
      +                                     FLUX(IFLUX,ISEG)*VOLUME(ISEG)*FACT
                   ENDDO
                ENDIF

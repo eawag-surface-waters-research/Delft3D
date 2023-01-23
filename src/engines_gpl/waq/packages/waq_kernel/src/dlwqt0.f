@@ -127,10 +127,8 @@
          wstset = .false.
          funset = .false.
          othset = .false.
-         if (mypart .eq. 1) then
-            call dhopnf ( lun(3), luntxt(3), 3    , 2     , ierr  )
-            call dhopnf ( lun(4), luntxt(4), 4    , 2     , ierr  )
-         endif
+         call dhopnf ( lun(3), luntxt(3), 3    , 2     , ierr  )
+         call dhopnf ( lun(4), luntxt(4), 4    , 2     , ierr  )
       endif
 
 !         initialisation
@@ -151,16 +149,14 @@
 !         integration step size IDT
 
       if ( nrftot( 1) .gt. 0 ) then
-         if (mypart.eq.1) then
-            call dlwqt1 ( lun       , itime      , itimel , iharm(ipf), harmat(iph),
+         call dlwqt1 ( lun       , itime      , itimel , iharm(ipf), harmat(iph),
      &                    array(ipa), ipoint(ipi), adt    , 1         , nrharm( 1) ,
      &                    1         , nrftot( 1) , ipa    , iph       , ipf        ,
      &                    ipi       , luntxt     , 5      , isflag    , ifflag     ,
      &                    update    , othset     , 0      , iwork     , lstdum     ,
      &                    lredum    , rdummy     , ftype  , dlwqd     )
-            ldum(1) = update
-            ldum(2) = othset
-         endif
+         ldum(1) = update
+         ldum(2) = othset
 
          update = ldum(1)
          othset = ldum(2)
@@ -179,7 +175,6 @@
          if   ( rdvolu ) then
 !           if .not. computed volumes .or. this is the first time
             if ( ivflag     .eq. 0 .or. ifflag .eq. 1 ) then
-               if (mypart .eq. 1) then
                   call dlwqt1 ( lun       , itime      , itimel , iharm(ipf), harmat(iph),
      &                          array(ipa), ipoint(ipi), volume , 1         , nrharm( 2) ,
      &                          noseg     , nrftot( 2) , ipa    , iph       , ipf        ,
@@ -189,7 +184,6 @@
                   ldum(1) = update
                   ldum(2) = othset
                   ldum(3) = lrewin
-               endif
 
                update = ldum(1)
                othset = ldum(2)
@@ -208,16 +202,14 @@
 !         dispersions
 
       if ( nrharm( 3) .ge. 0 ) then
-         if (mypart.eq.1) then
-            call dlwqt1 ( lun       , itime      , itimel , iharm(ipf), harmat(iph),
+         call dlwqt1 ( lun       , itime      , itimel , iharm(ipf), harmat(iph),
      &                    array(ipa), ipoint(ipi), disper , nodisp    , nrharm( 3) ,
      &                    noq       , nrftot( 3) , ipa    , iph       , ipf        ,
      &                    ipi       , luntxt     , 9      , isflag    , ifflag     ,
      &                    update    , othset     , 0      , iwork     , lstdum     ,
      &                    lredum    , rdummy     , ftype  , dlwqd     )
-            ldum(1) = update
-            ldum(2) = othset
-         endif
+         ldum(1) = update
+         ldum(2) = othset
 
          update = ldum(1)
          othset = ldum(2)
@@ -231,16 +223,14 @@
 !         area
 
       if ( nrharm( 4) .ge. 0 ) then
-         if (mypart .eq. 1) then
-            call dlwqt1 ( lun       , itime      , itimel , iharm(ipf), harmat(iph),
+         call dlwqt1 ( lun       , itime      , itimel , iharm(ipf), harmat(iph),
      &                    array(ipa), ipoint(ipi), area   , 1         , nrharm( 4) ,
      &                    noq       , nrftot( 4) , ipa    , iph       , ipf        ,
      &                    ipi       , luntxt     , 10     , isflag    , ifflag     ,
      &                    update    , othset     , 0      , iwork     ,  lstdum    ,
      &                    lredum    , rdummy     , ftype  , dlwqd     )
-            ldum(1) = update
-            ldum(2) = othset
-         endif
+         ldum(1) = update
+         ldum(2) = othset
 
          update = ldum(1)
          othset = ldum(2)
@@ -254,7 +244,6 @@
 !         flow
 
       if ( nrharm( 5) .ge. 0 ) then
-         if (mypart .eq. 1) then
             call dlwqt1 ( lun       , itime      , itimel , iharm(ipf) , harmat(iph),
      &                    array(ipa), ipoint(ipi), flow   , 1          , nrharm( 5) ,
      &                    noq       , nrftot( 5) , ipa    , iph        , ipf        ,
@@ -263,7 +252,6 @@
      &                    lredum    , rdummy     , ftype  , dlwqd      )
             ldum(1) = update
             ldum(2) = othset
-         endif
 
          update = ldum(1)
          othset = ldum(2)
@@ -277,16 +265,14 @@
 !         velocities
 
       if ( nrharm( 6) .ge. 0 ) then
-         if (mypart .eq. 1) then
-            call dlwqt1 ( lun       , itime      , itimel , iharm(ipf) , harmat(iph),
+         call dlwqt1 ( lun       , itime      , itimel , iharm(ipf) , harmat(iph),
      &                    array(ipa), ipoint(ipi), velo   , novelo     , nrharm( 6) ,
      &                    noq       , nrftot( 6) , ipa    , iph        , ipf        ,
      &                    ipi       , luntxt     , 12     , isflag     , ifflag     ,
      &                    update    , othset     , 0      , iwork      , lstdum     ,
      &                    lredum    , rdummy     , ftype  , dlwqd      )
-            ldum(1) = update
-            ldum(2) = othset
-         endif
+         ldum(1) = update
+         ldum(2) = othset
 
          update = ldum(1)
          othset = ldum(2)
@@ -300,16 +286,14 @@
 !         'from'- and 'to'-length
 
       if ( nrharm( 7) .ge. 0 .and. ilflag .eq. 1 ) then
-         if (mypart .eq. 1) then
             call dlwqt1 ( lun       , itime      , itimel , iharm(ipf), harmat(iph),
      &                    array(ipa), ipoint(ipi), aleng  , 2         , nrharm( 7) ,
      &                    noq       , nrftot( 7) , ipa    , iph       , ipf        ,
      &                    ipi       , luntxt     , 13     , isflag    , ifflag     ,
      &                    update    , othset     , 0      , iwork     , lstdum     ,
      &                    lredum    , rdummy     , ftype  , dlwqd     )
-            ldum(1) = update
-            ldum(2) = othset
-         endif
+         ldum(1) = update
+         ldum(2) = othset
 
          update = ldum(1)
          othset = ldum(2)
@@ -327,17 +311,15 @@
          nosubs = nosys
       endif
       if ( nrharm( 8) .ge. 0 .and. .not. bndset ) then
-         if (mypart .eq. 1) then
-            call dlwqt1 ( lun       , itime      , itimel , iharm(ipf), harmat(iph),
+         call dlwqt1 ( lun       , itime      , itimel , iharm(ipf), harmat(iph),
      &                    array(ipa), ipoint(ipi), bounds , nosubs    , nrharm( 8) ,
      &                    nobnd     , nrftot( 8) , ipa    , iph       , ipf        ,
      &                    ipi       ,  luntxt    , 14     , isflag    , ifflag     ,
      &                    update    , bndset     , 0      , iwork     ,  lstdum    ,
      &                    lredum    , rdummy     , ftype  , dlwqd     )
-            ldum(1) = update
-            ldum(2) = othset
-            ldum(3) = bndset
-         endif
+         ldum(1) = update
+         ldum(2) = othset
+         ldum(3) = bndset
 
          update = ldum(1)
          othset = ldum(2)
@@ -346,16 +328,14 @@
       endif
 
       if ( bndset ) then
-         if (mypart .eq. 1) then
             call dlwqt1 ( lun    , itime     , itimel , inwspc(ipni), anwspc(ipna),
      &                    adummy , inwtyp(it), bounds , nosubs      , isnul2      ,
      &                    nobnd  , isnul     , ipni   , ipna        , idummy      ,
      &                    ibndmx , luntxt    , 14     , isflag      , ifflag      ,
      &                    update , bndset    , 0      , iwork       , lstdum      ,
      &                    lredum , rdummy    , ftype  , dlwqd       )
-            ldum(1) = update
-            ldum(2) = othset
-         endif
+         ldum(1) = update
+         ldum(2) = othset
 
          update = ldum(1)
          othset = ldum(2)
@@ -367,17 +347,15 @@
 !         wastes
 
       if ( nrharm( 9) .ge. 0 .and. .not. wstset ) then
-         if (mypart .eq. 1) then
-            call dlwqt1 ( lun       , itime      , itimel , iharm(ipf), harmat(iph),
+         call dlwqt1 ( lun       , itime      , itimel , iharm(ipf), harmat(iph),
      &                    array(ipa), ipoint(ipi), wastes , notot+1   , nrharm( 9) ,
      &                    nowst     , nrftot( 9) , ipa    , iph       , ipf        ,
      &                    ipi       , luntxt     , 15     , isflag    , ifflag     ,
      &                    update    , wstset     , 1      , iwork     ,  lstdum    ,
      &                    lredum    , rdummy     , ftype  , dlwqd     )
-            ldum(1) = update
-            ldum(2) = othset
-            ldum(3) = wstset
-         endif
+         ldum(1) = update
+         ldum(2) = othset
+         ldum(3) = wstset
 
          update = ldum(1)
          othset = ldum(2)
@@ -387,16 +365,14 @@
       isnul = 0
       isnul2= 0
       if ( wstset ) then
-         if (mypart .eq. 1) then
-            call dlwqt1 ( lun       , itime     , itimel , inwspc(ipni), anwspc(ipna),
+         call dlwqt1 ( lun       , itime     , itimel , inwspc(ipni), anwspc(ipna),
      &                    adummy    , inwtyp(it), wastes , notot+1     , isnul2      ,
      &                    nowst     , isnul     , ipni   , ipna        , idummy      ,
      &                    iwstmx    , luntxt    , 15     , isflag      , ifflag      ,
      &                    update    , wstset    , 1      , iwork       , lstdum      ,
      &                    lredum    , rdummy    , ftype  , dlwqd       )
-            ldum(1) = update
-            ldum(2) = othset
-         endif
+         ldum(1) = update
+         ldum(2) = othset
 
          update = ldum(1)
          othset = ldum(2)
@@ -408,12 +384,10 @@
 
       nosss = noseg + nseg2
       if ( nrharm(10) .ge. 0 ) then
-         if (mypart .eq. 1) then
-            call dlwqta ( lun(16), luntxt(16), lun(19), nosss  , nocons ,
+         call dlwqta ( lun(16), luntxt(16), lun(19), nosss  , nocons ,
      &                    nopa   , nofun     , nosfun , consts , param  ,
      &                    funcs  , sfuncs    , isflag , ifflag , itime  ,
      &                    gridps , dlwqd     , ierr   )
-         endif
       endif
 
 
@@ -425,10 +399,8 @@
 !         close the harmonics and pointer files
 
    10 if ( ifflag .eq. 1 ) then
-         if (mypart .eq. 1 ) then
-            close ( lun( 3) )
-            close ( lun( 4) )
-         endif
+         close ( lun( 3) )
+         close ( lun( 4) )
          if ( othset ) then
             write ( lun(19) , * ) ' error, new time series processing',
      &           ' wanted for an unsupported item: ',luntxt(is)

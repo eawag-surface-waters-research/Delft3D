@@ -211,7 +211,7 @@
          CALL DLWQIO ( LUN(25) , LCHAR(25), LUN(19) , NOUTP   , NRVART  ,
      +                 NBUFMX  , J(IIOUT) , J(IIOPO), C(IONAM), C(IOSNM),
      +                 C(IOUNI), C(IODSC) , NOTOT   , C(ISSNM), C(ISUNI),
-     +                 C(ISDSC), LUN      , LCHAR   , MYPART  , IERR    )
+     +                 C(ISDSC), LUN      , LCHAR   , IERR    )
          CLOSE ( LUN(25) )
       ENDIF
 !
@@ -269,7 +269,7 @@
 !     determine mesh/grid partitioning for parallel computing
 !
       CALL PARTIT ( LUN(19) , NOSSS   , NOLAY   , NOQTT   , J(IXPNT),
-     +              MYPART  , J(IOWNS), J(IOWNQ), INTSRT  )
+     +              J(IOWNS), J(IOWNQ), INTSRT  )
 
       IBFLAG = 0
       IF ( MOD(INTOPT,16) .GE. 8 ) IBFLAG = 1
@@ -282,7 +282,7 @@
 !        feature 4 == segment belongs to own processor
 !
 
-      CALL CHKNMR ( LUN(19) , MYPART , nosss  , J(IOWNS) , J(IKNMR) )
+      CALL CHKNMR ( LUN(19) , nosss  , J(IOWNS) , J(IKNMR) )
 
       ! determine top of the vertcical columns
 
@@ -382,7 +382,6 @@
       call delpar00 ( lchar(45), noseg    , noq      , a(ivol)  , a(iflow) ,
      &                nosfun   , c(isfna) , a(isfun) )
 
-      if (mypart .eq.1) then
 !
 !     New bottomlayer processing
 !
@@ -394,7 +393,6 @@
      *                      C(ISFNA), J(IXPNT), A(IVOL ), A(IAREA), A(IFLOW),
      *                      A(ILENG))
 !
-      end if
 
       IF ( INTSRT .EQ. 6 .OR. INTSRT .EQ. 7 ) THEN
          NOSUBz = NOTOT

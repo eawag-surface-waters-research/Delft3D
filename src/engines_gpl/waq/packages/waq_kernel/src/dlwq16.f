@@ -27,7 +27,7 @@
      &                    ipoint , iknmrk , idpnt  , ivpnt  , conc   ,
      &                    bound  , iopt   , ilflag , idt    , deriv  ,
      &                    iaflag , amass2 , ndmpq  , iqdmp  , dmpq   ,
-     &                    owners , mypart )
+     &                    owners )
 
 !     Deltares Software Centre
 
@@ -111,7 +111,6 @@
       integer  ( 4), intent(in   ) :: iqdmp (noq)          !< pointer from echange to dump location
       real     ( 4), intent(inout) :: dmpq  (nosys,ndmpq,2)!< array with mass balance information
       integer  ( 4), intent(in   ) :: owners(noseg)        !< array of owners per volume for paralellism
-      integer  ( 4), intent(in   ) :: mypart               !< which processor am I ?
 
 !     Local variables     :
 
@@ -143,13 +142,6 @@
          ito   = ipoint(2,iq)
          if ( ifrom .eq. 0 .or.  ito .eq. 0 ) cycle
          if ( ifrom .le. 0 .and. ito .le. 0 ) cycle
-         if   ( ifrom .lt. 0) then
-            if ( owners(ito)   .ne. mypart ) cycle
-         elseif ( ito .lt. 0) then
-            if ( owners(ifrom) .ne. mypart ) cycle
-         else
-            if ( owners(ifrom) .ne. mypart .and. owners(ito) .ne. mypart ) cycle
-         endif
 
          a = area(iq)
          q = flow(iq)

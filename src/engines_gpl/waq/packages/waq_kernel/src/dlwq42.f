@@ -23,7 +23,7 @@
 
       subroutine dlwq42 ( nosys  , notot  , nototp , noseg  , volume ,
      &                    surface, amass  , conc   , deriv  , idt    ,
-     &                    ivflag , lun    , owners , mypart )
+     &                    ivflag , lun    , owners )
 
 !     Deltares Software Centre
 
@@ -71,7 +71,6 @@
       integer   (4), intent(in   ) :: ivflag                  !< if 1 computational volumes
       integer   (4), intent(in   ) :: lun                     !< unit number of the monitoring file
       integer   (4), intent(in   ) :: owners(noseg )          !< ownership array for segments
-      integer   (4), intent(in   ) :: mypart                  !< number of the current subdomain
 
 !     local variables
 

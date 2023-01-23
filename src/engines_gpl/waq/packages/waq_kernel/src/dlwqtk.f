@@ -129,7 +129,7 @@
 !        Change the time-variable kenmerk-array (column 3) such that it
 !        includes ownership of segments in parallel runs
 !
-         CALL CHKNMR ( LUN(19) , MYPART , NOSEG  , IOWN(1) , IKNMRK(1,3) )
+         CALL CHKNMR ( LUN(19) , NOSEG  , IOWN(1) , IKNMRK(1,3) )
 
 !
 !        OR the constant and the time variable array's

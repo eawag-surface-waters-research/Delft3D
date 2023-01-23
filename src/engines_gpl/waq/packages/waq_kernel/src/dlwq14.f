@@ -23,7 +23,7 @@
 
       subroutine dlwq14 ( deriv  , notot  , noseg  , itfact , amass2 ,
      &                    idt    , iaflag , dmps   , intopt , isdmp  ,
-     &                    owners , mypart )
+     &                    owners )
 
 !     Deltares Software Centre
 
@@ -55,7 +55,6 @@
       integer  ( 4), intent(in   ) :: intopt               !< Integration suboptions
       integer  ( 4), intent(in   ) :: isdmp (noseg)        !< Pointer dumped segments
       integer  ( 4), intent(in   ) :: owners(noseg)        !< Ownership of segments
-      integer  ( 4), intent(in   ) :: mypart               !< Number of current part/subdomain
 
 !     Local variables
 
@@ -73,13 +72,11 @@
       dtfac = idt
       if ( iaflag .eq. 1 ) then
          do iseg = 1 , noseg
-            if ( owners(iseg) .ne. mypart ) cycle
             deriv (:,iseg) = deriv(:,iseg) * atfac
             amass2(:,2)    = deriv(:,iseg) * dtfac + amass2(:,2)
          enddo
       else
          do iseg = 1 , noseg
-            if ( owners(iseg) .ne. mypart ) cycle
             deriv (:,iseg) = deriv(:,iseg) * atfac
          enddo
       endif
@@ -89,7 +86,7 @@
       if ( mod(intopt,16) .ge. 8  ) then
          do iseg = 1 , noseg
             ip = isdmp(iseg)
-            if ( owners(iseg) .eq. mypart .and. ip .gt. 0 ) then
+            if ( ip .gt. 0 ) then
                dmps(:,ip) = dmps(:,ip) + deriv(:,iseg) * dtfac
             endif
          enddo

@@ -218,7 +218,7 @@
      &                 j(ivtda) , j(ivdag) , j(ivtag) , j(ivagg) , j(iapoi) ,
      &                 j(iaknd) , j(iadm1) , j(iadm2) , j(ivset) , j(ignos) ,
      &                 j(igseg) , novar    , a        , nogrid   , ndmps    ,
-     &                 c(iprna) , intsrt   , j(iowns) , j(iownq) , mypart   ,
+     &                 c(iprna) , intsrt   , j(iowns) , j(iownq) ,
      &                 j(iprvpt), j(iprdon), nrref    , j(ipror) , nodef    ,
      &                 surface  , lun(19)  )
 
@@ -247,7 +247,7 @@
      +              C(IBTYP), J(INTYP), C(ICNAM), noqtt   , J(IXPNT),
      +              INTOPT  , C(IPNAM), C(IFNAM), C(ISFNA), J(IDMPB),
      +              NOWST   , NOWTYP  , C(IWTYP), J(IWAST), J(INWTYP),
-     +              A(IWDMP), iknmkv  , J(IOWNS), MYPART  , isegcol )
+     +              A(IWDMP), iknmkv  , J(IOWNS), isegcol )
 
 !          zero cummulative array's
 
@@ -257,7 +257,7 @@
      &                    a(idmpq), a(idmps), noraai  , imflag  , ihflag  ,
      &                    a(itrra), ibflag  , nowst   , a(iwdmp))
          endif
-         if (mypart.eq.1) call write_progress( dlwqd%progress )
+         call write_progress( dlwqd%progress )
 
 !          simulation done ?
 
@@ -268,7 +268,7 @@
 
          call dlwq14 ( a(iderv), notot   , nosss   , itfact  , a(imas2),
      &                 idt     , iaflag  , a(idmps), intopt  , j(isdmp),
-     &                 j(iowns), mypart )
+     &                 j(iowns)  )
          itimel = itime                     ! For case 2 a(ivoll) contains the incorrect
          itime  = itime + idt               ! new volume from file and mass correction
          idtold = idt
@@ -277,7 +277,7 @@
 
          call dlwq18 ( nosys    , notot    , nototp   , nosss    , a(ivol2) ,
      &                 surface  , a(imass) , a(iconc) , a(iderv) , idtold   ,
-     &                 ivflag   , lun(19)  , j(iowns) , mypart   )
+     &                 ivflag   , lun(19)  , j(iowns) )
 
 !          integrate the fluxes at dump segments fill ASMASS with mass
 
@@ -293,18 +293,15 @@
 
       if ( ACTION == ACTION_FINALISATION    .or.
      &     ACTION == ACTION_FULLCOMPUTATION      ) then
-          if (mypart.eq.1) then
-
 !             close files, except monitor file
 
-              call CloseHydroFiles( dlwqd%collcoll )
-              call close_files( lun )
+        call CloseHydroFiles( dlwqd%collcoll )
+        call close_files( lun )
 
 !             write restart file
 
-              CALL DLWQ13 ( LUN      , LCHAR , A(ICONC) , ITIME , C(IMNAM) ,
+        CALL DLWQ13 ( LUN      , LCHAR , A(ICONC) , ITIME , C(IMNAM) ,
      &                      C(ISNAM) , NOTOT , NOSSS    )
-          end if ! mypart.eq.1
       endif
 
  9999 if ( timon ) call timstop ( ithandl )

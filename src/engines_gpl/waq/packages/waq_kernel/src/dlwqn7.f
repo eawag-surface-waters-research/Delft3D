@@ -160,7 +160,7 @@
      *                 J(INRHA), J(INRH2), J(INRFT), NOSEG   , A(IVOL2),
      *                 J(IBULK), LCHAR   , ftype   , ISFLAG  , IVFLAG  ,
      *                 LDUMMY  , J(INISP), A(INRSP), J(INTYP), J(IWORK),
-     *                 LSTREC  , LREWIN  , A(IVOLL), MYPART  , dlwqd   )
+     *                 LSTREC  , LREWIN  , A(IVOLL), dlwqd   )
          CALL DLWQ65 ( A(IVOL2), A(IVOL) , IDT     , NOSEG   )
       ELSE
          CALL ZERO ( A(IVOL2) , NOSEG )
@@ -200,7 +200,7 @@
      &                 j(inwtyp) , j(iwast) , iwstkind , a(iwste) , a(iderv) ,
      &                 iknmkv    , nopa     , c(ipnam) , a(iparm) , nosfun   ,
      &                 c(isfna ) , a(isfun) , j(isdmp) , a(idmps) , a(imas2) ,
-     &                 a(iwdmp)  , isys     , nsys     , j(iowns ), mypart   )
+     &                 a(iwdmp)  , isys     , nsys     , j(iowns )  )
 !
 !          fill the matrix
 !
@@ -256,7 +256,7 @@
      +              C(IBTYP), J(INTYP), C(ICNAM), NOQ     , J(IXPNT),
      +              INTOPT  , C(IPNAM), C(IFNAM), C(ISFNA), J(IDMPB),
      +              NOWST   , NOWTYP  , C(IWTYP), J(IWAST), J(INWTYP),
-     +              A(IWDMP), iknmkv  , J(IOWNS), MYPART  , isegcol )
+     +              A(IWDMP), iknmkv  , J(IOWNS), isegcol )
 !
 !          close files, except monitor file
 !

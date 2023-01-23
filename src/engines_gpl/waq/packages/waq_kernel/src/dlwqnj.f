@@ -310,7 +310,7 @@
      &                 j(ivtda) , j(ivdag) , j(ivtag) , j(ivagg) , j(iapoi) ,
      &                 j(iaknd) , j(iadm1) , j(iadm2) , j(ivset) , j(ignos) ,
      &                 j(igseg) , novar    , a        , nogrid   , ndmps    ,
-     &                 c(iprna) , intsrt   , j(iowns) , j(iownq) , mypart   ,
+     &                 c(iprna) , intsrt   , j(iowns) , j(iownq) ,
      &                 j(iprvpt), j(iprdon), nrref    , j(ipror) , nodef    ,
      &                 surface  , lun(19)  )
 
@@ -370,7 +370,7 @@
      +              C(IBTYP), J(INTYP), C(ICNAM), NOQ     , J(IXPNT),
      +              INTOPT  , C(IPNAM), C(IFNAM), C(ISFNA), J(IDMPB),
      +              NOWST   , NOWTYP  , C(IWTYP), J(IWAST), J(INWTYP),
-     +              A(IWDMP), iknmkv  , J(IOWNS), MYPART  , isegcol )
+     +              A(IWDMP), iknmkv  , J(IOWNS), isegcol )
 
 !          zero cummulative array's
 
@@ -380,7 +380,7 @@
      &                    a(idmpq), a(idmps), noraai  , imflag  , ihflag  ,
      &                    a(itrra), ibflag  , nowst   , a(iwdmp))
          endif
-         if (mypart.eq.1) call write_progress( dlwqd%progress )
+         call write_progress( dlwqd%progress )
 
 !          simulation done ?
 
@@ -419,7 +419,7 @@
 
          call dlwq14 ( a(iderv), notot   , nosss   , itfact  , a(imas2),
      &                 idt     , iaflag  , a(idmps), intopt  , j(isdmp),
-     &                 j(iowns), mypart )
+     &                 j(iowns))
 
 !        get new volumes
 
@@ -438,7 +438,7 @@
      &                       j(inrha), j(inrh2), j(inrft), noseg   , a(ivoll),
      &                       j(ibulk), lchar   , ftype   , isflag  , ivflag  ,
      &                       updatr  , j(inisp), a(inrsp), j(intyp), j(iwork),
-     &                       lstrec  , lrewin  , a(ivol2), mypart  , dlwqd   )
+     &                       lstrec  , lrewin  , a(ivol2), dlwqd   )
                call dlwqf8 ( noseg   , noq     , j(ixpnt), idt     , iknmkv  ,
      &                       a(ivol ), a(iflow), a(ivoll), a(ivol2))
                updatr = .true.
@@ -449,7 +449,7 @@
      &                       j(inrha), j(inrh2), j(inrft), noseg   , a(ivol2),
      &                       j(ibulk), lchar   , ftype   , isflag  , ivflag  ,
      &                       updatr  , j(inisp), a(inrsp), j(intyp), j(iwork),
-     &                       lstrec  , lrewin  , a(ivoll), mypart  , dlwqd   )
+     &                       lstrec  , lrewin  , a(ivoll), dlwqd   )
          end select
 
 !        update the info on dry volumes with the new volumes
@@ -466,7 +466,7 @@
      &                 j(inwtyp), j(iwast) , iwstkind , a(iwste) , a(iderv) ,
      &                 iknmkv   , nopa     , c(ipnam) , a(iparm) , nosfun   ,
      &                 c(isfna ), a(isfun) , j(isdmp) , a(idmps) , a(imas2) ,
-     &                 a(iwdmp) , 1        , notot    , j(iowns ), mypart   )
+     &                 a(iwdmp) , 1        , notot    , j(iowns )  )
 
 !        conversion of Delwaq arrays to FLOW arrays
 
@@ -574,8 +574,7 @@
 !
       IF ( FORESTER .AND. INTSRT .EQ. 19 ) THEN
          CALL DLWQD2 ( LUN(19) , NOSYS   , NOTOT   , NOSEG   , NOQ3    ,
-     *                 KMAX    , A(ICONC), A(LLENG), NOWARN  , J(IOWNS),
-     *                 MYPART )
+     *                 KMAX    , A(ICONC), A(LLENG), NOWARN  , J(IOWNS))
       ENDIF
 
 !     calculate closure error

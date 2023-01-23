@@ -25,7 +25,7 @@
      &                    iharm  , nrharm , nrftot , noseg  , volume ,
      &                    ipoint , luntxt , ftype  , isflag , ivflag ,
      &                    updatv , inwspc , anwspc , inwtyp , iwork  ,
-     &                    lstrec , lrewin , vollst , mypart , dlwqd  )
+     &                    lstrec , lrewin , vollst , dlwqd  )
 
 !     Deltares Software Centre
 
@@ -78,7 +78,6 @@
       logical   , intent(in   ) :: lstrec              !< Switch last record on rewind wanted
       logical   , intent(  out) :: lrewin              !< If T then rewindtook place
       real   (4), intent(  out) :: vollst(noseg)       !< Last volume record before rewind
-      integer(4), intent(in   ) :: mypart              !< number of current part/subdomain
       type(delwaq_data), intent(inout) :: dlwqd        !< derived type for persistent storage
 
 
@@ -112,14 +111,12 @@
 !         volumes
 
       if ( nrharm( 2) .ge. 0 ) then
-         if (mypart.eq.1) then
-            call dlwqt1 ( lun       , itime      , itimel, iharm(ipf), harmat(iph),
+         call dlwqt1 ( lun       , itime      , itimel, iharm(ipf), harmat(iph),
      &                    array(ipa), ipoint(ipi), volume, 1         , nrharm( 2) ,
      &                    noseg     , nrftot( 2) , ipa   , iph       , ipf        ,
      &                    ipi       , luntxt     , 7     , isflag    , ifflag     ,
      &                    update    , .false.    , 0     , iwork     , lstrec     ,
      &                    lrewin    , vollst     , ftype , dlwqd     )
-         endif
 
          if ( update ) then
             updatv = .true.

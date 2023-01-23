@@ -24,7 +24,7 @@
       SUBROUTINE DLWQIO ( LUNWRO, LCH   , LUREP , NOUTP , NRVART,
      +                    NBUFMX, IOUTPS, IOPOIN, OUNAM , OUSNM ,
      +                    OUUNI , OUDSC , NOTOT , SYSNM , SYUNI ,
-     +                    SYDSC , LUN   , LCHAR , MYPART, IERR  )
+     +                    SYDSC , LUN   , LCHAR , IERR  )
 !
 !     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
 !
@@ -66,7 +66,6 @@
 !     OSDSC   CHAR*(*) NRVART    OUTPUT   description of substance
 !     LUN     INTEGER    *        INPUT   array with unit numbers
 !     LCHAR   CHAR*(*)   *        INPUT   filenames
-!     MYPART  INTEGER       1     INPUT   subdomain number in parallel run
 !     IERR    INTEGER       1    IN/OUT   cummulative error count
 !
 !     Declaration of arguments
@@ -148,7 +147,6 @@
 !
 !     Set initialize flag, open files: only on first subdomain
 !
-      IF (MYPART.EQ.1) THEN
          DO 10 K = 1,NOUTP
             ISRTOU = IOUTPS(5,K)
             IF ( K .LE. 4 ) THEN
@@ -181,7 +179,6 @@
                CALL DHOPNF ( LUN(IFI), LCHAR(IFI), 37    , 1     , IDUM  )
             ENDIF
    10    CONTINUE
-      ENDIF ! MYPART.EQ.1
 !
       if ( timon ) call timstop ( ithandl )
       RETURN

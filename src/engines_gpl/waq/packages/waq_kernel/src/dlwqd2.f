@@ -22,8 +22,7 @@
 !!  rights reserved.
 
       SUBROUTINE DLWQD2 ( LUNUT , NOSYS , NOTOT , NOSEG , NOQ3 ,
-     *                    KMAX  , CONC  , ALENG , NOWARN, OWNERS,
-     *                    MYPART )
+     *                    KMAX  , CONC  , ALENG , NOWARN, OWNERS)
 !
 !
 !       Forester filter for the vertical.
@@ -71,7 +70,7 @@
 !
       INTEGER     LUNUT , NOSYS , NOTOT , NOSEG , NOQ3  , NOWARN
       REAL        CONC(NOTOT,NOSEG) , ALENG(2,NOQ3)
-      INTEGER     OWNERS(NOSEG), MYPART
+      INTEGER     OWNERS(NOSEG)
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "dlwqd2", ithandl )
 !
@@ -85,7 +84,6 @@
       NHOR = NOSEG/KMAX
 !          for all horizontal segments
       DO 40 ISEG = 1 , NHOR
-         IF (OWNERS(ISEG).EQ.MYPART) THEN
 !          for all active substances
             DO 30 ISYS = 1 , NOSYS
 !          do until maximum iteration or untill satisfied
@@ -146,7 +144,6 @@
                   NOWARN = NOWARN + 1
                ENDIF
    30       CONTINUE
-         END IF  ! (owners(iseg.eq.mypart)
    40 CONTINUE
 !
  9999 if ( timon ) call timstop ( ithandl )

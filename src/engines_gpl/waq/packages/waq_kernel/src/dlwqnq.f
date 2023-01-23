@@ -252,7 +252,7 @@
      &                 j(ivtda) , j(ivdag) , j(ivtag) , j(ivagg) , j(iapoi) ,
      &                 j(iaknd) , j(iadm1) , j(iadm2) , j(ivset) , j(ignos) ,
      &                 j(igseg) , novar    , a        , nogrid   , ndmps    ,
-     &                 c(iprna) , intsrt   , j(iowns) , j(iownq) , mypart   ,
+     &                 c(iprna) , intsrt   , j(iowns) , j(iownq) ,
      &                 j(iprvpt), j(iprdon), nrref    , j(ipror) , nodef    ,
      &                 surface  , lun(19)  )
 
@@ -304,7 +304,7 @@
      +              C(IBTYP), J(INTYP), C(ICNAM), noqtt   , J(IXPNT),
      +              INTOPT  , C(IPNAM), C(IFNAM), C(ISFNA), J(IDMPB),
      +              NOWST   , NOWTYP  , C(IWTYP), J(IWAST), J(INWTYP),
-     +              A(IWDMP), iknmkv  , J(IOWNS), MYPART  , isegcol )
+     +              A(IWDMP), iknmkv  , J(IOWNS), isegcol )
 
 !          zero cummulative array's
 
@@ -314,7 +314,7 @@
      &                    a(idmpq), a(idmps), noraai  , imflag  , ihflag  ,
      &                    a(itrra), ibflag  , nowst   , a(iwdmp))
          endif
-         if (mypart.eq.1) call write_progress( dlwqd%progress )
+         call write_progress( dlwqd%progress )
 
 !          simulation done ?
 
@@ -325,7 +325,7 @@
 
          call dlwq14 ( a(iderv), notot   , nosss   , itfact  , a(imas2),
      &                 idt     , iaflag  , a(idmps), intopt  , j(isdmp),
-     &                 j(iowns), mypart )
+     &                 j(iowns) )
                                             ! correct new volumes come in a(ivol2)
 !        get new volumes                    ! at rewind a(ivoll) contains the new volume
                                             ! after rewind.
@@ -344,7 +344,7 @@
      &                       j(inrha), j(inrh2), j(inrft), noseg   , a(ivoll),
      &                       j(ibulk), lchar   , ftype   , isflag  , ivflag  ,
      &                       updatr  , j(inisp), a(inrsp), j(intyp), j(iwork),
-     &                       lstrec  , lrewin  , a(ivol2), mypart  , dlwqd   )
+     &                       lstrec  , lrewin  , a(ivol2), dlwqd   )
                if ( lrewin ) call move ( a(ivol2), a(ivoll) , noseg   )
                call dlwqf8 ( noseg   , noq     , j(ixpnt), idt     , iknmkv  ,
      &                       a(ivol ), a(iflow), a(ivoll), a(ivol2))
@@ -356,7 +356,7 @@
      &                       j(inrha), j(inrh2), j(inrft), noseg   , a(ivol2),
      &                       j(ibulk), lchar   , ftype   , isflag  , ivflag  ,
      &                       updatr  , j(inisp), a(inrsp), j(intyp), j(iwork),
-     &                       lstrec  , lrewin  , a(ivoll), mypart  , dlwqd   )
+     &                       lstrec  , lrewin  , a(ivoll), dlwqd   )
          end select
 
 !        update the info on dry volumes with the new volumes
@@ -373,7 +373,7 @@
      &                 j(inwtyp), j(iwast) , iwstkind , a(iwste) , a(iderv) ,
      &                 iknmkv   , nopa     , c(ipnam) , a(iparm) , nosfun   ,
      &                 c(isfna) , a(isfun) , j(isdmp) , a(idmps) , a(imas2) ,
-     &                 a(iwdmp) , 1        , notot    , j(iowns ), mypart   )
+     &                 a(iwdmp) , 1        , notot    , j(iowns )  )
 
 !        do the transport itself
 
@@ -383,7 +383,7 @@
      &                 j(ixpnt) , iknmkv   , j(idpnw) , j(ivpnw) , a(iconc) ,
      &                 a(iboun) , intopt   , ilflag   , idt      , a(iderv) ,
      &                 iaflag   , a(imas2) , ndmpq    , j(iqdmp) , a(idmpq) ,
-     &                 j(iowns) , mypart   )
+     &                 j(iowns)   )
 
 !        new time values, volumes excluded
 
@@ -402,15 +402,14 @@
 
          call dlwq18 ( nosys    , notot    , nototp   , nosss    , a(ivol2) ,
      &                 surface  , a(imass) , a(iconc) , a(iderv) , idtold   ,
-     &                 ivflag   , lun(19)  , j(iowns) , mypart   )
+     &                 ivflag   , lun(19)  , j(iowns)   )
 
 
 !        calculate closure error
 
          if ( lrewin .and. lstrec ) then
 !           collect information on master for computation of closure error before rewind
-            if ( mypart .eq. 1 )
-     &      call dlwqce ( a(imass), a(ivoll), a(ivol2), nosys , notot ,
+            call dlwqce ( a(imass), a(ivoll), a(ivol2), nosys , notot ,
      &                    noseg   , lun(19) )
             call move   ( a(ivoll), a(ivol) , noseg   )
          else
@@ -433,8 +432,6 @@
 
       if ( ACTION == ACTION_FINALISATION    .or.
      &     ACTION == ACTION_FULLCOMPUTATION      ) then
-          if (mypart.eq.1) then
-
 !             close files, except monitor file
 
               call CloseHydroFiles( dlwqd%collcoll )
@@ -444,7 +441,6 @@
 
               CALL DLWQ13 ( LUN      , LCHAR , A(ICONC) , ITIME , C(IMNAM) ,
      &                      C(ISNAM) , NOTOT , NOSSS    )
-          end if ! mypart.eq.1
       endif
 
  9999 if ( timon ) call timstop ( ithandl )

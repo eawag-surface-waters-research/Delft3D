@@ -91,7 +91,6 @@ module m_sysn
     integer :: noarr    !  Number of array's in workspace
     integer :: nogrid   !  Number of defined grids
     integer :: nufil    !  Number of extra unformatted files
-    integer :: mypart   !  part-number of the current computing process
     integer :: nrref    !  Maximum nr of input references for processes
     integer :: nothrd   !  Nr of threads to be used for parallel processing
     integer :: nototp   !  Total number of substances inclusive of particle tracking
@@ -111,7 +110,7 @@ module m_sysn
                     ntdmps , ncbufm , noraai , ntraaq , newrsp ,         &
                     newisp , nobtyp , nowtyp , nomat  , novec  ,         &
                     mmax   , nmax   , kmax   , novar  , noarr  ,         &
-                    nogrid , nufil  , mypart , nrref  ,         &
+                    nogrid , nufil  , nrref  ,         &
                     nothrd , nototp
 
     integer          ::  in(insize)   

@@ -290,7 +290,7 @@
      &                 j(ivtda) , j(ivdag) , j(ivtag) , j(ivagg) , j(iapoi) ,
      &                 j(iaknd) , j(iadm1) , j(iadm2) , j(ivset) , j(ignos) ,
      &                 j(igseg) , novar    , a        , nogrid   , ndmps    ,
-     &                 c(iprna) , intsrt   , j(iowns) , j(iownq) , mypart   ,
+     &                 c(iprna) , intsrt   , j(iowns) , j(iownq) ,
      &                 j(iprvpt), j(iprdon), nrref    , j(ipror) , nodef    ,
      &                 surface  , lun(19)  )
 
@@ -341,7 +341,7 @@
      +              C(IBTYP), J(INTYP), C(ICNAM), NOQ     , J(IXPNT),
      +              INTOPT  , C(IPNAM), C(IFNAM), C(ISFNA), J(IDMPB),
      +              NOWST   , NOWTYP  , C(IWTYP), J(IWAST), J(INWTYP),
-     +              A(IWDMP), iknmkv  , J(IOWNS), MYPART  , isegcol )
+     +              A(IWDMP), iknmkv  , J(IOWNS), isegcol )
 
 !        zero cummulative array's
 
@@ -351,7 +351,7 @@
      &                    a(idmpq), a(idmps), noraai  , imflag  , ihflag  ,
      &                    a(itrra), ibflag  , nowst   , a(iwdmp))
          endif
-         if (mypart.eq.1) call write_progress( dlwqd%progress )
+         call write_progress( dlwqd%progress )
 
 !          simulation done ?
 
@@ -362,7 +362,7 @@
 
          call dlwq14 ( a(iderv), notot   , nosss   , itfact  , a(imas2),
      &                 idt     , iaflag  , a(idmps), intopt  , j(isdmp),
-     &                 j(iowns), mypart )
+     &                 j(iowns) )
 
 !     get new volumes
          itimel = itime
@@ -380,7 +380,7 @@
      &                       j(inrha), j(inrh2), j(inrft), noseg   , a(ivoll),
      &                       j(ibulk), lchar   , ftype   , isflag  , ivflag  ,
      &                       updatr  , j(inisp), a(inrsp), j(intyp), j(iwork),
-     &                       lstrec  , lrewin  , a(ivol2), mypart  , dlwqd   )
+     &                       lstrec  , lrewin  , a(ivol2), dlwqd   )
                if ( lrewin ) call move ( a(ivol2), a(ivoll) , noseg   )
                call dlwqf8 ( noseg   , noq     , j(ixpnt), idt     , iknmkv  ,
      &                       a(ivol ), a(iflow), a(ivoll), a(ivol2))
@@ -392,7 +392,7 @@
      &                       j(inrha), j(inrh2), j(inrft), noseg   , a(ivol2),
      &                       j(ibulk), lchar   , ftype   , isflag  , ivflag  ,
      &                       updatr  , j(inisp), a(inrsp), j(intyp), j(iwork),
-     &                       lstrec  , lrewin  , a(ivoll), mypart  , dlwqd   )
+     &                       lstrec  , lrewin  , a(ivoll), dlwqd   )
          end select
 
 !        update the info on dry volumes with the new volumes
@@ -409,7 +409,7 @@
      &                 j(inwtyp), j(iwast) , iwstkind , a(iwste) , a(iderv) ,
      &                 iknmkv   , nopa     , c(ipnam) , a(iparm) , nosfun   ,
      &                 c(isfna ), a(isfun) , j(isdmp) , a(idmps) , a(imas2) ,
-     &                 a(iwdmp) , 1        , notot    , j(iowns ), mypart   )
+     &                 a(iwdmp) , 1        , notot    , j(iowns )  )
 
 
 !        explicit part of the transport step, derivative
@@ -425,7 +425,7 @@
 
          call dlwq42 ( nosys   , notot   , nototp  , noseg   , a(ivol2),
      &                 surface , a(imass), a(iconc), a(iderv), idt     ,
-     &                 ivflag  , lun(19) , j(iowns), mypart  )
+     &                 ivflag  , lun(19) , j(iowns) )
 
 !        performs the implicit part of the transport step
 
@@ -450,7 +450,7 @@
 !          update the necessary arrays
 
          call dlwq44 ( nosys   , notot   , noseg   , a(ivol2), a(imass),
-     &                 a(iconc), a(iderv), j(iowns), mypart  )
+     &                 a(iconc), a(iderv), j(iowns) )
 
 !     calculate closure error
          if ( lrewin .and. lstrec ) then
@@ -469,8 +469,7 @@
      *              A(LVELO), A(ICONC), A(IBOUN), J(LXPNT), NOSYS   ,
      *              NOTOT   , LNOQ    , NDDIM   , NVDIM   , J(IDPNW),
      *              J(IVPNW), INTOPT  , IDT     , ILFLAG  , A(IDMPQ),
-     *              NDMPQ   , J(LQDMP), 0       , NOQ3    , J(IOWNS),
-     *              MYPART  )
+     *              NDMPQ   , J(LQDMP), 0       , NOQ3    , J(IOWNS))
 
 !          integrate the fluxes at dump segments fill ASMASS with mass
 

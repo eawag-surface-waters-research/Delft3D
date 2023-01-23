@@ -219,54 +219,52 @@
          READ  ( LUNIN ) ( LUN    (K), K = 1, NOLUN )
          READ  ( LUNIN ) ( LCHAR  (K), K = 1, NOLUN )
          READ  ( LUNIN ) ( filtype(K), K = 1, NOLUN )
-         DO 5 ILUN = 1, NOLUN
+         DO ILUN = 1, NOLUN
             CLOSE ( LUN(ILUN) )
-    5    CONTINUE
+         END DO
          close(lunin)
 
 
          CALL DHOPNF ( LUN(19) , LCHAR(19) , 19    , 1    , IERRD  )
          CALL SETMLU ( LUN(19) )
-         MYPART = 1                      ! to be removed soon. 20-jan-2023. DELWAQ-182
-         IF (MYPART .EQ. 1) THEN
 
 !      Initialise communication options SOBEK
 
-            OLCFWQ = .FALSE.
-            SRWACT = .FALSE.
-            RTCACT = .FALSE.
-            LCHAR(44) = ' '
-            LUN(44)   = LUN(43) + 1
+         OLCFWQ = .FALSE.
+         SRWACT = .FALSE.
+         RTCACT = .FALSE.
+         LCHAR(44) = ' '
+         LUN(44)   = LUN(43) + 1
 
-            call getcom ( '-i'  , 3    , lfound, idummy, rdummy,
-     +                   inifil, ierr2)
-            if ( lfound ) then
-               if ( ierr2.ne. 0 ) then
-                  inifil = ' '
-               endif
-            else
-               inifil = 'delwaq.ini'
+         call getcom ( '-i'  , 3    , lfound, idummy, rdummy,
+     +                 inifil, ierr2)
+         if ( lfound ) then
+            if ( ierr2.ne. 0 ) then
+               inifil = ' '
             endif
-            open(newunit=lunin,file=inifil,status='old',err=123)
-            write(lun(19),*) ' Using options from ini file : ',trim(inifil)
-            call gkwini(lunin,'SimulationOptions','OnLineWQ',c2)
-            if ( c2 .eq. '-1' ) then
-               olcfwq = .true.
-               write(lun(19),*) ' online coupling with FLOW module activated'
-            endif
-            call gkwini(lunin,'SimulationOptions','OutputRTC',c2)
-            if ( c2 .eq. '-1' ) then
-               rtcact = .true.
-               write(lun(19),*) ' RTC coupling activated'
-            endif
-            call gkwini(lunin,'SimulationOptions','SRW',c2)
-            if ( c2 .eq. '-1' ) then
-               srwact = .true.
-               write(lun(19),*) ' SRW coupling activated'
-            endif
-            call gkwini(lunin,'General','DIOConfigFile',dioconfig)
-            call gkwini(lunin,'General','ProgressFile',lchar(44))
-            close (lunin)
+         else
+            inifil = 'delwaq.ini'
+         endif
+         open(newunit=lunin,file=inifil,status='old',err=123)
+         write(lun(19),*) ' Using options from ini file : ',trim(inifil)
+         call gkwini(lunin,'SimulationOptions','OnLineWQ',c2)
+         if ( c2 .eq. '-1' ) then
+            olcfwq = .true.
+            write(lun(19),*) ' online coupling with FLOW module activated'
+         endif
+         call gkwini(lunin,'SimulationOptions','OutputRTC',c2)
+         if ( c2 .eq. '-1' ) then
+            rtcact = .true.
+            write(lun(19),*) ' RTC coupling activated'
+         endif
+         call gkwini(lunin,'SimulationOptions','SRW',c2)
+         if ( c2 .eq. '-1' ) then
+            srwact = .true.
+            write(lun(19),*) ' SRW coupling activated'
+         endif
+         call gkwini(lunin,'General','DIOConfigFile',dioconfig)
+         call gkwini(lunin,'General','ProgressFile',lchar(44))
+         close (lunin)
  123        continue
 
        ! initialise DIO
@@ -294,7 +292,6 @@
                WRITE(*,*)
             ENDIF
 
-         endif
 !
 !        end of reading master proces
 !
@@ -306,17 +303,17 @@
      &                 imaxi  , imaxc  , ipage  , lun    , lchar  ,
      &                 filtype, gridps , dlwqd  , ierr   )
 !
-         if (mypart .eq. 1) then
-            CLOSE ( LUNIN )
-            IF ( IERR .GT. 0 ) GOTO 992
+
+         CLOSE ( LUNIN )
+         IF ( IERR .GT. 0 ) GOTO 992
 !
 !        end of initialisation
 !
-            WRITE ( * , *)
-            WRITE ( * , * ) ' SIMULATION STARTED '
-            WRITE ( * , * )
-            WRITE ( * , * ) ' INTEGRATION ROUTINE =', intsrt
-         endif
+         WRITE ( * , *)
+         WRITE ( * , * ) ' SIMULATION STARTED '
+         WRITE ( * , * )
+         WRITE ( * , * ) ' INTEGRATION ROUTINE =', intsrt
+
       ENDIF
 !     SOBEK external communications ONLY implemented in scheme 10!
       IF ( OLCFWQ .OR. SRWACT .OR. RTCACT ) THEN
