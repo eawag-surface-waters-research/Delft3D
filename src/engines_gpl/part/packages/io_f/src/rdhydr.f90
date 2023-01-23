@@ -37,6 +37,7 @@ module rdhydr_mod
       use rd_token       ! tokenized reading like in DELWAQ
       use partmem
       use m_part_regular
+      use m_part_modeltypes
       use alloc_mod
 !
       implicit none      ! force explicit typing
@@ -320,7 +321,7 @@ module rdhydr_mod
 !
 !     end of routine
 !
-      if ( lunit(22) .ne. 0 .and. lunit(23) .ne. 0 .and. ideltold .ne. -999 ) then
+      if ( lunit(22) .ne. 0 .and. lunit(23) .ne. 0 .and. ideltold .ne. -999 .and. model_prob_dens_settling) then
          do i = 1, noseg
             rhowatc(i) = densty(max(0.0e0,salin1(i)), temper1(i))
          enddo
