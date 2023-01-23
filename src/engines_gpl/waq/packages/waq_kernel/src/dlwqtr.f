@@ -27,8 +27,7 @@
      +                    ALENG  , CONC   , DISP   , CONS   , PARAM  ,
      +                    FUNC   , SEGFUN , DISPER , VELO   , ITIME  ,
      +                    IDT    , SYNAME , NOCONS , NOFUN  , CONAME ,
-     +                    PANAME , FUNAME , SFNAME , UPDATR , ILFLAG ,
-     +                    NPARTp )
+     +                    PANAME , FUNAME , SFNAME , UPDATR , ILFLAG )
 !
 !     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
 !
@@ -87,7 +86,6 @@
 !                                         part of the matrix and uses integratio
 !                                         option 10.xx .
 !     ILFLAG  INTEGER     1       INPUT   if 0 then 3 length values
-!     NPARTp  INTEGER     1       INPUT   number of subdomains in parallel run
 !
 !     ==================================================================
 !

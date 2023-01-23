@@ -269,7 +269,7 @@
 !     determine mesh/grid partitioning for parallel computing
 !
       CALL PARTIT ( LUN(19) , NOSSS   , NOLAY   , NOQTT   , J(IXPNT),
-     +              MYPART  , NPARTp  , J(IOWNS), J(IOWNQ), INTSRT  )
+     +              MYPART  , J(IOWNS), J(IOWNQ), INTSRT  )
 
       IBFLAG = 0
       IF ( MOD(INTOPT,16) .GE. 8 ) IBFLAG = 1

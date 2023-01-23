@@ -193,9 +193,8 @@
      *                 A(ILENG), A(ICONC), A(IDISP), A(ICONS), A(IPARM),
      *                 A(IFUNC), A(ISFUN), A(IDIFF), A(IVELO), ICSYS   ,
      *                 IDT     , C(ISNAM), NOCONS  , NOFUN   , C(ICNAM),
-     *                 C(IPNAM), C(IFNAM), C(ISFNA), LDUMMY  , ILFLAG  ,
-     *                 NPARTp  )
-!
+     *                 C(IPNAM), C(IFNAM), C(ISFNA), LDUMMY  , ILFLAG  ,)
+     
 !             do the user water quality processes
 !
          CALL DLWQ60 ( A(IDERV), A(ICONC), NOTOT   , NOSEG   , ITFACT  ,

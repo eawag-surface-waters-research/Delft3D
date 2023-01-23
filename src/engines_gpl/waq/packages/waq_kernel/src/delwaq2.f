@@ -228,7 +228,6 @@
          CALL DHOPNF ( LUN(19) , LCHAR(19) , 19    , 1    , IERRD  )
          CALL SETMLU ( LUN(19) )
          MYPART = 1                      ! to be removed soon. 20-jan-2023. DELWAQ-182
-         npartp = 1                      ! to be removed soon. 20-jan-2023. DELWAQ-182
          IF (MYPART .EQ. 1) THEN
 
 !      Initialise communication options SOBEK
@@ -330,27 +329,7 @@
       DLWQD%II = II
       DLWQD%IN = IN
 
-!
-!     Check restrictions of Parallel computing
-!
-      IF ( NPARTp .GT. 1 ) THEN
-!
-!        Parallel computing only allowed for schemes 1, 5, 12
-!
-         IF ( INTSRT.NE.1 .AND. INTSRT.NE.5 .AND. INTSRT.NE.12 ) GOTO 993
-!
-!        Bottom layers not allowed in parallel runs
-!
-         IF ( NOQ4.GT.0 ) GOTO 994
-!
-!        Multiple grids not allowed in parallel runs
-!
-         IF ( NOGRID.GT.1 ) GOTO 995
-!
-!        Use of DelftIO coupling not allowed in parallel runs
-!
-         IF ( OLCFWQ .OR. SRWACT .OR. RTCACT ) GOTO 996
-      ENDIF
+
 
 !         branch to the appropriate integration option
 
@@ -462,18 +441,6 @@
   991 WRITE ( * , * ) ' ERROR: INTEGRATION OPTION NOT IMPLEMENTED in online mode'
       CALL SRSTOP(1)
   992 WRITE ( * , * ) ' ERROR : INITIALISATION FAILED'
-      CALL SRSTOP(1)
-  993 WRITE ( * , '(/,1x,a,i4,/)' )
-     + ' INTEGRATION OPTION NOT IMPLEMENTED in parallel mode, npart=',npartp
-      CALL SRSTOP(1)
-  994 WRITE ( * , '(/,1x,a,i4,/)' )
-     + ' BOTTOM LAYERS NOT SUPPORTED in parallel mode, npart=',npartp
-      CALL SRSTOP(1)
-  995 WRITE ( * , '(/,1x,a,i4,/)' )
-     + ' MULTIPLE GRIDS NOT SUPPORTED in parallel mode, npart=',npartp
-      CALL SRSTOP(1)
-  996 WRITE ( * , '(/,1x,a,i4,/)' )
-     + ' ON-LINE MODE NOT SUPPORTED in parallel mode, npart=',npartp
       CALL SRSTOP(1)
   999 WRITE ( * , * ) ' ERROR: NO VALID SET OF MODEL-INTERMEDIATE-FILES'
       CALL SRSTOP(1)
