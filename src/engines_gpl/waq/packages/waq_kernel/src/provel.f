@@ -23,7 +23,7 @@
 
       subroutine provel (velonw, nveln , ivpnew, velo  , novelo,
      +                   ivpnt , velx  , nvelx , vsto  , nosys ,
-     +                   noq   , ownerq, velndt, istep )
+     +                   noq   , velndt, istep )
 !
 !     function            : makes velonw array from velo and velx array
 !
@@ -47,7 +47,6 @@
       integer, intent(in)       :: ivpnt(nosys)                    ! pointer to original velo
       real   , intent(in)       :: velx(nvelx,noq)                 ! velocities from processes
       real   , intent(in)       :: vsto(nosys,nvelx)               ! factor for velocities
-      integer, intent(in)       :: ownerq(noq)                     ! ownership of exchanges
       integer, intent(in)       :: velndt(nvelx)                   ! time step size of the velocities
       integer, intent(in)       :: istep                           ! time step nr.
 

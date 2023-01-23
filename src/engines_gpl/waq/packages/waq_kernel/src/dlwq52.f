@@ -22,7 +22,7 @@
 !!  rights reserved.
 
       subroutine dlwq52 ( nosys  , notot  , noseg  , volume , amass  ,
-     &                    conc2  , conc   , owners )
+     &                    conc2  , conc    )
 
 !     Deltares Software Centre
 
@@ -50,7 +50,6 @@
       real      (4), intent(inout) :: amass (notot ,noseg)    !< masses per substance per volume
       real      (4), intent(in   ) :: conc2 (notot ,noseg)    !< concentrations per substance per volume
       real      (4), intent(  out) :: conc  (notot ,noseg)    !< concentrations per substance per volume
-      integer   (4), intent(in   ) :: owners(noseg )          !< ownership array for segments
 
 !     local variables
 

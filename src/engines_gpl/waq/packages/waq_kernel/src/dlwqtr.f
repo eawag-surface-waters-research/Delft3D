@@ -222,9 +222,6 @@
  2040 FORMAT (' Dispersion length in third dir. will be calculated')
  2050 FORMAT (' ERROR: File areachar.dat does not match.',
      +        ' NMA = ',I8,' LAYT= ',I8,' NMT = ',I8,' NOSEG=',I8)
- 2060 FORMAT (' ERROR: User-supplied transport processes (DLWQTR) may n
-     +ot be used',/,
-     +        '        in parallel runs (NPART=',i3,').')
  2070 FORMAT (' End extra functionality DLWQTR')
 !
       END

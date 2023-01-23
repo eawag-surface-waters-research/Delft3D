@@ -44,7 +44,7 @@
      +                    bndtyp, inwtyp, coname, noq   , ipoint,
      +                    intopt, paname, funame, sfname, dmpbal,
      +                    nowst , nowtyp, wsttyp, iwaste, inxtyp,
-     +                    wstdmp, iknmrk, owners, isegcol)
+     +                    wstdmp, iknmrk, isegcol)
 !
 !     Created             : january 1993 Jan van Beek
 !
@@ -154,7 +154,6 @@
 !     ranam   char*20       *     input   Raaien names
 !     stochi  real   notot*noflux input   Proces stochiometry
 !     intopt  integer     1       input   Integration and balance suboptions
-!     owners  integer   noseg     input   ownership of segments
 !     ==================================================================
 !
       use timers
@@ -185,8 +184,7 @@
      +              arrdm1(*)     , arrdm2(*)     ,
      +              vgrset(novar,*),grdnos(nogrid),
      +              grdseg(noseg,nogrid)          ,
-     +              inwtyp(*)     , ipoint( 4,noq),
-     +              owners(noseg)
+     +              inwtyp(*)     , ipoint( 4,noq)
       integer(4), intent(in   ) :: iknmrk(noseg)      ! Feature array. Bit zero set means active.
       real          conc ( notot, noseg ),
      &                              cons(*)       ,

@@ -58,8 +58,6 @@
       INTEGER       LUN(*)   , IKNMRK(NOSEG,*),
      +              IKTIM(*)
 
-      INTEGER, ALLOCATABLE, DIMENSION(:) :: IOWN
-
       CHARACTER*(*) LUNTXT(*)
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "dlwqtk", ithandl )
@@ -67,7 +65,6 @@
 !
 !     Allocate the work array
 !
-      ALLOCATE( IOWN(NOSEG) )
 !
 !
 !     If time variable then get variable kenmerk array
@@ -118,18 +115,15 @@
 !
          ENDIF
 !
-!        Retrieve the ownership of segments from the constant kenmerk array
 !        (column 2)
 !
          DO 100 ISEG = 1 , NOSEG
             CALL DHKMRK(4,IKNMRK(ISEG,2),IKMRK4)
-            IOWN(ISEG) = IKMRK4
   100    CONTINUE
 !
 !        Change the time-variable kenmerk-array (column 3) such that it
-!        includes ownership of segments in parallel runs
 !
-         CALL CHKNMR ( LUN(19) , NOSEG  , IOWN(1) , IKNMRK(1,3) )
+         CALL CHKNMR ( LUN(19) , NOSEG  , IKNMRK(1,3) )
 
 !
 !        OR the constant and the time variable array's
@@ -139,8 +133,6 @@
   200    CONTINUE
 !
       ENDIF
-!
-      DEALLOCATE( IOWN )
 
       if ( timon ) call timstop ( ithandl )
       RETURN

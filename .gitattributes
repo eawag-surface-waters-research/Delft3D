@@ -3954,7 +3954,6 @@ src/engines_gpl/waq/packages/waq_kernel/src/outmo2.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/outmo3.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/outmon.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/par2waq.f -text
-src/engines_gpl/waq/packages/waq_kernel/src/partit.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/proces.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/prodr2.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/profld.f -text

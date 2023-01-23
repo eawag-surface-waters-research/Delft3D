@@ -22,8 +22,7 @@
 !!  rights reserved.
 
       SUBROUTINE PRODR2 (DERIV , NOTOT , NOFLUX, STOCHI, NFLUX1,
-     +                   NFLUXP, FLUX  , NOSEG , VOLUME, NDT   ,
-     +                   OWNERS)
+     +                   NFLUXP, FLUX  , NOSEG , VOLUME, NDT   )
 !
 !     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
 !
@@ -51,13 +50,11 @@
 !     NOSEG   INTEGER       1     INPUT   number of segments
 !     VOLUME  REAL          *     INPUT   Segment volumes
 !     NDT     INTEGER       1     INPUT   nuber of timesteps in fractional step
-!     OWNERS  INTEGER     NOSEG   INPUT   Ownership array for segments
 !
 !     Declaration of arguments
 !
       use timers
       INTEGER NOTOT , NOFLUX, NFLUX1, NFLUXP, NOSEG
-      INTEGER OWNERS(NOSEG)
       REAL    DERIV(NOTOT,NOSEG) , STOCHI(NOTOT,NOFLUX) ,
      +        FLUX(NOFLUX,NOSEG) , VOLUME(NOSEG)
       integer(4) ithandl /0/

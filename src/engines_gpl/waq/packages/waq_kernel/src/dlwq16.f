@@ -26,8 +26,7 @@
      &                    disper , velo   , area   , flow   , aleng  ,
      &                    ipoint , iknmrk , idpnt  , ivpnt  , conc   ,
      &                    bound  , iopt   , ilflag , idt    , deriv  ,
-     &                    iaflag , amass2 , ndmpq  , iqdmp  , dmpq   ,
-     &                    owners )
+     &                    iaflag , amass2 , ndmpq  , iqdmp  , dmpq   )
 
 !     Deltares Software Centre
 
@@ -57,15 +56,6 @@
 
 !     Function            : Makes explicit derivatives according to
 !                           upwind differencing in space
-
-!     Created             : March     1988 by Leo Postma
-!     Modified            : Unknown        by Jan van Beek
-!                                          balances
-!                         : September 2007 by Vortech
-!                                          parallelism
-!                         : September 2010 by Leo Postma
-!                                          addition of feature array for drying and flooding
-!                                          FORTRAN-90 look and feel
 
 !     Files               : lun: the monitoring file
 
@@ -110,7 +100,6 @@
       integer  ( 4), intent(in   ) :: ndmpq                !< number of dumped exchanges for mass balances
       integer  ( 4), intent(in   ) :: iqdmp (noq)          !< pointer from echange to dump location
       real     ( 4), intent(inout) :: dmpq  (nosys,ndmpq,2)!< array with mass balance information
-      integer  ( 4), intent(in   ) :: owners(noseg)        !< array of owners per volume for paralellism
 
 !     Local variables     :
 

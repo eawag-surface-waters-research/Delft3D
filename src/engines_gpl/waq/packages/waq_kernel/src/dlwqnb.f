@@ -278,7 +278,7 @@
      &                 j(ivtda) , j(ivdag) , j(ivtag) , j(ivagg) , j(iapoi) ,
      &                 j(iaknd) , j(iadm1) , j(iadm2) , j(ivset) , j(ignos) ,
      &                 j(igseg) , novar    , a        , nogrid   , ndmps    ,
-     &                 c(iprna) , intsrt   , j(iowns) , j(iownq) ,
+     &                 c(iprna) , intsrt   ,
      &                 j(iprvpt), j(iprdon), nrref    , j(ipror) , nodef    ,
      &                 surface  , lun(19)  )
 
@@ -330,7 +330,7 @@
      +              C(IBTYP), J(INTYP), C(ICNAM), NOQ     , J(IXPNT),
      +              INTOPT  , C(IPNAM), C(IFNAM), C(ISFNA), J(IDMPB),
      +              NOWST   , NOWTYP  , C(IWTYP), J(IWAST), J(INWTYP),
-     +              A(IWDMP), iknmkv  , J(IOWNS), isegcol )
+     +              A(IWDMP), iknmkv  , isegcol )
 
 !        zero cummulative array's
 
@@ -355,8 +355,7 @@
 !        add processes
 
          call dlwq14 ( a(iderv) , notot    , nosss    , itfact   , a(imas2) ,
-     &                 idt      , iaflag   , a(idmps) , intopt   , j(isdmp) ,
-     &                 j(iowns)  )
+     &                 idt      , iaflag   , a(idmps) , intopt   , j(isdmp) )
 !
 !          get new volumes
 !
@@ -398,7 +397,7 @@
      &                 j(inwtyp) , j(iwast) , iwstkind , a(iwste) , a(iderv) ,
      &                 iknmkv    , nopa     , c(ipnam) , a(iparm) , nosfun   ,
      &                 c(isfna ) , a(isfun) , j(isdmp) , a(idmps) , a(imas2) ,
-     &                 a(iwdmp)  , 1        , notot    , j(iowns ) )
+     &                 a(iwdmp)  , 1        , notot     )
 
 !          Here we implement a loop that inverts the same matrix
 !          for series of subsequent substances having the same

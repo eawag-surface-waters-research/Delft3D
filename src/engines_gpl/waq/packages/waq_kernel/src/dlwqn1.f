@@ -253,7 +253,7 @@
      &                 j(ivtda) , j(ivdag) , j(ivtag) , j(ivagg) , j(iapoi) ,
      &                 j(iaknd) , j(iadm1) , j(iadm2) , j(ivset) , j(ignos) ,
      &                 j(igseg) , novar    , a        , nogrid   , ndmps    ,
-     &                 c(iprna) , intsrt   , j(iowns) , j(iownq) ,
+     &                 c(iprna) , intsrt   ,
      &                 j(iprvpt), j(iprdon), nrref    , j(ipror) , nodef    ,
      &                 surface  , lun(19)  )
 
@@ -306,7 +306,7 @@
      +              C(IBTYP), J(INTYP), C(ICNAM), noqtt   , J(IXPNT),
      +              INTOPT  , C(IPNAM), C(IFNAM), C(ISFNA), J(IDMPB),
      +              NOWST   , NOWTYP  , C(IWTYP), J(IWAST), J(INWTYP),
-     +              A(IWDMP), iknmkv  , J(IOWNS), isegcol )
+     +              A(IWDMP), iknmkv  , isegcol )
 
 !          zero cummulative array's
 
@@ -326,8 +326,7 @@
 !        add processes
 
          call dlwq14 ( a(iderv), notot   , nosss   , itfact  , a(imas2),
-     &                 idt     , iaflag  , a(idmps), intopt  , j(isdmp),
-     &                 j(iowns) )
+     &                 idt     , iaflag  , a(idmps), intopt  , j(isdmp))
                                             ! correct new volumes come in a(ivol2)
 !        get new volumes                    ! at rewind a(ivoll) contains the new volume
                                             ! after rewind.
@@ -375,7 +374,7 @@
      &                 j(inwtyp), j(iwast) , iwstkind , a(iwste) , a(iderv) ,
      &                 iknmkv   , nopa     , c(ipnam) , a(iparm) , nosfun   ,
      &                 c(isfna) , a(isfun) , j(isdmp) , a(idmps) , a(imas2) ,
-     &                 a(iwdmp) , 1        , notot    , j(iowns ) )
+     &                 a(iwdmp) , 1        , notot     )
 
 !        do the transport itself
 
@@ -384,8 +383,7 @@
      &                 a(idnew) , a(ivnew) , a(iarea) , a(iflow) , a(ileng) ,
      &                 j(ixpnt) , iknmkv   , j(idpnw) , j(ivpnw) , a(iconc) ,
      &                 a(iboun) , intopt   , ilflag   , idt      , a(iderv) ,
-     &                 iaflag   , a(imas2) , ndmpq    , j(iqdmp) , a(idmpq) ,
-     &                 j(iowns)   )
+     &                 iaflag   , a(imas2) , ndmpq    , j(iqdmp) , a(idmpq) )
 
 !        new time values, volumes excluded
 
@@ -404,7 +402,7 @@
 
          call dlwq18 ( nosys    , notot    , nototp   , nosss    , a(ivol2) ,
      &                 surface  , a(imass) , a(iconc) , a(iderv) , idtold   ,
-     &                 ivflag   , lun(19)  , j(iowns)   )
+     &                 ivflag   , lun(19)   )
 
 !        calculate closure error
 

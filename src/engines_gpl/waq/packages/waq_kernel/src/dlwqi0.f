@@ -265,11 +265,7 @@
          enddo
       ENDIF
       CLOSE ( LUN( 8) )
-!
-!     determine mesh/grid partitioning for parallel computing
-!
-      CALL PARTIT ( LUN(19) , NOSSS   , NOLAY   , NOQTT   , J(IXPNT),
-     +              J(IOWNS), J(IOWNQ), INTSRT  )
+
 
       IBFLAG = 0
       IF ( MOD(INTOPT,16) .GE. 8 ) IBFLAG = 1
@@ -282,7 +278,7 @@
 !        feature 4 == segment belongs to own processor
 !
 
-      CALL CHKNMR ( LUN(19) , nosss  , J(IOWNS) , J(IKNMR) )
+      CALL CHKNMR ( LUN(19) , nosss  , J(IKNMR) )
 
       ! determine top of the vertcical columns
 

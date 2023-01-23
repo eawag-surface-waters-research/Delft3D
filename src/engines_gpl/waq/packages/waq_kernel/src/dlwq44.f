@@ -22,7 +22,7 @@
 !!  rights reserved.
 
       subroutine dlwq44 ( nosys  , notot  , noseg  , volume , amass  ,
-     &                    conc   , deriv  , owners )
+     &                    conc   , deriv   )
 
 !     Deltares Software Centre
 
@@ -52,7 +52,6 @@
       real      (4), intent(inout) :: amass (notot ,noseg)    !< masses per substance per volume
       real      (4), intent(inout) :: conc  (notot ,noseg)    !< concentrations per substance per volume
       real      (4), intent(inout) :: deriv (notot ,noseg)    !< derivatives per substance per volume
-      integer   (4), intent(in   ) :: owners(noseg )          !< ownership array for segments
 
 !     local variables
 

@@ -22,7 +22,7 @@
 !!  rights reserved.
 
       SUBROUTINE DLWQD2 ( LUNUT , NOSYS , NOTOT , NOSEG , NOQ3 ,
-     *                    KMAX  , CONC  , ALENG , NOWARN, OWNERS)
+     *                    KMAX  , CONC  , ALENG , NOWARN)
 !
 !
 !       Forester filter for the vertical.
@@ -70,7 +70,6 @@
 !
       INTEGER     LUNUT , NOSYS , NOTOT , NOSEG , NOQ3  , NOWARN
       REAL        CONC(NOTOT,NOSEG) , ALENG(2,NOQ3)
-      INTEGER     OWNERS(NOSEG)
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "dlwqd2", ithandl )
 !

@@ -28,7 +28,7 @@
      &                    iwtype  , iwaste  , iwstkind, waste   , deriv   ,
      &                    iknmrk  , nopa    , paname  , param   , nosfun  ,
      &                    sfname  , segfun  , isdmp   , dmps    , amass2  ,
-     &                    wstdmp  , isys    , nsys    , owners   )
+     &                    wstdmp  , isys    , nsys     )
 
 !     Deltares Software Centre
 
@@ -115,7 +115,6 @@
       real      (4), intent(inout) :: wstdmp(notot,nowst,2)   !< accumulated wasteloads 1/2 in and out
       integer   (4), intent(in   ) :: isys                    !< first substance in array
       integer   (4), intent(in   ) :: nsys                    !< number of substances  to deal with
-      integer   (4), intent(in   ) :: owners(noseg  )         !< ownership array for comp. volumes
 
 !     local simple variables
 

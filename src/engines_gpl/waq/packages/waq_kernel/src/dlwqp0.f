@@ -23,7 +23,7 @@
 
       subroutine dlwqp0 ( conc   , amass  , deriv  , volume , idt    ,
      *                    nosys  , notot  , noseg  , lun     ,ivflag ,
-     *                    owners , surfac )
+     *                    surfac )
 
 !     Deltares Software Centre
 
@@ -56,7 +56,6 @@
       integer   (4), intent(in   ) :: idt                     !< integration time step size
       integer   (4), intent(in   ) :: lun                     !< unit number of the monitoring file
       integer   (4), intent(in   ) :: ivflag                  !< if 1 computational volumes
-      integer   (4), intent(in   ) :: owners(noseg )          !< ownership array for segments
       real      (4), intent(in   ) :: surfac(noseg)           !< horizontal surface
 
       ! local declarations

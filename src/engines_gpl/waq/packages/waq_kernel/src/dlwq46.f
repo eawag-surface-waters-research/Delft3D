@@ -25,7 +25,7 @@
      *                    VELO   , CONC   , BOUND  , IPOINT , NOSYS  ,
      *                    NOTOT  , NOQ    , NODISP , NOVELO , IDPNT  ,
      *                    IVPNT  , IOPT   , IDT    , ILFLAG , DMPQ   ,
-     *                    NDMPQ  , IQDMP  , IBACKW , NOQW   , OWNERS )
+     *                    NDMPQ  , IQDMP  , IBACKW , NOQW    )
 !
 !     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
 !
@@ -72,7 +72,6 @@
 !     IBACKW  INTEGER     *       INPUT   flag = 0 central differences
 !                                              = 1 backward differences
 !     NOQW    INTEGER     1       INPUT   number of water exchanges
-!     OWNERS  INTEGER   NOSEG     INPUT   ownership of segments
 !
       use timers
       INTEGER    NDMPQ         , IBACKW
@@ -81,7 +80,6 @@
      *           ALENG (  *)   , VELO  (*) , CONC (*) , BOUND(*) ,
      *           IPOINT( 4,* ) , IDPNT(*)  , IVPNT(*) , DMPQ(*)
       integer noqw                      !  input   number of exchanges waterphase
-      INTEGER    OWNERS(*)
 
       logical disp0q0, disp0bnd, loword !  logical representation of options
 

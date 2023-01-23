@@ -22,8 +22,7 @@
 !!  rights reserved.
 
       subroutine dlwq14 ( deriv  , notot  , noseg  , itfact , amass2 ,
-     &                    idt    , iaflag , dmps   , intopt , isdmp  ,
-     &                    owners )
+     &                    idt    , iaflag , dmps   , intopt , isdmp  )
 
 !     Deltares Software Centre
 
@@ -54,7 +53,6 @@
       real     ( 4), intent(inout) :: dmps  (notot,*)      !< Integrated fluxes if intopt > 7
       integer  ( 4), intent(in   ) :: intopt               !< Integration suboptions
       integer  ( 4), intent(in   ) :: isdmp (noseg)        !< Pointer dumped segments
-      integer  ( 4), intent(in   ) :: owners(noseg)        !< Ownership of segments
 
 !     Local variables
 

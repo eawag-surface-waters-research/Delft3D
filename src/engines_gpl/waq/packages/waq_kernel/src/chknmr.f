@@ -21,7 +21,7 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-      subroutine chknmr ( lunrep , noseg  , owners  , iknmrk )
+      subroutine chknmr ( lunrep , noseg  , iknmrk )
 !
 !     Deltares
 !
@@ -38,7 +38,6 @@
       implicit none
       integer, intent(in)    :: lunrep         ! unit number of output file
       integer, intent(in)    :: noseg          ! number of segments
-      integer, intent(in)    :: owners(noseg)  ! ownership array
 
       integer, intent(inout) :: iknmrk(noseg)  ! property array
 !
