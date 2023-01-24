@@ -90,13 +90,13 @@ end function nc_create
 subroutine write_volume_table_gridpoint_data(ioutput,bedlevel,topheight,volume,surface,count,numnodes,increment)
  use MessageHandling
 
-   integer,                            intent(in)  :: ioutput           !< Handle to the output file.
-   double precision, dimension(:),     intent(in)  :: bedlevel          !< Bedevels w.r.t. the bedlevel.
-   double precision, dimension(:),     intent(in)  :: topheight         !< Array of highest waterlevel w.r.t. the bedlevel.
-   double precision, dimension(:,:),   intent(in)  :: volume            !< Volumes. 
-   double precision, dimension(:,:),   intent(in)  :: surface           !< Wet surface area.
-   integer         , dimension(:),     intent(in)  :: count             !< Number of levels in the volume table
-   integer,                            intent(in)  :: numnodes          !< Number of nodes  in the volume table
+   integer,                            intent(in)  :: ioutput           !< NetCDF dataset ID for the already opened output file.
+   double precision, dimension(:),     intent(in)  :: bedlevel          !< (numnodes) Absolute bed levels for each gridpoint.
+   double precision, dimension(:),     intent(in)  :: topheight         !< (numnodes) Array of highest tabulated waterlevel w.r.t. the bed level, for each gridpoint.
+   double precision, dimension(:,:),   intent(in)  :: volume            !< (numnodes, count) Tabulated volumes.
+   double precision, dimension(:,:),   intent(in)  :: surface           !< (numnodes, count) Tabulated wet surface area.
+   integer         , dimension(:),     intent(in)  :: count             !< Number of levels in the volume/surface table
+   integer,                            intent(in)  :: numnodes          !< Number of nodes (gridpoints) in the volume table
    double precision,                   intent(in)  :: increment         !< increment between two volume table levels
 
 
@@ -220,7 +220,7 @@ end subroutine  write_volume_surface_arrays
 function SetupVariable(ioutput,var_name,var_type,dimensions,std_name,lng_name,units,      & 
    fillDble, fillInt) result (varid)
 implicit none
-integer,               intent(in)               :: ioutput        !< ID of the netcdf file, already opened for writing
+integer,               intent(in)             :: ioutput          !< ID of the netcdf file, already opened for writing
 character(len=*),      intent(in)             :: var_name         !< Variable name in the file
 integer,               intent(in)             :: var_type         !< NetCDF variable type (as defined in the netCDF API)
 character(len=*),      intent(in)             :: std_name         !< Standard name attribute

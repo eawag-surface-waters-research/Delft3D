@@ -159,12 +159,12 @@ enddo
 end subroutine ComputeSurfaceAndStorage
 
 
-!> Determine the lowest level and the highest level in the model.
+!> Determine the lowest level and the highest level in the volume table.
 subroutine getBedToplevel(voltb, numpoints, toplevel, bedlevel)
-   integer,          intent(in   ) :: numpoints
-   type(t_voltable), pointer, dimension(:), intent(in) :: voltb     !< volume table for individual 
-   double precision, intent(  out) :: toplevel       !< Highest level in the model, where cross sections or storage nodes are defined.
-   double precision, intent(  out) :: bedlevel       !< Lowest level in the model, where cross sections or storage nodes are defined.
+   type(t_voltable), pointer, dimension(:), intent(in   ) :: voltb      !< (numpoints) volume table for individual grid points.
+   integer,                                 intent(in   ) :: numpoints  !< Number of grid points in the input volume table.
+   double precision,                        intent(  out) :: toplevel   !< Highest absolute level in the model, where cross sections or storage nodes are defined.
+   double precision,                        intent(  out) :: bedlevel   !< Lowest (bed)level in the model, where cross sections or storage nodes are defined.
 
    integer :: n
    toplevel = -huge(1d0)
