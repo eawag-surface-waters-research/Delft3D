@@ -4913,16 +4913,16 @@ end subroutine partition_make_globalnumbers
          Lother_right = idum
 
          where (ibr_glob_left == -huge(0))
-             ibr_glob_left = 0
+            ibr_glob_left = 0
          end where
          where (ibr_glob_right == -huge(0))
-             ibr_glob_right = 0
+            ibr_glob_right = 0
          end where
          where (Lother_left == -huge(0))
-             Lother_left = 0
+            Lother_left = 0
          end where
          where (Lother_right == -huge(0))
-             Lother_right = 0
+            Lother_right = 0
          end where
 
              

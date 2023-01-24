@@ -10957,21 +10957,19 @@ subroutine unc_write_net_ugrid2(ncid, id_tsp, janetcell, jaidomain, jaiglobal_s)
 
             N1 = abs(lne(1,L))
             N2 = abs(lne(2,L))
-            if (N1 > nump) then  ! First point of 1D link is 1D cell
+            if (N1 > nump .and. N2 <= nump) then  ! First point of 1D link is 1D cell
                K1 = netcell(N1)%nod(1)
                if (KC(K1) == 0) then
                   NUMK1D = NUMK1D+1
                   KC(K1) = 1
                end if
-            end if
-            if (N2 > nump) then  ! Second point of 1D link is 1D cell
+            else if (N2 > nump .and. N1 <= nump ) then  ! Second point of 1D link is 1D cell
                K2 = netcell(N2)%nod(1)
                if (KC(K2) == 0) then
                   NUMK1D = NUMK1D+1
                   KC(K2) = 1
                end if
-            end if
-            if ((n1 > nump .and. n2 > nump) .or. (n1 <= nump .and. n2 <= nump)) then
+            else
               n1d2dcontacts = n1d2dcontacts -1
             endif
             
@@ -10979,6 +10977,7 @@ subroutine unc_write_net_ugrid2(ncid, id_tsp, janetcell, jaidomain, jaiglobal_s)
       enddo
 
       ! Allocate  nodes
+      numk1d = max(numk1d,nump1d2d - nump) ! See: UNST-6524. Ugly fix to prevent a crash in case of invalid 1d2dlinks
       call realloc(xn, NUMK1D)
       call realloc(yn, NUMK1D)
       call realloc(zn, NUMK1D)
@@ -11035,18 +11034,17 @@ subroutine unc_write_net_ugrid2(ncid, id_tsp, janetcell, jaidomain, jaiglobal_s)
                 
                N1 = abs(lne(1,L))
                N2 = abs(lne(2,L))
-               if ((n1 > nump .and. n2 > nump) .or. (n1 <= nump .and. n2 <= nump)) then !invalid 1d2dlink
-                    cycle
-               endif 
                
                n1d2dcontacts = n1d2dcontacts + 1
-               if (N1 > nump) then  ! First point of 1D link is 1D cell
+               if (N1 > nump .and. N2 <= nump) then  ! First point of 1D link is 1D cell
                   contacts(1,n1d2dcontacts) = abs(KC(netcell(N1)%nod(1))) ! cell -> orig node -> new node
                   contacts(2,n1d2dcontacts) = N2   ! 2D cell number in network_data is the same in UGRID mesh2d numbering (see below).
-               end if
-               if (N2 > nump) then  ! First point of 1D link is 1D cell
+               else if (N2 > nump .and. N1 <= nump) then  ! First point of 1D link is 1D cell
                   contacts(1,n1d2dcontacts) = abs(KC(netcell(N2)%nod(1))) ! cell -> orig node -> new node
                   contacts(2,n1d2dcontacts) = N1   ! 2D cell number in network_data is the same in UGRID mesh2d numbering (see below).
+               else 
+                  n1d2dcontacts = n1d2dcontacts - 1
+                  cycle
                end if
 
                contacttype(n1d2dcontacts) = kn(3,L)
