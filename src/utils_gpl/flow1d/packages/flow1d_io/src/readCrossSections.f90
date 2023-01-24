@@ -458,19 +458,22 @@ module m_readCrossSections
          call realloc(fricTypes, maxnumsections, keepExisting = .false.)
          allocate(pCS%frictionValue      (pCs%frictionSectionsCount))
 
-         ! The use of "s" in case of plural is not clear. So it was decided to support both possibilities
-         call prop_get_strings(md_ptr%child_nodes(i)%node_ptr, '', 'frictionIds', pCs%frictionSectionsCount, pCS%frictionSectionID, success)
-         if (.not. success) then
+         if (plural) then
+            call prop_get_strings(md_ptr%child_nodes(i)%node_ptr, '', 'frictionIds', pCs%frictionSectionsCount, pCS%frictionSectionID, success)
+         else
             call prop_get_strings(md_ptr%child_nodes(i)%node_ptr, '', 'frictionId', pCs%frictionSectionsCount, pCS%frictionSectionID, success)
-         endif
-            
+         end if
+         call check_prop_get_wrong_singular_or_plural_keyword(md_ptr%child_nodes(i)%node_ptr, '', plural, 'frictionIds', 'frictionId', success, trim(id))
+              
+
          if (.not. success) then
-            ! The use of "s" in case of plural is not clear. So it was decided to support both possibilities
-            call prop_get_strings(md_ptr%child_nodes(i)%node_ptr, '', 'frictionTypes', pCs%frictionSectionsCount, fricTypes, success)
-            if (.not. success) then
+            if (plural) then
+               call prop_get_strings(md_ptr%child_nodes(i)%node_ptr, '', 'frictionTypes', pCs%frictionSectionsCount, fricTypes, success)
+            else
                call prop_get_strings(md_ptr%child_nodes(i)%node_ptr, '', 'frictionType' , pCs%frictionSectionsCount, fricTypes, success)
             end if
-            
+            call check_prop_get_wrong_singular_or_plural_keyword(md_ptr%child_nodes(i)%node_ptr, '', plural, 'frictionTypes', 'frictionType', success, trim(id))
+
             if (success) then
                do j = 1, pCs%frictionSectionsCount
                   call frictionTypeStringToInteger(fricTypes(j), pCS%frictionType(j))
@@ -482,11 +485,13 @@ module m_readCrossSections
                   endif
                end do
                
-               ! The use of "s" in case of plural is not clear. So it was decided to support both possibilities
-               call prop_get(md_ptr%child_nodes(i)%node_ptr, '', 'frictionValues', pCS%frictionValue, pCs%frictionSectionsCount, success)
-               if (.not. success) then
+               if (plural) then
+                  call prop_get(md_ptr%child_nodes(i)%node_ptr, '', 'frictionValues', pCS%frictionValue, pCs%frictionSectionsCount, success)
+               else
                   call prop_get(md_ptr%child_nodes(i)%node_ptr, '', 'frictionValue' , pCS%frictionValue, pCs%frictionSectionsCount, success)
                end if
+               call check_prop_get_wrong_singular_or_plural_keyword(md_ptr%child_nodes(i)%node_ptr, '', plural, 'frictionValues', 'frictionValue', success, trim(id))
+
             endif
                
             if (.not. success) then
@@ -539,6 +544,45 @@ module m_readCrossSections
       endif 
 
    end subroutine parseCrossSectionDefinitionFile
+
+   !> Checks whether a wrong singular or plural keyword was given after an earlier prop_get() call,
+   !! which should have been done already at the call site.
+   !! If user has supplied wrong keyword, a warning message is printed, and input value will not be read.
+   subroutine check_prop_get_wrong_singular_or_plural_keyword(prop_ptr, chapname, plural, key_plural, key_singular, success_get, id)
+      type(TREE_DATA),  pointer       :: prop_ptr     !< Pointer to a property tree in which the prop_get will be done.
+      character(len=*), intent(in   ) :: chapname     !< The name of the chapter under which the input key is searched (may be empty '').
+      logical,          intent(in   ) :: plural       !< Whether or not the plural keyword is the correct one.
+      character(len=*), intent(in   ) :: key_plural   !< The plural version of the keyword.
+      character(len=*), intent(in   ) :: key_singular !< The singular version of the keyword.
+      logical,          intent(in   ) :: success_get  !< Result status of an earlier prop_get call of the expected keyword.
+      character(len=*), intent(in   ) :: id           !< The object id, can be used in the warning message
+      character(len=IdLen) :: tmpstr
+
+      character(len=max(len(key_plural), len(key_singular))) :: key_expected, key_alt
+      logical :: success_alt
+
+      if (success_get) then
+         ! User already gave the correct keyword
+         return
+      else
+         if (plural) then
+            key_expected = key_plural
+            key_alt      = key_singular
+         else
+            key_expected = key_singular
+            key_alt      = key_plural
+         end if
+
+         ! If expected keyword was *not* given, double check whether the alternative keyword *was* given.
+         ! If so: print a warning, so user can correct their input.
+         call prop_get_string(prop_ptr, chapname, key_alt, tmpstr, success_alt)
+         if (success_alt) then
+            write (msgbuf,'(a,a,a,a,a,a,a)') 'Incorrect keyword ''', trim(key_alt), ''' found for id: ', &
+               trim(id), & '. Did you mean ''', trim(key_expected), '''?'
+            call warn_flush()
+         end if
+      end if
+   end subroutine check_prop_get_wrong_singular_or_plural_keyword
 
    !> read tabulated cross section definition from treedata input
    logical function readTabulatedCS(pCS, node_ptr)  
