@@ -22,8 +22,6 @@ FMODULES += \
         -I$(top_builddir)/engines_gpl/part/packages/io_f/src/ \
         -I$(top_builddir)/engines_gpl/part/packages/kernel_f/src/ \
         -I$(top_builddir)/engines_gpl/waq/packages/waq_utils_f/src/waq_utils \
-        -I$(top_builddir)/engines_gpl/waq/packages/waq_utils_f/src/mod_timings \
-        -I$(top_builddir)/engines_gpl/waq/packages/waq_utils_f/src/mod_couplib \
         -I$(top_builddir)/engines_gpl/waq/packages/waq_utils_f/src/dlwq_netcdf \
 		-I$(top_builddir)/engines_gpl/waq/packages/waq_process/src/bloom \
         -I$(top_builddir)/engines_gpl/waq/packages/waq_plugin_wasteload/src/ \

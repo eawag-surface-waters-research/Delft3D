@@ -46,8 +46,6 @@
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration></Configurations>
 	<Files>
 		<Filter Name="Source Files" Filter="f90;for;f;fpp;ftn;def;odl;idl">
-		<Filter Name="mpidum">
-		<File RelativePath=".\src\mpidum\mpidum.f90"/></Filter>
 		<Filter Name="ods">
 		<File RelativePath=".\src\ods\getdim.f"/>
 		<File RelativePath=".\src\ods\getloc.f"/>
