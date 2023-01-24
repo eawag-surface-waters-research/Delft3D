@@ -1455,7 +1455,7 @@ end if
              else
                 rr  = dble(k-kb)/dble(kt-kb)
              endif
-             sa1(k) = (1d0 - rr)*sa1(kk) + rr*satop(kk)
+             sa1(k) = (1d0 - rr)*sa1(kb) + rr*satop(kk)
           enddo
        else if (inisal2D == 3) then          ! uniform below is specified
           do k = kb, kt
