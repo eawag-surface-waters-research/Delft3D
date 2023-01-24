@@ -98,8 +98,6 @@
 
       INTEGER       IERRIO
 
-      logical, save :: init_ixset = .true.
-
 !     Common to define external communications in SOBEK
 !     OLCFWQ             Flag indicating ONLINE running of CF and WQ
 !     SRWACT             Flag indicating active data exchange with SRW

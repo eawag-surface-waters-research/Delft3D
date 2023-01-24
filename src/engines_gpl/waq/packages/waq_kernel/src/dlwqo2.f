@@ -357,13 +357,6 @@
 !
          if ( .not. loflag ) goto 100
 !
-!        Collect data on master-process
-!
-         if (lread) then
-            lread = .false.
-         endif
-
-!
 !        Map output structure to single variables part 2
 !
             isrtou = ioutps(5,iout)

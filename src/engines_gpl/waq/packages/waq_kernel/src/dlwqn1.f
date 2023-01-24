@@ -407,7 +407,6 @@
 !        calculate closure error
 
          if ( lrewin .and. lstrec ) then
-!           collect information on master for computation of closure error before rewind
             call dlwqce ( a(imass), a(ivoll), a(ivol2), nosys , notot, noseg , lun(19) )
             call move   ( a(ivoll), a(ivol) , noseg   )
          else

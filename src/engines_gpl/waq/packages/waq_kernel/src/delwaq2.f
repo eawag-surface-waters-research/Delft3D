@@ -292,9 +292,7 @@
                WRITE(*,*)
             ENDIF
 
-!
-!        end of reading master proces
-!
+
 ! collaborative call to i0
 !
          IERR = 0
