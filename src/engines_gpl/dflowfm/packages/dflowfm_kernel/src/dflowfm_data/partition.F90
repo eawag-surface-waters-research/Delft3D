@@ -801,7 +801,8 @@ use meshdata, only : ug_idsLen, ug_idsLongNamesLen
       integer, intent(  out)                :: ierror !< (allocation) error code. 0=success
 
       integer, allocatable                  :: edge_nodes(:,:)
-      integer, allocatable                  :: iglobal_edge(:) !< Original global number of all current 1D edges.
+      integer, allocatable                  :: iglobal_edge(:) !< Original global number of all current 1D edges (that is: excluding 1d2d)
+      integer, allocatable                  :: kperm(:) !< Permutation table for net nodes (from old to new numbering)
       integer                               :: i, ii, ic_p, ic_g, i_p, i_g, n1dedges, numk1d
       character(len=ug_idsLen), allocatable :: nodeids_p(:)
       character(len=ug_idsLongNamesLen), allocatable :: nodelongnames_p(:)
@@ -829,7 +830,8 @@ use meshdata, only : ug_idsLen, ug_idsLongNamesLen
       end if
 
       ! create edge_nodes (Edge-to-node mapping array)
-      call get_1d_edges_in_domain(numl1d, L2Lorg, numk1d, n1dedges, edge_nodes, iglobal_edge, ierror)
+      ! Prepare 1D edges and 1d nodes for UGRID mesh1d writing, and obtain the original global numbers, so that edge/node (branch)ids can be set correctly.
+      call get_1d_edges_in_domain(numl1d, L2Lorg, numk1d, n1dedges, edge_nodes, iglobal_edge, kperm, ierror)
       if (ierror /= 0) return
 
       ! partition node arrays
@@ -838,6 +840,9 @@ use meshdata, only : ug_idsLen, ug_idsLongNamesLen
       ! 1D cells have already been sorted in original global order
       ! and 1D net should be written in original order (with other partitions removed, that is: in the current 1:numk1d order)
       do ic_p = nump+1, nump1d2d
+         ! UNST-6571: deliberately not using kperm here, under the assumption that in input 1D netnodes are already sorted by branch,
+         !            and this loop should stay consistent with the one in unc_write_net_ugrid2().
+         !            This subroutine only deals with edge-ordering and partition-to-global mapping (i.e., no netnode remapping).
          i_p  = netcell(ic_p)%nod(1) ! 1D netcell -> 1D net node
          ic_g = iglobal_s(ic_p)
          i_g  = netcell0(ic_g)%nod(1) ! netcell0 currently still contains backup of unpartitioned original full grid.
@@ -868,25 +873,26 @@ use meshdata, only : ug_idsLen, ug_idsLongNamesLen
    end subroutine partition_make_1dugrid_in_domain
 
    !> Helper routine to get 1D edge_nodes and original edge number for current domain while partitioning.
+   !! The net link and net node numbering is returned in a "1D only" numbering, intended for UGRID mesh1d output.
    !! A 1D edge is a true 1D netlink, i.e., not a 1D2D link.
-   subroutine get_1d_edges_in_domain(numl1d, L2Lorg, numk1d, n1dedges, edge_nodes, Lorg, ierror)
-      use network_data, only : kn
+   subroutine get_1d_edges_in_domain(numl1d, L2Lorg, numk1d, n1dedges, edge_nodes, Lorg, kperm, ierror)
+      use network_data, only : kn, LNE
       implicit none
-      integer,              intent(in   ) :: numl1d          !< number of 1D links in original 1d mesh
-      integer,              intent(in   ) :: L2Lorg(:)       !< Mapping table current (new) to original net link numbers
+      integer,              intent(in   ) :: numl1d          !< number of 1D(+1D2D) links in current partition mesh
+      integer,              intent(in   ) :: L2Lorg(:)       !< Mapping table current (new) to original global net link numbers
       integer,              intent(  out) :: numk1d          !< number of 1D nodes returned
       integer,              intent(  out) :: n1dedges        !< number of 1D edges returned
       integer, allocatable, intent(  out) :: edge_nodes(:,:) !< Edge-to-node mapping array.
       integer, allocatable, intent(  out) :: Lorg(:)         !< Original edge numbers for current (new) edges (edges can be subset of 1D net links, namely: excluding the 1D2D net links).
+      integer, allocatable, intent(  out) :: kperm(:)        !< Permutation table for net node numbers (from old to new numbers).
       integer,              intent(  out) :: ierror          !< error code
 
       integer              :: k1, k2, l, size
-      integer, allocatable :: kc(:)
 
       size = maxval(kn(1:2, 1:numl1d))
-      allocate(kc(size), stat=ierror)
+      allocate(kperm(size), stat=ierror)
       if (ierror /= 0) return
-      kc(:) = 0
+      kperm(:) = 0
 
       n1dedges = 0
       do l=1,numl1d
@@ -907,18 +913,32 @@ use meshdata, only : ug_idsLen, ug_idsLongNamesLen
 
             k1 = kn(1,l)
             k2 = kn(2,l)
-            if (kc(k1) == 0) then
+            if (kperm(k1) == 0) then
                numk1d = numk1d+1
-               kc(k1) = -numk1d ! remember new node number
+               kperm(k1) = numk1d ! remember new node number
             end if
-            if (kc(k2) == 0) then
+            if (kperm(k2) == 0) then
                numk1d = numk1d+1
-               kc(k2) = -numk1d ! remember new node number
+               kperm(k2) = numk1d ! remember new node number
             end if
 
-            edge_nodes(1,n1dedges) = abs(kc(kn(1,l)))
-            edge_nodes(2,n1dedges) = abs(kc(kn(2,l)))
-            Lorg(n1dedges) = L2Lorg(L) ! Note: this assumes that in original net, all 1D net links come first in the range 1:numl1d, and the 1D2D links are all togather at the end of that numl1d range.
+            edge_nodes(1,n1dedges) = kperm(kn(1,l))
+            edge_nodes(2,n1dedges) = kperm(kn(2,l))
+            Lorg(n1dedges) = L2Lorg(L) ! Note: this assumes that in original net, all 1D net links come first in the range 1:numl1d, and the 1D2D links are all together at the end of that numl1d range.
+         else if (kn(3,l) >= 3 .and. kn(3,l) <= 7) then
+            ! We may encounter an orphan 1D2D link, where the 1D side has no own true 1D links.
+            ! In that case, only increment the numk1d counter, but don't add any 1d edge.
+            if (lne(1,L) < 0) then ! #1 is the 1D side, as set in find1dcells()
+               k1 = kn(1,L)
+            else if (lne(2,L) < 0) then ! #2 is the 1D side, as set in find1dcells()
+               k1 = kn(2,L)
+            else
+               cycle
+            end if
+            if (kperm(k1) == 0) then
+               numk1d = numk1d + 1
+               kperm(k1) = numk1d ! remember new node number
+            end if
          end if
       end do
    end subroutine get_1d_edges_in_domain
