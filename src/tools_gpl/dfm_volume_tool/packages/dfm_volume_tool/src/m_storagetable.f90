@@ -178,7 +178,7 @@ subroutine getBedToplevel(voltb, numpoints, toplevel, bedlevel)
 end subroutine getBedToplevel
 
 !> Calculate the dead storage using boundary conditions, turn off levels of pumping stations and the geometry of the network.
-subroutine calculateDeadStorage(wl_deadstorage, network, bndvalues, inslevtube, bndindex, ln2nd, numlinks, numpoints, numboundaries)
+subroutine calculateDeadStorage(wl_deadstorage, network, bndvalues, inslevtube, bndindex, ln2nd, kcu2,  numlinks, numpoints, numboundaries)
 
    use m_flowgeom
    use m_network
@@ -192,6 +192,7 @@ subroutine calculateDeadStorage(wl_deadstorage, network, bndvalues, inslevtube, 
    double precision, dimension(:,:), intent(in   )    :: inslevtube      !< Inside level tubes. See BOB in D-FlowFM.
    integer,          dimension(:,:), intent(in   )    :: bndindex        !< Index numbers for boundary condtions. See KBNDZ in D-FfowFM.
    integer,          dimension(:,:), intent(in   )    :: ln2nd           !< Link nodes to node numbers. See LN in D-FfowFM.
+   integer,          dimension(:)  , intent(in   )    :: kcu2            !< Link type
    integer,                          intent(in   )    :: numpoints       !< Number of 1d points in volume tables.
    integer,                          intent(in   )    :: numlinks        !< Number of 1d internal links
    integer,                          intent(in   )    :: numboundaries   !< Number of water level boundaries
@@ -219,7 +220,7 @@ subroutine calculateDeadStorage(wl_deadstorage, network, bndvalues, inslevtube, 
       itpbn   = bndindex(4,n)
       if (     itpbn == 1) then                        ! waterlevelbnd
          wl_deadstorage(k2) = bndvalues(n)
-         wl_deadstorage(kb) = bndvalues(n)
+         !wl_deadstorage(kb) = bndvalues(n)
       endif
    enddo
 
@@ -250,6 +251,9 @@ subroutine calculateDeadStorage(wl_deadstorage, network, bndvalues, inslevtube, 
    do while (numberOfChanges > 0)
       numberOfChanges = 0
       do L = 1, numlinks
+         if (kcu2(L) /= 1 ) then
+             cycle
+         endif
          do k1 = 1, 2
             if (k1==1) then
                k2 = 2

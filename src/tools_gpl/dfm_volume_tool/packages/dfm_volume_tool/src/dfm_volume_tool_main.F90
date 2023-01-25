@@ -60,7 +60,7 @@ character(len=Idlen) :: dll_name
 character(len=Idlen) :: mdufile
 integer(pntrsize)    :: dfm
 integer              :: ret_val, dia
-integer              :: i, j
+integer              :: i, j, L
 integer              :: idindex
 integer              :: numids
 integer              :: numbranches
@@ -94,7 +94,10 @@ type(t_network),                  pointer       :: network
 type(t_branch),   dimension(:),   pointer       :: branches
 integer,          dimension(:),   allocatable   :: mask, tablecount
 integer,          dimension(:,:), pointer       :: bndindex
-integer,          dimension(:,:), pointer       :: ln2nd
+integer,          dimension(:,:), allocatable   :: ln2nd
+integer,          dimension(:,:), pointer       :: lnog !Don't modify this!!!
+integer,          dimension(:)  , pointer       :: kcu2
+integer,                          pointer       :: ndx2d
 double precision, dimension(:),   pointer       :: bndvalues
 double precision, dimension(:,:), pointer       :: inslevtube
 double precision, dimension(:,:), pointer       :: gridvolume, gridsurface
@@ -195,14 +198,20 @@ if (ierr==0) then
    call c_f_pointer(xptr, count)
    numbnd = count
    
-   allocate(inslevtube(2,lnx), ln2nd(2,lnx), bndvalues(numbnd), bndindex(6,numbnd))
+   allocate(inslevtube(2,lnx), ln2nd(2,lnx), lnog(2,lnx), bndvalues(numbnd), bndindex(6,numbnd),kcu2(lnx))
    call bmi_get_var(dfm, 'bob', inslevtube, 2*lnx)
    if (numbnd > 0) then
       call bmi_get_var(dfm, 'zbndz', bndvalues, numbnd)
       call get_variable_pointer(dfm, string_to_char_array('kbndz'), xptr)
    endif
+   call get_variable_pointer(dfm, string_to_char_array('kcu'), xptr)
+   call c_f_pointer(xptr, kcu2, (/ lnx /))
+   
+   call get_variable_pointer(dfm, string_to_char_array('ndx2d'), xptr)
+   call c_f_pointer(xptr, ndx2d)
+   
    call get_variable_pointer(dfm, string_to_char_array('ln'), xptr)
-   call c_f_pointer(xptr, ln2nd, (/2, lnx/))
+   call c_f_pointer(xptr, lnog, (/2, lnx/))
    
    call c_f_pointer(xptr, bndindex, (/6, numbnd/))
    
@@ -216,6 +225,15 @@ if (ierr==0) then
    ! Determine the number of levels for the aggregated volume tables
    call getBedToplevel(volumetable, numpoints, toplevel,bedlevel)
 
+   ln2nd = lnog
+   
+   do l = 1, lnx
+     if(abs(kcu2(L)) == 1) then
+         ln2nd(:,L) = lnog(:,L) - ndx2d
+    endif
+   enddo
+   
+   
    numlevels = 0
    do i = 1, numpoints
       numlevels = max(numlevels,volumetable(i)%count)
@@ -251,7 +269,7 @@ if (ierr==0) then
    enddo
    tableincrement = increment
    
-   call calculateDeadStorage(wl_deadstorage, network, bndvalues, inslevtube, bndindex, ln2nd, numlinks, numpoints, numbnd)
+   call calculateDeadStorage(wl_deadstorage, network, bndvalues, inslevtube, bndindex, ln2nd, kcu2, numlinks, numpoints, numbnd)
 
    idindex = 0
    if (computeTotal) then

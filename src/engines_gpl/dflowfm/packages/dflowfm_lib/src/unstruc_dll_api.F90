@@ -86,6 +86,7 @@ subroutine  dfm_get_variable_pointer(name_var, x) bind(C, name="dfm_get_variable
    use iso_c_utils
    use m_flowgeom
    use m_flowexternalforcings
+   use m_cell_geometry
    
    type(c_ptr), intent(inout)  :: x
    character(kind=c_char), intent(in) :: name_var(*)
@@ -111,6 +112,12 @@ subroutine  dfm_get_variable_pointer(name_var, x) bind(C, name="dfm_get_variable
       x = c_loc(vltbOnLinks)
    case('network')
       x = c_loc(Network)
+   case('ndx2d')
+      x = c_loc(ndx2d)
+   case ('kcu')
+      x= c_loc(kcu)
+   case default
+      call mess(LEVEL_ERROR, 'invalid pointer target!')
    end select
    
 end subroutine  dfm_get_variable_pointer
