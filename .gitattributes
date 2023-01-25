@@ -4687,6 +4687,7 @@ src/test/engines_gpl/dflowfm/packages/test_dflowfm/test_data/IniField1dField_wat
 src/test/engines_gpl/dflowfm/packages/test_dflowfm/test_data/IniField1dField_waterlevel/sobek3_to_dflowfm.log -text
 src/test/engines_gpl/dflowfm/packages/test_dflowfm/test_data/MDUversion/new_general.mdu -text
 src/test/engines_gpl/dflowfm/packages/test_dflowfm/test_data/MDUversion/old_model.mdu -text
+src/test/engines_gpl/dflowfm/packages/test_dflowfm/test_data/MDUversion/stretch_example.mdu -text
 src/test/engines_gpl/dflowfm/packages/test_dflowfm/test_data/cross_sections/cross[!!-~]sections.xlsx -text
 src/test/engines_gpl/dflowfm/packages/test_dflowfm/test_data/cross_sections/crsdef.ini -text
 src/test/engines_gpl/dflowfm/packages/test_dflowfm/test_data/dflowfm_compare_version_output.py -text
