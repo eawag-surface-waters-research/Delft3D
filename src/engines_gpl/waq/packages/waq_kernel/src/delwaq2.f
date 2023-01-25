@@ -302,8 +302,6 @@
      &                 filtype, gridps , dlwqd  , ierr   )
 !
 
-         CLOSE ( LUNIN )
-         IF ( IERR .GT. 0 ) GOTO 992
 !
 !        end of initialisation
 !
@@ -434,8 +432,6 @@
   990 WRITE ( * , * ) ' ERROR: INTEGRATION OPTION NOT IMPLEMENTED'
       CALL SRSTOP(1)
   991 WRITE ( * , * ) ' ERROR: INTEGRATION OPTION NOT IMPLEMENTED in online mode'
-      CALL SRSTOP(1)
-  992 WRITE ( * , * ) ' ERROR : INITIALISATION FAILED'
       CALL SRSTOP(1)
   999 WRITE ( * , * ) ' ERROR: NO VALID SET OF MODEL-INTERMEDIATE-FILES'
       CALL SRSTOP(1)
