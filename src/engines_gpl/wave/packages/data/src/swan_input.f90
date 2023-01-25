@@ -3796,9 +3796,6 @@ subroutine write_swan_inp (wavedata, calccount, &
        write (fname,'(a,i0,5a)') 'hot_', inest, '_', trim(sr%writehottime(1:8)), '_', trim(sr%writehottime(10:15)), '.nc'
        line = "SPEC 'COMPGRID' RELATIVE '" // trim(fname) // "' MDGRID"  
        write (luninp, '(1X,A)') line
-       !line = "SPEC 'COMPGRID' RELATIVE '" // trim(fname) // "' MDGRID OUTPUT & "  
-       !write (luninp, '(1X,A)') line
-       !write(luninp,'(2a)') sr%writehottime, ' 1 HR'
     endif
     line       = ' '
     line(1:2) = '$ '
