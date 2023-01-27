@@ -368,7 +368,7 @@
         rhomea  = 0.5d0*( rho(k+1) + rho(k) )
         dijdij(kk) = -ag*drhodz/rhomea
      enddo
-     dijdij(0) = 0d0 ;       dijdij(km) = 0d0
+     dijdij(0) = 0d0 ;       dijdij(km) = dijdij(km-1) 
      vmin = minval(dijdij(1:km-1))
      vmax = maxval(dijdij(1:km-1))
      if (abs(vmin) < vmax) vmin = -vmax

@@ -36,8 +36,9 @@
  use m_flowtimes
  use m_sferic
  use unstruc_display
- use m_netw, only : xk,yk,zk
+ use m_netw, only : xk,yk,zk,kc
  use m_sediment
+ use m_polygon
 
  implicit none
  integer          :: nx, ncol, jaall, ITYP
@@ -52,10 +53,14 @@
        if (ja == 1) exit
     endif
 
+    k1  = ln  (1,L)
+    k2  = ln  (2,L)
+    if (npl > 1) then 
+        if (kc(k1)*kc(k2) == 0 ) cycle
+    endif
+
     if (ityp == 1) then                                ! bottom layer
        if (ibedlevtyp == 1 .or. ibedlevtyp == 6) then  ! tegelen
-          k1  = ln  (1,L)
-          k2  = ln  (2,L)
           xx1 = xz(k1)
           xx2 = xz(k2)
           zz1 = bl(k1)
@@ -124,6 +129,10 @@
  do L = 1,lnx1D
     k1  = ln(1,L)
     k2  = ln(2,L)
+    if (npl > 1) then 
+        if (kc(k1)*kc(k2) == 0 ) cycle
+    endif
+ 
     xx1 = xz(k1)
     xx2 = xz(k2)
     zz1 = bl(k1)
