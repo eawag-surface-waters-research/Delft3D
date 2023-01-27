@@ -3623,7 +3623,6 @@ src/engines_gpl/waq/packages/delwaq_lib/src/delwaq2_global_data.f90 -text
 src/engines_gpl/waq/packages/delwaq_lib/src/delwaq2_main.F90 -text
 src/engines_gpl/waq/packages/delwaq_lib/src/delwaq2_main_finalise.F90 -text
 src/engines_gpl/waq/packages/delwaq_lib/src/delwaq2_main_init.F90 -text
-src/engines_gpl/waq/packages/delwaq_lib/src/delwaq_version.F90 -text
 src/engines_gpl/waq/packages/delwaq_lib/src/getidentification.F90 -text
 src/engines_gpl/waq/packages/delwaq_lib/src/m_delwaq1_data.F90 -text
 src/engines_gpl/waq/packages/delwaq_lib/src/waq_bmi.F90 -text
@@ -4351,6 +4350,7 @@ src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/computeRefday.f90 -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/d00sub.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/dattim.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/delwaq_loads.f -text
+src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/delwaq_version.F90 -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/dhagg2.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/dhaggr.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/dhagkm.f -text

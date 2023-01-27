@@ -34,6 +34,7 @@
 
       use timers
       use dlwq_netcdf  !   read/write grid in netcdf
+      use delwaq_version_module
       use output, only: ncopt
       implicit none
 
@@ -345,8 +346,7 @@
              goto 800
          endif
 
-!!         call getfullversionstring_delwaq( versionid )
-         versionid = "Deltares, DELWAQ version 5.10.00"
+         call getfullversionstring_delwaq( versionid )
          inc_error = nf90_put_att( ncidmap, nf90_global, 'source', trim(versionid) )
          if ( inc_error /= nf90_noerr ) then
              write ( lunut , 2573 )

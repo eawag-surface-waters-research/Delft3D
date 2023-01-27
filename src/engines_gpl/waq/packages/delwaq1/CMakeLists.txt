@@ -7,7 +7,7 @@ set(waq_version_path ${waq_root_path}/version)
 set(waq_data_path ${waq_root_path}/include)
 
 set(ini_version_file ${waq_version_path}/version_number.ini)
-set(fortran_version_file_delwaq ${waq_root_path}/packages/delwaq_lib/src/delwaq_version.F90)
+set(fortran_version_file_delwaq ${waq_root_path}/packages/waq_utils_f/src/waq_utils/delwaq_version.F90)
 set(rc_version_file ${waq_version_path}/version_number_delwaq1.rc)
 
 
