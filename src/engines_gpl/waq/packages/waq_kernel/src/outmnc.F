@@ -97,6 +97,7 @@
       character(len=nf90_max_name) :: network_name
       character(len=nf90_max_name) :: network_geometry_name
       character(len=nf90_max_name) :: dimname
+      character(len=nf90_max_name) :: history
 
       integer :: i, j
       integer :: type_ugrid
@@ -348,6 +349,13 @@
 
          call getfullversionstring_delwaq( versionid )
          inc_error = nf90_put_att( ncidmap, nf90_global, 'source', trim(versionid) )
+         if ( inc_error /= nf90_noerr ) then
+             write ( lunut , 2573 )
+             goto 800
+         endif
+
+         history = "Created on " // trim(timestamp) // ", DELWAQ"
+         inc_error = nf90_put_att( ncidmap, nf90_global, 'history', trim(history) )
          if ( inc_error /= nf90_noerr ) then
              write ( lunut , 2573 )
              goto 800
