@@ -93,7 +93,9 @@ subroutine tram1 (numrealpar,realpar   ,wave      ,npar      ,par       , &
 ! Local variables
 !
     integer :: iopsus
+    integer :: kmaxsd2
     real(fp):: aksfac
+    real(fp):: alphak
     real(fp):: rwave
     real(fp):: rdc
     real(fp):: rdw
@@ -144,7 +146,9 @@ subroutine tram1 (numrealpar,realpar   ,wave      ,npar      ,par       , &
     real(fp) :: gambr
     real(fp) :: hs
     real(fp) :: lci
+    real(fp) :: lci2
     real(fp) :: muc
+    real(fp) :: rsedeq2
     real(fp) :: sag
     real(fp) :: ta
     real(fp) :: taubcw
@@ -221,21 +225,6 @@ subroutine tram1 (numrealpar,realpar   ,wave      ,npar      ,par       , &
                  & vonkar    ,wave      ,tauadd    ,betam     ,awb       )
     realpar(RP_DSS)   = real(dss    ,hp)
     !
-    ! Find bottom cell for SAND sediment calculations and store for use
-    ! in DIFU and DIF_WS
-    !
-    kmaxsd = 1
-    do k = kmax - 1, 1, -1
-       !
-       ! Calculate level of lower cell interface
-       !
-       lci = (1.0_fp + sig(k) - thick(k)/2.0_fp) * h1
-       if (lci >= aks) then
-          kmaxsd = k
-          exit
-       endif
-    enddo
-    !
     ! Adjust caks for presence of multiple sediment fractions.
     !
     caks     = caks * frac
@@ -276,18 +265,62 @@ subroutine tram1 (numrealpar,realpar   ,wave      ,npar      ,par       , &
     ! solution to stationary advection/diffusion equation in vertical.
     !
     if (caks>1.0e-6_fp) then
+       ! Find bottom cell for SAND sediment calculations and store for use
+       ! in DIFU and DIF_WS
        !
-       ! Put concentration in kmaxsd cell
+       kmaxsd  = 1
+       kmaxsd2 = 1
+       alphak  = 1.0_fp
+       do k = kmax - 1, 1, -1
+          !
+          ! Calculate level of lower cell interface
+          !
+          lci = (1.0_fp + sig(k) - thick(k)/2.0_fp) * h1
+          if (lci >= aks) then
+             kmaxsd = k
+             if (k>1) then
+                 kmaxsd2 = k-1
+                 !
+                 ! if aks is close to the lower interface of the previous layer, then set alphak equal to 1
+                 ! if aks is close to the lower interface of this layer, then set alphak equal to 0
+                 !
+                 lci2 = (1.0_fp + sig(kmaxsd+1) - thick(kmaxsd+1)/2.0_fp) * h1
+                 alphak  = (lci - aks)/(lci - lci2)
+             ! else use the default kmaxsd2 and alphak
+             endif
+             exit
+          endif
+       enddo
+       !
+       ! Put concentration for alphak in kmaxsd cell and for 1-alphak in kmaxsd2 cell
        !
        dz     = h1*(1.0_fp + sig(kmaxsd))-aks
        diffbt = seddif(kmaxsd) + bakdif
        diffbt = max(diffbt , 0.1_fp*ws(kmaxsd)*dz)
        fact1  = 1.0_fp + dz * ws(kmaxsd) / diffbt
-       rsedeq(kmaxsd) = caks / fact1 * rhosol
+       rsedeq(kmaxsd) = alphak * caks / fact1 * rhosol
+       !
+       if (kmaxsd2 == kmaxsd-1) then
+          dz     = h1*(1.0_fp + sig(kmaxsd2))-aks
+          diffbt = seddif(kmaxsd2) + bakdif
+          diffbt = max(diffbt , 0.1_fp*ws(kmaxsd2)*dz)
+          fact1  = 1.0_fp + dz * ws(kmaxsd2) / diffbt
+          rsedeq2 = (1.0_fp-alphak) * caks / fact1 * rhosol
+          !
+          ! Set diffusion coefficient at bottom of layer
+          !
+          dz        = h1 * (sig(kmaxsd2)-sig(kmaxsd2+1))
+          diffbt    = seddif(kmaxsd2) + bakdif
+          diffbt    = max(diffbt , 0.1_fp*ws(kmaxsd2)*dz)
+          fact1     = 1.0_fp + dz * ws(kmaxsd2) / diffbt
+          rsedeq(kmaxsd2) = rsedeq2 + rsedeq(kmaxsd2+1) / fact1
+          !
+          rsedeq(kmaxsd) = rsedeq(kmaxsd) + rsedeq2
+       endif
        !
        ! Now work upward
        !
-       do k = kmaxsd - 1, 1, -1
+       do k = kmaxsd2 - 1, 1, -1
           !
           ! Set diffusion coefficient at bottom of layer
           !
@@ -307,6 +340,7 @@ subroutine tram1 (numrealpar,realpar   ,wave      ,npar      ,par       , &
        !
        ! if caks <= 1.0e-6
        !
+       kmaxsd = 1
        do k = 1, kmax
           rsedeq(k) = 0.0_fp
        enddo
