@@ -126,7 +126,11 @@ if (UNIX)
     pkg_check_modules(NETCDF REQUIRED IMPORTED_TARGET netcdf)
     pkg_check_modules(NETCDF_FTN REQUIRED IMPORTED_TARGET netcdf-fortran)
 
-    set(oss_dependencies ${oss_dependencies_general})
+# WARNING: UGLY FIX AHEAD: two dependencies are mentioned twice: flow2d3d_io, flow2d3d_kernel
+#          This is needed to get everything linked correctly on Linux
+    set(oss_dependencies ${oss_dependencies_general}
+                             flow2d3d_io
+                             flow2d3d_kernel)
 
     target_link_libraries(${library_name}
          ${oss_dependencies}
