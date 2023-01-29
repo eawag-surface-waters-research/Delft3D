@@ -233,6 +233,7 @@ subroutine tram2 (numrealpar,realpar   ,wave      ,i2d3d     ,npar      , &
     wform  = int(par(19))
     ! NOTE ADDING PARAMETERS HERE INFLUENCES SANTOSS PARAMETERS AS WELL: numbers in santoss.f90 continue from here!
     !
+    tp = max(tp, 1e-2_fp)
     drho  = (rhosol-rhowat) / rhowat
     !
     if (di50 < 1.5_fp*dsand) then
