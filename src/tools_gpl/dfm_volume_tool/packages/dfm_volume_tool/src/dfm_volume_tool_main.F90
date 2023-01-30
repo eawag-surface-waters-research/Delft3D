@@ -72,7 +72,7 @@ character(len=Idlen) :: output_file, grid_output_file
 character(len=Idlen) :: var_name
 type(c_ptr)          :: xptr
 integer              :: numpoints, numlinks, lnx, numbnd
-integer, pointer     :: count
+integer, pointer     :: integer_pointer
 logical              :: computeTotal
 logical              :: computeOnBranches
 logical              :: computeOnGridpoints
@@ -189,14 +189,21 @@ if (ierr==0) then
    call dfm_generate_volume_tables(dfm, increment)
    
    ! Retrieve data from the D-FLOW FM dll
-   call bmi_get_var(dfm, 'lnx1D', numlinks, 1)
-   call bmi_get_var(dfm, 'lnx', lnx, 1)
+   call get_variable_pointer(dfm, string_to_char_array('lnx1D'), xptr)
+   call c_f_pointer(xptr, integer_pointer)
+   numlinks = integer_pointer
+   
+   call get_variable_pointer(dfm, string_to_char_array('lnx'), xptr)
+   call c_f_pointer(xptr, integer_pointer)
+   lnx = integer_pointer
+   
    call get_variable_pointer(dfm, string_to_char_array('numpoints'), xptr)
-   call c_f_pointer(xptr, count)
-   numpoints = count
+   call c_f_pointer(xptr, integer_pointer)
+   numpoints = integer_pointer
+   
    call get_variable_pointer(dfm, string_to_char_array('nbndz'), xptr)
-   call c_f_pointer(xptr, count)
-   numbnd = count
+   call c_f_pointer(xptr, integer_pointer)
+   numbnd = integer_pointer
    
    allocate(inslevtube(2,lnx), ln2nd(2,lnx), lnog(2,lnx), bndvalues(numbnd), bndindex(6,numbnd),kcu2(lnx))
    call bmi_get_var(dfm, 'bob', inslevtube, 2*lnx)

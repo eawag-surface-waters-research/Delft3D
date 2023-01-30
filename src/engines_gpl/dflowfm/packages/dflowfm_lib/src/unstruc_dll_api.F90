@@ -116,6 +116,10 @@ subroutine  dfm_get_variable_pointer(name_var, x) bind(C, name="dfm_get_variable
       x = c_loc(ndx2d)
    case ('kcu')
       x= c_loc(kcu)
+   case('lnx1D')
+      x = c_loc(lnx1d)
+   case('lnx')
+      x = c_loc(lnx)
    case default
       call mess(LEVEL_ERROR, 'invalid pointer target!')
    end select
