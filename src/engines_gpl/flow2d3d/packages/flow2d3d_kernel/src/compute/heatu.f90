@@ -74,6 +74,9 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
     real(fp)                , pointer :: timjan
     real(fp)                , pointer :: stanton
     real(fp)                , pointer :: dalton
+    real(fp)                , pointer :: mulsd
+    real(fp)                , pointer :: betasd
+    real(fp)                , pointer :: albedo
     real(fp)                , pointer :: qtotmx
     real(fp)                , pointer :: lambda
     real(fp)                , pointer :: rhum
@@ -174,7 +177,6 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
     integer       :: ndm
     integer       :: nm
     integer       :: nmd
-    real(fp)      :: albedo  ! Albedo coefficient 
     real(fp)      :: b1      ! Transmission coefficient 
     real(fp)      :: bowrat
     real(fp)      :: cccoef  ! Coefficient for cloud cover 
@@ -189,7 +191,11 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
     real(fp)      :: esvp
     real(fp)      :: ew      ! Saturation pressure of water vapour near water surface
     real(fp)      :: ewl     ! Saturation pressure of water vapour in air remote
-    real(fp)      :: extinc
+    real(fp)      :: extinc  ! Extinction coefficient light absorbed
+    real(fp)      :: extish  ! Extinction coefficient light absorbed in shallow part
+    real(fp)      :: extide  ! Extinction coefficient light absorbed in deep part 
+    real(fp)      :: explo   ! Exponential value bottom of layer
+    real(fp)      :: expup   ! Exponential value top of layer
     real(fp)      :: ffclou
     real(fp)      :: fheat
     real(fp)      :: flux
@@ -221,6 +227,7 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
     real(fp)      :: qtot    ! Total heat flux 
     real(fp)      :: qtotk
     real(fp)      :: qw      ! Specific humidity of air at air temperature
+    real(fp)      :: ratio   ! coefficient in exponential relation	
     real(fp)      :: rcpa
     real(fp)      :: rdry
     real(fp)      :: rhoa0
@@ -265,6 +272,9 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
     timjan      => gdp%gdheat%timjan
     stanton     => gdp%gdheat%stanton
     dalton      => gdp%gdheat%dalton
+    mulsd       => gdp%gdheat%mulsd
+    betasd      => gdp%gdheat%betasd
+    albedo      => gdp%gdheat%albedo
     qtotmx      => gdp%gdheat%qtotmx
     lambda      => gdp%gdheat%lambda
     rhum        => gdp%gdheat%rhum
@@ -360,63 +370,6 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
        fwind = (5.0e6_fp/sarea)**0.05_fp
     else
        fwind = 1.0_fp
-    endif
-    !
-    ! Check if user specified output of heat fluxes
-    !
-    if (flwoutput%temperature) then
-       if (.not. associated(gdp%gdheat%qeva_out)) then
-          !
-          ! allocate all arrays needed for writing to output files
-          !
-          allocate (gdp%gdheat%qeva_out (gdp%d%nmlb:gdp%d%nmub) , stat = istat)
-          if (istat==0) allocate (gdp%gdheat%qco_out  (gdp%d%nmlb:gdp%d%nmub) , stat = istat)
-          if (istat==0) allocate (gdp%gdheat%qbl_out  (gdp%d%nmlb:gdp%d%nmub) , stat = istat)
-          if (istat==0) allocate (gdp%gdheat%qin_out  (gdp%d%nmlb:gdp%d%nmub) , stat = istat)
-          if (istat==0) allocate (gdp%gdheat%qnet_out (gdp%d%nmlb:gdp%d%nmub) , stat = istat)
-          if (ktemp == 3) then
-             if (istat==0) allocate (gdp%gdheat%hlc_out  (gdp%d%nmlb:gdp%d%nmub) , stat = istat)
-          endif
-          if (free_convec) then
-             if (istat==0) allocate (gdp%gdheat%hfree_out(gdp%d%nmlb:gdp%d%nmub) , stat = istat)
-             if (istat==0) allocate (gdp%gdheat%efree_out(gdp%d%nmlb:gdp%d%nmub) , stat = istat)
-          endif
-          if (keva == 3) then
-             if (istat==0) allocate (gdp%gdheat%qmis_out  (gdp%d%nmlb:gdp%d%nmub) , stat = istat)
-          endif
-          !
-          if (istat /= 0) then
-             call prterr(lundia, 'U021', 'HEATU: memory allocation error')
-             call d3stop(1, gdp)
-          endif
-          !
-          ! define pointers again to update references; initialize the arrays
-          !
-          qeva_out   => gdp%gdheat%qeva_out
-          qco_out    => gdp%gdheat%qco_out
-          qbl_out    => gdp%gdheat%qbl_out
-          qin_out    => gdp%gdheat%qin_out
-          qnet_out   => gdp%gdheat%qnet_out
-          qeva_out  = 0.0_fp
-          qco_out   = 0.0_fp
-          qbl_out   = 0.0_fp
-          qin_out   = 0.0_fp
-          qnet_out  = 0.0_fp
-          if (ktemp == 3) then
-             hlc_out    => gdp%gdheat%hlc_out
-             hlc_out   = 0.0_fp
-          endif
-          if (free_convec) then
-             hfree_out  => gdp%gdheat%hfree_out
-             efree_out  => gdp%gdheat%efree_out
-             hfree_out = 0.0_fp
-             efree_out = 0.0_fp
-          endif
-          if (keva == 3) then
-             qmis_out   => gdp%gdheat%qmis_out
-             qmis_out  = 0.0_fp          
-          endif
-       endif
     endif
     !
     !
@@ -868,7 +821,6 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
              ! So, except for reflection which is equal to 9%, we do not have to
              ! compute QSN separately
              !
-             albedo = 0.09_fp
              qsn    = qsun * (1.0_fp-albedo)
              !
              h0old   = max(htrsh, s0(nm) + real(dps(nm),fp))
@@ -978,7 +930,6 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
        rlat = anglat
        !
        cccoef = 0.4_fp
-       albedo = 0.06_fp
        tm0    = timjan + timhr
        !
        decln  = 23.5_fp * degrad
@@ -1234,7 +1185,6 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
              h0old   = max(htrsh, s0(nm) + real(dps(nm),fp))
              h0new   = max(htrsh, s1(nm) + real(dps(nm),fp))
              ztop    = 0.0_fp
-             zbottom = -h0old
              !
              ! For thin layers of water: no heat flux calculations
              ! to avoid large fluxes in small bodies of water
@@ -1244,24 +1194,58 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
                    k1    = kfsmx0(nm) - 1
                    k2    = kfsmin(nm)
                    kstep = -1
-                   zdown = -max(htrsh,dzs0(nm, kfsmx0(nm)))
+                   zdown = max(htrsh,dzs0(nm, kfsmx0(nm)))
                 else
                    k1    = 2
                    k2    = kmax
                    kstep = 1
-                   zdown = -thick(1)*h0old
+                   zdown = thick(1)*h0old
                 endif
                 !
-                extinc = 1.7_fp/secchi(nm)
-                corr  = 1.0_fp / ( (1.0_fp - exp(extinc*zbottom)) / extinc )
-                qink  = corr * qsn * (1.0_fp - exp(extinc*zdown)) / extinc
+                ! Separation of penetration of solar radiation through a deep and shallow Secchi depth.
+                ! If BetaSD = 1, then only one (deep) contribution.
+                !
+                extide = 1.7_fp/secchi(nm)
+                if (mulsd > 0.0) then
+                   extish = 1.7_fp/(mulsd*secchi(nm))
+                else
+                   extish = extide
+                endif
+                !
+                ! first deep light penetration top layer (portion betasd of flux qsn) 
+                !
+                expup = betasd
+                ratio = extide*zdown
+                if (ratio < 10.0_fp) then
+                   !
+                   ! portion betasd
+                   ! 
+                   explo = betasd*exp(-ratio)
+                else
+                   explo  = 0.0_fp 
+                endif
+                qink = qsn*(expup-explo)
+                !
+                ! second shallow light penetration top layer (portion 1-betasd of flux qsn) 
+                !
+                if (betasd < 1.0_fp) then
+                   expup = 1.0_fp-betasd
+                   ratio  = extish*zdown
+                   if (ratio < 10.0_fp) then
+                      !
+                      ! portion 1-betasd 
+                      !
+                      explo = (1.0-betasd)*exp(-ratio)
+                   else
+                      explo  = 0.0_fp 
+                   endif
+                   !
+                   ! Both portions are summed.
+                   !
+                   qink  = qink + qsn*(expup-explo)
+                endif
+                !
                 qtotk = (qink-ql) / (rhow*cp)
-                !
-                ! Reduction of solar radiation at shallow areas
-                !
-                if (h0old<secchi(nm) .and. qtotk>0.0_fp) then
-                   qtotk = qtotk * (1.0_fp - exp(extinc*zdown))
-                endif    
                 !
                 if (zmodel) then
                    if (qtotk > 0.0_fp) then
@@ -1283,19 +1267,71 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
                    elseif (r0(nm, k0, ltem) > 0.0_fp .and. r0(nm, k0, ltem) < 0.01_fp) then
                       !
                       ! No addition to sink when the water temperature is lower than 0.01 degree.
-                      !                   
+                      !
                    else
                       msgcount = msgcount + 1
                    endif
                 endif
+                !
+                ! Implementation of separate (shallow and deep) Secchi depthts for the rest of the water column
+                !
                 do k = k1, k2, kstep
                    ztop = zdown
                    if (zmodel) then
-                      zdown = zdown - dzs0(nm, k)
+                      zdown = zdown + dzs0(nm, k)
                    else
-                      zdown = zdown - thick(k)*h0old
+                      zdown = zdown + thick(k)*h0old
                    endif
-                   qink  = corr * qsn * (exp(extinc*ztop) - exp(extinc*zdown)) / extinc
+                   !
+                   ! first deep light penetration top layer (portion betasd of flux qsn) 
+                   !
+                   ratio  = extide*ztop
+                   if (ratio < 10.0_fp) then
+                      !
+                      ! portion betasd
+                      !
+                      expup  = betasd*exp(-ratio)
+                   else
+                      expup  = 0.0_fp 
+                   endif
+                   ratio = extide*zdown
+                   if (ratio < 10.0_fp) then
+                      !
+                      ! portion betasd
+                      !
+                      explo  = betasd*exp(-ratio)
+                   else
+                      explo  = 0.0_fp 
+                   endif
+                   qink = qsn*(expup-explo)
+                   !
+                   ! second shallow light penetration top layer (portion 1-betasd of flux qsn) 
+                   !
+                   if (betasd < 1.0_fp) then
+                      ratio  = extish*ztop
+                      if (ratio < 10.0_fp) then
+                         !
+                         ! portion 1-betasd at top of layer
+                         !
+                         expup  = (1.0_fp-betasd)*exp(-ratio)
+                      else
+                         expup  = 0.0_fp 
+                      endif
+                      ratio  = extish*zdown
+                      if (ratio < 10.0_fp) then
+                         !
+                         ! portion 1-betasd at bottom of layer
+                         !
+                         explo  = (1.0_fp-betasd)*exp(-ratio)
+                      else
+                         explo  = 0.0_fp 
+                      endif
+                      !
+                      ! both portions are summed
+                      !
+                      qink   = qink+qsn*(expup-explo)
+                   endif
+                   !
                    qtotk = qink / (rhow*cp)
                    if (zmodel) then
                       sour(nm, k, ltem) = sour(nm, k, ltem) + qtotk*gsqs(nm)

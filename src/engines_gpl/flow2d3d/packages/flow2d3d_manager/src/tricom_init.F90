@@ -1015,7 +1015,7 @@ subroutine tricom_init(olv_handle, gdp)
     !
     call inchki(lundia    ,error     ,runid     ,sferic    ,filrgf    , &
               & dx        ,dy        ,anglat    ,anglon    ,grdang    , &
-              & tgfcmp    ,riglid    , &
+              & tgfcmp    ,riglid    ,keva      , &
               & temeqs    ,saleqs    ,ktemp     ,fclou     , &
               & sarea     ,roumet    ,rouflo    ,restid    , &
               & lturi     ,gdp       )

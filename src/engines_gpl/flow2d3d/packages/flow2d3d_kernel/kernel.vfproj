@@ -354,7 +354,8 @@
 		<File RelativePath="src\inichk\iniphy.f90"/>
 		<File RelativePath="src\inichk\inirgl.f90"/>
 		<File RelativePath="src\inichk\inised.f90"/>
-		<File RelativePath=".\src\inichk\init_mom_output.f90"/>
+		<File RelativePath="src\inichk\init_mom_output.f90"/>
+		<File RelativePath="src\inichk\init_out_heatfluxes.f90"/>
 		<File RelativePath="src\inichk\initau.f90"/>
 		<File RelativePath="src\inichk\initem.f90"/>
 		<File RelativePath="src\inichk\initgf.f90"/>
