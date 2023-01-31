@@ -244,6 +244,7 @@ function updmorlyr(this, dbodsd, dz, messages) result (istat)
 !
 !! executable statements -------------------------------------------------------
 !
+
     morlyrnum   => this%settings%morlyrnum
     rhofrac     => this%settings%rhofrac
     thtrlyr     => this%settings%thtrlyr
@@ -254,7 +255,7 @@ function updmorlyr(this, dbodsd, dz, messages) result (istat)
     sedshort    => this%state%sedshort
     thlyr       => this%state%thlyr  
     !
-    istat = allocwork(this,work)
+    istat = allocwork(this,this%work)
     if (istat /= 0) return
     select case(this%settings%iunderlyr)
     case(2)
@@ -409,7 +410,7 @@ function updmorlyr(this, dbodsd, dz, messages) result (istat)
           dz(nm) = dpsed(nm) - seddep0
        enddo
     endselect
-    istat = deallocwork(this,work)
+    istat = deallocwork(this,this%work)
 end function updmorlyr
 !
 !
@@ -470,7 +471,7 @@ function gettoplyr(this, dz_eros, dbodsd, messages  ) result (istat)
     sedshort    => this%state%sedshort
     thlyr       => this%state%thlyr
     !
-    istat = allocwork(this,work)
+    istat = allocwork(this,this%work)
     if (istat /= 0) return
     select case(this%settings%iunderlyr)
     case(2)
@@ -639,7 +640,7 @@ function gettoplyr(this, dz_eros, dbodsd, messages  ) result (istat)
           endif
        enddo
     endselect
-    istat = deallocwork(this,work)
+    istat = deallocwork(this,this%work)
 end function gettoplyr
 !
 !
