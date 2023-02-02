@@ -19312,7 +19312,7 @@ src/utils_lgpl/deltares_common/packages/deltares_common/deltares_common.vfproj -
 src/utils_lgpl/deltares_common/packages/deltares_common/include/tri-dyn.igd -text
 src/utils_lgpl/deltares_common/packages/deltares_common/include/version_number.ini -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/Makefile.am -text
-src/utils_lgpl/deltares_common/packages/deltares_common/src/MessageHandling.f90 -text
+src/utils_lgpl/deltares_common/packages/deltares_common/src/MessageHandling.F90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/array_module.f90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/bilin5.f90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/buffer.f90 -text
@@ -19326,7 +19326,7 @@ src/utils_lgpl/deltares_common/packages/deltares_common/src/geometry_module.f90 
 src/utils_lgpl/deltares_common/packages/deltares_common/src/grid_dimens_module.f90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/handles.f90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/hash_search.f90 -text
-src/utils_lgpl/deltares_common/packages/deltares_common/src/iso_c_utils.F90 -text
+src/utils_lgpl/deltares_common/packages/deltares_common/src/iso_c_utils.f90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/m_tablematrices.f90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/m_tables.f90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/malloc.f90 -text
@@ -19336,9 +19336,9 @@ src/utils_lgpl/deltares_common/packages/deltares_common/src/multi_file_io.f90 -t
 src/utils_lgpl/deltares_common/packages/deltares_common/src/nan_check_module.f90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/physicalconsts.f90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/polygon_module.f90 -text
-src/utils_lgpl/deltares_common/packages/deltares_common/src/precision.F90 -text
-src/utils_lgpl/deltares_common/packages/deltares_common/src/precision_basics.F90 -text
-src/utils_lgpl/deltares_common/packages/deltares_common/src/precision_sp.F90 -text
+src/utils_lgpl/deltares_common/packages/deltares_common/src/precision.f90 -text
+src/utils_lgpl/deltares_common/packages/deltares_common/src/precision_basics.f90 -text
+src/utils_lgpl/deltares_common/packages/deltares_common/src/precision_sp.f90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/properties.f90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/rd_token/Makefile.am -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/rd_token/gettok.f -text

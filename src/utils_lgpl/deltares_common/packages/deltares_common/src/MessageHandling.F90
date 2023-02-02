@@ -322,7 +322,9 @@ end subroutine set_mh_callback
 
 
 subroutine set_logger(c_callback) bind(C, name="set_logger")
+#ifdef _WIN32
   !DEC$ ATTRIBUTES DLLEXPORT::set_logger
+#endif
 
   use iso_c_binding
   implicit none
@@ -997,7 +999,9 @@ subroutine set_progress_callback(callback)
 end subroutine set_progress_callback
 
 subroutine set_progress_c_callback(c_callback) bind(C, name="set_progress_c_callback")
+#ifdef _WIN32
   !DEC$ ATTRIBUTES DLLEXPORT:: set_progress_c_callback
+#endif
 
   use iso_c_binding
   use iso_c_utils

@@ -1,4 +1,4 @@
-module precision
+module precision_sp
 !----- LGPL --------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2023.                                
@@ -44,9 +44,9 @@ module precision
 ! SWITCHING FROM SINGLE PRECISION   FP   TO DOUBLE PRECISION:
 ! 1) File libsrc\flow_modsrc\precision.f90
 !    - Comment out the following line:
-!      INTEGER, PARAMETER :: FP=SP
+!      integer, parameter :: fp=sp
 !    - Activate the following line:
-!      INTEGER, PARAMETER :: FP=HP
+!      integer, parameter :: fp=hp
 ! 2) File include\flow\tri-dyn.igd
 !    - Comment out the following line:
 !      equivalence ( r(0),  rbuf(0))
@@ -56,7 +56,6 @@ module precision
 !    - Comment out the following line:
 !      #undef FLOW_DOUBLE_PRECISION
 !    - Activate the following line:
-!      #define FLOW_DOUBLE_PRECISION
 !
 ! SWITCHING FROM SINGLE PRECISION BODSED/DPS TO DOUBLE PRECISION:
 ! 1) File libsrc\flow_modsrc\precision.f90
@@ -73,19 +72,17 @@ module precision
 !    - Comment out the following line:
 !      #undef PREC_DOUBLE_PRECISION
 !    - Activate the following line:
-!      #define PREC_DOUBLE_PRECISION
 !
 !!--pseudo code and references--------------------------------------------------
 ! NONE
 !!--declarations----------------------------------------------------------------
 use precision_basics
-use iso_c_binding
 implicit none
 !
 ! fp is the generally used precision in Delft3D-FLOW
 !
-integer, parameter :: fp=hp
-!integer, parameter :: fp=sp
+!integer, parameter :: fp=hp
+integer, parameter :: fp=sp
 !
 ! prec is used to switch bodsed/dps from sp to hp
 !
@@ -95,11 +92,6 @@ integer, parameter :: prec=hp
 ! old hp's in sobek that should stay sp
 !
 integer, parameter :: fhp=sp 
-!
-! length of integers which are esm/fsm pointers
-! = 4 for 32bit versions
-! = 8 for 64bit versions
-!
-integer, parameter :: pntrsize=c_size_t
 
-end module precision
+
+end module precision_sp
