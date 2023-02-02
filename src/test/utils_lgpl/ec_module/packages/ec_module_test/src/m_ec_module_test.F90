@@ -556,6 +556,8 @@ contains
              call prop_get_integer (config_ptr, trim(testname), 'VectorMax', config%vectormax, status)
 
              liststring = ''
+             nx = 0
+             ny = 0
              call prop_get_string (config_ptr, trim(testname), 'LocationsX', liststring , status)
              if (len_trim(liststring)>0) then                  ! count the comma's, which serve as separators
                 nx = 1
