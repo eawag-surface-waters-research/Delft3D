@@ -52,7 +52,6 @@
 !     subroutines called : dlwqtr, user transport routine
 !                          proces, delwaq proces system
 !                          dlwqo2, delwaq output system
-!                          dlwqpp, user postprocessing routine
 !                          dlwq13, system postpro-dump routine
 !                          dlwq14, scales waterquality
 !                          dlwq15, wasteload routine

@@ -46,7 +46,6 @@
 !     SUBROUTINES CALLED : DLWQTR, user transport routine
 !                          PROCES, DELWAQ proces system
 !                          DLWQO2, DELWAQ output system
-!                          DLWQPP, user postprocessing routine
 !                          DLWQT0, sets time functions
 !                          DLWQ13, system postpro-dump routine
 !                          DLWQ14, scales waterquality

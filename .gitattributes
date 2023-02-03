@@ -3900,7 +3900,6 @@ src/engines_gpl/waq/packages/waq_kernel/src/dlwqnq.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/dlwqo0.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/dlwqo2.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/dlwqp0.f -text
-src/engines_gpl/waq/packages/waq_kernel/src/dlwqpp.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/dlwqt0.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/dlwqt1.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/dlwqt2.f -text
