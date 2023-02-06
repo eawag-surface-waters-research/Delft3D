@@ -372,7 +372,11 @@
                call err_flush()
             endif
          enddo
-         bl_ave(nm) = href_tot/ba_mor_tot
+         if (ba_mor_tot > 0d0) then
+             bl_ave(nm) = href_tot/ba_mor_tot
+         else
+             bl_ave(nm) = bl(nm)
+         endif
    enddo
 
    do nm = 1, ndx2D  ! internal 2d nodes
