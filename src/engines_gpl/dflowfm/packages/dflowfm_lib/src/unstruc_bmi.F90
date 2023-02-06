@@ -1034,6 +1034,8 @@ subroutine get_var(c_var_name, x) bind(C, name="get_var")
    use m_alloc
    use string_module
    use m_cell_geometry ! TODO: UNST-1705: temp, replace by m_flowgeom
+   use m_VolumeTables, only: vltb, vltbOnLinks
+   use unstruc_channel_flow, only: network
 
    character(kind=c_char), intent(in) :: c_var_name(*) !< Variable name. May be slash separated string "name/item/field": then get_compound_field is called.
    type(c_ptr), intent(inout) :: x
