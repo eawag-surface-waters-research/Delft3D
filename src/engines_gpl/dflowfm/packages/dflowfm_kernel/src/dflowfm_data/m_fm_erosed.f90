@@ -119,6 +119,7 @@
    ! morpar
    real(fp)                             , pointer :: thresh
    real(fp)                             , pointer :: sus
+   real(fp)                             , pointer :: suscorfac
    real(fp)                             , pointer :: bed
    real(fp)                             , pointer :: susw
    real(fp)                             , pointer :: sedthr

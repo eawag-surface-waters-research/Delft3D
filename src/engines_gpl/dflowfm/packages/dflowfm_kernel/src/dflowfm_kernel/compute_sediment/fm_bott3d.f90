@@ -321,7 +321,7 @@
                            endif
                         endif
                      endif
-                     e_scrn(Lx,l) = -cumflux / wu(Lx)
+                     e_scrn(Lx,l) = -suscorfac * cumflux / wu(Lx)
                      !
                      ! bedload will be reduced in case of sediment transport
                      ! over a non-erodible layer (no sediment in bed) in such

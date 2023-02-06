@@ -80,6 +80,7 @@
    ! morpar
    thresh              => stmpar%morpar%thresh
    sus                 => stmpar%morpar%sus
+   suscorfac           => stmpar%morpar%suscorfac
    bed                 => stmpar%morpar%bed
    susw                => stmpar%morpar%susw
    sedthr              => stmpar%morpar%sedthr
