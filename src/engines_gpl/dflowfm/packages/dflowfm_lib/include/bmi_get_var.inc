@@ -334,5 +334,13 @@
      x = c_loc(yz)
   case("ba") !<  [m2] bottom area, if < 0 use table in node type {"location": "face", "shape": ["ndx"]}
      x = c_loc(ba)
+  case("kcu") !< [-] link code, 1=1D link, 2=2D link, -1= bc 1D, -2=bc 2D, 3=lateral_1d2d_link, 4=longitudinal_1d2d_link, 5=street_inlet_1d2d_link, 7=roof_gutter_1d2d_link
+     x = c_loc(kcu)
+  case('vltb')
+     x = c_loc(vltb)
+  case('vltbOnLinks')
+     x = c_loc(vltbOnLinks)
+  case('network')
+     x = c_loc(Network)
   end select
 

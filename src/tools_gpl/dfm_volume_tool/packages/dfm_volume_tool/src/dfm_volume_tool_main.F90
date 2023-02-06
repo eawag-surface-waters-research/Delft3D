@@ -96,7 +96,7 @@ integer,          dimension(:),   allocatable   :: mask, tablecount
 integer,          dimension(:,:), pointer       :: bndindex
 integer,          dimension(:,:), allocatable   :: ln2nd
 integer,          dimension(:,:), pointer       :: lnog !Don't modify this!!!
-integer,          dimension(:)  , pointer       :: kcu2
+integer,          dimension(:)  , pointer       :: kcu2, shapearray
 integer,                          pointer       :: ndx2d
 double precision, dimension(:),   pointer       :: bndvalues
 double precision, dimension(:,:), pointer       :: inslevtube
@@ -189,44 +189,46 @@ if (ierr==0) then
    call dfm_generate_volume_tables(dfm, increment)
    
    ! Retrieve data from the D-FLOW FM dll
-   call get_variable_pointer(dfm, string_to_char_array('lnx1D'), xptr)
+   call BMI_GET_VAR_POINTER(dfm, string_to_char_array('lnx1D'), xptr)
    call c_f_pointer(xptr, integer_pointer)
    numlinks = integer_pointer
    
-   call get_variable_pointer(dfm, string_to_char_array('lnx'), xptr)
+   call BMI_GET_VAR_POINTER(dfm, string_to_char_array('lnx'), xptr)
    call c_f_pointer(xptr, integer_pointer)
    lnx = integer_pointer
+
+   call BMI_GET_VAR_SHAPE(dfm, string_to_char_array('zbndz'), xptr)  
+   allocate(shapearray(6)) 
+   call c_f_pointer(xptr, shapearray)
+   numbnd = shapearray(1)
    
-   call get_variable_pointer(dfm, string_to_char_array('numpoints'), xptr)
-   call c_f_pointer(xptr, integer_pointer)
-   numpoints = integer_pointer
+   call BMI_GET_VAR_POINTER(dfm, string_to_char_array('ndx2d'), xptr)
+   call c_f_pointer(xptr, ndx2d)
    
-   call get_variable_pointer(dfm, string_to_char_array('nbndz'), xptr)
+   call BMI_GET_VAR_POINTER(dfm, string_to_char_array('ndx'), xptr)
    call c_f_pointer(xptr, integer_pointer)
-   numbnd = integer_pointer
+   
+   numpoints = integer_pointer - ndx2d
    
    allocate(inslevtube(2,lnx), ln2nd(2,lnx), lnog(2,lnx), bndvalues(numbnd), bndindex(6,numbnd),kcu2(lnx))
    call bmi_get_var(dfm, 'bob', inslevtube, 2*lnx)
    if (numbnd > 0) then
       call bmi_get_var(dfm, 'zbndz', bndvalues, numbnd)
-      call get_variable_pointer(dfm, string_to_char_array('kbndz'), xptr)
+      !call get_variable_pointer(dfm, string_to_char_array('kbndz'), xptr)
    endif
-   call get_variable_pointer(dfm, string_to_char_array('kcu'), xptr)
+   call BMI_GET_VAR_POINTER(dfm, string_to_char_array('kcu'), xptr)
    call c_f_pointer(xptr, kcu2, (/ lnx /))
    
-   call get_variable_pointer(dfm, string_to_char_array('ndx2d'), xptr)
-   call c_f_pointer(xptr, ndx2d)
-   
-   call get_variable_pointer(dfm, string_to_char_array('ln'), xptr)
+   call BMI_GET_VAR_POINTER(dfm, string_to_char_array('ln'), xptr)
    call c_f_pointer(xptr, lnog, (/2, lnx/))
    
    call c_f_pointer(xptr, bndindex, (/6, numbnd/))
    
-   call get_variable_pointer(dfm, string_to_char_array('vltb'), xptr)
+   call BMI_GET_VAR_POINTER(dfm, string_to_char_array('vltb'), xptr)
    call c_f_pointer(xptr, volumetable, (/numpoints/))
-   call get_variable_pointer(dfm, string_to_char_array('vltbOnLinks'), xptr)
+   call BMI_GET_VAR_POINTER(dfm, string_to_char_array('vltbOnLinks'), xptr)
    call c_f_pointer(xptr, volumetableOnLinks, (/2, numlinks/))
-   call get_variable_pointer(dfm, string_to_char_array('network'), xptr)
+   call BMI_GET_VAR_POINTER(dfm, string_to_char_array('network'), xptr)
    call c_f_pointer(xptr, network)
    
    ! Determine the number of levels for the aggregated volume tables

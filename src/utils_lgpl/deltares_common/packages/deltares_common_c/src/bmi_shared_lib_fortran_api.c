@@ -202,6 +202,18 @@ void STDCALL BMI_GET_VAR(int64_t * sharedDLLHandle,
    free(c_var_name); c_var_name = NULL;
 }
 
+void STDCALL BMI_GET_VAR_POINTER(int64_t* sharedDLLHandle, char* var_name, void* xptr)
+{
+	typedef void* (STDCALL* MyProc)(char*, void*);
+	MyProc proc = (MyProc)GetDllProcedure(sharedDLLHandle, "get_var");
+
+
+	if (proc != NULL)
+	{
+		(void*)(*proc)(var_name, xptr);
+	}
+}
+
 void STDCALL BMI_GET_VAR_SHAPE(int64_t * sharedDLLHandle,
    char   * var_name,
    int    * values,
