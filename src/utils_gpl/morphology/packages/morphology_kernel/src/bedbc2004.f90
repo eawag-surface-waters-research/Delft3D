@@ -449,7 +449,7 @@ subroutine bedbc2004(tp        ,rhowat    , &
        ! Upper limit camax set to 0.65 in stead of 0.05
        ! 0.05 is official TR2004, but results seem to be reasonable when using 0.65
        !
-       caks = min(camax , 0.015_fp*fsilt*d50*ta**1.5_fp/(aks*dstar**0.3_fp))
+       caks = min(0.015_fp*fsilt*d50*ta**1.5_fp/(aks*dstar**0.3_fp), camax)
     else
        caks = 0.0_fp
     endif
