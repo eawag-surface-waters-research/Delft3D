@@ -31,7 +31,7 @@
 ! $HeadURL$
 
  subroutine chknan(a, b, n)
- use m_flow
+ !use m_flow
 
  implicit none
  integer           :: n

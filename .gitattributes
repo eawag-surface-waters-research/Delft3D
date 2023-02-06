@@ -2232,7 +2232,6 @@ src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_utils/statisticsini.
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_utils/statisticsnewstep.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_utils/statisticsonemorepoint.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_utils/step_to_screen.f90 -text
-src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_utils/to_deltares_common/chknan.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_utils/to_deltares_common/klok.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_utils/to_deltares_common/maketime.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_utils/to_deltares_common/maketimeinverse.f90 -text
@@ -19305,6 +19304,7 @@ src/utils_lgpl/deltares_common/packages/deltares_common/src/bilin5.f90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/buffer.f90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/caldat.f90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/check_mpi_env.f90 -text
+src/utils_lgpl/deltares_common/packages/deltares_common/src/chknan.f90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/combinepaths.f90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/coshsafe.f90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/coshsafei.f90 -text
