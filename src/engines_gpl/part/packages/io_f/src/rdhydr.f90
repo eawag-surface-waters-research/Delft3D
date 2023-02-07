@@ -281,7 +281,6 @@ module rdhydr_mod
          first  = .false.
          if (itimv1  /=  itimf1) goto 170
 !
-!.. selfort does not understand this..  think it is Salford after Salford University lp
 !
          if ( (updatv.and..not.updatf) .or.  &
               (.not.updatv.and.updatf)     ) goto 180
