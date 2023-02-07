@@ -237,7 +237,6 @@
 		<File RelativePath="src\dd\xzyz_dd.f90"/></Filter>
 		<Filter Name="general">
 		<File RelativePath="src\general\angle.f90"/>
-		<File RelativePath="src\general\area4.f90"/>
 		<File RelativePath="src\general\chckit.f90"/>
 		<File RelativePath="src\general\checkmeteoresult.f90"/>
 		<File RelativePath="src\general\copykcuv.f90"/>
