@@ -59,6 +59,7 @@
 #  define BMI_GET_VAR_SHAPE     BMI_GET_VAR_SHAPE
 #  define BMI_SET_VAR           BMI_SET_VAR
 #  define BMI_GET_VAR           BMI_GET_VAR
+#  define BMI_GET_VAR_POINTER   BMI_GET_VAR_POINTER
 #  define STDCALL
 #elif defined(linux)
 #  include "config.h"
@@ -74,6 +75,7 @@
 #  define BMI_GET_VAR_SHAPE     FC_FUNC(bmi_get_var_shape,BMI_GET_VAR_SHAPE)
 #  define BMI_SET_VAR           FC_FUNC(bmi_set_var,BMI_SET_VAR)
 #  define BMI_GET_VAR           FC_FUNC(bmi_get_var,BMI_GET_VAR)
+#  define BMI_GET_VAR_POINTER   FC_FUNC(bmi_get_var_pointer,BMI_GET_VAR_POINTER)
 #  define STDCALL
 #endif
 
