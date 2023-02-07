@@ -4722,7 +4722,6 @@ src/test/utils_lgpl/deltares_common/packages/test_deltares_common/test_data/test
 src/test/utils_lgpl/deltares_common/packages/test_deltares_common/test_data/test_strings.ini -text
 src/test/utils_lgpl/ec_module/packages/ec_module_test/CMakeLists.txt -text
 src/test/utils_lgpl/ec_module/packages/ec_module_test/ReadMe.txt -text
-src/test/utils_lgpl/ec_module/packages/ec_module_test/build_ec_module_testprog.sh -text
 src/test/utils_lgpl/ec_module/packages/ec_module_test/run_all_tests.py -text
 src/test/utils_lgpl/ec_module/packages/ec_module_test/run_ec_module_testprog.sh -text
 src/test/utils_lgpl/ec_module/packages/ec_module_test/src/cmdlargs.f90 -text
