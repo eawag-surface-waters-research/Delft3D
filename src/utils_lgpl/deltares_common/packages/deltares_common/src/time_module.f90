@@ -268,18 +268,26 @@ module time_module
          integer      , intent(in)  :: year              !< year
          integer      , intent(in)  :: month             !< month
          integer      , intent(in)  :: day               !< day
-         real(kind=hp), intent(out) :: modified_jul_date  !< output modified Julian Date number
+         real(kind=hp), intent(out) :: modified_jul_date !< output modified Julian Date number
          logical                    :: success           !< function result
 
-         integer :: jdn
-
+         integer :: jdn       
+         real(kind=hp) :: jd 
+         
          jdn = CalendarYearMonthDayToJulianDateNumber(year, month, day)
-
+         ! jdn is an integer value (and the result of an integer computation). 
+         ! To compute the Julian date at YYYYMMDDhhmmss as a real number for a moment 
+         ! after 12:00 noon one must add (hh - 12)/24 + mm/1440 + sec/86400 (real divisions). 
+         ! 
+         ! In this function, only calendar days starting at midnight, are used. 
+         ! For midnight, exactly 12 hours before noon, one must add (0-12)/24 + 0 + 0 = -0.5
+         jd = real(jdn, hp) - real(0.5, hp)
+         
          if (jdn == 0) then
             modified_jul_date = 0.0_hp
             success = .false.
          else
-            modified_jul_date = real(jdn, hp) - offset_modified_jd
+            modified_jul_date = jd - offset_modified_jd
             success = .true.
          endif
 
