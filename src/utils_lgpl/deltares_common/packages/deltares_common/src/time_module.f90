@@ -436,8 +436,9 @@ module time_module
          integer :: y      !< helper variable
          integer :: m      !< helper variable
          integer :: d      !< helper variable
-         !
-         ! Calculate Julian day assuming the given month is correct
+
+         ! Calculate Julian day assuming the given month is correct.
+         ! This is an integer computation, divisions are integer divisions towards zero.
          !
          month1 = (month - 14)/12
          jdn = day - 32075 + 1461*(year + 4800 + month1)/4 &
@@ -856,19 +857,6 @@ module time_module
       end function datetime2mjd
 
 !---------------------------------------------------------------------------------------------
-! private: convert Modified Julian day to Julian day.
-!---------------------------------------------------------------------------------------------
-      function mjd2jul(days,frac) result(jul)
-         implicit none
-         real(kind=hp)          , intent(in)  :: days
-         real(kind=hp), optional, intent(out) :: frac
-         integer                              :: jul
-
-         jul = nint(days+offset_modified_jd) ! juldate whole nr is at 12:00, so round it to get correct day (for times in the night/morning)
-         frac = days+offset_modified_jd-jul
-      end function mjd2jul
-      
-!---------------------------------------------------------------------------------------------
 ! private: convert Julian day to Modified Julian 
 !---------------------------------------------------------------------------------------------
       function jul2mjd(jul,frac) result(days)
@@ -904,7 +892,7 @@ module time_module
          implicit none
          real(kind=hp), intent(in)       :: days
          integer, intent(out)            :: ymd
-         real(kind=hp), intent(out)      :: hms
+         integer, intent(out)            :: hms
          integer       :: year, month, day, hour, minute
          real(kind=hp) :: second
          integer       :: success
@@ -912,7 +900,7 @@ module time_module
          success = 0
          if (mjd2datetime(days,year,month,day,hour,minute,second)==0) return
          ymd = year*10000 + month*100 + day
-         hms = hour*10000 + minute*100 + second
+         hms = hour*10000 + minute*100 + nint(second)
          success = 1
       end function mjd2ymdhms
 
@@ -923,15 +911,15 @@ module time_module
          integer,  intent(out)      :: hour, minute
          real(kind=hp), intent(out) :: second
          real(kind=hp) :: dayfrac
-         integer       :: jul
+         real(kind=hp) :: jul
          integer       :: success
 
          success = 0
-         jul = mjd2jul(days,dayfrac)
-         call JulianDateNumberToCalendarYearMonthDay(jul,year,month,day)
-         hour = int(dayfrac*24)
-         minute = int(mod(dayfrac*24*60,60.d0))
-         second = mod(dayfrac*24*60*60,60.d0)
+         jul = days + offset_modified_jd
+         call JulianDateNumberToCalendarYearMonthDay(nint(jul),year,month,day)
+         hour = 0
+         minute = 0
+         second = 0._hp
          success = 1
       end function mjd2datetime
 
