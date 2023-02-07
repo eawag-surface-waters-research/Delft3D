@@ -32,7 +32,7 @@ if { $scriptpos >= 0 } {
 puts "rootdir:$rootdir"
 
 set files {}
-lappend files [file join $rootdir "packages" "deltares_common" "src" "precision.F90"]
+lappend files [file join $rootdir "packages" "deltares_common" "src" "precision.f90"]
 lappend files [file join $rootdir "packages" "deltares_common" "include" "tri-dyn.igd"]
 lappend files [file join $rootdir "packages" "deltares_common_c" "include" "precision.h"]
 lappend files [file join $rootdir ".." ".." "engines_gpl" "flow2d3d" "packages" "flow2d3d" "flow2d3d.vcxproj"]
