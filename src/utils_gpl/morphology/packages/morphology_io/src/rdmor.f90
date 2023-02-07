@@ -1476,6 +1476,7 @@ subroutine echomor(lundia    ,error     ,lsec      ,lsedtot   ,nto       , &
     eulerisoglm         => morpar%eulerisoglm
     glmisoeuler         => morpar%glmisoeuler
     l_suscor            => morpar%l_suscor
+    suscorfac           => morpar%suscorfac
     flsthetsd           => morpar%flsthetsd
     thetsduni           => morpar%thetsduni
     upwindbedload       => mornum%upwindbedload
