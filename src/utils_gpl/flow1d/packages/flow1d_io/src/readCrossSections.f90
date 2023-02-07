@@ -578,7 +578,7 @@ module m_readCrossSections
          call prop_get_string(prop_ptr, chapname, key_alt, tmpstr, success_alt)
          if (success_alt) then
             write (msgbuf,'(a,a,a,a,a,a,a)') 'Incorrect keyword ''', trim(key_alt), ''' found for id: ', &
-               & trim(id), '. Did you mean ''', trim(key_expected), '''?'
+               trim(id), '. Did you mean ''', trim(key_expected), '''?'
             call warn_flush()
          end if
       end if
