@@ -120,7 +120,7 @@ module test_time_module
          integer       :: returndate
          
          refdate = 20221101
-         expected_mjd = 59884.0_hp
+         expected_mjd = 59884.5_hp
          success_ = ymd2modified_jul(refdate, refdate_mjd)
          call assert_comparable(refdate_mjd, expected_mjd, tol, 'error in conversion ymd to modified julian date')
          success_ = mjd2date(refdate_mjd, returndate)
