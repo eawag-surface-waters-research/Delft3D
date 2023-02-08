@@ -18670,10 +18670,8 @@ src/utils_gpl/flow1d/packages/flow1d_io/src/Readstructures.f90 -text
 src/utils_gpl/flow1d/packages/flow1d_io/src/flow1d_io.F90 -text
 src/utils_gpl/flow1d/packages/flow1d_io/src/flow1d_reader.F90 -text
 src/utils_gpl/flow1d/packages/flow1d_io/src/readCrossSections.f90 -text
-src/utils_gpl/flow1d/packages/flow1d_io/src/readModelParameters.f90 -text
 src/utils_gpl/flow1d/packages/flow1d_io/src/readObservCrossSections.f90 -text
 src/utils_gpl/flow1d/packages/flow1d_io/src/readObservationPoints.f90 -text
-src/utils_gpl/flow1d/packages/flow1d_io/src/readSalinityParameters.f90 -text
 src/utils_gpl/flow1d/packages/flow1d_io/src/readStorageNodes.f90 -text
 src/utils_gpl/flow1d/packages/flow1d_io/src/read_roughness.f90 -text
 src/utils_gpl/flow1d/packages/flow1d_io/src/readspatialdata.f90 -text
