@@ -45,6 +45,7 @@
  use m_observations, only : mxls
  use unstruc_files, only : defaultFilename
  use m_GlobalParameters, only: callcount, wccount, countstop, rate
+ use m_sediment, only: stm_included
 #ifdef _OPENMP
  use omp_lib
 #endif
@@ -152,30 +153,34 @@
  write(msgbuf,'(a,F25.10)') 'av nr of cont. it s1it ( )  :' , dnums1it/max(dnt,1d-8)     ; call msg_flush()
 
  if ( jatimer.eq.1 ) then
-    write(msgbuf,'(a,F25.10)') 'time transport [s]         :' , gettimer(1,ITRANSPORT)
+    write(msgbuf,'(a,F25.10)') 'time transport         (s)  :' , gettimer(1,ITRANSPORT)
     call msg_flush()
     if (ti_waqproc /= 0) then
-       write(msgbuf,'(a,F25.10)') 'time processes [s]         :' , gettimer(1,IFMWAQ)
+       write(msgbuf,'(a,F25.10)') 'time processes         (s)  :' , gettimer(1,IFMWAQ)
        call msg_flush()
     endif
     if (idebug > 0) then
-    write(msgbuf,'(a,F25.10)') 'time debug     [s]         :' , gettimer(1,IDEBUG)
-    call msg_flush()
+       write(msgbuf,'(a,F25.10)') 'time debug            (s)  :' , gettimer(1,IDEBUG)
+       call msg_flush()
     endif
     if (jafilter > 0) then
-    write(msgbuf,'(a,F25.10)') 'time filter coeff.      [s]:' , gettimer(1,IFILT_COEF)
+    write(msgbuf,'(a,F25.10)') 'time filter coeff.     (s)  :' , gettimer(1,IFILT_COEF)
     call msg_flush()
-    write(msgbuf,'(a,F25.10)') 'time filter solve       [s]:' , gettimer(1,IFILT_SOLV)
+    write(msgbuf,'(a,F25.10)') 'time filter solve      (s)  :' , gettimer(1,IFILT_SOLV)
     call msg_flush()
-    write(msgbuf,'(a,F25.10)') 'time filter cnstr. mat. [s]:' , gettimer(1,IFILT_MAT)
+    write(msgbuf,'(a,F25.10)') 'time filter cnstr. mat.(s)  :' , gettimer(1,IFILT_MAT)
     call msg_flush()
-    write(msgbuf,'(a,F25.10)') 'time filter copy back   [s]:' , gettimer(1,IFILT_COPYBACK)
+    write(msgbuf,'(a,F25.10)') 'time filter copy back  (s)  :' , gettimer(1,IFILT_COPYBACK)
     call msg_flush()
-    write(msgbuf,'(a,F25.10)') 'time filter other       [s]:' , gettimer(1,IFILT_OTHER)
+    write(msgbuf,'(a,F25.10)') 'time filter other      (s)  :' , gettimer(1,IFILT_OTHER)
     call msg_flush()
-    write(msgbuf,'(a,F25.10)') 'time filter             [s]:' , gettimer(1,IFILT)
+    write(msgbuf,'(a,F25.10)') 'time filter            (s)  :' , gettimer(1,IFILT)
     call msg_flush()
     endif
+    if (jased > 0 .and. stm_included) then
+    write(msgbuf,'(a,F25.10)') 'time erosed            (s)  :' , gettimer(1,IEROSED)
+       call msg_flush()
+    endif 
  end if
 
  do k = 1,3
