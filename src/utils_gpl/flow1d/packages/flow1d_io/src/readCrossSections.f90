@@ -250,6 +250,10 @@ module m_readCrossSections
       integer                       :: major 
       integer                       :: minor
       
+      if (len_trim(CrossSectionDefinitionFile) == 0) then
+         return
+      endif
+      
       call tree_create(trim(CrossSectionDefinitionFile), md_ptr, maxlenpar)
       call prop_file('ini',trim(CrossSectionDefinitionFile),md_ptr,istat)
       msgbuf = 'Reading '//trim(CrossSectionDefinitionFile)//'.'
