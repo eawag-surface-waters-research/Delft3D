@@ -910,17 +910,28 @@ module time_module
          integer,  intent(out)      :: year, month, day
          integer,  intent(out)      :: hour, minute
          real(kind=hp), intent(out) :: second
-         real(kind=hp) :: dayfrac
+         real(kind=hp) :: mjd, dayfrac
          real(kind=hp) :: jul
-         integer       :: success
+         integer       :: success, ntry
 
          success = 0
-         jul = days + offset_modified_jd
+         ntry = 1
+         mjd = days
+         do while (ntry <= 2)
+            jul = mjd + offset_modified_jd
+            dayfrac = mjd - floor(mjd)         
+            hour = int(dayfrac*24)
+            minute = int(mod(dayfrac*1440,60._hp))
+            second = mod(dayfrac*86400,60._hp)            
+            if (nint(second) >= 60) then
+               ! add less than 0.5 second to mjd (1/86400 = 1.157E-5) and retry
+               mjd = mjd + 0.000005_hp
+               ntry = ntry + 1
+            else 
+               exit
+            endif
+         enddo
          call JulianDateNumberToCalendarYearMonthDay(nint(jul),year,month,day)
-         dayfrac = days - floor(days)
-         hour = int(dayfrac*24)
-         minute = int(mod(dayfrac*24*60,60.d0))
-         second = mod(dayfrac*24*60*60,60.d0)
          success = 1
       end function mjd2datetime
 

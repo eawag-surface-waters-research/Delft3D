@@ -170,7 +170,21 @@ module test_time_module
          call assert_equal(hour_expected, hour,'error in conversion modified julian date: hour')
          call assert_equal(minute_expected, minute,'error in conversion modified julian date: minute')
          call assert_equal(second_expected, int(second), 'error in conversion modified julian date: second')
+
+         ! check that rounding is correct for end of year
+         ! 20221231 = 59944 in mjd, 1 second = 1.157407E-5
+         timestamp_mjd = 59944.999985_hp
+         ymd_expected = 20221231
+         hms_expected = 235959
+         success = mjd2date(timestamp_mjd, ymd, hms)
+         call assert_equal(hms_expected, hms, 'error in conversion modified julian date: second')
          
+         timestamp_mjd = 59944.999999_hp
+         ymd_expected = 20230101
+         hms_expected = 0
+         success = mjd2date(timestamp_mjd, ymd, hms)
+         call assert_equal(hms_expected, hms, 'error in conversion modified julian date: second')
+
       end subroutine test_mjd2date
 
       !> test split_date_time with valid input
@@ -280,7 +294,7 @@ module test_time_module
       subroutine test_ymd2modified_jul_string_valid
          integer, parameter           :: nr_cases = 9
          character(len=16), parameter :: date(nr_cases) = (/ &
-            "20200904        ", &   ! no separators
+            "20200904        ", &   ! no separat
             "0020200904        ", & ! no separators, six digit year
             "2020-09-04      ", &   ! - separators
             "2020-09-4       ", &   ! - separators, one digit day, two digit month
