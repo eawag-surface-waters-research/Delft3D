@@ -13,13 +13,14 @@ import inspect
 import re
 import json
 import logging
+import fileinput
 
 from docopt import docopt
 import mako.template
 import mako.lookup
 
 
-def main(fortranfiles, templatedir="templates"):
+def main(templatedir="templates"):
     """read the fortran files, parse them and apply them
     to the templates in templatedir"""
 
@@ -56,7 +57,9 @@ def main(fortranfiles, templatedir="templates"):
 
     variables = []
     numv = 0
-    for fortranfile in fortranfiles:
+    filepath = '..\\..\\..\\scripts\\fortranfiles.txt'
+    fortranfiles = open(filepath,'r')
+    for fortranfile in fortranfiles.read().splitlines():
         logging.info("Scanning file %s...", fortranfile)
         with open(fortranfile) as f:
             linenr = 0
@@ -71,16 +74,16 @@ def main(fortranfiles, templatedir="templates"):
                     else:
                         variable['rank'] = 0
                     variable['type'] = FORTRANTYPESMAP[variable['fortrantype']]
-
+    
                     try:
                         variable.update(json.loads(variable["json"]))
                     except ValueError as e:
                         logging.exception("Variable's JSON string could not be parsed: %s. File: %s, line %d.", variable, fortranfile, linenr)
-
+    
                     # shape overwrites rank
                     if 'shape' in variable:
                         variable['rank'] = len(variable['shape'])
-
+    
                     #print 'variable: ', variable
                     variables.append(variable)
         logging.info("Extracted %d variables.", len(variables)-numv)
@@ -113,7 +116,7 @@ def main(fortranfiles, templatedir="templates"):
 
     for template_name in templates:
         #template = lookup.get_template(template_name) # is not so nice on Windows: changes CRLF into CRCRLF.
-        ftpl = open(os.path.join(templatedir, template_name), 'rU')
+        ftpl = open(os.path.join(templatedir, template_name), 'r')
         text = ftpl.read()
         template = mako.template.Template(text=text)
 
@@ -130,4 +133,4 @@ if __name__ == '__main__':
     if arguments['--verbose']:
         logging.basicConfig(level=logging.INFO)
 
-    main(arguments['<fortranfile>'], arguments['--template-dir'] or 'templates')
+    main(arguments['--template-dir'] or 'templates')

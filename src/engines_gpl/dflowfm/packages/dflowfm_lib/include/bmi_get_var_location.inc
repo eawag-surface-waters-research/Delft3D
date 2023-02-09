@@ -38,39 +38,29 @@ select case(var_name)
     location_name = "face"
   case("Uorb")
     location_name = "face"
-  case("bodsed")
+  case("InterceptThickness")
     location_name = "face"
-  case("dpsed")
+  case("InterceptHs")
     location_name = "face"
-  case("msed")
+  case("PotEvap")
     location_name = "face"
-  case("thlyr")
+  case("ActEvap")
     location_name = "face"
-  case("rsedeq")
-    location_name = "face"
-  case("sbcx")
-    location_name = "face"
-  case("sbcy")
-    location_name = "face"
-  case("sbwx")
-    location_name = "face"
-  case("sbwy")
-    location_name = "face"
-  case("sscx")
-    location_name = "face"
-  case("sscy")
-    location_name = "face"
-  case("sswx")
-    location_name = "face"
-  case("sswy")
-    location_name = "face"
-  case("taucr")
-    location_name = ""
-  case("tetacr")
-    location_name = ""
   case("infilt")
     location_name = "face"
+  case("infiltcap0")
+    location_name = "face"
   case("infiltcap")
+    location_name = "face"
+  case("HortonMinInfCap")
+    location_name = "face"
+  case("HortonMaxInfCap")
+    location_name = "face"
+  case("HortonDecreaseRate")
+    location_name = "face"
+  case("HortonRecoveryRate")
+    location_name = "face"
+  case("HortonState")
     location_name = "face"
   case("shx")
     location_name = ""
@@ -127,6 +117,20 @@ select case(var_name)
   case("qqlat")
     location_name = "face"
   case("balat")
+    location_name = ""
+  case("qplatCum")
+    location_name = ""
+  case("qplatCumPre")
+    location_name = ""
+  case("qplatAve")
+    location_name = ""
+  case("qLatReal")
+    location_name = ""
+  case("qLatRealCum")
+    location_name = ""
+  case("qLatRealCumPre")
+    location_name = ""
+  case("qLatRealAve")
     location_name = ""
   case("n1latsg")
     location_name = ""
@@ -186,13 +190,15 @@ select case(var_name)
     location_name = "face"
   case("s1")
     location_name = "face"
+  case("s1max")
+    location_name = "face"
   case("a0")
     location_name = "face"
   case("a1")
     location_name = "face"
-  case("vol0")
-    location_name = "face"
   case("vol1")
+    location_name = "face"
+  case("vol0")
     location_name = "face"
   case("vol1_f")
     location_name = "face"
@@ -205,6 +211,10 @@ select case(var_name)
   case("ucz")
     location_name = "face"
   case("ucmag")
+    location_name = "face"
+  case("ucx_mor")
+    location_name = "face"
+  case("ucy_mor")
     location_name = "face"
   case("sa0")
     location_name = "face"
@@ -228,6 +238,8 @@ select case(var_name)
     location_name = "edge"
   case("au")
     location_name = "edge"
+  case("au_nostrucs")
+    location_name = "edge"
   case("hu")
     location_name = "edge"
   case("frcu")
@@ -250,6 +262,8 @@ select case(var_name)
     location_name = "face"
   case("bl")
     location_name = "face"
+  case("bl_min")
+    location_name = "face"
   case("lnx1D")
     location_name = ""
   case("lnxi")
@@ -263,6 +277,8 @@ select case(var_name)
   case("LLkkk")
     location_name = ""
   case("lncn")
+    location_name = ""
+  case("kcu")
     location_name = ""
   case("iadv")
     location_name = "edge"
@@ -279,6 +295,8 @@ select case(var_name)
   case("bob")
     location_name = "edge"
   case("bob0")
+    location_name = "edge"
+  case("blup")
     location_name = "edge"
   case("xu")
     location_name = "edge"
@@ -334,6 +352,8 @@ select case(var_name)
     location_name = "face"
   case("ba")
     location_name = "face"
+  case("ndx1d")
+    location_name = ""
   case default
     location_name = ""
 end select

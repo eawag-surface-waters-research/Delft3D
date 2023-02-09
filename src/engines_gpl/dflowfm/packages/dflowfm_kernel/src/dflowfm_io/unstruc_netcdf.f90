@@ -17174,11 +17174,10 @@ subroutine convert_hysteresis_summerdike(logic2int, work1di)
                                                      !< false: convert from integers to logic values
    integer, dimension(:), intent(inout) :: work1di   !< array storing integers
 
-   integer :: L, irem, k, ndx1d, i
+   integer :: L, irem, k, i
 
    if (logic2int) then
       if (useVolumeTables) then
-         ndx1d = ndx - ndx2d
          do k = 1, ndx1d
             do i = 1, vltb(k)%numberOfSummerDikes
                L = vltb(k)%linkNumber(i)

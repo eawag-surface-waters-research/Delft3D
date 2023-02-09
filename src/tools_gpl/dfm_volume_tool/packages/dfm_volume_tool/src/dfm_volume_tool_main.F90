@@ -102,7 +102,7 @@ double precision, dimension(:),   pointer       :: bndvalues
 double precision, dimension(:,:), pointer       :: inslevtube
 double precision, dimension(:,:), pointer       :: gridvolume, gridsurface
 double precision, dimension(:),   allocatable   :: wl_deadstorage, bedlevels, topheights
-
+integer, parameter                              :: maxdims = 6
 ! externals
 
 integer, external  :: open_shared_library, bmi_initialize
@@ -198,7 +198,7 @@ if (ierr==0) then
    lnx = integer_pointer
 
    call BMI_GET_VAR_SHAPE(dfm, string_to_char_array('zbndz'), xptr)  
-   allocate(shapearray(6)) 
+   allocate(shapearray(MAXDIMS)) 
    call c_f_pointer(xptr, shapearray)
    numbnd = shapearray(1)
    
@@ -222,7 +222,7 @@ if (ierr==0) then
    call BMI_GET_VAR_POINTER(dfm, string_to_char_array('ln'), xptr)
    call c_f_pointer(xptr, lnog, (/2, lnx/))
    
-   call c_f_pointer(xptr, bndindex, (/6, numbnd/))
+   call c_f_pointer(xptr, bndindex, (/MAXDIMS, numbnd/))
    
    call BMI_GET_VAR_POINTER(dfm, string_to_char_array('vltb'), xptr)
    call c_f_pointer(xptr, volumetable, (/numpoints/))

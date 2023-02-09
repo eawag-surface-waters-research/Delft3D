@@ -2291,6 +2291,7 @@ src/engines_gpl/dflowfm/scripts/QA/runtestsdbg.bat -text
 src/engines_gpl/dflowfm/scripts/build-devenv.cmd -text
 src/engines_gpl/dflowfm/scripts/data/convert_qstss.sh -text
 src/engines_gpl/dflowfm/scripts/data/nchis2noos.sh -text
+src/engines_gpl/dflowfm/scripts/fortranfiles.txt -text
 src/engines_gpl/dflowfm/scripts/generate.cmd -text
 src/engines_gpl/dflowfm/scripts/parallel/generate_parallel_mdu.py -text
 src/engines_gpl/dflowfm/scripts/parallel/generate_parallel_mdu.sh -text

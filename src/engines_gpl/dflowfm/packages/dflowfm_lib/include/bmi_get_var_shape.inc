@@ -40,52 +40,29 @@
        shape(1) = ndx
     case("Uorb")
        shape(1) = ndx
-    case("bodsed")
-       shape(2) = stmpar%morlyr%settings%nfrac
+    case("InterceptThickness")
        shape(1) = ndx
-    case("dpsed")
+    case("InterceptHs")
        shape(1) = ndx
-    case("msed")
-       shape(3) = stmpar%morlyr%settings%nfrac
-       shape(2) = stmpar%morlyr%settings%nlyr
+    case("PotEvap")
        shape(1) = ndx
-    case("thlyr")
-       shape(2) = stmpar%morlyr%settings%nlyr
+    case("ActEvap")
        shape(1) = ndx
-    case("rsedeq")
-       shape(2) = ndx
-       shape(1) = stmpar%lsedsus
-    case("sbcx")
-       shape(2) = ndx
-       shape(1) = stmpar%lsedtot
-    case("sbcy")
-       shape(2) = ndx
-       shape(1) = stmpar%lsedtot
-    case("sbwx")
-       shape(2) = ndx
-       shape(1) = stmpar%lsedtot
-    case("sbwy")
-       shape(2) = ndx
-       shape(1) = stmpar%lsedtot
-    case("sscx")
-       shape(2) = ndx
-       shape(1) = stmpar%lsedsus
-    case("sscy")
-       shape(2) = ndx
-       shape(1) = stmpar%lsedsus
-    case("sswx")
-       shape(2) = ndx
-       shape(1) = stmpar%lsedsus
-    case("sswy")
-       shape(2) = ndx
-       shape(1) = stmpar%lsedsus
-    case("taucr")
-       shape(1) = stmpar%lsedtot
-    case("tetacr")
-       shape(1) = stmpar%lsedtot
     case("infilt")
        shape(1) = ndx
+    case("infiltcap0")
+       shape(1) = ndx
     case("infiltcap")
+       shape(1) = ndx
+    case("HortonMinInfCap")
+       shape(1) = ndx
+    case("HortonMaxInfCap")
+       shape(1) = ndx
+    case("HortonDecreaseRate")
+       shape(1) = ndx
+    case("HortonRecoveryRate")
+       shape(1) = ndx
+    case("HortonState")
        shape(1) = ndx
     case("shx")
        shape(1) = nshiptxy
@@ -142,6 +119,20 @@
     case("qqlat")
        shape(1) = ndx
     case("balat")
+       shape(1) = numlatsg
+    case("qplatCum")
+       shape(1) = numlatsg
+    case("qplatCumPre")
+       shape(1) = numlatsg
+    case("qplatAve")
+       shape(1) = numlatsg
+    case("qLatReal")
+       shape(1) = numlatsg
+    case("qLatRealCum")
+       shape(1) = numlatsg
+    case("qLatRealCumPre")
+       shape(1) = numlatsg
+    case("qLatRealAve")
        shape(1) = numlatsg
     case("n1latsg")
        shape(1) = numlatsg
@@ -201,13 +192,15 @@
        shape(1) = ndx
     case("s1")
        shape(1) = ndx
+    case("s1max")
+       shape(1) = ndx
     case("a0")
        shape(1) = ndx
     case("a1")
        shape(1) = ndx
-    case("vol0")
-       shape(1) = ndx
     case("vol1")
+       shape(1) = ndx
+    case("vol0")
        shape(1) = ndx
     case("vol1_f")
        shape(1) = ndx
@@ -220,6 +213,10 @@
     case("ucz")
        shape(1) = ndkx
     case("ucmag")
+       shape(1) = ndkx
+    case("ucx_mor")
+       shape(1) = ndkx
+    case("ucy_mor")
        shape(1) = ndkx
     case("sa0")
        shape(1) = ndkx
@@ -243,6 +240,8 @@
        shape(1) = lnkx
     case("au")
        shape(1) = lnkx
+    case("au_nostrucs")
+       shape(1) = lnkx
     case("hu")
        shape(1) = lnx
     case("frcu")
@@ -265,6 +264,8 @@
        shape(1) = ndx
     case("bl")
        shape(1) = ndx
+    case("bl_min")
+       shape(1) = ndx
     case("lnx1D")
        shape(1) = 0
     case("lnxi")
@@ -282,6 +283,8 @@
     case("lncn")
        shape(2) = 2
        shape(1) = lnkx
+    case("kcu")
+       shape(1) = lnx
     case("iadv")
        shape(1) = lnx
     case("dx")
@@ -299,6 +302,8 @@
        shape(1) = lnx
     case("bob0")
        shape(2) = 2
+       shape(1) = lnx
+    case("blup")
        shape(1) = lnx
     case("xu")
        shape(1) = lnx
@@ -358,4 +363,6 @@
        shape(1) = ndx
     case("ba")
        shape(1) = ndx
+    case("ndx1d")
+       shape(1) = 0
   end select

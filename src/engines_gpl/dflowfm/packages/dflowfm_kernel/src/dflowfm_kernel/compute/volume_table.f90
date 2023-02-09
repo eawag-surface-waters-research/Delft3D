@@ -88,9 +88,9 @@ module m_VolumeTables
       procedure, pass :: computeSurface      => computeSurfaceVoltable       !< Computes the surface areas for the different levels
    end type
    
-   type(t_voltable), target,      public, allocatable, dimension(:)     :: vltb  !< 1D Volume tables
-   type(t_voltable), target,      public, allocatable, dimension(:,:)   :: vltbOnLinks  !< 1D Volume tables, used for storage table output on branches.
-                                                                               !< Only the entries VOL and SUR will be filled.
+   type(t_voltable), target,      public, allocatable, dimension(:)     :: vltb        !< [-] 1D Volume tables {"shape": ["ndx1d"]}
+   type(t_voltable), target,      public, allocatable, dimension(:,:)   :: vltbOnLinks !< [-] 1D Volume tables, used for storage table output on branches. {"shape": [2 ,"ndx1d"]}
+   integer, target, public                                              :: ndx1d       !< [-] volume table size {"rank": 0}
 
    contains
    
@@ -282,7 +282,6 @@ module m_VolumeTables
       logical, optional, intent(in   ) :: branchOutput   !< Flag indicates whether the volumes on flow links are required.
                                                          !< This option is used by the volume tool to aggregate volumes to branches.      
       
-      integer :: ndx1d
       integer :: nstor
       integer :: nod
       integer :: n
