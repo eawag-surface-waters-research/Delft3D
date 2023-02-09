@@ -41,7 +41,6 @@ module m_readstructures
    use m_pump
    use m_Orifice
    use m_General_Structure
-   use m_ExtraResistance
    use m_Dambreak
 
    use properties
@@ -155,6 +154,9 @@ module m_readstructures
       major = 1
       minor = 0
       call prop_get_version_number(md_ptr, major = major, minor = minor, success = success1)
+      if (.not. success1) then
+         return
+      endif
       ! For now majorVersion = 2.xx is supported for all structures, except for the bridge. 
       if ((major /= StructureFileMajorVersion .and. major /= 2) .or. (major == StructureFileMajorVersion .and. minor > StructureFileMinorversion)) then
          write (msgbuf, '(a,i0,".",i2.2,a,i0,".",i2.2,a)') 'Unsupported format of structure file detected in '''//trim(structurefile)//''': v', major, minor, '. Current format: v',StructureFileMajorVersion,StructureFileMinorVersion,'. Ignoring this file.'
