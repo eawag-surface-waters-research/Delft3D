@@ -155,7 +155,7 @@ contains
        if (smax + scr<=1.5d0*(smin + scr)) then
           !       submerged flow
           state = 2
-          cu    = 2*gravity/(StructureDynamicsFactor*dxm)
+          cu    = 2*gravity/dxm
           !       ARS 4681 improved wetted area computation
           aum   = max(smax - u0m**2/(2d0*gravity) + scr, 2.0d0/3.0d0*(smax + scr))*swi
           uweir = dsqrt(gravity*2d0*(smax - smin))
@@ -163,7 +163,7 @@ contains
        else
           !       free flow
           state = 1
-          cu    = gravity/(1.5*(StructureDynamicsFactor*dxm))
+          cu    = gravity/(1.5*dxm)
           aum   = 2./3.*(smax + scr)*swi
           uweir = dsqrt(2./3.*gravity*(smax + scr))
 
@@ -176,7 +176,7 @@ contains
        endif
        aum   = aum*weir%cmu  ! cmu out of the lines above, just as factor on au, jira 19171
        dadsm = swi
-       fr    = uweir/(StructureDynamicsFactor*dxm)
+       fr    = uweir/dxm
        dxdt = 1.0/dt
 
        call furu_iter(fum, rum, s1m2, s1m1, u1m, q0m, aum, fr, cu, rhsc, dxdt, 0d0, 0d0, 0d0, 0d0)
