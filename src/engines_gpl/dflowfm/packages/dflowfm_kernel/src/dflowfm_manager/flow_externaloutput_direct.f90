@@ -45,7 +45,7 @@ subroutine flow_externaloutput_direct()
    call mess(LEVEL_INFO, 'Performing direct write of solution state...')
 
    ! Compute current absolute date time, based on time1 since refdat
-   call datetime_from_refdat(time1, iyear, imonth, iday, ihour, imin, isec)
+   call datetime_from_refdat(time1, refdat, iyear, imonth, iday, ihour, imin, isec)
    write (msgbuf, '(a,i0,a,f12.2,a,a,a,a)') 'Simulation current time: nt = ', int(dnt, 8), ', time1 = ', time1, 's ', &
                              '(', trim(datetime_to_string(iyear, imonth, iday, ihour, imin, isec)), ').'
    call msg_flush()

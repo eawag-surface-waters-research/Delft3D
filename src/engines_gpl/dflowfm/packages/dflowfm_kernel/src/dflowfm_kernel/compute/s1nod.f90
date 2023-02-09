@@ -113,7 +113,7 @@
        call setMessage(LEVEL_WARN, msgbufpar)
        call SetMessage(-1, 'This might lead to a SAAD error in the solve process' )
        write(msgbufpar, '(a)') 'Current time is: '
-       call maketime(msgbufpar(18:), time1)
+       call seconds_to_datetimestring(msgbufpar(18:), refdat, time1)
        call setMessage(-1, msgbufpar)
        write(msgbufpar,'(a,f10.2,a,f10.2,a)') 'The location of the node is at (',xz(n),',',yz(n),')'
        call setMessage(-1, msgbufpar)

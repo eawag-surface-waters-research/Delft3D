@@ -32,12 +32,12 @@
 
  !> Calculates the relative time in seconds since refdat, given an absolute datetime.
  !! The input datetime is in separate year/month/../seconds values.
- !! \see maketimeinverse
- subroutine seconds_since_refdat(iyear, imonth, iday, ihour, imin, isec, timsec)
- use m_flowtimes
+ !! \see datetimestring_to_seconds
+ subroutine seconds_since_refdat(iyear, imonth, iday, ihour, imin, isec, refdat, timsec)
  implicit none
  integer,          intent(in)  :: iyear, iday, imonth, ihour, imin, isec !< Input absolute date time components
- double precision, intent(out) :: timsec !< Output seconds since refdate for the specified input datetime.
+ character (len=8), intent(in) :: refdat                                 !< reference date
+ double precision, intent(out) :: timsec                                 !< Output seconds since refdate for the specified input datetime.
 
  integer :: jul, jul0, iyear0, imonth0, iday0
  integer, external :: julday

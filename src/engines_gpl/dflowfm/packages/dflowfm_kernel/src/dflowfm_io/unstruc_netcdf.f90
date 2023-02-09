@@ -12452,7 +12452,7 @@ subroutine unc_read_map_or_rst(filename, ierr)
     tok2 = index( filename, '_map.nc', .true. )
 
     ! Convert the refdat from the mdu to seconds w.r.t. an absolute t0
-    call maketimeinverse(refdat//'000000',trefdat_mdu, iostat)
+    call datetimestring_to_seconds(refdat//'000000', refdat, trefdat_mdu, iostat)
 
     call readyy('Reading map data',0d0)
 
@@ -12608,7 +12608,7 @@ subroutine unc_read_map_or_rst(filename, ierr)
     call readyy('Reading map data',0.10d0)
 
     iostat = 0
-    call maketimeinverse(restartdatetime(1:14),trefdat_rst,iostat)    ! result: refdatnew in seconds  w.r.t. absolute MDU refdat
+    call datetimestring_to_seconds(restartdatetime(1:14), refdat, trefdat_rst, iostat)    ! result: refdatnew in seconds  w.r.t. absolute MDU refdat
     mdu_has_date = (iostat==0)
 
     ! Restart from *yyyymmdd_hhmmss_rst.nc
@@ -12621,7 +12621,7 @@ subroutine unc_read_map_or_rst(filename, ierr)
        fname_has_date = .false.
        if (tok1 .gt. 15) then
           tmpstr  = filename(tok1-15:tok1-8)//filename(tok1-6:tok1-1)
-          call maketimeinverse(tmpstr(1:14), trefdat_rst, iostat)
+          call datetimestring_to_seconds(tmpstr(1:14), refdat, trefdat_rst, iostat)
           fname_has_date = (iostat==0)
           tok3    = index( filename(tok1-15:tok1-1), '_')
           fname_has_date = fname_has_date .and. (tok3 > 0)                    ! require connecting underscore between date and time
@@ -12645,10 +12645,10 @@ subroutine unc_read_map_or_rst(filename, ierr)
            call mess(LEVEL_INFO, 'Datetime for restart state differs from model start date/time. Will use it anyway, and keep '&
                      //'TStart the same.')
            tmpstr = ''
-           call maketime(tmpstr, trefdat_rst)
+           call seconds_to_datetimestring(tmpstr, refdat, trefdat_rst)
            msgbuf = 'Datetime for rst: '//trim(tmpstr)
 
-           call maketime(tmpstr, tstart_user)
+           call seconds_to_datetimestring(tmpstr, refdat, tstart_user)
            msgbuf = trim(msgbuf)//', start datetime for model: '//trim(tmpstr)
            call msg_flush()
        end if
@@ -12671,7 +12671,7 @@ subroutine unc_read_map_or_rst(filename, ierr)
         ierr = ncu_get_att(imapfile, id_time, "units", refdat_map)
         tmpstr = ' '
         tmpstr  = refdat_map(15:18)//refdat_map(20:21)//refdat_map(23:24)//refdat_map(26:27)//refdat_map(29:30)//refdat_map(32:33)
-        call maketimeinverse(trim(tmpstr),trefdat_map,iostat)             ! result: refdatold in seconds  w.r.t. absolute t0
+        call datetimestring_to_seconds(trim(tmpstr), refdat, trefdat_map, iostat)             ! result: refdatold in seconds  w.r.t. absolute t0
         deallocate(refdat_map)
         
         ! Read map times
@@ -12698,7 +12698,7 @@ subroutine unc_read_map_or_rst(filename, ierr)
             goto 999
         end if
         if (maptimes(it_read) + trefdat_map /= trefdat_rst) then
-            call maketime(tmpstr, maptimes(it_read) + trefdat_map)
+            call seconds_to_datetimestring(tmpstr, refdat, maptimes(it_read) + trefdat_map)
             call mess(LEVEL_WARN, 'Could not find exact restart datetime in '''//trim(filename)// &
                                   ''', now selected: '//tmpstr)
             ! And proceed, because this is still a good restart time.
@@ -12709,10 +12709,10 @@ subroutine unc_read_map_or_rst(filename, ierr)
            call mess(LEVEL_INFO, 'Datetime for restart state differs from model start date/time. Will use it anyway, and keep '&
                      //'TStart the same.')
            tmpstr = ''
-           call maketime(tmpstr, trefdat_map)
+           call seconds_to_datetimestring(tmpstr, refdat, trefdat_map)
            msgbuf = 'Datetime for rst: '//trim(tmpstr)
 
-           call maketime(tmpstr, tstart_user)
+           call seconds_to_datetimestring(tmpstr, refdat, tstart_user)
            msgbuf = trim(msgbuf)//', start datetime for model: '//trim(tmpstr)
            call msg_flush()
         end if

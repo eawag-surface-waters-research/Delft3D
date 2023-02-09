@@ -84,7 +84,7 @@
      enddo
      do i=1,6202
         read(minp,*) tim, (a(k), k = 1,30)
-        call maketime(dateandtime, tim)
+        call seconds_to_datetimestring(dateandtime, refdat, tim)
         dateandtime(9:9) = ' '
         write(mout,'(a, 30F10.3)') dateandtime, (a(k), k = 1,30)
      enddo
