@@ -850,14 +850,13 @@ module time_module
 !---------------------------------------------------------------------------------------------
 ! private: convert Modified Julian day to Julian day.
 !---------------------------------------------------------------------------------------------
-      function mjd2jul(days,frac) result(jul)
+      function mjd2jul(mjd) result(jul)
          implicit none
-         real(kind=hp)          , intent(in)  :: days
-         real(kind=hp), optional, intent(out) :: frac
+         real(kind=hp)          , intent(in)  :: mjd
          integer                              :: jul
 
-         jul = nint(days+offset_modified_jd) ! juldate whole nr is at 12:00, so round it to get correct day (for times in the night/morning)
-         frac = days+offset_modified_jd-jul
+         jul = nint(mjd+offset_modified_jd) ! juldate whole nr is at 12:00, so round it to get correct day (for times in the night/morning)
+         
       end function mjd2jul
       
 !---------------------------------------------------------------------------------------------
@@ -896,7 +895,7 @@ module time_module
          implicit none
          real(kind=hp), intent(in)       :: days
          integer, intent(out)            :: ymd
-         real(kind=hp), intent(out)      :: hms
+         integer, intent(out)            :: hms
          integer       :: year, month, day, hour, minute
          real(kind=hp) :: second
          integer       :: success
@@ -904,7 +903,7 @@ module time_module
          success = 0
          if (mjd2datetime(days,year,month,day,hour,minute,second)==0) return
          ymd = year*10000 + month*100 + day
-         hms = hour*10000 + minute*100 + second
+         hms = nint(hour*10000 + minute*100 + second)
          success = 1
       end function mjd2ymdhms
 
@@ -919,8 +918,9 @@ module time_module
          integer       :: success
 
          success = 0
-         jul = mjd2jul(days,dayfrac)
+         jul = mjd2jul(days)
          call JulianDateNumberToCalendarYearMonthDay(jul,year,month,day)
+         dayfrac = days - floor(days)
          hour = int(dayfrac*24)
          minute = int(mod(dayfrac*24*60,60.d0))
          second = mod(dayfrac*24*60*60,60.d0)

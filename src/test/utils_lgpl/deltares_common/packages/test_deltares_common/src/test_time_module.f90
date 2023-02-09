@@ -51,6 +51,7 @@ module test_time_module
          call test( test_conversion2juliandate, 'Test CalendarYearMonthDayToJulianDate' )
          call test( test_julian, 'Test julian' )
          call test( test_date2mjd2date, 'Test CalendarYearMonthDayToModifiedJulianDateAndBack')
+         call test( test_mjd2date, 'Test_ModifiedJulianDateToYearMonthDayHourMinuteSecond' )
          call test( test_split_date_time, 'Test split_date_time' )
          call test( test_split_date_time_invalid, 'Test split_date_time with invalid input')
          call test( test_parse_time_valid, 'Test parse_time with valid input')
@@ -127,6 +128,48 @@ module test_time_module
          call assert_equal(refdate, returndate,'error in conversion modified julian date to ymd')
                   
       end subroutine test_date2mjd2date
+
+      !> test ModifiedJulianDateToYearMonthDayHourMinuteSecond
+      subroutine test_mjd2date()
+         implicit none
+         integer       :: success
+         integer       :: ymd, ymd_expected
+         integer       :: hms, hms_expected
+         integer       :: year, year_expected
+         integer       :: month, month_expected
+         integer       :: day, day_expected
+         integer       :: hour, hour_expected
+         integer       :: minute, minute_expected, second_expected
+         real(kind=hp) :: second
+         real(kind=hp) :: timestamp_mjd
+ 
+         ! check correct date and hhmmss for 3h30 ie before noon and whole minutes
+         timestamp_mjd = 55833.125_hp + 30./1440.
+         ymd_expected = 20110929
+         hms_expected = 33000
+         success = mjd2date(timestamp_mjd,ymd)
+         call assert_equal(ymd_expected, ymd,'error in conversion modified julian date to yymmdd')
+
+         success = mjd2date(timestamp_mjd, ymd, hms)
+         call assert_equal(hms_expected, hms,'error in conversion modified julian date for hhmmss')
+ 
+         ! check correct date and hour for 18h i.e. after noon and with seconds
+         timestamp_mjd = 55833.80
+         year_expected = 2011
+         month_expected = 9
+         day_expected = 29
+         hour_expected = 19
+         minute_expected = 13
+         second_expected = 7
+         success = mjd2date(timestamp_mjd,year,month,day,hour,minute,second)
+         call assert_equal(year_expected, year,'error in conversion modified julian date: year')
+         call assert_equal(month_expected, month,'error in conversion modified julian date: month')
+         call assert_equal(day_expected, day,'error in conversion modified julian date: day')
+         call assert_equal(hour_expected, hour,'error in conversion modified julian date: hour')
+         call assert_equal(minute_expected, minute,'error in conversion modified julian date: minute')
+         call assert_equal(second_expected, int(second), 'error in conversion modified julian date: second')
+         
+      end subroutine test_mjd2date
 
       !> test split_date_time with valid input
       subroutine test_split_date_time
