@@ -3301,7 +3301,7 @@ subroutine xbeach_waves(ierr)
          if (gammal>1.d0) then
             hstokes(k) = deltahmin*(gammal-1.d0)*H(k)+hhw(k)
          else
-            hstokes = hhw
+            hstokes(k) = hhw(k)
          endif
       enddo
    endif
