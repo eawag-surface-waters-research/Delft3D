@@ -1212,6 +1212,10 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
                    extish = extide
                 endif
                 !
+                ! Correction factor to to increase the amount of heat taken up in shallow areas
+                !
+                corr  = 1.0_fp / ( (1.0_fp - exp(-extide*h0old)) / extide )
+                !
                 ! first deep light penetration top layer (portion betasd of flux qsn) 
                 !
                 expup = betasd
@@ -1224,13 +1228,14 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
                 else
                    explo  = 0.0_fp 
                 endif
-                qink = qsn*(expup-explo)
+                qink = corr*qsn*(expup-explo)
                 !
                 ! second shallow light penetration top layer (portion 1-betasd of flux qsn) 
                 !
                 if (betasd < 1.0_fp) then
                    expup = 1.0_fp-betasd
                    ratio  = extish*zdown
+                   corr  = 1.0_fp / ( (1.0_fp - exp(-extish*h0old)) / extish )
                    if (ratio < 10.0_fp) then
                       !
                       ! portion 1-betasd 
@@ -1242,10 +1247,16 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
                    !
                    ! Both portions are summed.
                    !
-                   qink  = qink + qsn*(expup-explo)
+                   qink  = qink + corr*qsn*(expup-explo)
                 endif
                 !
                 qtotk = (qink-ql) / (rhow*cp)
+                !
+                ! Reduction of solar radiation at shallow areas
+                !
+                if (h0old<secchi(nm) .and. qtotk>0.0_fp) then
+                   qtotk = qtotk * (1.0_fp - exp(-extide*zdown))
+                endif
                 !
                 if (zmodel) then
                    if (qtotk > 0.0_fp) then
