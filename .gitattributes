@@ -1920,6 +1920,7 @@ src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_kernel/timespace/met
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_kernel/timespace/setzminmax.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_kernel/timespace/timespaceinitialfield_mpi.F90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_manager/dfm_signals.F90 -text
+src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_manager/dobatch.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_manager/flow_externaloutput.F90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_manager/flow_externaloutput_direct.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_manager/flow_finalize_usertimestep.f90 -text
