@@ -226,7 +226,7 @@ contains
                                                        tst%inFilename, tst%inFiletype, &
                                                        tst%method, tst%operand, &
                                                        tst%tgt_refdate, tst%tgt_tzone, tst%tgt_tunit, &
-                                                       tst%jasferic, tst%missing_value, itemIDs(1:1), &
+                                                       tst%jasferic, itemIDs(1:1), &
                                                        xyen=xyen)
              else
                 success = ecModuleAddTimeSpaceRelation(ecInstancePtr, &
@@ -236,7 +236,7 @@ contains
                                                        tst%inFilename, tst%inFiletype, &
                                                        tst%method, tst%operand, &
                                                        tst%tgt_refdate, tst%tgt_tzone, tst%tgt_tunit, &
-                                                       tst%jasferic, tst%missing_value, itemIDs(1:1), &
+                                                       tst%jasferic, itemIDs(1:1), &
                                                        forcingfile=trim(tst%forcingfile), &
                                                        xyen=xyen)
              endif
@@ -301,7 +301,7 @@ contains
                                                              inFilename, inFiletype_nr, &
                                                              method_nr, operand_nr, &
                                                              tst%tgt_refdate, tst%tgt_tzone, tst%tgt_tunit, &
-                                                             tst%jasferic, tst%missing_value, itemIDs(isrc:isrc), &
+                                                             tst%jasferic, itemIDs(isrc:isrc), &
                                                              xyen=xyen, forcingfile=forcingfile)
                    else
                       success = ecModuleAddTimeSpaceRelation(ecInstancePtr, &
@@ -311,7 +311,7 @@ contains
                                                              inFilename, inFiletype_nr, &
                                                              method_nr, operand_nr, &
                                                              tst%tgt_refdate, tst%tgt_tzone, tst%tgt_tunit, &
-                                                             tst%jasferic, tst%missing_value, itemIDs(isrc:isrc), &
+                                                             tst%jasferic, itemIDs(isrc:isrc), &
                                                              xyen=xyen)
                    endif
                    if (.not.success) then
@@ -341,7 +341,7 @@ contains
           endif
           write(*,*) 'Writing new reference file '//trim(treeRefFile)
        else
-           open(newunit=ftree,file=trim(treeTstFile),iostat=iostat)
+          open(newunit=ftree,file=trim(treeTstFile),iostat=iostat)
           if (iostat/=0) then
              call TCMessage(testname,'Cannot write EC-module tree!','testFailed')
              call ec_test_exception
@@ -351,18 +351,9 @@ contains
        call ecInstancePrintState(ecInstancePtr,callback_msg,ftree)
        close(ftree)
 
-       if (jacompare) then
-!         if (.not.compareTextDump(treeTstFile, treeRefFile)) then
-!            call TCMessage(testname,'Trees differ!','testFailed')
-!            call ec_test_exception
-!            return
-!         endif
-       endif
-
        ! try to estimate the result size
        result_size = ecEstimateItemresultSize(ecInstancePtr, itemIDs(1))
-       if (result_size>0) then
-       else
+       if (result_size<=0) then
           call TCMessage(testname,'returned result size is not larger than zero','testFailed')
           return
        endif
@@ -440,12 +431,6 @@ contains
              cycle
           endif
 
-          ! take a section of the resultvector and write it to file
-          !write(testOutLun,TIME_FMT) tst%t(it)
-          !do id=max(tst%ndxstart,1), min(tst%ndxend,result_size)
-          !   write(testOutLun,DATA_FMT) targetArray(id)
-          !enddo
-
           write(testOutLun,time_format) tst%t(it)
           do id=max(tst%ndxstart,1), min(tst%ndxend,result_size)
              write(testOutLun,'(a$)') ' '
@@ -511,12 +496,6 @@ contains
        iostat = chdir(trim(oldcwd))
        ! Free EC instance
        success = ecInstanceFree(ecInstancePtr)
-
-   ! teamcity messages
-   ! "##teamcity[testStarted name='%s']\n"
-   ! "##teamcity[testFailed name='%s' message='Exception occurred' details='%s']\n" %
-   ! "##teamcity[testFailed name='%s' message='Comparison: differences above tolerance']\n" % stripEscapeCharacters(testCaseConfig.getName()))
-   ! "##teamcity[testFinished name='%s' message='Comparison passed']\n"
 
        contains
           subroutine callback_msg(lvl,msg)

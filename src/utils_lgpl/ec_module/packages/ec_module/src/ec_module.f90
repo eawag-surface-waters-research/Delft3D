@@ -403,14 +403,14 @@ module m_ec_module
       !>      the array of SOURCE QUANTITY NAMES to be sought in the FileReader
       function ecModuleAddTimeSpaceRelation(instancePtr, name, x, y, vectormax, filename, filetype, &
                                             method, operand, tgt_refdate, tgt_tzone, tgt_tunit, &
-                                            jsferic, missing_value, itemIDs, &
+                                            jsferic, itemIDs, &
                                             mask, xyen, z, pzmin, pzmax, pkbot, pktop, &
-                                            targetIndex, forcingfile, srcmaskfile, dtnodal) &
+                                            forcingfile, srcmaskfile, dtnodal) &
                                             result (success)
    !     use m_ec_module, only: ecFindFileReader ! TODO: Refactor this private data access (UNST-703).
          use m_ec_filereader_read, only: ecParseARCinfoMask
          use m_ec_support
-         use time_module, only: JULIAN, date2mjd
+         use time_module, only: ymd2modified_jul
  
          type(tEcInstance), pointer :: instancePtr !< intent(in)
          character(len=*),                         intent(inout) :: name         !< Name for the target Quantity, possibly compounded with a tracer name.
@@ -425,7 +425,6 @@ module m_ec_module
          integer,                                  intent(in)    :: tgt_refdate
          real(kind=hp),                            intent(in)    :: tgt_tzone
          integer,                                  intent(in)    :: tgt_tunit
-         real(kind=hp),                            intent(in)    :: missing_value
          integer, dimension(:),                    intent(inout) :: itemIDs      !<  Connection available outside to which one can connect target items
    
          integer,  dimension(:), optional,         intent(in)    :: mask         !< Array of masking values for the target ElementSet.
@@ -435,7 +434,6 @@ module m_ec_module
          real(hp), dimension(:), optional, pointer               :: pzmax        !< array of maximum z coordinate
          integer,  dimension(:), optional, pointer               :: pkbot  
          integer,  dimension(:), optional, pointer               :: pktop  
-         integer,                optional,         intent(in)    :: targetIndex  !< target position or rank of (complete!) vector in target array
          character(len=*),       optional,         intent(in)    :: forcingfile  !< file containing the forcing data for pli-file 'filename'
          character(len=*),       optional,         intent(in)    :: srcmaskfile  !< file containing mask applicable to the arcinfo source data 
          real(hp),               optional,         intent(in)    :: dtnodal      !< update interval for nodal factors
@@ -443,7 +441,6 @@ module m_ec_module
          integer :: convtype !< EC-module's convType_ enumeration.
          !
          integer :: fileReaderId   !< Unique FileReader id.
-         integer :: sourceItemId   !< Unique SourceItem id.
          integer :: quantityId     !< Unique Quantity id.
          integer :: elementSetId   !< Unique ElementSet id.
          integer :: converterId    !< Unique Converter id.
@@ -455,7 +452,7 @@ module m_ec_module
          integer, external         :: findname
          type (tEcMask)            :: srcmask
          logical                   :: res
-         integer                   :: i, isrc, itgt
+         integer                   :: i, itgt
          integer                   :: fieldId
          real(hp)                  :: tgt_mjd
    
@@ -471,7 +468,7 @@ module m_ec_module
             fileReaderPtr => ecSupportFindFileReader(instancePtr, fileReaderId)
             fileReaderPtr%vectormax = vectormax
             
-            tgt_mjd = JULIAN(tgt_refdate, 0) ! TODO: handle time zone (and time?)
+            success = ymd2modified_jul(tgt_refdate, tgt_mjd) ! TODO: handle time zone (and time?)
 
             if (present(forcingfile)) then
                if (present(dtnodal)) then
@@ -663,6 +660,7 @@ module m_ec_module
 
       type(c_time)                                            :: ecReqTime    !< time stamp for request to EC
       real(hp)                                                :: tUnitFactor  !< factor for time step unit
+      real(hp)                                                :: tgt_mjd      !< current time in modified julian days
       character(len=20) :: datestring
       integer           :: ierr
       
@@ -674,7 +672,8 @@ module m_ec_module
          success = .false.
          call clearECMessage()
          tUnitFactor = ecSupportTimeUnitConversionFactor(tgt_tunit)
-         call ecReqTime%set2(JULIAN(tgt_refdate, 0), timesteps * tUnitFactor / 86400.0_hp - tgt_tzone / 24.0_hp)
+         ierr = ymd2modified_jul(tgt_refdate, tgt_mjd)
+         call ecReqTime%set2(tgt_mjd, timesteps * tUnitFactor / 86400.0_hp - tgt_tzone / 24.0_hp)        
          if (.not. ecGetValues(instancePtr, itemId, ecReqTime, target_array)) then
             datestring = datetime_to_string(ecReqTime%mjd(), ierr)
             if (ierr==0) then
@@ -711,7 +710,7 @@ module m_ec_module
          integer,                         intent(in) :: connectionId !< identifier of the connection
          character(len=*), dimension(:),  intent(in) :: qnames       !< list of quantity names 
          integer :: sourceItemId
-         integer :: n, i, isrc
+         integer :: i, isrc
          !
          success = .False. 
          do isrc = 1, size(qnames)

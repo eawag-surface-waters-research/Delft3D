@@ -24,9 +24,13 @@ def runThisTest(dir, files):
                 sys.stdout.write("##teamcity[testFinished name='"+testname+"' message='Comparison failed']\n\n")
 
 print(os.path.dirname(os.path.realpath(__file__)))
-#configuration = "Release"
-configuration = "Debug"
 executable = ""
+
+# On TeamCity environment variable LD_LIBRARY_PATH or PATH is set before running this script.
+# When running locally, you should set this for your local environment. 
+# ~/build/lnx64/*/share/lib
+# ~/build/x64/*/share/bin
+# The location of the executable is probably different as well. 
 
 if os.name == 'posix':
     executable = "../lnx64/bin/ec_module_test"
