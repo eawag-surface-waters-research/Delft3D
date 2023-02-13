@@ -14173,35 +14173,58 @@ subroutine get_2d_edge_data(edge_nodes, edge_faces, edge_type, xue, yue, edge_ma
    integer, optional, intent(out)                :: reverse_edge_mapping_table(:) !< Mapping from ordered edges (first flow links, then closed edges) to original edges. To be filled if present.
 
    integer :: is, i, L, Lf !< Counters.
+   logical :: is_lne2ln_allocated, is_edge_faces_associated, is_edge_mapping_table_present, is_reverse_edge_mapping_table_present
 
+   is_lne2ln_allocated = allocated(lne2ln) 
+   is_edge_faces_associated = associated(edge_faces)
+   is_edge_mapping_table_present = present(edge_mapping_table)
+   is_reverse_edge_mapping_table_present = present(reverse_edge_mapping_table)
+   
+   ! set LC mask to 0
+   LC = 0
+   
    ! Write all edges that are 2D internal flow links.
    i = 0
    ! Lf is flow link number.
    do Lf = lnx1d+1,lnxi
+      
+      L = ln2lne(Lf)
+      if (LC(L).ne.0) then
+          cycle
+      end if
+      LC(L) = 1
+      
       ! i is edge number.
       i = i + 1
 
       edge_nodes(1:2, i) = lncn(1:2, Lf)
-      if (associated(edge_faces)) edge_faces(1:2,i) = ln(1:2, Lf)
+      if (is_edge_faces_associated) edge_faces(1:2,i) = ln(1:2, Lf)
 
       edge_type(i) = UG_EDGETYPE_INTERNAL
       xue(i) = xu(Lf)
       yue(i) = yu(Lf)
 
-      ! L is net link number.
-      L = ln2lne(Lf)
-      if (present(edge_mapping_table)) edge_mapping_table(L - numl1d) = i
-      if (present(reverse_edge_mapping_table)) reverse_edge_mapping_table(i) = L - numl1d
+      
+
+      if (is_edge_mapping_table_present) edge_mapping_table(L - numl1d) = i
+      if (is_reverse_edge_mapping_table_present) reverse_edge_mapping_table(i) = L - numl1d
    end do
 
    ! Write all edges that are 2D boundary flow links.
    ! Lf is flow link number.
    do Lf = lnx1Db+1,lnx
+      
+      L = ln2lne(Lf)
+      if (LC(L).ne.0) then
+          cycle
+      end if
+      LC(L) = 1
+      
       ! i is edge number.
       i = i + 1
 
       edge_nodes(1:2, i) = lncn(1:2, Lf)
-      if (associated(edge_faces)) then
+      if (is_edge_faces_associated) then
          ! NOTE: the internal face intentionally gets placed on index 1,
          ! even though the flow link has it on index 2 by definition.
          edge_faces(1,i) = ln(2, Lf)
@@ -14212,23 +14235,28 @@ subroutine get_2d_edge_data(edge_nodes, edge_faces, edge_type, xue, yue, edge_ma
       xue(i) = xu(Lf)
       yue(i) = yu(Lf)
 
-      ! L is net link number.
-      L = ln2lne(Lf)
-      if (present(edge_mapping_table)) edge_mapping_table(L - numl1d) = i
-      if (present(reverse_edge_mapping_table)) reverse_edge_mapping_table(i) = L - numl1d
+      if (is_edge_mapping_table_present) edge_mapping_table(L - numl1d) = i
+      if (is_reverse_edge_mapping_table_present) reverse_edge_mapping_table(i) = L - numl1d
    end do
 
    ! Write all remaining edges, which are closed.
    ! Loop over all 2D net links, which includes both 2D flow links and closed 2D net links.
-   ! L is net link number.
-   if (allocated(lne2ln)) then
+   ! L is net link number
+   if (is_lne2ln_allocated) then
       do L = NUML1D+1,NUML
+         
          ! Lf is flow link number.
          Lf =  lne2ln(L)
+         
          if (Lf <= 0) then ! If this net link does not have a flow link (i.e. closed net link).
+            
+            if (LC(L).ne.0) then
+               cycle
+            end if
+            LC(L) = 1
+            
             ! i is edge number.
             i = i + 1
-
             edge_nodes(1:2, i) = KN(1:2, L)
             if (lnn(L) < 2) then
                edge_type(i) = UG_EDGETYPE_BND_CLOSED
@@ -14236,7 +14264,7 @@ subroutine get_2d_edge_data(edge_nodes, edge_faces, edge_type, xue, yue, edge_ma
                edge_type(i) = UG_EDGETYPE_INTERNAL_CLOSED
             end if
 
-            if (associated(edge_faces)) then
+            if (is_edge_faces_associated) then
                do is=1,2
                   if (lne(is, L) > 0) then
                      edge_faces(is, i) = lne(is, L)
@@ -14250,11 +14278,16 @@ subroutine get_2d_edge_data(edge_nodes, edge_faces, edge_type, xue, yue, edge_ma
             xue(i) = .5d0*(xk(kn(1,L)) + xk(kn(2,L)))
             yue(i) = .5d0*(yk(kn(1,L)) + yk(kn(2,L)))
 
-            if (present(edge_mapping_table)) edge_mapping_table(L - numl1d) = i
-            if (present(reverse_edge_mapping_table)) reverse_edge_mapping_table(i) = L - numl1d
+            if (is_edge_mapping_table_present) edge_mapping_table(L - numl1d) = i
+            if (is_reverse_edge_mapping_table_present) reverse_edge_mapping_table(i) = L - numl1d
          end if
-      end do
+      
+      end do   
    end if
+   
+   ! restore the mask
+   LC = 0
+  
 end subroutine get_2d_edge_data
 
 !> Sets layer info in the given variables. Only call this if layers present.
