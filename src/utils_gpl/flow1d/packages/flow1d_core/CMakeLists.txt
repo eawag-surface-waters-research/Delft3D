@@ -16,7 +16,7 @@ set_source_files_properties(
                    PROPERTIES COMPILE_OPTIONS "${file_preprocessor_flag}")
 
 # Specify dependencies
-set(oss_dependencies    deltares_common) 
+set(oss_dependencies    deltares_commo         gridgeom) 
 oss_include_libraries(${library_name} oss_dependencies)
 
 if(UNIX)
