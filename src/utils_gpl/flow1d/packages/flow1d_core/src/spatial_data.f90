@@ -123,8 +123,7 @@ contains
          call realloc(spData)
          spData%quant(1)%quantity = CFiWaterLevel
          spData%quant(2)%quantity = CFiDischarge
-         spData%quant(3)%quantity = CFiSalinity
-         spData%Count = 3
+         spData%Count = 2
          spData%level      = -1
          spData%discharge  = -1
          spData%salinity   = -1
@@ -139,9 +138,6 @@ contains
       case (CFiDischarge)
          iQuant = 2
          spData%discharge  = 2
-      case (CFiSalinity)
-         iQuant = 3
-         spData%salinity   = 3
       case default
          spData%count = spData%count+1
          iQuant = spData%count
@@ -151,16 +147,6 @@ contains
          psp => spData%quant(iQuant)
          spData%quant(iQuant)%quantity = quantity
          select case (quantity)
-            case (CFiDispersion)
-               spData%dispersion = spData%count
-            case (CFiWindShield)
-               spData%windShield = spData%count
-            case (CFiTH_F1)
-               spData%TH_F1 = spData%count
-            case (CFiTH_F3)
-               spData%TH_F3 = spData%count
-            case (CFiTH_F4)
-               spData%TH_F4 = spData%count
          end select
       end select
       

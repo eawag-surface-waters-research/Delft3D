@@ -35,8 +35,6 @@ module m_network
    use m_crossSections
    use m_1d_structures
    use m_roughness
-   use m_ExtraResistance
-   use m_df1d_transport
    use m_ObservCrossSections
    use m_compound
    
@@ -96,7 +94,6 @@ module m_network
       type(t_storageSet)                        :: storS                   !< set containing storage in gridpoints
       type(t_CSDefinitionSet)                   :: CSDefinitions
       type(t_spatial_dataSet)                   :: spData
-      type(t_transportSet)                      :: trans
       type(t_ObservCrossSectionSet)             :: observcrs               !< set of observation Cross-Sections 
       type(t_forcingList)                       :: forcinglist             !< Work list of read-in (structure) forcing data, to be initialized by calling kernel later.
       logical                                   :: loaded      = .false.
@@ -159,7 +156,6 @@ contains
       call dealloc(network%storS)
       call dealloc(network%CSDefinitions)
       call dealloc(network%spData)
-      call dealloc(network%trans)
       call dealloc(network%observcrs)
       network%loaded = .false.
    

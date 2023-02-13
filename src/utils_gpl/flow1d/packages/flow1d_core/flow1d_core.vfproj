@@ -57,14 +57,10 @@
 		<File RelativePath=".\src\CrossSections.f90"/>
 		<File RelativePath=".\src\culvert.f90"/>
 		<File RelativePath=".\src\Dambreak.f90"/>
-		<File RelativePath=".\src\df1d_transport.f90"/>
-		<File RelativePath=".\src\ExtraResistance.f90"/>
 		<File RelativePath=".\src\flow1d_core.F90"/>
 		<File RelativePath=".\src\forcinglist.f90"/>
 		<File RelativePath=".\src\general_structure.f90"/>
 		<File RelativePath=".\src\GlobalParameters.f90"/>
-		<File RelativePath=".\src\ModelParameters.f90"/>
-		<File RelativePath=".\src\ModelTypes.f90"/>
 		<File RelativePath=".\src\Network.f90"/>
 		<File RelativePath=".\src\NetworkTypes.f90"/>
 		<File RelativePath=".\src\nodes.f90"/>
@@ -79,7 +75,6 @@
 		<File RelativePath=".\src\Storage.f90"/>
 		<File RelativePath=".\src\struc_helper.f90"/>
 		<File RelativePath=".\src\structures.f90"/>
-		<File RelativePath=".\src\temperature.f90"/>
 		<File RelativePath=".\src\Trenches.f90"/>
 		<File RelativePath=".\src\universal_weir.f90"/>
 		<File RelativePath=".\src\weir.f90"/>

@@ -44,7 +44,6 @@
  use m_monitoring_crosssections
  use m_observations, only : mxls
  use unstruc_files, only : defaultFilename
- use m_GlobalParameters, only: callcount, wccount, countstop, rate
  use m_sediment, only: stm_included
 #ifdef _OPENMP
  use omp_lib
@@ -243,16 +242,6 @@
 
  if (jawriteDetailedTimers > 0) then
     call timdump(trim(defaultFilename('timers')), .true.)
-
-    call system_clock(countstop, rate) ! Only to get the rate
-
-    open(newunit=mout, file=trim(defaultFilename('timers')), access='append', action='write')
-    write(mout, '(a,i15,a,D13.6, a,D13.6)') 'Totals GetCSParsFlowCross: Calls: ', callcount(1), &
-       'WC Time: ', real(wccount(1), 8 ) / real( rate, 8 )
-    write(mout, '(a,i15,a,D13.6, a,D13.6)') 'Totals GetCSParsFlowTot  : Calls: ', callcount(2), &
-       'WC Time: ', real(wccount(2), 8 ) / real( rate, 8 )
-    close(mout)
-
  end if
 
  call timstrt('All', handle_all)

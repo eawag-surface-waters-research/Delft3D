@@ -205,20 +205,6 @@ contains
             spData%depth = isp
          case (CFiDischarge )
             spData%discharge = isp
-         case (CFiDispersion)
-            spData%dispersion = isp
-         case (CFiSalinity)
-            spData%salinity = isp
-         case (CFiTH_F1)
-            spData%TH_F1 = isp
-         case (CFiTH_F3)
-            spData%TH_F3 = isp
-         case (CFiTH_F4)
-            spData%TH_F4 = isp
-         case (CFiConvLength)
-            spData%ConvLength = isp
-         case (CFiWindShield)
-            spData%windShield = isp
          case default
             spData%quant(isp)%def_type = -itype
       end select

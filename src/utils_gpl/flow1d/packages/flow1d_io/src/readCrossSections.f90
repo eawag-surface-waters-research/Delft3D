@@ -78,7 +78,6 @@ module m_readCrossSections
    subroutine readCrossSectionLocationFile(network, CrossSectionfile)
       use m_CrossSections
       use m_network
-      use ModelParameters
       type(t_network), intent(inout) :: network                 !< Network structure
       character(len=*), intent(in)   :: CrossSectionFile        !< name of the crossection location input file 
 
@@ -168,10 +167,6 @@ module m_readCrossSections
 
          ! Stop in case of errors
          maxErrorLevel = getMaxErrorLevel()
-         if (maxErrorLevel >= LEVEL_ERROR) then
-            call LogAllParameters()
-            call SetMessage(LEVEL_FATAL, 'Error(s) during reading model data from files')
-         endif
         call finalizeCrs(network,pCrs,iref,inext)
          
       end do

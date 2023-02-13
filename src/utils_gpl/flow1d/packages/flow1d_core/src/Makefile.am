@@ -19,7 +19,6 @@ FMODULES += \
 #Sources
 libflow1d_core_la_SOURCES = \
          nodes.f90 \
-         ModelTypes.f90 \
          GlobalParameters.f90 \
          forcinglist.f90 \
          branches.f90 \
@@ -29,7 +28,6 @@ libflow1d_core_la_SOURCES = \
          wetcrs_modules.F90 \
          CrossSections.f90 \
          struc_helper.f90 \
-         ExtraResistance.f90 \
          weir.f90 \
          universal_weir.f90 \
          Pump.f90 \
@@ -40,19 +38,16 @@ libflow1d_core_la_SOURCES = \
          bridge.f90 \
          structures.f90 \
          compound.f90 \
-         ModelParameters.f90 \
          Storage.f90 \
          ObservationPoints.f90 \
          ObservCrossSections.f90 \
          NetworkTypes.f90 \
-         df1d_transport.f90 \
          Network.f90 \
          c_structures.f90 \
          callback_functions.F90 \
          cross_helper.f90 \
          flow1d_core.F90 \
-         quantity_statistics.f90 \
-         temperature.f90
+         quantity_statistics.f90
 
 # libflow1d_core is a convenience library, which will be linked into toplevel flow1d library.
 libflow1d_core_la_LIBADD=

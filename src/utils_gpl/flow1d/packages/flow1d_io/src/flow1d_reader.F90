@@ -29,8 +29,6 @@ module m_flow1d_reader
 !  $HeadURL$
 !-------------------------------------------------------------------------------
   
-   use ModelParameters
-   
    implicit none
    
    private
@@ -126,10 +124,6 @@ module m_flow1d_reader
      
      ! Stop in case of errors
      maxErrorLevel = getMaxErrorLevel()
-     if (maxErrorLevel >= LEVEL_ERROR) then
-        call LogAllParameters()
-        call SetMessage(LEVEL_FATAL, 'Error(s) during reading model data from files')
-     endif
      
      call SetMessage(LEVEL_INFO, 'All 1D-Reading Done')
 

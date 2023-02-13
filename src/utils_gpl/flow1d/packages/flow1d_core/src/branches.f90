@@ -62,13 +62,8 @@ module m_branch
    type, public :: t_branch
       character(IdLen)               :: id                      !< unique identification
       integer                        :: index                   !< sequence number
-      character(IdLen)               :: name                    !< Name of the branch
       double precision               :: length                  !< length of branch
       integer                        :: orderNumber             !< order number to interpolate cross sections over branches
-
-      integer                        :: brType                  !< channel type of 1D channnel
-      integer                        :: flapGate = 0            !< 0 = None, 1 = Only Positive Flow, 2 = Only Negative Flow
-                                                                !< Not implemeted in Readers yet
 
       integer                        :: nextBranch(2)           !< neighbouring branch with same ordernumber at start or end of branch
       integer                        :: nodeIndex(2)            !< indexes of Begin Node and End Node
