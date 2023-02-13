@@ -30,7 +30,6 @@ module m_GlobalParameters
 !-------------------------------------------------------------------------------
    
    use MessageHandling
-   use ModelTypes
    use m_node
    
    
