@@ -143,11 +143,8 @@ contains
          if (success) then
             success = hashsearch_or_add(rgs%hashlist, rgs%rough(i)%id) == i
             rgs%rough(i)%spd_pos_idx = 0
-            rgs%rough(i)%spd_neg_idx = 0
             rgs%rough(i)%rgh_type_pos => null()
-            rgs%rough(i)%rgh_type_neg => null()
             rgs%rough(i)%fun_type_pos => null()
-            rgs%rough(i)%fun_type_neg => null()
             rgs%rough(i)%table        => null()
          endif
       enddo

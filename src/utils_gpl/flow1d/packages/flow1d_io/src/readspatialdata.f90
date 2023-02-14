@@ -145,11 +145,6 @@ contains
          enddo
       endif
  
-      ! [General] and [Content] are obligatory items and are omitted in the number
-      ! of items in spData
-      pspData%interpolate = .false.
-      call prop_get_logical(md_ptr, 'Content', 'interpolate', pspData%interpolate, success)
-
       ! These arrays will be deallocated after retrieving roughness values for YZ-Profiles
       allocate(pspData%brIndex(count), pspData%chainage(count), pspData%valuesOnLocation(count))
 
@@ -197,17 +192,6 @@ contains
       endif
       
       call ValuesToGridPoints(spData%quant(isp), brs, tbls, interpolateOverBranches)
-      
-      select case (itype)
-         case (CFiWaterlevel)
-            spData%level = isp
-         case (CFiWaterDepth)
-            spData%depth = isp
-         case (CFiDischarge )
-            spData%discharge = isp
-         case default
-            spData%quant(isp)%def_type = -itype
-      end select
    
       ! cleaning up time
       if (allocated(levels))    deallocate(levels)

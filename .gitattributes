@@ -18623,7 +18623,6 @@ src/utils_gpl/flow1d/packages/flow1d_core/src/Dambreak.f90 -text
 src/utils_gpl/flow1d/packages/flow1d_core/src/GlobalParameters.f90 -text
 src/utils_gpl/flow1d/packages/flow1d_core/src/Makefile.am -text
 src/utils_gpl/flow1d/packages/flow1d_core/src/Network.f90 -text
-src/utils_gpl/flow1d/packages/flow1d_core/src/NetworkTypes.f90 -text
 src/utils_gpl/flow1d/packages/flow1d_core/src/ObservCrossSections.f90 -text
 src/utils_gpl/flow1d/packages/flow1d_core/src/ObservationPoints.f90 -text
 src/utils_gpl/flow1d/packages/flow1d_core/src/Orifice.f90 -text
@@ -18640,7 +18639,6 @@ src/utils_gpl/flow1d/packages/flow1d_core/src/flow1d_core.F90 -text
 src/utils_gpl/flow1d/packages/flow1d_core/src/forcinglist.f90 -text
 src/utils_gpl/flow1d/packages/flow1d_core/src/general_structure.f90 -text
 src/utils_gpl/flow1d/packages/flow1d_core/src/nodes.f90 -text
-src/utils_gpl/flow1d/packages/flow1d_core/src/quantity_statistics.f90 -text
 src/utils_gpl/flow1d/packages/flow1d_core/src/spatial_data.f90 -text
 src/utils_gpl/flow1d/packages/flow1d_core/src/struc_helper.f90 -text
 src/utils_gpl/flow1d/packages/flow1d_core/src/structures.f90 -text

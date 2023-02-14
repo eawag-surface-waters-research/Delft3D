@@ -41,13 +41,11 @@ libflow1d_core_la_SOURCES = \
          Storage.f90 \
          ObservationPoints.f90 \
          ObservCrossSections.f90 \
-         NetworkTypes.f90 \
          Network.f90 \
          c_structures.f90 \
          callback_functions.F90 \
          cross_helper.f90 \
-         flow1d_core.F90 \
-         quantity_statistics.f90
+         flow1d_core.F90 
 
 # libflow1d_core is a convenience library, which will be linked into toplevel flow1d library.
 libflow1d_core_la_LIBADD=

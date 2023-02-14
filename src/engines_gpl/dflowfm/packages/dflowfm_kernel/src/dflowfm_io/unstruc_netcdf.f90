@@ -16315,7 +16315,7 @@ integer function read_1d_mesh_convention_one(ioncid, numk_keep, numl_keep, numk_
 !      call read_1d_ugrid(network, ioncid, dflowfm_1d, nodesOnBranchVertices = 1)
       call read_1d_ugrid(network, ioncid, dflowfm_1d)
       if (network%loaded) then
-         call admin_network(network, numk, numl)
+         call admin_network(network, numl)
 
          !! TODO: Start temporary fix, to be removed when 1d ugrid file is correct (at this point branches are not connected)
          do inod = 1, network%nds%Count

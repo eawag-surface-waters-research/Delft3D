@@ -2605,7 +2605,7 @@ else if (i012 == 0) then                                ! look at u points, mom.
          endif
          !
          if (convtab%conveyType==CS_LUMPED) then
-            cz = getchezy(frictionType, frictionValue, area/perimeter, dpt, 0d0)
+            cz = getchezy(frictionType, frictionValue, area/perimeter, dpt, 1d0)
             conv = (cz)*area*sqrt(area/perimeter)
          elseif (convtab%conveyType==CS_VERT_SEGM) then
             conv  = a1*c1 + a2*c2
