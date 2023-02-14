@@ -277,7 +277,6 @@ double precision, allocatable      :: thindam(:,:)
  double precision                            :: VillemonteCD2 = 10.0d0     !< default for VillemonteCD2 = 10
 
 ! Debug parameter
- integer                                     :: jabatch  = 0       !< dobatch
  integer                                     :: cmd_icgsolver = 4  !< save commandline icgsolver
 
  integer, allocatable, target      :: structuresAndWeirsList(:)    !< List containing flow links on which a structure or fixed weir is located.

@@ -83,7 +83,7 @@ function read_commandline() result(istat)
       call read_commandline_option(inarg, Soption, Nkeys, Skeys, ivals, svals)
 
       if (index(inarg,'batch') > 0) then
-         jabatch = 1
+         iarg_dobatch = 1
       else if (index(inarg,'.batdfm') > 0 .or. index(inarg,'.BATDFM') > 0) then
          call batch(inarg) 
       endif
