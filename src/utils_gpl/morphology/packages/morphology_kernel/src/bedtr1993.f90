@@ -90,6 +90,7 @@ subroutine bedtr1993(uuu       ,vvv       ,u2dh      ,d50       ,d90       , &
 !
 ! Local variables
 !
+    integer  :: asymmetry
     real(fp) :: a11
     real(fp) :: a22
     real(fp) :: a33
@@ -127,6 +128,7 @@ subroutine bedtr1993(uuu       ,vvv       ,u2dh      ,d50       ,d90       , &
     real(fp) :: u1
     real(fp) :: u1strc
     real(fp) :: ua
+    real(fp) :: ubw
     real(fp) :: umax
     real(fp) :: uwb
     real(fp) :: uwb1
@@ -187,84 +189,85 @@ subroutine bedtr1993(uuu       ,vvv       ,u2dh      ,d50       ,d90       , &
           tp1   = tp
           rls   = max(rlabda,1.0e-12_fp)
           arg = 2.0_fp * pi * h1 / rls
-          if (arg > 20.0_fp) then
-             awb = 0.0_fp
-             uwb = 0.0_fp
+          !
+          asymmetry = 1
+          if (asymmetry == 2) then
+             !
+             ! What Van Rijn (1993) prefers ...
+             !
+             if (arg > 20.0_fp) then
+                awb = 0.0_fp
+                uwb = 0.0_fp
+             else
+                ! Linear wave theory
+                awb = hs / (2.0_fp * sinh(arg))
+                uwb = 2.0_fp * pi * awb / tp1
+             endif
+             umax = 2.0_fp * uwb
+             !
+             ! original algorithm by Van Rijn
+             ! h1->hd, aon->h1, uon->ubwfor, uoff->ubwback
+             !
+             hlimit = 0.01_fp * ag * tp1 * tp1
+             if (h1 >= hlimit) then
+                uwb1 = (3.0_fp * pi * pi * hs * hs) / &
+                      & (4.0_fp * tp1 * rls * (sinh(arg)**4))
+                uon  = uwb + uwb1
+             else ! hd < hlimit
+                aon = 1.0_fp + 0.3_fp * (hs/h1)
+                uon = aon * uwb
+             endif
+             uon = min(uon, 1.2_fp * uwb)
           else
-             ! Linear wave theory
-             awb = hs / (2.0_fp * sinh(arg))
-             uwb = 2.0_fp * pi * awb / tp1
+             !
+             ! What used to be in Delft3D ...
+             !
+             rhs13 = hs/rls
+             if (arg > 20.0_fp) then
+                ubw = 0.0_fp
+             else
+                ubw = pi*hs/tp1/sinh(arg)
+             endif
+             rr   = 0.75_fp - 0.1_fp*tanh(2.5_fp*rhs13 - 1.4_fp)
+             umax = rr*2.0_fp*ubw
+             t1   = tp1*sqrt(ag/h1)
+             u1   = umax/sqrt(ag*h1)
+             a55  = 0.0032_fp*t1**2 + 0.00008_fp*t1**3
+             if (t1 > 20.0_fp) a55 = 0.0056_fp*t1**2 - 0.00004_fp*t1**3
+             !
+             ! Only continue at 20; not at 30 as used in the formulations
+             !
+             a44 = -15.0_fp + 1.35_fp*t1
+             if (t1 > 15.0_fp) a44 = -2.7_fp + 0.53_fp*t1
+             epst1 = t1 - 100.0_fp/9.0_fp
+             if (abs(epst1) < 0.001_fp) then
+                !
+                ! Approximation of ra1 for t1--->100/9 (Henri Petit).
+                !
+                ra1 = 0.5_fp + 368.0_fp/729.0_fp*u1 - 7.0_fp/1458.0_fp*u1**2                &
+                    & + (-1667.0_fp/16200.0_fp*u1**2 + 7.0_fp/3240.0_fp*u1**3            &
+                    &    + 68.0_fp/675.0_fp*u1                         )*epst1     &
+                    & + (11.0_fp/1875.0_fp*u1 - 37039.0_fp/720000.0_fp*u1**2             &
+                    &    + 1667.0_fp/36000.0_fp*u1**3 - 7.0_fp/9600.0_fp*u1**4)*epst1**2
+             else
+                a33 = (0.5_fp - a55)/(a44 - 1.0_fp + exp( - a44))
+                a22 = a33*a44 + a55
+                a11 = 0.5_fp - a33
+                ra1 = a11 + a22*u1 + a33*exp( - a44*u1)
+             endif
+             rmax = -2.50_fp*h1/rls + 0.85_fp
+             ra1  = min(ra1, rmax)
+             if (ra1 >= 0.75_fp) then
+                rmax = 0.75_fp
+             elseif (ra1 <= 0.62_fp) then
+                rmax = 0.62_fp
+             else
+             endif
+             uon  = umax*(0.5_fp + (rmax - 0.5_fp)*tanh((ra1 - 0.5_fp)/(rmax - 0.5_fp)))
+             uon  = max(0.5_fp*umax, uon)
           endif
-          !
-          ! original algorithm by Van Rijn
-          ! h1->hd, aon->h1, uon->ubwfor, uoff->ubwback
-          !
-          hlimit = 0.01_fp * ag * tp1 * tp1
-          if (h1 >= hlimit) then
-             uwb1 = (3.0_fp * pi * pi * hs * hs) / &
-                   & (4.0_fp * tp1 * rls * (sinh(arg)**4))
-             uon  = uwb + uwb1
-             uoff = uwb - uwb1
-          else ! hd < hlimit
-             aon = 1.0_fp + 0.3_fp * (hs/h1)
-             uon = aon * uwb
-             uoff = (2.0_fp - aon) * uwb
-          endif
-          uon = min(uon, 1.2_fp * uwb)
-          uoff = max(0.8_fp * uwb, uoff)
-          ! if (awb > 0.0_fp) then
-          !    asym = uon/(uon+uoff)
-          ! else
-          !    asym = 0.0_fp
-          ! endif
-          !
-          ! original asymmetry inspired by Isobe & Horikawa (1982)
-          !
-          ! rhs13 = hs/rls
-          ! rr   = 0.75_fp - 0.1_fp * tanh(2.5_fp * rhs13 - 1.4_fp)
-          ! umax = rr * 2.0_fp * uwb
-          ! t1   = tp1 * sqrt(ag/h1)
-          ! u1   = umax / sqrt(ag*h1)
-          ! if (t1 > 20.0_fp) then
-          !    a55 = 0.0056_fp * t1**2 - 0.00004_fp * t1**3
-          ! else
-          !    a55  = 0.0032_fp * t1**2 + 0.00008_fp * t1**3
-          ! endif
-          !
-          ! Only continue at 20; not at 30 as used in the formulations
-          !
-          ! if (t1 > 15.0_fp) then
-          !    a44 = -2.7_fp + 0.53_fp * t1
-          ! else
-          !    a44 = -15.0_fp + 1.35_fp * t1
-          ! endif
-          ! epst1 = t1 - 100.0_fp/9.0_fp
-          ! if (abs(epst1) < 0.001_fp) then
-          !    !
-          !    ! Approximation of ra1 for t1--->100/9 (Henri Petit).
-          !    !
-          !    ra1 = 0.5_fp + 368.0_fp/729.0_fp * u1 - 7.0_fp/1458.0_fp * u1**2                &
-          !        & + (-1667.0_fp/16200.0_fp * u1**2 + 7.0_fp/3240.0_fp * u1**3               &
-          !        &    + 68.0_fp/675.0_fp * u1                                  ) * epst1     &
-          !        & + (11.0_fp/1875.0_fp * u1 - 37039.0_fp/720000.0_fp * u1**2                &
-          !        &    + 1667.0_fp/36000.0_fp * u1**3 - 7.0_fp/9600.0_fp * u1**4) * epst1**2
-          ! else
-          !    a33 = (0.5_fp - a55) / (a44 - 1.0_fp + exp( - a44))
-          !    a22 = a33 * a44 + a55
-          !    a11 = 0.5_fp - a33
-          !    ra1 = a11 + a22 * u1 + a33 * exp( - a44*u1)
-          ! endif
-          ! rmax = -2.50_fp * h1/rls + 0.85_fp
-          ! ra1  = min(ra1, rmax)
-          ! if (ra1 >= 0.75_fp) then
-          !    rmax = 0.75_Fp
-          ! elseif (ra1 <= 0.62_fp) then
-          !    rmax = 0.62_fp
-          ! else
-          ! endif
-          ! uon  = umax*(0.5_fp + (rmax - 0.5_fp)*tanh((ra1 - 0.5_fp)/(rmax - 0.5_fp)))
-          ! uoff = umax - uon
-       else
+          uoff = umax - uon
+      else
           uon  = 0.0_fp
           uoff = 0.0_fp
        endif
