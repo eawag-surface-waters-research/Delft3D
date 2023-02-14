@@ -226,7 +226,7 @@ contains
                                                        tst%inFilename, tst%inFiletype, &
                                                        tst%method, tst%operand, &
                                                        tst%tgt_refdate, tst%tgt_tzone, tst%tgt_tunit, &
-                                                       tst%jasferic, itemIDs(1:1), &
+                                                       tst%jasferic, tst%missing_value, itemIDs(1:1), &
                                                        xyen=xyen)
              else
                 success = ecModuleAddTimeSpaceRelation(ecInstancePtr, &
@@ -236,7 +236,7 @@ contains
                                                        tst%inFilename, tst%inFiletype, &
                                                        tst%method, tst%operand, &
                                                        tst%tgt_refdate, tst%tgt_tzone, tst%tgt_tunit, &
-                                                       tst%jasferic, itemIDs(1:1), &
+                                                       tst%jasferic, tst%missing_value, itemIDs(1:1), &
                                                        forcingfile=trim(tst%forcingfile), &
                                                        xyen=xyen)
              endif
@@ -301,7 +301,7 @@ contains
                                                              inFilename, inFiletype_nr, &
                                                              method_nr, operand_nr, &
                                                              tst%tgt_refdate, tst%tgt_tzone, tst%tgt_tunit, &
-                                                             tst%jasferic, itemIDs(isrc:isrc), &
+                                                             tst%jasferic, tst%missing_value, itemIDs(isrc:isrc), &
                                                              xyen=xyen, forcingfile=forcingfile)
                    else
                       success = ecModuleAddTimeSpaceRelation(ecInstancePtr, &
@@ -311,7 +311,7 @@ contains
                                                              inFilename, inFiletype_nr, &
                                                              method_nr, operand_nr, &
                                                              tst%tgt_refdate, tst%tgt_tzone, tst%tgt_tunit, &
-                                                             tst%jasferic, itemIDs(isrc:isrc), &
+                                                             tst%jasferic, tst%missing_value, itemIDs(isrc:isrc), &
                                                              xyen=xyen)
                    endif
                    if (.not.success) then

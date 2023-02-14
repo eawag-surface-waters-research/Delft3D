@@ -403,9 +403,9 @@ module m_ec_module
       !>      the array of SOURCE QUANTITY NAMES to be sought in the FileReader
       function ecModuleAddTimeSpaceRelation(instancePtr, name, x, y, vectormax, filename, filetype, &
                                             method, operand, tgt_refdate, tgt_tzone, tgt_tunit, &
-                                            jsferic, itemIDs, &
+                                            jsferic, missing_value, itemIDs, &
                                             mask, xyen, z, pzmin, pzmax, pkbot, pktop, &
-                                            forcingfile, srcmaskfile, dtnodal) &
+                                            targetIndex, forcingfile, srcmaskfile, dtnodal) &
                                             result (success)
    !     use m_ec_module, only: ecFindFileReader ! TODO: Refactor this private data access (UNST-703).
          use m_ec_filereader_read, only: ecParseARCinfoMask
@@ -425,6 +425,7 @@ module m_ec_module
          integer,                                  intent(in)    :: tgt_refdate
          real(kind=hp),                            intent(in)    :: tgt_tzone
          integer,                                  intent(in)    :: tgt_tunit
+         real(kind=hp),                            intent(in)    :: missing_value
          integer, dimension(:),                    intent(inout) :: itemIDs      !<  Connection available outside to which one can connect target items
    
          integer,  dimension(:), optional,         intent(in)    :: mask         !< Array of masking values for the target ElementSet.
@@ -434,6 +435,7 @@ module m_ec_module
          real(hp), dimension(:), optional, pointer               :: pzmax        !< array of maximum z coordinate
          integer,  dimension(:), optional, pointer               :: pkbot  
          integer,  dimension(:), optional, pointer               :: pktop  
+         integer,                optional,         intent(in)    :: targetIndex  !< target position or rank of (complete!) vector in target array
          character(len=*),       optional,         intent(in)    :: forcingfile  !< file containing the forcing data for pli-file 'filename'
          character(len=*),       optional,         intent(in)    :: srcmaskfile  !< file containing mask applicable to the arcinfo source data 
          real(hp),               optional,         intent(in)    :: dtnodal      !< update interval for nodal factors
