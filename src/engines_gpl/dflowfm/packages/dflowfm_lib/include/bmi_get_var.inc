@@ -38,6 +38,36 @@
      x = c_loc(twav)
   case("Uorb") !<  [m/s] orbital velocity {"location": "face", "shape": ["ndx"]}
      x = c_loc(Uorb)
+  case("bodsed") !<  [kg m-2] Available sediment in the bed in flow cell center. {"location": "face", "shape": ["stmpar%morlyr%settings%nfrac", "ndx"], "internal": "stmpar%morlyr%state%bodsed"}
+     x = c_loc(stmpar%morlyr%state%bodsed)
+  case("dpsed") !<  [m] Sediment thickness in the bed in flow cell center. {"location": "face", "shape": ["ndx"], "internal": "stmpar%morlyr%state%dpsed"}
+     x = c_loc(stmpar%morlyr%state%dpsed)
+  case("msed") !<  [kg m-2] Available sediment in a layer of the bed in flow cell center. {"location": "face", "shape": ["stmpar%morlyr%settings%nfrac", "stmpar%morlyr%settings%nlyr", "ndx"], "internal": "stmpar%morlyr%state%msed"}
+     x = c_loc(stmpar%morlyr%state%msed)
+  case("thlyr") !<  [m] Thickness of a layer of the bed in flow cell center. {"location": "face", "shape": ["stmpar%morlyr%settings%nlyr","ndx"], "internal": "stmpar%morlyr%state%thlyr"}
+     x = c_loc(stmpar%morlyr%state%thlyr)
+  case("rsedeq") !<  [kg m-3] Equilibrium sediment concentration. {"location": "face", "shape": ["ndx","stmpar%lsedsus"], "internal": "sedtra%rsedeq"}
+     x = c_loc(sedtra%rsedeq)
+  case("sbcx") !<  [kg s-1 m-1] bed load transport due to currents, x-component. {"location": "face", "shape": ["ndx","stmpar%lsedtot"], "internal": "sedtra%sbcx"}
+     x = c_loc(sedtra%sbcx)
+  case("sbcy") !<  [kg s-1 m-1] bed load transport due to currents, y-component. {"location": "face", "shape": ["ndx","stmpar%lsedtot"], "internal": "sedtra%sbcy"}
+     x = c_loc(sedtra%sbcy)
+  case("sbwx") !<  [kg s-1 m-1] bed load transport due to waves, x-component. {"location": "face", "shape": ["ndx","stmpar%lsedtot"], "internal": "sedtra%sbwx"}
+     x = c_loc(sedtra%sbwx)
+  case("sbwy") !<  [kg s-1 m-1] bed load transport due to waves, y-component. {"location": "face", "shape": ["ndx","stmpar%lsedtot"], "internal": "sedtra%sbwy"}
+     x = c_loc(sedtra%sbwy)
+  case("sscx") !<  [kg s-1 m-1] suspended load transport due to currents, x-component. {"location": "face", "shape": ["ndx","stmpar%lsedsus"], "internal": "sedtra%sscx"}
+     x = c_loc(sedtra%sscx)
+  case("sscy") !<  [kg s-1 m-1] suspended load transport due to currents, y-component. {"location": "face", "shape": ["ndx","stmpar%lsedsus"], "internal": "sedtra%sscy"}
+     x = c_loc(sedtra%sscy)
+  case("sswx") !<  [kg s-1 m-1] suspended load transport due to waves, x-component. {"location": "face", "shape": ["ndx","stmpar%lsedsus"], "internal": "sedtra%sswx"}
+     x = c_loc(sedtra%sswx)
+  case("sswy") !<  [kg s-1 m-1] suspended load transport due to waves, y-component. {"location": "face", "shape": ["ndx","stmpar%lsedsus"], "internal": "sedtra%sswy"}
+     x = c_loc(sedtra%sswy)
+  case("taucr") !<  [kg s-2 m-1] dimensional critical shear stress taucr. {"location": "face", "shape": ["stmpar%lsedtot"], "internal": "stmpar%sedpar%taucr"}
+     x = c_loc(stmpar%sedpar%taucr)
+  case("tetacr") !<  [-] dimensionless critical shear stress tetacr. {"location": "face", "shape": ["stmpar%lsedtot"], "internal": "stmpar%sedpar%tetacr"}
+     x = c_loc(stmpar%sedpar%tetacr)
   case("InterceptThickness") !<  [m] Interception layer thickness (max depth) {"location": "face", "shape": ["ndx"]}
      x = c_loc(InterceptThickness)
   case("InterceptHs") !<  [m] Interception layer water depth at current time {"location": "face", "shape": ["ndx"]}

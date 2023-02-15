@@ -38,6 +38,36 @@
      rank = 1
   case("Uorb")
      rank = 1
+  case("bodsed")
+     rank = 2
+  case("dpsed")
+     rank = 1
+  case("msed")
+     rank = 3
+  case("thlyr")
+     rank = 2
+  case("rsedeq")
+     rank = 2
+  case("sbcx")
+     rank = 2
+  case("sbcy")
+     rank = 2
+  case("sbwx")
+     rank = 2
+  case("sbwy")
+     rank = 2
+  case("sscx")
+     rank = 2
+  case("sscy")
+     rank = 2
+  case("sswx")
+     rank = 2
+  case("sswy")
+     rank = 2
+  case("taucr")
+     rank = 1
+  case("tetacr")
+     rank = 1
   case("InterceptThickness")
      rank = 1
   case("InterceptHs")

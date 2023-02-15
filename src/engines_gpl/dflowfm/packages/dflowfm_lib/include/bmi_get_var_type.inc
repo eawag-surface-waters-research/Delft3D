@@ -38,6 +38,36 @@ select case(var_name)
     type_name = "double"
   case("Uorb")
     type_name = "double"
+  case("bodsed")
+    type_name = "double"
+  case("dpsed")
+    type_name = "double"
+  case("msed")
+    type_name = "double"
+  case("thlyr")
+    type_name = "double"
+  case("rsedeq")
+    type_name = "double"
+  case("sbcx")
+    type_name = "double"
+  case("sbcy")
+    type_name = "double"
+  case("sbwx")
+    type_name = "double"
+  case("sbwy")
+    type_name = "double"
+  case("sscx")
+    type_name = "double"
+  case("sscy")
+    type_name = "double"
+  case("sswx")
+    type_name = "double"
+  case("sswy")
+    type_name = "double"
+  case("taucr")
+    type_name = "double"
+  case("tetacr")
+    type_name = "double"
   case("InterceptThickness")
     type_name = "double"
   case("InterceptHs")

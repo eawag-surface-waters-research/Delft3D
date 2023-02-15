@@ -38,6 +38,36 @@ select case(var_name)
     location_name = "face"
   case("Uorb")
     location_name = "face"
+  case("bodsed")
+    location_name = "face"
+  case("dpsed")
+    location_name = "face"
+  case("msed")
+    location_name = "face"
+  case("thlyr")
+    location_name = "face"
+  case("rsedeq")
+    location_name = "face"
+  case("sbcx")
+    location_name = "face"
+  case("sbcy")
+    location_name = "face"
+  case("sbwx")
+    location_name = "face"
+  case("sbwy")
+    location_name = "face"
+  case("sscx")
+    location_name = "face"
+  case("sscy")
+    location_name = "face"
+  case("sswx")
+    location_name = "face"
+  case("sswy")
+    location_name = "face"
+  case("taucr")
+    location_name = "face"
+  case("tetacr")
+    location_name = "face"
   case("InterceptThickness")
     location_name = "face"
   case("InterceptHs")

@@ -40,6 +40,49 @@
        shape(1) = ndx
     case("Uorb")
        shape(1) = ndx
+    case("bodsed")
+       shape(2) = stmpar%morlyr%settings%nfrac
+       shape(1) = ndx
+    case("dpsed")
+       shape(1) = ndx
+    case("msed")
+       shape(3) = stmpar%morlyr%settings%nfrac
+       shape(2) = stmpar%morlyr%settings%nlyr
+       shape(1) = ndx
+    case("thlyr")
+       shape(2) = stmpar%morlyr%settings%nlyr
+       shape(1) = ndx
+    case("rsedeq")
+       shape(2) = ndx
+       shape(1) = stmpar%lsedsus
+    case("sbcx")
+       shape(2) = ndx
+       shape(1) = stmpar%lsedtot
+    case("sbcy")
+       shape(2) = ndx
+       shape(1) = stmpar%lsedtot
+    case("sbwx")
+       shape(2) = ndx
+       shape(1) = stmpar%lsedtot
+    case("sbwy")
+       shape(2) = ndx
+       shape(1) = stmpar%lsedtot
+    case("sscx")
+       shape(2) = ndx
+       shape(1) = stmpar%lsedsus
+    case("sscy")
+       shape(2) = ndx
+       shape(1) = stmpar%lsedsus
+    case("sswx")
+       shape(2) = ndx
+       shape(1) = stmpar%lsedsus
+    case("sswy")
+       shape(2) = ndx
+       shape(1) = stmpar%lsedsus
+    case("taucr")
+       shape(1) = stmpar%lsedtot
+    case("tetacr")
+       shape(1) = stmpar%lsedtot
     case("InterceptThickness")
        shape(1) = ndx
     case("InterceptHs")
