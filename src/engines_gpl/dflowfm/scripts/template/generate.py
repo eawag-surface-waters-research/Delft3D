@@ -16,11 +16,12 @@ import logging
 import fileinput
 
 from docopt import docopt
+from pathlib import Path
 import mako.template
 import mako.lookup
 
 
-def main(fortranfiledirs="fortranfiledirs",templatedir="templates"):
+def main(fortranfiledirs,templatedir="templates"):
     """read the fortran files, parse them and apply them
     to the templates in templatedir"""
 
@@ -57,12 +58,11 @@ def main(fortranfiledirs="fortranfiledirs",templatedir="templates"):
 
     variables = []
     numv = 0
-    filepath = '..\\..\\..\\scripts\\fortranfiles.txt'
     for fdir in fortranfiledirs:
-        fortranfiles = open(fdir,'r')
+        fortranfiles = open(Path(fdir),'r')
         for fortranfile in fortranfiles.read().splitlines():
             logging.info("Scanning file %s...", fortranfile)
-            with open(fortranfile) as f:
+            with open(Path(fortranfile)) as f:
                 linenr = 0
                 for line in f.readlines():
                     linenr = linenr + 1
