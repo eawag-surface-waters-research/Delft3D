@@ -37,6 +37,7 @@
       use m_flowtimes
       use unstruc_messages
       use m_partitioninfo
+      use m_nod2lin
       implicit none
 
       character(len=256)         :: str
@@ -47,8 +48,6 @@
 
       integer                    :: k, k1, k2, L
       integer                    :: ierror
-
-      double precision, external :: nod2linx, nod2liny
 
 !     compute water depth gradient, based on cell-centered date
       hs = s1-bl

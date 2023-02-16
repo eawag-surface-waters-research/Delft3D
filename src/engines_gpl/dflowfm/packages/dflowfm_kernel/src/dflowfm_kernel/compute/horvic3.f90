@@ -34,6 +34,7 @@
  use m_flow
  use m_flowgeom
  use m_missing
+ use m_nod2lin, only: nod2linx, nod2liny, lin2nodx, lin2nody
  implicit none
 
  integer :: L                                        ! in direction of link L
@@ -50,7 +51,7 @@
 
  integer          :: ik1, ik2, in3, in4
 
- double precision, external :: nod2linx, nod2liny, lin2nodx, lin2nody, cor2linx, cor2liny
+ double precision, external :: cor2linx, cor2liny
 
  horvic3 = 0d0
  csL     = csu(L) ; snL = snu(L)

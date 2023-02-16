@@ -42,6 +42,8 @@ subroutine sethu(jazws0)                            ! Set upwind waterdepth hu
  use m_netw, only: xk, yk, zk
  use unstruc_model, only:md_restartfile
  use geometry_module, only: dbdistance
+ use m_limiters, only: dslim
+ use m_nod2lin, only: nod2linx, nod2liny
 
  implicit none
 
@@ -70,8 +72,6 @@ subroutine sethu(jazws0)                            ! Set upwind waterdepth hu
  integer           :: k3, k4, itel, kuu, ku2, kku, ip , Lnu, kbd, ktd, kbd0, LLbc, kkd
 
  double precision  :: zw0u
-
- double precision, external :: dslim,  nod2linx, nod2liny
 
  ! SPvdP: s0 at the old time level already satisfies the boundary conditions at the old time level (see s1nod)
  !  Nevertheless, s0 at the boundary (at the old time-level) will now be filled with boundary conditions at the new time level
