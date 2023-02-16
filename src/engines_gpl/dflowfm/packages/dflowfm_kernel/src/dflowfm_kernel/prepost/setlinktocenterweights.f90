@@ -37,7 +37,6 @@
  use m_flowgeom
  use m_sferic
  use m_longculverts
- use m_nod2lin, only: lin2nodx, lin2nody
  implicit none
 
  double precision       :: wud, wuL1, wuL2, wuk, cs, sn
@@ -50,6 +49,8 @@
 
  double precision, allocatable       :: wcxy (:,:)   ! center weight factors (2,ndx) , only for normalising
  double precision, allocatable       :: wc   (:)     ! center weight factors (ndx)   , only for normalising
+
+ double precision, external :: lin2nodx, lin2nody
 
  if ( allocated (wcx1) )  deallocate(wcx1,wcy1,wcx2,wcy2)
  if ( allocated (wcxy ) ) deallocate(wcxy )

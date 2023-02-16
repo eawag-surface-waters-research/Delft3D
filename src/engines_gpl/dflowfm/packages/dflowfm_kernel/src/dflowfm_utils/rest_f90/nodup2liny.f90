@@ -30,36 +30,22 @@
 ! $Id$
 ! $HeadURL$
 
-! =================================================================================================
-! =================================================================================================
-  subroutine getucxucybarrierzero ( Lf, ku, ucxku, ucyku )
- use m_flow
- use m_flowgeom
- implicit none
+!>    return y-component in link coordinate frame of vector in "klnup"-node coordinate frame
+      double precision function nodup2liny(L,ib,ux,uy)
+         use m_flowgeom, only: csbup, snbup
+         use m_sferic
+         implicit none
 
- integer           :: ku, L, LL, Ls, n12, Lf
- double precision  :: ucxku, ucyku, ww, ac1, cs, sn
- double precision, external :: lin2nodx, lin2nody
+         integer,          intent(in) :: L   !< flowlink number
+         integer,          intent(in) :: ib !< stencil index (1 (iup=1), 2 (iup=2), 3 (iup=4), or 4 (iup=5))
+         double precision, intent(in) :: ux, uy !< vector components in flownode coordinate frame
 
- ucxku = 0d0  ; ucyku = 0d0
 
- do LL = 1,nd(ku)%lnx
-    Ls = nd(ku)%ln(LL); L = iabs(Ls)
-    if (Ls < 0) then
-       ac1 = acL(L)
-       n12 = 1
-    else
-       ac1 = 1d0 - acL(L)
-       n12 = 2
-    endif
-    ww = ac1*dx(L)*wu(L)
-    cs = ww*csu(L) ; sn = ww*snu(L)
-    if( L /= Lf ) then
-       ucxku = ucxku + lin2nodx(L,n12,cs,sn)*u1(L)
-       ucyku = ucyku + lin2nody(L,n12,cs,sn)*u1(L)
-    endif
- enddo
- ucxku = ucxku/ba(ku)
- ucyku = ucyku/ba(ku)
+         if ( jsferic.ne.1 .or. jasfer3D.ne.1 ) then
+            nodup2liny = uy
+         else
+            nodup2liny = -snbup(ib,L) * ux + csbup(ib,L) * uy
+         end if
 
- end subroutine getucxucybarrierzero
+         return
+      end function nodup2liny

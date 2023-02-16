@@ -34,12 +34,13 @@
  use m_flow
  use m_flowgeom
  use m_sferic, only: jasfer3D
- use m_nod2lin, only: lin2nodx, lin2nody
  implicit none
 
  integer           :: ku, LLL, LL, L, Ls, ischeme, n12
 
  double precision  :: ucxku, ucyku, ww, ac1, huweir, hunoweir, wl, wlno, at, cs, sn, fac
+
+ double precision, external :: lin2nodx, lin2nody
 
  ucxku = 0d0  ; ucyku = 0d0
  huweir = 0d0 ; hunoweir = 0d0; wl = 0d0 ; wlno = 0d0; at = 0d0
