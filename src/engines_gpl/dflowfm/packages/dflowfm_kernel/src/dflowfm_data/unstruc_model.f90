@@ -492,6 +492,10 @@ subroutine loadModel(filename)
        call remove_path(md_netfile, unc_meta_net_file)
     end if
     call timstop(timerHandle)
+    
+    if (useVolumeTables .and. ( network%loaded == .false. ) ) then
+        useVolumeTables = .false.
+    end if 
 
     network%sferic = jsferic==1
 
