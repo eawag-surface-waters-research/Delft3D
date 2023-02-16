@@ -258,6 +258,7 @@ module m_readCrossSections
       if (.not. success) then
          major = 1
          minor = 0
+         return
       endif
       
       select case (major)
