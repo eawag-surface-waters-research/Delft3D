@@ -38,7 +38,8 @@ use tree_data_types
 use tree_structures
 use unstruc_messages
 use m_globalparameters, only : t_filenames
-use time_module, only : JULIAN
+!BS use time_module, only : JULIAN
+use time_module
 
 implicit none
 
@@ -683,6 +684,7 @@ end subroutine loadModel
 !! Important in loadModel() process.
 !! @see writeMDUFile
 subroutine readMDUFile(filename, istat)
+    use time_module
     use m_flow, notinuse_s=>success
                !,                  only : kmx, layertype, mxlayz, sigmagrowthfactor, iturbulencemodel, &
                !                         LAYTP_SIGMA, numtopsig, spirbeta,                              &

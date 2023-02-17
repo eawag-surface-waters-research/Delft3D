@@ -58,6 +58,8 @@ module test_time_module
          call test( test_parse_time_invalid, 'Test parse_time with invalid input')
          call test( test_ymd2modified_jul_string_valid, 'Test ymd2modified_jul_string with valid input')
          call test( test_ymd2modified_jul_string_invalid, 'Test ymd2modified_jul_string with invalid input')
+         call test( test_datetimestring_to_seconds, 'Test datetimestring_to_seconds' )
+         call test( test_seconds_to_datetimestring, 'Test seconds_to_datetimestring' )
       end subroutine tests_time_module
 
       !> test CalendarYearMonthDayToJulianDate
@@ -335,5 +337,22 @@ module test_time_module
          end do
       end subroutine test_ymd2modified_jul_string_invalid
       
+      subroutine test_datetimestring_to_seconds()
+        double precision    :: timsec
+        integer             :: stat
+      
+        call datetimestring_to_seconds('20120101000100','20120101',timsec,stat)     ! easy for now, delta = 1 minute
+        call assert_comparable(timsec, 60.0_hp, tol, 'error for timsec = 201201010001')
+      
+      end subroutine test_datetimestring_to_seconds
+      
+      subroutine test_seconds_to_datetimestring()
+        character(len=15) :: dateandtime
+        
+        dateandtime = '00000000_000000'
+        call seconds_to_datetimestring(dateandtime,'20120101',60.0_hp)              ! easy for now, delta = 1 minute
+        call assert_equal_string( trim(dateandtime), '20120101_000100', 'error for datetimestring = 20120101000001' )
+      
+      end subroutine test_seconds_to_datetimestring
 
 end module test_time_module

@@ -31,6 +31,7 @@
 ! $HeadURL$
 
  SUBROUTINE TEXTFLOW()
+ use time_module
  use m_flowgeom
  use Timers
  !USE M_NETW
