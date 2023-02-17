@@ -4177,7 +4177,7 @@ subroutine create_hotfile_line(fname,inest,line,sr,wavedata)
        ! line to ensure that SWAN is going to produce a hotfile
        !
        write (fname,'(a,i0,5a)') 'hot_', inest, '_', trim(sr%writehottime(1:8)), '_', trim(sr%writehottime(10:15)), '.nc'
-       line = "SPEC 'COMPGRID' RELATIVE '" // trim(fname) // "'"    
+       line = "SPEC 'COMPGRID' RELATIVE '" // trim(fname) // "' MDGRID"
     endif
     
     
