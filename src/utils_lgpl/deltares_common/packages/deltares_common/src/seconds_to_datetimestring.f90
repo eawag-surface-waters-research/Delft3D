@@ -30,36 +30,28 @@
 ! $Id$
 ! $HeadURL$
 
-!> wall clock timer
-   subroutine klok(t)
-   !BS use unstruc_messages
-   use MessageHandling
-   implicit none
+!> Given time in seconds from refdat, fill dateandtime string
+ !! NOTE: seconds_to_datetimestring and datetimestring_to_seconds are not compatible, because of minutes versus seconds, and different format string.
+ subroutine seconds_to_datetimestring(dateandtime,refdat,tim)
+ implicit none
 
-   double precision   :: t
-   character(len=8)   :: date
-   character(len=10)  :: time
-   character(len=5)   :: zone
-   integer            :: timing(8)
+ character,        intent(out) :: dateandtime*(*) !< Output datetime string, format '20000101_000000', note: includes seconds.
+ double precision, intent(in)  :: tim             !< Input time in seconds since refdat.
+character (len=8), intent(in)  :: refdat          !< reference date
 
-   character(len=128) :: mesg
+ integer          :: iday, imonth, iyear, ihour, imin, isec
 
-   integer,          save :: ndays=0
-   integer,          save :: dayprev=-999
+ dateandtime = '20000101_000000'
+ ! TODO: AvD: seconds_to_datetimestring and datetimestring_to_seconds are now inconsistent since the addition of this '_'
 
-   call date_and_time(date, time, zone, timing)
+ call datetime_from_refdat(tim, refdat, iyear, imonth, iday, ihour, imin, isec)
 
-!  check for new day
-   if ( dayprev.eq.-999 ) then
-      dayprev = timing(3)    ! initialization to
-   else if ( timing(3).ne.dayprev ) then
-      ndays = ndays+1
-      write(mesg, "('new wall clock day: previous day=', I2, ', new day=', I2)") dayprev, timing(3)
-      call mess(LEVEL_INFO, trim(mesg))
-      dayprev = timing(3)
-   end if
+ write(dateandtime( 1:4 ),'(i4)')   iyear
+ write(dateandtime( 5:6 ),'(i2.2)') imonth
+ write(dateandtime( 7:8 ),'(i2.2)') iday
+ write(dateandtime(10:11),'(i2.2)') ihour
+ write(dateandtime(12:13),'(i2.2)') imin
+ write(dateandtime(14:15),'(i2.2)') isec
 
-   t = ndays*3600d0*24d0 + timing(5)*3600d0 + timing(6)*60d0 + timing(7) + dble(timing(8))/1000d0
-
-
-   end subroutine klok
+ return
+ end subroutine seconds_to_datetimestring

@@ -32,7 +32,6 @@
 
    subroutine maketekaltimes()
    use m_flowtimes
-   use time_module
    implicit none
    logical          :: jawel
    integer          :: minp, mout, i, k

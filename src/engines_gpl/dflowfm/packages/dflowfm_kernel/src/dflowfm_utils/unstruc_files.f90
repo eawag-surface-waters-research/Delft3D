@@ -35,7 +35,6 @@ module unstruc_files
 
 use unstruc_messages
 use unstruc_version_module
-use time_module
 
 implicit none
 
@@ -141,7 +140,6 @@ end subroutine close_all_files
 function defaultFilename(filecat, timestamp, prefixWithDirectory, allowWildcard)
     use unstruc_model
     use m_flowtimes
-    use time_module
     use string_module, only: get_dirsep
     implicit none
     

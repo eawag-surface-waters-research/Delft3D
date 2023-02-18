@@ -51,7 +51,6 @@ use io_ugrid
 use m_sediment
 use string_module
 use io_netcdf_acdd
-use time_module
 implicit none
 
 integer            :: nerr_
@@ -12347,7 +12346,6 @@ end function get_var_and_shift
 !! Processing is done elsewhere.
 !subroutine unc_read_map(filename, numk_keep, numl_keep, numk_read, numl_read, ierr)
 subroutine unc_read_map_or_rst(filename, ierr)
-    use time_module
     use m_flow
     use m_flowtimes
     use m_transport, only: NUMCONST, ISALT, ITEMP, ISED1, ISEDN, ITRA1, ITRAN, constituents, itrac2const, const_names
