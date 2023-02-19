@@ -105,6 +105,7 @@ subroutine z_bott3d(nmmax     ,kmax      ,lsed      ,lsedtot   , &
     logical                              , pointer :: scour
     logical                              , pointer :: snelli
     logical                              , pointer :: l_suscor
+    logical, dimension(:)                , pointer :: cmpupdfrac
     real(fp), dimension(:)               , pointer :: factor
     real(fp)                             , pointer :: slope
     real(fp), dimension(:)               , pointer :: bc_mor_array
@@ -322,6 +323,7 @@ subroutine z_bott3d(nmmax     ,kmax      ,lsed      ,lsedtot   , &
     sinkse              => gdp%gderosed%sinkse
     sourse              => gdp%gderosed%sourse
     nmudfrac            => gdp%gdsedpar%nmudfrac
+    cmpupdfrac          => gdp%gdsedpar%cmpupdfrac
     rhosol              => gdp%gdsedpar%rhosol
     cdryb               => gdp%gdsedpar%cdryb
     sedtyp              => gdp%gdsedpar%sedtyp
@@ -1028,6 +1030,14 @@ subroutine z_bott3d(nmmax     ,kmax      ,lsed      ,lsedtot   , &
        ! Apply erosion and sedimentation to bookkeeping system
        !
        if (cmpupd) then
+          !
+          ! exclude specific fractions if cmpupdfrac has been set
+          !
+          do l = 1, lsedtot
+             if (.not. cmpupdfrac(l)) then
+                dbodsd(l, :) = 0.0_fp 
+             endif
+          enddo
           !
           ! Determine new thickness of transport layer
           !

@@ -73,6 +73,8 @@ subroutine rdstm(stm, griddim, filsed, filmor, filtrn, &
     use m_ini_noderel ! for node relation definitions
     !
     implicit none
+    !
+    integer                   , parameter    :: NPARDEF = 20
 !
 ! Arguments
 !
@@ -94,17 +96,17 @@ subroutine rdstm(stm, griddim, filsed, filmor, filtrn, &
 !
 ! Local variables
 !
-    type(tree_data)             , pointer     :: sedfil_tree
-    type(tree_data)             , pointer     :: morfil_tree
-    integer                   :: istat
-    integer                   :: lstsci
-    integer                   :: nto
-    integer                   :: nmaxus
-    integer                   :: nmlb
-    integer                   :: nmub
-    integer                   :: l
-    !
-    integer                   , parameter    :: NPARDEF = 20
+    logical                                  :: cmpupdall
+    logical                                  :: cmpupdany
+    integer                                  :: istat
+    integer                                  :: lstsci
+    integer                                  :: nto
+    integer                                  :: nmaxus
+    integer                                  :: nmlb
+    integer                                  :: nmub
+    integer                                  :: l
+    type(tree_data)               , pointer  :: morfil_tree
+    type(tree_data)               , pointer  :: sedfil_tree
     integer, dimension(2,NPARDEF)            :: ipardef
     real(fp), dimension(NPARDEF)             :: rpardef
 !
@@ -221,13 +223,15 @@ subroutine rdstm(stm, griddim, filsed, filmor, filtrn, &
     ! Echo sediment and transport parameters
     !
     call echosed(lundia, error, stm%lsedsus, stm%lsedtot, &
-               & stm%morpar%iopsus, stm%sedpar, stm%trapar)
+               & stm%morpar%iopsus, stm%sedpar, stm%trapar, stm%morpar%cmpupd)
     if (error) goto 999
     !
     ! Echo morphology parameters
     !
+    cmpupdall = all(stm%sedpar%cmpupdfrac)
+    cmpupdany = any(stm%sedpar%cmpupdfrac)
     call echomor(lundia, error, lsec, stm%lsedtot, nto, &
-               & nambnd, stm%sedpar, stm%morpar, dtunit)
+               & nambnd, stm%sedpar, stm%morpar, dtunit, cmpupdall, cmpupdany)
     !
 999 continue
     !
