@@ -184,7 +184,6 @@ subroutine tram2 (numrealpar,realpar   ,wave      ,i2d3d     ,npar      , &
     real(fp) :: zusus
     real(fp) :: phi_phase
     real(fp) :: r
-    real(fp) :: uw_lt
 !
 !! executable statements -------------------------------------------------------
 !
@@ -257,7 +256,7 @@ subroutine tram2 (numrealpar,realpar   ,wave      ,i2d3d     ,npar      , &
                  & i2d3d     ,mudfrac   ,fsilt     ,taucr1    ,psi       , &
                  & dzduu     ,dzdvv     ,eps       ,camax     ,iopsus    , &
                  & ag        ,wave      ,tauadd    ,gamtcr    ,betam     , &
-                 & awb       ,wform     ,phi_phase ,r         ,uw_lt     ) 
+                 & awb       ,wform     ,phi_phase ,r         ) 
     realpar(RP_DSS)   = real(dss    ,hp)
     !
     ! Find bottom cell for SAND sediment calculations and store for use
@@ -410,7 +409,7 @@ subroutine tram2 (numrealpar,realpar   ,wave      ,i2d3d     ,npar      , &
                         & dzduu     ,dzdvv     ,rhowat    ,ag        ,bedw      , &
                         & pangle    ,fpco      ,susw      ,wave      ,eps       , &
                         & subiw     ,vcr       ,error     ,message   ,wform     , &
-                        & r         ,phi_phase ,uw_lt     )
+                        & r         ,phi_phase ,uwbih     )
            ! van Rijn (2004) specific output
            par     = missing_value
            par( 1) = tauc

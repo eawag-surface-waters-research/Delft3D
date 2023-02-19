@@ -8,7 +8,7 @@ subroutine bedtr2004(u2dh      ,d50       ,d90       ,h1        ,rhosol    , &
                    & dzduu     ,dzdvv     ,rhowat    ,ag        ,bedw      , &
                    & pangle    ,fpco      ,susw      ,wave      ,eps       , &
                    & subiw     ,vcr       ,error     ,message   ,wform     , &
-                   & r         ,phi_phase ,uw_lt     )
+                   & r         ,phi_phase ,uwbih     )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2023.                                
@@ -112,7 +112,7 @@ subroutine bedtr2004(u2dh      ,d50       ,d90       ,h1        ,rhosol    , &
     integer                  , intent(in)  :: wform
     real(fp)                 , intent(in)  :: r
     real(fp)                 , intent(in)  :: phi_phase
-    real(fp)                 , intent(in)  :: uw_lt
+    real(fp)                 , intent(in)  :: uwbih
 !
 ! Local variables
 !
@@ -311,10 +311,10 @@ subroutine bedtr2004(u2dh      ,d50       ,d90       ,h1        ,rhosol    , &
              ! Makes u(0)=0 from ABREU et al 2010 CE (Part 2)
              tc     = time-deltat
              !
-             udt = uw_lt*f*(sin(omega*tc)+(r*sin(phi_phase))/(1.0_fp+f))/(1.0_fp-r*cos(omega*tc+phi_phase))   ! Velocity u(t) from Eq. (4)
+             udt = uwbih*f*(sin(omega*tc)+(r*sin(phi_phase))/(1.0_fp+f))/(1.0_fp-r*cos(omega*tc+phi_phase))   ! Velocity u(t) from Eq. (4)
              if (pangle > 0.0_fp) then !pangle is phase lead defined in .tra file
-                udt2 = uw_lt*f*(sin(omega*(tc+dtt))+(r*sin(phi_phase))/(1.0_fp+f))/(1.0_fp-r*cos(omega*(tc+dtt)+phi_phase))   ! Velocity u(t) from Eq. (4) with phase lead to t+dtt
-                udt1 = uw_lt*f*(sin(omega*(tc-dtt))+(r*sin(phi_phase))/(1.0_fp+f))/(1.0_fp-r*cos(omega*(tc-dtt)+phi_phase))   ! Velocity u(t) from Eq. (4) with phase lead to t-dtt
+                udt2 = uwbih*f*(sin(omega*(tc+dtt))+(r*sin(phi_phase))/(1.0_fp+f))/(1.0_fp-r*cos(omega*(tc+dtt)+phi_phase))   ! Velocity u(t) from Eq. (4) with phase lead to t+dtt
+                udt1 = uwbih*f*(sin(omega*(tc-dtt))+(r*sin(phi_phase))/(1.0_fp+f))/(1.0_fp-r*cos(omega*(tc-dtt)+phi_phase))   ! Velocity u(t) from Eq. (4) with phase lead to t-dtt
                 udt  = plead1*udt + plead2*tp*(udt2-udt1)/(4.0_fp*pi*dtt)                                                     ! Velocity u(t) with phase lead
              endif
              ! update uon and uoff values
