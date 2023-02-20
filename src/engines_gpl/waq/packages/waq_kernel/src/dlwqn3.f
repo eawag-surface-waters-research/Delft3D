@@ -46,7 +46,6 @@
 !     SUBROUTINES CALLED : DLWQTR, user transport routine
 !                          PROCES, DELWAQ proces system
 !                          DLWQO2, DELWAQ output system
-!                          DLWQPP, user postprocessing routine
 !                          DLWQT0, sets time functions
 !                          DLWQ13, system postpro-dump routine
 !                          DLWQ14, scales waterquality
@@ -72,8 +71,6 @@
 !
       use grids
       use timers
-      use m_timers_waq
-      use m_couplib
       use delwaq2_data
       use waqmem          ! module with the more recently added arrays
       use m_openda_exchange_items, only : get_openda_buffer
@@ -203,8 +200,7 @@
      &                 a(ileng) , a(iconc) , a(idisp) , a(icons) , a(iparm) ,
      &                 a(ifunc) , a(isfun) , a(idiff) , a(ivelo) , itime    ,
      &                 idt      , c(isnam) , nocons   , nofun    , c(icnam) ,
-     &                 c(ipnam) , c(ifnam) , c(isfna) , ldummy   , ilflag   ,
-     &                 npartp   )
+     &                 c(ipnam) , c(ifnam) , c(isfna) , ldummy   , ilflag   )
 
 !jvb  Temporary ? set the variables grid-setting for the DELWAQ variables
 
@@ -240,7 +236,7 @@
      &                 j(ivtda) , j(ivdag) , j(ivtag) , j(ivagg) , j(iapoi) ,
      &                 j(iaknd) , j(iadm1) , j(iadm2) , j(ivset) , j(ignos) ,
      &                 j(igseg) , novar    , a        , nogrid   , ndmps    ,
-     &                 c(iprna) , intsrt   , j(iowns) , j(iownq) , mypart   ,
+     &                 c(iprna) , intsrt   , 
      &                 j(iprvpt), j(iprdon), nrref    , j(ipror) , nodef    ,
      &                 surface  , lun(19)  )
 
@@ -291,7 +287,7 @@
      +              C(IBTYP), J(INTYP), C(ICNAM), noqtt   , J(IXPNT),
      +              INTOPT  , C(IPNAM), C(IFNAM), C(ISFNA), J(IDMPB),
      +              NOWST   , NOWTYP  , C(IWTYP), J(IWAST), J(INWTYP),
-     +              A(IWDMP), iknmkv  , J(IOWNS), MYPART  , isegcol )
+     +              A(IWDMP), iknmkv  , isegcol )
 
 !          zero cummulative array's
 
@@ -301,7 +297,7 @@
      &                    a(idmpq), a(idmps), noraai  , imflag  , ihflag  ,
      &                    a(itrra), ibflag  , nowst   , a(iwdmp))
          endif
-         if (mypart.eq.1) call write_progress( dlwqd%progress )
+         call write_progress( dlwqd%progress )
 
 !          simulation done ?
 
@@ -311,8 +307,7 @@
 !          add processes
 
          call dlwq14 ( a(iderv), notot   , nosss   , itfact  , a(imas2),
-     &                 idt     , iaflag  , a(idmps), intopt  , j(isdmp),
-     &                 j(iowns), mypart )
+     &                 idt     , iaflag  , a(idmps), intopt  , j(isdmp))
 
 !     get new volumes
          itimel = itime
@@ -330,7 +325,7 @@
      &                       j(inrha), j(inrh2), j(inrft), noseg   , a(ivoll),
      &                       j(ibulk), lchar   , ftype   , isflag  , ivflag  ,
      &                       updatr  , j(inisp), a(inrsp), j(intyp), j(iwork),
-     &                       lstrec  , lrewin  , a(ivol2), mypart  , dlwqd   )
+     &                       lstrec  , lrewin  , a(ivol2), dlwqd   )
                if ( lrewin ) call move ( a(ivol2), a(ivoll) , noseg   )
                call dlwqf8 ( noseg   , noq     , j(ixpnt), idt     , iknmkv  ,
      &                       a(ivol ), a(iflow), a(ivoll), a(ivol2))
@@ -342,7 +337,7 @@
      &                       j(inrha), j(inrh2), j(inrft), noseg   , a(ivol2),
      &                       j(ibulk), lchar   , ftype   , isflag  , ivflag  ,
      &                       updatr  , j(inisp), a(inrsp), j(intyp), j(iwork),
-     &                       lstrec  , lrewin  , a(ivoll), mypart  , dlwqd   )
+     &                       lstrec  , lrewin  , a(ivoll), dlwqd   )
          end select
 
 !        update the info on dry volumes with the new volumes
@@ -359,7 +354,7 @@
      &                 j(inwtyp), j(iwast) , iwstkind , a(iwste) , a(iderv) ,
      &                 iknmkv   , nopa     , c(ipnam) , a(iparm) , nosfun   ,
      &                 c(isfna ), a(isfun) , j(isdmp) , a(idmps) , a(imas2) ,
-     &                 a(iwdmp) , 1        , notot    , j(iowns ), mypart   )
+     &                 a(iwdmp) , 1        , notot      )
 
 !          do the transport itself
 
@@ -387,14 +382,13 @@
 
          call dlwq18 ( nosys    , notot    , nototp   , nosss    , a(ivol2) ,
      &                 surface  , a(imass) , a(iconc) , a(iderv) , idtold   ,
-     &                 ivflag   , lun(19)  , j(iowns) , mypart   )
+     &                 ivflag   , lun(19)    )
 !
 !       Forester filter on the vertical
 !
       IF ( FORESTER ) THEN
          CALL DLWQD2 ( LUN(19) , NOSYS   , NOTOT   , NOSEG   , NOQ3    ,
-     *                 KMAX    , A(ICONC), A(LLENG), NOWARN  , J(IOWNS),
-     *                 MYPART )
+     *                 KMAX    , A(ICONC), A(LLENG), NOWARN  )
       ENDIF
 
 !     calculate closure error
@@ -422,8 +416,6 @@
 
       if ( ACTION == ACTION_FINALISATION    .or.
      &     ACTION == ACTION_FULLCOMPUTATION      ) then
-          if (mypart.eq.1) then
-
 !            close files, except monitor file
 
              call CloseHydroFiles( dlwqd%collcoll )
@@ -433,7 +425,6 @@
 
              CALL DLWQ13 ( LUN      , LCHAR , A(ICONC) , ITIME , C(IMNAM) ,
      &                     C(ISNAM) , NOTOT , nosss    )
-          end if ! mypart.eq.1
       endif
 
  9999 if ( timon ) call timstop ( ithandl )

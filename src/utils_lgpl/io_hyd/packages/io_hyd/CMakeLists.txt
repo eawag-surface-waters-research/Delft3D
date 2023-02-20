@@ -41,4 +41,3 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${source_files})
 set_target_properties (${library_name} PROPERTIES FOLDER utils_lgpl/io_hyd)
 
 target_compile_options(${library_name} PRIVATE "${waq_default_flags}")
-target_compile_options(${library_name} PRIVATE $<$<CONFIG:Debug>:${waq_debug_flags} ${check_bounds_flag}>)

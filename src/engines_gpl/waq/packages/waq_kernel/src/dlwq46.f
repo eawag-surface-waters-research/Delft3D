@@ -25,8 +25,7 @@
      *                    VELO   , CONC   , BOUND  , IPOINT , NOSYS  ,
      *                    NOTOT  , NOQ    , NODISP , NOVELO , IDPNT  ,
      *                    IVPNT  , IOPT   , IDT    , ILFLAG , DMPQ   ,
-     *                    NDMPQ  , IQDMP  , IBACKW , NOQW   , OWNERS ,
-     *                    MYPART )
+     *                    NDMPQ  , IQDMP  , IBACKW , NOQW    )
 !
 !     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
 !
@@ -73,8 +72,6 @@
 !     IBACKW  INTEGER     *       INPUT   flag = 0 central differences
 !                                              = 1 backward differences
 !     NOQW    INTEGER     1       INPUT   number of water exchanges
-!     OWNERS  INTEGER   NOSEG     INPUT   ownership of segments
-!     MYPART  INTEGER     1       INPUT   number of current part/subdomain
 !
       use timers
       INTEGER    NDMPQ         , IBACKW
@@ -83,7 +80,6 @@
      *           ALENG (  *)   , VELO  (*) , CONC (*) , BOUND(*) ,
      *           IPOINT( 4,* ) , IDPNT(*)  , IVPNT(*) , DMPQ(*)
       integer noqw                      !  input   number of exchanges waterphase
-      INTEGER    OWNERS(*), MYPART
 
       logical disp0q0, disp0bnd, loword !  logical representation of options
 
@@ -107,13 +103,6 @@
          I    = IPOINT(1,IQ)
          J    = IPOINT(2,IQ)
          IF ( I .EQ. 0 .OR. J .EQ. 0 ) GOTO 60
-         IF ( I .LT. 0) THEN
-            IF (OWNERS(J).NE.MYPART) GOTO 60
-         ELSEIF ( J .LT. 0) THEN
-            IF (OWNERS(I).NE.MYPART) GOTO 60
-         ELSE
-            IF (OWNERS(I).NE.MYPART .AND. OWNERS(J).NE.MYPART) GOTO 60
-         ENDIF
          A    = AREA(IQ)
          Q    = FLOW(IQ)
 !

@@ -63,8 +63,8 @@ subroutine  dfm_generate_volume_tables(increment) bind(C, name="dfm_generate_vol
 end subroutine dfm_generate_volume_tables
 
 !!> DLL handle to unc_write_1D_flowgeom_ugrid, used by volume tool to write 1D flowgeom
-subroutine write_volume_table_geom(ncid) bind(C, name="write_volume_table_geom")
-   !DEC$ ATTRIBUTES DLLEXPORT :: write_volume_table_geom
+subroutine write_1D_flowgeom_ugrid(ncid) bind(C, name="write_1D_flowgeom_ugrid")
+   !DEC$ ATTRIBUTES DLLEXPORT :: write_1D_flowgeom_ugrid
 
    use unstruc_netcdf, only: unc_write_1D_flowgeom_ugrid, t_unc_mapids      
    use messageHandling, only: Idlen
@@ -74,44 +74,6 @@ subroutine write_volume_table_geom(ncid) bind(C, name="write_volume_table_geom")
    type(t_unc_mapids)  :: mapids
    call unc_write_1D_flowgeom_ugrid(mapids%id_tsp,ncid)
 
-end subroutine write_volume_table_geom
+end subroutine write_1D_flowgeom_ugrid
 
-!!> generate the volume table with the given increment
-subroutine  dfm_get_variable_pointer(name_var, x) bind(C, name="dfm_get_variable_pointer")
-   !DEC$ ATTRIBUTES DLLEXPORT :: dfm_get_variable_pointer
-
-   use messageHandling
-   use unstruc_channel_flow
-   use m_VolumeTables
-   use iso_c_utils
-   use m_flowgeom
-   use m_flowexternalforcings
-   
-   type(c_ptr), intent(inout)  :: x
-   character(kind=c_char), intent(in) :: name_var(*)
-   
-   character(len=idlen) :: varname
-   integer, target :: numpoints
-   
-   varname = char_array_to_string(name_var)
-
-   select case(varname)
-   case('numpoints')
-      numpoints = size(vltb)
-      x = c_loc(numpoints)
-   case('nbndz')
-      x = c_loc(nbndz)
-   case('ln')
-      x = c_loc(ln)
-   case('kbndz')
-      x = c_loc(kbndz)
-   case('vltb')
-      x = c_loc(vltb)
-   case('vltbOnLinks')
-      x = c_loc(vltbOnLinks)
-   case('network')
-      x = c_loc(Network)
-   end select
-   
-end subroutine  dfm_get_variable_pointer
 end module dll_api

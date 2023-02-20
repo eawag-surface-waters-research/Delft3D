@@ -46,6 +46,7 @@ module m_sediment
     real(fp), dimension(:,:), pointer      :: sed      !< sediment concentration
     real(fp), dimension(:), pointer        :: blchg    !< bed level change  [m]
     real(fp), dimension(:), pointer        :: dzbdt    !< bed level change rate [m/s]
+    real(fp), dimension(:,:), pointer      :: sscdtzb  !< account for ssc in shallow cells
     type (message_stack)    , pointer      :: messages
  end type mortmpdummy
  !
@@ -91,6 +92,7 @@ module m_sediment
  logical         , allocatable     :: bermslopeindexbed(:)
  logical         , allocatable     :: bermslopeindexsus(:)
  double precision, allocatable     :: bermslopecontrib(:,:)
+ double precision, allocatable     :: ssccum(:,:)
 
  integer                           :: jased         !< Include sediment, 1=Krone, 2=Soulsby van Rijn 2007, 3=Bert's morphology module
  integer                           :: jaseddenscoupling=0    !< Include sediment in rho 1 = yes , 0 = no

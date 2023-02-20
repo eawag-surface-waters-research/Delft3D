@@ -39,11 +39,9 @@ libflow1d_io_la_SOURCES = \
          Readstructures.f90 \
          readObservationPoints.f90 \
          readStorageNodes.f90 \
-         readSalinityParameters.f90 \
          readspatialdata.f90 \
 		 read_roughness.f90 \
          readCrossSections.f90 \
-         readModelParameters.f90 \
          flow1d_reader.F90 \
          flow1d_io.F90
 

@@ -26,6 +26,7 @@
 # In practice, it's often better to omit it, because allocation of contiguous nodes may take more time than allocation of random nodes.
 
 
+
 echo "---Load modules..."
 module purge
 module load 2022

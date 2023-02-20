@@ -62,13 +62,8 @@ module m_branch
    type, public :: t_branch
       character(IdLen)               :: id                      !< unique identification
       integer                        :: index                   !< sequence number
-      character(IdLen)               :: name                    !< Name of the branch
       double precision               :: length                  !< length of branch
       integer                        :: orderNumber             !< order number to interpolate cross sections over branches
-
-      integer                        :: brType                  !< channel type of 1D channnel
-      integer                        :: flapGate = 0            !< 0 = None, 1 = Only Positive Flow, 2 = Only Negative Flow
-                                                                !< Not implemeted in Readers yet
 
       integer                        :: nextBranch(2)           !< neighbouring branch with same ordernumber at start or end of branch
       integer                        :: nodeIndex(2)            !< indexes of Begin Node and End Node
@@ -357,11 +352,13 @@ module m_branch
             ngrid = ngrid + 1
             pbr%grd(i) = ngrid
 
-            if (pbr%grd_input(i) /= 0) then
-               ! Store the original input grid point number, without auto-added
-               ! start/end points on branch.
-               ngrid_input = ngrid_input+1
-               pbr%grd_input(i) = ngrid_input
+            if (admin_input) then
+               if (pbr%grd_input(i) /= 0) then
+                  ! Store the original input grid point number, without auto-added
+                  ! start/end points on branch.
+                  ngrid_input = ngrid_input+1
+                  pbr%grd_input(i) = ngrid_input
+               end if
             end if
 
             ! Administer grid points sequences:
@@ -404,11 +401,13 @@ module m_branch
 
          ngrid = ngrid + 1
          pbr%grd(i) = ngrid
-         if (pbr%grd_input(i) /= 0) then
-            ! Store the original input grid point number, without auto-added
-            ! start/end points on branch.
-            ngrid_input = ngrid_input+1
-            pbr%grd_input(i) = ngrid_input
+         if (admin_input) then
+            if (pbr%grd_input(i) /= 0) then
+               ! Store the original input grid point number, without auto-added
+               ! start/end points on branch.
+               ngrid_input = ngrid_input+1
+               pbr%grd_input(i) = ngrid_input
+            end if
          end if
 
          if (pbr%ToNode%gridNumber == -1.and. pbr%isGPLastAtBranchEnd) then

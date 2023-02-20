@@ -139,6 +139,11 @@ rem =================================
         set config=%1
         set mode=quiet
     )
+    if "%1" == "flow2d3d" (
+        set prepareonly=0
+        set config=%1
+        set mode=quiet
+    )
     
   set "options=-vs:0 -ifort:0 -coverage: -prepareonly:"
 
@@ -514,12 +519,10 @@ rem =======================
         xcopy %root%\build_delft3d4\x64\Release\share                    %root%\build_delft3d4\x64\share\           /E /C /Y /Q > del.log 2>&1
         xcopy %root%\build_delft3d4\x64\Release\swan                     %root%\build_delft3d4\x64\swan\            /E /C /Y /Q > del.log 2>&1
         xcopy %root%\build_delft3d4\x64\Release\d_hydro\bin\*.exe        %root%\build_delft3d4\x64\dflow2d3d\bin\   /E /C /Y /Q > del.log 2>&1
+        xcopy %root%\build_delft3d4\x64\Release\dmor                     %root%\build_delft3d4\x64\dmor\            /E /C /Y /Q > del.log 2>&1
+
         rmdir /s /q %root%\build_delft3d4\x64\Release > del.log 2>&1
         del /f/q del.log
-        echo.
-        echo.
-        echo "Executing python ..\src\scripts_lgpl\artifacts_cleaner.py --product delft3d4 --root ."
-        python src\scripts_lgpl\artifacts_cleaner.py --product delft3d4 --root .
     )
     goto :endproc
 
@@ -555,6 +558,7 @@ rem =======================
     echo "- dimr"
     echo "- tests"
     echo "- delft3d4"
+    echo "- flow2d3d"
     echo.
     echo "[OPTIONS]: usage [OPTION], sometimes followed by a value, space separated, in any order"
     echo "-coverage: Instrument object files for code-coverage tool (codecov) Example: -coverage"

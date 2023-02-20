@@ -42,7 +42,6 @@ module m_1d_structures
    use m_General_Structure
    use m_Universal_Weir
    use m_Bridge
-   use m_ExtraResistance
    use m_hash_search
    use m_Dambreak
    use iso_c_utils
@@ -169,7 +168,6 @@ module m_1d_structures
       type(t_uni_weir),pointer         :: uniweir => null()
       type(t_bridge),pointer           :: bridge => null()
       type(t_GeneralStructure),pointer :: generalst => null()
-      type(t_ExtraResistance),pointer  :: extrares => null()
       type(t_dambreak),pointer         :: dambreak => null()
    end type
 
@@ -352,7 +350,6 @@ subroutine deallocstructure(sts)
          if (associated(sts%struct(i)%uniweir))    call dealloc(sts%struct(i)%uniweir)
          if (associated(sts%struct(i)%bridge))     deallocate(sts%struct(i)%bridge)
          if (associated(sts%struct(i)%generalst))  call dealloc(sts%struct(i)%generalst)
-         if (associated(sts%struct(i)%extrares))   call dealloc(sts%struct(i)%extrares)
          if (associated(sts%struct(i)%xCoordinates)) deallocate(sts%struct(i)%xCoordinates)
          if (associated(sts%struct(i)%yCoordinates)) deallocate(sts%struct(i)%yCoordinates)
          if (associated(sts%struct(i)%linknumbers))  deallocate(sts%struct(i)%linknumbers)
@@ -369,7 +366,6 @@ subroutine deallocstructure(sts)
          sts%struct(i)%uniweir      => null() 
          sts%struct(i)%bridge       => null() 
          sts%struct(i)%generalst    => null()
-         sts%struct(i)%extrares     => null()
          sts%struct(i)%xCoordinates => null()
          sts%struct(i)%yCoordinates => null()
          sts%struct(i)%linknumbers  => null()

@@ -123,7 +123,9 @@ subroutine comp_fluxver(NUMCONST, limtyp, thetavert, Ndkx, kmx, zws, qw, kbot, k
             if (jaimplicitfallvelocity == 0) then  ! explicit
                if (jased < 4) then
                   qw_loc = qw(k) - wsf(j)*ba(kk)
-               else  if ( stm_included .and. j.ge.ISED1 .and. j.le.ISEDN ) then
+               endif
+             
+               if ( stm_included .and. j.ge.ISED1 .and. j.le.ISEDN ) then
                   ll = j-ISED1+1
                   if (k<sedtra%kmxsed(kk,ll)) then
                      qw_loc = qw(k)     ! settling flux zero below kmxsed layer

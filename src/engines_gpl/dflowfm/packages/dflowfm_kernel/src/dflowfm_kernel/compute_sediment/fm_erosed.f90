@@ -402,7 +402,7 @@
       z0curk(k)=max(epsz0,z0curk(k))
    enddo
    !
-   z0rouk = 0d0; taub = 0d0; dzdx=0d0; dzdy=0d0
+   taub = 0d0; dzdx=0d0; dzdy=0d0
    do L=1,lnx
       k1=ln(1,L); k2=ln(2,L)
       z0rouk(k1) = z0rouk(k1)+wcl(1,L)*z0urou(L)   

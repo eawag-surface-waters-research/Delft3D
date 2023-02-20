@@ -516,9 +516,9 @@ if (ncgentst > 0) then
          call findqorifice12(gateheight,crestheight,z1,z2lab,qg12,zg12,regime,num,qcrit) 
         ! if (num .ne. 50) then 
             qsimple     = gateheight*sqrt( 2d0*g*(z1-z3) )
-            tim = 1440d0*k - 23*60 ; call maketime(datetime, tim*60d0)
+            tim = 1440d0*k - 23*60 ; call seconds_to_datetimestring(datetime, refdat, tim*60d0)
             write(mou2,'(A,20F8.3)') datetime, qglab*10d0, qg*10d0, qg12*10d0, gateheight, crestheight, z1, z3, z2, qglab, qg, qg12, qg/qglab, qg12/qglab, zg/gateheight, zg12/gateheight   
-            tim = 1440d0*k         ; call maketime(datetime, tim*60d0)
+            tim = 1440d0*k         ; call seconds_to_datetimestring(datetime, refdat, tim*60d0)
             write(mou2,'(A,20F8.3)') datetime, qglab*10d0, qg*10d0, qg12*10d0, gateheight, crestheight, z1, z3, z2, qglab, qg, qg12, qg/qglab, qg12/qglab, zg/gateheight, zg12/gateheight  
         ! endif   
       enddo   

@@ -48,14 +48,12 @@
 
 #if defined(WIN32)
 #  define DFM_GENERATE_VOLUME_TABLES  DFM_GENERATE_VOLUME_TABLES
-#  define WRITE_VOLUME_TABLE_GEOM WRITE_VOLUME_TABLE_GEOM
-#  define GET_VARIABLE_POINTER GET_VARIABLE_POINTER
+#  define WRITE_1D_FLOWGEOM_UGRID WRITE_1D_FLOWGEOM_UGRID
 #  define STDCALL
 #elif defined(linux)
 #  include "config.h"
 #  define DFM_GENERATE_VOLUME_TABLES FC_FUNC(dfm_generate_volume_tables,DFM_GENERATE_VOLUME_TABLES)
-#  define WRITE_VOLUME_TABLE_GEOM FC_FUNC(write_volume_table_geom,WRITE_VOLUME_TABLE_GEOM)
-#  define GET_VARIABLE_POINTER FC_FUNC(get_variable_pointer,GET_VARIABLE_POINTER)
+#  define WRITE_1D_FLOWGEOM_UGRID FC_FUNC(write_1d_flowgeom_ugrid,WRITE_1D_FLOWGEOM_UGRID)
 #  define STDCALL
 #endif
 
@@ -99,10 +97,10 @@ long STDCALL DFM_GENERATE_VOLUME_TABLES(int64_t* sharedDLLHandle, double* increm
 	return -1;
 }
 
-long STDCALL WRITE_VOLUME_TABLE_GEOM(int64_t* sharedDLLHandle, int64_t* ncid)
+long STDCALL WRITE_1D_FLOWGEOM_UGRID(int64_t* sharedDLLHandle, int64_t* ncid)
 {
 	typedef void* (STDCALL* MyProc)(int64_t*);
-	MyProc proc = (MyProc)GetDllProcedure(sharedDLLHandle, "write_volume_table_geom");
+	MyProc proc = (MyProc)GetDllProcedure(sharedDLLHandle, "write_1D_flowgeom_ugrid");
 
 
 	if (proc != NULL)
@@ -113,17 +111,4 @@ long STDCALL WRITE_VOLUME_TABLE_GEOM(int64_t* sharedDLLHandle, int64_t* ncid)
 	return -1;
 }
 
-long STDCALL GET_VARIABLE_POINTER(int64_t* sharedDLLHandle, char* var_name, void *xptr)
-{
-	typedef void* (STDCALL* MyProc)(char *, void *);
-	MyProc proc = (MyProc)GetDllProcedure(sharedDLLHandle, "dfm_get_variable_pointer");
-
-
-	if (proc != NULL)
-	{
-		(void*)(*proc)(var_name, xptr);
-		return 0;
-	}
-	return -1;
-}
 

@@ -47,6 +47,8 @@ implicit none
    character(len=lenfile)                         :: iarg_outfile = ' '     !< Output filename for several commandline/batch-mode operations (not related to model runs).
    integer                                        :: iarg_autostart         !< autostart/autstartstop or not set (-1)
    integer                                        :: iarg_usecaching = -1   !< use cache file or not or not set (-1)
+   integer                                        :: iarg_dobatch  = 0      !< Call the dobatch() subroutine for research functionality.
+
 
 contains
 !> read, from a string, command line option with key-value pair(s) of the form

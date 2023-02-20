@@ -78,6 +78,16 @@ subroutine wrthis(lundia    ,error     ,filename  ,selhis    ,ithisc    , &
     type (datagroup)                , pointer :: group1
     type (datagroup)                , pointer :: group3
     type (flwoutputtype)            , pointer :: flwoutput
+    integer                         , pointer :: ktemp
+    logical                         , pointer :: free_convec 
+    real(fp)      , dimension(:)    , pointer :: zqeva_out  
+    real(fp)      , dimension(:)    , pointer :: zqco_out  
+    real(fp)      , dimension(:)    , pointer :: zqbl_out   
+    real(fp)      , dimension(:)    , pointer :: zqin_out   
+    real(fp)      , dimension(:)    , pointer :: zqnet_out  
+    real(fp)      , dimension(:)    , pointer :: zhlc_out   
+    real(fp)      , dimension(:)    , pointer :: zhfree_out 
+    real(fp)      , dimension(:)    , pointer :: zefree_out 
 !
 ! Global variables
 !
@@ -202,17 +212,29 @@ subroutine wrthis(lundia    ,error     ,filename  ,selhis    ,ithisc    , &
 !
     call getdatagroup(gdp, FILOUT_HIS, grnam1, group1)
     call getdatagroup(gdp, FILOUT_HIS, grnam3, group3)
-    celidt     => group1%celidt
-    mnstat     => gdp%gdstations%mnstat
-    namst      => gdp%gdstations%namst
-    mfg        => gdp%gdparall%mfg
-    nfg        => gdp%gdparall%nfg
-    io_fp      => gdp%gdpostpr%io_fp
-    io_prec    => gdp%gdpostpr%io_prec
-    shlay      => gdp%gdpostpr%shlay
-    temp       => gdp%gdprocs%temp
-    xystat     => gdp%gdstations%xystat
-    flwoutput  => gdp%gdflwpar%flwoutput
+    celidt      => group1%celidt
+    mnstat      => gdp%gdstations%mnstat
+    xystat      => gdp%gdstations%xystat
+    flwoutput   => gdp%gdflwpar%flwoutput
+    namst       => gdp%gdstations%namst
+    mfg         => gdp%gdparall%mfg
+    nfg         => gdp%gdparall%nfg
+    io_fp       => gdp%gdpostpr%io_fp
+    io_prec     => gdp%gdpostpr%io_prec
+    shlay       => gdp%gdpostpr%shlay
+    temp        => gdp%gdprocs%temp
+    xystat      => gdp%gdstations%xystat
+    flwoutput   => gdp%gdflwpar%flwoutput
+    ktemp       => gdp%gdtricom%ktemp
+    free_convec => gdp%gdheat%free_convec
+    zqeva_out   => gdp%gdheat%zqeva_out
+    zqco_out    => gdp%gdheat%zqco_out
+    zqbl_out    => gdp%gdheat%zqbl_out
+    zqin_out    => gdp%gdheat%zqin_out
+    zqnet_out   => gdp%gdheat%zqnet_out
+    zhlc_out    => gdp%gdheat%zhlc_out
+    zhfree_out  => gdp%gdheat%zhfree_out
+    zefree_out  => gdp%gdheat%zefree_out
     !
     ! Initialize local variables
     !
@@ -367,7 +389,17 @@ subroutine wrthis(lundia    ,error     ,filename  ,selhis    ,ithisc    , &
        if (nsluv > 0 .and. flwoutput%hisbar) then
           call addelm(gdp, lundia, FILOUT_HIS, grnam3, 'ZBAR', ' ', io_prec        , 1, dimids=(/iddim_nsluv/), longname='Barrier height', unit='m', attribs=(/idatt_bar/))
        endif
-       !
+       if (ktemp>0 .and. flwoutput%temperature) then       
+          call addelm(gdp, lundia, FILOUT_HIS, grnam3, 'ZQEVA ', ' ', io_prec   , 1, dimids=(/iddim_nostat/), longname='Evaporation heat flux in ZETA-point'         , unit='W/m2', attribs=(/idatt_sta/))       !
+          call addelm(gdp, lundia, FILOUT_HIS, grnam3, 'ZQCO  ', ' ', io_prec   , 1, dimids=(/iddim_nostat/), longname='Heat flux of forced convection in ZETA-point', unit='W/m2', attribs=(/idatt_sta/)) 
+          call addelm(gdp, lundia, FILOUT_HIS, grnam3, 'ZQBL  ', ' ', io_prec   , 1, dimids=(/iddim_nostat/), longname='Back radiation in ZETA-point'                , unit='W/m2', attribs=(/idatt_sta/))       !
+          call addelm(gdp, lundia, FILOUT_HIS, grnam3, 'ZQIN  ', ' ', io_prec   , 1, dimids=(/iddim_nostat/), longname='Incoming solar radiation flux in ZETA-point' , unit='W/m2', attribs=(/idatt_sta/))              
+          call addelm(gdp, lundia, FILOUT_HIS, grnam3, 'ZQNET ', ' ', io_prec   , 1, dimids=(/iddim_nostat/), longname='INetto heat flux in ZETA-point'              , unit='W/m2', attribs=(/idatt_sta/))  
+          if (free_convec) then
+             call addelm(gdp, lundia, FILOUT_HIS, grnam3, 'ZEFREE', ' ',io_prec   , 1, dimids=(/iddim_nostat/), longname='Heat flux free convection in ZETA-point'   , unit='W/m2', attribs=(/idatt_sta/))       !   
+             call addelm(gdp, lundia, FILOUT_HIS, grnam3, 'ZHFREE',' ', io_prec   , 1, dimids=(/iddim_nostat/), longname='Heat flux forced convection in ZETA-point' , unit='W/m2', attribs=(/idatt_sta/)) 
+          endif
+       endif
        group1%grp_dim = iddim_time
        group3%grp_dim = iddim_time
        celidt = 0
@@ -650,6 +682,47 @@ subroutine wrthis(lundia    ,error     ,filename  ,selhis    ,ithisc    , &
                  & celidt, nostat, nostatto, nostatgl, order_sta, gdp, &
                  & ierror, lundia, zdps, 'DPS', station)
           if (ierror/=0) goto 9999
+          !          
+          ! Output of heat fluxes from temperature model
+          ! 
+          if (ktemp > 0 .and. flwoutput%temperature) then
+             call wrtarray_n(fds, filename, filetype, grnam3, &
+                           & celidt, nostat, nostatto, nostatgl, order_sta, gdp, &
+                           & ierror, lundia, zqeva_out, 'ZQEVA', station)
+             if (ierror/=0) goto 9999
+             !
+             call wrtarray_n(fds, filename, filetype, grnam3, &
+                           & celidt, nostat, nostatto, nostatgl, order_sta, gdp, &
+                           & ierror, lundia, zqco_out, 'ZQCO', station)
+             if (ierror/=0) goto 9999
+             !
+             call wrtarray_n(fds, filename, filetype, grnam3, &
+                           & celidt, nostat, nostatto, nostatgl, order_sta, gdp, &
+                           & ierror, lundia, zqbl_out, 'ZQBL ', station)
+             if (ierror/=0) goto 9999
+             !
+             call wrtarray_n(fds, filename, filetype, grnam3, &
+                           & celidt, nostat, nostatto, nostatgl, order_sta, gdp, &
+                           & ierror, lundia, zqin_out, 'ZQIN  ', station)
+             if (ierror/=0) goto 9999
+             !
+             call wrtarray_n(fds, filename, filetype, grnam3, &
+                           & celidt, nostat, nostatto, nostatgl, order_sta, gdp, &
+                           & ierror, lundia, zqnet_out, 'ZQNET  ', station)
+             if (ierror/=0) goto 9999
+             !
+             if (free_convec) then
+                call wrtarray_n(fds, filename, filetype, grnam3, &
+                              & celidt, nostat, nostatto, nostatgl, order_sta, gdp, &
+                              & ierror, lundia, zefree_out, 'ZEFREE  ', station)
+                if (ierror/=0) goto 9999
+                !
+                call wrtarray_n(fds, filename, filetype, grnam3, &
+                              & celidt, nostat, nostatto, nostatgl, order_sta, gdp, &
+                              & ierror, lundia, zhfree_out, 'ZHFREE  ', station)
+                if (ierror/=0) goto 9999
+             endif
+          endif
        endif
        !
        if (ntruvgl > 0) then

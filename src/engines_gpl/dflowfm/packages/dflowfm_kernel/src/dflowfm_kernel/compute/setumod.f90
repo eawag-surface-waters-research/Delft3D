@@ -367,8 +367,9 @@ if (ihorvic > 0 .or. NDRAW(29) == 37) then
                 endif
                 if (Smagorinsky > 0) then
                    shearvar = 2d0*(dundn*dundn + dutdt*dutdt + dundt*dutdn) + dundt*dundt + dutdn*dutdn
-
-                   vicL     = vicL + Smagorinsky*Smagorinsky*sqrt(shearvar)/( dxi(L)*wui(L) )
+                   if (shearvar>1d-15) then
+                      vicL     = vicL + Smagorinsky*Smagorinsky*sqrt(shearvar)/( dxi(L)*wui(L) )
+                   endif
                 endif
 
              endif

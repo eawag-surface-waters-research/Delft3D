@@ -49,7 +49,7 @@
    sed                 => mtd%sed
    ws                  => mtd%ws
    uau                 => mtd%uau
-
+   sscdtzb             => mtd%sscdtzb
 
    ! stmpar
    lsed                => stmpar%lsedsus
@@ -80,6 +80,7 @@
    ! morpar
    thresh              => stmpar%morpar%thresh
    sus                 => stmpar%morpar%sus
+   suscorfac           => stmpar%morpar%suscorfac
    bed                 => stmpar%morpar%bed
    susw                => stmpar%morpar%susw
    sedthr              => stmpar%morpar%sedthr
@@ -140,6 +141,13 @@
    thetsd              => stmpar%morpar%thetsd
    eulerisoglm         => stmpar%morpar%eulerisoglm
    l_suscor            => stmpar%morpar%l_suscor
+   bermslopetransport  => stmpar%morpar%bermslopetransport
+   bermslopebed        => stmpar%morpar%bermslopebed
+   bermslopesus        => stmpar%morpar%bermslopesus
+   bermslope           => stmpar%morpar%bermslope
+   bermslopefac        => stmpar%morpar%bermslopefac
+   bermslopegamma      => stmpar%morpar%bermslopegamma
+   bermslopedepth      => stmpar%morpar%bermslopedepth
 
    ! trapar
    iform               => stmpar%trapar%iform

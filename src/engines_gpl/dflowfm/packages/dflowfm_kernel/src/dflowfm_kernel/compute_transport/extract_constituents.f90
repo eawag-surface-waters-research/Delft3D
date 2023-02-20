@@ -41,10 +41,11 @@ subroutine extract_constituents()
    use m_missing
    use m_plotdots
    use timers
+   use m_flowtimes
 
    implicit none
 
-   integer :: i, iconst, k, kk, limmin, limmax
+   integer :: i, iconst, k, kk, limmin, limmax,  ll, kb, kt, ii
    double precision :: dmin
 
    integer(4) ithndl /0/
@@ -146,6 +147,19 @@ subroutine extract_constituents()
 
   if (jasal > 0 .and. maxitverticalforestersal > 0 .or. jatem > 0 .and. maxitverticalforestertem > 0) then
      call doforester()
+  endif
+
+  if (ISED1>0) then
+    do ll=1,mxgr
+       ii = ISED1-ll+1 
+       do k=1,ndx
+          if (hs(k)<=epshu) then
+             call getkbotktop(k,kb,kt)
+             ssccum(ll,k) = ssccum(ll,k)+sum(constituents(ISED1+ll-1,kb:kt))/dts*bai_mor(k)*vol1(k)
+             constituents(ISED1+ll-1,kb:kt) = 0d0
+          endif
+       enddo
+     enddo
   endif
 
   if (timon) call timstop( ithndl )

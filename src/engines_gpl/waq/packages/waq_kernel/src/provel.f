@@ -23,7 +23,7 @@
 
       subroutine provel (velonw, nveln , ivpnew, velo  , novelo,
      +                   ivpnt , velx  , nvelx , vsto  , nosys ,
-     +                   noq   , ownerq, mypart, velndt, istep )
+     +                   noq   , velndt, istep )
 !
 !     function            : makes velonw array from velo and velx array
 !
@@ -47,8 +47,6 @@
       integer, intent(in)       :: ivpnt(nosys)                    ! pointer to original velo
       real   , intent(in)       :: velx(nvelx,noq)                 ! velocities from processes
       real   , intent(in)       :: vsto(nosys,nvelx)               ! factor for velocities
-      integer, intent(in)       :: ownerq(noq)                     ! ownership of exchanges
-      integer, intent(in)       :: mypart                          ! own subdomain number
       integer, intent(in)       :: velndt(nvelx)                   ! time step size of the velocities
       integer, intent(in)       :: istep                           ! time step nr.
 
@@ -102,8 +100,7 @@
                      lfirst = .false.
                      ivp = ivpnt(isys)
                      do iq = 1 , noq
-                        if (ownerq(iq).eq.mypart)
-     +                     velonw(ivnw,iq) = velo(ivp,iq)
+                        velonw(ivnw,iq) = velo(ivp,iq)
                      enddo
                   endif
 
@@ -116,26 +113,22 @@
                            lfirst = .false.
                            if ( abs(factor-1.0) .lt. 1.e-10 ) then
                               do iq = 1 , noq
-                                 if (ownerq(iq).eq.mypart)
-     +                              velonw(ivnw,iq) = velx(ivx,iq)
+                                 velonw(ivnw,iq) = velx(ivx,iq)
                               enddo
                            else
                               do iq = 1 , noq
-                                 if (ownerq(iq).eq.mypart)
-     +                              velonw(ivnw,iq) = factor*velx(ivx,iq)
+                                 velonw(ivnw,iq) = factor*velx(ivx,iq)
                               enddo
                            endif
                         else
                            if ( abs(factor-1.0) .lt. 1.e-10 ) then
                               do iq = 1 , noq
-                                 if (ownerq(iq).eq.mypart)
-     +                              velonw(ivnw,iq) = velonw(ivnw,iq) +
+                                    velonw(ivnw,iq) = velonw(ivnw,iq) +
      +                                                velx(ivx,iq)
                               enddo
                            else
                               do iq = 1 , noq
-                                 if (ownerq(iq).eq.mypart)
-     +                              velonw(ivnw,iq) = velonw(ivnw,iq) +
+                                    velonw(ivnw,iq) = velonw(ivnw,iq) +
      +                                                factor*velx(ivx,iq)
                               enddo
                            endif

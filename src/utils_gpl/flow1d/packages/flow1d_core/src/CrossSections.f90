@@ -106,7 +106,6 @@ module m_CrossSections
    !> Realloc memory cross-section definition or cross-sections
    interface realloc
       module procedure reallocCSDefinitions
-      module procedure reallocCSDefinitionsSize
       module procedure reallocCrossSections
    end interface
 
@@ -352,22 +351,6 @@ subroutine deallocCSDefinitions(CSdef)
    endif
    call dealloc(CSDef%hashlist)
 end subroutine deallocCSDefinitions
-
-
-
-!> Increase the memory used by a cross-section definition
-subroutine reallocCSDefinitionsSize(CSDef,growsBy)
-   implicit none
-   type(t_CSDefinitionSet), intent(inout)    :: CSdef    !< Current cross-section definition
-   integer                , intent(in)       :: growsBy  !< Increment for extending array size
-   integer                   :: old_growsBy
-   old_growsBy = CSdef%growsBy
-   CSdef%growsBy = growsBy
-   call reallocCSDefinitions(CSDef)
-   CSdef%growsBy = old_growsBy
-   return
-end subroutine 
-
 
 !> Increase the memory used by a cross-section definition
 subroutine reallocCSDefinitions(CSDef)
@@ -877,47 +860,6 @@ subroutine SetParsCross(CrossDef, cross)
       
    endif                        
 end subroutine SetParsCross
-   
-!> Set the groundlayer data
-subroutine setGroundLayerData(crossDef, thickness)
-
-   type(t_CStype), pointer, intent(inout) :: crossDef
-   double precision       , intent(in   ) :: thickness
-      
-   double precision                    :: area 
-   double precision                    :: perimeter
-   double precision                    :: width
-   double precision                    :: maxwidth
-   double precision                    :: af_sub(3), perim_sub(3)
-   
-   if (Thickness <= 0.0d0) then
-      crossDef%groundlayer%used      = .false.
-      crossDef%groundlayer%thickness = 0.0d0
-      crossDef%groundlayer%area      = 0.0d0
-      crossDef%groundlayer%perimeter = 0.0d0
-      crossDef%groundlayer%width     = 0.0d0
-      return
-   endif
-   
-   select case(crossDef%crossType)
-      case (CS_TABULATED)
-         call GetTabSizesFromTables(thickness, crossDef, .true., area, width, perimeter, af_sub, perim_sub, CS_TYPE_NORMAL)
-      case (CS_CIRCLE)
-         call CircleProfile(thickness, crossDef%diameter, area, width, maxwidth, perimeter, CS_TYPE_NORMAL)
-      case (CS_EGG)
-         call EggProfile(thickness, crossDef%diameter, area, width, perimeter, CS_TYPE_NORMAL)
-      case default
-         call SetMessage(LEVEL_ERROR, 'INTERNAL ERROR: Unknown type of cross section')
-   end select
-      
-   crossDef%groundlayer%used      = .true.
-   crossDef%groundlayer%thickness = thickness
-   crossDef%groundlayer%area      = area
-   crossDef%groundlayer%perimeter = perimeter
-   crossDef%groundlayer%width     = width
-
-end subroutine setGroundLayerData
-   
 
 !> Add a cross-section on a reach, using a cross section defined on another reach
 integer function AddCrossSectionByCross(crs, cross, branchid, chainage)
@@ -1267,7 +1209,6 @@ subroutine GetCSParsFlowInterpolate(line2cross, cross, dpt, flowArea, wetPerimet
 
    double precision                      :: af_sub_local1(3), af_sub_local2(3)      
    double precision                      :: perim_sub_local1(3), perim_sub_local2(3)
-   integer, save                         :: ihandle = 0
 
    if (line2cross%c1 <= 0) then
       ! no cross section defined on branch, use default definition
@@ -1374,7 +1315,6 @@ subroutine GetCSParsFlowCross(cross, dpt, flowArea, wetPerimeter, flowWidth, max
    double precision                  :: af_sub_local(3)      
    double precision                  :: perim_sub_local(3)      
    logical                           :: hysteresis =.true.   ! hysteresis is a dummy variable at this location, since this variable is only used for total areas
-   integer, save                     :: ihandle = 0
    perim_sub_local = 0d0
    if (dpt < 0.0d0) then
       flowArea     = 0.0
@@ -1437,9 +1377,6 @@ subroutine GetCSParsFlowCross(cross, dpt, flowArea, wetPerimeter, flowWidth, max
       maxFlowWidth = maxFlowWidth1
    endif
 
-   !call system_clock(countstop)
-   !wccount(1)   = wccount(1) + countstop-countstart ! GetCSParsFlowCross
-   !callcount(1) = callcount(1) + 1
 end subroutine GetCSParsFlowCross
 
 !> Get total area and total width for given location and water depth
@@ -1468,7 +1405,6 @@ subroutine GetCSParsTotalInterpolate(line2cross, cross, dpt, totalArea, totalWid
    type (t_CrossSection), save           :: crossi         !< intermediate virtual crosssection     
    type (t_CrossSection), pointer        :: cross1         !< cross section
    type (t_CrossSection), pointer        :: cross2         !< cross section
-   integer, save                         :: ihandle   = 0
 
    if (line2cross%c1 <= 0) then
       ! no cross section defined on branch, use default definition
@@ -1546,7 +1482,6 @@ subroutine GetCSParsTotalCross(cross, dpt, totalArea, totalWidth, calculationOpt
    double precision                  :: wlev            !< water level at cross section
    logical                           :: getSummerDikes
    double precision                  :: af_sub(3), perim_sub(3)
-   integer, save                     :: ihandle = 0
 
    if (dpt < 0.0d0) then
       totalArea = 0.0d0
@@ -1592,9 +1527,6 @@ subroutine GetCSParsTotalCross(cross, dpt, totalArea, totalWidth, calculationOpt
          call SetMessage(LEVEL_ERROR, 'INTERNAL ERROR: Unknown type of cross section')
    end select
  
-   !call system_clock(countstop)
-   !wccount(2)   = wccount(2) + countstop-countstart ! GetCSParsTotalCross
-   !callcount(2) = callcount(2) + 1
 end subroutine GetCSParsTotalCross
 
 !> Get area, width and perimeter for a tabulated profile
@@ -2673,7 +2605,7 @@ else if (i012 == 0) then                                ! look at u points, mom.
          endif
          !
          if (convtab%conveyType==CS_LUMPED) then
-            cz = getchezy(frictionType, frictionValue, area/perimeter, dpt, 0d0)
+            cz = getchezy(frictionType, frictionValue, area/perimeter, dpt, 1d0)
             conv = (cz)*area*sqrt(area/perimeter)
          elseif (convtab%conveyType==CS_VERT_SEGM) then
             conv  = a1*c1 + a2*c2
@@ -3531,6 +3463,8 @@ subroutine createTablesForTabulatedProfile(crossDef)
 
     !> retrieve the interpolated summerdike  data
     subroutine getSummerDikeData(line2cross, cross, crestLevel, baseLevel)
+       use m_missing
+       
        type(t_chainage2cross),intent(in)         :: line2cross     !< cross section indirection
        type(t_CrossSection), target, intent(in)  :: cross(:)       !< array containing cross section information
        double precision,      intent(  out)      :: crestLevel     !< Crest level of the summerdike at the given location
@@ -3554,8 +3488,8 @@ subroutine createTablesForTabulatedProfile(crossDef)
          crestLevel = cross2%tabDef%summerdike%crestLevel + cross2%shift
          baseLevel  = cross2%tabDef%summerdike%baseLevel  + cross2%shift
        else
-         crestLevel = missingvalue
-         baseLevel  = missingvalue
+         crestLevel = dmiss
+         baseLevel  = dmiss
        endif
 
     end subroutine getSummerDikeData

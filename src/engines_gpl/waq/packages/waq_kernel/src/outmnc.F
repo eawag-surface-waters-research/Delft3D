@@ -34,7 +34,7 @@
 
       use timers
       use dlwq_netcdf  !   read/write grid in netcdf
-!!      use delwaq_version_module
+      use delwaq_version_module
       use output, only: ncopt
       implicit none
 
@@ -97,6 +97,7 @@
       character(len=nf90_max_name) :: network_name
       character(len=nf90_max_name) :: network_geometry_name
       character(len=nf90_max_name) :: dimname
+      character(len=nf90_max_name) :: history
 
       integer :: i, j
       integer :: type_ugrid
@@ -346,9 +347,15 @@
              goto 800
          endif
 
-!!         call getfullversionstring_delwaq( versionid )
-         versionid = "Deltares, DELWAQ version 5.10.00"
+         call getfullversionstring_delwaq( versionid )
          inc_error = nf90_put_att( ncidmap, nf90_global, 'source', trim(versionid) )
+         if ( inc_error /= nf90_noerr ) then
+             write ( lunut , 2573 )
+             goto 800
+         endif
+
+         history = "Created on " // trim(timestamp) // ", DELWAQ"
+         inc_error = nf90_put_att( ncidmap, nf90_global, 'history', trim(history) )
          if ( inc_error /= nf90_noerr ) then
              write ( lunut , 2573 )
              goto 800

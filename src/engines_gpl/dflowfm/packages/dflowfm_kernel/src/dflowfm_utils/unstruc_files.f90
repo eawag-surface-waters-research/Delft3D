@@ -338,7 +338,7 @@ function defaultFilename(filecat, timestamp, prefixWithDirectory, allowWildcard)
 
     if (present(timestamp)) then
         dateandtime = '_'
-        call maketime(dateandtime(2:), timestamp)
+        call seconds_to_datetimestring(dateandtime(2:), refdat, timestamp)
     else
         dateandtime = ' '
     end if

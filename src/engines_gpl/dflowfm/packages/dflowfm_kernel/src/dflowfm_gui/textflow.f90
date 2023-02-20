@@ -86,7 +86,7 @@
  tstepinc = tim_get_wallclock_inc(handle_steps)
  cpuperstep = max(0d0, min(100d0,  tstepinc))
 
- call maketime(tex,time1)
+ call seconds_to_datetimestring(tex,refdat,time1)
 
  dtav = (time1 - tstart_user)/max(1d0, dnt)
 

@@ -11,7 +11,6 @@ noinst_LTLIBRARIES = libwaq_process.la
 #-------------------------------------------------------------------------------
 #Includes
 FMODULES += \
-     -I$(top_builddir)/engines_gpl/waq/packages/waq_utils_f/src/mod_timings \
      -I$(top_builddir)/engines_gpl/waq/packages/waq_utils_f/src/waq_utils \
      -I$(top_builddir)/engines_gpl/waq/packages/waq_process/src/bloom \
      -I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src

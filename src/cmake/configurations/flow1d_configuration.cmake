@@ -1,4 +1,3 @@
-project(flow1d)
 # ============
 add_subdirectory(${checkout_src_root}/${flow1d_cf_module} delftflow)
 add_subdirectory(${checkout_src_root}/${flow1d_kernel_cf_module} kernel_cf)
@@ -44,9 +43,6 @@ endif()
 if(NOT TARGET morphology_plugins_c)
     add_subdirectory(${checkout_src_root}/${morphology_plugins_c_module} morphology_plugins_c)
 endif()
-if(NOT TARGET morphology_waq)
-    add_subdirectory(${checkout_src_root}/${morphology_waq_module} morphology_waq)
-endif()
 
 # UTILS_LGPL
 #
@@ -58,7 +54,7 @@ if(NOT TARGET delftio_shm)
     add_subdirectory(${checkout_src_root}/${delftio_shm_module} delftio_shm)
 endif()
 if(NOT TARGET ec_module)
-    add_subdirectory(${checkout_src_root}/${ec_module_module} ec_module)
+    add_subdirectory(${checkout_src_root}/${ec_module} ec_module)
 endif()
 if(NOT TARGET gridgeom)
     add_subdirectory(${checkout_src_root}/${gridgeom_module} gridgeom)
@@ -66,6 +62,19 @@ endif()
 if(NOT TARGET io_netcdf)
     add_subdirectory(${checkout_src_root}/${io_netcdf_module} io_netcdf)
 endif()
+
+# fortrangis
+if(NOT TARGET fortrangis)
+    add_subdirectory(${checkout_src_root}/${fortrangis_module} fortrangis)
+endif()
+if(NOT TARGET shp)
+    add_subdirectory(${checkout_src_root}/${shp_module} shp)
+endif()
+if(WIN32)
+    if(NOT TARGET proj)
+        add_subdirectory(${checkout_src_root}/${proj_module} proj)
+    endif()
+endif(WIN32)
 
 
 # Third party libraries
@@ -117,3 +126,5 @@ if(NOT TARGET d_hydro_lib)
     add_subdirectory(${checkout_src_root}/${d_hydro_lib_module} d_hydro_lib)
 endif()
 
+# Project name must be at the end of the configuration: it might get a name when including other configurations and needs to overwrite that
+project(flow1d)

@@ -79,6 +79,7 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
     real(hp)                             , pointer :: morft
     real(fp)                             , pointer :: morfac
     real(fp)                             , pointer :: sus
+    real(fp)                             , pointer :: suscorfac
     real(fp)                             , pointer :: bed
     real(fp)              , dimension(:) , pointer :: thetsd
     real(fp)                             , pointer :: sedthr
@@ -259,6 +260,7 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
     morft               => gdp%gdmorpar%morft
     morfac              => gdp%gdmorpar%morfac
     sus                 => gdp%gdmorpar%sus
+    suscorfac           => gdp%gdmorpar%suscorfac
     bed                 => gdp%gdmorpar%bed
     thetsd              => gdp%gdmorpar%thetsd
     sedthr              => gdp%gdmorpar%sedthr
@@ -434,7 +436,7 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
                             cumflux = cumflux - u1(nm,k)*(cavg-r1avg)*dz
                          endif
                       endif
-                      sucor(nm,l) = -cumflux
+                      sucor(nm,l) = -suscorfac * cumflux
                       !
                       ! bedload will be reduced in case of sediment transport
                       ! over a non-erodible layer (no sediment in bed) in such
@@ -516,7 +518,7 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
                             cumflux = cumflux - v1(nm,k)*(cavg-r1avg)*dz
                          endif
                       endif
-                      svcor(nm, l) = -cumflux
+                      svcor(nm, l) = -suscorfac * cumflux
                       !
                       ! bedload will be reduced in case of sediment transport
                       ! over a non-erodible layer (no sediment in bed) in such

@@ -492,6 +492,10 @@ subroutine loadModel(filename)
        call remove_path(md_netfile, unc_meta_net_file)
     end if
     call timstop(timerHandle)
+    
+    if (useVolumeTables .and. ( network%loaded == .false. ) ) then
+        useVolumeTables = .false.
+    end if 
 
     network%sferic = jsferic==1
 
@@ -1040,6 +1044,7 @@ subroutine readMDUFile(filename, istat)
     endif
 
     call prop_get_integer(md_ptr, 'numerics', 'TransportAutoTimestepdiff' , jatransportautotimestepdiff)
+
     if (jatransportautotimestepdiff == 3 .and. kmx > 0) then
        call mess(LEVEL_ERROR, 'Implicit horizontaldiffusion is only implemented in 2D', 'set TransportAutoTimestepdiff = 0, 1 or 2')
     endif
@@ -1053,6 +1058,8 @@ subroutine readMDUFile(filename, istat)
        endif
     endif
 
+    call prop_get_integer(md_ptr, 'numerics', 'DiagnosticTransport' , jadiagnostictransport)
+    
     call prop_get_integer(md_ptr, 'numerics', 'Vertadvtypsal'       , javasal)
     call prop_get_integer(md_ptr, 'numerics', 'Vertadvtyptem'       , javatem)
     call prop_get_integer(md_ptr, 'numerics', 'Vertadvtypmom'       , javau)
@@ -1626,7 +1633,7 @@ subroutine readMDUFile(filename, istat)
     Startdatetime = ' '
     call prop_get_string  (md_ptr, 'time', 'Startdatetime', Startdatetime, success)
     if (len_trim(Startdatetime) > 0 .and. success) then
-        call maketimeinverse( Startdatetime, tim, iostat)
+        call datetimestring_to_seconds(Startdatetime, refdat, tim, iostat)
         if (iostat == 0) then
            Tstart_user = tim
         endif
@@ -1635,7 +1642,7 @@ subroutine readMDUFile(filename, istat)
     Stopdatetime = ' '
     call prop_get_string  (md_ptr, 'time', 'Stopdatetime', Stopdatetime, success)
     if (len_trim(Stopdatetime) > 0 .and. success) then
-        call maketimeinverse( Stopdatetime, tim, iostat)
+        call datetimestring_to_seconds(Stopdatetime, refdat, tim, iostat)
         if (iostat == 0) then
            Tstop_user = tim
         endif
@@ -2958,6 +2965,8 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     call prop_set(prop_ptr, 'numerics', 'TransportAutoTimestepdiff', jatransportautotimestepdiff,   'Auto Timestepdiff in Transport, 0 : lim diff, no lim Dt_tr, 1 : no lim diff, lim Dt_tr, 2: no lim diff, no lim Dt_tr, 3=implicit (only 2D)')
     call prop_set(prop_ptr, 'numerics', 'Implicitdiffusion2D', Implicitdiffusion2D,   '1 = Yes, 0 = No')
   
+    call prop_set(prop_ptr, 'numerics', 'DiagnosticTransport' , jadiagnostictransport, 'Diagnostic ("frozen") transport (0: prognostic transport, 1: diagnostic transport)')
+
     call prop_set(prop_ptr, 'numerics', 'Vertadvtypsal', Javasal,   'Vertical advection type for salinity (0: none, 1: upwind explicit, 2: central explicit, 3: upwind implicit, 4: central implicit, 5: central implicit but upwind for neg. stratif., 6: higher order explicit, no Forester)')
     call prop_set(prop_ptr, 'numerics', 'Vertadvtyptem', Javatem,   'Vertical advection type for temperature (0: none, 1: upwind explicit, 2: central explicit, 3: upwind implicit, 4: central implicit, 5: central implicit but upwind for neg. stratif., 6: higher order explicit, no Forester)')
     call prop_set(prop_ptr, 'numerics', 'Vertadvtypmom', javau, 'Vertical advection type for u1: 0: No, 3: Upwind implicit, 4: Central implicit, 5: QUICKEST implicit., 6: centerbased upwind expl, 7=6 HO' )
@@ -3291,7 +3300,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     call prop_set(prop_ptr, 'physics', 'Rhomean',          rhomean,      'Average water density (kg/m3)')
   
     if (writeall .or. idensform .ne. 1) then
-       call prop_set(prop_ptr, 'physics', 'Idensform',     idensform,    'Density calulation (0: uniform, 1: Eckart, 2: Unesco, 3=Unesco83, 13=3+pressure)')
+       call prop_set(prop_ptr, 'physics', 'Idensform',     idensform,    'Density calulation (0: uniform, 1: Eckart, 2: UNESCO, 3=UNESCO83, 13=3+pressure)')
     endif
   
     call prop_set(prop_ptr, 'physics', 'Ag'     ,          ag ,          'Gravitational acceleration')

@@ -139,7 +139,7 @@
              CALL MESSAGE('YOU SAVED ' , filnam, ' ')
          ENDIF
       ELSE IF (NWHAT2 .EQ. 6) THEN
-         CALL load_displaysettings('unstruc.cfg')
+         CALL load_displaysettings('unstruc.cfg'); key=3
       ELSE IF (NWHAT2 .EQ. 7) THEN
          CALL save_displaysettings('unstruc.cfg')
       ENDIF

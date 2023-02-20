@@ -85,3 +85,5 @@ post_build_target (${executable_name}
                    ${build_dir} 
                    ${checkout_src_root} 
                    ${executable_name})
+
+install(TARGETS ${executable_name} RUNTIME  DESTINATION bin)

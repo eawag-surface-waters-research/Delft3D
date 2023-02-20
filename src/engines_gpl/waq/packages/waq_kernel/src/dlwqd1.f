@@ -26,7 +26,7 @@
      &                    area   , flow   , aleng  , ipoint , iknmrk ,
      &                    idpnt  , ivpnt  , conc   , bound  , iopt   ,
      &                    ilflag , idt    , deriv  , iaflag , amass2 ,
-     &                    owners , mypart , lun    , ndmpq  , iqdmp  ,
+     &                    lun    , ndmpq  , iqdmp  ,
      &                    dmpq   , rhs    , diag   , acodia , bcodia )
 
 !     Deltares Software Centre
@@ -99,8 +99,6 @@
       real     ( 4), intent(inout) :: deriv (notot,noseg)  !< workspace containing the diagonal
       integer  ( 4), intent(in   ) :: iaflag               !< if 1 then accumulate mass in report array
       real     ( 4), intent(inout) :: amass2(notot, 5   )  !< report array for monitoring file
-      integer  ( 4), intent(in   ) :: owners(noseg)        !< array of owners per volume for paralellism
-      integer  ( 4), intent(in   ) :: mypart               !< which processor am I ?
       integer  ( 4), intent(in   ) :: lun                  !< unit number of monitoring file
       integer  ( 4), intent(in   ) :: ndmpq                !< number of dumped exchanges
       integer  ( 4), intent(in   ) :: iqdmp ( noq )        !< pointers dumped exchages

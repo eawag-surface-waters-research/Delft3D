@@ -48,7 +48,6 @@
 !                          LUN(23) , output, unformatted restart file
 !
 !     SUBROUTINES CALLED : DLWQTR, user transport routine
-!                          DLWQPP, user postprocessing routine
 !                          DLWQ13, system postpro-dump routine
 !                          DLWQ15, wasteload routine
 !                          DLWQ60, scales water quality
@@ -170,7 +169,7 @@
      *                 J(INRHA), J(INRH2), J(INRFT), NOSEG   , A(IVOL2),
      *                 J(IBULK), LCHAR   , ftype   , ISFLAG  , IVFLAG  ,
      *                 LDUMMY  , J(INISP), A(INRSP), J(INTYP), J(IWORK),
-     *                 LSTREC  , LREWIN  , A(IVOLL), MYPART  , dlwqd   )
+     *                 LSTREC  , LREWIN  , A(IVOLL), dlwqd   )
          CALL DLWQ65 ( A(IVOL2), A(IVOL) , IDT     , NOSEG   )
       ELSE
          CALL ZERO ( A(IVOL2) , NOSEG   )
@@ -193,9 +192,8 @@
      *                 A(ILENG), A(ICONC), A(IDISP), A(ICONS), A(IPARM),
      *                 A(IFUNC), A(ISFUN), A(IDIFF), A(IVELO), ICSYS   ,
      *                 IDT     , C(ISNAM), NOCONS  , NOFUN   , C(ICNAM),
-     *                 C(IPNAM), C(IFNAM), C(ISFNA), LDUMMY  , ILFLAG  ,
-     *                 NPARTp  )
-!
+     *                 C(IPNAM), C(IFNAM), C(ISFNA), LDUMMY  , ILFLAG  ,)
+
 !             do the user water quality processes
 !
          CALL DLWQ60 ( A(IDERV), A(ICONC), NOTOT   , NOSEG   , ITFACT  ,
@@ -211,7 +209,7 @@
      &                 j(inwtyp) , j(iwast) , iwstkind , a(iwste) , a(iderv) ,
      &                 iknmkv    , nopa     , c(ipnam) , a(iparm) , nosfun   ,
      &                 c(isfna ) , a(isfun) , j(isdmp) , a(idmps) , a(imas2) ,
-     &                 a(iwdmp)  , isys     , nsys     , j(iowns ), mypart   )
+     &                 a(iwdmp)  , isys     , nsys     )
 !
 !          fill the matrix
 !
@@ -267,7 +265,7 @@
      +              C(IBTYP), J(INTYP), C(ICNAM), NOQ     , J(IXPNT),
      +              INTOPT  , C(IPNAM), C(IFNAM), C(ISFNA), J(IDMPB),
      +              NOWST   , NOWTYP  , C(IWTYP), J(IWAST), J(INWTYP),
-     +              A(IWDMP), iknmkv  , J(IOWNS), MYPART  , isegcol )
+     +              A(IWDMP), iknmkv  , isegcol )
 !
 !          close files, except monitor file
 !
@@ -278,19 +276,6 @@
 !
       CALL DLWQ13 ( LUN      , LCHAR , A(ICONC) , ITSTRT, C(IMNAM) ,
      *              C(ISNAM) , NOTOT , NOSEG    )
-!
-!          user output routine
-!
-      CALL DLWQPP ( NOTOT   , NOSYS   , NOSEG   , NOPA    , NOSFUN  ,
-     *              ITSTRT  , IMFLAG  , IDFLAG  , IHFLAG  , C(IMNAM),
-     *              C(ISNAM), C(IDNAM), C(IWSID), J(IDUMP), NODUMP  ,
-     *              J(IWAST), NOWST   , A(ICONC), A(ICONS), A(IPARM),
-     *              A(IFUNC), A(ISFUN), A(IVOL ), A(IWSTE), A(IBOUN),
-     *              NOBND   , ITSTRT  , ITSTOP  , NX      , NY      ,
-     *              J(IGRID), NODISP  , NOVELO  , NOQ     , NOQ1    ,
-     *              NOQ2    , NOQ3    , A(IDISP), A(IVELO), A(ISMAS),
-     *              IBFLAG  , NOCONS  , NOFUN   , C(ICNAM), C(IPNAM),
-     *              C(IFNAM), C(ISFNA), C(IBNID))
 !
 !          output formats
 !

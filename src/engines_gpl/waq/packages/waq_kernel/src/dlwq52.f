@@ -22,7 +22,7 @@
 !!  rights reserved.
 
       subroutine dlwq52 ( nosys  , notot  , noseg  , volume , amass  ,
-     &                    conc2  , conc   , owners , mypart )
+     &                    conc2  , conc    )
 
 !     Deltares Software Centre
 
@@ -50,8 +50,6 @@
       real      (4), intent(inout) :: amass (notot ,noseg)    !< masses per substance per volume
       real      (4), intent(in   ) :: conc2 (notot ,noseg)    !< concentrations per substance per volume
       real      (4), intent(  out) :: conc  (notot ,noseg)    !< concentrations per substance per volume
-      integer   (4), intent(in   ) :: owners(noseg )          !< ownership array for segments
-      integer   (4), intent(in   ) :: mypart                  !< number of the current subdomain
 
 !     local variables
 
@@ -65,7 +63,6 @@
 !         loop accross the number of computational elements
 
       do iseg = 1, noseg
-         if (owners(iseg).eq.mypart) then
             vol = volume(iseg)
             do isys = 1, nosys
                conc (isys,iseg) = conc2(isys,iseg)
@@ -74,7 +71,6 @@
             do isys = nosys+1, notot
                conc (isys,iseg) = conc2(isys,iseg)
             enddo
-         endif
       enddo
 
       if ( timon ) call timstop ( ithandl )

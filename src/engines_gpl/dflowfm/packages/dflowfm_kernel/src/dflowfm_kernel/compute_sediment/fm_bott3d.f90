@@ -171,6 +171,7 @@
    bcmfile             => stmpar%morpar%bcmfile
    morbnd              => stmpar%morpar%morbnd
    cmpupd              => stmpar%morpar%cmpupd
+   bermslopetransport  => stmpar%morpar%bermslopetransport 
 
    if (flowWithoutWaves) then
       jawaveswartdelwaq_local = 0
@@ -374,7 +375,7 @@
                            endif
                         endif
                      endif
-                     e_scrn(Lx,l) = -cumflux / wu_mor(Lx)
+                     e_scrn(Lx,l) = -suscorfac * cumflux / wu_mor(Lx)
                      !
                      ! bedload will be reduced in case of sediment transport
                      ! over a non-erodible layer (no sediment in bed) in such
@@ -894,7 +895,8 @@
                      k = kb
                   endif
                   thick1 = vol1(k) * bai_mor(nm)
-                  sedflx = sinksetot(j,nm)*bai_mor(nm)
+                  sedflx = sinksetot(j,nm)*bai_mor(nm) + ssccum(l,nm)   ! kg/s/m2
+                  ssccum(l,nm) = 0d0
                   eroflx = sourse(nm,l)*thick1            ! mass conservation, different from D3D
                   !
                   ! Update fluff layer
@@ -994,7 +996,7 @@
          !
          ! If this is a cell in which sediment processes are active then ...
          !
-         if (kfsed(nm) /= 1 .or. (s1(nm)-bl(nm))<epshs) cycle                    ! check whether sufficient as condition
+         if (kfsed(nm) /= 1 .or. (s1(nm)-bl(nm))<epshs .or. thetsd(nm)<=0 ) cycle                    ! check whether sufficient as condition
          !
          totdbodsd = 0d0
          do l = 1, lsedtot

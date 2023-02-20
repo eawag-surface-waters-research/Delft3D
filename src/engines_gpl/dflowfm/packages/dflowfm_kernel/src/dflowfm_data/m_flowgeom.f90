@@ -122,7 +122,7 @@
  integer,          allocatable, target   :: ln    (:,:)    !< [-] 1D link (2,*) node   administration, 1=nd1,  2=nd2   linker en rechter celnr {"shape": [2, "lnkx"]}
  integer,          allocatable, target   :: LLkkk (:,:)    !< [-]    Link Link admin (5,*) , 1=lowL 2=hihL, 3=leftk, 4= midk, 5=rightk {"shape": [5, "lnx"]}
  integer,          allocatable, target   :: lncn  (:,:)    !< [-] 2D link (2,*) corner administration, 1=nod1, 2=nod2  linker en rechter netnr {"shape": [2, "lnkx"]}
- integer,          allocatable           :: kcu   (:)      !< [-] link code, 1=1D link, 2=2D link, -1= bc 1D, -2=bc 2D, 3=lateral_1d2d_link, 4=longitudinal_1d2d_link, 5=street_inlet_1d2d_link, 7=roof_gutter_1d2d_link
+ integer,          allocatable, target   :: kcu   (:)      !< [-] link code, 1=1D link, 2=2D link, -1= bc 1D, -2=bc 2D, 3=lateral_1d2d_link, 4=longitudinal_1d2d_link, 5=street_inlet_1d2d_link, 7=roof_gutter_1d2d_link {"shape": ["lnx"]}
  integer,          allocatable           :: Linkdried(:)   !< [-] latest dried links
 
  integer,          allocatable, target :: iadv(:)    !< [-] type of advection for this link {"location": "edge", "shape": ["lnx"]}
@@ -277,7 +277,6 @@ double precision, allocatable      :: thindam(:,:)
  double precision                            :: VillemonteCD2 = 10.0d0     !< default for VillemonteCD2 = 10
 
 ! Debug parameter
- integer                                     :: jabatch  = 0       !< dobatch
  integer                                     :: cmd_icgsolver = 4  !< save commandline icgsolver
 
  integer, allocatable, target      :: structuresAndWeirsList(:)    !< List containing flow links on which a structure or fixed weir is located.

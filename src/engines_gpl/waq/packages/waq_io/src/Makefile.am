@@ -8,5 +8,4 @@
 include $(top_srcdir)/common.am
 
 SUBDIRS = ods \
-          waq_io \
-          mpidum
+          waq_io

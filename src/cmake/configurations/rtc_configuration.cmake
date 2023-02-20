@@ -1,7 +1,5 @@
-project(drr)
-
-# DRR Rainfall Runoff
-# ============
+# RTC Real Time Control
+# =====================
 add_subdirectory(${checkout_src_root}/${rtc_module} rtc)
 add_subdirectory(${checkout_src_root}/${rtc_plugin_c_module} plugin_rtc_c)
 add_subdirectory(${checkout_src_root}/${rtc_kernel_module} rtc_kernel)
@@ -49,3 +47,6 @@ if(WIN32)
         add_subdirectory(${checkout_src_root}/${netcdf_module} netcdff)
     endif()
 endif()
+
+# Project name must be at the end of the configuration: it might get a name when including other configurations and needs to overwrite that
+project(rtc)

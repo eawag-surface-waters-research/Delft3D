@@ -693,6 +693,7 @@ subroutine fm_calksc()
     integer                                        :: kmaxx
     real(fp)                                       :: par1, par2, par3, par4, par5, par6
     real(fp)                                       :: relaxr, relaxmr, relaxd
+    real(fp)                                       :: llabda  ! local limited rlabda value
     real(fp)                                       :: maxdepfrac, zcc, zz
     real(fp)                                       :: hh, arg, uw, rr, umax, t1, uu, a11, raih, rmax, uon, uoff, uwbih, depth, umod, u2dh
     real(fp)                                       :: d50l, d90l, fch2, fcoarse, uwc, psi, rksr0, rksmr0, rksd0, cz_dum, z00
@@ -818,7 +819,8 @@ subroutine fm_calksc()
              !
              if (jawave>0 .and. .not. flowWithoutWaves) then
                 hh  = hwav(k) * sqrt(2.0_fp)
-                arg = 2.0_fp * pi * depth / max(rlabda(k),0.1)
+                llabda = max(0.1_fp, rlabda(k))
+                arg = 2.0_fp * pi * depth / llabda
                 if (arg > 50.0_fp) then
                    uw = 0.0_fp
                 else
@@ -830,7 +832,7 @@ subroutine fm_calksc()
                 uu    = umax / (ag*depth)**0.5_fp
                 a11   = -0.0049_fp*t1**2 - 0.069_fp*t1 + 0.2911_fp
                 raih  = max(0.5_fp  , -5.25_fp - 6.1_fp*tanh(a11*uu-1.76_fp))
-                rmax  = max(0.62_fp , min(0.75_fp , -2.5_fp*depth/max(rlabda(k),0.1)+0.85_fp))
+                rmax  = max(0.62_fp , min(-2.5_fp*depth/llabda+0.85_fp, 0.75_fp))
                 uon   = umax * (0.5_fp+(rmax-0.5_fp)*tanh((raih-0.5_fp)/(rmax-0.5_fp)))
                 uoff  = umax - uon
                 uon   = max(1.0e-5_fp , uon)

@@ -87,7 +87,7 @@ subroutine bedbc2004(tp        ,rhowat    , &
     real(fp), intent(out) :: taucr1
     real(fp), intent(out) :: taurat
     real(fp), intent(out) :: tauwav
-    real(fp), intent(in)  :: tp     !< peak wave period
+    real(fp), intent(in)  :: tp     !< peak wave period (limited to values larger than 1e-2)
     real(fp), intent(in)  :: umod
     real(fp), intent(out) :: ustarc
     real(fp), intent(out) :: usus
@@ -131,6 +131,7 @@ subroutine bedbc2004(tp        ,rhowat    , &
     real(fp) :: fw
     real(fp) :: fw1
     real(fp) :: kswr
+    real(fp) :: llabda ! local limited rlabda value
     real(fp) :: muw
     real(fp) :: raih 
     real(fp) :: rc
@@ -165,7 +166,6 @@ subroutine bedbc2004(tp        ,rhowat    , &
     real(fp) :: a
     real(fp) :: b
     real(fp) :: psi_phase
-    real(fp) :: bb_phase
     real(fp) :: rsf
     real(fp) :: aas
     real(fp) :: bbs
@@ -227,8 +227,9 @@ subroutine bedbc2004(tp        ,rhowat    , &
     if (phicur < 0.0_fp) then
        phicur = phicur + 2.0_fp*pi
     endif
+    llabda = max(0.1_fp, rlabda)
     if (wave .and. tp>0.1_fp) then
-       arg = 2.0_fp * pi * h1 / max(rlabda,1.0e-12_fp)
+       arg = 2.0_fp * pi * h1 / llabda
        if (arg > 50.0_fp) then
           awb = 0.0_fp
           uwb = 0.0_fp
@@ -244,7 +245,7 @@ subroutine bedbc2004(tp        ,rhowat    , &
     !
     ! wave parameters (if waves are present)
     !
-    if (wave .and. tp>0.1_fp) then
+    if (wave) then
        !
        ! kswr has same value as kscr (uncalibrated)
        !
@@ -305,7 +306,7 @@ subroutine bedbc2004(tp        ,rhowat    , &
           u1     = umax / sqrt(ag*h1)
           a11    = -0.0049_fp*t1**2 - 0.069_fp*t1 + 0.2911_fp
           raih   = max(0.5_fp  , -5.25_fp-6.1_fp*tanh(a11*u1 - 1.76_fp))
-          rmax   = max(0.62_fp , min(0.75_fp, -2.5_fp*h1/rlabda + 0.85_fp) )
+          rmax   = max(0.62_fp , min(0.75_fp, -2.5_fp*h1/llabda + 0.85_fp) )
           !
           uon    = umax * (0.5_fp+(rmax-0.5_fp)*tanh((raih-0.5_fp)/(rmax-0.5_fp)))
           uoff   = umax - uon
@@ -336,9 +337,9 @@ subroutine bedbc2004(tp        ,rhowat    , &
           xb       = -2.0_fp*bbs*ccs                                  ! members of quadr. func. bx
           xc       = ccs**2.0_fp-aas**2.0_fp                          ! members of quadr. func. c
           !
-          x2       = -xb+sqrt(-xb-4.0_fp*xa*xc)/(2.0_fp*xc)           ! positive quadr. func.
+          x2       = (-xb+sqrt(xb**2-4.0_fp*xa*xc))/(2.0_fp*xa)       ! positive quadr. func.
           x2       = max(x2,-1.0_fp)                                  ! makes asin(x) real.
-          x1       = -xb-sqrt(-xb-4.0_fp*xa*xc)/(2.0_fp*xc)           ! negative quadr. func.
+          x1       = (-xb-sqrt(xb**2-4.0_fp*xa*xc))/(2.0_fp*xa)       ! negative quadr. func.
           x1       = min(x1,1.0_fp)                                   ! makes asin(x) real.
           !
           t1_sol   = asin(x1)/omega                                   ! du/dt=0 solution 1 -> bounded to be real from limiting x1
@@ -448,7 +449,7 @@ subroutine bedbc2004(tp        ,rhowat    , &
        ! Upper limit camax set to 0.65 in stead of 0.05
        ! 0.05 is official TR2004, but results seem to be reasonable when using 0.65
        !
-       caks = min(camax , 0.015_fp*fsilt*d50*ta**1.5_fp/(aks*dstar**0.3_fp))
+       caks = min(0.015_fp*fsilt*d50*ta**1.5_fp/(aks*dstar**0.3_fp), camax)
     else
        caks = 0.0_fp
     endif

@@ -76,7 +76,7 @@ subroutine update_constituents(jarhoonly)
    use m_physcoef,   only: vicouv
    use m_transport
    use m_mass_balance_areas
-   use m_flowparameters, only: limtypsa, limtyptm, limtypsed
+   use m_flowparameters, only: limtypsa, limtyptm, limtypsed, flowwithoutwaves
    use m_alloc
    use m_partitioninfo
    use m_timer
@@ -169,7 +169,7 @@ subroutine update_constituents(jarhoonly)
                   q1sed(L) = q1(L)!+mtd%uau(L)*Au(L)
                end do
             end do
-         else if (jatranspvel .eq. 2) then                        ! Eulerian approach
+         else if (jatranspvel .eq. 2 .and. .not. flowwithoutwaves) then                        ! Eulerian approach
 !           stokes+asymmetry
             do LL=1,Lnx
                call getLbotLtop(LL,Lb,Lt)
@@ -241,6 +241,10 @@ subroutine update_constituents(jarhoonly)
       enddo
    endif
 
+!  Move here, needed in two following subroutines
+!  restore dts
+   dts = dts_store
+
    if (jarhoonly == 1) then
       call extract_rho() ; numconst = numconst_store
    else
@@ -252,9 +256,6 @@ subroutine update_constituents(jarhoonly)
 
    ierror = 0
 1234 continue
-
-!  restore dts
-   dts = dts_store
 
    if (timon) call timstop( ithndl )
    return

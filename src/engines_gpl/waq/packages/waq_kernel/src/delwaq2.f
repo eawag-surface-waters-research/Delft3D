@@ -104,8 +104,6 @@
       use grids
       USE DLWQI0_MOD
       USE Timers
-      use m_timers_waq
-      use m_couplib
       use delwaq2_data
       use m_actions
       use m_sysn          ! System characteristics
@@ -156,7 +154,6 @@
       integer, save            :: filtype(nlun)
       CHARACTER*(LCHMAX), SAVE :: RUNID
       LOGICAL, SAVE            :: INIT2        = .TRUE. ! To suppress the start-up screen
-      LOGICAL, SAVE            :: INIT_COUPLIB = .TRUE. ! Initialise the couplib library only once
 
 !     Common to define external communications in SOBEK
 !     OLCFWQ             Flag indicating ONLINE running of CF and WQ
@@ -222,70 +219,52 @@
          READ  ( LUNIN ) ( LUN    (K), K = 1, NOLUN )
          READ  ( LUNIN ) ( LCHAR  (K), K = 1, NOLUN )
          READ  ( LUNIN ) ( filtype(K), K = 1, NOLUN )
-         DO 5 ILUN = 1, NOLUN
+         DO ILUN = 1, NOLUN
             CLOSE ( LUN(ILUN) )
-    5    CONTINUE
+         END DO
          close(lunin)
-!
-!        start couplib
-!
-         if ( init_couplib ) then
-             init_couplib = .false.
-             call couplib_init(lunout=lun(19), idebug=0)
-         endif
-!
-!        store number of processes and own process number in sysn
-!
-         mypart = myprc
-         npartp = numprc
-!
-         if (mypart .gt. 1) then
-! open lokale monitor-files voor uitvoer tijdens initialisatie
-            write(lchar(19),'(a,i3.3,a)') 'part-', mypart,'.mon'
-         end if
+
 
          CALL DHOPNF ( LUN(19) , LCHAR(19) , 19    , 1    , IERRD  )
          CALL SETMLU ( LUN(19) )
 
-         IF (MYPART .EQ. 1) THEN
-
 !      Initialise communication options SOBEK
 
-            OLCFWQ = .FALSE.
-            SRWACT = .FALSE.
-            RTCACT = .FALSE.
-            LCHAR(44) = ' '
-            LUN(44)   = LUN(43) + 1
+         OLCFWQ = .FALSE.
+         SRWACT = .FALSE.
+         RTCACT = .FALSE.
+         LCHAR(44) = ' '
+         LUN(44)   = LUN(43) + 1
 
-            call getcom ( '-i'  , 3    , lfound, idummy, rdummy,
-     +                   inifil, ierr2)
-            if ( lfound ) then
-               if ( ierr2.ne. 0 ) then
-                  inifil = ' '
-               endif
-            else
-               inifil = 'delwaq.ini'
+         call getcom ( '-i'  , 3    , lfound, idummy, rdummy,
+     +                 inifil, ierr2)
+         if ( lfound ) then
+            if ( ierr2.ne. 0 ) then
+               inifil = ' '
             endif
-            open(newunit=lunin,file=inifil,status='old',err=123)
-            write(lun(19),*) ' Using options from ini file : ',trim(inifil)
-            call gkwini(lunin,'SimulationOptions','OnLineWQ',c2)
-            if ( c2 .eq. '-1' ) then
-               olcfwq = .true.
-               write(lun(19),*) ' online coupling with FLOW module activated'
-            endif
-            call gkwini(lunin,'SimulationOptions','OutputRTC',c2)
-            if ( c2 .eq. '-1' ) then
-               rtcact = .true.
-               write(lun(19),*) ' RTC coupling activated'
-            endif
-            call gkwini(lunin,'SimulationOptions','SRW',c2)
-            if ( c2 .eq. '-1' ) then
-               srwact = .true.
-               write(lun(19),*) ' SRW coupling activated'
-            endif
-            call gkwini(lunin,'General','DIOConfigFile',dioconfig)
-            call gkwini(lunin,'General','ProgressFile',lchar(44))
-            close (lunin)
+         else
+            inifil = 'delwaq.ini'
+         endif
+         open(newunit=lunin,file=inifil,status='old',err=123)
+         write(lun(19),*) ' Using options from ini file : ',trim(inifil)
+         call gkwini(lunin,'SimulationOptions','OnLineWQ',c2)
+         if ( c2 .eq. '-1' ) then
+            olcfwq = .true.
+            write(lun(19),*) ' online coupling with FLOW module activated'
+         endif
+         call gkwini(lunin,'SimulationOptions','OutputRTC',c2)
+         if ( c2 .eq. '-1' ) then
+            rtcact = .true.
+            write(lun(19),*) ' RTC coupling activated'
+         endif
+         call gkwini(lunin,'SimulationOptions','SRW',c2)
+         if ( c2 .eq. '-1' ) then
+            srwact = .true.
+            write(lun(19),*) ' SRW coupling activated'
+         endif
+         call gkwini(lunin,'General','DIOConfigFile',dioconfig)
+         call gkwini(lunin,'General','ProgressFile',lchar(44))
+         close (lunin)
  123        continue
 
        ! initialise DIO
@@ -313,22 +292,8 @@
                WRITE(*,*)
             ENDIF
 
-         endif
-!
-!        end of reading master proces
-!
-!        initialize timers
-!
-         call timers_waq_init(lun(19))
-         call couplib_timers_init(timer_start_couplib,
-     +       couplib_max_timers, measr_idle=.false.)
-!
-         call timer_start(timer_total)
-!
-         call timer_start(timer_init)
 
 ! collaborative call to i0
-         call sync_processes()
 !
          IERR = 0
          gridps => dlwqd%gridps
@@ -336,18 +301,16 @@
      &                 imaxi  , imaxc  , ipage  , lun    , lchar  ,
      &                 filtype, gridps , dlwqd  , ierr   )
 !
-         if (mypart .eq. 1) then
-            CLOSE ( LUNIN )
-            IF ( IERR .GT. 0 ) GOTO 992
+
+         IF ( IERR .GT. 0 ) GOTO 992
 !
 !        end of initialisation
 !
-            WRITE ( * , *)
-            WRITE ( * , * ) ' SIMULATION STARTED '
-            WRITE ( * , * )
-            WRITE ( * , * ) ' INTEGRATION ROUTINE =', intsrt
-         endif
-         call timer_stop(timer_init)
+         WRITE ( * , *)
+         WRITE ( * , * ) ' SIMULATION STARTED '
+         WRITE ( * , * )
+         WRITE ( * , * ) ' INTEGRATION ROUTINE =', intsrt
+
       ENDIF
 !     SOBEK external communications ONLY implemented in scheme 10!
       IF ( OLCFWQ .OR. SRWACT .OR. RTCACT ) THEN
@@ -360,136 +323,74 @@
       DLWQD%II = II
       DLWQD%IN = IN
 
-!
-!     Check restrictions of Parallel computing
-!
-      IF ( NPARTp .GT. 1 ) THEN
-!
-!        Parallel computing only allowed for schemes 1, 5, 12
-!
-         IF ( INTSRT.NE.1 .AND. INTSRT.NE.5 .AND. INTSRT.NE.12 ) GOTO 993
-!
-!        Bottom layers not allowed in parallel runs
-!
-         IF ( NOQ4.GT.0 ) GOTO 994
-!
-!        Multiple grids not allowed in parallel runs
-!
-         IF ( NOGRID.GT.1 ) GOTO 995
-!
-!        Use of DelftIO coupling not allowed in parallel runs
-!
-         IF ( OLCFWQ .OR. SRWACT .OR. RTCACT ) GOTO 996
-      ENDIF
+
 
 !         branch to the appropriate integration option
 
       select case ( intsrt )
 
          case (  0 )     !      not transport, just processes
-            call timer_start(timer_offs_intsrt+0)
             call dlwqn0 ( a , j , c , lun , lchar, action, dlwqd, gridps )
-            call timer_stop(timer_offs_intsrt+0)
 
          case (  1 )     !      backward in space and time
-            call timer_start(timer_offs_intsrt+1)
             call dlwqn1 ( a , j , c , lun , lchar, action, dlwqd, gridps )
-            call timer_stop(timer_offs_intsrt+1)
 
          case (  2 )     !      modified 2nd order Runge Kutta
-            call timer_start(timer_offs_intsrt+2)
             call dlwqn2 ( a , j , c , lun , lchar, action, dlwqd, gridps )
-            call timer_stop(timer_offs_intsrt+2)
 
          case (  3 )     !      2nd order Lax Wendroff
-            call timer_start(timer_offs_intsrt+3)
             call dlwqn3 ( a , j , c , lun , lchar, action, dlwqd, gridps )
-            call timer_stop(timer_offs_intsrt+3)
 
          case (  4 )     !      Aternating direction implicit
-            call timer_start(timer_offs_intsrt+4)
             call dlwqn4 ( a , j , c , lun , lchar, action, dlwqd, gridps )
-            call timer_stop(timer_offs_intsrt+4)
 
          case (  5 )     !      Flux corrected transport
-            call timer_start(timer_offs_intsrt+5)
             call dlwqn5 ( a , j , c , lun , lchar, action, dlwqd, gridps )
-            call timer_stop(timer_offs_intsrt+5)
 
          case (  6 )     !      Direct steady state, backward differences in space
-            call timer_start(timer_offs_intsrt+6)
             call dlwqn6 ( a , j , c , lun , lchar, action, dlwqd, gridps )
-            call timer_stop(timer_offs_intsrt+6)
 
          case (  7 )     !      Direct steady state, central differences in space
-            call timer_start(timer_offs_intsrt+7)
             call dlwqn7 ( a , j , c , lun , lchar, action, dlwqd, gridps )
-            call timer_stop(timer_offs_intsrt+7)
 
          case (  8 )     !      Iteratively steady state, backward differences in space
-            call timer_start(timer_offs_intsrt+8)
             call dlwqn8 ( a , j , c , lun , lchar, action, dlwqd, gridps )
-            call timer_stop(timer_offs_intsrt+8)
 
          case (  9 )     !      Iteratively steady state, central differences in space
-            call timer_start(timer_offs_intsrt+9)
             call dlwqn9 ( a , j , c , lun , lchar, action, dlwqd, gridps )
-            call timer_stop(timer_offs_intsrt+9)
 
          case ( 10 )     !      Fully implicit, direct method, upwind
-            call timer_start(timer_offs_intsrt+10)
             call dlwqnb ( a , j , c , lun , lchar, action, dlwqd, gridps )
-            call timer_stop(timer_offs_intsrt+10)
 
          case ( 11 )     !      Horizontal explicit upwind, vertical implicit central
-            call timer_start(timer_offs_intsrt+11)
             call dlwqnc ( a , j , c , lun , lchar, action, dlwqd, gridps )
-            call timer_stop(timer_offs_intsrt+11)
 
          case ( 12 )     !      Horizontal explicit FCT   , vertical implicit central
-            call timer_start(timer_offs_intsrt+12)
             call dlwqnd ( a , j , c , lun , lchar, action, dlwqd, gridps )
-            call timer_stop(timer_offs_intsrt+12)
 
          case ( 13 )     !      Horizontal explicit upwind, vertical implicit upwind
-            call timer_start(timer_offs_intsrt+13)
             call dlwqne ( a , j , c , lun , lchar, action, dlwqd, gridps )
-            call timer_stop(timer_offs_intsrt+13)
 
          case ( 14 )     !      Horizontal explicit FCT   , vertical implicit upwind
-            call timer_start(timer_offs_intsrt+14)
             call dlwqna ( a , j , c , lun , lchar, action, dlwqd, gridps )
-            call timer_stop(timer_offs_intsrt+14)
 
          case ( 15 )     !      GMRES, horizontal upwind, vertical upwind
-            call timer_start(timer_offs_intsrt+15)
             call dlwqnf ( a , j , c , lun , lchar, action, dlwqd, gridps )
-            call timer_stop(timer_offs_intsrt+15)
 
          case ( 16 )     !      GMRES, horizontal upwind, vertical central
-            call timer_start(timer_offs_intsrt+16)
             call dlwqng ( a , j , c , lun , lchar, action, dlwqd, gridps )
-            call timer_stop(timer_offs_intsrt+16)
 
          case ( 17 )     !      stationary GMRES, horizontal upwind, vertical upwind
-            call timer_start(timer_offs_intsrt+17)
             call dlwqnh ( a , j , c , lun , lchar, action, dlwqd, gridps )
-            call timer_stop(timer_offs_intsrt+17)
 
          case ( 18 )     !      stationary GMRES, horizontal upwind, vertical central
-            call timer_start(timer_offs_intsrt+18)
             call dlwqni ( a , j , c , lun , lchar, action, dlwqd, gridps )
-            call timer_stop(timer_offs_intsrt+18)
 
          case ( 19 )     !      TRISULA-ADI 1 (vertically upwind)
-            call timer_start(timer_offs_intsrt+19)
             call dlwqnj ( a , j , c , lun , lchar, action, dlwqd, gridps )
-            call timer_stop(timer_offs_intsrt+19)
 
          case ( 20 )     !      TRISULA-ADI 2 (vertically central)
-            call timer_start(timer_offs_intsrt+20)
             call dlwqnj ( a , j , c , lun , lchar, action, dlwqd, gridps )
-            call timer_stop(timer_offs_intsrt+20)
 
          case ( 21 )     !      Self adjusting teta method (limiter Salezac)
             call dlwqnm ( a , j , c , lun , lchar, action, dlwqd, gridps )
@@ -517,10 +418,7 @@
 !     print timer-results
 !     Note: removed printing of timers to monitoring file
 
-          call timer_stop(timer_total)
 
-          call sync_processes()
-          call couplib_stop()
 
           if ( timon ) then
              call timstop ( ithndl )
@@ -537,18 +435,6 @@
   991 WRITE ( * , * ) ' ERROR: INTEGRATION OPTION NOT IMPLEMENTED in online mode'
       CALL SRSTOP(1)
   992 WRITE ( * , * ) ' ERROR : INITIALISATION FAILED'
-      CALL SRSTOP(1)
-  993 WRITE ( * , '(/,1x,a,i4,/)' )
-     + ' INTEGRATION OPTION NOT IMPLEMENTED in parallel mode, npart=',npartp
-      CALL SRSTOP(1)
-  994 WRITE ( * , '(/,1x,a,i4,/)' )
-     + ' BOTTOM LAYERS NOT SUPPORTED in parallel mode, npart=',npartp
-      CALL SRSTOP(1)
-  995 WRITE ( * , '(/,1x,a,i4,/)' )
-     + ' MULTIPLE GRIDS NOT SUPPORTED in parallel mode, npart=',npartp
-      CALL SRSTOP(1)
-  996 WRITE ( * , '(/,1x,a,i4,/)' )
-     + ' ON-LINE MODE NOT SUPPORTED in parallel mode, npart=',npartp
       CALL SRSTOP(1)
   999 WRITE ( * , * ) ' ERROR: NO VALID SET OF MODEL-INTERMEDIATE-FILES'
       CALL SRSTOP(1)

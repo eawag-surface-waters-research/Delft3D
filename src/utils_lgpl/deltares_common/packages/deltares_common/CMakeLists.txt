@@ -42,7 +42,8 @@ endif(UNIX)
 target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${check_bounds_flag}>")
 
 set_source_files_properties(${fortran_version_file}
-                            ${src_path}/system_utils.f90
+                            ${src_path}/system_utils.F90
+                            ${src_path}/MessageHandling.F90
                             PROPERTIES COMPILE_OPTIONS "${file_preprocessor_flag}")
 
 

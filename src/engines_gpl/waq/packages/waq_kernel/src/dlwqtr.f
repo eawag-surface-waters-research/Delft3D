@@ -27,8 +27,7 @@
      +                    ALENG  , CONC   , DISP   , CONS   , PARAM  ,
      +                    FUNC   , SEGFUN , DISPER , VELO   , ITIME  ,
      +                    IDT    , SYNAME , NOCONS , NOFUN  , CONAME ,
-     +                    PANAME , FUNAME , SFNAME , UPDATR , ILFLAG ,
-     +                    NPARTp )
+     +                    PANAME , FUNAME , SFNAME , UPDATR , ILFLAG )
 !
 !     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
 !
@@ -87,7 +86,6 @@
 !                                         part of the matrix and uses integratio
 !                                         option 10.xx .
 !     ILFLAG  INTEGER     1       INPUT   if 0 then 3 length values
-!     NPARTp  INTEGER     1       INPUT   number of subdomains in parallel run
 !
 !     ==================================================================
 !
@@ -224,9 +222,6 @@
  2040 FORMAT (' Dispersion length in third dir. will be calculated')
  2050 FORMAT (' ERROR: File areachar.dat does not match.',
      +        ' NMA = ',I8,' LAYT= ',I8,' NMT = ',I8,' NOSEG=',I8)
- 2060 FORMAT (' ERROR: User-supplied transport processes (DLWQTR) may n
-     +ot be used',/,
-     +        '        in parallel runs (NPART=',i3,').')
  2070 FORMAT (' End extra functionality DLWQTR')
 !
       END

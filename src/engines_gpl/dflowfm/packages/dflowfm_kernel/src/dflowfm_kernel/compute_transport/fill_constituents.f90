@@ -77,6 +77,17 @@ subroutine fill_constituents(jas) ! if jas == 1 do sources
       end if
    end do
 
+   if (ISED1 .ne. 0) then
+      do i = 1, mxgr
+         iconst = ISED1+i-1
+         do k=1,ndx
+            if (.not. (hs(k)>stmpar%morpar%sedthr)) then
+               constituents(iconst,k) = 0d0   
+            end if
+         enddo
+      enddo
+   endif
+
    difsedu = 0d0 ; difsedw = 0d0 ; sigdifi = 0d0
 
 !  diffusion coefficients

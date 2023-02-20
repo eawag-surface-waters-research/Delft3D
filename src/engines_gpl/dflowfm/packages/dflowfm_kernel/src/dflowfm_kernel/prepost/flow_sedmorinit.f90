@@ -257,6 +257,7 @@ subroutine flow_sedmorinit()
        deallocate(mtd%sed)
        deallocate(mtd%ws)
        deallocate(mtd%blchg)
+       deallocate(mtd%sscdtzb)
 
        call clearstack (mtd%messages)
        deallocate(mtd%messages)
@@ -269,6 +270,7 @@ subroutine flow_sedmorinit()
     allocate(mtd%sed(stmpar%lsedsus,ndkx))
     allocate(mtd%ws(ndkx,stmpar%lsedsus))
     allocate(mtd%blchg(Ndx))
+    allocate(mtd%sscdtzb(stmpar%lsedsus,Ndx))
     allocate(mtd%messages)
     call initstack     (mtd%messages)
     !
@@ -278,13 +280,16 @@ subroutine flow_sedmorinit()
     mtd%sed         = 0.0_fp
     mtd%ws          = 0.0_fp
     mtd%blchg       = 0.0_fp
+    mtd%sscdtzb     = 0.0_fp
     !
     ! Array for transport.f90
     mxgr = stmpar%lsedsus
     if ( allocated(sed) ) deallocate(sed)
     if (stmpar%lsedsus .gt. 0) then
        allocate(sed(stmpar%lsedsus,Ndkx))
-       sed = 0d0
+       allocate(ssccum(stmpar%lsedsus,Ndkx))
+       sed    = 0d0
+       ssccum = 0d0
     end if
     !
     call rdinimorlyr(stmpar%lsedtot, stmpar%lsedsus, mdia, error, &

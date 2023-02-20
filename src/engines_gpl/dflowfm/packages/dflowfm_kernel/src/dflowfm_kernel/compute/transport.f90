@@ -40,6 +40,7 @@ subroutine transport()                           ! transport for now, advect sal
  use m_sediment
  use m_netw, only : xk,yk,zk
  use m_flowtimes
+ use m_flowparameters, only : jadiagnostictransport
  use m_physcoef, only : idensform, difmolsal
  use m_partitioninfo
  use m_timer
@@ -189,9 +190,11 @@ subroutine transport()                           ! transport for now, advect sal
 
  endif
 
+    if (jadiagnostictransport == 0 ) then ! if jadiagnostictransport = 1 then update of constituents is skipped (all constituents are then "frozen")
        call apply_tracer_bc()
        call update_constituents(0) ! do all constituents
-
+    endif
+    
     if ( jasal.gt.0 ) then    !  compute salt error
 
        sam0tot = sam1tot

@@ -801,7 +801,8 @@ use meshdata, only : ug_idsLen, ug_idsLongNamesLen
       integer, intent(  out)                :: ierror !< (allocation) error code. 0=success
 
       integer, allocatable                  :: edge_nodes(:,:)
-      integer, allocatable                  :: iglobal_edge(:) !< Original global number of all current 1D edges.
+      integer, allocatable                  :: iglobal_edge(:) !< Original global number of all current 1D edges (that is: excluding 1d2d)
+      integer, allocatable                  :: kperm(:) !< Permutation table for net nodes (from old to new numbering)
       integer                               :: i, ii, ic_p, ic_g, i_p, i_g, n1dedges, numk1d
       character(len=ug_idsLen), allocatable :: nodeids_p(:)
       character(len=ug_idsLongNamesLen), allocatable :: nodelongnames_p(:)
@@ -829,7 +830,8 @@ use meshdata, only : ug_idsLen, ug_idsLongNamesLen
       end if
 
       ! create edge_nodes (Edge-to-node mapping array)
-      call get_1d_edges_in_domain(numl1d, L2Lorg, numk1d, n1dedges, edge_nodes, iglobal_edge, ierror)
+      ! Prepare 1D edges and 1d nodes for UGRID mesh1d writing, and obtain the original global numbers, so that edge/node (branch)ids can be set correctly.
+      call get_1d_edges_in_domain(numl1d, L2Lorg, numk1d, n1dedges, edge_nodes, iglobal_edge, kperm, ierror)
       if (ierror /= 0) return
 
       ! partition node arrays
@@ -838,6 +840,9 @@ use meshdata, only : ug_idsLen, ug_idsLongNamesLen
       ! 1D cells have already been sorted in original global order
       ! and 1D net should be written in original order (with other partitions removed, that is: in the current 1:numk1d order)
       do ic_p = nump+1, nump1d2d
+         ! UNST-6571: deliberately not using kperm here, under the assumption that in input 1D netnodes are already sorted by branch,
+         !            and this loop should stay consistent with the one in unc_write_net_ugrid2().
+         !            This subroutine only deals with edge-ordering and partition-to-global mapping (i.e., no netnode remapping).
          i_p  = netcell(ic_p)%nod(1) ! 1D netcell -> 1D net node
          ic_g = iglobal_s(ic_p)
          i_g  = netcell0(ic_g)%nod(1) ! netcell0 currently still contains backup of unpartitioned original full grid.
@@ -868,25 +873,26 @@ use meshdata, only : ug_idsLen, ug_idsLongNamesLen
    end subroutine partition_make_1dugrid_in_domain
 
    !> Helper routine to get 1D edge_nodes and original edge number for current domain while partitioning.
+   !! The net link and net node numbering is returned in a "1D only" numbering, intended for UGRID mesh1d output.
    !! A 1D edge is a true 1D netlink, i.e., not a 1D2D link.
-   subroutine get_1d_edges_in_domain(numl1d, L2Lorg, numk1d, n1dedges, edge_nodes, Lorg, ierror)
-      use network_data, only : kn
+   subroutine get_1d_edges_in_domain(numl1d, L2Lorg, numk1d, n1dedges, edge_nodes, Lorg, kperm, ierror)
+      use network_data, only : kn, LNE
       implicit none
-      integer,              intent(in   ) :: numl1d          !< number of 1D links in original 1d mesh
-      integer,              intent(in   ) :: L2Lorg(:)       !< Mapping table current (new) to original net link numbers
+      integer,              intent(in   ) :: numl1d          !< number of 1D(+1D2D) links in current partition mesh
+      integer,              intent(in   ) :: L2Lorg(:)       !< Mapping table current (new) to original global net link numbers
       integer,              intent(  out) :: numk1d          !< number of 1D nodes returned
       integer,              intent(  out) :: n1dedges        !< number of 1D edges returned
       integer, allocatable, intent(  out) :: edge_nodes(:,:) !< Edge-to-node mapping array.
       integer, allocatable, intent(  out) :: Lorg(:)         !< Original edge numbers for current (new) edges (edges can be subset of 1D net links, namely: excluding the 1D2D net links).
+      integer, allocatable, intent(  out) :: kperm(:)        !< Permutation table for net node numbers (from old to new numbers).
       integer,              intent(  out) :: ierror          !< error code
 
       integer              :: k1, k2, l, size
-      integer, allocatable :: kc(:)
 
       size = maxval(kn(1:2, 1:numl1d))
-      allocate(kc(size), stat=ierror)
+      allocate(kperm(size), stat=ierror)
       if (ierror /= 0) return
-      kc(:) = 0
+      kperm(:) = 0
 
       n1dedges = 0
       do l=1,numl1d
@@ -907,18 +913,32 @@ use meshdata, only : ug_idsLen, ug_idsLongNamesLen
 
             k1 = kn(1,l)
             k2 = kn(2,l)
-            if (kc(k1) == 0) then
+            if (kperm(k1) == 0) then
                numk1d = numk1d+1
-               kc(k1) = -numk1d ! remember new node number
+               kperm(k1) = numk1d ! remember new node number
             end if
-            if (kc(k2) == 0) then
+            if (kperm(k2) == 0) then
                numk1d = numk1d+1
-               kc(k2) = -numk1d ! remember new node number
+               kperm(k2) = numk1d ! remember new node number
             end if
 
-            edge_nodes(1,n1dedges) = abs(kc(kn(1,l)))
-            edge_nodes(2,n1dedges) = abs(kc(kn(2,l)))
-            Lorg(n1dedges) = L2Lorg(L) ! Note: this assumes that in original net, all 1D net links come first in the range 1:numl1d, and the 1D2D links are all togather at the end of that numl1d range.
+            edge_nodes(1,n1dedges) = kperm(kn(1,l))
+            edge_nodes(2,n1dedges) = kperm(kn(2,l))
+            Lorg(n1dedges) = L2Lorg(L) ! Note: this assumes that in original net, all 1D net links come first in the range 1:numl1d, and the 1D2D links are all together at the end of that numl1d range.
+         else if (kn(3,l) >= 3 .and. kn(3,l) <= 7) then
+            ! We may encounter an orphan 1D2D link, where the 1D side has no own true 1D links.
+            ! In that case, only increment the numk1d counter, but don't add any 1d edge.
+            if (lne(1,L) < 0) then ! #1 is the 1D side, as set in find1dcells()
+               k1 = kn(1,L)
+            else if (lne(2,L) < 0) then ! #2 is the 1D side, as set in find1dcells()
+               k1 = kn(2,L)
+            else
+               cycle
+            end if
+            if (kperm(k1) == 0) then
+               numk1d = numk1d + 1
+               kperm(k1) = numk1d ! remember new node number
+            end if
          end if
       end do
    end subroutine get_1d_edges_in_domain
@@ -2865,7 +2885,7 @@ use meshdata, only : ug_idsLen, ug_idsLongNamesLen
     end subroutine partition_fill_ghostsendlist_nonoverlap
    
    
-   subroutine update_ghosts(itype, NDIM, N, var, ierror)
+   subroutine update_ghosts(itype, NDIM, N, var, ierror, ignore_orientation)
 #ifdef HAVE_MPI   
       use mpi
 #endif      
@@ -2880,9 +2900,8 @@ use meshdata, only : ug_idsLen, ug_idsLongNamesLen
       integer,                                     intent(in)    :: N            !< number of flownodes/links
       double precision, dimension(NDIM*N),         intent(inout) :: var          !< solution
       integer,                                     intent(out)   :: ierror       !< error (1) or not (0)
-      
+      logical,                                     intent(in), optional :: ignore_orientation !< Ignore orientation of ghost and own location, useful for directionless quantities on u-points. Default: .false.
 
-      
       ierror = 1
       
       if ( .not.allocated(isendlist_sall) ) goto 1234   ! safety
@@ -2892,19 +2911,19 @@ use meshdata, only : ug_idsLen, ug_idsLongNamesLen
             call qnerror('update_ghosts, ITYPE_S: numbering error', ' ', ' ')
             goto 1234
          end if
-         call update_ghost_loc(ndomains, NDIM, N, var, nghostlist_s(ndomains-1), ighostlist_s, nghostlist_s, nsendlist_s(ndomains-1), isendlist_s, nsendlist_s, itag_s, ierror)
+         call update_ghost_loc(ndomains, NDIM, N, var, nghostlist_s(ndomains-1), ighostlist_s, nghostlist_s, nsendlist_s(ndomains-1), isendlist_s, nsendlist_s, itag_s, ierror, ignore_orientation=ignore_orientation)
       else if ( itype.eq.ITYPE_SALL ) then
          if ( N.ne.Ndx) then
             call qnerror('update_ghosts, ITYPE_Sall: numbering error', ' ', ' ')
             goto 1234
          end if
-         call update_ghost_loc(ndomains, NDIM, N, var, nghostlist_sall(ndomains-1), ighostlist_sall, nghostlist_sall, nsendlist_sall(ndomains-1), isendlist_sall, nsendlist_sall, itag_sall, ierror)
+         call update_ghost_loc(ndomains, NDIM, N, var, nghostlist_sall(ndomains-1), ighostlist_sall, nghostlist_sall, nsendlist_sall(ndomains-1), isendlist_sall, nsendlist_sall, itag_sall, ierror, ignore_orientation=ignore_orientation)
       else if ( itype.eq.ITYPE_U ) then
          if ( N.ne.Lnx) then
             call qnerror('update_ghosts, ITYPE_U: numbering error', ' ', ' ')
             goto 1234
          end if
-         call update_ghost_loc(ndomains, NDIM, N, var, nghostlist_u(ndomains-1), ighostlist_u, nghostlist_u, nsendlist_u(ndomains-1), isendlist_u, nsendlist_u, itag_u, ierror)
+         call update_ghost_loc(ndomains, NDIM, N, var, nghostlist_u(ndomains-1), ighostlist_u, nghostlist_u, nsendlist_u(ndomains-1), isendlist_u, nsendlist_u, itag_u, ierror, ignore_orientation=ignore_orientation)
 !
 !     3D-extension         
       else if ( itype.eq.ITYPE_S3D ) then
@@ -2912,26 +2931,26 @@ use meshdata, only : ug_idsLen, ug_idsLongNamesLen
             call qnerror('update_ghosts, ITYPE_S3D: numbering error', ' ', ' ')
             goto 1234
          end if
-         call update_ghost_loc(ndomains, NDIM, N, var, nghostlist_s(ndomains-1), ighostlist_s, nghostlist_s, nsendlist_s(ndomains-1), isendlist_s, nsendlist_s, itag_s, ierror, nghostlist_s_3D, nsendlist_s_3D, kmxn, kbot)
+         call update_ghost_loc(ndomains, NDIM, N, var, nghostlist_s(ndomains-1), ighostlist_s, nghostlist_s, nsendlist_s(ndomains-1), isendlist_s, nsendlist_s, itag_s, ierror, nghostlist_s_3D, nsendlist_s_3D, kmxn, kbot, ignore_orientation=ignore_orientation)
       else if ( itype.eq.ITYPE_SALL3D ) then
          if ( N.ne.Ndkx) then
             call qnerror('update_ghosts, ITYPE_Sall3D: numbering error', ' ', ' ')
             goto 1234
          end if
-         call update_ghost_loc(ndomains, NDIM, N, var, nghostlist_sall(ndomains-1), ighostlist_sall, nghostlist_sall, nsendlist_sall(ndomains-1), isendlist_sall, nsendlist_sall, itag_sall, ierror, nghostlist_sall_3D, nsendlist_sall_3D, kmxn, kbot)
+         call update_ghost_loc(ndomains, NDIM, N, var, nghostlist_sall(ndomains-1), ighostlist_sall, nghostlist_sall, nsendlist_sall(ndomains-1), isendlist_sall, nsendlist_sall, itag_sall, ierror, nghostlist_sall_3D, nsendlist_sall_3D, kmxn, kbot, ignore_orientation=ignore_orientation)
       else if ( itype.eq.ITYPE_U3D ) then
          if ( N.ne.Lnkx) then
             call qnerror('update_ghosts, ITYPE_U3D: numbering error', ' ', ' ')
             goto 1234
          end if
 !         call update_ghost_loc(ndomains, NDIM, N, var, nghostlist_u(ndomains-1), ighostlist_u, nghostlist_u, nsendlist_u(ndomains-1), isendlist_u, nsendlist_u, itag_u, ierror, nghost3d=nghostlist_u_3D, nsend3d=nsendlist_u_3D, kmxnL=kmxL, kbot=Lbot)
-         call update_ghost_loc(ndomains, NDIM, N, var, nghostlist_u(ndomains-1), ighostlist_u, nghostlist_u, nsendlist_u(ndomains-1), isendlist_u, nsendlist_u, itag_u, ierror, nghostlist_u_3D, nsendlist_u_3D, kmxL, Lbot)
+         call update_ghost_loc(ndomains, NDIM, N, var, nghostlist_u(ndomains-1), ighostlist_u, nghostlist_u, nsendlist_u(ndomains-1), isendlist_u, nsendlist_u, itag_u, ierror, nghostlist_u_3D, nsendlist_u_3D, kmxL, Lbot, ignore_orientation=ignore_orientation)
        else if ( itype.eq.ITYPE_U3DW ) then
          if ( N.ne.Lnkx) then
             call qnerror('update_ghosts, ITYPE_U3DW: numbering error', ' ', ' ')
             goto 1234
          end if
-         call update_ghost_loc(ndomains, NDIM, N, var, nghostlist_u(ndomains-1), ighostlist_u, nghostlist_u, nsendlist_u(ndomains-1), isendlist_u, nsendlist_u, itag_u, ierror, nghostlist_u_3Dw, nsendlist_u_3Dw, kmxL+1, Lbot-1)
+         call update_ghost_loc(ndomains, NDIM, N, var, nghostlist_u(ndomains-1), ighostlist_u, nghostlist_u, nsendlist_u(ndomains-1), isendlist_u, nsendlist_u, itag_u, ierror, nghostlist_u_3Dw, nsendlist_u_3Dw, kmxL+1, Lbot-1, ignore_orientation=ignore_orientation)
                  
 !     overlap
       else if ( itype.eq.ITYPE_Snonoverlap ) then
@@ -2940,9 +2959,9 @@ use meshdata, only : ug_idsLen, ug_idsLongNamesLen
             goto 1234
          end if
          if ( jaoverlap.eq.1 ) then
-            call update_ghost_loc(ndomains, NDIM, N, var, nghostlist_snonoverlap(ndomains-1), ighostlist_snonoverlap, nghostlist_snonoverlap, nsendlist_snonoverlap(ndomains-1), isendlist_snonoverlap, nsendlist_snonoverlap, itag_snonoverlap, ierror)
+            call update_ghost_loc(ndomains, NDIM, N, var, nghostlist_snonoverlap(ndomains-1), ighostlist_snonoverlap, nghostlist_snonoverlap, nsendlist_snonoverlap(ndomains-1), isendlist_snonoverlap, nsendlist_snonoverlap, itag_snonoverlap, ierror, ignore_orientation=ignore_orientation)
          else  ! no overlap: use sall
-            call update_ghost_loc(ndomains, NDIM, N, var, nghostlist_sall(ndomains-1), ighostlist_sall, nghostlist_sall, nsendlist_sall(ndomains-1), isendlist_sall, nsendlist_sall, itag_sall, ierror)
+            call update_ghost_loc(ndomains, NDIM, N, var, nghostlist_sall(ndomains-1), ighostlist_sall, nghostlist_sall, nsendlist_sall(ndomains-1), isendlist_sall, nsendlist_sall, itag_sall, ierror, ignore_orientation=ignore_orientation)
          end if
       else
          call qnerror('update_ghosts: unknown ghost type', ' ', ' ')
@@ -2959,7 +2978,7 @@ use meshdata, only : ug_idsLen, ug_idsLongNamesLen
      
 !> update ghost values
 !>   3D extension: we assume that kbot/Lbot and kmxn/kmxL match their counterparts in the other domain(s)
-   subroutine update_ghost_loc(ndomains, NDIM, N, s, numghost, ighost, nghost, numsend, isend, nsend, itag, ierror, nghost3d, nsend3d, kmxnL, kbot)
+   subroutine update_ghost_loc(ndomains, NDIM, N, s, numghost, ighost, nghost, numsend, isend, nsend, itag, ierror, nghost3d, nsend3d, kmxnL, kbot, ignore_orientation)
 #ifdef HAVE_MPI   
       use mpi
 #endif      
@@ -2971,7 +2990,7 @@ use meshdata, only : ug_idsLen, ug_idsLongNamesLen
       integer,                                     intent(in)     :: ndomains        !< number of subdomains
       integer,                                     intent(in)     :: NDIM            !< number of unknowns per flownode/link
       integer,                                     intent(in)     :: N               !< number of flownodes/links
-      double precision, dimension(NDIM*N),         intent(inout)  :: s               !< solution
+      double precision, dimension(NDIM*N),         intent(inout)  :: s               !< Solution. Note: will correct for orientation between ghost and own location if needed (typically only for u-points).
       integer,                                     intent(in)     :: numghost        !< number of ghost nodes/links
       integer,          dimension(numghost),       intent(in)     :: ighost          !< ghost nodes/links
       integer,          dimension(-1:ndomains-1),  intent(in)     :: nghost          !< ghost list pointers
@@ -2985,6 +3004,7 @@ use meshdata, only : ug_idsLen, ug_idsLongNamesLen
       integer,          dimension(-1:ndomains-1),  intent(in), optional :: nsend3d   !< number of unknowns to be send     per domain
       integer,          dimension(N),              intent(in), optional :: kmxnL     !< number of layers
       integer,          dimension(N),              intent(in), optional :: kbot      !< bottom layer indices
+      logical,                                     intent(in), optional :: ignore_orientation !< Ignore orientation of ghost and own location, useful for directionless quantities on u-points. Default: .false.
 
 !      double precision, dimension(:), allocatable                :: work         ! work array
 #ifdef HAVE_MPI
@@ -3002,6 +3022,7 @@ use meshdata, only : ug_idsLen, ug_idsLongNamesLen
 !      double precision, parameter                                 :: DNOCELL = -1234.5678
       
       character(len=1024)                                         :: str
+      logical :: ignore_orientation_
 #endif
       ierror = 1
 #ifdef HAVE_MPI
@@ -3010,6 +3031,11 @@ use meshdata, only : ug_idsLen, ug_idsLongNamesLen
       ja3d = 0
       if ( present(nghost3d) .and. present(nsend3d) .and. present(kmxnL) .and. present(kbot) ) then
          ja3d = 1
+      end if
+
+      ignore_orientation_ = .false.
+      if (present(ignore_orientation)) then
+         ignore_orientation_ = ignore_orientation
       end if
          
 !     allocate work array (will be reallocated later)
@@ -3206,7 +3232,12 @@ use meshdata, only : ug_idsLen, ug_idsLongNamesLen
                 if ( ighost(i).gt.0 ) then
                    s(ighost(i)) = workrec(i)
                 else if ( ighost(i).lt.0 ) then
-                   s(-ighost(i)) = -workrec(i)
+                   ! Some quantities may not need an orientation fix on u-points:
+                   if (ignore_orientation_) then
+                      s(-ighost(i)) =  workrec(i)
+                   else
+                      s(-ighost(i)) = -workrec(i)
+                   end if
                 end if
                   
 !               else  ! no cell was found during handshake
@@ -4808,10 +4839,10 @@ end subroutine partition_make_globalnumbers
          integer :: ibr, inext
          
 !     see if any of the left/right links of other domain's branches is in a netbranch in this domain
-         ibr_glob_left = 0
-         ibr_glob_right = 0
-         Lother_left  = 0
-         Lother_right = 0
+         ibr_glob_left = -huge(0)
+         ibr_glob_right= -huge(0)
+         Lother_left   = -huge(0)
+         Lother_right  = -huge(0)
          ioff = 0
          do idmn=0,numranks-1
             istart = 1 + ioff                   ! global branch number of first branch in other domain
@@ -4885,22 +4916,36 @@ end subroutine partition_make_globalnumbers
          end do
       
 !        gather information from all domains
-         call MPI_allreduce(ibr_glob_left,idum,numallnetbr,MPI_INTEGER,MPI_SUM,DFM_COMM_DFMWORLD,ierror)
+         call MPI_allreduce(ibr_glob_left,idum,numallnetbr,MPI_INTEGER,MPI_MAX,DFM_COMM_DFMWORLD,ierror)
          if ( ierror.ne.0 ) goto 1234
          ibr_glob_left = idum
       
-         call MPI_allreduce(ibr_glob_right,idum,numallnetbr,MPI_INTEGER,MPI_SUM,DFM_COMM_DFMWORLD,ierror)
+         call MPI_allreduce(ibr_glob_right,idum,numallnetbr,MPI_INTEGER,MPI_MAX,DFM_COMM_DFMWORLD,ierror)
          if ( ierror.ne.0 ) goto 1234
          ibr_glob_right = idum
       
-         call MPI_allreduce(Lother_left,idum,numallnetbr,MPI_INTEGER,MPI_SUM,DFM_COMM_DFMWORLD,ierror)
+         call MPI_allreduce(Lother_left,idum,numallnetbr,MPI_INTEGER,MPI_MAX,DFM_COMM_DFMWORLD,ierror)
          if ( ierror.ne.0 ) goto 1234
          Lother_left = idum
       
-         call MPI_allreduce(Lother_right,idum,numallnetbr,MPI_INTEGER,MPI_SUM,DFM_COMM_DFMWORLD,ierror)
+         call MPI_allreduce(Lother_right,idum,numallnetbr,MPI_INTEGER,MPI_MAX,DFM_COMM_DFMWORLD,ierror)
          if ( ierror.ne.0 ) goto 1234
          Lother_right = idum
 
+         where (ibr_glob_left == -huge(0))
+            ibr_glob_left = 0
+         end where
+         where (ibr_glob_right == -huge(0))
+            ibr_glob_right = 0
+         end where
+         where (Lother_left == -huge(0))
+            Lother_left = 0
+         end where
+         where (Lother_right == -huge(0))
+            Lother_right = 0
+         end where
+
+             
    !     check for mutual connectivity
          do ibr=1,numallnetbr
    !        check right
@@ -5563,8 +5608,8 @@ end subroutine gatherv_int_data_mpi_dif
       real,             allocatable, dimension(:) :: ubvec           ! specify the allowed load imbalance tolerance for each constraint.=1.001 when ncon=1
       integer                                     :: L, k1, k2
 
-      integer,          allocatable, dimension(:)  :: iadj_tmp
-      integer,          allocatable, dimension(:)  :: iadj, jadj, adjw
+      integer,          allocatable, dimension(:)  :: xadj_tmp
+      integer,          allocatable, dimension(:)  :: xadj, adjncy, adjw
 
       integer,                       external      :: metisopts, METIS_PartGraphKway, METIS_PartGraphRecursive, METIS_PARTMESHDUAL
 
@@ -5663,62 +5708,60 @@ end subroutine gatherv_int_data_mpi_dif
          ubvec = 1.001                      ! allowed load imbalance tolerance
 
 !        generate adjacency structure in CSR format 
-         allocate(iadj(nump1d2d+1), stat=ierror)
-         call aerr('iadj(nump1d2d+1)', ierror, nump1d2d+1)
-         iadj = 0
-         allocate(iadj_tmp(nump1d2d+1), stat=ierror)
-         call aerr('iadj_tmp(nump1d2d+1)', ierror, nump1d2d+1)
+         allocate(xadj(nump1d2d+1), stat=ierror)
+         call aerr('xadj(nump1d2d+1)', ierror, nump1d2d+1)
+         xadj = 0
+         allocate(xadj_tmp(nump1d2d+1), stat=ierror)
+         call aerr('xadj_tmp(nump1d2d+1)', ierror, nump1d2d+1)
 
 !        count number of connection per vertex
-         iadj_tmp = 0
+         xadj_tmp = 0
          do L=1,numL
             if ( lnn(L) > 1 ) then
                k1 = abs(lne(1,L))
                k2 = abs(lne(2,L))
-               iadj_tmp(k1) = iadj_tmp(k1) + 1
-               iadj_tmp(k2) = iadj_tmp(k2) + 1
+               xadj_tmp(k1) = xadj_tmp(k1) + 1
+               xadj_tmp(k2) = xadj_tmp(k2) + 1
             end if
          end do
 
 !        set startpointers
-         iadj(1) = 1
+         xadj(1) = 1
          do k=1,nump1d2d
-            iadj(k+1) = iadj(k) + iadj_tmp(k)
+            xadj(k+1) = xadj(k) + xadj_tmp(k)
          end do
 
 !        set connections
-         allocate(jadj(iadj(nump1d2d+1)-1), stat=ierror)
-         call aerr('jadj(iadj(nump1d2d+1)-1)', ierror, iadj(nump1d2d+1)-1)
-         jadj = 0
+         allocate(adjncy(xadj(nump1d2d+1)-1), stat=ierror)
+         call aerr('adjncy(xadj(nump1d2d+1)-1)', ierror, xadj(nump1d2d+1)-1)
+         adjncy = 0
 
-         iadj_tmp = iadj
+         xadj_tmp = xadj
          do L=1,numL
             if ( lnn(L).gt.1 ) then
                k1 = abs(lne(1,L))
                k2 = abs(lne(2,L))
-               jadj(iadj_tmp(k1)) = k2
-               jadj(iadj_tmp(k2)) = k1
-               iadj_tmp(k1) = iadj_tmp(k1)+1
-               iadj_tmp(k2) = iadj_tmp(k2)+1
+               adjncy(xadj_tmp(k1)) = k2
+               adjncy(xadj_tmp(k2)) = k1
+               xadj_tmp(k1) = xadj_tmp(k1)+1
+               xadj_tmp(k2) = xadj_tmp(k2)+1
             end if
          end do
 
-         allocate(adjw(iadj(nump1d2d+1)-1), stat=ierror)
-         call aerr('jadjw(iadj(nump1d2d+1)-1)', ierror, iadj(nump1d2d+1)-1)
-         adjw = 0
-!        set edge weights and vsize
-         call set_weights_for_METIS(nump1d2d, Nparts, iadj(nump1d2d+1)-1, iadj, jadj,vsize, adjw)
+         allocate(adjw(xadj(nump1d2d+1)-1), stat=ierror)
+         call aerr('jadjw(xadj(nump1d2d+1)-1)', ierror, xadj(nump1d2d+1)-1)
+         call set_edge_weights_and_vsize_for_METIS(nump1d2d, Nparts, xadj(nump1d2d+1)-1, xadj, adjncy, vsize, adjw)
 
 !        make CSR arrays zero-based
-         iadj = iadj-1
-         jadj = jadj-1
+         xadj   = xadj-1
+         adjncy = adjncy-1
       endif
 
      ! netstat = NETSTAT_CELLS_DIRTY
 
       select case (method)
       case (0,1)
-         ierror = METIS_PartGraphKway(Ne, Ncon, iadj, jadj, vwgt, vsize, adjw, Nparts, tpwgts, ubvec, opts, objval, idomain)
+         ierror = METIS_PartGraphKway(Ne, Ncon, xadj, adjncy, vwgt, vsize, adjw, Nparts, tpwgts, ubvec, opts, objval, idomain)
          if (ierror /= METIS_OK .and. jacontiguous == 1) then
             call mess(LEVEL_INFO, 'The above METIS error message is not a problem.')
             call mess(LEVEL_INFO, 'It means that partitioning failed for k-way method with option contiguous=1')
@@ -5726,13 +5769,13 @@ end subroutine gatherv_int_data_mpi_dif
             call mess(LEVEL_INFO, 'contiguous=0.')
             ierror = metisopts(opts, "CONTIG", 0) ! Fallback, allow non-contiguous domains in case of non-contiguous network.
             if (ierror == 0) then ! Note: metisopts does not use METIS_OK status, but simply 0 instead.
-               ierror = METIS_PartGraphKway(Ne, Ncon, iadj, jadj, vwgt, vsize, adjw, Nparts, tpwgts, ubvec, opts, objval, idomain)
+               ierror = METIS_PartGraphKway(Ne, Ncon, xadj, adjncy, vwgt, vsize, adjw, Nparts, tpwgts, ubvec, opts, objval, idomain)
             else
                call mess(LEVEL_ERROR, 'Fallback fails.')
             end if
          end if
       case (2)
-         ierror = METIS_PartGraphRecursive(Ne, Ncon, iadj, jadj, vwgt, vsize, adjw, Nparts, tpwgts, ubvec, opts, objval, idomain)
+         ierror = METIS_PartGraphRecursive(Ne, Ncon, xadj, adjncy, vwgt, vsize, adjw, Nparts, tpwgts, ubvec, opts, objval, idomain)
       case (3)
          ierror = METIS_PARTMESHDUAL(Ne, Nn, eptr, eind, vwgt, vsize, ncommon, Nparts, tpwgts, opts, objval, idomain, npart)
       case default
@@ -6453,47 +6496,77 @@ end subroutine gatherv_int_data_mpi_dif
 ! =================================================================================================
 !> Sets weights of edges and vsize on mesh that is to be partitioned by METIS
 !! If there are structures defined by polylines, then for structure related cells and edges, it gives special values to edges weights and vertex size.
-!! The purpose is to avoid structures intercross partition boundaries.
+!! The purpose is to avoid structures intercross partition boundaries including ghost cells.
 !! NOTE: It uses "Ne/Nparts" as the special weights on structures, othere weight values can also be investigated.
 !! Now ONLY support structures defined by polylines. TODO: support setting special weights on structures that are defined by other ways.
-   subroutine set_weights_for_METIS(Ne, Nparts, njadj, iadj, jadj,vsize, adjw)
-      use m_alloc
-      implicit none
-      integer,                      intent(in)    :: Ne     !< Number of vertices
-      integer,                      intent(in)    :: Nparts !< Number of partition subdomains
-      integer,                      intent(in)    :: njadj  !< Length of array jadj
-      integer, dimension(Ne),       intent(in)    :: iadj   !< Array for mesh structure (CSR format, see METIS manual)
-      integer, dimension(njadj),    intent(in)    :: jadj   !< Array for mesh structure (CSR format, see METIS manual)
-      integer, dimension(njadj),    intent(inout) :: adjw   !< Edge weight
-      integer, dimension(Ne),       intent(inout) :: vsize  !< Size of vertices
+subroutine set_edge_weights_and_vsize_for_METIS(Ne, Nparts, njadj, xadj, adjncy, vsize, adjw)
+   implicit none
+   integer,                    intent(in)    :: Ne     !< Number of vertices
+   integer,                    intent(in)    :: Nparts !< Number of partition subdomains
+   integer,                    intent(in)    :: njadj  !< Length of array adjncy
+   integer, dimension(Ne),     intent(in)    :: xadj   !< The adjacency structure of the graph as described in Section 5.5. of METIS manual
+   integer, dimension(njadj),  intent(in)    :: adjncy !< The adjacency structure of the graph as described in Section 5.5. of METIS manual
+   integer, dimension(njadj),  intent(inout) :: adjw   !< Edge weight used to minimize edge cut (see METIS manual)
+   integer, dimension(Ne),     intent(inout) :: vsize  !< Vertex size used to minimize total communication volume (see METIS manual)
 
-      integer              :: nstrucells         ! Number of netcells that relate to structures
-      integer, allocatable :: istrucells(:)      ! Indices of netcells that relate to structures, there can be duplicated
-                                                 ! indices here, and it is no problem
-      integer              :: i, j, k, val_adjw, val_vsize, val
+   integer                                   :: number_of_vertices_related_to_structures
+   integer, dimension(Ne)                    :: list_of_vertices_related_to_structures
+   integer                                   :: vertex_index, vertex, higher_weight
+   integer, parameter                        :: DEFAULT_WEIGHT_VALUE = 1
+   integer, parameter                        :: INITIAL_HALO_LEVEL   = 0 
 
-      ! Find indices of net cells that relate to structures
-      nstrucells = Ne
-      call realloc(istrucells, nstrucells, keepExisting=.false., fill = 0)
-      call find_netcells_for_structures(nstrucells, istrucells)
+   adjw(:)  = DEFAULT_WEIGHT_VALUE
+   vsize(:) = DEFAULT_WEIGHT_VALUE
 
-      ! Set weights, the structure cells and their connected edges get bigger weights
-      val  = 1
-      if (nstrucells > 0) then      ! If there are structures
-         adjw  = val                ! edge weight, used to minimize edge cut (see METIS manual)
-         vsize = val                ! size of vertex, used to minimize total communication volume (see METIS manual)
-         val_adjw = int(Ne/Nparts)  ! edge weight of structure related edges
-         val_vsize = int(Ne/Nparts) ! size of vertex of structure related cells
+   call find_netcells_for_structures(Ne, number_of_vertices_related_to_structures, list_of_vertices_related_to_structures)
 
-         do i = 1, nstrucells
-            k = istrucells(i)
-            vsize(k) = val_vsize
-            do j = iadj(k), iadj(k+1)-1
-               adjw(j) = val_adjw
-            end do
-         end do
-      else ! no structures, set the same weights
-         adjw  = val
-         vsize = val
+   if (number_of_vertices_related_to_structures > 0) then
+      higher_weight = int(Ne/Nparts)  
+      do vertex_index = 1, number_of_vertices_related_to_structures
+         vertex = list_of_vertices_related_to_structures(vertex_index)
+         call set_edge_weights_and_vsize_with_halo(INITIAL_HALO_LEVEL, vertex, higher_weight, DEFAULT_WEIGHT_VALUE, &
+                                                   Ne, xadj, njadj, adjncy, adjw, vsize)
+      end do
+   end if
+end subroutine set_edge_weights_and_vsize_for_METIS
+    
+!> set edge weight and vsize for vertex and associated edges with halo around structures  
+recursive subroutine set_edge_weights_and_vsize_with_halo(halo_level, vertex, higher_weight, default_weight_value, &
+                                                          size_xadj, xadj, size_jadj, adjncy, adjw, vsize)
+   implicit none
+   integer,                        intent(in)    :: halo_level           !< halo_level around the structures
+   integer,                        intent(in)    :: vertex               !< vertex of the graph
+   integer,                        intent(in)    :: higher_weight        !< higher_weight to be assigned to vsize and adjw around structures
+   integer,                        intent(in)    :: default_weight_value !< default_weight_value
+   integer,                        intent(in)    :: size_xadj            !< size of xadj array
+   integer, dimension(size_xadj),  intent(in)    :: xadj                 !< starting points for adjacency list, the adjacency structure of the graph is described in Section 5.5. of METIS manual
+   integer,                        intent(in)    :: size_jadj            !< size of adjacency list array
+   integer, dimension(size_jadj),  intent(in)    :: adjncy               !< adjacency list, the adjacency structure of the graph is described in Section 5.5. of METIS manual
+   integer, dimension(size_jadj),  intent(inout) :: adjw                 !< Edge weight used to minimize edge cut (see METIS manual)
+   integer, dimension(size_xadj),  intent(inout) :: vsize                !< Vertex size used to minimize total communication volume (see METIS manual)
+
+   integer, parameter     :: MAX_HALO_LEVEL  = 6 ! perhaps, it is too strong, some experiments are needed on MAX_HALO_LEVEL and MAX_GHOST_LEVEL
+   integer, parameter     :: MAX_GHOST_LEVEL = 4 ! maxghostlev_sall is not defined yet at this stage 
+   integer                :: edge, next_halo_level, next_halo_level_higher_weight
+   
+   if ( halo_level <= MAX_HALO_LEVEL .and. higher_weight > default_weight_value ) then
+      next_halo_level = halo_level + 1
+      if ( halo_level > MAX_GHOST_LEVEL ) then 
+          next_halo_level_higher_weight = higher_weight / 2 ! an attemp to smooth constraints
+      else
+          next_halo_level_higher_weight = higher_weight
       end if
-   end subroutine set_weights_for_METIS
+      
+      if ( vsize(vertex) < higher_weight ) then
+           vsize(vertex) = higher_weight
+      end if
+      do edge = xadj(vertex), xadj(vertex + 1) - 1
+         if ( adjw(edge) < higher_weight ) then
+              adjw(edge) = higher_weight
+         end if
+         call set_edge_weights_and_vsize_with_halo(next_halo_level, adjncy(edge), next_halo_level_higher_weight, &
+                                         default_weight_value, size_xadj, xadj, size_jadj, adjncy, adjw, vsize)
+      end do
+   end if
+end subroutine set_edge_weights_and_vsize_with_halo
+    

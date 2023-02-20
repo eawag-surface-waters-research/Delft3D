@@ -97,9 +97,8 @@ echo configuration       : !configuration!
 echo project             : !project!
 echo compiler_redist_dir : !compiler_redist_dir!
 echo mkl_redist_dir      : !mkl_redist_dir!
+echo mpi_redist_dir      : !mpi_redist_dir!
 echo oss_mpi             : !oss_mpi!
-
-
 
 
 
@@ -173,21 +172,104 @@ goto :endproc
 
 rem ===============
 rem === copyMPI
+rem === compare with copyMPIRedist below
 rem ===============
 :copyMPI
     set destination=%~1
     echo "Copy MPI libraries . . ."
-    if !oss_mpi!=="IntelMPI" (
+    if "!oss_mpi!" == "IntelMPI" (
         call :copyFile "%I_MPI_ONEAPI_ROOT%\env\*.bat"                !destination!
         call :copyFile "%I_MPI_ONEAPI_ROOT%\bin\*.dll"                !destination!
         call :copyFile "%I_MPI_ONEAPI_ROOT%\bin\*.exe"                !destination!
         call :copyFile "%I_MPI_ONEAPI_ROOT%\bin\release\*.dll"        !destination!
         call :copyFile "%I_MPI_ONEAPI_ROOT%\libfabric\bin\*.dll"      !destination!
-        call :copyFile "%I_MPI_ONEAPI_ROOT%\libfabric\bin\*.dll"      !destination!
     )
-    if !oss_mpi!=="MPICH" (
+    if "!oss_mpi!" == "MPICH" (
         call :copyFile "!checkout_src_root!\third_party_open\mpich2\x64\bin\*.exe" !destination!
         call :copyFile "!checkout_src_root!\third_party_open\mpich2\x64\lib\*.dll" !destination!
+    )
+goto :endproc
+
+
+
+rem ===============
+rem === copyMPIRedist
+rem === compare with copyMPI above
+rem ===============
+:copyMPIRedist
+    if !mpi_redist_dir!=="" (
+        rem mpi_redist_dir not set
+    ) else (
+        echo "Copy MPI redist libraries . . ."
+        call :copyFile "!mpi_redist_dir!env\*.bat"                !dest_bin!
+        call :copyFile "!mpi_redist_dir!bin\*.dll"                !dest_bin!
+        call :copyFile "!mpi_redist_dir!bin\*.exe"                !dest_bin!
+        call :copyFile "!mpi_redist_dir!bin\release\*.dll"        !dest_bin!
+        call :copyFile "!mpi_redist_dir!libfabric\bin\*.dll"      !dest_bin!
+    )
+goto :endproc
+
+
+
+rem ===============
+rem === copyCompilerRedist
+rem === if argument = "withPetsc":
+rem ===       also copy fitting Petsc library
+rem ===============
+:copyCompilerRedist
+    set argument=%~1
+    if !compiler_redist_dir!=="" (
+        rem Compiler_dir not set
+    ) else (
+        echo "Copy Compiler redist libraries . . ."
+        rem "Compiler_dir:!compiler_redist_dir!"
+        set localstring="!compiler_redist_dir!*.dll"
+        rem Note the awkward usage of !-characters
+        call :copyFile !!localstring! !dest_bin!!
+        if "!argument!" == "withPetsc" (
+            call :copyFile "!checkout_src_root!\third_party_open\petsc\petsc-3.10.2\lib\x64\Release\libpetsc.dll"               !dest_bin!
+            rem is needed for dimr nuget package? please check
+            call :copyFile "!checkout_src_root!\third_party_open\petsc\petsc-3.10.2\lib\x64\Release\libpetsc.dll"               !dest_share!
+        )
+    )
+goto :endproc
+
+
+
+rem ===============
+rem === copyMklRedist
+rem === if argument = "withPetsc":
+rem ===       also copy fitting Petsc library
+rem ===============
+:copyMklRedist
+    set argument=%~1
+    if !mkl_redist_dir!=="" (
+        rem mkl_redist_dir not set
+    ) else (
+        echo "Copy MKL redist libraries . . ."
+        rem note that for oneAPI MKL, the DLL names end in '.1.dll'
+        set localstring="!mkl_redist_dir!mkl_core*.dll"
+        call :copyFile !!localstring! !dest_bin!
+        set localstring="!mkl_redist_dir!mkl_def*.dll"
+        call :copyFile !!localstring! !dest_bin!
+        set localstring="!mkl_redist_dir!mkl_core*.dll"
+        call :copyFile !!localstring! !dest_bin!
+        set localstring="!mkl_redist_dir!mkl_avx*.dll"
+        call :copyFile !!localstring! !dest_bin!
+        rem is needed for dimr nuget package? please check
+        call :copyFile !!localstring! !dest_share!
+        set localstring="!mkl_redist_dir!mkl_intel_thread*.dll"
+        call :copyFile !!localstring! !dest_bin!
+        rem is needed for dimr nuget package?  please check
+        call :copyFile !!localstring! !dest_share!
+        if "!argument!" == "withPetsc" (
+            rem if 'mkl_redist_dir' contains 'oneAPI', use the version of petsc built with oneAPI Fortran
+            if not "x!mkl_redist_dir:oneAPI=!"=="x!mkl_redist_dir!" (
+                call :copyFile "!checkout_src_root!\third_party_open\petsc\petsc-3.10.2\lib\x64\Release-oneAPI\libpetsc.dll"             !dest_bin!
+            ) else (
+                call :copyFile "!checkout_src_root!\third_party_open\petsc\petsc-3.10.2\lib\x64\Release\libpetsc.dll"             !dest_bin!
+            )
+        )
     )
 goto :endproc
 
@@ -225,8 +307,15 @@ rem ===============
     call :flow1d2d
     call :d_hydro
     call :flow2d3d
+    call :plugin_culvert
+    call :plugin_delftflow_traform
     call :rr_dll
     call :rtc
+    call :nesthd1
+    call :nesthd2
+    call :datsel
+    call :kubint
+    call :lint
 
 goto :endproc
 
@@ -262,6 +351,7 @@ rem =============================================================
     call :makeDir !dest_share!
 
 goto :endproc
+
 
 
 rem =============================================================
@@ -325,9 +415,6 @@ rem =============================================================
     call :copyFile "!checkout_src_root!\third_party_open\netcdf\netCDF 4.6.1\bin\*"                                          !dest_bin!
     call :copyFile "!checkout_src_root!\third_party_open\pthreads\bin\x64\*.dll"                                             !dest_bin!
     call :copyFile "!checkout_src_root!\third_party_open\expat\x64\x64\%configuration%\libexpat.dll"                         !dest_bin!
-    if !compiler_redist_dir!=="" (
-    call :copyFile "!checkout_src_root!\third_party_open\intelredist\lib\x64\\*.*"                                           !dest_bin!
-    )
     call :copyFile "!checkout_src_root!\third_party_open\pthreads\bin\x64\\*.dll"                                            !dest_bin!
     call :copyFile "!checkout_src_root!\third_party_open\Tecplot\lib\x64\\*.dll"                                             !dest_bin!
     call :copyFile "!checkout_src_root!\third_party_open\GISInternals\release-1911-x64\bin\xerces-c_3_2.dll"                 !dest_bin!
@@ -346,55 +433,10 @@ rem =============================================================
     call :copyFile "!checkout_src_root!\third_party_open\GISInternals\release-1911-x64\bin\geos.dll"                         !dest_bin!
     call :copyFile "!checkout_src_root!\third_party_open\GISInternals\release-1911-x64\bin\freexl.dll"                       !dest_bin!
 
+    call :copyCompilerRedist withPetsc
+    call :copyMklRedist withPetsc
+    call :copyMPIRedist
 
-    if !compiler_redist_dir!=="" (
-        rem Compiler_dir not set
-    ) else (
-        rem "Compiler_dir:!compiler_redist_dir!"
-        set localstring="!compiler_redist_dir!*.dll"
-        rem Note the awkward usage of !-characters
-        call :copyFile !!localstring! !dest_bin!!
-        call :copyFile "!checkout_src_root!\third_party_open\petsc\petsc-3.10.2\lib\x64\Release\libpetsc.dll"               !dest_bin!
-        rem is needed for dimr nuget package? please check
-        call :copyFile "!checkout_src_root!\third_party_open\petsc\petsc-3.10.2\lib\x64\Release\libpetsc.dll"               !dest_share!
-    )
-
-    if !mkl_redist_dir!=="" (
-        rem mkl_redist_dir not set
-    ) else (
-        rem note that for oneAPI MKL, the DLL names end in '.1.dll'
-        set localstring="!mkl_redist_dir!mkl_core*.dll"
-        call :copyFile !!localstring! !dest_bin!
-        set localstring="!mkl_redist_dir!mkl_def*.dll"
-        call :copyFile !!localstring! !dest_bin!
-        set localstring="!mkl_redist_dir!mkl_core*.dll"
-        call :copyFile !!localstring! !dest_bin!
-        set localstring="!mkl_redist_dir!mkl_avx*.dll"
-        call :copyFile !!localstring! !dest_bin!
-        rem is needed for dimr nuget package? please check
-        call :copyFile !!localstring! !dest_share!
-        set localstring="!mkl_redist_dir!mkl_intel_thread*.dll"
-        call :copyFile !!localstring! !dest_bin!
-        rem is needed for dimr nuget package?  please check
-        call :copyFile !!localstring! !dest_share!
-
-        rem if 'mkl_redist_dir' contains 'oneAPI', use the version of petsc built with oneAPI Fortran
-        if not "x!mkl_redist_dir:oneAPI=!"=="x!mkl_redist_dir!" (
-            call :copyFile "!checkout_src_root!\third_party_open\petsc\petsc-3.10.2\lib\x64\Release-oneAPI\libpetsc.dll"             !dest_bin!
-        ) else (
-            call :copyFile "!checkout_src_root!\third_party_open\petsc\petsc-3.10.2\lib\x64\Release\libpetsc.dll"             !dest_bin!
-        )
-    )
-
-    if !mpi_redist_dir!=="" (
-        rem mpi_redist_dir not set
-    ) else (
-        call :copyFile "!mpi_redist_dir!env\*.bat"                !dest_bin!
-        call :copyFile "!mpi_redist_dir!bin\*.dll"                !dest_bin!
-        call :copyFile "!mpi_redist_dir!bin\*.exe"                !dest_bin!
-        call :copyFile "!mpi_redist_dir!bin\release\*.dll"        !dest_bin!
-        call :copyFile "!mpi_redist_dir!libfabric\bin\*.dll"      !dest_bin!
-    )
 
 goto :endproc
 
@@ -425,8 +467,7 @@ rem =============================================================
     call :copyFile "!checkout_src_root!\third_party_open\pthreads\bin\x64\*.dll"                                        !destination!
 
     rem copy intel dlls
-    call :copyFile "!compiler_redist_dir!*.dll"                                                                         !destination!
-
+    call :copyCompilerRedist noPetsc
 
 goto :endproc
 
@@ -444,6 +485,7 @@ rem =============================================================
 goto :endproc
 
 
+
 rem =============================================================
 rem === copies runtime libraries for SwanOMP                  ===
 rem =============================================================
@@ -453,6 +495,7 @@ rem =============================================================
     call :copyFile "!checkout_src_root!\third_party_open\netcdf\netCDF 4.6.1\bin\*"                                     !destination!
 
 goto :endproc
+
 
 
 rem =============================================================
@@ -466,6 +509,8 @@ rem =============================================================
 
 goto :endproc
 
+
+
 rem =============================================================
 rem === copies runtime libraries for flow1d                   ===
 rem =============================================================
@@ -477,6 +522,8 @@ rem =============================================================
     call :copyFile "!checkout_src_root!\third_party_open\pthreads\bin\x64\*.dll"                                        !destination!
 
 goto :endproc
+
+
 
 rem =============================================================
 rem === copies runtime libraries for flow1d2d                 ===
@@ -491,6 +538,7 @@ rem =============================================================
 goto :endproc
 
 
+
 rem =============================================================
 rem === copies runtime libraries for D_HYDRO        ===
 rem =============================================================
@@ -501,7 +549,12 @@ rem =============================================================
     call :copyFile "!checkout_src_root!\third_party_open\pthreads\bin\x64\*.dll"                                        !destination!
     call :copyFile "!checkout_src_root!\third_party_open\expat\x64\x64\%configuration%\libexpat.dll"                    !destination!
 
+    call :copyCompilerRedist noPetsc
+    call :copyMklRedist noPetsc
+    call :copyMPIRedist
+
 goto :endproc
+
 
 
 rem =============================================================
@@ -515,7 +568,66 @@ rem =============================================================
     call :copyFile "!checkout_src_root!\third_party_open\pthreads\bin\x64\*.dll"                                        !destination!
     call :copyFile "!checkout_src_root!\third_party_open\expat\x64\x64\%configuration%\libexpat.dll"                    !destination!
 
+    call :copyCompilerRedist noPetsc
+    call :copyMklRedist noPetsc
+    call :copyMPIRedist
 goto :endproc
+
+
+
+rem =============================================================
+rem === copies runtime libraries for nesthd1                  ===
+rem =============================================================
+:copyNestHD1DependentRuntimeLibraries
+
+    set destination=%~1
+
+goto :endproc
+
+
+
+rem =============================================================
+rem === copies runtime libraries for nesthd2                  ===
+rem =============================================================
+:copyNestHD2DependentRuntimeLibraries
+
+    set destination=%~1
+
+goto :endproc
+
+
+
+rem =============================================================
+rem === copies runtime libraries for datsel                   ===
+rem =============================================================
+:copyDatselDependentRuntimeLibraries
+
+    set destination=%~1
+
+goto :endproc
+
+
+
+rem =============================================================
+rem === copies runtime libraries for kubint                   ===
+rem =============================================================
+:copyKubintDependentRuntimeLibraries
+
+    set destination=%~1
+
+goto :endproc
+
+
+
+rem =============================================================
+rem === copies runtime libraries for lint                     ===
+rem =============================================================
+:copyLintDependentRuntimeLibraries
+
+    set destination=%~1
+
+goto :endproc
+
 
 
 rem =============================================================
@@ -531,6 +643,8 @@ rem =============================================================
 
 goto :endproc
 
+
+
 rem =============================================================
 rem === copies runtime libraries for RTC                      ===
 rem =============================================================
@@ -541,6 +655,8 @@ rem =============================================================
     call :copyFile "!checkout_src_root!\third_party_open\pthreads\bin\x64\*.dll"                                        !destination!
 
 goto :endproc
+
+
 
 rem ==========================
 rem === POST_BUILD_DFLOWFM_DLL
@@ -726,6 +842,7 @@ rem ==========================
     )
 
 goto :endproc
+
 
 
 rem ==========================
@@ -1138,7 +1255,6 @@ goto :endproc
 
 
 
-
 rem ==========================
 rem === POST_BUILD_ddcouple
 rem ==========================
@@ -1258,6 +1374,8 @@ rem ==========================
 
 goto :endproc
 
+
+
 rem ==========================
 rem === POST_BUILD_wave_exe
 rem ==========================
@@ -1303,6 +1421,8 @@ rem ==========================
     )
 
 goto :endproc
+
+
 
 rem ==========================
 rem === POST_BUILD_swan_omp
@@ -1353,6 +1473,7 @@ rem ==========================
 goto :endproc
 
 
+
 rem ==========================
 rem === POST_BUILD_swan_mpi
 rem ==========================
@@ -1400,6 +1521,8 @@ rem ==========================
 
 goto :endproc
 
+
+
 rem ==========================
 rem === cf_dll (flow1d)
 rem ==========================
@@ -1409,7 +1532,7 @@ rem ==========================
 
     if "%configuration%" == "Debug" (
 
-    echo "Debug postbuild"
+        echo "Debug postbuild"
         set dest_bin="%install_dir%\x64\Debug"
 
         set dest_bin="!install_dir!\x64\Debug"
@@ -1418,7 +1541,7 @@ rem ==========================
         set dest_plugins="!install_dir!\x64\Debug"
         set dest_share="!install_dir!\x64\Debug"
 
-    call :makeDir !dest_bin!
+        call :makeDir !dest_bin!
         call :copyFlow1DDependentRuntimeLibraries                                                                             !dest_bin!
 
         rem copy binaries and dll
@@ -1427,7 +1550,7 @@ rem ==========================
 
     if "%configuration%" == "Release" (
 
-    echo "Release postbuild"
+        echo "Release postbuild"
 
         set dest_bin="!install_dir!\x64\Release\flow1d\bin"
         set dest_default="!install_dir!\x64\Release\flow1d\default"
@@ -1449,6 +1572,8 @@ rem ==========================
 
 goto :endproc
 
+
+
 rem ==========================
 rem === flow1d2d
 rem ==========================
@@ -1458,16 +1583,16 @@ rem ==========================
 
     if "%configuration%" == "Debug" (
 
-    echo "Debug postbuild"
+        echo "Debug postbuild"
         set dest_bin="%install_dir%\x64\Debug"
 
-    set dest_bin="!install_dir!\x64\Debug"
+        set dest_bin="!install_dir!\x64\Debug"
         set dest_default="!install_dir!\x64\Debug"
         set dest_scripts="!install_dir!\x64\Debug"
         set dest_plugins="!install_dir!\x64\Debug"
         set dest_share="!install_dir!\x64\Debug"
 
-    call :makeDir !dest_bin!
+        call :makeDir !dest_bin!
         call :copyRFlow1D2DDependentRuntimeLibraries                                                                             !dest_bin!
 
         rem copy binaries and dll
@@ -1476,7 +1601,7 @@ rem ==========================
 
     if "%configuration%" == "Release" (
 
-    echo "Release postbuild"
+        echo "Release postbuild"
 
         set dest_bin="!install_dir!\x64\Release\flow1d2d\bin"
         set dest_default="!install_dir!\x64\Release\flow1d2d\default"
@@ -1498,50 +1623,89 @@ rem ==========================
 
 goto :endproc
 
+
+
 rem ==========================
 rem === POST_BUILD_D_HYDRO
 rem ==========================
 :d_hydro
     echo "postbuild d_hydro . . ."
-
     if "%configuration%" == "Debug" (
-
-    echo "Debug postbuild"
-    set dest_bin="!install_dir!\x64\Debug"
-
-    call :makeDir !dest_bin!
-
-    call :copyDHydroDependentRuntimeLibraries                                                                               !dest_bin!
-    call :copyFile "!build_dir!\d_hydro\!configuration!\d_hydro.*"                                                              !dest_bin!
+        echo "Debug postbuild"
+        set dest_bin="!install_dir!\x64\Debug"
+        call :makeDir !dest_bin!
+        call :copyDHydroDependentRuntimeLibraries                                                             !dest_bin!
+        call :copyFile "!build_dir!\d_hydro\!configuration!\d_hydro.*"                                        !dest_bin!
     )
-
-
     if "%configuration%" == "Release" (
-
-    echo "Release postbuild"
-
-    set dest_bin="!install_dir!\x64\Release\d_hydro\bin"
-    set dest_default="!install_dir!\x64\Release\d_hydro\default"
-    set dest_scripts="!install_dir!\x64\Release\d_hydro\scripts"
-    set dest_plugins="!install_dir!\x64\Release\plugins\bin"
-    set dest_share="!install_dir!\x64\Release\share\bin"
-    set dest_schema="!install_dir!\x64\Release\d_hydro\schema"
-
-    call :makeAllDirs
-    call :copyDHydroDependentRuntimeLibraries                                                                             !dest_share!
-    call :copyFile "!build_dir!\d_hydro\!configuration!\d_hydro.exe"                                                          !dest_bin!
-
-    call :copyFile "!checkout_src_root!\engines_gpl\d_hydro\scripts\create_config_xml.tcl"                              !dest_menu!
+        echo "Release postbuild"
+        set dest_bin="!install_dir!\x64\Release\d_hydro\bin"
+        set dest_default="!install_dir!\x64\Release\d_hydro\default"
+        set dest_scripts="!install_dir!\x64\Release\d_hydro\scripts"
+        set dest_plugins="!install_dir!\x64\Release\plugins\bin"
+        set dest_share="!install_dir!\x64\Release\share\bin"
+        set dest_schema="!install_dir!\x64\Release\d_hydro\schema"
+        call :makeAllDirs
+        call :copyDHydroDependentRuntimeLibraries                                                             !dest_share!
+        call :copyFile "!build_dir!\d_hydro\!configuration!\d_hydro.exe"                                      !dest_bin!
+        call :copyFile "!checkout_src_root!\engines_gpl\d_hydro\scripts\create_config_xml.tcl"                !dest_menu!
     )
 
 goto :endproc
+
+
 
 rem ==========================
 rem === POST_BUILD_flow2d3d
 rem ==========================
 :flow2d3d
-
+:flow2d3d_sp
     echo "postbuild flow2d3d. . ."
+    if "%configuration%" == "Debug" (
+        echo "Debug postbuild"
+        set dest_bin="%install_dir%\x64\Debug"
+        set dest_bin="!install_dir!\x64\Debug"
+        set dest_default="!install_dir!\x64\Debug"
+        set dest_scripts="!install_dir!\x64\Debug"
+        set dest_plugins="!install_dir!\x64\Debug"
+        set dest_share="!install_dir!\x64\Debug"
+        call :makeDir !dest_bin!
+        call :copyFlow2D3DDependentRuntimeLibraries                                                       !dest_bin!
+        rem copy binaries and dll
+        rem take care of both flow2d3d and flow2d3d_sp
+        call :copyFile "!build_dir!\flow2d3d\!configuration!\flow2d3d*.*"                                  !dest_bin!
+    )
+    if "%configuration%" == "Release" (
+        echo "Release postbuild"
+        set dest_bin="!install_dir!\x64\Release\dflow2d3d\bin"
+        set dest_default="!install_dir!\x64\Release\dflow2d3d\default"
+        set dest_scripts="!install_dir!\x64\Release\dflow2d3d\scripts"
+        set dest_plugins="!install_dir!\x64\Release\plugins\bin"
+        set dest_share="!install_dir!\x64\Release\share\bin"
+        call :makeAllDirs
+        call :copyFlow2D3DDependentRuntimeLibraries                                                       !dest_bin!
+        rem Temporarily rename dest_bin to share_bin to copy libraries there as well
+        set dest_bin=!dest_share!
+        call :copyFlow2D3DDependentRuntimeLibraries                                                       !dest_bin!
+        set dest_bin="!install_dir!\x64\Release\dflow2d3d\bin"
+        rem copy binaries and dll
+        rem take care of both flow2d3d and flow2d3d_sp
+        call :copyFile "!build_dir!\flow2d3d\!configuration!\flow2d3d*.*"                                  !dest_bin!
+        call :copyFile "!checkout_src_root!\engines_gpl\flow2d3d\scripts\*.bat"                           !dest_scripts!
+        call :copyFile "!checkout_src_root!\engines_gpl\flow2d3d\scripts\*.m"                             !dest_scripts!
+        call :copyFile "!checkout_src_root!\engines_gpl\flow2d3d\default\*"                               !dest_default!
+    )
+
+goto :endproc
+
+
+
+rem ==========================
+rem === POST_BUILD_plugin_culvert
+rem ==========================
+:plugin_culvert
+
+    echo "postbuild plugin_culvert. . ."
 
     if "%configuration%" == "Debug" (
 
@@ -1555,10 +1719,9 @@ rem ==========================
         set dest_share="!install_dir!\x64\Debug"
 
         call :makeDir !dest_bin!
-        call :copyFlow2D3DDependentRuntimeLibraries                                                                             !dest_bin!
 
         rem copy binaries and dll
-        call :copyFile "!build_dir!\flow2d3d\!configuration!\flow2d3d.*"                                                      !dest_bin!
+        call :copyFile "!build_dir!\plugin_culvert\!configuration!\plugin_culvert.*"                                  !dest_bin!
     )
 
     if "%configuration%" == "Release" (
@@ -1572,23 +1735,279 @@ rem ==========================
         set dest_share="!install_dir!\x64\Release\share\bin"
 
         call :makeAllDirs
-        call :copyFlow2D3DDependentRuntimeLibraries                                                                             !dest_bin!
-
-        rem Temporarily rename dest_bin to share_bin to copy libraries there as well
-        set dest_bin=!dest_share!
-        call :copyFlow2D3DDependentRuntimeLibraries                                                                             !dest_bin!
-        set dest_bin="!install_dir!\x64\Release\dflow2d3d\bin"
 
         rem copy binaries and dll
-        call :copyFile "!build_dir!\flow2d3d\!configuration!\flow2d3d.*"                                                      !dest_bin!
-
-        call :copyFile "!checkout_src_root!\engines_gpl\flow2d3d\scripts\*.bat"                                                 !dest_scripts!
-        call :copyFile "!checkout_src_root!\engines_gpl\flow2d3d\scripts\*.m"                                                   !dest_scripts!
-
-        call :copyFile "!checkout_src_root!\engines_gpl\flow2d3d\default\*"                                                     !dest_default!
+        call :copyFile "!build_dir!\plugin_culvert\!configuration!\plugin_culvert.dll"                      !dest_bin!
     )
 
 goto :endproc
+
+
+
+rem ==========================
+rem === POST_BUILD_plugin_delftflow_traform
+rem ==========================
+:plugin_delftflow_traform
+
+    echo "postbuild plugin_delftflow_traform. . ."
+
+    if "%configuration%" == "Debug" (
+
+        echo "Debug postbuild"
+        set dest_bin="%install_dir%\x64\Debug"
+
+        set dest_bin="!install_dir!\x64\Debug"
+        set dest_default="!install_dir!\x64\Debug"
+        set dest_scripts="!install_dir!\x64\Debug"
+        set dest_plugins="!install_dir!\x64\Debug"
+        set dest_share="!install_dir!\x64\Debug"
+
+        call :makeDir !dest_bin!
+
+        rem copy binaries and dll
+        call :copyFile "!build_dir!\plugin_delftflow_traform\!configuration!\plugin_delftflow_traform.*"                                  !dest_bin!
+    )
+
+    if "%configuration%" == "Release" (
+
+        echo "Release postbuild"
+
+        set dest_bin="!install_dir!\x64\Release\dflow2d3d\bin"
+        set dest_default="!install_dir!\x64\Release\dflow2d3d\default"
+        set dest_scripts="!install_dir!\x64\Release\dflow2d3d\scripts"
+        set dest_plugins="!install_dir!\x64\Release\plugins\bin"
+        set dest_share="!install_dir!\x64\Release\share\bin"
+
+        call :makeAllDirs
+
+        rem copy binaries and dll
+        call :copyFile "!build_dir!\plugin_delftflow_traform\!configuration!\plugin_delftflow_traform.dll"                      !dest_bin!
+    )
+
+goto :endproc
+
+
+
+rem ==========================
+rem === nesthd1
+rem ==========================
+:nesthd1
+
+    echo "postbuild nesthd1. . ."
+
+    if "%configuration%" == "Debug" (
+    
+        echo "Debug postbuild"
+        set dest_bin="!install_dir!\x64\Debug"
+        set dest_share="!install_dir!\x64\Debug"
+        
+        call :makeDir !dest_bin!
+        call :makeDir !dest_share!
+        call :copyNestHD1DependentRuntimeLibraries    !dest_bin!
+        
+        rem copy binaries and dll 
+        call :copyFile "!build_dir!\nesthd1\!configuration!\nesthd1.*"    !dest_bin!
+    )
+    
+    if "%configuration%" == "Release" ( 
+    
+        echo "Release postbuild"
+
+        set dest_bin="!install_dir!\x64\Release\dflow2d3d\bin"
+        set dest_share="!install_dir!\x64\Release\share\bin"
+        
+        call :makeDir !dest_bin!
+        call :makeDir !dest_share!
+        
+        call :copyNestHD1DependentRuntimeLibraries    !dest_bin!
+        
+        rem Temporarily rename dest_bin to share_bin to copy libraries there as well
+        set dest_bin=!dest_share!
+        call :copyNestHD1DependentRuntimeLibraries    !dest_bin!
+        set dest_bin="!install_dir!\x64\Release\dflow2d3d\bin"
+
+        call :copyFile "!build_dir!\nesthd1\!configuration!\nesthd1.*"    !dest_bin! 
+    )
+    
+goto :endproc
+
+
+
+rem ==========================
+rem === nesthd2
+rem ==========================
+:nesthd2
+
+    echo "postbuild nesthd2. . ."
+
+    if "%configuration%" == "Debug" (
+    
+        echo "Debug postbuild"
+        set dest_bin="!install_dir!\x64\Debug"
+        set dest_share="!install_dir!\x64\Debug"
+        
+        call :makeDir !dest_bin!   
+        call :copyNestHD2DependentRuntimeLibraries    !dest_bin!
+        
+        rem copy binaries and dll 
+        call :copyFile "!build_dir!\nesthd2\!configuration!\nesthd2.*"    !dest_bin!
+    )
+    
+    if "%configuration%" == "Release" ( 
+    
+        echo "Release postbuild"
+
+        set dest_bin="!install_dir!\x64\Release\dflow2d3d\bin"
+        set dest_share="!install_dir!\x64\Release\share\bin"
+        
+        call :makeDir !dest_bin!
+        call :makeDir !dest_share!
+        call :copyNestHD2DependentRuntimeLibraries    !dest_bin!
+        
+        rem Temporarily rename dest_bin to share_bin to copy libraries there as well
+        set dest_bin=!dest_share!
+        call :copyNestHD2DependentRuntimeLibraries    !dest_bin!
+        set dest_bin="!install_dir!\x64\Release\dflow2d3d\bin"
+        
+        rem copy binaries and dll 
+        call :copyFile "!build_dir!\nesthd2\!configuration!\nesthd2.*"    !dest_bin! 
+    )
+    
+goto :endproc
+
+
+
+rem ==========================
+rem === datsel
+rem ==========================
+:datsel
+
+    echo "postbuild datsel. . ."
+
+    if "%configuration%" == "Debug" (
+    
+        echo "Debug postbuild"
+        set dest_bin="!install_dir!\x64\Debug"
+        set dest_share="!install_dir!\x64\Debug"
+        
+        call :makeDir !dest_bin!   
+        call :copyDatselDependentRuntimeLibraries    !dest_bin!
+        
+        rem copy binaries and dll 
+        call :copyFile "!build_dir!\datsel\!configuration!\datsel.*"    !dest_bin!
+    )
+    
+    if "%configuration%" == "Release" ( 
+    
+        echo "Release postbuild"
+
+        set dest_bin="!install_dir!\x64\Release\dflow2d3d\bin"
+        set dest_share="!install_dir!\x64\Release\share\bin"
+        
+        call :makeDir !dest_bin!
+        call :makeDir !dest_share!
+        call :copyDatselDependentRuntimeLibraries    !dest_bin!
+        
+        rem Temporarily rename dest_bin to share_bin to copy libraries there as well
+        set dest_bin=!dest_share!
+        call :copyDatselDependentRuntimeLibraries    !dest_bin!
+        set dest_bin="!install_dir!\x64\Release\dflow2d3d\bin"
+        
+        rem copy binaries and dll 
+        call :copyFile "!build_dir!\datsel\!configuration!\datsel.*"    !dest_bin! 
+    )
+    
+goto :endproc
+
+
+
+rem ==========================
+rem === kubint
+rem ==========================
+:kubint
+
+    echo "postbuild kubint. . ."
+
+    if "%configuration%" == "Debug" (
+    
+        echo "Debug postbuild"
+        set dest_bin="!install_dir!\x64\Debug"
+        set dest_share="!install_dir!\x64\Debug"
+        
+        call :makeDir !dest_bin!   
+        call :copyKubintDependentRuntimeLibraries    !dest_bin!
+        
+        rem copy binaries and dll 
+        call :copyFile "!build_dir!\kubint\!configuration!\kubint.*"    !dest_bin!
+    )
+    
+    if "%configuration%" == "Release" ( 
+    
+        echo "Release postbuild"
+
+        set dest_bin="!install_dir!\x64\Release\dflow2d3d\bin"
+        set dest_share="!install_dir!\x64\Release\share\bin"
+        
+        call :makeDir !dest_bin!
+        call :makeDir !dest_share!
+        call :copyKubintDependentRuntimeLibraries    !dest_bin!
+        
+        rem Temporarily rename dest_bin to share_bin to copy libraries there as well
+        set dest_bin=!dest_share!
+        call :copyKubintDependentRuntimeLibraries    !dest_bin!
+        set dest_bin="!install_dir!\x64\Release\dflow2d3d\bin"
+        
+        rem copy binaries and dll 
+        call :copyFile "!build_dir!\kubint\!configuration!\kubint.*"    !dest_bin! 
+    )
+    
+goto :endproc
+
+
+
+rem ==========================
+rem === lint
+rem ==========================
+:lint
+
+    echo "postbuild lint. . ."
+
+    if "%configuration%" == "Debug" (
+    
+        echo "Debug postbuild"
+        set dest_bin="!install_dir!\x64\Debug"
+        set dest_share="!install_dir!\x64\Debug"
+        
+        call :makeDir !dest_bin!   
+        call :copyLintDependentRuntimeLibraries    !dest_bin!
+        
+        rem copy binaries and dll 
+        call :copyFile "!build_dir!\lint\!configuration!\lint.*"    !dest_bin!
+    )
+    
+    if "%configuration%" == "Release" ( 
+    
+        echo "Release postbuild"
+
+        set dest_bin="!install_dir!\x64\Release\dflow2d3d\bin"
+        set dest_share="!install_dir!\x64\Release\share\bin"
+        
+        call :makeDir !dest_bin!
+        call :makeDir !dest_share!
+        call :copyLintDependentRuntimeLibraries    !dest_bin!
+        
+        rem Temporarily rename dest_bin to share_bin to copy libraries there as well
+        set dest_bin=!dest_share!
+        call :copyLintDependentRuntimeLibraries    !dest_bin!
+        set dest_bin="!install_dir!\x64\Release\dflow2d3d\bin"
+        
+        rem copy binaries and dll 
+        call :copyFile "!build_dir!\lint\!configuration!\lint.*"    !dest_bin! 
+    )
+    
+goto :endproc
+
+
 
 rem ==========================
 rem === rr_dll
@@ -1639,6 +2058,8 @@ rem ==========================
 
 goto :endproc
 
+
+
 rem ==========================
 rem === rtc
 rem ==========================
@@ -1687,6 +2108,9 @@ rem ==========================
     )
 
 goto :endproc
+
+
+
 rem ===========================
 rem === POST_BUILD_GRIDGEOM_DLL
 rem ===========================
@@ -1716,6 +2140,7 @@ rem ===========================
     )
 
 goto :endproc
+
 
 
 rem ==================================
@@ -1751,6 +2176,7 @@ rem ==================================
     )
 
 goto :endproc
+
 
 
 rem ===============================
@@ -1921,6 +2347,27 @@ rem =============================
 
     )
 
+goto :endproc
+
+
+
+rem =============================
+rem === POST_BUILD_NEFIS_DLL
+rem =============================
+:nefis_dll
+    echo "postbuild nefis_dll . . ."
+    if "%configuration%" == "Debug" (
+        echo "Debug postbuild"
+        set dest_bin="!install_dir!\x64\Debug"
+        call :makeDir !dest_bin!
+        call :copyFile "!build_dir!\nefis\!configuration!\nefis_dll.*"               !dest_bin!
+    )
+    if "%configuration%" == "Release" (
+        echo "Release postbuild"
+        set dest_share=!install_dir!\x64\Release\share\bin
+        call :makeDir "!dest_share!"
+        call :copyFile "!build_dir!\nefis\!configuration!\nefis_dll.dll"             "!dest_share!\nefis.dll"
+    )
 goto :endproc
 
 

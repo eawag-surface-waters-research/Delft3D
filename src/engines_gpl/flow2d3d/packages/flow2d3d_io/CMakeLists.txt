@@ -30,10 +30,10 @@ get_fortran_source_files(${src_path}/input input_files)
 get_fortran_source_files(${src_path}/output output_files)
 get_fortran_source_files(${src_path}/preprocessor preprocessor_files)
 set_source_files_properties(
-                    src/output/wrwaqcco.F90
-                    src/output/wrwaqfil.F90
-                    src/output/wrwaqpnt.F90
-                    src/output/wrwaqsrf.F90
+                    ${src_path}/output/wrwaqcco.F90
+                    ${src_path}/output/wrwaqfil.F90
+                    ${src_path}/output/wrwaqpnt.F90
+                    ${src_path}/output/wrwaqsrf.F90
                     ${fortran_version_file}
                     PROPERTIES COMPILE_OPTIONS "${file_preprocessor_flag}")
 
@@ -92,3 +92,7 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${input_files}
                                                     ${output_files}
                                                     ${preprocessor_files})
 set_target_properties (${library_name} PROPERTIES FOLDER engines_gpl/flow2d3d)
+
+# Change project flags at the end of this file
+target_compile_options(${library_name} PRIVATE "${qauto_threaded_flags}")
+target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${check_nobounds_flag}>")

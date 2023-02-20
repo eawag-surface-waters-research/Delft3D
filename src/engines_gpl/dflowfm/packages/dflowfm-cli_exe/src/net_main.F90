@@ -296,7 +296,7 @@
        goto 1234
     end if
 
-    if (jabatch == 1) then
+    if (iarg_dobatch == 1) then
        call dobatch()
     endif
 

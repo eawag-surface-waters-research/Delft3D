@@ -382,6 +382,8 @@ integer                            :: javau3onbnd = 0   !< vert. adv. u1 bnd Upw
 
  integer                           :: implicitdiffusion2D = 0 ! Auto Timestep in Transport module, 0 = limitation of diffusion, but no limitation of time-step due to diffusion, 1 = no limitation of diffusion, but limitation of time step due to diffusion, 2: no limitation of diffusion and no limitation of time step due to diffusion
 
+ integer                           :: jadiagnostictransport = 0 ! Switch for diagnostic ("frozen") transport, 0 = prognostic transport, 1 = diagnostic transport
+
  integer                           :: jaexplicitsinks = 1
 
  integer                           :: jaanalytic        !< analytic solution available in black sideview => do not also show computed surface in black

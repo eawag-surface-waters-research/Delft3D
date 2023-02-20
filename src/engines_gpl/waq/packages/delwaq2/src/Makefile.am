@@ -14,8 +14,6 @@ LDFLAGS += -fopenmp
 #Includes
 FMODULES += \
         -I$(top_builddir)/engines_gpl/waq/packages/waq_kernel/src \
-        -I$(top_builddir)/engines_gpl/waq/packages/waq_utils_f/src/mod_timings \
-        -I$(top_builddir)/engines_gpl/waq/packages/waq_utils_f/src/mod_couplib \
         -I$(top_builddir)/engines_gpl/waq/packages/waq_utils_f/src/waq_utils \
         -I$(top_builddir)/engines_gpl/part/packages/data_f/src \
         -I$(top_builddir)/engines_gpl/part/packages/io_f/src \
@@ -40,8 +38,6 @@ delwaq2_LDADD = \
     $(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src/libDeltaresCommon.la \
     $(top_builddir)/engines_gpl/waq/packages/waq_delftio/packages/waq_delftio/src/diof90/libDIOF90.la \
     $(top_builddir)/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/libwaq_utils.la \
-    $(top_builddir)/engines_gpl/waq/packages/waq_utils_f/src/mod_timings/libmod_timings.la \
-    $(top_builddir)/engines_gpl/waq/packages/waq_utils_f/src/mod_couplib/libmod_couplib.la \
     $(top_builddir)/engines_gpl/waq/packages/waq_utils_c/src/libwaq_utils_c.la \
     $(top_builddir)/engines_gpl/waq/packages/waq_plugin_wasteload/src/libwaq_plugin_wasteload.la \
     $(top_builddir)/engines_gpl/waq/packages/waq_kernel/src/libWaqKernel.la \

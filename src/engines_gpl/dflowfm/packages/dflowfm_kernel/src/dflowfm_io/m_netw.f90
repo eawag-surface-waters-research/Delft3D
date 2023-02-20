@@ -117,7 +117,7 @@ subroutine loadNetwork(filename, istat, jadoorladen)
 
     iDumk = 0
     iDuml = 0
-    call admin_network(network, iDumk, iDuml)
+    call admin_network(network, iDuml)
 
     if (istat == 0) then
         NUMK = K0 + NUMKN

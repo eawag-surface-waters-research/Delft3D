@@ -12,6 +12,33 @@ if(NOT TARGET deltares_common_mpi)
     add_subdirectory(${checkout_src_root}/${deltares_common_mpi_module} deltares_common_mpi)
 endif()
 
+# emfsm
+if(NOT TARGET esmfsm_version_number)
+    add_subdirectory(${checkout_src_root}/${esmfsm_version_number_module} esmfsm_version_number)
+endif()
+if(NOT TARGET esmfsm_c)
+    add_subdirectory(${checkout_src_root}/${esmfsm_c_module} esmfsm_c)
+endif()
+if(NOT TARGET esmfsm)
+    add_subdirectory(${checkout_src_root}/${esmfsm_module} esmfsm)
+endif()
+if (UNIX)
+    if(NOT TARGET esm_create)
+        add_subdirectory(${checkout_src_root}/${utils_lgpl_path}/esmfsm/tests/esm_create esm_create)
+    endif()
+    if(NOT TARGET esm_delete)
+        add_subdirectory(${checkout_src_root}/${utils_lgpl_path}/esmfsm/tests/esm_delete esm_delete)
+    endif()
+    if(NOT TARGET esm_info)
+        add_subdirectory(${checkout_src_root}/${utils_lgpl_path}/esmfsm/tests/esm_info esm_info)
+    endif()
+endif(UNIX)
+
+# Nefis
+if(NOT TARGET nefis)
+    add_subdirectory(${checkout_src_root}/${nefis_module} nefis)
+endif()
+
 
 # TOOLS_GPL
 

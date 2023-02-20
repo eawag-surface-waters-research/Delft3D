@@ -372,18 +372,19 @@ type morpar_type
     real(fp):: alfabn     !  factor for transverse bed load transport
     real(fp):: camax      !  Maximum volumetric reference concentration
     real(fp):: dzmax      !  factor for limiting source and sink term in EROSED (percentage of water depth)
-    real(fp):: sus        !  flag for calculating suspended load transport
-    real(fp):: bed        !  flag for calculating bed load transport
+    real(fp):: sus        !  calibration factor for suspended load transport
+    real(fp):: suscorfac  !  calibration factor for near-bed suspended load transport correction
+    real(fp):: bed        !  calibration factor for bed load transport
     real(fp):: pangle     !  phase lead angle acc. to Nielsen (1992) for TR2004 expression
     real(fp):: fpco       !  coefficient for phase llag effects
     real(fp):: factcr     !  calibration factor on Shields' critical shear stress   
     real(fp):: tmor       !  time where calculation for morphological changes start (tunit relative to ITDATE,00:00:00)
     real(fp):: tcmp       !  time where calculation for bed composition changes start (tunit relative to ITDATE,00:00:00)
     real(fp):: thetsduni  !  uniform value for dry cell erosion factor
-    real(fp):: susw       !  factor for adjusting wave-related suspended sand transport (included in bed-load)
+    real(fp):: susw       !  calibration factor for wave-related suspended sand transport (included in bed-load)
     real(fp):: sedthr     !  minimum depth for sediment calculations
     real(fp):: hmaxth     !  maximum depth for setting theta for erosion of dry bank
-    real(fp):: bedw       !  factor for adjusting wave-related bed-load sand transport (included in bed-load)
+    real(fp):: bedw       !  calibration factor for wave-related bed-load sand transport (included in bed-load)
     real(fp):: factsd     !  calibration factor for 2D suspended load relaxation time
     real(fp):: rdw
     real(fp):: rdc
@@ -1315,6 +1316,7 @@ subroutine nullmorpar(morpar)
     real(fp)                             , pointer :: camax
     real(fp)                             , pointer :: dzmax
     real(fp)                             , pointer :: sus
+    real(fp)                             , pointer :: suscorfac
     real(fp)                             , pointer :: bed
     real(fp)                             , pointer :: tmor
     real(fp)                             , pointer :: tcmp
@@ -1402,6 +1404,7 @@ subroutine nullmorpar(morpar)
     camax               => morpar%camax
     dzmax               => morpar%dzmax
     sus                 => morpar%sus
+    suscorfac           => morpar%suscorfac
     bed                 => morpar%bed
     tmor                => morpar%tmor
     tcmp                => morpar%tcmp
@@ -1584,6 +1587,7 @@ subroutine nullmorpar(morpar)
     eulerisoglm        = .false.    
     glmisoeuler        = .false.    
     l_suscor           = .true.    
+    suscorfac          = 1.0_fp
     densin             = .true.
     rouse              = .false.
     epspar             = .false.

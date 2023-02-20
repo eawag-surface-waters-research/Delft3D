@@ -1,27 +1,42 @@
+# Set version file variables
+# Note that the CMAKE_CURRENT_SOURCE_DIR has a path to THIS CMakeLists location
+set(waq_root_path ${CMAKE_CURRENT_SOURCE_DIR}/../..) # Trace back to the WAQ path
+set(waq_version_path ${waq_root_path}/version)
+
+set(ini_version_file ${waq_version_path}/version_number.ini)
+set(fortran_version_file ${CMAKE_CURRENT_SOURCE_DIR}/src/waq_utils/static_version_info.f90)
+
+# Generate version files
+generate_version_files(${fortran_version_file}
+                       ${ini_version_file}
+                       ON)
+
 # Set directory which contains all source files
 set(src_path src)
 
+# Gather the source files
 set(dlwq_netcdf_path ${src_path}/dlwq_netcdf)
 get_fortran_source_files(${dlwq_netcdf_path} dlwq_netcdf_source)
 
-set(mod_couplib_path ${src_path}/mod_couplib)
-get_fortran_source_files(${mod_couplib_path} mod_couplib_source)
-list(REMOVE_ITEM mod_couplib_source ${CMAKE_CURRENT_SOURCE_DIR}/${src_path}/mod_couplib/sndrcv_wrappers.F90)
-
-set(mod_timings_path ${src_path}/mod_timings)
-get_fortran_source_files(${mod_timings_path} mod_timings_source)
-
 set(waq_utils_path ${src_path}/waq_utils)
 get_fortran_source_files(${waq_utils_path} waq_utils_source)
-list(REMOVE_ITEM waq_utils_source ${CMAKE_CURRENT_SOURCE_DIR}/${src_path}/waq_utils/gregor.f)
 
 set(library_name waq_utils_f)
 add_library(${library_name} ${dlwq_netcdf_source}
-                            ${mod_couplib_source}
-                            ${mod_timings_source}
                             ${waq_utils_source})
 
+# Define prebuild events
+prebuild_version_number(${library_name} ${fortran_version_file}
+                                        ${checkout_src_root}
+                                        ${ini_version_file}
+                                        ON)
+
+
 # Set dependencies
+set(oss_dependencies_general deltares_common
+                             waq_data
+                             io_netcdf)
+
 if (UNIX)
     # the `pkg_check_modules` function is created with this call
     find_package(PkgConfig REQUIRED)
@@ -32,9 +47,8 @@ if (UNIX)
 
     # WARNING: waq_process and waq_util_f are (weakly) circular dependent
     # Just add waq_process to "target_lib_libraries", nothing more
-    set(oss_dependencies    deltares_common
-                            waq_data
-                            io_netcdf)
+    set(oss_dependencies ${oss_dependencies_general})
+
     target_link_libraries(${library_name}
          ${oss_dependencies}
          waq_process
@@ -42,11 +56,9 @@ if (UNIX)
          PkgConfig::NETCDF_FTN)
 endif(UNIX)
 if (WIN32)
-    set(oss_dependencies    deltares_common
-                            waq_data
-                            io_netcdf
-                            netcdf4
-                            netcdff)
+    set(oss_dependencies ${oss_dependencies_general}
+                         netcdf4
+                         netcdff)
 endif(WIN32)
 
 oss_include_libraries(${library_name} oss_dependencies)
@@ -55,15 +67,12 @@ oss_include_libraries(${library_name} oss_dependencies)
 # Set additional compilation properties
 target_compile_options(${library_name} PRIVATE "${qauto_threaded_flags}")
 target_compile_options(${library_name} PRIVATE "${waq_default_flags}")
-target_compile_options(${library_name} PRIVATE $<$<CONFIG:Debug>:${waq_debug_flags} ${check_bounds_flag}>)
 
 target_include_directories(${library_name}  PRIVATE ${mpi_include_path}/
                                                     "${CMAKE_CURRENT_SOURCE_DIR}/../../include")
 
 # Define how the files should be structured in Visual studio
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES  ${dlwq_netcdf_source}
-                                                     ${mod_couplib_source}
-                                                     ${mod_timings_source}
                                                      ${waq_utils_source})
 
 set_target_properties (${library_name} PROPERTIES FOLDER engines_gpl/waq)

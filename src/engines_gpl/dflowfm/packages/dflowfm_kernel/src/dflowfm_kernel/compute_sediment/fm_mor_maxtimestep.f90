@@ -41,10 +41,11 @@
    implicit none
 
    integer           :: k, k1, k2, kk, L, ised, ac1, ac2
-   double precision  :: dum, sx, sy, sL, dt, dtmaxmor, dhmax, kkcflmxloc
+   double precision  :: dum, sx, sy, sL, dt, dtmaxmor, dhmax, kkcflmxloc, mf
 
    dtmaxmor = huge(0d0)
    kkcflmxloc = 0
+   mf = max(morfac,1d0)
 
    do k = 1, ndx
       dum = 0.d0
@@ -61,8 +62,8 @@
             ac1 = acl(L)
             ac2 = 1d0-ac1
 
-            sx = (ac1*sxtot(k1,ised) + ac2*sxtot(k2,ised))/cdryb(ised)*max(morfac,1d0)
-            sy = (ac1*sytot(k1,ised) + ac2*sytot(k2,ised))/cdryb(ised)*max(morfac,1d0)
+            sx = (ac1*sxtot(k1,ised) + ac2*sxtot(k2,ised))/cdryb(ised)*mf
+            sy = (ac1*sytot(k1,ised) + ac2*sytot(k2,ised))/cdryb(ised)*mf
             sL = csu(L)*sx + snu(L)*sy
 
             if (k2 .eq. k) sL = -sL

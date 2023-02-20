@@ -286,7 +286,7 @@
                if (valgategen(IVAL_GATE_WIDTHWET,n) == 0d0) then
                   valgategen(IVAL_GATE_FLOWH,n) = dmiss
                else
-                  valgategen(IVAL_GATE_FLOWH,n) = max( min( zcgen(3*i-1)-zcgen(3*i-2), valgategen(IVAL_GATE_FLOWH,n)/valgategen(IVAL_WIDTHWET,n)-zcgen(3*i-2) ), 0.0d0)  ! flow through height is always positive
+                  valgategen(IVAL_GATE_FLOWH,n) = max( min( zcgen(3*i-1)-zcgen(3*i-2), valgategen(IVAL_GATE_FLOWH,n)/valgategen(IVAL_GATE_WIDTHWET,n)-zcgen(3*i-2) ), 0.0d0)  ! flow through height is always positive
                endif
             endif
          enddo

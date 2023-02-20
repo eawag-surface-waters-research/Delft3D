@@ -44,7 +44,7 @@
      +                    bndtyp, inwtyp, coname, noq   , ipoint,
      +                    intopt, paname, funame, sfname, dmpbal,
      +                    nowst , nowtyp, wsttyp, iwaste, inxtyp,
-     +                    wstdmp, iknmrk, owners, mypart, isegcol)
+     +                    wstdmp, iknmrk, isegcol)
 !
 !     Created             : january 1993 Jan van Beek
 !
@@ -154,12 +154,9 @@
 !     ranam   char*20       *     input   Raaien names
 !     stochi  real   notot*noflux input   Proces stochiometry
 !     intopt  integer     1       input   Integration and balance suboptions
-!     owners  integer   noseg     input   ownership of segments
-!     mypart  integer     1       input   number of current part/subdomain
 !     ==================================================================
 !
       use timers
-      use m_couplib
       use precision
       use output
       use nan_check_module
@@ -174,7 +171,7 @@
      +              ihstep, noloc , nodef , itstrt, itstop,
      +              ndmpar, ndmpq , ndmps , ntdmpq, noraai,
      +              ntraaq, nogrid, novar , nobnd , nobtyp,
-     +              noq   , mypart
+     +              noq  
       integer       idump(*)      , lun(*)        ,
      +              ioutps(7,*)   , iopoin(*)     ,
      +              lgrid(*)      , ip(*)         ,
@@ -187,8 +184,7 @@
      +              arrdm1(*)     , arrdm2(*)     ,
      +              vgrset(novar,*),grdnos(nogrid),
      +              grdseg(noseg,nogrid)          ,
-     +              inwtyp(*)     , ipoint( 4,noq),
-     +              owners(noseg)
+     +              inwtyp(*)     , ipoint( 4,noq)
       integer(4), intent(in   ) :: iknmrk(noseg)      ! Feature array. Bit zero set means active.
       real          conc ( notot, noseg ),
      &                              cons(*)       ,
@@ -307,19 +303,13 @@
 !
       if ( imflag ) then
          damass2 = amass2
-
-         call collect_data(mypart, amass , notot,'noseg',1,ierr)
-         call combine_1d_rdata(amass2, notot*5, cp_sum, ierr)
          iaflag = 1
-         if (mypart.eq.1) then
-            do 20 i2 = 1,notot
-               amass2(i2,1) = 0.0
-               do 10 i1 = 1,noseg
-                  damass2(i2,1) = damass2(i2,1) + amass(i2,i1)
-   10          continue
-   20       continue
-         endif
-
+         do i2 = 1,notot
+            amass2(i2,1) = 0.0
+            do i1 = 1,noseg
+               damass2(i2,1) = damass2(i2,1) + amass(i2,i1)
+            enddo
+         enddo
          amass2 = damass2
       endif
 !
@@ -327,26 +317,18 @@
 !
       if ( imflag .or. ( ihflag .and. noraai .gt. 0) ) then
          if ( ibflag .eq. 1 ) then
-            call collect_data(mypart, flxdmp, noflux,'ndmps',1, ierr)
-            call collect_data(mypart, dmps  , notot ,'ndmps',3, ierr)
-            call collect_data(mypart, dmpq  , nosys ,'ndmpq',2, ierr)
-            if (mypart.eq.1) then
-               call baldmp (notot , nosys , noflux, ndmpar, ndmpq ,
+            call baldmp (notot , nosys , noflux, ndmpar, ndmpq ,
      +                      ndmps , ntdmpq, iqdmp , isdmp , ipdmp ,
      +                      dmpq  , amass , dmps  , flxdmp, asmass,
      +                      flxint)
-            endif
          endif
 
          if ( noraai .gt. 0 ) then
             if ( lhfirs ) then
                call zero   (trraai, noraai*nosys  )
             else
-               call collect_data(mypart, dmpq  , nosys , 'ndmps',2,ierr)
-               if (mypart.eq.1) then
-                  call raatra (nosys , ndmpq , noraai, ntraaq, ioraai,
+               call raatra (nosys , ndmpq , noraai, ntraaq, ioraai,
      +                         nqraai, iqraai, iqdmp , dmpq  , trraai)
-               endif
             endif
          endif
 !
@@ -374,19 +356,6 @@
      +                loflag, ldummy)
 !
          if ( .not. loflag ) goto 100
-!
-!        Collect data on master-process
-!
-         if (lread) then
-            call collect_data(mypart, conc  , notot ,'noseg',1, ierr)
-            call collect_data(mypart, volume, 1     ,'noseg',1, ierr)
-            call collect_data(mypart, proloc, noloc ,'noseg',1, ierr)
-            if (ibflag.gt.0)
-     +         call accumulate_data(flxint, noflux,'ndmpar',1, 'my_dmpar', ierr)
-            lread = .false.
-         endif
-
-         if (mypart.eq.1) then
 !
 !        Map output structure to single variables part 2
 !
@@ -749,7 +718,6 @@
 !
             ioutps(7,iout) = iniout
 !
-         endif !(mypart.eq.1)
 !
   100    continue
 !

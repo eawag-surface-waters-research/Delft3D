@@ -3011,7 +3011,7 @@ end subroutine DioPltPutJulTimeIntegers
 
 subroutine DioPltCheckJumpBack(plt, julianTime, integerHisTime)
 
-#if (defined(HAVE_CONFIG_H)||defined(salford32))
+#if (defined(HAVE_CONFIG_H))
     type(waq_DioPltType)                            :: plt
     double precision, intent(in), optional      :: julianTime
     integer         , intent(in), optional      :: integerHisTime
@@ -3917,7 +3917,7 @@ end function DioPltHisReadValues
 
 subroutine DioPltHisReadAllTimes(plt)
 
-#if (defined(HAVE_CONFIG_H)||defined(salford32))
+#if (defined(HAVE_CONFIG_H))
     type(waq_DioPltType)     :: plt      ! dataset
     call waq_DioStreamError(228, &
         'DioPltHisReadAllTimes not supported for LINUX (ds: ', &
@@ -4032,7 +4032,7 @@ end subroutine DioPltHisReadAllTimes
 function DioPltHisGetSelectionReals(plt, nPar, parIndx, nLoc, locIndx,&
                                      nTim, timIndx, values) result(retVal)
 
-#if (defined(HAVE_CONFIG_H)||defined(salford32))
+#if (defined(HAVE_CONFIG_H))
     logical                                     :: retVal
     type(waq_DioPltType)                            :: plt
     integer         , intent(in)                :: nPar, nLoc, nTim

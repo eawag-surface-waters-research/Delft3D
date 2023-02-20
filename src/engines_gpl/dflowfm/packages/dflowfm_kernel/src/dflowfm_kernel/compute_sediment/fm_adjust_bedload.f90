@@ -81,7 +81,9 @@
       if (wu_mor(Lf)==0d0) cycle
       !
       ! no bed slope effects on links with bermslope adjustments
-      if (stmpar%morpar%bermslopetransport .and. bermslopeindexbed(Lf)) cycle
+      if (stmpar%morpar%bermslopetransport) then
+         if (bermslopeindexbed(Lf)) cycle
+      endif
       !
       if (hu(Lf) > 0d0) then
          k1 = ln(1, Lf)
