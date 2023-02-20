@@ -38,7 +38,7 @@ use tree_data_types
 use tree_structures
 use unstruc_messages
 use m_globalparameters, only : t_filenames
-use time_module, only : JULIAN
+use time_module, only : ymd2modified_jul
 
 implicit none
 
@@ -1560,7 +1560,10 @@ subroutine readMDUFile(filename, istat)
 ! Time
     call prop_get_string(md_ptr, 'time', 'RefDate', refdat)
     read(refdat,*) irefdate
-    refdate_mjd = JULIAN(irefdate, 0)
+    success = ymd2modified_jul(irefdate, refdate_mjd)
+    if (.not.success) then
+       call mess(LEVEL_ERROR, 'Something went wrong in conversion from RefDate to Modified Julian Date')
+    endif
     call prop_get_double(md_ptr, 'time', 'Tzone', Tzone)
     call prop_get_string(md_ptr, 'time', 'Tunit', md_tunit)
     call prop_get_double(md_ptr, 'time', 'TStart', tstart_user)

@@ -70,15 +70,16 @@ contains
 
    !> init with time in seconds and use refdate and tzone to get the correct offset
    subroutine c_time_set4(this, tim, irefdate, tzone, tUnitFactor)
-      use time_module, only : JULIAN
+      use time_module, only : ymd2modified_jul
       class(c_time), intent(inout) :: this
       real(kind=hp), intent(in)    :: tim, tzone, tUnitFactor
       integer      , intent(in)    :: irefdate
 
       real(kind=hp)                :: refmjd
 
-      refmjd = JULIAN(irefdate, 0)
-      call this%set2(refmjd, tim * tUnitFactor / 86400.0_hp - tzone / 24.0_hp)
+      if (ymd2modified_jul(irefdate, refmjd)) then   
+         call this%set2(refmjd, tim * tUnitFactor / 86400.0_hp - tzone / 24.0_hp)
+      endif
 
    end subroutine c_time_set4
 
