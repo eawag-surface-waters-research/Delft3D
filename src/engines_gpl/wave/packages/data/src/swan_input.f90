@@ -479,7 +479,7 @@ end subroutine read_swan
 subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
     use properties
     use read_grids
-    use time_module
+    use time_module, only: ymd2jul
     use string_module
     use netcdf_utils, only: ncu_format_to_cmode
     use system_utils, only: SCRIPT_EXTENSION

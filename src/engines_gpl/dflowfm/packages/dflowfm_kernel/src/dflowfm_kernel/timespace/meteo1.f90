@@ -6496,7 +6496,6 @@ module m_meteo
    use m_flowexternalforcings
    use processes_input, only: nofun, funame, funinp, nosfunext, sfunname, sfuninp
    use unstruc_messages
-   use time_module
    use m_observations
    use string_module
    use m_sediment, only: stm_included, stmpar
