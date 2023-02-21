@@ -710,6 +710,9 @@ static BInt4 RT_retrieve_file (
   BUInt8  numbytes;
   BInt4   max_comp;
 
+  cel_num_dim = 0;
+  i = -1;
+  
   cel_name    [MAX_NAME] = '\0';
   elm_desc    [MAX_DESC] = '\0';
   elm_name    [MAX_NAME] = '\0';
