@@ -43,6 +43,7 @@ module time_module
    public :: datetime2sec
    public :: sec2ddhhmmss
    public :: ymd2jul, ymd2modified_jul
+   public :: jul2mjd    ! obsolete, but in use in rtc
    public :: date2mjd   ! obsolete, use ymd2modified_jul
    public :: mjd2date
    public :: duration_to_string
@@ -51,7 +52,8 @@ module time_module
    public :: parse_time
    public :: split_date_time
    public :: CalendarYearMonthDayToJulianDateNumber
-   public :: julian, gregor, offset_modified_jd
+   public :: offset_modified_jd
+   public :: julian, gregor  ! public only for testing in test_time_module.f90
 
    interface ymd2jul
       ! obsolete, use ymd2modified_jul
@@ -242,6 +244,7 @@ module time_module
          if (month>=1 .and. month <= 12 .and. day>=1 .and. year>=1) then
             modified_jul_date = julian(year*10000 + month * 100 + day, 0)
             if (modified_jul_date == -1) return 
+            modified_jul_date = modified_jul_date - offset_modified_jd 
          else
             return
          endif
@@ -278,7 +281,7 @@ module time_module
          ! To compute the Julian date at YYYYMMDDhhmmss as a real number for a moment 
          ! after 12:00 noon one must add (hh - 12)/24 + mm/1440 + sec/86400 (real divisions). 
          ! 
-         ! In this function, only calendar days starting at midnight, are used. 
+         ! In this function, only calendar days starting at midnight, are assumed. 
          ! For midnight, exactly 12 hours before noon, one must add (0-12)/24 + 0 + 0 = -0.5
          jd = real(jdn, hp) - real(0.5, hp)
          
@@ -1130,7 +1133,7 @@ module time_module
          TEMP1  = FLOAT ( IHOUR ) * 3600.0 + &
                   FLOAT ( IMIN  ) *   60.0 + &
                   FLOAT ( ISEC  ) - 43200.0
-         JULIAN = TEMP2 + ( TEMP1 / 86400.0 ) - offset_modified_jd
+         JULIAN = TEMP2 + ( TEMP1 / 86400.0 )
       ELSE
          TEMP1  = INT (( IMONTH-14.0) / 12.0 )
          TEMP2  = IDAY - 32075.0 + &
@@ -1141,7 +1144,7 @@ module time_module
          TEMP1  = FLOAT ( IHOUR ) * 3600.0 + &
                   FLOAT ( IMIN  ) *   60.0 + &
                   FLOAT ( ISEC  ) - 43200.0
-         JULIAN = TEMP2 + ( TEMP1 / 86400.0 ) - offset_modified_jd
+         JULIAN = TEMP2 + ( TEMP1 / 86400.0 )
       ENDIF
   999 RETURN
       END FUNCTION JULIAN
