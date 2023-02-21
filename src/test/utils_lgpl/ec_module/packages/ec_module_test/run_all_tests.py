@@ -35,8 +35,9 @@ executable = ""
 if os.name == 'posix':
     executable = "../lnx64/bin/ec_module_test"
 if os.name == 'nt':
-    executable = "../x64/test/ec_module_test.exe"
-
+#    executable = "../x64/test/ec_module_test.exe"
+	executable = "d:/D-HYDRO/delft3d/build_tests/test_ec_module/Debug/ec_module_test.exe"
+	
 if (executable == ""):
     sys.stderr.write("Invalid OS = "+os.name)
     sys.exit()

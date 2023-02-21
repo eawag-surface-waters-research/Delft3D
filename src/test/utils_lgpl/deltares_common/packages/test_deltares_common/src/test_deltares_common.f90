@@ -58,8 +58,8 @@ program test_deltares_common
     !
     ! Done - properly finalize
     !
+    call showResult    
     call runtests_final
-    call showResult
 
 contains
 

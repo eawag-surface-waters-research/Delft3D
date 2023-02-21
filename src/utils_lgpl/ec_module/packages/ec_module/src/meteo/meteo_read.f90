@@ -40,7 +40,7 @@ module meteo_read
 !!--declarations----------------------------------------------------------------
    use precision
    use meteo_data
-   use time_module
+   use time_module, only: ymd2jul
    use string_module
 
    implicit none
