@@ -254,6 +254,7 @@ type t_unc_mapids
    integer :: id_hu(MAX_ID_VAR)       = -1 !< Variable ID for
    integer :: id_q1(MAX_ID_VAR)       = -1 !< Variable ID for
    integer :: id_q1main(MAX_ID_VAR)   = -1 !< Variable ID for main channel discharge (1D quantity)
+   integer :: id_fwel(MAX_ID_VAR)     = -1 !< Variable ID for
    integer :: id_u1(MAX_ID_VAR)       = -1 !< Variable ID for
    integer :: id_u0(MAX_ID_VAR)       = -1 !< Variable ID for
    integer :: id_viu(MAX_ID_VAR)      = -1 !< Variable ID for horizontal eddy viscosity
@@ -5177,6 +5178,11 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
          ierr = unc_put_att(mapids%ncid, mapids%id_q1main, 'comment', 'Positive direction is from first to second neighbouring face (flow element).')
       end if
 
+      if(jamapfw > 0) then
+         ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_fwel, nf90_double, UNC_LOC_U, 'fixed weir energy loss', '', 'Fixed weir energy loss', 'm', jabndnd=jabndnd_)
+         ierr = unc_put_att(mapids%ncid, mapids%id_fwel, '', '')
+      end if
+            
       if (jamapviu > 0) then
          ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_viu, nf90_double, iLocU, 'viu', '', 'Horizontal eddy viscosity', 'm2 s-1', jabndnd=jabndnd_)
       end if
@@ -6188,6 +6194,10 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
       ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_q1main, iLocU, q1_main, 0d0, jabndnd=jabndnd_)
    end if
 
+   if (jamapfw == 1) then
+      ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_fwel, UNC_LOC_U, map_fixed_weir_energy_loss, 0d0, jabndnd=jabndnd_)
+   end if
+      
    ! TIDAL TURBINES: Insert equivalent of wrturbine_cnst and wrturbine_time here
 
    if (kmx > 0) then

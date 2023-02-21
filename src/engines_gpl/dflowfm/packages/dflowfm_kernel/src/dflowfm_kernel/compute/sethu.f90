@@ -304,7 +304,10 @@ subroutine sethu(jazws0)                            ! Set upwind waterdepth hu
                            uLL      = max(1d-4, abs(u1(LL)))
                            advi(LL) = advi(LL) + agwdxi/uLL
                         enddo
-                    endif
+                     endif
+                     map_fixed_weir_energy_loss(L) = agwdxi
+                 else
+                     map_fixed_weir_energy_loss(L) = 0
                  endif
                                   
                  !if (huweirregular > 0d0) then 

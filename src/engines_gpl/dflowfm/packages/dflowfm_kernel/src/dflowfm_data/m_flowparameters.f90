@@ -509,6 +509,7 @@ integer                            :: javau3onbnd = 0   !< vert. adv. u1 bnd Upw
  integer                           :: jamaprho                  !< flow density to map file, 0: no, 1: yes
  integer                           :: jamapq1                   !< flow flux to map file, 0: no, 1: yes
  integer                           :: jamapq1main               !< main channel flow flux to map file, 0: no, 1: yes
+ integer                           :: jamapfw                   !< fixed weir energy loss to map file, 0: no, 1: yes
  integer                           :: jamapspir                 !< spiral flow to map file, 0: no, 1: yes
  integer                           :: jamaptidep                !< tidal potential to map file, 0: no, 1: yes
  integer                           :: jamapselfal               !< self attraction and loading potential to map file, 0: no, 1: yes
@@ -982,6 +983,7 @@ subroutine default_flowparameters()
     jamaprho = 1
     jamapq1  = 1
     jamapq1main = 0
+    jamapfw   = 0
     jamapspir = 1
     jamaptidep = 1
     jamapselfal = 1
