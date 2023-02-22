@@ -298,6 +298,7 @@
  double precision, allocatable, target     :: q1(:)   !< [m3/s] discharge     (m3/s) at   end of timestep n, used as q0 in timestep n+1, statement q0 = q1 is out of code, saves 1 array {"location": "edge", "shape": ["lnkx"]}
  double precision, allocatable, target     :: q1_main(:)   !< [m3/s] discharge     (m3/s) in main channel at {"location": "edge", "shape": ["lnkx"]}
  double precision, allocatable     :: qa    (:)   !< discharge (m3/s) used in advection, qa=au(n)*u1(n+1) instead of
+ double precision, allocatable     :: map_fixed_weir_energy_loss(:)   !< fixed weir energy loss at end of timestep {"location": "edge", "shape": ["lnkx"]}
  double precision, allocatable     :: cflj  (:)   !< courant nr link j to downwind volume i (    ) = Dt*Qj/Vi
  double precision, allocatable     :: tetaj (:)   !< 1-1/sum(upwind incoming courants)      (    )
  double precision, allocatable, target     :: au    (:)   !< [m2] flow area     (m2)   at u point {"location": "edge", "shape": ["lnkx"]}

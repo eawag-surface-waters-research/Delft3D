@@ -38,7 +38,7 @@ use tree_data_types
 use tree_structures
 use unstruc_messages
 use m_globalparameters, only : t_filenames
-use time_module, only : JULIAN
+use time_module, only : ymd2modified_jul
 
 implicit none
 
@@ -1560,7 +1560,10 @@ subroutine readMDUFile(filename, istat)
 ! Time
     call prop_get_string(md_ptr, 'time', 'RefDate', refdat)
     read(refdat,*) irefdate
-    refdate_mjd = JULIAN(irefdate, 0)
+    success = ymd2modified_jul(irefdate, refdate_mjd)
+    if (.not.success) then
+       call mess(LEVEL_ERROR, 'Something went wrong in conversion from RefDate to Modified Julian Date')
+    endif
     call prop_get_double(md_ptr, 'time', 'Tzone', Tzone)
     call prop_get_string(md_ptr, 'time', 'Tunit', md_tunit)
     call prop_get_double(md_ptr, 'time', 'TStart', tstart_user)
@@ -1864,6 +1867,7 @@ subroutine readMDUFile(filename, istat)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_horizontal_diffusivity_diu', jamapdiu, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_flow_flux_q1', jamapq1, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_flow_flux_q1_main', jamapq1main, success)
+    call prop_get_integer(md_ptr, 'output', 'Wrimap_fixed_weir_energy_loss', jamapfw, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_spiral_flow', jamapspir, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_numlimdt', jamapnumlimdt, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_taucurrent', jamaptaucurrent, success)
@@ -3931,6 +3935,9 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     endif
     if (writeall .or. jamapq1main /= 0) then
         call prop_set(prop_ptr, 'output', 'Wrimap_flow_flux_q1_main', jamapq1main, 'Write flow flux in main channel to map file (1: yes, 0: no)')
+    endif
+    if (jamapfw /= 0) then
+        call prop_set(prop_ptr, 'output', 'Wrimap_fixed_weir_energy_loss', jamapfw, 'Write fixed weir energy loss to map file (1: yes, 0: no)')
     endif
     if ( jasecflow > 0 .and. (writeall .or. jamapspir /= 1)) then
         call prop_set(prop_ptr, 'output', 'Wrimap_spiral_flow', jamapspir, 'Write spiral flow to map file (1: yes, 0: no)')

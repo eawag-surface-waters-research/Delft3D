@@ -95,6 +95,7 @@
 
    !     sedpar
    integer                              , pointer :: nmudfrac
+   logical          , dimension(:)      , pointer :: cmpupdfrac
    real(fp)         , dimension(:)      , pointer :: rhosol
    real(fp)         , dimension(:)      , pointer :: cdryb
    real(fp)         , dimension(:,:,:)  , pointer :: logseddia

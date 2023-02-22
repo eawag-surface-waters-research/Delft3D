@@ -38,7 +38,7 @@
 subroutine flow_externaloutput_direct()
    use m_flowtimes
    use unstruc_messages
-   use time_module
+   use time_module, only: datetime_to_string
    implicit none
    integer :: iyear, imonth, iday, ihour, imin, isec
 

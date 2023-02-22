@@ -437,7 +437,7 @@ subroutine waq_wri_hyd()
    use m_flowexternalforcings
    use m_flowgeom
    use unstruc_model
-   use time_module
+   use time_module, only: ymd2jul
 
    implicit none
    !

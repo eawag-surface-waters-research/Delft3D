@@ -1303,7 +1303,8 @@ end subroutine rdmor1
 
 !> Report morphology settings to diag file
 subroutine echomor(lundia    ,error     ,lsec      ,lsedtot   ,nto       , &
-                 & nambnd    ,sedpar    ,morpar    ,dtunit    )
+                 & nambnd    ,sedpar    ,morpar    ,dtunit    ,cmpupdall , &
+                 & cmpupdany )
 !!--declarations----------------------------------------------------------------
     use precision
     use properties
@@ -1416,6 +1417,8 @@ subroutine echomor(lundia    ,error     ,lsec      ,lsedtot   ,nto       , &
     character(*)                   , intent(in)  :: dtunit
     type(sedpar_type)              , pointer     :: sedpar
     type(morpar_type)              , pointer     :: morpar
+    logical                        , intent(in)  :: cmpupdall !< flag indicating that bed composition will be updated for all fractions
+    logical                        , intent(in)  :: cmpupdany !< flag indicating whether bed composition would be preferred for any fractions
 !
 ! Local variables
 !
@@ -1561,6 +1564,16 @@ subroutine echomor(lundia    ,error     ,lsec      ,lsedtot   ,nto       , &
        write (lundia, '(2a,e20.4)') txtput1, ':', morfac
     endif
     !
+    if (cmpupd .and. .not.cmpupdany) then
+    txtput1 = 'Bed level updating  '
+       if (bedupd) write (lundia, '(3a)') txtput1, ':', ' deactivated by CmpUpd = FALSE for all fractions.'
+       txtput1 = 'Composition updating'
+       write (lundia, '(3a)') txtput1, ':', ' deactivated by CmpUpd = FALSE for all fractions.'
+       !
+       bedupd = .false.
+       cmpupd = .false.
+    endif
+    !
     txtput1 = 'Bed level updating  '
     if (bedupd) then
        txtput2 = '              ACTIVE'
@@ -1574,8 +1587,14 @@ subroutine echomor(lundia    ,error     ,lsec      ,lsedtot   ,nto       , &
     endif
     !
     txtput1 = 'Composition updating'
-    if (cmpupd) then
+    if (cmpupd .and. .not.cmpupdany) then
+       write (lundia, '(3a)') txtput1, ':', ' deactivated for all fracions.'
+       cmpupd = .false.
+    endif
+    if (cmpupd .and. cmpupdall) then
        txtput2 = '              ACTIVE'
+    elseif (cmpupd) then
+       txtput2 = '  FRACTION DEPENDENT'
     else
        txtput2 = '            INACTIVE'
     endif

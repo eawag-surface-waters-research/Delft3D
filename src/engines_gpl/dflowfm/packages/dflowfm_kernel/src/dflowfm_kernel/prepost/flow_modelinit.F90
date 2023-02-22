@@ -375,12 +375,12 @@
     call timstrt('Surfbeat init         ', handle_extra(27)) ! Surfbeat init
     if (jampi==0) then
        if (nwbnd==0) then
-          call mess(LEVEL_ERROR, 'unstruc::flow_modelinit - No wave boundary defined for surfbeat model')
-             end if
-          endif
-    call xbeach_wave_init()
-    call timstop(handle_extra(27))
-       endif
+          call mess(LEVEL_ERROR, 'unstruc::flow_modelinit - No wave boundary defined for surfbeat model. Do you use the correct ext file?')
+       end if
+    endif
+   call xbeach_wave_init()
+   call timstop(handle_extra(27))
+ endif
 
  call timstrt('Observations init 2 ', handle_extra(28)) ! observations init 2
  call flow_obsinit()                                 ! initialise stations and cross sections on flow grid + structure his (2nd time required to fill values in observation stations)

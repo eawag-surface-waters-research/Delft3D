@@ -75,6 +75,7 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
     real(fp)                           , pointer :: sc_flcf
     integer                            , pointer :: nmudfrac
     integer                            , pointer :: sc_mudfac
+    logical          , dimension(:)    , pointer :: cmpupdfrac
     real(fp)         , dimension(:)    , pointer :: tpsnumber
     real(fp)         , dimension(:)    , pointer :: rhosol
     real(fp)         , dimension(:,:,:), pointer :: logseddia
@@ -182,6 +183,7 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
     sc_flcf              => sedpar%sc_flcf
     nmudfrac             => sedpar%nmudfrac
     sc_mudfac            => sedpar%sc_mudfac
+    cmpupdfrac           => sedpar%cmpupdfrac
     tpsnumber            => sedpar%tpsnumber
     rhosol               => sedpar%rhosol
     logseddia            => sedpar%logseddia
@@ -226,6 +228,7 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
        !
        ! allocation of namsed, rhosol and sedtyp have been allocated in count_sed routine
        !
+       if (istat==0) allocate (sedpar%cmpupdfrac(                          lsedtot), stat = istat)
        if (istat==0) allocate (sedpar%tpsnumber (                          lsedtot), stat = istat)
        !
        if (istat==0) allocate (sedpar%sedblock  (                          lsedtot), stat = istat)
@@ -266,6 +269,7 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
        !
        ! update local pointers
        !
+       cmpupdfrac    => sedpar%cmpupdfrac
        tpsnumber     => sedpar%tpsnumber
        !
        nseddia       => sedpar%nseddia
@@ -301,6 +305,7 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
     !
     ! Initialization of the just allocated arrays
     !
+    cmpupdfrac = .TRUE.
     do i = 1,lsedtot
        sedpar%sedblock(i)%node_name => null()
        if (sedtyp(i) == SEDTYP_COHESIVE) then
@@ -530,6 +535,10 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
           !
           rhosol(l) = rmissval
           call prop_get(sedblock_ptr, '*', 'RhoSol', rhosol(l))
+          !
+          ! Check if bed composition for this fraction needs to be updated (only if the master CmpUpd flag in the mor-file is true)
+          !
+          call prop_get(sedblock_ptr, '*', 'CmpUpd', cmpupdfrac(l))
           !
           ! Get the geometric standard deviation of the sediment fraction
           !
@@ -972,7 +981,7 @@ end subroutine opensedfil
 
 
 subroutine echosed(lundia    ,error     ,lsed      ,lsedtot   , &
-                 & iopsus    ,sedpar    ,trapar    )
+                 & iopsus    ,sedpar    ,trapar    ,cmpupd    )
 !!--description-----------------------------------------------------------------
 !
 ! Report sediment parameter to diag file
@@ -989,10 +998,11 @@ subroutine echosed(lundia    ,error     ,lsed      ,lsedtot   , &
 ! Arguments
 !
     integer                                  , intent(in)  :: iopsus
-    integer                                  , intent(in)  :: lsed    !  Description and declaration in iidim.f90
-    integer                                  , intent(in)  :: lsedtot !  Description and declaration in iidim.f90
-    integer                                                :: lundia  !  Description and declaration in inout.igs
-    logical                                  , intent(out) :: error   !!  Flag=TRUE if an error is encountered
+    integer                                  , intent(in)  :: lsed    !< Number of suspended sediment fractions
+    integer                                  , intent(in)  :: lsedtot !< Total number of sediment fractions
+    integer                                                :: lundia  !< Unit number of diagnostic file
+    logical                                  , intent(in)  :: cmpupd  !< Indicates whether main flag for bed composition updating is switched on
+    logical                                  , intent(out) :: error   !< Flag=TRUE if an error is encountered
     type(sedpar_type)                        , pointer     :: sedpar
     type(trapar_type)                        , pointer     :: trapar
 !
@@ -1006,6 +1016,7 @@ subroutine echosed(lundia    ,error     ,lsed      ,lsedtot   , &
     real(fp)                          , pointer :: sc_cmf2
     real(fp)                          , pointer :: sc_flcf
     integer                           , pointer :: sc_mudfac
+    logical         , dimension(:)    , pointer :: cmpupdfrac
     real(fp)        , dimension(:)    , pointer :: tpsnumber
     real(fp)        , dimension(:)    , pointer :: rhosol
     real(fp)        , dimension(:,:,:), pointer :: logseddia
@@ -1048,9 +1059,10 @@ subroutine echosed(lundia    ,error     ,lsed      ,lsedtot   , &
     real(fp)                  :: rmissval
     real(fp)                  :: xxinv               ! Help var. [1/xx or 1/(1-xx) in log unif distrib.]
     real(fp)                  :: xm
+    logical                   :: cmpupdall           !< flag indicating whether bed composition is updated for all fractions
     logical        , external :: stringsequalinsens
     character(45)             :: txtput1
-    character(10)             :: txtput2
+    character(12)             :: txtput2
     character(256)            :: errmsg
 !
 !! executable statements -------------------------------------------------------
@@ -1063,6 +1075,7 @@ subroutine echosed(lundia    ,error     ,lsed      ,lsedtot   , &
     sc_cmf2              => sedpar%sc_cmf2
     sc_flcf              => sedpar%sc_flcf
     sc_mudfac            => sedpar%sc_mudfac
+    cmpupdfrac           => sedpar%cmpupdfrac
     tpsnumber            => sedpar%tpsnumber
     rhosol               => sedpar%rhosol
     logseddia            => sedpar%logseddia
@@ -1152,9 +1165,9 @@ subroutine echosed(lundia    ,error     ,lsed      ,lsedtot   , &
        !
        select case (sc_mudfac)
        case (SC_MUDFRAC)
-          txtput2 = 'fraction'
+          txtput2 = '    fraction'
        case (SC_MUDTHC)
-          txtput2 = 'thickness'
+          txtput2 = '   thickness'
        end select
        txtput1 = 'Lower crit mud '//txtput2
        write (lundia, '(2a,f12.6)') txtput1,':', sc_cmf1
@@ -1174,6 +1187,7 @@ subroutine echosed(lundia    ,error     ,lsed      ,lsedtot   , &
        write (lundia, '(3a)') txtput1, ':  ', trim(sedpar%flnrd(0))
     endif
     !
+    cmpupdall = all(cmpupdfrac)
     do l = 1, lsedtot
        txtput1 = 'Sediment number'
        write (lundia, '(2a,i12)') txtput1, ':', l
@@ -1192,6 +1206,17 @@ subroutine echosed(lundia    ,error     ,lsed      ,lsedtot   , &
            txtput1 = '  Tracer calibration factor '
            write (lundia, '(2a,e12.4)') txtput1, ':', sedtrcfac(l)
        endif
+       !
+       if (cmpupd .and. .not. cmpupdall) then
+          txtput1 = '  Include fraction in bed composition update'
+          if (cmpupdfrac(l)) then
+             txtput2 = '         YES'
+          else
+             txtput2 = '          NO'
+          endif
+          write (lundia, '(3a)') txtput1, ':', txtput2
+       endif
+       !
        if (l <= lsed) then
           txtput1 = '  Turbulent Prandtl-Schmidt number'
           write (lundia, '(2a,e12.4)') txtput1, ':', tpsnumber(l)

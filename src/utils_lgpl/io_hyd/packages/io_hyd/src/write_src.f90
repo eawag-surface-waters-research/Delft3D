@@ -34,7 +34,7 @@
       ! global declarations
 
       use hydmod                   ! module contains everything for the hydrodynamics
-      use time_module              ! time conversion
+      use time_module, only: sec2ddhhmmss
       implicit none
 
       ! declaration of the arguments

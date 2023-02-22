@@ -946,6 +946,7 @@ endif
  if (allocated(u1))       deallocate(u1)
  if (allocated(q1))       deallocate(q1)
  if (allocated(qa))       deallocate(qa)
+ if (allocated(map_fixed_weir_energy_loss)) deallocate(map_fixed_weir_energy_loss)
  if (allocated(v))        deallocate(v)
  if (allocated(ucxu))     deallocate(ucxu)
  if (allocated(ucyu))     deallocate(ucyu)
@@ -983,6 +984,8 @@ endif
  call aerr('q1   (lnkx)' , ierr , lnkx )  ; q1    = 0
  allocate ( qa   (lnkx)  , stat = ierr)
  call aerr('qa   (lnkx)' , ierr , lnkx )  ; qa    = 0
+ allocate (  map_fixed_weir_energy_loss(lnkx)  , stat = ierr)
+ call aerr(' map_fixed_weir_energy_loss(lnkx)' , ierr , lnkx )  ;  map_fixed_weir_energy_loss(:) = 0
  allocate ( v    (lnkx)  , stat = ierr)
  call aerr('v    (lnkx)' , ierr , lnkx )  ; v     = 0
  allocate ( ucxu (lnkx)  , stat = ierr)

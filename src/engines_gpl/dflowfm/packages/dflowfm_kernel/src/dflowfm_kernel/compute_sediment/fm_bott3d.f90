@@ -1148,6 +1148,14 @@
       !
       if (cmpupd) then
          !
+         ! exclude specific fractions if cmpupdfrac has been set
+         !
+         do l = 1, lsedtot
+           if (.not. cmpupdfrac(l)) then
+               dbodsd(l, :) = 0.0_fp 
+            endif
+         enddo
+         !
          ! Determine new thickness of transport layer
          !
          call compthick()

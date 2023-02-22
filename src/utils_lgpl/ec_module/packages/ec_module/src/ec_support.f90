@@ -828,7 +828,6 @@ end subroutine ecInstanceListSourceItems
             endif
 
             if (ierr == 0) then
-               success = .true.
                success = ymd2modified_jul(yyyymmdd, ref_date)
                ref_date = ref_date + real(hh, hp) / 24.0_hp
             endif

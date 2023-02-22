@@ -36,7 +36,7 @@ module tables
 !!--declarations----------------------------------------------------------------
     use precision
     use string_module
-    use time_module
+    use time_module, only: ymd2jul
     implicit none
     !
     public tablefiletype
