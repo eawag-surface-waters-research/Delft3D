@@ -49,7 +49,7 @@ module test_time_module
 
       subroutine tests_time_module
          call test( test_conversion2juliandate, 'Test CalendarYearMonthDayToJulianDate' )
-         call test( test_julian, 'Test julian' )
+         call test( test_julian_gregor, 'Test Julian inverse to Gregor')
          call test( test_date2mjd2date, 'Test CalendarYearMonthDayToModifiedJulianDateAndBack')
          call test( test_mjd2date, 'Test_ModifiedJulianDateToYearMonthDayHourMinuteSecond' )
          call test( test_split_date_time, 'Test split_date_time' )
@@ -95,22 +95,34 @@ module test_time_module
 
       end subroutine test_conversion2juliandate
 
-      !> test julian
-      subroutine test_julian()
+      !> test Julian inverse to Gregor
+      subroutine test_julian_gregor
 
-         real(kind=hp) :: jdn1, jdn2, jdn3, jdn4
+         real(kind=hp) :: jdn, dsec
+         integer :: returnyear, returnmonth, returnday, hour, min, sec
+         integer :: year, month, day
 
-         jdn1 = julian(00010101, 0)
-         jdn2 = julian(15821004, 0)
-         jdn3 = julian(15821015, 0)
-         jdn4 = julian(20010101, 0)
+         jdn = julian(00010101, 0)
+         call assert_comparable(jdn, -678577.0_hp + offset_modified_jd, tol, 'error for 1-1-1')
 
-         call assert_comparable(jdn1, -678577.0_hp, tol, 'error for 1-1-1')
-         call assert_comparable(jdn2, -100841.0_hp, tol, 'error for 4-10-1582')
-         call assert_comparable(jdn3, -100840.0_hp, tol, 'error for 15-10-1582')
-         call assert_comparable(jdn4, 51910.0_hp, tol, 'error for 1-1-2001')
+         jdn = julian(15821004, 0)
+         call assert_comparable(jdn, -100841.0_hp + offset_modified_jd, tol, 'error for 4-10-1582')
+         
+         jdn = julian(15821015, 0)
+         call assert_comparable(jdn, -100840.0_hp + offset_modified_jd, tol, 'error for 15-10-1582')
 
-      end subroutine test_julian
+         year = 2001
+         month = 01
+         day = 01
+         jdn = julian(year*10000 + month * 100 + day, 0)
+         call assert_comparable(jdn, 51910.0_hp + offset_modified_jd, tol, 'error for 1-1-2001')         
+         call gregor(jdn, returnyear, returnmonth, returnday, hour, min, sec, dsec)
+
+         call assert_equal(year, returnyear, 'error in Julian/Gregor: incorrect year')
+         call assert_equal(month, returnmonth, 'error in Julian/Gregor: incorrect month')
+         call assert_equal(day, returnday, 'error in Julian/Gregor: incorrect day')
+         
+      end subroutine test_julian_gregor
 
       !> test yyyymmddToModifieldJulianDateToyyyymmdd
       subroutine test_date2mjd2date()
