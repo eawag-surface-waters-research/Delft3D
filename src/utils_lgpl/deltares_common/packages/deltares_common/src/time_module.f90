@@ -54,6 +54,9 @@ module time_module
    public :: CalendarYearMonthDayToJulianDateNumber
    public :: offset_modified_jd
    public :: julian, gregor  ! public only for testing in test_time_module.f90
+   public :: datetimestring_to_seconds
+   public :: seconds_to_datetimestring
+
 
    interface ymd2jul
       ! obsolete, use ymd2modified_jul
@@ -1050,7 +1053,74 @@ module time_module
               ok = (iPart == nParts)
          enddo
       end function parse_time
+      
+      
+            !BS UNST-5815
+      
+      !> Given datetime string, compute time in seconds from refdat
+     subroutine datetimestring_to_seconds(dateandtime,refdat,timsec,stat)
+         implicit none
 
+         character,         intent(in)  :: dateandtime*(*) !< Input datetime string, format '201201010000', note that seconds are ignored.
+         character (len=8), intent(in)  :: refdat          !< reference date
+         integer,           intent(out) :: stat
+ 
+
+         double precision              :: timmin
+         double precision, intent(out) :: timsec
+
+         integer          :: iday ,imonth ,iyear ,ihour , imin, isec
+         integer          :: iostat
+
+         ! dateandtime = '20120101000000'
+
+         stat = 0
+         read(dateandtime( 1:4 ),'(i4)'  ,err=666,iostat=iostat) iyear
+         read(dateandtime( 5:6 ),'(i2.2)',err=666,iostat=iostat) imonth
+         read(dateandtime( 7:8 ),'(i2.2)',err=666,iostat=iostat) iday
+         read(dateandtime( 9:10),'(i2.2)',err=666,iostat=iostat) ihour
+         read(dateandtime(11:12),'(i2.2)',err=666,iostat=iostat) imin
+         read(dateandtime(13:14),'(i2.2)',err=666,iostat=iostat) isec
+
+        666 if (iostat/=0) then
+               stat=iostat
+               return
+            endif
+
+         call seconds_since_refdat(iyear, imonth, iday, ihour, imin, isec, refdat, timsec)
+
+         timmin  = timsec/60d0
+         !timmin = (jul - jul0)*24d0*60d0      + ihour*60d0      + imin
+
+         return
+     end subroutine datetimestring_to_seconds
+      
+     !> Given time in seconds from refdat, fill dateandtime string
+     !! NOTE: seconds_to_datetimestring and datetimestring_to_seconds are not compatible, because of minutes versus seconds, and different format string.
+     subroutine seconds_to_datetimestring(dateandtime,refdat,tim)
+         implicit none
+
+         character,        intent(out) :: dateandtime*(*) !< Output datetime string, format '20000101_000000', note: includes seconds.
+         double precision, intent(in)  :: tim             !< Input time in seconds since refdat.
+        character (len=8), intent(in)  :: refdat          !< reference date
+
+         integer          :: iday, imonth, iyear, ihour, imin, isec
+
+         dateandtime = '20000101_000000'
+         ! TODO: AvD: seconds_to_datetimestring and datetimestring_to_seconds are now inconsistent since the addition of this '_'
+
+         call datetime_from_refdat(tim, refdat, iyear, imonth, iday, ihour, imin, isec)
+
+         write(dateandtime( 1:4 ),'(i4)')   iyear
+         write(dateandtime( 5:6 ),'(i2.2)') imonth
+         write(dateandtime( 7:8 ),'(i2.2)') iday
+         write(dateandtime(10:11),'(i2.2)') ihour
+         write(dateandtime(12:13),'(i2.2)') imin
+         write(dateandtime(14:15),'(i2.2)') isec
+
+         return
+     end subroutine seconds_to_datetimestring
+ 
       DOUBLE PRECISION FUNCTION JULIAN ( IDATE , ITIME )
 !***********************************************************************
 !
