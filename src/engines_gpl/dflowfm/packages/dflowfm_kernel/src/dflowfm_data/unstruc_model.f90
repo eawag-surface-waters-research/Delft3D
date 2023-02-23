@@ -1882,6 +1882,11 @@ subroutine readMDUFile(filename, istat)
       call warn_flush()
     end if
     call prop_get_integer(md_ptr, 'output', 'Wrimap_chezy', jamapchezy, success)
+    jamap_chezy_elements = jamapchezy
+    call prop_get_integer(md_ptr, 'output', 'Wrimap_chezy_in_elements', jamap_chezy_elements, success)
+    jamap_chezy_links = jamapchezy
+    call prop_get_integer(md_ptr, 'output', 'Wrimap_chezy_on_links', jamap_chezy_links, success)
+    jamapchezy = jamap_chezy_elements + jamap_chezy_links - jamap_chezy_elements * jamap_chezy_links
     call prop_get_integer(md_ptr, 'output', 'Wrimap_temperature', jamaptem, success)
     if (success .and. jamaptem == 1 .and. jatem < 1) then
       write (msgbuf, '(a)') 'MDU setting "Wrimap_temperature = 1" asks to write temperature to the output map file, ' &
@@ -3951,7 +3956,13 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
         call prop_set(prop_ptr, 'output', 'Wrimap_taucurrent', jamaptaucurrent, 'Write the shear stress to map file (1: yes, 0: no)')
     endif
     if (writeall .or. jamapchezy /= 1) then
-        call prop_set(prop_ptr, 'output', 'Wrimap_chezy', jamapchezy, 'Write the chezy roughness to map file (1: yes, 0: no)')
+        call prop_set(prop_ptr, 'output', 'Wrimap_chezy', jamapchezy, 'Write the chezy values in flow elements and on flow links to map file (1: yes, 0: no)')
+    endif
+    if (writeall .or. jamap_chezy_elements /= 1) then
+        call prop_set(prop_ptr, 'output', 'Wrimap_chezy_in_elements', jamap_chezy_elements, 'Write the chezy values in flow elements to map file (1: yes, 0: no). It has a higher priority than Wrimap_chezy')
+    endif
+    if (writeall .or. jamap_chezy_links /= 1) then
+        call prop_set(prop_ptr, 'output', 'Wrimap_chezy_on_links', jamap_chezy_links, 'Write the chezy values on flow links to map file (1: yes, 0: no). It has a higher priority than Wrimap_chezy')
     endif
     if(jasal > 0 .and. (writeall .or. jamapsal /= 1)) then
         call prop_set(prop_ptr, 'output', 'Wrimap_salinity', jamapsal, 'Write salinity to map file (1: yes, 0: no)')

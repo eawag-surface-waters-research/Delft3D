@@ -4021,9 +4021,9 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
     ! Write the data: tau current
     if (jawave ==0) then   ! Else, get taus from subroutine tauwave (taus = taucur + tauwave). Bas; Mind for jawind!
         call gettaus(1,1)                    
-    elseif (jamapchezy > 0) then
+    else if (jamap_chezy_links > 0) then
         call gettaus(2,1)
-    endif
+    end if
     !
     if (jawave>0 .and. .not. flowWithoutWaves) then  
        call gettauswave(jawaveswartdelwaq)
@@ -4032,9 +4032,9 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
     if(jamaptaucurrent > 0) then
         ierr = nf90_put_var(irstfile, id_taus, taus,  (/ 1, itim /), (/ ndxi, 1 /))
     endif
-    if(jamapchezy > 0) then
+    if( jamap_chezy_elements > 0 ) then
         ierr = nf90_put_var(irstfile, id_czs, czs,  (/ 1, itim /), (/ ndxi, 1 /))
-    endif
+    end if
 
     ! Write the data: velocities (components and magnitudes)
     if (kmx > 0) then
@@ -5221,13 +5221,15 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
 
       ! Chezy data on flow nodes and flow links
       ! Input roughness value and type on flow links for input check (note: overwritten when jatrt==1)
-      if (jamapchezy > 0) then
+      if (jamap_chezy_elements > 0) then
             ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp  , mapids%id_czs , nf90_double, UNC_LOC_S, 'czs'  , '', 'Chezy roughness in flow element center', 'm0.5s-1', jabndnd=jabndnd_)
             ! WO: m0.5s-1 does not follow standard ? (which accepts only integral powers?)
+      end if
+      if (jamap_chezy_links > 0) then
             ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp  , mapids%id_czu , nf90_double, UNC_LOC_U, 'czu'  , '', 'Chezy roughness on flow links', 'm0.5s-1', jabndnd=jabndnd_)
             ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp  , mapids%id_cfu , nf90_double, UNC_LOC_U, 'cfu'  , '', 'Input roughness on flow links', '-', jabndnd=jabndnd_)
             ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp  , mapids%id_cfutyp , nf90_int, UNC_LOC_U, 'cfutyp'  , '', 'Input roughness type on flow links', '-', jabndnd=jabndnd_)
-      endif
+      end if
 
 
       ! Constituents
@@ -7197,7 +7199,7 @@ if (jamapsed > 0 .and. jased > 0 .and. stm_included) then
    !        * 2: taus = sedtra%taub if sediment included, otherwise based on taubxu from wave shear stress subroutines
  
    !
-   if (jamaptaucurrent > 0 .or. jamapchezy > 0) then
+   if (jamaptaucurrent > 0 .or. jamap_chezy_elements > 0 .or. jamap_chezy_links > 0 ) then
       if (jawave==0) then        ! Else, get taus from subroutine tauwave (taus = f(taucur,tauwave))
          call gettaus(1,1)       
          workx=DMISS; worky=DMISS
@@ -7215,7 +7217,7 @@ if (jamapsed > 0 .and. jased > 0 .and. stm_included) then
                worky(k) = taus(k)*uy/um   
             enddo
          endif
-      else if (jamapchezy > 0) then
+      else if (jamap_chezy_links > 0) then
          call gettaus(2,1)       ! Only update czs
       end if
       
@@ -7224,13 +7226,13 @@ if (jamapsed > 0 .and. jased > 0 .and. stm_included) then
       endif   
    end if
 
-   if (jamapchezy > 0) then
+   if (jamap_chezy_links > 0) then
       do LL = 1,lnx
          if (frcu(LL) > 0d0) then
             call getcz (hu(LL), frcu(LL), ifrcutp(LL), czu(LL), LL)  ! in gettaus czu is calculated but not stored
-         endif
-      enddo
-   endif
+         end if
+      end do
+   end if
    !
    if (jamaptaucurrent>0) then
       ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_tausx, UNC_LOC_S, workx(1:ndx), jabndnd=jabndnd_)
@@ -7265,8 +7267,10 @@ if (jamapsed > 0 .and. jased > 0 .and. stm_included) then
    end if
        
    
-   if (jamapchezy > 0) then
+   if (jamap_chezy_elements > 0) then
       ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_czs , UNC_LOC_S, czs, jabndnd=jabndnd_)
+   end if
+   if (jamap_chezy_links > 0) then
       ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_czu , UNC_LOC_U, czu, jabndnd=jabndnd_)
       ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_cfu , UNC_LOC_U, frcu, jabndnd=jabndnd_)
       ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_cfutyp , UNC_LOC_U, ifrcutp, jabndnd=jabndnd_)
@@ -8624,12 +8628,14 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
                ierr = nf90_put_att(imapfile, id_cfcl(iid),'units'        , ' ')
            endif
 
-           if (jamapchezy > 0) then
+           if (jamap_chezy_elements > 0) then
                ! Chezy data on flow-nodes
                ierr = nf90_def_var(imapfile, 'czs' , nf90_double, (/ id_flowelemdim(iid), id_timedim(iid) /) , id_czs(iid))
                ierr = nf90_put_att(imapfile, id_czs(iid),'long_name'    , 'Chezy roughness')
                ierr = nf90_put_att(imapfile, id_czs(iid),'coordinates'  , 'FlowElem_xcc FlowElem_ycc')
                ierr = nf90_put_att(imapfile, id_czs(iid),'units'        , 'm0.5s-1')                ! WO: does not follow standard ? (which accepts only integral powers?)
+           end if 
+           if (jamap_chezy_links > 0) then
                ! Chezy data on flow-links
                ierr = nf90_def_var(imapfile, 'czu' , nf90_double, (/ id_flowlinkdim(iid), id_timedim(iid) /) , id_czu(iid))
                ierr = nf90_put_att(imapfile, id_czu(iid),'long_name'    , 'Chezy roughness on flow links')
@@ -9269,18 +9275,18 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
            ierr = nf90_put_var(imapfile, id_hs(iid),  hs,   (/ 1, itim /), (/ ndxndxi, 1 /))
         endif
        ! Tau current and chezy roughness
-       if (jamaptaucurrent > 0 .or. jamapchezy > 0) then
+       if (jamaptaucurrent > 0 .or. jamap_chezy_elements > 0 .or. jamap_chezy_links > 0) then
           if (jawave==0) then       ! Else, get taus from subroutine tauwave (taus = f(taucur,tauwave))
              call gettaus(1,1)       ! Update taus and czs    
-          elseif (jamapchezy > 0) then
+          else if (jamap_chezy_links > 0) then
              call gettaus(2,1)       ! Only update czs 
-          endif
+          end if
           if (jawave>0 .and. .not. flowWithoutWaves) then
              call gettauswave(jawaveswartdelwaq)
           endif
        endif
        !
-       if (jamapchezy > 0) then
+       if (jamap_chezy_links > 0) then
           do LL = 1,lnx
              if (frcu(LL) > 0d0) then
                 call getcz (hu(LL), frcu(LL), ifrcutp(LL), czu(LL), LL)
@@ -9292,8 +9298,10 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
            ierr = nf90_put_var(imapfile, id_taus(iid), taus,  (/ 1, itim /), (/ ndxndxi, 1 /))
        endif
        !
-       if (jamapchezy > 0) then
+       if (jamap_chezy_elements > 0) then
            ierr = nf90_put_var(imapfile, id_czs(iid), czs,  (/ 1, itim /), (/ ndxndxi, 1 /))
+       end if
+       if (jamap_chezy_links > 0) then
            ierr = nf90_put_var(imapfile, id_czu(iid), czu,  (/ 1, itim /), (/ lnx, 1 /))
        endif
 
