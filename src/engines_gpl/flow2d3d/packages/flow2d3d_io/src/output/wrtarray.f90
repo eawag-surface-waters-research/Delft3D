@@ -899,6 +899,135 @@ subroutine wrtarray_hp_4d(fds, filename, filetype, grpnam, &
 end subroutine wrtarray_hp_4d
 
 
+subroutine wrtarray_hp_5d(fds, filename, filetype, grpnam, &
+                       & itime, gdp, ierr, lundia, var, varnam)
+    use precision
+    use dfparall, only: inode, master
+    use netcdf, only: nf90_inq_varid, nf90_noerr, nf90_put_var
+    use globaldata
+    !
+    implicit none
+    !
+    type(globdat),target :: gdp
+    !
+    integer                                                                      , intent(in)  :: fds
+    integer                                                                      , intent(in)  :: filetype
+    integer                                                                      , intent(out) :: ierr
+    integer                                                                      , intent(in)  :: itime
+    integer                                                                      , intent(in)  :: lundia
+    real(hp)     , dimension(:,:,:,:,:)                                          , intent(in)  :: var
+    character(*)                                                                 , intent(in)  :: varnam
+    character(*)                                                                 , intent(in)  :: grpnam
+    character(*)                                                                 , intent(in)  :: filename
+    !
+    ! local
+    integer                                           :: u1
+    integer                                           :: u2
+    integer                                           :: u3
+    integer                                           :: u4
+    integer                                           :: u5
+    real(sp)     , dimension(:,:,:,:,:), allocatable  :: lvar
+    integer                                           :: i1
+    integer                                           :: i2
+    integer                                           :: i3
+    integer                                           :: i4
+    integer                                           :: i5
+    integer                                           :: idvar
+    integer                                           :: namlen
+    integer      , dimension(3,5)                     :: uindex
+    character(16)                                     :: varnam_nfs
+    character(16)                                     :: grpnam_nfs
+    character(256)                                    :: errmsg        ! Character var. containing the error message to be written to file. The message depend on the error.
+    integer                          , external       :: inqelm
+    integer                          , external       :: neferr
+    integer                          , external       :: putelt
+    !
+    character(8)                                      :: elmtyp
+    integer                                           :: nbytsg
+    character(16)                                     :: elmqty
+    character(16)                                     :: elmunt
+    character(64)                                     :: elmdes
+    integer                                           :: elmndm
+    integer, dimension(5)                             :: elmdms
+    !
+    ! body
+    !
+    u1 = size(var,1)
+    u2 = size(var,2)
+    u3 = size(var,3)
+    u4 = size(var,4)
+    u5 = size(var,5)
+    !
+    if (inode == master) then
+       select case (filetype)
+          case (FTYPE_NEFIS)
+             uindex = 0
+             uindex(1,1) = itime
+             uindex(2,1) = itime
+             uindex(3,1) = 1
+             !
+             namlen = min (16,len(varnam))
+             varnam_nfs = varnam(1:namlen)
+             namlen = min (16,len(grpnam))
+             grpnam_nfs = grpnam(1:namlen)
+             !
+             elmndm = 5
+             ierr = inqelm (fds, varnam_nfs, elmtyp, nbytsg, elmqty, elmunt, elmdes, elmndm, elmdms)
+             if (ierr == 0) then
+                if (nbytsg==hp) then
+                   ierr = putelt(fds, grpnam_nfs, varnam_nfs, uindex, 1, var)
+                else
+                   allocate(lvar(u1,u2,u3,u4,u5))
+                   do i5 = 1,u5
+                      do i4 = 1,u4
+                         do i3 = 1,u3
+                            do i2 = 1,u2
+                               do i1 = 1,u1
+                                  lvar(i1,i2,i3,i4,i5) = real(var(i1,i2,i3,i4,i5),sp)
+                               enddo
+                            enddo
+                         enddo
+                      enddo
+                   enddo
+                   ierr = putelt(fds, grpnam_nfs, varnam_nfs, uindex, 1, lvar)
+                   deallocate(lvar)
+                endif
+             endif
+             if (ierr /= 0) then
+                ierr = neferr(0, errmsg)
+                call prterr(lundia, 'P004', errmsg)
+             endif
+          case (FTYPE_NETCDF)
+             ierr = nf90_inq_varid(fds, varnam, idvar)
+             if (ierr == nf90_noerr) then
+                 ierr = nf90_put_var  (fds, idvar, var, start=(/ 1, 1, 1, 1, 1, itime /), count = (/u1, u2, u3, u4, u5, 1 /))
+             endif
+             call nc_check_err(lundia, ierr, 'writing '//varnam, filename)
+          case (FTYPE_UNFORM32)
+             do i5 = 1,u5
+                do i4 = 1,u4
+                   do i3 = 1,u3
+                      write (fds) ((real(var(i1,i2,i3,i4,i5),sp), i2 = 1,u2), i1 = 1,u1)
+                   enddo
+                enddo
+             enddo
+             ierr = 0
+          case (FTYPE_UNFORM64)
+             do i5 = 1,u5
+                do i4 = 1,u4
+                  do i3 = 1,u3
+                     write (fds) ((var(i1,i2,i3,i4,i5), i2 = 1,u2), i1 = 1,u1)
+                  enddo
+                enddo
+             enddo
+             ierr = 0
+       endselect
+    else
+       ierr = 0
+    endif
+end subroutine wrtarray_hp_5d
+
+
 subroutine wrtarray_sp_0d(fds, filename, filetype, grpnam, &
                        & itime, gdp, ierr, lundia, var, varnam)
     use precision

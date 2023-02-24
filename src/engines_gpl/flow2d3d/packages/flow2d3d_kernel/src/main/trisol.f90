@@ -1412,14 +1412,44 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
        ! Run near field model and calculate source terms from
        ! this near field computation
        !
-       if (nfl .and. nst == itnflf) then
+       if (nfl .and. (nst==itnflf .or. nst==itnflrf)) then
+          if (nst == itnflf) then
+             ! Write near field files
+             if (nst == itnflrf) then
+                ! Also read near field files
+                if (itnflri > 0) then
+                   ! Read old files
+                   nflrwmode = NFLWRITEREADOLD
+                else
+                   ! Write files, wait until they appear and read them
+                   ! This is the default
+                   nflrwmode = NFLWRITEREADNEW
+                endif
+             else
+                ! Only write, do not read
+                nflrwmode = NFLWRITE
+             endif
+          else
+             ! Only read, do not write
+             nflrwmode = NFLREADOLD
+          endif
+          call near_field(r(u0)  , r(v0)     , r(rho)    , r(thick)  , &
+                        & kmax   , r(alfas)  , d(dps)    , r(s0)     , &
+                        & lstsci , lsal      , ltem      , r(xz)     , &
+                        & r(yz)  , nmmax     , nflrwmode , ch(namcon), &
+                        & i(kcs) , i(kfu)    , i(kfv)    , &
+                        & r(r0)  , 2*nst*hdt , saleqs    , temeqs    , &
+                        & r(s1)  , i(kfsmn0) , i(kfsmx0) , r(dzs0)   , &
+                        & r(sig) , r(sig)    , gdp       )
+          if (nflrwmode==NFLWRITE .or. nflrwmode == NFLWRITEREADOLD) then
+             itnflrf = itnflf + itnflri
+          endif
+          if (nst==itnflf .and. (itnflf+itnfli<=itnfll)) then
           itnflf = itnflf + itnfli
-          call near_field(r (u1    )  , r (v1    ), r (rho   ), r (thick), &
-                        & kmax        , r (alfas ), d (dps   ), r (s1)   , &
-                        & r (disnf)   , r (sournf), lstsci    , lsal     , &
-                        & ltem        , r (xz    ), r (yz    ), nmmax    , &
-                        & i (kcs)     , i (kcs_nf), r (r1    ), gdp      , &
-                        r (s1)      )
+          endif
+          if (nflrwmode==NFLWRITEREADNEW) then
+             itnflrf = itnflf
+          endif
        endif
        !
        ! Calculate source and sink terms for fluid mud layer
@@ -1836,10 +1866,13 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
                     & i(kfs)    ,i(kcs)    ,r(sour)   ,r(sink)   ,r(volum1) ,r(volum0) , &
                     & r(r0)     ,r(disch)  ,r(rint)   ,r(rintsm) ,r(thick)  ,bubble    , &
                     & gdp       )
+          !
+          ! Addition from nearfield-farfield model
+          !
           if (nfl) then
              call discha_nf(kmax      ,lstsci    ,nmmax   ,i(kfs)   ,r(sour)  ,r(sink)   , &
-                          & r(volum1) ,r(volum0) ,r(r0)   ,r(thick) ,r(disnf) ,r(sournf) , &
-                          & gdp       )
+                          & r(volum1) ,r(volum0) ,r(r0)   ,r(thick) ,i(kfsmn0) ,i(kfsmx0) , &
+                          & i(kcs)    ,gdp )
           endif
           call timer_stop(timer_discha, gdp)
        endif
@@ -2904,10 +2937,13 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
                     & i(kfs)    ,i(kcs)    ,r(sour)   ,r(sink)   ,r(volum1) ,r(volum0) , &
                     & r(r0)     ,r(disch)  ,r(rint)   ,r(rintsm) ,r(thick)  ,bubble    , &
                     & gdp       )
+          !
+          ! Addition from nearfield-farfield model
+          !
           if (nfl) then
-             call discha_nf(kmax      ,lstsci    ,nmmax   ,i(kfs)   ,r(sour)  ,r(sink)   , &
-                          & r(volum1) ,r(volum0) ,r(r0)   ,r(thick) ,r(disnf) ,r(sournf) , &
-                          & gdp       )
+             call discha_nf(kmax      ,lstsci    ,nmmax   ,i(kfs)   ,r(sour)   ,r(sink)   , &
+                          & r(volum1) ,r(volum0) ,r(r0)   ,r(thick) ,i(kfsmn0) ,i(kfsmx0) , &
+                          & i(kcs)    ,gdp )
           endif
           call timer_stop(timer_discha, gdp)
        endif
