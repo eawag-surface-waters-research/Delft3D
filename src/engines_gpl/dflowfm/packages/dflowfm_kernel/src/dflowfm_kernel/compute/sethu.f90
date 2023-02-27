@@ -305,7 +305,7 @@ subroutine sethu(jazws0)                            ! Set upwind waterdepth hu
                            advi(LL) = advi(LL) + agwdxi/uLL
                         enddo
                      endif
-                     map_fixed_weir_energy_loss(L) = agwdxi
+                     map_fixed_weir_energy_loss(L) = weirdte(nfw)
                  else
                      map_fixed_weir_energy_loss(L) = 0
                  endif
