@@ -968,9 +968,9 @@ subroutine default_flowparameters()
     jamapnumlimdt = 1
     jamaptaucurrent = 1
     jamapz0 = 0
-    jamapchezy = 1
-    jamap_chezy_elements = 1
-    jamap_chezy_links    = 1
+    jamapchezy = 0
+    jamap_chezy_elements = 0
+    jamap_chezy_links    = 0
     jamapsal = 1
     jamaptem = 1
     jamapconst = 1
