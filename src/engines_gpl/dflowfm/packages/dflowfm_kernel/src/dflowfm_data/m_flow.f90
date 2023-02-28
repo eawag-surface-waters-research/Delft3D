@@ -1,30 +1,30 @@
 !----- AGPL --------------------------------------------------------------------
-!                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2023.                                
-!                                                                               
-!  This file is part of Delft3D (D-Flow Flexible Mesh component).               
-!                                                                               
-!  Delft3D is free software: you can redistribute it and/or modify              
-!  it under the terms of the GNU Affero General Public License as               
-!  published by the Free Software Foundation version 3.                         
-!                                                                               
-!  Delft3D  is distributed in the hope that it will be useful,                  
-!  but WITHOUT ANY WARRANTY; without even the implied warranty of               
-!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the                
-!  GNU Affero General Public License for more details.                          
-!                                                                               
-!  You should have received a copy of the GNU Affero General Public License     
-!  along with Delft3D.  If not, see <http://www.gnu.org/licenses/>.             
-!                                                                               
-!  contact: delft3d.support@deltares.nl                                         
-!  Stichting Deltares                                                           
-!  P.O. Box 177                                                                 
-!  2600 MH Delft, The Netherlands                                               
-!                                                                               
-!  All indications and logos of, and references to, "Delft3D",                  
-!  "D-Flow Flexible Mesh" and "Deltares" are registered trademarks of Stichting 
+!
+!  Copyright (C)  Stichting Deltares, 2017-2023.
+!
+!  This file is part of Delft3D (D-Flow Flexible Mesh component).
+!
+!  Delft3D is free software: you can redistribute it and/or modify
+!  it under the terms of the GNU Affero General Public License as
+!  published by the Free Software Foundation version 3.
+!
+!  Delft3D  is distributed in the hope that it will be useful,
+!  but WITHOUT ANY WARRANTY; without even the implied warranty of
+!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+!  GNU Affero General Public License for more details.
+!
+!  You should have received a copy of the GNU Affero General Public License
+!  along with Delft3D.  If not, see <http://www.gnu.org/licenses/>.
+!
+!  contact: delft3d.support@deltares.nl
+!  Stichting Deltares
+!  P.O. Box 177
+!  2600 MH Delft, The Netherlands
+!
+!  All indications and logos of, and references to, "Delft3D",
+!  "D-Flow Flexible Mesh" and "Deltares" are registered trademarks of Stichting
 !  Deltares, and remain the property of Stichting Deltares. All rights reserved.
-!                                                                               
+!
 !-------------------------------------------------------------------------------
 
 ! $Id$
@@ -76,6 +76,7 @@
 
  integer                           :: iturbulencemodel  !< 0=no, 1 = constant, 2 = algebraic, 3 = k-eps
  integer                           :: ieps              !< bottom boundary type eps. eqation, 1=dpmorg, 2 = dpmsandpit, 3=D3D, 4=Dirichlethdzb
+ integer                           :: jadrhodz = 1
  double precision                  :: sigmagrowthfactor !<layer thickness growth factor from bed up
  double precision                  :: dztopuniabovez  = -999d0     !< bottom level of lowest uniform layer == blmin if not specified
  double precision                  :: Floorlevtoplay  = -999d0     !< floor  level of top zlayer, == sini if not specified
@@ -182,10 +183,10 @@
  double precision, allocatable         :: limitingTimestepEstimation(:)     !< Number of times during the output interval the conditions in a node is limiting the time step
  double precision, allocatable         :: limitingTimestepEstimation_cum(:) !< Cumulative number of times the conditions in a node is limiting the time step.
                                                                             !< Note: this doubles with variable numlimdt(:), which contains the same cumulative count, under a different MDU option.
-                                                                            !< Note: these variables are double precision (in stead of integers) because post processing is 
-                                                                            !<       based on double precision variables.     
+                                                                            !< Note: these variables are double precision (in stead of integers) because post processing is
+                                                                            !<       based on double precision variables.
  double precision, allocatable         :: flowCourantNumber(:)              !< Courant number
- 
+
 ! node related, dim = ndkx
 
  double precision, allocatable         :: volau   (:)   !< trial, au based cell volume (m3)
@@ -284,7 +285,7 @@
  double precision, allocatable     :: tidep (:,:) !< tidal potential (m2/s2)
  double precision, allocatable     :: tidef (:)   !< tidal force (m/s2)
  double precision, allocatable     :: s1init (:)   !< initial water level, for correction in SAL
- 
+
  double precision, allocatable     :: vih   (:)   !< horizontal eddy viscosity in cell center (m2/s)
  double precision, allocatable     :: qin   (:)   !< rain, evap, qlat and src netto inloop (m3/s)
 
@@ -348,7 +349,7 @@
  double precision, allocatable, target    :: viusp(:)   !< [m2/s] user defined spatial eddy viscosity coefficient at u point (m2/s) {"location": "edge", "shape": ["lnx"]}
  double precision, allocatable, target    :: diusp(:)   !< [m2/s] user defined spatial eddy diffusivity coefficient at u point (m2/s) {"location": "edge", "shape": ["lnx"]}
                                                         !< so in transport, total diffusivity = viu*sigdifi + diusp
- real,             allocatable     :: fcori (:)   !< spatially variable fcorio coeff at u point (1/s)
+ real            , allocatable     :: fcori (:)   !< spatially variable fcorio coeff at u point (1/s)
  double precision, allocatable     :: fvcoro (:)  !< 3D adamsbashford u point (m/s2)
 
  double precision, allocatable     :: plotlin(:)  !< for plotting on u points
@@ -479,7 +480,7 @@
  integer                           :: nodneg        !< node nr with negative hs
  integer                           :: numnodneg     !< nr of posh checks
  integer                           :: jaLinkdried   !< there was at least 1 setback in this step
- integer                           :: Linkdriedmx=0 !< max nr of au growth steps after having dried 
+ integer                           :: Linkdriedmx=0 !< max nr of au growth steps after having dried
  integer                           :: nodnegtek     !< node nr with negative hs to draw
  integer                           :: kkcflmx       !< 2D Node nr with max courant
  integer                           :: kcflmx        !< 3D Node nr with max courant

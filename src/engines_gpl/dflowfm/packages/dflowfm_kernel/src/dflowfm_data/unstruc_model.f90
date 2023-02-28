@@ -1136,6 +1136,7 @@ subroutine readMDUFile(filename, istat)
     call prop_get_integer(md_ptr, 'numerics', 'Maxitverticalforestertem' , Maxitverticalforestertem)
     call prop_get_integer(md_ptr, 'numerics', 'Turbulencemodel' , Iturbulencemodel)
     call prop_get_integer(md_ptr, 'numerics', 'Turbulenceadvection' , javakeps)
+    call prop_get_integer(md_ptr, 'numerics', 'Jadrhodz' , jadrhodz)
     call prop_get_double (md_ptr, 'numerics', 'Eddyviscositybedfacmax' , Eddyviscositybedfacmax)
     call prop_get_integer(md_ptr, 'numerics', 'AntiCreep' , jacreep)
 
@@ -3141,6 +3142,10 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
 
     if (writeall .or. (javakeps .ne. 3  .and. kmx > 0) ) then
        call prop_set(prop_ptr, 'numerics', 'Turbulenceadvection' , javakeps, 'Turbulence advection (0: none, 3: horizontally explicit and vertically implicit)')
+    endif
+
+    if (writeall .or. (jadrhodz .ne. 1  .and. kmx > 0) ) then
+       call prop_set(prop_ptr, 'numerics', 'Jadrhodz' , jadrhodz, '(1:central org, 2:centralnew, 3:upw cell, 4:most stratf. cell, 5:least stratf. cell)')
     endif
 
     if (writeall .or. Eddyviscositybedfacmax > 0 .and. kmx > 0) then
