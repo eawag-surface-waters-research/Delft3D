@@ -96,8 +96,8 @@ subroutine fill_valobs()
                call getkbotktop(k,kb,kt)
                ux = ueux(kb); uy = ueuy(kb)
                um = max(hypot(ux,uy),1d-4)
-               workx(k) = taus(k)*ux/max(ucmag(k),1d-4)   
-               worky(k) = taus(k)*uy/max(ucmag(k),1d-4)   
+               workx(k) = taus(k)*ux/um  
+               worky(k) = taus(k)*uy/um 
             enddo
          endif
       else
