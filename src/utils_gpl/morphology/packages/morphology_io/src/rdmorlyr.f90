@@ -979,7 +979,7 @@ subroutine rdinimorlyr(lsedtot   ,lsed      ,lundia    ,error     , &
     use string_module, only: remove_leading_spaces
     use grid_dimens_module, only: griddimtype
     use message_module, only: FILE_NOT_FOUND, FILE_READ_ERROR, PREMATURE_EOF
-    use MessageHandling
+    use MessageHandling, only: mess, LEVEL_ERROR
     use sediment_basics_module, only: SEDTYP_COHESIVE
     use morphology_data_module, only: sedpar_type, morpar_type
     use m_depfil_stm
@@ -1030,6 +1030,7 @@ subroutine rdinimorlyr(lsedtot   ,lsed      ,lundia    ,error     , &
     logical                               :: anysedbed
     logical                               :: err2
     logical                               :: ex
+    logical                               :: success
     character(10)                         :: lstr
     character(10)                         :: versionstring
     character(11)                         :: fmttmp   ! Format file ('formatted  ') 
@@ -1372,12 +1373,17 @@ subroutine rdinimorlyr(lsedtot   ,lsed      ,lundia    ,error     , &
                       ! Constant thickness
                       !
                       sedbed = rmissval
-                      call prop_get(layer_ptr, '*', parname, sedbed)
-                      if (comparereal(sedbed,rmissval) == 0) then
-                         write (message,'(a,i2,2a)')  &
-                             & 'Missing Thick keyword for layer ', ilyr, &
-                             & ' in file ', trim(flcomp)
-                         call mess(LEVEL_ERROR, message)  
+                      success = .true.
+                      call prop_get(layer_ptr, '*', parname, sedbed, success, valuesfirst=.true.)
+                      if (.not.success) then
+                         if (filename == 'dummyname') then ! string was empty or key not found
+                            write (message,'(a,i2,2a)')  &
+                               & 'No value assigned to Thick for layer ', ilyr,' in file ', trim(flcomp)
+                         else
+                            write (message,'(3a,i2,2a)')  &
+                               & 'Invalid file or value "',trim(filename),'" assigned to Thick for layer ', ilyr,' in file ', trim(flcomp)
+                         endif
+                         call mess(LEVEL_ERROR, message)
                          error = .true.
                          return
                       endif
@@ -1442,18 +1448,18 @@ subroutine rdinimorlyr(lsedtot   ,lsed      ,lundia    ,error     , &
                          ! Constant fraction
                          !
                          fraction = rmissval
-                         call prop_get(layer_ptr, '*', parname, fraction)
-                         if (comparereal(fraction,rmissval) == 0) then
-                            fraction = 0.0_fp
-                         elseif (fraction<0.0_fp .or. fraction>1.0_fp) then
-                            write (message,'(a,e12.4,5a,i2,3a)')  &
-                                & 'Invalid value ',fraction,' for ', trim(parname), &
-                                & ' of ', trim(layertype), ' layer ', &
-                                & ilyr, ' in file ', trim(flcomp), &
-                                & ' Value between 0 and 1 required.'
-                            call mess(LEVEL_ERROR, message)  
-                            error = .true.
-                            return
+                         success = .true.
+                         call prop_get(layer_ptr, '*', parname, fraction, success, valuesfirst=.true.)
+                         if (.not.success) then
+                            if (filename == 'dummyname') then ! string was empty or key not found
+                               fraction = 0.0_fp
+                            else
+                               write (message,'(7a,i2,2a)')  &
+                                  & 'Invalid file or value "',trim(filename),'" assigned to ',trim(parname),' of ', trim(layertype), ' layer ', ilyr,' in file ', trim(flcomp)
+                               call mess(LEVEL_ERROR, message)
+                               error = .true.
+                               return
+                            endif
                          else
                             anyfrac = .true.
                          endif

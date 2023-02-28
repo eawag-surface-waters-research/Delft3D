@@ -47,6 +47,7 @@ subroutine iniid(error     ,prgnm     ,runid     ,filmd     ,filmrs    , &
     use globaldata
     use string_module
     use system_utils, only: exifil
+    use MessageHandling, only: SetMessageHandling
     !
     implicit none
     !
@@ -465,6 +466,7 @@ subroutine iniid(error     ,prgnm     ,runid     ,filmd     ,filmrs    , &
                & status = 'replace')
        endif
     endif
+    call SetMessageHandling(write2screen = .true., useLog = .false., lunMessages = lundia)
     !
  9999 continue
 end subroutine iniid

@@ -56,6 +56,7 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
     use precision
     use properties
     use string_module
+    use MessageHandling, only: mess, LEVEL_ERROR
     use message_module
     use morphology_data_module
     use sediment_basics_module
@@ -707,18 +708,17 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
           if (.not. ex) then
              sdbuni(l) = rmissval
              if (inisedunit(l) == 'm') then
-                call prop_get(sedblock_ptr, '*', 'IniSedThick', sdbuni(l), success)
+                call prop_get(sedblock_ptr, '*', 'IniSedThick', sdbuni(l), success, valuesfirst=.true.)
              else
-                call prop_get(sedblock_ptr, '*', 'SdBUni', sdbuni(l), success)
+                call prop_get(sedblock_ptr, '*', 'SdBUni', sdbuni(l), success, valuesfirst=.true.)
              endif
-             if (.not. success) then
+             if (.not. success .or. comparereal(sdbuni(l),rmissval) == 0) then
                 if (inisedunit(l) == 'm') then
-                   errmsg = 'Error in IniSedThick: ' // trim(flsdbd(l)) // ' is not a file and not a value.'
+                   write (errmsg,'(5a)') 'Invalid file or value "',trim(flsdbd(l)),'" assigned to IniSedThick for fraction ',trim(sedname),'.'
                 else
-                   errmsg = 'Error in SdBUni.' // trim(flsdbd(l))
+                   write (errmsg,'(5a)') 'Invalid file or value "',trim(flsdbd(l)),'" assigned to SdBUni for fraction ',trim(sedname),'.'
                 endif
-                errmsg = FILE_NOT_FOUND // trim(errmsg)
-                call write_error(errmsg, unit=lundia)
+                call mess(LEVEL_ERROR, errmsg)
                 error = .true.
                 return
              endif
