@@ -1054,9 +1054,6 @@ module time_module
          enddo
       end function parse_time
       
-      
-            !BS UNST-5815
-      
       !> Given datetime string, compute time in seconds from refdat
      subroutine datetimestring_to_seconds(dateandtime,refdat,timsec,stat)
          implicit none

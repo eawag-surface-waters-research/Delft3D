@@ -38,8 +38,7 @@ use tree_data_types
 use tree_structures
 use unstruc_messages
 use m_globalparameters, only : t_filenames
-!BS use time_module, only : ymd2modified_jul
-use time_module
+use time_module, only : ymd2modified_jul, datetimestring_to_seconds
 
 implicit none
 
@@ -684,7 +683,7 @@ end subroutine loadModel
 !! Important in loadModel() process.
 !! @see writeMDUFile
 subroutine readMDUFile(filename, istat)
-    use time_module
+    use time_module, only : ymd2modified_jul, datetimestring_to_seconds
     use m_flow, notinuse_s=>success
                !,                  only : kmx, layertype, mxlayz, sigmagrowthfactor, iturbulencemodel, &
                !                         LAYTP_SIGMA, numtopsig, spirbeta,                              &

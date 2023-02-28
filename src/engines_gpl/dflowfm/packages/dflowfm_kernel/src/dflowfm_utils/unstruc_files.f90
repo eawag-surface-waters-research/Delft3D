@@ -35,7 +35,7 @@ module unstruc_files
 
 use unstruc_messages
 use unstruc_version_module
-use time_module
+use time_module, only : seconds_to_datetimestring
 
 implicit none
 
@@ -141,8 +141,8 @@ end subroutine close_all_files
 function defaultFilename(filecat, timestamp, prefixWithDirectory, allowWildcard)
     use unstruc_model
     use m_flowtimes
-    use time_module
-    use string_module, only: get_dirsep
+    use time_module,   only : seconds_to_datetimestring
+    use string_module, only : get_dirsep
     implicit none
     
     character(len=*), intent(in)  :: filecat             !< File category for which the filename is requested, e.g. 'obs', 'map', 'hyd'.

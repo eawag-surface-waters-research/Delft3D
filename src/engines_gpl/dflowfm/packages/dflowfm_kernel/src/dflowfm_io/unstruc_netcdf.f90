@@ -12365,7 +12365,7 @@ end function get_var_and_shift
 !! Processing is done elsewhere.
 !subroutine unc_read_map(filename, numk_keep, numl_keep, numk_read, numl_read, ierr)
 subroutine unc_read_map_or_rst(filename, ierr)
-    use time_module
+    use time_module, only :  datetimestring_to_seconds, seconds_to_datetimestring
     use m_flow
     use m_flowtimes
     use m_transport, only: NUMCONST, ISALT, ITEMP, ISED1, ISEDN, ITRA1, ITRAN, constituents, itrac2const, const_names
