@@ -168,23 +168,9 @@ subroutine rdmorlyr(lundia    ,error     ,filmor    , &
     error      = .false.
     rmissval   = -999.0_fp
     fmttmp     = 'formatted'
-    !
-    ! return if input file is too old, otherwise get
-    ! the data tree read from the input file
-    !
-    if (version < 2) then
-       if (allocmorlyr(morlyr) /= 0) then
-          errmsg = 'RDMORLYR: memory alloc error'
-          call write_error(errmsg, unit=lundia)
-          error = .true.
-          return
-       endif
-       call set_sediment_properties_for_the_morphological_layers(iporosity, morlyr, sedpar)
-       return
-    endif
     
     !
-    ! allocate memory for boundary conditions
+    ! allocate memory for boundary conditions. This needs to be done always. 
     !
     istat = 0
     allocate (morpar%cmpbnd(nto), stat = istat)
@@ -202,7 +188,22 @@ subroutine rdmorlyr(lundia    ,error     ,filmor    , &
        cmpbnd(j)%icond = 1
        cmpbnd(j)%ibcmt = 0
     enddo
-    
+
+    !
+    ! return if input file is too old, otherwise get
+    ! the data tree read from the input file
+    !
+    if (version < 2) then
+       if (allocmorlyr(morlyr) /= 0) then
+          errmsg = 'RDMORLYR: memory alloc error'
+          call write_error(errmsg, unit=lundia)
+          error = .true.
+          return
+       endif
+       call set_sediment_properties_for_the_morphological_layers(iporosity, morlyr, sedpar)
+       return
+    endif
+
     write (lundia, '(a)') '*** Start  of underlayer input'
     !
     ! underlayer bookkeeping mechanism
