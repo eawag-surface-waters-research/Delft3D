@@ -419,13 +419,6 @@ use meshdata, only : ug_idsLen, ug_idsLongNamesLen
             end do
          end do   ! do ipol=1,npartition_pol
       end do   ! do idmn=0,ndomains
-      
-      if ( janet.eq.0 ) then  ! flow mode
-!        get fictitious boundary cells in own domain
-         do i=Ndxi+1,Ndx
-            idomain(i) = my_rank
-         end do
-      end if
 
       ierror = 0
 1234  continue
@@ -535,17 +528,11 @@ use meshdata, only : ug_idsLen, ug_idsLongNamesLen
       call partition_setghost_params(icgsolver)
       
 !     the following subroutine will determine the number of domains and generate the domain numbering
-     if ( npartition_pol.lt.1 ) then ! If do not use polygon (the domain numbers have been read from the partition nc file)
-!        get fictitious boundary cells in own domain
-         if (Ndx > nump1d2d) then
-            call realloc(idomain, Ndx, keepExisting=.true.)
-            do i=Ndxi+1,Ndx
-               idomain(i) = my_rank
-            end do
-         endif
-     else
-        call partition_pol_to_idomain(0) ! for flow geom.
+     if ( npartition_pol > 0 ) then 
+        call partition_pol_to_idomain(0)
      endif
+     
+    call set_idomain_for_all_open_boundaries()
      
 !     check the number of ranks
       if ( ndomains.ne.numranks .and. jampi.eq.1 ) then
@@ -6569,4 +6556,38 @@ recursive subroutine set_edge_weights_and_vsize_with_halo(halo_level, vertex, hi
       end do
    end if
 end subroutine set_edge_weights_and_vsize_with_halo
+    
+!> set idomain values for all open boundary cells
+subroutine set_idomain_for_all_open_boundaries()
+   use m_flowexternalforcings, only: nbndz, kez, nbndu, keu, ke1d2d
+   use m_sobekdfm            , only: nbnd1d2d
+   implicit none
+   
+   call set_idomain_for_open_boundary_cells(nbndz, kez)
+   call set_idomain_for_open_boundary_cells(nbndu, keu)
+   call set_idomain_for_open_boundary_cells(nbnd1d2d, ke1d2d)
+
+end subroutine set_idomain_for_all_open_boundaries
+
+!> set idomain values for a set of open boundary cells
+subroutine set_idomain_for_open_boundary_cells(number_of_boundary_cells, links_to_boundary_cells)
+   use m_flowgeom     , only: ln, lne2ln
+   use m_partitioninfo, only: idomain
+   implicit none
+   
+   integer     :: number_of_boundary_cells                          !< number of boundary cells
+   integer     :: links_to_boundary_cells(number_of_boundary_cells) !< links to boundary cells
+
+   integer     :: boundary_cell, index, internal_cell, link
+   
+   do index  = 1, number_of_boundary_cells
+       link  = links_to_boundary_cells(index)
+       boundary_cell = ln(1,lne2ln(link)) 
+       internal_cell = ln(2,lne2ln(link))
+       idomain(boundary_cell) = idomain(internal_cell)
+   end do
+   
+end subroutine set_idomain_for_open_boundary_cells
+    
+    
     
