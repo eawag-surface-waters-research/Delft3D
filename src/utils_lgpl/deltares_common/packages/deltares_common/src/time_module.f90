@@ -1067,28 +1067,30 @@ module time_module
          double precision, intent(out) :: timsec
 
          integer          :: iday ,imonth ,iyear ,ihour , imin, isec
-         integer          :: iostat
-
-         ! dateandtime = '20120101000000'
+         integer          :: ierr
 
          stat = 0
-         read(dateandtime( 1:4 ),'(i4)'  ,err=666,iostat=iostat) iyear
-         read(dateandtime( 5:6 ),'(i2.2)',err=666,iostat=iostat) imonth
-         read(dateandtime( 7:8 ),'(i2.2)',err=666,iostat=iostat) iday
-         read(dateandtime( 9:10),'(i2.2)',err=666,iostat=iostat) ihour
-         read(dateandtime(11:12),'(i2.2)',err=666,iostat=iostat) imin
-         read(dateandtime(13:14),'(i2.2)',err=666,iostat=iostat) isec
-
-        666 if (iostat/=0) then
-               stat=iostat
-               return
-            endif
-
+         read(dateandtime( 1:4 ),'(i4)'  ,iostat=ierr) iyear
+         if (ierr /= 0) goto 999
+         read(dateandtime( 5:6 ),'(i2.2)',iostat=ierr) imonth
+         if (ierr /= 0) goto 999
+         read(dateandtime( 7:8 ),'(i2.2)',iostat=ierr) iday
+         if (ierr /= 0) goto 999
+         read(dateandtime( 9:10),'(i2.2)',iostat=ierr) ihour
+         if (ierr /= 0) goto 999
+         read(dateandtime(11:12),'(i2.2)',iostat=ierr) imin
+         if (ierr /= 0) goto 999
+         read(dateandtime(13:14),'(i2.2)',iostat=ierr) isec
+         if (ierr /= 0) goto 999
+         
          call seconds_since_refdat(iyear, imonth, iday, ihour, imin, isec, refdat, timsec)
 
          timmin  = timsec/60d0
          !timmin = (jul - jul0)*24d0*60d0      + ihour*60d0      + imin
 
+         return
+999      continue
+         stat = ierr
          return
      end subroutine datetimestring_to_seconds
       
