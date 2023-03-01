@@ -473,9 +473,9 @@ end subroutine deallocstructure
       case ('generalstructure')
          GetStrucType_from_string = ST_GENERAL_ST
       case ('weir')
-         GetStrucType_from_string = ST_GENERAL_ST
+         GetStrucType_from_string = ST_WEIR
       case ('orifice')
-         GetStrucType_from_string = ST_GENERAL_ST
+         GetStrucType_from_string = ST_ORIFICE
       case ('gate')
          GetStrucType_from_string = ST_GATE
       case ('culvert')
