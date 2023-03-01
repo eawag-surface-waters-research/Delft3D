@@ -1413,8 +1413,6 @@ use m_flow
 use unstruc_channel_flow
 use m_1d_structures
 use m_Pump
-use m_Weir
-use m_Orifice
 use m_Culvert
 implicit none
 
@@ -1428,9 +1426,7 @@ integer :: L     ! net link number
 integer :: line_max ! maximal line number
 integer :: branchindex, ilocallin, nstruc, istrtype, i
 double precision, external :: zlin , znod
-type(t_weir), pointer      :: pweir
 type(t_pump), pointer      :: ppump
-type(t_orifice), pointer   :: porifice
 type(t_culvert), pointer   :: pculvert
 
 
@@ -1545,13 +1541,6 @@ if (nstruc > 0) then
    call Write2Scr(linec, 'Structure type', str_type)   
    
    select case (istrtype)
-   case (ST_WEIR)
-      pweir=>network%sts%struct(nstruc)%weir
-      call write2scr(linec, 'Crest level', pweir%crestlevel, 'm')
-      call write2scr(linec, 'Crest width', pweir%crestwidth, 'm')
-      call write2scr(linec, 'Discharge coef.', pweir%dischargecoeff, '-')
-      call write2scr(linec, 'Lat. dis. coef.', pweir%latdiscoeff, '-')
-      call write2scr(linec, 'Allowed flow dir.', pweir%allowedflowdir, '-')
    case (ST_PUMP)
       ppump=>network%sts%struct(nstruc)%PUMP
       call Write2Scr(linec, 'Direction', ppump%direction, 'm')
@@ -1564,25 +1553,6 @@ if (nstruc > 0) then
       end if
       call Write2Scr(linec, 'Current capacity', ppump%current_capacity, 'm3/s')
       call Write2Scr(linec, 'Reduction factor', ppump%reduction_factor, '-')
-   case (ST_ORIFICE)
-      porifice=>network%sts%struct(nstruc)%orifice
-      call write2scr(linec, 'Crest level', porifice%crestlevel, 'm')
-      call write2scr(linec, 'Crest width', porifice%crestwidth, 'm')
-      call write2scr(linec, 'Contraction coef.', porifice%contrcoeff, '-')
-      call write2scr(linec, 'Lat. contract coef.', porifice%latcontrcoeff, '-')
-      call write2scr(linec, 'Allowed flow dir.', porifice%allowedflowdir, '-')
-      if (porifice%uselimitflowpos) then
-         call write2scr(linec, 'Use limit flow pos.', 1, '-')
-         call write2scr(linec, 'Limit flow pos.', porifice%limitflowpos, 'm3/s')
-      else 
-         call write2scr(linec, 'Use limit flow pos.', 0, '-')
-      end if
-      if (porifice%uselimitflowneg) then
-         call write2scr(linec, 'Use limit flow neg.', 1, '-')
-         call write2scr(linec, 'Limit flow neg.', porifice%limitflowneg, 'm3/s')
-      else
-         call write2scr(linec, 'Use limit flow neg.', 0, '-')
-      end if
    case (ST_CULVERT)
       pculvert=>network%sts%struct(nstruc)%culvert
       call write2scr(linec, 'Left level', pculvert%leftlevel, 'm')
