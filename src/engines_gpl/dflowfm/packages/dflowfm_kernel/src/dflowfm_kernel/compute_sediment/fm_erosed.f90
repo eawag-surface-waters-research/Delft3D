@@ -790,7 +790,7 @@
          dll_reals(RP_RLAMB) = real(rlabda(nm)   ,hp)
          dll_reals(RP_UORB ) = real(uorb(nm)     ,hp)
          if (jawave>2) then
-            dll_reals(RP_KWTUR) = real(ktb(nm)      ,hp)
+            dll_reals(RP_KWTUR) = real(ktb(nm)     ,hp)
          else
             dll_reals(RP_KWTUR) = real(0.0_hp      ,hp)      ! array not allocated for fetch length models (choice of HK)
          endif
@@ -1194,7 +1194,7 @@
             rca(nm, l) = caks * rhosol(l)
          endif
       enddo ! next sediment fraction
-      ua(nm) = real(dll_reals(RP_UAU), fp)
+      ua(nm) = real(dll_reals(RP_UAU), fp)    ! cartesian
       va(nm) = real(dll_reals(RP_VAU), fp)
    enddo ! next nm point
    !

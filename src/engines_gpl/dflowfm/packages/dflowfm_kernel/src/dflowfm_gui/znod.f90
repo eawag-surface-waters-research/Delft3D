@@ -335,11 +335,11 @@ else if (nodval == 27) then
                znod = Hwav(kk)
          case (2)
             if (jawave.ne.4) then
-               znod = Twav(kk)
-            elseif (windmodel.eq.0) then
+            !   znod = Twav(kk)
+            !elseif (windmodel.eq.0) then
                znod = Trep
-            else
-               znod = tt1(itheta_view,kk)
+            !else
+            !   znod = tt1(itheta_view,kk)
             endif
          case (3)
             znod = taus(kk)
@@ -420,51 +420,57 @@ else if (nodval == 27) then
                znod = dhsdy(kk)
             endif
          case(25)
-            if (jawave .eq. 4) then
-               if (jawind>0 .and. jawsource>0) then
-                  znod = wsorE(itheta_view, kk)
-               endif
-            end if
+            znod = dmiss
+            !if (jawave .eq. 4) then
+            !   if (jawind>0 .and. jawsource>0) then
+            !      znod = wsorE(itheta_view, kk)
+            !   endif
+            !end if
          case(26)
             if (jawave .eq. 4 ) then
                znod = sigt(itheta_view,kk)
             end if
          case(27)
             if (jawave .eq. 4 ) then
-               if (windmodel.eq.0) then
+               !if (windmodel.eq.0) then
                   znod = cgwav(kk)
-               else
-                  znod = cgwavt(itheta_view,kk)
-               end if
+               !else
+               !   znod = cgwavt(itheta_view,kk)
+               !end if
             endif
          case(28)
             if (jawave == 1 .or. jawave == 2) then
                znod = fetch(1,kk)
             end if
          case(29)
-            if (jawave.eq.4) then
-               znod = dtheta * egradcg(itheta_view,kk)
-            endif
+            znod = dmiss
+            !if (jawave.eq.4) then
+            !   znod = dtheta * egradcg(itheta_view,kk)
+            !endif
          case(30)
-            if (jawave.eq.4) then
-               znod = SwT(kk)
-            endif
+            znod = dmiss
+            !if (jawave.eq.4) then
+            !   znod = SwT(kk)
+            !endif
          case(31)
-            if(jawave.eq.4) then
-               znod = SwE(kk)
-            endif
+            znod = dmiss
+            !if(jawave.eq.4) then
+            !   znod = SwE(kk)
+            !endif
          case(32)
             if(jawave.eq.4) then
                znod = horadvec(itheta_view,kk)
             endif
          case(33)
-            if(jawave.eq.4) then
-               znod = horadvec2(itheta_view,kk)
-            endif
+            znod = dmiss
+            !if(jawave.eq.4) then
+            !   znod = horadvec2(itheta_view,kk)
+            !endif
          case(34)
-            if(jawave.eq.4) then
-               znod = ma(itheta_view,kk)
-            endif
+            znod = dmiss
+            !if(jawave.eq.4) then
+            !   znod = ma(itheta_view,kk)
+            !endif
          end select
 
     endif

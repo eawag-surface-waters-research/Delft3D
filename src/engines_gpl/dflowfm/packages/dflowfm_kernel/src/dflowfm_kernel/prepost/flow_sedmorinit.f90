@@ -132,12 +132,16 @@ subroutine flow_sedmorinit()
        end if
     end do
 
-    ! Set transport velocity definitions according to morfile settings, replaces Transportvelocity keyword in MDU, repeat functionality
+    ! Set transport velocity definitions according to morfile settings
     !
     jatranspvel = 1                              ! default eul bedload, lag susp load
-    if (stmpar%morpar%eulerisoglm) then
+    if (stmpar%morpar%eulerisoglm .and. jawave > 0) then
         jatranspvel = 2                          ! everything euler
     end if
+
+    if (stmpar%morpar%eulerisoglm .and. jawave == 0) then
+        call mess(LEVEL_WARN, 'unstruc::flow_sedmorinit - EulerISOGLM set to .false., as waves are not modeled.')
+    endif
 
     if (stmpar%morpar%glmisoeuler) then
         jatranspvel = 0                          ! everything lagrangian
@@ -257,7 +261,6 @@ subroutine flow_sedmorinit()
        deallocate(mtd%sed)
        deallocate(mtd%ws)
        deallocate(mtd%blchg)
-       deallocate(mtd%sscdtzb)
 
        call clearstack (mtd%messages)
        deallocate(mtd%messages)
@@ -270,7 +273,6 @@ subroutine flow_sedmorinit()
     allocate(mtd%sed(stmpar%lsedsus,ndkx))
     allocate(mtd%ws(ndkx,stmpar%lsedsus))
     allocate(mtd%blchg(Ndx))
-    allocate(mtd%sscdtzb(stmpar%lsedsus,Ndx))
     allocate(mtd%messages)
     call initstack     (mtd%messages)
     !
@@ -280,11 +282,11 @@ subroutine flow_sedmorinit()
     mtd%sed         = 0.0_fp
     mtd%ws          = 0.0_fp
     mtd%blchg       = 0.0_fp
-    mtd%sscdtzb     = 0.0_fp
     !
     ! Array for transport.f90
     mxgr = stmpar%lsedsus
     if ( allocated(sed) ) deallocate(sed)
+    if ( allocated(ssccum) ) deallocate(ssccum)
     if (stmpar%lsedsus .gt. 0) then
        allocate(sed(stmpar%lsedsus,Ndkx))
        allocate(ssccum(stmpar%lsedsus,Ndkx))

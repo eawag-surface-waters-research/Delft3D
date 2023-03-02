@@ -49,7 +49,6 @@
    sed                 => mtd%sed
    ws                  => mtd%ws
    uau                 => mtd%uau
-   sscdtzb             => mtd%sscdtzb
 
    ! stmpar
    lsed                => stmpar%lsedsus

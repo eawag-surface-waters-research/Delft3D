@@ -173,7 +173,7 @@ subroutine trab19(u         ,v         ,hrms      ,rlabda    ,teta      ,h      
     uamag = 0.0_fp
     if (waveform==1) then
        call ua_rvr(facas    ,facsk  ,sws   ,h   ,hrms   , &
-                 & rlabda   ,ubot   ,uamag )        ! to check, uorb or urms
+                 & rlabda   ,ubot   ,uamag )                   ! to check, uorb or urms
     else if (waveform==2) then
        call ua_vt(facas    ,facsk   ,sws   ,h      ,   &
                 & hrms     ,tp      ,ag    ,ubot   ,   &

@@ -96,7 +96,7 @@ subroutine xbeach_all_input()
    call writelog('l','','Physical processes: ')
    swave       = readkey_int (md_surfbeatfile,'swave',         1,        0,     1, strict=.true.)
    lwave       = readkey_int (md_surfbeatfile,'lwave',         1,        0,     1, strict=.true.)
-   windmodel   = readkey_int (md_surfbeatfile,'windmodel',     0,        0,     1, strict=.true.)
+   !windmodel   = readkey_int (md_surfbeatfile,'windmodel',     0,        0,     1, strict=.true.)
    single_dir  = readkey_int (md_surfbeatfile,'single_dir',    0,        0,     1, strict=.true.)
    !
    ! Grid parameters
@@ -245,8 +245,8 @@ subroutine xbeach_all_input()
    deallocate(allowednames,oldnames)
    !
    ! Wave field initialization parameters
-   Trepini = readkey_dbl (md_surfbeatfile,'Trepini',    1.d-5,         1.d-5,    1.d3   )
-   Eini    = readkey_dbl (md_surfbeatfile,'Eini',      1.0d-5,         1.d-5,    1.d10  )
+   !Trepini = readkey_dbl (md_surfbeatfile,'Trepini',    1.d-5,         1.d-5,    1.d3   )
+   !Eini    = readkey_dbl (md_surfbeatfile,'Eini',      1.0d-5,         1.d-5,    1.d10  )
    
    ! Wave breaking parameters
 
@@ -310,18 +310,18 @@ subroutine xbeach_all_input()
    deltahmin  = readkey_dbl(md_surfbeatfile,'deltahmin',  0.1d0,     0.05d0,       0.3d0, strict=.true.)
    !
    !
-   ! Windmodel paramaters
-   if (windmodel .eq. 1) then
-      call writelog('l','','--------------------------------')
-      call writelog('l','','Wind source parameters: ')
-      mwind       = readkey_dbl (md_surfbeatfile,'mwind',   1.d0,    0.5d0,   1.d0)
-      jawsource   = readkey_int (md_surfbeatfile,'windsource',   0,    0,   1, required=(swave==1 .and. jawind==1), strict=.true.)
-      jagradcg    = readkey_int (md_surfbeatfile,'jagradcg',   1,    0,   1, required=((swave==1 .and. jawind==1) .and. jawsource==1), strict=.true.)
-      advecmod    = readkey_int (md_surfbeatfile,'advecmod',    1,         1,      2)
-      ndissip     = readkey_dbl (md_surfbeatfile,'ndissip',  3.d0,         1.d0,      10.d0)      
-      coefdispT   = readkey_dbl (md_surfbeatfile,'coefdispT',  3.5d0,         0.d0,      1000.d0)  
-      coefdispk   = readkey_dbl (md_surfbeatfile,'coefdispk',  1.d0,         0.d0,      1000.d0)  
-   endif
+   ! Windmodel parameters
+   !if (windmodel .eq. 1) then
+   !   call writelog('l','','--------------------------------')
+   !   call writelog('l','','Wind source parameters: ')
+   !   mwind       = readkey_dbl (md_surfbeatfile,'mwind',   1.d0,    0.5d0,   1.d0)
+   !   jawsource   = readkey_int (md_surfbeatfile,'windsource',   0,    0,   1, required=(swave==1 .and. jawind==1), strict=.true.)
+   !   jagradcg    = readkey_int (md_surfbeatfile,'jagradcg',   1,    0,   1, required=((swave==1 .and. jawind==1) .and. jawsource==1), strict=.true.)
+   !   advecmod    = readkey_int (md_surfbeatfile,'advecmod',    1,         1,      2)
+   !   ndissip     = readkey_dbl (md_surfbeatfile,'ndissip',  3.d0,         1.d0,      10.d0)      
+   !   coefdispT   = readkey_dbl (md_surfbeatfile,'coefdispT',  3.5d0,         0.d0,      1000.d0)  
+   !   coefdispk   = readkey_dbl (md_surfbeatfile,'coefdispk',  1.d0,         0.d0,      1000.d0)  
+   !endif
    !
    !
    ! Roller turbulence parameters
@@ -465,38 +465,38 @@ subroutine xbeach_wave_init()
 
    if ( ntheta.gt.0 ) then
       ! dispersion
-      if (windmodel .eq. 1) then   
-         tt1 = Trepini
-         sigt = twopi / tt1  
-         ee1 = Eini 
-      else          
+      !if (windmodel .eq. 1) then   
+      !   tt1 = Trepini
+      !   sigt = twopi / tt1  
+      !   ee1 = Eini 
+      !else          
          do itheta=1,ntheta
             sigt(itheta,:) = twopi/Trep
          end do
-      endif 
+      !endif 
       
-      if (windmodel.eq.0) then
+      !if (windmodel.eq.0) then
          do k = 1, ndx  
              sigmwav(k) = sum(sigt(:,k), dim=1)/dble(ntheta)
              L0(k) = 2*pi*ag/(sigmwav(k)**2)
              L1(k) = L0(k)
              Ltemp(k) = L0(k)
          end do
-      else
-         L0t = 2*pi*ag/(sigt**2)
-         L1t = L0t
-         Ltempt = L0t      
-      endif
+      !else
+      !   L0t = 2*pi*ag/(sigt**2)
+      !   L1t = L0t
+      !   Ltempt = L0t      
+      !endif
       !
       ! for setexternalforcings
       rlabda = L1
       
       ! initialize celerities
-      if (windmodel .eq. 1) then
-          call xbeach_dispersion_windmodel()
-      else 
+      !if (windmodel .eq. 1) then
+      !    call xbeach_dispersion_windmodel()
+      !else 
           call xbeach_dispersion(hhw)    
-      endif
+      !endif
 
    end if
 
@@ -555,17 +555,17 @@ subroutine xbeach_wave_init()
       vmeanrm = 0d0
    end if
    
-   if ( windmodel.eq.1) then
-      if (jawsource.eq.1) then
-      !define source term coefficients
-         CE1 = 8d0/(aa1*aa1*bb1 ) * (16d0/(aa1*aa1 ) )**(1d0/(2d0* bb1) -1d0 )
-         CE2 = 1d0/(2d0* bb1) -1d0
-         CT1 = 1d0/(aa2*bb2 ) * (1d0/(aa2 ) )**(1d0/bb2 -1d0 )
-         CT2 = 1d0/bb2 -1d0
-      endif
-      !map wind field to cell centers
-      call xbeach_map_wind_field(wx, wy, mwind, wmagcc, windspreadfac)
-   endif
+   !if ( windmodel.eq.1) then
+   !   if (jawsource.eq.1) then
+   !   !define source term coefficients
+   !      CE1 = 8d0/(aa1*aa1*bb1 ) * (16d0/(aa1*aa1 ) )**(1d0/(2d0* bb1) -1d0 )
+   !      CE2 = 1d0/(2d0* bb1) -1d0
+   !      CT1 = 1d0/(aa2*bb2 ) * (1d0/(aa2 ) )**(1d0/bb2 -1d0 )
+   !      CT2 = 1d0/bb2 -1d0
+   !   endif
+   !   !map wind field to cell centers
+   !   call xbeach_map_wind_field(wx, wy, mwind, wmagcc, windspreadfac)
+   !endif
   
    if (trim(instat)=='stat' .or. trim(instat)=='stat_table' .or. single_dir>0) then
       !
@@ -773,16 +773,16 @@ subroutine xbeach_wave_init()
    double precision, external                       :: iteratedispersion
    
    do k=1,ndx
-      if (hh(k) > epshs) then
+      if (hh(k) > epshu) then
          L0(k) = 2*pi*ag/(sigmwav(k)**2)
       else
-         L0(k) = waveps
+         L0(k) = 0d0
       end if
    end do
    L1=L0
    
    do k=1,ndxi
-      if(hh(k).ge.waveps) then
+      if(hh(k).gt.epshu) then
          if (2*pi/L0(k)*hh(k) > 5d0) then
             Ltemp(k) = L0(k)
          else
@@ -815,11 +815,11 @@ subroutine xbeach_wave_init()
       cgwav(k)=cwav(k)*nwav(k)
    end do
    
-   where (hh<epshs)
+   where (hh<=epshu)
       kwav=25d0
-      cwav = sqrt(ag*epshs)
+      cwav = 0d0 
       nwav = 1.d0
-      cgwav= sqrt(ag*epshs)
+      cgwav= 0d0 
    end where
    
    end subroutine xbeach_dispersion
@@ -964,9 +964,9 @@ subroutine xbeach_wave_instationary()
    !urf = 0d0
    !vrf = 0d0
    horadvec=0d0
-   horadvec2=0d0
+   !horadvec2=0d0
    thetaadvec=0d0
-   thetaadvec2=0d0
+   !thetaadvec2=0d0
    RH = 0d0
    gammax_correct = .false.                          
    !
@@ -998,47 +998,47 @@ subroutine xbeach_wave_instationary()
    endif
    
    !  construct and solve system
-   if (windmodel.eq.1) then
-      if (advecmod.eq.1) then
-          !define
-           ma=ee1/sigt
-           mb=ee1 
-      elseif (advecmod.eq.2) then
-          !define moments
-          ma=ee1
-          mb=sigt*ee1  
-      endif
-      
-      call advec_horz_windmodel(dtmaxwav, snx, csx, limtypw, ma, cgwavt, horadvec)
-      call advec_horz_windmodel(dtmaxwav, snx, csx, limtypw, mb, cgwavt, horadvec2)     
-      call advec_dir(ma, ctheta, thetaadvec)
-      call advec_dir(mb, ctheta, thetaadvec2) 
-
-      do k = 1,ndxi
-         do itheta = 1,ntheta
-            if ( vol1(k) > epshs*ba(k) ) then
-                  ma(itheta,k) = ma(itheta,k) - dtmaxwav*(horadvec(itheta,k)  * bai(k) + thetaadvec(itheta,k))       
-                  mb(itheta,k) = mb(itheta,k) - dtmaxwav*(horadvec2(itheta,k)  * bai(k) + thetaadvec2(itheta,k)) 
-               else
-                  ma(itheta,k)=ee_eps*tt_eps/twopi
-                  mb(itheta,k)=ee_eps
-               endif   
-            enddo
-      enddo
-      
-      if (advecmod.eq.1) then               
-         sigt=min(mb/ma,twopi/tt_eps)
-         ee1=max(mb,ee_eps)     
-         tt1=twopi/sigt
-     else  
-        sigt=min(mb/ma,twopi/tt_eps)
-        ee1=max(ma,ee_eps)
-        tt1=twopi/sigt         
-      endif
-      
-      call xbeach_wave_dispersion(0)
-
-   else !regular xbeach approach, fixed period
+   !if (windmodel.eq.1) then
+   !   if (advecmod.eq.1) then
+   !       !define
+   !        ma=ee1/sigt
+   !        mb=ee1 
+   !   elseif (advecmod.eq.2) then
+   !       !define moments
+   !       ma=ee1
+   !       mb=sigt*ee1  
+   !   endif
+   !   
+   !   call advec_horz_windmodel(dtmaxwav, snx, csx, limtypw, ma, cgwavt, horadvec)
+   !   call advec_horz_windmodel(dtmaxwav, snx, csx, limtypw, mb, cgwavt, horadvec2)     
+   !   call advec_dir(ma, ctheta, thetaadvec)
+   !   call advec_dir(mb, ctheta, thetaadvec2) 
+   !
+   !   do k = 1,ndxi
+   !      do itheta = 1,ntheta
+   !         if ( vol1(k) > epshs*ba(k) ) then
+   !               ma(itheta,k) = ma(itheta,k) - dtmaxwav*(horadvec(itheta,k)  * bai(k) + thetaadvec(itheta,k))       
+   !               mb(itheta,k) = mb(itheta,k) - dtmaxwav*(horadvec2(itheta,k)  * bai(k) + thetaadvec2(itheta,k)) 
+   !            else
+   !               ma(itheta,k)=ee_eps*tt_eps/twopi
+   !               mb(itheta,k)=ee_eps
+   !            endif   
+   !         enddo
+   !   enddo
+   !   
+   !   if (advecmod.eq.1) then               
+   !      sigt=min(mb/ma,twopi/tt_eps)
+   !      ee1=max(mb,ee_eps)     
+   !      tt1=twopi/sigt
+   !  else  
+   !     sigt=min(mb/ma,twopi/tt_eps)
+   !     ee1=max(ma,ee_eps)
+   !     tt1=twopi/sigt         
+   !   endif
+   !   
+   !   call xbeach_wave_dispersion(0)
+   !
+   !else !regular xbeach approach, fixed period
       !
       ! Slopes of water depth
       call getcellcentergradients(hh, dhsdx, dhsdy)
@@ -1078,7 +1078,7 @@ subroutine xbeach_wave_instationary()
       ee1 = ee1*sigt                   ! Back to wave energy
       ee1=max(ee1,0.0d0)
 
-   endif 
+   !endif 
    !
    !   Energy integrated over wave directions,Hrms, depth limitation on energy
    !
@@ -1095,7 +1095,7 @@ subroutine xbeach_wave_instationary()
    end do
    
    !   Breaker dissipation
-   call xbeach_wave_breaker_dissipation(dts, break, DeltaH, waveps, hhw, kwav, km, gamma, gamma2, nroelvink, QB, alpha, Trep, cwav, thetamean, E, D, sigmwav, wci, windmodel)
+   call xbeach_wave_breaker_dissipation(dts, break, DeltaH, waveps, hhw, kwav, km, gamma, gamma2, nroelvink, QB, alpha, Trep, cwav, thetamean, E, D, sigmwav, wci, 0)
 
    !   Dissipation by bed friction
    dfac = 2.d0*fw*rhomean/(3.d0*pi)
@@ -1120,28 +1120,28 @@ subroutine xbeach_wave_instationary()
       dd(itheta,:)   = ddlok(itheta,:) + ee1(itheta,:)*Df/max(E,0.00001d0)   ! breaking plus friction
    enddo
 
-   if (windmodel.eq.1) then
-     ! wave period depth limitation 
-      call xbeach_wave_compute_period_depth_limitation( 1.d0/8.d0*rhomean*ag*(gammaxxb*hh**2) , Tdeplim)  
-      do itheta=1,ntheta
-         tt1(itheta,:) = min(tt1(itheta,:) , Tdeplim )
-      enddo
-      sigt=twopi/tt1
-      sigmwav=sum(sigt,dim=1)/ntheta  
-      
-      ! wave period breaker dissipation 
-      call xbeach_wave_period_breaker_dissipation( D, E, sigmwav, cgwav, kwav, ddT)        
-      
-      !  Wind source term
-      if (jawsource.eq.1) then
-         call xbeach_windsource(ee1, E, tt1, sigmwav , cgwavt, cgwav, hh, dtmaxwav, wsorE, wsorT,egradcg,SwE,SwT)    
-      else
-          wsorE=0.d0
-          wsorT=0.d0
-          SwE=0.d0
-          SwT=0.d0
-      endif
-   endif ! windmodel
+   !if (windmodel.eq.1) then
+   !  ! wave period depth limitation 
+   !   call xbeach_wave_compute_period_depth_limitation( 1.d0/8.d0*rhomean*ag*(gammaxxb*hh**2) , Tdeplim)  
+   !   do itheta=1,ntheta
+   !      tt1(itheta,:) = min(tt1(itheta,:) , Tdeplim )
+   !   enddo
+   !   sigt=twopi/tt1
+   !   sigmwav=sum(sigt,dim=1)/ntheta  
+   !   
+   !   ! wave period breaker dissipation 
+   !   call xbeach_wave_period_breaker_dissipation( D, E, sigmwav, cgwav, kwav, ddT)        
+   !   
+   !   !  Wind source term
+   !   if (jawsource.eq.1) then
+   !      call xbeach_windsource(ee1, E, tt1, sigmwav , cgwavt, cgwav, hh, dtmaxwav, wsorE, wsorT,egradcg,SwE,SwT)    
+   !   else
+   !       wsorE=0.d0
+   !       wsorT=0.d0
+   !       SwE=0.d0
+   !       SwT=0.d0
+   !   endif
+   !endif ! windmodel
 
    where (hh>epshs)
       wete=1
@@ -1166,37 +1166,37 @@ subroutine xbeach_wave_instationary()
    rr=max(rr,0.0d0)
    
    !  euler step roller energy dissipation
-   if (windmodel.eq.1) then
-       do k = 1,ndx  
-         do itheta=1,ntheta
-            if (wete(k)==1) then 
-               ee1(itheta,k) = ee1(itheta, k) + min( dtmaxwav * (wsorE(itheta, k) -  dd(itheta, k) )  , ee1(itheta, k) ) 
-               tt1(itheta,k) = tt1(itheta, k) + min( dtmaxwav * (wsorT(itheta, k) -  ddT(k) ) , tt1(itheta, k) )
-               ! 
-               if(roller==1) then
-                     drr(itheta, k) = 2*ag*BR(k)*max(rr(itheta, k),0.0d0)/ cwav(k)
-                     rr(itheta, k)=rr(itheta, k)+dtmaxwav*(ddlok(itheta, k) -drr(itheta, k))
-               else if (roller==0) then
-                  rr(itheta, k)  = 0.0d0
-                  drr(itheta, k) = 0.0d0
-               endif
-               !
-               ee1(itheta, k)    = max(ee1(itheta, k),ee_eps)
-               tt1(itheta, k)    = max(tt1(itheta, k), tt_eps)
-               rr(itheta, k)     = max(rr(itheta, k),0.0d0)
-            else
-               ee1(itheta, k)    = ee_eps
-               tt1(itheta, k)    = tt_eps
-               rr(itheta, k)     = 0.0d0
-            end if
-         end do
-       end do
-       
-       tt1=max(tt1,tt_eps)
-       ee1=max(ee1,ee_eps)
-       sigt=twopi/tt1
-       
-   else !if windmodel=0
+   !if (windmodel.eq.1) then
+   !    do k = 1,ndx  
+   !      do itheta=1,ntheta
+   !         if (wete(k)==1) then 
+   !            ee1(itheta,k) = ee1(itheta, k) + min( dtmaxwav * (wsorE(itheta, k) -  dd(itheta, k) )  , ee1(itheta, k) ) 
+   !            tt1(itheta,k) = tt1(itheta, k) + min( dtmaxwav * (wsorT(itheta, k) -  ddT(k) ) , tt1(itheta, k) )
+   !            ! 
+   !            if(roller==1) then
+   !                  drr(itheta, k) = 2*ag*BR(k)*max(rr(itheta, k),0.0d0)/ cwav(k)
+   !                  rr(itheta, k)=rr(itheta, k)+dtmaxwav*(ddlok(itheta, k) -drr(itheta, k))
+   !            else if (roller==0) then
+   !               rr(itheta, k)  = 0.0d0
+   !               drr(itheta, k) = 0.0d0
+   !            endif
+   !            !
+   !            ee1(itheta, k)    = max(ee1(itheta, k),ee_eps)
+   !            tt1(itheta, k)    = max(tt1(itheta, k), tt_eps)
+   !            rr(itheta, k)     = max(rr(itheta, k),0.0d0)
+   !         else
+   !            ee1(itheta, k)    = ee_eps
+   !            tt1(itheta, k)    = tt_eps
+   !            rr(itheta, k)     = 0.0d0
+   !         end if
+   !      end do
+   !    end do
+   !    
+   !    tt1=max(tt1,tt_eps)
+   !    ee1=max(ee1,ee_eps)
+   !    sigt=twopi/tt1
+   !    
+   !else !if windmodel=0
        
       do k = 1,ndx
          do itheta=1,ntheta
@@ -1219,7 +1219,7 @@ subroutine xbeach_wave_instationary()
             end if ! wete
          end do
       end do
-   endif !windmodel
+   !endif !windmodel
 
    if ( jampi.eq.1 ) then
       !write(6,*) 'my_rank=', my_rank
@@ -1455,33 +1455,39 @@ subroutine xbeach_wave_compute_flowforcing2D()
          !            do not include ghost cells
          if ( idomain(k).ne.my_rank ) cycle
       end if
-      do itheta = 1, ntheta
-         dum = 0.d0
-         do kk = 1, nd(k)%lnx
-            L = iabs(nd(k)%ln(kk))
-            k1 = ln(1,L)
-            k2 = ln(2,L)
-            
-            if (windmodel .eq. 0) then
+      !
+      dum = 0.d0
+      !
+      do kk = 1, nd(k)%lnx
+         L = iabs(nd(k)%ln(kk))
+         k1 = ln(1,L)
+         k2 = ln(2,L)
+         do itheta = 1, ntheta
+
+            !if (windmodel .eq. 0) then
                cgwavL = acL(L)*cgwav(k1) + (1-acL(L))*cgwav(k2)
                cwuL    = cgwavL*( csu(L)*csx(itheta) + snu(L)*snx(itheta) )
-            else
-               cgwavL = acL(L)*cgwavt(itheta,k1) + (1-acL(L))*cgwavt(itheta,k2)
-               cwuL    = cgwavL*( csu(L)*csx(itheta) + snu(L)*snx(itheta) ) 
-            endif
-
+            !else
+            !   cgwavL = acL(L)*cgwavt(itheta,k1) + (1-acL(L))*cgwavt(itheta,k2)
+            !   cwuL    = cgwavL*( csu(L)*csx(itheta) + snu(L)*snx(itheta) ) 
+            !endif
+        
             if (ln(2,L) .eq. k) cwuL = -cwuL
-
+        
             if (cwuL .ge. 0.) then        ! outgoing velocities only
                dum = dum + cwuL*wu(L)
             end if
          end do
-         if (dum > tiny(0d0)) then
-            dt = cflmx*ba(k) / dum
-            if ( dt.lt.dtmaxwav ) then
-               dtmaxwav = dt
-            end if
+      end do
+      !
+      if (dum > tiny(0d0)) then
+         dt = cflmx*ba(k) / dum
+         if ( dt.lt.dtmaxwav ) then
+            dtmaxwav = dt
          end if
+      end if
+      
+      do itheta = 1, ntheta
          dum = ctheta(itheta, k)/dtheta
          if (dum > tiny(0d0)) then
             dt = cflmx / dum
@@ -1490,7 +1496,7 @@ subroutine xbeach_wave_compute_flowforcing2D()
                kkcflmxloc = k
             end if
          end if
-      end do
+      enddo
    end do
    !
    if (dtmaxwav > dts) then
@@ -1970,11 +1976,11 @@ subroutine xbeach_wave_bc()
             if (theta0<-2d0*pi) theta0=theta0+2d0*pi
             newstatbc=1                    
 
-            if (windmodel==0) then
+            !if (windmodel==0) then
                do itheta=1,ntheta
                   sigt(itheta,:) = 2d0*pi/Trep
                end do
-            endif
+            !endif
 
             do n = 1,nbndw
                 kb = kbndw(1,n)
@@ -2023,11 +2029,11 @@ subroutine xbeach_wave_bc()
          end if
          do n = 1, nbndw
             kb = kbndw(1,n)
-            if (windmodel.eq.1) then
-               zbndw(:,n)=max(e01,Eini) 
-            else
+            !if (windmodel.eq.1) then
+            !   zbndw(:,n)=max(e01,Eini) 
+            !else
                zbndw(:,n)=e01   
-            endif  
+            !endif  
             bi(n) = 0.0d0
          end do
 
@@ -2087,11 +2093,11 @@ subroutine xbeach_wave_bc()
                call linear_interp(tE,dataE,nt,tshifted,E1,E_idx)
             endif
 
-            if (windmodel .eq. 1) then
-               zbndw(:,n)=max(e01*E1/max(Emean,0.000001d0)*min(time0/taper,1.d0),Eini)                
-            else 
+            !if (windmodel .eq. 1) then
+            !   zbndw(:,n)=max(e01*E1/max(Emean,0.000001d0)*min(time0/taper,1.d0),Eini)                
+            !else 
                zbndw(:,n)=e01*E1/max(Emean,0.000001d0)*min(time0/taper,1.d0)
-            endif
+            !endif
             
             if (nbndu .gt. 0) then
                Lb = kbndw2kbndu(n)
@@ -2188,9 +2194,9 @@ subroutine xbeach_wave_bc()
          ee1(itheta,kb) = ee1(itheta,ki)
          rr(itheta,kb) = rr(itheta,ki)
          
-         if (windmodel.eq.1) then
-             tt1(itheta,kb) = tt1(itheta,ki)
-         endif
+         !if (windmodel.eq.1) then
+         !    tt1(itheta,kb) = tt1(itheta,ki)
+         !endif
          
       end do
    end do
@@ -2201,16 +2207,16 @@ subroutine xbeach_wave_bc()
       do itheta = 1,ntheta
          ee1(itheta,kb) = zbndw(itheta,k)
          
-         if (windmodel.eq.1) then
-            tt1(itheta,kb) = Trep
-         endif
+         !if (windmodel.eq.1) then
+         !   tt1(itheta,kb) = Trep
+         !endif
          
       enddo
    enddo
    !
-   if (windmodel.eq.1) then
-       sigt  = twopi/tt1
-   endif
+   !if (windmodel.eq.1) then
+   !    sigt  = twopi/tt1
+   !endif
    
 end subroutine xbeach_apply_wave_bc
 
@@ -3403,11 +3409,11 @@ subroutine xbeach_waves(ierr)
    
    ierror = 1
    
-   if (windmodel .eq. 0) then
+   !if (windmodel .eq. 0) then
       factime = 1d0/cats/Trep*dts
-   else
-      factime = 1d0/cats/minval(sigmwav)/2d0/pi*dts       
-   endif
+   !else
+   !   factime = 1d0/cats/minval(sigmwav)/2d0/pi*dts       
+   !endif
       
 !  compute boundary-averaged velocities
    numbnd = 0
@@ -3659,15 +3665,15 @@ subroutine rollerturbulence(k)
       ktb(k)=0d0
       return
    endif
-
-   if (jawave .eq. 3 .or. jawave==6) then
+   !
+   if (jawave .eq. 3 .or. jawave .eq. 6) then
       disrol = dsurf(k)
       cw     = rlabda(k)/max(1d-1,twav(k))
       rol    = disrol*cw/2d0/ag/0.10d0          ! assume something for roller slope
       Tw     = twav(k)
       Tb     = twav(k)
    end if
-   
+   !
    if (jawave .eq. 4) then
       disrol = DR(k)
       rol    = R(k)
@@ -3782,180 +3788,180 @@ subroutine borecharacter()
    end subroutine borecharacter
    
 
-   subroutine xbeach_map_wind_field(wx, wy, mwind, wmagcc, windspreadfac)
-   use m_flowgeom, only: ln, wcl, lnx, ndx, thetabin, ntheta, dtheta
-
-   implicit none
-                                                 
-   double precision, dimension(lnx)        , intent(in) :: wx
-   double precision, dimension(lnx)        , intent(in) :: wy
-   double precision                        , intent(in) :: mwind
-
-   double precision, dimension(ndx)        , intent(inout):: wmagcc
-   double precision, dimension(ntheta,ndx) , intent(inout):: windspreadfac
-   
-   integer                                          :: ierr, L, k1, k2, itheta, k
-   double precision, dimension(:), allocatable      :: wxcc            !  [m/s] x-component windspeed cell centered
-   double precision, dimension(:), allocatable      :: wycc            !  [m/s] y-component windspeed cell centered
-   double precision, dimension(:), allocatable      :: wdir            !  [rad] wind speed direction cell centered
-   double precision, dimension(:,:), allocatable    :: dist2           !< temp array for windspreadfac
-   double precision, dimension(:), allocatable      :: dist0           !< temp array for windspreadfac
-
-   ierr = 1
- 
-   if (.not.allocated(dist2))   allocate(dist2(1:ntheta , 1:ndx),  stat = ierr)  
-   if (.not.allocated(dist0)) allocate(dist0(1:ntheta), stat = ierr)
-   if (.not.allocated(wxcc)) allocate(wxcc(1:ndx), stat = ierr)
-   if (.not.allocated(wycc)) allocate(wycc(1:ndx), stat = ierr)
-   if (.not.allocated(wdir))    allocate(wdir(1:ndx),              stat = ierr)   
-   
-   wxcc=0d0
-   wycc=0d0
-   wdir=0d0
-   wmagcc=0d0
-   dist2=0d0
-   dist0=0d0   
-   windspreadfac=0d0
-   
-   do L = 1, lnx                                                              ! interpolate face values to cell centered values 
-      k1 = ln(1,L); k2 = ln(2,L)
-      wxcc(k1) = wxcc(k1) + wcl(1,L)*wx(L)
-      wxcc(k2) = wxcc(k2) + wcl(2,L)*wx(L)
-      wycc(k1) = wycc(k1) + wcl(1,L)*wy(L)
-      wycc(k2) = wycc(k2) + wcl(2,L)*wy(L)
-   end do
-   
-   wdir = atan2(wycc, wxcc)                               ! assume  cartesian CCW
-   !etilde = rhomean*ag*3.6d-3
-   do k = 1, ndx
-      do itheta = 1,ntheta
-       dist2(itheta, k)=(cos(thetabin(itheta)-wdir(k)))**mwind   
-         if(cos(thetabin(itheta)-wdir(k))<0.d0) then
-          dist2(itheta,k)=0.0d0
-         end if
-      end do
-    if (sum(dist2(:,k))>0.d0) then
-       dist0 = dist2(:,k)
-       windspreadfac(:,k) = (dist0/sum(dist0))/dtheta
-    else
-       windspreadfac(:,k)=0.d0
-    endif            
-   end do       
-   
-   do k = 1, ndx
-      wmagcc(k)=sqrt(wxcc(k) * wxcc(k) + wycc(k) * wycc(k)) 
-   end do
-   
-   ierr = 0
-   
-1234 continue
-   deallocate(dist2,dist0, stat=ierr)  
-   deallocate(wxcc,wycc,wdir, stat=ierr)       
-   return
-   
-  end subroutine xbeach_map_wind_field    
-    
-  subroutine xbeach_windsource(ee1, E, tt1, sigmwav , cgwavt, cgwav, hh, dtmaxwav, wsorE, wsorT,egradcg,SwE ,SwT )
-   use m_flowgeom, only: ndx, ndxi, lnx, wcl, ln, thetabin,ntheta, dtheta, bai
-   use m_xbeach_data, only: mwind, Eini, Trepini, snx, csx, wmagcc, windspreadfac, Eful, Tful,CE1, CT1, CE2, CT2, jagradcg
-   use m_physcoef, only: rhomean, ag
-   use m_sferic, only: twopi, pi
-!   use m_growth_curves
-
-   implicit none
-                                                                             
-   double precision, dimension(ntheta, ndx), intent(in) :: ee1              !<   wave energy/rad 
-   double precision, dimension(ndx)        , intent(in) :: E                !<   nodal wave energy
-   double precision, dimension(ntheta, ndx), intent(in) :: tt1              !<   wave period in directional bin
-   double precision, dimension(ndx)        , intent(in) :: sigmwav             !<   nodal wave period
-   double precision, dimension(ntheta, ndx), intent(in) :: cgwavt           !<   group celerity per bin
-   double precision, dimension(ndx)        , intent(in) :: cgwav            !<   nodal group celerity
-   double precision, dimension(ndx)        , intent(in) :: hh               !<   water depth
-   double precision,                         intent(in) :: dtmaxwav         !<   time step
-
-   double precision, dimension(ntheta, ndx), intent(out):: wsorT            !<   wind input period per second
-   double precision, dimension(ntheta, ndx), intent(out):: wsorE            !<   wind input energy per second
-   double precision, dimension(ntheta, ndx), intent(out):: egradcg            !<   wind input energy per second
-   double precision, dimension(ndx),         intent(out):: SwE              !<   nodal wind input energy per second
-   double precision, dimension(ndx),         intent(out):: SwT              !<   nodal wind input period per second
-   
-   integer                                          :: ierr
-   integer                                          :: itheta, k, k1, k2, L
-  
-   double precision                                 :: Edmlss, Tdmlss, cgdmlss, Ddmlss, wsorTdlss, wsorEdlss, dtdmlss
-   
-   double precision                                 :: dir0
-   double precision                                 :: fE, fT, dE, dT, dEful, dTful 
-   double precision,  allocatable                   :: gradcg(:,:)
-   double precision                                 :: tgradcg
-         
-
-   ierr = 1
-    
-   allocate( gradcg( 1:ntheta, 1:ndx), stat = ierr)
-   fE=0d0; fT=0d0; dE=0d0; dT=0d0;
-   wsorE=0d0; wsorT=0d0;
-   gradcg=0d0; tgradcg=0d0; gradcg=0d0; 
-      
-  
-   ! velocity gradient operator       
-   call advec_horz_cg(dtmaxwav, snx, csx, cgwavt, gradcg)  
-       
-   do k = 1, ndxi
-        
-        dEful = (Tful / (4.0d0 * pi)) / (CE1 * Eful ** CE2) !d
-        
-        do itheta = 1, ntheta     
-            
-           !compute dimensionless wave state
-           !Edmlss  =   ag / rhomean / wmagcc(k)**4 * E(k)    
-           !Tdmlss  =   ag / wmagcc(k) * tt1(itheta,k)
-           !cgdmlss =   cgwavt(itheta ,k) / wmagcc(k)  
-           
-!          if decoupled growth in each wave bin replace with:
-           Edmlss=ag / rhomean / wmagcc(k)**4 * ee1(itheta,k) / windspreadfac(itheta,k)   
-           Tdmlss= ag / wmagcc(k) * tt1(itheta,k)
-           cgdmlss= cgwavt(itheta,k) / wmagcc(k)  
-           
-           
-           ! dimensionless magnitude of source terms        
-           fE =        CE1* Edmlss**CE2
-           dE =        cgdmlss/ fE
-           
-           fT =        CT1* Tdmlss**CT2
-           dT =        cgdmlss/ fT 
-                                     
-           wsorEdlss = min(dE , dEful)  
-           wsorTdlss = dT !max(dT,dTful) !windspreadfac(itheta,k)  * dT * dtheta !max(dT , dTful) 
-           
-           SwE(k)= max(wmagcc(k)**3 * rhomean * wsorEdlss, 0.d0) !
-           SwT(k)= max(wsorTdlss , 0.d0) !         
-        
-           !distribute growth over the wave bins, add gradcg component and make dimensional
-           
-            if (jagradcg .eq. 1) then 
-              ! egradcg = max(-windspreadfac(itheta,k) * ee0(itheta,k) / windspreadfac(itheta,k) * bai(k) * gradcg(itheta,k) , 0d0) ! * Etaper  perhaps use gradcg(nodal)?                   
-              egradcg(itheta,k) = max(- ee1(itheta, k) * bai(k) * gradcg(itheta,k) , 0.d0)! 
-              !tgradcg = max(-windspreadfac(itheta,k) * twopi / sigmwav(k) * bai(k) * gradcg(itheta,k)  , 0d0) 
-            else
-                egradcg(itheta,k) = 0.d0
-                !tgardcg = 0.d0
-           endif
-           
-           wsorE(itheta,k) = max(windspreadfac(itheta,k) * SwE(k)   + egradcg(itheta,k), 0.d0 )
-           wsorT(itheta,k) = max(windspreadfac(itheta,k) * dtheta * SwT(k) , 0.d0 ) 
- 
-        enddo
-    
-    end do           
-     
-   ierr = 0
-   
-1234 continue
-    deallocate(gradcg, stat = ierr )
-     
-   return
-end subroutine xbeach_windsource
+!   subroutine xbeach_map_wind_field(wx, wy, mwind, wmagcc, windspreadfac)
+!   use m_flowgeom, only: ln, wcl, lnx, ndx, thetabin, ntheta, dtheta
+!
+!   implicit none
+!                                                 
+!   double precision, dimension(lnx)        , intent(in) :: wx
+!   double precision, dimension(lnx)        , intent(in) :: wy
+!   double precision                        , intent(in) :: mwind
+!
+!   double precision, dimension(ndx)        , intent(inout):: wmagcc
+!   double precision, dimension(ntheta,ndx) , intent(inout):: windspreadfac
+!   
+!   integer                                          :: ierr, L, k1, k2, itheta, k
+!   double precision, dimension(:), allocatable      :: wxcc            !  [m/s] x-component windspeed cell centered
+!   double precision, dimension(:), allocatable      :: wycc            !  [m/s] y-component windspeed cell centered
+!   double precision, dimension(:), allocatable      :: wdir            !  [rad] wind speed direction cell centered
+!   double precision, dimension(:,:), allocatable    :: dist2           !< temp array for windspreadfac
+!   double precision, dimension(:), allocatable      :: dist0           !< temp array for windspreadfac
+!
+!   ierr = 1
+! 
+!   if (.not.allocated(dist2))   allocate(dist2(1:ntheta , 1:ndx),  stat = ierr)  
+!   if (.not.allocated(dist0)) allocate(dist0(1:ntheta), stat = ierr)
+!   if (.not.allocated(wxcc)) allocate(wxcc(1:ndx), stat = ierr)
+!   if (.not.allocated(wycc)) allocate(wycc(1:ndx), stat = ierr)
+!   if (.not.allocated(wdir))    allocate(wdir(1:ndx),              stat = ierr)   
+!   
+!   wxcc=0d0
+!   wycc=0d0
+!   wdir=0d0
+!   wmagcc=0d0
+!   dist2=0d0
+!   dist0=0d0   
+!   windspreadfac=0d0
+!   
+!   do L = 1, lnx                                                              ! interpolate face values to cell centered values 
+!      k1 = ln(1,L); k2 = ln(2,L)
+!      wxcc(k1) = wxcc(k1) + wcl(1,L)*wx(L)
+!      wxcc(k2) = wxcc(k2) + wcl(2,L)*wx(L)
+!      wycc(k1) = wycc(k1) + wcl(1,L)*wy(L)
+!      wycc(k2) = wycc(k2) + wcl(2,L)*wy(L)
+!   end do
+!   
+!   wdir = atan2(wycc, wxcc)                               ! assume  cartesian CCW
+!   !etilde = rhomean*ag*3.6d-3
+!   do k = 1, ndx
+!      do itheta = 1,ntheta
+!       dist2(itheta, k)=(cos(thetabin(itheta)-wdir(k)))**mwind   
+!         if(cos(thetabin(itheta)-wdir(k))<0.d0) then
+!          dist2(itheta,k)=0.0d0
+!         end if
+!      end do
+!    if (sum(dist2(:,k))>0.d0) then
+!       dist0 = dist2(:,k)
+!       windspreadfac(:,k) = (dist0/sum(dist0))/dtheta
+!    else
+!       windspreadfac(:,k)=0.d0
+!    endif            
+!   end do       
+!   
+!   do k = 1, ndx
+!      wmagcc(k)=sqrt(wxcc(k) * wxcc(k) + wycc(k) * wycc(k)) 
+!   end do
+!   
+!   ierr = 0
+!   
+!1234 continue
+!   deallocate(dist2,dist0, stat=ierr)  
+!   deallocate(wxcc,wycc,wdir, stat=ierr)       
+!   return
+!   
+!  end subroutine xbeach_map_wind_field    
+!    
+!  subroutine xbeach_windsource(ee1, E, tt1, sigmwav , cgwavt, cgwav, hh, dtmaxwav, wsorE, wsorT,egradcg,SwE ,SwT )
+!   use m_flowgeom, only: ndx, ndxi, lnx, wcl, ln, thetabin,ntheta, dtheta, bai
+!   use m_xbeach_data, only: mwind, Eini, Trepini, snx, csx, wmagcc, windspreadfac, Eful, Tful,CE1, CT1, CE2, CT2, jagradcg
+!   use m_physcoef, only: rhomean, ag
+!   use m_sferic, only: twopi, pi
+!!   use m_growth_curves
+!
+!   implicit none
+!                                                                             
+!   double precision, dimension(ntheta, ndx), intent(in) :: ee1              !<   wave energy/rad 
+!   double precision, dimension(ndx)        , intent(in) :: E                !<   nodal wave energy
+!   double precision, dimension(ntheta, ndx), intent(in) :: tt1              !<   wave period in directional bin
+!   double precision, dimension(ndx)        , intent(in) :: sigmwav             !<   nodal wave period
+!   double precision, dimension(ntheta, ndx), intent(in) :: cgwavt           !<   group celerity per bin
+!   double precision, dimension(ndx)        , intent(in) :: cgwav            !<   nodal group celerity
+!   double precision, dimension(ndx)        , intent(in) :: hh               !<   water depth
+!   double precision,                         intent(in) :: dtmaxwav         !<   time step
+!
+!   double precision, dimension(ntheta, ndx), intent(out):: wsorT            !<   wind input period per second
+!   double precision, dimension(ntheta, ndx), intent(out):: wsorE            !<   wind input energy per second
+!   double precision, dimension(ntheta, ndx), intent(out):: egradcg            !<   wind input energy per second
+!   double precision, dimension(ndx),         intent(out):: SwE              !<   nodal wind input energy per second
+!   double precision, dimension(ndx),         intent(out):: SwT              !<   nodal wind input period per second
+!   
+!   integer                                          :: ierr
+!   integer                                          :: itheta, k, k1, k2, L
+!  
+!   double precision                                 :: Edmlss, Tdmlss, cgdmlss, Ddmlss, wsorTdlss, wsorEdlss, dtdmlss
+!   
+!   double precision                                 :: dir0
+!   double precision                                 :: fE, fT, dE, dT, dEful, dTful 
+!   double precision,  allocatable                   :: gradcg(:,:)
+!   double precision                                 :: tgradcg
+!         
+!
+!   ierr = 1
+!    
+!   allocate( gradcg( 1:ntheta, 1:ndx), stat = ierr)
+!   fE=0d0; fT=0d0; dE=0d0; dT=0d0;
+!   wsorE=0d0; wsorT=0d0;
+!   gradcg=0d0; tgradcg=0d0; gradcg=0d0; 
+!      
+!  
+!   ! velocity gradient operator       
+!   call advec_horz_cg(dtmaxwav, snx, csx, cgwavt, gradcg)  
+!       
+!   do k = 1, ndxi
+!        
+!        dEful = (Tful / (4.0d0 * pi)) / (CE1 * Eful ** CE2) !d
+!        
+!        do itheta = 1, ntheta     
+!            
+!           !compute dimensionless wave state
+!           !Edmlss  =   ag / rhomean / wmagcc(k)**4 * E(k)    
+!           !Tdmlss  =   ag / wmagcc(k) * tt1(itheta,k)
+!           !cgdmlss =   cgwavt(itheta ,k) / wmagcc(k)  
+!           
+!!          if decoupled growth in each wave bin replace with:
+!           Edmlss=ag / rhomean / wmagcc(k)**4 * ee1(itheta,k) / windspreadfac(itheta,k)   
+!           Tdmlss= ag / wmagcc(k) * tt1(itheta,k)
+!           cgdmlss= cgwavt(itheta,k) / wmagcc(k)  
+!           
+!           
+!           ! dimensionless magnitude of source terms        
+!           fE =        CE1* Edmlss**CE2
+!           dE =        cgdmlss/ fE
+!           
+!           fT =        CT1* Tdmlss**CT2
+!           dT =        cgdmlss/ fT 
+!                                     
+!           wsorEdlss = min(dE , dEful)  
+!           wsorTdlss = dT !max(dT,dTful) !windspreadfac(itheta,k)  * dT * dtheta !max(dT , dTful) 
+!           
+!           SwE(k)= max(wmagcc(k)**3 * rhomean * wsorEdlss, 0.d0) !
+!           SwT(k)= max(wsorTdlss , 0.d0) !         
+!        
+!           !distribute growth over the wave bins, add gradcg component and make dimensional
+!           
+!            if (jagradcg .eq. 1) then 
+!              ! egradcg = max(-windspreadfac(itheta,k) * ee0(itheta,k) / windspreadfac(itheta,k) * bai(k) * gradcg(itheta,k) , 0d0) ! * Etaper  perhaps use gradcg(nodal)?                   
+!              egradcg(itheta,k) = max(- ee1(itheta, k) * bai(k) * gradcg(itheta,k) , 0.d0)! 
+!              !tgradcg = max(-windspreadfac(itheta,k) * twopi / sigmwav(k) * bai(k) * gradcg(itheta,k)  , 0d0) 
+!            else
+!                egradcg(itheta,k) = 0.d0
+!                !tgardcg = 0.d0
+!           endif
+!           
+!           wsorE(itheta,k) = max(windspreadfac(itheta,k) * SwE(k)   + egradcg(itheta,k), 0.d0 )
+!           wsorT(itheta,k) = max(windspreadfac(itheta,k) * dtheta * SwT(k) , 0.d0 ) 
+! 
+!        enddo
+!    
+!    end do           
+!     
+!   ierr = 0
+!   
+!1234 continue
+!    deallocate(gradcg, stat = ierr )
+!     
+!   return
+!end subroutine xbeach_windsource
    
 subroutine advec_horz_cg(dtmaxwav, snx, csx, veloc, gradcg)
    use m_sferic
@@ -4034,262 +4040,262 @@ subroutine advec_horz_cg(dtmaxwav, snx, csx, veloc, gradcg)
 
 end subroutine advec_horz_cg    
 
-subroutine xbeach_wave_period_breaker_dissipation( Df, E, sigmwav, cgwav, kwav, DtotT)
-   use m_flowgeom, only: ndx
-   use m_xbeach_data, only: ndissip, coefdispT, coefdispk
-   use m_physcoef, only: rhomean, ag
-   use m_sferic, only: twopi
-   implicit none
-
-   double precision, dimension(ndx)        , intent(in)  :: Df
-   double precision, dimension(ndx)        , intent(in)  :: E
-   double precision, dimension(ndx)        , intent(in)  :: sigmwav
-   double precision, dimension(ndx)        , intent(in)  :: cgwav
-   double precision, dimension(ndx)        , intent(in)  :: kwav   
-   double precision, dimension(ndx)        , intent(out) :: DtotT
-   
-   DtotT = - coefdispT * tanh(coefdispk * kwav) * 1.d0 /(1.d0 -ndissip) * (twopi) / sigmwav / sigmwav * cgwav * kwav / E * Df              
-      
-1234 continue 
-   return
-   
-end subroutine xbeach_wave_period_breaker_dissipation    
-
-subroutine xbeach_wave_compute_period_depth_limitation(E, Tmaxdep )
-   use m_flowgeom, only: ndx
-   use m_xbeach_data, only: wmagcc, aa1, aa2, bb1, bb2
-   use m_physcoef, only: rhomean, ag 
-   
-   implicit none
-
-   double precision, dimension(ndx)        , intent(in)  :: E
-   double precision, dimension(ndx)        , intent(out) :: Tmaxdep
-   
-   integer                                               :: k
-   integer                                               :: ierr
-   
-   double precision, allocatable                         :: Edls(:)
-   double precision, allocatable                         :: Tdls(:)
-   
-   allocate(Edls(1:ndx), Tdls(1:ndx), stat = ierr)
-   
-   Edls=ag / rhomean / wmagcc**4d0 * E
-   Tdls=aa2*(16d0* Edls / (aa1*aa1) )**(bb2/(2*bb1)) 
-   Tmaxdep = wmagcc * Tdls / ag
-      
-1234 continue
-   deallocate(Edls, Tdls, stat=ierr)  
-   return   
- end subroutine xbeach_wave_compute_period_depth_limitation 
-     
-   
- subroutine advec_horz_windmodel(dtmaxwav, snx, csx, limtypw, quant, veloc, advec)
-   use m_sferic
-   use m_physcoef
-   use m_flowgeom
-   use m_flowparameters, only:eps10
-   
-   implicit none
-   
-   integer                                                :: L, k, k1, k2, itheta, ku, kl2s, kl2, kl1, kd, is, ip
-   double precision                                       :: velocL, qds, qst, half, fluxvel1, waku, sl1, sl2, sl3
-   double precision                                       :: cf, ds2, ds1, ds, cwuL
-   double precision, intent(in)                           :: dtmaxwav
-   double precision, intent(in), dimension(ntheta)        :: snx, csx
-   integer,          intent(in)                           :: limtypw
-   double precision, intent(in), dimension(ntheta, ndx)   :: veloc
-   double precision, intent(in), dimension(ntheta,ndx)    :: quant
-   double precision, intent(out), dimension(ntheta, ndx)  :: advec
-   double precision, external                             :: dslim
-   
-   double precision                                       :: cs, sn, wuL
-                                                          
-   integer                                                :: nwalls
-   
-   advec = 0d0
-   do L  = 1,lnx                                                              ! upwind (supq) + limited high order (dsq), loop over link
-        k1  = ln(1,L) ; k2 = ln(2,L)                                       ! linker en rechtercelnr geassocieerd aan de links
-        
-        do itheta = 1,ntheta
-            velocL  = acL(L)*veloc(itheta,k1) + (1d0-acL(L))*veloc(itheta,k2)
-            cwuL    = velocL*( csu(L)*csx(itheta) + snu(L)*snx(itheta) )   ! *au(L)   met cwi: u1(L) + cg*( csu(L)*csx(itheta) + snu(L)*snx(itheta) )
-                                                                           ! inproduct cgx*csu+cgy*snu
-            if (cwuL > 0) then                                              !   ->      ds1   ds2
-                k = k1 ; kd = k2 ; is =  1 ; half = 1d0 - acl(L) ; ip = 0   !   ->   ku     k     kd
-            else                                                            !   <-      ds2   ds1
-                k = k2 ; kd = k1 ; is = -1 ; half = acl(L)       ; ip = 3   !   <-   kd     k     ku
-            endif                                                           ! acL = linkse dx fractie van afstand tussen flownodes (slide 83)
-
-            fluxvel1  = is*cwuL*wu(L)                                       ! snelheidsbijdrage linkse cel
-            qst = fluxvel1*quant(itheta,k)                                  ! cg*E voor link L, sector itheta
-            advec(itheta,kd) = advec(itheta,kd) - qst                       ! downwind cel krijgt bijdrage
-            advec(itheta,k)  = advec(itheta,k)  + qst                       ! centrale cel verliest bijdrage
-
-            if (limtypw > 0 ) then                                          ! hogere orde, tijdstapafhankelijk!
-                ku  = klnup(1+ip,L)                                         ! pointer upwind cel horende bij link L
-            
-                if (ku .ne. 0 ) then
-                    kl2s = klnup(2+ip,L) ; kl2 = iabs(kl2s)                 ! 
-            
-                    if (ku < 0) then
-                        waku = quant(itheta,abs(ku))                        ! pointer naar cel negatief?
-                    else
-                        kl1  = ku
-                        sl1  = slnup(1+ip,L) ; sl2  = slnup(2+ip,L)             ! link upwind cell weight
-                        waku  = quant(itheta,kl1)*sl1 + quant(itheta,kl2)*sl2   ! gewogen gemiddelde upwind waarden
-                    endif  
-            
-                    sl3 = slnup(3+ip,L)
-                    cf  =  dtmaxwav*abs(cwuL)*dxi(L)                  
-                    cf  =  half*max( 0d0,1d0-cf )                    
-                    ds2  =  quant(itheta,kd) - quant(itheta,k)        ! ds1 = voorlopende slope, ds2 = eigen slope
-                    ds1  = (quant(itheta,k)  - waku )*sl3
-            
-                    if (abs(ds2)  > eps10 .and. abs(ds1) > eps10) then
-                        ds  =  cf*dslim(ds1, ds2, limtypw)                  ! reconstructie van totale slope volgens 1 van de 4 schema's                                            ! centraal schema
-            
-                        if (abs(ds) > eps10) then                           ! als celgemiddelde niet volstaat
-                            qds      =  ds*fluxvel1                         ! slope * linkse celbijdrage
-                            advec(itheta,kd) =  advec(itheta,kd) - qds        ! downwind cel krijgt bijdrage
-                            advec(itheta,k ) =  advec(itheta,k ) + qds        ! cel verliest bijdrage
-                        endif
-                    endif
-                endif
-            endif
-        enddo ! directions
-    enddo ! links
-    
-    
-!  account for outflow at closed boundaries   
-   do nwalls=1,mxwalls
-     k1 = walls(1,nwalls)     
-     cs =  walls(8,nwalls) ! outward positive
-     sn = -walls(7,nwalls)
-     wuL = walls(9,nwalls)
-     
-     do itheta = 1,ntheta
-         cwuL    = veloc(itheta, k1)*( cs*csx(itheta) + sn*snx(itheta) )   ! *au(L)   met cwi: u1(L) + cg*( csu(L)*csx(itheta) + snu(L)*snx(itheta) )
-         fluxvel1 = cwuL*wuL
-         
-         if ( fluxvel1.gt.0 ) then
-           advec(itheta,k1) = advec(itheta,k1) + fluxvel1*quant(itheta,k1)
-         end if
-      end do
-   end do
-   
-! account for thin dams
-   do nwalls=1,nthd
-     k1 = thindam(1,nwalls)     
-     cs = thindam(5,nwalls) 
-     sn = -thindam(4,nwalls)
-     wuL = thindam(6,nwalls)
-     
-     do itheta = 1,ntheta
-         cwuL    = veloc(itheta, k1)*( cs*csx(itheta) + sn*snx(itheta) )   ! *au(L)   met cwi: u1(L) + cg*( csu(L)*csx(itheta) + snu(L)*snx(itheta) )
-         fluxvel1 = cwuL*wuL
-         
-         if ( fluxvel1.gt.0 ) then
-           advec(itheta,k1) = advec(itheta,k1) + fluxvel1*quant(itheta,k1)
-         end if
-      end do
-   end do
-
-end subroutine advec_horz_windmodel
-
-
-subroutine xbeach_dispersion_windmodel()
-   use m_xbeach_filefunctions
-   use m_flowgeom
-   use m_flow, only: s1, hu
-   use m_flowparameters, only: epshu, epshs
-   use m_sferic, only: pi
-   use m_xbeach_data, only: hdisp, deltaH, H, waveps, sigt, sigmwav, L0t, L1t, Ltempt, cwavt, nwavt, cgwavt, kwavt, cwav, nwav, cgwav, kwav, ee1
-   use m_physcoef, only: ag
-   use m_flowtimes, only: time0
-   use m_flowexternalforcings
-
-   implicit none
-
-   integer                                          :: i,j,j1,j2,k,L,k1,k2,itheta
-   double precision                                 :: kh, hh
-   double precision, external                       :: iteratedispersion
-   
-       
-   do k=1,ndx
-      hh=max(s1(k)-bl(k),epshs)
-      if (hh > epshs) then
-         hdisp(k) = max(hh + deltaH*H(k), waveps)
-         do itheta = 1,ntheta
-            L0t(itheta,k) = 2*pi*ag/(sigt(itheta,k)**2)
-         enddo
-      else
-         hdisp(k) = waveps
-         do itheta=1,ntheta
-            L0t(itheta,k)    = waveps
-         enddo
-      end if
-   enddo
-   L1t=L0t
-   
-   do k=1,ndxi
-      if(hdisp(k).ge.waveps) then
-          do itheta = 1,ntheta
-             if (2*pi/L0t(itheta,k)*hdisp(k) > 5d0) then
-                 Ltempt(itheta,k) = L0t(itheta,k)
-              else
-                 !Ltempt(k) = (2d0*pi*ag/(sigt(itheta,k)**2))*(1-exp(-(sigt(itheta,k)*sqrt(hdisp(k)/ag))**(5d0/2d0)))**(2d0/5d0)
-                 Ltempt(itheta,k) = iteratedispersion(L0t(itheta,k),Ltempt(itheta,k),pi,hdisp(k))
-                 if (Ltempt(itheta,k)<0.d0) then   ! this is an error from iteratedispersion
-                    Ltempt(itheta,k) = -Ltempt(itheta,k)
-                    call writelog('lws','','Warning: no convergence in dispersion relation iteration at t = ', &
-                       time0)
-                 endif
-              endif
-              L1t(itheta,k)=Ltempt(itheta,k)
-          enddo    
-      endif
-   end do
-   
-   do L=1,nbndz
-      k1=kbndz(1,L); k2=kbndz(2,L)
-      do itheta=1,ntheta
-         L1t(itheta,k1) = L1t(itheta,k2)
-      enddo
-   end do
-   
-   do L=1,nbndu
-      k1=kbndu(1,L); k2=kbndu(2,L)
-      do itheta=1,ntheta
-         L1t(itheta,k1) = L1t(itheta,k2)
-      enddo
-   end do
-   
-   do k=1,ndx
-       do itheta=1,ntheta
-         kwavt(itheta,k)  = 2*pi/max(L1t(itheta,k),waveps)
-         cwavt(itheta,k)  = sigt(itheta,k)/kwavt(itheta,k)
-         kh   = min(kwavt(itheta,k)*hdisp(k),10.0d0)
-         nwavt(itheta,k)=0.5d0+kh/max(sinh(2d0*kh),waveps)
-         cgwavt(itheta,k)=cwavt(itheta,k)*nwavt(itheta,k)
-      enddo
-   end do
-   
-   do k=1,ndx
-      hh=s1(k)-bl(k)
-      if (hh<epshs) then
-         do itheta=1,ntheta
-            kwavt(itheta,k)=0d0
-         enddo
-      endif
-   enddo
-   
-   ! define thetabin-energy-weighted average values for propagationspeeds and wave numbers
-   cgwav = max(sum(ee1*cgwavt,1),1d-6)/max(sum(ee1,1),1d-6)
-   cwav  = max(sum(ee1*cwavt,1),1d-6) /max(sum(ee1,1),1d-6)
-   nwav  = max(sum(ee1*nwavt,1),1d-6) /max(sum(ee1,1),1d-6)
-   kwav  = max(sum(ee1*kwavt,1),1d-6) /max(sum(ee1,1),1d-6)
-   
-   end subroutine xbeach_dispersion_windmodel
+!subroutine xbeach_wave_period_breaker_dissipation( Df, E, sigmwav, cgwav, kwav, DtotT)
+!   use m_flowgeom, only: ndx
+!   use m_xbeach_data, only: ndissip, coefdispT, coefdispk
+!   use m_physcoef, only: rhomean, ag
+!   use m_sferic, only: twopi
+!   implicit none
+!
+!   double precision, dimension(ndx)        , intent(in)  :: Df
+!   double precision, dimension(ndx)        , intent(in)  :: E
+!   double precision, dimension(ndx)        , intent(in)  :: sigmwav
+!   double precision, dimension(ndx)        , intent(in)  :: cgwav
+!   double precision, dimension(ndx)        , intent(in)  :: kwav   
+!   double precision, dimension(ndx)        , intent(out) :: DtotT
+!   
+!   DtotT = - coefdispT * tanh(coefdispk * kwav) * 1.d0 /(1.d0 -ndissip) * (twopi) / sigmwav / sigmwav * cgwav * kwav / E * Df              
+!      
+!1234 continue 
+!   return
+!   
+!end subroutine xbeach_wave_period_breaker_dissipation    
+!
+!subroutine xbeach_wave_compute_period_depth_limitation(E, Tmaxdep )
+!   use m_flowgeom, only: ndx
+!   use m_xbeach_data, only: wmagcc, aa1, aa2, bb1, bb2
+!   use m_physcoef, only: rhomean, ag 
+!   
+!   implicit none
+!
+!   double precision, dimension(ndx)        , intent(in)  :: E
+!   double precision, dimension(ndx)        , intent(out) :: Tmaxdep
+!   
+!   integer                                               :: k
+!   integer                                               :: ierr
+!   
+!   double precision, allocatable                         :: Edls(:)
+!   double precision, allocatable                         :: Tdls(:)
+!   
+!   allocate(Edls(1:ndx), Tdls(1:ndx), stat = ierr)
+!   
+!   Edls=ag / rhomean / wmagcc**4d0 * E
+!   Tdls=aa2*(16d0* Edls / (aa1*aa1) )**(bb2/(2*bb1)) 
+!   Tmaxdep = wmagcc * Tdls / ag
+!      
+!1234 continue
+!   deallocate(Edls, Tdls, stat=ierr)  
+!   return   
+! end subroutine xbeach_wave_compute_period_depth_limitation 
+!     
+!   
+! subroutine advec_horz_windmodel(dtmaxwav, snx, csx, limtypw, quant, veloc, advec)
+!   use m_sferic
+!   use m_physcoef
+!   use m_flowgeom
+!   use m_flowparameters, only:eps10
+!   
+!   implicit none
+!   
+!   integer                                                :: L, k, k1, k2, itheta, ku, kl2s, kl2, kl1, kd, is, ip
+!   double precision                                       :: velocL, qds, qst, half, fluxvel1, waku, sl1, sl2, sl3
+!   double precision                                       :: cf, ds2, ds1, ds, cwuL
+!   double precision, intent(in)                           :: dtmaxwav
+!   double precision, intent(in), dimension(ntheta)        :: snx, csx
+!   integer,          intent(in)                           :: limtypw
+!   double precision, intent(in), dimension(ntheta, ndx)   :: veloc
+!   double precision, intent(in), dimension(ntheta,ndx)    :: quant
+!   double precision, intent(out), dimension(ntheta, ndx)  :: advec
+!   double precision, external                             :: dslim
+!   
+!   double precision                                       :: cs, sn, wuL
+!                                                          
+!   integer                                                :: nwalls
+!   
+!   advec = 0d0
+!   do L  = 1,lnx                                                              ! upwind (supq) + limited high order (dsq), loop over link
+!        k1  = ln(1,L) ; k2 = ln(2,L)                                       ! linker en rechtercelnr geassocieerd aan de links
+!        
+!        do itheta = 1,ntheta
+!            velocL  = acL(L)*veloc(itheta,k1) + (1d0-acL(L))*veloc(itheta,k2)
+!            cwuL    = velocL*( csu(L)*csx(itheta) + snu(L)*snx(itheta) )   ! *au(L)   met cwi: u1(L) + cg*( csu(L)*csx(itheta) + snu(L)*snx(itheta) )
+!                                                                           ! inproduct cgx*csu+cgy*snu
+!            if (cwuL > 0) then                                              !   ->      ds1   ds2
+!                k = k1 ; kd = k2 ; is =  1 ; half = 1d0 - acl(L) ; ip = 0   !   ->   ku     k     kd
+!            else                                                            !   <-      ds2   ds1
+!                k = k2 ; kd = k1 ; is = -1 ; half = acl(L)       ; ip = 3   !   <-   kd     k     ku
+!            endif                                                           ! acL = linkse dx fractie van afstand tussen flownodes (slide 83)
+!
+!            fluxvel1  = is*cwuL*wu(L)                                       ! snelheidsbijdrage linkse cel
+!            qst = fluxvel1*quant(itheta,k)                                  ! cg*E voor link L, sector itheta
+!            advec(itheta,kd) = advec(itheta,kd) - qst                       ! downwind cel krijgt bijdrage
+!            advec(itheta,k)  = advec(itheta,k)  + qst                       ! centrale cel verliest bijdrage
+!
+!            if (limtypw > 0 ) then                                          ! hogere orde, tijdstapafhankelijk!
+!                ku  = klnup(1+ip,L)                                         ! pointer upwind cel horende bij link L
+!            
+!                if (ku .ne. 0 ) then
+!                    kl2s = klnup(2+ip,L) ; kl2 = iabs(kl2s)                 ! 
+!            
+!                    if (ku < 0) then
+!                        waku = quant(itheta,abs(ku))                        ! pointer naar cel negatief?
+!                    else
+!                        kl1  = ku
+!                        sl1  = slnup(1+ip,L) ; sl2  = slnup(2+ip,L)             ! link upwind cell weight
+!                        waku  = quant(itheta,kl1)*sl1 + quant(itheta,kl2)*sl2   ! gewogen gemiddelde upwind waarden
+!                    endif  
+!            
+!                    sl3 = slnup(3+ip,L)
+!                    cf  =  dtmaxwav*abs(cwuL)*dxi(L)                  
+!                    cf  =  half*max( 0d0,1d0-cf )                    
+!                    ds2  =  quant(itheta,kd) - quant(itheta,k)        ! ds1 = voorlopende slope, ds2 = eigen slope
+!                    ds1  = (quant(itheta,k)  - waku )*sl3
+!            
+!                    if (abs(ds2)  > eps10 .and. abs(ds1) > eps10) then
+!                        ds  =  cf*dslim(ds1, ds2, limtypw)                  ! reconstructie van totale slope volgens 1 van de 4 schema's                                            ! centraal schema
+!            
+!                        if (abs(ds) > eps10) then                           ! als celgemiddelde niet volstaat
+!                            qds      =  ds*fluxvel1                         ! slope * linkse celbijdrage
+!                            advec(itheta,kd) =  advec(itheta,kd) - qds        ! downwind cel krijgt bijdrage
+!                            advec(itheta,k ) =  advec(itheta,k ) + qds        ! cel verliest bijdrage
+!                        endif
+!                    endif
+!                endif
+!            endif
+!        enddo ! directions
+!    enddo ! links
+!    
+!    
+!!  account for outflow at closed boundaries   
+!   do nwalls=1,mxwalls
+!     k1 = walls(1,nwalls)     
+!     cs =  walls(8,nwalls) ! outward positive
+!     sn = -walls(7,nwalls)
+!     wuL = walls(9,nwalls)
+!     
+!     do itheta = 1,ntheta
+!         cwuL    = veloc(itheta, k1)*( cs*csx(itheta) + sn*snx(itheta) )   ! *au(L)   met cwi: u1(L) + cg*( csu(L)*csx(itheta) + snu(L)*snx(itheta) )
+!         fluxvel1 = cwuL*wuL
+!         
+!         if ( fluxvel1.gt.0 ) then
+!           advec(itheta,k1) = advec(itheta,k1) + fluxvel1*quant(itheta,k1)
+!         end if
+!      end do
+!   end do
+!   
+!! account for thin dams
+!   do nwalls=1,nthd
+!     k1 = thindam(1,nwalls)     
+!     cs = thindam(5,nwalls) 
+!     sn = -thindam(4,nwalls)
+!     wuL = thindam(6,nwalls)
+!     
+!     do itheta = 1,ntheta
+!         cwuL    = veloc(itheta, k1)*( cs*csx(itheta) + sn*snx(itheta) )   ! *au(L)   met cwi: u1(L) + cg*( csu(L)*csx(itheta) + snu(L)*snx(itheta) )
+!         fluxvel1 = cwuL*wuL
+!         
+!         if ( fluxvel1.gt.0 ) then
+!           advec(itheta,k1) = advec(itheta,k1) + fluxvel1*quant(itheta,k1)
+!         end if
+!      end do
+!   end do
+!
+!end subroutine advec_horz_windmodel
+!
+!
+!subroutine xbeach_dispersion_windmodel()
+!   use m_xbeach_filefunctions
+!   use m_flowgeom
+!   use m_flow, only: s1, hu
+!   use m_flowparameters, only: epshu, epshs
+!   use m_sferic, only: pi
+!   use m_xbeach_data, only: hdisp, deltaH, H, waveps, sigt, sigmwav, L0t, L1t, Ltempt, cwavt, nwavt, cgwavt, kwavt, cwav, nwav, cgwav, kwav, ee1
+!   use m_physcoef, only: ag
+!   use m_flowtimes, only: time0
+!   use m_flowexternalforcings
+!
+!   implicit none
+!
+!   integer                                          :: i,j,j1,j2,k,L,k1,k2,itheta
+!   double precision                                 :: kh, hh
+!   double precision, external                       :: iteratedispersion
+!   
+!       
+!   do k=1,ndx
+!      hh=max(s1(k)-bl(k),epshs)
+!      if (hh > epshs) then
+!         hdisp(k) = max(hh + deltaH*H(k), waveps)
+!         do itheta = 1,ntheta
+!            L0t(itheta,k) = 2*pi*ag/(sigt(itheta,k)**2)
+!         enddo
+!      else
+!         hdisp(k) = waveps
+!         do itheta=1,ntheta
+!            L0t(itheta,k)    = waveps
+!         enddo
+!      end if
+!   enddo
+!   L1t=L0t
+!   
+!   do k=1,ndxi
+!      if(hdisp(k).ge.waveps) then
+!          do itheta = 1,ntheta
+!             if (2*pi/L0t(itheta,k)*hdisp(k) > 5d0) then
+!                 Ltempt(itheta,k) = L0t(itheta,k)
+!              else
+!                 !Ltempt(k) = (2d0*pi*ag/(sigt(itheta,k)**2))*(1-exp(-(sigt(itheta,k)*sqrt(hdisp(k)/ag))**(5d0/2d0)))**(2d0/5d0)
+!                 Ltempt(itheta,k) = iteratedispersion(L0t(itheta,k),Ltempt(itheta,k),pi,hdisp(k))
+!                 if (Ltempt(itheta,k)<0.d0) then   ! this is an error from iteratedispersion
+!                    Ltempt(itheta,k) = -Ltempt(itheta,k)
+!                    call writelog('lws','','Warning: no convergence in dispersion relation iteration at t = ', &
+!                       time0)
+!                 endif
+!              endif
+!              L1t(itheta,k)=Ltempt(itheta,k)
+!          enddo    
+!      endif
+!   end do
+!   
+!   do L=1,nbndz
+!      k1=kbndz(1,L); k2=kbndz(2,L)
+!      do itheta=1,ntheta
+!         L1t(itheta,k1) = L1t(itheta,k2)
+!      enddo
+!   end do
+!   
+!   do L=1,nbndu
+!      k1=kbndu(1,L); k2=kbndu(2,L)
+!      do itheta=1,ntheta
+!         L1t(itheta,k1) = L1t(itheta,k2)
+!      enddo
+!   end do
+!   
+!   do k=1,ndx
+!       do itheta=1,ntheta
+!         kwavt(itheta,k)  = 2*pi/max(L1t(itheta,k),waveps)
+!         cwavt(itheta,k)  = sigt(itheta,k)/kwavt(itheta,k)
+!         kh   = min(kwavt(itheta,k)*hdisp(k),10.0d0)
+!         nwavt(itheta,k)=0.5d0+kh/max(sinh(2d0*kh),waveps)
+!         cgwavt(itheta,k)=cwavt(itheta,k)*nwavt(itheta,k)
+!      enddo
+!   end do
+!   
+!   do k=1,ndx
+!      hh=s1(k)-bl(k)
+!      if (hh<epshs) then
+!         do itheta=1,ntheta
+!            kwavt(itheta,k)=0d0
+!         enddo
+!      endif
+!   enddo
+!   
+!   ! define thetabin-energy-weighted average values for propagationspeeds and wave numbers
+!   cgwav = max(sum(ee1*cgwavt,1),1d-6)/max(sum(ee1,1),1d-6)
+!   cwav  = max(sum(ee1*cwavt,1),1d-6) /max(sum(ee1,1),1d-6)
+!   nwav  = max(sum(ee1*nwavt,1),1d-6) /max(sum(ee1,1),1d-6)
+!   kwav  = max(sum(ee1*kwavt,1),1d-6) /max(sum(ee1,1),1d-6)
+!   
+!   end subroutine xbeach_dispersion_windmodel
    
 ! ======================   
 ! Stationary solver
@@ -5823,7 +5829,7 @@ subroutine xbeach_compute_wave_velocities(callType,dhdx,dhdy,dudx,dudy,dvdx,dvdy
             if (hs(k)>epshs) then
                if (wci>0) then                                     ! non-wci: see dispersion
                   cgwav(k) = cgwav(k) + hypot(uwci(k), vwci(k))    ! directions taken into account in advection routine
-                  cwav(k)  = cwav(k)  + hypot(uwci(k), vwci(k))
+                  cwav(k)  = cwav(k)  + hypot(uwci(k), vwci(k))    ! To check: only in wave direction?
                   do itheta=1, ntheta
                      cs = costh(itheta,k)
                      sn = sinth(itheta,k)
@@ -5831,6 +5837,7 @@ subroutine xbeach_compute_wave_velocities(callType,dhdx,dhdy,dudx,dudy,dvdx,dvdy
                                       (cs*(sn*dudx(k)-cs*dudy(k)) + sn*(sn*dvdx(k)-cs*dvdy(k)))
                   enddo
                else
+                  ! cwav, cgwav from dispersion
                   do itheta=1, ntheta
                      cs = costh(itheta,k)
                      sn = sinth(itheta,k)

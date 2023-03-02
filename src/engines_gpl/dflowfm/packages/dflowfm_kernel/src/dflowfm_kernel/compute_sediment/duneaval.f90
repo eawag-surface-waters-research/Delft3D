@@ -62,9 +62,9 @@
          !
          slp = sqrt(e_dzdn(L)*e_dzdn(L)+e_dzdt(L)*e_dzdt(L))
          if (slp>slpmax) then
-            avflux = ba(k1)*ba(k2)/(ba(k1)+ba(k2)) * (bl(k2)-bl(k1) + slpmax*e_dzdn(L)/slp*Dx(L)) * (ac1*frac(k1,lsd) + ac2*frac(k2,lsd)) / avaltime / max(morfac, 1d0)
+            avflux = (bl(k2)-bl(k1) + slpmax*e_dzdn(L)/slp*Dx(L)) * (ac1*frac(k1,lsd) + ac2*frac(k2,lsd)) / avaltime / max(morfac, 1d0)
 
-            maxflux= ba(k1)*ba(k2)/(ba(k1)+ba(k2)) * dzmaxdune / max(morfac,1d0)
+            maxflux=  dzmaxdune / max(morfac,1d0)
 
             if (abs(maxflux) < abs(avflux)) then
                if (avflux > 0 ) then
@@ -74,7 +74,7 @@
                end if
             endif
 
-            avalflux(L, lsd) = avalflux(L,lsd) - avflux*rhosol(lsd)/wu_mor(L)
+            avalflux(L, lsd) = avalflux(L,lsd) - ba(k1)*ba(k2)/(ba(k1)+ba(k2))*avflux*rhosol(lsd)/wu_mor(L)
          end if
       end do
    end do

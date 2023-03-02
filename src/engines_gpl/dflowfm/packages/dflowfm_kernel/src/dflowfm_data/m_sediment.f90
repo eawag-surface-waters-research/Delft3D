@@ -46,7 +46,6 @@ module m_sediment
     real(fp), dimension(:,:), pointer      :: sed      !< sediment concentration
     real(fp), dimension(:), pointer        :: blchg    !< bed level change  [m]
     real(fp), dimension(:), pointer        :: dzbdt    !< bed level change rate [m/s]
-    real(fp), dimension(:,:), pointer      :: sscdtzb  !< account for ssc in shallow cells
     type (message_stack)    , pointer      :: messages
  end type mortmpdummy
  !

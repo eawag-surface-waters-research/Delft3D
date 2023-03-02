@@ -81,7 +81,6 @@
    real(fp), dimension(:),                pointer :: dzbdt         !< Bed level change time rate
    real(fp), dimension(:),                pointer :: uau
    real(fp), dimension(:,:),              pointer :: ws
-   real(fp), dimension(:,:),              pointer :: sscdtzb
 
    real(fp), dimension(:)               , pointer :: ucxq_mor
    real(fp), dimension(:)               , pointer :: ucyq_mor

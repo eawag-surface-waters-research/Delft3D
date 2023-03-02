@@ -41,7 +41,7 @@
    use m_plotdots
    use m_transport
    use m_waves, only: waveparopt, numoptwav
-   use m_xbeach_data,   only: windmodel
+   !use m_xbeach_data,   only: windmodel
    use gridoperations
 
    implicit none
