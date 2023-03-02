@@ -168,7 +168,7 @@ end if
  endif
  volerror = 0d0 ; squ = 0 ; sqi = 0
 
- ispecials = 1
+ ispecials = 0
  call str_lower(md_netfile) ! INTERACTOR!
 
  if (ispecials == 1) then
