@@ -159,6 +159,9 @@ subroutine z_trisol(dischy    ,solver    ,icreep    ,ithisc    , &
     real(fp)                             , pointer :: timhr
     integer                              , pointer :: itnflf
     integer                              , pointer :: itnfli
+    integer                              , pointer :: itnfll
+    integer                              , pointer :: itnflrf
+    integer                              , pointer :: itnflri
     integer                              , pointer :: itiwei
     integer                              , pointer :: itdiag
     integer                              , pointer :: julday
@@ -471,6 +474,7 @@ subroutine z_trisol(dischy    ,solver    ,icreep    ,ithisc    , &
     integer(pntrsize)                    , pointer :: namsrc
     integer(pntrsize)                    , pointer :: tprofc
     integer(pntrsize)                    , pointer :: tprofu
+    integer(pntrsize)                    , pointer :: namcon
     integer                              , pointer :: nrcmp
 
     integer                              , pointer :: rtcact
@@ -538,6 +542,7 @@ subroutine z_trisol(dischy    ,solver    ,icreep    ,ithisc    , &
     integer      :: itemp
     integer      :: itype
     integer      :: n
+    integer      :: nflrwmode
     integer      :: nhystp
     integer      :: nmaxddb
     integer      :: nreal       ! Pointer to real array RCOUSR for UDF particle wind factor parameters 
@@ -635,6 +640,9 @@ subroutine z_trisol(dischy    ,solver    ,icreep    ,ithisc    , &
     timhr               => gdp%gdinttim%timhr
     itnflf              => gdp%gdinttim%itnflf
     itnfli              => gdp%gdinttim%itnfli
+    itnfll              => gdp%gdinttim%itnfll
+    itnflrf             => gdp%gdinttim%itnflrf
+    itnflri             => gdp%gdinttim%itnflri
     itiwei              => gdp%gdinttim%itiwei
     itdiag              => gdp%gdinttim%itdiag
     julday              => gdp%gdinttim%julday
@@ -934,6 +942,7 @@ subroutine z_trisol(dischy    ,solver    ,icreep    ,ithisc    , &
     namsrc              => gdp%gdr_i_ch%namsrc
     tprofc              => gdp%gdr_i_ch%tprofc
     tprofu              => gdp%gdr_i_ch%tprofu
+    namcon              => gdp%gdr_i_ch%namcon
     rtcact              => gdp%gdrtc%rtcact
     rhosol              => gdp%gdsedpar%rhosol
     ifirst              => gdp%gdtrisol%ifirst

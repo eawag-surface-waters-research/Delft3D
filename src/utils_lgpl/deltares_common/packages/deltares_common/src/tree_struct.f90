@@ -768,7 +768,7 @@ subroutine tree_get_data_string( tree, string, success )
       if ( .not. associated(data_ptr) ) then
          return
       endif
-      if ( data_type /= 'STRING' ) then
+      if ( data_type(1:6) /= 'STRING' ) then
          return
       endif
 
@@ -808,7 +808,7 @@ subroutine tree_get_data_alloc_string( tree, string, success )
       if ( .not. associated(data_ptr) ) then
          return
       endif
-      if ( data_type /= 'STRING' ) then
+      if ( data_type(1:6) /= 'STRING' ) then
          return
       endif
 

@@ -152,6 +152,9 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
     integer                              , pointer :: itimtt
     integer                              , pointer :: itnflf
     integer                              , pointer :: itnfli
+    integer                              , pointer :: itnfll
+    integer                              , pointer :: itnflrf
+    integer                              , pointer :: itnflri
     integer                              , pointer :: ittrtu
     integer                              , pointer :: itiwei
     integer                              , pointer :: itdiag
@@ -491,7 +494,6 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
     integer(pntrsize)                    , pointer :: kadu
     integer(pntrsize)                    , pointer :: kadv
     integer(pntrsize)                    , pointer :: kcs
-    integer(pntrsize)                    , pointer :: kcs_nf
     integer(pntrsize)                    , pointer :: kcu
     integer(pntrsize)                    , pointer :: kcv
     integer(pntrsize)                    , pointer :: kfs
@@ -530,6 +532,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
     integer(pntrsize)                    , pointer :: namsrc
     integer(pntrsize)                    , pointer :: tprofc
     integer(pntrsize)                    , pointer :: tprofu
+    integer(pntrsize)                    , pointer :: namcon
     integer(pntrsize)                    , pointer :: ubnd
     integer(pntrsize), dimension(:, :)   , pointer :: nprptr
     integer                              , pointer :: nrcmp
@@ -591,6 +594,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
     integer                 :: imode
     integer                 :: itype
     integer                 :: n
+    integer                 :: nflrwmode
     integer                 :: nhystp
     integer                 :: nmaxddb
     integer                 :: nreal       ! Pointer to real array RCOUSR for UDF particle wind factor parameters 
@@ -697,6 +701,9 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
     itimtt              => gdp%gdinttim%itimtt
     itnflf              => gdp%gdinttim%itnflf
     itnfli              => gdp%gdinttim%itnfli
+    itnfll              => gdp%gdinttim%itnfll
+    itnflrf             => gdp%gdinttim%itnflrf
+    itnflri             => gdp%gdinttim%itnflri
     ittrtu              => gdp%gdinttim%ittrtu
     itiwei              => gdp%gdinttim%itiwei
     itdiag              => gdp%gdinttim%itdiag
@@ -1036,7 +1043,6 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
     kadu                => gdp%gdr_i_ch%kadu
     kadv                => gdp%gdr_i_ch%kadv
     kcs                 => gdp%gdr_i_ch%kcs
-    kcs_nf              => gdp%gdr_i_ch%kcs_nf
     kcu                 => gdp%gdr_i_ch%kcu
     kcv                 => gdp%gdr_i_ch%kcv
     kfs                 => gdp%gdr_i_ch%kfs
@@ -1075,6 +1081,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
     namsrc              => gdp%gdr_i_ch%namsrc
     tprofc              => gdp%gdr_i_ch%tprofc
     tprofu              => gdp%gdr_i_ch%tprofu
+    namcon              => gdp%gdr_i_ch%namcon
     ifirst              => gdp%gdtrisol%ifirst
     nubnd               => gdp%gdtrisol%nubnd
     ubnd                => gdp%gdtrisol%ubnd
@@ -1155,6 +1162,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
                        & r(s1)     ,d(dps)    ,ifirst    ,gdp       )
           endif
        endif
+       !
        ifirst = 0
     endif
     !

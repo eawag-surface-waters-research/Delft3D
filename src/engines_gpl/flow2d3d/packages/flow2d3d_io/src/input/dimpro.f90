@@ -347,11 +347,26 @@ subroutine dimpro(lunmd     ,lundia    ,error     ,nrrec     ,lsts      , &
     !
     ! Near Field computations
     !
-    nflmod = ' '
-    nfl = .false.
+    nflmod            = ' '
+    nfl               = .false.
+    gdp%gdnfl%infile  = ' '
     call prop_get_string(gdp%mdfile_ptr, '*', 'Nflmod', nflmod)
     if (nflmod /= ' ') then
        nfl = .true.
+       call prop_get_string(gdp%mdfile_ptr, '*', 'Filnfl', gdp%gdnfl%infile)
+       if (gdp%gdnfl%infile == ' ') then
+          call prterr(lundia, 'P004', "Cosumo file not specified in mdf-file with keyword 'Filnfl'")
+          call d3stop(1, gdp)
+       endif
+    endif
+    !
+    skipuniqueid = .false.
+    call prop_get(gdp%mdfile_ptr, '*', 'SkipUniqueId', skipuniqueid)
+    !
+    nf_timeout = huge(nf_timeout)
+    call prop_get(gdp%mdfile_ptr, '*', 'NfTimeout', nf_timeout)
+    if (nf_timeout < huge(nf_timeout)) then
+       write (lundia, '(a,f8.1,a)') '*** MESSAGE NfTimeout = ', nf_timeout, ' minutes'
     endif
     !
     ! Fixed gates (CDW): get file name
