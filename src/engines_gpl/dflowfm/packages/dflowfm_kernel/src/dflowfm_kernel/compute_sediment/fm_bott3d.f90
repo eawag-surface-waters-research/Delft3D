@@ -826,11 +826,7 @@
       call reconstructsedtransports()   ! reconstruct cell centre transports for morstats and cumulative st output
       call collectcumultransports()     ! Always needed, written on last timestep of simulation
       !
-      if (stmpar%morpar%moroutput%morstats .and. ti_sed>0d0) then
-         call morstats(dbodsd, hs_mor, ucxq_mor, ucyq_mor, sbcx, sbcy, sbwx, sbwy, sscx, sscy, sswx, sswy)
-      endif
-      !
-      ! Apply erosion and sedimentation to bookkeeping system
+      ! Conditionally exclude specific fractions from erosion and sedimentation
       !
       if (cmpupd) then
          !
@@ -841,6 +837,15 @@
                dbodsd(l, :) = 0.0_fp 
             endif
          enddo
+      endif
+      !
+      if (stmpar%morpar%moroutput%morstats .and. ti_sed>0d0) then
+         call morstats(dbodsd, hs_mor, ucxq_mor, ucyq_mor, sbcx, sbcy, sbwx, sbwy, sscx, sscy, sswx, sswy)
+      endif
+      !
+      ! Apply erosion and sedimentation to bookkeeping system
+      !
+      if (cmpupd) then
          !
          ! Determine new thickness of transport layer
          !
