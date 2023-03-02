@@ -38,6 +38,8 @@
  use m_missing
  use unstruc_display
  use m_transport
+ use m_polygon 
+ use m_netw
  implicit none
  integer          :: nx, ncol, jaall, ITYP
  integer          :: r, L, k1,k2
@@ -51,10 +53,13 @@
        if (ja == 1) exit
     endif
 
-
     k1 = ln (1,L)
     k2 = ln (2,L)
 
+    if (npl >= 2) then 
+       if (kc(k1)*kc(k2) == 0 ) cycle
+    endif
+ 
     if (jaall == 1 .and. wetplot > 0d0) then
        if (hu(L) < wetplot) then !  hs(k1) < wetplot .or. hs(k2) < wetplot) then
            cycle
