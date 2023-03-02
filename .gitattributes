@@ -19624,6 +19624,12 @@ src/utils_lgpl/deltares_common/tests/08_inifiles_dredgedumptest/testcase/rundadt
 src/utils_lgpl/deltares_common/tests/09_system_info/Makefile.am -text
 src/utils_lgpl/deltares_common/tests/09_system_info/main.cpp -text
 src/utils_lgpl/deltares_common/tests/09_system_info/system_info.vcxproj -text
+src/utils_lgpl/deltares_common/tests/10_xml_treetest/corinp_gen2.f90 -text
+src/utils_lgpl/deltares_common/tests/10_xml_treetest/testcase/COSUMOsettings.xml -text
+src/utils_lgpl/deltares_common/tests/10_xml_treetest/testcase/FF2NF_2dis_001_SubMod001_5.000.xml -text
+src/utils_lgpl/deltares_common/tests/10_xml_treetest/testcase/NF2FF_local_001_SubMod002_87960.000_4.xml -text
+src/utils_lgpl/deltares_common/tests/10_xml_treetest/xmlread.sln -text
+src/utils_lgpl/deltares_common/tests/10_xml_treetest/xmlread.vfproj -text
 src/utils_lgpl/deltares_common/tests/Makefile.am -text
 src/utils_lgpl/ec_module/Makefile.am -text
 src/utils_lgpl/ec_module/packages/Makefile.am -text
