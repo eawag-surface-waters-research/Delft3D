@@ -3,13 +3,8 @@
 set(waq_root_path ${CMAKE_CURRENT_SOURCE_DIR}/../..) # Trace back to the WAQ path
 set(waq_version_path ${waq_root_path}/version)
 
-set(ini_version_file ${waq_version_path}/version_number.ini)
-set(fortran_version_file ${CMAKE_CURRENT_SOURCE_DIR}/src/waq_utils/static_version_info.f90)
-
-# Generate version files
-generate_version_files(${fortran_version_file}
-                       ${ini_version_file}
-                       ON)
+set(version_include_dir ${CMAKE_SOURCE_DIR}/../version_includes)
+set(fortran_static_version_file ${CMAKE_CURRENT_SOURCE_DIR}/waq_utils/static_version_info.f90)
 
 # Set directory which contains all source files
 set(src_path src)
@@ -24,13 +19,6 @@ get_fortran_source_files(${waq_utils_path} waq_utils_source)
 set(library_name waq_utils_f)
 add_library(${library_name} ${dlwq_netcdf_source}
                             ${waq_utils_source})
-
-# Define prebuild events
-prebuild_version_number(${library_name} ${fortran_version_file}
-                                        ${checkout_src_root}
-                                        ${ini_version_file}
-                                        ON)
-
 
 # Set dependencies
 set(oss_dependencies_general deltares_common
@@ -63,13 +51,17 @@ endif(WIN32)
 
 oss_include_libraries(${library_name} oss_dependencies)
 
-
 # Set additional compilation properties
 target_compile_options(${library_name} PRIVATE "${qauto_threaded_flags}")
 target_compile_options(${library_name} PRIVATE "${waq_default_flags}")
 
+set_source_files_properties(${fortran_static_version_file}
+                            PROPERTIES COMPILE_OPTIONS "${file_preprocessor_flag}")
+
 target_include_directories(${library_name}  PRIVATE ${mpi_include_path}/
-                                                    "${CMAKE_CURRENT_SOURCE_DIR}/../../include")
+                                                    "${CMAKE_CURRENT_SOURCE_DIR}/../../include"
+                                                    ${version_include_dir}
+                                                    ${waq_version_path})
 
 # Define how the files should be structured in Visual studio
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES  ${dlwq_netcdf_source}

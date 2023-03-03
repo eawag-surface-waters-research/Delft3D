@@ -7,11 +7,7 @@ include_directories(${waq_delftio_include_path})
 set(public_include_path ${waq_delftio_include_path})
 
 # Set version file variables
-set(ini_version_file ${CMAKE_CURRENT_SOURCE_DIR}/include/version_number.ini)
 set(fortran_version_file ${CMAKE_CURRENT_SOURCE_DIR}/src/diof90/delftio_version.F90)
-
-# Generate the F90 version file
-generate_version_files(${fortran_version_file} ${ini_version_file})
 
 # Set directory which contains all source files
 set(src_path src)
