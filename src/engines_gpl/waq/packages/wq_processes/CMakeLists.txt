@@ -6,6 +6,7 @@ set(svn_version_root ${CMAKE_CURRENT_SOURCE_DIR}/../) # Check the SVN revision o
 set(ini_version_file ${CMAKE_CURRENT_SOURCE_DIR}/../../version/version_number.ini)
 set(fortran_version_file ${CMAKE_CURRENT_SOURCE_DIR}/src/wq_processes_version.F90)
 set(rc_version_file ${CMAKE_CURRENT_SOURCE_DIR}/../../version/version_number.rc)
+set(version_include_dir ${CMAKE_SOURCE_DIR}/../version_includes)
 
 # Generate the F90 version files
 generate_version_files(${fortran_version_file}
