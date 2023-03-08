@@ -1,7 +1,7 @@
 module time_module
    !----- LGPL --------------------------------------------------------------------
    !                                                                               
-   !  Copyright (C)  Stichting Deltares, 2011-2022.                                
+   !  Copyright (C)  Stichting Deltares, 2011-2023.                                
    !                                                                               
    !  This library is free software; you can redistribute it and/or                
    !  modify it under the terms of the GNU Lesser General Public                   
@@ -43,7 +43,7 @@ module time_module
    public :: datetime2sec
    public :: sec2ddhhmmss
    public :: ymd2jul, ymd2modified_jul
-   public :: jul2mjd    ! obsolete, but in use in rtc
+   public :: jul2mjd 
    public :: date2mjd   ! obsolete, use ymd2modified_jul
    public :: mjd2date
    public :: duration_to_string
@@ -52,7 +52,11 @@ module time_module
    public :: parse_time
    public :: split_date_time
    public :: CalendarYearMonthDayToJulianDateNumber
-   public :: julian, gregor, offset_modified_jd
+   public :: offset_modified_jd
+   public :: julian, gregor  ! public only for testing in test_time_module.f90
+   public :: datetimestring_to_seconds
+   public :: seconds_to_datetimestring
+
 
    interface ymd2jul
       ! obsolete, use ymd2modified_jul
@@ -243,6 +247,7 @@ module time_module
          if (month>=1 .and. month <= 12 .and. day>=1 .and. year>=1) then
             modified_jul_date = julian(year*10000 + month * 100 + day, 0)
             if (modified_jul_date == -1) return 
+            modified_jul_date = modified_jul_date - offset_modified_jd 
          else
             return
          endif
@@ -268,18 +273,26 @@ module time_module
          integer      , intent(in)  :: year              !< year
          integer      , intent(in)  :: month             !< month
          integer      , intent(in)  :: day               !< day
-         real(kind=hp), intent(out) :: modified_jul_date  !< output modified Julian Date number
+         real(kind=hp), intent(out) :: modified_jul_date !< output modified Julian Date number
          logical                    :: success           !< function result
 
-         integer :: jdn
-
+         integer :: jdn       
+         real(kind=hp) :: jd 
+         
          jdn = CalendarYearMonthDayToJulianDateNumber(year, month, day)
-
+         ! jdn is an integer value (and the result of an integer computation). 
+         ! To compute the Julian date at YYYYMMDDhhmmss as a real number for a moment 
+         ! after 12:00 noon one must add (hh - 12)/24 + mm/1440 + sec/86400 (real divisions). 
+         ! 
+         ! In this function, only calendar days starting at midnight, are assumed. 
+         ! For midnight, exactly 12 hours before noon, one must add (0-12)/24 + 0 + 0 = -0.5
+         jd = real(jdn, hp) - real(0.5, hp)
+         
          if (jdn == 0) then
             modified_jul_date = 0.0_hp
             success = .false.
          else
-            modified_jul_date = real(jdn, hp) - offset_modified_jd
+            modified_jul_date = jd - offset_modified_jd
             success = .true.
          endif
 
@@ -429,7 +442,8 @@ module time_module
          integer :: m      !< helper variable
          integer :: d      !< helper variable
          !
-         ! Calculate Julian day assuming the given month is correct
+         ! Calculate Julian day assuming the given month is correct.
+         ! This is an integer computation, divisions are integer divisions towards zero.
          !
          month1 = (month - 14)/12
          jdn = day - 32075 + 1461*(year + 4800 + month1)/4 &
@@ -848,19 +862,6 @@ module time_module
       end function datetime2mjd
 
 !---------------------------------------------------------------------------------------------
-! private: convert Modified Julian day to Julian day.
-!---------------------------------------------------------------------------------------------
-      function mjd2jul(days,frac) result(jul)
-         implicit none
-         real(kind=hp)          , intent(in)  :: days
-         real(kind=hp), optional, intent(out) :: frac
-         integer                              :: jul
-
-         jul = nint(days+offset_modified_jd) ! juldate whole nr is at 12:00, so round it to get correct day (for times in the night/morning)
-         frac = days+offset_modified_jd-jul
-      end function mjd2jul
-      
-!---------------------------------------------------------------------------------------------
 ! private: convert Julian day to Modified Julian 
 !---------------------------------------------------------------------------------------------
       function jul2mjd(jul,frac) result(days)
@@ -896,7 +897,7 @@ module time_module
          implicit none
          real(kind=hp), intent(in)       :: days
          integer, intent(out)            :: ymd
-         real(kind=hp), intent(out)      :: hms
+         integer, intent(out)            :: hms
          integer       :: year, month, day, hour, minute
          real(kind=hp) :: second
          integer       :: success
@@ -904,7 +905,7 @@ module time_module
          success = 0
          if (mjd2datetime(days,year,month,day,hour,minute,second)==0) return
          ymd = year*10000 + month*100 + day
-         hms = hour*10000 + minute*100 + second
+         hms = nint(hour*10000 + minute*100 + second)
          success = 1
       end function mjd2ymdhms
 
@@ -914,16 +915,28 @@ module time_module
          integer,  intent(out)      :: year, month, day
          integer,  intent(out)      :: hour, minute
          real(kind=hp), intent(out) :: second
-         real(kind=hp) :: dayfrac
-         integer       :: jul
-         integer       :: success
+         real(kind=hp) :: mjd, dayfrac
+         real(kind=hp) :: jul
+         integer       :: success, ntry
 
          success = 0
-         jul = mjd2jul(days,dayfrac)
-         call JulianDateNumberToCalendarYearMonthDay(jul,year,month,day)
-         hour = int(dayfrac*24)
-         minute = int(mod(dayfrac*24*60,60.d0))
-         second = mod(dayfrac*24*60*60,60.d0)
+         ntry = 1
+         mjd = days
+         do while (ntry <= 2)
+            jul = mjd + offset_modified_jd
+            dayfrac = mjd - floor(mjd)         
+            hour = int(dayfrac*24)
+            minute = int(mod(dayfrac*1440,60._hp))
+            second = mod(dayfrac*86400,60._hp)            
+            if (nint(second) >= 60) then
+               ! add less than 0.5 second to mjd (1/86400 = 1.157E-5) and retry
+               mjd = mjd + 0.000005_hp
+               ntry = ntry + 1
+            else 
+               exit
+            endif
+         enddo
+         call JulianDateNumberToCalendarYearMonthDay(nint(jul),year,month,day)
          success = 1
       end function mjd2datetime
 
@@ -1040,7 +1053,73 @@ module time_module
               ok = (iPart == nParts)
          enddo
       end function parse_time
+      
+      !> Given datetime string, compute time in seconds from refdat
+     subroutine datetimestring_to_seconds(dateandtime,refdat,timsec,stat)
+         implicit none
 
+         character,         intent(in)  :: dateandtime*(*) !< Input datetime string, format '201201010000', note that seconds are ignored.
+         character (len=8), intent(in)  :: refdat          !< reference date
+         integer,           intent(out) :: stat
+ 
+
+         double precision              :: timmin
+         double precision, intent(out) :: timsec
+
+         integer          :: iday ,imonth ,iyear ,ihour , imin, isec
+         integer          :: ierr
+
+         stat = 0
+         read(dateandtime( 1:4 ),'(i4)'  ,iostat=ierr) iyear
+         if (ierr /= 0) goto 999
+         read(dateandtime( 5:6 ),'(i2.2)',iostat=ierr) imonth
+         if (ierr /= 0) goto 999
+         read(dateandtime( 7:8 ),'(i2.2)',iostat=ierr) iday
+         if (ierr /= 0) goto 999
+         read(dateandtime( 9:10),'(i2.2)',iostat=ierr) ihour
+         if (ierr /= 0) goto 999
+         read(dateandtime(11:12),'(i2.2)',iostat=ierr) imin
+         if (ierr /= 0) goto 999
+         read(dateandtime(13:14),'(i2.2)',iostat=ierr) isec
+         if (ierr /= 0) goto 999
+         
+         call seconds_since_refdat(iyear, imonth, iday, ihour, imin, isec, refdat, timsec)
+
+         timmin  = timsec/60d0
+         !timmin = (jul - jul0)*24d0*60d0      + ihour*60d0      + imin
+
+         return
+999      continue
+         stat = ierr
+         return
+     end subroutine datetimestring_to_seconds
+      
+     !> Given time in seconds from refdat, fill dateandtime string
+     !! NOTE: seconds_to_datetimestring and datetimestring_to_seconds are not compatible, because of minutes versus seconds, and different format string.
+     subroutine seconds_to_datetimestring(dateandtime,refdat,tim)
+         implicit none
+
+         character,        intent(out) :: dateandtime*(*) !< Output datetime string, format '20000101_000000', note: includes seconds.
+         double precision, intent(in)  :: tim             !< Input time in seconds since refdat.
+        character (len=8), intent(in)  :: refdat          !< reference date
+
+         integer          :: iday, imonth, iyear, ihour, imin, isec
+
+         dateandtime = '20000101_000000'
+         ! TODO: AvD: seconds_to_datetimestring and datetimestring_to_seconds are now inconsistent since the addition of this '_'
+
+         call datetime_from_refdat(tim, refdat, iyear, imonth, iday, ihour, imin, isec)
+
+         write(dateandtime( 1:4 ),'(i4)')   iyear
+         write(dateandtime( 5:6 ),'(i2.2)') imonth
+         write(dateandtime( 7:8 ),'(i2.2)') iday
+         write(dateandtime(10:11),'(i2.2)') ihour
+         write(dateandtime(12:13),'(i2.2)') imin
+         write(dateandtime(14:15),'(i2.2)') isec
+
+         return
+     end subroutine seconds_to_datetimestring
+ 
       DOUBLE PRECISION FUNCTION JULIAN ( IDATE , ITIME )
 !***********************************************************************
 !
@@ -1123,7 +1202,7 @@ module time_module
          TEMP1  = FLOAT ( IHOUR ) * 3600.0 + &
                   FLOAT ( IMIN  ) *   60.0 + &
                   FLOAT ( ISEC  ) - 43200.0
-         JULIAN = TEMP2 + ( TEMP1 / 86400.0 ) - offset_modified_jd
+         JULIAN = TEMP2 + ( TEMP1 / 86400.0 )
       ELSE
          TEMP1  = INT (( IMONTH-14.0) / 12.0 )
          TEMP2  = IDAY - 32075.0 + &
@@ -1134,7 +1213,7 @@ module time_module
          TEMP1  = FLOAT ( IHOUR ) * 3600.0 + &
                   FLOAT ( IMIN  ) *   60.0 + &
                   FLOAT ( ISEC  ) - 43200.0
-         JULIAN = TEMP2 + ( TEMP1 / 86400.0 ) - offset_modified_jd
+         JULIAN = TEMP2 + ( TEMP1 / 86400.0 )
       ENDIF
   999 RETURN
       END FUNCTION JULIAN

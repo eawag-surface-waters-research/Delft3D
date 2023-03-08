@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !
-!  Copyright (C)  Stichting Deltares, 2017-2022.
+!  Copyright (C)  Stichting Deltares, 2017-2023.
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).
 !
 !  Delft3D is free software: you can redistribute it and/or modify
@@ -58,6 +58,7 @@ module bmi
   use m_fm_erosed, only: taucr, tetacr
   use m_heatfluxes, only: Qsunmap
   use m_longculverts
+  use m_VolumeTables, only: vltb, vltbonlinks, ndx1d
 
   implicit none
 
@@ -774,6 +775,12 @@ subroutine get_var_type(c_var_name, c_type)  bind(C, name="get_var_type")
       type_name = "double"
    case("TcrEro", "TcrSed", "tem1Surf")
       type_name = "double"
+   case('vltb')
+      type_name = "type(t_voltable)"
+   case('vltbOnLinks')
+      type_name = "type(t_voltable)"
+   case('network')
+      type_name = "type(t_network)"
    end select
 
    if (numconst > 0) then
@@ -954,6 +961,13 @@ subroutine get_var_shape(c_var_name, shape) bind(C, name="get_var_shape")
    case("laterals")
 	   shape(1) = numlatsg
 	   shape(2) = 1
+   case('vltb')
+      shape(1) = ndx1d
+   case('vltbOnLinks')
+      shape(1) = 2
+      shape(2) = ndx1d
+   case('network')
+      shape(1) = 1 
    end select
 
    include "bmi_get_var_shape.inc"
@@ -1034,6 +1048,7 @@ subroutine get_var(c_var_name, x) bind(C, name="get_var")
    use m_alloc
    use string_module
    use m_cell_geometry ! TODO: UNST-1705: temp, replace by m_flowgeom
+   use unstruc_channel_flow, only: network
 
    character(kind=c_char), intent(in) :: c_var_name(*) !< Variable name. May be slash separated string "name/item/field": then get_compound_field is called.
    type(c_ptr), intent(inout) :: x
@@ -1212,7 +1227,12 @@ subroutine get_var(c_var_name, x) bind(C, name="get_var")
          endif
       enddo
       x = c_loc(TcrSed)
-
+   case('vltb')
+      x = c_loc(vltb)
+   case('vltbOnLinks')
+      x = c_loc(vltbOnLinks)
+   case('network')
+      x = c_loc(Network)
    end select
 
    ! Try to parse variable name as slash-separated id (e.g., 'weirs/Lith/crest_level')

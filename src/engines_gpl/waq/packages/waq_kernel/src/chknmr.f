@@ -1,4 +1,4 @@
-!!  Copyright (C)  Stichting Deltares, 2012-2022.
+!!  Copyright (C)  Stichting Deltares, 2012-2023.
 !!
 !!  This program is free software: you can redistribute it and/or modify
 !!  it under the terms of the GNU General Public License version 3,
@@ -21,7 +21,7 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-      subroutine chknmr ( lunrep , mypart , noseg  , owners  , iknmrk )
+      subroutine chknmr ( lunrep , noseg  , iknmrk )
 !
 !     Deltares
 !
@@ -37,9 +37,7 @@
       use timers
       implicit none
       integer, intent(in)    :: lunrep         ! unit number of output file
-      integer, intent(in)    :: mypart         ! identification number of processor
       integer, intent(in)    :: noseg          ! number of segments
-      integer, intent(in)    :: owners(noseg)  ! ownership array
 
       integer, intent(inout) :: iknmrk(noseg)  ! property array
 !
@@ -66,22 +64,6 @@
 !
       icount = 0
       do iseg = 1, noseg
-         if (owners(iseg).ne.mypart) then
-!
-!           Segment does not belong to current subdomain
-!            - reset 1st digit
-!            - maintain 2nd digit
-!            - copy original 1st digit to 3rd digit
-!            - set 4th digit to 0
-!
-            var1 = 0
-            var2 = mod((iknmrk(iseg)/10),10)
-            var3 = mod( iknmrk(iseg)    ,10)
-            var4 = 0
-            iknmrk(iseg) = var1 + 10*var2 + 100*var3 + 1000*var4
-            icount = icount + 1
-         else
-!
 !           Segment belongs to current subdomain
 !            - maintain 1st digit
 !            - maintain 2nd digit
@@ -92,8 +74,7 @@
             var2 = mod((iknmrk(iseg)/10),10)
             var3 = mod( iknmrk(iseg)    ,10)
             var4 = 1
-            iknmrk(iseg) = var1 + 10*var2 + 100*var3 + 1000*var4
-         end if
+      iknmrk(iseg) = var1 + 10*var2 + 100*var3 + 1000*var4
       end do
       if ( icount .gt. 0 ) then
          write(lunrep ,*) 'number of changes in feature array', icount

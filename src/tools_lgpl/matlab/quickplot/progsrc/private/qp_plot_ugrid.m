@@ -3,7 +3,7 @@ function [hNew,Thresholds,Param,Parent] = qp_plot_ugrid(hNew,Parent,Param,data,O
 
 %----- LGPL --------------------------------------------------------------------
 %
-%   Copyright (C) 2011-2022 Stichting Deltares.
+%   Copyright (C) 2011-2023 Stichting Deltares.
 %
 %   This library is free software; you can redistribute it and/or
 %   modify it under the terms of the GNU Lesser General Public
@@ -63,11 +63,7 @@ elseif isfield(data,'TRI')
 elseif isfield(data,'Connect')
     data.FaceNodeConnect = data.Connect;
     data = rmfield(data,'Connect');
-else
-    data.FaceNodeConnect = [];
 end
-FaceNodeConnect = data.FaceNodeConnect;
-nc = size(FaceNodeConnect,2);
 if isfield(data,'XYZ')
     data.X = data.XYZ(:,:,:,1);
     data.Y = data.XYZ(:,:,:,2);
@@ -102,7 +98,7 @@ switch NVal
                     if isfield(data,'EdgeNodeConnect')
                         EdgeNodeConnect = data.EdgeNodeConnect;
                     else
-                        EdgeNodeConnect = fnc2enc(FaceNodeConnect);
+                        EdgeNodeConnect = fnc2enc(data.FaceNodeConnect);
                     end
                     %
                     xy = EdgeNodeConnect(:,[1 2 2])';

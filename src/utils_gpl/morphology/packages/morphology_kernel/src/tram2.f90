@@ -10,7 +10,7 @@ subroutine tram2 (numrealpar,realpar   ,wave      ,i2d3d     ,npar      , &
                 & message   )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2011-2022.                                     
+!  Copyright (C)  Stichting Deltares, 2011-2023.                                     
 !                                                                               
 !  This program is free software: you can redistribute it and/or modify         
 !  it under the terms of the GNU General Public License as published by         
@@ -184,7 +184,6 @@ subroutine tram2 (numrealpar,realpar   ,wave      ,i2d3d     ,npar      , &
     real(fp) :: zusus
     real(fp) :: phi_phase
     real(fp) :: r
-    real(fp) :: uw_lt
 !
 !! executable statements -------------------------------------------------------
 !
@@ -233,6 +232,7 @@ subroutine tram2 (numrealpar,realpar   ,wave      ,i2d3d     ,npar      , &
     wform  = int(par(19))
     ! NOTE ADDING PARAMETERS HERE INFLUENCES SANTOSS PARAMETERS AS WELL: numbers in santoss.f90 continue from here!
     !
+    tp = max(tp, 1e-2_fp)
     drho  = (rhosol-rhowat) / rhowat
     !
     if (di50 < 1.5_fp*dsand) then
@@ -256,7 +256,7 @@ subroutine tram2 (numrealpar,realpar   ,wave      ,i2d3d     ,npar      , &
                  & i2d3d     ,mudfrac   ,fsilt     ,taucr1    ,psi       , &
                  & dzduu     ,dzdvv     ,eps       ,camax     ,iopsus    , &
                  & ag        ,wave      ,tauadd    ,gamtcr    ,betam     , &
-                 & awb       ,wform     ,phi_phase ,r         ,uw_lt     ) 
+                 & awb       ,wform     ,phi_phase ,r         ) 
     realpar(RP_DSS)   = real(dss    ,hp)
     !
     ! Find bottom cell for SAND sediment calculations and store for use
@@ -409,7 +409,7 @@ subroutine tram2 (numrealpar,realpar   ,wave      ,i2d3d     ,npar      , &
                         & dzduu     ,dzdvv     ,rhowat    ,ag        ,bedw      , &
                         & pangle    ,fpco      ,susw      ,wave      ,eps       , &
                         & subiw     ,vcr       ,error     ,message   ,wform     , &
-                        & r         ,phi_phase ,uw_lt     )
+                        & r         ,phi_phase ,uwbih     )
            ! van Rijn (2004) specific output
            par     = missing_value
            par( 1) = tauc

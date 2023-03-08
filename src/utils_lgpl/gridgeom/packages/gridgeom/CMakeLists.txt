@@ -98,7 +98,11 @@ set_target_properties (${library_name} PROPERTIES FOLDER utils_lgpl/gridgeom)
 # because CMake then gives an error when trying to replace the static library artifacts from the gridgeom project
 # Another solution would be to split gridgeom and gridgeom_dll in two separate components with their own CMakeLists.txt
 if(WIN32)
-    SET(library_renamed ${CMAKE_BINARY_DIR}/gridgeom/$<CONFIG>/gridgeom.dll)
+    if (CMAKE_GENERATOR MATCHES "Visual Studio") # for visual studio
+      SET(library_renamed ${CMAKE_BINARY_DIR}/gridgeom/$<CONFIG>/gridgeom.dll)
+    else() # for Ninja generator on Windows
+      SET(library_renamed ${CMAKE_BINARY_DIR}/gridgeom/gridgeom.dll)
+    endif()
     ADD_CUSTOM_COMMAND(TARGET gridgeom_dll POST_BUILD
                        COMMAND ${CMAKE_COMMAND} -E rename
                            $<TARGET_FILE:${library_name}>

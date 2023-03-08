@@ -154,9 +154,6 @@
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
 			<FileConfiguration Name="Release|Win32" ExcludedFromBuild="true">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File></Filter>
-		<Filter Name="mod_timings">
-		<File RelativePath=".\src\mod_timings\m_timers_waq.f90"/>
-		<File RelativePath=".\src\mod_timings\m_timings.f90"/></Filter>
 		<Filter Name="waq_utils">
 		<File RelativePath=".\src\waq_utils\cnvper.f"/>
 		<File RelativePath=".\src\waq_utils\cnvtim.f"/>

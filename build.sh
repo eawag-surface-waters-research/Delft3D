@@ -25,6 +25,8 @@ function print_usage_info {
     echo "- dimr"
     echo "- tests"
     echo "- swan"
+    echo "- delft3d4"
+    echo "- flow2d3d"
     echo
     echo "Options:"
     echo "-p, --prepareonly"
@@ -167,7 +169,7 @@ prepareonly=0
 mode=quiet
 config=
 generator="Unix Makefiles"
-compiler=intel18
+compiler=intel21
 buildtype=Release
 buildDirExtension=""
 
@@ -220,6 +222,14 @@ case $key in
     ;;
     swan)
     config="swan"
+    shift
+    ;;
+    delft3d4)
+    config="delft3d4"
+    shift
+    ;;
+    flow2d3d)
+    config="flow2d3d"
     shift
     ;;
     --debug)

@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !
-!  Copyright (C)  Stichting Deltares, 2017-2022.
+!  Copyright (C)  Stichting Deltares, 2017-2023.
 !
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).
 !
@@ -219,6 +219,7 @@
  double precision                  :: slotw1D           !< minimum slotwidth 1D
 
  integer                           :: jaconveyance2D    !< 1 : yes, 0 : no
+ integer                           :: jaconveyance3D=0  !< 1 : yes, 0 : no
  integer                           :: nums1it           !<   : nr of non-linear continuity iterations
  integer                           :: nums1mit          !<   : nr of non-linear continuity iterations outer loop ic nested
  integer                           :: isimplefixedweirs !< 1=only links stored, 0=complete crossection paths stored
@@ -359,7 +360,7 @@ integer                            :: javau3onbnd = 0   !< vert. adv. u1 bnd Upw
 
  integer                           :: javatest          !< vert. adv. keps : test, 0 = no
 
- integer                           :: jaimplicitfallvelocity=0 !< fallvelocity implicit 1/0 
+ integer                           :: jaimplicitfallvelocity=1 !< fallvelocity implicit 1=yes, 0=no 
 
  integer                           :: jahazlayer        !< vertical treatment of horizontal advection in z layers 1=org, 2=sigma, 3=node volumes
 
@@ -380,6 +381,8 @@ integer                            :: javau3onbnd = 0   !< vert. adv. u1 bnd Upw
  integer                           :: jatransportautotimestepdiff = 0 ! Auto Timestep in Transport module, 0 = limitation of diffusion, but no limitation of time-step due to diffusion, 1 = no limitation of diffusion, but limitation of time step due to diffusion, 2: no limitation of diffusion and no limitation of time step due to diffusion
 
  integer                           :: implicitdiffusion2D = 0 ! Auto Timestep in Transport module, 0 = limitation of diffusion, but no limitation of time-step due to diffusion, 1 = no limitation of diffusion, but limitation of time step due to diffusion, 2: no limitation of diffusion and no limitation of time step due to diffusion
+
+ integer                           :: jadiagnostictransport = 0 ! Switch for diagnostic ("frozen") transport, 0 = prognostic transport, 1 = diagnostic transport
 
  integer                           :: jaexplicitsinks = 1
 
@@ -490,6 +493,8 @@ integer                            :: javau3onbnd = 0   !< vert. adv. u1 bnd Upw
  integer                           :: jamaptaucurrent           !< shear stress to map file, 0: no, 1: yes
  integer                           :: jamapz0                   !< roughness heights to map file, 0: no, 1: yes
  integer                           :: jamapchezy                !< chezy to map file, 0: no, 1: yes
+ integer                           :: jamap_chezy_elements      !< chezy roghness in flow elements to map file, 0: no, 1: yes
+ integer                           :: jamap_chezy_links         !< chezy roghness on flow links to map file, 0: no, 1: yes
  integer                           :: jamapsal                  !< salinity to map file, 0: no, 1: yes
  integer                           :: jamaptem                  !< temperature to map file, 0: no, 1: yes
  integer                           :: jamapcali                 !< roughness calibration factors to map file, 0: no, 1: yes
@@ -506,6 +511,7 @@ integer                            :: javau3onbnd = 0   !< vert. adv. u1 bnd Upw
  integer                           :: jamaprho                  !< flow density to map file, 0: no, 1: yes
  integer                           :: jamapq1                   !< flow flux to map file, 0: no, 1: yes
  integer                           :: jamapq1main               !< main channel flow flux to map file, 0: no, 1: yes
+ integer                           :: jamapfw                   !< fixed weir energy loss to map file, 0: no, 1: yes
  integer                           :: jamapspir                 !< spiral flow to map file, 0: no, 1: yes
  integer                           :: jamaptidep                !< tidal potential to map file, 0: no, 1: yes
  integer                           :: jamapselfal               !< self attraction and loading potential to map file, 0: no, 1: yes
@@ -962,7 +968,9 @@ subroutine default_flowparameters()
     jamapnumlimdt = 1
     jamaptaucurrent = 1
     jamapz0 = 0
-    jamapchezy = 1
+    jamapchezy = 0
+    jamap_chezy_elements = 0
+    jamap_chezy_links    = 0
     jamapsal = 1
     jamaptem = 1
     jamapconst = 1
@@ -979,6 +987,7 @@ subroutine default_flowparameters()
     jamaprho = 1
     jamapq1  = 1
     jamapq1main = 0
+    jamapfw   = 0
     jamapspir = 1
     jamaptidep = 1
     jamapselfal = 1

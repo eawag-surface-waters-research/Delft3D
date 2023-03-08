@@ -15,7 +15,7 @@ function Out = qpfopen(varargin)
 
 %----- LGPL --------------------------------------------------------------------
 %                                                                               
-%   Copyright (C) 2011-2022 Stichting Deltares.                                     
+%   Copyright (C) 2011-2023 Stichting Deltares.                                     
 %                                                                               
 %   This library is free software; you can redistribute it and/or                
 %   modify it under the terms of the GNU Lesser General Public                   
@@ -43,5 +43,6 @@ function Out = qpfopen(varargin)
 %   $HeadURL$
 %   $Id$
 
+finalversion
 [Out,FileName,Tp] = qp_fmem('open',varargin{:});
 Out.QP_FileType = Tp;

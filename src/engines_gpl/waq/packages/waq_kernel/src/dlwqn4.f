@@ -1,4 +1,4 @@
-!!  Copyright (C)  Stichting Deltares, 2012-2022.
+!!  Copyright (C)  Stichting Deltares, 2012-2023.
 !!
 !!  This program is free software: you can redistribute it and/or modify
 !!  it under the terms of the GNU General Public License version 3,
@@ -44,7 +44,6 @@
 !     SUBROUTINES CALLED : DLWQTR, user transport routine
 !                          PROCES, DELWAQ proces system
 !                          DLWQO2, DELWAQ output system
-!                          DLWQPP, user postprocessing routine
 !                          DLWQ13, system postpro-dump routine
 !                          DLWQ14, scales waterquality
 !                          DLWQ15, wasteload routine
@@ -75,8 +74,6 @@
 !
       use grids
       use timers
-      use m_timers_waq
-      use m_couplib
       use delwaq2_data
       use m_openda_exchange_items, only : get_openda_buffer
       use waqmem          ! module with the more recently added arrays
@@ -256,8 +253,7 @@
      &                 a(ileng) , a(iconc) , a(idisp) , a(icons) , a(iparm) ,
      &                 a(ifunc) , a(isfun) , a(idiff) , a(ivelo) , itime    ,
      &                 idt      , c(isnam) , nocons   , nofun    , c(icnam) ,
-     &                 c(ipnam) , c(ifnam) , c(isfna) , ldummy   , ilflag   ,
-     &                 npartp   )
+     &                 c(ipnam) , c(ifnam) , c(isfna) , ldummy   , ilflag   )
 
 !jvb     Temporary ? set the variables grid-setting for the DELWAQ variables
 
@@ -293,7 +289,7 @@
      &                 j(ivtda) , j(ivdag) , j(ivtag) , j(ivagg) , j(iapoi) ,
      &                 j(iaknd) , j(iadm1) , j(iadm2) , j(ivset) , j(ignos) ,
      &                 j(igseg) , novar    , a        , nogrid   , ndmps    ,
-     &                 c(iprna) , intsrt   , j(iowns) , j(iownq) , mypart   ,
+     &                 c(iprna) , intsrt   ,
      &                 j(iprvpt), j(iprdon), nrref    , j(ipror) , nodef    ,
      &                 surface  , lun(19)  )
 
@@ -344,7 +340,7 @@
      +              C(IBTYP), J(INTYP), C(ICNAM), NOQ     , J(IXPNT),
      +              INTOPT  , C(IPNAM), C(IFNAM), C(ISFNA), J(IDMPB),
      +              NOWST   , NOWTYP  , C(IWTYP), J(IWAST), J(INWTYP),
-     +              A(IWDMP), iknmkv  , J(IOWNS), MYPART  , isegcol )
+     +              A(IWDMP), iknmkv  , isegcol )
 
 !        zero cummulative array's
 
@@ -354,7 +350,7 @@
      &                    a(idmpq), a(idmps), noraai  , imflag  , ihflag  ,
      &                    a(itrra), ibflag  , nowst   , a(iwdmp))
          endif
-         if (mypart.eq.1) call write_progress( dlwqd%progress )
+         call write_progress( dlwqd%progress )
 
 !          simulation done ?
 
@@ -364,8 +360,7 @@
 !          add processes
 
          call dlwq14 ( a(iderv), notot   , nosss   , itfact  , a(imas2),
-     &                 idt     , iaflag  , a(idmps), intopt  , j(isdmp),
-     &                 j(iowns), mypart )
+     &                 idt     , iaflag  , a(idmps), intopt  , j(isdmp))
 
 !     get new volumes
          itimel = itime
@@ -383,7 +378,7 @@
      &                       j(inrha), j(inrh2), j(inrft), noseg   , a(ivoll),
      &                       j(ibulk), lchar   , ftype   , isflag  , ivflag  ,
      &                       updatr  , j(inisp), a(inrsp), j(intyp), j(iwork),
-     &                       lstrec  , lrewin  , a(ivol2), mypart  , dlwqd   )
+     &                       lstrec  , lrewin  , a(ivol2), dlwqd   )
                if ( lrewin ) call move ( a(ivol2), a(ivoll) , noseg   )
                call dlwqf8 ( noseg   , noq     , j(ixpnt), idt     , iknmkv  ,
      &                       a(ivol ), a(iflow), a(ivoll), a(ivol2))
@@ -395,7 +390,7 @@
      &                       j(inrha), j(inrh2), j(inrft), noseg   , a(ivol2),
      &                       j(ibulk), lchar   , ftype   , isflag  , ivflag  ,
      &                       updatr  , j(inisp), a(inrsp), j(intyp), j(iwork),
-     &                       lstrec  , lrewin  , a(ivoll), mypart  , dlwqd   )
+     &                       lstrec  , lrewin  , a(ivoll), dlwqd   )
          end select
 
 !        update the info on dry volumes with the new volumes
@@ -412,7 +407,7 @@
      &                 j(inwtyp), j(iwast) , iwstkind , a(iwste) , a(iderv) ,
      &                 iknmkv   , nopa     , c(ipnam) , a(iparm) , nosfun   ,
      &                 c(isfna ), a(isfun) , j(isdmp) , a(idmps) , a(imas2) ,
-     &                 a(iwdmp) , 1        , notot    , j(iowns ), mypart   )
+     &                 a(iwdmp) , 1        , notot     )
 
 
 !        explicit part of the transport step, derivative
@@ -428,7 +423,7 @@
 
          call dlwq42 ( nosys   , notot   , nototp  , noseg   , a(ivol2),
      &                 surface , a(imass), a(iconc), a(iderv), idt     ,
-     &                 ivflag  , lun(19) , j(iowns), mypart  )
+     &                 ivflag  , lun(19)  )
 
 !        performs the implicit part of the transport step
 
@@ -453,7 +448,7 @@
 !          update the necessary arrays
 
          call dlwq44 ( nosys   , notot   , noseg   , a(ivol2), a(imass),
-     &                 a(iconc), a(iderv), j(iowns), mypart  )
+     &                 a(iconc), a(iderv) )
 
 !     calculate closure error
          if ( lrewin .and. lstrec ) then
@@ -472,8 +467,7 @@
      *              A(LVELO), A(ICONC), A(IBOUN), J(LXPNT), NOSYS   ,
      *              NOTOT   , LNOQ    , NDDIM   , NVDIM   , J(IDPNW),
      *              J(IVPNW), INTOPT  , IDT     , ILFLAG  , A(IDMPQ),
-     *              NDMPQ   , J(LQDMP), 0       , NOQ3    , J(IOWNS),
-     *              MYPART  )
+     *              NDMPQ   , J(LQDMP), 0       , NOQ3    )
 
 !          integrate the fluxes at dump segments fill ASMASS with mass
 
@@ -493,7 +487,6 @@
 
 !         close files, except monitor file
 
-          call timer_start(timer_close)
           call CloseHydroFiles( dlwqd%collcoll )
           call close_files( lun )
 
@@ -501,7 +494,6 @@
 
           CALL DLWQ13 ( LUN      , LCHAR , A(ICONC) , ITIME , C(IMNAM) ,
      *                  C(ISNAM) , NOTOT , NOSEG    )
-          call timer_stop(timer_close)
       endif
 
  9999 if ( timon ) call timstop ( ithandl )

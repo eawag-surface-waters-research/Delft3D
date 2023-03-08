@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2022.                                
+!  Copyright (C)  Stichting Deltares, 2017-2023.                                
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -105,15 +105,15 @@
  double precision, allocatable     :: thrtt(:)          !< temp array for Thatcher-Harleman return time readout, stores return times
  integer,          allocatable     :: thrtn(:)          !< temp array for Thatcher-Harleman return time readout, stores cell indices (first one)
 
- integer                           :: nzbnd             !< number of waterlevel boundary segments
- integer                           :: nbndz             !< waterlevel boundary points dimension
+ integer, target                   :: nzbnd             !< number of waterlevel boundary segments
+ integer, target                   :: nbndz             !< waterlevel boundary points dimension
  double precision, allocatable     :: xbndz(:)          !< waterlevel boundary points xcor
  double precision, allocatable     :: ybndz(:)          !< waterlevel boundary points ycor
  double precision, allocatable, target :: zbndz(:)      !< [m] waterlevel boundary points function  {"location": "edge", "shape": ["nbndz"]}
  double precision, allocatable     :: zbndz0(:)         !< waterlevel boundary points function
  double precision, allocatable     :: xy2bndz(:,:)      !< waterlevel boundary 'external tolerance point'
  integer         , allocatable     :: kdz  (:)          !< waterlevel boundary points temp array
- integer         , allocatable     :: kbndz(:,:)        !< waterlevel boundary points index array
+ integer         , allocatable, target :: kbndz(:,:)        !< waterlevel boundary points index array
                                                         !! 1,* = index in s1 boundary point
                                                         !! 2,* = index in s1 first point on the inside
                                                         !! 3,* = index in u1 of their connecting link (always positive to the inside)

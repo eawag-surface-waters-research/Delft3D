@@ -1,4 +1,4 @@
-!!  Copyright (C)  Stichting Deltares, 2012-2022.
+!!  Copyright (C)  Stichting Deltares, 2012-2023.
 !!
 !!  This program is free software: you can redistribute it and/or modify
 !!  it under the terms of the GNU General Public License version 3,
@@ -226,7 +226,7 @@
       vertical_upwind = .not. btest(iopt,18)
 
       if ( init .eq. 0 ) then
-         write ( lunut, '(A)' ) ' Using local flexible time step method (scheme 24 - beta functionality)'
+         write ( lunut, '(A)' ) ' Using local flexible time step method (scheme 24)'
          if ( vertical_upwind ) then
             write ( lunut, '(A)' ) ' Using upwind discretisation for vertical advection.'
          else

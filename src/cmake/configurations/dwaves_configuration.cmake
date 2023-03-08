@@ -1,5 +1,3 @@
-project(dwaves)
-
 # Wave modules
 # ============
 add_subdirectory(${checkout_src_root}/${wave_data_module} wave_data)
@@ -101,3 +99,6 @@ if(UNIX)
     # install
     add_subdirectory(${checkout_src_root}/${install_wave_module} install_wave)
 endif()
+
+# Project name must be at the end of the configuration: it might get a name when including other configurations and needs to overwrite that
+project(dwaves)

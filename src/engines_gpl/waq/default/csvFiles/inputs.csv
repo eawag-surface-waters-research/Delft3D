@@ -17853,3 +17853,4 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "RadioSub3 ","HalflifeR3",   2,"N","x",1
 "RadioSub3 ","AtommassR3",   3,"N","x",1
 "AgeCART   ","WaterSrc  ",   1,"N","x",1
+"AgeCART   ","WaterAge  ",   2,"N","x",1

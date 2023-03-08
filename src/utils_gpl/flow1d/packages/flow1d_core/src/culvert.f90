@@ -1,7 +1,7 @@
 module m_Culvert
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2021.                                
+!  Copyright (C)  Stichting Deltares, 2017-2023.                                
 !                                                                               
 !  This program is free software: you can redistribute it and/or modify              
 !  it under the terms of the GNU Affero General Public License as               
@@ -134,9 +134,7 @@ contains
       double precision               :: inflowCrest         !< zc_1 (at upstream water level)
       double precision               :: outflowCrest        !< zc_2 (at downstream water level)
       double precision               :: du
-      double precision               :: fr
       double precision               :: gl_thickness
-      double precision               :: dummy
       double precision               :: dpt                 !< upstream water depth
       double precision               :: openingfac
       double precision               :: valveOpening

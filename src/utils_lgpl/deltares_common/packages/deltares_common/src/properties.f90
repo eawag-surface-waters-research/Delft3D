@@ -1,7 +1,7 @@
 module properties
 !----- LGPL --------------------------------------------------------------------
 !
-!  Copyright (C)  Stichting Deltares, 2011-2022.
+!  Copyright (C)  Stichting Deltares, 2011-2023.
 !
 !  This library is free software; you can redistribute it and/or
 !  modify it under the terms of the GNU Lesser General Public
@@ -1159,16 +1159,18 @@ end subroutine node_unvisit
 !!    Convert it to integer.
 !!
 !!  Comments on this line:
+!!    Only after integer if valuesfirst = .true., otherwise:
 !!    Value is set with the first integer found behind the character "=".
 !!    The following example is allowed:
 !!    IntegerIn = Index 8, denoting the startpoint for searches
-subroutine prop_get_integer(tree, chapter, key, value, success)
+subroutine prop_get_integer(tree, chapter, key, value, success, valuesfirst)
     implicit none
-    type(tree_data)  , pointer       :: tree    !< The property tree
-    integer          , intent(inout) :: value   !< Value of the key (not set if the key is not found, so you can set a default value)
-    character(*)     , intent(in)    :: chapter !< Name of the chapter (case-insensitive) or "*" to get any key
-    character(*)     , intent(in)    :: key     !< Name of the key (case-insensitive)
-    logical, optional, intent(out)   :: success !< Whether successful or not (optional)
+    type(tree_data)  , pointer       :: tree        !< The property tree
+    integer          , intent(inout) :: value       !< Value of the key (not set if the key is not found, so you can set a default value)
+    character(*)     , intent(in)    :: chapter     !< Name of the chapter (case-insensitive) or "*" to get any key
+    character(*)     , intent(in)    :: key         !< Name of the key (case-insensitive)
+    logical, optional, intent(out)   :: success     !< Whether successful or not (optional)
+    logical, optional, intent(in)    :: valuesfirst !< Whether value should be specified before any comments (optional)
     !
     ! Local variables
     !
@@ -1177,7 +1179,7 @@ subroutine prop_get_integer(tree, chapter, key, value, success)
     !! executable statements -------------------------------------------------------
     !
     valuearray(1) = value
-    call prop_get_integers(tree   ,chapter   ,key       ,valuearray,1, success)
+    call prop_get_integers(tree   ,chapter   ,key       ,valuearray,1, success, valuesfirst)
     value = valuearray(1)
 end subroutine prop_get_integer
 
@@ -1190,10 +1192,11 @@ end subroutine prop_get_integer
 !!    only valuelength integers are set in value
 !!
 !!  Comments on this line:
+!!    Only after valuelength integers if valuesfirst = .true., otherwise:
 !!    Everywhere behind the character "=".
 !!    The following example is allowed:
 !!    IntegersIn = (n,m): 4,5
-subroutine prop_get_integers(tree, chapter, key, value, valuelength, success)
+subroutine prop_get_integers(tree, chapter, key, value, valuelength, success, valuesfirst)
     implicit none
     type(tree_data)      , pointer       :: tree         !< The property tree
     integer              , intent(in)    :: valuelength  !< Size of the array value
@@ -1201,6 +1204,7 @@ subroutine prop_get_integers(tree, chapter, key, value, valuelength, success)
     character(*)         , intent(in)    :: chapter      !< Name of the chapter (case-insensitive) or "*" to get any key
     character(*)         , intent(in)    :: key          !< Name of the key (case-insensitive)
     logical, optional    , intent(out)   :: success      !< Whether successful or not (optional)
+    logical, optional    , intent(in)    :: valuesfirst  !< Whether values should be specified before any comments (optional)
     !
     ! Local variables
     !
@@ -1210,74 +1214,97 @@ subroutine prop_get_integers(tree, chapter, key, value, valuelength, success)
     integer :: valcount
     integer :: ierr
     character(12)  :: intchars = '0123456789-+'
+    character(2)   :: spacechars = ' '//achar(9)
     character(20)  :: fmt
     character(255) :: avalue
     character(len=:), allocatable :: prop_value
-
-    allocate(character(maxlen)::prop_value)
+    logical         :: valuesfirst_
 
     !
     !! executable statements -------------------------------------------------------
     !
-    prop_value(1:maxlen) = ' '
-    call prop_get_string(tree, chapter, key, prop_value, success)
+    call prop_get_alloc_string(tree, chapter, key, prop_value, success)
+    if (.not. allocated(prop_value)) prop_value = ' '
+    if (present(valuesfirst)) then
+        valuesfirst_ = valuesfirst
+    else
+        valuesfirst_ = .false.
+    endif
     !
     ! Extract the integer part
     ! Using read(prop_value,*,iostat=io) (value(i),i=1,valuelength)
     ! Has another behaviour as the following implementation:
     !
     do valcount = 1, valuelength
-       !
-       ! Remove everything before the first integer
-       !
-       k = 0
-       do i = 1, len_trim(prop_value)
-          k = index(intchars, prop_value(i:i))
-          if (k>0) exit
-       enddo
-       !
-       ! k=0: no integer found
-       !
-       if (k == 0) return
-       prop_value = prop_value(i:len(prop_value))
-       !
-       ! Move the first integer to avalue
-       !
-       do i = 1, len(prop_value)
-          k = index(intchars, prop_value(i:i))
-          if (k==0) exit
-       enddo
-       avalue = prop_value(1:i - 1)
-       prop_value = prop_value(i:len(prop_value))
-       length = len_trim(avalue)
-       if (length/=0) then
-          write (fmt, '(a,i5,a)') '(i', length, ')'
-          read (avalue, fmt, iostat=ierr) value(valcount)
-          if (ierr /= 0) then
-             if (present(success)) then
-                success = .false.
+       do
+          !
+          ! Remove everything before the first integer
+          !
+          k = 0
+          do i = 1, len_trim(prop_value)
+             k = index(intchars, prop_value(i:i))
+             if (k>0) exit
+             if (valuesfirst_ .and. index(spacechars, prop_value(i:i)) == 0) then
+                if (present(success)) then
+                   success = .false.
+                endif
+                return
              endif
-             return
+          enddo
+          !
+          ! k=0: no integer found
+          !
+          if (k == 0) return
+          prop_value = prop_value(i:len(prop_value))
+          !
+          ! Move the first integer to avalue
+          !
+          do i = 1, len(prop_value)
+             k = index(intchars, prop_value(i:i))
+             if (k==0) exit
+          enddo
+          avalue = prop_value(1:i - 1)
+          prop_value = prop_value(i:len(prop_value))
+          length = len_trim(avalue)
+          if (length/=0) then
+             write (fmt, '(a,i5,a)') '(i', length, ')'
+             read (avalue, fmt, iostat=ierr) value(valcount)
+             if (ierr /= 0) then
+                if (present(success)) then
+                   success = .false.
+                endif
+                return
+             endif
+             exit
+          else
+             if (valuesfirst_) then
+                if (present(success)) then
+                   success = .false.
+                endif
+                return
+             endif
           endif
-       endif
+       enddo
     enddo
 end subroutine prop_get_integers
 
 !> Get the real value for a property
-!!              Use prop_get_string to get the string value.
-!!              Convert it to real.
+!!    Use prop_get_string to get the string value.
+!!    Convert it to real.
 !!
 !!  Comments on this line:
-!!              Value is set with the first real found behind the character "=".
-!!              The following example is allowed:
-!!              RealIn = Gravity 9.8, m/s*2
-subroutine prop_get_real(tree, chapter, key, value, success)
+!!    Only after real if valuesfirst = .true., otherwise:
+!!    Value is set with the first real found behind the character "=".
+!!    The following example is allowed:
+!!    RealIn = Gravity 9.8, m/s*2
+subroutine prop_get_real(tree, chapter, key, value, success, valuesfirst)
     implicit none
-    type(tree_data)  , pointer       :: tree !< The property tree
-    real             , intent(inout) :: value !< Value of the key (not set if the key is not found, so you can set a default value)
-    character(*)     , intent(in)    :: chapter !< Name of the chapter (case-insensitive) or "*" to get any key
-    character(*)     , intent(in)    :: key !< Name of the key (case-insensitive)
-    logical, optional, intent(out)   :: success !< Whether successful or not (optional)
+    type(tree_data)  , pointer       :: tree        !< The property tree
+    real             , intent(inout) :: value       !< Value of the key (not set if the key is not found, so you can set a default value)
+    character(*)     , intent(in)    :: chapter     !< Name of the chapter (case-insensitive) or "*" to get any key
+    character(*)     , intent(in)    :: key         !< Name of the key (case-insensitive)
+    logical, optional, intent(out)   :: success     !< Whether successful or not (optional)
+    logical, optional, intent(in)    :: valuesfirst !< Whether value should be specified before any comments (optional)
     !
     ! Local variables
     !
@@ -1286,23 +1313,24 @@ subroutine prop_get_real(tree, chapter, key, value, success)
     !! executable statements -------------------------------------------------------
     !
     valuearray(1) = value
-    call prop_get_reals(tree, chapter, key, valuearray, 1, success)
+    call prop_get_reals(tree, chapter, key, valuearray, 1, success, valuesfirst)
     value = valuearray(1)
 end subroutine prop_get_real
 
 !> Get the array of real values for a property
-!!     Use prop_get_string to get the string value.
-!!     Convert it to reals.
-!!     If the string contains less reals than valuelength,
-!!     only the reals found are set in value.
-!!     If the string contains more reals than valuelength,
-!!     only valuelength reals are set in value
+!!    Use prop_get_string to get the string value.
+!!    Convert it to reals.
+!!    If the string contains less reals than valuelength,
+!!    only the reals found are set in value.
+!!    If the string contains more reals than valuelength,
+!!    only valuelength reals are set in value
 !!
 !!  Comments on this line:
-!!     Everywhere behind the character "=".
-!!     The following example is allowed:
-!!     RealsIn = (x,y): 4.5,5.9 Start point
-subroutine prop_get_reals(tree, chapter, key, value, valuelength, success)
+!!    Only after valuelength reals if valuesfirst = .true., otherwise:
+!!    Everywhere behind the character "=".
+!!    The following example is allowed:
+!!    RealsIn = (x,y): 4.5,5.9 Start point
+subroutine prop_get_reals(tree, chapter, key, value, valuelength, success, valuesfirst)
     implicit none
     type(tree_data)   , pointer        :: tree         !< The property tree
     integer           , intent (in)    :: valuelength  !< Size of the array value
@@ -1310,6 +1338,7 @@ subroutine prop_get_reals(tree, chapter, key, value, valuelength, success)
     character(*)      , intent (in)    :: chapter      !< Name of the chapter (case-insensitive) or "*" to get any key
     character(*)      , intent (in)    :: key          !< Name of the key (case-insensitive)
     logical, optional , intent (out)   :: success      !< Whether successful or not (optional)
+    logical, optional , intent(in)     :: valuesfirst  !< Whether values should be specified before any comments (optional)
     !
     ! Local variables
     !
@@ -1319,17 +1348,22 @@ subroutine prop_get_reals(tree, chapter, key, value, valuelength, success)
     integer         :: valcount
     integer         :: ierr
     character(15)   :: realchars = '0123456789-+.eE'
+    character(2)    :: spacechars = ' '//achar(9)
     character(20)   :: fmt
     character(255)  :: avalue
     character(len=:), allocatable :: prop_value
     logical         :: digitfound
-
-    allocate(character(maxlen)::prop_value)
+    logical         :: valuesfirst_
     !
     !! executable statements -------------------------------------------------------
     !
-    prop_value(1:maxlen) = ' '
-    call prop_get_string(tree, chapter, key, prop_value, success)
+    call prop_get_alloc_string(tree, chapter, key, prop_value, success)
+    if (.not. allocated(prop_value)) prop_value = ' '
+    if (present(valuesfirst)) then
+        valuesfirst_ = valuesfirst
+    else
+        valuesfirst_ = .false.
+    endif
     !
     ! Extract the real part
     ! Using read(prop_value,*,iostat=io) (value(i),i=1,valuelength)
@@ -1347,6 +1381,12 @@ subroutine prop_get_reals(tree, chapter, key, value, valuelength, success)
           do i = 1, length
              k = index(realchars, prop_value(i:i))
              if (k>0) exit
+             if (valuesfirst_ .and. index(spacechars, prop_value(i:i)) == 0) then
+                if (present(success)) then
+                   success = .false.
+                endif
+                return
+             endif
           enddo
           !
           ! k=0: no real found
@@ -1378,6 +1418,13 @@ subroutine prop_get_reals(tree, chapter, key, value, valuelength, success)
                 return
              endif
              exit
+          else
+             if (valuesfirst_) then
+                if (present(success)) then
+                   success = .false.
+                endif
+                return
+             endif
           endif
        enddo
     enddo
@@ -1388,16 +1435,18 @@ end subroutine prop_get_reals
 !!    Convert it to a double precision real.
 !!
 !!  Comments on this line:
+!!    Only after the double if valuesfirst = .true., otherwise:
 !!    Value is set with the first real found behind the character "=".
 !!    The following example is allowed:
 !!    RealIn = Gravity 9.8, m/s*2
-subroutine prop_get_double(tree, chapter, key, value, success)
+subroutine prop_get_double(tree, chapter, key, value, success, valuesfirst)
     implicit none
-    type(tree_data)  , pointer       :: tree    !< The property tree
-    real(kind=dp)    , intent(inout) :: value   !< Value of the key (not set if the key is not found, so you can set a default value)
-    character(*)     , intent(in)    :: chapter !< Name of the chapter (case-insensitive) or "*" to get any key
-    character(*)     , intent(in)    :: key     !< Name of the key (case-insensitive)
-    logical, optional, intent(out)   :: success !< Whether successful or not (optional)
+    type(tree_data)  , pointer       :: tree        !< The property tree
+    real(kind=dp)    , intent(inout) :: value       !< Value of the key (not set if the key is not found, so you can set a default value)
+    character(*)     , intent(in)    :: chapter     !< Name of the chapter (case-insensitive) or "*" to get any key
+    character(*)     , intent(in)    :: key         !< Name of the key (case-insensitive)
+    logical, optional, intent(out)   :: success     !< Whether successful or not (optional)
+    logical, optional, intent(in)    :: valuesfirst !< Whether value should be specified before any comments (optional)
     !
     ! Local variables
     !
@@ -1406,7 +1455,7 @@ subroutine prop_get_double(tree, chapter, key, value, success)
     !! executable statements -------------------------------------------------------
     !
     valuearray(1) = value
-    call prop_get_doubles(tree, chapter, key, valuearray, 1, success)
+    call prop_get_doubles(tree, chapter, key, valuearray, 1, success, valuesfirst)
     value = valuearray(1)
 end subroutine prop_get_double
 
@@ -1416,13 +1465,14 @@ end subroutine prop_get_double
 !!    If the string contains less reals than valuelength,
 !!    only the reals found are set in value.
 !!    If the string contains more reals than valuelength,
-!!    only valuelength reals are set in value
+!!    only valuelength reals are set in value.
 !!
-!! Comments on this line:
+!!  Comments on this line:
+!!    Only after valuelength doubles if valuesfirst = .true., otherwise:
 !!    Everywhere behind the character "=".
 !!    The following example is allowed:
 !!    RealsIn = (x,y): 4.5,5.9 Start point
-subroutine prop_get_doubles(tree, chapter, key, value, valuelength, success)
+subroutine prop_get_doubles(tree, chapter, key, value, valuelength, success, valuesfirst)
     implicit none
     type(tree_data)            , pointer       :: tree        !< The property tree
     integer                    , intent(in)    :: valuelength !< Size of the array value
@@ -1430,6 +1480,7 @@ subroutine prop_get_doubles(tree, chapter, key, value, valuelength, success)
     character(*)               , intent(in)    :: chapter     !< Name of the chapter (case-insensitive) or "*" to get any key
     character(*)               , intent(in)    :: key         !< Name of the key (case-insensitive)
     logical, optional          , intent(out)   :: success     !< Whether successful or not (optional)
+    logical, optional          , intent(in)    :: valuesfirst !< Whether values should be specified before any comments (optional)
     !
     ! Local variables
     !
@@ -1439,16 +1490,23 @@ subroutine prop_get_doubles(tree, chapter, key, value, valuelength, success)
     integer         :: valcount
     integer         :: ierr
     character(17)   :: realchars = '0123456789-+.eEdD'
+    character(2)    :: spacechars = ' '//achar(9)
     character(20)   :: fmt
     character(255)  :: avalue
     character(len=:), allocatable :: prop_value
     logical         :: digitfound
+    logical         :: valuesfirst_
 
     !
     !! executable statements -------------------------------------------------------
     !
     call prop_get_alloc_string(tree, chapter, key, prop_value, success)
     if (.not. allocated(prop_value)) prop_value = ' '
+    if (present(valuesfirst)) then
+        valuesfirst_ = valuesfirst
+    else
+        valuesfirst_ = .false.
+    endif
     !
     ! Extract the real part
     ! Using read(prop_value,*,iostat=io) (value(i),i=1,valuelength)
@@ -1466,6 +1524,12 @@ subroutine prop_get_doubles(tree, chapter, key, value, valuelength, success)
           do i = 1, length
              k = index(realchars, prop_value(i:i))
              if (k>0) exit
+             if (valuesfirst_ .and. index(spacechars, prop_value(i:i)) == 0) then
+                if (present(success)) then
+                   success = .false.
+                endif
+                return
+             endif
           enddo
           !
           ! k=0: no real found
@@ -1497,6 +1561,13 @@ subroutine prop_get_doubles(tree, chapter, key, value, valuelength, success)
                 return
              endif
              exit
+          else
+             if (valuesfirst_) then
+                if (present(success)) then
+                   success = .false.
+                endif
+                return
+             endif
           endif
        enddo
     enddo
@@ -1530,8 +1601,6 @@ subroutine prop_get_logical(tree, chapter, key, value, success)
     character(100) :: falsity
     character(100) :: truth
     character(len=:), allocatable :: prop_value
-
-    allocate(character(maxlen)::prop_value)
     !
     data truth/    &
      & '|1|Y|y|YES|yes|Yes|T|t|TRUE|true|True|J|j|JA|Ja|ja|W|w|WAAR|Waar|waar|'/
@@ -1540,9 +1609,8 @@ subroutine prop_get_logical(tree, chapter, key, value, success)
     !
     !! executable statements -------------------------------------------------------
     !
-    prop_value(1:maxlen) = ' '
-    call prop_get_string(tree, chapter, key, prop_value, success)
-    prop_value = adjustl(prop_value)
+    call prop_get_alloc_string(tree, chapter, key, prop_value, success)
+    if (.not. allocated(prop_value)) prop_value = ' '
     if (prop_value(1:1) == '.') prop_value = prop_value(2:)
     vallength = len_trim(prop_value)
     !

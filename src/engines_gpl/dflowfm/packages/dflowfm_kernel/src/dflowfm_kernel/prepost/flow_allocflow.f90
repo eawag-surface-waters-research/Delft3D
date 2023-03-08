@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2022.                                
+!  Copyright (C)  Stichting Deltares, 2017-2023.                                
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -149,7 +149,8 @@
  allocate ( laymx(mxlaydefs)   , stat= ierr      )
  call aerr('laymx(mxlaydefs)'  , ierr, mxlaydefs )
 
- if (layertype >= 2) then    
+ if (layertype >= 2) then   
+    if (allocated(nlaybn)) deallocate(nlaybn, nrlayn) 
     allocate ( nlaybn(ndx) , stat= ierr) ; nlaybn = 0
     call aerr('nlaybn(ndx)', ierr, ndx)
     allocate ( nrlayn(ndx) , stat= ierr) ; nrlayn = 0
@@ -864,8 +865,9 @@ endif
     endif
  endif
 
-
- if (jsferic == 1) then
+ if (jsferic == 0) then 
+    jatidep = 0 ; jaselfal = 0
+ else if (jatidep > 0 .or. jaselfal > 0) then
     if (allocated (tidep) ) deallocate(tidep)
     if ( allocated(tidef) ) deallocate(tidef)
     if ( allocated(s1init) ) deallocate(s1init)
@@ -873,22 +875,20 @@ endif
 !      also store SAL potential
        allocate ( tidep (2,ndx) , stat = ierr)
        call aerr('tidep (2,ndx)', ierr, 2*ndx) ; tidep = 0
+       if ( jaSELFALcorrectWLwithIni.eq.1 ) then
+          allocate(s1init(Ndx), stat=ierr)
+          call aerr('s1init(Ndx)', ierr, Ndx)
+          s1init = 0d0
+       endif
     else
        allocate ( tidep (1,ndx) , stat = ierr)
        call aerr('tidep (1,ndx)', ierr,   ndx) ; tidep = 0
     end if
 
-    if ( jatidep.eq.1 .or. jaselfal.gt.0 ) then
-       allocate(tidef(Lnx), stat=ierr)
-       call aerr('tidef(Lnx)', ierr, Lnx)
-       tidef = 0d0
-    end if
-
-    if ( jaselfal.gt.0 .and. jaSELFALcorrectWLwithIni.eq.1 ) then
-       allocate(s1init(Ndx), stat=ierr)
-       call aerr('s1init(Ndx)', ierr, Ndx)
-       s1init = 0d0
-    end if
+    allocate(tidef(Lnx), stat=ierr)
+    call aerr('tidef(Lnx)', ierr, Lnx)
+    tidef = 0d0
+ 
  endif
 
 
@@ -946,6 +946,7 @@ endif
  if (allocated(u1))       deallocate(u1)
  if (allocated(q1))       deallocate(q1)
  if (allocated(qa))       deallocate(qa)
+ if (allocated(map_fixed_weir_energy_loss)) deallocate(map_fixed_weir_energy_loss)
  if (allocated(v))        deallocate(v)
  if (allocated(ucxu))     deallocate(ucxu)
  if (allocated(ucyu))     deallocate(ucyu)
@@ -983,6 +984,8 @@ endif
  call aerr('q1   (lnkx)' , ierr , lnkx )  ; q1    = 0
  allocate ( qa   (lnkx)  , stat = ierr)
  call aerr('qa   (lnkx)' , ierr , lnkx )  ; qa    = 0
+ allocate (  map_fixed_weir_energy_loss(lnkx)  , stat = ierr)
+ call aerr(' map_fixed_weir_energy_loss(lnkx)' , ierr , lnkx )  ;  map_fixed_weir_energy_loss(:) = 0
  allocate ( v    (lnkx)  , stat = ierr)
  call aerr('v    (lnkx)' , ierr , lnkx )  ; v     = 0
  allocate ( ucxu (lnkx)  , stat = ierr)
@@ -1038,10 +1041,12 @@ endif
     call aerr('cftrt(numl,3)'   , ierr, numl)   ; cftrt   = 0
  end if
 
- if (jamapchezy > 0) then
+ if (jamap_chezy_elements > 0) then
     if (allocated (czs) ) deallocate(czs)
     allocate ( czs(ndx)    , stat=ierr)
     call aerr('czs(ndx)'   , ierr, ndx)   ; czs   = 0
+ end if
+ if (jamap_chezy_links > 0) then
     if (allocated (czu) ) deallocate(czu)
     allocate ( czu(lnx)    , stat=ierr)
     call aerr('czu(lnx)'   , ierr, lnx)   ; czu   = 0

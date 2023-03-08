@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2022.                                
+!  Copyright (C)  Stichting Deltares, 2017-2023.                                
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -35,6 +35,7 @@ module unstruc_files
 
 use unstruc_messages
 use unstruc_version_module
+use time_module, only : seconds_to_datetimestring
 
 implicit none
 
@@ -140,7 +141,8 @@ end subroutine close_all_files
 function defaultFilename(filecat, timestamp, prefixWithDirectory, allowWildcard)
     use unstruc_model
     use m_flowtimes
-    use string_module, only: get_dirsep
+    use time_module,   only : seconds_to_datetimestring
+    use string_module, only : get_dirsep
     implicit none
     
     character(len=*), intent(in)  :: filecat             !< File category for which the filename is requested, e.g. 'obs', 'map', 'hyd'.
@@ -338,7 +340,7 @@ function defaultFilename(filecat, timestamp, prefixWithDirectory, allowWildcard)
 
     if (present(timestamp)) then
         dateandtime = '_'
-        call maketime(dateandtime(2:), timestamp)
+        call seconds_to_datetimestring(dateandtime(2:), refdat, timestamp)
     else
         dateandtime = ' '
     end if

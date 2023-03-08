@@ -1,7 +1,7 @@
 module wave_main
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2011-2022.                                
+!  Copyright (C)  Stichting Deltares, 2011-2023.                                
 !                                                                               
 !  This program is free software: you can redistribute it and/or modify         
 !  it under the terms of the GNU General Public License as published by         
@@ -195,6 +195,7 @@ function wave_master_init(mode_in, mdw_file) result(retval)
    ! Read mdw file
    !
    call read_swan(mdw_file, swan_run, wavedata)
+   !
    n_swan_grids = swan_run%nnest
    if (wavedata%mode/=stand_alone .and. swan_run%flowgridfile/=' ') then
       swan_run%nttide = 1

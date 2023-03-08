@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2022.                                
+!  Copyright (C)  Stichting Deltares, 2017-2023.                                
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -321,7 +321,7 @@
                            endif
                         endif
                      endif
-                     e_scrn(Lx,l) = -cumflux / wu(Lx)
+                     e_scrn(Lx,l) = -suscorfac * cumflux / wu(Lx)
                      !
                      ! bedload will be reduced in case of sediment transport
                      ! over a non-erodible layer (no sediment in bed) in such
@@ -825,6 +825,19 @@
       !
       call reconstructsedtransports()   ! reconstruct cell centre transports for morstats and cumulative st output
       call collectcumultransports()     ! Always needed, written on last timestep of simulation
+      !
+      ! Conditionally exclude specific fractions from erosion and sedimentation
+      !
+      if (cmpupd) then
+         !
+         ! exclude specific fractions if cmpupdfrac has been set
+         !
+         do l = 1, lsedtot
+           if (.not. cmpupdfrac(l)) then
+               dbodsd(l, :) = 0.0_fp 
+            endif
+         enddo
+      endif
       !
       if (stmpar%morpar%moroutput%morstats .and. ti_sed>0d0) then
          call morstats(dbodsd, hs_mor, ucxq_mor, ucyq_mor, sbcx, sbcy, sbwx, sbwy, sscx, sscy, sswx, sswy)

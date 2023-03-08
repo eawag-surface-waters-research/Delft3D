@@ -1,12 +1,12 @@
 subroutine inchki(lundia    ,error     ,runid     ,sferic    ,filrgf    , &
                 & dx        ,dy        ,anglat    ,anglon    ,grdang    , &
-                & tgfcmp    ,riglid    , &
+                & tgfcmp    ,riglid    ,keva      , &
                 & temeqs    ,saleqs    ,ktemp     ,fclou     , &
                 & sarea     ,roumet    ,rouflo    ,restid    , &
                 & lturi     ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2011-2022.                                
+!  Copyright (C)  Stichting Deltares, 2011-2023.                                
 !                                                                               
 !  This program is free software: you can redistribute it and/or modify         
 !  it under the terms of the GNU General Public License as published by         
@@ -164,6 +164,7 @@ subroutine inchki(lundia    ,error     ,runid     ,sferic    ,filrgf    , &
 !
 ! Global variables
 !
+    integer       :: keva   !  Description and declaration in tricom.igs
     integer       :: ktemp  !  Description and declaration in tricom.igs
     integer       :: lturi  !  Description and declaration in tricom.igs
     integer       :: lundia !  Description and declaration in inout.igs
@@ -547,5 +548,10 @@ subroutine inchki(lundia    ,error     ,runid     ,sferic    ,filrgf    , &
        call mirror_bnd(1       ,gdp%d%nub-gdp%d%nlb+1,gdp%d%nmmax     , &
                      & i(kcs)  ,duneheight           ,gdp%d%nmlb      ,gdp%d%nmub      )
     endif
+    !
+    ! Allocate and initialize arrays for output of heatfluxes
+    !
+    call init_out_heatfluxes(lundia, ktemp, keva, nostat, gdp)
+    !
  9999 continue
 end subroutine inchki

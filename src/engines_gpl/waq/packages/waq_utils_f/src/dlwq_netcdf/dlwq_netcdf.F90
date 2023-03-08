@@ -1,4 +1,4 @@
-!!  Copyright (C)  Stichting Deltares, 2012-2022.
+!!  Copyright (C)  Stichting Deltares, 2012-2023.
 !!
 !!  This program is free software: you can redistribute it and/or modify
 !!  it under the terms of the GNU General Public License version 3,
@@ -178,12 +178,12 @@ integer function dlwqnc_find_meshes_by_att( ncid, varid2d, type_ugrid, varid1d, 
       else
          cycle
       endif
-      
+
       topology_dimension = 0
       ierror = nf90_inquire_attribute( ncid, ivar, 'topology_dimension')
       if ( ierror /= nf90_noerr .and. ierror /= nf90_enotatt ) then
          return
-      elseif ( ierror == nf90_noerr ) then ! 
+      elseif ( ierror == nf90_noerr ) then !
          ierror = nf90_get_att( ncid, ivar, 'topology_dimension', topology_dimension )
          if ( ierror /= nf90_noerr ) then
             return
@@ -731,16 +731,12 @@ recursive function dlwqnc_copy_associated( ncidin, ncidout, meshidin, meshidout,
         !       Should you require NetCDF 3, then use the commented call to nf90_def_var
         !       instead.
         !
-#ifdef NetCDF4
         if ( ncopt(4) == 1 .and. ncopt(2) /= 0 ) then
             ierror = nf90_def_var( ncidout, trim(varname), xtype, dimids(1:ndims), newvarid, &
                          deflate_level = dlwqnc_deflate )
         else
             ierror = nf90_def_var( ncidout, trim(varname), xtype, dimids(1:ndims), newvarid )
         endif
-#else
-        ierror = nf90_def_var( ncidout, trim(varname), xtype, dimids(1:ndims), newvarid )
-#endif
         if ( ierror /= nf90_noerr ) then
             dlwqnc_result = ierror
             return
@@ -766,7 +762,7 @@ recursive function dlwqnc_copy_associated( ncidin, ncidout, meshidin, meshidout,
             case( nf90_double )
                 ierror = dlwqnc_copy_double_var( ncidin,  ncidout, oldvarid, newvarid, ndims, dimids, dimsizes )
             case ( nf90_char )
-                continue ! TODO: function to copy character strings
+                ierror = dlwqnc_copy_char_var( ncidin,  ncidout, oldvarid, newvarid, ndims, dimids, dimsizes )
             case default
                 ierror = -1
         end select
@@ -817,14 +813,10 @@ integer function dlwqnc_copy_int_var( ncidin, ncidout, varin, varout, ndims, dim
     integer                               :: sz, sz1
     integer                               :: ierror
     integer                               :: ierr
-    integer                               :: i, j
-    integer                               :: xtype, length, attnum
-    integer                               :: oldvarid, newvarid
+    integer                               :: i
 
     integer, dimension(:), allocatable    :: value
     integer, dimension(:,:), allocatable  :: value2d
-
-    integer                               :: start, count, chunk
 
     dlwqnc_copy_int_var = -1
 
@@ -861,9 +853,7 @@ integer function dlwqnc_copy_real_var( ncidin, ncidout, varin, varout, ndims, di
     integer                               :: sz
     integer                               :: ierror
     integer                               :: ierr
-    integer                               :: i, j
-    integer                               :: xtype, length, attnum
-    integer                               :: oldvarid, newvarid
+    integer                               :: i
 
     real, dimension(:), allocatable       :: value
     real, dimension(:,:), allocatable     :: value2d
@@ -909,9 +899,7 @@ integer function dlwqnc_copy_double_var( ncidin, ncidout, varin, varout, ndims, 
     integer                               :: sz
     integer                               :: ierror
     integer                               :: ierr
-    integer                               :: i, j
-    integer                               :: xtype, length, attnum
-    integer                               :: oldvarid, newvarid
+    integer                               :: i
 
     real(kind=kind(1.0d0)), dimension(:), allocatable   :: value
     real(kind=kind(1.0d0)), dimension(:,:), allocatable :: value2d
@@ -949,6 +937,43 @@ integer function dlwqnc_copy_double_var( ncidin, ncidout, varin, varout, ndims, 
 
     dlwqnc_copy_double_var = nf90_noerr
 end function dlwqnc_copy_double_var
+
+integer function dlwqnc_copy_char_var( ncidin, ncidout, varin, varout, ndims, dimids, dimsizes )
+!   use ISO_C_BINDING
+
+    integer, intent(in)                   :: ncidin, ncidout, varin, varout, ndims
+    integer, intent(in), dimension(:)     :: dimids, dimsizes
+
+    integer                               :: dim1, dim2
+    integer                               :: ierror
+    integer                               :: ierr
+
+    character(len=:), dimension(:), allocatable :: value
+
+    dlwqnc_copy_char_var = -1
+
+    dim1 = dimsizes(dimids(1))
+    dim2 = dimsizes(dimids(2))
+
+    allocate( character(len=dim1) :: value(dim2), stat = ierr )
+    if ( ierr /= 0 ) then
+        return
+    endif
+
+    ierror = nf90_get_var( ncidin, varin, value )
+    if ( ierror /= nf90_noerr ) then
+        dlwqnc_copy_char_var = ierror
+        return
+    endif
+
+    ierror = nf90_put_var( ncidout, varout, value )
+    if ( ierror /= nf90_noerr ) then
+        dlwqnc_copy_char_var = ierror
+        return
+    endif
+
+    dlwqnc_copy_char_var = nf90_noerr
+end function dlwqnc_copy_char_var
 
 ! dlwqnc_write_wqtime --
 !     Write the time to the output file
@@ -1253,38 +1278,26 @@ integer function dlwqnc_create_wqvariable( ncidout, mesh_name, wqname, longname,
     ! TODO: support for chunking - this requires an array of chunksizes per dimension
     !
     if ( nolayid /= dlwqnc_type2d .and. nolayid /= dlwqnc_type1d ) then
-#ifdef NetCDF4
         if ( ncopt(1) == 4 .and. ncopt(2) /= 0 ) then
             ierror = nf90_def_var( ncidout, name, nf90_float, (/ noseglid, nolayid, ntimeid /), wqid, &
                          deflate_level= ncopt(2) )
         else
-#endif
             ierror = nf90_def_var( ncidout, name, nf90_float, (/ noseglid, nolayid, ntimeid /), wqid)
-#ifdef NetCDF4
         endif
-#endif
     else if (nolayid == dlwqnc_type2d ) then
-#ifdef NetCDF4
         if ( ncopt(1) == 4 .and. ncopt(2) /= 0 ) then
             ierror = nf90_def_var( ncidout, name2d, nf90_float, (/ noseglid, ntimeid /), wqid, &
                          deflate_level= ncopt(2) )
         else
-#endif
             ierror = nf90_def_var( ncidout, name2d, nf90_float, (/ noseglid, ntimeid /), wqid)
-#ifdef NetCDF4
         endif
-#endif
     else
-#ifdef NetCDF4
         if ( ncopt(1) == 4 .and. ncopt(2) /= 0 ) then
             ierror = nf90_def_var( ncidout, name, nf90_float, (/ noseglid, ntimeid /), wqid, &
                          deflate_level= ncopt(2) )
         else
-#endif
             ierror = nf90_def_var( ncidout, name, nf90_float, (/ noseglid, ntimeid /), wqid)
-#ifdef NetCDF4
         endif
-#endif
     endif
 !    ierror = nf90_def_var( ncidout, name, nf90_float, (/ noseglid, nolayid, ntimeid /), wqid )
     if ( ierror /= 0 .and. ierror /= nf90_enameinuse ) then
@@ -1496,7 +1509,7 @@ integer function dlwqnc_create_layer_dim( ncidout, mesh_name, nolay, thickness, 
     !
     ! Cumulative sigma coordinate
     !
-    write( name, '(3a)' ) mesh_name(1:k), '_sigma_dlwq'
+    write( name, '(3a)' ) mesh_name(1:k), '_layer_dlwq'
     ierror = nf90_def_var( ncidout, name, nf90_float, (/ nolayid /), cumlayid )
     if ( ierror /= 0 ) then
         if (dlwqnc_debug) write(*,*) 'Note: Creating layer dimension failed (def_var): ', ierror

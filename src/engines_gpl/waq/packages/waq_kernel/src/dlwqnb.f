@@ -1,4 +1,4 @@
-!!  Copyright (C)  Stichting Deltares, 2012-2022.
+!!  Copyright (C)  Stichting Deltares, 2012-2023.
 !!
 !!  This program is free software: you can redistribute it and/or modify
 !!  it under the terms of the GNU General Public License version 3,
@@ -46,7 +46,6 @@
 !     SUBROUTINES CALLED : DLWQTR, user transport routine
 !                          PROCES, DELWAQ proces system
 !                          DLWQO2, DELWAQ output system
-!                          DLWQPP, user postprocessing routine
 !                          DLWQ13, system postpro-dump routine
 !                          DLWQ14, scales waterquality
 !                          DLWQ15, wasteload routine
@@ -82,8 +81,6 @@
 !
       use grids
       use timers
-      use m_timers_waq
-      use m_couplib
       use delwaq2_data
       use m_openda_exchange_items, only : get_openda_buffer
       use report_progress
@@ -243,8 +240,7 @@
      &                 a(ileng) , a(iconc) , a(idisp) , a(icons) , a(iparm) ,
      &                 a(ifunc) , a(isfun) , a(idiff) , a(ivelo) , itime    ,
      &                 idt      , c(isnam) , nocons   , nofun    , c(icnam) ,
-     &                 c(ipnam) , c(ifnam) , c(isfna) , update   , ilflag   ,
-     &                 npartp   )
+     &                 c(ipnam) , c(ifnam) , c(isfna) , update   , ilflag   )
          if ( update ) updatr = .true.
 
 !jvb     Temporary ? set the variables grid-setting for the DELWAQ variables
@@ -281,7 +277,7 @@
      &                 j(ivtda) , j(ivdag) , j(ivtag) , j(ivagg) , j(iapoi) ,
      &                 j(iaknd) , j(iadm1) , j(iadm2) , j(ivset) , j(ignos) ,
      &                 j(igseg) , novar    , a        , nogrid   , ndmps    ,
-     &                 c(iprna) , intsrt   , j(iowns) , j(iownq) , mypart   ,
+     &                 c(iprna) , intsrt   ,
      &                 j(iprvpt), j(iprdon), nrref    , j(ipror) , nodef    ,
      &                 surface  , lun(19)  )
 
@@ -333,7 +329,7 @@
      +              C(IBTYP), J(INTYP), C(ICNAM), NOQ     , J(IXPNT),
      +              INTOPT  , C(IPNAM), C(IFNAM), C(ISFNA), J(IDMPB),
      +              NOWST   , NOWTYP  , C(IWTYP), J(IWAST), J(INWTYP),
-     +              A(IWDMP), iknmkv  , J(IOWNS), MYPART  , isegcol )
+     +              A(IWDMP), iknmkv  , isegcol )
 
 !        zero cummulative array's
 
@@ -358,8 +354,7 @@
 !        add processes
 
          call dlwq14 ( a(iderv) , notot    , nosss    , itfact   , a(imas2) ,
-     &                 idt      , iaflag   , a(idmps) , intopt   , j(isdmp) ,
-     &                 j(iowns) , mypart   )
+     &                 idt      , iaflag   , a(idmps) , intopt   , j(isdmp) )
 !
 !          get new volumes
 !
@@ -383,7 +378,7 @@
      *                 J(INRHA), J(INRH2), J(INRFT), NOSEG   , A(IVOL2),
      *                 J(IBULK), LCHAR   , ftype   , ISFLAG  , IVFLAG  ,
      *                 UPDATE  , J(INISP), A(INRSP), J(INTYP), J(IWORK),
-     *                 LSTREC  , LREWIN  , A(IVOLL), MYPART  , dlwqd   )
+     *                 LSTREC  , LREWIN  , A(IVOLL), dlwqd   )
          IF ( UPDATE ) UPDATR = .TRUE.
       ENDIF
 
@@ -401,7 +396,7 @@
      &                 j(inwtyp) , j(iwast) , iwstkind , a(iwste) , a(iderv) ,
      &                 iknmkv    , nopa     , c(ipnam) , a(iparm) , nosfun   ,
      &                 c(isfna ) , a(isfun) , j(isdmp) , a(idmps) , a(imas2) ,
-     &                 a(iwdmp)  , 1        , notot    , j(iowns ), mypart   )
+     &                 a(iwdmp)  , 1        , notot     )
 
 !          Here we implement a loop that inverts the same matrix
 !          for series of subsequent substances having the same

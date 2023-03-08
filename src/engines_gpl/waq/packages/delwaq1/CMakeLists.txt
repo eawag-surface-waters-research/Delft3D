@@ -7,8 +7,7 @@ set(waq_version_path ${waq_root_path}/version)
 set(waq_data_path ${waq_root_path}/include)
 
 set(ini_version_file ${waq_version_path}/version_number.ini)
-set(fortran_version_file ${CMAKE_CURRENT_SOURCE_DIR}/src/delwaq1_version.F90)
-set(fortran_version_file_delwaq ${waq_root_path}/packages/delwaq_lib/src/delwaq_version.F90)
+set(fortran_version_file_delwaq ${waq_root_path}/packages/waq_utils_f/src/waq_utils/delwaq_version.F90)
 set(rc_version_file ${waq_version_path}/version_number_delwaq1.rc)
 
 
@@ -17,14 +16,6 @@ set(icon_file ${waq_version_path}/waq_icon.rc)
 
 # Generate version files
 generate_version_files(${rc_version_file}
-                       ${ini_version_file}
-                       ON)
-
-generate_version_files(${fortran_version_file}
-                       ${ini_version_file}
-                       ON)
-
-generate_version_files(${fortran_version_file_delwaq}
                        ${ini_version_file}
                        ON)
 
@@ -47,20 +38,25 @@ prebuild_version_number(${executable_name} ${rc_version_file}
                                         ${ini_version_file}
                                         ON)
 
-prebuild_version_number(${executable_name} ${fortran_version_file}
-                                        ${checkout_src_root}
-                                        ${ini_version_file}
-                                        ON)
-
-prebuild_version_number(${executable_name} ${fortran_version_file_delwaq}
-                                        ${waq_root_path}
-                                        ${ini_version_file}
-                                        ON)
-
 set_source_files_properties(${fortran_version_file} ${fortran_version_file_delwaq}
                             PROPERTIES COMPILE_OPTIONS "${file_preprocessor_flag}")
 
 # Add dependencies
+set(oss_dependencies_general deltares_common
+                             deltares_common_c
+                             waq_delftio
+                             io_netcdf
+                             nefis
+                             delwaq_lib
+                             waq_io
+                             waq_data
+                             waq_kernel
+                             waq_plugin_wasteload
+                             waq_process
+                             waq_utils_c
+                             waq_utils_f)
+
+
 if(UNIX)
     # the `pkg_check_modules` function is created with this call
     find_package(PkgConfig REQUIRED)
@@ -69,19 +65,8 @@ if(UNIX)
     pkg_check_modules(NETCDF     REQUIRED IMPORTED_TARGET netcdf)
     pkg_check_modules(NETCDF_FTN REQUIRED IMPORTED_TARGET netcdf-fortran)
 
-    set(oss_dependencies    deltares_common
-                            deltares_common_c
-                            waq_delftio
-                            io_netcdf
-                            nefis
-                            delwaq_lib
-                            waq_io
-                            waq_data
-                            waq_kernel
-                            waq_plugin_wasteload
-                            waq_process
-                            waq_utils_c
-                            waq_utils_f)
+    set(oss_dependencies ${oss_dependencies_general})
+
     target_link_libraries(${executable_name}
          ${oss_dependencies}
          PkgConfig::NETCDF
@@ -89,9 +74,10 @@ if(UNIX)
 endif(UNIX)
 
 if(WIN32)
-    set(oss_dependencies    delwaq_lib
-                            netcdf4
-                            netcdff)
+    set(oss_dependencies ${oss_dependencies_general}
+                         netcdf4
+                         netcdff)
+
     target_link_libraries(${executable_name} ${oss_dependencies})
 endif(WIN32)
 
@@ -100,7 +86,6 @@ oss_include_libraries(${executable_name} oss_dependencies)
 
 # Set additional compilation properties
 target_compile_options(${executable_name} PRIVATE "${waq_default_flags}")
-target_compile_options(${executable_name} PRIVATE "$<$<CONFIG:Debug>:${waq_debug_flags}>")
 
 if(UNIX)
     target_include_directories(${executable_name} PRIVATE ${waq_data_path})

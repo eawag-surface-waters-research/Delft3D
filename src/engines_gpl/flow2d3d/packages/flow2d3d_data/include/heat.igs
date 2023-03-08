@@ -1,6 +1,6 @@
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2011-2022.                                
+!  Copyright (C)  Stichting Deltares, 2011-2023.                                
 !                                                                               
 !  This program is free software: you can redistribute it and/or modify         
 !  it under the terms of the GNU General Public License as published by         
@@ -87,7 +87,9 @@ type gd_heat
     real(fp)                :: dpreci    !  Time increment of Precipitation
     real(fp)                :: train     !  Rain temperature
     real(fp)                :: dtrain    !  Time increment of the rain temperature
-!
+    real(fp)                :: mulsd     !  Multiplier for the Secchi depth to obtain the Shallow Secchi depth (range 0.01--1)
+    real(fp)                :: betasd    !  Fraction of the solar radiation that penetrates deep (range 0--1)
+    real(fp)                :: albedo    !  Albedo coefficient 
 ! reals
 !
 !
@@ -123,20 +125,30 @@ type gd_heat
 !
 ! pointers
 !
-    real(fp) , dimension(:) , pointer :: secchi    !  Secchidepth; extinc = 1.7 / secchi
-    real(fp) , dimension(:) , pointer :: rhumarr   ! Relative humidity array; used when read from file (rhum_file = true)
-    real(fp) , dimension(:) , pointer :: tairarr   ! Air temperature   array; used when read from file (tair_file = true)
-    real(fp) , dimension(:) , pointer :: clouarr   ! Cloudiness        array; used when read from file (clou_file = true)
-    real(fp) , dimension(:) , pointer :: swrfarr   ! Solar radiation   array; used when read from file (swrf_file = true)
-    real(fp) , dimension(:) , pointer :: qeva_out  ! Evaporation heat flux
-    real(fp) , dimension(:) , pointer :: qco_out   ! Heat flux of forced convection
-    real(fp) , dimension(:) , pointer :: qbl_out   ! Nett back radation
-    real(fp) , dimension(:) , pointer :: qin_out   ! Nett solar radiation
-    real(fp) , dimension(:) , pointer :: qnet_out  ! Total nett heat flux
-    real(fp) , dimension(:) , pointer :: hlc_out   ! Exchange coefficient in Excess temperature model
-    real(fp) , dimension(:) , pointer :: hfree_out ! Free convection of sensible heat
-    real(fp) , dimension(:) , pointer :: efree_out ! Free convection of latent heat   
-    real(fp) , dimension(:) , pointer :: qmis_out  ! keva=3: mismatch between calculated and derived heat flux
+    real(fp) , dimension(:) , pointer :: secchi     !  Secchidepth; extinc = 1.7 / secchi
+    real(fp) , dimension(:) , pointer :: rhumarr    ! Relative humidity array; used when read from file (rhum_file = true)
+    real(fp) , dimension(:) , pointer :: tairarr    ! Air temperature   array; used when read from file (tair_file = true)
+    real(fp) , dimension(:) , pointer :: clouarr    ! Cloudiness        array; used when read from file (clou_file = true)
+    real(fp) , dimension(:) , pointer :: swrfarr    ! Solar radiation   array; used when read from file (swrf_file = true)
+    real(fp) , dimension(:) , pointer :: qeva_out   ! Evaporation heat flux
+    real(fp) , dimension(:) , pointer :: qco_out    ! Heat flux of forced convection
+    real(fp) , dimension(:) , pointer :: qbl_out    ! Nett back radation
+    real(fp) , dimension(:) , pointer :: qin_out    ! Nett solar radiation
+    real(fp) , dimension(:) , pointer :: qnet_out   ! Total nett heat flux
+    real(fp) , dimension(:) , pointer :: hlc_out    ! Exchange coefficient in Excess temperature model
+    real(fp) , dimension(:) , pointer :: hfree_out  ! Free convection of sensible heat
+    real(fp) , dimension(:) , pointer :: efree_out  ! Free convection of latent heat   
+    real(fp) , dimension(:) , pointer :: qmis_out   ! keva=3: mismatch between calculated and derived heat flux
+    real(fp) , dimension(:) , pointer :: zqeva_out  ! Evaporation heat flux, in zeta-point for history file
+    real(fp) , dimension(:) , pointer :: zqco_out   ! Heat flux of forced convection, in zeta-point for history file
+    real(fp) , dimension(:) , pointer :: zqbl_out   ! Nett back radation, in zeta-point for history file
+    real(fp) , dimension(:) , pointer :: zqin_out   ! Nett solar radiation, in zeta-point for history file
+    real(fp) , dimension(:) , pointer :: zqnet_out  ! Total nett heat flux, in zeta-point for history file
+    real(fp) , dimension(:) , pointer :: zhlc_out   ! Exchange coefficient in Excess temperature model, in zeta-point for history file
+    real(fp) , dimension(:) , pointer :: zhfree_out ! Free convection of sensible heat, in zeta-point for history file
+    real(fp) , dimension(:) , pointer :: zefree_out ! Free convection of latent heat, in zeta-point for history file
+    real(fp) , dimension(:) , pointer :: zqmis_out  ! keva=3: mismatch between calculated and derived heat flux, in zeta-point for history file
+
 !
 ! logicals
 !

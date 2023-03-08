@@ -1,7 +1,7 @@
 module m_network
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2022.                                
+!  Copyright (C)  Stichting Deltares, 2017-2023.                                
 !                                                                               
 !  This program is free software: you can redistribute it and/or modify              
 !  it under the terms of the GNU Affero General Public License as               
@@ -30,15 +30,16 @@ module m_network
 !-------------------------------------------------------------------------------
 
    use m_GlobalParameters
-   use networkTypes
+   use m_branch
    use m_forcinglist
    use m_crossSections
    use m_1d_structures
    use m_roughness
-   use m_ExtraResistance
-   use m_df1d_transport
    use m_ObservCrossSections
    use m_compound
+   use m_spatial_data
+   use m_Storage
+   use m_ObservationPoints
    
    implicit none
 
@@ -55,10 +56,10 @@ module m_network
       module procedure realloc_1dadmin
    end interface realloc
 
-   interface dealloc
-      module procedure deallocNetwork
+    interface dealloc
+       module procedure deallocNetwork
       module procedure dealloc_1dadmin
-   end interface dealloc
+    end interface dealloc
    
 
    ! !TODO JN: zorg voor allocatie en initialisatie. en vullen van lin2ibr en lin2local uit adm%lin. -1 is missing value e.g. for a 2d link, length LINALL
@@ -79,9 +80,6 @@ module m_network
    end type
 
    type, public   :: t_network
-      integer                                   :: gridpointsCount         !< total number of gridpoints in network NDS%count - NDS%bndCount
-      integer                                   :: l1dall                  !< total number of links (internal, boundary and compound links)
-      integer                                   :: l1d                     !< total number of links (internal and boundary)
       integer                                   :: numk                    !< total number of links (internal and boundary)
       integer                                   :: numl                    !< total number of links (internal and boundary)
       logical                                   :: sferic                  !< flag indicating whether the used coordinate system is sferical or metric
@@ -96,7 +94,6 @@ module m_network
       type(t_storageSet)                        :: storS                   !< set containing storage in gridpoints
       type(t_CSDefinitionSet)                   :: CSDefinitions
       type(t_spatial_dataSet)                   :: spData
-      type(t_transportSet)                      :: trans
       type(t_ObservCrossSectionSet)             :: observcrs               !< set of observation Cross-Sections 
       type(t_forcingList)                       :: forcinglist             !< Work list of read-in (structure) forcing data, to be initialized by calling kernel later.
       logical                                   :: loaded      = .false.
@@ -159,37 +156,19 @@ contains
       call dealloc(network%storS)
       call dealloc(network%CSDefinitions)
       call dealloc(network%spData)
-      call dealloc(network%trans)
       call dealloc(network%observcrs)
       network%loaded = .false.
    
    end subroutine deallocNetwork
 
-   subroutine admin_network(network, ngrid, nlink)
+   subroutine admin_network(network, nlink)
       use m_node
       use m_branch
    
       type(t_network), intent(inout) :: network
-      integer, intent(inout) :: ngrid
       integer, intent(inout) :: nlink
    
-      integer ibr
-      integer nnode
-      integer ityp
-      integer i
-      integer icon, ibnd, typ
-      integer nod
-      integer, allocatable, dimension(:) :: itype
-      integer, allocatable, dimension(:) :: iboun
-   
-      type(t_branch), pointer :: pbr
-   
       call admin_branch(network%brs, nlink)
-      network%gridpointsCount = ngrid
-      network%l1d    = nlink
-      network%l1dall = nlink
-
-
 
    end subroutine admin_network
 
@@ -206,27 +185,18 @@ contains
       integer :: is, k1, k2, L1, L2
       integer :: ilnk
       integer :: igpt
-      integer :: ll
-      integer :: istru
       integer :: ibran
       integer :: m
       integer :: icrs1
       integer :: icrs2
       
       double precision                   :: f
-      double precision                   :: dpu1
-      double precision                   :: dpu2
       double precision                   :: chainage1
       double precision                   :: chainage2
       double precision                   :: chainage
       double precision                   :: chainageg
-      double precision                   :: chezy
-      double precision                   :: as
-      double precision                   :: wetperimeter
       type(t_administration_1d), pointer          :: adm
       type(t_branch), pointer            :: pbran
-      type(t_structure), pointer         :: pstru
-
       integer, allocatable, dimension(:) :: crossOrder
       integer, allocatable, dimension(:) :: lastAtBran
       integer                            :: icrsBeg
@@ -485,7 +455,7 @@ contains
                igpt = pbran%grd(m)
                
                ! Skip gridpoints not in this partition
-               if (igpt > size(adm%gpnt2cross)) cycle
+               if (igpt > size(adm%gpnt2cross)) cycle ! this is probably not always caused by parallel models: igpt includes auto-added branch start/end grid points
                
                if (icrsBeg == icrsEnd) then
                   
@@ -927,15 +897,9 @@ use m_tablematrices
     
     if (rgs%version == 1) then
       rgh => rgs%rough(isec)
-      if (q >= 0d0 .or. .not. associated(rgh%rgh_type_neg)) then
-          values    => spData%quant(rgh%spd_pos_idx)
-          rgh_type  => rgh%rgh_type_pos 
-          fun_type  => rgh%fun_type_pos 
-       else 
-          values    => spData%quant(rgh%spd_neg_idx)
-          rgh_type  => rgh%rgh_type_neg 
-          fun_type  => rgh%fun_type_neg 
-       endif   
+      values    => spData%quant(rgh%spd_pos_idx)
+      rgh_type  => rgh%rgh_type_pos 
+      fun_type  => rgh%fun_type_pos 
        if (fun_type(ibranch) == R_FunctionDischarge) then
           cpar = interpolate(values%tables%tb(values%tblIndex(igrid))%table,  dabs(q))
        !
@@ -1100,15 +1064,9 @@ use m_tablematrices
     
     if (rgs%version == 1) then
       rgh => rgs%rough(isec)
-      if (q >= 0d0 .or. .not. associated(rgh%rgh_type_neg)) then
-          values    => spData%quant(rgh%spd_pos_idx)
-          rgh_type  => rgh%rgh_type_pos 
-          fun_type  => rgh%fun_type_pos 
-       else 
-          values    => spData%quant(rgh%spd_neg_idx)
-          rgh_type  => rgh%rgh_type_neg 
-          fun_type  => rgh%fun_type_neg 
-       endif   
+      values    => spData%quant(rgh%spd_pos_idx)
+      rgh_type  => rgh%rgh_type_pos 
+      fun_type  => rgh%fun_type_pos 
        if (fun_type(ibranch) == R_FunctionDischarge) then
           cpar = interpolate(values%tables%tb(values%tblIndex(igrid))%table,  dabs(q))
        !
@@ -1187,6 +1145,12 @@ subroutine getRoughnessForProfile(network, crs)
       endif
       
       pRgs => network%rgs%rough(iRough)
+      if (len_trim(pRgs%frictionValuesFile)== 0) then
+         call SetMessage(LEVEL_ERROR, 'No Data found for Section '//trim(crs%frictionSectionID(i))//' of Cross-Section ID: '//trim(crs%csid))
+         cycle
+      endif
+      
+
       if (network%rgs%version == network%rgs%roughnessFileMajorVersion) then
          frictionValue = crs%frictionValuePos(i)
          call getFrictionParameters(pRgs,  crs%branchid, crs%chainage, crs%frictionTypePos(i), crs%frictionValuePos(i))
@@ -1209,13 +1173,8 @@ subroutine getRoughnessForProfile(network, crs)
          
       
       crs%frictionTypePos(i) = pRgs%rgh_type_pos(crs%branchid)
-      if (associated(pRgs%rgh_type_neg)) then
-         crs%frictionTypeNeg(i) = pRgs%rgh_type_neg(crs%branchid)
-      else
-         crs%frictionTypeNeg(i) = pRgs%rgh_type_pos(crs%branchid)
-      endif
       
-      if (pRgs%spd_pos_idx <= 0 .and. pRgs%spd_neg_idx <= 0) then
+      if (pRgs%spd_pos_idx <= 0) then
          call SetMessage(LEVEL_ERROR, 'No Spatial Data specified for Section '//trim(crs%frictionSectionID(i))//' of Cross-Section ID: '//trim(crs%csid))
          cycle
       endif
@@ -1230,28 +1189,6 @@ subroutine getRoughnessForProfile(network, crs)
          if (istatus >= 0) crs%frictionValuePos(i) = frictionValue
          if (istatus > 0)  crs%frictionTypePos(i)  = frictionType
 
-      endif
-        
-      ! Negative direction
-      if (pRgs%spd_neg_idx > 0) then
-      
-         pSpData => network%spData%quant(pRgs%spd_neg_idx)
-         
-         iStatus = getValueAtLocation(pSpData, crs%branchid, crs%chainage, frictionValue, frictionType)
-         
-         if (istatus >= 0) crs%frictionValueNeg(i) = frictionValue
-         if (istatus > 0)  crs%frictionTypeNeg(i)  = frictionType
-
-      endif
-      
-      if (pRgs%spd_pos_idx > 0 .and. pRgs%spd_neg_idx <= 0) then
-         crs%frictionValueNeg(i) = crs%frictionValuePos(i)
-         crs%frictionTypeNeg(i)  = crs%frictionTypePos(i)
-      endif
-      
-      if (pRgs%spd_pos_idx <= 0 .and. pRgs%spd_neg_idx > 0) then
-         crs%frictionValuePos(i) = crs%frictionValueNeg(i)
-         crs%frictionTypePos(i)  = crs%frictionTypeNeg(i)
       endif
         
    enddo
@@ -1290,6 +1227,7 @@ subroutine update_flow1d_admin(network, lc)
       pbr%Xs(1)                  = pbr%Xs(1)                 
       pbr%Ys(1)                  = pbr%Ys(1)                 
       pbr%grd(1)                 = pbr%grd(1)                
+      ! TODO: is this code already safe for gridpointssequences?
       do LL = 1, upointscount
          if (pbr%lin(LL)==LC(Ltoberemoved_index) ) then
             Ltoberemoved_index = Ltoberemoved_index + 1
@@ -1317,6 +1255,7 @@ subroutine update_flow1d_admin(network, lc)
             pbr%uPointsChainages(LL_new)      = pbr%uPointsChainages(LL)   
             pbr%lin(LL_new)                   = Lnew               
             pbr%grd(LL_new+1)                 = pbr%grd(LL+1)                
+            ! TODO: %grd_input
          endif
       enddo
    enddo

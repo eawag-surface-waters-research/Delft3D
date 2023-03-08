@@ -24,14 +24,18 @@ def runThisTest(dir, files):
                 sys.stdout.write("##teamcity[testFinished name='"+testname+"' message='Comparison failed']\n\n")
 
 print(os.path.dirname(os.path.realpath(__file__)))
-#configuration = "Release"
-configuration = "Debug"
 executable = ""
+
+# On TeamCity environment variable LD_LIBRARY_PATH or PATH is set before running this script.
+# When running locally, you should set this for your local environment. 
+# ~/build/lnx64/*/share/lib
+# ~/build/x64/*/share/bin
+# The location of the executable is probably different as well. 
 
 if os.name == 'posix':
     executable = "../lnx64/bin/ec_module_test"
 if os.name == 'nt':
-    executable = "d:/D-HYDRO/delft3d/build_tests/test_ec_module/Debug/ec_module_test.exe"
+    executable = "../x64/test/ec_module_test.exe"
 
 if (executable == ""):
     sys.stderr.write("Invalid OS = "+os.name)
@@ -41,8 +45,6 @@ if len(sys.argv)>1:
     executable = sys.argv[1]
 
 abs_exec = os.path.abspath(executable)
-print(executable+"\n")
-print(abs_exec)
 args = ["-v", "-c"] 
 
 for root, dirs, files in os.walk("."):

@@ -1,4 +1,4 @@
-!!  Copyright (C)  Stichting Deltares, 2012-2022.
+!!  Copyright (C)  Stichting Deltares, 2012-2023.
 !!
 !!  This program is free software: you can redistribute it and/or modify
 !!  it under the terms of the GNU General Public License version 3,
@@ -23,7 +23,7 @@
 
       subroutine dlwq18 ( nosys  , notot  , nototp , noseg  , volume ,
      &                    surface, amass  , conc   , deriv  , idt    ,
-     &                    ivflag , lun    , owners , mypart )
+     &                    ivflag , lun     )
 
 !     Deltares Software Centre
 
@@ -68,8 +68,6 @@
       integer  ( 4), intent(in   ) :: idt                     !< integration time step size
       integer  ( 4), intent(in   ) :: ivflag                  !< if 1 computational volumes
       integer  ( 4), intent(in   ) :: lun                     !< unit number of the monitoring file
-      integer  ( 4), intent(in   ) :: owners (noseg )         !< ownership array for segments
-      integer  ( 4), intent(in   ) :: mypart                  !< number of the current subdomain
 
 !     local variables
 

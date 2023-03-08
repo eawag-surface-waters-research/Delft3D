@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !
-!  Copyright (C)  Stichting Deltares, 2017-2022.
+!  Copyright (C)  Stichting Deltares, 2017-2023.
 !
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).
 !
@@ -67,6 +67,7 @@
  use m_sedtrails_network
  use m_sedtrails_netcdf, only: sedtrails_loadNetwork
  use m_sedtrails_stats, only: default_sedtrails_stats, alloc_sedtrails_stats
+ use unstruc_display, only : ntek, jaGUI
  !
  ! To raise floating-point invalid, divide-by-zero, and overflow exceptions:
  ! Activate the following line (See also statements below)
@@ -94,7 +95,7 @@
     call makedir(getoutputdir('waq'))  ! No problem if it exists already.
  end if
 
-  call timstrt('Basic init', handle_extra(1)) ! Basic steps
+ call timstrt('Basic init', handle_extra(1)) ! Basic steps
 
  md_snapshotdir =  trim(getoutputdir())                  ! plot output to outputdir
  ! Make sure output dir for plot files exists
@@ -111,10 +112,14 @@
  call reset_unstruc_netcdf_map_class()
 
  call resetflow()
-
+ 
  call reset_waq()
 
  call timstop(handle_extra(1)) ! End basic steps
+
+ if (jagui == 1) then 
+    call timini()  ! this seems to work, initimer and timini pretty near to each other 
+ endif
 
 ! JRE
  if (jawave == 4) then
@@ -261,7 +266,9 @@
  end if
  call timstop(handle_extra(12)) ! vertical administration
 
- ierr = init_openmp(md_numthreads, jampi)
+#ifdef _OPENMP
+   ierr = init_openmp(md_numthreads, jampi) 
+#endif
 
  call timstrt('Net link tree 0     ', handle_extra(13)) ! netlink tree 0
  if ((jatrt == 1) .or. (jacali == 1)) then

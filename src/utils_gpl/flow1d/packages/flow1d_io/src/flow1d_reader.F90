@@ -1,7 +1,7 @@
 module m_flow1d_reader
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2022.                                
+!  Copyright (C)  Stichting Deltares, 2017-2023.                                
 !                                                                               
 !  This program is free software: you can redistribute it and/or modify              
 !  it under the terms of the GNU Affero General Public License as               
@@ -29,17 +29,11 @@ module m_flow1d_reader
 !  $HeadURL$
 !-------------------------------------------------------------------------------
   
-   use ModelParameters
-   
    implicit none
    
    private
    
    public read_1d_attributes
-   
-   logical :: files_have_been_read = .false. ! temporary flag (needed as long as WaterflowModel1D
-   public files_have_been_read               ! calls 'ReadFiles' and d_hydro.exe does not)
-   ! files_have_been_read also used to retrieve interpolated cross-section data by delta-shell!!
    
    contains
     
@@ -48,12 +42,10 @@ module m_flow1d_reader
       use string_module
       use m_globalParameters
       use messageHandling
-      use m_readModelParameters
       use m_readCrossSections
       use m_readSpatialData
       use m_read_roughness
       use m_network
-      use m_readSalinityParameters
       use m_readstructures
       use m_readObservationPoints
       use m_readStorageNodes
@@ -67,19 +59,11 @@ module m_flow1d_reader
       type(t_network), intent(inout)  :: network
       
       type(tree_data), pointer        :: md_ptr
-      integer                         :: numstr
-      integer                         :: backslash
-      integer                         :: slash
-      integer                         :: posslash
       integer                         :: maxErrorLevel
       logical                         :: success
       
-      integer                         :: istat
-      
-      integer                         :: timerRead          = 0
       integer                         :: timerReadCsDefs    = 0
       integer                         :: timerReadCsLocs    = 0
-      integer                         :: timerReadStructs   = 0
       integer                         :: timerReadStorgNodes= 0
       integer                         :: timerReadRoughness = 0
 
@@ -116,6 +100,7 @@ module m_flow1d_reader
       call readCrossSectionLocationFile(network, filenames%cross_section_locations)
          
      if (network%crs%Count < 1) then
+        allocate(network%crs%cross(0))
         call SetMessage(LEVEL_WARN, 'No Cross Sections Found')
      endif
 
@@ -139,15 +124,9 @@ module m_flow1d_reader
      
      ! Stop in case of errors
      maxErrorLevel = getMaxErrorLevel()
-     if (maxErrorLevel >= LEVEL_ERROR) then
-        call LogAllParameters()
-        call SetMessage(LEVEL_FATAL, 'Error(s) during reading model data from files')
-     endif
      
      call SetMessage(LEVEL_INFO, 'All 1D-Reading Done')
 
-     files_have_been_read = .true.
-     
      call tree_destroy(md_ptr)
 
    end subroutine read_1d_attributes

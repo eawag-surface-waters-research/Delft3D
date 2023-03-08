@@ -1,4 +1,4 @@
-!!  Copyright (C)  Stichting Deltares, 2012-2022.
+!!  Copyright (C)  Stichting Deltares, 2012-2023.
 !!
 !!  This program is free software: you can redistribute it and/or modify
 !!  it under the terms of the GNU General Public License version 3,
@@ -23,7 +23,7 @@
 
       subroutine dlwqp0 ( conc   , amass  , deriv  , volume , idt    ,
      *                    nosys  , notot  , noseg  , lun     ,ivflag ,
-     *                    owners , mypart , surfac )
+     *                    surfac )
 
 !     Deltares Software Centre
 
@@ -56,8 +56,6 @@
       integer   (4), intent(in   ) :: idt                     !< integration time step size
       integer   (4), intent(in   ) :: lun                     !< unit number of the monitoring file
       integer   (4), intent(in   ) :: ivflag                  !< if 1 computational volumes
-      integer   (4), intent(in   ) :: owners(noseg )          !< ownership array for segments
-      integer   (4), intent(in   ) :: mypart                  !< number of the current subdomain
       real      (4), intent(in   ) :: surfac(noseg)           !< horizontal surface
 
       ! local declarations
@@ -74,42 +72,38 @@
       ! loop accross the number of computational elements
 
       do iseg=1,noseg
+         ! compute volumes if necessary
 
-         if (owners(iseg).eq.mypart) then
-
-            ! compute volumes if necessary
-
-            if ( ivflag .eq. 1 ) volume(iseg) = amass(1,iseg) + idt*deriv(1,iseg)
-            v1 = volume(iseg)
-            if ( abs(v1).lt.1.0e-25 ) then
-               if ( ivmess .lt. 25 ) then
-                  ivmess = ivmess + 1
-                  write ( lun, 1000 ) iseg  , v1
-               elseif ( ivmess .eq. 25 ) then
-                  ivmess = ivmess + 1
-                  write ( lun, 1001 )
-               endif
-               volume (iseg) = 1.0
-               v1            = 1.0
+         if ( ivflag .eq. 1 ) volume(iseg) = amass(1,iseg) + idt*deriv(1,iseg)
+         v1 = volume(iseg)
+         if ( abs(v1).lt.1.0e-25 ) then
+            if ( ivmess .lt. 25 ) then
+               ivmess = ivmess + 1
+               write ( lun, 1000 ) iseg  , v1
+            elseif ( ivmess .eq. 25 ) then
+               ivmess = ivmess + 1
+               write ( lun, 1001 )
             endif
-
-           !  active substances first
-
-            do i=1,nosys
-               a           = amass(i,iseg) + idt*deriv(i,iseg)
-               amass(i,iseg) = a
-               conc (i,iseg) = a / v1
-               deriv(i,iseg) = 0.0
-            enddo
-
-            ! then the inactive substances
-
-            do i=nosys+1,notot
-               amass(i,iseg) = amass(i,iseg) + idt*deriv(i,iseg)
-               conc (i,iseg) = amass(i,iseg) / max(tiny(1.0),surfac(iseg))
-               deriv(i,iseg) = 0.0
-            enddo
+            volume (iseg) = 1.0
+            v1            = 1.0
          endif
+
+         !  active substances first
+
+         do i=1,nosys
+            a           = amass(i,iseg) + idt*deriv(i,iseg)
+            amass(i,iseg) = a
+            conc (i,iseg) = a / v1
+            deriv(i,iseg) = 0.0
+         enddo
+
+         ! then the inactive substances
+
+         do i=nosys+1,notot
+            amass(i,iseg) = amass(i,iseg) + idt*deriv(i,iseg)
+            conc (i,iseg) = amass(i,iseg) / max(tiny(1.0),surfac(iseg))
+            deriv(i,iseg) = 0.0
+         enddo
 
       enddo
 

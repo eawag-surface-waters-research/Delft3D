@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2022.                                
+!  Copyright (C)  Stichting Deltares, 2017-2023.                                
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -88,9 +88,9 @@ module m_VolumeTables
       procedure, pass :: computeSurface      => computeSurfaceVoltable       !< Computes the surface areas for the different levels
    end type
    
-   type(t_voltable), target,      public, allocatable, dimension(:)     :: vltb  !< 1D Volume tables
-   type(t_voltable), target,      public, allocatable, dimension(:,:)   :: vltbOnLinks  !< 1D Volume tables, used for storage table output on branches.
-                                                                               !< Only the entries VOL and SUR will be filled.
+   type(t_voltable), target,      public, allocatable, dimension(:)     :: vltb        !< [-] 1D Volume tables {"shape": ["ndx1d"]}
+   type(t_voltable), target,      public, allocatable, dimension(:,:)   :: vltbOnLinks !< [-] 1D Volume tables, used for storage table output on branches. {"shape": [2 ,"ndx1d"]}
+   integer, target, public                                              :: ndx1d       !< [-] volume table size {"rank": 0}
 
    contains
    
@@ -282,7 +282,6 @@ module m_VolumeTables
       logical, optional, intent(in   ) :: branchOutput   !< Flag indicates whether the volumes on flow links are required.
                                                          !< This option is used by the volume tool to aggregate volumes to branches.      
       
-      integer :: ndx1d
       integer :: nstor
       integer :: nod
       integer :: n
@@ -317,6 +316,8 @@ module m_VolumeTables
          generateVLTBOnLinks = .false.
       endif
 
+      ndx1d = ndx - ndx2d     ! include also the 2d boundary nodes.
+            
       if (useVolumeTableFile .and. .not. generateVLTBOnLinks) then
          ! Do not use the volumetable file for the storage tables.
          volumeTableFile = fileName
@@ -329,7 +330,6 @@ module m_VolumeTables
       cross => network%crs%cross
       stors => network%storS%stor
 
-      ndx1d = ndx - ndx2d     ! include also the 2d boundary nodes.
       if (allocated(vltb)) then
          call dealloc(vltb)
       end if
@@ -570,7 +570,6 @@ module m_VolumeTables
       integer :: n, ndx1d, nod, L, LL, numlinks
       integer :: Lindex, dir
 
-      ndx1d = ndx - ndx2d
       do n = 1, ndx1d
          nod = n+ndx2d
          ! there is additional storage on this node, split this over the flow links
@@ -750,7 +749,18 @@ module m_VolumeTables
 
          ! water surface at the highest level is equal to the width*dx of the cross section at the highest level.
          vltb(n)%sur(vltb(n)%count) = vltb(n)%sur(vltb(n)%count) + dxL*width
-         if (present(vltbOnLinks) .and. lorg <= lnxi) then
+         if (present(vltbOnLinks)) then
+            if (L > lnxi) then                      ! for 1D boundary links, refer to attached link
+               L = LBND1D(L)
+            endif
+            if (lorg > lnxi) then
+               nodintern = ln(2,Lorg)
+               if (ln(1, L) == nodintern) then
+                  lindex = 1
+               else
+                  lindex = 2
+               endif
+            endif
             vltbOnLinks(Lindex, L)%sur(vltb(n)%count) = vltbOnLinks(Lindex, L)%sur(vltb(n)%count) + dxL*width
          endif
          
@@ -784,7 +794,6 @@ module m_VolumeTables
 
       integer :: ibin
       integer :: i, n, istat, j
-      integer :: ndx1d
       integer :: count, numberOfSummerdikes
 
       open(newunit=ibin, file=volumeTableFile, form='unformatted', access='stream', iostat=istat)
@@ -796,7 +805,6 @@ module m_VolumeTables
       write(ibin) volumeTableFileType
       write(ibin) VolumeTableFileMajorVersion, VolumeTableFileMinorVersion
 
-      ndx1d = ndx - ndx2d
       write(ibin) ndx1d, nonlin1D
 
       do n = 1, ndx1d
@@ -838,7 +846,7 @@ module m_VolumeTables
 
       integer :: ibin
       integer :: i, j, n, istat
-      integer :: ndx1d
+      integer :: ndx1d_read
       integer :: count
       integer :: nonlin1D_file
       integer :: numberOfSummerdikes
@@ -876,9 +884,9 @@ module m_VolumeTables
          close(ibin)
          return
       endif
-      read(ibin) ndx1d, nonlin1D_file
+      read(ibin) ndx1d_read, nonlin1D_file
       
-      if (ndx1d /= ndx - ndx2d) then
+      if (ndx1d_read /= ndx1d) then
          call SetMessage(LEVEL_WARN, trim(volumeTableFile)//' is not compatible with the current model, the number of 1d cells are different.')
          return
       endif

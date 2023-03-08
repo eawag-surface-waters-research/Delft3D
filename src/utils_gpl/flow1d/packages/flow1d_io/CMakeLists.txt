@@ -17,6 +17,7 @@ if (UNIX)
 endif(UNIX)
 if (WIN32)
     set(oss_dependencies    deltares_common
+                            gridgeom
                             ec_module
                             flow1d_core
                             gridgeom

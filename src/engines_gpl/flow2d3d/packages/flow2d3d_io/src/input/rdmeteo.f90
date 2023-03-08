@@ -1,7 +1,7 @@
 subroutine rdmeteo(gdp, ecwind)
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2011-2022.                                
+!  Copyright (C)  Stichting Deltares, 2011-2023.                                
 !                                                                               
 !  This program is free software: you can redistribute it and/or modify         
 !  it under the terms of the GNU General Public License as published by         
@@ -67,6 +67,9 @@ subroutine rdmeteo(gdp, ecwind)
    real(fp)                 , pointer :: tzone
    real(fp)                 , pointer :: rhum
    real(fp)                 , pointer :: tair
+   real(fp)                 , pointer :: mulsd
+   real(fp)                 , pointer :: betasd
+   real(fp)                 , pointer :: albedo
    real(fp), dimension(:)   , pointer :: rhumarr
    real(fp), dimension(:)   , pointer :: tairarr
    real(fp), dimension(:)   , pointer :: clouarr
@@ -134,6 +137,9 @@ subroutine rdmeteo(gdp, ecwind)
    tzone         => gdp%gdexttim%tzone
    rhum          => gdp%gdheat%rhum
    tair          => gdp%gdheat%tair
+   mulsd         => gdp%gdheat%mulsd
+   betasd        => gdp%gdheat%betasd
+   albedo        => gdp%gdheat%albedo
    rhumarr       => gdp%gdheat%rhumarr
    tairarr       => gdp%gdheat%tairarr
    clouarr       => gdp%gdheat%clouarr
@@ -711,6 +717,73 @@ subroutine rdmeteo(gdp, ecwind)
             endif
             call prterr(lundia, 'G051', trim(message))
          endif
-      endif 
+      endif
+      !
+      ! Locate and read optional real 'mulsd': The multiplier of the Secchi depth to obtain the shallow-Secchi depth (used in heatu)
+      !
+      rdef = -999.0_fp
+      call prop_get(gdp%mdfile_ptr, '*', 'mulsd', rdef)
+      if (comparereal(rdef, -999.0_fp) /= 0) then
+         mulsd = rdef
+         if (comparereal(mulsd, 0.01_fp) == -1 .or. comparereal(mulsd, 1.0_fp) == 1) then
+            write(message,'(a,f12.3)') 'Secchi depth multiplication factor MulSD (for shallow Secchi depth) has a value outside the region [0.01,1.0]: ', mulsd
+            call prterr(lundia, 'P004', trim(message))
+            call d3stop(1, gdp)
+         else
+            write(message,'(a,f12.3)') 'Secchi multiplication factor MulSD for shallow Secchi depth: ', mulsd
+            call prterr(lundia, 'G051', trim(message))
+         endif
+      else
+          !
+          ! Use default value mulsd = 0.0 (only the normal Secchi depth is used)
+          !
+          mulsd = 0.0_fp
+      endif      
+      !
+      ! Locate and read optional real 'betasd': The fraction of solar radiation that penetrates deep (used in heatu)
+      !
+      rdef = -999.0_fp
+      call prop_get(gdp%mdfile_ptr, '*', 'betasd', rdef)
+      if (comparereal(rdef, -999.0_fp) /= 0) then
+         betasd = rdef
+         if (comparereal(betasd, 0.0_fp) == -1 .or. comparereal(betasd, 1.0_fp) == 1) then
+            write(message,'(a,f12.3)') 'The fraction of solar radiation that penetrates deep BetaSD has a value outside the region [0.0,1.0]: ', betasd
+            call prterr(lundia, 'P004', trim(message))
+            call d3stop(1, gdp)
+         else
+            write(message,'(a,f12.3)') 'The fraction of solar radiation that penetrates deep BetaSD: ', betasd
+            call prterr(lundia, 'G051', trim(message))
+         endif
+      else
+          !
+          ! Use default value betasd = 1.0 (Solar radiation penetrates completely over the Secchi depth)
+          !
+          betasd = 1.0_fp
+      endif
+      !
+      ! Locate and read optional real 'albedo': The Albedo coefficient for reflection of solar radiation (used in heatu)
+      !
+      rdef = -999.0_fp
+      call prop_get(gdp%mdfile_ptr, '*', 'albedo', rdef)
+      if (comparereal(rdef, -999.0_fp) /= 0) then
+         albedo = rdef
+         if (comparereal(albedo, 0.0_fp) == -1 .or. comparereal(albedo, 1.0_fp) == 1) then
+            write(message,'(a,f12.3)') 'The Albedo coefficient has a value outside the region [0.0,1.0]: ', albedo
+            call prterr(lundia, 'P004', trim(message))
+            call d3stop(1, gdp)
+         else
+            write(message,'(a,f12.3)') 'The Albedo coefficient for reflection of solar radiation: ', albedo
+            call prterr(lundia, 'G051', trim(message))
+         endif
+      else
+          !
+          ! Use default value for Albedo = 0.09, or Albedo = 0.06 for temperature model 5 (Murakami)
+          !
+          if (ktemp /= 5) then
+             albedo = 0.09_fp
+          else
+             albedo = 0.06_fp
+          endif
+      endif
    endif
 end subroutine rdmeteo

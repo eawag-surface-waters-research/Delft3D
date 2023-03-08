@@ -8,7 +8,7 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
                & anglon    ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2011-2022.                                
+!  Copyright (C)  Stichting Deltares, 2011-2023.                                
 !                                                                               
 !  This program is free software: you can redistribute it and/or modify         
 !  it under the terms of the GNU General Public License as published by         
@@ -74,6 +74,7 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
     real(fp)                , pointer :: timjan
     real(fp)                , pointer :: stanton
     real(fp)                , pointer :: dalton
+    real(fp)                , pointer :: albedo
     real(fp)                , pointer :: qtotmx
     real(fp)                , pointer :: lambda
     real(fp)                , pointer :: rhum
@@ -174,7 +175,6 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
     integer       :: ndm
     integer       :: nm
     integer       :: nmd
-    real(fp)      :: albedo  ! Albedo coefficient 
     real(fp)      :: b1      ! Transmission coefficient 
     real(fp)      :: bowrat
     real(fp)      :: cccoef  ! Coefficient for cloud cover 
@@ -189,7 +189,7 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
     real(fp)      :: esvp
     real(fp)      :: ew      ! Saturation pressure of water vapour near water surface
     real(fp)      :: ewl     ! Saturation pressure of water vapour in air remote
-    real(fp)      :: extinc
+    real(fp)      :: extinc  ! Extinction coefficient light absorbed
     real(fp)      :: ffclou
     real(fp)      :: fheat
     real(fp)      :: flux
@@ -265,6 +265,7 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
     timjan      => gdp%gdheat%timjan
     stanton     => gdp%gdheat%stanton
     dalton      => gdp%gdheat%dalton
+    albedo      => gdp%gdheat%albedo
     qtotmx      => gdp%gdheat%qtotmx
     lambda      => gdp%gdheat%lambda
     rhum        => gdp%gdheat%rhum
@@ -360,63 +361,6 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
        fwind = (5.0e6_fp/sarea)**0.05_fp
     else
        fwind = 1.0_fp
-    endif
-    !
-    ! Check if user specified output of heat fluxes
-    !
-    if (flwoutput%temperature) then
-       if (.not. associated(gdp%gdheat%qeva_out)) then
-          !
-          ! allocate all arrays needed for writing to output files
-          !
-          allocate (gdp%gdheat%qeva_out (gdp%d%nmlb:gdp%d%nmub) , stat = istat)
-          if (istat==0) allocate (gdp%gdheat%qco_out  (gdp%d%nmlb:gdp%d%nmub) , stat = istat)
-          if (istat==0) allocate (gdp%gdheat%qbl_out  (gdp%d%nmlb:gdp%d%nmub) , stat = istat)
-          if (istat==0) allocate (gdp%gdheat%qin_out  (gdp%d%nmlb:gdp%d%nmub) , stat = istat)
-          if (istat==0) allocate (gdp%gdheat%qnet_out (gdp%d%nmlb:gdp%d%nmub) , stat = istat)
-          if (ktemp == 3) then
-             if (istat==0) allocate (gdp%gdheat%hlc_out  (gdp%d%nmlb:gdp%d%nmub) , stat = istat)
-          endif
-          if (free_convec) then
-             if (istat==0) allocate (gdp%gdheat%hfree_out(gdp%d%nmlb:gdp%d%nmub) , stat = istat)
-             if (istat==0) allocate (gdp%gdheat%efree_out(gdp%d%nmlb:gdp%d%nmub) , stat = istat)
-          endif
-          if (keva == 3) then
-             if (istat==0) allocate (gdp%gdheat%qmis_out  (gdp%d%nmlb:gdp%d%nmub) , stat = istat)
-          endif
-          !
-          if (istat /= 0) then
-             call prterr(lundia, 'U021', 'HEATU: memory allocation error')
-             call d3stop(1, gdp)
-          endif
-          !
-          ! define pointers again to update references; initialize the arrays
-          !
-          qeva_out   => gdp%gdheat%qeva_out
-          qco_out    => gdp%gdheat%qco_out
-          qbl_out    => gdp%gdheat%qbl_out
-          qin_out    => gdp%gdheat%qin_out
-          qnet_out   => gdp%gdheat%qnet_out
-          qeva_out  = 0.0_fp
-          qco_out   = 0.0_fp
-          qbl_out   = 0.0_fp
-          qin_out   = 0.0_fp
-          qnet_out  = 0.0_fp
-          if (ktemp == 3) then
-             hlc_out    => gdp%gdheat%hlc_out
-             hlc_out   = 0.0_fp
-          endif
-          if (free_convec) then
-             hfree_out  => gdp%gdheat%hfree_out
-             efree_out  => gdp%gdheat%efree_out
-             hfree_out = 0.0_fp
-             efree_out = 0.0_fp
-          endif
-          if (keva == 3) then
-             qmis_out   => gdp%gdheat%qmis_out
-             qmis_out  = 0.0_fp          
-          endif
-       endif
     endif
     !
     !
@@ -868,7 +812,6 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
              ! So, except for reflection which is equal to 9%, we do not have to
              ! compute QSN separately
              !
-             albedo = 0.09_fp
              qsn    = qsun * (1.0_fp-albedo)
              !
              h0old   = max(htrsh, s0(nm) + real(dps(nm),fp))
@@ -978,7 +921,6 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
        rlat = anglat
        !
        cccoef = 0.4_fp
-       albedo = 0.06_fp
        tm0    = timjan + timhr
        !
        decln  = 23.5_fp * degrad

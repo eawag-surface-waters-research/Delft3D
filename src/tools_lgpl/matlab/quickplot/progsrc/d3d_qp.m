@@ -1,4 +1,4 @@
-function outdata=d3d_qp(cmd,varargin)
+function outdata = d3d_qp(cmd,varargin)
 %D3D_QP QuickPlot user interface: plotting interface for Delft3D output data.
 %   To start the interface type: d3d_qp
 %
@@ -6,7 +6,7 @@ function outdata=d3d_qp(cmd,varargin)
 
 %----- LGPL --------------------------------------------------------------------
 %
-%   Copyright (C) 2011-2022 Stichting Deltares.
+%   Copyright (C) 2011-2023 Stichting Deltares.
 %
 %   This library is free software; you can redistribute it and/or
 %   modify it under the terms of the GNU Lesser General Public
@@ -317,6 +317,7 @@ switch cmd
         d3d_qp updatedomains
         d3d_qp refreshfigs
         set(mfig,'CloseRequestFcn','d3d_qp close');
+        finalversion(1)
         
     case {'openfile','reloadfile','openurl'}
         OpenFile=findobj(mfig,'tag','openfile','type','uipushtool');
@@ -2847,8 +2848,13 @@ switch cmd
         
     case {'comline','hidecomline'}
         currentstatus=get(UD.ComLine.Fig,'visible');
-        if strcmp(cmd,'hidecomline'),
+        if strcmp(cmd,'hidecomline')
             currentstatus='on';
+        elseif matlabversionnumber >= 9.04 % 2018a
+            winstate = get(UD.ComLine.Fig,'WindowState');
+            if ~strcmp(winstate,'normal')
+                set(UD.ComLine.Fig,'WindowState','normal')
+            end
         else
             try
                 jFrame = get(handle(UD.ComLine.Fig),'JavaFrame');

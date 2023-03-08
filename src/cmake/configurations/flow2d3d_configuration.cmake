@@ -1,5 +1,3 @@
-project(flow2d3d)
-
 # Specify the modules to be included
 
 if(NOT TARGET deltares_common)
@@ -95,3 +93,6 @@ add_subdirectory(${checkout_src_root}/${flow2d3d_kernel_dd_f_module} flow2d3d_ke
 add_subdirectory(${checkout_src_root}/${flow2d3d_kernel_module} flow2d3d_kernel)
 add_subdirectory(${checkout_src_root}/${flow2d3d_manager_module} flow2d3d_manager)
 add_subdirectory(${checkout_src_root}/${flow2d3d_module} flow2d3d)
+
+# Project name must be at the end of the configuration: it might get a name when including other configurations and needs to overwrite that
+project(flow2d3d)

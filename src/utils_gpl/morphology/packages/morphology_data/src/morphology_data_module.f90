@@ -1,7 +1,7 @@
 module morphology_data_module
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2011-2022.                                
+!  Copyright (C)  Stichting Deltares, 2011-2023.                                
 !                                                                               
 !  This program is free software: you can redistribute it and/or modify         
 !  it under the terms of the GNU General Public License as published by         
@@ -372,18 +372,19 @@ type morpar_type
     real(fp):: alfabn     !  factor for transverse bed load transport
     real(fp):: camax      !  Maximum volumetric reference concentration
     real(fp):: dzmax      !  factor for limiting source and sink term in EROSED (percentage of water depth)
-    real(fp):: sus        !  flag for calculating suspended load transport
-    real(fp):: bed        !  flag for calculating bed load transport
+    real(fp):: sus        !  calibration factor for suspended load transport
+    real(fp):: suscorfac  !  calibration factor for near-bed suspended load transport correction
+    real(fp):: bed        !  calibration factor for bed load transport
     real(fp):: pangle     !  phase lead angle acc. to Nielsen (1992) for TR2004 expression
     real(fp):: fpco       !  coefficient for phase llag effects
     real(fp):: factcr     !  calibration factor on Shields' critical shear stress   
     real(fp):: tmor       !  time where calculation for morphological changes start (tunit relative to ITDATE,00:00:00)
     real(fp):: tcmp       !  time where calculation for bed composition changes start (tunit relative to ITDATE,00:00:00)
     real(fp):: thetsduni  !  uniform value for dry cell erosion factor
-    real(fp):: susw       !  factor for adjusting wave-related suspended sand transport (included in bed-load)
+    real(fp):: susw       !  calibration factor for wave-related suspended sand transport (included in bed-load)
     real(fp):: sedthr     !  minimum depth for sediment calculations
     real(fp):: hmaxth     !  maximum depth for setting theta for erosion of dry bank
-    real(fp):: bedw       !  factor for adjusting wave-related bed-load sand transport (included in bed-load)
+    real(fp):: bedw       !  calibration factor for wave-related bed-load sand transport (included in bed-load)
     real(fp):: factsd     !  calibration factor for 2D suspended load relaxation time
     real(fp):: rdw
     real(fp):: rdc
@@ -545,6 +546,8 @@ type sedpar_type
     !
     type(tree_data)     , dimension(:), pointer :: sedblock => null()  !  Pointer to array of data block per fraction in .sed file (version 2)
     type(t_nodefraction), dimension(:), pointer :: nodefractions       !  Pointer to array of nodal point relations
+    !
+    logical       , dimension(:)    , pointer :: cmpupdfrac !  Flag for doing composition (underlayer) updates per fraction
     !
     real(fp)      , dimension(:)    , pointer :: tpsnumber  !  Turbulent Prandtl-Schmidt number
     real(fp)      , dimension(:)    , pointer :: rhosol     !  Soil density
@@ -1190,6 +1193,8 @@ subroutine nullsedpar(sedpar)
     sedpar%flspmc   = ' '
     !
     nullify(sedpar%sedblock)
+    !
+    nullify(sedpar%cmpupdfrac)
     nullify(sedpar%tpsnumber)
     nullify(sedpar%rhosol)
     !
@@ -1236,6 +1241,8 @@ subroutine clrsedpar(istat     ,sedpar  )
 !! executable statements -------------------------------------------------------
 !
     if (associated(sedpar%sedblock))   deallocate(sedpar%sedblock,   STAT = istat) ! the actual data tree should be deleted as part of the whole sed_ptr tree.
+    !
+    if (associated(sedpar%cmpupdfrac)) deallocate(sedpar%cmpupdfrac, STAT = istat)
     if (associated(sedpar%tpsnumber))  deallocate(sedpar%tpsnumber,  STAT = istat)
     if (associated(sedpar%rhosol))     deallocate(sedpar%rhosol,     STAT = istat)
     !
@@ -1307,10 +1314,10 @@ subroutine nullmorpar(morpar)
     real(fp)                             , pointer :: camax
     real(fp)                             , pointer :: dzmax
     real(fp)                             , pointer :: sus
+    real(fp)                             , pointer :: suscorfac
     real(fp)                             , pointer :: bed
     real(fp)                             , pointer :: tmor
     real(fp)                             , pointer :: tcmp
-    real(fp)              , dimension(:) , pointer :: thetsd
     real(fp)                             , pointer :: thetsduni
     real(fp)                             , pointer :: susw
     real(fp)                             , pointer :: sedthr
@@ -1341,9 +1348,7 @@ subroutine nullmorpar(morpar)
     logical                              , pointer :: duneavalan
     real(fp)                             , pointer :: hswitch
     real(fp)                             , pointer :: dzmaxdune
-    real(fp)              , dimension(:) , pointer :: xx
     !
-    real(hp)              , dimension(:) , pointer :: mergebuf
     logical                              , pointer :: bedupd
     logical                              , pointer :: cmpupd
     logical                              , pointer :: eqmbcsand
@@ -1365,8 +1370,6 @@ subroutine nullmorpar(morpar)
     character(256)                       , pointer :: ttlfil
     character(256)                       , pointer :: telfil
     character(256)                       , pointer :: flsthetsd
-    type (bedbndtype)     , dimension(:) , pointer :: morbnd
-    type (cmpbndtype)     , dimension(:) , pointer :: cmpbnd
     !
     real(fp) :: rmissval
     integer  :: imissval
@@ -1387,10 +1390,10 @@ subroutine nullmorpar(morpar)
     camax               => morpar%camax
     dzmax               => morpar%dzmax
     sus                 => morpar%sus
+    suscorfac           => morpar%suscorfac
     bed                 => morpar%bed
     tmor                => morpar%tmor
     tcmp                => morpar%tcmp
-    thetsd              => morpar%thetsd
     thetsduni           => morpar%thetsduni
     susw                => morpar%susw
     sedthr              => morpar%sedthr
@@ -1429,10 +1432,6 @@ subroutine nullmorpar(morpar)
     morfacrec           => morpar%morfacrec
     morfactable         => morpar%morfactable
     nxx                 => morpar%nxx
-    morbnd              => morpar%morbnd
-    cmpbnd              => morpar%cmpbnd
-    mergebuf            => morpar%mergebuf
-    xx                  => morpar%xx
     ttlform             => morpar%ttlform
     telform             => morpar%telform
     !
@@ -1555,6 +1554,7 @@ subroutine nullmorpar(morpar)
     eulerisoglm        = .false.    
     glmisoeuler        = .false.    
     l_suscor           = .true.    
+    suscorfac          = 1.0_fp
     densin             = .true.
     rouse              = .false.
     epspar             = .false.

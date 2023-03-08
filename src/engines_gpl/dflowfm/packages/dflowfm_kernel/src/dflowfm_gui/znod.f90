@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2022.                                
+!  Copyright (C)  Stichting Deltares, 2017-2023.                                
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -240,7 +240,11 @@ else if (nodval == 27) then
        znod = constituents(iconst_cur,k)
     end if
  else if (nodval == 46) then
-    znod =  turkinepsws(1,k)
+    if ( allocated(FrcInternalTides2D) ) then
+       znod = FrcInternalTides2D(kk)
+    else
+       znod = turkinepsws(1,k)
+    endif
  else if (nodval == 47 .and. (jagrw > 0 .or. jadhyd > 0)) then
     select case (grwhydopt)
     case (1) ! Ground water pressure
@@ -292,7 +296,7 @@ else if (nodval == 27) then
          znod = 1d0/nudge_rate(kk)
        endif
     else if (nshiptxy > 0) then
-       znod = v1ship(kk)
+       znod = s1(kk) + zsp(kk)
     endif
 
  else if (nodval == numoptwav .and. jawave > 0 .and. .not. flowWithoutWaves) then

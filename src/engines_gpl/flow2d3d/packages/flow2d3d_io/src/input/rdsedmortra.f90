@@ -4,7 +4,7 @@ subroutine rdsedmortra(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
                      & nambnd    ,lsec      ,tstart    ,tunit     ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2011-2022.                                     
+!  Copyright (C)  Stichting Deltares, 2011-2023.                                     
 !                                                                               
 !  This program is free software: you can redistribute it and/or modify         
 !  it under the terms of the GNU General Public License as published by         
@@ -77,6 +77,8 @@ subroutine rdsedmortra(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
 !
 ! Local variables
 !
+    logical                                  :: cmpupdall
+    logical                                  :: cmpupdany
     integer                                  :: i
     real(fp)                                 :: fwfacmor
     character(256)                           :: filmor
@@ -206,13 +208,15 @@ subroutine rdsedmortra(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
     ! Echo sediment and transport parameters
     !
     call echosed(lundia    ,error     ,lsed      ,lsedtot   , &
-               & iopsus    ,gdp%gdsedpar, gdp%gdtrapar)
+               & iopsus    ,gdp%gdsedpar, gdp%gdtrapar, gdp%gdmorpar%cmpupd)
     if (error) goto 999
     !
     ! Echo morphology parameters
     !
+    cmpupdall = all(gdp%gdsedpar%cmpupdfrac)
+    cmpupdany = any(gdp%gdsedpar%cmpupdfrac)
     call echomor(lundia    ,error     ,lsec      ,lsedtot   ,nto        , &
-               & nambnd    ,gdp%gdsedpar, gdp%gdmorpar, gdp%gdexttim%tunitstr)
+               & nambnd    ,gdp%gdsedpar, gdp%gdmorpar, gdp%gdexttim%tunitstr, cmpupdall, cmpupdany)
     if (error) goto 999
     !
     ! Read scour and echo parameters

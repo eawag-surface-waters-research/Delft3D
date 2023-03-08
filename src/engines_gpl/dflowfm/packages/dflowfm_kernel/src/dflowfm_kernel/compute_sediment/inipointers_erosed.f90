@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2022.                                
+!  Copyright (C)  Stichting Deltares, 2017-2023.                                
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -54,8 +54,10 @@
    ! stmpar
    lsed                => stmpar%lsedsus
    lsedtot             => stmpar%lsedtot
+   
    ! sedpar
    nmudfrac            => stmpar%sedpar%nmudfrac
+   cmpupdfrac          => stmpar%sedpar%cmpupdfrac
    rhosol              => stmpar%sedpar%rhosol
    cdryb               => stmpar%sedpar%cdryb
    logseddia           => stmpar%sedpar%logseddia
@@ -77,9 +79,11 @@
    thcmud              => stmpar%sedpar%thcmud
    tpsnumber           => stmpar%sedpar%tpsnumber
    dss                 => stmpar%sedpar%dss
+   
    ! morpar
    thresh              => stmpar%morpar%thresh
    sus                 => stmpar%morpar%sus
+   suscorfac           => stmpar%morpar%suscorfac
    bed                 => stmpar%morpar%bed
    susw                => stmpar%morpar%susw
    sedthr              => stmpar%morpar%sedthr

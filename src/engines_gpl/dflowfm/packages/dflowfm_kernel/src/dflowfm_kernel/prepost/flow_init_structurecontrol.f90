@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2022.                                
+!  Copyright (C)  Stichting Deltares, 2017-2023.                                
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -62,6 +62,7 @@ use string_module, only: str_lower, strcmpi
 use iso_c_binding
 use m_inquire_flowgeom
 use m_longculverts, only: nlongculverts
+use m_partitioninfo, only: jampi
 
 implicit none
 logical                       :: status
@@ -204,9 +205,13 @@ do i=1,network%sts%count
    if (numgen > 0) then
       istat =  initialize_structure_links(pstru, numgen, kegen(1:numgen), wu)
    else
+      call reallocP(pstru%linknumbers, 0)
       istat = DFM_NOERR
-      msgbuf = 'No intersecting flow links found for structure with id '''//trim(pstru%id)//'''.'
-      call msg_flush()
+      if (jampi == 0) then
+         ! TODO: change this if into a global reduction and check whether for each structure there is at least one partition handling it.
+         msgbuf = 'No intersecting flow links found for structure with id '''//trim(pstru%id)//'''.'
+         call msg_flush()
+      end if
    endif
 
 end do
@@ -370,7 +375,9 @@ do i=1,nstr
       if (loc_spec_type /= LOCTP_POLYLINE_FILE) then
          !use branchId, chainage
          npum = pstru%numlinks
-         kep(npump+1:npump+npum) = pstru%linknumbers(1:npum)
+         if (pstru%numlinks > 0) then
+            kep(npump+1:npump+npum) = pstru%linknumbers(1:npum)
+         end if
       else
          call selectelset_internal_links(xz, yz, ndx, ln, lnx, kep(npump+1:numl), npum, LOCTP_POLYLINE_FILE, plifile)
       endif
@@ -390,7 +397,9 @@ do i=1,nstr
 
       if (loc_spec_type /= LOCTP_POLYLINE_FILE) then
          ndambr = pstru%numlinks
-         kedb(ndambreak+1:ndambreak+ndambr) = pstru%linknumbers(1:ndambr)
+         if (pstru%numlinks > 0) then
+            kedb(ndambreak+1:ndambreak+ndambr) = pstru%linknumbers(1:ndambr)
+         end if
       else
          call selectelset_internal_links(xz, yz, ndx, ln, lnx, kedb(ndambreak+1:numl), ndambr, LOCTP_POLYLINE_FILE, plifile, &
                                          xps = dambreakPolygons(i)%xp, yps = dambreakPolygons(i)%yp, nps = dambreakPolygons(i)%np, &
@@ -411,7 +420,9 @@ do i=1,nstr
    case ('gate', 'weir', 'generalstructure') !< The various generalstructure-based structures
       if (loc_spec_type /= LOCTP_POLYLINE_FILE) then
          numgen = pstru%numlinks
-         kegen(ncgen+1:ncgen+numgen) = pstru%linknumbers(1:numgen)
+         if (pstru%numlinks > 0) then
+            kegen(ncgen+1:ncgen+numgen) = pstru%linknumbers(1:numgen)
+         end if
       else
          call selectelset_internal_links(xz, yz, ndx, ln, lnx, kegen(ncgen+1:numl), numgen, LOCTP_POLYLINE_FILE, plifile, sortLinks = 1)
       end if

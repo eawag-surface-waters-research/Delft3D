@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !
-!  Copyright (C)  Stichting Deltares, 2017-2022.
+!  Copyright (C)  Stichting Deltares, 2017-2023.
 !
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).
 !
@@ -1455,7 +1455,7 @@ end if
              else
                 rr  = dble(k-kb)/dble(kt-kb)
              endif
-             sa1(k) = (1d0 - rr)*sa1(kk) + rr*satop(kk)
+             sa1(k) = (1d0 - rr)*sa1(kb) + rr*satop(kk)
           enddo
        else if (inisal2D == 3) then          ! uniform below is specified
           do k = kb, kt
@@ -1538,6 +1538,7 @@ end if
            endif
         enddo
     enddo
+    call restore_au_q1_3D_for_1st_history_record()
  endif
 
  if ( janudge.eq.1 ) then  ! and here last actions on sal/tem nudging, before we set rho
@@ -1632,4 +1633,27 @@ end if
     s1m = bl
  endif
 
- end function flow_flowinit
+end function flow_flowinit
+
+    
+!> restore au and q1 for 3D case for the first write into a history file    
+subroutine restore_au_q1_3D_for_1st_history_record()
+use m_flow,     only : q1, LBot, kmx, kmxL
+use m_flowgeom, only : lnx
+
+implicit none
+
+integer:: i_q1_v, i_q1_0
+
+if ( kmx > 0 ) then
+   call furusobekstructures() ! to have correct au values but it provides incorrect q1 values for structures
+!  restore correct discharge values
+   do i_q1_0 = 1, lnx
+      q1(i_q1_0) = 0d0 
+      do i_q1_v = Lbot(i_q1_0), Lbot(i_q1_0) - 1 + kmxL(i_q1_0)
+         q1(i_q1_0) = q1(i_q1_0) + q1(i_q1_v)       ! depth integrated result
+      end do
+   end do
+end if
+    
+end subroutine restore_au_q1_3D_for_1st_history_record

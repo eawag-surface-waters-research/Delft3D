@@ -64,6 +64,7 @@ echo DIMR      : %root%\build_dimr\dimr.sln
 echo DWAQ      : %root%\build_dwaq\dwaq.sln
 echo D-Waves   : %root%\build_dwaves\dwaves.sln
 echo Tests     : %root%\build_tests\tests.sln
+echo Delft3D4  : %root%\build_delft3d4\delft3d4.sln
 echo.
 echo Finished
 goto :end
@@ -129,6 +130,16 @@ rem =================================
         set mode=quiet
     )
     if "%1" == "tests" (
+        set prepareonly=0
+        set config=%1
+        set mode=quiet
+    )
+    if "%1" == "delft3d4" (
+        set prepareonly=0
+        set config=%1
+        set mode=quiet
+    )
+    if "%1" == "flow2d3d" (
         set prepareonly=0
         set config=%1
         set mode=quiet
@@ -272,9 +283,7 @@ rem === Prepare_sln    ====
 rem =======================
 :PrepareSln
     if "!mode!" == "quiet" (
-        if "%config%" == "all" (
-            echo "Calling prepare_sln.py is not needed ..."
-        )
+        echo "Mode is 'quiet': Calling prepare_sln.py is not needed ..."
     ) else (
         echo.
         echo "Calling prepare_sln.py in interactive mode ..."
@@ -499,6 +508,22 @@ rem =======================
         rmdir /s /q %root%\build_all\x64\Release > del.log 2>&1
         del /f/q del.log
     )
+    if "!config!" == "delft3d4" (
+        echo.
+        echo "Installing in build_delft3d4 ..."
+        xcopy %root%\build_delft3d4\x64\Release\dflow2d3d                %root%\build_delft3d4\x64\dflow2d3d\       /E /C /Y /Q > del.log 2>&1
+        xcopy %root%\build_delft3d4\x64\Release\dimr                     %root%\build_delft3d4\x64\dimr\            /E /C /Y /Q > del.log 2>&1
+        xcopy %root%\build_delft3d4\x64\Release\dpart                    %root%\build_delft3d4\x64\dpart\           /E /C /Y /Q > del.log 2>&1
+        xcopy %root%\build_delft3d4\x64\Release\dwaq                     %root%\build_delft3d4\x64\dwaq\            /E /C /Y /Q > del.log 2>&1
+        xcopy %root%\build_delft3d4\x64\Release\dwaves                   %root%\build_delft3d4\x64\dwaves\          /E /C /Y /Q > del.log 2>&1
+        xcopy %root%\build_delft3d4\x64\Release\share                    %root%\build_delft3d4\x64\share\           /E /C /Y /Q > del.log 2>&1
+        xcopy %root%\build_delft3d4\x64\Release\swan                     %root%\build_delft3d4\x64\swan\            /E /C /Y /Q > del.log 2>&1
+        xcopy %root%\build_delft3d4\x64\Release\d_hydro\bin\*.exe        %root%\build_delft3d4\x64\dflow2d3d\bin\   /E /C /Y /Q > del.log 2>&1
+        xcopy %root%\build_delft3d4\x64\Release\dmor                     %root%\build_delft3d4\x64\dmor\            /E /C /Y /Q > del.log 2>&1
+
+        rmdir /s /q %root%\build_delft3d4\x64\Release > del.log 2>&1
+        del /f/q del.log
+    )
     goto :endproc
 
 
@@ -532,6 +557,8 @@ rem =======================
     echo "- dwaq"
     echo "- dimr"
     echo "- tests"
+    echo "- delft3d4"
+    echo "- flow2d3d"
     echo.
     echo "[OPTIONS]: usage [OPTION], sometimes followed by a value, space separated, in any order"
     echo "-coverage: Instrument object files for code-coverage tool (codecov) Example: -coverage"
