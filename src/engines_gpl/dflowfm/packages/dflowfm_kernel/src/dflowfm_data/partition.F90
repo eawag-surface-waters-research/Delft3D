@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! $Id: partition.F90 142612 2023-03-01 18:35:31Z markelov $
+! $HeadURL: https://svn.oss.deltares.nl/repos/delft3d/branches/research/Deltares/20230301_UNST_4401_neumann/src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_data/partition.F90 $
    
 !------------------------------------------------------------------------
 !  THOUGHTS:
@@ -6561,33 +6561,39 @@ end subroutine set_edge_weights_and_vsize_with_halo
 subroutine set_idomain_for_all_open_boundaries()
    use m_flowexternalforcings, only: nbndz, kez, nbndu, keu, ke1d2d
    use m_sobekdfm            , only: nbnd1d2d
+   use m_cell_geometry       , only: ndx 
+   use m_partitioninfo       , only: idomain
+   use m_alloc               , only: realloc
    implicit none
    
-   call set_idomain_for_open_boundary_cells(nbndz, kez)
-   call set_idomain_for_open_boundary_cells(nbndu, keu)
-   call set_idomain_for_open_boundary_cells(nbnd1d2d, ke1d2d)
+   if ( size(idomain) < ndx ) then
+       call realloc(idomain, ndx, keepExisting=.true.)
+   end if
+   call set_idomain_for_open_boundary_points(nbndz, size(kez), kez, ndx, idomain)
+   call set_idomain_for_open_boundary_points(nbndu, size(keu), keu, ndx, idomain)
+   call set_idomain_for_open_boundary_points(nbnd1d2d, size(ke1d2d), ke1d2d, ndx, idomain)
 
 end subroutine set_idomain_for_all_open_boundaries
 
 !> set idomain values for a set of open boundary cells
-subroutine set_idomain_for_open_boundary_cells(number_of_boundary_cells, links_to_boundary_cells)
+subroutine set_idomain_for_open_boundary_points(number_of_boundary_points, links_array_size, &
+    links_to_boundary_points, ndx, idomain)
    use m_flowgeom     , only: ln, lne2ln
-   use m_partitioninfo, only: idomain
    implicit none
    
-   integer     :: number_of_boundary_cells                          !< number of boundary cells
-   integer     :: links_to_boundary_cells(number_of_boundary_cells) !< links to boundary cells
+   integer, intent(in)     :: number_of_boundary_points                  !< number of boundary points
+   integer, intent(in)     :: links_array_size                           !< size of the links array
+   integer, intent(in)     :: links_to_boundary_points(links_array_size) !< links to boundary cells
+   integer, intent(in)     :: ndx                                        !< number of flow nodes (internal + boundary)
+   integer, intent(inout)  :: idomain(ndx)                               !< cell-based domain number
 
-   integer     :: boundary_cell, index, internal_cell, link
+   integer                 :: boundary_cell, boundary_point_number, internal_cell, link
    
-   do index  = 1, number_of_boundary_cells
-       link  = links_to_boundary_cells(index)
-       boundary_cell = ln(1,lne2ln(link)) 
-       internal_cell = ln(2,lne2ln(link))
+   do  boundary_point_number  = 1, number_of_boundary_points
+       link                   = links_to_boundary_points(boundary_point_number)
+       boundary_cell          = ln(1,lne2ln(link)) 
+       internal_cell          = ln(2,lne2ln(link))
        idomain(boundary_cell) = idomain(internal_cell)
    end do
    
-end subroutine set_idomain_for_open_boundary_cells
-    
-    
-    
+end subroutine set_idomain_for_open_boundary_points
