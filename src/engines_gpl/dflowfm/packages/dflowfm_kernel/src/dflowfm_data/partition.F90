@@ -130,16 +130,16 @@ implicit none
    
    integer                   :: minghostlev_u=0    !< minimum ghost-cell layer level of links
    integer                   :: maxghostlev_u=0    !< maximum ghost-cell layer level of links
-   integer, parameter        :: ighosttype_u=IGHOSTTYPE_COMBINED
+   integer, parameter        :: IGHOSTTYPE_U=IGHOSTTYPE_COMBINED
    
    integer                   :: minghostlev_sall=0 !< minimum ghost-cell layer level of water-level nodes, all ghost levels
    integer                   :: maxghostlev_sall=0 !< maximum ghost-cell layer level of water-level nodes, all ghost levels
-   integer, parameter        :: ighosttype_sall=IGHOSTTYPE_COMBINED
+   integer, parameter        :: IGHOSTTYPE_SALL=IGHOSTTYPE_COMBINED
    
-   integer, parameter        :: itag_s=1           !< communication tag
-   integer, parameter        :: itag_u=2           !< communication tag
-   integer, parameter        :: itag_sall=3        !< communication tag
-   integer, parameter        :: itag_snonoverlap=4 !< communication tag
+   integer, parameter        :: ITAG_S=1           !< communication tag
+   integer, parameter        :: ITAG_U=2           !< communication tag
+   integer, parameter        :: ITAG_Sall=3        !< communication tag
+   integer, parameter        :: ITAG_Snonoverlap=4 !< communication tag
    
    integer                      :: numghost_s            !< number of water-level ghost nodes
    integer, allocatable, target :: ighostlist_s(:)       !< list of water-level ghost nodes, in order of their corresponding domain
@@ -212,10 +212,10 @@ implicit none
    !integer, dimension(:), allocatable      :: ioverlap   !< overlapping nodes (in solver)
 
 #ifdef HAVE_MPI
-   integer                   :: JAMPI = 1          !< use MPI (1) or not (0)
+   integer                   :: jampi = 1          !< use MPI (1) or not (0)
    integer                   :: ja_mpi_init_by_fm  !< MPI_Init called by FM (1) or not (0). Not/0 in case FM runs in library mode and an outside runner program has taken care of MPI_Init.
 #else
-   integer                   :: JAMPI = 0          !< use MPI (1) or not (0)
+   integer                   :: jampi = 0          !< use MPI (1) or not (0)
 #endif
 
    double precision, allocatable :: reducebuf(:)    !< work array for mpi-reduce
@@ -613,9 +613,7 @@ implicit none
       
 !     make 3D ghost- and sendlists
       call partition_make_ghostsendlists_3d(ierror)
-      if ( ierror /= 0 ) goto 1234
-      
- 1234 continue
+
       return
    end subroutine partition_init_3D
 
@@ -1567,7 +1565,6 @@ implicit none
 !>    it is assumed that idomain and ighostlev are filled
    subroutine partition_get_ghosts(domain_number, itype, ghost_list, ierror)
       use m_alloc
-      !use m_flowgeom
 
       implicit none
 
@@ -1581,13 +1578,13 @@ implicit none
       if ( allocated(ghost_list) ) call dealloc_tghost(ghost_list)
 
       if ( itype == ITYPE_Sall ) then ! flow node
-         call get_ghost_cells(domain_number, minghostlev_sall, maxghostlev_sall, ighosttype_sall, ghost_list)
+         call get_ghost_cells(domain_number, minghostlev_sall, maxghostlev_sall, IGHOSTTYPE_SALL, ghost_list)
       else if ( itype == ITYPE_S ) then
         call get_ghost_cells(domain_number, minghostlev_s, maxghostlev_s, ighosttype_s, ghost_list)
       else if ( itype == ITYPE_U ) then  ! flow link
-         call get_ghost_links(domain_number, minghostlev_u, maxghostlev_u, ighosttype_u, ghost_list)
+         call get_ghost_links(domain_number, minghostlev_u, maxghostlev_u, IGHOSTTYPE_U, ghost_list)
       else if ( itype == ITYPE_CN ) then  ! flow node corners
-         call get_ghost_corners(domain_number, minghostlev_sall, maxghostlev_sall, ighosttype_sall, ghost_list)
+         call get_ghost_corners(domain_number, minghostlev_sall, maxghostlev_sall, IGHOSTTYPE_SALL, ghost_list)
       else  ! unknown type
          call qnerror('partition_get_ghosts: unsupported ghost type', ' ', ' ')
       end if
@@ -1802,11 +1799,11 @@ implicit none
       type(tghost), dimension(:), allocatable :: sallghost
       type(tghost), dimension(:), allocatable :: ughost
       
-      integer,                    parameter   :: maxnamelen=255
+      integer,                    parameter   :: MAXNAMELEN=255
 
       integer                                 :: idmn_other, minp
       
-      character(len=maxnamelen)               :: filename
+      character(len=MAXNAMELEN)               :: filename
       character(len=4)                        :: sdmn       ! domain number string
 
       ierror = 1
@@ -2538,25 +2535,25 @@ implicit none
             call qnerror('update_ghosts, ITYPE_S: numbering error', ' ', ' ')
             goto 1234
          end if
-         call update_ghost_loc(ndomains, NDIM, N, var, nghostlist_s(ndomains-1), ighostlist_s, nghostlist_s, nsendlist_s(ndomains-1), isendlist_s, nsendlist_s, itag_s, ierror, ignore_orientation=ignore_orientation)
+         call update_ghost_loc(ndomains, NDIM, N, var, nghostlist_s(ndomains-1), ighostlist_s, nghostlist_s, nsendlist_s(ndomains-1), isendlist_s, nsendlist_s, ITAG_S, ierror, ignore_orientation=ignore_orientation)
       else if ( itype == ITYPE_SALL ) then
          if ( N /= Ndx) then
             call qnerror('update_ghosts, ITYPE_Sall: numbering error', ' ', ' ')
             goto 1234
          end if
-         call update_ghost_loc(ndomains, NDIM, N, var, nghostlist_sall(ndomains-1), ighostlist_sall, nghostlist_sall, nsendlist_sall(ndomains-1), isendlist_sall, nsendlist_sall, itag_sall, ierror, ignore_orientation=ignore_orientation)
+         call update_ghost_loc(ndomains, NDIM, N, var, nghostlist_sall(ndomains-1), ighostlist_sall, nghostlist_sall, nsendlist_sall(ndomains-1), isendlist_sall, nsendlist_sall, ITAG_Sall, ierror, ignore_orientation=ignore_orientation)
       else if ( itype == ITYPE_U ) then
          if ( N /= Lnx) then
             call qnerror('update_ghosts, ITYPE_U: numbering error', ' ', ' ')
             goto 1234
          end if
-         call update_ghost_loc(ndomains, NDIM, N, var, nghostlist_u(ndomains-1), ighostlist_u, nghostlist_u, nsendlist_u(ndomains-1), isendlist_u, nsendlist_u, itag_u, ierror, ignore_orientation=ignore_orientation)
+         call update_ghost_loc(ndomains, NDIM, N, var, nghostlist_u(ndomains-1), ighostlist_u, nghostlist_u, nsendlist_u(ndomains-1), isendlist_u, nsendlist_u, ITAG_U, ierror, ignore_orientation=ignore_orientation)
       else if ( itype == ITYPE_CN ) then
          if ( N /= numk ) then
             call qnerror('update_ghosts, ITYPE_CN: numbering error', ' ', ' ')
             goto 1234
          end if
-         call update_ghost_loc(ndomains, NDIM, N, var, nghostlist_cn(ndomains-1), ighostlist_cn, nghostlist_cn, nsendlist_cn(ndomains-1), isendlist_cn, nsendlist_cn, itag_u, ierror)
+         call update_ghost_loc(ndomains, NDIM, N, var, nghostlist_cn(ndomains-1), ighostlist_cn, nghostlist_cn, nsendlist_cn(ndomains-1), isendlist_cn, nsendlist_cn, ITAG_U, ierror)
 !
 !     3D-extension         
       else if ( itype == ITYPE_S3D ) then
@@ -2564,26 +2561,25 @@ implicit none
             call qnerror('update_ghosts, ITYPE_S3D: numbering error', ' ', ' ')
             goto 1234
          end if
-         call update_ghost_loc(ndomains, NDIM, N, var, nghostlist_s(ndomains-1), ighostlist_s, nghostlist_s, nsendlist_s(ndomains-1), isendlist_s, nsendlist_s, itag_s, ierror, nghostlist_s_3D, nsendlist_s_3D, kmxn, kbot, ignore_orientation=ignore_orientation)
+         call update_ghost_loc(ndomains, NDIM, N, var, nghostlist_s(ndomains-1), ighostlist_s, nghostlist_s, nsendlist_s(ndomains-1), isendlist_s, nsendlist_s, ITAG_S, ierror, nghostlist_s_3D, nsendlist_s_3D, kmxn, kbot, ignore_orientation=ignore_orientation)
       else if ( itype == ITYPE_SALL3D ) then
          if ( N /= Ndkx) then
             call qnerror('update_ghosts, ITYPE_Sall3D: numbering error', ' ', ' ')
             goto 1234
          end if
-         call update_ghost_loc(ndomains, NDIM, N, var, nghostlist_sall(ndomains-1), ighostlist_sall, nghostlist_sall, nsendlist_sall(ndomains-1), isendlist_sall, nsendlist_sall, itag_sall, ierror, nghostlist_sall_3D, nsendlist_sall_3D, kmxn, kbot, ignore_orientation=ignore_orientation)
+         call update_ghost_loc(ndomains, NDIM, N, var, nghostlist_sall(ndomains-1), ighostlist_sall, nghostlist_sall, nsendlist_sall(ndomains-1), isendlist_sall, nsendlist_sall, ITAG_Sall, ierror, nghostlist_sall_3D, nsendlist_sall_3D, kmxn, kbot, ignore_orientation=ignore_orientation)
       else if ( itype == ITYPE_U3D ) then
          if ( N /= Lnkx) then
             call qnerror('update_ghosts, ITYPE_U3D: numbering error', ' ', ' ')
             goto 1234
          end if
-!         call update_ghost_loc(ndomains, NDIM, N, var, nghostlist_u(ndomains-1), ighostlist_u, nghostlist_u, nsendlist_u(ndomains-1), isendlist_u, nsendlist_u, itag_u, ierror, nghost3d=nghostlist_u_3D, nsend3d=nsendlist_u_3D, kmxnL=kmxL, kbot=Lbot)
-         call update_ghost_loc(ndomains, NDIM, N, var, nghostlist_u(ndomains-1), ighostlist_u, nghostlist_u, nsendlist_u(ndomains-1), isendlist_u, nsendlist_u, itag_u, ierror, nghostlist_u_3D, nsendlist_u_3D, kmxL, Lbot, ignore_orientation=ignore_orientation)
+         call update_ghost_loc(ndomains, NDIM, N, var, nghostlist_u(ndomains-1), ighostlist_u, nghostlist_u, nsendlist_u(ndomains-1), isendlist_u, nsendlist_u, ITAG_U, ierror, nghostlist_u_3D, nsendlist_u_3D, kmxL, Lbot, ignore_orientation=ignore_orientation)
        else if ( itype == ITYPE_U3DW ) then
          if ( N /= Lnkx) then
             call qnerror('update_ghosts, ITYPE_U3DW: numbering error', ' ', ' ')
             goto 1234
          end if
-         call update_ghost_loc(ndomains, NDIM, N, var, nghostlist_u(ndomains-1), ighostlist_u, nghostlist_u, nsendlist_u(ndomains-1), isendlist_u, nsendlist_u, itag_u, ierror, nghostlist_u_3Dw, nsendlist_u_3Dw, kmxL+1, Lbot-1, ignore_orientation=ignore_orientation)
+         call update_ghost_loc(ndomains, NDIM, N, var, nghostlist_u(ndomains-1), ighostlist_u, nghostlist_u, nsendlist_u(ndomains-1), isendlist_u, nsendlist_u, ITAG_U, ierror, nghostlist_u_3Dw, nsendlist_u_3Dw, kmxL+1, Lbot-1, ignore_orientation=ignore_orientation)
                  
 !     overlap
       else if ( itype == ITYPE_Snonoverlap ) then
@@ -2592,9 +2588,9 @@ implicit none
             goto 1234
          end if
          if ( jaoverlap.eq.1 ) then
-            call update_ghost_loc(ndomains, NDIM, N, var, nghostlist_snonoverlap(ndomains-1), ighostlist_snonoverlap, nghostlist_snonoverlap, nsendlist_snonoverlap(ndomains-1), isendlist_snonoverlap, nsendlist_snonoverlap, itag_snonoverlap, ierror, ignore_orientation=ignore_orientation)
+            call update_ghost_loc(ndomains, NDIM, N, var, nghostlist_snonoverlap(ndomains-1), ighostlist_snonoverlap, nghostlist_snonoverlap, nsendlist_snonoverlap(ndomains-1), isendlist_snonoverlap, nsendlist_snonoverlap, ITAG_Snonoverlap, ierror, ignore_orientation=ignore_orientation)
          else  ! no overlap: use sall
-            call update_ghost_loc(ndomains, NDIM, N, var, nghostlist_sall(ndomains-1), ighostlist_sall, nghostlist_sall, nsendlist_sall(ndomains-1), isendlist_sall, nsendlist_sall, itag_sall, ierror, ignore_orientation=ignore_orientation)
+            call update_ghost_loc(ndomains, NDIM, N, var, nghostlist_sall(ndomains-1), ighostlist_sall, nghostlist_sall, nsendlist_sall(ndomains-1), isendlist_sall, nsendlist_sall, ITAG_Sall, ierror, ignore_orientation=ignore_orientation)
          end if
       else
          call qnerror('update_ghosts: unknown ghost type', ' ', ' ')
@@ -5025,23 +5021,6 @@ end subroutine gatherv_int_data_mpi_dif
       return
    end subroutine abort_all
    
-!> prints ghost data into a file
-subroutine   print_ghosts_to_file(nfile, ghost)
-implicit none
-integer, intent(in) :: nfile
-type(tghost), dimension(:), allocatable, intent(in)   :: ghost 
-
-integer:: iglev, i
-
-do iglev=lbound(ghost,1),ubound(ghost,1)
-    write (nfile,*) 'ghost level ', iglev, ghost(iglev)%num, ghost(iglev)%numdomains, ghost(iglev)%numneighdmn
-write (nfile,*) 'ghost list ', ghost(iglev)%list
-write (nfile,*) 'ghost nodes ', ghost(iglev)%N
-write (nfile,*) 'ghost neighdmn ', ghost(iglev)%neighdmn
-enddo
-
-end subroutine   print_ghosts_to_file
-
 !> counts a number of ghost data
 integer function count_list_size(min_ghost_level, max_ghost_level, ghost_list)
 implicit none
