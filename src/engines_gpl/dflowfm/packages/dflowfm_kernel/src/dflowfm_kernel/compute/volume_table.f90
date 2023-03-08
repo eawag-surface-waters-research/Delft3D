@@ -316,6 +316,8 @@ module m_VolumeTables
          generateVLTBOnLinks = .false.
       endif
 
+      ndx1d = ndx - ndx2d     ! include also the 2d boundary nodes.
+            
       if (useVolumeTableFile .and. .not. generateVLTBOnLinks) then
          ! Do not use the volumetable file for the storage tables.
          volumeTableFile = fileName
@@ -328,7 +330,6 @@ module m_VolumeTables
       cross => network%crs%cross
       stors => network%storS%stor
 
-      ndx1d = ndx - ndx2d     ! include also the 2d boundary nodes.
       if (allocated(vltb)) then
          call dealloc(vltb)
       end if
@@ -569,7 +570,6 @@ module m_VolumeTables
       integer :: n, ndx1d, nod, L, LL, numlinks
       integer :: Lindex, dir
 
-      ndx1d = ndx - ndx2d
       do n = 1, ndx1d
          nod = n+ndx2d
          ! there is additional storage on this node, split this over the flow links
@@ -794,7 +794,6 @@ module m_VolumeTables
 
       integer :: ibin
       integer :: i, n, istat, j
-      integer :: ndx1d
       integer :: count, numberOfSummerdikes
 
       open(newunit=ibin, file=volumeTableFile, form='unformatted', access='stream', iostat=istat)
@@ -806,7 +805,6 @@ module m_VolumeTables
       write(ibin) volumeTableFileType
       write(ibin) VolumeTableFileMajorVersion, VolumeTableFileMinorVersion
 
-      ndx1d = ndx - ndx2d
       write(ibin) ndx1d, nonlin1D
 
       do n = 1, ndx1d
@@ -848,7 +846,7 @@ module m_VolumeTables
 
       integer :: ibin
       integer :: i, j, n, istat
-      integer :: ndx1d
+      integer :: ndx1d_read
       integer :: count
       integer :: nonlin1D_file
       integer :: numberOfSummerdikes
@@ -886,9 +884,9 @@ module m_VolumeTables
          close(ibin)
          return
       endif
-      read(ibin) ndx1d, nonlin1D_file
+      read(ibin) ndx1d_read, nonlin1D_file
       
-      if (ndx1d /= ndx - ndx2d) then
+      if (ndx1d_read /= ndx1d) then
          call SetMessage(LEVEL_WARN, trim(volumeTableFile)//' is not compatible with the current model, the number of 1d cells are different.')
          return
       endif

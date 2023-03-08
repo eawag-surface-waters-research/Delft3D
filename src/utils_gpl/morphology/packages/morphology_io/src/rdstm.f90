@@ -1,4 +1,3 @@
-module m_rdstm
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2023.                                
@@ -28,7 +27,7 @@ module m_rdstm
 !  $Id$
 !  $HeadURL$
 !-------------------------------------------------------------------------------
-
+module m_rdstm
 use morphology_data_module
 use bedcomposition_module
 use precision
@@ -59,15 +58,11 @@ end type stmtype
 
 contains
 
+!> Read sediment transport and morphology data from filsed, filemor and filtrn
+!! (and files referenced therein).
 subroutine rdstm(stm, griddim, filsed, filmor, filtrn, &
                & lundia, lsal, ltem, ltur, lsec, lfbedfrm, &
                & julrefday, dtunit, nambnd, error)
-!!--description-----------------------------------------------------------------
-!
-! Read sediment transport and morphology data from filsed, filemor and filtrn
-! (and files referenced therein).
-!
-!!--declarations----------------------------------------------------------------
     use grid_dimens_module
     use properties ! includes tree_structures
     use m_ini_noderel ! for node relation definitions
@@ -140,7 +135,7 @@ subroutine rdstm(stm, griddim, filsed, filmor, filtrn, &
     !
     call count_sed(lundia, error, stm%lsedsus, stm%lsedtot, filsed, &
                  & stm%sedpar, sedfil_tree)
-    if (error) goto 999
+    if (error) return
     !
     lstsci = max(0,lsal,ltem) + stm%lsedsus
     !
@@ -169,13 +164,13 @@ subroutine rdstm(stm, griddim, filsed, filmor, filtrn, &
     ! get pointer
     !
     call initrafrm(lundia, error, stm%lsedtot, stm%trapar)
-    if (error) goto 999
+    if (error) return
     !
     call rdsed  (lundia, error, lsal, ltem, stm%lsedsus, &
                & stm%lsedtot, lstsci, ltur, stm%namcon, &
                & stm%morpar%iopsus, nmlb, nmub, filsed, &
                & sedfil_tree, stm%sedpar, stm%trapar, griddim)
-    if (error) goto 999
+    if (error) return
     ! 
     !  For 1D branches read the node relation definitions
     !
@@ -192,7 +187,7 @@ subroutine rdstm(stm, griddim, filsed, filmor, filtrn, &
                & stm%lsedsus, nmaxus, nto, lfbedfrm, nambnd, julrefday, morfil_tree, &
                & stm%sedpar, stm%morpar, stm%fwfac, stm%morlyr, &
                & griddim)
-    if (error) goto 999
+    if (error) return
     !
     ! Some other parameters are transport formula specific. Use the value
     ! historically specified in mor file as default.
@@ -217,14 +212,14 @@ subroutine rdstm(stm, griddim, filsed, filmor, filtrn, &
                 & stm%morpar%moroutput%sedpar, &
                 & stm%sedpar%sedtyp, stm%sedpar%sedblock, &
                 & griddim)
-    if (error) goto 999
+    if (error) return
     !--------------------------------------------------------------------------
     !
     ! Echo sediment and transport parameters
     !
     call echosed(lundia, error, stm%lsedsus, stm%lsedtot, &
                & stm%morpar%iopsus, stm%sedpar, stm%trapar, stm%morpar%cmpupd)
-    if (error) goto 999
+    if (error) return
     !
     ! Echo morphology parameters
     !
@@ -232,8 +227,6 @@ subroutine rdstm(stm, griddim, filsed, filmor, filtrn, &
     cmpupdany = any(stm%sedpar%cmpupdfrac)
     call echomor(lundia, error, lsec, stm%lsedtot, nto, &
                & nambnd, stm%sedpar, stm%morpar, dtunit, cmpupdall, cmpupdany)
-    !
-999 continue
     !
     ! we should deallocate sedfil_tree, morfil_tree but
     ! we can't deallocate sedfil_tree since parts are referenced from stm%sedpar

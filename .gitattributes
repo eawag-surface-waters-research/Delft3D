@@ -18100,6 +18100,7 @@ src/tools_lgpl/matlab/quickplot/progsrc/compileonly/make_exe.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/compileonly/wl_identification.c -text
 src/tools_lgpl/matlab/quickplot/progsrc/compute_percentile.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/convertnval.m -text
+src/tools_lgpl/matlab/quickplot/progsrc/css_color.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/d3d_attrib.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/d3d_qp.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/default.fig -text
@@ -18114,6 +18115,7 @@ src/tools_lgpl/matlab/quickplot/progsrc/ecoplot.ini -text
 src/tools_lgpl/matlab/quickplot/progsrc/ecoplot.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/enclosure.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/face2surf.m -text
+src/tools_lgpl/matlab/quickplot/progsrc/finalversion.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/floodmask.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/geojson.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/golder.m -text
@@ -18642,7 +18644,6 @@ src/utils_gpl/flow1d/packages/flow1d_core/src/spatial_data.f90 -text
 src/utils_gpl/flow1d/packages/flow1d_core/src/struc_helper.f90 -text
 src/utils_gpl/flow1d/packages/flow1d_core/src/structures.f90 -text
 src/utils_gpl/flow1d/packages/flow1d_core/src/universal_weir.f90 -text
-src/utils_gpl/flow1d/packages/flow1d_core/src/weir.f90 -text
 src/utils_gpl/flow1d/packages/flow1d_core/src/wetcrs_modules.F90 -text
 src/utils_gpl/flow1d/packages/flow1d_io/CMakeLists.txt -text
 src/utils_gpl/flow1d/packages/flow1d_io/Makefile.am -text

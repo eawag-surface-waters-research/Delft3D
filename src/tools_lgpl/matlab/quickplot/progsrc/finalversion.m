@@ -1,5 +1,5 @@
-function hNew=gentextfld(hOld,Ops,Parent,Val,X,Y,Z)
-%GENTEXTFLD Generic plot routine for a text field.
+function finalversion(gui)
+%LASTVERSION Report that this is the last version.
 
 %----- LGPL --------------------------------------------------------------------
 %                                                                               
@@ -30,63 +30,17 @@ function hNew=gentextfld(hOld,Ops,Parent,Val,X,Y,Z)
 %   http://www.deltaressystems.com
 %   $HeadURL$
 %   $Id$
+persistent finalremark
 
-delete(hOld);
-zcoord=nargin>6;
-if iscellstr(Val) || ischar(Val)
-    convert=0;
-elseif isfield(Ops,'numformat')
-    convert=1;
-else
-    convert=2;
-end
-if zcoord
-    blank=isnan(X(:))|isnan(Y(:))|isnan(Z(:));
-    Z=Z(~blank); Z=Z(:);
-else
-    blank=isnan(X(:))|isnan(Y(:));
-end
-X=X(~blank); X=X(:);
-Y=Y(~blank); Y=Y(:);
-Val=Val(~blank); Val=Val(:);
-%
-if isempty(X)
-    X=NaN;
-    Y=NaN;
-    if zcoord
-        Z=NaN;
-    end
-end
-%
-if zcoord
-    hNew = line([min(X) max(X)],[min(Y) max(Y)],[min(Z) max(Z)],'linestyle','none','marker','none','parent',Parent);
-else
-    hNew = line([min(X) max(X)],[min(Y) max(Y)],'linestyle','none','marker','none','parent',Parent);
-end
-hNew = repmat(hNew,1,length(Val)+1); % pre-allocate hNew of appropriate length
-for i=1:length(Val)
-    if convert==1
-        if iscell(Val)
-            Str=sprintf(Ops.numformat,Val{i});
-        else
-            Str=sprintf(Ops.numformat,Val(i));
-        end
-    elseif convert==2
-        if iscell(Val)
-            Str=var2str(Val{i});
-        else
-            Str=var2str(Val(i));
-        end
-    elseif iscell(Val)
-        Str=Val{i};
-    else % char
-        Str=Val(i);
-    end
-    Str = protectstring(Str);
-    if zcoord
-        hNew(i+1)=text(X(i),Y(i),Z(i),Str,'parent',Parent); % faster to use text(X,Y,Z,Val,...)?
+if isempty(finalremark)
+    Str = {'We''re migrating to GitLab. This is the final QUICKPLOT / Delft3D-MATLAB'
+           'toolbox version from the https://svn.oss.deltares.nl repository. Please'
+           'check after 13 March 2023 the Deltares OSS website for information on'
+           'where to newer versions.'};
+    if nargin > 0 && gui
+        ui_message('warning',Str);
     else
-        hNew(i+1)=text(X(i),Y(i),Str,'parent',Parent); % faster to use text(X,Y,Z,Val,...)?
+        fprintf('%s\n',Str{:});
     end
+    finalremark = 'done';
 end
-set(hNew(2:end),'clipping','on',Ops.FontParams{:})

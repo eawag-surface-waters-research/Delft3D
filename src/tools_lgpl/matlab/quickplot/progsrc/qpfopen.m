@@ -43,5 +43,6 @@ function Out = qpfopen(varargin)
 %   $HeadURL$
 %   $Id$
 
+finalversion
 [Out,FileName,Tp] = qp_fmem('open',varargin{:});
 Out.QP_FileType = Tp;

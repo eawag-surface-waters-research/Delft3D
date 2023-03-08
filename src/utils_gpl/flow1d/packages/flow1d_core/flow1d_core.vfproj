@@ -65,7 +65,6 @@
 		<File RelativePath=".\src\nodes.f90"/>
 		<File RelativePath=".\src\ObservationPoints.f90"/>
 		<File RelativePath=".\src\ObservCrossSections.f90"/>
-		<File RelativePath=".\src\Orifice.f90"/>
 		<File RelativePath=".\src\Pump.f90"/>
 		<File RelativePath=".\src\Qsort.f90"/>
 		<File RelativePath=".\src\Roughness.f90"/>
@@ -74,7 +73,6 @@
 		<File RelativePath=".\src\struc_helper.f90"/>
 		<File RelativePath=".\src\structures.f90"/>
 		<File RelativePath=".\src\Trenches.f90"/>
-		<File RelativePath=".\src\universal_weir.f90"/>
 		<File RelativePath=".\src\weir.f90"/>
 		<File RelativePath=".\src\wetcrs_modules.F90"/></Filter></Files>
 	<Globals/></VisualStudioProject>

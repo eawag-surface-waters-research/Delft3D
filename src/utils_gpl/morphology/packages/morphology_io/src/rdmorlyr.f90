@@ -52,16 +52,16 @@ subroutine rdmorlyr(lundia    ,error     ,filmor    , &
 !
 ! Arguments
 !
-    integer                                         , intent(in)  :: lsedtot  !  Description and declaration in esm_alloc_int.f90
-    integer                                                       :: lundia   !  Description and declaration in inout.igs
+    integer                                         , intent(in)  :: lsedtot  !< Description and declaration in esm_alloc_int.f90
+    integer                                                       :: lundia   !< Description and declaration in inout.igs
     integer                                         , intent(in)  :: nmaxus
     integer                                         , intent(in)  :: nto
     integer                                         , intent(in)  :: version
     logical                                         , intent(in)  :: lfbedfrm    
     logical                                         , intent(out) :: error
     character(*)                                                  :: filmor
-    character(20)             , dimension(nto)                    :: nambnd   !  Description and declaration in esm_alloc_char.f90
-    character(20)             , dimension(lsedtot)                :: namsed   !  Names of all sediment fractions 
+    character(20)             , dimension(nto)                    :: nambnd   !< Description and declaration in esm_alloc_char.f90
+    character(20)             , dimension(lsedtot)                :: namsed   !< Names of all sediment fractions 
     type(morpar_type)                               , pointer     :: morpar
     type(sedpar_type)                               , pointer     :: sedpar
     type(bedcomp_data)                              , pointer     :: morlyr
@@ -81,7 +81,7 @@ subroutine rdmorlyr(lundia    ,error     ,filmor    , &
     integer                  :: mxnulyr
     integer                  :: nm
     integer                  :: nval
-    character(11)            :: fmttmp       ! Format file ('formatted  ') 
+    character(11)            :: fmttmp       !< Format file ('formatted  ') 
     character(20)            :: parname
     character(20)            :: txtput2
     character(40)            :: txtput1
@@ -168,8 +168,9 @@ subroutine rdmorlyr(lundia    ,error     ,filmor    , &
     error      = .false.
     rmissval   = -999.0_fp
     fmttmp     = 'formatted'
+    
     !
-    ! allocate memory for boundary conditions
+    ! allocate memory for boundary conditions. This needs to be done always. 
     !
     istat = 0
     allocate (morpar%cmpbnd(nto), stat = istat)
@@ -180,14 +181,14 @@ subroutine rdmorlyr(lundia    ,error     ,filmor    , &
        call write_error(errmsg, unit=lundia)
        error = .true.
        return
-    endif
-    !
-    cmpbnd              => morpar%cmpbnd
-    !
+    endif  
+    
+    cmpbnd     => morpar%cmpbnd
     do j = 1, nto
        cmpbnd(j)%icond = 1
        cmpbnd(j)%ibcmt = 0
     enddo
+
     !
     ! return if input file is too old, otherwise get
     ! the data tree read from the input file
@@ -199,8 +200,10 @@ subroutine rdmorlyr(lundia    ,error     ,filmor    , &
           error = .true.
           return
        endif
-       goto 777
+       call set_sediment_properties_for_the_morphological_layers(iporosity, morlyr, sedpar)
+       return
     endif
+
     write (lundia, '(a)') '*** Start  of underlayer input'
     !
     ! underlayer bookkeeping mechanism
@@ -774,9 +777,22 @@ subroutine rdmorlyr(lundia    ,error     ,filmor    , &
     write (lundia, '(a)') '*** End    of underlayer input'
     write (lundia, *)
     !
-    ! Set sediment properties for the morphological layers
+    call set_sediment_properties_for_the_morphological_layers(iporosity, morlyr, sedpar)
     !
-777 continue
+    deallocate(parnames, stat = istat)
+    !
+end subroutine rdmorlyr
+
+
+subroutine set_sediment_properties_for_the_morphological_layers(iporosity, morlyr, sedpar)
+    use bedcomposition_module, only : bedcomp_data, setbedfracprop
+    use morphology_data_module, only : sedpar_type
+    implicit none
+
+    integer                                 , pointer, intent(in)      :: iporosity
+    type(bedcomp_data)                      , pointer, intent(inout)   :: morlyr
+    type(sedpar_type)                       , pointer, intent(inout)   :: sedpar
+                  
     if (iporosity==0) then
        !
        ! porosity is fraction dependent and included in cdryb densities
@@ -791,10 +807,8 @@ subroutine rdmorlyr(lundia    ,error     ,filmor    , &
              & sedpar%logsedsig, sedpar%rhosol)
        ! sedpar%cdryb = sedpar%rhosol
     endif
-    deallocate(parnames, stat = istat)
-    !
-end subroutine rdmorlyr
-
+    
+end subroutine set_sediment_properties_for_the_morphological_layers
 
 subroutine rdinidiff(lundia    ,fildiff   ,ndiff     ,kdiff    , &
                    & zdiff     ,griddim   ,error     )
@@ -813,11 +827,11 @@ subroutine rdinidiff(lundia    ,fildiff   ,ndiff     ,kdiff    , &
 ! Global variables
 !
     type(griddimtype)                        , target   , intent(in)  :: griddim
-    integer                                             , intent(in)  :: lundia  !  Description and declaration in inout.igs
-    integer                                             , intent(in)  :: ndiff   !  Description and declaration in bedcomposition module
-    real(fp), dimension(ndiff)                          , intent(out) :: zdiff   !  Description and declaration in bedcomposition module
-    real(fp), dimension(ndiff,griddim%nmlb:griddim%nmub), intent(out) :: kdiff   !  Description and declaration in bedcomposition module
-    character(*)                                                      :: fildiff
+    integer                                             , intent(in)  :: lundia  !< Description and declaration in inout.igs
+    integer                                             , intent(in)  :: ndiff   !< Description and declaration in bedcomposition module
+    real(fp), dimension(ndiff)                          , intent(out) :: zdiff   !< Description and declaration in bedcomposition module
+    real(fp), dimension(ndiff,griddim%nmlb:griddim%nmub), intent(out) :: kdiff   !< Description and declaration in bedcomposition module
+    character(*)                                        , intent(out) :: fildiff
     logical                                             , intent(out) :: error
 !
 ! Local variables
