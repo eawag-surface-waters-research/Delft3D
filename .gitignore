@@ -5,6 +5,7 @@ bin/**
 .vscode/**
 
 # files extensions to exclude
+*.i90
 
 # folders to exclude
 src/utils_lgpl/**/tests/**/obj/**
