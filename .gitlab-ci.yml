@@ -1,8 +1,0 @@
-print-info:
-  stage: test
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH
-  script:
-    - 'echo "Job start: $CI_JOB_STARTED_AT"'
-    - 'echo "Branch: $CI_COMMIT_BRANCH"'
-    - 'echo "Commit Author: $CI_COMMIT_AUTHOR"'
