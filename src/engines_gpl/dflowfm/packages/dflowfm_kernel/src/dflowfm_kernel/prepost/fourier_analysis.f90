@@ -27,13 +27,6 @@
 !
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
-!-------------------------------------------------------------------------------------------------------
-!  Origin:
-!     URL: https://svn.oss.deltares.nl/repos/delft3d/trunk/src/engines_gpl/flow2d3d/packages/data/include/fourier.igs
-!     Revision: 5108
-
 module m_fourier_analysis
 
 ! TODO:
@@ -939,10 +932,10 @@ subroutine setfoustandardname(founam, foustdname)
     case ('uc')
        foustdname = 'sea_water_speed'
     case ('uxa','ux')
-       foustdname = merge('sea_water_x_velocity       ',    & 
+       foustdname = merge('sea_water_x_velocity       ',    &
                           'eastward_sea_water_velocity', jsferic==0)
     case ('uya','uy')
-       foustdname = merge('sea_water_y_velocity        ',   &   
+       foustdname = merge('sea_water_y_velocity        ',   &
                           'northward_sea_water_velocity', jsferic==0)
     case ('fb')
        foustdname = 'freeboard'
@@ -1342,7 +1335,7 @@ end subroutine setfoustandardname
        bl_min = min(bl, bl_min) ! lowest bed level
        s1max = max(s1, s1max) ! highest water level
        endif
-    
+
     if (gdfourier%iblws > 0) then
        allocate(wmag(lnx), stat=ierr)
        if (ierr /= 0) then
@@ -1428,7 +1421,7 @@ end subroutine setfoustandardname
        case ('r1')
           fieldptr => constituents(gdfourier%fconno(ifou),:)
        case ('ta')
-            if (jawave==0 .or. flowWithoutWaves) then  
+            if (jawave==0 .or. flowWithoutWaves) then
                 call gettaus(1,1)
              else
                 call gettauswave(jawaveswartdelwaq)
@@ -1645,7 +1638,7 @@ end subroutine setfoustandardname
            namfunlong = cnumber // ": " // namfun
            !
            idvar(:,ivar) = imissval
-           if (index(founam(ifou),'fb') > 0 .or. index(founam(ifou),'wdog') > 0 .or. index(founam(ifou),'vog') > 0) then 
+           if (index(founam(ifou),'fb') > 0 .or. index(founam(ifou),'wdog') > 0 .or. index(founam(ifou),'vog') > 0) then
            ! Freeboard, waterdepth on ground and volume on ground are only for 1D
            ierr = unc_def_var_map(fileids%ncid,fileids%id_tsp, idvar(:,ivar), NF90_DOUBLE, unc_loc, trim(fouvarnam(ivar)), trim(fouvarnamstd(ivar)), &
                           AnalyseTypeShort // namfunlong // ', ' // trim(fouvarnamlong(ivar)), fouvarunit(ivar), is_timedep = 0, which_meshdim = 1)
@@ -1772,7 +1765,7 @@ end subroutine setfoustandardname
           if( fousmb(1) > 0d0 ) then
              do n = 1, nmaxus
                 fousma(n) = fousma(n) / fousmb(1)
-             enddo 
+             enddo
           else
              fousma = defaultd
           endif
@@ -1883,7 +1876,7 @@ end subroutine setfoustandardname
        !
        ! Initialize local variables
        !
-       
+
        ! Frequention := 360 degree / period
        ! where period = [ (FTMSTO - FMTSTR) ] / [ FNUMCY * 3600 ]
        ! FOUFAS is defined in RDFOUR as
