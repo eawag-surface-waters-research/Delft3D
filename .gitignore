@@ -5,3 +5,9 @@ bin/**
 .vscode/**
 
 # files extensions to exclude
+
+# folders to exclude
+src/utils_lgpl/**/tests/**/obj/**
+src/utils_lgpl/**/unittests/**/obj/**
+src/utils_lgpl/io_netcdf/packages/io_netcdf_csharp/**/obj/**
+src/engines_gpl/dflowfm/tests/DFlowFMTests/**/obj/*
