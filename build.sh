@@ -36,7 +36,7 @@ function print_usage_info {
     echo "      Compile in debug mode"
     echo
     echo "More info  : https://oss.deltares.nl/web/delft3d/source-code"
-    echo "About CMake: https://svn.oss.deltares.nl/repos/delft3d/trunk/src/cmake/doc/README"
+    echo "About CMake: https://git.deltares.nl/oss/delft3d/-/tree/main/src/cmake/README"
     echo
     exit 1
 }
@@ -47,7 +47,7 @@ function print_usage_info {
 function CheckUtils () {
     if ! command -v patchelf &> /dev/null; then
        echo "'patchelf' is not found."
-    fi 
+    fi
 
     if ! command -v svnversion &> /dev/null; then
        echo "'svnversion' is not found."
