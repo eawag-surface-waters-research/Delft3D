@@ -79,6 +79,8 @@ use meshdata, only : ug_idsLen, ug_idsLongNamesLen
    !! to a FORTRAN comm handle.
    integer, target :: DFM_COMM_DFMWORLD ! = NAMECLASH_MPI_COMM_WORLD !< [-] The MPI communicator for dflowfm (FORTRAN handle). {"rank": 0}
    integer, target :: DFM_COMM_ALLWORLD                              !< [-] The MPI communicator for dflowfm including the fetch proc (FORTRAN handle). {"rank": 0}#endif
+#endif
+
    type tghost
       integer, dimension(:), allocatable   :: list               !< list of ghost nodes or links, in order of their corresponding other domain, dim(1:number of ghost nodes/links)
       integer, dimension(:), allocatable   :: N                  !< cumulative number of ghost nodes/links per domain in the list, starts with fictitious domain 0, dim(0:numdomains)

@@ -45,7 +45,6 @@
  use m_observations, only : mxls
  use unstruc_files, only : defaultFilename
  use m_sediment, only: stm_included
- use m_GlobalParameters, only: callcount, wccount, countstop, rate
 #ifdef _OPENMP
  use omp_lib
 #endif
