@@ -69,9 +69,10 @@ Replace "..." by the actual path on your system to the checkout directory.
 with:
 - \<kernel\>  : one of: all, d3d4, fm, none, part, rr, swan, waq, wave    
   -> Use all/none to trigger all/none tests
-- \<type\>    : one of: bugfix, doc, feature, poc, release, research    
+- \<type\>    : one of: bugfix, doc, feature, poc, release, research, task    
   -> Use research for branches that will not be merged into trunk directly
-- \<ISSUENR\> : JIRA issue number
+- \<ISSUENR\> : JIRA issue number    
+  -> Not needed for type research
 
 Example:    
 fm/feature/UNST-1234_improve_partition_file
