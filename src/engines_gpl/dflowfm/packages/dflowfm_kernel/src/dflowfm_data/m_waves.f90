@@ -37,7 +37,6 @@ module m_waves
  integer, parameter                         :: TPWAVSMOOTH   = 1    !< Indicator for TPS
  integer, parameter                         :: TPWAVRELATIVE = 2    !< Indicator for RTP
  integer                                    :: nwf                  !< nr of fetch wind dirs + 1
- integer                                    :: ndx2Dr               !< (reduced) total nr 2D cells
  double precision, allocatable              :: fetch(:,:)           !< wind dir dep. fetch lenght (m) of each cell, dimension 5,*, or 13, * nr of wind dirs + 1
  double precision, allocatable              :: fetdp(:,:)           !< wind dir dep. waterdepth (m)   of each cell, dimension 5,*, or 13, * nr of wind dirs + 1
  double precision, allocatable              :: fett(:,:)            !< reduce array, (2,ndx)

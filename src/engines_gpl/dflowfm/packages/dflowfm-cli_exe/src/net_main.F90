@@ -137,47 +137,6 @@
    numranks          = 1
    my_rank           = 0
    ja_mpi_init_by_fm = 0
-#ifdef HAVE_MPI
-
-   ! Preparations for calling mpi_init:
-   ! When using IntelMPI, mpi_init will cause a crash if IntelMPI is not
-   ! installed. Do not call mpi_init in a sequential computation.
-   ! Check this via the possible environment parameters.
-   jampi = merge(1, 0, running_in_mpi_environment())
-
-   if (jampi == 1) then
-       ja_mpi_init_by_fm = 1
-       call mpi_init(ierr)
-       if (ierr /= 0) then
-           jampi = 0
-       end if
-   end if
-
-   if (jampi == 1) then
-      ! From calling C/C++ side, construct an MPI communicator, and call
-      ! MPI_Fint MPI_Comm_c2f(MPI_Comm comm) to convert the C comm handle
-      ! to a FORTRAN comm handle.
-      call mpi_comm_rank(DFM_COMM_DFMWORLD,my_rank,ierr)
-      call mpi_comm_size(DFM_COMM_DFMWORLD,numranks,ierr)
-   end if
-
-   if ( numranks.le.1 ) then
-      jampi = 0
-   end if
-
-!  make domain number string as soon as possible
-   write(sdmn, '(I4.4)') my_rank
-   !write(6,*) 'my_rank =', my_rank
-
-!   call pressakey()
-#else
-   numranks=1
-   !write(6,*) 'NO MPI'
-   !call pressakey()
-#endif
-
-
-
    !INTEGER*4 OLD_FPE_FLAGS, NEW_FPE_FLAGS                                ! nanrelease
    !NEW_FPE_FLAGS = FPE_M_TRAP_OVF + FPE_M_TRAP_DIV0 + FPE_M_TRAP_INV     ! nanrelease
    !OLD_FPE_FLAGS = FOR_SET_FPE (NEW_FPE_FLAGS)                           ! nanrelease
@@ -217,7 +176,41 @@
     end select
 
 #ifdef HAVE_MPI
-    write(*,*) ' my_rank, numranks ', my_rank, numranks
+
+   ! Preparations for calling mpi_init:
+   ! When using IntelMPI, mpi_init will cause a crash if IntelMPI is not
+   ! installed. Do not call mpi_init in a sequential computation.
+   ! Check this via the possible environment parameters.
+   jampi = merge(1, 0, running_in_mpi_environment())
+
+   if (jampi == 1) then
+       ja_mpi_init_by_fm = 1
+       call mpi_init(ierr)
+       if (ierr /= 0) then
+           jampi = 0
+       end if
+   end if
+
+   if ( jampi == 1 ) then
+      ! From calling C/C++ side, construct an MPI communicator, and call
+      ! MPI_Fint MPI_Comm_c2f(MPI_Comm comm) to convert the C comm handle
+      ! to a FORTRAN comm handle.
+       call set_mpi_environment_wwo_fetch_proc()
+   endif
+
+   if ( numranks.le.1 ) then
+      jampi = 0
+   end if
+   write(*,*) ' my_rank, numranks ', my_rank, numranks
+!  make domain number string as soon as possible
+   write(sdmn, '(I4.4)') my_rank
+   !write(6,*) 'my_rank =', my_rank
+
+!   call pressakey()
+#else
+   numranks=1
+   !write(6,*) 'NO MPI'
+   !call pressakey()
 #endif
 
     if ( md_pressakey == 1 ) then
@@ -467,6 +460,7 @@
 
 1234 continue
 
+   call finish_fetch_proc()
 !  finalize before exit in case we did "normal" computation
    call partition_finalize()
 
