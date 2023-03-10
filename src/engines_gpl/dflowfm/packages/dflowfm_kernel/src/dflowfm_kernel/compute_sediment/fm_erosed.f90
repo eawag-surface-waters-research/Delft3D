@@ -82,6 +82,7 @@
    use m_tables, only: interpolate
    use m_partitioninfo
    use compbsskin_module, only: compbsskin, get_alpha_fluff
+   use m_debug
    !
    implicit none
    !
@@ -1195,7 +1196,7 @@
          endif
       enddo ! next sediment fraction
       ua(nm) = real(dll_reals(RP_UAU), fp)    ! cartesian
-      va(nm) = real(dll_reals(RP_VAU), fp)
+      va(nm) = real(dll_reals(RP_VAU), fp)    ! values checked 20230310 JRE
    enddo ! next nm point
    !
    ! Distribute velocity asymmetry to links

@@ -361,7 +361,7 @@
                            !
                            ! The corresponding effective suspended load flux is
                            !
-                           cflux   = u1(k)*cavg*dz*wu_mor(Lx)
+                           cflux   = u1(ka)*cavg*dz*wu_mor(Lx)
                            !
                            ! Increment the correction by the part of the suspended load flux
                            ! that is in excess of the flux computed above, but never opposite.

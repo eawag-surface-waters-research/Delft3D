@@ -358,7 +358,7 @@ subroutine fill_valobs()
                   valobs(IPNT_RHO+klay-1,i) = rho(kk)
                endif
                if (kmx > 0) then 
-                   if (zws(kt) - zws(kb-1) > epshu .and. k < kt ) then
+                   if (zws(kt) - zws(kb-1) > epshu .and. kk < kt ) then    ! Make issue k->kk
                       if (idensform > 10 ) then           
                          prsappr = ag*rhomean*( zws(kt) - zws(kk) )  
                          drhodz  = ( setrhofixedp(kk+1,prsappr) - setrhofixedp(kk,prsappr) ) / max(0.5d0*(zws(kk+1) - zws(kk-1)),epshs)    ! FIXME!!!!

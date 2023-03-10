@@ -335,8 +335,8 @@ subroutine xbeach_all_input()
    call setoldnames('0','1','2')
    call parmapply('turb',3, turb)
 
-   Tbfac    = readkey_dbl (md_surfbeatfile,'Tbfac  ',1.0d0,     0.00d0,   1.0d0)
-   nuhfac    = readkey_dbl (md_surfbeatfile,'nuhfac  ',1.0d0,     0.00d0,   1.0d0)
+   Tbfac    = readkey_dbl (md_surfbeatfile,'Tbfac  ',1.0d0,     0.0d0,   1.0d0)        ! this is setting for van Thiel. Rest: 0.3
+   nuhfac    = readkey_dbl (md_surfbeatfile,'nuhfac  ',1.0d0,     0.0d0,   1.0d0)
    !
    !
    ! Finish
@@ -808,18 +808,18 @@ subroutine xbeach_wave_init()
    end do
    
    do k=1,ndx
-      kwav(k)  = 2*pi/max(L1(k),waveps)
+      kwav(k)  = 2*pi/max(L1(k),epshu)
       cwav(k)  = sigmwav(k)/kwav(k)
       kh   = min(kwav(k)*hh(k),10.0d0)
-      nwav(k)=0.5d0+kh/max(sinh(2d0*kh),waveps)
+      nwav(k)=0.5d0+kh/max(sinh(2d0*kh),epshu)
       cgwav(k)=cwav(k)*nwav(k)
    end do
    
    where (hh<=epshu)
       kwav=25d0
-      cwav = 0d0 
+      cwav = sqrt(ag*epshu) 
       nwav = 1.d0
-      cgwav= 0d0 
+      cgwav= sqrt(ag*epshu) 
    end where
    
    end subroutine xbeach_dispersion
@@ -1095,7 +1095,8 @@ subroutine xbeach_wave_instationary()
    end do
    
    !   Breaker dissipation
-   call xbeach_wave_breaker_dissipation(dts, break, DeltaH, waveps, hhw, kwav, km, gamma, gamma2, nroelvink, QB, alpha, Trep, cwav, thetamean, E, D, sigmwav, wci, 0)
+   !call xbeach_wave_breaker_dissipation(dts, break, DeltaH, waveps, hhw, kwav, km, gamma, gamma2, nroelvink, QB, alpha, Trep, cwav, thetamean, E, D, sigmwav, wci, 0)
+   call xbeach_wave_breaker_dissipation(dts, break, DeltaH, waveps, hhw, kwav, km, gamma, gamma2, nroelvink, QB, alpha, Trep, cwav, thetamean, H, D, sigmwav, wci, 0)
 
    !   Dissipation by bed friction
    dfac = 2.d0*fw*rhomean/(3.d0*pi)
@@ -1609,8 +1610,8 @@ subroutine xbeach_wave_compute_flowforcing2D()
          !		 	          + km*(H/2)**2*sqrt(max(par%g*km*tanh(arg),0.001d0))/sqrt(max(fac,0.001d0)) ! include wave steepness
          nwav=0.5d0+km*hh/sinh(2*max(km,0.00001d0)*hh)
       elsewhere
-         cwav  = 0.01d0
-         cgwav = 0.01d0
+         cwav  = sqrt(ag*epshu)
+         cgwav = sqrt(ag*epshu)
          nwav  = 1.d0
       endwhere
       !
@@ -2222,7 +2223,7 @@ end subroutine xbeach_apply_wave_bc
 
 
 subroutine xbeach_wave_breaker_dissipation(dtmaxwav, break, deltaH, waveps, hhw, kwav, km, gamma, gamma2, nroelvink, &
-                                           & QB, alpha, Trep, cwav, thetamean, E, D, sigmwav, wci,windmodel)
+                                           & QB, alpha, Trep, cwav, thetamean, hwav, D, sigmwav, wci,windmodel)
    use m_flow
    use m_flowgeom
    use m_sferic, only: pi
@@ -2247,7 +2248,7 @@ subroutine xbeach_wave_breaker_dissipation(dtmaxwav, break, deltaH, waveps, hhw,
    double precision,                 intent(in)     :: Trep
    double precision, dimension(Ndx), intent(in)     :: cwav
    double precision, dimension(Ndx), intent(in)     :: thetamean
-   double precision, dimension(Ndx), intent(in)     :: E
+   double precision, dimension(Ndx), intent(in)     :: hwav
    double precision, dimension(Ndx), intent(out)    :: D
    double precision, dimension(Ndx), intent(in)     :: sigmwav
    integer                         , intent(in)     :: wci
@@ -2272,7 +2273,8 @@ subroutine xbeach_wave_breaker_dissipation(dtmaxwav, break, deltaH, waveps, hhw,
    break = trim(break)
 
    if (break == 'roelvink1') then                  ! Dissipation according to Roelvink (1993)
-      H   = sqrt(8.d0*E/rhomean/ag)
+      !H   = sqrt(8.d0*E/rhomean/ag)
+      H   = hwav
       hr  = hhw
       kmr = min(max(kwav, 0.01d0), 100.d0)
       !
@@ -2283,7 +2285,7 @@ subroutine xbeach_wave_breaker_dissipation(dtmaxwav, break, deltaH, waveps, hhw,
       endif
       !
       Qb = min(1.d0 - exp(max(arg,-100.d0)), 1.d0)
-      D = Qb * 2.d0 * alpha * E
+      D = Qb * 2.d0 * alpha * rhomean * ag * H**2 / 8d0
       !
       if (wci.ne.0 .or. windmodel.eq.1) then
          D = D * sigmwav/2.d0/pi;
@@ -2311,7 +2313,8 @@ subroutine xbeach_wave_breaker_dissipation(dtmaxwav, break, deltaH, waveps, hhw,
          gam = gamma
       endif
 
-      H   = sqrt(8.d0/rhomean/ag*E)
+      !H   = sqrt(8.d0/rhomean/ag*E)
+      H   = hwav
       Hb  = tanh(gam*kh/0.88d0)*(0.88d0/max(kwav,1e-10))
       R   = Hb/max(H,0.00001d0)
 
@@ -2319,7 +2322,8 @@ subroutine xbeach_wave_breaker_dissipation(dtmaxwav, break, deltaH, waveps, hhw,
       D   = 0.25d0 * alpha * f * rhomean * ag * (Hb**2+H**2) * Qb
 
    elseif (break == 'roelvink2') then
-      H   = sqrt(8.d0*E/rhomean/ag)
+      !H   = sqrt(8.d0*E/rhomean/ag)
+      H   = hwav
       hr  = hhw
       hh  = max(hs, waveps)
       kmr = min(max(kwav, 0.01d0), 100.d0)
@@ -2331,7 +2335,7 @@ subroutine xbeach_wave_breaker_dissipation(dtmaxwav, break, deltaH, waveps, hhw,
       endif
       !
       Qb  = min(1.d0 - exp(max(arg,-100.d0)), 1.d0)
-      D = Qb * 2.d0 * alpha * E
+      D = Qb * 2.d0 * alpha * rhomean * ag * H**2 / 8d0
       !
       if (wci.ne.0 .or. windmodel.eq.1) then
          D = D * sigmwav/2.d0/pi * H/hh
@@ -2340,7 +2344,8 @@ subroutine xbeach_wave_breaker_dissipation(dtmaxwav, break, deltaH, waveps, hhw,
       endif
 
    elseif (trim(break) == 'roelvink_daly') then
-      H   = sqrt(8.d0*E/rhomean/ag)
+      !H   = sqrt(8.d0*E/rhomean/ag)
+      H   = hwav
       call advec_upw_bulk(thetamean, Qb,cwav,Qb_advec) ! first order upwind, with mean direction
       do k = 1, ndxi
          Qb(k) = Qb(k) - dtmaxwav * Qb_advec(k) * bai(k)
@@ -2351,7 +2356,7 @@ subroutine xbeach_wave_breaker_dissipation(dtmaxwav, break, deltaH, waveps, hhw,
       where (H > gamma * hr)   Qb = 1.d0
       where (H < gamma2 * hr)  Qb = 0.d0
       Qb = max(Qb, 0.d0)
-      D = Qb * 2.d0 * alpha * E
+      D = Qb * 2.d0 * alpha * rhomean * ag * H**2 / 8d0
       !
       if (wci.ne.0 .or. windmodel.eq.1) then
          D = D * sigmwav/2.d0/pi * H/hh
@@ -2360,7 +2365,8 @@ subroutine xbeach_wave_breaker_dissipation(dtmaxwav, break, deltaH, waveps, hhw,
       endif
 
    elseif (break == 'janssen') then                 ! Dissipation according to Janssen and Battjes (2007)
-      H   = sqrt(8.d0*E/rhomean/ag)
+      !H   = sqrt(8.d0*E/rhomean/ag)
+      H   = hwav
       if (wci.ne.0) then
          f = sigmwav / 2.d0 / pi
          ka = km
@@ -3661,7 +3667,7 @@ subroutine rollerturbulence(k)
    double precision          :: disrol, rol, Tw, Tb, cw, ktrb, hloc
    double precision          :: dcf, dcfin, ML, twothird
    
-   if (hs(k)<=epshs) then
+   if (hs(k)<=epshu) then
       ktb(k)=0d0
       return
    endif
@@ -3677,19 +3683,19 @@ subroutine rollerturbulence(k)
    if (jawave .eq. 4) then
       disrol = DR(k)
       rol    = R(k)
-      cw     = max(cwav(k),eps6)
-      Tw     = 2*pi/sigmwav(k)
+      cw     = max(cwav(k),sqrt(ag*epshu))
+      Tw     = 2.*pi/sigmwav(k)
       if (turb==TURB_BORE_AVERAGED) then
-         Tb     = Tbore(k)
+         Tb = Tbore(k)
       else 
-         Tb = 2.d0 * pi / sigmwav(k)
+         Tb = Trep
       end if
    end if
    
    twothird = 2d0/3d0
    ktrb = (disrol/rhomean)**twothird           ! See Battjes, 1975 / 1985
 
-   hloc = max(s1(k)-bl(k),1d-2)
+   hloc = max(s1(k)-bl(k),0.01)
    ! compute mixing length
    ML = dsqrt(2*rol*Tw/(rhomean*cw)) 
    ML = min(ML, hloc);
@@ -3703,7 +3709,7 @@ end subroutine rollerturbulence
    
 subroutine borecharacter()
    use m_xbeach_data
-   use m_flow, only: s1, epshs
+   use m_flow, only: s1, epshu
    use m_flowgeom, only: ndx, bl
    use m_physcoef
    use m_sferic, only:pi
@@ -3711,14 +3717,14 @@ subroutine borecharacter()
    
    implicit none
     
-   integer                          :: nh, nt, k, ierr
-   integer                          :: ih0, it0, ih1, it1
-   double precision                 :: p, q
-   double precision                 :: f0, f1, f2, f3
-   double precision                 :: t0fac
-   double precision                 :: duddtmax, dudtmax, detadxmean, siguref, detadxmax, duddtmean, dudtmean
-   double precision                 :: dh, dt
-   double precision, allocatable    :: h0(:), t0(:), hh(:)
+   integer                                :: nh, nt, k, ierr
+   integer                                :: ih0, it0, ih1, it1
+   double precision                       :: p, q
+   double precision                       :: f0, f1, f2, f3
+   double precision                       :: t0fac
+   double precision                       :: duddtmax, dudtmax, detadxmean, siguref, duddtmean, dudtmean
+   double precision                       :: dh, dt
+   double precision, allocatable, save    :: h0(:), t0(:), hh(:), detadxmax(:)
    
    include 'RF.inc'
    
@@ -3726,22 +3732,21 @@ subroutine borecharacter()
       allocate(h0(1:ndx), stat=ierr)
       allocate(t0(1:ndx), stat=ierr)
       allocate(hh(1:ndx), stat=ierr)
+      allocate(detadxmax(1:ndx), stat=ierr)
    end if
    
    dh = 0.03d0
    dt = 1.25d0
    nh = floor(0.99d0/dh);
    nt = floor(50.d0/dt);
-   hh = max(s1-bl,epshs)
+   hh = max(s1-bl,epshu)
    
    ! compute dimensionless wave height and wave period in each grid point..
-      h0 = min(nh*dh,max(dh,     min(H,hh)/max(hh,epshs)))
-!      t0 = min(nt*dt,max(dt,Trep*sqrt(ag/max(hs, epshs))))
-      t0 = min(nt*dt,max(dt,2d0*pi/sigmwav*sqrt(ag/max(hh, epshs))))        
+      h0 = min(nh*dh,max(dh,     min(H,hh)/hh))
+      t0 = min(nt*dt,max(dt,Trep*sqrt(ag/hh)))        
       do k=1,ndx
-         if (hh(k).lt.epshs) then      ! some sensible defaults
-!            Tbore(k)=Trep
-            Tbore(k)=2.d0 * pi / sigmwav(k)
+         if (hh(k).lt.epshu) then      ! some sensible defaults
+            Tbore(k)=Trep
             BR(k) = beta
             cycle
          end if
@@ -3758,11 +3763,9 @@ subroutine borecharacter()
          f3=p*q;
                   
          if (t0(k)==50.d0) then
-!            t0fac = 50.d0/max((Trep*sqrt(ag/max(hs(k),epshs))),50.d0)
-            t0fac = 50.d0/max((2.d0 * pi / sigmwav(k) *sqrt(ag/max(hh(k),epshs))),50.d0)            
+            t0fac = 50.d0/max((Trep*sqrt(ag/hh(k))),50.d0)            
          elseif (t0(k)==1.25)then
-!            t0fac = 1.25d0/min((Trep*sqrt(ag/max(hs(k),epshs))),1.25d0)
-            t0fac = 1.25d0/min((2.d0 * pi /sigmwav(k) *sqrt(ag/max(hh(k),epshs))),1.25d0)
+            t0fac = 1.25d0/min((Trep*sqrt(ag/hh(k))),1.25d0)
          else
             t0fac = 1.d0
          endif
@@ -3770,21 +3773,18 @@ subroutine borecharacter()
          duddtmax = f0*RF(3,ih0,it0)+f1*RF(3,ih1,it0)+ f2*RF(3,ih0,it1)+f3*RF(3,ih1,it1)
          siguref = f0*RF(4,ih0,it0)+f1*RF(4,ih1,it0)+ f2*RF(4,ih0,it1)+f3*RF(4,ih1,it1)
          !
-         dudtmax = uorb(k)/sqrt(2.0) / max(waveps,siguref)* sqrt(ag/max(hh(k), epshs)) * t0fac * duddtmax    ! urms_cc is uorb, not urms
-         detadxmax = dudtmax*sinh(min(kwav(k)*hh(k),10d0))/max(max(cwav(k),sqrt(H(k)*ag)),1d-10)/sigmwav(k)
+         dudtmax = uorb(k)/sqrt(2.0) / max(waveps,siguref)* sqrt(ag/hh(k)) * t0fac * duddtmax    ! urms_cc is uorb, not urms. Checked, set jauorb=1 in mdu for match
+         detadxmax(k) = dudtmax*sinh(min(kwav(k)*hh(k),10d0))/max(cwav(k),sqrt(H(k)*ag))/sigmwav(k) ! checked JRE
          !
          if (rfb==1) then
             duddtmean = f0*RF(5,ih0,it0)+f1*RF(5,ih1,it0)+ f2*RF(5,ih0,it1)+f3*RF(5,ih1,it1)
-            dudtmean = uorb(k)/sqrt(2.0) / max(waveps,siguref) * sqrt(ag/max(hh(k), epshs))*t0fac*duddtmean
+            dudtmean = uorb(k)/sqrt(2.0) / max(waveps,siguref) * sqrt(ag/hh(k))*t0fac*duddtmean
             detadxmean = dudtmean*sinh(min(kwav(k)*hh(k),10d0))/max(max(cwav(k),sqrt(H(k)*ag)),1d-10)/sigmwav(k)
-            BR(k) = BRfac*sin(atan(detadxmean))
+            BR(k) = BRfac*sin(atan(detadxmean))   ! checked to be consistent w XB JRE
          endif
       enddo
 
-!      Tbore = Tbfac*max(Trep/25.d0,min(Trep/4.d0,H/(max(max(cwav,sqrt(H*ag)),1d-10)*max(detadxmax,waveps))))
-      Tbore = Tbfac*max(2.d0 * pi / sigmwav /25.d0,min(2.d0 * pi / sigmwav /4.d0,H/(max(max(cwav,sqrt(H*ag)),1d-10)*max(detadxmax,waveps))))  
-      deallocate(h0, t0, stat=ierr)
-
+      Tbore = Tbfac*max(Trep/25.d0,min(Trep/4.d0,H/(max(cwav,sqrt(H*ag))*max(detadxmax,5d-3))))
    end subroutine borecharacter
    
 
@@ -5788,7 +5788,8 @@ subroutine xbeach_compute_wave_velocities(callType,dhdx,dhdy,dudx,dudy,dvdx,dvdy
    use m_flow, only: ucx, ucy, hs
    use m_flowgeom, only: ndx, ntheta, ntheta_s
    use m_sferic, only:pi
-   use m_flowparameters, only: epshs
+   use m_flowparameters, only: epshs, epshu
+   use m_physcoef, only:ag
 
    implicit none
    
@@ -5826,7 +5827,7 @@ subroutine xbeach_compute_wave_velocities(callType,dhdx,dhdy,dudx,dudy,dvdx,dvdy
    select case (callType)  
       case (0,1)    ! regular stationary, instationary
          do k = 1, ndx
-            if (hs(k)>epshs) then
+            if (hs(k)>epshu) then
                if (wci>0) then                                     ! non-wci: see dispersion
                   cgwav(k) = cgwav(k) + hypot(uwci(k), vwci(k))    ! directions taken into account in advection routine
                   cwav(k)  = cwav(k)  + hypot(uwci(k), vwci(k))    ! To check: only in wave direction?
@@ -5845,8 +5846,8 @@ subroutine xbeach_compute_wave_velocities(callType,dhdx,dhdy,dudx,dudy,dvdx,dvdy
                   enddo
                endif
             else
-               cgwav(k)    = 0d0
-               cwav(k)     = 0d0
+               cgwav(k)    = sqrt(ag*epshu)
+               cwav(k)     = sqrt(ag*epshu)
                ctheta(:,k) = 0d0
             endif
          enddo
@@ -5873,8 +5874,8 @@ subroutine xbeach_compute_wave_velocities(callType,dhdx,dhdy,dudx,dudy,dvdx,dvdy
                   enddo
                endif
             else
-               cgwav_s(k)    = 0d0
-               cwav_s(k)     = 0d0
+               cgwav_s(k)    = sqrt(ag*epshu)
+               cwav_s(k)     = sqrt(ag*epshu)
                ctheta_s(:,k) = 0d0
             endif
          enddo

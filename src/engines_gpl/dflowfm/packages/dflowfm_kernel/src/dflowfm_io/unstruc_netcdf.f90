@@ -51,6 +51,8 @@ use io_ugrid
 use m_sediment
 use string_module
 use io_netcdf_acdd
+use m_debug
+
 implicit none
 
 integer            :: nerr_
@@ -470,7 +472,11 @@ type t_unc_mapids
    integer :: id_limtstep(MAX_ID_VAR)     = -1 !< Variable ID for number of times a node was limiting for the computational time step
    integer :: id_limtstep_cum(MAX_ID_VAR) = -1 !< Variable ID for cumulative number of times a node was limiting for the computational time step
    integer :: id_courant(MAX_ID_VAR)      = -1 !< Variable ID for the Courant number in a node      
-
+   !
+   ! for debug purposes JRE
+   integer :: id_dbg1d(MAX_ID_VAR)        = -1
+   integer :: id_dbg2d(MAX_ID_VAR)        = -1
+   integer :: id_dbg3d(MAX_ID_VAR)        = -1
    !
    ! Other
    !
@@ -6001,7 +6007,20 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
             enddo
          endif
       endif
-   if (timon) call timstop (handle_extra(71))
+
+      if (jawritedebug) then
+         ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp  , mapids%id_dbg1d  , nf90_double, UNC_LOC_S, 'debug1d', 'debug1d', 'debug1d', '-', dimids = (/ -2, -1 /), jabndnd=jabndnd_)
+         !      
+         if (allocated(debugarr2d)) then
+            ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_dbg2d, nf90_double, UNC_LOC_S, 'debug2d', 'debug2d', 'debug2d', '-', dimids = (/ -2, mapids%id_tsp%id_sedtotdim,-1 /), jabndnd=jabndnd_) ! not CF
+         endif
+         !
+         if (allocated(debugarr3d)) then
+            !ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_dbg3d, nf90_double, UNC_LOC_S, 'debug3d', 'debug3d', 'debug3d', '-', dimids = (/ -2, -1 /), jabndnd=jabndnd_) ! not CF   
+         endif
+      endif
+
+      if (timon) call timstop (handle_extra(71))
 
    endif
    ! End of writing time-independent flow geometry data.
@@ -7280,6 +7299,21 @@ if (jamapsed > 0 .and. jased > 0 .and. stm_included) then
    if (jamapcali > 0 .and. jacali == 1) then
       ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_cfcl, UNC_LOC_L, cfclval, jabndnd=jabndnd_)
    end if
+
+   ! JRE debug variables
+   if (jawritedebug) then
+      ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_dbg1d, UNC_LOC_S, debugarr1d(1:ndxndxi), jabndnd=jabndnd_)
+
+      if (allocated(debugarr2d)) then
+         ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_dbg2d, UNC_LOC_S, debugarr2d(1:ndxndxi,:), jabndnd=jabndnd_)
+      endif
+
+      if (allocated(debugarr3d)) then
+         !ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_dbg3d, UNC_LOC_L, cfclval, jabndnd=jabndnd_)
+      endif
+
+   endif
+
    
    ! water quality bottom variables
     if (numwqbots > 0) then
@@ -13110,8 +13144,8 @@ subroutine unc_read_map_or_rst(filename, ierr)
                    end if
                    call getkbotktop(kloc, kb, kt)
                    ! TODO: UNST-976, incorrect for Z-layers:
-                   !constituents(iconst,kb:kt) = tmpvar(1:kt-kb+1,kk)
-                   sed(i,kb:kt) = tmpvar(1:kt-kb+1,kk)
+                   constituents(iconst,kb:kt) = tmpvar(1:kt-kb+1,kk)
+                   !sed(i,kb:kt) = tmpvar(1:kt-kb+1,kk)
                 enddo
              else
                 ierr = nf90_get_var(imapfile, id_sf1(i), tmpvar(1,1:um%ndxi_own), start = (/ kstart, it_read/), count = (/ndxi,1/))
@@ -13121,8 +13155,8 @@ subroutine unc_read_map_or_rst(filename, ierr)
                    else
                       kloc = kk
                    end if
-                   !constituents(iconst, kloc) = tmpvar(1,kk)
-                   sed(i, kloc) = tmpvar(1,kk)
+                   constituents(iconst, kloc) = tmpvar(1,kk)
+                   !sed(i, kloc) = tmpvar(1,kk)
                 end do
              endif
              call check_error(ierr, const_names(iconst))

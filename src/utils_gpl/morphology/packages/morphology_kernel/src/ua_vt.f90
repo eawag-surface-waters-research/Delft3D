@@ -98,6 +98,6 @@ subroutine ua_vt(facas,      facsk,        sws,      h,   &
    as = f0*RF(2,ih0,it0)+f1*RF(2,ih1,it0)+ f2*RF(2,ih0,it1)+f3*RF(2,ih1,it1)
    !
    ! Sediment advection velocity from Skewness and Assymetry
-   ua = sws*(facsk*sk-facas*as)*uorb
+   ua = sws*(facsk*sk-facas*as)*uorb/sqrt(2.)   ! urms, not uorb
    
 end subroutine ua_vt

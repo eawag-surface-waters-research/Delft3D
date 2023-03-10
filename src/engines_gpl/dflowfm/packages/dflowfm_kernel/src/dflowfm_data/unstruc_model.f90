@@ -724,6 +724,7 @@ subroutine readMDUFile(filename, istat)
     use m_subsidence, only: sdu_update_s1
     use unstruc_channel_flow
     use m_bedform, only: bfm_included
+    use m_debug
 
     use m_sediment
     use m_waves, only: hwavuni, twavuni, phiwavuni
@@ -1753,10 +1754,12 @@ subroutine readMDUFile(filename, istat)
        md_unc_conv = UNC_CONV_UGRID
        write (msgbuf, '(a,i0,a,i0,a)') 'Old format MapFormat=', IFORMAT_NETCDF, ' requested, which is not used when SedTrails output is activated. Output set to MapFormat=', IFORMAT_UGRID, '.'
        call warn_flush()
-    endif   
+    endif  
 
-    call prop_get_integer(md_ptr, 'output', 'NcFormat', md_ncformat, success)
+    call prop_get_integer(md_ptr, 'output', 'NcFormat', md_ncformat, success)  
     call unc_set_ncformat(md_ncformat)
+
+    call prop_get_integer(md_ptr, 'output', 'enableDebugArrays', jawritedebug, success)   ! allocate 1d, 2d, 3d arrays to quickly write quantities to map file
 
     call prop_get_integer(md_ptr, 'output', 'NcNoUnlimited', unc_nounlimited, success)
     call prop_get_integer(md_ptr, 'output', 'NcNoForcedFlush',  unc_noforcedflush, success)

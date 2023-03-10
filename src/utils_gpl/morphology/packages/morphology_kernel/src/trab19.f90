@@ -226,7 +226,7 @@ subroutine trab19(u         ,v         ,hrms      ,rlabda    ,teta      ,h      
     srfTotal = 1.0_fp
     if (dilatancy == 1) then
        vero = max(0.0_fp,-dzbdt)      ! Erosion velocity
-       kl = ag/(160.0_fp*vicmol)*(d15**2)*((poros**3)/(1.0_fp-poros)**2) ! Permeability, Adel 1987
+       kl = ag/(160.0_fp*vicmol)*(d15**2)*((poros**3)/(1.0_fp-poros)**2) ! Permeability, Adel 1987
        ! Reduction factor on the critical Shields parameter by dilatancy (Van Rhee, 2010)
        srfRhee = vero/kl*(pormax-poros)/(1.0_fp-poros)*rheea/delta
     endif

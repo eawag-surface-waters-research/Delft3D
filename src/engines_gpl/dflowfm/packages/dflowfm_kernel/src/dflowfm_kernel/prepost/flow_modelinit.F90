@@ -67,6 +67,7 @@
  use m_sedtrails_network
  use m_sedtrails_netcdf, only: sedtrails_loadNetwork
  use m_sedtrails_stats, only: default_sedtrails_stats, alloc_sedtrails_stats
+ use m_debug
  !
  ! To raise floating-point invalid, divide-by-zero, and overflow exceptions:
  ! Activate the following line (See also statements below)
@@ -402,6 +403,11 @@
     call set_frcu_mor(2)
  endif
  call timstop(handle_extra(31)) ! end set fcru mor
+
+! Initialise debug array
+ if (jawritedebug) then
+   call init_debugarr(ndx,stmpar%lsedtot)
+ endif
 
  call flow_initimestep(1, iresult)                   ! 1 also sets zws0
 

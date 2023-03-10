@@ -81,6 +81,6 @@ subroutine ua_rvr(facas,    facsk,    sws,    h,    hrms, &
     b1 = (-90.0_fp+90.0_fp*tanh(m5/urs**m6))*pi/180.0_fp
     sk = bm*cos(b1)                                                         !Skewness (eq 8)
     as = bm*sin(b1)                                                         !Asymmetry(eq 9)                                
-    ua = sws*(facsk*sk-facas*as)*uorb
+    ua = sws*(facsk*sk-facas*as)*uorb/sqrt(2.)
    
 end subroutine ua_rvr

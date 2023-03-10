@@ -58,7 +58,10 @@
     else if (itpbn == 2) then                        ! neumannbnd, positive specified slope leads to inflow
        !zb   = s0(k2) + zbndz(n)*dx(L)
        zb   = s1(kb)
-       !if (hu(L)<=epshu) zb = bl(k2)
+
+       ! debug
+       if (hu(L)<=epshu) zb = bl(k2)
+       !\debug
     else if (itpbn == 5) then                        ! Riemannbnd
        hh   = max(epshs, 0.5d0*( hs(kb) + hs(k2) ) )
        zb   = 2d0*zbndz(n) - zbndz0(n) - sqrt(hh/ag)*u1(L)
