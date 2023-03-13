@@ -1,6 +1,7 @@
 # default build directories
 bin/**
 build_*/**
+install_*/**
 
 # editor files
 .vscode/**
