@@ -3367,8 +3367,8 @@ subroutine write_partition_metis(c_netfile_in, c_netfile_out, c_npart, c_jaconti
    character(kind=c_char), intent(in)       :: c_netfile_out(MAXSTRLEN)
    integer(c_int), intent(in)               :: c_npart
    integer(c_int), intent(in)               :: c_jacontiguous
-   character(len=strlen(c_netfile_in))      :: netfile_in
-   character(len=strlen(c_netfile_out))     :: netfile_out
+   character(MAXSTRLEN)                     :: netfile_in
+   character(MAXSTRLEN)                     :: netfile_out
    integer                                  :: npart
    integer                                  :: jacontiguous
    integer                                  :: istat
@@ -3431,9 +3431,9 @@ subroutine write_partition_pol(c_netfile_in, c_netfile_out, c_polfile) bind(C, n
    character(kind=c_char), intent(in)       :: c_netfile_in(MAXSTRLEN)
    character(kind=c_char), intent(in)       :: c_netfile_out(MAXSTRLEN)
    character(kind=c_char), intent(in)       :: c_polfile(MAXSTRLEN)
-   character(len=strlen(c_netfile_in))      :: netfile_in
-   character(len=strlen(c_netfile_out))     :: netfile_out
-   character(len=strlen(c_polfile))         :: polfile
+   character(MAXSTRLEN)         :: netfile_in
+   character(MAXSTRLEN)         :: netfile_out
+   character(MAXSTRLEN)         :: polfile
    integer                                  :: minp,istat
    
    netfile_in = char_array_to_string(c_netfile_in, strlen(c_netfile_in))
