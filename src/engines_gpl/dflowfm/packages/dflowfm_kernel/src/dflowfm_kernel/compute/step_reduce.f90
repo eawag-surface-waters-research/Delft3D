@@ -45,9 +45,6 @@
  use MessageHandling
  use m_sobekdfm
  use m_subsidence
- 
- !testing update_ghost for corners
- use network_data, only: numk, zk
 
  implicit none
 
@@ -115,7 +112,6 @@
     !    call tekrai(nsiz,ja)
     !    call toemaar()
     ! endif
-    
 !    synchronise all water-levels
     if ( jampi == 1 ) then
        if ( jatimer == 1 ) call starttimer(IUPDSALL)

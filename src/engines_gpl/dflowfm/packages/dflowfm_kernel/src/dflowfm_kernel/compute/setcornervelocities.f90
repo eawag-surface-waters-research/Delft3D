@@ -37,8 +37,6 @@
  use m_flowgeom
  use m_sferic
  
- use m_partitioninfo, only : my_rank
-
  implicit none
 
  integer                    :: L, k1, k2, k3, k4, k, kk, LL, Lb, Lt, kw

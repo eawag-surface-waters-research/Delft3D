@@ -80,22 +80,22 @@ implicit none
    integer, target :: DFM_COMM_DFMWORLD = NAMECLASH_MPI_COMM_WORLD !< [-] The MPI communicator for dflowfm (FORTRAN handle). {"rank": 0}
 #endif
    type tghost
-      integer, allocatable   :: list(:)            !< list of ghost nodes or links, in order of their corresponding other domain, dim(1:number of ghost nodes/links)
-      integer, allocatable   :: N(:)               !< cumulative number of ghost nodes/links per domain in the list, starts with fictitious domain 0, dim(0:numdomains)
-      integer, allocatable   :: neighdmn(:)        !< list of neighboring domains, dim(1:numneighdmn)
-      integer                :: num                !< number of ghost nodes or links
-      integer                :: numdomains         !< number of domains
-      integer                :: numneighdmn        !< number of neighboring domains
+      integer, allocatable       :: list(:)            !< list of ghost nodes or links, in order of their corresponding other domain, dim(1:number of ghost nodes/links)
+      integer, allocatable       :: N(:)               !< cumulative number of ghost nodes/links per domain in the list, starts with fictitious domain 0, dim(0:numdomains)
+      integer, allocatable       :: neighdmn(:)        !< list of neighboring domains, dim(1:numneighdmn)
+      integer                    :: num                !< number of ghost nodes or links
+      integer                    :: numdomains         !< number of domains
+      integer                    :: numneighdmn        !< number of neighboring domains
    end type
    
-   integer                   :: ndomains = 0       !< number of domains
-   integer                   :: numranks = 1       !< number of ranks
-   integer                   :: my_rank            !< own rank
+   integer                       :: ndomains = 0       !< number of domains
+   integer                       :: numranks = 1       !< number of ranks
+   integer                       :: my_rank            !< own rank
    
-   character(len=4)          :: sdmn               !< domain number string
+   character(len=4)              :: sdmn               !< domain number string
 
-   type(tpoly), allocatable  :: partition_pol(:)   !< polygons that define the partition
-   integer                   :: npartition_pol     !< number of partition polygons
+   type(tpoly), allocatable      :: partition_pol(:)   !< polygons that define the partition
+   integer                       :: npartition_pol     !< number of partition polygons
 
    integer, allocatable          :: idomain(:)             !< cell-based domain number, dim(nump1d2d or ndx)
    integer, allocatable          :: idomain0(:)            !< backup of idomain 
@@ -104,87 +104,87 @@ implicit none
    integer, allocatable, target  :: ighostlev_nodebased(:) !< ghost-cell level, neighboring cells connected through netnodes
    integer, allocatable, target  :: ighostlev_cellbased(:) !< ghost-cell level, neighboring cells connected through netlinks
 
-   integer, parameter        :: ITYPE_S      = 0       !< water-level communication identifier, for Poisson equation (water level), first ghost level only
-   integer, parameter        :: ITYPE_U      = 1       !< flow link communication identifier
-   integer, parameter        :: ITYPE_Sall   = 2       !< water-level communcation identifier, all ghost levels
-   integer, parameter        :: ITYPE_S3D    = 3       !< 3D water-level communication identifier, for Poisson equation (water level), first ghost level only
-   integer, parameter        :: ITYPE_U3D    = 4       !< 3D flow link communication identifier
-   integer, parameter        :: ITYPE_Sall3D = 5       !< 3D water-level communcation identifier, all ghost levels
-   integer, parameter        :: ITYPE_SallTheta = 6    !< water-level communcation identifier, all ghost levels, theta-grid (for XBeach waves)
-   integer, parameter        :: ITYPE_Snonoverlap = 7  !< non-overlappling ghost nodes (for solver)
-   integer, parameter        :: ITYPE_U3DW        = 8  !< 3D flow link communication identifier, starting at 0, for interfaces
-   integer, parameter        :: ITYPE_CN          = 9  !< corners communication identificator
+   integer, parameter            :: ITYPE_S      = 0       !< water-level communication identifier, for Poisson equation (water level), first ghost level only
+   integer, parameter            :: ITYPE_U      = 1       !< flow link communication identifier
+   integer, parameter            :: ITYPE_Sall   = 2       !< water-level communcation identifier, all ghost levels
+   integer, parameter            :: ITYPE_S3D    = 3       !< 3D water-level communication identifier, for Poisson equation (water level), first ghost level only
+   integer, parameter            :: ITYPE_U3D    = 4       !< 3D flow link communication identifier
+   integer, parameter            :: ITYPE_Sall3D = 5       !< 3D water-level communcation identifier, all ghost levels
+   integer, parameter            :: ITYPE_SallTheta = 6    !< water-level communcation identifier, all ghost levels, theta-grid (for XBeach waves)
+   integer, parameter            :: ITYPE_Snonoverlap = 7  !< non-overlappling ghost nodes (for solver)
+   integer, parameter            :: ITYPE_U3DW        = 8  !< 3D flow link communication identifier, starting at 0, for interfaces
+   integer, parameter            :: ITYPE_CN          = 9  !< corners communication identificator
 
    
-   integer, parameter        :: IGHOSTTYPE_CELLBASED = 0  !< cell-based ghostlevels
-   integer, parameter        :: IGHOSTTYPE_NODEBASED = 1  !< node-based ghostlevels
-   integer, parameter        :: IGHOSTTYPE_COMBINED  = 2  !< combined ghostlevels
+   integer, parameter            :: IGHOSTTYPE_CELLBASED = 0  !< cell-based ghostlevels
+   integer, parameter            :: IGHOSTTYPE_NODEBASED = 1  !< node-based ghostlevels
+   integer, parameter            :: IGHOSTTYPE_COMBINED  = 2  !< combined ghostlevels
    
 !  the non-parameter variables that are initialized with 0 are set in "partition_setghost_params"
-   integer                   :: numlay_cellbased=0           !< number of cell-based ghost-cell layers
-   integer                   :: numlay_nodebased=0           !< number of node-based ghost-cell layers
+   integer                       :: numlay_cellbased=0           !< number of cell-based ghost-cell layers
+   integer                       :: numlay_nodebased=0           !< number of node-based ghost-cell layers
    
-   integer                   :: minghostlev_s=0    !< minimum ghost-cell layer level of water-level nodes, used for overlap in solver
-   integer                   :: maxghostlev_s=0    !< maximum ghost-cell layer level of water-level nodes, used for overlap in solver
-   integer                   :: ighosttype_s=IGHOSTTYPE_CELLBASED
+   integer                       :: minghostlev_s=0    !< minimum ghost-cell layer level of water-level nodes, used for overlap in solver
+   integer                       :: maxghostlev_s=0    !< maximum ghost-cell layer level of water-level nodes, used for overlap in solver
+   integer                       :: ighosttype_s=IGHOSTTYPE_CELLBASED
    
-   integer                   :: minghostlev_u=0    !< minimum ghost-cell layer level of links
-   integer                   :: maxghostlev_u=0    !< maximum ghost-cell layer level of links
-   integer, parameter        :: IGHOSTTYPE_U=IGHOSTTYPE_COMBINED
+   integer                       :: minghostlev_u=0    !< minimum ghost-cell layer level of links
+   integer                       :: maxghostlev_u=0    !< maximum ghost-cell layer level of links
+   integer, parameter            :: IGHOSTTYPE_U=IGHOSTTYPE_COMBINED
    
-   integer                   :: minghostlev_sall=0 !< minimum ghost-cell layer level of water-level nodes, all ghost levels
-   integer                   :: maxghostlev_sall=0 !< maximum ghost-cell layer level of water-level nodes, all ghost levels
-   integer, parameter        :: IGHOSTTYPE_SALL=IGHOSTTYPE_COMBINED
+   integer                       :: minghostlev_sall=0 !< minimum ghost-cell layer level of water-level nodes, all ghost levels
+   integer                       :: maxghostlev_sall=0 !< maximum ghost-cell layer level of water-level nodes, all ghost levels
+   integer, parameter            :: IGHOSTTYPE_SALL=IGHOSTTYPE_COMBINED
    
-   integer, parameter        :: ITAG_S=1           !< communication tag
-   integer, parameter        :: ITAG_U=2           !< communication tag
-   integer, parameter        :: ITAG_Sall=3        !< communication tag
-   integer, parameter        :: ITAG_Snonoverlap=4 !< communication tag
+   integer, parameter            :: ITAG_S=1           !< communication tag
+   integer, parameter            :: ITAG_U=2           !< communication tag
+   integer, parameter            :: ITAG_SALL=3        !< communication tag
+   integer, parameter            :: ITAG_SNONOVERLAP=4 !< communication tag
    
-   integer                      :: numghost_s            !< number of water-level ghost nodes
-   integer, allocatable, target :: ighostlist_s(:)       !< list of water-level ghost nodes, in order of their corresponding domain
-   integer, allocatable, target :: nghostlist_s(:)       !< pointer to last s-node of a certain ghost domain in the ighostlist_s array, first domain first, etc., includes fictitious domain '0' (0, n1, n1+n2, n1+n1+n3, ...) {"shape": ["-1:numdomains-1"]}
+   integer                       :: numghost_s            !< number of water-level ghost nodes
+   integer, allocatable, target  :: ighostlist_s(:)       !< list of water-level ghost nodes, in order of their corresponding domain
+   integer, allocatable, target  :: nghostlist_s(:)       !< pointer to last s-node of a certain ghost domain in the ighostlist_s array, first domain first, etc., includes fictitious domain '0' (0, n1, n1+n2, n1+n1+n3, ...) {"shape": ["-1:numdomains-1"]}
    
-   integer                      :: numghost_u            !< number of ghost links
-   integer, allocatable, target :: ighostlist_u(:)       !< list of ghost links, in order of their corresponding domain
-   integer, allocatable, target :: nghostlist_u(:)       !< pointer to last link of a certain ghost domain in the ighostlist_u array, first domain first, etc., includes fictitious domain '0' (0, n1, n1+n2, n1+n1+n3, ...) {"shape": ["-1:numdomains-1"]}
+   integer                       :: numghost_u            !< number of ghost links
+   integer, allocatable, target  :: ighostlist_u(:)       !< list of ghost links, in order of their corresponding domain
+   integer, allocatable, target  :: nghostlist_u(:)       !< pointer to last link of a certain ghost domain in the ighostlist_u array, first domain first, etc., includes fictitious domain '0' (0, n1, n1+n2, n1+n1+n3, ...) {"shape": ["-1:numdomains-1"]}
    
-   integer                      :: numghost_sall         !< number of water-level ghost nodes
-   integer, allocatable, target :: ighostlist_sall(:)    !< list of water-level ghost nodes, in order of their corresponding domain
-   integer, allocatable, target :: nghostlist_sall(:)    !< pointer to last s-node of a certain ghost domain in the ighostlist_s array, first domain first, etc., includes fictitious domain '0' (0, n1, n1+n2, n1+n1+n3, ...) {"shape": ["-1:numdomains-1"]}
+   integer                       :: numghost_sall         !< number of water-level ghost nodes
+   integer, allocatable, target  :: ighostlist_sall(:)    !< list of water-level ghost nodes, in order of their corresponding domain
+   integer, allocatable, target  :: nghostlist_sall(:)    !< pointer to last s-node of a certain ghost domain in the ighostlist_s array, first domain first, etc., includes fictitious domain '0' (0, n1, n1+n2, n1+n1+n3, ...) {"shape": ["-1:numdomains-1"]}
    
-   integer                      :: numghost_snonoverlap         !< number of water-level ghost nodes
-   integer, allocatable, target :: ighostlist_snonoverlap(:)    !< list of water-level ghost nodes, in order of their corresponding domain
-   integer, allocatable, target :: nghostlist_snonoverlap(:)    !< pointer to last s-node of a certain ghost domain in the ighostlist_s array, first domain first, etc., includes fictitious domain '0' (0, n1, n1+n2, n1+n1+n3, ...) {"shape": ["-1:numdomains-1"]}
+   integer                       :: numghost_snonoverlap         !< number of water-level ghost nodes
+   integer, allocatable, target  :: ighostlist_snonoverlap(:)    !< list of water-level ghost nodes, in order of their corresponding domain
+   integer, allocatable, target  :: nghostlist_snonoverlap(:)    !< pointer to last s-node of a certain ghost domain in the ighostlist_s array, first domain first, etc., includes fictitious domain '0' (0, n1, n1+n2, n1+n1+n3, ...) {"shape": ["-1:numdomains-1"]}
 
-   integer                      :: numghost_cn           !< number of water-level ghost node corners
-   integer, allocatable, target :: ighostlist_cn(:)      !< list of water-level ghost node corners, in order of their corresponding domain
-   integer, allocatable, target :: nghostlist_cn(:)      !< pointer to last s-node of a certain ghost domain in the ighostlist_cn array, first domain first, etc. {"shape": ["-1:numdomains-1"]}
+   integer                       :: numghost_cn           !< number of water-level ghost node corners
+   integer, allocatable, target  :: ighostlist_cn(:)      !< list of water-level ghost node corners, in order of their corresponding domain
+   integer, allocatable, target  :: nghostlist_cn(:)      !< pointer to last s-node of a certain ghost domain in the ighostlist_cn array, first domain first, etc. {"shape": ["-1:numdomains-1"]}
    
-   integer                      :: numsend_s             !< number of water-level send nodes
-   integer, allocatable, target :: isendlist_s(:)        !< list of water-level internal nodes to be sent to other domains
-   integer, allocatable, target :: nsendlist_s(:)        !< pointer to last s-node of a certain other domain in the isendlist_s array, first domain first, etc., includes fictitious domain '0' (0, n1, n1+n2, n1+n1+n3, ...) {"shape": ["-1:numdomains-1"]}
+   integer                       :: numsend_s             !< number of water-level send nodes
+   integer, allocatable, target  :: isendlist_s(:)        !< list of water-level internal nodes to be sent to other domains
+   integer, allocatable, target  :: nsendlist_s(:)        !< pointer to last s-node of a certain other domain in the isendlist_s array, first domain first, etc., includes fictitious domain '0' (0, n1, n1+n2, n1+n1+n3, ...) {"shape": ["-1:numdomains-1"]}
    
-   integer                      :: numsend_u             !< number of send links
-   integer, allocatable, target :: isendlist_u(:)        !< list of internal links to be sent to other domains
-   integer, allocatable, target :: nsendlist_u(:)        !< pointer to last link of a certain other domain in the isendlist_u array, first domain first, etc., includes fictitious domain '0' ('0, n1, n1+n2, n1+n1+n3, ...) {"shape": ["-1:numdomains-1"]}
+   integer                       :: numsend_u             !< number of send links
+   integer, allocatable, target  :: isendlist_u(:)        !< list of internal links to be sent to other domains
+   integer, allocatable, target  :: nsendlist_u(:)        !< pointer to last link of a certain other domain in the isendlist_u array, first domain first, etc., includes fictitious domain '0' ('0, n1, n1+n2, n1+n1+n3, ...) {"shape": ["-1:numdomains-1"]}
    
-   integer                      :: numsend_sall          !< number of water level send nodes, all ghostlevels.
-   integer, allocatable, target :: isendlist_sall(:)     !< list of water level internal nodes to be sent to other domains, all ghostlevels.
-   integer, allocatable, target :: nsendlist_sall(:)     !< pointer to last s-node of a certain other domain in the isendlist_sall array, first domain first, etc., includes fictitious domain '0' ('0, n1, n1+n2, n1+n1+n3, ...) {"shape": ["-1:numdomains-1"]}
+   integer                       :: numsend_sall          !< number of water level send nodes, all ghostlevels.
+   integer, allocatable, target  :: isendlist_sall(:)     !< list of water level internal nodes to be sent to other domains, all ghostlevels.
+   integer, allocatable, target  :: nsendlist_sall(:)     !< pointer to last s-node of a certain other domain in the isendlist_sall array, first domain first, etc., includes fictitious domain '0' ('0, n1, n1+n2, n1+n1+n3, ...) {"shape": ["-1:numdomains-1"]}
    
-   integer                      :: numsend_snonoverlap       !< number of water level send nodes, all non-overlapping ghostlevels (for solver).
-   integer, allocatable, target :: isendlist_snonoverlap(:)  !< list of water level internal nodes to be sent to other domains, all non-overlapping ghostlevels (for solver).
-   integer, allocatable, target :: nsendlist_snonoverlap(:)  !< pointer to last s-node of a certain other domain in the isendlist_snonoverlap array, first domain first, etc., includes fictitious domain '0' ('0, n1, n1+n2, n1+n1+n3, ...) {"shape": ["-1:numdomains-1"]}
+   integer                       :: numsend_snonoverlap       !< number of water level send nodes, all non-overlapping ghostlevels (for solver).
+   integer, allocatable, target  :: isendlist_snonoverlap(:)  !< list of water level internal nodes to be sent to other domains, all non-overlapping ghostlevels (for solver).
+   integer, allocatable, target  :: nsendlist_snonoverlap(:)  !< pointer to last s-node of a certain other domain in the isendlist_snonoverlap array, first domain first, etc., includes fictitious domain '0' ('0, n1, n1+n2, n1+n1+n3, ...) {"shape": ["-1:numdomains-1"]}
    
-   integer                      :: numsend_cn          !< number of water level send node corners, all ghostlevels.
-   integer, allocatable, target :: isendlist_cn(:)     !< list of water level internal node corners to be sent to other domains, all ghostlevels.
-   integer, allocatable, target :: nsendlist_cn(:)     !< pointer to last s-node of a certain other domain in the isendlist_cn array, first domain first, etc., {"shape": ["-1:numdomains-1"]}
+   integer                       :: numsend_cn          !< number of water level send node corners, all ghostlevels.
+   integer, allocatable, target  :: isendlist_cn(:)     !< list of water level internal node corners to be sent to other domains, all ghostlevels.
+   integer, allocatable, target  :: nsendlist_cn(:)     !< pointer to last s-node of a certain other domain in the isendlist_cn array, first domain first, etc., {"shape": ["-1:numdomains-1"]}
    
-   integer, allocatable         :: iglobal(:)          !< [-] unique flow node numbers for matrix solver, does not exactly correspond with the original unpartitioned cell/flow node numbers! (duplicate boundary cells cause some addtional cell number increments.)
-   integer, allocatable, target :: iglobal_s(:)        !< [-] global flow node numbers to help output aggregation later. Should exactly correspond with the original unpartitioned flow node numbers! (as opposed to iglobal) {"shape": ["ndx"]}
-   integer                      :: Nglobal_s           !< total number of global net cells, equals unpartitioned nump1d2d, Ndxi
-   integer, allocatable         :: numcells(:)         !< number of active cells per domain, dim(0:ndomains-1)
+   integer, allocatable          :: iglobal(:)          !< [-] unique flow node numbers for matrix solver, does not exactly correspond with the original unpartitioned cell/flow node numbers! (duplicate boundary cells cause some addtional cell number increments.)
+   integer, allocatable, target  :: iglobal_s(:)        !< [-] global flow node numbers to help output aggregation later. Should exactly correspond with the original unpartitioned flow node numbers! (as opposed to iglobal) {"shape": ["ndx"]}
+   integer                       :: nglobal_s           !< total number of global net cells, equals unpartitioned nump1d2d, ndxi
+   integer, allocatable          :: numcells(:)         !< number of active cells per domain, dim(0:ndomains-1)
    
    double precision, allocatable, private :: work(:), workrec(:)  !< work array
    
@@ -192,30 +192,28 @@ implicit none
    double precision, allocatable :: workmatc(:,:)  ! for overlap (solver): matrix (ccr)
 
 
-   integer, allocatable      :: nghostlist_s_3D(:)
-   integer, allocatable      :: nsendlist_s_3D(:)
+   integer, allocatable          :: nghostlist_s_3D(:)
+   integer, allocatable          :: nsendlist_s_3D(:)
    
-   integer, allocatable      :: nghostlist_sall_3D(:)
-   integer, allocatable      :: nsendlist_sall_3D(:)
+   integer, allocatable          :: nghostlist_sall_3D(:)
+   integer, allocatable          :: nsendlist_sall_3D(:)
    
-   integer, allocatable      :: nghostlist_u_3D(:)
-   integer, allocatable      :: nsendlist_u_3D(:)
+   integer, allocatable          :: nghostlist_u_3D(:)
+   integer, allocatable          :: nsendlist_u_3D(:)
    
-   integer, allocatable      :: nghostlist_u_3Dw(:)
-   integer, allocatable      :: nsendlist_u_3Dw(:)
+   integer, allocatable          :: nghostlist_u_3Dw(:)
+   integer, allocatable          :: nsendlist_u_3Dw(:)
    
-   integer, allocatable      :: nghostlist_sall_theta(:)
-   integer, allocatable      :: nsendlist_sall_theta(:)
+   integer, allocatable          :: nghostlist_sall_theta(:)
+   integer, allocatable          :: nsendlist_sall_theta(:)
    
-   integer                   :: jaoverlap  !< overlap in solver (1) or not (0)
-   !integer                                 :: noverlap   !< number of overlapping nodes (in solver)
-   !integer, dimension(:), allocatable      :: ioverlap   !< overlapping nodes (in solver)
+   integer                       :: jaoverlap  !< overlap in solver (1) or not (0)
 
 #ifdef HAVE_MPI
-   integer                   :: jampi = 1          !< use MPI (1) or not (0)
-   integer                   :: ja_mpi_init_by_fm  !< MPI_Init called by FM (1) or not (0). Not/0 in case FM runs in library mode and an outside runner program has taken care of MPI_Init.
+   integer                       :: jampi = 1          !< use MPI (1) or not (0)
+   integer                       :: ja_mpi_init_by_fm  !< MPI_Init called by FM (1) or not (0). Not/0 in case FM runs in library mode and an outside runner program has taken care of MPI_Init.
 #else
-   integer                   :: jampi = 0          !< use MPI (1) or not (0)
+   integer                       :: jampi = 0          !< use MPI (1) or not (0)
 #endif
 
    double precision, allocatable :: reducebuf(:)    !< work array for mpi-reduce
@@ -584,13 +582,6 @@ implicit none
 !     flow links: check and fix orientation of send list
       call partition_fixorientation_ghostlist(ierror)
       if ( ierror /= 0 ) goto 1234
-
-!      call partition_cleanup(0,ierror)
-!      if ( ierror.ne.0 ) goto 1234
-
-!     begin DEBUG
-!         call write_ghosts(trim(md_ident)//'_gst.pli')
-!     end DEBUG
       
 !     make non-overlapping ghost- and sendlists (for solver)      
       call partition_fill_ghostsendlist_nonoverlap(ierror)
@@ -2368,16 +2359,14 @@ implicit none
    end subroutine partition_fill_ghostsendlist_3d
    
 !> generate non-overlapping ghost/sendlists (for solver)
-   subroutine partition_fill_ghostsendlist_nonoverlap(ierror)
+   subroutine partition_fill_ghostsendlist_nonoverlap(error)
       use m_alloc
       implicit none
       
-      integer,               intent(out) :: ierror   !< error (1) or not (0)
+      integer,               intent(out) :: error   !< error (1) or not (0)
             
       integer                            :: i, idmn, iglev, inum, k, lenold
-      
-      ierror = 1
-      
+  
       if ( allocated(nghostlist_snonoverlap) ) deallocate(nghostlist_snonoverlap)
       if ( allocated(ighostlist_snonoverlap) ) deallocate(ighostlist_snonoverlap)
       
@@ -2392,9 +2381,8 @@ implicit none
 !     check for overlap (in solver)      
       if ( maxghostlev_s.eq.1 ) then
           jaoverlap = 0
-          
-          ierror = 0
-          goto 1234
+          error     = 0
+          return
       end if
       
 !     safety: allocate lists with full overlapping length
@@ -2461,54 +2449,14 @@ implicit none
 !         call mess(LEVEL_ERROR, 'partition_fill_ghostsendlist_nonoverlap gave error')
 !         goto 1234
 !      end if
-      
-!!     BEGIN DEBUG
-!      allocate(idum(Ndx))
-!      idum = 0
-!      
-!      do i=1,noverlap
-!         k = ioverlap(i)
-!         if ( idum(k).ne.0 ) then
-!            continue
-!         end if
-!         idum(k) = i
-!      end do
-!      
-!      do i=1,numghost_snonoverlap
-!         k = ighostlist_snonoverlap(i)
-!         if ( idum(k).ne.0 ) then
-!            write(6,*) i
-!            continue
-!         else
-!            idum(k) = 1
-!         end if
-!      end do
-!      
-!      do i=1,numghost_sall
-!         k = ighostlist_sall(i)
-!         if ( idum(k).eq.0 ) then
-!            continue
-!         end if
-!         idum(k) = 0
-!      end do
-!      
-!      do k=1,Ndx
-!         if ( idum(k).gt.0 ) then
-!            write (6,*) idum(k)
-!            continue
-!         end if
-!      end do
-!!     END DEBUG
-
          
-      ierror = 0
- 1234 continue    
+      error = 0
       
       return
     end subroutine partition_fill_ghostsendlist_nonoverlap
    
    
-   subroutine update_ghosts(itype, NDIM, N, var, ierror, ignore_orientation)
+   subroutine update_ghosts(itype, ndim, n, solution, error, ignore_orientation)
 #ifdef HAVE_MPI   
       use mpi
 #endif      
@@ -2519,87 +2467,103 @@ implicit none
 
       implicit none
 
-      integer,                                     intent(in)    :: itype        !< type: 0: flownode, 1: flowlink
-      integer,                                     intent(in)    :: NDIM         !< number of unknowns per flownode/link
-      integer,                                     intent(in)    :: N            !< number of flownodes/links
-      double precision, dimension(NDIM*N),         intent(inout) :: var          !< solution
-      integer,                                     intent(out)   :: ierror       !< error (1) or not (0)
-      logical,                                     intent(in), optional :: ignore_orientation !< Ignore orientation of ghost and own location, useful for directionless quantities on u-points. Default: .false.
+      integer,                                 intent(in)    :: itype        !< type: 0: flownode, 1: flowlink
+      integer,                                 intent(in)    :: ndim         !< number of unknowns per flownode/link
+      integer,                                 intent(in)    :: n            !< number of flownodes/links
+      double precision, dimension(ndim*n),     intent(inout) :: solution     !< solution
+      integer,                                 intent(out)   :: error        !< error (1) or not (0)
+      logical, optional,                       intent(in)    :: ignore_orientation !< Ignore orientation of ghost and own location, useful for directionless quantities on u-points. Default: .false.
 
-      ierror = 1
+      error = 1
       
       if ( .not.allocated(isendlist_sall) ) goto 1234   ! safety
       
       if ( itype == ITYPE_S ) then
-         if ( N /= Ndx) then
+         if ( n /= ndx) then
             call qnerror('update_ghosts, ITYPE_S: numbering error', ' ', ' ')
             goto 1234
          end if
-         call update_ghost_loc(ndomains, NDIM, N, var, nghostlist_s(ndomains-1), ighostlist_s, nghostlist_s, nsendlist_s(ndomains-1), isendlist_s, nsendlist_s, ITAG_S, ierror, ignore_orientation=ignore_orientation)
+         call update_ghost_loc(ndomains, ndim, n, solution, nghostlist_s(ndomains-1), ighostlist_s, nghostlist_s, &
+             nsendlist_s(ndomains-1), isendlist_s, nsendlist_s, ITAG_S, error, ignore_orientation=ignore_orientation)
       else if ( itype == ITYPE_SALL ) then
-         if ( N /= Ndx) then
+         if ( n /= ndx) then
             call qnerror('update_ghosts, ITYPE_Sall: numbering error', ' ', ' ')
             goto 1234
          end if
-         call update_ghost_loc(ndomains, NDIM, N, var, nghostlist_sall(ndomains-1), ighostlist_sall, nghostlist_sall, nsendlist_sall(ndomains-1), isendlist_sall, nsendlist_sall, ITAG_Sall, ierror, ignore_orientation=ignore_orientation)
+         call update_ghost_loc(ndomains, ndim, n, solution, nghostlist_sall(ndomains-1), ighostlist_sall, nghostlist_sall,&
+             nsendlist_sall(ndomains-1), isendlist_sall, nsendlist_sall, ITAG_Sall, error, ignore_orientation=ignore_orientation)
       else if ( itype == ITYPE_U ) then
-         if ( N /= Lnx) then
+         if ( n /= lnx) then
             call qnerror('update_ghosts, ITYPE_U: numbering error', ' ', ' ')
             goto 1234
          end if
-         call update_ghost_loc(ndomains, NDIM, N, var, nghostlist_u(ndomains-1), ighostlist_u, nghostlist_u, nsendlist_u(ndomains-1), isendlist_u, nsendlist_u, ITAG_U, ierror, ignore_orientation=ignore_orientation)
+         call update_ghost_loc(ndomains, ndim, n, solution, nghostlist_u(ndomains-1), ighostlist_u, nghostlist_u, &
+             nsendlist_u(ndomains-1), isendlist_u, nsendlist_u, ITAG_U, error, ignore_orientation=ignore_orientation)
       else if ( itype == ITYPE_CN ) then
-         if ( N /= numk ) then
+         if ( n /= numk ) then
             call qnerror('update_ghosts, ITYPE_CN: numbering error', ' ', ' ')
             goto 1234
          end if
-         call update_ghost_loc(ndomains, NDIM, N, var, nghostlist_cn(ndomains-1), ighostlist_cn, nghostlist_cn, nsendlist_cn(ndomains-1), isendlist_cn, nsendlist_cn, ITAG_U, ierror)
+         call update_ghost_loc(ndomains, ndim, n, solution, nghostlist_cn(ndomains-1), ighostlist_cn, &
+             nghostlist_cn, nsendlist_cn(ndomains-1), isendlist_cn, nsendlist_cn, ITAG_U, error)
 !
 !     3D-extension         
       else if ( itype == ITYPE_S3D ) then
-         if ( N /= Ndkx) then
+         if ( n /= ndkx) then
             call qnerror('update_ghosts, ITYPE_S3D: numbering error', ' ', ' ')
             goto 1234
          end if
-         call update_ghost_loc(ndomains, NDIM, N, var, nghostlist_s(ndomains-1), ighostlist_s, nghostlist_s, nsendlist_s(ndomains-1), isendlist_s, nsendlist_s, ITAG_S, ierror, nghostlist_s_3D, nsendlist_s_3D, kmxn, kbot, ignore_orientation=ignore_orientation)
+         call update_ghost_loc(ndomains, ndim, n, solution, nghostlist_s(ndomains-1), ighostlist_s, nghostlist_s, &
+             nsendlist_s(ndomains-1), isendlist_s, nsendlist_s, ITAG_S, error, nghostlist_s_3D, nsendlist_s_3D, &
+             kmxn, kbot, ignore_orientation=ignore_orientation)
       else if ( itype == ITYPE_SALL3D ) then
-         if ( N /= Ndkx) then
+         if ( n /= ndkx) then
             call qnerror('update_ghosts, ITYPE_Sall3D: numbering error', ' ', ' ')
             goto 1234
          end if
-         call update_ghost_loc(ndomains, NDIM, N, var, nghostlist_sall(ndomains-1), ighostlist_sall, nghostlist_sall, nsendlist_sall(ndomains-1), isendlist_sall, nsendlist_sall, ITAG_Sall, ierror, nghostlist_sall_3D, nsendlist_sall_3D, kmxn, kbot, ignore_orientation=ignore_orientation)
+         call update_ghost_loc(ndomains, ndim, n, solution, nghostlist_sall(ndomains-1), ighostlist_sall, &
+             nghostlist_sall, nsendlist_sall(ndomains-1), isendlist_sall, nsendlist_sall, ITAG_Sall, error, nghostlist_sall_3D, nsendlist_sall_3D, &
+             kmxn, kbot, ignore_orientation=ignore_orientation)
       else if ( itype == ITYPE_U3D ) then
-         if ( N /= Lnkx) then
+         if ( n /= lnkx) then
             call qnerror('update_ghosts, ITYPE_U3D: numbering error', ' ', ' ')
             goto 1234
          end if
-         call update_ghost_loc(ndomains, NDIM, N, var, nghostlist_u(ndomains-1), ighostlist_u, nghostlist_u, nsendlist_u(ndomains-1), isendlist_u, nsendlist_u, ITAG_U, ierror, nghostlist_u_3D, nsendlist_u_3D, kmxL, Lbot, ignore_orientation=ignore_orientation)
+         call update_ghost_loc(ndomains, ndim, n, solution, nghostlist_u(ndomains-1), ighostlist_u, nghostlist_u, &
+             nsendlist_u(ndomains-1), isendlist_u, nsendlist_u, ITAG_U, error, nghostlist_u_3D, nsendlist_u_3D,&
+             kmxL, Lbot, ignore_orientation=ignore_orientation)
        else if ( itype == ITYPE_U3DW ) then
-         if ( N /= Lnkx) then
+         if ( n /= lnkx) then
             call qnerror('update_ghosts, ITYPE_U3DW: numbering error', ' ', ' ')
             goto 1234
          end if
-         call update_ghost_loc(ndomains, NDIM, N, var, nghostlist_u(ndomains-1), ighostlist_u, nghostlist_u, nsendlist_u(ndomains-1), isendlist_u, nsendlist_u, ITAG_U, ierror, nghostlist_u_3Dw, nsendlist_u_3Dw, kmxL+1, Lbot-1, ignore_orientation=ignore_orientation)
+         call update_ghost_loc(ndomains, ndim, n, solution, nghostlist_u(ndomains-1), ighostlist_u, nghostlist_u, &
+             nsendlist_u(ndomains-1), isendlist_u, nsendlist_u, ITAG_U, error, nghostlist_u_3Dw, nsendlist_u_3Dw, &
+             kmxL+1, Lbot-1, ignore_orientation=ignore_orientation)
                  
 !     overlap
       else if ( itype == ITYPE_Snonoverlap ) then
-         if ( N /= Ndx ) then
+         if ( n /= ndx ) then
             call qnerror('update_ghosts, ITYPE_Snonoverlap: numbering error', ' ', ' ')
             goto 1234
          end if
-         if ( jaoverlap.eq.1 ) then
-            call update_ghost_loc(ndomains, NDIM, N, var, nghostlist_snonoverlap(ndomains-1), ighostlist_snonoverlap, nghostlist_snonoverlap, nsendlist_snonoverlap(ndomains-1), isendlist_snonoverlap, nsendlist_snonoverlap, ITAG_Snonoverlap, ierror, ignore_orientation=ignore_orientation)
+         if ( jaoverlap == 1 ) then
+            call update_ghost_loc(ndomains, ndim, n, solution, nghostlist_snonoverlap(ndomains-1), ighostlist_snonoverlap,&
+                nghostlist_snonoverlap, nsendlist_snonoverlap(ndomains-1), isendlist_snonoverlap, nsendlist_snonoverlap, &
+                ITAG_Snonoverlap, error, ignore_orientation=ignore_orientation)
          else  ! no overlap: use sall
-            call update_ghost_loc(ndomains, NDIM, N, var, nghostlist_sall(ndomains-1), ighostlist_sall, nghostlist_sall, nsendlist_sall(ndomains-1), isendlist_sall, nsendlist_sall, ITAG_Sall, ierror, ignore_orientation=ignore_orientation)
+            call update_ghost_loc(ndomains, ndim, n, solution, nghostlist_sall(ndomains-1), ighostlist_sall, &
+                nghostlist_sall, nsendlist_sall(ndomains-1), isendlist_sall, nsendlist_sall, ITAG_Sall, error, &
+                ignore_orientation=ignore_orientation)
          end if
       else
          call qnerror('update_ghosts: unknown ghost type', ' ', ' ')
       end if
       
-      ierror = 0
+      error = 0
  1234 continue
  
-      if ( ierror /= 0 ) call mess(LEVEL_ERROR, 'update_ghosts gave error')
+      if ( error /= 0 ) call mess(LEVEL_ERROR, 'update_ghosts gave error')
       
       return
    end subroutine update_ghosts
@@ -5084,7 +5048,7 @@ end subroutine fill_ghost_data_list
 !> get ghost cells 
 !! get the sorted ghost flow node list and count the number of flow nodes per ghost domain
 subroutine get_ghost_cells(domain_number, min_ghost_level, max_ghost_level, ghost_type, ghost_list)
-use m_flowgeom, only: Ndx
+use m_flowgeom, only: ndx
 use m_alloc
 
 implicit none
@@ -5105,7 +5069,7 @@ end if
         
 call alloc_tghost(ghost_list, max_ghost_level, min_ghost_level)
 
-do cell = 1, Ndx ! also include fictitious boundary node
+do cell = 1, ndx ! also include fictitious boundary node
     if ( idomain(cell) /= domain_number .and. &
         ghost_level(cell) >= min_ghost_level .and. ghost_level(cell) <= max_ghost_level ) then
         call add_data_to_ghost_list(ghost_level(cell), idomain(cell), ghost_list, cell)
