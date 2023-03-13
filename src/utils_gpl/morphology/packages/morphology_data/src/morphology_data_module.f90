@@ -123,13 +123,14 @@ integer, parameter, public :: RP_USTAR = 45     ! effective shear velocity [m/s]
 integer, parameter, public :: RP_KWTUR = 46     ! wave breaking induced turbulence
 integer, parameter, public :: RP_UAU   = 47     ! U component of velocity asymmetry due to short waves [m/s]
 integer, parameter, public :: RP_VAU   = 48     ! V component of velocity asymmetry due to short waves [m/s]
-integer, parameter, public :: RP_BLCHG = 49     ! bed level change rate (needed for dilatancy calculation in van Thiel formulation0)[m/s]
+integer, parameter, public :: RP_BLCHG = 49     ! bed level change rate (needed for dilatancy calculation in van Thiel formulation) [m/s]
 integer, parameter, public :: RP_D15MX = 50     ! D15 of particle size mix of the part of the bed exposed to transport [m]
 integer, parameter, public :: RP_POROS = 51     ! porosity of particle size mix of the part of the bed exposed to transport [-]
 integer, parameter, public :: RP_DZDX  = 52     ! U component of bed slope [-]
 integer, parameter, public :: RP_DZDY  = 53     ! V component of bed slope [-]
 integer, parameter, public :: RP_DM    = 54     ! median sediment diameter of particle size mix of the part of the bed exposed to transport [m]
-integer, parameter, public :: MAX_RP   = 54     ! mmaximum number of real parameters
+integer, parameter, public :: RP_DBG   = 55     ! debug array value from eqtran [-]
+integer, parameter, public :: MAX_RP   = 55     ! mmaximum number of real parameters
 !
 integer, parameter, public :: IP_NM    =  1     ! local (i.e. within partition) cell index
 integer, parameter, public :: IP_N     =  2     ! local (i.e. within partition) fastest dimension index -- only for structured mesh models

@@ -283,6 +283,7 @@ subroutine xbeach_all_input()
       call writelog('l','','Roller parameters: ')
       roller           = readkey_int (md_surfbeatfile,'roller',     1,        0,     1, strict=.true.)
       beta             = readkey_dbl (md_surfbeatfile,'beta',    0.10d0,     0.05d0,   0.3d0)
+      varbeta          = readkey_int (md_surfbeatfile,'varbeta',     1,        0,     1,strict=.true.)
       rfb              = readkey_int (md_surfbeatfile,'rfb',        0,        0,     1, strict=.true.)
       !
       !
@@ -925,6 +926,7 @@ subroutine xbeach_wave_instationary()
    use m_alloc
    use m_waves, only: hwav, twav, phiwav, ustokes, vstokes, rlabda, uorb, jauorb
    use m_flowtimes, only:dts
+   use m_debug
 
    implicit none
 
@@ -934,18 +936,18 @@ subroutine xbeach_wave_instationary()
    double precision, allocatable  :: hh(:), ddlok(:,:), dd(:,:), drr(:,:)
    !double precision, allocatable  :: uwf(:), vwf(:), ustr(:), urf(:), vrf(:), ustw(:), dfac(:)
    double precision, allocatable  :: dfac(:)
-   double precision, allocatable  :: Tdeplim(:)
+   !double precision, allocatable  :: Tdeplim(:)
    double precision, allocatable  :: RH(:)
    double precision, external     :: sinhsafei
 
    double precision               :: fsqrtt, ee_eps, tt_eps
-   double precision               :: cost, sint
+   double precision               :: cost, sint, rsl, rhog8
 
    allocate(hh(1:ndx), ddlok(1:ntheta, 1:ndx), dd(1:ntheta, 1:ndx), wete(1:ndx), drr(1:ntheta,1:ndx), stat = ierr)
    !allocate(ustw(1:ndx), uwf(1:ndx), vwf(1:ndx), ustr(1:ndx), stat = ierr)
    !allocate(urf(1:ndx), vrf(1:ndx), dfac(1:ndx), stat = ierr)
-   allocate(dfac(1:ndx), stat = ierr)
-   allocate(Tdeplim(1:ndx), stat = ierr)
+   allocate(dfac(1:ndx), beta1(1:ndx), stat = ierr)
+   !allocate(Tdeplim(1:ndx), stat = ierr)
    allocate(RH(1:ndx), stat=ierr)
    allocate(gammax_correct(1:ndx), stat=ierr)
    
@@ -975,6 +977,12 @@ subroutine xbeach_wave_instationary()
    else
       hh = hhw
    endif
+   !
+   where (hh>epshs)
+      wete=1
+   elsewhere
+      wete=0
+   end where
    !
    if (wci>0) then
       call xbeach_wave_dispersion(2) 
@@ -1082,18 +1090,47 @@ subroutine xbeach_wave_instationary()
    !
    !   Energy integrated over wave directions,Hrms, depth limitation on energy
    !
-   do k=1,ndx
-       E(k)=sum(ee1(:,k),dim=1)*dtheta
-       H(k)=sqrt(8.d0*E(k)/rhomean/ag)
+   !do k=1,ndx
+   !    E(k)=sum(ee1(:,k),dim=1)*dtheta
+   !    H(k)=sqrt(8.d0*E(k)/rhomean/ag)
+   !
+   !    do itheta=1,ntheta
+   !        ee1(itheta,k)=ee1(itheta,k)/(H(k)/(gammaxxb*hh(k)))**2
+   !    enddo
+   !    
+   !    H(k)=min(H(k),gammaxxb*hh(k))
+   !    E(k)=rhomean*ag*(H(k)**2)/8.d0
+   !end do
 
-       do itheta=1,ntheta
-           ee1(itheta,k)=ee1(itheta,k)/max(1.d0,(H(k)/(gammaxxb*hh(k)))**2)
-       enddo
+   where(wete == 1)
+      E=sum(ee1,dim=1)*dtheta
+   elsewhere
+      E = 0.d0
+   endwhere
+   H=sqrt(8.d0*E/rhomean/ag)
+   !
+   ! Correct for gammax in these areas
+   where(H>gammaxxb*hs .and. wete==1)
+      gammax_correct = .true.
+   elsewhere
+      gammax_correct = .false.
+   endwhere
+   !
+   do itheta=1,ntheta
+      where(gammax_correct)
+         ee1(itheta,:)=ee1(itheta,:)/(H/(gammaxxb*hs))**2
+      endwhere
+   enddo
+   !
+   where(gammax_correct)
+      H=min(H,gammaxxb*hs)
+   endwhere
+   !
+   rhog8 = rhomean*ag/8d0
+   where(gammax_correct)
+      E=rhog8*H**2 
+   endwhere
 
-       H(k)=min(H(k),gammaxxb*hh(k))
-       E(k)=rhomean*ag*(H(k)**2)/8.d0
-   end do
-   
    !   Breaker dissipation
    !call xbeach_wave_breaker_dissipation(dts, break, DeltaH, waveps, hhw, kwav, km, gamma, gamma2, nroelvink, QB, alpha, Trep, cwav, thetamean, E, D, sigmwav, wci, 0)
    call xbeach_wave_breaker_dissipation(dts, break, DeltaH, waveps, hhw, kwav, km, gamma, gamma2, nroelvink, QB, alpha, Trep, cwav, thetamean, H, D, sigmwav, wci, 0)
@@ -1101,7 +1138,6 @@ subroutine xbeach_wave_instationary()
    !   Dissipation by bed friction
    dfac = 2.d0*fw*rhomean/(3.d0*pi)
    do k=1,Ndx
-      !urms_cc(k) = H(k) * sigmwav(k) / 2d0 / sinh(min(max(kwav(k),0.01d0)*max(hh(k),deltaH*H(k)),10.0d0))   ! uorb uit XBeach
       uorb(k) = H(k) * sigmwav(k) / 2d0 * sinhsafei(kwav(k)*hh(k))   ! uorb uit XBeach
       Df(k)=dfac(k)*uorb(k)**3
    end do
@@ -1117,8 +1153,8 @@ subroutine xbeach_wave_instationary()
    !   Distribution of total dissipation over directions
    !
    do itheta=1,ntheta
-      ddlok(itheta,:)=ee1(itheta,:)*D/max(E,0.00001d0)                       ! breaking
-      dd(itheta,:)   = ddlok(itheta,:) + ee1(itheta,:)*Df/max(E,0.00001d0)   ! breaking plus friction
+      ddlok(itheta,:) = ee1(itheta,:)*D/max(E,1d-5)                       ! breaking
+      dd(itheta,:)    = ddlok(itheta,:) + ee1(itheta,:)*Df/max(E,1d-5)   ! breaking plus friction
    enddo
 
    !if (windmodel.eq.1) then
@@ -1143,12 +1179,6 @@ subroutine xbeach_wave_instationary()
    !       SwT=0.d0
    !   endif
    !endif ! windmodel
-
-   where (hh>epshs)
-      wete=1
-   elsewhere
-      wete=0
-   end where
 
    ! Roller energy balance
    call advec_horz(dts, sinth, costh, limtypw, rr, cwav, rrhoradvec)
@@ -1198,16 +1228,15 @@ subroutine xbeach_wave_instationary()
    !    sigt=twopi/tt1
    !    
    !else !if windmodel=0
-       
+ 
       do k = 1,ndx
+         !
          do itheta=1,ntheta
             if(wete(k)==1) then
-               ee1(itheta,k)=ee1(itheta, k)-dts*dd(itheta, k)                ! totale dissipatie
+               ee1(itheta,k)=ee1(itheta, k)-dts*dd(itheta, k)                                  ! totale dissipatie
                if(roller>0) then
-                  drr(itheta, k) = 2.0*ag*BR(k)*max(rr(itheta, k),0.0d0)/    &
-                                   cwav(k)
-                  rr(itheta, k)=rr(itheta, k)+dts*(ddlok(itheta, k)   &      ! only wave breaker dissipation
-                                -drr(itheta, k))
+                  drr(itheta, k) = 2.0*ag*BR(k)*max(rr(itheta, k),0.0d0)/cwav(k)
+                  rr(itheta, k)  = rr(itheta, k)+dts*(ddlok(itheta, k)-drr(itheta, k))                     ! only wave breaker dissipation               
                else
                   rr(itheta, k)  = 0.0d0
                   drr(itheta, k) = 0.0d0
@@ -1243,9 +1272,10 @@ subroutine xbeach_wave_instationary()
          DR(k) = sum(drr(:,k),dim=1)*dtheta
       enddo
    else       ! need something here for mor
+      rsl = sin(beta)
       do k=1, ndx
-         DR(k) = D(k)
-         R(k) = DR(k)*cwav(k)/2d0/ag/BR(k)
+         R(k)  = 9d-1*rhomean*ag*rsl*H(k)**2    ! Martins 2018
+         DR(k) = 2.0*ag*beta*R(k)/cwav(k)
       enddo
    end if
    !
@@ -1286,6 +1316,7 @@ subroutine xbeach_wave_instationary()
    endif
    !
    ! Energy limitation roller; strictly speaking, I would expect this after advection step
+   gammax_correct = .false.
    if (rollergammax==1) then
       RH = sqrt(8d0*R/rhomean/ag)
       where(RH>gammaxxb*hhw .and. wete==1)
@@ -1304,9 +1335,9 @@ subroutine xbeach_wave_instationary()
       endwhere
       !
       ! Correct roller dissipation, check with Dano
-      where (hs>epshs) 
-         DR = 2d0*ag*BR*R/cwav
-      endwhere
+      !where (hs>epshs) 
+      !   DR = 2d0*ag*beta1*R/cwav
+      !endwhere
    endif
    
    if (roller.eq.1 .and. turb.ne.TURB_NONE) then
@@ -1319,8 +1350,8 @@ subroutine xbeach_wave_instationary()
    phiwav = thetamean*rd2dg
    rlabda = L1
 
-   deallocate(hh, ddlok, wete, drr, stat = ierr)
-   deallocate(Tdeplim, stat=ierr)
+   deallocate(hh, ddlok, wete, drr, beta1, stat = ierr)
+   !deallocate(Tdeplim, stat=ierr)
    deallocate(RH, stat=ierr)
    deallocate(gammax_correct, stat=ierr)
 
@@ -2230,6 +2261,7 @@ subroutine xbeach_wave_breaker_dissipation(dtmaxwav, break, deltaH, waveps, hhw,
    use m_physcoef, only: rhomean
    use m_xerf
    use m_xbeach_typesandkinds, only: slen
+   use m_debug
    
    implicit none
    
@@ -2255,7 +2287,7 @@ subroutine xbeach_wave_breaker_dissipation(dtmaxwav, break, deltaH, waveps, hhw,
    integer                         , intent(in)     :: windmodel
    
    integer                                          :: ierr, i, k
-   double precision, allocatable                    :: hh(:), hr(:), kmr(:), arg(:), kh(:), Hb(:), Qb_advec(:), ka(:), f(:), gam(:), H(:), R(:)
+   double precision, allocatable, save              :: hh(:), hr(:), kmr(:), arg(:), kh(:), Hb(:), Qb_advec(:), ka(:), f(:), gam(:), H(:), R(:)
 
    call realloc(hh,       ndx, stat=ierr, fill=0d0, keepExisting=.false.)
    call realloc(hr,       ndx, stat=ierr, fill=0d0, keepExisting=.false.)
@@ -2342,7 +2374,6 @@ subroutine xbeach_wave_breaker_dissipation(dtmaxwav, break, deltaH, waveps, hhw,
       else
          D = D / Trep * H/hh
       endif
-
    elseif (trim(break) == 'roelvink_daly') then
       !H   = sqrt(8.d0*E/rhomean/ag)
       H   = hwav
@@ -2387,7 +2418,7 @@ subroutine xbeach_wave_breaker_dissipation(dtmaxwav, break, deltaH, waveps, hhw,
       D   = 3d0*sqrt(pi)/16d0 * alpha*f*rhomean*ag* (H**3)/hh * Qb    ! alpha is B from the paper, same as Roelvink 1993
    endif
 
-   deallocate(hh, hr, kmr, arg, kh, Hb, Qb_advec, H, R, stat = ierr)
+   !deallocate(hh, hr, kmr, arg, kh, Hb, Qb_advec, H, R, stat = ierr)
 
 end subroutine xbeach_wave_breaker_dissipation
 
@@ -3673,9 +3704,9 @@ subroutine rollerturbulence(k)
    endif
    !
    if (jawave .eq. 3 .or. jawave .eq. 6) then
-      disrol = dsurf(k)
       cw     = rlabda(k)/max(1d-1,twav(k))
-      rol    = disrol*cw/2d0/ag/0.10d0          ! assume something for roller slope
+      rol    = 9d-1*rhomean*ag*sin(1d-1)*hwav(k)**2    ! Martins 2018
+      disrol = 2d-1*ag*rol/cw                          ! 2.0*beta = 2d-1
       Tw     = twav(k)
       Tb     = twav(k)
    end if
@@ -3714,6 +3745,7 @@ subroutine borecharacter()
    use m_physcoef
    use m_sferic, only:pi
    use m_waves, only:uorb
+   use m_debug
    
    implicit none
     
@@ -3779,7 +3811,8 @@ subroutine borecharacter()
          if (rfb==1) then
             duddtmean = f0*RF(5,ih0,it0)+f1*RF(5,ih1,it0)+ f2*RF(5,ih0,it1)+f3*RF(5,ih1,it1)
             dudtmean = uorb(k)/sqrt(2.0) / max(waveps,siguref) * sqrt(ag/hh(k))*t0fac*duddtmean
-            detadxmean = dudtmean*sinh(min(kwav(k)*hh(k),10d0))/max(max(cwav(k),sqrt(H(k)*ag)),1d-10)/sigmwav(k)
+            debugarr1d(k) = dudtmean
+            detadxmean = dudtmean*sinh(kwav(k)*hh(k))/max(cwav(k),sqrt(H(k)*ag))/sigmwav(k)
             BR(k) = BRfac*sin(atan(detadxmean))   ! checked to be consistent w XB JRE
          endif
       enddo

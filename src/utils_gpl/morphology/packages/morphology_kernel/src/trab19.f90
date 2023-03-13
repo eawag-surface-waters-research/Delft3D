@@ -1,7 +1,7 @@
 subroutine trab19(u         ,v         ,hrms      ,rlabda    ,teta      ,h         ,tp        , &
                 & d50       ,d15       ,d90       ,npar      ,par       ,dzbdt     ,vicmol    , &
                 & poros     ,chezy     ,dzdx      ,dzdy      ,sbotx     ,sboty     ,ssusx     , &
-                & ssusy     ,ua        ,va        ,ubot      ,kwtur     ,vonkar    ,ubot_from_com )
+                & ssusy     ,ua        ,va        ,ubot      ,kwtur     ,vonkar    ,ubot_from_com, debug )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2023.                                
@@ -73,6 +73,7 @@ subroutine trab19(u         ,v         ,hrms      ,rlabda    ,teta      ,h      
     real(fp)                 , intent(out)   :: ssusy
     real(fp)                 , intent(out)   :: ua
     real(fp)                 , intent(out)   :: va
+    real(fp)                 , intent(out)   :: debug
     !
     ! Local variables
     !
@@ -118,7 +119,7 @@ subroutine trab19(u         ,v         ,hrms      ,rlabda    ,teta      ,h      
     !! executable statements -------------------------------------------------------
     !
     !
-    !     Initiliaze Transports to zero
+    !     Initialize Transports to zero
     !
     sbotx = 0.0_fp
     sboty = 0.0_fp
@@ -126,6 +127,7 @@ subroutine trab19(u         ,v         ,hrms      ,rlabda    ,teta      ,h      
     ssusy = 0.0_fp
     ua    = 0.0_fp
     va    = 0.0_fp
+    debug = 0.0_fp
     !
     !     Initialisations
     !
@@ -170,19 +172,6 @@ subroutine trab19(u         ,v         ,hrms      ,rlabda    ,teta      ,h      
     !
     ! velocity asymmetry
     !
-    uamag = 0.0_fp
-    if (waveform==1) then
-       call ua_rvr(facas    ,facsk  ,sws   ,h   ,hrms   , &
-                 & rlabda   ,ubot   ,uamag )                   ! to check, uorb or urms
-    else if (waveform==2) then
-       call ua_vt(facas    ,facsk   ,sws   ,h      ,   &
-                & hrms     ,tp      ,ag    ,ubot   ,   &
-                & uamag    )
-    end if
-    !
-    !     Velocity magnitude
-    !
-    phi = reposeangle*degrad ! Angle of internal friction
     utot = u**2 + v**2
     if (utot>0.0_fp) utot = sqrt(utot)
     if (utot<dtol .or. h>200.0_fp .or. h<0.01_fp) goto 999
@@ -204,8 +193,23 @@ subroutine trab19(u         ,v         ,hrms      ,rlabda    ,teta      ,h      
        urms = uorb*0.7071_fp
        urms2 = urms**2 + 1.45_fp*kwtur
     else
+       urms  = 0.0_fp
        urms2 = 0.0_fp
     endif
+    !
+    uamag = 0.0_fp
+    if (waveform==1) then
+       call ua_rvr(facas    ,facsk  ,sws   ,h   ,hrms   , &
+                 & rlabda   ,urms   ,uamag )                   ! uorb internally converted to urms
+    else if (waveform==2) then
+       call ua_vt(facas    ,facsk   ,sws   ,h      ,   &
+                & hrms     ,tp      ,ag    ,urms   ,   &
+                & uamag    )
+    end if
+    !
+    !     Velocity magnitude
+    !
+    phi = reposeangle*degrad ! Angle of internal friction
     !
     dster=(delta*ag/1e-12_fp)**onethird*d50        ! 1e-12 = nu**2
     !
@@ -219,8 +223,9 @@ subroutine trab19(u         ,v         ,hrms      ,rlabda    ,teta      ,h      
        Ucrc=1.3_fp*sqrt(delta*ag*d50)*(h/d50)**(0.5_fp*onethird)            !Maynord (1978) --> also Neill (1968) where 1.3_fp = 1.4_fp
        Ucrw=0.95_fp*(delta*ag)**0.57_fp*d50**0.43_fp*tp**0.14_fp                  !Komar and Miller (1975)
     end if
-    B2 = utot/max(utot+sqrt(urms2),1e-5_fp)
+    B2 = utot/max(utot+sqrt(urms2),5e-3_fp)
     Ucr = B2*Ucrc + (1.0_fp-B2)*Ucrw                                           !Van Rijn 2007 (Bed load transport paper)
+    debug = Ucr
     !
     srfRhee  = 0.0_fp
     srfTotal = 1.0_fp
@@ -259,6 +264,8 @@ subroutine trab19(u         ,v         ,hrms      ,rlabda    ,teta      ,h      
     endif
    ! Calculate the new critical velocity based on the modification factors on the Shields parameter
    Ucrb = Ucr*sqrt(srfTotal)
+   debug=ucrb
+
    if (bedslpeffini == 1) then         ! bed+sus
       Ucrs = Ucrb
    else

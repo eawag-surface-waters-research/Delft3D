@@ -243,6 +243,7 @@ module m_xbeach_data
    ! [Section] Roller parameters
    integer                 :: roller                     = -123    !  [-] (advanced) Turn on (1) or off(0) roller model
    double precision        :: beta                       = -123    !  [-] (advanced) Breaker slope coefficient in roller model
+   integer                 :: varbeta                    = -123    !  [-] (advanced) Rafati varying roller slope
    integer                 :: rfb                        = -123    !  [-] (advanced) Switch to feed back maximum wave surface slope in roller energy balance, otherwise rfb = par%Beta
    double precision        :: nuhfac                     = -123    !  [-] (advanced) Calibration factor for roller turbulence induced viscosity
 

@@ -1,5 +1,5 @@
 subroutine ua_rvr(facas,    facsk,    sws,    h,    hrms, &
-               &  rlabda, uorb, ua)
+               &  rlabda, urms, ua)
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2023.                                
@@ -48,7 +48,7 @@ subroutine ua_rvr(facas,    facsk,    sws,    h,    hrms, &
     real(fp), intent(in)          :: rlabda
     real(fp), intent(in)          :: hrms
     real(fp), intent(in)          :: h
-    real(fp), intent(in)          :: uorb
+    real(fp), intent(in)          :: urms
     real(fp), intent(out)         :: ua
     !
     ! Local variables
@@ -81,6 +81,6 @@ subroutine ua_rvr(facas,    facsk,    sws,    h,    hrms, &
     b1 = (-90.0_fp+90.0_fp*tanh(m5/urs**m6))*pi/180.0_fp
     sk = bm*cos(b1)                                                         !Skewness (eq 8)
     as = bm*sin(b1)                                                         !Asymmetry(eq 9)                                
-    ua = sws*(facsk*sk-facas*as)*uorb/sqrt(2.)
+    ua = sws*(facsk*sk-facas*as)*urms
    
 end subroutine ua_rvr

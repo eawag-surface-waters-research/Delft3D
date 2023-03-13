@@ -188,6 +188,7 @@ subroutine eqtran(sig       ,thick     ,kmax      ,ws        ,ltur      , &
     real(fp)                    :: ua
     real(fp)                    :: va
     real(fp)                    :: uamg
+    real(fp)                    :: debug
     !
     ! Interface to dll is in High precision!
     !
@@ -275,6 +276,7 @@ subroutine eqtran(sig       ,thick     ,kmax      ,ws        ,ltur      , &
     ua     = 0.0_fp
     va     = 0.0_fp
     uamg   = 0.0_fp
+    debug  = 0.0_fp
     sag    = sqrt(ag)
     bakdif = vicmol / sigmol
     !
@@ -536,11 +538,12 @@ subroutine eqtran(sig       ,thick     ,kmax      ,ws        ,ltur      , &
        call trab19(u         ,v         ,hrms      ,rlabda    ,teta      ,h1        ,tp        , &
                  & di50      ,d15       ,d90       ,npar      ,par       ,dzbdt     ,vicmol    , &
                  & poros     ,chezy     ,dzdx      ,dzdy      ,sbcu      ,sbcv      ,sscu      , &
-                 & sscv      ,ua        ,va        ,ubot      ,kwtur     ,vonkar    ,ubot_from_com )
+                 & sscv      ,ua        ,va        ,ubot      ,kwtur     ,vonkar    ,ubot_from_com, debug )
        !
        uamg = sqrt(ua*ua+va*va)
        realpar(RP_UAU) = real(ua      ,hp)  ! needed for suspended transport
        realpar(RP_VAU) = real(va      ,hp)
+       realpar(RP_DBG) = real(debug   ,hp)
        !
        sbc_total = .false.
        sus_total = .false.
