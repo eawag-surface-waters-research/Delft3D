@@ -6,13 +6,8 @@ include_directories(${waq_root_path}/include)
 # Set version file variables
 set(waq_version_path ${waq_root_path}/version)
 
-set(ini_version_file ${waq_version_path}/version_number.ini)
 set(rc_version_file ${waq_version_path}/version_number.rc)
-
-# Generate version files
-generate_version_files(${rc_version_file}
-                       ${ini_version_file}
-                       ON)
+set(version_include_dir ${CMAKE_SOURCE_DIR}/../version_includes)
 
 # Set directory which contains all source files
 set(src_path src)
@@ -25,13 +20,6 @@ file(GLOB preprocessor_files ${CMAKE_CURRENT_SOURCE_DIR}/${src_path}/waq_bmi.F90
 set(library_name delwaq_lib)
 add_library(${library_name} SHARED ${source_files}
                                    ${rc_version_file})
-
-# Define prebuild events
-prebuild_version_number(${library_name} ${rc_version_file}
-                                        ${checkout_src_root}
-                                        ${ini_version_file}
-                                        ON)
-
 
 set(oss_dependencies_general deltares_common
                              deltares_common_c
@@ -113,6 +101,7 @@ source_group(Resources FILES    ${rc_version_file})
 target_compile_options(${library_name} PRIVATE "${openmp_flag}")
 target_compile_options(${library_name} PRIVATE "${waq_default_flags}")
 
+target_include_directories(${library_name} PRIVATE ${version_include_dir})
 set_target_properties(${library_name} PROPERTIES FOLDER engines_gpl/waq)
 
 if(UNIX)

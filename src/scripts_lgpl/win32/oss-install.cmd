@@ -111,7 +111,7 @@ rem =============================================================
     rem
     rem "echo f |" is (only) needed when dest does not exist
     rem and does not harm in other cases
-    rem 
+    rem
     echo f | xcopy "%fileName%" %dest% /F /Y
     if NOT !ErrorLevel! EQU 0 (
         echo ERROR: while copying "!fileName!" to "!dest!"
@@ -201,7 +201,7 @@ rem ===================
 
     call :makeDir !dest_bin!
     call :makeDir !dest_menu!
-    
+
     call :copyFile engines_gpl\d_hydro\bin\Release\d_hydro.exe          !dest_bin!
     call :copyFile engines_gpl\d_hydro\scripts\create_config_xml.tcl    !dest_menu!
 goto :endproc
@@ -245,8 +245,8 @@ rem ================
     call :copyFile "third_party_open\mpich2\bin\smpd.exe"                                !dest_shared!
     call :copyFile "third_party_open\expat\win32\bin\Release\*.dll"                      !dest_shared!
     call :copyFile "third_party_open\pthreads\bin\win32\*.dll"                           !dest_shared!
-    echo This directory is automatically created by script https://svn.oss.deltares.nl/repos/delft3d/trunk/src/scripts_lgpl/win32/oss-install.cmd >!dest_shared!\readme.txt
-    echo This script is executed via a post-build event of https://svn.oss.deltares.nl/repos/delft3d/trunk/src/engines_gpl/dimr/packages/dimr/dimr_exe.vcxproj >>!dest_shared!\readme.txt
+    echo This directory is automatically created by script https://git.deltares.nl/oss/delft3d/-/tree/main/src/scripts_lgpl/win32/oss-install.cmd >!dest_shared!\readme.txt
+    echo This script is executed via a post-build event of https://git.deltares.nl/oss/delft3d/-/tree/main/src/engines_gpl/dimr/packages/dimr/dimr_exe.vcxproj >>!dest_shared!\readme.txt
     echo Further modifications can be done via a Python script executed via "DIMR_collector" projects in TeamCity >>!dest_shared!\readme.txt
 goto :endproc
 
@@ -262,7 +262,7 @@ rem ====================
     set dest_default="!dest_main!\win32\dflow2d3d\default"
     set dest_scripts="!dest_main!\win32\dflow2d3d\scripts"
     set dest_plugins="!dest_main!\win32\plugins\bin"
-    
+
     call :makeDir !dest_bin!
     call :makeDir !dest_default!
     call :makeDir !dest_scripts!
@@ -290,7 +290,7 @@ rem ====================
     call :copyFile "utils_lgpl\delftonline\lib\Release\dynamic\delftonline.dll" !dest_bin!
     call :copyFile "utils_lgpl\delftonline\lib\Release\dynamic\delftonline.dll" !dest_plugins!
     call :copyNetcdf
-    
+
     if !compiler_dir!=="" (
         rem Compiler_dir not set
     ) else (
@@ -362,7 +362,7 @@ rem ===================
     echo "installing delwaq1 . . ."
 
     set dest_bin="!dest_main!\win32\dwaq\bin"
-    
+
     call :makeDir !dest_bin!
 
     call :copyFile engines_gpl\waq\bin\Release\delwaq1.exe                     !dest_bin!
@@ -377,7 +377,7 @@ rem ===================
     echo "installing delwaq2 . . ."
 
     set dest_bin="!dest_main!\win32\dwaq\bin"
-    
+
     call :makeDir !dest_bin!
 
     call :copyFile engines_gpl\waq\bin\Release\delwaq2.exe               	   !dest_bin!
@@ -393,10 +393,10 @@ rem ======================
 
     set dest_bin="!dest_main!\win32\dwaq\bin"
     set dest_default="!dest_main!\win32\dwaq\default"
-    
+
     call :makeDir !dest_bin!
     call :makeDir !dest_default!
-    
+
     call :copyFile engines_gpl\waq\bin\Release\delwaq.dll                      !dest_bin!
     call :copyNetcdf
 
@@ -439,12 +439,12 @@ rem ==============================
     echo "installing delwaq2_openda_lib . . ."
 
     set dest_bin="!dest_main!\win32\dwaq\bin"
-    
+
     call :makeDir !dest_bin!
-    
+
     call :copyFile engines_gpl\waq\bin\Release\delwaq2_openda_lib.dll          !dest_bin!
     call :copyNetcdf
-	
+
     if !compiler_dir!=="" (
         rem Compiler_dir not set
     ) else (
@@ -472,9 +472,9 @@ rem ================================
     echo "installing waq_plugin_wasteload . . ."
 
     set dest_bin="!dest_main!\win32\dwaq\bin"
-    
+
     call :makeDir !dest_bin!
-    
+
     call :copyFile engines_gpl\waq\bin\Release\waq_plugin_wasteload.dll        !dest_bin!
 goto :endproc
 
@@ -500,7 +500,7 @@ rem ================
         set localstring="!compiler_dir!libiomp5md.dll"
         call :copyFile !localstring! !dest!
     )
-	
+
 goto :endproc
 
 
@@ -539,7 +539,7 @@ rem ================
     )
     if exist engines_gpl\wave\bin\release\wave_exe.exe (
         call :copyFile engines_gpl\wave\bin\release\wave_exe.exe      "!dest_bin!\wave.exe"
-    ) 
+    )
     call :copyFile engines_gpl\flow2d3d\default\dioconfig.ini      "!dest_default!"
     call :copyFile "third_party_open\swan\bin\win32\*.*"           "!dest_swan_bin!"
     call :copyFile third_party_open\swan\scripts\swan.bat          "!dest_swan_scripts!"
@@ -749,7 +749,7 @@ goto :endproc
 if NOT %globalErrorLevel% EQU 0 (
     rem
     rem Only jump to :end when the script is completely finished
-    rem 
+    rem
     echo An error occurred while executing this file
     echo Returning with error number %globalErrorLevel%
     exit /B %globalErrorLevel%
