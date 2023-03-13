@@ -28,11 +28,13 @@ if (WIN32)
     set(floating_point_exception_flag /fpe:0)
     set(traceback_flag /traceback)
     
-    # To prevent Visual Studio compilation failures when trying to write the manifest file
-    # to a blocked .exe
-    set(CMAKE_EXE_LINKER_FLAGS    "${CMAKE_EXE_LINKER_FLAGS} /MANIFEST:NO")
-    set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} /MANIFEST:NO")
-    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /MANIFEST:NO")
+    if (CMAKE_GENERATOR MATCHES "Visual Studio") # for visual studio
+        # To prevent Visual Studio compilation failures when trying to write the manifest file
+        # to a blocked .exe
+        set(CMAKE_EXE_LINKER_FLAGS    "${CMAKE_EXE_LINKER_FLAGS} /MANIFEST:NO")
+        set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} /MANIFEST:NO")
+        set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /MANIFEST:NO")
+    endif()
 
 endif(WIN32)
 
