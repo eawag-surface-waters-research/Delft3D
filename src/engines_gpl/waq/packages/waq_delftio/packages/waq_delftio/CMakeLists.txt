@@ -2,7 +2,6 @@
 # Note that the CMAKE_CURRENT_SOURCE_DIR has a path to THIS CMakeLists location
 set(waq_delftio_include_path ${CMAKE_CURRENT_SOURCE_DIR}/../../include)
 include_directories(${waq_delftio_include_path})
-
 # Set include path to have it accessible for other components
 set(public_include_path ${waq_delftio_include_path})
 
