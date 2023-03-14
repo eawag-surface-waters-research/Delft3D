@@ -124,6 +124,11 @@ rem =================================
         set config=%1
         set mode=quiet
     )
+    if "%1" == "dwaves" (
+        set prepareonly=0
+        set config=%1
+        set mode=quiet
+    )
     if "%1" == "swan" (
         set prepareonly=0
         set config=%1

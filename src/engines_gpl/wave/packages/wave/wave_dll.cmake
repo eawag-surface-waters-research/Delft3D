@@ -1,5 +1,3 @@
-# Navigate back to the wave/manager component to retrieve the rc file for setting file properties
-set(rc_version_file ${CMAKE_CURRENT_SOURCE_DIR}/../manager/src/wave_version.rc)
 
 # Gather source files
 set(library_files ${src_path}/wave_bmi.f90) # Because the .dll and the .exe are defined in the same directory, retrieve the relevant files for the library alone
