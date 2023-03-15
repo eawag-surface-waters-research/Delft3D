@@ -3,12 +3,8 @@ set(src_path src)
 
 # Set version file variables
 # Note that the CMAKE_CURRENT_SOURCE_DIR has a path to THIS CMakeLists location
-set(ini_version_file ${CMAKE_CURRENT_SOURCE_DIR}/../../res/version_number.ini)
-set(fortran_version_file ${CMAKE_CURRENT_SOURCE_DIR}/${src_path}/part_version.F90)
+set(fortran_version_file ${part_root_path}/../waq/packages/waq_utils_f/src/waq_utils/delwaq_version.F90)
 
-generate_version_files(${fortran_version_file} 
-                       ${ini_version_file} 
-                       ON)
 
 # Gather source files
 get_fortran_source_files(${src_path} source_files)
@@ -16,7 +12,6 @@ get_fortran_source_files(${src_path} source_files)
 # Define library
 set(library_name part_utils_f)
 add_library(${library_name} ${source_files})
-
 
 
 set(oss_dependencies_general deltares_common

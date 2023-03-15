@@ -12,15 +12,11 @@ set(part_root_path ${CMAKE_CURRENT_SOURCE_DIR}/../../) # Trace back to the WAQ p
 # Set version file variables
 set(part_version_path ${part_root_path}/version)
 
-set(ini_version_file ${part_version_path}/version_number.ini)
-set(fortran_version_file ${part_root_path}/packages/utils_f/src/part_version.F90)
+set(fortran_version_file ${part_root_path}/../waq/packages/waq_utils_f/src/waq_utils/delwaq_version.F90)
+set(version_include_dir ${CMAKE_SOURCE_DIR}/../version_includes)
 
 # Set icon file
 set(icon_file ${part_version_path}/part_icon.rc)
-
-generate_version_files(${fortran_version_file} 
-                       ${ini_version_file} 
-                       ON)
 
 
 
@@ -30,11 +26,6 @@ add_executable(${executable_name} ${source_files}
                                   ${icon_file}
                                   ${fortran_version_file})
 
-# Define prebuild events
-prebuild_version_number(${executable_name} ${fortran_version_file} 
-                                        ${checkout_src_root}
-                                        ${ini_version_file}
-                                        ON)
 
 set_source_files_properties(${fortran_version_file} ${fortran_version_file}
                             PROPERTIES COMPILE_OPTIONS "${file_preprocessor_flag}")
