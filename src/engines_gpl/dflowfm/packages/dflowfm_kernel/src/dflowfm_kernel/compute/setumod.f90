@@ -27,8 +27,8 @@
 !
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! $Id: setumod.f90 142549 2023-02-16 12:28:37Z buwalda $
+! $HeadURL: https://svn.oss.deltares.nl/repos/delft3d/trunk/src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_kernel/compute/setumod.f90 $
 
 subroutine setumod(jazws0)                          ! set cell center Perot velocities at nodes
                                                      ! set Perot based friction velocities umod at u point
@@ -46,6 +46,7 @@ subroutine setumod(jazws0)                          ! set cell center Perot velo
  use m_xbeach_data, only : DR, roller, swave, nuhfac
  use unstruc_model, only : md_restartfile
  use m_setucxcuy_leastsquare, only: reconst2nd
+ use m_nod2lin, only: lin2nodx, lin2nody, nod2linx, nod2liny
  implicit none
 
  integer,intent(in):: jazws0
@@ -74,7 +75,7 @@ subroutine setumod(jazws0)                          ! set cell center Perot velo
  integer :: ndraw
  COMMON /DRAWTHIS/ ndraw(50)
 
- double precision, external :: nod2linx, nod2liny, lin2nodx, lin2nody, cor2linx, cor2liny
+ double precision, external :: cor2linx, cor2liny
  double precision, external :: nod2wallx, nod2wally, wall2linx, wall2liny
 
  call timstrt('Umod', handle_umod)

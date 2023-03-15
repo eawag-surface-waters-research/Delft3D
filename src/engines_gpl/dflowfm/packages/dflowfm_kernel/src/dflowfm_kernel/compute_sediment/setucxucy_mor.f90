@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! $Id: setucxucy_mor.f90 142549 2023-02-16 12:28:37Z buwalda $
+! $HeadURL: https://svn.oss.deltares.nl/repos/delft3d/trunk/src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_kernel/compute_sediment/setucxucy_mor.f90 $
 
    ! =================================================================================================
    ! =================================================================================================
@@ -41,6 +41,7 @@
    use m_missing
    use m_flowparameters, only: jabarrieradvection
    use m_sferic
+   use m_nod2lin, only: lin2nodx, lin2nody, nod2linx, nod2liny
    implicit none
    double precision, dimension(lnkx), intent(in ) :: u1_loc
 
@@ -49,9 +50,6 @@
    double precision :: uu, vv, uucx, uucy, wcxu, wcyu, cs, sn, adx, ac1, ac2, wuw, hdx, hul, dzz, uin, duxdn, duydn
    double precision :: dischcorrection
    double precision :: uinx, uiny
-
-   double precision, external :: nod2linx, nod2liny
-   double precision, external :: lin2nodx, lin2nody
 
    ucxq_mor = 0d0 ; ucyq_mor = 0d0           ! zero arrays
    ucx_mor  = 0d0 ; ucy_mor  = 0d0
