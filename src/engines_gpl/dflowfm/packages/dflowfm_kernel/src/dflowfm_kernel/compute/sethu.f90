@@ -27,8 +27,8 @@
 !
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! $Id: sethu.f90 142549 2023-02-16 12:28:37Z buwalda $
+! $HeadURL: https://svn.oss.deltares.nl/repos/delft3d/trunk/src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_kernel/compute/sethu.f90 $
 
 subroutine sethu(jazws0)                            ! Set upwind waterdepth hu
  use m_flowgeom                                     ! Todo: higher order + limiter, see transport
@@ -42,6 +42,8 @@ subroutine sethu(jazws0)                            ! Set upwind waterdepth hu
  use m_netw, only: xk, yk, zk
  use unstruc_model, only:md_restartfile
  use geometry_module, only: dbdistance
+ use m_limiters, only: dslim
+ use m_nod2lin, only: nod2linx, nod2liny
 
  implicit none
 
@@ -70,8 +72,6 @@ subroutine sethu(jazws0)                            ! Set upwind waterdepth hu
  integer           :: k3, k4, itel, kuu, ku2, kku, ip , Lnu, kbd, ktd, kbd0, LLbc, kkd
 
  double precision  :: zw0u
-
- double precision, external :: dslim,  nod2linx, nod2liny
 
  ! SPvdP: s0 at the old time level already satisfies the boundary conditions at the old time level (see s1nod)
  !  Nevertheless, s0 at the boundary (at the old time-level) will now be filled with boundary conditions at the new time level
@@ -304,10 +304,7 @@ subroutine sethu(jazws0)                            ! Set upwind waterdepth hu
                            uLL      = max(1d-4, abs(u1(LL)))
                            advi(LL) = advi(LL) + agwdxi/uLL
                         enddo
-                     endif
-                     map_fixed_weir_energy_loss(L) = weirdte(nfw)
-                 else
-                     map_fixed_weir_energy_loss(L) = 0
+                    endif
                  endif
                                   
                  !if (huweirregular > 0d0) then 

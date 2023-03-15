@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! $Id: setucxucyucxuucyunew.f90 142549 2023-02-16 12:28:37Z buwalda $
+! $HeadURL: https://svn.oss.deltares.nl/repos/delft3d/trunk/src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_kernel/compute/setucxucyucxuucyunew.f90 $
 
  subroutine setucxucyucxuucyunew()   ! and reclaim ucxq, ucyq for Coriolis without interfering with Morfology
  use m_flowgeom
@@ -39,6 +39,7 @@
  use m_missing
  use m_flowparameters, only: jabarrieradvection
  use m_sferic
+ use m_nod2lin, only: lin2nodx, lin2nody, nod2linx, nod2liny
  implicit none
 
  logical          :: make2dh
@@ -50,9 +51,6 @@
  double precision :: uinx, uiny, ahu, uxy
 
  double precision,  allocatable :: husx, husy
-
- double precision, external :: nod2linx, nod2liny
- double precision, external :: lin2nodx, lin2nody
 
  ucxq = 0d0 ; ucyq = 0d0           ! zero arrays
 
