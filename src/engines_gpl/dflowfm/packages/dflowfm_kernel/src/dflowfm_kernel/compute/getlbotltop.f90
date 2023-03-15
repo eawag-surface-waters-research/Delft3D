@@ -27,14 +27,15 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! $Id: getlbotltop.f90 142549 2023-02-16 12:28:37Z buwalda $
+! $HeadURL: https://svn.oss.deltares.nl/repos/delft3d/trunk/src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_kernel/compute/getlbotltop.f90 $
 
- subroutine getLbotLtop(LL,Lb,Lt)
+elemental subroutine getLbotLtop(LL,Lb,Lt)
  use m_flow
  use m_flowgeom
  implicit none
- integer :: LL,Lb,Lt
+ integer, intent(in) :: LL
+ integer, intent(out):: Lb,Lt
  if (kmx == 0) then
     Lb = LL
     if (hu(LL) > 0) then

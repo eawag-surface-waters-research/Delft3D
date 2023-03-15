@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! $Id: qucper3dsigmapiaczekteta.f90 142549 2023-02-16 12:28:37Z buwalda $
+! $HeadURL: https://svn.oss.deltares.nl/repos/delft3d/trunk/src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_kernel/compute/qucper3dsigmapiaczekteta.f90 $
 
  subroutine QucPer3Dsigmapiaczekteta(LL,Lb,Lt,cs,sn,ae,ai)  ! Piaczekteta in 3D
 
@@ -36,6 +36,7 @@
  use m_flowgeom
  use m_flowtimes, only : dts                                !
  use m_sferic
+ use m_nod2lin, only: nod2linx, nod2liny, lin2nodx, lin2nody
  implicit none
 
  integer,          intent(in) :: LL,Lb,Lt                   ! working for basis link LL
@@ -51,8 +52,6 @@
 
  double precision ::  ucinx, uciny
  integer          :: nn12
-
- double precision, external:: lin2nodx, lin2nody, nod2linx, nod2liny
 
  ae = 0d0 ; ai = 0d0
 

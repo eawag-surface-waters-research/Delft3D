@@ -27,11 +27,11 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! $Id: dlimiter.f90 142549 2023-02-16 12:28:37Z buwalda $
+! $HeadURL: https://svn.oss.deltares.nl/repos/delft3d/trunk/src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_kernel/compute_transport/dlimiter.f90 $
 
 !> limiter function
-double precision function dlimiter(d1,d2,limtyp)
+elemental double precision function dlimiter(d1,d2,limtyp)
    implicit none
 
    double precision, intent(in) :: d1, d2   !< left and right slopes
@@ -48,12 +48,7 @@ double precision function dlimiter(d1,d2,limtyp)
 
    r = d1/d2    ! d1/d2
 
-!   if ( limtyp.eq.1 ) then
-!!     Van Leer
-!      dlimiter = dble(min(limtyp,1)) * (r + abs(r) ) / (1 + abs(r) )
-!   else
 !!     Monotinized Central
       dlimiter = max(0d0, min(TWO*r,TWO,0.5d0*(1d0+r)) )
-!   end if
 
 end function dlimiter

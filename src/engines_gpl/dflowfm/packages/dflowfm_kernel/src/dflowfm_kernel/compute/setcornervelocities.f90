@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! $Id: setcornervelocities.f90 142549 2023-02-16 12:28:37Z buwalda $
+! $HeadURL: https://svn.oss.deltares.nl/repos/delft3d/trunk/src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_kernel/compute/setcornervelocities.f90 $
 
  subroutine setcornervelocities()                    ! set corner related velocity x- and y components
 
@@ -36,6 +36,7 @@
  use m_netw
  use m_flowgeom
  use m_sferic
+ use m_nod2lin, only: nod2linx, nod2liny, lin2nodx, lin2nody
 
  implicit none
 
@@ -43,7 +44,7 @@
  integer                    :: m, n
  double precision           :: uLx, uLy, csk, snk, sg
 
- double precision, external :: nod2linx, nod2liny, lin2corx, lin2cory
+ double precision, external :: lin2corx, lin2cory
 
  ucnx = 0 ; ucny = 0
 

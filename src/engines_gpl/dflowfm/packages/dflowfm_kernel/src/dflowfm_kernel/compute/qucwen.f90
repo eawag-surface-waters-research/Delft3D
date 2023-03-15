@@ -27,12 +27,13 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! $Id: qucwen.f90 142549 2023-02-16 12:28:37Z buwalda $
+! $HeadURL: https://svn.oss.deltares.nl/repos/delft3d/trunk/src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_kernel/compute/qucwen.f90 $
 
  double precision function QucWen(n12,L)             ! sum of (Q*uc cell centre upwind normal) at side n12 of link L
  use m_flow                                          ! advect the cell center velocities (dimension: m4/s2)
  use m_flowgeom                                      ! leaving the cell = +
+ use m_nod2lin, only: lin2nodx, lin2nody, nod2linx, nod2liny
  implicit none
 
  integer :: L                                        ! for link L,
@@ -43,8 +44,6 @@
  integer :: k12                                      ! relevant node, 1 or 2, L/R
  double precision cs, sn, ucin, ucinx, uciny
  integer :: nn12
-
- double precision, external:: lin2nodx, lin2nody, nod2linx, nod2liny
 
  QucWen = 0d0
  cs     = csu(L)

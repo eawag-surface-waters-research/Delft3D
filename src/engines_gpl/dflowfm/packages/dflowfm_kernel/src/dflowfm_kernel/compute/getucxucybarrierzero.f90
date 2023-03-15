@@ -27,19 +27,19 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! $Id: getucxucybarrierzero.f90 142549 2023-02-16 12:28:37Z buwalda $
+! $HeadURL: https://svn.oss.deltares.nl/repos/delft3d/trunk/src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_kernel/compute/getucxucybarrierzero.f90 $
 
 ! =================================================================================================
 ! =================================================================================================
   subroutine getucxucybarrierzero ( Lf, ku, ucxku, ucyku )
  use m_flow
  use m_flowgeom
+ use m_nod2lin, only: lin2nodx, lin2nody
  implicit none
 
  integer           :: ku, L, LL, Ls, n12, Lf
  double precision  :: ucxku, ucyku, ww, ac1, cs, sn
- double precision, external :: lin2nodx, lin2nody
 
  ucxku = 0d0  ; ucyku = 0d0
 
