@@ -934,7 +934,6 @@ subroutine xbeach_wave_instationary()
    logical         , allocatable  :: gammax_correct(:)
    integer         , allocatable  :: wete(:)
    double precision, allocatable  :: hh(:), ddlok(:,:), dd(:,:), drr(:,:)
-   !double precision, allocatable  :: uwf(:), vwf(:), ustr(:), urf(:), vrf(:), ustw(:), dfac(:)
    double precision, allocatable  :: dfac(:)
    !double precision, allocatable  :: Tdeplim(:)
    double precision, allocatable  :: RH(:)
@@ -944,9 +943,7 @@ subroutine xbeach_wave_instationary()
    double precision               :: cost, sint, rsl, rhog8
 
    allocate(hh(1:ndx), ddlok(1:ntheta, 1:ndx), dd(1:ntheta, 1:ndx), wete(1:ndx), drr(1:ntheta,1:ndx), stat = ierr)
-   !allocate(ustw(1:ndx), uwf(1:ndx), vwf(1:ndx), ustr(1:ndx), stat = ierr)
-   !allocate(urf(1:ndx), vrf(1:ndx), dfac(1:ndx), stat = ierr)
-   allocate(dfac(1:ndx), beta1(1:ndx), stat = ierr)
+   allocate(dfac(1:ndx), stat = ierr)
    !allocate(Tdeplim(1:ndx), stat = ierr)
    allocate(RH(1:ndx), stat=ierr)
    allocate(gammax_correct(1:ndx), stat=ierr)
@@ -959,12 +956,6 @@ subroutine xbeach_wave_instationary()
    ddlok = 0.d0
    wete = 0
    drr = 0.d0
-   !ustw = 0d0
-   !uwf = 0d0
-   !vwf = 0d0
-   !ustr = 0d0
-   !urf = 0d0
-   !vrf = 0d0
    horadvec=0d0
    !horadvec2=0d0
    thetaadvec=0d0
@@ -1088,20 +1079,6 @@ subroutine xbeach_wave_instationary()
 
    !endif 
    !
-   !   Energy integrated over wave directions,Hrms, depth limitation on energy
-   !
-   !do k=1,ndx
-   !    E(k)=sum(ee1(:,k),dim=1)*dtheta
-   !    H(k)=sqrt(8.d0*E(k)/rhomean/ag)
-   !
-   !    do itheta=1,ntheta
-   !        ee1(itheta,k)=ee1(itheta,k)/(H(k)/(gammaxxb*hh(k)))**2
-   !    enddo
-   !    
-   !    H(k)=min(H(k),gammaxxb*hh(k))
-   !    E(k)=rhomean*ag*(H(k)**2)/8.d0
-   !end do
-
    where(wete == 1)
       E=sum(ee1,dim=1)*dtheta
    elsewhere
@@ -1350,7 +1327,7 @@ subroutine xbeach_wave_instationary()
    phiwav = thetamean*rd2dg
    rlabda = L1
 
-   deallocate(hh, ddlok, wete, drr, beta1, stat = ierr)
+   deallocate(hh, ddlok, wete, drr, stat = ierr)
    !deallocate(Tdeplim, stat=ierr)
    deallocate(RH, stat=ierr)
    deallocate(gammax_correct, stat=ierr)
@@ -3811,7 +3788,6 @@ subroutine borecharacter()
          if (rfb==1) then
             duddtmean = f0*RF(5,ih0,it0)+f1*RF(5,ih1,it0)+ f2*RF(5,ih0,it1)+f3*RF(5,ih1,it1)
             dudtmean = uorb(k)/sqrt(2.0) / max(waveps,siguref) * sqrt(ag/hh(k))*t0fac*duddtmean
-            debugarr1d(k) = dudtmean
             detadxmean = dudtmean*sinh(kwav(k)*hh(k))/max(cwav(k),sqrt(H(k)*ag))/sigmwav(k)
             BR(k) = BRfac*sin(atan(detadxmean))   ! checked to be consistent w XB JRE
          endif
@@ -3996,82 +3972,82 @@ subroutine borecharacter()
 !   return
 !end subroutine xbeach_windsource
    
-subroutine advec_horz_cg(dtmaxwav, snx, csx, veloc, gradcg)
-   use m_sferic
-   use m_physcoef
-   use m_flowgeom
-   use m_flowparameters, only:eps10
-   
-   implicit none
-   
-   integer                                                  :: L, k, k1, k2, itheta, ku, kl2s, kl2, kl1, kd, is, ip
-   double precision                                         :: velocL, qds, qst, half, fluxvel1, waku, sl1, sl2, sl3
-   double precision                                         :: cf, ds2, ds1, ds, cwuL
-   double precision, intent(in)                             :: dtmaxwav
-   double precision, intent(in), dimension(ntheta)          :: snx, csx
-   double precision, intent(in), dimension(ntheta, ndx)     :: veloc
-   double precision, intent(out), dimension(ntheta, ndx)    :: gradcg
-   double precision, external                               :: dslim
-   
-   double precision                                         :: cs, sn, wuL
-   
-   integer                                                  :: nwalls
-   
-   gradcg = 0d0
-   velocL = 0d0
-   cwuL   = 0d0
-   
-   do L  = 1,lnx                                                              ! upwind (supq) + limited high order (dsq), loop over link
-        k1  = ln(1,L) ; k2 = ln(2,L)                                          ! linker en rechtercelnr geassocieerd aan de links
-
-        do itheta = 1,ntheta
-
-            velocL = acL(L)*veloc(itheta,k1) + (1d0-acL(L))*veloc(itheta,k2)                       
-          
-            cwuL    = velocL * wu(L) * ( csu(L)*csx(itheta) + snu(L)*snx(itheta) )   ! *au(L)   met cwi: u1(L) + cg*( csu(L)*csx(itheta) + snu(L)*snx(itheta) )
-                                                                                     ! inproduct cgx*csu+cgy*snu                                                                                    
-            gradcg(itheta,k1) = gradcg(itheta,k1) - cwul                       ! left cell outward facing normal
-            gradcg(itheta,k2) = gradcg(itheta,k2)  + cwul                       ! right cell inward facing normal
-
-        enddo ! directions
-    enddo ! links
-    
-   
-!  account for outflow at closed boundaries   
-   do nwalls=1,mxwalls
-     k1 = walls(1,nwalls)
-     
-     if (k1==7420) then
-        continue
-     end if
-
-     cs =  walls(8,nwalls) ! outward positive
-     sn = -walls(7,nwalls)
-     wuL = walls(9,nwalls)
-     
-     do itheta = 1,ntheta
-         cwuL    = veloc(itheta,k1) * wuL* ( cs*csx(itheta) + sn*snx(itheta) )   ! *au(L)   met cwi: u1(L) + cg*( csu(L)*csx(itheta) + snu(L)*snx(itheta) )
-         
-         gradcg(itheta,k1) = gradcg(itheta,k1) - cwuL ! minus because of outward positive, like Left adjacent cell
-      end do
-   end do
-  
-! account for thin dams
-   do nwalls=1,nthd
-     k1 = thindam(1,nwalls)
-     
-     cs = thindam(5,nwalls)  ! outward facing positive? Check with JRE
-     sn = -thindam(4,nwalls)
-     wuL = thindam(6,nwalls)
-     
-     do itheta = 1,ntheta
-         cwuL    = veloc(itheta,k1)* wuL * ( cs*csx(itheta) + sn*snx(itheta) )   ! *au(L)   met cwi: u1(L) + cg*( csu(L)*csx(itheta) + snu(L)*snx(itheta) )
-         
-         gradcg(itheta,k1) = gradcg(itheta,k1) - cwuL
-     end do
-   end do
-
-end subroutine advec_horz_cg    
+!subroutine advec_horz_cg(dtmaxwav, snx, csx, veloc, gradcg)
+!   use m_sferic
+!   use m_physcoef
+!   use m_flowgeom
+!   use m_flowparameters, only:eps10
+!   
+!   implicit none
+!   
+!   integer                                                  :: L, k, k1, k2, itheta, ku, kl2s, kl2, kl1, kd, is, ip
+!   double precision                                         :: velocL, qds, qst, half, fluxvel1, waku, sl1, sl2, sl3
+!   double precision                                         :: cf, ds2, ds1, ds, cwuL
+!   double precision, intent(in)                             :: dtmaxwav
+!   double precision, intent(in), dimension(ntheta)          :: snx, csx
+!   double precision, intent(in), dimension(ntheta, ndx)     :: veloc
+!   double precision, intent(out), dimension(ntheta, ndx)    :: gradcg
+!   double precision, external                               :: dslim
+!   
+!   double precision                                         :: cs, sn, wuL
+!   
+!   integer                                                  :: nwalls
+!   
+!   gradcg = 0d0
+!   velocL = 0d0
+!   cwuL   = 0d0
+!   
+!   do L  = 1,lnx                                                              ! upwind (supq) + limited high order (dsq), loop over link
+!        k1  = ln(1,L) ; k2 = ln(2,L)                                          ! linker en rechtercelnr geassocieerd aan de links
+!
+!        do itheta = 1,ntheta
+!
+!            velocL = acL(L)*veloc(itheta,k1) + (1d0-acL(L))*veloc(itheta,k2)                       
+!          
+!            cwuL    = velocL * wu(L) * ( csu(L)*csx(itheta) + snu(L)*snx(itheta) )   ! *au(L)   met cwi: u1(L) + cg*( csu(L)*csx(itheta) + snu(L)*snx(itheta) )
+!                                                                                     ! inproduct cgx*csu+cgy*snu                                                                                    
+!            gradcg(itheta,k1) = gradcg(itheta,k1) - cwul                       ! left cell outward facing normal
+!            gradcg(itheta,k2) = gradcg(itheta,k2)  + cwul                       ! right cell inward facing normal
+!
+!        enddo ! directions
+!    enddo ! links
+!    
+!   
+!!  account for outflow at closed boundaries   
+!   do nwalls=1,mxwalls
+!     k1 = walls(1,nwalls)
+!     
+!     if (k1==7420) then
+!        continue
+!     end if
+!
+!     cs =  walls(8,nwalls) ! outward positive
+!     sn = -walls(7,nwalls)
+!     wuL = walls(9,nwalls)
+!     
+!     do itheta = 1,ntheta
+!         cwuL    = veloc(itheta,k1) * wuL* ( cs*csx(itheta) + sn*snx(itheta) )   ! *au(L)   met cwi: u1(L) + cg*( csu(L)*csx(itheta) + snu(L)*snx(itheta) )
+!         
+!         gradcg(itheta,k1) = gradcg(itheta,k1) - cwuL ! minus because of outward positive, like Left adjacent cell
+!      end do
+!   end do
+!  
+!! account for thin dams
+!   do nwalls=1,nthd
+!     k1 = thindam(1,nwalls)
+!     
+!     cs = thindam(5,nwalls)  ! outward facing positive? Check with JRE
+!     sn = -thindam(4,nwalls)
+!     wuL = thindam(6,nwalls)
+!     
+!     do itheta = 1,ntheta
+!         cwuL    = veloc(itheta,k1)* wuL * ( cs*csx(itheta) + sn*snx(itheta) )   ! *au(L)   met cwi: u1(L) + cg*( csu(L)*csx(itheta) + snu(L)*snx(itheta) )
+!         
+!         gradcg(itheta,k1) = gradcg(itheta,k1) - cwuL
+!     end do
+!   end do
+!
+!end subroutine advec_horz_cg    
 
 !subroutine xbeach_wave_period_breaker_dissipation( Df, E, sigmwav, cgwav, kwav, DtotT)
 !   use m_flowgeom, only: ndx

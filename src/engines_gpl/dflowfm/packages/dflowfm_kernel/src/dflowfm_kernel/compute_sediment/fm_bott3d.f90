@@ -410,7 +410,7 @@
          call getLbotLtop(L,Lb,Lt)
          if (Lt<Lb) cycle
          do iL = Lb,Lt
-            e_ssn(L, ll)  = e_ssn(L, ll) + fluxhortot(j,iL)/max(wu_mor(L), epshu)             ! timestep transports per layer [kg/s/m]
+            e_ssn(L, ll)  = e_ssn(L, ll) + fluxhortot(j,iL)/max(wu_mor(L), 1d-3)             ! timestep transports per layer [kg/s/m]
          enddo
          e_ssn(L, ll)  = e_ssn(L, ll) + e_scrn(L, ll)  ! bottom layer correction
       enddo

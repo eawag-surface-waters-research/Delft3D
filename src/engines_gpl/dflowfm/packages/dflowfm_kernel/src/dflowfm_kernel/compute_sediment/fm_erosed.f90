@@ -57,7 +57,7 @@
    use bedcomposition_module
    use morphology_data_module
    use sediment_basics_module
-   use m_physcoef, only: ag, vonkar, sag, ee, backgroundsalinity, backgroundwatertemperature, vismol
+   use m_physcoef, only: ag, vonkar, sag, ee, backgroundsalinity, backgroundwatertemperature, vismol, rhomean, vicouv
    use m_sediment, only: stmpar, sedtra, stm_included, mtd, jatranspvel, sbcx_raw,sbcy_raw,sswx_raw,sswy_raw,sbwx_raw,sbwy_raw
    use m_flowgeom, only: bl, lnxi, lnx, ln, dxi, ndx, csu, snu, wcx1, wcx2, wcy1, wcy2, acl, nd, csu, snu, wcl, wu_mor
    use m_flow, only: s0, s1, u1, kmx, zws, hs, &
@@ -205,6 +205,9 @@
    double precision                    :: dzdn, dzds
    double precision                    :: z0u, czu
    double precision                    :: facCheck
+   ! debug vTvR
+   double precision :: Tex, kvisx, Ssterx,cc1x, cc2x, wsterx   ! make settling equal to XB
+   !\debug
    !
    real(fp), dimension(:), allocatable :: localpar        !< local array for sediment transport parameters
    !! executable statements -------------------------------------------------------
@@ -222,7 +225,7 @@
    if (istat == 0) allocate(z0rouk(1:ndx), z0curk(1:ndx), deltas(1:ndx), stat=istat)
 
    localpar = 0.0_fp
-   ua = 0d0; va = 0d0; z0rouk = 0d0; z0curk=0d0
+   ua = 0d0; va = 0d0; z0rouk = 0d0; z0curk=0d0; 
 
    if ((istat == 0) .and. (.not. allocated(u1_tmp))) allocate(u1_tmp(1:lnx), ucxq_tmp(1:ndx), ucyq_tmp(1:ndx), stat=ierr)
 
@@ -641,10 +644,10 @@
          klc     = 1
          do k = kt,kb,-1                                ! counts from surface to bottom
             thicklc(klc)   = (zws(k)-zws(k-1))/h1       ! depth fraction, this works for z layers. If only sigma: m_flow::laycof can be used
-            klc=klc+1
+            klc            = klc+1
          enddo
-         siglc   = 0.0_fp
-         kmaxlc = klc-1                                 ! needed for z layers eventually. For sigma, equals kmx
+         siglc    = 0.0_fp
+         kmaxlc   = klc-1                                 ! needed for z layers eventually. For sigma, equals kmx
          siglc(1) = -0.5_fp*thicklc(1)
          do klc = 2, kmaxlc
             siglc(klc) = siglc(klc-1) - 0.5_fp*(thicklc(klc) + thicklc(klc-1))
@@ -716,7 +719,7 @@
       endif
       !
       ustarc = umod(nm)*vonkar/log(1.0_fp + zumod(nm)/max(z0rou,1d-5))
-
+      !
       ! To be in line with rest of FM, this should be 
       !ustarc = umod(nm)*vonkar/log(zumod(nm)/z0rou - 1d0)
       !
@@ -1196,8 +1199,9 @@
             rca(nm, l) = caks * rhosol(l)
          endif
       enddo ! next sediment fraction
-      ua(nm) = real(dll_reals(RP_UAU), fp)    ! cartesian
-      va(nm) = real(dll_reals(RP_VAU), fp)    ! values checked 20230310 JRE
+      ua(nm) = real(dll_reals(RP_UAU), fp)                 ! cartesian
+      va(nm) = real(dll_reals(RP_VAU), fp)                 ! values checked 20230310 JRE    
+      !
    enddo ! next nm point
    !
    ! Distribute velocity asymmetry to links

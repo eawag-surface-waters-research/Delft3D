@@ -188,6 +188,7 @@ subroutine eqtran(sig       ,thick     ,kmax      ,ws        ,ltur      , &
     real(fp)                    :: ua
     real(fp)                    :: va
     real(fp)                    :: uamg
+    real(fp)                    :: denom
     real(fp)                    :: debug
     !
     ! Interface to dll is in High precision!
@@ -535,12 +536,13 @@ subroutine eqtran(sig       ,thick     ,kmax      ,ws        ,ltur      , &
        !
        ! van Thiel / Van Rijn (2008)
        !
+       equi_conc = .true.
        call trab19(u         ,v         ,hrms      ,rlabda    ,teta      ,h1        ,tp        , &
                  & di50      ,d15       ,d90       ,npar      ,par       ,dzbdt     ,vicmol    , &
-                 & poros     ,chezy     ,dzdx      ,dzdy      ,sbcu      ,sbcv      ,sscu      , &
-                 & sscv      ,ua        ,va        ,ubot      ,kwtur     ,vonkar    ,ubot_from_com, debug )
+                 & poros     ,chezy     ,dzdx      ,dzdy      ,sbcu      ,sbcv      ,cesus      , &
+                 & ua        ,va        ,ubot      ,kwtur     ,vonkar    ,ubot_from_com, debug )
        !
-       uamg = sqrt(ua*ua+va*va)
+       uamg = hypot(u+ua,v+va)
        realpar(RP_UAU) = real(ua      ,hp)  ! needed for suspended transport
        realpar(RP_VAU) = real(va      ,hp)
        realpar(RP_DBG) = real(debug   ,hp)
@@ -551,14 +553,16 @@ subroutine eqtran(sig       ,thick     ,kmax      ,ws        ,ltur      , &
        !
        ! Soulsby / Van Rijn with XBeach adaptations
        !
+       equi_conc = .true.
        call trab20(u         ,v         ,hrms      ,rlabda    ,teta      ,h1        ,tp        , &
                  & di50      ,d15       ,d90       ,npar      ,par       ,dzbdt     ,vicmol    , &
-                 & poros     ,chezy     ,dzdx      ,dzdy      ,sbcu      ,sbcv      ,sscu      , &
-                 & sscv      ,ua        ,va        ,ubot      ,kwtur     ,vonkar    ,ubot_from_com )
+                 & poros     ,chezy     ,dzdx      ,dzdy      ,sbcu      ,sbcv      ,cesus      , &
+                 & ua        ,va        ,ubot      ,kwtur     ,vonkar    ,ubot_from_com, debug )
        !
-       uamg = sqrt(ua*ua+va*va)
+       uamg = hypot(u+ua,v+va)
        realpar(RP_UAU) = real(ua      ,hp)  ! needed for suspended transport
        realpar(RP_VAU) = real(va      ,hp)
+       realpar(RP_DBG) = real(debug   ,hp)
        !
        sbc_total = .false.
        sus_total = .false.
@@ -759,13 +763,13 @@ subroutine eqtran(sig       ,thick     ,kmax      ,ws        ,ltur      , &
               ! derive concentration. Add non-zero uamg for van Thiel
               ! and XBeach like Soulsby / Van Rijn (iform=19, 20)
               !
-              cesus = ssus / (utot+uamg+eps) / h1
+              cesus = ssus / (utot + eps) / h1
           endif
           !
           ! Concentration needs to be multiplied by frac to match Van Rijn
           ! formulae.
           !
-          conc2d    = cesus * frac
+          conc2d    = cesus * frac     ! this is rsedeq used for 2d runs
           !
           ! Convert depth averaged concentration to reference concentration
           ! at distance aks from bed.

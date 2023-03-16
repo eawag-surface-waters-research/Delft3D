@@ -1,7 +1,7 @@
 subroutine trab20(u         ,v         ,hrms      ,rlabda    ,teta      ,h         ,tp        , &
                 & d50       ,d15       ,d90       ,npar      ,par       ,dzbdt     ,vicmol    , &
-                & poros     ,chezy     ,dzdx      ,dzdy      ,sbotx     ,sboty     ,ssusx     , &
-                & ssusy     ,ua        ,va        ,ubot      ,kwtur     ,vonkar    ,ubot_from_com )
+                & poros     ,chezy     ,dzdx      ,dzdy      ,sbotx     ,sboty     ,cesus     , &
+                & ua        ,va        ,ubot      ,kwtur     ,vonkar    ,ubot_from_com )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2023.                                
@@ -69,8 +69,7 @@ subroutine trab20(u         ,v         ,hrms      ,rlabda    ,teta      ,h      
     !
     real(fp)                 , intent(out)   :: sbotx
     real(fp)                 , intent(out)   :: sboty
-    real(fp)                 , intent(out)   :: ssusx
-    real(fp)                 , intent(out)   :: ssusy
+    real(fp)                 , intent(out)   :: cesus
     real(fp)                 , intent(out)   :: ua
     real(fp)                 , intent(out)   :: va
     !
@@ -115,6 +114,7 @@ subroutine trab20(u         ,v         ,hrms      ,rlabda    ,teta      ,h      
     real(fp)                       :: ucrb, ucrs, asb, ass, term1, ceqb, ceqs
     real(fp)                       :: z0
     real(fp)                       :: cd
+    real(fp)                       :: cmax2h
     !
     !
     !! executable statements -------------------------------------------------------
@@ -124,8 +124,7 @@ subroutine trab20(u         ,v         ,hrms      ,rlabda    ,teta      ,h      
     !
     sbotx = 0.0_fp
     sboty = 0.0_fp
-    ssusx = 0.0_fp
-    ssusy = 0.0_fp
+    cesus = 0.0_fp
     ua    = 0.0_fp
     va    = 0.0_fp
     !
@@ -172,20 +171,6 @@ subroutine trab20(u         ,v         ,hrms      ,rlabda    ,teta      ,h      
     !
     cf = ag / chezy / chezy
     !
-    ! velocity asymmetry
-    !
-    if (waveform==1) then
-       call ua_rvr(facas    ,facsk  ,sws   ,h   ,hrms   , &
-                 & rlabda   ,ubot   ,uamag )   
-    else if (waveform==2) then
-       call ua_vt(facas    ,facsk   ,sws   ,h      ,   &
-                & hrms     ,tp      ,ag    ,ubot   ,   &
-                & uamag    )
-    end if
-    !
-    !     Velocity magnitude
-    !
-    phi = reposeangle*degrad ! Angle of internal friction
     utot = u**2 + v**2
     if (utot>0.0_fp) utot = sqrt(utot)
     if (utot<dtol .or. h>200.0_fp .or. h<0.01_fp) goto 999
@@ -209,6 +194,21 @@ subroutine trab20(u         ,v         ,hrms      ,rlabda    ,teta      ,h      
     else
        urms2 = 0.0_fp
     endif
+    !
+    ! velocity asymmetry
+    !
+    if (waveform==1) then
+       call ua_rvr(facas    ,facsk  ,sws   ,h   ,hrms   , &
+                 & rlabda   ,urms   ,uamag )   
+    else if (waveform==2) then
+       call ua_vt(facas    ,facsk   ,sws   ,h      ,   &
+                & hrms     ,tp      ,ag    ,urms   ,   &
+                & uamag    )
+    end if
+    !
+    !     Velocity magnitude
+    !
+    phi = reposeangle*degrad ! Angle of internal friction
     !
     dster=(delta*ag/1e-12_fp)**onethird*d50        ! 1e-12 = nu**2
     !
@@ -283,14 +283,13 @@ subroutine trab20(u         ,v         ,hrms      ,rlabda    ,teta      ,h      
       ceqs=Ass*(term1-Ucrs)**2.4_fp
    end if
    !
-   ceqb = min(ceqb/h,   cmax/2.0_fp)*h      ! maximum equilibrium bed concentration
-   ceqs = min(ceqs/h,   cmax/2.0_fp)*h      ! maximum equilibrium suspended concentration
+   cmax2h = cmax*h/2.0_fp
+   ceqb = min(ceqb,   cmax2h)         ! maximum equilibrium bed concentration
+   cesus = min(ceqs,   cmax2h)/h      ! maximum equilibrium suspended concentration
    ua = uamag*cos(teta*degrad)
    va = uamag*sin(teta*degrad)
    sbotx = (u+ua)*ceqb
    sboty = (v+va)*ceqb
-   ssusx = (u+ua)*ceqs                  ! this is now eulerian, correct?
-   ssusy = (v+va)*ceqs
    !
   999 continue
 end subroutine trab20
