@@ -29,7 +29,8 @@
 
    ! $Id: sethigherorderadvectionvelocities.f90 142549 2023-02-16 12:28:37Z buwalda $
    ! $HeadURL: https://svn.oss.deltares.nl/repos/delft3d/trunk/src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_kernel/compute/sethigherorderadvectionvelocities.f90 $
-   
+
+   !> set higher order advection velocities. split in 4 possible loops (3D, Jasfer3D)
    Subroutine sethigherorderadvectionvelocities()
    use m_flowgeom
    use m_flow
@@ -44,28 +45,36 @@
 
    integer  L, LL , Lb, Lt
 
-   if (limtypmom < 1 ) return
+   if (limtypmom < 1 .or. .not. allocated(klnup)) return
 
    if (kmx == 0) then
       if (jasfer3D == 0) then
          !$OMP PARALLEL DO
          do L  = 1,lnx                                                    ! upwind (supq) + limited high order (dsq)
-            if (qa (L) > 0) then
-               call setvelocity_pos(ucxu(L), ucyu(L), L, L, L)
+            if ((limtypmom == 6 .and. klnup(1,L).eq.0) .or. hs(ln(1,L)) < Chkadvd .or. hs(ln(2,L)) < Chkadvd) then
+               cycle
+            else
+               if (qa (L) > 0) then
+                  call setHOAvelocity_pos(ucxu(L), ucyu(L), L, L, L)
+               endif
+               if (qa (L) < 0) then
+                  call setHOAvelocity_neg(ucxu(L), ucyu(L), L, L, L)
+               endif
             endif
-            if (qa (L) < 0) then
-               call setvelocity_neg(ucxu(L), ucyu(L), L, L, L)
-            endif
-         enddo 
+         enddo
          !$OMP END PARALLEL DO
       else
          !$OMP PARALLEL DO
          do L  = 1,lnx                                                    ! upwind (supq) + limited high order (dsq)
-            if (qa (L) > 0) then
-               call setvelocity_pos_Jasfer3D(ucxu(L), ucyu(L), L, L, L)
-            endif
-            if (qa (L) < 0) then
-               call setvelocity_neg_Jasfer3D(ucxu(L), ucyu(L), L, L, L)
+            if ((limtypmom == 6 .and. klnup(1,L).eq.0) .or. hs(ln(1,L)) < Chkadvd .or. hs(ln(2,L)) < Chkadvd) then
+               cycle
+            else
+               if (qa (L) > 0) then
+                  call setHOAvelocity_pos_Jasfer3D(ucxu(L), ucyu(L), L, L, L)
+               endif
+               if (qa (L) < 0) then
+                  call setHOAvelocity_neg_Jasfer3D(ucxu(L), ucyu(L), L, L, L)
+               endif
             endif
          enddo
          !$OMP END PARALLEL DO
@@ -77,10 +86,14 @@
             if (qa(L) .ne. 0d0) then
                call getLbotLtop(L,Lb,Lt)
                do LL = Lb,Lt
-                  if (qa (LL) > 0) then
-                     call setvelocity_pos(ucxu(LL), ucyu(LL), L, LL, Lb)
+                  if ((limtypmom == 6 .and. klnup(1,LL).eq.0) .or. hs(ln(1,LL)) < Chkadvd .or. hs(ln(2,LL)) < Chkadvd) then
+                     cycle
                   else
-                     call setvelocity_neg(ucxu(LL), ucyu(LL), L, LL, Lb)
+                     if (qa (LL) > 0) then
+                        call setHOAvelocity_pos(ucxu(LL), ucyu(LL), L, LL, Lb)
+                     else
+                        call setHOAvelocity_neg(ucxu(LL), ucyu(LL), L, LL, Lb)
+                     endif
                   endif
                enddo
             endif
@@ -92,10 +105,14 @@
             if (qa(L) .ne. 0d0) then
                call getLbotLtop(L,Lb,Lt)
                do LL = Lb,Lt
-                  if (qa (LL) > 0) then
-                     call setvelocity_pos_Jasfer3D(ucxu(LL), ucyu(LL), L, LL, Lb)
+                  if ((limtypmom == 6 .and. klnup(1,LL).eq.0) .or. hs(ln(1,LL)) < Chkadvd .or. hs(ln(2,LL)) < Chkadvd) then
+                     cycle
                   else
-                     call setvelocity_neg_Jasfer3D(ucxu(LL), ucyu(LL), L, LL, Lb)
+                     if (qa (LL) > 0) then
+                        call setHOAvelocity_pos_Jasfer3D(ucxu(LL), ucyu(LL), L, LL, Lb)
+                     else
+                        call setHOAvelocity_neg_Jasfer3D(ucxu(LL), ucyu(LL), L, LL, Lb)
+                     endif
                   endif
                enddo
             endif
