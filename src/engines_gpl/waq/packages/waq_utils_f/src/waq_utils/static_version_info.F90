@@ -32,9 +32,8 @@ module static_version_info
     character(*),  public, parameter :: build_nr     = BUILD_NR
     character(*),  public, parameter :: major        = MAJOR_STR
     character(*),  public, parameter :: minor        = MINOR_STR
-    character(*),  public, parameter :: revision     = REVISION_STR
 
-    character(*),  public, parameter :: version_full = trim(major)//'.'//trim(minor)//'.'//trim(revision)//'.'//trim(build_nr)
+    character(*),  public, parameter :: version_full = trim(major)//'.'//trim(minor)//'.'//trim(build_nr)
     character(*),  public, parameter :: version_suffix      = version_full
     character(*),  public, parameter :: version_suffix_full = ' Version '//version_suffix//', '//__DATE__//', '//__TIME__
     character(*),  public, parameter :: version_prefix      = company
