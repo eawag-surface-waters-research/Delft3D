@@ -103,7 +103,7 @@
    integer, intent(in)             :: L, LL, Lb
    double precision, intent(inout) :: ucxu, ucyu
 
-   integer                    :: k1, k2, k, kd, is, n12, ib, kku, ku2, ku, kkub
+   integer                    :: k1, k2, k, kd, is, n12, ib, kku, ku2, ku, kkua, kkub
    double precision           :: half, sl1, sl2, sl3
 
    k1  = ln(1,L) ; k2 = ln(2,L)
@@ -123,9 +123,11 @@
    ku   = abs(kku)
 
    if (kmx /= 0) then !different ku for 3D
-      kkub = ku2
-      ku2 = kbot(kkub) + kmxn(kkub) - ( Lb + kmxL(LL) - L) ;
-      if (ku < kbot(kkub) .or. ku > ktop(kkub) ) return
+      kkub = ku2 
+      kkua = ku
+      ku2 = kbot(kkub) + kmxn(kkub) - ( Lb + kmxL(LL) - L) 
+      ku  = kbot(kkua) + kmxn(kkua) - ( Lb + kmxL(LL) - L)
+      if (ku < kbot(kkub) .or. ku > ktop(kkub) .or. ku < kbot(kkua) .or. ku > ktop(kkua)) return
    endif
 
    if (hs(ln(1,LL)) < Chkadvd .or. hs(ln(2,LL)) < Chkadvd .or. kku == 0 .or. (kku > 0 .and. ku2 == 0)) return
@@ -144,7 +146,7 @@
    integer, intent(in)             :: L, LL, Lb
    double precision, intent(inout) :: ucxu, ucyu
 
-   integer                    :: k1, k2, k, kd, is, n12, ib, kku, ku2, ku, kkub
+   integer                    :: k1, k2, k, kd, is, n12, ib, kku, ku2, ku, kkub, kkua
    double precision           :: half, sl1, sl2, sl3
 
    k1  = ln(1,L) ; k2 = ln(2,L)
@@ -165,9 +167,11 @@
    ku   = abs(kku)
 
    if (kmx /= 0) then !different ku for 3D
-      kkub = ku2
-      ku2 = kbot(kkub) + kmxn(kkub) - ( Lb + kmxL(LL) - L) ;
-      if (ku < kbot(kkub) .or. ku > ktop(kkub) ) return
+      kkub = ku2 
+      kkua = ku
+      ku2 = kbot(kkub) + kmxn(kkub) - ( Lb + kmxL(LL) - L) 
+      ku  = kbot(kkua) + kmxn(kkua) - ( Lb + kmxL(LL) - L)
+      if (ku < kbot(kkub) .or. ku > ktop(kkub) .or. ku < kbot(kkua) .or. ku > ktop(kkua)) return
    endif
 
    if (hs(ln(1,LL)) < Chkadvd .or. hs(ln(2,LL)) < Chkadvd .or. kku == 0 .or. (kku >= 0 .and. ku2 == 0)) return
@@ -191,7 +195,7 @@
    integer, intent(in)             :: L, LL, Lb
    double precision, intent(inout) :: ucxu, ucyu
 
-   integer                    :: k1, k2, k, kd, is, n12, ib, kku, ku2, ku, kkub
+   integer                    :: k1, k2, k, kd, is, n12, ib, kku, ku2, ku, kkua, kkub
    double precision           :: half, sl1, sl2, sl3
 
    k1  = ln(1,L) ; k2 = ln(2,L)
@@ -210,9 +214,11 @@
    ku   = abs(kku)
 
    if (kmx /= 0) then !different ku for 3D
-      kkub = ku2
-      ku2 = kbot(kkub) + kmxn(kkub) - ( Lb + kmxL(LL) - L) ;
-      if (ku < kbot(kkub) .or. ku > ktop(kkub) ) return
+      kkub = ku2 
+      kkua = ku
+      ku2 = kbot(kkub) + kmxn(kkub) - ( Lb + kmxL(LL) - L) 
+      ku  = kbot(kkua) + kmxn(kkua) - ( Lb + kmxL(LL) - L)
+      if (ku < kbot(kkub) .or. ku > ktop(kkub) .or. ku < kbot(kkua) .or. ku > ktop(kkua)) return
    endif
    if (hs(ln(1,LL)) < Chkadvd .or. hs(ln(2,LL)) < Chkadvd .or. kku == 0 .or. (kku > 0 .and. ku2 == 0)) return
 
@@ -230,7 +236,7 @@
    integer, intent(in)             :: L, LL, Lb
    double precision, intent(inout) :: ucxu, ucyu
 
-   integer                    :: k1, k2, k, kd, is, n12, ib, kku, ku2, ku, kkub
+   integer                    :: k1, k2, k, kd, is, n12, ib, kku, ku2, ku, kkua, kkub
    double precision           :: half, sl1, sl2, sl3
 
    k1  = ln(1,L) ; k2 = ln(2,L)
@@ -251,9 +257,11 @@
    ku   = abs(kku)
 
    if (kmx /= 0) then !different ku for 3D
-      kkub = ku2
-      ku2 = kbot(kkub) + kmxn(kkub) - ( Lb + kmxL(LL) - L) ;
-      if (ku < kbot(kkub) .or. ku > ktop(kkub) ) return
+      kkub = ku2 
+      kkua = ku
+      ku2 = kbot(kkub) + kmxn(kkub) - ( Lb + kmxL(LL) - L) 
+      ku  = kbot(kkua) + kmxn(kkua) - ( Lb + kmxL(LL) - L)
+      if (ku < kbot(kkub) .or. ku > ktop(kkub) .or. ku < kbot(kkua) .or. ku > ktop(kkua)) return
    endif
 
    if (hs(ln(1,LL)) < Chkadvd .or. hs(ln(2,LL)) < Chkadvd .or. kku == 0 .or. (kku > 0 .and. ku2 == 0)) return
