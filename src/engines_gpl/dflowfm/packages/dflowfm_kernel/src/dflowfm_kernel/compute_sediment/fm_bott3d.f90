@@ -50,9 +50,9 @@
    use bedcomposition_module
    use sediment_basics_module
    use m_flow     , only: vol1, s0, s1, hs, u1, kmx, hu, qa
-   use m_flowgeom , only: ndxi, nd, wu, bl, ba, ln, ndx, lnx, lnxi, acl, xz, yz, wu_mor, bai_mor, bl_ave, dxi
+   use m_flowgeom , only: ndxi, nd, wu, bl, ba, ln, ndx, lnx, lnxi, acl, xz, yz, wu_mor, bai_mor, bl_ave
    use m_flowexternalforcings, only: nopenbndsect
-   use m_flowparameters, only: epshs, epshu, eps10, jasal, flowWithoutWaves, jawaveswartdelwaq, jawave
+   use m_flowparameters, only: epshs, eps10, jasal, flowWithoutWaves, jawaveswartdelwaq, jawave
    use m_sediment, m_sediment_sed=>sed 
    use m_flowtimes, only: dts, tstart_user, time1, dnt, julrefdat, tfac, ti_sed, ti_seds, time_user
    use m_transport, only: fluxhortot, ised1, constituents, sinksetot, sinkftot, itra1, itran, numconst, isalt
@@ -71,6 +71,7 @@
    use m_waves
    use unstruc_channel_flow, only: network, t_branch, t_node, nt_LinkNode
    use m_tables, only: interpolate
+   use m_debug
    !
    implicit none
    !
@@ -80,7 +81,6 @@
    !
    type(t_nodefraction)                 , pointer :: pFrac
    type(t_noderelation)                 , pointer :: pNodRel
-   type(t_branch)                       , pointer :: pbr
    type(t_node)                         , pointer :: pnod
    !!
    !! Local parameters
@@ -132,9 +132,7 @@
    integer                                     :: nxmx
    integer                                     :: lm
    integer                                     :: jawaveswartdelwaq_local
-   integer                                     :: lsd
    integer                                     :: inod
-   integer                                     :: kmaxsd
    integer                                     :: ised
    integer                                     :: k3
    double precision                            :: aksu
@@ -152,17 +150,6 @@
    double precision                            :: r1avg
    double precision                            :: z
    double precision                            :: timhr
-   double precision                            :: smax
-   double precision                            :: hwavu
-   double precision                            :: rrru
-   double precision                            :: umodu
-   double precision                            :: ccu
-   double precision                            :: slopenorm
-   double precision                            :: slope
-   double precision                            :: csslope
-   double precision                            :: snslope
-   double precision                            :: bsmax_u
-   double precision                            :: trmag_u
    double precision                            :: Ldir
    real(hp)                                    :: dim_real
    !!
@@ -418,71 +405,11 @@
    !
    ! Add equilibrium berm slope adjustment
    if (bermslopetransport) then
-      ! Determine points where berm slope adjustment is used
-      bermslopeindex=.false.
-      if (jawave>0) then
-         do L=1,lnx
-            if (hu(L)<epshu) cycle
-            k1 = ln(1,L); k2=ln(2,L)
-            hwavu = (hwav(k1)+hwav(k2))/2d0
-            if (hwavu/hu(L)>bermslopegamma) then
-               bermslopeindex(L) = .true.
-            else
-               bermslopeindex(L) = .false.
-            endif
-         enddo
-      endif
-      ! Criteria cannot be combined as hwav not allocated for jawave==0
-      do L=1,lnx
-         if (hu(L)<epshu) cycle
-         if (hu(L)<bermslopedepth) then    ! to check: hu value up to date? Replace by weighted hs?
-            bermslopeindex(L) = .true.
-         else
-            bermslopeindex(L) = .false. .or. bermslopeindex(L)
-         endif
-      enddo
-      !
-      if (bermslopebed) then
-         bermslopeindexbed = bermslopeindex
-      endif
-      if (bermslopesus) then
-         bermslopeindexsus = bermslopeindex
-      endif
-      !
-      bermslopecontrib=0d0
-      do lsd = 1,lsedtot
-         if (stmpar%sedpar%sedtyp(lsd) == SEDTYP_COHESIVE) cycle
-         do L=1,lnx
-            if (hu(L)<epshu) cycle
-            if (wu_mor(L)==0) cycle
-            if (.not. bermslopeindexbed(L) .and. .not. bermslopeindexsus(L)) cycle
-            !
-            k1=ln(1,L); k2=ln(2,L)
-            slopenorm = max(hypot(e_dzdn(L),e_dzdt(L)),eps10)
-            slope     = (bl(k2)-bl(k1))*dxi(L)
-            snslope = slope/slopenorm
-            bsmax_u = snslope*bermslope                          ! slope in link direction
-            !
-            if (bermslopeindexbed(L) .and. bed/=0.0) then
-               trmag_u       = hypot(e_sbcn(L,lsd),e_sbct(L,lsd))
-               e_sbcn(L,lsd) = e_sbcn(L,lsd)-bed*(bermslopefac*trmag_u*(slope-bsmax_u))
-               bermslopecontrib(L,lsd) = bermslopecontrib(L,lsd)+bed*(bermslopefac*trmag_u*(slope-bsmax_u))
-               trmag_u       = hypot(e_sbwn(L,lsd),e_sbwt(L,lsd))
-               e_sbwn(L,lsd) = e_sbwn(L,lsd)-bed*(bermslopefac*trmag_u*(-e_dzdn(L)-bsmax_u))
-               bermslopecontrib(L,lsd) = bermslopecontrib(L,lsd)+bed*(bermslopefac*trmag_u*(slope-bsmax_u))
-               trmag_u       = hypot(e_sswn(L,lsd),e_sswt(L,lsd))   ! conceptually suspended, but everywhere part of bedload
-               e_sswn(L,lsd) = e_sswn(L,lsd)-bed*(bermslopefac*trmag_u*(-e_dzdn(L)-bsmax_u))
-               bermslopecontrib(L,lsd) = bermslopecontrib(L,lsd)+bed*(bermslopefac*trmag_u*(slope-bsmax_u))
-            endif
-            !
-            if (bermslopeindexsus(L) .and. sus/=0.0 .and. lsd<=lsed) then
-               trmag_u       = hypot(e_ssn(L,lsd),e_sst(L,lsd))
-               e_ssn(L,lsd)  = e_ssn(L,lsd)-sus*(bermslopefac*trmag_u*(-e_dzdn(L)-bsmax_u))
-               bermslopecontrib(L,lsd) = bermslopecontrib(L,lsd)+sus*(bermslopefac*trmag_u*(slope-bsmax_u))
-            endif
-            !bermslopecontrib(L,lsd) = bsmax_u/lsedtot
-         enddo
-      enddo
+      call bermslopenudging(error)
+      if (error) then
+         write(errmsg,'(a)') 'fm_bott3d::bermslopenudging returned an error. Check your inputs.'
+         call write_error(errmsg, unit=mdia)
+      end if
    endif
    !
    !   Moved parts from fm_erosed() here   --------|
@@ -667,14 +594,14 @@
    if (susw>0.0_fp .and. jawave > 0) then
       call fm_adjust_bedload(e_sswn, e_sswt, .false.)
    endif
-   !
-   if (duneavalan) then
-      call duneaval(error)         ! only on current related bed transport
-      if (error) then
-         write(errmsg,'(a)') 'fm_bott3d::duneavalan returned an error. Check your inputs.'
-         call write_error(errmsg, unit=mdia)
-      end if
-   end if
+   !!
+   !if (duneavalan) then
+   !   call duneaval(error)         ! only on current related bed transport
+   !   if (error) then
+   !      write(errmsg,'(a)') 'fm_bott3d::duneavalan returned an error. Check your inputs.'
+   !      call write_error(errmsg, unit=mdia)
+   !   end if
+   !end if
    !
    ! Summation of current-related and wave-related transports on links
    !
@@ -1488,6 +1415,14 @@
          enddo
       endif
    endif
+   !
+   if (duneavalan) then
+      call duneaval(error)         ! only on current related bed transport
+      if (error) then
+         write(errmsg,'(a)') 'fm_bott3d::duneavalan returned an error. Check your inputs.'
+         call write_error(errmsg, unit=mdia)
+      end if
+   end if
    !
    if (istat == 0) deallocate(qb_out, stat = istat)
    if (istat == 0) deallocate(width_out, stat = istat)

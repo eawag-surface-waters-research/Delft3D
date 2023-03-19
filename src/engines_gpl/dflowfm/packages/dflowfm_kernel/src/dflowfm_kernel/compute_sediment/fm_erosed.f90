@@ -205,9 +205,6 @@
    double precision                    :: dzdn, dzds
    double precision                    :: z0u, czu
    double precision                    :: facCheck
-   ! debug vTvR
-   double precision :: Tex, kvisx, Ssterx,cc1x, cc2x, wsterx   ! make settling equal to XB
-   !\debug
    !
    real(fp), dimension(:), allocatable :: localpar        !< local array for sediment transport parameters
    !! executable statements -------------------------------------------------------
@@ -223,11 +220,10 @@
    if (istat == 0) allocate(localpar (npar), stat = istat)
    if (istat == 0) allocate(ua(1:ndx), va(1:ndx), stat=istat)
    if (istat == 0) allocate(z0rouk(1:ndx), z0curk(1:ndx), deltas(1:ndx), stat=istat)
+   if ((istat == 0) .and. (.not. allocated(u1_tmp))) allocate(u1_tmp(1:lnx), ucxq_tmp(1:ndx), ucyq_tmp(1:ndx), stat=ierr)
 
    localpar = 0.0_fp
    ua = 0d0; va = 0d0; z0rouk = 0d0; z0curk=0d0; 
-
-   if ((istat == 0) .and. (.not. allocated(u1_tmp))) allocate(u1_tmp(1:lnx), ucxq_tmp(1:ndx), ucyq_tmp(1:ndx), stat=ierr)
 
    if (istat /= 0) then
       error = .true.
@@ -588,7 +584,7 @@
       ! Interpolate back to links
       k1 = ln(1,L); k2 = ln(2,L)
       !       e_dzdn(L) = acl(L)*(csu(L)*dzdx(k1) + snu(L)*dzdy(k1)) + (1d0-acl(L))*(csu(L)*dzdx(k2) + snu(L)*dzdy(k2))
-      e_dzdn(L) = -dxi(L)*(bl(ln(2,L))-bl(ln(1,L)))                                                              ! more accurate near boundaries
+      e_dzdn(L) = -dxi(L)*(bl(k2)-bl(k1))                                                              ! more accurate near boundaries
       e_dzdt(L) = acl(L)*(-snu(L)*dzdx(k1) + csu(L)*dzdy(k1))+(1d0-acl(L))*(-snu(L)*dzdx(k2) + csu(L)*dzdy(k2))  ! affected near boundaries due to interpolation
    end do
    !

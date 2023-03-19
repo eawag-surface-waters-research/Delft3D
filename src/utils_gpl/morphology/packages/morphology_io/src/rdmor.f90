@@ -303,8 +303,8 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
     hswitch             => morpar%hswitch
     dzmaxdune           => morpar%dzmaxdune
     bermslopetransport  => morpar%bermslopetransport
-    bermslopebed        => morpar%bermslopetransport
-    bermslopesus        => morpar%bermslopetransport
+    bermslopebed        => morpar%bermslopebed
+    bermslopesus        => morpar%bermslopesus
     bermslope           => morpar%bermslope
     bermslopefac        => morpar%bermslopefac
     bermslopegamma      => morpar%bermslopegamma

@@ -34,7 +34,7 @@
  !! @return Error status: error (/=0) or not (0)
  integer function flow_modelinit() result(iresult)                     ! initialise flowmodel
  use timers
- use m_flowgeom,    only: jaFlowNetChanged, ndx
+ use m_flowgeom,    only: jaFlowNetChanged, ndx, lnx
  use waq,           only: reset_waq
  use m_flow,        only: kmx, jasecflow, iperot
  use m_flowtimes
@@ -406,7 +406,7 @@
 
 ! Initialise debug array
  if (jawritedebug) then
-   call init_debugarr(ndx,stmpar%lsedtot)
+   call init_debugarr(lnx,stmpar%lsedtot)
  endif
 
  call flow_initimestep(1, iresult)                   ! 1 also sets zws0
