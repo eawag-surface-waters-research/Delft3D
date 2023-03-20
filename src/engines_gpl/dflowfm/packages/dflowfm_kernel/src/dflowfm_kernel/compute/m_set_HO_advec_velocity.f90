@@ -126,7 +126,7 @@
       kkua = ku
       ku2 = kbot(kkub) + kmxn(kkub) - ( Lb + kmxL(LL) - L) 
       ku  = kbot(kkua) + kmxn(kkua) - ( Lb + kmxL(LL) - L)
-      if (ku < kbot(kkub) .or. ku > ktop(kkub) .or. ku < kbot(kkua) .or. ku > ktop(kkua)) return
+      if (ku2 < kbot(kkub) .or. ku2 > ktop(kkub) .or. ku < kbot(kkua) .or. ku > ktop(kkua)) return
    endif
 
    if (kku == 0 .or. (kku > 0 .and. ku2 == 0)) return
@@ -166,10 +166,10 @@
       kkua = ku
       ku2 = kbot(kkub) + kmxn(kkub) - ( Lb + kmxL(LL) - L) 
       ku  = kbot(kkua) + kmxn(kkua) - ( Lb + kmxL(LL) - L)
-      if (ku < kbot(kkub) .or. ku > ktop(kkub) .or. ku < kbot(kkua) .or. ku > ktop(kkua)) return
+      if (ku2 < kbot(kkub) .or. ku2 > ktop(kkub) .or. ku < kbot(kkua) .or. ku > ktop(kkua)) return
    endif
 
-   if (kku == 0 .or. (kku >= 0 .and. ku2 == 0)) return
+   if (kku == 0 .or. (kku > 0 .and. ku2 == 0)) return
 
    call setHOAvelocity(ucxu, ucyu, L, LL, Lb, k, kd, is, n12, ib, half, sl1, sl2, sl3, kku, ku2, ku)
    
@@ -211,7 +211,7 @@
       kkua = ku
       ku2 = kbot(kkub) + kmxn(kkub) - ( Lb + kmxL(LL) - L) 
       ku  = kbot(kkua) + kmxn(kkua) - ( Lb + kmxL(LL) - L)
-      if (ku < kbot(kkub) .or. ku > ktop(kkub) .or. ku < kbot(kkua) .or. ku > ktop(kkua)) return
+      if (ku2 < kbot(kkub) .or. ku2 > ktop(kkub) .or. ku < kbot(kkua) .or. ku > ktop(kkua)) return
    endif
 
    if (kku == 0 .or. (kku > 0 .and. ku2 == 0)) return
@@ -251,7 +251,7 @@
       kkua = ku
       ku2 = kbot(kkub) + kmxn(kkub) - ( Lb + kmxL(LL) - L) 
       ku  = kbot(kkua) + kmxn(kkua) - ( Lb + kmxL(LL) - L)
-      if (ku < kbot(kkub) .or. ku > ktop(kkub) .or. ku < kbot(kkua) .or. ku > ktop(kkua)) return
+      if (ku2 < kbot(kkub) .or. ku2 > ktop(kkub) .or. ku < kbot(kkua) .or. ku > ktop(kkua)) return
    endif
 
    if (kku == 0 .or. (kku > 0 .and. ku2 == 0)) return
