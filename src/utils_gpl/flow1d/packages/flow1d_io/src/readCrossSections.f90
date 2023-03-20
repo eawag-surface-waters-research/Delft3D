@@ -630,23 +630,6 @@ module m_readCrossSections
       else
          totalWidth = width
       endif
-      
-      if (numlevels > 1) then
-         do i = 1, numlevels-1
-            if (height(i+1) < height(i) ) then
-               call SetMessage(LEVEL_ERROR, 'Incorrect input for tabulated Cross-Section Definition id: '//trim(pCS%id)//'. Levels should be monotonically increasing!')
-               return
-            endif
-            if (width(i+1) < width(i) ) then
-               call SetMessage(LEVEL_ERROR, 'Incorrect input for tabulated Cross-Section Definition id: '//trim(pCS%id)//'. flowWidths should be monotonically increasing!')
-               return
-            endif
-            if (totalWidth(i+1) < totalWidth(i) ) then
-               call SetMessage(LEVEL_ERROR, 'Incorrect input for tabulated Cross-Section Definition id: '//trim(pCS%id)//'. totalWidths should be monotonically increasing!')
-               return
-            endif
-         enddo
-      endif
    
       ! summerdike
       
