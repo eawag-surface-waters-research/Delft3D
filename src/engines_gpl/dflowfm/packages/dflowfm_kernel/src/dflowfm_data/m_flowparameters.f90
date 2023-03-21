@@ -492,9 +492,9 @@ integer                            :: javau3onbnd = 0   !< vert. adv. u1 bnd Upw
  integer                           :: jamapnumlimdt             !< num limdt to map file, 0: no, 1: yes
  integer                           :: jamaptaucurrent           !< shear stress to map file, 0: no, 1: yes
  integer                           :: jamapz0                   !< roughness heights to map file, 0: no, 1: yes
- integer                           :: jamapchezy                !< chezy to map file, 0: no, 1: yes
- integer                           :: jamap_chezy_elements      !< chezy roghness in flow elements to map file, 0: no, 1: yes
- integer                           :: jamap_chezy_links         !< chezy roghness on flow links to map file, 0: no, 1: yes
+ integer                           :: jamap_chezy_elements      !< chezy roughness in flow elements to map file, 0: no, 1: yes
+ integer                           :: jamap_chezy_links         !< chezy roughness on flow links to map file, 0: no, 1: yes
+ integer                           :: jamap_chezy_input         !< chezy input roughness on flow links to map file, 0: no, 1: yes
  integer                           :: jamapsal                  !< salinity to map file, 0: no, 1: yes
  integer                           :: jamaptem                  !< temperature to map file, 0: no, 1: yes
  integer                           :: jamapcali                 !< roughness calibration factors to map file, 0: no, 1: yes
@@ -968,9 +968,9 @@ subroutine default_flowparameters()
     jamapnumlimdt = 1
     jamaptaucurrent = 1
     jamapz0 = 0
-    jamapchezy = 0
     jamap_chezy_elements = 0
     jamap_chezy_links    = 0
+    jamap_chezy_input    = 0
     jamapsal = 1
     jamaptem = 1
     jamapconst = 1
