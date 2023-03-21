@@ -3,15 +3,10 @@ set(src_path src)
 
 # Set version file variables
 set(svn_version_root ${CMAKE_CURRENT_SOURCE_DIR}/../) # Check the SVN revision of WAQ directory
-set(ini_version_file ${CMAKE_CURRENT_SOURCE_DIR}/../../version/version_number.ini)
 set(fortran_version_file ${CMAKE_CURRENT_SOURCE_DIR}/src/wq_processes_version.F90)
 set(rc_version_file ${CMAKE_CURRENT_SOURCE_DIR}/../../version/version_number.rc)
 set(version_include_dir ${CMAKE_SOURCE_DIR}/../version_includes)
 
-# Generate the F90 version files
-generate_version_files(${fortran_version_file}
-                       ${ini_version_file}
-                       ON)
 
 # Gather source files
 get_fortran_source_files(${src_path} source)
@@ -21,10 +16,6 @@ set(library_name wq_processes)
 add_library(${library_name} ${source}
                             ${rc_version_file})
 
-# Define prebuild events
-prebuild_version_number(${library_name} ${fortran_version_file}
-                                        ${checkout_src_root}
-                                        ${ini_version_file})
 
 # Define additional compilation flags
 set_source_files_properties(${fortran_version_file}
