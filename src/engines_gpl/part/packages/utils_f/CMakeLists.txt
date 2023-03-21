@@ -50,11 +50,6 @@ oss_include_libraries(${library_name} oss_dependencies)
 set_source_files_properties(${fortran_version_file}
                             PROPERTIES COMPILE_OPTIONS "${file_preprocessor_flag}")
 
-# Add prebuild events
-prebuild_version_number(${library_name} ${fortran_version_file} 
-                                        ${checkout_src_root}
-                                        ${ini_version_file}
-                                        ON)
 
 # Define how the files should be structured within Visual Studio
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${source_files})
