@@ -10,6 +10,8 @@
 #define nefis_company_url  = "http://www.deltares.nl"
 #define nefis_program "NEFIS"
 
+#include "version_number.h"
+
 /*=================================================== DO NOT MAKE CHANGES BELOW THIS LINE ===================================================================== */
 
 
