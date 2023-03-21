@@ -1,6 +1,5 @@
 # Set version file variables
 # Note that the CMAKE_CURRENT_SOURCE_DIR has a path to THIS CMakeLists location
-set(ini_version_file ${CMAKE_CURRENT_SOURCE_DIR}/include/version_number.ini)
 set(fortran_version_file ${CMAKE_CURRENT_SOURCE_DIR}/src/io_netcdf_version.F90)
 
 if(UNIX)
@@ -13,8 +12,6 @@ if(UNIX)
 
 endif(UNIX)
 
-# Generate the F90 version file
-generate_version_files(${fortran_version_file} ${ini_version_file})
             
 set(src_path src)
 get_fortran_source_files(${src_path} sources)
@@ -64,10 +61,6 @@ endif(WIN32)
 # Set additional compilation properties, specific for Debug mode
 target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${check_bounds_flag}>")
 
-# Prebuild events
-prebuild_version_number(${library_name} ${fortran_version_file} 
-                                        ${checkout_src_root} 
-                                        ${ini_version_file})
 
 # Set additional compilation properties
 set_source_files_properties(${fortran_version_file}
