@@ -598,6 +598,7 @@ module m_readCrossSections
       double precision, dimension(:), allocatable :: totalwidth
       integer :: i, j, k
       double precision, parameter   :: eps = 1d-5
+      character(len=IdLen) :: typestr
 
       numlevels = 0
       readTabulatedCS= .false.
@@ -631,19 +632,20 @@ module m_readCrossSections
          totalWidth = width
       endif
       
-      if (numlevels > 1) then
+      call prop_get_string(node_ptr, '', 'template', typestr, success) !don't do this check for template zw profiles
+      if (numlevels > 1 .and. .not. success) then
          do i = 1, numlevels-1
             if (height(i+1) < height(i) ) then
                call SetMessage(LEVEL_ERROR, 'Incorrect input for tabulated Cross-Section Definition id: '//trim(pCS%id)//'. Levels should be monotonically increasing!')
-               return
+               exit
             endif
             if (width(i+1) < width(i) ) then
                call SetMessage(LEVEL_ERROR, 'Incorrect input for tabulated Cross-Section Definition id: '//trim(pCS%id)//'. flowWidths should be monotonically increasing!')
-               return
+               exit
             endif
             if (totalWidth(i+1) < totalWidth(i) ) then
                call SetMessage(LEVEL_ERROR, 'Incorrect input for tabulated Cross-Section Definition id: '//trim(pCS%id)//'. totalWidths should be monotonically increasing!')
-               return
+               exit
             endif
          enddo
       endif
