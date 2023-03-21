@@ -5,12 +5,6 @@ include_directories(${waq_delftio_include_path})
 # Set include path to have it accessible for other components
 set(public_include_path ${waq_delftio_include_path})
 
-# Set version file variables
-set(ini_version_file ${CMAKE_CURRENT_SOURCE_DIR}/include/version_number.ini)
-set(fortran_version_file ${CMAKE_CURRENT_SOURCE_DIR}/src/diof90/delftio_version.F90)
-
-# Generate the F90 version file
-generate_version_files(${fortran_version_file} ${ini_version_file})
 
 # Set directory which contains all source files
 set(src_path src)
@@ -34,11 +28,7 @@ if(UNIX)
     target_link_libraries(${library_name} ${oss_dependencies})
 endif(UNIX)
 
-# Define prebuild events
-prebuild_version_number(${library_name} ${fortran_version_file}
-                                        ${checkout_src_root}
-                                        ${ini_version_file}
-                                        ON)
+
 
 # Set preprocessor definitions
 if(WIN32)
