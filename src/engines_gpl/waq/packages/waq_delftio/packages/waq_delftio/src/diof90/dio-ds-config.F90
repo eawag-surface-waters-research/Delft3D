@@ -41,7 +41,6 @@ module waq_Dio_ds_config
 
 
 use waq_dio_prop
-use waq_delftio_version_module
 
 implicit none
 
