@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 integer function get_isub(j, nfac1, j_loc)   !< gets the subinterval of grid layer j
    use m_spline2curvi

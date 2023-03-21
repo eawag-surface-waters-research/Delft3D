@@ -25,8 +25,8 @@ subroutine chkrefinement(gdp)
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !  File 'TMP_refinement' is filled by each mapper (one for each DD boundary),

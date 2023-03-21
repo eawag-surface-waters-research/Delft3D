@@ -32,8 +32,8 @@ subroutine adjust_bedload(nmmax     ,icx       ,icy       ,kcs       , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Computes 

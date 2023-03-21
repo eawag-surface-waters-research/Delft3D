@@ -25,8 +25,8 @@ subroutine dfexchg ( iptr, ks, ke, itype, nm_pos, gdp)
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !   Exchanges halo values of field array between neighbouring subdomains

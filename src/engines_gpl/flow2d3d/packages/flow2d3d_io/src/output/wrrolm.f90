@@ -31,8 +31,8 @@ subroutine wrrolm(lundia    ,error     ,filename  ,itmapc    ,nmax      , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! Writes the time varying data for wave model (WAVE coupling, Roller, or XBeach)

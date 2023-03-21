@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> A cross-section path is defined by a polyline.
 !! On the unstructured grid it then results in a set of flow links that

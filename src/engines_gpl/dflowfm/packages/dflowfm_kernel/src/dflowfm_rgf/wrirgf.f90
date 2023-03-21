@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       !> Write a curvilinear grid to (ascii) grd-file.
       !! NOTE: 'new' format (RGFGrid 4.x)

@@ -26,8 +26,8 @@ subroutine depfil(lundia    ,error     ,fildep    ,fmttmp    ,array     , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description----------------------------------------------------------------- 
 ! 
 !    Function: Reads the depth values from the attribute file 

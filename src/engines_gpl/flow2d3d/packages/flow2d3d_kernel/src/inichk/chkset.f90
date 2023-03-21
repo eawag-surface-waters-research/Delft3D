@@ -27,8 +27,8 @@ subroutine chkset(lundia    ,error     ,sferic    ,method    ,trasol    , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! Checks the combination of Domain Decomposition with various program modes

@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> Initializes OpenMP settings, when necessary.
 !! Call this once initially, or after changing the max number of OpenMP threads setting.

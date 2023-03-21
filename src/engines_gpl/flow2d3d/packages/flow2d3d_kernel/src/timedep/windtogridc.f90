@@ -26,8 +26,8 @@ subroutine windtogridc(mmax      ,nmax      ,nmaxus    ,kcs       ,alfas     , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Conversion of wind(stresses) from x/y-coordinates

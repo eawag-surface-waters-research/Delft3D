@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> DFM_SIGNALS - Respond to process signals (POSIX-style).
 !! Lets the program watch signals such as Control-C and Control-Z, and

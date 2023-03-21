@@ -31,8 +31,8 @@ subroutine z_dwnvel(nmmax     ,kmax      ,icx     ,kcs       ,kfu       , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 ! Calculate velocity components and magnitude at the
 ! zeta points based on velocity in the bottom

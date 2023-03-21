@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> prepares a matrix for solver test (as in "mpitest")
 subroutine make_matrix(CFL, s1)

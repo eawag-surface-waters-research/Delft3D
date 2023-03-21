@@ -27,8 +27,8 @@ subroutine z_precon(bbka      ,bbkc      ,pbbk      ,pbbkc     ,kmax      , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! Computes the preconditioning

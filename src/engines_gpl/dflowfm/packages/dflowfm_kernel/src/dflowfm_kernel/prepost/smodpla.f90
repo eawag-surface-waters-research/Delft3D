@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       SUBROUTINE SMODPLA(DPLA, DXS, NPL)                   ! SMOOTH WITH DESIRED
       USE M_ALLOC

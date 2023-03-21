@@ -26,8 +26,8 @@ subroutine bndmorlyr(lsedtot   ,timhr     ,nto       , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: - Apply bed composition boundary conditions

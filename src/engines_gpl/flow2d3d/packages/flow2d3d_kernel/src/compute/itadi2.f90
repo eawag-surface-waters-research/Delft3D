@@ -29,8 +29,8 @@ subroutine itadi2(lundia    ,s1        ,kcs       ,mmax      ,nmax      , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: ITADI2 solves the linearized system of equations

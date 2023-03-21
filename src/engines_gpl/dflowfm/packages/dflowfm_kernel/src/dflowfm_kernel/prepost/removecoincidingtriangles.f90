@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
    SUBROUTINE REMOVECOINCIDINGTRIANGLES()
    use m_netw                     ! 2 REMOVES SMALL TRIANGLES NEXT TO

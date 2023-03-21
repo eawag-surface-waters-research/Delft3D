@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  subroutine setwor_rai(xs1,ys1,xs2,ys2,xw1,yw1,xw2,yw2)
  use m_raaitek

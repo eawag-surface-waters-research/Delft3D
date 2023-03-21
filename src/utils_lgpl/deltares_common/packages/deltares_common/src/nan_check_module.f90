@@ -25,8 +25,8 @@ module nan_check_module
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--module description----------------------------------------------------------
 !
 ! This module provides a subroutine nan_check for 1D, 2D, 3D and 4D,

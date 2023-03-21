@@ -31,8 +31,8 @@
 ! 
 ! For more information contact saad@cs.umn.edu
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 #include "blasfm.h"
 

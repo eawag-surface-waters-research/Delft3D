@@ -25,8 +25,8 @@ subroutine ipon(xq     ,yq     ,n      ,xp     ,yp     ,inout     )
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !--description----------------------------------------------------------------
 !
 ! Deltares                                                               *

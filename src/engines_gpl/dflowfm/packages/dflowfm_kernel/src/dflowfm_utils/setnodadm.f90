@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> Toplevel setnodadm routine wraps:
 !! * original setnodadm(), for network_data administration.

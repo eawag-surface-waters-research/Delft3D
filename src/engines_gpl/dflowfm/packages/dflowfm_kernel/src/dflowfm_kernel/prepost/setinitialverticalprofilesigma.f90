@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 subroutine setinitialverticalprofilesigma(yy,ny,filename) ! polyfil
  use m_flowgeom

@@ -25,8 +25,8 @@ subroutine run_swan_slave (command, retval)
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !     *** Run swan; produce output file swanout with values on     ***

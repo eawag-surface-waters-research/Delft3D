@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       DOUBLE PRECISION FUNCTION DLENGTH(K1,K2)
       use m_netw

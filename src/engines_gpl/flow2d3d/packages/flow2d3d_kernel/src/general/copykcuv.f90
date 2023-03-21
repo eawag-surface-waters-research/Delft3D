@@ -25,8 +25,8 @@ subroutine copykcuv(kcu, kcucopy, gdp)
 !  Stichting Deltares. All rights reserved.
 !
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Copy kcu (or kcv), replacing all 2 and 3 (in kcu) by 1 (in kcucopy)

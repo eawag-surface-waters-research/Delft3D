@@ -27,8 +27,8 @@ subroutine drofil(lundia    ,fildro    ,fmttmp    ,error     ,ndro      , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Reads the drogue definitions from attri-

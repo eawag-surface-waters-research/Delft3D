@@ -25,8 +25,8 @@ subroutine chknum(lundia    ,error     ,roumet    ,rouflo    ,gdp)
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: - Checks the numerical parameters

@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       SUBROUTINE READARCINFOHEADER(MINP,MMAX,NMAX,X0,Y0,DX,DY,RMIS)
       implicit none

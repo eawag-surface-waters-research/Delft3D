@@ -28,8 +28,8 @@ subroutine z_precon_ilu(aak       ,bbk       ,cck       ,aak2      ,cck2      , 
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! Computes the preconditioning

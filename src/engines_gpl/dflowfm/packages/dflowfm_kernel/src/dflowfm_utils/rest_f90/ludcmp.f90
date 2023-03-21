@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       SUBROUTINE LUDCMP(A,N,NP,INDX,D,JAPARALLEL)
       implicit none

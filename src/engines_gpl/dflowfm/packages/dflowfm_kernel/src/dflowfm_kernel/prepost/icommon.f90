@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> find common neighboring cell of two net links (0: no cell found)
 integer function common_cell_for_two_net_links(L1, L2)

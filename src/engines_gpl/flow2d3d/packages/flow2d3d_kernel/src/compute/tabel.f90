@@ -25,8 +25,8 @@ function tabel(d1        ,eweir     ,qunit     ,qvolk     )
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Determines additional energy loss due to weir.

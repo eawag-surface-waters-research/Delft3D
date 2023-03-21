@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
     subroutine thacker2d(t, ini)
     use m_netw, only  : xk, yk, zk, numk

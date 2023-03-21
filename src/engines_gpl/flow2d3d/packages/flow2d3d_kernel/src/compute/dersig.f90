@@ -27,8 +27,8 @@ subroutine dersig(j         ,nmmaxj    ,nmmax     ,icx       ,icy       , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Computes transformation coefficients sigma-

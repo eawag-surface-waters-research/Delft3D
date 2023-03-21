@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 subroutine reconstructucz(k)
     ! Perot reconstruction of the vertical velocity, by Willem

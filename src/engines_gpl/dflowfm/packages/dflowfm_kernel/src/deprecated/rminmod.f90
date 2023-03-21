@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  double precision function rminmod(sl1,sl2)                      ! twee maal vergroot vanwege acl
  implicit none

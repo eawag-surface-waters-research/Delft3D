@@ -31,8 +31,8 @@ subroutine euler(j         ,nmmax     ,nmmaxj    ,kmax      ,icx       , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: EULER corrects the velocities with the

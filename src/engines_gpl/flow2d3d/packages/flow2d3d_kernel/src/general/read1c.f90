@@ -26,8 +26,8 @@ subroutine read1c(record    ,lrec      ,ibeg      ,iend      ,cvar      , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Reads ONE character variable with fixed length

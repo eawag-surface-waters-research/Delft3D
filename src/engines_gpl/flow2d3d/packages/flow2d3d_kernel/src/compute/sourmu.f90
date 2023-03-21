@@ -30,8 +30,8 @@ subroutine sourmu(soumud    ,excbed    ,entr      ,wssus     ,j         , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Computation of source term for combined effect of

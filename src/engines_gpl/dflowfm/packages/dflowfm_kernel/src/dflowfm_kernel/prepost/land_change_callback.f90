@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> Updates derived bathymetry arrays, after zk values have been changed.
 !! This routine updates the entire grid, so call this once after a (series of) zk update(s).

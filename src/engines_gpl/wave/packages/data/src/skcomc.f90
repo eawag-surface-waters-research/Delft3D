@@ -25,8 +25,8 @@ function skcomc(iuni)
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 ! skips comment in the input file and counts the
 ! number of records

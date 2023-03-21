@@ -28,8 +28,8 @@ subroutine rdtddn(lundia    ,lunout    ,lunrd     ,error     ,filout    , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: This general purpose routine reads the time depen-

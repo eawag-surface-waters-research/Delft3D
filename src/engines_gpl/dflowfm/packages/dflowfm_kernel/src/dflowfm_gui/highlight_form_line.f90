@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> Highlights the 'string' field of a user-input form field.
 !! Input fields are highlighted automatically, but the string label isn't.

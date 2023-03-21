@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 subroutine transport()                           ! transport for now, advect salinity and add
                                                   ! high order limited terms to uqcx, uqcy

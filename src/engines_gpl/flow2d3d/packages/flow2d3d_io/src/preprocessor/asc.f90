@@ -26,8 +26,8 @@ subroutine asc(w         ,v0u       ,fr        ,kcmp      ,inaam     , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Determination of FR and V0+U

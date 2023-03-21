@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       SUBROUTINE DGTEXT(TEX,XD,YD,ZD,NCOL)
       use gridoperations

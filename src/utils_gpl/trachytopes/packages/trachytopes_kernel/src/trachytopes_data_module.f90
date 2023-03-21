@@ -25,8 +25,8 @@ module trachytopes_data_module
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--module description----------------------------------------------------------
 !
 ! This module defines the data structures for the trachytopes      

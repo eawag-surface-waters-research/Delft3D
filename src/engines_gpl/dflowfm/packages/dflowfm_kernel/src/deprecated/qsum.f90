@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  double precision function Qsum(k)                   ! sum of Q out of k (m3/s)
  use m_flow

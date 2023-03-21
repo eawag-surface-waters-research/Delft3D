@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  !double precision function QunPeri(n12,L)            ! sum of (Q*un face node upwind normal) at side n12 of link L
  !use m_flow                                          ! advect the corner velocities (dimension: m4/s2)

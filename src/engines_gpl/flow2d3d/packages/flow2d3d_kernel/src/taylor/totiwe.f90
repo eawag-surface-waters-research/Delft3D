@@ -26,8 +26,8 @@ subroutine totiwe(kmxdt     ,kmxt      ,ratio     ,singul    ,top       , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Compute ratio between twice Kin. IWE and <w^2>

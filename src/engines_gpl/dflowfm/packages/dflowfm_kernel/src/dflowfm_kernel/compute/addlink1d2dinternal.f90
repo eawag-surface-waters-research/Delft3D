@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  subroutine addlink1D2Dinternal(L,japerim)                         ! and add area's and volumes of 1D2D links
  use m_flowgeom

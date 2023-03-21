@@ -26,8 +26,8 @@ subroutine trabg(utot      ,di        ,taub      ,npar      ,par       , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !  Computes sediment transport according to the Gaeuman et al modified form of the 

@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 subroutine addnetlink(x1,y1,x2,y2,L)
 use gridoperations ! or you can not call connectdbn

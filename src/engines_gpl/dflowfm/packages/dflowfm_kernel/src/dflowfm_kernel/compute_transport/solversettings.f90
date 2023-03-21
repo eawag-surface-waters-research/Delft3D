@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> default solver settings
    subroutine SolverSettings(solver, numrows, numnonzeros)

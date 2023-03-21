@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> split a link, make new cells and update administration
 subroutine splitlink(xp, yp, L_, dcosmin, jatek, ierror)

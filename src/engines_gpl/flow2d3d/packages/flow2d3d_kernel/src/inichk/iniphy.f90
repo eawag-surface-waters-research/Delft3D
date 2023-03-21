@@ -26,8 +26,8 @@ subroutine iniphy(iro       ,z0        ,vonkar    ,vicmol    ,sboltz    , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: - Define some physical constants

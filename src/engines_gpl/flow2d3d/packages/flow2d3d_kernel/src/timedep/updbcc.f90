@@ -28,8 +28,8 @@ subroutine updbcc(lunbcc    ,lundia    ,first     ,itbcc     ,ito       , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Reads the time dependent constituent BC from file

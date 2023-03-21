@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  subroutine tekrailinesBATHY(ncol,jaall,ITYP)
  use m_flowgeom

@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 module m_roofs
  double precision  :: roofheightuni        = 2.7d0                  ! if not dmiss, rooflevel = av gr

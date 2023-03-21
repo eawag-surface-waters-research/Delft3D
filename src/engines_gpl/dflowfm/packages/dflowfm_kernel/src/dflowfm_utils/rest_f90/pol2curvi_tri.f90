@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> construct triangle with three blocks of curvilinear grids
 subroutine pol2curvi_tri(i1, i2_, i3_)

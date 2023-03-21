@@ -27,8 +27,8 @@ subroutine compsandfrac(frac      ,seddm     ,nmmax     ,lsedtot   , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !  compsandfrac returns the total proportion of sand sized material on the bed

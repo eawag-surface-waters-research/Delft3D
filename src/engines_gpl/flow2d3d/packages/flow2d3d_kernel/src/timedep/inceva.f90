@@ -26,8 +26,8 @@ subroutine inceva(timnow    ,evaint    ,j         ,nmmaxj    ,nmmax     , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Determine increments and update the current time

@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       SUBROUTINE PLUSABSI(XK,YK,ZK,KN,NUMK,NUML,KEY,kndefault)
       use M_polygon

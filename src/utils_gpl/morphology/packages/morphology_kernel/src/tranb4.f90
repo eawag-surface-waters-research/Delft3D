@@ -26,8 +26,8 @@ subroutine tranb4(utot      ,d         ,chezy     ,npar      ,par       , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 ! computes sediment transport according to
 ! general formula

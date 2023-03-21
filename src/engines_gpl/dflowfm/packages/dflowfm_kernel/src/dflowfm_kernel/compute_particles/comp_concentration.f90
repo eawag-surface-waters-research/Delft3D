@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> compute concentrations of particles (parts per unit volume) in flownodes
 subroutine comp_concentration(s, nconst, iconst, c)

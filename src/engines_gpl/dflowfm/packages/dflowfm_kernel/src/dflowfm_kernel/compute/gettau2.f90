@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 subroutine gettau2(n,taucurc,czc,ustw2,jawaveswartdelwaq_par)
    use m_flowgeom
