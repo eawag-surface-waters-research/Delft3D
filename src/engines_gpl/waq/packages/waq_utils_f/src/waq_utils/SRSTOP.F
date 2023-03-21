@@ -22,7 +22,6 @@
 !!  rights reserved.
       
       module exception_waq
-      logical :: useexception_waq = .false.
       end module exception_waq
       
       subroutine srstop ( iexit )
@@ -57,7 +56,7 @@
       write ( lunfil , * ) iexit
       close ( lunfil )
 
-      if (useexception_waq) call throwexception()
+
 
       select case ( iexit )
          case ( :0 )
