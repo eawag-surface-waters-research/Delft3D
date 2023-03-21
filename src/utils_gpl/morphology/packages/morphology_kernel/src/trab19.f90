@@ -30,13 +30,13 @@
 subroutine trab19(u         ,v         ,hrms      ,rlabda    ,teta      ,h         ,tp        , &
                 & d50       ,d15       ,d90       ,npar      ,par       ,dzbdt     ,vicmol    , &
                 & poros     ,chezy     ,dzdx      ,dzdy      ,sbotx     ,sboty     ,cesus     , &
-                & ua        ,va        ,ubot      ,kwtur     ,vonkar    ,ubot_from_com, debug )
+                & ua        ,va        ,ubot      ,kwtur     ,ubot_from_com )
 !!--pseudo code and references--------------------------------------------------
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
     use mathconsts
-    use sed_support_routines, only: calculate_critical_velocities, calculate_velocity_asymmetry
+    use sed_support_routines, only: calculate_critical_velocities, calculate_velocity_asymmetry, calculate_urms
     !
     implicit none
 !
@@ -63,14 +63,12 @@ subroutine trab19(u         ,v         ,hrms      ,rlabda    ,teta      ,h      
     real(fp)                 , intent(in)    :: u
     real(fp)                 , intent(in)    :: v
     real(fp)                 , intent(in)    :: vicmol
-    real(fp)                 , intent(in)    :: vonkar
     !
     real(fp)                 , intent(out)   :: sbotx
     real(fp)                 , intent(out)   :: sboty
     real(fp)                 , intent(out)   :: cesus
     real(fp)                 , intent(out)   :: ua
     real(fp)                 , intent(out)   :: va
-    real(fp)                 , intent(out)   :: debug
     !
     ! Local variables
     !
@@ -84,7 +82,6 @@ subroutine trab19(u         ,v         ,hrms      ,rlabda    ,teta      ,h      
     integer                        :: bedslpeffini
     real(fp)                       :: ag
     real(fp)                       :: delta
-    real(fp)                       :: rnu
     real(fp)                       :: facua
     real(fp)                       :: facas
     real(fp)                       :: facsk
@@ -93,14 +90,10 @@ subroutine trab19(u         ,v         ,hrms      ,rlabda    ,teta      ,h      
     real(fp)                       :: cmax
     real(fp)                       :: reposeangle
     real(fp)                       :: rheea
-    real(fp)                       :: cf
-    real(fp)                       :: dtol
-    real(fp)                       :: onethird
-    real(fp)                       :: twothird   
+    real(fp)                       :: cf 
     real(fp)                       :: utot   
     real(fp)                       :: uamag   
-    real(fp)                       :: phi   
-    real(fp)                       :: uorb   
+    real(fp)                       :: phi      
     real(fp)                       :: b2   
     real(fp)                       :: ucrw  
     real(fp)                       :: ucrc   
@@ -119,12 +112,9 @@ subroutine trab19(u         ,v         ,hrms      ,rlabda    ,teta      ,h      
     !
     sbotx = 0.0_fp
     sboty = 0.0_fp
-    ssusx = 0.0_fp
-    ssusy = 0.0_fp
     ua    = 0.0_fp
     va    = 0.0_fp
     cesus = 0.0_fp
-    debug = 0.0_fp
     utot = sqrt(u**2 + v**2)
     if ( utot < DTOL .or. h > 200.0_fp .or. h < 0.01_fp ) return
     !
@@ -164,45 +154,15 @@ subroutine trab19(u         ,v         ,hrms      ,rlabda    ,teta      ,h      
     !
     cf = ag / chezy / chezy
     !
+    call calculate_urms(hrms, tp, h, ag, ubot_from_com, ubot, kwtur, urms, urms2)
+    !
     ! velocity asymmetry
     !
-    uamag = 0.0_fp
-    if (waveform==1) then
-       call ua_rvr(facas    ,facsk  ,sws   ,h   ,hrms   , &
-                 & rlabda   ,ubot   ,uamag )        ! to check, uorb or urms
-    else if (waveform==2) then
-       call ua_vt(facas    ,facsk   ,sws   ,h      ,   &
-                & hrms     ,tp      ,ag    ,ubot   ,   &
-                & uamag    )
-    end if
+    call calculate_velocity_asymmetry(waveform, facas, facsk, sws, h, hrms, rlabda, ag, tp, urms, uamag)
     !
     !     Velocity magnitude
     !
     phi = reposeangle*degrad ! Angle of internal friction
-    utot = u**2 + v**2
-    if (utot>0.0_fp) utot = sqrt(utot)
-    if (utot<dtol .or. h>200.0_fp .or. h<0.01_fp) goto 999
-    !
-    !     Wave number k, urms orbital velocity
-    !
-    if (tp>1.e-6_fp) then
-       !
-       !     Prevent small tp
-       !
-       tp = max(tp,1.0_fp)
-       !
-       call wavenr(h         ,tp        ,k         ,ag        )
-       if (ubot_from_com) then
-          uorb = ubot
-       else
-          uorb = pi*hrms/tp/sinh(k*h)
-       endif
-       urms = uorb*0.7071_fp
-       urms2 = urms**2 + 1.45_fp*kwtur
-    else
-       urms2 = 0.0_fp
-    endif
-    !
     dster=(delta*ag/1e-12_fp)**onethird*d50        ! 1e-12 = nu**2
     !
     if(d50<=0.0005_fp) then

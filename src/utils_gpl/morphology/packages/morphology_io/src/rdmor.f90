@@ -47,7 +47,7 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
     use properties
     use table_handles
     use bedcomposition_module
-    use morphology_data_module, only: sedpar_type, morpar_type
+    use morphology_data_module
     use grid_dimens_module, only: griddimtype
     use sediment_basics_module
     use string_module
@@ -654,16 +654,16 @@ subroutine read_morphology_properties(mor_ptr, morpar, griddim, filmor, fmttmp, 
        !
        ! === bermslope (FM only)
        !
-       call prop_get_logical(mor_ptr, 'Morphology', 'bermslopetransport' , bermslopetransport)
-       if (bermslopetransport) then
-          call prop_get(mor_ptr, 'Morphology', 'bermslope'          , bermslope         )
-          call prop_get(mor_ptr, 'Morphology', 'bermslopefac'       , bermslopefac      )
-          call prop_get(mor_ptr, 'Morphology', 'bermslopegamma'     , bermslopegamma    )
-          call prop_get(mor_ptr, 'Morphology', 'bermslopedepth'     , bermslopedepth    )
-          call prop_get(mor_ptr, 'Morphology', 'bermslopesus'       , bermslopesus      )
-          call prop_get(mor_ptr, 'Morphology', 'bermslopebed'       , bermslopebed      )
-          if (bermslopefac>5) then
-             errmsg = 'bermslopefac set to value higher than 5. It is advised to lower the value in order to maintain stable morphology.'
+       call prop_get_logical(mor_ptr, 'Morphology', 'bermslopetransport' , morpar%bermslopetransport)
+       if (morpar%bermslopetransport) then
+          call prop_get(mor_ptr, 'Morphology', 'bermslope'          , morpar%bermslope         )
+          call prop_get(mor_ptr, 'Morphology', 'bermslopefac'       , morpar%bermslopefac      )
+          call prop_get(mor_ptr, 'Morphology', 'bermslopegamma'     , morpar%bermslopegamma    )
+          call prop_get(mor_ptr, 'Morphology', 'bermslopedepth'     , morpar%bermslopedepth    )
+          call prop_get(mor_ptr, 'Morphology', 'bermslopesus'       , morpar%bermslopesus      )
+          call prop_get(mor_ptr, 'Morphology', 'bermslopebed'       , morpar%bermslopebed      )
+          if (morpar%bermslopefac>30) then
+             errmsg = 'bermslopefac set to value higher than 30. It is advised to lower the value in order to maintain stable morphology.'
              call write_warning(errmsg, unit=lundia)
           endif
        endif
@@ -1768,9 +1768,8 @@ subroutine echomor(lundia    ,error     ,lsec      ,lsedtot   ,nto       , &
     txtput3 = 'Correct 3D suspended load for doublecounting' //       &
              & ' below the reference height aks (SUSCOR)'
     if (l_suscor) then
-       if (suscorfac >= 1.0_fp) then
-          txtput2 = '                 YES'
-       else
+       txtput2 = '                 YES'
+    else
        txtput2 = '                  NO'
     endif
     write (lundia, '(3a)') txtput3(1:82), ':', txtput2 

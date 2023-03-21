@@ -134,7 +134,6 @@ subroutine eqtran(sig       ,thick     ,kmax      ,ws        ,ltur      , &
     integer(pntrsize), external :: perf_function_eqtran
     real(fp)                    :: ag
     real(fp)                    :: alphaspir
-    real(fp)                    :: avgu
     real(fp)                    :: bakdif
     real(fp)                    :: cesus
     real(fp)                    :: chezy
@@ -187,9 +186,6 @@ subroutine eqtran(sig       ,thick     ,kmax      ,ws        ,ltur      , &
     real(fp)                    :: poros
     real(fp)                    :: ua
     real(fp)                    :: va
-    real(fp)                    :: uamg
-    real(fp)                    :: denom
-    real(fp)                    :: debug
     !
     ! Interface to dll is in High precision!
     !
@@ -276,8 +272,6 @@ subroutine eqtran(sig       ,thick     ,kmax      ,ws        ,ltur      , &
     sswv   = 0.0_fp
     ua     = 0.0_fp
     va     = 0.0_fp
-    uamg   = 0.0_fp
-    debug  = 0.0_fp
     sag    = sqrt(ag)
     bakdif = vicmol / sigmol
     !
@@ -540,12 +534,10 @@ subroutine eqtran(sig       ,thick     ,kmax      ,ws        ,ltur      , &
        call trab19(u         ,v         ,hrms      ,rlabda    ,teta      ,h1        ,tp        , &
                  & di50      ,d15       ,d90       ,npar      ,par       ,dzbdt     ,vicmol    , &
                  & poros     ,chezy     ,dzdx      ,dzdy      ,sbcu      ,sbcv      ,cesus      , &
-                 & ua        ,va        ,ubot      ,kwtur     ,vonkar    ,ubot_from_com, debug )
+                 & ua        ,va        ,ubot      ,kwtur     ,ubot_from_com )
        !
-       uamg = hypot(u+ua,v+va)
        realpar(RP_UAU) = real(ua      ,hp)  ! needed for suspended transport
        realpar(RP_VAU) = real(va      ,hp)
-       realpar(RP_DBG) = real(debug   ,hp)
        !
        sbc_total = .false.
        sus_total = .false.
@@ -554,15 +546,13 @@ subroutine eqtran(sig       ,thick     ,kmax      ,ws        ,ltur      , &
        ! Soulsby / Van Rijn with XBeach adaptations
        !
        equi_conc = .true.
-       call trab20(u         ,v         ,hrms      ,rlabda    ,teta      ,h1        ,tp        , &
+       call trab20(u         ,v         ,hrms      ,rlabda    ,teta      ,h1         ,tp        , &
                  & di50      ,d15       ,d90       ,npar      ,par       ,dzbdt     ,vicmol    , &
-                 & poros     ,chezy     ,dzdx      ,dzdy      ,sbcu      ,sbcv      ,cesus      , &
-                 & ua        ,va        ,ubot      ,kwtur     ,vonkar    ,ubot_from_com, debug )
+                 & poros     ,chezy     ,dzdx      ,dzdy      ,sbcu      ,sbcv     ,cesus     , &
+                 & ua        ,va        ,ubot      ,kwtur     ,ubot_from_com )
        !
-       uamg = hypot(u+ua,v+va)
        realpar(RP_UAU) = real(ua      ,hp)  ! needed for suspended transport
        realpar(RP_VAU) = real(va      ,hp)
-       realpar(RP_DBG) = real(debug   ,hp)
        !
        sbc_total = .false.
        sus_total = .false.
@@ -760,8 +750,7 @@ subroutine eqtran(sig       ,thick     ,kmax      ,ws        ,ltur      , &
           else
               !
               ! Suspended transport rate given by transport formula,
-              ! derive concentration. Add non-zero uamg for van Thiel
-              ! and XBeach like Soulsby / Van Rijn (iform=19, 20)
+              ! derive concentration. 
               !
               cesus = ssus / (utot + eps) / h1
           endif

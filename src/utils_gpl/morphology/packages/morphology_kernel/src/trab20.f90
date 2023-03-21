@@ -31,11 +31,11 @@
 subroutine trab20(u         ,v         ,hrms      ,rlabda    ,teta      ,h         ,tp        , &
                 & d50       ,d15       ,d90       ,npar      ,par       ,dzbdt     ,vicmol    , &
                 & poros     ,chezy     ,dzdx      ,dzdy      ,sbotx     ,sboty     ,cesus     , &
-                & ua        ,va        ,ubot      ,kwtur     ,vonkar    ,ubot_from_com )
+                & ua        ,va        ,ubot      ,kwtur     ,ubot_from_com )
 !!--declarations----------------------------------------------------------------
     use precision
     use mathconsts
-    use sed_support_routines, only: calculate_critical_velocities, calculate_velocity_asymmetry
+    use sed_support_routines, only: calculate_critical_velocities, calculate_velocity_asymmetry, calculate_urms
     !
     implicit none
 !
@@ -62,7 +62,6 @@ subroutine trab20(u         ,v         ,hrms      ,rlabda    ,teta      ,h      
     real(fp)                 , intent(in)    :: u
     real(fp)                 , intent(in)    :: v
     real(fp)                 , intent(in)    :: vicmol
-    real(fp)                 , intent(in)    :: vonkar
     !
     real(fp)                 , intent(out)   :: sbotx
     real(fp)                 , intent(out)   :: sboty
@@ -82,7 +81,6 @@ subroutine trab20(u         ,v         ,hrms      ,rlabda    ,teta      ,h      
     integer                        :: bedslpeffini
     real(fp)                       :: ag
     real(fp)                       :: delta
-    real(fp)                       :: rnu
     real(fp)                       :: facua
     real(fp)                       :: facas
     real(fp)                       :: facsk
@@ -94,11 +92,7 @@ subroutine trab20(u         ,v         ,hrms      ,rlabda    ,teta      ,h      
     real(fp)                       :: cf
     real(fp)                       :: utot    !< Velocity magnitude
     real(fp)                       :: uamag   
-    real(fp)                       :: phi   
-    real(fp)                       :: uorb   
-    real(fp)                       :: b2   
-    real(fp)                       :: ucrw  
-    real(fp)                       :: ucrc   
+    real(fp)                       :: phi     
     real(fp)                       :: dster   
     real(fp)                       :: ucr  
     real(fp)                       :: urms     
@@ -121,10 +115,6 @@ subroutine trab20(u         ,v         ,hrms      ,rlabda    ,teta      ,h      
     if ( utot < DTOL .or. h > 200.0_fp .or. h < 0.01_fp ) return
     !
     !     Initialisations
-    !
-    dtol = 1e-6_fp
-    onethird=1.0_fp/3.0_fp
-    twothird=2.0_fp/3.0_fp
     !
     ag = par(1)
     delta = par(4)
@@ -163,9 +153,11 @@ subroutine trab20(u         ,v         ,hrms      ,rlabda    ,teta      ,h      
     !
     cf = ag / chezy / chezy
     !
-    call calculate_velocity_asymmetry(waveform, facas, facsk, sws, h, hrms, rlabda, ubot, ag, tp, &
-                            reposeangle, ubot_from_com, kwtur, uamag, phi, uorb, urms2)
+    call calculate_urms(hrms, tp, h, ag, ubot_from_com, ubot, kwtur, urms, urms2)
     !
+    call calculate_velocity_asymmetry(waveform, facas, facsk, sws, h, hrms, rlabda, ag, tp, urms, uamag)
+    !
+    phi = reposeangle*degrad ! Angle of internal friction
     dster=(delta*ag/1e-12_fp)**onethird*d50        ! 1e-12 = nu**2
     !
     if(d50<=0.0005_fp) then
