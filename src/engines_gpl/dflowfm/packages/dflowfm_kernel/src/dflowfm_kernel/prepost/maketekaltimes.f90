@@ -32,6 +32,7 @@
 
    subroutine maketekaltimes()
    use m_flowtimes
+   use time_module, only : seconds_to_datetimestring
    implicit none
    logical          :: jawel
    integer          :: minp, mout, i, k

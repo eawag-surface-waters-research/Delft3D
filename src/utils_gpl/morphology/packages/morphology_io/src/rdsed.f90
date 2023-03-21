@@ -1,4 +1,3 @@
-module m_rdsed
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2023.                                
@@ -28,6 +27,7 @@ module m_rdsed
 !  $Id$
 !  $HeadURL$
 !-------------------------------------------------------------------------------
+module m_rdsed
 use m_depfil_stm
 
 private
@@ -56,6 +56,7 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
     use precision
     use properties
     use string_module
+    use MessageHandling, only: mess, LEVEL_ERROR
     use message_module
     use morphology_data_module
     use sediment_basics_module
@@ -118,15 +119,15 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
 !
 ! Arguments
 !
-    integer                                  , intent(in)  :: lsal    !  Description and declaration in dimens.igs
-    integer                                  , intent(in)  :: lsed    !  Description and declaration in esm_alloc_int.f90
-    integer                                  , intent(in)  :: lsedtot !  Description and declaration in esm_alloc_int.f90
-    integer                                  , intent(in)  :: lstsci  !  Description and declaration in esm_alloc_int.f90
-    integer                                  , intent(in)  :: ltem    !  Description and declaration in dimens.igs
-    integer                                  , intent(in)  :: ltur    !  Description and declaration in esm_alloc_int.f90
-    integer                                  , intent(in)  :: lundia  !  Description and declaration in inout.igs
-    logical                                  , intent(out) :: error   !!  Flag=TRUE if an error is encountered
-    character(20) , dimension(lstsci + ltur) , intent(in)  :: namcon  !  Description and declaration in esm_alloc_char.f90
+    integer                                  , intent(in)  :: lsal    !<  Description and declaration in dimens.igs
+    integer                                  , intent(in)  :: lsed    !<  Description and declaration in esm_alloc_int.f90
+    integer                                  , intent(in)  :: lsedtot !<  Description and declaration in esm_alloc_int.f90
+    integer                                  , intent(in)  :: lstsci  !<  Description and declaration in esm_alloc_int.f90
+    integer                                  , intent(in)  :: ltem    !<  Description and declaration in dimens.igs
+    integer                                  , intent(in)  :: ltur    !<  Description and declaration in esm_alloc_int.f90
+    integer                                  , intent(in)  :: lundia  !<  Description and declaration in inout.igs
+    logical                                  , intent(out) :: error   !<  Flag=TRUE if an error is encountered
+    character(20) , dimension(lstsci + ltur) , intent(in)  :: namcon  !<  Description and declaration in esm_alloc_char.f90
     integer                                  , intent(out) :: iopsus
     integer                                  , intent(in)  :: nmlb
     integer                                  , intent(in)  :: nmub
@@ -144,28 +145,28 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
     integer(pntrsize)           :: istat_ptr
     integer                     :: j
     integer                     :: l
-    integer                     :: lbl                 ! bedload fraction number: lbl = l - lsed
-    integer                     :: lenc                ! Help var. (length of character var.) 
+    integer                     :: lbl                 !< bedload fraction number: lbl = l - lsed
+    integer                     :: lenc                !< Help var. (length of character var.) 
     integer                     :: lfile
     integer                     :: luninp
-    integer                     :: n                   ! Temporary storage for nseddia(l)
+    integer                     :: n                   !< Temporary storage for nseddia(l)
     integer                     :: nm
     integer                     :: version
     integer(pntrsize), external :: open_shared_library
     real(fp)                    :: rmissval
-    real(fp)                    :: seddxx              ! Temporary storage for sediment diameter
-    real(fp)                    :: sedsg               ! Temporary storage for geometric standard deviation
+    real(fp)                    :: seddxx              !< Temporary storage for sediment diameter
+    real(fp)                    :: sedsg               !< Temporary storage for geometric standard deviation
     real(fp)                    :: tpsmud
     logical                     :: ex
     logical                     :: success
-    character(11)               :: fmttmp ! Format file ('formatted  ') 
+    character(11)               :: fmttmp !< Format file ('formatted  ') 
     character(20)               :: sedname
     character(256)              :: filtrn
     character(256)              :: rec
     character(300)              :: message
     character(80)               :: parname
     character(20)               :: sc_type
-    character(20)               :: sedtype             ! Local variable for sediment type
+    character(20)               :: sedtype             !< Local variable for sediment type
     character(78)               :: string
     character(10)               :: versionstring
     character(6)                :: seddxxstring
@@ -707,18 +708,17 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
           if (.not. ex) then
              sdbuni(l) = rmissval
              if (inisedunit(l) == 'm') then
-                call prop_get(sedblock_ptr, '*', 'IniSedThick', sdbuni(l), success)
+                call prop_get(sedblock_ptr, '*', 'IniSedThick', sdbuni(l), success, valuesfirst=.true.)
              else
-                call prop_get(sedblock_ptr, '*', 'SdBUni', sdbuni(l), success)
+                call prop_get(sedblock_ptr, '*', 'SdBUni', sdbuni(l), success, valuesfirst=.true.)
              endif
-             if (.not. success) then
+             if (.not. success .or. comparereal(sdbuni(l),rmissval) == 0) then
                 if (inisedunit(l) == 'm') then
-                   errmsg = 'Error in IniSedThick: ' // trim(flsdbd(l)) // ' is not a file and not a value.'
+                   write (errmsg,'(5a)') 'Invalid file or value "',trim(flsdbd(l)),'" assigned to IniSedThick for fraction ',trim(sedname),'.'
                 else
-                   errmsg = 'Error in SdBUni.' // trim(flsdbd(l))
+                   write (errmsg,'(5a)') 'Invalid file or value "',trim(flsdbd(l)),'" assigned to SdBUni for fraction ',trim(sedname),'.'
                 endif
-                errmsg = FILE_NOT_FOUND // trim(errmsg)
-                call write_error(errmsg, unit=lundia)
+                call mess(LEVEL_ERROR, errmsg)
                 error = .true.
                 return
              endif
@@ -790,14 +790,14 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
           endif
        enddo
     endif
-    if (error) goto 9999
+    if (error) return
     do l = 1, lsedtot
        if (sedtyp(l) == SEDTYP_COHESIVE) then
           anymud   = .true.
           nmudfrac = nmudfrac + 1
        endif
     enddo
- 9999 continue
+
 end subroutine rdsed
 
 
@@ -820,7 +820,7 @@ subroutine rdsed01(lsed      ,luninp    ,lundia    ,csoil     ,iopsus    , &
 ! Arguments
 !
     integer                        , intent(out):: iopsus
-    integer                        , intent(in) :: lundia !  Description and declaration in inout.igs
+    integer                        , intent(in) :: lundia !<  Description and declaration in inout.igs
     integer                        , intent(in) :: luninp
     integer                        , intent(in) :: version
     integer                                     :: lsed
@@ -832,7 +832,7 @@ subroutine rdsed01(lsed      ,luninp    ,lundia    ,csoil     ,iopsus    , &
     real(fp)       , dimension(:,:), intent(out):: parsettle
     real(fp)       , dimension(:)  , intent(out):: sdbuni
     real(fp)       , dimension(:)  , intent(out):: seddia
-    integer        , dimension(:)  , intent(out):: sedtyp !  sediment type: 0=total/1=noncoh/2=coh
+    integer        , dimension(:)  , intent(out):: sedtyp !<  sediment type: 0=total/1=noncoh/2=coh
     character(256) , dimension(:)  , intent(out):: flsdbd
     type(tree_data), dimension(:)  , intent(out):: sedblock
 !
@@ -933,11 +933,11 @@ subroutine opensedfil(lundia    ,error     ,filsed    ,luninp    ,version  )
 !
 ! Arguments
 !
-    integer                                  , intent(in)  :: lundia  ! unit of diagnostic file
-    integer                                  , intent(out) :: luninp  ! unit of opened .sed file
-    integer                                  , intent(out) :: version ! version of .sed file
-    logical                                  , intent(out) :: error   ! .true. if error occured
-    character(*)                                           :: filsed  ! name of .sed file
+    integer                                  , intent(in)  :: lundia  !< unit of diagnostic file
+    integer                                  , intent(out) :: luninp  !< unit of opened .sed file
+    integer                                  , intent(out) :: version !< version of .sed file
+    logical                                  , intent(out) :: error   !< .true. if error occured
+    character(*)                                           :: filsed  !< name of .sed file
 !
 ! Local variables
 !
@@ -1053,11 +1053,11 @@ subroutine echosed(lundia    ,error     ,lsed      ,lsedtot   , &
     !
     integer                   :: i
     integer                   :: l
-    integer                   :: n                   ! Temporary storage for nseddia(l)
+    integer                   :: n                   !< Temporary storage for nseddia(l)
     integer                   :: nm
     real(fp)                  :: logsedd50
     real(fp)                  :: rmissval
-    real(fp)                  :: xxinv               ! Help var. [1/xx or 1/(1-xx) in log unif distrib.]
+    real(fp)                  :: xxinv               !< Help var. [1/xx or 1/(1-xx) in log unif distrib.]
     real(fp)                  :: xm
     logical                   :: cmpupdall           !< flag indicating whether bed composition is updated for all fractions
     logical        , external :: stringsequalinsens
@@ -1654,9 +1654,9 @@ subroutine count_sed(lundia    ,error     ,lsed      ,lsedtot   , &
 !
 ! Arguments
 !
-    integer                         , intent(out) :: lsed    ! Number of suspended sediment fractions
-    integer                         , intent(out) :: lsedtot ! Total number of sediment fractions
-    integer                         , intent(in)  :: lundia  ! Unit of diagnostic file
+    integer                         , intent(out) :: lsed    !< Number of suspended sediment fractions
+    integer                         , intent(out) :: lsedtot !< Total number of sediment fractions
+    integer                         , intent(in)  :: lundia  !< Unit of diagnostic file
     logical                         , intent(out) :: error
     character(len=*)                , intent(in)  :: filsed
     type(sedpar_type)               , pointer     :: sedpar
@@ -1668,13 +1668,13 @@ subroutine count_sed(lundia    ,error     ,lsed      ,lsedtot   , &
     integer                                                :: ibl
     integer                                                :: istat
     integer                                                :: j
-    integer                                                :: lsedbl        ! Number of bedload fractions
+    integer                                                :: lsedbl        !< Number of bedload fractions
     integer                                                :: sedtypnr
-    integer         , dimension(:) , allocatable           :: typsedim      ! Type of the sediments
+    integer         , dimension(:) , allocatable           :: typsedim      !< Type of the sediments
     logical                                                :: found
     character(20)                                          :: versionstring
-    character(20)   , dimension(:) , allocatable           :: namsedim      ! Names of the sediments as read from sed-file
-    character(20)                                          :: sedtyptmp     ! Sediment type in sed-file
+    character(20)   , dimension(:) , allocatable           :: namsedim      !< Names of the sediments as read from sed-file
+    character(20)                                          :: sedtyptmp     !< Sediment type in sed-file
     character(80)                                          :: parname
     character(300)                                         :: message
     type(tree_data)                            , pointer   :: asedblock_ptr
@@ -1854,22 +1854,22 @@ subroutine count_sed01(lundia    ,error     ,lsed      ,filsed    , &
 !
 ! Arguments
 !
-    integer                         , intent(out) :: lsed     ! Number of suspended sediment fractions
-    integer                         , intent(in)  :: lundia   ! Unit of diagnostic file
+    integer                         , intent(out) :: lsed     !< Number of suspended sediment fractions
+    integer                         , intent(in)  :: lundia   !< Unit of diagnostic file
     character(*)                                  :: filsed
-    logical                         , intent(out) :: error    ! error flag
-    integer         , dimension(:) , allocatable  :: typsedim ! Type of the sediments
-    character(20)   , dimension(:) , allocatable  :: namsedim ! Names of the sediments as read from sed-file
+    logical                         , intent(out) :: error    !< error flag
+    integer         , dimension(:) , allocatable  :: typsedim !< Type of the sediments
+    character(20)   , dimension(:) , allocatable  :: namsedim !< Names of the sediments as read from sed-file
 !
 ! Local variables
 !
     integer                                                :: i
     integer                                                :: iocond
     integer                                                :: l
-    integer                                                :: luninp   ! Unit of .sed file
+    integer                                                :: luninp    !< Unit of .sed file
     integer                                                :: npar
-    integer                                                :: version  ! version number (0 or 1)
-    character(20)                                          :: sedtyptmp     ! Sediment type in sed-file
+    integer                                                :: version   !< version number (0 or 1)
+    character(20)                                          :: sedtyptmp !< Sediment type in sed-file
     character(300)                                         :: line
     character(300)                                         :: errmsg
 !
@@ -1884,6 +1884,7 @@ subroutine count_sed01(lundia    ,error     ,lsed      ,filsed    , &
     allocate(namsedim(lsed))
     allocate(typsedim(lsed))
     !
+    loop: &
     do l = 1, lsed
        write(namsedim(l),'(a,1i0)') 'sed.fraction ',l
        read (luninp, '(a)', iostat = iocond) sedtyptmp
@@ -1897,7 +1898,7 @@ subroutine count_sed01(lundia    ,error     ,lsed      ,filsed    , &
              errmsg = 'Invalid suspended sediment type (must start with sand or mud)'
              call write_error(errmsg, unit=lundia)
              error = .true.
-             goto 999
+             exit loop
           endif
        endif
        !
@@ -1910,12 +1911,11 @@ subroutine count_sed01(lundia    ,error     ,lsed      ,filsed    , &
              write(errmsg,'(A,I0)') 'Error reading parameters for sediment fraction',l
              call write_error(errmsg, unit=lundia)
              error = .true.
-             goto 999
+             exit loop
           endif
        enddo
-    enddo
+    enddo loop
     !
-999 continue
     close (luninp)
 end subroutine count_sed01
 

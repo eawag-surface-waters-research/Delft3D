@@ -1041,10 +1041,12 @@ endif
     call aerr('cftrt(numl,3)'   , ierr, numl)   ; cftrt   = 0
  end if
 
- if (jamapchezy > 0) then
+ if (jamap_chezy_elements > 0) then
     if (allocated (czs) ) deallocate(czs)
     allocate ( czs(ndx)    , stat=ierr)
     call aerr('czs(ndx)'   , ierr, ndx)   ; czs   = 0
+ end if
+ if (jamap_chezy_links > 0) then
     if (allocated (czu) ) deallocate(czu)
     allocate ( czu(lnx)    , stat=ierr)
     call aerr('czu(lnx)'   , ierr, lnx)   ; czu   = 0

@@ -38,7 +38,7 @@ use tree_data_types
 use tree_structures
 use unstruc_messages
 use m_globalparameters, only : t_filenames
-use time_module, only : ymd2modified_jul
+use time_module, only : ymd2modified_jul, datetimestring_to_seconds
 
 implicit none
 
@@ -683,6 +683,7 @@ end subroutine loadModel
 !! Important in loadModel() process.
 !! @see writeMDUFile
 subroutine readMDUFile(filename, istat)
+    use time_module, only : ymd2modified_jul, datetimestring_to_seconds
     use m_flow, notinuse_s=>success
                !,                  only : kmx, layertype, mxlayz, sigmagrowthfactor, iturbulencemodel, &
                !                         LAYTP_SIGMA, numtopsig, spirbeta,                              &
@@ -1136,6 +1137,7 @@ subroutine readMDUFile(filename, istat)
     call prop_get_integer(md_ptr, 'numerics', 'Maxitverticalforestertem' , Maxitverticalforestertem)
     call prop_get_integer(md_ptr, 'numerics', 'Turbulencemodel' , Iturbulencemodel)
     call prop_get_integer(md_ptr, 'numerics', 'Turbulenceadvection' , javakeps)
+    call prop_get_integer(md_ptr, 'numerics', 'Jadrhodz' , jadrhodz)
     call prop_get_double (md_ptr, 'numerics', 'Eddyviscositybedfacmax' , Eddyviscositybedfacmax)
     call prop_get_integer(md_ptr, 'numerics', 'AntiCreep' , jacreep)
 
@@ -1878,7 +1880,11 @@ subroutine readMDUFile(filename, istat)
          //'and do not write salinity to map file.'
       call warn_flush()
     end if
-    call prop_get_integer(md_ptr, 'output', 'Wrimap_chezy', jamapchezy, success)
+    
+    call prop_get_integer(md_ptr, 'output', 'Wrimap_chezy', jamap_chezy_elements, success)
+    call prop_get_integer(md_ptr, 'output', 'Wrimap_chezy_on_flow_links', jamap_chezy_links, success)
+    call prop_get_integer(md_ptr, 'output', 'Wrimap_input_roughness', jamap_chezy_input, success)
+    
     call prop_get_integer(md_ptr, 'output', 'Wrimap_temperature', jamaptem, success)
     if (success .and. jamaptem == 1 .and. jatem < 1) then
       write (msgbuf, '(a)') 'MDU setting "Wrimap_temperature = 1" asks to write temperature to the output map file, ' &
@@ -3136,6 +3142,10 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
        call prop_set(prop_ptr, 'numerics', 'Turbulenceadvection' , javakeps, 'Turbulence advection (0: none, 3: horizontally explicit and vertically implicit)')
     endif
 
+    if (writeall .or. (jadrhodz .ne. 1  .and. kmx > 0) ) then
+       call prop_set(prop_ptr, 'numerics', 'Jadrhodz' , jadrhodz, '(1:central org, 2:centralnew, 3:upw cell, 4:most stratf. cell, 5:least stratf. cell)')
+    endif
+
     if (writeall .or. Eddyviscositybedfacmax > 0 .and. kmx > 0) then
        call prop_set(prop_ptr, 'numerics', 'Eddyviscositybedfacmax' , Eddyviscositybedfacmax, 'Limit eddy viscosity at bed )')
     endif
@@ -3947,8 +3957,14 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     if (writeall .or. jamaptaucurrent /= 1) then
         call prop_set(prop_ptr, 'output', 'Wrimap_taucurrent', jamaptaucurrent, 'Write the shear stress to map file (1: yes, 0: no)')
     endif
-    if (writeall .or. jamapchezy /= 1) then
-        call prop_set(prop_ptr, 'output', 'Wrimap_chezy', jamapchezy, 'Write the chezy roughness to map file (1: yes, 0: no)')
+    if (writeall .or. jamap_chezy_elements /= 0) then
+        call prop_set(prop_ptr, 'output', 'Wrimap_chezy', jamap_chezy_elements, 'Write the chezy values in flow elements to map file (1: yes, 0: no)')
+    endif
+    if (writeall .or. jamap_chezy_links /= 0) then
+        call prop_set(prop_ptr, 'output', 'Wrimap_chezy_on_flow_links', jamap_chezy_links, 'Write the chezy values on flow links to map file (1: yes, 0: no)')
+    endif
+    if (writeall .or. jamap_chezy_input /= 0) then
+        call prop_set(prop_ptr, 'output', 'Wrimap_input_roughness', jamap_chezy_input, 'Write the input roughness on flow links to map file (1: yes, 0: no)')
     endif
     if(jasal > 0 .and. (writeall .or. jamapsal /= 1)) then
         call prop_set(prop_ptr, 'output', 'Wrimap_salinity', jamapsal, 'Write salinity to map file (1: yes, 0: no)')

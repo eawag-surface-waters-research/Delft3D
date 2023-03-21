@@ -296,7 +296,7 @@ else if (nodval == 27) then
          znod = 1d0/nudge_rate(kk)
        endif
     else if (nshiptxy > 0) then
-       znod = v1ship(kk)
+       znod = s1(kk) + zsp(kk)
     endif
 
  else if (nodval == numoptwav .and. jawave > 0 .and. .not. flowWithoutWaves) then

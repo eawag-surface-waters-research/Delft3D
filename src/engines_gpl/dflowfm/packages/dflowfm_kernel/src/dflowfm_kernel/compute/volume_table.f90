@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! $Id: volume_table.f90 142608 2023-03-01 15:48:13Z buwalda $
+! $HeadURL: https://svn.oss.deltares.nl/repos/delft3d/trunk/src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_kernel/compute/volume_table.f90 $
 
 !> Module for using volume tables at 1d nodes for the computation of the total volume of water in a node.
 module m_VolumeTables
@@ -316,6 +316,8 @@ module m_VolumeTables
          generateVLTBOnLinks = .false.
       endif
 
+      ndx1d = ndx - ndx2d     ! include also the 2d boundary nodes.
+            
       if (useVolumeTableFile .and. .not. generateVLTBOnLinks) then
          ! Do not use the volumetable file for the storage tables.
          volumeTableFile = fileName
@@ -328,7 +330,6 @@ module m_VolumeTables
       cross => network%crs%cross
       stors => network%storS%stor
 
-      ndx1d = ndx - ndx2d     ! include also the 2d boundary nodes.
       if (allocated(vltb)) then
          call dealloc(vltb)
       end if
@@ -349,7 +350,7 @@ module m_VolumeTables
       ! determine the highest level for the storage nodes
       call calculateHighestLevelOnStorageNodes(vltb)
       
-      call initializeVltb(vltb, ndx1d)
+      call initializeVltb(vltb)
 
       call addStorageToVltb(vltb)
 
@@ -413,14 +414,13 @@ module m_VolumeTables
    !> ** number of levels
    !> ** number of summerdikes
    !> * allocate the arrays in the volume tables.
-   subroutine initializeVltb(vltb, ndx1d)
+   subroutine initializeVltb(vltb)
       use m_flowparameters
       use m_flowgeom
       use unstruc_channel_flow
       
       type(t_voltable), dimension(:), intent(inout) :: vltb    !< Volume tables.
-      integer,                        intent(in   ) :: ndx1d   !< Number of 1d nodes.
-
+      
       integer :: n, nod
       integer :: LL, L
       integer :: index
@@ -566,10 +566,9 @@ module m_VolumeTables
       type(t_voltable), dimension(:),     intent(in   ) :: vltb         !< Volume tables on nodes.
       type(t_voltable), dimension(:, :),  intent(inout) :: vltbOnLinks  !< Volume tables on links.
 
-      integer :: n, ndx1d, nod, L, LL, numlinks
+      integer :: n, nod, L, LL, numlinks
       integer :: Lindex, dir
 
-      ndx1d = ndx - ndx2d
       do n = 1, ndx1d
          nod = n+ndx2d
          ! there is additional storage on this node, split this over the flow links
@@ -794,7 +793,6 @@ module m_VolumeTables
 
       integer :: ibin
       integer :: i, n, istat, j
-      integer :: ndx1d
       integer :: count, numberOfSummerdikes
 
       open(newunit=ibin, file=volumeTableFile, form='unformatted', access='stream', iostat=istat)
@@ -806,7 +804,6 @@ module m_VolumeTables
       write(ibin) volumeTableFileType
       write(ibin) VolumeTableFileMajorVersion, VolumeTableFileMinorVersion
 
-      ndx1d = ndx - ndx2d
       write(ibin) ndx1d, nonlin1D
 
       do n = 1, ndx1d
@@ -848,7 +845,7 @@ module m_VolumeTables
 
       integer :: ibin
       integer :: i, j, n, istat
-      integer :: ndx1d
+      integer :: ndx1d_read
       integer :: count
       integer :: nonlin1D_file
       integer :: numberOfSummerdikes
@@ -886,9 +883,9 @@ module m_VolumeTables
          close(ibin)
          return
       endif
-      read(ibin) ndx1d, nonlin1D_file
+      read(ibin) ndx1d_read, nonlin1D_file
       
-      if (ndx1d /= ndx - ndx2d) then
+      if (ndx1d_read /= ndx1d) then
          call SetMessage(LEVEL_WARN, trim(volumeTableFile)//' is not compatible with the current model, the number of 1d cells are different.')
          return
       endif

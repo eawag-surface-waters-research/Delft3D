@@ -1,4 +1,3 @@
-module m_rdmor
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2023.                                
@@ -28,9 +27,8 @@ module m_rdmor
 !  $Id$
 !  $HeadURL$
 !-------------------------------------------------------------------------------
-
+module m_rdmor
 private
-
 !
 ! functions and subroutines
 !
@@ -49,11 +47,7 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
     use properties
     use table_handles
     use bedcomposition_module
-    use morphology_data_module, only: moroutputtype, mornumericstype, &
-      & bedbndtype, sedpar_type, morpar_type, initmoroutput, &
-      & FLUX_LIMITER_MINMOD, FLUX_LIMITER_MC, FLUX_LIMITER_NONE, &
-      & MOR_STAT_TIME, MOR_STAT_BODS, MOR_STAT_MIN, MOR_STAT_MAX, &
-      & MOR_STAT_MEAN, MOR_STAT_STD, MOR_STAT_CUM
+    use morphology_data_module, only: sedpar_type, morpar_type
     use grid_dimens_module, only: griddimtype
     use sediment_basics_module
     use string_module
@@ -119,10 +113,6 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
     real(fp)                               , pointer :: dzmaxdune
     real(fp)                               , pointer :: avaltime
     real(fp)                               , pointer :: thetsduni    
-    real(fp)                               , pointer :: bermslope
-    real(fp)                               , pointer :: bermslopefac
-    real(fp)                               , pointer :: bermslopegamma
-    real(fp)                               , pointer :: bermslopedepth
     real(fp)              , dimension(:)   , pointer :: xx
     logical                                , pointer :: bedupd
     logical                                , pointer :: cmpupd
@@ -140,9 +130,6 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
     logical                                , pointer :: eulerisoglm
     logical                                , pointer :: glmisoeuler
     logical                                , pointer :: l_suscor
-    logical                                , pointer :: bermslopetransport
-    logical                                , pointer :: bermslopesus
-    logical                                , pointer :: bermslopebed
     character(256)                         , pointer :: bcmfilnam
     character(256)                         , pointer :: flsthetsd
     character(20)          , dimension(:)  , pointer :: namsed
@@ -161,14 +148,14 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
     integer                        , intent(in)  :: julday
     integer                        , intent(in)  :: nmaxus
     integer                        , intent(in)  :: nto
-    integer                                      :: lundia  !  Description and declaration in inout.igs
+    integer                        , intent(in)  :: lundia  !<  Description and declaration in inout.igs
     integer                        , intent(in)  :: lsec
-    integer                        , intent(in)  :: lsed    !  Description and declaration in esm_alloc_int.f90
-    integer                        , intent(in)  :: lsedtot !  Description and declaration in esm_alloc_int.f90
+    integer                        , intent(in)  :: lsed    !<  Description and declaration in esm_alloc_int.f90
+    integer                        , intent(in)  :: lsedtot !<  Description and declaration in esm_alloc_int.f90
     logical                        , intent(in)  :: lfbedfrm    
     logical                        , intent(out) :: error
-    character(len=*)                             :: filmor
-    character(20) , dimension(nto)               :: nambnd  !  Description and declaration in esm_alloc_char.f90
+    character(len=*)               , intent(in)  :: filmor
+    character(20) , dimension(nto)               :: nambnd  !<  Description and declaration in esm_alloc_char.f90
     type(tree_data)                , pointer     :: mor_ptr
     type(sedpar_type)              , pointer     :: sedpar
     type(morpar_type)              , pointer     :: morpar
@@ -179,67 +166,38 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
 ! Local variables
 !
     integer                                                           :: i
-    integer                                                           :: ilist
-    integer                                                           :: ilun     ! Unit number for attribute file
-    integer                                                           :: iqnt
+    integer                                                           :: ilun     !< Unit number for attribute file
     integer                                                           :: istat
     integer                                                           :: j
-    integer                                                           :: jj
-    integer                                                           :: jmin
     integer                                                           :: lenc
-    integer                                                           :: lfile    ! Length of file name
-    integer                                                           :: nm
-    integer                                                           :: nmlb
-    integer                                                           :: nmub
+    integer                                                           :: lfile    !< Length of file name
     integer                                                           :: nxxprog
     integer                                                           :: nxxuser
     integer                                                           :: version
-    integer                    , dimension(6)                         :: stat_flags
-    integer                    , dimension(:) , allocatable           :: itype
-    integer                    , dimension(:) , allocatable           :: ifield
-    integer                    , dimension(:) , allocatable           :: lenchr
-    real(fp)                                                          :: rmissval
-    real(fp)                                                          :: xxmin
     real(fp)                   , dimension(3)                         :: tint
     real(fp)                   , dimension(:) , allocatable           :: xxprog
-    real(fp)                   , dimension(:) , allocatable           :: rfield
-    logical                                                           :: ex       ! Logical flag for file existence
+    real(fp)                   , dimension(MAX_NUSERFRAC)             :: rfield
+    logical                                                           :: ex       !< Logical flag for file existence
     logical                                                           :: found
-    logical                                                           :: ldef
     character(10)                                                     :: versionstring
-    character(20)                                                     :: fluxlimstring
-    character(80)                                                     :: bndname
     character(256)                                                    :: errmsg
     character(256)                                                    :: pxxstr
     character(256)                                                    :: string
-    character(11)                                                     :: fmttmp ! Format file ('formatted  ')
-    character(10)              , dimension(:) , allocatable           :: cfield
-    type(tree_data)                                         , pointer :: morbound_ptr
+    character(11)                                                     :: fmttmp !< Format file ('formatted  ')
 !
 !! executable statements -------------------------------------------------------
 !
-    !
-    allocate(itype  (max_nuserfrac))
-    allocate(ifield (max_nuserfrac))
-    allocate(lenchr (max_nuserfrac))
-    allocate(rfield (max_nuserfrac))
-    allocate(cfield (max_nuserfrac))
-    !
     error         = .false.
-    rmissval      = -999.0_fp
-    rfield        = -999.0_fp
+    rfield(:)     = -999.0_fp
     version       = -1
     nxxuser       = 0
     fmttmp        = 'formatted'
-    !
-    nmlb = griddim%nmlb
-    nmub = griddim%nmub
     !
     ! allocate memory for boundary conditions
     !
     istat = 0
                   allocate (morpar%morbnd(nto), stat = istat)
-    if (istat==0) allocate (morpar%thetsd(nmlb:nmub            ), stat = istat)
+    if (istat==0) allocate (morpar%thetsd(griddim%nmlb:griddim%nmub), stat = istat)
     !
     if (istat /= 0) then
        call write_error('RDMOR: memory alloc error',unit=lundia)
@@ -247,106 +205,16 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
        return
     endif
     !
-    ! Let local variables point to fields within data structures
-    !
-    morfac              => morpar%morfac
-    thresh              => morpar%thresh
-    aksfac              => morpar%aksfac
-    rwave               => morpar%rwave
-    alfabs              => morpar%alfabs
-    alfabn              => morpar%alfabn
-    camax               => morpar%camax
-    dzmax               => morpar%dzmax
-    sus                 => morpar%sus
-    bed                 => morpar%bed
-    tmor                => morpar%tmor
-    tcmp                => morpar%tcmp
-    thetsd              => morpar%thetsd
-    susw                => morpar%susw
-    sedthr              => morpar%sedthr
-    hmaxth              => morpar%hmaxth
-    bedw                => morpar%bedw
-    factsd              => morpar%factsd
-    rdc                 => morpar%rdc
-    rdw                 => morpar%rdw
-    espir               => morpar%espir
-    ashld               => morpar%ashld
-    bshld               => morpar%bshld
-    cshld               => morpar%cshld
-    dshld               => morpar%dshld
-    coulfri             => morpar%coulfri
-    flfdrat             => morpar%flfdrat
-    alfpa               => morpar%alfpa
-    thcrpa              => morpar%thcrpa
-    asklhe              => morpar%asklhe
-    mwwjhe              => morpar%mwwjhe
-    i10                 => morpar%i10
-    i15                 => morpar%i15
-    i50                 => morpar%i50
-    i90                 => morpar%i90
-    ihidexp             => morpar%ihidexp
-    iopkcw              => morpar%iopkcw
-    islope              => morpar%islope
-    morfacpar           => morpar%morfacpar
-    morfacrec           => morpar%morfacrec
-    morfactable         => morpar%morfactable
-    nxx                 => morpar%nxx
-    bcmfile             => morpar%bcmfile
-    morfacfile          => morpar%morfacfile
-    moroutput           => morpar%moroutput
-    mornum              => morpar%mornum
-    morbnd              => morpar%morbnd
-    wetslope            => morpar%wetslope
-    dryslope            => morpar%dryslope
-    duneavalan          => morpar%duneavalan
-    avaltime            => morpar%avaltime
-    hswitch             => morpar%hswitch
-    dzmaxdune           => morpar%dzmaxdune
-    bermslopetransport  => morpar%bermslopetransport
-    bermslopebed        => morpar%bermslopebed
-    bermslopesus        => morpar%bermslopesus
-    bermslope           => morpar%bermslope
-    bermslopefac        => morpar%bermslopefac
-    bermslopegamma      => morpar%bermslopegamma
-    bermslopedepth      => morpar%bermslopedepth
-    xx                  => morpar%xx
-    bedupd              => morpar%bedupd
-    cmpupd              => morpar%cmpupd
-    eqmbcsand           => morpar%eqmbcsand
-    eqmbcmud            => morpar%eqmbcmud
-    densin              => morpar%densin
-    rouse               => morpar%rouse
-    epspar              => morpar%epspar
-    updinf              => morpar%updinf
-    neglectentrainment  => morpar%neglectentrainment
-    oldmudfrac          => morpar%oldmudfrac
-    varyingmorfac       => morpar%varyingmorfac
-    multi               => morpar%multi
-    bcmfilnam           => morpar%bcmfilnam
-    nmudfrac            => sedpar%nmudfrac
-    namsed              => sedpar%namsed
-    anymud              => sedpar%anymud
-    pangle              => morpar%pangle
-    fpco                => morpar%fpco
-    factcr              => morpar%factcr
-    subiw               => morpar%subiw
-    eulerisoglm         => morpar%eulerisoglm
-    glmisoeuler         => morpar%glmisoeuler
-    l_suscor            => morpar%l_suscor
-    suscorfac           => morpar%suscorfac
-    flsthetsd           => morpar%flsthetsd
-    thetsduni           => morpar%thetsduni
-    !
     do j = 1, nto
-       morbnd(j)%icond = 1
-       morbnd(j)%ibcmt = 0
-       morbnd(j)%npnt  = 0
-       nullify(morbnd(j)%alfa_dist)
-       nullify(morbnd(j)%alfa_mag)
-       nullify(morbnd(j)%idir)
-       nullify(morbnd(j)%nm)
-       nullify(morbnd(j)%nxmx)
-       nullify(morbnd(j)%lm)
+       morpar%morbnd(j)%icond = 1
+       morpar%morbnd(j)%ibcmt = 0
+       morpar%morbnd(j)%npnt  = 0
+       nullify(morpar%morbnd(j)%alfa_dist)
+       nullify(morpar%morbnd(j)%alfa_mag)
+       nullify(morpar%morbnd(j)%idir)
+       nullify(morpar%morbnd(j)%nm)
+       nullify(morpar%morbnd(j)%nxmx)
+       nullify(morpar%morbnd(j)%lm)
     enddo
     versionstring = 'n.a.'
     !
@@ -373,24 +241,10 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
        !
        errmsg = 'No morphological file defined. Using default values.'
        call write_warning(errmsg,unit=lundia)
-       goto 8888
-    endif 
+    else 
     !
-    ! Put mor-file in input tree
-    !
-    call prop_file('ini', trim(filmor), mor_ptr, istat)
-    if (istat /= 0) then
-       select case (istat)
-       case(1)
-          call write_error(FILE_NOT_FOUND//trim(filmor), unit=lundia)
-       case(3)
-          call write_error(PREMATURE_EOF//trim(filmor), unit=lundia)
-       case default
-          call write_error(FILE_READ_ERROR//trim(filmor), unit=lundia)
-       endselect
-       error = .true.
-       return
-    endif
+       call put_morfile_in_input_tree(mor_ptr, filmor, lundia, error)
+       if (error) return
     !
     ! Check version number of mor input file
     !
@@ -414,36 +268,191 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
           inquire (file = trim(string), exist = ex)
        endif
        if (.not. ex) then
-          varyingmorfac = .false.
-          call prop_get(mor_ptr, 'Morphology', 'MorFac', morfac)
+             morpar%varyingmorfac = .false.
+             call prop_get(mor_ptr, 'Morphology', 'MorFac', morpar%morfac)
        else
-          varyingmorfac = .true.
-          morfac        = -1.0
-          call readtable(morfacfile, trim(string), julday, errmsg)
+             morpar%varyingmorfac = .true.
+             morpar%morfac = -1.0
+             call readtable(morpar%morfacfile, trim(string), julday, errmsg)
           if (errmsg /= ' ') then
              call write_error(errmsg, unit=lundia)
              error = .true.
              return
        endif
        endif
+       
+          call read_morphology_properties(mor_ptr, morpar, griddim, filmor, fmttmp, nto, sedpar%anymud, &
+                                          lundia, fwfac, error)
+          if (error) return
+	   
+          call read_morsys_parameters(mor_ptr, morpar, filmor, lsec, morpar%islope, lundia, error)
+          if (error) return
+          !
+          call read_morphology_boundary_conditions(mor_ptr, morpar%morbnd, morpar%bcmfilnam, morpar%bcmfile,&
+                    julday, nto, nambnd, filmor, lundia, error)
+          if (error) return
+          !
+          call read_morphology_numerical_settings(mor_ptr, morpar%mornum)
+          !
+          call read_morphology_output_options(mor_ptr, morpar%moroutput, lsedtot, filmor, lundia, error)
+          if (error) return
+          !
+          call set_sediment_percentiles(mor_ptr, morpar%moroutput, pxxstr)
+          !
+          call read_morphology_process_string(pxxstr, nxxuser, max_nuserfrac, rfield, filmor, lundia, error)
+          if (error) return
+       else
+          call remove_leading_spaces(filmor, lfile)
+          !
+          inquire (file = filmor(1:lfile), exist = ex)
+          if (ex) then
+             open (newunit=ilun, file = filmor(1:lfile), form = 'formatted', status = 'old')
+             !
+             version = 0
+             lenc    = 999
+             read (ilun, '(a)') string
+             do while (string(:1) == '*')
+                call str_lower(string, lenc)
+                i = index(string, 'version')
+                if (i /= 0) then
+                   read (string(i + 8:), '(i2)') version
+                end if
+                read (ilun, '(a)') string
+             end do
+             write (versionstring, '(i4)') version
+             !
+             rewind (ilun)
+             call skipstarlines(ilun)
+             !
+             if (version == 0) then
+                call rdmor0(ilun, morpar%morfac, morpar%tmor, morpar%thresh, morpar%bedupd, morpar%eqmbcsand, morpar%densin, &
+                       morpar%aksfac, morpar%rwave, morpar%rouse, morpar%alfabs, morpar%alfabn, morpar%sus, morpar%bed, &
+                       morpar%susw, morpar%bedw, morpar%sedthr, morpar%thetsduni, morpar%hmaxth, fwfac)
+             else
+                call rdmor1(ilun, morpar%morfac, morpar%tmor, morpar%thresh, morpar%bedupd, morpar%eqmbcsand, morpar%densin, &
+                    morpar%aksfac, morpar%rwave, morpar%alfabs, morpar%alfabn, morpar%sus, morpar%bed, morpar%susw, morpar%bedw, &
+                    morpar%sedthr, morpar%thetsduni, morpar%hmaxth, fwfac, morpar%epspar, morpar%iopkcw, morpar%rdc, morpar%rdw)
+             end if
+             morpar%thetsd = max(0.0_fp,min(morpar%thetsduni,1.0_fp))
+             morpar%tcmp = morpar%tmor
+             morpar%cmpupd = .true.
+             close (ilun)
+          else
+             !
+             ! file not found
+             !
+             call write_error(FILE_NOT_FOUND//trim(filmor), unit=lundia)
+          end if
+       end if
+       !
+    end if
+    !
+    call remove_double_percentiles(morpar, nxxuser, nxxprog, xxprog, max_nuserfrac, rfield)
+    !
+    ! allocate memory for percentiles
+    !
+    allocate (morpar%xx(morpar%nxx), stat = istat)
+    !
+    if (istat /= 0) then
+       errmsg = 'RDMOR: memory alloc error'
+       call write_error(errmsg, unit=lundia)
+       error = .true.
+       return
+    end if
+    !
+    call copy_and_sort_percentiles(morpar, nxxuser, nxxprog, xxprog, max_nuserfrac, rfield, lundia, error)
+    if (error) return
+    !
+    if (sedpar%anymud) then
+       call rdflufflyr(lundia    ,error    ,filmor    ,lsed    , &
+                     & mor_ptr   ,morpar%flufflyr     ,sedpar  , &
+                     & griddim   )
+    end if
+    !
+    call rdmorlyr (lundia    ,error     ,filmor    , &
+                 & nmaxus    ,nto       ,lfbedfrm  , &
+                 & nambnd    ,version   ,lsedtot   , sedpar%namsed    , &
+                 & morpar    ,morlyr    ,sedpar    ,mor_ptr   , &
+                 & griddim   )
+    !
+    deallocate(xxprog)
+end subroutine rdmor
+
+!> put mor file in input tree 
+subroutine put_morfile_in_input_tree(mor_ptr, filmor, lundia, error)
+    use tree_data_types
+    use properties
+    use message_module, only: write_error, write_warning, FILE_NOT_FOUND, FILE_READ_ERROR, PREMATURE_EOF
+    implicit none
+
+    type(tree_data)               , pointer, intent(inout)  :: mor_ptr
+    character(len=*)                       , intent(in)     :: filmor
+    integer                                , intent(in)     :: lundia  !<  Description and declaration in inout.igs
+    logical                                , intent(out)    :: error
+    
+    integer                                                 :: istat
+
+    error = .false.
+    call prop_file('ini', trim(filmor), mor_ptr, istat)
+    if (istat /= 0) then
+       select case (istat)
+       case(1)
+          call write_error(FILE_NOT_FOUND//trim(filmor), unit=lundia)
+       case(3)
+          call write_error(PREMATURE_EOF//trim(filmor), unit=lundia)
+       case default
+          call write_error(FILE_READ_ERROR//trim(filmor), unit=lundia)
+       endselect
+       error = .true.
+    end if
+end subroutine put_morfile_in_input_tree
+    
+!> read morphology properties               
+subroutine read_morphology_properties(mor_ptr, morpar, griddim, filmor, fmttmp, nto, anymud, lundia, fwfac, error)			   
+    use tree_data_types
+    use morphology_data_module
+    use grid_dimens_module
+    use properties
+    use precision
+    use m_depfil_stm
+    use message_module
+    implicit none
+
+    real(fp)                               , parameter      :: RMISSVAL = -999.0_fp
+        
+    type(tree_data)               , pointer, intent(inout)  :: mor_ptr
+    type(morpar_type)             , pointer, intent(inout)  :: morpar
+    type(griddimtype)             , target , intent(in)     :: griddim
+    character(len=*)                       , intent(in)     :: filmor
+    character(11)                          , intent(in)     :: fmttmp !< Format file ('formatted  ')
+    integer                                , intent(in)     :: nto
+    logical                       , pointer, intent(in)     :: anymud
+    integer                                , intent(in)     :: lundia  !<  Description and declaration in inout.igs
+    real(fp)                               , intent(out)    :: fwfac
+    logical                                , intent(out)    :: error
+    
+    character(256)                                          :: errmsg
+    character(256)                                          :: string
+    logical                                                 :: exist
+    integer                                                 :: j, nm
        !
        ! === start for calculating morphological changes (backward compatibility)
        !
-       call prop_get(mor_ptr, 'Morphology', 'MorStt', tmor)
+    call prop_get(mor_ptr, 'Morphology', 'MorStt', morpar%tmor)
        !
        ! === start for calculating morphological changes
        !
-       call prop_get(mor_ptr, 'Morphology', 'BedUpdStt', tmor)       
+    call prop_get(mor_ptr, 'Morphology', 'BedUpdStt', morpar%tmor)       
        !
        ! === start for calculating bed composition changes
        !
-       tcmp = tmor  ! by default, composition update starts when morphological update starts
+    morpar%tcmp = morpar%tmor  ! by default, composition update starts when morphological update starts
        !
-       call prop_get(mor_ptr, 'Morphology', 'CmpUpdStt', tcmp)   
+    call prop_get(mor_ptr, 'Morphology', 'CmpUpdStt', morpar%tcmp)   
        !
        ! === threshold value for slowing erosion near a fixed layer (m)
        !
-       call prop_get(mor_ptr, 'Morphology', 'Thresh', thresh)
+    call prop_get(mor_ptr, 'Morphology', 'Thresh', morpar%thresh)
        !
        ! === flags for doing morphological updates
        ! First, there was morupd
@@ -452,25 +461,25 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
        ! By replacing morupd with bedupd, the parameter morupd is no longer needed.
        ! By default, cmpupd must be true
        !
-       call prop_get_logical(mor_ptr, 'Morphology', 'MorUpd', bedupd)
-       cmpupd = .true.
+    call prop_get_logical(mor_ptr, 'Morphology', 'MorUpd', morpar%bedupd)
+    morpar%cmpupd = .true.
        !
        ! flag for doing bed level updates
        !
-       call prop_get_logical(mor_ptr, 'Morphology', 'BedUpd', bedupd)
+    call prop_get_logical(mor_ptr, 'Morphology', 'BedUpd', morpar%bedupd)
        !
        ! flag for doing composition updates
        !
-       call prop_get_logical(mor_ptr, 'Morphology', 'CmpUpd', cmpupd)
+    call prop_get_logical(mor_ptr, 'Morphology', 'CmpUpd', morpar%cmpupd)
        !
-       if (bedupd .and. tcmp>tmor) then
+    if (morpar%bedupd .and. morpar%tcmp > morpar%tmor) then
           errmsg = 'When BedUpd = true, CmpUpdStt must be smaller than or equal to BedUpdStt (MorStt) in ' // trim(filmor)
           call write_error(errmsg, unit=lundia)
           error = .true.
           return   
        endif 
        !
-       call prop_get_logical(mor_ptr, 'Morphology', 'NeglectEntrainment', neglectentrainment)
+    call prop_get_logical(mor_ptr, 'Morphology', 'NeglectEntrainment', morpar%neglectentrainment)
        !
        ! === flag for setting equilibrium sediment concentration profiles
        ! at the open boundaries for sand sediment
@@ -481,110 +490,110 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
        string = ' '
        call prop_get_string(mor_ptr, 'Morphology', 'NeuBcSand', string)
        if (string /= ' ') then
-          call prop_get_logical(mor_ptr, 'Morphology', 'NeuBcSand', eqmbcsand)
+        call prop_get_logical(mor_ptr, 'Morphology', 'NeuBcSand', morpar%eqmbcsand)
        else
-          call prop_get_logical(mor_ptr, 'Morphology', 'EqmBc', eqmbcsand)
+        call prop_get_logical(mor_ptr, 'Morphology', 'EqmBc', morpar%eqmbcsand)
        endif
        !
        ! === flag for setting equilibrium sediment concentration profiles
        ! at the open boundaries for mud sediment
        !
-       call prop_get_logical(mor_ptr, 'Morphology', 'NeuBcMud', eqmbcmud)
+    call prop_get_logical(mor_ptr, 'Morphology', 'NeuBcMud', morpar%eqmbcmud)
        !
        ! === flag for including sediment in fluid density calculations
        !
-       call prop_get_logical(mor_ptr, 'Morphology', 'DensIn', densin)
+    call prop_get_logical(mor_ptr, 'Morphology', 'DensIn', morpar%densin)
        !
        ! === factor for setting aks height
        !
-       call prop_get(mor_ptr, 'Morphology', 'AksFac', aksfac)
+    call prop_get(mor_ptr, 'Morphology', 'AksFac', morpar%aksfac)
        !
        ! === factor for calculating wave-related roughness from ripple dimensions
        !
-       call prop_get(mor_ptr, 'Morphology', 'RWave', rwave)
+    call prop_get(mor_ptr, 'Morphology', 'RWave', morpar%rwave)
        !
        ! Flag Rouse is skipped
        !
        ! === factor for longitudinal bed load transport
        !
-       call prop_get(mor_ptr, 'Morphology', 'AlfaBs', alfabs)
+    call prop_get(mor_ptr, 'Morphology', 'AlfaBs', morpar%alfabs)
        !
        ! === factor for transverse bed load transport
        !
-       call prop_get(mor_ptr, 'Morphology', 'AlfaBn', alfabn)
+    call prop_get(mor_ptr, 'Morphology', 'AlfaBn', morpar%alfabn)
        !
        ! === Parameters used in dune avalanching
        !
-       call prop_get(mor_ptr, 'Morphology', 'WetSlope'  , wetslope)
-       call prop_get(mor_ptr, 'Morphology', 'DrySlope'  , dryslope)
-       call prop_get(mor_ptr, 'Morphology', 'DuneAvalan', duneavalan)
-       call prop_get(mor_ptr, 'Morphology', 'Hswitch'   , hswitch)
-       call prop_get(mor_ptr, 'Morphology', 'DzMaxDune' , dzmaxdune)
+    call prop_get(mor_ptr, 'Morphology', 'WetSlope'  , morpar%wetslope)
+    call prop_get(mor_ptr, 'Morphology', 'DrySlope'  , morpar%dryslope)
+    call prop_get(mor_ptr, 'Morphology', 'DuneAvalan', morpar%duneavalan)
+    call prop_get(mor_ptr, 'Morphology', 'Hswitch'   , morpar%hswitch)
+    call prop_get(mor_ptr, 'Morphology', 'DzMaxDune' , morpar%dzmaxdune)
        !
        ! === time scale for avalanching  D3D style
        !
-       call prop_get(mor_ptr, 'Morphology', 'AvalTime', avaltime)
+    call prop_get(mor_ptr, 'Morphology', 'AvalTime', morpar%avaltime)
        !
        ! === factor for calculating suspended load transport
        !
-       call prop_get(mor_ptr, 'Morphology', 'Sus', sus)
+    call prop_get(mor_ptr, 'Morphology', 'Sus', morpar%sus)
        !
        ! === factor for calculating bed load transport
        !
-       call prop_get(mor_ptr, 'Morphology', 'Bed', bed)
+    call prop_get(mor_ptr, 'Morphology', 'Bed', morpar%bed)
        !
        ! === wave-related suspended sediment factor
        !
-       call prop_get(mor_ptr, 'Morphology', 'SusW', susw)
+    call prop_get(mor_ptr, 'Morphology', 'SusW', morpar%susw)
        !
        ! === wave-related bed-load sediment factor
        !
-       call prop_get(mor_ptr, 'Morphology', 'BedW', bedw)
+    call prop_get(mor_ptr, 'Morphology', 'BedW', morpar%bedw)
        !
        ! === minimum depth for sediment calculations
        !
-       call prop_get(mor_ptr, 'Morphology', 'SedThr', sedthr)
+    call prop_get(mor_ptr, 'Morphology', 'SedThr', morpar%sedthr)
        !
        ! === global / maximum dry cell erosion factor
        !
-       call prop_get(mor_ptr, 'Morphology', 'ThetSD', flsthetsd)
+    call prop_get(mor_ptr, 'Morphology', 'ThetSD', morpar%flsthetsd)
        !
        !
        ! Intel 7.0 crashes on an inquire statement when file = ' '
        !
-       if (flsthetsd == ' ') then
-          ex = .false.
+    if (morpar%flsthetsd == ' ') then
+        exist = .false.
        else
-          call combinepaths(filmor, flsthetsd)
-          inquire (file = flsthetsd, exist = ex)
+        call combinepaths(filmor, morpar%flsthetsd)
+        inquire (file = morpar%flsthetsd, exist = exist)
        endif
-       if (ex) then
+    if (exist) then
           !
           ! Space varying data has been specified
           ! Use routine that also read the depth file to read the data
           !
-          call depfil_stm(lundia    ,error     ,flsthetsd    ,fmttmp    , &
-                        & thetsd    ,1         ,1         ,griddim   , errmsg)
+        call depfil_stm(lundia    ,error     ,morpar%flsthetsd    ,fmttmp    , &
+                        & morpar%thetsd    ,1         ,1         ,griddim   , errmsg)
           if (error) then
               call write_error(errmsg, unit=lundia)
               return
           endif
           do nm = 1, griddim%nmmax
-             thetsd(nm) = max(0.0_fp, min(thetsd(nm), 1.0_fp))
+            morpar%thetsd(nm) = max(0.0_fp, min(morpar%thetsd(nm), 1.0_fp))
           enddo
        else
-          flsthetsd = ' '
-          thetsduni = 0.0_fp
-          call prop_get(mor_ptr, 'Morphology', 'ThetSD', thetsduni)
+        morpar%flsthetsd = ' '
+        morpar%thetsduni = 0.0_fp
+        call prop_get(mor_ptr, 'Morphology', 'ThetSD', morpar%thetsduni)
           !
           ! Uniform data has been specified
           !
-          thetsd = max(0.0_fp,min(thetsduni,1.0_fp))
+        morpar%thetsd = max(0.0_fp,min(morpar%thetsduni,1.0_fp))
        endif
        !
        ! === maximum depth for variable dry cell erosion factor
        !
-       call prop_get(mor_ptr, 'Morphology', 'HMaxTH', hmaxth)
+    call prop_get(mor_ptr, 'Morphology', 'HMaxTH', morpar%hmaxth)
        !
        ! === factor for adjusting intensity of energy dissipation in wave boundary layer
        ! fwfac should be read from mdf-file (see rdnum)
@@ -595,60 +604,53 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
        !
        ! === factor for adjusting shields critical shear stress
        !
-       call prop_get(mor_ptr, 'Morphology', 'Factcr', factcr)
+    call prop_get(mor_ptr, 'Morphology', 'Factcr', morpar%factcr)
        !
        ! === flag for using eulerian vel iso glm velocities for susp transports
        !
-       call prop_get(mor_ptr, 'Morphology', 'EulerisoGLM', eulerisoglm)
+    call prop_get(mor_ptr, 'Morphology', 'EulerisoGLM', morpar%eulerisoglm)
        !
        ! === flag for using glm vel iso eulerian velocities for bed load transports and ref concentration
        !
-       call prop_get(mor_ptr, 'Morphology', 'GLMisoEuler', glmisoeuler)
+    call prop_get(mor_ptr, 'Morphology', 'GLMisoEuler', morpar%glmisoeuler)
        !
        ! === flag for correction of doublecounting sus/bed transport below aks
        !
-       call prop_get(mor_ptr, 'Morphology', 'SusCor', l_suscor)
-       if (l_suscor) then
-          call prop_get(mor_ptr, 'Morphology', 'SusCorFac', suscorfac)
-          suscorfac = max(0.0_fp, min(suscorfac, 1.0_fp))
-          if (suscorfac <= 0.0_fp) l_suscor = .FALSE.
-       else
-          suscorfac = 0.0_fp
-       endif
+    call prop_get(mor_ptr, 'Morphology', 'SusCor', morpar%l_suscor)
        !
        ! === phase lead for bed shear stress of Nielsen (1992) in TR2004
        !
-       call prop_get(mor_ptr, 'Morphology', 'Pangle', pangle)
+    call prop_get(mor_ptr, 'Morphology', 'Pangle', morpar%pangle)
        !
        ! === coefficient for phase lag effects in wave-induced suspended transport in TR2004
        !
-       call prop_get(mor_ptr, 'Morphology', 'Fpco', fpco)        
+    call prop_get(mor_ptr, 'Morphology', 'Fpco', morpar%fpco)        
        !
        ! === wave period subdivision in TR2004
        !
-       call prop_get(mor_ptr, 'Morphology', 'Subiw', subiw)
+    call prop_get(mor_ptr, 'Morphology', 'Subiw', morpar%subiw)
        !
        ! === flag for parametric epsilon distribution in case of K-Eps model
        !
-       call prop_get_logical(mor_ptr, 'Morphology', 'EpsPar', epspar)
+    call prop_get_logical(mor_ptr, 'Morphology', 'EpsPar', morpar%epspar)
        !
-       call prop_get_integer(mor_ptr, 'Morphology', 'IopKCW', iopkcw)
+    call prop_get_integer(mor_ptr, 'Morphology', 'IopKCW', morpar%iopkcw)
        !
        ! === calibration factor for 2D suspended load relaxation time
        !
-       call prop_get(mor_ptr, 'Morphology', 'FacTsd', factsd)
+    call prop_get(mor_ptr, 'Morphology', 'FacTsd', morpar%factsd)
        !
-       call prop_get(mor_ptr, 'Morphology', 'RDC', rdc)
+    call prop_get(mor_ptr, 'Morphology', 'RDC', morpar%rdc)
        !
-       call prop_get(mor_ptr, 'Morphology', 'RDW', rdw)
+    call prop_get(mor_ptr, 'Morphology', 'RDW', morpar%rdw)
        !
        ! === flag for updating bed level at inflow boundary
        !
-       call prop_get_logical(mor_ptr, 'Morphology', 'UpdInf', updinf)
+    call prop_get_logical(mor_ptr, 'Morphology', 'UpdInf', morpar%updinf)
        !
        ! === flag for merging bottoms of parallel runs
        !
-       call prop_get_logical(mor_ptr, 'Morphology', 'Multi', multi)
+       call prop_get_logical(mor_ptr, 'Morphology', 'Multi', morpar%multi)
        !
        ! === bermslope (FM only)
        !
@@ -666,43 +668,43 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
           endif
        endif
        !
-       if (updinf) then
+       if (morpar%updinf) then
           !
           ! set bed boundary conditions to "free boundaries"
           !
           do j = 1, nto
-             morbnd(j)%icond = 0
+            morpar%morbnd(j)%icond = 0
           enddo
        endif
        !
-       call prop_get(mor_ptr, 'Morphology', 'DzMax', dzmax)
-       call prop_get(mor_ptr, 'Morphology', 'CaMax', camax)
-       call prop_get_logical(mor_ptr, 'Morphology', 'OldMudFrac', oldmudfrac)
+    call prop_get(mor_ptr, 'Morphology', 'DzMax', morpar%dzmax)
+    call prop_get(mor_ptr, 'Morphology', 'CaMax', morpar%camax)
+    call prop_get_logical(mor_ptr, 'Morphology', 'OldMudFrac', morpar%oldmudfrac)
        !
        ! Hiding & exposure
        !
-       call prop_get_integer(mor_ptr, 'Morphology', 'IHidExp', ihidexp)
-       if (ihidexp < 1 .or. ihidexp > 5) then
+    call prop_get_integer(mor_ptr, 'Morphology', 'IHidExp', morpar%ihidexp)
+    if ( morpar%ihidexp < 1 .or. morpar%ihidexp > 5 ) then
           errmsg = 'IHidExp should be in the range 1 to 5 in ' // trim(filmor)
           call write_error(errmsg, unit=lundia)
           error = .true.
           return
-       elseif (ihidexp>1 .and. anymud) then
+    else if ( morpar%ihidexp > 1 .and. anymud ) then
           errmsg = 'Hiding-exposure with mud is an experimental feature. Hiding-exposure does not take into account the presence of mud.'
           call write_warning(errmsg, unit=lundia)
        endif
-       select case(ihidexp)
+    select case(morpar%ihidexp)
        case(4) ! Parker, Klingeman, McLean
-          call prop_get(mor_ptr, 'Morphology', 'ASKLHE', asklhe)
-          if (comparereal(asklhe,rmissval) == 0) then
+        call prop_get(mor_ptr, 'Morphology', 'ASKLHE', morpar%asklhe)
+        if (comparereal(morpar%asklhe,RMISSVAL) == 0) then
              errmsg = 'ASKLHE missing: Alpha exponent for Soehngen et.al. hiding & exposure in file '//trim(filmor)
              call write_error(errmsg, unit=lundia)
              error = .true.
              return
           endif
        case(5) ! Wu, Wang, Jia
-          call prop_get(mor_ptr, 'Morphology', 'MWWJHE', mwwjhe)
-          if (comparereal(mwwjhe,rmissval) == 0) then
+        call prop_get(mor_ptr, 'Morphology', 'MWWJHE', morpar%mwwjhe)
+        if (comparereal(morpar%mwwjhe,RMISSVAL) == 0) then
              errmsg = 'MWWJHE missing: M exponent for Wu, Wang, Jia hiding & exposure in file '//trim(filmor)
              call write_error(errmsg, unit=lundia)
              error = .true.
@@ -710,11 +712,29 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
           endif
        endselect
        !
-       ! MORSYS parameters
-       !
+	   
+end subroutine read_morphology_properties
+
+subroutine read_morsys_parameters(mor_ptr, morpar, filmor, lsec, islope, lundia, error)
+    use tree_data_types
+    use morphology_data_module
+    use properties
+    use message_module
+    implicit none
+    
+    type(tree_data)               , pointer, intent(inout)  :: mor_ptr
+    type(morpar_type)             , pointer, intent(inout)  :: morpar
+    character(len=*)                       , intent(in)     :: filmor
+    integer                                , intent(in)     :: lsec
+    integer                       , pointer, intent(in)     :: islope
+    integer                                , intent(in)     :: lundia  !<  Description and declaration in inout.igs
+    logical                                , intent(out)    :: error  
+    
+    character(256)                                          :: errmsg
+    
        if (lsec > 0) then
           ! factor for spiral flow intensity effect
-          call prop_get(mor_ptr, 'Morphology', 'Espir', espir)
+        call prop_get(mor_ptr, 'Morphology', 'Espir', morpar%espir)
        endif
        call prop_get_integer(mor_ptr, 'Morphology', 'ISlope', islope)
        if (islope < 1 .or. islope > 4) then
@@ -726,18 +746,46 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
        endif
        if (islope == 3) then
           ! bedslope effect parameters
-          call prop_get(mor_ptr, 'Morphology', 'AShld', ashld)
-          call prop_get(mor_ptr, 'Morphology', 'BShld', bshld)
-          call prop_get(mor_ptr, 'Morphology', 'CShld', cshld)
-          call prop_get(mor_ptr, 'Morphology', 'DShld', dshld)
+        call prop_get(mor_ptr, 'Morphology', 'AShld', morpar%ashld)
+        call prop_get(mor_ptr, 'Morphology', 'BShld', morpar%bshld)
+        call prop_get(mor_ptr, 'Morphology', 'CShld', morpar%cshld)
+        call prop_get(mor_ptr, 'Morphology', 'DShld', morpar%dshld)
        elseif (islope == 4) then
-          call prop_get(mor_ptr, 'Morphology', 'CoulFri', coulfri)
-          call prop_get(mor_ptr, 'Morphology', 'FlFdRat', flfdrat)
-          alfpa = coulfri / (1.0 + flfdrat * coulfri)
-          call prop_get(mor_ptr, 'Morphology', 'ThetaCr', thcrpa)
+        call prop_get(mor_ptr, 'Morphology', 'CoulFri', morpar%coulfri)
+        call prop_get(mor_ptr, 'Morphology', 'FlFdRat', morpar%flfdrat)
+        morpar%alfpa = morpar%coulfri / (1.0 + morpar%flfdrat * morpar%coulfri)
+        call prop_get(mor_ptr, 'Morphology', 'ThetaCr', morpar%thcrpa)
        endif
+       
+end subroutine read_morsys_parameters
+
+!> reading boundary conditions
+subroutine read_morphology_boundary_conditions(mor_ptr, morbnd, bcmfilnam, bcmfile, julday, nto, nambnd, filmor, lundia, error)
+    use tree_data_types
+    use tree_structures
+    use morphology_data_module, only: bedbndtype
+    use properties
+    use table_handles
+    use handles
+    use message_module
+    implicit none
+!    
+    type(tree_data)               , pointer, intent(inout)  :: mor_ptr
+    type(bedbndtype), dimension(:), pointer, intent(inout)  :: morbnd
+    character(256)                         , intent(inout)  :: bcmfilnam
+    type(handletype)                       , intent(in)     :: bcmfile
+    integer                                , intent(in)     :: julday
+    integer                                , intent(in)     :: nto
+    character(20) , dimension(nto)         , intent(in)     :: nambnd  !<  Description and declaration in esm_alloc_char.f90
+    character(len=*)                       , intent(in)     :: filmor
+    integer                                , intent(in)     :: lundia  !<  Description and declaration in inout.igs
+    logical                                , intent(out)    :: error
        !
-       ! Boundary conditions
+    character(256)                                          :: errmsg
+    character(80)                                           :: bndname
+    logical                                                 :: found
+    integer                                                 :: i, j
+    type(tree_data)                            , pointer    :: morbound_ptr
        !
        bcmfilnam = ' '
        call prop_get_string(mor_ptr, 'Morphology', 'BcFil', bcmfilnam)
@@ -788,9 +836,23 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
              return
           endif
        enddo
-       !
-       ! Numerical settings
-       !
+       
+end subroutine read_morphology_boundary_conditions
+               
+               
+!> reading numerical setting for rdmor
+subroutine read_morphology_numerical_settings(mor_ptr, mornum)
+    use tree_data_types
+    use morphology_data_module
+    use properties
+
+    implicit none
+    
+    type(tree_data)                , pointer     :: mor_ptr
+    type(mornumericstype)          , pointer     :: mornum
+    
+    character(20)                                :: fluxlimstring
+    
        call prop_get_logical(mor_ptr, 'Numerics', 'Pure1D', mornum%pure1d)
        call prop_get_logical(mor_ptr, 'Numerics', 'UpwindBedload', mornum%upwindbedload)
        call prop_get_logical(mor_ptr, 'Numerics', 'LaterallyAveragedBedload', mornum%laterallyaveragedbedload)
@@ -806,13 +868,36 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
            case default 
                mornum%fluxlim = FLUX_LIMITER_NONE  
            end select
-       !
-       ! Output options
-       !
-       call prop_get_logical(mor_ptr, 'Output', 'Default', ldef, success = found)
-       if (.not.found) call prop_get_logical(mor_ptr, 'Output', 'OutDefault', ldef, success = found) ! backward compatibility
+           
+end subroutine read_morphology_numerical_settings
+
+!> reading output options
+subroutine read_morphology_output_options(mor_ptr, moroutput, lsedtot, filmor, lundia, error)
+    use precision
+    use tree_data_types
+    use morphology_data_module
+    use properties
+    use message_module
+    
+    implicit none
+    
+    type(tree_data)                , pointer     :: mor_ptr
+    type(moroutputtype)            , pointer     :: moroutput
+    integer                        , intent(in)  :: lsedtot !<  Description and declaration in esm_alloc_int.f90
+    character(len=*)               , intent(in)  :: filmor
+    integer                        , intent(in)  :: lundia  !<  Description and declaration in inout.igs
+    logical                        , intent(out) :: error
+    
+    character(256)                               :: string
+    character(256)                               :: errmsg
+    logical                                      :: exist, found, defined
+    integer                                      :: i, iqnt
+    integer                    , dimension(6)    :: stat_flags
+        
+    call prop_get_logical(mor_ptr, 'Output', 'Default', defined, success = found)
+    if (.not.found) call prop_get_logical(mor_ptr, 'Output', 'OutDefault', defined, success = found) ! backward compatibility
        if (found) then
-           call initmoroutput(moroutput, ldef)
+        call initmoroutput(moroutput, defined)
        endif
        call prop_get_logical(mor_ptr, 'Output', 'VelocAtZeta', moroutput%uuuvvv)
        call prop_get_logical(mor_ptr, 'Output', 'VelocMagAtZeta', moroutput%umod)
@@ -873,8 +958,8 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
        !
        call prop_get_logical(mor_ptr, 'Output', 'MainChannelWidthAtFlux'      , moroutput%wumor)
        !
-       call prop_get(mor_ptr,         'Output', 'MorStatsOutputInterval'      , moroutput%avgintv, 3, ex)
-       if (ex) then
+    call prop_get(mor_ptr,         'Output', 'MorStatsOutputInterval'      , moroutput%avgintv, 3, exist)
+    if (exist) then
           moroutput%morstats = .true.    ! only used in FM, separate _sed.nc file
        endif
        if (moroutput%avgintv(2) < 0.0_fp) then
@@ -940,10 +1025,25 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
            moroutput%statflg(:,iqnt) = stat_flags
        enddo
        moroutput%nstatqnt = i
-       !
-       ! Sediment percentiles
-       ! Requested by the user via the .mor attribute file
-       !
+       
+
+end subroutine read_morphology_output_options
+
+!> Sediment percentiles. Requested by the user via the .mor attribute file
+subroutine set_sediment_percentiles(mor_ptr, moroutput, pxxstr)
+    use tree_data_types
+    use morphology_data_module
+    use properties
+    use string_module
+    
+    implicit none
+    
+    type(tree_data)                , pointer, intent(inout)     :: mor_ptr
+    type(moroutputtype)            , pointer, intent(in)        :: moroutput 
+    character(256)                          , intent(inout)     :: pxxstr
+    
+    integer                                                     :: lenc
+        
        pxxstr = ' '
        call prop_get_string(mor_ptr, 'Output', 'Percentiles', pxxstr)
        lenc = 999
@@ -958,9 +1058,33 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
        else
           moroutput%percentiles = .true.
        endif
-       !
-       ! Process string
-       !
+       
+end subroutine set_sediment_percentiles
+
+!> process string
+subroutine read_morphology_process_string(pxxstr, nxxuser, max_nuserfrac, rfield, filmor, lundia, error)
+    use precision
+    use properties
+    use string_module
+    use message_module
+    
+    implicit none
+    
+    character(256)                                  , intent(in)     :: pxxstr
+    integer                                         , intent(inout)  :: nxxuser
+    integer                                         , intent(in)     :: max_nuserfrac
+    real(fp)            , dimension(max_nuserfrac)  , intent(inout)  :: rfield
+    character(len=*)                                , intent(in)     :: filmor
+    integer                                         , intent(in)     :: lundia  !<  Description and declaration in inout.igs
+    logical                                         , intent(out)    :: error
+        
+    integer             , dimension(max_nuserfrac)                   :: itype
+    integer             , dimension(max_nuserfrac)                   :: ifield
+    character(10)       , dimension(max_nuserfrac)                   :: cfield
+    integer             , dimension(max_nuserfrac)                   :: lenchr
+    character(256)                                                   :: errmsg
+    integer                                                          :: i 
+        
        call scannr( pxxstr,       1,      len(pxxstr), nxxuser,   itype, &
                  &  ifield,  rfield,  cfield,  lenchr,  max_nuserfrac,  .true., &
                  & .false., .false.)
@@ -977,61 +1101,27 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
              errmsg = 'Cannot interpret Percentiles string in '//trim(filmor)
              call write_error(errmsg, unit=lundia)
              error = .true.
-             return
-          endif
-       enddo
-    else
-       call remove_leading_spaces(filmor    ,lfile     )
-       !
-       inquire (file = filmor(1:lfile), exist = ex)
-       if (ex) then
-          open (newunit=ilun, file = filmor(1:lfile), form = 'formatted',               &
-              & status = 'old')
-          !
-          version = 0
-          lenc    = 999
-          read (ilun, '(a)') string
-          do while (string(:1) == '*')
-             call str_lower(string, lenc)
-             i = index(string, 'version')
-             if (i /= 0) then
-                read (string(i + 8:), '(i2)') version
+            exit
              endif
-             read (ilun, '(a)') string
           enddo
-          write (versionstring, '(i4)') version
-          !
-          rewind (ilun)
-          call skipstarlines(ilun)
-          !
-          if (version == 0) then
-             call rdmor0(ilun      ,morfac    ,tmor      ,thresh    ,bedupd    , &
-                       & eqmbcsand ,densin    ,aksfac    ,rwave     ,rouse     , &
-                       & alfabs    ,alfabn    ,sus       ,bed       ,susw      , &
-                       & bedw      ,sedthr    ,thetsduni ,hmaxth    ,fwfac     )
-          else
-             call rdmor1(ilun      ,morfac    ,tmor      ,thresh    ,bedupd    , &
-                       & eqmbcsand ,densin    ,aksfac    ,rwave     ,alfabs    , &
-                       & alfabn    ,sus       ,bed       ,susw      ,bedw      , &
-                       & sedthr    ,thetsduni ,hmaxth    ,fwfac     ,epspar    , &
-                       & iopkcw    ,rdc       ,rdw       )
-          endif
-          thetsd = max(0.0_fp,min(thetsduni,1.0_fp)) ! we do not support field entries for thetsd in old formats
-          tcmp = tmor
-          cmpupd = .true.
-          close (ilun)
-       else
-          !
-          ! file not found
-          !
-          call write_error(FILE_NOT_FOUND//trim(filmor), unit=lundia)
-       endif
-    endif
-    !
- 8888 continue
-    !
-    ! Remove double percentiles
-    !
+end subroutine read_morphology_process_string
+
+!> remove double percentiles
+subroutine remove_double_percentiles(morpar, nxxuser, nxxprog, xxprog, max_nuserfrac, rfield)
+    use precision
+    use morphology_data_module
+    implicit none
+    
+    type(morpar_type)                           , pointer, intent(inout)  :: morpar
+    integer                                              , intent(in)     :: nxxuser
+    integer                                              , intent(inout)  :: nxxprog
+    real(fp)                   , dimension(nxxprog)      , intent(inout)  :: xxprog
+    integer                                              , intent(in)     :: max_nuserfrac
+    real(fp)                   , dimension(max_nuserfrac), intent(inout)  :: rfield
+
+
+    integer :: i, j, jj
+
     i = 0
     do while (i < nxxuser)
        i = i+1
@@ -1047,26 +1137,30 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
           endif
        enddo
     enddo
-    nxx = nxxuser + nxxprog
-    !
-    ! allocate memory for percentiles
-    !
-    allocate (morpar%xx(nxx), stat = istat)
-    !
-    if (istat /= 0) then
-       errmsg = 'RDMOR: memory alloc error'
-       call write_error(errmsg, unit=lundia)
-       error = .true.
-       return
-    endif
-    !
-    ! Update local pointer
-    !
-    xx => morpar%xx
-    !
-    ! Copy and sort percentiles
-    !
-    do i = 1, nxx
+    morpar%nxx = nxxuser + nxxprog
+    
+end subroutine remove_double_percentiles
+
+subroutine copy_and_sort_percentiles(morpar, nxxuser, nxxprog, xxprog, max_nuserfrac, rfield, lundia, error)
+    use precision
+    use morphology_data_module
+     use message_module, only: write_error
+    implicit none
+    
+    type(morpar_type)                           , pointer, intent(inout)  :: morpar
+    integer                                              , intent(in)     :: nxxuser
+    integer                                              , intent(inout)  :: nxxprog
+    real(fp)                   , dimension(nxxprog)      , intent(inout)  :: xxprog
+    integer                                              , intent(in)     :: max_nuserfrac
+    real(fp)                   , dimension(max_nuserfrac), intent(inout)  :: rfield
+    integer                                              , intent(in)     :: lundia  !  Description and declaration in inout.igs
+    logical                                              , intent(inout)  :: error
+
+    integer                                                         :: i, j, jmin, ilist
+    real(fp)                                                        :: xxmin
+    character(256)                                                  :: errmsg
+    
+    do i = 1, morpar%nxx
        jmin = -1
        xxmin = 100.0_fp
        ilist = 1
@@ -1091,12 +1185,12 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
           error = .true.
           return
        endif
-       xx(i) = xxmin / 100.0_fp
+       morpar%xx(i) = xxmin / 100.0_fp
        !
-       if (abs(xxmin-10.0_fp) < 0.01_fp) i10 = i
-       if (abs(xxmin-15.0_fp) < 0.01_fp) i15 = i
-       if (abs(xxmin-50.0_fp) < 0.01_fp) i50 = i
-       if (abs(xxmin-90.0_fp) < 0.01_fp) i90 = i
+       if (abs(xxmin-10.0_fp) < 0.01_fp) morpar%i10 = i
+       if (abs(xxmin-15.0_fp) < 0.01_fp) morpar%i15 = i
+       if (abs(xxmin-50.0_fp) < 0.01_fp) morpar%i50 = i
+       if (abs(xxmin-90.0_fp) < 0.01_fp) morpar%i90 = i
        !
        if (ilist == 1) then
           rfield(jmin) = 200.0_fp
@@ -1104,27 +1198,8 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
           xxprog(jmin) = 200.0_fp
        endif
     enddo
-    !
-    if (anymud) then
-       call rdflufflyr(lundia    ,error    ,filmor    ,lsed    , &
-                     & mor_ptr   ,morpar%flufflyr     ,sedpar  , &
-                     & griddim   )
-    endif
-    !
-    call rdmorlyr (lundia    ,error     ,filmor    , &
-                 & nmaxus    ,nto       ,lfbedfrm  , &
-                 & nambnd    ,version   ,lsedtot   ,namsed    , &
-                 & morpar    ,morlyr    ,sedpar    ,mor_ptr   , &
-                 & griddim   )
-    !
-    deallocate(itype)
-    deallocate(ifield)
-    deallocate(lenchr)
-    deallocate(rfield)
-    deallocate(cfield)
-    deallocate(xxprog)
-end subroutine rdmor
 
+end subroutine copy_and_sort_percentiles
 
 !> Reads morphology input version 0 (or no version number found)
 subroutine rdmor0(ilun      ,morfac    ,tmor      ,thresh    ,morupd    , &
@@ -1345,7 +1420,6 @@ subroutine echomor(lundia    ,error     ,lsec      ,lsedtot   ,nto       , &
     real(fp)                               , pointer :: tcmp
     real(fp)              , dimension(:)   , pointer :: thetsd
     real(fp)                               , pointer :: thetsduni
-    real(fp)                               , pointer :: suscorfac
     real(fp)                               , pointer :: susw
     real(fp)                               , pointer :: sedthr
     real(fp)                               , pointer :: hmaxth
@@ -1516,7 +1590,6 @@ subroutine echomor(lundia    ,error     ,lsec      ,lsedtot   ,nto       , &
     eulerisoglm         => morpar%eulerisoglm
     glmisoeuler         => morpar%glmisoeuler
     l_suscor            => morpar%l_suscor
-    suscorfac           => morpar%suscorfac
     flsthetsd           => morpar%flsthetsd
     thetsduni           => morpar%thetsduni
     upwindbedload       => mornum%upwindbedload
@@ -1565,7 +1638,7 @@ subroutine echomor(lundia    ,error     ,lsec      ,lsedtot   ,nto       , &
     endif
     !
     if (cmpupd .and. .not.cmpupdany) then
-    txtput1 = 'Bed level updating  '
+       txtput1 = 'Bed level updating  '
        if (bedupd) write (lundia, '(3a)') txtput1, ':', ' deactivated by CmpUpd = FALSE for all fractions.'
        txtput1 = 'Composition updating'
        write (lundia, '(3a)') txtput1, ':', ' deactivated by CmpUpd = FALSE for all fractions.'
@@ -1696,12 +1769,8 @@ subroutine echomor(lundia    ,error     ,lsec      ,lsedtot   ,nto       , &
              & ' below the reference height aks (SUSCOR)'
     if (l_suscor) then
        if (suscorfac >= 1.0_fp) then
-       txtput2 = '                 YES'
-    else
-          txtput2 = '          YES (___%)'
-          write(txtput2(16:18),'(I3)') int(suscorfac * 100.0_fp)
-       endif
-    else
+          txtput2 = '                 YES'
+       else
        txtput2 = '                  NO'
     endif
     write (lundia, '(3a)') txtput3(1:82), ':', txtput2 
@@ -1846,32 +1915,32 @@ subroutine echomor(lundia    ,error     ,lsec      ,lsedtot   ,nto       , &
     endif
     write (lundia, '(3a)') txtput1, ':', txtput2 
     !
-    if (bermslopetransport) then
+    if (morpar%bermslopetransport) then
        txtput1 = 'Berm slope adjustment mechanism activated'
        txtput2 = '                 YES'
        write (lundia, '(3a)') txtput1,':', txtput2
        txtput1 = 'Berm slope adjustment for bedload'
-       if (bermslopebed) then
+       if (morpar%bermslopebed) then
           txtput2 = '                 YES'
        else
           txtput2 = '                  NO'
        endif       
        write (lundia, '(3a)') txtput1,':', txtput2
        txtput1 = 'Berm slope adjustment for suspended load'
-       if (bermslopesus) then
+       if (morpar%bermslopesus) then
           txtput2 = '                 YES'
        else
           txtput2 = '                  NO'
        endif       
        write (lundia, '(3a)') txtput1,':', txtput2
        txtput1 = '   Equilibrium slope'
-       write (lundia, '(2a,f20.4)') txtput1, ':', bermslope
+       write (lundia, '(2a,f20.4)') txtput1, ':', morpar%bermslope
        txtput1 = '   Transport proportionality factor'
-       write (lundia, '(2a,f20.4)') txtput1, ':', bermslopefac
+       write (lundia, '(2a,f20.4)') txtput1, ':', morpar%bermslopefac
        txtput1 = '   Breaker index to activate cells'
-       write (lundia, '(2a,f20.4)') txtput1, ':', bermslopegamma
+       write (lundia, '(2a,f20.4)') txtput1, ':', morpar%bermslopegamma
        txtput1 = '   Depth limit to activate cells'
-       write (lundia, '(2a,f20.4)') txtput1, ':', bermslopedepth 
+       write (lundia, '(2a,f20.4)') txtput1, ':', morpar%bermslopedepth 
     endif
     !
     ! User requested sediment percentiles

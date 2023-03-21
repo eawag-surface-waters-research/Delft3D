@@ -24,8 +24,7 @@
 // Stichting Deltares. All rights reserved.
 //
 //------------------------------------------------------------------------------
-// $Id: nef-def.h 1180 2012-01-13 17:05:48Z mourits $
-// $HeadURL: https://svn.oss.deltares.nl/repos/delft3d/trunk/src/utils_lgpl/nefis/packages/nefis/include/nef-def.h $
+
 #ifndef __NEFIS_DEF__
 #define __NEFIS_DEF__
 

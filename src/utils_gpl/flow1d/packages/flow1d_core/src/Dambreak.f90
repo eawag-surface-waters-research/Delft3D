@@ -50,7 +50,6 @@
       double precision :: f2
       double precision :: ucrit
       double precision :: t0
-      integer          :: hasTable       
       integer          :: materialtype                      =  1 !for algorithm 1, default matrerial type is clay
       double precision :: endTimeFirstPhase
       double precision :: breachWidthDerivative             = -1.0d0

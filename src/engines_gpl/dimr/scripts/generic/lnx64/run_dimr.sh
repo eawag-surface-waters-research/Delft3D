@@ -9,7 +9,7 @@
     # Usage example:
     # Execute in the working directory:
     # /path/to/delft3d/installation/lnx64/bin/run_dimr.sh
-    # More examples: check run scripts in https://svn.oss.deltares.nl/repos/delft3d/trunk/examples/*
+    # More examples: check run scripts in https://git.deltares.nl/oss/delft3d/-/tree/main/examples/*
 
 function print_usage_info {
     echo "Usage: ${0##*/} [OPTION]..."
@@ -103,7 +103,7 @@ case $key in
 esac
 done
 
-# Check configfile    
+# Check configfile
 if [ ! -f $configfile ]; then
     echo "ERROR: configfile $configfile does not exist"
     print_usage_info
@@ -116,11 +116,11 @@ else
     debugarg="-d $debuglevel"
 fi
 
-if [ -z ${OMP_NUM_THREADS+x} ]; then 
+if [ -z ${OMP_NUM_THREADS+x} ]; then
     # If OMP_NUM_THREADS is not already defined:
     # Since OMP_NUM_THREADS is advised to be 1, don't do any smart setting, just set it to 1
       # Optionally: set the number of OpenMP threads equal to max(2,NumberOfPhysicalCores-2)
-      # export NumberOfPhysicalCores=`cat /proc/cpuinfo | grep "cpu cores" | uniq | awk -F: '{print $2}'` 
+      # export NumberOfPhysicalCores=`cat /proc/cpuinfo | grep "cpu cores" | uniq | awk -F: '{print $2}'`
       # export OMP_NUM_THREADS=`expr $NumberOfPhysicalCores - 2`
       # if [ $OMP_NUM_THREADS -lt 2 ]; then
       #     export OMP_NUM_THREADS=2
@@ -130,7 +130,7 @@ else
     echo "OMP_NUM_THREADS is already defined"
 fi
 
-export NSLOTS=`expr $NNODES \* $corespernode` 
+export NSLOTS=`expr $NNODES \* $corespernode`
 
 workdir=`pwd`
 
@@ -277,7 +277,7 @@ if [ $? -eq 0 ]; then
             else
                 echo "option --cleanup is active, script $cleanupfile is executed now"
                 . $cleanupfile
-            fi 
+            fi
         fi
     fi
 fi

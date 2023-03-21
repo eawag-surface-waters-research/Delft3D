@@ -51,6 +51,7 @@ use io_ugrid
 use m_sediment
 use string_module
 use io_netcdf_acdd
+use time_module
 use m_debug
 
 implicit none
@@ -4026,7 +4027,7 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
     ! Write the data: tau current
     if (jawave ==0) then   ! Else, get taus from subroutine tauwave (taus = taucur + tauwave). Bas; Mind for jawind!
         call gettaus(1,1)                    
-    elseif (jamapchezy > 0) then
+    else if (jamap_chezy_links > 0) then
         call gettaus(2,1)
     endif
     !
@@ -4037,7 +4038,7 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
     if(jamaptaucurrent > 0) then
         ierr = nf90_put_var(irstfile, id_taus, taus,  (/ 1, itim /), (/ ndxi, 1 /))
     endif
-    if(jamapchezy > 0) then
+    if( jamap_chezy_elements > 0 ) then
         ierr = nf90_put_var(irstfile, id_czs, czs,  (/ 1, itim /), (/ ndxi, 1 /))
     endif
 
@@ -5226,10 +5227,14 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
 
       ! Chezy data on flow nodes and flow links
       ! Input roughness value and type on flow links for input check (note: overwritten when jatrt==1)
-      if (jamapchezy > 0) then
+      if (jamap_chezy_elements > 0) then
             ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp  , mapids%id_czs , nf90_double, UNC_LOC_S, 'czs'  , '', 'Chezy roughness in flow element center', 'm0.5s-1', jabndnd=jabndnd_)
             ! WO: m0.5s-1 does not follow standard ? (which accepts only integral powers?)
+      end if
+      if (jamap_chezy_links > 0) then
             ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp  , mapids%id_czu , nf90_double, UNC_LOC_U, 'czu'  , '', 'Chezy roughness on flow links', 'm0.5s-1', jabndnd=jabndnd_)
+      end if
+      if (jamap_chezy_input > 0) then
             ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp  , mapids%id_cfu , nf90_double, UNC_LOC_U, 'cfu'  , '', 'Input roughness on flow links', '-', jabndnd=jabndnd_)
             ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp  , mapids%id_cfutyp , nf90_int, UNC_LOC_U, 'cfutyp'  , '', 'Input roughness type on flow links', '-', jabndnd=jabndnd_)
       endif
@@ -6020,7 +6025,7 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
          endif
       endif
 
-      if (timon) call timstop (handle_extra(71))
+   if (timon) call timstop (handle_extra(71))
 
    endif
    ! End of writing time-independent flow geometry data.
@@ -7215,7 +7220,7 @@ if (jamapsed > 0 .and. jased > 0 .and. stm_included) then
    !        * 2: taus = sedtra%taub if sediment included, otherwise based on taubxu from wave shear stress subroutines
  
    !
-   if (jamaptaucurrent > 0 .or. jamapchezy > 0) then
+   if (jamaptaucurrent > 0 .or. jamap_chezy_elements > 0 .or. jamap_chezy_links > 0 ) then
       if (jawave==0) then        ! Else, get taus from subroutine tauwave (taus = f(taucur,tauwave))
          call gettaus(1,1)       
          workx=DMISS; worky=DMISS
@@ -7233,7 +7238,7 @@ if (jamapsed > 0 .and. jased > 0 .and. stm_included) then
                worky(k) = taus(k)*uy/um   
             enddo
          endif
-      else if (jamapchezy > 0) then
+      else if (jamap_chezy_links > 0) then
          call gettaus(2,1)       ! Only update czs
       end if
       
@@ -7242,7 +7247,7 @@ if (jamapsed > 0 .and. jased > 0 .and. stm_included) then
       endif   
    end if
 
-   if (jamapchezy > 0) then
+   if (jamap_chezy_links > 0) then
       do LL = 1,lnx
          if (frcu(LL) > 0d0) then
             call getcz (hu(LL), frcu(LL), ifrcutp(LL), czu(LL), LL)  ! in gettaus czu is calculated but not stored
@@ -7283,9 +7288,13 @@ if (jamapsed > 0 .and. jased > 0 .and. stm_included) then
    end if
        
    
-   if (jamapchezy > 0) then
+   if (jamap_chezy_elements > 0) then
       ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_czs , UNC_LOC_S, czs, jabndnd=jabndnd_)
+   end if
+   if (jamap_chezy_links > 0) then
       ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_czu , UNC_LOC_U, czu, jabndnd=jabndnd_)
+   end if
+   if (jamap_chezy_input > 0) then
       ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_cfu , UNC_LOC_U, frcu, jabndnd=jabndnd_)
       ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_cfutyp , UNC_LOC_U, ifrcutp, jabndnd=jabndnd_)
    end if
@@ -7299,7 +7308,7 @@ if (jamapsed > 0 .and. jased > 0 .and. stm_included) then
    if (jamapcali > 0 .and. jacali == 1) then
       ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_cfcl, UNC_LOC_L, cfclval, jabndnd=jabndnd_)
    end if
-
+   
    ! JRE debug variables
    if (jawritedebug) then
       ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_dbg1d, UNC_LOC_U, debugarr1d(1:lnx), jabndnd=jabndnd_)
@@ -8600,21 +8609,21 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
              ierr = nf90_put_att(imapfile, id_sigmwav(iid),   'long_name'    , 'mean wave frequency')
              ierr = nf90_put_att(imapfile, id_sigmwav(iid),   'units'        , 'rad s-1')
 
-             !if ( (windmodel.eq.1) .and. (jawsource.eq.1) ) then
-             !
-             !   ierr = nf90_def_var(imapfile, 'SwE',  nf90_double, (/ id_flowelemdim(iid), id_timedim(iid) /) , id_SwE(iid))
-             !   ierr = nf90_put_att(imapfile, id_SwE(iid),   'coordinates'  , 'FlowElem_xcc FlowElem_ycc')
-             !   ierr = nf90_put_att(imapfile, id_SwE(iid),   'standard_name', 'source_term_wind_on_E')                          ! not CF
-             !   ierr = nf90_put_att(imapfile, id_SwE(iid),   'long_name'    , 'source term wind on wave energy')
-             !   ierr = nf90_put_att(imapfile, id_SwE(iid),   'units'        , 'J m-2 s-1')
-             !
-             !   ierr = nf90_def_var(imapfile, 'SwT',  nf90_double, (/ id_flowelemdim(iid), id_timedim(iid) /) , id_SwT(iid))
-             !   ierr = nf90_put_att(imapfile, id_SwT(iid),   'coordinates'  , 'FlowElem_xcc FlowElem_ycc')
-             !   ierr = nf90_put_att(imapfile, id_SwT(iid),   'standard_name', 'source_term_wind_on_T')                          ! not CF
-             !   ierr = nf90_put_att(imapfile, id_SwT(iid),   'long_name'    , 'source term wind on wave period')
-             !   ierr = nf90_put_att(imapfile, id_SwT(iid),   'units'        , 's s-1')
-             !
-             !endif
+             if ( (windmodel.eq.1) .and. (jawsource.eq.1) ) then
+
+                ierr = nf90_def_var(imapfile, 'SwE',  nf90_double, (/ id_flowelemdim(iid), id_timedim(iid) /) , id_SwE(iid))
+                ierr = nf90_put_att(imapfile, id_SwE(iid),   'coordinates'  , 'FlowElem_xcc FlowElem_ycc')
+                ierr = nf90_put_att(imapfile, id_SwE(iid),   'standard_name', 'source_term_wind_on_E')                          ! not CF
+                ierr = nf90_put_att(imapfile, id_SwE(iid),   'long_name'    , 'source term wind on wave energy')
+                ierr = nf90_put_att(imapfile, id_SwE(iid),   'units'        , 'J m-2 s-1')
+
+                ierr = nf90_def_var(imapfile, 'SwT',  nf90_double, (/ id_flowelemdim(iid), id_timedim(iid) /) , id_SwT(iid))
+                ierr = nf90_put_att(imapfile, id_SwT(iid),   'coordinates'  , 'FlowElem_xcc FlowElem_ycc')
+                ierr = nf90_put_att(imapfile, id_SwT(iid),   'standard_name', 'source_term_wind_on_T')                          ! not CF
+                ierr = nf90_put_att(imapfile, id_SwT(iid),   'long_name'    , 'source term wind on wave period')
+                ierr = nf90_put_att(imapfile, id_SwT(iid),   'units'        , 's s-1')
+
+             endif
            endif
 
            if ( NUMCONST.eq.0 ) then
@@ -8657,12 +8666,14 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
                ierr = nf90_put_att(imapfile, id_cfcl(iid),'units'        , ' ')
            endif
 
-           if (jamapchezy > 0) then
+           if (jamap_chezy_elements > 0) then
                ! Chezy data on flow-nodes
                ierr = nf90_def_var(imapfile, 'czs' , nf90_double, (/ id_flowelemdim(iid), id_timedim(iid) /) , id_czs(iid))
                ierr = nf90_put_att(imapfile, id_czs(iid),'long_name'    , 'Chezy roughness')
                ierr = nf90_put_att(imapfile, id_czs(iid),'coordinates'  , 'FlowElem_xcc FlowElem_ycc')
                ierr = nf90_put_att(imapfile, id_czs(iid),'units'        , 'm0.5s-1')                ! WO: does not follow standard ? (which accepts only integral powers?)
+           end if 
+           if (jamap_chezy_links > 0) then
                ! Chezy data on flow-links
                ierr = nf90_def_var(imapfile, 'czu' , nf90_double, (/ id_flowlinkdim(iid), id_timedim(iid) /) , id_czu(iid))
                ierr = nf90_put_att(imapfile, id_czu(iid),'long_name'    , 'Chezy roughness on flow links')
@@ -9302,10 +9313,10 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
            ierr = nf90_put_var(imapfile, id_hs(iid),  hs,   (/ 1, itim /), (/ ndxndxi, 1 /))
         endif
        ! Tau current and chezy roughness
-       if (jamaptaucurrent > 0 .or. jamapchezy > 0) then
+       if (jamaptaucurrent > 0 .or. jamap_chezy_elements > 0 .or. jamap_chezy_links > 0) then
           if (jawave==0) then       ! Else, get taus from subroutine tauwave (taus = f(taucur,tauwave))
              call gettaus(1,1)       ! Update taus and czs    
-          elseif (jamapchezy > 0) then
+          else if (jamap_chezy_links > 0) then
              call gettaus(2,1)       ! Only update czs 
           endif
           if (jawave>0 .and. .not. flowWithoutWaves) then
@@ -9313,7 +9324,7 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
           endif
        endif
        !
-       if (jamapchezy > 0) then
+       if (jamap_chezy_links > 0) then
           do LL = 1,lnx
              if (frcu(LL) > 0d0) then
                 call getcz (hu(LL), frcu(LL), ifrcutp(LL), czu(LL), LL)
@@ -9325,8 +9336,10 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
            ierr = nf90_put_var(imapfile, id_taus(iid), taus,  (/ 1, itim /), (/ ndxndxi, 1 /))
        endif
        !
-       if (jamapchezy > 0) then
+       if (jamap_chezy_elements > 0) then
            ierr = nf90_put_var(imapfile, id_czs(iid), czs,  (/ 1, itim /), (/ ndxndxi, 1 /))
+       end if
+       if (jamap_chezy_links > 0) then
            ierr = nf90_put_var(imapfile, id_czu(iid), czu,  (/ 1, itim /), (/ lnx, 1 /))
        endif
 
@@ -12390,6 +12403,7 @@ end function get_var_and_shift
 !! Processing is done elsewhere.
 !subroutine unc_read_map(filename, numk_keep, numl_keep, numk_read, numl_read, ierr)
 subroutine unc_read_map_or_rst(filename, ierr)
+    use time_module, only :  datetimestring_to_seconds, seconds_to_datetimestring
     use m_flow
     use m_flowtimes
     use m_transport, only: NUMCONST, ISALT, ITEMP, ISED1, ISEDN, ITRA1, ITRAN, constituents, itrac2const, const_names

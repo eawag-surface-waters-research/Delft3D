@@ -67,7 +67,9 @@
  use m_sedtrails_network
  use m_sedtrails_netcdf, only: sedtrails_loadNetwork
  use m_sedtrails_stats, only: default_sedtrails_stats, alloc_sedtrails_stats
+ use unstruc_display, only : ntek, jaGUI
  use m_debug
+ 
  !
  ! To raise floating-point invalid, divide-by-zero, and overflow exceptions:
  ! Activate the following line (See also statements below)
@@ -116,6 +118,10 @@
  call reset_waq()
 
  call timstop(handle_extra(1)) ! End basic steps
+
+ if (jagui == 1) then 
+    call timini()  ! this seems to work, initimer and timini pretty near to each other 
+ endif
 
 ! JRE
  if (jawave == 4) then
@@ -262,7 +268,9 @@
  end if
  call timstop(handle_extra(12)) ! vertical administration
 
+#ifdef _OPENMP
  ierr = init_openmp(md_numthreads, jampi)
+#endif
 
  call timstrt('Net link tree 0     ', handle_extra(13)) ! netlink tree 0
  if ((jatrt == 1) .or. (jacali == 1)) then
@@ -377,11 +385,11 @@
     if (jampi==0) then
        if (nwbnd==0) then
           call mess(LEVEL_ERROR, 'unstruc::flow_modelinit - No wave boundary defined for surfbeat model. Do you use the correct ext file?')
-       end if
-    endif
-   call xbeach_wave_init()
-   call timstop(handle_extra(27))
- endif
+             end if
+          endif
+    call xbeach_wave_init()
+    call timstop(handle_extra(27))
+       endif
 
  call timstrt('Observations init 2 ', handle_extra(28)) ! observations init 2
  call flow_obsinit()                                 ! initialise stations and cross sections on flow grid + structure his (2nd time required to fill values in observation stations)

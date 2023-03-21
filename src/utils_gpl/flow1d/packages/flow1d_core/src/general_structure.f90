@@ -919,7 +919,6 @@ contains
                        flowDir, hu, hd, velhght, zs, ds, dg, dc, wstr,&
                        cwfa, cwd, mugfa, cgfa, cgda, dx_struc, lambda, Cz)
       use m_GlobalParameters
-      use m_Weir
       implicit none
       !
       ! Local parameters
