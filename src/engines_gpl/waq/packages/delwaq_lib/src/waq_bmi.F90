@@ -122,7 +122,7 @@ contains
     integer                          :: iarg
     integer                          :: errorcode
 
-    ! do not use stop, but exception when used trough bmi
+    ! do not use stop, but exception when used through bmi
     useexception_waq = .true.
     useexception_part = .true.
 
