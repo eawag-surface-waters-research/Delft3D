@@ -17,7 +17,8 @@ add_library(${library_name} ${source_files})
 set(oss_dependencies_general deltares_common
                              part_data_f
                              io_netcdf
-                             io_hyd)
+                             io_hyd
+                             waq_utils_f)
 # Add dependencies
 if (UNIX)
     # the `pkg_check_modules` function is created with this call
