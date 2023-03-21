@@ -599,7 +599,7 @@ subroutine DioGetVersion(retVal)
 
     ! body
     retVal = ' '
-    call getfullversionstring_delftio(retval)
+    call getfullversionstring_delwaq(retval)
 
 end subroutine DioGetVersion
 
@@ -614,7 +614,7 @@ subroutine DioGetIdent(retVal)
 
     ! body
     retVal = ' '
-    call getfullversionstring_delftio(retval)
+    call getfullversionstring_delwaq(retval)
 
 end subroutine DioGetIdent
 

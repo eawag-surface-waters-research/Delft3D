@@ -21,7 +21,8 @@ set_target_properties(${library_name} PROPERTIES COMPILE_OPTIONS "${file_preproc
 
 # Set dependencies
 set(oss_dependencies    deltares_common
-                        deltares_common_c)
+                        deltares_common_c
+                        waq_utils_f)
 oss_include_libraries(${library_name} oss_dependencies)
 
 if(UNIX)

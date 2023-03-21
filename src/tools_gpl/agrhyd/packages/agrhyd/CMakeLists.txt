@@ -11,8 +11,6 @@ set(rc_version_file ${waq_version_path}/version_number_agrhyd.rc)
 set(version_include_dir ${CMAKE_SOURCE_DIR}/../version_includes)
 
 
-
-
 # Set source directory
 set(src_path src)
 
@@ -22,6 +20,7 @@ get_fortran_source_files(${src_path} source_files)
 # Define executable
 set(executable_name agrhyd)
 add_executable(${executable_name} ${source_files}
+                                  ${rc_version_file}
                                   ${fortran_version_file_delwaq})
 
 
@@ -31,6 +30,7 @@ set_source_files_properties(${fortran_version_file} ${fortran_version_file_delwa
 
 
 # Add dependencies
+target_include_directories(${executable_name} PRIVATE ${waq_data_path} ${version_include_dir})
 if (UNIX)
     # the `pkg_check_modules` function is created with this call
     find_package(PkgConfig REQUIRED)
