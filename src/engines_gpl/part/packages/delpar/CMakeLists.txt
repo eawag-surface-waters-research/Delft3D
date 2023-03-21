@@ -9,8 +9,6 @@ set(waq_version_path ${waq_root_path}/version)
 set(fortran_version_file_delwaq ${waq_root_path}/packages/waq_utils_f/src/waq_utils/delwaq_version.F90)
 set(rc_version_file ${waq_version_path}/version_number_delpar.rc)
 set(version_include_dir ${CMAKE_SOURCE_DIR}/../version_includes)
-message("QQQ1", ${CMAKE_SOURCE_DIR})
-message("QQQ2", ${version_include_dir})
 
 
 # Set icon file
