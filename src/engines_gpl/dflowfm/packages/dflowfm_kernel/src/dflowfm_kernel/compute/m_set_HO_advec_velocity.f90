@@ -41,7 +41,7 @@
    ds2x =  ucx(kd) - ucx(k)
    ds2y =  ucy(kd) - ucy(k)
 
-   call dslimvec(ds1x, ds1y, ds2x, ds2y, csu(L), snu(L), limtypmom, dsx, dsy)
+   call dslimvec(ds1x, ds1y, ds2x, ds2y, csu(LL), snu(LL), limtypmom, dsx, dsy)
    ucxu = ucxu + cf*dsx
    ucyu = ucyu + cf*dsy
 
@@ -89,21 +89,20 @@
    ds2x =  nod2linx(LL,3-n12,ucx(kd),ucy(kd)) - nod2linx(LL,n12,ucx(k),ucy(k))
    ds2y =  nod2liny(LL,3-n12,ucx(kd),ucy(kd)) - nod2liny(LL,n12,ucx(k),ucy(k))
 
-   call dslimvec(ds1x, ds1y, ds2x, ds2y, csu(L), snu(L), limtypmom, dsx, dsy)
+   call dslimvec(ds1x, ds1y, ds2x, ds2y, csu(LL), snu(LL), limtypmom, dsx, dsy)
    ucxu = ucxu + cf*dsx
    ucyu = ucyu + cf*dsy
 
    end subroutine
    
-   !> calculate parameters when QA(L) < 0, JAsfer3D = 0
+   !> calculates parameters when QA(L) < 0, JAsfer3D = 0
    elemental subroutine setHOAvelocity_neg(ucxu, ucyu, L, LL, Lb)
 
    use m_flowgeom
    use m_flow, only: limtypmom, qa, kmx, kbot, kmxn, kmxl, ktop, hs, chkadvd, ducxdx, ducxdy, ducydx, ducydy, u1, ucx, ucy, u1
-   !use m_sferic, only: jasfer3D
    implicit none
 
-   integer, intent(in)             :: L, LL, Lb    !> Flowlink numbers, main link, 3D link and bottom link respectively
+   integer, intent(in)             :: L, LL, Lb    !> Flowlink numbers, 3D link, main link, and bottom link respectively
    double precision, intent(inout) :: ucxu, ucyu   !> HOA velocities that need to be calculated
 
    integer                    :: k1, k2, k, kd, is, n12, ib, kku, ku2, ku, kkua, kkub
@@ -135,12 +134,11 @@
 
    end subroutine
    
-   !> calculate parameters when QA(L) > 0, JAsfer3D = 0
+   !> calculates parameters when QA(L) > 0, JAsfer3D = 0
    elemental subroutine setHOAvelocity_pos(ucxu, ucyu, L, LL, Lb)
 
    use m_flowgeom
    use m_flow, only: limtypmom, qa, kmx, kbot, kmxn, kmxl, ktop, hs, chkadvd, ducxdx, ducxdy, ducydx, ducydy, u1, ucx, ucy, u1
-   !use m_sferic, only: Jasfer3D
    implicit none
 
    integer, intent(in)             :: L, LL, Lb    !> Flowlink numbers, main link, 3D link and bottom link respectively
@@ -172,16 +170,10 @@
    if (kku == 0 .or. (kku > 0 .and. ku2 == 0)) return
 
    call setHOAvelocity(ucxu, ucyu, L, LL, Lb, k, kd, is, n12, ib, half, sl1, sl2, sl3, kku, ku2, ku)
-   
-   !if(jasfer3D == 0) then
-   !   call setHOAvelocity(ucxu, ucyu, L, LL, Lb, k, kd, is, n12, ib, half, sl1, sl2, sl3, kku, ku2, ku)
-   !else
-   !   call setHOAvelocity_jasfer3D(ucxu, ucyu, L, LL, Lb, k, kd, is, n12, ib, half, sl1, sl2, sl3, kku, ku2, ku)
-   !endif
 
    end subroutine
 
-   !> calculate parameters when QA(L) < 0, JAsfer3D = 1
+   !> calculates parameters when QA(L) < 0, JAsfer3D = 1
    elemental subroutine setHOAvelocity_neg_jasfer3D(ucxu, ucyu, L, LL, Lb)
 
    use m_flowgeom
@@ -220,7 +212,7 @@
 
    end subroutine
 
-   !> calculate parameters when QA(L) > 0, JAsfer3D = 1
+   !> calculates parameters when QA(L) > 0, JAsfer3D = 1
    elemental subroutine setHOAvelocity_pos_jasfer3D(ucxu, ucyu, L, LL, Lb)
 
    use m_flowgeom

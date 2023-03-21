@@ -82,40 +82,36 @@
    else
       if (jasfer3D == 0) then
          !$OMP PARALLEL DO PRIVATE(LL, Lb, Lt)
-         do L  = 1,lnx                                                    ! upwind (supq) + limited high order (dsq)
-            if (qa(L) .ne. 0d0) then
-               call getLbotLtop(L,Lb,Lt)
-               do LL = Lb,Lt
-                  if ((limtypmom == 6 .and. klnup(1,LL).eq.0) .or. hs(ln(1,LL)) < Chkadvd .or. hs(ln(2,LL)) < Chkadvd) then
-                     cycle
+         do LL  = 1,lnx                                                    ! upwind (supq) + limited high order (dsq)
+            if ((limtypmom == 6 .and. klnup(1,LL).eq.0) .or. hs(ln(1,LL)) < Chkadvd .or. hs(ln(2,LL)) < Chkadvd) then
+               cycle
+            else
+               call getLbotLtop(LL,Lb,Lt)
+               do L = Lb,Lt
+                  if (qa (L) > 0) then
+                     call setHOAvelocity_pos(ucxu(L), ucyu(L), L, LL, Lb)
                   else
-                     if (qa (LL) > 0) then
-                        call setHOAvelocity_pos(ucxu(LL), ucyu(LL), L, LL, Lb)
-                     else
-                        call setHOAvelocity_neg(ucxu(LL), ucyu(LL), L, LL, Lb)
-                     endif
+                     call setHOAvelocity_neg(ucxu(L), ucyu(L), L, LL, Lb)
                   endif
-               enddo
-            endif
+               endif
+            enddo
          enddo  ! horizontal
          !$OMP END PARALLEL DO
       else
          !$OMP PARALLEL DO PRIVATE(LL, Lb, Lt)
-         do L  = 1,lnx                                                    ! upwind (supq) + limited high order (dsq)
-            if (qa(L) .ne. 0d0) then
-               call getLbotLtop(L,Lb,Lt)
-               do LL = Lb,Lt
-                  if ((limtypmom == 6 .and. klnup(1,LL).eq.0) .or. hs(ln(1,LL)) < Chkadvd .or. hs(ln(2,LL)) < Chkadvd) then
-                     cycle
+         do LL  = 1,lnx                                                    ! upwind (supq) + limited high order (dsq)
+            if ((limtypmom == 6 .and. klnup(1,LL).eq.0) .or. hs(ln(1,LL)) < Chkadvd .or. hs(ln(2,LL)) < Chkadvd) then
+               cycle
+            else
+               call getLbotLtop(LL,Lb,Lt)
+               do L = Lb,Lt
+                  if (qa (L) > 0) then
+                     call setHOAvelocity_pos_Jasfer3D(ucxu(L), ucyu(L), L, LL, Lb)
                   else
-                     if (qa (LL) > 0) then
-                        call setHOAvelocity_pos_Jasfer3D(ucxu(LL), ucyu(LL), L, LL, Lb)
-                     else
-                        call setHOAvelocity_neg_Jasfer3D(ucxu(LL), ucyu(LL), L, LL, Lb)
-                     endif
+                     call setHOAvelocity_neg_Jasfer3D(ucxu(L), ucyu(L), L, LL, Lb)
                   endif
-               enddo
-            endif
+               endif
+            enddo
          enddo  ! horizontal
          !$OMP END PARALLEL DO
       endif
