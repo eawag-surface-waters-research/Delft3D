@@ -534,6 +534,13 @@ subroutine read_morphology_properties(mor_ptr, morpar, griddim, filmor, fmttmp, 
     ! === flag for correction of doublecounting sus/bed transport below aks
     !
     call prop_get(mor_ptr, 'Morphology', 'SusCor', morpar%l_suscor)
+    if (morpar%l_suscor) then
+       call prop_get(mor_ptr, 'Morphology', 'SusCorFac', morpar%suscorfac)
+       morpar%suscorfac = max(0.0_fp, min(morpar%suscorfac, 1.0_fp))
+       if (morpar%suscorfac <= 0.0_fp) morpar%l_suscor = .FALSE.
+    else
+       morpar%suscorfac = 0.0_fp
+    end if
     !
     ! === phase lead for bed shear stress of Nielsen (1992) in TR2004
     !
@@ -1321,6 +1328,7 @@ subroutine echomor(lundia    ,error     ,lsec      ,lsedtot   ,nto       , &
     real(fp)                               , pointer :: tcmp
     real(fp)              , dimension(:)   , pointer :: thetsd
     real(fp)                               , pointer :: thetsduni
+    real(fp)                               , pointer :: suscorfac
     real(fp)                               , pointer :: susw
     real(fp)                               , pointer :: sedthr
     real(fp)                               , pointer :: hmaxth
@@ -1486,6 +1494,7 @@ subroutine echomor(lundia    ,error     ,lsec      ,lsedtot   ,nto       , &
     l_suscor            => morpar%l_suscor
     flsthetsd           => morpar%flsthetsd
     thetsduni           => morpar%thetsduni
+    suscorfac           => morpar%suscorfac
     upwindbedload       => mornum%upwindbedload
     pure1d_mor          => mornum%pure1d
     !
@@ -1655,7 +1664,12 @@ subroutine echomor(lundia    ,error     ,lsec      ,lsedtot   ,nto       , &
     txtput3 = 'Correct 3D suspended load for doublecounting' //       &
              & ' below the reference height aks (SUSCOR)'
     if (l_suscor) then
-       txtput2 = '                 YES'
+       if (suscorfac >= 1.0_fp) then
+          txtput2 = '                 YES'
+       else
+          txtput2 = '          YES (___%)'
+          write(txtput2(16:18),'(I3)') int(suscorfac * 100.0_fp)
+       end if
     else
        txtput2 = '                  NO'
     end if
@@ -2254,7 +2268,7 @@ subroutine rdflufflyr(lundia   ,error    ,filmor   ,lsed     ,mor_ptr ,flufflyr,
         do l = 2, lsed
             depfac(l,:) = depfac(1,:)
         enddo 
-    end if                                                                                                                                                         
+    end if
 end subroutine rdflufflyr
 
 
