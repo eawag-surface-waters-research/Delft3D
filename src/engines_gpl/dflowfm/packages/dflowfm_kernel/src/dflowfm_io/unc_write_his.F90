@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> Write history data in NetCDF format.
 subroutine unc_write_his(tim)            ! wrihis

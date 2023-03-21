@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       SUBROUTINE MAPPROJECTIONS(IT,JA)
       USE M_MAPPROPARAMETERS

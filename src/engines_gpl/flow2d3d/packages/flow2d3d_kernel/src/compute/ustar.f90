@@ -26,8 +26,8 @@ subroutine ustar(s         ,uz        ,dz        ,zro       ,iro       , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Computes shear velocity

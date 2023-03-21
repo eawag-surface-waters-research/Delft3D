@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> Store the model bounding box coordinates to quickly present this model's extent.
 !! If applicable, also geospatial bounds with lat+_lon values can be set.

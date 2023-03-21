@@ -27,8 +27,8 @@ subroutine chktra(lundia    ,error     ,nmax      ,mmax      ,ittdef    , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 ! - Checks used trachytopes are available in
 ! trachytope definitions.

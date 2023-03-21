@@ -27,8 +27,8 @@ subroutine wangp1(s1        ,kcs       ,irocol    ,norow     ,icx       , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: WANGP1 performs step 1 of the so-called

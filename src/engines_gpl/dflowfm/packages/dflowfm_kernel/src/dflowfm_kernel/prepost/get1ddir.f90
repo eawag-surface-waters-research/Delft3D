@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  !> Gets the tangential direction vector for a 1D flow node,
  !! based on direction of the last regular 1D link connected to it.

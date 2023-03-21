@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> generate curvi-linear grid from net, growing from (xp,yp)
 subroutine netw2curv(xp,yp)

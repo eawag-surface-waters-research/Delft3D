@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  subroutine reathd2pli(mthd, mout)   ! convert d3d obs file to model independent
  use m_grid

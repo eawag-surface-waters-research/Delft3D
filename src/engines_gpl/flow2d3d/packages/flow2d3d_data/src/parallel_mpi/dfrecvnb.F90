@@ -28,8 +28,8 @@ subroutine dfrecvnb ( iptr, ilen, itype, isource, itag, gdp )
 !  Stichting Deltares. All rights reserved.
 !
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !   Data is received from a neighbour

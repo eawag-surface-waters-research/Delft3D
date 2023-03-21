@@ -25,8 +25,8 @@ subroutine rdmud(lunmd     ,lundia    ,error     ,nrrec     ,gdp       )
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: - Reads parameters Fluid Mud model.

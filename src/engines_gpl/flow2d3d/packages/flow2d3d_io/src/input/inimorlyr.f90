@@ -26,8 +26,8 @@ subroutine inimorlyr(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
 !  Stichting Deltares. All rights reserved.
 !
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: - Initialisation underlayer bookkeeping system

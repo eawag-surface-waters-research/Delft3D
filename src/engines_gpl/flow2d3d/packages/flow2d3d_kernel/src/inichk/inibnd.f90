@@ -26,8 +26,8 @@ subroutine inibnd(lundia    ,error      ,nto       ,nopest    ,nrob      , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: - Fills and checks the open boundary type

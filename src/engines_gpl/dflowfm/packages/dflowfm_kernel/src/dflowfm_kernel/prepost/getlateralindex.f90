@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> returns the index of a named lateral in the global array from this module
 subroutine getLateralIndex(idlat, index)

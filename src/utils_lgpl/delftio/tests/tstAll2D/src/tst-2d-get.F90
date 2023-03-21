@@ -24,8 +24,8 @@
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 subroutine write_his_long_2dget(synched, auto, resFileName)
 
     use Dio_2D_Tst

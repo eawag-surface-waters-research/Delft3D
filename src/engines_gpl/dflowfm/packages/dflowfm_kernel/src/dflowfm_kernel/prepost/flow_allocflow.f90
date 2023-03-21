@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  subroutine flow_allocflow()                             ! initialise flow model time independent parameters
  use m_netw, only : kn

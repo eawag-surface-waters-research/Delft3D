@@ -43,8 +43,8 @@ subroutine tstat(prshis    ,selhis    ,rhow      ,zmodel    ,nostat    , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: - Updates the monitoring station informations at

@@ -29,8 +29,8 @@ subroutine u_ppr(lundia    ,lunprt    ,error     ,versio    ,prsmap    , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: - Routine similar to POSTPR that may be used by

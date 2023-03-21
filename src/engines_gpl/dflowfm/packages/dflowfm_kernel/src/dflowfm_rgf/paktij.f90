@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
      SUBROUTINE PAKTIJ(T,mmax, nmax, TH,imax,I1,I2,J1,J2,NUM)
        implicit none

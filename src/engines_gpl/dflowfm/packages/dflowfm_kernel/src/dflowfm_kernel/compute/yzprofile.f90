@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 subroutine yzprofile(hpr, ka, itp, area, width, japerim, frcn, ifrctyp, perim, cfhi )
 use m_profiles

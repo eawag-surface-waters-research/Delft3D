@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       !> Find a point on a polyline at a certain distance from the start.
       !! The distance is measured along the consecutive polyline segments.

@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  !> adjust bobs and iadvec for dams and structs
  subroutine adjust_bobs_for_dams_and_structs()

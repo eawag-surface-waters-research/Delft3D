@@ -26,8 +26,8 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        ,mmax      , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! Reads the dimensions ntrt, nttaru, nttarv

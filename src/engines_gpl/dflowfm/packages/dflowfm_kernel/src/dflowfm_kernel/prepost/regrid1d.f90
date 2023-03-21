@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
    subroutine regrid1D(jaregrid)  ! based on 1D net itself, 1 = regrid, otherwise 1dgrid to pol
 

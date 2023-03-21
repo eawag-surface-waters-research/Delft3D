@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> send/receive data from sendlist to/from worksend/workrecv and update recvlist
 subroutine sendrecv_particledata(N,jsend,jrecv)

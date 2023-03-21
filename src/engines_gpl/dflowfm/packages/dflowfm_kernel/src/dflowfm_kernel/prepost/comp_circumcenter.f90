@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> compute the "best-fit" circumcenter of a polygon
 subroutine comp_circumcenter(N, xp, yp, xf, yf, xc, yc)

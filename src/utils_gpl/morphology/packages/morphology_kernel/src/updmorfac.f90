@@ -25,8 +25,8 @@ subroutine updmorfac(morpar, timhr, refjulday)
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! update morfac in case of varyingmorfac

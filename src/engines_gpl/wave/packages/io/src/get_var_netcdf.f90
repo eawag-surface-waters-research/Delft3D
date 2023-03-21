@@ -26,8 +26,8 @@ subroutine get_var_netcdf(i_flow, wavetime, varname, vararr, mmax, nmax, basenam
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 ! NONE
 !!--pseudo code and references--------------------------------------------------

@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  module m_nudge
     double precision, allocatable, target :: nudge_tem(:) !< 3D temperature for nudging

@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> write the network domains to file
 !>    it is assumed that the domain coloring "idomain" is available

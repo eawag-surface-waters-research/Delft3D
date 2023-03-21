@@ -25,8 +25,8 @@ module test_running_mean
    !  Stichting Deltares. All rights reserved.                                     
    !                                                                               
    !-------------------------------------------------------------------------------
-   !  $Id$
-   !  $HeadURL$
+   !  
+   !  
    !!--description-----------------------------------------------------------------
    !
    !    Function: - Tests for the modules runsum and runsum_weighted

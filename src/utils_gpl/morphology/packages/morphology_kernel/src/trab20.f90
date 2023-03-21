@@ -24,8 +24,8 @@
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 
 !> computes sediment transport according to the transport formula of Soulsby / Van Rijn, XBeach flavour
 subroutine trab20(u         ,v         ,hrms      ,rlabda    ,teta      ,h         ,tp        , &

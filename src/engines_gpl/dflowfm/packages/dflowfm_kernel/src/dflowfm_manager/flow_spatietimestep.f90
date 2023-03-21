@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  subroutine flow_spatietimestep()                 ! do 1 flowstep
  use m_flowtimes

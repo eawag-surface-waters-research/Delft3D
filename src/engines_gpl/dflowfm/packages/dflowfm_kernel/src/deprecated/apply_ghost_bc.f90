@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  !> apply Dirichlet conditions to non-overlapping ghost cells (i.e. effectively remove from the system)
  subroutine apply_ghost_bc(ierror)

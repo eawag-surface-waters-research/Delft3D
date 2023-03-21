@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> make a gridline on the spline
 subroutine spline2gridline(mc, num, xsp, ysp, xsp2, ysp2, xc, yc, sc, h)

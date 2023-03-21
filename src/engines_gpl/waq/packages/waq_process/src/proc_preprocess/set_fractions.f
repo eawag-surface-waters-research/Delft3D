@@ -24,8 +24,8 @@
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 
       subroutine set_fraction( lurep    , notot   , syname, nomult, imultp,
      +                         procesdef, allitems, no_act, actlst, nbpr  )

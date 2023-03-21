@@ -25,8 +25,8 @@ module io_netcdf_version_module
 !  Stichting Deltares. All rights reserved.
 !
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 
 implicit none
 

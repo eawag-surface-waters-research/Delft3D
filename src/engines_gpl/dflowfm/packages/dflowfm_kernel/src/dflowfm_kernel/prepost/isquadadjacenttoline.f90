@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
   subroutine isquadadjacenttoline(L1,n,L2)
   use m_netw

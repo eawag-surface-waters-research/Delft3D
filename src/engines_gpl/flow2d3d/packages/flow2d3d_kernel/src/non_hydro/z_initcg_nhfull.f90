@@ -29,8 +29,8 @@ subroutine z_initcg_nhfull(aak       ,bbk       ,cck       ,aak2      ,cck2     
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! Initialisation for CG iterative solver.

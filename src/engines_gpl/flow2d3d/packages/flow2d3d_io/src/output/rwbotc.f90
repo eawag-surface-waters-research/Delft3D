@@ -27,8 +27,8 @@ subroutine rwbotc(comfil    ,lundia    ,error     ,itima     , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: - Write dp array to communication file

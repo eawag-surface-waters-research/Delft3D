@@ -24,8 +24,8 @@
    !  Stichting Deltares. All rights reserved.                                     
    !                                                                               
    !-------------------------------------------------------------------------------
-   !  $Id$
-   !  $HeadURL$
+   !  
+   !  
    !!--description-----------------------------------------------------------------
    !
    !    Function: - time class with double counters for mjd and seconds since reference time

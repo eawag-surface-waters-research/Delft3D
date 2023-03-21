@@ -26,8 +26,8 @@ subroutine findnm_kcs_flowwrapper(xp    , yp    , mp    , np    , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: - Locate a point in the Delft3D curvilinear mesh

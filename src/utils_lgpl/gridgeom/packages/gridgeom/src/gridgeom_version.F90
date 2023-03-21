@@ -26,7 +26,7 @@ module gridgeom_version_module
 !
 !-------------------------------------------------------------------------------
 !  $Id: gridgeom_version.F90.svn 7241 2017-05-31 08:38:38Z carniato $
-!  $HeadURL$
+!  
 
 implicit none
 

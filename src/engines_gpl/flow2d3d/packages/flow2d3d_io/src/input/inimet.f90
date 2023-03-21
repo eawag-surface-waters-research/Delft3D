@@ -27,8 +27,8 @@ subroutine inimet(lundia    ,error     ,versio    ,wave      ,trasol    , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! - Initialisation of numerical parameters which define the numerical methods.

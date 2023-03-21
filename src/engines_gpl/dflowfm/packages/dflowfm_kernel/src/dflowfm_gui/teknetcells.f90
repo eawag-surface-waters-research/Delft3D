@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
    subroutine teknetcells(netwhat, jahalt, jacol)
    use m_netw

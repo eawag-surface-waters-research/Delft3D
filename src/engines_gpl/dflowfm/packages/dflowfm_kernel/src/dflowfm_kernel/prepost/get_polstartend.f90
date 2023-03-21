@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> find the start and end index of a polygon
 subroutine get_polstartend(NPL, XPL, YPL, ipol, jstart, jend)

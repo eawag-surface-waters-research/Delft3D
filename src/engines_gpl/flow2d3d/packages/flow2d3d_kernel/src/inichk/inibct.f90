@@ -28,8 +28,8 @@ subroutine inibct(lundia    ,error     ,runid     , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Reads the time dependent data from file for the

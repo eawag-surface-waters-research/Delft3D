@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 subroutine foresterpoint2(constituents, numconst, ndkx, itemp, vol, a, d, km, kmxx, kb, maxit, ip)
 use m_flow, only  : eps6, eps10

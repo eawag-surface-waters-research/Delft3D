@@ -26,8 +26,8 @@ subroutine chckit(lundia    ,error     ,filnam    ,timrd     ,dt        , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Check time read for time dependent data

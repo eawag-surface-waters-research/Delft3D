@@ -28,8 +28,8 @@ subroutine red_soursin(nmmax     ,kmax      ,thick     , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Reduces sourse and sink terms to avoid large

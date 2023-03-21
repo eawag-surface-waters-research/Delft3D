@@ -28,7 +28,7 @@
 !-------------------------------------------------------------------------------
 
 ! $Id: partition.F90 142612 2023-03-01 18:35:31Z markelov $
-! $HeadURL: https://svn.oss.deltares.nl/repos/delft3d/branches/research/Deltares/20230301_UNST_4401_neumann/src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_data/partition.F90 $
+! : https://svn.oss.deltares.nl/repos/delft3d/branches/research/Deltares/20230301_UNST_4401_neumann/src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_data/partition.F90 $
    
 !------------------------------------------------------------------------
 !  THOUGHTS:

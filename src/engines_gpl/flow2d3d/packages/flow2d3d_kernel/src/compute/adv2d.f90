@@ -32,8 +32,8 @@ subroutine adv2d(timest    ,lundia    ,nst       ,icx       ,icy       , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! Computes 2D transport in u- and v-direction.

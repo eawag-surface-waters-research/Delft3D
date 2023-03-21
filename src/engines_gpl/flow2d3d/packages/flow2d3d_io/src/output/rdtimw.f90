@@ -26,8 +26,8 @@ subroutine rdtimw(comfil    ,lundia    ,error     ,ntwav     , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !

@@ -26,8 +26,8 @@ subroutine regel(string    ,il        ,ir        ,maxvld    ,nveld     , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Analyses character string line

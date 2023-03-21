@@ -25,8 +25,8 @@ subroutine readldb(x,y,nopol,nop,fin)
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 ! Read TEKAL file with landboundary data, just first two columns are read
 ! Seperator could be a new TEKA block or

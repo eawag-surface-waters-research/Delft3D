@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
    subroutine get_spiral3d
       use m_flow, only: ucx, ucy, spirint, czssf, zws, hs, dzslay, spiratx, spiraty

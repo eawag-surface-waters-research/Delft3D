@@ -28,8 +28,8 @@ subroutine santoss_orb(nt, as_effects, tw, uorb, unet, ang, tp, &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !   The SANTOSS practical sand transport model, version 2.08  

@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
    module m_tpoly !< tpoly-type polygon/polyline
    implicit none
 

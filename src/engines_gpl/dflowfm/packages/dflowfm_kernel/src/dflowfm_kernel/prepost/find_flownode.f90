@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> Finds the flow nodes/cell numbers for each given x,y point (e.g., an observation station)
 subroutine find_flownode(N, xobs, yobs, namobs, kobs, jakdtree, jaoutside, iLocTp)

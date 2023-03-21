@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> administer a cell
 !>    note: cell circumcenters are not updated (would require up-to-date lnn, lne)

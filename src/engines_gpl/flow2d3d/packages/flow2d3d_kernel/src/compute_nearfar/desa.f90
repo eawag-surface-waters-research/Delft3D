@@ -29,8 +29,8 @@ subroutine desa(x_jet   ,y_jet    ,z_jet   ,s_jet   ,nrow    , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Converts Jet3D output to delft3d sources following the DESA

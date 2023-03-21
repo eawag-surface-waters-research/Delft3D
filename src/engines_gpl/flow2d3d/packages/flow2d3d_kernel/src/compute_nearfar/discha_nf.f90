@@ -27,8 +27,8 @@ subroutine discha_nf(kmax      ,lstsci    ,nmmax     ,kfs       ,sour      ,sink
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !   Function: The discharges resulting from near field simulation (jet3d/nrfield etc) are

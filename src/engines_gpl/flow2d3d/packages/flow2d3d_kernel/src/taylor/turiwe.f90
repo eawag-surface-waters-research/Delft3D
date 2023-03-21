@@ -28,8 +28,8 @@ subroutine turiwe(kmxdt     ,kmxt      ,h0        ,scale     ,bvav      , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Transfer of turbulent kinetic energy into internal

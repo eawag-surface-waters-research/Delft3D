@@ -27,8 +27,8 @@ subroutine wangp3(s1        ,kcs       ,irocol    ,norow     ,icx       , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: WANGP3 performs step 3 of the so-called

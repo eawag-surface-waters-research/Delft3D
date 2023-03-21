@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> prepare the sample Hessians
 subroutine prepare_sampleHessian(ierror)

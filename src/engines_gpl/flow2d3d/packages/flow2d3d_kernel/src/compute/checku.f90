@@ -29,8 +29,8 @@ subroutine checku(hu        ,s1        ,dpu       ,umean     , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: This routine checks the drying and flooding at ve-

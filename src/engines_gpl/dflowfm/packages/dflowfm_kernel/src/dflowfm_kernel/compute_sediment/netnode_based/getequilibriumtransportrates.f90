@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  subroutine getequilibriumtransportrates(kk, seq, wse, mx, hsk)       ! get them for flowcell kk or ban kk
  use m_flowgeom

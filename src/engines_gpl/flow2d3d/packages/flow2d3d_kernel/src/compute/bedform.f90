@@ -27,8 +27,8 @@ subroutine bedform(nmmax     ,dps       ,s1        ,u         ,v         , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! Calculate bedform height and length.

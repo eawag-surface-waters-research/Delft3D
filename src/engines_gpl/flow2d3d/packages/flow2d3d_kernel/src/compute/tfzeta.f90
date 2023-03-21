@@ -26,8 +26,8 @@ subroutine tfzeta(timnow    ,nmax      ,mmax      ,tgfsep    ,xz        , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: This routine calculates the equilibrium tide

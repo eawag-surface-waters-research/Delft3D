@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 subroutine pipe(hpr, dia, area, width, japerim, perim) ! half open part
 use m_sferic

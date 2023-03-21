@@ -28,8 +28,8 @@ subroutine upwbed(su        ,sv        ,suu       ,svv       ,kfu       , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Copy transport rate from cell centres to velocity points

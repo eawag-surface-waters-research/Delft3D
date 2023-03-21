@@ -29,8 +29,8 @@ subroutine vihsec(u         ,v         ,guu       ,gvu       ,gvv       , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Computes the horizontal stresses RXX, RXY and RYY

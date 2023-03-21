@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  !> in m_flowgeom: nd and ln apply to waterlevel nodes and links
  !! in m_netw    : nod and lin apply to 'grid' or 'net' nodes and links

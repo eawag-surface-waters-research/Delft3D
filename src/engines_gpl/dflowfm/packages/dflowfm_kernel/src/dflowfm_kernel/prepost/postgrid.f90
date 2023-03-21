@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> remove skewed cells and cells whose aspect ratio exceeds a prescibed value
 !> note: latter not implemented yet

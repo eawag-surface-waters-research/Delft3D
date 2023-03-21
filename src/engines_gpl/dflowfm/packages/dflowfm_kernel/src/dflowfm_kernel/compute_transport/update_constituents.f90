@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !----- AGPL --------------------------------------------------------------------
 !
@@ -58,8 +58,8 @@
 !  Deltares, and remain the property of Stichting Deltares. All rights reserved.
 !
 !-------------------------------------------------------------------------------
-! $Id$
-! $HeadURL$
+! 
+! 
 !> This subroutine transports an array of scalars.
 !> In light of future vectorization, the aim is to:
 !>   -use as few module variables as possible,

@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> delete cell and update administration (no direct need for findcells afterwards)
 subroutine deletecell(k, ndirect, nindirect, kdirect, kindirect, kne, Lprompt_nogo, jadeleted)

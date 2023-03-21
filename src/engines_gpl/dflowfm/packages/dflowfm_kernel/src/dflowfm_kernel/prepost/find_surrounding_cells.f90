@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !>  find cells that are directly and indirectly connected to cell k
    subroutine find_surrounding_cells(kcell, nmax, ndirect, nindirect, kdirect, kindirect, kne)

@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 ! update the water levels for the bed level change caused by subsidence/uplift
 subroutine subsupl_update_s1()

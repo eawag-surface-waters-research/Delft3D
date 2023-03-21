@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       subroutine triangulate_quadsandmore(ja) ! ja==1, findcells moet opnieuw
 

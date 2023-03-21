@@ -43,7 +43,7 @@ c
 c***********************************************************************
 c CVS log information:
 c
-c $Id$
+c 
 c
 c History:
 c $Log: /delft3d/modules/d3d-waq/waq/libsrc/dh/gkwini.f $

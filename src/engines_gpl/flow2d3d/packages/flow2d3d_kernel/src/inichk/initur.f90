@@ -31,8 +31,8 @@ subroutine initur(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Initialises turbulent energy and/or

@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> Runs flow steps for a certain period (do computational flowsteps for as long as timeinterval dtrange).
 subroutine flow_run_sometimesteps(dtrange, iresult)                   ! do computational flowsteps for as long as timeinterval dtrange

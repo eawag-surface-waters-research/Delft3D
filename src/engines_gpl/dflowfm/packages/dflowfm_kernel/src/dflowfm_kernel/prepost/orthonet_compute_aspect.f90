@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !>  compute link-based aspect ratios
 subroutine orthonet_compute_aspect(aspect)

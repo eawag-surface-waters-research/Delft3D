@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !>  compute the orientation of a cell by SVD
 subroutine orthonet_compute_orientation(aspect, uu1, vv1, uu2, vv2, i)

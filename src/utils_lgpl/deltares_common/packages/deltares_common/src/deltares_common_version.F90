@@ -25,8 +25,8 @@ module deltares_common_version_module
 !  Stichting Deltares. All rights reserved.
 !
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 
 implicit none
 
@@ -42,7 +42,7 @@ implicit none
     character(*),  public, parameter :: deltares_common_version      = deltares_common_major//'.'//deltares_common_minor//'.'//deltares_common_revision//'.'//deltares_common_build_number
     character(*),  public, parameter :: deltares_common_version_full = 'Deltares, '//deltares_common_program//' Version '//deltares_common_version//', '//__DATE__//', '//__TIME__
     character(*),  public, parameter :: deltares_common_version_id   = '@(#)'//deltares_common_version_full
-    character(*),  public, parameter :: deltares_common_source_code  = '@(#) $HeadURL$'//char(0)
+    character(*),  public, parameter :: deltares_common_source_code  = '@(#) '//char(0)
 
 contains
 

@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> compute the grid heights at grid edges on the center spline
 subroutine comp_gridheights(mc, eheight, ierror)

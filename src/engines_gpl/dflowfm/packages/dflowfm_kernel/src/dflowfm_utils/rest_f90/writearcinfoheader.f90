@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       SUBROUTINE WRITEARCINFOHEADER(MARC,MC,NC,X0,Y0,DX,DY,dmiss)
       implicit none

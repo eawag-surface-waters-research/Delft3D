@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  subroutine fdster(dster,taucr,thetcr,pclay,g,d50,rhos,rhow,FCR)
  IMPLICIT NONE

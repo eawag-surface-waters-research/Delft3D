@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  !> compute viscous flux balance of cell ln (n12,L) in coordinate frame of L
  double precision function horvic(n12,L)             ! horizontal viscosity term

@@ -37,8 +37,8 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Carry out interpolation in space, determine time

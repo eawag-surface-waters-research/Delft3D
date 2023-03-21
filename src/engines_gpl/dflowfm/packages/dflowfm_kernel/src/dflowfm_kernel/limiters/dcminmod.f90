@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  double precision function dcminmod(d1,d2)                     ! basic minmod definition
  implicit none

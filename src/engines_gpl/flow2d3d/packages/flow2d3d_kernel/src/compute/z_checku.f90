@@ -29,8 +29,8 @@ subroutine z_checku(j         ,nmmaxj    ,nmmax     ,icx       ,kmax      , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: This routine checks the drying and flooding at ve-

@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
    !> Reads raw restart data from a formatted restart file by wrirst.
    !! Water levels and velocities are directly stored into the flow arrays.

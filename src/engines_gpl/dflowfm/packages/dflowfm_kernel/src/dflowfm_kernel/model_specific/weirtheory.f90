@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 subroutine weirtheory(zupstream,zdownstream,crestheight,zcrestperfect,zminsub,zcrest, &
                       qweir,uupstream,ucrest,udownstream,regime, qfree, gateheight)

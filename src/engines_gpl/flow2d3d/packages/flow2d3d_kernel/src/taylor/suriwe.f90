@@ -30,8 +30,8 @@ subroutine suriwe(kmax      ,kmxdt     ,kmxt      ,h0        ,scale     , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Transfer of energy from wind- and surface-wave-

@@ -31,8 +31,8 @@ subroutine secrhs(s0        ,s1        ,dps       ,u1        ,v1        , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Computes righthandside terms for the transport

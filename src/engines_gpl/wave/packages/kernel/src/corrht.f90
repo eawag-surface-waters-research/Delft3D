@@ -27,8 +27,8 @@ subroutine corrht(hrm       ,deph      ,tp        ,wavel     ,wavek     , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !

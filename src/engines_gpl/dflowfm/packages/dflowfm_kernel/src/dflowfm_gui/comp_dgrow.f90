@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 ! determine the grid grow factor for a given total grid height, first grid layer height and number of grid layers
 double precision function comp_dgrow(height, dheight0, nfac, ierror)

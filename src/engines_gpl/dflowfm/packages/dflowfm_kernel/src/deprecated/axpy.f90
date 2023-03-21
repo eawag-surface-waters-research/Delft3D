@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  !> speed test: compute z = Ax+y
  !> note: no communcation included in parallel runs, only test speed

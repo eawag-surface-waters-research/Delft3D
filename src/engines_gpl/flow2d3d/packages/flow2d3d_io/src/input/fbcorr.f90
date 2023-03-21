@@ -25,8 +25,8 @@ subroutine fbcorr(lundia, nto, nambnd, typbnd, gdp)
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Reads flow boundary corrections file
