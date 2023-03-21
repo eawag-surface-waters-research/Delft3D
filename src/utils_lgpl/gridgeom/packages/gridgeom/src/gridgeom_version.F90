@@ -31,7 +31,7 @@ module gridgeom_version_module
 implicit none
 
     character(*),  public, parameter :: gridgeom_major        = '1'
-    character(*),  public, parameter :: gridgeom_minor        = '00'
+    character(*),  public, parameter :: gridgeom_minor        = '01'
     character(*),  public, parameter :: gridgeom_revision     = '00'
     character(*),  public, parameter :: gridgeom_build_number = '000000'
 
