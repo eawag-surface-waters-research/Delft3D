@@ -1,5 +1,3 @@
-#include "version_number.h"
-
 #ifndef NEFIS_VERSION
 #define NEFIS_VERSION
 
