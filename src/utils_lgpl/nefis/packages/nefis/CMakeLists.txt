@@ -18,9 +18,6 @@ if (UNIX)
     add_definitions(-DHAVE_LSEEK64)
 endif(UNIX)
 
-# Generate the version files
-generate_version_files(${header_version_file} ${ini_version_file})
-generate_version_files(${rc_version_file} ${ini_version_file})
 
 # Gather source files
 file(GLOB headers include/*.h)
@@ -34,13 +31,6 @@ add_library(${library_name} ${headers}
                             ${source}
                             ${ini_version_file})
 
-# Define prebuild events
-prebuild_version_number(${library_name} ${header_version_file} 
-                                        ${checkout_src_root} 
-                                        ${ini_version_file})
-prebuild_version_number(${library_name} ${rc_version_file} 
-                                        ${checkout_src_root} 
-                                        ${ini_version_file})
 
 # Set additional dependencies
 target_include_directories(${library_name}  PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/include")
