@@ -112,6 +112,7 @@ subroutine update_particles(q,h0,h1,Dt)
    if ( timon ) call timstop ( ithndl )
 end subroutine update_particles
 
+
 !> update positions of particles within triangles
 subroutine update_particles_in_cells(numremaining, ierror)
    use partmem, only: nopart, mpart

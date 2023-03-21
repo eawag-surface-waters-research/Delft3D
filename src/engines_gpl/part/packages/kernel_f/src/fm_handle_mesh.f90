@@ -139,6 +139,7 @@ subroutine part_fill_networkdata(hyd, waqgeom,openbndsect_coll)
    if ( timon ) call timstop ( ithndl )
 end subroutine
 
+
 subroutine part_setmesh()
    use network_data, only: kn, xk, yk, xzw, yzw, numk, numL, nump, netcell, lnn, lne
    use m_flowgeom, only: lne2ln, ba
@@ -440,6 +441,7 @@ subroutine part_setmesh()
 
    if ( timon ) call timstop ( ithndl )
 end subroutine part_setmesh
+
 
 !> (re)allocate partmesh data
 subroutine realloc_partmesh()

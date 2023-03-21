@@ -31,7 +31,7 @@
 #include "config.h"
 #endif
 
-   subroutine partfm(lunpr)
+subroutine partfm(lunpr)
 
    use precision_part
    use MessageHandling
@@ -123,96 +123,6 @@
 
    call ini_part(partinifile, partrelfile, tstart_user, dts, 0)
 
-if (.false.) then
-   call realloc(trpart, Nrpart)
-   call realloc(xrpart, Nrpart)
-   call realloc(yrpart, Nrpart)
-   call realloc(zrpart, Nrpart)
-   call realloc(mrpart, Nrpart)
-   !set up the trpart xrpart etc arrays
-   !loop over the instantaneous discharges, still assuming one substance
-   ipart = 1
-   npmax = 0
-   do iload = 1, nodye
-        npmax = ndprt(iload) + npmax
-        wpart(1, ipart:npmax+1) = amassd(1, iload) / ndprt(iload)
-        do while (ipart <= npmax)
-            dpangle =2.0D0 * pi * rnd(rseed)
-            dradius = rnd(rseed) * radius(iload) !noteradius is in m. need to convert to degrees.
-            dxp = cos(dpangle) * dradius
-            dyp = sin(dpangle) * dradius
-            trpart(ipart) = iwtime(iload)
-            if (jsferic == 1) then
-                dradius = atan2(dradius,earth_radius)*raddeg_hp !in degrees
-                dxp = cos(dpangle) * dradius
-                dyp = sin(dpangle) * dradius
-! the distance is expressed in degrees (to make a circle for spherical models,
-                !call Cart3Dtospher(dble(xwaste(iload)),dble(ywaste(iload)),dble(zwaste(iload)),xx,yy,ptref)
-              !  xx = xx + dxp
-               ! yy = yy + dyp
-                !call sphertocart3D(xx,yy,xrpart(ipart),yrpart(ipart),zrpart(ipart))
-            endif
-            xrpart(ipart) = xwaste(iload) + dxp !radius(iload)/2. * rnd(rseed)
-            yrpart(ipart) = ywaste(iload) + dyp !radius(iload)/2. * rnd(rseed)
-            zrpart(ipart) = zwaste(iload)
-        !  endif
-            ipart = ipart +1
-        end do
-        ipart = ipart -1
-   enddo
-
-   ndpart = npmax-1
-   do iload = 1, nocont  !here follows the infor from the continuous discharge, no time interpolation.
-        npmax = ndprt(nodye + iload) + npmax
-        ! total mass per load to calculate mass per particle
-        totcload = 0.0
-        do ictimes = 1, ictmax(iload)-1
-            if (linear(iload) == 0) then
-                totcload = totcload + amassc(iload,1,ictimes) * (ictime(iload, ictimes+1) - ictime(iload, ictimes))
-            else
-                totcload = totcload + amassc(iload,1,ictimes) + abs((amassc(iload, 1, ictimes+1) - amassc(iload, 1, ictimes))) * &
-                          (ictime(iload, ictimes+1) - ictime(iload, ictimes))/2.0 !total mass for interpolated load
-            endif
-
-        end do
-        ! calculate the mass per particle for this load, store this in wpart
-        wpart(1, ipart:npmax+1) = totcload / ndprt(nodye + iload)
-        npload = 0
-        ! her add the loop for the number of timings
-        ipartload = 0
-        do ictimes = 1, ictmax(iload)-1
-            trpart(ipart)=ictime(iload,ictimes)
-            xrpart(ipart) = xwaste(iload) !radius(iload)/2. * rnd(rseed)
-            yrpart(ipart) = ywaste(iload) !radius(iload)/2. * rnd(rseed)
-            zrpart(ipart) = zwaste(iload)
-            ntimes = (ictime(iload, ictimes + 1) - ictime(iload, ictimes)) / dts
-            ipartload = amassc(iload,1,ictimes) * (ictime(iload, ictimes+1) - ictime(iload, ictimes)) / wpart(1, ipart) ! this is the number of particles to be added for this period
-            npload = npload + ipartload
-            if (ipartload > 0) then
-               dtcontp =   (float(ntimes) * dts) / ipartload
-            else
-               dtcontp = 0.0
-            endif
-            do while (ipart <= ndpart + npload)
-                dpangle =2.0D0 * pi * rnd(rseed)
-                dradius = rnd(rseed) * radius(iload)
-                dxp = cos(dpangle) * dradius
-                dyp = sin(dpangle) * dradius
-                if (jsferic == 1) then ! the distance is expressed in degrees(to make a circle for spherical models,
-                    dradius = atan2(dradius,earth_radius)*raddeg_hp !in degrees
-                    dxp = cos(dpangle) * dradius
-                    dyp = sin(dpangle) * dradius
-                endif
-                xrpart(ipart) = xwaste(iload) + dxp !radius(iload)/2. * rnd(rseed)
-                yrpart(ipart) = ywaste(iload) + dyp !radius(iload)/2. * rnd(rseed)
-                zrpart(ipart) = zwaste(iload)
-                trpart(ipart+1) = trpart(ipart) + dtcontp  !here the time is set for each particle that is released.
-                ipart = ipart +1
-            end do
-            ipartload = ipart-1
-        end do
-   enddo
-endif
    call realloc(xrpart, npmax)
    call realloc(yrpart, npmax)
    call realloc(zrpart, npmax)
@@ -220,7 +130,6 @@ endif
    call realloc_particles(npmax, .true., ierror)
    irpart = 1
    ptref = 0.0D0
-   !call part_findcell(Nrpart,xrpart,yrpart,mrpart,ierror)
 
    if ( notrak > 0 ) call unc_init_trk()
    call unc_init_map(hyd%crs, hyd%waqgeom, hyd%nosegl, hyd%nolay)
@@ -229,68 +138,66 @@ endif
    time1 = time0
    istat = -1 ! skip copying of data durin the first stime stap
    call part_readhydstep(hyd,itime,istat)
-   if (istat == 99) then
-      write ( lunpr, * ) ' Timing mismatch between input and actual data:', time0, itime
-      write (   *  , * ) ' Timing mismatch between input and actual data:', time0, itime
-      goto 1234
-   else if (istat /= 0) then
-      write ( lunpr, * ) ' Error during reading of the hydrodynamic time step data', time0, itime
-      write (   *  , * ) ' Error during reading of the hydrodynamic time step data', time0, itime
-      goto 1234
-   end if
+   if ( istat /= 0 ) then
+      if (istat == 99) then
+         write ( lunpr, * ) ' Timing mismatch between input and actual data:', time0, itime
+         write (   *  , * ) ' Timing mismatch between input and actual data:', time0, itime
+      else
+         write ( lunpr, * ) ' Error during reading of the hydrodynamic time step data', time0, itime
+         write (   *  , * ) ' Error during reading of the hydrodynamic time step data', time0, itime
+      end if
+   else
 
-   do while (istat == 0)
-   !     determine if map and track files must be produced
+      do while (istat == 0)
+         ! determine if map and track files must be produced
 
-      mapfil = .true.
-      trkfil = .true.
-      if ( notrak .eq. 0 ) trkfil = .false.
-      if (icwste                     < 1     ) mapfil = .false.
-      if (itime                      < icwsta) mapfil = .false.
-      if (itime - idelt              >=  icwsto) mapfil = .false.
-      if (mod(itime-icwsta, icwste)  >=  idelt ) mapfil = .false.
+         mapfil = .true.
+         trkfil = .true.
+         if ( notrak .eq. 0 ) trkfil = .false.
+         if (icwste                     < 1     ) mapfil = .false.
+         if (itime                      < icwsta) mapfil = .false.
+         if (itime - idelt              >=  icwsto) mapfil = .false.
+         if (mod(itime-icwsta, icwste)  >=  idelt ) mapfil = .false.
 
-      if ( trkfil .and. mod(itime, notrak * idelt) .ge. idelt) trkfil = .false.
-      if ( trkfil ) call unc_write_trk()
-      if (mapfil) call unc_write_map()
+         if ( trkfil .and. mod(itime, notrak * idelt) .ge. idelt) trkfil = .false.
+         if ( trkfil ) call unc_write_trk()
+         if (mapfil) call unc_write_map()
 
-      call report_progress( lunpr, int(time0), itstrtp, itstopp, nopart, npmax )
+         call report_progress( lunpr, int(time0), itstrtp, itstopp, nopart, npmax )
 
 
 
-      if (time1 .ge. tstop_user) then
-         exit
-      endif
-      time0 = time1
-      time1 = min(tstop_user, time0 + dts)
-      call part_readhydstep(hyd,itime,istat)
-      if ( idtset .gt. 0 )                                                    &
-         call part17 ( itime    , nosubs   , idtset   , idtime   , decay    ,    &
-                       decays   )
-      call partfm_decay()
-!     interpolation for wind speed/direction in the wind table
-      call part15 ( lun(2)   , itime    , spawnd   , numcells , nowind   ,    &
-                    iwndtm   , wveloa   , wdira    , wvelo    , wdir     )
-!     transport (advection, dispersion, winddrag)
-!      jsfer_old = jsferic
-!      jsferic = 0 ! everything in part10fm is in meters
-      call update_part(itime)
-      call part10fm()
-!      jsferic = jsfer_old ! back to what it should be
-      call oildspfm(itime)
-!     interpolation for wind speed/direction in the wind table
-   end do
+         if (time1 .ge. tstop_user) then
+            exit
+         endif
+         time0 = time1
+         time1 = min(tstop_user, time0 + dts)
+         call part_readhydstep(hyd,itime,istat)
+         if ( idtset .gt. 0 )                                                    &
+            call part17 ( itime    , nosubs   , idtset   , idtime   , decay    ,    &
+                          decays   )
+         call partfm_decay()
 
-1234 continue
+         ! interpolation for wind speed/direction in the wind table
+         call part15 ( lun(2)   , itime    , spawnd   , numcells , nowind   ,    &
+                       iwndtm   , wveloa   , wdira    , wvelo    , wdir     )
 
+         ! transport (advection, dispersion, winddrag)
+         call update_part(itime)
+         call part10fm()
+         call oildspfm(itime)
+      end do
+   endif
+
+   !
+   ! Finish the calculation in all cases
+   !
    call unc_close_trk()
    call unc_close_map()
 
    if ( timon ) call timstop ( ithndl )
 
-   return
-
-   contains
+contains
 
    subroutine report_progress( lunpr, itime, itstrtp, itstopp, nopart, npmax )
    integer, intent(in) :: lunpr, itime, itstrtp, itstopp, nopart, npmax
@@ -310,5 +217,5 @@ endif
                  i6.4 ,'D-', i2.2 ,'H-', i2.2 ,'M-', i2.2 ,'S. (', f5.1, '% completed) ',   &
                  i11,' part. (of',i11,')')
 
-   end subroutine report_progress
-   end subroutine partfm
+end subroutine report_progress
+end subroutine partfm

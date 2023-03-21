@@ -27,8 +27,8 @@
 !
 !-------------------------------------------------------------------------------
 
-   !>    determine sample bounding box
-   subroutine get_samples_boundingbox()
+!> determine sample bounding box
+subroutine get_samples_boundingbox()
    use m_samples
    use m_missing
    implicit none
@@ -48,12 +48,11 @@
          ysammax = max(ysammax,ys(i))
       end if
    end do
+end subroutine get_samples_boundingbox
 
-   return
-   end subroutine get_samples_boundingbox
 
-   !> return common node of links L1 and L2
-   subroutine find_common_node(L1, L2, node)
+!> return common node of links L1 and L2
+subroutine find_common_node(L1, L2, node)
 
    use network_data
    use m_missing
@@ -81,9 +80,10 @@
       exit
    end do
 
-   end subroutine find_common_node
+end subroutine find_common_node
 
-   subroutine dlinedis2(x3,y3,x1,y1,x2,y2,ja,dis,xn,yn,rl)
+
+subroutine dlinedis2(x3,y3,x1,y1,x2,y2,ja,dis,xn,yn,rl)
    use m_sferic
    use geometry_module, only: getdx, getdy, dbdistance, sphertocart3d, cart3dtospher
    use m_missing, only: dmiss
@@ -150,10 +150,10 @@
 
    endif
 
-   return
-   end subroutine dlinedis2
+end subroutine dlinedis2
 
-   subroutine dlinedis3D(xx3,yy3,zz3,xx1,yy1,zz1,xx2,yy2,zz2,JA,DIS,xxn,yyn,zzn,rl)
+
+subroutine dlinedis3D(xx3,yy3,zz3,xx1,yy1,zz1,xx2,yy2,zz2,JA,DIS,xxn,yyn,zzn,rl)
 
    implicit none
 
@@ -187,11 +187,10 @@
       dis = 0d0
    endif
 
-   return
+end subroutine dlinedis3d
 
-   end subroutine dlinedis3d
 
-   SUBROUTINE REASAM(MSAM, JADOORLADEN)
+SUBROUTINE REASAM(MSAM, JADOORLADEN)
    USE M_MISSING
    USE M_SAMPLES
    use m_alloc
@@ -329,15 +328,15 @@
       IPSTAT = IPSTAT_OK
    END IF
    call doclose(MSAM)
-   RETURN
-   END
+
+END subroutine reasam
 
 
-   !>    delete samples
-   !>      jaconfirm=0: do not prompt for confirmation,       keep arrays,        make copy
-   !>                1:        prompt for confirmation,       keep arrays,        make copy
-   !>               -1: do not prompt for confirmation, deallocate arrays, do not make copy
-   SUBROUTINE DELSAM(JACONFIRM)      ! SPvdP: need promptless delsam in orthogonalisenet
+!>    delete samples
+!>      jaconfirm=0: do not prompt for confirmation,       keep arrays,        make copy
+!>                1:        prompt for confirmation,       keep arrays,        make copy
+!>               -1: do not prompt for confirmation, deallocate arrays, do not make copy
+SUBROUTINE DELSAM(JACONFIRM)      ! SPvdP: need promptless delsam in orthogonalisenet
    USE M_SAMPLES
    use m_polygon
    USE m_missing
@@ -386,17 +385,17 @@
    ! Else: check in polygon
    CALL SAVESAM()
    INHUL = -1
-   DO 10 I = 1,NS
+   DO I = 1,NS
       RD = ZS(I)
       XI = XS(I)
       YI = YS(I)
       CALL DBPINPOL(xI, yI, INHUL, dmiss, JINS, NPL, xpl, ypl, zpl)
       IF (INHUL .EQ. 1) ZS(I) = dmiss
-10 CONTINUE
+   enddo
 
    K = 0
    NSOL = NS
-   DO 20 I = 1,NS
+   DO I = 1,NS
       IF (ZS(I) .NE. dmiss) THEN
          K     = K + 1
          XS(K) = XS(I)
@@ -404,26 +403,21 @@
          ZS(K) = ZS(I)
          ipsam(k) = ipsam(i)
       ENDIF
-20 CONTINUE
+   enddo
    NS = K
 
-   DO 30 I = NS+1,NSOL
+   DO I = NS+1,NSOL
       XS(I) = DMISS
       YS(I) = DMISS
       ZS(I) = DMISS
       ipsam(i) = 0
-30 CONTINUE
+   enddo
 
-   RETURN
-   END SUBROUTINE DELSAM
+END SUBROUTINE DELSAM
 
-   function thisisanumber(rec)
+
+function thisisanumber(rec)
    use string_module, only: find_first_char
-   !!--description-----------------------------------------------------------------
-   ! NONE
-   !!--pseudo code and references--------------------------------------------------
-   ! NONE
-   !!--declarations----------------------------------------------------------------
    implicit none
    !
    ! Global variables
@@ -453,9 +447,10 @@
          thisisanumber = .false.
       endif
    endif
-   end function thisisanumber
+end function thisisanumber
 
-   SUBROUTINE TIDYSAMPLES(XS,YS,ZS,IPSAM,NS,MXSAM,MYSAM)
+
+SUBROUTINE TIDYSAMPLES(XS,YS,ZS,IPSAM,NS,MXSAM,MYSAM)
    use sorting_algorithms, only: indexx
    implicit none
    integer :: ns
@@ -472,6 +467,4 @@
    !      if ( MXSAM*MYSAM.ne.NS ) then
    !         IF (NS .GT. 1) CALL RMDOUBLE(XS,YS,ZS,IPSAM,NS)
    !      end if
-
-   RETURN
-   END
+END subroutine tidysamples

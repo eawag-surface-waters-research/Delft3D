@@ -27,7 +27,7 @@
 !
 !-------------------------------------------------------------------------------
 
-   subroutine unc_init_trk()
+subroutine unc_init_trk()
 
    use netcdf
    use m_partfm_trk_netcdf
@@ -53,9 +53,10 @@
    call unc_write_part_header(itrkfile,id_trk_timedim,id_trk_partdim,id_trk_parttime,id_trk_partx,id_trk_party,id_trk_partz)
    ierr = nf90_enddef(itrkfile)
    it_trk = 0
-   end subroutine unc_init_trk
+end subroutine unc_init_trk
 
-   subroutine unc_write_trk()
+
+subroutine unc_write_trk()
 
    use m_flowtimes
    use netcdf
@@ -80,11 +81,10 @@
 
    if ( timon ) call timstop ( ithndl )
 
-   return
+end subroutine unc_write_trk
 
-   end subroutine unc_write_trk
 
-   subroutine unc_close_trk()
+subroutine unc_close_trk()
 
    use netcdf
    use m_partfm_trk_netcdf
@@ -95,11 +95,12 @@
    integer                      :: ierr
 
    ierr = nf90_close(itrkfile)
-   end subroutine unc_close_trk
+end subroutine unc_close_trk
 
-   !> Writes the (possibly aggregated) unstructured network and edge type to a netCDF file for DelWAQ.
-   !! If file exists, it will be overwritten.
-   subroutine unc_init_map(crs, meshgeom, nosegl, nolay)
+
+!> Writes the (possibly aggregated) unstructured network and edge type to a netCDF file for DelWAQ.
+!! If file exists, it will be overwritten.
+subroutine unc_init_map(crs, meshgeom, nosegl, nolay)
 
    use partmem, only: nosubs, nfract, oil, substi
    use m_partfm_map_netcdf
@@ -214,9 +215,10 @@
    it_map = 0
    call realloc(work, ndx, keepExisting = .false., fill = dmiss)
 
-   end subroutine unc_init_map
+end subroutine unc_init_map
 
-   subroutine unc_write_map()
+
+subroutine unc_write_map()
 
    use partmem, only: nosubs, hyd
    use m_flowtimes
@@ -275,9 +277,10 @@
 
    if ( timon ) call timstop ( ithndl )
 
-   end subroutine unc_write_map
+end subroutine unc_write_map
 
-   subroutine unc_close_map()
+
+subroutine unc_close_map()
 
    use netcdf
    use m_partfm_map_netcdf
@@ -288,10 +291,11 @@
    integer                      :: ierr
 
    ierr = nf90_close(imapfile)
-   end subroutine unc_close_map
+end subroutine unc_close_map
 
-   !> write particle tracks header to netcdf trk file
-   subroutine unc_write_part_header(ifile,id_timedim,id_trk_partdim,id_trk_parttime,id_trk_partx,id_trk_party,id_trk_partz)
+
+!> write particle tracks header to netcdf trk file
+subroutine unc_write_part_header(ifile,id_timedim,id_trk_partdim,id_trk_parttime,id_trk_partx,id_trk_party,id_trk_partz)
    use m_particles
    use netcdf
    use m_flow, only: kmx
@@ -356,11 +360,11 @@
       ierr = nf90_redef(ifile)
    end if
 
-   return
-   end subroutine unc_write_part_header
+end subroutine unc_write_part_header
 
-   !> write particles to netcdf file
-   subroutine unc_write_part(ifile,itime,id_trk_parttime,id_trk_partx,id_trk_party,id_trk_partz)
+
+!> write particles to netcdf file
+subroutine unc_write_part(ifile,itime,id_trk_parttime,id_trk_partx,id_trk_party,id_trk_partz)
    use partmem, only: nopart
    use m_particles
    use netcdf
@@ -430,12 +434,12 @@
       call mess(LEVEL_ERROR, 'particles output error')
    end if
 
-   return
-   end subroutine unc_write_part
+end subroutine unc_write_part
 
-   !> Puts global attributes in NetCDF data set.
-   !! This includes: institution, Conventions, etc.
-   subroutine unc_addglobalatts(ncid)
+
+!> Puts global attributes in NetCDF data set.
+!! This includes: institution, Conventions, etc.
+subroutine unc_addglobalatts(ncid)
    use netcdf
    use MessageHandling
    use part_version_module
@@ -473,11 +477,12 @@
    if (jaInDefine == 0) then
       ierr = nf90_enddef(ncid)
    end if
-   end subroutine unc_addglobalatts
+end subroutine unc_addglobalatts
 
-   !> Sets the UDUnit timestring based on current model time settings.
-   !! Module variable Tudunitstr can the be used in various output routines.
-   subroutine setTUDUnitString()
+
+!> Sets the UDUnit timestring based on current model time settings.
+!! Module variable Tudunitstr can the be used in various output routines.
+subroutine setTUDUnitString()
    use m_flowtimes
 
    implicit none
@@ -493,11 +498,11 @@
    end if
    write(Tudunitstr,'(a,i2.2,a)') 'seconds since '//refdat(1:4)//'-'//refdat(5:6)//'-'//refdat(7:8)//' 00:00:00 '//Tzonesgn, abs(Tzonehrs),':00'
 
-   end subroutine setTUDUnitString
+end subroutine setTUDUnitString
 
 
-   !> compute concentrations of particles (parts per unit volume) in flownodes
-   subroutine comp_concentration(h, nconst, iconst, c)
+!> compute concentrations of particles (parts per unit volume) in flownodes
+subroutine comp_concentration(h, nconst, iconst, c)
    use partmem, only: mpart, wpart, oil, nfract, nopart
    use m_particles
    use m_partmesh
@@ -551,5 +556,4 @@
 
    if ( timon ) call timstop ( ithndl )
 
-   return
-   end subroutine comp_concentration
+end subroutine comp_concentration

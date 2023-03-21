@@ -45,6 +45,7 @@ subroutine add_particles(Nadd, xadd, yadd)
    call calculate_position_in_grid( nadd, xadd, yadd, nopart, xpart, ypart, zpart, mpart )
 end subroutine add_particles
 
+
 !> calculate where the particles are within the grid
 subroutine calculate_position_in_grid(Nadd, xadd, yadd, np, xcrd, ycrd, zcrd, kcrd)
    use m_partmesh
@@ -130,6 +131,7 @@ subroutine calculate_position_in_grid(Nadd, xadd, yadd, np, xcrd, ycrd, zcrd, kc
    if ( timon ) call timstop ( ithndl )
 end subroutine calculate_position_in_grid
 
+
 !> find in which cells particles are located
 subroutine part_findcellsingle(xxpart, yypart, kpart, ierror)
    use m_partmesh
@@ -162,7 +164,7 @@ subroutine part_findcellsingle(xxpart, yypart, kpart, ierror)
 
    ierror = 1
 
-!  build kdtree
+   ! build kdtree
    if (.not.initkdtreecell) then
       if ( jsferic.eq.0 ) then
          call build_kdtree(kdtreecell, numcells, xzwcell, yzwcell, ierror, 0, dmiss)
@@ -175,35 +177,37 @@ subroutine part_findcellsingle(xxpart, yypart, kpart, ierror)
          call build_kdtree(kdtreecell, numcells, xxzwcell, yyzwcell, ierror, 0, dmiss)
       end if
       if ( ierror.ne.0 ) then
-         goto 1234
+         return
       end if
+
       initkdtreecell = .true.
    end if
 
    kpart = 0
 
-!     fill query vector
+   ! fill query vector
    call make_queryvector_kdtree(kdtreecell,xxpart,yypart, 0)
 
-!  reallocate if necessary
+   ! reallocate if necessary
    NN = min(numcells,100) ! Was: 100)
    call realloc_results_kdtree(kdtreecell,NN)
 
-!  find nearest NN samples
+   ! find nearest NN samples
    call kdtree2_n_nearest(kdtreecell%tree,kdtreecell%qv,NN,kdtreecell%results)
 
-!  check if samples are in cell
-!  loop over cells
+   ! check if samples are in cell
+   !  loop over cells
    do nres=1,NN
       k = kdtreecell%results(nres)%idx
-!     check cell size
+
+      ! check cell size
       N = jcell2edge(k+1)-jcell2edge(k)
       if ( N.ne.3 ) then
          call mess(LEVEL_ERROR, 'part_findcellsingle: non-triangle')
-         goto 1234
+         return
       end if
 
-!     get cell polygon
+      ! get cell polygon
       i=0
       do j = jcell2edge(k),jcell2edge(k+1)-1
          i = i+1
@@ -239,9 +243,8 @@ subroutine part_findcellsingle(xxpart, yypart, kpart, ierror)
    end do
 
    ierror = 0
-
-1234 continue
 end subroutine part_findcellsingle
+
 
 !> find in which cells particles are located
 subroutine part_findcell(Nopart, xxpart, yypart, mpart, ierror)
@@ -273,6 +276,7 @@ subroutine part_findcell(Nopart, xxpart, yypart, mpart, ierror)
    if ( timon ) call timstop ( ithndl )
 end subroutine part_findcell
 
+
 !> (re)allocate
 subroutine realloc_particles(Nsize, LkeepExisting, ierror)
    use partmem, only: mpart
@@ -287,7 +291,8 @@ subroutine realloc_particles(Nsize, LkeepExisting, ierror)
    integer, intent(out) :: ierror         !< error (1) or not
 
    ! local
-   integer                                        :: npmargin
+   integer              :: npmargin
+
    ierror = 1
    npmargin = Nsize / 100 + 1 + Nsize
    !  reallocate
@@ -305,6 +310,7 @@ subroutine realloc_particles(Nsize, LkeepExisting, ierror)
    numzero = 0
    ierror = 0
 end subroutine realloc_particles
+
 
 !> deallocate particle data
 subroutine dealloc_particles()
@@ -328,6 +334,7 @@ subroutine dealloc_particles()
    if ( allocated(zrpart)       ) deallocate(zrpart)
    Nrpart = 0
 end subroutine dealloc_particles
+
 
 !> initialize particles
 subroutine ini_part(partfile, partrelfile, starttime_loc, timestep_loc, threeDtype_loc)
@@ -416,6 +423,7 @@ subroutine ini_part(partfile, partrelfile, starttime_loc, timestep_loc, threeDty
    if ( timon ) call timstop ( ithndl )
 end subroutine ini_part
 
+
 !> read particles release file
 subroutine read_particles_release_file(partrelfile)
    use m_particles
@@ -489,8 +497,10 @@ subroutine read_particles_release_file(partrelfile)
          endif
       enddo
    endif
+
    close(lun)
-   end subroutine read_particles_release_file
+end subroutine read_particles_release_file
+
 
 !> add released particles
 subroutine add_particles_from_release_file(time0)
@@ -548,6 +558,7 @@ subroutine add_particles_from_release_file(time0)
 
    if ( timon ) call timstop ( ithndl )
 end subroutine add_particles_from_release_file
+
 
 subroutine part06fm ( lun    , nodye  , nocont , xwaste ,      &
                       ywaste , zwaste , nwaste , mwaste )
@@ -650,7 +661,6 @@ subroutine part06fm ( lun    , nodye  , nocont , xwaste ,      &
 !     end of routine
 
       if ( timon ) call timstop ( ithndl )
-      return
 
  1000 format( '  Error 4901. Dye release', i0,' at (x,y): (',   &
                  f9.2,',',f9.2,') not on active grid cell.' )
