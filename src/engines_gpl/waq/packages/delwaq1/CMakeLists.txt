@@ -6,18 +6,12 @@ set(waq_root_path ${CMAKE_CURRENT_SOURCE_DIR}/../../) # Trace back to the WAQ pa
 set(waq_version_path ${waq_root_path}/version)
 set(waq_data_path ${waq_root_path}/include)
 
-set(ini_version_file ${waq_version_path}/version_number.ini)
 set(fortran_version_file_delwaq ${waq_root_path}/packages/waq_utils_f/src/waq_utils/delwaq_version.F90)
 set(rc_version_file ${waq_version_path}/version_number_delwaq1.rc)
-
+set(version_include_dir ${CMAKE_SOURCE_DIR}/../version_includes)
 
 # Set icon file
 set(icon_file ${waq_version_path}/waq_icon.rc)
-
-# Generate version files
-generate_version_files(${rc_version_file}
-                       ${ini_version_file}
-                       ON)
 
 # Set directory which contains all source files
 set(src_path src)
@@ -31,12 +25,6 @@ add_executable(${executable_name} ${source_files}
                                   ${icon_file}
                                   ${rc_version_file}
                                   ${fortran_version_file_delwaq})
-
-# Define prebuild events
-prebuild_version_number(${executable_name} ${rc_version_file}
-                                        ${checkout_src_root}
-                                        ${ini_version_file}
-                                        ON)
 
 set_source_files_properties(${fortran_version_file} ${fortran_version_file_delwaq}
                             PROPERTIES COMPILE_OPTIONS "${file_preprocessor_flag}")
@@ -88,7 +76,7 @@ oss_include_libraries(${executable_name} oss_dependencies)
 target_compile_options(${executable_name} PRIVATE "${waq_default_flags}")
 
 if(UNIX)
-    target_include_directories(${executable_name} PRIVATE ${waq_data_path})
+    target_include_directories(${executable_name} PRIVATE ${waq_data_path} ${version_include_dir})
 
     message(STATUS "netcdf lib dir is ${NETCDF_LIBRARY_DIRS}")
     target_link_directories(${executable_name} PRIVATE ${NETCDF_LIBRARY_DIRS})
@@ -98,7 +86,7 @@ if(UNIX)
 endif(UNIX)
 
 if (WIN32)
-    target_include_directories(${executable_name} PRIVATE ${waq_data_path} ${mpi_include_path})
+    target_include_directories(${executable_name} PRIVATE ${waq_data_path} ${version_include_dir} ${mpi_include_path})
 
     # Set linker properties
     message(STATUS "Setting linker properties in windows")
