@@ -93,8 +93,8 @@
                   else
                      call setHOAvelocity_neg(ucxu(L), ucyu(L), L, LL, Lb)
                   endif
-               endif
-            enddo
+               enddo
+            endif
          enddo  ! horizontal
          !$OMP END PARALLEL DO
       else
@@ -110,8 +110,8 @@
                   else
                      call setHOAvelocity_neg_Jasfer3D(ucxu(L), ucyu(L), L, LL, Lb)
                   endif
-               endif
-            enddo
+               enddo
+            endif
          enddo  ! horizontal
          !$OMP END PARALLEL DO
       endif
