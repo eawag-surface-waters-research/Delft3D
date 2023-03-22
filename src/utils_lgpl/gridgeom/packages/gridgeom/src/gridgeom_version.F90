@@ -33,7 +33,6 @@ implicit none
     character(*),  public, parameter :: gridgeom_major        = '1'
     character(*),  public, parameter :: gridgeom_minor        = '01'
     character(*),  public, parameter :: gridgeom_revision     = '00'
-    character(*),  public, parameter :: gridgeom_build_number = '000000'
 
     character(*),  public, parameter :: gridgeom_company      = 'Deltares'
     character(*),  public, parameter :: gridgeom_company_url  = 'http://www.deltares.nl'
@@ -47,7 +46,7 @@ implicit none
     character(*),  public, parameter :: gridgeom_architecture = 'unknown' ! used in about box
 #endif
 
-    character(*),  public, parameter :: gridgeom_version      = gridgeom_major//'.'//gridgeom_minor//'.'//gridgeom_revision//'.'//gridgeom_build_number
+    character(*),  public, parameter :: gridgeom_version      = gridgeom_major//'.'//gridgeom_minor//'.'//gridgeom_revision
     character(*),  public, parameter :: gridgeom_version_full = 'Deltares, '//gridgeom_program//' Version '//gridgeom_version//' ('//gridgeom_architecture// '), '//__DATE__//', '//__TIME__
     character(*),  public, parameter :: gridgeom_version_id   = '@(#)'//gridgeom_version_full
 
