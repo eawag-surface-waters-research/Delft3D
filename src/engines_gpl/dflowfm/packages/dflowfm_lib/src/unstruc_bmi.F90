@@ -934,7 +934,7 @@ subroutine get_var_shape(c_var_name, shape) bind(C, name="get_var_shape")
       return
    case("orifices")
       shape(1) = network%sts%numOrifices
-      shape(2) = 1
+      shape(2) = 2
       return
    case("gates")
       shape(1) = ngategen
@@ -1835,6 +1835,11 @@ subroutine get_compound_field(c_var_name, c_item_name, c_field_name, x) bind(C, 
             x = get_gate_lower_edge_level_c_loc(network%sts%struct(item_index))  
          end if
          return
+      case("crest_level", "CrestLevel", "crestLevel")
+         if (is_in_network) then
+            x = get_crest_level_c_loc(network%sts%struct(item_index))
+         end if
+         return
       end select
 
    ! GATES
@@ -2363,6 +2368,8 @@ subroutine get_compound_field_name(c_var_name, c_field_index, c_field_name) bind
       select case(field_index)
       case(1)
          field_name = "gateLowerEdgeLevel"
+      case(2)
+         field_name = "CrestLevel"
       end select
    ! GATES
    case("gates")

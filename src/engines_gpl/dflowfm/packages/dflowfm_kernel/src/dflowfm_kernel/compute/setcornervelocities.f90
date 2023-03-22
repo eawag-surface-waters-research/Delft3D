@@ -36,8 +36,12 @@
  use m_netw
  use m_flowgeom
  use m_sferic
+<<<<<<< src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_kernel/compute/setcornervelocities.f90
  use m_nod2lin, only: nod2linx, nod2liny, lin2nodx, lin2nody
 
+=======
+ 
+>>>>>>> src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_kernel/compute/setcornervelocities.f90
  implicit none
 
  integer                    :: L, k1, k2, k3, k4, k, kk, LL, Lb, Lt, kw
