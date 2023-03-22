@@ -25,11 +25,11 @@
          !
          ! Get the ident-string and version number for DELWAQ2
          !
-         use wq_processes_version_module
+         use delwaq_version_module
          implicit none
          
          character(len=*) :: idstr
 
-         call getfullversionstring_wq_processes(idstr)
+         call getfullversionstring_delwaq_processes(idstr)
 
       end subroutine

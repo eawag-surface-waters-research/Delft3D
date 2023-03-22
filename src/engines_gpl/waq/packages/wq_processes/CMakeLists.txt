@@ -3,9 +3,14 @@ set(src_path src)
 
 # Set version file variables
 set(svn_version_root ${CMAKE_CURRENT_SOURCE_DIR}/../) # Check the SVN revision of WAQ directory
-set(fortran_version_file ${CMAKE_CURRENT_SOURCE_DIR}/src/wq_processes_version.F90)
+set(waq_root_path ${CMAKE_CURRENT_SOURCE_DIR}/../../) # Trace back to the WAQ path
+
+# Set version file variables
+set(waq_version_path ${waq_root_path}/version)
+set(fortran_version_file_delwaq ${waq_root_path}/packages/waq_utils_f/src/waq_utils/delwaq_version.F90)
 set(rc_version_file ${CMAKE_CURRENT_SOURCE_DIR}/../../version/version_number.rc)
 set(version_include_dir ${CMAKE_SOURCE_DIR}/../version_includes)
+
 
 
 # Gather source files
