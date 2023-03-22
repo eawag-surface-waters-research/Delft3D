@@ -536,8 +536,16 @@ subroutine read_morphology_properties(mor_ptr, morpar, griddim, filmor, fmttmp, 
     call prop_get(mor_ptr, 'Morphology', 'SusCor', morpar%l_suscor)
     if (morpar%l_suscor) then
        call prop_get(mor_ptr, 'Morphology', 'SusCorFac', morpar%suscorfac)
-       morpar%suscorfac = max(0.0_fp, min(morpar%suscorfac, 1.0_fp))
-       if (morpar%suscorfac <= 0.0_fp) morpar%l_suscor = .FALSE.
+       if (morpar%suscorfac > 1.0_fp) then
+          errmsg = 'Suspended sediment correction factor too large. SusCorFac set to 1.'
+          call write_warning(errmsg, unit=lundia)
+          morpar%suscorfac = 1.0_fp
+       elseif (morpar%suscorfac <= 0.0_fp) then
+          errmsg = 'Suspended sediment correction switched off because of 0 or negative SusCorFac.'
+          call write_warning(errmsg, unit=lundia)
+          morpar%l_suscor = .FALSE.
+          morpar%suscorfac = 0.0_fp
+       end if
     else
        morpar%suscorfac = 0.0_fp
     end if
