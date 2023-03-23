@@ -30,25 +30,25 @@
 ! $Id$
 ! $HeadURL$
 
-!> find common neighboring cell of two net links (0: no cell found)
-integer function common_cell_for_two_net_links(L1, L2)
+!> find common neighboring cell of two links (0: no cell found)
+integer function icommon(L1, L2)
    use network_data, only: lnn, lne
    implicit none
 
-   integer, intent(in) :: L1, L2 !< net link numbers
+   integer, intent(in) :: L1, L2 !< link numbers
 
    integer :: icell, i, j, kk
 
-   common_cell_for_two_net_links = 0
+   icommon = 0
 
    do i=1,lnn(L1)
       do j=1,lnn(L2)
          if ( lne(i,L1).eq.lne(j,L2) ) then
-            common_cell_for_two_net_links = lne(i,L1)
+            icommon = lne(i,L1)
             exit
          end if
       end do
    end do
 
    return
-end function common_cell_for_two_net_links
+end function icommon
