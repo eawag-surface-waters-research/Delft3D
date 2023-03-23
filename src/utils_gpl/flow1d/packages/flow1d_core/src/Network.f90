@@ -418,8 +418,8 @@ contains
          call resetMaxerrorLevel()
          do L = 1, linall_1d
             do i = 1,3
-               c1 = network%crs%cross(adm%line2cross(L,i)%C1)
-               c2 = network%crs%cross(adm%line2cross(L,i)%C2)
+               c1 => network%crs%cross(adm%line2cross(L,i)%C1)
+               c2 => network%crs%cross(adm%line2cross(L,i)%C2)
                if (c1%crosstype /= c2%crosstype) then
                   call SetMessage(LEVEL_WARN, 'Incorrect CrossSection input for CrossSections '''//trim(c1%csid)//''', '''//trim(c2%csid)//''' on branch '''//trim(pbran%id)// &
                      '''. CrossSections must be of the same type!')
