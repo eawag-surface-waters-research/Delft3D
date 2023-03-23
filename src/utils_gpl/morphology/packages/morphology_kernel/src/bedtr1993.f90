@@ -40,7 +40,7 @@ subroutine bedtr1993(uuu       ,vvv       ,u2dh      ,d50       ,d90       , &
 ! simulation.
 ! If no waves then use traditional Van Rijn formulation
 ! If waves then use new parameterization which
-! includes wave asymetry
+! includes wave asymmetry
 ! Note: The two methods are known to give different results
 ! (order factor 2) for situations without waves
 ! Van Rijn (1993,2000)
@@ -138,7 +138,7 @@ subroutine bedtr1993(uuu       ,vvv       ,u2dh      ,d50       ,d90       , &
     ! Note: formulation used depends on presence of waves in the
     ! simulation.
     ! If no waves then use traditional Van Rijn formulation
-    ! If waves then use new parameterization which includes wave asymetry
+    ! If waves then use new parameterization which includes wave asymmetry
     ! Note: The two methods are known to give different results
     ! (order factor 2) for situations without waves
     !
