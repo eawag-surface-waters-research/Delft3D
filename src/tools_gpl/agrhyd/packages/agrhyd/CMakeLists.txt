@@ -24,7 +24,7 @@ add_executable(${executable_name} ${source_files}
                                   ${fortran_version_file_delwaq})
 
 
-set_source_files_properties(${fortran_version_file} ${fortran_version_file_delwaq}
+set_source_files_properties(${fortran_version_file_delwaq}
                             PROPERTIES COMPILE_OPTIONS "${file_preprocessor_flag}")
 
 
