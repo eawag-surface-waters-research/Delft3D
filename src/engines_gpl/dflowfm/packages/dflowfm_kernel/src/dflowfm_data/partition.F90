@@ -5246,7 +5246,7 @@ loop_over_nodes: &
         
         cell = common_cell_for_two_net_links(first_link, second_link)
                      
-        if ( cell == 0 ) cycle  ! no cell
+        if ( cell <= 0 ) cycle  ! no cell
         
         if ( idomain(cell) == domain_number ) cycle loop_over_nodes
                 
