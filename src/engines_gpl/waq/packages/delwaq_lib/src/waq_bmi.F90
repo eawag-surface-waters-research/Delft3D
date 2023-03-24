@@ -111,8 +111,6 @@ contains
     use iso_c_utils
     use delwaq2_global_data
     use dhcommand
-    use exception_waq
-    use exception_part
     use m_actions
 
     implicit none

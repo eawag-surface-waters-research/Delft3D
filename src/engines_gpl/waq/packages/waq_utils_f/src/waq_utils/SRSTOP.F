@@ -39,7 +39,6 @@
 
 !     kind           function         name                 description
 
-      use exception_waq
 
       integer  ( 4), intent(in   ) :: iexit             !< return value
       integer  ( 4)                :: lunfil
