@@ -27,8 +27,8 @@
 !
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 module unstruc_netcdf_map_class
 use precision, only : hp
 use precision_basics, only : comparereal

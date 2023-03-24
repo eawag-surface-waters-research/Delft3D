@@ -24,8 +24,8 @@
 !  Stichting Deltares. All rights reserved.
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !-------------------------------------------------------------------------------
 
 !> DFlowFM will call the concept, for now is coded in Python

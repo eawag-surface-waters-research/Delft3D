@@ -27,8 +27,8 @@ subroutine bewvuf(ierrs     ,kcmp      ,mxkc      ,inaam     ,knaam     , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: calculates V0U() and FR()

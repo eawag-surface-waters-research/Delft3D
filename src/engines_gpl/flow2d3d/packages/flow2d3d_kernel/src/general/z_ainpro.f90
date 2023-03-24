@@ -26,8 +26,8 @@ function z_ainpro(vect1     ,vect2     ,kmax      ,kfs      ,kfsz0     , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! Computes inproduct between two vectors.

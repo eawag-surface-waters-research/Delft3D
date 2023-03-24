@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
    SUBROUTINE CHANGEINTERPOLATIONPARAMETERS()
    use m_ec_interpolationsettings

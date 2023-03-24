@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> convert quadrilaterals, pentagons and hexagons to triangles
 subroutine triangulate_cells()

@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       SUBROUTINE D1ARROWS(X,Y,Z,U,V,W,PSI0,VFAC)
       use gridoperations

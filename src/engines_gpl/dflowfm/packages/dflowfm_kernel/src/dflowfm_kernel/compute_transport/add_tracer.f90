@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> add tracer to constituents, or get constituents number if tracer already exists
 subroutine add_tracer(tracer_name, iconst)

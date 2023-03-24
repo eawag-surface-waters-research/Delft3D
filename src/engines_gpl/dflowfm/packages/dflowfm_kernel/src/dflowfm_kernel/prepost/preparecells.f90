@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 subroutine preparecells(md_netfile, jaidomain, jaiglobal_s, ierr)
 

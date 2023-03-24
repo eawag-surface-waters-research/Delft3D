@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       !> Read a curvilinear grid to (ascii) grd-file.
       !! NOTE: reads 'old' (RGFGrid 3.x) and 'new' format (RGFGrid 4.x)

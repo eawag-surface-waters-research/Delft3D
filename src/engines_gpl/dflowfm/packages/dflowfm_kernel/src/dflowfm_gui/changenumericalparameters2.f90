@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
   SUBROUTINE CHANGENUMERICALPARAMETERS2()
    use m_netw

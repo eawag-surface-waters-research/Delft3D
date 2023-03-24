@@ -26,8 +26,8 @@ subroutine updeva(luneva    ,timnow    ,dt        ,inteva    ,first     , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Reads the time dependent rain/evaporation pars.

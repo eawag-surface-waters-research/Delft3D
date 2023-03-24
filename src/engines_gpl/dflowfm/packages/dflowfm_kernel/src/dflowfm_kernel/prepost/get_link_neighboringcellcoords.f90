@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> get neighboring cell center coordinates
   subroutine get_link_neighboringcellcoords(L, isactive, xza, yza, xzb, yzb)

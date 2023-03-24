@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> find in which cells particles are located
 subroutine part_findcell(Npart, xxpart, yypart, kpart, ierror)

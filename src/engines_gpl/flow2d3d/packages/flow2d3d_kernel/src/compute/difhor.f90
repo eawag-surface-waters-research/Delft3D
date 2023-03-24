@@ -29,8 +29,8 @@ subroutine difhor(nm        ,nmu       ,j         ,nmmaxj    ,kmax      , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: computes horizontal diffusion along strict

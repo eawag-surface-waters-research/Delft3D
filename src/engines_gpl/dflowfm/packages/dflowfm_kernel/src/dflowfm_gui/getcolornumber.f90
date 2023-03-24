@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       SUBROUTINE GETCOLORNUMBER(XP,YP,NUMCOL,N1O,N2O,N3O)
       implicit none

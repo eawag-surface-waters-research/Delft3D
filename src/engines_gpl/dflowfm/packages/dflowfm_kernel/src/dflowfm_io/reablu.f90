@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  subroutine reablu(mout)                             ! read bottom level u points
  USE M_FLOWGEOM

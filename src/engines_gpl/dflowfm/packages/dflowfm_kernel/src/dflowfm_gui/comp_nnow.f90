@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> compute the difference with the optimal number of links by counting the numbers of links that:
 !>   connect nodes k1 and k2, and

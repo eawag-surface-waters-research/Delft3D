@@ -28,7 +28,7 @@
 !-------------------------------------------------------------------------------
 
 ! $Id: volume_table.f90 142608 2023-03-01 15:48:13Z buwalda $
-! $HeadURL: https://svn.oss.deltares.nl/repos/delft3d/trunk/src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_kernel/compute/volume_table.f90 $
+! : https://svn.oss.deltares.nl/repos/delft3d/trunk/src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_kernel/compute/volume_table.f90 $
 
 !> Module for using volume tables at 1d nodes for the computation of the total volume of water in a node.
 module m_VolumeTables

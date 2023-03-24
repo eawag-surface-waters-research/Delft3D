@@ -27,8 +27,8 @@ subroutine wrihisdad(lundia    ,error     ,filename  ,itdate    , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! Writes the initial Dredge and Dump group to HIS-DAT

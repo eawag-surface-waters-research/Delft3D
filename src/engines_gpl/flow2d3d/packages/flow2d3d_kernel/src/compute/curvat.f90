@@ -28,8 +28,8 @@ subroutine curvat(u1        ,v1        ,gsqs      ,guu       ,gvv       , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Computes the local curvature of streakline (2dh)

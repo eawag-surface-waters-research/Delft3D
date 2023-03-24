@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
   !> Finds the net link number between two net nodes.
   SUBROUTINE FINDEL(K1,K2,L1)

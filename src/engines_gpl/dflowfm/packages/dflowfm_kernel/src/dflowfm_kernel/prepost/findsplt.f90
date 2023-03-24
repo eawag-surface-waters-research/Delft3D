@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       SUBROUTINE FINDSPLT(X,Y,X2,Y2,MMAX,MFAC,MCS,TS,DS,XS,YS,JA)
       implicit none

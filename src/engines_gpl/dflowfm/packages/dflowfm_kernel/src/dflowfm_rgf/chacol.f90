@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       SUBROUTINE CHACOL(      X,     mmax, nmax, J1,     J2, NUMSPL)
 !     VERWISSEL KOLOM J1 EN J2

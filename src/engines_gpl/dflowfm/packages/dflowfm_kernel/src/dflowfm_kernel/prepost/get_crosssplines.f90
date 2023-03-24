@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> get the intersections of a spline with all other splines
 subroutine get_crosssplines(num, xs1, ys1, ncs, ics, Lorient, t, cosphi)

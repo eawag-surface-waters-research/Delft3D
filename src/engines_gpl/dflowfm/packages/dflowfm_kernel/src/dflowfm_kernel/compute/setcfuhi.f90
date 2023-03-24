@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  subroutine setcfuhi()                                 ! set friction coefficients g/C2 etc
  use m_flowtimes                                       ! sqrt(g/C2) in both in 2D and in 3D

@@ -26,8 +26,8 @@ subroutine ciofil(lundia    ,error     ,filcio    ,mmax      ,nmax      , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description----------------------------------------------------------------- 
 ! 
 !    Function: Reads the coriolis values from the attribute file 

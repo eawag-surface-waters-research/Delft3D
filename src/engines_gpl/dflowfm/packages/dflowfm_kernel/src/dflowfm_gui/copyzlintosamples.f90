@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  !> copy values that are displayed at flowlinks to samples
  subroutine copyzlintosamples()

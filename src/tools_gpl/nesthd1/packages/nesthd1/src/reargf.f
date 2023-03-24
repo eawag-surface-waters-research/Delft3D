@@ -26,8 +26,8 @@
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !
       real    xymiss 
       real    x( mdim  , ndim  )   , y( mdim  , ndim  )

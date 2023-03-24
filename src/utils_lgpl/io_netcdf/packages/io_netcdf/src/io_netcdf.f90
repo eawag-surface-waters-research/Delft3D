@@ -25,8 +25,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 
 !> I/O module for reading and writing NetCDF files based on selected NetCDF conventions (UGRID, and more in the future).

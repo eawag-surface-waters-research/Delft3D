@@ -26,8 +26,8 @@ subroutine updtem(luntem    ,ktemp     ,timnow    ,dt        ,inttem    , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Reads the time dependent temperature parameters

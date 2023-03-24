@@ -27,8 +27,8 @@ subroutine z_shrwav(nmmax     ,kmax      ,icx       ,dfu       ,deltau    , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! NONE

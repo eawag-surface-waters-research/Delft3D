@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
    SUBROUTINE ADDMAZE(X,Y,Z,N,JAFIVE)    ! FOR FLOW GRIDS
    use m_netw

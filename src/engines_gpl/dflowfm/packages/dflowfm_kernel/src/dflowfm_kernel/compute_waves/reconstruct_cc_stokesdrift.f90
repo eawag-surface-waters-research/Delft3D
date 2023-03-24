@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  subroutine reconstruct_cc_stokesdrift(ndkx,ust_x, ust_y)
     use m_flowgeom, only: lnx, ln, wcx1, wcx2,wcy1,wcy2

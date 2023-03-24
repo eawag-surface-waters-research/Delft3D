@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       SUBROUTINE SWITCH(X, Y, mmax, nmax, JN, NUMPJ)
 !      USE DIMENS

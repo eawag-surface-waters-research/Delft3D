@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       SUBROUTINE UPDATEFILES(FILNAM,FILIST,NUMFIL,NUMDIR,IFDATE,IFSIZE,IXP,IYP,IH)
       use unstruc_display

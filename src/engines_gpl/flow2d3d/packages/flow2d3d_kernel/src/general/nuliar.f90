@@ -25,8 +25,8 @@ subroutine nuliar(intarr    ,intdim    )
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Initialize integer array with length INTDIM

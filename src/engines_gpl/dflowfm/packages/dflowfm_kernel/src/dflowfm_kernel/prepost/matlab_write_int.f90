@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> write matlab integer array to file
    subroutine matlab_write_int(matfile, varname, var, Ni, Nj)

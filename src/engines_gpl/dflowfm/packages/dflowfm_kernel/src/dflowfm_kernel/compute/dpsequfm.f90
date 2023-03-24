@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 function dpsequfm(dvar1, dvar2, eps) ! equal within eps?
 implicit none

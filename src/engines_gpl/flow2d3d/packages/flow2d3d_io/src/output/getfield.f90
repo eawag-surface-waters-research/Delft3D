@@ -25,8 +25,8 @@ subroutine getfield(itim, comfil, grpnam, funam, ierr, fcom, nmaxus, mmax, kmax,
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! Method used:

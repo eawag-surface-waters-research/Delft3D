@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> add tracer boundary
 subroutine add_bndtracer(tracnam, tracunit, itrac, janew)

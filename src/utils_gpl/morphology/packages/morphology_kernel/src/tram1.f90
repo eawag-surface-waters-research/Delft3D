@@ -34,8 +34,8 @@ subroutine tram1 (numrealpar,realpar   ,wave      ,npar      ,par       , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! computes sediment transport according to

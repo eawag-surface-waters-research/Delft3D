@@ -27,8 +27,8 @@ subroutine edyfil(lundia    ,error     ,filedy    ,fmttmp    ,nmax      , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Reads the eddy viscosity arrays VICUV and eddy

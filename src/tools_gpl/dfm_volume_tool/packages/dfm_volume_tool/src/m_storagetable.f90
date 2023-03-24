@@ -26,8 +26,8 @@
 !  Deltares, and remain the property of Stichting Deltares. All rights reserved.
 !
 !-------------------------------------------------------------------------------
-! $Id$
-! $HeadURL$
+! 
+! 
 !> Module for using volume tables at 1d nodes for the computation of the total volume of water in a node.
 module m_StorageTable
    use messageHandling

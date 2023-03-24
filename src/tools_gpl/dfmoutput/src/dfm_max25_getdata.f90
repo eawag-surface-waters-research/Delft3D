@@ -27,8 +27,8 @@
 !
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> DFM_MAX25_GETDATA - Subroutine to provide max25 filters to dfmoutput.
 !!

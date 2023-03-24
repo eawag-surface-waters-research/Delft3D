@@ -26,8 +26,8 @@ subroutine wave(uo        ,t         ,uuvar     ,pi        ,wh        , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 ! computes a correction factor to
 ! account for the wave effect on the

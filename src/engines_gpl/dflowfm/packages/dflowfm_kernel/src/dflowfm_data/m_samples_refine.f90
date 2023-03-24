@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 module m_samples_refine     ! used in refinecellsandfaces2 and in sample paths
    integer                                         :: NDIM=5             !< sample vector dimension

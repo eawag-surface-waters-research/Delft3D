@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> Computes the velocity magnitude in cell centers, typically used for output only.
 !! All arrays via input arguments, not via use m_flow.

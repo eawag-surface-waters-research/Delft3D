@@ -30,8 +30,8 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: - Checks whether the current time step requires an

@@ -25,8 +25,8 @@
    !  Stichting Deltares. All rights reserved.
    !
    !-------------------------------------------------------------------------------
-   !  $Id$
-   !  $HeadURL$
+   !  
+   !  
    !!--description-----------------------------------------------------------------
    !
    ! This module includes sorting algorithms

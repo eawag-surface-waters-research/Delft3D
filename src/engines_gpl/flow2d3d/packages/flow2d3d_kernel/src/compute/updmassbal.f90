@@ -28,8 +28,8 @@ subroutine updmassbal(imode     ,qxk       ,qyk       ,kcs       ,r1        , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !

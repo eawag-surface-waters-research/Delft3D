@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  !> Gets the local layer numbers for a given flow link.
  !! Always uses the maximum possible layer range instead of the actual range.

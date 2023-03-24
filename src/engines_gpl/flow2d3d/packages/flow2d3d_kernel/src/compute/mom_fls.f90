@@ -32,8 +32,8 @@ subroutine mom_fls &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! This subroutine is part of (called by) CUCNP and UZD. It computes the

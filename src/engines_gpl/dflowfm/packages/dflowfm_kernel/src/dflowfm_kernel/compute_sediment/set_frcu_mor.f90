@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 subroutine set_frcu_mor(dim)
     use m_flow, only: frcu, frcu_mor

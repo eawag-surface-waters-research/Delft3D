@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> sort per-node link administration (nod()%lin), based on connectivity
 subroutine sortlinks()

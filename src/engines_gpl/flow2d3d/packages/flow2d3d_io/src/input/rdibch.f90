@@ -27,8 +27,8 @@ subroutine rdibch(lundia    ,error     ,runid     ,ntof      ,nto       , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: - Reads the boundary condition records from the

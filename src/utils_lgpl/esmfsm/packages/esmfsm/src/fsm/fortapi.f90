@@ -24,8 +24,8 @@
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !-------------------------------------------------------------------------------
 !   Delft-FSM (Fortran Shared Memory)
 !   Interface between Fortran (the users of FSM) and C (the implementation)

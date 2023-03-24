@@ -27,8 +27,8 @@ subroutine seliwe(angle     ,kbed      ,ktop      ,kmxt      ,omeg      , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Determines whether the eigen mode R1TG for given

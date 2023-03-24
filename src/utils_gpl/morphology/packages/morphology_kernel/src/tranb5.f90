@@ -28,8 +28,8 @@ subroutine tranb5(u         ,v         ,d50       ,d90       ,chezy     , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 ! computes sediment transport according to
 ! bijker with wave effect

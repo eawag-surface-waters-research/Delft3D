@@ -24,8 +24,8 @@
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 
       subroutine read_lga(file_lga, mmax  , nmax  , nolay , nosegl, &
                           noq1    , noq2  , noq3  , lgrid )

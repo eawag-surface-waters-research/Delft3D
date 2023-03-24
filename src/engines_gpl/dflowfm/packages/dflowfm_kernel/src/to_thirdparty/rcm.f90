@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 !> @file rcm.f90
 !! Reverse-Cuthill-Mckee algorithm + helpers.
 !! Used for network-node renumbering to improve cache efficiency

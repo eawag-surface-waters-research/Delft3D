@@ -26,8 +26,8 @@ subroutine increm(mx1       ,ny1       ,mx2       ,ny2       ,incx      , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Computes increments (-1, 0 or 1) in the x- and y-

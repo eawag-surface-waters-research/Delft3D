@@ -28,8 +28,8 @@ subroutine dif_ws(j         ,nmmaxj    ,nmmax     ,kmax      ,lsal      , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Includes settling velocity in the coefficient

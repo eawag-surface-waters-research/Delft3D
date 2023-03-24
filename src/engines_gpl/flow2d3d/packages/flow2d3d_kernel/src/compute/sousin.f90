@@ -29,8 +29,8 @@ subroutine sousin(j         ,nmmaxj    ,nmmax     ,kmax      ,lstsci    , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Initialisation of the arrays SOUR and SINK.

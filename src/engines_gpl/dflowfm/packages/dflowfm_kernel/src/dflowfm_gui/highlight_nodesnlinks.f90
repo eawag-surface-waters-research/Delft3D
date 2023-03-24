@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> Highlights net/flow nodes and/or links, when specified in display parameters.
 subroutine highlight_nodesnlinks()

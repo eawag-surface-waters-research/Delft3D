@@ -26,8 +26,8 @@ subroutine rdroll(lunmd     ,lundia    ,lunscr    ,lerror    ,nrrec     , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! - Reads the roller parameters from the MD-file :

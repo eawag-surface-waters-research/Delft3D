@@ -25,8 +25,8 @@ subroutine dfstrip ( ipown, jpart, npart, iwork, mmax, nmax )
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !   Performs a stripwise partitioning with straight interfaces

@@ -24,8 +24,8 @@
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
       subroutine read_bnd(file_bnd, openbndsect_coll)
 
       ! function : read a bnd file and add to the collection

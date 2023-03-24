@@ -24,8 +24,8 @@
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 
       subroutine upd_p2 ( c10   , c50   , value , segmnt, newtab,
      j                    grp   , io_mes, iitem , c20   , newfrm,
