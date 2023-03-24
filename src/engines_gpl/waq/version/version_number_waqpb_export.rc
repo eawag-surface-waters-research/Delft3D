@@ -11,7 +11,7 @@
 #define _WIN32_WINNT 0x0501
 #define WIN_LEAN_AND_MEAN
 
-#include "afxres.h"
+#include "windows.h"
 
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
@@ -54,7 +54,7 @@ BEGIN
     BEGIN
         BLOCK "041304b0"
         BEGIN
-            VALUE "Comments", "-\0"           
+            VALUE "Comments", "-\0"
             VALUE "CompanyName", COMPANY_NAME
             VALUE "FileDescription", DESCRIPTION
             VALUE "FileVersion", VERSION_FULL
@@ -90,7 +90,7 @@ END
 
 2 TEXTINCLUDE DISCARDABLE
 BEGIN
-    "#include ""afxres.h""\r\n"
+    "#include ""windows.h""\r\n"
     "\0"
 END
 
